@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpManager.h,v 1.1.1.1 2000/03/09 17:48:33 aihong Exp $
+ * $Id: StPidAmpManager.h,v 1.2 2000/04/09 16:36:43 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpManager.h,v $
+ * Revision 1.2  2000/04/09 16:36:43  aihong
+ * change for adapting NHitDcaNet added
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:33  aihong
  * Installation of package
  *
@@ -54,7 +57,15 @@ class StPidAmpManager{
      void bookANHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4,TString fitOpt, TString drawOpt);
      void bookANHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt, TString drawOpt);
 
+     void bookANHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt, TString drawOpt, Double_t d1, Double_t d2, Double_t d3);
+     void bookANHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4,TString fitOpt, TString drawOpt, Double_t d1, Double_t d2, Double_t d3);
+     void bookANHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt, TString drawOpt, Double_t d1, Double_t d2, Double_t d3);
+
+
+
      void bookAPtNHitsChannelCollection(Int_t n, Int_t* nitsAry,Int_t p, Double_t* ptAry,TString fitOpt, TString drawOpt);
+
+
 
      void setUseBetaGammaFit(Bool_t br);
      void setDrawOpt(TString s);

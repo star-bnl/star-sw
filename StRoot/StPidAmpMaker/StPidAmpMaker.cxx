@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpMaker.cxx,v 1.1.1.1 2000/03/09 17:48:33 aihong Exp $
+ * $Id: StPidAmpMaker.cxx,v 1.2 2000/04/09 16:36:43 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpMaker.cxx,v $
+ * Revision 1.2  2000/04/09 16:36:43  aihong
+ * change for adapting NHitDcaNet added
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:33  aihong
  * Installation of package
  *
@@ -50,7 +53,9 @@ Int_t
 StPidAmpMaker::Init()
 {
 
+
   ampTrks->reserve(8000000);
+
   return StMaker::Init();
 }
 
@@ -140,6 +145,37 @@ StPidAmpMaker::AddNHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4,
     theManager->bookANHitsChannelCollection(x1,x2,x3,x4,x5,fitOpt,drawOpt);
     gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<x5<<" "<<") NetSet is registered in NetSet Store "<<endm;
 }
+
+
+void 
+StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,TString fitOpt, TString drawOpt,Double_t d1, Double_t d2, Double_t d3){
+    theManager->bookADefaultChannelCollection(fitOpt,drawOpt);
+    gMessMgr->Info()<<"ignored two inputs "<<x1<<" "<<x2<<endm;
+    gMessMgr->Info()<<"two inputs is for default option, the default NetSet is registered in NetSet Store"<<endm;
+}
+
+
+void 
+StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt, TString drawOpt,Double_t d1, Double_t d2,  Double_t d3){
+    theManager->bookANHitsDcaChannelCollection(x1,x2,x3,fitOpt,drawOpt,d1,d2,d3);
+    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<") dca("<<d1<<" "<<d2<<" "<<d3<<")  NetSet is registered in NetSet Store "<<endm;
+}
+
+void 
+StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x4,TString fitOpt, TString drawOpt,Double_t d1,  Double_t d2, Double_t d3){
+
+    theManager->bookANHitsDcaChannelCollection(x1,x2,x3,x4,fitOpt,drawOpt,d1,d2,d3);
+    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<") dca("<<d1<<" "<<d2<<" "<<d3<<") NetSet is registered in NetSet Store "<<endm;
+}
+
+
+
+void 
+StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt, TString drawOpt, Double_t d1,  Double_t d2, Double_t  d3){
+    theManager->bookANHitsDcaChannelCollection(x1,x2,x3,x4,x5,fitOpt,drawOpt,d1,d2,d3);
+    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<x5<<" "<<") dca("<<d1<<" "<<d2<<" "<<d3<<") NetSet is registered in NetSet Store "<<endm;
+}
+
 
 
 void 
