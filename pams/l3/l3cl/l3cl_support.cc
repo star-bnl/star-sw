@@ -11,6 +11,9 @@
 **:                  10/20/98 py: ConvertRawToDetector moved to l3clUtilities.cc 
 **:                  10/22/98 py: add l3cl at beginning function names
 **:                  10/22/98 py: l3clAllocateMemory and l3clFreeMemory added
+**:                  07/06/99 py: l3clWriteDataToTable hit handling commented out, there
+**:                               a new sl3Hit format, we need new code to handle it 
+**:                  07/07/99 py: SL3HIT replaced with SL3BUFFER
 **:
 **:>-----------------------------------------------------------------*/
 
@@ -333,14 +336,18 @@ void l3clInitOther()
 **:
 **:>------------------------------------------------------------------*/
 void l3clWriteDataToTable( TABLE_HEAD_ST *hit_h,
-                           SL3HIT_ST     *hit )
+                           SL3BUFFER_ST     *hit )
 {
    int i, nok ;
    float x, y, z ;
    PFormattedData p = pGlobalStore ; 
 
    nok = hit_h->nok ;
-
+//
+//   sl3Hit format changed
+//   We need code to write hit buffer here
+//
+/*
    for ( i = 0 ; i < clusters; i++ )
    {
       hit[nok].row  = p->PadRow + 1;
@@ -350,4 +357,5 @@ void l3clWriteDataToTable( TABLE_HEAD_ST *hit_h,
       p++;
    }
    hit_h->nok = nok ;
+*/
 }
