@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.144 2004/02/17 19:19:30 jeromel Exp $
+# $Id: Construct,v 1.145 2004/03/01 17:46:16 fisyak Exp $
 use Env;
 use lib $ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -155,10 +155,12 @@ if ( !$param::quiet ) {
 		 FC FDEBUG FPPFLAGS FEXTEND FFLAGS br 
 		 FCPATH EXTRA_FCPATH br
 		 F77LD F77LDFLAGS br
-		 CERNLIBS  FLIBS br
-		 CLIBS SYSLIBS br
+		 CERNLIBS br 
+		 FLIBS CLIBS SYSLIBS br
 		 LD LDFLAGS EXTRA_LDFLAGS LIBPATH LIBS Libraries br
-		 SO SOFLAGS br );
+		 SO SOFLAGS br 
+		 LIBG2C LIBSTDC br
+		);
   my $tab = "";
   foreach my $p ( @list ) {
     if ($p eq 'br') {print "\n"; $tab = "";}
@@ -171,7 +173,7 @@ if ( !$param::quiet ) {
 PrintHash($env,"\$env->{") if ($param::debug);
 my @subdirs = ();
 # install includes
-my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg StRoot/*/include/.includes_for_export.flg";
+my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg StRoot/*/include/.includes_for_export.flg StRoot/StRTSClient/include/.includes_for_export.flg";
 @DirsWithIncludes = map File::Basename::dirname($_), @DirsWithIncludes;
 my @DirsIdlInc = glob "pams/*/idl pams/*/inc";
 print "DirsWithIncludes = @DirsWithIncludes @DirsIdlInc\n" if ($param::debug);
@@ -263,17 +265,16 @@ foreach my $dir( "pams", "StRoot" ,"StPiD") {
 		    #print "=== Skipping $subsub_dir in $subsub_DIR\n";
                     next;
 		}
-		#if (   $sub_dir =~ /Pool$/                                       && 
-		#     ( ! $param::include or  $subsub_dir !~ /$param::include/o )    ) {
-		    #if (! $param::include ) {
-		    #	print  "skip ";
-		    #	printf("%40s","$sub_dir/$subsub_dir");
-		    #	printf("\tto build it you need to add %25s","+$subsub_dir");
-		    #	print  " in cons command line\n";
-		    #}
-		    #next;
-                #}
-
+#		if (($STAR =~ /\.dev/ || $STAR =~ /\.DEV/) &&   $sub_dir =~ /Pool$/  && 
+#		       ( ! $param::include or  $sub_dir !~ /$param::include/o )    ) {
+#		  print "param::include = $param::include $subsub_dir \n";
+#		    print  "skip ";
+#		    printf("%40s","$sub_dir/$subsub_dir");
+#		    printf("\tto build it you need to add %25s","+$subsub_dir");
+#		    print  " in cons command line\n";
+#		  next;
+#                }
+		
                 if ( ( $sub_dir =~ /^sim$/    || 
 		       $sub_dir =~ /^gen$/    ||
 		       $sub_dir =~ /Pool$/    ||
@@ -306,9 +307,11 @@ my @sysdirlist = qw(asps/Simulation/agetof
 		    asps/staf/sdd 
 		    asps/rexe 
 		    StDb 
-		    cern/geant321 
+		    asps/Simulation/geant321 
 		    asps/Simulation/gcalor 
-		    asps/Simulation/AtlsimMain);
+		    asps/Simulation/starsim
+		   );
+#		    minicern
 
 # Platform specific target inclusion/exclusion
 if ( $STAR_HOST_SYS !~ /^alpha_dux/) {
@@ -351,6 +354,5 @@ sub script::PrintHash($$) {
     }
   }
 }
-
 #___________________________________________________________________________
 __END__;

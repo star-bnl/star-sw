@@ -56,11 +56,37 @@ my @h_filesL = script::find_hfiles($Dir);
 print "idlL = @idlL\n" if $param::debug;
 
 my (@src, @h_files, @idlM);
-my ($LIBS, $LIBPATH, $CPPPATH, $CXXFLAGS, $FC, $FFLAGS, $FEXTEND, $FFLAGS);
+my $CPPPATH = $env->{CPPPATH};
+my $CXXFLAGS= $env->{CXXFLAGS};
+my $FC      = $env->{FC};
+my $CC      = $env->{CC};
+my $FFLAGS  = $env->{FFLAGS};
+my $FCPATH  = $env->{FCPATH};
+my $FEXTEND = $env->{FEXTEND};
+my $FPPFLAGS= $env->{FPPFLAGS};
+my $FCCOM   = $env->{FCCOM};
+my $LIBS    = $env->{LIBS};
+my $LIBPATH = $env->{LIBPATH};
+my $EXTRA_CPPFLAGS = $env->{EXTRA_CPPFLAGS};
 my ($i, $obj);
 my $LIBPKG = "";
-
-
+if ($FC eq 'pgf77') {
+  # switch from pgf77 to g77 
+  my @g77pkgs = qw(gcalor geant321 agetof StBichsel Bichsel geometry gen StEeFit); 
+  my $g77pkgs = join('|', @g77pkgs);
+  if ($pkg =~ /$g77pkgs/) {
+      $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
+      $FFLAGS   = $env->{G77FLAGS}; 
+      $FEXTEND  = $env->{G77EXTEND};
+  }
+}
+if ($STAR_SYS =~ '^rh80_g77' && $DirPath =~ /pams|StRoot/ || 
+    $STAR_SYS =~ '^rh80_gcc' && $DirPath =~ /\/sim\//) { 
+  $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
+  $FFLAGS   = $env->{G77FLAGS}; 
+  $FEXTEND  = $env->{G77EXTEND};
+  $FCCOM    = $env->{FCviaAGETOFCOM};
+}
 
 if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "\t--- Regular case treatment (not gen not sim) ---\n" if $param::debug;
@@ -100,15 +126,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     $SO_PKG = $PKG . "." . $env->{SUFSOLIB};
     print "SO_PKG = $SO_PKG\n" if $param::debug;
 
-    $LIBS    = $env->{LIBS};
-    $LIBPATH = $env->{LIBPATH};
-    $CPPPATH = $env->{CPPPATH};
-    $CXXFLAGS= $env->{CXXFLAGS};
-    $FC      = $env->{FC};
-    $FFLAGS  = $env->{FFLAGS};
-    $FPPFLAGS= $env->{FPPFLAGS};
-    $FCPATH  = $env->{FCPATH};
-    $FEXTEND = $env->{FEXTEND};
     #+
     # Extraneous flag treatment for specific makers
     # Search path depth for Makers.
@@ -123,25 +140,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    #$LIBS ... should come loaded from ROOT 
 	    $CXXFLAGS.= " " . $env->{Packages}->{QT}->{FLAGS}; 
 	}
-
-	#
-	# This is more strict with -lmysqlclient addition
-	# and MUST appear PRIOR to the next block ...
-	#
-    } elsif ( $pkg =~ m/^StDbLib$/ ||
-	      $pkg =~ m/^StDbBroker$/) {
-	if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
-	
-	$LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
-	print "LIBPATH = $LIBPATH\n" if $param::debug;
-	$LIBS .= " " . $env->{Packages}->{MYSQL}->{LIBS};
-	print "LIBS    = $LIBS\n" if $param::debug;
-	$CPPPATH .=  $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{INCDIR};
-	print "CPPPATH = $CPPPATH\n" if $param::debug;
-
-
-	#... next block wich only requires the includes
-	# but no link with the client library
     } elsif ( $pkg =~ m/^St.*Db/ ) {
 	$CPPPATH .= $main::PATH_SEPARATOR .  $env->{Packages}->{MYSQL}->{INCDIR};
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
@@ -219,7 +217,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     } elsif ( $pkg =~ m/^StDaqLib$/ ) {
 	$CPPPATH = "#" . $Dir . $main::PATH_SEPARATOR . $env->{CPPPATH};
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
-    } elsif ( $pkg =~ m/^gcalor$/ || $pkg =~ m/^geant321$/ ) {
+    } elsif ( $pkg =~ m/^gcalor$/ || $pkg =~ m/^geant321$/) {
         $LIBPKG = "lib" . $pkg . "." . $env->{SUFLIB};
 	$SO_PKG = "";
 	$FCPATH = "#" . $Dir . "/../geant321" .
@@ -227,18 +225,15 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    $main::PATH_SEPARATOR . "#" . $Dir . "/../gcalor/include" . 
 	      $main::PATH_SEPARATOR . $env->{FCPATH};
 	$FPPFLAGS = " -DCOMMONS_CONFIG_H -DCERNLIB_LINUX -DCPP_VERS=\"'W'\"";
-	if ($env->{ENV}->{PGI} && $STAR_SYS =~ /^rh/) { 
-	  $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
-	  $FFLAGS   = $env->{G77FLAGS}; 
-	  $FEXTEND  = ""; 
-	}
-    }
+      } elsif ( $pkg =~ m/^g2t/ || $pkg =~ m/^gstar/ || $pkg =~ m/^geometry/ ) {
+	$FCPATH .=  $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include/atlsim";
+      }
     if ( $#idlM > -1 ) {
 	$CPPPATH = $INCLUDE . "/" . $pkg . $main::PATH_SEPARATOR . $CPPPATH;
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
 
     } elsif ( $#idlL > -1 ) {
-	$CPPPATH .= $main::PATH_SEPARATOR . $INCLUDE . "/tables";
+	$CPPPATH .= $main::PATH_SEPARATOR . $INCLUDE . "/tables" . $main::PATH_SEPARATOR . "#";;
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
     }
 
@@ -251,28 +246,34 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    $CPPPATH .= $main::PATH_SEPARATOR . "/usr/local/include";
 	}
     }
-
+    if (($pkg eq 'StHbtMaker' or $pkg eq 'StMuDSTMaker') and $CC ne 'gcc' and $CC ne 'icc') {
+# fight with __PRETTY_FUNCTION__
+      $EXTRA_CPPFLAGS .= " -DDEBUGMESSAGE\\\(x\\\)=\"\"  -DDEBUGMESSAGE1\\\(x\\\)=\"\"  -DDEBUGMESSAGE2\\\(x\\\)=\"\"  -DDEBUGMESSAGE3\\\(x\\\)=\"\"  -DFORCEDDEBUGMESSAGE\\\(x\\\)=\"\"";
+}
     #print "_+_+_+_+_+ $CPPPATH $CXXFLAGS $LIBS $CPPPATH $LIBPATH _+_+_+_+_+\n";
 
-    my $FCCOM = $env->{FCCOM};
     if ( $STAR_SYS =~ /^sun4x_5.$/ ) { $CXXFLAGS .= " -ptr" . $obj_dir; }
     if ( $STAR_SYS =~ /kcc$/ ) { $LIBPATH = ""; $LIBS = ""; }
-    $env2 = $env->clone(
+    $env2 = $env->clone('EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS,
 			'CPPPATH'  => $CPPPATH,
 			'CXXFLAGS' => $CXXFLAGS,
-			'FCCOM'    => $FCCOM,
-			'LIBPATH'  => $LIBPATH,
-			'LIBS'     => $LIBS,
-			'ObjDir'   => $obj_dir,
 			'FC'       => $FC,
 			'FFLAGS'   => $FFLAGS,
-			'FPPFLAGS' => $FPPFLAGS,
 			'FCPATH'   => $FCPATH,
-			'FEXTEND'  => $FEXTEND
+			'FEXTEND'  => $FEXTEND,
+			'FPPFLAGS' => $FPPFLAGS,
+			'FCCOM'    => $FCCOM,
+			'LIBS'     => $LIBS,
+			'LIBPATH'  => $LIBPATH,
+			'ObjDir'   => $obj_dir
 			);
-#?     bless $env2, "cons";
-
-
+#    bless $env2, "cons"; #?
+#    if ($CC eq 'icc') {$EXTRA_CPPFLAGS .= " " . "-DR__NO_CLASS_TEMPLATE_SPECIALIZATION";}
+    my $Cint_CPPPATH = $CPPPATH . $main::PATH_SEPARATOR . "#";
+    $envCint = $env2->clone('DEBUG' => $env2->{NOOPT},
+			    'CPPPATH'  => $Cint_CPPPATH,
+			    'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS);
+    
     print "LIBPATH = |", $env2->{LIBPATH}, "|\n LIBS = |", $env2->{LIBS},
     "|\n CPPPATH = |", $env2->{CPPPATH}, "|\n" if $param::debug;
 
@@ -333,9 +334,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 
 	    if ( $STAR_SYS !~ /^intel_wnt$/ ) {
 	      my $stic_cmd = 
-		  "mkdir -p /tmp/\$\$ && cd /tmp/\$\$ && ".
-		  "stic -s -r $STIC_CPPPATH -q %<:a && ".
-		  "(mv %>:f %>:a; cd /tmp ; rm -rf /tmp/\$\$)";
+		  "mkdir /tmp/\$\$ && cd /tmp/\$\$ && ".
+		  "stic -s -r $STIC_CPPPATH -q %<:a && mv %>:f %>:a && ".
+		  "cd /tmp  &&  rm -rf /tmp/\$\$";
 	      Command $env2 [$modh], @idlS, qq($stic_cmd);
 	      Command $env2 [$modi], @idlS, qq($stic_cmd);
 	      Command $env2 [$modH], @idlS, qq($stic_cmd);
@@ -404,7 +405,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
 	Command $env2 [@CintFiles], @defs,
 	  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
-	push @src, $CintFiles[0];
+	my @objfiles = Objects $envCint ($CintFiles[0]);#
+#	push @src, $CintFiles[0];
+	push @src, @objfiles[0];
 	print "+==========add $cint\n" if $param::debug;
     }
 
@@ -452,7 +455,7 @@ if ( $#idlL > -1 ) {
 		    $PKGT )
 		unless ($param::quiet);
         }
-        Install $env $INCLUDE, @idlT;  # print "Install $env $INCLUDE, @idlT\n";
+#        Install $env $INCLUDE, @idlT;  # print "Install $env $INCLUDE, @idlT\n";
 
         #___________________________________
         my $ROOTCINT_CPP =
@@ -461,11 +464,10 @@ if ( $#idlL > -1 ) {
 
         my $tobj_dir = $obj_dir . "/Tables";
         $CPPPATH =
-	    $env->{CPPPATH} . $main::PATH_SEPARATOR . $INCLUDE . "/tables";
-        $env3 = $env->clone(
-          'DEBUG'   => ' ',
-          'CPPPATH' => $CPPPATH,
-          'ObjDir'  => $tobj_dir
+	    $env->{CPPPATH} . $main::PATH_SEPARATOR . $INCLUDE . "/tables" . $main::PATH_SEPARATOR . "#";
+        $env3 = $env->clone('DEBUG'   => $env->{NOOPT},
+			    'CPPPATH' => $CPPPATH,
+			    'ObjDir'  => $tobj_dir
          );
        my $cscanner =
 	    find scan::cpp( $env->{_cwd}, $ROOTCINT_CPP );
@@ -590,6 +592,17 @@ sub script::MakeMoc {
 	print "+==========add moc file: $G__name\n" if $param::debug;
     }
     return @src;
+}
+#____________________________________________________________
+sub script::alpha_arcom { # 
+  my ($lib,$src) = @_;
+  my $input = "input" . File::Basename::dirname($lib);
+  open (OUTPUT, ">$input") or die "Can't open $input\n";
+  print OUTPUT $src;
+  close(OUTPUT);
+  my $cmd = "ar $lib -input $input'; ranlib $lib"; print "$cmd\n";
+  my $flag = `$cmd`; if ($?) {exit 2;}
+  return 1;
 }
 
 #_________________________________________________________________________________
