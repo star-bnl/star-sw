@@ -15,7 +15,9 @@
 //#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 #include <cstdio>
 
+#ifdef __ROOT__
 ClassImp(ParityCorrFctn)
+#endif
 
 //____________________________
 ParityCorrFctn::ParityCorrFctn(ParityEventCut* PEC){

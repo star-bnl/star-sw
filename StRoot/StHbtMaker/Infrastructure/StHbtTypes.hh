@@ -4,6 +4,11 @@
 // than once (by cint "preprocessor" and by C++ preprocessor)
 
 
+//#define FRANKS_HISTO
+#include "StHbtMaker/Infrastructure/franks1Histo.hh"  
+#include "StHbtMaker/Infrastructure/franks1HistoD.h"  
+#include "StHbtMaker/Infrastructure/franks2HistoD.h"  
+
 /*------------------------------
  * Enumerations                */
 #ifndef HBT_Enumarations
@@ -20,12 +25,16 @@ enum StHbtParticleType {hbtUndefined, hbtTrack, hbtV0};
 #ifndef StHbt_Histos
 #define StHbt_Histos
 
+#ifdef __ROOT__
+
 #ifndef ROOT_TH1
 #include "TH1.h"
 #endif
+
 #ifndef ROOT_TH2
 #include "TH2.h"
 #endif
+
 #ifndef ROOT_TH3
 #include "TH3.h"
 #endif
@@ -33,6 +42,11 @@ enum StHbtParticleType {hbtUndefined, hbtTrack, hbtV0};
 typedef TH1D StHbt1DHisto;
 typedef TH2D StHbt2DHisto;
 typedef TH3D StHbt3DHisto;
+
+#else 
+typedef franks1HistoD StHbt1DHisto;
+typedef franks2HistoD StHbt2DHisto;
+#endif // __ROOT__
 
 #endif
 
@@ -78,4 +92,9 @@ typedef StThreeVectorD StHbtThreeVector;//!
 //typedef StLorentzVector<double> StHbtLorentzVector;//!
 #include "StLorentzVectorD.hh"
 typedef StLorentzVectorD StHbtLorentzVector;//!
+#include "StHelix.hh"
+typedef StHelix StHbtHelix;//!
+#include "StPhysicalHelixD.hh"
+typedef StPhysicalHelixD StHbtPhysicalHelix;//!
+
 #endif

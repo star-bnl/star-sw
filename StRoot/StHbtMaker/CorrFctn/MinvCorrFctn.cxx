@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctn.cxx,v 1.3 1999/07/29 02:47:08 lisa Exp $
+ * $Id: MinvCorrFctn.cxx,v 1.4 2000/01/25 17:34:44 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,18 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctn.cxx,v $
+ * Revision 1.4  2000/01/25 17:34:44  laue
+ * I. In order to run the stand alone version of the StHbtMaker the following
+ * changes have been done:
+ * a) all ClassDefs and ClassImps have been put into #ifdef __ROOT__ statements
+ * b) unnecessary includes of StMaker.h have been removed
+ * c) the subdirectory StHbtMaker/doc/Make has been created including everything
+ * needed for the stand alone version
+ *
+ * II. To reduce the amount of compiler warning
+ * a) some variables have been type casted
+ * b) some destructors have been declared as virtual
+ *
  * Revision 1.3  1999/07/29 02:47:08  lisa
  * 1) add OpeningAngle correlation function 2) add StHbtMcEventReader 3) make histos in CorrFctns do errors correctly
  *
@@ -21,41 +33,49 @@
  * Installation of StHbtMaker
  *
  **************************************************************************/
-
+//#ifndef __CINT__
+//#include "fortranc.h"
+//#define fortrantest F77_NAME(fortrantest,FORTRANTEST)
+//extern "C" {int type_of_call F77_NAME(fortrantest,FORTRANTEST)(int*);}
+//#endif
 
 #include "StHbtMaker/CorrFctn/MinvCorrFctn.h"
-//#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 #include <cstdio>
 
-ClassImp(MinvCorrFctn)
+#ifdef __ROOT__
+ClassImp(MinvCorrFctn) 
+#endif
 
 //____________________________
 MinvCorrFctn::MinvCorrFctn(char* title, const int& nbins, const float& MinvLo, const float& MinvHi){
+  char theTitle[100];
   // set up numerator
-  char TitNum[100] = "Num";
-  strcat(TitNum,title);
-  mNumerator = new StHbt1DHisto(TitNum,title,nbins,MinvLo,MinvHi);
+  char *TitNum = "MinvCorrFctn_Num";
+  sprintf(theTitle,"Num %s\n",title);
+  mNumerator = new StHbt1DHisto(TitNum,theTitle,nbins,MinvLo,MinvHi);
   // set up denominator
-  char TitDen[100] = "Den";
-  strcat(TitDen,title);
-  mDenominator = new StHbt1DHisto(TitDen,title,nbins,MinvLo,MinvHi);
+  char *TitDen= "MinvCorrFctn_Den";
+  sprintf(theTitle,"Den %s\n",title);
+  mDenominator = new StHbt1DHisto(TitDen,theTitle,nbins,MinvLo,MinvHi);
   // set up difference
-  char TitDif[100] = "Dif";
-  strcat(TitDif,title);
-  mDifference = new StHbt1DHisto(TitDif,title,nbins,MinvLo,MinvHi);
+  char *TitDif = "MinvCorrFctn_Dif";
+  sprintf(theTitle,"Dif %s\n",title);
+  mDifference = new StHbt1DHisto(TitDif,theTitle,nbins,MinvLo,MinvHi);
   // this next bit is unfortunately needed so that we can have many histos of same "title"
   // it is neccessary if we typedef StHbt1DHisto to TH1d (which we do)
-  //mNumerator->SetDirectory(0);
-  //mDenominator->SetDirectory(0);
-  //mRatio->SetDirectory(0);
+  mNumerator->SetDirectory(0);
+  mDenominator->SetDirectory(0);
+  mDifference->SetDirectory(0);
 
-  // to enable error bar calculation...
   mNumerator->Sumw2();
   mDenominator->Sumw2();
   mDifference->Sumw2();
 
-}
-
+  //  for (int i=0; i < 100; i++) {
+  //    int j = fortrantest( &i );
+  //  }
+}   
+ 
 //____________________________
 MinvCorrFctn::~MinvCorrFctn(){
   delete mNumerator;
@@ -64,23 +84,33 @@ MinvCorrFctn::~MinvCorrFctn(){
 }
 //_________________________
 void MinvCorrFctn::Finish(){
-  // here is where we should normalize, fit, etc...
-  // we should NOT Draw() the histos (as I had done it below),
-  // since we want to insulate ourselves from root at this level
-  // of the code.  Do it instead at root command line with browser.
-  //  mNumerator->Draw();
-  //  mDenominator->Draw();
-  //mRatio->Draw();
-  double MumeratorInt = mNumerator->Integral();
+  cout << " alive in finish " << endl;
+  cout << HbtAnalysis() << endl;
+  cout << HbtAnalysis()->EventCut() << endl;
+
+  int NEvents = ((mikesEventCut*)HbtAnalysis()->EventCut())->NEventsPassed();
+  cout << " alive in finish " << endl;
+
+  mNumerator->Scale(1./NEvents);
+  mDenominator->Scale(1./NEvents);
+  mDifference->Scale(1./NEvents);
+
+  double NumeratorInt = mNumerator->Integral();
   double DenominatorInt = mDenominator->Integral();
-  mDifference->Add(mNumerator,mDenominator,1.0,-1*MumeratorInt/DenominatorInt);
+  mDifference->Add(mNumerator,mDenominator,1.0,-1*NumeratorInt/DenominatorInt);
 
+}    
+//____________________________
+MinvCorrFctn::MinvCorrFctn(const MinvCorrFctn& fctn) // copy constructor
+  :StHbtCorrFctn() { 
+   mNumerator = new StHbt1DHisto(*(fctn.mNumerator));
+   mDenominator= new StHbt1DHisto(*(fctn.mDenominator));
+   mDifference = new StHbt1DHisto(*(fctn.mDifference));
 }
-
 //____________________________
 StHbtString MinvCorrFctn::Report(){
   string stemp = "Minv Correlation Function Report:\n";
-  char ctemp[100];
+  char ctemp[100];  
   sprintf(ctemp,"Number of entries in numerator:\t%E\n",mNumerator->GetEntries());
   stemp += ctemp;
   sprintf(ctemp,"Number of entries in denominator:\t%E\n",mDenominator->GetEntries());
@@ -91,17 +121,12 @@ StHbtString MinvCorrFctn::Report(){
   return returnThis;
 }
 //____________________________
-void MinvCorrFctn::AddRealPair(const StHbtPair* pair){
-  double Minv = fabs(pair->mInv());   
-  mNumerator->Fill(Minv);
-  //  cout << "MinvCorrFctn::AddRealPair : " << pair->mInv() << " " << Minv <<
-  //" " << pair->track1().FourMomentum() << " " << pair->track2().FourMomentum() << endl;
+inline void MinvCorrFctn::AddRealPair(const StHbtPair* pair){
+  mNumerator->Fill(pair->mInv());
 }
 //____________________________
-void MinvCorrFctn::AddMixedPair(const StHbtPair* pair){
-  double weight = 1.0;
-  double Minv = fabs(pair->mInv());   
-  mDenominator->Fill(Minv,weight);
+inline void MinvCorrFctn::AddMixedPair(const StHbtPair* pair){
+  mDenominator->Fill(pair->mInv());
 }
 
 

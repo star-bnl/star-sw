@@ -19,9 +19,9 @@
 //#include "StChain.h"
 //#include "StHbtMaker/Infrastructure/StHbtIO.cc"
 
-
+#ifdef __ROOT__
 ClassImp(StHbtAsciiReader)
-
+#endif
 
 
 //_______________________________

@@ -14,7 +14,7 @@ class StHbtCutMonitorHandler{
  public:
   
   StHbtCutMonitorHandler();
-  ~StHbtCutMonitorHandler();
+  virtual ~StHbtCutMonitorHandler();
   
   StHbtCutMonitorCollection* PassMonitorColl(); 
   StHbtCutMonitorCollection* FailMonitorColl(); 
@@ -33,9 +33,9 @@ class StHbtCutMonitorHandler{
   bool mCollectionsEmpty;
   StHbtCutMonitorCollection* mPassColl; 
   StHbtCutMonitorCollection* mFailColl; 
-  
+#ifdef __ROOT__  
   ClassDef(StHbtCutMonitorHandler, 0)
-  
+#endif  
   
 };
 

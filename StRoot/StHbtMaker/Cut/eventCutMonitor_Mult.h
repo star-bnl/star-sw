@@ -23,7 +23,9 @@ public:
   virtual void Finish();
   StHbt1DHisto* Histo() {return mHisto;}
   
+#ifdef __ROOT__ 
  ClassDef(eventCutMonitor_Mult, 1)
+#endif
 };
 
 #endif

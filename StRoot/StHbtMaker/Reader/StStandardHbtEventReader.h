@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.11 1999/12/03 22:24:37 lisa Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.12 2000/01/25 17:35:27 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,18 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
+ * Revision 1.12  2000/01/25 17:35:27  laue
+ * I. In order to run the stand alone version of the StHbtMaker the following
+ * changes have been done:
+ * a) all ClassDefs and ClassImps have been put into #ifdef __ROOT__ statements
+ * b) unnecessary includes of StMaker.h have been removed
+ * c) the subdirectory StHbtMaker/doc/Make has been created including everything
+ * needed for the stand alone version
+ *
+ * II. To reduce the amount of compiler warning
+ * a) some variables have been type casted
+ * b) some destructors have been declared as virtual
+ *
  * Revision 1.11  1999/12/03 22:24:37  lisa
  * (1) make Cuts and CorrFctns point back to parent Analysis (as well as other way). (2) Accommodate new PidTraits mechanism
  *
@@ -121,9 +133,9 @@ public:
   void SetEventCut(StHbtEventCut*);          // use these methods to do
   void SetTrackCut(StHbtTrackCut*);          // "front-loaded" cuts
   void SetV0Cut(StHbtV0Cut*);
-
+#ifdef __ROOT__
   ClassDef(StStandardHbtEventReader, 1)
-
+#endif
 };
 
 inline void StStandardHbtEventReader::SetTheEventMaker(StMaker* maker){mTheEventMaker=maker;}

@@ -1,87 +1,92 @@
-// Cons tries to include even if there is a  '#ifdef #endif' around
-// For that reson I had to change all '#include' statements into
-// '//(notTheY2KBuf)#include' 
-#undef McEventExists
-#ifdef McEventExists
-
-
 #define HBT_B_FIELD 0.5*tesla
 #define DIFF_CUT_OFF 1.
 
-//(notTheY2KBug)#include "StHbtMaker/Reader/StHbtAssociationReader.h"
-//(notTheY2KBug)#include "StChain.h"
-//(notTheY2KBug)#include "TOrdCollection.h"
+#include "StHbtMaker/Reader/StHbtAssociationReader.h"
+#include "StChain.h"
+#include "TOrdCollection.h"
 
-//(notTheY2KBug)#include "StEvent.h"
-//(notTheY2KBug)#include "StGlobalTrack.h"
-//(notTheY2KBug)#include "StTpcDedxPid.h"
-//(notTheY2KBug)#include "StDedxPid.h"
+#include "StEvent.h"
+#include "StGlobalTrack.h"
+#include "StTrackNode.h"
+#include "StContainers.h"
+#include "StPrimaryVertex.h"
+#include "StVertex.h"
+#include "StMeasuredPoint.h"
+#include "StDedxPidTraits.h"
+#include "StTrackPidTraits.h"
+#include "StTrackGeometry.h"
 
-//(notTheY2KBug)#include "SystemOfUnits.h"   // has "tesla" in it
-//(notTheY2KBug)#include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
-//(notTheY2KBug)#include "StEventMaker/StEventMaker.h"
-//(notTheY2KBug)#include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
-//(notTheY2KBug)#include "StV0MiniDstMaker/StV0MiniDstMaker.h"  
-//(notTheY2KBug)#include "StV0MiniDstMaker/StV0MiniDst.hh"
-//(notTheY2KBug)#include "StAssociationMaker/StAssociationMaker.h"
+#include "StParticleTypes.hh"
+#include "StTpcDedxPidAlgorithm.h"
 
-//(notTheY2KBug)#include <iostream.h>
-//(notTheY2KBug)#include <stdlib.h>
-//(notTheY2KBug)#include <string>
-//(notTheY2KBug)#include <vector>
-////(notTheY2KBug)#include "TStyle.h"
-////(notTheY2KBug)#include "TCanvas.h"
-//(notTheY2KBug)#include "StMcEventMaker/StMcEventMaker.h"
-//(notTheY2KBug)#include "PhysicalConstants.h"
-//(notTheY2KBug)#include "SystemOfUnits.h"
-//(notTheY2KBug)#include "StThreeVector.hh"
-//(notTheY2KBug)#include "StThreeVectorF.hh"
-//(notTheY2KBug)#include "StThreeVectorD.hh"
+#include <typeinfo>
+#include <cmath>
 
-//(notTheY2KBug)#include "StChain.h"
-//(notTheY2KBug)#include "St_DataSet.h"
-//(notTheY2KBug)#include "St_DataSetIter.h"
+#include "SystemOfUnits.h"   // has "tesla" in it
+#include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
+#include "StEventMaker/StEventMaker.h"
+#include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
+#include "StV0MiniDstMaker/StV0MiniDstMaker.h"  
+#include "StV0MiniDstMaker/StV0MiniDst.hh"
+#include "StAssociationMaker/StAssociationMaker.h"
 
-//(notTheY2KBug)#include "g2t_event.h"
-//(notTheY2KBug)#include "g2t_ftp_hit.h"
-//(notTheY2KBug)#include "g2t_svt_hit.h"
-//(notTheY2KBug)#include "g2t_tpc_hit.h"
-//(notTheY2KBug)#include "g2t_track.h"
-//(notTheY2KBug)#include "g2t_vertex.h"
+#include <iostream.h>
+#include <stdlib.h>
+#include <string>
+#include <vector>
+//#include "TStyle.h"
+//#include "TCanvas.h"
+#include "StMcEventMaker/StMcEventMaker.h"
+#include "PhysicalConstants.h"
+#include "SystemOfUnits.h"
+#include "StThreeVector.hh"
+#include "StThreeVectorF.hh"
+#include "StThreeVectorD.hh"
 
-//(notTheY2KBug)#include "tables/St_g2t_event_Table.h"
-//(notTheY2KBug)#include "tables/St_g2t_ftp_hit_Table.h"
-//(notTheY2KBug)#include "tables/St_g2t_svt_hit_Table.h"
-//(notTheY2KBug)#include "tables/St_g2t_tpc_hit_Table.h"
-//(notTheY2KBug)#include "tables/St_g2t_track_Table.h"
-//(notTheY2KBug)#include "tables/St_g2t_vertex_Table.h"
+#include "StChain.h"
+#include "St_DataSet.h"
+#include "St_DataSetIter.h"
 
-// //(notTheY2KBug)#include "StMcEvent/StMemoryInfo.hh"
+#include "g2t_event.h"
+#include "g2t_ftp_hit.h"
+#include "g2t_svt_hit.h"
+#include "g2t_tpc_hit.h"
+#include "g2t_track.h"
+#include "g2t_vertex.h"
 
-////(notTheY2KBug)#include "StMcEvent/StMcEvent.hh"
-////(notTheY2KBug)#include "StMcEvent/StMcTrack.hh"
-////(notTheY2KBug)#include "StMcEvent/StMcTpcHit.hh"
-////(notTheY2KBug)#include "StMcEvent/StMcFtpcHit.hh"
-////(notTheY2KBug)#include "StMcEvent/StMcSvtHit.hh"
-////(notTheY2KBug)#include "StMcEvent/StMcVertex.hh"
+#include "tables/St_g2t_event_Table.h"
+#include "tables/St_g2t_ftp_hit_Table.h"
+#include "tables/St_g2t_svt_hit_Table.h"
+#include "tables/St_g2t_tpc_hit_Table.h"
+#include "tables/St_g2t_track_Table.h"
+#include "tables/St_g2t_vertex_Table.h"
 
-//(notTheY2KBug)#include "StMcEvent.hh"
-//(notTheY2KBug)#include "StMcTrack.hh"
-//(notTheY2KBug)#include "StMcTpcHit.hh"
-//(notTheY2KBug)#include "StMcFtpcHit.hh"
-//(notTheY2KBug)#include "StMcSvtHit.hh"
-//(notTheY2KBug)#include "StMcVertex.hh"
+// #include "StMcEvent/StMemoryInfo.hh"
 
-//(notTheY2KBug)#include "StAssociationMaker/StTrackPairInfo.hh"
-//(notTheY2KBug)#include "StParticleDefinition.hh"
-//(notTheY2KBug)#include "StPhysicalHelix.hh"
+//#include "StMcEvent/StMcEvent.hh"
+//#include "StMcEvent/StMcTrack.hh"
+//#include "StMcEvent/StMcTpcHit.hh"
+//#include "StMcEvent/StMcFtpcHit.hh"
+//#include "StMcEvent/StMcSvtHit.hh"
+//#include "StMcEvent/StMcVertex.hh"
+
+#include "StMcEvent.hh"
+#include "StMcTrack.hh"
+#include "StMcTpcHit.hh"
+#include "StMcFtpcHit.hh"
+#include "StMcSvtHit.hh"
+#include "StMcVertex.hh"
+
+#include "StAssociationMaker/StTrackPairInfo.hh"
+#include "StParticleDefinition.hh"
+#include "StPhysicalHelix.hh"
   
 
 #ifndef ST_NO_NAMESPACES
 using namespace std;
 #endif
 
-static double vertexCut = .0000025; // 25 nm (lifetime of the pi0)
+//static double vertexCut = .0000025; // 25 nm (lifetime of the pi0)
 struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
@@ -181,10 +186,10 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     cout << "StHbtAssociationReader - assoc " << assoc <<endl;
     return 0;
   }
-  tpcHitMapType* theHitMap = 0;
-  theHitMap = assoc->tpcHitMap();
-  trackMapType* theTrackMap = 0;
-  theTrackMap = assoc->trackMap();
+  rcTpcHitMapType* theHitMap = 0;
+  theHitMap = assoc->rcTpcHitMap();
+  rcTrackMapType* theTrackMap = 0;
+  theTrackMap = assoc->rcTrackMap();
   if (!theTrackMap){
     cout << "StHbtAssociationReader - No trackMap!!! " << endl;
     cout << "StHbtAssociationReader - theTrackMap " << theTrackMap <<endl;
@@ -208,15 +213,15 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   cout << " StHbtAssociationReader" << endl;
   cout << " **********************" << endl;
   unsigned long mRunNumber = mEvent->runNumber();
-  unsigned long rRunNumber = rEvent->runNumber();
+  unsigned long rRunNumber = rEvent->runId();
   cout << " DST run:    #" << rRunNumber << endl;
   cout << " MC  run:    #" << mRunNumber << endl;
   unsigned long rEventNumber = 0;
   unsigned long mEventNumber = mEvent->eventNumber();
   cout << " DST event:  #" << rEventNumber << endl;
   cout << " MC  event:  #" << mEventNumber << endl;
-  int rMult = rEvent->trackCollection()->size();
-  int mMult = mEvent->trackCollection()->size();
+  int rMult = rEvent->trackNodes().size();
+  int mMult = mEvent->tracks().size();
   cout << " DST mult:  #" << rMult << endl;
   cout << " MC  mult:  #" << mMult << endl;
   StHbtThreeVector rVertexPosition = rEvent->primaryVertex()->position();
@@ -227,10 +232,6 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   cout << "StHbtAssociationReader::ReturnHbtEvent - We have " << rMult << " tracks to store - we skip tracks with nhits==0" << endl;
     
   
-  //StMcTrack*     mTrack;
-  //int numberOfassociatedTracks =  theTrackMap->count(rTrack);
-  pair<trackMapIter,trackMapIter> trackBounds;
-  StDedxPid* tpcDedxPid;
   double pathlength;
   StHbtThreeVector p;
   StHbtThreeVector mp;
@@ -238,9 +239,7 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   mDiffCurrent->Reset();
 
   // what the hell is this?  StHbtTrackCollection dummyTrackCollection;
-  int icount=0;
   float diff=0;
-  float diff_mean=0;
 
   StHbtEvent* hbtEvent = new StHbtEvent;
 
@@ -263,17 +262,22 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     }
   }
 
-  for (StTrackIterator iter=rEvent->trackCollection()->begin();
-       iter!=rEvent->trackCollection()->end();iter++){
+
+  for (rcTrackMapIter tIter=theTrackMap->begin(); tIter!=theTrackMap->end(); ++tIter){
     //    cout << "Doing track number " << ++icount << endl;
-  StGlobalTrack* rTrack = *iter;
-    int nhits = rTrack->numberOfTpcHits();
-    //    cout << "nhits\t" << nhits << endl;
-    if (nhits==0) {
-      //      cout << "No hits -- skipping track (because it crashes otherwise)" << endl;
+    StGlobalTrack* rTrack = (*tIter).first;
+    // do I really got a track
+    if (!rTrack) {
       continue;
     }
-    
+    // check number points in tpc
+    int nhits = rTrack->detectorInfo()->numberOfPoints(kTpcId);
+    //cout << "nhits\t" << nhits << endl;
+    if (nhits==0) {
+      //cout << "No hits -- skipping track (because it crashes otherwise)" << endl;
+      continue;
+    }
+
     // *********************************
     // checking for associated mc tracks
     // *********************************
@@ -283,62 +287,70 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
       //      cout << " skip this track" << endl;
       continue;
     }
+    // get dedxPidTraits
+    //cout << " number of pidTraits " << rTrack->pidTraits().size();
+    //cout << " number of pidTraits for tpc: " << rTrack->pidTraits(kTpcId).size() << endl;
+    StTrackPidTraits* trackPidTraits; 
+    int iPidTraitsCounter=0;
+    do {
+      iPidTraitsCounter++;
+      trackPidTraits = rTrack->pidTraits(kTpcId)[iPidTraitsCounter];
+    } while (iPidTraitsCounter < (int)rTrack->pidTraits(kTpcId).size() && (!trackPidTraits) );
+    if (!trackPidTraits) {
+      //cout << " No dEdx information from Tpc- skipping track with " << nhits << " hits"<< endl;
+      continue;
+    }
+    const StDedxPidTraits* dedxPidTraits = (const StDedxPidTraits*)trackPidTraits;
+    //cout << " dE/dx = " << dedxPidTraits->mean() << endl;
 
-
-
+    // get fitTraits
+    StTrackFitTraits fitTraits = rTrack->fitTraits();
+    //cout << " got fitTraits " << endl;
+      
     // **********************
     // get associated mctrack
     // **********************
-    trackBounds = theTrackMap->equal_range(rTrack);
-    // equal-range return two iterators, 
-    // first iterator points to the first matching entry theTrackMap 
-    // second iterator points to the first not matching entry theTrackMap -- is this write 
-    //cout << rTrack << " == " << (*trackBounds.first).first << "== " << (*trackBounds.second).first  << " ???" << endl;
-    //                                         ^       ^
-    //                   first of the pair ----+       +---- first element of the map
-    StMcTrack* mTrack = (*trackBounds.first).second->partnerMcTrack();
+    StMcTrack* mTrack = (*tIter).second->partnerMcTrack();
+    /*
+      if ((*tIter).second->commonTpcHits()<10) 
+      continue;
+    */
     int geantId =  mTrack->geantId();
     //cout << " partnerMcTrack geant Id           : " << mTrack->geantId() << endl;
     //cout << " partnerMcTrack particleDefinition : " << *(mTrack->particleDefinition()) << endl;
-
+    
     //    cout << "Now getting the pidTraits" << endl;
     //StTrackPidTraits pidTraitsTemp = rTrack->pidTraits();
     //cout << " Got it"<<endl;
-
-    tpcDedxPid = rTrack->pidTraits().tpcDedxPid();
-    if (!tpcDedxPid) {
-      cout << "No dEdx information - skipping track with " << nhits << " hits"<<endl;
-      continue;
-    }
-
+    
     // ****************************************
     // check momenta of real track and mc track
     // ****************************************
-    pathlength = rTrack->helix().pathLength( rVertexPosition );
+    pathlength = rTrack->geometry()->helix().pathLength( rVertexPosition );
     //cout << "pathlength\t" << pathlength << endl;
-    p = rTrack->helix().momentumAt(pathlength,HBT_B_FIELD);
-    mp = (*trackBounds.first).second->partnerMcTrack()->momentum();
+    p = rTrack->geometry()->helix().momentumAt(pathlength,HBT_B_FIELD);
+    mp = mTrack->momentum();
     //cout << "p: " << p << endl;
     //cout << "mp: " << mp << endl;
     diff =  (p.mag()-mp.mag()) / p.mag();
-
+    
     if ( fabs(diff) > DIFF_CUT_OFF ) {
       //      cout << "StHbtAssociationReader::ReturnEvent() : momenta diff " << 100 * diff << " %   -- track skipped -- " << endl;
       continue;
     }
-
+    
     mDiff->Fill(diff,1.);
     mDiffEvents->Fill(diff,eventNumber,1.);
     mDiffCurrent->Fill(diff,1.);
-
+    
     //    cout << "Getting readty to instantiate new StHbtTrack " << endl;
     // o.k., god track found, fill it
     StHbtTrack* hbtTrack = new StHbtTrack;
-
+    
     //cout << "StHbtTrack instantiated " << endl;
-
+    
     hbtTrack->SetNHits(nhits);
-
+    
     switch (geantId) {
     case 8:  // intentional fall-through
     case 9:  // gid=8,9 is pion
@@ -364,36 +376,36 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
       hbtTrack->SetNSigmaProton(999.);
       break;
     }
-
-
-    float dEdx = rTrack->tpcDedx()->mean();
+    
+    
+    float dEdx = dedxPidTraits->mean();
     //cout << "dEdx\t" << dEdx << endl; 
     hbtTrack->SetdEdx(dEdx);
     
-    double pathlength = rTrack->helix().pathLength(rVertexPosition);
+    double pathlength = rTrack->geometry()->helix().pathLength(rVertexPosition);
     //cout << "pathlength\t" << pathlength << endl;
-    StHbtThreeVector p = rTrack->helix().momentumAt(pathlength,HBT_B_FIELD);
+    StHbtThreeVector p = rTrack->geometry()->helix().momentumAt(pathlength,HBT_B_FIELD);
     //cout << "p: " << p << endl;
     hbtTrack->SetP(p);
-
-    StHbtThreeVector  DCAxyz = rTrack->helix().at(pathlength)-rVertexPosition;
+    
+    StHbtThreeVector  DCAxyz = rTrack->geometry()->helix().at(pathlength)-rVertexPosition;
     //cout << "DCA\t\t" << DCAxyz << " " << DCAxyz.perp() << endl;
     hbtTrack->SetDCAxy( DCAxyz.perp() );
     hbtTrack->SetDCAz(  DCAxyz.z()  );
-
-    hbtTrack->SetChiSquaredXY( rTrack->fitTraits().chiSquaredInXY() );
-    hbtTrack->SetChiSquaredZ( rTrack->fitTraits().chiSquaredInPlaneZ() ); 
-
-    StPhysicalHelixD&  helix = rTrack->helix();
+    
+    hbtTrack->SetChiSquaredXY( rTrack->fitTraits().chi2(0) );
+    hbtTrack->SetChiSquaredZ( rTrack->fitTraits().chi2(1) ); 
+    
+    StPhysicalHelixD&  helix = rTrack->geometry()->helix();
     hbtTrack->SetHelix( helix );
-
+    
     float pt = sqrt(p[0]*p[0]+p[1]*p[1]);
     //cout << "pt\t\t\t" << pt << endl;
     //hbtTrack->SetPt(pt);
-
+    
     hbtTrack->SetPt(pt);
-
-    int charge = ((rTrack->helix().charge(HBT_B_FIELD)>0) ? 1 : -1);
+    
+    int charge = ( rTrack->geometry()->charge() );
     //cout << "charge\t\t\t\t" << charge << endl;
     hbtTrack->SetCharge(charge);
     
@@ -406,11 +418,13 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
 	continue;
       }
     }
-
+    
     hbtEvent->TrackCollection()->push_back(hbtTrack);
   }
+  
+  
   hbtEvent->SetNumberOfGoodTracks(hbtEvent->TrackCollection()->size());
-
+  
   cout << "StHbtAssociationReader::ReturnEvent() : mean of momenta diff (accepted tracks)= " << mDiffCurrent->GetMean() << endl;
   cout << "StHbtAssociationReader::ReturnEvent() : rms  of momenta diff (accepted tracks)= " << mDiffCurrent->GetRMS() << endl;
   mDiffMean->Fill(mDiffCurrent->GetMean(),1.);
@@ -428,4 +442,3 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
 
 ClassImp(StHbtAssociationReader)
 
-#endif // McEventExists

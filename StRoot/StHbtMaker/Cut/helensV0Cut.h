@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helensV0Cut.h,v 1.3 1999/10/15 01:57:02 lisa Exp $
+ * $Id: helensV0Cut.h,v 1.4 2000/01/25 17:35:02 laue Exp $
  *
  * Authors: Helen Caines, Tom Humanic, Ohio State, humanic@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,18 @@
  ***************************************************************************
  *
  * $Log: helensV0Cut.h,v $
+ * Revision 1.4  2000/01/25 17:35:02  laue
+ * I. In order to run the stand alone version of the StHbtMaker the following
+ * changes have been done:
+ * a) all ClassDefs and ClassImps have been put into #ifdef __ROOT__ statements
+ * b) unnecessary includes of StMaker.h have been removed
+ * c) the subdirectory StHbtMaker/doc/Make has been created including everything
+ * needed for the stand alone version
+ *
+ * II. To reduce the amount of compiler warning
+ * a) some variables have been type casted
+ * b) some destructors have been declared as virtual
+ *
  * Revision 1.3  1999/10/15 01:57:02  lisa
  * Important enhancement of StHbtMaker - implement Franks CutMonitors
  * ----------------------------------------------------------
@@ -40,9 +52,9 @@
 #ifndef helensV0Cut_hh
 #define helensV0Cut_hh
 
-#ifndef StMaker_H
-#include "StMaker.h"
-#endif
+//#ifndef StMaker_H
+//#include "StMaker.h"
+//#endif
 
 #include "StHbtMaker/Base/StHbtV0Cut.h"
 #include "StHbtMaker/Infrastructure/StHbtV0.hh"	//9-17-99 seems like good idea
@@ -93,8 +105,9 @@ private:   // here are the quantities we want to cut on...
 
   char*             V0Type;                // String selecting v0 (la,antil,k0)
 
+#ifdef __ROOT__ 
   ClassDef(helensV0Cut, 1)
-
+#endif
 };
 
 
@@ -127,7 +140,7 @@ inline void helensV0Cut::SetRapidity(const float& lo,const float& hi)
 {mRapidity[0]=lo; mRapidity[1]=hi;}
 
 inline void helensV0Cut::SetV0Type(const char* type)
-{V0Type = type;}
+{V0Type = (char*)type;}
 
 #endif
 

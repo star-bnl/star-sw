@@ -16,7 +16,9 @@
 #include "StHbtMaker/Cut/mikesTrackCut.h"
 #include <cstdio>
 
+#ifdef __ROOT__ 
 ClassImp(mikesTrackCut)
+#endif
 
 mikesTrackCut::mikesTrackCut(){
   mNTracksPassed = mNTracksFailed = 0;
@@ -27,8 +29,6 @@ mikesTrackCut::mikesTrackCut(){
 //}
 //------------------------------
 bool mikesTrackCut::Pass(const StHbtTrack* track){
-  static int trackCount=0;
-
 
   /*
     cout << endl;

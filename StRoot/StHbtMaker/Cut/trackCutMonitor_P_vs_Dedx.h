@@ -25,8 +25,9 @@ public:
 
   virtual void Fill(const StHbtTrack* track);
   StHbt2DHisto* Histo() {return mHisto;}  
-  
+#ifdef __ROOT__  
  ClassDef(trackCutMonitor_P_vs_Dedx, 1)
+#endif
 };
 
 #endif

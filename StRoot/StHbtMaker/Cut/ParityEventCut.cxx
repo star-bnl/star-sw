@@ -19,7 +19,9 @@
 #include "StHbtMaker/Cut/ParityEventCut.h"
 #include <cstdio>
 
+#ifdef __ROOT__
 ClassImp(ParityEventCut)
+#endif
 
 ParityEventCut::ParityEventCut(char* title, const int& nbins, const float& Lo, const float& Hi){
   mNEventsPassed =  mNEventsFailed = 0;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.12 1999/10/15 01:57:29 lisa Exp $
+ * $Id: StHbtManager.cxx,v 1.13 2000/01/25 17:35:17 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,18 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
+ * Revision 1.13  2000/01/25 17:35:17  laue
+ * I. In order to run the stand alone version of the StHbtMaker the following
+ * changes have been done:
+ * a) all ClassDefs and ClassImps have been put into #ifdef __ROOT__ statements
+ * b) unnecessary includes of StMaker.h have been removed
+ * c) the subdirectory StHbtMaker/doc/Make has been created including everything
+ * needed for the stand alone version
+ *
+ * II. To reduce the amount of compiler warning
+ * a) some variables have been type casted
+ * b) some destructors have been declared as virtual
+ *
  * Revision 1.12  1999/10/15 01:57:29  lisa
  * Important enhancement of StHbtMaker - implement Franks CutMonitors
  * ----------------------------------------------------------
@@ -71,8 +83,9 @@
 #include "StHbtMaker/Base/StHbtV0Cut.h"
 #include <cstdio>
 
+#ifdef __ROOT__
 ClassImp(StHbtManager)
-
+#endif
 
 // this little function used to apply ParticleCuts (TrackCuts or V0Cuts) and fill ParticleCollections of picoEvent
 //  it is called from StHbtManager::ProcessEvent()
@@ -184,7 +197,7 @@ StHbtString StHbtManager::Report(){
   StHbtAnalysis* currentAnalysis;
   //cout << stemp.c_str();
   for (AnalysisIter=mAnalysisCollection->begin();AnalysisIter!=mAnalysisCollection->end();AnalysisIter++){
-    //cout << "StHbtManager - asking for Analysis Report" << endl;
+    cout << "StHbtManager - asking for Analysis Report" << endl;
     currentAnalysis = *AnalysisIter;
     stemp+=currentAnalysis->Report();
   }
@@ -193,7 +206,7 @@ StHbtString StHbtManager::Report(){
 }
 //____________________________
 StHbtAnalysis* StHbtManager::Analysis( int n ){  // return pointer to n-th analysis
-  if ( n<0 || n > mAnalysisCollection->size() )
+  if ( n<0 || n > (int) mAnalysisCollection->size() )
     return NULL;
   StHbtAnalysisIterator iter = mAnalysisCollection->begin();
   for (int i=0; i<n ;i++){

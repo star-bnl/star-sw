@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.4 1999/07/29 16:16:34 lisa Exp $
+ * $Id: StHbtPair.hh,v 1.5 2000/01/25 17:35:17 laue Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,18 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
+ * Revision 1.5  2000/01/25 17:35:17  laue
+ * I. In order to run the stand alone version of the StHbtMaker the following
+ * changes have been done:
+ * a) all ClassDefs and ClassImps have been put into #ifdef __ROOT__ statements
+ * b) unnecessary includes of StMaker.h have been removed
+ * c) the subdirectory StHbtMaker/doc/Make has been created including everything
+ * needed for the stand alone version
+ *
+ * II. To reduce the amount of compiler warning
+ * a) some variables have been type casted
+ * b) some destructors have been declared as virtual
+ *
  * Revision 1.4  1999/07/29 16:16:34  lisa
  * Selemons upgrade of StHbtPair class
  *
@@ -83,8 +95,8 @@ private:
 
 };
 
-inline void StHbtPair::SetTrack1(const StHbtParticle* trkPtr){mTrack1=trkPtr;}
-inline void StHbtPair::SetTrack2(const StHbtParticle* trkPtr){mTrack2=trkPtr;}
+inline void StHbtPair::SetTrack1(const StHbtParticle* trkPtr){mTrack1=(StHbtParticle*)trkPtr;}
+inline void StHbtPair::SetTrack2(const StHbtParticle* trkPtr){mTrack2=(StHbtParticle*)trkPtr;}
 
 inline StHbtParticle* StHbtPair::track1() const {return mTrack1;}
 inline StHbtParticle* StHbtPair::track2() const {return mTrack2;}

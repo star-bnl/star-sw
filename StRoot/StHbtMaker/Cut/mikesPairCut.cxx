@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mikesPairCut.cxx,v 1.2 1999/07/06 22:33:21 lisa Exp $
+ * $Id: mikesPairCut.cxx,v 1.3 2000/01/25 17:35:02 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,18 @@
  ***************************************************************************
  *
  * $Log: mikesPairCut.cxx,v $
+ * Revision 1.3  2000/01/25 17:35:02  laue
+ * I. In order to run the stand alone version of the StHbtMaker the following
+ * changes have been done:
+ * a) all ClassDefs and ClassImps have been put into #ifdef __ROOT__ statements
+ * b) unnecessary includes of StMaker.h have been removed
+ * c) the subdirectory StHbtMaker/doc/Make has been created including everything
+ * needed for the stand alone version
+ *
+ * II. To reduce the amount of compiler warning
+ * a) some variables have been type casted
+ * b) some destructors have been declared as virtual
+ *
  * Revision 1.2  1999/07/06 22:33:21  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -23,7 +35,9 @@
 #include <string>
 #include <cstdio>
 
+#ifdef __ROOT__
 ClassImp(mikesPairCut)
+#endif
 
 //__________________
 mikesPairCut::mikesPairCut(){

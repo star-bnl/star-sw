@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: ParityEventCut.h,v 1.2 1999/10/15 01:56:55 lisa Exp $
+ * $Id: ParityEventCut.h,v 1.3 2000/01/25 17:35:02 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -15,9 +15,10 @@
 #ifndef ParityEventCut_hh
 #define ParityEventCut_hh
 
-#ifndef StMaker_H
-#include "StMaker.h"
-#endif
+// do I need these lines ?
+//#ifndef StMaker_H
+//#include "StMaker.h"
+//#endif
 
 #include "StHbtMaker/Base/StHbtEventCut.h"
 
@@ -56,8 +57,9 @@ private:   // here are the quantities I want to cut on...
   StHbt1DHisto* mReals;  
   StHbt1DHisto* mMixed;
 
+#ifdef __ROOT__
   ClassDef(ParityEventCut, 0)
-
+#endif
 };
 
 inline void ParityEventCut::SetEventMult(const int& lo, const int& hi){mEventMult[0]=lo; mEventMult[1]=hi;}

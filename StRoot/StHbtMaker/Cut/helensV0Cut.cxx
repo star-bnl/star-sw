@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helensV0Cut.cxx,v 1.2 1999/10/05 11:37:38 lisa Exp $
+ * $Id: helensV0Cut.cxx,v 1.3 2000/01/25 17:35:02 laue Exp $
  *
  * Authors: Helen Caines, Tom Humanic, Ohio State, humanic@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,18 @@
  ***************************************************************************
  *
  * $Log: helensV0Cut.cxx,v $
+ * Revision 1.3  2000/01/25 17:35:02  laue
+ * I. In order to run the stand alone version of the StHbtMaker the following
+ * changes have been done:
+ * a) all ClassDefs and ClassImps have been put into #ifdef __ROOT__ statements
+ * b) unnecessary includes of StMaker.h have been removed
+ * c) the subdirectory StHbtMaker/doc/Make has been created including everything
+ * needed for the stand alone version
+ *
+ * II. To reduce the amount of compiler warning
+ * a) some variables have been type casted
+ * b) some destructors have been declared as virtual
+ *
  * Revision 1.2  1999/10/05 11:37:38  lisa
  * Helens realistic V0Cut and Franks memory-sealed McReader
  *
@@ -23,7 +35,9 @@
 #include "StHbtMaker/Cut/helensV0Cut.h"
 #include <cstdio>
 
+#ifdef __ROOT__ 
 ClassImp(helensV0Cut)
+#endif
 
 helensV0Cut::helensV0Cut(){
   mNV0sPassed = mNV0sFailed = 0;
@@ -34,7 +48,6 @@ helensV0Cut::helensV0Cut(){
 //}
 //------------------------------
 bool helensV0Cut::Pass(const StHbtV0* V0){
-  static int V0Count=0;
   int inMassRange;
 
 

@@ -42,9 +42,9 @@ public:
 
   // methods special to this Reader
   void SetFileName(char* file);
-
+#ifdef __ROOT__
   ClassDef(StHbtAsciiReader, 0)
-
+#endif
 };
 
 inline void StHbtAsciiReader::SetFileName(char* file){mFileName=file;}

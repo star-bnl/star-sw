@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtMaker.cxx,v 1.7 1999/09/24 01:23:08 fisyak Exp $
+ * $Id: StHbtMaker.cxx,v 1.8 2000/01/25 17:33:38 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,18 @@
  ***************************************************************************
  *
  * $Log: StHbtMaker.cxx,v $
+ * Revision 1.8  2000/01/25 17:33:38  laue
+ * I. In order to run the stand alone version of the StHbtMaker the following
+ * changes have been done:
+ * a) all ClassDefs and ClassImps have been put into #ifdef __ROOT__ statements
+ * b) unnecessary includes of StMaker.h have been removed
+ * c) the subdirectory StHbtMaker/doc/Make has been created including everything
+ * needed for the stand alone version
+ *
+ * II. To reduce the amount of compiler warning
+ * a) some variables have been type casted
+ * b) some destructors have been declared as virtual
+ *
  * Revision 1.7  1999/09/24 01:23:08  fisyak
  * Reduced Include Path
  *
@@ -38,18 +50,25 @@
 #include <iostream.h>
 #include <stdlib.h>
 //#include <string>
-#include <vector>
+
+#ifdef __ROOT__
 #include "StChain.h"
+#endif
+
+#include <vector>
 #include "StHbtMaker.h"
 
-
+#ifdef __ROOT__
 ClassImp(StHbtMaker)
-
+#endif
 
 //_____________________________________________________________________________
 
     
-StHbtMaker::StHbtMaker(const char*name, const char * title):StMaker(name,title)
+StHbtMaker::StHbtMaker(const char*name, const char * title)
+#ifdef __ROOT__
+:StMaker(name,title)
+#endif
 {
   // StHbtMaker - constructor
   mHbtManager = new StHbtManager;
@@ -59,13 +78,19 @@ StHbtMaker::~StHbtMaker()
 {
   // StHbtMaker - destructor
   cout << "Inside ReaderMaker Destructor" << endl;
+#ifdef __ROOT__
   SafeDelete(mHbtManager);  //
+#else
+  delete mHbtManager;
+#endif
 }
 //_____________________________________________________________________________
 void StHbtMaker::Clear(const char*)
 {
   /* no-op - do not delete manager! */
+#ifdef __ROOT__
   StMaker::Clear();
+#endif
 }
 //_____________________________________________________________________________
 //_____________________________________________________________________________
@@ -79,24 +104,40 @@ Int_t StHbtMaker::Init()
   StHbtString tempString = mHbtManager->Report();
   cout << "Got the report, now let me try to put it to screen" << endl;
   cout << tempString.c_str() << endl; //!
-
+#ifdef __ROOT__
   return StMaker::Init();
+#else
+  return 0;
+#endif
 }
 //_____________________________________________________________________________
 Int_t StHbtMaker::Finish()
 {
   cout << mHbtManager->Report().c_str() << endl; //!
   mHbtManager->Finish();
+#ifdef __ROOT__
   return StMaker::Finish();
+#else
+  return 0;
+#endif
 }
 //_____________________________________________________________________________
 Int_t StHbtMaker::Make()
 {
   cout << "\nStHbtMaker::Make -- processing event" << endl;
+#ifdef __ROOT__
   if (mHbtManager->ProcessEvent()){
     return kStEOF;    // non-zero value returned --> end of file action
   }
   else{
     return kStOK;
   }
+#else
+  if (mHbtManager->ProcessEvent()){
+    return -1;    // non-zero value returned --> end of file action
+  }
+  else{
+    return 0;
+  }
+#endif
 }

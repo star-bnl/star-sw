@@ -14,8 +14,9 @@
 #include "StThreeVectorD.hh"
 #include <cstdio>
 
+#ifdef __ROOT__
 ClassImp(ExitSepCorrFctn)
-
+#endif
 
 StThreeVectorD FindExitPoint(const StPhysicalHelixD& pHelix);
 

@@ -4,8 +4,9 @@
 #include <cstdio>
 #include <typeinfo>
 
+#ifdef __ROOT__ 
 ClassImp(eventCutMonitor_Mult)
-
+#endif
 eventCutMonitor_Mult::eventCutMonitor_Mult(){
   mHisto = new StHbt1DHisto("Mult","multiplicity",1000,0,10000.);
   mHisto->SetDirectory(0);

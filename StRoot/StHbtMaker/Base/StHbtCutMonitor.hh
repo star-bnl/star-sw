@@ -1,8 +1,6 @@
 #ifndef StHbtCutMonitor_hh
 #define StHbtCutMonitor_hh
 
-//#include<string>
-//#include "StHbtMaker/Base/StHbtParticleCut.hh"
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
