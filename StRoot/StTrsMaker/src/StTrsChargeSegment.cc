@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.37 2003/12/24 13:44:52 fisyak Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.38 2004/04/07 18:58:57 perev Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -13,6 +13,9 @@
  *
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.38  2004/04/07 18:58:57  perev
+ * Cleanup
+ *
  * Revision 1.37  2003/12/24 13:44:52  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
  *
@@ -163,7 +166,8 @@ using std::random_shuffle;
 #include "StTrsDeDx.hh"
 
 // Need a CERNLIB routine for tssSplit
-extern "C"  float dislan_(float *);
+extern "C"  float dislan_(float &x);
+float dislan(float x) { return (x<10.)? 0.:dislan_(x);}
  
 HepJamesRandom  StTrsChargeSegment::mEngine;
 RandFlat        StTrsChargeSegment::mFlatDistribution(mEngine);
@@ -537,13 +541,13 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 	double xBinary;
       	
 	for(ii=1; ii<numberOfLevels; ii++) {
-	    numberOfSubSegmentsInCurrentLevel = ::pow(2.,ii);
+	    numberOfSubSegmentsInCurrentLevel = 1<<(ii);
 	    float dL = mDs/numberOfSubSegmentsInCurrentLevel;
 	    //PR(dL/centimeter);
 		
 	    // In this level you must create "numberOfSubSegments" subsegments
 	    // Loop over the existing ones...
-	      numberOfSubSegmentsInPreviousLevel = ::pow(2.,(ii-1)); 
+	      numberOfSubSegmentsInPreviousLevel = 1<<(ii-1); 
 	    for(jj=0; jj<numberOfSubSegmentsInPreviousLevel; jj++) {
 		double parentdEdx = ionizationSegments[(ii-1)][jj];
 		
@@ -683,9 +687,8 @@ double StTrsChargeSegment::xReflectedLandau(double x0, double sig) const
     float arg3 = (1.-x0)/sig;
     float arg4 = -x0/sig;
 
-    float dlan3 = dislan_(&arg3);
-    float dlan4 = dislan_(&arg4);
-    if (isnan(dlan4)) dlan4=0;
+    float dlan3 = dislan(arg3);
+    float dlan4 = dislan(arg4);
 
     double denom = dlan3 - dlan4;
 
@@ -703,8 +706,8 @@ double StTrsChargeSegment::xReflectedLandau(double x0, double sig) const
 	x = .5*(xlo+xhi);
 	arg1 = (x-x0)/sig;
 	arg2 = (1.-x-x0)/sig;
-	dlan1 = dislan_(&arg1);
-	dlan2 = dislan_(&arg2);
+	dlan1 = dislan(arg1);
+	dlan2 = dislan(arg2);
 	if (isnan(dlan1)) dlan1=0;
 	p = .5*(1. + (dlan1 - dlan2)/denom);
 	if( (fabs(testValue-p)<granularity) ) {
@@ -719,6 +722,7 @@ double StTrsChargeSegment::xReflectedLandau(double x0, double sig) const
 	if(counter++ == 100){
 	  cout << "Probable race condition in loop in StTrsChargeSegement::xReflectedLandau" << endl;
 	  PR(arg1); PR(arg2); PR(arg3); PR(arg4);
+          return x;
 	}
     } while(true);
 }
