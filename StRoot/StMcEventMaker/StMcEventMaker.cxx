@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.39 2001/05/13 21:14:49 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.40 2001/10/15 20:38:56 pavlinov Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.40  2001/10/15 20:38:56  pavlinov
+ * Added bfcTree/geantBranch for searching g2t tablesStMcEventMaker.cxx
+ *
  * Revision 1.39  2001/05/13 21:14:49  calderon
  * Modifications from Aleksei : StMcEmcHitCollections changed, added
  * method for printing Emc information of the event
@@ -188,7 +191,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.39 2001/05/13 21:14:49 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.40 2001/10/15 20:38:56 pavlinov Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -276,17 +279,34 @@ Int_t StMcEventMaker::Make()
     
     cout << "Inside StMcEventMaker::Make()" << endl;
     // We're supposed to get the dataset from the chain. I don't know how yet. I think it is:
-
     
-    St_DataSet* dsGeant = GetDataSet("geant");
+    Char_t* geaTmp[3]={"geant","event/geant/Event","bfcTree/geantBranch"};
+    St_DataSet* dsGeant = 0;
+    for(UInt_t i=0; i<3; i++){ 
+      dsGeant = GetDataSet(geaTmp[i]);
+      if(!dsGeant || !dsGeant->GetList()) {
+	gMessMgr->Warning() << "Could not find dataset " << geaTmp[i] << endm;
+        dsGeant = GetDataSet("event/geant/Event");
+      } else {
+	gMessMgr->Info() << "Get Geant info from  dataset " << geaTmp[i] << endm;
+        break;
+      }
+    }
+    if(!dsGeant) return kStWarn;;
+    /* 
     if(!dsGeant || !dsGeant->GetList()) {
 	gMessMgr->Warning() << "Could not find dataset geant" << endm;
         dsGeant = GetDataSet("event/geant/Event");
         if(!dsGeant || !dsGeant->GetList()) {  // Try direct output from Geant
 	  gMessMgr->Warning() << "Could not find dataset event/geant/Event" << endm;
-	  return kStWarn;
+          dsGeant = GetDataSet("bfcTree/geantBranch");
+          if(!dsGeant || !dsGeant->GetList()) {  // Try output from bfc forGeant
+	    gMessMgr->Warning() << "Could not find dataset bfcTree/geantBranch" << endm;
+	    return kStWarn;
+          } else cout<< "Find dataset bfcTree/geantBranch "<<endl;
         }
     }
+    */
     // This is done only for one file, though.  I haven't put functionality for
     // multiple file handling.  If needed, it should start in the StMcEventReadMacro
     // and try to follow the doEvents.C macro to read in multiple files.
@@ -953,7 +973,7 @@ StMcEventMaker::fillBemc(St_g2t_emc_hit* g2t_emc_hitTablePointer)
     }
 
     g2t_emc_hit_st* emcHitTable = g2t_emc_hitTablePointer->GetTable();
-    StEmcGeom geomBemc(1);
+    StEmcGeom *geomBemc = StEmcGeom::getEmcGeom(1);
     int module, eta, sub, detector; 
     float de;
     StMcTrack *tr; 
@@ -970,7 +990,7 @@ StMcEventMaker::fillBemc(St_g2t_emc_hit* g2t_emc_hitTablePointer)
 		
     for(long ihit=0; ihit<NHits; ihit++,emcHitTable++) { 
 
-	geomBemc.getVolIdBemc(emcHitTable->volume_id, module,eta,sub,detector); // Must check ??
+	geomBemc->getVolIdBemc(emcHitTable->volume_id, module,eta,sub,detector); // Must check ??
 	tr   = ttemp[emcHitTable->track_p - 1];
 	de   = emcHitTable->de;
 		    
@@ -1032,7 +1052,7 @@ StMcEventMaker::fillBsmd(St_g2t_emc_hit* g2t_smd_hitTablePointer)
     }
 
     g2t_emc_hit_st* smdHitTable = g2t_smd_hitTablePointer->GetTable();
-    StEmcGeom geomBsmd(3);
+    StEmcGeom *geomBsmd = StEmcGeom::getEmcGeom(3);
     int module, eta, sub, detector; 
     float de;
     StMcTrack *tr; 
@@ -1047,7 +1067,7 @@ StMcEventMaker::fillBsmd(St_g2t_emc_hit* g2t_smd_hitTablePointer)
 
     long NHits = g2t_smd_hitTablePointer->GetNRows();
     for(long ihit=0; ihit<NHits; ihit++,smdHitTable++) { 
-	geomBsmd.getVolIdBsmd(smdHitTable->volume_id, module,eta,sub,detector); // Must check ??
+	geomBsmd->getVolIdBsmd(smdHitTable->volume_id, module,eta,sub,detector); // Must check ??
 	tr   = ttemp[smdHitTable->track_p - 1];
 	de   = smdHitTable->de;
 
