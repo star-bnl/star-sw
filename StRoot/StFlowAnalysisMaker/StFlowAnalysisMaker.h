@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.38 2003/05/06 18:38:06 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.39 2003/05/06 21:33:06 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -55,7 +55,7 @@ public:
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   void     SetHistoRanges(Bool_t ftpc_included = kFALSE);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.38 2003/05/06 18:38:06 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.39 2003/05/06 21:33:06 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -80,7 +80,6 @@ private:
 
   // for single histograms
   TH1F*     mHistTrigger;              //!
-  TH1F*     mHistChargeTpc;            //!
   TH1F*     mHistChargeFtpc;           //!
   TH1F*     mHistDcaGlobalTpc;         //!
   TH1F*     mHistDcaGlobalFtpc;        //!
@@ -192,7 +191,6 @@ private:
     TH1F*       mHistMult;
     TH1F*       mHist_q;
     TH2D*       mHistYield2D;
-    TH2D*       mHistEtaPhi2D;
     TProfile2D* mHist_vObs2D;
     TProfile*   mHist_vObsEta;
     TProfile*   mHist_vObsPt;
@@ -233,6 +231,9 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.39  2003/05/06 21:33:06  posk
+// Removed some histograms.
+//
 // Revision 1.38  2003/05/06 18:38:06  posk
 // Removed StFlowTagMaker.
 //

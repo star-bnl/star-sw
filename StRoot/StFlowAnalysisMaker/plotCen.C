@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.15 2003/03/18 17:58:38 posk Exp $
+// $Id: plotCen.C,v 1.16 2003/05/06 21:33:08 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -64,7 +64,6 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_MultOverOrig",
     "Flow_MultEta",
     "Flow_MultPart",
-    "Flow_Charge_Tpc",
     "Flow_Charge_Ftpc",
     "Flow_DcaGlobal_Tpc",
     "Flow_Dca_Ftpc",
@@ -139,7 +138,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
 };
   const int nNames = sizeof(baseName) / sizeof(char*);
   const int nDoubles = 6;
-  const int nSingles = 46 + nDoubles;
+  const int nSingles = 45 + nDoubles;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -659,6 +658,9 @@ static Double_t StruveL0(Double_t x)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.16  2003/05/06 21:33:08  posk
+// Removed some histograms.
+//
 // Revision 1.15  2003/03/18 17:58:38  posk
 // Kirill Fillimonov's improved fit to the angle between subevent planes.
 //
