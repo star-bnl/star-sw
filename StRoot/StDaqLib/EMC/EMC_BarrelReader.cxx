@@ -1,5 +1,5 @@
 /*!\class EMC_BarrelReader
-/author Subhasis, Herbert Ward and Alexandre A. P. Suaide
+\author Subhasis, Herbert Ward and Alexandre A. P. Suaide
 
 EMC Barrel reader.
 */ 

@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.24 2001/12/26 19:25:34 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.25 2001/12/27 16:23:44 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.25  2001/12/27 16:23:44  suaide
+// changed documentation
+//
 // Revision 1.24  2001/12/26 19:25:34  suaide
 // Added documentation and few modifications
 //
@@ -27,14 +30,14 @@
 //
 // Revision 1.7  2001/10/24 14:41:44  suaide
 // huge change on StEmcADCtoEMaker to a different software.
-// The other version is kept as *.old for future debug
+// The other version is kept as *.old for future debug 
 //
 // Revision 1.13  2000/05 16:07:01  
 // Add README
 //
 
 /*!\class StEmcADCtoEMaker
-/author Alexandre A. P. Suaide
+\author Alexandre A. P. Suaide
 
 This class gets EMC raw ADC's and convert them to calibrated energy.<br><br>
 
