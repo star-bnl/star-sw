@@ -1,8 +1,11 @@
 // 
 // ROOT Tree for Laser Events tracking by tpt. -- Bill Love
 //$Log: StLaserEvent.cxx,v $
+//Revision 1.8  2001/12/18 20:27:38  pfachini
+//Adding date and time stamp to Bill's tree
+//
 //Revision 1.7  2001/07/17 17:12:44  love
-//Added phi variable to laser track object
+// Added phi variable to laser track object
 //
 //Revision 1.6  2001/03/23 15:27:59  love
 //Updated README text
@@ -48,6 +51,7 @@
 //        Int_t          fEvtNum;
 //        Int_t          fRun;
 //        Int_t          fDate;
+//        Int_t          fTime;
 //        Float_t ftZero;
 //        Float_t fDriVel;
 //        Float_t fClock;
@@ -200,31 +204,31 @@ void StLaserEvent::Reset()
 }
 
 //______________________________________________________________________________
-void StLaserEvent::SetHeader(Int_t i, Int_t run, Int_t date)
+void StLaserEvent::SetHeader(Int_t i, Int_t run, Int_t date, Int_t time)
 {
    fNtrack = 0;
    fNhit = 0;
    fNpixel = 0;
-   fEvtHdr.Set(i, run, date);
+   fEvtHdr.Set(i, run, date, time);
 }
 //______________________________________________________________________________
-void StLaserEvent::SetHeader(Int_t i, Int_t run, Int_t date,
+void StLaserEvent::SetHeader(Int_t i, Int_t run, Int_t date, Int_t time,
      Float_t tzero, Float_t drivel, Float_t clock)
 {
    fNtrack = 0;
    fNhit = 0;
    fNpixel = 0;
-   fEvtHdr.Set(i, run, date);
+   fEvtHdr.Set(i, run, date, time);
    fEvtHdr.SetE(tzero, drivel, clock);
 }
 //______________________________________________________________________________
-void StLaserEvent::SetHeader(Int_t i, Int_t run, Int_t date,
+void StLaserEvent::SetHeader(Int_t i, Int_t run, Int_t date, Int_t time,
      Float_t tzero, Float_t drivel, Float_t clock, Float_t trigger)
 {
    fNtrack = 0;
    fNhit = 0;
    fNpixel = 0;
-   fEvtHdr.Set(i, run, date);
+   fEvtHdr.Set(i, run, date, time);
    fEvtHdr.SetE(tzero, drivel, clock, trigger);
 }
 
