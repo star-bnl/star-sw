@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.6 2000/08/29 22:46:26 caines Exp $
+ * $Id: StSvtAnalysis.cc,v 1.7 2000/09/14 22:17:15 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -81,6 +81,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.7  2000/09/14 22:17:15  caines
+ * Fix memory problems
+ *
  * Revision 1.6  2000/08/29 22:46:26  caines
  * Fixed some memory leaks
  *
@@ -152,12 +155,12 @@ StSvtAnalysis::StSvtAnalysis(int TotalNumberOfHybrids)
   assert(mCluPeakAdc);              assert(mCluNumPixels);           assert(mCluNumAnodes);
   assert(mHybridNum);               assert(mCluID);                  assert(mCluDeconvID);
 
-  m_countBadAn = malloc_matrix_d (TotalNumberOfHybrids+1, 240+1);             // number of hybrids bad anodes (>4 hits)
+  m_countBadAn = malloc_matrix_d (TotalNumberOfHybrids+1, 240+2);             // number of hybrids bad anodes (>4 hits)
   m_countBadTb = malloc_matrix_d (TotalNumberOfHybrids+1, 128+1);             // bad time
 
   if (m_countBadAn == NULL || m_countBadTb == NULL) {
     cout<<"You have a bad error assigning memory for counting bad SVT pixels"<<endl;
-    if (m_countBadAn==NULL) free_matrix_d(m_countBadAn, 240+1);
+    if (m_countBadAn==NULL) free_matrix_d(m_countBadAn, 240+2);
     if (m_countBadTb==NULL) free_matrix_d(m_countBadTb, 128+1);
   }
 
@@ -209,69 +212,69 @@ void StSvtAnalysis::SetPointers(StSvtHybridData* hybAdjData,
 
   //this is called for each new event
   for (int i=0; i<NumberOfHybrids; i++) {
-    for (int j=0; j<241; j++) m_countBadAn[i][j] = 0;
+    for (int j=0; j<242; j++) m_countBadAn[i][j] = 0;
     for (int j=0; j<129; j++) m_countBadTb[i][j] = 0;
   }
 
 }
 
 void StSvtAnalysis::FirstAndLastAnodes()
-// Calculate the First and last Anodes of all the clusters. Selemon
-  {
-    int actualAn = 0, actualan = 0, mem = 0;
-   
-    if (numOfClusters>500) { 
-      mCluFirstAnode = new int[numOfClusters];
-      mCluLastAnode = new int[numOfClusters];
-      assert(mCluFirstAnode); assert(mCluLastAnode);
-    }
-
-    for(int clu = 0; clu < numOfClusters; clu++)   
-     {
+  // Calculate the First and last Anodes of all the clusters. Selemon
+{
+  int actualAn = 0, actualan = 0, mem = 0;
+  
+  if (numOfClusters>500) { 
+    mCluFirstAnode = new int[numOfClusters];
+    mCluLastAnode = new int[numOfClusters];
+    assert(mCluFirstAnode); assert(mCluLastAnode);
+  }
+  
+  for(int clu = 0; clu < numOfClusters; clu++)   
+    {
       mem = 0;  //add apr00 SUP
       numOfMembers = mHybridCluster->getNumberOfMembers(clu);
       tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
-
+      
       if(numOfMembers==1)
         {
-         mCluFirstAnode[clu] = tempMemberInfo[clu][mem].actualAnode;
-         mCluLastAnode[clu] = mCluFirstAnode[clu];
+	  mCluFirstAnode[clu] = tempMemberInfo[clu][mem].actualAnode;
+	  mCluLastAnode[clu] = mCluFirstAnode[clu];
 	}
       else
-       {
-        for(int j = 1; j<numOfMembers ; j++)
-          {
-           actualAn =  tempMemberInfo[clu][mem].actualAnode;
-           actualan = tempMemberInfo[clu][j].actualAnode;
-                 
-           if(actualAn < actualan)
-            mCluFirstAnode[clu] = actualAn;
-           else  
-             {
-              mCluFirstAnode[clu]= actualan;
-              mem = j;
-             }
-	  }
-
-        mem = 0;
-        for(int j = 1; j<numOfMembers ; j++)
-          {
-           actualAn = tempMemberInfo[clu][mem].actualAnode;
-           actualan = tempMemberInfo[clu][j].actualAnode;
-
-           if(actualAn > actualan)
-            mCluLastAnode[clu] = actualAn;
-
-           else  
-             {
-              mCluLastAnode[clu] =  actualan;
-              mem = j;
-             }
-	  }
-
-       }
-     }
-  }
+	{
+	  for(int j = 1; j<numOfMembers ; j++)
+	    {
+	      actualAn =  tempMemberInfo[clu][mem].actualAnode;
+	      actualan = tempMemberInfo[clu][j].actualAnode;
+	      
+	      if(actualAn < actualan)
+		mCluFirstAnode[clu] = actualAn;
+	      else  
+		{
+		  mCluFirstAnode[clu]= actualan;
+		  mem = j;
+		}
+	    }
+	  
+	  mem = 0;
+	  for(int j = 1; j<numOfMembers ; j++)
+	    {
+	      actualAn = tempMemberInfo[clu][mem].actualAnode;
+	      actualan = tempMemberInfo[clu][j].actualAnode;
+	      
+	      if(actualAn > actualan)
+		mCluLastAnode[clu] = actualAn;
+	      
+	      else  
+		{
+		  mCluLastAnode[clu] =  actualan;
+		  mem = j;
+		}
+	    }
+	  
+	}
+    }
+}
 
 
 void StSvtAnalysis::CluFirstTimeBin()
@@ -478,7 +481,7 @@ void StSvtAnalysis::MomentAnalysis()
                                                        //do this else we distort the means of small clusters.
        if (peakADC<ADC) { peakADC=ADC; ano_p=actualAn; bkt_p=stTimeBin+j; mem_p=mem; seq_p=j;}
 
-       if (ADC>1 && ADC<4000 && (stTimeBin+j)>=0 && (stTimeBin+j)<128 && actualAn>=0 && actualAn<240)
+       if (ADC>1 && ADC<4000 && (stTimeBin+j)>=0 && (stTimeBin+j)<128 && actualAn>0 && actualAn<=240)
        {
          numPixels++;                                  //calculate the various moments
          if (ADC>3) igt3++;
@@ -499,7 +502,7 @@ void StSvtAnalysis::MomentAnalysis()
    }  //end loop over sequeces from 1 cluster
 	     
    //make the 2nd moments better for 1 anode hits. Look a little to the right of them for better calc. Sanjeev
-   if (numAnodes==1  && ano_p>0 && ano_p<239 && bkt_p>0 && bkt_p<127) {    /*do a better job for the 1 anode hits*/
+   if (numAnodes==1  && ano_p>1 && ano_p<240 && bkt_p>0 && bkt_p<127) {    /*do a better job for the 1 anode hits*/
      for (int i=ano_p-1; i<=ano_p+1; i++) {                                /*note we are doing this blindly*/
        for (int j=bkt_p-1; j<=bkt_p+1; j++) {                                
          if (i==ano_p && (j==bkt_p || j==bkt_p-1 || j==bkt_p+1)  ) continue;
@@ -520,7 +523,7 @@ void StSvtAnalysis::MomentAnalysis()
 
    //make the 2nd moments better for 2 anode hits. Look a little to the right of them for better calc. Sanjeev
    iAst = GetFirstAnode(clu); iAend = GetLastAnode(clu);
-   if (numAnodes==2 && iAst>0 && iAend<239 && bkt_p>0 && bkt_p<127) {       /*This is dangerous as we do it blindly*/
+   if (numAnodes==2 && iAst>1 && iAend<240 && bkt_p>0 && bkt_p<127) {       /*This is dangerous as we do it blindly*/
      for (int i=iAst-1; i<=iAend+1; i++) {                                  /*It will mess up for a small fraction of hits*/
        for (int j=bkt_p-1; j<=bkt_p+1; j++) {                               /*when another cluster is close by*/ 
          if ( (i==iAst || i==iAend) && (j==bkt_p || j==bkt_p-1 || j==bkt_p+1)  ) continue;
@@ -613,11 +616,11 @@ void StSvtAnalysis::MomentAnalysis()
    // Print_Pixels(iRows, iCols, clu);                         //creates nice picture of cluster with 0's padding the edges
       
    //if (hit_id<4) {                                        //only good hits. NO NO. Look at all hits.
-   if( (int)(.5+fAnodeMom1) >= 0 && (int)(.5+fAnodeMom1) <= 240 ||
-       (int)(.5+fDriftMom1) >= 0 && (int)(.5+fDriftMom1) <= 128){
+   if( (int)(.5+fAnodeMom1) > 0 && (int)(.5+fAnodeMom1) <= 241 )
      m_countBadAn[m_hybIndex][(int)(.5+fAnodeMom1)]++;         //count the noisy anodes and time for all hits whether good or bad
+     if(  (int)(.5+fDriftMom1) >= 0 && (int)(.5+fDriftMom1) <= 128)
      m_countBadTb[m_hybIndex][(int)(.5+fDriftMom1)]++;         //invstigate this.
-   }
+ 
      //}  
 
 
@@ -1225,8 +1228,8 @@ int StSvtAnalysis::FillRawAdc()
 
 void StSvtAnalysis::ClearRawAdc()
 {
-  for (int i1=0;i1<40;i1++) {
-    for (int j1=0;j1<128;j1++) {
+  for (int i1=0;i1<242;i1++) {
+    for (int j1=0;j1<130;j1++) {
       m_Raw[i1][j1] = 0;
     }
   }
@@ -1242,7 +1245,7 @@ void StSvtAnalysis::SetBadAnTb(int nClus)
     iHyb = mHybridNum[i];
     iAn  = (int)(.5+mMeanClusterAnode[i]);
     iTb  = (int)(.5+mMeanClusterTimeBin[i]);
-    if( iAn >=0 && iAn < 241){
+    if( iAn >=1 && iAn < 242){
       if (m_countBadAn[iHyb][iAn]>4) {mCluFlag[i] += 4;}// cout<<"Hot Anodes: "<<iAn<<" Hyb: "<<iHyb<<endl;}
     }
     if( iTb >=0 && iTb < 129){
