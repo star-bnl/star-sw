@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.4  1999/02/21 22:30:53  ward
+// small corrections
+//
 // Revision 1.3  1999/02/20 17:49:57  ward
 // Fixed bug in setting of SeqModBreak.
 //
@@ -22,7 +25,7 @@
 // #include "StTrsMaker/include/StTrsRawDataEvent.hh"
 // #include "StTrsMaker/include/StDacRawDataEvent.hh"
 #ifdef TRS_SIMPLE
-#include "StTrsMaker/include/StTrsSimpleMaker.h"
+#include "StTrsSimpleMaker/StTrsSimpleMaker.h"
 #else
 #include "StTrsMaker/include/StTrsUnpacker.hh"
 #endif
@@ -154,7 +157,6 @@ void St_tpcdaq_Maker::SeqWrite(St_raw_seq *raw_seq_gen,int rownumber,
     int startTimeBin,int numberOfBinsInSequence) {
   raw_seq_st singlerow;
   if(startTimeBin>=0x100) { 
-    // printf("bbb error uuc\n");
     mErr=__LINE__; return; 
   }
   singlerow.m=startTimeBin;
@@ -179,7 +181,9 @@ void St_tpcdaq_Maker::RowWrite(St_raw_row *raw_row_gen,int rownumber,
   raw_row_gen->AddAt(&singlerow,rownumber);
 }
 void St_tpcdaq_Maker::OrderTheSequences(int nseq,StSequence *los) {
-  // bbb should not need this function with Brian's TRS
+#ifndef TRS_SIMPLE
+  return;
+#endif
   int ii,didASwap=7;
   StSequence saveValue;
   while(didASwap) {
@@ -257,6 +261,7 @@ int St_tpcdaq_Maker::Output() {
       pixSave=pixR; iseqSave=seqR; nPixelThisPadRow=0; nSeqThisPadRow=0;
       offsetIntoPadTable=padR; pixTblWhere=0; numPadsWithSignal=0;
       seqOffset=0; npad=mUnpacker->getPadList(ipadrow+1,&padlist); pixOffset=0;
+      // printf("BBB isect=%d ,ipadrow=%d ,npad=%d \n",isect,ipadrow,npad);
       for( ipad=0,pad=padlist[0] ; ipad<npad ; pad=padlist[++ipad] ) {
         seqStatus=mUnpacker->getSequences(ipadrow+1,pad,&nseq,&listOfSequences);
         OrderTheSequences(nseq,listOfSequences); // BBB writing on Brian's mem
@@ -268,7 +273,7 @@ int St_tpcdaq_Maker::Output() {
           if(prevStartTimeBin> startTimeBin) { mErr=__LINE__; return 7; }
           prevStartTimeBin=startTimeBin; seqLen=listOfSequences[iseq].length;
           if(startTimeBin<=0x100) timeWhere=iseq+1; else timeOff=0x101;
-// printf("bbb startTimeBin=%3d, timeOff=%3d\n",startTimeBin,timeOff);
+// printf("BBB startTimeBin=%3d, timeOff=%3d\n",startTimeBin,timeOff);
           SeqWrite(raw_seq_gen,seqR,(startTimeBin-timeOff),seqLen);
           nSeqThisPadRow++;
           pointerToAdc=listOfSequences[iseq].firstAdc;
@@ -297,7 +302,7 @@ pixTblOff   half sector PadWrite PadWrite PadOffset(1)   0x10000
 timeWhere   pad         SeqWrite PadWrite SeqModBreak(4) numSeq
 timeOff     pad         SeqWrite SeqWrite m              0x100
 ------------------------------------------------------------------------*/
-// bbb Brian don't forget LinArray[] ("DAQ to Offline").
+// BBB Brian don't forget LinArray[] ("DAQ to Offline").
 Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
  St_DataSetIter trs(gStChain->DataSet("Trs"));            
 #ifdef TRS_SIMPLE
@@ -336,7 +341,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.3 1999/02/20 17:49:57 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.4 1999/02/21 22:30:53 ward Exp $ \n");
   // printf("* %s *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if(gStChain->Debug()) StMaker::PrintInfo();
