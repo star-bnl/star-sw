@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.hh,v 1.1 1998/11/10 17:12:11 fisyak Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.hh,v 1.2 1999/01/18 10:25:12 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.hh,v $
- * Revision 1.1  1998/11/10 17:12:11  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/18 10:25:12  lasiuk
+ * add conversion code for StTrsDigitalSector
  *
  * Revision 1.1  1998/11/10 17:12:11  fisyak
  * Put Brian trs versin into StRoot
@@ -38,15 +38,14 @@ public:
     //StTrsFastDigitalSignalGenerator& operator=(const StTrsFastDigitalSignalGenerator&);
 
     static StTrsDigitalSignalGenerator* instance();
-    static StTrsDigitalSignalGenerator* instance(StTpcElectronics*, StTrsSector*);
+    static StTrsDigitalSignalGenerator* instance(StTpcElectronics*, StTrsSector*, StTrsDigitalSector*);
     
     void digitizeSignal()    ;
     void addWhiteNoise()     ;
     void addCorrelatedNoise();
     
 protected:
-    StTrsFastDigitalSignalGenerator(StTpcElectronics*, StTrsSector*);
-
+    StTrsFastDigitalSignalGenerator(StTpcElectronics*, StTrsSector*, StTrsDigitalSector*);
 
 private:
     static StTrsDigitalSignalGenerator* mInstance;
