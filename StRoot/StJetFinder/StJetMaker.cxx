@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.8 2003/09/24 20:54:07 thenry Exp $
+ * $Id: StJetMaker.cxx,v 1.9 2004/06/01 15:37:05 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -161,7 +161,7 @@ Int_t StJetMaker::Make() {
   //cout << "Failed to set muDst in event.  Retrying!" << endl; 
   //jetEvent->mudst = mudst;
   //}
-  if(muDstMaker->muDst()->numberOfPrimaryTracks() <= 0) return kStOk;
+  //if(muDstMaker->muDst()->numberOfPrimaryTracks() <= 0) return kStOk;
 
   // fill jetEvent 
   //int res;
