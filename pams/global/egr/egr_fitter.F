@@ -73,6 +73,7 @@ C ---------------------------------------------------------------------
       INTEGER igtrk,itpct,isvtt,ipriv,iglob,ishit,ithit
       INTEGER tpcmc(mxtrack),icov,lastrow,lasthit,lastsec
       INTEGER*4 egr_refit_track,egr_load_globtrk
+      INTEGER svt(mxtrack),tpc(mxtrack)
       INTEGER imsg,imsgw
       INTEGER imsg1,imsg2,imsg3,imsg4,imsg5,imsg6,imsg7,imsg8
       CHARACTER*132 errmsg,msg
@@ -150,7 +151,7 @@ C Perfect SVT/TPC matching (M.C.). Only tracks w/ TPC into globtrk
 
       else if (egrpar(1).scenario.eq.7) then
          egrpar(1).useglobal = 1
-         egrpar(1).usetpc = 1
+         egrpar(1).usetpc = 0
          egrpar(1).usesvt = 0
          egrpar(1).usevert = 0
          egrpar(1).useemc = 0
@@ -186,6 +187,16 @@ C All info from svt_track except invpt taken from tptrack.
          egrpar(1).useemc = 0
          egrpar(1).usetof = 0
 
+C Perfect SVT/TPC matching (M.C.). Only tracks w/ TPC into globtrk
+C Refit done
+
+      else if (egrpar(1).scenario.eq.11) then
+         egrpar(1).useglobal = 1
+         egrpar(1).usetpc = -1
+         egrpar(1).usesvt = -1
+         egrpar(1).usevert = 0
+         egrpar(1).useemc = 0
+         egrpar(1).usetof = 0
       end if ! End of choosing scenario
 
 
@@ -214,9 +225,9 @@ C  Abort if the TPC is needed but there are no TPC tracks
             gtrk(i).nhit = 0
             gtrk(i).ntpc = 0
             gtrk(i).nfit = 0
+            tpc(tptrack(i).id) = i
 *--- reset foreign keys that are set here SM ---------*
 	    tptrack(i).id_globtrk = 0
-*	    tphit(i).id_globtrk = 0
          end do
          do ithit=1,tphit_h.nok        ! Loop over number of hits
             tphit(i).id_globtrk = 0
@@ -229,13 +240,13 @@ C  Abort if the TPC is needed but there are no TPC tracks
                      gtrk(itrk).pos(ient) = ient
                      gtrk(itrk).det(ient) = 1
                      gtrk(itrk).nhit = gtrk(itrk).nhit + 1
+                     gtrk(itrk).ntpc = gtrk(itrk).ntpc + 1
                   endif
                else
-                  if( gtrk(itrk).ntpc .eq. 0) then 
+                  if( ient .eq. mxpnt_tpc+1) then 
                      write (errmsg,'(A45,I5)')
      +                 ' EGR_REFITTER-W: Too many hits on track', itrk
                      call message(errmsg,1,imsg2)
-                     gtrk(itrk).ntpc = 1
                   endif
                endif
             else
@@ -247,9 +258,6 @@ C  Abort if the TPC is needed but there are no TPC tracks
                endif
             endif
          enddo                  ! Loop over ithit
-         do i=1,tptrack(tptrack_h.nok).id
-            gtrk(i).ntpc = gtrk(i).nhit
-         enddo
       endif                     ! usetpc.gt.0
  
 
@@ -258,8 +266,14 @@ C  Abort if the TPC is needed but there are no TPC tracks
       else
          ipriv = 0
       endif
+
+      do i=1,svt_track_h.nok
+         if( svt_track(i).id .lt. mxtrack) then
+            svt(svt_track(i).id) = i
+         endif
+      enddo
  
-      if( egrpar(1).useglobal .eq. 1) then
+      if( egrpar(1).useglobal .eq. 1 ) then
          do itpct = 1,tptrack_h.nok  
             j=1
             jj=0
@@ -277,55 +291,58 @@ c     Find svt track with matching mc_id for perfect track matching
             do while (isvtt .eq. 0 .and. j .le. svt_track_h.nok)
                if( svt_track(j).id_mctrack .eq. tpcmc(itpct)
      +              .and. svt_track(j).flag .gt. 0) then
-                  isvtt = j
+                  isvtt = svt_track(j).id
                endif
                j = j +1 
             enddo
             if( isvtt .ne. 0) then
 c     Fill tracks
-                 globtrk_h.nok = globtrk_h.nok + 1
-               igtrk = globtrk_h.nok
-               do i=1,15
-                  globtrk(igtrk).cov(i)=svt_track(isvtt).cov(i)
-               enddo
-               globtrk(igtrk).cov(10) = svt_track(isvtt).nspt +
-     +              tptrack(itpct).nfit 
-               globtrk(igtrk).chisq=svt_track(isvtt).chisq(1)+
-     1              svt_track(isvtt).chisq(2)
-               globtrk(igtrk).id= igtrk
-               globtrk(igtrk).icharge=tptrack(itpct).q ! tpc q
-               globtrk(igtrk).r0=svt_track(isvtt).r0
-               globtrk(igtrk).phi0=svt_track(isvtt).phi0
-               globtrk(igtrk).z0=svt_track(isvtt).z0
-               globtrk(igtrk).invpt=abs(tptrack(itpct).invp) ! tpc pt
-               globtrk(igtrk).psi=svt_track(isvtt).psi
-               globtrk(igtrk).tanl=svt_track(isvtt).tanl
-               globtrk(igtrk).ndegf = svt_track(isvtt).nspt +
-     +              tptrack(itpct).nfit
-               globtrk(igtrk).id_emc = 0
-               globtrk(igtrk).id_hypo_pid = 0
-               globtrk(igtrk).id_global_pid = 0
-               globtrk(igtrk).id_part = 0
-               globtrk(igtrk).id_pver = 0
-               globtrk(igtrk).id_tof = 0
 
-               globtrk(igtrk).sflag = svt_track(isvtt).flag*10
+               if( egrpar(1).usesvt .eq. 0 .and. 
+     +              egrpar(1).usetpc .eq. 0) then
+                  globtrk_h.nok = globtrk_h.nok + 1
+                  igtrk = globtrk_h.nok
+                  do i=1,15
+                     globtrk(igtrk).cov(i)=svt_track(svt(isvtt)).cov(i)
+                  enddo
+                  globtrk(igtrk).cov(10) = svt_track(svt(isvtt)).nspt +
+     +                 tptrack(itpct).nfit 
+                  globtrk(igtrk).chisq=svt_track(svt(isvtt)).chisq(1)+
+     1                 svt_track(svt(isvtt)).chisq(2)
+                  globtrk(igtrk).id= igtrk
+                  globtrk(igtrk).icharge=tptrack(itpct).q ! tpc q
+                  globtrk(igtrk).r0=svt_track(svt(isvtt)).r0
+                  globtrk(igtrk).phi0=svt_track(svt(isvtt)).phi0
+                  globtrk(igtrk).z0=svt_track(svt(isvtt)).z0
+                  globtrk(igtrk).invpt=abs(tptrack(itpct).invp) ! tpc pt
+                  globtrk(igtrk).psi=svt_track(svt(isvtt)).psi
+                  globtrk(igtrk).tanl=svt_track(svt(isvtt)).tanl
+                  globtrk(igtrk).ndegf = svt_track(svt(isvtt)).nspt +
+     +                 tptrack(itpct).nfit
+                  globtrk(igtrk).id_emc = 0
+                  globtrk(igtrk).id_hypo_pid = 0
+                  globtrk(igtrk).id_global_pid = 0
+                  globtrk(igtrk).id_part = 0
+                  globtrk(igtrk).id_pver = 0
+                  globtrk(igtrk).id_tof = 0
+                  
+                  globtrk(igtrk).sflag = svt_track(svt(isvtt)).flag*10
      +                 +(sign(1.0,float(tptrack(itrk).flag)))*600
      +                 +tptrack(itrk).flag
-               if( abs(globtrk(igtrk).icharge) .ne. 1) then
-                  globtrk(igtrk).sflag = -1.0*globtrk(igtrk).sflag+20
-               endif
+                  if( abs(globtrk(igtrk).icharge) .ne. 1) then
+                     globtrk(igtrk).sflag = -1.0*globtrk(igtrk).sflag+20
+                  endif
 C     Now find last point on track and calculate track length.
-
+                  
                   if (tptrack(itpct).id.gt.0.and.
      +                 tptrack(itpct).id.lt.mxtrack) then
                      lasthit = gtrk(tptrack(itpct).id).ipnt(1)
                   else
                      write (errmsg,'(A60)')
-     +                'EGR_REFITTER-W: lasthit trk id error'
+     +                    'EGR_REFITTER-W: lasthit trk id error'
                      call message(errmsg,1,imsg4)
                   endif
-
+                  
                   lastsec = tphit(lasthit).row/100
                   lastrow = tphit(lasthit).row - lastsec*100
                   globtrk(igtrk).last_row = lastrow
@@ -338,17 +355,19 @@ C     Now find last point on track and calculate track length.
                   if (globtrk(igtrk).length.gt.999.9) then
                      globtrk(igtrk).length=999.9
                   endif
-           
-*               iret = egr_refit_track(itpct,itpct,isvtt,ipriv,gtrk,
-*     +              tphit_h,tphit,privert_h,privert,svt_spt_h,svt_spt,
-*     +              svt_track_h,svt_track,svt_group_h,svt_group,
-*     +              egrpar_h,egrpar,evt_match_h,evt_match,covar)
-               
-*               iret = egr_load_globtrk(globtrk_h,globtrk,itpct,gtrk,
-*     +              tphit_h,tphit,covar,itpct)
-               
+                  
+               else
+                  iret = egr_refit_track(tptrack(itpct).id,tptrack(itpct).id,
+     +                 svt(isvtt),ipriv,gtrk,
+     +                 tphit_h,tphit,privert_h,privert,svt_spt_h,svt_spt,
+     +                 svt_track_h,svt_track,svt_group_h,svt_group,
+     +                 egrpar_h,egrpar,evt_match_h,evt_match,covar)
+                  
+                  iret = egr_load_globtrk(globtrk_h,globtrk,tptrack(itpct).id,gtrk,
+     +                 tphit_h,tphit,covar,itpct)
+               endif
                tptrack(itpct).id_globtrk = globtrk_h.nok
-               svt_track(isvtt).id_globtrk = globtrk_h.nok  
+               svt_track(svt(isvtt)).id_globtrk = globtrk_h.nok  
             endif               ! isvtt>0
 c     mark spts as used
             do ient = 1, gtrk(itpct).nfit
@@ -370,7 +389,7 @@ c     mark spts as used
             if( egrpar(1).useglobal .eq. 2) then
 
                igtrk = itpct             
-               iret = egr_refit_track(igtrk,itpct,isvtt,ipriv,gtrk,
+               iret = egr_refit_track(igtrk,itpct,svt(isvtt),ipriv,gtrk,
      +              tphit_h,tphit,privert_h,privert,svt_spt_h,svt_spt,
      +              svt_track_h,svt_track,svt_group_h,svt_group,
      +              egrpar_h,egrpar,evt_match_h,evt_match,covar)
@@ -396,22 +415,22 @@ c     mark spts as used
                globtrk_h.nok = globtrk_h.nok + 1
                igtrk = globtrk_h.nok
                do i=1,15
-                  globtrk(igtrk).cov(i)=svt_track(isvtt).cov(i)
+                  globtrk(igtrk).cov(i)=svt_track(svt(isvtt)).cov(i)
                enddo
-               globtrk(igtrk).cov(10) = svt_track(isvtt).nspt +
-     +              tptrack(itpct).nfit 
-               globtrk(igtrk).chisq=svt_track(isvtt).chisq(1)+
-     1              svt_track(isvtt).chisq(2)
-               globtrk(igtrk).id=svt_track(isvtt).id_mctrack
-               globtrk(igtrk).icharge=tptrack(itpct).q ! tpc q
-               globtrk(igtrk).r0=svt_track(isvtt).r0
-               globtrk(igtrk).phi0=svt_track(isvtt).phi0
-               globtrk(igtrk).z0=svt_track(isvtt).z0
-               globtrk(igtrk).invpt=abs(tptrack(itpct).invp) ! tpc pt
-               globtrk(igtrk).psi=svt_track(isvtt).psi
-               globtrk(igtrk).tanl=svt_track(isvtt).tanl
-               globtrk(igtrk).ndegf = svt_track(isvtt).nspt +
-     +              tptrack(itpct).nfit
+               globtrk(igtrk).cov(10) = svt_track(svt(isvtt)).nspt +
+     +              tptrack(tpc(itpct)).nfit 
+               globtrk(igtrk).chisq=svt_track(svt(isvtt)).chisq(1)+
+     1              svt_track(svt(isvtt)).chisq(2)
+               globtrk(igtrk).id=igtrk
+               globtrk(igtrk).icharge=tptrack(tpc(itpct)).q ! tpc q
+               globtrk(igtrk).r0=svt_track(svt(isvtt)).r0
+               globtrk(igtrk).phi0=svt_track(svt(isvtt)).phi0
+               globtrk(igtrk).z0=svt_track(svt(isvtt)).z0
+               globtrk(igtrk).invpt=abs(tptrack(tpc(itpct)).invp) ! tpc pt
+               globtrk(igtrk).psi=svt_track(svt(isvtt)).psi
+               globtrk(igtrk).tanl=svt_track(svt(isvtt)).tanl
+               globtrk(igtrk).ndegf = svt_track(svt(isvtt)).nspt +
+     +              tptrack(tpc(itpct)).nfit
                globtrk(igtrk).id_emc = 0
                globtrk(igtrk).id_hypo_pid = 0
                globtrk(igtrk).id_global_pid = 0
@@ -419,15 +438,15 @@ c     mark spts as used
                globtrk(igtrk).id_pver = 0
                globtrk(igtrk).id_tof = 0
 
-               globtrk(igtrk).sflag = svt_track(isvtt).flag*10
-     +                 +(sign(1.0,float(tptrack(itrk).flag)))*600
-     +                 +tptrack(itrk).flag
+               globtrk(igtrk).sflag = svt_track(svt(isvtt)).flag*10
+     +                 +(sign(1.0,float(tptrack(tpc(itpct)).flag)))*600
+     +                 +tptrack(tpc(itpct)).flag
 
 C     Now find last point on track and calculate track length.
 
-                  if (tptrack(itpct).id.gt.0.and.
-     +                 tptrack(itpct).id.lt.mxtrack) then
-                     lasthit = gtrk(tptrack(itpct).id).ipnt(1)
+                  if (tptrack(tpc(itpct)).id.gt.0.and.
+     +                 tptrack(tpc(itpct)).id.lt.mxtrack) then
+                     lasthit = gtrk(tptrack(tpc(itpct)).id).ipnt(1)
                   else
                      write (errmsg,'(A60)')
      +                'EGR_REFITTER-W: lasthit trk id error'
@@ -460,7 +479,7 @@ c     mark spts as used
                ient = gtrk(itpct).ntpc
                do ishit = 1, svt_group_h.nok
                   if( svt_group(ishit).id1 .eq. 
-     +                 svt_track(isvtt).id) then
+     +                 svt_track(svt(isvtt)).id) then
                      
                      ient = ient+1
                      ithit = svt_group(ishit).id2
@@ -470,8 +489,8 @@ c     mark spts as used
                enddo
             endif
             
-            tptrack(itpct).id_globtrk = globtrk_h.nok
-            svt_track(isvtt).id_globtrk = globtrk_h.nok
+            tptrack(tpc(itpct)).id_globtrk = globtrk_h.nok
+            svt_track(svt(isvtt)).id_globtrk = globtrk_h.nok
 
          enddo                  ! imatch
       endif                     ! if useglobal>0
@@ -481,19 +500,19 @@ C     Loop through unmatched TPC tracks here.  Straight copy of tptrack.
       if( egrpar(1).usetpc .gt. 0) then
          isvtt = 0
          do itrk = 1,tptrack_h.nok
-            if (tptrack(itrk).id_globtrk.eq.0 .and.
+            if( tptrack(itrk).id_globtrk.eq.0 .and.
      +           tptrack(itrk).invp .ne. 0.0   .and.
      +           tptrack(itrk).flag .gt. 0)    then
                
                if( egrpar(1).usetpc .gt. 1) then
                   
-                  iret = egr_refit_track(itrk,itrk,isvtt,ipriv,gtrk,
-     +                 tphit_h,tphit,privert_h,privert,
-     +                 svt_spt_h,svt_spt,svt_track_h,svt_track,
-     +                 svt_group_h,svt_group,
+                  iret = egr_refit_track(tptrack(itrk).id,
+     +                 tptrack(itrk).id,isvtt,ipriv,gtrk,tphit_h,
+     +                 tphit,privert_h,privert,svt_spt_h,svt_spt,
+     +                 svt_track_h,svt_track,svt_group_h,svt_group,
      +                 egrpar_h,egrpar,evt_match_h,evt_match,covar)
-                  iret = egr_load_globtrk(globtrk_h,globtrk,itrk,gtrk,
-     +                 tphit_h,tphit,covar,itrk)  
+                  iret = egr_load_globtrk(globtrk_h,globtrk,
+     +                 tptrack(itrk).id,gtrk,tphit_h,tphit,covar,itrk)
                else
                   gtrk(itrk).nfit = tptrack(itrk).nfit
                   globtrk_h.nok = globtrk_h.nok + 1
@@ -648,3 +667,8 @@ Cvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
       
       return
       end
+      
+
+
+
+

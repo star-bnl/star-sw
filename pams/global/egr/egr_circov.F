@@ -1,3 +1,44 @@
+C>--------------------------------------------------------------------
+C
+C EGR_CIRCOV - a covariance matrix calculation program for 
+C              circle fitting
+C
+C DESCRIPTION:
+C Compute the covariance matrix of an effective circle fitting algorithm
+C The circle equation is (X(I)-A)**2 + (Y(I)-B)**2 = R**2. 
+C The functional minimum is W(I)*[(X(I)-A)**2+(Y(I)-B)**2-R*R]**2/(R*R)
+C For details about the algorithm, see
+C N.I. CHERNOV, G.A. OSOSKOV, COMPUT. PHYS. COMMUN. 33(1984) 329-333
+C
+C INPUT ARGUMENTS:                                             
+C      X(N),Y(N),W(N) - Input values and weights                
+C      N              - Number of pairs of data points,      INTEGER
+C      X              - Array of data points in X-axis,      REAL    
+C      Y              - Array of data points in Y-axis,      REAL
+C      W              - Array of weights for data points,    REAL
+C      A              - Best fitted circle center in X axis, REAL
+C      B              - Best fitted circle center in Y axis, REAL
+C      R              - Best fitted radius                   REAL
+C
+C OUTPUT ARGUMENTS:            
+C     H(3,3)          - A 3x3 symmetric covariance matrix,   REAL
+C                       H(1,1)=VAR(A)   H(1,2)=COV(A,B)  H(1,3)=COV(A,R)
+C                       H(2,1)=COV(B,A) H(2,1)=VAR(B)    H(2,3)=COV(B,R)
+C                       H(3,1)=COV(R,A) H(3,1)=COV(R,A)  H(3,3)=VAR(R)
+C     CIRCOV          - -1 Got some errors
+C                        0 Successfully return 
+C
+C  AUTHOR:
+C  Jawluen Tang, Physics department , UT-Austin 
+C                                                  
+C  USAGE:                                                       
+C     IRET=CIRCOV(X,Y,W,N,A,B,R,H)                   
+C
+C  CREATION DATE:
+C  10-AUGUST-1993
+C  Last modified,    Jawluen Tang, August 10,1993               
+C<---------------------------------------------------------------
+
       INTEGER*4 FUNCTION EGR_CIRCOV(X,Y,W,N,A,B,R,H)
  
         IMPLICIT NONE

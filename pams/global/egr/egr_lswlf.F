@@ -1,3 +1,37 @@
+C ---------------------------------------------------------------------
+C
+C EGR_LSWLF - a least squares straight line fitting program
+C
+C DESCRIPTION:
+C Performs weighted least squares fit to line (Y  =  A*X  +  B )
+C using linear regression.
+C
+C INPUT ARGUMENTS:
+C  X(N),Y(N),W(N) - Input values and weights
+C  N              - Number of pairs of data points,  INTEGER
+C  X              - Array of data points in X-axis,  MUST BE REAL
+C  Y              - Array of data points in Y-axis,  MUST BE REAL
+C  W              - Array of weights for data points,MUST BE REAL
+C
+C OUTPUT ARGUMENTS:
+C  B              - Y intercept of best fitted straight line, REAL
+C  SIGB           - Standard deviation of B,                  REAL
+C  A              - Slope of fitted straight line,            REAL
+C  SIGA           - Standard deviation of A,                  REAL
+C  CHISQ          - Chi-square                                REAL
+C  EGR_LSWLF          - = 0  return without error
+C                   = -1 got some fitting problems
+C
+C AUTHOR:
+C Jawluen Tang, Physics department, UT-Austin
+C
+C USAGE:
+C IRET=EGR_LSWLF(X,Y,W,N,A,B,CHISQ,SIGA,SIGB)
+C
+C CREATION DATE:
+C 10-AUGUST-1993
+C Last modified,    Jawluen Tang, August 10,1993
+C<---------------------------------------------------------------
       INTEGER*4 FUNCTION EGR_LSWLF(X,Y,W,N,A,B,CHISQ,SIGA,SIGB)
  
       IMPLICIT NONE
