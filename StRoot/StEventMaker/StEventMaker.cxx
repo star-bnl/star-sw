@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.18 1999/08/14 03:12:19 genevb Exp $
+// $Id: StEventMaker.cxx,v 1.19 1999/08/30 18:04:28 genevb Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.19  1999/08/30 18:04:28  genevb
+// More stringent prim vtx requirement
+//
 // Revision 1.18  1999/08/14 03:12:19  genevb
 // Remove ambiguity for vertexMatchIndex
 //
@@ -132,8 +135,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.18 1999/08/14 03:12:19 genevb Exp $
+// $Id: StEventMaker.cxx,v 1.19 1999/08/30 18:04:28 genevb Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.19  1999/08/30 18:04:28  genevb
+// More stringent prim vtx requirement
+//
 // Revision 1.18  1999/08/14 03:12:19  genevb
 // Remove ambiguity for vertexMatchIndex
 //
@@ -280,7 +286,7 @@
 #include <new.h>
 static const char thisClass[] = "StEventMaker: ";
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.18 1999/08/14 03:12:19 genevb Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.19 1999/08/30 18:04:28 genevb Exp $";
 #include "StEventManager.hh"
  * Revision 2.23  2000/05/22 21:53:41  ullrich
 #include <vector>
@@ -606,7 +612,8 @@ Int_t StEventMaker::Make(){
             currentEvent->vertexCollection()->push_back(vtx);
             vtxPtr.push_back(vtx);
             // Assign the primary vertex (only once!)
-            if (dstVertex[i].vtx_id == kEventVtxId) {
+            if ((dstVertex[i].vtx_id == kEventVtxId) &&
+                (dstVertex[i].iflag == 1)) {
               if (primaryFound) {
                 gMessMgr->Warning() << thisClass <<
                   "Additional primary vertex found - ignoring!" << endm;
