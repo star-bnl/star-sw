@@ -68,7 +68,7 @@
 
       call xntup ('Ntr10',N10)
       call xntup ('*** end_of_event ***',1)
-      print *,' EVENT ',IEV,' DONE '
+      if (idebug>0) print *,' EVENT ',IEV,' DONE '
       iquest(100)=Iev
       end
 
