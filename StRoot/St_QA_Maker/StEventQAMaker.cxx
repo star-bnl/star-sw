@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.26 2001/10/31 22:08:40 suaide Exp $
+// $Id: StEventQAMaker.cxx,v 2.27 2001/11/02 20:50:03 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.27  2001/11/02 20:50:03  genevb
+// Changed histogram ranges for momenta
+//
 // Revision 2.26  2001/10/31 22:08:40  suaide
 // fixed EMC histograms
 //
@@ -465,7 +468,7 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_etaT->Fill(eta);
         hists->m_etaTTS->Fill(eta,1.);
         hists->m_pTT->Fill(pT);
-        hists->m_pTTTS->Fill(pT,1.);
+        hists->m_pTTTS->Fill(lmevpt,1.);
         hists->m_momT->Fill(gmom);
         hists->m_lengthT->Fill(globtrk->length());
         hists->m_chisq0T->Fill(chisq0);
@@ -590,7 +593,7 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_etaTS->Fill(eta);
         hists->m_etaTTS->Fill(eta,0.);
         hists->m_pTTS->Fill(pT);
-        hists->m_pTTTS->Fill(pT,0.);
+        hists->m_pTTTS->Fill(lmevpt,0.);
         hists->m_momTS->Fill(gmom);
         hists->m_lengthTS->Fill(globtrk->length());
         hists->m_chisq0TS->Fill(chisq0);
