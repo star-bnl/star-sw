@@ -36,7 +36,7 @@ if ($ACTUAL_INPUT0) {
 die "No input file has been defined" if ! $input_file;
 my $NofEvents = 200;
 
-symlink "/star/data03/reco/StarDb", "StarDb";
+symlink "/star/data07/reco/StarDb", "StarDb";
 my $cmd = " root4star -q -b 'bfc.C(200,\"in TpcT0\",\"" . $input_file . "\")\';
 system 'echo "Start calibration job execution at" `date` " on " `hostname`'; 
 print "$cmd\n";
