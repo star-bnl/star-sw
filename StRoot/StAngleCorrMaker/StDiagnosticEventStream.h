@@ -27,7 +27,11 @@ public:
                   StDiagnosticEventStream();
                   ~StDiagnosticEventStream();
   void        Fill(StEvent& ev);
-  void        Write();
+// warnoff
+  void        Fill(StTrackForPool* t){StDiagnosticTool::Fill(t);}
+  void        Fill(StTrackForPool* t1, StTrackForPool* t2){StDiagnosticTool::Fill(t1,t2);}
+
+    void        Write();
   TString GetName();
 private:
   TH1D*  evstreamMULT;
