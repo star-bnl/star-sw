@@ -1,12 +1,15 @@
 /***************************************************************
- * $Id: StRichDrawableTMip.cxx,v 2.0 2000/08/09 16:28:03 gans Exp $
+ * $Id: StRichDrawableTMip.cxx,v 2.1 2000/09/29 17:36:58 gans Exp $
  *
  * Description:
  *
  ***************************************************************
  * $Log: StRichDrawableTMip.cxx,v $
- * Revision 2.0  2000/08/09 16:28:03  gans
- * Created New Maker for all drawable objects.
+ * Revision 2.1  2000/09/29 17:36:58  gans
+ * Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
+ *
+ * Revision 2.1  2000/09/29 17:36:58  gans
+ * Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
  *
  * Revision 2.0  2000/08/09 16:28:03  gans
  * Created New Maker for all drawable objects.
@@ -32,16 +35,13 @@
 #include "SystemOfUnits.h"
 
 ClassImp(StRichDrawableTMip)
-StRichDrawableTMip::StRichDrawableTMip(StRichDrawableTTrack * drawableTrackP)
-   : TMarker(){
+
 StRichDrawableTMip::StRichDrawableTMip() {/*nopt*/}
-    mTLineMIPPointer = 0;
+
 StRichDrawableTMip::StRichDrawableTMip(StRichDrawableTTrack * drawableTrackP) : TMarker(){
 
-    mMomText = 0;
-    
-    mTrackPointer = drawableTrackP;
-
+    mTLineMIPPointer   = 0;
+    mTMarkerMIPPointer = 0;
     geantTrackP = 0;
     mMomText    = 0;
     mTrackPointer  = drawableTrackP;
@@ -55,7 +55,7 @@ StRichDrawableTMip::StRichDrawableTMip(StRichDrawableTTrack * drawableTrackP) : 
 	
 	this->SetX( trackP->getProjectedMIP().x() );
 	this->SetY( trackP->getProjectedMIP().y() );
-	mMomText = new TText(this->GetX()+.3,this->GetY()+.1,tempChar);
+
 	char tempChar[100];
 	sprintf(tempChar,"%.3f",trackP->getMomentum().mag());
 	mMomText = new TText(this->GetX()+.35,this->GetY()+.15,tempChar);
@@ -67,23 +67,24 @@ StRichDrawableTMip::StRichDrawableTMip(StRichDrawableTTrack * drawableTrackP) : 
 	
 	mThreeMomMag = trackP->getMomentum().mag();
 	mEta = trackP->getMomentum().pseudoRapidity();
+	mTheta = trackP->getTheta()*Degrees;
 	mPhi = trackP->getPhi()*Degrees;
     }
 
-    mGeantPhi = 0;
+    // Intialize MC Info to 0
     mGeantThreeMomMag = 0;
-    mGeantYImpactRadiator= 0;
+    mGeantTheta = 0;
     mGeantPhi   = 0;
     mGeantXImpactRadiator = 0;
-    mGeantStopVertexProcess = 0;
+    mGeantYImpactRadiator = 0;
     mGeantXStopVertex = 0;
-    mGeantCommonTpcHits  = 0;
+    mGeantYStopVertex = 0;
     mGeantStopVertexProcess   = 0;
-    mGeantHitsInRadiator = 0;
+    mGeantStopVertexNumDaught = 0;
     mGeantCommonTpcHits    = 0;
-    mGeantTrackID = 0;
-    mGeantX = -999;
-    mGeantY = -999;
+    mGeantNumberOfPartners = 0;
+    mGeantHitsInRadiator   = 0;
+    mGeantHitsInGap = 0;
     mGeantTrackID   = 0;
     mGeantX        = -999;
     mGeantY        = -999;
@@ -95,32 +96,28 @@ StRichDrawableTMip::StRichDrawableTMip(StRichDrawableTTrack * drawableTrackP) : 
 
     geantTrackP = dynamic_cast<StRichMCTrack*>(trackP);
 
-	
     if(geantTrackP){	
-	    
 	mGeantX = geantTrackP->getGeantMIP().x();
-				  + pow(mGeantY - trackP->getProjectedMIP().y(),2));
-	    
+	mGeantY = geantTrackP->getGeantMIP().y();
 	if(mGeantX > -998 && mGeantY > -998){
 	    mGeantResidual =sqrt( pow(mGeantX - trackP->getProjectedMIP().x(),2)
 				+ pow(mGeantY - trackP->getProjectedMIP().y(),2));
 	}
-	mGeantThreeMomMag = geantTrackP->getGeantMomentumAtRadiator().mag();
-	mGeantTheta = geantTrackP->getGeantThetaAtRadiator()*Degrees;
-	mGeantPhi = geantTrackP->getGeantPhiAtRadiator()*Degrees;
 	
-	mGeantXStopVertex = geantTrackP->getGeantStopVertex().x();
-	mGeantYStopVertex = geantTrackP->getGeantStopVertex().y();
+	mGeantXImpactRadiator = geantTrackP->getGeantImpactPointAtRadiator().x();
+	mGeantYImpactRadiator = geantTrackP->getGeantImpactPointAtRadiator().y();
 	mGeantThreeMomMag     = geantTrackP->getGeantMomentumAtRadiator().mag();
 	mGeantTheta           = geantTrackP->getGeantThetaAtRadiator()*Degrees;
-	    mGeantStopVertexProcess = geantTrackP->getStMcTrack()->stopVertex()->geantProcess();
+	mGeantPhi             = geantTrackP->getGeantPhiAtRadiator()*Degrees;
 	
+	if( geantTrackP->getStMcTrack() && geantTrackP->getStMcTrack()->stopVertex() ){
+	    mGeantStopVertexProcess   = geantTrackP->getStMcTrack()->stopVertex()->geantProcess();
 	    mGeantStopVertexNumDaught = geantTrackP->getStMcTrack()->stopVertex()->numberOfDaughters();
 	    mGeantXStopVertex         = geantTrackP->getStMcTrack()->stopVertex()->position().x();
-	mGeantCommonTpcHits = geantTrackP->getCommonTpcHits();
+	    mGeantYStopVertex         = geantTrackP->getStMcTrack()->stopVertex()->position().y();	
 	}
-	mGeantHitsInRadiator = geantTrackP->getNumberOfGeantHitsInRadiator();
-	mGeantHitsInGap = geantTrackP->getNumberOfGeantHitsInGap();
+	
+	mGeantCommonTpcHits    = geantTrackP->getCommonTpcHits();
 	mGeantNumberOfPartners = geantTrackP->getNumberOfPartners();
 	mGeantHitsInRadiator   = geantTrackP->getNumberOfGeantHitsInRadiator();
 	mGeantHitsInGap        = geantTrackP->getNumberOfGeantHitsInGap();
@@ -182,6 +179,7 @@ void StRichDrawableTMip::drawProtonRing(){
     
 void StRichDrawableTMip::drawAllRings(){
     this->drawPionRing();
+    this->drawKaonRing();
     this->drawProtonRing();
 }
 

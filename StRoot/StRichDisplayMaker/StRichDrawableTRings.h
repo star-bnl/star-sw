@@ -1,12 +1,15 @@
 /**********************************************************
- * $Id: StRichDrawableTRings.h,v 2.0 2000/08/09 16:28:03 gans Exp $
+ * $Id: StRichDrawableTRings.h,v 2.1 2000/09/29 17:36:58 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichDrawableTRings.h,v $
- *  Revision 2.0  2000/08/09 16:28:03  gans
- *  Created New Maker for all drawable objects.
+ *  Revision 2.1  2000/09/29 17:36:58  gans
+ *  Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
+ *
+ *  Revision 2.1  2000/09/29 17:36:58  gans
+ *  Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
  *
  *  Revision 2.0  2000/08/09 16:28:03  gans
  *  Created New Maker for all drawable objects.
@@ -36,6 +39,7 @@
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 #endif
+
 class StRichTrack;
 class StRichRings;
 class StRichHit;
@@ -45,7 +49,7 @@ class StRichDrawableTRings : public TObject {
 public:
     StRichDrawableTRings();  
     StRichDrawableTRings(StRichRings& ring);  
-    void addHit(double,double);
+    ~StRichDrawableTRings();
     void draw();
     void clear(); // Clearss Ring?
     void addHit(StRichHit*);

@@ -1,12 +1,15 @@
 /**********************************************************
- * $Id: StRichDrawableTTrack.cxx,v 2.0 2000/08/09 16:28:03 gans Exp $
+ * $Id: StRichDrawableTTrack.cxx,v 2.1 2000/09/29 17:36:58 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichDrawableTTrack.cxx,v $
- *  Revision 2.0  2000/08/09 16:28:03  gans
- *  Created New Maker for all drawable objects.
+ *  Revision 2.1  2000/09/29 17:36:58  gans
+ *  Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
+ *
+ *  Revision 2.1  2000/09/29 17:36:58  gans
+ *  Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
  *
  *  Revision 2.0  2000/08/09 16:28:03  gans
  *  Created New Maker for all drawable objects.
@@ -25,16 +28,15 @@
  **********************************************************/
 
 #include "StRichDrawableTTrack.h"
-
 #include "StRichDrawableTRings.h"
 #include "StParticleDefinition.hh"
 #include "StParticleTypes.hh"
-
 #include "StRichPIDMaker/StRichRings.h"
 #include "TPolyLine.h"
-
 #include "StRichPIDMaker/StRichTrack.h"
-
+#include "StThreeVectorD.hh"
+#include "StThreeVector.hh"
+#include <vector>
 #include "StEventTypes.h"
 #include "StPhysicalHelixD.hh"
 #include "StPhysicalHelix.hh"
@@ -72,18 +74,26 @@ StRichDrawableTTrack::StRichDrawableTTrack(StRichTrack* track) {
   StRichRings antiprotonRing(mTrack,antiproton);
   StRichRings protonRing(mTrack,proton);
   
-  if(mTrack->getCharge() < 0) // if negative
-      {
-	  mVectorRings.push_back(new StRichDrawableTRings(pionminusRing));
-	  mVectorRings.push_back(new StRichDrawableTRings(kaonminusRing));
-	  mVectorRings.push_back(new StRichDrawableTRings(antiprotonRing));
-      }
+  mVectorRings.clear();
+  mVectorRings.resize(0);
+  int charge=0;
+  if (mTrack->getStTrack() && mTrack->getStTrack()->geometry()) {
+    charge = mTrack->getStTrack()->geometry()->helix().h();
+  }
+
+  //  if(charge < 0) // if negative
+  //  {
+  mVectorRings.push_back(new StRichDrawableTRings(pionminusRing));
+  mVectorRings.push_back(new StRichDrawableTRings(kaonminusRing));
+  mVectorRings.push_back(new StRichDrawableTRings(antiprotonRing));
 	  //   }
 
   /*
   else
       {
 	  mVectorRings.push_back(new StRichDrawableTRings(pionplusRing));
+	  mVectorRings.push_back(new StRichDrawableTRings(kaonplusRing));
+	  mVectorRings.push_back(new StRichDrawableTRings(protonRing));
       }
   */
 
