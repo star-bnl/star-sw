@@ -414,7 +414,7 @@ Bool_t TTreeIter::Notify()
     }
     fTree->SetBranchAddress(t->GetName(),*pddr);
   }
-#if ROOT_VERSION_CODE <= ROOT_VERSION(3,3,9)
+
   TBranch *br=0;
   int added = 1;
   while(added) {
@@ -425,18 +425,26 @@ Bool_t TTreeIter::Notify()
       added++;
 
       GetInfo(br,tyName,units,add,brType);
-      if (brType==3 || brType==4) {//add counter
+      if (brType==3 || brType==4 ) {//add counter
         (*this)(br->GetName());   
         printf("Branch %s activated\n",br->GetName());
-      } else {// We are here because of ROOT bug. Do workaround
-        fTree->SetBranchStatus(br->GetName(),0);
-        br->SetBit(kDoNotProcess);		continue;
-        printf("Branch %s desactivated\n",br->GetName());
-      }  
+        					continue;
+      }
+      TObjArray *brl = br->GetListOfBranches();
+      if (brl && brl->GetEntriesFast()) {//Node
+        printf("Node Branch %s ignored\n",br->GetName());
+        added--;
+        					continue;
+      }
 
+      {// We are here because of ROOT bug. Do workaround
+        fTree->SetBranchStatus(br->GetName(),0);
+        br->SetBit(kDoNotProcess);		
+        printf("Branch %s desactivated\n",br->GetName());
+        					continue;
+      }  
     }
   }
-#endif //ROOT 3.03.09
   fMemList.Sort();
   n = fMemList.GetEntriesFast();
   for (int i=0;i<n;i++) {
