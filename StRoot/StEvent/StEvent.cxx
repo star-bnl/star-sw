@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 1.10 1999/06/23 15:07:38 perev Exp $
+ * $Id: StEvent.cxx,v 1.11 1999/07/17 19:10:29 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 1.10  1999/06/23 15:07:38  perev
- * zeroing added
+ * Revision 1.11  1999/07/17 19:10:29  perev
+ * type() check for non print characters added
+ *
+ * Revision 1.11  1999/07/17 19:10:29  perev
+ * type() check for non print characters added
  *
  * Revision 1.10  1999/06/23 15:07:38  perev
  * zeroing added
@@ -81,17 +84,18 @@
 #include "StThreeVectorF.hh"
 #include "TString.h"
 #include "TBrowser.h"
+#if !defined(ST_NO_NAMESPACES) 
 using namespace std;
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.10 1999/06/23 15:07:38 perev Exp $";
+static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.11 1999/07/17 19:10:29 perev Exp $";
  extern "C" {int isprint(int);}
  *
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.10 1999/06/23 15:07:38 perev Exp $";
+static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.11 1999/07/17 19:10:29 perev Exp $";
  * Changes due to the addition of the EMC to StEvent
 StEvent::StEvent():St_DataSet("StEvent")
  * add rich pixel info/containers
     init();
 #include "StTpcHitCollection.h"
-static const char rcsid[] = "$Id: StEvent.cxx,v 1.10 1999/06/23 15:07:38 perev Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 1.11 1999/07/17 19:10:29 perev Exp $";
 StEvent::StEvent(StRun* run, dst_event_header_st& hdr, dst_event_summary_st& sum):
 St_DataSet("StEvent")
 #include "StEmcCollection.h"
@@ -297,6 +301,14 @@ void StEvent::setBeamPolarization(StBeamDirection dir, StBeamPolarizationAxis ax
 }
     if (dir == east)
 	mBeamPolarizationEast[axis] = val;
+    else
+	mBeamPolarizationWest[axis] = val;
+    if (mSoftwareMonitor) delete mSoftwareMonitor;
+    mSoftwareMonitor = val;
+{
+const char* StEvent::type() const
+{ 
+ char *t = (char*)((const char*)mType);
  for (int i=0; t[i]; i++) {if (!isprint(t[i])) t[i]=0;}
  return  (const char*)mType; 
 }                        
