@@ -36,10 +36,10 @@ class StiDefaultHitErrorCalculator: public StiHitErrorCalculator
 	 const StiDefaultHitErrorCalculator & operator=(const HitError_st & error);
    ~StiDefaultHitErrorCalculator();
    void calculateError(StiKalmanTrackNode *,double&,double&)const; 
-   void set(double intrinsicZ, double driftZ,
-									 double crossZ, double intrinsicX,
-									 double driftX, double crossX);
-	 virtual void loadDS(TDataSet&ds);
+   void set(double intrinsicZ, double driftZ, double crossZ
+	   ,double intrinsicX, double driftX, double crossX);
+
+   	 virtual void loadDS(TDataSet&ds);
 	 virtual void loadFS(ifstream& inFile);
 	 virtual void initialize(){};
 	 friend ostream& operator<<(ostream& os, const StiDefaultHitErrorCalculator& c);
