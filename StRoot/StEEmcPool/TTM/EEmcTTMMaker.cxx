@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.13 2004/04/13 15:48:11 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.14 2004/04/13 16:34:17 zolnie Exp $
 // doxygen info here
 /** 
     \mainpage TTM - an endcap Tower to Track Match maker
@@ -113,7 +113,7 @@
 #include "StEEmcUtil/StEEmcSmd/StEEmcSmdGeom.h"
 
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/StEEmcDbIndexItem1.h"
+#include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 
 #define DEBUG_PRINTS 0
@@ -391,13 +391,13 @@ EEmcTTMMaker::Make(){
     // get endcap hit(s) and use dbase to subtract pedestal and apply gain
     int   adc,sec,sub,eta;  // back to Fortran++ 
     float adcped,edep;  
+    // some idiot changed indexing scheme in the middle of the run 
     emc->getEndcapTowerADC(i,adc,sec,sub,eta); 
     if (adc<=0) continue;          // how about zero suppression :))
     
     //const EEmcDbItem *dbi = mEEmcDb->getT(sec+1,sub+'A',eta+1); // fortran scheiss .... 
-    const StEEmcDbIndexItem1 *dbi = mEEmcDb->getT(sec,sub+'@',eta); 
-    // some idiot changed indexing scheme and function implementation
-    // in the middle of the run 
+    const EEmcDbItem *dbi = mEEmcDb->getT(sec,sub+'@',eta); 
+    // some idiot changed indexing scheme in the middle of the run 
     if(dbi==NULL) continue;
     // now because of that idiot I have to do this scheiss
     sec--;
@@ -664,6 +664,9 @@ ostream&  operator<<(ostream &out, const StMuTrack    &t  )  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.14  2004/04/13 16:34:17  zolnie
+// *** empty log message ***
+//
 // Revision 1.13  2004/04/13 15:48:11  zolnie
 // fixes for some idiot changed indexing scheme and implementation
 // of some vital functions in the middle of the run
