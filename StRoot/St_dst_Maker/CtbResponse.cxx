@@ -95,8 +95,18 @@ CtbResponse::CtbResponse(StVertexMaker *head, int *ipar, float *fpar,unsigned in
     goto endCtb;
   }
 
+  if(this->GetCTBMode() == 2){
+      cout << "Runing in Embedding Mode, Killing DAQ CTB's" << endl;
+      St_dst_TrgDet *trgDet_temp=(St_dst_TrgDet*) trg->Find(".data/TrgDet");
+      dst_TrgDet_st *tab_temp= (dst_TrgDet_st *)trgDet_temp->GetArray() ;
+      
+      for(int iTray = 0;iTray < 2;iTray++)
+	  for(int iSlat = 0; iSlat < 120;iSlat++)
+	      tab_temp->nCtb[iTray][iSlat][0] = 0; 
+  }
 
-  if( this->GetCTBMode() == 1) {// *************  M-C events *****************************
+  // *************  M-C events *****************************
+  if( this->GetCTBMode() == 1 || this->GetCTBMode() == 2 ) {
     printf("use M-C for CTB hits\n");
     printf("I will write CTB ADC's into DAQ Table with 2 MeV=> 5 ADC!!!\n");
     St_DataSet *gds=head->GetDataSet("geant"); 
