@@ -7,7 +7,6 @@
 #include "TDialogCanvas.h"
 #include "TSlider.h"
 #include "TView.h"
-#include "TList.h"
 
 #ifdef SL3ROOT
 #include "Rtypes.h"
@@ -46,8 +45,6 @@ public:
    int    trackWidth  ;
    int    fitColor ;
    int    fitWidth  ;
-   TList* hitList ;
-   TList* trackList ;
 //
    FtfGraphic ( ) ;
    ~FtfGraphic ( ) ;
@@ -62,9 +59,10 @@ public:
    int  plotFits     ( int firstTrack, int lastTrack ) ;
    int  plotFitsa    ( int thisTrack ) ;
    int  plotFitsa    ( int firstTrack, int lastTrack ) ;
-   int  plotFit      ( FtfBaseTrack *lTrack, float rMin, float rMax ) ;
+   int  plotFit      ( FtfTrack *lTrack, float rMin, float rMax ) ;
    void ExecuteEvent ( Int_t event, Int_t px, Int_t py ) ;
-   int  set          ( TList* hitListIn, TList* trackListIn ) ;
+   int  set          ( int nHitsIn, int nTracksIn, 
+                       FtfHit* hitArray, FtfTrack* trackArray ) ;
 
    long setDefaults  ( ) ;
    void setXy ( ) { 
@@ -142,6 +140,11 @@ public:
       ftfCanvas->Draw();
    };
 
+   //
+   int           nHits ;
+   void*         hitP ;
+   void*         trackP ;
+   int           nTracks ;
 //
   ClassDef(FtfGraphic,1)
 };

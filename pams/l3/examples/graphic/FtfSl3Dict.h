@@ -9,9 +9,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+extern "C" {
 #define G__ANSIHEADER
 #include "G__ci.h"
-extern "C" {
 extern void G__cpp_setup_tagtableFtfSl3Dict();
 extern void G__cpp_setup_inheritanceFtfSl3Dict();
 extern void G__cpp_setup_typetableFtfSl3Dict();
@@ -25,7 +25,7 @@ extern void G__set_cpp_environmentFtfSl3Dict();
 
 #include "TROOT.h"
 #include "TMemberInspector.h"
-#include "../inc/FtfSl3.h"
+#include "FtfSl3.h"
 
 #ifndef G__MEMFUNCBODY
 #endif

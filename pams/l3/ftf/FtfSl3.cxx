@@ -462,7 +462,7 @@ int FtfSl3::readMezzanine (int sector,        int readOutBoard,
    rows = mzcld->rows;
    if ( swapByte ) rows = swap32(rows);
 
-  // printf("FtfSl3::readMezzaninne:  Found %d rows.\n",rows) ;
+   // fprintf(stderr,"       Found %d rows.\n",rows) ;
 
    for (i=0; i<rows; i++) {
       row = *tmp32++ ;
@@ -471,7 +471,7 @@ int FtfSl3::readMezzanine (int sector,        int readOutBoard,
 	 row = swap32(row);
 	 len = swap32(len);
       }
-      //printf("        Row# %d: clusters %d\n",row,len) ;
+      //  fprintf(stderr,"        Row# %d: clusters %d\n",row,len) ;
 
       for ( j=0; j<len; j++) {
 	 double fp, ft ;
@@ -495,7 +495,6 @@ int FtfSl3::readMezzanine (int sector,        int readOutBoard,
 //
 //   Discard 1 pad clusters
 // cs: discard one-pad cluster marked by the cluster finder as such (set first bit)
-         //printf ( "flags %d \n", c->flags ) ;
          if ( (c->flags & 1) == 1) continue;
 
 
@@ -511,12 +510,9 @@ int FtfSl3::readMezzanine (int sector,        int readOutBoard,
          ft = (double)time/ 64. ;
 
 // Cut on timebins and clustercharge added by cle 02/21/00
-         //printf ( "FtfSl3:readMezzaninne row %d \n", row ) ;
-	 //printf ( "ft %f min max %d %d \n", ft, minTimeBin, maxTimeBin ) ;
+
          if ( ft < minTimeBin ) continue ;
 	 if ( ft > maxTimeBin ) continue ;
-	 //printf ( "charge %d min max %d %d \n", c->charge, minClusterCharge,
-	 //                             maxClusterCharge ) ;
          if ( c->charge < minClusterCharge ) continue ;
          if ( c->charge > maxClusterCharge ) continue ;
 //

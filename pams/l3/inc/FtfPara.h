@@ -58,7 +58,7 @@
        int       nPrimaryPasses;  // # iterations looking for primaries
        int       nSecondaryPasses;// # iterations looking for secondaries
        int       vertexConstrainedFit; // 
-       int       parameterLocation; // 0=inner most point, 1=closest approach
+       int       parameterLocation; // 1=inner most point, 0=closest approach
        float     maxChi2Primary ; // maximum chi2 to be considered primary 
        int       rowInnerMost;    // Row where end track search 
        int       rowOuterMost;    // Outer most row to consider tin tracking
