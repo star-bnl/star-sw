@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.6 1999/12/21 01:19:29 posk Exp $
+// $Id: plot.C,v 1.7 1999/12/21 18:14:14 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker
@@ -9,6 +9,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.7  1999/12/21 18:14:14  posk
+// More graphs.
+//
 // Revision 1.6  1999/12/21 01:19:29  posk
 // Added more histograms.
 //
@@ -45,6 +48,17 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   // names of histograms made by StFlowAnalysisMaker
   // also projections of some of these histograms
   const char* baseName[] = { "Flow_Res_Sel",
+			     "Flow_Charge",
+			     "Flow_ImpactPar",
+			     "Flow_Chi2",
+			     "Flow_FitPts",
+			     "Flow_MaxPts",
+			     "Flow_FitOverMax",
+			     "Flow_OrigMult",
+			     "Flow_MultOverOrig",
+			     "Flow_VertexZ",
+			     "Flow_VertexXY2D",
+			     "Flow_EtaSym",
 			     "Flow_EtaPtPhi3D",
 			     "Flow_EtaPtPhi2D.PhiEta",
                              "Flow_EtaPtPhi2D.PhiPt",
@@ -74,7 +88,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_v.Pt_Sel" };
   //const int nNames = sizeof(baseName) / sizeof(baseName[0]);
   const int nNames = sizeof(baseName) / 4;
-  const int nSingles = 8 + 1;
+  const int nSingles = 19 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -110,9 +124,9 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   cout << "  name= " << shortName[pageNumber] << endl;
 
   // set the constants
-  float qMax   =     2.;
-  float phiMax = twopi; 
-  int n_qBins  =    50;
+  float qMax    =     2.;
+  float phiMax  = twopi; 
+  int   n_qBins =    50;
 
   char* cp = strstr(shortName[pageNumber],"Subs");
   int columns = (cp) ? nSubs + nSels : nSels;
@@ -411,6 +425,7 @@ TCanvas* plotSingles(char* shortName){
     hist->Draw();
     lineDiagonal->Draw();
   } else {
+    gStyle->SetOptStat(100110);
     hist->Draw();
   }
 
