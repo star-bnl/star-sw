@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.hh,v 1.2 1999/01/15 22:54:22 wenaus Exp $
+ * $Id: StVertex.hh,v 1.3 1999/01/27 12:53:39 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StVertex.hh,v $
- * Revision 1.2  1999/01/15 22:54:22  wenaus
- * version with constructors for table-based loading
+ * Revision 1.3  1999/01/27 12:53:39  ullrich
+ * Made setType() virtual. See StV0Vertex for reason.
  *
  * Revision 1.4  1999/01/30 23:03:18  wenaus
  * table load intfc change; include ref change
@@ -46,7 +46,7 @@ public:
     StVecPtrGlobalTrack&        daughters();
     unsigned int                numberOfDaughters();
     const StGlobalTrack*        parent();
-    void setType(StVertexType);           
+    const StThreeVector<float>& position();
     const StThreeVector<float>& positionError();
     unsigned long               qualityBitmask();
     float                       chiSquared();         
