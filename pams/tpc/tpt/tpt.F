@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.2 1998/01/27 00:35:42 fisyak Exp $
+* $Id: tpt.F,v 1.3 1998/02/06 22:03:14 fisyak Exp $
 * $Log: tpt.F,v $
+* Revision 1.3  1998/02/06 22:03:14  fisyak
+* Remove tgc_cross_and_dip.F
+*
 * Revision 1.2  1998/01/27 00:35:42  fisyak
 * Split sources
 *
@@ -88,6 +91,13 @@ C     preset all the hit(i).track to 0
         hit(i).track=0
       end do
       if(hit_h.nok.eq.0) go to 888
+c
+c     make sure that there is enough space in local arrays
+c     if not, truncate number of hits to track...
+      if(hit_h.nok.gt.tpt_mxhit) then
+        write(6,*) ' tpt local araays not big enough',hit_h.nok,tpt_mxhit
+        hit_h.nok=tpt_mxhit
+      endif
 
 C     Sort the TPC hits according to row/sector field
       call timed(time_now)

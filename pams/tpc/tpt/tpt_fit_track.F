@@ -1,5 +1,8 @@
-* $Id: tpt_fit_track.F,v 1.2 1998/01/27 00:35:46 fisyak Exp $
+* $Id: tpt_fit_track.F,v 1.3 1998/02/06 22:03:15 fisyak Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.3  1998/02/06 22:03:15  fisyak
+* Remove tgc_cross_and_dip.F
+*
 * Revision 1.2  1998/01/27 00:35:46  fisyak
 * Split sources
 *
@@ -130,10 +133,10 @@ C             calculate the error squared on phi0
      >        (hit(ient1).dy**2 + abs(trk(ipt).dpar(4)) +
      >        tanphi0**2*(hit(ient1).dx**2 + abs(trk(ipt).dpar(1))))
               if(iret.eq.STAFCV_OK) then
-                   if((trk(ipt).p(8)/real(2*ncir-3).lt.
+                   if((trk(ipt).p(8)/real(ncir-3).lt.
      >                 tpar(ipass).prob(1)
      >             .or.tpar(ipass).prob(1).lt.0.0).and.
-     >             (trk(ipt).p(9)/real(2*ncir-2).lt.
+     >             (trk(ipt).p(9)/real(ncir-2).lt.
      >                 tpar(ipass).prob(2)
      >             .or.tpar(ipass).prob(2).lt.0.0)) then
                      trk(ipt).nfit = ncir
