@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.2 2003/05/12 12:12:18 subhasis Exp $
+ * $Id: StPmdClustering.cxx,v 1.3 2003/05/14 10:49:12 subhasis Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -11,10 +11,11 @@
  ***********************************************************
  *
  * $Log: StPmdClustering.cxx,v $
- * Revision 1.2  2003/05/12 12:12:18  subhasis
- * StEvent added
+ * Revision 1.3  2003/05/14 10:49:12  subhasis
+ * CPV clustering added
  *
- *
+ * Revision 1.2  2003/05/14 10:21:05  Dipak
+ * Clustering for CPV plane implemented same as PMD plane
  ***********************************************************/
 
 #include<iostream.h>
@@ -44,7 +45,7 @@
 
 ClassImp(StPmdClustering)
 
-Double_t d1[96][72], clusters[4][2000], coord[2][96][72];
+Double_t d1[96][72],d2[96][72], clusters[4][2000], coord[2][96][72];
 Double_t crd_org[2][96][72];
 
 Int_t iord[2][6912], infocl[2][96][72], inford[3][6912], clno;
@@ -114,6 +115,7 @@ void StPmdClustering::findPmdClusters()
 	      if(idet==1){
 		d1[xpad][ypad]=d1[xpad][ypad]+edep;  //! edep added for each cell
 	      }
+
 	    }
 	  }
 
@@ -139,7 +141,7 @@ void StPmdClustering::findPmdClusters()
 	
        	refclust(m_pmd_det,incr, id, idet,pmdclus);  //! resolve superclusters into clusters
       }
-      //	cout << " supermodule (PMD)" << id<< " done"<<endl;
+      //      cout << " supermodule (PMD)" << id<< " done"<<endl;
     }
   }
 }
@@ -148,50 +150,78 @@ void StPmdClustering::findPmdClusters()
 
 void StPmdClustering::findCpvClusters()
 {
-  if(m_cpv_det){
-      Int_t idet,gsuper;
-      Double_t  edep;
-
+  if(m_cpv_det){  //! getting Pmd detector
     StPmdClusterCollection * pmdclus = new StPmdClusterCollection();
     m_cpv_det->setCluster(pmdclus);
     
-    for(Int_t id=1;id<=12;id++){    //! loop for supermodule
+      Int_t i, i1, i2, j,xpad, ypad,nmx1, incr,idet;
+      Int_t gsuper;  
+      Double_t  edep, cutoff, ave;
+      for(i=0; i<96; i++){
+	for(j=0;j<72;j++){
+	  coord[0][i][j]=i+j/2.; coord[1][i][j]=sqrth*j; 
+	  crd_org[0][i][j]=i; crd_org[1][i][j]=j; 
+	}
+      }
+      //      i=0;
+      for(Int_t id=1;id<=12;id++){   //! loop for supermodule
 
-      StPmdModule * pmd_mod=m_cpv_det->module(id);
+	//!  id has to be 1 to 12, not 0 to 11
+	for(Int_t j=0;j<96;j++){
+	  for(Int_t k=0;k<72;k++){
+            d2[j][k]=0;  //! Initialize CPV arrays
+	  }
+	}
+	
+	StPmdModule * pmd_mod=m_cpv_det->module(id);  //! getting module(id)
+
       
       if(m_cpv_det->module_hit(id)>0){
-	Int_t nmh=m_cpv_det->module_hit(id);  //! total number of hits in the supermodule
+	Int_t nmh1=m_cpv_det->module_hit(id);  //! total no.of hits in the supermodule  
+
 	TIter next(pmd_mod->Hits());
-	StPmdHit *spmcl;
-	for(Int_t im=0; im<nmh; im++)
+	StPmdHit *spmcl;   //! pointer for hits
+	for(Int_t im=0; im<nmh1; im++)
 	  {
+
 	    spmcl = (StPmdHit*)next();
 	    if(spmcl){
-             Float_t clueta,cluphi,x,y;
-	     Int_t ypad=spmcl->Row();       //! row of the hit
-	     Int_t xpad=spmcl->Column();    //! column of the hit
-	     edep=spmcl->Edep();            //! edep 
-	     gsuper = spmcl->Gsuper();      //! supermodule
-	     idet=spmcl->SubDetector();    //!  detector(= 2) for Cpv
+	      ypad=spmcl->Row();          //! row of the hit
+	      xpad=spmcl->Column();       //! column of the hit
+	      edep=spmcl->Edep();         //! edep
+	      gsuper = spmcl->Gsuper();   //! supermodule
+	      idet=spmcl->SubDetector();  //! detector(= 2) for Cpv
+	      xpad = xpad -1;ypad = ypad -1; 
 
-	     //! x,y,eta,phi of the hits has been calculated
-	     //	     geom->DetCell_xy(gsuper,Float_t(ypad),Float_t(xpad),x,y,clueta,cluphi); 
-
-	     geom->IntDetCell_xy(gsuper,ypad,xpad,x,y,clueta,cluphi); 
-
-	     //! Hits of CPV are written as clusters here 
-
-             StPmdCluster *pclust = new StPmdCluster();
-             Int_t members=1; //! As we are taking only one CPV cell
-             pclust->setModule(id);
-             pclust->setCluEdep(edep);
-             pclust->setCluEta(clueta);
-             pclust->setCluPhi(cluphi);
-             pclust->setNumofMems(Int_t(members));    
-             pmdclus->addCluster(pclust);
+	      if(idet==2){
+		d2[xpad][ypad]=d2[xpad][ypad]+edep;  //! edep added for each cell
+	      }
 	    }
 	  }
+
+	idet=2;
+	order(idet);  //! order the data according to edep ( largest to smallest )
+	//! cutoff is the threshold above which value the data is analysed.
+	cutoff=0.0000002;
+	ave=0.; nmx1=-1;
+	for(Int_t jj=0;jj<nmx; jj++){
+	  i1=iord[0][jj]; i2=iord[1][jj];
+	  if(d2[i1][i2] > 0.){nmx1=nmx1+1;ave=ave+d2[i1][i2];}
+	}
+
+	ave=ave/nmx1;
+	//!compare cutoff with the average energy deposited. Has no use in calc.
+
+	cutoff=0.0000002; //! cutoff is the threshold above which value the data is analysed.
+
+	/* crude clusters. superclusters are formed. These are separated from each other by cells having edep smaller than cutoff. */
+	incr=crclust(ave, cutoff, nmx1, idet);
+
+	arrange(incr);  //! arrange cells in each supercluster
+	
+       	refclust(m_cpv_det,incr, id, idet,pmdclus);  //! resolve superclusters into clusters
       }
+      //	cout << " supermodule (CPV)" << id<< " done"<<endl;
     }
   }
 }
@@ -238,7 +268,16 @@ void StPmdClustering::order(Int_t idet)
       }
     }
   }
-
+  else
+    {
+      for(i1=0; i1 < 96; i1++){
+	for(i2=0; i2 < 72; i2++){
+	  i=i1+i2*96;
+	  d[i]=d2[i1][i2]; iord1[i]=i; dd[i]=d[i];
+	}
+      }
+    }
+  
   for(j=1; j < nmx; j++){
 
     itst=0; adum=d[j]; idum=iord1[j];
@@ -313,6 +352,14 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
       }
     }
   }
+  else
+    {
+      for(i1=0; i1<96; i1++){
+	for(i2=0; i2<72; i2++){
+	  d[i1][i2]=d2[i1][i2];
+	}
+      }
+    }
   for(i=0; i<1000; i++){ncl[i]=-1;}
   for(i=0; i<incr; i++){
     if(inford[0][i] != nsupcl){ nsupcl=nsupcl+1; }
@@ -583,6 +630,14 @@ Int_t StPmdClustering::crclust(Double_t ave, Double_t cutoff, Int_t nmx1, Int_t 
        }
      }
    }
+   else
+     {
+       for (j=0; j < 96; j++){
+	 for(k=0; k < 72; k++){
+	   d[j][k]=d2[j][k];
+	 }
+       }
+     }
    for (j=0; j < 96; j++){
      for(k=0; k < 72; k++){
        for (i=0; i < 2; i++){infocl[i][j][k] = 0;} //! initialize infocl[2][96][72]
@@ -705,7 +760,7 @@ Double_t StPmdClustering::ranmar()
 //-----------------------------------------------------
 
 StPmdHit*
-StPmdClustering::GetHit(StPmdDetector* pdet,Int_t id,Int_t xc, Int_t yc)
+StPmdClustering::GetHit(StPmdDetector* pdet,Int_t id,Double_t xc, Double_t yc)
 {
         Int_t xpad,ypad,super;
         Int_t nmh=pdet->module_hit(id);
@@ -720,7 +775,7 @@ StPmdClustering::GetHit(StPmdDetector* pdet,Int_t id,Int_t xc, Int_t yc)
               ypad=spmcl->Row();
               xpad=spmcl->Column();
               super = spmcl->Gsuper();
-	      if((yc+1)==ypad && (xc+1)==xpad && id == super)   return spmcl;
+	      if(int(yc+1)==ypad && int(xc+1)==xpad && id == super)   return spmcl;
           }
        }
     return NULL;

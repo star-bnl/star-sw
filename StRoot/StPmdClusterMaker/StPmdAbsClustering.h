@@ -4,7 +4,7 @@
  */
 /******************************************************
  *
- * $Id: StPmdAbsClustering.h,v 1.2 2003/05/12 12:12:18 subhasis Exp $
+ * $Id: StPmdAbsClustering.h,v 1.3 2003/05/14 10:49:12 subhasis Exp $
  *
  * Author: Subhasis
  ******************************************************
@@ -14,8 +14,8 @@
  ******************************************************
  *
  * $Log: StPmdAbsClustering.h,v $
- * Revision 1.2  2003/05/12 12:12:18  subhasis
- * StEvent added
+ * Revision 1.3  2003/05/14 10:49:12  subhasis
+ * CPV clustering added
  *
  *
  ******************************************************/

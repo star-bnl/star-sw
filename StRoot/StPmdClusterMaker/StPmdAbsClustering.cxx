@@ -1,6 +1,6 @@
 /****************************************************
  *
- * $Id: StPmdAbsClustering.cxx,v 1.2 2003/05/12 12:12:18 subhasis Exp $
+ * $Id: StPmdAbsClustering.cxx,v 1.3 2003/05/14 10:49:04 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -11,8 +11,8 @@
  ******************************************************
  *
  * $Log: StPmdAbsClustering.cxx,v $
- * Revision 1.2  2003/05/12 12:12:18  subhasis
- * StEvent added
+ * Revision 1.3  2003/05/14 10:49:04  subhasis
+ * CPV clustering added
  *
  *
  ******************************************************/
