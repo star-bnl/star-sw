@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.9 2004/08/18 20:08:04 balewski Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.10 2004/08/25 15:20:30 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -45,7 +45,7 @@ StppLMVVertexFinder::StppLMVVertexFinder() {
     mMaxTrkDcaRxy=2.0;// was 3.9
     mMinTrkPt=0.2; // was 0.2
     mMinNumberOfFitPointsOnTrack = 15; // was 10 
-    mMaxZrange=70; // for tracks
+    mMaxZrange=150; // for tracks
     mDVtxMax=4.0;  // max sigma multipl between tracks and current vertex, used for tracks rejection
     mMinMatchTr=2; // minimal # of tracks matched to CTB // was 1
     mBLequivNtr=20; // equivalent # of tracks for BeamLine
@@ -178,7 +178,7 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
   gMessMgr->Debug() << "PrimCand  before ppLMV for eveID=" << eveID << "tracks at first point" << endm;
   for( uint j=0;j<mPrimCand.size();j++) {
     StThreeVectorD p=mPrimCand[j].helix.momentum(mBfield*tesla);
-    printf("j=%d  sig=%f pT=%f eta=%f phi/deg=%f\n",j,mPrimCand[j].sigma,p.perp(),p.pseudoRapidity(), p.phi()/C_PI*180);
+    // printf("j=%d  sig=%f pT=%f eta=%f phi/deg=%f\n",j,mPrimCand[j].sigma,p.perp(),p.pseudoRapidity(), p.phi()/C_PI*180);
     
   }
 
@@ -334,7 +334,7 @@ bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
   if(d2.first>=0 || d2.second<=0) {
     n5++;
     gMessMgr->Message("","W") << "ppLMV::matchTrack2CTB ()"  
-      " unexpected solution for track crossing CTB, track="<<track <<endm;
+      " unexpected solution for track crossing CTB, TrkHlxOut="<< TrkHlxOut<<endm;
     return false;
   }
   
@@ -481,7 +481,7 @@ bool  StppLMVVertexFinder::ppLMV5() {
       d = ::sqrt(d);
       chi2 = chi2 + (d*d)/(sig*sig);
       double drel = d;  // do not use sig during track rejection ??? JB
-      printf(" DCA x=%f y=%f z=%f d=%f drel=%f dmax=%f sig=%f\n",XHel.x(),XHel.y(),XHel.z(),d,drel,dmax,sig);
+      //printf(" DCA x=%f y=%f z=%f d=%f drel=%f dmax=%f sig=%f\n",XHel.x(),XHel.y(),XHel.z(),d,drel,dmax,sig);
       if( drel > dmax ){// save  track that deviates the most from vertex to be discarded later
         dmax = drel;
         ikeep = itehlx;
@@ -572,6 +572,9 @@ void  StppLMVVertexFinder::changeCuts(){
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.10  2004/08/25 15:20:30  balewski
+ * Z-vertex range increased to +/- 150 cm
+ *
  * Revision 1.9  2004/08/18 20:08:04  balewski
  * outerGeometry()->helix() used by ppLMV for extrapolation to CTB
  *
