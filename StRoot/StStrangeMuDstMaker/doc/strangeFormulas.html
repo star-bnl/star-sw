@@ -92,8 +92,10 @@ TTreeFormula is just a special case of
 which allows the usage of data members of a particular TTree, and are
 thus tied to a particular TTree.<p>
 
-To see which formulas are provided, it is best to look at the macro itself.
-However, some examples include:
+To see which formulas are provided, it is best to look at the macro itself,
+which is located in:<br>
+<tt>$STAR/StRoot/macros/analysis/strangeFormulas.C</tt><br>
+Some examples include:
 <ul>
 <li><tt>Event.primaryVertexX()</tt>
 <li><tt>V0.massLambda()</tt>
@@ -273,8 +275,12 @@ twice, but has a limit of 50 values one can calculate.<p>
 
 For example, "a()+a()+a()" repeats everything necessary to find
 "a()" three times. If "a()" requires 20 values to calculate, then
-"a()+a()+a()" will fail, needing 60 values. It is much better to write
-something like "3*a()".<p>
+"a()+a()+a()" will fail, needing 60 values. However, this failure
+<b>does not</b> get reported to the user! A false value is returned
+which is the result of the incomplete calculation using only the first
+50 values. <b>BE WARNED!</b> In the above example, it is much better
+to write something like "3*a()", which actually still only requires
+20 values.<p>
 
 Complicated formulas in the macro have the number of values used in their
 calculations documented above them. The user should take note of these
