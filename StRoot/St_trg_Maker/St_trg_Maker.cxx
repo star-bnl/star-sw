@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.13 2000/07/13 18:48:23 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.14 2000/07/19 22:03:43 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.14  2000/07/19 22:03:43  ward
+// Switch from non-attenuated to attenuated ZDC.
+//
 // Revision 1.13  2000/07/13 18:48:23  ward
 // Fixed ZDC indices according to email from Javier.
 //
@@ -291,9 +294,9 @@ void St_trg_Maker::ZdcDaq(St_dst_TrgDet *dst1) {
     tt->adcZDC[i]=GraceSlick->TrgSum.DSM.ZDC[i];
     tt->tdcZDC[i]=0;
   }
-  tt->adcZDCEast=GraceSlick->TrgSum.DSM.ZDC[4];
-  tt->adcZDCWest=GraceSlick->TrgSum.DSM.ZDC[0];
-  tt->adcZDCsum=GraceSlick->TrgSum.DSM.ZDC[4]+GraceSlick->TrgSum.DSM.ZDC[0];
+  tt->adcZDCEast=GraceSlick->TrgSum.DSM.ZDC[13];
+  tt->adcZDCWest=GraceSlick->TrgSum.DSM.ZDC[10];
+  tt->adcZDCsum=GraceSlick->TrgSum.DSM.ZDC[13]+GraceSlick->TrgSum.DSM.ZDC[10];
 }
 void St_trg_Maker::VpdSim(St_dst_TrgDet *dst1) {
   int i;
