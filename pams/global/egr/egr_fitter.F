@@ -97,6 +97,27 @@ C  Initialize number of refit tracks
       globtrk_aux_h.nok = 0
 c      write(6,*) 'EGR: ',tphit_h.nok,tptrack_h.nok,tpeval_h.nok,globtrk_h.nok
 
+CCC  Initialize the local track-pointer array structure to zero:
+CCC  L. Ray, 9/16/98
+
+      write(6,997) 
+997   format(2x,'Initializing gtrk in egr_fitter.F')
+
+      do i = 1,mxtrack
+         gtrk(i).nhit         = 0
+         gtrk(i).nfit         = 0
+         gtrk(i).flag         = 0
+         gtrk(i).ntpc         = 0
+         do j = 1,mxpnt
+            gtrk(i).ipnt(j)   = 0
+            gtrk(i).pos(j)    = 0
+            gtrk(i).det(j)    = 0
+         end do
+         do j = 1,9
+            gtrk(i).p(j)      = 0.0
+         end do
+      end do
+
 C  Use the egrpar(1).scenario variable to set the running schem
 
       if (egrpar(1).scenario.eq.1) then     ! Real TPC stand-alone tracking
@@ -236,6 +257,7 @@ C  Abort if the TPC is needed but there are no TPC tracks
 	    tptrack(i).id_globtrk = 0
          end do
          do ithit=1,tphit_h.nok        ! Loop over number of hits
+            tphit(ithit).id_globtrk = 0     !  Zero out F.key - L. Ray 9/16/98
             itrk = tphit(ithit).track/1000
             if (itrk.ge.1.and.itrk.le.mxtrack) then
                ient = tphit(ithit).track - itrk*1000
@@ -864,6 +886,22 @@ C     second pass.  This situation is specified with egrpar(1).usevert=2.
       
 Cvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
       
+CCC  Read thru globtrk and check for invpt values out of range (e.g. positive infinity)
+CCC  and for such cases set globtrk.invpt = -999999.
+CCC  L.Ray - 9/16/98
+
+      if(globtrk_h.nok .gt. 0) then
+         do i = 1,globtrk_h.nok
+            if(globtrk(i).invpt .ge. -999999. .and. globtrk(i).invpt .le. 999999.) then
+               continue 
+            else 
+               write(6,998) i
+998   Format(5x,'BAD Value of globtrk(i=',I7,').invpt detected - set to -999999')
+               globtrk(i).invpt = -999999.
+            end if  
+         end do
+      end if
+             
       egr_fitter = STAFCV_OK
       
       return
