@@ -1,3 +1,10 @@
+* $Id: richgeo.g,v 1.8 2000/01/28 21:53:37 nevsky Exp $
+*
+* $Log: richgeo.g,v $
+* Revision 1.8  2000/01/28 21:53:37  nevsky
+* secondaries in Rich can be discarded
+*
+*
 module  RICHGEO defines Ring Image Cerenkov geometry
 author  Gerd Kunde
 created June 1, 1998 supposely
@@ -388,11 +395,14 @@ end
 +CDE,TYPING,GCBANK,GCONST,GCUNIT,GCTMED,GCTRAK,GCKINE,GCSETS,AGCSTEP.
       character  Cmed*8
 
-      check ISVOL>0 & Ipart==50
+      check ISVOL>0 
       CALL UHTOC(NATMED,4,Cmed,8)
+      check Cmed!='RICH_CSI'
 
 * cerenkov photons are seen in CSI only
-      check Cmed!='RICH_CSI'
+* secondaries are not interesting ???
+      check Ipart==50  "| Istak>0"
+           
 * discard hit:
       {Step,dEstep,aStep,AdEstep} = 0; 
 *
@@ -405,10 +415,12 @@ end
       Real    HIT
 
       if Ipart != 50 { hit=AdEStep; return }
-      hit = -VECT(7)
+      hit = -AdEStep
       end 
       
  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%OLD STUFF - NOT USED NOW%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       subroutine  rgjkstep
 +CDE,gckine,gctrak,gctmed,agcstep.
