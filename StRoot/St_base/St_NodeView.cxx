@@ -6,6 +6,8 @@
 #include <iostream.h>
 #include <iomanip.h>
 
+#include "TCanvas.h"
+#include "TPad.h"
 #include "TBrowser.h"
 #include "St_NodeView.h"
 #include "St_NodeViewIter.h"
@@ -302,6 +304,73 @@ St_Node *St_NodeView::GetNode() const {
   return 0;
 }
 
+//_____________________________________________________________________________
+Int_t St_NodeView::GetGlobalRange(const St_NodeView *rootNode,Float_t *globalMin,Float_t *globalMax)
+{
+  //
+  // Calculate the position of the vertrex of the outlined cude in repect
+  // of the given St_NodeView object
+  //
+  if (rootNode) 
+  {
+    SetTitle(rootNode->GetTitle());
+    EDataSetPass mode = kContinue;
+    St_NodeViewIter next((St_NodeView *)rootNode,0);
+    St_NodeView *nextView = 0;
+    // Find itself.
+    while ( (nextView = (St_NodeView *)next(mode)) && nextView != this ){}
+    if (nextView == this) {
+      St_NodePosition *position = next[0];
+      if (!position->GetNode()) {
+          Error("St_NodeView ctor","%s %s ",GetName(),nextView->GetName());
+      }
+      // Calculate the range of the outlined cube verteces.
+      GetLocalRange(globalMin,globalMax);
+      Float_t offSet[3] = {position->GetX(),position->GetY(),position->GetZ()};
+      for (Int_t i=0;i<3;i++) {
+        globalMin[i] += offSet[i];
+        globalMax[i] += offSet[i];
+      }
+    }
+    return next.GetDepth();
+  }
+  else return -1;
+}
+//______________________________________________________________________________
+void St_NodeView::GetLocalRange(Float_t *min, Float_t *max)
+{
+  //  GetRange
+  //
+  //  Calculate the size of 3 box the node occupies
+  //  return two floating point array with the bound of box
+  //  surroundind all shapes of this St_ModeView
+  //
+
+  TVirtualPad *savePad = gPad;
+  //  Create a dummy TPad;
+//  TPad dummyPad;
+  TCanvas dummyPad("--Dumm--","dum",1,1);
+//  dummyPad.cd();
+  // Assing 3D TView 
+  TView view(1);
+//  view.SetRange(mn,mx);
+//  Float_t phi   = 90.0;
+//  Float_t theta = -90.0; 
+//  Int_t iret;
+  // view.SetView(phi, theta, 0, iret);
+//    dummyPad.SetView(&view);
+  // Make it current for a while
+//  gPad = &dummyPad;
+//*-*- Draw Referenced node
+  gGeometry->SetGeomLevel();
+  gGeometry->UpdateTempMatrix();
+  view.SetAutoRange(kTRUE);
+  Paint("range");
+  view.GetRange(&min[0],&max[0]);
+  // restore "current pad"
+   if (savePad) savePad->cd();   
+}
+
 //______________________________________________________________________________
 void St_NodeView::Paint(Option_t *option)
 {
@@ -318,7 +387,7 @@ void St_NodeView::Paint(Option_t *option)
 // restrict the levels for "range" option
   Int_t level = gGeometry->GeomLevel();
 //  if (option && option[0]=='r' && level > 3 && strcmp(option,"range") == 0) return;
-//  if (option && option[0]=='r' && level > 3 ) return;
+  if (option && option[0]=='r' && level > 3 ) return;
 
   TPadView3D *view3D=gPad->GetView3D();
 
