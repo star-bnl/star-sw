@@ -1,12 +1,12 @@
-/*    bemcCalSummary.idl
+/*    emcCalSummary.idl
 *
-*  Table: bemcCalSummary
+*  Table: emcCalSummary
 *
-*       description: *         //:  Table which contains the bemc calibration summary
+*       description: *         //:  Table which contains the emc calibration summary
 */ 
 
 
-struct bemcCalSummary { 
+struct emcCalSummary { 
 
    long  DetNumber;   /*     detector number  */
    long  FirstRun;   /*     first run used for calibration  */
