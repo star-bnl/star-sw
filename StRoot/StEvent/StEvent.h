@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.28 2002/12/20 22:41:30 ullrich Exp $
+ * $Id: StEvent.h,v 2.29 2003/01/30 18:36:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.29  2003/01/30 18:36:31  ullrich
+ * Added hooks for StTriggerIdCollection.
+ *
  * Revision 2.28  2002/12/20 22:41:30  ullrich
  * Added PMD.
  *
@@ -132,6 +135,7 @@ class StEmcCollection;
 class StRichCollection;
 class StTofCollection;
 class StTriggerDetectorCollection;
+class StTriggerIdCollection;
 class StL0Trigger;
 class StL1Trigger;
 class StL3Trigger;
@@ -199,6 +203,8 @@ public:
     const StL3Trigger*                  l3Trigger() const;
     StTriggerDetectorCollection*        triggerDetectorCollection();
     const StTriggerDetectorCollection*  triggerDetectorCollection() const;
+    StTriggerIdCollection*              triggerIdCollection();
+    const StTriggerIdCollection*        triggerIdCollection() const;
     
     StSPtrVecTrackDetectorInfo&         trackDetectorInfo();
     const StSPtrVecTrackDetectorInfo&   trackDetectorInfo() const;
@@ -256,6 +262,7 @@ public:
     void setFpdCollection(StFpdCollection*);
     void setPhmdCollection(StPhmdCollection*);
     void setTriggerDetectorCollection(StTriggerDetectorCollection*);
+    void setTriggerIdCollection(StTriggerIdCollection*);
     void setL0Trigger(StL0Trigger*);
     void setL1Trigger(StL1Trigger*);
     void setL3Trigger(StL3Trigger*);
