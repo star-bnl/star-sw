@@ -79,10 +79,9 @@ foreach my $logFile (@list) {
        
         my $ltime = `mod_time $mfile`;
            if( $ltime > 7200){
-		    if ($msize < 6000 )  {
-     print "Crashed job :", $mfile, "\n";
-   }else {
-#              chop $mfile; 
+		    if ($msize < 2000 )  {
+#     print "Crashed job :", $mfile, "\n";
+   }else { 
               $f_flag = 0;
               $file_sum = $mfile;
               $file_sum =~ s/.log//g;
@@ -387,7 +386,7 @@ sub parse_log($) {
     $jLog_err = $filename;
     $jLog_err =~ s/log/err/g;
 
-     @err_out = `tail -200 $jLog_err`;
+     @err_out = `tail -100 $jLog_err`;
   foreach $mline (@err_out){
           chop $mline;
        if ( $mline =~ /No space left on device/)  {
