@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.17 1998/09/27 01:24:22 fisyak Exp $
+// $Id: bfc.C,v 1.18 1998/10/12 00:53:02 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.18  1998/10/12 00:53:02  fisyak
+// Add parameters for bfc
+//
 // Revision 1.17  1998/09/27 01:24:22  fisyak
 // bfc.C for whole file
 //
@@ -45,10 +48,14 @@
 // Revision 1.2  1998/07/20 15:08:19  fisyak
 // Add tcl and tpt
 //
+void bfc(const Char_t *fileinp = 
+"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/g2t/psc262_02_142evts.xdf", 
+         const Char_t *fileout=
+"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/root/psc262_02_142evts_dst.xdf",
+         const Char_t *fileout=
+"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/root/psc262_02_142evts_dst.root",
+         const Int_t  Nevents=1000)
 {
-#pragma includepath "/afs/rhic/star/packages/dev/StRoot"
-#pragma includepath "/afs/rhic/star/packages/dev/lib"
-  //#include "macros/bfc.h"
    gSystem->Load("St_base.so");
    gSystem->Load("StChain.so");
    gSystem->Load("xdf2root.so");
@@ -76,19 +83,20 @@
    gSystem->Load("St_xdfin_Maker.so");
 
 
-//gSystem.Exec("rm *.log");
-//  Char_t *filename = "/afs/rhic/star/data/samples/auau_central_hijing.xdf";
-//  Char_t *filename = "/disk1/star/auau200/year1a/central/hijing/set0001/regular/gst/auau_ce_b0-2_1001_1050.xdf";
-  Char_t *filename ="/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/g2t/psc079_01_46evts.xdf";
-  St_XDFFile *xdf_in   = 0;
-  xdf_in   = new St_XDFFile(filename,"r");
-  St_XDFFile *xdf_out  = 0;
-  xdf_out  = new St_XDFFile("/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc079_01_46evts.xdf","w");
-  TFile      *root_out= 0; 
-  root_out=  new TFile("/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc079_01_46evts.root","RECREATE");
+   //  Char_t *fileinp ="$SCRATCH/input.xdf";
+   //  Char_t *fileout ="$SCRATCH/ouput.xdf";
+   //  Char_t *FileOut ="$SCRATCH/ouput.root";
+  St_XDFFile   *xdf_in   = 0;
+  if (fileinp)  xdf_in   = new St_XDFFile(fileinp,"r");
+  St_XDFFile  *xdf_out   = 0;
+  if (fileout) xdf_out   = new St_XDFFile(fileout,"wb");
+  TFile       *root_out  = 0; 
+  if (FileOut) root_out  =  new TFile(FileOut,"RECREATE");
 //TFile      *root_tree= new TFile("auau_central_hijing.tree.root","RECREATE");
 // Create the main chain object
-  StChain chain("StChain");
+//  StChain chain("StChain");
+  StChainSpy chain("StChain");
+
 //  Create the makers to be called by the current chain
   St_run_Maker run_Maker("run_Maker","run/params");
   if (xdf_in) {
@@ -108,7 +116,9 @@
   St_dst_Maker dst_Maker("dst_Maker","event/data/global");
   chain.PrintInfo();
 // Init the mai chain and all its makers
-  chain.Init();
+
+  int iInit = chain.Init();
+  if (iInit) chain.Fatal(iInit,"on init");
 //  chain.MakeTree("StChainTree","Title");
 // Prepare TCanvas to show some histograms created by makers
   if (xdf_out){
@@ -125,7 +135,6 @@
   }
   gBenchmark->Start("bfc");
   Int_t i=0;
-  const Int_t Nevents=100;
   for (Int_t i =1; i <= Nevents; i++){
     if (chain.Make(i)) break;
     St_DataSetIter local(chain.DataSet());
@@ -148,6 +157,9 @@
     //  histCanvas->Modified();
     //  histCanvas->Update();
     if (i != Nevents) chain.Clear();
+    printf ("===========================================\n");
+    printf ("=========================================== Done with Event no. %d\n",i);
+    printf ("===========================================\n");
   }
   if (Nevents > 1) {
     chain.Finish();
