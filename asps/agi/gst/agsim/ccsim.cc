@@ -1,4 +1,4 @@
-/*CMZ :          09/07/98  17.21.49  by  Pavel Nevski*/
+/*CMZ :          17/08/98  16.59.37  by  Pavel Nevski*/
 /*-- Author :    Pavel Nevski   28/11/97*/
 /*****************************************************/
 /*               S T A F   i n t e r f a c e         */
@@ -28,7 +28,8 @@ extern "C" void ami_module_register_ ()    {}
 #include "tntLib.h"
 #include "topLib.h"
 #include "dstype.h"
-
+ 
+ 
 #define staf_start_          F77_NAME(staf_start,STAF_START)
 #define staf_stop_           F77_NAME(staf_stop,STAF_STOP)
 #define dui_cdir_            F77_NAME(dui_cdir,dui_cdir)
@@ -184,7 +185,7 @@ extern "C" int type_of_call tdm_find_spec_(char* c, int lc)
 {
   char *pSpec;  int i;  unsigned lspec=0;
   for (i=1;;i++)
-  { if (!dsTypeSpecifier(&pSpec, &lspec, i)) return 0;
+  { if (!dsTypeSpecifier((const char**)&pSpec, &lspec, i)) return 0;
     if (strstr(pSpec,c)) return i;
   }
 }
@@ -201,7 +202,8 @@ extern "C" int type_of_call tdm_get_spec_(TABLE_HEAD_ST* pTab, char* c, int lc)
   printf("         ds_p = %d \n",  pTab->dsl_pointer);
   printf("         dd_p = %d \n",  pTab->data_pointer);
 */
-  if (!dsTableTypeSpecifier(&pSpec,(ds_dataset_t*)pTab->dsl_pointer)) return 0;
+  if (!dsTableTypeSpecifier((const char**)&pSpec,
+                            (ds_dataset_t*)pTab->dsl_pointer)) return 0;
      if (strlen(pSpec)<lc) strcpy(c,pSpec); else strncpy(c,pSpec,lc);
      return strlen(pSpec)+1;
 }
@@ -218,8 +220,8 @@ extern "C" int type_of_call tdm_get_ccount_(TABLE_HEAD_ST* pTab)
 extern "C" int type_of_call tdm_get_column_(TABLE_HEAD_ST* pTab,int* k,char* c,char* d,
                                 unsigned* l, unsigned* e, unsigned* m)
 { char *cc; char *dd;
-  if (!dsColumnName     (&cc, (ds_dataset_t*) pTab->dsl_pointer,*k)
-   || !dsColumnTypeName (&dd, (ds_dataset_t*) pTab->dsl_pointer,*k)
+  if (!dsColumnName     ((const char**)&cc,(ds_dataset_t*)pTab->dsl_pointer,*k)
+   || !dsColumnTypeName ((const char**)&dd,(ds_dataset_t*)pTab->dsl_pointer,*k)
    || !dsColumnSize     (l  , (ds_dataset_t*) pTab->dsl_pointer,*k)
    || !dsColumnElcount  (e  , (ds_dataset_t*) pTab->dsl_pointer,*k)
    || !dsColumnDimCount (m  , (ds_dataset_t*) pTab->dsl_pointer,*k))  return 0;
@@ -297,7 +299,7 @@ extern "C" int type_of_call ami_module_call_
 #else
   (char* name, int ln, int* n, char* tables, int lt)
 #endif
-                                                 
+ 
 {
     int i; char* ctab[40];
     for (i=0;i<*n;i++)
@@ -419,7 +421,7 @@ extern "C" void type_of_call xdf_open_
 #else
 (unsigned long *Lun, char *File, int lFile, char *Mode, int lMode,int *ier)
 #endif
-                          
+ 
 {
   char file[512], mode[8];
   int l;
