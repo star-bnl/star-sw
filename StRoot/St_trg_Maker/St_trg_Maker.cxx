@@ -69,12 +69,12 @@ Int_t St_trg_Maker::Init(){
 
 #define SWITCH(x) x
 #define LATER_THAN_YEAR_2000
-#include "duplicated.code"
+#include "St_trg_duplicated.code"
 #undef SWITCH
 #undef LATER_THAN_YEAR_2000
 
 #define SWITCH(x) x ## 2000
-#include "duplicated.code"
+#include "St_trg_duplicated.code"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 void St_trg_Maker::SecondDstSim(St_dst_L0_Trigger *dst2) 
@@ -982,8 +982,11 @@ void St_trg_Maker::InitMwcArrays(void) {
 
 
 
-// $Id: St_trg_Maker.cxx,v 1.45 2003/09/02 17:59:33 perev Exp $
+// $Id: St_trg_Maker.cxx,v 1.46 2003/10/06 04:07:20 perev Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.46  2003/10/06 04:07:20  perev
+// bug in duplicated.code fixed and this file renamed
+//
 // Revision 1.45  2003/09/02 17:59:33  perev
 // gcc 3.2 updates + WarnOff
 //
