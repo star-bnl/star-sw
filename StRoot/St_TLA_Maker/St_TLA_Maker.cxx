@@ -1,5 +1,8 @@
-// $Id: St_TLA_Maker.cxx,v 1.7 1998/10/31 00:25:45 fisyak Exp $
+// $Id: St_TLA_Maker.cxx,v 1.8 1999/03/10 15:02:07 fine Exp $
 // $Log: St_TLA_Maker.cxx,v $
+// Revision 1.8  1999/03/10 15:02:07  fine
+// HTML link to STAR problem report form has been introduced
+//
 // Revision 1.7  1998/10/31 00:25:45  fisyak
 // Makers take care about branches
 //
@@ -22,6 +25,8 @@
 //                                                                      //
 // St_TLA_Maker class for Makers                                        //
 //                                                                      //
+//  Submit any problem with this code via begin_html <A HREF="http://www.rhic.bnl.gov/STAR/html/comp_l/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
+//
 //////////////////////////////////////////////////////////////////////////
 
 #include "St_TLA_Maker.h"
@@ -53,7 +58,7 @@ Int_t St_TLA_Maker::Make(){
 //_____________________________________________________________________________
 void St_TLA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_TLA_Maker.cxx,v 1.7 1998/10/31 00:25:45 fisyak Exp $\n");
+  printf("* $Id: St_TLA_Maker.cxx,v 1.8 1999/03/10 15:02:07 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

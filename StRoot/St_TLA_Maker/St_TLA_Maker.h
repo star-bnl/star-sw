@@ -1,5 +1,8 @@
-// $Id: St_TLA_Maker.h,v 1.7 1998/10/31 00:25:45 fisyak Exp $
+// $Id: St_TLA_Maker.h,v 1.8 1999/03/10 15:02:07 fine Exp $
 // $Log: St_TLA_Maker.h,v $
+// Revision 1.8  1999/03/10 15:02:07  fine
+// HTML link to STAR problem report form has been introduced
+//
 // Revision 1.7  1998/10/31 00:25:45  fisyak
 // Makers take care about branches
 //
@@ -25,6 +28,8 @@
 //                                                                      //
 // St_TLA_Maker virtual base class for Maker                            //
 //                                                                      //
+//  Submit any problem with this code via begin_html <A HREF="http://www.rhic.bnl.gov/STAR/html/comp_l/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
+//
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -33,7 +38,7 @@
 class St_TLA_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.7 1998/10/31 00:25:45 fisyak Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.8 1999/03/10 15:02:07 fine Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
  

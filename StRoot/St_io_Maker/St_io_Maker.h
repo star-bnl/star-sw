@@ -11,6 +11,8 @@
 //                                                                      //
 // St_io_Maker virtual base class for Maker                            //
 //                                                                      //
+//  Submit any problem with this code via begin_html <A HREF="http://www.rhic.bnl.gov/STAR/html/comp_l/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html  //
+//
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -24,7 +26,7 @@ class St_io_Maker : public StMaker {
  private:
    Bool_t drawinit;
    Bool_t fSplit;    // flag of the "split" mode
-// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.9 1999/03/07 16:38:07 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.10 1999/03/10 15:03:03 fine Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
    TFile         *m_TreeRootFile;   //! ROOT file to keep TTRee object in their.
    TObjArray     *m_ListOfBranches; //!
