@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.29 2000/05/17 19:42:01 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.30 2000/05/17 23:43:11 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.30  2000/05/17 23:43:11  calderon
+ * assign the parent of the tracks from the particle table at the end
+ * of the track loop.
+ *
  * Revision 1.29  2000/05/17 19:42:01  calderon
  * Fix bug in assigning parent tracks, Thanks Zhangbu
  *
@@ -150,7 +154,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.29 2000/05/17 19:42:01 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.30 2000/05/17 23:43:11 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -480,45 +484,6 @@ Int_t StMcEventMaker::Make()
 	    ttempParticle[gtrk] = egTrk;
 	    mCurrentMcEvent->tracks().push_back(egTrk); // adds track egTrk to master collection 
 	    usedTracksEvGen++;
-	    // Find Mother...
-	    motherIndex = particleTable[gtrk].jmohep[0];
-	    if ((motherIndex > 0) && (motherIndex < NGeneratorTracks)) {
-		if (motherIndex > gtrk) 
-		    gMessMgr->Warning()
-			<< "Wrong ordering!  Track " << gtrk+1 << " from particle table: "
-			<< "Can't assign mother track " << motherIndex
-			<< " because it has not been created yet!" << endm;
-		else egTrk->setParent(ttempParticle[motherIndex]);
-	    
-	    
-		if (Debug() && motherIndex && !(ttempParticle[gtrk]->parent())) {
-		    cout << "Error in particle table filling!\n There should be a parent and there isn't one!\n";
-		    PR(motherIndex);
-		    PR(particleTable[gtrk].jmohep[0]);
-		    PR(ttempParticle[gtrk]->parent());
-		    
-		}
-	    }
-	    if (Debug() && ttempParticle[gtrk]->parent()) {
-		// at this point this check should be valid
-		// careful during merging of tracks, it might not be...
-		// but at the end of the track loop it should again be valid
-		if (ttempParticle[gtrk]->parent() != ttempParticle[particleTable[gtrk].jmohep[0]])
-		    cout << "The indexing during particle table filling got screwed up!" << endl;
-		long parIndexPtr = (ttempParticle[gtrk]->parent()->eventGenLabel() - 1);
-		long parIndexTab = (particleTable[gtrk].jmohep[0]);
-		if (parIndexPtr != parIndexTab ) {
-		    cout << "Something is wrong during particle table filling!" << endl;
-		    PR(gtrk+1);
-		    PR(ttempParticle[gtrk]->eventGenLabel());// should equal gtrk + 1
-		    		    
-		    PR(motherIndex+1);
-		    PR(ttemp[motherIndex]->eventGenLabel()); // should equal motherIndex+1
-		    
-		    PR(parIndexPtr); // the two below should be equal
-		    PR(parIndexTab);
-		}
-	    }
 	    
 	} // Generator Tracks Loop
 	
@@ -611,30 +576,9 @@ Int_t StMcEventMaker::Make()
 			    PR(ttempParticle[particleTable[iEventGeneratorLabel].jmohep[0]]);
 			    
 			}
-			if (ttempParticle[iEventGeneratorLabel]->parent()) {
-			    long parIndexPtr = (ttempParticle[particleTable[iEventGeneratorLabel].jmohep[0]]->eventGenLabel() - 1);
-			    long parIndexTab = (particleTable[iEventGeneratorLabel].jmohep[0]);
-			    if (parIndexPtr != parIndexTab ) {
-				cout << "\nSomething is wrong during g2t_track merging!" << endl;
-				PR(itrk+1);
-				PR(trackTable[itrk].id); // should equal itrk + 1
-				PR(ttemp[itrk]->key());// should equal itrk + 1
-				PR(t->key());// should equal itrk + 1
-				
-				PR(iEventGeneratorLabel+1);
-				PR(ttemp[itrk]->eventGenLabel()); // should equal iEventGeneratorLabel+1
-				PR(ttempParticle[iEventGeneratorLabel]->eventGenLabel());// should equal iEventGeneratorLabel+1
-				
-				PR(parIndexPtr); // the two below should be equal
-				PR(parIndexTab);
-				
-				PR(ttempParticle[iEventGeneratorLabel]->parent());
-				PR(ttempParticle[particleTable[iEventGeneratorLabel].jmohep[0]]);
-			    }
-			}
 		    }
-
-		    t->setParent(ttempParticle[particleTable[iEventGeneratorLabel].jmohep[0]]);
+		    if (particleTable[iEventGeneratorLabel].jmohep[0])
+			t->setParent(ttempParticle[particleTable[iEventGeneratorLabel].jmohep[0]]);
 		    StMcTrackIterator trkToErase = find (mCurrentMcEvent->tracks().begin(),
 							 mCurrentMcEvent->tracks().end(),
 							 ttempParticle[iEventGeneratorLabel]);
@@ -659,7 +603,27 @@ Int_t StMcEventMaker::Make()
 	    }
 	    
 	} // Track loop
-	
+	for (long gtrk=0; gtrk<NGeneratorTracks; gtrk++) {
+	    // Find Mother...
+	    motherIndex = particleTable[gtrk].jmohep[0];
+	    if ((motherIndex > 0) && (motherIndex < NGeneratorTracks)) {
+		if (motherIndex > gtrk) 
+		    gMessMgr->Warning()
+			<< "Wrong ordering!  Track " << gtrk+1 << " from particle table: "
+			<< "Can't assign mother track " << motherIndex
+			<< " to track with index " << gtrk << endm;
+		else ttempParticle[gtrk]->setParent(ttempParticle[motherIndex]);
+		if (Debug()) {
+		    if (motherIndex && !(ttempParticle[gtrk]->parent())) {
+			cout << "Error in assigning parent to particle table!\n There should be a parent and there isn't one!\n";
+			PR(gtrk);
+			PR(motherIndex);
+			PR(particleTable[gtrk].jmohep[0]);
+			PR(ttempParticle[gtrk]->parent());
+		    }
+		}
+	    }
+	}
 	if (nThrownTracks)
 	    gMessMgr->Warning() << "StMcEventMaker::Make(): Throwing " << nThrownTracks
 				<< " whose stop vertex is the same as primary vertex." << endm;
