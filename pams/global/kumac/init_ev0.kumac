@@ -39,7 +39,13 @@ cd /dui
  
  macro init_ev02
    macro/global/import *
+   return
+* **************************************************
+ 
+ macro init_ev0d
+   macro/global/import *
  return
+ 
 * ***********************************************
  macro fill_ev02
    

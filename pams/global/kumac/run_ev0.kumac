@@ -1,4 +1,21 @@
-*******************************************************************
+* ******************************************************************
+ 
+  macro ev0d
+    
+   macro/global/import *
+         
+     ami/mod/call ev0_dst _
+       [dst]/ev0out _
+       [dst]/dst_v0_vertex
+     
+
+   if (staf_status(1).ne.stafcv_ok) then
+                message 'Problem on return from EV0_DST'
+   endif
+  
+ return
+ 
+* ******************************************************************
  macro ev0_am2 
    
   macro/global/import *
