@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.83 1999/06/08 11:30:13 fisyak Exp $
+# $Id: MakeDll.mk,v 1.84 1999/06/09 22:47:29 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.84  1999/06/09 22:47:29  fisyak
+# Add more stuff for double directory levels
+#
 # Revision 1.83  1999/06/08 11:30:13  fisyak
 # take out NT stuff for the moment
 #
@@ -203,12 +206,20 @@ endif
 #	If NO source , NOTHING to do
 #	Skip up to the end
 #
-FILES_ALL := $(wildcard $(addprefix $(SRC_DIR)/, *.c *.cxx *.cc))
-FILES_ALL += $(wildcard $(addprefix $(SRC_DIR)/*/, *.c *.cxx *.cc))
+SRC_DIRS  :=$(SRC_DIR)
+FILES_ALL := $(filter %.c %.cc %.cxx %.f %.F %g, $(wildcard $(addprefix $(SRC_DIR)/*,.c .cc .cxx .f .F .g)))
+ALL_DIRS  :=$(strip $(sort $(dir $(wildcard $(addprefix $(SRC_DIR)/*/*,.c .cc .cxx .f .F .g)))))
+ifneq (,$(ALL_DIRS))
+ALL_DIRS  := $(subst / , ,$(ALL_DIRS) )
+ALL_DIRS  := $(strip $(filter-out $(addprefix $(SRC_DIR)/,run examples doc local), $(ALL_DIRS)))
+endif
+ifneq (,$(ALL_DIRS))
+FILES_ALL += $(filter %.c %.cc %.cxx %.f %.F %g, $(wildcard $(addprefix $(SRC_DIRS)/*,.c .cc .cxx .f .F .g)))
+SRC_DIRS  += $(ALL_DIRS)
+endif
 ifneq ($(GEN_DIR),$(SRC_DIR))
-FILES_ALL += $(wildcard $(addprefix $(SRC_DIR)/, *.f *.F *.g))
+FILES_ALL += $(filter-out $(SRC_DIRS), $(wildcard $(addprefix $(SRC_DIRS)/, *.f *.F *.g)))
 FILES_ALL := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_ALL)))
-
 endif
 FILES_SRC  = $(filter-out      %Cint.cxx, $(FILES_ALL))
 FILES_SRC := $(filter-out %/.share/%/*.F, $(FILES_SRC))
@@ -228,7 +239,8 @@ DOIT := $(strip $(FILES_SRC))
 ifneq (,$(DOIT))
 
 OUTPUT_DIRS := $(LIB_DIR) $(OBJ_DIR) $(DEP_DIR) $(BIN_DIR) $(TMP_DIR) $(GEN_DIR) 
-INPUT_DIRS  += $(sort $(SRC_DIR) $(dir $(wildcard $(SRC_DIR)/*/*.c*))) $(ROOT_DIR)
+INPUT_DIRS  += $(SRC_DIRS)
+#                           $(ROOT_DIR)
 
 # 	Make dirs before make real work. Othervice VPATH does not see
 #    	non existing directories
@@ -460,8 +472,7 @@ $(MY_SO) : $(FILES_O) $(wildcard $(OBJ_DIR)/Templates.DB/*.$(O)) $(STAR_FILES_O)
         $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)
 	@echo "           Shared library " $(MY_SO) " has been created"   
 $(OBJ_DIR)/%.$(O) : %.c
-	$(CC)  -c $(subst \,/,$(CPPFLAGS) $(CFLAGS) $(INCLUDES) -Fd$(OBJ_DIR)\$(PKG) $(CINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS))
-
+	$(CC)  -c $(CPPFLAGS) $(CFLAGS) $(INCLUDES) $(CINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
 $(OBJ_DIR)/%.$(O) : %.cc
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
 $(OBJ_DIR)/%.$(O) : %.cxx 
@@ -510,12 +521,12 @@ test:
 	@echo INP_DIR     := $(INP_DIR) 
 	@echo PKG         := $(PKG) 
 	@echo SRC_DIR     := $(SRC_DIR)
+	@echo SRC_DIRS    := $(SRC_DIRS) 
 	@echo GEN_DIR     := $(GEN_DIR) 
 	@echo LIB_DIR     := $(LIB_DIR)
 	@echo OBJ_DIR     := $(OBJ_DIR)
 	@echo DEP_DIR     := $(DEP_DIR) 
 	@echo TMP_DIR     := $(TMP_DIR)
-	@echo SRC_DIR     := $(SRC_DIR) 
 	@echo BIN_DIR     := $(BIN_DIR) 
 	@echo OUTPUT_DIRS := $(OUTPUT_DIRS)
 	@echo INPUT_DIRS  := $(INPUT_DIRS)
@@ -541,6 +552,7 @@ test:
 	@echo FILES_SRC   := $(FILES_SRC)
 	@echo FILES_D     := $(FILES_D)
 	@echo FILES_O     := $(FILES_O)
+	@echo ALL_DIRS  := $(ALL_DIRS)
 	@echo FILES_ALL := $(FILES_ALL)
 	@echo FILES_ORD := $(FILES_ORD)
 	@echo FILES_DEF := $(FILES_DEF)
