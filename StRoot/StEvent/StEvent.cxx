@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 1.8 1999/05/05 22:36:37 fisyak Exp $
+ * $Id: StEvent.cxx,v 1.9 1999/06/16 14:22:04 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 1.8  1999/05/05 22:36:37  fisyak
- * restore relatedTracks
+ * Revision 1.9  1999/06/16 14:22:04  fisyak
+ * take out StRun from StEvent
+ *
+ * Revision 1.9  1999/06/16 14:22:04  fisyak
+ * take out StRun from StEvent
  *
  * Revision 1.8  1999/05/05 22:36:37  fisyak
  * restore relatedTracks
@@ -76,16 +79,16 @@
 #include "TString.h"
 #include "TBrowser.h"
 using namespace std;
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.8 1999/05/05 22:36:37 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.9 1999/06/16 14:22:04 fisyak Exp $";
  extern "C" {int isprint(int);}
  *
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.8 1999/05/05 22:36:37 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.9 1999/06/16 14:22:04 fisyak Exp $";
  * Changes due to the addition of the EMC to StEvent
 StEvent::StEvent():St_DataSet("StEvent")
  * add rich pixel info/containers
     init();
 #include "StTpcHitCollection.h"
-static const char rcsid[] = "$Id: StEvent.cxx,v 1.8 1999/05/05 22:36:37 fisyak Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 1.9 1999/06/16 14:22:04 fisyak Exp $";
 StEvent::StEvent(StRun* run, dst_event_header_st& hdr, dst_event_summary_st& sum):
 St_DataSet("StEvent")
 #include "StEmcCollection.h"
@@ -129,7 +132,7 @@ StEvent::operator=(const StEvent&) { return *this;} // private
     SafeDelete(mL0Trigger);
 }
 
-    mRun = run;
+void StEvent::init(StRun* run)
 {
     mType = "Unknown";
     //    mRun = run;
@@ -177,7 +180,7 @@ StEvent::operator=(const StEvent&) { return *this;} // private
 StEvent::initToZero() { /* noop */ }
 //______________________________________________________________________________
 void StEvent::Browse(TBrowser *b)
-     if (mRun)              b->Add(mRun);                
+{
   // Browse this dataset (called by TBrowser).
    if (b) {
      //     if (mRun)              b->Add(mRun);                
@@ -240,7 +243,7 @@ void StEvent::setRunNumber(ULong_t val) { mRunNumber = val; }
 void StEvent::setTriggerMask(ULong_t val) { mTriggerMask = val; }              
     _lookup(hits, mContent);
 void StEvent::setBunchCrossingNumber(ULong_t val) { mBunchCrossingNumber = val; }      
-void StEvent::setRun(StRun* val) { mRun = val; }                            
+    _lookup(emc, mContent);
 void StEvent::setLuminosity(Double_t val) { mLuminosity = val; }               
     _lookup(emc, mContent);
 //void StEvent::setRun(StRun* val) { mRun = val; }                            
