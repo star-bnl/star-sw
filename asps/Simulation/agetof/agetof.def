@@ -596,8 +596,12 @@ Replace [^bla(#) #*# [IDENT]([IDENT])] with
         [^bla(#1) #2*#3 #4([REDUCE #5_PARAMETER])]
 Replace [^bla(#) END STRUCTURE #;]  with
         ["*" Integer LEN_#1; Parameter (LEN_#1=[COPY X]);
-         Character*[COPY X] #1;  Data #1/' '/;"*";"end structure #1 #2";"*";
-         [SETR Y=[REDUCE ([COPY X]+3)/4]]  DFN[LEN__#1] AS [[COPY Y]]
+         [SETR Y=[REDUCE ([COPY X]+3)/4]]  
+         Character*[COPY X] #1; 
+         Integer*4 #1_ALIGN([COPY Y]);
+         Equivalence (#1,#1_ALIGN);
+         Data #1/' '/;"*";"end structure #1 #2";"*";
+DFN[LEN__#1] AS [[COPY Y]]
         ;]
 Replace [.#(#+TYPE_#(#))] with [(unknown member in structure #1)]
 Replace [;RECORD/#/#;] with [;{IF}[COPY R] {Integer #2(LEN__#1);
