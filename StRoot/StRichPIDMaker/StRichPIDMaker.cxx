@@ -1,14 +1,18 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.2 2000/09/29 01:35:37 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.3 2000/09/29 17:55:51 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 2.2  2000/09/29 01:35:37  horsley
- * Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
- * Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
+ * Revision 2.3  2000/09/29 17:55:51  horsley
+ * fixed bug in Minimization routine, included StMagF stuff (commented out)
+ * changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
  *
+ * Revision 2.15  2000/11/21 16:24:22  horsley
+ * Major overhaul of StRichArea, introduced monte carlo integration cross check,
+ * all possible areas, angles calculated together. StRichRingCalculator,
+ * StRichPIDMaker modified to support new StRichArea. StRichPIDMaker's hit finder
  * typo corrected.
  *
  * Revision 2.14  2000/11/14 22:32:50  lasiuk
@@ -108,10 +112,17 @@ using std::max;
 // for finite
 #include <math.h>
 #ifdef SUN
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.2 2000/09/29 01:35:37 horsley Exp $";
+#include <ieeefp.h>
+#endif
+       fabs(impactPoint.y()) > (mRadiatorCut) &&
+// magnetic field map
+//#include "StarCallf77.h"
+//#define gufld  F77_NAME(gufld,GUFLD)
+//extern "C" {void gufld(Float_t *, Float_t *);}
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.3 2000/09/29 17:55:51 horsley Exp $";
 
 	track->geometry() && 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.2 2000/09/29 01:35:37 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.3 2000/09/29 17:55:51 horsley Exp $";
 	(fabs(track->geometry()->momentum().pseudoRapidity()) < mEtaCut) &&
 Int_t StRichPIDMaker::Make() { 
   
@@ -445,7 +456,6 @@ void StRichPIDMaker::drawPadPlane(StEvent* rEvent, bool kCreatePsFile) {
 #endif 
 }
 
-  
 
 void StRichPIDMaker::fillHitNtuple(const StSPtrVecRichHit* hits, const StSPtrVecRichCluster* clusters) {
 	    pionCalculator->clear();  
@@ -476,8 +486,8 @@ void StRichPIDMaker::fillHitNtuple(const StSPtrVecRichHit* hits, const StSPtrVec
 	for (int k=j+1;k<hits.size();k++) {
 	    out = pionCalculator->getOuterRingPoint();
 	    
-	      hits[j]->getDist() > 0  && hits[j]->getDist() < 1 &&
-	      hits[k]->getDist() > 0  && hits[k]->getDist() < 1) {		 
+	     ( hits[j]->getDist() > 0  && hits[j]->getDist() < 1) &&
+	      (hits[k]->getDist() > 0  && hits[k]->getDist() < 1) ) {		 
 	  if (fabs(psi1)>constAngle && fabs(psi2)>constAngle &&
 	     (hits[j]->getNSigma() < 2) && (hits[k]->getNSigma() < 2) ) {		 
 
@@ -614,8 +624,8 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
       pid->setTotalArea(totalArea);
       pid->setTotalAzimuth(ringCalc->getTotalAngle());
       pid->setTruncatedAzimuth(ringCalc->getConstantAreaAngle());
-      cout << "filling pid traits for " << part->name() << endl;
-      cout << "has " << hits.size() << "  hits " << endl;
+      totalHits    = 0;
+      constantHits = 0;
       vector<StRichRingHit*> hits = track->getRingHits(part);
       //cout << "filling pid traits for " << part->name() << endl;
 	if (hits[i]->getDist()>0 && hits[i]->getDist()<1) {
@@ -1684,7 +1694,13 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
   else {
     cout << "hard coded (!!!!!!!!!!)  mag field = " << magField << endl;
   } 
-
+ 
+  // not yet in use, will implement soon
+  //  Float_t x[3] = {0,0,0};
+  //  Float_t b[3] = {0,0,0};
+  //  gufld(x,b);
+  //  cout << "field map at 0,0,0 = " 
+  //  << b[0] << "   " << b[1] << "   " << b[2] << endl;
   // cout << "field map at 0,0,0 = " 
   //<< b[0] << "   " << b[1] << "   " << b[2] << endl;
   if (!tempEvent->primaryVertex()) {return 0;}  

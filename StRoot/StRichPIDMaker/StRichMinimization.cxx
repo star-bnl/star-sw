@@ -1,14 +1,18 @@
 /**********************************************************
- * $Id: StRichMinimization.cxx,v 2.1 2000/09/29 01:35:37 horsley Exp $
+ * $Id: StRichMinimization.cxx,v 2.2 2000/09/29 17:55:51 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMinimization.cxx,v $
- *  Revision 2.1  2000/09/29 01:35:37  horsley
- *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
- *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
+ *  Revision 2.2  2000/09/29 17:55:51  horsley
+ *  fixed bug in Minimization routine, included StMagF stuff (commented out)
+ *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
  *
+ *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
+ *  added normal distance sigma cut on hits, quartz and radiator pathlengths
+ *  for individual photons, modified minimization routine to correct boundary
+ *  problems
  *
  *  Revision 2.2  2000/09/29 17:55:51  horsley
  *  fixed bug in Minimization routine, included StMagF stuff (commented out)
@@ -70,9 +74,26 @@ StThreeVectorF StRichMinimization::rotatedMin(StThreeVectorF& point) {
 
   StThreeVectorF tempPoint = point - t->getImpactPoint();
 
-  if (rotatedPoint.y() > 0) { minDistance = brent(0.0,M_PI/2.0,M_PI,&returnPsi);}
-  else {minDistance = brent(0.0,-M_PI/2.0,-M_PI,&returnPsi);}
+  StThreeVectorF rotatedPoint(mTrackCosPhi*tempPoint.x() + 
+  double returnPsia,returnPsib,returnPsic;
+			      0.0);  
+  double minDistanceb = brent(0.0,-M_PI/2.0,-M_PI,&returnPsib);
+  double minDistancec = brent(M_PI/2.0,M_PI,1.5*M_PI,&returnPsic);
   }
+  if (minDistancea<minDistanceb) {
+    returnPsi=returnPsia;
+    minDistance=minDistancea;
+  }
+  else  {
+    minDistance=minDistanceb;
+    returnPsi=returnPsib;
+  }
+
+  if (minDistancec<minDistance) {
+    returnPsi=returnPsic;
+    minDistance=minDistancec;
+  }
+    
   status              = ringPoint->getPoint(returnPsi,returnThisPoint);
   mMeanPathInRadiator = ringPoint->getMeanPathInRadiator();
   mMeanPathInQuartz   = ringPoint->getMeanPathInQuartz();
@@ -91,7 +112,7 @@ double StRichMinimization::getMeanPathInQuartz()   { return mMeanPathInQuartz;}
 
 //
 // this is the numerical recipes minimization routine brent
- 
+//
 
 /* CAUTION: This is the ANSI C (only) version of the Numerical Recipes
    utility file nrutil.c.  Do not confuse this file with the same-named

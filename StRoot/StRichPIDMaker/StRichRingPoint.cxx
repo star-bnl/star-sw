@@ -1,14 +1,18 @@
 /**********************************************************
- * $Id: StRichRingPoint.cxx,v 2.1 2000/09/29 01:35:38 horsley Exp $
+ * $Id: StRichRingPoint.cxx,v 2.2 2000/09/29 17:55:51 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingPoint.cxx,v $
- *  Revision 2.1  2000/09/29 01:35:38  horsley
- *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
- *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
+ *  Revision 2.2  2000/09/29 17:55:51  horsley
+ *  fixed bug in Minimization routine, included StMagF stuff (commented out)
+ *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
  *
+ *  Added #include <values.h> neeaded for MAXFLOAT
+ *
+ *  Revision 2.2  2000/09/29 17:55:51  horsley
+ *  fixed bug in Minimization routine, included StMagF stuff (commented out)
  *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
  *
  *  Revision 2.1  2000/09/29 01:35:38  horsley
@@ -106,9 +110,9 @@ StRichRingPoint::StRichRingPoint(StRichTrack* track,
   // define "fast" trig functions
   mTrackCosTheta = cos(mTrackTheta); 
   mTrackSinTheta = sin(mTrackTheta); 
-  mRefractedAway.setX(static_cast<float>HUGE_VAL);
-  mRefractedAway.setY(static_cast<float>HUGE_VAL);
-  mRefractedAway.setZ(static_cast<float>HUGE_VAL);  
+  mTrackCosPhi   = cos(mTrackPhi); 
+  mTrackSinPhi   = sin(mTrackPhi); 
+  mTrackTanTheta = tan(mTrackTheta);
   
   // use this StThreeVectorD as a return 
   // if ring is refracted away to infinity

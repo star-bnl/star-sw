@@ -1,14 +1,18 @@
 /**********************************************************
- * $Id: StRichRingCalculator.cxx,v 2.1 2000/09/29 01:35:37 horsley Exp $
+ * $Id: StRichRingCalculator.cxx,v 2.2 2000/09/29 17:55:51 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingCalculator.cxx,v $
- *  Revision 2.1  2000/09/29 01:35:37  horsley
- *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
- *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
+ *  Revision 2.2  2000/09/29 17:55:51  horsley
+ *  fixed bug in Minimization routine, included StMagF stuff (commented out)
+ *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
  *
+ *
+ *  Revision 2.3  2000/10/19 01:13:23  horsley
+ *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
+ *  added normal distance sigma cut on hits, quartz and radiator pathlengths
  *  for individual photons, modified minimization routine to correct boundary
  *  problems
  *
@@ -145,6 +149,8 @@ double StRichRingCalculator::getOuterDistance(StThreeVectorF& testPoint,double& 
   closestOuterRingPoint = mOuterMinimization->rotatedMin(testPoint);
   outerAngle            = mOuterMinimization->getPsi();
   return (closestOuterRingPoint - testPoint).perp();
+					      double& outerAngle) {
+
     return (closestOuterRingPoint - testPoint).perp();
 double StRichRingCalculator::getMeanDistance(StThreeVectorF& testPoint,double& meanAngle) {
   closestMeanRingPoint = mMeanMinimization->rotatedMin(testPoint);
@@ -164,8 +170,8 @@ void StRichRingCalculator::clear() {
   
   StThreeVectorF temp(0,0,0);
   closestInnerRingPoint = temp;
-double StRichRingCalculator::getMeanPathInRadiator() { return mMeanMinimization->getMeanPathInRadiator();}
-double StRichRingCalculator::getMeanPathInQuartz() { return mMeanMinimization->getMeanPathInQuartz();}
+  closestOuterRingPoint = temp;
+  closestMeanRingPoint  = temp;
 StThreeVectorF StRichRingCalculator::getOuterRingPoint() { return closestOuterRingPoint;}
 StThreeVectorF StRichRingCalculator::getInnerRingPoint() { return closestInnerRingPoint;}
 StThreeVectorF StRichRingCalculator::getMeanRingPoint()  { return closestMeanRingPoint;}
