@@ -11,7 +11,7 @@ char gStr[100];
 void CutsInit(void) {
   printf("Initializing cuts.\n"); gDone=0;
 }
-void Progress(long jj) {
+void Progress(int jj,int junk,char *junk2,char *junk3) {
   if(jj<0) return;
   if(jj<1000||jj%3300==0) 
       printf("       I:         %d \n",jj); /* modulus=150n */
