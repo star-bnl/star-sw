@@ -1,0 +1,14 @@
+//InnerSeedFinder.txt
+//Run-time configuration for the outer seed finder
+
+//Min padrow
+MinPadrow:	14
+
+//Max padrow
+MaxPadrow:	17
+
+//Min sector
+MinSector:	1
+
+//Max sector
+MaxSector:	12
