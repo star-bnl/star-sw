@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.1 1998/11/10 17:12:24 fisyak Exp $
+ * $Id: StTrsDeDx.cc,v 1.2 1999/01/15 10:57:45 lasiuk Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,8 +13,9 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
- * Revision 1.1  1998/11/10 17:12:24  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/15 10:57:45  lasiuk
+ * exponential dist
+ * unit check
  *
  * exponential dist
  * unit check
@@ -64,10 +65,10 @@
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
-HepJamesRandom StTrsDeDx::mEngine;
-RandFlat       StTrsDeDx::mFlatDistribution(mEngine);
-RandPoisson    StTrsDeDx::mPoissonDistribution(mEngine);
 
+#include "StTrsDeDx.hh"
+
+HepJamesRandom  StTrsDeDx::mEngine;
 RandFlat        StTrsDeDx::mFlatDistribution(mEngine);
   doInitialization();
     : mPadLength(pad),  mGas(gas)
@@ -200,6 +201,10 @@ int StTrsDeDx::secondary(double* primaryEnergy) const
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 void StTrsDeDx::electrons(vector<int>& sum, double bg) const
 #else
+    PR(StTrsDeDx::numberOfElectrons);
+#endif
+{
+    PR(sum.size());
     if(sum.size() != StTrsDeDx::numberOfElectrons)
 	sum.resize(StTrsDeDx::numberOfElectrons);
     //PR(sum.size());
