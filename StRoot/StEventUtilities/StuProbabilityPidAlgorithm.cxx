@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.17 2000/10/24 22:36:47 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.18 2000/12/18 23:22:58 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,26 +11,8 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
- * Revision 1.17  2000/10/24 22:36:47  aihong
- * pass if no parameter file read
- *
- * Revision 1.16  2000/10/24 15:19:58  aihong
- * fix bug in fillPIDByLookUpTable()
- *
- * Revision 1.15  2000/08/30 12:55:19  aihong
- * upgrade lowRigPID()
- *
- * Revision 1.14  2000/08/23 15:15:33  aihong
- * *** empty log message ***
- *
- * Revision 1.13  2000/08/23 01:18:13  aihong
- * remove a bug
- *
- * Revision 1.12  2000/08/22 23:50:04  aihong
- * fix lowRigPID
- *
- * Revision 1.11  2000/08/17 13:32:13  aihong
- * remove edge effect
+ * Revision 1.18  2000/12/18 23:22:58  aihong
+ * big revision. eta bin and centrality bin added
  *
  * Revision 1.10  2000/08/16 12:46:07  aihong
  * bug killed
@@ -59,7 +41,6 @@
 #include <fstream.h> //this line should be deleted later
 #include "TFile.h"
 #include "TF1.h"
-#include "TTree.h"
 
 #include "StMessMgr.h"
 #include "StPhysicalHelixD.hh"
@@ -70,35 +51,47 @@
 #include "StEventUtilities/BetheBlochFunction.hh"
 #include "StEventUtilities/MaxllBoltz.hh"
 #include "StEventUtilities/Linear.hh"
-#include "StEventUtilities/StPidAmpConst.hh"
 
-#include "StEventUtilities/StPidAmpChannelInfoOut.h"
-#include "StEventUtilities/StuObjPidReport.h"
-
+#include "StEventUtilities/StuRefMult.hh"
 
 //TMap::FindObject goes wild!! TMap::GetValue works.
 
-
 //-------------------------------
-StuProbabilityPidAlgorithm::StuProbabilityPidAlgorithm(StEvent& ev){
+StuProbabilityPidAlgorithm::StuProbabilityPidAlgorithm(StEvent& ev): 
+               mPionMinusProb(0.),
+               mElectronProb(0.),
+               mKaonMinusProb(0.),
+               mAntiProtonProb(0.),
+               mPionPlusProb(0.),
+               mPositronProb(0.),
+               mKaonPlusProb(0.),
+	       mProtonProb(0.){
 
 
-
-      
       PID[0]=-1;//should be sth.standard say unIdentified.
       PID[1]=-1;     
       PID[2]=-1;
+      PID[3]=-1;
 
-     mProb[0]=0;
-     mProb[1]=0;
-     mProb[2]=0;
-  
+      mProb[0]=0;
+      mProb[1]=0;
+      mProb[2]=0;
+      mProb[3]=0;
 
      table = StParticleTable::instance();
 
      mExtrap=false;
-     mNoise=0.0;
      mEvent=&ev;
+
+	//init funtions
+  myBandBGFcn
+     =new TF1("myBandBGFcn",BetheBlochFunction, 0.,5., 7); 
+
+  Double_t myPars[7]
+        ={ 1.072, 0.3199, 1.66032e-07, 1, 1, 2.71172e-07, 0.0005 };
+
+   myBandBGFcn->SetParameters(&myPars[0]);
+
 }
 //-------------------------------
 StuProbabilityPidAlgorithm::~StuProbabilityPidAlgorithm(){
@@ -132,22 +125,22 @@ StParticleDefinition* StuProbabilityPidAlgorithm::thirdLikelihoodParticle(){
 //-------------------------------
 StParticleDefinition* StuProbabilityPidAlgorithm::getParticle(int i){
 
-   if (i>=0 && i<3){
+   if (i>=0 && i<4){
            return table->findParticleByGeantId(PID[i]);
    }   else { 
 
-	gMessMgr->Error()<<"StuProbabilityPidAlgorithm::getParticle(int i), i must be 0,1,2 only. "<<endm;
+	gMessMgr->Error()<<"StuProbabilityPidAlgorithm::getParticle(int i), i must be 0,1,2,3 only. "<<endm;
 
      return 0;
    }
  }
 //-------------------------------
 double StuProbabilityPidAlgorithm::getProbability(int i){
-   if (i>=0 && i<3){
+   if (i>=0 && i<4){
            return mProb[i];
    }   else { 
 
-	gMessMgr->Error()<<"StuProbabilityPidAlgorithm::getProbability(int i), i must be 0,1,2 only. "<<endm;
+	gMessMgr->Error()<<"StuProbabilityPidAlgorithm::getProbability(int i), i must be 0,1,2,3 only. "<<endm;
 
      return 0.0;
  }
@@ -181,25 +174,41 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
       PID[0]=-1;//should be sth.standard say unIdentified.
       PID[1]=-1;     
       PID[2]=-1;
+      PID[3]=-1;
+
      mProb[0]=0;
      mProb[1]=0;
      mProb[2]=0;
+     mProb[3]=0;
+
      mExtrap=false;
 
-     if (StuProbabilityPidAlgorithm::mHasParameterFile){
+
+     mPionMinusProb=0.;
+     mElectronProb=0.;
+     mKaonMinusProb=0.;
+     mAntiProtonProb=0.;
+     mPionPlusProb=0.;
+     mPositronProb=0.;
+     mKaonPlusProb=0.;
+     mProtonProb=0.;
 
           double rig    =0.0;
           double dedx   =0.0;
 	  double dca    =0.0; //in units of cm.
-          double pt     =0;
           int    nhits  =0;
           int    charge =0;
+          double eta    =0.; 
+          double cent   =0.; // % central
+
 
            StPrimaryVertex* primaryVtx=mEvent->primaryVertex();
     const StPhysicalHelixD& helix=theTrack.geometry()->helix();
            dca=helix.distance(primaryVtx->position());
 
+  cent = getCentrality(uncorrectedNumberOfNegativePrimaries(*mEvent));
 
+   
           const StDedxPidTraits* dedxPidTr;
 
 
@@ -229,162 +238,54 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
 	   }
 
 
-
-
-
        if (dedx!=0.0){//dedx =0.0 means not this track is not in Tpc dector.
 
-
-	 // const StPhysicalHelixD& helix=theTrack.geometry()->helix();
     const StThreeVectorF& p=theTrack.geometry()->momentum();
     rig=double(p.mag()/charge);
-    pt=double(p.perp());
+    eta=fabs(p.pseudoRapidity());
 
-    rig=fabs(rig); 
-    dedx = (dedx>mDedxStart) ? dedx : mDedxStart;
-    rig  = (rig >mRigStart)  ? rig  : mRigStart;
-    rig  = (rig <mRigEnd  )  ? rig  : mRigEnd*0.9999; //*0.9999 to remove edge effect.   
-        //this has to be deal with later. 
-        //if rig go to 5 in TMap, we end up with a big file
-
-    pt   = (pt  >mPtStart)   ? pt   : mPtStart;
-    pt   = (pt  <mPtEnd  )   ? pt   : mPtEnd*0.9999;
-
+    rig   = fabs(rig);
+    dedx  = (dedx>thisDedxStart) ? dedx : thisDedxStart;
+    rig   = (rig >thisPStart)  ? rig  : thisPStart;
+    rig   = (rig <thisPEnd  )  ? rig  : thisPEnd*0.9999;   
+    eta   = (eta  >thisEtaStart)   ? eta   : thisEtaStart;
+    eta   = (eta  <thisEtaEnd  )   ? eta   : thisEtaEnd*0.9999;
+    nhits = (nhits > int(thisNHitsStart)) ? nhits : int(thisNHitsStart);
+    nhits = (nhits < int(thisNHitsEnd) ) ? nhits : int(thisNHitsEnd-1);
 
     //----------------get all info. I want for a track. now do PID
 
-   if (dedx<mDedxEnd){
+    setCalibrations(eta, nhits);
 
 
 
-   if (mDynamicallyCalculatePID)
-      fillPIDByCalculation(charge, dca, nhits, pt, dedx, rig);
-   else fillPIDByLookUpTable(charge, dca, nhits, pt, dedx, rig);
+
+   if (dedx<thisDedxEnd){
+
+   fillPIDByLookUpTable(cent, dca, charge,rig, eta, nhits,dedx);
 
    } else { lowRigPID(rig,dedx,charge);}
-
  
        } else if (dedx==0.0){ fillAsUnknown();}
-     } else { fillAsUnknown();}
 
+     // do not do deuteron or higher
+      myBandBGFcn->SetParameter(3,1);
+      myBandBGFcn->SetParameter(4,1.45);
+      if (dedx>myBandBGFcn->Eval(rig,0,0)) fillAsUnknown();
+
+       fillPIDHypothis();
 
        return table->findParticleByGeantId(PID[0]);
 
        }
 
-//-------------------------------
-double StuProbabilityPidAlgorithm::bandCenter(double rig,TArrayD* bandPars){
-       
- TF1 mBandBetheBlochFcn("mBandBetheBlochFcn",BetheBlochFunction, BandsBegin,BandsEnd, NBandParam);
-       
-    for (int i=0; i<NBandParam; i++)
-       mBandBetheBlochFcn.SetParameter(i,bandPars->At(i));
-    // rig=tossTail(rig);
-       return mBandBetheBlochFcn.Eval(fabs(rig),0,0);
-
-}
-//-------------------------------
-double StuProbabilityPidAlgorithm::bandCenter(double rig, int NChannel, int NType){
-
-    TObjArray* myChannelLevelFuncAry
-      =(TObjArray *)mBetheBlochFuncSet.At(NChannel);
-    TF1*       myBandBGFcn
-      =(TF1 *)myChannelLevelFuncAry->At(NType);
-    
-    // rig=tossTail(rig);
-
-       return myBandBGFcn->Eval(fabs(rig),0,0);
-}
-
-//-------------------------------
-double StuProbabilityPidAlgorithm::resolution(double rig, TArrayD* linrPars,TArrayD* bandPars){
-
-  TF1 mResoFcn("mResoFcn",Linear, BandsBegin,BandsEnd,NResoParam);
-   
-   if (linrPars->GetSize()==NResoParam){//if deuteron not filled, its linrPars.GetSize()=0
-       mResoFcn.SetParameter(0,linrPars->At(0));
-       mResoFcn.SetParameter(1,linrPars->At(1));
-    
-       // rig=tossTail(rig);
-
-
-        if (bandPars->At(4)>0.139 && bandPars->At(4)<0.140 && fabs(rig)<0.15 && fabs(rig)>0.05 )//for pion resolution fit at low rig adjudement.
-         
-        return lowRigReso(0.15,0.05,mResoFcn.Eval(fabs(0.15),0,0),0.7,rig);
-       
-         else   return mResoFcn.Eval(fabs(rig),0,0);
-
-   } else  return 0.0;
- 
-
-       
-}
-//-------------------------------
-double StuProbabilityPidAlgorithm::resolution(double rig, int NChannel, int NType){
-    TObjArray* myChannelLevelFuncAry
-      =(TObjArray *)mLinearFuncSet.At(NChannel);
-    TF1*       myResoFcn
-      =(TF1 *)myChannelLevelFuncAry->At(NType);
-
-//for pion resolution fit at low rig adjudement.
-    if ((NType==1 || NType==3) &&  fabs(rig)<0.15 && fabs(rig)>0.05)
-     return lowRigReso(0.15,0.05,myResoFcn->Eval(fabs(0.15),0,0),0.7,rig);
-    else return myResoFcn->Eval(fabs(rig),0,0);
-}
-
-
-//-------------------------------
-double StuProbabilityPidAlgorithm::peak(double rig, TArrayD* ampPars){
-
-
-   TF1 mMaxllBoltzFcn("mMaxllBoltzFcn",MaxllBoltz, BandsBegin,BandsEnd,NAmpParam);    
-     for (int i=0; i<NAmpParam; i++)
-     mMaxllBoltzFcn.SetParameter(i,ampPars->At(i));
-    
-     //  rig=tossTail(rig);
-
-      return mMaxllBoltzFcn.Eval(fabs(rig),0,0);
-       
-
-}
-//-------------------------------
-double StuProbabilityPidAlgorithm::peak(double rig, int NChannel, int NType){
-    TObjArray* myChannelLevelFuncAry
-      =(TObjArray *)mMaxllFuncSet.At(NChannel);
-    TF1*       myMaxllBoltzFcn
-      =(TF1 *)myChannelLevelFuncAry->At(NType);
-
-    //  rig=tossTail(rig);
-
-  return myMaxllBoltzFcn->Eval(fabs(rig),0,0);
-}
 
 
 
 
 //-------------------------------
-double StuProbabilityPidAlgorithm::tossTail(double rig){
-   
-      double therig=(fabs(rig)>BandsEnd) ? BandsEnd : fabs(rig);
-      
-       therig=(therig==0.0) ? 1.0e-10 : fabs(rig); //just to avoid possible crash.
+void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx,int theCharge){
 
-       return therig;
-}
-
-
-
-//-------------------------------
-void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx, int theCharge){
-
-    TObjArray* myChannelLevelFuncAry
-      =(TObjArray *)mBetheBlochFuncSet.At(0);
-    TF1*       myBandBGFcn
-      =(TF1 *)myChannelLevelFuncAry->At(1);
-    
-
-       double m; 
-       double a;
        double upper;
        double lower;
        double rigidity=fabs(rig);      
@@ -406,6 +307,7 @@ void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx, int theCharge
          mProb[0]=1.0;
          mProb[1]=0.0;
          mProb[2]=0.0;
+         mProb[3]=0.0;
        }
 
            lower = upper;
@@ -422,6 +324,7 @@ void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx, int theCharge
          mProb[0]=1.0;
          mProb[1]=0.0;
          mProb[2]=0.0;
+         mProb[3]=0.0;
        }
 
 
@@ -439,9 +342,10 @@ void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx, int theCharge
          mProb[0]=1.0;
          mProb[1]=0.0;
          mProb[2]=0.0;
+         mProb[3]=0.0;
        } 
 
-                
+       /*                
        lower = upper;
 
        //deuteron
@@ -456,6 +360,7 @@ void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx, int theCharge
          mProb[0]=1.0;
          mProb[1]=0.0;
          mProb[2]=0.0;
+         mProb[3]=0.0;
        }
 
        lower = upper;
@@ -469,242 +374,108 @@ void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx, int theCharge
          mProb[0]=1.0;
          mProb[1]=0.0;
          mProb[2]=0.0;
+         mProb[3]=0.0;
        }
 
+       */
 
 
 
 }  
 
 
-//-------------------------------
-void StuProbabilityPidAlgorithm::fill(double prob, StPidAmpNetOut* netOut){
 
-              if (prob>mProb[0]) {
-         mProb[2]=mProb[1];
-         mProb[1]=mProb[0];
-        mProb[0]=prob;
-    
-         PID[2]=PID[1];
-         PID[1]=PID[0];
-         PID[0]=netOut->GetGeantID();
-	    }
-            else if (prob>mProb[1]){
-          mProb[2]=mProb[1];
-          mProb[1]=prob;
-          PID[2]=PID[1];
-          PID[1] =netOut->GetGeantID();
-	    }
-            else if (prob>mProb[2]){
-            mProb[2]=prob;
-            PID[2]=netOut->GetGeantID();
-	    }
-}  
-//-------------------------------
-void StuProbabilityPidAlgorithm::fill(double* probAry, int* pidAry, double prob,StPidAmpNetOut* netOut){
-
- 
-
-              if (prob>probAry[0]) {
-         probAry[2]=probAry[1];
-         probAry[1]=probAry[0];
-         probAry[0]=prob;
-    
-         pidAry[2]=pidAry[1];
-         pidAry[1]=pidAry[0];
-         pidAry[0]=netOut->GetGeantID();
-	    }
-            else if (prob>probAry[1]){
-          probAry[2]=probAry[1];
-          probAry[1]=prob;
-          pidAry[2]=pidAry[1];
-          pidAry[1] =netOut->GetGeantID();
-	    }
-            else if (prob>probAry[2]){
-            probAry[2]=prob;
-            pidAry[2]=netOut->GetGeantID();
-	    }
-
-
-
-}  
 //-------------------------------
 void StuProbabilityPidAlgorithm::fillAsUnknown(){
 
-  for (int i=0; i<3; i++) {
+  for (int i=0; i<4; i++) {
       PID[i]=-1; mProb[i]=-1;
   }
 }
-
-//-------------------------------
-double StuProbabilityPidAlgorithm::amplitude(double dedx, double rig, TArrayD* bandPars, TArrayD* linrPars, TArrayD* ampPars){
-
-    rig=tossTail(rig);
-
-    double dedxHighLimit=12.0e-6;
-
-    double theMean=StuProbabilityPidAlgorithm::bandCenter(rig,bandPars);
-    double thePeak=StuProbabilityPidAlgorithm::peak(rig,ampPars);
-     
-    if (thePeak<=0) return mNoise;
-
-    double theSigma=theMean*(StuProbabilityPidAlgorithm::resolution(rig,linrPars,bandPars));
-
-
-    if (theSigma<=0.0) return mNoise;
-
-    TF1 mGaussFcn("mGaussFcn", "gaus",0.0,dedxHighLimit);
-
-        mGaussFcn.SetParameter(0,thePeak);
-        mGaussFcn.SetParameter(1,theMean);
-        mGaussFcn.SetParameter(2,theSigma);
-
-
-        double theDedx=(fabs(dedx)>dedxHighLimit) ? dedxHighLimit : fabs(dedx);
-      
-       return mGaussFcn.Eval(fabs(theDedx),0,0)+mNoise;
- 
-
- 
-
-   }
-
-//-------------------------------
-double StuProbabilityPidAlgorithm::amplitude(double dedx, double rig, int NChannel, int NType){
-
-
-    rig=tossTail(rig);
-    double dedxHighLimit=12.0e-6;
-
-    double theMean=StuProbabilityPidAlgorithm::bandCenter(rig,NChannel,NType);
-    double thePeak=StuProbabilityPidAlgorithm::peak(rig,NChannel,NType);
-
-
-   if (thePeak<=0) return mNoise;
-
-   double theSigma=theMean*(StuProbabilityPidAlgorithm::resolution(rig,NChannel,NType));
-   if (theSigma<=0.0) return mNoise;
-
-    TF1 mGaussFcn("mGaussFcn", "gaus",0.0,dedxHighLimit);
-
-        mGaussFcn.SetParameter(0,thePeak);
-        mGaussFcn.SetParameter(1,theMean);
-        mGaussFcn.SetParameter(2,theSigma);
-
- 
-        double theDedx=(fabs(dedx)>dedxHighLimit) ? dedxHighLimit : fabs(dedx);
-
-     
-       return mGaussFcn.Eval(fabs(theDedx),0,0)+mNoise;
-
-}
-
 
 
 //-------------------------------
 void StuProbabilityPidAlgorithm::readParametersFromFile(TString fileName){
 
-      if (mDataSet.GetEntries()>0) mDataSet.Delete();
-      if (mMaxllFuncSet.GetEntries()>0) mMaxllFuncSet.Delete();
-      if (mLinearFuncSet.GetEntries()>0) mLinearFuncSet.Delete();
-      if (mBetheBlochFuncSet.GetEntries()>0) mBetheBlochFuncSet.Delete();
 
-      TFile f(fileName,"READ",fileName);
+
+      TFile f(fileName,"READ");
 
       if (f.IsOpen()){
 
-	StuProbabilityPidAlgorithm::mHasParameterFile=true;
+	StuProbabilityPidAlgorithm::mEAmp     =(TVectorD* )f.Get("eAmp");
+	StuProbabilityPidAlgorithm::mECenter  =(TVectorD* )f.Get("eCenter");
+	StuProbabilityPidAlgorithm::mESigma   =(TVectorD* )f.Get("eSigma");
 
-      StPidAmpNetOut*          netOut;
-      StPidAmpChannelInfoOut*  channelInfoOut;      
+	StuProbabilityPidAlgorithm::mPiAmp    =(TVectorD* )f.Get("piAmp");
+	StuProbabilityPidAlgorithm::mPiCenter =(TVectorD* )f.Get("piCenter");
+	StuProbabilityPidAlgorithm::mPiSigma  =(TVectorD* )f.Get("piSigma");
 
-      TTree* netSetTree=(TTree*)f.Get("netSetTree");
+	StuProbabilityPidAlgorithm::mKAmp     =(TVectorD* )f.Get("kAmp");
+	StuProbabilityPidAlgorithm::mKCenter  =(TVectorD* )f.Get("kCenter");
+	StuProbabilityPidAlgorithm::mKSigma   =(TVectorD* )f.Get("kSigma");
 
-      TBranch* br=netSetTree->GetBranch("netSetBranch");
-      
+	StuProbabilityPidAlgorithm::mPAmp     =(TVectorD* )f.Get("pAmp");
+	StuProbabilityPidAlgorithm::mPCenter  =(TVectorD* )f.Get("pCenter");
+	StuProbabilityPidAlgorithm::mPSigma   =(TVectorD* )f.Get("pSigma");
 
-      int numOfChannels=int(netSetTree->GetEntries());
+	StuProbabilityPidAlgorithm::mEqualyDividableRangeStartSet
+                        =(TVectorD* )f.Get("EqualyDividableRangeStartSet");
+	StuProbabilityPidAlgorithm::mEqualyDividableRangeEndSet
+                        =(TVectorD* )f.Get("EqualyDividableRangeEndSet");
+	StuProbabilityPidAlgorithm::mEqualyDividableRangeNBinsSet
+                        =(TVectorD* )f.Get("EqualyDividableRangeNBinsSet");
+	StuProbabilityPidAlgorithm::mNoEqualyDividableRangeNBinsSet
+                        =(TVectorD* )f.Get("NoEqualyDividableRangeNBinsSet");
 
-      int i,j;
-      int nb=0;
+	StuProbabilityPidAlgorithm::mMultiBinEdgeSet 
+                        =(TVectorD* )f.Get("MultiBinEdgeSet");
+	StuProbabilityPidAlgorithm::mDcaBinEdgeSet   
+                        =(TVectorD* )f.Get("DcaBinEdgeSet");
 
-      for (i=0; i<numOfChannels; i++){
-      TObjArray* theArray=new TObjArray();
-      br->SetAddress(&theArray);
-        nb=netSetTree->GetEvent(i);
-         mDataSet.Add(theArray);
+	StuProbabilityPidAlgorithm::mBBScale
+                   	  =(TVectorD* )f.Get("BBScale");
+	StuProbabilityPidAlgorithm::mBBOffSet
+                	  =(TVectorD* )f.Get("BBOffSet");
 
-
-	//construct functions
-	TObjArray* channelMaxllFuncArray      = new TObjArray();
-	TObjArray* channelLinearFuncArray     = new TObjArray();
-	TObjArray* channelBetheBlochFuncArray = new TObjArray();
-
-    channelInfoOut=(StPidAmpChannelInfoOut *)theArray->At(0);             
-    channelMaxllFuncArray->Add(channelInfoOut);
-    channelLinearFuncArray->Add(channelInfoOut);
-    channelBetheBlochFuncArray->Add(channelInfoOut);
-
-       for (j=1;j<theArray->GetEntries();j++){
-
-	 strstream maxllSt;
-         strstream linearSt;
-         strstream BetheBlochSt;
-
-         maxllSt<<"theMaxllBoltzFunc"<<i<<j;
-         linearSt<<"theLinearFunc"<<i<<j;
-         BetheBlochSt<<"theBetheBlochFunc"<<i<<j;
-
-         netOut=(StPidAmpNetOut *)theArray->At(j);
-
-	 TArrayD* bArry=netOut->GetBandParArray();
-         TArrayD* rArry=netOut->GetResoParArray();
-         TArrayD* aArry=netOut->GetAmpParArray();
+	StuProbabilityPidAlgorithm::thisMultBins
+                        =int((*mNoEqualyDividableRangeNBinsSet)(0));
+	StuProbabilityPidAlgorithm::thisDcaBins
+                        =int((*mNoEqualyDividableRangeNBinsSet)(1));
+	StuProbabilityPidAlgorithm::thisChargeBins
+                        =int((*mNoEqualyDividableRangeNBinsSet)(2));
 
 
- TF1* myBandBetheBlochFcn =
-  new TF1(BetheBlochSt.str(),BetheBlochFunction, BandsBegin,BandsEnd, NBandParam);
- TF1* myResoFcn           =
-  new TF1(linearSt.str(),Linear, BandsBegin,BandsEnd,NResoParam);
- TF1* myMaxllBoltzFcn     = 
-  new TF1(maxllSt.str(),MaxllBoltz, BandsBegin,BandsEnd,NAmpParam);
+	StuProbabilityPidAlgorithm::thisPBins
+	                 =int((*mEqualyDividableRangeNBinsSet)(1));
+	StuProbabilityPidAlgorithm::thisEtaBins
+                         =int((*mEqualyDividableRangeNBinsSet)(2));
+	StuProbabilityPidAlgorithm::thisNHitsBins
+                         =int((*mEqualyDividableRangeNBinsSet)(3));
 
- int hh=0;
 
-   for (hh=0; hh<NBandParam; hh++)
-       myBandBetheBlochFcn->SetParameter(hh,bArry->At(hh));
-    
-   for (hh=0; hh<NAmpParam; hh++)
-       myMaxllBoltzFcn->SetParameter(hh,aArry->At(hh));
+	StuProbabilityPidAlgorithm::thisDedxStart
+	                 =(*mEqualyDividableRangeStartSet)(0);
+	StuProbabilityPidAlgorithm::thisPStart
+                         =(*mEqualyDividableRangeStartSet)(1);
+	StuProbabilityPidAlgorithm::thisEtaStart
+                         =(*mEqualyDividableRangeStartSet)(2);
+	StuProbabilityPidAlgorithm::thisNHitsStart
+                         =(*mEqualyDividableRangeStartSet)(3);
 
-   if (rArry->GetSize()==NResoParam) //if deuteron not filled, its linrPars.GetSize()=0
-   for (hh=0; hh<NResoParam; hh++)
-       myResoFcn->SetParameter(hh,rArry->At(hh));
+	StuProbabilityPidAlgorithm::thisDedxEnd
+                    	  =(*mEqualyDividableRangeEndSet)(0);
+	StuProbabilityPidAlgorithm::thisPEnd
+                	  =(*mEqualyDividableRangeEndSet)(1);
+	StuProbabilityPidAlgorithm::thisEtaEnd
+                	  =(*mEqualyDividableRangeEndSet)(2);
+	StuProbabilityPidAlgorithm::thisNHitsEnd
+                	  =(*mEqualyDividableRangeEndSet)(3);
 
-   channelBetheBlochFuncArray->Add(myBandBetheBlochFcn);
-   channelMaxllFuncArray->Add(myMaxllBoltzFcn);
-   channelLinearFuncArray->Add(myResoFcn);
-       }
 
-       mBetheBlochFuncSet.Add(channelBetheBlochFuncArray);
-       mMaxllFuncSet.Add(channelMaxllFuncArray);
-       mLinearFuncSet.Add(channelLinearFuncArray);
 
-      }
 
-      cout<<"reading PID tables, this takes a while..."<<endl;
-       
-     StuProbabilityPidAlgorithm::mTheReportTable = 
-        (TObjArray *)f.Get("mProbabilityTable");
 
-   
-          StuProbabilityPidAlgorithm::mTheRangeSettingVector = 
-        (TVectorD* )f.Get("mTheRangeSettingVector");
-
-       if (mTheRangeSettingVector)
-          setRanges4Table(mTheRangeSettingVector);
-
-       //  setBins4Table(); 
 
       } else if (!f.IsOpen()) {
    
@@ -752,741 +523,306 @@ void StuProbabilityPidAlgorithm::refreshParameters(St_Table* theTable){
 }
 
 */
-//-------------------------------
-void StuProbabilityPidAlgorithm::printParameters(){
-  //print parameters stored in mDataSet.
- 
-
-     TObjArray*              channelLevel;
-     StPidAmpNetOut*         theNetOut;
-     StPidAmpChannelInfoOut* infoOut;
- 
-     for (int i=0; i<mDataSet.GetEntries(); i++){
-
-        channelLevel=(TObjArray *)mDataSet.At(i);
-        infoOut=(StPidAmpChannelInfoOut *)channelLevel->At(0);
- 
-        infoOut->PrintContent();
-
-        for(int j=1; j<channelLevel->GetEntries();j++){
-        theNetOut = (StPidAmpNetOut *)channelLevel->At(j);
- 
-        theNetOut->PrintContent();
-	}
-     }
-}
-  
-
-
-//-------------------------------
-bool StuProbabilityPidAlgorithm::tagExtrap(double rig, double dedx,TObjArray* channelLevel){
-   bool myTag=false;
-
- //StPidAmpNetOut*   electronNetOut=(StPidAmpNetOut *)channelLevel->At(1);
-   //   StPidAmpNetOut*       pionMinusNetOut=(StPidAmpNetOut *)channelLevel->At(2);
-   //  StPidAmpNetOut*       kaonMinusNetOut=(StPidAmpNetOut *)channelLevel->At(3);
- //StPidAmpNetOut*      antiprotonNetOut=(StPidAmpNetOut *)channelLevel->At(4);
- //StPidAmpNetOut*   positronNetOut=(StPidAmpNetOut *)channelLevel->At(5);
-   //   StPidAmpNetOut*        pionPlusNetOut=(StPidAmpNetOut *)channelLevel->At(6);
-    StPidAmpNetOut*        kaonPlusNetOut=(StPidAmpNetOut *)channelLevel->At(7);
-   // StPidAmpNetOut*          protonNetOut=(StPidAmpNetOut *)channelLevel->At(8);
-
-   int nn=-1;    
-   //   int mm=0;
-
-   int channel4BG=0;//here I always the BetheBloch function from the 1st chanel
-   //not safe from the code view. but here run speed is most concerned.
-   //int piMinusIdx=2;
-   int piPlusIdx=6;
-   int kaonPlusIdx=7;
-   //int kaonMinusIdx=3;
-   //int protonIdx=8;
-   float halfHeight=(NPaths-2.0)*PathHeight/2.0;
-
-   //     if ((rig>(kaonPlusNetOut->GetAmpParArray())->At(3)) && ( (dedx<(bandCenter(rig,(pionPlusNetOut->GetBandParArray()))+(NPaths-2.0)*PathHeight/2.0-nn*PathHeight)) && (dedx>(bandCenter(rig,(kaonPlusNetOut->GetBandParArray()))-(NPaths-2.0)*PathHeight/2.0+nn*PathHeight))) ) mExtrap=true;
-     if ((fabs(rig)>(kaonPlusNetOut->GetAmpParArray())->At(3))) {
-   if( ( (dedx<(bandCenter(rig,channel4BG,piPlusIdx)+halfHeight-nn*PathHeight)) && (dedx>(bandCenter(rig,channel4BG,kaonPlusIdx)-halfHeight+nn*PathHeight))) ) myTag=true;
-     }
-
-
-     //    if ((rig<(kaonMinusNetOut->GetAmpParArray())->At(3)) && ( (dedx<(bandCenter(rig,(pionMinusNetOut->GetBandParArray()))+(NPaths-2.0)*PathHeight/2.0-nn*PathHeight))  && (dedx>(bandCenter(rig,(kaonMinusNetOut->GetBandParArray()))-(NPaths-2.0)*PathHeight/2.0+nn*PathHeight)) ) ) mExtrap=true;
-
-     //  if ((rig<(kaonMinusNetOut->GetAmpParArray())->At(3)) && ( (dedx<(bandCenter(rig,channel4BG,piMinusIdx)+(NPaths-2.0)*PathHeight/2.0-nn*PathHeight))  && (dedx>(bandCenter(rig,channel4BG,kaonMinusIdx)-(NPaths-2.0)*PathHeight/2.0+nn*PathHeight)) ) ) mExtrap=true;
-
-
- 
-     // if ((rig>(protonNetOut->GetAmpParArray())->At(3)) && (dedx > (bandCenter(rig,(protonNetOut->GetBandParArray()))+(NPaths-2.0)*PathHeight/2.0-(mm+3)*PathHeight))) myTag=true;
-     //if ((rig>(protonNetOut->GetAmpParArray())->At(3)) && (dedx > (bandCenter(rig,channel4BG,protonIdx)+(NPaths-2.0)*PathHeight/2.0-(mm+3)*PathHeight))) myTag=true;
-
-     //  if ((rig>(protonNetOut->GetAmpParArray())->At(3)) && (dedx > (bandCenter(rig,(protonNetOut->GetBandParArray()))+(NPaths-2.0)*PathHeight/2.0-(mm+3)*PathHeight))) mExtrap=true;
-	 // if ((rig>(protonNetOut->GetAmpParArray())->At(3)) && (dedx > (bandCenter(rig,channel4BG,protonIdx)+(NPaths-2.0)*PathHeight/2.0-(mm+3)*PathHeight))) mExtrap=true;
-
-
-
-   return myTag;
-}
-
-//-------------------------------
-void StuProbabilityPidAlgorithm::readAType(StParticleDefinition* def, Float_t* mean, Float_t* amp,Float_t* sig,Float_t cal,TObjArray*  theChannel){
-  int i=0;
-
-  TArrayD BandParArray;
-  TArrayD AmpParArray;
-  TArrayD ResoParArray;
-
-  BandParArray.Set(NBandParam);
-   AmpParArray.Set(NAmpParam);
-  ResoParArray.Set(NResoParam);
-
- 
-  for (i=0; i<NFitBandParam;i++)
-  BandParArray.AddAt(mean[i],i);
-
-  BandParArray.AddAt(def->charge()/eplus, NFitBandParam);
-  BandParArray.AddAt(def->mass(),NFitBandParam+1);
-  BandParArray.AddAt(CalibFactor,NFitBandParam+2);
-  BandParArray.AddAt(Saturation,NFitBandParam+3);
-
-
-
-  for (i=0; i<NAmpParam; i++)
-  AmpParArray.AddAt(amp[i],i);
-
-  for (i=0; i<NResoParam; i++)
-  ResoParArray.AddAt(sig[i],i);
-
-
-
-  StPidAmpNetOut*  theNetOut=new StPidAmpNetOut(def->name().c_str(), def->name().c_str(), 3, BandParArray,AmpParArray,ResoParArray);
-  theNetOut->SetCalibConst(cal);
-
-  theChannel->Add(theNetOut);
-
-
-}
 
 
 
 //-------------------------------
-TObjArray StuProbabilityPidAlgorithm::mDataSet           = TObjArray();
-TObjArray StuProbabilityPidAlgorithm::mMaxllFuncSet      = TObjArray();
-TObjArray StuProbabilityPidAlgorithm::mLinearFuncSet     = TObjArray();
-TObjArray StuProbabilityPidAlgorithm::mBetheBlochFuncSet = TObjArray();
+int StuProbabilityPidAlgorithm::thisMultBins=0;
+int StuProbabilityPidAlgorithm::thisDcaBins=0;
+int StuProbabilityPidAlgorithm::thisChargeBins=0;
+
+int StuProbabilityPidAlgorithm::thisPBins=0;
+int StuProbabilityPidAlgorithm::thisEtaBins=0;
+int StuProbabilityPidAlgorithm::thisNHitsBins=0;
+
+double StuProbabilityPidAlgorithm::thisDedxStart=0.;
+double StuProbabilityPidAlgorithm::thisDedxEnd=0;
+double StuProbabilityPidAlgorithm::thisPStart=0;
+double StuProbabilityPidAlgorithm::thisPEnd=0;
+double StuProbabilityPidAlgorithm::thisEtaStart=0;
+double StuProbabilityPidAlgorithm::thisEtaEnd=0;
+double StuProbabilityPidAlgorithm::thisNHitsStart=0;
+double StuProbabilityPidAlgorithm::thisNHitsEnd=0;
+
 StDedxMethod  StuProbabilityPidAlgorithm::mDedxMethod=kTruncatedMeanId;
-TObjArray* StuProbabilityPidAlgorithm::mTheReportTable = new TObjArray();
-TVectorD* StuProbabilityPidAlgorithm::mTheRangeSettingVector = new TVectorD();
 
- int  StuProbabilityPidAlgorithm::mNDedxBins=200;
- int  StuProbabilityPidAlgorithm::mNRigBins=200;
- int  StuProbabilityPidAlgorithm::mNNhitsBins=4;
- int  StuProbabilityPidAlgorithm::mNPtBins=1;
- int  StuProbabilityPidAlgorithm::mNDcaBins=2;
- int  StuProbabilityPidAlgorithm::mNChargeBins=2;
+TVectorD* StuProbabilityPidAlgorithm::mEAmp = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mECenter = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mESigma = new TVectorD();
 
-bool StuProbabilityPidAlgorithm::mDynamicallyCalculatePID=false;
-bool StuProbabilityPidAlgorithm::mHasParameterFile=false;
+TVectorD* StuProbabilityPidAlgorithm::mPiAmp = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mPiCenter = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mPiSigma = new TVectorD();
 
-double   StuProbabilityPidAlgorithm::mDedxBinWidth=0.4e-05/200.;
-double   StuProbabilityPidAlgorithm::mRigBinWidth=2.0/200; //do not let NBins exceed 999.
-double   StuProbabilityPidAlgorithm::mPtBinWidth=5.0/1.; //not implemented yet.
-double   StuProbabilityPidAlgorithm::mNHitsBinWidth=10.;
+TVectorD* StuProbabilityPidAlgorithm::mKAmp = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mKCenter = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mKSigma = new TVectorD();
 
-double   StuProbabilityPidAlgorithm::mDedxStart=1e-12;
-double   StuProbabilityPidAlgorithm::mDedxEnd=0.4e-05;
-double   StuProbabilityPidAlgorithm::mRigStart=1e-12;
-double   StuProbabilityPidAlgorithm::mRigEnd=2.0;
-double   StuProbabilityPidAlgorithm::mNHitsStart=1;
-double   StuProbabilityPidAlgorithm::mNHitsEnd=40;
-double   StuProbabilityPidAlgorithm::mPtStart=1e-12;
-double   StuProbabilityPidAlgorithm::mPtEnd=5.;
-double   StuProbabilityPidAlgorithm::mDcaCutPoint=2; //just 2 bins for dca
-double   StuProbabilityPidAlgorithm::mNoise=0.0; 
-bool     StuProbabilityPidAlgorithm::mTurnOnNoise=true;
+TVectorD* StuProbabilityPidAlgorithm::mPAmp = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mPCenter = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mPSigma = new TVectorD();
+
+
+TVectorD* StuProbabilityPidAlgorithm::mEqualyDividableRangeStartSet = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mEqualyDividableRangeEndSet = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mEqualyDividableRangeNBinsSet = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mNoEqualyDividableRangeNBinsSet = new TVectorD();
+
+TVectorD* StuProbabilityPidAlgorithm::mMultiBinEdgeSet = new TVectorD();
+TVectorD* StuProbabilityPidAlgorithm::mDcaBinEdgeSet = new TVectorD();  
+
+TVectorD* StuProbabilityPidAlgorithm::mBBScale = new TVectorD(); 
+TVectorD* StuProbabilityPidAlgorithm::mBBOffSet = new TVectorD();
+
 
 
 
 //-------------------------------
 //St_Table* StuProbabilityPidAlgorithm::mDataTable=0;
 
-//-------------------------------
-double StuProbabilityPidAlgorithm::lowRigReso(double xa, double xb, double ya, double yb,double theX){
 
-    return yb-(yb-ya)*sqrt(1.0-(fabs(theX)-xa)*(fabs(theX)-xa)/((xa-xb)*(xa-xb))) ;
-
-}
 
 
 //-------------------------------
-void StuProbabilityPidAlgorithm::fillReportObjArray(TString fileName){
-
-  //set idx schema for table
-
-int    thisNDedxBins=200;
-int    thisNRigBins=200;
-int    thisNNhitsBins=4;
-int    thisNPtBins=1;
-int    thisNDcaBins=2;
-int    thisNChargeBins=2;
+void StuProbabilityPidAlgorithm::fillPIDByLookUpTable(double myCentrality, double myDca, int myCharge, double myRig, double myEta, int myNhits, double myDedx)
+{
 
 
-
-   double        thisDedxStart=1e-12;
-   double        thisDedxEnd=0.4e-05;
-   double        thisRigStart=1e-12;
-   double        thisRigEnd=2.0;
-   double        thisNHitsStart=0;
-   double        thisNHitsEnd=40;
-   double        thisPtStart=1e-12;
-   double        thisPtEnd=5.;
-   double        thisDcaCutPoint=2; //just 2 bins for dca
-   double        thisNoise=0.0; 
-
-   double    thisDedxBinWidth=
-      (thisDedxEnd-thisDedxStart)/(thisNDedxBins);
+  //assume bound has been checked before they enter this func.
+  int theMultBin=getCentralityBin(myCentrality);
+  int theDcaBin = (myDca>(*mDcaBinEdgeSet)(1)) ? 1 : 0;
+  int theChargeBin=(myCharge>0) ? 1 : 0;
+  int thePBin=int(thisPBins*myRig/(thisPEnd-thisPStart));
+  int theEtaBin=int(thisEtaBins*myEta/(thisEtaEnd-thisEtaStart));
+  int theNHitsBin=int(thisNHitsBins*float(myNhits)/(thisNHitsEnd-thisNHitsStart));
 
 
-
- double      thisRigBinWidth=
-(thisRigEnd-thisRigStart)/(thisNRigBins); //do not let NBins exceed 999.
- double      thisPtBinWidth=
-(thisPtEnd-thisPtStart)/(thisNPtBins); //not implemented yet.
- double      thisNHitsBinWidth=(thisNHitsEnd-thisNHitsStart)/(thisNNhitsBins);
-
-
-
-     TFile f(fileName,"UPDATE",fileName);
-
-      if (f.IsOpen()){
-	cout<<" opened "<<endl;
-
-	TObjArray* myReportTable = new TObjArray(645000);
-
-
-
-   double  total  =0.0;
-
-      int dedxIdx=0;
-      int rigIdx=0;
-      int nhitsIdx=0;
-      int ptIdx=0;
-      int zIdx=0;
-      int dcaIdx=0;
-
-   int     objAryIdx=0; //index of the array
-
-   int     i=0;
-   int     j=0;
-   int     jj=0;
-
-
-   double  theDedx=0;
-   double  theRig=0;     
-   int     theNHits=0;
-   double  thePt=0;
-   int     theCharge=0;
-   double  theDca=0;
-
-   //charge dca nhits pt dedx p
-  
-   for (zIdx=0; zIdx<thisNChargeBins; zIdx++){
-
-     for (dcaIdx=0; dcaIdx<thisNDcaBins;dcaIdx++){
-
-       for (nhitsIdx=0; nhitsIdx<thisNNhitsBins;nhitsIdx++){
- 
-	 for (ptIdx=0; ptIdx<thisNPtBins;ptIdx++){
-
-	   for (dedxIdx=0; dedxIdx<thisNDedxBins;dedxIdx++){
-
-	     for (rigIdx=0; rigIdx<thisNRigBins; rigIdx++){
-
-	       if (zIdx==0) theCharge=-1;
-               else if (zIdx==1) theCharge=1;
-         
-               if (dcaIdx==0) theDca= thisDcaCutPoint*0.7; //force a primary trk.
-               else if (dcaIdx==1) theDca=thisDcaCutPoint*1.3;
-
-
-     StuObjPidReport* tempReport = new StuObjPidReport();
-                  
-	       theNHits=int((nhitsIdx+0.5)*thisNHitsBinWidth);
-               thePt=(ptIdx+0.5)*thisPtBinWidth;
-               theDedx=(dedxIdx+0.5)*thisDedxBinWidth;
-               theRig=(rigIdx+0.5)*thisRigBinWidth;
-
-
-     total=0.0;
-
-      TObjArray*               channelLevel;
-      StPidAmpNetOut*          netOut;
-      StPidAmpChannelInfoOut*  channelInfoOut;
-
-    for (i=0;i<mDataSet.GetEntries(); i++){
-
-     channelLevel=(TObjArray *)mDataSet.At(i);
-     channelInfoOut=(StPidAmpChannelInfoOut *)channelLevel->At(0);
- 
-     if (channelInfoOut->IsInChannel(theNHits, thePt,theDca )) {//pick up the right channel
-
-       if (mTurnOnNoise){
-       StPidAmpNetOut*  protonNetOut=(StPidAmpNetOut *)channelLevel->At(8);
-       mNoise=((protonNetOut->GetAmpParArray())->At(0))*0.002;
-       }//turn on noise.
-      
-      double amplitudeArray[NParticleTypes]; 
-      //the size should be channelLevel->GetEntries()
-      //but we need a integer constant to declare an array.
-
-       for (j=1;j<channelLevel->GetEntries();j++){
- 
-         netOut=(StPidAmpNetOut *)channelLevel->At(j);
-      
-
-         jj=j-1; //index for amplitudeArray
-
-	 //TArrayD* bArry=netOut->GetBandParArray();
-         //TArrayD* rArry=netOut->GetResoParArray();
-         //TArrayD* aArry=netOut->GetAmpParArray();
-
-     if (jj<NParticleTypes) 
-       //  amplitudeArray[jj]= amplitude(dedx,rig, bArry, rArry,aArry);
-       amplitudeArray[jj]= StuProbabilityPidAlgorithm::amplitude(theDedx,theRig, i,j);
-
-     if (theCharge*((netOut->GetBandParArray())->At(3))>0.0)//the same sign of z
-	total +=amplitudeArray[jj];   
-     
-       }
-
-      for (j=1;j<channelLevel->GetEntries();j++){//do not use j=0. j=0 is for channelInfoOut.
-          jj=j-1;
-          
-         netOut=(StPidAmpNetOut *)channelLevel->At(j);  
- 
-	 if (theCharge*((netOut->GetBandParArray())->At(3))>0.0) {
-
-
-            double probability=amplitudeArray[jj]/total;
-            
-   fill(tempReport->GetProbArray(), tempReport->GetPIDArray(), probability, netOut);
-  
-
-	 }
-       }
-
-           tempReport->SetExtrap(tagExtrap(theRig, theDedx,channelLevel));
- 
-
-	   //following block for debugging
-	   /*
-      tempReport->SetCharge(theCharge);
-      tempReport->SetDca(theDca);
-      tempReport->SetNHits(theNHits);
-      tempReport->SetPt(thePt);
-      tempReport->SetDedx(theDedx);
-      tempReport->SetRig(theRig);
-	   */
-
-
-
-     }//is inchanel
-    }
-
-
-    myReportTable->AddAt(tempReport,objAryIdx); objAryIdx++;
-    cout<<objAryIdx<<endl;
+    int totalEntry
+      = thisMultBins*thisDcaBins*thisChargeBins*thisPBins*thisEtaBins*thisNHitsBins;
     
+    int positionPointer=0;
+    
+    totalEntry=totalEntry/thisMultBins;
+    positionPointer=positionPointer+totalEntry*theMultBin;
+    
+    totalEntry=totalEntry/thisDcaBins;
+    positionPointer=positionPointer+totalEntry*theDcaBin;
+    
+    totalEntry=totalEntry/thisChargeBins;
+    positionPointer=positionPointer+totalEntry*theChargeBin;
+    
+    totalEntry=totalEntry/thisPBins;
+    positionPointer=positionPointer+totalEntry*thePBin;
+    
+    totalEntry=totalEntry/thisEtaBins;
+    positionPointer=positionPointer+totalEntry*theEtaBin;
+    
+    totalEntry=totalEntry/thisNHitsBins;
+    positionPointer=positionPointer+totalEntry*theNHitsBin;
 
-	     }
 
-	   }
-	 }
-       }//for (nhitsIdx=0; nhitsIdx<mNNhitsBins;nhitsIdx++)
+
+    //now calculate prob.
+    TF1 eGaus("eGaus","gaus",thisDedxStart,thisDedxStart);
+    TF1 piGaus("piGaus","gaus",thisDedxStart,thisDedxStart);
+    TF1 kGaus("kGaus","gaus",thisDedxStart,thisDedxStart);
+    TF1 pGaus("pGaus","gaus",thisDedxStart,thisDedxStart);
+
+    
+    eGaus.SetParameter(0, (*mEAmp)(positionPointer));
+    eGaus.SetParameter(1, (*mECenter)(positionPointer));
+    eGaus.SetParameter(2, (*mESigma)(positionPointer));
+
+    piGaus.SetParameter(0, (*mPiAmp)(positionPointer));
+    piGaus.SetParameter(1, (*mPiCenter)(positionPointer));
+    piGaus.SetParameter(2, (*mPiSigma)(positionPointer));
+
+    kGaus.SetParameter(0, (*mKAmp)(positionPointer));
+    kGaus.SetParameter(1, (*mKCenter)(positionPointer));
+    kGaus.SetParameter(2, (*mKSigma)(positionPointer));
+
+    pGaus.SetParameter(0, (*mPAmp)(positionPointer));
+    pGaus.SetParameter(1, (*mPCenter)(positionPointer));
+    pGaus.SetParameter(2, (*mPSigma)(positionPointer));
+
+
+    double eContribution=0;
+   if (mEAmp && mECenter && mESigma) eContribution = eGaus.Eval(myDedx,0.,0.);
+
+    double piContribution=0;
+   if (mPiAmp && mPiCenter && mPiSigma) piContribution = piGaus.Eval(myDedx,0.,0.);
+
+    double kContribution=0;
+   if (mKAmp && mKCenter && mKSigma) kContribution = kGaus.Eval(myDedx,0.,0.);
+
+    double pContribution=0;
+   if (mPAmp && mPCenter && mPSigma) pContribution = pGaus.Eval(myDedx,0.,0.);
+
+
+   double total = eContribution+piContribution+kContribution+pContribution;
+
+   double eProb=0; double piProb=0; double kProb=0; double pProb=0;
+
+   if (total>0) {
+     eProb=eContribution/total;
+     piProb=piContribution/total;
+     kProb=kContribution/total;
+     pProb=pContribution/total;
+   }
+
+
+	    fill(eProb,  int((myCharge>0) ? 2 : 3   ));
+	    fill(piProb, int((myCharge>0) ? 8 : 9   ));
+	    fill(kProb,  int((myCharge>0) ? 11 : 12 ));
+	    fill(pProb,  int((myCharge>0) ? 14 : 15 ));
+
+	    int nn=-1;
+            float PathHeight=1.0e-7;
+            float halfHeight=(11-2.0)*PathHeight/2.0;
+
+     if (fabs(myRig) > 0.3) {
+      if ((myDedx<(((*mECenter)(positionPointer))+halfHeight-nn*PathHeight)) 
+ && (myDedx > ( ((*mECenter)(positionPointer))-halfHeight+nn*PathHeight) )) 
+        mExtrap=true;
      }
-   }//for (zIdx=0; zIdx<mNChargeBins; zIdx++)
-
-
-
-   myReportTable->Write("mProbabilityTable",TObject::kOverwrite | TObject::kSingleKey);
-
-
-
-
-   TVectorD* rangeSet = new TVectorD(40);
-
-   (*rangeSet)(0)=thisDedxStart;
-   (*rangeSet)(1)=thisDedxEnd;
-   (*rangeSet)(2)=thisRigStart;
-   (*rangeSet)(3)=thisRigEnd;
-   (*rangeSet)(4)=thisNHitsStart;
-   (*rangeSet)(5)=thisNHitsEnd;
-   (*rangeSet)(6)=thisPtStart;
-   (*rangeSet)(7)=thisPtEnd;
-   (*rangeSet)(8)=thisDcaCutPoint;
-   (*rangeSet)(9)=thisNoise;
-   (*rangeSet)(10)=thisDedxBinWidth;
-   (*rangeSet)(11)=thisRigBinWidth;
-   (*rangeSet)(12)=thisPtBinWidth;
-   (*rangeSet)(13)=thisNHitsBinWidth;
-   (*rangeSet)(14)=thisNDedxBins;
-   (*rangeSet)(15)=thisNRigBins;
-   (*rangeSet)(16)=thisNNhitsBins;
-   (*rangeSet)(17)=thisNPtBins;
-   (*rangeSet)(18)=thisNDcaBins;
-   (*rangeSet)(19)=thisNChargeBins;
-
-   rangeSet->Write("mTheRangeSettingVector",TObject::kOverwrite);
-
-
- f.Close();    
-
-      }
-
-
-
-}
-
-//-------------------------------
-void StuProbabilityPidAlgorithm::setBins4Table(){
-
-
-    StuProbabilityPidAlgorithm::mNDedxBins=200;
-    StuProbabilityPidAlgorithm::mNRigBins=200;
-    StuProbabilityPidAlgorithm::mNNhitsBins=4;
-    StuProbabilityPidAlgorithm::mNPtBins=1;
-    StuProbabilityPidAlgorithm::mNDcaBins=2;
-    StuProbabilityPidAlgorithm::mNChargeBins=2;
-
-
-
-    StuProbabilityPidAlgorithm::mDedxStart=1e-12;
-    StuProbabilityPidAlgorithm::mDedxEnd=0.4e-05;
-    StuProbabilityPidAlgorithm::mRigStart=1e-12;
-    StuProbabilityPidAlgorithm::mRigEnd=2.0;
-    StuProbabilityPidAlgorithm::mNHitsStart=0;
-    StuProbabilityPidAlgorithm::mNHitsEnd=40;
-    StuProbabilityPidAlgorithm::mPtStart=1e-12;
-    StuProbabilityPidAlgorithm::mPtEnd=5.;
-    StuProbabilityPidAlgorithm::mDcaCutPoint=2; //just 2 bins for dca
-    StuProbabilityPidAlgorithm::mNoise=0.0; 
-    StuProbabilityPidAlgorithm::mTurnOnNoise=true;
-
-    StuProbabilityPidAlgorithm::mDedxBinWidth=
-      (StuProbabilityPidAlgorithm::mDedxEnd-StuProbabilityPidAlgorithm::mDedxStart)/(StuProbabilityPidAlgorithm::mNDedxBins);
-    StuProbabilityPidAlgorithm::mRigBinWidth=
-(StuProbabilityPidAlgorithm::mRigEnd-StuProbabilityPidAlgorithm::mRigStart)/(StuProbabilityPidAlgorithm::mNRigBins); //do not let NBins exceed 999.
-    StuProbabilityPidAlgorithm::mPtBinWidth=
-(StuProbabilityPidAlgorithm::mPtEnd-StuProbabilityPidAlgorithm::mPtStart)/(StuProbabilityPidAlgorithm::mNPtBins); //not implemented yet.
-    StuProbabilityPidAlgorithm::mNHitsBinWidth=(StuProbabilityPidAlgorithm::mNHitsEnd-StuProbabilityPidAlgorithm::mNHitsStart)/(StuProbabilityPidAlgorithm::mNNhitsBins);
-
-
-
 }
 //-------------------------------
-void StuProbabilityPidAlgorithm::fillPIDByLookUpTable(int myCharge, double myDca, int myNhits, double myPt, double myDedx, double myRig){
-     int totalEntry
-      =mNChargeBins*mNDcaBins*mNNhitsBins*mNPtBins*mNDedxBins*mNRigBins;
-
-     int positionPointer=0;     
-     totalEntry=totalEntry/2;
-
-     if (myCharge>0) positionPointer=totalEntry;
-     //     else positionPointer=0;
-
-     totalEntry=totalEntry/2;
-     if (myDca>mDcaCutPoint) positionPointer=positionPointer+totalEntry;
-
-
-     int myNhitsBin = int((myNhits-mNHitsStart)/mNHitsBinWidth);
-     totalEntry=totalEntry/mNNhitsBins;
-     positionPointer=positionPointer+totalEntry*myNhitsBin;
-
-
-     int myPtBin    =int((myPt-mPtStart)/mPtBinWidth);
-     totalEntry=totalEntry/mNPtBins;
-     positionPointer=positionPointer+totalEntry*myPtBin;
-
-
-     int myDedxBin=int((myDedx-mDedxStart)/mDedxBinWidth);
-     totalEntry=totalEntry/mNDedxBins;
-     positionPointer=positionPointer+totalEntry*myDedxBin;
-
-     int myRigBin=int((myRig-mRigStart)/mRigBinWidth);
-     totalEntry=totalEntry/mNRigBins;//should =1 here
-     positionPointer=positionPointer+totalEntry*myRigBin;
-
-
-
-     if (positionPointer<mTheReportTable->GetEntries()) {
-     StuObjPidReport* myReport=(StuObjPidReport *)(mTheReportTable->At(positionPointer));
-    
-
-	    for (int jk=0; jk<3; jk++){
-            PID[jk]=myReport->GetPID(jk);
-            mProb[jk]=myReport->GetProb(jk);
-	    }
-
-            mExtrap=myReport->GetExtrapTag();
-     }          
-
-}
-
-//-------------------------------
-void StuProbabilityPidAlgorithm::setRanges4Table(TVectorD* theSetting){
-
-    StuProbabilityPidAlgorithm::mNDedxBins  =int((*theSetting)(14));
-    StuProbabilityPidAlgorithm::mNRigBins   =int((*theSetting)(15));
-    StuProbabilityPidAlgorithm::mNNhitsBins =int((*theSetting)(16));
-    StuProbabilityPidAlgorithm::mNPtBins    =int((*theSetting)(17));
-    StuProbabilityPidAlgorithm::mNDcaBins   =int((*theSetting)(18));
-    StuProbabilityPidAlgorithm::mNChargeBins=int((*theSetting)(19));
-
-
-
-    StuProbabilityPidAlgorithm::mDedxStart  =(*theSetting)(0);
-    StuProbabilityPidAlgorithm::mDedxEnd    =(*theSetting)(1);
-    StuProbabilityPidAlgorithm::mRigStart   =(*theSetting)(2);
-    StuProbabilityPidAlgorithm::mRigEnd     =(*theSetting)(3);
-    StuProbabilityPidAlgorithm::mNHitsStart =(*theSetting)(4);
-    StuProbabilityPidAlgorithm::mNHitsEnd   =(*theSetting)(5);
-    StuProbabilityPidAlgorithm::mPtStart    =(*theSetting)(6);
-    StuProbabilityPidAlgorithm::mPtEnd      =(*theSetting)(7);
-    StuProbabilityPidAlgorithm::mDcaCutPoint=(*theSetting)(8); //just 2 bins for dca
-    StuProbabilityPidAlgorithm::mNoise      =(*theSetting)(9); 
-    StuProbabilityPidAlgorithm::mTurnOnNoise=true;
-
-    StuProbabilityPidAlgorithm::mDedxBinWidth=
-      (StuProbabilityPidAlgorithm::mDedxEnd-StuProbabilityPidAlgorithm::mDedxStart)/(StuProbabilityPidAlgorithm::mNDedxBins);
-    StuProbabilityPidAlgorithm::mRigBinWidth=
-(StuProbabilityPidAlgorithm::mRigEnd-StuProbabilityPidAlgorithm::mRigStart)/(StuProbabilityPidAlgorithm::mNRigBins); //do not let NBins exceed 999.
-    StuProbabilityPidAlgorithm::mPtBinWidth=
-(StuProbabilityPidAlgorithm::mPtEnd-StuProbabilityPidAlgorithm::mPtStart)/(StuProbabilityPidAlgorithm::mNPtBins); //not implemented yet.
-    StuProbabilityPidAlgorithm::mNHitsBinWidth=(StuProbabilityPidAlgorithm::mNHitsEnd-StuProbabilityPidAlgorithm::mNHitsStart)/(StuProbabilityPidAlgorithm::mNNhitsBins);
-
-}
-    
-//-------------------------------
-void StuProbabilityPidAlgorithm::fillPIDByCalculation(int myCharge, double myDca, int myNhits, double myPt, double myDedx, double myRig){
- 
-   double   total=0.0;
-   int     i=0;
-   int     j=0;
-   int     jj=0;
-
-      TObjArray*               channelLevel;
-      StPidAmpNetOut*          netOut;
-      StPidAmpChannelInfoOut*  channelInfoOut;
-
-    for (i=0;i<mDataSet.GetEntries(); i++){
-
-     channelLevel=(TObjArray *)mDataSet.At(i);
-     channelInfoOut=(StPidAmpChannelInfoOut *)channelLevel->At(0);
- 
- 
-
-     if (channelInfoOut->IsInChannel(myNhits, myPt,myDca )) {//pick up the right channel
-
-       if (mTurnOnNoise){
-       StPidAmpNetOut*  protonNetOut=(StPidAmpNetOut *)channelLevel->At(8);
-       mNoise=((protonNetOut->GetAmpParArray())->At(0))*0.002;
-       }//turn on noise.
-      
-      double amplitudeArray[NParticleTypes]; 
-      //the size should be channelLevel->GetEntries()
-      //but we need a integer constant to declare an array.
-
-
-      //true vaule begin with amplitudeArray[1]
-       
-       for (j=1;j<channelLevel->GetEntries();j++){
- 
-         netOut=(StPidAmpNetOut *)channelLevel->At(j);
-      
-
-         jj=j-1; //index for amplitudeArray
-
-	 //TArrayD* bArry=netOut->GetBandParArray();
-         //TArrayD* rArry=netOut->GetResoParArray();
-         //TArrayD* aArry=netOut->GetAmpParArray();
-
-     if (jj<NParticleTypes) 
-       //  amplitudeArray[jj]= amplitude(dedx,rig, bArry, rArry,aArry);
-       amplitudeArray[jj]= amplitude(myDedx,myRig, i,j);
- 
-         if (myCharge*((netOut->GetBandParArray())->At(3))>0.0)//the same sign of z
-	total +=amplitudeArray[jj];   
-     
-       }
-
-       for (j=1;j<channelLevel->GetEntries();j++){//do not use j=0. j=0 is for channelInfoOut.
-          jj=j-1;
-          
-         netOut=(StPidAmpNetOut *)channelLevel->At(j);  
- 
-	 if (myCharge*((netOut->GetBandParArray())->At(3))>0.0) {
-            double probability=amplitudeArray[jj]/total;
-           fill(probability,netOut);
-	 }
-       }
-            mExtrap=tagExtrap(myRig, myDedx,channelLevel);
-     }//is inchanel
-    }
-}
-//-------------------------------
-void StuProbabilityPidAlgorithm::setDynamicallyCalculatePID(){
-
-  StuProbabilityPidAlgorithm::mDynamicallyCalculatePID=true;
-}
-
-/*
-//-------------------------------
-void StuProbabilityPidAlgorithm::debug(double theDedx, double theRig, double theNHits, double thePt, int theCharge, double theDca){
-
-     StuObjPidReport* tempReport = new StuObjPidReport();
- 
-  double   total=0.0;
-   int     i=0;
-   int     j=0;
-   int     jj=0;
-
-      TObjArray*               channelLevel;
-      StPidAmpNetOut*          netOut;
-      StPidAmpChannelInfoOut*  channelInfoOut;
-
-    for (i=0;i<mDataSet.GetEntries(); i++){
-
-     channelLevel=(TObjArray *)mDataSet.At(i);
-     channelInfoOut=(StPidAmpChannelInfoOut *)channelLevel->At(0);
- 
-     if (channelInfoOut->IsInChannel(theNHits, thePt,theDca )) {//pick up the right channel
-       cout<<" in the above channel "<<endl;
-
-       if (mTurnOnNoise){
-       StPidAmpNetOut*  protonNetOut=(StPidAmpNetOut *)channelLevel->At(8);
-       mNoise=((protonNetOut->GetAmpParArray())->At(0))*0.002;
-       }//turn on noise.
-      
-      double amplitudeArray[NParticleTypes]; 
-      //the size should be channelLevel->GetEntries()
-      //but we need a integer constant to declare an array.
-
-       for (j=1;j<channelLevel->GetEntries();j++){
- 
-         netOut=(StPidAmpNetOut *)channelLevel->At(j);
-      
-
-         jj=j-1; //index for amplitudeArray
-
-	 //TArrayD* bArry=netOut->GetBandParArray();
-         //TArrayD* rArry=netOut->GetResoParArray();
-         //TArrayD* aArry=netOut->GetAmpParArray();
-
-     if (jj<NParticleTypes) 
-       //  amplitudeArray[jj]= amplitude(dedx,rig, bArry, rArry,aArry);
-       amplitudeArray[jj]= StuProbabilityPidAlgorithm::amplitude(theDedx,theRig, i,j);
-
-     if (theCharge*((netOut->GetBandParArray())->At(3))>0.0)//the same sign of z
-	total +=amplitudeArray[jj];   
-     
-       }
-
-      for (j=1;j<channelLevel->GetEntries();j++){//do not use j=0. j=0 is for channelInfoOut.
-          jj=j-1;
-          
-         netOut=(StPidAmpNetOut *)channelLevel->At(j);  
- 
-	 if (theCharge*((netOut->GetBandParArray())->At(3))>0.0) {
-
-
-            double probability=amplitudeArray[jj]/total;
-            
-   fill(tempReport->GetProbArray(), tempReport->GetPIDArray(), probability, netOut);
+void StuProbabilityPidAlgorithm::fillPIDHypothis(){
   
+  for (int i=0; i<4; i++){
 
-	 }
-       }
+    switch (PID[i]) {
 
-           tempReport->SetExtrap(tagExtrap(theRig, theDedx,channelLevel));
-
-     }//is inchanel
+    case 2 : mPositronProb=mProb[i];
+               break;
+    case 3 : mElectronProb=mProb[i];
+               break;
+    case 8 : mPionPlusProb=mProb[i];
+               break;
+    case 9 : mPionMinusProb=mProb[i];
+               break;
+    case 11 : mKaonPlusProb=mProb[i];
+               break;
+    case 12 : mKaonMinusProb=mProb[i];
+               break;
+    case 14 : mProtonProb=mProb[i];
+               break;
+    case 15 : mAntiProtonProb=mProb[i];
+               break;
     }
+  }
 
-      
-  for (int y=0; y<10; y++)  cout<<"tempReport->GetProb(0) "<<tempReport->GetProb(0)<<endl;
+}
+//-------------------------------
+int StuProbabilityPidAlgorithm::getCentralityBin(double theCent){
+  int theBin=0; //input % centrality. output the corres. bin.
+  
+  for (int mm = (thisMultBins-1); mm>0; mm--) {
+    if (theCent< (*mMultiBinEdgeSet)(mm) ) theBin=mm;
+  }
 
+  return theBin;
+
+}
+
+//-------------------------------
+
+
+double StuProbabilityPidAlgorithm::getCentrality(int theMult){
+
+
+     // limits 
+    // For Cut Set 1       
+    // 225 ~ 3%            
+    // 215 ~ 5%            
+    // 200 ~ 7%            
+    // 180 ~ 10%           
+    // 140 ~ 18%           
+    // 130 ~ 20%           
+    // 120 ~ 23%
+    // 115 ~ 24%
+    // 100 ~ 28%
+
+    //  highMedLimit = 180;  // 10%
+    //  medLowLimit = 108;   //~26%
      
+  if (theMult > 225 ) return 0.03;
+  else if (theMult > 215 ) return 0.05;
+  else if (theMult > 200 ) return 0.07;
+  else if (theMult > 180 ) return 0.10;
+  else if (theMult > 140 ) return 0.18;
+  else if (theMult > 130 ) return 0.20; 
+  else if (theMult > 120 ) return 0.23;
+  else if (theMult > 115 ) return 0.24;
+  else if (theMult > 100 ) return 0.28;
+  else return 0.99;
+}
+
+
+//-------------------------------
+void StuProbabilityPidAlgorithm::fill(double prob, int geantId){
+
+              if (prob>mProb[0]) {
+	 mProb[3]=mProb[2];
+         mProb[2]=mProb[1];
+         mProb[1]=mProb[0];
+         mProb[0]=prob;
+
+         PID[3]=PID[2];    
+         PID[2]=PID[1];
+         PID[1]=PID[0];
+         PID[0]=geantId;
+	    }
+            else if (prob>mProb[1]){
+          mProb[3]=mProb[2];
+          mProb[2]=mProb[1];
+          mProb[1]=prob;
+
+          PID[3]=PID[2];
+          PID[2]=PID[1];
+          PID[1] =geantId;
+	    }
+            else if (prob>mProb[2]){
+            mProb[3]=mProb[2];
+            mProb[2]=prob;
+            PID[3]=PID[2];
+            PID[2]=geantId;
+	    }
+	      else if (prob>=mProb[3]){
+		mProb[3]=prob;
+                PID[3]=geantId;
+	      }
+
+}  
+//------------------------------------------------
+int StuProbabilityPidAlgorithm::getCalibPosition(double theEta, int theNHits){
+
+  int theEtaBin=int(thisEtaBins*theEta/(thisEtaEnd-thisEtaStart));
+  int theNHitsBin=int(thisNHitsBins*float(theNHits)/(thisNHitsEnd-thisNHitsStart));
+
+    int totalEntry
+      = thisEtaBins*thisNHitsBins;
+    
+    int positionPointer=0;
+    
+    totalEntry=totalEntry/thisEtaBins;
+    positionPointer=positionPointer+totalEntry*theEtaBin;
+    
+    totalEntry=totalEntry/thisNHitsBins;
+    positionPointer=positionPointer+totalEntry*theNHitsBin;
+
+
+
+    return positionPointer;
+}
+//--------------------------------------------
+void StuProbabilityPidAlgorithm::setCalibrations(double theEta, int theNhits){
+   
+  int thePosition=getCalibPosition(theEta,theNhits);
+
+   myBandBGFcn->SetParameter(5,(*mBBScale)(thePosition));
+   myBandBGFcn->SetParameter(2,(*mBBOffSet)(thePosition));
+
 
 
 }
-*/
-
-
-/*
-//-------------------------------
-void StuProbabilityPidAlgorithm::debug2(double theDedx, double theRig, int theNHits, double thePt, int theCharge, double theDca){
-  int charge=theCharge;
-  int nhits=theNHits;
-  double dedx=theDedx;
-  double rig=theRig;
-  double pt=thePt;
-  double dca=theDca;
-
-  int totalEntry=mTheReportTable->GetEntries();
-  //      =mNChargeBins*mNDcaBins*mNNhitsBins*mNPtBins*mNDedxBins*mNRigBins;
-
-     int positionPointer=0;     
-     totalEntry=totalEntry/2;
-
-     if (charge>0) positionPointer=totalEntry;
-     //     else positionPointer=0;
-
-     totalEntry=totalEntry/2;
-     if (dca>mDcaCutPoint) positionPointer=positionPointer+totalEntry;
-
-
-     int myNhitsBin = (nhits)/mNHitsBinWidth;
-
-     //int myNhitsBin = (nhits-mNHitsStart)/mNHitsBinWidth;
-     totalEntry=totalEntry/mNNhitsBins;
-     positionPointer=positionPointer+totalEntry*myNhitsBin;
-
-
-     int myPtBin  =0;// =(Pt-mPtStart)/mPtBinWidth
-     totalEntry=totalEntry/mNPtBins;
-     positionPointer=positionPointer+totalEntry*myPtBin;
-
-
-     int myDedxBin=(dedx)/mDedxBinWidth;
-     //int myDedxBin=(dedx-mDedxStart)/mDedxBinWidth;
-     totalEntry=totalEntry/mNDedxBins;
-     positionPointer=positionPointer+totalEntry*myDedxBin;
-
-     int myRigBin=(rig)/mRigBinWidth;
-     //int myRigBin=(rig-mRigStart)/mRigBinWidth;
-     cout<<"totalEntry "<<totalEntry<<" =? "<<" mNRigBins "<<mNRigBins<<endl;
-     totalEntry=totalEntry/mNRigBins;//should =1 here
-     cout<<" totalEntry shoud =1 :"<<totalEntry<<endl;
-     positionPointer=positionPointer+totalEntry*myRigBin;
-
-     
-     StuObjPidReport* myReport=(StuObjPidReport *)(mTheReportTable->At(positionPointer));
-    
-
-          
-	    for (int y=0; y<2; y++){
-	     cout<<" positionPointer "<<positionPointer<<endl;
-	     cout<<"myReport->GetPID(0) "<<myReport->GetPID(0)<<" myReport->GetProb(0)  "<<myReport->GetProb(0)<<endl;
-
-            //  cout<<" charge   "<<myReport->GetCharge()<<endl;
-            //  cout<<" dca      "<<myReport->GetDca()<<endl;
-            //  cout<<" GetNHits "<<myReport->GetNHits()<<endl;
-            //  cout<<" GetPt    "<<myReport->GetPt()<<endl;
-            //  cout<<" GetDedx  "<<myReport->GetDedx()<<endl;
-            //  cout<<" GetRig   "<<myReport->GetRig()<<endl;
-
-
-	    }
-
-
-       }
-*/
-
