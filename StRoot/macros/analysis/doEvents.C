@@ -1,4 +1,5 @@
-/////////////////////////////////////////////////////////////////////////////// $Id: doEvents.C,v 1.93 2004/08/10 19:44:19 perev Exp $
+/////////////////////////////////////////////////////////////////////////////
+// $Id: doEvents.C,v 1.94 2004/08/12 00:13:45 perev Exp $
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
@@ -20,25 +21,30 @@
 // .x doEvents.C(10,"some_directory/some_dst_file.root")
 // example multi-ROOT file invocation:
 // .x doEvents.C(9999,"some_directory/*.dst.root")
+//
 // example using the Grid Collector
+// 0) The third argument, qaflag, must contain "gc" in order to access Grid
+//    Collector functions
 // 1) process first ten events generated, request is embedded in this file
-// .x doEvents.C(10, "GC")
+// .x doEvents.C(10, "", "gc")
 // 2) specify the request as a string argument (analyze the event branch of
 //    selected data from production P02gg).  First argument 0 (or smaller)
 //    indicates that all events satisfying the condition will be analyzed.
-// .x doEvents.C(0, "select event where Production=P02gg and NV0>2000")
+// .x doEvents.C(0, "select event where Production=P02gg and NV0>2000", "gc")
+//
 //  The rules for constructing valid conditions are as follows
 //  a) simple conditions can be joined together with logical operator "AND",
 //     "OR", "XOR" and "!" (for NOT).
 //  b) a simple condition is a range such as 'v1 < name' and 'v1 <= name <
 //     v2'.  The supported range operators are >, >=, <, <=, == and !=.
-//     The name is the name of a leaf of the ROOT tree in tag.root files.
-//     In case, a leaf of a ROOT tree contains many values, the name to
-//     be used are of the form leaf_name[0], leaf_name[1], and so on.
-//  c) only '==' operation is supported for string attributes, to avoid a
-//     string literal be mistaken as a name of an attribute, it can be
-//     quoted either with "" or with ''.
-////////////////////////////////////////////////////////////////////////////// Author List: Torre Wenaus, BNL  2/99
+//     The name is the name of a leaf of the ROOT tree in tags.root files.
+//     In case a leaf contains many values, the name to be used are of the
+//     form leaf_name[0], leaf_name[1], and so on.
+//  c) only '==' operator is supported for string attributes.  To ensure
+//     a string literal is definitely treated as a string literal, not a
+//     name, it should be quoted either with "" or with ''.
+////////////////////////////////////////////////////////////////////////////
+// Author List: Torre Wenaus, BNL  2/99
 //              Victor Perevoztchikov
 //  
 //  inputs:
@@ -48,8 +54,10 @@
 //      file = a. file names in directory (takes all files)
 //             b. the 1 particular full file name (with directory) you want
 //      qaflag = "evout"    turn on writing of output test.event.root
-//      qaflag = "display"  turn on EventDisplay
-//                 file --- set to off by default 
+//      qaflag = "display"  turn on EventDisplay,
+//                          set to off by default.
+//      qaflag = "gc"       treat the file argument as a select statement
+//                          for Grid Collector.
 //      
 /////////////////////////////////////////////////////////////////////////////
 #include "iostream.h"
@@ -62,19 +70,19 @@ class StFileI;
 StFileI *setFiles =0;
 TString mainBranch;
 
-Int_t iEvt=0;
-//______________________________________________________________________________
+Int_t iEvt=0,istat=0;
+//____________________________________________________________________________
 void doEvents()
 {
   cout << "Usage: doEvents.C(2)  // work with default event.root file" << endl;
-  cout << "       doEvents.C(startEvent,nEvents,\"path/somefile.event.root\")" << endl;
-  cout << "       doEvents.C(nEvents,\"path/*.event.root\")" << endl;
-  cout << "       doEvents.C(nEvents,\"path/file.dst.root\",\"evout\") //Write out StEvent" << endl;	
-  cout << "       doEvents.C(nEvents,\"path/file.dst.root\",\"display\") //EventDispay" << endl;	
-  cout << "       doEvents.C(nEvents,\"path/file.dst.root\",\"dbon\") //DB on" << endl;	
-  cout << "       doEvents.C(nEvents,\"@file.lis\") //list of files in file.lis " << endl;	
-  cout << "       doEvents.C(nEvents,\"GridCollector commands\",\"gc\") //GridCollector " << endl;	
-  cout << "       doEvents.C(nEvents,\"@GridCollector_commands.txt\",\"gc\") //GridCollector commands in file" << endl;	
+  cout << "       doEvents.C(startEvent, nEvents,\"path/somefile.event.root\")" << endl;
+  cout << "       doEvents.C(nEvents, \"path/*.event.root\")" << endl;
+  cout << "       doEvents.C(nEvents, \"path/file.dst.root\", \"evout\") //Write out StEvent" << endl;	
+  cout << "       doEvents.C(nEvents, \"path/file.dst.root\", \"display\") //EventDispay" << endl;	
+  cout << "       doEvents.C(nEvents, \"path/file.dst.root\", \"dbon\") //DB on" << endl;	
+  cout << "       doEvents.C(nEvents, \"@file.lis\") //list of files in file.lis " << endl;	
+  cout << "       doEvents.C(nEvents, \"SELECT [MuDST|event] WHERE production=P04ih and zdc1Energy>50\", \"gc\") //GridCollector " << endl;	
+  cout << "       doEvents.C(nEvents, \"@GridCollector_commands.txt\", \"gc,evout\") //GridCollector commands in file" << endl;	
 }
 
 
@@ -97,7 +105,6 @@ void doEvents(Int_t nEvents,
               const char *qaflag, int flag);
               
 void loadLibs(const char *opt);              
-int  gcPrep  (const char *req, char ***argv, char **argc);
 int  gcInit  (const char *request); 
               
               
@@ -138,26 +145,26 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
   chain  = new StChain("StChain");
   setFiles =0;
 
-  if (tflag.Contains("gc")) {	//GridCollector
+  if (tflag.Contains("gc")) {	// GridCollector
     int nev = gcInit(fileList[0]); 
-    if (nev==0) return;
-    
-  } else {			// Normal case -- user has specified a list of files
-	setFiles = new StFile(fileList);
-	char line[999]; strcpy(line,fileList[0]);
-	if (*line=='@') {
-	    TString command("grep '.root' "); command += line+1;
-	    FILE *pipe = gSystem->OpenPipe(command.Data(),"r");
-	    if (pipe) {fgets(line,999,pipe);line[strlen(line)-1] = 0;}
-	    fclose(pipe);
-	}
-	mainBranch = line;
-	//    printf("fileList[0] %s %s\n",line,mainBranch.Data());
-	mainBranch.ReplaceAll(".root","");
-	int idot = strrchr((char*)mainBranch,'.') - mainBranch.Data();
-	mainBranch.Replace(0,idot+1,"");
-	mainBranch += "Branch";
+    if (nev<=0) return;
+    if (nEvents <= 0) nEvents = nev;
+  } else {		// Normal case -- user has specified a list of files
+    setFiles = new StFile(fileList);
+    char line[999]; strcpy(line,fileList[0]);
+    if (*line=='@') {
+      TString command("grep '.root' "); command += line+1;
+      FILE *pipe = gSystem->OpenPipe(command.Data(),"r");
+      if (pipe) {fgets(line,999,pipe);line[strlen(line)-1] = 0;}
+      fclose(pipe);
     }
+    mainBranch = line;
+    //    printf("fileList[0] %s %s\n",line,mainBranch.Data());
+    mainBranch.ReplaceAll(".root","");
+    int idot = strrchr((char*)mainBranch,'.') - mainBranch.Data();
+    mainBranch.Replace(0,idot+1,"");
+    mainBranch += "Branch";
+  }
  
   //   		Geant maker  for EventDisplay
   if (eventDisplay) {
@@ -191,8 +198,9 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
     dbMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
   }
 
-    // Maker to read events from file or database into StEvent
-    if (mainBranch.Contains("dstBranch")) {
+  // Maker to read events from file or database into StEvent
+  if (!mainBranch.Contains("mudstBranch") &&
+      mainBranch.Contains("dstBranch")) {
     gSystem->Load("StEventMaker");
     StEventMaker *readerMaker =  new StEventMaker("events","title");
   }
@@ -202,7 +210,8 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
 //  StMuAnalysisMaker *analysisMaker = new StMuAnalysisMaker("analysis");
 
 
-  ///////////////////////////////////////////////////////////////////  //  IT IS THE PLACE TO ADD USER MAKERS
+  ///////////////////////////////////////////////////////////////////
+  //  IT IS THE PLACE TO ADD USER MAKERS
   //  LIKE:
   //  gSystem->Load("StUserMaker");
   //  StUserMaker *UserMk = new StUserMaker("UserName");
@@ -238,8 +247,8 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
     displayMk->AddFilter(new StColorFilterHelper("Color schema",kFALSE));
   }
   
-    // Initialize chain
-    cout << "----------------------------------------------------------" << endl;
+  // Initialize chain
+  cout << "----------------------------------------------------------" << endl;
   cout << " doEvents - Initializing and Printing chain information   " << endl;
   Int_t iInit = chain->Init();
   if (iInit) chain->Fatal(iInit,"on init");
@@ -250,15 +259,12 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
   // go to event startEvent
   if (startEvent > 1) IOMk->Skip(startEvent-1);
 
-    // Event loop
-    istat=0,iEvt=1;
+  // Event loop
+  istat=0,iEvt=1;
   istat = chain->EventLoop(1,nEvents);    
   //VP    delete setFiles; setFiles=0;
-  
 }
-//______________________________________________________________________________
-
-
+//____________________________________________________________________________
 void doEvents(Int_t startEvent, Int_t nEvents, const char *file, const char *qaflag)
 {
     if (!qaflag) qaflag="";
@@ -268,7 +274,7 @@ void doEvents(Int_t startEvent, Int_t nEvents, const char *file, const char *qaf
     cout << "Calling (startEvent,nEvents,fileListQQ,qaflag)" << endl;
     doEvents(startEvent,nEvents,fileListQQ,qaflag);
 }
-//______________________________________________________________________________
+//____________________________________________________________________________
 void doEvents(Int_t nEvents, const char *file, const char *qaflag)
 {
   if (!qaflag) qaflag="";
@@ -276,7 +282,7 @@ void doEvents(Int_t nEvents, const char *file, const char *qaflag)
   doEvents(1,nEvents,file,qaflag);
 }
 
-//______________________________________________________________________________
+//____________________________________________________________________________
 void doEvents(Int_t nEvents, const char *path,const char *file, const char *qaflag, int flag)
 {
   if (!qaflag) qaflag="";
@@ -293,13 +299,13 @@ void doEvents(Int_t nEvents, const char *path,const char *file, const char *qafl
   doEvents(1,nEvents,F.Data(),opt.Data());
 }
 
-//______________________________________________________________________________
+//____________________________________________________________________________
 void doEvents(Int_t nEvents, const char **fileList, const char *qaflag)
 { 
   cout << "Calling (1,nEvents,fileList,qaflag)" << endl;
   doEvents(1,nEvents,fileList,qaflag);
 }
-//______________________________________________________________________________
+//____________________________________________________________________________
 void loadLibs(const char *opt) 
 {
 // Dynamically link needed shared libs
@@ -350,100 +356,108 @@ void loadLibs(const char *opt)
     gSystem->Load("StEventDisplayMaker");
   }
 }
-//______________________________________________________________________________
-int gcPrep(const char *req, char ***argvP, char **argcP)
-{
-   
-   TString *full=new TString;
-   char **argv = *(argvP);
-   char  *argc = *(argcP); 
-   argv = 0; argc=0;
-   int idx = 0;
-   FILE *inp = 0;
-   char line[500],*comm;
-   if (req[0]=='@') { // get info from the file
-     inp = fopen(req+1,"r");
-     if (!inp) { // File not found
-       printf("DoEvents: ERROR. File Not Found // %s\n",req+1);
-       gSystem->Exit(13);
-     }
-     while(fgets(line,500,inp))  {
-        for (int i=0;line[i];i++){if (line[i]=='\t'||line[i]=='\n')line[i]=' ';}
-        char *fst = line + strspn(line," t");
-        if (fst[0]            == 0 ) continue;
-        if (fst[0]            =='#') continue;
-        if (strncmp(fst,"//",2)==0 ) continue;
-        comm = strstr(line,"#"  ); if (comm) comm[0]=0;
-        comm = strstr(line," //"); if (comm) comm[0]=0;
-        *(full) += fst; idx++;
-     }
-     fclose(inp);
-   } else {
-     *full = req;
-   }
-
-   if ((*full)[0]!='-') {argc = full->Data(); return idx;}
-   
-//  argv mode
-   argv = new char*[100];
-   memset(argv,0,sizeof(char*)*100);
-   idx=0; char *c = full->Data();
-   while(1) {
-     c = c+strspn(c," ");
-     if (c[0] == 0) break;
-     int n = strcspn(c," ");
-     argv[idx++]=c;
-     if (c[n]==0) break;
-     c[n]=0; c = c+n+1;
-   }
-   for (int i=0;argv[i];i++) { printf("argv[%i]=%s\n",i,argv[i]);}
-
-
-   return idx;
-}
-//______________________________________________________________________________
-int gcInit(const char *request) 
+//____________________________________________________________________________
+// read GC command file as one single string,
+// return number of bytes in the command string, cmds.
+int gcReadCommands(const char *file, TString& cmds)
 {   
-
-  int Argc=0; char **Argv=0; char  *Sele=0;
-  Argc = gcPrep(request,&Argv,&Sele);
-  if (Argc==0) return 0;
-
-  gSystem->Load("StGridCollector");
-  StGridCollector *req = StGridCollector::Create();
-  req->SetDebug(5);
-  if (Argv) {
-    Int_t ierr = req->Init(Argc, Argv);
-    if (ierr) {
-        std::cout << "doEvents.C can not initialize the Grid Collector "
-                  << "with \"";
-        for (Int_t i=0; i < Argc; ++i)
-            std::cout << " " << Argv[i];
-        std::cout << "\"\nError code is " << ierr << std::endl;
-        return; // initialization failure
+  if (*file != 0) { // must have a valid file name
+    FILE *inp = 0;
+    inp = fopen(file, "r");
+    if (!inp) { // File not found
+      printf("doEvents: ERROR.  File Not Found // %s\n",req+1);
+      return 13;
     }
-  } else { // Grid Collector: case II -- user has specified the options on
-      // command line
-      Int_t ierr = req->Init(Sele);
-      if (0 != ierr) { // parse the arguments
-          std::cout << "doEvents.C can not initialize the Grid Collector "
-                    << "with argument \"" << Sele
-                    << "\"\nError code is " << ierr
-                    << std::endl;
-          return 0;
-      }
+
+    char line[500], *comm, *fst;
+    while(fgets(line, 500, inp)) {
+      for (int i=0; line[i]; i++) // change new line to space
+	if (line[i]=='\t' || line[i]=='\n') line[i]=' ';
+      // strip away comments
+      fst = line + strspn(line," \t");
+      if (fst[0]            == 0 ) continue; // blank line
+      if (fst[0]            =='#') continue; // # comment
+      if (strncmp(fst,"//",2)==0 ) continue; // // comment
+      comm = strstr(line,"#"  ); if (comm) comm[0]=0; // # comment
+      comm = strstr(line," //"); if (comm) comm[0]=0; // // comment
+      cmds += fst;
+    }
+    fclose(inp);
   }
 
-  int nEvents =  req->GetNEvents();
-      std::cout << "INFO: actual number of events " << nEvents << std::endl;
-  setFiles = req;
-  mainBranch = req->GetCompName();
-  mainBranch += "Branch";
-  return nEvents;
+  return 0;
 }
-//______________________________________________________________________________
-/////////////////////////////////////////////////////////////////////////////// 
+//____________________________________________________________________________
+// Initialize global variable setFiles for Grid Collector operations
+// also initialize variable mainBranch
+int gcInit(const char *request) 
+{
+  Int_t ierr = 0;
+  gSystem->Load("StGridCollector");
+  StGridCollector *req = StGridCollector::Create();
+  req->SetDebug(1);
+
+  if (request == 0 || *request == 0) {
+    // This is an example to show how to initialize Grid Collector in
+    // another way.
+    const char *argv[] = {
+      "-v", "5",
+      "-c", "/afs/rhic.bnl.gov/star/incoming/GCA/gca.rc"
+      "-s", "MuDST",
+      "-w", "production=P04ih and zdc1Energy>50"
+    };
+    const Int_t argc = sizeof(argv)/4;
+    ierr = req->Init(argc, argv);
+    if (0 != ierr) {
+      std::cout << "doEvents.C can not initialize the Grid Collector "
+		<< "with argument \"";
+      std::cout << *argv;
+      for (Int_t i = 1; i < argc; ++ i)
+	std::cout << " " << argv[i];
+      std::cout << "\"\nError code is " << ierr
+		<< std::endl;
+    }
+  }
+  else if (*request == '@') { // read the command file
+    TString cmds;
+    gcReadCommands(request+1, cmds);
+    ierr = req->Init(cmds.Data());
+    if (0 != ierr) {
+      std::cout << "doEvents.C can not initialize the Grid Collector "
+		<< "with argument \"" << cmds.Data()
+		<< "\"\nError code is " << ierr
+		<< std::endl;
+    }
+  }
+  else { // use the input value directly
+    ierr = req->Init(request);
+    if (0 != ierr) {
+      std::cout << "doEvents.C can not initialize the Grid Collector "
+		<< "with argument \"" << request
+		<< "\"\nError code is " << ierr
+		<< std::endl;
+    }
+  }
+
+  if (0 != ierr) { // initialization failure, message printed already
+    ierr = 0;
+  }
+  else {
+    int nEvents =  req->GetNEvents();
+    std::cout << "INFO: actual number of events " << nEvents << std::endl;
+    setFiles = req;
+    mainBranch = req->GetCompName();
+    mainBranch += "Branch";
+    ierr = nEvents;
+  }
+  return ierr;
+}
+//____________________________________________________________________________
+//////////////////////////////////////////////////////////////////////////////
 // $Log: doEvents.C,v $
+// Revision 1.94  2004/08/12 00:13:45  perev
+// JohnWu GC corrections
+//
 // Revision 1.93  2004/08/10 19:44:19  perev
 // Cleanup+StGridCollector
 //
