@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.58 1999/05/21 15:33:56 kathy Exp $
+// $Id: bfc.C,v 1.59 1999/05/21 23:25:40 didenko Exp $
 // $Log: bfc.C,v $
+// Revision 1.59  1999/05/21 23:25:40  didenko
+// Remove capital letters from Branch name because of HPSS
+//
 // Revision 1.58  1999/05/21 15:33:56  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
@@ -605,7 +608,7 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar",Char_t *infile=0, C
     }
     if (evMk){
       //  treeMk->SetBranch("EventBranch",FileOut.Data());
-      treeMk->IntoBranch("EventBranch","StEvent");
+      treeMk->IntoBranch("eventBranch","StEvent");
     }
     if (ChainFlags[kAllEvent]) {
       if (geant) {
@@ -634,7 +637,7 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar",Char_t *infile=0, C
       }
       if (l3tMk) {
 	//  treeMk->SetBranch("l3TBranch",FileOut.Data());
-	treeMk->IntoBranch("l3TBranch","l3Tracks");
+	treeMk->IntoBranch("l3tBranch","l3Tracks");
       }
     }      
     treeMk->SetBranch("histBranch");
