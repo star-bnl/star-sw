@@ -30,7 +30,7 @@ void bfcread(Int_t nevents=1, const char *MainFile="/disk1/star/test/SL99d/tfs_L
   treeMk->SetIOMode("r");
   treeMk->SetDebug();
 
-   chain->SetInput("Event","bfcTree/EventBranch/Event");
+   chain->SetInput("Event","bfcTree/EventBranch/StEvent");
    St_QA_Maker  *qa  = new St_QA_Maker;
   
   chain->Init();
