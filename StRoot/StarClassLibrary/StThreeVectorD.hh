@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.hh,v 1.8 2004/10/26 17:33:15 perev Exp $
+ * $Id: StThreeVectorD.hh,v 1.9 2005/02/05 01:14:48 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.hh,v $
+ * Revision 1.9  2005/02/05 01:14:48  perev
+ * test for zero mag added
+ *
  * Revision 1.8  2004/10/26 17:33:15  perev
  * check for x,y=0 added
  *
@@ -212,12 +215,12 @@ inline double StThreeVectorD::z() const {return mX3;}
 
 inline double StThreeVectorD::theta() const
 {
-    return acos(mX3/this->mag());
+    return acos(mX3/(this->mag()+1.e-10));
 }
 
 inline double StThreeVectorD::cosTheta() const
 {
-    return mX3/this->mag();
+    return mX3/(this->mag()+1.e-10);
 }
 
 inline double StThreeVectorD::phi() const
@@ -233,7 +236,7 @@ inline double StThreeVectorD::pseudoRapidity() const
 
 inline StThreeVectorD StThreeVectorD::unit() const
 {
-    return *this/this->mag();
+    return *this/(this->mag()+1.e-10);
 }
 
 inline double StThreeVectorD::massHypothesis(double mass) const
@@ -444,7 +447,7 @@ StThreeVectorD::cross(const StThreeVectorD& v) const
 
 inline double StThreeVectorD::angle(const StThreeVectorD& v) const
 {
-    return acos(this->dot(v)/this->mag()/v.mag());
+    return acos(this->dot(v)/(this->mag()*v.mag()+1.e-10));
 }
 
 inline StThreeVectorD
