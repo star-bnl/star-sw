@@ -31,7 +31,7 @@ public:
     double position() const;
     const StHit* stHit() const;
     bool   isUsed() const;
-    const StThreeVectorD& globalPosition() const;
+    StThreeVectorD globalPosition() const;
 
     //Sets
     void set(double refAngle, double position,double x, double y, double z, 
