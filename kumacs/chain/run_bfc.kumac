@@ -47,7 +47,8 @@ MACRO run_all _
    svt_simul=srs _
    svt_tracker=sgr _  
    tpc_simul=tfs _
-   tpc_tracker=tpt _ 
+   tpc_tracker=tpt _
+   tpc_evaluator=tte _
    tpc_svt_match=svm _ 
    event_refit=egr _
    ev0_finder=ev0 _
@@ -194,7 +195,7 @@ $STAR/pams/trg/kumac
  *****************************************
  * TPC initialization - simulation
  *****************************************
-
+  exec tpc_clustering#initialize_fast
   exec tpc_fast_sim#initialize
 
  *****************************************
@@ -202,6 +203,12 @@ $STAR/pams/trg/kumac
  *****************************************
 
   exec tpc_tracker#initialize
+  
+ *****************************************
+ * TPC initialization - tracker
+ *****************************************
+
+  exec tpc_evaluation#initialize
 
  ****************************************
  * EMC  geometry &  pam initialization 
@@ -298,7 +305,10 @@ TPC:
      message ' tpc tracker not valid!'
    endif
    sigma vtpt = vtpt + $cptime
-
+   
+   if [tpc_evaluator]=tte then
+     exec tpc_evaluation#process_event [ievent]
+   endif
 
 * TPC to SVT Matching ----------------------------------------------------
 
