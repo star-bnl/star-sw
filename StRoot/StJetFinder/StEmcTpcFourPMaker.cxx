@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.8 2003/06/25 23:03:22 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.9 2003/06/26 22:37:32 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -184,8 +184,14 @@ Int_t StEmcTpcFourPMaker::Make() {
     pointMap::value_type &point_val = *point;
     StMuTrackFourVec& newTrack = tPile[index++];
     StCorrectedEmcPoint &cPoint = point_val.second;
-    newTrack.Init(NULL, cPoint.P(), cPoint.getIndex()+nTracks);
-    //tracks.push_back(&newTrack);  
+    cout << "Point/Track E: " << cPoint.P().e() << endl;
+    cout << "Point/Track Phi: " << cPoint.P().phi() << endl;
+    cout << "Point/Track Eta: " << cPoint.P().pseudoRapidity() << endl;
+    if(cPoint.P().e() > .01)
+      {
+	newTrack.Init(NULL, cPoint.P(), cPoint.getIndex()+nTracks);
+	tracks.push_back(&newTrack);  
+      }
   }  
   //stop = clock();
   //timeLengths[timeindex] += static_cast<double>(stop-start)
