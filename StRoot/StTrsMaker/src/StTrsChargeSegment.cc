@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.2 1999/01/15 10:59:11 lasiuk Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.3 1999/01/28 02:50:28 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -11,11 +11,14 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
- * Revision 1.2  1999/01/15 10:59:11  lasiuk
- * remove g2t pointer
- * add pid member; add systemofunits; mv access fcts to .hh
- * add ostream operator
+ * Revision 1.3  1999/01/28 02:50:28  lasiuk
+ * beta gamma for particle mass
  *
+ * Revision 1.5  1999/02/12 01:26:37  lasiuk
+ * Limit debug output
+ *
+ * Revision 1.4  1999/02/10 18:02:24  lasiuk
+ * verbose output and ostream
  *
  * Revision 1.3  1999/01/28 02:50:28  lasiuk
  * beta gamma for particle mass
@@ -116,11 +119,11 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 
 	// what is the subsegment length?
     gasDb->setPadLength(deltaS*centimeter);
-    cout << "StTrsDeDx::padLength() -->        " << (gasDb->padLength()/millimeter) << " mm" << endl;
-    cout << "StTrsChargeSegment::split() de--> " << this->dE() << endl;
-    cout << "StTrsChargeSegment::split() ds--> " << this->ds() << endl;
-    cout << "StTrsDeDx::W() -->                " << gasDb->W() << endl;
-    cout << "StMagneticField:at() -->          " << (magDb->at(mSector12Position)) << endl;
+    cout << "StTrsDeDx::padLength() -->        "  << (gasDb->padLength()/millimeter) << " mm" << endl;
+    cout << "StTrsChargeSegment::split() de--> " << (this->dE()/eV)                 << " eV" << endl;
+    cout << "StTrsChargeSegment::split() ds--> " << (this->ds()/millimeter)         << " mm" << endl;
+    cout << "StTrsDeDx::W() -->                "   << (gasDb->W()/eV)                 << " eV"  << endl;
+    cout << "StMagneticField:at() -->          " << (magDb->at(mSector12Position))    << " T"  <<endl;
     PR(mSector12Position);
     
     // Number of electrons in complete segment
@@ -141,11 +144,25 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
     //
     // tmp: pion mass
     // Must get from pid structures
-    double particleMass = .1395*GeV;
+    double particleMass;
+    switch (mPid) {
+    case 1:
+	particleMass = .1395*GeV;
+	break;
+    case 2:
+	particleMass = .493*GeV;
+	break;
+    case 3:
+	particleMass = .939*GeV;
+	break;
+    default:
+	particleMass = .1395*GeV;
+	break;
+    }
     
     double betaGamma = abs(mMomentum)/particleMass;
-    //PR(mMomentum);
-    //PR(betaGamma);
+    PR(mMomentum);
+    PR(betaGamma);
 	    break;
     // number of segments to split given by command line argument (default 1):
     //  should be related to mNumberOfElectrons
