@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridCollection.hh,v 1.1.1.1 2000/03/10 14:26:21 munhoz Exp $
+ * $Id: StSvtHybridCollection.hh,v 1.2 2000/07/30 21:18:33 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridCollection.hh,v $
+ * Revision 1.2  2000/07/30 21:18:33  munhoz
+ * correction for getObject method and allow year 1 east side reading
+ *
  * Revision 1.1.1.1  2000/03/10 14:26:21  munhoz
  * SVT Class Library
  *
@@ -22,7 +25,7 @@
 
 #include "StArray.h"
 
-class StHybridObject;
+class StSvtHybridObject;
 
 class StSvtHybridCollection: public StObjArray
 {
@@ -40,7 +43,7 @@ public:
   void setConfiguration(char* config); // Set the SVT configuration
   char* getConfiguration() {return fConfig;} // Returns the SVT configuration
 
-  StHybridObject* getObject(int barrel, int ladder, int wafer, int hybrid); // Returns a object of the collection
+  StSvtHybridObject* getObject(int barrel, int ladder, int wafer, int hybrid); // Returns a object of the collection
 
 protected:
 
