@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.h,v 1.14 2004/06/04 11:04:15 jcs Exp $
+// $Id: StFtpcTrackMaker.h,v 1.15 2004/06/18 09:07:03 jcs Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.15  2004/06/18 09:07:03  jcs
+// add code to write out a root file for calibration
+//
 // Revision 1.14  2004/06/04 11:04:15  jcs
 // replaced StarDb/ftpc/fdepars/fdepar with StarDb/ftpc/ftpcdEdxPars
 //
@@ -70,6 +73,11 @@
 #include "StFtpcTracker.hh"
 #include "StFtpcSoftwareMonitor.h"
 
+// For cluster and laser run analysis
+//#define DEBUGFILE
+// Select tracker
+#define TWOCYCLETRACKING
+//#define LASERTRACKING
 
 class TH1F;
 class TH2F;
@@ -124,7 +132,7 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  Finish();                                         // final cleanup
    virtual Int_t  FinishRun(Int_t run);                             // cleanup after every run
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.14 2004/06/04 11:04:15 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.15 2004/06/18 09:07:03 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
 	   void   MakeHistograms(StFtpcTracker *tracker);           // makes histograms
 	   void   FillMonSoftFtpc(StEvent *event,StFtpcTracker *tracker,StFtpcSoftwareMonitor *ftpcMon);  // fills StEvent->StSoftwareMonitor->StFtpcSoftwareMonitor
