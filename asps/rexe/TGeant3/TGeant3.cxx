@@ -15,6 +15,9 @@
 
 /*
 $Log: TGeant3.cxx,v $
+Revision 1.9  2001/03/27 15:08:28  fisyak
+make return char static
+
 Revision 1.8  2000/06/21 18:17:24  fisyak
 Add gfrung, gfhead
 
@@ -1026,7 +1029,7 @@ const char* TGeant3::VolName(Int_t id) const
   //
   // Return the volume name given the volume identifier
   //
-  const char name[5]="NULL";
+  const static char name[5]="NULL";
   if(id<1 || id > fGcnum->nvolum || fGclink->jvolum<=0) 
     return name;
   else
