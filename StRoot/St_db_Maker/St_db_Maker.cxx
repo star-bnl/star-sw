@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.51 2001/10/27 21:48:32 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.52 2001/11/07 18:02:28 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.52  2001/11/07 18:02:28  perev
+// reurn into InitRun added
+//
 // Revision 1.51  2001/10/27 21:48:32  perev
 // SetRunNumber added
 //
@@ -208,6 +211,7 @@ Int_t St_db_Maker::InitRun(int runumber)
 {
   if (!fDBBroker) return 0;
   fDBBroker->SetRunNumber((UInt_t) runumber);
+  return 0;
 }
 //_____________________________________________________________________________
 Int_t St_db_Maker::Init()
