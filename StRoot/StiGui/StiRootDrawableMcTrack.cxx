@@ -82,19 +82,3 @@ void StiRootDrawableMcTrack::reset()
   this->StiRootDrawableTrack::reset();
 }
 
-StiRootDrawableMcTrackFactory::StiRootDrawableMcTrackFactory(const string& newName,
-							     int original,
-							     int incremental, 
-							     int maxInc)
-  : StiMcTrackFactory(newName, 
-		      original, 
-		      incremental, 
-		      maxInc)
-{
-  initialize();
-}
-
-StiRootDrawableMcTrackFactory::~StiRootDrawableMcTrackFactory()
-{
-  // cout <<"StiRootDrawableMcTrackFactory::~StiRootDrawableMcTrackFactory()"<<endl;
-}
