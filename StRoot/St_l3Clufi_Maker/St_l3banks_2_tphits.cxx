@@ -138,23 +138,11 @@ Int_t St_l3banks_2_tphits::Filltclpoints()
 		      UShort_t flag   = (UShort_t) (dword->info1);
 		      UShort_t charge = (UShort_t) (dword->info2);
 
-		      // pad time row sector
-		      Double_t ptrs[4];
-		      ptrs[0] = pad;
-		      ptrs[1] = time;
-		      ptrs[2] = row; 
-		      ptrs[3] = sector;
-
-		      // transform
-		      Double_t* xyz = transformer.raw_to_global(ptrs);
-
-		      // new style
 		      //XYZ.Setxyz(1,1,1) ;
 		      PTRS.Setptrs((Double_t) pad, (Double_t) time,(Double_t) row, (Double_t) sector) ;
 		      transformer.raw_to_global(PTRS,XYZ) ;
-		      //Double_t a = xyzn.Getx() ;
-					    
-		      if ( flag == 0 )
+							    
+		      if ( flag == 0 ) // no one pad clusters !
 			{
 			  // fill tphits
 			  mytclhits_st[tphit_index].x = (Float_t) XYZ.Getx() ;
@@ -188,14 +176,20 @@ Int_t St_l3banks_2_tphits::Filltclpoints()
 			  // 					    cout << "  pad: " << pad << "\t" ;
 			  // 					    cout << "  c: " << charge << endl  ;
 
-			  mytclhits->AddAt(&mytclhits_st[tphit_index],tphit_index);
+			  // add this instance to main dataset
+			  if (tphit_index < (mytclhits->GetTableSize())-5)
+			      {
+				  mytclhits->AddAt(&mytclhits_st[tphit_index],tphit_index);
+			      }
+			  else
+			      {
+				  cout << "Number of clusters will exceed limit of 400,000. Abort this event." ;
+				  return 0 ;
+			      }
+
+			  // increase hit counter
 			  tphit_index++;
 			}
-
-		      // hit counter
-		      //tphit_index++;
-
-					   
 		    } // loop over cluster
 		  // set offset for next row 
 		  rowoffset += ((2 * clusternumb) + 2); 

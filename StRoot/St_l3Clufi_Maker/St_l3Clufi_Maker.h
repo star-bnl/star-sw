@@ -1,5 +1,8 @@
-// $Id: St_l3Clufi_Maker.h,v 1.4 2000/03/28 19:53:59 fine Exp $
+// $Id: St_l3Clufi_Maker.h,v 1.5 2000/04/12 18:39:21 flierl Exp $
 // $Log: St_l3Clufi_Maker.h,v $
+// Revision 1.5  2000/04/12 18:39:21  flierl
+// check whether enough memory is allocated for the clusters ( for the tables and the buffers )
+//
 // Revision 1.4  2000/03/28 19:53:59  fine
 // Adjuested to ROOT 2.24
 //
@@ -65,7 +68,7 @@
 //class St_stk_stkpar;
 class St_l3Clufi_Maker : public StMaker {
  private:
-    // static Char_t  m_VersionCVS = "$Id: St_l3Clufi_Maker.h,v 1.4 2000/03/28 19:53:59 fine Exp $";
+    // static Char_t  m_VersionCVS = "$Id: St_l3Clufi_Maker.h,v 1.5 2000/04/12 18:39:21 flierl Exp $";
      
     //
     // l3 clusterfinding variables
@@ -90,7 +93,7 @@ class St_l3Clufi_Maker : public StMaker {
     TH1D* i960_time;
     
     // some constants
-    
+    Int_t Buffer_size ; // define max buffer_size
 
  protected:
  public: 
@@ -107,7 +110,7 @@ class St_l3Clufi_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_l3Clufi_Maker.h,v 1.4 2000/03/28 19:53:59 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_l3Clufi_Maker.h,v 1.5 2000/04/12 18:39:21 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_l3Clufi_Maker, 1)   //StAF chain virtual base class for Makers
 };
