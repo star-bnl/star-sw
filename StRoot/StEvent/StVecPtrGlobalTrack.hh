@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVecPtrGlobalTrack.hh,v 1.5 1999/03/10 12:12:15 ullrich Exp $
+ * $Id: StVecPtrGlobalTrack.hh,v 1.6 1999/03/10 12:15:38 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVecPtrGlobalTrack.hh,v $
- * Revision 1.5  1999/03/10 12:12:15  ullrich
- * Added iterators
+ * Revision 1.6  1999/03/10 12:15:38  ullrich
+ * Added missing version for no template def args.
  *
  * Revision 1.5  1999/03/10 12:12:15  ullrich
  * Added iterators
@@ -36,6 +36,7 @@ class StGlobalTrack;
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<StGlobalTrack*, allocator<StGlobalTrack*> > StVecPtrGlobalTrack;
+typedef vector<StGlobalTrack*, allocator<StGlobalTrack*> >::iterator StVecPtrGlobalTrackIterator;
 #else
 typedef vector<StGlobalTrack*> StVecPtrGlobalTrack;
 typedef vector<StGlobalTrack*>::iterator StVecPtrGlobalTrackIterator;
