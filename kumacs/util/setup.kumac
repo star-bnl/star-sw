@@ -5,7 +5,7 @@
 * editted 9/1/98 K. Turner - define counters nevdsttot,nevdstgood
 *                            which are incremented in bfc_util
 * editted 9/23/98 K. Turner - remove event counters that aren't needed
-* 
+*                           - and move all macro creates to correct place
 **************************************************
  
 macro setup 
@@ -45,8 +45,7 @@ macro set_globals
  macro/global/create nev_total 0    
    
  macro/global/create ievent           1          'Event counter'
-   
-   
+      
 *************** create global macros for directories ********************
  macro/global/create run       /dui/run
  macro/global/create event     /dui/event
