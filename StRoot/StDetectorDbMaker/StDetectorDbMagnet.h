@@ -1,9 +1,10 @@
 #ifndef StDetectorDbMagnet_h
 #define StDetectorDbMagnet_h
 
-#include <iostream.h>
 #include "StMaker.h"
 
+class  ostream;
+class  TTable;
 struct starMagOnl_st;
 
 enum StMagnetPolarity {eUnknownMField, eFullMFieldPolB, eHalfMFieldPolB,

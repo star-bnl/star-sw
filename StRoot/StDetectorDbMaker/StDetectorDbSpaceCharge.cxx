@@ -4,6 +4,12 @@
 #include "StDetectorDbMagnet.h"
 #include "StDetectorDbRichScalers.h"
 
+/*!
+
+ This class provides and interface to get the space charge correction.
+
+*/
+
 /// Initialize Instance
 StDetectorDbSpaceCharge* StDetectorDbSpaceCharge::sInstance = 0;
 

@@ -1,6 +1,9 @@
 #include "StDetectorDbTpcVoltages.h"
 #include "tables/St_tpcHighVoltages_Table.h"
 
+/*! 
+ This class is used to get TPC voltages durring the run. The data contained within is NOT the voltages over time, but rather the set points used. These have only changed a few times per year. 
+*/
 
 /// Initialize Instance
 StDetectorDbTpcVoltages* StDetectorDbTpcVoltages::sInstance = 0;
@@ -52,7 +55,7 @@ StDetectorDbTpcVoltages::StDetectorDbTpcVoltages(){
 /// Default destructor, does nothing
 StDetectorDbTpcVoltages::~StDetectorDbTpcVoltages(){};
 
-
+/// Gets cathode voltages
 double StDetectorDbTpcVoltages::getCathodeVoltage(){
   double value = 0;
   
@@ -62,6 +65,7 @@ double StDetectorDbTpcVoltages::getCathodeVoltage(){
   return value;
 };
 
+/// Gets gating grid voltage
 double StDetectorDbTpcVoltages::getGGVoltage(){
   double value = 0;
   
@@ -72,7 +76,7 @@ double StDetectorDbTpcVoltages::getGGVoltage(){
 };
 
 
-
+/// outputs information to ostream
 ostream& operator<<(ostream& os, StDetectorDbTpcVoltages& v){
 
   os << "TPC High Voltages: Cathode = " << v.getCathodeVoltage()
@@ -80,3 +84,4 @@ ostream& operator<<(ostream& os, StDetectorDbTpcVoltages& v){
 
   return os;
 }
+

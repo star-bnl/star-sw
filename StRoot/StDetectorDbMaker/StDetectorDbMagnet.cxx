@@ -1,6 +1,11 @@
 #include "StDetectorDbMagnet.h"
 #include "tables/St_starMagOnl_Table.h"
 
+/*!
+   This class provites and interface to the magnet status. It can provide the nominal scale factor as well as the current.
+
+*/
+
 /// Initialize Instance
 StDetectorDbMagnet* StDetectorDbMagnet::sInstance = 0;
 

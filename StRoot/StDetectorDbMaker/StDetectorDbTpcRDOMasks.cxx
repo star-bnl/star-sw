@@ -1,7 +1,7 @@
 #include "StDetectorDbTpcRDOMasks.h"
 #include "tables/St_tpcRDOMasks_Table.h"
 
-/* 
+/*! 
 In database, TPC Sector 1 and 2 are packed into Sector 1 with higher 6 bits belonding to sector 2, lower order to sector 1. Sector 3 and 4 in sector 2, etc. This class pulls the sector, rdo enable out in human readable Sector (1-24) rdo 1-6
 
 It is a singleton which requires manual updating, usually taken care of in StDetectorDbMaker.cxx::Make(). If no data exists all values return DEAD. To use:

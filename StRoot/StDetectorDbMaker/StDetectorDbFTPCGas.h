@@ -1,9 +1,9 @@
 #ifndef StDetectorDbFTPCGas_h
 #define StDetectorDbFTPCGas_h
 
-#include <iostream.h>
 #include "StMaker.h"
 
+class  ostream;
 struct ftpcGasSystem_st;
 struct ftpcGasOut_st;
 struct tpcGas_st;
