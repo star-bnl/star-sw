@@ -48,6 +48,13 @@ c
 c   modificattions:
 c   ==============
 C
+C   1 Dec MA Lisa
+C	- added ntuple 500+event# to show pixel information for each hit
+C
+C   14Dec MA Lisa
+C	- account for the fact that # Geant volumes over each row may vary
+C	  through use of numbv_row array
+C
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
@@ -132,11 +139,11 @@ c
          integer iquest(100)
 
          integer nquota,nvar,icycle,nvar2,nvar3
-         character*4 chtags(9),chtags2(11),chtags3(5)
+         character*4 chtags(9),chtags2(12),chtags3(5)
 C-----------------------------------------------------------------------
          logical lstat,first
 
-         real vec(11)
+         real vec(17)
 
          integer istat
          integer indx, ihit
@@ -145,7 +152,6 @@ C-----------------------------------------------------------------------
 
          integer mxhits
          parameter (mxhits = 45)
-         integer mcptr(4*mxhits),dtptr(mxhits)
          
          integer nmctrk,nhitrk,itrk,nmchit,oldmchit
          integer nhitrk2,nmchit2
@@ -156,28 +162,42 @@ C-----------------------------------------------------------------------
          real tphit_q(mxhits),mchit_q(mxhits)
 
 	integer nvar4
-	character*4 chtags4(11)
+	character*4 chtags4(17)
 	integer khit,kclus,nseq_hit,ktpc_row,kseq_count
 	integer ksector,krow,kseq,kpix,kdatum,kpad
 	integer numpix_seq,kadc,ktdc,kpix_count
 	integer kmcid,krowtemp
-	logical kstatus,tpg_local_to_global
+	logical kstatus,tpg_local_to_global,tpg_global_to_local
 	double precision tpg_pad_to_x,tpg_row_to_y
 	double precision invec(3),outvec(3)
-	real xtemp,time_bucket
+	real time_bucket
 	integer mxrow
 	parameter(mxrow=45)
 	integer id_pad(mxrow)
 	integer imal
-	
+
+	real desum
+
+c to account for the fact that the number or volumes per row has changed..
+
+	integer numbv_row(mxrow),numbv_row_max
+	data numbv_row/9,9,9,9,9,9,9,9,9,9,9,9,9,	! inner sector
+     +		 5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,	! outer sector
+     +		 5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5/
+	parameter (numbv_row_max=9)
+	logical testcond
+
+         integer mcptr(numbv_row_max*mxhits),dtptr(mxhits)
+
 C-----------------------------------------------------------------------
-         data nvar/9/,nvar2/11/,nvar3/5/,nvar4/11/
+         data nvar/9/,nvar2/12/,nvar3/5/,nvar4/17/
          data chtags/'itrk','itcl','nrow','x','y','z','prf','zrf','q'/
          data chtags2/'itrk','mcx ','mcy ','mcz ','tpx ','tpy ','tpz '
-     +,              'delx','dely','delz','nrow'/
+     +,              'delx','dely','delz','nrow', 'clus'/
          data chtags3/'prec','mce','tpe','rde','pre2'/
 	 data chtags4/'hit ','clus','sect','row ','pad ',
-     +		      'tdc ','adc ','mcid','xpix','ypix','zpix'/
+     +		      'tdc ','adc ','mcid','xpix','ypix','zpix',
+     +		      'xloc','yloc','zloc','xh_l','yh_l','zh_l'/
          data first/.true./,ihisto/0/
 C-----------------------------------------------------------------------
 c
@@ -228,11 +248,11 @@ c things needed for the ntuple 500+ihisto...
          ihisto = ihisto+1
          call hbookn(200+ihisto,'Hit Info',nvar,'ntup',8000,
      +           chtags)
-         call hbookn(300+ihisto,'Compare Info',nvar2,'ntup',11000,
+         call hbookn(300+ihisto,'Compare Info',nvar2,'ntup',12000,
      +              chtags2)
          call hbookn(400+ihisto,'Track Info',nvar3,'ntup',4000,
      +              chtags3)
-         call hbookn(500+ihisto,'Hit Pixel Info',nvar4,'ntup',11000,
+         call hbookn(500+ihisto,'Hit Pixel Info',nvar4,'ntup',17000,
      +              chtags4)
 c        
 c        proceed with evaluation...
@@ -271,11 +291,11 @@ c
            nmchit2 = 0
            oldmchit = 0
            call vzero(dtptr,45)
-           call vzero(mcptr,180)
+c           call vzero(mcptr,180)
 
            call vzero(tphit_q,45)
            call vzero(mchit_q,45)
-           call vzero(mcptr,4*mxhits)
+           call vzero(mcptr,numbv_row_max*mxhits)
 c
 c          build pointers to reconstructed hits on itrk
 c
@@ -302,12 +322,12 @@ c
               if(mhits_tpc(ihit).itrk.eq.itrk)then
                  nmctrk = nmctrk + 1
                  numbv = mhits_tpc(ihit).numbv
-                 
+c note that iwire no longer refers to wire# - it is subvolume over row...
                  iwire = numbv/10000
                  isect = (numbv-10000*iwire)/100
                  irow = (numbv-10000*iwire-100*isect)
 
-                 mcptr((irow-1)*4+iwire) = ihit
+                 mcptr((irow-1)*numbv_row_max+iwire) = ihit
               endif
            enddo
 c          write(6,*)' ',nmctrk,' mchits on itrk = ',itrk
@@ -316,10 +336,17 @@ c          collect comparison statistics for all mc/rec hits on itrk
 c
            do irow = 1, 45
 
-              if(mcptr((irow-1)*4+1).ne.0 
-     +       .or.mcptr((irow-1)*4+2).ne.0 
-     +       .or.mcptr((irow-1)*4+3).ne.0 
-     +       .or.mcptr((irow-1)*4+4).ne.0 )then
+c              if(mcptr((irow-1)*4+1).ne.0 
+c     +       .or.mcptr((irow-1)*4+2).ne.0 
+c     +       .or.mcptr((irow-1)*4+3).ne.0 
+c     +       .or.mcptr((irow-1)*4+4).ne.0 )then
+
+	      testcond = .false.
+	      do iwire=1,numbv_row(irow)
+		testcond = (testcond.or.
+     +			(mcptr((irow-1)*numbv_row_max+iwire).ne.0))
+	      enddo
+	      if (testcond) then
                  nmchit = nmchit + 1
                  if(irow.ge.40)then
                     nmchit2 = nmchit2 + 1
@@ -336,23 +363,35 @@ c
                  vec(4) = 0.
 
                  wire_hits = 0
-                 do kwir=1,4
-                    if(mcptr((irow-1)*4+kwir).ne.0)then
-                       vec(2)=vec(2)
-     +                           +mhits_tpc(mcptr((irow-1)*4+kwir)).x(1)
-                       vec(3)=vec(3)
-     +                           +mhits_tpc(mcptr((irow-1)*4+kwir)).x(2)
-                       vec(4)=vec(4)
-     +                           +mhits_tpc(mcptr((irow-1)*4+kwir)).x(3)
-                       mchit_q(nmchit)=mchit_q(nmchit)
-     +                       +1.e06*mhits_tpc(mcptr((irow-1)*4+kwir)).de
-                       wire_hits = wire_hits + 1
-                    endif
+c something of a philosophical point: could weight the x,y,z averages
+c  by dE.  To do this, remove the *'s
+		 desum = 0.0
+                 do kwir=1,numbv_row(irow)
+                  if(mcptr((irow-1)*numbv_row_max+kwir).ne.0)then
+                   vec(2)=vec(2)
+     +              +mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).x(1)
+*     +              *mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).de
+                   vec(3)=vec(3)
+     +              +mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).x(2)
+*     +              *mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).de
+                   vec(4)=vec(4)
+     +              +mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).x(3)
+*     +              *mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).de
+                   mchit_q(nmchit)=mchit_q(nmchit)
+     +              +1.e06*mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).de
+                   wire_hits = wire_hits + 1
+		   desum = desum + 
+     +              mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).de
+                  endif
                  enddo
+*                 if(desum.gt.0.0)then
                  if(wire_hits.gt.0)then
                     vec(2)=vec(2)/float(wire_hits)
                     vec(3)=vec(3)/float(wire_hits)
                     vec(4)=vec(4)/float(wire_hits)
+*                    vec(2)=vec(2)/desum
+*                    vec(3)=vec(3)/desum
+*                    vec(4)=vec(4)/desum
                  endif
 c                if(irow .le. pad_plane(1).nrow_in)then
                  if(irow .le. 13)then
@@ -372,6 +411,7 @@ c
                     vec(8) = vec(2)-vec(5)
                     vec(9) = vec(3)-vec(6)
                     vec(10) = vec(4)-vec(7)
+		    vec(12) = tphit(dtptr(irow)).cluster
                  else
                     vec(5) = 0.
                     vec(6) = 0.
@@ -424,8 +464,10 @@ c now fill pixel data for each hit - added 28nov94 mal
 *	goto 119
 
 	do khit=1,tphith.nok
-*	  WRITE(17,*)' AT TOP OF LOOP 1'
 	  kclus = tphit(khit).cluster
+	  invec(1)=dble(tphit(khit).x)
+	  invec(2)=dble(tphit(khit).y)
+	  invec(3)=dble(tphit(khit).z)
 	  nseq_hit = tpcluster(kclus).nseq
 	  kseq = tpcluster(kclus).jseq
 	  ktpc_row = tpcluster(kclus).secpad
@@ -436,29 +478,25 @@ c now fill pixel data for each hit - added 28nov94 mal
 	  else
 	    krowtemp = krow
 	  endif
+	  kstatus=tpg_global_to_local(ksector,invec,outvec)
+	  vec(15)=real(outvec(1))
+	  vec(16)=real(outvec(2))
+	  vec(17)=real(outvec(3))
 	  vec(1)=khit
 	  vec(2)=kclus
 	  vec(3)=ksector
 	  vec(4)=krow
 	  invec(2)=tpg_row_to_y(krow,ksector)
-*	  WRITE(17,*)' ENTERING LOOP 2'
+	  vec(13) = real(invec(2))
 	  do kseq_count=1,nseq_hit
-*	    WRITE(17,*)' AT TOP OF LOOP 2'
-*	    WRITE(17,*)'KSEQ,KROWTEMP,KROW = ',KSEQ,KROWTEMP,KROW
 	    kpad = tpseq(kseq).secpad - id_pad(krowtemp)
-*	    WRITE(17,*)'KPAD=',KPAD
 	    kpix = tpseq(kseq).jpix
-*	    WRITE(17,*)'KPIX=',KPIX
 	    kdatum=tppixel(kpix).datum
 	    numpix_seq=ibits(kdatum,8,6)
-*	    WRITE(17,*)'NUMPIX=',NUMPIX_SEQ
 	    vec(5)=kpad
-	    xtemp = kpad
-*	    WRITE(17,*)'XTEMP=',XTEMP
-	    invec(1)=tpg_pad_to_x(xtemp,krow,ksector)
-*	    WRITE(17,*)' ENTERING LOOP 3'
+	    invec(1)=tpg_pad_to_x(kpad,krow,ksector)
+	    vec(12) = real(invec(1))
 	    do kpix_count=1,numpix_seq
-*	      WRITE(17,*)' AT TOP OF LOOP 3'
 	      kdatum=tppixel(kpix).datum
 	      kadc = ibits(kdatum,16,16)
 	      ktdc = ibits(kdatum,0,8) + 256*ibits(kdatum,14,2)
@@ -467,21 +505,19 @@ c now fill pixel data for each hit - added 28nov94 mal
 	      vec(7)=kadc
 	      vec(8)=kmcid
 	      invec(3) = dble(ktdc*time_bucket)
+	      vec(14) = real(invec(3))
 	      kstatus=tpg_local_to_global(ksector,invec,outvec)
+	      if (.not.kstatus)
+     +		write(6,*)'Global transform failed!!',ksector
 	      vec(9)=real(outvec(1))
 	      vec(10)=real(outvec(2))
 	      vec(11)=real(outvec(3))
-*	      write(49,'(11(f6.2,1x))')(vec(imal),imal=1,11)
-*	      write(49,*)(vec(imal),imal=1,11)
 	      call hfn(500+ihisto,vec)
 	      kpix=kpix+1
 	    enddo
-*	    WRITE(17,*)' OUT OF LOOP 3'
 	    kseq = tpseq(kseq).next
 	  enddo
-*	  WRITE(17,*)' OUTOF LOOP 2'
 	enddo
-*	WRITE(17,*)' OUTOF LOOP 1'
 
  119	continue
 

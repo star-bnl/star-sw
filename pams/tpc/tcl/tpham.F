@@ -90,6 +90,11 @@ C	the padplane.  (it is atan(delta_time/delta_pad)).  It is hoped
 C	that this variable, along with prf and zrf, will give information
 C	about the crossing and dip angles, alpha and lambda.
 C
+C    13 Dec 1994 - MA Lisa
+C     -	Changed the way x is calculated from the sector/pad #'s.
+C	Now I do the job of the tpg routine tpg_pad_to_x here, since
+C	now that routine demands integer pad#
+C
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
@@ -257,7 +262,12 @@ c          account for "lower-edge" binning in z coordinate
 c
            invec(3)=dble(tphit(tphith.nok).z*time_bucket)
            invec(2)=tpg_row_to_y(irow,isec)
-           invec(1)=tpg_pad_to_x(tphit(tphith.nok).x,irow,isec)
+c
+c mal 13dec94 - tpg_pad_to_x wants pad passed as integer which screws me
+c  		up, so I just do tpg's job explicitly...
+c           invec(1)=tpg_pad_to_x(tphit(tphith.nok).x,irow,isec)  
+	   invec(1) = sector(isec).xrow(irow) + 
+     +		  (tphit(tphith.nok).x-1.0)*sector(isec).pad_x_space
 
            lstat=tpg_local_to_global(isec,invec,outvec)
 
@@ -717,6 +727,15 @@ C-----------------------------------------------------------------------
 	real radicand
 	real sum
 C-----------------------------------------------------------------------
+
+
+
+***** I am bypassing all the fancy stuff below for a simple weighted mean **
+
+	call tph_weighted_mean(tseq,aseq,itim,t0,tau)
+	return
+
+************************************************************8
 
 	imax = lvmax(aseq,itim)
 	if ((imax.ge.2.).and.(imax.lt.itim)) then

@@ -128,43 +128,7 @@ C----------------------------------------------------------------------
 	DATA    IDE1 /0/
 
 C----------------------------------------------------------------------
-c--------- mal - inserted just temporarily... -------------------
-        integer iii,jjj
-        integer secmal,rowmal,padmal
-        integer padsprevious(1:45)
-        integer tpptrmal,nbkts,ibkt
-        integer adcmal,tdcmal,idmal
 
-        padsprevious(1) = 0
-        do iii=2,45
-          padsprevious(iii) = padsprevious(iii-1)+
-     1                          pad_plane(1).npads(iii-1)
-        enddo
- 
-c output all occupied pixels to a file for later visualization
-        write(6,*)'writing contents of pixels to unit 39'
-        write(6,*)'there are ',tppadh.nok,' pixels to write out'
-        do iii=1,tppadh.nok
-          secmal = tppad(iii).tpc_row/100
-          rowmal = tppad(iii).tpc_row - 100*secmal
-          padmal = tppad(iii).secpad - padsprevious(rowmal)
-          if (rowmal.gt.pad_plane(1).nrow_in) 
-     1          rowmal=rowmal-pad_plane(1).nrow_in
-          tpptrmal = tppad(iii).jpix
-          do jjj=1,tppad(iii).nseq
-            nbkts = ibits(tppixel(tpptrmal).datum,8,6)
-            do ibkt = 1,nbkts
-              adcmal=ibits(tppixel(tpptrmal).datum,16,16)
-              tdcmal=ibits(tppixel(tpptrmal).datum,0,8)+
-     1                  ibits(tppixel(tpptrmal).datum,14,2)*256
-              idmal=tpmcpix(tpptrmal).mcid
-              tpptrmal = tpptrmal+1
-              write(39,'(6(i4,5x))')
-     1                  secmal,rowmal,padmal,tdcmal,adcmal,idmal
-            enddo
-          enddo
-        enddo
-c----------------------------------------------------
 	TCL_Make_Clusters = tucod_ok
 
 *       CALL MESSAGE(
@@ -616,6 +580,12 @@ c
 c   19nov94 MALisa - small stuff: jtppad no longer passed, since it is internal
 c				  also, inconsistency in row OR sector will
 c				  result in failure now (was row AND sector)
+c
+c   18dec94 MALisa - fixed a major and insidious bug which did not
+c		     properly index pixel pointer if there are more than
+c		     one sequence on a pad
+c
+
 #include "tas_structures.inc"
 
 #include "tpg_pad_plane_pars.inc"
@@ -747,10 +717,12 @@ c->RJM  starts at jsector = 1; must translate from tppads 1,45 rows
 	  Nsequences = tppad( Jtppad ).nseq   !Number of sequences for this pad.
 
           nseqpix = 0
+	  jndx = tppad(jtppad).jpix	! mal 18dec94
 
  	  DO Isequence = 1, Nsequences
 
-             jndx = tppad(jtppad).jpix + nseqpix
+c BUG BUG BUG! - found 18dec94 malisa     jndx = tppad(jtppad).jpix + nseqpix
+	     jndx = jndx + nseqpix
              ldatum = tppixel(jndx).datum
              nseqpix = iand(idatum(2),seqmask)/'100'X
              adc = idatum(1)
