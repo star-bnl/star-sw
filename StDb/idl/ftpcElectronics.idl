@@ -1,0 +1,13 @@
+/*    ftpcElectronics.idl
+*
+*  Table: ftpcElectronics
+*
+*       description:
+*/ 
+
+
+struct ftpcElectronics { 
+
+   double  tZero;   /*   us (microseconds)  */
+
+ };  
