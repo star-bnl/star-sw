@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.h,v 1.6 2001/05/17 20:45:19 jcs Exp $
+// $Id: StFtpcDriftMapMaker.h,v 1.7 2001/07/12 18:17:18 jcs Exp $
 // $Log: StFtpcDriftMapMaker.h,v $
+// Revision 1.7  2001/07/12 18:17:18  jcs
+// remove unnecessary calls to StarDb/ftpc tables
+//
 // Revision 1.6  2001/05/17 20:45:19  jcs
 // change to use Jim Thomas StMagUtilities
 //
@@ -33,9 +36,6 @@
 
 #include "StDbUtilities/StMagUtilities.h"
 
-class St_ftpcClusterPars;
-class St_ftpcSlowSimGas;
-class St_ftpcSlowSimPars;
 class St_ftpcDimensions;
 class St_ftpcPadrowZ;
 class St_ftpcEField;
@@ -53,11 +53,8 @@ class StFtpcDriftMapMaker : public StMaker {
  private:
    char*   fTableName;      // c-structure name that is same as table in database
    char*   fOutputFileName; // file name for output
-  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.6 2001/05/17 20:45:19 jcs Exp $";
+  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.7 2001/07/12 18:17:18 jcs Exp $";
   // Int_t         m_mode;        // mode 1 = primaries;
-   St_ftpcClusterPars   *m_clusterpars;   //!
-   St_ftpcSlowSimGas    *m_slowsimgas;    //!
-   St_ftpcSlowSimPars   *m_slowsimpars;   //!
    St_ftpcDimensions    *m_dimensions;    //!
    St_ftpcPadrowZ       *m_padrow_z;      //!
    St_ftpcEField        *m_efield;        //!
@@ -76,7 +73,7 @@ class StFtpcDriftMapMaker : public StMaker {
 
   // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.6 2001/05/17 20:45:19 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.7 2001/07/12 18:17:18 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StFtpcDriftMapMaker, 1)  
 };
