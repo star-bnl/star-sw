@@ -1,5 +1,10 @@
-// $Id: StFtpcTrack.cc,v 1.11 2001/01/25 15:21:57 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.12 2001/05/04 09:19:58 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.12  2001/05/04 09:19:58  oldi
+// For non main vertex tracks the momentum of the fit with vertex constraint was
+// stored. To fix this  Fit-> was changed to looseFit-> at the appropriate
+// locations.
+//
 // Revision 1.11  2001/01/25 15:21:57  oldi
 // Review of the complete code.
 // Fix of several bugs which caused memory leaks:
@@ -496,9 +501,9 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
   StFtpcMomentumFit *Fit = new StFtpcMomentumFit(&vertexPos, Hit, numHits);
 
   if (id_start_vertex < 0 ) {
-    mP.SetX(Fit->momentum().x());
-    mP.SetY(Fit->momentum().y());
-    mP.SetZ(Fit->momentum().z());
+    mP.SetX(looseFit->momentum().x());
+    mP.SetY(looseFit->momentum().y());
+    mP.SetZ(looseFit->momentum().z());
     StThreeVector<double> firstPoint(Hit[0].x(),Hit[0].y(),Hit[0].z());
     pl = looseFit->pathLength(firstPoint,nv);
     mV.SetX(looseFit->x(pl));
@@ -523,9 +528,9 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
   else {
 
      if (mDca > max_Dca) {
-       mP.SetX(Fit->momentum().x());
-       mP.SetY(Fit->momentum().y());
-       mP.SetZ(Fit->momentum().z());
+       mP.SetX(looseFit->momentum().x());
+       mP.SetY(looseFit->momentum().y());
+       mP.SetZ(looseFit->momentum().z());
        StThreeVector<double> firstPoint(Hit[0].x(), Hit[0].y(), Hit[0].z());
        pl = looseFit->pathLength(firstPoint,nv);
        mV.SetX(looseFit->x(pl));
