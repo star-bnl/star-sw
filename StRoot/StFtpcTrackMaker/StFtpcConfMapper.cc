@@ -1,5 +1,11 @@
-// $Id: StFtpcConfMapper.cc,v 1.4 2000/06/07 10:04:18 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.5 2000/06/13 14:34:25 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.5  2000/06/13 14:34:25  oldi
+// Excluded function call to TrackLoop().
+// Changed cout to gMessMgr->Message().
+// Limits for pseudorapidity eta changed. They are now calculated from the
+// z-position of the main vertex directly. This solves bug #574.
+//
 // Revision 1.4  2000/06/07 10:04:18  oldi
 // Changed 0 pointers to NULL pointers.
 // Constructor changed. Setting of mNumRowSegment is not possible anymore to
@@ -29,7 +35,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 07.06.2000
+//----------Last Modified: 13.06.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcConfMapper.hh"
@@ -54,7 +60,7 @@
 #include "TTUBE.h"
 #include "TBRIK.h"
 
-#include <assert.h>
+#include "StMessMgr.h"
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                                                                //
@@ -84,17 +90,19 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t v
   : StFtpcTracker(fcl_fppoint, vertexPos)
 {
   // Constructor.
-  
+
+  if (bench) { 
+    mBench = new TBenchmark();
+    mBench->Start("init");
+  }
+
   mNumRowSegment = 20;   // The number of rows has to be fixed to 20 (because this is the number of rows in both Ftpc's)!
   mNumPhiSegment = phi_segments; 
   mNumEtaSegment = eta_segments; 
   mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
   mMaxFtpcRow = mNumRowSegment/2;
 
-  if (bench) { 
-    mBench = new TBenchmark();
-    mBench->Start("init");
-  }
+  CalcEtaMinMax();
 
   mMergedTracks = 0;
   mMergedTracklets = 0;
@@ -133,7 +141,7 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t v
 
   if (mBench) {
     mBench->Stop("init");
-    cout << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endl;
+    gMessMgr->Message("", "I", "OST") << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endm;
   }
 }
 
@@ -168,11 +176,11 @@ void StFtpcConfMapper::MainVertexTracking()
 
   SetVertexConstraint(true);
   ClusterLoop();
-  TrackLoop();
+  //TrackLoop();
   
   if (mBench) {
     mBench->Stop("main_vertex");
-    cout << "Main vertex tracking finished (" << mBench->GetCpuTime("main_vertex") << " s)." << endl;
+    gMessMgr->Message("", "I", "OST") << "Main vertex tracking finished (" << mBench->GetCpuTime("main_vertex") << " s)." << endm;
   }
   
   return;
@@ -192,7 +200,7 @@ void StFtpcConfMapper::FreeTracking()
 
   if (mBench) {
     mBench->Stop("non_vertex");
-    cout << "Non vertex tracking finished  (" << mBench->GetCpuTime("non_vertex") << " s)." << endl;
+    gMessMgr->Message("", "I", "OST") << "Non vertex tracking finished  (" << mBench->GetCpuTime("non_vertex") << " s)." << endm;
   }
   
   return;
@@ -359,6 +367,22 @@ void StFtpcConfMapper::SetTrackletCuts(Double_t maxangle, Bool_t vertex_constrai
 }
 
 
+void StFtpcConfMapper::CalcEtaMinMax()
+{
+  // Calculates the min. and max. value of eta (pseudorapidity) with the given main vertex.
+  // The FTPCs are placed in a distance to the point of origin between 162.75 and 256.45 cm.
+  // Their inner radius is 8, the outer one 30 cm. This means they are seen from (0, 0, 0) 
+  // under an angle between 1.79 and 10.62 degrees which translates directly into max. eta and min. eta. 
+  // Due to the fact that the main vertex is shifted, the values of min./max. eta is calculated for each 
+  // event. To be save, 0.01 is substracted/added.
+  
+  mEtaMin = -TMath::Log(TMath::Tan( TMath::ASin(30./ (162.75 - TMath::Abs(mVertex->GetZ()) ) ) /2.) ) - 0.01;
+  mEtaMax = -TMath::Log(TMath::Tan( TMath::ASin( 8./ (256.45 + TMath::Abs(mVertex->GetZ()) ) ) /2.) ) + 0.01;
+
+  return;
+}
+
+
 Int_t StFtpcConfMapper::GetRowSegm(StFtpcConfMapPoint *hit)
 {
  // Returns number of pad segment of a specific hit.
@@ -382,22 +406,12 @@ Int_t StFtpcConfMapper::GetEtaSegm(StFtpcConfMapPoint *hit)
   Double_t eta;
   Int_t eta_segm;
   
-  // Short explanation of the following two lines of code:
-  // The FTPC are placed in a distance to the point of origin between 162.75 and 256.45 cm.
-  // Their inner radius is 8, the outer one 30 cm. This means they are seen from (0, 0, 0) 
-  // under an angle between 1.79 and 10.44 degrees. If the main vertex is shifted about -/+50 cm
-  // they are seen between 1.50/2.22  and 8.03/14.90 degrees. This translates to limits in pseudorapidity
-  // between 4.339/3.944 and 2.657/2.034. The maximal possible values were chosen.
-
-  Double_t eta_min = 2.0;  // minimal possible eta value
-  Double_t eta_max = 4.4;  // maximal possible eta value
-  
   if ((eta = hit->GetEta()) > 0.) {  // positive values
-    eta_segm = (Int_t)((eta-eta_min) * mNumEtaSegment/(eta_max-eta_min) /2.); // Only use n_eta_segm/2. bins because of negative eta values.
+    eta_segm = (Int_t)((eta - mEtaMin) * mNumEtaSegment/(mEtaMax - mEtaMin) /2.); // Only use n_eta_segm/2. bins because of negative eta values.
   }
 
   else {                             // negative eta values
-    eta_segm = (Int_t)((-eta-eta_min) * mNumEtaSegment/(eta_max-eta_min) /2. + mNumEtaSegment/2.);
+    eta_segm = (Int_t)((-eta -  mEtaMin) * mNumEtaSegment/(mEtaMax - mEtaMin) /2. + mNumEtaSegment/2.);
   }
   
   return eta_segm;
@@ -490,8 +504,9 @@ Double_t const StFtpcConfMapper::TrackAngle(const StFtpcPoint *lasthitoftrack, c
   Int_t n = track->GetNumberOfPoints();
   
   if (n<2) {
-    cout << "StFtpcConfMapper::TrackAngle(StFtpcPoint *lasthitoftrack, StFtpcPoint *hit)" << endl 
-	 << " - Call this function only if you are sure to have at least two points on the track already!" << endl;
+    gMessMgr->Message("StFtpcConfMapper::TrackAngle(StFtpcPoint *lasthitoftrack, StFtpcPoint *hit)", "E", "OST");    
+    gMessMgr->Message(" - Call this function only if you are sure to have at least two points on the track already!", "E", "OST");
+
     return false;
   }
 
@@ -521,8 +536,9 @@ Double_t const StFtpcConfMapper::TrackletAngle(StFtpcTrack *track, Int_t n)
   }
 
   if (n<3) {
-    cout << "StFtpcConfMapper::TrackletAngle(StFtpcTrack *track)" << endl 
-	 << " - Call this function only if you are sure to have at least three points on this track already!" << endl;
+    gMessMgr->Message("StFtpcConfMapper::TrackletAngle(StFtpcTrack *track, Int_t n)", "E", "OST");
+    gMessMgr->Message(" - Call this function only if you are sure to have at least three points on this track already!", "E", "OST");
+
     return false;
   }
     
@@ -709,7 +725,7 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
   Double_t chi2circle = 0.;
   Double_t chi2length = 0.;
   
-  for (Int_t i = 0; i < n; i++) {
+  for (Int_t i = start_counter; i < n; i++) {
     trackpoint = (StFtpcConfMapPoint *)trackpoints->At(i);
     asin_arg = (trackpoint->GetYv() - track->GetCenterY()) / track->GetRadius();
 
@@ -926,7 +942,7 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
   // It forms tracklets then extends them to tracks.
 
   Double_t *coeff = NULL;
-  Double_t chi2[2];
+  //Double_t chi2[2];
 
   StFtpcConfMapPoint *closest_hit = NULL;
   StFtpcTrack *track = NULL;
@@ -1277,8 +1293,8 @@ void StFtpcConfMapper::TrackLoop()
       num_extended++;
     }
   }
-
-  cout << num_extended << " tracks extended" << endl;
+  
+  gMessMgr->Message("", "I", "OST") << num_extended << " tracks extended" << endm;
 
   return;
 }
@@ -1348,52 +1364,47 @@ Bool_t StFtpcConfMapper::ExtendTrack(StFtpcTrack *track)
 }
 
 
-void StFtpcConfMapper::Cout(Int_t width, Int_t figure) 
-{
-  // Prints the integer figure in a field with width.
-
-  cout.width(width);
-  cout << figure;
-
-  return;
-}
-
-
-void StFtpcConfMapper::Cout(Int_t width, Double_t figure) 
-{
-  // Prints the double precission figure in a field with width.
-
-  cout.width(width);
-  cout << figure;
-
-  return;
-}
-
-
 void StFtpcConfMapper::TrackingInfo()
 {
   // Information about the tracking process.
+  
+  gMessMgr->Message("", "I", "OST") << endm;
+  gMessMgr->Message("Tracking information", "I", "OST");
+  gMessMgr->Message("--------------------", "I", "OST");
+  
+  gMessMgr->Message("", "I", "OST");
+  gMessMgr->width(5);
+  *gMessMgr << GetNumberOfTracks() << " (";
+  gMessMgr->width(5);
+  *gMessMgr << GetNumMainVertexTracks() << "/";
+  gMessMgr->width(5);
+  *gMessMgr << GetNumberOfTracks() - GetNumMainVertexTracks() << ") tracks (main vertex/non vertex) found." << endm;
+  
+  gMessMgr->Message("", "I", "OST");
+  gMessMgr->width(5);
+  *gMessMgr << GetNumberOfClusters() << " (";
+  gMessMgr->width(5);
+  *gMessMgr << GetNumberOfClusters() - GetNumClustersUnused() << "/";
+  gMessMgr->width(5);
+  *gMessMgr << GetNumClustersUnused() << ") clusters (used/unused)." << endm;
 
-                                                           cout << endl;
-                                                           cout << "Tracking information" << endl;
-                                                           cout << "--------------------" << endl;
+  gMessMgr->Message("", "I", "OST") << "       ";
+  gMessMgr->width(5);
+  *gMessMgr << GetNumMergedTracks() << "/";
+  gMessMgr->width(5);
+  *gMessMgr << GetNumMergedTracklets() << "  tracks/tracklets merged." << endm;
 
-  Cout(5, GetNumberOfTracks());                            cout << " (";
-  Cout(5, GetNumMainVertexTracks());                       cout << "/";
-  Cout(5, GetNumberOfTracks() - GetNumMainVertexTracks()); cout << ") tracks (main vertex/non vertex) found." << endl;
+  gMessMgr->Message("", "I", "OST");
+  gMessMgr->width(18);
+  *gMessMgr << GetNumDiffHits() << "  times different hits for circle and length fit found." << endm;
 
-  Cout(5, GetNumberOfClusters());                          cout << " (";
-  Cout(5, GetNumberOfClusters() - GetNumClustersUnused()); cout << "/";
-  Cout(5, GetNumClustersUnused());                         cout << ") clusters (used/unused)." << endl;
+  gMessMgr->Message("", "I", "OST");
+  gMessMgr->width(18);
+  *gMessMgr << GetNumLengthFitNaN() << "  times argument of arcsin set to +/-1." << endm;
 
-                                                           cout << "       ";
-  Cout(5, GetNumMergedTracks());                           cout << "/";
-  Cout(5, GetNumMergedTracklets());                        cout << "  tracks/tracklets merged." << endl;
-
-  Cout(18, GetNumDiffHits());                              cout << "  times different hits for circle and length fit found." << endl;
-  Cout(18, GetNumLengthFitNaN());                          cout << "  times argument of arcsin set to +/-1." << endl;
-
-  Cout(18, GetNumMergedSplits());                           cout << "  split tracks merged." << endl;
+  gMessMgr->Message("", "I", "OST");
+  gMessMgr->width(18);
+  *gMessMgr << GetNumMergedSplits() << "  split tracks merged." << endm;
 
   return;
 }
@@ -1403,21 +1414,33 @@ void StFtpcConfMapper::CutInfo()
 {
   // Information about cuts.
 
-                                 cout << endl;
-                                 cout << "Cuts for main vertex constraint on / off" << endl;
-                                 cout << "----------------------------------------" << endl;
-                                 cout << "Max. angle between last three points of tracklets:  "; 
-  Cout(6, mMaxAngleTracklet[1]); cout << " / "; 
-  Cout(6, mMaxAngleTracklet[0]); cout << endl;
-                                 cout << "Max. angle between last three points of tracks:     "; 
-  Cout(6, mMaxAngleTrack[1]);    cout << " / "; 
-  Cout(6, mMaxAngleTrack[0]);    cout << endl;
-                                 cout << "Max. distance between circle fit and trackpoint:    "; 
-  Cout(6, mMaxCircleDist[1]);    cout << " / "; 
-  Cout(6, mMaxCircleDist[0]);    cout << endl;
-                                 cout << "Max. distance between length fit and trackpoint:    "; 
-  Cout(6, mMaxLengthDist[1]);    cout << " / "; 
-  Cout(6, mMaxLengthDist[0]);    cout << endl;
+  gMessMgr->Message("", "I", "OST") << endm;
+  gMessMgr->Message("", "I", "OST") << "Cuts for main vertex constraint on / off" << endm;
+  gMessMgr->Message("", "I", "OST") << "----------------------------------------" << endm;
+  gMessMgr->Message("", "I", "OST") << "Max. angle between last three points of tracklets:  "; 
+  
+  gMessMgr->width(6);
+  *gMessMgr <<  mMaxAngleTracklet[1] << " / "; 
+  gMessMgr->width(6);
+  *gMessMgr <<  mMaxAngleTracklet[0] << endm;
+  
+  gMessMgr->Message("", "I", "OST") << "Max. angle between last three points of tracks:     "; 
+  gMessMgr->width(6);
+  *gMessMgr <<  mMaxAngleTrack[1] << " / "; 
+  gMessMgr->width(6);
+  *gMessMgr <<  mMaxAngleTrack[0] << endm;
+                      
+  gMessMgr->Message("", "I", "OST") << "Max. distance between circle fit and trackpoint:    "; 
+  gMessMgr->width(6);
+  *gMessMgr <<  mMaxCircleDist[1] << " / "; 
+  gMessMgr->width(6);
+  *gMessMgr <<  mMaxCircleDist[0] << endm;
+
+  gMessMgr->Message("", "I", "OST") << "Max. distance between length fit and trackpoint:    "; 
+  gMessMgr->width(6);
+  *gMessMgr <<  mMaxLengthDist[1] << " / "; 
+  gMessMgr->width(6);
+  *gMessMgr <<  mMaxLengthDist[0] << endl;
 
   return;
 }
@@ -1427,27 +1450,16 @@ void StFtpcConfMapper::SettingInfo()
 {
   // Information about settings.
 
-  cout << endl;
-  cout << "Settings for main vertex constraint on / off" << endl;
-  cout << "--------------------------------------------" << endl;
-  cout << "Points required to create a tracklet:                "; 
-  cout << mTrackletLength[1] << " / "; 
-  cout << mTrackletLength[0] << endl;
-  cout << "Points required for a track:                         ";
-  cout << mMinPoints[1] << " / ";
-  cout << mMinPoints[0] << endl;  
-  cout << "Subsequent padrows to look for next tracklet point:  "; 
-  cout << mRowScopeTracklet[1] << " / "; 
-  cout << mRowScopeTracklet[0] << endl; 
-  cout << "Subsequent padrows to look for next track point:     "; 
-  cout << mRowScopeTrack[1] << " / "; 
-  cout << mRowScopeTrack[0] << endl;
-  cout << "Adjacent phi segments to look for next point:        "; 
-  cout << mPhiScope[1] << " / "; 
-  cout << mPhiScope[0] << endl;
-  cout << "Adjacent eta segments to look for next point:        "; 
-  cout << mEtaScope[1] << " / "; 
-  cout << mEtaScope[0] << endl;
+  gMessMgr->Message("", "I", "OST") << endm;
+  gMessMgr->Message("", "I", "OST") << "Settings for main vertex constraint on / off" << endm;
+  gMessMgr->Message("", "I", "OST") << "--------------------------------------------" << endm;
+  gMessMgr->Message("", "I", "OST") << "Points required to create a tracklet:                " << mTrackletLength[1] << " / " << mTrackletLength[0] << endm;
+  gMessMgr->Message("", "I", "OST") << "Points required for a track:                         " << mMinPoints[1] << " / " << mMinPoints[0] << endm;  
+  gMessMgr->Message("", "I", "OST") << "Subsequent padrows to look for next tracklet point:  " << mRowScopeTracklet[1] << " / " << mRowScopeTracklet[0] << endm; 
+  gMessMgr->Message("", "I", "OST") << "Subsequent padrows to look for next track point:     " << mRowScopeTrack[1] << " / " << mRowScopeTrack[0] << endm;
+  gMessMgr->Message("", "I", "OST") << "Adjacent phi segments to look for next point:        " << mPhiScope[1] << " / " << mPhiScope[0] << endm;
+  gMessMgr->Message("", "I", "OST") << "Adjacent eta segments to look for next point:        " << mEtaScope[1] << " / " << mEtaScope[0] << endm;
+
   return;
 }
 
