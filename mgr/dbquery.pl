@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbquery.pl,v 1.4 1999/09/21 12:26:39 wenaus Exp $
+# $Id: dbquery.pl,v 1.5 1999/11/19 23:13:18 wenaus Exp $
 #
 # $Log: dbquery.pl,v $
+# Revision 1.5  1999/11/19 23:13:18  wenaus
+# more help
+#
 # Revision 1.4  1999/09/21 12:26:39  wenaus
 # Add calib/param databases to backup list
 #
@@ -72,6 +75,11 @@ All comments (to wenaus\@bnl.gov) appreciated.
      <li> Some keys are applicable only for files.
      <font color="green">Green: files and datasets</font>;
      <font color="blue">Blue: files only</font>
+     <li> Files have a 'parameter' field in the name that is used in
+          different ways for different types of files. To select on
+          the basis of the value of this field use "param='value'"
+          in the 'enter your own SQL' field, for example "param='halffield'"
+          for half field data.
      <li> Other sources for test and sample data files are
      <ul>
        <li><a href="/data/disk1_star_test/">/disk1/star/test</a>
