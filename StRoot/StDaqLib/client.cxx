@@ -9,8 +9,9 @@
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/TPC/MemMan.hh"
+#include "StDaqLib/TPC/trans_table.hh"
 
-unsigned short lookup[256];
+
 
 int main(int argc, char *argv[])
 {
@@ -45,10 +46,6 @@ int main(int argc, char *argv[])
     perror("FormatClient");
   }
 
-  //initialize lookup table (dummy version)
-  for (int i=0; i<256; i++){
-    lookup[i] = 4*i;
-  }
 
   while(offset != -1)
     {  
@@ -101,7 +98,7 @@ int main(int argc, char *argv[])
 		fflush(stdout);
 		unsigned char *p = Seq[pad-1][i].FirstAdc;
 		for (int j=0; j<len; j++) {
-		  ADC = lookup[*(p++)];
+		  ADC = log8to10_table[*(p++)];
 		  printf("%d ",ADC);
 		}
 		printf("\n");
