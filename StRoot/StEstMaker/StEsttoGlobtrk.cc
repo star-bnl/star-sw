@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEsttoGlobtrk.cc,v 1.6 2001/02/27 16:56:24 caines Exp $
+ * $Id: StEsttoGlobtrk.cc,v 1.7 2001/02/28 18:27:19 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEsttoGlobtrk.cc,v $
+ * Revision 1.7  2001/02/28 18:27:19  caines
+ * Get psi angle correctly
+ *
  * Revision 1.6  2001/02/27 16:56:24  caines
  * Get helix track info. directly from the fit track
  *
@@ -113,7 +116,8 @@ void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
 
       svtTrkPtr->z0 = mTrack[i]->GetBranch(j)->GetHelix()->z(0);
       svtTrkPtr->psi = mTrack[i]->GetBranch(j)->GetHelix()->phase()
-	*C_DEG_PER_RAD+mTrack[i]->GetBranch(j)->GetHelix()->h()*M_PI_2;
+	+mTrack[i]->GetBranch(j)->GetHelix()->h()*M_PI_2;
+      svtTrkPtr->psi *= C_DEG_PER_RAD;
       svtTrkPtr->tanl = tan(mTrack[i]->GetBranch(j)->GetHelix()->dipAngle());
       q = ((b[2] * mTrack[i]->GetBranch(j)->GetHelix()->h()) > 0 ? -1 : 1);
       svtTrkPtr->invpt = q/mTrack[i]->GetTPCTrack()->GetPt();
