@@ -52,7 +52,9 @@ EventDisplay(const string& name, const string & description, StiToolkit * toolki
 	    DrawingPolicy<StiDrawable> * policy);
   void draw(StiHitContainer * container,
 	    Filter<StiHit>  * filter, 
-	    DrawingPolicy<StiDrawable> * policy);
+	    DrawingPolicy<StiDrawable> * policy,
+	    StiRootDrawableHits & usedHits,
+	    StiRootDrawableHits & unusedHits);
   void reset();
 
   void setStChain(StChain * chain);
@@ -69,6 +71,7 @@ EventDisplay(const string& name, const string & description, StiToolkit * toolki
   StiTrackContainer        * getTrackContainer();
   StiTrackContainer        * getMcTrackContainer();
   EditableFilter<StiHit>   * getHitFilter();
+  EditableFilter<StiHit>   * getMcHitFilter();
   EditableFilter<StiTrack> * getTrackFilter(); 
   EditableFilter<StiTrack> * getMcTrackFilter();   
   EventDisplayParameters   * getOptions();
@@ -115,6 +118,8 @@ EventDisplay(const string& name, const string & description, StiToolkit * toolki
   Messenger & _messenger;  
   StiRootDrawableHits _usedHits;
   StiRootDrawableHits _unusedHits;
+  StiRootDrawableHits _mcUsedHits;
+  StiRootDrawableHits _mcUnusedHits;
   ClassDef(EventDisplay,1)
 };
 

@@ -20,6 +20,7 @@
 #include "Sti/StiDetector.h" 
 #include "Sti/StiHit.h" 
 #include "Sti/StiDefaultTrackFilter.h" 
+#include "Sti/StiDefaultHitFilter.h" 
 #include "Sti/StiDetectorContainer.h"
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiTrackContainer.h"
@@ -172,9 +173,6 @@ void EventDisplay::draw()
   if (view) view->GetRange(pmin,pmax);
   gPad->Clear();
   
-  //_canvas->Clear();
-  //_canvas->cd();
-  //_canvas->Update();
   if (!_initialized)
     {
       cout << "EventDisplay::draw() -I- Initialize detector display"<<endl;
@@ -182,11 +180,11 @@ void EventDisplay::draw()
       _initialized = true;
     }
 
-  if (_options->getDetectorVisible())  _node->Draw();
-  if (_options->getHitVisible())       draw(_hitContainer,    _hitFilter,    _hitDrawingPolicy);
-  //if (_options->getMcHitVisible())     draw(_mcHitContainer,  _mcHitFilter,  _mcHitDrawingPolicy);
-  if (_options->getMcTrackVisible())   draw(_mcTrackContainer,_mcTrackFilter,_mcTrackDrawingPolicy);
-  if (_options->getTrackVisible())     draw(_trackContainer,  _trackFilter,  _trackDrawingPolicy); 
+  if (_options->getDetectorVisible())_node->Draw();
+  if (_options->getHitVisible())    draw(_hitContainer,  _hitFilter,  _hitDrawingPolicy, _usedHits,_unusedHits);
+  if (_options->getMcHitVisible())  draw(_mcHitContainer,_mcHitFilter,_mcHitDrawingPolicy,_mcUsedHits,_mcUnusedHits);
+  if (_options->getMcTrackVisible())draw(_mcTrackContainer,_mcTrackFilter,_mcTrackDrawingPolicy);
+  if (_options->getTrackVisible())  draw(_trackContainer,  _trackFilter,  _trackDrawingPolicy); 
   if (view)
     {
       view = gPad->GetView();
@@ -282,11 +280,13 @@ void EventDisplay::draw(StiTrackContainer * container,
 /// policy    : ptr to drawing policy used to determine the color, style attributes of the hit.
 void EventDisplay::draw(StiHitContainer * container,
 			Filter<StiHit>  * filter, 
-			DrawingPolicy<StiDrawable> * policy)
+			DrawingPolicy<StiDrawable> * policy,
+			StiRootDrawableHits & usedHits,
+			StiRootDrawableHits & unusedHits)
 {  
   if (!container) return;
-  _usedHits.reset();
-  _unusedHits.reset();
+  usedHits.reset();
+  unusedHits.reset();
   const hitmap& map = container->hits();
   for (hitmap::const_iterator it=map.begin(); it!=map.end(); it++) 
     {
@@ -294,27 +294,27 @@ void EventDisplay::draw(StiHitContainer * container,
        for (hitvector::const_iterator iter=hits.begin();iter!=hits.end();iter++)
 	 {
 	   const StiHit * hit = (*iter);
-	   //if (!filter && !filter->filter(hit)) continue;
+	   if (filter && !filter->filter(hit)) continue;
 	   if (!hit) 
 	       continue;
 	   if (hit->timesUsed()>0)
 	     {
-	       _usedHits.add(hit->x_g(), hit->y_g(), hit->z_g() );
+	       usedHits.add(hit->x_g(), hit->y_g(), hit->z_g() );
 	     }
 	   else
 	     {
-	       _unusedHits.add(hit->x_g(), hit->y_g(), hit->z_g() );
+	       unusedHits.add(hit->x_g(), hit->y_g(), hit->z_g() );
 	     }
 	 }
     }
-  _usedHits.setColor(5);
-  _usedHits.setStyle(8);
+  usedHits.setColor(5);
+  usedHits.setStyle(8);
   //_usedHits.setSize(5.);
-  _usedHits.draw();
-  _unusedHits.setColor(6);
-  _unusedHits.setStyle(7);
+  usedHits.draw();
+  unusedHits.setColor(6);
+  unusedHits.setStyle(7);
   //_unusedHits.setSize(5.);
-  _unusedHits.draw();
+  unusedHits.draw();
   //cout << "EventDisplay::draw() -I- Done" << endl;
 }
 
@@ -325,14 +325,15 @@ void EventDisplay::reset()
 /// Create hit and track filters used by this event display.
 void EventDisplay::createFilters()
 {
+  Observer * obs = dynamic_cast<Observer *>(this);
   //cout << "EventDisplay::createFilters() -I- Started" << endl;
-  if (_hitFilter)
-    {
-    }
-  else
-    {
-      cout << "EventDisplay::createFilters() -I- No hit filtered available" << endl;
-    }	
+  _hitFilter = new StiDefaultHitFilter("HitFilter","Reconstructed Hits Filter"); 
+  _hitFilter->initialize();
+  dynamic_cast<Subject*>(_hitFilter)->attach(obs);
+  _mcHitFilter = new StiDefaultHitFilter("McHitFilter","MC Hits Filter"); 
+  _mcHitFilter->initialize();
+  dynamic_cast<Subject*>(_mcHitFilter)->attach(obs);
+
   // Track Filter
   //cout << "EventDisplay::createFilters() -I- Setting up reco track filter" << endl;
   _trackFilter = new StiDefaultTrackFilter("TrackFilter","Reconstructed Tracks Filter"); 
@@ -360,7 +361,6 @@ void EventDisplay::createFilters()
   _trackFilter->add(new EditableParameter("chargeUsed","Use Charge",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kCharge));
   _trackFilter->add(new EditableParameter("chargeMin", "Min Charge", -1., -1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge));
   _trackFilter->add(new EditableParameter("chargeMax", "Max Charge",  1.,  1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge));
-  Observer * obs = dynamic_cast<Observer *>(this);
   dynamic_cast<Subject*>(_trackFilter)->attach(obs);
   //cout << "EventDisplay::createFilters() -I- Setup of reco track filter completed" << endl;
   //cout << "EventDisplay::createFilters() -I- Setting up mc track filter" << endl;
@@ -383,7 +383,6 @@ void EventDisplay::createFilters()
   _mcTrackFilter->add(new EditableParameter("chargeUsed","Use Charge",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kCharge));
   _mcTrackFilter->add(new EditableParameter("chargeMin", "Min Charge", -1., -1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge));
   _mcTrackFilter->add(new EditableParameter("chargeMax", "Max Charge",  1.,  1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge));
-  obs = dynamic_cast<Observer *>(this);
   dynamic_cast<Subject*>(_mcTrackFilter)->attach(obs);
   //cout << "EventDisplay::createFilters() -I- Setup of reco track filter completed" << endl;
   //cout << "EventDisplay::createFilters() -I- Done" << endl;
@@ -458,6 +457,11 @@ StiTrackContainer        * EventDisplay::getMcTrackContainer()
 EditableFilter<StiHit>   * EventDisplay::getHitFilter()
 {
   return _hitFilter;
+}
+
+EditableFilter<StiHit>   * EventDisplay::getMcHitFilter()
+{
+  return _mcHitFilter;
 }
 
 EditableFilter<StiTrack> * EventDisplay::getTrackFilter()

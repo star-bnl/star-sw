@@ -82,13 +82,31 @@ void PrintMenuGroup::printHits()
 
 void PrintMenuGroup::printTracks()
 {
-  cout << "PrintMenuGroup::printTracks() -I- Started"<<endl;
-  StiTrackContainer * trackContainer = getToolkit()->getTrackContainer();
-  if (trackContainer)
-    cout << "TrackContainer - track count:" << trackContainer->getTrackCount(0) << endl;
+  //cout << "PrintMenuGroup::printTracks() -I- Started"<<endl;
+  StiTrackContainer * trackContainer = getToolkit()->getTrackContainer(); 
+  StiTrackContainer * mcTrackContainer = getToolkit()->getMcTrackContainer();
+  if (trackContainer&& mcTrackContainer)
+    {
+      double recRaw  = trackContainer->getTrackCount(0);
+      double recFilt = trackContainer->getTrackCount(getDisplay()->getTrackFilter());
+      double mcRaw   = mcTrackContainer->getTrackCount(0);
+      double mcFilt  = mcTrackContainer->getTrackCount(getDisplay()->getMcTrackFilter());
+      cout << "======================================" << endl
+	   << " Reconstruction Diagnosis" << endl
+	   << "--------------------------------" << endl
+	   << "    Reconstructed tracks:" << endl
+	   << "        unfiltered count:" << recRaw  << endl
+	   << "          filtered count:" << recFilt << endl
+	   << "              MC  tracks:" << endl
+	   << "        unfiltered count:" << mcRaw  << endl
+	   << "          filtered count:" << mcFilt << endl;
+      if (mcFilt>0)
+	cout << "filtered rec/filtered MC:" << recFilt/mcFilt << endl;
+
+    }
   else
     cout << "PrintMenuGroup::printTracks() -E- trackContainer==null"<<endl;
-  cout << "PrintMenuGroup::printTracks() -I- Done"<<endl;
+  //cout << "PrintMenuGroup::printTracks() -I- Done"<<endl;
 }
 
 void PrintMenuGroup::printMcTracks()
@@ -96,7 +114,9 @@ void PrintMenuGroup::printMcTracks()
   cout << "PrintMenuGroup::printMcTracks() -I- Started"<<endl; 
   StiTrackContainer * mcTrackContainer = getToolkit()->getMcTrackContainer();
   if (mcTrackContainer)
-    cout << "mcTrackContainer - track count:" << mcTrackContainer->getTrackCount(0) << endl;
+    {
+      cout << "mcTrackContainer - track count:" << mcTrackContainer->getTrackCount(0) << endl;
+    }
   else
     cout << "PrintMenuGroup::printMcTracks() -E- mcTrackContainer==null"<<endl;
   cout << "PrintMenuGroup::printMcTracks() -I- Done"<<endl;
