@@ -15,6 +15,7 @@
 * editted 7/8/98 Kathy Turner - put in default STAR geometry
 *                               and make kumac more standard
 * editted 7/10/98 Kathy Turner - change directories where tables get written
+* editted 7/11/98 K. Turner - 
 * *******************************************************************
 * ---------available values of input parameters ---------------
 * 
@@ -42,7 +43,7 @@
 * input_file=auau_ce_b0-2_1_200.xdf _
 * 
  macro run__
-   TOP=/scr22/kathy/testdev _
+   TOP=$STAR _
    domain='geometry sim/gstar sim/g2t' _
    phystype=on _
    geomtype=all _   
