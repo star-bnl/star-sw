@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.19 2001/12/23 20:08:04 pfachini Exp $
+// $Id: StLaserEventMaker.cxx,v 1.20 2002/01/03 20:39:38 jeromel Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.20  2002/01/03 20:39:38  jeromel
+// /10^6 for consistency
+//
 // Revision 1.19  2001/12/23 20:08:04  pfachini
 // *** empty log message ***
 //
@@ -678,7 +681,7 @@ Int_t StLaserEventMaker::Finish() {
 //_____________________________________________________________________________
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.19 2001/12/23 20:08:04 pfachini Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.20 2002/01/03 20:39:38 jeromel Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -708,8 +711,8 @@ void StLaserEventMaker::WriteTableToFile(){
   tpcDriftVelocity_st* row = table->GetTable();
   row->cathodeDriftVelocityEast = 0.0;
   row->cathodeDriftVelocityWest = 0.0;
-  row->laserDriftVelocityEast = velocityEast;
-  row->laserDriftVelocityWest = velocityWest;
+  row->laserDriftVelocityEast = velocityEast/1000000.0;
+  row->laserDriftVelocityWest = velocityWest/1000000.0;
   table->SetNRows(1);
   return table;
  }
