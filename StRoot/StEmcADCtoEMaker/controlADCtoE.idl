@@ -1,0 +1,16 @@
+/*
+*********************************************************
+* Table:       controlADCtoE.idl
+* Description: define keys for managing StEmcADCtoEMaker
+* Author     : Aleksei Pavlinov, WSU 
+*********************************************************
+*/
+  struct  controlADCtoE{
+    short bemcDeductPedestal;  /* switch for deducting pedestal */
+    short bsmdDeductPedestal;  /* switch for deducting pedestal */
+
+    short bemcCalibration;       /* switch for calibration */
+    short bsmdCalibration;       /* switch for calibration */
+
+    short messLimit;           /* limit for warning message */
+  };

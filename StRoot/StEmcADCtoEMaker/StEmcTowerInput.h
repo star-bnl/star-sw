@@ -35,18 +35,18 @@ public:
     StEmcTowerInput(StEvent*, StEMCReader*,TDataSet*);
     virtual       ~StEmcTowerInput();
     virtual Int_t  ProcessInput();
-    Int_t subtract_pedestals(StEmcHandleDB*);
-    Int_t Apply_equalization(StEmcHandleDB*);
-    Int_t fillevent();
+    Int_t subtractPedestals(StEmcHandleDB*);
+    Int_t applyEqualization(StEmcHandleDB*);
+    Int_t fillEvent();
 protected:
     
 private:
-    StEvent* mevent;
-    StEMCReader* mTheEmcReader;//!
-    TDataSet* m_calibdb;
-    Float_t m_TowerADC[120][20][2];
+    StEvent     *mevent;                //!
+    StEMCReader *mTheEmcReader;         //!
+    TDataSet    *mCalibDb;              //!
+    Float_t      mTowerADC[120][20][2]; //!
     ClassDef(StEmcTowerInput, 1)   
-	};
+};
 
 #endif 
 #endif /* __ROOT__ */

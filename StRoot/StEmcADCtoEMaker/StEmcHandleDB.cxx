@@ -7,61 +7,53 @@
 
 #include <iostream.h>
 #include <fstream.h>
-#include "StEmcUtil/StEmcGeom.h"
 #include "StEmcHandleDB.h"
 #include "TDataSet.h"
+#include "StEmcUtil/StEmcGeom.h"
 #include "StEmcUtil/emcDetectorName.h"
 #include "Stypes.h" 
 
 ClassImp(StEmcHandleDB) // macro
 
-StEmcGeom*  geo[4];   
-//-----------------------------------------------------------------
+static StEmcGeom*  geo[4];   
 
-    StEmcHandleDB::StEmcHandleDB(TDataSet* calibdb)
-      : m_calibdbptr(calibdb)
+StEmcHandleDB::StEmcHandleDB(TDataSet* calibdb)
+: m_calibdbptr(calibdb)
 {}
-
-//-----------------------------------------------------------------
 
 StEmcHandleDB::~StEmcHandleDB() {}
 
-//-----------------------------------------------------------------
+Int_t 
+StEmcHandleDB::ProcessDB() {
+  cout << "HandleDB::ProcessDB()" << endl;
 
+  for(Int_t i=0; i<4; i++) {
+    geo[i] = StEmcGeom::getEmcGeom(i+1);
+  }
+  //initialize DB arrays
 
-Int_t StEmcHandleDB::ProcessDB() {
-    cout << "HandleDB::ProcessDB()" << endl;
-
-    for (Int_t i=0; i<4; i++) {
-   geo[i]=new StEmcGeom(detname[i].Data());
+  for(Int_t i=0;i<120;i++){
+    for(Int_t j=0;j<20;j++){
+      for(Int_t k=0;k<2;k++){
+	m_TowerCalibs[i][j][k].clear();
+	m_TowerEquals[i][j][k].clear();
+      }
     }
-    //initialize DB arrays
 
-    for(Int_t i=0;i<120;i++){
-      for(Int_t j=0;j<20;j++){
-	for(Int_t k=0;k<2;k++){
-//	  m_TowerPeds[i][j][k].clear();
-	  m_TowerCalibs[i][j][k].clear();
-	  m_TowerEquals[i][j][k].clear();
-	}
-      }
+    for(Int_t ise=0;ise<150;ise++){
+      m_SmdEPeds[i][ise].clear();
+      m_SmdECalibs[i][ise].clear();
+      m_SmdEEquals[i][ise].clear();
+    }
 
-      for(Int_t ise=0;ise<150;ise++){
-	m_SmdEPeds[i][ise].clear();
-	m_SmdECalibs[i][ise].clear();
-	m_SmdEEquals[i][ise].clear();
-      }
-
-      for(Int_t isp1=0;isp1<10;isp1++){
-	for(Int_t isp2=0;isp2<15;isp2++){
+    for(Int_t isp1=0;isp1<10;isp1++){
+      for(Int_t isp2=0;isp2<15;isp2++){
 	m_SmdPPeds[i][isp1][isp2].clear();
 	m_SmdPCalibs[i][isp1][isp2].clear();
 	m_SmdPEquals[i][isp1][isp2].clear();
-	}
       }
-
     }
-    ////////////////////////////////////////////
+  }
 
     // get tower tables and fill arrays
     Int_t towerstat=Process_TowerPedDB();
@@ -73,99 +65,85 @@ Int_t StEmcHandleDB::ProcessDB() {
 }
 
 
-Int_t StEmcHandleDB::Process_TowerPedDB()
+Int_t 
+StEmcHandleDB::Process_TowerPedDB()
 {
   cout<<"EMCHandleDB:: In Process Tower Ped DB**"<<endl;
   // Get pedestal tables from m_calibdb
   TString TableNamePed=detname[0]+"Pedestal"; 
-     St_emcCalibration* calped;
-    if(calped)calped=0;
-//Get Pedestal tables
-cout<<"GETTING PEDS FOR TOWER***"<<endl;
-      calped = (St_emcCalibration*)m_calibdbptr->Find(TableNamePed.Data());
-      if(!calped)
-      {
-        cout<<"StEmcAdcToEMaker::Make() - Can not get pointer to pedestal table for det." << TableNamePed << endl;
-       }
-   else{
-      m_TowerPeddb=calped->GetTable();
-      for(Int_t idh=1;idh<4801;idh++){
-	  Int_t m=0,e=0,s=0;
-        geo[0]->getBin(idh,m,e,s);
-
-     if(m_TowerPeddb[idh-1].Status==1)
-        {
-
+  St_emcCalibration* calped=0;
+  //Get Pedestal tables
+  cout<<"GETTING PEDS FOR TOWER***"<<endl;
+  calped = (St_emcCalibration*)m_calibdbptr->Find(TableNamePed.Data());
+  if(!calped) {
+    cout<<"StEmcAdcToEMaker::Make() - Can not get pointer to pedestal table for det." 
+    << TableNamePed << endl;
+  } else{
+    cout<<"Table Name "<<TableNamePed<<" NRows " <<calped->GetNRows()
+        <<" max rows " << calped->GetTableSize() << endl; 
+    m_TowerPeddb=calped->GetTable();
+    for(Int_t idh=1;idh<4801;idh++){
+      Int_t m=0,e=0,s=0;
+      geo[0]->getBin(idh,m,e,s);
+      if(m_TowerPeddb[idh-1].Status==1) {
 // Does it (m,e,s) in (0,0,0) or (1,1,1)
-
 	if(m!=0||e!=0||s!=0){
 	  m_TowerPeds[m-1][e-1][s-1].clear();
 	  Float_t ped=(Float_t)m_TowerPeddb[idh-1].AdcPedestal;
-      if(m>47 && m<59)cout<<" DB***m,e,s  "<<m<<" "<<e<<" "<<s<<" "<<"ped  "<<ped<<endl;
-      m_TowerPeds[m-1][e-1][s-1].push_back(ped);
+// if(m>47 && m<59) cout<<" DB***m,e,s  "<<m<<" "<<e<<" "<<s<<" "<<"ped  "<<ped<<endl;
+          m_TowerPeds[m-1][e-1][s-1].push_back(ped);
+        }
+      }
     }
-   }
-   }
   }
-return kStOK;
-
+  return kStOK;
 }
 
 
-Int_t StEmcHandleDB::Process_TowerCalibDB()
+Int_t 
+StEmcHandleDB::Process_TowerCalibDB()
 {
   cout<<"EMCHandleDB:: In Process Tower Calib DB**"<<endl;
   TString TableName=detname[0]+"Calibration"; 
-
-     St_emcCalibration* caltemp;
-//Get Calibration tables
-
- 
-      caltemp = (St_emcCalibration*)m_calibdbptr->Find(TableName.Data());
-      if(!caltemp)
-      {
-        cout<<"StEmcAdcToEMaker::Make() - Can not get pointer to Calibration table for det." << TableName << endl;
-       }
-   else{
-      m_Towercalibdb=caltemp->GetTable();
-      for(Int_t idh=1;idh<4801;idh++){
-	  Int_t m=0,e=0,s=0;
-        geo[0]->getBin(idh,m,e,s);
-
-     if(m_Towercalibdb[idh-1].Status==1 && m_Towercalibdb[idh-1].CalibStatus==1)
-        {
-
+  St_emcCalibration* caltemp=0;
+  //Get Calibration tables
+  caltemp = (St_emcCalibration*)m_calibdbptr->Find(TableName.Data());
+  if(!caltemp) {
+    cout<<"StEmcAdcToEMaker::Make() - Can not get pointer to Calibration table for det." 
+    << TableName << endl;
+  } else{
+    m_Towercalibdb=caltemp->GetTable();
+    for(Int_t idh=1;idh<4801;idh++){
+      Int_t m=0,e=0,s=0;
+      geo[0]->getBin(idh,m,e,s);
+      if(m_Towercalibdb[idh-1].Status==1 && m_Towercalibdb[idh-1].CalibStatus==1){
 // Does it (m,e,s) in (0,0,0) or (1,1,1)
-
 	if(m!=0||e!=0||s!=0){
 	  Float_t ped=(Float_t)m_Towercalibdb[idh-1].AdcPedestal;
-        m_TowerEquals[m-1][e-1][s-1].push_back(ped);
-
-	for(Int_t ic=0;ic<5;ic++){
-	  Float_t conv=(Float_t)m_Towercalibdb[idh-1].AdcToE[ic];
-          m_TowerCalibs[m-1][e-1][s-1].push_back(conv);
+          m_TowerEquals[m-1][e-1][s-1].push_back(ped);
+	  for(Int_t ic=0;ic<5;ic++){ // ic - what is this
+	    Float_t conv=(Float_t)m_Towercalibdb[idh-1].AdcToE[ic];
+            m_TowerCalibs[m-1][e-1][s-1].push_back(conv);
+	  }
 	}
-	}
-        } 
-    else{
-cout<<"error in ped table**"<<m-1<<" "<<e-1<<" "<<s-1<<"stat "<<m_Towercalibdb[idh-1].Status<<"calibstat "<<m_Towercalibdb[idh-1].CalibStatus<<endl;
- } 
-    }
+     } else{
+       cout<<"error in ped table**"<<m-1<<" "<<e-1<<" "<<s-1<<"stat "
+       <<m_Towercalibdb[idh-1].Status<<"calibstat "<<m_Towercalibdb[idh-1].CalibStatus<<endl;
+     } 
    }
+ }
 
-   ////////////////////////////////////////////////////////////
+ ////////////////////////////////////////////////////////////
  // Get pdestal tables from m_calibdb
-  cout<<"In Process Tower DB, get equal **"<<endl;
-  TableName=detname[0]+"Equalization"; 
-     St_emcCalibration* caleq;
- 
-      caleq = (St_emcCalibration*)m_calibdbptr->Find(TableName.Data());
-      if(!caleq)
-      {
-        cout<<"StEmcHandleDB::Make() - Can not get pointer to Calibration table for det." << TableName << endl;
-      }
+ cout<<"In Process Tower DB, get equal **"<<endl;
+ TableName=detname[0]+"Equalization"; 
+ St_emcCalibration* caleq=0;
+ caleq = (St_emcCalibration*)m_calibdbptr->Find(TableName.Data());
 
-  else{
+ if(!caleq) {
+   cout<<"StEmcHandleDB::Make() - Can not get pointer to Calibration table for det." 
+   << TableName << endl;
+ } else{
    m_Towerequaldb=caleq->GetTable();
 /*
    for(Int_t idh=1;idh<4801;idh++){
@@ -181,8 +159,7 @@ cout<<"error in ped table**"<<m-1<<" "<<e-1<<" "<<s-1<<"stat "<<m_Towercalibdb[i
       }
 */
  }
-
-   return kStOK;
+ return kStOK;
 }
 
 Int_t StEmcHandleDB::Process_SmdEDB()

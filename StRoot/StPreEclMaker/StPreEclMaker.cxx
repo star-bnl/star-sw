@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.17 2001/10/01 15:36:19 pavlinov Exp $
+// $Id: StPreEclMaker.cxx,v 1.18 2001/10/03 17:29:24 pavlinov Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.18  2001/10/03 17:29:24  pavlinov
+// clean up for production
+//
 // Revision 1.17  2001/10/01 15:36:19  pavlinov
 // cleanup
 //
@@ -203,7 +206,8 @@ Int_t StPreEclMaker::Init()
 //_____________________________________________________________________________
 Int_t StPreEclMaker::Make()
 {
-  cout << "\n************************* Entering PreEclMaker Make() \n\n";
+  cout << "\n************************* Entering PreEclMaker Make() Event "<<
+    GetEventNumber()<<"\n\n";
 //
 // This maker must be run after StEventMaker => StEvent must be !!!!!
 //
@@ -245,12 +249,15 @@ Int_t StPreEclMaker::Make()
     if(ecmpreecl == 0) {
     // Try to get from calibration - 28-sep-2001 by PAI 
       StEmcADCtoEMaker *adcE =(StEmcADCtoEMaker*)GetMaker("adctoe");     
-      ecmpreecl = (StEmcCollection*)adcE->getEmcCollection();
-      if(ecmpreecl) cout<<"***** Get EmcCollection from StEmcADCtoEMaker\n";
-      else          cout<<"***** => No EmcCollection from anyside\n";
+      if(adcE) ecmpreecl = (StEmcCollection*)adcE->getEmcCollection();
+      if(ecmpreecl) {
+        currevent->setEmcCollection(ecmpreecl);
+        adcE->clearStEventStaf();// We move StEmcCollection to StEvent 
+        cout<<" => Get EmcCollection from StEmcADCtoEMaker " << ecmpreecl << "\n";
+      } else  cout<<"***** => No EmcCollection or StEmcADCtoEMaker\n";
     }
 
-    if(ecmpreecl==0) return kStWarn;
+    if(ecmpreecl == 0) return kStWarn;
 
   }
   
@@ -263,11 +270,11 @@ Int_t StPreEclMaker::Make()
 
   for(Int_t i=0; i<4; i++)  // Loop over the BEMC detectors
   {  
-    cout <<"***** Doing clustering on detector "<<detname[i].Data()<<"\n";
+    cout <<"***** Doing clustering on detector "<<detname[i].Data();
     StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
     StEmcDetector* mDet=ecmpreecl->detector(id); // getting detector pointer
-    if(mDet)
-    {
+    if(mDet) {
+      cout<<" => number of hits " << mDet->numberOfHits()<<endl;
       StEmcPreClusterCollection* cc=new StEmcPreClusterCollection(detname[i].Data(),mDet);
       if(Debug()>=2) AddData(cc);  // 17-apr-2001 by PAI
       if(cc->IsOk())
@@ -283,7 +290,7 @@ Int_t StPreEclMaker::Make()
         fillStEvent(i,cc);
       }      
       if(Debug()<2) delete cc;
-    }  
+    } else cout<<" ..  NO !!! \n";
   }
   
   AddData(new St_ObjectSet("PreEclEmcCollection",ecmpreecl));  // for what ??
@@ -459,7 +466,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.17 2001/10/01 15:36:19 pavlinov Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.18 2001/10/03 17:29:24 pavlinov Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

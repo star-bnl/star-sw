@@ -38,11 +38,11 @@ public:
 protected:
     
 private:
-    StEvent* mevent;
-    StEMCReader* mTheEmcReader;
-    TDataSet* m_calibdb;
+    StEvent     *mevent;
+    StEMCReader *mTheEmcReader;
+    TDataSet    *mCalibDb;
     ClassDef(StEmcHandleInput, 1)   
-	};
+};
 
 #endif 
 #endif

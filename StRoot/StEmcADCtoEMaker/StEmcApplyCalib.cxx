@@ -6,6 +6,7 @@
 #include <iostream.h>
 #include <fstream.h>
 
+#include "StEmcADCtoEMaker.h"
 #include "StEmcApplyCalib.h"
 //#include "St_DataSetIter.h"
 #include "StEventTypes.h"
@@ -19,52 +20,71 @@
 #include "StDaqLib/EMC/EMC_Reader.hh"
 #include "StDAQMaker/StDAQReader.h"
 
+#include "tables/St_controlADCtoE_Table.h"
+
 ClassImp(StEmcApplyCalib) // macro
 
+Short_t calibBemc, calibSmd;
    
-//--------------------------------------------------------------
-
-    StEmcApplyCalib::StEmcApplyCalib(StEvent*event,TDataSet* calibdb)
-      : mevent(event), m_calibdb(calibdb)
-{
-}
-
-//-----------------------------------------------------------------
+StEmcApplyCalib::StEmcApplyCalib(StEvent*event,TDataSet* calibdb)
+: mevent(event), m_calibdb(calibdb)
+{}
 
 StEmcApplyCalib::~StEmcApplyCalib() {}
 
-//-----------------------------------------------------------------
-
-Int_t StEmcApplyCalib::Calibrate() {
-    cout << "ApplyCalib::Calibrate()" << endl;
-
-//Get DB
- cout<<"Getting CalibDB"<<endl;
-    StEmcHandleDB * db=new StEmcHandleDB(m_calibdb);
-    db->Process_TowerCalibDB(); 
-    cout<<"DB handled"<<endl;
+Int_t 
+StEmcApplyCalib::Calibrate() 
+{
+  cout << "ApplyCalib::Calibrate()" << endl;
+  StEmcHandleDB * db=0;
+  calibBemc = StEmcADCtoEMaker::getControlTable()[0].bemcCalibration;
+  calibSmd  = StEmcADCtoEMaker::getControlTable()[0].bsmdCalibration;
+  if(calibBemc && calibSmd) {
+    cout<<" StEmcApplyCalib::Calibrate() -> N O  C A L I B R A T I O N"
+	<<" calibBemc "<<calibBemc<<" calibSmd "<< calibSmd<<endl;
+    return kStWarn;
+  }
 
 // Get EmcCollection, apply separately for each subdetectors
-      StEmcCollection * emccoll=mevent->emcCollection();  
+  StEmcCollection * emccoll=mevent->emcCollection();  
+  if(!emccoll){
+    cout<<"EmcCollection does not exist **, quit" << endl;
+    return kStWarn;
+  }
 
-   if(!emccoll){
-    cout<<"EmcCollection does not exist **, quit"<<endl;return kStWarn;
-   }
+  if(calibBemc || calibSmd) {
+//Get DB
+    cout<<"Getting CalibDB"<<endl;
+    db = new StEmcHandleDB(m_calibdb);
+    db->Process_TowerCalibDB(); 
+    cout<<"DB handled"<<endl;
+  }
 
-    //
-    //First , Tower 
+  //First , Tower 
+  if(calibBemc) {
     Int_t stat_tower = Calibrate_Tower(db,emccoll);
-    if(stat_tower!=kStOK){cout<<"Tower Calibration not OK**"<<endl;}
-    else{cout<<"Tower Calibration OK**"<<endl;}
+    if(stat_tower!=kStOK) {
+      cout<<"Tower Calibration not OK**"<<endl;
+    } else {
+      cout<<"Tower Calibration OK**"<<endl;
+    }
+  }
+  if(calibSmd) {
+  //Second  , SMD 
     Int_t stat_smd = Calibrate_Smd(db,emccoll);
-    if(stat_smd!=kStOK){cout<<"Smd Calibration not OK**"<<endl;}
-    else{cout<<"Smd Calibration OK**"<<endl;}
-    delete db;db=0;
-    return kStOK;
+    if(stat_smd!=kStOK) {
+      cout<<"Smd Calibration not OK**"<<endl;
+    } else {
+      cout<<"Smd Calibration OK**"<<endl;
+    }
+  }
+  if(db) delete db; 
+  db=0;
+  return kStOK;
 }
 
-//////////////////////////////////////////////////
-Int_t StEmcApplyCalib::Calibrate_Tower(StEmcHandleDB* db,StEmcCollection* emccoll)
+Int_t 
+StEmcApplyCalib::Calibrate_Tower(StEmcHandleDB* db,StEmcCollection* emccoll)
 {
     StDetectorId id = static_cast<StDetectorId>(1+kBarrelEmcTowerId);
     StEmcDetector* detector1=(StEmcDetector*)emccoll->detector(id);
@@ -102,8 +122,9 @@ Int_t StEmcApplyCalib::Calibrate_Tower(StEmcHandleDB* db,StEmcCollection* emccol
        else{cout<<"detector not found**"<<endl;}
  return kStOK;
 }
-/////////////////////////////////////////////////////
-Int_t StEmcApplyCalib::Calibrate_Smd(StEmcHandleDB* db,StEmcCollection* emccoll)
+
+Int_t 
+StEmcApplyCalib::Calibrate_Smd(StEmcHandleDB* db,StEmcCollection* emccoll)
 {
   for(UInt_t idet=3;idet<=4;idet++){
     StDetectorId id = static_cast<StDetectorId>(idet+kBarrelEmcTowerId);

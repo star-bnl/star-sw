@@ -103,15 +103,15 @@ public:
   EMC_Reader(EventReader *er, Bank_EMCP *pEMCP);
 
   Bank_BTOWERADCR& getBTOWERADCR();
-  int getTowerADC(int,int,int,unsigned short&);
-  int getTowerADC(int,unsigned short&);
+  int getTowerADC(int,int,int,unsigned short&); // int is indexes !!
+  int getTowerADC(int,unsigned short&);         // int is index   !!
   int NTowerHits();
   //  int getTowerADCR(unsigned short***);
 
   Bank_BSMDADCR& getSMD_ADCR();
 
   int getSMD_ADC(int,int,unsigned short&);
-  int getSMDE_ADC(int,int,unsigned short&);
+  int getSMDE_ADC(int,int,unsigned short&);      // int is indexes !!
   int getSMDP_ADC(int,int,int,unsigned short&);
   int getSMD_TIMEBIN(int,unsigned int&);
   int NSmdHits();
@@ -136,8 +136,8 @@ protected:
   Bank_BSMDADCD mTheSmdAdcD;
   Bank_BSMDPEDR mTheSmdPedR;
   Bank_BSMDRMSR mTheSmdRMSR;
-  bool TowerPresent;
-  bool SmdPresent;
+  bool mTowerPresent;
+  bool mSmdPresent;
 
 };
 
