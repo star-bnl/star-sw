@@ -8,5 +8,5 @@ echo $list[$#list] | awk -F. '{print $2}' >> N
 echo $list[1]      | awk -F. '{print $1}' >> N
 echo $dir                                 >> N
 rm -f $dir.log paw.metafile detm.rz detmsys.def
-staf -w 1 -g 20 -b $STAR/kumacs/sim/filter > $dir.log &
+staf -w 1 -g 20 -b $STAR/kumacs/sim/filter > $dir.log 
 rm -f paw.metafile detm.rz detmsys.def

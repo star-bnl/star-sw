@@ -7,6 +7,16 @@ macro test input
  message input = [input]
  pwd=$shell('pwd');                   message pwd  = [pwd]; 
  dir=$shell('basename `pwd`');        message dir  = [dir] 
+ if ($fexist('/net/rmds03/disk1/star')) then
+    disk1=net/rmds03/disk1
+ elseif ($fexist('/disk1/star')) then
+    disk1=disk1
+ else
+    message This machine has no /disk1/star access - test cannot run !
+    message Select another machine and re-run the test
+    abend
+ endif
+ 
  j=0; path=/
  do i=1,15
    ele=$word([pwd],[i],1,'/');       | message ele [i] [j] = [ele]
@@ -14,8 +24,13 @@ macro test input
    if ([ele].eq.tests) then; j=1;     endif  
    if ([ele].eq.[dir]) then; breakl;  endif  
  enddo
- base=$word([input],1,1,'.');         message base = [base]
- file=/disk1/star/[path]/[input];     message file = [file]
+ if ([j].eq.0) then
+    message You are not on the MDC test area, test cannot run !
+    message Do: cd /star/scr2f/tests/...etc... and re-run the test
+    aben
+ endif
+ set =$word([input],1,1,'.');         message set  = [set]
+ file=/[disk1]/star/[path]/[input];     message file = [file]
  title=testing file [input] in [dir]; message title= [title]
  
 * set I/O 
@@ -24,8 +39,8 @@ macro test input
  endif
  make    sim/control
  gfile     p  [file]
- ghist        [base].his
- fort/file 66 [base].ps; meta 66 -111
+ ghist        [set].his
+ fort/file 66 [set].ps; meta 66 -111
  Set DMOD 1; Igset TXFP -60; Igset CHHE .35 
 
 * check:
