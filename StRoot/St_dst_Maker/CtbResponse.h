@@ -2,7 +2,7 @@
 #define  CTBRESPONSE_H
 
 #include <TH1.h>
-#include "StPrimaryMaker.h"
+#include "StVertexMaker.h"
 #include <iostream.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,7 +18,7 @@ class CtbResponse {
 
  private:
  public:
-  CtbResponse( StPrimaryMaker *, int* , float *);
+  CtbResponse( StVertexMaker *, int* , float *);
   struct Jcyl {float eta,phi,gBXing; int ID;}; // ID=tray+120*slat 
   vector <Jcyl> hits[MxTimeSlot];
   void * GVER[MxTimeSlot];

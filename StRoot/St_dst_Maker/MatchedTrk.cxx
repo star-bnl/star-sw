@@ -6,7 +6,7 @@
 #include "TH2.h"
 
 
-MatchedTrk:: MatchedTrk(StPrimaryMaker* head, int *ipar, float *fpar, CtbResponse* ctbRes,St_dst_track * track ){
+MatchedTrk:: MatchedTrk(StVertexMaker* head, int *ipar, float *fpar, CtbResponse* ctbRes,St_dst_track * track ){
   assert(head);
   assert(ctbRes);
   assert(track);
@@ -40,9 +40,6 @@ MatchedTrk:: MatchedTrk(StPrimaryMaker* head, int *ipar, float *fpar, CtbRespons
     head->hmtr[0]->Fill(1);
     
     long NPoints = glb_track_pointer->n_point;
-    if(NPoints <= MinTrkPoints) continue;
-    n2++;
-    head->hmtr[0]->Fill(2);
 
     // First point on Helix
     double x0 = glb_track_pointer->r0*cos(C_RAD_PER_DEG*glb_track_pointer->phi0);
@@ -78,8 +75,20 @@ MatchedTrk:: MatchedTrk(StPrimaryMaker* head, int *ipar, float *fpar, CtbRespons
     double x_m = posDCA.x(), y_m = posDCA.y();
     double dmin = sqrt(x_m*x_m + y_m*y_m);
     if( dmin > MaxTrkDcaRxy ) continue;
+    n2++;
+    head->hmtr[0]->Fill(2);
+
+    CanTrk trk0;
+    trk0.x0=posDCA.x();
+    trk0.y0=posDCA.y();
+    trk0.z0=posDCA.z();
+    trk0.glb_track_pointer=glb_track_pointer;
+    primCan.push_back(trk0);
+
+    if(NPoints <= MinTrkPoints) continue;
     n3++;
     head->hmtr[0]->Fill(3);
+
 
     // reject low pT tracks
     if(1./ptinv<MinTrkPt){
@@ -205,6 +214,7 @@ MatchedTrk:: MatchedTrk(StPrimaryMaker* head, int *ipar, float *fpar, CtbRespons
       printf("    no vertex\n");
   }
 
+  printf("total primCandidates=%d\n",primCan.size());
   printf("CHeck :getPileupBXing()=%d (-26 == NONE)\n",getPileupBXing()+firstBXing);
 
 }

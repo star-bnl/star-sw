@@ -1,27 +1,8 @@
-// $Id: ppLMV4.cxx,v 1.6 2002/01/24 06:10:24 balewski Exp $
+// $Id: ppLMV4.cxx,v 1.7 2002/02/18 19:48:20 genevb Exp $
 // $Log: ppLMV4.cxx,v $
-// Revision 1.6  2002/01/24 06:10:24  balewski
-// beamLine4ppLMV+DB correction and double call of ppLMV
+// Revision 1.7  2002/02/18 19:48:20  genevb
+// Separation of primary vertex and track finding, other minor changes
 //
-// Revision 1.5  2002/01/21 01:35:07  balewski
-// Optional beam line constrain was added to ppLMV
-//
-// Revision 1.4  2001/12/06 02:27:10  balewski
-// *** empty log message ***
-//
-// Revision 1.3  2001/12/05 23:21:44  balewski
-// *** empty log message ***
-//
-// Revision 1.2  2001/12/04 01:48:34  balewski
-// *** empty log message ***
-//
-// Revision 1.1  2001/11/29 00:19:08  balewski
-// *** empty log message ***
-//
-// Revision 1.1  2001/06/12 23:16:22  balewski
-// reject pileup in ppLMV
-//
-// Revision 1.1  2001/04/12 15:46:27  balewski
 // *** empty log message ***
 ///////////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
@@ -38,7 +19,7 @@
 #include "TH2.h"
 void cts_get_ctb_indexes ( long volume, long &i_phi, long &i_eta ) ;
 
-#include "StPrimaryMaker.h"
+#include "StVertexMaker.h"
 
 #include "SystemOfUnits.h"
 #if !defined(ST_NO_NAMESPACES)
@@ -54,7 +35,7 @@ using namespace units;
 #include "StDetectorDefinitions.h"
 
 #include "Stypes.h"
-#include "StEventTypes.h" // for StEvent only
+
 #include "StVertexId.h"
 #include "math_constants.h"
 
@@ -62,14 +43,14 @@ using namespace units;
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 
-//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.6 2002/01/24 06:10:24 balewski Exp $";
+//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.7 2002/02/18 19:48:20 genevb Exp $";
 
 struct Jcyl {float eta,phi;};
 
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 //_____________________________________________________________________________
-long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vertex *vertex, Int_t mdate)
+long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vertex *vertex, Int_t mdate )
 {
   //int bXing=maTrk.getTrigBXing();
   //int bXing=maTrk.getPileupBXing();
@@ -93,7 +74,7 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
 
   if( beam4ppLMV.isOn) { // add beam line to ppLMV to constrain vertex
     
-    assert(beam4ppLMV.equivNtr>0);
+    if (! (beam4ppLMV.equivNtr>0)) return kStErr;
     double pt  = 88889999;   
     double nxy=sqrt(beam4ppLMV.nx*beam4ppLMV.nx +beam4ppLMV.ny*beam4ppLMV.ny);
     if(nxy<1.e-5){ // beam line _MUST_ be tilted
@@ -258,9 +239,7 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
 
 
   Int_t nrows = vertex->GetNRows();
-  long IVertex = nrows+1; //By definition
-  dst_track_st *sec_pointer = trackAll->GetTable();
-
+  long IVertex = 55;  //By definition
 
   // printf(" Fill the dst_vertex table\n");
   dst_vertex_st primvtx;
@@ -288,15 +267,8 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
   primvtx.chisq[1]    = 1.0; // Need to find the prob func in Root
   vertex->AddAt(&primvtx,nrows);
 
-  //temp schizophrenia JB
-  if(mdate<0) {
-    printf(" WARN: ppLMV in schizophrenic mode, no beamLine added, done\n");
-    return kStOk;
-  }
-  //temp schizophrenia JB end
-
-
   // printf(" Mark the vertex tracks in the global_trk table\n");
+  dst_track_st *sec_pointer = trackAll->GetTable();
   for (long ll=0; ll<trackAll->GetNRows(); ll++){
     long idt = sec_pointer->id;
     long icheck;
@@ -314,6 +286,20 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
     sec_pointer++;
   }
 
+  // mark also other global tracks close enough to the vertex
+
+  for(uint j=0;j<maTrk.primCan.size(); j++) {
+      printf("glob j=%d x,y,z %f %f %f  trID=%d verID=%d\n",j, maTrk.primCan[j].x0,maTrk.primCan[j].y0,maTrk.primCan[j].z0,maTrk.primCan[j].glb_track_pointer->id,maTrk.primCan[j].glb_track_pointer->id_start_vertex);
+      if(maTrk.primCan[j].glb_track_pointer->id_start_vertex>10) continue; // already marked
+      double dz=maTrk.primCan[j].z0 - XVertex.z();
+      if(fabs(dz)>DVtxMax) continue; // too fare in Z
+      double dx=maTrk.primCan[j].x0 - XVertex.x();
+      double dy=maTrk.primCan[j].y0 - XVertex.y();
+      double dr2=dx*dx + dy*dy + dz*dz;
+      double dr=sqrt(dr2);
+      if(dr>DVtxMax) continue; // too fare in X*Y*Z
+      maTrk.primCan[j].glb_track_pointer->id_start_vertex+=10*IVertex ;
+  }
 
   {// fill some histos
     hPiFi[13]->Fill((*tracks).size());
@@ -357,7 +343,7 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 
-void StPrimaryMaker::ppLMVuse(int *parI, float *parF) {
+void StVertexMaker::ppLMVuse(int *parI, float *parF) {
 const  char *nameI[]={"CtbThres/ch","MinTrkPonits","i2","i3","i4","i5","i6","i7","i8","i9"};
 const  char *nameF[]={"CtbThres/MeV","MaxTrkDcaRxy","MinTrkPt/GeV","CtbEtaErr","CtbPhiErr/deg","MaxTrkDcaZ","f6","f7","f8","f9"};
   printf("\nppLMV use new set of params\n    INT:  "); 
@@ -376,48 +362,3 @@ const  char *nameF[]={"CtbThres/MeV","MaxTrkDcaRxy","MinTrkPt/GeV","CtbEtaErr","
 }
 
 
-    
-#if 0
-##############################################################
-
-
-  StEvent *Steve= (StEvent *) GetInputDS("StEvent");
-  assert(Steve);
-  // Tracks from StEvent
-  StSPtrVecTrackNode& trackNodes = Steve->trackNodes();
-  cout<<"** StPreEclRMaker:: Node size **"<<trackNodes.size()<<endl;
-  int allGlobals =0;
-  StTrack* track1;
-  for (size_t nodeIndex=0; nodeIndex<trackNodes.size(); nodeIndex++) {
-    
-    size_t numberOfTracksInNode =  trackNodes[nodeIndex]->entries(global);
-    for (size_t trackIndex=0; trackIndex<numberOfTracksInNode; trackIndex++) {
-      track1 =trackNodes[nodeIndex]->track(global,trackIndex);
-      if (track1){
-	
-	//emcFinalCoord(fieldB*tesla, track, &finalPosition, &finalMomentum);
-      }
-    }
-  }
-#endif
-
-#if 0
-.. goes to duplicate.code
-
-  int nCtbOK=0;
-  {// JB temporary extraction of bXIng & CTB hits
-   int pp=0; // ignore pre & post
-   for(int slat=0;slat<2;slat++) {
-      for(int tray=0;tray<120;tray++)
-        if( SWITCH(gs)->RAW[pp].CTB[ctbmap[tray][slat]]>1)nCtbOK++;
-    }
-   }
-
-  printf("\n\n\n BBBBBBBBBBBBBBBBB JB  %s-maker nCtbOK=%d\n\n\n",GetName(),nCtbOK );
-
-  if(1&&nCtbOK>80) {// WARN  WARN  WARN  WARN
-          printf("\n WARN %s-Maker JB: TEMPORARY HIGH MULTIPLICITY EVENT DISCARDED\n
-  # of CTB hits=%d  SET to ZERO by Jan BAlewski, No Vertex will be found\n\n",GetName(),nCtbOK);
-  return kStErr;
-
-#endif
