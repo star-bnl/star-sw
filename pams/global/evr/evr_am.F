@@ -1,16 +1,14 @@
 CC:>--------------------------------------------------------------------
 CC: FILE:       evr_am.F
 CC: HISTORY:    
-CC:             no history only future !!!
+CC:           see below
 CC:<--------------------------------------------------------------------
 
       INTEGER*4 FUNCTION EVR_AM(
      1            evrpar_h,            evrpar ,
-     2           tptrack_h,           tptrack ,
-     3         svt_track_h,         svt_track ,
-     4           globtrk_h,           globtrk ,
-     5         evt_match_h,         evt_match ,
-     6           privert_h,           privert ) 
+     2            egrpar_h,            egrpar ,
+     3           globtrk_h,           globtrk ,
+     4           privert_h,           privert ) 
       IMPLICIT NONE
 #include "evr_am.inc"
 CC:>----------------------------------------------------------------------
@@ -20,10 +18,8 @@ CC: AUTHOR:     S. Margetis  Created  MARCH-1992
 CC: ARGUMENTS:
 CC:          IN:
 CC:	       	evrpar   = Parameters controlling vertex finding
-CC:     	tptrack    = Track information from tpt package
-CC:       	svt_track    = Track information from stk package
+CC:	       	egrpar   = Parameters controlling egr - very relevant here
 CC:       	globtrk  = Track information from egr package
-CC:       	evt_match    = Matching information from svm package
 CC:         OUT:
 CC:	       	privert  = Primary Vertex Information
 CC: RETURNS:    STAF Condition Value
@@ -59,7 +55,7 @@ CC:
 CC:>----------------------------------------------------------------------
 
       INTEGER 	maxtr,i,j,k,ipnt
-      PARAMETER	(maxtr=5000)
+      PARAMETER	(maxtr=10000)
       REAL 	vtrv(6,maxtr)
       COMMON 	/FITVERT/ vtrv
       REAL 	XV,YV,ZV
@@ -67,79 +63,53 @@ CC:>----------------------------------------------------------------------
       INTEGER   ntrk,index
       LOGICAL   match_flag
       REAL	dr
+      INTEGER   gindex(maxtr)
       REAL      x0(maxtr),y0(maxtr),z0(maxtr)
       REAL	phi0(maxtr),tanl(maxtr)
       REAL      psi,ppt,xx0,yy0,b,zz0,tanla
       INTEGER   icharge
       REAL	xp(2),x(4)
       REAL	zsum(100),seed,zmax
+      REAL      xlocal(3),bfield(3)
 *
         CALL VZERO(zsum,100)
 	ntrk = 0
-C=== decide which tracks to use===
-        if (evrpar(1).use.eq.0.or.evrpar(1).use.eq.1) then
-           if (evrpar(1).match.eq.1) then
-              match_flag = .true.
-              ntrk = evt_match_h.nok
-           elseif (evrpar(1).match.eq.0) then
-              if (evrpar(1).use.eq.0) ntrk = tptrack_h.nok
-              if (evrpar(1).use.eq.1) ntrk = svt_track_h.nok
-           else
-              write(6,'('' Not a valid value for EVRPAR.MATCH'')')
-              evr_am = STAFCV_BAD
-              return
-           endif
-        elseif (evrpar(1).use.eq.2) then
-           ntrk = globtrk_h.nok
-        else
-           write(6,'('' Not a valid value for EVRPAR.USE'')')
-           evr_am = STAFCV_BAD
-           return
-        endif
 
+c B-field obtained via gufld call
+
+      xlocal(1) = 0.
+      xlocal(2) = 0.
+      xlocal(3) = 0.
+
+      call gufld(xlocal,bfield)
+      write(6,*) 'Using a field of',bfield(3),' KGauss'
+
+
+C=== use only global tracks, i.e. dst_track instances ====
+
+        ntrk = globtrk_h.nok
         k = 0
+
         do 20 i = 1,ntrk
-           if (evrpar(1).use.eq.0) then
-              if (match_flag) then
-                 ipnt = evt_match(i).idtpc
-              else
-                 ipnt = i
-              endif
-              psi = tptrack(ipnt).psi
-             icharge = tptrack(ipnt).q
-              ppt = 1/tptrack(ipnt).invp
-              tanla = tptrack(ipnt).tanl
-              xx0 = tptrack(ipnt).r0*cosd(tptrack(ipnt).phi0)
-              yy0 = tptrack(ipnt).r0*sind(tptrack(ipnt).phi0)
-              zz0 = tptrack(ipnt).z0
-           elseif (evrpar(1).use.eq.1) then
-              if (match_flag) then
-                 ipnt = evt_match(i).idsvt
-              else
-                 ipnt = i
-              endif
-              psi = svt_track(ipnt).psi
-             icharge = sign(1.0,svt_track(ipnt).invpt)
-              ppt = 1/abs(svt_track(ipnt).invpt)
-              tanla = svt_track(ipnt).tanl
-              xx0 = svt_track(ipnt).r0*cosd(svt_track(ipnt).phi0)
-              yy0 = svt_track(ipnt).r0*sind(svt_track(ipnt).phi0)
-              zz0 = svt_track(ipnt).z0
-           elseif (evrpar(1).use.eq.2) then
-              psi = globtrk(i).psi
-             icharge = globtrk(i).icharge
-              ppt = 1/globtrk(i).invpt
-              tanla = globtrk(i).tanl
-              xx0 = globtrk(i).x0
-              yy0 = globtrk(i).y0
-              zz0 = globtrk(i).z0
+           psi = globtrk(i).psi
+           icharge = globtrk(i).icharge
+           if (globtrk(k).invpt.ne.0.) then
+              ppt = 1./globtrk(i).invpt
+           else
+              ppt = 99999.
            endif
+           tanla = globtrk(i).tanl
+           xx0 = globtrk(i).x0
+           yy0 = globtrk(i).y0
+           zz0 = globtrk(i).z0
+           
            if (ppt.ge.evrpar(1).ptmin) then
-              b = 5.0
+              b = bfield(3)
               xp(1) = 0.0
               xp(2) = 0.0
               call evr_project_track(psi,icharge,ppt,tanla,xx0,yy0,b,zz0,xp,x)
               k = k + 1
+              gindex(k) = i
 	      x0(k) = x(1)
 	      y0(k) = x(2)
 	      z0(k) = x(3)
@@ -218,36 +188,39 @@ C=== decide which tracks to use===
 C
 C save results
 C
+
+C--mark default primary tracks
+
+	do 235 i=1,ntrk
+           dr=sqrt( (x0(i)-xv)*(x0(i)-xv)+(y0(i)-yv)*(y0(i)-yv)
+     +          +(z0(i)-zv)*(z0(i)-zv) )
+           if(dr.lt.evrpar(1).vcut) then
+              globtrk(gindex(k)).id_start_vertex = 1
+           endif
+ 235    continue
+        
+
+
         index=privert_h.nok + 1
         privert_h.nok = index
 
-        if (evrpar(1).use.eq.0) then
-           privert(index).det_id = 1
-           privert(index).sigma(1)  = 0.0150
-           privert(index).sigma(2)  = 0.0150
-           privert(index).sigma(3)  = 0.0200
-        elseif (evrpar(1).use.eq.1) then
-           privert(index).det_id = 2
-           privert(index).sigma(1)  = 0.0050
-           privert(index).sigma(2)  = 0.0050
-           privert(index).sigma(3)  = 0.0050
-        elseif (evrpar(1).use.eq.2) then
-           privert(index).det_id = 3
-           privert(index).sigma(1)   = 0.0150
-           privert(index).sigma(2)  = 0.0150
-           privert(index).sigma(3)  = 0.0200
-        endif
-CC        privert(index).match = evrpar(1).match
-CC        privert(index).ptmin = evrpar(1).ptmin
         privert(index).id = 1
-cc        privert(index).ndegf = 2*k
-cc        privert(index).ntch = k
+        privert(index).iflag  = 1              ! found
+        privert(index).det_id = 3              ! global reconstruction
+        privert(index).vtx_id  = 1             ! primary
+        privert(index).n_daughters  = k
         privert(index).x = xv
         privert(index).y = yv
         privert(index).z = zv
-        privert(index).iflag  = 1              ! found
-        privert(index).vtx_id  = 1             ! primary
-        privert(index).n_daughters  = k
+        if (egrpar(1).scenario.lt.3) then
+           privert(index).sigma(1)  = 0.0150
+           privert(index).sigma(2)  = 0.0150
+           privert(index).sigma(3)  = 0.0200
+        else
+           privert(index).sigma(1)  = 0.0050
+           privert(index).sigma(2)  = 0.0050
+           privert(index).sigma(3)  = 0.0050
+        endif
         privert(index).pchi2  = 0
         privert(index).id_aux_ent  = 0
 
@@ -279,7 +252,7 @@ CC:
 CC:>--------------------------------------------------------------------
 
 	integer ngmx
-	PARAMETER (NGMX=5000)
+	PARAMETER (NGMX=10000)
 	integer ITACP(NGMX),NEX,NTRK
 	real Trk(15,ngmx)
         COMMON /VTRAK/ ITACP,NEX,NTRK,TRK
@@ -503,3 +476,9 @@ C
   999 CONTINUE
       RETURN
       END
+
+
+
+
+
+
