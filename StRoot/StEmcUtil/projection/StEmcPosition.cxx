@@ -46,8 +46,8 @@ Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
   const StThreeVectorF& origin = track->geometry()->origin();
   const StThreeVectorF& momentum = track->geometry()->momentum();
   Double_t charge = track->geometry()->charge();
-  StPhysicalHelixD* helix = new StPhysicalHelixD(momentum, origin, magField*tesla, charge);
-  pairD pathLength = helix->pathLength(radius);
+  StPhysicalHelixD helix(momentum, origin, magField*tesla, charge);
+  pairD pathLength = helix.pathLength(radius);
 
   Double_t s,s1,s2; 
   s=0;
@@ -57,7 +57,7 @@ Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
   Bool_t goProj;
   goProj = kFALSE;
 
-  if (finite(s1) == 0 && finite(s2) == 0) { delete helix; return kFALSE;} // Track couldn't be projected!
+  if (finite(s1) == 0 && finite(s2) == 0) { return kFALSE;} // Track couldn't be projected!
 
   if (option == 1)  // Selects positive path lenght to project track forwards along its helix relative to
                     // first point of track. The smaller solution is taken when both are positive
@@ -77,11 +77,10 @@ Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
 	
   if (goProj) 
   {
-    *atFinal = helix->at( s );
-    *momentumAtFinal = helix->momentumAt( s, magField*tesla );
+    *atFinal = helix.at( s );
+    *momentumAtFinal = helix.momentumAt( s, magField*tesla );
     if (charge == 0) *momentumAtFinal = momentum;
   }
-	delete helix;
   return goProj;
 }
 //------------------------------------------------------------------------------
@@ -95,8 +94,8 @@ Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
   const StThreeVectorF& origin = mcTrack->startVertex()->position();
   const StThreeVectorF& momentum = mcTrack->momentum();
   Double_t charge = mcTrack->particleDefinition()->charge();
-  StPhysicalHelixD* helix = new StPhysicalHelixD(momentum, origin, magField*tesla, charge);
-  pairD pathLength = helix->pathLength(radius);
+  StPhysicalHelixD helix(momentum, origin, magField*tesla, charge);
+  pairD pathLength = helix.pathLength(radius);
 
   Double_t s,s1,s2;  
   s=0;
@@ -106,7 +105,7 @@ Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
   Bool_t goProj;
   goProj = kFALSE;
 
-  if (finite(s1) == 0 && finite(s2) == 0) { delete helix; return kFALSE;} // Track couldn't be projected!
+  if (finite(s1) == 0 && finite(s2) == 0) { return kFALSE;} // Track couldn't be projected!
 
   if (option == 1)  // Selects positive path lenght to project track forwards along its helix relative to
                     // first point of track. The smaller solution is taken when both are positive
@@ -126,11 +125,10 @@ Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
 
 	if (goProj) 
   {
-    *atFinal = helix->at( s );
-    *momentumAtFinal = helix->momentumAt( s, magField*tesla );
+    *atFinal = helix.at( s );
+    *momentumAtFinal = helix.momentumAt( s, magField*tesla );
     if (charge == 0) *momentumAtFinal = momentum;
   }
-  delete helix;
   return goProj;
 }
 //------------------------------------------------------------------------------
