@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: client.cxx,v 1.5 1999/08/31 01:59:47 levine Exp $
+ * $Id: client.cxx,v 1.6 2000/01/04 20:55:05 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: sample top-level code sould be used as a tutorial
@@ -11,17 +11,17 @@
  *  09-Jul-99 MJL add calls to various non_TPC detector readers
  *  12-Jul-99 MJL add calls to getSpacePts()
  *  20-Jul-99 MJL use new EventReader constructor with log file name
- *  29-Aug-99 MJL change to include <iostream.h> for HP platform
  *
  ***************************************************************************
  * $Log: client.cxx,v $
- * Revision 1.5  1999/08/31 01:59:47  levine
- * changes to allow compilation on HP/UX
- * in EventReader.cxx:
- * if((MMAPP = (char *) mmap(0, datap.EventLength * 4, PROT_READ |PROT_WRITE,
+ * Revision 1.6  2000/01/04 20:55:05  levine
+ * Implemented memory-mapped file access in EventReader.cxx. Old method
+ * (via seeks) is still possible by setting mmapp=0 in
  *
- * in various files in TPC directory:
- * #include <iostream.h>
+ * 	getEventReader(fd,offset,(const char *)logfile,mmapp);
+ *
+ *
+ * but memory-mapped access is much more effective.
  *
  * Revision 1.4  1999/07/21 21:33:10  levine
  *
@@ -65,7 +65,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <iostream.h>
+#include <iostream>
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/EMC/EMC_Reader.hh"
@@ -96,7 +96,6 @@ char *convert_name_to_logfile(const char *filename)
   strcpy(locfile,t2);
   return locfile;
 }
-#define GET_OTHERS
 
 int main(int argc, char *argv[])
 {
@@ -133,7 +132,7 @@ int main(int argc, char *argv[])
 
   while(offset != -1)
     {  
-      EventReader *er = getEventReader(fd,offset,(const char *)logfile,0);
+      EventReader *er = getEventReader(fd,offset,(const char *)logfile,1);
       if(!er) 
 	{
 	  cout << "Error creating ER" << endl;
@@ -142,40 +141,14 @@ int main(int argc, char *argv[])
 	}
 
       er->printEventInfo();
+      
 
       // Prepare for the next event
       if(offset != -1)
-	offset = er->NextEventOffset();
+	offset = er->NextEventOffset(); 
       else
 	offset = -1;
-#ifdef GET_OTHERS
-      // try to create RICH reader
-      RICH_Reader *drich = getRICHReader(er);
-      if(!drich)
-	cout << "Error creating RICH_Reader: " << er->errstr() << endl;
-      else {
-	printf("created RICH_Reader!!!\n");
-	// call additional methods defined for RICH
-      }
 
-      // try to create TRG reader
-      TRG_Reader *dtrg = getTRGReader(er);
-      if(!dtrg)
-	cout << "Error creating TRG_Reader: " << er->errstr() << endl;
-      else {
-	printf("created TRG_Reader!!!\n");
-	// call additional methods defined for TRG
-      }
-
-      // try to create EMC reader
-      EMC_Reader *demc = getEMCReader(er);
-      if(!demc)
-	cout << "Error creating EMC_Reader: " << er->errstr() << endl;
-      else {
-	printf("created EMC_Reader!!!\n");
-	// call additional methods defined for EMC
-      }
-#endif
       DetectorReader *dr = getDetectorReader(er, "TPCV2P0");
       if(!dr) {
 	cout << "Error creating TPC_Reader: " << er->errstr() << endl;
@@ -183,86 +156,36 @@ int main(int argc, char *argv[])
 	exit(0);
       } 
       else printf("created TPC_Reader!!!\n");
-
+#ifdef DO_SECTORS
       for(int sector=1;sector <= 24;sector++)
 	{
-	  ZeroSuppressedReader *zsr = dr->getZeroSuppressedReader(sector);
-	  if(!zsr)
-	    {
-	      printf(" error in ZeroSuppressedReader: sector %d\n",sector);
-	      continue;  // no banks for this sector
-	    }
 
 	  int nSeq[TPC_MAXPADS];
 	  Sequence *Seq[TPC_MAXPADS];
-	  for(int row=1;row <= TPC_PADROWS; row++) {
-	    int count = zsr->getPadList(row, &padlist[row-1]);
-	    if (!count) continue; // any pads with data?
-	    printf("+++++++ padrow %d +++++++\n", row);
-	    for (int padnum = 0; padnum<count; padnum++) {
-	      int pad = padlist[row-1][padnum];
-	      printf("pad %d:\n",pad);
-	      int ret = zsr->getSequences(row, pad, &nSeq[pad-1], &Seq[pad-1]);
-	      unsigned short ADC;
-	      for (int i=0; i<nSeq[pad-1]; i++){
-		int start = Seq[pad-1][i].startTimeBin;
-		int len = Seq[pad-1][i].Length;
-		printf("\tsequence timebin [%d..%d]\n\t",start,start+len-1);
-		fflush(stdout);
-		unsigned char *p = Seq[pad-1][i].FirstAdc;
 
-		// Translation from 8-bit to 10-bit ADC values is done as illustrated here
-		// The log8to10_table is defined in trans_table.hh
-		// NB this table is ONLY applicable for physics runs. Do not try to use it on
-		// pedestal or configuration runs. [MJL]
 
-		for (int j=0; j<len; j++) {
-		  ADC = log8to10_table[*(p++)];
-		  printf("%d ",ADC);
-		}
-		printf("\n");
-	      }
-	    }
-	    int nSpacePts;
-	    struct SpacePt *SpacePts;
-	    int iret = zsr->getSpacePts(row, &nSpacePts, &SpacePts); 
-	    if (!iret) continue; //test for return status
-	    if (!nSpacePts) continue; // test for space points this row
-	    printf("--------- Row %d: found %d space pts ----------------\n",row,nSpacePts);
-	    printf("\t  <x>\t  <t>\t   Q\t quality\n");
-	    for (int isp=0; isp<nSpacePts; isp++) {
-	      int tbin = SpacePts[isp].centroids.t/640;
-	      if (tbin>49) tbin=49;
-	      histogram[tbin]++;
-	      printf("\t%5.1f\t%5.1f\t%5d\t%4d ",
-		     float(SpacePts[isp].centroids.x)/64.0,
-		     float(SpacePts[isp].centroids.t)/64.0,
-		     SpacePts[isp].q, 
-		     (SpacePts[isp].flags>>3)&0xf );
-	     if (SpacePts[isp].flags & 1) printf("\texc pad width ");
-	     if (SpacePts[isp].flags & 2) printf("\texc time width ");
-	     if (SpacePts[isp].flags & 4) printf("\tsat'd ADC ");
-	     printf("\n");
-	     //	     printf("0x%X 0x%X 0x%X 0x%X \n",SpacePts[isp].centroids.x,
-	     //    SpacePts[isp].centroids.t, SpacePts[isp].flags,
-	     //    SpacePts[isp].q);
-	    }
-	  }
-
-#ifdef TEST_RAW
-
-	  CPPReader *CPPr = dr->getCPPReader(sector);
-	  if(!CPPr)
+	  PedestalReader *pedr = dr->getPedestalReader(sector);
+	  if(!pedr)
 	    {
-	      cout << "Error creating CPPr: " << dr->errstr() << endl;
+	      cout << "Error creating pedestal reader: " << dr->errstr() << endl;
 	      close(fd);
 	      exit(0);
 	    }
 
+	  PedestalRMSReader *rmsr = dr->getPedestalRMSReader(sector);
+	  if(!rmsr)
+	    {
+	      cout << "Error creating pedestal RMS reader: " << dr->errstr() << endl;
+	      close(fd);
+	      exit(0);
+	    }
 
+	  // test for existence of PEDR banks this sector
+	  if (pedr->getNumberOfEvents()==0) continue; // no PEDR banks this sector
+#ifdef PEDS
 	  for(int row=1;row <= TPC_PADROWS; row++)
 	    {
-	      int count = ADCRr->getPadList(row, &padlist[row-1]);
+	      int count = pedr->getPadList(row, &padlist[row-1]);
 	      if (count){
 		printf("%2d -- pad list\n",row);
 		for(int i=0;i<count;i++)
@@ -275,73 +198,51 @@ int main(int argc, char *argv[])
 
 	  for(int row=1;row <= TPC_PADROWS; row++)
 	    {
-	      int count = ADCRr->getPadList(row, &padlist[row-1]);
+	      int count = pedr->getPadList(row, &padlist[row-1]);
 
 	      for(int i=0;i<count;i++)
 		{
 		  int length;
-		  u_char *Array;
+		  u_char  *Array[TPC_MAXPADS];
 		  u_char thispad = padlist[row-1][i];
-		  int nseq = ADCRr->getSequences(row, thispad, &length, &Array);
+		  int nseq = pedr->getSequences(row, thispad, &length, &Array[thispad-1]);
 		  //       print non-zero ADC values for this pad (all 512)
-		  //        printf("non-zero ADC values for row %d, pad %d:\n",row,thispad);
-		  //        for(int j=0; j<length; j++)
-		  // 	  {
-		  // 	    if (Array[j]) printf("timebin[%d] = %d \n", j, Array[j]);
-		  // 	  }
+		  if (!nseq) continue; // pad not implemented
+		  printf("pedestal values for row %d, pad %d:\n",row,thispad);
+		  for(int j=0; j<length; j++)
+		    {
+		      printf("%d ", Array[thispad-1][j]);
+		      if (j%16==0) printf("\n");
+		    }
+		  printf("\n");
 		}
 	    }
-
+#endif
 	  for(int row=1;row <= TPC_PADROWS; row++)
 	    {
-	      int count = ADCRr->getPadList(row, &padlist[row-1]);
+	      int count = rmsr->getPadList(row, &padlist[row-1]);
 
-	      for(int i=0;i<count;i++) //loop over pads with data in this row
+	      for(int i=0;i<count;i++)
 		{
-		  int nClusters;
-		  // array of pointers to ASIC_Cluster
-		  struct ASIC_Cluster *clusters[TPC_MAXPADS];
+		  int length;
+		  u_char  *Array[TPC_MAXPADS];
 		  u_char thispad = padlist[row-1][i];
-
-		  int n = CPPr->getClusters(row, thispad, &nClusters, clusters);
-		  if (n) {
-		    cout << "Error getting clusters: " << dr->errstr() << endl;
-		    close(fd);
-		    printf("sector %d row %d   pad %d \n",sector, row, thispad);
-		    exit(0);
-		  }
-		  if (nClusters) printf("found %d clusters sector %d row %d  pad %d\n",
-					nClusters,sector,row,thispad);
-		  // print all valid CPP values for this pad
-		  int jmax = (nClusters>31)? 31:nClusters;
-		  for(int j=0; j<jmax; j++)
+		  int nseq = rmsr->getSequences(row, thispad, &length, &Array[thispad-1]);
+		  //       print non-zero ADC values for this pad (all 512)
+		  if (!nseq) continue; // pad not implemented
+		  printf("pedestal RMS values for row %d, pad %d:\n",row,thispad);
+		  for(int j=0; j<length; j++)
 		    {
-		      printf("(%d,%d)[%d] = start %d: stop %d \n", 
-			     row,thispad, j, (clusters[thispad-1]+j)->start_time_bin,
-			     (clusters[thispad-1]+j)->stop_time_bin);
+		      printf("%4.1f ", (float)Array[thispad-1][j]/16.0);
+		      if (j%16==0) printf("\n");
 		    }
+		  printf("\n");
 		}
 	    }
 
-	  delete ADCRr;
-	  delete CPPr;
-#endif
-	  delete zsr;
+	  delete pedr;
+	  delete rmsr;
 	}
-      EventInfo info=er->getEventInfo();
-      printf("===============TIMEBIN HISTOGRAMS: event %d====================\n",
-	     info.EventSeqNo);
-      float total=0;
-      for (int i=0; i<50; i++) {
-	total += histogram[i];
-      }
-      for (int i=0; i<50; i++) {
-	printf("%d-%d:  %f clusters\n", i*10, i*10+9, (float)histogram[i]/total);
-      }
-#ifdef GET_OTHERS
-      if (demc) delete demc; // remove EMC_Reader
-      if (dtrg) delete dtrg; // remove TRG_Reader
-      if (drich) delete drich; // remove RICH_Reader
 #endif
       delete dr; // remove TPC reader
       delete er;

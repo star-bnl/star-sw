@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_CPP_SR.cxx,v 1.4 1999/09/02 21:47:12 fisyak Exp $
+ * $Id: TPCV2P0_CPP_SR.cxx,v 1.5 2000/01/04 20:55:04 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC reader for raw cluster pointer banks (TPCCPPR)
@@ -8,9 +8,19 @@
  *   change log
  * 06-May-99 MJL code cloned from Jeff's ADCR_SR
  * 22-Jun-99 MJL added TPCV2P0_CPP_SR::getAsicParams(struct ASIC_params *);
+ * 29-Aug-99 MJL #include <iostream.h> for HP platform
  *
  ***************************************************************************
  * $Log: TPCV2P0_CPP_SR.cxx,v $
+ * Revision 1.5  2000/01/04 20:55:04  levine
+ * Implemented memory-mapped file access in EventReader.cxx. Old method
+ * (via seeks) is still possible by setting mmapp=0 in
+ *
+ * 	getEventReader(fd,offset,(const char *)logfile,mmapp);
+ *
+ *
+ * but memory-mapped access is much more effective.
+ *
  * Revision 1.4  1999/09/02 21:47:12  fisyak
  * HP corrections
  *

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.6 1999/07/26 17:00:03 levine Exp $
+ * $Id: EventReader.hh,v 1.7 2000/01/04 20:54:47 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -15,9 +15,19 @@
  * 20-Jul-99 MJL added EventReader::fprintError()
  * 20-Jul-99 MJL add alternate getEventReader with name of logfile
  * 20-Jul-99 MJL add overloaded printEventInfo(FILE *)
+ * 28-Dec-99 MJL add alternate InitEventReaders, mapped and unmapped
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.7  2000/01/04 20:54:47  levine
+ * Implemented memory-mapped file access in EventReader.cxx. Old method
+ * (via seeks) is still possible by setting mmapp=0 in
+ *
+ * 	getEventReader(fd,offset,(const char *)logfile,mmapp);
+ *
+ *
+ * but memory-mapped access is much more effective.
+ *
  * Revision 1.6  1999/07/26 17:00:03  levine
  * changes to RICH file organization
  *
@@ -359,8 +369,12 @@ public:
   EventReader();
   EventReader(const char *logfilename);
 
-  void InitEventReader(int fd, long offset, int mmap=1);  
+  void InitEventReader(int fd, long offset, int mmap);  
                              // takes open file descripter-offset
+                             // works on MAPPED file
+  void InitEventReader(int fd, long offset);  
+                             // takes open file descripter-offset
+                             // works on file
   void InitEventReader(void *event);           // pointer to the event
       //  There is an ambiguity here.  The specifier may point to
       //  A logical record header, or it may point to a DATAP Bank

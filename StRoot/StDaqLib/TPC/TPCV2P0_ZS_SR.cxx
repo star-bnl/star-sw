@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.12 1999/12/09 02:50:41 levine Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.13 2000/01/04 20:55:05 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -25,9 +25,19 @@
  * 07-Jul-99 MJL if no banks found for a given rcb,mz just skip it. 
  *           No longer return FALSE
  * 27-Jul-99 MJL init RowSpacePts = 0 to make destructor robust
+ * 29-Aug-99 MJL #include <iostream.h> for HP platform
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.13  2000/01/04 20:55:05  levine
+ * Implemented memory-mapped file access in EventReader.cxx. Old method
+ * (via seeks) is still possible by setting mmapp=0 in
+ *
+ * 	getEventReader(fd,offset,(const char *)logfile,mmapp);
+ *
+ *
+ * but memory-mapped access is much more effective.
+ *
  * Revision 1.12  1999/12/09 02:50:41  levine
  * #define changed to get rid of unused fee array defs for TPCv?P0_ZS_SR.cxx
  * only
