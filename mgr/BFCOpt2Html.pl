@@ -11,7 +11,13 @@
 #           and extra threading.
 #
 
-open(FI,"$ARGV[0]");
+$IN = shift(@ARGV) if (@ARGV);
+$OUT= shift(@ARGV) if (@ARGV);
+
+if( ! defined($IN) ){  $IN  = "StRoot/StBFChain/StBFChain.cxx";}
+if( ! defined($OUT)){  $OUT = "StRoot/StBFChain/doc/index.html";}
+
+open(FI,"$IN");
 
 $parse = 0;
 while ( defined($line = <FI>) ){
@@ -76,7 +82,9 @@ for ($i=0 ; $i <= $#lines ; $i++){
 }
 undef(@lines);
 
-print 
+
+open(FO,">$OUT");
+print FO
     "<head><title>BFChain Options</title></head>\n",
     "<html>\n",
     "<body bgcolor=white>\n",
@@ -95,23 +103,24 @@ foreach $key (@KEYS){
     } else {
 	$col = "";
     }
-    print "<tr$col><td><A NAME=\"$key\">$OKEY{$key}</A></td><td>$KNAME{$key}</td><td>$KCHAIN{$key}</td>";
+    print FO "<tr$col><td><A NAME=\"$key\">$OKEY{$key}</A></td><td>$KNAME{$key}</td><td>$KCHAIN{$key}</td>";
 
-    print "<td>";	
+    print FO "<td>";	
     @items = split(" ",$KOPT{$key});
     foreach $el (@items){
 	$tmp = uc($el);
 	if( defined($KNAME{$tmp}) ){
-	    print "<A HREF=\"\#$tmp\">$el</A> ";
+	    print FO "<A HREF=\"\#$tmp\">$el</A> ";
 	} else {
-	    print "$el ";
+	    print FO "$el ";
 	}
     }
-    print "</td><td>$KMAKE{$key}</td><td>$KLIBS{$key}</td><td>$KCMT{$key}</td></tr>\n";
+    print FO "</td><td>$KMAKE{$key}</td><td>$KLIBS{$key}</td><td>$KCMT{$key}</td></tr>\n";
 	
 }
-print 
+print FO
     "</table>\n",
     "</body>\n",
     "</html>\n";
+close(FO);
 
