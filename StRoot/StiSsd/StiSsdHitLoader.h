@@ -5,7 +5,7 @@
 class StEvent;
 class StMcEvent;
 class StiDetectorBuilder;
-class StSsdHit;
+
 
 /*! \class StiSsdHitLoader
   StiSsdHitLoader is a concrete class implementing the StiHitLoader abstract
@@ -35,7 +35,6 @@ public:
 			    bool useMcAsRec,
 			    Filter<StiTrack> * trackFilter, 
 			    Filter<StiHit> * hitFilter);
-    void operator() (const StSsdHit* ssdhit, StiHit* stiHit);
 };
 
 #endif
