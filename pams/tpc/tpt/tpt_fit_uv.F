@@ -1,5 +1,8 @@
-* $Id: tpt_fit_uv.F,v 1.4 2000/11/14 22:29:08 genevb Exp $
+* $Id: tpt_fit_uv.F,v 1.5 2000/12/07 16:52:55 genevb Exp $
 * $Log: tpt_fit_uv.F,v $
+* Revision 1.5  2000/12/07 16:52:55  genevb
+* Need save declaration for optimized code
+*
 * Revision 1.4  2000/11/14 22:29:08  genevb
 * Switched from float to double in many places
 *
@@ -17,6 +20,7 @@
       real*8  at, bt
       real*8  su, sv, suv, suu, s1
       real*8  u, v, rr
+      save    su, sv, suv, suu, s1
 
       if(iflag.eq.0) then
 C        Initialise track parameters
