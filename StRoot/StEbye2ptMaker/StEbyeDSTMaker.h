@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeDSTMaker.h,v 1.1 2000/08/14 22:05:20 jseger Exp $
+ * $Id: StEbyeDSTMaker.h,v 1.2 2001/09/14 18:00:19 perev Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -19,6 +19,9 @@
  **********************************************************************
  *
  * $Log: StEbyeDSTMaker.h,v $
+ * Revision 1.2  2001/09/14 18:00:19  perev
+ * Removed references to StRun.
+ *
  * Revision 1.1  2000/08/14 22:05:20  jseger
  * Added eta-spectra.  Now reads Ebye mini-DST as input.  Bins events in
  * multiplicity and z-vertex position.  Name of output file is no longer hard-wired.
@@ -40,7 +43,7 @@
 #include "StEbyeEvent.h"
 
 class StEvent;
-class StRun;
+//-tu class StRun;
 
 class StEbyeDSTMaker : public StMaker {
 
@@ -63,7 +66,7 @@ public:
   void SetFilename(const Char_t* name="EbyeDST.root");
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeDSTMaker.h,v 1.1 2000/08/14 22:05:20 jseger Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeDSTMaker.h,v 1.2 2001/09/14 18:00:19 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEbyeDSTMaker, 1)
 };

@@ -1,6 +1,9 @@
-// $Id: StRareMaker.h,v 1.2 2001/09/06 20:51:23 hardtke Exp $
+// $Id: StRareMaker.h,v 1.3 2001/09/14 18:00:25 perev Exp $
 //
 // $Log: StRareMaker.h,v $
+// Revision 1.3  2001/09/14 18:00:25  perev
+// Removed references to StRun.
+//
 // Revision 1.2  2001/09/06 20:51:23  hardtke
 // Update
 //
@@ -37,7 +40,7 @@
 #include "TFile.h"
 
 class StEvent;
-class StRun;
+//-tu class StRun;
 class StRareEvent;
 class StRareEventCut;
 class StRareTrackCut;
