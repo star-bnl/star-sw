@@ -31,6 +31,7 @@ StKinkMaker::StKinkMaker(const char *name):
   m_tkfpar(0),
   mKinkLocalTrack(0)
 {
+  m_kinkEvalOn = kTRUE;
 }
 //_____________________________________________________________________________
 StKinkMaker::~StKinkMaker(){
@@ -520,7 +521,7 @@ PROPERFILL:
 //_____________________________________________________________________________
 void StKinkMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StKinkMaker.cxx,v 1.3 1999/07/02 19:56:15 wdeng Exp $\n");
+  printf("* $Id: StKinkMaker.cxx,v 1.4 1999/07/02 20:14:16 wdeng Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
