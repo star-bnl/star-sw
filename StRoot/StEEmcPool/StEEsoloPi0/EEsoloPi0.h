@@ -2,14 +2,12 @@
 // \author Jan Balewski
 #ifndef EEsoloPi0_h
 #define EEsoloPi0_h
-/*********************************************************************
- * $Id: EEsoloPi0.h,v 1.4 2004/05/07 21:38:38 balewski Exp $
- *********************************************************************
+/******************************************************
+ * $Id: EEsoloPi0.h,v 1.5 2004/08/26 04:39:40 balewski Exp $
+ ******************************************************
  * Descripion:
  *  finds pi0 based on EEMC tower response
- *********************************************************************/
-
-#include "TObject.h"
+ ******************************************************/
 
 class EEmcGeomSimple;
 class TVector3;
@@ -22,22 +20,25 @@ class EEmcDbItem;
 
 #include "StEEmcUtil/EEfeeRaw/EEdims.h"
 
-#ifdef NO_ROOT4STAR
+
+/// the trick to switch between two DB readers
+#ifdef StRootFREE
   class EEmcDb;
-  typedef EEmcDb MYDB;
+  typedef EEmcDb EEDB;
 #else
   class StEEmcDbMaker;
-  typedef StEEmcDbMaker MYDB;
+  typedef StEEmcDbMaker EEDB;
 #endif
 
-
-class EEsoloPi0 :public TObject{
+class EEsoloPi0 {
  protected:
   enum {MxTwEta=12, MxTwPhi=60, MxTw=12*60};
-
+  enum {mxTile=4,kT=0,kP=1, kQ=2,kR=3, kU=0, kV=1}; // 0=tower, 1=pres1, 2=pres2, 3=post
+ 
  private:
   EEmcGeomSimple *geom;
  protected:
+  int  nInpEve;
   float seedEnergy; // lower limit in search for seeds
   float shapeLimit; // cut on eHTower/eCluster 
   float mLo, mHi; // define mass of meson
@@ -57,6 +58,7 @@ class EEsoloPi0 :public TObject{
   TH1F *hA[32], *hR[64], *hM[64]; // all, real , mixed eve
   EEsoloMipA soloMip[MxTw]; // stores all towers
 
+  int dbMapped;
   const  EEmcDbItem  *soloMipDb[MxTw]; // stores DB pointers for all towers
 
   void clear();
@@ -64,25 +66,32 @@ class EEsoloPi0 :public TObject{
   void sumTwClusterEnergy(int ic,int d=1);
   float sumPatchEnergy(int k0,int d,EEsoloMipA *soloMipX, float *maxVal=0);
   int findInvM(Cluster *, Cluster *, TH1F **);
-  MYDB *db;
+
+  EEDB *eeDb; /// DB access point
+  TObjArray  *HList; /// output histo access point
+
  public:
   
   EEsoloPi0();
   virtual ~EEsoloPi0();
   void print();
   void finish();
-#ifdef NO_ROOT4STAR
-  int getTowerAdc(EEfeeRawEvent  *feeEve, EEstarTrig *eTrig=0,EEmcEventHeader *eHead=0, int n1=0, int n2=240);
-#endif
   int findTowerClust();
   void findTowerPi0();
-  void init( MYDB *, TObjArray * L=0);
+  void init( );
+  void initRun(int runID);// must be called after DB timestamp is known
+
   void set(float a, float b,  float d, float m1=0.11, float m2=0.16 )
     {scaleFactor =a; seedEnergy=b;  shapeLimit=d;  mLo=m1; mHi=m2; }
 
  
   ClassDef(EEsoloPi0,1) 
 };
+#endif
+
+#if 0
+  int getTowerAdc(EEfeeRawEvent  *feeEve, EEstarTrig *eTrig=0,EEmcEventHeader *eHead=0, int n1=0, int n2=240);
+
 #endif
 
 /* fix in St-code
@@ -94,6 +103,9 @@ class EEsoloPi0 :public TObject{
 
 /*****************************************************************
  * $Log: EEsoloPi0.h,v $
+ * Revision 1.5  2004/08/26 04:39:40  balewski
+ * towards pi0
+ *
  * Revision 1.4  2004/05/07 21:38:38  balewski
  * gamma finder with SMD
  *
