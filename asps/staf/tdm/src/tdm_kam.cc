@@ -368,8 +368,6 @@ int kam_tdmtable_cell_getvalue()
 
    tdmTable* table;		/* tdmTable object */
 
-   EML_PRINTF("table.cell = (%s)\n",cellSpec);
-
    /*- HACK - preliminary AHS calls do not work!!! -*/
    char *cs = (char*)ASUALLOC(strlen(cellSpec) +1);
    strcpy(cs,cellSpec);
@@ -409,34 +407,34 @@ int kam_tdmtable_cell_getvalue()
    }
 
    printf("TDMTABLE:\tCell data = ");
-   dsuPrintData(stdout,cellData._d,col.elcount,cellData.v);
+   dsuPrintData(stdout,cellData._d,col.elcount,cellData.data.v);
    printf("\n");
 
    float result;
    switch( cellData._d ){
       case DS_TYPE_CHAR:
-         result = *(cellData.c);
+         result = *(cellData.data.c);
 	 break;
       case DS_TYPE_OCTET:
-         result = *(cellData.o);
+         result = *(cellData.data.o);
 	 break;
       case DS_TYPE_SHORT:
-         result = *(cellData.s);
+         result = *(cellData.data.s);
 	 break;
       case DS_TYPE_U_SHORT:
-         result = *(cellData.us);
+         result = *(cellData.data.us);
 	 break;
       case DS_TYPE_LONG:
-         result = *(cellData.l);
+         result = *(cellData.data.l);
 	 break;
       case DS_TYPE_U_LONG:
-         result = *(cellData.ul);
+         result = *(cellData.data.ul);
 	 break;
       case DS_TYPE_FLOAT:
-         result = *(cellData.f);
+         result = *(cellData.data.f);
 	 break;
       case DS_TYPE_DOUBLE:
-         result = *(cellData.d);
+         result = *(cellData.data.d);
 	 break;
       case DS_TYPE_STRUCT:
 	 result = 11301957;
@@ -495,32 +493,33 @@ int kam_tdmtable_cell_putvalue()
 	
    TDM_CELLDATA_T cellData;
    cellData._d = tcode;
+   cellData.data.v = ASUALLOC(sizeof(double));
    switch( tcode ){
       case DS_TYPE_CHAR:
 	 char *v = (char*)ASUALLOC(strlen(value) +1);
 	 strcpy(v,value);
-         cellData.c = (char*)v;
+         cellData.data.c = (char*)v;
 	 break;
       case DS_TYPE_OCTET:
-         *(cellData.o) = atol(value);
+         *(cellData.data.o) = atol(value);
 	 break;
       case DS_TYPE_SHORT:
-         *(cellData.s) = atol(value);
+         *(cellData.data.s) = atol(value);
 	 break;
       case DS_TYPE_U_SHORT:
-         *(cellData.us) = atol(value);
+         *(cellData.data.us) = atol(value);
 	 break;
       case DS_TYPE_LONG:
-         *(cellData.l) = atol(value);
+         *(cellData.data.l) = atol(value);
 	 break;
       case DS_TYPE_U_LONG:
-         *(cellData.ul) = atol(value);
+         *(cellData.data.ul) = atol(value);
 	 break;
       case DS_TYPE_FLOAT:
-         *(cellData.f) = atof(value);
+         *(cellData.data.f) = atof(value);
 	 break;
       case DS_TYPE_DOUBLE:
-         *(cellData.d) = atof(value);
+         *(cellData.data.d) = atof(value);
 	 break;
       case DS_TYPE_STRUCT:
 	 EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
@@ -533,6 +532,7 @@ int kam_tdmtable_cell_putvalue()
    if( !table->putCell(cellData,nrow,ncol) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
+   ASUFREE(cellData.data.v);
 
    ASUFREE(cs);
    EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);

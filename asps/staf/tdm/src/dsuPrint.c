@@ -15,8 +15,9 @@ void dsuPrintData(FILE *stream, DS_TYPE_CODE_T code
    switch(code) {
 
       case DS_TYPE_CHAR:
+	 fprintf( stream,  "\t");
          for (i = 0; i < count; i++) {
-            fprintf( stream,  "\t%c", p.c[i]);
+            fprintf( stream,  "%c", p.c[i]);
 	 }
          break;
          
