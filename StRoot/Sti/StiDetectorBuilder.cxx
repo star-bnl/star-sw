@@ -5,6 +5,12 @@ StiDetectorBuilder::StiDetectorBuilder(){
 }
 
 StiDetectorBuilder::~StiDetectorBuilder(){
+  detectorIterator iterator = mDetectorVector.begin();
+
+  while(iterator != mDetectorVector.end()){
+    StiDetector *pDetector = *(iterator++);
+    delete pDetector;
+  }
 }
 
 bool StiDetectorBuilder::hasMore() const {

@@ -6,6 +6,7 @@
 
 //SCL
 #include "StThreeVector.hh"
+#include "StHelix.hh" 
 
 //StEvent
 #include "StEventTypes.h"
@@ -22,9 +23,6 @@
 #include "tables/St_svg_geom_Table.h"
 #include "tables/St_svg_config_Table.h"
 #include "tables/St_svg_shape_Table.h"
-
-//StEvent
-#include "StEventTypes.h"
 
 //StiMaker
 #include "StiMaker/StiMaker.h"
@@ -390,6 +388,36 @@ void StiGeometryTransform::operator() (const StSsdHit* ssdhit, StiHit* stihit){
 }
 
 void StiGeometryTransform::operator() (const StiHit* stihit, StSsdHit* ssdhit){
+}
+
+void StiGeometryTransform::operator() (const StiTrackNode *pTrackNode,
+                                       StHelix *pHelix){
+
+  // first, calculate the helix origin in global coords
+  StThreeVector<double> origin(pTrackNode->fX, pTrackNode->fP0,
+                               pTrackNode->fP1);
+  origin.rotateZ(- pTrackNode->fAlpha);
+
+  // dip angle & curvature easy
+  double dDip = atan(pTrackNode->fP4);
+  double dCurvature = pTrackNode->fP3;
+
+  // now calculate azimuthal angle of the helix origin wrt the helix axis
+  // in _local_ coordinates.  
+  double dDeltaX = pTrackNode->fX - pTrackNode->fP2/dCurvature;
+  double dDeltaY = sqrt(1/(dCurvature*dCurvature) - dDeltaX*dDeltaX) *
+      (dCurvature>0 ? -1 : 1); // sign(curvature) == -sign(Y-Y0)
+  double dPhi = atan2( dDeltaY, dDeltaX); // in [0,2pi]
+  // now change to global coords
+  dPhi -= pTrackNode->fAlpha;
+  while(dPhi<0.){      dPhi += 2.*M_PI; };
+  while(dPhi>2.*M_PI){ dPhi -= 2.*M_PI; };
+
+  // finally, need the sense of rotation.  Here we need the fact that
+  // the track model assumes outward tracks (positive local x coord of mtm).
+  int iH = dCurvature>0 ? 1 : -1;
+
+  pHelix->setParameters( fabs(dCurvature), dDip, dPhi, origin, iH );
 }
 
 //Go from global->Sti, expect refAngle positive

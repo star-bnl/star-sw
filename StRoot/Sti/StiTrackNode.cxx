@@ -181,7 +181,7 @@ void StiTrackNode::getMomentum(double p[3], double e[6]) const
   else if (c>-1e-9 && c<0)
     c = -1e-9;
 
-  pt = kField/c;
+  pt = getPt();
   sinPhi = c*fX-fP2;
   cosPhi = sqrt(1-sinPhi*sinPhi);
   p[0] = pt*cosPhi;
@@ -285,6 +285,9 @@ void StiTrackNode::getGlobalMomentum(double p[3], double e[6]) const
   p[1] = a10*px + a11*py + a12*pz;
   p[2] = a20*px + a21*py + a22*pz;
 
+  if (e==0)
+    return;
+
   // original error matrix
   double b00=e[0], b01=e[1], b02=e[2];
   double b10=e[1], b11=e[3], b12=e[4];
@@ -340,7 +343,7 @@ double StiTrackNode::getPt() const
     c = 1e-9;
   else if (c>-1e-9 && c<0)
     c = -1e-9;
-  pt = kField/c;
+  pt = fabs(kField/c);
   return pt;
 }
 
