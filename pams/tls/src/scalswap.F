@@ -1,3 +1,8 @@
+* $Id: scalswap.F,v 1.2 1998/03/24 00:42:04 fisyak Exp $
+* $Log: scalswap.F,v $
+* Revision 1.2  1998/03/24 00:42:04  fisyak
+* Clean
+*
 	SUBROUTINE SCALSWAP(raw,swapped)
  
 C+
