@@ -1,6 +1,7 @@
       INTEGER*4 FUNCTION FITTER(
      & ntpc, xcir, ycir, zcir, xerr, yerr, zerr, param, chisquare,
-     & covar, hypoid, npfit,good_hit)
+     & covar, hypoid, npfit,good_hit,
+     & parout, covout)
 
 C* INPUT
 C* ntpc - number of points to fit
@@ -27,7 +28,8 @@ C* ( 5  9 12 14 15)  -  q/p
 C* OUTPUT
 C* chisquare
 C* covar - covariance matrix
-
+C* parout(5)  - fitted parameters at out most surface
+C* covout(15) - their covariance matrix
 
       IMPLICIT NONE
 #include "math_constants.inc"
@@ -43,14 +45,15 @@ C* covar - covariance matrix
 
       DOUBLE PRECISION    xcir(mxpnt),ycir(mxpnt),zcir(mxpnt)
       DOUBLE PRECISION    xerr(mxpnt),yerr(mxpnt),zerr(mxpnt),pnt(mxpnt)
-      DOUBLE PRECISION    chisquare, param(*)
-      DOUBLE PRECISION    covar(5,5)
+      DOUBLE PRECISION    chisquare, param(*), parout(*)
+      DOUBLE PRECISION    covar(5,5), covout(5,5)
 
       REAL xfirst,yfirst,zfirst,xlast,ylast,zlast,rfirst,xpar,ypar
       REAL x,y,z,xer,yer,zer,phi,psi,lambda,psii,psif,psir,parmass
       REAL tanl,cosl
       REAL r,x0,y0,dpsi,twopi
       REAL TRKGEN(6),TRKREF(6),TPC(6,MXPNT),TPCCH2(MXPNT),TRKTPC(23)
+     &,TRKOUT(23)
       INTEGER ihitseq(mxpnt)
 
       INTEGER minfit,iret,nevt,ntrk,ntpc,i,npfit,ic,ih,hypoid
@@ -207,7 +210,8 @@ C -- check for rotation direction
 
       trkref(3) = trkgen(3)-dpsi*sign(r,csign)*tanl ! z
 
-      CALL TPCTRK(NEVT,NTRK,TRKGEN,TRKREF,NTPCUSED,TPC,TPCCH2,TRKTPC,IRET)
+      CALL TPCTRK(NEVT,NTRK,TRKGEN,TRKREF,NTPCUSED,TPC,TPCCH2,TRKTPC
+     &,TRKOUT,IRET)
 C DEBUG
       IF(IRET.ne.0)then
         a=b
@@ -262,6 +266,56 @@ c fill in covar here
         covar(5,3) = covar(3,5)
         covar(5,4) = covar(4,5)
 
+*!  parameters at out most surface
+        parout(1)=trkout(2)/trkout(1) ! theta
+        parout(2)=trkout(3) ! z
+C convert to 0-2pi
+        psi = amod(trkout(5),twopi)
+        if(psi.lt.0)psi=psi+C_2PI
+        parout(3)=psi ! psi
+        parout(4)=trkout(4) ! tanl
+        parout(5)=trkout(6) ! q/pt
+        parout(6)=trkout(1) ! r0 where parameters are evaluated 
+        chisquare = trkout(22)/trkout(23) ! chisq/degf
+        npfit = (ifix(trkout(23))+5)/2 ! (ndegf+5)/2
+        do ih =1,ntpcused ! tag the removed hits
+          if(tpcch2(ih).ne.0)good_hit(ihitseq(ih))=.false.
+        enddo
+c fill in covar here
+        ic = 6
+
+        covout(1,1) = trkout(ic+1) ! phi*r*phi*r
+        covout(2,2) = trkout(ic+6) ! z*z
+        covout(3,3) = trkout(ic+10)! tanl*tanl
+        covout(4,4) = trkout(ic+13)! psi*psi
+        covout(5,5) = trkout(ic+15)! q/pt*q/pt
+
+        covout(1,2) = trkout(ic+2) ! r*phi*z
+        covout(1,3) = trkout(ic+3) ! r*phi*tanl
+        covout(1,4) = trkout(ic+4) ! r*phi*psi
+        covout(1,5) = trkout(ic+5) ! r*phi*q/pt
+
+        covout(2,1) = covout(1,2)
+        covout(2,3) = trkout(ic+7) ! z*tanl
+        covout(2,4) = trkout(ic+8) ! z*psi
+        covout(2,5) = trkout(ic+9) ! z*q/pt
+
+        covout(3,1) = covout(1,3)
+        covout(3,2) = covout(2,3)
+        covout(3,4) = trkout(ic+11)! tanl*psi
+        covout(3,5) = trkout(ic+12)! tanl*q/pt
+
+        covout(4,1) = covout(1,4)
+        covout(4,2) = covout(2,4)
+        covout(4,3) = covout(3,4)
+        covout(4,5) = trkout(ic+14)! psi*q/pt
+
+        covout(5,1) = covout(1,5)
+        covout(5,2) = covout(2,5)
+        covout(5,3) = covout(3,5)
+        covout(5,4) = covout(4,5)
+
+
       ENDIF
 
  900  CONTINUE
@@ -271,7 +325,6 @@ c fill in covar here
 
       RETURN
       END
-
 
 
       SUBROUTINE TPCINI(HYPOID,OUTFIL,OUTSMO)
@@ -426,7 +479,8 @@ CCC         CH2SMO=1.E20
       END
 
       SUBROUTINE TPCTRK(NEVT,NTRK,
-     &                  TRKGEN,TRKREF,NTPC,TPC,TPCCH2,TRKTPC,IRET)
+     &                  TRKGEN,TRKREF,NTPC,TPC,TPCCH2,TRKTPC,TRKOUT,
+     &IRET)
 *------------------------------------------------------------------------------
 *--
 *--   fit a TPC track
@@ -441,6 +495,8 @@ CCC         CH2SMO=1.E20
 *--   Output:
 *--      TRKTPC      ... track at reference surface within the beam tube
 *--                      (R,R*PHI,z,tanl,phi,1/p,c11,..,c55,chi2,ndef)
+*--      TRKOUT      ... track at out most surface
+*--                      (R,R*PHI,z,tanl,phi,1/p,c11,..,c55,chi2,ndef)
 *--      IRET        ... return code
 *--
 *--   Dietrich Liko
@@ -454,12 +510,13 @@ CCC         CH2SMO=1.E20
      &              FRES(2,MTPC),FPUL(2,MTPC),FCH2(MTPC),
      &              SRES(2,MTPC),SPUL(2,MTPC),SCH2(MTPC)
 *--
-      REAL TRKGEN(6),TRKREF(6),TPC(6,*),TPCCH2(*),TRKTPC(23)
+      REAL TRKGEN(6),TRKREF(6),TPC(6,*),TPCCH2(*),TRKTPC(23),TRKOUT(23)
       CHARACTER*80 CHSAVE
 *--
       REAL TRK(31),HIT(20)
 *--
-      CALL TPCFIT(TRKREF(1),NTPC,TPC(1,1),TPCCH2(1),TRKTPC(1),IERR)
+      CALL TPCFIT(TRKREF(1),NTPC,TPC(1,1),TPCCH2(1),TRKTPC(1),TRKOUT(1),
+     &IERR)
       IF (IERR.NE.0) THEN
          IRET = IERR
          RETURN
@@ -471,7 +528,7 @@ CCC         CH2SMO=1.E20
       RETURN
 *--
       END
-      SUBROUTINE TPCFIT(TRKREF,NTPC,TPC,TPCCH2,TRKTPC,IRET)
+      SUBROUTINE TPCFIT(TRKREF,NTPC,TPC,TPCCH2,TRKTPC,TRKOUT,IRET)
 *------------------------------------------------------------------------------
 *--
 *--   fit a TPC track
@@ -484,6 +541,8 @@ CCC         CH2SMO=1.E20
 *--
 *--   Output:
 *--      TRKTPC      ... track at reference surface within the beam tube
+*--                      (R,R*PHI,z,theta,phi,1/p,c11,..,c55,chi2,ndef)
+*--      TRKOUT      ... track at out most plane
 *--                      (R,R*PHI,z,theta,phi,1/p,c11,..,c55,chi2,ndef)
 *--      IRET        ... return code
 *--
@@ -498,7 +557,7 @@ CCC         CH2SMO=1.E20
      &              FRES(2,MTPC),FPUL(2,MTPC),FCH2(MTPC),
      &              SRES(2,MTPC),SPUL(2,MTPC),SCH2(MTPC)
 *--
-      REAL TRKGEN(6),TRKREF(6),TPC(6,*),TPCCH2(*),TRKTPC(23)
+      REAL TRKGEN(6),TRKREF(6),TPC(6,*),TPCCH2(*),TRKTPC(23),TRKOUT(23)
 *--
       REAL PIx2xR
       REAL PR(5),P(5),C(15),V(2),CV(3),CINI(15)
@@ -651,6 +710,7 @@ CCC      IF (TRKTPC(5).GT.2.*PI)   TRKTPC(5) = TRKTPC(5) - 2.*PI
 *--
       DO 4000 I=2,NTPC
          CALL KTSMOO(P(1),C(1),IERR)
+         R=TPC(1,I)
          IF (IERR.NE.0) THEN
             IRET=11000+IERR
             RETURN
@@ -664,6 +724,16 @@ CCC      IF (TRKTPC(5).GT.2.*PI)   TRKTPC(5) = TRKTPC(5) - 2.*PI
          ENDIF
  4000 CONTINUE
 *--
+      TRKOUT( 1) = R
+      CALL UCOPY(P(1),TRKOUT(2),5)
+      CALL UCOPY(C(1),TRKOUT(7),15)
+      PIx2xR = 2.*PI*R
+      IF (TRKOUT(2).LT.0)      TRKOUT(2) = TRKOUT(2) + PIx2xR
+      IF (TRKOUT(2).GT.PIx2xR) TRKOUT(2) = TRKOUT(2) - PIx2xR
+CCC      IF (TRKOUT(5).LT.0)       TRKOUT(5) = TRKOUT(5) + 2.*PI
+CCC      IF (TRKOUT(5).GT.2.*PI)   TRKOUT(5) = TRKOUT(5) - 2.*PI
+      TRKOUT(22) = CH2TOT
+      TRKOUT(23) = NDEF
       IRET = 0
       RETURN
 *--

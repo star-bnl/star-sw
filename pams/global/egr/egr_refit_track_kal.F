@@ -93,10 +93,10 @@ C     Local variables
       LOGICAL good_hit(mxpnt), good_hit_tpc(mxpnt)
       DOUBLE PRECISION    xcir(mxpnt),ycir(mxpnt),zcir(mxpnt)
       DOUBLE PRECISION    xerr(mxpnt),yerr(mxpnt),zerr(mxpnt)
-      DOUBLE PRECISION    chisquare, param(*)
+      DOUBLE PRECISION    chisquare, param(6), parout(6)
 
       REAL    as,bs,cf,xold,yold,theta
-      DOUBLE PRECISION    covar(5,5)
+      DOUBLE PRECISION    covar(5,5), covout(5,5)
       REAL*4  prim_vrtx_x, prim_vrtx_y, prim_vrtx_z
       DATA    imsg /0/
 
@@ -230,7 +230,8 @@ C        write(6,*) param(1), param(2), param(3), param(4), param(5)
          EGR_REFIT_TRACK_KAL = STAFCV_BAD
          iret = fitter(ncir, xcir, ycir, zcir, xerr, yerr, zerr, param, 
      c   chisquare, 
-     c   covar, egrpar(2).useglobal, npfit, good_hit_tpc)
+     c   covar, egrpar(2).useglobal, npfit, good_hit_tpc,
+     c   parout,covout)
 CCC     c   covar, egrpar(1).prob(1), egrpar(1).minfit)
 C        write(6,*) param(1), param(2), param(3), param(4), param(5)
          gtrk(igtrk).flag = iret
@@ -241,6 +242,7 @@ C        write(6,*) param(1), param(2), param(3), param(4), param(5)
 
          do i=1,6
             gtrk(igtrk).p(i) = param(i)
+            gtrk(igtrk).pout(i) = parout(i)
          enddo
 
 CCC         gtrk(igtrk).p(6) = sqrt(xcir(1)**2+ycir(1)**2)
