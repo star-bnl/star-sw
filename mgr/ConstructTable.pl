@@ -56,7 +56,7 @@ sub TableCXX {
   my $dir = dirname($dst);
   rmkdir($dir);
   open (OUT,">$dst") or die "Can't open $dst\n";
-  print OUT "#include \"St_",$stem,"_Table.h\"\n";
+  print OUT "#include \"tables/St_",$stem,"_Table.h\"\n";
   print OUT "/////////////////////////////////////////////////////////////////////////\n";
   print OUT "//\n";
   print OUT "//  Class St_",$stem," wraps the STAF table ",$stem,"\n";

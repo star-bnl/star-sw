@@ -2,10 +2,22 @@
 use Env;
 if (defined($AFS)) {$File::Find::dont_use_nlink;}
 use File::Basename;
-use File::Find ();
-#use strict;
 use Sys::Hostname;
 use Cwd;
+use File::Find ();
+#________________________________________
+*name           = *File::Find::name;
+*prune          = *File::Find::prune;
+*dir            = *File::Find::dir;
+*topdir         = *File::Find::topdir;
+*topdev         = *File::Find::topdev;
+*topino         = *File::Find::topino;
+*topmode        = *File::Find::topmode;
+*topnlink       = *File::Find::topnlink;
+#use strict;
+  my $pwd = cwd();
+  if ($pwd =~ '^/afs/') {$File::Find::dont_use_nlink;}
+
 my $DEBUG = "-g";
 @search_files   = ();
 if (defined($NODEBUG)) {$DEBUG = "-O2";}
@@ -37,7 +49,8 @@ my $LDFLAGS  = $CXXFLAGS;
 my $SO       = $CXX;
 my $SOFLAGS  = "";
 my $EXEFLAGS = "NONE";
-my $STIC     = $STAF_BIN . "/" . "stic";
+#my $STIC     = $STAF_BIN . "/" . "stic";
+my $STIC     = "stic";
 my $STICFLAGS= "";
 my $GEANT3   = $STAF_BIN . "/" . "geant3";
 my $KUIP     = $CERN_ROOT . "/bin/kuipc";
@@ -45,6 +58,7 @@ my $ROOTCINT = $ROOTSYS . "/bin/rootcint";
 my $LIBS     = "";
 my $CLIBS    = "";
 my $FLIBS    = "";
+my $CERNLIBS = "";
 my $OSFID    = "";
 my $ROOTCINTD= "";
 my $SoLibs   = "";
@@ -97,7 +111,7 @@ elsif (/^hp_ux102/) {
   $FLIBS     = "/opt/fortran/lib/libU77.a";
 #  $FFLAGS    = "+DA1.0 +ppu +Z  +U77 -K";
 #  $FFLAGS    = "+DA1.0 +ppu +B +Z -K";
-  $FFLAGS    = "-WF,-P +ppu +Z -K";
+  $FFLAGS    = "-WF,-P +ppu +Z +B -K";
   $FEXTEND   = "+es";
 }
 elsif (/^sun4x_55/ ||  /^sun4x_56/) {
@@ -196,9 +210,8 @@ my $ROOTLIBS    = " -L$ROOTSYS/lib -lRint -lNew -lBase -lCint -lClib -lCont -lFu
    $ROOTLIBS   .= " -lPostscript -lProof -lTree -lUnix -lZip";
 my $ROOTGLIBS   = " -lGpad -lGui -lGX11 -lX3d";
 my $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/ROOT/src";
-$CPPPATH = $INCLUDE . ":#StRoot:#pams:" . $INCLUDE . "/tables:#.share:#.share/tables:" . $CERN_ROOT . "/include:" . $ROOTSRC . ":" . $STAF . "/inc:/opt/star/include";
+$CPPPATH = $INCLUDE . ":" .  $ROOTSRC . ":" . $CERN_ROOT . "/include:". $STAF . "/inc:/opt/star/include";
 $FCPPPATH ="";
-#                                                   -I" . $CERN_ROOT . "/include/geant321/geant321";
 print "CPPPATH  = \t$CPPPATH\n";
 Repository ($STAR);
 (my $DirPath  = cwd()) =~ s/\/$//g;#print " in DirPath=$DirPath\n";
@@ -208,9 +221,9 @@ foreach my $rep (@Repo) {
   push @Reps, $rep;
 } print "Repositories: @Reps\n";
 if ($STAR_SYS !~ /^intel_wnt/) {
-  $LIBS .= " " . `cernlib geant321 pawlib graflib/X11 packlib mathlib kernlib`;
-  chop ($LIBS);
-  $LIBS .=  " " . $ROOTLIBS . " " . $ROOTGLIBS . " -lXpm  ";
+  $CERNLIBS .= " " . `cernlib geant321 pawlib graflib/X11 packlib mathlib kernlib`;
+  chop ($CERNLIBS);
+  $LIBS =  $CERNLIBS . " " . $ROOTLIBS . " " . $ROOTGLIBS . " -lXpm  ";
   if ($STAR_SYS !~ /^hp_ux/) {$LIBS .=  " ". $FLIBS . " " . $CLIBS . " ";}
   chop ($LIBS);
   print "LIBS     = \t$LIBS\n";
@@ -257,6 +270,9 @@ $env = new cons(
 		'CXXCOM'       => '%CXX %CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %CXXinp%< %Cout%>',
 		'CLIBS'        => $CLIBS,
 		'FLIBS'        => $FLIBS,
+		'CERNLIBS'     => $CERNLIBS,
+		'ROOTLIBS'     => $ROOTLIBS,
+		'ROOTGLIBS'    => $ROOTGLIBS,
 		'LIBS'         => $LIBS,
 		'SoLibs'       => $SoLibs,
 		'LINK'	       => $LD,
@@ -330,7 +346,10 @@ foreach my $dir ("StRoot","pams") {
     foreach my $sub_dir (@subdirS) {
       # skip unwanted directories
       if ($sub_dir =~ /^macros$/     ||
-#	  $sub_dir =~ /^StPadDisplayMaker$/    ||
+	  $sub_dir =~ /^StAssociationMaker$/    ||
+	  $sub_dir =~ /^StMcAnalysisMaker$/    ||
+	  $sub_dir =~ /^StHbt/    ||
+#	  $sub_dir =~ /^StTrsMaker$/    ||
 	  $sub_dir =~ /^StTpcDb$/    ||
 	  $sub_dir =~ /^StDbMaker$/    ||
           $sub_dir =~ /^test$/)  {next;}
@@ -363,21 +382,10 @@ foreach my $dir ("StRoot","pams") {
                }   
                next;   
              }   
-
-#	    print "subsub :  $subsub_dir /  $subsub_DIR\n";
-	    if ($subsub_dir =~ /^inc$/ || $subsub_dir =~ /^include$/) {
-	      opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";
-	      my @incs = readdir DIR; 
-	      closedir DIR; #print "incs = @incs\n";
-	      foreach my $inc (@incs) {
-		if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ || $inc =~ /\.hpp$/ || $inc =~ /\.inc$/ ) {
-		  push @incT, $subsub_DIR ."/" . $inc; #print "+++ add $inc\n";
-		}
-	      }
-	      next;
-	    }
-	    if ($subdir =~ /^StHbtMaker$/ ||
-		$subdir =~ /^StDaqLib$/) {# print "subdir ===> $subdir\n";
+	    #print "subsub : sub_dir = $sub_dir subsub_dir/DIR = $subsub_dir /  $subsub_DIR\n";
+	    if ($sub_dir =~ /^StHbtMaker$/ ||
+		$sub_dir =~ /^StTrsMaker$/ ||
+		$sub_dir =~ /^StDaqLib$/) { #print "sub_dir ===> $sub_dir\n";
 	      opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";
 	      my @inchbt = readdir DIR; 
 	      my @incHbt = ();
@@ -388,14 +396,28 @@ foreach my $dir ("StRoot","pams") {
 		}
 	      }
 	      if ($#incHbt > -1) {
-		my $include_Hbt = $INCLUDE . "/" . $sibsub_dir;# print "Install  $include_Hbt, @incHbt\n";
+		my $include_Hbt = $INCLUDE . "/" . $sub_dir . "/" . $subsub_dir; 
+#		if ($sub_dir =~ /^StDaqLib$/) {$include_Hbt = $INCLUDE . "/" . $sub_dir . "/" . $subsub_dir;}
+		#print "Install  $include_Hbt, @incHbt\n";
 		Install $env $include_Hbt, @incHbt; 
 	      }
 	      next;
 	    }
-	    if (($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) && $subsub_dir !~ /^g2t$/) {
+	    if (($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) && 
+		($subsub_dir !~ /^g2t$/ || $subsub_dir !~ /^g2t$/)) {
 	      # one more level for gen & sim
 	      push @subdirs, $subsub_DIR; #print "================== add $subsub_DIR\n";
+	    }
+	    if ($subsub_dir =~ /^inc$/ || $subsub_dir =~ /^include$/) {
+	      opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";
+	      my @incs = readdir DIR; 
+	      closedir DIR; #print "incs = @incs\n";
+	      foreach my $inc (@incs) {
+		if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ || $inc =~ /\.hpp$/ || $inc =~ /\.inc$/ ) {
+		  push @incT, $subsub_DIR ."/" . $inc; #print "+++ add $inc\n";
+		}
+	      }
+	      next;
 	    }
 	  }
 	}
@@ -412,11 +434,7 @@ foreach my $dir ("StRoot","pams") {
 	    $sub_dir =~ /^StMcEvent$/ ||
 	    $sub_dir =~ /^StMagF$/ ||
 	    $sub_dir =~ /^StAnalysisUtilities$/ ||
-	    $sub_dir =~ /^St_geant_Maker$/ ||
-	    $sub_dir =~ /^St_db_Maker$/ ||
 	    $sub_dir =~ /^StDbBroker$/ ||
-	    $sub_dir =~ /^StTreeMaker$/ ||
-	    $sub_dir =~ /^StIOMaker$/ ||
 	    $sub_dir =~ /^StDbLib$/) {
 	  opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
 	  my @incs = readdir DIR; 
@@ -427,21 +445,22 @@ foreach my $dir ("StRoot","pams") {
 	    }
 	  }
 	}
-# special directories exported to include with their directory names
-	next if $sub_dir ne "StMcEventMaker" && $sub_dir ne "StEventMaker";
-#	print "sub_dir ==== $sub_dir ====\n";
-	opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
-	my @inc_local = readdir DIR; 
-	closedir DIR;# print "incs = @inc_local\n";
-	my @inclTT     = ();
-	foreach my $inc (@inc_local) {
-	  if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ ||$inc =~ /\.inc$/) { 
-	    push @inclTT, $sub_DIR ."/" . $inc; #print "+++ add $inc\n";
+	else {
+	  if ($sub_dir =~ /Maker$/      || 
+	      $sub_dir =~ /^StDaqLib$/  ||
+	      $sub_dir =~ /LSEvent/     ) {#print "Export Maker includes for $sub_dir\n";
+	    #print "sub_dir = $sub_dir sub_DIR = $sub_DIR\n";
+	    my @incs = find_inc($sub_DIR); #print "in $sub_DIR : @incs\n";
+	    foreach my $inc (@incs) {
+	      (my $ldir = dirname ($inc)) =~ s/^StRoot\///g;
+	      if ($ldir eq ".") {$ldir = "";}
+	      else              {$ldir = "/" . $ldir;}
+	      my $local_install = $INCLUDE . $ldir;
+	      
+	      my @lincT = ("#" . $inc); #print "$inc, @lincT\n";	      
+	      Install $env $local_install, @lincT; #print "Install $env $local_install, @lincT\n";
+	    }
 	  }
-	}
-	if ($#inclTT > -1) {
-	  my $include_dir = $INCLUDE . "/" . $sub_dir;# print "Install $include_dir, @inclTT\n";
-	  Install $env $include_dir, @inclTT;
 	}
       }
     }
@@ -474,6 +493,7 @@ if (-d $db_dir) {
 #print "subdirs = @subdirs\n";
 #print "incT = @incT\n";
 my @Targets = ();
+#foreach $dir ("asps/Rexe","asps/geant","asps/rexe",@subdirs) {#,"cern/geant321","cern/minicern") {
 foreach $dir ("asps/rexe",@subdirs) {
   next if !-d $dir;
   push @Targets, $OBJ . "/" . $dir . "/Conscript";
@@ -484,10 +504,7 @@ Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
 Default qw (   .  );
 Build  @Targets;
 if ($#incT > -1) {Install $env $INCLUDE, @incT;}
-if ($#idlT > -1) {   
-   my $tables = $INCLUDE . "/tables";   
-   Install $env $tables, @idlT;   
- } 
+if ($#idlT > -1) {Install $env $INCLUDE, @idlT;} 
 #________________________________________________________________________________
 # Builder for a C++ module
 package build::command::cxx;
@@ -614,20 +631,8 @@ sub includes {
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
 }
 #________________________________________________________________________________
-#________________________________________________________________________________
 package script;
-#________________________________________
-*name           = *File::Find::name;
-*prune          = *File::Find::prune;
-*dir            = *File::Find::dir;
-*topdir         = *File::Find::topdir;
-*topdev         = *File::Find::topdev;
-*topino         = *File::Find::topino;
-*topmode        = *File::Find::topmode;
-*topnlink       = *File::Find::topnlink;
 sub find_sources {
-  my $pwd = cwd();
-  if ($pwd =~ '^/afs/') {$File::Find::dont_use_nlink;}
   @search_files   = ();
   if (-d $_[0]) {
     &File::Find::find(\&wanted, @_);
@@ -647,46 +652,25 @@ sub find_sources {
   return @search_files;
 }
 #________________________________________
-sub find_hfiles {
-  if (defined($AFS)) {$File::Find::dont_use_nlink;}
-  @search_files   = ();
-  &File::Find::find(\&wanted_Def, @_);
-  for my $dir (@_) {
-    if ( -d $dir ) { 
-      my $i = 0;
-      for ($i=0;$i<=$#search_files;$i++) {
-	#      print "i = ",$i, "src =", $search_files[$i],"\n";
-	my $file = $search_files[$i];
-	$file =~ s/$dir\///g;
-	$search_files[$i] = $file;
-      }
-    }
-  }
-#  print "find_source found $#search_files + 1 files\n";
-  return @search_files;
-}
-#________________________________________
 sub find_inc {
-  if (defined($AFS)) {$File::Find::dont_use_nlink;}
   @search_files   = ();
   &File::Find::find(\&wanted_inc, @_);
-  for my $dir (@_) {
-    if ( -d $dir ) { 
-      my $i = 0;
-      for ($i=0;$i<=$#search_files;$i++) {
-	#      print "i = ",$i, "src =", $search_files[$i],"\n";
-	my $file = $search_files[$i];
-	$file =~ s/$dir\///g;
-	$search_files[$i] = $file;
-      }
-    }
-  }
+#  for my $dir (@_) {
+#    if ( -d $dir ) { 
+#      my $i = 0;
+#      for ($i=0;$i<=$#search_files;$i++) {
+#	#      print "i = ",$i, "src =", $search_files[$i],"\n";
+#	my $file = $search_files[$i];
+#	$file =~ s/$dir\///g;
+#	$search_files[$i] = $file;
+#      }
+#    }
+#  }
 #  print "find_source found $#search_files + 1 files\n";
   return @search_files;
 }
 #________________________________________
 sub find_idlM {
-  if (defined($AFS)) {$File::Find::dont_use_nlink;}
   @search_files   = ();
   &File::Find::find(\&wanted_idlM, @_);
   for my $dir (@_) {
@@ -754,30 +738,10 @@ sub script::wanted_idlM {
   }
 }
 #________________________________________
-sub script::wanted_Def {
-  #  print "wanted ",$_,"\n";
-  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);#  print "wanted $_ \n";
-  if ( -d _ &&
-       (/^CVS$/      ||
-	/^macros$/ ||
-	/^html$/ ||
-	/^idl$/      ||
-	/^exa$/      ||
-	/^inc$/      ||
-	/^doc$/      ||
-	/^run$/      ||
-	/^examples$/ ||
-	/^local$/    ||
-	/^hold$/     ||
-	/^wrk$/))       {$prune = 1; return;}
-  if (/^.*\.h$/      || /^.*\.hh$/ ) {# print "$name\n"; 
-					 push @search_files, $name; }
-}
-#________________________________________
 sub script::wanted_inc {
   #  print "wanted ",$_,"\n";
-  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);#  print "wanted $_ \n";
-  if ( -d $_ &&
+  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
+  if ( -d _ &&
        (/^CVS$/ ||
 	/^macros$/ ||
 	/^html$/ ||
@@ -790,10 +754,8 @@ sub script::wanted_inc {
 	/^hold$/ ||
 	/^wrk$/)
      ) {$prune = 1; return;}
-  if ( /^.*\.h$/|| /^.*\.hh$/ || /^.*\.inc$/  || /^.*\.hpp$/) { 
-#    if ($name =~ '/inc/' || $name =~ '/\w*cdes/') { print "$name\n"; 
-    if ($name =~ '/inc/' ) {# print "$name\n"; 
-      push @search_files, $name; }
+  if ( /^.*\.h$/|| /^.*\.hh$/ || /^.*\.inc$/  || /^.*\.hpp$/) {# print "$name\n"; 
+      push @search_files, $name;
   }
 }
 #____________________________________________________________
@@ -817,3 +779,42 @@ sub sortu {
   }
   return @sorted_and_uniq;
 }
+#________________________________________
+sub find_hfiles {
+  @search_files   = ();
+  &File::Find::find(\&wanted_Def, @_);
+  for my $dir (@_) {
+    if ( -d $dir ) { 
+      my $i = 0;
+      for ($i=0;$i<=$#search_files;$i++) {
+	#      print "i = ",$i, "src =", $search_files[$i],"\n";
+	my $file = $search_files[$i];
+	$file =~ s/$dir\///g;
+	$search_files[$i] = $file;
+      }
+    }
+  }
+#  print "find_source found $#search_files + 1 files\n";
+  return @search_files;
+}
+#________________________________________
+sub script::wanted_Def {
+  #  print "wanted ",$_,"\n";
+  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);#  print "wanted $_ \n";
+  if ( -d _ &&
+       (/^CVS$/      ||
+	/^macros$/ ||
+	/^html$/ ||
+	/^idl$/      ||
+	/^exa$/      ||
+	/^inc$/      ||
+	/^doc$/      ||
+	/^run$/      ||
+	/^examples$/ ||
+	/^local$/    ||
+	/^hold$/     ||
+	/^wrk$/))       {$prune = 1; return;}
+  if (/^.*\.h$/      || /^.*\.hh$/ ) { #print "$name\n"; 
+					 push @search_files, $name; }
+}
+__END__;
