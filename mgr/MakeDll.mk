@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.98 1999/07/17 21:46:00 fisyak Exp $
+# $Id: MakeDll.mk,v 1.99 1999/07/28 14:16:23 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.99  1999/07/28 14:16:23  fisyak
+# Simplify for St_base, take out geant3.def
+#
 # Revision 1.98  1999/07/17 21:46:00  fisyak
 # Clean up
 #
@@ -297,8 +300,6 @@ MAKEDIRS := $(shell mkdir -p $(OUTPUT_DIRS))
 
 VPATH =  $(INPUT_DIRS) $(OUTPUT_DIRS)
 
-FILES_SYM  := $(wildcard $(SRC_DIR)/St_Module.cxx)
-FILES_SYT  := $(wildcard $(SRC_DIR)/St_Table.cxx)
 FILES_TAB  := $(wildcard $(SRC_DIR)/St_*_Table.cxx)
 FILES_MOD  := $(wildcard $(SRC_DIR)/St_*_Module.cxx)
 FILES_DAT  := $(wildcard $(SRC_DIR)/St_DataSet.cxx)
@@ -313,21 +314,11 @@ endif
 else
 FILES_H    := $(wildcard $(SRC_DIR)/St*Table.h)
 endif
-FILES_ST   := $(FILES_SYM) $(FILES_SYT) $(FILES_TAB) $(FILES_MOD) 
+FILES_ST   := $(FILES_TAB) $(FILES_MOD) 
 NAMES_ST   := $(basename $(notdir $(FILES_ST)))
 FILES_ALL  := $(sort $(filter-out $(FILES_ST),$(FILES_SRC)))
 FILES_ORD  := $(FILES_ALL)
 
-ifdef FILES_SYM
-  NAMES_SYM      := $(subst St_,, $(notdir $(basename $(FILES_SYM))))
-  FILES_CINT_SYM := $(addprefix $(GEN_DIR)/St_,$(addsuffix Cint.cxx,$(NAMES_SYM)))
-  FILES_H        := $(filter-out $(subst .cxx,.h,$(FILES_SYM)), $(FILES_H))
-endif
-ifdef FILES_SYT
-  NAMES_SYT      := $(basename $(notdir $(FILES_SYT)))
-  FILES_CINT_SYT := $(addprefix $(GEN_DIR)/,$(addsuffix Cint.cxx,$(NAMES_SYT)))
-  FILES_H        := $(filter-out $(subst .cxx,.h,$(FILES_SYT)), $(FILES_H))
-endif
 
 ifdef FILES_TAB
   NAMES_TAB      := $(strip $(subst _Table,,$(subst St_,,$(basename $(notdir $(FILES_TAB))))))
@@ -457,23 +448,6 @@ all:   RootCint Libraries  DeleteDirs
 #  $(INCLUDES)
 RootCint :  $(FILES_CINT)
 
-#$(GEN_DIR)/St_ModuleCint.cxx
-$(FILES_CINT_SYM) : $(SRC_DIR)/St_Module.h 
-	$(COMMON_LINKDEF)
-	@echo "#pragma link C++ class St_Module-;"	>> $(LINKDEF)
-	@echo "#pragma link C++ enum EModuleTypes;"     >> $(LINKDEF)
-	@echo "#endif"					>> $(LINKDEF)
-	$(CAT) $(LINKDEF); 
-	cd $(GEN_DIR); \
-	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) St_Module.h $(notdir $(LINKDEF))
-$(GEN_DIR)/St_TableCint.cxx : $(SRC_DIR)/St_Table.h
-	$(COMMON_LINKDEF)
-	@echo "#pragma link C++ class St_Table-;"       >> $(LINKDEF)
-	@echo "#pragma link C++ class table_head_st-!;" >> $(LINKDEF)
-	@echo "#endif"                                  >> $(LINKDEF)
-	@$(CAT) $(LINKDEF);
-	cd $(GEN_DIR); \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) St_Table.h $(LINKDEF)
 $(FILES_COG): $(GEN_DIR)/%.h:$(SRC_DIR)/%.h $(STAR)/StRoot/St_base/StArray.h
 	$(RM) $(ALL_TAGS)
 	precint.pl $(1ST_DEPS) > $(ALL_TAGS);
@@ -530,15 +504,12 @@ $(OBJ_DIR)/%.$(O) : %.cc
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
 $(OBJ_DIR)/%.$(O) : %.cxx 
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
-$(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(OBJ_DIR)/geant3.def
+$(FILES_OG): $(OBJ_DIR)/%.$(O):%.g 
 	$(CP)$(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
 	$(FOR72) $(CPPFLAGS) $(INCLUDES) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  $(FOUT)$(ALL_TAGS)))
 $(FILES_OBJ) $(FILES_ORJ) $(FILES_OTJ): $(OBJ_DIR)/%.$(O): %.cxx
 	$(CXX) $(CXXFLAGS) $(CXXOPT) $(subst \,/, $(CPPFLAGS)  -c $(CXXINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN)
-$(OBJ_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
-	test -h $(OBJ_DIR)/geant3.def || $(RM)  $(OBJ_DIR)/geant3.def
-	test -h $(OBJ_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(OBJ_DIR)/geant3.def 
-$(OBJ_DIR)/%.$(O):%.g $(OBJ_DIR)/geant3.def
+$(OBJ_DIR)/%.$(O):%.g
 	cp $(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
 	$(FOR72)  $(CPPFLAGS) $(INCLUDES) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  -o  $(ALL_TAGS)
 $(OBJ_DIR)/%.$(O): %.F
@@ -611,8 +582,6 @@ test:
 	@echo ALL_DIRS  := $(ALL_DIRS)
 	@echo FILES_ORD := $(FILES_ORD)
 	@echo FILES_DEF := $(FILES_DEF)
-	@echo FILES_SYM := $(FILES_SYM)
-	@echo FILES_SYT := $(FILES_SYT)
 	@echo FILES_TAB := $(FILES_TAB)
 	@echo FILES_MOD := $(FILES_MOD) 
 	@echo FILES_CINT:= $(FILES_CINT)
