@@ -1,7 +1,11 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.5 2002/03/19 22:23:52 meissner Exp $
+// $Id: StPeCTrigger.cxx,v 1.6 2002/12/16 23:04:02 yepes Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.6  2002/12/16 23:04:02  yepes
+// Field comes in KGauss and should be passed to routines in Teslas
+// problem pointed out by Vladimir
+//
 // Revision 1.5  2002/03/19 22:23:52  meissner
 // New variables: zdc unatt., Trigger word, MC tree if Geant Branch, DCA  for primary pairs, all tracks for secondary pairs (Test)
 //
@@ -60,7 +64,8 @@ void StPeCTrigger::clear() {
    ctbSlats->Clear();
 }
 
-Int_t StPeCTrigger::process(StEvent *event){
+Int_t StPeCTrigger::process(StEvent *event)
+{
   unsigned int i,j;
 
   // get trigger word 
@@ -241,6 +246,123 @@ Int_t StPeCTrigger::process(StEvent *event){
      }
 
   }
+
   return 0 ;
 }
 
+
+Int_t StPeCTrigger::process(StMuDst* mudst)
+{
+  unsigned int i,j;
+
+  // get trigger word 
+  tw = mudst->event()->l0Trigger().triggerWord();
+
+  
+  l0_2000->setInfoLevel ( infoLevel );
+//  l0_2000Corrected->setInfoLevel ( infoLevel );
+
+  StL0Trigger* l0Data = &mudst->event()->l0Trigger();
+//  StFpdCollection* trg = &mudst->event()->fpdCollection();
+//  if ( !trg ) {
+//     printf ( "StPeCTrigger::StPeCTrigger: No trigger information \n" ) ;
+//     return 1 ;
+//  }
+  StCtbTriggerDetector& ctb = mudst->event()->ctbTriggerDetector();
+//  StMwcTriggerDetector& mwc = &mudst->event()->ctbTriggerDetector();
+  StZdcTriggerDetector& zdc = mudst->event()->zdcTriggerDetector();
+
+  if ( l0Data && infoLevel > 0 ){
+    cout << "L0 mwcCtbMultiplicity = " << l0Data->mwcCtbMultiplicity() << endl;
+  }
+  if(&zdc){
+    if ( infoLevel > 1 ) {
+       cout << "ZDC sum " << zdc.adcSum() << endl;
+       cout << "ZDC sum west " << zdc.adcSum(west) << endl;
+       cout << "ZDC sum east " << zdc.adcSum(east) << endl;
+    }
+    // attenuated signals 
+    zdcWest = zdc.adcSum(west) ;
+    zdcEast = zdc.adcSum(east) ;
+    zdcSum  = zdc.adcSum() ;
+    // unattenuated  // see StZdcTriggerDetector documentation
+    zdcWestUA = zdc.adc(0) ;
+    zdcEastUA = zdc.adc(4) ;
+    zdcSumUA  = zdcEastUA+zdcWestUA ;
+  }
+  else {
+    zdcWestUA = 0 ;
+    zdcEastUA = 0 ;
+    zdcSumUA  = 0 ;
+
+    zdcWest = 0 ;
+    zdcEast = 0 ;
+    zdcSum  = 0 ;
+  }
+//
+//   CTB
+//
+  float ctbsum=0.0;
+  ctbSW = 0 ;
+  ctbNW = 0 ;
+  ctbTW = 0 ;
+  ctbBW = 0 ;
+  ctbSE = 0 ;
+  ctbNE = 0 ;
+  ctbTE = 0 ;
+  ctbBE = 0 ;
+  nCtbHits = 0 ;
+  float ctbThres = 2. ;
+  if(&ctb){
+    TClonesArray &pCtbSlats = *ctbSlats;
+    for(i=0; i<120; i++){
+      for(j=0; j<2; j++){
+	ctbsum += ctb.mips(i,j,0);
+	if ( ctb.mips(i,j,0) > 0 ) {
+	   Byte_t i_eta = (Byte_t)(j+1);
+	   Byte_t i_phi = (Byte_t)(i+1);
+	   Int_t  adc   = (Int_t)ctb.mips(i,j,0) ;
+           new(pCtbSlats[nCtbHits++]) StPeCCtbSlat(i_phi,i_eta,adc) ;
+	}
+
+	if ( ctb.mips(i,j,0) > ctbThres ) {
+           if      ( i >=   5 && i <  20 ) ctbSW++ ;
+	   else if ( i >=  20 && i <  35 ) ctbBW++ ;
+	   else if ( i >=  35 && i <  50 ) ctbNW++ ;
+	   else if ( i >=  50 && i <  60 ) ctbTW++ ;
+	   else if (             i <   5 ) ctbTW++ ;
+           else if ( i >=  65 && i <  80 ) ctbNE++ ;
+	   else if ( i >=  80 && i <  95 ) ctbBE++ ;
+	   else if ( i >=  95 && i < 110 ) ctbSE++ ;
+	   else if ( i >= 110            ) ctbTE++ ;
+	   else if ( i >=  60 && i <  65 ) ctbTE++ ;
+         }
+      }
+    }
+    if ( infoLevel > 1 ) 
+       cout << "CTB MIP total sum = " << ctbsum << endl;
+  }
+  ctbSum = ctbsum ;
+  mwcSum = 0 ;
+//
+//   Simulate l0
+//
+  p4  = l0_2000->process(mudst);
+  p4c = l0_2000Corrected->process(mudst);
+  p5  = l0Offline2001->process(mudst);
+//
+//   Take quadrants from 2001 wiring
+//
+  // L0 simulator
+  Bool_t trgOut[40];
+  {for ( int i = 0 ; i < 40 ; i++ ) trgOut[i] = 0 ;}
+
+  if ( infoLevel > 2 ) {
+     printf ( "trgBits : " ) ;
+     for ( int i = 0 ; i < 24 ; i++ ) {
+        printf ( "%d ", trgOut[i] ) ;
+     }
+     printf ( "\n" ) ;
+  }
+  return 0 ;
+}

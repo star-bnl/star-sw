@@ -19,6 +19,9 @@
 #include "StEventTypes.h"
 #endif /* __CINT__ */
 
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
+
 const int nL0Trays = 120 ;
 const int nL0Slats  = 2 ;
 const int nL0Depth3 =  2 ;
@@ -43,6 +46,7 @@ public:
 
 #ifndef __CINT__
   Int_t process ( StEvent *event ) ; 
+  Int_t process(StMuDst* mudst); 
 #endif /* __CINT__ */
   Int_t dsm1Sum ( ) ;
   Int_t dsm2Sum ( ) ;

@@ -1,7 +1,11 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCL0.cxx,v 1.3 2001/04/25 18:11:25 perev Exp $
+// $Id: StPeCL0.cxx,v 1.4 2002/12/16 23:04:01 yepes Exp $
 // $Log: StPeCL0.cxx,v $
+// Revision 1.4  2002/12/16 23:04:01  yepes
+// Field comes in KGauss and should be passed to routines in Teslas
+// problem pointed out by Vladimir
+//
 // Revision 1.3  2001/04/25 18:11:25  perev
 // HPcorrs
 //
@@ -15,6 +19,7 @@
 #include <math.h>
 #include "StPeCL0.h"
 #include "StCtbTriggerDetector.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
 
 
 
@@ -239,6 +244,75 @@ Int_t StPeCL0::process ( StEvent* event ) {
       printf ( "StPeCL0::process: trigger output %d \n", output ) ;
 
    return output ;
+}
+
+Int_t StPeCL0::process(StMuDst* mudst)
+{
+	StMuEvent* event = 0;
+	event = mudst->event();
+
+
+	StCtbTriggerDetector& ctb = event->ctbTriggerDetector();
+	if (!&ctb)
+	{
+		printf("StPeCL0::process: Didn't find CTB");
+		return 1;
+	}
+
+
+	int i, j, slot;
+
+	for (i=0 ; i<nL0Trays; i++)
+	{
+		slot = cabling[i];
+		if (slot < 0 || slot >= nL0Trays)
+		{
+			printf ("StPeCL0:process: wrong cabling tray %d slot %d \n", i, slot ) ;
+			continue;
+		}
+
+		for (j = 0; j < nL0Slats; j++)
+		{
+			int adc = (int)ctb.mips(i, j, 0);
+			if (adc < 0)
+				adc = 0;
+
+			if (adc > 255)
+			{
+				printf ("StPeCL0:process: adc %d out of range \n", adc);
+				adc = 255;
+			}
+
+			array1[i][j] = adc;
+			weighted1[slot][j] = lut1[slot][j][adc];
+			if (infoLevel && adc > 0) 
+				printf (" Event %d tray %d slot %d slat %d adc %d matched %d \n", mudst->event()->eventInfo().id(), i+1, slot, j+1, adc, weighted1[slot][j]);
+		}
+	}
+
+
+	if (infoLevel) 
+	{
+		printSlats();
+		printWeightedSlats();
+	}
+
+	dsm1Sum();
+
+	if (infoLevel)
+	{
+		printPatches();
+		printWeightedPatches();
+	}
+
+	dsm2Sum();
+
+	int output = weighted3[0] + weighted3[1];
+	if (infoLevel) 
+		printf ("StPeCL0::process: trigger output %d \n", output);
+
+
+	return output;
 }
 #endif
 
