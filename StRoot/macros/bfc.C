@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.139 2000/06/26 22:15:06 fisyak Exp $
+// $Id: bfc.C,v 1.140 2000/06/29 15:57:21 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -38,6 +38,7 @@ class StEventDisplayMaker; StEventDisplayMaker *dsMk = 0;
 class StEventMaker; StEventMaker *evMk = 0;
 //_____________________________________________________________________
 void Load(){
+  if (gClassTable->GetID("TTable") < 0) gSystem->Load("libStar");
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("StUtilities");
