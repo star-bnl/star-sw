@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.3 2003/03/13 21:21:29 pruneau Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.4 2003/03/14 19:02:21 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.4  2003/03/14 19:02:21  pruneau
+ * various minor updates
+ *
  * Revision 2.3  2003/03/13 21:21:29  pruneau
  * getPhase() fixed. MUST inclde -helicity()*pi/2
  *
@@ -42,12 +45,12 @@ StiTrackingPlots::StiTrackingPlots()
   add( _eta    = new TH1D("eta","Track Eta",200,-2,2) );
   add( _phi    = new TH1D("phi","Track Phi",100,-3.1415927,3.1415927) );
   add( _pt     = new TH1D("pt", "pt",       100,0., 5.) );
-  add( mCurv  = new TH3D("mCurv","Curvature v. Eta and Pt", 256,-100,100,128,-2,2,128,0,30));
-  add( mHeli  = new TH3D("mHeli","Helicity v. Eta and Pt", 3,-1,1,128,-2,2,128,0,30));
-  add( mMomX  = new TH3D("mMomX","Momentum (X) v. Eta and Phi",  256,0,30,128,-2,2,128,0,360));
-  add( mMomY  = new TH3D("mMomY","Momentum (Y) v. Eta and Phi",  256,0,30,128,-2,2,128,0,360));
-  add( mMomZ  = new TH3D("mMomZ","Momentum (Z) v. Eta and Phi",  256,0,30,128,-2,2,128,0,360));
-  add( mPhase = new TH3D("mPhase","Phase v. Eta and Pt",  256,0,30,128,-2,2,128,0,360));
+  //add( mCurv  = new TH3D("mCurv","Curvature v. Eta and Pt", 256,-100,100,128,-2,2,128,0,30));
+  //add( mHeli  = new TH3D("mHeli","Helicity v. Eta and Pt", 3,-1,1,128,-2,2,128,0,30));
+  //add( mMomX  = new TH3D("mMomX","Momentum (X) v. Eta and Phi",  256,0,30,128,-2,2,128,0,360));
+  //add( mMomY  = new TH3D("mMomY","Momentum (Y) v. Eta and Phi",  256,0,30,128,-2,2,128,0,360));
+  //add( mMomZ  = new TH3D("mMomZ","Momentum (Z) v. Eta and Phi",  256,0,30,128,-2,2,128,0,360));
+  //add( mPhase = new TH3D("mPhase","Phase v. Eta and Pt",  256,0,30,128,-2,2,128,0,360));
   add( globalDca = new TH1D("globalDca","Global DCA", 160, -20,20) );	 
   add( _dca40 = new TH1D("dca40","DCA N>=40", 160, -20,20) );	 
 
@@ -110,11 +113,11 @@ void StiTrackingPlots::fillStandardPlots(StiTrackContainer *mTrackStore)
       radLengthPhi->Fill(kTrack->getTrackRadLength(),phi);
       radLengthEta->Fill(kTrack->getTrackRadLength(),eta);
 
-      mCurv->Fill(kTrack->getCurvature(), eta, pt);
+      //mCurv->Fill(kTrack->getCurvature(), eta, pt);
       //mHeli->Fill(kTrack->getHelicity(), eta, pt);
-      mMomX->Fill(p[0],eta,phi);
-      mMomY->Fill(p[1],eta,phi);
-      mMomZ->Fill(p[2],eta,phi);
+      //mMomX->Fill(p[0],eta,phi);
+      //mMomY->Fill(p[1],eta,phi);
+      //mMomZ->Fill(p[2],eta,phi);
       //mPhase->Fill(kTrack->);
 
     }//end loop over tracks
