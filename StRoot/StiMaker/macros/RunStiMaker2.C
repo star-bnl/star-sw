@@ -30,8 +30,8 @@ void RunStiMaker2(Int_t, const Char_t **, const Char_t *qaflag = "");
 
 void RunStiMaker2(Int_t nevents=1,
                   //const Char_t *path="/star/data13/reco/dev/2002/01/",
-                  //const Char_t *path = "/star/data22/ITTF/data/simple_geant/DEV_10_8_01/",
-                  const Char_t *path = "data/simple_geant/DEV_10_8_01/",
+                  const Char_t *path = "/star/data22/ITTF/data/simple_geant/DEV_10_8_01/",
+                  //const Char_t *path = "data/simple_geant/DEV_10_8_01/",
 		     
                   //const Char_t *file="*3007007*.event.root",
                   const Char_t *file= "muon_10_neg.event.root",
