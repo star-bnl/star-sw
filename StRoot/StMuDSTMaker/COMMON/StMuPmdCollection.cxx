@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StMuPmdCollection.cxx,v 1.1 2004/04/02 03:36:21 jeromel Exp $
+ * $Id: StMuPmdCollection.cxx,v 1.2 2004/04/08 23:55:41 jeromel Exp $
  *
  * Class : StMuPmdCollection
  * Author: Supriya Das & Subhasis Chattopadhyay
@@ -8,6 +8,9 @@
  * Description: This class holds the PMD clusters for MuDst
  * ****************************************************************
  * $Log: StMuPmdCollection.cxx,v $
+ * Revision 1.2  2004/04/08 23:55:41  jeromel
+ * Extraneous message commented out
+ *
  * Revision 1.1  2004/04/02 03:36:21  jeromel
  * New files for PMD
  *
@@ -27,7 +30,7 @@ StMuPmdCollection::StMuPmdCollection()
 {    
   int n = sizeof(mPmdClusters[0])+sizeof(mPmdClusters[1]);
   memset(&mPmdClusters[0],0,n);
-  cout<<"memset "<<n<<endl;
+  //cout<<"memset "<<n<<endl;
   for(int i=0;i<2;i++)
 	  {
         mPmdClusters[i]       =NULL; 
