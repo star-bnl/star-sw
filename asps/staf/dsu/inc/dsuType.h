@@ -35,8 +35,14 @@ CWN_BLOCK_TYPE_T block_type(DS_TYPE_CODE_T type);
 char* block_name(char *name,long n);
 char* col2spec(char *name,DS_TYPE_CODE_T type,size_t dims,size_t *dim);
 long dsl2cwn(DS_DATASET_T *pDataset,long hid);
-long dspPrintDataset(DS_DATASET_T *pDataset);
+long dsuPrintDataset(DS_DATASET_T *pDataset); /* Was dspPrintDataset.
+						 Had to be a typo. */
 long xdf2rzd(int lunn, char* inFile);
+int dsuDoCuts(size_t, char *, char *, DS_DATASET_T *);
+
+/* Added because tbr uses it */
+extern int dsuRowPassedCuts(char *, long);
+
 #ifndef linux
 char* basename(char* filename);
 #endif
