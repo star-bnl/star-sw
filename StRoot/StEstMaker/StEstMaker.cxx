@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.10 2001/04/23 12:20:33 lmartin Exp $
+ * $Id: StEstMaker.cxx,v 1.11 2001/04/25 15:05:55 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.11  2001/04/25 15:05:55  lmartin
+ * Retuned tracking parameters (mostly geometrical cuts).
+ *
  * Revision 1.10  2001/04/23 12:20:33  lmartin
  * ptmax of the first pass set to a large value to allow tracking of no field events.
  *
@@ -202,9 +205,9 @@ Int_t StEstMaker::Init(){
       mParams[i]->share[j] = 5;
     }
     mParams[i]->onoff[3] = 0;
-    mParams[i]->nbranch[3] = 3;
-    mParams[i]->nbranch[2] = 2;
-    mParams[i]->nbranch[1] = 1;
+    mParams[i]->nbranch[3] = 1;
+    mParams[i]->nbranch[2] = 5;
+    mParams[i]->nbranch[1] = 2;
     mParams[i]->nbranch[0] = 1;
 
     mParams[i]->maxtpchits=50;
@@ -233,49 +236,50 @@ Int_t StEstMaker::Init(){
   mParams[0]->ptmax = 10000000;
 
   mParams[0]->geomcutl[3] = 1.0;
-  mParams[0]->geomcutl[2] = 0.5;
-  mParams[0]->geomcutl[1] = 0.2;
-  mParams[0]->geomcutl[0] = 0.2;
   mParams[0]->geomcutw[3] = 1.0;
-  mParams[0]->geomcutw[2] = 0.5;
-  mParams[0]->geomcutw[1] = 0.2;
-  mParams[0]->geomcutw[0] = 0.2;
-
-  mParams[1]->geomcutl[3] = 1.0;
-  mParams[1]->geomcutl[2] = 0.5;
-  mParams[1]->geomcutl[1] = 0.2;
-  mParams[1]->geomcutl[0] = 0.2;
   mParams[1]->geomcutw[3] = 1.0;
-  mParams[1]->geomcutw[2] = 0.5;
+  mParams[1]->geomcutl[3] = 1.0;
+  mParams[2]->geomcutl[3] = 1.0;
+  mParams[2]->geomcutw[3] = 1.0;
+  mParams[3]->geomcutl[3] = 1.0;
+  mParams[3]->geomcutw[3] = 1.0;
+  mParams[4]->geomcutl[3] = 1.0;
+  mParams[4]->geomcutw[3] = 1.0;
+
+  mParams[0]->geomcutl[2] = 5.0;
+  mParams[0]->geomcutl[1] = 0.2;
+  mParams[0]->geomcutl[0] = 0.1;
+  mParams[0]->geomcutw[2] = 5.0;
+  mParams[0]->geomcutw[1] = 0.2;
+  mParams[0]->geomcutw[0] = 0.1;
+
+  mParams[1]->geomcutl[2] = 5.0;
+  mParams[1]->geomcutl[1] = 0.2;
+  mParams[1]->geomcutl[0] = 0.1;
+  mParams[1]->geomcutw[2] = 5.0;
   mParams[1]->geomcutw[1] = 0.2;
-  mParams[1]->geomcutw[0] = 0.2;
+  mParams[1]->geomcutw[0] = 0.1;
   
-  mParams[2]->geomcutl[3] = 1.5;
-  mParams[2]->geomcutl[2] = 0.5;
+  mParams[2]->geomcutl[2] = 5.0;
   mParams[2]->geomcutl[1] = 0.2;
-  mParams[2]->geomcutl[0] = 0.2;
-  mParams[2]->geomcutw[3] = 1.5;
-  mParams[2]->geomcutw[2] = 0.5;
+  mParams[2]->geomcutl[0] = 0.1;
+  mParams[2]->geomcutw[2] = 5.0;
   mParams[2]->geomcutw[1] = 0.2;
-  mParams[2]->geomcutw[0] = 0.2;
+  mParams[2]->geomcutw[0] = 0.1;
   
-  mParams[3]->geomcutl[3] = 3.0;
-  mParams[3]->geomcutl[2] = 0.5;
+  mParams[3]->geomcutl[2] = 7.0;
   mParams[3]->geomcutl[1] = 0.2;
-  mParams[3]->geomcutl[0] = 0.2;
-  mParams[3]->geomcutw[3] = 3.0;
-  mParams[3]->geomcutw[2] = 0.5;
+  mParams[3]->geomcutl[0] = 0.15;
+  mParams[3]->geomcutw[2] = 7.0;
   mParams[3]->geomcutw[1] = 0.2;
-  mParams[3]->geomcutw[0] = 0.2;
+  mParams[3]->geomcutw[0] = 0.15;
   
-  mParams[4]->geomcutl[3] = 5.;
-  mParams[4]->geomcutl[2] = 0.5;
+  mParams[4]->geomcutl[2] = 7.0;
   mParams[4]->geomcutl[1] = 0.2;
-  mParams[4]->geomcutl[0] = 0.2;
-  mParams[4]->geomcutw[3] = 5.;
-  mParams[4]->geomcutw[2] = 0.5;
+  mParams[4]->geomcutl[0] = 0.15;
+  mParams[4]->geomcutw[2] = 7.0;
   mParams[4]->geomcutw[1] = 0.2;
-  mParams[4]->geomcutw[0] = 0.2;
+  mParams[4]->geomcutw[0] = 0.15;
 
 
   // superpass settings
