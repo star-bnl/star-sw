@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.9 1998/08/10 02:33:09 fisyak Exp $ 
+// $Id: St_XDFFile.cxx,v 1.10 1998/08/14 16:49:42 fisyak Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.10  1998/08/14 16:49:42  fisyak
+// reduce level of print out
+//
 // Revision 1.9  1998/08/10 02:33:09  fisyak
 // Add St_fileSet
 //
@@ -194,7 +197,7 @@ St_DataSet *St_XDFFile::NextEventGet()
  //
 
  fMethodName = "NextEvent()";
- printf("%s \n",fMethodName);
+ // printf("%s \n",fMethodName);
  if (!fFile) return 0;
  if (strchr(fType,'r')) {
    if (!::xdr_dataset(fStream,&fDataSet))
@@ -230,9 +233,9 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
   DS_DATASET_T *dt;
   St_DataSet *dataset = 0;
 
-   printf (" dir: ds=0x%x  \n", ds);
-   printf ("      tid  - %d     \n", ds->tid);
-   printf ("      name - %s     \n", ds->name);
+  //   printf (" dir: ds=0x%x  \n", ds);
+  //   printf ("      tid  - %d     \n", ds->tid);
+  //   printf ("      name - %s     \n", ds->name);
 
   if (ds->tid) 
   {
@@ -350,7 +353,7 @@ Int_t St_XDFFile::CloseXDF()
 void St_XDFFile::GetXdFile(const Char_t *filename, St_DataSet *dataset)
 {
   if (!(dataset && filename && strlen(filename))) return;
-  printf(" GetXdfFile: read from %s to DataSet %s",filename,dataset->GetName());
+  printf(" GetXdfFile: read from %s to DataSet %s \n",filename,dataset->GetName());
   St_XDFFile xdf;
   if (xdf.OpenXDF(filename) == 0){
     St_DataSet *set = xdf.NextEventGet();
