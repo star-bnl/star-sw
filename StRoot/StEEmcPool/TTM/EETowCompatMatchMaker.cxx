@@ -1,5 +1,5 @@
 // *-- Author : Piotr A. Zolnierczuk
-// $Id: EETowCompatMatchMaker.cxx,v 1.4 2004/01/06 17:45:09 zolnie Exp $
+// $Id: EETowCompatMatchMaker.cxx,v 1.5 2004/01/06 21:33:51 zolnie Exp $
 
 #include "TFile.h"
 #include "TTree.h"
@@ -72,6 +72,8 @@ EETowCompatMatchMaker::EETowCompatMatchMaker(const char* self            , // th
   mAdcMode=kRawAdc;
   //InitTree();
 
+  Warning("EETowCompatMatchMaker","***** DO NOT USE THIS MAKER - IT IS OBSOLETE ***** ");
+  Warning("EETowCompatMatchMaker","***** USE EETowTrackMatchMaker INSTEAD       ***** ");
   mNMatch=0;
 }
 
@@ -427,6 +429,9 @@ EETowCompatMatchMaker::extrapolateToZ(const StMuTrack *track, const double   z, 
 
 
 // $Log: EETowCompatMatchMaker.cxx,v $
+// Revision 1.5  2004/01/06 21:33:51  zolnie
+// release
+//
 // Revision 1.4  2004/01/06 17:45:09  zolnie
 // close to release
 //

@@ -1,5 +1,7 @@
 // *-- Author : Piotr A. Zolnierczuk
-// $Id: EEmcTTMMaker.cxx,v 1.1 2004/01/06 17:45:10 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.2 2004/01/06 21:33:51 zolnie Exp $
+
+#include <iostream>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -37,6 +39,7 @@
 
 #if !defined(ST_NO_NAMESPACES)
 using std::map;
+using std::ostream;
 #endif
 
 
@@ -68,7 +71,7 @@ EETowTrackMatchMaker::EETowTrackMatchMaker(
   if( (mGeom = new EEmcGeomSimple()) == NULL) 
     Fatal("EETowTrackMatchMaker","cannot create EEmcGeomSimple class");
 
-  mDebugLevel   = kWarning;
+  //mDebugLevel   = kWarning;
 
   mFileName = TString(GetName());
   mFileName.ToLower();
@@ -133,20 +136,20 @@ EETowTrackMatchMaker::Init(){
   (void)mTree->Branch("numz"   ,&(mMatch->numz) , "numz/I");
   (void)mTree->Branch("zpos"   ,  mMatch->zpos  , "zpos[numz]/F");
 
-  map<TString,double>::const_iterator zpos; 
+  map<double,TString>::const_iterator zpos; 
   unsigned k=0; 
   for(zpos=mZ.begin(),k=0; zpos!=mZ.end() ; ++zpos, k++) {
     if(k>=kNTupleTTM_MaxZ) { 
-      Warning("Init","too many z positions: %s %g will be used but not written",zpos->first.Data(),zpos->second);
+      Warning("Init","too many z positions: %s %g will be used but not written",zpos->second.Data(),zpos->first);
       continue;
     }
     const TString deta = "deta";
     const TString dphi = "dphi";
     const TString ntra = "[numtracks]/F";
-    TString bEtaName = deta + zpos->first;
-    TString bEtaDef  = deta + zpos->first + ntra;
-    TString bPhiName = dphi + zpos->first;
-    TString bPhiDef  = dphi + zpos->first + ntra;
+    TString bEtaName = deta + zpos->second;
+    TString bEtaDef  = deta + zpos->second + ntra;
+    TString bPhiName = dphi + zpos->second;
+    TString bPhiDef  = dphi + zpos->second + ntra;
 
     //Info("Init","Adding branches %s/%s (test match at z=%g)",bEtaName.Data(),bPhiName.Data(),zpos->second);
     (void)mTree->Branch(bEtaName, mMatch->deta[k], bEtaDef);
@@ -188,39 +191,39 @@ EETowTrackMatchMaker::Make(){
   int &ntrack =  mMatch->numtracks = 0; // an alias
   mMatch->numz = 3;
 
-  map<TString,double>::const_iterator zpos=mZ.begin();
-  for(unsigned int k=0; zpos!=mZ.end() && k< kNTupleTTM_MaxZ ; ++zpos,k++)  mMatch->zpos[k]=zpos->second;
+  map<double,TString>::const_iterator zpos=mZ.begin();
+  for(unsigned int k=0; zpos!=mZ.end() && k< kNTupleTTM_MaxZ ; ++zpos,k++)  mMatch->zpos[k]=zpos->first;
 
   StMuDst   *muDst  = mMuDstMaker->muDst();   // get pointer to _the_ _data_
 
   // sanity checks
   if(muDst==NULL) { 
-    if(mDebugLevel>=kWarning) Warning("Make","%s aborted, muDST maker data missing",GetName());
+    Warning("Make","%s aborted, muDST maker data missing",GetName());
     return kStErr;
   }
 
   if(mEEmcDb->valid()<=0) {
-    if(mDebugLevel>=kWarning) Warning("Make","%s aborted, missing EEMC Db records",GetName());
+    Warning("Make","%s aborted, missing EEMC Db records",GetName());
     return kStErr;
   }
 
   // real work begins here
   TClonesArray      *tracks = muDst->primaryTracks();   // fetch primary tracks
   if (!tracks) { 
-    if(mDebugLevel>=kInfo) Info("Make","no tracks for this event");
+    Info("Make","no tracks for this event");
     return kStWarn;
   }
 
   StMuEvent* muEvent = muDst->event();                     // fetch microEvent data
    if (!muEvent) {
-    if(mDebugLevel>=kInfo) Info("Make","no MuEvent data for this event");
-    return kStWarn;
+     Info("Make","no MuEvent data for this event");
+     return kStWarn;
   }
 
 
   StMuEmcCollection *emc    = muDst->emcCollection();   // fetch endcap data
   if (!emc) {
-    if(mDebugLevel>=kInfo) Info("Make","no EMC data for this event");
+    Info("Make","no EMC data for this event");
     return kStWarn;
   }
   
@@ -289,7 +292,7 @@ EETowTrackMatchMaker::Make(){
 
       zpos=mZ.begin();
       for(unsigned int k=0; zpos!=mZ.end() ; ++zpos,k++) { 
-	double z = zpos->second;
+	double z = zpos->first;
 	matched=false;
 	if(!ExtrapolateToZ(track,z,r) ) break;   // track 'hit' at z
 	dphi = tc.Phi()            - r.Phi()           ;
@@ -308,14 +311,12 @@ EETowTrackMatchMaker::Make(){
       mMatch->etabin[ntrack]=eta;
       mMatch->adc   [ntrack]=adcped;
       mMatch->edep  [ntrack]=edep;
-
   
       mMatch->nhits[ntrack]  = track->nHitsFit();
       mMatch->pt[ntrack]     = track->pt();
       mMatch->ptot[ntrack]   = track->pt()*TMath::CosH(track->eta());    // for now
       mMatch->length[ntrack] = track->length();
       mMatch->dedx[ntrack]   = track->dEdx();
-  
 
       // fill trigger info
       mMatch->daqbits = l0trig.triggerWord();
@@ -395,26 +396,37 @@ EETowTrackMatchMaker::ExtrapolateToZ(const StMuTrack *track, const double   z, T
   return   kTRUE;
 }
 //_____________________________________________________________________________
-void     
-EETowTrackMatchMaker::PrintCutSummary()
+ostream& 
+EETowTrackMatchMaker::PrintCutSummary(ostream &out ) const
 {
-  Info(GetName(),"tracks will be matched at the following depths:");
-  map<TString,double>::const_iterator zpos; 
+  TString head = TString("<EETowTrackMatchMaker::PrintCutSummary()>"); 
+  
+  out << head  << " => " << GetName() << "\n";
+  out << head  << "   tracks will be matched at the following depths:\n";
+  map<double,TString>::const_iterator zpos; 
   for(zpos=mZ.begin(); zpos!=mZ.end() ; ++zpos) 
-    Info(GetName(),"  ==> %8s z=%g ",zpos->first.Data(),zpos->second);
+    out << head  << "      ==> " << zpos->second << "\tz=" << zpos->first << endl;
+  
+  out << head  << "   minimum hits/track  required         "  << mMinTrackHits    << "\n"; 
+  out << head  << "   minimum track length required        "  << mMinTrackLength  << "\n";
+  out << head  << "   minimum transverse momentum required "  << mMinTrackPt      << "\n";
 
-
-  Info(GetName(),"minimum hits/track  required         %d"        , mMinTrackHits); 
-  Info(GetName(),"minimum track length required        %g"        , mMinTrackLength);
-  Info(GetName(),"minimum transverse momentum required %g [GeV/c]", mMinTrackPt);
-
-  Info(GetName(),"tracks will be considered matched if closer to the tower center than");
-  Info(GetName(),"   %g x tower half-width (in phi)",mPhiFac);
-  Info(GetName(),"   %g x tower half-width (in eta)",mEtaFac);
-
+  out << head  << "   tracks will be considered matched if closer to the tower center than\n";
+  out << head  << "     " << mPhiFac << " x tower half-width (in phi)\n";
+  out << head  << "     " << mEtaFac << " x tower half-width (in eta)\n";
+  
+  return out;
 }
 
+
+ostream&  operator<<(ostream &out, const EETowTrackMatchMaker& ttm)  { 
+  return ttm.PrintCutSummary(out); 
+};
+
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.2  2004/01/06 21:33:51  zolnie
+// release
+//
 // Revision 1.1  2004/01/06 17:45:10  zolnie
 // close to release
 //
