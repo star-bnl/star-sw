@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.136 2000/06/16 21:49:00 fisyak Exp $
+// $Id: bfc.C,v 1.137 2000/06/16 23:33:35 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -42,9 +42,6 @@ void Load(){
   gSystem->Load("StChain");
   gSystem->Load("StUtilities");
   gSystem->Load("StBFChain");
-  if (chain) delete chain;
-  chain = new StBFChain;   // Create the main chain object
-  if (!chain) gSystem->Exit(1);
 }
 //_____________________________________________________________________
 void bfc(const Int_t First,
@@ -58,7 +55,9 @@ void bfc(const Int_t First,
   // Chain = "minidaq" read miniDAQ xdf file and process 
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load();
-  
+  if (chain) delete chain;
+  chain = new StBFChain;   // Create the main chain object
+  if (!chain) gSystem->Exit(1);
   chain->SetFlags(Chain);
   if (TreeFile) chain->SetTFile(new TFile(TreeFile,"RECREATE"));
   if (chain->GetOption("LAna") && !chain->GetTFile()) 
