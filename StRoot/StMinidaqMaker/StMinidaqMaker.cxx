@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.6 1999/03/24 01:17:01 sakrejda Exp $
+// $Id: StMinidaqMaker.cxx,v 1.7 1999/03/30 15:58:10 love Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.7  1999/03/30 15:58:10  love
+// Set Drift velocity and trigger time for a laser run
+//
 // Revision 1.6  1999/03/24 01:17:01  sakrejda
 // tss_pars added to the xyz_newtab call
 //
@@ -73,6 +76,9 @@ m_Params(0)
    m_last_sector=no_of_sectors;
 //   m_clock_frequency = 13359400.0;  //Nominal for tss
    m_clock_frequency = 9.4345e+6; // For 1997 and 1998 tpc test runs.
+   m_z_inner_offset  = -0.35; // for run t28f5(1997)
+   m_drift_velocity = 5.37e+6;  // calibrated from t28f5(1997).
+   m_trigger_offset = 0.8e-6; // for run t28f5(1997)
 }
 //_____________________________________________________________________________
 StMinidaqMaker::~StMinidaqMaker(){
@@ -98,7 +104,7 @@ Int_t StMinidaqMaker::Init() {
          tsspar->min_sect = m_first_sector;
          tsspar->max_sect = m_last_sector;
          cout << " Min and Max Sector numbers for tpc slow simulation: " << 
-           tsspar->min_sect << tsspar->max_sect << endl;
+           tsspar->min_sect <<" to "<< tsspar->max_sect << endl;
        }
    }
 // geometry parameters
@@ -112,9 +118,12 @@ Int_t StMinidaqMaker::Init() {
          cout << "TPC geometry parameter tables are incomplete."<< endl;
          SafeDelete(tpgpar);
        }
-    // set the clock for the TPC system tests
+    // set the clock and the velocity for the TPC system tests
        tpg_detector_st *tpg_detector = m_tpg_detector->GetTable();
        tpg_detector->clock_frequency = m_clock_frequency;
+       tpg_detector->z_inner_offset = m_z_inner_offset;
+       tpg_detector->vdrift = m_drift_velocity;
+       tpg_detector->trigger_offset = m_trigger_offset;
        m_tpg_pad       = (St_tpg_pad       *) tpgpar->Find("tpg_pad");
        if (!m_tpg_pad) {
          m_tpg_pad       = new St_tpg_pad("tpg_pad",1); AddConst(m_tpg_pad);
@@ -209,14 +218,14 @@ Int_t StMinidaqMaker::Init() {
                    if(strcmp(sectorN->GetName(),"Sector") == 0){
                    sectorNumber++;
                   if(sectorNumber == list_of_sectors[l]){
-		 cout<<"sector number"<<sectorNumber<<" "<<sectorN<<endl;
+		 cout<<"sector number "<<sectorNumber<<" "<<sectorN<<endl;
 		 St_DataSetIter localIter(sectorN);
 		 cout<<"created localIter"<<endl;
 		 St_raw_row *rri = (St_raw_row *) localIter.Find("gain_row_in");
 		 St_raw_row *rro = (St_raw_row *) localIter.Find("gain_row_out");
 		 St_type_floatdata *fdi = (St_type_floatdata *) localIter.Find("gain_data_in");
 		 St_type_floatdata *fdo = (St_type_floatdata *) localIter.Find("gain_data_out");
-		 cout<<"input pointers"<<rri<<" "<<rro<<" "<<fdi<<" "<<fdo<<endl;
+		 cout<<"input pointers "<<rri<<" "<<rro<<" "<<fdi<<" "<<fdo<<endl;
 		 Int_t result = tfc_load_native_gains(tsi,m_it,m_gt,m_st,rsm,rri,fdi, rro, fdo); 
                  if(result!=kSTAFCV_OK) Warning("Make","tfc_load_native_gains==%d",result);
                   }
@@ -478,7 +487,7 @@ void StMinidaqMaker::MakeHistograms(){
                                    m_tfc_sector_index,raw_sec_m,
                                    raw_row_in,raw_pad_in,raw_seq_in,pixel_data_in,
                                    raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
-                                   adcxyz,m_tsspar);
+                                   adcxyz, m_tsspar);
            if(res!=kSTAFCV_OK) Warning("Make","xyz_newtab==%d",res);
 	 }
        }
@@ -498,7 +507,7 @@ void StMinidaqMaker::MakeHistograms(){
 //_____________________________________________________________________________
 void StMinidaqMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StMinidaqMaker.cxx,v 1.6 1999/03/24 01:17:01 sakrejda Exp $\n");
+  printf("* $Id: StMinidaqMaker.cxx,v 1.7 1999/03/30 15:58:10 love Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
