@@ -1,7 +1,10 @@
 // Using StV0MiniDstMaker to read a v0 mini-DST
 // Peter G. Jones, University of Birmingham, p.g.jones@bham.ac.uk
-// $Id: readV0MiniDst.C,v 1.5 1999/08/13 13:36:44 jones Exp $
+// $Id: readV0MiniDst.C,v 1.6 1999/08/31 20:49:08 genevb Exp $
 // $Log: readV0MiniDst.C,v $
+// Revision 1.6  1999/08/31 20:49:08  genevb
+// StV0MiniDst class now depends on StAnalysisUtilities library
+//
 // Revision 1.5  1999/08/13 13:36:44  jones
 // Modified to reflect new revision of StV0MiniDstMaker
 //
@@ -27,6 +30,7 @@ void load() {
   gSystem->Load("St_Tables.so");
   gSystem->Load("StChain.so");
   gSystem->Load("StUtilities");
+  gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StEvent.so");
   gSystem->Load("StV0MiniDstMaker.so");
