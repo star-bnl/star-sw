@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsoloPi0Maker.cxx,v 1.10 2004/10/21 13:31:25 balewski Exp $
+// $Id: StEEsoloPi0Maker.cxx,v 1.11 2004/10/27 18:07:50 balewski Exp $
 
 #include <TFile.h>
 
@@ -32,19 +32,6 @@ StEEsoloPi0Maker::StEEsoloPi0Maker(const char* self ,const char* muDstMakerName)
   mMuDstMaker = (StMuDstMaker*)GetMaker(muDstMakerName);
   assert(mMuDstMaker);
   MCflag=0;// default off
-   // towers are gain matched to fixed E_T
-  float maxAdc=4095;
-  float maxEtot=60;  // in GeV
-  const float feta[MaxEtaBins]= {1.95,1.855,1.765,1.675,1.59,1.51,1.435,1.365,1.3,1.235,1.17,1.115};
-
-  int i;
-
-  mfixEmTgain=new float [MaxEtaBins];
-  for (i=0;i<MaxEtaBins;i++) {
-    mfixEmTgain[i]=maxAdc/maxEtot/cosh(feta[i]);
-  }
-  mfixSMDgain=23000;
-  mfixPgain=23000;
 
 }
 
@@ -194,19 +181,14 @@ bool StEEsoloPi0Maker::unpackMuEemc(){
     int irad=iphi*MaxEtaBins+ieta; // unified spiral index
     assert(irad>=0 && irad<EEsoloPi0::MxTw);
 
-    float adc=-100, rawAdc=-101, ene=-102;
-    
-    if(MCflag) {  // M-C & real data needs different handling
-      adc=val; //  this is stored in muDst
-      rawAdc=adc+x->ped; // ped noise could be added but is not yet
-      rawAdc-=3; // tmp, simulate threshold over pedestal, remove once ideal peds are loaded
-      ene=adc/ mfixEmTgain[ieta];
-      ene/=0.8; //fug factor for sampling fraction in M-C being ~4% insted of assumed 5%
-    } else {
-      rawAdc=val;
-      adc=rawAdc-x->ped;
-      if(x->gain) ene=adc/x->gain;
-    }
+    float  ene=-102;
+ 
+    float  rawAdc=val;
+    if(rawAdc<x->thr) continue;
+    float  adc=rawAdc-x->ped; 
+    if(x->gain) ene=adc/x->gain;
+
+    if(MCflag) ene/=0.8; //fug factor for sampling fraction in M-C being ~4% insted of assumed 5%
 
     int ii=(x->sec-1)*60+(x->sub-'A')*12+x->eta-1;
     assert(ii==irad);
@@ -216,7 +198,7 @@ bool StEEsoloPi0Maker::unpackMuEemc(){
     //aa int iT=0;// for towers   
     //aa tileAdc[iT][ieta][iphi]=adc;// store towers
     //aa tileThr[iT][ieta][iphi]=rawAdc>x->thr;
-    if(rawAdc<x->thr) continue;
+
     n1++;
     //aa tileEne[iT][ieta][iphi]=ene;
     float recoEner=ene/scaleFactor; // ideal
@@ -259,6 +241,9 @@ float StEEsoloPi0Maker::getCtbSum(){
 
 
 // $Log: StEEsoloPi0Maker.cxx,v $
+// Revision 1.11  2004/10/27 18:07:50  balewski
+// practical use of 'sim' flavor for M-C
+//
 // Revision 1.10  2004/10/21 13:31:25  balewski
 // to match new name of emcCollection in muDst
 //
