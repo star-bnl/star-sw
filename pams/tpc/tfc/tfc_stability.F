@@ -1,3 +1,8 @@
+* $Id: tfc_stability.F,v 1.2 1998/01/27 01:14:51 fisyak Exp $
+* $Log: tfc_stability.F,v $
+* Revision 1.2  1998/01/27 01:14:51  fisyak
+* Split sources
+*
 CC:>--------------------------------------------------------------------
 CC: FILE:       tfc_stability.F
 CC: HISTORY:

@@ -1,3 +1,8 @@
+* $Id: tfc_calc_delta.F,v 1.2 1998/01/27 01:14:50 fisyak Exp $
+* $Log: tfc_calc_delta.F,v $
+* Revision 1.2  1998/01/27 01:14:50  fisyak
+* Split sources
+*
 CC:>--------------------------------------------------------------------
 CC: FILE:       tfc_calc_delta.F
 CC: HISTORY:
