@@ -12,7 +12,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.clusterTreat	 =         12; // max number of cluster in a matched ;
     row.AdcTolerance	 =        0.2; // set to 20% ;
     row.matchMean	 =          0; // matching mean ;
-    row.matchSigma	 =          5; // matching sigma ;
+    row.matchSigma	 =          8; // matching sigma ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;
