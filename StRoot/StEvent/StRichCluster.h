@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichCluster.h,v 2.3 2000/08/09 14:11:51 perev Exp $
+ * $Id: StRichCluster.h,v 2.4 2001/04/05 04:00:39 ullrich Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichCluster.h,v $
+ * Revision 2.4  2001/04/05 04:00:39  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.3  2000/08/09 14:11:51  perev
  * ClassDef must be without ;, (???)
  *
@@ -28,58 +31,58 @@ class StRichCluster : public StObject {
 public:
     StRichCluster();
     ~StRichCluster();
-    StRichCluster(Int_t nPads, Int_t nLocMax, Int_t fPad, Float_t ampSum, Float_t amp2Sum, Float_t rms2);
+    StRichCluster(int nPads, int nLocMax, int fPad, float ampSum, float amp2Sum, float rms2);
     //StRichCluster(const StRichCluster&) {}
     //StRichCluster& operator=(const StRichCluster&) {}
     
-    Int_t    operator==(const StRichCluster&) const;
+    int    operator==(const StRichCluster&) const;
     
-    Int_t    numberOfPads()        const;
-    Int_t    numberOfLocalMax()    const;
-    Int_t    firstPad()            const;
-    Float_t  minimumAmplitudeOfLocalMax() const;
-    Float_t  amplitudeSum()       const;
-    Float_t  amplitude2Sum()      const;
-    Float_t  rms2()               const;
-    Float_t  rms2Calc();
+    int    numberOfPads()        const;
+    int    numberOfLocalMax()    const;
+    int    firstPad()            const;
+    float  minimumAmplitudeOfLocalMax() const;
+    float  amplitudeSum()        const;
+    float  amplitude2Sum()       const;
+    float  rms2()                const;
+    float  rms2Calc();
     
     void   increaseNumberOfLocalMax();
     void   increaseNumberOfPads();
-    void   setFirstPad(Int_t index);
-    void   setNumberOfPads(Int_t newNPads);
-    void   updateAmplitude(Float_t newamp);
-    void   setMinimumAmplitudeOfLocalMax(Float_t newLocMax);
+    void   setFirstPad(int index);
+    void   setNumberOfPads(int newNPads);
+    void   updateAmplitude(float newamp);
+    void   setMinimumAmplitudeOfLocalMax(float newLocMax);
     
 private:
     Int_t    mNumberOfPads;     // number of associated pads
     Int_t    mNumberOfLocalMax; // number of local maxima
     Int_t    mFirstPad;         // index of first cluster pad
-    Float_t  mMinimumAmplitudeOfLocalMax;   // lowest amplitude of all associated local maxima 
+    Float_t  mMinimumAmplitudeOfLocalMax;   // lowest amplitude of all associated local maxima
     Float_t  mAmplitudeSum;     // sum of all pad amplitudes
     Float_t  mAmplitude2Sum;    // sum of squares of all pad amplitudes
     Float_t  mRms2;             // square rms of pad amplitudes
     ClassDef(StRichCluster,1)
 };
 
-inline Int_t StRichCluster::numberOfPads() const { return mNumberOfPads; } 
-inline Int_t StRichCluster::numberOfLocalMax() const { return mNumberOfLocalMax; } 
-inline Int_t StRichCluster::firstPad() const { return mFirstPad; } 
-inline Float_t StRichCluster::minimumAmplitudeOfLocalMax() const { return mMinimumAmplitudeOfLocalMax; } 
-inline Float_t StRichCluster::amplitudeSum() const { return mAmplitudeSum; } 
-inline Float_t StRichCluster::amplitude2Sum() const { return mAmplitude2Sum; } 
-inline Float_t StRichCluster::rms2() const { return mRms2; } 
-inline void StRichCluster::increaseNumberOfLocalMax() { mNumberOfLocalMax++; } 
-inline void StRichCluster::increaseNumberOfPads() { mNumberOfPads++; } 
-inline void StRichCluster::setFirstPad(Int_t index) { mFirstPad=index; } 
-inline void StRichCluster::setNumberOfPads(Int_t newNPads)  { mNumberOfPads=newNPads; } 
-inline void StRichCluster::updateAmplitude(Float_t newamp)
+inline int StRichCluster::numberOfPads() const { return mNumberOfPads; }
+inline int StRichCluster::numberOfLocalMax() const { return mNumberOfLocalMax; }
+inline int StRichCluster::firstPad() const { return mFirstPad; }
+inline float StRichCluster::minimumAmplitudeOfLocalMax() const { return mMinimumAmplitudeOfLocalMax; }
+inline float StRichCluster::amplitudeSum() const { return mAmplitudeSum; }
+inline float StRichCluster::amplitude2Sum() const { return mAmplitude2Sum; }
+inline float StRichCluster::rms2() const { return mRms2; }
+inline void StRichCluster::increaseNumberOfLocalMax() { mNumberOfLocalMax++; }
+inline void StRichCluster::increaseNumberOfPads() { mNumberOfPads++; }
+inline void StRichCluster::setFirstPad(int index) { mFirstPad=index; }
+inline void StRichCluster::setNumberOfPads(int newNPads)  { mNumberOfPads=newNPads; }
+inline void StRichCluster::updateAmplitude(float newamp)
 {
     mAmplitudeSum += newamp;
     mAmplitude2Sum += newamp*newamp;
 }
-inline Float_t StRichCluster::rms2Calc()
+inline float StRichCluster::rms2Calc()
 { return (mRms2 = mAmplitude2Sum/mNumberOfPads - (mAmplitudeSum*mAmplitudeSum/mNumberOfPads/mNumberOfPads)); }
-inline void StRichCluster::setMinimumAmplitudeOfLocalMax(Float_t newLocMax)
-{ mMinimumAmplitudeOfLocalMax = newLocMax; } 
+inline void StRichCluster::setMinimumAmplitudeOfLocalMax(float newLocMax)
+{ mMinimumAmplitudeOfLocalMax = newLocMax; }
 #endif
 

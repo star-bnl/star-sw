@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.7 2001/03/24 03:35:00 perev Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.8 2001/04/05 04:00:58 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.8  2001/04/05 04:00:58  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.7  2001/03/24 03:35:00  perev
  * clone() -> clone() const
  *
@@ -47,7 +50,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.7 2001/03/24 03:35:00 perev Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.8 2001/04/05 04:00:58 ullrich Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
@@ -61,11 +64,11 @@ StTrackFitTraits::StTrackFitTraits(const dst_track_st& t)
     mPidHypothesis = t.pid;
     mNumberOfFitPoints = t.n_fit_point;
     copy(t.chisq+0, t.chisq+2, mChi2);
-    mCovariantMatrix.Set(15, (float*)t.covar);	//tempHackVP
+    mCovariantMatrix.Set(15, (float*)t.covar);        //tempHackVP
 }
 
-StTrackFitTraits::StTrackFitTraits(UShort_t pid, UShort_t nfp,
-                 Float_t chi[2], Float_t cov[15])
+StTrackFitTraits::StTrackFitTraits(unsigned short pid, unsigned short nfp,
+                 float chi[2], float cov[15])
 {
     mPidHypothesis = pid;
     mNumberOfFitPoints = nfp;
@@ -75,15 +78,15 @@ StTrackFitTraits::StTrackFitTraits(UShort_t pid, UShort_t nfp,
 
 StTrackFitTraits::~StTrackFitTraits() {/* noop */}
 
-UShort_t
+unsigned short
 StTrackFitTraits::numberOfFitPoints() const
 {
     return (numberOfFitPoints(kTpcId) +
-	    numberOfFitPoints(kSvtId) +
-	    numberOfFitPoints(kSsdId));
+            numberOfFitPoints(kSvtId) +
+            numberOfFitPoints(kSsdId));
 }
 
-UShort_t
+unsigned short
 StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
 {
     // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
@@ -91,17 +94,17 @@ StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
     case kFtpcWestId:
     case kFtpcEastId:
     case kTpcId:
-	return mNumberOfFitPoints%1000;
-	break;
+        return mNumberOfFitPoints%1000;
+        break;
     case kSvtId:
-	return (mNumberOfFitPoints%10000)/1000;
-	break;
+        return (mNumberOfFitPoints%10000)/1000;
+        break;
     case kSsdId:
-	return mNumberOfFitPoints/10000;
-	break;
+        return mNumberOfFitPoints/10000;
+        break;
     default:
-	return 0;
-    }    
+        return 0;
+    }
 }
 
 StParticleDefinition*
@@ -110,8 +113,8 @@ StTrackFitTraits::pidHypothesis() const
     return StParticleTable::instance()->findParticleByGeantId(mPidHypothesis);
 }
 
-Double_t
-StTrackFitTraits::chi2(UInt_t i) const
+double
+StTrackFitTraits::chi2(unsigned int i) const
 {
     if (i < 2)
         return mChi2[i];
@@ -124,23 +127,23 @@ StTrackFitTraits::covariantMatrix() const
 {
     StMatrixF m(5,5);
     if (mCovariantMatrix.GetSize() == 15) {
-#define mCovariantMatrix ((TArrayF&)mCovariantMatrix) 	//temporary HACK VP
-	m(1,1) = mCovariantMatrix[0];
-	m(1,2) = m(2,1) = mCovariantMatrix[1];
-	m(1,3) = m(3,1) = mCovariantMatrix[2];
-	m(1,4) = m(4,1) = mCovariantMatrix[3];
-	m(1,5) = m(5,1) = mCovariantMatrix[4];
-	m(2,2) = mCovariantMatrix[5];
-	m(2,3) = m(3,2) = mCovariantMatrix[6];
-	m(2,4) = m(4,2) = mCovariantMatrix[7];
-	m(2,5) = m(5,2) = mCovariantMatrix[8];
-	m(3,3) = mCovariantMatrix[9];
-	m(3,4) = m(4,3) = mCovariantMatrix[10];
-	m(3,5) = m(5,3) = mCovariantMatrix[11];
-	m(4,4) = mCovariantMatrix[12];
-	m(4,5) = m(5,4) = mCovariantMatrix[13];
-	m(5,5) = mCovariantMatrix[14];
-#undef mCovariantMatrix 				//temporary HACK VP
+#define mCovariantMatrix ((TArrayF&)mCovariantMatrix)         //temporary HACK VP
+        m(1,1) = mCovariantMatrix[0];
+        m(1,2) = m(2,1) = mCovariantMatrix[1];
+        m(1,3) = m(3,1) = mCovariantMatrix[2];
+        m(1,4) = m(4,1) = mCovariantMatrix[3];
+        m(1,5) = m(5,1) = mCovariantMatrix[4];
+        m(2,2) = mCovariantMatrix[5];
+        m(2,3) = m(3,2) = mCovariantMatrix[6];
+        m(2,4) = m(4,2) = mCovariantMatrix[7];
+        m(2,5) = m(5,2) = mCovariantMatrix[8];
+        m(3,3) = mCovariantMatrix[9];
+        m(3,4) = m(4,3) = mCovariantMatrix[10];
+        m(3,5) = m(5,3) = mCovariantMatrix[11];
+        m(4,4) = mCovariantMatrix[12];
+        m(4,5) = m(5,4) = mCovariantMatrix[13];
+        m(5,5) = mCovariantMatrix[14];
+#undef mCovariantMatrix                                 //temporary HACK VP
     }
     return m;
 }
@@ -151,7 +154,7 @@ StTrackFitTraits::clearCovariantMatrix() {mCovariantMatrix.Set(0);}
 //______________________________________________________________________________
 void StTrackFitTraits::Streamer(TBuffer &R__b)
 {
-//	Stream an object of class StTrackFitTraits.
+//        Stream an object of class StTrackFitTraits.
 
 Version_t R__f = R__b.GetVersion();
 TBEvol R__e(Class(),&R__b);
@@ -160,7 +163,7 @@ TBEvol R__e(Class(),&R__b);
     R__v = R__b.ReadVersion();
     {  R__e.MemberBegin();
        StObject::Streamer(R__b);
-       R__e.MemberEnd();} 
+       R__e.MemberEnd();}
 
     R__b >> (unsigned short&)mPidHypothesis;
     R__b >> (unsigned short&)mNumberOfFitPoints;
@@ -171,7 +174,7 @@ TBEvol R__e(Class(),&R__b);
        mCovariantMatrix.Streamer(R__b);
        R__e.MemberEnd();
     } else {
-      Float_t tmp[15];
+      float tmp[15];
       R__b.ReadStaticArray(tmp);
       mCovariantMatrix.Set(15,tmp);
     }
@@ -180,7 +183,7 @@ TBEvol R__e(Class(),&R__b);
     R__b.WriteVersion(Class());
       {R__e.MemberBegin();
        StObject::Streamer(R__b);
-       R__e.MemberEnd();} 
+       R__e.MemberEnd();}
     R__b << (unsigned short )mPidHypothesis;
     R__b << (unsigned short )mNumberOfFitPoints;
     int R__i=0;if(R__i){};

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.12 2001/03/16 20:56:45 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.13 2001/04/05 04:00:57 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.13  2001/04/05 04:00:57  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.12  2001/03/16 20:56:45  ullrich
  * Added non-const version of fitTraits().
  *
@@ -61,7 +64,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.12 2001/03/16 20:56:45 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.13 2001/04/05 04:00:57 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -127,7 +130,7 @@ StTrack::operator=(const StTrack& track)
         else
             mGeometry = 0;
         mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
-	mPidTraitsVec = track.mPidTraitsVec;
+        mPidTraitsVec = track.mPidTraitsVec;
         mNode = 0;                                 // do not assume any context here
     }
     return *this;
@@ -138,63 +141,63 @@ StTrack::~StTrack()
     delete mGeometry;
 }
 
-Short_t
+short
 StTrack::flag() const { return mFlag; }
 
-UShort_t
+unsigned short
 StTrack::key() const { return mKey; }
 
-UShort_t
+unsigned short
 StTrack::encodedMethod() const { return mEncodedMethod; }
 
-Bool_t
+bool
 StTrack::finderMethod(StTrackFinderMethod bit) const
 {
     return mEncodedMethod & (1<<bit);
 }
 
-StTrackFittingMethod           
+StTrackFittingMethod
 StTrack::fittingMethod() const
 {
     int method = mEncodedMethod & 0xf;
     switch(method) {
     case kHelix2StepId:
-	return kHelix2StepId;
-	break;
+        return kHelix2StepId;
+        break;
     case kHelix3DId:
-	return kHelix3DId;
-	break;
+        return kHelix3DId;
+        break;
     case kKalmanFitId:
-	return kKalmanFitId;
-	break;
+        return kKalmanFitId;
+        break;
     case kLine2StepId:
-	return kLine2StepId;
-	break;
+        return kLine2StepId;
+        break;
     case kLine3DId:
-	return kLine3DId;
-	break;
+        return kLine3DId;
+        break;
     default:
     case kUndefinedFitterId:
-	return kUndefinedFitterId;
-	break;
+        return kUndefinedFitterId;
+        break;
     }
 }
 
-Float_t
+float
 StTrack::impactParameter() const { return mImpactParameter; }
 
-Float_t
+float
 StTrack::length() const { return mLength; }
 
-UShort_t
+unsigned short
 StTrack::numberOfPossiblePoints() const
 {
     return (numberOfPossiblePoints(kTpcId) +
-	    numberOfPossiblePoints(kSvtId) +
-	    numberOfPossiblePoints(kSsdId));
+            numberOfPossiblePoints(kSvtId) +
+            numberOfPossiblePoints(kSsdId));
 }
 
-UShort_t
+unsigned short
 StTrack::numberOfPossiblePoints(StDetectorId det) const
 {
     // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
@@ -202,16 +205,16 @@ StTrack::numberOfPossiblePoints(StDetectorId det) const
     case kFtpcWestId:
     case kFtpcEastId:
     case kTpcId:
-	return mNumberOfPossiblePoints%1000;
-	break;
+        return mNumberOfPossiblePoints%1000;
+        break;
     case kSvtId:
-	return (mNumberOfPossiblePoints%10000)/1000;
-	break;
+        return (mNumberOfPossiblePoints%10000)/1000;
+        break;
     case kSsdId:
-	return mNumberOfPossiblePoints/10000;
-	break;
+        return mNumberOfPossiblePoints/10000;
+        break;
     default:
-	return 0;
+        return 0;
     }
 }
 
@@ -265,16 +268,16 @@ StTrackNode*
 StTrack::node() { return mNode; }
 
 void
-StTrack::setFlag(Short_t val) { mFlag = val; }
+StTrack::setFlag(short val) { mFlag = val; }
 
 void
-StTrack::setEncodedMethod(UShort_t val) { mEncodedMethod = val; }
+StTrack::setEncodedMethod(unsigned short val) { mEncodedMethod = val; }
 
 void
-StTrack::setImpactParameter(Float_t val) { mImpactParameter = val; }
+StTrack::setImpactParameter(float val) { mImpactParameter = val; }
 
 void
-StTrack::setLength(Float_t val) { mLength = val; }
+StTrack::setLength(float val) { mLength = val; }
 
 void
 StTrack::setTopologyMap(const StTrackTopologyMap& val) { mTopologyMap = val; }

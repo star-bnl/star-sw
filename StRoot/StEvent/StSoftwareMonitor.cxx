@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSoftwareMonitor.cxx,v 2.4 2000/12/08 03:53:41 ullrich Exp $
+ * $Id: StSoftwareMonitor.cxx,v 2.5 2001/04/05 04:00:54 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSoftwareMonitor.cxx,v $
+ * Revision 2.5  2001/04/05 04:00:54  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  2000/12/08 03:53:41  ullrich
  * Prepared hooks for ToF.
  *
@@ -42,7 +45,7 @@
 #include "tables/St_dst_mon_soft_glob_Table.h"
 #include "tables/St_dst_mon_soft_l3_Table.h"
 
-static const char rcsid[] = "$Id: StSoftwareMonitor.cxx,v 2.4 2000/12/08 03:53:41 ullrich Exp $";
+static const char rcsid[] = "$Id: StSoftwareMonitor.cxx,v 2.5 2001/04/05 04:00:54 ullrich Exp $";
 
 ClassImp(StSoftwareMonitor)
 
@@ -177,7 +180,7 @@ StSoftwareMonitor::operator=(const StSoftwareMonitor& mon)
         delete mGlobalMonitor; mGlobalMonitor = 0;
         delete mL3Monitor;     mL3Monitor = 0;
         delete mTofMonitor;    mTofMonitor = 0;
-	
+        
         if (mon.mTpcMonitor)
             mTpcMonitor = new StTpcSoftwareMonitor(*(mon.mTpcMonitor));
         else
@@ -210,10 +213,10 @@ StSoftwareMonitor::operator=(const StSoftwareMonitor& mon)
             mL3Monitor = new StL3SoftwareMonitor(*(mon.mL3Monitor));
         else
             mL3Monitor = 0;
-	if (mon.mTofMonitor)
-	    mTofMonitor = new StTofSoftwareMonitor(*(mon.mTofMonitor));
-	else
-	    mTofMonitor = 0;
+        if (mon.mTofMonitor)
+            mTofMonitor = new StTofSoftwareMonitor(*(mon.mTofMonitor));
+        else
+            mTofMonitor = 0;
     }
     return *this;
 }

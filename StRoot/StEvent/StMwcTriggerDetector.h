@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMwcTriggerDetector.h,v 2.2 2000/05/09 10:22:28 ullrich Exp $
+ * $Id: StMwcTriggerDetector.h,v 2.3 2001/04/05 04:00:39 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMwcTriggerDetector.h,v $
+ * Revision 2.3  2001/04/05 04:00:39  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  2000/05/09 10:22:28  ullrich
  * Updated to cope with modified dst_TrgDet.idl
  *
@@ -31,25 +34,25 @@ public:
     // StMwcTriggerDetector& operator=(const StMwcTriggerDetector&); use default
     virtual ~StMwcTriggerDetector();
 
-    UInt_t   numberOfSectors() const;
-    UInt_t   numberOfSubSectors() const;
-    UInt_t   numberOfPreSamples() const;
-    UInt_t   numberOfPostSamples() const;
-    UInt_t   numberOfAuxWords() const;
+    unsigned int   numberOfSectors() const;
+    unsigned int   numberOfSubSectors() const;
+    unsigned int   numberOfPreSamples() const;
+    unsigned int   numberOfPostSamples() const;
+    unsigned int   numberOfAuxWords() const;
 
-    Float_t  mips(UInt_t sec, UInt_t subsec, UInt_t evt = 0) const;
-    Float_t  aux(UInt_t, UInt_t evt = 0) const;
+    float  mips(unsigned int sec, unsigned int subsec, unsigned int evt = 0) const;
+    float  aux(unsigned int, unsigned int evt = 0) const;
 
-    void setMips(UInt_t, UInt_t, UInt_t, Float_t);
-    void setAux(UInt_t, UInt_t, Float_t);
-    void setNumberOfPreSamples(UInt_t);
-    void setNumberOfPostSamples(UInt_t);
+    void setMips(unsigned int, unsigned int, unsigned int, float);
+    void setAux(unsigned int, unsigned int, float);
+    void setNumberOfPreSamples(unsigned int);
+    void setNumberOfPostSamples(unsigned int);
     
 protected:
     enum {mMaxSectors = 24,
-	  mMaxSubSectors = 4,
-	  mMaxEventSamples = 11,
-	  mMaxAux = 32};
+          mMaxSubSectors = 4,
+          mMaxEventSamples = 11,
+          mMaxAux = 32};
     Float_t  mMips[mMaxSectors][mMaxSubSectors][mMaxEventSamples];
     Float_t  mAux[mMaxAux][mMaxEventSamples];
     Int_t    mNumberOfPreSamples;

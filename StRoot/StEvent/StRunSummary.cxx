@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunSummary.cxx,v 2.3 2000/01/31 12:01:05 ullrich Exp $
+ * $Id: StRunSummary.cxx,v 2.4 2001/04/05 04:00:54 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRunSummary.cxx,v $
+ * Revision 2.4  2001/04/05 04:00:54  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.3  2000/01/31 12:01:05  ullrich
  * Unique const_cast syntax for all platforms.
  *
@@ -29,7 +32,7 @@
 #include "StRunSummary.h"
 #include "tables/St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: StRunSummary.cxx,v 2.3 2000/01/31 12:01:05 ullrich Exp $";
+static const char rcsid[] = "$Id: StRunSummary.cxx,v 2.4 2001/04/05 04:00:54 ullrich Exp $";
 
 ClassImp(StRunSummary)
 
@@ -73,29 +76,29 @@ StRunSummary::StRunSummary(const dst_run_summary_st& runSum)
     mRmsPt = runSum.pt[1];
     mMeanNumberOfVertices = runSum.num_vert[0];
     mRmsNumberOfVertices = runSum.num_vert[1];
-    mMeanMultiplicity.Set(mMultiplicityArraySize, const_cast<Float_t*>(runSum.mean_mult));
-    mRmsMultiplicity.Set(mMultiplicityArraySize, const_cast<Float_t*>(runSum.rms_mult));
+    mMeanMultiplicity.Set(mMultiplicityArraySize, const_cast<float*>(runSum.mean_mult));
+    mRmsMultiplicity.Set(mMultiplicityArraySize, const_cast<float*>(runSum.rms_mult));
 }
 
 StRunSummary::~StRunSummary() { /* noop */ }
     
 void
-StRunSummary::setNumberOfEvents(ULong_t val) { mNumberOfEvents = val; }
+StRunSummary::setNumberOfEvents(unsigned int val) { mNumberOfEvents = val; }
 
 void
-StRunSummary::setNumberOfProcessedEvents(ULong_t val) { mNumberOfProcessedEvents = val; }
+StRunSummary::setNumberOfProcessedEvents(unsigned int val) { mNumberOfProcessedEvents = val; }
 
 void
-StRunSummary::setStartTime(Long_t val) { mStartTime = val; }
+StRunSummary::setStartTime(int val) { mStartTime = val; }
 
 void
-StRunSummary::setStopTime(Long_t val) { mStopTime = val; }
+StRunSummary::setStopTime(int val) { mStopTime = val; }
 
 void
-StRunSummary::setCpuSeconds(Float_t val) { mCpuSeconds = val; }
+StRunSummary::setCpuSeconds(float val) { mCpuSeconds = val; }
 
 void
-StRunSummary::setAverageBeamPolarization(StBeamDirection dir, StBeamPolarizationAxis axis, Float_t val)
+StRunSummary::setAverageBeamPolarization(StBeamDirection dir, StBeamPolarizationAxis axis, float val)
 {
     if (axis == transverse) {
         if (dir == east)
@@ -112,28 +115,28 @@ StRunSummary::setAverageBeamPolarization(StBeamDirection dir, StBeamPolarization
 }
 
 void
-StRunSummary::setAverageLuminosity(Float_t val) { mAverageLuminosity = val; }
+StRunSummary::setAverageLuminosity(float val) { mAverageLuminosity = val; }
 
 void
-StRunSummary::setMeanEta(Float_t val) { mMeanEta = val; }
+StRunSummary::setMeanEta(float val) { mMeanEta = val; }
 
 void
-StRunSummary::setRmsEta(Float_t val) { mRmsEta = val; }
+StRunSummary::setRmsEta(float val) { mRmsEta = val; }
 
 void
-StRunSummary::setMeanPt(Float_t val) { mMeanPt = val; }
+StRunSummary::setMeanPt(float val) { mMeanPt = val; }
 
 void
-StRunSummary::setRmsPt(Float_t val) { mRmsPt = val; }
+StRunSummary::setRmsPt(float val) { mRmsPt = val; }
 
 void
-StRunSummary::setMeanNumberOfVertices(Float_t val) { mMeanNumberOfVertices = val; }
+StRunSummary::setMeanNumberOfVertices(float val) { mMeanNumberOfVertices = val; }
 
 void
-StRunSummary::setRmsNumberOfVertices(Float_t val) { mRmsNumberOfVertices = val; }
+StRunSummary::setRmsNumberOfVertices(float val) { mRmsNumberOfVertices = val; }
 
 void
-StRunSummary::setMeanMultiplicity(StDetectorId id, Float_t val)
+StRunSummary::setMeanMultiplicity(StDetectorId id, float val)
 {
     unsigned int i = id-1;        // detector numbering scheme starts at 1
     if (i < mMultiplicityArraySize)
@@ -141,14 +144,14 @@ StRunSummary::setMeanMultiplicity(StDetectorId id, Float_t val)
 }
 
 void
-StRunSummary::setRmsMultiplicity(StDetectorId id, Float_t val)
+StRunSummary::setRmsMultiplicity(StDetectorId id, float val)
 {
     unsigned int i = id-1;        // detector numbering scheme starts at 1
     if (i < mMultiplicityArraySize)
         mRmsMultiplicity[i] = val;
 }
 
-Float_t
+float
 StRunSummary::meanMultiplicity(StDetectorId id) const
 {
     unsigned int i = id-1;        // detector numbering scheme starts at 1
@@ -163,7 +166,7 @@ StRunSummary::meanMultiplicity(StDetectorId id) const
         return 0;
 }
 
-Float_t
+float
 StRunSummary::rmsMultiplicity(StDetectorId id) const
 {
     unsigned int i = id-1;        // detector numbering scheme starts at 1
@@ -178,22 +181,22 @@ StRunSummary::rmsMultiplicity(StDetectorId id) const
         return 0;
 }
 
-ULong_t
+unsigned int
 StRunSummary::numberOfEvents() const { return mNumberOfEvents; }
 
-ULong_t
+unsigned int
 StRunSummary::numberOfProcessedEvents() const { return mNumberOfProcessedEvents; }
 
-Long_t
+int
 StRunSummary::startTime() const { return mStartTime; }
 
-Long_t
+int
 StRunSummary::stopTime() const { return mStopTime; }
 
-Float_t
+float
 StRunSummary::cpuSeconds() const { return mCpuSeconds; }
 
-Float_t
+float
 StRunSummary::averageBeamPolarization(StBeamDirection dir, StBeamPolarizationAxis axis) const
 {
     if (axis == transverse)
@@ -203,23 +206,23 @@ StRunSummary::averageBeamPolarization(StBeamDirection dir, StBeamPolarizationAxi
             
 }
 
-Float_t
+float
 StRunSummary::averageLuminosity() const { return mAverageLuminosity; }
 
-Float_t
+float
 StRunSummary::meanEta() const { return mMeanEta; }
 
-Float_t
+float
 StRunSummary::rmsEta() const { return mRmsEta; }
 
-Float_t
+float
 StRunSummary::meanPt() const { return mMeanPt; }
 
-Float_t
+float
 StRunSummary::rmsPt() const { return mRmsPt; }
 
-Float_t
+float
 StRunSummary::meanNumberOfVertices() const { return mMeanNumberOfVertices; }
 
-Float_t
+float
 StRunSummary::rmsNumberOfVertices() const { return mRmsNumberOfVertices; }

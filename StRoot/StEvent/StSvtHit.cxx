@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.7 2001/03/24 03:34:59 perev Exp $
+ * $Id: StSvtHit.cxx,v 2.8 2001/04/05 04:00:56 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
+ * Revision 2.8  2001/04/05 04:00:56  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.7  2001/03/24 03:34:59  perev
  * clone() -> clone() const
  *
@@ -39,7 +42,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.7 2001/03/24 03:34:59 perev Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.8 2001/04/05 04:00:56 ullrich Exp $";
 
 ClassImp(StSvtHit)
     
@@ -49,7 +52,7 @@ StSvtHit::StSvtHit() { /* noop */ }
 
 StSvtHit::StSvtHit(const StThreeVectorF& p,
                    const StThreeVectorF& e,
-                   ULong_t hw, Float_t q, UChar_t c)
+                   unsigned int hw, float q, unsigned char c)
     : StHit(p, e, hw, q, c)
 { /* noop */ }
 
@@ -58,24 +61,24 @@ StSvtHit::StSvtHit(const dst_point_st& pt)
     //
     // Unpack charge and status flag
     //
-    const ULong_t iflag = pt.charge/(1L<<16);
-    const ULong_t svtq  = pt.charge - iflag*(1L<<16);
-    mCharge = Float_t(svtq)/(1<<21);
-    mFlag = static_cast<UChar_t>(iflag);
+    const unsigned int iflag = pt.charge/(1L<<16);
+    const unsigned int svtq  = pt.charge - iflag*(1L<<16);
+    mCharge = float(svtq)/(1<<21);
+    mFlag = static_cast<unsigned char>(iflag);
 
     //
     // Unpack position in xyz
     //
-    const Float_t maxRange   = 22;
-    const Float_t mapFactor  = 23800;
-    ULong_t svty11 = pt.position[0]/(1L<<20);
-    ULong_t svtz   = pt.position[1]/(1L<<10);
-    ULong_t svtx   = pt.position[0] - (1L<<20)*svty11;
-    ULong_t svty10 = pt.position[1] - (1L<<10)*svtz;
-    ULong_t svty   = svty11 + (1L<<10)*svty10;
-    mPosition.setX(Float_t(svtx)/mapFactor - maxRange);
-    mPosition.setY(Float_t(svty)/mapFactor - maxRange);
-    mPosition.setZ(Float_t(svtz)/mapFactor - maxRange);
+    const float maxRange   = 22;
+    const float mapFactor  = 23800;
+    unsigned int svty11 = pt.position[0]/(1L<<20);
+    unsigned int svtz   = pt.position[1]/(1L<<10);
+    unsigned int svtx   = pt.position[0] - (1L<<20)*svty11;
+    unsigned int svty10 = pt.position[1] - (1L<<10)*svtz;
+    unsigned int svty   = svty11 + (1L<<10)*svty10;
+    mPosition.setX(float(svtx)/mapFactor - maxRange);
+    mPosition.setY(float(svty)/mapFactor - maxRange);
+    mPosition.setZ(float(svtz)/mapFactor - maxRange);
     
     //
     // Unpack error on position in xyz
@@ -85,9 +88,9 @@ StSvtHit::StSvtHit(const dst_point_st& pt)
     svtx   = pt.pos_err[0] - (1L<<20)*svty11;
     svty10 = pt.pos_err[1] - (1L<<10)*svtz;
     svty   = svty11 + (1L<<10)*svty10;
-    mPositionError.setX(Float_t(svtx)/(1L<<26));
-    mPositionError.setY(Float_t(svty)/(1L<<26));
-    mPositionError.setZ(Float_t(svtz)/(1L<<26));
+    mPositionError.setX(float(svtx)/(1L<<26));
+    mPositionError.setY(float(svty)/(1L<<26));
+    mPositionError.setZ(float(svtz)/(1L<<26));
 
     //
     // The hardware position stays at it is
@@ -100,9 +103,9 @@ StSvtHit::~StSvtHit() {/* noop */}
 StObject*
 StSvtHit::clone() const { return new StSvtHit(*this); }
 
-ULong_t
+unsigned int
 StSvtHit::barrel() const { return (layer()+1)/2; }
 
-ULong_t
+unsigned int
 StSvtHit::hybrid() const { return 0; } // to be implemented
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPidTraits.cxx,v 2.4 2001/02/22 21:05:00 lasiuk Exp $
+ * $Id: StRichPidTraits.cxx,v 2.5 2001/04/05 04:00:53 ullrich Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.cxx,v $
+ * Revision 2.5  2001/04/05 04:00:53  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  2001/02/22 21:05:00  lasiuk
  * add production version, associated MIP, dca residual 3Vectors
  *
@@ -26,7 +29,7 @@
  ***************************************************************************/
 #include "StRichPidTraits.h"
 
-static const char rcsid[] = "$Id: StRichPidTraits.cxx,v 2.4 2001/02/22 21:05:00 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPidTraits.cxx,v 2.5 2001/04/05 04:00:53 ullrich Exp $";
 
 ClassImp(StRichPidTraits)
 
@@ -42,10 +45,10 @@ StRichPid* StRichPidTraits::getPid(StParticleDefinition* part) {
 
     for (size_t index=0;index<mThePids.size();index++) {
 
-	if ( (mThePids[index]->getRingType()==part) ||
-	     (mThePids[index]->getParticleNumber() == part->pdgEncoding()) ) {
-	    return mThePids[index];
-	}
+        if ( (mThePids[index]->getRingType()==part) ||
+             (mThePids[index]->getParticleNumber() == part->pdgEncoding()) ) {
+            return mThePids[index];
+        }
 
     }
     return 0;
@@ -56,11 +59,11 @@ const StRichPid* StRichPidTraits::getPid(StParticleDefinition* part) const {
 
     for (size_t index=0;index<mThePids.size();index++) {
 
-	if ( (mThePids[index]->getRingType()==part) ||
-	     (mThePids[index]->getParticleNumber() == part->pdgEncoding()) ) {
-	    return mThePids[index];
-	}
-	
+        if ( (mThePids[index]->getRingType()==part) ||
+             (mThePids[index]->getParticleNumber() == part->pdgEncoding()) ) {
+            return mThePids[index];
+        }
+        
     }
     return 0;
 }
@@ -69,10 +72,10 @@ ostream&
 operator<<(ostream& os, const StRichPidTraits& t)
 {
     return (os << "StrichPidTraits::> #Pids= " << t.getAllPids().size()
-	    << "\n\tProduction Version: " << t.productionVersion()
-	    << "\n\tAssociated Mip:     " << t.associatedMip()
-	    << "\n\tMip Residual:       " << t.mipResidual()
-	    << "\n\tRefit Residual:     " << t.refitResidual()
-	    << "\n\tid                  " << t.id()
-	    << "\n\tprobability         " << t.probability());
+            << "\n\tProduction Version: " << t.productionVersion()
+            << "\n\tAssociated Mip:     " << t.associatedMip()
+            << "\n\tMip Residual:       " << t.mipResidual()
+            << "\n\tRefit Residual:     " << t.refitResidual()
+            << "\n\tid                  " << t.id()
+            << "\n\tprobability         " << t.probability());
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.cxx,v 2.1 1999/10/28 22:26:27 ullrich Exp $
+ * $Id: StRun.cxx,v 2.2 2001/04/05 04:00:54 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRun.cxx,v $
+ * Revision 2.2  2001/04/05 04:00:54  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  1999/10/28 22:26:27  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
@@ -28,8 +31,8 @@
 #include "tables/St_dst_run_summary_Table.h"
 #include "SystemOfUnits.h"
 
-TString StRun::mCvsTag = "$Id: StRun.cxx,v 2.1 1999/10/28 22:26:27 ullrich Exp $";
-static const char rcsid[] = "$Id: StRun.cxx,v 2.1 1999/10/28 22:26:27 ullrich Exp $";
+TString StRun::mCvsTag = "$Id: StRun.cxx,v 2.2 2001/04/05 04:00:54 ullrich Exp $";
+static const char rcsid[] = "$Id: StRun.cxx,v 2.2 2001/04/05 04:00:54 ullrich Exp $";
 
 ClassImp(StRun)
 
@@ -81,13 +84,13 @@ StRun::~StRun()
     mSummary = 0;
 }
 
-Int_t
+int
 StRun::operator==(const StRun& r) const
 {
     return mId == r.mId && mBfcId == r.mBfcId;
 }
 
-Int_t
+int
 StRun::operator!=(const StRun& r) const
 {
     return !(r == *this);
@@ -97,22 +100,22 @@ const TString&
 StRun::cvsTag() { return mCvsTag; }
 
 void
-StRun::setId(Long_t val) { mId = val; }
+StRun::setId(int val) { mId = val; }
     
 void
-StRun::setBfcId(Long_t val) { mBfcId = val; }
+StRun::setBfcId(int val) { mBfcId = val; }
     
 void
-StRun::setType(const Char_t* val) { mType = val; }
+StRun::setType(const char* val) { mType = val; }
 
 void
-StRun::setTriggerMask(Long_t val) { mTriggerMask = val; }
+StRun::setTriggerMask(int val) { mTriggerMask = val; }
 
 void
-StRun::setCenterOfMassEnergy(Double_t val) { mCenterOfMassEnergy = val; }
+StRun::setCenterOfMassEnergy(double val) { mCenterOfMassEnergy = val; }
 
 void
-StRun::setBeamMassNumber(StBeamDirection dir, Short_t val)
+StRun::setBeamMassNumber(StBeamDirection dir, short val)
 {
     if (dir == east)
         mEastA = val;
@@ -121,7 +124,7 @@ StRun::setBeamMassNumber(StBeamDirection dir, Short_t val)
 }
 
 void
-StRun::setBeamCharge(StBeamDirection dir, Short_t val)
+StRun::setBeamCharge(StBeamDirection dir, short val)
 {
     if (dir == east)
         mEastZ = val;
@@ -133,33 +136,33 @@ void
 StRun::setSummary(StRunSummary* val) { mSummary = val; }
 
 void
-StRun::setMagneticField(Double_t val) { mMagneticFieldZ = val; }
+StRun::setMagneticField(double val) { mMagneticFieldZ = val; }
 
-Long_t
+int
 StRun::id() const { return mId; }
 
-Long_t
+int
 StRun::bfcId() const { return mBfcId; }
 
 const TString&
 StRun::type() const { return mType; }
 
-Long_t
+int
 StRun::triggerMask() const { return mTriggerMask; }
 
-Double_t
+double
 StRun::centerOfMassEnergy() const { return mCenterOfMassEnergy; }
 
-Double_t
+double
 StRun::magneticField() const { return mMagneticFieldZ; }
 
-Short_t
+short
 StRun::beamMassNumber(StBeamDirection dir) const
 {
     return dir == east ? mEastA : mWestA;
 }
 
-Short_t
+short
 StRun::beamCharge(StBeamDirection dir) const
 {
     return dir == east ? mEastZ : mWestZ;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL3Trigger.cxx,v 2.1 2000/03/29 16:53:07 ullrich Exp $
+ * $Id: StL3Trigger.cxx,v 2.2 2001/04/05 04:00:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL3Trigger.cxx,v $
+ * Revision 2.2  2001/04/05 04:00:51  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  2000/03/29 16:53:07  ullrich
  * Initial Revision
  *
@@ -18,7 +21,7 @@
 #include "StTpcHitCollection.h"
 #include "StPrimaryVertex.h"
 
-static const char rcsid[] = "$Id: StL3Trigger.cxx,v 2.1 2000/03/29 16:53:07 ullrich Exp $";
+static const char rcsid[] = "$Id: StL3Trigger.cxx,v 2.2 2001/04/05 04:00:51 ullrich Exp $";
 
 ClassImp(StL3Trigger)
 
@@ -50,11 +53,11 @@ StL3Trigger::trackNodes() { return mL3TrackNodes; }
 const StSPtrVecTrackNode&
 StL3Trigger::trackNodes() const { return mL3TrackNodes; }
 
-UInt_t
+unsigned int
 StL3Trigger::numberOfPrimaryVertices() const { return mL3PrimaryVertices.size(); }
 
 StPrimaryVertex*
-StL3Trigger::primaryVertex(UInt_t i)
+StL3Trigger::primaryVertex(unsigned int i)
 {
     if (i < mL3PrimaryVertices.size())
         return mL3PrimaryVertices[i];
@@ -63,7 +66,7 @@ StL3Trigger::primaryVertex(UInt_t i)
 }
 
 const StPrimaryVertex*
-StL3Trigger::primaryVertex(UInt_t i) const
+StL3Trigger::primaryVertex(unsigned int i) const
 {
     if (i < mL3PrimaryVertices.size())
         return mL3PrimaryVertices[i];

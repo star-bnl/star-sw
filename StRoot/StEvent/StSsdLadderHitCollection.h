@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdLadderHitCollection.h,v 2.1 2000/01/05 16:00:10 ullrich Exp $
+ * $Id: StSsdLadderHitCollection.h,v 2.2 2001/04/05 04:00:42 ullrich Exp $
  *
  * Author: Lilian Martin, Thomas Ullrich, Dec 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSsdLadderHitCollection.h,v $
+ * Revision 2.2  2001/04/05 04:00:42  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  2000/01/05 16:00:10  ullrich
  * Initial Revision.
  *
@@ -28,11 +31,11 @@ public:
     // const StSsdLadderHitCollection&
     // operator=(const StSsdLadderHitCollection&);                use default
     
-    ULong_t numberOfHits() const;
-    UInt_t  numberOfWafers() const;
+    unsigned int  numberOfHits() const;
+    unsigned int  numberOfWafers() const;
     
-    StSsdWaferHitCollection*       wafer(UInt_t);
-    const StSsdWaferHitCollection* wafer(UInt_t) const;
+    StSsdWaferHitCollection*       wafer(unsigned int);
+    const StSsdWaferHitCollection* wafer(unsigned int) const;
 
 private:
     enum { mMaxNumberOfWafers = 16 };

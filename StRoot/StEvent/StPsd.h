@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPsd.h,v 2.2 2001/03/24 03:34:54 perev Exp $
+ * $Id: StPsd.h,v 2.3 2001/04/05 04:00:39 ullrich Exp $
  *
  * Author: Thomas Ullrich, Mar 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPsd.h,v $
+ * Revision 2.3  2001/04/05 04:00:39  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  2001/03/24 03:34:54  perev
  * clone() -> clone() const
  *
@@ -41,7 +44,7 @@ protected:
 
 private:
     StPwg   mPwg;
-    int     mId;
+    Int_t   mId;
     
     ClassDef(StPsd,1)
 };

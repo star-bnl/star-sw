@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.17 2001/03/14 02:35:43 ullrich Exp $
+ * $Id: StEvent.h,v 2.18 2001/04/05 04:00:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.18  2001/04/05 04:00:36  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.17  2001/03/14 02:35:43  ullrich
  * Added container and methods to handle PSDs.
  *
@@ -111,11 +114,11 @@ public:
     static const TString&               cvsTag();
     
     TString                             type() const;
-    Long_t                              id() const;
-    Long_t                              runId() const;
-    Long_t                              time() const;
-    ULong_t                             triggerMask() const;
-    ULong_t                             bunchCrossingNumber(UInt_t) const;
+    int                                 id() const;
+    int                                 runId() const;
+    int                                 time() const;
+    unsigned int                        triggerMask() const;
+    unsigned int                        bunchCrossingNumber(unsigned int) const;
     
     StEventInfo*                        info();
     const StEventInfo*                  info() const;
@@ -154,9 +157,9 @@ public:
     StSPtrVecTrackNode&                 trackNodes();
     const StSPtrVecTrackNode&           trackNodes() const;
 
-    UInt_t                              numberOfPrimaryVertices() const;
-    StPrimaryVertex*                    primaryVertex(UInt_t = 0);
-    const StPrimaryVertex*              primaryVertex(UInt_t = 0) const;
+    unsigned int                        numberOfPrimaryVertices() const;
+    StPrimaryVertex*                    primaryVertex(unsigned int = 0);
+    const StPrimaryVertex*              primaryVertex(unsigned int = 0) const;
 
     StSPtrVecV0Vertex&                  v0Vertices();
     const StSPtrVecV0Vertex&            v0Vertices() const;
@@ -167,18 +170,18 @@ public:
 
     StPsd*                              psd(StPwg, int);
     const StPsd*                        psd(StPwg, int) const;
-    StSPtrVecPsd*                       psds();
-    const StSPtrVecPsd*                 psds() const;
+    unsigned int                        numberOfPsds() const;
+    unsigned int                        numberOfPsds(StPwg) const;
     
     StSPtrVecObject&                    content();       // for IO purposes only
     void                                statistics();    // *MENU*
 
-    void setType(const Char_t*);
-    void setRunId(Long_t);
-    void setId(Long_t);
-    void setTime(Long_t);
-    void setTriggerMask(ULong_t);
-    void setBunchCrossingNumber(ULong_t, UInt_t);
+    void setType(const char*);
+    void setRunId(int);
+    void setId(int);
+    void setTime(int);
+    void setTriggerMask(unsigned int);
+    void setBunchCrossingNumber(unsigned int, unsigned int);
     void setInfo(StEventInfo*);
     void setSummary(StEventSummary*);
     void setSoftwareMonitor(StSoftwareMonitor*);
@@ -196,7 +199,7 @@ public:
     void addPsd(StPsd*);
     void removePsd(StPsd*);
     
-protected:    
+protected:
     mutable StSPtrVecObject  mContent;
     static  TString          mCvsTag;
 

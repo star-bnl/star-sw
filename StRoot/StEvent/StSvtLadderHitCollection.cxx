@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtLadderHitCollection.cxx,v 2.3 2000/02/17 18:13:16 ullrich Exp $
+ * $Id: StSvtLadderHitCollection.cxx,v 2.4 2001/04/05 04:00:56 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtLadderHitCollection.cxx,v $
+ * Revision 2.4  2001/04/05 04:00:56  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.3  2000/02/17 18:13:16  ullrich
  * Changed the SVT hit storage model. Hits are now stored according
  * to barrel/ladder/wafer not by layer/ladder/wafer.
@@ -23,7 +26,7 @@
  **************************************************************************/
 #include "StSvtLadderHitCollection.h"
 
-static const char rcsid[] = "$Id: StSvtLadderHitCollection.cxx,v 2.3 2000/02/17 18:13:16 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtLadderHitCollection.cxx,v 2.4 2001/04/05 04:00:56 ullrich Exp $";
 
 ClassImp(StSvtLadderHitCollection)
 
@@ -35,12 +38,12 @@ StSvtLadderHitCollection::StSvtLadderHitCollection()
 StSvtLadderHitCollection::~StSvtLadderHitCollection() { /* noop */ }
 
 void
-StSvtLadderHitCollection::setBarrelNumber(Int_t i)
+StSvtLadderHitCollection::setBarrelNumber(int i)
 {
     if (mBarrelNumber == -1) mBarrelNumber = i;
 }
     
-UInt_t
+unsigned int
 StSvtLadderHitCollection::numberOfWafers() const
 {
     switch (mBarrelNumber) {
@@ -58,10 +61,10 @@ StSvtLadderHitCollection::numberOfWafers() const
     }
 }
 
-ULong_t
+unsigned int
 StSvtLadderHitCollection::numberOfHits() const
 {
-    ULong_t sum = 0;
+    unsigned int sum = 0;
     for (unsigned int j=0; j<numberOfWafers(); j++) {
         sum += mWafers[j].hits().size();
     }
@@ -69,7 +72,7 @@ StSvtLadderHitCollection::numberOfHits() const
 }
 
 StSvtWaferHitCollection*
-StSvtLadderHitCollection::wafer(UInt_t i)
+StSvtLadderHitCollection::wafer(unsigned int i)
 {
     if (i < numberOfWafers())
         return &(mWafers[i]);
@@ -78,7 +81,7 @@ StSvtLadderHitCollection::wafer(UInt_t i)
 }
 
 const StSvtWaferHitCollection*
-StSvtLadderHitCollection::wafer(UInt_t i) const
+StSvtLadderHitCollection::wafer(unsigned int i) const
 {
     if (i < numberOfWafers())
         return &(mWafers[i]);

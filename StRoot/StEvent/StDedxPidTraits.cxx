@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.cxx,v 2.8 2001/03/24 03:34:40 perev Exp $
+ * $Id: StDedxPidTraits.cxx,v 2.9 2001/04/05 04:00:47 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.cxx,v $
+ * Revision 2.9  2001/04/05 04:00:47  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.8  2001/03/24 03:34:40  perev
  * clone() -> clone() const
  *
@@ -40,13 +43,13 @@
 
 ClassImp(StDedxPidTraits)
 
-static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.8 2001/03/24 03:34:40 perev Exp $";
+static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.9 2001/04/05 04:00:47 ullrich Exp $";
 
 StDedxPidTraits::StDedxPidTraits() :
     mNumberOfPoints(0), mDedx(0), mSigma(0), mMethod(0) { /* noop */ }
 
-StDedxPidTraits::StDedxPidTraits(StDetectorId det, Short_t meth,
-                                 UShort_t n, Float_t dedx, Float_t sig) :
+StDedxPidTraits::StDedxPidTraits(StDetectorId det, short meth,
+                                 unsigned short n, float dedx, float sig) :
     StTrackPidTraits(det),
     mNumberOfPoints(n), mDedx(dedx), mSigma(sig), mMethod(meth) { /* noop */ }
 
@@ -57,21 +60,21 @@ StDedxPidTraits::StDedxPidTraits(const dst_dedx_st& t) :
 
 StDedxPidTraits::~StDedxPidTraits() { /* noop */ }
 
-UShort_t
+unsigned short
 StDedxPidTraits::numberOfPoints() const { return mNumberOfPoints%100; }
-Float_t
+float
 StDedxPidTraits::length() const { return (mNumberOfPoints/100); }
 
-Float_t
+float
 StDedxPidTraits::mean() const { return mDedx; }
 
-Float_t
+float
 StDedxPidTraits::errorOnMean() const { return mSigma; }
 
 StObject*
 StDedxPidTraits::clone() const { return new StDedxPidTraits(*this); }
 
-Short_t
+short
 StDedxPidTraits::encodedMethod() const { return mMethod; }
 
 StDedxMethod
@@ -79,23 +82,23 @@ StDedxPidTraits::method() const
 {
     switch (mMethod) {
     case kTruncatedMeanId:
-	return kTruncatedMeanId;
-	break;
+        return kTruncatedMeanId;
+        break;
     case kEnsembleTruncatedMeanId:
-	return kEnsembleTruncatedMeanId;
-	break;
+        return kEnsembleTruncatedMeanId;
+        break;
     case kLikelihoodFitId:
-	return kLikelihoodFitId;
-	break;
+        return kLikelihoodFitId;
+        break;
     case kWeightedTruncatedMeanId:
-	return kWeightedTruncatedMeanId;
-	break;
+        return kWeightedTruncatedMeanId;
+        break;
     case kOtherMethodId:
-	return kOtherMethodId;
-	break;
+        return kOtherMethodId;
+        break;
     default:
-	return kUndefinedMethodId;
-	break;
+        return kUndefinedMethodId;
+        break;
     }
 }
 

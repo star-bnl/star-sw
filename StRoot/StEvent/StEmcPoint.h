@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcPoint.h,v 2.3 2001/03/24 03:34:45 perev Exp $
+ * $Id: StEmcPoint.h,v 2.4 2001/04/05 04:00:35 ullrich Exp $
  *
  * Author: Akio Ogawa, Mar 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.h,v $
+ * Revision 2.4  2001/04/05 04:00:35  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.3  2001/03/24 03:34:45  perev
  * clone() -> clone() const
  *
@@ -29,63 +32,66 @@
 
 class StEmcPoint : public StHit {
 public:
-  StEmcPoint();
-  StEmcPoint(const StThreeVectorF&,
- 	     const StThreeVectorF&,
- 	     const StThreeVectorF&,
-  	     ULong_t, Float_t, 
-	     Float_t, Float_t,
-	     UChar_t = 0);
-  ~StEmcPoint();
-  
-  Float_t   energy() const;
-  Float_t   chiSquare() const;
-  void setEnergy(const Float_t);
-  void setChiSquare(const Float_t);
-  StThreeVectorF size() const;
-  void setSize(const StThreeVectorF&);
+    StEmcPoint();
+    StEmcPoint(const StThreeVectorF&,
+	       const StThreeVectorF&,
+	       const StThreeVectorF&,
+               unsigned int, float,
+	       float, float,
+	       unsigned char = 0);
+    ~StEmcPoint();
+    
+    float   energy() const;
+    float   chiSquare() const;
+    void setEnergy(const float);
+    void setChiSquare(const float);
+    StThreeVectorF size() const;
+    void setSize(const StThreeVectorF&);
+    
+    float   energyInDetector(const StDetectorId) const;
+    float   sizeAtDetector(const StDetectorId) const;
+    void setEnergyInDetector(const StDetectorId, const float);
+    void setSizeAtDetector(const StDetectorId, const float);
+    
+    float deltaEta() const;
+    float deltaPhi() const;
+    float deltaU() const;
+    float deltaV() const;
+    void  setDeltaEta(const float);
+    void  setDeltaPhi(const float);
+    void  setDeltaU(const float);
+    void  setDeltaV(const float);
+    
+    StPtrVecEmcCluster&       cluster(const StDetectorId);
+    const StPtrVecEmcCluster& cluster(const StDetectorId) const;
 
-  Float_t   energyInDetector(const StDetectorId) const;
-  Float_t   sizeAtDetector(const StDetectorId) const;
-  void setEnergyInDetector(const StDetectorId, const Float_t);
-  void setSizeAtDetector(const StDetectorId, const Float_t);
+    void addCluster(const StDetectorId, const StEmcCluster*);
+    
+    StPtrVecEmcPoint&       neighbor();
+    const StPtrVecEmcPoint& neighbor() const;
 
-  Float_t deltaEta() const;
-  Float_t deltaPhi() const;
-  Float_t deltaU() const;
-  Float_t deltaV() const;
-  void setDeltaEta(const Float_t);
-  void setDeltaPhi(const Float_t);
-  void setDeltaU(const Float_t);
-  void setDeltaV(const Float_t);
-
-  StPtrVecEmcCluster& cluster(const StDetectorId);
-  const StPtrVecEmcCluster& cluster(const StDetectorId) const;
-  void addCluster(const StDetectorId, const StEmcCluster*);
-
-  StPtrVecEmcPoint& neighbor();
-  const StPtrVecEmcPoint& neighbor() const;
-  void addNeighbor(const StEmcPoint*);
-
-  Int_t   nTracks() const;
-  StPtrVecTrack&  track();
-  const StPtrVecTrack& track() const;
-  void addTrack(StTrack*);
-
+    void addNeighbor(const StEmcPoint*);
+    
+    int                  nTracks() const;
+    StPtrVecTrack&       track();
+    const StPtrVecTrack& track() const;
+    
+    void addTrack(StTrack*);
+    
 protected:
-  Float_t            mEnergy;
-  Float_t            mChiSquare;
-  StThreeVectorF     mSize;
-  Float_t            mEnergyInDetector[4];
-  Float_t            mSizeAtDetector[4];
-  Float_t            mDelta[2];
-  StPtrVecEmcCluster mCluster[4];
-  StPtrVecEmcPoint   mNeighbors;
-  StPtrVecTrack      mTracks;
-
-  Int_t getDetId(const StDetectorId) const;
-  StObject* clone() const;
-  ClassDef(StEmcPoint,1)  
+    Float_t            mEnergy;
+    Float_t            mChiSquare;
+    StThreeVectorF     mSize;
+    Float_t            mEnergyInDetector[4];
+    Float_t            mSizeAtDetector[4];
+    Float_t            mDelta[2];
+    StPtrVecEmcCluster mCluster[4];
+    StPtrVecEmcPoint   mNeighbors;
+    StPtrVecTrack      mTracks;
+    
+    int getDetId(const StDetectorId) const;
+    StObject* clone() const;
+    ClassDef(StEmcPoint,1)
 };
 #endif
 

@@ -1,15 +1,18 @@
 /***************************************************************************
  *
- * $Id: StEmcClusterCollection.h,v 2.1 2000/02/23 17:34:04 ullrich Exp $
+ * $Id: StEmcClusterCollection.h,v 2.2 2001/04/05 04:00:34 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
  *
- * Description: 
+ * Description:
  *
  ***************************************************************************
  *
  * $Log: StEmcClusterCollection.h,v $
+ * Revision 2.2  2001/04/05 04:00:34  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  2000/02/23 17:34:04  ullrich
  * Initial Revision
  *
@@ -22,7 +25,7 @@
 #include "StEnumerations.h"
 
 class StEmcClusterCollection : public StObject {
-public: 
+public:
     StEmcClusterCollection();
     // StEmcClusterCollection(const StEmcClusterCollection&);            use default
     // StEmcClusterCollection& operator=(const StEmcClusterCollection&); use default
@@ -31,15 +34,16 @@ public:
     StDetectorId detector() const;
     void setDetector(StDetectorId);
     
-    Int_t numberOfClusters() const;
-    StSPtrVecEmcCluster& clusters();
+    int numberOfClusters() const;
+    StSPtrVecEmcCluster&       clusters();
     const StSPtrVecEmcCluster& clusters() const;
+
     void addCluster(StEmcCluster*);
     
-    Int_t clusterFinderId() const;
-    Int_t clusterFinderParamVersion() const;
-    void setClusterFinderId(Int_t);
-    void setClusterFinderParamVersion(Int_t);
+    int  clusterFinderId() const;
+    int  clusterFinderParamVersion() const;
+    void setClusterFinderId(int);
+    void setClusterFinderParamVersion(int);
     
 private:
     StDetectorId        mDetector;

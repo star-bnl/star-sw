@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSoftwareMonitor.h,v 2.1 1999/10/13 19:43:51 ullrich Exp $
+ * $Id: StSvtSoftwareMonitor.h,v 2.2 2001/04/05 04:00:43 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSoftwareMonitor.h,v $
+ * Revision 2.2  2001/04/05 04:00:43  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  1999/10/13 19:43:51  ullrich
  * Initial Revision
  *
@@ -28,14 +31,14 @@ public:
     // StSvtSoftwareMonitor& operator=(const StSvtSoftwareMonitor&); use default
     ~StSvtSoftwareMonitor();
 
-    Long_t  n_clus_svt[4];
-    Long_t  n_pts_svt[4];
-    Long_t  n_trk_svt;
-    Float_t chrg_svt_tot[4];
-    Float_t hit_frac_svt[4];
-    Float_t avg_trkL_svt;
-    Float_t res_pad_svt;
-    Float_t res_drf_svt;
+    Int_t    n_clus_svt[4];
+    Int_t    n_pts_svt[4];
+    Int_t    n_trk_svt;
+    Float_t  chrg_svt_tot[4];
+    Float_t  hit_frac_svt[4];
+    Float_t  avg_trkL_svt;
+    Float_t  res_pad_svt;
+    Float_t  res_drf_svt;
 
     ClassDef(StSvtSoftwareMonitor,1)
 };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.10 2000/10/26 18:33:20 calderon Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.11 2001/04/05 04:00:56 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.11  2001/04/05 04:00:56  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.10  2000/10/26 18:33:20  calderon
  * Return DBL_MAX in the numberOfSigma() function when
  * the number of dE/dx points is equal to zero.
@@ -61,7 +64,7 @@
 #include "StTrackGeometry.h"
 #include "BetheBloch.h"
 
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.10 2000/10/26 18:33:20 calderon Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.11 2001/04/05 04:00:56 ullrich Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -88,7 +91,7 @@ StTpcDedxPidAlgorithm::operator() (const StTrack& track, const StSPtrVecTrackPid
     mTraits = 0;
     mTrack  = &track;
     for (unsigned int i=0; i<vec.size(); i++) {
-	const StDedxPidTraits *p = dynamic_cast<const StDedxPidTraits*>(vec[i]);
+        const StDedxPidTraits *p = dynamic_cast<const StDedxPidTraits*>(vec[i]);
         if (p && p->detector() == kTpcId && p->method() == mDedxMethod) mTraits = p;
     }
     if (!mTraits) return 0;    // no info available

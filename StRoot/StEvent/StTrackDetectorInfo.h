@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.h,v 2.5 2001/03/24 03:35:00 perev Exp $
+ * $Id: StTrackDetectorInfo.h,v 2.6 2001/04/05 04:00:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.h,v $
+ * Revision 2.6  2001/04/05 04:00:45  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.5  2001/03/24 03:35:00  perev
  * clone() -> clone() const
  *
@@ -48,11 +51,11 @@ public:
     const StThreeVectorF& firstPoint() const;
     const StThreeVectorF& lastPoint() const;
 
-    UShort_t              numberOfPoints() const;
-    UShort_t              numberOfPoints(StDetectorId) const;
-    
-    UShort_t              numberOfReferencedPoints() const;
-    UShort_t              numberOfReferencedPoints(StDetectorId) const;
+    unsigned short        numberOfPoints() const;
+    unsigned short        numberOfPoints(StDetectorId) const;
+    			 
+    unsigned short        numberOfReferencedPoints() const;
+    unsigned short        numberOfReferencedPoints(StDetectorId) const;
     
     StPtrVecHit           hits(StDetectorId) const;
     StPtrVecHit           hits(StHitFilter&) const;
@@ -61,7 +64,7 @@ public:
 
     void setFirstPoint(const StThreeVectorF&);
     void setLastPoint(const StThreeVectorF&);
-    void setNumberOfPoints(UShort_t);
+    void setNumberOfPoints(unsigned short);
     void addHit(StHit*);
     void removeHit(StHit*&);
 

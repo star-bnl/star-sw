@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtBarrelHitCollection.cxx,v 2.1 2000/02/17 18:15:09 ullrich Exp $
+ * $Id: StSvtBarrelHitCollection.cxx,v 2.2 2001/04/05 04:00:55 ullrich Exp $
  *
  * Author: Thomas Ullrich, Feb 2000
  ***************************************************************************
@@ -10,13 +10,16 @@
  ***************************************************************************
  *
  * $Log: StSvtBarrelHitCollection.cxx,v $
+ * Revision 2.2  2001/04/05 04:00:55  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  2000/02/17 18:15:09  ullrich
  * Initial Revision
  *
  **************************************************************************/
 #include "StSvtBarrelHitCollection.h"
 
-static const char rcsid[] = "$Id: StSvtBarrelHitCollection.cxx,v 2.1 2000/02/17 18:15:09 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtBarrelHitCollection.cxx,v 2.2 2001/04/05 04:00:55 ullrich Exp $";
 
 ClassImp(StSvtBarrelHitCollection)
 
@@ -28,12 +31,12 @@ StSvtBarrelHitCollection::StSvtBarrelHitCollection()
 StSvtBarrelHitCollection::~StSvtBarrelHitCollection() { /* noop */ }
 
 void
-StSvtBarrelHitCollection::setBarrelNumber(Int_t i)
+StSvtBarrelHitCollection::setBarrelNumber(int i)
 {
     if (mBarrelNumber == -1) mBarrelNumber = i;
 }
     
-UInt_t
+unsigned int
 StSvtBarrelHitCollection::numberOfLadders() const
 {
     switch (mBarrelNumber) {
@@ -51,10 +54,10 @@ StSvtBarrelHitCollection::numberOfLadders() const
     }
 }
 
-ULong_t
+unsigned int
 StSvtBarrelHitCollection::numberOfHits() const
 {
-    ULong_t sum = 0;
+    unsigned int sum = 0;
     for (unsigned int j=0; j<numberOfLadders(); j++) {
         for (unsigned int k=0; k<mLadders[j].numberOfWafers(); k++) {
             sum += mLadders[j].wafer(k)->hits().size();
@@ -64,7 +67,7 @@ StSvtBarrelHitCollection::numberOfHits() const
 }
 
 StSvtLadderHitCollection*
-StSvtBarrelHitCollection::ladder(UInt_t i)
+StSvtBarrelHitCollection::ladder(unsigned int i)
 {
     if (i < numberOfLadders())
         return &(mLadders[i]);
@@ -73,7 +76,7 @@ StSvtBarrelHitCollection::ladder(UInt_t i)
 }
 
 const StSvtLadderHitCollection*
-StSvtBarrelHitCollection::ladder(UInt_t i) const
+StSvtBarrelHitCollection::ladder(unsigned int i) const
 {
     if (i < numberOfLadders())
         return &(mLadders[i]);

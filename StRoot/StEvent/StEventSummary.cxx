@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventSummary.cxx,v 2.7 2000/01/31 12:01:00 ullrich Exp $
+ * $Id: StEventSummary.cxx,v 2.8 2001/04/05 04:00:49 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventSummary.cxx,v $
+ * Revision 2.8  2001/04/05 04:00:49  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.7  2000/01/31 12:01:00  ullrich
  * Unique const_cast syntax for all platforms.
  *
@@ -43,7 +46,7 @@ using units::tesla;
 using units::degree;
 #endif
 
-static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.7 2000/01/31 12:01:00 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.8 2001/04/05 04:00:49 ullrich Exp $";
 
 ClassImp(StEventSummary)
 
@@ -72,7 +75,7 @@ StEventSummary::StEventSummary()
     mPhiOfTracksHisto.Set(mHistogramSize);
     mEneryVsEtaHisto.Set(mHistogramSize);
     mEnergyVsPhiHisto.Set(mHistogramSize);
-    mMagneticFieldZ = 0;    
+    mMagneticFieldZ = 0;
 }
 
 StEventSummary::StEventSummary(const dst_event_summary_st& runSum,
@@ -100,7 +103,7 @@ StEventSummary::StEventSummary(const dst_event_summary_st& runSum,
     //
     mNumberOfVertexTypes.Set(mVertexTypeArraySize);
     for(i=0; i<mVertexTypeArraySize; i++)
-	mNumberOfVertexTypes[i] = runSum.n_vert_type[i];
+        mNumberOfVertexTypes[i] = runSum.n_vert_type[i];
     
     //
     //   Set the 'histo' bins
@@ -110,8 +113,8 @@ StEventSummary::StEventSummary(const dst_event_summary_st& runSum,
     mPhiBins.Set(mPhiBinsSize);
 
     for(i=0; i<mPtAndEtaBinsSize; i++) {
-	mEtaBins[i] = sumPar.eta_bins[i];
-	mPtBins[i] = sumPar.pt_bins[i];
+        mEtaBins[i] = sumPar.eta_bins[i];
+        mPtBins[i] = sumPar.pt_bins[i];
     }
     for(i=0; i<mPhiBinsSize; i++) mPhiBins[i] = sumPar.phi_bins[i]*degree;
     
@@ -125,97 +128,97 @@ StEventSummary::StEventSummary(const dst_event_summary_st& runSum,
     mEnergyVsPhiHisto.Set(mHistogramSize);
 
     for(i=0; i<mHistogramSize; i++) {
-	mEtaOfTracksHisto[i] = runSum.mult_eta[i];
-	mPtOfTracksHisto[i] = runSum.mult_pt[i];
-	mPhiOfTracksHisto[i] = runSum.mult_phi[i];
-	mEneryVsEtaHisto[i] = runSum.energy_emc_eta[i];
-	mEnergyVsPhiHisto[i] = runSum.energy_emc_phi[i];
+        mEtaOfTracksHisto[i] = runSum.mult_eta[i];
+        mPtOfTracksHisto[i] = runSum.mult_pt[i];
+        mPhiOfTracksHisto[i] = runSum.mult_phi[i];
+        mEneryVsEtaHisto[i] = runSum.energy_emc_eta[i];
+        mEnergyVsPhiHisto[i] = runSum.energy_emc_phi[i];
     }
 }
 
 StEventSummary::~StEventSummary() { /* noop */ }
     
-Long_t StEventSummary::numberOfTracks() const { return mNumberOfTracks; }
+int StEventSummary::numberOfTracks() const { return mNumberOfTracks; }
 
-Long_t StEventSummary::numberOfGoodTracks() const { return mNumberOfGoodTracks; }
+int StEventSummary::numberOfGoodTracks() const { return mNumberOfGoodTracks; }
 
-Long_t StEventSummary::numberOfGoodTracks(StChargeSign s) const
+int StEventSummary::numberOfGoodTracks(StChargeSign s) const
 {
     return s == negative ? mNumberOfNegativeTracks : mNumberOfPositiveTracks;
 }
 
-Long_t
+int
 StEventSummary::numberOfGoodPrimaryTracks() const { return mNumberOfGoodPrimaryTracks; }
 
-Long_t
+int
 StEventSummary::numberOfExoticTracks() const { return mNumberOfExoticTracks; }
 
-Long_t
+int
 StEventSummary::numberOfVertices() const { return mNumberOfVertices; }
 
-Long_t
+int
 StEventSummary::numberOfVerticesOfType(StVertexId id) const
 {
     unsigned int i = id-1;        // vector numbering scheme starts at 1
-    if (i < mVertexTypeArraySize) 
+    if (i < mVertexTypeArraySize)
         return const_cast<TArrayL&>(mNumberOfVertexTypes)[i];
     else
         return 0;
 }
 
-Long_t
+int
 StEventSummary::numberOfPileupVertices() const { return mNumberOfPileupVertices; }
 
-Float_t
+float
 StEventSummary::meanPt() const { return mMeanPt; }
 
-Float_t
+float
 StEventSummary::meanPt2() const { return mMeanPt2; }
 
-Float_t
+float
 StEventSummary::meanEta() const { return mMeanEta; }
 
-Float_t
+float
 StEventSummary::rmsEta() const { return mRmsEta; }
 
 const StThreeVectorF&
 StEventSummary::primaryVertexPosition() const { return mPrimaryVertexPos; }
 
-UInt_t
+unsigned int
 StEventSummary::numberOfBins() const { return mHistogramSize; }
 
-Long_t
-StEventSummary::tracksInEtaBin(UInt_t i) const
+int
+StEventSummary::tracksInEtaBin(unsigned int i) const
 {
         return i < mHistogramSize ? const_cast<TArrayL&>(mEtaOfTracksHisto)[i] : 0;
 }
 
-Long_t
-StEventSummary::tracksInPhiBin(UInt_t i) const
+int
+StEventSummary::tracksInPhiBin(unsigned int i) const
 {
         return i < mHistogramSize ? const_cast<TArrayL&>(mPhiOfTracksHisto)[i] : 0;
 }
 
-Long_t
-StEventSummary::tracksInPtBin(UInt_t i) const
+int
+StEventSummary::tracksInPtBin(unsigned int i) const
 {
         return i < mHistogramSize ? const_cast<TArrayL&>(mPtOfTracksHisto)[i] : 0;
 }
 
-Float_t
-StEventSummary::energyInEtaBin(UInt_t i) const
+float
+StEventSummary::energyInEtaBin(unsigned int i) const
 {
         return i < mHistogramSize ? const_cast<TArrayF&>(mEneryVsEtaHisto)[i] : 0;
 }
 
-Float_t
-StEventSummary::energyInPhiBin(UInt_t i) const
+float
+StEventSummary::energyInPhiBin(unsigned int i) const
 {
         return i < mHistogramSize ? const_cast<TArrayF&>(mEnergyVsPhiHisto)[i] : 0;
 }
 
-Float_t
-StEventSummary::lowerEdgeEtaBin(UInt_t i) const
+float
+StEventSummary::lowerEdgeEtaBin(unsigned int i) const
 {
     if (i <= mPtAndEtaBinsSize) {
         if (i == 0)
@@ -227,8 +230,8 @@ StEventSummary::lowerEdgeEtaBin(UInt_t i) const
         return 0;
 }
 
-Float_t
-StEventSummary::upperEdgeEtaBin(UInt_t i) const
+float
+StEventSummary::upperEdgeEtaBin(unsigned int i) const
 {
     if (i <= mPtAndEtaBinsSize) {
        if (i == mPtAndEtaBinsSize)
@@ -240,8 +243,8 @@ StEventSummary::upperEdgeEtaBin(UInt_t i) const
         return 0;
 }
 
-Float_t
-StEventSummary::lowerEdgePtBin(UInt_t i) const
+float
+StEventSummary::lowerEdgePtBin(unsigned int i) const
 {
     if (i <= mPtAndEtaBinsSize) {
         if (i == 0)
@@ -253,8 +256,8 @@ StEventSummary::lowerEdgePtBin(UInt_t i) const
         return 0;
 }
 
-Float_t
-StEventSummary::upperEdgePtBin(UInt_t i) const
+float
+StEventSummary::upperEdgePtBin(unsigned int i) const
 {
     if (i <= mPtAndEtaBinsSize) {
        if (i == mPtAndEtaBinsSize)
@@ -266,8 +269,8 @@ StEventSummary::upperEdgePtBin(UInt_t i) const
         return 0;
 }
 
-Float_t
-StEventSummary::lowerEdgePhiBin(UInt_t i) const
+float
+StEventSummary::lowerEdgePhiBin(unsigned int i) const
 {
     if (i < mPhiBinsSize)
         return const_cast<TArrayF&>(mPhiBins)[i];
@@ -275,8 +278,8 @@ StEventSummary::lowerEdgePhiBin(UInt_t i) const
         return 0;
 }
 
-Float_t
-StEventSummary::upperEdgePhiBin(UInt_t i) const
+float
+StEventSummary::upperEdgePhiBin(unsigned int i) const
 {
     if (i < mPhiBinsSize) {
        if (i == mPhiBinsSize-1)
@@ -289,13 +292,13 @@ StEventSummary::upperEdgePhiBin(UInt_t i) const
 }
 
 void
-StEventSummary::setNumberOfTracks(Long_t val) { mNumberOfTracks = val; }
+StEventSummary::setNumberOfTracks(int val) { mNumberOfTracks = val; }
 
 void
-StEventSummary::setNumberOfGoodTracks(Long_t val) { mNumberOfGoodTracks = val; }
+StEventSummary::setNumberOfGoodTracks(int val) { mNumberOfGoodTracks = val; }
 
 void
-StEventSummary::setNumberOfGoodTracks(StChargeSign s, Long_t val)
+StEventSummary::setNumberOfGoodTracks(StChargeSign s, int val)
 {
     if (s == negative)
         mNumberOfNegativeTracks = val;
@@ -304,16 +307,16 @@ StEventSummary::setNumberOfGoodTracks(StChargeSign s, Long_t val)
 }
 
 void
-StEventSummary::setNumberOfGoodPrimaryTracks(Long_t val) { mNumberOfGoodPrimaryTracks = val; }
+StEventSummary::setNumberOfGoodPrimaryTracks(int val) { mNumberOfGoodPrimaryTracks = val; }
 
 void
-StEventSummary::setNumberOfExoticTracks( Long_t val) { mNumberOfExoticTracks = val; }
+StEventSummary::setNumberOfExoticTracks( int val) { mNumberOfExoticTracks = val; }
 
 void
-StEventSummary::setNumberOfVertices(Long_t val) { mNumberOfVertices = val; }
+StEventSummary::setNumberOfVertices(int val) { mNumberOfVertices = val; }
 
 void
-StEventSummary::setNumberOfVerticesForType(StVertexId id, Long_t val)
+StEventSummary::setNumberOfVerticesForType(StVertexId id, int val)
 {
     int i = id-1;
     if (i < mVertexTypeArraySize)
@@ -321,25 +324,25 @@ StEventSummary::setNumberOfVerticesForType(StVertexId id, Long_t val)
 }
 
 void
-StEventSummary::setNumberOfPileupVertices(Long_t val) { mNumberOfPileupVertices = val; }
+StEventSummary::setNumberOfPileupVertices(int val) { mNumberOfPileupVertices = val; }
 
 void
-StEventSummary::setMeanPt(Float_t val) { mMeanPt = val; }
+StEventSummary::setMeanPt(float val) { mMeanPt = val; }
 
 void
-StEventSummary::setMeanPt2(Float_t val) { mMeanPt2 = val; }
+StEventSummary::setMeanPt2(float val) { mMeanPt2 = val; }
 
 void
-StEventSummary::setMeanEta(Float_t val) { mMeanEta = val; }
+StEventSummary::setMeanEta(float val) { mMeanEta = val; }
 
 void
-StEventSummary::setRmsEta(Float_t val) { mRmsEta = val; }
+StEventSummary::setRmsEta(float val) { mRmsEta = val; }
 
 void
 StEventSummary::setPrimaryVertexPosition(const StThreeVectorF& val) { mPrimaryVertexPos = val; }
 
-Double_t
+double
 StEventSummary::magneticField() const { return mMagneticFieldZ; }
 
 void
-StEventSummary::setMagneticField(Double_t val) { mMagneticFieldZ = val; }
+StEventSummary::setMagneticField(double val) { mMagneticFieldZ = val; }

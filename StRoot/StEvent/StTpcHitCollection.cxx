@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitCollection.cxx,v 2.3 1999/12/13 20:16:29 ullrich Exp $
+ * $Id: StTpcHitCollection.cxx,v 2.4 2001/04/05 04:00:57 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitCollection.cxx,v $
+ * Revision 2.4  2001/04/05 04:00:57  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.3  1999/12/13 20:16:29  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
  *
@@ -24,7 +27,7 @@
 #include "StTpcPadrowHitCollection.h"
 #include "StTpcHit.h"
 
-static const char rcsid[] = "$Id: StTpcHitCollection.cxx,v 2.3 1999/12/13 20:16:29 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcHitCollection.cxx,v 2.4 2001/04/05 04:00:57 ullrich Exp $";
 
 ClassImp(StTpcHitCollection)
 
@@ -32,7 +35,7 @@ StTpcHitCollection::StTpcHitCollection() { /* noop */ }
 
 StTpcHitCollection::~StTpcHitCollection() { /* noop */ }
     
-Bool_t
+bool
 StTpcHitCollection::addHit(StTpcHit* hit)
 {
     unsigned int s, r;
@@ -46,13 +49,13 @@ StTpcHitCollection::addHit(StTpcHit* hit)
         return kFALSE;
 }
 
-UInt_t
+unsigned int
 StTpcHitCollection::numberOfSectors() const { return mNumberOfSectors; }
 
-ULong_t
+unsigned int
 StTpcHitCollection::numberOfHits() const
 {
-    ULong_t sum = 0;
+    unsigned int sum = 0;
     for (int i=0; i<mNumberOfSectors; i++) {
         for (unsigned int j=0; j<mSectors[i].numberOfPadrows(); j++) {
             sum += mSectors[i].padrow(j)->hits().size();
@@ -62,7 +65,7 @@ StTpcHitCollection::numberOfHits() const
 }
 
 StTpcSectorHitCollection*
-StTpcHitCollection::sector(UInt_t i)
+StTpcHitCollection::sector(unsigned int i)
 {
     if (i < mNumberOfSectors)
         return &(mSectors[i]);
@@ -71,7 +74,7 @@ StTpcHitCollection::sector(UInt_t i)
 }
 
 const StTpcSectorHitCollection*
-StTpcHitCollection::sector(UInt_t i) const
+StTpcHitCollection::sector(unsigned int i) const
 {
     if (i < mNumberOfSectors)
         return &(mSectors[i]);

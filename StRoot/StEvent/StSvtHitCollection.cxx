@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitCollection.cxx,v 2.4 2000/02/17 18:13:11 ullrich Exp $
+ * $Id: StSvtHitCollection.cxx,v 2.5 2001/04/05 04:00:55 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitCollection.cxx,v $
+ * Revision 2.5  2001/04/05 04:00:55  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  2000/02/17 18:13:11  ullrich
  * Changed the SVT hit storage model. Hits are now stored according
  * to barrel/ladder/wafer not by layer/ladder/wafer.
@@ -27,7 +30,7 @@
 #include "StSvtHitCollection.h"
 #include "StSvtHit.h"
 
-static const char rcsid[] = "$Id: StSvtHitCollection.cxx,v 2.4 2000/02/17 18:13:11 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtHitCollection.cxx,v 2.5 2001/04/05 04:00:55 ullrich Exp $";
 
 ClassImp(StSvtHitCollection)
 
@@ -47,10 +50,10 @@ StSvtHitCollection::StSvtHitCollection()
 
 StSvtHitCollection::~StSvtHitCollection() { /* noop */ }
     
-UInt_t
+unsigned int
 StSvtHitCollection::numberOfBarrels() const { return mNumberOfBarrels; }
 
-Bool_t
+bool
 StSvtHitCollection::addHit(StSvtHit* hit)
 {
     unsigned int l, d, w;
@@ -65,10 +68,10 @@ StSvtHitCollection::addHit(StSvtHit* hit)
         return kFALSE;
 }
 
-ULong_t
+unsigned int
 StSvtHitCollection::numberOfHits() const
 {
-    ULong_t sum = 0;
+    unsigned int sum = 0;
     for (int i=0; i<mNumberOfBarrels; i++)
         for (unsigned int j=0; j<mBarrels[i].numberOfLadders(); j++)
             for (unsigned int k=0; k<mBarrels[i].ladder(j)->numberOfWafers(); k++)
@@ -77,7 +80,7 @@ StSvtHitCollection::numberOfHits() const
 }
 
 StSvtBarrelHitCollection*
-StSvtHitCollection::barrel(UInt_t i)
+StSvtHitCollection::barrel(unsigned int i)
 {
     if (i < mNumberOfBarrels)
         return &(mBarrels[i]);
@@ -86,7 +89,7 @@ StSvtHitCollection::barrel(UInt_t i)
 }
 
 const StSvtBarrelHitCollection*
-StSvtHitCollection::barrel(UInt_t i) const
+StSvtHitCollection::barrel(unsigned int i) const
 {
     if (i < mNumberOfBarrels)
         return &(mBarrels[i]);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StCtbTriggerDetector.h,v 2.2 2000/05/09 10:22:21 ullrich Exp $
+ * $Id: StCtbTriggerDetector.h,v 2.3 2001/04/05 04:00:34 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StCtbTriggerDetector.h,v $
+ * Revision 2.3  2001/04/05 04:00:34  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  2000/05/09 10:22:21  ullrich
  * Updated to cope with modified dst_TrgDet.idl
  *
@@ -31,26 +34,26 @@ public:
     // StCtbTriggerDetector(const StCtbTriggerDetector&);            use default
     // StCtbTriggerDetector& operator=(const StCtbTriggerDetector&); use default
     
-    UInt_t   numberOfTrays() const;
-    UInt_t   numberOfSlats() const;
-    UInt_t   numberOfPreSamples() const;
-    UInt_t   numberOfPostSamples() const;
-    UInt_t   numberOfAuxWords() const;
-    Float_t  mips(UInt_t tray, UInt_t slot, UInt_t evt = 0) const;
-    Char_t   time(UInt_t tray, UInt_t slot, UInt_t evt = 0) const;
-    Float_t  aux(UInt_t, UInt_t evt = 0) const;
+    unsigned int   numberOfTrays() const;
+    unsigned int   numberOfSlats() const;
+    unsigned int   numberOfPreSamples() const;
+    unsigned int   numberOfPostSamples() const;
+    unsigned int   numberOfAuxWords() const;
+    float          mips(unsigned int tray, unsigned int slot, unsigned int evt = 0) const;
+    char           time(unsigned int tray, unsigned int slot, unsigned int evt = 0) const;
+    float          aux(unsigned int, unsigned int evt = 0) const;
 
-    void setMips(UInt_t, UInt_t, UInt_t, Float_t);
-    void setTime(UInt_t, UInt_t, UInt_t, Char_t);
-    void setAux(UInt_t, UInt_t, Float_t);
-    void setNumberOfPreSamples(UInt_t);
-    void setNumberOfPostSamples(UInt_t);
+    void setMips(unsigned int, unsigned int, unsigned int, float);
+    void setTime(unsigned int, unsigned int, unsigned int, char);
+    void setAux(unsigned int, unsigned int, float);
+    void setNumberOfPreSamples(unsigned int);
+    void setNumberOfPostSamples(unsigned int);
     
 protected:
     enum {mMaxTrays = 120,
-	  mMaxSlats = 2,
-	  mMaxEventSamples = 11,
-	  mMaxAux = 16};
+          mMaxSlats = 2,
+          mMaxEventSamples = 11,
+          mMaxAux = 16};
     Float_t  mMips[mMaxTrays][mMaxSlats][mMaxEventSamples];
     Char_t   mTime[mMaxTrays][mMaxSlats][mMaxEventSamples];
     Float_t  mAux[mMaxAux][mMaxEventSamples];

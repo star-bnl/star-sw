@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StKinkVertex.h,v 2.4 2001/03/24 03:34:52 perev Exp $
+ * $Id: StKinkVertex.h,v 2.5 2001/04/05 04:00:38 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StKinkVertex.h,v $
+ * Revision 2.5  2001/04/05 04:00:38  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  2001/03/24 03:34:52  perev
  * clone() -> clone() const
  *
@@ -39,38 +42,38 @@ public:
     ~StKinkVertex();
     
     StVertexId     type() const;
-    UInt_t         numberOfDaughters() const;
-    StTrack*       daughter(UInt_t = 0);
-    const StTrack* daughter(UInt_t = 0) const;
+    unsigned int   numberOfDaughters() const;
+    StTrack*       daughter(unsigned int = 0);
+    const StTrack* daughter(unsigned int = 0) const;
     StPtrVecTrack  daughters(StTrackFilter&);
 
     StParticleDefinition* pidParent() const;
     StParticleDefinition* pidDaughter() const;
-    UShort_t              geantIdParent() const;
-    UShort_t              geantIdDaughter() const;
-    Float_t               dcaParentDaughter() const;
-    Float_t               dcaDaughterPrimaryVertex() const;
-    Float_t               dcaParentPrimaryVertex() const;
-    Float_t               hitDistanceParentDaughter() const;
-    Float_t               hitDistanceParentVertex() const;
-    Float_t               dE(UInt_t i) const;
-    Float_t               decayAngle() const;
-    Float_t               decayAngleCM() const;
+    unsigned short        geantIdParent() const;
+    unsigned short        geantIdDaughter() const;
+    float                 dcaParentDaughter() const;
+    float                 dcaDaughterPrimaryVertex() const;
+    float                 dcaParentPrimaryVertex() const;
+    float                 hitDistanceParentDaughter() const;
+    float                 hitDistanceParentVertex() const;
+    float                 dE(unsigned int i) const;
+    float                 decayAngle() const;
+    float                 decayAngleCM() const;
     const StThreeVectorF& parentMomentum() const;
     StThreeVectorF&       parentMomentum();
     const StThreeVectorF& daughterMomentum() const;
     StThreeVectorF&       daughterMomentum();
 
-    void setGeantIdParent(UShort_t);
-    void setGeantIdDaughter(UShort_t);
-    void setDcaParentDaughter(Float_t);
-    void setDcaDaughterPrimaryVertex(Float_t);
-    void setDcaParentPrimaryVertex(Float_t);
-    void setHitDistanceParentDaughter(Float_t);
-    void setHitDistanceParentVertex(Float_t);
-    void setdE(UInt_t, Float_t);
-    void setDecayAngle(Float_t);
-    void setDecayAngleCM(Float_t);
+    void setGeantIdParent(unsigned short);
+    void setGeantIdDaughter(unsigned short);
+    void setDcaParentDaughter(float);
+    void setDcaDaughterPrimaryVertex(float);
+    void setDcaParentPrimaryVertex(float);
+    void setHitDistanceParentDaughter(float);
+    void setHitDistanceParentVertex(float);
+    void setdE(unsigned int, float);
+    void setDecayAngle(float);
+    void setDecayAngleCM(float);
     void setParentMomentum(const StThreeVectorF&);
     void setDaughterMomentum(const StThreeVectorF&);
     void addDaughter(StTrack*);

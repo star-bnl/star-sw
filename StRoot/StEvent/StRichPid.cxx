@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPid.cxx,v 2.5 2000/12/08 03:50:31 ullrich Exp $
+ * $Id: StRichPid.cxx,v 2.6 2001/04/05 04:00:53 ullrich Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPid.cxx,v $
+ * Revision 2.6  2001/04/05 04:00:53  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.5  2000/12/08 03:50:31  ullrich
  * Removed compiler warning (signed/unsigned comparison).
  *
@@ -32,7 +35,7 @@
  ***************************************************************************/
 #include "StRichPid.h"
 
-static const char rcsid[] = "$Id: StRichPid.cxx,v 2.5 2000/12/08 03:50:31 ullrich Exp $";
+static const char rcsid[] = "$Id: StRichPid.cxx,v 2.6 2001/04/05 04:00:53 ullrich Exp $";
 
 ClassImp(StRichPid)
 
@@ -41,9 +44,9 @@ StRichPid::StRichPid()
       mTotalAzimuth(0), mTotalArea(0), mTotalHits(0), mTotalDensity(0),
       mTruncatedAzimuth(0), mTruncatedArea(0), mTruncatedHits(0), mTruncatedDensity(0) {/* noop */}
 
-StRichPid::StRichPid(StParticleDefinition* type, StThreeVectorD resid, Float_t totAzim,
-                     Float_t totArea, UShort_t totHits, Float_t trunAzim, Float_t trunArea,
-                     UShort_t trunHits)
+StRichPid::StRichPid(StParticleDefinition* type, StThreeVectorD resid, float totAzim,
+                     float totArea, unsigned short totHits, float trunAzim, float trunArea,
+                     unsigned short trunHits)
     : mMipResidual(resid), mTotalAzimuth(totAzim), mTotalArea(totArea),
       mTotalHits(totHits), mTruncatedAzimuth(trunAzim), mTruncatedArea(trunArea),
       mTruncatedHits(trunHits) {
@@ -69,9 +72,9 @@ const StSPtrVecRichPhotonInfo& StRichPid::getPhotonInfo() {return mPhotonInfo;}
 StRichPhotonInfo* StRichPid::getPhotonInfo(int i)
 {
     if(static_cast<unsigned int>(i) > mPhotonInfo.size())
-	return 0;
+        return 0;
     else
-	return mPhotonInfo[i];
+        return mPhotonInfo[i];
 }
 
 
@@ -80,16 +83,16 @@ void StRichPid::addPhotonInfo(StRichPhotonInfo* i)
     mPhotonInfo.push_back(i);
 }
 
-Int_t
+int
 StRichPid::operator==(const StRichPid& pid) const {
     return ( mParticleNumber   == pid.getParticleNumber() &&
-	     mMipResidual      == pid.getMipResidual() &&
-	     mTotalAzimuth     == pid.getTotalAzimuth() &&
-	     mTotalArea        == pid.getTotalArea() &&
-	     mTotalHits        == pid.getTotalHits() &&
-	     mTotalDensity     == pid.getTotalDensity() &&
-	     mTruncatedAzimuth == pid.getTruncatedAzimuth() &&
-	     mTruncatedArea    == pid.getTruncatedArea() &&
-	     mTruncatedHits    == pid.getTruncatedHits() &&
-	     mTruncatedDensity == pid.getTruncatedDensity() );
+             mMipResidual      == pid.getMipResidual() &&
+             mTotalAzimuth     == pid.getTotalAzimuth() &&
+             mTotalArea        == pid.getTotalArea() &&
+             mTotalHits        == pid.getTotalHits() &&
+             mTotalDensity     == pid.getTotalDensity() &&
+             mTruncatedAzimuth == pid.getTruncatedAzimuth() &&
+             mTruncatedArea    == pid.getTruncatedArea() &&
+             mTruncatedHits    == pid.getTruncatedHits() &&
+             mTruncatedDensity == pid.getTruncatedDensity() );
 }

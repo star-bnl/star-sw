@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitCollection.h,v 2.1 1999/10/13 19:44:00 ullrich Exp $
+ * $Id: StTpcHitCollection.h,v 2.2 2001/04/05 04:00:44 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitCollection.h,v $
+ * Revision 2.2  2001/04/05 04:00:44  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  1999/10/13 19:44:00  ullrich
  * Initial Revision
  *
@@ -29,12 +32,12 @@ public:
     // StTpcHitCollection(const StTpcHitCollection&);            use default
     // StTpcHitCollection& operator=(const StTpcHitCollection&); use default
     
-    Bool_t  addHit(StTpcHit*);
-    ULong_t numberOfHits() const;
-    UInt_t  numberOfSectors() const;
+    bool          addHit(StTpcHit*);
+    unsigned int  numberOfHits() const;
+    unsigned int  numberOfSectors() const;
     
-    StTpcSectorHitCollection*       sector(UInt_t);
-    const StTpcSectorHitCollection* sector(UInt_t) const;
+    StTpcSectorHitCollection*       sector(unsigned int);
+    const StTpcSectorHitCollection* sector(unsigned int) const;
 
 private:
     enum { mNumberOfSectors = 24 };

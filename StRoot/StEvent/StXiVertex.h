@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.h,v 2.3 2001/03/24 03:35:01 perev Exp $
+ * $Id: StXiVertex.h,v 2.4 2001/04/05 04:00:47 ullrich Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.h,v $
+ * Revision 2.4  2001/04/05 04:00:47  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.3  2001/03/24 03:35:01  perev
  * clone() -> clone() const
  *
@@ -41,26 +44,26 @@ public:
     ~StXiVertex();
 
     StVertexId            type() const;
-    UInt_t                numberOfDaughters() const;
-    StTrack*              daughter(UInt_t = 0);
-    const StTrack*        daughter(UInt_t = 0) const;
+    unsigned int          numberOfDaughters() const;
+    StTrack*              daughter(unsigned int = 0);
+    const StTrack*        daughter(unsigned int = 0) const;
     StPtrVecTrack         daughters(StTrackFilter&);
 
-    Float_t               dcaBachelorToPrimaryVertex() const;
-    Float_t               dcaV0ToPrimaryVertex() const;
-    Float_t               dcaDaughters() const;
-    Float_t               dcaParentToPrimaryVertex() const;
+    float                 dcaBachelorToPrimaryVertex() const;
+    float                 dcaV0ToPrimaryVertex() const;
+    float                 dcaDaughters() const;
+    float                 dcaParentToPrimaryVertex() const;
     const StThreeVectorF& momentumOfBachelor() const;
     StThreeVectorF        momentumOfV0() const;
     StThreeVectorF        momentum() const;
     StV0Vertex*           v0Vertex() const;
     StTrack*              bachelor();
-    Double_t              chargeOfBachelor();
+    double                chargeOfBachelor();
 
-    void setDcaBachelorToPrimaryVertex(Float_t);
+    void setDcaBachelorToPrimaryVertex(float);
     void setMomentumOfBachelor(const StThreeVectorF&);
-    void setDcaDaughters(Float_t);
-    void setDcaParentToPrimaryVertex(Float_t);
+    void setDcaDaughters(float);
+    void setDcaParentToPrimaryVertex(float);
     void setV0Vertex(StV0Vertex*);
     void addDaughter(StTrack*);
     void removeDaughter(StTrack*);

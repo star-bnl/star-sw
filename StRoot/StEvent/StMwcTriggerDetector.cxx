@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMwcTriggerDetector.cxx,v 2.4 2000/05/09 10:22:25 ullrich Exp $
+ * $Id: StMwcTriggerDetector.cxx,v 2.5 2001/04/05 04:00:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMwcTriggerDetector.cxx,v $
+ * Revision 2.5  2001/04/05 04:00:51  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  2000/05/09 10:22:25  ullrich
  * Updated to cope with modified dst_TrgDet.idl
  *
@@ -26,7 +29,7 @@
 #include "StMwcTriggerDetector.h"
 #include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StMwcTriggerDetector.cxx,v 2.4 2000/05/09 10:22:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StMwcTriggerDetector.cxx,v 2.5 2001/04/05 04:00:51 ullrich Exp $";
 
 ClassImp(StMwcTriggerDetector)
 
@@ -34,13 +37,13 @@ StMwcTriggerDetector::StMwcTriggerDetector()
 {
     int i, j, k;
     for(i=0; i<mMaxSectors; i++)
-	for(j=0; j<mMaxSubSectors; j++)
-	    for(k=0; k<mMaxEventSamples; k++)
-		mMips[i][j][k] = 0;
+        for(j=0; j<mMaxSubSectors; j++)
+            for(k=0; k<mMaxEventSamples; k++)
+                mMips[i][j][k] = 0;
 
     for(i=0; i<mMaxAux; i++)
-	for(j=0; j<mMaxEventSamples; j++)
-	    mAux[i][j] = 0;
+        for(j=0; j<mMaxEventSamples; j++)
+            mAux[i][j] = 0;
     
     mNumberOfPreSamples = 0;
     mNumberOfPostSamples = 0;
@@ -50,13 +53,13 @@ StMwcTriggerDetector::StMwcTriggerDetector(const dst_TrgDet_st& t)
 {
     int i, j, k;
     for(i=0; i<mMaxSectors; i++)
-	for(j=0; j<mMaxSubSectors; j++)
-	    for(k=0; k<mMaxEventSamples; k++) 
-		mMips[i][j][k] = t.nMwc[i][j][k];
-	    
+        for(j=0; j<mMaxSubSectors; j++)
+            for(k=0; k<mMaxEventSamples; k++)
+                mMips[i][j][k] = t.nMwc[i][j][k];
+            
     for(i=0; i<mMaxAux; i++)
-	for(j=0; j<mMaxEventSamples; j++)
-	    mAux[i][j] = t.mwcaux[i][j];
+        for(j=0; j<mMaxEventSamples; j++)
+            mAux[i][j] = t.mwcaux[i][j];
     
     mNumberOfPreSamples = t.npre;
     mNumberOfPostSamples = t.npost;
@@ -64,53 +67,53 @@ StMwcTriggerDetector::StMwcTriggerDetector(const dst_TrgDet_st& t)
 
 StMwcTriggerDetector::~StMwcTriggerDetector() {/* noop */}
 
-UInt_t
+unsigned int
 StMwcTriggerDetector::numberOfSectors() const {return mMaxSectors;}
 
-UInt_t
+unsigned int
 StMwcTriggerDetector::numberOfSubSectors() const {return mMaxSubSectors;}
 
-UInt_t
+unsigned int
 StMwcTriggerDetector::numberOfPreSamples() const {return mNumberOfPreSamples;}
 
-UInt_t
+unsigned int
 StMwcTriggerDetector::numberOfPostSamples() const {return mNumberOfPostSamples;}
 
-UInt_t
+unsigned int
 StMwcTriggerDetector::numberOfAuxWords() const {return mMaxAux;}
 
-Float_t
-StMwcTriggerDetector::mips(UInt_t i, UInt_t j, UInt_t k) const
+float
+StMwcTriggerDetector::mips(unsigned int i, unsigned int j, unsigned int k) const
 {
     return mMips[i][j][k];
 }
 
-Float_t
-StMwcTriggerDetector::aux(UInt_t i, UInt_t j) const
+float
+StMwcTriggerDetector::aux(unsigned int i, unsigned int j) const
 {
     return mAux[i][j];
 }
 
 void
-StMwcTriggerDetector::setMips(UInt_t i, UInt_t j, UInt_t k, Float_t val)
+StMwcTriggerDetector::setMips(unsigned int i, unsigned int j, unsigned int k, float val)
 {
     mMips[i][j][k] = val;
 }
 
 void
-StMwcTriggerDetector::setAux(UInt_t i, UInt_t j, Float_t val)
+StMwcTriggerDetector::setAux(unsigned int i, unsigned int j, float val)
 {
     mAux[i][j] = val;
 }
 
 void
-StMwcTriggerDetector::setNumberOfPreSamples(UInt_t val)
+StMwcTriggerDetector::setNumberOfPreSamples(unsigned int val)
 {
     mNumberOfPreSamples = val;
 }
 
 void
-StMwcTriggerDetector::setNumberOfPostSamples(UInt_t val)
+StMwcTriggerDetector::setNumberOfPostSamples(unsigned int val)
 {
     mNumberOfPostSamples = val;
 }

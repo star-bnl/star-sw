@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 2.6 2000/03/08 14:29:54 ullrich Exp $
+ * $Id: StVertex.cxx,v 2.7 2001/04/05 04:00:59 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
+ * Revision 2.7  2001/04/05 04:00:59  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.6  2000/03/08 14:29:54  ullrich
  * New method probChiSquared() added.
  *
@@ -43,7 +46,7 @@ using std::copy;
 
 ClassImp(StVertex)
 
-static const char rcsid[] = "$Id: StVertex.cxx,v 2.6 2000/03/08 14:29:54 ullrich Exp $";
+static const char rcsid[] = "$Id: StVertex.cxx,v 2.7 2001/04/05 04:00:59 ullrich Exp $";
 
 StVertex::StVertex()
 {
@@ -70,7 +73,7 @@ StVertex::StVertex(const dst_vertex_st& v)
 
 StVertex::~StVertex() {/* noop */};
 
-Int_t
+int
 StVertex::operator==(const StVertex& v) const
 {
     return mType == v.mType &&
@@ -79,19 +82,19 @@ StVertex::operator==(const StVertex& v) const
         mChiSquared == v.mChiSquared;
 }
 
-Int_t
+int
 StVertex::operator!=(const StVertex& v) const
 {
     return !(v == *this);
 }
 
-Long_t
+int
 StVertex::flag() const { return mFlag; }
 
-Float_t
+float
 StVertex::chiSquared() const { return mChiSquared; }
 
-Float_t
+float
 StVertex::probChiSquared() const { return mProbChiSquared; }
 
 StMatrixF
@@ -120,16 +123,16 @@ const StTrack*
 StVertex::parent() const { return mParent; }
 
 void
-StVertex::setFlag(Long_t val) { mFlag = val; }
+StVertex::setFlag(int val) { mFlag = val; }
 
 void
-StVertex::setCovariantMatrix(Float_t val[6]) { copy(val, val+6, mCovariantMatrix); }
+StVertex::setCovariantMatrix(float val[6]) { copy(val, val+6, mCovariantMatrix); }
 
 void
-StVertex::setChiSquared(Float_t val) { mChiSquared = val; }
+StVertex::setChiSquared(float val) { mChiSquared = val; }
 
 void
-StVertex::setProbChiSquared(Float_t val) { mProbChiSquared = val; }
+StVertex::setProbChiSquared(float val) { mProbChiSquared = val; }
 
 void
 StVertex::setParent(StTrack* val) { mParent = val; }

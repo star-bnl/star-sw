@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPid.h,v 2.5 2000/11/27 17:19:09 lasiuk Exp $
+ * $Id: StRichPid.h,v 2.6 2001/04/05 04:00:40 ullrich Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPid.h,v $
+ * Revision 2.6  2001/04/05 04:00:40  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.5  2000/11/27 17:19:09  lasiuk
  * keep the constant angle
  *
@@ -48,14 +51,14 @@ public:
     StRichPid();
     ~StRichPid();
     StRichPid(StParticleDefinition* particle, StThreeVectorD resid,
-              Float_t totAzim,  Float_t totArea,
-              UShort_t totHits, Float_t trunAzim,
-              Float_t trunArea, UShort_t trunHits);
+              float totAzim,  float totArea,
+              unsigned short totHits, float trunAzim,
+              float trunArea, unsigned short trunHits);
   
     // StRichPid(const StRichPid&) {}
     // StRichPid& operator=(const StRichPid&) {}
   
-    Int_t operator==(const StRichPid&) const;
+    int operator==(const StRichPid&) const;
 
     const StPtrVecRichHit&      getAssociatedRichHits() const;
     StPtrVecRichHit&            getAssociatedRichHits();
@@ -63,38 +66,38 @@ public:
 
     const StSPtrVecRichPhotonInfo& getPhotonInfo();
     StRichPhotonInfo*              getPhotonInfo(int);   // should be constant
-    void     addPhotonInfo(StRichPhotonInfo*);
+    void                           addPhotonInfo(StRichPhotonInfo*);
 
     void setRingType(StParticleDefinition* particle);
     void setMipResidual(StThreeVectorD t);
     
     // whole ring
-    void setTotalAzimuth(Float_t);
-    void setTotalArea(Float_t);
-    void setTotalHits(UShort_t);
-    void setTotalDensity(Float_t);
+    void setTotalAzimuth(float);
+    void setTotalArea(float);
+    void setTotalHits(unsigned short);
+    void setTotalDensity(float);
     
-    Float_t  getTotalAzimuth() const;
-    Float_t  getTotalArea()    const;
-    UShort_t getTotalHits()    const;
-    Float_t  getTotalDensity() const;
+    float  getTotalAzimuth() const;
+    float  getTotalArea()    const;
+    unsigned short getTotalHits()    const;
+    float  getTotalDensity() const;
     
     // constant area cut
-    void setTruncatedAzimuth(Float_t);
-    void setTruncatedArea(Float_t);
-    void setTruncatedHits(UShort_t);
-    void setTruncatedDensity(Float_t);
+    void setTruncatedAzimuth(float);
+    void setTruncatedArea(float);
+    void setTruncatedHits(unsigned short);
+    void setTruncatedDensity(float);
 
-    Float_t  getTruncatedAzimuth() const;
-    Float_t  getTruncatedArea()    const;
-    UShort_t getTruncatedHits()    const;
-    Float_t  getTruncatedDensity() const;
+    float  getTruncatedAzimuth() const;
+    float  getTruncatedArea()    const;
+    unsigned short getTruncatedHits()    const;
+    float  getTruncatedDensity() const;
 
-    Float_t  getConstantAreaCut()  const;
-    void     setConstantAreaCut(Float_t);
+    float  getConstantAreaCut()  const;
+    void   setConstantAreaCut(float);
     
     StParticleDefinition* getRingType()       const;
-    Int_t                 getParticleNumber() const;
+    int                 getParticleNumber() const;
 
     
     StThreeVectorD        getMipResidual() const;
@@ -106,12 +109,12 @@ public:
     
 private:
     StParticleDefinition*  mParticleType;//!
-    Int_t               mParticleNumber;
+    Int_t                  mParticleNumber;
     
     StPtrVecRichHit         mAssociatedHits;
     StSPtrVecRichPhotonInfo mPhotonInfo;
 
-    StThreeVectorD      mMipResidual;
+    StThreeVectorD          mMipResidual;
 
     Float_t  mTotalAzimuth;
     Float_t  mTotalArea;
@@ -125,7 +128,7 @@ private:
 
     Float_t  mConstantAreaCut;
     
-    unsigned long mFlags;
+    UInt_t   mFlags;
 
     ClassDef(StRichPid,1)
 };
@@ -134,15 +137,15 @@ private:
 // sets
 inline void StRichPid::setMipResidual(StThreeVectorD t) { mMipResidual=t;}
 
-inline void StRichPid::setTotalAzimuth(Float_t t) { mTotalAzimuth=t;}
-inline void StRichPid::setTotalArea(Float_t t)    { mTotalArea=t;}
-inline void StRichPid::setTotalHits(UShort_t t)   { mTotalHits=t;}
-inline void StRichPid::setTotalDensity(Float_t t) {mTotalDensity=t;}
+inline void StRichPid::setTotalAzimuth(float t) { mTotalAzimuth=t;}
+inline void StRichPid::setTotalArea(float t)    { mTotalArea=t;}
+inline void StRichPid::setTotalHits(unsigned short t)   { mTotalHits=t;}
+inline void StRichPid::setTotalDensity(float t) {mTotalDensity=t;}
 
-inline void StRichPid::setTruncatedAzimuth(Float_t t) { mTruncatedAzimuth=t;}
-inline void StRichPid::setTruncatedArea(Float_t t)    { mTruncatedArea=t;}
-inline void StRichPid::setTruncatedHits(UShort_t t)   { mTruncatedHits=t;}
-inline void StRichPid::setTruncatedDensity(Float_t t) {mTruncatedDensity=t;}
+inline void StRichPid::setTruncatedAzimuth(float t) { mTruncatedAzimuth=t;}
+inline void StRichPid::setTruncatedArea(float t)    { mTruncatedArea=t;}
+inline void StRichPid::setTruncatedHits(unsigned short t)   { mTruncatedHits=t;}
+inline void StRichPid::setTruncatedDensity(float t) {mTruncatedDensity=t;}
 
 
 // containers
@@ -153,19 +156,19 @@ inline void  StRichPid::addHit(StRichHit* hit) { mAssociatedHits.push_back(hit);
 // gets
 
 inline StParticleDefinition* StRichPid::getRingType() const { return mParticleType;}
-inline Int_t StRichPid::getParticleNumber() const {return mParticleNumber;}
-inline Float_t  StRichPid::getTotalAzimuth() const { return mTotalAzimuth;}
-inline Float_t  StRichPid::getTotalArea()    const { return mTotalArea;}
-inline UShort_t StRichPid::getTotalHits()    const { return mTotalHits;}
-inline Float_t  StRichPid::getTotalDensity() const { return mTotalDensity;}
+inline int StRichPid::getParticleNumber() const {return mParticleNumber;}
+inline float  StRichPid::getTotalAzimuth() const { return mTotalAzimuth;}
+inline float  StRichPid::getTotalArea()    const { return mTotalArea;}
+inline unsigned short StRichPid::getTotalHits()    const { return mTotalHits;}
+inline float  StRichPid::getTotalDensity() const { return mTotalDensity;}
 
-inline Float_t  StRichPid::getTruncatedAzimuth() const { return mTruncatedAzimuth;}
-inline Float_t  StRichPid::getTruncatedArea()    const { return mTruncatedArea;}
-inline UShort_t StRichPid::getTruncatedHits()    const { return mTruncatedHits;}
-inline Float_t  StRichPid::getTruncatedDensity() const { return mTruncatedDensity;}
+inline float  StRichPid::getTruncatedAzimuth() const { return mTruncatedAzimuth;}
+inline float  StRichPid::getTruncatedArea()    const { return mTruncatedArea;}
+inline unsigned short StRichPid::getTruncatedHits()    const { return mTruncatedHits;}
+inline float  StRichPid::getTruncatedDensity() const { return mTruncatedDensity;}
 
-inline Float_t  StRichPid::getConstantAreaCut() const {return mConstantAreaCut;}
-inline void     StRichPid::setConstantAreaCut(Float_t c) { mConstantAreaCut = c;}
+inline float  StRichPid::getConstantAreaCut() const {return mConstantAreaCut;}
+inline void     StRichPid::setConstantAreaCut(float c) { mConstantAreaCut = c;}
 
 
 

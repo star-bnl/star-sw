@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHitCollection.cxx,v 2.3 1999/12/13 20:16:17 ullrich Exp $
+ * $Id: StFtpcHitCollection.cxx,v 2.4 2001/04/05 04:00:50 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFtpcHitCollection.cxx,v $
+ * Revision 2.4  2001/04/05 04:00:50  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.3  1999/12/13 20:16:17  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
  *
@@ -24,7 +27,7 @@
 #include "StFtpcSectorHitCollection.h"
 #include "StFtpcHit.h"
 
-static const char rcsid[] = "$Id: StFtpcHitCollection.cxx,v 2.3 1999/12/13 20:16:17 ullrich Exp $";
+static const char rcsid[] = "$Id: StFtpcHitCollection.cxx,v 2.4 2001/04/05 04:00:50 ullrich Exp $";
 
 ClassImp(StFtpcHitCollection)
 
@@ -32,7 +35,7 @@ StFtpcHitCollection::StFtpcHitCollection() { /* noop */ }
 
 StFtpcHitCollection::~StFtpcHitCollection() { /* noop */ }
     
-Bool_t
+bool
 StFtpcHitCollection::addHit(StFtpcHit* hit)
 {
     unsigned int p, s;
@@ -46,13 +49,13 @@ StFtpcHitCollection::addHit(StFtpcHit* hit)
         return kFALSE;
 }
 
-UInt_t
+unsigned int
 StFtpcHitCollection::numberOfPlanes() const { return mNumberOfPlanes; }
 
-ULong_t
+unsigned int
 StFtpcHitCollection::numberOfHits() const
 {
-    ULong_t sum = 0;
+    unsigned int sum = 0;
     for (unsigned int i=0; i<mNumberOfPlanes; i++) {
         for (unsigned int j=0; j<mPlanes[i].numberOfSectors(); j++) {
             sum += mPlanes[i].sector(j)->hits().size();
@@ -62,7 +65,7 @@ StFtpcHitCollection::numberOfHits() const
 }
 
 StFtpcPlaneHitCollection*
-StFtpcHitCollection::plane(UInt_t i)
+StFtpcHitCollection::plane(unsigned int i)
 {
     if (i < mNumberOfPlanes)
         return &(mPlanes[i]);
@@ -71,7 +74,7 @@ StFtpcHitCollection::plane(UInt_t i)
 }
 
 const StFtpcPlaneHitCollection*
-StFtpcHitCollection::plane(UInt_t i) const
+StFtpcHitCollection::plane(unsigned int i) const
 {
     if (i < mNumberOfPlanes)
         return &(mPlanes[i]);

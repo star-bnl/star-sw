@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSoftwareMonitor.h,v 2.3 2000/12/08 03:53:41 ullrich Exp $
+ * $Id: StSoftwareMonitor.h,v 2.4 2001/04/05 04:00:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSoftwareMonitor.h,v $
+ * Revision 2.4  2001/04/05 04:00:42  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.3  2000/12/08 03:53:41  ullrich
  * Prepared hooks for ToF.
  *
@@ -100,6 +103,4 @@ protected:
     
     ClassDef(StSoftwareMonitor,1)
 };
-
-
 #endif

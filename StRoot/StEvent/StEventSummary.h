@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventSummary.h,v 2.2 2000/01/14 19:06:51 ullrich Exp $
+ * $Id: StEventSummary.h,v 2.3 2001/04/05 04:00:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventSummary.h,v $
+ * Revision 2.3  2001/04/05 04:00:36  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  2000/01/14 19:06:51  ullrich
  * Made code more robust if read-in table is not well defined.
  *
@@ -41,52 +44,52 @@ public:
     // StEventSummary& operator=(const StEventSummary&); use default
     // StEventSummary(const StEventSummary&);            use default
     
-    Long_t   numberOfTracks() const;
-    Long_t   numberOfGoodTracks() const;
-    Long_t   numberOfGoodTracks(StChargeSign) const;
-    Long_t   numberOfGoodPrimaryTracks() const;
-    Long_t   numberOfExoticTracks() const;
-    Long_t   numberOfVertices() const;
-    Long_t   numberOfVerticesOfType(StVertexId) const;
-    Long_t   numberOfPileupVertices() const;
-    Float_t  meanPt() const;
-    Float_t  meanPt2() const;
-    Float_t  meanEta() const;
-    Float_t  rmsEta() const;
-    Double_t magneticField() const;
+    int    numberOfTracks() const;
+    int    numberOfGoodTracks() const;
+    int    numberOfGoodTracks(StChargeSign) const;
+    int    numberOfGoodPrimaryTracks() const;
+    int    numberOfExoticTracks() const;
+    int    numberOfVertices() const;
+    int    numberOfVerticesOfType(StVertexId) const;
+    int    numberOfPileupVertices() const;
+    float  meanPt() const;
+    float  meanPt2() const;
+    float  meanEta() const;
+    float  rmsEta() const;
+    double magneticField() const;
     
     const StThreeVectorF& primaryVertexPosition() const;
 
-    UInt_t   numberOfBins() const;
-    Long_t   tracksInEtaBin(UInt_t) const;
-    Long_t   tracksInPhiBin(UInt_t) const;
-    Long_t   tracksInPtBin(UInt_t) const;
-    Float_t  energyInEtaBin(UInt_t) const;
-    Float_t  energyInPhiBin(UInt_t) const;
+    unsigned int   numberOfBins() const;
+    int    tracksInEtaBin(unsigned int) const;
+    int    tracksInPhiBin(unsigned int) const;
+    int    tracksInPtBin(unsigned int) const;
+    float  energyInEtaBin(unsigned int) const;
+    float  energyInPhiBin(unsigned int) const;
 
-    Float_t  lowerEdgeEtaBin(UInt_t) const;
-    Float_t  upperEdgeEtaBin(UInt_t) const;
-    Float_t  lowerEdgePhiBin(UInt_t) const;
-    Float_t  upperEdgePhiBin(UInt_t) const;
-    Float_t  lowerEdgePtBin(UInt_t) const;
-    Float_t  upperEdgePtBin(UInt_t) const;
+    float  lowerEdgeEtaBin(unsigned int) const;
+    float  upperEdgeEtaBin(unsigned int) const;
+    float  lowerEdgePhiBin(unsigned int) const;
+    float  upperEdgePhiBin(unsigned int) const;
+    float  lowerEdgePtBin(unsigned int) const;
+    float  upperEdgePtBin(unsigned int) const;
     
-    void setNumberOfTracks(Long_t);
-    void setNumberOfGoodTracks(Long_t);
-    void setNumberOfGoodTracks(StChargeSign, Long_t);
-    void setNumberOfGoodPrimaryTracks(Long_t);
-    void setNumberOfNegativeTracks(Long_t);
-    void setNumberOfExoticTracks(Long_t);
-    void setNumberOfVertices(Long_t);
+    void setNumberOfTracks(int);
+    void setNumberOfGoodTracks(int);
+    void setNumberOfGoodTracks(StChargeSign, int);
+    void setNumberOfGoodPrimaryTracks(int);
+    void setNumberOfNegativeTracks(int);
+    void setNumberOfExoticTracks(int);
+    void setNumberOfVertices(int);
     
-    void setNumberOfVerticesForType(StVertexId, Long_t);
-    void setNumberOfPileupVertices(Long_t);
-    void setMeanPt(Float_t);
-    void setMeanPt2(Float_t);
-    void setMeanEta(Float_t);
-    void setRmsEta(Float_t);
+    void setNumberOfVerticesForType(StVertexId, int);
+    void setNumberOfPileupVertices(int);
+    void setMeanPt(float);
+    void setMeanPt2(float);
+    void setMeanEta(float);
+    void setRmsEta(float);
     void setPrimaryVertexPosition(const StThreeVectorF&);
-    void setMagneticField(Double_t);
+    void setMagneticField(double);
 
 protected:
     enum { mVertexTypeArraySize = 5,
@@ -94,15 +97,15 @@ protected:
            mPtAndEtaBinsSize = 9,
            mHistogramSize = 10 };
     
-    Long_t         mNumberOfTracks;
-    Long_t         mNumberOfGoodTracks;
-    Long_t         mNumberOfGoodPrimaryTracks;
-    Long_t         mNumberOfPositiveTracks;
-    Long_t         mNumberOfNegativeTracks;
-    Long_t         mNumberOfExoticTracks;
-    Long_t         mNumberOfVertices;
+    Int_t          mNumberOfTracks;
+    Int_t          mNumberOfGoodTracks;
+    Int_t          mNumberOfGoodPrimaryTracks;
+    Int_t          mNumberOfPositiveTracks;
+    Int_t          mNumberOfNegativeTracks;
+    Int_t          mNumberOfExoticTracks;
+    Int_t          mNumberOfVertices;
     TArrayL        mNumberOfVertexTypes;
-    Long_t         mNumberOfPileupVertices;
+    Int_t          mNumberOfPileupVertices;
     Float_t        mMeanPt;
     Float_t        mMeanPt2;
     Float_t        mMeanEta;

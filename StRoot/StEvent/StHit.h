@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.5 2001/03/24 03:34:50 perev Exp $
+ * $Id: StHit.h,v 2.6 2001/04/05 04:00:38 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.6  2001/04/05 04:00:38  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.5  2001/03/24 03:34:50  perev
  * clone() -> clone() const
  *
@@ -18,7 +21,7 @@
  * is used in the fit.
  *
  * Revision 2.3  2000/06/07 09:43:21  ullrich
- * Changed return type of flag() to UInt_t
+ * Changed return type of flag() to unsigned int
  *
  * Revision 2.2  2000/06/01 21:38:56  ullrich
  * Added member mFlag and access member flag() and setFlag().
@@ -45,34 +48,34 @@ public:
     StHit();
     StHit(const StThreeVectorF&,
           const StThreeVectorF&,
-          ULong_t, Float_t, UChar_t = 0);
+          unsigned int, float, unsigned char = 0);
     // StHit(const StHit&);            use default
     // StHit& operator=(const StHit&); use default
     ~StHit();
 
-    Int_t operator==(const StHit&) const;
-    Int_t operator!=(const StHit&) const;
+    int operator==(const StHit&) const;
+    int operator!=(const StHit&) const;
     
-    Float_t         charge() const;
-    UInt_t          trackReferenceCount() const;
+    float           charge() const;
+    unsigned int    trackReferenceCount() const;
     StDetectorId    detector() const;
-    UInt_t          flag() const;
+    unsigned int    flag() const;
     StThreeVectorF  positionError() const;     // overwrite inherited
     StMatrixF       covariantMatrix() const;   // overwrite inherited
-    Int_t           usedInFit() const; 
+    int             usedInFit() const;
     
-    void setCharge(Float_t);
-    void setFlag(UChar_t);
-    void setTrackReferenceCount(UChar_t);
-    void setHardwarePosition(ULong_t);
+    void setCharge(float);
+    void setFlag(unsigned char);
+    void setTrackReferenceCount(unsigned char);
+    void setHardwarePosition(unsigned int);
     void setPositionError(const StThreeVectorF&);
     
     virtual StPtrVecTrack relatedTracks(const StSPtrVecTrackNode&, StTrackType);
     
 protected:
-    ULong_t bits(UInt_t, UInt_t) const;
+    unsigned int bits(unsigned int, unsigned int) const;
     
-    ULong_t        mHardwarePosition;
+    UInt_t         mHardwarePosition;
     Float_t        mCharge;
     UChar_t        mTrackRefCount;
     StThreeVectorF mPositionError;
@@ -83,7 +86,7 @@ protected:
     ClassDef(StHit,1)
 };
 
-inline ULong_t StHit::bits(UInt_t bit, UInt_t nbits) const
+inline unsigned int StHit::bits(unsigned int bit, unsigned int nbits) const
 {
     return (mHardwarePosition>>bit) & ~(~0UL<<nbits);
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdHitCollection.cxx,v 2.1 2000/01/05 16:00:04 ullrich Exp $
+ * $Id: StSsdHitCollection.cxx,v 2.2 2001/04/05 04:00:54 ullrich Exp $
  *
  * Author: Lilian Martin, Thomas Ullrich, Dec 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHitCollection.cxx,v $
+ * Revision 2.2  2001/04/05 04:00:54  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  2000/01/05 16:00:04  ullrich
  * Initial Revision.
  *
@@ -18,7 +21,7 @@
 #include "StSsdLadderHitCollection.h"
 #include "StSsdHit.h"
 
-static const char rcsid[] = "$Id: StSsdHitCollection.cxx,v 2.1 2000/01/05 16:00:04 ullrich Exp $";
+static const char rcsid[] = "$Id: StSsdHitCollection.cxx,v 2.2 2001/04/05 04:00:54 ullrich Exp $";
 
 ClassImp(StSsdHitCollection)
 
@@ -26,10 +29,10 @@ StSsdHitCollection::StSsdHitCollection() { /* noop */ }
 
 StSsdHitCollection::~StSsdHitCollection() { /* noop */ }
     
-UInt_t
+unsigned int
 StSsdHitCollection::numberOfLadders() const { return mNumberOfLadders; }
 
-Bool_t
+bool
 StSsdHitCollection::addHit(StSsdHit* hit)
 {
     unsigned int l, w;
@@ -44,10 +47,10 @@ StSsdHitCollection::addHit(StSsdHit* hit)
     }
 }
 
-ULong_t
+unsigned int
 StSsdHitCollection::numberOfHits() const
 {
-    ULong_t sum = 0;
+    unsigned int sum = 0;
     for (int i=0; i<mNumberOfLadders; i++)
         for (unsigned int j=0; j<mLadders[i].numberOfWafers(); j++)
                 sum += mLadders[i].wafer(j)->hits().size();
@@ -55,7 +58,7 @@ StSsdHitCollection::numberOfHits() const
 }
 
 StSsdLadderHitCollection*
-StSsdHitCollection::ladder(UInt_t i)
+StSsdHitCollection::ladder(unsigned int i)
 {
     if (i < mNumberOfLadders)
         return &(mLadders[i]);
@@ -64,7 +67,7 @@ StSsdHitCollection::ladder(UInt_t i)
 }
 
 const StSsdLadderHitCollection*
-StSsdHitCollection::ladder(UInt_t i) const
+StSsdHitCollection::ladder(unsigned int i) const
 {
     if (i < mNumberOfLadders)
         return &(mLadders[i]);

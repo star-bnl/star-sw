@@ -1,15 +1,18 @@
 /***************************************************************************
  *
- * $Id: StEmcRawHit.h,v 2.4 2001/03/24 03:34:46 perev Exp $
+ * $Id: StEmcRawHit.h,v 2.5 2001/04/05 04:00:35 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
  *
- * Description: 
+ * Description:
  *
  ***************************************************************************
  *
  * $Log: StEmcRawHit.h,v $
+ * Revision 2.5  2001/04/05 04:00:35  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  2001/03/24 03:34:46  perev
  * clone() -> clone() const
  *
@@ -31,36 +34,36 @@
 
 class StEmcRawHit : public StObject {
 public:
-  StEmcRawHit();
-  StEmcRawHit(StDetectorId, UInt_t, UInt_t, UInt_t, UInt_t);
-  StEmcRawHit(StDetectorId, UInt_t, UInt_t, UInt_t, UInt_t, Float_t);
-  StEmcRawHit(const StEmcRawHit&);
-  // StEmcRawHit& operator=(const StEmcRawHit&); use default
-  ~StEmcRawHit();
-  
-  StDetectorId detector() const;        
-  UInt_t    module() const;        
-  UInt_t    eta() const;        
-  Int_t     sub() const;        
-  UInt_t    calibrationType() const;
-  UInt_t    adc() const;        
-  Float_t   energy() const;
-
-  void setId(StDetectorId, UInt_t, UInt_t, UInt_t);
-  void setCalibrationType(const UInt_t);
-  void setAdc(const UInt_t);
-  void setEnergy(const Float_t);
-  
+    StEmcRawHit();
+    StEmcRawHit(StDetectorId, unsigned int, unsigned int, unsigned int, unsigned int);
+    StEmcRawHit(StDetectorId, unsigned int, unsigned int, unsigned int, unsigned int, float);
+    StEmcRawHit(const StEmcRawHit&);
+    // StEmcRawHit& operator=(const StEmcRawHit&); use default
+    ~StEmcRawHit();
+    
+    StDetectorId    detector() const;
+    unsigned int    module() const;
+    unsigned int    eta() const;
+    int             sub() const;
+    unsigned int    calibrationType() const;
+    unsigned int    adc() const;
+    float           energy() const;
+    
+    void setId(StDetectorId, unsigned int, unsigned int, unsigned int);
+    void setCalibrationType(const unsigned int);
+    void setAdc(const unsigned int);
+    void setEnergy(const float);
+    
 protected:
-  UInt_t    bits(UInt_t, UInt_t) const;        
-  
+    unsigned int    bits(unsigned int, unsigned int) const;
+    
 protected:
-  UInt_t    mId;
-  UInt_t    mAdc;        
-  Float_t   mEnergy;
-  
-  StObject* clone() const;
-  ClassDef(StEmcRawHit,1)  
+    UInt_t    mId;
+    UInt_t    mAdc;
+    Float_t   mEnergy;
+    
+    StObject* clone() const;
+    ClassDef(StEmcRawHit,1)
 };
 #endif
 

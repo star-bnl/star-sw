@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMeasuredPoint.h,v 2.4 2001/03/24 03:34:52 perev Exp $
+ * $Id: StMeasuredPoint.h,v 2.5 2001/04/05 04:00:38 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMeasuredPoint.h,v $
+ * Revision 2.5  2001/04/05 04:00:38  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  2001/03/24 03:34:52  perev
  * clone() -> clone() const
  *
@@ -38,8 +41,8 @@ public:
     // StMeasuredPoint(const StMeasuredPoint&);            use default
     // StMeasuredPoint& operator=(const StMeasuredPoint&); use default
     
-    Int_t operator==(const StMeasuredPoint&) const;
-    Int_t operator!=(const StMeasuredPoint&) const;
+    int operator==(const StMeasuredPoint&) const;
+    int operator!=(const StMeasuredPoint&) const;
     
     virtual const StThreeVectorF& position() const;
     virtual StThreeVectorF        positionError() const = 0;

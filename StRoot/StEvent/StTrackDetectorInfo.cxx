@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.cxx,v 2.6 2001/03/24 03:35:00 perev Exp $
+ * $Id: StTrackDetectorInfo.cxx,v 2.7 2001/04/05 04:00:58 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.cxx,v $
+ * Revision 2.7  2001/04/05 04:00:58  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.6  2001/03/24 03:35:00  perev
  * clone() -> clone() const
  *
@@ -36,7 +39,7 @@
 
 ClassImp(StTrackDetectorInfo)
 
-static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.6 2001/03/24 03:35:00 perev Exp $";
+static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.7 2001/04/05 04:00:58 ullrich Exp $";
 
 StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0)
 { /* noop */ }
@@ -56,15 +59,15 @@ StTrackDetectorInfo::firstPoint() const { return mFirstPoint; }
 const StThreeVectorF&
 StTrackDetectorInfo::lastPoint() const { return mLastPoint; }
 
-UShort_t
+unsigned short
 StTrackDetectorInfo::numberOfPoints() const
 {
     return (numberOfPoints(kTpcId) +
-	    numberOfPoints(kSvtId) +
-	    numberOfPoints(kSsdId));    
+            numberOfPoints(kSvtId) +
+            numberOfPoints(kSsdId));
 }
 
-UShort_t
+unsigned short
 StTrackDetectorInfo::numberOfPoints(StDetectorId det) const
 {
     // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
@@ -72,29 +75,29 @@ StTrackDetectorInfo::numberOfPoints(StDetectorId det) const
     case kFtpcWestId:
     case kFtpcEastId:
     case kTpcId:
-	return mNumberOfPoints%1000;
-	break;
+        return mNumberOfPoints%1000;
+        break;
     case kSvtId:
-	return (mNumberOfPoints%10000)/1000;
-	break;
+        return (mNumberOfPoints%10000)/1000;
+        break;
     case kSsdId:
-	return mNumberOfPoints/10000;
-	break;
+        return mNumberOfPoints/10000;
+        break;
     default:
-	return 0;
+        return 0;
     }
 }
 
-UShort_t
+unsigned short
 StTrackDetectorInfo::numberOfReferencedPoints() const
 {
-    return static_cast<UShort_t>(mHits.size());
+    return static_cast<unsigned short>(mHits.size());
 }
 
-UShort_t
+unsigned short
 StTrackDetectorInfo::numberOfReferencedPoints(StDetectorId id) const
 {
-    UShort_t count = 0;
+    unsigned short count = 0;
     for (StPtrVecHitConstIterator iter=mHits.begin(); iter != mHits.end(); iter++)
         if ((*iter)->detector() == id) count++;
     return count;
@@ -137,7 +140,7 @@ StTrackDetectorInfo::setLastPoint(const StThreeVectorF& val)
 }
 
 void
-StTrackDetectorInfo::setNumberOfPoints(UShort_t val)
+StTrackDetectorInfo::setNumberOfPoints(unsigned short val)
 {
     mNumberOfPoints = val;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtBarrelHitCollection.h,v 2.1 2000/02/17 18:15:11 ullrich Exp $
+ * $Id: StSvtBarrelHitCollection.h,v 2.2 2001/04/05 04:00:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Feb 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtBarrelHitCollection.h,v $
+ * Revision 2.2  2001/04/05 04:00:42  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  2000/02/17 18:15:11  ullrich
  * Initial Revision
  *
@@ -28,13 +31,13 @@ public:
     // const StSvtBarrelHitCollection&
     // operator=(const StSvtBarrelHitCollection&);                use default
     
-    ULong_t numberOfHits() const;
-    UInt_t  numberOfLadders() const;
+    unsigned int numberOfHits() const;
+    unsigned int  numberOfLadders() const;
     
-    StSvtLadderHitCollection*       ladder(UInt_t);
-    const StSvtLadderHitCollection* ladder(UInt_t) const;
+    StSvtLadderHitCollection*       ladder(unsigned int);
+    const StSvtLadderHitCollection* ladder(unsigned int) const;
 
-    void setBarrelNumber(Int_t);
+    void setBarrelNumber(int);
     
 private:
     enum { mMaxNumberOfLadders = 16 };

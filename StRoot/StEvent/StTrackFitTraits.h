@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.5 2001/03/24 03:35:00 perev Exp $
+ * $Id: StTrackFitTraits.h,v 2.6 2001/04/05 04:00:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
+ * Revision 2.6  2001/04/05 04:00:45  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.5  2001/03/24 03:35:00  perev
  * clone() -> clone() const
  *
@@ -42,19 +45,19 @@ class StParticleDefinition;
 class StTrackFitTraits : public StObject {
 public:
     StTrackFitTraits();
-    StTrackFitTraits(UShort_t, UShort_t, Float_t[2], Float_t[15]);
+    StTrackFitTraits(unsigned short, unsigned short, float[2], float[15]);
     StTrackFitTraits(const dst_track_st&);
     // StTrackFitTraits(const StTrackFitTraits&);            use default
     // StTrackFitTraits& operator=(const StTrackFitTraits&); use default
     virtual ~StTrackFitTraits();
 
-    UShort_t              numberOfFitPoints() const;
-    UShort_t              numberOfFitPoints(StDetectorId) const;
-    StParticleDefinition* pidHypothesis() const;
-    StMatrixF             covariantMatrix() const;
-    Double_t              chi2(UInt_t = 0) const;
+    unsigned short         numberOfFitPoints() const;
+    unsigned short         numberOfFitPoints(StDetectorId) const;
+    StParticleDefinition*  pidHypothesis() const;
+    StMatrixF              covariantMatrix() const;
+    double                 chi2(unsigned int = 0) const;
 
-    void                  clearCovariantMatrix();
+    void                   clearCovariantMatrix();
     
 protected:
     UShort_t mPidHypothesis;       // GeantId

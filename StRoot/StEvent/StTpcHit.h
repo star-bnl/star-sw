@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.6 2001/03/24 03:34:59 perev Exp $
+ * $Id: StTpcHit.h,v 2.7 2001/04/05 04:00:44 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.7  2001/04/05 04:00:44  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.6  2001/03/24 03:34:59  perev
  * clone() -> clone() const
  *
@@ -44,7 +47,7 @@ public:
     StTpcHit();
     StTpcHit(const StThreeVectorF&,
              const StThreeVectorF&,
-             ULong_t, Float_t, UChar_t = 0);
+             unsigned int, float, unsigned char = 0);
     StTpcHit(const dst_point_st&);
     // StTpcHit(const StTpcHit&);            use default
     // StTpcHit& operator=(const StTpcHit&); use default
@@ -53,24 +56,24 @@ public:
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
 
-    ULong_t   sector() const;          // 1-24
-    ULong_t   padrow() const;          // 1-45
-    ULong_t   padsInHit() const;
-    ULong_t   pixelsInHit() const;
+    unsigned int   sector() const;          // 1-24
+    unsigned int   padrow() const;          // 1-45
+    unsigned int   padsInHit() const;
+    unsigned int   pixelsInHit() const;
 
 protected:
     static StMemoryPool mPool;  //!
     StObject* clone() const;
-    ClassDef(StTpcHit,1)  
+    ClassDef(StTpcHit,1)
 };
 
-inline ULong_t
+inline unsigned int
 StTpcHit::sector() const
 {
     return bits(4, 5);   // bits 4-8, sector=[1,24]
 }
 
-inline ULong_t
+inline unsigned int
 StTpcHit::padrow() const
 {
     return bits(9, 6);   // bits 9-14, padrow=[1-45]

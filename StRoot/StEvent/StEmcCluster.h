@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcCluster.h,v 2.4 2001/03/24 03:34:44 perev Exp $
+ * $Id: StEmcCluster.h,v 2.5 2001/04/05 04:00:34 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCluster.h,v $
+ * Revision 2.5  2001/04/05 04:00:34  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  2001/03/24 03:34:44  perev
  * clone() -> clone() const
  *
@@ -31,33 +34,33 @@
 #include "StContainers.h"
 
 class StEmcCluster : public StObject {
-public: 
+public:
     StEmcCluster();
     ~StEmcCluster();
     // StEmcCluster(const StEmcCluster&);            use default
     // StEmcCluster& operator=(const StEmcCluster&); use default
     
-    Float_t eta() const;
-    Float_t phi() const;
-    Float_t sigmaEta() const;
-    Float_t sigmaPhi() const;
-    Float_t energy() const;
-    Int_t   nHits() const; 
-    Int_t   nNeighbors() const;
-    Int_t   nTracks() const;
+    float eta() const;
+    float phi() const;
+    float sigmaEta() const;
+    float sigmaPhi() const;
+    float energy() const;
+    int   nHits() const;
+    int   nNeighbors() const;
+    int   nTracks() const;
     
-    StPtrVecEmcRawHit& hit();
-    const StPtrVecEmcRawHit& hit() const;
-    StPtrVecEmcCluster& neighbor();
+    StPtrVecEmcRawHit&        hit();
+    const StPtrVecEmcRawHit&  hit() const;
+    StPtrVecEmcCluster&       neighbor();
     const StPtrVecEmcCluster& neighbor() const;
-    StPtrVecTrack& track();
-    const StPtrVecTrack& track() const;
+    StPtrVecTrack&            track();
+    const StPtrVecTrack&      track() const;
     
-    void setEta(Float_t);
-    void setPhi(Float_t);
-    void setSigmaEta(Float_t);
-    void setSigmaPhi(Float_t);
-    void setEnergy(Float_t);
+    void setEta(float);
+    void setPhi(float);
+    void setSigmaEta(float);
+    void setSigmaPhi(float);
+    void setEnergy(float);
     
     void addHit(StEmcRawHit*);
     void addNeighbor(StEmcCluster*);

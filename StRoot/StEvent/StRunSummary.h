@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRunSummary.h,v $
+ * Revision 2.1  2001/04/05 04:00:41  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.0  1999/10/12 18:42:40  ullrich
  * Completely Revised for New Version
  *
@@ -36,59 +39,59 @@ public:
     // StRunSummary(const StRunSummary&);            use default
     virtual ~StRunSummary();
     
-    ULong_t  numberOfEvents() const;
-    ULong_t  numberOfProcessedEvents() const;
-    Long_t   startTime() const;
-    Long_t   stopTime() const;
-    Float_t  cpuSeconds() const;
-    Float_t  averageBeamPolarization(StBeamDirection, StBeamPolarizationAxis) const;
-    Float_t  averageLuminosity() const;
-    Float_t  meanEta() const;
-    Float_t  rmsEta() const;
-    Float_t  meanPt() const;
-    Float_t  rmsPt() const;
-    Float_t  meanNumberOfVertices() const;
-    Float_t  rmsNumberOfVertices() const;
-    Float_t  meanMultiplicity(StDetectorId) const;
-    Float_t  rmsMultiplicity(StDetectorId) const;
+    unsigned int  numberOfEvents() const;
+    unsigned int  numberOfProcessedEvents() const;
+    int    startTime() const;
+    int    stopTime() const;
+    float  cpuSeconds() const;
+    float  averageBeamPolarization(StBeamDirection, StBeamPolarizationAxis) const;
+    float  averageLuminosity() const;
+    float  meanEta() const;
+    float  rmsEta() const;
+    float  meanPt() const;
+    float  rmsPt() const;
+    float  meanNumberOfVertices() const;
+    float  rmsNumberOfVertices() const;
+    float  meanMultiplicity(StDetectorId) const;
+    float  rmsMultiplicity(StDetectorId) const;
 
-    void setNumberOfEvents(ULong_t);
-    void setNumberOfProcessedEvents(ULong_t);
-    void setStartTime(Long_t);
-    void setStopTime(Long_t);
-    void setCpuSeconds(Float_t);
-    void setAverageBeamPolarization(StBeamDirection, StBeamPolarizationAxis, Float_t);
-    void setAverageLuminosity(Float_t);
-    void setMeanEta(Float_t);
-    void setRmsEta(Float_t);
-    void setMeanPt(Float_t);
-    void setRmsPt(Float_t);
-    void setMeanNumberOfVertices(Float_t);
-    void setRmsNumberOfVertices(Float_t);
-    void setMeanMultiplicity(StDetectorId, Float_t);
-    void setRmsMultiplicity(StDetectorId, Float_t);
+    void setNumberOfEvents(unsigned int);
+    void setNumberOfProcessedEvents(unsigned int);
+    void setStartTime(int);
+    void setStopTime(int);
+    void setCpuSeconds(float);
+    void setAverageBeamPolarization(StBeamDirection, StBeamPolarizationAxis, float);
+    void setAverageLuminosity(float);
+    void setMeanEta(float);
+    void setRmsEta(float);
+    void setMeanPt(float);
+    void setRmsPt(float);
+    void setMeanNumberOfVertices(float);
+    void setRmsNumberOfVertices(float);
+    void setMeanMultiplicity(StDetectorId, float);
+    void setRmsMultiplicity(StDetectorId, float);
     
 protected:
     enum { mMultiplicityArraySize = 30 };
     
-    ULong_t mNumberOfEvents;
-    ULong_t mNumberOfProcessedEvents;
-    Long_t  mStartTime;
-    Long_t  mStopTime;
-    Float_t mCpuSeconds;
-    Float_t mAveragePolarizationEastL;
-    Float_t mAveragePolarizationWestL;
-    Float_t mAveragePolarizationEastT;
-    Float_t mAveragePolarizationWestT;
-    Float_t mAverageLuminosity;
-    Float_t mMeanEta;
-    Float_t mRmsEta;
-    Float_t mMeanPt;
-    Float_t mRmsPt;
-    Float_t mMeanNumberOfVertices;
-    Float_t mRmsNumberOfVertices;
-    TArrayF mMeanMultiplicity;
-    TArrayF mRmsMultiplicity;
+    UInt_t   mNumberOfEvents;
+    UInt_t   mNumberOfProcessedEvents;
+    Int_t    mStartTime;
+    Int_t    mStopTime;
+    Float_t  mCpuSeconds;
+    Float_t  mAveragePolarizationEastL;
+    Float_t  mAveragePolarizationWestL;
+    Float_t  mAveragePolarizationEastT;
+    Float_t  mAveragePolarizationWestT;
+    Float_t  mAverageLuminosity;
+    Float_t  mMeanEta;
+    Float_t  mRmsEta;
+    Float_t  mMeanPt;
+    Float_t  mRmsPt;
+    Float_t  mMeanNumberOfVertices;
+    Float_t  mRmsNumberOfVertices;
+    TArrayF  mMeanMultiplicity;
+    TArrayF  mRmsMultiplicity;
     
     ClassDef(StRunSummary,1)
 };

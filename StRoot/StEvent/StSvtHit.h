@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.h,v 2.6 2001/03/24 03:34:59 perev Exp $
+ * $Id: StSvtHit.h,v 2.7 2001/04/05 04:00:43 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.h,v $
+ * Revision 2.7  2001/04/05 04:00:43  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.6  2001/03/24 03:34:59  perev
  * clone() -> clone() const
  *
@@ -44,7 +47,7 @@ public:
     StSvtHit();
     StSvtHit(const StThreeVectorF&,
              const StThreeVectorF&,
-             ULong_t, Float_t, UChar_t = 0);
+             unsigned int, float, unsigned char = 0);
     StSvtHit(const dst_point_st&);
     // StSvtHit(const StSvtHit&);            use default
     // StSvtHit& operator=(const StSvtHit&); use default
@@ -53,11 +56,11 @@ public:
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
 
-    ULong_t layer() const;      // layer=[1,6]
-    ULong_t ladder() const;     // ladder=[1-8]
-    ULong_t wafer() const;      // wafer=[1-7]
-    ULong_t barrel() const;     // barrel=[1-3]
-    ULong_t hybrid() const;
+    unsigned int layer() const;      // layer=[1,6]
+    unsigned int ladder() const;     // ladder=[1-8]
+    unsigned int wafer() const;      // wafer=[1-7]
+    unsigned int barrel() const;     // barrel=[1-3]
+    unsigned int hybrid() const;
 
 protected:
     static StMemoryPool mPool;  //!
@@ -65,21 +68,21 @@ protected:
     ClassDef(StSvtHit,1)
 };
 
-inline ULong_t
+inline unsigned int
 StSvtHit::layer() const
 {
     // bits 4-31: 1000*layer + 100*wafer + ladder (Helen, Sep 99)
     return (mHardwarePosition>>4)/1000;
 }
 
-inline ULong_t
+inline unsigned int
 StSvtHit::ladder() const
 {
     // bits 4-31: 1000*layer + 100*wafer + ladder (Helen, Sep 99)
     return (mHardwarePosition>>4)%100;
 }
 
-inline ULong_t
+inline unsigned int
 StSvtHit::wafer() const
 {
     // bits 4-31: 1000*layer + 100*wafer + ladder (Helen, Sep 99)

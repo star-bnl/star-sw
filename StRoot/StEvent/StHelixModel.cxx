@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixModel.cxx,v 2.4 2001/03/24 03:34:49 perev Exp $
+ * $Id: StHelixModel.cxx,v 2.5 2001/04/05 04:00:50 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.cxx,v $
+ * Revision 2.5  2001/04/05 04:00:50  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  2001/03/24 03:34:49  perev
  * clone() -> clone() const
  *
@@ -32,7 +35,7 @@
 
 ClassImp(StHelixModel)
 
-static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.4 2001/03/24 03:34:49 perev Exp $";
+static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.5 2001/04/05 04:00:50 ullrich Exp $";
 
 StHelixModel::StHelixModel() : mModel(helixModel)
 {
@@ -42,7 +45,7 @@ StHelixModel::StHelixModel() : mModel(helixModel)
     mCharge = 0;
 }
 
-StHelixModel::StHelixModel(Short_t q, Float_t psi, Float_t c, Float_t dip,
+StHelixModel::StHelixModel(short q, float psi, float c, float dip,
                            const StThreeVectorF& o, const StThreeVectorF& p)
     : mModel(helixModel),
       mCharge(q),
@@ -80,16 +83,16 @@ StHelixModel::clone() const { return new StHelixModel(*this); }
 StTrackModel
 StHelixModel::model() const {return mModel;}
 
-Short_t
+short
 StHelixModel::charge() const {return mCharge;}
 
-Double_t
+double
 StHelixModel::curvature() const {return mCurvature;}
 
-Double_t
+double
 StHelixModel::psi() const {return mPsi;}
 
-Double_t
+double
 StHelixModel::dipAngle() const {return mDipAngle;}
 
 const StThreeVectorF&
@@ -121,11 +124,11 @@ StHelixModel::helix() const
     //
     int h;
     if (mCharge == 0)
-	h = 1;
+        h = 1;
     else if (mCharge > 0)
-	h = -1;
+        h = -1;
     else
-	h = 1;
+        h = 1;
     
     double phase = mPsi-h*pi/2;
     

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackNode.h,v 2.4 1999/11/09 15:44:19 ullrich Exp $
+ * $Id: StTrackNode.h,v 2.5 2001/04/05 04:00:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackNode.h,v $
+ * Revision 2.5  2001/04/05 04:00:45  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  1999/11/09 15:44:19  ullrich
  * Removed method unlink() and all calls to it.
  *
@@ -39,13 +42,13 @@ public:
     void           addTrack(StTrack*);
     void           removeTrack(StTrack*);
 
-    UInt_t         entries() const;
-    StTrack*       track(UInt_t);
-    const StTrack* track(UInt_t) const;
+    unsigned int   entries() const;
+    StTrack*       track(unsigned int);
+    const StTrack* track(unsigned int) const;
 
-    UInt_t         entries(StTrackType) const;
-    StTrack*       track(StTrackType, UInt_t = 0);
-    const StTrack* track(StTrackType, UInt_t = 0) const;
+    unsigned int   entries(StTrackType) const;
+    StTrack*       track(StTrackType, unsigned int = 0);
+    const StTrack* track(StTrackType, unsigned int = 0) const;
 
 private:
     StTrackNode(const StTrackNode&);

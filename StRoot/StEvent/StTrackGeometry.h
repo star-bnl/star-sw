@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackGeometry.h,v 2.3 2001/03/24 03:35:00 perev Exp $
+ * $Id: StTrackGeometry.h,v 2.4 2001/04/05 04:00:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackGeometry.h,v $
+ * Revision 2.4  2001/04/05 04:00:45  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.3  2001/03/24 03:35:00  perev
  * clone() -> clone() const
  *
@@ -37,18 +40,18 @@ public:
     // StTrackGeometry & operator=(const StTrackGeometry&); use default
     virtual ~StTrackGeometry();
 
-    virtual StTrackModel          model() const = 0;
-    virtual Short_t               charge() const = 0;
-    virtual Double_t              curvature() const = 0;
-    virtual Double_t              psi() const = 0;
-    virtual Double_t              dipAngle() const = 0;
-    virtual const StThreeVectorF& origin() const = 0;
-    virtual const StThreeVectorF& momentum() const = 0;
-    virtual StPhysicalHelixD      helix() const = 0;
+    virtual StTrackModel           model() const = 0;
+    virtual short                  charge() const = 0;
+    virtual double                 curvature() const = 0;
+    virtual double                 psi() const = 0;
+    virtual double                 dipAngle() const = 0;
+    virtual const StThreeVectorF&  origin() const = 0;
+    virtual const StThreeVectorF&  momentum() const = 0;
+    virtual StPhysicalHelixD       helix() const = 0;
 
-    virtual StTrackGeometry*      copy() const = 0;     // virtual constructor
+    virtual StTrackGeometry*       copy() const = 0;     // virtual constructor
 
-protected:    
+protected:
     virtual StObject*  clone() const = 0;     // virtual constructor used in StArray
     ClassDef(StTrackGeometry,1)
 };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.h,v 2.5 2001/03/24 03:34:46 perev Exp $
+ * $Id: StFtpcHit.h,v 2.6 2001/04/05 04:00:37 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.h,v $
+ * Revision 2.6  2001/04/05 04:00:37  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.5  2001/03/24 03:34:46  perev
  * clone() -> clone() const
  *
@@ -41,7 +44,7 @@ public:
     StFtpcHit();
     StFtpcHit(const StThreeVectorF&,
               const StThreeVectorF&,
-              ULong_t, Float_t, UChar_t = 0);
+              unsigned int, float, unsigned char = 0);
     StFtpcHit(const dst_point_st&);
     // StFtpcHit(const StFtpcHit&);            use default
     // StFtpcHit& operator=(const StFtpcHit&); use default
@@ -50,14 +53,14 @@ public:
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
   
-    ULong_t sector() const;        // 1-6
-    ULong_t plane() const;         // 1-20
-    ULong_t padsInHit() const;
-    ULong_t timebinsInHit() const;
+    unsigned int sector() const;        // 1-6
+    unsigned int plane() const;         // 1-20
+    unsigned int padsInHit() const;
+    unsigned int timebinsInHit() const;
 
-protected:    
+protected:
     static StMemoryPool mPool;  //!
     StObject* clone() const;
-    ClassDef(StFtpcHit,1) 
+    ClassDef(StFtpcHit,1)
 };
 #endif

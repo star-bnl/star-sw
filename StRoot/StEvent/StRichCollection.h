@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichCollection.h,v 2.2 2001/02/22 21:04:17 lasiuk Exp $
+ * $Id: StRichCollection.h,v 2.3 2001/04/05 04:00:39 ullrich Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StRichCollection.h,v $
+ * Revision 2.3  2001/04/05 04:00:39  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  2001/02/22 21:04:17  lasiuk
  * keep the tracks that fly through the RICH in
  * the collection
@@ -45,17 +48,17 @@ public:
     const StSPtrVecRichHit&      getRichHits() const;
     StSPtrVecRichHit&            getRichHits();
 
-    const StPtrVecTrack&      getTracks() const;
-    StPtrVecTrack&            getTracks();
+    const StPtrVecTrack&         getTracks() const;
+    StPtrVecTrack&               getTracks();
 
     void addPixel(const StRichPixel*);
     void addCluster(const StRichCluster*);
     void addHit(const StRichHit*);
     void addTrack(const StTrack*);
 
-    Bool_t pixelsPresent()   const;
-    Bool_t clustersPresent() const;
-    Bool_t hitsPresent()     const;
+    bool pixelsPresent()   const;
+    bool clustersPresent() const;
+    bool hitsPresent()     const;
     
 private:
     StSPtrVecRichPixel     mRichPixels;

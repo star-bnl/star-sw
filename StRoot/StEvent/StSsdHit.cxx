@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdHit.cxx,v 2.7 2001/03/24 03:34:58 perev Exp $
+ * $Id: StSsdHit.cxx,v 2.8 2001/04/05 04:00:55 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.cxx,v $
+ * Revision 2.8  2001/04/05 04:00:55  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.7  2001/03/24 03:34:58  perev
  * clone() -> clone() const
  *
@@ -37,7 +40,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.7 2001/03/24 03:34:58 perev Exp $";
+static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.8 2001/04/05 04:00:55 ullrich Exp $";
 
 StMemoryPool StSsdHit::mPool(sizeof(StSsdHit));
 
@@ -47,7 +50,7 @@ StSsdHit::StSsdHit() { /* noop */ }
 
 StSsdHit::StSsdHit(const StThreeVectorF& p,
                    const StThreeVectorF& e,
-                   ULong_t hw, Float_t q, UChar_t c)
+                   unsigned int hw, float q, unsigned char c)
     : StHit(p, e, hw, q, c)
 { /* noop */ }
 
@@ -56,24 +59,24 @@ StSsdHit::StSsdHit(const dst_point_st& pt)
     //
     // Unpack charge and status flag
     //
-    const ULong_t iflag = pt.charge/(1L<<16);
-    const ULong_t ssdq  = pt.charge - iflag*(1L<<16);
-    mCharge = Float_t(ssdq)/(1<<21);
-    mFlag = static_cast<UChar_t>(iflag);
+    const unsigned int iflag = pt.charge/(1L<<16);
+    const unsigned int ssdq  = pt.charge - iflag*(1L<<16);
+    mCharge = float(ssdq)/(1<<21);
+    mFlag = static_cast<unsigned char>(iflag);
 
     //
     // Unpack position in xyz
     //
-    const Float_t maxRange   = 40;
-    const Float_t mapFactor  = 16000;
-    ULong_t ssdy11 = pt.position[0]/(1L<<20);
-    ULong_t ssdz   = pt.position[1]/(1L<<10);
-    ULong_t ssdx   = pt.position[0] - (1L<<20)*ssdy11;
-    ULong_t ssdy10 = pt.position[1] - (1L<<10)*ssdz;
-    ULong_t ssdy   = ssdy11 + (1L<<10)*ssdy10;
-    mPosition.setX(Float_t(ssdx)/mapFactor - maxRange);
-    mPosition.setY(Float_t(ssdy)/mapFactor - maxRange);
-    mPosition.setZ(Float_t(ssdz)/mapFactor - maxRange);
+    const float maxRange   = 40;
+    const float mapFactor  = 16000;
+    unsigned int ssdy11 = pt.position[0]/(1L<<20);
+    unsigned int ssdz   = pt.position[1]/(1L<<10);
+    unsigned int ssdx   = pt.position[0] - (1L<<20)*ssdy11;
+    unsigned int ssdy10 = pt.position[1] - (1L<<10)*ssdz;
+    unsigned int ssdy   = ssdy11 + (1L<<10)*ssdy10;
+    mPosition.setX(float(ssdx)/mapFactor - maxRange);
+    mPosition.setY(float(ssdy)/mapFactor - maxRange);
+    mPosition.setZ(float(ssdz)/mapFactor - maxRange);
     
     //
     // Unpack error on position in xyz
@@ -83,9 +86,9 @@ StSsdHit::StSsdHit(const dst_point_st& pt)
     ssdx   = pt.pos_err[0] - (1L<<20)*ssdy11;
     ssdy10 = pt.pos_err[1] - (1L<<10)*ssdz;
     ssdy   = ssdy11 + (1L<<10)*ssdy10;
-    mPositionError.setX(Float_t(ssdx)/(1L<<26));
-    mPositionError.setY(Float_t(ssdy)/(1L<<26));
-    mPositionError.setZ(Float_t(ssdz)/(1L<<26));
+    mPositionError.setX(float(ssdx)/(1L<<26));
+    mPositionError.setY(float(ssdy)/(1L<<26));
+    mPositionError.setZ(float(ssdz)/(1L<<26));
 
     //
     // The hardware position stays at it is
@@ -98,39 +101,39 @@ StSsdHit::~StSsdHit() {/* noop */}
 StObject*
 StSsdHit::clone() const { return new StSsdHit(*this); }
 
-ULong_t
+unsigned int
 StSsdHit::ladder() const
 {
     unsigned long numwaf = (mHardwarePosition>>4) & ~(~0UL<<9);
     return (numwaf/mWaferPerLadder+1);
 }
 
-ULong_t
+unsigned int
 StSsdHit::wafer() const
 {
     unsigned long numwaf = (mHardwarePosition>>4) & ~(~0UL<<9);
     return (numwaf-(numwaf/mWaferPerLadder)*mWaferPerLadder+1);
 }
 
-ULong_t 
+unsigned int
 StSsdHit::centralStripNSide() const
 {
   return bits(13, 10);     // bits 13-22
 }
 
-ULong_t
+unsigned int
 StSsdHit::centralStripPSide() const
 {
   return bits(23, 5);      // bits 23-27
 }
 
-ULong_t
+unsigned int
 StSsdHit::clusterSizeNSide() const
 {
     return bits(28, 2);    // bits 28-29
 }
 
-ULong_t
+unsigned int
 StSsdHit::clusterSizePSide() const
 {
     return bits(30, 2);    // bits 30-31

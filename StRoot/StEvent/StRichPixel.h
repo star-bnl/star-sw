@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPixel.h,v 2.4 2001/02/07 16:04:05 lasiuk Exp $
+ * $Id: StRichPixel.h,v 2.5 2001/04/05 04:00:41 ullrich Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPixel.h,v $
+ * Revision 2.5  2001/04/05 04:00:41  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  2001/02/07 16:04:05  lasiuk
  * check the 11th bit for overflow.
  * Overflow is 1024
@@ -35,45 +38,45 @@
 class StRichPixel : public StObject {
 public:
     StRichPixel();
-    StRichPixel(ULong_t packedData);
+    StRichPixel(unsigned int packedData);
     // StRichPixel(const StRichPixel&);            use default
     // StRichPixel& operator=(const StRichPixel&); use default
     ~StRichPixel();
     
-    Int_t operator==(const StRichPixel&) const;
-    Int_t operator!=(const StRichPixel&) const;
+    int operator==(const StRichPixel&) const;
+    int operator!=(const StRichPixel&) const;
 
-    void      setPackedData(ULong_t);
+    void            setPackedData(unsigned int);
     
-    UShort_t  pad() const;
-    UShort_t  row() const;
-    UShort_t  adc() const;
+    unsigned short  pad() const;
+    unsigned short  row() const;
+    unsigned short  adc() const;
     
 protected:
-    ULong_t  mPackedData;
+    UInt_t  mPackedData;
     
     ClassDef(StRichPixel,1)
 };
 
 inline void
-StRichPixel::setPackedData(ULong_t pixel)
+StRichPixel::setPackedData(unsigned int pixel)
 {
     mPackedData = pixel;
 }
 
-inline UShort_t
+inline unsigned short
 StRichPixel::pad() const
 {
     return (mPackedData & 0xff);  // first 8 bits
 }
 
-inline UShort_t
+inline unsigned short
 StRichPixel::row() const
 {
     return ( (mPackedData>>8) & 0xff);  // second 8 bits
 }
 
-inline UShort_t
+inline unsigned short
 StRichPixel::adc()  const
 {
     //

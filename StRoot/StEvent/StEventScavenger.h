@@ -1,15 +1,18 @@
 /***************************************************************************
  *
- * $Id: StEventScavenger.h,v 2.3 2000/10/16 21:06:32 ullrich Exp $
+ * $Id: StEventScavenger.h,v 2.4 2001/04/05 04:00:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
  *
- * Description:  
+ * Description:
  *
  ***************************************************************************
  *
  * $Log: StEventScavenger.h,v $
+ * Revision 2.4  2001/04/05 04:00:36  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.3  2000/10/16 21:06:32  ullrich
  * Added new method: removeTpcHitsNotOnTracks()
  *

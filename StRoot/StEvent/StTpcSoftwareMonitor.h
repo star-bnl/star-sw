@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcSoftwareMonitor.h,v 2.1 1999/10/13 19:44:09 ullrich Exp $
+ * $Id: StTpcSoftwareMonitor.h,v 2.2 2001/04/05 04:00:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcSoftwareMonitor.h,v $
+ * Revision 2.2  2001/04/05 04:00:45  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  1999/10/13 19:44:09  ullrich
  * Initial Revision
  *
@@ -28,13 +31,13 @@ public:
     // StTpcSoftwareMonitor& operator=(const StTpcSoftwareMonitor&); use default
     ~StTpcSoftwareMonitor();
 
-    Long_t  n_clus_tpc_tot;
-    Long_t  n_clus_tpc_in[24];
-    Long_t  n_clus_tpc_out[24];
-    Long_t  n_pts_tpc_tot;
-    Long_t  n_pts_tpc_in[24];
-    Long_t  n_pts_tpc_out[24];
-    Long_t  n_trk_tpc[2];
+    Int_t   n_clus_tpc_tot;
+    Int_t   n_clus_tpc_in[24];
+    Int_t   n_clus_tpc_out[24];
+    Int_t   n_pts_tpc_tot;
+    Int_t   n_pts_tpc_in[24];
+    Int_t   n_pts_tpc_out[24];
+    Int_t   n_trk_tpc[2];
     Float_t chrg_tpc_drift[10];
     Float_t chrg_tpc_tot;
     Float_t chrg_tpc_in[24];

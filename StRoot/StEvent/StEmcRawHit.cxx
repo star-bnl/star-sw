@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcRawHit.cxx,v 2.4 2001/03/24 03:34:46 perev Exp $
+ * $Id: StEmcRawHit.cxx,v 2.5 2001/04/05 04:00:49 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcRawHit.cxx,v $
+ * Revision 2.5  2001/04/05 04:00:49  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  2001/03/24 03:34:46  perev
  * clone() -> clone() const
  *
@@ -25,25 +28,25 @@
  **************************************************************************/
 #include "StEmcRawHit.h"
 
-static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.4 2001/03/24 03:34:46 perev Exp $";
+static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.5 2001/04/05 04:00:49 ullrich Exp $";
 
 ClassImp(StEmcRawHit)
 
 StEmcRawHit::StEmcRawHit()
 {
     mId = 0;
-    mAdc = 0;        
+    mAdc = 0;
     mEnergy = 0;
 }
 
-StEmcRawHit::StEmcRawHit(StDetectorId d, UInt_t m, UInt_t e, UInt_t s, UInt_t a)
+StEmcRawHit::StEmcRawHit(StDetectorId d, unsigned int m, unsigned int e, unsigned int s, unsigned int a)
 {
     setId(d, m, e, s);
     setAdc(a);
     setEnergy(0.0);
 }
 
-StEmcRawHit::StEmcRawHit(StDetectorId d, UInt_t m, UInt_t e, UInt_t s, UInt_t a, Float_t ene)
+StEmcRawHit::StEmcRawHit(StDetectorId d, unsigned int m, unsigned int e, unsigned int s, unsigned int a, float ene)
 {
     setId(d, m, e, s);
     setAdc(a);
@@ -52,20 +55,20 @@ StEmcRawHit::StEmcRawHit(StDetectorId d, UInt_t m, UInt_t e, UInt_t s, UInt_t a,
 
 StEmcRawHit::StEmcRawHit(const StEmcRawHit& h) : StObject(h){
   mId = h.mId;
-  mAdc = h.mAdc;        
+  mAdc = h.mAdc;
   mEnergy = h.mEnergy;
 }
 
 StEmcRawHit::~StEmcRawHit() {/* noop */}
 
-UInt_t
-StEmcRawHit::bits(UInt_t bit, UInt_t nbits) const
+unsigned int
+StEmcRawHit::bits(unsigned int bit, unsigned int nbits) const
 {
     return (mId>>bit) & ~(~0UL<<nbits);
 }
 
 void
-StEmcRawHit::setCalibrationType(UInt_t t){
+StEmcRawHit::setCalibrationType(unsigned int t){
   if(t<256){
     mId = mId & 0xffffff;
     mId += t << 24;
@@ -73,53 +76,53 @@ StEmcRawHit::setCalibrationType(UInt_t t){
 }
 
 void
-StEmcRawHit::setId(StDetectorId d, UInt_t m, UInt_t e, UInt_t s)
+StEmcRawHit::setId(StDetectorId d, unsigned int m, unsigned int e, unsigned int s)
 {
-    mId  = UInt_t(d - kBarrelEmcTowerId) << 20;
+    mId  = static_cast<unsigned int>(d - kBarrelEmcTowerId) << 20;
     mId += m << 13;
     mId += e << 4;
     mId += s;
 }
 
-UInt_t
+unsigned int
 StEmcRawHit::calibrationType() const {return bits(24, 8);} // bits 24-31
 
 StDetectorId
 StEmcRawHit::detector() const
-{ 
+{
     return static_cast<StDetectorId>(bits(20, 4)+kBarrelEmcTowerId); // bits 20-24
 }
 
-UInt_t
+unsigned int
 StEmcRawHit::module() const {return bits(13, 7);}   // bits 13-19
 
-UInt_t
+unsigned int
 StEmcRawHit::eta() const {return bits( 4, 9);}  // bits 4-12
 
-Int_t
+int
 StEmcRawHit::sub() const {
-  Int_t sub;
+  int sub;
   switch(detector()){
   case kBarrelSmdEtaStripId:                  // irrelevant case return negative
   case kEndcapSmdUStripId: case kEndcapSmdVStripId:
     sub = -1; break;
   default:
     sub = bits(0, 4);                         // bits 0-3
-  }   
+  }
   return sub;
 }
 
-UInt_t
-StEmcRawHit::adc() const {return mAdc;}   
+unsigned int
+StEmcRawHit::adc() const {return mAdc;}
 
-Float_t
+float
 StEmcRawHit::energy() const {return mEnergy;}
 
 void
-StEmcRawHit::setAdc(const UInt_t adc) {mAdc=adc;}   
+StEmcRawHit::setAdc(const unsigned int adc) {mAdc=adc;}
 
 void
-StEmcRawHit::setEnergy(const Float_t energy) {mEnergy=energy;}   
+StEmcRawHit::setEnergy(const float energy) {mEnergy=energy;}
 
 StObject*
 StEmcRawHit::clone() const { return new StEmcRawHit(*this); }
