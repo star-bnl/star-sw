@@ -10,6 +10,16 @@
 #include "math_constants.h"
 #include "phys_constants.h"
 
+/* External routines*/
+#define gufld F77_NAME(gufld,GUFLD)
+extern void type_of_call gufld(float *, float *);
+extern void prop_circle_param_();
+extern void ev0_project_track_();
+extern void prop_update_track_param_();
+extern void prop_track_mom_();
+extern void prop_fine_approach_();
+extern void prop_vzero_geom_();
+
 long type_of_call track_propagator_(
   TABLE_HEAD_ST         *gtrack_h,      DST_TRACK_ST           *gtrack ,
   TABLE_HEAD_ST         *target_h,  EGR_PROPAGATE_ST           *target ,
@@ -39,7 +49,7 @@ long type_of_call track_propagator_(
   float bfld, xpr[2];
   float psi, pt, tanl, x0, y0, z0, xp[2], xout[2], p[3], xv[3], xx0[3];
   float trk[7], r1, r2, xc[2], xc1[2], xc2[2], x[2], y[2], cut, x1[3];
-  float phi0, phi, dphi, temppsi, test=1. ;
+  float phi0, phi, dphi, temppsi;
   float pStraight[3];
   long  psiftr;
   float xlocal[3],bfield[3];
@@ -49,7 +59,7 @@ long type_of_call track_propagator_(
   
   
   xlocal[0] =  xlocal[1] = xlocal[2] = 0.;
-  gufld_(xlocal,bfield);
+  gufld(xlocal,bfield);
   printf("Propagator uses field of %f KG \n",bfield[2]);
   bfld = bfield[2]/10.;         /* Tesla */
   

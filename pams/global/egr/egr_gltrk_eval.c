@@ -375,8 +375,8 @@ void min_dist_vrt ( G2T_VERTEX_ST          *g2t_vertex,
                     int                   row_mv )
 
 {
-  extern svt_project_track_();           /*  These functions are in    */
-  extern svt_update_track_param_();      /* the file egr_gltrk_eval.F  */
+  extern void svt_project_track_();           /*  These functions are in    */
+  extern void svt_update_track_param_();      /* the file egr_gltrk_eval.F  */
 
   int q , f = 1;
   float rh , phi , rad , h , xc[2] , xv[3] , x[2] , trk[6] , trk2[6] , 
