@@ -1,5 +1,8 @@
-* $Id: tcl_clusters_in_row.F,v 1.3 1998/06/02 22:54:16 hardtke Exp $
+* $Id: tcl_clusters_in_row.F,v 1.4 1998/08/20 21:30:17 sakrejda Exp $
 * $Log: tcl_clusters_in_row.F,v $
+* Revision 1.4  1998/08/20 21:30:17  sakrejda
+* printing replaced by a message call
+*
 * Revision 1.3  1998/06/02 22:54:16  hardtke
 * fix bug in pixel table indexing
 *
@@ -177,6 +180,12 @@ c
         integer npixel_pad, number_of_pads, number_of_sequences
         integer iipad, sequence_break, length_of_sequence
         integer pad_break
+c message call related variables
+        integer IDE2
+        data    IDE2 /0/
+        save    IDE2
+
+        character*132 m132
 
 c These are returned by tcl_get_row_seq describing seq. on this padrow:
 	INTEGER Ipix( Nrowseqs_max ) !Offset into raw pixel table, tppixel.
@@ -369,10 +378,10 @@ c look to left of seed, unless this is already the left-most unused sequence:
 		  nseq_in_cluster = nseq_in_cluster+1
                   if (nseq_in_cluster.gt.max_nseq_in_cluster) then
                      nseq_in_cluster = max_nseq_in_cluster
-*                     CALL Message('TCL_Get_Row_Seq-E2 '
-*     +                    //'too many connected sequences - '
-*     +                    //'breaking into >1 cluster',1, IDE2 )
-                  write(6,*) 'too many connected sequences'
+                     write(m132,*)'TCL_Get_Row_Seq-E2 '
+     +                    //'too many connected sequences - '
+     +                    //'breaking into >1 cluster'
+                     call Message(m132,1, IDE2 )
                      goto 91
                   endif
 		  seq_in_cluster(nseq_in_cluster) = iptr
@@ -399,10 +408,10 @@ c look to right of seed, unless this is already the right-hand limit:
 		  nseq_in_cluster = nseq_in_cluster+1
                   if (nseq_in_cluster.gt.max_nseq_in_cluster) then
                      nseq_in_cluster = max_nseq_in_cluster
-*                     CALL Message('TCL_Get_Row_Seq-E2 '
-*     +                    //'too many connected sequences - '
-*     +                    //'breaking into >1 cluster',1, IDE2 )
-                      write(6,*) 'too many connected sequences'
+                     write(m132,*)'TCL_Get_Row_Seq-E2 '
+     +                    //'too many connected sequences - '
+     +                    //'breaking into >1 cluster'
+                     call Message(m132,1, IDE2 )
                      goto 91
                   endif
 		  seq_in_cluster(nseq_in_cluster) = iptr

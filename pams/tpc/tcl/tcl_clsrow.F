@@ -1,5 +1,8 @@
-* $Id: tcl_clsrow.F,v 1.1 1998/01/27 00:49:10 fisyak Exp $
+* $Id: tcl_clsrow.F,v 1.2 1998/08/20 21:29:33 sakrejda Exp $
 * $Log: tcl_clsrow.F,v $
+* Revision 1.2  1998/08/20 21:29:33  sakrejda
+* printing replaced by a message call
+*
 * Revision 1.1  1998/01/27 00:49:10  fisyak
 * Split sources
 *
@@ -157,6 +160,12 @@ c The following are used to group the sequences into clusters....
         logical tcl_get_row_seq
 	logical used(max_pads_in_row,max_nseqs_on_pad)  ! .T. iff seq. in clus.
 
+c message call related variables
+        integer IDE2
+        data    IDE2 /0/
+        save    IDE2
+
+        character*132 m132
 C----------------------------------------------------------------------
         save first
 
@@ -285,10 +294,10 @@ c look to left of seed, unless this is already the left-most unused sequence:
 		  nseq_in_cluster = nseq_in_cluster+1
                   if (nseq_in_cluster.gt.max_nseq_in_cluster) then
                      nseq_in_cluster = max_nseq_in_cluster
-*                     CALL Message('TCL_Get_Row_Seq-E2 '
-*     +                    //'too many connected sequences - '
-*     +                    //'breaking into >1 cluster',1, IDE2 )
-                  write(6,*) 'too many connected sequences'
+                     write(m132,*)'TCL_Get_Row_Seq-E2 '
+     +                    //'too many connected sequences - '
+     +                    //'breaking into >1 cluster'
+                     call Message(m132,1, IDE2 )
                      goto 91
                   endif
 		  seq_in_cluster(nseq_in_cluster) = iptr
@@ -315,10 +324,10 @@ c look to right of seed, unless this is already the right-hand limit:
 		  nseq_in_cluster = nseq_in_cluster+1
                   if (nseq_in_cluster.gt.max_nseq_in_cluster) then
                      nseq_in_cluster = max_nseq_in_cluster
-*                     CALL Message('TCL_Get_Row_Seq-E2 '
-*     +                    //'too many connected sequences - '
-*     +                    //'breaking into >1 cluster',1, IDE2 )
-                      write(6,*) 'too many connected sequences'
+                     write(m132,*)'TCL_Get_Row_Seq-E2 '
+     +                    //'too many connected sequences - '
+     +                    //'breaking into >1 cluster'
+                     call Message(m132,1, IDE2 )
                      goto 91
                   endif
 		  seq_in_cluster(nseq_in_cluster) = iptr
