@@ -16,7 +16,7 @@ my @idl = sortu (@idlL); # print "idl = @idl\n";
 my @idlT = ();
 my @sources = (); 
 my $DIR = cwd();# print "DIR = $DIR\n";
-my $PKG = "St_DbTables";
+my $PKG = "StDb_Tables";
 my $obj = $OBJ . "/" . $PKG;
 my $share  = "#.share/" . $PKG;# print "share = $share\n";
 my $include = $INCLUDE . "/tables"; #print "include = $include\n";
