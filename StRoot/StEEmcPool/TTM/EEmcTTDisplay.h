@@ -1,7 +1,7 @@
 // Hey Emacs this is -*-c++-*-
 #ifndef STAR_EEmcTTDisplay
 #define STAR_EEmcTTDisplay
-// $Id: EEmcTTDisplay.h,v 1.6 2004/01/27 20:38:41 zolnie Exp $
+// $Id: EEmcTTDisplay.h,v 1.7 2004/04/13 14:53:38 zolnie Exp $
 
 /*!
  *                                                                     
@@ -9,10 +9,16 @@
  * \author Piotr A. Zolnierczuk
  * \date   2003/12/08
  *
- * \brief  EEMC tower display
+ * \brief  EEmc Tower and Track display
  *
- * Full Info
- * \image html snapshot.jpg 
+ * This is a simple root TGeoXXXX based class. It displays EEMC tower geometry
+ * (the class inherits from EEmcGeomSimple) and allows for "turining on/off" individual
+ * towers as well as displays muDST tracks (StMuTrack).
+ * 
+ * use 
+ *  
+ * example see StRoot/StEEmcPool/macros/TTM/show.C
+ * \image html snapshot.jpg "Sample snapshot"
  */                                                                      
 
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
@@ -36,26 +42,27 @@ public:
   /// returns top EEMC TGeoVolume 
   TGeoVolume* operator() () { return mEEmc; }; 
   /// returns top TGeoVolume 
-  TGeoVolume* getVolume()   { return mEEmc; }; 
+  TGeoVolume* GetVolume()   { return mEEmc; }; 
 
-  //! adds tower hit to the list of hits
+  //! adds tower to the list
   /// \param tile name (in the form of 05TC11) 
   /// \return      kTRUE on success and kFALSE on failure
-  Bool_t       towerHit(const char *tile);
+  Bool_t       AddTower(const char *tile);
 
-  //! adds tower hit to the list of hits
+  //! adds tower to the list
   /// \param sec     sector index    [0,mNumSec)
   /// \param sub     subsector index [0,mNumSSec)
   /// \param eta     eta index       [0,mNumEta)
   /// \return      kTRUE on success and kFALSE on failure
-  Bool_t       towerHit(int sec, int sub, int eta) {   return towerHit(volumeName(sec,sub,eta)); }  
+  Bool_t       AddTower(int sec, int sub, int eta) {   
+    return AddTower(volumeName(sec,sub,eta)); }  
 
-  //! adds tower hit to the list of hits
+  //! adds tower to the list 
   /// \param tower a reference to EEmcTower 
   /// \return      kTRUE on success and kFALSE on failure
-  Bool_t       towerHit(const EEmcTower& tower)       ;
+  Bool_t       AddTower(const EEmcTower& tower)       ;
 
-  //! adds track hit to the list of hits
+  //! adds track to the list 
   /// \param x     x-component of the track origin
   /// \param y     y-component of the track origin
   /// \param z     z-component of the track origin
@@ -64,25 +71,34 @@ public:
   /// \param pz    z-component of the track momentum
   /// \param qB    sign sensitive product of the particle charge and magnetic field 
   /// \return      kTRUE on success and kFALSE on failure
-  Bool_t       trackHit(Double_t x, Double_t y, Double_t z, Double_t px, Double_t py, Double_t pz, Double_t qB);
-  //! adds track hit to the list of hits
+  Bool_t       AddTrack(Double_t x, Double_t y, Double_t z, 
+			   Double_t px, Double_t py, Double_t pz, Double_t qB);
+  //! adds track to the list
   /// \param track a refence to StMuTrack
   /// \return      kTRUE on success and kFALSE on failure
-  Bool_t       trackHit(const StMuTrack& track);
+  Bool_t       AddTrack(const StMuTrack& track);
 
-  /// draws hits (towers/tracks)
-  //! adds tower hit to the list of hits
-  void         DrawHits();
-
-  /// clears hit (towers/tracks) list
+  //! draws towers/tracks from the list
   /// \param option - not uset at the moment
-  void         Clear(const Option_t *option);
+  void         Draw ( const Option_t* = "");
+
+  //! clears tower/track lists
+  /// \param option - not uset at the moment
+  void         Clear( const Option_t* = ""); 
+
   /// prints StMuTrack and EEmcTower to ostream
   /// \param out    a reference to std::ostream
   /// \param track  a reference to class  StMuTrack
   /// \param tower  a reference to struct EEmcTower
   void         Out(ostream &out, const StMuTrack &track, const EEmcTower &tower);
   void         Out(TString &out, const StMuTrack &track, const EEmcTower &tower);
+  
+  //! sets STAR magnetic field 
+  /// \param B magnetic field (sign sensitive) in Tesla
+  void   SetMagneticField(double B) { mBField = B;    }
+  //! returns STAR magnetic fiels in Tesla
+  double GetMagneticField()         { return mBField; }
+
 
 protected:
   //! initializes EEMC geometry: sector,subsectors and towers
@@ -100,10 +116,12 @@ protected:
   /// \return a pointer to a static string (fixit)
   char *volumeName(const EEmcTower& tower);
 
+  TGeoVolume* mEEmc; /**<- top TGeoVolume        */
+  TList *mTowerHits; /**<- list of towers        */
+  TList *mTrackHits; /**<- list of tracks        */
+  double mBField   ; /**<- magnetic field (in T) */ 
+  
 
-  TGeoVolume* mEEmc; /**<- top TGeoVolume */
-  TList *mTowerHits; /**<- list of tower hits */
-  TList *mTrackHits; /**<- list of track hits */
 public:
   ClassDef(EEmcTTDisplay, 1)   // 
 };
@@ -113,6 +131,9 @@ public:
 
 
 // $Log: EEmcTTDisplay.h,v $
+// Revision 1.7  2004/04/13 14:53:38  zolnie
+// *** empty log message ***
+//
 // Revision 1.6  2004/01/27 20:38:41  zolnie
 // more docs
 //

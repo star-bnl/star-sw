@@ -13,10 +13,10 @@ void loadSharedLibraries();
 void
 ttm
 (
- char* inpDir  = "/star/2003/mudst/",                    // MuDST directory
- char* inpFile = "",                                     // MuDST file(s)
- char* outFile = "R4145010.root",
- Int_t nFiles  = 40,                                     // # of MuDST file(s)
+ char* inpDir  = "/star/2004/mudst/",    // MuDST directory
+ char* inpFile = "R5086033b.MuDst.root", // MuDST file(s)
+ char* outFile = "x.root",
+ Int_t nFiles  = 1,                      // # of MuDST file(s)
  Int_t nEvents = 50000
  )
 { 
@@ -28,6 +28,7 @@ ttm
   loadSharedLibraries();
 
   // load more libraries :)
+  gSystem->Load("libmysqlclient");
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
@@ -47,8 +48,11 @@ ttm
   St_db_Maker    *dbMk       = new St_db_Maker("StarDb", "MySQL:StarDb");  // need the database (???)
 
   // now comment in/out/change the below if you want it your way
-  eemcDbMaker->setSectors(5,8);            // request EEMC DB for sectors you need (dafault:1-12)
-  eemcDbMaker->setTimeStampDay(20030514);  // format: yyyymmdd
+  //eemcDbMaker->setSectors(5,8);            // request EEMC DB for sectors you need (dafault:1-12)
+  eemcDbMaker->setSectors(1,12);            // request EEMC DB for sectors you need (dafault:1-12)
+  eemcDbMaker->setTimeStampDay(20040327);  // format: yyyymmdd
+  eemcDbMaker->setPreferedFlavor("onlped","eemcPMTped"); // request alternative flavor (if needed)
+  // eemcDbMaker->setTimeStampDay(20030514);  // format: yyyymmdd
   // eemcDbMaker->setDBname("TestScheme/eemc");               // use alternative database   (if needed)
   // eemcDbMaker->setPreferedFlavor("set430","eemcPMTcal");   // request alternative flavor (   -//-  )
 

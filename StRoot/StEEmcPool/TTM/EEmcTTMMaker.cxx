@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.11 2004/04/12 16:19:59 balewski Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.12 2004/04/13 14:53:39 zolnie Exp $
 // doxygen info here
 /** 
     \mainpage TTM - an endcap Tower to Track Match maker
@@ -115,6 +115,9 @@
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
 #include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
+
+#define DEBUG_PRINTS 0
+#define DEBUG        1
 
 #if !defined(ST_NO_NAMESPACES)
 using std::map;
@@ -295,7 +298,7 @@ EEmcTTMMaker::Make(){
   //
   mMatch->Clear()  ; 
 
-  int &ntrack =  mMatch->numtracks = 0; // an alias
+  int &ntrack       = mMatch->numtracks = 0; // an alias
   mMatch->numz = 3;
 
   map<double,TString>::const_iterator zpos=mZ.begin();
@@ -331,6 +334,10 @@ EEmcTTMMaker::Make(){
     Info("Make","no EMC data for this event");
     return kStWarn;
   }
+  if(emc->getNEndcapTowerADC()<=0) {
+    Info("Make","no EEMC tower data for this event");
+    return kStWarn;
+  }
   
   //StEventInfo             &evinfo = muEvent->eventInfo();           // event info
   StEventSummary          &evsumm = muEvent->eventSummary();        // event summary
@@ -344,10 +351,12 @@ EEmcTTMMaker::Make(){
   TIter      nextTrack(tracks);
   StMuTrack *track  = NULL;
 
+
+ 
   while ( (track = (StMuTrack *)nextTrack()) ) {
     StThreeVectorF p  =track->p();
     StThreeVectorF dca=track->dca();
-
+ 
     // control histograms
     hTrackNHits->Fill(track->nHitsFit());
     hTrackLen  ->Fill(track->lengthMeasured());
@@ -363,10 +372,21 @@ EEmcTTMMaker::Make(){
   }
 
   // no good tracks
-  if( mTrackList->IsEmpty() ) return kStOk;  // what the ... 
+  if( mTrackList->IsEmpty() ) { 
+#if     DEBUG 
+    Info("Make","no good tracks for this event");
+    //cerr << "TOTAL TRACKS FOR EVENT#" << evinfo.id() << endl;
+    //cerr << " primary : " << muDst->primaryTracks()->GetEntries() << endl;
+    //cerr << " global  : " << muDst->globalTracks()->GetEntries()  << endl;
+    //cerr << " other   : " << muDst->otherTracks()->GetEntries()   << endl;
+    //cerr << " l3      : " << muDst->l3Tracks()->GetEntries()      << endl;
+#endif
+    return kStOK  ;  // what the ...
+  }
 
   // do the matching
   ntrack=0;
+  int goodTowerHits = 0;
   for (Int_t i=0; i< emc->getNEndcapTowerADC(); i++) { // loop over EEMC hits
     // get endcap hit(s) and use dbase to subtract pedestal and apply gain
     int   adc,sec,sub,eta;  // back to Fortran++ 
@@ -380,6 +400,7 @@ EEmcTTMMaker::Make(){
     adcped = float(adc) - dbi->ped; 
     edep   = (dbi->gain>0.0) ? adcped/dbi->gain : 0.0;
     if(adcped<0.0) continue;
+    goodTowerHits++;
     //cerr <<  sec+1 << "|" << char(sub+'A') << "|" << eta+1 << "\t=>\t" << adcped << endl;
     EEmcTower *eemcHit = new EEmcTower(sec,sub,eta,adcped);
     mTowerList->Add(eemcHit);
@@ -411,7 +432,7 @@ EEmcTTMMaker::Make(){
       }
       if(!matched) continue;
 
-#define DEBUG_PRINTS 0
+
 #if     DEBUG_PRINTS
       cerr << "<ExtrapolateToZ>\n";      
       cerr <<  sec+1 << "|" << char(sub+'A') << "|" << eta+1 << endl;
@@ -454,6 +475,13 @@ EEmcTTMMaker::Make(){
       ntrack++;       
     }
   }
+
+#if     DEBUG 
+  if(goodTowerHits<=0) {
+    Info("Make","no good EEMC tower data for this event");
+    return kStWarn;
+  }
+#endif
 
   mNMatched += ntrack;
   if(0<ntrack && ntrack<kNTupleTTM_MaxTracks)  mTree->Fill();
@@ -629,6 +657,9 @@ ostream&  operator<<(ostream &out, const StMuTrack    &t  )  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.12  2004/04/13 14:53:39  zolnie
+// *** empty log message ***
+//
 // Revision 1.11  2004/04/12 16:19:59  balewski
 // DB cleanup & update
 //
