@@ -198,7 +198,6 @@ $(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
 	@echo "#pragma link C++ class St_DataSet;"       >> $(LINKDEF);
 	@echo "#pragma link C++ class St_XDFFile;"       >> $(LINKDEF);
 	@echo "#pragma link C++ enum EModuleTypes;"      >> $(LINKDEF);
-	@echo "#pragma link C++ class St_TableIter;"     >> $(LINKDEF);   
 	@echo "#pragma link C++ class St_DataSetIter;"   >> $(LINKDEF);
 	@echo "#endif"					 >> $(LINKDEF);
 	@cat $(LINKDEF);
