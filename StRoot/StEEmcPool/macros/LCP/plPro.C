@@ -1,17 +1,16 @@
 TFile *fd=0;
 
-plCut(TString run="R305", TString path="./wrkLcpX/") {
+plPro(TString run="R3012013", TString path="./wrkLcpX/") {
+  path="/star/data04/sim/balewski/LcpRun2/maxEta1.0";
+  // run="R616";
+  
+
   gStyle->SetPalette(1,0);
-  // gStyle->SetOptStat(0);
+   gStyle->SetOptStat(1111111);
 
-    //  run="R616";
-
+  
   TString fname=path+"/"+run;  
-  //   fname+="-D";  fname+=dca;
   fname+=".tree.root";
-
-  // TString run1="bXoff/R3001002.hist.root";
-
   fd=new TFile(fname);
 
   if(!fd->IsOpen()) {
@@ -22,24 +21,27 @@ plCut(TString run="R305", TString path="./wrkLcpX/") {
   printf("plCut: %s  opened \n",fname.Data());
   fd->ls();
 
-  ln = new TLine(10,260,40,260);
-  ln = new TLine(0,340,4,340);
-
-  ln->SetLineStyle(3);
-
-  //  TString cname="maxDCA=";  cname+=dca;
-  //TString cname="maxEta=";  cname+=eta;
   TString cname=run;
 
   TCanvas *c1=new TCanvas(cname,cname,600,350);
   TH1F* h=0;
 
-  //  h=(TH1F*)fd->Get("pT"); h->Draw();   return;
+  //h=(TH1F*)fd->Get("Vz"); h->Draw();   return;
+  h=(TH1F*)fd->Get("bX120"); h->Draw();   return;
+
+  h=(TH1F*)fd->Get("nPrim");// h->Draw();  // return;
      
 
   c1->Divide(2,1);
   c1->cd(1);
-  mL=new TLegend(0.15,.5,.7,.7);
+  h->Draw();
+  c1->cd(2);
+  h1=(TH1F*) h->Clone();
+  h1->Draw();
+  gPad->SetLogy();
+  return;
+
+ mL=new TLegend(0.15,.5,.7,.7);
 
   // fd->ls();
   h=(TH1F*)fd->Get("CnFP-A"); 
