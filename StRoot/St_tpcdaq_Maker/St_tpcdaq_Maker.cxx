@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.47  2000/02/23 21:31:32  ward
+// Replaced the mErr mechanism with assert()s.
+//
 // Revision 1.46  2000/01/14 15:29:42  ward
 // Implementation of ASICS thresholds for Iwona and Dave H.
 //
@@ -325,9 +328,7 @@ void St_tpcdaq_Maker::SeqWrite(St_raw_seq *raw_seq_gen,int rownumber,
     int startTimeBin,int numberOfBinsInSequence) {
   int nAlloc,nUsed;
   raw_seq_st singlerow;
-  if(startTimeBin>=0x100) { 
-    mErr=__LINE__; return; 
-  }
+  assert(startTimeBin<0x100);
   singlerow.m=startTimeBin;
   singlerow.i=numberOfBinsInSequence-1;
   nAlloc=raw_seq_gen->GetTableSize(); nUsed=raw_seq_gen->GetNRows();
@@ -599,7 +600,7 @@ int St_tpcdaq_Maker::Output() {
 #endif
         nPixelThisPad=0;
         seqStatus=getSequences(fGain[ipadrow][pad-1],ipadrow+1,pad,&nseq,&listOfSequences);
-        if(seqStatus<0) { PrintErr(seqStatus,'a'); mErr=__LINE__; return 7; }
+        if(seqStatus<0) { PrintErr(seqStatus,'a'); assert(0); }
         if(nseq) {
           numPadsWithSignal++; 
           if(ipadrow>=13) dataOuter[isect-1]=7; else dataInner[isect-1]=7;
@@ -613,7 +614,7 @@ int St_tpcdaq_Maker::Output() {
           startTimeBin=listOfSequences[iseq].startTimeBin;
           if(startTimeBin<0) startTimeBin=0;
           if(startTimeBin>511) startTimeBin=511;
-          if(prevStartTimeBin> startTimeBin) { mErr=__LINE__; return 7; }
+          assert(prevStartTimeBin<=startTimeBin);
           prevStartTimeBin=startTimeBin; seqLen=listOfSequences[iseq].length;
 #ifdef NOISE_ELIM
           skip=0;
@@ -695,8 +696,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 }
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
-  mErr=0;
-  printf("I am Santa Clause (Jan 14 2000).  St_tpcdaq_Maker::Make().\n"); 
+  printf("I am Confucius. (Feb 23 2000).  St_tpcdaq_Maker::Make().\n"); 
   errorCode=GetEventAndDecoder();
   if(gDAQ) { victor=victorPrelim->getTPCReader(); assert(victor); }
   printf("GetEventAndDecoder() = %d\n",errorCode);
@@ -704,13 +704,8 @@ Int_t St_tpcdaq_Maker::Make() {
     printf("Error: St_tpcdaq_Maker no event from TRS (%d).\n",errorCode);
     return kStErr;
   }
-  if (!m_DataSet->GetList()) Output(); else mErr=__LINE__;
-  if(mErr) {
-    for(ii=0;ii<5;ii++) {
-      printf("\007Error Number %d in St_tpcdaq_Maker::Make().\n",mErr);
-    }
-    return kStErr;
-  }
+  assert(!m_DataSet->GetList());
+  Output();
   printf("Got through St_tpcdaq_Maker OK.\n");
   return kStOK;
 }
