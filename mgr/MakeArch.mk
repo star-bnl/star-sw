@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.29  1998/09/21 20:30:55  perev
+#  add sgi_62
+#
 #  Revision 1.28  1998/09/21 14:46:51  perev
 #  add CERNLIB_SOLARIS
 #
@@ -65,7 +68,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/09/21 14:46:51 $ 
+#             Last modification $Date: 1998/09/21 20:30:55 $ 
 #. default setings
 
 RM := rm -f
@@ -332,6 +335,25 @@ ifneq (,$(findstring $(STAF_ARCH),sgi_52 sgi_53))
   SOFLAGS   :=  $(DEBUG) -shared
   CLIBS     := -lsun -lmalloc  -lm -lc -lPW -lXext
   FLIBS     :=   -lftn 
+
+endif
+ifneq (,$(findstring $(STAF_ARCH),sgi_62 ))
+#  sgi_62 in sgi_52 compatible mode (VP)
+  SGI62 := Yess
+  OSFID :=  irix62 sgi62 SGI62 IRIX62 CERNLIB_QMIRIX53 CERNLIB_SGI CERNLIB_UNIX NEW_ARRAY_ON
+  STRID := sgi
+  FFLAGS    :=  $(DEBUG) -32  -static -trapuv 
+  FEXTEND   :=  -extend_source
+  CC        :=    cc
+  CFLAGS    :=  $(DEBUG) -32  -fullwarn	
+  CXX       :=    CC
+  CXXFLAGS  := $(DEBUG)  -32 -fullwarn
+  LD        :=   $(CXX)
+  LDFLAGS   := $(DEBUG)  -32 -multigot
+  SO        :=   $(CXX)
+  SOFLAGS   := $(DEBUG)  -32 -shared -multigot
+  CLIBS     :=  -lsun  -lm -lc -lPW -lXext -lmalloc
+  FLIBS     :=  -lftn 
 
 endif
 
