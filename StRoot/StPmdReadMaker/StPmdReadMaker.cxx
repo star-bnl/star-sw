@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.7 2004/04/14 15:40:41 subhasis Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.8 2004/06/25 10:38:00 subhasis Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.8  2004/06/25 10:38:00  subhasis
+ *vmecond bug fixed for 200 geV
+ *
  *Revision 1.7  2004/04/14 15:40:41  subhasis
  *chainno 45,46 interchanged (in hardware) issue fixed
  *
@@ -215,7 +218,7 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 		if(BLOCK==0)Chain_No=25+CRAM;
 		if(BLOCK==1)Chain_No=37+CRAM;
 	      }	
-              else return kStOK;	      
+              else break;	      
 	    }
 	    break; 
 	  case 2: 
