@@ -1,5 +1,10 @@
-// $Id: StFtpcDisplay.hh,v 1.1 2000/05/10 13:39:14 oldi Exp $
+// $Id: StFtpcDisplay.hh,v 1.2 2000/05/12 12:59:14 oldi Exp $
 // $Log: StFtpcDisplay.hh,v $
+// Revision 1.2  2000/05/12 12:59:14  oldi
+// removed delete operator for mSegment in StFtpcConfMapper (mSegment was deleted twice),
+// add two new constructors for StFtpcTracker to be able to refit already existing tracks,
+// minor cosmetics
+//
 // Revision 1.1  2000/05/10 13:39:14  oldi
 // Initial version of StFtpcTrackMaker
 //
@@ -25,8 +30,8 @@ class StFtpcDisplay : public TObject {
 private:
             TObjArray  *mTrack;         // found tracks
             TObjArray  *mHit;           // found hits
-            TObjArray  *mGeantTrack;         // geant tracks
-            TObjArray  *mGeantHit;           // geanthits
+            TObjArray  *mGeantTrack;    // geant tracks
+            TObjArray  *mGeantHit;      // geanthits
   
                 Int_t   mNumRowSegment; // number of row segments
                 Int_t   mNumPhiSegment; // number of phi segments
@@ -44,7 +49,7 @@ private:
                  TNode *mNode2;         // node for negative Ftpcs
 
            TPolyLine3D *l;              // tracks
-           TPolyLine3D *k;              // tracks
+           TPolyLine3D *k;              // pointer to tracks
                Float_t *value;          // hit coordinates of both Ftpcs
                Float_t *value_plus;     // hit coordinates of positive Ftpc
                Float_t *value_minus;    // hit coordinates of negative Ftpc

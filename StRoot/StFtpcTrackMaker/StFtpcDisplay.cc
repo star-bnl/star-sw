@@ -1,5 +1,10 @@
-// $Id: StFtpcDisplay.cc,v 1.2 2000/05/11 15:14:43 oldi Exp $
+// $Id: StFtpcDisplay.cc,v 1.3 2000/05/12 12:59:13 oldi Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.3  2000/05/12 12:59:13  oldi
+// removed delete operator for mSegment in StFtpcConfMapper (mSegment was deleted twice),
+// add two new constructors for StFtpcTracker to be able to refit already existing tracks,
+// minor cosmetics
+//
 // Revision 1.2  2000/05/11 15:14:43  oldi
 // Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
 //
@@ -742,17 +747,10 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
 
   // fill histograms with tracks and clusters
 
-  TPolyLine3D *l = 0;
-  Float_t *value = 0;
-  Float_t *value_plus = 0;
-  Float_t *value_minus = 0;
-  
   // coordinates of trackpoints
   Float_t x[100];
   Float_t y[100];
   Float_t z[100];
-
-  //Int_t all_clusters = 0;
 
   if (trackanz != -1) { // do everything if the '-1' option is not given 
     
@@ -761,7 +759,6 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
       
       StFtpcConfMapPoint *cluster;
       StFtpcTrack *track;
-      TPolyLine3D *k;
       l = new TPolyLine3D[track_entries];
       
       // loop over all tracks
@@ -806,7 +803,6 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
       
       StFtpcConfMapPoint *cluster;
       StFtpcTrack *track;
-      TPolyLine3D *k;
       l = new TPolyLine3D[track_entries];
       
       // loop over all tracks specified by the given trackarray      
@@ -1228,9 +1224,9 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
     Int_t cluster_anz = mGeantHit->GetEntriesFast();
 
     // coordinates of clusters (=, -, both)
-    Float_t *value_plus = new Float_t[3*cluster_anz];
-    Float_t *value_minus = new Float_t[3*cluster_anz];
-    Float_t *value = new Float_t[3*cluster_anz];
+    value_plus = new Float_t[3*cluster_anz];
+    value_minus = new Float_t[3*cluster_anz];
+    value = new Float_t[3*cluster_anz];
     
     StFtpcConfMapPoint *h;
     Int_t cl_plus = 0;
@@ -1466,9 +1462,9 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
     Int_t cluster_anz = mHit->GetEntriesFast();
 
     // coordinates of clusters (=, -, both)
-    Float_t *value_plus = new Float_t[3*cluster_anz];
-    Float_t *value_minus = new Float_t[3*cluster_anz];
-    Float_t *value = new Float_t[3*cluster_anz];
+    value_plus = new Float_t[3*cluster_anz];
+    value_minus = new Float_t[3*cluster_anz];
+    value = new Float_t[3*cluster_anz];
     
     StFtpcConfMapPoint *h;
     Int_t cl_plus = 0;

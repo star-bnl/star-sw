@@ -1,5 +1,10 @@
-// $Id: StFtpcTracker.cc,v 1.2 2000/05/11 15:14:53 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.3 2000/05/12 12:59:17 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.3  2000/05/12 12:59:17  oldi
+// removed delete operator for mSegment in StFtpcConfMapper (mSegment was deleted twice),
+// add two new constructors for StFtpcTracker to be able to refit already existing tracks,
+// minor cosmetics
+//
 // Revision 1.2  2000/05/11 15:14:53  oldi
 // Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
 //
@@ -8,7 +13,7 @@
 //
 
 //----------Author:        Holm G. H&uuml;mmler, Markus D. Oldenburg
-//----------Last Modified: 27.04.2000
+//----------Last Modified: 12.05.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcTracker.hh"
@@ -30,11 +35,13 @@ ClassImp(StFtpcTracker)
 StFtpcTracker::StFtpcTracker()
 {
   // Default constructor.
-  // Sets the pointers to 0 an dcut for momnetum fit loosely.
+  // Sets the pointers to 0 an cut for momnetum fit loosely.
 
   mVertex = 0;
   mHit = 0;
   mTrack = 0;
+
+  mHitsCreated = (Bool_t)false;
 
   mMaxDca = 100.;
 }
@@ -45,6 +52,7 @@ StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3],
   // Usual used constructor.
   // Sets up the pointers and the cut value for the momentum fit.
 
+  mHitsCreated = (Bool_t)false;
   mMaxDca = max_Dca;
   mTrack = new TClonesArray("StFtpcTrack", 0);
 
@@ -61,6 +69,54 @@ StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3],
 }
 
 
+StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TClonesArray *hit, TClonesArray *track, Double_t dca)
+{
+  // Constructor to handle the case where everything is there already.
+
+  mVertex = vertex;
+  mHit = hit;
+  mHitsCreated = (Bool_t) false;
+  mTrack = track;
+  mMaxDca = dca;
+}
+
+
+StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, St_fpt_fptrack *fpt_fptrack, Double_t dca)
+{
+  // Constructor to do refitting.
+
+  mVertex = vertex;
+
+  // Copy clusters into ClonesArray.
+  Int_t n_clusters = fcl_fppoint->GetNRows();          // number of clusters
+  fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
+
+  mHit = new TClonesArray("StFtpcPoint", n_clusters);    // create TClonesArray
+  mHitsCreated = (Bool_t)true;
+
+  TClonesArray &hit = *mHit;
+  
+  for (Int_t i = 0; i < n_clusters; i++) {
+    new(hit[i]) StFtpcPoint(point_st++);
+    ((StFtpcPoint *)mHit->At(i))->SetHitNumber(i);
+  }
+
+  // Copy tracks into ClonesArray.
+  Int_t n_tracks = fpt_fptrack->GetNRows();            // number of tracks
+  fpt_fptrack_st *track_st = fpt_fptrack->GetTable();  // pointer to first track structure
+
+  mTrack = new TClonesArray("StFtpcTrack", n_tracks);    // create TClonesArray
+
+  TClonesArray &track = *mTrack;
+  
+  for (Int_t i = 0; i < n_tracks; i++) {
+    new(track[i]) StFtpcTrack(track_st++, mHit);
+  }
+
+  mMaxDca = dca;
+}
+
+
 StFtpcTracker::~StFtpcTracker()
 {
   // Destructor.
@@ -68,6 +124,11 @@ StFtpcTracker::~StFtpcTracker()
   if (mTrack) {
     mTrack->Delete();
     delete mTrack;
+  }
+  
+  if (mHitsCreated) {
+    mHit->Delete();
+    delete mHit;
   }
 
   if (mVertex) {
@@ -78,7 +139,7 @@ StFtpcTracker::~StFtpcTracker()
 }
 
 
-Int_t StFtpcTracker::Write(St_fpt_fptrack *trackTableWrapper)
+Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper)
 {
   // Writes tracks to STAF table.
   
@@ -87,12 +148,9 @@ Int_t StFtpcTracker::Write(St_fpt_fptrack *trackTableWrapper)
   if (mTrack) {
     Int_t num_tracks = mTrack->GetEntriesFast();
     
-    //if(num_tracks > trackTableWrapper->GetHeader()->maxlen)
-    //  num_tracks = trackTableWrapper->GetHeader()->maxlen;
-
-    if(num_tracks > trackTableWrapper->GetTableSize())
+    if(num_tracks > trackTableWrapper->GetTableSize()) {
       num_tracks = trackTableWrapper->GetTableSize();
-
+    }
 
     for (Int_t i=0; i<num_tracks; i++) {
       ((StFtpcTrack *)(mTrack->At(i)))->Fit(mVertex, mMaxDca);    

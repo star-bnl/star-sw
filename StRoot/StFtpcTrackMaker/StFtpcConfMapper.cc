@@ -1,5 +1,10 @@
-// $Id: StFtpcConfMapper.cc,v 1.2 2000/05/11 15:14:41 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.3 2000/05/12 12:59:12 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.3  2000/05/12 12:59:12  oldi
+// removed delete operator for mSegment in StFtpcConfMapper (mSegment was deleted twice),
+// add two new constructors for StFtpcTracker to be able to refit already existing tracks,
+// minor cosmetics
+//
 // Revision 1.2  2000/05/11 15:14:41  oldi
 // Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
 //
@@ -119,11 +124,6 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t v
 StFtpcConfMapper::~StFtpcConfMapper()
 {
   // Destructor.
-
-  if (mSegment) {
-    mSegment->Delete();
-    delete mSegment;
-  }
 
   if (mVolume) {
     mVolume->Delete();
