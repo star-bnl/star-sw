@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPicoEventCollectionVectorHideAway.cc,v 1.2 2001/11/11 18:34:13 laue Exp $
+ * $Id: StHbtPicoEventCollectionVectorHideAway.cc,v 1.3 2002/11/01 20:45:53 magestro Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPicoEventCollectionVectorHideAway.cc,v $
+ * Revision 1.3  2002/11/01 20:45:53  magestro
+ * Fixed bug in 3rd dimension of event collection vector, probably never encountered
+ *
  * Revision 1.2  2001/11/11 18:34:13  laue
  * StHbtPicoEventCollectionVectorHideAway: updated for 3d grid
  * StHbtVertexMultAnalysis: new
@@ -47,7 +50,7 @@ StHbtPicoEventCollection* StHbtPicoEventCollectionVectorHideAway::PicoEventColle
   if ( ix<0 || ix >= mBinsx) return 0;
   if ( iy<0 || iy >= mBinsy) return 0;
   if ( iz<0 || iz >= mBinsz) return 0;
-  int bin = ix + iy*mBinsx + iz*mBinsy*mBinsz; 
+  int bin = ix + iy*mBinsx + iz*mBinsy*mBinsx; 
   cout << " StHbtPicoEventCollectionVectorHideAway::PicoEventCollection(...) - bin(ix,iy,iz): ";
   cout << bin << "(" << ix <<"," << iy << "," << iz <<")" << endl;
   return mCollectionVector[bin]; 
