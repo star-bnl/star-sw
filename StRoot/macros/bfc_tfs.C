@@ -1,4 +1,4 @@
-// $Id: bfc_tfs.C,v 1.6 1999/03/01 20:43:24 fisyak Exp $
+// $Id: bfc_tfs.C,v 1.7 1999/03/02 15:49:04 fisyak Exp $
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -82,7 +82,7 @@ bfc_tfs(const Int_t Nevents=1000,
   St_params_Maker     *params = new St_params_Maker("params","params");
   St_geom_Maker        *geom = new St_geom_Maker("geom","run/geant/Run");
   geant = new St_geant_Maker("geant","event/geant/Event");
-  geant->SetNwGEANT(40 000 000);
+  geant->SetNwGEANT(25 000 000);
   //  geant->SetNwPAW(1000000);
   TString cmd("gfile p ");
   cmd += InFile;
@@ -131,7 +131,7 @@ bfc_tfs(const Int_t Nevents=1000,
   gBenchmark->Start("bfc");
   Int_t i=0;
   for (Int_t i =1; i <= NoEvents; i++){
-    if (chain->Make(i)) break;
+    if (chain->Make(i) == 2) break;
     if (xdf_out){
       St_DataSet *dstSet = chain.DataSet("dst");
       St_DataSet *hits = dstSet->Find("hits");
