@@ -1,5 +1,10 @@
-// $Id: StFtpcTrackMaker.h,v 1.11 2004/03/22 16:02:04 oldi Exp $
+// $Id: StFtpcTrackMaker.h,v 1.12 2004/05/07 15:02:18 oldi Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.12  2004/05/07 15:02:18  oldi
+// Tracks are written to StEvent directly, now.
+// Primary Vertex is read from StEvent.
+// MonSoftDst table is filled here now (was filled in the now obsolete StFtpcGlobalMaker before).
+//
 // Revision 1.11  2004/03/22 16:02:04  oldi
 // Moved destruction of the instance of StFtpcTrackingParams from Finish() to FinishRun().
 //
@@ -110,9 +115,10 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  Finish();                                         // final cleanup
    virtual Int_t  FinishRun(Int_t run);                             // cleanup after every run
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.11 2004/03/22 16:02:04 oldi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.12 2004/05/07 15:02:18 oldi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
 	   void   MakeHistograms(StFtpcTracker *tracker);           // makes histograms
+	   void   FillDstMonSoftFtpcTable(StFtpcTracker *tracker);  // fills DstMonSoftFtpc table
 
 
    ClassDef(StFtpcTrackMaker,0)   //StAF chain virtual base class for Makers
