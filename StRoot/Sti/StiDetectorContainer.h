@@ -63,12 +63,11 @@
 using std::vector;
 #include <map>
 using std::map;
-#include "StiMapUtilities.h"
 
-#include "StiFactoryTypes.h"
-#include "StiObjectFactoryInterface.h"
-#include "StiCompositeTreeNode.h"
+#include "Factory.h"
+#include "StiDetector.h"
 #include "StiCompositeLeafIterator.h"
+#include "StiMapUtilities.h"
 
 using std::map;
 
@@ -92,13 +91,11 @@ public:
     
     ///This calls builds the detector tree given a pointer to the necessary
     ///factories.
-    virtual void buildDetectors(StiObjectFactoryInterface<StiDetectorNode>*
-				nodefactory,
-				StiObjectFactoryInterface<StiDetector>*
-				detfactory);
+    virtual void buildDetectors(Factory<StiDetectorNode>* nodefactory,
+				Factory<StiDetector>* detfactory);
 
     //gets
-    const data_node* root() const;
+    const StiDetectorNode* root() const;
     
     //Action
     
@@ -143,34 +140,34 @@ private:
     
     // Utility function for moveIn(), moveOut() functions
     bool setPhiIterator(double oldOrder, unsigned int oldNDaughters,
-			data_node_vec::difference_type oldDistance);
+			StiDetectorNodeVector::difference_type oldDistance);
     
     ///The root of the tree representation of the detector material.
-    data_node* mroot;
+    StiDetectorNode* mroot;
 
     ///An iterator representing the current region
     ///(mid/forward/backward rapidity, etc).
-    data_node* mregion;
+    StiDetectorNode* mregion;
 
     ///An iterator over the leaves of the detector tree.
     /// It is declared on heap for size concerns.
-    StiCompositeLeafIterator<data_t>* mLeafIt; 
+    StiCompositeLeafIterator<StiDetector>* mLeafIt; 
 
     //A message stream
     Messenger& mMessenger;
     
     ///An iterator representing the current radial position.
-    data_node_vec::const_iterator mradial_it;
+    StiDetectorNodeVector::const_iterator mradial_it;
 
     ///An iterator representing the current azimuthal position.
-    data_node_vec::const_iterator mphi_it;
+    StiDetectorNodeVector::const_iterator mphi_it;
 
 private:
 
     ///This is an internal function that is used to set the internal iterator
     ///structure
     /// to point to the position (or position closest to) that given by node.
-    void setToLeaf(data_node* node);
+    void setToLeaf(StiDetectorNode* node);
     
 		
 		//private:
@@ -192,7 +189,7 @@ private:
 
 //inlines
 
-inline const data_node* StiDetectorContainer::root() const
+inline const StiDetectorNode* StiDetectorContainer::root() const
 {
     return mroot;
 }

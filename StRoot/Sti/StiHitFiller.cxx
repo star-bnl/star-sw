@@ -18,11 +18,9 @@
 #include "Messenger.h"
 #include "StiHit.h"
 #include "StiHitContainer.h"
-#include "StiObjectFactory.h"
 #include "StiGeometryTransform.h"
 #include "StiDetectorFinder.h"
 #include "StiDetector.h"
-
 #include "StiHitFiller.h"
 
 ostream& operator<<(ostream&, const StiDetector&);
@@ -49,7 +47,7 @@ void StiHitFiller::addDetector(StDetectorId det)
     return;
 }
 
-void StiHitFiller::fillHits(StiHitContainer* store, StiObjectFactoryInterface<StiHit>* factory)
+void StiHitFiller::fillHits(StiHitContainer* store, Factory<StiHit>* factory)
 {
     mMessenger <<"StiHitFiller::fillHits()"<<endl;
     for (det_id_vector::const_iterator it=mvec.begin(); it!=mvec.end(); ++it) {
@@ -62,7 +60,7 @@ void StiHitFiller::fillHits(StiHitContainer* store, StiObjectFactoryInterface<St
 }
 
 void StiHitFiller::fillTpcHits(StiHitContainer* store,
-			       StiObjectFactoryInterface<StiHit>* factory)
+			       Factory<StiHit>* factory)
 {
     mMessenger <<"StiHitFiller::fillTpcHits()"<<endl;
     mtimer.reset();
@@ -102,7 +100,7 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store,
 	    for (vector<StTpcHit*>::const_iterator iter = hitvec.begin();
 		 iter != hitvec.end(); iter++) {
 		//Now we have the hit
-		StiHit* stihit = factory->getObject();
+		StiHit* stihit = factory->getInstance();
 		stihit->reset();
 		
 		mtranslator->operator()( *iter, stihit);
@@ -124,7 +122,7 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store,
     return;
 }
 
-void StiHitFiller::fillSvtHits(StiHitContainer* store, StiObjectFactoryInterface<StiHit>* factory)
+void StiHitFiller::fillSvtHits(StiHitContainer* store, Factory<StiHit>* factory)
 {
     mMessenger <<"StiHitFiller::fillSvtHits()"<<endl;
     mtimer.reset();
@@ -164,7 +162,7 @@ void StiHitFiller::fillSvtHits(StiHitContainer* store, StiObjectFactoryInterface
 		    if (hit) {
 			if (hit->flag()<4) {
 			    //Now we've got the hit, fillerup!
-			    StiHit* stihit = factory->getObject();
+			    StiHit* stihit = factory->getInstance();
 			    stihit->reset();
 			    
 			    mtranslator->operator()(hit, stihit);
@@ -186,13 +184,13 @@ void StiHitFiller::fillSvtHits(StiHitContainer* store, StiObjectFactoryInterface
     return;
 }
 
-void StiHitFiller::fillPrimaryVertices(StiHitContainer* store, StiObjectFactoryInterface<StiHit>* factory)
+void StiHitFiller::fillPrimaryVertices(StiHitContainer* store, Factory<StiHit>* factory)
 {
     StPrimaryVertex* primVtx = 0;
     for(unsigned int i=0; i<mevent->numberOfPrimaryVertices(); i++) {
 	primVtx = mevent->primaryVertex(i);
 	
-	StiHit* stihit = factory->getObject();
+	StiHit* stihit = factory->getInstance();
 	stihit->reset();
 	
 	mtranslator->operator() ( primVtx, stihit);

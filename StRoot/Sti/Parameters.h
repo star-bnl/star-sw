@@ -9,6 +9,7 @@
 using namespace std;
 
 #include "Parameter.h"
+#include "Factory.h"
 
 typedef vector<Parameter*> ParameterVector;
 typedef ParameterVector::iterator ParameterIterator;
@@ -36,11 +37,59 @@ class Parameters  : public Named, public Described
   ParameterConstIterator begin() const;
   ParameterConstIterator end() const;
   virtual void initialize()=0;
+  bool isEnabled();
+  bool isEditable();
+  void setEnabled(bool value);
+  void setEditable(bool value);
+
+  //static void setFactory(Factory<Parameter> * factory);
+  //static Factory<Parameter> * getFactory();
 
  protected:
   
-  ParameterVector parameterVector;
+  //static Factory<Parameter> * _factory;
+  ParameterVector parameterVector; 
+  bool _enabled;
+  bool _editable;
 };
+
+
+/*! Get the "enabled" state of this object.
+<p>
+The "enabled" state dictates whether this object is available for use.
+*/
+inline bool Parameters::isEnabled()
+{
+	return _enabled;
+}
+
+/*! Get the "editable" state of this object.
+<p>
+The "editable" state dictates whether this object can be edited by user code, or via a GUI interface.
+*/
+inline bool Parameters::isEditable()
+{
+	return _editable;
+}
+
+/*! Set the "enabled" state of this object to the given value.
+<p>
+The "enabled" state dictates whether this object is available for use.
+*/
+inline void Parameters::setEnabled(bool value)
+{
+	_enabled = value;
+}
+
+/*! Set the "editable" state of this object.
+<p>
+The "editable" state dictates whether this object can be edited by user code, or via a GUI interface.
+*/
+inline void Parameters::setEditable(bool value)
+{
+	_editable = value;
+}
+
 
 
 #endif // !defined(PARAMETERS_H_INCLUDED_)

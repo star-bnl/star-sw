@@ -1,24 +1,23 @@
-/*
- * StiDetector represents a detector for the purposes of ITTF tracking.
- * It contains all information about the geometry of the detector and
- * the necessary physical properties for incorporating it in tracking.
- */
-
-#ifndef STI_DETECTOR_HH
-#define STI_DETECTOR_HH 1
-
+#ifndef STI_DETECTOR_H
+#define STI_DETECTOR_H
+#include <vector>
 #include <string>
 using std::string;
+#include "Named.h"
 
 class StiMaterial;
 class StiShape;
 class StiPlacement;
-
-//This is a little convoluted, but we need it:
-class StiDetector;
-template <class T> class StiCompositeTreeNode;
 class StiIsActiveFunctor;
-class StiDetector {
+template<class T> class StiCompositeTreeNode;
+
+/*!
+   StiDetector represents a detector for the purposes of ITTF tracking.
+   It contains all information about the geometry of the detector and
+   the necessary physical properties for incorporating it in tracking.
+ */
+class StiDetector : public Named
+{
     
 public:
 
@@ -39,8 +38,6 @@ public:
     StiShape* getShape() const { return shape; }
     StiPlacement* getPlacement() const { return placement; }
 
-    const string& getName() const {return name;}
-    
     // mutators
     void setIsOn(bool val) {on = val;}
     void setIsActive(StiIsActiveFunctor *val){ isActiveFunctor = val; }
@@ -53,8 +50,6 @@ public:
     void setShape(StiShape *val){ shape = val; }
     void setPlacement(StiPlacement *val){ placement = val; }
 
-    void setName(const string& val){ name=val;}
-
     //action
     virtual void build(){}  //for now, build from SCL parsable ascii file
 
@@ -62,32 +57,41 @@ public:
     
     //This is a bit of a hack, but we leave ourselves a reverse connection between
     // a detector and the tree node that it's stored on.
-    void setTreeNode(StiCompositeTreeNode<StiDetector>* val) {mNode=val;}
-    StiCompositeTreeNode<StiDetector>* getTreeNode() const {return mNode;}
+    void setTreeNode( StiCompositeTreeNode<StiDetector> * val) {mNode=val;}
+    StiCompositeTreeNode<StiDetector> * getTreeNode() const {return mNode;}
     
-protected:
+ protected:
     
-    // logical switches
-    bool on;                  // toggle this layer on/off.  (off => NOT added to detector container)
-    StiIsActiveFunctor *isActiveFunctor; // provides hit information?
-    bool continuousMedium;    // is this a continuous scatterer?  (yes => scatterer info given by "gas" below)
+    /// Toggle switch determining whether this detector is to be added to the detector tree.
+    /// The detector is added if the switch is "true"
+    bool on;    
+    /// Functor used to calculate whether the posistion reached by a track is 
+    /// to be considered within the active area of the detector, and
+    /// is thus susceptible of providing hit information.
+    StiIsActiveFunctor *isActiveFunctor; 
+    /// Toggle switch determining whether this detector contains a continuous 
+    /// medium (e.g. gas). If true, scatterer information is provided 
+    /// by the gas material.
+    bool continuousMedium;  
+    /// Toggle switch determining whether the detector contains a discrete
+    /// thin scatterer (e.g. a Si wafer). If true, scatter information provided
+    /// by the material.
     bool discreteScatterer;   // is this a discrete scatterer?    (yes => scatterer given by "material" below)
-
-    // material information
-    StiMaterial *gas;           // gas representing the atmosphere in 
-    //   (if it's a continuous medium) and/or  radially outward from the detector.
-    StiMaterial *material;      // material composing the discrete scatterer
     
-    // physical location / orientation
+    /// Continuous scatter attributes.
+    StiMaterial *gas;         
+    /// Discrete scatterer attributes
+    StiMaterial *material;   
+    
+    /// Physical Shape attribute of this detector or voloume
     StiShape     *shape;
+    /// Physical position and orientation of this detector or volume.
     StiPlacement *placement;
-
-    string name;
-
-    StiCompositeTreeNode<StiDetector>* mNode;
-
+    /// Pointer to the parent detector node.
+    StiCompositeTreeNode<StiDetector>  * mNode;
 };
 
-//ostream& operator<<(ostream& os, const StiDetector& d);
+//typedef StiCompositeTreeNode<StiDetector> StiDetectorNode;
+//typedef vector<  StiCompositeTreeNode<StiDetector>  *>  StiDetectorNodeVector;
 
 #endif

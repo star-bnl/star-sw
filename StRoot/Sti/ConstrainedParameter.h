@@ -6,7 +6,6 @@
 #endif // _MSC_VER > 1000
 
 #include "Parameter.h"
-#include "StiObjectFactoryInterface.h"
 
 class ConstrainedParameter : public Parameter  
 {
@@ -38,6 +37,7 @@ public:
               double max, 
               int type=Double,
 	      int key=0);
+  void    reset();
 
 protected:
 
@@ -113,6 +113,14 @@ inline  void    ConstrainedParameter::setValue(double value)
     _value = value;
 }
 
+/*! Reset the parameter value to its default value.
+  \see void setDefault()
+ */
+inline void ConstrainedParameter::reset()
+{
+  _value = _default;
+}
+
 inline  void ConstrainedParameter::set(double value, 
 				       double defaultValue, 
 				       double min, 
@@ -146,26 +154,5 @@ inline  void ConstrainedParameter::set(double value,
       _type = Boolean;
     }
 }
-
-/*! ConstrainedParameter factory
- */
-class ConstrainedParameterFactory : public StiObjectFactoryInterface<Parameter>
-{
-public:
-    ///This is the only constructor available.
-    ConstrainedParameterFactory(const string& newName, 
-		      int original=-1, int 
-		      incremental=-1, 
-		      int maxInc=-1);
-    ///Default destructor.
-    virtual ~ConstrainedParameterFactory();
-    
-protected:
-    ///Return a pointer to a new Parameter object on the heap.
-    virtual void* makeNewObject() const;
-    
-private:
-    ConstrainedParameterFactory(); // no imp
-};
 
 #endif // !defined(CONSTRAINEDPARAMETER_H__5B75CCD2_01CA_4993_8BD6_836465B6A0E1__INCLUDED_)

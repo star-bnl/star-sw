@@ -30,7 +30,7 @@
 #include "../pams/global/inc/StDetectorId.h" //for detector enumerations
 
 #include "StiHit.h"
-#include "StiObjectFactoryInterface.h"
+#include "Factory.h"
 
 using std::vector;
 using std::map;
@@ -62,16 +62,16 @@ public:
     void setEvent(StEvent*);
 
     ///Fill the hits for a given event.
-    void fillHits(StiHitContainer*, StiObjectFactoryInterface<StiHit>*);
+    void fillHits(StiHitContainer*, Factory<StiHit>*);
 
     ///Friend out a streamer for the class.
     friend ostream& operator<<(ostream&, const StiHitFiller&);
 
 private:
-    void fillTpcHits(StiHitContainer*, StiObjectFactoryInterface<StiHit>*);
-    void fillSvtHits(StiHitContainer*, StiObjectFactoryInterface<StiHit>*);
+    void fillTpcHits(StiHitContainer*, Factory<StiHit>*);
+    void fillSvtHits(StiHitContainer*, Factory<StiHit>*);
     void fillPrimaryVertices(StiHitContainer*,
-			     StiObjectFactoryInterface<StiHit>*);
+			     Factory<StiHit>*);
     
 private:
     Messenger& mMessenger;

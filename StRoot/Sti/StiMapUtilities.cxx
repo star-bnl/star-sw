@@ -20,7 +20,6 @@
 #include "StiPlacement.h"
 #include "StiDetector.h"
 #include "StiTrackNode.h"
-#include "StiFactoryTypes.h" //For typedef
 
 //------------------------------ Hit Map Utilities ----------------------------
 
@@ -89,8 +88,8 @@ bool StizHitLessThan::operator() (const StiHit* lhs, const StiHit* rhs) const
     return (lhs->z() < rhs->z()) ? true : false;
 }
 
-bool StiDetectorNodePositionLessThan::operator() (const StiDetectorNode* lhs,
-					  const StiDetectorNode* rhs) const
+bool StiDetectorNodePositionLessThan::operator() (const StiCompositeTreeNode<StiDetector> * lhs,
+						  const StiCompositeTreeNode<StiDetector> * rhs) const
 {
     if (lhs->getData()==0 || rhs->getData()==0) {
 	*(Messenger::instance(MessageType::kHitMessage)) <<"StiDetectorNodeLessThan::operator(). ERROR:\t";

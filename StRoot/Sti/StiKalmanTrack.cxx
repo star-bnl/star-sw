@@ -17,7 +17,7 @@
 
 ostream& operator<<(ostream&, const StiHit&);
 
-StiObjectFactoryInterface<StiKalmanTrackNode>* StiKalmanTrack::trackNodeFactory = 0;
+Factory<StiKalmanTrackNode>* StiKalmanTrack::trackNodeFactory = 0;
 StiKalmanTrackFinderParameters* StiKalmanTrack::pars = 0;
 
 int debugCount=0;
@@ -49,7 +49,7 @@ void StiKalmanTrack::reset()
   Set the factory used for the creation of kalman track nodes.
   \see StiKalmanTrackNodeFactory
 */
-void StiKalmanTrack::setKalmanTrackNodeFactory(StiObjectFactoryInterface<StiKalmanTrackNode>* val)
+void StiKalmanTrack::setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>* val)
 {
   trackNodeFactory = val;
 }
@@ -73,7 +73,7 @@ StiKalmanTrackNode * StiKalmanTrack::addHit(StiHit *h)
 {
   if (lastNode!=0)
     {
-      StiKalmanTrackNode * n = trackNodeFactory->getObject();
+      StiKalmanTrackNode * n = trackNodeFactory->getInstance();
       n->reset();
       n->setHit(h);
       n->fX = h->x();
@@ -83,7 +83,7 @@ StiKalmanTrackNode * StiKalmanTrack::addHit(StiHit *h)
     }
   else 
     {
-      firstNode  = trackNodeFactory->getObject(); 
+      firstNode  = trackNodeFactory->getInstance(); 
       firstNode->reset();
       firstNode->setHit(h);
       firstNode->fX = h->x();
@@ -103,7 +103,7 @@ StiKalmanTrackNode * StiKalmanTrack::insertHit(StiHit *hInserted, StiHit * targe
   // It is further assumed that the targetParent has at most
   // one child.
   
-  StiKalmanTrackNode * n = trackNodeFactory->getObject();
+  StiKalmanTrackNode * n = trackNodeFactory->getInstance();
   n->reset();
   n->setHit(hInserted);
   if (targetParent==0)
@@ -368,7 +368,7 @@ void StiKalmanTrack::initialize(double curvature,
 {
     if (!trackNodeFactory) 
 			throw logic_error("StiKalmanTrack::initialize()\tERROR:\tNo Kalman Track Node Factory-Abort");
-    StiObjectFactoryInterface<StiKalmanTrackNode>* fac = trackNodeFactory;
+    Factory<StiKalmanTrackNode>* fac = trackNodeFactory;
     if (!fac) 
 			throw logic_error("StiKalmanTrack::initialize(). ERROR:\tFactory cast failed-Abort");
     //StThreeVectorD stiOrigin;
@@ -395,7 +395,7 @@ void StiKalmanTrack::initialize(double curvature,
 				if (!layer) 
 					throw logic_error("StiKalmanTrack::initialize() ERROR:\t Hit has null detector.");
 				alpha = layer->getPlacement()->getNormalRefAngle();
-				node = fac->getObject();
+				node = fac->getInstance();
 				if (node==0)
 					throw logic_error("StiKalmanTrack::initialize() ERROR:\t Null node returned by Node factory");
 				node->reset();
@@ -507,11 +507,11 @@ StThreeVector<double> StiKalmanTrack::getGlobalPointAt(double x) const
     StiKalmanTrackNode * nearNode = getNodeNear(x);
     if (nearNode==0)
 			throw logic_error("StiKalmanTrack::getGlobalPointAt(double x) - ERROR - nearNode==0");
-    StiObjectFactoryInterface<StiKalmanTrackNode> * f 
-			= static_cast<StiObjectFactoryInterface<StiKalmanTrackNode>*>(trackNodeFactory);
+    Factory<StiKalmanTrackNode> * f 
+			= static_cast<Factory<StiKalmanTrackNode>*>(trackNodeFactory);
 		if (f==0)
 			throw logic_error("StiKalmanTrack::getGlobalPointAt(double x) - ERROR - no factory f==0");
-    StiKalmanTrackNode * n = f->getObject();
+    StiKalmanTrackNode * n = f->getInstance();
     if (n==0)
 			throw logic_error("StiKalmanTrack::getGlobalPointAt(double x) - ERROR - n==0");
     n->reset();
@@ -974,7 +974,7 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 //   if (true)      //commented out for testing, MC & AAR 
 //     return true;
   sNode = lastNode;
-  tNode = trackNodeFactory->getObject();
+  tNode = trackNodeFactory->getInstance();
   if (tNode==0) 
     throw logic_error("SKTF::extendTrackToVertex()\t- ERROR - tNode==null");
   tNode->reset();

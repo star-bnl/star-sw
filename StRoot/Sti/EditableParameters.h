@@ -18,7 +18,7 @@ class EditableParameters : public Parameters, public Subject
   
   const EditableParameters & operator=(const EditableParameters & parameter);
   
-  virtual void setDefaults()=0;
+  virtual void setDefaults();
 
   virtual void add(const string & name, 
 		   const string & description,

@@ -11,7 +11,7 @@
 using std::string;
 
 #include "Messenger.h"
-#include "StiObjectFactoryInterface.h"
+#include "Factory.h"
 
 class StiKalmanTrack;
 class StTrack;
@@ -30,13 +30,13 @@ public:
     virtual void reset() =0;
 
     ///Set factory
-    void setFactory(StiObjectFactoryInterface<StiKalmanTrack>* val);
+    void setFactory(Factory<StiKalmanTrack>* val);
 
     ///Set hit container
     void setHitContainer(StiHitContainer*);
     
 protected:
-    StiObjectFactoryInterface<StiKalmanTrack>* mFactory;
+    Factory<StiKalmanTrack>* mFactory;
     Messenger& mMessenger;
     StiHitContainer* mHitStore;
     
@@ -46,7 +46,7 @@ private:
 
 //inlines
 
-inline void StiSeedFinder::setFactory(StiObjectFactoryInterface<StiKalmanTrack>* val)
+inline void StiSeedFinder::setFactory(Factory<StiKalmanTrack>* val)
 {
     mFactory=val;
 }

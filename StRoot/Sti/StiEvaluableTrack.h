@@ -42,7 +42,7 @@ public:
 
     ///Reset the class members to default state.
     /*! This is used so that StiEvaluableTrack objects can be owned and served by
-      StiObjectFactory.  It is guarunteed that a call to reset() fully propogates
+      Factory.  It is guarunteed that a call to reset() fully propogates
       up the inheritance tree.
     */    
     virtual void reset();

@@ -43,7 +43,6 @@ using std::pair;
 
 #include "SubjectObserver.h"
 #include "StiSeedFinder.h"
-#include "StiObjectFactoryInterface.h"
 
 class StiKalmanTrack;
 class StMcEvent;
@@ -52,6 +51,7 @@ class StAssociationMaker;
 class StTrackPairInfo;
 class StTpcHitFilter;
 class StiIOBroker;
+class StiEvaluableTrack;
 
 //Stl utility functor
 class BestCommonHits

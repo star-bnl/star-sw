@@ -49,11 +49,9 @@
 
 #include <vector>
 using std::vector;
+#include "Factory.h"
 #include "StiCompositeTreeNode.h"
-
-#include "StiFactoryTypes.h"
-#include "StiObjectFactoryInterface.h"
-
+#include "StiDetector.h"
 class StiDetectorBuilder;
 
 class StiDetectorTreeBuilder
@@ -75,8 +73,9 @@ public:
       root, and thus the protection becomes impossible.
       Additionaly, the root of the tree is assumed to be owned by the nodefactory.
     */
-    data_node* build(StiObjectFactoryInterface<StiDetectorNode>* nodefactory,
-		     StiObjectFactoryInterface<StiDetector>* detfactory);
+
+    StiDetectorNode* build(Factory<StiDetectorNode>* nodefactory,
+		     Factory<StiDetector>* detfactory);
     
 private:
     ///Iterate over the detector objects served by StiDetectorBuilder.
@@ -89,19 +88,19 @@ private:
     void addToTree(StiDetector*);
 
     ///Decide where to hang the detector object on the tree.
-    data_node* hangWhere(data_node* parent, const StiOrderKey& order,
+    StiDetectorNode* hangWhere(StiDetectorNode* parent, const StiOrderKey& order,
                          string& keystring);
 
     ///Store a pointer to the root of the tree.
-    data_node* mroot;
+    StiDetectorNode* mroot;
     ///This object is assumed <b>not</b> to be owned by this class
 
     ///Store a pointer to the factory of tree nodes.
     ///This is used for internal convenience.  This object is <b>not</b> owned by this class.
-    StiObjectFactoryInterface<StiDetectorNode>* mnodefactory;
+    Factory<StiDetectorNode>* mnodefactory;
     
     ///Store a pointer to the factory of detector objects.
-    StiObjectFactoryInterface<StiDetector>* mdetfactory;
+    Factory<StiDetector>* mdetfactory;
     ///This is used for internal convenience.  This object is <b>not</b> owned by this class.
 
     ///Store a pointer to the StiDetectorBuilder instance
@@ -112,7 +111,7 @@ private:
     /// <code>mDetectorBuilder = new StiCodedDetectorBuilder()</code>
 
     ///We store a pointer to the current region in the tree (e.g., mid rapidity)
-    data_node* mregion;
+    StiDetectorNode* mregion;
     
 };
 

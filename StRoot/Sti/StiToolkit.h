@@ -16,14 +16,21 @@
 #ifndef StiToolkit_H
 #define StiToolkit_H 1
 
-#include <string>
-using std::string;
-#include "StiFactoryTypes.h"
-/////#include "StiMcTrack.h"
+class   StEvent;
+class   StiDetector;
+class   StiTrack;
+class   StiKalmanTrack;
+class   StiKalmanTrackNode;
+class   StiHit;
+class   StiMcTrack;
+template<class Factorized> class Factory;
+template<class Filtered>   class Filter;
+template<class T>          class StiCompositeTreeNode;
+template<class X,class y>  class StiHitLoader;
+
 
 // common object containers
 
-class   StiMcTrack;
 class 	StiDetectorContainer;
 class 	StiHitContainer;
 class 	StiHitFiller;
@@ -34,7 +41,6 @@ class 	StiCoordinateTransform;
 class 	StiDetectorFinder;
 class 	StiSeedFinder;
 class 	StiTrackFinder;
-class 	StiTrackFilter;
 class 	StiTrackFitter;
 class 	StiTrackMerger;
 //class 	StiDisplayManager;
@@ -53,15 +59,14 @@ class   Parameter;
 class StiToolkit 
 {
 public:
-  
-  virtual StiObjectFactoryInterface<StiHit> * getHitFactory()=0;
-  virtual StiObjectFactoryInterface<StiKalmanTrack> * getTrackFactory()=0;
-  virtual StiObjectFactoryInterface<StiMcTrack> * getMcTrackFactory()=0;
-  virtual StiObjectFactoryInterface<StiKalmanTrackNode> * getTrackNodeFactory()=0;
-  virtual StiObjectFactoryInterface<StiDetector>  * getDetectorFactory()=0;
-  virtual StiObjectFactoryInterface<StiDetectorNode>  * getDetectorNodeFactory()=0;
-  virtual StiObjectFactoryInterface<Parameter>  * getParameterFactory()=0;
-  virtual StiObjectFactoryInterface<StiTrackFilter>  * getTrackFilterFactory()=0;
+  virtual Factory<StiHit> * getHitFactory()=0;
+  virtual Factory<StiKalmanTrack> * getTrackFactory()=0;
+  virtual Factory<StiMcTrack> * getMcTrackFactory()=0;
+  virtual Factory<StiKalmanTrackNode> * getTrackNodeFactory()=0;
+  virtual Factory<StiDetector>  * getDetectorFactory()=0;
+  virtual Factory< StiCompositeTreeNode<StiDetector> >  * getDetectorNodeFactory()=0;
+  virtual Factory<Parameter>  * getParameterFactory()=0;
+  virtual Factory< Filter<StiTrack>   >  * getTrackFilterFactory()=0;
   
   // common object containers
   virtual StiDetectorContainer  * getDetectorContainer()=0;
@@ -84,16 +89,18 @@ public:
   virtual StiIOBroker * getIOBroker()=0;
   virtual StAssociationMaker * getAssociationMaker()=0;
   virtual void setAssociationMaker(StAssociationMaker * a)=0;
+  virtual StiHitLoader<StEvent,StiGeometryTransform> * getHitLoader()=0;
   virtual StiHitFiller * getHitFiller()=0;
   
   virtual StiHitErrorCalculator * getHitErrorCalculator() = 0;
 
+  static void setToolkit(StiToolkit*toolkit);
   static StiToolkit *instance();
   static void kill();
   
  protected:
 
-  static StiToolkit * sInstance;
+  static StiToolkit * _instance;
 };
 
 #endif

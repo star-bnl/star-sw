@@ -31,7 +31,7 @@ using namespace std;
 #include "StDetectorId.h"
 
 //Sti
-#include "StiObjectFactoryInterface.h"
+#include "Factory.h"
 #include "StiKalmanTrackNode.h"
 #include "StiHitContainer.h"
 #include "StiKTNIterator.h"
@@ -77,14 +77,10 @@ using namespace std;
   each time a fit or re-fit is performed but once when the information
   is actually needed. 
   
-  \see StiKalmanTrackFactory 
   \see StiKalmanTrackNode
   \see StiKalmanTrackFinder
   \author Claude A Pruneau (Wayne State University)
 */
-
-
-
 class StiKalmanTrack : public StiTrack 
 {
  public:
@@ -92,7 +88,7 @@ class StiKalmanTrack : public StiTrack
   /*! 
     Constructor
     Delegates the initialization of the object to the reset method. Note that users should not call this 
-    ctor directly but should instead invoke to the "getObject" method of the StiKalmantrackFactory class 
+    ctor directly but should instead invoke to the "getInstance" method of the Factory<StiKalmanTrack> class 
     to get instances of this class. The StiKalmanTrackFactory holds (and owns, i.e. has responsibility for
     memory management) of a large array of re-usable track objects. Instances of this class should only be 
     obtained from the factory as this eliminates (or at the very least minimizes the risk) of memory leaks.
@@ -116,7 +112,7 @@ class StiKalmanTrack : public StiTrack
     {  }
   
   /// Set the factory used for the creation of kalman track nodes.
-  static void setKalmanTrackNodeFactory(StiObjectFactoryInterface<StiKalmanTrackNode>*);
+  static void setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>*);
   static void setParameters(StiKalmanTrackFinderParameters* p);
 
   void    reset();
@@ -310,7 +306,7 @@ class StiKalmanTrack : public StiTrack
 protected:
     
   static StiKalmanTrackFinderParameters * pars;
-  static StiObjectFactoryInterface<StiKalmanTrackNode> * trackNodeFactory;
+  static Factory<StiKalmanTrackNode> * trackNodeFactory;
   
   StiDirection trackingDirection;
   StiDirection fittingDirection;
