@@ -1,5 +1,8 @@
-# $Id: MakeDirs.mk,v 1.1 1999/02/08 02:29:19 fisyak Exp $
+# $Id: MakeDirs.mk,v 1.2 1999/02/12 02:50:29 fisyak Exp $
 # $Log: MakeDirs.mk,v $
+# Revision 1.2  1999/02/12 02:50:29  fisyak
+# Fix St_Tables, single module
+#
 # Revision 1.1  1999/02/08 02:29:19  fisyak
 # New Makefile scheme
 #
@@ -63,19 +66,28 @@ ifeq (,$(findstring $(LEVEL),0 1))
       check_tmp   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(GEN_TMP))))
   endif #/* NT */
 endif
+ifdef NEVER
 ifneq (,$(ROOT_DIR))
 ifneq ($(STAR),$(ROOT_DIR))
   StTables    :=$(strip $(wildcard $(ROOT_DIR)/.share/tables))
   ifeq (,$(StTables))
-    checkout := $(shell  mkdir -p $(ROOT_DIR)/.share/tables && $(LN) $(STAR)/.share/tables/*.* $(ROOT_DIR)/.share/tables/.)
+    checkout := $(shell  mkdir -p $(ROOT_DIR)/.share/tables)
+    checkout := $(foreach p,$(wildcard $(STAR)/.share/tables/*.*),\
+                            $(shell $(LN) $(p)  $(ROOT_DIR)/.share/tables/.))
   endif
   StTables :=$(strip $(wildcard $(SYS_DIR)/obj/tables))
   ifeq (,$(StTables)) 
-    checkout := $(shell  mkdir -p $(SYS_DIR)/obj/tables && $(LN) $(STAR)/.$(SYS_HOST_SYS)/obj/tables/*.* $(SYS_DIR)/obj/tables/.)
+    checkout := $(shell  mkdir -p $(SYS_DIR)/obj/tables)
+    checkout := $(foreach p,$(wildcard  $(STAR)/.$(SYS_HOST_SYS)/obj/tables/*.*),\
+                           $(shell $(LN) $(p)  $(SYS_DIR)/obj/tables/.))
   endif
   StTables :=$(strip $(wildcard $(SYS_DIR)/dep/tables))
   ifeq (,$(StTables)) 
-    checkout := $(shell  mkdir -p $(SYS_DIR)/dep/tables && $(LN) $(STAR)/.$(STAR_HOST_SYS)/dep/tables/*.* $(SYS_DIR)/dep/tables/.)
+    checkout := $(shell  mkdir -p $(SYS_DIR)/dep/tables)
+    checkout := $(foreach p,$(wildcard  $(STAR)/.$(SYS_HOST_SYS)/dep/tables/*.*),\
+                           $(shell $(LN) $(p)  $(SYS_DIR)/dep/tables/.))
+
   endif
+endif
 endif
 endif

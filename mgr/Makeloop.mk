@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.53  1999/02/12 02:50:33  fisyak
+#  Fix St_Tables, single module
+#
 #  Revision 1.52  1999/02/10 14:12:43  fisyak
 #  Turn on StEventReaderMaker and StTrsMaker
 #
@@ -235,7 +238,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/02/10 14:12:43 $ 
+#           Last modification $Date: 1999/02/12 02:50:33 $ 
 #  default setings
 # Current Working Directory
 #
@@ -288,8 +291,11 @@ ifndef SUBDIRS
   endif
   SUBDIRS := $(filter-out St_mev_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
+  SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
+  SUBDIRS := $(filter-out StREvent, $(SUBDIRS))
   ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
     SUBDIRS := $(filter-out CLHEP, $(SUBDIRS)) 
+    SUBDIRS := $(filter-out l3, $(SUBDIRS)) 
   endif
   ifdef PKG
     SUBDIRS:=
