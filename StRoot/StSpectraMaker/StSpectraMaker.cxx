@@ -1,5 +1,8 @@
-// $Id: StSpectraMaker.cxx,v 1.7 2000/03/03 03:30:32 ogilvie Exp $
+// $Id: StSpectraMaker.cxx,v 1.8 2000/03/08 02:30:20 ogilvie Exp $
 // $Log: StSpectraMaker.cxx,v $
+// Revision 1.8  2000/03/08 02:30:20  ogilvie
+// individual output .root files per analysis, prep. for user choice of axes, (y,eta) (pperp,mperp)
+//
 // Revision 1.7  2000/03/03 03:30:32  ogilvie
 // major infra. change to read in/use efficiency histos
 //
@@ -30,12 +33,12 @@
 #include "StChain.h"
 #include "StRun.h"
 #include "StEventTypes.h"
+#include "StSpectraAnalysis.h"
 #include "StTpcDeviantSpectraAnalysis.h"
 #include "StMessMgr.h"
 #include "StEfficiency.h"
+#include "StSpectraAxesEnumeration.h"
 
-
-#include <vector>
 #include <fstream.h>
 
 string readString(ifstream& ifs) {
@@ -50,7 +53,7 @@ string readString(ifstream& ifs) {
   return line;
 }
 
-static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.7 2000/03/03 03:30:32 ogilvie Exp $";
+static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.8 2000/03/08 02:30:20 ogilvie Exp $";
 
 StSpectraMaker::StSpectraMaker(const Char_t *name) : StMaker(name) {
 }
@@ -77,26 +80,35 @@ Int_t StSpectraMaker::Init() {
     StEfficiency effic(efficiencyFile);
     delete efficiencyFile; 
 
+    StSpectraOrdinate ordinateType = effic.getOrdinate();
+    StSpectraAbscissa abscissaType = effic.getAbscissa();
+
     effic.setParticle(particleName);
     
-    float lYbin = effic.getLowEdge('x');
-    float uYbin = effic.getUpEdge('x');
-    int nYbin = effic.getNbin('x');
-    float lPtbin = effic.getLowEdge('y');
-    float uPtbin = effic.getUpEdge('y');
-    int nPtbin = effic.getNbin('y');
+    float lbinAbscissa = effic.getLowEdge('x');
+    float ubinAbscissa = effic.getUpEdge('x');
+    int   nbinAbscissa = effic.getNbin('x');
+    cout <<"abscissa range and bins "<< lbinAbscissa << " "
+	 << ubinAbscissa << " " 
+	 << nbinAbscissa << endl;  
+    float lbinOrdinate = effic.getLowEdge('y');
+    float ubinOrdinate = effic.getUpEdge('y');
+    int   nbinOrdinate = effic.getNbin('y');
+    cout <<"ordinate range and bins "<< lbinOrdinate << " "
+	 << ubinOrdinate << " " 
+	 << nbinOrdinate << endl; 
 
     StTpcDeviantSpectraAnalysis* anal = new StTpcDeviantSpectraAnalysis;
     anal->setParticle(particleName);
     anal->setTitle(analysisTitle);
     anal->setEfficiency(effic);   
-    anal->setYAxis(lYbin,uYbin,nYbin); 
-    anal->setPtAxis(lPtbin,uPtbin,nPtbin);
+    anal->setAbscissa(abscissaType,lbinAbscissa,ubinAbscissa,nbinAbscissa); 
+    anal->setOrdinate(ordinateType,lbinOrdinate,ubinOrdinate,nbinOrdinate);
  
     mSpectraAnalysisContainer.push_back(anal);
 
     string comment = readString(from); 
-  }
+   }
   from.close();
  
   //
@@ -110,8 +122,7 @@ Int_t StSpectraMaker::Init() {
 	 analysisIter++) {
     (*analysisIter)->bookHistograms();
   }
-
- return StMaker::Init();
+  return StMaker::Init();
 }
 
 Int_t StSpectraMaker::Make() {
@@ -148,11 +159,18 @@ Int_t StSpectraMaker::Finish() {
     (*analysisIter)->projectHistograms();
   }
 
-  // write out histograms
-  cout << "writing out histograms" << endl;
+  for (analysisIter = mSpectraAnalysisContainer.begin();
+	 analysisIter != mSpectraAnalysisContainer.end();
+	 analysisIter++) {
+    (*analysisIter)->writeHistograms();
+  }
 
-  mOutput->Write("MyKey",kSingleKey);
-  cout << "written"<< endl;
+  // write out histograms
+  
+  // cout << "writing out histograms" << endl;
+
+  // mOutput->Write(,kSingleKey);
+  // cout << "written"<< endl;
   mOutput->Close();
 
   // delete analyses in container

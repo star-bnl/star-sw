@@ -9,41 +9,27 @@ class TH2D;
 class TH3D;
 
 #include "StSpectraAnalysis.h"
-#include "StEventTypes.h"
-#include "SystemOfUnits.h"
-#include "PhysicalConstants.h"
-#include "StTpcDedxPidAlgorithm.h"
 
-class StTpcDeviantSpectraAnalysis : public  StSpectraAnalysis {
+class StEvent;
+
+class StTpcDeviantSpectraAnalysis : public StSpectraAnalysis {
 
  private:
 
-  TH3D* mYPtDeviant;
-  TH2D* mYPt;
+  TH3D* m2DSpectraDeviant;
+  TH2D* m2DSpectra;
   TH1D* mPIDDeviant;  
   TH2D* mDedxvsP;
-
-  float mlYbin;
-  float muYbin;
-  int   mnYbin;
-  float mlPtbin;
-  float muPtbin;
-  int   mnPtbin;
-
- protected:
-
+  
  public:
 
   StTpcDeviantSpectraAnalysis();
   ~StTpcDeviantSpectraAnalysis();
+
   void bookHistograms();
   void fillHistograms(StEvent& event);
   void projectHistograms();
-
-  void setYAxis(float lYbin, float uYbin, int nYbin);
-  void setPtAxis(float lPtbin, float uPtbin, int nPtbin);
-
-
+  void writeHistograms();
 };
 
 #endif

@@ -1,27 +1,33 @@
 #ifndef StEfficiency_hh
 #define StEfficiency_hh
 #include "StSpectraCut.h"
+#include "StSpectraAxesEnumeration.h"
 #include "StParticleDefinition.hh"
-#include "StParticleTable.hh"
 #include "StEventTypes.h"
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
 #include "TH2.h"
+
 class TH2D;
+
+#include <vector>
+#if !defined(ST_NO_NAMESPACES)
+using std::vector;
+#endif
 
 class StEfficiency {
 
  private:
 
   StParticleDefinition* mParticle;
-
-  double mScale;
-  double mMomentumTerm;
   TH2D mEfficHistogram;
+  StSpectraOrdinate mOrdinate ;
+  StSpectraAbscissa mAbscissa ;
 
  protected:
 
  public:
+
   StEfficiency();
   StEfficiency(char* efficFile);
   ~StEfficiency();
@@ -36,7 +42,9 @@ class StEfficiency {
   //
   void setParticle(string particle);
   double efficiency(StTrack* track);
-  TH2D getEfficHistogram();
+
+  StSpectraOrdinate getOrdinate();
+  StSpectraAbscissa getAbscissa();
 
   double getLowEdge(char axis);
   double getUpEdge(char axis);

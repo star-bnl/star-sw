@@ -1,23 +1,14 @@
 #include "StTpcDeviantSpectraAnalysis.h"
+#include "StTpcDedxPidAlgorithm.h"
+#include "SystemOfUnits.h"
+#include "PhysicalConstants.h"
 #include <string.h>
+#include <TFile.h>
+#include "StEventTypes.h"
 
-StTpcDeviantSpectraAnalysis::StTpcDeviantSpectraAnalysis() {
-}
+StTpcDeviantSpectraAnalysis::StTpcDeviantSpectraAnalysis() {}
 
-StTpcDeviantSpectraAnalysis::~StTpcDeviantSpectraAnalysis() {
-}
-
-void StTpcDeviantSpectraAnalysis::setYAxis(float lYbin, float uYbin, int nYbin) {
-  mlYbin = lYbin;
-  muYbin = uYbin;
-  mnYbin = nYbin;
-}
-
-void StTpcDeviantSpectraAnalysis::setPtAxis(float lPtbin, float uPtbin, int nPtbin) {
-  mlPtbin = lPtbin;
-  muPtbin = uPtbin;
-  mnPtbin = nPtbin;
-}
+StTpcDeviantSpectraAnalysis::~StTpcDeviantSpectraAnalysis() {}
 
 void StTpcDeviantSpectraAnalysis::bookHistograms() {
 
@@ -27,13 +18,15 @@ void StTpcDeviantSpectraAnalysis::bookHistograms() {
   float udevbin = 5. ;
   int Ndevbins = 50;
 
-  string hlabYPt = "YPt";
-  hlabYPt = hlabYPt + mTitle;
-  const char* hYPt = hlabYPt.c_str(); 
-  mYPt = new TH2D(hYPt,"y,pt",
-			 mnYbin, mlYbin,muYbin,
-			 mnPtbin,mlPtbin,muPtbin);
-  mYPt->Sumw2();
+  // use abscissa and ordinate types
+  string hlab2DSpectra = "YPt";
+
+  hlab2DSpectra = hlab2DSpectra + mTitle;
+  const char* h2DSpectra = hlab2DSpectra.c_str(); 
+  m2DSpectra = new TH2D(h2DSpectra,"2-D spectra",
+			 mnbinAbscissa, mlbinAbscissa,mubinAbscissa,
+			 mnbinOrdinate,mlbinOrdinate,mubinOrdinate);
+  m2DSpectra->Sumw2();
 
   string hlabDedx = "dedxvsP";
   hlabDedx = hlabDedx + mTitle;
@@ -41,14 +34,16 @@ void StTpcDeviantSpectraAnalysis::bookHistograms() {
   mDedxvsP = new TH2D(hDedx,"dedx vs p",50,0.,1.,50, 0., 1.e-05);
   mDedxvsP->Sumw2();
 
-  string hlabYPtDev = "YPtDeviant";
-  hlabYPtDev = hlabYPtDev + mTitle;
-  const char* hYPtDev = hlabYPtDev.c_str(); 
-  mYPtDeviant = new TH3D(hYPtDev,"number sigma from PID band, y,pt",
-			 mnYbin, mlYbin,muYbin,
-			 mnPtbin,mlPtbin,muPtbin,
+  string hlab2DSpectraDev = "YPtDeviant";
+
+  hlab2DSpectraDev = hlab2DSpectraDev + mTitle;
+  const char* h2DSpectraDev = hlab2DSpectraDev.c_str(); 
+  m2DSpectraDeviant = new TH3D(h2DSpectraDev,
+			       "number sigma from PID band in 2D phase space bins",
+			 mnbinAbscissa, mlbinAbscissa,mubinAbscissa,
+			 mnbinOrdinate,mlbinOrdinate,mubinOrdinate,
 			 Ndevbins,ldevbin,udevbin);
-  mYPtDeviant->Sumw2();  
+  m2DSpectraDeviant->Sumw2();  
 
 
   string hlabPID = "PIDDeviant";
@@ -105,19 +100,20 @@ void StTpcDeviantSpectraAnalysis::fillHistograms(StEvent& event) {
        // of the algorithm e.g. numberOfSigma
        // guess is currently not used
        //
-            const StParticleDefinition *guess = track->pidTraits(tpcDedxAlgorithm);
+            track->pidTraits(tpcDedxAlgorithm);
 	    double deviant = tpcDedxAlgorithm.numberOfSigma(mParticle);
+
 
 	    double effic = mEffic.efficiency(track);
 	    //  cout << effic << endl;
 	    if (effic > 0. && effic <= 1.) {
 		float weight = 1./effic;
 		double pperp = mom.perp();
-		double mt = sqrt(pperp*pperp + mMassPid*mMassPid);
+		// double mt = sqrt(pperp*pperp + mMassPid*mMassPid);
 		double E = sqrt(p*p+mMassPid*mMassPid);
 		double pz = mom.z();
 		double y = 0.5*log((E+pz)/(E-pz)); 
-		mYPtDeviant->Fill(y,pperp,deviant,weight);
+		m2DSpectraDeviant->Fill(y,pperp,deviant,weight);
 	    }
        }       
   }   
@@ -127,22 +123,29 @@ void StTpcDeviantSpectraAnalysis::projectHistograms() {
 
   if (mNumEvent==0) return;
   float xnorm = 1./float(mNumEvent);
-  mYPtDeviant->Scale(xnorm);
+  m2DSpectraDeviant->Scale(xnorm);
 
   // check for histograms
-  cout << mYPtDeviant->GetDimension() << "-D histogram" << endl;
-  int NYbins  = mYPtDeviant->GetNbinsX();
-  int NPtbins = mYPtDeviant->GetNbinsY();
+  cout << m2DSpectraDeviant->GetDimension() << "-D histogram" << endl;
+  int NYbins  = m2DSpectraDeviant->GetNbinsX();
+  int NPtbins = m2DSpectraDeviant->GetNbinsY();
 
   cout << "has "<< NYbins*NPtbins << " bins" << endl ;
  
   Stat_t stats[8];
-  mYPtDeviant->GetStats(stats);
+  m2DSpectraDeviant->GetStats(stats);
   cout << "sum of weights " << stats[0] << endl;
 
 }
 
+void StTpcDeviantSpectraAnalysis::writeHistograms(){
 
+  const char* outputName = ((*this).getTitle()+".root").c_str();
+  TFile* analysisOutputFile = new TFile(outputName,"RECREATE");
+  m2DSpectraDeviant->Write(outputName);
+  mPIDDeviant->Write(outputName);
+  delete analysisOutputFile;
+}
 
 
 
