@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 1.1 1999/01/30 03:58:08 fisyak Exp $
+ * $Id: StTrackFitTraits.h,v 1.2 1999/02/09 23:11:17 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
- * Revision 1.1  1999/01/30 03:58:08  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 23:11:17  fisyak
+ * Torre stuff
+ *
+ * Revision 1.4  1999/04/28 22:27:37  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.3  1999/01/30 23:03:17  wenaus
  * table load intfc change; include ref change
@@ -26,7 +29,7 @@
 #include "TObject.h"
 #endif
  * Adapted new StArray version. First version to compile on Linux and Sun.
-#include "dst_track.h"
+#include "tables/dst_track.h"
  * Revision 2.0  1999/10/12 18:43:02  ullrich
 class StTrackFitTraits : public TObject {
 #include "dst_track.h"

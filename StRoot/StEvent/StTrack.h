@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.h,v 1.1 1999/01/30 03:58:08 fisyak Exp $
+ * $Id: StTrack.h,v 1.2 1999/02/09 23:20:27 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
- * Revision 1.1  1999/01/30 03:58:08  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 23:20:27  fisyak
+ * Torre stuff
+ *
+ * Revision 1.4  1999/02/12 02:01:20  wenaus
+ * New track constructor to load helix params independently of table
  *
  * Revision 1.3  1999/01/30 23:03:16  wenaus
  * table load intfc change; include ref change
@@ -28,8 +31,9 @@
  * Added non-const method pidTraits().
 #include "StTrackPidTraits.h"
 #define StTrack_hh 
-#include "dst_track.h"
+#include "tables/dst_track.h"
 #include "StPhysicalHelixD.hh"
+ *
 class StTrack : public TObject {
  * Revision 2.2  1999/11/01 12:45:06  ullrich
  *
