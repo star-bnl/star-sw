@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDriftVelocityMaker.cxx,v 1.1 2002/01/18 19:57:42 willson Exp $
+ * $Id: StSvtDriftVelocityMaker.cxx,v 1.2 2002/01/18 20:53:47 willson Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDriftVelocityMaker.cxx,v $
+ * Revision 1.2  2002/01/18 20:53:47  willson
+ * Some bug fixes by Helen
+ *
  * Revision 1.1  2002/01/18 19:57:42  willson
  * Drift Velocity Calculation v.1
  *
@@ -47,6 +50,7 @@ ClassImp(StSvtDriftVelocityMaker)
 {
   mSvtData = NULL;    
   mSvtDriftVeloc = NULL;
+  mSvtRawData = NULL;
   mEventCounter = mHitCounter = 0;
   mNumBinsDV = 128;
   mMaximumDV = 127;
@@ -66,36 +70,37 @@ Int_t StSvtDriftVelocityMaker::Init()
 {
   //cout << "StSvtDriftVelocityMaker::Init" << endl;
 
+  SetSvtRawData();
+
+  SetSvtDriftVelocity();
+
   int indexHybrid;
   StSvtHybridDriftVelocity* hybridDriftVeloc;
   TH1D* hybridHisto;
   TH2D* hybrid2DHisto;
   char CharString1[100];
   char CharString2[100];
-
-  SetSvtData();
-  SetSvtDriftVelocity();
   
-  mHybridDriftVelocityHisto = new TH1D*[mSvtDriftVeloc->getTotalNumberOfHybrids()];
+  mHybridDriftVelocityHisto = new TH1D*[mSvtRawData->getTotalNumberOfHybrids()];
   
   if (mDebug)
-    mHybridDriftVelocity2DHisto = new TH2D*[mSvtDriftVeloc->getTotalNumberOfHybrids()];
+    mHybridDriftVelocity2DHisto = new TH2D*[mSvtRawData->getTotalNumberOfHybrids()];
 
   // Loop over barrels, ladders, wafers and hybrids
-  for (int barrel = 1;barrel <= mSvtDriftVeloc->getNumberOfBarrels();barrel++) {
-    for (int ladder = 1;ladder <= mSvtDriftVeloc->getNumberOfLadders(barrel);ladder++) {
-      for (int wafer = 1;wafer <= mSvtDriftVeloc->getNumberOfWafers(barrel);wafer++) {
-    	for (int hybrid = 1;hybrid <= mSvtDriftVeloc->getNumberOfHybrids();hybrid++) {
+  for (int barrel = 1;barrel <= mSvtRawData->getNumberOfBarrels();barrel++) {
+    for (int ladder = 1;ladder <= mSvtRawData->getNumberOfLadders(barrel);ladder++) {
+      for (int wafer = 1;wafer <= mSvtRawData->getNumberOfWafers(barrel);wafer++) {
+    	for (int hybrid = 1;hybrid <= mSvtRawData->getNumberOfHybrids();hybrid++) {
 
-	  indexHybrid = mSvtDriftVeloc->getHybridIndex(barrel, ladder, wafer, hybrid);
+	  indexHybrid = mSvtRawData->getHybridIndex(barrel, ladder, wafer, hybrid);
 
 	  if (indexHybrid < 0) continue;
 
-	  hybridDriftVeloc = (StSvtHybridDriftVelocity*)mSvtDriftVeloc->at(indexHybrid);
+	  hybridDriftVeloc = (StSvtHybridDriftVelocity*)mSvtRawData->at(indexHybrid);
 	  if (!hybridDriftVeloc)
 	    hybridDriftVeloc = new StSvtHybridDriftVelocity(barrel, ladder, wafer, hybrid);
 	    
-	  mSvtDriftVeloc->put_at(hybridDriftVeloc,indexHybrid);
+	  mSvtRawData->put_at(hybridDriftVeloc,indexHybrid);
 
 	  sprintf(CharString1, "Histo%d", indexHybrid);
 	  sprintf(CharString2, "2DHisto%d", indexHybrid);
@@ -122,7 +127,24 @@ Int_t StSvtDriftVelocityMaker::Init()
 
   return StMaker::Init();
 }
+//______________________________________________
+Int_t StSvtDriftVelocityMaker::SetSvtRawData()
+{
+  St_DataSet *dataSet;
+  
+  dataSet = GetDataSet("StSvtRawData");
+  if( !dataSet) {
+    gMessMgr->Warning() << " No Svt Raw data set" << endm;
+    return kStWarn;
+  }
 
+  mSvtRawData = (StSvtData*)(dataSet->GetObject());
+  if( !mSvtRawData) {
+    gMessMgr->Warning() << " No Svt Raw data " << endm;
+    return kStWarn;
+  }
+  return kStOK;
+}
 //_____________________________________________________________________________
 Int_t StSvtDriftVelocityMaker::SetSvtData()
 {
@@ -133,8 +155,7 @@ Int_t StSvtDriftVelocityMaker::SetSvtData()
     mRaw = false;
 
   if (mRaw) {
-    mSvtData = (StSvtData*)(dataSet->GetObject());
-    assert(mSvtData);
+    mSvtData = (StSvtHybridCollection*)(dataSet->GetObject());
   }
 
   return kStOK;
@@ -143,8 +164,8 @@ Int_t StSvtDriftVelocityMaker::SetSvtData()
 //_____________________________________________________________________________
 Int_t StSvtDriftVelocityMaker::SetSvtDriftVelocity()
 {
-  if (mRaw)
-    mSvtDriftVeloc = new StSvtHybridCollection(mSvtData->getConfiguration());
+  if (mSvtRawData)
+    mSvtDriftVeloc = new StSvtHybridCollection(mSvtRawData->getConfiguration());
   else
     mSvtDriftVeloc = new StSvtHybridCollection("FULL");
 
@@ -155,14 +176,17 @@ Int_t StSvtDriftVelocityMaker::SetSvtDriftVelocity()
 Int_t StSvtDriftVelocityMaker::Make()
 {
   cout << "StSvtDriftVelocityMaker::Make" << endl;
-  cout << "Current Run Number is " << ((StSvtData*)mSvtData)->getRunNumber() << endl;
+  
+  SetSvtData();
 
   if (mRaw)
     FillHistogramsRaw();
   else
     FillHistogramsStEvent();
 
-  cout << "Current Event  Number is " << ((StSvtData*)mSvtData)->getEventNumber() << endl;
+  cout << "Current Event  Number is " << ((StSvtData*)mSvtRawData)->getEventNumber() << endl;
+  cout << "Current Run Number is " << ((StSvtData*)mSvtRawData)->getRunNumber() << endl;
+
 
   //WriteToDb("2000-02-03 07:31:00");
 
@@ -172,8 +196,6 @@ Int_t StSvtDriftVelocityMaker::Make()
 //_____________________________________________________________________________
 Int_t StSvtDriftVelocityMaker::FillHistogramsRaw()
 {
-
-  SetSvtData();
 
   //cout << "StSvtDriftVelocityMaker::FillHistogramsRaw" << endl;
   StSvtAnalysedHybridClusters* hybridData;
@@ -294,7 +316,7 @@ Int_t StSvtDriftVelocityMaker::CalcDriftVelocity()
   if (!mDebug)       
     file.open("test.txt");
 
-  cout << "Current Run Number is " << ((StSvtData*)mSvtData)->getRunNumber() << endl;
+  cout << "Current Run Number is " << mSvtRawData->getRunNumber() << endl;
 
   for (i=0; i<mSvtDriftVeloc->getTotalNumberOfHybrids(); i++) {
     
