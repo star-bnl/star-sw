@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichMiniHit.h,v 1.1 2000/03/17 14:54:50 lasiuk Exp $
+ * $Id: StRichMiniHit.h,v 1.2 2000/04/05 15:59:34 lasiuk Exp $
  *
  * Description:
  *   StRichMiniHit is a data type containing information
@@ -15,8 +15,8 @@
  *       
  ***************************************************************
  * $Log: StRichMiniHit.h,v $
- * Revision 1.1  2000/03/17 14:54:50  lasiuk
- * Large scale revisions after ROOT dependent memory leak
+ * Revision 1.2  2000/04/05 15:59:34  lasiuk
+ * short --> int
  *
  * Revision 1.1  2000/03/17 14:54:50  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -36,7 +36,7 @@ public:
     StRichMiniHit();
     StRichMiniHit(StThreeVector<double> x,
 		  StThreeVector<double> p,
-		  int trackP, short pID, double mass, StRichSignalType type);
+		  int trackP, int hitID, int gID, double mass, StRichSignalType type);
     ~StRichMiniHit();
 
     //StRichMiniHit(const StRichMiniHit&); { /* use default */}
@@ -49,7 +49,8 @@ public:
     StThreeVector<double>& momentum();
 
     int              trackp()   const;
-    short            id()       const;
+    int              id()       const;
+    int              gid()      const;
     double           mass()     const;
     StRichSignalType process()  const;
     StRichSignalType type()     const;
@@ -58,7 +59,8 @@ private:
     StThreeVector<double>    mX;
     StThreeVector<double>    mP;
     int                      mTrackp;
-    short                    mId;
+    int                      mId;
+    int                      mGid;
     double                   mMass;
     StRichSignalType         mType;
 };    
@@ -68,8 +70,9 @@ inline const StThreeVector<double>& StRichMiniHit::position() const {return mX;}
 inline StThreeVector<double>& StRichMiniHit::position() {return mX;}
 inline const StThreeVector<double>& StRichMiniHit::momentum()  const {return mP;}
 inline StThreeVector<double>& StRichMiniHit::momentum() {return mP;}
-inline int     StRichMiniHit::trackp() const {return mTrackp;}
-inline short   StRichMiniHit::id()       const {return mId;}
+inline int StRichMiniHit::trackp() const {return mTrackp;}
+inline int StRichMiniHit::id()       const {return mId;}
+inline int StRichMiniHit::gid()       const {return mGid;}
 inline double  StRichMiniHit::mass() const {return mMass;}
 inline StRichSignalType StRichMiniHit::process() const {return mType;}
 inline StRichSignalType StRichMiniHit::type() const {return mType;}

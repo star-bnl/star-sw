@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichGHit.h,v 1.5 2000/03/17 14:54:31 lasiuk Exp $
+ * $Id: StRichGHit.h,v 1.6 2000/04/05 15:59:26 lasiuk Exp $
  *
  * Description:
  *   StRichGHit is a data type containing information
@@ -14,8 +14,8 @@
  *       
  ***************************************************************
  * $Log: StRichGHit.h,v $
- * Revision 1.5  2000/03/17 14:54:31  lasiuk
- * Large scale revisions after ROOT dependent memory leak
+ * Revision 1.6  2000/04/05 15:59:26  lasiuk
+ * short --> int
  *
  * Revision 1.5  2000/03/17 14:54:31  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -59,10 +59,10 @@ class StRichGHit {
 public:
     StRichGHit();
 
-    StRichGHit(double x, double y, double z, double dE, short pID, string vID);
-    StRichGHit(double x, double y, double z, int track_p, short pID);
-    StRichGHit(double x, double y, double z, short pID);
-    StRichGHit(double x, double y, double z, double dE, double ds, short pID, string vID,
+    StRichGHit(double x, double y, double z, double dE, int pID, string vID);
+    StRichGHit(double x, double y, double z, int track_p, int pID);
+    StRichGHit(double x, double y, double z, int pID);
+    StRichGHit(double x, double y, double z, double dE, double ds, int pID, string vID,
 	       double px, double py, double pz);
     ~StRichGHit();
 
@@ -81,7 +81,8 @@ public:
     double  cosZ()     const;
     double  ds()       const;
     double  dE()       const;
-    short   id()       const;
+    int     id()       const;
+    int     gid()      const;
     double  mass()     const;
     const string& volumeID() const;
     
@@ -89,18 +90,18 @@ public:
 	      double cosX, double coxY, double cosZ,
 	      double step, double dE,
 	      double px, double py, double pz,
-	      short pID, string vID);
+	      int pID, string vID);
 
     void fill(StThreeVector<double>& x,
 	      StThreeVector<double>& p,
 	      int track_p,
 	      double cosX, double coxY, double cosZ,
 	      double step, double dE, double mass,
-	      short pID, string vID);
+	      int id, int gid, string vID);
 
     void fill(double x, double y, double z, int track_p,
 	      double cosX, double coxY, double cosZ, double step,
-	      double dE, short pID, string vID);
+	      double dE, int pID, string vID);
 
     void addGlobal(double,double,double);
 
@@ -113,7 +114,8 @@ private:
     double                   mCosX, mCosY, mCosZ;
     int                      mTrackp;
     double                   mdS;
-    short                    mId;
+    int                      mId;
+    int                      mGid;
     string                   mVolumeId;  //!
     double                   mdE;
     double                   mMass;
@@ -130,7 +132,8 @@ inline double  StRichGHit::cosY()     const {return mCosY;}
 inline double  StRichGHit::cosZ()     const {return mCosZ;}
 inline double  StRichGHit::ds()       const {return mdS;}
 inline double  StRichGHit::dE()       const {return mdE;}
-inline short   StRichGHit::id()       const {return mId ;}
+inline int   StRichGHit::id()       const {return mId ;}
+inline int   StRichGHit::gid()       const {return mGid ;}
 inline double  StRichGHit::mass()     const {return mMass;}
 inline const string&  StRichGHit::volumeID() const {return mVolumeId ;}
 

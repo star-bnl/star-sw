@@ -1,13 +1,13 @@
 /******************************************************
- * $Id: StRichGHit.cxx,v 1.6 2000/03/17 14:54:29 lasiuk Exp $
+ * $Id: StRichGHit.cxx,v 1.7 2000/04/05 15:59:22 lasiuk Exp $
  *
  * Description:
  *  Implementation of the GHit object.
  *
  ******************************************************
  * $Log: StRichGHit.cxx,v $
- * Revision 1.6  2000/03/17 14:54:29  lasiuk
- * Large scale revisions after ROOT dependent memory leak
+ * Revision 1.7  2000/04/05 15:59:22  lasiuk
+ * short --> int
  *
  * Revision 1.6  2000/03/17 14:54:29  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -38,16 +38,16 @@ using namespace units;
 
 StRichGHit::StRichGHit() {/* nopt */}
 
-StRichGHit::StRichGHit(double x, double y, double z, double dE, short pID, string vID)
+StRichGHit::StRichGHit(double x, double y, double z, double dE, int pID, string vID)
     :  mXLocal(x,y,z), mId(pID), mVolumeId(vID), mdE(dE) {/* nopt*/ }
 
-StRichGHit::StRichGHit(double x, double y, double z, int track_p, short pID) 
+StRichGHit::StRichGHit(double x, double y, double z, int track_p, int pID) 
     : mXLocal(x, y, z), mTrackp(track_p), mId(pID) {/* nopt*/ }
 
-StRichGHit::StRichGHit(double x, double y, double z, short pID)
+StRichGHit::StRichGHit(double x, double y, double z, int pID)
     : mXLocal(x,y,z), mId(pID) { /* nopt */ }
 
-StRichGHit::StRichGHit(double x, double y, double z, double dE, double ds, short pID, string vID,
+StRichGHit::StRichGHit(double x, double y, double z, double dE, double ds, int pID, string vID,
 		       double px, double py, double pz)
     : mXLocal(x,y,z), mP(px, py,pz), mdS(ds), mId(pID), mVolumeId(vID), mdE(dE)
 {
@@ -60,7 +60,7 @@ StRichGHit::~StRichGHit() {/*nopt*/}
 
 void StRichGHit::fill(double x, double y, double z, int track_p,
 		      double cosX, double cosY, double cosZ, double step, 
-		      double dE ,short pID , string vID)
+		      double dE ,int pID , string vID)
 {
     mXLocal.setX(x);
     mXLocal.setY(y);
@@ -79,7 +79,7 @@ void StRichGHit::fill(double x, double y, double z, int track_p,
 		      double cosX, double cosY, double cosZ,
 		      double step, double dE,
 		      double px, double py, double pz,
-		      short pID , string vID)
+		      int pID , string vID)
 {
     mXLocal.setX(x);
     mXLocal.setY(y);
@@ -102,7 +102,7 @@ void StRichGHit::fill(StThreeVector<double>& x,
 		      int track_p,
 		      double cosX, double cosY, double cosZ,
 		      double step, double dE, double mass,
-		      short pID, string vID)
+		      int pID, int gid, string vID)
 {
     mXLocal = x;
     mP      = p;
@@ -114,6 +114,7 @@ void StRichGHit::fill(StThreeVector<double>& x,
     mdE = dE;
     mMass = mass;
     mId = pID;
+    mGid = gid;
     mVolumeId = vID;
 }
 
