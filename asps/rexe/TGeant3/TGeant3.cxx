@@ -14,6 +14,9 @@
  **************************************************************************/
 /*
 $Log: TGeant3.cxx,v $
+Revision 1.12  2004/03/15 18:00:16  fisyak
+Clean up argument handling (Insure++ reports)
+
 Revision 1.11  2004/03/01 16:02:49  fisyak
 new interface to simulation based on starsim
 
@@ -3636,9 +3639,12 @@ void TGeant3::Aginit(const Char_t *command) {
   TString tChain(command);
   //  static Int_t argc = 0;
   //  static Char_t *argv[200];
+  static Int_t MargC = 0;
+  static Char_t *MargV[500];
   static TString ProgName(Margv[0]);
   ProgName.ReplaceAll("root4star","starsim");
-  Margv[0] = (Char_t *) ProgName.Data();
+  MargV[MargC]   = (Char_t *) calloc(ProgName.Length(), 1);
+  strcpy(MargV[MargC],ProgName.Data()); MargC++;
   Ssiz_t begin, index, end, end2;
   begin = index = end = end2 = 0;
   TRegexp separator("[^ ;,\\t\\s]+");
@@ -3656,15 +3662,15 @@ void TGeant3::Aginit(const Char_t *command) {
     argc++;
   }
 #endif
-  Margc = 1; // keep program name
+  //  Margc = 1; // keep program name
   //  Margc = 0; // don't keep program name
   while ( (begin < tChain.Length()) && (index != kNPOS) ) {
     // loop over given Chain options
     index = tChain.Index(separator,&end,begin);
     if (index >= 0 && end >= 1) {
-      TString *t = new TString(tChain(index,end));
-      Margv[Margc] = (Char_t *) t->Data();
-      Margc++;
+      TString t(tChain(index,end));
+      MargV[MargC]   = (Char_t *) calloc(t.Length(), 1);
+      strcpy(MargV[MargC],t.Data()); MargC++;
     }
     begin += end+1;
   }
@@ -3673,6 +3679,8 @@ void TGeant3::Aginit(const Char_t *command) {
   Margc = argc;
   Margv = &argv[0];
 #endif
+  Margc = MargC;
+  Margv = MargV;
   k_setar(Margc, Margv);
 
   aginit();
