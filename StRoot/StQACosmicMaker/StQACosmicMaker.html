@@ -1,0 +1,29 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<META NAME="Generator" CONTENT="Microsoft Word 97">
+<TITLE>StQACosmicMaker</TITLE>
+</HEAD>
+<BODY>
+
+<FONT SIZE=7><P ALIGN="CENTER">StQACosmicMaker</P>
+</FONT><FONT SIZE=5>
+<P>&nbsp;</P>
+<P>Run BFC.C</P>
+
+<P>.x bfc.C(50,"tpc tpt fzin eval tfs","/data01/snelling/gstar/fzfiles/year_1b/hadr_on/auau_b0-15_5927evt1.fzd")</P>
+
+<P>&nbsp;</P>
+<P>gSystem-&gt;Load("StQACosmicMaker");</P>
+
+<P>StQACosmicMaker *mQACosmicMaker12 = new StQACosmicMaker("QACosmicsSector12");</P>
+<P>mQACosmicMaker12-&gt;setNrXbins(100);</P>
+<P>mQACosmicMaker12-&gt;setSector(12);</P>
+
+<P>StQACosmicMaker *mQACosmicMaker6 = new StQACosmicMaker("QACosmicsSector6");</P>
+<P>mQACosmicMaker6-&gt;setNrXbins(50);</P>
+<P>mQACosmicMaker6-&gt;setSector(6);</P>
+
+<P>StQACosmicMaker *mQACosmicMaker = new StQACosmicMaker;</P>
+<P>mQACosmicMaker-&gt;setNrXbins(50);</P></FONT></BODY>
+</HTML>
