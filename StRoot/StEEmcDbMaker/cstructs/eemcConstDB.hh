@@ -56,8 +56,9 @@ analysis make a different choice.
 #define EEMCSTAT_OUTPI0   0x0010 // hot in pi0 analysis
 
 #define EEMCSTAT_HOTSTR   0x0020 // hot esmd strip
+#define EEMCSTAT_JUMPED   0x0040 // jumpy ped over several chan
 
-//The remaing 10 bits of 'stat' are free.
+//The remaing  bits of 'stat' are free.
 
 /* The 'fail' 16-bits are meant as general abort of a given 
 channel. If any bit is set in
