@@ -1,7 +1,7 @@
-// $Id: MakeHists.cxx,v 1.9 1999/06/03 16:12:21 kathy Exp $
+// $Id: MakeHists.cxx,v 1.10 1999/06/03 16:40:36 kathy Exp $
 // $Log: MakeHists.cxx,v $
-// Revision 1.9  1999/06/03 16:12:21  kathy
-// putting in new default files for some macros, remove unneeded macro dedx.C and put in new read_bfc_hist_list.C macro
+// Revision 1.10  1999/06/03 16:40:36  kathy
+// put back old dedx.C and restore original macros that use non-existent input file
 //
 // Revision 1.8  1999/05/21 15:33:51  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
@@ -12,7 +12,7 @@
 //=======================================================================
 //*-- Author :    Valery Fine   21/07/98  (E-mail:fine@bnl.gov)
 // #include "St_mevsim_Module.h"
-void MakeHists(Char_t *xdffilename="/disk00000/star/test/new/tfs_Solaris/year_1b/psc0069_01_40evts_dst.xdf")
+void MakeHists(Char_t *xdffilename="/afs/rhic/star/packages/dev/StRoot/macros/data/test.xdf")
 {
 
   gROOT->Reset();
