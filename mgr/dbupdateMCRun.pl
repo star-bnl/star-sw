@@ -21,10 +21,10 @@ require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
 my $prodSr = "P00hi"; 
 
 my @Sets = (
-            "auau130/hijing/b0_3_jet05/year_1h/halffield/hadronic_on",
-            "auau130/hijing/b0_15/year_1h/halffield/hadronic_on",
-            "auau130/hijing/b0_3/year_1h/halffield/hadronic_on",
-            "auau130/hijing/b3_6/year_1h/halffield/hadronic_on",
+#            "auau130/hijing/b0_3_jet05/year_1h/halffield/hadronic_on",
+#            "auau130/hijing/b0_15/year_1h/halffield/hadronic_on",
+            "auau130/hijing/b0_3/year_1e/halffield/hadronic_on",
+#            "auau130/hijing/b3_6/year_1h/halffield/hadronic_on",
 );
 
 
@@ -68,7 +68,7 @@ struct JSFileAttr => {
 my $debugOn = 0;
 
 my $topHpssReco  =  "/home/starreco/reco";
-my $DISK1 = "/star/rcf/disk00001/star";
+my $DISK1 = "/star/rcf/prodlog";
 my $DISKD = "/star/rcf";
 
 my $prod_ext = "trs_1i";
@@ -109,11 +109,12 @@ my @jobSum_set;
 my $jobSum_no = 0;
 
 
-########## Find reconstruction files in HPSS
+########## Find reco files in HPSS
 
 for( $ll = 0; $ll<scalar(@Sets); $ll++) {
   $hpssRecoDirs[$ll] = $topHpssReco . "/" . $Sets[$ll] . "/" . $prod_ext;
-  }
+ print "Directories name: ", $hpssRecoDirs[$ll], "\n"; 
+ }
 my $ftpHpss = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>200)
   or die "HPSS access failed";
 $ftpHpss->login("starsink","MockData") or die "HPSS access failed";
@@ -129,7 +130,7 @@ $ftpHpss->quit();
  &StDbProdConnect();
 
 
- $sql="SELECT dataset, fName, path, size, createTime, Nevents, redone FROM $FileCatalogT  WHERE fName LIKE '%root' AND jobID LIKE '%$prodSr%' AND path like '%auau130%' ";
+ $sql="SELECT dataset, fName, path, size, createTime, Nevents, redone FROM $FileCatalogT  WHERE fName LIKE '%root' AND jobID LIKE '%$prodSr%' AND path like '%auau130/hijing/b0_3/year_1e/%' ";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
           $cursor->execute;
@@ -159,7 +160,7 @@ $ftpHpss->quit();
 
 ### select reco files status from JobStatus
 
- $sql="SELECT JobID, prodSeries, jobfileName, sumFileName, sumFileDir, jobStatus, NoEvents, CPU_per_evt_sec FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobfileName like 'auau130%' AND jobStatus <> 'n/a'";
+ $sql="SELECT JobID, prodSeries, jobfileName, sumFileName, sumFileDir, jobStatus, NoEvents, CPU_per_evt_sec FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobfileName like 'auau130_hijing_b0_3%' AND jobStatus <> 'n/a'";
 
   $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
@@ -359,13 +360,12 @@ last;
 
        if ( ($mfName eq $dbfname) and ($mpath eq $dbfpath)) { 
 # print "Name of File: ", $mfName , " % ", $mcTime, " % " ,$dbctime,"\n";
-           if ( ($msize eq $dbfsize) and ($mcTime eq $dbctime) and ($dbNevt == $nNoEvt)) {
-#          if ( $msize eq $dbfsize) {  
+           if ( ($msize eq $dbfsize) and ( $mcTime =~ /$dbctime/)) {
            $flagHash{$fullName} = 0;
 
           } else {
             $flagHash{$fullName} = 2;  
-# print  $mfName, " % " ,$flagHash{$fullName}," % " , $mcTime, " % " ,$dbctime, " % " , $dbNevt," % " , $nNoEvt, "\n";  
+# print "Update file: ", $mfName, " % " ,$flagHash{$fullName}," % " , $mcTime, " % " ,$dbctime, " % " , $dbNevt," % " , $nNoEvt, "\n";  
 	  }
         last;
 	}else {
@@ -426,20 +426,20 @@ my $mcalib;
    $mowner = ($$eachRecoFile)->fowner;
    $msize = ($$eachRecoFile)->size;
    $mName = $mfName; 
-  if($mfName =~ /rcf150_p/ and $mfName =~ /_100000evts/) {
-   $mrunId = 150;
-   $mfileSeq = 0; 
- }
-  elsif($mfName =~ /rcf150_p/) {
-   $mrunId = 150;
-   @prtFS = split("_",$mfName);
-   $mfileSeq = $prtFS[2];
-}else{
+#  if($mfName =~ /rcf150_p/ and $mfName =~ /_100000evts/) {
+#   $mrunId = 150;
+#   $mfileSeq = 0; 
+# }
+#  elsif($mfName =~ /rcf150_p/) {
+#   $mrunId = 150;
+#   @prtFS = split("_",$mfName);
+#   $mfileSeq = $prtFS[2];
+#}else{
    $mName =~ m/(^[a-z0-9]+)_([0-9]+)_([0-9]+)/;
    $mfileSeq = $2 +0;
    $mrun = $1;
    $mrunId = substr($1,3) + 0;  
-}
+#}
    if($mfName =~  /root/) {
      $mformat = "root";
      $compont = basename("$mfName",".root");
@@ -487,7 +487,7 @@ my $mcalib;
 if ( $gflag == 1) {
      $mdone = 0;
    print "Files to be inserted :", "\n"; 
-   print "Inserted Files: ", $mJobId, " % ",$mpath, " % ",$mfName, " % ",$mcTime," % ",$mdone,"\n"; 
+   print "Inserted Files: ", $mJobId, " % ",$mpath, " % ",$mfName, " % ",$mcTime," % ",$mdone," % ",$mjobSt," % ",$mdtStat, "\n"; 
      $NumMisFile++;
 
    print "Filling Files Catalog\n";
@@ -738,13 +738,17 @@ sub fillDbTable {
 	$year = $year - 1900;
       }
       
-      if( $year > 98 ) {
+      if( $year > 97 ) {
 	$year = 1900 + $year;
       } else {
 	$year = 2000 + $year;
       }
 #      $year = 2000;
       $fflag = 1;   
+
+if ( $monthD == 12) {
+ $year = 2000;
+}    
    
 #     $timeS = sprintf ("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:00",
 #                        $year,$monthD,$day,$hr,$min);
