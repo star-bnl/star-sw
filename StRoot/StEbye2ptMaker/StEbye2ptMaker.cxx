@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEbye2ptMaker.cxx,v 1.6 2000/09/19 19:49:50 jgreid Exp $
+ * $Id: StEbye2ptMaker.cxx,v 1.7 2000/09/20 00:53:50 jgreid Exp $
  *
  * StEbye2ptMaker.cxx
  *
@@ -15,8 +15,8 @@
  ***************************************************************************
  *
  * $Log: StEbye2ptMaker.cxx,v $
- * Revision 1.6  2000/09/19 19:49:50  jgreid
- * added functionality for urgent analysis - DNP2000
+ * Revision 1.7  2000/09/20 00:53:50  jgreid
+ * fixed sorting to work properly with event cuts
  *
  * Revision 1.4  2000/08/14 22:05:19  jseger
  * Added eta-spectra.  Now reads Ebye mini-DST as input.  Bins events in
@@ -52,7 +52,7 @@
 using namespace units;
 #endif
 
-static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.6 2000/09/19 19:49:50 jgreid Exp $";
+static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.7 2000/09/20 00:53:50 jgreid Exp $";
 
 ClassImp(StEbye2ptMaker)
 
@@ -239,6 +239,12 @@ StEbye2ptMaker::Make()
     Int_t entryNum = mIndex[mEventCounter];
     mthisEventBinNumber = mSortArray[entryNum];
     mEventCounter++;
+   
+    // drop off events which are outside 700<mult<1600, abs(z)>75cm. 
+    if (mthisEventBinNumber == 0) {
+	gMessMgr->Info() << "StEbye2ptMaker::Make() drops it !" << endm;
+	return kStOK;
+    }
   
     if (!mEbyeEvent || !pEbyeTree->GetEntry(entryNum)) return kStOK;
   
@@ -262,6 +268,7 @@ StEbye2ptMaker::Make()
       EtatempEventMinus = mEtaPreviousEventMinus;
 
       mPreviousEventPlus = mThisEventPlus;
+
       mPreviousEventMinus = mThisEventMinus;
       mEtaPreviousEventPlus = mEtaThisEventPlus;
       mEtaPreviousEventMinus = mEtaThisEventMinus;
@@ -564,21 +571,27 @@ void StEbye2ptMaker::SortEvents() {
   Int_t mNZBins = 40;  //set number of bins for z vertex position
   Int_t mMultMax = 1600;  // set the maximum multiplicity for the dataset
   Int_t mMultMin = 700;
-  Int_t mZMax = 75;  // set the maximum value for z vertex position
+  Float_t mZMax = 75.;  // set the maximum value for z vertex position
 
   // place events into bins
   gMessMgr->Info() << " StEbye2ptMaker::SortEvents() Binning events... " << endm;
   Int_t i=0;
+  Int_t BinNumber=0;
   for (i=0;i<Nentries;i++) {
     pEbyeTree->GetEntry(i);
     Int_t mult = mEbyeEvent->OrigMult();
-    Int_t zvertex = mEbyeEvent->Vz();
+    Float_t zvertex = mEbyeEvent->Vz();
+    if(mult > mMultMax || mult < mMultMin || zvertex > mZMax || zvertex < -75.){
+	BinNumber = 0;
+    } else {
     Int_t multbin = 1+((mult-mMultMin)*mNMultBins/(mMultMax-mMultMin));
-    Int_t zbin = 1+((zvertex+mZMax)*mNZBins/(2*mZMax));
-    Int_t BinNumber = (multbin-1)*mNZBins+zbin;
-   if(zbin > mNZBins || zbin < 0 || multbin >mNMultBins || multbin <0){
-   gMessMgr->Info() << " StEbye2ptMaker::SortEvents() Bin Number Outside Allowed Range " << endm;
-   }
+    Int_t zbin = 1 + int((zvertex+mZMax)*mNZBins/(2.*mZMax));
+    BinNumber = (multbin-1)*mNZBins+zbin;
+     if(zbin > mNZBins || zbin < 0 || multbin >mNMultBins || multbin <0){
+     gMessMgr->Info() << " StEbye2ptMaker::SortEvents() Bin Number Outside Allowed Range " << endm;
+     cout <<zbin<<" mNZBins=40"<<multbin<<" mNMultBins=40 "<<zvertex<<" "<<mult<<endl;
+     }
+    }
     mSortArray[i] = BinNumber;
   }
 
@@ -586,7 +599,7 @@ void StEbye2ptMaker::SortEvents() {
   // the same bin
   gMessMgr->Info() << " StEbye2ptMaker::SortEvents() Sorting events... " << endm;
   TMath::Sort(Nentries,mSortArray,mIndex);
-   for (i=0;i<20;i++) {
+   for (i=0;i<40;i++) {
       printf("i=%d, index=%d,param=%d\n",i,mIndex[i],mSortArray[mIndex[i]]);
    }
 }
