@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.cxx,v 1.6 2000/03/16 02:07:04 laue Exp $
+ * $Id: StHbtAnalysis.cxx,v 1.7 2000/03/17 17:23:05 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.cxx,v $
+ * Revision 1.7  2000/03/17 17:23:05  laue
+ * Roberts new three particle correlations implemented.
+ *
  * Revision 1.6  2000/03/16 02:07:04  laue
  * Copy constructor added to StHbtAnalysis (only known cuts, corrfctn).
  *
@@ -124,7 +127,7 @@ StHbtAnalysis::StHbtAnalysis(){
 }
 //____________________________
 
-StHbtAnalysis::StHbtAnalysis(const StHbtAnalysis& a) {
+StHbtAnalysis::StHbtAnalysis(const StHbtAnalysis& a) : StHbtBaseAnalysis() {
   //StHbtAnalysis();
   mEventCut          = 0;
   mFirstParticleCut  = 0;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.17 2000/03/16 02:07:05 laue Exp $
+ * $Id: StHbtManager.cxx,v 1.18 2000/03/17 17:23:05 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,14 +13,8 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
- * Revision 1.17  2000/03/16 02:07:05  laue
- * Copy constructor added to StHbtAnalysis (only known cuts, corrfctn).
- *
- * StHbtBinaryReader can now derive filename from StIOMaker and read a list
- * of files.
- *
- * StHbtManager now holds a collection of StHbtEventWriters (multiple writes
- * possible now)
+ * Revision 1.18  2000/03/17 17:23:05  laue
+ * Roberts new three particle correlations implemented.
  *
  * Revision 1.16  2000/02/26 19:04:52  laue
  * Some unnecessary includes removed.
@@ -73,7 +67,7 @@
  * ** None of these changes should affect any user **
  *
  * Revision 1.11  1999/10/04 15:38:57  lisa
- * include Franks new accessor methods StHbtAnalysis::CorrFctn and StHbtManager::Analysis as well as McEvent example macro
+ * include Franks new accessor methods StHbtAnalysis::CorrFctn and StHbtManager::Analysis as well as McEnt example macro
  *
  * Revision 1.10  1999/09/17 22:38:02  lisa
  * first full integration of V0s into StHbt framework
@@ -188,7 +182,7 @@ void StHbtManager::Finish(){
   }
   // Analyses
   StHbtAnalysisIterator AnalysisIter;
-  StHbtAnalysis* currentAnalysis;
+  StHbtBaseAnalysis* currentAnalysis;
   for (AnalysisIter=mAnalysisCollection->begin();AnalysisIter!=mAnalysisCollection->end();AnalysisIter++){
     currentAnalysis = *AnalysisIter;
     currentAnalysis->Finish();
@@ -214,7 +208,7 @@ StHbtString StHbtManager::Report(){
   sprintf(ctemp,"\nStHbtManager Reporting %u Analyses\n",mAnalysisCollection->size());
   stemp += ctemp;
   StHbtAnalysisIterator AnalysisIter;
-  StHbtAnalysis* currentAnalysis;
+  StHbtBaseAnalysis* currentAnalysis;
   for (AnalysisIter=mAnalysisCollection->begin();AnalysisIter!=mAnalysisCollection->end();AnalysisIter++){
     cout << "StHbtManager - asking for Analysis Report" << endl;
     currentAnalysis = *AnalysisIter;
@@ -225,7 +219,7 @@ StHbtString StHbtManager::Report(){
   return returnThis;
 }
 //____________________________
-StHbtAnalysis* StHbtManager::Analysis( int n ){  // return pointer to n-th analysis
+StHbtBaseAnalysis* StHbtManager::Analysis( int n ){  // return pointer to n-th analysis
   if ( n<0 || n > (int) mAnalysisCollection->size() )
     return NULL;
   StHbtAnalysisIterator iter = mAnalysisCollection->begin();

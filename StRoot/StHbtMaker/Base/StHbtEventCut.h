@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventCut.h,v 1.4 2000/03/16 01:54:36 laue Exp $
+ * $Id: StHbtEventCut.h,v 1.5 2000/03/17 17:18:25 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEventCut.h,v $
+ * Revision 1.5  2000/03/17 17:18:25  laue
+ * Roberts new three particle correlations implemented.
+ *
  * Revision 1.4  2000/03/16 01:54:36  laue
  * Copy constructor added to all the cut base classes and to the
  * corrfctn base class
@@ -72,11 +75,11 @@ public:
   ClassDef(StHbtEventCut, 0)
 #endif
   // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
-  friend class StHbtAnalysis;
-  StHbtAnalysis* HbtAnalysis(){return myAnalysis;};
+  friend class StHbtBaseAnalysis;
+  StHbtBaseAnalysis* HbtAnalysis(){return myAnalysis;};
 
 protected:
-  StHbtAnalysis* myAnalysis;
+  StHbtBaseAnalysis* myAnalysis;
 
 };
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helensV0Cut.cxx,v 1.6 2000/03/16 01:57:17 laue Exp $
+ * $Id: helensV0Cut.cxx,v 1.7 2000/03/17 17:22:53 laue Exp $
  *
  * Authors: Helen Caines, Tom Humanic, Ohio State, humanic@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: helensV0Cut.cxx,v $
+ * Revision 1.7  2000/03/17 17:22:53  laue
+ * Roberts new three particle correlations implemented.
+ *
  * Revision 1.6  2000/03/16 01:57:17  laue
  * Copy constructor added to some cuts
  *
@@ -61,7 +64,6 @@ bool helensV0Cut::Pass(const StHbtV0* V0){
 
 #ifdef STHBTDEBUG  
   cout << endl;
-  cout << "#V0 " << V0Count++;
   cout << " * dcaV0Daughters " << V0->dcaV0Daughters();
   cout << " * dcaV0ToPrimVertex " << V0->dcaV0ToPrimVertex();
   cout << " * decayLengthV0 " << V0->decayLengthV0();
