@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.95 2000/06/05 17:29:24 fisyak Exp $
+# $Id: Construct,v 1.94 2000/05/16 01:33:26 fisyak Exp $
 use Env;
 #use lib qw($STAR . "/mgr"); # Modify perl include path
 use lib $STAR . "/mgr"; # Modify perl include path
@@ -21,12 +21,11 @@ $OSFID .= " " . $STAR_SYS;
 my $ROOTLIBS;
 my $RINTLIBS;
 my $ROOTGLIBS;
-#$ROOTLIBS    = "-lNew -lCore -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui";
-$ROOTLIBS    = " -lNew  -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lHist -lGraf -lGraf3d -lTree -lGpad -lPhysics"; print "ROOTLIBS = $ROOTLIBS\n";
-
-if (!defined($ARG{NoNew}))    {$ROOTLIBS    = " -lNew";}
-$ROOTLIBS .=  " -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui -lGpad -lPhysics -lMatrix";      
-print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
+$ROOTLIBS    = "-lNew -lCore -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui";
+if (defined($ARG{NoNew}))    {
+  $ROOTLIBS =  "-lCore -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui";      
+  print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
+}
 if (defined($ARG{ROOTLIBS}))    {$ROOTLIBS = $ARG{ROOTLIBS}        ; print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);}
 $RINTLIBS    = "-lRint ";
 $CPPPATH  = $INCLUDE . ":#StRoot:" .  $ROOTSRC;
@@ -95,10 +94,6 @@ Ignore qw(
 	  include/fortran.h
 	  include/not_cern
 	  include/compiledata.h
-	  include/src/newsos.h
-	  include/src/sunos.h
-	  include/src/memtest.h
-	  include/TWin32HookViaThread.h
 	 );
 if (! $param::quiet) {
   print "STAR_SYS = \t$env->{ENV}->{STAR_SYS}\n";

@@ -43,6 +43,14 @@ foreach my $Rep (@Repo) {
 my @src     = sortu (@srcL);# print "src = @src\n";
 my @h_files = sortu (@h_filesL);
 my @idlM    = sortu (@idlML);# print "idlM = @idlM\n";
+#if ($pkg eq 'g2t') {
+#  my @srcg2t = ();
+#  my @idlMg2t = ();
+#  foreach my $s (@src)  {next if ($s =~ /g2.main.g$/);   push @srcg2t, $s;}
+#  foreach my $s (@idlM) {next if ($s =~ /g2.main.idl$/); push @idlMg2t, $s;}
+#  @src = @srcg2t;# print "scr = @src\n";
+#  @idlM = @idlMg2t;# print "idlM = @idlM\n";
+#}
 if ($#idlM > -1) {$PKG = "St_" . $PKG;}
 my $obj  = $ObjDir;  print "obj = $obj\n" if $param::debug;
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; print "SO_PKG = $SO_PKG\n" if $param::debug;
@@ -57,12 +65,7 @@ if ($pkg =~ /^StDb/ || $pkg =~ /^StTpcDb/) {
 if ($pkg =~ /^pyth$/){
   my $CERN_ROOT = $env->{ENV}->{CERN_ROOT}; print "CERN_ROOT = $CERN_ROOT\n" if $param::debug;
   if ($LIBPATH) { $LIBPATH .=":";}
-  $LIBPATH .= $CERN_ROOT . "/lib";
-  $LIBS    .= " -lpythia ";  
-#  if ($STAR_SYS =~ /^i386/) {
-#   $LIBPATH .=  ":/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66";
-#   $LIBS    .= " -lg2c";
-# }
+  $LIBPATH .= $CERN_ROOT . "/lib -lpythia";
 }
 (my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g; print "new share $share\n" if $param::debug;
 $share =~ s/\/StRoot//g;
@@ -130,7 +133,6 @@ foreach my $cpp ($Dir,@cpps) {
 }
 $cscanner= find scan::cpp($env2->{_cwd}, $ROOTCINT_CPP); print "ROOTCINT_CPP = $ROOTCINT_CPP\n" if $param::debug;
 my $ROOTCINT_CPPPATH = $cscanner->iflags; 
-#$ROOTCINT_CPPPATH .= " -I" . $env->{ENV}->{ROOTSYS} . "/root/cint/stl";
 print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n" if $param::debug;
 $cscanner= find scan::cpp($env2->{_cwd}, $STIC_CPP);
 my $STIC_CPPPATH = $cscanner->iflags;
@@ -192,10 +194,9 @@ if ($#Defs > -1) {
   ($share . "/"  . $PKG . "_Cint.cxx", $share . "/"  . $PKG . "_Cint.h");#, $share . "/"  . "LinkDef.h"); 
   Install $env2 $share, @Defs;
   my @defs = ();
-  foreach my $def (@Defs) {#print "def = $def OBJ = $OBJ\n";
-    if ($def =~ /^\#/) {push @defs, $def;}			   
-    else               {push @defs, "#" . $Dir . "/" . $def;}
-  }# print "defs = @defs\n";
+  foreach my $def (@Defs) {
+    push @defs, $share . "/" . basename($def);
+  }
   Command $env2 [@CintFiles], @defs,  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
   Install $env2 $ObjDir, @CintFiles;
   (my $cint =  $CintFiles[0]) =~ s/$share/$obj/g;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.19 2000/06/05 13:42:50 jgreid Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.20 2000/06/06 17:55:39 jgreid Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.20  2000/06/06 17:55:39  jgreid
+ * Don't use exit(0)lsls Us kStWarn instead!
+ *
  * Revision 1.19  2000/06/05 13:42:50  jgreid
  * change to exit(0) on primary vertex failure
  *
@@ -207,7 +210,7 @@ Int_t StEbyeScaTagsMaker::fillTag(StEvent& event) {
 
   // If there is no found vertex exit with no error
   //   so that the DST can be written
-  if (npvtx == 0) exit(0);
+  if (npvtx == 0) return kStWarn;
   
   // loop over these and choose the one with the most daughters,
   //  or default to primaryVertex(0) if there is only one

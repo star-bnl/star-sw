@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.15 2000/06/05 17:29:23 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.14 2000/05/12 20:29:48 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -34,19 +34,7 @@
  $CXXinp   = "";
  $CPP      = "gcc";
  $CPPFLAGS = "";#-I-";
- $AFSDIR   = "/usr/afsws";
- $AFSLIBS  = "-L" . $AFSDIR . "/lib -L" . $AFSDIR . "/lib/afs";
- $AFSLIBS .= " -lkauth -lprot -lubik -lauth -lrxkad -lsys -ldes -lrx -llwp";
- $AFSLIBS .= " -lcmd -lcom_err -laudit ". $AFSDIR . "/lib/afs/util.a";
- $SRPDIR   = $ROOTSYS . "/lib";
- $SRPFLAGS = "";# -DR__SRP -I" . $SRPDIR . "/include";
- $SRPLIBS  = "";# -L" . $SRPDIR . "/lib -lsrp -lgmp";
-##### use shadow passwords for authentication #####
- $SHADOWFLAGS = ""; #-DR__SHADOWPW
- $SHADOWLIBS  = "";
- $AUTHFLAGS   = $SHADOWFLAGS . " " . $AFSFLAGS . " " . $SRPFLAGS;
- $AUTHLIBS    = $SHADOWLIBS . " " .  $AFSLIBS . " " . $SRPLIBS;
- $R_CPPFLAGS = " -DR__AFS -DHAVE_CONFIG ";
+ $R_CPPFLAGS = " -DR__AFS";
  $CPPPATH  = "";
  $EXTRA_CPPPATH = "";
  $CXX      = "g++";
@@ -54,8 +42,7 @@
  $EXTRA_CXXFLAGS = "";
  $CXXOPT   = "";
  $CINTCXXFLAGS = "";
- $PLATFORM = "linux"; 
- $ARCH     = "linuxegcs";
+ 
  $CC       = "gcc";
  $CFLAGS   = "-fpic -w";
  $EXTRA_CFLAGS = "";
@@ -66,8 +53,6 @@
  $ARFLAGS  = "rvu";
  $LD       = $CXX;
  $LDFLAGS  = $CXXFLAGS;
- $F77LD    = $LD;
- $F77LDFLAGS = $LDFLAGS;
  $EXTRA_LDFLAGS = "";
  $SO       = $CXX;
  $SOFLAGS  = "";
@@ -101,8 +86,6 @@
  if (/^i386_/) {
    #    case linux
    #  ====================
-   $PLATFORM = "linux"; 
-   $ARCH     = "linuxegcs";
    $OSFID    = "f2cFortran";
    $OSFID   .= " lnx Linux linux LINUX";
    $OSFID   .= " CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX NEW_ARRAY_ON GNU_GCC";
@@ -113,8 +96,7 @@
    #                                             -fpipe
    $CFLAGS   = "-fPIC -Wall";# -march=pentiumpro";
    $CINTCFLAGS = $CFLAGS . " " . $R_CPPFLAGS;
-   $LDFLAGS  = "";#$DEBUG . " " . $CXXFLAGS . " -Wl,-Bdynamic";
-   $F77FLAGS      = "";
+   $LDFLAGS  = $DEBUG . " " . $CXXFLAGS . " -Wl,-Bdynamic";
    $SOFLAGS  = "-shared -Wl,-Bdynamic";  
    $XLIBS    = "-L/usr/X11R6/lib -lX11 -lXpm";
    $THREAD   = "-lpthread";
@@ -123,7 +105,7 @@
    if (/egcs$/) {
      $CLIBS    = "-L/usr/X11R6/lib  -lXt -lXpm -lX11 -lm -ldl  -rdynamic";
      $FC       = "g77";
-#    $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
+     $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
      $FFLAGS   = "-w %DEBUG -fno-second-underscore -fno-automatic";
      $FCCOM    = "test -f %>.g && rm %>.g ; test -f %>.f && rm %>.f;";
      $FCCOM   .= "%FC -E -P %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %< %Fout%>.g &&"; 
@@ -147,7 +129,7 @@
      $FC       = "pgf77";
      $FLIBS    = "-L/usr/pgi/linux86/lib -lpgftnrtl -lpgc";
      $FLIBS   .= " -L/opt/star/lib -lpgf77S -lpgf77A";
-#     $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
+     $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
      $FFLAGS   = "-DPGI";  
      $FEXTEND  = "-Mextend";
      $LD       = $CXX;
@@ -160,14 +142,14 @@
      $FC       = "pgf77";
      $FLIBS    = "-L/opt/star/lib -lpgf77S -lpgf77A";
      $FLIBS   .= " -L/usr/pgi/linux86/lib -lpgftnrtl -lpgc";
-#     $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
+     $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
      $FFLAGS   = "-DPGI";  
      $FEXTEND  = "-Mextend";
      if ($HOST =~ /pcstar/) {# From Janet for MPI /usr/pgi -> /usr/local/pgi
        $CLIBS    = "-L/usr/local/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11 -lpgc -lm -ldl  -rdynamic";
        $FLIBS    = "-L/usr/local/pgi/linux86/lib -lpgftnrtl -lpgc";
        $FLIBS   .= " -L/opt/star/lib -lpgf77S -lpgf77A";
-#       $FLIBS   .= " -L/usr/local/egcs/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
+       $FLIBS   .= " -L/usr/local/egcs/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
      }
    }
    if (/^i386_linux2/) {$FLIBS   .= " -lI77 -lF77";}
@@ -179,14 +161,10 @@
      $LD       = $CXX;
      $SO       = $CXX;
    } 
-   $F77LIBS = " -lg2c -lnsl";
-   $FLIBS .= $F77LIBS;
  }
  elsif (/^hp_ux102/) {
    #    case "hp":
    #  ====================
-   $PLATFORM = "hpux"; 
-   $ARCH     = "hpuxacc";
    $OSFID = "HPUX CERNLIB_HPUX CERNLIB_UNIX ST_NO_NAMESPACES ST_NO_EXCEPTIONS";
    $OSFID   .= " NEW_ARRAY_ON";
    $CXX      = "aCC";
@@ -212,13 +190,9 @@
    $FC        = "fort77";
    $FFLAGS    = "-WF,-P +ppu +Z +B -K";
    $FEXTEND   = "+es";
-   $F77LD     = $FC;
-   $F77LDFLAGS= "-K +ppu";
    print "SHLIB_PATH = $SHLIB_PATH\n";
  }
  elsif (/^sun4x_56_CC5$/) {
-   $PLATFORM = "solaris"; 
-   $ARCH     = "solarisCC5";
    $OSFID     = "__CC5__ __SunOS_5_6";
    $OSFID    .= " CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS";
    $OSFID    .= " ST_NO_MEMBER_TEMPLATES";
@@ -232,10 +206,9 @@
    $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
 #   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/WS5.0/SC5.0/lib -lCstd -liostream -lCrun";
    $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/star/lib -lCstd -liostream -lCrun";
-#   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/star/lib -lCstd -liostream -lCrun";
    $FLIBS     = "-L/opt/WS5.0/lib -lM77 -lF77 -lsunmath";
    $XLIBS     = $ROOTSYS . "/lib/libXpm.a -L/usr/openwin/lib -lX11";
-   $SYSLIBS   = "-lm -ldl -lnsl -lsocket -L/opt/star/lib -lCstd -liostream -lCrun";
+   $SYSLIBS   = "-lm -ldl -lnsl -lsocket";
    $FFLAGS    = "-KPIC -w";
    $FEXTEND   = "-e";
    $CFLAGS    = "-KPIC";
@@ -261,8 +234,6 @@
 #   }
  }
  elsif (/^sun4x_5.$/) {
-   $PLATFORM = "solaris"; 
-   $ARCH     = "solaris";
    $OSFID     = "__SunOS_5_6";
    $OSFID    .= "CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ";
    $OSFID    .= "ST_NO_EXCEPTIONS ST_NO_MEMBER_TEMPLATES ST_NO_NAMESPACES ";
@@ -307,8 +278,6 @@
    }
  }
  elsif (/^intel_wnt/) {
-   $PLATFORM = "win32"; 
-   $ARCH     = "win32";
    #  $DEBUG    = "-Zi";
    $DEBUG    = "";
    $EXESUF   = ".exe";
@@ -381,19 +350,7 @@
  if (defined($ARG{SO}))       {$SO = $ARG{SO}              ; print "set SO = $SO\n" unless ($param::quiet);}
  if (defined($ARG{SOFLAGS}))  {$SOFLAGS = $ARG{SOFLAGS}    ; print "set SOFLAGS = $SOFLAGS\n" unless ($param::quiet);}
  $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/include";
- my @params = (	'PLATFORM'     => $PLATFORM,
-		'ARCH'         => $ARCH,
-		'AFSDIR'       => $AFSDIR,
-		'AFSLIB'       => $AFSLIB,
-		'AFSFLAGS'     => $AFSFLAGS,
-		'SRPDIR'       => $SRPDIR,
-		'SRPFLAGS'     => $SRPFLAGS,
-		'SRPLIBS'      => $SRPLIBS,
-		'SHADOWFLAGS'  => $SHADOWFLAGS,
-		'SHADOWLIBS'   => $SHADOWLIBS,
-		'AUTHFLAGS'    => $AUTHFLAGS,
-		'AUTHLIBS'     => $AUTHLIBS,
-	        'CPPPATH'      => $CPPPATH,
+ my @params = (	'CPPPATH'      => $CPPPATH,
 		'EXTRA_CPPPATH'=> $EXTRA_CPPPATH,
 		'CPPFLAGS'     => $CPPFLAGS,
 		'R_CPPFLAGS'   => $R_CPPFLAGS,
@@ -432,10 +389,8 @@
 		'CERNLIBS'     => $CERNLIBS,
 		'Libraries'    => $Libraries,
 		'LIBS'         => $LIBS,
-		'LD' 	       => $LD,
+		'LD' 	        => $LD,
 		'LDFLAGS'      => $LDFLAGS,
-		'F77LD'        => $F77LD,
-		'F77LDFLAGS'   => $F77LDFLAGS,
 		'EXEFLAGS'     => $EXEFLAGS,
 		'LIBPATH'      => $LIBPATH,
 		'LINKCOM'      => $LINKCOM,
@@ -443,13 +398,15 @@
 		'SOFLAGS'      => $SOFLAGS, 
 		'SoOUT'        => $SoOUT,
 		'LINKMODULECOM'=> $MAKELIB,
-		'AR'	       => $AR,
+		'AR'	        => $AR,
 		'ARFLAGS'      => $ARFLAGS,
 		'ARCOM'        => "%AR %ARFLAGS %> %<;%RANLIB %>",
 		'RANLIB'       => 'ranlib',
-		'AS'	       => 'as',
+		'AS'	        => 'as',
 		'ASFLAGS'      => '',
 		'ASCOM'        => '%AS %%DEBUG ASFLAGS %< -o %>',
+		'LD'	        => $LD,
+		'LDFLAGS'      => $LDFLAGS,
 		'PREFLIB'      => 'lib',
 		'SUFLIB'       => $A,
 		'SUFLIBS'      => "." . $SOEXT . ":." . $A,
