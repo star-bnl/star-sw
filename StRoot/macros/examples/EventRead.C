@@ -1,5 +1,22 @@
+// $Id: EventRead.C,v 1.2 1999/06/11 18:35:13 fine Exp $
+// $Log: EventRead.C,v $
+// Revision 1.2  1999/06/11 18:35:13  fine
+// *** empty log message ***
+//
+// Revision 1.13  1999/06/07 17:31:23  kathy
+// clean up some macros
+//
+// Revision 1.12  1999/05/21 15:33:57  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+// Revision 1.11  1999/05/20 18:43:21  kathy
+// removing unecessary macros
+//
 //======================================================================
-//   bfcread.C
+// owner:  Victor Perevoztchikov
+// what it does: 
+//=======================================================================
+// EventRead.C
 //
 // Kathy's notes (5/13/99):
 //     - Victor's example to show how to read in a DST produced from bfc.C and
@@ -23,12 +40,13 @@
 
 class StChain;
 class St_DataSet;
-St_DataSet *Event;
+class StEvent;
+StEvent *Event;
 StChain *chain;
 TBrowser *brow=0;
 
 void EventRead(Int_t nevents=1, const char
-*MainFile="/disk00000/star/test/new/tfs_Solaris/year_2a/psc0210_01_40evts.Event.root")
+*MainFile="/disk00000/star/test/new/tfs_Solaris/year_2a/psc0210_01_40evts.dst.root")
 
 {
 //
@@ -40,7 +58,7 @@ void EventRead(Int_t nevents=1, const char
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StRootEvent");
 
-    cout << "  .. bfcread.C, have loaded libraries " << endl;
+    cout << "  .. EventRead.C, have loaded libraries " << endl;
 
 //  Setup top part of chain
     chain = new StChain("bfc");
@@ -50,9 +68,9 @@ void EventRead(Int_t nevents=1, const char
   StTreeMaker *treeMk = new StTreeMaker("treeRead",MainFile);
   treeMk->SetIOMode("r");
   treeMk->SetDebug();
-  treeMk->SetBranch("*",0,"0");  		//deactivate all branches
-  treeMk->SetBranch("EventBranch",0,"r");	//activate EventBranch
-
+  //  treeMk->SetBranch("*",0,"0");  		//deactivate all branches
+  //  treeMk->SetBranch("eventBranch",0,"r");	//activate EventBranch
+  chain->SetInput("StEvent","treeRead/.data/bfcTree/eventBranch/StEvent");
 //  add other makers to chain:
 //   St_QA_Maker  *qa  = new St_QA_Maker;
   
@@ -65,14 +83,24 @@ void EventRead(Int_t nevents=1, const char
     int iret = chain->Make();
     if (iret) break;
 
-// this next part is just for doing the browser:
-//create browser with name=BName,title=Btitle
-    Event = chain->GetDataSet("StEvent");
+  }
+
+//  You are out of event loop now.  
+// Now print out contents of dataset and pop browser
+// for the last event.
+// Create browser with name=BName,title=Btitle
+    Event = (StEvent *) chain->GetDataSet("StEvent");
     if (Event) {
           Event->ls(9);
-          brow = new TBrowser("BName","BTitle");    
-
+          brow = new TBrowser("Event",Event);    
     }
-  }
+
+// Comment out for now because it clears data so you can't
+// look at data in browser!  
+//  Call finish routines:
+// chain->Finish();    
+  
 }
  
+
+
