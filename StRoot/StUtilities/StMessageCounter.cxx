@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.cxx,v 1.11 1999/07/17 00:23:23 genevb Exp $
+// $Id: StMessageCounter.cxx,v 1.12 1999/07/17 00:38:03 genevb Exp $
 // $Log: StMessageCounter.cxx,v $
+// Revision 1.12  1999/07/17 00:38:03  genevb
+// Small typo
+//
 // Revision 1.11  1999/07/17 00:23:23  genevb
 // Fixed bug when option fields are empty in FORTRAN, and let type limits be set before types are even added
 //
@@ -179,7 +182,7 @@ int StMessageCounter::CheckLimit(char* mess, const char* type) {
       printIt = 0;
     }
 
-    int index=0;
+    index=0;
     for (curString=limitList.begin(); curString!=limitList.end(); curString++) {
       if (strstr(mess,(*curString))) {
         int counts = limitNCountList[index] + 1;
