@@ -9,8 +9,8 @@
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
-TFile *root_out=0;
-
+TFile *root_file=0;
+TTree  *tree=0;
 void Load(){
     gSystem->Load("St_base");
     gSystem->Load("StChain");
@@ -19,35 +19,39 @@ void Load(){
     gSystem->Load("St_xdfin_Maker");
     gSystem->Load("St_io_Maker");
     gSystem->Load("St_TLA_Maker");
-    gSystem->Load("global");
+    gSystem->Load("libmsg");
+    gSystem->Load("libtls");
+    gSystem->Load("St_tpc");
+    gSystem->Load("St_svt");
     gSystem->Load("St_global");
     gSystem->Load("St_dst_Maker");
 };
 
-void GetEvent(const Char_t *testedMakerName = "geant",Int_t numberOfEvent=1,Int_t firstEventNumber=2) {
- cout << "\tUsage: GetEvent(const Char_t *testedMakerName = \"" << testedMakerName << "\""
-                      << ", Int_t numberOfEvent=" << numberOfEvent
-                      <<",Int_t firstEventNumber="<<firstEventNumber<< ")" 
-      << endl << endl;
+void GetEvent(Int_t numberOfEvent=1,
+	      Int_t firstEventNumber=2,
+	      const Char_t *RootFileName = "gtrack.rootx",
+	      const Char_t *testedMakerName = "dst")
+{
+  cout << "Usage:   \tGetEvent(Int_t numberOfEvent=\t"<<numberOfEvent<<"," << endl; 
+  cout << "\t \t Int_t firstEventNumber=\t"<<firstEventNumber<<","<< endl;
+  cout << "\t \t const Char_t *RootFileName = \t\""<<RootFileName<< "\","<< endl;
+  cout << "\t \t const Char_t *testedMakerName = \t\""<<testedMakerName<<"\"," << endl;
 //=================  NAME to TEST ==================
 //  const Char_t *testedMakerName = "geant";
 //==================================================
 
   if (gClassTable->GetID("StChain") < 0) Load();
+  if (!root_file && RootFileName) root_file  =  new TFile(RootFileName);
 
-  const Char_t *FileOut = "/afs/rhic/star/data/samples/hijet-g2t.root";
-  if (FileOut) root_out  =  new TFile(FileOut);
+  if (!chain) {
+    chain = new StChain("bfc");
+    St_io_Maker *in    = new St_io_Maker("Input","all");
+//  St_TLA_Maker   *geant = new St_TLA_Maker(testedMakerName,"event/geant/Event");
+//  St_TLA_Maker    *dst   = new St_TLA_Maker("dst","event/geant/Event");
+    in->MakeDoc(); 
 
-  if (chain) delete chain;
-  chain = new StChain("bfc");
-
-  St_io_Maker *in    = new St_io_Maker("Input","all");
- //  St_TLA_Maker   *geant = new St_TLA_Maker(testedMakerName,"event/geant/Event");
- // St_TLA_Maker    *dst   = new St_TLA_Maker("dst","event/geant/Event");
-//   in->MakeDoc(); 
-
-  TTree *tree = 0;
-  if (root_out) tree=(TTree *)root_out->Get("Output");
+    if (root_file) tree=(TTree *)root_file->Get("Output");
+  }
   if (tree) {
     tree->Print();
     chain->SetTree(tree);
