@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: GenericTripletCut.cxx,v 1.4 2000/08/08 23:39:31 laue Exp $
+ * $Id: GenericTripletCut.cxx,v 1.5 2000/08/15 23:24:24 lisa Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: GenericTripletCut.cxx,v $
+ * Revision 1.5  2000/08/15 23:24:24  lisa
+ * Fixed small typo in preprocessor directive ifdef
+ *
  * Revision 1.4  2000/08/08 23:39:31  laue
  * Updated for standalone version
  *
@@ -23,7 +26,7 @@
 #include "StHbtMaker/Cut/GenericTripletCut.h"
 //#include <cstdio>
 
-#ifdef _ROOT__
+#ifdef __ROOT__
 ClassImp(GenericTripletCut)
 #endif
 
