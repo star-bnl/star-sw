@@ -666,8 +666,7 @@ Bool_t StXiFinderMaker::UseV0() {
               StThreeVectorD p1 = globHelix->at(globHelix->pathLength(xPvx));
               StThreeVectorD p2(p1.x()-globHelix->xcenter(),p1.y()-globHelix->ycenter(),0);
               StThreeVectorD p3(xPvx.x()-globHelix->xcenter(),xPvx.y()-globHelix->ycenter(),0);
-              if (p3.mag2() > p2.mag2()) dca=(-::sqrt(dca));
-                 else dca=::sqrt(dca);
+              if (p3.mag2() > p2.mag2()) bxi=-bxi;
               delete globHelix;
               globHelix=0;
               /*bBach=trk[k]->impactParameter();
@@ -677,7 +676,7 @@ Bool_t StXiFinderMaker::UseV0() {
               xiVertex->addDaughter(trk[k]);
               xiVertex->setDcaBachelorToPrimaryVertex(trk[k]->impactParameter());
               xiVertex->setMomentumOfBachelor(xOrig);
-              xiVertex->setDcaDaughters(dca);
+              xiVertex->setDcaDaughters(::sqrt(dca));
               xiVertex->setDcaParentToPrimaryVertex(bxi);
               xiVertex->setV0Vertex(v0Vertex);
               
@@ -710,8 +709,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.17 2004/02/04 14:24:58 faivre Exp $
+// $Id: StXiFinderMaker.cxx,v 1.18 2004/02/04 14:53:36 faivre Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.18  2004/02/04 14:53:36  faivre
+// Remove bug introduced in previous version (confusion dca/bxi when copy-pasting from helixDCA).
+//
 // Revision 1.17  2004/02/04 14:24:58  faivre
 // Add sign of dcaXiDaughters, slightly move cuts, small cleanup.
 //
