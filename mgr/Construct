@@ -313,7 +313,8 @@ my $ROOTGLIBS;
 $ROOTLIBS    = " -L$ROOTSYS/lib -lNew -lCore -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui";
 $RINTLIBS    = " -lRint ";
 my $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/ROOT/src";
-$CPPPATH = $INCLUDE . ":#StRoot:" .  $ROOTSRC . ":" . $CERN_ROOT . "/include:". $STAF . "/inc:/opt/star/include";
+#$CPPPATH = $INCLUDE . ":#StRoot:" .  $ROOTSRC . ":" . $CERN_ROOT . "/include:". $STAF . "/inc:/opt/star/include";
+$CPPPATH = $INCLUDE . ":#StRoot:" .  $ROOTSRC . ":" . $CERN_ROOT . "/include:/opt/star/include";
 $FCPPPATH ="";
 print "CPPPATH  = \t$CPPPATH\n" unless ($param::quiet);
 Repository ($STAR);# unless $param::noRepository;
@@ -359,7 +360,7 @@ else {
   }
   my $ROOTSRC = $AFS_RHIC . "\\star\\ROOT\\" . $ROOT_LEVEL . "\\ROOT\\src";
   $INCLUDE_PATH .= ";" . $ROOTSRC;
-  $INCLUDE_PATH .= ";" . $STAF . "/inc";
+#  $INCLUDE_PATH .= ";" . $STAF . "/inc";
   $INCLUDE_PATH .= ";" . $CERN_ROOT . "/include";
 }
 $env = new cons(
@@ -458,7 +459,7 @@ if (defined($ARG{LinksCheck})) {
 print "Install includes\n";
 my @subdirs = ();
 # make Targets and install includes
-foreach my $dir ("StRoot","pams"){#,"StDb") {
+foreach my $dir ("pams","StRoot"){#,"StDb") {
   next if ! -d $dir;
   my $db_dir  = "StDb/include"; #print "db_dir = $db_dir\n";
   if ($dir =~ /^StDb$/) {
@@ -550,6 +551,7 @@ foreach my $dir ("StRoot","pams"){#,"StDb") {
 	      print "skip dir: $subsub_dir \t=> $SKIP_DIRS\n";
 	      next;
 	    }
+	    next if ($subsub_dir =~ /tables/);
 	    push @subdirs, $subsub_DIR; #print "================== add $subsub_DIR\n";
 	  }
 	}
@@ -559,13 +561,14 @@ foreach my $dir ("StRoot","pams"){#,"StDb") {
 	print "skip dir: $sub_dir \t=> $SKIP_DIRS\n";
 	next;
       }
+      next if ($sub_dir =~ /tables/);
       if ($STAR_HOST_SYS =~ /^hp_ux102$/ &&  $sub_dir =~ /StHbtMaker/) {next;}
       push @subdirs, $sub_DIR;# print "================== add $sub_DIR\n";
     }
   }
 }
 my @Targets = ();
-foreach $dir ("asps/rexe","asps/Rexe","asps/geant",@subdirs) {#,"cern/geant321","cern/minicern") {
+foreach $dir ("asps/rexe","pams/tables",@subdirs) {
   next if !-d $dir;
   push @Targets, $OBJ . "/" . $dir . "/Conscript";
 }

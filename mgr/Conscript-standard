@@ -32,18 +32,18 @@ foreach my $Rep (@Repo) {
 my @src     = sortu (@srcL);# print "src = @src\n";
 my @h_files = sortu (@h_filesL);
 my @idlM    = sortu (@idlML);# print "idlM = @idlM\n";
-if ($pkg eq "g2r") {#  print "package = $pkg\n";
-  foreach my $f ("g2t_get_event","g2t_get_kine"){
-    my $didl = $Dir . "/../g2t/" . $f . ".idl";# print "$didl\n"; 
-    my $dsrc =  $Dir . "/../g2t/" . $f . ".F";#  print "$dsrc\n";
-    if (-f $didl && -f $dsrc) {
-#      $didl = "../g2t/" . $f . ".idl"; print "$didl\n"; 
-      $dsrc = "../g2t/" . $f . ".F";#  print "$dsrc\n";
-#      push @idlM, $didl; print "Add $didl\n";
-      push @src,  $dsrc;# print "Add $dsrc\n";
-    }
-  }
-}
+#if ($pkg eq "g2r") {#  print "package = $pkg\n";
+#  foreach my $f ("g2t_get_event","g2t_get_kine"){
+#    my $didl = $Dir . "/../g2t/" . $f . ".idl";# print "$didl\n"; 
+#    my $dsrc =  $Dir . "/../g2t/" . $f . ".F";#  print "$dsrc\n";
+#    if (-f $didl && -f $dsrc) {
+##      $didl = "../g2t/" . $f . ".idl"; print "$didl\n"; 
+#      $dsrc = "../g2t/" . $f . ".F";#  print "$dsrc\n";
+##      push @idlM, $didl; print "Add $didl\n";
+#      push @src,  $dsrc;# print "Add $dsrc\n";
+#    }
+#  }
+#}
 my $so_pkg  = "";
 if ($#idlM > -1) {$PKG = "St_" . $PKG;}
 printf ("Run Conscript-standard in %-30s  for %-20s\n",$Dir, $PKG) unless ($param::quiet);
@@ -170,8 +170,17 @@ if ($#Defs > -1) {
   foreach my $def (@Defs) {
     push @defs, $share . "/" . basename($def);
   }
-  my @Mod = ($INCLUDE . "/St_Module.h");
-  Depends $env2 [@CintFiles], @Mod;
+#  my @Mod = ($INCLUDE . "/St_Module.h", 
+#	     $INCLUDE . "/StMaker.h", 
+#	     $INCLUDE . "/StChain.h",
+#	     $INCLUDE . "/St_DataSet.h",
+#	     $INCLUDE . "/St_Table.h",
+#	     $INCLUDE . "/StTree.h",
+#	     $INCLUDE . "/StIOMaker.h",
+#	     $INCLUDE . "/StIOInterFace.h",
+#	     $INCLUDE . "/St_XDFFile.h"
+#	    );
+#  Depends $env2 [@CintFiles], @Mod;
   Command $env2 [@CintFiles], @defs,  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
   Install $env2 $ObjDir, @CintFiles;
   (my $cint =  $CintFiles[0]) =~ s/$share/$obj/g;
