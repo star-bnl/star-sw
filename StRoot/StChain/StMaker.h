@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.19 1999/05/06 00:19:05 fine Exp $
+// $Id: StMaker.h,v 1.20 1999/05/06 21:27:11 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.20  1999/05/06 21:27:11  perev
+// StMaker remove his from hdirectory
+//
 // Revision 1.19  1999/05/06 00:19:05  fine
 // StMaker::MakeDoc method has been re-introduced for the 3d time
 //
@@ -76,7 +79,7 @@ protected:
    static StMaker *fgStChain;     	//current pointer to StChain
    Int_t	   m_Mode;		// Integer mode of maker
    Int_t           m_Number;        	//Serial event number
-   EDebugLevel     m_DebugLevel;    	//Debug level
+   Int_t           m_DebugLevel;    	//Debug level
    TStopwatch      m_Timer;             //Timer object
 
    StMaker        *gStChain;  		//???? Temporary ?????
@@ -139,8 +142,8 @@ public:
                           {return GetDataBase(logInput);};
 
 
-   virtual EDebugLevel 	GetDebug() const {return m_DebugLevel;}
-   virtual EDebugLevel 	   Debug() const {return GetDebug();};
+   virtual Int_t 	GetDebug() const {return m_DebugLevel;}
+   virtual Int_t 	   Debug() const {return GetDebug();};
    virtual TList       *Histograms()  const {return GetHistList();}
    virtual TString      GetAlias (const char* log, const char* dir=".aliases") const ;
    virtual TString      GetInput (const char* log) const {return GetAlias(log);};
@@ -153,7 +156,7 @@ public:
 
 //    Setters for flags and switches
 
-   virtual void        	SetDebug(EDebugLevel l=kDebug){m_DebugLevel=l;}
+   virtual void        	SetDebug(Int_t l=1){m_DebugLevel=l;}
    virtual void       	SetAlias(const char* log,const char* act,const char* dir=".aliases");
    virtual void       	AddAlias(const char* log,const char* act,const char* dir=".aliases");
    virtual void       	SetInput(const char* log,const char* act){SetAlias(log,act);};
@@ -177,7 +180,7 @@ public:
 
 //		must be in here in .h
    static const char   *GetCVSIdH() 
-    {static const char cvs[]="$Id: StMaker.h,v 1.19 1999/05/06 00:19:05 fine Exp $";
+    {static const char cvs[]="$Id: StMaker.h,v 1.20 1999/05/06 21:27:11 perev Exp $";
      return cvs;};
    static const char   *GetCVSTag()
      {static const char cvs[]="$Name:  $"; return cvs;};
