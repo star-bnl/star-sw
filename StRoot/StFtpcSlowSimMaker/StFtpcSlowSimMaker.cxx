@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.11 2002/10/16 12:29:15 fsimon Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.12 2002/10/23 09:13:58 fsimon Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.12  2002/10/23 09:13:58  fsimon
+// Use calibration Db instead of local (local commented out, uncomment for use)
+//
 // Revision 1.11  2002/10/16 12:29:15  fsimon
 // Include ftpcAmpSlope, ftpcAmpOffset and ftpcTimeOffset in Database access
 // permits usage of gain factors and time offset in the simulator
@@ -164,6 +167,8 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
   // Get Database for gain factors and time offset
   m_ampslope = (St_ftpcAmpSlope *)dblocal_calibrations("ftpcAmpSlope" );
   m_ampoffset = (St_ftpcAmpOffset *)dblocal_calibrations("ftpcAmpOffset");
+
+ m_timeoffset = (St_ftpcTimeOffset *)dblocal_calibrations("ftpcTimeOffset");
  
   //cout << "Global Dbs read...\n";
  
@@ -179,7 +184,7 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
   
   //cout << "Iterator created ...\n";
 
-  m_timeoffset = (St_ftpcTimeOffset *)local("ftpcTimeOffset");
+  //m_timeoffset = (St_ftpcTimeOffset *)local("ftpcTimeOffset");
  
   m_clusterpars  = (St_ftpcClusterPars *)local("ftpcClusterPars");
   m_slowsimgas   = (St_ftpcSlowSimGas  *)local("ftpcSlowSimGas");
@@ -188,7 +193,7 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
   //cout << "Local Dbs read...\n";
  
 
- //m_timeoffset = (St_ftpcTimeOffset *)dblocal_calibrations("ftpcTimeOffset");
+
  
   return 0;
 }
