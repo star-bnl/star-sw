@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.7 1999/07/15 13:58:26 perev Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.8 1999/07/27 17:30:40 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.8  1999/07/27 17:30:40  ward
+// Converted to StIOMaker.  Also noise suppression.
+//
 // Revision 1.7  1999/07/15 13:58:26  perev
 // cleanup
 //
@@ -47,6 +50,15 @@ class StTrsSimpleMaker;
 class StTpcUnpacker;
 class StSequence;
 class TH1F;
+#define NOISE_ELIM
+#define MAXROWPADPERSECTOR 400
+#define BINRANGE 3
+#ifdef NOISE_ELIM
+typedef struct {
+  int npad,row[MAXROWPADPERSECTOR],pad[MAXROWPADPERSECTOR];
+  int nbin,low[BINRANGE],up[BINRANGE];
+} tpcdaq_noiseElim; /* one of these for each of the 24 sectors */
+#endif
 class St_tpcdaq_Maker : public StMaker {
  private:
    StTpcRawDataEvent *mEvent; //!
@@ -67,8 +79,7 @@ class St_tpcdaq_Maker : public StMaker {
  public: 
    St_tpcdaq_Maker(const char *name="tpc_raw",char *daqInputFile=NULL); // If
        // the 2nd arg (daqInputFile) is NULL, then we use TRS.
-   int mFileDes,mErr;
-   char *daqInputFile;
+   int mErr;
    
    void OrderTheSequences(int nseq,StSequence *los);
    // void FatalError(int);
@@ -99,12 +110,14 @@ class St_tpcdaq_Maker : public StMaker {
    int getSector(Int_t isect);
    int getPadList(int whichPadRow,unsigned char **padlist);
    int getSequences(int whichPadRow,int pad,int *nseq,StSequence **seqList);
+   void SetNoiseEliminationStuff(tpcdaq_noiseElim*);
+   void WriteStructToScreenAndExit(tpcdaq_noiseElim*);
    virtual       ~St_tpcdaq_Maker();
    virtual Int_t  Init();
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.7 1999/07/15 13:58:26 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.8 1999/07/27 17:30:40 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };
