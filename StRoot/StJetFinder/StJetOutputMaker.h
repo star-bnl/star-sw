@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetOutputMaker.h,v 1.9 2003/10/01 16:39:29 thenry Exp $
+ * $Id: StJetOutputMaker.h,v 1.10 2003/11/12 15:48:11 thenry Exp $
  * $Log: StJetOutputMaker.h,v $
+ * Revision 1.10  2003/11/12 15:48:11  thenry
+ * Added PJetEvent accessor.
+ *
  * Revision 1.9  2003/10/01 16:39:29  thenry
  * Added new getter for StProjectedTracks to StEmcTpcFourPMaker, and used
  * in StJetOutputMaker so that StTrackStruct now contains track px, py, pz
@@ -410,6 +413,7 @@ public:
     virtual Int_t Make();
     virtual Int_t doMake();
     virtual Int_t Finish();
+    PJetEvent &pjEvent(void) { return oJetEvent; };
 
 protected:
     StMuDstMaker *muDstMaker;
