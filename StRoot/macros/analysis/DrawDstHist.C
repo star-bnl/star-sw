@@ -28,16 +28,16 @@ void Load()
 
 
 // DrawDstHist macro ======================================================
-// enter nevproc,firstHistName,lastHistName,input fileName,output psFile name
+// enter nevproc,firstHist,lastHist,input fileName,output psFile name
 
 // MDC2 dsts:
 //   *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0064_07_40evts.root
 //   *fileName="/disk1/star/test/hijing135/jetq_on/b0_3/year_1b/tfs_dst/set0016_01_51evts.dst.root",
 
 void DrawDstHist(
-     Int_t nevproc=100,
-     const Char_t *firstHistName="*",
-     const Char_t *lastHistName="*",
+     Int_t nevproc=2,
+     const Char_t *firstHist="*",
+     const Char_t *lastHist="*",
      const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0064_07_40evts.root",
      const Char_t *psFile="QA_hist.ps")
 { 
@@ -46,13 +46,13 @@ void DrawDstHist(
     cout << endl   
          << " Usage:  DrawDstHist( " << endl
          << "                        Int_t nevproc= " << nevproc    << endl
-         << "                        const Char_t *firstHistName=\"" << firstHistName << "\","   << endl
-         << "                        const Char_t *lastHistName=\""  << lastHistName  << "\""    << endl
+         << "                        const Char_t *firstHist=\"" << firstHist << "\","   << endl
+         << "                        const Char_t *lastHist=\""  << lastHist  << "\""    << endl
          << "                        const Char_t *fileName =\""     << fileName      << "\","   << endl
          << "                        const Char_t *psFile=\""        << psFile        << "\","   << endl
          << "                      );" << endl 
-         << " Note: firstHistName = \"*\" is by default and means ALL histograms from the file are drawn" << endl
-         << " ----- lastHistName  = \"*\" is by default and means ALL histograms by the end of file are drawn" << endl
+         << " Note: firstHist = \"*\" is by default and means ALL histograms from the file are drawn" << endl
+         << " ----- lastHist  = \"*\" is by default and means ALL histograms by the end of file are drawn" << endl
          << "       fileName      - may define either file or entire directory tree." << endl
          << "                       For the directory, all files from that will be used." << endl
          << endl ;
@@ -91,7 +91,7 @@ void DrawDstHist(
       St_FileSet dstDirs(exFileName,".");
       St_DataSetIter nextDataSet(&dstDirs,0);
       St_DataSet *set = 0;      
-      while ( set = nextDataSet() ) {           
+      while ( (set = nextDataSet()) ) {           
         if (strcmp(set->GetTitle(),"file") || !(strstr(set->GetName(),"evts.root"))) continue;
         TString p = set->Path();
         Char_t *rootfilename = gSystem->ConcatFileName(exFileName,p.Data());
@@ -125,8 +125,8 @@ void DrawDstHist(
     St_QA_Maker *QA   = new St_QA_Maker;
 
 // the following methods are already set to default values in St_QA_Maker constructor:
-    QA->SetHistsNames(firstHistName,lastHistName);
-    QA->SetDraw(kTrue);
+    QA->SetHistsNamesDraw(firstHist,lastHist);
+    QA->SetDraw(kTRUE);
     QA->SetPostScriptFile(psFile);
     QA->SetZones();
     QA->SetPaperSize();
@@ -148,11 +148,28 @@ void DrawDstHist(
     if (!chain->Make(i))  chain->Clear();
     else break;
   }
-  cout <<  " !!! passed chain->Make" << endl ;
+  cout <<  " !!! passed chain->Make !!!" << endl ;
+
+
+// Now tell which histograms we want plotted with LogY scale
+// Set default list:
+  const Char_t *defList[] = {"QaGlobtrkPt", "QaGlobtrkNPoint", "QaGlobtrkNPointFit"};
+  Int_t lengOfList = 0;
+  Int_t lengOfList = sizeof(defList)/4;
+  Int_t i = 0;
+// Now put it in list for QA method:
+  Int_t numLog = 0;
+  for (i=0;i<lengOfList;i++) {
+     numLog = QA->AddToLogYList(defList[i]);
+     cout <<  " !!! adding histogram " << defList[i] << " to LogY list "  << endl ;
+  }
+  cout <<" Number hist to plot with log scale = " << numLog << endl;
+
+// Finish method in St_QA_Maker is where the actual DrawHist is done
   chain->Finish();
   cout <<  " !!! passed chain->Finish" << endl ;
 
-// method to print out list of histograms:
+// method to print out list of histograms - can do this anytime after they're booked
    Int_t NoHist=0;
    NoHist = QA->ListHists();
    cout << " No. of Hist we have == " << NoHist << endl;
