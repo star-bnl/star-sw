@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.59 2000/03/03 20:53:48 nevski Exp $
+// $Id: St_geant_Maker.cxx,v 1.60 2000/03/03 22:00:53 nevski Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.60  2000/03/03 22:00:53  nevski
+// protection against bad track number
+//
 // Revision 1.59  2000/03/03 20:53:48  nevski
 // add protection against corrupted Itrac
 //
@@ -578,9 +581,9 @@ Int_t St_geant_Maker::Make()
 // Fill Histograms    
    FillHist();
 
-  if     (cflag->ieorun) {return kStEOF;} 
-  elseif (cflag->ieotri) {return kStErr;} 
-  else                   {return kStOK;}
+   if (cflag->ieorun) return kStEOF; 
+   if (cflag->ieotri) return kStErr; 
+   return kStOK;
 }
 //_____________________________________________________________________________
 void St_geant_Maker::LoadGeometry(Char_t *option){
