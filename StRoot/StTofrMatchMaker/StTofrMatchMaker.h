@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.h,v 1.4 2004/03/16 22:30:51 dongx Exp $
+ * $Id: StTofrMatchMaker.h,v 1.5 2004/05/03 23:08:50 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.h,v $
+ * Revision 1.5  2004/05/03 23:08:50  dongx
+ * change according to the update of StTofrGeometry, save CPU time by 100 times
+ *
  * Revision 1.4  2004/03/16 22:30:51  dongx
  * fix the warning message when compiling
  *
@@ -50,6 +53,16 @@ class StTofrDaqMap;
 class TH1D;
 class TH2D;
 
+#if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
+typedef vector<Int_t>  IntVec;
+typedef vector<Double_t>  DoubleVec;
+typedef vector<StThreeVectorD> PointVec;
+#else
+typedef vector<Int_t, allocator<Int_t>>  IntVec;
+typedef vector<Double_t, allocator<Double_t>>  DoubleVec;
+typedef vector<StThreeVectorD, allocator<StThreeVectorD>> PointVec;
+#endif
+
 class StTofrMatchMaker : public StMaker {
 public:
     StTofrMatchMaker(const Char_t *name="tofrMatch");
@@ -72,7 +85,7 @@ public:
     void setMaxDCA(Float_t);
     void setHistoFileName(Char_t*);
     void setNtupleFileName(Char_t*);
-    
+   
 private:
     StTrackGeometry* trackGeometry(StTrack*);//!
     Int_t getTofData(StTofCollection*); // check, remap and fill local arrays with tof and pvpd data
@@ -172,14 +185,13 @@ private:
     TH1D* mDaqOccupancyMatch3;
     TH2D* mDeltaHitMatch3;
     
-    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     typedef vector<Int_t> idVector;
 #else
     typedef vector<Int_t,allocator<Int_t>> idVector;
 #endif
     typedef idVector::iterator idVectorIter;   
-    
+
     struct StructCellHit{
       Int_t channel;
       Int_t tray;
@@ -201,7 +213,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.4 2004/03/16 22:30:51 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.5 2004/05/03 23:08:50 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofrMatchMaker,1)
 };
