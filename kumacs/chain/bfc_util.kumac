@@ -176,6 +176,8 @@
 * 11/10/98 K. Turner - fixes to ems,emc, jet chains for Akio
 * 11/12/98 K. Turner - fixes to dstin for rerunning desum & drsum
 * 11/18/98 K. Turner - add "rhij" chain to run hijing
+* 11/24/98 K. Turner - change to smdst chain (macro names) and rename sdst 
+*                    - add sdst2 chain
 * 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -460,9 +462,11 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
             exec init_sca#init_analysis [calib_dir] [output_file] _
 	      [ebye_prior_switch] [ebye_ensemble_switch]  [ebye_analysis_switch]
     (ev0j)  exec init_ev0join
-   (smdst)  exec create_tables_strange#smdst
-            exec init_smdst#init
-    (dchkt)
+    (sdst)  exec create_tables_strange#smdst
+            exec init_smdst#init_smdst
+   (sdst2)  exec create_tables_strange#smdst2
+	    exec init_smdst#init_smdst2
+   (dchkt)
 	    exec dst_chk_tabl#init
 	    exec dst_chk_tabl#run_header
     (user)  exec init_user
@@ -769,7 +773,8 @@ return
 		 goto NEXT_EVENT
                endif
     (ev0j)     exec run_ev0join
-   (smdst)     exec run_smdst#run
+    (sdst)     exec run_smdst#run_smdst
+   (sdst2)     exec run_smdst#run_smdst2
    (dchkt)    
                exec dst_chk_tabl#event_header
                exec dst_chk_tabl#dst_tables
