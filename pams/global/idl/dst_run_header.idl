@@ -2,8 +2,8 @@
 /*  Table: dst_run_header        */  
 
  struct dst_run_header  {
-  long   run_id;          /* Unique production run ID number            */
   char   event_type[20];  /* Event type: collision, cosmic, lasers...   */
+  long   run_id;          /* Unique production run ID number            */
   long   trig_mask;       /* Trigger mask                               */
   float  luminosity[2];   /* Mean and std.dev. luminosity for events    */
   float  sqrt_s;          /* CM total energy per NN pair (GeV)          */
@@ -16,4 +16,4 @@
   float  west_pol[3];     /* N,L,S polarization components, west ion    */
   float  west_pol_cov[6]; /* Polarization covariance matrix, west ion   */
  } ;
-/*  Last mod. for dst_event:   $Date: 1998/06/03 13:52:01 $ */
+/*  Last mod. for dst_event:   $Date: 1998/08/31 15:11:13 $ */
