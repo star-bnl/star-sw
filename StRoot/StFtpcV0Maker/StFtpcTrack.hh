@@ -1,3 +1,9 @@
+// $Id: StFtpcTrack.hh,v 1.3 2000/01/03 13:16:07 jcs Exp $
+//
+// $Log: StFtpcTrack.hh,v $
+// Revision 1.3  2000/01/03 13:16:07  jcs
+// Add CVS Id strings
+//
 ///////////////////////////////////////////
 //  This is the track class.
 //

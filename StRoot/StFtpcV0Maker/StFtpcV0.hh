@@ -1,3 +1,9 @@
+// $Id: StFtpcV0.hh,v 1.3 2000/01/03 13:16:12 jcs Exp $
+//
+// $Log: StFtpcV0.hh,v $
+// Revision 1.3  2000/01/03 13:16:12  jcs
+// Add CVS Id strings
+//
 ///////////////////////////////////////////////////////////
 //  This is a class for defining V0s.
 //
