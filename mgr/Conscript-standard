@@ -188,13 +188,12 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    if (-f $file) {$LIBS .= " -l" . $py; last;}
 	}
 
-    } elsif ( $pkg =~ m/^StTrsMaker$/ ||
-	      $pkg =~ m/^StRTSClient$/ ) {
+    } elsif ( $pkg =~ m/^StTrsMaker$/ ){
 	$CPPPATH =
 	    "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include"
 	    . $main::PATH_SEPARATOR . $env->{CPPPATH};
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
-	
+
     } elsif ( $pkg =~ m/^StHbtMaker$/ ) {
 	$CPPPATH = "#" . $Dir;
 	foreach
@@ -206,8 +205,21 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$CPPPATH .= $main::PATH_SEPARATOR . $env->{CPPPATH};
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
 
-	# This block can be used for ANY maker having a 2 level
-	# directory structure using auto-globbing
+
+	# According to description, all client requirering this
+	# should be added here.
+    } elsif ( $pkg =~ m/^StRTSClient/ ) {
+	my ($basep) = $Dir;
+	$basep =~ s/Client\/.*/Client/;
+	$CPPPATH =
+	    "#" . $Dir . $main::PATH_SEPARATOR ."#". $basep ."/include" 
+	    . $main::PATH_SEPARATOR . $env->{CPPPATH};
+	print "CPPPATH = $CPPPATH\n" if $param::debug;
+
+	
+
+	# This block can be used for ANY Maker or Pool having a 2 level
+	# directory structure using auto-globbing for include purposes
     } elsif ( $pkg =~ m/^StAssociationMaker$/ ||
 	      $pkg =~ m/EmcUtil$/             ||
 	      $pkg =~ m/^StMuDSTMaker$/       ||
