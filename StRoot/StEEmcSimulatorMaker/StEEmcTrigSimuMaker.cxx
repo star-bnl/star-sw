@@ -1,7 +1,10 @@
 //*-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StEEmcTrigSimuMaker.cxx,v 1.1 2003/01/28 23:13:00 balewski Exp $
+// $Id: StEEmcTrigSimuMaker.cxx,v 1.2 2003/02/14 00:04:31 balewski Exp $
 // $Log: StEEmcTrigSimuMaker.cxx,v $
+// Revision 1.2  2003/02/14 00:04:31  balewski
+// remove few printouts
+//
 // Revision 1.1  2003/01/28 23:13:00  balewski
 // star
 //
@@ -42,7 +45,6 @@ Int_t StEEmcTrigSimuMaker::Init(){
   // Create Histograms    
    return StMaker::Init();
 }
-
 
 //____________________________________________________________
 //____________________________________________________________
