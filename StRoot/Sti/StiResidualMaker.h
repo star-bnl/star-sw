@@ -1,11 +1,14 @@
 //StiResidualMaker.h
 /***************************************************************************
  *
- * $Id: StiResidualMaker.h,v 2.0 2002/12/10 21:59:58 pruneau Exp $
+ * $Id: StiResidualMaker.h,v 2.1 2003/03/16 16:52:12 andrewar Exp $
  *
  * Author: Andrew Rose, Wayne State University, October 2002
  ***************************************************************************
  * $Log: StiResidualMaker.h,v $
+ * Revision 2.1  2003/03/16 16:52:12  andrewar
+ * Add histograms, removed redundant checks on hits
+ *
  * Revision 2.0  2002/12/10 21:59:58  pruneau
  * Introducing version 2.0
  *
@@ -43,10 +46,10 @@ class StiResidualMaker: StiResiduals
 
 
      //Residual Hists  
-     TH3D *mYResidualCrossDipZ;
-     TH3D *mYResidualZYRow;
-     TH3D *mZResidualCrossDipZ;
-     TH3D *mZResidualZYRow;
+     TH3D *mYResidualCrossDip;
+     TH3D *mYResidualZY;
+     TH3D *mZResidualCrossDip;
+     TH3D *mZResidualZY;
 };
   
 
