@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.3 2000/04/06 15:57:47 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.4 2000/04/18 14:00:58 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.4  2000/04/18 14:00:58  aihong
+ * change the name from BetheBlock to BetheBloch
+ *
  * Revision 1.3  2000/04/06 15:57:47  aihong
  * fix operator() for working fine when constructed above the track loop
  *
@@ -28,7 +31,7 @@
 #include "StMessMgr.h"
 #include "StPhysicalHelixD.hh"
 #include "PhysicalConstants.h"
-#include "StPidAmpMaker/Include/BetheBlock.hh"
+
 #include "StuProbabilityPidAlgorithm.h"
 
 #include "StPidAmpMaker/Include/BetheBloch.hh"
@@ -52,7 +55,7 @@ StuProbabilityPidAlgorithm::StuProbabilityPidAlgorithm(StEvent& ev){
 
      mDedxMethod=kTruncatedMeanId;
      mProb[0]=0;
-     StuProbabilityPidAlgorithm::funcBandPt=&BetheBlock;
+     mProb[1]=0;
      mProb[2]=0;
       
      StuProbabilityPidAlgorithm::funcBandPt=&BetheBloch;
@@ -270,12 +273,12 @@ bool StuProbabilityPidAlgorithm::isExtrap(){
 
 double StuProbabilityPidAlgorithm::bandCenter(double rig,TArrayD& bandPars){
 
- TF1 mBandBetheBlockFcn("mBandBetheBlockFcn",funcBandPt, BandsBegin,BandsEnd, NBandParam);
+//-------------------------------
 double StuProbabilityPidAlgorithm::bandCenter(double rig,TArrayD* bandPars){
        
-       mBandBetheBlockFcn.SetParameter(i,bandPars.At(i));
+       mBandBetheBlochFcn.SetParameter(i,bandPars.At(i));
       
-       return mBandBetheBlockFcn.Eval(fabs(rig),0,0);
+    for (int i=0; i<NBandParam; i++)
        mBandBetheBlochFcn.SetParameter(i,bandPars->At(i));
         rig=tossTail(rig);
        return mBandBetheBlochFcn.Eval(fabs(rig),0,0);
