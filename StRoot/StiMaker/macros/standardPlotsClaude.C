@@ -1,10 +1,13 @@
 /*
  *
- * $Id: standardPlotsClaude.C,v 1.1 2002/07/11 18:21:31 pruneau Exp $
+ * $Id: standardPlotsClaude.C,v 1.2 2002/09/05 21:27:18 pruneau Exp $
  *  A. Rose, WSU
  *  
  *
  * $Log: standardPlotsClaude.C,v $
+ * Revision 1.2  2002/09/05 21:27:18  pruneau
+ * Fixed problem with StiRootSimpleTrackFilter::makeNewObject
+ *
  * Revision 1.1  2002/07/11 18:21:31  pruneau
  * new plots added
  *
@@ -46,7 +49,8 @@ void run()
 {
 	TChain * c = new TChain("StMiniMcTree");
 	standardPlots t(c);
-	t.makeTrackEffPlots("/star/u/pruneau/ittf5/","trackEff.root");
+	//t.makeTrackEffPlots("/star/u/pruneau/ittf5/","trackEff.root");
+	t.makeTrackEffPlots("/star/u/pruneau/ittf5/","rcf0183_20_300evts.minimc.root");
 }
 
 void standardPlots::Loop()

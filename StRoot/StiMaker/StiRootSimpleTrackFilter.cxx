@@ -17,29 +17,9 @@ StiRootSimpleTrackFilter::StiRootSimpleTrackFilter()
 StiRootSimpleTrackFilter::~StiRootSimpleTrackFilter()
 {}
 
-/*
-void StiRootSimpleTrackFilter::add(const string & name, 
-				   const string & description,
-				   double value, 
-				   double defaultValue, 
-				   double min, 
-				   double max,
-				   double increment,
-				   int    type)
-{
-EditableParameter * par = static_cast<EditableParameter*>(StiToolkit::instance()->getParameterFactory()->getObject());
-  if (par)
-    {
-      par->set(name,description,value,defaultValue,min,max,increment,type);
-      add(par);
-    }
-  else
-    throw runtime_error("StiRootSimpleTrackFilter::add() - ERROR - static_cast returned null pointer");
-}
-*/
-
 void StiRootSimpleTrackFilter::initialize()
 {
+  cout << "StiRootSimpleTrackFilter::initialize() - INFO - Starting" << endl;
   parameterVector.clear();
   add("Chi2Used", "Use Chi2",     false, false, 0,1,1,Parameter::Boolean);
   add("Chi2Min",  "Minimum Chi2", 0., 0., 0., 100.,2,Parameter::Double);
@@ -146,10 +126,10 @@ StiRootSimpleTrackFilterFactory::StiRootSimpleTrackFilterFactory(const string & 
 								 int original,
 								 int incremental,
 								 int maxInc)
-  : StiTrackFilterFactory(newName, 
-			  original, 
-			  incremental, 
-			  maxInc)
+  : StiObjectFactoryInterface<StiTrackFilter>(newName, 
+					      original, 
+					      incremental, 
+					      maxInc)
 {
   initialize();
 }
@@ -157,4 +137,11 @@ StiRootSimpleTrackFilterFactory::StiRootSimpleTrackFilterFactory(const string & 
 StiRootSimpleTrackFilterFactory::~StiRootSimpleTrackFilterFactory()
 {
   // cout <<"StiRootSimpleTrackFilterFactory::~StiRootSimpleTrackFilterFactory()"<<endl;
+}
+
+void * StiRootSimpleTrackFilterFactory::makeNewObject() const
+{
+  cout << "StiRootSimpleTrackFilterFactory::makeNewObject - INFO - instantiating StiRootSimpleTrackFilter" << endl;
+  
+  return new StiRootSimpleTrackFilter();
 }

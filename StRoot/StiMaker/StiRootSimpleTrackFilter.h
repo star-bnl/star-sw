@@ -2,6 +2,7 @@
 #define StiRootSimpleTrackFilter_H 1
 #include "Sti/StiTrackFilter.h"
 #include "Sti/EditableParameters.h"
+#include "Sti/StiObjectFactoryInterface.h"
 
 class StiRootSimpleTrackFilter : public StiTrackFilter, public EditableParameters
 {
@@ -24,7 +25,7 @@ class StiRootSimpleTrackFilter : public StiTrackFilter, public EditableParameter
 
 /*! StiRootSimpleTrackFilter factory
  */
-class StiRootSimpleTrackFilterFactory : public StiTrackFilterFactory
+class StiRootSimpleTrackFilterFactory : public StiObjectFactoryInterface<StiTrackFilter>
 {
 public:
   ///This is the only constructor available.
@@ -37,10 +38,7 @@ public:
   
  protected:
   ///Return a pointer to a new StiRootSimpleTrackFilter object on the heap.
-  virtual void * makeNewObject() const
-    {
-      return new StiRootSimpleTrackFilter();
-    }
+  virtual void * makeNewObject() const;
   
  private:
   StiRootSimpleTrackFilterFactory(); //Not implemented
