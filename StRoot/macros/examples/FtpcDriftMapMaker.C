@@ -1,7 +1,7 @@
-// $Id: FtpcDriftMapMaker.C,v 1.6 2001/07/20 09:29:18 jcs Exp $
+// $Id: FtpcDriftMapMaker.C,v 1.7 2001/10/29 13:02:19 jcs Exp $
 // $Log: FtpcDriftMapMaker.C,v $
-// Revision 1.6  2001/07/20 09:29:18  jcs
-// change timestamp for Y2001 real data
+// Revision 1.7  2001/10/29 13:02:19  jcs
+// select FTPC drift maps according to flavor of magnetic field
 //
 // Revision 1.4  2001/05/16 18:34:18  jcs
 // select timestamp
@@ -48,16 +48,55 @@ void FtpcDriftMapMaker(const Int_t map=2, const Float_t factor=1.0)
     gSystem->Load("StFtpcDriftMapMaker");
     gSystem->Load("StFtpcClusterMaker");
 
-  //  Create the makers to be called by the current chain
-  const char *mysqlDB =  "MySQL:StarDb";
-  const char *paramsDB = "$STAR/StarDb";
-  StChain *chain =  new StChain();
+    //  Create the makers to be called by the current chain
+    const char *mysqlDB =  "MySQL:StarDb";
+    const char *paramsDB = "$STAR/StarDb";
+    //const char *paramsDB = "$PWD/StarDb";
+    StChain *chain =  new StChain();
+    
+    St_db_Maker *dbMk = new St_db_Maker("db",mysqlDB,paramsDB);
+    dbMk->SetDateTime(20010501,00000);
 
-  St_db_Maker *dbMk = new St_db_Maker("db",mysqlDB,paramsDB);
-  dbMk->SetDateTime(20010701,10000);
-//  dbMk->SetDateTime("year_2b");
-  dbMk->Init();
-  dbMk->Make();
-
-  StFtpcDriftMapMaker *ftpcDriftMapMk = new StFtpcDriftMapMaker(map,factor);
+  // Full Field Positive ?
+  if ( factor > 0.8 ) {
+     dbMk->SetFlavor("ffp10kv","ftpcVDrift");
+     dbMk->SetFlavor("ffp10kv","ftpcdVDriftdP");
+     dbMk->SetFlavor("ffp10kv","ftpcDeflection");
+     dbMk->SetFlavor("ffp10kv","ftpcdDeflectiondP");
+     gMessMgr->Info() << "StFtpcDriftMapMaker::InitRun: flavor set to ffp10kv"<<endm;
+  }
+  else if ( factor > 0.2 ) {
+     dbMk->SetFlavor("hfp10kv","ftpcVDrift");
+     dbMk->SetFlavor("hfp10kv","ftpcdVDriftdP");
+     dbMk->SetFlavor("hfp10kv","ftpcDeflection");
+     dbMk->SetFlavor("hfp10kv","ftpcdDeflectiondP");
+     gMessMgr->Info() << "StFtpcDriftMapMaker::InitRun: flavor set to hfp10kv"<<endm;
+  }
+  else if ( factor > -0.2 ) {
+     dbMk->SetFlavor("zf10kv","ftpcVDrift");
+     dbMk->SetFlavor("zf10kv","ftpcdVDriftdP");
+     dbMk->SetFlavor("zf10kv","ftpcDeflection");
+     dbMk->SetFlavor("zf10kv","ftpcdDeflectiondP");
+     gMessMgr->Info() << "StFtpcDriftMapMaker::InitRun: flavor set to zf10kv"<<endm;
+  }
+  else if ( factor > -0.8 ) {
+     dbMk->SetFlavor("hfn10kv","ftpcVDrift");
+     dbMk->SetFlavor("hfn10kv","ftpcdVDriftdP");
+     dbMk->SetFlavor("hfn10kv","ftpcDeflection");
+     dbMk->SetFlavor("hfn10kv","ftpcdDeflectiondP");
+     gMessMgr->Info() << "StFtpcDriftMapMaker::InitRun: flavor set to hfn10kv"<<endm;
+  }
+  else {
+     dbMk->SetFlavor("ffn10kv","ftpcVDrift");
+     dbMk->SetFlavor("ffn10kv","ftpcdVDriftdP");
+     dbMk->SetFlavor("ffn10kv","ftpcDeflection");
+     dbMk->SetFlavor("ffn10kv","ftpcdDeflectiondP");
+     gMessMgr->Info() << "StFtpcDriftMapMaker::InitRun: flavor set to ffn10kv"<<endm;
+  }
+    dbMk->Init();
+    dbMk->Make();
+    
+    //b=new TBrowser();
+    
+    StFtpcDriftMapMaker *ftpcDriftMapMk = new StFtpcDriftMapMaker(map,factor);
 }
