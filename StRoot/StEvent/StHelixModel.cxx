@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixModel.cxx,v 2.8 2001/07/21 18:04:02 ullrich Exp $
+ * $Id: StHelixModel.cxx,v 2.9 2003/04/09 17:59:39 genevb Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.cxx,v $
+ * Revision 2.9  2003/04/09 17:59:39  genevb
+ * Add setMomentum function
+ *
  * Revision 2.8  2001/07/21 18:04:02  ullrich
  * Added code to helix() in order to stay backwards compatible.
  *
@@ -44,7 +47,7 @@
 
 ClassImp(StHelixModel)
 
-static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.8 2001/07/21 18:04:02 ullrich Exp $";
+static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.9 2003/04/09 17:59:39 genevb Exp $";
 
 StHelixModel::StHelixModel() : mModel(helixModel)
 {
@@ -185,3 +188,6 @@ StHelixModel::setDipAngle(double val) { mDipAngle = val; }
 
 void
 StHelixModel::setOrigin(const StThreeVectorF& val) { mOrigin = val; }
+
+void
+StHelixModel::setMomentum(const StThreeVectorF& val) { mMomentum = val; }
