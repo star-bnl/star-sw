@@ -204,46 +204,51 @@ C     Now find last point on track and calculate track length.
             endif    
          endif
       endif
-      if( itpct .ne. 0 .and. isvtt .ne. 0) then
+C     Prevent mixing Kalman error flag with det_id (L.Barnby 06/00)
+      if( gtrk(igtrk).flag .ge. 0) then
+         if( itpct .ne. 0 .and. isvtt .ne. 0) then
          
-         if((globtrk(iglob).x_first(1)**2+globtrk(iglob).x_first(2)**2)
-     +        .gt. 400) then
+            if((globtrk(iglob).x_first(1)**2+globtrk(iglob).x_first(2)**2)
+     +           .gt. 400) then
             
-            globtrk(iglob).det_id = kTpcSsdId
-         else
-            if( (gtrk(igtrk).nhit .eq. gtrk(igtrk).ntpc+1 .and.
-     +      ipriv .eq. 0) .or. (gtrk(igtrk).nhit.eq.
-     +           gtrk(igtrk).ntpc+2))then
-               globtrk(iglob).det_id = kTpcSvtId
+               globtrk(iglob).det_id = kTpcSsdId
             else
-               globtrk(iglob).det_id = kTpcSsdSvtId
+               if( (gtrk(igtrk).nhit .eq. gtrk(igtrk).ntpc+1 .and.
+     +              ipriv .eq. 0) .or. (gtrk(igtrk).nhit.eq.
+     +              gtrk(igtrk).ntpc+2))then
+                  globtrk(iglob).det_id = kTpcSvtId
+               else
+                  globtrk(iglob).det_id = kTpcSsdSvtId
+               endif
             endif
-        endif
-        if( ipriv .eq. 0) then
-            globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
-     +           flag)))*500.+gtrk(igtrk).flag 
-         else
-            globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
-     +           flag)))*600.+gtrk(igtrk).flag 
+            if( ipriv .eq. 0) then
+               globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
+     +              flag)))*500.+gtrk(igtrk).flag 
+            else
+               globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
+     +              flag)))*600.+gtrk(igtrk).flag 
+            endif
+         elseif( isvtt .eq. 0) then
+            globtrk(iglob).det_id = kTpcId
+            if( ipriv .eq. 0) then
+               globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
+     +              flag)))*100.+gtrk(igtrk).flag 
+            else
+               globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
+     +              flag)))*300.+gtrk(igtrk).flag 
+            endif
+         elseif( itpct .eq. 0) then
+            globtrk(iglob).det_id = kSsdSvtId
+            if( ipriv .eq. 0) then
+               globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
+     +              flag)))*200.+gtrk(igtrk).flag 
+            else
+               globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
+     +              flag)))*400.+gtrk(igtrk).flag 
+            endif
          endif
-      elseif( isvtt .eq. 0) then
-         globtrk(iglob).det_id = kTpcId
-         if( ipriv .eq. 0) then
-            globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
-     +           flag)))*100.+gtrk(igtrk).flag 
-         else
-            globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
-     +           flag)))*300.+gtrk(igtrk).flag 
-         endif
-      elseif( itpct .eq. 0) then
-         globtrk(iglob).det_id = kSsdSvtId
-         if( ipriv .eq. 0) then
-            globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
-     +           flag)))*200.+gtrk(igtrk).flag 
-         else
-            globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
-     +           flag)))*400.+gtrk(igtrk).flag 
-         endif
+      else
+         globtrk(iglob).iflag = gtrk(igtrk).flag
       endif
       if (globtrk(iglob).length.gt.99999.9) then
          globtrk(iglob).length=99999.9
