@@ -11,6 +11,7 @@
 
 #pragma link C++ class StTree;
 #pragma link C++ class StBranch;
+#pragma link C++ class StFileI;
 #pragma link C++ class StFile;
 #pragma link C++ class StIOEvent-;
 #pragma link C++ class StIO-;
