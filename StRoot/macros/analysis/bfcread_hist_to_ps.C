@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.15 2000/01/10 21:59:17 kathy Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.16 2000/01/13 17:18:04 kathy Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.16  2000/01/13 17:18:04  kathy
+// updated bfcread_hist* macros so that they can now use the new *PrintList methods from StHistUtil to only print a subset (given a list of names) of histograms from the given Maker Directory; also updated documentation
+//
 // Revision 1.15  2000/01/10 21:59:17  kathy
 // must now load St_global when running St_QA_Maker
 //
@@ -68,13 +71,15 @@
 //         psFile - output postscript file name
 //         PageTitle - title at top of each page - if it's "", then it's
 //                set to MainFile by default
+//         PrintList - name of subset histogram list that you want printed
+//                   - these are defined in StHistUtil, method SetDefaultPrintList
+//                   - default = "", prints all histograms in directory MakerHistDir
 // 
 //
-// standard Maker names in bfc ==>
+// standard Maker names in bfc 
 //   (but if you run your own Maker here, then use whatever name you give it)
 //  are listed at 
-// http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/St_QA_Maker/doc/
-//
+//  http://www.star.bnl.gov/STAR/html/comp_l/train/tut/bfc_maker_names.html
 //
 //======================================================================
 
@@ -92,7 +97,8 @@ void bfcread_hist_to_ps(
   const Char_t *MakerHistDir="QA",
   const Char_t *TopDirTree="bfcTree",
   const Char_t *psFile="QA_hist.ps",
-  const Char_t *PageTitle="")
+  const Char_t *PageTitle="",
+  const Char_t *PrintList="")
 {             
 
   cout << "bfcread_hist_to_ps.C, input hist file = " 
@@ -105,7 +111,8 @@ void bfcread_hist_to_ps(
        << psFile << endl;
   cout << "bfcread_hist_to_ps.C, page title for histograms = " 
        << PageTitle << endl;
-
+  cout << "bfcread_hist_to_pst.C, subset list name of which histograms to draw,print = "
+       << PrintList  << endl;
 //
     gSystem->Load("St_base");
     gSystem->Load("StChain");
@@ -160,9 +167,15 @@ void bfcread_hist_to_ps(
       if (PageTitle=="") PageTitle=MainFile;
     HU->SetGlobalTitle(PageTitle);
 
+    HU->SetDefaultPrintList(MakerHistDir,PrintList);
+
    Int_t numLog = 0;
    numLog = HU->ExamineLogYList();
    cout <<" bfcread_hist_to_ps.C, Number hist to plot with log scale = " << numLog << endl;
+
+  Int_t numPrint = 0;
+  numPrint = HU->ExaminePrintList();
+  cout << " bfcread_hist_to_ps.C, Number hist to print = " << numPrint << endl;
 
 //  Now draw the actual histograms to canvas and to ps file
     HU->DrawHists(MakerHistDir);
