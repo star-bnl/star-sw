@@ -1,11 +1,18 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.34 2004/07/30 18:49:18 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.35 2004/08/05 05:25:25 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.35  2004/08/05 05:25:25  calderon
+ * Fix the assignment of the first point for primaries.  Now,
+ * the logic for both globals and primaries is that the first
+ * point is the first element of the stHits() vector that
+ * can actually be casted to an StHit (the vertex will fail this test,
+ * all other hits coming from detectors will satisfy it).
+ *
  * Revision 2.34  2004/07/30 18:49:18  calderon
  * For running in production, Yuri's dEdx Maker will fill the Pid Traits,
  * so the filling of Pid Traits in the filler is no longer needed:
@@ -578,7 +585,14 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
 {
   //cout << "StiStEventFiller::fillDetectorInfo() -I- Started"<<endl;
   vector<StMeasuredPoint*> hitVec = track->stHits();
-  detInfo->setFirstPoint(hitVec.front()->position());
+  vector<StMeasuredPoint*>::iterator first = hitVec.begin();
+  if (StHit* firstHit = dynamic_cast<StHit*> (*first)) {
+      detInfo->setFirstPoint((*first)->position());
+  }
+  else {
+      first++;
+      detInfo->setFirstPoint((*first)->position());      
+  }
   detInfo->setLastPoint(hitVec.back()->position());
   detInfo->setNumberOfPoints(encodedStEventPoints(track));
   for (vector<StMeasuredPoint*>::iterator point = hitVec.begin(); point!=hitVec.end(); ++point) 
