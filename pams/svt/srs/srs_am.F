@@ -686,15 +686,25 @@ c       fill the spt table for tracking
 	   spt(spt_h.nok).x(1)=new_x
 	   spt(spt_h.nok).x(2)=new_y
 	   spt(spt_h.nok).x(3)=new_z
+           spt(spt_h.nok).xl(1) = lcoord(1)
+           spt(spt_h.nok).xl(2) = lcoord(2)
+           spt(spt_h.nok).xl(3) = lcoord(3)
 	   spt(spt_h.nok).flag=0 ! unmerged hit for now
 	   spt(spt_h.nok).cov(1)=covar(1)
 	   spt(spt_h.nok).cov(2)=covar(2)
 	   spt(spt_h.nok).cov(3)=covar(3)
+           spt(spt_h.nok).mom2(1) = 0.
+           spt(spt_h.nok).mom2(2) = 0.
 	   spt(spt_h.nok).id_mctrack=svt_hit(ihit).track_p
+           spt(spt_h.nok).id_mchit = svt_hit(ihit).id
+           spt(spt_h.nok).id_match = 0
 	   spt(spt_h.nok).id_track=0
 	   spt(spt_h.nok).id_globtrk=0
 	   spt(spt_h.nok).de(1)=svt_hit(ihit).de
 	   spt(spt_h.nok).de(2)=0
+           spt(spt_h.nok).res(1) = 0
+           spt(spt_h.nok).res(2) = 0
+           spt(spt_h.nok).res(3) = 0
 c	   spt(spt_h.nok).id_cluster=svt_hit(ihit).id_spt
 	   spt(spt_h.nok).id_wafer=svt_hit(ihit).volume_id  
 	   spt(spt_h.nok).id=spt_h.nok
@@ -761,6 +771,7 @@ c                            we will merge i with j, weighting by ionization
      2                           spt(ii).cov(kk)**2.0)
 			     enddo
 			     spt(jj).id_mctrack=0
+                             spt(jj).id_mchit = 0
 			     spt(jj).id_cluster=0
 			     spt(jj).de(1)=wi+wj
 			     spt(ii).flag=-1
@@ -779,18 +790,25 @@ c       Now we loop through, getting rid of the merged (flag=-1) hits
 	   if (spt(ii).flag.ge.0) then
 	      new_ok=new_ok+1
 	      if (ii.ne.new_ok) then
+                 spt(new_ok).id = new_ok
 		 spt(new_ok).flag=spt(ii).flag
 		 spt(new_ok).flag=new_ok
 		 spt(new_ok).id_cluster=spt(ii).id_cluster
 		 spt(new_ok).id_mctrack=spt(ii).id_mctrack
+                 spt(new_ok).id_mchit = spt(ii).id_mchit
 		 spt(new_ok).id_track=spt(ii).id_track
 		 spt(new_ok).id_wafer=spt(ii).id_wafer
+		 spt(new_ok).id_match=spt(ii).id_match
+ 		 spt(new_ok).id_globtrk=spt(ii).id_globtrk                
 		 do kk=1,3
 		    spt(new_ok).cov(kk)=spt(ii).cov(kk)
 		    spt(new_ok).x(kk)=spt(ii).x(kk)
+		    spt(new_ok).xl(kk)=spt(ii).xl(kk)
+                    spt(new_ok).res(kk)= spt(ii).res(kk)
 		 enddo
 		 do kk=1,2
 		    spt(new_ok).de(kk)=spt(ii).de(kk)
+                    spt(new_ok).mom2(kk)=spt(ii).mom2(kk)
 		 enddo
 	      endif
 	   endif
@@ -2345,18 +2363,28 @@ c     to spt, will set errors to zero
          spt(ihit).x(1)   = svt_hit(ihit).x(1) ! position of space point
          spt(ihit).x(2)   = svt_hit(ihit).x(2) ! position of space point
          spt(ihit).x(3)   = svt_hit(ihit).x(3) ! position of space point
+         spt(ihit).xl(1)     = 0.                  ! local position on wafer
+         spt(ihit).xl(2)     = 0.                  ! local position on wafer
+         spt(ihit).xl(3)     = 0.                  ! local position on wafer
          spt(ihit).de(1)      = svt_hit(ihit).de  ! energy loss
          spt(ihit).de(2)      = 0.                  ! error on energy loss
+         spt(ihit).mom2(1)    = 0.                  ! 2nd moment of fit x
+         spt(ihit).mom2(2)    = 0.                  ! 2nd moment of fit y
          spt(ihit).cov(1)     = 0.                  ! error on x(1)
          spt(ihit).cov(2)     = 0.                  ! error on x(2)
          spt(ihit).cov(3)     = 0.                  ! error on x(3)
+         spt(ihit).res(1)     = 0.                  ! residual of fit
+         spt(ihit).res(2)     = 0.                  ! 
+         spt(ihit).res(3)     = 0.                  ! 
          spt(ihit).flag       = 0                   ! quality of space point - perfect
          spt(ihit).id         = ihit                ! sequential index
          spt(ihit).id_globtrk = 0                   ! initialized to zero.
          spt(ihit).id_track   = 0                   ! link to reconstructed track - 
-                                                        ! to   be left empty here
+                                                    ! to   be left empty here
+         spt(ihit).id_match   = 0 
          spt(ihit).id_mctrack = svt_hit(ihit).track_p! link to monte carlo track
          spt(ihit).id_cluster = svt_hit(ihit).id  ! link to svt_hit
+         spt(ihit).id_mchit = svt_hit(ihit).id ! Link to mc hit
          spt(ihit).id_wafer   = svt_hit(ihit).volume_id
 c         svt_hit(ihit).id_spt   = ihit
       end do
@@ -2502,6 +2530,9 @@ c     map to wafer local frame coordinate, smear and map back to global frame
      &           geom(iwafer).n)
             xp(1) = xp(1)+ direct(1).sd *rg32(dummy)
             xp(2) = xp(2)+ direct(1).st *rg32(dummy)
+            spt(ispt).xl(1) = xp(1)
+            spt(ispt).xl(2) = xp(2)
+            spt(ispt).xl(3) = 0
             call svtltog(xp,spt(ispt).x,
      &           geom(iwafer).x,
      &           geom(iwafer).d,
@@ -2523,6 +2554,11 @@ c     map to wafer local frame coordinate, smear and map back to global frame
             spt(ispt).cov(1)     = abs(dx(1))
             spt(ispt).cov(2)     = abs(dx(2))
             spt(ispt).cov(3)     = abs(dx(3))
+            spt(ispt).res(1)     = 0.
+            spt(ispt).res(2)     = 0.
+            spt(ispt).res(3)     = 0.
+            spt(ispt).mom2(1)    = 0.
+            spt(ispt).mom2(2)    = 0.
             spt(ispt).flag       = 0 ! quality of space point - perfect
             spt(ispt).id         = ihit ! sequential index
             spt(ispt).id_globtrk = 0 ! link to global track 
@@ -2530,6 +2566,8 @@ c     map to wafer local frame coordinate, smear and map back to global frame
             spt(ispt).id_mctrack = svt_hit(ihit).track_p! link to monte carlo track
             spt(ispt).id_cluster = svt_hit(ihit).id ! link to mchits_svt
             spt(ispt).id_wafer   = svt_hit(ihit).volume_id
+            spt(ispt).id_match   = 0
+            spt(ispt).id_mchit = svt_hit(ihit).id ! Link to mc hits
 c            svt_hit(ihit).id_spt   = ihit
          else
             write(6,1004) ihit 
