@@ -144,12 +144,12 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$CPPPATH .= $main::PATH_SEPARATOR .  $env->{Packages}->{MYSQL}->{INCDIR};
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
 	
-    } elsif ( $pkg =~ m/^pyth$/ ) {
+    } elsif ( $pkg =~ m/^apythia$/ ) {
 	my $CERN_ROOT = $env->{ENV}->{CERN_ROOT};
 	print "CERN_ROOT = $CERN_ROOT\n" if $param::debug;
 	if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
 	$LIBPATH .= $CERN_ROOT . "/lib";
-	foreach my $py ("pythia","pythia6152","pythia6136") {
+	foreach my $py ("pythia6205","pythia","pythia6152","pythia6136") {
 	    my $file = $CERN_ROOT . "/lib/lib" . $py . ".a";
 	    if (-f $file) {$LIBS .= " -l" . $py; last;}
 	}
