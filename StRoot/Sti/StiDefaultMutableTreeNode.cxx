@@ -982,5 +982,9 @@ StiDefaultMutableTreeNode::appendChildrenToVector(
 	//cout << "appendChildrenToVector : node has no children " << endl;
 }
 
-//Global Utility function:
-
+const StiDefaultMutableTreeNode& StiDefaultMutableTreeNode::operator=(const StiDefaultMutableTreeNode& node)  
+{
+  parent = node.parent;	
+  children.clear();
+  return *this;
+}
