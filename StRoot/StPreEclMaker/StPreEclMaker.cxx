@@ -1,7 +1,39 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.2 2000/07/04 02:36:52 perev Exp $
+// $Id: StPreEclMaker.cxx,v 1.3 2000/08/24 11:26:48 suaide Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.3  2000/08/24 11:26:48  suaide
+// by A. A. P. Suaide - 2000/08/24 07:25:00
+//
+// Notes:
+//
+// 1. Full StEvent Compatible
+// 2. Read hits from StEvent object
+// 3. Write clusters in StEvent format and old format to keep background
+//    compatibility
+// 4. Do clustering in bemc, bprs, bsmde, bsmdp
+// 5. Included method StPreEclMaker::SetClusterCollection
+//
+// Removed Files:
+//
+//    StBemcPreCluster.cxx StBemcPreCluster.h
+//    StBsmdePreCluster.cxx StBsmdePreCluster.h
+//    StBsmdpPreCluster.cxx StBsmdpPreCluster.h
+//    StBemcPreClusterCollection.cxx StBemcPreClusterCollection.h
+//    StBsmdePreClusterCollection.cxx StBsmdePreClusterCollection.h
+//    StBsmdpPreClusterCollection.cxx StBsmdpPreClusterCollection.h
+//
+//
+// Revision 1.3  2000/08/22 05:30:00  A. A. P. Suaide
+//     Full StEvent compatible
+//     Read hits from StEvent object. If it does not exist creates a new one
+//     write clusters in StEvent format and old format
+//     Do clustering on bemc, bprs, bsmde and bsmdp
+//     StBemcPreClusterCollection, StBemcPreClsuter now obsolete
+//     StBsmdePreClusterCollection, StBsmdePreClsuter now obsolete
+//     StBsmdpPreClusterCollection, StBsmdpPreClsuter now obsolete
+//     Included method SetClusterConditions 
+//
 // Revision 1.2  2000/07/04 02:36:52  perev
 // formal corrections, gStChain removed
 //
@@ -9,7 +41,8 @@
 // initial version
 //
 //
-// Authors: Subhasis Chattopadhyay,
+// Authors: Alexandre A. P. Suaide (version 1.3)
+//          Subhasis Chattopadhyay,
 //          Aleksei Pavlinov , July 1999.
 //          initial version from Akio Ogawa    
 //    
@@ -27,7 +60,9 @@
 #include "StPreEclMaker.h"
 
 // added for StEvent
- 
+
+#include "StEvent.h" 
+#include "StEventTypes.h"
 #include "St_ObjectSet.h"
 #include "StEmcCollection.h"
 #include "StEmcDetector.h"
@@ -37,22 +72,39 @@
 #include "StEmcCluster.h"
 #include "StEmcPoint.h"
 #include "StEnumerations.h"
+#include "StContainers.h"
 
 
 ClassImp(StPreEclMaker)
 
-const TString detname[] = {"Bemc", "Bprs", "Bsmde", "Bsmdp"};
+
+int nModule[8] = {120, 120, 120, 120, 24, 24, 24, 24}; // temp.->database
+const TString detname[] = {"bemc", "bprs", "bsmde", "bsmdp","eemc", "eprs", "esmde", "esmdp"};
+
+TArrayI       mSizeMaxConf(8);      
+TArrayF       mEnergySeedConf(8);
+TArrayF       mEnergyAddConf(8);
+TArrayF       mEnergyThresholdAllConf(8);
+
+StEmcCollection* emc;
 
 //_____________________________________________________________________________
 StPreEclMaker::StPreEclMaker(const char *name, const char *title):StMaker(name,title){
 //  drawinit=kFALSE;
 }
 //_____________________________________________________________________________
-StPreEclMaker::~StPreEclMaker(){
+StPreEclMaker::~StPreEclMaker()
+{
 }
 //_____________________________________________________________________________
-Int_t StPreEclMaker::Init(){
-  Int_t i;
+Int_t StPreEclMaker::Init()
+{
+  //Setting default cluster conditions ...
+  SetClusterConditions("bemc",4,0.1,0.001,0.02);
+  SetClusterConditions("bprs",4,0.1,0.001,0.2);
+  SetClusterConditions("bsmde",5,0.08,0.001,0.001);
+  SetClusterConditions("bsmdp",5,0.08,0.001,0.001);
+  
   //Making QA histgrams
   m_ncl  = new TH2F("Ncluster","Number of cluster(log) .vs. Detector #",40,0.0,4.0, 4,0.5,4.5);
   m_etot = new TH2F("Ecluster" ,"Total PreCluster Energy(log) .vs. Detector #", 40,-2.0,2.0, 4,0.5,4.5);
@@ -60,7 +112,8 @@ Int_t StPreEclMaker::Init(){
   Int_t   rmsN=52;
   m_sig_e= new TH2F("RMS(eta)" ,"Sigma(eta) .vs. Detector #",rmsN,0.0,rmsMax,4,0.5,4.5);
   m_sig_p= new TH2F("RMS(phi)" ,"Sigma(phi) .vs. Detector #",rmsN,0.0,rmsMax,4,0.5,4.5);
-  for (i=0; i<4; i++){
+  for (Int_t i=0; i<4; i++)
+  {
     TString name_h = detname[i] + "_cluster";
     TString name_e = detname[i] + "_cluster_energy";
     TString tit_h  = detname[i] + " cluster";
@@ -87,88 +140,119 @@ Int_t StPreEclMaker::Init(){
   return StMaker::Init();
 }  
 //_____________________________________________________________________________
-Int_t StPreEclMaker::Make(){
-  if (!m_DataSet->GetList()){   //if DataSet is empty, create object and fill it
-    StEmcHitCollection *hit = 0;
-    StEmcHitCollection dummy; TString tit = dummy.GetTitle();
+Int_t StPreEclMaker::Make()
+{
+  cout << "\n************************* Entering PreEclMaker Make() \n\n";
+
+// First of all, try to get StEvent Pointer
+  StEvent *currevent = (StEvent*)GetInputDS("StEvent");
+  
+  if(!currevent)
+  {
+    cout << "***** Can not get Event pointer\n";
+    kStEvOk=kFALSE;
+  }
+  else
+  {
+    cout << "***** Event pointer Ok\n";
+    kStEvOk=kTRUE;
+    emc=currevent->emcCollection();
+  }
+  
+  if(!emc) // if not emcCollection, create one and fill it with hits from emc
+  {
+    cout <<"***** No emc object. Creating one ..\n";
+    emc = new StEmcCollection();
     St_DataSetIter itr(GetDataSet("emc_hits"));
-    while ( (hit = (StEmcHitCollection *)itr()) ) {
-      if(hit->GetTitle() == tit){
-	TString name = hit->GetName();
-        Int_t nhitsw = hit->NHit();
-
-        if(nhitsw > 0){ 
-//          cout <<" Name "<< name.Data() <<"  Hits " << nhitsw << endl;
-          if(!strcmp(name.Data(),"bemc")){
-            StBemcPreClusterCollection *cc = new StBemcPreClusterCollection(name);
-	    m_DataSet->Add(cc);
-	    if(cc->findClusters(hit)!= kStOK) return kStErr;
+    StEmcHitCollection* hit=0;
+    while((hit = (StEmcHitCollection*)itr()))
+    {
+      TString name = hit->GetName();
+      for(Int_t i=0; i<8; i++)
+      {  
+        if(!strcmp(name.Data(),detname[i].Data()))
+        {
+          StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
+          //Create StEmcDetector
+          StEmcDetector* detector = new StEmcDetector(id, nModule[i]);
+          //Create StEmcHit
+          for(Int_t j=0; j<hit->NHit(); j++)
+          {
+	          Float_t energy=hit->HitEnergy(j);
+            Int_t hid=hit->HitId(j);
+            Int_t module,eta,sub;
+            hit->getBin(hid,module,eta,sub);
+            StEmcRawHit *rawHit=new StEmcRawHit(id,(UInt_t)module,(UInt_t)eta,(UInt_t)sub,0,energy);
+  	        detector->addHit(rawHit);
           }
-          else if(!strcmp(name.Data(),"bsmde")){
-	    StBsmdePreClusterCollection *cc = new StBsmdePreClusterCollection(name);
-	    m_DataSet->Add(cc);
-	    if(cc->findClusters(hit)!= kStOK) return kStErr;
-          }
-          else if(!strcmp(name.Data(),"bsmdp")){
-	    StBsmdpPreClusterCollection *cc = new StBsmdpPreClusterCollection(name);
-	    m_DataSet->Add(cc);
-	    if(cc->findClusters(hit)!= kStOK) return kStErr;
-          }
-
-        }
-        else{
-          cout <<" Name "<< hit->GetName()<<"  Hits " << nhitsw << endl;
-        }
+          emc->setDetector(detector);
+        } 
       }
     }
+    if(kStEvOk) 
+    {
+      currevent->setEmcCollection(emc);
+      cout <<"***** New EmcCollection on StEvent\n";
+    }
+    
   }
+// At this point, StEmcCollection should be Ok.
+//
+
+// Starting clustering....
+
+  for(Int_t i=0; i<4; i++)  // Loop over the BEMC detectors
+  {  
+    cout <<"***** Doing clustering on detector "<<detname[i].Data()<<"\n";
+    StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
+    StEmcDetector* mDet=emc->detector(id); // getting detector pointer
+    StEmcPreClusterCollection* cc=new StEmcPreClusterCollection(detname[i].Data(),mDet);
+    if(cc->IsOk())
+    {
+      m_DataSet->Add(cc);
+      cc->setSizeMax(mSizeMaxConf[i]);
+      cc->setEnergySeed(mEnergySeedConf[i]);
+      cc->setEnergyAdd(mEnergyAddConf[i]);
+      cc->setEnergyThresholdAll(mEnergyThresholdAllConf[i]);
+//      cc->printConf();
+  	  if(cc->findClusters()!= kStOK) return kStErr;
+    }
+  }
+
   MakeHistograms(); // Fill QA histgrams
-  Int_t fill = fillStEvent(); if (fill){/*touch*/}
+  fillStEvent(); 
+  
+  AddData(new St_ObjectSet("EmcCollection",emc));
+  cout <<"***** New EmcCollection on local .data\n";
+    
   return kStOK;
 }
 //_____________________________________________________________________________
 void StPreEclMaker::MakeHistograms()
 {
+
   Int_t n,det;
   if (!m_DataSet) return;
 
   St_DataSetIter itr(m_DataSet);
   StEmcPreClusterCollection *cluster = 0;
-  StEmcPreClusterCollection dummy;
-  TString tit = dummy.GetTitle(); 
 
-  Char_t *cdet;
-  for(Int_t idet=0; idet <4; idet++){
-    switch (idet) {
-    case 0: 
-      cdet="bemc"; 
-      cluster = (StBemcPreClusterCollection*)itr(cdet);
-      break;
-    case 1: 
-      cdet="bprs"; 
-      cluster = (StBemcPreClusterCollection*)itr(cdet);
-      break;
-    case 2: 
-      cdet="bsmde"; 
-      cluster = (StBsmdePreClusterCollection*)itr(cdet);
-      break;
-    case 3: 
-      cdet="bsmdp";
-      cluster = (StBsmdpPreClusterCollection*)itr(cdet);
-      break;
-    }
-    if(cluster == 0) goto END;
-
-    if(cluster->GetTitle() == tit){
+  for(Int_t idet=0; idet <4; idet++)
+  {
+    cluster = (StEmcPreClusterCollection*)itr(detname[idet].Data());
+    if(cluster > 0)
+    {
       n = cluster->Nclusters();
       Float_t Etot=0.0;
-      if(n>0){
-	det = cluster->Detector();
+      if(n>0)
+      {
+	      det = cluster->Detector();
         m_ncl->Fill(log10((Float_t)n),(Float_t)det);
 
         TIter next(cluster->Clusters());
         StEmcPreCluster *cl;
-        for(Int_t i=0; i<n; i++){
+        for(Int_t i=0; i<n; i++)
+        {
           cl=(StEmcPreCluster*)next();
           Float_t eta=cl->Eta();
           Float_t phi=cl->Phi();
@@ -178,9 +262,11 @@ void StPreEclMaker::MakeHistograms()
           Int_t   nhits=cl->Nhits();
 
           if(sigmaeta>1.0e-5) m_sig_e->Fill(sigmaeta, (Float_t)det);
-          else             m_sig_e->Fill(-1.,      (Float_t)det);
+          else m_sig_e->Fill(-1.,(Float_t)det);
+          
           if(sigmaphi>1.0e-5) m_sig_p->Fill(sigmaphi, (Float_t)det);
-          else             m_sig_p->Fill(-1.,      (Float_t)det);
+          else m_sig_p->Fill(-1.,(Float_t)det);
+          
           m_cl[det-1]->Fill(eta, phi);
           m_energy[det-1]->Fill(eta, phi, energy);
           m_HitsInCl[det-1]->Fill((Float_t)nhits);
@@ -193,112 +279,104 @@ void StPreEclMaker::MakeHistograms()
         m_etot->Fill(log10(Etot),(Float_t)det);
       }
     }
-END:
-    continue;
   }
 }
 
 //------------------------------------------------------------------------
-Int_t StPreEclMaker::fillStEvent(){
- 
-  int nModule[8] = {120, 120, 120, 120, 24, 24, 24, 24}; // temp.->database
+Int_t StPreEclMaker::fillStEvent()
+{
+  
   if (!m_DataSet) return kStOK;
- 
-  //Create StEmcHitCollection
-  StEmcCollection* emc = new StEmcCollection();
- 
-  //Add it to dataset as ObjectSet
-  AddData(new St_ObjectSet("EmcCollection" , emc));
- 
+
   St_DataSetIter itr(m_DataSet);
   StEmcPreClusterCollection *cluster = 0;
-  StEmcPreClusterCollection dummy;
-  TString tit = dummy.GetTitle();
  
   Char_t *cdet;                                   
 
-  for(Int_t idet=0; idet <4; idet++){
-    switch (idet) {
-    case 0:
-      cdet="bemc";
-      cluster = (StBemcPreClusterCollection*)itr(cdet);
-      break;
-    case 1:
-      cdet="bprs";
-      cluster = (StBemcPreClusterCollection*)itr(cdet);
-      break;
-    case 2:
-      cdet="bsmde";
-      cluster = (StBsmdePreClusterCollection*)itr(cdet);
-      break;
-    case 3:
-      cdet="bsmdp";
-      cluster = (StBsmdpPreClusterCollection*)itr(cdet);
-      break;
-    }
-    if(cluster> 0){
-// Set detector Id
-    StDetectorId id = static_cast<StDetectorId>(idet+kBarrelEmcTowerId);
-    //cout<<" after stdetectorId Id "<<id<<endl;
-// Create StEmcDetector
- 
-      StEmcDetector* detector = new StEmcDetector(id, nModule[idet]);
- 
-//  Set Detector to EmcCollection
- 
-      emc->setDetector(detector);
- 
-// Create Cluster Collection and set Detector, clusterfinderId,
-// ClusterFinderParamVersion  
- 
+  for(Int_t idet=0; idet <4; idet++)
+  {
+    
+    cluster = (StEmcPreClusterCollection*)itr(detname[idet].Data());
+    
+    if(cluster> 0)
+    {
+      StDetectorId id = static_cast<StDetectorId>(idet+kBarrelEmcTowerId); 
+      StEmcDetector* detector = emc->detector(id);           
+
       StEmcClusterCollection* cluscoll = new StEmcClusterCollection();
       cluscoll->setDetector(id);
       cluscoll->setClusterFinderId(1);
-      cluscoll->setClusterFinderParamVersion(1);
- 
-//  set clustercoll to detector
- 
+      cluscoll->setClusterFinderParamVersion(1); 
+
       detector->setCluster(cluscoll);
  
-    if(cluster->GetTitle() == tit){
       Int_t n = cluster->Nclusters();
-      if(n>0){
-        Int_t det = cluster->Detector(); if(det){/*touch*/}
+      if(n>0)
+      {
+        Int_t det = cluster->Detector(); 
+        if(det){}
  
         TIter next(cluster->Clusters());
         StEmcPreCluster *cl;
-        for(Int_t i=0; i<n; i++){
-            cl=(StEmcPreCluster*)next();
- 
+        for(Int_t i=0; i<n; i++)
+        {
+          cl=(StEmcPreCluster*)next();
+          Int_t module=cl->Module();
+          StSPtrVecEmcRawHit& RawHit = detector->module((UInt_t)module)->hits();
           Float_t eta=cl->Eta();
           Float_t phi=cl->Phi();
           Float_t energy=cl->Energy();
           Float_t sigmaeta=cl->SigmaEta();
           Float_t sigmaphi=cl->SigmaPhi();
- 
-                StEmcCluster* clus = new StEmcCluster();
-                 clus->setEta(eta);
-                 clus->setPhi(phi);
-                 clus->setEnergy(energy);
-                 clus->setSigmaEta(sigmaeta);
-                 clus->setSigmaPhi(sigmaphi);
-// Add cluster to clustercoll
- 
-           cluscoll->addCluster(clus);
- 
-         } // for loop for n
-       } // if n>0 check
-     } //tit check
-   } // if cluster>0
-    } // det loop
- 
+          StEmcCluster* clus = new StEmcCluster();
+          clus->setEta(eta);
+          clus->setPhi(phi);
+          clus->setEnergy(energy);
+          clus->setSigmaEta(sigmaeta);
+          clus->setSigmaPhi(sigmaphi);
+            
+//          cout <<"**********************************************************************\n";
+//          cout <<"Cluster Information for detector "<<detname[idet].Data()<<"\n";
+//          cout <<"Eta = "<<eta<<"  Phi = "<<phi<< "  Energy = "<<energy<<"\n";
+//          cout <<"Number of hits = "<<cl->Nhits()<<"\n";
+            
+//          cout <<"Hits Information\n";
+          for(Int_t kk=0;kk<cl->Nhits();kk++)
+          {
+//            cout <<"Hit number = "<<kk<<"  module = " << RawHit[kk]->module()<<"  eta = "<<RawHit[kk]->eta() << "  sub = "<< RawHit[kk]->sub() <<"  energy = "<<RawHit[kk]->energy()<<"\n";
+            clus->addHit(RawHit[kk]);
+          }   
+          
+          cluscoll->addCluster(clus);
+        } 
+      } 
+    } 
+  } 
+  cout <<"**********************************************************************\n"; 
   return kStOK;
 }                                                                               
+//_____________________________________________________________________________
+void StPreEclMaker::SetClusterConditions(char *cdet,Int_t mSizeMax,
+                                            Float_t mEnergySeed,
+                                            Float_t mEnergyAdd,
+                                            Float_t mEnergyThresholdAll)
+{
+  for(Int_t i=0;i<8;i++)
+  {
+    if(!strcmp(cdet,detname[i].Data()))
+    {
+      mSizeMaxConf[i]=mSizeMax;
+      mEnergySeedConf[i]=mEnergySeed;
+      mEnergyAddConf[i]=mEnergyAdd;
+      mEnergyThresholdAllConf[i]=mEnergyThresholdAll;
+    }
+  }
+}
 
 //_____________________________________________________________________________
 void StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.2 2000/07/04 02:36:52 perev Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.3 2000/08/24 11:26:48 suaide Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
