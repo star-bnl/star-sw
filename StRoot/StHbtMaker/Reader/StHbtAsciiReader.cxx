@@ -14,6 +14,7 @@
  * 
  **************************************************************************/
 
+#include <string>
 #include "StHbtMaker/Reader/StHbtAsciiReader.h"
 //#include "StChain/StChain.h"
 //#include "StHbtMaker/Infrastructure/StHbtIO.cc"
@@ -26,11 +27,14 @@ ClassImp(StHbtAsciiReader)
 //_______________________________
 StHbtAsciiReader::StHbtAsciiReader() : mInputStream(0), mOutputStream(0){
   mFileName = "HbtAsciiFile";  // default name
+  mReaderStatus = 0;           // means "good"
 }
 
 //_______________________________
 StHbtAsciiReader::StHbtAsciiReader(char* file) : mInputStream(0), mOutputStream(0), mFileName(file)
-{  /* no-op */ }
+{
+  mReaderStatus = 0;           // means "good"
+}
 
 //_______________________________
 StHbtAsciiReader::~StHbtAsciiReader(){
@@ -48,19 +52,23 @@ StHbtAsciiReader::~StHbtAsciiReader(){
 StHbtEvent* StHbtAsciiReader::ReturnHbtEvent(){
   if (!mInputStream){
     cout << "StHbtAsciiReader::ReturnHbtEvent() - there is no input stream!";
+    mReaderStatus = 1;           // 0 means "good"
     return (0);
   }
   if (!(*mInputStream)){
     cout << "StHbtAsciiReader::ReturnHbtEvent() - input stream in bad state!" << endl;
+    cout << "State is " << mInputStream->rdstate() << endl;
+    mReaderStatus = 1;           // 0 means "good"
     return (0);
   }
   StHbtEvent* event = new StHbtEvent;
   (*mInputStream) >> (*event);
   if (!(mInputStream->good())){
     cout << "StHbtAsciiReader::ReturnHbtEvent() - input stream in bad state!" <<endl;
-    cout << "State is " << mInputStream->rdstate() << " - attempting to clear and move on " << endl;
-    //    return (0);
-    mInputStream->clear();
+    cout << "State is " << mInputStream->rdstate() << endl;
+    mReaderStatus = 1;           // 0 means "good"
+    return (0);
+    //mInputStream->clear();
   }
   return event;
 }
@@ -91,7 +99,7 @@ int StHbtAsciiReader::WriteHbtEvent(StHbtEvent* event){
 //_______________________________
 int StHbtAsciiReader::Init(const char* ReadWrite, StHbtString Message){
   cout << " *\n *\n *\n StHbtAsciiReader::Init() being called*\n *\n";
-
+  mReaderStatus = 0;           // means "good"
   //  if ((ReadWrite=="r")|| (ReadWrite=="R")){  // this object will be a reader
   if (((*ReadWrite)=='r')|| ((*ReadWrite)=='R')){  // this object will be a reader
     mInputStream = new ifstream;
@@ -101,6 +109,17 @@ int StHbtAsciiReader::Init(const char* ReadWrite, StHbtString Message){
       return (1);
     }
     cout << "StHbtAsciiReader::Init() - being configured as a Reader" << ReadWrite << endl;
+    // extract Input reader Report...
+    char temp[200] = "";
+    string stemp;
+    do {
+      Message += temp;
+      Message += "\n";
+      mInputStream->getline(temp,200);
+      stemp = temp;
+    } while (stemp != "-*-*-*-* End of Input Reader Report");
+    cout << "Here is the message that was at the beginning of the file...\n";
+    cout << Message.c_str();
   }
   else{                                      // this object will be a writer
     mOutputStream = new ofstream;
@@ -112,6 +131,9 @@ int StHbtAsciiReader::Init(const char* ReadWrite, StHbtString Message){
       return (1);
     }
     cout << "StHbtAsciiReader::Init() - being configured as a Writer" << ReadWrite << endl;
+    (*mOutputStream) << Message.c_str();
+    (*mOutputStream) << endl;
+    (*mOutputStream) << "-*-*-*-* End of Input Reader Report" << endl;  // write THIS out even if there is no report
   }
   return (0);
 }

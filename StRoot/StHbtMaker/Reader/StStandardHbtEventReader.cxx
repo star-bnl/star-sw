@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.7 1999/09/03 22:39:17 lisa Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.8 1999/09/08 04:15:53 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.8  1999/09/08 04:15:53  lisa
+ * persistent microDST implementation tweaked to please fickle solaris details
+ *
  * Revision 1.7  1999/09/03 22:39:17  lisa
  * Readers now MUST have Report() methods and MAY have WriteHbtEvent() methods
  *
@@ -71,15 +74,33 @@ ClassImp(StStandardHbtEventReader)
 
 //__________________
 StStandardHbtEventReader::StStandardHbtEventReader(){
-  /* no-op */
+  mEventCut=0;
+  mParticleCut=0;
+  mReaderStatus = 0;  // "good"
 }
 //__________________
-//StStandardHbtEventReader::~StStandardHbtEventReader(){
-//  /* no-op *//
-//}
+StStandardHbtEventReader::~StStandardHbtEventReader(){
+  if (mEventCut) delete mEventCut;
+  if (mParticleCut) delete mParticleCut;
+}
 //__________________
 StHbtString StStandardHbtEventReader::Report(){
-  StHbtString temp = "\n This is the StStandardHbtEventReader - no Early Cuts applied\n";
+  StHbtString temp = "\n This is the StStandardHbtEventReader\n";
+  temp += "---> EventCuts in Reader: ";
+  if (mEventCut) {
+    temp += mEventCut->Report();
+  }
+  else {
+    temp += "NONE";
+  }
+  temp += "\n---> ParticleCuts in Reader: ";
+  if (mParticleCut) {
+    temp += mParticleCut->Report();
+  }
+  else {
+    temp += "NONE";
+  }
+  temp += "\n";
   return temp;
 }
 //__________________
@@ -88,13 +109,6 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   cout << "StStandardHbtEventReader::ReturnHbtEvent" << endl;
 
   StEvent* rEvent = 0;
-
-  /* Yuri put this "if 0" and DS stuff here, but it doesn't work
-  #if 0
-  rEvent = ((StEventReaderMaker*) mTheChain->Maker("events"))->event();
-  #endif
-  rEvent =  (StEvent *) GetInputDS("StEvent");
-  */
 
   StEventMaker* tempMaker = (StEventMaker*) mTheEventMaker;
 
@@ -113,6 +127,16 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   StHbtThreeVector vp = rEvent->primaryVertex()->position();
   hbtEvent->SetPrimVertPos(vp);
   
+  // By now, all event-wise information has been extracted and stored in hbtEvent
+  // see if it passes any front-loaded event cut
+  if (mEventCut){
+    if (!(mEventCut->Pass(hbtEvent))){    // event failed! - return null pointer (but leave Reader status flag as "good")
+      delete hbtEvent;
+      return 0;
+    }
+  }
+
+
   StGlobalTrack* rTrack;
   cout << "StStandardHbtReader::ReturnHbtEvent - We have " << mult << " tracks to store - we skip tracks with nhits==0" << endl;
 
@@ -194,6 +218,17 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     hbtTrack->SetCharge(charge);
     
     //cout << "pushing..." <<endl;
+
+    // By now, all track-wise information has been extracted and stored in hbtTrack
+    // see if it passes any front-loaded event cut
+    if (mParticleCut){
+      if (!(mParticleCut->Pass(hbtTrack))){                  // track failed - delete it and skip the push_back
+	delete hbtTrack;
+	continue;
+      }
+    }
+
+
     hbtEvent->TrackCollection()->push_back(hbtTrack);
   }
   return hbtEvent;

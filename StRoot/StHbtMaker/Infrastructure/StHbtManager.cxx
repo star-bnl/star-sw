@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.8 1999/09/05 02:58:11 lisa Exp $
+ * $Id: StHbtManager.cxx,v 1.9 1999/09/08 04:15:52 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
+ * Revision 1.9  1999/09/08 04:15:52  lisa
+ * persistent microDST implementation tweaked to please fickle solaris details
+ *
  * Revision 1.8  1999/09/05 02:58:11  lisa
  * add ASCII microDST reader/writer AND franksParticle cuts
  *
@@ -112,13 +115,22 @@ StHbtString StHbtManager::Report(){
   return returnThis;
 }
 //____________________________
-void StHbtManager::ProcessEvent(){
+int StHbtManager::ProcessEvent(){
 
   cout << "StHbtManager::ProcessEvent" << endl;
   // NOTE - this ReturnHbtEvent makes a *new* StHbtEvent - delete it when done!
   StHbtEvent* currentHbtEvent = mEventReader->ReturnHbtEvent();
 
   cout << "Event reader has returned control to manager" << endl;
+
+  // if no HbtEvent is returned, then we abort processing.
+  // the question is now: do we try again next time (i.e. there may be an HbtEvent next time)
+  // or are we at EOF or something?  If Reader says Status=0, then that means try again later.
+  // so, we just return the Reader's Status.
+  if (!currentHbtEvent){
+    cout << "StHbtManager::ProcessEvent() - Reader::ReturnHbtEvent() has returned null pointer\n";
+    return mEventReader->Status();
+  }
 
   // shall we write a microDST? - added 3sep99
   if (mEventWriter) mEventWriter->WriteHbtEvent(currentHbtEvent);
@@ -258,4 +270,5 @@ void StHbtManager::ProcessEvent(){
     }   // if currentEvent is accepted by currentAnalysis
   }     // loop over Analyses
   delete currentHbtEvent;
+  return 0;    // 0 = "good return"
 }       // ProcessEvent

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventReader.hh,v 1.5 1999/09/05 02:58:11 lisa Exp $
+ * $Id: StHbtEventReader.hh,v 1.6 1999/09/08 04:15:52 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEventReader.hh,v $
+ * Revision 1.6  1999/09/08 04:15:52  lisa
+ * persistent microDST implementation tweaked to please fickle solaris details
+ *
  * Revision 1.5  1999/09/05 02:58:11  lisa
  * add ASCII microDST reader/writer AND franksParticle cuts
  *
@@ -43,6 +46,9 @@
 
 class StHbtEventReader {
 
+protected:
+  int mReaderStatus;     // 0="good"
+
 public:
   // even tho it's only a base class and never constructed, if you don't have an implementation,
   // you get "StHbtEventReader type_info node" upon dynamical loading
@@ -61,6 +67,8 @@ public:
   // these next two are optional but would make sense for, e.g., opening and closing a file
   virtual int Init(const char* ReadWrite, StHbtString Message=" "){cout << "do-nothing StHbtEventReader::Init()\n"; return(0);}
   virtual void Finish(){/*no-op*/};
+
+  int Status(){return mReaderStatus;} // StHbtManager looks at this for guidance if it gets null pointer from ReturnHbtEvent
 
 
 };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.h,v 1.4 1999/09/05 02:58:12 lisa Exp $
+ * $Id: StHbtManager.h,v 1.5 1999/09/08 04:15:52 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.h,v $
+ * Revision 1.5  1999/09/08 04:15:52  lisa
+ * persistent microDST implementation tweaked to please fickle solaris details
+ *
  * Revision 1.4  1999/09/05 02:58:12  lisa
  * add ASCII microDST reader/writer AND franksParticle cuts
  *
@@ -58,7 +61,7 @@ public:
   void AddAnalysis(StHbtAnalysis*);
 
   int Init();
-  void ProcessEvent();
+  int ProcessEvent();   // a "0" return value means success - otherwise quit
   void Finish();
 
   StHbtString Report(); //!

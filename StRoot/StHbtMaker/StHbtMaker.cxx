@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtMaker.cxx,v 1.5 1999/09/05 02:58:10 lisa Exp $
+ * $Id: StHbtMaker.cxx,v 1.6 1999/09/08 04:15:51 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtMaker.cxx,v $
+ * Revision 1.6  1999/09/08 04:15:51  lisa
+ * persistent microDST implementation tweaked to please fickle solaris details
+ *
  * Revision 1.5  1999/09/05 02:58:10  lisa
  * add ASCII microDST reader/writer AND franksParticle cuts
  *
@@ -87,6 +90,10 @@ Int_t StHbtMaker::Finish()
 Int_t StHbtMaker::Make()
 {
   cout << "\nStHbtMaker::Make -- processing event" << endl;
-  mHbtManager->ProcessEvent();
-  return kStOK;
+  if (mHbtManager->ProcessEvent()){
+    return kStEOF;    // non-zero value returned --> end of file action
+  }
+  else{
+    return kStOK;
+  }
 }
