@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.19  1999/04/07 21:42:33  ward
+// Version tag, Desi and Lucy.
+//
 // Revision 1.18  1999/04/07 21:41:46  ward
 // Incorporates nPixelThisPad fix from Bill Love.
 //
@@ -361,7 +364,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am the Video Ranger. St_tpcdaq_Maker::Make().\n");
+  printf("I am Desi and Lucy. St_tpcdaq_Maker::Make().\n");
   errorCode=GetEventAndDecoder();
   printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
@@ -382,7 +385,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.18 1999/04/07 21:41:46 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.19 1999/04/07 21:42:33 ward Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }
