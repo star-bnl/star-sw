@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.6 2000/04/18 20:38:09 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.7 2000/04/21 17:43:01 pavlinov Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.7  2000/04/21 17:43:01  pavlinov
+ * Added methods for for decoding Geant volume Id
+ *
  * Revision 1.6  2000/04/18 20:38:09  pavlinov
  * Added ctor from Geant geometry
  *
@@ -117,12 +120,14 @@ public:
   Int_t    checkSub(const Int_t );
   Int_t    checkId(const Int_t );
 
-  Int_t    getBin(const Int_t,Int_t &,Int_t &,Int_t &);  // From raw# to bin#; 
-  Int_t    getBin(const Float_t, const Float_t, Int_t &,Int_t &,Int_t &); //From eta,phi to bin
-  Int_t    getId(const Int_t,const Int_t,const Int_t,Int_t &); // From bin# to raw#;
+  Int_t    getBin(const Int_t,Int_t &,Int_t &,Int_t &);
+  Int_t    getBin(const Float_t, const Float_t, Int_t &,Int_t &,Int_t &);
+  Int_t    getId(const Int_t,const Int_t,const Int_t,Int_t &);
+
   Int_t    getVolIdBemc(const Int_t,Int_t&, Int_t &,Int_t &,Int_t &);
+  Int_t    getVolIdBsmd(const Int_t,Int_t&, Int_t &,Int_t &,Int_t &);
   
-  Int_t    getZlYl(const Int_t,Float_t &,Float_t &);  // Get (x,y) local in the raw#;
+  Int_t    getZlYl(const Int_t,Float_t &,Float_t &);
   Int_t    getEta(const Int_t, const Int_t, Float_t &);
   Int_t    getTheta(const Int_t, const Int_t, Float_t &);
   Int_t    getPhi(const Int_t, const Int_t, Float_t &);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.5 2000/04/18 20:38:10 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.6 2000/04/21 17:43:02 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.6  2000/04/21 17:43:02  pavlinov
+ * Added methods for for decoding Geant volume Id
+ *
  * Revision 1.5  2000/04/18 20:38:10  pavlinov
  * Added ctor from Geant geometry
  *
@@ -28,6 +31,7 @@
 #include <strings.h>
 #include "StEmcGeom.h"
 #include "TROOT.h"
+#include "emc_def.h"
 
 ClassImp(StEmcGeom)
 
@@ -366,10 +370,118 @@ void StEmcGeom::initBSMDP()
   }
 }
 // _____________________________________________________________________
-Int_t StEmcGeom::getVolIdBemc(const Int_t ivid,Int_t &det,Int_t &m,Int_t &e,Int_t &s)
+Int_t StEmcGeom::getVolIdBemc(const Int_t ivid, Int_t &module,Int_t &eta,
+Int_t &sub, Int_t &dep)
 {
   // Transition from Geant Volume Id to usual for BEMC and BPRS
   // See  emc/util/volid_bemc.F
+
+  static Int_t emcIvid[5]={10000000,100000,100,10,1};
+  Int_t emcChid[5], i, ividw, rl, phi;
+
+  ividw = ivid;
+  for(i=0; i<5; i++){
+    emcChid[i] = ividw/emcIvid[i];
+    ividw      = ividw%emcIvid[i];
+  }
+  if(ividw == 0){
+    rl     = emcChid[0];  // right/left: =1 for Z>0, and =2 for Z<0
+    eta    = emcChid[1];  // pseudorapidity bin number [1,20]
+    phi    = emcChid[2];  // module phi [1,120]
+    sub    = emcChid[3];  // d(eta)=0.1 tower number [1,2]
+    dep    = emcChid[4];  // depth section [1,2]
+    if     (rl==1) {
+      phi+=((Int_t)toDeg(mPhiOffset[0])-75)/6;
+      if     (phi<=0)  phi+=60;
+      else if(phi>=61) phi-=60;
+      module=phi;
+    }
+    else if(rl==2) {
+      phi+=((Int_t)toDeg(mPhiOffset[1])-105)/6;
+      if     (phi<=0)  phi+=60;
+      else if(phi>=61) phi-=60;
+      module=phi+60;
+      sub   =(sub+1)%2+1;
+    }
+    else{
+    printf("<E> getVolIdBemc -- error decoding BEMC Geant volume Id %i; rl=%i\n",
+    ivid, rl);
+    return 0;
+    }
+  }
+  else {
+    printf("<E> getVolIdBemc -- error decoding BEMC Geant volume Id %i=>%i\n",
+    ivid, ividw);
+    return 0;
+  }
+  printf(" vid %i m %3i eta %3i sub %3i dep %3i \n",
+  ivid,module,eta,sub,dep);  
+  return 1;
+}
+// _____________________________________________________________________
+Int_t StEmcGeom::getVolIdBsmd(const Int_t ivid, Int_t &module,Int_t &eta,
+Int_t &sub, Int_t &type)
+{
+  // Transition from Geant Volume Id to usual for BSMDE and BSMDP
+  // See  emc/util/volid_bsmd.F
+  static Int_t smdIvid[5]={100000000,1000000,1000,100,1}; //matched with AGI&G2T
+  Int_t smdChid[5], i, ividw, rl, phi, t, strip;
+
+  ividw = ivid;
+  for(i=0; i<5; i++){
+    smdChid[i] = ividw/smdIvid[i];
+    ividw      = ividw%smdIvid[i];
+  }
+  if(ividw == 0){
+    rl     = smdChid[0];  // right/left: =1 for Z>0, and =2 for Z<0
+    eta    = smdChid[1];  // pseudorapidity bin number [-10,10]
+    phi    = smdChid[2];  // module phi [1,60]
+    t      = smdChid[3];  // SMD type 1->3
+    strip  = smdChid[4];  // strip number 1-75(type 1,2) 1-15(type 3)
+    if     (rl==1) {
+      phi+=((Int_t)toDeg(mPhiOffset[0])-75)/6;
+      if     (phi<=0)  phi+=60;
+      else if(phi>=61) phi-=60;
+      module=phi;
+    }
+    else if(rl==2) {
+      phi+=((Int_t)toDeg(mPhiOffset[1])-105)/6;
+      if     (phi<=0)  phi+=60;
+      else if(phi>=61) phi-=60;
+      module=phi+60;
+    }
+    else{
+      printf("<E> getVolIdBsmd -- error decoding BSMD Geant volume Id %i; rl=%i\n",
+      ivid, rl);
+      return 0;
+    }
+    if     (t==1){
+      type = BSMDE;
+      eta  = strip;
+      sub  = 1;
+    }
+    else if(t==2){
+      type = BSMDE;
+      eta  = strip + 75;
+      sub  = 1;
+    }
+    else if(t==3){
+      type = BSMDP;
+      eta  = abs(eta);
+      sub  = strip;
+    }
+    else {
+      printf("<E> getVolIdBsmd: Type mismatch %i \n",t);
+      return 0;
+    }
+  }
+  else {
+    printf("<E> getVolIdBsmd -- error decoding BSMD Geant volume Id %i=>%i\n",
+    ivid, ividw);
+    return 0;
+  }
+  printf(" vid %i m %3i eta %3i sub %3i type %3i \n",
+  ivid,module,eta,sub,type);  
   return 1;
 }
 // _____________________________________________________________________
