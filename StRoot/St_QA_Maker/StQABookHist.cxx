@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.5 2001/04/26 16:34:28 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.6 2001/04/26 20:45:19 lansdell Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.6  2001/04/26 20:45:19  lansdell
+// changed some histogram ranges (TPC+SVT radius at start, impact param for primary tracks)
+//
 // Revision 2.5  2001/04/26 16:34:28  genevb
 // Fixed some histogram ranges
 //
@@ -655,7 +658,7 @@ void StQABookHist::BookHistGlob(){
     m_glb_ratioTS->SetMinimum(10);
   m_glb_ratiomTS = QAH::H1F("QaGtrkRnmTS",    "globtrk: ratio Nfit/max pnt, tpc+svt", 55, 0., 1.1);
   m_glb_chargeTS = QAH::H1F("QaGtrkChrgTS",   "globtrk: charge, tpc+svt ", 20,-2.,2.);
-  m_glb_r0TS     = QAH::H1F("QaGtrkR0TS",     "globtrk: radius at start (cm), tpc+svt", 50,0.,200.);
+  m_glb_r0TS     = QAH::H1F("QaGtrkR0TS",     "globtrk: radius at start (cm), tpc+svt", 100,0.,25.);
     m_glb_r0TS->SetMinimum(100);
   m_glb_phi0TS   = QAH::H1F("QaGtrkPhi0TS",   "globtrk: azimuth (phi) at start (deg,force 0-360),tpc+svt", 64, 0.,360.);
   m_glb_z0TS     = QAH::H1F("QaGtrkZ0TS",     "globtrk: z-coord at start (cm), tpc+svt", 50, -300.,300.);
@@ -852,7 +855,7 @@ void StQABookHist::BookHistPrim(){
   m_prim_ratioT  = QAH::H1F("QaPtrkRnfT",    "primtrk: ratio Nfit/tot pnt, tpc", 55, 0., 1.1);
   m_prim_ratiomT = QAH::H1F("QaPtrkRnmT",    "primtrk: ratio Nfit/max pnt, tpc", 55, 0., 1.1);
   m_prim_chargeT = QAH::H1F("QaPtrkChrgT",   "primtrk: charge, tpc ", 20,-2.,2.);
-  m_prim_r0T     = QAH::H1F("QaPtrkR0T",     "primtrk: radius at start (cm), tpc ", 50,0.,200.);
+  m_prim_r0T     = QAH::H1F("QaPtrkR0T",     "primtrk: radius at start (cm), tpc ", 50,0.,.1);
   m_prim_phi0T   = QAH::H1F("QaPtrkPhi0T",   "primtrk: azimuth (phi) at start (deg,force 0,360), tpc ", 64,0.,360.);
   m_prim_z0T     = QAH::H1F("QaPtrkZ0T",     "primtrk: z-coord at start (cm), tpc ", 50, -300.,300.);
   m_prim_curvT   = QAH::H1F("QaPtrkCurvT",   "primtrk: log10 curvature (1/cm), tpc ", 80,-3.5,0.5);
@@ -877,7 +880,7 @@ void StQABookHist::BookHistPrim(){
   m_pchisq0T     = QAH::H1F("QaPtrkChisq0T", "primtrk: chisq0, tpc", 50, 0.,5.);
   m_pchisq1T     = QAH::H1F("QaPtrkChisq1T", "primtrk: chisq1, tpc", 50, 0.,5.);
   m_prim_impactT = QAH::H1F("QaPtrkImpactT", "primtrk: log10 impact param from prim vtx, tpc",120,-3.0,3.0);
-  m_prim_impactrT = QAH::H1F("QaPtrkImpactrT", "primtrk: impact param from prim vtx, tpc",100,0.,10.);
+  m_prim_impactrT = QAH::H1F("QaPtrkImpactrT", "primtrk: impact param from prim vtx, tpc",100,0.,0.01);
 
 // 2D - tpc
   m_ppT_eta_recT = QAH::H2F("QaPtrkPtVsEtaT","primtrk: log pT vs eta, tpc", 20,-2.,2.,40,1.,4.);
@@ -942,7 +945,7 @@ void StQABookHist::BookHistPrim(){
   m_prim_ratioTS  = QAH::H1F("QaPtrkRnfTS",    "primtrk: ratio Nfit/tot pnt, tpc+svt", 55, 0., 1.2005);
   m_prim_ratiomTS = QAH::H1F("QaPtrkRnmTS",    "primtrk: ratio Nfit/max pnt, tpc+svt", 55, 0., 1.2005);
   m_prim_chargeTS = QAH::H1F("QaPtrkChrgTS",   "primtrk: charge, tpc+svt ", 20,-2.,2.);
-  m_prim_r0TS     = QAH::H1F("QaPtrkR0TS",     "primtrk: radius at start (cm), tpc+svt", 50,0.,200.);
+  m_prim_r0TS     = QAH::H1F("QaPtrkR0TS",     "primtrk: radius at start (cm), tpc+svt", 50,0.,0.1);
   m_prim_phi0TS   = QAH::H1F("QaPtrkPhi0TS",   "primtrk: azimuth (phi) at start (deg,force 0-360),tpc+svt", 64, 0.,360.);
   m_prim_z0TS     = QAH::H1F("QaPtrkZ0TS",     "primtrk: z-coord at start (cm), tpc+svt", 50, -300.,300.);
   m_prim_curvTS   = QAH::H1F("QaPtrkCurvTS",   "primtrk: log10 curvature (1/cm), tpc+svt", 80,-3.5,0.5);
@@ -967,7 +970,7 @@ void StQABookHist::BookHistPrim(){
   m_pchisq0TS     = QAH::H1F("QaPtrkChisq0TS", "primtrk: chisq0, tpc+svt", 50, 0.,5.);
   m_pchisq1TS     = QAH::H1F("QaPtrkChisq1TS", "primtrk: chisq1, tpc+svt", 50, 0.,5.);
   m_prim_impactTS = QAH::H1F("QaPtrkImpactTS", "primtrk: log10 impact param from prim vtx, tpc+svt",120,-3.0,3.0);
-  m_prim_impactrTS = QAH::H1F("QaPtrkImpactrTS", "primtrk: impact param from prim vtx, tpc+svt",100,0.,10.);
+  m_prim_impactrTS = QAH::H1F("QaPtrkImpactrTS", "primtrk: impact param from prim vtx, tpc+svt",100,0.,0.01);
 
 // 2D - tpc + silicon (svt + ssd)
   m_ppT_eta_recTS = QAH::H2F("QaPtrkPtVsEtaTS","primtrk: log pT vs eta, tpc+svt", 20,-2.,2.,40,1.,4.);
