@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.cc,v 1.19 2004/05/03 23:35:31 perev Exp $
+ * $Id: StHelixD.cc,v 1.20 2004/10/17 03:20:41 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHelixD.cc,v $
+ * Revision 1.20  2004/10/17 03:20:41  perev
+ * Error check improved
+ *
  * Revision 1.19  2004/05/03 23:35:31  perev
  * Possible non init WarnOff
  *
@@ -84,6 +87,7 @@
 #include "StHelixD.hh"
 #include "PhysicalConstants.h" 
 #include "SystemOfUnits.h"
+#include "StMkDeb.h"
 
 #ifdef __ROOT__
 ClassImp(StHelixD)
@@ -92,11 +96,13 @@ ClassImp(StHelixD)
 StHelixD::StHelixD()
 {
     setParameters(0, 0, 0, StThreeVectorD(), -1);
+    StMkDeb::SetUser(this);
 }
 
 StHelixD::StHelixD(double c, double d, double phase,
 		   const StThreeVectorD& o, int h)
 {
+    StMkDeb::SetUser(this);
     setParameters(c, d, phase, o, h);
 }
 
@@ -567,21 +573,27 @@ StHelixD::pathLengths(const StHelixD& h) const
     }
 }
 
-int StHelixD::valid(double WorldSize) const
+int StHelixD::valid(double WorldSize) const {return !bad(WorldSize);}
+int StHelixD::bad(double WorldSize) const
 {
 
-    if (!::finite(mDipAngle    )) 	return 0;
-    if (!::finite(mH           )) 	return 0;
-    if (!::finite(mCurvature   )) 	return 0;
-    if (::fabs(mCurvature) > WorldSize)	return 0;
+    int ierr;
+    if (!::finite(mDipAngle    )) 	return   11;
+    if (!::finite(mCurvature   )) 	return   12;
 
-    if (!mOrigin.valid(WorldSize))      return 0;
+    ierr = mOrigin.bad(WorldSize);
+    if (ierr)                           return    3+ierr*100;
+
+    if (::fabs(mDipAngle)  >1.58)	return   21;
     double qwe = ::fabs(::fabs(mDipAngle)-M_PI/2);
-    if (qwe < 1./WorldSize      ) 	return 0; 
-    if (abs(mH) != 1            )       return 0; 
-    if (mCurvature < 0          )	return 0;
+    if (qwe < 1./WorldSize      ) 	return   31; 
 
-    return 1;
+    if (::fabs(mCurvature) > WorldSize)	return   22;
+    if (mCurvature < 0          )	return   32;
+
+    if (abs(mH) != 1            )       return   24; 
+
+    return 0;
 }
 
 void StHelixD::moveOrigin(double s)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.hh,v 1.6 2003/10/30 20:06:47 perev Exp $
+ * $Id: StThreeVectorD.hh,v 1.7 2004/10/17 03:20:41 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.hh,v $
+ * Revision 1.7  2004/10/17 03:20:41  perev
+ * Error check improved
+ *
  * Revision 1.6  2003/10/30 20:06:47  perev
  * Check of quality added
  *
@@ -124,6 +127,7 @@ public:
     StThreeVectorD& operator+= (const StThreeVectorD&);
     StThreeVectorD& operator-= (const StThreeVectorD&);
     int             valid(double world = 1.e+5) const;
+    int               bad(double world = 1.e+5) const;
 protected:
     double    mX1, mX2, mX3;
 #ifdef __ROOT__

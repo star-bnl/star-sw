@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.cc,v 1.12 2004/01/27 02:52:26 perev Exp $
+ * $Id: StThreeVectorF.cc,v 1.13 2004/10/17 03:20:41 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.cc,v $
+ * Revision 1.13  2004/10/17 03:20:41  perev
+ * Error check improved
+ *
  * Revision 1.12  2004/01/27 02:52:26  perev
  * Add finite() for float
  *
@@ -145,13 +148,12 @@ istream&  operator>>(istream& is, StThreeVectorF& v)
     return is;
 }
 
-int StThreeVectorF::valid(double world) const
+int StThreeVectorF::valid(double world) const {return !bad(world);}
+int StThreeVectorF::bad(double world) const
 {		
-  for (int i=0;i<3;i++) {
-    if (!StMath::Finite((&mX1)[i])      ) return 0; 		
-    if ( ::fabs  ((&mX1)[i])>world) return 0; 		
-  }		
-  return 1;		
+  for (int i=0;i<3;i++) {if (!StMath::Finite((&mX1)[i])) return 10+i;} 		
+  for (int i=0;i<3;i++) {if ( ::fabs  ((&mX1)[i])>world) return 20+i;} 		
+  return 0;		
 }
 
 #ifdef __ROOT__

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.cc,v 1.13 2003/10/30 20:06:47 perev Exp $
+ * $Id: StThreeVectorD.cc,v 1.14 2004/10/17 03:20:41 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999  
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.cc,v $
+ * Revision 1.14  2004/10/17 03:20:41  perev
+ * Error check improved
+ *
  * Revision 1.13  2003/10/30 20:06:47  perev
  * Check of quality added
  *
@@ -140,13 +143,12 @@ istream&  operator>>(istream& is, StThreeVectorD& v)
     v.setZ(z);
     return is;
 }
-int StThreeVectorD::valid(double world) const
+int StThreeVectorD::valid(double world) const {return !bad(world);}
+int StThreeVectorD::bad(double world) const
 {		
-  for (int i=0;i<3;i++) {
-    if (!::finite((&mX1)[i])      ) return 0; 		
-    if ( ::fabs  ((&mX1)[i])>world) return 0; 		
-  }		
-  return 1;		
+  for (int i=0;i<3;i++) {if (!::finite((&mX1)[i]))       return 10+i;} 		
+  for (int i=0;i<3;i++) {if ( ::fabs  ((&mX1)[i])>world) return 20+i;} 		
+  return 0;		
 }
 
 #ifdef __ROOT__
