@@ -1,6 +1,13 @@
-// $Id: StMcCalorimeterHit.hh,v 2.3 2003/09/02 17:58:41 perev Exp $
+// $Id: StMcCalorimeterHit.hh,v 2.4 2003/10/08 20:17:54 calderon Exp $
 //
 // $Log: StMcCalorimeterHit.hh,v $
+// Revision 2.4  2003/10/08 20:17:54  calderon
+// -using <iostream>, std::cout, std::ostream.
+// -changes in FTPC volume Id.
+//   o Causes changes in decoding of plane().
+//   o sector() is added.
+//   o print volumeId and sector() in the operator<<.
+//
 // Revision 2.3  2003/09/02 17:58:41  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -15,7 +22,12 @@
 #ifndef StMcCalorimeterHit_hh
 #define StMcCalorimeterHit_hh
 
-#include <Stiostream.h>
+#include <iostream>
+#ifndef ST_NO_NAMESPACES
+using std::ostream;
+using std::cout;
+#endif
+
 //#include "StMemoryPool.hh"
 
 class StMcTrack;

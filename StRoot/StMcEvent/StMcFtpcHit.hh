@@ -1,7 +1,14 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.hh,v 2.6 2000/06/06 02:58:41 calderon Exp $
+ * $Id: StMcFtpcHit.hh,v 2.7 2003/10/08 20:17:55 calderon Exp $
  * $Log: StMcFtpcHit.hh,v $
+ * Revision 2.7  2003/10/08 20:17:55  calderon
+ * -using <iostream>, std::cout, std::ostream.
+ * -changes in FTPC volume Id.
+ *   o Causes changes in decoding of plane().
+ *   o sector() is added.
+ *   o print volumeId and sector() in the operator<<.
+ *
  * Revision 2.6  2000/06/06 02:58:41  calderon
  * Introduction of Calorimeter classes.  Modified several classes
  * accordingly.
@@ -58,7 +65,8 @@ public:
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
 
-    unsigned long plane() const; // 1-20
+    unsigned long plane() const; // 1-20, where 1-10 = West and 11-20 = East
+    unsigned long sector() const; // 1-6
     
 private:
 

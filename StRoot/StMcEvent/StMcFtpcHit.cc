@@ -1,7 +1,14 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.cc,v 2.7 2000/06/06 02:58:41 calderon Exp $
+ * $Id: StMcFtpcHit.cc,v 2.8 2003/10/08 20:17:55 calderon Exp $
  * $Log: StMcFtpcHit.cc,v $
+ * Revision 2.8  2003/10/08 20:17:55  calderon
+ * -using <iostream>, std::cout, std::ostream.
+ * -changes in FTPC volume Id.
+ *   o Causes changes in decoding of plane().
+ *   o sector() is added.
+ *   o print volumeId and sector() in the operator<<.
+ *
  * Revision 2.7  2000/06/06 02:58:41  calderon
  * Introduction of Calorimeter classes.  Modified several classes
  * accordingly.
@@ -40,7 +47,7 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_ftp_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.7 2000/06/06 02:58:41 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.8 2003/10/08 20:17:55 calderon Exp $";
 
 StMemoryPool StMcFtpcHit::mPool(sizeof(StMcFtpcHit));
 
@@ -65,15 +72,26 @@ StMcFtpcHit::~StMcFtpcHit() {/* noop */ }
 ostream&  operator<<(ostream& os, const StMcFtpcHit& h)
 {
     os << "Position      : " << h.position() << endl; 
-    os << "Local Momentum: " << h.localMomentum() << endl; 
+    os << "Local Momentum: " << h.localMomentum() << endl;
+    os << "Volume Id     : " << h.volumeId() << endl;
     os << "Plane         : " << h.plane()    << endl;
+    os << "Sector        : " << h.sector()   << endl;
     return os;
 }
 
 unsigned long
 StMcFtpcHit::plane() const
 {
-    //volume_id = 101 to 110 are the first FTPC (1-10 in StEvent)
-    //volume_id = 201 to 210 are the second FTPC (11-20 in StEvent)
-    return (mVolumeId/100 - 1)*10 + mVolumeId%100;
+    //new encoding from Maria: 1st (west) or 2nd (east) FTPC * 1000 + plane * 100 + sector
+    //volume_id = 101? to 110? are the first FTPC (1-10 in StEvent), last digit is sector (below)
+    //volume_id = 201? to 210? are the second FTPC (11-20 in StEvent), last digit is sector (below)
+    return (mVolumeId/1000 - 1)*10 + (mVolumeId/10)%100;
+}
+
+unsigned long
+StMcFtpcHit::sector() const
+{
+    //volume_id = 1??1 to 1??6 are the sectors in the first FTPC (1-6 in StEvent)
+    //volume_id = 2??1 to 2??6 are the sectors in the second FTPC (1-6 in StEvent)
+    return mVolumeId%10;
 }

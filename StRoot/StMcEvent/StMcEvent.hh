@@ -1,7 +1,14 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.11 2003/09/02 17:58:41 perev Exp $
+ * $Id: StMcEvent.hh,v 2.12 2003/10/08 20:17:55 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.12  2003/10/08 20:17:55  calderon
+ * -using <iostream>, std::cout, std::ostream.
+ * -changes in FTPC volume Id.
+ *   o Causes changes in decoding of plane().
+ *   o sector() is added.
+ *   o print volumeId and sector() in the operator<<.
+ *
  * Revision 2.11  2003/09/02 17:58:41  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -64,8 +71,11 @@
 #ifndef StMcEvent_hh
 #define StMcEvent_hh
 
-#include <Stiostream.h>
-
+#include <iostream>
+#ifndef ST_NO_NAMESPACES
+using std::ostream;
+using std::cout;
+#endif
 #include "StMcContainers.hh" 
 #include "TString.h"
 
