@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StDbBufferI.h,v 1.3 1999/12/28 21:31:41 porter Exp $
+ * $Id: StDbBufferI.h,v 1.4 1999/12/29 13:49:34 porter Exp $
  *
  * Author: Laurent Conin & Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbBufferI.h,v $
+ * Revision 1.4  1999/12/29 13:49:34  porter
+ * fix for Solaris-CC4.2 within StRoot make (cons)...
+ * replaced #include <config.h> with #include <ospace/config.h>
+ *
  * Revision 1.3  1999/12/28 21:31:41  porter
  * added 'using std::vector' and 'using std::list' for Solaris CC5 compilation.
  * Also fixed some warnings arising from the CC5 compiles
@@ -26,7 +30,7 @@
 
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
-#include <config.h>
+#include <ospace/config.h>
 #endif
 
 //#ifdef SOLARIS

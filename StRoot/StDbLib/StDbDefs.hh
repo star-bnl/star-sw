@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbDefs.hh,v 1.5 1999/12/28 21:31:41 porter Exp $
+ * $Id: StDbDefs.hh,v 1.6 1999/12/29 13:49:35 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbDefs.hh,v $
+ * Revision 1.6  1999/12/29 13:49:35  porter
+ * fix for Solaris-CC4.2 within StRoot make (cons)...
+ * replaced #include <config.h> with #include <ospace/config.h>
+ *
  * Revision 1.5  1999/12/28 21:31:41  porter
  * added 'using std::vector' and 'using std::list' for Solaris CC5 compilation.
  * Also fixed some warnings arising from the CC5 compiles
@@ -29,7 +33,7 @@ enum StDbDomain {Unknown=0, Star, Tpc, Emc, Ftpc, Svt, Ctb, Trg, Daq, Scaler, Gl
 
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
-#include <config.h>
+#include <ospace/config.h>
 #endif
 //#ifdef SOLARIS
 //# ifndef false
