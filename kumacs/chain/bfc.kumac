@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.21 1998/07/22 21:31:22 kathy Exp $
+* $Id: bfc.kumac,v 1.22 1998/07/28 21:37:54 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.22  1998/07/28 21:37:54  kathy
+* moved bfc_defaults and bfc_load out of bfc_util and into kumacs/util setup_defaults and load_libraries; changed bfc kumacs to reflect this - also now allow input text file to run gstar off of; fixed up some comments
+*
 * Revision 1.21  1998/07/22 21:31:22  kathy
 * changed all names in chains to be 5 characters or less: evg2tin -> g2tin and ev0_eval2 -> ev0_e
 *
@@ -57,6 +60,7 @@
 * editted 7/21/98 K. Turner - renamed rgst -> rungst
 *                                     rg2t -> rung2t
 *                                      g2t -> rdg2t 
+* editted 7/28/98 K. Turner - now can read in txt file and run gstar (gtxin)
 * ******************************************************************************
 * -- DICTIONARY OF INPUTS TO BFC.KUMAC --
 * TOP        - top level directory to search for kumacs 
@@ -90,6 +94,7 @@
 * g2tin      - read G2T xdf file
 * evin       - read in simulated-data file 
 * fzin       - read in fz file
+* gtxin      - read in txt file to run gstar off of
 * rgst       - run gstar from evgin file
 * rg2t       - run g2t from rungst(gstar) stuff
 * svg        - SVT geometry initialization
@@ -115,7 +120,9 @@
 * 
 * -- EXAMPLE CHAINS --
 * for #1-5, use domain='geometry tpc svt global' 
-*       -> take out ones you don't need
+* -> take out ones you don't need
+* !! In order to get tpc code, you must load BOTH geometry and tpc 
+*     e.g. domain='geometry tpc'
 * example input file is:  $AFS_RHIC/star/data/samples/auau_central_hijing.xdf _
 * 
 * 
@@ -146,13 +153,18 @@
 *     domain=' geometry sim/gstar sim/g2t ' _
 *     chain=' evgin rgst rg2t evout'
 *      example input files:  
-*          $AFS_RHIC/star/data/samples/muons_central_2.txt
 *          /star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2_1_200.xdf 
 * 
-* 7. to read from an xdf file that already has raw data simulated on it
+* 7. to read from an xdf file that was produced from bfc.kumac 
 *    and then doing tpc clustering and tracking and write out results:
 *    domain=' tpc '
-*    chain=' evin tpg tcl tpt'
+* chain=' evin tpg tcl tpt'
+* 
+*  8. to read in event text file, run gstar & g2t & write out to xdf file
+*     domain=' geometry sim/gstar sim/g2t ' _
+*     chain=' gtxin rgst rg2t evout'
+*      example input files:  
+*          $AFS_RHIC/star/data/samples/muons_central_2.txt
 *  
 *****************************************************************
 *****************************************************************
@@ -214,28 +226,33 @@ MACRO bfc _
 ***********************************************************
 * BEGINNING STUFF 
 * **********************************************************
- exec [TOP]/kumacs/chain/bfc_util#bfc_start domain=[domain] chain=[chain] 
+   
+ exec [TOP]/kumacs/util/setup_defaults domain=[domain]
+   
+ exec setup#setup
+      
+ exec bfc_util#bfc_start domain=[domain] chain=[chain] 
    
  macro/global/import *
    
  if $iquest(1)<>0 goto ABEND
- exec [TOP]/kumacs/chain/bfc_util#bfc_init chain=[chain]
+ exec bfc_util#bfc_init chain=[chain]
  
 *****************************************
 *  MAIN EVENT LOOP 
-*****************************************
-   
+***************************************** 
+ 
  message $cptime
  do ievent=[first],[last]	| loop over events
    tabclear [event]          | zero all tables
-   exec [TOP]/kumacs/chain/bfc_util#bfc_process [chain]
+   exec bfc_util#bfc_process [chain]
  enddo
 
 *****************************************
 *  FINISH
 * ****************************************
  
-  exec [TOP]/kumacs/chain/bfc_util#bfc_finish [chain]
+  exec bfc_util#bfc_finish [chain]
   goto END
   
 ABEND:

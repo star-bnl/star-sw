@@ -13,17 +13,14 @@
 * 21Jul98 K. Turner - changed to separate out the gstar & g2t parts
 * 22Jul98 K. Turner - fixed to pick up correct gstar files
 * 27Jul98 K. Turner - fixed to include all domains in bfc_defaults 
-*************************************************************
+* 27Jul98 K. Turner - allow to run gstar from input txt file
+* 28Jul98 K. Turner - separate bfc_defaults and bfc_load to 
+*                      kumacs/util/setup_defaults and load_libraries
+* ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
 ******************************************************************
  macro bfc_start domain='geometry tpc svt global'  chain=' ' 
-
-* SETUP DEFAULT DIRECTORIES TO GET KUMACS FROM
-  exec bfc_defaults
-  
-* SETUP TABLE DIRECTORIES
-  exec setup#setup
 
 * SETUP LOCAL VARIABLES 
  alias/create STAFCV_OK  1
@@ -35,7 +32,7 @@
 *  THESE NEXT 4 MUST BE DONE IN THIS ORDER!!!!
    exec bfc_util#bfc_gstar_setup    [chain]
    exec bfc_util#bfc_g2t_b4_load    [chain]
-   exec bfc_util#bfc_load          [domain]
+   exec load_libraries#run          [domain]
    exec bfc_util#bfc_g2t_after_load [chain]
  
 return
@@ -62,6 +59,7 @@ macro bfc_init _
     (oldin)  user/input dummy [input_file]
     (evgin) newfile hij_in [input_file] r; 
             user/input u [evgen]/particle.staf
+    (gtxin) user/input dummy [input_file]
      (fzin)
      (g2tin) exec input_g2t_file#init [input_file]
             if (STAF_STATUS(1).ne. STAFCV_OK) then
@@ -133,7 +131,6 @@ macro bfc_init _
                 message "Cannot open output file"
                 goto eof
               endif
-*             exec write_table_to_file#write evout [geant_Run]
               exec write_table_to_file#write evout [run]         
             endif
       (*)   message " !!! bfc_util: No initialization for package " [mod]
@@ -162,9 +159,9 @@ EOF:
     (oldin) nextl 1
     (evgin) cd [event]; getev hij_in
             user/input u [evgen]/particle.staf
-*           exec $STAR/pams/gen/kumac/particle
     (g2tin) exec input_g2t_file#read
             if (staf_status(1).ne.STAFCV_OK) goto EOF
+     (gtxin) nextl 1
      (evin) exec read_table_from_file#read inev
      (fzin) nextl 1 
      (rgst) trig 1
@@ -311,41 +308,7 @@ return
  enddo
   
 return
- 
-*********************************************************************
-**********************************************************************
-**************************************************************************
 
- macro bfc_load domain
-   
-   macro/global/import *
-     
-*  LOAD LIBRARIES
- if $vexist(make_done)=0 then
-   message " bfc_util#bfc_load: Load domains --> " [domain]
-   test = [domain]
-   nw = $words([test])
-   do i = 1, [nw]
-     mod = $word([test],[i],1)
-     n = $words([mod],'/') 
-     module = $word([mod],[n],[n],'/')
-     test_done = [module]_done
-     if ($vexist([test_done])=0) then
-       vec/cre [test_done]
-	message ' bfc_load: doing make for domain:' [mod]
-        make [mod]
-        if $iquest(1)<>0 then
-            message "<bfc> Shared libraries have not been loaded : ABend"
-         endif
-     endif
-     if $iquest(1)<>0 then
-       message "<bfc> Shared libraries have not been loaded : ABend"
-     endif
-   enddo
-   vec/cre make_done
- endif
- 
- return
  
 *********************************************************************
 **********************************************************************
@@ -406,64 +369,6 @@ macro bfc_g2t_b4_load chain
    ENDCASE
  enddo
        
-return
- 
-*********************************************************************
-*********************************************************************
-*********************************************************************
-
-macro bfc_defaults
-  
-macro/global/import *
-  DEFAULT = _
-[TOP]/kumacs/chain,_
-[TOP]/kumacs/ctf,_
-[TOP]/kumacs/emc,_
-[TOP]/kumacs/ftpc,_
-[TOP]/kumacs/gen,_
-[TOP]/kumacs/mwc,_
-[TOP]/kumacs/sim,_
-[TOP]/kumacs/svt,_
-[TOP]/kumacs/tpc,_
-[TOP]/kumacs/trg,_
-[TOP]/kumacs/util,_
-[TOP]/pams/ctf/kumac,_
-[TOP]/pams/emc/kumac,_
-[TOP]/pams/ftpc/kumac,_
-[TOP]/pams/gen/kumac,_
-[TOP]/pams/global/kumac,_
-[TOP]/pams/mwc/kumac,_
-[TOP]/pams/sim/kumac,_
-[TOP]/pams/svt/kumac,_
-[TOP]/pams/tpc/kumac,_
-[TOP]/pams/trg/kumac,_
-[TOP]/pams/vpd/kumac,_
-$STAR/kumacs/chain,_
-$STAR/kumacs/ctf,_
-$STAR/kumacs/emc,_
-$STAR/kumacs/ftpc,_
-$STAR/kumacs/gen,_
-$STAR/kumacs/mwc,_
-$STAR/kumacs/sim,_
-$STAR/kumacs/svt,_
-$STAR/kumacs/tpc,_
-$STAR/kumacs/trg,_
-$STAR/kumacs/util,_
-$STAR/pams/ctf/kumac,_
-$STAR/pams/emc/kumac,_
-$STAR/pams/ftpc/kumac,_
-$STAR/pams/gen/kumac,_
-$STAR/pams/global/kumac,_
-$STAR/pams/mwc/kumac,_
-$STAR/pams/sim/kumac,_
-$STAR/pams/svt/kumac,_
-$STAR/pams/tpc/kumac,_
-$STAR/pams/trg/kumac,_
-$STAR/pams/vpd/kumac
-
- def [DEFAULT]
- message ' bfc_defaults: Define default kumac search path as' [default]
- 
 return
 
 **********************************************************************
