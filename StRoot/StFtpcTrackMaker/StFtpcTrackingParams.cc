@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.16 2003/05/21 09:47:35 putschke Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.17 2003/05/23 21:10:44 oldi Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.17  2003/05/23 21:10:44  oldi
+// Cosmetics.
+//
 // Revision 1.16  2003/05/21 09:47:35  putschke
 // Include rotation around y-axis for FTPC east and west
 //
@@ -1138,8 +1141,8 @@ void StFtpcTrackingParams::PrintParams() {
 
   gMessMgr->Message("", "I", "OST") << endm;
   gMessMgr->Message("", "I", "OST") << "FTPC to global transformation" << endm;
-  gMessMgr->Message("", "I", "OST") << "Installation point x , y, z (east, cm).: " << InstallationPointX(0) << " , "<<InstallationPointY(0) << ", " << InstallationPointZ(0) << endm;
-  gMessMgr->Message("", "I", "OST") << "Installation point x , y, z (west, cm).: " << InstallationPointX(1) << " , "<< InstallationPointY(1) << ", " << InstallationPointZ(1) << endm;
+  gMessMgr->Message("", "I", "OST") << "Installation point x, y, z (east, cm).: " << InstallationPointX(0) << ", "<<InstallationPointY(0) << ", " << InstallationPointZ(0) << endm;
+  gMessMgr->Message("", "I", "OST") << "Installation point x, y, z (west, cm).: " << InstallationPointX(1) << ", "<< InstallationPointY(1) << ", " << InstallationPointZ(1) << endm;
   gMessMgr->Message("", "I", "OST") << "Observed vertex offset y (east, cm): " << ObservedVertexOffsetY(0) << endm;
   gMessMgr->Message("", "I", "OST") << "Observed vertex offset y (west, cm): " << ObservedVertexOffsetY(1) << endm;
   gMessMgr->Message("", "I", "OST") << "Observed vertex offset x (east, cm): " << ObservedVertexOffsetX(0) << endm;
