@@ -1,11 +1,16 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.36 2004/08/06 02:29:20 andrewar Exp $
+ * $Id: StiStEventFiller.cxx,v 2.37 2004/08/06 22:23:29 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.37  2004/08/06 22:23:29  calderon
+ * Modified the code to use the setNumberOfxxxPoints(unsigned char,StDetectorId)
+ * methods of StTrack, StTrackDetectorInfo, StTrackFitTraits, and to use
+ * the maxPointCount(unsigned int detId) method of StiKalmanTrack.
+ *
  * Revision 2.36  2004/08/06 02:29:20  andrewar
  * Modifed call to getMaxPointCount
  *
@@ -597,7 +602,11 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
       detInfo->setFirstPoint((*first)->position());      
   }
   detInfo->setLastPoint(hitVec.back()->position());
-  detInfo->setNumberOfPoints(encodedStEventPoints(track));
+  // Now the number of Points are filled by detector, encoding
+  // is no longer needed.
+  detInfo->setNumberOfPoints(static_cast<unsigned char>(stEventPoints(track,kTpcId)),kTpcId);
+  detInfo->setNumberOfPoints(static_cast<unsigned char>(stEventPoints(track,kSvtId)),kSvtId);
+  detInfo->setNumberOfPoints(static_cast<unsigned char>(stEventPoints(track,kSsdId)),kSsdId);
   for (vector<StMeasuredPoint*>::iterator point = hitVec.begin(); point!=hitVec.end(); ++point) 
     {
       StHit * hh = dynamic_cast<StHit*>(*point);
@@ -677,7 +686,6 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   unsigned short geantIdPidHyp = 9999;
   //if (.13< massHyp<.14) 
   geantIdPidHyp = 9;
-  unsigned short nFitPoints = encodedStEventFitPoints(track);
   // chi square and covariance matrix, plus other stuff from the
   // innermost track node
   StiKalmanTrackNode* node = track->getInnerMostHitNode();
@@ -716,7 +724,13 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   // setFitTraits uses assignment operator of StTrackFitTraits, which is the default one,
   // which does a memberwise copy.  Therefore, constructing a local instance of 
   // StTrackFitTraits is fine, as it will get properly copied.
-  StTrackFitTraits fitTraits(geantIdPidHyp,nFitPoints,chi2,covMFloat);
+  StTrackFitTraits fitTraits(geantIdPidHyp,0,chi2,covMFloat);
+  // Now we have to use the new setters that take a detector ID to fix
+  // a bug.  There is no encoding anymore.
+  fitTraits.setNumberOfFitPoints(static_cast<unsigned char>(stEventFitPoints(track,kTpcId)),kTpcId);
+  fitTraits.setNumberOfFitPoints(static_cast<unsigned char>(stEventFitPoints(track,kSvtId)),kSvtId);
+  fitTraits.setNumberOfFitPoints(static_cast<unsigned char>(stEventFitPoints(track,kSsdId)),kSsdId);
+  
   gTrack->setFitTraits(fitTraits);
   return;
 }
@@ -843,15 +857,17 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
       gTrack->setImpactParameter(impactParam );
   }
 
-  int maxPoints = track->getMaxPointCount(1);//1 for TPC
-  cout <<"Tpc Hits: Max "<<maxPoints <<" coded: "
-       <<encodedStEventPoints(track)<<endl;
-  maxPoints = track->getMaxPointCount(2);//2 for Svt
-  cout <<"Svt Hits: Max "<<maxPoints<<" coded: "
-       <<encodedStEventPoints(track)<<endl;
+  // Follow the StDetectorId.h enumerations...
+  // can't include them from here in order not to
+  // create a package dependence...
+  int maxPointsTpc = track->getMaxPointCount(1);//1 for TPC
+  int maxPointsSvt = track->getMaxPointCount(2);//2 for Svt
+  int maxPointsSsd = track->getMaxPointCount(8);//8 for Ssd
 
   
-  gTrack->setNumberOfPossiblePoints(static_cast<unsigned short>(maxPoints));
+  gTrack->setNumberOfPossiblePoints(static_cast<unsigned char>(maxPointsTpc),kTpcId);
+  gTrack->setNumberOfPossiblePoints(static_cast<unsigned char>(maxPointsSvt),kSvtId);
+  gTrack->setNumberOfPossiblePoints(static_cast<unsigned char>(maxPointsSsd),kSsdId);
   fillGeometry(gTrack, track, false); // inner geometry
   fillGeometry(gTrack, track, true);  // outer geometry
   fillFitTraits(gTrack, track);
@@ -862,50 +878,37 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
 bool StiStEventFiller::accept(StiKalmanTrack* track) {
     return (track->getTrackLength()>0); // insert other filters for riff-raff we don't want in StEvent here.
 }
-unsigned short StiStEventFiller::encodedStEventPoints(StiKalmanTrack* track) 
+unsigned short StiStEventFiller::stEventPoints(StiKalmanTrack* track,StDetectorId id) 
 {
   // need to write the fit points in StEvent following the convention
   // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
   //vector<StHit*> hitVec = track->stHits();
   vector<StMeasuredPoint*> hitVec = track->stHits();
     
-  unsigned short nFitTpc, nFitSvt, nFitSsd; // maybe need ftpc (east, west), emc, rich, tof, later
-  nFitTpc = nFitSvt = nFitSsd = 0;
+  unsigned short nPoints(0);
     
   // loop here to get the hits in each detector
-  // use StDetectorId's and switch
+  // use StDetectorId's to count for each detector.
     
   for (vector<StMeasuredPoint*>::iterator point = hitVec.begin(); point!=hitVec.end();++point) {
     StHit * hit = dynamic_cast<StHit *>(*point);
     if (hit) {
       StDetectorId detId = hit->detector();
-      switch (detId) {
-      case kTpcId:
-	++nFitTpc;
-	break;
-      case kSvtId:
-	++nFitSvt;
-	break;
-      case kSsdId:
-	++nFitSsd;
-	break;
-      default:
-	cout << "StiStEventFiller::encodedStEventPoints()\t"
-	     << "hit->detector() " << (unsigned long)hit->detector() << " not forseen in the logic" << endl;
+      if (detId == id) {
+	++nPoints;
       }
     }
   }
-  //        1*tpc + 1000*svt     + 10000*ssd       (Helen/Spiros Oct 29, 1999)
-  return (nFitTpc + 1000*nFitSvt + 10000*nFitSsd);
+  return (nPoints); // No encoding is necessary anymore
     
 }
-unsigned short StiStEventFiller::encodedStEventFitPoints(StiKalmanTrack* track) 
+unsigned short StiStEventFiller::stEventFitPoints(StiKalmanTrack* track, StDetectorId id) 
 {
-    // need to write the fit points in StEvent following the convention
-    // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
+    // need to write the fit points in StEvent,
+    // where now StEvent has a set method that knows about the detector id.
+    // No encoding is necessary anymore.
     //vector<StMeasuredPoint*> hitVec = track->stHits();
-    unsigned short nFitTpc, nFitSvt, nFitSsd; // maybe need ftpc (east, west), emc, rich, tof, later
-    nFitTpc = nFitSvt = nFitSsd = 0;
+    unsigned short nFitPoints(0);
     unsigned char ImUsed = 1;
     StiKTNBidirectionalIterator it;
     double maxChi2 = track->fitPars()->getMaxChi2();
@@ -919,28 +922,20 @@ unsigned short StiStEventFiller::encodedStEventFitPoints(StiKalmanTrack* track)
 		// the stHit function returns a const StHit, so we can't modify it
 		// unless we do the dirty trick of const_cast...
 		StHit* hit = const_cast<StHit*>(chit);
-		hit->setFitFlag(ImUsed);
+		// setFitFlag is needed for all hits
+		// one additional reminder that if one
+		// doesn't call this method for the 3 detectors (tpc, svt, ssd)
+		// the information will be incomplete.
 		StDetectorId detId = hit->detector();
-		switch (detId) {
-		case kTpcId:
-		    ++nFitTpc;
-		    break;
-		case kSvtId:
-		    ++nFitSvt;
-		    break;
-		case kSsdId:
-		    ++nFitSsd;
-		    break;
-		default:
-		    cout << "StiStEventFiller::encodedStEventFitPoints()\t"
-			 << "hit->detector() " << (unsigned long)hit->detector() << " not forseen in the logic" << endl;
-		    
-		} // switch
+		if  (detId==id) {		
+		    hit->setFitFlag(ImUsed);
+		    ++nFitPoints;
+		}
 	    } // if (hit)
 	} // if (chi2<maxChi2)
     } // KTNode loop    
-  //        1*tpc + 1000*svt     + 10000*ssd       (Helen/Spiros Oct 29, 1999)
-  return (nFitTpc + 1000*nFitSvt + 10000*nFitSsd);
+
+  return (nFitPoints);
     
 }
 

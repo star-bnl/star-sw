@@ -1,12 +1,17 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.9 2004/07/07 19:33:48 calderon Exp $
+ * $Id: StiStEventFiller.h,v 2.10 2004/08/06 22:23:29 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.10  2004/08/06 22:23:29  calderon
+ * Modified the code to use the setNumberOfxxxPoints(unsigned char,StDetectorId)
+ * methods of StTrack, StTrackDetectorInfo, StTrackFitTraits, and to use
+ * the maxPointCount(unsigned int detId) method of StiKalmanTrack.
+ *
  * Revision 2.9  2004/07/07 19:33:48  calderon
  * Added method fillFlags.  Flags tpc, tpc+svt (globals and primaries) and flags -x02 tracks with less than 5 total fit points
  *
@@ -104,6 +109,7 @@
 #define StiStEventFiller_HH
 #include <map>
 using std::map;
+#include "StDetectorId.h"
 #include "Sti/StiDedxCalculator.h"
 class StEvent;
 class StTrackNode;
@@ -138,8 +144,8 @@ public:
     void filldEdxInfo(StiDedxCalculator&, StTrack* track, StiKalmanTrack* kTrack);
     void fillTrack(StTrack* track, StiKalmanTrack* kTrack);
     void fillFlags(StTrack* track);
-    unsigned short encodedStEventPoints(StiKalmanTrack* kTrack); 
-    unsigned short encodedStEventFitPoints(StiKalmanTrack* kTrack); 
+    unsigned short stEventPoints(StiKalmanTrack* kTrack,StDetectorId id); 
+    unsigned short stEventFitPoints(StiKalmanTrack* kTrack, StDetectorId id); 
     float impactParameter(StiKalmanTrack* kTrack);
     float impactParameter(StTrack* track);
 private:
