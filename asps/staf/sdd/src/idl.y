@@ -89,7 +89,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.11 1998/06/23 15:52:43 ward Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.12 1998/08/20 00:46:30 fisyak Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -1026,7 +1026,7 @@ if (gNArgName[0]){
   FF"};\n");
   FF"  CheckParameters(names);\n");
 };
-  FF"return ::%s_(\n",sifn);
+  FF"Int_t res = ::%s_(\n",sifn);
 /*  for(i=1;i<gNIncFile;i++) {
      ToUpper(uppercase,Xidl(Nq(gIncFile[i])));
      strcpy(cap,Capitalized(Xidl(Nq(gIncFile[i]))));
@@ -1043,6 +1043,10 @@ if (gNArgName[0]){
        }
 
   FF" );\n");
+if (gNArgName[0]){
+  FF"res =  CheckResults(res,names);\n");
+};
+  FF"return res;\n",sifn);
   FF"};\n");
   FF"\n");
   FF"//_______________________________________________________________\n");
