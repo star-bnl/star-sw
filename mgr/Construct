@@ -49,7 +49,7 @@ my $INCLUDE_PATH = $INCLUDE;
 my $LINKMODULECOM  = "";
 $_ = $STAR_SYS;
 print "System: ", $_,"\n";
-if (/^i386_linux2/ || /^i386_redhat50/ || /^i386_redhat51/ ||  /^i386_redhat52/) {
+if (/^i386_linux2/ || /^i386_redhat50/ || /^i386_redhat51/ ||  /^i386_redhat52/ || /^i386_redhat60) {
 #    case linux but gcc is EGCS
 #  ====================
   $OSFID    = "lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
