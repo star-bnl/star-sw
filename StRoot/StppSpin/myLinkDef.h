@@ -6,8 +6,8 @@
 
 // ... main persistency classes
 #pragma link C++ class ppDst-;
-#pragma link C++ class xxDst-;
+#pragma link C++ class ppEmcDst-;
 #pragma link C++ class ppDst_t-;
-#pragma link C++ class xxDst_t-;
+#pragma link C++ class ppEmcDst_t-;
 #endif
 

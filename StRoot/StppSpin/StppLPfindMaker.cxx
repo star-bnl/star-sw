@@ -2,8 +2,11 @@
 //  
 // JB 3/30/01 - divorce with MC. Only StEvent is used. No evaluation
 //
-// $Id: StppLPfindMaker.cxx,v 1.5 2001/04/27 20:50:45 balewski Exp $
+// $Id: StppLPfindMaker.cxx,v 1.6 2001/05/03 23:38:10 balewski Exp $
 // $Log: StppLPfindMaker.cxx,v $
+// Revision 1.6  2001/05/03 23:38:10  balewski
+// *** empty log message ***
+//
 // Revision 1.5  2001/04/27 20:50:45  balewski
 // *** empty log message ***
 //
@@ -231,6 +234,7 @@ Int_t StppLPfindMaker::Make()
   St_DataSet *dst1 = GetDataSet("dst");
   assert(dst1);
   dst1->Add(my);
+
 
   // =========================================================
   //printf(" ppTag   U p d a t e     . . . NOT implemented\n");
