@@ -1,5 +1,13 @@
-// $Id: StFtpcConfMapper.hh,v 1.3 2000/06/07 11:03:53 oldi Exp $
+// $Id: StFtpcConfMapper.hh,v 1.4 2000/06/13 14:33:10 oldi Exp $
 // $Log: StFtpcConfMapper.hh,v $
+// Revision 1.4  2000/06/13 14:33:10  oldi
+// Added three new funtions (SetEtaMin(), SetEtaMax(), CalcEtaMinMax()) and
+// two data members (mEtaMin, mEtaMax) to be able to calculate the
+// min./max. possible value of the pseudorapidity eta with the z-position of
+// the found main vertex. This solves bug #574 where the min./max. values of eta
+// were fixed and could be to small if the found main vertex was to far off from
+// z=0.
+//
 // Revision 1.3  2000/06/07 11:03:53  oldi
 // Added CreateTrack(StFtpcConfMapPoint *hit) to cleanup ClusterLoop().
 // Added TrackLoop().
@@ -47,6 +55,10 @@ private:
   Int_t  mBounds;         // array size
   Char_t mMaxFtpcRow;     // number of rows in one Ftpc
   Char_t mFtpc;           // current Ftpc number (either 1 ore 2)
+
+  // max. eta (pseudorapidity) values
+  Double_t mEtaMin;
+  Double_t mEtaMax;
   
   // Settings ([0]: non vertex tracks, [1]: main vertex tracks)
   Bool_t mVertexConstraint;     // vertex constraint (true or false)
@@ -74,38 +86,42 @@ private:
   Int_t mClustersUnused;   // number of unused clusters
 
   // setter
-  void SetTrackletLength(Int_t f)        { mTrackletLength[0] = mTrackletLength[1] = f; }      // sets tracklet lengths (both the same)
-  void SetRowScopeTrack(Int_t f)         { mRowScopeTrack[0] = mRowScopeTrack[1] = f; }        // sets row scopes (both the same)
+  void SetEtaMin(Double_t f) { mEtaMin = f; }  // sets min. value for eta
+  void SetEtaMAx(Double_t f) { mEtaMax = f; }  // sets max. value for eta
+  void CalcEtaMinMax();                        // calculates the min. and max. value for eta
+
+  void SetTrackletLength(Int_t f)        { mTrackletLength[0] = mTrackletLength[1] = f;     }  // sets tracklet lengths (both the same)
+  void SetRowScopeTrack(Int_t f)         { mRowScopeTrack[0] = mRowScopeTrack[1] = f;       }  // sets row scopes (both the same)
   void SetRowScopeTracklet(Int_t f)      { mRowScopeTracklet[0] = mRowScopeTracklet[1] = f; }  // sets row scopes (both the same)=  
-  void SetPhiScope(Int_t f)              { mPhiScope[0] = mPhiScope[1] = f; }                  // sets phi scopes (both the same)
-  void SetEtaScope(Int_t f)              { mEtaScope[0] = mEtaScope[1] = f; }                  // sets eta scopes (both the same)
-  void SetMinPoints(Int_t f)             { mMinPoints[0] = mMinPoints[1] = f; }                // sets minimum number of points (both the same)
-  void SetMaxAngleTrack(Double_t f)      { mMaxAngleTrack[0] = mMaxAngleTrack[1] = f; }        // sets angle cuts (both the same)
+  void SetPhiScope(Int_t f)              { mPhiScope[0] = mPhiScope[1] = f;                 }  // sets phi scopes (both the same)
+  void SetEtaScope(Int_t f)              { mEtaScope[0] = mEtaScope[1] = f;                 }  // sets eta scopes (both the same)
+  void SetMinPoints(Int_t f)             { mMinPoints[0] = mMinPoints[1] = f;               }  // sets minimum number of points (both the same)
+  void SetMaxAngleTrack(Double_t f)      { mMaxAngleTrack[0] = mMaxAngleTrack[1] = f;       }  // sets angle cuts (both the same)
   void SetMaxAngleTracklet(Double_t f)   { mMaxAngleTracklet[0] = mMaxAngleTracklet[1] = f; }  // sets angle cuts (both the same)
-  void SetMaxCircleDistTrack(Double_t f) { mMaxCircleDist[0] = mMaxCircleDist[1] = f; }        // sets circle cuts (both the same)
-  void SetMaxLengthDistTrack(Double_t f) { mMaxLengthDist[0] = mMaxLengthDist[1] = f; }        // sets length cuts (both the same)
+  void SetMaxCircleDistTrack(Double_t f) { mMaxCircleDist[0] = mMaxCircleDist[1] = f;       }  // sets circle cuts (both the same)
+  void SetMaxLengthDistTrack(Double_t f) { mMaxLengthDist[0] = mMaxLengthDist[1] = f;       }  // sets length cuts (both the same)
 
-  void SetTrackletLength(Int_t f, Int_t g)           { mTrackletLength[1] = f; mTrackletLength[0] = g; }      // sets tracklet lengths (both but different)
-  void SetRowScopeTrack(Int_t f, Int_t g)            { mRowScopeTrack[1] = f; mRowScopeTrack[0] = g; }        // sets row scopes for tracks(both but different)
+  void SetTrackletLength(Int_t f, Int_t g)           { mTrackletLength[1] = f; mTrackletLength[0] = g;     }  // sets tracklet lengths (both but different)
+  void SetRowScopeTrack(Int_t f, Int_t g)            { mRowScopeTrack[1] = f; mRowScopeTrack[0] = g;       }  // sets row scopes for tracks(both but different)
   void SetRowScopeTracklet(Int_t f, Int_t g)         { mRowScopeTracklet[1] = f; mRowScopeTracklet[0] = g; }  // sets row scopes for tracklets(both but different)
-  void SetPhiScope(Int_t f, Int_t g)                 { mPhiScope[1] = f; mPhiScope[0] = g; }                  // sets phi scopes (both but different)
-  void SetEtaScope(Int_t f, Int_t g)                 { mEtaScope[1] = f; mEtaScope[0] = g; }                  // sets eta scopes (both but different)
-  void SetMinPoints(Int_t f, Int_t g)                { mMinPoints[1] = f; mMinPoints[0] = g; }                // sets minimum number of points (both but different)
-  void SetMaxAngleTrack(Double_t f, Double_t g)      { mMaxAngleTrack[1] = f; mMaxAngleTrack[0] = g; }        // sets angle cuts (both but different)
+  void SetPhiScope(Int_t f, Int_t g)                 { mPhiScope[1] = f; mPhiScope[0] = g;                 }  // sets phi scopes (both but different)
+  void SetEtaScope(Int_t f, Int_t g)                 { mEtaScope[1] = f; mEtaScope[0] = g;                 }  // sets eta scopes (both but different)
+  void SetMinPoints(Int_t f, Int_t g)                { mMinPoints[1] = f; mMinPoints[0] = g;               }  // sets minimum number of points (both but different)
+  void SetMaxAngleTrack(Double_t f, Double_t g)      { mMaxAngleTrack[1] = f; mMaxAngleTrack[0] = g;       }  // sets angle cuts (both but different)
   void SetMaxAngleTracklet(Double_t f, Double_t g)   { mMaxAngleTracklet[1] = f; mMaxAngleTracklet[0] = g; }  // sets angle cuts (both but different)
-  void SetMaxCircleDistTrack(Double_t f, Double_t g) { mMaxCircleDist[1] = f; mMaxCircleDist[0] = g; }        // sets circle cuts (both but different)
-  void SetMaxLengthDistTrack(Double_t f, Double_t g) { mMaxLengthDist[1] = f; mMaxLengthDist[0] = g; }        // sets length cuts (both but different)
+  void SetMaxCircleDistTrack(Double_t f, Double_t g) { mMaxCircleDist[1] = f; mMaxCircleDist[0] = g;       }  // sets circle cuts (both but different)
+  void SetMaxLengthDistTrack(Double_t f, Double_t g) { mMaxLengthDist[1] = f; mMaxLengthDist[0] = g;       }  // sets length cuts (both but different)
 
-  void SetTrackletLength(Int_t f, Bool_t vertex_constraint)        { mTrackletLength[(Int_t)vertex_constraint] = f; }    // sets one tracklet length
-  void SetRowScopeTrack(Int_t f, Bool_t vertex_constraint)         { mRowScopeTrack[(Int_t)vertex_constraint] = f; }     // sets one row scope for tracks
+  void SetTrackletLength(Int_t f, Bool_t vertex_constraint)        { mTrackletLength[(Int_t)vertex_constraint] = f;   }  // sets one tracklet length
+  void SetRowScopeTrack(Int_t f, Bool_t vertex_constraint)         { mRowScopeTrack[(Int_t)vertex_constraint] = f;    }  // sets one row scope for tracks
   void SetRowScopeTracklet(Int_t f, Bool_t vertex_constraint)      { mRowScopeTracklet[(Int_t)vertex_constraint] = f; }  // sets one row scope for tracklets
-  void SetPhiScope(Int_t f, Bool_t vertex_constraint)              { mPhiScope[(Int_t)vertex_constraint] = f; }          // sets one phi scope
-  void SetEtaScope(Int_t f, Bool_t vertex_constraint)              { mEtaScope[(Int_t)vertex_constraint] = f; }          // sets one eta scope
-  void SetMinPoints(Int_t f, Bool_t vertex_constraint)             { mMinPoints[(Int_t)vertex_constraint] = f; }         // sets one minimum number of points
-  void SetMaxAngleTrack(Double_t f, Bool_t vertex_constraint)      { mMaxAngleTrack[(Int_t)vertex_constraint] = f; }     // sets one angle cut
+  void SetPhiScope(Int_t f, Bool_t vertex_constraint)              { mPhiScope[(Int_t)vertex_constraint] = f;         }  // sets one phi scope
+  void SetEtaScope(Int_t f, Bool_t vertex_constraint)              { mEtaScope[(Int_t)vertex_constraint] = f;         }  // sets one eta scope
+  void SetMinPoints(Int_t f, Bool_t vertex_constraint)             { mMinPoints[(Int_t)vertex_constraint] = f;        }  // sets one minimum number of points
+  void SetMaxAngleTrack(Double_t f, Bool_t vertex_constraint)      { mMaxAngleTrack[(Int_t)vertex_constraint] = f;    }  // sets one angle cut
   void SetMaxAngleTracklet(Double_t f, Bool_t vertex_constraint)   { mMaxAngleTracklet[(Int_t)vertex_constraint] = f; }  // sets one angle cut
-  void SetMaxCircleDistTrack(Double_t f, Bool_t vertex_constraint) { mMaxCircleDist[(Int_t)vertex_constraint] = f; }     // sets one circle cut
-  void SetMaxLengthDistTrack(Double_t f, Bool_t vertex_constraint) { mMaxLengthDist[(Int_t)vertex_constraint] = f; }     // sets one length cut
+  void SetMaxCircleDistTrack(Double_t f, Bool_t vertex_constraint) { mMaxCircleDist[(Int_t)vertex_constraint] = f;    }  // sets one circle cut
+  void SetMaxLengthDistTrack(Double_t f, Bool_t vertex_constraint) { mMaxLengthDist[(Int_t)vertex_constraint] = f;    }  // sets one length cut
 
 
 public:
@@ -139,6 +155,9 @@ public:
   void SetVertexConstraint(Bool_t f) { mVertexConstraint = f; }                                                          // sets vertex constraint (on or off)
 
   // getter
+  Double_t  GetEtaMin()              { return mEtaMin;           }  // returns min. value of eta
+  Double_t  GetEtaMax()              { return mEtaMax;           }  // returns max. value of eta
+
      Int_t  GetNumMainVertexTracks() { return mMainVertexTracks; }  // returns number of main vertex tracks
      Int_t  GetNumMergedTracks()     { return mMergedTracks;     }  // returns number of merged tracks
      Int_t  GetNumMergedTracklets()  { return mMergedTracklets;  }  // returns number of merged tracklets
@@ -183,8 +202,6 @@ StFtpcConfMapPoint *GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coe
   
 
   // Information
-  void  Cout(Int_t width, Int_t figure);     // cout routine with adjustable width for ints
-  void  Cout(Int_t width, Double_t figure);  // cout routine with adjustable width for doubles
   void  SettingInfo();  // displays settings
   void  CutInfo();      // displays cust
   void  TrackingInfo(); // displays information about the tracking process (e.g. difficulties during the tracking)
