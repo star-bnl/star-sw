@@ -267,7 +267,7 @@ Block  TPGV is the Gas Volume placed in TPC
       Component Ar    A=40  Z=18 W=9
       Component C     A=12  Z=6  W=1
       Component H     A=1   Z=1  W=4
-      Mixture   p10   Dens=0.9*0.00166+0.1*0.000667    " g/cm**3 "
+      Mixture   p10   Dens=0.9*0.001782+0.1*0.000667    " g/cm**3 "
       SHAPE     TUBE  rmin=tpgvIR  rmax=tpcg_SenGasOR  dz=tpgvLeng/2
       Create    TPSS
 endblock
