@@ -76,7 +76,7 @@ StEmcCalibrationMaker::StEmcCalibrationMaker(const char *name):StMaker(name)
   Settings_st[0].UseMipEtaBin=1;
   Settings_st[0].EOverMipCte=0.290;  // e/MIP for geant
   Settings_st[0].MipPeakFitFuntion=0;
-  Settings_st[0].MipEventsPerBin=950; //600
+  Settings_st[0].MipEventsPerBin=500; //600
   Settings_st[0].MipMaxNumberOfTracks=1000;
   Settings_st[0].MipMinOccupancy=0.99;
   Settings_st[0].MipMinimumMomentum=1.5;
@@ -214,10 +214,14 @@ Int_t StEmcCalibrationMaker::Init()
   
   if(Settings_st[0].UsePi0Calib==1) // do Pi0 calibration
   {
+    ElectronStatus=0;
+    m_electronCounter=0;
   }
   
   if(Settings_st[0].UseElectronCalib==1) // do Electron calibration
   {
+    ElectronStatus=0;
+    m_electronCounter=0;
   }
   
   CalibStatus=0;
@@ -312,6 +316,20 @@ Int_t StEmcCalibrationMaker::Make()
     gMessMgr->Info("StEmcCalibrationMaker::Make() - doing MIP calibration");
     MipCalib();
    }
+
+  if(Settings_st[0].UseElectronCalib==1) FillElectron();
+  if(Settings_st[0].UseElectronCalib==1 && ElectronStatus==1) 
+  {
+    gMessMgr->Info("StEmcCalibrationMaker::Make() - doing Electron calibration");
+    ElectronCalib();
+  }
+
+  if(Settings_st[0].UsePi0Calib==1) FillPi0();
+  if(Settings_st[0].UsePi0Calib==1 && Pi0Status==1) 
+  {
+    gMessMgr->Info("StEmcCalibrationMaker::Make() - doing Pi0 calibration");
+    Pi0Calib();
+  }
     
   Int_t done=0;
   if(Settings_st[0].DoEqualization==1 && EqStatus==2)   done+=1;
@@ -333,8 +351,8 @@ Int_t StEmcCalibrationMaker::Make()
     gMessMgr->Info("StEmcCalibrationMaker::Make() - saving tables");
     SaveTables();
     gMessMgr->Info("StEmcCalibrationMaker::Make() - starting again");
-    Init();
-    //return kStFATAL;
+    //Init();
+    return kStFATAL;
   }
     
   clock.Stop();
@@ -866,6 +884,26 @@ Bool_t StEmcCalibrationMaker::MipCalib()
   MipStatus=2;  // Mip fit done
   return kTRUE;
 }
+//_____________________________________________________________________________
+Bool_t StEmcCalibrationMaker::FillElectron()
+{
+  return kTRUE;
+}    
+//_____________________________________________________________________________
+Bool_t StEmcCalibrationMaker::ElectronCalib()
+{ 
+  return kTRUE;
+}     
+//_____________________________________________________________________________
+Bool_t StEmcCalibrationMaker::FillPi0()
+{ 
+  return kTRUE;
+}     
+//_____________________________________________________________________________
+Bool_t StEmcCalibrationMaker::Pi0Calib()
+{ 
+  return kTRUE;
+}     
 //_____________________________________________________________________________
 Bool_t StEmcCalibrationMaker::MakeCalibration()
 {
