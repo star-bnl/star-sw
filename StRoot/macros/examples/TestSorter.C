@@ -1,7 +1,10 @@
-// $Id: TestSorter.C,v 1.6 1999/12/01 13:57:42 fine Exp $
+// $Id: TestSorter.C,v 1.7 2000/01/12 02:20:19 fine Exp $
 // $Log: TestSorter.C,v $
+// Revision 1.7  2000/01/12 02:20:19  fine
+// test check new St_TableSorter ctors
+//
 // Revision 1.6  1999/12/01 13:57:42  fine
-// Second test to check operator [] has been introduced
+//  Second test to check operator [] has been introduced
 //
 // Revision 1.5  1999/05/21 15:33:55  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
@@ -31,7 +34,9 @@ void TestSorter(Char_t *xdffilename="/afs/rhic/star/data/samples/test.xdf",const
     table = (St_particle *)root["/evgen/particle"]; // [] means we are looking for the "real" table/ not just a St_DataSet
     if (table) {
        TString colName = col;
-       sorter = new St_TableSorter(*table,colName,1,5);  
+       sorter = new St_TableSorter(table,colName,1,5);  
+//       sorter = new St_TableSorter(*table,colName,1,5);  
+//       sorter = new St_TableSorter(table->GetHeader(),colName,1,5);  
        table->Print(0,6);
        int cols = sorter->GetFirstRow() + sorter->GetNRows() -1;
        cout << " Result of the ordering the table: " << endl 
@@ -74,10 +79,12 @@ void TestSorter(Char_t *xdffilename="/afs/rhic/star/data/samples/test.xdf",const
       table =  (St_dst_vertex *)event->FindByName("vertex");
       if (table) {
         TString colName = "vtx_id";
-        sorter = new St_TableSorter(*table,colName,1,5);  
+//        sorter = new St_TableSorter(table,colName,1,5);  
+//        sorter = new St_TableSorter(*table,colName,1,5);  
+        sorter = new St_TableSorter(table->GetHeader(),colName,1,5);  
         St_TableSorter &sort = *sorter;  
         table->Print(0,6);
-        int cols = sorter->GetFirstRow() + sorter->GetNRows() -1;
+        int cols = sorter->GetFirstRow() + sorter->GetNRows() - 1;
         cout << " Result of the ordering the table: " << endl 
              << "<" << sorter->GetTableName() <<" : " << sorter->GetTableType() << "[" << sorter->GetFirstRow() << "]> - "	    
              << "<" << sorter->GetTableName() 
@@ -98,11 +105,14 @@ void TestSorter(Char_t *xdffilename="/afs/rhic/star/data/samples/test.xdf",const
         cout << endl;
 
        cout << " Binary Search test:"<< endl;
-       for (i=sorter->GetNRows()-1; i >= 0 ; i--) {
+       Int_t nrows = sorter->GetNRows() - 1;
+       for (i=nrows; i >= 0 ; i--) {
           Short_t vtx = vertex[sorter->GetIndex(i)]->vtx_id; 
           Int_t lastFound = sorter->BinarySearch(vtx);
           cout << i << ". " << vtx << " == " << lastFound << " : " << sorter->GetLastFound() << endl;
-          if (sort[vtx] != lastFound) cout << " *** Error ****  " << lastFound << " != " << sorter[vtx] << endl;
+          if (sort[vtx] != lastFound) 
+                cout << " *** Error ****  " << lastFound << " != " << sorter[vtx] << endl;
+//                printf(" *** Error ****  %d != %d \n" lastFound,sorter[vtx]);
        }
    
 //      Int_t key2Count = 1;
