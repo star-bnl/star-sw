@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.cc,v 1.17 2003/12/22 18:59:37 perev Exp $
+ * $Id: StHelixD.cc,v 1.18 2004/01/27 02:50:28 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHelixD.cc,v $
+ * Revision 1.18  2004/01/27 02:50:28  perev
+ * Big value appropriate for float
+ *
  * Revision 1.17  2003/12/22 18:59:37  perev
  * remove test for only +ve pathLeng added before
  *
@@ -293,7 +296,7 @@ double StHelixD::pathLength(const StThreeVectorD& p) const
 double StHelixD::period() const
 {
     if (mSingularity)
-	return 9.e+99;
+	return 3.e+33;
     else	
 	return fabs(2*M_PI/(mH*mCurvature*mCosDipAngle)); 
 }
@@ -398,7 +401,7 @@ double StHelixD::pathLength(const StThreeVectorD& r,
     // the max. largest value for s is returned.
     //
     double s;
-    const double NoSolution = 9.e+99;
+    const double NoSolution = 3.e+33;
 
     if (mSingularity) {
 	double t = n.z()*mSinDipAngle +
@@ -454,7 +457,7 @@ double StHelixD::pathLength(const StThreeVectorD& r,
 pairD
 StHelixD::pathLengths(const StHelixD& h) const
 {
-    const double NoSolution = 9.e+99;
+    const double NoSolution = 3.e+33;
 
     //
     //	Cannot handle case where one is a helix
