@@ -64,7 +64,7 @@ void StIOMaker::Build(StFileI *fileSet,const char *ioFile,const char *treeName)
     if (ioFile && ioFile[0]) {  //Make small StFile
       fFileSet = new StFile();
       fFileSet->AddFile(ioFile);
-      AddConst(new TObjectSet("..FileSet",fFileSet,1)); 	//To be deleted at the end
+//VP      AddConst(new TObjectSet("..FileSet",fFileSet,1)); 	//To be deleted at the end
     }  
   } else {			//Write/Update
     fCase = 1;
@@ -75,8 +75,7 @@ void StIOMaker::Build(StFileI *fileSet,const char *ioFile,const char *treeName)
 StIOMaker::~StIOMaker()
 {
   // pointer may belong to someone else - do not delete
-  //if (fFileSet) delete fFileSet; 
-  fFileSet= 0;
+  if (fFileSet) delete fFileSet; fFileSet= 0;
 }
 //_____________________________________________________________________________
 void StIOMaker::Rewind()
@@ -102,7 +101,7 @@ Int_t StIOMaker::Init()
 //		Add file to StFile
   if(!fFileSet) {
     fFileSet = new StFile();
-    AddConst(new TObjectSet("..FileSet",fFileSet,1)); 	//To be deleted at the end
+//    AddConst(new TObjectSet("..FileSet",fFileSet,1)); 	//To be deleted at the end
   }
   fFileSet->AddFile(file);
 }
