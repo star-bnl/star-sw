@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.97 1999/07/17 23:31:26 fisyak Exp $
+// $Id: bfc.C,v 1.98 1999/07/18 23:52:18 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -279,7 +279,7 @@ void SetOption(int k){// set all OFF
   case kSD97:
   case kSD98:
   case kER99:
-  case kSR99:
+  case kES99:
     if (!ChainFlags[kDEFAULT]) {
       SetOption(kDEFAULT);
       SetOption(kTPC);
