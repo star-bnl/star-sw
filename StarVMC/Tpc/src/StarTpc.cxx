@@ -1,4 +1,4 @@
-/* $Id: StarTpc.cxx,v 1.1 2004/07/12 20:15:11 potekhin Exp $ */
+/* $Id: StarTpc.cxx,v 1.2 2004/09/02 23:23:59 potekhin Exp $ */
 
 #include <TVirtualMC.h>
 
@@ -11,22 +11,21 @@
 
 #include "TPCG.h"
 #include "TECW.h"
-
+#include "TPRS.h"
 
 
 ClassImp(StarTpc)
 
 
 //_______________________________________________________________________
-  StarTpc::StarTpc()
-{
+StarTpc::StarTpc() {
   cout<<"Constructing Star TPC"<<endl;
 }
 //_______________________________________________________________________
 //_______________________________________________________________________
 StarTpc::StarTpc(const char* name_, const char *title_):
-  StarDetector(name_,title_)
-{
+  StarDetector(name_,title_) {
+    cout<<"Constructing Star TPC"<<endl;
 }
 
 //_______________________________________________________________________
@@ -135,43 +134,43 @@ void StarTpc::CreateGeometry(void) {
   //  tsecNumb+=1;
   //  StarVolume::Volume(tsecNumb,"TRD1","Al",tsec,4);
 
+  // the padrow: ------------------------------
+    Float_t tpad[3];
+    //  tpce[0] = TPCG::rmin;       // TPC inner radius
+    //tpce[1] = TPCG::rmax;       // TPC outer radius
+    //tpce[2] = TPCG::length/2.0; // TPC half length
+    //StarVolume::Volume("TPAD","BOX","P10",tpea,3);
 
 
-  /*
-  */
-
-  Double_t posX =  0.0;
-  Double_t posY =  0.0;
-  Double_t posZ =  0.0;
+  Double_t posX =  0.0;  Double_t posY =  0.0;  Double_t posZ =  0.0;
   gMC->Gspos("TPCE", 1 ,"WRLD", posX, posY, posZ, 0, "ONLY");
 
-  posX =  0.0;
-  posY =  0.0;
-  posZ =  tpgvz;
 
   StarRotation::Rotation("tpgv1",90.0, 75.0, 90.0, -15.0,   0.0, 0.0);
   StarRotation::Rotation("tpgv2",90.0,105.0, 90.0, 195.0, 180.0, 0.0);
 
+  posX =  0.0;  posY =  0.0;  posZ =  tpgvz;
   gMC->Gspos("TPGV", 1 ,"TPCE", posX, posY,  posZ, StarRotation::FindRotation("tpgv1")->GetNumber(), "ONLY");
   gMC->Gspos("TPGV", 2 ,"TPCE", posX, posY, -posZ, StarRotation::FindRotation("tpgv2")->GetNumber(), "ONLY");
 
-  posX =  0.0;
-  posY =  0.0;
-  posZ =  0.0;
+  posX =  0.0;  posY =  0.0;  posZ =  0.0;
   gMC->Gspos("TIFC", 1 ,"TPCE", posX, posY,  posZ, 0, "ONLY");
   gMC->Gspos("TOFC", 1 ,"TPCE", posX, posY,  posZ, 0, "ONLY");
 
-  posX =  0.0;
-  posY =  0.0;
-  posZ =  tpeaZ;
-
+  posX =  0.0;  posY =  0.0;  posZ =  tpeaZ;
   gMC->Gspos("TPEA", 1 ,"TPCE", posX, posY,  posZ, StarRotation::FindRotation("tpgv1")->GetNumber(), "ONLY");
   gMC->Gspos("TPEA", 2 ,"TPCE", posX, posY, -posZ, StarRotation::FindRotation("tpgv2")->GetNumber(), "ONLY");
 
-  // TESS is a division of endcap volume corresponding to one supersector
-  //  gMC->Gsdvn("TESS",    "TPEA", 12,2);
+  // TESS is a division of endcap volume corresponding to one supersector:  gMC->Gsdvn("TESS",    "TPEA", 12,2);
 
   StarVolume::Division("TESS","TPEA", 12,2);
+
+  for(int i_sec=1;i_sec<=2;i_sec++) {
+    for(int i_row=1;i_row<=TPRS::nRow[i_sec];i_row++) {
+      
+    }
+  }
+  //  StarVolume::Division("TPSS","TPGV", 12,2);
 
 
 
