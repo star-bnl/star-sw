@@ -65,7 +65,6 @@ void StiSvtHitLoader::loadHits(StEvent* source,
 		   it!=hits.end(); 
 		   ++it) 
 		{
-		  cout << "fetch hit"<<endl;
 		  if (!*it) 
 		    {
 		      _messenger <<"StiSvtHitLoader::loadHits() - WARNING - *it==0"<<endl;
@@ -84,86 +83,86 @@ void StiSvtHitLoader::loadHits(StEvent* source,
 		    {
 		    case 1:
 		      switch (svtLadder)
-			{
-			case 2: layer = 0; ladder = 0;break;
-			case 4: layer = 0; ladder = 1;break;
-			case 6: layer = 0; ladder = 2;break;
-			case 8: layer = 0; ladder = 3;break;
-			default: throw runtime_error("StiSvtHitLoader:loadHits() -E- 1");
-			}
+						{
+						case 2: layer = 0; ladder = 0;break;
+						case 4: layer = 0; ladder = 1;break;
+						case 6: layer = 0; ladder = 2;break;
+						case 8: layer = 0; ladder = 3;break;
+						default: throw runtime_error("StiSvtHitLoader:loadHits() -E- 1");
+						}
 		      break;
 		    case 2:
 		      switch (svtLadder)
-			{
-			case 1: layer = 1; ladder = 0;break;
-			case 3: layer = 1; ladder = 1;break;
-			case 5: layer = 1; ladder = 2;break;
-			case 7: layer = 1; ladder = 3;break;
-			default: throw runtime_error("StiSvtHitLoader:loadHits() -E- 2");
-			}
+						{
+						case 1: layer = 1; ladder = 0;break;
+						case 3: layer = 1; ladder = 1;break;
+						case 5: layer = 1; ladder = 2;break;
+						case 7: layer = 1; ladder = 3;break;
+						default: throw runtime_error("StiSvtHitLoader:loadHits() -E- 2");
+						}
 		      break;
 		    case 3:
 		      switch (svtLadder)
-			{
-			case  2: layer = 2; ladder = 0;break;
-			case  4: layer = 2; ladder = 1;break;
-			case  6: layer = 2; ladder = 2;break;
-			case  8: layer = 2; ladder = 3;break;
-			case 10: layer = 2; ladder = 4;break;
-			case 12: layer = 2; ladder = 5;break;
-			default: throw runtime_error("StiSvtHitLoader:loadHits() -E- 3");
-			}
+						{
+						case  2: layer = 2; ladder = 0;break;
+						case  4: layer = 2; ladder = 1;break;
+						case  6: layer = 2; ladder = 2;break;
+						case  8: layer = 2; ladder = 3;break;
+						case 10: layer = 2; ladder = 4;break;
+						case 12: layer = 2; ladder = 5;break;
+						default: throw runtime_error("StiSvtHitLoader:loadHits() -E- 3");
+						}
 		      break;
 		    case 4:
 		      switch (svtLadder)
-			{
-			case  1: layer = 3; ladder = 0;break;
-			case  3: layer = 3; ladder = 1;break;
-			case  5: layer = 3; ladder = 2;break;
-			case  7: layer = 3; ladder = 3;break;
-			case  9: layer = 3; ladder = 4;break;
-			case 11: layer = 3; ladder = 5;break;
-			default: throw runtime_error("StiSvtHitLoader:loadHits() -E- 4");
-			}
+						{
+						case  1: layer = 3; ladder = 0;break;
+						case  3: layer = 3; ladder = 1;break;
+						case  5: layer = 3; ladder = 2;break;
+						case  7: layer = 3; ladder = 3;break;
+						case  9: layer = 3; ladder = 4;break;
+						case 11: layer = 3; ladder = 5;break;
+						default: throw runtime_error("StiSvtHitLoader:loadHits() -E- 4");
+						}
 		      break;
 		    case 5:
 		      switch (svtLadder)
-			{
-			case  2: layer = 4; ladder = 0;break;
-			case  4: layer = 4; ladder = 1;break;
-			case  6: layer = 4; ladder = 2;break;
-			case  8: layer = 4; ladder = 3;break;
-			case 10: layer = 4; ladder = 4;break;
-			case 12: layer = 4; ladder = 5;break;
-			case 14: layer = 4; ladder = 6;break;
-			case 16: layer = 4; ladder = 7;break;
-			default: throw runtime_error("StiSvtHitLoader:loadHits() -E- 5");
-			}
+						{
+						case  2: layer = 4; ladder = 0;break;
+						case  4: layer = 4; ladder = 1;break;
+						case  6: layer = 4; ladder = 2;break;
+						case  8: layer = 4; ladder = 3;break;
+						case 10: layer = 4; ladder = 4;break;
+						case 12: layer = 4; ladder = 5;break;
+						case 14: layer = 4; ladder = 6;break;
+						case 16: layer = 4; ladder = 7;break;
+						default: throw runtime_error("StiSvtHitLoader:loadHits() -E- 5");
+						}
 		      break;
 		    case 6:
 		      switch (svtLadder)
-			{
-			case  1: layer = 5; ladder = 0;break;
-			case  3: layer = 5; ladder = 1;break;
-			case  5: layer = 5; ladder = 2;break;
-			case  7: layer = 5; ladder = 3;break;
-			case  9: layer = 5; ladder = 4;break;
-			case 11: layer = 5; ladder = 5;break;
-			case 13: layer = 5; ladder = 6;break;
-			case 15: layer = 5; ladder = 7;break;
-			default: throw runtime_error("StiSvtHitLoader:loadHits() -E- 6");
-			}
+						{
+						case  1: layer = 5; ladder = 0;break;
+						case  3: layer = 5; ladder = 1;break;
+						case  5: layer = 5; ladder = 2;break;
+						case  7: layer = 5; ladder = 3;break;
+						case  9: layer = 5; ladder = 4;break;
+						case 11: layer = 5; ladder = 5;break;
+						case 13: layer = 5; ladder = 6;break;
+						case 15: layer = 5; ladder = 7;break;
+						default: throw runtime_error("StiSvtHitLoader:loadHits() -E- 6");
+						}
 		      break;
 		    }
-		  cout << "hit->layer():"<<hit->layer()
-		       << "hit->ladder():"<<hit->ladder()
-		       << " layer:"<<layer
-		       << " ladder:"<<ladder<<endl;
 		  
 		  //detector = _detector->getDetector(hit->layer(),hit->ladder());
 		  detector = _detector->getDetector(layer,ladder);
-		  if (hit && detector && hit->flag()<4) 
+		  if (hit && detector && hit->flag()>0 && hit->flag()<4) 
 		    {
+					//cout << "hit->layer():"<<hit->layer()
+					//		 << "hit->ladder():"<<hit->ladder()
+					//		 << " layer:"<<layer
+					//		 << " ladder:"<<ladder<<endl;
 		      stiHit = _hitFactory->getInstance();
 		      stiHit->setGlobal(detector,hit,
 					hit->position().x(),
@@ -171,13 +170,11 @@ void StiSvtHitLoader::loadHits(StEvent* source,
 					hit->position().z(),
 					hit->charge() );
 		      _hitContainer->push_back( stiHit );
-		      if (fabs(stiHit->y())>4.)
-			{
-			  cout << " hit from :"<<*detector<<endl;
-			  cout << " stHit-x"<<hit->position().x()<<" x:"<<stiHit->x()<<endl;
-			  cout << " stHit-y"<<hit->position().y()<<" y:"<<stiHit->y()<<endl;
-			  cout << " stHit-z"<<hit->position().z()<<" z:"<<stiHit->z()<<endl <<endl;
-			}
+					//cout << " hit from :"<<*detector<<endl;
+					//cout << " stHit-x"<<hit->position().x()<<" x:"<<stiHit->x()<<endl;
+					//cout << " stHit-y"<<hit->position().y()<<" y:"<<stiHit->y()<<endl;
+					//cout << " stHit-z"<<hit->position().z()<<" z:"<<stiHit->z()<<endl;
+					//cout << " _______DIFF:" << stiHit->x()-detector->getPlacement()->getNormalRadius()<<endl;
 		    }
 		}
 	    }
