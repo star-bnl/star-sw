@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsZeroSuppressedReader.hh,v 1.1 1999/11/05 22:17:05 calderon Exp $
+ * $Id: StTrsZeroSuppressedReader.hh,v 1.2 2000/03/15 18:08:43 calderon Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -31,6 +31,9 @@
  ***************************************************************************
  *
  * $Log: StTrsZeroSuppressedReader.hh,v $
+ * Revision 1.2  2000/03/15 18:08:43  calderon
+ * ZSR is no longer a singleton.  Two will be needed for mixer chain.
+ *
  * Revision 1.1  1999/11/05 22:17:05  calderon
  * Made private copy constructor and operator= in StTrsDigitalSector.
  * Renamed DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast
@@ -50,8 +53,8 @@ class StTrsDigitalSector;
 
 class StTrsZeroSuppressedReader : public ZeroSuppressedReader {
 public:
-    
-    static StTrsZeroSuppressedReader* instance(StTpcRawDataEvent*);
+    StTrsZeroSuppressedReader();
+    StTrsZeroSuppressedReader(StTpcRawDataEvent*);
     ~StTrsZeroSuppressedReader();
 
     //StTrsZeroSuppressedReader(StTrsZeroSuppressedReader&);
@@ -65,17 +68,15 @@ public:
     void clear();
 
 private:
-    StTrsZeroSuppressedReader();
-    StTrsZeroSuppressedReader(StTpcRawDataEvent*);
-    StTrsZeroSuppressedReader(int);
+    StTrsZeroSuppressedReader(int);    
+
     int checkTheData(unsigned int);
 
-    static StTrsZeroSuppressedReader* mInstance;
-
-    StTrsRawDataEvent*  mTrsEvent;
     int                 mSector;
     StTrsDigitalSector* mTheSector;
     unsigned char*      mPadList;
     Sequence*         mSequence;
+    StTrsRawDataEvent*  mTrsEvent;
+
 };
 #endif

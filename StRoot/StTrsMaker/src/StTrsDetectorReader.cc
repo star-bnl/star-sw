@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDetectorReader.cc,v 1.2 1999/12/08 02:10:42 calderon Exp $
+ * $Id: StTrsDetectorReader.cc,v 1.3 2000/03/15 18:08:56 calderon Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDetectorReader.cc,v $
+ * Revision 1.3  2000/03/15 18:08:56  calderon
+ * ZSR is no longer a singleton.  Two will be needed for mixer chain.
+ *
  * Revision 1.2  1999/12/08 02:10:42  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -46,12 +49,12 @@ StTrsDetectorReader::StTrsDetectorReader()
 StTrsDetectorReader::StTrsDetectorReader(StTpcRawDataEvent* ev, string ver)
     : mVersion(ver), mTheEvent(ev) 
 {
-    mZSR = StTrsZeroSuppressedReader::instance(mTheEvent);
+    mZSR = new StTrsZeroSuppressedReader(mTheEvent);
 }
 
 StTrsDetectorReader::~StTrsDetectorReader()
 {
-    //Does nothing, the ZSR is a singleton.
+    delete mZSR;
 }
 
 ZeroSuppressedReader* StTrsDetectorReader::getZeroSuppressedReader(int sector)
