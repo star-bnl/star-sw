@@ -3,13 +3,14 @@
 
 #include <ctime>
 #include "StMaker.h"
+#include "StHbtMaker/Infrastructure/StHbtCheckPdgIdList.h"
 #include "StHbtMaker/Base/StHbtEventReader.hh"
 #include "StV0MiniDstMaker/StV0MiniDstMaker.h"
 #include "StHbtMaker/Base/StHbtEventCut.h"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 #include "StHbtMaker/Base/StHbtV0Cut.h"
 
-class StHbtMcEventReader : public StHbtEventReader{
+class StHbtMcEventReader : public StHbtEventReader, public StHbtCheckPdgIdList {
   
  private:
   // pointers to other makers
@@ -18,6 +19,10 @@ class StHbtMcEventReader : public StHbtEventReader{
 
   long  mV0;        //! Number of v0s looked at to date
   time_t timeStamp; // to display the time/event
+
+  StHbt3DHisto* mMotherMinvYPt;
+  StHbt3DHisto* mMotherMinvYMt;
+  StHbt3DHisto* mMotherMinvEtaPt;
 
  protected:
   

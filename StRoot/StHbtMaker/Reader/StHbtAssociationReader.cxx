@@ -1,9 +1,9 @@
-#define HBT_B_FIELD 0.5*tesla
 #define DIFF_CUT_OFF 1.
 
 #include "StHbtMaker/Reader/StHbtAssociationReader.h"
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
+#include "StEventUtilities/StuRefMult.hh"
 
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Base/StHbtEventCut.h"
@@ -85,12 +85,11 @@ struct vertexFlag {
 	      int primaryFlag; };
 
 //__________________
-StHbtAssociationReader::StHbtAssociationReader() {
+StHbtAssociationReader::StHbtAssociationReader() : mPerfectPID(true) {
   mDiffCurrent = new StHbt1DHisto("Diff_current", " (p_real - p_mc ) / p_real ",100,-1.,1.);
   mDiff        = new StHbt1DHisto("Diff",         " (p_real - p_mc ) / p_real ",100,-1.,1.);
   mDiffMean    = new StHbt1DHisto("Diff_mean",    " mean of   (p_real - p_mc ) / p_real ",100,-1.,1.);
   mDiffRMS     = new StHbt1DHisto("Diff_sigma",   " sigma of  (p_real - p_mc ) / p_real ",100,0.,1.);
-  mDiffEvents  = new StHbt2DHisto("Diff_sigma",   " (p_real - p_mc ) / p_real vs eventNumber",100,0.,1.,40,0.,39.);
   eventNumber=0;
   mEventCut=0;
   mTrackCut=0;
@@ -99,6 +98,7 @@ StHbtAssociationReader::StHbtAssociationReader() {
 }
 //__________________
 StHbtAssociationReader::~StHbtAssociationReader(){
+  cout << " StHbtAssociationReader::~StHbtAssociationReader() " << endl;
   if (mEventCut) delete mEventCut;
   if (mTrackCut) delete mTrackCut;
 }   
@@ -184,6 +184,16 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     return 0;
   }
 
+  if ( !(rEvent->primaryVertex()) || // no pointer to prim vertex
+       (mEvent->primaryVertex()->position().x() == mEvent->primaryVertex()->position().y() && 
+	mEvent->primaryVertex()->position().y() == mEvent->primaryVertex()->position().z()     ) ||// x==y==z --> mark for bad events from embedding
+       isnan(rEvent->primaryVertex()->position().x())  // vertex position not a number 
+       ) { 
+    cout << "StHbtAssociationReader - bad vertex !!! " << endl;
+    return 0;
+  }
+
+
   // o.k. we got a StEvent and a McEvent --> create hbtEvent
   
   // ******************
@@ -207,6 +217,8 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   int mMult = mEvent->tracks().size();
   cout << " DST mult:  #" << rMult << endl;
   cout << " MC  mult:  #" << mMult << endl;
+  if ( !rEvent->primaryVertex() ) return 0;
+  if ( !mEvent->primaryVertex() ) return 0;
   StHbtThreeVector rVertexPosition = rEvent->primaryVertex()->position();
   StHbtThreeVector mVertexPosition = mEvent->primaryVertex()->position();
   cout << " DST primary Vertex #" << rVertexPosition << endl;
@@ -225,6 +237,8 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   StHbtEvent* hbtEvent = new StHbtEvent;
 
   hbtEvent->SetEventNumber(rEventNumber);
+  hbtEvent->SetUncorrectedNumberOfPositivePrimaries(uncorrectedNumberOfPositivePrimaries(*rEvent));
+  hbtEvent->SetUncorrectedNumberOfNegativePrimaries(uncorrectedNumberOfNegativePrimaries(*rEvent));
   hbtEvent->SetCtbMult(0.);
   hbtEvent->SetZdcAdcEast(0.);
   hbtEvent->SetZdcAdcWest(0.);
@@ -236,12 +250,22 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
 
   // By now, all event-wise information has been extracted and stored in hbtEvent
   // see if it passes any front-loaded event cut
-  if (mEventCut){
-    if (!(mEventCut->Pass(hbtEvent))){    // event failed! - return null pointer (but leave Reader status flag as "good")
-      delete hbtEvent;
-      return 0;
-    }
-  }
+//   if (mEventCut){
+//     if (!(mEventCut->Pass(hbtEvent))){    // event failed! - return null pointer (but leave Reader status flag as "good")
+//       delete hbtEvent;
+//       return 0;
+//     }
+//   }
+
+  StTpcDedxPidAlgorithm* PidAlgorithm = new StTpcDedxPidAlgorithm();
+
+  if (!PidAlgorithm) cout << " StStandardHbtEventReader::ReturnHbtEvent() - Whoa!! No PidAlgorithm!! " << endl;
+
+  // the following just point to particle definitions in StEvent
+  StElectron* Electron = StElectron::instance();
+  StPionPlus* Pion = StPionPlus::instance();
+  StKaonPlus* Kaon = StKaonPlus::instance();
+  StProton* Proton = StProton::instance();
 
   {for (rcTrackMapIter tIter=theTrackMap->begin(); tIter!=theTrackMap->end(); ++tIter){
     //    cout << "Doing track number " << ++icount << endl;
@@ -267,94 +291,66 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
       //      cout << " skip this track" << endl;
       continue;
     }
-    // get dedxPidTraits
-    //cout << " number of pidTraits " << rTrack->pidTraits().size();
-    //cout << " number of pidTraits for tpc: " << rTrack->pidTraits(kTpcId).size() << endl;
-    StTrackPidTraits* trackPidTraits; 
-    int iPidTraitsCounter=0;
-    do {
-      iPidTraitsCounter++;
-      trackPidTraits = rTrack->pidTraits(kTpcId)[iPidTraitsCounter];
-    } while (iPidTraitsCounter < (int)rTrack->pidTraits(kTpcId).size() && (!trackPidTraits) );
-    if (!trackPidTraits) {
-      //cout << " No dEdx information from Tpc- skipping track with " << nhits << " hits"<< endl;
+
+    // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
+    // pointers to track and pidTraits are set 
+    StParticleDefinition* BestGuess = (StParticleDefinition*)rTrack->pidTraits(*PidAlgorithm);
+    //    if (BestGuess) cout << "best guess for particle is " << BestGuess->name() << endl; //2dec9
+    if (!BestGuess){
       continue;
     }
-    const StDedxPidTraits* dedxPidTraits = (const StDedxPidTraits*)trackPidTraits;
-    //cout << " dE/dx = " << dedxPidTraits->mean() << endl;
 
-    // get fitTraits
-    StTrackFitTraits fitTraits = rTrack->fitTraits();
-    //cout << " got fitTraits " << endl;
-      
     // **********************
     // get associated mctrack
     // **********************
     StMcTrack* mTrack = (*tIter).second->partnerMcTrack();
 
     // check Pdg Id of the StMcTrack and its mc-mother and mc-daughters
+    int pdgCode = 0;
+    int motherPdgCode = 0;
+    int daughterPdgCode =0;
+    int motherTrackId =0;
     if (CheckPdgIdLists()) {
-      int checkParticle = CheckPdgIdList(mAcceptedParticles);
-      int checkMother   = CheckPdgIdList(mAcceptedMothers);
-      int checkDaughter = CheckPdgIdList(mAcceptedDaughters);
-      // check particle
-      checkParticle = CheckPdgIdList(mAcceptedParticles, mTrack->particleDefinition()->pdgEncoding());
-      //      cout << " particleID " << mTrack->particleDefinition()->pdgEncoding() << endl;
-      // check mothers
-      if ( mTrack->startVertex() == 0 ) {
-	//	cout << " no start vertex " << endl;
-	checkMother+= CheckPdgIdList(mAcceptedMothers, 0);
+      int check=0;
+      if (!mTrack->particleDefinition()) {
+	cout << " track has no particle definiton " << endl;
+	continue;
       }
-      else {
-	if ( mTrack->startVertex()->parent() != 0 ) {
-	  //	  cout << " parent found " << endl;
-	  //	  cout <<  " parent " << mTrack->startVertex()->parent() << endl;
-	  if (mTrack->startVertex()->parent()->particleDefinition() != 0 ) {
-	    checkMother+= CheckPdgIdList(mAcceptedMothers, mTrack->startVertex()->parent()->particleDefinition()->pdgEncoding());
-	    if (mTrack->startVertex()->parent()->particleDefinition()->pdgEncoding() == 333) {
-	      cout << " motherID " << mTrack->startVertex()->parent()->particleDefinition()->pdgEncoding() << endl;
-	    }
-	  }
-	}
+      pdgCode = mTrack->particleDefinition()->pdgEncoding();
+      motherPdgCode = mTrack->parent(); // 0 if no start vertex 
+      if (motherPdgCode) {
+	motherPdgCode = mTrack->parent()->pdgId();
+	motherTrackId = mTrack->parent()->key();
       }
-      /*
+      if (motherPdgCode) cout << " motherPdgCode :"  << motherPdgCode << endl;
+      else cout << " mother has no pdgId "<< endl;  
       if ( mTrack->stopVertex() == 0 ) {
-//	cout << " no stop vertex " << endl;
+	check += CheckPdgIdList(pdgCode,motherPdgCode,0);
       }
       else {
 	for (int iDaughter=0; iDaughter < mTrack->stopVertex()->daughters().size()-1; iDaughter++) {
-	  checkDaughter+= 
-	    CheckPdgIdList(mAcceptedDaughters,mTrack->stopVertex()->daughters()[iDaughter]->particleDefinition()->pdgEncoding());
+	  daughterPdgCode = mTrack->stopVertex()->daughters()[iDaughter]->pdgId();
+	  check += CheckPdgIdList(pdgCode,motherPdgCode,daughterPdgCode);
 	}
       }
-      */
-      // all together
-      if ( !(checkParticle && checkMother && checkDaughter) ) {
-	continue;
+      if ( !(check) ) {
+	continue;   // particle failed, continue with next track
       }
     }
     
 
-    /*
-      if ((*tIter).second->commonTpcHits()<10) 
-      continue;
-    */
     int geantId =  mTrack->geantId();
 
 
     //cout << " partnerMcTrack geant Id           : " << mTrack->geantId() << endl;
     //cout << " partnerMcTrack particleDefinition : " << *(mTrack->particleDefinition()) << endl;
     
-    //    cout << "Now getting the pidTraits" << endl;
-    //StTrackPidTraits pidTraitsTemp = rTrack->pidTraits();
-    //cout << " Got it"<<endl;
-    
     // ****************************************
     // check momenta of real track and mc track
     // ****************************************
     pathlength = rTrack->geometry()->helix().pathLength( rVertexPosition );
     //cout << "pathlength\t" << pathlength << endl;
-    p = rTrack->geometry()->helix().momentumAt(pathlength,HBT_B_FIELD);
+    p = rTrack->geometry()->momentum();
     mp = mTrack->momentum();
     //cout << "p: " << p << endl;
     //cout << "mp: " << mp << endl;
@@ -366,7 +362,6 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     }
     
     mDiff->Fill(diff,1.);
-    mDiffEvents->Fill(diff,eventNumber,1.);
     mDiffCurrent->Fill(diff,1.);
     
     //    cout << "Getting readty to instantiate new StHbtTrack " << endl;
@@ -375,55 +370,62 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     
     //cout << "StHbtTrack instantiated " << endl;
     
-    hbtTrack->SetTrackId(rTrack->key());
+    hbtTrack->SetTrackId(rTrack->key()+motherTrackId*pow(2,16));
 
     hbtTrack->SetNHits(nhits);
     
-    switch (geantId) {
-    case 2:  // intentional fall-through
-    case 3:  // gid=2,3 is electron
-      hbtTrack->SetNSigmaElectron(0.);
-      hbtTrack->SetNSigmaPion(-999);
-      hbtTrack->SetNSigmaKaon(-999.);
-      hbtTrack->SetNSigmaProton(-999.);
-      break;
-    case 8:  // intentional fall-through
-    case 9:  // gid=8,9 is pion
-      hbtTrack->SetNSigmaElectron(999.);
-      hbtTrack->SetNSigmaPion(0.);
-      hbtTrack->SetNSigmaKaon(-999.);
-      hbtTrack->SetNSigmaProton(-999.);
-      break;
-    case 11:  // intentional fall-through
-    case 12:  // gid=11,12 is kaon
-      hbtTrack->SetNSigmaElectron(999.);
-      hbtTrack->SetNSigmaPion(999.0);
-      hbtTrack->SetNSigmaKaon(0.);
-      hbtTrack->SetNSigmaProton(-999.);
-      break;
-    case 14:  // intentional fall-through
-    case 15:  // gid=14,15 is proton
-      hbtTrack->SetNSigmaElectron(999.);
-      hbtTrack->SetNSigmaPion(999.);
-      hbtTrack->SetNSigmaKaon(999.);
-      hbtTrack->SetNSigmaProton(0.);
-      break;
-    default:
-      hbtTrack->SetNSigmaElectron(999.);
-      hbtTrack->SetNSigmaPion(999.);
-      hbtTrack->SetNSigmaKaon(999.);
-      hbtTrack->SetNSigmaProton(999.);
-      break;
+    if (mPerfectPID) {
+      switch (geantId) {
+      case 2:  // intentional fall-through
+      case 3:  // gid=2,3 is electron
+	hbtTrack->SetNSigmaElectron(0.);
+	hbtTrack->SetNSigmaPion(-999);
+	hbtTrack->SetNSigmaKaon(-999.);
+	hbtTrack->SetNSigmaProton(-999.);
+	break;
+      case 8:  // intentional fall-through
+      case 9:  // gid=8,9 is pion
+	hbtTrack->SetNSigmaElectron(999.);
+	hbtTrack->SetNSigmaPion(0.);
+	hbtTrack->SetNSigmaKaon(-999.);
+	hbtTrack->SetNSigmaProton(-999.);
+	break;
+      case 11:  // intentional fall-through
+      case 12:  // gid=11,12 is kaon
+	hbtTrack->SetNSigmaElectron(999.);
+	hbtTrack->SetNSigmaPion(999.0);
+	hbtTrack->SetNSigmaKaon(0.);
+	hbtTrack->SetNSigmaProton(-999.);
+	break;
+      case 14:  // intentional fall-through
+      case 15:  // gid=14,15 is proton
+	hbtTrack->SetNSigmaElectron(999.);
+	hbtTrack->SetNSigmaPion(999.);
+	hbtTrack->SetNSigmaKaon(999.);
+	hbtTrack->SetNSigmaProton(0.);
+	break;
+      default:
+	hbtTrack->SetNSigmaElectron(999.);
+	hbtTrack->SetNSigmaPion(999.);
+	hbtTrack->SetNSigmaKaon(999.);
+	hbtTrack->SetNSigmaProton(999.);
+	break;
+      }
+    }
+    else {
+      hbtTrack->SetNSigmaElectron(PidAlgorithm->numberOfSigma(Electron));
+      hbtTrack->SetNSigmaPion(PidAlgorithm->numberOfSigma(Pion));
+      hbtTrack->SetNSigmaKaon(PidAlgorithm->numberOfSigma(Kaon));
+      hbtTrack->SetNSigmaProton(PidAlgorithm->numberOfSigma(Proton));
     }
     
-    
-    float dEdx = dedxPidTraits->mean();
-    //cout << "dEdx\t" << dEdx << endl; 
-    hbtTrack->SetdEdx(dEdx);
-    
+
+    //cout << "dEdx\t" << PidAlgorithm->traits()->mean() << endl; 
+    hbtTrack->SetdEdx(PidAlgorithm->traits()->mean());
+      
     double pathlength = rTrack->geometry()->helix().pathLength(rVertexPosition);
     //cout << "pathlength\t" << pathlength << endl;
-    StHbtThreeVector p = rTrack->geometry()->helix().momentumAt(pathlength,HBT_B_FIELD);
+    StHbtThreeVector p = rTrack->geometry()->momentum();
     //cout << "p: " << p << endl;
     hbtTrack->SetP(p);
     
@@ -472,7 +474,6 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   mDiffMean->Fill(mDiffCurrent->GetMean(),1.);
   mDiffRMS->Fill(mDiffCurrent->GetRMS(),1.);
   cout << " StHbtAssociationReader::ReturnEvent() : DiffCurrent (p_real - p_mc ) / p_real                " << mDiffCurrent << endl;
-  cout << " StHbtAssociationReader::ReturnEvent() : DiffEvents  (p_real - p_mc ) / p_real vs eventNumber " << mDiffEvents << endl;
   cout << " StHbtAssociationReader::ReturnEvent() : Diff        (p_real - p_mc ) / p_real                " << mDiff << endl;
   cout << " StHbtAssociationReader::ReturnEvent() : DiffMean    mean  of (p_real - p_mc ) / p_real      " << mDiffMean << endl;
   cout << " StHbtAssociationReader::ReturnEvent() : DiffSigma   sigma of (p_real - p_mc ) / p_real      " << mDiffRMS << endl;

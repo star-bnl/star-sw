@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.18 2001/06/04 19:09:54 rcwells Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.19 2001/06/23 21:55:45 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
+ * Revision 1.19  2001/06/23 21:55:45  laue
+ * *** empty log message ***
+ *
  * Revision 1.18  2001/06/04 19:09:54  rcwells
  * Adding B-field, run number, and improved reaction plane functionality
  *
@@ -145,13 +148,15 @@ private:
   StHbtTagReader* mTheTagReader;  //! this tag reader opens a tags.root file 
 
   StTrackType mTrackType;
+  bool mReadTracks;
+  bool mReadV0s;
 
   StFlowMaker* mFlowMaker;             //!
   StFlowAnalysisMaker* mFlowAnalysisMaker; //!
 
  protected:
 
-public:
+ public:
   StStandardHbtEventReader();
   ~StStandardHbtEventReader();
 
@@ -166,8 +171,11 @@ public:
   StHbtTagReader* TheTagReader();
 
   StTrackType TrackType(); 
+  bool ReadTracks();
+  bool ReadV0s();
   void SetTrackType(StTrackType);
-
+  void SetReadTracks(bool);
+  void SetReadV0s(bool);
   void SetFlowMaker(StFlowMaker* flowMaker);
   void SetFlowAnalysisMaker(StFlowAnalysisMaker* flowAnal);
 
@@ -183,7 +191,11 @@ inline StStrangeMuDstMaker* StStandardHbtEventReader::TheV0Maker(){return mTheV0
 inline void StStandardHbtEventReader::SetTheTagReader(StHbtTagReader* maker){mTheTagReader=maker;}
 inline StHbtTagReader* StStandardHbtEventReader::TheTagReader(){return mTheTagReader;}
 inline StTrackType StStandardHbtEventReader::TrackType() { return mTrackType;}
+inline bool StStandardHbtEventReader::ReadTracks() { return mReadTracks;}
+inline bool StStandardHbtEventReader::ReadV0s() { return mReadV0s;}
 inline void StStandardHbtEventReader::SetTrackType(StTrackType t) { mTrackType=t;}
+inline void StStandardHbtEventReader::SetReadTracks(bool b) { mReadTracks=b;}
+inline void StStandardHbtEventReader::SetReadV0s(bool b) { mReadV0s=b;}
 inline void StStandardHbtEventReader::SetFlowMaker(StFlowMaker* flowMaker){mFlowMaker = flowMaker;}
 inline void StStandardHbtEventReader::SetFlowAnalysisMaker(StFlowAnalysisMaker* flowAnal) {
   mFlowAnalysisMaker = flowAnal;

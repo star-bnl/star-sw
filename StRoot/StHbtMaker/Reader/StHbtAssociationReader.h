@@ -22,11 +22,11 @@ class StHbtAssociationReader : public StHbtEventReader, public StHbtCheckPdgIdLi
   StHbt1DHisto* mDiff;          //! momenta diff distribution
   StHbt1DHisto* mDiffMean;      //! mean of momenta diff distribution
   StHbt1DHisto* mDiffRMS;       //! sigma of momenta diff distribution
-  StHbt2DHisto* mDiffEvents;    //! sigma of momenta diff distribution
 
   long              mV0;        //! Number of v0s looked at to date
   int eventNumber;
   time_t timeStamp;
+  bool mPerfectPID;
   
  protected:
 
@@ -48,6 +48,9 @@ class StHbtAssociationReader : public StHbtEventReader, public StHbtCheckPdgIdLi
   StMaker* TheAssociationMaker();
   //StMaker* TheV0Maker();
 
+  bool PerfectPID();
+  void SetPerfectPID(bool);
+
   ClassDef(StHbtAssociationReader, 0)
 };
     
@@ -59,6 +62,9 @@ inline StMaker* StHbtAssociationReader::TheEventMaker(){return mTheEventMaker;}
 inline StMaker* StHbtAssociationReader::TheMcEventMaker(){return mTheMcEventMaker;}
 inline StMaker* StHbtAssociationReader::TheAssociationMaker(){return mTheAssociationMaker;}
 //inline StMaker* StHbtAssociationReader::TheV0Maker(){return mTheV0Maker;}
+inline bool StHbtAssociationReader::PerfectPID(){return mPerfectPID;}
+inline void StHbtAssociationReader::SetPerfectPID(bool b) {mPerfectPID=b;}
+
 
 #endif
 
