@@ -209,10 +209,10 @@ long  type_of_call fill_dst_event_summary_ (
   dstEventSummary->glb_trk_minus = glb_trk_minus ;
   
   /* Fill mean eta, pt, pt^2 and rms_eta */
-  dstEventSummary->mean_pt  = mean_pt/(float)glb_trk_good;
-  dstEventSummary->mean_pt2 = mean_pt2/(float)glb_trk_good;
-  dstEventSummary->mean_eta = mean_eta/(float)glb_trk_good;
-  dstEventSummary->rms_eta  = sqrt(rms_eta/(float)glb_trk_good);
+  dstEventSummary->mean_pt  = mean_pt/((float)glb_trk_good+1.e-10);
+  dstEventSummary->mean_pt2 = mean_pt2/((float)glb_trk_good+1.e-10);
+  dstEventSummary->mean_eta = mean_eta/((float)glb_trk_good+1.e-10);
+  dstEventSummary->rms_eta  = sqrt(rms_eta/((float)glb_trk_good+1.e-10));
   
 
   /* Fill total # of vertices */
@@ -261,7 +261,7 @@ float  mt_inverse_slope(double *mthisto,int ibegin, int istop)
   float s=0, sx=0, sy=0, sxx=0, sxy=0, delta=0;
   int   imtbin, index, NBINS=10;
 
-  mt_binsize  = (mt_max - mt_min)/NBINS;
+  mt_binsize  = (mt_max - mt_min)/(NBINS+1.e-10);
 
   /*  Do a Linear Leat Square fit to  log(dN/mt*dy*dmt) = -mt/T  */
   for  (index=ibegin; index<istop;  index++) {
