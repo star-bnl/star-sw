@@ -1,5 +1,8 @@
-// $Id: makeStrangeMuDst.C,v 1.5 2000/05/18 19:50:48 genevb Exp $
+// $Id: makeStrangeMuDst.C,v 2.0 2000/06/02 22:28:58 genevb Exp $
 // $Log: makeStrangeMuDst.C,v $
+// Revision 2.0  2000/06/02 22:28:58  genevb
+// Updated for version 2 of Strangeness mico DST package
+//
 // Revision 1.5  2000/05/18 19:50:48  genevb
 // Better handling of status returned by chain.Make()
 //
@@ -18,8 +21,9 @@
 //
 //======================================================
 // owner:  Gene Van Buren, UCLA
-// what it does:  uses StStrangeMuDstMaker to create a micro DST
-//                with both v0's and xi's
+// what it does:  Uses StStrangeMuDstMaker to create a micro DST
+//                with both v0's and xi's. Uncomment lines after
+//                "using Monte Carlo" to include MC info in DST.
 //======================================================
 
 
@@ -39,6 +43,11 @@ void load() {
   gSystem->Load("StMagF");
   gSystem->Load("StEventMaker");
   gSystem->Load("StStrangeMuDstMaker");
+// The following are needed for using Monte Carlo info
+//  gSystem->Load("StMcEvent");
+//  gSystem->Load("StMcEventMaker");
+//  gSystem->Load("StAssociationMaker");
+//  gSystem->Load("StMcAnalysisMaker");
 }
 
 void run() {
@@ -57,11 +66,24 @@ void run() {
   // Create Makers
   StIOMaker IOMaker("IO","r",files,"bfcTree");
   StEventMaker eventMaker("events","title");
+// The following are needed for using Monte Carlo info
+//  StMcEventMaker*     mcEventReader = new StMcEventMaker; 
+//  StAssociationMaker* associator    = new StAssociationMaker;
   StStrangeMuDstMaker strangeDst("strangeMuDst");
 
+  // Indicate input branches
+  IOMaker.SetBranch("*",0,"0");           //deactivate all branches
+  IOMaker.SetBranch("dstBranch",0,"r");   //activate Event Branch
+  IOMaker.SetBranch("runcoBranch",0,"r"); //activate runco Branch
+// The following is needed for using Monte Carlo info
+//  IOMaker.SetBranch("geantBranch",0,"r"); //activate geant Branch
+
+  // Indicate micro DST settings
   strangeDst.DoV0();     // Selects V0 vertices for micro-DST
   strangeDst.DoXi();     // Selects Xi vertices for micro-DST
   strangeDst.SetWrite(); // Sets "write" mode (using default filenames)
+// The following is needed for using Monte Carlo info
+//  strangeDst.DoMc();
 
   // Do init
   Int_t istatus = chain.Init();
