@@ -2,7 +2,7 @@ c table_header.inc
 c
 #ifndef TABLE_HEADER_INC
 #define TABLE_HEADER_INC
-#endif /*TABLE_HEADER_INC*/
+#endif 
 c
        STRUCTURE  /table_head_st/
            CHARACTER*20 name    ! table name

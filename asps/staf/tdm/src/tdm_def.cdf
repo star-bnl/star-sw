@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_and_Dataset_Memory commands.
 .
- #(@)$Id: tdm_def.cdf,v 1.9 1998/03/11 21:40:29 ward Exp $
+ #(@)$Id: tdm_def.cdf,v 1.10 1998/03/16 02:08:15 fisyak Exp $
  Edited by Bill Love on 23-24 Feb 1998
 .
 TDM is an Analysis Service Package (ASP) for the Standard Analysis
@@ -130,7 +130,7 @@ EG1. Show the current count of TDM worker objects.
 BUGS: 
    None known.
 .
->ACTION KAM_TDM_COUNT
+>ACTION kam_tdm_count_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/LIST
@@ -208,7 +208,7 @@ BUGS:
 SEE ALSO: 
    DUI/LS
 .
->ACTION KAM_TDM_LIST
+>ACTION kam_tdm_list_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/NEWDATASET NAME
@@ -255,7 +255,7 @@ SEE ALSO:
 .
    TDM/DATASET
 .
->ACTION KAM_TDM_NEWDATASET
+>ACTION kam_tdm_newdataset_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/NEWTABLE NAME SPEC MAXROWCOUNT
@@ -315,7 +315,7 @@ SEE ALSO:
 .
    TDM/TABLE
 .
->ACTION KAM_TDM_NEWTABLE
+>ACTION kam_tdm_newtable_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/ALLOCSTATS
@@ -353,7 +353,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TDM_ALLOCSTATS
+>ACTION kam_tdm_allocstats_%C
 **
 ************************************************************************
 ** TDM/DATASET
@@ -414,7 +414,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TDMDATASET_ENTRYCOUNT
+>ACTION kam_tdmdataset_entrycount_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/DATASET/NAME SOREF
@@ -461,7 +461,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TDMDATASET_NAME
+>ACTION kam_tdmdataset_name_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/DATASET/ADDDATASET SOREF NAME
@@ -512,7 +512,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TDMDATASET_ADDDATASET
+>ACTION kam_tdmdataset_adddataset_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/DATASET/ADDTABLE SOREF NAME SPEC MAXROWCOUNT
@@ -568,7 +568,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TDMDATASET_ADDTABLE
+>ACTION kam_tdmdataset_addtable_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/DATASET/SHOW SOREF
@@ -616,7 +616,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TDMDATASET_SHOW
+>ACTION kam_tdmdataset_show_%C
 **
 ************************************************************************
 ** TDM/TABLE
@@ -684,7 +684,7 @@ BUGS:
 .
    None known.
 .
->ACTION KAM_TDMTABLE_MAXROWCOUNT
+>ACTION kam_tdmtable_maxrowcount_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/TABLE/ROWCOUNT SOREF [ NEW_VALUE ]
@@ -743,7 +743,7 @@ BUGS:
 .
    None known. 
 .
->ACTION KAM_TDMTABLE_ROWCOUNT
+>ACTION kam_tdmtable_rowcount_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/TABLE/COLUMNCOUNT SOREF
@@ -789,7 +789,7 @@ BUGS:
 .
    None known.
 .
->ACTION KAM_TDMTABLE_COLUMNCOUNT
+>ACTION kam_tdmtable_columncount_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/TABLE/NAME SOREF
@@ -835,7 +835,7 @@ BUGS:
 .
    None known.
 .
->ACTION KAM_TDMTABLE_NAME
+>ACTION kam_tdmtable_name_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/TABLE/ROWSIZE SOREF
@@ -885,7 +885,7 @@ SEE ALSO:
 .
  DUI/LS
 .
->ACTION KAM_TDMTABLE_ROWSIZE
+>ACTION kam_tdmtable_rowsize_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/TABLE/SPECIFIER SOREF
@@ -935,7 +935,7 @@ BUGS:
 .
    None known.
 .
->ACTION KAM_TDMTABLE_SPECIFIER
+>ACTION kam_tdmtable_specifier_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/TABLE/TYPENAME SOREF
@@ -981,7 +981,7 @@ BUGS:
 .
    None known. 
 .
->ACTION KAM_TDMTABLE_TYPENAME
+>ACTION kam_tdmtable_typename_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/TABLE/PRINT SOREF [ NROWS IFIRST ]
@@ -1034,7 +1034,7 @@ BUGS:
 .
    None known.
 .
->ACTION KAM_TDMTABLE_PRINT
+>ACTION kam_tdmtable_print_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/TABLE/SHOW SOREF
@@ -1084,7 +1084,7 @@ BUGS:
 SEE ALSO: 
 TDM/TABLE/SPECIFIER gives similar information.
 .
->ACTION KAM_TDMTABLE_SHOW
+>ACTION kam_tdmtable_show_%C
 **
 ************************************************************************
 ** TDM/TABLE/CELL
@@ -1155,7 +1155,9 @@ BUGS:
  TRACEQ.  In-line trace-back still not available.
  
 .
->ACTION KAM_TDMTABLE_CELL_GETVALUE
+SEE ALSO: 
+.
+>ACTION kam_tdmtable_cell_getvalue_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/TABLE/CELL/PUTVALUE SOREF VALUES
@@ -1214,7 +1216,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TDMTABLE_CELL_PUTVALUE
+>ACTION kam_tdmtable_cell_putvalue_%C
 **
 ************************************************************************
 ** TDM/TYPESPECIFIERS
@@ -1265,7 +1267,7 @@ BUGS:
 .
    None known.
 .
->ACTION KAM_TDMTYPESPECIFIERS_LIST
+>ACTION kam_tdmtypespecifiers_list_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/TYPESPECIFIERS/LOAD IDL_FILE
@@ -1325,7 +1327,7 @@ BUGS:
 .
  None known.  
 .
->ACTION KAM_TDMTYPESPECIFIERS_LOAD
+>ACTION kam_tdmtypespecifiers_load_%C
 **
 ** ---------------------------------------------------------------------
 ** TDM/TYPESPECIFIERS/SHOW [ TYPENAME ]
@@ -1376,5 +1378,5 @@ SEE ALSO:
 .
  TDM/TABLE/SHOW
 .
->ACTION KAM_TDMTYPESPECIFIERS_SHOW
+>ACTION kam_tdmtypespecifiers_show_%C
 **

@@ -143,6 +143,7 @@ c:<---------------------------------------------------------------------
 	 WRITE(*,*)'PAW has already been started.'
       endif
 *
+      TNT_START_PAW = 0
       RETURN
       END
 
@@ -165,6 +166,7 @@ c:<---------------------------------------------------------------------
 	 WRITE(*,*)'Only one shared memory space is supported.'
       endif
 *
+      TNT_START_SHARE = 0
       RETURN
       END
 

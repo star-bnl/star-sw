@@ -8,6 +8,10 @@
 //:<--------------------------------------------------------------------
 
 #include "tdmLib.h"
+#include "fortranc.h"   /* The definition of the Fortran/C interface */
+
+#define tdm_def_ F77_NAME(tdm_def,TDM_DEF)
+extern "C" void type_of_call tdm_def_();
 
 extern "C" int tdm_init();
 extern "C" int tdm_start();
