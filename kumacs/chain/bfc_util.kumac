@@ -297,7 +297,8 @@ macro bfc_init _
       (svm) 
             exec create_tables_global#svm
             exec init_svm#init
-      (evr) exec init_evr#init
+      (evr) exec create_tables_global#evr
+            exec init_evr#init
       (egr) 
 	    exec create_tables_global#egr
 	    exec init_egr#init
