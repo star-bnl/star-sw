@@ -1,6 +1,10 @@
-// $Id: StFtpcClusterFinder.cc,v 1.41 2002/11/15 11:52:05 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.42 2003/01/14 12:58:00 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.42  2003/01/14 12:58:00  jcs
+// use Geometry_ftpc/ftpcAsicMap to control corrections for error in Y2001-2002
+// FTPC asic mapping
+//
 // Revision 1.41  2002/11/15 11:52:05  jcs
 // correct error in merging CUCs for statement condition
 // (CurrentCUC->Sequence[159] was not filled for the case of >= MAXNUMSEQUENCES)
@@ -329,7 +333,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
       {
          iPad=padlist[iHardRow-1][iThPad];
 //cout<<"iPad=padlist["<<iHardRow-1<<"]["<<iThPad<<"] = "<<iPad<<endl;
-         if ( iRow>=10 && (iPad>=65 && iPad<=96))
+         if ( mDb->Asic2EastNotInverted() && iRow>=10 && (iPad>=65 && iPad<=96))
              newpadlist[padkey[iPad-1]-1] = iPad; 
          else
              newpadlist[iPad-1] = iPad;

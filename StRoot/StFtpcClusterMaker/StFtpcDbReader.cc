@@ -1,6 +1,10 @@
-// $Id: StFtpcDbReader.cc,v 1.17 2003/01/07 16:15:18 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.18 2003/01/14 12:58:01 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.18  2003/01/14 12:58:01  jcs
+// use Geometry_ftpc/ftpcAsicMap to control corrections for error in Y2001-2002
+// FTPC asic mapping
+//
 // Revision 1.17  2003/01/07 16:15:18  jcs
 // get all values in ftpcGas table for cluster finding
 //
@@ -62,6 +66,7 @@
 // for StFtpcClusterMaker
 StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
                                St_ftpcPadrowZ       *zrow,
+			       St_ftpcAsicMap       *asicmap,
                                St_ftpcEField        *efield,
                                St_ftpcVDrift        *vdrift,
                                St_ftpcDeflection    *deflection,
@@ -106,6 +111,16 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   } else {
     gMessMgr->Message( " No data in table class St_ftpcPadrowZ","E");
   }
+
+  //  just copy asicmap table start to pointer
+  ftpcAsicMap_st* asicmapTable = (ftpcAsicMap_st*)asicmap->GetTable();
+  if(asicmapTable){
+	    mEastIsInverted = asicmapTable->EastIsInverted;
+            mAsic2EastNotInverted = asicmapTable->Asic2EastNotInverted;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcAsicMap","E");
+  }
+cout<<"StFtpcClusterMaker:rmEastIsInverted = "<<mEastIsInverted<<" mAsic2EastNotInverted = "<<mAsic2EastNotInverted<<endl;
 
   //  just copy EField table start to pointer
   ftpcEField_st* efieldTable = (ftpcEField_st*)efield->GetTable();
@@ -209,6 +224,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
 
 // for StFtpcSlowSimMaker
 StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
+			       St_ftpcAsicMap       *asicmap,
                                St_ftpcEField        *efield,
                                St_ftpcVDrift        *vdrift,
                                St_ftpcDeflection    *deflection,
@@ -246,6 +262,16 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   } else {
     gMessMgr->Message( " No data in table class St_ftpcDimensions","E");
   }
+
+  //  just copy asicmap table start to pointer
+  ftpcAsicMap_st* asicmapTable = (ftpcAsicMap_st*)asicmap->GetTable();
+  if(asicmapTable){
+	    mEastIsInverted = asicmapTable->EastIsInverted;
+            mAsic2EastNotInverted = asicmapTable->Asic2EastNotInverted;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcAsicMap","E");
+  }
+cout<<"StFtpcSlowSimMaker: mEastIsInverted = "<<mEastIsInverted<<" mAsic2EastNotInverted = "<<mAsic2EastNotInverted<<endl;
 
 
   //  just copy EField table start to pointer

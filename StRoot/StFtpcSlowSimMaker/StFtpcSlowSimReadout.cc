@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.13 2002/10/17 13:42:11 fsimon Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.14 2003/01/14 12:58:25 jcs Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.14  2003/01/14 12:58:25  jcs
+// use Geometry_ftpc/ftpcAsicMap to control corrections for error in Y2001-2002
+// FTPC asic mapping
+//
 // Revision 1.13  2002/10/17 13:42:11  fsimon
 // Charge scaling taken out (assumes high amplification)
 // use scaling to match 2001/2002 data
@@ -439,7 +443,7 @@ int StFtpcSlowSimReadout::GetHardPad(const int daqsec, const int daqpad, const i
   if (pad <0) pad =0;
   if (pad > (mDb->numberOfPads() -1)) pad = mDb->numberOfPads() -1;
   if (irow>=10)
-    if ((pad>63)&&(pad<96)) // no turning for center FEE card in each sector
+    if (mDb->Asic2EastNotInverted() && (pad>63)&&(pad<96)) // no turning for center FEE card in each sector
       return pad;
     else
       return (mDb->numberOfPads()-pad-1);

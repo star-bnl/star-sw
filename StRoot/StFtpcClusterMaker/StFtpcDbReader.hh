@@ -1,6 +1,10 @@
-// $Id: StFtpcDbReader.hh,v 1.11 2002/10/15 09:46:46 fsimon Exp $
+// $Id: StFtpcDbReader.hh,v 1.12 2003/01/14 12:58:01 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.12  2003/01/14 12:58:01  jcs
+// use Geometry_ftpc/ftpcAsicMap to control corrections for error in Y2001-2002
+// FTPC asic mapping
+//
 // Revision 1.11  2002/10/15 09:46:46  fsimon
 // Constructor used by SlowSimulator changed to include Db access to
 // ftpcAmpSlope, ftpcAmpOffset and ftpcTimeOffset
@@ -41,10 +45,14 @@
 #ifndef STAR_StFtpcDbReader
 #define STAR_StFtpcDbReader
 
+#define TRUE 1
+#define FALSE 0
+
 #include "TObject.h"
 
 #include "tables/St_ftpcDimensions_Table.h"
 #include "tables/St_ftpcPadrowZ_Table.h"
+#include "tables/St_ftpcAsicMap_Table.h"
 #include "tables/St_ftpcEField_Table.h"
 #include "tables/St_ftpcVDrift_Table.h"
 #include "tables/St_ftpcDeflection_Table.h"
@@ -72,6 +80,9 @@ protected:
   Int_t mLastSectorToSearch;
   Int_t mNumberOfPads;
   Int_t mNumberOfTimebins;
+
+  Bool_t mEastIsInverted;
+  Bool_t mAsic2EastNotInverted;
 
   Float_t mPhiOrigin;
   Float_t mPhiPerSector;
@@ -123,6 +134,7 @@ public:
   // constructor used by StFtpcClusterMaker:
   StFtpcDbReader(St_ftpcDimensions    *dimensions,
                  St_ftpcPadrowZ       *zrow,
+		 St_ftpcAsicMap       *asicmap,
                  St_ftpcEField        *efield,
                  St_ftpcVDrift        *vdrift,
                  St_ftpcDeflection    *deflection,
@@ -136,6 +148,7 @@ public:
                  St_ftpcElectronics   *electronics);
   // constructor used by StFtpcSlowSimMaker
   StFtpcDbReader(St_ftpcDimensions    *dimensions,
+		 St_ftpcAsicMap       *asicmap,
                  St_ftpcEField        *efield,
                  St_ftpcVDrift        *vdrift,
                  St_ftpcDeflection    *deflection,
@@ -185,6 +198,9 @@ public:
   Int_t lastSectorToSearch() {return mLastSectorToSearch;}
   Int_t numberOfPads() {return mNumberOfPads;}
   Int_t numberOfTimebins() {return mNumberOfTimebins;}
+   
+  Bool_t EastIsInverted() {return mEastIsInverted;}
+  Bool_t Asic2EastNotInverted() {return mAsic2EastNotInverted;}
 
   Int_t numberOfMagboltzBins() {return mNumberOfMagboltzBins;}
   Int_t maximumNumberOfMagboltzBins() {return mMaximumNumberOfMagboltzBins;}
