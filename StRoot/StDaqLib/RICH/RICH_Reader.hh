@@ -32,13 +32,13 @@ class RICH_Reader : public DetectorReader
 
 public:
   RICH_Reader *getRICHReader(int sector){cout <<"DUMMY implementation"<<endl;};
-  ZeroSuppressedReader *getZeroSuppressedReader(int sector){};
-  ADCRawReader *getADCRawReader(int sector){};
-  PedestalReader *getPedestalReader(int sector){};
-  PedestalRMSReader *getPedestalRMSReader(int sector){};
-  GainReader *getGainReader(int sector){};
-  CPPReader *getCPPReader(int sector){};
-  BadChannelReader *getBadChannelReader(int sector){};
+  ZeroSuppressedReader *getZeroSuppressedReader(int sector){cout<<sector<<endl; return FALSE;};
+  ADCRawReader *getADCRawReader(int sector){cout<<sector<<endl; return FALSE;};
+  PedestalReader *getPedestalReader(int sector){cout<<sector<<endl; return FALSE;};
+  PedestalRMSReader *getPedestalRMSReader(int sector){cout<<sector<<endl; return FALSE;};
+  GainReader *getGainReader(int sector){cout<<sector<<endl; return FALSE;};
+  CPPReader *getCPPReader(int sector){cout<<sector<<endl; return FALSE;};
+  BadChannelReader *getBadChannelReader(int sector){cout<<sector<<endl; return FALSE;};
   RICH_Reader(EventReader *er){
     cout <<"DUMMY implementation"<<endl;
     ercpy = er; // squirrel away pointer eventreader for our friends
@@ -69,7 +69,7 @@ public:
 
   ~RICH_Reader(){}; 
 
-  int MemUsed(){};
+  int MemUsed(){return FALSE;};
 
 
 protected:
