@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.13 2001/08/01 18:34:40 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.14 2001/10/05 03:44:25 jeromel Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.14  2001/10/05 03:44:25  jeromel
+ * Modifications by Jamie so we can turn on/off every corrections.
+ *
  * Revision 1.13  2001/08/01 18:34:40  jhthomas
  * Add temporary mode flag for year 2 running (different cathode potentials)
  *
@@ -46,11 +49,22 @@
 #include "TFile.h"
 
 enum   EBField  { kUndefined=0, kConstant=1, kMapped=2, kChain=3 } ;
+enum   DistortSelect { kElectricField2001 = 1, 
+		       kBMap = 2,
+		       kPadrow13 = 4,
+		       kTwist = 8,
+		       kClock = 16,
+		       kMembrane = 32,
+		       kEndcap = 64 
+};
 
+
+		       
 class StMagUtilities {
 
 
  private:
+    Int_t mDistortionMode;
 
   virtual void    Init ( Int_t mode ) ;
   virtual void    ReadField ( ) ;
@@ -65,12 +79,12 @@ class StMagUtilities {
                                            Float_t &Er_value, Float_t &Ephi_value ) ;
   virtual void    InterpolateEEdistortion ( const Float_t r, const Float_t phi, const Float_t z, 
 					    Float_t &Er_value, Float_t &Ephi_value ) ;
-
+    
  public:
 
   StMagUtilities () ;
   StMagUtilities ( Int_t mode ) ;
-  StMagUtilities ( const EBField map, const Float_t factor ) ;
+  StMagUtilities ( const EBField map, const Float_t factor=1.0, Int_t mode = 0) ;
   virtual ~StMagUtilities() {}
 
   virtual void    BField ( const Float_t x[], Float_t B[] ) ;
