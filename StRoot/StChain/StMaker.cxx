@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.102 2000/07/27 19:05:34 perev Exp $
+// $Id: StMaker.cxx,v 1.103 2000/07/30 01:39:04 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -25,7 +25,7 @@
 #include "StChain.h"
 #include "TTable.h"
 
-#include "StMemoryInfo.hh"
+#include "StMem.h"
 
 StMaker *StMaker::fgStChain = 0;
 StMaker *StMaker::fgFailedMaker = 0;
@@ -412,9 +412,9 @@ void StMaker::StartMaker()
     if (!m_DataSet) {m_DataSet = new TObjectSet(".data"); Add(m_DataSet);}
   }
   if (GetDebug()>1) {
-    printf("\n*** Call %s::Make() ***\n\n", ClassName());
-    StMemoryInfo* info = StMemoryInfo::instance();
-    info->snapshot(); info->print();
+    printf("\n*** Call %s(%s)::Make() mem = ", ClassName(),GetName());
+    StMem::Print(0);
+    printf("\n");
   }
 
 
@@ -428,9 +428,9 @@ void StMaker::EndMaker(int ierr)
   ::doPs(GetName(),"EndMaker");
   
   if (GetDebug()>1) {
-    printf("\n*** End of %s::Make() ***\n\n", ClassName());
-    StMemoryInfo* info = StMemoryInfo::instance();
-    info->snapshot(); info->print();
+    printf("\n*** End %s(%s)::Make() mem = ", ClassName(),GetName());
+    StMem::Print(0);
+    printf("\n");
   }
   StopTimer();
 }
@@ -1061,6 +1061,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.103  2000/07/30 01:39:04  perev
+// StMem::Print added
+//
 // Revision 1.102  2000/07/27 19:05:34  perev
 // Small memleak in StMakerIter fixed, thanx Akio
 //
