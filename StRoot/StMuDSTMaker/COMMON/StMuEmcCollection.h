@@ -19,10 +19,11 @@ Tower id starts from 1 and goes to 4800 to match EMC Id
 #include "StMuEmcHit.h"
 #include "StMuEmcCluster.h"
 #include "StMuEmcPoint.h"
-
+#include "StMuEmcTowerData.h"
+#include "StEnumerations.h"
 #include "Stiostream.h"
 
-enum {bemc=1, bprs=2, bsmde=3, bsmdp=4, eemc=5, eprs=6, esmdu=7, esmdv=8};
+//enum {bemc=1, bprs=2, bsmde=3, bsmdp=4, eemc=5, eprs=6, esmdu=7, esmdv=8};
 
 class StMuEmcCollection: public TObject
 {
@@ -35,8 +36,10 @@ class StMuEmcCollection: public TObject
     void              DeleteThis();
     
     int               getTowerADC(int id, int detector = bemc);    
+    StEmcCrateStatus  getCrateStatus(int crate, int detector = bemc) { if (mTowerData) return mTowerData->crateStatus(crate,detector); else return crateUnknown; }    
     int               getNSmdHits(int detector);
     StMuEmcHit*       getSmdHit(int hitId, int detector = bsmde);    
+    TClonesArray*     getPrsHits(int detector = bprs) { if (detector==bprs) return mPrsHits; else if (detector==eprs) return mEndcapPrsHits; else return 0; }
     int               getNPrsHits(int detector = bprs);
     StMuEmcHit*       getPrsHit(int hitId, int detector = bprs);    
     int               getNClusters(int detector);
@@ -58,7 +61,6 @@ class StMuEmcCollection: public TObject
     int   getNEndcapSmdHits(char uv); // set 'U' or 'V'
     StMuEmcHit * getEndcapSmdHit(char uv, int ihit,
 				 int &sec, int &strip);
-
         
     void              setTowerADC(int,int, int detector = bemc);
     void              addSmdHit(int detector);
@@ -66,15 +68,21 @@ class StMuEmcCollection: public TObject
     void              addCluster(int detector);
     void              addPoint();
     void              addEndcapPoint();
-        
+    void              setPrsArray(int detector, TClonesArray *cla);
+    void              setSmdArray(int detector, TClonesArray *cla);
+    void              setTowerData(StMuEmcTowerData *tow_dat) {mTowerData=tow_dat;}
+    void              setCrateStatus(StEmcCrateStatus status, int crate, int detector = bemc) { if (mTowerData) mTowerData->setCrateStatus(status,crate,detector);}
+
   protected:
     void              init();
     void              packbits(unsigned char*, unsigned int, unsigned int, unsigned int);
     unsigned int      unpackbits(unsigned char*, unsigned int, unsigned int);
     
+    // The char arrays are obsolete, but needed for backward compatibility
     unsigned char     mTowerADC[7200];
     unsigned char     mEndcapTowerADC[1080];
-    
+    StMuEmcTowerData* mTowerData; // This replaces the above arrays
+
     TClonesArray*     mPrsHits;
     TClonesArray*     mSmdHits[2];
     TClonesArray*     mEmcClusters[4];
@@ -85,7 +93,7 @@ class StMuEmcCollection: public TObject
     TClonesArray*     mEndcapEmcClusters[4];
     TClonesArray*     mEndcapEmcPoints;
     
-    ClassDef(StMuEmcCollection,2)
+    ClassDef(StMuEmcCollection,3)
 };
 
 
