@@ -43,9 +43,8 @@ C     ===================
       real    th_step, th_init, th_max, th, factor, sfactor(4)
       logical done
 
-      integer mess_id(20)
       character mess*132
-      common /stk_mess_com/mess_id
+
  
 
 c     EXTERNALS
@@ -104,7 +103,7 @@ c     initialization phase
          if (status.ne.stafcv_ok) then
 c            stk_am = status
             write(mess,1001) 'svd','stk_am_vertex_direct'
-            call message(mess,1,mess_id(2))
+            call StError(mess)
             return
          end if
       end if
@@ -121,7 +120,7 @@ c modified to add the stkpar table as argument.
          if (status.ne.stafcv_ok) then
 c            stk_am = status
             write(mess,1001) 'std','stk_am_direct'
-            call message(mess,1,mess_id(3))
+            call StError(mess)
             return
          end if
 
@@ -134,7 +133,7 @@ c            stk_am = status
          if (status.ne.stafcv_ok) then
             stk_am = status
             write(mess,1001) 'stdf','stk_am_fit'
-            call message(mess,1,mess_id(4))
+            call StError(mess)
             return
          end if
 
@@ -146,7 +145,7 @@ c            stk_am = status
          if (status.ne.stafcv_ok) then
 c            stk_am = status
             write(mess,1001) 'stdk','stk_am_kine'
-            call message(mess,1,mess_id(5))
+            call StError(mess)
             return
          end if
 
@@ -164,7 +163,7 @@ c     normal reconstruction loop. (wkw)
      5             track_h,             track )
                if (status.ne.stafcv_ok) then
                   write(mess,1001) 'stfit','stk_am_fit'
-                  call message(mess,1,mess_id(7))
+                  call StError(mess)
                end if
                status = STK_AM_SELECT(
      1            stkpar_h,            stkpar ,
@@ -173,7 +172,7 @@ c     normal reconstruction loop. (wkw)
      4             track_h,             track )
                if (status.ne.stafcv_ok) then
                   write(mess,1001) 'sts','stk_am_select'
-                  call message(mess,1,mess_id(8))
+                  call StError(mess)
                end if
 
          endif
@@ -314,7 +313,7 @@ c               filler(1).th87  =    th
      8            stkpar_h,            stkpar )
                   if (status.ne.stafcv_ok) then
                      write(mess,1001) 'stf','stk_am_fill3'
-                     call message(mess,1,mess_id(6))
+                     call StError(mess)
                      track_h.nok = oldcandidate
                      groups_h.nok = oldgroups
                      goto 999
@@ -331,7 +330,7 @@ c               filler(1).th87  =    th
      8           stkpar_h,            stkpar )
                   if (status.ne.stafcv_ok) then
                      write(mess,1001) 'stf','stk_am_fill4'
-                     call message(mess,1,mess_id(6))
+                     call StError(mess)
                      track_h.nok = oldcandidate
                      groups_h.nok = oldgroups
                      goto 999
@@ -346,7 +345,7 @@ c               filler(1).th87  =    th
      5             track_h,             track )
                if (status.ne.stafcv_ok) then
                   write(mess,1001) 'stfit','stk_am_fit'
-                  call message(mess,1,mess_id(7))
+                  call StError(mess)
                end if
             
                status = STK_AM_SELECT(
@@ -356,7 +355,7 @@ c               filler(1).th87  =    th
      4             track_h,             track )
                if (status.ne.stafcv_ok) then
                   write(mess,1001) 'sts','stk_am_select'
-                  call message(mess,1,mess_id(8))
+                  call StError(mess)
                end if
                write(mess,*)'Found ',track_h.nok-oldcandidate
                call StInfo(mess)
@@ -450,7 +449,7 @@ c     filler(1).th65  =    th
      8            stkpar_h,             stkpar)
                         if (status.ne.stafcv_ok) then
                            write(mess,1001) 'stf','stk_am_fill3'
-                           call message(mess,1,mess_id(6))
+                           call StError(mess)
                            track_h.nok = oldcandidate
                            groups_h.nok = oldgroups
                            goto 999
@@ -467,7 +466,7 @@ c     filler(1).th65  =    th
      8            stkpar_h,             stkpar)
                         if (status.ne.stafcv_ok) then
                            write(mess,1001) 'stf','stk_am_fill4'
-                           call message(mess,1,mess_id(6))
+                           call StError(mess)
                            track_h.nok = oldcandidate
                            groups_h.nok = oldgroups
                            goto 999
@@ -482,7 +481,7 @@ c     filler(1).th65  =    th
      5             track_h,             track )
                      if (status.ne.stafcv_ok) then
                         write(mess,1001) 'stfit','stk_am_fit'
-                        call message(mess,1,mess_id(7))
+                        call StError(mess)
                      end if
                      
                      status = STK_AM_SELECT(
@@ -492,7 +491,7 @@ c     filler(1).th65  =    th
      4             track_h,             track )
                      if (status.ne.stafcv_ok) then
                         write(mess,1001) 'sts','stk_am_select'
-                        call message(mess,1,mess_id(8))
+                        call StError(mess)
                      end if
                      write(mess,*)'Found ',track_h.nok-oldcandidate
                      call StInfo(mess)
@@ -529,7 +528,7 @@ c     sgr may have been called
          if (status.ne.stafcv_ok) then
             stk_am = status
             write(mess,1001) 'stkin','stk_am_kine'
-            call message(mess,1,mess_id(9))
+            call StError(mess)
             return
          end if
       end if

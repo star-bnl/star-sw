@@ -163,7 +163,7 @@ c------------------------------------------------------------------------------c
               endif
            else
               write(m132,*) 'SVT Wafer Shape ID is not set!'
-              call Message( m132, 1, idI1)
+              call StError( m132)
 *yf           print*,'SVT Wafer Shape ID is not set!'
 *yf           srs_am=STAFCV_BAD
 *yf           return

@@ -111,8 +111,6 @@ c     =====================
 c     error/message
 c     =============
       character*132 mess
-      character msg*132
-      integer   msg_id(10)/10*0./
       logical   first
       data      first/.true./
       save      first
@@ -157,23 +155,19 @@ c     check if inputs are valid, if not return with abort event status
       
       if (vtx_h.nok.le.0) then
          stk_am_fit = stafcv_bad
-         msg = 'stk_am_fit_npvi-e: no primary vertex information'
-         call message(msg,1,msg_id(1))
+         call StError('stk_am_fit_npvi-e: no primary vertex information')
          return
       else if (spt_h.nok.le.0) then
          stk_am_fit = stafcv_bad
-         msg = '<e>_stk_am_fit_nspp: no svt space point'
-         call message(msg,1,msg_id(2))
+         call StError('<e>_stk_am_fit_nspp: no svt space point')
          return
       else if (track_h.nok.le.0) then
-         stk_am_fit = stafcv_bad
-         msg = '<e>_stk_am_fit_ntc: no track candicate'
-         call message(msg,1,msg_id(3))
+         stk_am_fit = stafcv_bad 
+         call StError('<e>_stk_am_fit_ntc: no track candidate')
          return
       else if (groups_h.nok.le.0) then
          stk_am_fit = stafcv_bad
-         msg = '<e>_stk_am_fit_ntc: no groups'
-         call message(msg,1,msg_id(3))
+         call StError( '<e>_stk_am_fit_ntc: no groups')
          return
       end if
       

@@ -29,11 +29,7 @@ c     local declarations
 c     ==================
       real*8 r1sq,r2sq,r3sq
       real*8 check1,check2
-
-c     error report
-c     ============
-      character msg*132
-      integer   msg_id
+ 
 
 c     executable code
 c     ===============
@@ -64,8 +60,7 @@ c     check consistency
       check2=sqrt((x(3)-xc)**2.0+(y(3)-yc)**2.0)-rc
       
       if ((check1.gt.1e-3).or.(check2.gt.1e-3)) then
-         msg = ' svt_fit_circle3pts_bchk-e : 3pts fit failed'
-         call message(msg,1,msg_id)
+         call StError(' svt_fit_circle3pts_bchk-e : 3pts fit failed')
          svt_fit_circle3pts = 1
       endif
       
