@@ -62,7 +62,6 @@ extern "C" void  hf2_ ( long* ihis, float* x, float* y, float* w );
 //
 //   Common variables
 //
-char  OutMessage[50] ;
 long  const max_local_index = 6000 ;
 long  local_index[max_local_index] ;
 float const Pi    = acos(-1.) ;
@@ -112,6 +111,7 @@ extern "C" long cts_(
 **: 
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
+   char  OutMessage[50] ;
 //
 //   Check there are input hits
 //
@@ -247,6 +247,7 @@ long cts_detector_response (
 **:              mslat    - Monte Carlo slat information   
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
+   char  OutMessage[50] ;
 //
 //    Total number of counters in phi and eta
 //
@@ -443,6 +444,7 @@ void cts_fill_event (
 **:           event       - event       table
 **:>------------------------------------------------------------------*/
    long i ;
+   char  OutMessage[50] ;
 //
    long n_event = event_h->nok ;
 //
@@ -825,6 +827,7 @@ float cts_slat_response_table ( float& z, float& dd, float& tof,
 **:           mpara       - Module parameters
 **:>------------------------------------------------------------------*/
    float weight ;
+   char  OutMessage[50] ;
 //
 //   Check array dimensions
 //

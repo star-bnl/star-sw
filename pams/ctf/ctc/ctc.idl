@@ -8,14 +8,14 @@
 #include "cte_extra.idl"
 #include "ctu_raw.idl"
 #include "ctc_histos.idl"
-#include "ctg_cal.idl"
+#include "ctg_slat.idl"
 
-interface ctc : amiModule{
+interface ctc_driver : amiModule{
 	STAFCV_T call
 		( in    ctc_ctrl   ctrl  
 		, in    cte_extra  extra
 		, in    ctu_raw    raw    
 		, in    ctc_histos histos
-		, out   ctg_cal    cal    
+		, out   ctg_slat   slat    
 		);
 };
