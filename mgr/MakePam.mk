@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.114 1999/09/07 19:31:04 fine Exp $
+# $Id: MakePam.mk,v 1.115 1999/09/07 21:01:10 fine Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.115  1999/09/07 21:01:10  fine
+# new macro for Stypes.h TableImpl has been introduced
+#
 # Revision 1.114  1999/09/07 19:31:04  fine
 # table descriptor access has been changed. All tables are affected and must be re-compiled
 #
@@ -282,9 +285,7 @@ echo "//                                          ">>$(GEN_TAB)/St_$(STEM)_Table
 echo "/////////////////////////////////////////////////////////////////////////  ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
 echo "                                            ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
 echo "#include \"Stypes.h\"                       ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
-echo "St_tableDescriptor *_NAME2_(St_,$(STEM))::fgColDescriptors = 0; ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
-echo "TableImp($(STEM))                     ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
-echo "TableStreamerImp($(STEM))             ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;
+echo "TableImpl($(STEM))                     ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
 endef
 define MAKE_TABLE_H
 	@$(RM) 	$(GEN_TAB)/St_$(STEM)_Table.h ;\
