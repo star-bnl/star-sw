@@ -19,7 +19,7 @@
       G2T_TOF=STAFCV_OK
       if (g2t_ctf_hit_h.maxlen.le.0) return
 *
-      call G2R_GET_SYS ('BTOF','BXSA',Iprin,Idigi)
+      call G2R_GET_SYS ('BTOF','BCSB',Iprin,Idigi)
       if (Iprin.lt.0) return
       Local  = Idigi.ge.2
 *
