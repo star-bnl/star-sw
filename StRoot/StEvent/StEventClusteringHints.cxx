@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.9 2002/01/03 20:59:33 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.10 2002/02/19 16:42:05 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.10  2002/02/19 16:42:05  ullrich
+ * Fixed bug: StDetectorState now StSPtrVecDetectorState.
+ *
  * Revision 2.9  2002/01/03 20:59:33  ullrich
  * Added BBC and FPD.
  *
@@ -41,7 +44,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.9 2002/01/03 20:59:33 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.10 2002/02/19 16:42:05 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -54,7 +57,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StRunInfo",                   "evt_header",   2);
     setBranch("StEventInfo",                 "evt_header",   2);
     setBranch("StEventSummary",              "evt_header",   2);
-    setBranch("StDetectorState",             "evt_header",   2);
+    setBranch("StSPtrVecDetectorState",      "evt_header",   2);
     setBranch("StEventClusteringHints",      "evt_header",   2);
     setBranch("StSoftwareMonitor",           "evt_header",   2);
     setBranch("StL0Trigger",                 "evt_trigger",  3);
@@ -80,7 +83,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StRunInfo",                   "event", 1);
     setBranch("StEventInfo",                 "event", 1);
     setBranch("StEventSummary",              "event", 1);
-    setBranch("StDetectorState",             "event", 1);
+    setBranch("StSPtrVecDetectorState",      "event", 1);
     setBranch("StEventClusteringHints",      "event", 1);
     setBranch("StSoftwareMonitor",           "event", 1);
     setBranch("StEmcCollection",             "event", 1);
