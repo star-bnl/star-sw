@@ -1,5 +1,8 @@
-// $Id: St_l3Clufi_Maker.h,v 1.3 2000/02/24 01:55:25 flierl Exp $
+// $Id: St_l3Clufi_Maker.h,v 1.4 2000/03/28 19:53:59 fine Exp $
 // $Log: St_l3Clufi_Maker.h,v $
+// Revision 1.4  2000/03/28 19:53:59  fine
+// Adjuested to ROOT 2.24
+//
 // Revision 1.3  2000/02/24 01:55:25  flierl
 // i960 timing built in.
 // output just with debug option.
@@ -46,7 +49,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_l3Clufi_Maker virtual base class for Maker                            //
+// St_l3Clufi_Maker virtual base class for Maker                        //
 //                                                                      //
 //  Submit any problem with this code via begin_html <A HREF="http://www.rhic.bnl.gov/STAR/html/comp_l/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
 //
@@ -57,10 +60,12 @@
 #include "tables/St_pixelarray_Table.h"
 #include "tables/St_hitarray_Table.h"
 
+#include "St_DataSet.h"
+
 //class St_stk_stkpar;
 class St_l3Clufi_Maker : public StMaker {
  private:
-    // static Char_t  m_VersionCVS = "$Id: St_l3Clufi_Maker.h,v 1.3 2000/02/24 01:55:25 flierl Exp $";
+    // static Char_t  m_VersionCVS = "$Id: St_l3Clufi_Maker.h,v 1.4 2000/03/28 19:53:59 fine Exp $";
      
     //
     // l3 clusterfinding variables
@@ -102,7 +107,7 @@ class St_l3Clufi_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_l3Clufi_Maker.h,v 1.3 2000/02/24 01:55:25 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_l3Clufi_Maker.h,v 1.4 2000/03/28 19:53:59 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_l3Clufi_Maker, 1)   //StAF chain virtual base class for Makers
 };
