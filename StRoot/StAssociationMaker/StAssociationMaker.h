@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.10 1999/12/14 07:07:41 calderon Exp $
+ * $Id: StAssociationMaker.h,v 1.11 2000/01/18 20:53:38 calderon Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.11  2000/01/18 20:53:38  calderon
+ * Changes to work with CC5
+ *
  * Revision 1.10  1999/12/14 07:07:41  calderon
  * Added Ratio Number of Common Hits / Number of Reconstructed Hits for
  * each detector.
@@ -82,14 +85,15 @@ struct trackPing {
 };
 
 
-#if !defined(ST_NO_NAMESPACES)
-using namespace std;
-#endif
 
 
 #ifndef __CINT__
 #include <map>
 #include <utility>
+#if !defined(ST_NO_NAMESPACES)
+using std::multimap;
+using std::pair;
+#endif
 
 // Define the comparisons to be used in the multimaps
 struct compTpcHit{
@@ -419,7 +423,7 @@ private:
     Bool_t drawinit;
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.10 1999/12/14 07:07:41 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.11 2000/01/18 20:53:38 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker, 1)
 
