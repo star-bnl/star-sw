@@ -1,5 +1,13 @@
-// $Id: StFtpcTrack.cc,v 1.19 2002/10/03 10:33:59 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.20 2002/10/11 15:45:14 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.20  2002/10/11 15:45:14  oldi
+// Get FTPC geometry and dimensions from database.
+// No field fit activated: Returns momentum = 0 but fits a helix.
+// Bug in TrackMaker fixed (events with z_vertex > outer_ftpc_radius were cut).
+// QA histograms corrected (0 was supressed).
+// Code cleanup (several lines of code changed due to *params -> Instance()).
+// cout -> gMessMgr.
+//
 // Revision 1.19  2002/10/03 10:33:59  oldi
 // Usage of gufld removed.
 // Magnetic field is read by StMagUtilities, now.
@@ -337,7 +345,7 @@ void StFtpcTrack::SetProperties(Bool_t usage, Int_t tracknumber)
     StFtpcConfMapPoint *p = (StFtpcConfMapPoint *)mPoints->At(i);
 
     if (usage == true) {
-      mRowsWithPoints += (Int_t)TMath::Power(2, ((p->GetPadRow()-1)%10)+1);
+      mRowsWithPoints += (Int_t)TMath::Power(2, ((p->GetPadRow()-1)%StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide())+1);
 
       if (i != 0) {
 	p->SetNextHitNumber(((StFtpcConfMapPoint *)mPoints->At(i-1))->GetHitNumber());
@@ -369,7 +377,7 @@ void StFtpcTrack::SetPointDependencies()
   for (Int_t i = 0; i < mPoints->GetEntriesFast(); i++) {    
     StFtpcConfMapPoint *p = (StFtpcConfMapPoint *)mPoints->At(i);
 
-    mRowsWithPoints += (Int_t)TMath::Power(2, ((p->GetPadRow()-1)%10)+1);
+    mRowsWithPoints += (Int_t)TMath::Power(2, ((p->GetPadRow()-1)%StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide())+1);
     
     if (i != 0) {
       p->SetNextHitNumber(((StFtpcConfMapPoint *)mPoints->At(i-1))->GetHitNumber());
@@ -393,9 +401,6 @@ void StFtpcTrack::CalculateNMax()
   // In addition this funtion calculates the radius and the angle of a potential 
   // track point in the first (inner) and the last (outer) pad row.
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
   Short_t nmax = 0;
   
   StFtpcConfMapPoint *lastpoint  = (StFtpcConfMapPoint *)this->GetHits()->Last();
@@ -410,9 +415,9 @@ void StFtpcTrack::CalculateNMax()
 
   Double_t r, x;
     
-  for (Int_t i = 0; i < 10; i++) {
-    r = (r2 - r1) / (z2 - z1) * (TMath::Sign(params->PadRowPosZ(i), z1) - z1) + r1;
-    x = (x2 - x1) / (z2 - z1) * (TMath::Sign(params->PadRowPosZ(i), z1) - z1) + x1;
+  for (Int_t i = 0; i < StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(); i++) {
+    r = (r2 - r1) / (z2 - z1) * (TMath::Sign(StFtpcTrackingParams::Instance()->PadRowPosZ(i), z1) - z1) + r1;
+    x = (x2 - x1) / (z2 - z1) * (TMath::Sign(StFtpcTrackingParams::Instance()->PadRowPosZ(i), z1) - z1) + x1;
     
     if (i == 0) {
       mRFirst = r;
@@ -438,7 +443,7 @@ void StFtpcTrack::CalculateNMax()
       mAlphaLast = TMath::ACos(ratio);
     }
     
-    if (r < params->OuterRadius() && r > params->InnerRadius()) {
+    if (r < StFtpcTrackingParams::Instance()->OuterRadius() && r > StFtpcTrackingParams::Instance()->InnerRadius()) {
       nmax++;
     }
   }
@@ -585,7 +590,7 @@ Int_t StFtpcTrack::WriteTrack(fpt_fptrack_st *trackTableEntry, Int_t id_start_ve
   trackTableEntry->nrec = mPoints->GetEntriesFast();
   trackTableEntry->nfit = trackTableEntry->nrec;
 
-  if(mFromMainVertex) {
+  if (mFromMainVertex) {
     trackTableEntry->flag = 1;
     trackTableEntry->id_start_vertex = id_start_vertex;
   }
@@ -595,7 +600,7 @@ Int_t StFtpcTrack::WriteTrack(fpt_fptrack_st *trackTableEntry, Int_t id_start_ve
     trackTableEntry->id_start_vertex = 0;
   }
   
-  for(Int_t k=0; k<10; k++) {
+  for(Int_t k=0; k<StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(); k++) {
     trackTableEntry->hitid[k] = -1;
   }
   
@@ -604,8 +609,8 @@ Int_t StFtpcTrack::WriteTrack(fpt_fptrack_st *trackTableEntry, Int_t id_start_ve
   for(Int_t i=0; i<trackTableEntry->nrec; i++) {
     Int_t rowindex = (((StFtpcConfMapPoint *)mPoints->At(i))->GetPadRow());
     
-    if(rowindex > 10) {
-      rowindex -= 10;
+    if (rowindex > StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
+      rowindex -= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide();
     }  
     
     trackTableEntry->hitid[rowindex-1] = mPointNumbers->At(i)+1;
@@ -614,7 +619,7 @@ Int_t StFtpcTrack::WriteTrack(fpt_fptrack_st *trackTableEntry, Int_t id_start_ve
   trackTableEntry->nfit = trackTableEntry->nrec;
   trackTableEntry->nmax = mNMax;
 
-  if(mFromMainVertex) {
+  if (mFromMainVertex) {
     trackTableEntry->flag = 1;
     trackTableEntry->id_start_vertex = id_start_vertex;
     if (id_start_vertex > 0) {
@@ -706,17 +711,17 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
   // determine helix parameters
   Double_t dipAngle = fabs(atan(1/(mFitRadius*mArcSlope)));
   
-  if(zval[1]<0) {
-    dipAngle*=-1;
+  if (zval[1] < 0) {
+    dipAngle *= -1;
   }
   
   Double_t startPhase = atan((yval[0]-mYCenter)/(xval[0]-mXCenter));
   
-  if (xval[0]-mXCenter<0) {
-    startPhase+=pi;
+  if (xval[0]-mXCenter < 0) {
+    startPhase += pi;
   }
   
-  else if (yval[0]-mYCenter<0) {
+  else if (yval[0]-mYCenter < 0) {
     startPhase += twopi;
   }
   
@@ -737,8 +742,7 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
   // get z-component of B-field at 0,0,0 for first momentum guess
   Float_t pos[3] = {0, 0, 0};
   Float_t centralField[3];
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-  params->MagField()->B3DField(pos, centralField);
+  StFtpcTrackingParams::Instance()->MagField()->B3DField(pos, centralField);
   centralField[0] *= kilogauss;
   centralField[1] *= kilogauss;
   centralField[2] *= kilogauss;
@@ -766,123 +770,127 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
   ///////////////////////////////////////////////////////////////////////
 
   // initialize position and momentum
-  StThreeVector<Double_t> currentPosition(xhelix[0+mVertexPointOffset], 
-					  yhelix[0+mVertexPointOffset],
-					  zhelix[0+mVertexPointOffset]);
-  pl=pathLength(currentPosition, nv);
+  StThreeVector<Double_t> currentPosition(xhelix[0 + mVertexPointOffset], 
+					  yhelix[0 + mVertexPointOffset],
+					  zhelix[0 + mVertexPointOffset]);
+  pl = pathLength(currentPosition, nv);
   StThreeVector<Double_t> currentMomentum(momentumAt(pl, mZField));
 
-  // iterate over points
-  Double_t stepSize;
 
-  for(i = 1 + mVertexPointOffset; i < GetNumberOfPoints() + mVertexPointOffset; i++) {
-    stepSize = (zval[i] - zval[i-1]) / mIterSteps;
+  if (StFtpcTrackingParams::Instance()->MagFieldFactor()) {
+
+    // iterate over points
+    Double_t stepSize;
     
-    // iterate between points
-    for(j = 0; j < mIterSteps; j++) {
-      // store momentum for position propagation
-      Double_t propagateXMomentum = currentMomentum.x();
-      Double_t propagateYMomentum = currentMomentum.y();
-      Double_t propagateZMomentum = currentMomentum.z();
+    for(i = 1 + mVertexPointOffset; i < GetNumberOfPoints() + mVertexPointOffset; i++) {
+      stepSize = (zval[i] - zval[i-1]) / mIterSteps;
       
-      // get local magnetic field
-      Float_t positionArray[3] = {currentPosition.x(), 
-				currentPosition.y(), 
-				currentPosition.z() + stepSize/2};
-      Float_t localField[3];
-      params->MagField()->B3DField(positionArray, localField);
-
-      StThreeVector<Double_t> fieldVector
-	((Double_t) localField[0] * kilogauss/tesla*c_light*nanosecond/meter, 
-	 (Double_t) localField[1] * kilogauss/tesla*c_light*nanosecond/meter, 
-	 (Double_t) localField[2] * kilogauss/tesla*c_light*nanosecond/meter); 
+      // iterate between points
+      for(j = 0; j < mIterSteps; j++) {
+	// store momentum for position propagation
+	Double_t propagateXMomentum = currentMomentum.x();
+	Double_t propagateYMomentum = currentMomentum.y();
+	Double_t propagateZMomentum = currentMomentum.z();
+	
+	// get local magnetic field
+	Float_t positionArray[3] = {currentPosition.x(), 
+				    currentPosition.y(), 
+				    currentPosition.z() + stepSize/2};
+	Float_t localField[3];
+	StFtpcTrackingParams::Instance()->MagField()->B3DField(positionArray, localField);
+	
+	StThreeVector<Double_t> fieldVector
+	  ((Double_t) localField[0] * kilogauss/tesla*c_light*nanosecond/meter, 
+	   (Double_t) localField[1] * kilogauss/tesla*c_light*nanosecond/meter, 
+	   (Double_t) localField[2] * kilogauss/tesla*c_light*nanosecond/meter); 
+	
+	// calculate new momentum as helix segment
+	Double_t absMomentum = abs(currentMomentum);
+	StThreeVector<Double_t> perpField = 
+	  currentMomentum.cross(fieldVector) * (Double_t)mQ/absMomentum;
+	Double_t twistRadius = (absMomentum/abs(perpField)) * meter/GeV;
+	
+	Double_t stepLength = stepSize/cos(currentMomentum.theta());
+	
+	Double_t newMomentumCross = absMomentum*stepLength/twistRadius;
+	Double_t newMomentumParallel = 
+	  sqrt(absMomentum * absMomentum - newMomentumCross * newMomentumCross);
+	currentMomentum.setMagnitude(newMomentumParallel);
+	StThreeVector<Double_t> momentumChange(perpField);
+	momentumChange.setMagnitude(newMomentumCross);
+	currentMomentum = currentMomentum+momentumChange;
+	
+	// propagate position
+	propagateXMomentum = (propagateXMomentum + currentMomentum.x())/2;
+	propagateYMomentum = (propagateYMomentum + currentMomentum.y())/2;
+	propagateZMomentum = (propagateZMomentum + currentMomentum.z())/2;
+	currentPosition.setX(currentPosition.x() + stepSize *
+			     (propagateXMomentum / propagateZMomentum));
+	currentPosition.setY(currentPosition.y() + stepSize *
+			     (propagateYMomentum / propagateZMomentum));
+	currentPosition.setZ(currentPosition.z() + stepSize);
+      }
       
-      // calculate new momentum as helix segment
-      Double_t absMomentum = abs(currentMomentum);
-      StThreeVector<Double_t> perpField = 
-	currentMomentum.cross(fieldVector) * (Double_t)mQ/absMomentum;
-      Double_t twistRadius = (absMomentum/abs(perpField)) * meter/GeV;
+      // change position array to compensate for distortion
+      StThreeVector<Double_t> rvec(0, 0, zval[i]);
+      StThreeVector<Double_t> nvec(0, 0, 1);
+      Double_t plength=pathLength(rvec, nvec);
       
-      Double_t stepLength = stepSize/cos(currentMomentum.theta());
+      if (zval[1] > 0) {
+	xval[i] += (x(plength) - currentPosition.x());
+	yval[i] += (y(plength) - currentPosition.y());
+      }
       
-      Double_t newMomentumCross = absMomentum*stepLength/twistRadius;
-      Double_t newMomentumParallel = 
-	sqrt(absMomentum * absMomentum - newMomentumCross * newMomentumCross);
-      currentMomentum.setMagnitude(newMomentumParallel);
-      StThreeVector<Double_t> momentumChange(perpField);
-      momentumChange.setMagnitude(newMomentumCross);
-      currentMomentum = currentMomentum+momentumChange;
+      else {
+	xval[i] -= (x(plength) - currentPosition.x());
+	yval[i] -= (y(plength) - currentPosition.y());
+      }
       
-      // propagate position
-      propagateXMomentum = (propagateXMomentum + currentMomentum.x())/2;
-      propagateYMomentum = (propagateYMomentum + currentMomentum.y())/2;
-      propagateZMomentum = (propagateZMomentum + currentMomentum.z())/2;
-      currentPosition.setX(currentPosition.x() + stepSize *
-			   (propagateXMomentum / propagateZMomentum));
-      currentPosition.setY(currentPosition.y() + stepSize *
-			   (propagateYMomentum / propagateZMomentum));
-      currentPosition.setZ(currentPosition.z() + stepSize);
+      // calculate fit quality indicators only if needed
+      //       Double_t distHitHelix=sqrt((xval[i]-x(plength))*(xval[i]-x(plength))+(yval[i]-y(plength))*(yval[i]-y(plength)));
+      //       Double_t distHelixFit=sqrt((x(plength)-currentPosition.x())*(x(plength)-currentPosition.x())+(y(plength)-currentPosition.y())*(y(plength)-currentPosition.y()));
+      
     }
     
-    // change position array to compensate for distortion
-    StThreeVector<Double_t> rvec(0, 0, zval[i]);
-    StThreeVector<Double_t> nvec(0, 0, 1);
-    Double_t plength=pathLength(rvec, nvec);
+    //////////////////////////////////////////////////////////////////////
+    // refit helix
+    //////////////////////////////////////////////////////////////////////
     
-    if (zval[1] > 0) {
-      xval[i] += (x(plength) - currentPosition.x());
-      yval[i] += (y(plength) - currentPosition.y());
+    CircleFit(xval, yval, xWeight, yWeight, GetNumberOfPoints()+mVertexPointOffset);
+    LineFit(xval, yval, zval, xWeight, yWeight, GetNumberOfPoints()+mVertexPointOffset);
+    
+    // determine helix parameters
+    dipAngle = fabs(atan(1/(mFitRadius*mArcSlope)));
+    
+    if (zval[1] < 0) {
+      dipAngle*=-1;
     }
     
-    else {
-      xval[i] -= (x(plength) - currentPosition.x());
-      yval[i] -= (y(plength) - currentPosition.y());
+    startPhase = atan((yval[0]-mYCenter)/(xval[0]-mXCenter));
+    
+    if (xval[0] - mXCenter < 0) {
+      startPhase+=pi;
     }
     
-    // calculate fit quality indicators only if needed
-    //       Double_t distHitHelix=sqrt((xval[i]-x(plength))*(xval[i]-x(plength))+(yval[i]-y(plength))*(yval[i]-y(plength)));
-    //       Double_t distHelixFit=sqrt((x(plength)-currentPosition.x())*(x(plength)-currentPosition.x())+(y(plength)-currentPosition.y())*(y(plength)-currentPosition.y()));
+    else if (yval[0]-mYCenter<0) {
+      startPhase+=twopi;
+    }
     
+    orientation = 1;
+    
+    if (mArcSlope * zval[1] < 0) {
+      orientation = -1;
+    }
+    
+    // set helix parameters to new values
+    startAngle = mArcOffset + mArcSlope * zval[0];
+    startX = mXCenter + mFitRadius * cos(startAngle);
+    startY = mYCenter + mFitRadius * sin(startAngle);
+    startHit.setX(startX);
+    startHit.setY(startY);
+    
+    setParameters(1/mFitRadius, dipAngle, startPhase, startHit, orientation);
   }
-  
-  //////////////////////////////////////////////////////////////////////
-  // refit helix
-  //////////////////////////////////////////////////////////////////////
-  
-  CircleFit(xval, yval, xWeight, yWeight, GetNumberOfPoints()+mVertexPointOffset);
-  LineFit(xval, yval, zval, xWeight, yWeight, GetNumberOfPoints()+mVertexPointOffset);
-  
-  // determine helix parameters
-  dipAngle = fabs(atan(1/(mFitRadius*mArcSlope)));
-  
-  if (zval[1] < 0) {
-    dipAngle*=-1;
-  }
-
-  startPhase = atan((yval[0]-mYCenter)/(xval[0]-mXCenter));
-  
-  if(xval[0] - mXCenter < 0) {
-    startPhase+=pi;
-  }
-  
-  else if(yval[0]-mYCenter<0) {
-    startPhase+=twopi;
-  }
-  
-  orientation = 1;
-  
-  if (mArcSlope * zval[1] < 0) {
-    orientation = -1;
-  }
-  
-  // set helix parameters to new values
-  startAngle = mArcOffset + mArcSlope * zval[0];
-  startX = mXCenter + mFitRadius * cos(startAngle);
-  startY = mYCenter + mFitRadius * sin(startAngle);
-  startHit.setX(startX);
-  startHit.setY(startY);
-  
-  setParameters(1/mFitRadius, dipAngle, startPhase, startHit, orientation);
   
   // set final momentum value
   pl = pathLength(rv, nv);
@@ -918,7 +926,7 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
   Int_t i;
   Int_t debug = 0; //set to 1 for debug messages
   
-  if(num ==0 ) {
+  if (num ==0 ) {
     // added to remove error from zero input
     return 0;
   }
@@ -946,13 +954,13 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
   
   cout.precision(16);
   
-  if(debug) {
+  if (debug) {
     cout << "from circle fitting program" << endl;
   }
 
   for(i=0;i<num;i++) {
       
-    if(debug) { 
+    if (debug) { 
       cout << "x: " << x[i] << " y: " << y[i] << "xw: " << xw[i] << " yw: " << yw[i] <<endl;
     }
 
@@ -1024,7 +1032,7 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
   Double_t f = 0., fp = 0.;
   Double_t xc = 0., yc = 0.;
   
-  if(debug) { 
+  if (debug) { 
     cout << "Solving by Newton method" << endl;
   }
   
@@ -1033,7 +1041,7 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
     fp = 4 * w*w*w + 3 * A0 * w*w + 2 * B0 * w + C0;
     wNew = w - f / fp;
     
-    if(debug) { 
+    if (debug) { 
       cout << "Iteration Number" << i << endl;
     }
     
@@ -1081,7 +1089,7 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
     Double_t err = R - sqrt((x[i] - xc) * (x[i] - xc) + (y[i] - yc) * (y[i] - yc));
     chi2 += err * err;
     
-    if(i>0) {
+    if (i>0) {
       // approximation for sigma r, more precise using atan...
       variance += 1 / (xw[i] * xw[i]) + 1 / (yw[i] * yw[i]);
     }
@@ -1119,8 +1127,8 @@ void StFtpcTrack::LineFit(Double_t *xval, Double_t *yval, Double_t *zval, Double
     
     // shift into same phase
     if (i != 0) {
-      if(angle>lastangle+pi) angle -= twopi;
-      if(angle<lastangle-pi) angle += twopi;
+      if (angle>lastangle+pi) angle -= twopi;
+      if (angle<lastangle-pi) angle += twopi;
     }
     
     lastangle = angle;
@@ -1164,14 +1172,14 @@ void StFtpcTrack::LineFit(Double_t *xval, Double_t *yval, Double_t *zval, Double
     
     // shift into same phase
     if (i != 0){
-      if(angle>lastangle+pi) angle-=twopi;
-      if(angle<lastangle-pi) angle+=twopi;
+      if (angle>lastangle+pi) angle-=twopi;
+      if (angle<lastangle-pi) angle+=twopi;
     }
     
     Double_t err = (angle - (mArcOffset + mArcSlope*zval[i]));
     chi2 += err*err;
     
-    if(i>0) {
+    if (i>0) {
       // approximation for sigma r, more precise using atan...
       Double_t temp= ((1 / xw[i] * 1 / xw[i]) + (1 / yw[i] * 1 / yw[i]))
 	* ((mArcSlope * (zval[i] - zval[0])) * (mArcSlope * (zval[i] - zval[0])))

@@ -1,5 +1,13 @@
-// $Id: StFtpcTracker.cc,v 1.21 2002/06/04 13:41:35 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.22 2002/10/11 15:45:35 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.22  2002/10/11 15:45:35  oldi
+// Get FTPC geometry and dimensions from database.
+// No field fit activated: Returns momentum = 0 but fits a helix.
+// Bug in TrackMaker fixed (events with z_vertex > outer_ftpc_radius were cut).
+// QA histograms corrected (0 was supressed).
+// Code cleanup (several lines of code changed due to *params -> Instance()).
+// cout -> gMessMgr.
+//
 // Revision 1.21  2002/06/04 13:41:35  oldi
 // Minor change: 'west' -> 'hemisphere' (just a naming convention)
 //
@@ -831,7 +839,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
       all_hit = 0;       
       track = (StFtpcTrack*)mTrack->At(itrk);
       track->Fit(mVertex, mMaxDca, id_start_vertex);
- 
+
       // we accumulate all the charges inside the sensitive volume
       for (icluster = 0; icluster < track->GetNumberOfPoints(); icluster++) {
 	hit = (StFtpcPoint*)((TObjArray*)track->GetHits())->At(icluster);
@@ -1012,7 +1020,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 	dedx_mean = 0;
       
 	track = (StFtpcTrack*)mTrack->At(itrk);
-      
+
 	for (icluster=0; icluster<track->GetNumberOfPoints(); icluster++) {
 	  // use vertex momenta instead of local momenta,
 	  // as angle to z-axis stays constant along the helix 
@@ -1069,7 +1077,6 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 	dedx_mean /= (Double_t)acc_hit;
 	track->SetdEdx(dedx_mean);
 	track->SetNumdEdxHits(acc_hit);
-
 	//cout << track->GetdEdx() << " " << track->GetNumdEdxHits() << endl;
 
 	// write track

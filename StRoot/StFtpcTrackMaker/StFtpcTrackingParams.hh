@@ -1,5 +1,13 @@
-// $Id: StFtpcTrackingParams.hh,v 1.4 2002/10/03 10:34:08 oldi Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.5 2002/10/11 15:45:47 oldi Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.5  2002/10/11 15:45:47  oldi
+// Get FTPC geometry and dimensions from database.
+// No field fit activated: Returns momentum = 0 but fits a helix.
+// Bug in TrackMaker fixed (events with z_vertex > outer_ftpc_radius were cut).
+// QA histograms corrected (0 was supressed).
+// Code cleanup (several lines of code changed due to *params -> Instance()).
+// cout -> gMessMgr.
+//
 // Revision 1.4  2002/10/03 10:34:08  oldi
 // Usage of gufld removed.
 // Magnetic field is read by StMagUtilities, now.
@@ -20,9 +28,14 @@
 #include "StThreeVector.hh"
 #include "StMatrixD.hh"
 
+#include "tables/St_ftpcDimensions_Table.h"
+#include "tables/St_ftpcPadrowZ_Table.h"
+
 #include "StDbUtilities/StMagUtilities.h"
 //#include "StTpcDb/StTpcDb.h"
 
+class St_ftpcDimensions;
+class St_ftpcPadrowZ;
 class StGlobalCoordinate;
 class StFtpcLocalCoordinate;
 class StTpcDb;
@@ -33,13 +46,12 @@ class StFtpcTrackingParams
 
   static StFtpcTrackingParams* mInstance;
   
-  // Pion mass
-  Float_t mM_pi;
-
   // FTPC geometry
-  Float_t mInnerRadius;
-  Float_t mOuterRadius;
-  Float_t mPadRowPosZ[10];
+  Float_t  mInnerRadius;
+  Float_t  mOuterRadius;
+  Int_t    mNumberOfPadRows;
+  Int_t    mNumberOfPadRowsPerSide;
+  Float_t *mPadRowPosZ;
 
   // Vertex position
   Float_t mMaxVertexPosZWarning;
@@ -106,7 +118,8 @@ class StFtpcTrackingParams
 
  protected:
   
-  StFtpcTrackingParams();
+  StFtpcTrackingParams(St_ftpcDimensions *dimensions = 0, 
+		       St_ftpcPadrowZ *padrow_z = 0);
 
   void PrintParams();
   Int_t InitdEdx();
@@ -114,18 +127,24 @@ class StFtpcTrackingParams
 
  public:
 
-  static StFtpcTrackingParams* Instance(Bool_t debug = kFALSE, TDataSet *RunLog = 0);
+  static StFtpcTrackingParams* Instance(Bool_t debug, 
+					St_ftpcDimensions *dimensions, 
+					St_ftpcPadrowZ *padrow_z, 
+					TDataSet *RunLog);
+  static StFtpcTrackingParams* Instance(Bool_t debug, 
+					TDataSet *RunLog);
+  static StFtpcTrackingParams* Instance();
+
   virtual ~StFtpcTrackingParams();
 
   Int_t Init();
   Int_t InitFromFile();
   
-  // Pion mass
-  Float_t m_pi();
-
   // FTPC geometry
   Float_t InnerRadius();
   Float_t OuterRadius();
+  Int_t NumberOfPadRows();
+  Int_t NumberOfPadRowsPerSide();
   Float_t PadRowPosZ(Int_t row);
 
   // Vertex position

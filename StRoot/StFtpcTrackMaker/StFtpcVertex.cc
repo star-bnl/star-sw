@@ -1,5 +1,13 @@
-// $Id: StFtpcVertex.cc,v 1.10 2002/06/04 13:43:52 oldi Exp $
+// $Id: StFtpcVertex.cc,v 1.11 2002/10/11 15:45:50 oldi Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.11  2002/10/11 15:45:50  oldi
+// Get FTPC geometry and dimensions from database.
+// No field fit activated: Returns momentum = 0 but fits a helix.
+// Bug in TrackMaker fixed (events with z_vertex > outer_ftpc_radius were cut).
+// QA histograms corrected (0 was supressed).
+// Code cleanup (several lines of code changed due to *params -> Instance()).
+// cout -> gMessMgr.
+//
 // Revision 1.10  2002/06/04 13:43:52  oldi
 // Minor change: 'west' -> 'hemisphere' (just a naming convention)
 //
@@ -101,40 +109,37 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
 {
   // constructor with ftpc points - fits vertex from points
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
-  Float_t *rmap = new Float_t[20*6*numFppoints];
-  Float_t *zmap = new Float_t[20];
-  Int_t *mapMax = new Int_t[20*6];
-  Int_t *myhist = new Int_t[params->HistoBins()];
-  Float_t hratio=params->HistoBins()/(params->HistoMax()-params->HistoMin());
+  Float_t *rmap = new Float_t[StFtpcTrackingParams::Instance()->NumberOfPadRows()*6*numFppoints];
+  Float_t *zmap = new Float_t[StFtpcTrackingParams::Instance()->NumberOfPadRows()];
+  Int_t *mapMax = new Int_t[StFtpcTrackingParams::Instance()->NumberOfPadRows()*6];
+  Int_t *myhist = new Int_t[StFtpcTrackingParams::Instance()->HistoBins()];
+  Float_t hratio=StFtpcTrackingParams::Instance()->HistoBins()/(StFtpcTrackingParams::Instance()->HistoMax()-StFtpcTrackingParams::Instance()->HistoMin());
   
-  for(Int_t iii=0; iii<params->HistoBins(); iii++) {
+  for(Int_t iii=0; iii<StFtpcTrackingParams::Instance()->HistoBins(); iii++) {
     myhist[iii]=0;
   }
   
   for(Int_t ii=0; ii<120; ii++) mapMax[ii]=0;
   
   for(Int_t i=0; i<numFppoints;i++) {
-    rmap[(thisFppoint[i].row-1)+20*(thisFppoint[i].sector-1)+120*mapMax[(thisFppoint[i].row-1)+20*(thisFppoint[i].sector-1)]]=sqrt(thisFppoint[i].x*thisFppoint[i].x+thisFppoint[i].y*thisFppoint[i].y);
+    rmap[(thisFppoint[i].row-1)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*(thisFppoint[i].sector-1)+120*mapMax[(thisFppoint[i].row-1)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*(thisFppoint[i].sector-1)]]=sqrt(thisFppoint[i].x*thisFppoint[i].x+thisFppoint[i].y*thisFppoint[i].y);
     zmap[thisFppoint[i].row-1]=thisFppoint[i].z;
-    mapMax[(thisFppoint[i].row-1)+20*(thisFppoint[i].sector-1)]++;
+    mapMax[(thisFppoint[i].row-1)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*(thisFppoint[i].sector-1)]++;
   }
 
   for(Int_t secI=0; secI<6; secI++) {
     
     for(Int_t rowOut=0; rowOut<19; rowOut++) {
 
-      for(Int_t rowIn=rowOut+1; rowIn<20; rowIn++) {
+      for(Int_t rowIn=rowOut+1; rowIn<StFtpcTrackingParams::Instance()->NumberOfPadRows(); rowIn++) {
 	
-	if(rowIn<10 || rowOut>=10) {
+	if(rowIn<StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() || rowOut>=StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
 	  
-	  for(Int_t iOut=0; iOut<mapMax[rowOut+20*secI]; iOut++) {
-	    Float_t ri=rmap[rowOut+20*secI+120*iOut];	    
+	  for(Int_t iOut=0; iOut<mapMax[rowOut+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI]; iOut++) {
+	    Float_t ri=rmap[rowOut+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI+120*iOut];	    
 
-	    for(Int_t iIn=0; iIn<mapMax[(rowIn)+20*secI]; iIn++) {
-	      Float_t rj=rmap[rowIn+20*secI+120*iIn];
+	    for(Int_t iIn=0; iIn<mapMax[(rowIn)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI]; iIn++) {
+	      Float_t rj=rmap[rowIn+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI+120*iIn];
 			  
 	      if(rj>ri) {
 		Float_t intersect=(rj*zmap[rowOut]-ri*zmap[rowIn])/(rj-ri);		
@@ -143,8 +148,8 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
 		  vtx_pos->Fill(intersect);
 		}
 
-		if(intersect>params->HistoMin() && intersect<params->HistoMax()) {
-		  myhist[int((intersect-params->HistoMin())*hratio)]++;
+		if(intersect>StFtpcTrackingParams::Instance()->HistoMin() && intersect<StFtpcTrackingParams::Instance()->HistoMax()) {
+		  myhist[int((intersect-StFtpcTrackingParams::Instance()->HistoMin())*hratio)]++;
 		}
 	      }
 	    }
@@ -154,12 +159,12 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
     }
   }
 
-  Int_t maxBin=params->HistoBins()/2, maxHeight=0;
+  Int_t maxBin=StFtpcTrackingParams::Instance()->HistoBins()/2, maxHeight=0;
   
   Float_t vertex = 0.;
   Float_t sigma = 0.;
 
-  for(Int_t hindex=1; hindex<params->HistoBins()-1; hindex++) {
+  for(Int_t hindex=1; hindex<StFtpcTrackingParams::Instance()->HistoBins()-1; hindex++) {
     
     if(myhist[hindex]>maxHeight && myhist[hindex]>=myhist[hindex-1] && myhist[hindex]>=myhist[hindex+1]) {
       maxBin=hindex;
@@ -175,9 +180,9 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
      || (myhist[maxBin] <= myhist[maxBin-1])) {
     
     // use weighted mean instead 
-    vertex=(myhist[maxBin]*((maxBin+0.5)/hratio+params->HistoMin())
-	    + myhist[maxBin-1]*((maxBin-0.5)/hratio+params->HistoMin())
-	    + myhist[maxBin+1]*((maxBin+1.5)/hratio+params->HistoMin()))
+    vertex=(myhist[maxBin]*((maxBin+0.5)/hratio+StFtpcTrackingParams::Instance()->HistoMin())
+	    + myhist[maxBin-1]*((maxBin-0.5)/hratio+StFtpcTrackingParams::Instance()->HistoMin())
+	    + myhist[maxBin+1]*((maxBin+1.5)/hratio+StFtpcTrackingParams::Instance()->HistoMin()))
       / (myhist[maxBin]+myhist[maxBin-1]+myhist[maxBin+1]);
   }
 
@@ -187,7 +192,7 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
     sigma = sqrt (1 / ((2 * log(myhist[maxBin])) -
 		       (log(myhist[maxBin+1]) + 
 			log(myhist[maxBin-1]))));
-    vertex =  ((maxBin+0.5)/hratio+params->HistoMin()) + 
+    vertex =  ((maxBin+0.5)/hratio+StFtpcTrackingParams::Instance()->HistoMin()) + 
       sigma*sigma/(hratio*hratio) * (log(myhist[maxBin+1]) - 
 				     log(myhist[maxBin-1]));
   } 
@@ -216,18 +221,15 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
 {
   // Constructor with TObjArray of ftpc points - fits vertex from points
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
   Int_t numFppoints = hits->GetEntriesFast();
 
-  Float_t *rmap = new Float_t[20*6*numFppoints];
-  Float_t *zmap = new Float_t[20];
-  Int_t *mapMax = new Int_t[20*6];
-  Int_t *myhist = new Int_t[params->HistoBins()];
-  Float_t hratio=params->HistoBins()/(params->HistoMax()-params->HistoMin());
+  Float_t *rmap = new Float_t[StFtpcTrackingParams::Instance()->NumberOfPadRows()*6*numFppoints];
+  Float_t *zmap = new Float_t[StFtpcTrackingParams::Instance()->NumberOfPadRows()];
+  Int_t *mapMax = new Int_t[StFtpcTrackingParams::Instance()->NumberOfPadRows()*6];
+  Int_t *myhist = new Int_t[StFtpcTrackingParams::Instance()->HistoBins()];
+  Float_t hratio=StFtpcTrackingParams::Instance()->HistoBins()/(StFtpcTrackingParams::Instance()->HistoMax()-StFtpcTrackingParams::Instance()->HistoMin());
   
-  for(Int_t iii=0; iii<params->HistoBins(); iii++) {
+  for(Int_t iii=0; iii<StFtpcTrackingParams::Instance()->HistoBins(); iii++) {
     myhist[iii]=0;
   }
   
@@ -237,24 +239,24 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
 
     StFtpcPoint *thispoint = (StFtpcPoint *)hits->At(i);
 
-    rmap[(thispoint->GetPadRow()-1)+20*(thispoint->GetSector()-1)+120*mapMax[(thispoint->GetPadRow()-1)+20*(thispoint->GetSector()-1)]]=sqrt(thispoint->GetX()*thispoint->GetX()+thispoint->GetY()*thispoint->GetY());
+    rmap[(thispoint->GetPadRow()-1)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*(thispoint->GetSector()-1)+120*mapMax[(thispoint->GetPadRow()-1)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*(thispoint->GetSector()-1)]]=sqrt(thispoint->GetX()*thispoint->GetX()+thispoint->GetY()*thispoint->GetY());
     zmap[thispoint->GetPadRow()-1]=thispoint->GetZ();
-    mapMax[(thispoint->GetPadRow()-1)+20*(thispoint->GetSector()-1)]++;
+    mapMax[(thispoint->GetPadRow()-1)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*(thispoint->GetSector()-1)]++;
   }
 
   for(Int_t secI=0; secI<6; secI++) {
     
     for(Int_t rowOut=0; rowOut<19; rowOut++) {
 
-      for(Int_t rowIn=rowOut+1; rowIn<20; rowIn++) {
+      for(Int_t rowIn=rowOut+1; rowIn<StFtpcTrackingParams::Instance()->NumberOfPadRows(); rowIn++) {
 	
-	if(rowIn<10 || rowOut>=10) {
+	if(rowIn<StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() || rowOut>=StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
 	  
-	  for(Int_t iOut=0; iOut<mapMax[rowOut+20*secI]; iOut++) {
-	    Float_t ri=rmap[rowOut+20*secI+120*iOut];	    
+	  for(Int_t iOut=0; iOut<mapMax[rowOut+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI]; iOut++) {
+	    Float_t ri=rmap[rowOut+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI+120*iOut];	    
 
-	    for(Int_t iIn=0; iIn<mapMax[(rowIn)+20*secI]; iIn++) {
-	      Float_t rj=rmap[rowIn+20*secI+120*iIn];
+	    for(Int_t iIn=0; iIn<mapMax[(rowIn)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI]; iIn++) {
+	      Float_t rj=rmap[rowIn+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI+120*iIn];
 			  
 	      if(rj>ri) {
 		Float_t intersect=(rj*zmap[rowOut]-ri*zmap[rowIn])/(rj-ri);
@@ -263,8 +265,8 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
 		  vtx_pos->Fill(intersect);
 		}
 
-		if(intersect>params->HistoMin() && intersect<params->HistoMax()) {
-		  myhist[int((intersect-params->HistoMin())*hratio)]++;
+		if(intersect>StFtpcTrackingParams::Instance()->HistoMin() && intersect<StFtpcTrackingParams::Instance()->HistoMax()) {
+		  myhist[int((intersect-StFtpcTrackingParams::Instance()->HistoMin())*hratio)]++;
 		}
 	      }
 	    }
@@ -274,12 +276,12 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
     }
   }
 
-  Int_t maxBin=params->HistoBins()/2, maxHeight=0;
+  Int_t maxBin=StFtpcTrackingParams::Instance()->HistoBins()/2, maxHeight=0;
   
   Float_t vertex = 0.;
   Float_t sigma = 0.;
 
-  for(Int_t hindex=1; hindex<params->HistoBins()-1; hindex++) {
+  for(Int_t hindex=1; hindex<StFtpcTrackingParams::Instance()->HistoBins()-1; hindex++) {
     
     if(myhist[hindex]>maxHeight && myhist[hindex]>=myhist[hindex-1] && myhist[hindex]>=myhist[hindex+1]) {
       maxBin=hindex;
@@ -295,9 +297,9 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
      || (myhist[maxBin] <= myhist[maxBin-1])) {
     
     // use weighted mean instead 
-    vertex=(myhist[maxBin]*((maxBin+0.5)/hratio+params->HistoMin())
-	    + myhist[maxBin-1]*((maxBin-0.5)/hratio+params->HistoMin())
-	    + myhist[maxBin+1]*((maxBin+1.5)/hratio+params->HistoMin()))
+    vertex=(myhist[maxBin]*((maxBin+0.5)/hratio+StFtpcTrackingParams::Instance()->HistoMin())
+	    + myhist[maxBin-1]*((maxBin-0.5)/hratio+StFtpcTrackingParams::Instance()->HistoMin())
+	    + myhist[maxBin+1]*((maxBin+1.5)/hratio+StFtpcTrackingParams::Instance()->HistoMin()))
       / (myhist[maxBin]+myhist[maxBin-1]+myhist[maxBin+1]);
   }
 
@@ -307,7 +309,7 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
     sigma = sqrt (1 / ((2 * log(myhist[maxBin])) -
 		       (log(myhist[maxBin+1]) + 
 			log(myhist[maxBin-1]))));
-    vertex =  ((maxBin+0.5)/hratio+params->HistoMin()) + 
+    vertex =  ((maxBin+0.5)/hratio+StFtpcTrackingParams::Instance()->HistoMin()) + 
       sigma*sigma/(hratio*hratio) * (log(myhist[maxBin+1]) - 
 				     log(myhist[maxBin-1]));
   } 

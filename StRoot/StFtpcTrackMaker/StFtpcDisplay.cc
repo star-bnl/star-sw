@@ -1,5 +1,13 @@
-// $Id: StFtpcDisplay.cc,v 1.13 2002/04/29 15:49:55 oldi Exp $
+// $Id: StFtpcDisplay.cc,v 1.14 2002/10/11 15:45:07 oldi Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.14  2002/10/11 15:45:07  oldi
+// Get FTPC geometry and dimensions from database.
+// No field fit activated: Returns momentum = 0 but fits a helix.
+// Bug in TrackMaker fixed (events with z_vertex > outer_ftpc_radius were cut).
+// QA histograms corrected (0 was supressed).
+// Code cleanup (several lines of code changed due to *params -> Instance()).
+// cout -> gMessMgr.
+//
 // Revision 1.13  2002/04/29 15:49:55  oldi
 // All tracking parameters moved to StFtpcTrackingParameters.cc/hh.
 // In a future version the actual values should be moved to an .idl file (the
@@ -104,12 +112,9 @@ StFtpcDisplay::StFtpcDisplay()
 {
   // Default constructor.
   
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
-  mNumRowSegment = params->RowSegments();
-  mNumPhiSegment = params->PhiSegments();
-  mNumEtaSegment = params->EtaSegments();
+  mNumRowSegment = StFtpcTrackingParams::Instance()->RowSegments();
+  mNumPhiSegment = StFtpcTrackingParams::Instance()->PhiSegments();
+  mNumEtaSegment = StFtpcTrackingParams::Instance()->EtaSegments();
   mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
   
   mTrack = 0;
@@ -164,12 +169,9 @@ StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks)
 {
   // Ususal constructor.
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
-  mNumRowSegment = params->RowSegments();
-  mNumPhiSegment = params->PhiSegments();
-  mNumEtaSegment = params->EtaSegments();
+  mNumRowSegment = StFtpcTrackingParams::Instance()->RowSegments();
+  mNumPhiSegment = StFtpcTrackingParams::Instance()->PhiSegments();
+  mNumEtaSegment = StFtpcTrackingParams::Instance()->EtaSegments();
   mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
 
   mTrack = tracks;
@@ -224,12 +226,9 @@ StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks, TObjArray *gean
 {
   // Constructor for evaluator output.
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
-  mNumRowSegment = params->RowSegments();
-  mNumPhiSegment = params->PhiSegments();
-  mNumEtaSegment = params->EtaSegments();
+  mNumRowSegment = StFtpcTrackingParams::Instance()->RowSegments();
+  mNumPhiSegment = StFtpcTrackingParams::Instance()->PhiSegments();
+  mNumEtaSegment = StFtpcTrackingParams::Instance()->EtaSegments();
   mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
   
   mTrack = tracks;
@@ -441,14 +440,11 @@ void StFtpcDisplay::TrackInfo()
   Int_t address;
   Int_t number;
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
   TCanvas *track_canvas = new TCanvas("track_canvas", "Tracks", 1580, 600);
   track_canvas->Divide(3,1);
-  TH2F *phi_frame  = new TH2F("phi_frame",  "phi_frame",   60, -params->OuterRadius(),    params->OuterRadius(), 60, -params->OuterRadius(), params->OuterRadius());
-  TH2F *eta_frame1 = new TH2F("eta_frame1", "eta_frame1", 120, -270, -150, 60, -params->OuterRadius(), params->OuterRadius());
-  TH2F *eta_frame2 = new TH2F("eta_frame2", "eta_frame2", 120,  150,  270, 60, -params->OuterRadius(), params->OuterRadius());
+  TH2F *phi_frame  = new TH2F("phi_frame",  "phi_frame",   60, -StFtpcTrackingParams::Instance()->OuterRadius(),    StFtpcTrackingParams::Instance()->OuterRadius(), 60, -StFtpcTrackingParams::Instance()->OuterRadius(), StFtpcTrackingParams::Instance()->OuterRadius());
+  TH2F *eta_frame1 = new TH2F("eta_frame1", "eta_frame1", 120, -270, -150, 60, -StFtpcTrackingParams::Instance()->OuterRadius(), StFtpcTrackingParams::Instance()->OuterRadius());
+  TH2F *eta_frame2 = new TH2F("eta_frame2", "eta_frame2", 120,  150,  270, 60, -StFtpcTrackingParams::Instance()->OuterRadius(), StFtpcTrackingParams::Instance()->OuterRadius());
 
   TH2F *circle_frame = new TH2F("circle_frame", "circle_frame",  60,   -0.15,   0.15,  60, -0.15, 0.15);
   TH2F *z_frame      = new TH2F("z_frame",      "z_frame",      540, -270,    270,    700, -7,    7);
@@ -472,8 +468,8 @@ void StFtpcDisplay::TrackInfo()
   TLine *phi_line = new TLine[mNumPhiSegment];
 
   {for (Int_t i=0; i<mNumPhiSegment; i++) {
-    phi_line[i] = TLine(0., 0., params->OuterRadius()*TMath::Cos(i*2*TMath::Pi()/mNumPhiSegment), 
-			params->OuterRadius()*TMath::Sin(i*2*TMath::Pi()/mNumPhiSegment));
+    phi_line[i] = TLine(0., 0., StFtpcTrackingParams::Instance()->OuterRadius()*TMath::Cos(i*2*TMath::Pi()/mNumPhiSegment), 
+			StFtpcTrackingParams::Instance()->OuterRadius()*TMath::Sin(i*2*TMath::Pi()/mNumPhiSegment));
   }} 
 
   TLine *eta_line = new TLine[2*mNumEtaSegment+2];
@@ -643,9 +639,6 @@ void StFtpcDisplay::Info()
 {
   // Information about clusters.
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
   TCanvas *c = new TCanvas("c", "Cluster Information", 1200, 1000);
   c->Divide(2, 1);
  
@@ -657,7 +650,7 @@ void StFtpcDisplay::Info()
   TH1F *phi = new TH1F("phi", "phi", mNumPhiSegment*10, 0. ,2*TMath::Pi());
   TH1F *eta = new TH1F("eta", "eta", mNumEtaSegment*10, -4.165, 4.165);
  
-  TH2F *xy = new TH2F("xy", "xy", 60, -params->OuterRadius(), params->OuterRadius(), 60, -params->OuterRadius(), params->OuterRadius());
+  TH2F *xy = new TH2F("xy", "xy", 60, -StFtpcTrackingParams::Instance()->OuterRadius(), StFtpcTrackingParams::Instance()->OuterRadius(), 60, -StFtpcTrackingParams::Instance()->OuterRadius(), StFtpcTrackingParams::Instance()->OuterRadius());
   TH2F *phi_eta = new TH2F("phi_eta", "phi_eta", 60, 0., 2*TMath::Pi(), 60, -4.165, 4.165);
 
   Int_t cluster_anz = mHit->GetEntriesFast();
@@ -733,9 +726,9 @@ void StFtpcDisplay::Info()
 
   TCanvas *track_canvas = new TCanvas("track_canvas", "Tracks", 1580, 600);
   track_canvas->Divide(3,1);
-  TH2F *phi_frame = new TH2F("phi_frame", "phi_frame", 60, -params->OuterRadius(), params->OuterRadius(), 60, -params->OuterRadius(), params->OuterRadius());
-  TH2F *eta_frame1 = new TH2F("eta_frame1", "eta_frame1", 120, -270, -150, 60, -params->OuterRadius(), params->OuterRadius());
-  TH2F *eta_frame2 = new TH2F("eta_frame2", "eta_frame2", 120, 150, 270, 60, -params->OuterRadius(), params->OuterRadius());
+  TH2F *phi_frame = new TH2F("phi_frame", "phi_frame", 60, -StFtpcTrackingParams::Instance()->OuterRadius(), StFtpcTrackingParams::Instance()->OuterRadius(), 60, -StFtpcTrackingParams::Instance()->OuterRadius(), StFtpcTrackingParams::Instance()->OuterRadius());
+  TH2F *eta_frame1 = new TH2F("eta_frame1", "eta_frame1", 120, -270, -150, 60, -StFtpcTrackingParams::Instance()->OuterRadius(), StFtpcTrackingParams::Instance()->OuterRadius());
+  TH2F *eta_frame2 = new TH2F("eta_frame2", "eta_frame2", 120, 150, 270, 60, -StFtpcTrackingParams::Instance()->OuterRadius(), StFtpcTrackingParams::Instance()->OuterRadius());
 
   track_canvas->cd(1);
   gPad->SetGridx();
@@ -781,8 +774,8 @@ void StFtpcDisplay::Info()
   TLine phi_line[mNumPhiSegment];
 
   for (Int_t i=0; i<mNumPhiSegment; i++) {
-    phi_line[i] = TLine(0., 0., params->OuterRadius()*TMath::Cos(i*2*TMath::Pi()/mNumPhiSegment), 
-			params->OuterRadius()*TMath::Sin(i*2*TMath::Pi()/mNumPhiSegment));
+    phi_line[i] = TLine(0., 0., StFtpcTrackingParams::Instance()->OuterRadius()*TMath::Cos(i*2*TMath::Pi()/mNumPhiSegment), 
+			StFtpcTrackingParams::Instance()->OuterRadius()*TMath::Sin(i*2*TMath::Pi()/mNumPhiSegment));
   } 
 
   TLine eta_line[2*mNumEtaSegment+2];
@@ -957,15 +950,12 @@ void StFtpcDisplay::ShowClusters()
 {
   // Displays the clusters (2D view).
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
   Int_t cluster_anz = mHit->GetEntriesFast();
 
   TCanvas *X_Yplus = new TCanvas("X_Yplus", "Blick in Beamrichtung +", 1100, 1100);
   TCanvas *X_Yminus = new TCanvas("X_Yminus", "Blick in Beamrichtung -", 1100, 1100);
 
-  TH2F *xy = new TH2F("xy", "xy", 60, -params->OuterRadius(), params->OuterRadius(), 60, -params->OuterRadius(), params->OuterRadius());
+  TH2F *xy = new TH2F("xy", "xy", 60, -StFtpcTrackingParams::Instance()->OuterRadius(), StFtpcTrackingParams::Instance()->OuterRadius(), 60, -StFtpcTrackingParams::Instance()->OuterRadius(), StFtpcTrackingParams::Instance()->OuterRadius());
   X_Yplus->cd();
   xy->Draw();
   X_Yminus->cd();
@@ -1019,9 +1009,6 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
   // ShowTracks(-2) displays all tracks but no clusters
   // Showtracks(trackanz, x[trackanz]) displays all tracks given by the numbers in the array x[] and all clusters
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
   // create 3 canvases (for +, -, and both Ftpcs)
   TCanvas *X_Y_Zplus  = new TCanvas("X_Y_Zplus",  "Event +", 600, 600);
   TCanvas *X_Y_Zminus = new TCanvas("X_Y_Zminus", "Event -", 600, 600);
@@ -1031,10 +1018,10 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
   TBRIK *origin = new TBRIK("origin", "origin", "void", 0.1, 0.1, 0.1);
   
   // create 4 tubes (cylinders) - two big ones (out) and two small ones (in) - to draw the Ftpcs
-  TTUBE *ftpc1_out = new TTUBE("ftpc1_out", "Ftpc + (out)", "void", params->OuterRadius(), params->OuterRadius(), (params->PadRowPosZ(9)-params->PadRowPosZ(0))/2., 1);
-  TTUBE *ftpc1_in =  new TTUBE("ftpc1_in",  "Ftpc + (in)",  "void", params->InnerRadius(), params->InnerRadius(), (params->PadRowPosZ(9)-params->PadRowPosZ(0))/2., 1);
-  TTUBE *ftpc2_out = new TTUBE("ftpc2_out", "Ftpc - (out)", "void", params->OuterRadius(), params->OuterRadius(), (params->PadRowPosZ(9)-params->PadRowPosZ(0))/2., 1);
-  TTUBE *ftpc2_in =  new TTUBE("ftpc2_in",  "Ftpc - (in)",  "void", params->InnerRadius(), params->InnerRadius(), (params->PadRowPosZ(9)-params->PadRowPosZ(0))/2., 1);
+  TTUBE *ftpc1_out = new TTUBE("ftpc1_out", "Ftpc + (out)", "void", StFtpcTrackingParams::Instance()->OuterRadius(), StFtpcTrackingParams::Instance()->OuterRadius(), (StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2., 1);
+  TTUBE *ftpc1_in =  new TTUBE("ftpc1_in",  "Ftpc + (in)",  "void", StFtpcTrackingParams::Instance()->InnerRadius(), StFtpcTrackingParams::Instance()->InnerRadius(), (StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2., 1);
+  TTUBE *ftpc2_out = new TTUBE("ftpc2_out", "Ftpc - (out)", "void", StFtpcTrackingParams::Instance()->OuterRadius(), StFtpcTrackingParams::Instance()->OuterRadius(), (StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2., 1);
+  TTUBE *ftpc2_in =  new TTUBE("ftpc2_in",  "Ftpc - (in)",  "void", StFtpcTrackingParams::Instance()->InnerRadius(), StFtpcTrackingParams::Instance()->InnerRadius(), (StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2., 1);
 
   // set divisions of tubes
   ftpc1_out->SetNumberOfDivisions(50);
@@ -1057,22 +1044,22 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
   // create dependencies for 'both' Ftpcs
   X_Y_Z->cd();
   node0->cd();  
-  TNode *node01_out = new TNode("node01_out", "node01_out", "ftpc1_out", 0, 0,  params->PadRowPosZ(0)+(params->PadRowPosZ(9)-params->PadRowPosZ(0))/2.);
-  TNode *node01_in  = new TNode("node01_in",  "node01_in",  "ftpc1_in",  0, 0,  params->PadRowPosZ(0)+(params->PadRowPosZ(9)-params->PadRowPosZ(0))/2.);
-  TNode *node02_out = new TNode("node02_out", "node02_out", "ftpc2_out", 0, 0, -params->PadRowPosZ(0)-(params->PadRowPosZ(9)-params->PadRowPosZ(0))/2.);
-  TNode *node02_in  = new TNode("node02_in",  "node02_in",  "ftpc2_in",  0, 0, -params->PadRowPosZ(0)-(params->PadRowPosZ(9)-params->PadRowPosZ(0))/2.);  
+  TNode *node01_out = new TNode("node01_out", "node01_out", "ftpc1_out", 0, 0,  StFtpcTrackingParams::Instance()->PadRowPosZ(0)+(StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2.);
+  TNode *node01_in  = new TNode("node01_in",  "node01_in",  "ftpc1_in",  0, 0,  StFtpcTrackingParams::Instance()->PadRowPosZ(0)+(StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2.);
+  TNode *node02_out = new TNode("node02_out", "node02_out", "ftpc2_out", 0, 0, -StFtpcTrackingParams::Instance()->PadRowPosZ(0)-(StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2.);
+  TNode *node02_in  = new TNode("node02_in",  "node02_in",  "ftpc2_in",  0, 0, -StFtpcTrackingParams::Instance()->PadRowPosZ(0)-(StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2.);  
 
   // create dependencies for '-' Ftpc
   X_Y_Zminus->cd();
   node2->cd();
-  TNode *node2_out = new TNode("node2_out", "node2_out", "ftpc2_out", 0, 0, -params->PadRowPosZ(0)-(params->PadRowPosZ(9)-params->PadRowPosZ(0))/2.);
-  TNode *node2_in = new TNode("node2_in", "node2_in", "ftpc2_in", 0, 0, -params->PadRowPosZ(0)-(params->PadRowPosZ(9)-params->PadRowPosZ(0))/2.);
+  TNode *node2_out = new TNode("node2_out", "node2_out", "ftpc2_out", 0, 0, -StFtpcTrackingParams::Instance()->PadRowPosZ(0)-(StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2.);
+  TNode *node2_in = new TNode("node2_in", "node2_in", "ftpc2_in", 0, 0, -StFtpcTrackingParams::Instance()->PadRowPosZ(0)-(StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2.);
 
   // create dependencies for '+' Ftpc
   X_Y_Zplus->cd();
   node1->cd();
-  TNode *node1_out = new TNode("node1_out", "node1_out", "ftpc1_out", 0, 0, params->PadRowPosZ(0)+(params->PadRowPosZ(9)-params->PadRowPosZ(0))/2.);
-  TNode *node1_in  = new TNode("node1_in",  "node1_in",  "ftpc1_in",  0, 0, params->PadRowPosZ(0)+(params->PadRowPosZ(9)-params->PadRowPosZ(0))/2.);
+  TNode *node1_out = new TNode("node1_out", "node1_out", "ftpc1_out", 0, 0, StFtpcTrackingParams::Instance()->PadRowPosZ(0)+(StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2.);
+  TNode *node1_in  = new TNode("node1_in",  "node1_in",  "ftpc1_in",  0, 0, StFtpcTrackingParams::Instance()->PadRowPosZ(0)+(StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2.);
 
   // The following lines are unnecessary. They avoid compiler warnings. They can be simply deleted.
   node0->cd();
@@ -1286,9 +1273,6 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
 {
   // Displays the tracks and the clusters in a nice 3D view (GEANT ant found!).
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
   // create 3 canvases (for +, -, and both Ftpcs)
   mX_Y_Zplus  = new TCanvas("X_Y_Zplus",  "Event +", 600, 600);
   mX_Y_Zminus = new TCanvas("X_Y_Zminus", "Event -", 600, 600);
@@ -1298,10 +1282,10 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
   TBRIK *origin = new TBRIK("origin", "origin", "void", 0.1, 0.1, 0.1);
   
   // create 4 tubes (cylinders) - two big ones (out) and two small ones (in) - to draw the Ftpcs
-  TTUBE *ftpc1_out = new TTUBE("ftpc1_out", "Ftpc + (out)", "void", params->OuterRadius(), params->OuterRadius(), (params->PadRowPosZ(9)-params->PadRowPosZ(0))/2., 1);
-  TTUBE *ftpc1_in  = new TTUBE("ftpc1_in",  "Ftpc + (in)",  "void", params->InnerRadius(), params->InnerRadius(), (params->PadRowPosZ(9)-params->PadRowPosZ(0))/2., 1);
-  TTUBE *ftpc2_out = new TTUBE("ftpc2_out", "Ftpc - (out)", "void", params->OuterRadius(), params->OuterRadius(), (params->PadRowPosZ(9)-params->PadRowPosZ(0))/2., 1);
-  TTUBE *ftpc2_in  = new TTUBE("ftpc2_in",  "Ftpc - (in)",  "void", params->InnerRadius(), params->InnerRadius(), (params->PadRowPosZ(9)-params->PadRowPosZ(0))/2., 1);
+  TTUBE *ftpc1_out = new TTUBE("ftpc1_out", "Ftpc + (out)", "void", StFtpcTrackingParams::Instance()->OuterRadius(), StFtpcTrackingParams::Instance()->OuterRadius(), (StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2., 1);
+  TTUBE *ftpc1_in  = new TTUBE("ftpc1_in",  "Ftpc + (in)",  "void", StFtpcTrackingParams::Instance()->InnerRadius(), StFtpcTrackingParams::Instance()->InnerRadius(), (StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2., 1);
+  TTUBE *ftpc2_out = new TTUBE("ftpc2_out", "Ftpc - (out)", "void", StFtpcTrackingParams::Instance()->OuterRadius(), StFtpcTrackingParams::Instance()->OuterRadius(), (StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2., 1);
+  TTUBE *ftpc2_in  = new TTUBE("ftpc2_in",  "Ftpc - (in)",  "void", StFtpcTrackingParams::Instance()->InnerRadius(), StFtpcTrackingParams::Instance()->InnerRadius(), (StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2., 1);
 
   // set divisions of tubes
   ftpc1_out->SetNumberOfDivisions(50);
@@ -1317,7 +1301,7 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
   ftpc2_in->SetLineColor(4);
 
   /*
-  TCONE *cone = new TCONE("cone", "cone", "void", 5., params->OuterRadius()/params->PadRowPosZ(9)*254.20-0.22, params->OuterRadius()/params->PadRowPosZ(9)*254.20, params->OuterRadius()/params->PadRowPosZ(9)*258.7-0.22,params->OuterRadius()/params->PadRowPosZ(9)*258.7 );
+  TCONE *cone = new TCONE("cone", "cone", "void", 5., StFtpcTrackingParams::Instance()->OuterRadius()/StFtpcTrackingParams::Instance()->PadRowPosZ(9)*254.20-0.22, StFtpcTrackingParams::Instance()->OuterRadius()/StFtpcTrackingParams::Instance()->PadRowPosZ(9)*254.20, StFtpcTrackingParams::Instance()->OuterRadius()/StFtpcTrackingParams::Instance()->PadRowPosZ(9)*258.7-0.22,StFtpcTrackingParams::Instance()->OuterRadius()/StFtpcTrackingParams::Instance()->PadRowPosZ(9)*258.7 );
   cone->SetNumberOfDivisions(100);
   cone->SetLineColor(1);
   */
@@ -1330,23 +1314,23 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
   // create dependencies for 'both' Ftpcs
   mX_Y_Z->cd();
   mNode0->cd();  
-  TNode *node01_out = new TNode("node01_out", "node01_out", "ftpc1_out", 0, 0,  params->PadRowPosZ(0)+(params->PadRowPosZ(9)-params->PadRowPosZ(0))/2.);
-  TNode *node01_in =  new TNode("node01_in",  "node01_in",  "ftpc1_in",  0, 0,  params->PadRowPosZ(0)+(params->PadRowPosZ(9)-params->PadRowPosZ(0))/2.);
-  TNode *node02_out = new TNode("node02_out", "node02_out", "ftpc2_out", 0, 0, -params->PadRowPosZ(0)-(params->PadRowPosZ(9)-params->PadRowPosZ(0))/2.);
-  TNode *node02_in =  new TNode("node02_in",  "node02_in",  "ftpc2_in",  0, 0, -params->PadRowPosZ(0)-(params->PadRowPosZ(9)-params->PadRowPosZ(0))/2.);  
+  TNode *node01_out = new TNode("node01_out", "node01_out", "ftpc1_out", 0, 0,  StFtpcTrackingParams::Instance()->PadRowPosZ(0)+(StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2.);
+  TNode *node01_in =  new TNode("node01_in",  "node01_in",  "ftpc1_in",  0, 0,  StFtpcTrackingParams::Instance()->PadRowPosZ(0)+(StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2.);
+  TNode *node02_out = new TNode("node02_out", "node02_out", "ftpc2_out", 0, 0, -StFtpcTrackingParams::Instance()->PadRowPosZ(0)-(StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2.);
+  TNode *node02_in =  new TNode("node02_in",  "node02_in",  "ftpc2_in",  0, 0, -StFtpcTrackingParams::Instance()->PadRowPosZ(0)-(StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2.);  
 
   // create dependencies for '-' Ftpc
   mX_Y_Zminus->cd();
   mNode2->cd();
-  TNode *node2_out = new TNode("node2_out", "node2_out", "ftpc2_out", 0, 0, -params->PadRowPosZ(0)-(params->PadRowPosZ(9)-params->PadRowPosZ(0))/2.);
-  TNode *node2_in  = new TNode("node2_in",  "node2_in",  "ftpc2_in",  0, 0, -params->PadRowPosZ(0)-(params->PadRowPosZ(9)-params->PadRowPosZ(0))/2.);
+  TNode *node2_out = new TNode("node2_out", "node2_out", "ftpc2_out", 0, 0, -StFtpcTrackingParams::Instance()->PadRowPosZ(0)-(StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2.);
+  TNode *node2_in  = new TNode("node2_in",  "node2_in",  "ftpc2_in",  0, 0, -StFtpcTrackingParams::Instance()->PadRowPosZ(0)-(StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2.);
 
   // create dependencies for '+' Ftpc
   mX_Y_Zplus->cd();
   mNode1->cd();
-  //TNode *cone_1 = new TNode("con1_1", "cone_1", "cone", 0, 0, params->PadRowPosZ(9));
-  TNode *node1_out = new TNode("node1_out", "node1_out", "ftpc1_out", 0, 0, params->PadRowPosZ(0)+(params->PadRowPosZ(9)-params->PadRowPosZ(0))/2.);
-  TNode *node1_in =  new TNode("node1_in",  "node1_in",  "ftpc1_in",  0, 0, params->PadRowPosZ(0)+(params->PadRowPosZ(9)-params->PadRowPosZ(0))/2.);
+  //TNode *cone_1 = new TNode("con1_1", "cone_1", "cone", 0, 0, StFtpcTrackingParams::Instance()->PadRowPosZ(9));
+  TNode *node1_out = new TNode("node1_out", "node1_out", "ftpc1_out", 0, 0, StFtpcTrackingParams::Instance()->PadRowPosZ(0)+(StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2.);
+  TNode *node1_in =  new TNode("node1_in",  "node1_in",  "ftpc1_in",  0, 0, StFtpcTrackingParams::Instance()->PadRowPosZ(0)+(StFtpcTrackingParams::Instance()->PadRowPosZ(9)-StFtpcTrackingParams::Instance()->PadRowPosZ(0))/2.);
 
   // The following lines are unnecessary. They avoid compiler warnings. They can be simply deleted.
   mNode0->cd();
@@ -1652,18 +1636,15 @@ void StFtpcDisplay::FillFound(Bool_t good_found, Bool_t st, MIntArray *split, MI
 {
   // Fill histograms with tracks and clusters.
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
   DeleteFound();
 
   StFtpcConfMapPoint *cluster;
   StFtpcTrack *track;
   
   // coordinates of trackpoints
-  Float_t x[10];
-  Float_t y[10];
-  Float_t z[10];
+  Float_t x[StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()];
+  Float_t y[StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()];
+  Float_t z[StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()];
 
   Int_t track_entries = mTrack->GetEntriesFast();
   Bool_t *good_track_to_show = new Bool_t[track_entries];
@@ -1833,7 +1814,7 @@ void StFtpcDisplay::FillFound(Bool_t good_found, Bool_t st, MIntArray *split, MI
 
       Int_t cluster_entries = track->GetNumberOfPoints();
       
-      if (cluster_entries < 10 && track->GetRFirst() > params->InnerRadius() && track->GetRLast() < params->OuterRadius()) { 
+      if (cluster_entries < StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() && track->GetRFirst() > StFtpcTrackingParams::Instance()->InnerRadius() && track->GetRLast() < StFtpcTrackingParams::Instance()->OuterRadius()) { 
       
 	// loop over all clusters
 	for (Int_t clusters = 0; clusters < cluster_entries; clusters++) {

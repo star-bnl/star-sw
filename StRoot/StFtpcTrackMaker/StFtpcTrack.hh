@@ -1,5 +1,13 @@
-// $Id: StFtpcTrack.hh,v 1.11 2002/04/29 15:50:05 oldi Exp $
+// $Id: StFtpcTrack.hh,v 1.12 2002/10/11 15:45:19 oldi Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.12  2002/10/11 15:45:19  oldi
+// Get FTPC geometry and dimensions from database.
+// No field fit activated: Returns momentum = 0 but fits a helix.
+// Bug in TrackMaker fixed (events with z_vertex > outer_ftpc_radius were cut).
+// QA histograms corrected (0 was supressed).
+// Code cleanup (several lines of code changed due to *params -> Instance()).
+// cout -> gMessMgr.
+//
 // Revision 1.11  2002/04/29 15:50:05  oldi
 // All tracking parameters moved to StFtpcTrackingParameters.cc/hh.
 // In a future version the actual values should be moved to an .idl file (the
@@ -84,6 +92,7 @@
 #include "StFtpcTrackingParams.hh"
 
 #include "fpt_fptrack.h"
+#include "phys_constants.h"
 
 class StFtpcPoint;
 class StFtpcVertex;
@@ -279,10 +288,7 @@ inline Double_t StFtpcTrack::GetRapidity() const
 {
   // Returns the rapidity of the particle with the assumption that the particle is a pion (+/-).
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
-  return 0.5 * TMath::Log((params->m_pi() + GetPz()) / (params->m_pi() - GetPz()));
+  return 0.5 * TMath::Log((M_PION_PLUS + GetPz()) / (M_PION_PLUS - GetPz()));
 }
 
 
