@@ -1,10 +1,20 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.28 2000/12/08 20:09:31 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.29 2000/12/14 19:20:48 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.29  2000/12/14 19:20:48  horsley
+ * added event run id to dist ntuple,
+ *
+ * added flag to bit mask in dist ntuple to indictae which checkTrack
+ * check made entry to ntuple,
+ *
+ * dist ntuple has global p_vec and not local p_vec
+ *
+ * commented out StRichTrack pathlength check in constructor
+ *
  * Revision 2.28  2000/12/08 20:09:31  horsley
  * updated monte carlo ntuples, member functions in StRichMCTrack, StRichPIDMaker
  * changed monte carlo double xCorrection = 0 in StRichTrack to xCorrection = 0
@@ -225,7 +235,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.28 2000/12/08 20:09:31 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.29 2000/12/14 19:20:48 horsley Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -723,6 +733,8 @@ Int_t StRichPIDMaker::Make() {
      this->drawPadPlane(rEvent,mPrintThisEvent);
      this->fillRichSoftwareMonitor(rEvent);
     
+
+
      //
      // fill ntuples
      //
@@ -928,9 +940,9 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 #ifdef myRICH_WITH_NTUPLE
 
 #ifdef myRICH_WITH_MC
-    float distHits[33];
+    float distHits[34];
 #else
-    float distHits[32];
+    float distHits[33];
 #endif
 
 #endif
@@ -1406,9 +1418,11 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	distHits[12] = central.x();
 	distHits[13] = central.y();
 	
-	distHits[14] = trackMomentum.x();
-	distHits[15] = trackMomentum.y();
-	distHits[16] = trackMomentum.z();
+
+	distHits[14] = track->geometry()->momentum().x();
+	distHits[15] = track->geometry()->momentum().y();
+	distHits[16] = track->geometry()->momentum().z();
+
 
 	// Track incident angle
 	//theta = acos(-pz/sqrt(px**2+py**2+pz**2))
@@ -1433,8 +1447,9 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	distHits[29] = refit;
 	distHits[30] = ringCalculator->getConstantAreaAngle()/degree;
 	distHits[31] = currentTrack->getEnergyLoss();
+	distHits[32] = mEventRunId;
 #ifdef myRICH_WITH_MC
-	distHits[32] = geantID;
+	distHits[33] = geantID;
 #endif
 
 
@@ -1675,6 +1690,8 @@ bool StRichPIDMaker::checkEvent(StEvent* event) {
 
     mVertexPos = event->primaryVertex()->position();
     mEventN = event->id();
+    mEventRunId = event->runId();
+
 
     if( fabs(mVertexPos.z()) > mVertexWindow) {
 	cout << "StRichPIDMaker::checkEvent()\n";
@@ -1758,9 +1775,9 @@ bool StRichPIDMaker::checkTrack(StTrack* track) {
 
 
 #ifdef myRICH_WITH_MC
-  float distHits[33];
+  float distHits[34];
 #else
-  float distHits[32];
+  float distHits[33];
 #endif
 
   distHits[0] = 0;
@@ -1784,16 +1801,17 @@ bool StRichPIDMaker::checkTrack(StTrack* track) {
   distHits[12] = 0;
   distHits[13] = 0;
   
-  distHits[14] = 0;
-  distHits[15] = 0;
-  distHits[16] = 0;
+
+  distHits[14] = track->geometry()->momentum().x();
+  distHits[15] = track->geometry()->momentum().y();
+  distHits[16] = track->geometry()->momentum().z();
   
   // Track incident angle
   //theta = acos(-pz/sqrt(px**2+py**2+pz**2))
   distHits[17] = 0;
   distHits[18] = mEventN;
   
-  distHits[19] = 0;
+  distHits[19] = -2.0;
   
   distHits[20] = 0;
   distHits[21] = 0;
@@ -1809,12 +1827,14 @@ bool StRichPIDMaker::checkTrack(StTrack* track) {
   distHits[29] = 0;
   distHits[30] = 0;
   distHits[31] = 0;
+  distHits[32] = mEventRunId;
   
 #ifdef myRICH_WITH_MC
-  distHits[32] = 0;
+  distHits[33] = 0;
 #endif  
 
   distup->Fill(distHits);
+
 #endif
   
   return status;
@@ -1883,9 +1903,9 @@ bool StRichPIDMaker::checkTrack(StRichTrack* track) {
 #ifdef myRICH_WITH_NTUPLE
 
 #ifdef myRICH_WITH_MC
-  float distHits[33];
+  float distHits[34];
 #else
-  float distHits[32];
+  float distHits[33];
 #endif
 
   distHits[0] = 0;
@@ -1909,16 +1929,16 @@ bool StRichPIDMaker::checkTrack(StRichTrack* track) {
   distHits[12] = track->getProjectedMIP().x();
   distHits[13] = track->getProjectedMIP().y();
   
-  distHits[14] = 0;
-  distHits[15] = 0;
-  distHits[16] = 0;
+  distHits[14] = track->getStTrack()->geometry()->momentum().x();
+  distHits[15] = track->getStTrack()->geometry()->momentum().y();
+  distHits[16] = track->getStTrack()->geometry()->momentum().z();
   
   // Track incident angle
   //theta = acos(-pz/sqrt(px**2+py**2+pz**2))
   distHits[17] = 0;
   distHits[18] = mEventN;
   
-  distHits[19] = 0;
+  distHits[19] = -1.0;
   
   distHits[20] = 0;
   distHits[21] = 0;
@@ -1934,9 +1954,10 @@ bool StRichPIDMaker::checkTrack(StRichTrack* track) {
   distHits[29] = 0;
   distHits[30] = 0;
   distHits[31] = 0;
+  distHits[32] = mEventRunId;
  
 #ifdef myRICH_WITH_MC
-  distHits[32] = 0;
+  distHits[33] = 0;
 #endif
 
 
@@ -3656,9 +3677,9 @@ void StRichPIDMaker::initNtuples() {
   //file = new TFile("/star/rcf/scratch/lasiuk/ex","RECREATE");
     file->SetFormat(1);
 #ifdef myRICH_WITH_MC
-    distup = new TNtuple("dist","b","xi:yi:xo:yo:si:ld:d:oldd:oldsig:oldsi:phx:phy:x:y:px:py:pz:theta:evt:numb:resx:resy:res:ring:cos:d2siline:p:q:vtx:refit:constang:energyloss:gid");
+    distup = new TNtuple("dist","b","xi:yi:xo:yo:si:ld:d:oldd:oldsig:oldsi:phx:phy:x:y:px:py:pz:theta:evt:numb:resx:resy:res:ring:cos:d2siline:p:q:vtx:refit:constang:energyloss:runid:gid");
 #else
-    distup = new TNtuple("dist","b","xi:yi:xo:yo:si:ld:d:oldd:oldsig:oldsi:phx:phy:x:y:px:py:pz:theta:evt:numb:resx:resy:res:ring:cos:d2siline:p:q:vtx:refit:constang:energyloss");
+    distup = new TNtuple("dist","b","xi:yi:xo:yo:si:ld:d:oldd:oldsig:oldsi:phx:phy:x:y:px:py:pz:theta:evt:numb:resx:resy:res:ring:cos:d2siline:p:q:vtx:refit:constang:energyloss:runid");
 #endif
 
     trackNtuple = new TNtuple("trackNtuple","trackwise tuple","evtn:nprimaries:nnegprimaries:posz:negz:vz:nrichtracks:globalp:globalpt:globalpx:globalpy:globalpz:localpx:localpy:localpz:eta:q:amipq:amipx:amipy:pmipx:pmipy:radx:rady:oradx:orady:otheta:ophi:ctbx:ctby:ctbz:firstrow:lastrow:lasthitx:lasthity:lasthitz:lasthitdca:pathlength:maxchain:maxgap:theta:phi:tpchits:tpcfitpoints:pionfactor:piontotalarea:pionconstarea:piontotalangle:pionconstangle:piontotalhits:pionconsthits:kaonfactor:kaontotalarea:kaonconstarea:kaontotalangle:kaonconstangle:kaontotalhits:kaonconsthits:protonfactor:protontotalarea:protonconstarea:protontotalangle:protonconstangle:protontotalhits:protonconsthits:innerwave:outerwave");
