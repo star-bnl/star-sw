@@ -1,5 +1,8 @@
-// $Id: StEmcHitCollection.cxx,v 1.2 1999/02/21 21:00:15 pavlinov Exp $
+// $Id: StEmcHitCollection.cxx,v 1.3 1999/03/03 04:12:15 fisyak Exp $
 // $Log: StEmcHitCollection.cxx,v $
+// Revision 1.3  1999/03/03 04:12:15  fisyak
+// replace kStErr to kStWarn
+//
 // Revision 1.2  1999/02/21 21:00:15  pavlinov
 // Delete one line with debugging print
 //
@@ -209,12 +212,12 @@ Int_t StEmcHitCollection::ADCtoEnergy(St_emc_hits *emc_hit, TArrayF *E){
     if(ped_h->det != mDetector){
       cout << "***StEmcHitCollection::ADCtoEnergy: Pedestal data is not for this datector: "
 	   << mName << endl;
-      return  kStErr;
+      return  kStWarn;
     }
     if(slp_h->det != mDetector){
       cout << "***StEmcHitCollection::ADCtoEnergy: Gain data is not for this datector: "
 	   << mName << endl;
-      return  kStErr;
+      return  kStWarn;
     }
     if(ped_h->nmodule != mNModule  ||
        ped_h->neta    != mNEta     ||
@@ -224,7 +227,7 @@ Int_t StEmcHitCollection::ADCtoEnergy(St_emc_hits *emc_hit, TArrayF *E){
        slp_h->nsub    != mNSub     ){      
       cout << "***StEmcHitCollection::ADCtoEnergy: Inconsistent Ped or Gain data: "
 	   << mName << endl;
-      return  kStErr;
+      return  kStWarn;
     }
     mNHit=0; mEnergySum=0.0; mEtSum =0.0; 
     switch(slp_h->func){
@@ -253,7 +256,7 @@ Int_t StEmcHitCollection::ADCtoEnergy(St_emc_hits *emc_hit, TArrayF *E){
     default:
       cout<< "***StEmcHitCollection::ADCtoEnergy: Function has not been implimented yet: "
 	  <<mName<<" : "<<slp_h->func<<endl;
-      return  kStErr;
+      return  kStWarn;
     }    
   }else{
     cout<< "StEmcHitCollection::ADCtoEnergy: Not enough information, use GEANT energy: "
@@ -281,15 +284,15 @@ Int_t StEmcHitCollection::fill(St_emc_hits *emc_hits){
   if(hit[0].det<1 || hit[0].det>MAXDET){
     cout<< "StEmcHitCollection::Fill: No hits or bad detector# in emc_hits_st : "
 	<< hit[0].det<<"  "<< getDetName() <<endl;
-    return kStErr;
+    return kStWarn;
   }
   init(hit[0].det);
   if(n > mNModule*mNes*2/3){
     getMemory(-1);
-    if(ADCtoEnergy(emc_hits, &mEnergy) != kStOK) return kStErr;
+    if(ADCtoEnergy(emc_hits, &mEnergy) != kStOK) return kStWarn;
   }else{
     TArrayF E(mNModule*mNes);
-    if(ADCtoEnergy(emc_hits, &E) != kStOK) return kStErr;
+    if(ADCtoEnergy(emc_hits, &E) != kStOK) return kStWarn;
     getMemory(mNHit);     
     Int_t m, e, s, i=0, j=0;
     for(m=0; m<mNModule; m++){

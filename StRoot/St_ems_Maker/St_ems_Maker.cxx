@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.cxx,v 1.7 1999/02/17 15:54:18 fisyak Exp $
+// $Id: St_ems_Maker.cxx,v 1.8 1999/03/03 04:12:14 fisyak Exp $
 // $Log: St_ems_Maker.cxx,v $
+// Revision 1.8  1999/03/03 04:12:14  fisyak
+// replace kStErr to kStWarn
+//
 // Revision 1.7  1999/02/17 15:54:18  fisyak
 // Adjust geometry paameters from GEANT
 //
@@ -108,25 +111,25 @@ Int_t St_ems_Maker::Make(){
       if(!i3){delete g2t_eem_hit;}
       if(!i4){delete g2t_esm_hit;}
       if (Res_ems != kSTAFCV_OK) {
-	cout << "***** Problem with ems_interface2 *****" << endl; return kStErr;
+	cout << "***** Problem with ems_interface2 *****" << endl; return kStWarn;
       }
       
       //calling dep_e_toadc which convert geant energy to ADC
       Res_ems = dep_e_toadc(m_ems_control,m_control_toadc,ems_hits_bemc,emc_hits_bemc,emc_hits_bprs);
       if (Res_ems != kSTAFCV_OK) {
-	cout << endl << "***** Problem with dep_e_toadc (BEMC/BPRS) *****" << endl; return kStErr;
+	cout << endl << "***** Problem with dep_e_toadc (BEMC/BPRS) *****" << endl; return kStWarn;
       }
       Res_ems = dep_e_toadc(m_ems_control,m_control_toadc,ems_hits_bsmd,emc_hits_bsmde,emc_hits_bsmdp);
       if (Res_ems != kSTAFCV_OK) {
-	cout << endl << "***** Problem with dep_e_toadc (BSMD) *****" << endl; return kStErr;
+	cout << endl << "***** Problem with dep_e_toadc (BSMD) *****" << endl; return kStWarn;
       } 
       Res_ems = dep_e_toadc(m_ems_control,m_control_toadc,ems_hits_eemc,emc_hits_eemc,emc_hits_eprs);
       if (Res_ems != kSTAFCV_OK) {
-	cout << endl << "***** Problem with dep_e_toadc (EEMC/EPRS) *****" << endl; return kStErr;
+	cout << endl << "***** Problem with dep_e_toadc (EEMC/EPRS) *****" << endl; return kStWarn;
       }
       Res_ems = dep_e_toadc(m_ems_control,m_control_toadc,ems_hits_esmd,emc_hits_esmde,emc_hits_esmdp);
       if (Res_ems != kSTAFCV_OK) {
-	cout << endl << "***** Problem with dep_e_toadc (ESMD) *****" << endl;  return kStErr;
+	cout << endl << "***** Problem with dep_e_toadc (ESMD) *****" << endl;  return kStWarn;
       }
       
       //calling emc_adc_sim which gives pedestal and alope variations.
@@ -135,7 +138,7 @@ Int_t St_ems_Maker::Make(){
 			    m_org_ped_bemc_h, m_org_ped_bemc, 
 			    m_org_slp_bemc_h, m_org_slp_bemc, emc_hits_bemc);
       if (Res_ems != kSTAFCV_OK) {
-	cout << endl << "***** Problem with emc_adc_sim (BEMC) *****" << endl;  return kStErr;
+	cout << endl << "***** Problem with emc_adc_sim (BEMC) *****" << endl;  return kStWarn;
       }
     }
   }
@@ -144,7 +147,7 @@ Int_t St_ems_Maker::Make(){
 //_____________________________________________________________________________
 void St_ems_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ems_Maker.cxx,v 1.7 1999/02/17 15:54:18 fisyak Exp $\n");
+  printf("* $Id: St_ems_Maker.cxx,v 1.8 1999/03/03 04:12:14 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }

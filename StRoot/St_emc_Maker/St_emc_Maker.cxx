@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.cxx,v 1.5 1999/02/26 17:28:50 kathy Exp $
+// $Id: St_emc_Maker.cxx,v 1.6 1999/03/03 04:12:15 fisyak Exp $
 // $Log: St_emc_Maker.cxx,v $
+// Revision 1.6  1999/03/03 04:12:15  fisyak
+// replace kStErr to kStWarn
+//
 // Revision 1.5  1999/02/26 17:28:50  kathy
 // fix histograms
 //
@@ -72,7 +75,7 @@ Int_t St_emc_Maker::Make(){
     //  St_emc_hits *emc = (St_emc_hits *)itr(n_emc);
     //  St_emc_hit *hit = new St_emc_hit(detname[det], det+1); 
     //  m_DataSet->Add(hit);
-    //  if(hit->Fill(emc) != kStOK) return kStErr;
+    //  if(hit->Fill(emc) != kStOK) return kStWarn;
     //}
     St_emc_hits *adc = 0;
     St_emc_hits dummy; TString tit = dummy.GetTitle();
@@ -80,7 +83,7 @@ Int_t St_emc_Maker::Make(){
       if(adc->GetTitle() == tit){
 	TString name = adc->GetName(); name.ReplaceAll("emc_hits_","");
 	StEmcHitCollection *hit = new StEmcHitCollection(name); m_DataSet->Add(hit);
-	if(hit->fill(adc) != kStOK) return kStErr;
+	if(hit->fill(adc) != kStOK) return kStWarn;
       }
     }
   }
@@ -141,7 +144,7 @@ void St_emc_Maker::MakeHistograms(){
 //_____________________________________________________________________________
 void St_emc_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_emc_Maker.cxx,v 1.5 1999/02/26 17:28:50 kathy Exp $\n");
+  printf("* $Id: St_emc_Maker.cxx,v 1.6 1999/03/03 04:12:15 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
