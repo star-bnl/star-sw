@@ -55,18 +55,20 @@ currentDateTime[4]='-';
 StDbManager * mgr = StDbManager::Instance();
  
 
-char* dbType;
-char* dbDomain;
+char dbType[64];
+char dbDomain[64];
 StDbType type;
 StDbDomain domain;
-char* version = 0;
+char version[128];
 
-if(!tableVersion)version="default";
+if(!tableVersion)strcpy((char*)version,"default");
  if(!database){
-   dbType = "TestScheme";
-   dbDomain = "Star";
+   strcpy((char*)dbType,"TestScheme");
+   strcpy((char*)dbDomain,"Star");
  } else {
-   if(!mgr->getDataBaseInfo(database, dbType, dbDomain)){
+   char* type=(char*)dbType;
+   char* domain = (char*)dbDomain;
+   if(!mgr->getDataBaseInfo(database, type, domain)){
      cerr << "StDbManager:: Database specified incorrectly" << endl;
      *nRows=0;
      return NULL;
