@@ -17,7 +17,7 @@ C :>--------------------------------------------------------------------
       RECORD          /TABLE_HEAD_ST/    p_track_h
       RECORD          /TABLE_HEAD_ST/    p_hits_h
       Integer         Lnmax,Lnam0,Lnam,Nbytpw,Nmh
-      Parameter       (Lnmax=50,Lnam0=35,Nbytpw=4,Nmh=15)
+      Parameter       (Lnmax=50,Lnam0=35,Nbytpw=4,Nmh=25)
       INTEGER         G2T_GET_HITS,p_hits(*),p_track(*),p_vert(*)
       integer         nh/0/,i,j,k,l,e,f,m,n,ip,in,jX,jP,iX,iC,iPT,iLP,
      >                iET,LenT,LenH,xD2M,pD2M,IH,JTRA,Iprin
@@ -59,6 +59,7 @@ C :>--------------------------------------------------------------------
       call vzero (QQ,   Lnmax)
       call vzero (iflg, Lnmax)
       call vzero (iadr, Nmh)
+      call vzero (jadr, Nmh)
       call vzero (phits,Nmh)
       if (Iprin.ge.4) then
          print *,'   name  = ',p_hits_h.name
