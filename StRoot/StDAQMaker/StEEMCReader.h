@@ -30,6 +30,7 @@ class StEEMCReader
 
   u_short getEemcHead(int fiber, int channel, char type);
   u_short getEemcData(int fiber, int channel, char type);
+  int isEemcBankIn( char type) ;
    
   virtual ~StEEMCReader();
   virtual int close();
