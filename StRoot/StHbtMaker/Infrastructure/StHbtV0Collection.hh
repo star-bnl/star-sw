@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtV0Collection.hh,v 1.1 1999/09/16 18:47:59 lisa Exp $
+ * $Id: StHbtV0Collection.hh,v 1.2 2000/02/01 00:33:33 laue Exp $
  *
  * Author: Tom Humanic, Ohio State, humanic@mps.ohio-state.edu
  ***************************************************************************
@@ -18,7 +18,7 @@
 #include <list>
 
 #if !defined(ST_NO_NAMESPACES)
-using namespace std;
+using std::list;
 #endif
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS

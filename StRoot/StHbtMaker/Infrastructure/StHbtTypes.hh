@@ -62,7 +62,7 @@ typedef franks2HistoD StHbt2DHisto;
 #define StHbtString_noCint
 #include <string>
 #if !defined(ST_NO_NAMESPACES)
-using namespace std;
+using std::string;
 #endif
 typedef string StHbtString; //!
 #endif
