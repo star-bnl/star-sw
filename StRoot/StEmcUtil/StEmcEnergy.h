@@ -63,6 +63,7 @@ class StEmcEnergy : public TObject
          void   setTPCEff(Bool_t);                ///< Apply or don't TPC efficiency correction
          void   setBfield(Float_t);               ///< Set magnetic field
          void   setQ0Factor(Float_t);             ///< Set neutral correction factor
+         void   setEffError(Float_t);
          void   processEvent();                   ///< Process StEvent/StMcEvent information
   
   protected:
@@ -92,7 +93,8 @@ class StEmcEnergy : public TObject
        Float_t   mBemcEt;
        Float_t   mChHadEt;
        Float_t   mQ0HadEt;
-       Float_t   mEmEt;   
+       Float_t   mEmEt;  
+       Float_t   mEffError; 
 			   Int_t   mNTracks;  
         Bool_t   mRealData;
             
@@ -134,6 +136,7 @@ inline void    StEmcEnergy::setEvent(StEvent* event){ mEvent = event; }
 inline void    StEmcEnergy::setMcEvent(StMcEvent* mcEvent){ mMcEvent = mcEvent; }
 inline void    StEmcEnergy::setTPCEff(Bool_t option)  { mTPCEff = option; }
 inline void    StEmcEnergy::setQ0Factor(Float_t factor)  { mQ0Factor = factor; }
+inline void    StEmcEnergy::setEffError(Float_t factor)  { mEffError = factor; }
 inline Float_t StEmcEnergy::getEnergyInBtow(UInt_t towerNdx) { return mEnergyInBtow[towerNdx]; }
 inline Float_t StEmcEnergy::getChHadEnergyInBtow(UInt_t towerNdx) { return mChHadEnergyInBtow[towerNdx]; }
 inline Float_t StEmcEnergy::getEmEnergyInBtow(UInt_t towerNdx) { return mEmEnergyInBtow[towerNdx]; }
