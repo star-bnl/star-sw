@@ -1,5 +1,8 @@
-// $Id: EEeventDst.cxx,v 1.4 2003/09/11 19:40:56 zolnie Exp $
+// $Id: EEeventDst.cxx,v 1.5 2003/10/02 20:52:45 balewski Exp $
 // $Log: EEeventDst.cxx,v $
+// Revision 1.5  2003/10/02 20:52:45  balewski
+// more functionality for print()
+//
 // Revision 1.4  2003/09/11 19:40:56  zolnie
 // updates for gcc3.2
 //
@@ -103,7 +106,7 @@ void EEeventDst::print(int k){
   int is;
   for(is=0;is<Sec->GetEntries();is++) {
     EEsectorDst *sec=(EEsectorDst*)Sec->At(is);
-    sec->print();
+    sec->print(k-1);
   }
 
 }
