@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.4 1999/02/18 21:17:42 lasiuk Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.5 1999/10/04 16:00:46 long Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,12 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.5  1999/10/04 16:00:46  long
+ * new coordinate system in the trs
+ *
+ * Revision 1.5  1999/10/01  17:15:00  Hui Long
+ * New definition of the coordinate system according to Brian nad Thomas's
+ * proposal
  * Revision 1.4  1999/02/18 21:17:42  lasiuk
  * instantiate with electronics db
  *
@@ -81,13 +87,22 @@ public:
     //StTpcCoordinateTransform(const StTpcCoordinateTransform&);
     //StTpcCoordinateTransform& operator=(const StTpcCoordinateTransform&);
     
-//      Raw Data          <-->  Internal TpcCoordinate
-    void  operator()(const StTpcPadCoordinate&, StTpcLocalCoordinate&);
-    void  operator()(const StTpcLocalCoordinate&, StTpcPadCoordinate&);
-
-// Tpc Local Sector --> TPC Local
-    void  operator()(const StTpcLocalSectorCoordinate&, StTpcLocalCoordinate&);
+//      Raw Data          <--> Tpc Local Sector Coordinates
+ 
     void  operator()(const StTpcLocalSectorCoordinate&, StTpcPadCoordinate&);
+    void  operator()(const StTpcPadCoordinate&, StTpcLocalSectorCoordinate&);
+//      Raw Data          <--> Tpc Local  Coordinates
+ 
+    void  operator()(const StTpcLocalCoordinate&, StTpcPadCoordinate&);
+    void  operator()(const StTpcPadCoordinate&, StTpcLocalCoordinate&);
+// Tpc Local Sector <--> TPC Local
+  
+    void  operator()(const  StTpcLocalCoordinate& ,StTpcLocalSectorCoordinate&);
+    void  operator()(const StTpcLocalSectorCoordinate&, StTpcLocalCoordinate&);
+// Tpc Local Sector <--> Global
+    void  operator()(const StTpcLocalSectorCoordinate&, StGlobalCoordinate&);
+    void  operator()(const  StGlobalCoordinate& ,StTpcLocalSectorCoordinate&);
+
     
 // Internal TpcCoordinate <-->  Global Coordinate
     void  operator()(const StTpcLocalCoordinate&, StGlobalCoordinate&);
@@ -98,24 +113,26 @@ public:
     void  operator()(const StGlobalCoordinate&, StTpcPadCoordinate&);
 
     StThreeVector<double> sector12Coordinate(StThreeVector<double>&, int*);
-    StThreeVector<double> padCentroid(StTpcLocalCoordinate&, int*, int*)  ;
+    StThreeVector<double> padCentroid(StTpcLocalSectorCoordinate&, int*, int*)  ;
     
 private:
     // Transformation Routines!!
-    // Raw Data From Coordinates
+    // Raw Data From tpc local Coordinates
     int      sectorFromCoordinate(const StTpcLocalCoordinate&)       const;
     int      sectorFromCoordinate(const StThreeVector<double>&)      const;
+    // Raw Data (pad row timebin or drift L From tpc local sector Coordinates
     int      rowFromLocal(const StThreeVector<double>&)              const;
     int      padFromLocal(const StThreeVector<double>&, const int)   const;
     int      tBFromZ(const double)                                   const;
 
-    // Coordinates from Raw Data
+    // tpc local sector Coordinates from Raw Data
     StThreeVector<double> xyFromRaw(const StTpcPadCoordinate&)      ;
     double                yFromRow(const int)                  const;
     double                xFromPad(const int, const int)       const;
     double                zFromTB(const int)                   const;
     
-    // rotations
+    // (3d)rotations   From means "From the TPC local  Coordinates to Tpc Local  Sector Coordinates "     
+  //    "to" means " from Tpc local sector  Coordinates to  TPC local  Coordinates "
     StThreeVector<double> rotateToLocal(const StThreeVector<double>&, const int)  ;
     StThreeVector<double> rotateFromLocal(const StThreeVector<double>&, const int);
 
