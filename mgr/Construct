@@ -20,8 +20,6 @@ if ($pwd =~ '^/afs/') {$File::Find::dont_use_nlink;}
 
 my $DEBUG = "-g";
 @search_files   = ();
-if (defined($ARG{NODEBUG})) {$DEBUG = "-O2" ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
-if (defined($ARG{DEBUG})) {$DEBUG = $ARG{DEBUG} ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
 my $O        = "o";
 my $A        = "a";
 my $Cxx      = "cxx";
@@ -84,7 +82,6 @@ if (/^i386_/) {
   $EXEFLAGS = $CXXFLAGS . " -Wl,-Bdynamic";
   $SOFLAGS  = "-shared";  
   if (/^i386_redhat51egcs$/ || /^i386_redhat60egcs$/) {
-    $DEBUG    = "-g";
     $CLIBS    = "-L/usr/X11R6/lib  -lXt -lXpm -lX11 -lm -ldl  -rdynamic";
     $FC       = "g77";
     $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
@@ -109,7 +106,6 @@ elsif (/^hp_ux102/) {
 #    case "hp":
 #  ====================
   $OSFID = "HPUX CERNLIB_HPUX CERNLIB_UNIX ST_NO_NAMESPACES ST_NO_EXCEPTIONS";
-#  if (defined(NODEBUG)) {$DEBUG = "-O";}
   $OSFID   .= " NEW_ARRAY_ON";
   $CXX      = "aCC";
   $CC       = "cc";
@@ -213,14 +209,14 @@ elsif (/^intel_wnt/) {
   $FC        = "fl32";
   $CLIBS     = "ws2_32.lib mswsock.lib user32.lib kernel32.lib msvcrt.lib oldnames.lib MSVCIRT.LIB";
   $FLIBS     = "DFORDLL.LIB";
-  $FFLAGS    =  $DEBUG . " -MD -G5 -fpp -Oxp -nokeep -nologo";
+  $FFLAGS    = " -MD -G5 -fpp -Oxp -nokeep -nologo";
   $FEXTEND   = "-extend_source";
-  $CFLAGS    =  $DEBUG . " -MD -G5 -nologo -DASU_MALLOC_OFF";
-  $CXXFLAGS  =  $CFLAGS;
-  $LD        =  $CXX;
+  $CFLAGS    = " -MD -G5 -nologo -DASU_MALLOC_OFF";
+  $CXXFLAGS  = $CFLAGS;
+  $LD        = $CXX;
 #  $LDFLAGS   =  $DEBUG . $(conlflags); 
   $SO        =  "link";
-  $SOFLAGS   =  $DEBUG . " -DEBUG -NODEFAULTLIB -INCREMENTAL:NO -NOLOGO -DLL ";
+  $SOFLAGS   = " -DEBUG -NODEFAULTLIB -INCREMENTAL:NO -NOLOGO -DLL ";
   $LINKMODULECOM = 
 "BINDEXPLIB.exe %> %< > %>.def && %AR %ARFLAGS %Lout%>.lib  %< -def:%>.def && %SO %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS %Libraries";
   $LIB .= ";" . $ROOTSYS . "\\lib";
@@ -235,24 +231,26 @@ $OSFID .= " " . $STAR_SYS;
 if ($STAR_SYS ne $STAR_HOST_SYS) {$OSFID .= " " . $STAR_HOST_SYS;}
 my $FLAGS = $OSFID . " CERNLIB_TYPE" . " __ROOT__";
 $CPPFLAGS .= " -D" . join (" -D", split (" ",$FLAGS));
-if (defined($ARG{CPPFLAGS})) {$CPPFLAGS = $ARG{CPPFLAGS} ; print "set CPPFLAGS = $CPPFLAGS\n" unless ($param::quiet);}
-if (defined($ARG{CPP}))      {$CPP = $ARG{CPP} ; print "set CPP = $CPP\n" unless ($param::quiet);}
-if (defined($ARG{CC}))       {$CC = $ARG{CC} ; print "set CC = $CC\n" unless ($param::quiet);}
-if (defined($ARG{CCFLAGS}))  {$CCFLAGS = $ARG{CCFLAGS} ; print "set CCFLAGS = $CCFLAGS\n" unless ($param::quiet);}
-if (defined($ARG{CLIBS}))    {$CLIBS = $ARG{CLIBS} ; print "set CLIBS = $CLIBS\n" unless ($param::quiet);}
-if (defined($ARG{CXX}))      {$CXX = $ARG{CXX} ; print "set CXX = $CXX\n" unless ($param::quiet);}
-if (defined($ARG{CXXFLAGS})) {$CXXFLAGS = $ARG{CXXFLAGS} ; print "set CXXFLAGS = $CXXFLAGS\n" unless ($param::quiet);}
-if (defined($ARG{FC}))       {$FC = $ARG{FC} ; print "set FC = $FC\n" unless ($param::quiet);}
-if (defined($ARG{FFLAGS}))   {$FFLAGS = $ARG{FFLAGS} ; print "set FFLAGS = $FFLAGS\n" unless ($param::quiet);}
-if (defined($ARG{FLIBS}))    {$FLIBS = $ARG{FLIBS} ; print "set FLIBS = $FLIBS\n" unless ($param::quiet);}
-if (defined($ARG{LD}))       {$LD = $ARG{LD} ; print "set LD = $DEBUG\n" unless ($param::quiet);}
-if (defined($ARG{LDFLAGS}))  {$LDFLAGS = $ARG{LDFLAGS} ; print "set LDFLAGS = $LDFLAGS\n" unless ($param::quiet);}
-if (defined($ARG{EXEFLAGS})) {$EXEFLAGS = $ARG{EXEFLAGS} ; print "set EXEFLAGS = $EXEFLAGS\n" unless ($param::quiet);}
-if (defined($ARG{Libraries})){$Libraries = $ARG{Libraries} ; print "set Libraries = $Libraries\n" unless ($param::quiet);}
-if (defined($ARG{LIBS}))     {$LIBS = $ARG{LIBS} ; print "set LIBS = $LIBS\n" unless ($param::quiet);}
-if (defined($ARG{LIBPATH}))  {$LIBPATH = $ARG{LIBPATH} ; print "set LIBPATH = $LIBPATH\n" unless ($param::quiet);}
-if (defined($ARG{SO}))       {$SO = $ARG{SO} ; print "set SO = $SO\n" unless ($param::quiet);}
-if (defined($ARG{SOFLAGS}))  {$SOFLAGS = $ARG{SOFLAGS} ; print "set SOFLAGS = $SOFLAGS\n" unless ($param::quiet);}
+if (defined($ARG{NODEBUG}))  {$DEBUG = "-O2"              ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
+if (defined($ARG{DEBUG}))    {$DEBUG = $ARG{DEBUG}        ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
+if (defined($ARG{CPPFLAGS})) {$CPPFLAGS = $ARG{CPPFLAGS}  ; print "set CPPFLAGS = $CPPFLAGS\n" unless ($param::quiet);}
+if (defined($ARG{CPP}))      {$CPP = $ARG{CPP}            ; print "set CPP = $CPP\n" unless ($param::quiet);}
+if (defined($ARG{CC}))       {$CC = $ARG{CC}              ; print "set CC = $CC\n" unless ($param::quiet);}
+if (defined($ARG{CCFLAGS}))  {$CCFLAGS = $ARG{CCFLAGS}    ; print "set CCFLAGS = $CCFLAGS\n" unless ($param::quiet);}
+if (defined($ARG{CLIBS}))    {$CLIBS = $ARG{CLIBS}        ; print "set CLIBS = $CLIBS\n" unless ($param::quiet);}
+if (defined($ARG{CXX}))      {$CXX = $ARG{CXX}            ; print "set CXX = $CXX\n" unless ($param::quiet);}
+if (defined($ARG{CXXFLAGS})) {$CXXFLAGS = $ARG{CXXFLAGS}  ; print "set CXXFLAGS = $CXXFLAGS\n" unless ($param::quiet);}
+if (defined($ARG{FC}))       {$FC = $ARG{FC}              ; print "set FC = $FC\n" unless ($param::quiet);}
+if (defined($ARG{FFLAGS}))   {$FFLAGS = $ARG{FFLAGS}      ; print "set FFLAGS = $FFLAGS\n" unless ($param::quiet);}
+if (defined($ARG{FLIBS}))    {$FLIBS = $ARG{FLIBS}        ; print "set FLIBS = $FLIBS\n" unless ($param::quiet);}
+if (defined($ARG{LD}))       {$LD = $ARG{LD}              ; print "set LD = $LD\n" unless ($param::quiet);}
+if (defined($ARG{LDFLAGS}))  {$LDFLAGS = $ARG{LDFLAGS}    ; print "set LDFLAGS = $LDFLAGS\n" unless ($param::quiet);}
+if (defined($ARG{EXEFLAGS})) {$EXEFLAGS = $ARG{EXEFLAGS}  ; print "set EXEFLAGS = $EXEFLAGS\n" unless ($param::quiet);}
+if (defined($ARG{Libraries})){$Libraries = $ARG{Libraries}; print "set Libraries = $Libraries\n" unless ($param::quiet);}
+if (defined($ARG{LIBS}))     {$LIBS = $ARG{LIBS}          ; print "set LIBS = $LIBS\n" unless ($param::quiet);}
+if (defined($ARG{LIBPATH}))  {$LIBPATH = $ARG{LIBPATH}    ; print "set LIBPATH = $LIBPATH\n" unless ($param::quiet);}
+if (defined($ARG{SO}))       {$SO = $ARG{SO}              ; print "set SO = $SO\n" unless ($param::quiet);}
+if (defined($ARG{SOFLAGS}))  {$SOFLAGS = $ARG{SOFLAGS}    ; print "set SOFLAGS = $SOFLAGS\n" unless ($param::quiet);}
 
 if (! $param::quiet) {
   print "STAR     = \t$STAR\n";
