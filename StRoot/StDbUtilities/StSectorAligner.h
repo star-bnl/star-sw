@@ -38,9 +38,9 @@ class StSectorAligner {
   
  private:
   StTpcDb* thedb;
-  static const int   lastInnerSectorRow=13; //!
-  static const float innerSectorRotatePoint=123; //! cm
-  static const float outerSectorRotatePoint=123; //! cm
+  int   lastInnerSectorRow; //!
+  float innerSectorRotatePoint; //! cm
+  float outerSectorRotatePoint; //! cm
 
   void             rotateHit(float angle,int sector,float radius);
   void             rotateCW(const StThreeVectorF& point,StThreeVectorF& pointR,
