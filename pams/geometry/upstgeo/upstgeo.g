@@ -6,14 +6,14 @@ Module UPSTGEO is the geometry  of the UPSTREAM AreA.
 ******************************************************************************
 +CDE,AGECOM,GCUNIT.
 *
-      Content  UPST,PIPD,PIPE,PIPF,DXMG,PVAD,PVAE,DCON,PIPG,DVAC,PVAG
+      Content  UPST,PUPD,PUPE,PUPF,DXMG,PVAD,PVAE,DCON,PUPG,DVAC,PVAG
 *
-      Structure PIPU {Version, DZ_upst, P1InnR,   P1OutR,   P1Leng,
-                      P2InnR, P2OutR, P2Leng,
-                      P3InnR, P3OutR, P3Leng,
-                      DXInnR,   DXOutR, DXLeng,
-                      CSInnR, CSOutR, CEInnR, CEOutR, CLeng,
-                      PGInnR, PGOutR, PGLeng }
+      Structure PIPU { Version, DZ_upst, P1InnR, P1OutR, P1Leng,
+                        P2InnR,  P2OutR, P2Leng,
+                        P3InnR,  P3OutR, P3Leng,
+                        DXInnR,  DXOutR, DXLeng,
+                        CSInnR,  CSOutR, CEInnR, CEOutR, CLeng,
+                        PGInnR,  PGOutR, PGLeng }
 *
 *    local variable for section positioning
       Real    Z1,Z2,Z3,Z4,z5,z6
@@ -65,30 +65,30 @@ Block UPST is the upstream mother volume in the STAR cave
       Attribute Upst   Seen=0  colo=2
       SHAPE     TUBE   Rmin=0. Rmax=40.0 Dz=pipu_dz_upst
 *
-      Create and Position PIPD z=z2               " Center of pipe before DX"
-      Create and Position PIPE z=z3               " center of DX Pipe  "
-      Create and Position PIPF z=z3               " center of DX outer pipe"
+      Create and Position PUPD z=z2               " Center of pipe before DX"
+      Create and Position PUPE z=z3               " center of DX Pipe  "
+      Create and Position PUPF z=z3               " center of DX outer pipe"
       Create and Position DXMG z=z3               " Center of DX Yoke  "
-      Create and Position DCON z=z4+pipu_cleng    " Center of DX Cone"
-      Create and Position PIPG z=z6+pipu_pgleng   "Center of last Pipe "
+      Create and Position DCON z=z4+Pipu_cleng    " Center of DX Cone"
+      Create and Position PUPG z=z6+pipu_pgleng   "Center of last Pipe "
 endblock
 * -----------------------------------------------------------------------------
-Block PIPD is the Beam PIPe before the DX magnet
+Block PUPD is the Beam PIPe before the DX magnet
        Material  Iron
-       Attribute Pipd      Seen=1  colo=1
+       Attribute PUPd      Seen=1  colo=1
        Shape     TUBE      Rmin=0  Rmax=pipu_p1OutR,
                            Dz=pipu_p1Leng
        Create and Position PVAD
 EndBlock
 *
-Block PVAD is the Vacuum Volume of the pipe before the DX magnet
+Block PVAD is the Vacuum Volume of the PIPe before the DX magnet
        Material  Vacuum
        Shape     TUBE      Rmax=pipu_p1InnR  
 EndBlock
 * -----------------------------------------------------------------------------
-Block PIPE is the Beam PIPe through the DX mAgnet Volume
+Block PUPE is the Beam PIPe through the DX mAgnet Volume
        Material  Iron
-       Attribute Pipe      Seen=1  colo=1
+       Attribute PUPe      Seen=1  colo=1
        Shape     TUBE      Rmin=0  Rmax=pipu_p2OutR,
                            Dz=pipu_p2Leng
        Create and Position PVAE
@@ -99,9 +99,9 @@ Block PVAE is the Vacuum Volume of DX mAgnet pipe
        Shape     TUBE      Rmax=pipu_p2InnR  
 EndBlock
 * -----------------------------------------------------------------------------
-Block PIPF is the Outer PIPe through the DX mAgnet Volume
+Block PUPF is the Outer PIPe through the DX mAgnet Volume
        Material  Iron
-       Attribute Pipf      Seen=1  colo=2
+       Attribute PUPf      Seen=1  colo=2
        Shape     TUBE      Rmin=pipu_p3InnR  Rmax=pipu_p3OutR,
                            Dz=pipu_p3Leng
 EndBlock
@@ -129,9 +129,9 @@ Block DVAC is its cavity
                            rmx2=pipu_ceinnr
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Block PIPG is the Beam PIPe After the DX magnet Volume
+Block PUPG is the Beam PIPe After the DX magnet Volume
        Material  Iron
-       Attribute Pipg      Seen=1  colo=4
+       Attribute PUPg      Seen=1  colo=4
        Shape     TUBE      Rmin=0  Rmax=pipu_pgoutr,
                            Dz=pipu_pgLeng
        Create and Position PVAG
