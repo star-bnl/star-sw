@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.42 2004/01/10 01:10:18 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.43 2004/01/27 20:08:14 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.43  2004/01/27 20:08:14  genevb
+// Modify SVT point hist
+//
 // Revision 2.42  2004/01/10 01:10:18  genevb
 // Preparations for Year 5, added some svt plots
 //
@@ -1707,7 +1710,7 @@ void StQABookHist::BookHistPoint(){
   // east and west on separate plots
   m_pnt_ftpcE   = QAH::H1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,25000.);
   m_pnt_ftpcW   = QAH::H1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,25000.);
-  m_pnt_xyS     = QAH::H2F("QaPointXYSvt","point: x-y distribution of hits, svt",60,-15,15,60,-15,15);
+  m_pnt_xyS     = QAH::H2F("QaPointXYSvt","point: x-y distribution of hits, svt",96,-16,16,96,-16,16);
   m_pnt_xyTE    = QAH::H2F("QaPointXYTpcE","point: x-y distribution of hits, tpcE",40,-200,200,40,-200,200);
   m_pnt_xyTW    = QAH::H2F("QaPointXYTpcW","point: x-y distribution of hits, tpcW",40,-200,200,40,-200,200);
   m_z_hits      = QAH::H1F("QaPointZhits","point: z distribution of hits, tpc",100,-210,210);
