@@ -179,7 +179,6 @@ void StRefArray::Streamer(TBuffer &R__b)
 ClassImp(StStrArray)
 //______________________________________________________________________________
 StStrArray::StStrArray(Int_t sz):StObjArray(sz){}
-#if 0
 //______________________________________________________________________________
  void StStrArray::operator=(const StStrArray &a)
 {
@@ -194,7 +193,6 @@ StStrArray::StStrArray(Int_t sz):StObjArray(sz){}
     push_back(sto);
   }
 } 
-#endif //0
 //______________________________________________________________________________
 StStrArray::StStrArray(const StStrArray &from){ *this = from;}
 //______________________________________________________________________________

@@ -138,7 +138,7 @@ public:
  StStrArray(Int_t sz=0);
  StStrArray(const StStrArray &from);
  virtual ~StStrArray();
-// virtual void operator=(const StStrArray &a); 
+       void operator=(const StStrArray &a); 
 
  void push_back(const TObject *to){fV.push_back((TObject*)to);}
  void clear();
