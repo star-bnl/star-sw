@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.9 2003/03/13 18:59:44 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 2.10 2003/03/13 21:20:10 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.10  2003/03/13 21:20:10  pruneau
+ * bug fix in filler fixed.
+ *
  * Revision 2.9  2003/03/13 18:59:44  pruneau
  * various updates
  *
@@ -647,21 +650,13 @@ float StiStEventFiller::impactParameter(StiTrack* track)
     
   // get the innermost hit node
   StiKalmanTrack* kTrack = static_cast<StiKalmanTrack*>(track);
-  StiKalmanTrackNode*	node = kTrack->getInnerMostHitNode();
+  StiKalmanTrackNode*	lastNode = kTrack->getInnerMostHitNode();
   //cout << " ///////////////////// LAST NODE :" << *lastNode<<endl;
-  //StiKalmanTrackNode*	node = static_cast<StiKalmanTrackNode*>(lastNode->getParent());
-  //cout << " //Previous node:"<<*node<<endl;
-  // construct a Helix using Ben's Routines
-  //StiGeometryTransform* transformer = StiGeometryTransform::instance();
-  //StThreeVector<double> dummyVec(-999,-999,-999);
-  //StPhysicalHelix* helix = new StPhysicalHelix(dummyVec,dummyVec,-100.,-100);
-  //transformer->operator()(node, helix);
-  //=====
-  //cout <<" =========  test ===== 1 =================="<<endl;
-
+  StiKalmanTrackNode*	node = static_cast<StiKalmanTrackNode*>(lastNode->getParent());
+  //cout << "  Previous node:"<<*node<<endl;
   //const StThreeVector<double> momentum = node->getGlobalMomentum();
   //cout << "StiTrack  ------->  px:"<< momentum.x() << " py:"<<  momentum.y() << " pz:"<< momentum.z()<<endl;
-  //cout << "    MYDCA:"<< kTrack->getDca();
+  cout << " MYDCA:"<< kTrack->getDca();
   //cout << "    PHASE: "<<node->getPhase()<<endl;
 
   StThreeVector<double> origin(node->getRefPosition(), node->getY(),node->getZ());
@@ -677,7 +672,7 @@ float StiStEventFiller::impactParameter(StiTrack* track)
   //		   origin,
   //		   int(node->getHelicity()));
   
-  //StThreeVector<double> phyMom = physical.momentum(0.5*tesla);
+  //  StThreeVector<double> phyMom = physical.momentum(0.5*tesla);
   //cout << "HELIX:  px:"<< phyMom.x() << " py:"<<  phyMom.y() << " pz:"<< phyMom.z()<<endl;
 
   *helix = StHelix(fabs(node->getCurvature()),
@@ -688,7 +683,7 @@ float StiStEventFiller::impactParameter(StiTrack* track)
 
   //cout << "helix " << *helix << endl;
   float dca = static_cast<float>(helix->distance(vxD));
-  //cout << "dcaHelix    : " << dca << endl;  
+  cout << "  dcaHelix : " << dca << endl;  
   //cout << "dcaPhysical : " << static_cast<float>(physical.distance(vxD) ) << endl;  
   kTrack->setDca(dca);
   return dca;
