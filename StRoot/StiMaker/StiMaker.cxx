@@ -48,6 +48,7 @@
 #include "StiGui/StiDrawableHits.h"
 #include "StiGui/StiRootDrawableHits.h"
 #include "StiGui/StiRootDrawableLine.h"
+//#include "StiGui/StiRootDrawableHitContainer.h"
 #include "StiGui/StiDisplayManager.h"
 
 // StiMaker
@@ -68,15 +69,14 @@ StiMaker::StiMaker(const Char_t *name) : StMaker(name),
 					 mhitfactory(0), mtrackfactory(0), mktracknodefactory(0),
 					 mdetectorfactory(0), mdatanodefactory(0), mkalmantrackfactory(0),
 					 //Display
-					 mdisplay(0), mdrawablehits(0),
+					 mdisplay(0),
 					 //Utilities
-					 mhitfiller(0), mEvaluableSeedFinder(0), mkalmanseedfinder(0),
-					 //Test
-					 mtempseedfinder(0), mcompseedfinder(0),
+					 mhitfiller(0),
+					 //SeedFinders
+					 mEvaluableSeedFinder(0), mKalmanSeedFinder(0), mcompseedfinder(0),
 					 //Tracker
 					 mtracker(0),
 					 //Members
-					 mmaterialbuildpath(0), mdetectorbuildpath(0),
 					 mevent(0), mMcEventMaker(0), mAssociationMaker(0)
 {
     cout <<"StiMaker::StiMaker()"<<endl;
@@ -132,15 +132,11 @@ StiMaker::~StiMaker()
     delete mktracknodefactory;
     mktracknodefactory = 0;
 
-    delete mkalmanseedfinder;
-    mkalmanseedfinder = 0;
-
     delete mkalmantrackfactory;
     mkalmantrackfactory=0;
 
-    //TEST!!!!!
-    delete mtempseedfinder;
-    mtempseedfinder=0;
+    delete mKalmanSeedFinder;
+    mKalmanSeedFinder=0;
 
     delete mcompseedfinder;
     mcompseedfinder=0;
@@ -160,9 +156,6 @@ void StiMaker::Clear(const char*)
     //Clear HitContainer
     mhitstore->clear();
 
-    //Clear Drawable hits
-    mdrawablehits->clear();
-    
     //Reset DetectorContainer
     StiDetectorContainer::instance()->reset();
     
@@ -178,9 +171,6 @@ void StiMaker::Clear(const char*)
     
     //Reset DisplayManager
     mdisplay->reset();
-
-    //Reset Kalman Track Seed Finder
-    mkalmanseedfinder->clear();
 
     //Clear the track store
     mtrackstore->clear();
@@ -224,11 +214,6 @@ Int_t StiMaker::Init()
     //EvaluableTrack SeedFinder
     mEvaluableSeedFinder = new StiEvaluableTrackSeedFinder(mAssociationMaker);
     mEvaluableSeedFinder->setFactory(mtrackfactory);
-    mEvaluableSeedFinder->setStTrackType(mStTrackType);
-
-    //KalmanTrackSeedFinder
-    mkalmanseedfinder = new StiTrackSeedFinder(mhitstore);
-    mkalmanseedfinder->setFactory(mkalmantrackfactory);
 
     //The StiDetector factory
     mdetectorfactory = new detector_factory("DrawableDetectorFactory");
@@ -248,15 +233,9 @@ Int_t StiMaker::Init()
     mdisplay->draw();
     mdisplay->update();
     
-    //Drawable hits
-    mdrawablehits = new StiRootDrawableHits();
-    mdrawablehits->clear();
-    mdrawablehits->setMarkerSize(.5);
-    mdisplay->addDrawable(mdrawablehits);
-
     //The Detector Tree
     mdetector = StiDetectorContainer::instance();
-    mdetector->buildDetectors(mdetectorbuildpath, mdatanodefactory, mdetectorfactory);
+    mdetector->buildDetectors(mdatanodefactory, mdetectorfactory);
     mdetector->reset();
     //mdetector->print();
       
@@ -272,19 +251,18 @@ Int_t StiMaker::Init()
 //    TrackNodeTest *pTest = new TrackNodeTest();
 //    pTest->doTest();
 
-    //Test another KalmanTrackSeedFinder via StiCompositeSeedFinder
-    mtempseedfinder = new StiTrackSeedFinder(mhitstore);
-    mtempseedfinder->setFactory(mkalmantrackfactory);
+    //StiCompositeSeedFinder
+    mKalmanSeedFinder = new StiTrackSeedFinder(mhitstore);
+    mKalmanSeedFinder->setFactory(mkalmantrackfactory);
     mcompseedfinder =new StiCompositeSeedFinder();
-    mcompseedfinder->buildOuterSeedFinder(mtempseedfinder);
-    mcompseedfinder->buildInnerSeedFinder(mtempseedfinder);
+    mcompseedfinder->buildOuterSeedFinder(mKalmanSeedFinder);
+    mcompseedfinder->buildInnerSeedFinder(mKalmanSeedFinder);
     
     //The Tracker
     mtracker = new StiKalmanTrackFinder();
-    //mtracker->setTrackNodeFactory(mktracknodefactory);
-    mtracker->setTrackSeedFinder(mEvaluableSeedFinder);
-    //mtracker->setTrackSeedFinder(mkalmanseedfinder);
-    //mtracker->setTrackSeedFinder(mcompseedfinder);
+    mtracker->setTrackNodeFactory(mktracknodefactory);
+    //mtracker->setTrackSeedFinder(mEvaluableSeedFinder);
+    mtracker->setTrackSeedFinder(mcompseedfinder);
     mtracker->isValid(true);
     
     return StMaker::Init();
@@ -318,45 +296,20 @@ Int_t StiMaker::Make()
 	mhitstore->sortHits();
 	cout <<"\tdone"<<endl;
 
+	cout <<"StiMaker::Make()\tCall StiHitContainer::update()"<<endl;
+	mhitstore->update();
+	cout <<"\tdone"<<endl;
+	    
 	//Init seed finder for start
 	mcompseedfinder->reset();
 
-	//Temp patch to draw hits
-	cout <<"StiMaker::Make()\tFill Drawable hits"<<endl;
-	const hitmap& hits = mhitstore->hits();
-	for (hitmap::const_iterator it=hits.begin(); it!=hits.end(); it++) {
-	    const hitvector& tempvec = (*it).second;
-	    for (hitvector::const_iterator vit=tempvec.begin(); vit!=tempvec.end(); vit++) {
-		
-		mdrawablehits->push_back( (*vit) );
-	    }
-	}
-	cout <<"\tdone"<<endl;
-	cout <<"StiMaker::Make()\tfill hits for drawing"<<endl;
-	mdrawablehits->fillHitsForDrawing();
-	cout <<"\tdone"<<endl;
-
 	//Initialize the SeedFinder, loop on tracks
-	mEvaluableSeedFinder->setEvent(mevent, mc);
+	mEvaluableSeedFinder->setEvent(mc);
 
 	//Test track finder
 	
-	/*
-	  cout <<"StiMaker::Make()\tFill drawable tracks"<<endl;
-	  while (mEvaluableSeedFinder->hasMore()) {
-	  StiRootDrawableStiEvaluableTrack* thetrack =
-	  dynamic_cast<StiRootDrawableStiEvaluableTrack*>(mEvaluableSeedFinder->next());
-	  if (thetrack) {
-	  thetrack->fillHitsForDrawing();
-	  }
-	  }
-	cout <<"\tdone"<<endl;
-	*/
-	
     }
 
-    //TEMP !!!!!
-    //mcompseedfinder->test();
     StiEvaluator::instance()->evaluateForEvent(mtrackstore);
     
     mdisplay->draw();
@@ -369,16 +322,6 @@ void StiMaker::printStatistics() const
     cout <<"HitFactory Size:\t"<<mhitfactory->getCurrentSize()<<endl;
     cout <<"HitContainer size:\t"<<mhitstore->size()<<endl;
     cout <<"Number of Primary Vertices:\t"<<mhitstore->numberOfVertices()<<endl;
-}
-
-void StiMaker::setMaterialBuildPath(char* val)
-{
-    mmaterialbuildpath = val;
-}
-
-void StiMaker::setDetectorBuildPath(char* val)
-{
-    mdetectorbuildpath = val;
 }
 
 void StiMaker::doNextAction()
