@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.5 2002/11/22 18:08:53 laue Exp $
+ * $Id: StMuTrack.cxx,v 1.6 2003/02/21 14:32:47 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -124,7 +124,10 @@ void StMuTrack::fillMuProbPidTraits(const StEvent* e, const StTrack* t) {
   for (unsigned int i = 0; i < size; i++) {
     if ( !(dedxPidTraits=dynamic_cast<StDedxPidTraits*>(traits[i])) ) continue;
     if (dedxPidTraits->method() == kTruncatedMeanIdentifier)  mProbPidTraits.setdEdxTruncated( dedxPidTraits->mean() ); 
-    if (dedxPidTraits->method() == kLikelihoodFitIdentifier)  mProbPidTraits.setdEdxFit( dedxPidTraits->mean() ); 
+    if (dedxPidTraits->method() == kLikelihoodFitIdentifier)  {
+      mProbPidTraits.setdEdxFit( dedxPidTraits->mean() ); 
+      mProbPidTraits.setdEdxTrackLength( dedxPidTraits->length() ); 
+    }
   }
 
   // get the StProbPidTraits 
@@ -145,6 +148,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.6  2003/02/21 14:32:47  laue
+ * Yuri's updates to the PID probabilities. dE/dx track length in TPC added
+ *
  * Revision 1.5  2002/11/22 18:08:53  laue
  * Bug in logic fixed. Checking for null pointers was wrong.
  *
