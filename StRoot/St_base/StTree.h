@@ -65,7 +65,8 @@ public:
 
 protected:
   virtual void OpenTFile();
-  void SetParAll(St_DataSet *par);
+  void SetParAll(St_DataSet *par,TList *savList);
+  void SetParAll(TList *savList);
   Int_t fNEvents; 		//  Number of written events in file
   ULong_t fUKey;          	//! Current RunEvent number 
   Char_t fIOMode;		//! r=ReadOnly; w=WriteOnly; u=Update;0=do nothing
@@ -74,7 +75,6 @@ protected:
   TFile   *fTFile;		//! Opened TFile
   Int_t   fTFileOwner;          //! Ownership of TFile flag
   Int_t   fDebug;		//! debug level
-  TList   *fListTmp;		//! temporary list
 ClassDef(StBranch,1)
 };  
 

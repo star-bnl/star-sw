@@ -120,7 +120,6 @@ StBranch::StBranch(const Char_t *name, StTree *parent):St_DataSet(name,parent)
 
   SetTitle(".StBranch");
   fNEvents=0;fUKey=0;fIOMode=0;fTFile=0;fTFileOwner=0,fDebug=0;
-  fListTmp=0;
 }
 StBranch::~StBranch()
 {
@@ -197,9 +196,10 @@ Int_t StBranch::WriteEvent(ULong_t ukey)
   if (!fList->First()) 	return 1;	//empty
   Open(); fNEvents++;
   
-  SetParAll(0);
+  TList *savList = new TList;
+  SetParAll(0,savList);
   iret= StIO::Write(fTFile,GetName(),fUKey,fList);
-  SetParAll(this);
+  SetParAll(savList); delete savList;
   return 0;
 }  
   
@@ -211,7 +211,7 @@ Int_t StBranch::GetEvent(Int_t mode)
   Open(); 
   if (mode) { fList = (TList*)StIO::ReadNext(fTFile,GetName(),fUKey);
   } else    { fList = (TList*)StIO::Read    (fTFile,GetName(),fUKey);}
-  SetParAll(this);
+  SetParAll(this,0);
   return (!fList);
 }  
 //_______________________________________________________________________________
@@ -236,27 +236,27 @@ Int_t StBranch::NextEvent (ULong_t &ukey)
   fUKey=ukey; int iret = GetEvent(1); ukey=fUKey; return iret;
 }
 //_______________________________________________________________________________
-void StBranch::SetParAll(St_DataSet *par)
+void StBranch::SetParAll(St_DataSet *par,TList *savList)
 {
-  if (!fListTmp) fListTmp = new TList();
   St_DataSetIter next(this);
   St_DataSet *son,*p;
   while ((son=next())) {
-    if (!par) {//zero parents
-
-      fListTmp->Add(son->GetParent());
-      son->SetParent(0);  
-
-    } else {
-
-      p =(St_DataSet*)fListTmp->First();
-      son->SetParent(p); 
-      fListTmp->Remove(p);
-
-    }// endif
+    p = son->GetParent();
+    if (savList) {assert(p);savList->Add(p);}
+    son->SetParent(par);  
   }// end while  
-
-  delete fListTmp; fListTmp = 0;
+}
+//_______________________________________________________________________________
+void StBranch::SetParAll(TList *savList)
+{
+  assert(savList);
+  St_DataSetIter next(this);
+  St_DataSet *son,*p;
+  while ((son=next())) {
+    p = (St_DataSet*)savList->First(); assert(p);
+    son->SetParent(p);  
+    savList->Remove(p);
+  }// end while  
 }
 //_______________________________________________________________________________
 void StBranch::OpenTFile()
