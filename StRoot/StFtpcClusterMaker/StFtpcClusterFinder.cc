@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.43 2003/01/16 18:03:52 oldi Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.44 2003/01/21 09:34:31 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.44  2003/01/21 09:34:31  jcs
+// initialize variables to eliminate compiler warnings for NODEBUG=yes
+//
 // Revision 1.43  2003/01/16 18:03:52  oldi
 // Bug eliminated. Now it compiles on Solaris again.
 //
@@ -247,6 +250,9 @@ int StFtpcClusterFinder::search()
     }
 
 // Loop over FTPC West and East individually
+  // initialize to elimate compiler warning when setenv NODEBUG yes 
+  firstPadrowToSearch = 0;
+  deltaAirPressure = 0;  
 
 for ( int iftpc=0; iftpc<2; iftpc++) {
    if ( iftpc == 0 ) {
@@ -286,6 +292,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
   /* initialize sequence and cluster lists */ 
   NewSequences = 0;
   FirstCUC = 0;
+  LastCUC = 0;
   iOldSeqNumber = 0;
   iNewSeqIndex = 0;
 
@@ -1054,6 +1061,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
   ChargeSum=0;
   PadSum=0;
   TimeSum=0;
+  iADCValue=0;
   for(iSequence = 0; iSequence < Cluster->NumSequences; iSequence++)
     {
       for(iBin = 0; iBin < Cluster->Sequence[iSequence].Length; iBin++)
