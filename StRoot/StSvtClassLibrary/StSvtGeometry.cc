@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtGeometry.cc,v 1.1 2001/08/16 21:02:03 munhoz Exp $
+ * $Id: StSvtGeometry.cc,v 1.2 2002/01/31 21:57:35 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtGeometry.cc,v $
+ * Revision 1.2  2002/01/31 21:57:35  caines
+ * Get ladder and barrels correct for the middle layer
+ *
  * Revision 1.1  2001/08/16 21:02:03  munhoz
  * changing StObjArray to StStrArray. StSvtConfig reestructured. New classes for geometry DB
  *
@@ -70,12 +73,12 @@ int StSvtGeometry::getBarrelID(int layer, int ladder)
     break;
   case 3:
     //if (!ladder%2)
-    if (ladder%2 != 0)
+    if (ladder%2 == 0)
       barrel = 2;
     break;
   case 4:
     //if (ladder%2)
-    if (ladder%2 == 0)
+    if (ladder%2 != 0)
       barrel = 2;
     break;
   case 5:
