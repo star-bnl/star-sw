@@ -119,7 +119,7 @@ typedef union ds_ptr_union_t {	/* union of pointers to basic types */
 #define DS_MAX_ERR		20		/* max number of thread error structures */
 #define DS_MAX_JOIN 	100 	/* max number of fields in a join */
 #define DS_MAX_NAME_LEN	31		/* max length of a name */
-#define DS_MAX_SPEC_LEN	10000	/* max length of specifier string */
+#define DS_MAX_SPEC_LEN	20000	/* max length of type or dataset specifier */
 #define DS_MAX_STRUCT	100		/* max number of struct defs in a type */
 #define DS_MAX_TID		1000	/* max number of tids */
 #define DS_NAME_DIM	(DS_MAX_NAME_LEN+1)/* size of name plus zero byte */
@@ -191,7 +191,9 @@ int dsDatasetEntryCount(size_t *pCount, DS_DATASET_T *pDataset);
 int dsDatasetMaxEntryCount(size_t *pCount, DS_DATASET_T *pDataset);  
 int dsDatasetName(char **pName, DS_DATASET_T *pDataset);
 int dsEquijoin(DS_DATASET_T *pJoinTable,DS_DATASET_T *pTableOne,
-	DS_DATASET_T *pTableTwo, char *aliases, char *joinLst, char *projectList);
+	DS_DATASET_T *pTableTwo, char *aliases, char *joinList, char *projectList);
+int dsSlowEquijoin(DS_DATASET_T *pJoinTable, DS_DATASET_T *pTableOne,
+	DS_DATASET_T *pTableTwo, char *aliases, char *joinList, char *projectList);
 const char * dsError(char *msg);
 int dsErrorCode(void);
 int dsFindColumn(size_t *pColNumber, DS_DATASET_T *pTable, char *name); 
@@ -418,7 +420,7 @@ typedef struct ds_key_t {
 * private functions
 *
 */
-int dsCmpKeys(char *baseOne, char *baseTwo, DS_KEY_T *key);
+int dsCmpKeys(DS_KEY_T *key, char *baseOne, char *baseTwo);
 int dsCmpName(char *s1, char *s2);
 int dsDatasetSpecifier(DS_DATASET_T *pDataset, char *buf, size_t bufSize);
 int dsDumpTypes(void);
@@ -426,6 +428,8 @@ int dsErrSemGive(void);
 int dsErrSemTake(void);
 int dsGetColumnSpecifier(char *tableName, char *columnName, char *str, char **ptr);
 size_t dsHash(char *str);
+size_t dsHashData(DS_FIELD_T *field, size_t h, char *base);
+size_t dsHashKey(DS_KEY_T *key, unsigned keyID, char *base);
 int dsIsNextName(char *name, char *str, char **ptr);
 int dsNonSpace(char *str, char **ptr);
 int dsParseName(char *name, char *str, char **ptr);
@@ -437,6 +441,8 @@ int dsPutTabs(size_t n, char **in, char *limit);
 int dsSemInit(void);
 int dsTargetField(char *dstColumnName, DS_FIELD_T **ppSrcField,
 	size_t *pSrcIndex, DS_TYPE_T **types, char **names, char *str, char **ptr);
+void *dsTmpAlloc(size_t size);
+void dsTmpFree(void *ptr, size_t size);
 void dsToDo(void);
 void *dsTypeCalloc(size_t size);
 void dsTypeFree(void *ptr, size_t size);

@@ -1,4 +1,3 @@
-/* WHG 07apr98 Modified for use in win32 DSL */
 /*
  * Sun RPC is a product of Sun Microsystems, Inc. and is provided for
  * unrestricted use provided that this legend is included on all tape
@@ -32,7 +31,7 @@
  * Copyright (c) 1986 - 1991 by Sun Microsystems, Inc.
  */
 
-/* WHG #pragma ident	"@(#)xdr_array.c	1.11	93/07/05 SMI" */
+#pragma ident	"@(#)xdr_array.c	1.11	93/07/05 SMI" 
 
 /*
  * xdr_array.c, Generic XDR routines impelmentation.
@@ -47,7 +46,7 @@
 #include <sys/param.h>
 #include <sys/systm.h>
 #else
-/* WHG #include <sys/syslog.h> */
+#include <sys/syslog.h>
 #include <stdio.h>
 #endif
 
@@ -70,9 +69,9 @@ xdr_array(xdrs, addrp, sizep, maxsize, elsize, elproc)
 	register XDR *xdrs;
 	caddr_t *addrp;		/* array pointer */
 	u_int *sizep;		/* number of elements */
-	const u_int maxsize;		/* max numberof elements */
-	const u_int elsize;		/* size in bytes of each element */
-	const xdrproc_t elproc;	/* xdr routine to handle each element */
+	u_int maxsize;		/* max numberof elements */
+	u_int elsize;		/* size in bytes of each element */
+	xdrproc_t elproc;	/* xdr routine to handle each element */
 {
 	register u_int i;
 	register caddr_t target = *addrp;
@@ -113,8 +112,7 @@ xdr_array(xdrs, addrp, sizep, maxsize, elsize, elproc)
 			*addrp = target = (caddr_t)mem_alloc(nodesize);
 #ifndef KERNEL
 			if (target == NULL) {
-/*WHG			(void) syslog(LOG_ERR, mem_err_msg_arr); */
-				WHG_MALLOC_ERR("xdr_array");
+				(void) syslog(LOG_ERR, mem_err_msg_arr);
 				trace1(TR_xdr_array, 1);
 				return (FALSE);
 			}
@@ -159,11 +157,11 @@ xdr_array(xdrs, addrp, sizep, maxsize, elsize, elproc)
  */
 bool_t
 xdr_vector(xdrs, basep, nelem, elemsize, xdr_elem)
-	XDR *xdrs;
-	char *basep;
-	const u_int nelem;
-	const u_int elemsize;
-	const xdrproc_t xdr_elem;
+	register XDR *xdrs;
+	register char *basep;
+	register u_int nelem;
+	register u_int elemsize;
+	register xdrproc_t xdr_elem;
 {
 	register u_int i;
 	register char *elptr;

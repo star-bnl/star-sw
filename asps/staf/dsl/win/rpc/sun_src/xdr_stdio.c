@@ -1,4 +1,3 @@
-/* WHG 07apr98 Modified for use in win32 DSL */
 /*
  * Sun RPC is a product of Sun Microsystems, Inc. and is provided for
  * unrestricted use provided that this legend is included on all tape
@@ -32,7 +31,7 @@
  * Copyright (c) 1984 - 1991 by Sun Microsystems, Inc.
  */
 
-/* WHG #pragma ident	"@(#)xdr_stdio.c	1.15	94/04/24 SMI" */
+#pragma ident	"@(#)xdr_stdio.c	1.15	94/04/24 SMI"
 
 #if !defined(lint) && defined(SCCSIDS)
 static char sccsid[] = "@(#)xdr_stdio.c	1.15	94/04/24 SMI";
@@ -46,7 +45,7 @@ static char sccsid[] = "@(#)xdr_stdio.c	1.15	94/04/24 SMI";
  * from the stream.
  */
 
-/* WHG #include "rpc_mt.h" */
+#include "rpc_mt.h"
 #include <rpc/types.h>
 #include <stdio.h>
 #include <rpc/xdr.h>
@@ -79,14 +78,20 @@ xdrstdio_create(xdrs, file, op)
  * Destroy a stdio xdr stream.
  * Cleans up the xdr stream handle xdrs previously set up by xdrstdio_create.
  */
-static void xdrstdio_destroy(XDR *xdrs)
+static void
+xdrstdio_destroy(xdrs)
+	register XDR *xdrs;
 {
 	trace1(TR_xdrstdio_destroy, 0);
 	(void) fflush((FILE *)xdrs->x_private);
 	/* xx should we close the file ?? */
 	trace1(TR_xdrstdio_destroy, 1);
 }
-static bool_t xdrstdio_getlong(XDR *xdrs, long *lp)
+
+static bool_t
+xdrstdio_getlong(xdrs, lp)
+	XDR *xdrs;
+	register long *lp;
 {
 	trace1(TR_xdrstdio_getlong, 0);
 	if (fread((caddr_t)lp, sizeof (long), 1,
@@ -101,7 +106,10 @@ static bool_t xdrstdio_getlong(XDR *xdrs, long *lp)
 	return (TRUE);
 }
 
-static bool_t xdrstdio_putlong(XDR *xdrs, long *lp)
+static bool_t
+xdrstdio_putlong(xdrs, lp)
+	XDR *xdrs;
+	long *lp;
 {
 
 #ifndef mc68000
@@ -118,7 +126,11 @@ static bool_t xdrstdio_putlong(XDR *xdrs, long *lp)
 	return (TRUE);
 }
 
-static bool_t xdrstdio_getbytes(XDR *xdrs, caddr_t addr, int len)
+static bool_t
+xdrstdio_getbytes(xdrs, addr, len)
+	XDR *xdrs;
+	caddr_t addr;
+	int len;
 {
 	trace2(TR_xdrstdio_getbytes, 0, len);
 	if ((len != 0) &&
@@ -130,7 +142,11 @@ static bool_t xdrstdio_getbytes(XDR *xdrs, caddr_t addr, int len)
 	return (TRUE);
 }
 
-static bool_t xdrstdio_putbytes(XDR *xdrs, caddr_t addr, int len)
+static bool_t
+xdrstdio_putbytes(xdrs, addr, len)
+	XDR *xdrs;
+	caddr_t addr;
+	int len;
 {
 	trace2(TR_xdrstdio_putbytes, 0, len);
 	if ((len != 0) &&
@@ -142,7 +158,9 @@ static bool_t xdrstdio_putbytes(XDR *xdrs, caddr_t addr, int len)
 	return (TRUE);
 }
 
-static u_int xdrstdio_getpos(XDR *xdrs)
+static u_int
+xdrstdio_getpos(xdrs)
+	XDR *xdrs;
 {
 	u_int dummy1;
 
@@ -152,7 +170,10 @@ static u_int xdrstdio_getpos(XDR *xdrs)
 	return (dummy1);
 }
 
-static bool_t xdrstdio_setpos(XDR *xdrs, u_int pos)
+static bool_t
+xdrstdio_setpos(xdrs, pos)
+	XDR *xdrs;
+	u_int pos;
 {
 	bool_t dummy2;
 
@@ -163,7 +184,10 @@ static bool_t xdrstdio_setpos(XDR *xdrs, u_int pos)
 	return (dummy2);
 }
 
-static long *xdrstdio_inline(XDR *xdrs, int len)
+static long *
+xdrstdio_inline(xdrs, len)
+	XDR *xdrs;
+	int len;
 {
 
 	/*
@@ -180,7 +204,11 @@ static long *xdrstdio_inline(XDR *xdrs, int len)
 	return (NULL);
 }
 
-static bool_t xdrstdio_control(XDR *xdrs, int request, void *info)
+static bool_t
+xdrstdio_control(xdrs, request, info)
+	XDR *xdrs;
+	int request;
+	void *info;
 {
 	switch (request) {
 

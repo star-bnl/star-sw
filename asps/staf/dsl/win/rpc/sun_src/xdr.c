@@ -1,4 +1,3 @@
-/* WHG 07apr98 Modified for use in win32 DSL */
 /*
  * Sun RPC is a product of Sun Microsystems, Inc. and is provided for
  * unrestricted use provided that this legend is included on all tape
@@ -32,7 +31,7 @@
  * Copyright (c) 1986-1991 by Sun Microsystems Inc.
  */
 
-/* WHG #pragma ident	"@(#)xdr.c	1.16	94/04/24 SMI" */
+#pragma ident	"@(#)xdr.c	1.16	94/04/24 SMI"
 
 #if !defined(lint) && defined(SCCSIDS)
 static char sccsid[] = "@(#)xdr.c 1.44 89/02/28";
@@ -52,7 +51,7 @@ static char sccsid[] = "@(#)xdr.c 1.44 89/02/28";
 #include <sys/param.h>
 #include <sys/systm.h>
 #else
-/* WHG #include <sys/syslog.h> */
+#include <sys/syslog.h>
 #include <stdio.h>
 #endif
 
@@ -427,7 +426,7 @@ bool_t
 xdr_opaque(xdrs, cp, cnt)
 	register XDR *xdrs;
 	caddr_t cp;
-	const u_int cnt;
+	register u_int cnt;
 {
 	bool_t dummy;
 	register u_int rndup;
@@ -511,7 +510,7 @@ xdr_bytes(xdrs, cpp, sizep, maxsize)
 	register XDR *xdrs;
 	char **cpp;
 	register u_int *sizep;
-	const u_int maxsize;
+	u_int maxsize;
 {
 	bool_t dummy;
 	register char *sp = *cpp;  /* sp is the actual string pointer */
@@ -555,8 +554,7 @@ xdr_bytes(xdrs, cpp, sizep, maxsize)
 		}
 #ifndef KERNEL
 		if (sp == NULL) {
-/* WHG		(void) syslog(LOG_ERR, xdr_err, (const char *) "bytes"); */
-			WHG_MALLOC_ERR("xdr_bytes");
+			(void) syslog(LOG_ERR, xdr_err, (const char *) "bytes");
 			trace1(TR_xdr_bytes, 1);
 			return (FALSE);
 		}
@@ -612,11 +610,11 @@ xdr_netobj(xdrs, np)
  */
 bool_t
 xdr_union(xdrs, dscmp, unp, choices, dfault)
-	XDR *xdrs;
+	register XDR *xdrs;
 	enum_t *dscmp;		/* enum to decide which arm to work on */
 	char *unp;		/* the union itself */
 	const struct xdr_discrim *choices;	/* [value, xdr proc] for each arm */
-	const xdrproc_t dfault;	/* default xdr routine */
+	xdrproc_t dfault;	/* default xdr routine */
 {
 	register enum_t dscm;
 	bool_t dummy;
@@ -674,7 +672,7 @@ bool_t
 xdr_string(xdrs, cpp, maxsize)
 	register XDR *xdrs;
 	char **cpp;
-	const u_int maxsize;
+	u_int maxsize;
 {
 	bool_t dummy;
 	register char *sp = *cpp;  /* sp is the actual string pointer */
@@ -731,9 +729,8 @@ xdr_string(xdrs, cpp, maxsize)
 			*cpp = sp = (char *)mem_alloc(nodesize);
 #ifndef KERNEL
 		if (sp == NULL) {
-/* WHG		(void) syslog(LOG_ERR, xdr_err,
-				(const char *) "string"); WHG */
-			WHG_MALLOC_ERR("xdr_string");
+			(void) syslog(LOG_ERR, xdr_err,
+				(const char *) "string");
 			trace1(TR_xdr_string, 1);
 			return (FALSE);
 		}

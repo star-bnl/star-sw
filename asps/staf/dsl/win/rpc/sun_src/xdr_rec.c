@@ -1,4 +1,3 @@
-/* WHG 07apr98 Modified for use in win32 DSL */
 /*
  * Sun RPC is a product of Sun Microsystems, Inc. and is provided for
  * unrestricted use provided that this legend is included on all tape
@@ -32,7 +31,7 @@
  * Copyright (c) 1984 - 1991 by Sun Microsystems, Inc.
  */
 
-/* WHG #pragma ident	"@(#)xdr_rec.c	1.20	94/04/24 SMI" */
+#pragma ident	"@(#)xdr_rec.c	1.20	94/04/24 SMI"
 
 #if !defined(lint) && defined(SCCSIDS)
 static char sccsid[] = "@(#)xdr_rec.c	1.20	94/04/24 SMI";
@@ -54,20 +53,20 @@ static char sccsid[] = "@(#)xdr_rec.c	1.20	94/04/24 SMI";
  * The other 31 bits encode the byte length of the fragment.
  */
 
-/* WHG #include "rpc_mt.h" */
+#include "rpc_mt.h"
 #include <stdio.h>
 #include <rpc/types.h>
 #include <rpc/xdr.h>
 #include <sys/types.h>
 #include <rpc/trace.h>
-/* WHG #include <sys/syslog.h> */
+#include <sys/syslog.h>
 #include <memory.h>
 
 extern long	lseek();
 
 static u_int	fix_buf_size();
 static struct	xdr_ops *xdrrec_ops();
-static bool_t	xdrrec_getbytes(XDR *xdrs, caddr_t addr, int len);
+static bool_t	xdrrec_getbytes();
 static bool_t	flush_out();
 static bool_t	get_input_bytes();
 static bool_t	set_input_fragment();
@@ -138,18 +137,15 @@ xdrrec_create(xdrs, sendsize, recvsize, tcp_handle, readit, writeit)
 	register u_int sendsize;
 	register u_int recvsize;
 	caddr_t tcp_handle;
-		/* like read, but pass it a vc_handle, not fd */
-	int (*readit)(void *, caddr_t, int);
-		/* like write, but pass it a vc_handle, not fd */
-	int (*writeit)(void *, caddr_t, int); 
+	int (*readit)();  /* like read, but pass it a vc_handle, not fd */
+	int (*writeit)(); /* like write, but pass it a vc_handle, not fd */
 {
 	register RECSTREAM *rstrm =
 		(RECSTREAM *)mem_alloc(sizeof (RECSTREAM));
 
 	trace3(TR_xdrrec_create, 0, sendsize, recvsize);
 	if (rstrm == NULL) {
-/* WHG	(void) syslog(LOG_ERR, mem_err_msg_rec); */
-		WHG_MALLOC_ERR("xdrrec_create");
+		(void) syslog(LOG_ERR, mem_err_msg_rec);
 		/*
 		 *  XXX: This is bad.  Should rework xdrrec_create to
 		 *  return a handle, and in this case return NULL
@@ -165,8 +161,7 @@ xdrrec_create(xdrs, sendsize, recvsize, tcp_handle, readit, writeit)
 	rstrm->the_buffer = (caddr_t)mem_alloc(sendsize +
 					recvsize + BYTES_PER_XDR_UNIT);
 	if (rstrm->the_buffer == NULL) {
-/* WHG	(void) syslog(LOG_ERR, mem_err_msg_rec); */
-		WHG_MALLOC_ERR("xdrrec_create");
+		(void) syslog(LOG_ERR, mem_err_msg_rec);
 		(void) mem_free((char *) rstrm, sizeof (RECSTREAM));
 		trace1(TR_xdrrec_create, 1);
 		return;
@@ -204,7 +199,10 @@ xdrrec_create(xdrs, sendsize, recvsize, tcp_handle, readit, writeit)
  * The routines defined below are the xdr ops which will go into the
  * xdr handle filled in by xdrrec_create.
  */
-static bool_t xdrrec_getlong(XDR *xdrs, long *lp)
+static bool_t
+xdrrec_getlong(xdrs, lp)
+	XDR *xdrs;
+	long *lp;
 {
 	register RECSTREAM *rstrm = (RECSTREAM *)(xdrs->x_private);
 	register long *buflp = (long *)(rstrm->in_finger);
@@ -228,7 +226,10 @@ static bool_t xdrrec_getlong(XDR *xdrs, long *lp)
 	return (TRUE);
 }
 
-static bool_t xdrrec_putlong(XDR *xdrs, long *lp)
+static bool_t
+xdrrec_putlong(xdrs, lp)
+	XDR *xdrs;
+	long *lp;
 {
 	register RECSTREAM *rstrm = (RECSTREAM *)(xdrs->x_private);
 	register long *dest_lp = ((long *)(rstrm->out_finger));
@@ -253,7 +254,11 @@ static bool_t xdrrec_putlong(XDR *xdrs, long *lp)
 	return (TRUE);
 }
 
-static bool_t xdrrec_getbytes(XDR *xdrs, caddr_t addr, int len)
+static bool_t	/* must manage buffers, fragments, and records */
+xdrrec_getbytes(xdrs, addr, len)
+	XDR *xdrs;
+	register caddr_t addr;
+	register int len;
 {
 	register RECSTREAM *rstrm = (RECSTREAM *)(xdrs->x_private);
 	register int current;
@@ -285,7 +290,11 @@ static bool_t xdrrec_getbytes(XDR *xdrs, caddr_t addr, int len)
 	return (TRUE);
 }
 
-static bool_t xdrrec_putbytes(XDR *xdrs, caddr_t addr, int len)
+static bool_t
+xdrrec_putbytes(xdrs, addr, len)
+	XDR *xdrs;
+	register caddr_t addr;
+	register int len;
 {
 	register RECSTREAM *rstrm = (RECSTREAM *)(xdrs->x_private);
 	register int current;
@@ -346,7 +355,9 @@ xdrrec_readbytes(xdrs, addr, l)
 	return (l - len);
 }
 
-static u_int xdrrec_getpos(XDR *xdrs)
+static u_int
+xdrrec_getpos(xdrs)
+	register XDR *xdrs;
 {
 	register RECSTREAM *rstrm = (RECSTREAM *)xdrs->x_private;
 	register long pos;
@@ -372,7 +383,10 @@ static u_int xdrrec_getpos(XDR *xdrs)
 	return ((u_int) pos);
 }
 
-static bool_t xdrrec_setpos(XDR *xdrs, u_int pos)
+static bool_t
+xdrrec_setpos(xdrs, pos)
+	register XDR *xdrs;
+	u_int pos;
 {
 	register RECSTREAM *rstrm = (RECSTREAM *)xdrs->x_private;
 	u_int currpos = xdrrec_getpos(xdrs);
@@ -409,7 +423,10 @@ static bool_t xdrrec_setpos(XDR *xdrs, u_int pos)
 	return (FALSE);
 }
 
-static long *xdrrec_inline(XDR *xdrs, int len)
+static long *
+xdrrec_inline(xdrs, len)
+	register XDR *xdrs;
+	int len;
 {
 	register RECSTREAM *rstrm = (RECSTREAM *)xdrs->x_private;
 	long * buf = NULL;
@@ -437,7 +454,9 @@ static long *xdrrec_inline(XDR *xdrs, int len)
 	return (buf);
 }
 
-static void xdrrec_destroy(XDR *xdrs)
+static void
+xdrrec_destroy(xdrs)
+	register XDR *xdrs;
 {
 	register RECSTREAM *rstrm = (RECSTREAM *)xdrs->x_private;
 
@@ -679,7 +698,7 @@ __is_xdrrec_first(xdrs)
 	register RECSTREAM *rstrm = (RECSTREAM *)(xdrs->x_private);
 	return ((rstrm->firsttime == TRUE)? 1 : 0);
 }
-void /* WHG added void */
+
 __xdrrec_setfirst(xdrs)
 	XDR *xdrs;
 {
@@ -687,7 +706,7 @@ __xdrrec_setfirst(xdrs)
 
 	rstrm->firsttime = TRUE;
 }
-void /* WHG added void */
+
 __xdrrec_resetfirst(xdrs)
 	XDR *xdrs;
 {
@@ -713,7 +732,11 @@ fix_buf_size(s)
 
 
 
-static bool_t xdrrec_control(XDR *xdrs, int request, void *info)
+static bool_t
+xdrrec_control(xdrs, request, info)
+	XDR *xdrs;
+	int request;
+	void *info;
 {
 	register RECSTREAM *rstrm = (RECSTREAM *)(xdrs->x_private);
 	xdr_bytesrec *xptr;

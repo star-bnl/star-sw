@@ -1,4 +1,3 @@
-/* WHG 07apr98 Modified for use in win32 DSL */
 /*
  * Sun RPC is a product of Sun Microsystems, Inc. and is provided for
  * unrestricted use provided that this legend is included on all tape
@@ -32,7 +31,7 @@
  * Copyright (c) 1986 - 1991 by Sun Microsystems, Inc.
  */
 
-/* WHG #pragma ident	"@(#)xdr_refer.c	1.10	93/07/05 SMI" */
+#pragma ident	"@(#)xdr_refer.c	1.10	93/07/05 SMI" 
 
 /*
  * xdr_refer.c, Generic XDR routines impelmentation.
@@ -45,7 +44,7 @@
 #ifdef KERNEL
 #include <sys/param.h>
 #else
-/* WHG #include <sys/syslog.h> */
+#include <sys/syslog.h>
 #include <stdio.h>
 #endif
 #include <rpc/types.h>
@@ -69,7 +68,7 @@ xdr_reference(xdrs, pp, size, proc)
 	register XDR *xdrs;
 	caddr_t *pp;		/* the pointer to work on */
 	u_int size;		/* size of the object pointed to */
-	const xdrproc_t proc;		/* xdr routine to handle the object */
+	xdrproc_t proc;		/* xdr routine to handle the object */
 {
 	register caddr_t loc = *pp;
 	register bool_t stat;
@@ -85,8 +84,8 @@ xdr_reference(xdrs, pp, size, proc)
 			*pp = loc = (caddr_t) mem_alloc(size);
 #ifndef KERNEL
 			if (loc == NULL) {
-/* WHG			(void) syslog(LOG_ERR, mem_err_msg_ref); */
-				WHG_MALLOC_ERR("xdr_reference");
+				(void) syslog(LOG_ERR, mem_err_msg_ref);
+
 				trace1(TR_xdr_reference, 1);
 				return (FALSE);
 			}
@@ -133,7 +132,7 @@ xdr_pointer(xdrs, objpp, obj_size, xdr_obj)
 	register XDR *xdrs;
 	char **objpp;
 	u_int obj_size;
-	const xdrproc_t xdr_obj;
+	xdrproc_t xdr_obj;
 {
 	bool_t more_data;
 	bool_t dummy;

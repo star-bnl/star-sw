@@ -151,10 +151,6 @@ void dsMarkTypes(int argc, char *argv[])
 	FILE *stream;
 	XDR xdr;
 
-	if (argc > 5) {
-		fprintf(stderr, "Too many arguments for option %c\n", optChar);
-		exit(0);
-	}
 	optChar = *argv[1];
 	fileName = argv[2];
 	if (argc > 3) {
@@ -167,9 +163,13 @@ void dsMarkTypes(int argc, char *argv[])
 	if (argc > 4) {
 		last = strtol(argv[4], &ptr, 10);
 		if (ptr == argv[4]) {
-			fprintf(stderr, "Invalid firstIndex: %s\n", argv[4]);
+			fprintf(stderr, "Invalid lastIndex: %s\n", argv[4]);
 			exit(0);
 		}
+	}
+	if (argc > 5) {
+		fprintf(stderr, "Too many arguments for option %c\n", optChar);
+		exit(0);
 	}
 	if ((stream = fopen(fileName, "rb")) == NULL) {
 		fprintf(stderr, "fopen failed for %s\n", fileName);
@@ -220,12 +220,12 @@ void dsMarkWrite(int argc, char *argv[])
 	FILE *stream;
 	XDR xdr;
 
+	i = 1;
+	optChar = *argv[i++];
 	if (argc < 6) {
 		fprintf(stderr, "Too few arguments for option %c\n", optChar);
 		exit(0);
 	}
-	i = 1;
-	optChar = *argv[i++];
 	fileName = argv[i++];
 	str = argv[i++];
 	if (strlen(str) != 1 || NULL == strchr("BL", endian = toupper(*str))) {

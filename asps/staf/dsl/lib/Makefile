@@ -14,7 +14,6 @@ endif
 HPATH=$(BASE_PATH)/inc
 SPATH=$(BASE_PATH)/src
 LPATH=$(BASE_PATH)/lib/$(OSARCH)
-VPATH=$(BASE_PATH)/lib/vxw
 export 
 
 all: lib
@@ -42,12 +41,5 @@ realclean:
 	cd sun4os5; $(MAKE) -f ../Makefile.lib clean
 	cd sun4os5pc; $(MAKE) -f ../Makefile.lib clean
 	cd t3e; $(MAKE) -f ../Makefile.lib clean
-	cd vxw; $(MAKE) -f ../Makefile.lib vwclean
-
-vwlib:
-	cd $(VPATH); $(MAKE) -f ../Makefile.lib vwlib
-
-vwclean:
-	cd $(VPATH); $(MAKE) -f ../Makefile.lib vwclean
 
 

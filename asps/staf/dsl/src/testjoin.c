@@ -32,7 +32,7 @@ typedef struct staff_t {
 	"long salary;"\
 	"short supNum;}"
 	
-STAFF_T staff[] = {
+static STAFF_T staff[] = {
 	{"Charles",	 1, 90000,  0},
 	{"Bob",		19, 50000, 11},
 	{"Mary",	10, 80000,  1},
@@ -42,16 +42,16 @@ STAFF_T staff[] = {
 	{"Jane",	22, 60000, 11},
 	{"Fred",	13, 70000, 10}};
 
-size_t staffRowCount = sizeof(staff)/sizeof(staff[0]);
+static size_t staffRowCount = sizeof(staff)/sizeof(staff[0]);
 
-char *selfAlias = "emp sup";
+static char *selfAlias = "emp sup";
 
-char *selfJoin = "{sup.empNum emp.supNum}";
+static char *selfJoin = "{sup.empNum emp.supNum}";
 
-char *selfProject = "{emp.salary empSalary, emp.name empName,"
+static char *selfProject = "{emp.salary empSalary, emp.name empName,"
       "sup.name supName, sup.salary supSalary}";
       
-char *removeName = "{selfJoin.empName myName, empSalary mySalary, supSalary}";               
+static char *removeName = "{selfJoin.empName myName, empSalary mySalary, supSalary}";               
 
 /****************************************************************************
 *
@@ -135,6 +135,85 @@ static void fillVarTwo(TYPE_TWO_T *var, unsigned count);
 static int checkJoin(JOIN_TYPE_T *join, unsigned count);
 /****************************************************************************
 *
+* testHashjoin - test program for hash join
+*/
+typedef struct hash_t {DS_LONG key, row;} HASH_JOIN_T;
+typedef struct joined_t {DS_LONG key, row1, row2;} JOINED_T;
+#define HASH1_S "struct hash_join1_t {long key, row1;}"
+#define HASH2_S "struct hash_join2_t {long key, row2;}"
+#define HASH_ROW_COUNT 1000
+int testHashjoin()
+{
+	double t, t0;
+	size_t i;
+	DS_DATASET_T *join1 = NULL, *join2 = NULL, *table1 = NULL, *table2 = NULL;
+	HASH_JOIN_T *p1, *p2;
+	JOINED_T *j1, *j2;
+
+	if (!dsNewTable(&table1, "table1", HASH1_S, HASH_ROW_COUNT, NULL) ||
+		!dsNewTable(&table2, "table2", HASH2_S, HASH_ROW_COUNT, NULL) ||
+		!dsTargetTable(&join1, "j1", "join_t", table1, table2, NULL, NULL) ||
+		!dsTargetTable(&join2, "j2", "join_t", table1, table2, NULL, NULL) ||
+		!dsAllocTables(table1) ||
+		!dsAllocTables(table2)) {
+		goto fail;
+	}
+	table1->elcount = table2->elcount = HASH_ROW_COUNT;
+	p1 = (HASH_JOIN_T *)table1->p.data;
+	p2 = (HASH_JOIN_T *)table2->p.data;
+
+	for (i = 0; i < HASH_ROW_COUNT; i++) {
+		p1[i].row = p2[i].row = i;
+		p1[i].key = (32*rand() + i)%HASH_ROW_COUNT;
+		p2[i].key = (32*rand() + i)%HASH_ROW_COUNT;
+	}
+	t0 = msecTime(NULL);
+	if (!dsEquijoin(join1, table1, table2, NULL, NULL, NULL)) {
+		dsPerror("Hash join test failed");
+		goto fail;
+	}
+	t = msecTime(NULL);
+	printf("fast join %d rows, time %f\n", join1->elcount, t - t0);
+
+	t0 = msecTime(NULL);
+	if (!dsSlowEquijoin(join2, table1, table2, NULL, NULL, NULL)) {
+		dsPerror("Slow join test failed");
+		goto fail;
+	}
+	t = msecTime(NULL);
+	printf("slow join %d rows, time %f\n", join2->elcount, t - t0);
+	
+	if (join1->elcount != join2->elcount) {
+		dsError("hash and slow join: bad row count");
+		goto fail;
+	} 
+	j1 = (JOINED_T *)join1->p.data;
+	j2 = (JOINED_T *)join2->p.data;
+	for (i = 0; i < join1->elcount; i++) {
+		if (j1[i].key != j2[i].key ||
+			j1[i].key != j2[i].key ||
+			j1[i].key != j2[i].key) {
+			dsPerror("hash and slow join: diff data error");
+			goto fail;
+		}
+	}
+	printf("success for fast/slow join test\n");
+
+	if (table1) dsFreeDataset(table1);
+	if (table2) dsFreeDataset(table2);
+	if (join1) dsFreeDataset(join1);
+	if (join2) dsFreeDataset(join2);
+	return TRUE;
+fail:
+	dsPerror("hashJoin failed");
+	if (table1) dsFreeDataset(table1);
+	if (table2) dsFreeDataset(table2);
+	if (join1) dsFreeDataset(join1);
+	if (join2) dsFreeDataset(join2);
+	return FALSE;
+}
+/****************************************************************************
+*
 * testNatural - program to test dsEquijoin
 *
 */
@@ -216,6 +295,7 @@ int testNatural()
 int dsTestJoin(void)
 {
 	if (!testEquijoin() ||
+		!testHashjoin() ||
 	    !testNatural()) {
 	    return FALSE;
 	}

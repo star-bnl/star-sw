@@ -41,7 +41,10 @@
 #include <rpc/trace.h>
 
 /* ARGSUSED */
-static bool_t x_putlong(XDR *xdrs, long *longp)
+static bool_t
+x_putlong(xdrs, longp)
+	XDR *xdrs;
+	long *longp;
 {
 	trace1(TR_x_putlong, 0);
 
@@ -51,7 +54,11 @@ static bool_t x_putlong(XDR *xdrs, long *longp)
 }
 
 /* ARGSUSED */
-static bool_t x_putbytes(XDR *xdrs, char  *bp, int len)
+static bool_t
+x_putbytes(xdrs, bp, len)
+	XDR *xdrs;
+	char  *bp;
+	int len;
 {
 	trace2(TR_x_putbytes, 0, len);
 	xdrs->x_handy += len;
@@ -60,7 +67,9 @@ static bool_t x_putbytes(XDR *xdrs, char  *bp, int len)
 	return (TRUE);
 }
 
-static u_int x_getpostn(XDR *xdrs)
+static u_int
+x_getpostn(xdrs)
+	XDR *xdrs;
 {
 	trace1(TR_x_getpostn, 0);
 	trace1(TR_x_getpostn, 1);
@@ -68,7 +77,10 @@ static u_int x_getpostn(XDR *xdrs)
 }
 
 /* ARGSUSED */
-static bool_t x_setpostn(XDR *xdrs, u_int pos)
+static bool_t
+x_setpostn(xdrs, pos)
+	XDR *xdrs;
+	u_int pos;
 {
 	/* This is not allowed */
 	trace2(TR_x_setpostn, 0, pos);
@@ -76,7 +88,10 @@ static bool_t x_setpostn(XDR *xdrs, u_int pos)
 	return (FALSE);
 }
 
-static long *x_inline(XDR *xdrs, int len)
+static long *
+x_inline(xdrs, len)
+	XDR *xdrs;
+	int len;
 {
 	trace2(TR_x_inline, 0, len);
 	if (len == 0) {
@@ -117,7 +132,9 @@ harmless()
 	return (0);
 }
 
-static void x_destroy(XDR *xdrs)
+static void
+x_destroy(xdrs)
+	XDR *xdrs;
 {
 	trace1(TR_x_destroy, 0);
 	xdrs->x_handy = 0;

@@ -58,6 +58,7 @@ int dsEquijoin(DS_DATASET_T *pJoinTable, DS_DATASET_T *pTableOne,
 {
 	char aliasName[2][DS_NAME_DIM];
 	char *baseOne, *baseTwo, *joinBase, *names[2], *srcBase, *str;
+	size_t *first, h, hashDim, *last, *next, tmpSize;
 	size_t i, r1, r2, size, srcIndex[DS_MAX_JOIN];
 	DS_FIELD_T *pJoinField, *srcField[DS_MAX_JOIN];
 	DS_KEY_T key;
@@ -87,31 +88,63 @@ int dsEquijoin(DS_DATASET_T *pJoinTable, DS_DATASET_T *pTableOne,
 			DS_ERROR(DS_E_INVALID_ALIAS);
 		}       
    	}
-	if (!dsEquijoinKey(&key, &types[1], names, joinList)) {
+	if (!dsEquijoinKey(&key, &types[1], names, joinList) ||
+		!dsEquijoinFields(srcField, srcIndex, types, &key, names, projectList)) {
 		return FALSE;
 	}
-	if (!dsEquijoinFields(srcField, srcIndex, types, &key, names, projectList)) {
+	/* compute hash for join */
+	h = pTableOne->elcount > pTableTwo->elcount ?
+		pTableOne->elcount : pTableTwo->elcount;
+	for (hashDim = 3; hashDim < h; hashDim += hashDim + 1);
+	tmpSize = sizeof(size_t)*(2*hashDim + pTableTwo->elcount);
+	if (!(first = (size_t *)dsTmpAlloc(tmpSize))) {
 		return FALSE;
 	}
+	last = first + hashDim;
+	next = last + hashDim;
+	for (i = 0 ; i < hashDim; i++) {
+		first[i] = pTableTwo->elcount;
+	}
+	baseTwo = pTableTwo->p.data;
+	for (r2 = 0; r2 < pTableTwo->elcount; r2++) {
+		next[r2] = pTableTwo->elcount;
+		h = dsHashKey(&key, 1, baseTwo)%hashDim;
+/*
+		printf("h %d, first[h], %d hashDim, %d\n", h, first[h], hashDim);
+*/
+		if (first[h] == pTableTwo->elcount) {
+			first[h] = r2;
+		}
+		else {
+			next[last[h]] = r2;
+		}
+		last[h] = r2;
+		baseTwo += types[2]->size; 
+	}
+	/* use hash to do join */
 	pJoinField = DS_FIELD_PTR(types[0]);
 	baseOne = pTableOne->p.data;
 	pJoinTable->elcount = 0;
 	for (r1 = 0; r1 < pTableOne->elcount; r1++) {
 		baseTwo = pTableTwo->p.data;
-		for (r2 = 0; r2 < pTableTwo->elcount; r2++) {
-			if (dsCmpKeys(baseOne, baseTwo, &key) == 0) {
+		h = dsHashKey(&key, 0, baseOne)%hashDim;
+		for (r2 = first[h]; r2 < pTableTwo->elcount; r2 = next[r2]) {
+			baseTwo = (char *)pTableTwo->p.data +r2*types[2]->size;
+			if (dsCmpKeys(&key, baseOne, baseTwo) == 0) {
 				if (pJoinTable->elcount >= pJoinTable->maxcount) {
 					if (pJoinTable->elcount != pJoinTable->maxcount) {
-						DS_ERROR(DS_E_SYSTEM_ERROR);
+						DS_LOG_ERROR(DS_E_SYSTEM_ERROR);
+						goto fail;
 					}
 					if (DS_IS_DYNAMIC(pJoinTable)) {
 						if (!dsReallocTable(pJoinTable,
 							DS_REALLOC_COUNT(pJoinTable))) {
-							return FALSE;
+							goto fail;
 						}
 					}
 					else {
-						DS_ERROR(DS_E_JOIN_TOO_LARGE);
+						DS_LOG_ERROR(DS_E_JOIN_TOO_LARGE);
+						goto fail;
 					}
 				}
 				joinBase = (char *)pJoinTable->p.data +
@@ -124,16 +157,19 @@ int dsEquijoin(DS_DATASET_T *pJoinTable, DS_DATASET_T *pTableOne,
 				}
 				pJoinTable->elcount++;
 			}
-			baseTwo += types[2]->size;
 		}
 		baseOne += types[1]->size;
 	}
+	dsTmpFree(first, tmpSize);
 	if (DS_IS_DYNAMIC(pJoinTable)) {
 		if (!dsReallocTable(pJoinTable, pJoinTable->elcount)) {
 			return FALSE;
 		}
 	}
 	return TRUE;
+fail:
+	dsTmpFree(first, tmpSize);
+	return FALSE;
 }
 /*****************************************************************************
 *
@@ -455,6 +491,94 @@ int dsProjectTable(DS_DATASET_T *pDst, DS_DATASET_T *pSrc, char *projectList)
 		default:
 			DS_ERROR(DS_E_MULTIPLE_ERRORS);
 	}
+}
+/*****************************************************************************
+*
+* dsSlowEquijoin - construct projection of natural join
+*
+* RETURNS: TRUE if success else FALSE
+*/
+int dsSlowEquijoin(DS_DATASET_T *pJoinTable, DS_DATASET_T *pTableOne,
+	DS_DATASET_T *pTableTwo, char *aliases, char *joinList, char *projectList)
+{
+	char aliasName[2][DS_NAME_DIM];
+	char *baseOne, *baseTwo, *joinBase, *names[2], *srcBase, *str;
+	size_t i, r1, r2, size, srcIndex[DS_MAX_JOIN];
+	DS_FIELD_T *pJoinField, *srcField[DS_MAX_JOIN];
+	DS_KEY_T key;
+	DS_TYPE_T *types[4];
+
+	if (!DS_IS_TABLE(pJoinTable) ||
+		!DS_IS_TABLE(pTableOne)  ||
+		!DS_IS_TABLE(pTableTwo)) {
+		DS_ERROR(DS_E_INVALID_TABLE);
+	}
+	if (!dsTypePtr(&types[0], pJoinTable->tid) || 
+		!dsTypePtr(&types[1], pTableOne->tid)  ||
+		!dsTypePtr(&types[2], pTableTwo->tid)) {
+		return FALSE;
+	}
+	types[3] = NULL;
+	if (aliases == NULL) {
+		names[0] = pTableOne->name;
+		names[1] = pTableTwo->name;
+	}
+	else {
+		str = aliases;
+		names[0] = aliasName[0];
+		names[1] = aliasName[1];
+		if (!dsParseName(names[0], str, &str) ||
+			!dsParseName(names[1], str, &str)) {
+			DS_ERROR(DS_E_INVALID_ALIAS);
+		}       
+   	}
+	if (!dsEquijoinKey(&key, &types[1], names, joinList)) {
+		return FALSE;
+	}
+	if (!dsEquijoinFields(srcField, srcIndex, types, &key, names, projectList)) {
+		return FALSE;
+	}
+	pJoinField = DS_FIELD_PTR(types[0]);
+	baseOne = pTableOne->p.data;
+	pJoinTable->elcount = 0;
+	for (r1 = 0; r1 < pTableOne->elcount; r1++) {
+		baseTwo = pTableTwo->p.data;
+		for (r2 = 0; r2 < pTableTwo->elcount; r2++) {
+			if (dsCmpKeys(&key, baseOne, baseTwo) == 0) {
+				if (pJoinTable->elcount >= pJoinTable->maxcount) {
+					if (pJoinTable->elcount != pJoinTable->maxcount) {
+						DS_ERROR(DS_E_SYSTEM_ERROR);
+					}
+					if (DS_IS_DYNAMIC(pJoinTable)) {
+						if (!dsReallocTable(pJoinTable,
+							DS_REALLOC_COUNT(pJoinTable))) {
+							return FALSE;
+						}
+					}
+					else {
+						DS_ERROR(DS_E_JOIN_TOO_LARGE);
+					}
+				}
+				joinBase = (char *)pJoinTable->p.data +
+					pJoinTable->elcount *types[0]->size;
+				for (i = 0; i < types[0]->nField; i++) {
+					size = pJoinField[i].count*pJoinField[i].type->size;
+					srcBase = srcIndex[i] ? baseTwo : baseOne;
+					memcpy(joinBase + pJoinField[i].offset,
+						srcBase + srcField[i]->offset, size);
+				}
+				pJoinTable->elcount++;
+			}
+			baseTwo += types[2]->size;
+		}
+		baseOne += types[1]->size;
+	}
+	if (DS_IS_DYNAMIC(pJoinTable)) {
+		if (!dsReallocTable(pJoinTable, pJoinTable->elcount)) {
+			return FALSE;
+		}
+	}
+	return TRUE;
 }
 /*****************************************************************************
 *

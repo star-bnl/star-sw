@@ -1,4 +1,3 @@
-/* WHG 07apr98 Modified for use in win32 DSL */
 /*
  * Sun RPC is a product of Sun Microsystems, Inc. and is provided for
  * unrestricted use provided that this legend is included on all tape
@@ -32,7 +31,7 @@
  * Copyright (c) 1984 - 1991 by Sun Microsystems, Inc.
  */
 
-/* WHG #pragma ident	"@(#)xdr_mem.c	1.15	94/04/24 SMI" */
+#pragma ident	"@(#)xdr_mem.c	1.15	94/04/24 SMI"
 
 #if !defined(lint) && defined(SCCSIDS)
 static char sccsid[] = "@(#)xdr_mem.c	1.15	94/04/24 SMI";
@@ -51,7 +50,7 @@ static char sccsid[] = "@(#)xdr_mem.c	1.15	94/04/24 SMI";
 #include <sys/param.h>
 #endif
 
-/* WHG #include "rpc_mt.h" */
+#include "rpc_mt.h"
 #include <sys/types.h>
 #include <rpc/trace.h>
 #include <rpc/types.h>
@@ -86,13 +85,18 @@ xdrmem_create(xdrs, addr, size, op)
 	trace2(TR_xdrmem_create, 1, size);
 }
 
-static void xdrmem_destroy(XDR *xdrs)
+static void
+xdrmem_destroy(xdrs)
+	XDR *xdrs;
 {
 	trace1(TR_xdrmem_destroy, 0);
 	trace1(TR_xdrmem_destroy, 1);
 }
 
-static bool_t xdrmem_getlong(XDR *xdrs, long *lp)
+static bool_t
+xdrmem_getlong(xdrs, lp)
+	register XDR *xdrs;
+	long *lp;
 {
 	trace1(TR_xdrmem_getlong, 0);
 	if ((xdrs->x_handy -= sizeof (long)) < 0) {
@@ -105,7 +109,10 @@ static bool_t xdrmem_getlong(XDR *xdrs, long *lp)
 	return (TRUE);
 }
 
-static bool_t xdrmem_putlong(XDR *xdrs, long *lp)
+static bool_t
+xdrmem_putlong(xdrs, lp)
+	register XDR *xdrs;
+	long *lp;
 {
 	trace1(TR_xdrmem_putlong, 0);
 	if ((xdrs->x_handy -= sizeof (long)) < 0) {
@@ -118,7 +125,11 @@ static bool_t xdrmem_putlong(XDR *xdrs, long *lp)
 	return (TRUE);
 }
 
-static bool_t xdrmem_getbytes(XDR *xdrs, caddr_t addr, int len)
+static bool_t
+xdrmem_getbytes(xdrs, addr, len)
+	register XDR *xdrs;
+	caddr_t addr;
+	register int len;
 {
 	trace2(TR_xdrmem_getbytes, 0, len);
 	if ((xdrs->x_handy -= len) < 0) {
@@ -131,7 +142,11 @@ static bool_t xdrmem_getbytes(XDR *xdrs, caddr_t addr, int len)
 	return (TRUE);
 }
 
-static bool_t xdrmem_putbytes(XDR *xdrs, caddr_t addr, int len)
+static bool_t
+xdrmem_putbytes(xdrs, addr, len)
+	register XDR *xdrs;
+	caddr_t addr;
+	register int len;
 {
 	trace2(TR_xdrmem_putbytes, 0, len);
 	if ((xdrs->x_handy -= len) < 0) {
@@ -144,14 +159,19 @@ static bool_t xdrmem_putbytes(XDR *xdrs, caddr_t addr, int len)
 	return (TRUE);
 }
 
-static u_int xdrmem_getpos(XDR *xdrs)
+static u_int
+xdrmem_getpos(xdrs)
+	register XDR *xdrs;
 {
 	trace1(TR_xdrmem_getpos, 0);
 	trace1(TR_xdrmem_getpos, 1);
 	return ((u_int)xdrs->x_private - (u_int)xdrs->x_base);
 }
 
-static bool_t xdrmem_setpos(XDR *xdrs, u_int pos)
+static bool_t
+xdrmem_setpos(xdrs, pos)
+	register XDR *xdrs;
+	u_int pos;
 {
 	register caddr_t newaddr = xdrs->x_base + pos;
 	register caddr_t lastaddr = xdrs->x_private + xdrs->x_handy;
@@ -167,7 +187,10 @@ static bool_t xdrmem_setpos(XDR *xdrs, u_int pos)
 	return (TRUE);
 }
 
-static long *xdrmem_inline(XDR *xdrs, int len)
+static long *
+xdrmem_inline(xdrs, len)
+	register XDR *xdrs;
+	int len;
 {
 	long *buf = 0;
 
@@ -181,7 +204,11 @@ static long *xdrmem_inline(XDR *xdrs, int len)
 	return (buf);
 }
 
-static bool_t xdrmem_control(XDR *xdrs, int request, void *info)
+static bool_t
+xdrmem_control(xdrs, request, info)
+	XDR *xdrs;
+	int request;
+	void *info;
 {
 	xdr_bytesrec *xptr;
 

@@ -1,6 +1,3 @@
-/* WHG 07apr98 Modified for use in win32 DSL */
-/* WHG 20Aug98 remove stuff for _KERNEL and alllow only ANSI C
-               see xdr_precpp.h for previous version */
 /*
  * Sun RPC is a product of Sun Microsystems, Inc. and is provided for
  * unrestricted use provided that this legend is included on all tape
@@ -41,17 +38,22 @@
 #ifndef _RPC_XDR_H
 #define	_RPC_XDR_H
 
-/* WHG #pragma ident	"@(#)xdr.h	1.23	94/04/25 SMI" */
+#pragma ident	"@(#)xdr.h	1.23	94/04/25 SMI"
 
 /*	xdr.h 1.26 88/12/17 SMI		*/
-/* WHG #include <sys/byteorder.h> */	/* For all ntoh* and hton*() kind of macros */
+
+#include <sys/byteorder.h>	/* For all ntoh* and hton*() kind of macros */
 #include <sys/types.h>	/* For all ntoh* and hton*() kind of macros */
+#ifndef _KERNEL
 #include <stdio.h> /* defines FILE *, used in ANSI C function prototypes */
+#endif
+#ifdef _KERNEL
+#include <sys/stream.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 /*
  * XDR provides a conventional way for converting between C data
@@ -110,6 +112,7 @@ enum xdr_op {
 typedef struct XDR {
 	enum xdr_op	x_op;	/* operation; fast additional param */
 	struct xdr_ops {
+#ifdef __STDC__
 		bool_t	(*x_getlong)(struct XDR *, long *);
 		/* get a long from underlying stream */
 		bool_t	(*x_putlong)(struct XDR *, long *);
@@ -127,6 +130,17 @@ typedef struct XDR {
 		void	(*x_destroy)(struct XDR *);
 		/* free privates of this xdr_stream */
 		bool_t	(*x_control)(struct XDR *, int, void *);
+#else
+		bool_t	(*x_getlong)();	/* get a long from underlying stream */
+		bool_t	(*x_putlong)();	/* put a long to " */
+		bool_t	(*x_getbytes)(); /* get some bytes from " */
+		bool_t	(*x_putbytes)(); /* put some bytes to " */
+		u_int	(*x_getpostn)(); /* returns bytes off from beginning */
+		bool_t  (*x_setpostn)(); /* lets you reposition the stream */
+		long *	(*x_inline)(); /* buf quick ptr to buffered data */
+		void	(*x_destroy)();	/* free privates of this xdr_stream */
+		bool_t	(*x_control)();
+#endif
 	} *x_ops;
 	caddr_t 	x_public; /* users' data */
 	caddr_t		x_private; /* pointer to private data */
@@ -208,7 +222,11 @@ typedef struct XDR {
  * allocate dynamic storage of the appropriate size and return it.
  * bool_t	(*xdrproc_t)(XDR *, void *);
  */
+#ifdef __STDC__
 typedef bool_t	(*xdrproc_t)(); /* For Backward compatibility */
+#else
+typedef	bool_t (*xdrproc_t)();
+#endif
 
 #define	NULL_xdrproc_t ((xdrproc_t)0)
 struct xdr_discrim {
@@ -254,6 +272,7 @@ struct xdr_discrim {
 /*
  * These are the "generic" xdr routines.
  */
+#ifdef __STDC__
 extern bool_t	xdr_void (void);
 extern bool_t	xdr_int (XDR *, int *);
 extern bool_t	xdr_u_int (XDR *, u_int *);
@@ -282,6 +301,7 @@ extern bool_t	xdr_wrapstring (XDR *, char **);
 extern bool_t	xdr_reference (XDR *, caddr_t *, u_int, const xdrproc_t);
 extern bool_t	xdr_pointer (XDR *, char **, u_int, const xdrproc_t);
 
+#ifndef _KERNEL
 extern bool_t	xdr_u_char (XDR *, u_char *);
 extern bool_t	xdr_vector (XDR *, char *, const u_int, const u_int, const
 xdrproc_t);
@@ -289,6 +309,41 @@ extern bool_t	xdr_float (XDR *, float *);
 extern bool_t	xdr_double (XDR *, double *);
 extern bool_t	xdr_quadruple (XDR *, long double *);
 extern void	xdr_free (xdrproc_t, char *);
+#endif /* !_KERNEL */
+#else
+extern bool_t	xdr_void ();
+extern bool_t	xdr_int ();
+extern bool_t	xdr_u_int ();
+extern bool_t	xdr_long ();
+extern bool_t	xdr_u_long ();
+extern bool_t	xdr_short ();
+extern bool_t	xdr_u_short ();
+extern bool_t	xdr_bool ();
+extern bool_t	xdr_enum ();
+extern bool_t	xdr_array ();
+extern bool_t	xdr_bytes ();
+extern bool_t	xdr_opaque ();
+extern bool_t	xdr_string ();
+extern bool_t	xdr_union ();
+
+extern bool_t   xdr_hyper ();
+extern bool_t   xdr_longlong_t ();
+extern bool_t   xdr_u_hyper ();
+extern bool_t   xdr_u_longlong_t ();
+extern bool_t	xdr_char ();
+extern bool_t	xdr_reference ();
+extern bool_t	xdr_pointer ();
+extern bool_t	xdr_wrapstring ();
+
+#ifndef _KERNEL
+extern bool_t	xdr_u_char ();
+extern bool_t	xdr_vector ();
+extern bool_t	xdr_float ();
+extern bool_t	xdr_double ();
+extern bool_t   xdr_quadruple();
+extern void	xdr_free ();
+#endif /* !_KERNEL */
+#endif
 
 /*
  * Common opaque bytes objects used by many rpc protocols;
@@ -301,7 +356,11 @@ struct netobj {
 };
 typedef struct netobj netobj;
 
+#ifdef __STDC__
 extern bool_t   xdr_netobj(XDR *, netobj *);
+#else
+extern bool_t   xdr_netobj();
+#endif
 
 /*
  * These are XDR control operators
@@ -316,17 +375,25 @@ struct xdr_bytesrec{
 
 typedef struct xdr_bytesrec xdr_bytesrec;
 
+#ifdef _KERNEL
+
+#define	XDR_PEEK 2
+
+#endif
 
 /*
  * These are the public routines for the various implementations of
  * xdr streams.
  */
-extern void   xdrmem_create(XDR *, caddr_t, u_int, enum xdr_op);
+#ifndef _KERNEL
+#ifdef __STDC__
+extern void   xdrmem_create(XDR *, const caddr_t, const u_int, const enum
+xdr_op);
 	/* XDR using memory buffers */
-extern void   xdrstdio_create(XDR *, FILE *, enum xdr_op);
+extern void   xdrstdio_create(XDR *, FILE *, const enum xdr_op);
 /* XDR using stdio library */
-extern void   xdrrec_create(XDR *, u_int, u_int, caddr_t,
-		int (*) (void *, caddr_t, int), int (*) (void *, caddr_t, int));
+extern void   xdrrec_create(XDR *, const u_int, const u_int, const caddr_t,
+int (*) (void *, caddr_t, int), int (*) (void *, caddr_t, int));
 /* XDR pseudo records for tcp */
 extern bool_t xdrrec_endofrecord(XDR *, bool_t);
 /* make end of xdr record */
@@ -335,6 +402,31 @@ extern bool_t xdrrec_skiprecord(XDR *);
 extern bool_t xdrrec_eof(XDR *);
 extern u_int xdrrec_readbytes(XDR *, caddr_t, u_int);
 /* true if no more input */
+#else
+extern void   xdrmem_create ();
+extern void   xdrstdio_create ();
+extern void   xdrrec_create ();
+extern bool_t xdrrec_endofrecord ();
+extern bool_t xdrrec_skiprecord ();
+extern bool_t xdrrec_eof ();
+extern u_int xdrrec_readbytes();
+#endif
+#else
+
+extern void	xdrmem_create(XDR *, caddr_t, u_int, enum xdr_op);
+extern void	xdrmblk_init(XDR *, mblk_t *, enum xdr_op, int);
+extern bool_t	xdrmblk_getmblk(XDR *, mblk_t **, u_int *);
+extern bool_t	xdrmblk_putmblk(XDR *, mblk_t *, u_int);
+
+struct rpc_msg;
+extern bool_t	xdr_callmsg(XDR *, struct rpc_msg *);
+extern bool_t	xdr_replymsg_body(XDR *, struct rpc_msg *);
+extern bool_t	xdr_replymsg_hdr(XDR *, struct rpc_msg *);
+
+extern bool_t	xdrmblk_setpos(XDR *, u_int);
+
+extern struct xdr_ops xdrmblk_ops;
+#endif /* !_KERNEL */
 
 #ifdef __cplusplus
 }
