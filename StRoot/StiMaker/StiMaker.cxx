@@ -1,7 +1,24 @@
+//
+// $Id $
 //StiMaker.cxx
 // M.L. Miller
 // 5/00
 // Modified Pruneau 3/02
+//
+//
+// $Log: StiMaker.cxx,v $
+// Revision 1.95  2002/05/29 19:13:50  calderon
+// Added
+//
+//   mevent = mStEventFiller->fillEvent(mevent, toolkit->getTrackContainer());
+//
+// for globals and
+//
+//   mevent = mStEventFiller->fillEventPrimaries(mevent, toolkit->getTrackContainer());
+//
+// for primaries.
+//
+//
 #include <iostream.h>
 #include <math.h>
 #include <string>
@@ -273,6 +290,16 @@ void StiMaker::finishEvent()
   tracker->findTracks();
   clock.stop();
   cout <<"StiMaker::finishEvent() - Time to find tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
+
+  //
+  // fill the global tracks in StEvent
+  //
+  clock.start();
+  cout <<"StiMaker::finishEvent() - INFO - Call StEvent Filler"  << endl;
+  mevent = mStEventFiller->fillEvent(mevent, toolkit->getTrackContainer());
+  clock.stop();
+  cout <<"StiMaker::finishEvent() - Time to fill StEvent: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
+
   bool useTrackMerger=false;
   if (useTrackMerger)
     {
@@ -287,20 +314,29 @@ void StiMaker::finishEvent()
   if (useExtendToVertex)
     {
       cout <<"StiMaker::finishEvent() - INFO - Get main vertex and extend tracks" << endl;
-      StiHit * vertex = toolkit->getHitFactory()->getObject();
-      const StThreeVectorF& vp = mevent->primaryVertex()->position();
-      const StThreeVectorF& ve = mevent->primaryVertex()->positionError();
-      vertex->set(0.,0.,vp.x(),vp.y(),vp.z(),ve.x(),0.,0.,ve.y(),0.,ve.z());
-      vertex->setStHit(mevent->primaryVertex());
-      tracker->extendTracksToVertex(vertex);
-      cout <<"StiMaker::finishEvent() - INFO - Tracks extension to main vertex completed" << endl;
+      if (mevent->primaryVertex()) {
+	  StiHit * vertex = toolkit->getHitFactory()->getObject();
+	  const StThreeVectorF& vp = mevent->primaryVertex()->position();
+	  const StThreeVectorF& ve = mevent->primaryVertex()->positionError();
+	  vertex->set(0.,0.,vp.x(),vp.y(),vp.z(),ve.x(),0.,0.,ve.y(),0.,ve.z());
+	  vertex->setStHit(mevent->primaryVertex());
+	  tracker->extendTracksToVertex(vertex);
+	  cout <<"StiMaker::finishEvent() - INFO - Tracks extension to main vertex completed" << endl;
+
+	  //
+	  // fill the primary tracks in StEvent
+	  //
+	  clock.start();  
+	  cout <<"StiMaker::finishEvent() - INFO - Call StEvent Filler for Primaries"  << endl;
+	  mevent = mStEventFiller->fillEventPrimaries(mevent, toolkit->getTrackContainer());
+	  clock.stop();
+	  cout <<"StiMaker::finishEvent() - Time to fill StEvent Primaries: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
+
+      }
+      else {
+	  cout <<"StiMaker::finishEvent() - INFO - Event has no vertex" << endl;
+      }
     }
-  clock.start();
-  
-  cout <<"StiMaker::finishEvent() - INFO - Call StEvent Filler"  << endl;
-  mevent = mStEventFiller->fillEvent(mevent, toolkit->getTrackContainer());
-  clock.stop();
-  cout <<"StiMaker::finishEvent() - Time to fill StEvent: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
   if (ioBroker->simulated())
     {
       cout <<"StiMaker::finishEvent() - INFO - Call Associator"<<endl;
