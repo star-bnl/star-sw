@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.h,v 1.3 2003/05/12 21:10:06 lbarnby Exp $
+ * $Id: StMinuitVertexFinder.h,v 1.4 2004/04/06 02:43:43 lbarnby Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  * Modified for pp by David Hardtke, Summer 2002
@@ -87,6 +87,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.4  2004/04/06 02:43:43  lbarnby
+ * Fixed identification of bad seeds (no z~0 problem now). Better flagging. Message manager used.
+ *
  * Revision 1.3  2003/05/12 21:10:06  lbarnby
  * Made destructor virtual
  *
@@ -126,6 +129,8 @@ public:
     int             NCtbMatches();
     void            SetFitPointsCut(int fitpoints);
     inline void DoUseITTF(){use_ITTF=kTRUE;};
+    inline void DoNotUseITTF(){use_ITTF=kFALSE;};
+
 private:
     bool accept(StTrack*) const;   // track filter
     static void fcn(int&, double*, double&, double*, int); // fit function
@@ -144,6 +149,7 @@ private:
     static double                   mdydz; // beam slope
     static double beamX(double z); // beamline parameterization
     static double beamY(double z); // beamline parameterization
+    inline void setFlagBase(UInt_t base){mFlagBase=base;};
 
     
     TMinuit*                 mMinuit;

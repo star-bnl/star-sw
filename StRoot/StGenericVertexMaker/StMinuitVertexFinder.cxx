@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.8 2004/04/04 23:20:13 jeromel Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.9 2004/04/06 02:43:43 lbarnby Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.9  2004/04/06 02:43:43  lbarnby
+ * Fixed identification of bad seeds (no z~0 problem now). Better flagging. Message manager used.
+ *
  * Revision 1.8  2004/04/04 23:20:13  jeromel
  * isfinite() -> finite()
  *
@@ -74,7 +77,7 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
  StMinuitVertexFinder::~StMinuitVertexFinder()
  {
      delete mBeamHelix;mBeamHelix=0;
-     gMessMgr->Info() << "Skipping delete Minuit in StMinuitVertexFinder::~StMinuitVertexFinder()" << endm;
+     gMessMgr->Warning() << "Skipping delete Minuit in StMinuitVertexFinder::~StMinuitVertexFinder()" << endm;
    //delete mMinuit;
  }
 
@@ -87,6 +90,13 @@ StMinuitVertexFinder::fit(StEvent* event)
     //  Reset vertex
     //
     mFitError = mFitResult = StThreeVectorD(0,0,0);
+
+    ///Flagging
+    if(use_ITTF){
+      setFlagBase(8000);
+    }else{
+      setFlagBase(1000);
+    }
 
     // get CTB info
     StCtbTriggerDetector* ctbDet = 0;
@@ -138,8 +148,8 @@ StMinuitVertexFinder::fit(StEvent* event)
 	     (!use_ITTF&&g->fittingMethod()!=kITKalmanFitId))) 
 	  {
 	    ///LSB This should not be necessary and could be removed in future
-	    if (isinf(g->geometry()->helix().curvature()) ){
-	      gMessMgr->Warning() << "INFINITE curvature in track !!" << endm;
+	    if (!finite(g->geometry()->helix().curvature()) ){
+	      gMessMgr->Warning() << "NON-FINITE curvature in track !!" << endm;
 	      continue;
 	    }
 	    mHelices.push_back(g->geometry()->helix());
@@ -156,11 +166,11 @@ StMinuitVertexFinder::fit(StEvent* event)
     //  In case there are no tracks left we better quit
     //
     if (mHelices.empty()) {
-	cout << "StMinuitVertexFinder::fit: no tracks to fit." << endl;
+	gMessMgr->Warning() << "StMinuitVertexFinder::fit: no tracks to fit." << endm;
 	mStatus = -1;
 	return false;
     }
-    cout << "StMinuitVertexFinder::fit size of helix vector: " << mHelices.size() << endl;
+    gMessMgr->Info() << "StMinuitVertexFinder::fit size of helix vector: " << mHelices.size() << endm;
 
 
     //
@@ -173,7 +183,13 @@ StMinuitVertexFinder::fit(StEvent* event)
     //  constrain the parameters since it harms
     //  the fit quality (see Minuit documentation).
     //
-    static double seed[3] = {0, 0, 0};
+    // Initialize the seed with a z value which is not one of the discrete 
+    // values which it can tend to, implies zero not allowed.
+    // Also need different initialization when vertex constraint.
+    static double seed[3] = {0.0, 0.0, 0.01};
+    if (mVertexConstrain){
+      seed[1] = 0.01; //other two not used
+    }
     static double step[3] = {0.03, 0.03, 0.03};
     if(mExternalSeedPresent) {
 	seed[0] = mExternalSeed.x();
@@ -216,11 +232,11 @@ StMinuitVertexFinder::fit(StEvent* event)
 	arglist[3] = 200;
 	mWidthScale = 2;
         if (mRequireCTB) requireCTB = true;
-	cout << "StMinuitVertexFinder::fit : Starting initial SCAN (no external z seed)" << endl;
+	gMessMgr->Info() << "StMinuitVertexFinder::fit : Starting initial SCAN (no external z seed)" << endm;
 	mMinuit->mnexcm("SCAn", arglist, 4, mStatus);
-	cout << "StMinuitVertexFinder::fit : Done with initial SCAN (no external z seed)" << endl;
+	gMessMgr->Info() << "StMinuitVertexFinder::fit : Done with initial SCAN (no external z seed)" << endm;
     }
-
+    
     //
     //  Final scan with smaller steps, performed in any case
     //  Note: GetParameter() uses C++ syntax, i.e. parameter
@@ -233,31 +249,35 @@ StMinuitVertexFinder::fit(StEvent* event)
     else{ 
      mMinuit->GetParameter(0, z, foo); 
     }
-    cout << "Vertex seed = " << z << endl;
+    gMessMgr->Info() << "Vertex seed = " << z << endm;
 
-    ///Give up when bad seed
-    ///LSB again, this a temporary protection which could be removed in future 
-    ///since it rejects vertices very close to zero in z
-    if(fabs(z)<1E-10){
-      cout << "Vertex seed not found ?? (very close to zero)" << endl;
-      mStatus=-1;
-      return false;
-    }
-
+    /// Give up when bad seed
+    // LSB We used to check whether seed still zero. Wrong! Also throws out
+      /// cases where seed really is zero. Now check best value of fn value
+      Double_t fedm,errdef; //dummies
+      Int_t npari,nparx,istat; // more dummies
+      Double_t fmin; // Used for the test - function value chi-sq.
+      mMinuit->mnstat(fmin,fedm,errdef,npari,nparx,istat);
+      if(fmin == 0.0){
+	gMessMgr->Warning() << "Vertex seed not found ?? " << endm;
+	mStatus=-1;
+	return false;
+      }
+      
       if (!mVertexConstrain){ 
 	arglist[0] = 3;
       }
       else {
         arglist[0]=1;
       }
-    arglist[1] = 10;
-    arglist[2] = z-5;
+      arglist[1] = 10;
+      arglist[2] = z-5;
     arglist[3] = z+5;
     mWidthScale = 1;
     if (mRequireCTB) requireCTB = true;
-    cout << "StMinuitVertexFinder::fit : Starting second SCAN" << endl;
+    gMessMgr->Info() << "StMinuitVertexFinder::fit : Starting second SCAN" << endm;
     mMinuit->mnexcm("SCAn", arglist, 4, mStatus);
-    cout << "StMinuitVertexFinder::fit : Done with second SCAN" << endl;
+    gMessMgr->Info() << "StMinuitVertexFinder::fit : Done with second SCAN" << endm;
 
     //
     //  Reset the flag which tells us about external
@@ -270,11 +290,11 @@ StMinuitVertexFinder::fit(StEvent* event)
     //
     mWidthScale = 1;
     requireCTB = false;
-    cout << "StMinuitVertexFinder::fit : Starting minimization" << endl;
+    gMessMgr->Info() << "StMinuitVertexFinder::fit : Starting minimization" << endm;
     mMinuit->mnexcm("MINImize", 0, 0, mStatus);
-    cout << "StMinuitVertexFinder::fit : Done minimization" << endl;
+    gMessMgr->Info() << "StMinuitVertexFinder::fit : Done minimization" << endm;
     if (mStatus) {
-	cout << "StMinuitVertexFinder::fit: error in Minuit::mnexcm(), check status flag." << endl;
+	gMessMgr->Warning() << "StMinuitVertexFinder::fit: error in Minuit::mnexcm(), check status flag." << endm;
 	return false;
     }
 
@@ -407,17 +427,17 @@ void StMinuitVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz
   mdxdz = dxdz;
   mdydz = dydz;
   mWeight = weight;
-  cout << "StMinuitVertexFinder::Using Constrained Vertex" << endl;
-  cout << "x origin = " << mX0 << endl;
-  cout << "y origin = " << mY0 << endl;
-  cout << "slope dxdz = " << mdxdz << endl;
-  cout << "slope dydz = " << mdydz << endl;
-  cout << "weight in fit = " << weight <<  endl;
+  gMessMgr->Info() << "StMinuitVertexFinder::Using Constrained Vertex" << endm;
+  gMessMgr->Info() << "x origin = " << mX0 << endm;
+  gMessMgr->Info() << "y origin = " << mY0 << endm;
+  gMessMgr->Info() << "slope dxdz = " << mdxdz << endm;
+  gMessMgr->Info() << "slope dydz = " << mdydz << endm;
+  gMessMgr->Info() << "weight in fit = " << weight <<  endm;
   StThreeVectorD origin(mX0,mY0,0.0);
   double pt  = 88889999;   
   double nxy=::sqrt(mdxdz*mdxdz +  mdydz*mdydz);
     if(nxy<1.e-5){ // beam line _MUST_ be tilted
-      cout << "StMinuitVertexFinder:: Beam line must be tilted!" << endl;
+      gMessMgr->Warning() << "StMinuitVertexFinder:: Beam line must be tilted!" << endm;
       nxy=mdxdz=1.e-5; 
     }
     double p0=pt/nxy;  
@@ -438,7 +458,7 @@ void StMinuitVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz
 
 }
 
-void StMinuitVertexFinder::NoVertexConstraint() {mVertexConstrain = false; cout << "StMinuitVertexFinder::No Vertex Constraint" << endl;}
+void StMinuitVertexFinder::NoVertexConstraint() {mVertexConstrain = false; gMessMgr->Info() << "StMinuitVertexFinder::No Vertex Constraint" << endm;}
 
 double StMinuitVertexFinder::beamX(double z) {
   float x = mX0 + mdxdz*z;
