@@ -92,8 +92,7 @@ C-------------------------------------------------------------------------------
  1003    enddo
  1005     continue
           svt_track(no_track).id      = no_track
-          svt_track(no_track).id_mctrack
-     +         = svt_hits(groups(i).id2).id_mctrack
+          svt_track(no_track).id_mctrack = 0
           svt_track(no_track).nspt    = k
           svt_track(no_track).pid     = 0
           svt_track(no_track).sec     = 0
