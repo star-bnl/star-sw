@@ -518,7 +518,7 @@ void TTreeIter::Print(const TBranch *tb,Int_t lvl, Option_t* option)
    active[0]='*';
    if (tb->TestBit(kDoNotProcess)) active[0]=0;
    
-   printf("%10p(%10p)  -  ",tb,add);
+   printf("%10p(%10p)  -  ",(void*)tb,(void*)add);
    for (int i=0;i<lvl;i++){printf("    ");}
    
    printf("%s%s(%s)",active,tb->GetName(),tb->ClassName());

@@ -472,7 +472,7 @@ void THelixTrack::Streamer(TBuffer &){}
 //_____________________________________________________________________________
 void THelixTrack::Print(Option_t *) const
 {
-  printf("\n THelixTrack::this = %p\n",this);
+  printf("\n THelixTrack::this = %p\n",(void*)this);
   printf(" THelixTrack::fX[3] = { %f , %f ,%f }\n",fX[0],fX[1],fX[2]);
   printf(" THelixTrack::fP[3] = { %f , %f ,%f }\n",fP[0],fP[1],fP[2]);
   printf(" THelixTrack::fH[3] = { %f , %f ,%f }\n",fH[0],fH[1],fH[2]);

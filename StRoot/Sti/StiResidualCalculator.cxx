@@ -1,7 +1,7 @@
 //StiResidualCalculator.cxx
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.cxx,v 2.8 2003/10/28 15:59:22 andrewar Exp $
+ * $Id: StiResidualCalculator.cxx,v 2.9 2004/01/27 02:55:11 perev Exp $
  *
  * \class  StiResidualCalculator provides a utility for determining the
  *         track residuals.
@@ -9,6 +9,9 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.cxx,v $
+ * Revision 2.9  2004/01/27 02:55:11  perev
+ * WarnOff
+ *
  * Revision 2.8  2003/10/28 15:59:22  andrewar
  * Fixed int() to (int) for var.
  *
@@ -110,7 +113,7 @@ void StiResidualCalculator::initDetector(StiDetectorBuilder *detBuilder)
       
 
 
-      for(int i=49, j=0; j<detBuilder->getNSectors(i);j++)
+      for(int i=49, j=0; j<(int)detBuilder->getNSectors(i);j++)
 	{
 	  StiDetector* det = detBuilder->getDetector(i,j);
 	  //mark detector as unused

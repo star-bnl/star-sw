@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: THack.cxx,v 1.1 2003/11/17 22:15:23 perev Exp $
+ * $Id: THack.cxx,v 1.2 2004/01/27 02:53:32 perev Exp $
  *
  ***************************************************************************
  *
@@ -64,7 +64,7 @@ void THack::ClearClonesArray(TClonesArray *clone)
    myClonesArray mycl;
 
    TObject **keep = mycl.GetKeep(clone);
-   TObject **cont = mycl.GetCont(clone);
+// TObject **cont = mycl.GetCont(clone); 
    int sz = clone->Capacity();
    int i=0;
    clone->Delete();
