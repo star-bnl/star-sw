@@ -1,9 +1,0 @@
-/*   rl0_mwccal.idl
-*   Table: rl0_mwccal
-*        description: Clibration of MWC in RL0                
-*/
-   struct rl0_mwccal{ 
-       float     fit[2];     /* slope and interc. adc.vs.hits mwc eta+ */
-   };
-/*  Last mod. for rl0_mwccal:   $Date: 1998/02/05 21:29:47 $ */
-
