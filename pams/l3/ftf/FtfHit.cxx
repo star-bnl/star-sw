@@ -33,16 +33,16 @@ void FtfHit::printLinks ( int point_level )
                   (int)id, (int)row, (int)phiIndex, (int)etaIndex, 
                    phi*toDeg, eta, x, y, z ) ;
    int vhit ;
-   if ( nextVolumeHit != 0 ) vhit = nextVolumeHit->id ;
+   if ( nextVolumeHit != 0 ) vhit = ((FtfHit *)nextVolumeHit)->id ;
    else vhit = -1 ;
    int rhit ;
-   if ( nextRowHit != 0 ) rhit = nextRowHit->id ;
+   if ( nextRowHit != 0 ) rhit = ((FtfHit *)nextRowHit)->id ;
    else rhit = -1 ;
    int thit ;
-   if ( nextTrackHit != 0 ) thit = nextTrackHit->id ;
+   if ( nextTrackHit != 0 ) thit = ((FtfBaseHit *)nextTrackHit)->id ;
    else thit = -1 ;
    int mhit ;
-   if ( nextMcTrackHit != 0 ) mhit = nextMcTrackHit->id ;
+   if ( nextMcTrackHit != 0 ) mhit = ((FtfBaseHit *)nextMcTrackHit)->id ;
    else mhit = -1 ;
 
    if ( fmod((double)point_level,10) > 1 ) 
@@ -52,8 +52,7 @@ void FtfHit::printLinks ( int point_level )
 //   if ( track != 0 ) tid = track->id ;
 //   else tid = -1 ;
    if ( fmod((double)point_level,10) > 2 )
-      printf ( "\n Tracks  :reco, mc            (%4d,%4d) ",
-                               tid, mcTrackId ) ;
+      printf ( "\n Tracks  :reco            (%4d) ", tid ) ;
 
 /*   if ( fmod((double)point_level,10)  printf ( "\n  " ) ; */
 }

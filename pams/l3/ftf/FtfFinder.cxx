@@ -15,6 +15,7 @@
 //:              1feb2000 ppy track id starting at 1
 //:             11feb2000 ppy timeout added, variables initialCpuTime and
 //:                           initialRealTime added
+//:             10apr2000 ppy deleteCandidate added when track is merged 
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfFinder, steers track finding
@@ -120,7 +121,7 @@ int FtfFinder::getTracks ( ) {
 //
 //     Set conformal coordinates if we are working with primaries
 //
-   short nHitsSegment   = (short)para.nHitsForSegment;  
+   int nHitsSegment   = (short)para.nHitsForSegment;  
    if ( para.primaries ) {
       setConformalCoordinates ( ) ;
       para.minHitsForFit = 1 ;
@@ -137,10 +138,11 @@ int FtfFinder::getTracks ( ) {
 //
 //           Loop over hits in this particular row
 //
-      if ( rowC[ir].first &&  ((FtfHit *)rowC[ir].first)->row < para.rowEnd ) break ;
+      if ( rowC[ir].first &&  (((FtfHit *)rowC[ir].first)->row) < para.rowEnd ) break ;
+//    if ( (((FtfHit *)rowC[ir].first)->row) < para.rowEnd ) break ;
       for ( FtfHit *firstHit = (FtfHit *)rowC[ir].first ;
             firstHit != 0 ;
-            firstHit = firstHit->nextRowHit ) {
+            firstHit = (FtfHit *)(firstHit->nextRowHit) ) {
 //
 //     Check hit was not used before
 //
@@ -185,8 +187,11 @@ int FtfFinder::getTracks ( ) {
            if ( para.primaries &&
                 para.mergePrimaries == 1 &&
                 para.fillTracks &&
-                thisTrack->mergePrimary( trackC )  ) nTracks-- ;
+                thisTrack->mergePrimary( trackC )  ) {
+              nTracks-- ;
+              thisTrack->deleteCandidate ( ) ;
            }
+       }
        else{
 //
 //      If track was not built delete candidate
@@ -430,7 +435,6 @@ int FtfFinder::setPointers ( )
 /*-------------------------------------------------------------------------
         Loop over hits 
 -------------------------------------------------------------------------*/
-
    for ( ihit = 0 ; ihit<nHits ; ihit++ )
    {
 /*-------------------------------------------------------------------------
@@ -476,9 +480,9 @@ int FtfFinder::setPointers ( )
       thisHit->phiIndex = (int)( (thisHit->phi-para.phiMin)/para.phiSlice + 1.);
       if ( thisHit->phiIndex < 1 || thisHit->phiIndex > para.nPhi ) {
          if ( para.infoLevel > 2 ) {
-	      fprintf ( stderr, " === > Hit %d has Phi = %f \n", (int)thisHit->id,    
+	      printf ( " === > Hit %d has Phi = %f \n", (int)thisHit->id,    
                                                       thisHit->phi*toDeg ) ;
-              fprintf ( stderr, " Phi index %d out of range \n", thisHit->phiIndex ) ;
+              printf ( " Phi index %d out of range \n", thisHit->phiIndex ) ;
          }
 	 nHitsOutOfRange++ ;
 	 continue ;
@@ -491,10 +495,10 @@ int FtfFinder::setPointers ( )
     thisHit->etaIndex = (int)((thisHit->eta - para.etaMin)/para.etaSlice + 1.);
     if ( thisHit->etaIndex < 1 || thisHit->etaIndex > para.nEta ) {
        if ( para.infoLevel > 2 ) {
-          fprintf ( stderr, " \n === > Hit %d has Eta = %f  z %f ", (int)thisHit->id, 
+          printf ( " \n === > Hit %d has Eta = %f  z %f ", (int)thisHit->id, 
                                                            thisHit->eta, thisHit->z ) ;
-          fprintf ( stderr, " \n Eta min/max %f %f ", para.etaMin, para.etaMax ) ;
-          fprintf ( stderr, " \n Eta slice   %f    ", para.etaSlice ) ;
+          printf ( " \n Eta min/max %f %f ", para.etaMin, para.etaMax ) ;
+          printf ( " \n Eta slice   %f    ", para.etaSlice ) ;
           fprintf ( stderr, " \n Eta index %d out of range ", thisHit->etaIndex ) ;	  
        }
        nHitsOutOfRange++ ;
@@ -523,8 +527,10 @@ int FtfFinder::setPointers ( )
 /*-------------------------------------------------------------------------
      Set row pointers
 -------------------------------------------------------------------------*/
-      if ( rowC[localRow].first == NULL )
-         rowC [localRow].first = (void *)thisHit ;
+     
+      if ( rowC[localRow].first == NULL ){
+	 rowC [localRow].first = (void *)thisHit ;
+      }
       else
          ((FtfHit *)(rowC[localRow].last))->nextRowHit = thisHit ;
       rowC[localRow].last = (void *)thisHit ;
@@ -547,7 +553,7 @@ double FtfFinder::CpuTime( void )
 //
 #ifdef LINUX
 double FtfFinder::RealTime (void) {
-  const long nClicks = 400000000 ;
+  const long nClicks = 500000000 ;
   unsigned long eax, edx;
   asm volatile("rdtsc":"=a" (eax), "=d" (edx));
   double realTime = (double)(eax)/ nClicks;
