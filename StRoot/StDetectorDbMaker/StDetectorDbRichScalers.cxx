@@ -152,8 +152,8 @@ double StDetectorDbRichScalers::getL0(){
 };
 
 /// Rich High Voltage status (1 is good, 0 is bad)
-double StDetectorDbRichScalers::getRichHVStatus(){
-    unsigned int value = 0;
+unsigned int StDetectorDbRichScalers::getRichHVStatus(){
+    unsigned int value = 999;
     if(mVolts)
 	value = mVolts->status;
     return value;
