@@ -18,6 +18,9 @@ Below is the API (functions intended for calling from outside the lev
 package).  The functions are listed in the approximate order that they
 should be called.
 All these functions return FALSE in case of error, and TRUE otherwise.
+These prototypes should be accessed in your code by <code>#include</code>ing
+the file <code>lev/inc/levHeader.h</code>, and not by copying this WWW
+page, to optimize your chances of having up-to-date prototypes.
 <pre>
 boolean levAddEnvironmentTable(DS_DATASET_T **ppEnv);
   /* Information on ppEnv:

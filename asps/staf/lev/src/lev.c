@@ -1,4 +1,4 @@
-/* This is code for the lev pkg (logging of environment and version). 
+/* This is code for the lev pkg (Logging of Environment and Version info). 
 ** Begun Aug 18 1995 by Herb Ward. */
 /*********************************************************  INCLUDES  **/
 #include <stdio.h>
