@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.h,v 1.6 2000/12/06 15:38:46 oldi Exp $
+// $Id: StFlowCutTrack.h,v 1.7 2000/12/08 17:03:38 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //
@@ -13,6 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.h,v $
+// Revision 1.7  2000/12/08 17:03:38  oldi
+// Phi weights for both FTPCs included.
+//
 // Revision 1.6  2000/12/06 15:38:46  oldi
 // Including FTPC.
 //
@@ -85,6 +88,18 @@ class StFlowCutTrack {
   static void    SetFitPtsTpc(Int_t lo, Int_t hi);
   static void    SetFitPtsFtpc(Int_t lo, Int_t hi);
   static void    SetFitOverMaxPts(Float_t lo, Float_t hi);
+<<<<<<< StFlowCutTrack.h
+  static void    SetChiSqTpc(Float_t lo, Float_t hi);
+  static void    SetChiSqFtpc(Float_t lo, Float_t hi);
+  static void    SetDcaTpc(Float_t lo, Float_t hi);
+  static void    SetDcaFtpc(Float_t lo, Float_t hi);
+  static void    SetPtTpc(Float_t lo, Float_t hi);
+  static void    SetPtFtpc(Float_t lo, Float_t hi);
+  static void    SetEtaTpc(Float_t lo, Float_t hi);
+  static void    SetEtaFtpc(Float_t lo_neg, Float_t hi_neg, Float_t lo_pos, Float_t hi_pos);
+
+  static Int_t   DetId(Float_t eta);
+=======
   static void    SetChiSq(Float_t lo, Float_t hi);
   static void    SetDca(Float_t lo, Float_t hi);
   static void    SetPt(Float_t lo, Float_t hi);
@@ -92,6 +107,7 @@ class StFlowCutTrack {
   static void    SetEtaFtpc(Float_t lo, Float_t hi);
 
   static Int_t   DetId(Float_t eta);
+>>>>>>> 1.6
   
  private:
 
@@ -118,24 +134,46 @@ class StFlowCutTrack {
   static UInt_t  mFitPtsFtpcCutN;            // number not accepted
   static Int_t   mFitPtsFtpcCuts[2];         // range
 
-  static UInt_t  mFitOverMaxCutN;            // number not accepted
+  static UInt_t  mFitOverMaxCutN;            // number not accepted (all)
+  static UInt_t  mFitOverMaxTpcCutN;         // number not accepted (Tpc)
+  static UInt_t  mFitOverMaxFtpcCutN;        // number not accepted (Ftpc)
   static Float_t mFitOverMaxCuts[2];         // range
 
-  static UInt_t  mChiSqCutN;                 // number not accepted
-  static Float_t mChiSqCuts[2];              // range
+  static UInt_t  mChiSqTpcCutN;              // number not accepted
+  static Float_t mChiSqTpcCuts[2];           // range
 
-  static UInt_t  mDcaCutN;                   // number not accepted
-  static Float_t mDcaCuts[2];                // range
+  static UInt_t  mChiSqFtpcCutN;             // number not accepted
+  static Float_t mChiSqFtpcCuts[2];          // range
 
+  static UInt_t  mDcaTpcCutN;                // number not accepted
+  static Float_t mDcaTpcCuts[2];             // range
+
+  static UInt_t  mDcaFtpcCutN;               // number not accepted
+  static Float_t mDcaFtpcCuts[2];            // range
+
+  static UInt_t  mPtTpcCutN;                 // number not accepted
+  static Float_t mPtTpcCuts[2];              // range
+
+<<<<<<< StFlowCutTrack.h
+  static UInt_t  mPtFtpcCutN;                // number not accepted
+  static Float_t mPtFtpcCuts[2];             // range
+=======
   static UInt_t  mPtCutN;                    // number not accepted
   static Float_t mPtCuts[2];                 // range
+>>>>>>> 1.6
 
   static UInt_t  mEtaTpcCutN;                // number not accepted
   static Float_t mEtaTpcCuts[2];             // range
 
+<<<<<<< StFlowCutTrack.h
+  static UInt_t  mEtaFtpcCutN;               // number not accepted
+  static Float_t mEtaFtpcCuts[4];            // range
+
+=======
   static UInt_t  mEtaFtpcCutN;               // number not accepted
   static Float_t mEtaFtpcCuts[2];            // range
 
+>>>>>>> 1.6
   ClassDef(StFlowCutTrack,1)                 // macro for rootcint
 }; 
 
@@ -154,19 +192,41 @@ inline void StFlowCutTrack::SetFitPtsFtpc(Int_t lo, Int_t hi) {
 inline void StFlowCutTrack::SetFitOverMaxPts(Float_t lo, Float_t hi) {
   mFitOverMaxCuts[0] = lo; mFitOverMaxCuts[1] = hi; }
 
-inline void StFlowCutTrack::SetChiSq(Float_t lo, Float_t hi) {
-  mChiSqCuts[0] = lo; mChiSqCuts[1] = hi; }
+inline void StFlowCutTrack::SetChiSqTpc(Float_t lo, Float_t hi) {
+  mChiSqTpcCuts[0] = lo; mChiSqTpcCuts[1] = hi; }
 
-inline void StFlowCutTrack::SetDca(Float_t lo, Float_t hi) {
-  mDcaCuts[0] = lo; mDcaCuts[1] = hi; }
+inline void StFlowCutTrack::SetChiSqFtpc(Float_t lo, Float_t hi) {
+  mChiSqFtpcCuts[0] = lo; mChiSqFtpcCuts[1] = hi; }
 
+inline void StFlowCutTrack::SetDcaTpc(Float_t lo, Float_t hi) {
+  mDcaTpcCuts[0] = lo; mDcaTpcCuts[1] = hi; }
+
+inline void StFlowCutTrack::SetDcaFtpc(Float_t lo, Float_t hi) {
+  mDcaFtpcCuts[0] = lo; mDcaFtpcCuts[1] = hi; }
+
+inline void StFlowCutTrack::SetPtTpc(Float_t lo, Float_t hi) {
+  mPtTpcCuts[0] = lo; mPtTpcCuts[1] = hi; }
+
+<<<<<<< StFlowCutTrack.h
+inline void StFlowCutTrack::SetPtFtpc(Float_t lo, Float_t hi) {
+  mPtFtpcCuts[0] = lo; mPtFtpcCuts[1] = hi; }
+
+inline void StFlowCutTrack::SetEtaTpc(Float_t lo, Float_t hi) {
+  mEtaTpcCuts[0] = lo; mEtaTpcCuts[1] = hi; }
+=======
 inline void StFlowCutTrack::SetPt(Float_t lo, Float_t hi) {
   mPtCuts[0] = lo; mPtCuts[1] = hi; }
 
 inline void StFlowCutTrack::SetEtaTpc(Float_t lo, Float_t hi) {
   mEtaTpcCuts[0] = lo; mEtaTpcCuts[1] = hi; }
+>>>>>>> 1.6
 
+<<<<<<< StFlowCutTrack.h
+inline void StFlowCutTrack::SetEtaFtpc(Float_t lo_neg, Float_t hi_neg, Float_t lo_pos, Float_t hi_pos) {
+  mEtaFtpcCuts[0] = lo_neg; mEtaFtpcCuts[1] = hi_neg; mEtaFtpcCuts[2] = lo_pos; mEtaFtpcCuts[3] = hi_pos;}
+=======
 inline void StFlowCutTrack::SetEtaFtpc(Float_t lo, Float_t hi) {
   mEtaFtpcCuts[0] = lo; mEtaFtpcCuts[1] = hi; }
+>>>>>>> 1.6
 
 #endif

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.17 2000/10/12 22:46:35 snelling Exp $
+// $Id: StFlowEvent.cxx,v 1.18 2000/12/08 17:03:38 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.18  2000/12/08 17:03:38  oldi
+// Phi weights for both FTPCs included.
+//
 // Revision 1.17  2000/10/12 22:46:35  snelling
 // Added support for the new pDST's and the probability pid method
 //
@@ -117,6 +120,7 @@
 #include "StFlowConstants.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
+#include "StEnumerations.h"
 #include "TVector2.h"
 #define PR(x) cout << "##### FlowEvent: " << (#x) << " = " << (x) << endl;
 
@@ -134,6 +138,18 @@ Float_t  StFlowEvent::mEtaCuts[2][Flow::nHars][Flow::nSels] = {{{0.,0.5},
 								{1.0,1.},
 								{1.0,2.},
 								{1.0,1.}}};
+Float_t  StFlowEvent::mEtaFtpcCuts[2][Flow::nHars][Flow::nSels] = {{{2.7,2.7},
+								    {2.7,2.7},
+								    {2.7,2.7},
+								    {2.7,2.7},
+								    {2.7,2.7},
+								    {2.7,2.7}},
+							           {{4.0,4.0},
+								    {4.0,4.0},
+								    {4.0,4.0},
+								    {4.0,4.0},
+								    {4.0,4.0},
+								    {4.0,4.0}}};
 //For gap of |eta| < 0.05
 // Float_t  StFlowEvent::mEtaCuts[2][Flow::nHars][Flow::nSels] = {{{0.05,0.5},
 // 								{0.05,0.},
@@ -160,6 +176,18 @@ Float_t  StFlowEvent::mPtCuts[2][Flow::nHars][Flow::nSels] =  {{{0.1,0.1},
 								{2.,2.},
 								{2.,2.},
 								{2.,2.}}};
+Float_t  StFlowEvent::mPtFtpcCuts[2][Flow::nHars][Flow::nSels] =  {{{0.1,0.1},
+								    {0.1,0.1},
+								    {0.1,0.1},
+								    {0.1,0.1},
+								    {0.1,0.1},
+								    {0.1,0.1}},
+							           {{2.,2.},
+								    {2.,2.},
+								    {2.,2.},
+								    {2.,2.},
+								    {2.,2.},
+								    {2.,2.}}};
 
 Float_t StFlowEvent::mPiPlusCuts[2]        = {-3., 3.};
 Float_t StFlowEvent::mPiMinusCuts[2]       = {-3., 3.};
@@ -193,12 +221,25 @@ StFlowEvent::~StFlowEvent() {
 
 //-------------------------------------------------------------
 
-Double_t StFlowEvent::PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const {
+Double_t StFlowEvent::PhiWeight(Float_t mPhi, Int_t selN, Int_t harN, Int_t detId) const {
 
   if (mPhi < 0.) mPhi += twopi;
-  int n = (int)((mPhi/twopi)*Flow::nPhiBins);
+  int n;
 
-  return mPhiWgt[selN][harN][n];
+  if (detId == kFtpcEastId) { 
+    n = (int)((mPhi/twopi)*Flow::nPhiBinsFtpc);
+    return mPhiWgtFtpcEast[selN][harN][n];
+  }
+  
+  else if (detId == kFtpcWestId) {
+    n = (int)((mPhi/twopi)*Flow::nPhiBinsFtpc);
+    return mPhiWgtFtpcWest[selN][harN][n];
+  }
+  
+  else { // (detId == kTpcId) or otherwise !!!
+    n = (int)((mPhi/twopi)*Flow::nPhiBins);
+    return mPhiWgt[selN][harN][n];
+  }
 }
 
 //-------------------------------------------------------------
@@ -301,24 +342,42 @@ void StFlowEvent::SetSelections() {
     StFlowTrack* pFlowTrack = *itr;
     Double_t eta = (double)(pFlowTrack->Eta());
     Float_t  Pt  = pFlowTrack->Pt();
+    Int_t detId  =  pFlowTrack->DetId();
     for (int selN = 0; selN < Flow::nSels; selN++) {
-      for (int harN = 0; harN < Flow::nHars; harN++) {
-
-	// Eta
-	if (mEtaCuts[1][harN][selN] > mEtaCuts[0][harN][selN] && 
- 	    (fabs(eta) < mEtaCuts[0][harN][selN] || 
- 	     fabs(eta) >= mEtaCuts[1][harN][selN])) continue;
-	// 	    (eta < mEtaCuts[0][harN][selN]         || both subs at +eta
-	// 	     eta >= mEtaCuts[1][harN][selN])) continue;
+	for (int harN = 0; harN < Flow::nHars; harN++) {
+	    
+	    if (detId == kFtpcEastId || detId == kFtpcWestId) {
+		// Eta
+		if (mEtaFtpcCuts[1][harN][selN] > mEtaFtpcCuts[0][harN][selN] && 
+		    (fabs(eta) < mEtaFtpcCuts[0][harN][selN] || 
+		     fabs(eta) >= mEtaFtpcCuts[1][harN][selN])) continue;
+		// 	    (eta < mEtaCuts[0][harN][selN]         || both subs at +eta
+		// 	     eta >= mEtaCuts[1][harN][selN])) continue;
+		
+		// Pt
+		if (mPtFtpcCuts[1][harN][selN] > mPtFtpcCuts[0][harN][selN] && 
+		    (Pt < mPtFtpcCuts[0][harN][selN] ||
+		     Pt >= mPtFtpcCuts[1][harN][selN])) continue;	
+	    }
+	    
+	    else { // (detId == kTpcId) or otherwise !!!
+		
+		// Eta
+		if (mEtaCuts[1][harN][selN] > mEtaCuts[0][harN][selN] && 
+		    (fabs(eta) < mEtaCuts[0][harN][selN] || 
+		     fabs(eta) >= mEtaCuts[1][harN][selN])) continue;
+		// 	    (eta < mEtaCuts[0][harN][selN]         || both subs at +eta
+		// 	     eta >= mEtaCuts[1][harN][selN])) continue;
+		
+		// Pt
+		if (mPtCuts[1][harN][selN] > mPtCuts[0][harN][selN] && 
+		    (Pt < mPtCuts[0][harN][selN] ||
+		     Pt >= mPtCuts[1][harN][selN])) continue;
+	    }
+	    
+	    pFlowTrack->SetSelect(harN, selN);
 	
-	// Pt
-	if (mPtCuts[1][harN][selN] > mPtCuts[0][harN][selN] && 
-	    (Pt < mPtCuts[0][harN][selN] ||
-	     Pt >= mPtCuts[1][harN][selN])) continue;
-	
-      	pFlowTrack->SetSelect(harN, selN);
-	
-      }
+	}
     }
   }
   
