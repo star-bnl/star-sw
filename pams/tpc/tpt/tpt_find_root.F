@@ -1,5 +1,9 @@
-* $Id: tpt_find_root.F,v 1.10 1999/07/28 20:24:01 liq Exp $
+* $Id: tpt_find_root.F,v 1.11 1999/12/17 16:30:52 sakrejda Exp $
 * $Log: tpt_find_root.F,v $
+* Revision 1.11  1999/12/17 16:30:52  sakrejda
+* Introduced additional integer to avit having mod(short,int).
+* It was not harmful, but confusing and debuggers complained about it.
+*
 * Revision 1.10  1999/07/28 20:24:01  liq
 * change the loop or ir2, and ir1 to make gap work
 *
@@ -77,6 +81,7 @@ C     Local variables
       INTEGER islic,is_pnt,js_pnt
       INTEGER tpt_find_slic, irets
       INTEGER tgc_sec24_to_sec12
+      INTEGER longrow
       REAL    zp3
       REAL    zorigl,r3,r2,delr23,zp2,delz2p,dely23
       REAL    delx23,delz23,an,bn,sl23,zp1,xp1,yp1
@@ -96,7 +101,8 @@ C_____________________________________________________________________
 C     get information about the seed
       isect = int(hit(k).row/100)
       iret  = tgc_sec24_to_sec12(isect,isect_trunc)
-      ir3   = mod(hit(k).row,100)
+      longrow =hit(k).row 
+      ir3   = mod(longrow,100)
       zp3   = hit(k).z
       r3    = sqrt(hit(k).x**2+hit(k).y**2)
        

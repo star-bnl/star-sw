@@ -1,5 +1,9 @@
-* $Id: tpt_project.F,v 1.11 1999/11/07 05:53:39 sakrejda Exp $
+* $Id: tpt_project.F,v 1.12 1999/12/17 16:30:53 sakrejda Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.12  1999/12/17 16:30:53  sakrejda
+* Introduced additional integer to avit having mod(short,int).
+* It was not harmful, but confusing and debuggers complained about it.
+*
 * Revision 1.11  1999/11/07 05:53:39  sakrejda
 * Calculation of the dip and crossing angle moved to tpt_load_track.F
 *
@@ -94,6 +98,7 @@ C     Local variables
       INTEGER islic,is_pnt,ipass,tte_skip
       INTEGER tpt_find_slic, irets,save_flag
       INTEGER tgc_sec24_to_sec12
+      INTEGER longrow
 
       LOGICAL more
       REAL    xp(2),yp(2),devsum0,dist,dc,alpha,devsum
@@ -114,9 +119,11 @@ C
          isect = is(i)
          ixpnt = trk(itrk).nhit
          ip_in = trk(itrk).ipnt(ixpnt)
-         row_in = mod(hit(ip_in).row,100)
+         longrow = hit(ip_in).row
+         row_in = mod(longrow,100)
          ip_out = trk(itrk).ipnt(1)
-         row_out =  mod(hit(ip_out).row,100)
+         longrow = hit(ip_out).row
+         row_out =  mod(longrow,100)
          row_start(1) = row_in-1
          row_start(2) = row_out+1
          row_end(1) = 1

@@ -1,5 +1,9 @@
-* $Id: tpt_row_sect_pnt.F,v 1.15 1999/12/16 16:11:44 sakrejda Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.16 1999/12/17 16:30:53 sakrejda Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.16  1999/12/17 16:30:53  sakrejda
+* Introduced additional integer to avit having mod(short,int).
+* It was not harmful, but confusing and debuggers complained about it.
+*
 * Revision 1.15  1999/12/16 16:11:44  sakrejda
 * Dimension of the loc_hit array passed correctly to the index sort.
 * Now that the array is allocated dynamically, the dimension is set to the number of hits.
@@ -87,6 +91,7 @@ C______________________________________________________________________
       INTEGER next_hit(*),slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic),loc_hit_tmp(4000)
       INTEGER iret, tls_Index_Sort_r,nhalf,itim1,ipos1,kc
+      INTEGER longrow
 
 c     allocate memory following Victor's suggestion
       INTEGER malloc
@@ -120,22 +125,13 @@ C        clean up sector assignement.
          xglobal(1)=hit(i).x
          xglobal(2)=hit(i).y
          xglobal(3)=hit(i).z
-c        check what xy and z says about the sector.
-C         iret=tgc_global_to_sector(isec2,xglobal)
-C         isec3=int(hit(i).row/100)
-C         if(isec3.ne.isec2) then
-C           write(m132,*) 'TPTI1-E1 sector missmatch',isec3,isec2,xglobal
-C           call message(m132,1,idI1)
-C           isec3=isec2
-c          repair it
-C           hit(i).row = isec3*100+mod(hit(i).row,100)
-C         endif
          if(xglobal(3).gt.0) then
             rhit(i)=hit(i).row
          else
             isec3=int(hit(i).row/100)
             iret=tgc_sec24_to_sec12(isec3,isect)
-            rhit(i) = isect*100+mod(hit(i).row,100)
+            longrow = hit(i).row
+            rhit(i) = isect*100+mod(longrow,100)
          endif
       end do
 

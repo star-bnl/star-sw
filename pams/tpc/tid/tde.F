@@ -1,5 +1,9 @@
-* $Id: tde.F,v 1.4 1999/10/15 00:54:06 nevski Exp $
+* $Id: tde.F,v 1.5 1999/12/17 16:35:26 sakrejda Exp $
 * $Log: tde.F,v $
+* Revision 1.5  1999/12/17 16:35:26  sakrejda
+* Introduced additional integer to avit having mod(short,int).
+* It was not harmful, but confusing and debuggers complained about it.
+*
 * Revision 1.4  1999/10/15 00:54:06  nevski
 * pgf->g77 cleanup
 *
@@ -118,6 +122,7 @@ C-----------------------------------------------------------------------
       real z(10),erf(10),frachalf(10),zcut,nontrunc,slope
       real average,sigma,dedx_upper,rndm
       INTEGER iseed, nde_old, ipos,nzero
+      INTEGER longrow
 C
 c     variables for maximumum likeihood
 c
@@ -314,7 +319,8 @@ C        options based on Jeff Mitchell's
          nde=0
          do while (int(hit(loc_hit(l)).track/1000).
      >      eq.itrack.and.last.eq.0)
-            irow=mod(hit(loc_hit(l)).row,100)
+            longrow=hit(loc_hit(l)).row
+            irow=mod(longrow,100)
             if(irow.gt.tdpar(1).minrow) then
                isect=hit(loc_hit(l)).row/100
 c              get the parametrisation for the center of a row
