@@ -2,214 +2,172 @@
 // this macro is not really for HBT, it is a tool requested by the
 // reco group to estimate the track splittin in the TPC from the data
 // it makes an upper and lower limit on its estimate of the splitting
-// malisa 15aug2000
+// malisa 15aug2000 (updated 05nov2001)
 // an example of an analysis done with this is at:
 //http://sol.star.bnl.gov/star/starlib/doc/www/protected/hbt/lisa/SplittingEstimate/
 
 class StChain;
 StChain *chain=0;    
 
-// keep pointers to Correlation Functions global, so you can have access to them...
-class QinvCorrFctn;
-QinvCorrFctn* QinvCF;
-class QvecCorrFctn;
-QvecCorrFctn* QvecCF;
-class MinvCorrFctn;
-MinvCorrFctn* MinvCF;
-
-void StHbtSplittingMacro(Int_t nevents=1,
-		  const char *MainFile="/star/rcf/pwg/hbt/July2000/HalfFieldData_new2.microDst")
-  // this is an OLD xdf file   const char *MainFile="
-{
-
-    // Dynamically link needed shared libs
-    gSystem->Load("St_base");
-    gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
-    gSystem->Load("StUtilities");  // new addition 22jul99
-    gSystem->Load("StAnalysisUtilities");  // needed by V0dstMaker
-    gSystem->Load("StMagF");
-    gSystem->Load("StIOMaker");
-    gSystem->Load("StarClassLibrary");
-    gSystem->Load("StEvent");
-    gSystem->Load("StEventMaker");
-    gSystem->Load("StHbtMaker");
-    //    gSystem->Load("StV0MiniDstMaker");
-
-    cout << "Dynamic loading done" << endl;
-
-    chain = new StChain("StChain"); 
-    chain->SetDebug();
-   
-
-    // Now we add Makers to the chain...
-
-    //    StIOMaker* ioMaker = new StIOMaker("IO","r",MainFile,"bfcTree");
-    //    ioMaker->SetDebug();
-
-//     ioMaker->SetIOMode("r");
-//     ioMaker->SetDebug();
-//     ioMaker->SetBranch("*",0,"0");                 //deactivate all branches
-//     ioMaker->SetBranch("dstBranch",0,"r"); //activate EventBranch
+// keep pointers to Analysis global, so you can have access to them ...
+class StHbtSplitEvalAnalysis;
+StHbtSplitEvalAnalysis* anal;
 
 
-    //    StEventMaker* eventMaker = new StEventMaker("events","title");
-    //    cout << "Just instantiated StEventMaker... lets go StHbtMaker!" << endl;
+// File-scope stuff needed by setFiles, nextFile. Someone ambitious
+// can clean this up by putting it all into a nice clean class.
+Int_t usePath = 0;
+Int_t nFile = 0;
+TString  thePath; 
+TString  theFileName;
+TString  originalPath;
 
-    // UNCOMMENT THIS NEXT PART OUT IF YOU WANT V0's
-    //StV0MiniDstMaker* v0dst = new StV0MiniDstMaker("v0dst"); 
-    //cout << "Just instantiated StV0MiniDstMaker... lets go StHbt!" << endl;
-    //v0dst.SetV0VertexType(); //Set v0MiniDstMaker to find v0s not Xis
-    //v0dst.SetOutputFile("muv0dst.root"); // Set V0MiniDStMaker output file
+ 
 
+//==========================================================================================
+void StHbtSplittingEstimate(const Int_t nevents=9999,
+			    const Char_t *path="/star/data01/pwg/hbt/RandTheMan/uDSTs/P01hi/minbias/08/",
+			    const Char_t *fileName="",
+			    const Char_t *extention=".hbtTTreeMuDst",
+			    const Char_t *filter=".",
+			    const int maxFiles=10) {
 
-
-    StHbtMaker* hbtMaker = new StHbtMaker("HBT","title");
-    cout << "StHbtMaker instantiated"<<endl;
-
-
-
-    /* -------------- set up of hbt stuff ----- */
-    cout << "StHbtMaker::Init - setting up Reader and Analyses..." << endl;
-
-    StHbtManager* TheManager = hbtMaker->HbtManager();
-
-    // here, we instantiate the appropriate StHbtEventReader
-    // for STAR analyses in root4star, we instantiate StStandardHbtEventReader
-    //    StStandardHbtEventReader* Reader = new StStandardHbtEventReader;
-    //    Reader->SetTheEventMaker(eventMaker);     // gotta tell the reader where it should read from
-
-    // UNCOMMENT THIS NEXT LINE OUT IF YOU WANT V0's
-    //    Reader->SetTheV0Maker(v0dst); //Gotta tell the reader where to read the v0 stuff from
-
-    // here would be the palce to plug in any "front-loaded" Event or Particle Cuts...
-
-    StHbtBinaryReader* Reader = new StHbtBinaryReader;
-    Reader->SetFileName(MainFile);
-
-
-
-    TheManager->SetEventReader(Reader);
-
-    cout << "READER SET UP.... " << endl;
-
-    // Hey kids! Let's make a microDST!
-    // in StHbt we do this by instantiating and plugging in a StHbtEventReader as a writer!
-    // the particular StHbtEventReader that we will use will write (and read) ASCII files
-    //
-    //    StHbtAsciiReader* Writer = new StHbtAsciiReader;
-    //    Writer->SetFileName("FirstMicroDst.asc");
-    //    TheManager->SetEventWriter(Writer);
-    //    cout << "WRITER SET UP.... " << endl;
-
-    // 0) now define an analysis...
-    StHbtSplitEvalAnalysis* anal = new StHbtSplitEvalAnalysis;
-    // 1) set the Event cuts for the analysis
-    mikesEventCut* evcut = new mikesEventCut;  // use "mike's" event cut object
-    evcut->SetEventMult(0,10000);      // selected multiplicity range
-    evcut->SetVertZPos(-70.0,70.0);    // selected range of vertex z-position
-    anal->SetEventCut(evcut);          // this is the event cut object for this analsys
-    // 2) set the Track (particle) cuts for the analysis
-    mikesTrackCut* trkcut = new mikesTrackCut;  // use "mike's" particle cut object
-    trkcut->SetNSigmaPion(-1.5,1.5);   // number of Sigma in TPC dEdx away from nominal pion dEdx
-    trkcut->SetNSigmaKaon(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
-    trkcut->SetNSigmaProton(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal proton dEdx
-    trkcut->SetNHits(5,50);            // range on number of TPC hits on the track
-    trkcut->SetPt(0.1,2.0);            // range in Pt
-    trkcut->SetRapidity(-1.0,1.0);     // range in rapidity
-    trkcut->SetDCA(0.0,0.5);           // range in Distance of Closest Approach to primary vertex
-    trkcut->SetCharge(-1);             // want negative pions
-    trkcut->SetMass(0.139);            // pion mass
-    anal->SetFirstParticleCut(trkcut); // this is the track cut for the "first" particle
-    anal->SetSecondParticleCut(trkcut); // NOTE - it is also for the "second" particle -- i.e. identical particle HBT
-    // 3) set the Pair cuts for the analysis
-    qualityPairCut* qpc = new qualityPairCut;
-    qpc->SetQualityCut(-0.5,0.7);
-
-    anal->SetPairCut(qpc);         // this is the pair cut for this analysis
-
-    // 4) set the number of events to mix (per event)
-    anal->SetNumEventsToMix(1);        
-    // 5) now set up the correlation functions that this analysis will make
-    // this particular analysis will have two: the first is a Q-invariant correlation function
-//     QinvCF = new QinvCorrFctn("mikesQinvCF",50,0.0,0.2);  // defines a Qinv correlation function
-//     anal->AddCorrFctn(QinvCF); // adds the just-defined correlation function to the analysis
-//     // for this analysis, we will also (simultaneously) build a Q-vector correlation function
-//     QvecCF = new QvecCorrFctn("randysQvecCF",50,0.0,0.2);
-//     anal->AddCorrFctn(QvecCF); // adds the just-defined correlation function to the analysis
-    
-    // now add as many more correlation functions to the Analysis as you like..
-    
-    // 6) add the Analysis to the AnalysisCollection
-    TheManager->AddAnalysis(anal);
-
-
-
-
-    /* ------------------ end of setting up hbt stuff ------------------ */
-
-
-  // now execute the chain member functions
+  gStyle->SetTextFont(41);
+  gStyle->SetStatH(.3);
+  gStyle->SetStatW(.3);
   
-  if (chain->Init()){ // This should call the Init() method in ALL makers
-    cout << "Initialization failed \n";
-    goto TheEnd;
-  }
+  // Dynamically link needed shared libs
+  gSystem->Load("St_base");
+  gSystem->Load("StChain");
+  gSystem->Load("St_Tables");
+  gSystem->Load("StMagF");
+  gSystem->Load("StUtilities");  // new addition 22jul99
+  gSystem->Load("StTreeMaker");
+  gSystem->Load("StIOMaker");
+  gSystem->Load("StarClassLibrary");
+  gSystem->Load("StTpcDb");
+  gSystem->Load("StDbUtilities");
+  gSystem->Load("StEvent");
+  gSystem->Load("StEventMaker");
+  gSystem->Load("StEventDstMaker"); 
+  gSystem->Load("StEventUtilities");
+  gSystem->Load("StEmcUtil");
+  gSystem->Load("St_emc_Maker");
+  gSystem->Load("StMcEvent"); 
+  gSystem->Load("StMcEventMaker");
+  gSystem->Load("StAssociationMaker");
+  gSystem->Load("StMcAnalysisMaker");
+  //  gSystem->Load("StFlowMaker");
+  //  gSystem->Load("StFlowTagMaker");
+  //  gSystem->Load("StFlowAnalysisMaker");
+  gSystem->Load("StStrangeMuDstMaker");
+  gSystem->Load("StHbtMaker");   
+  //  gSystem->Load("global_Tables");   
+  
+  // cout << " loading done " << endl;
+  chain = new StChain("StChain"); 
+  chain->SetDebug(1);
+  
+  
+ // *********
+ // Hbt Maker
+ // *********
+ 
+  StHbtMaker* hbtMaker = new StHbtMaker("HBT","title");
+  StHbtManager* TheManager = hbtMaker->HbtManager();
+
+  StHbtTTreeReader* Reader = new StHbtTTreeReader(0,0,path,fileName,extention,filter,maxFiles);
+  TheManager->SetEventReader(Reader);
+  
+  // define example particle cut and cut monitors to use in the analyses
+  // example particle cut
+  franksTrackCut* aTrackCut = new franksTrackCut;  // use "frank's" particle cut object
+  aTrackCut->SetPidProbPion(0.3,10);      // make it loose
+  aTrackCut->SetNHits(10,50);             // range on number of TPC hits on the track
+  aTrackCut->SetP(0.1,4.);              // range in P
+  aTrackCut->SetPt(0.1,2.);             // range in Pt
+  aTrackCut->SetEta(-1.1,+1.1);          // range in rapidity
+  //  aTrackCut->SetRapidity(-10.,10.);          // range in rapidity
+  aTrackCut->SetDCA(0.0,3.);             // range in Distance of Closest Approach to primary vertex
+  aTrackCut->SetCharge(-1);              // want piminux
+  aTrackCut->SetMass(0.138);             // pion mass
+  // define example track cut monitor
+  //  trackCutMonitor_P_vs_Dedx* aDedxMoniPos = new trackCutMonitor_P_vs_Dedx(+1,"P_vs_Dedx+","Momentum (GeV/c) vs Energy loss (a.u.)",100,0.,2.,100,0.,1e-5);
+  //  trackCutMonitor_P_vs_Dedx* aDedxMoniNeg = new trackCutMonitor_P_vs_Dedx(-1,"P_vs_Dedx-","Momentum (GeV/c) vs Energy loss (a.u.)",100,0.,2.,100,0.,1e-5);
+  
+  // ****************************************** // 
+  // 0) now define an analysis...
+  anal = new StHbtSplitEvalAnalysis;
+  anal->SetQinvCut(0.03);
+  // 1) set the Event cuts for the analysis
+  mikesEventCut* evcut = new mikesEventCut;  // use "mike's" event cut object
+  evcut->SetEventMult(30,10000);      // selected multiplicity range
+  evcut->SetVertZPos(-70.0,70.0);    // selected range of vertex z-position
+  anal->SetEventCut(evcut);          // this is the event cut object for this analsys
+  // 2) set the Track (particle) cuts for the analysis
+  anal->SetFirstParticleCut(aTrackCut);
+  anal->SetSecondParticleCut(aTrackCut);  // identical-particle analysis...
+
+  // 3) set the Pair cuts for the analysis
+  qualityPairCut* qpc = new qualityPairCut;
+  qpc->SetQualityCut(-0.5,0.65);
+  anal->SetPairCut(qpc);
+
+  // 4) set the number of events to mix (per event)
+  anal->SetNumEventsToMix(1);        
+  // 5) now set up the correlation functions that this analysis will make
+  // THIS ANALYSIS WILL MAKE NO CORRELATION FUNCTIONS!!
+
+  TheManager->AddAnalysis(anal);
+
+  cout << " StHbt Analysis - setup done " << endl;
+//   // ------------------ end of setting up hbt stuff ------------------ //
+  
+  chain->Init(); // This should call the Init() method in ALL makers
   chain->PrintInfo();
-
-
-  // Event loop
-  int istat=0,iev=1;
- EventLoop: if (iev <= nevents && !istat) {
-   cout << "StHbtExample -- Working on eventNumber " << iev << " of " << nevents << endl;
-   chain->Clear();
-   istat = chain->Make(iev);
-   if (istat) {cout << "Last event processed. Status = " << istat << endl;}
-   iev++; goto EventLoop;
- }
-
-//  good old Cint can't even handle a for-loop
-//   for (Int_t iev=1;iev<=nevents; iev++) {
-//     chain->Clear();
-//     int iret = chain->Make(iev); // This should call the Make() method in ALL makers
-//     if (iret) {
-//       cout << "StHbtExample.C -- chain returned nonzero value " << iret 
-// 	   << " on event " << iev << endl;
-//       break;
-//     } 
-//   } // Event Loop
-
-
-
-  cout << "StHbtExample -- Done with event loop" << endl;
-
+  
+  for (Int_t iev=0;iev<nevents; iev++) {
+    cout << "StHbtExample -- Working on eventNumber " << iev << endl;
+    chain->Clear();
+    int iret = chain->Make(iev); // This should call the Make() method in ALL makers    
+    if (iret) {
+      // cout << "Bad return code!" << endl;
+      break;
+    }
+  } // Event Loop
   chain->Finish(); // This should call the Finish() method in ALL makers
- TheEnd:
-
-
-  realAll->Draw();
-  c1->Divide(2,3);
-  c1->cd(1);
-  realAll->Draw();
-  c1->cd(2);
-  realSplit->Draw();
-  c1->cd(3);
-  mixedAll->Draw();
-  c1->cd(4);
-  mixedSplit->Draw();
   
-  c1->cd(5);
-  
-  TH1D realRat = *realSplit;
-  realRat.Divide(realSplit,realAll);
-  realRat.Draw();
+  TFile file("SplittingHistos.root","RECREATE");
+  anal->mRealSplits->Write();
+  anal->mRealAll->Write();
+  anal->mMixedSplits->Write();
+  anal->mMixedAll->Write();
+  anal->mSplitFractionUpperLimit->Write();
+  anal->mSplitFractionLowerLimit->Write();
+  file.Close();  
 
-  c1->cd(6);
-  TH1D Diff = *realSplit;
-  Diff.Add(realSplit,mixedSplit,1.0,-1.0);
-  TH1D diffRat = *realSplit;
-  TH1D* PDiff = &Diff;
-  diffRat.Divide(PDiff,realAll);
-  diffRat.Draw();
+
+  // plotting:
+  TCanvas can;
+  can->Divide(2,3);
+  can->cd(1);
+  anal->mRealAll->Draw();
+  can->cd(2);
+  anal->mRealSplits->Draw();
+  can->cd(3);
+  anal->mMixedAll->Draw();
+  can->cd(4);
+  anal->mMixedSplits->Draw();
+  can->cd(5);
+  anal->mSplitFractionUpperLimit->Draw();
+  can->cd(6);
+  anal->mSplitFractionLowerLimit->Draw();
+
+
 
 }
+
+
+
+
+

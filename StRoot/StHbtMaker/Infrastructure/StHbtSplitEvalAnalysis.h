@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtSplitEvalAnalysis.h,v 1.1 2000/08/15 22:18:47 lisa Exp $
+ * $Id: StHbtSplitEvalAnalysis.h,v 1.2 2001/11/05 14:11:20 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtSplitEvalAnalysis.h,v $
+ * Revision 1.2  2001/11/05 14:11:20  lisa
+ * small modifications to Splitting Analysis class and macro
+ *
  * Revision 1.1  2000/08/15 22:18:47  lisa
  * Add a special HbtAnalysis class that estimates amount of splitting and add a macro to use it
  *
@@ -143,6 +146,17 @@ public:
 
   friend class StHbtLikeSignAnalysis;
 
+  // just make these public for convenience...
+  StHbt1DHisto*  mRealSplits;
+  StHbt1DHisto*  mRealAll;
+  StHbt1DHisto*  mMixedSplits;
+  StHbt1DHisto*  mMixedAll;
+  StHbt1DHisto*  mSplitFractionUpperLimit;
+  StHbt1DHisto*  mSplitFractionLowerLimit;
+
+
+  void SetQinvCut(float qc);
+
 private:
   
   StHbtPairCut*             mPairCut;
@@ -153,16 +167,15 @@ private:
   StHbtPicoEventCollection*  mMixingBuffer;
   unsigned int mNumEventsToMix;
 
-  StHbt1DHisto*  mRealSplits;
-  StHbt1DHisto*  mRealAll;
-  StHbt1DHisto*  mMixedSplits;
-  StHbt1DHisto*  mMixedAll;
+  float mQinvCut;    // look at all pairs within this Qinv range.  (GeV/c)
 
 #ifdef __ROOT__
   ClassDef(StHbtSplitEvalAnalysis, 0)
 #endif
 
 };
+
+inline void                      StHbtSplitEvalAnalysis::SetQinvCut(float qc){mQinvCut=qc;}
 
 // Get's
 inline StHbtPairCut*             StHbtSplitEvalAnalysis::PairCut() {return mPairCut;}
