@@ -174,7 +174,17 @@ St_DataSet *St_DataSetIter::Dir(Char_t *dirname)
 //______________________________________________________________________________
 St_DataSet *St_DataSetIter::FindObject(const Char_t *name,const Char_t *path,Option_t *opt)
 {
-  // opt = "i"  - case nonsensetive search
+  //
+  // FindObject looks for the object with the name supplied across dataset.
+  //
+  // name        - the "base" name (with no path) of the St_DataSet
+  // path        - path to start the seacrh from (the current dataset "by default")
+  // opt = "-i"  - case insensitive search
+  //
+  // Note: If the name provided is not unique 
+  //       the first found is returned.
+  //
+
   if (!name || strlen(name) == 0) return 0;
   if (strchr(name,'/')) {
     Error("FindObject","The name of the object <%s> can not contain any \"/\"",name);
