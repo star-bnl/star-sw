@@ -1,5 +1,8 @@
-// $Id: St_TLA_Maker.h,v 1.11 1999/07/15 13:57:44 perev Exp $
+// $Id: St_TLA_Maker.h,v 1.12 1999/09/24 22:03:09 perev Exp $
 // $Log: St_TLA_Maker.h,v $
+// Revision 1.12  1999/09/24 22:03:09  perev
+// Add InitRun & FinishRun to template maker
+//
 // Revision 1.11  1999/07/15 13:57:44  perev
 // cleanup
 //
@@ -46,7 +49,7 @@
 //class St_stk_stkpar;
 class St_TLA_Maker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.11 1999/07/15 13:57:44 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.12 1999/09/24 22:03:09 perev Exp $";
  
  protected:
  public: 
@@ -54,9 +57,11 @@ class St_TLA_Maker : public StMaker {
    virtual       ~St_TLA_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();
-// virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_TLA_Maker.h,v 1.11 1999/07/15 13:57:44 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+// virtual Int_t InitRun  (int runumber){return 0;}; // Overload empty StMaker::InitRun 
+// virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
+
+   virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_TLA_Maker.h,v 1.12 1999/09/24 22:03:09 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_TLA_Maker, 1)   //StAF chain virtual base class for Makers
 };
