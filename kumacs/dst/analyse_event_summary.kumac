@@ -17,7 +17,7 @@ hi/file 21 [ntuple_file]
  set stat 111111
  
 * --- Book Histograms----------------------------------------------------
- 1dhist 101 'Num Global Tracks total'   100 0. 5000.
+ 1dhist 101 'Num Global Tracks total'   100 0. 10000.
  1dhist 102 'Num Global Tracks good '   100 0. 5000.
  1dhist 103 'Num Global Tracks primary' 100 0. 2000.
  
