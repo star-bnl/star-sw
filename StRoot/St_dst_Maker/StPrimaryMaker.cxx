@@ -399,16 +399,17 @@ Int_t StPrimaryMaker::Make(){
 	
 	for( i=0; i<svt_groups->GetNRows(); i++, sgroup++){
 	  
-	  if( sgroup->id1 != 0 && sgroup->ident >= 0 && s_spc[spt_id].id_globtrk <= nEstPrim){
+	  if( sgroup->id1 != 0 && sgroup->ident >= 0){
 	    spt_id = sgroup->id2-1;
-	    row = s_spc[spt_id].id_wafer/1000;
-	    if(  s_spc[spt_id].id_globtrk-1 < 0) {
-	      cout << spt_id << " " << s_spc[spt_id].id_globtrk<< " " << endl;
-	      return kStErr;
+	    if (s_spc[spt_id].id_globtrk <= nEstPrim){
+	      row = s_spc[spt_id].id_wafer/1000;
+	      if(  s_spc[spt_id].id_globtrk-1 < 0) {
+		cout << spt_id << " " << s_spc[spt_id].id_globtrk<< " " << endl;
+		return kStErr;
+	      }
+	      if( row>7)row=7;
+	      track[s_spc[spt_id].id_globtrk-1].map[0] |= (1UL<<row);
 	    }
-	    if( row>7)row=7;
-	    track[s_spc[spt_id].id_globtrk-1].map[0] |= (1UL<<row);
-	    
 	  }
 	  
 	}
@@ -540,8 +541,11 @@ Int_t StPrimaryMaker::Make(){
  return iMake;
   }
 //_____________________________________________________________________________
-// $Id: StPrimaryMaker.cxx,v 1.82 2004/05/17 20:52:43 fisyak Exp $
+// $Id: StPrimaryMaker.cxx,v 1.83 2004/05/18 14:42:28 fisyak Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.83  2004/05/18 14:42:28  fisyak
+// Fix bug with spt_id
+//
 // Revision 1.82  2004/05/17 20:52:43  fisyak
 // Add protection for no field data
 //
