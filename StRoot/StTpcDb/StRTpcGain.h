@@ -3,7 +3,7 @@
 //#include <TObject.h>
 #include <StTpcGainI.h>
 #include <gainFactors.time.h>
-#include <StTpcPadPlaneI.h>
+//#include <StTpcPadPlaneI.h>
 //#include <iostream.h>
 
 class StRTpcGain : public StTpcGainI {
@@ -21,11 +21,9 @@ public:
   void AddData(gain_factors GainIn) {
       mGain = GainIn;
    }
-  void SetPadPlaneP57ointer(StTpcPadPlaneI* ppin){
-      padplane = ppin;
-  }
 
   //Implements Abstract Interface 
+  void SetPadPlanePointer(StTpcPadPlaneI* ppin);
   float getGain(int row, int pad)   const;
   float getOnlineGain(int row, int pad) const;
   float getNominalGain(int row, int pad) const;

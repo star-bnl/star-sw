@@ -2,6 +2,10 @@
 
 ClassImp(StRTpcGain)
 
+  void StRTpcGain::SetPadPlanePointer(StTpcPadPlaneI* ppin){
+      padplane = ppin;
+  }
+
 
 float StRTpcGain::getGain(int row, int pad)   const {
   if (row>0&&row<=padplane->numberOfInnerRows()){
