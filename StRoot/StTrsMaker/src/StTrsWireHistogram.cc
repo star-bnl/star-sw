@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.10 1999/02/16 23:40:32 lasiuk Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.11 1999/04/07 00:49:05 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,9 +11,12 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
- * Revision 1.10  1999/02/16 23:40:32  lasiuk
- * check clear/add entry
+ * Revision 1.11  1999/04/07 00:49:05  lasiuk
+ * use the z offset for driftLength
  *
+ *
+ * Revision 1.11  1999/04/07 00:49:05  lasiuk
+ * use the z offset for driftLength
  *
  * Revision 1.10  1999/02/16 23:40:32  lasiuk
  * check clear/add entry
@@ -317,9 +320,11 @@ double StTrsWireHistogram::noFluctuations(int wireIndex) const
     return (wireIndex<mNumberOfInnerSectorAnodeWires) ?
 	mInnerSectorGasGain : mOuterSectorGasGain;
 }
-    // For now use values from SN247
-    //mInnerSectorGasGain = 1315.;
-    //mOuterSectorGasGain = 615.;
+
+void StTrsWireHistogram::gasGainCalculation()
+{
+    // do calculation here and use values from db
+    // For now use values from SN263
 //     mInnerSectorGasGain =
 // 	exp(scDb->innerSectorGasGainb*(innerSectorAnodeVoltage-innerSectorGasGainVzero));
 //     mOuterSectorGasGain =
