@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.16 2000/01/07 20:35:00 kathy Exp $
+// $Id: StEventQAMaker.cxx,v 1.17 2000/01/08 03:27:34 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.17  2000/01/08 03:27:34  lansdell
+// fixed nfit/nmax ratio in Tab version; separated hits by detector; changed vertex histograms to allow for events with 0 vertices
+//
 // Revision 1.16  2000/01/07 20:35:00  kathy
 // make some corrections to filling hist; add point hist for each det separately
 //
@@ -756,16 +759,16 @@ void StEventQAMaker::MakeHistVertex() {
 	  m_pv_z->Fill(primVtx->position().z());
 	m_pv_pchi2->Fill(primVtx->chiSquared());
       }
-      else{
-      //m_v_detid->Fill(aPrimVtx->det_id); 
-      m_v_vtxid->Fill(aPrimVtx->type());
-      if (!isnan(double(aPrimVtx->position().x())))
-	m_v_x->Fill(aPrimVtx->position().x());     
-      if (!isnan(double(aPrimVtx->position().y())))
-	m_v_y->Fill(aPrimVtx->position().y());     
-      if (!isnan(double(aPrimVtx->position().z())))
-	m_v_z->Fill(aPrimVtx->position().z());     
-      m_v_pchi2->Fill(aPrimVtx->chiSquared()); 
+      else {
+	//m_v_detid->Fill(aPrimVtx->det_id); 
+	m_v_vtxid->Fill(aPrimVtx->type());
+	if (!isnan(double(aPrimVtx->position().x())))
+	  m_v_x->Fill(aPrimVtx->position().x());     
+	if (!isnan(double(aPrimVtx->position().y())))
+	  m_v_y->Fill(aPrimVtx->position().y());     
+	if (!isnan(double(aPrimVtx->position().z())))
+	  m_v_z->Fill(aPrimVtx->position().z());     
+	m_v_pchi2->Fill(aPrimVtx->chiSquared()); 
       }
     }
   }
@@ -845,8 +848,20 @@ void StEventQAMaker::MakeHistPoint() {
   if (Debug()) cout << " *** in StEventQAMaker - filling point histograms " << endl;
 
   StTpcHitCollection *tpcHits = event->tpcHitCollection();
+  StSvtHitCollection *svtHits = event->svtHitCollection();
+  StFtpcHitCollection *ftpcHits = event->ftpcHitCollection();
+  StSsdHitCollection *ssdHits = event->ssdHitCollection();
 
-  m_pnt_tot->Fill(tpcHits->numberOfHits());
+  if (tpcHits)
+    m_pnt_tpc->Fill(tpcHits->numberOfHits());
+  if (svtHits)
+    m_pnt_svt->Fill(svtHits->numberOfHits());
+  if (ftpcHits) {
+    //m_pnt_ftpcE->Fill(ftpcHits-> );
+    //m_pnt_ftpcW->Fill(ftpcHits-> );
+  }
+  if (ssdHits)
+    m_pnt_ssd->Fill(ssdHits->numberOfHits());
 }
 
 //_____________________________________________________________________________
