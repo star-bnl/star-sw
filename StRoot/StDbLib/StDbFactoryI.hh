@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbFactoryI.hh,v 1.6 2000/01/10 20:37:53 porter Exp $
+ * $Id: StDbFactoryI.hh,v 1.7 2000/01/27 05:54:33 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbFactoryI.hh,v $
+ * Revision 1.7  2000/01/27 05:54:33  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.6  2000/01/10 20:37:53  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -49,7 +54,9 @@ class StDbTable;
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef list<StDbTableID*, allocator<StDbTableID*> > IDList;
 #else
+#if !defined(ST_NO_NAMESPACES)
 using std::list;
+#endif
 typedef list<StDbTableID*> IDList;
 #endif
 
@@ -73,7 +80,7 @@ public:
   virtual int findTableID(const char* tableName);
   virtual StDbTable* getDbTable(const char* tableName, int option);
   virtual void deleteIDList();
-  virtual void initIDList(ifstream& is);
+  virtual void readIDList(ifstream& is);
 
 };
 

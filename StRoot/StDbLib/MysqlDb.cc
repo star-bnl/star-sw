@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.3 1999/12/07 21:25:25 porter Exp $
+ * $Id: MysqlDb.cc,v 1.4 2000/01/27 05:54:31 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.4  2000/01/27 05:54:31  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.3  1999/12/07 21:25:25  porter
  * some fixes for linux warnings
  *
@@ -59,7 +64,7 @@ char *tString  ;
 
 MysqlDb::MysqlDb(){
 
-
+mhasConnected=false;
 mQuery=0;
 mQueryMess=0;
 mQueryLast=0;
@@ -76,6 +81,7 @@ if(mQueryMess) delete [] mQueryMess;
 if(mQueryLast) delete [] mQueryLast;
 Release();
 if(mRes) delete mRes;
+mysql_close(&mData);
 }
 
 
@@ -85,6 +91,7 @@ if(mRes) delete mRes;
 bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd, 
 		      const char *aDb, const int aPort){
   
+  if(mhasConnected)mysql_close(&mData);
   bool tRetVal = false;
   if (!mysql_init(&mData)) {
     cout << &mData <<endl;
@@ -99,6 +106,7 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
       cerr << " MySQL returned error " << mysql_error(&mData) << endl;
     }
   }
+  mhasConnected = tRetVal;
   return tRetVal;
 }
 ////////////////////////////////////////////////////////////////////////
@@ -107,6 +115,7 @@ void MysqlDb::RazQuery() {
   
   if (mQueryLast) delete [] mQueryLast;
   mQueryLast=mQueryMess;
+  if(mQuery) delete [] mQuery;  
   mQuery = new char[1];
   mQueryMess = new char[1];
   mQueryLen=0;
@@ -235,35 +244,52 @@ bool MysqlDb::Input(const char *table,StDbBuffer *aBuff){
     int len; 
     unsigned i;
 
-    for (i=0;i<NbFields();i++) {
-      if  ((IS_BLOB(mRes->mRes->fields[i].flags) ) || mRes->mRes->fields[i].type ==254) {
-	if (mRes->mRes->fields[i].flags&BINARY_FLAG) {
-	  if (aBuff->ReadArray(tVal,len,mRes->mRes->fields[i].name)){
-	    if (tFirst) {tFirst=false;} else {*this << ",";};
-	    *this << mRes->mRes->fields[i].name << "='" << Binary(len,(float*)tVal)<<"'";
-	  };
-	}else{
-      if(mRes->mRes->fields[i].type==254){
- 	  if (aBuff->ReadScalar(tVal,mRes->mRes->fields[i].name)) {
-	    if (tFirst) {tFirst=false;} else {*this << ",";};
-	    *this << mRes->mRes->fields[i].name << "='" << tVal << "'";
-	  };
-          } else {
-	  char** tVal2=0;
-	  if (aBuff->ReadArray(tVal2,len,mRes->mRes->fields[i].name)){
-	    tVal=CodeStrArray(tVal2,len);
-	    int j;for (j=0;j<len;j++) {if (tVal2[j]) delete [] tVal2[j];};
-	    delete [] tVal2;
-	    if (tFirst) {tFirst=false;} else {*this << ",";};
-	    *this << mRes->mRes->fields[i].name << "='" << tVal<<"'";
-	  }
-     };
+ for (i=0;i<NbFields();i++) {
+    if ((IS_BLOB(mRes->mRes->fields[i].flags) ) || 
+        mRes->mRes->fields[i].type ==254) {
+      if (mRes->mRes->fields[i].flags&BINARY_FLAG) { // Binary
+	    if (aBuff->ReadArray(tVal,len,mRes->mRes->fields[i].name)){
+	       if (tFirst) {
+               tFirst=false;
+           } else {
+               *this << ",";
+           };
+	         *this << mRes->mRes->fields[i].name << "='" << Binary(len,(float*)tVal)<<"'";
+	   };
+	 }else{  // text types
+       if(mRes->mRes->fields[i].type==254){
+ 	     if (aBuff->ReadScalar(tVal,mRes->mRes->fields[i].name)) {
+	       if (tFirst) {
+               tFirst=false;
+           } else {
+               *this << ",";
+           };
+	       *this << mRes->mRes->fields[i].name << "='" << tVal << "'";
+	     };
+       } else {
+	     char** tVal2=0;
+	     if (aBuff->ReadArray(tVal2,len,mRes->mRes->fields[i].name)){
+	       tVal=CodeStrArray(tVal2,len);
+	       int j;for (j=0;j<len;j++) {if (tVal2[j]) delete [] tVal2[j];};
+	       delete [] tVal2;
+	       if (tFirst) {
+               tFirst=false;
+           } else {
+               *this << ",";
+           };
+	       *this << mRes->mRes->fields[i].name << "='" << tVal<<"'";
+         }
+       };
 	};
-      }else {
-	if (aBuff->ReadScalar(tVal,mRes->mRes->fields[i].name)) {
-	  if (tFirst) {tFirst=false;} else {*this << ",";};
-	  *this << mRes->mRes->fields[i].name << "='" << tVal << "'";
-	};
+  } else {  // not binary nor text
+	      if (aBuff->ReadScalar(tVal,mRes->mRes->fields[i].name)) {
+	         if (tFirst) {
+                 tFirst=false;
+             } else {
+                 *this << ",";
+             };
+	         *this << mRes->mRes->fields[i].name << "='" << tVal << "'";
+	      };
       };
       if (tVal) delete [] tVal;tVal=0;
     };
@@ -316,6 +342,8 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
 	       int len;
 	       tStrPtr=DecodeStrArray((char*)tRow[i],len);
 	       aBuff->WriteArray(tStrPtr,len,mRes->mRes->fields[i].name);
+           for(int k=0;k<len;k++)delete tStrPtr[k];
+           delete tStrPtr;
 	    };
       } else {
         // cout << " Writing Scalar Named = " << mRes->mRes->fields[i].name << endl;
@@ -401,6 +429,7 @@ char** MysqlDb::DecodeStrArray(char* strinput , int &aLen){
       tPnt=tPntNew+1;
     };
   };
+  delete [] tBuff;
   return strarr;
 }
 ////////////////////////////////////////////////////////////////////////

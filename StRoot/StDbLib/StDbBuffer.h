@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.h,v 1.4 1999/10/19 14:30:37 porter Exp $
+ * $Id: StDbBuffer.h,v 1.5 2000/01/27 05:54:33 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.h,v $
+ * Revision 1.5  2000/01/27 05:54:33  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.4  1999/10/19 14:30:37  porter
  * modifications relevant to use with StDbBroker and future merging with
  * "params" database structure + some docs + suppressing diagnostics messages
@@ -63,14 +68,16 @@ private:
   column *mCol;
   BuffMode mMode;
 
+  void zeroColumn(int istart, int iend);
 
 public: 
 
   StDbBuffer(){
     mCur=0;
     mLast=-1;
-    mMax=4;
+    mMax=100;
     mCol= new column[mMax+1];
+    zeroColumn(0,100);
     mMode=Storage;
   };
 
@@ -83,6 +90,7 @@ public:
     mCol=acol;};
 
   ~StDbBuffer(){Raz();delete [] mCol;  };  
+
   virtual void SetClientMode() {mMode=Client;};
   virtual void SetStorageMode() {mMode=Storage;};
   virtual bool IsClientMode() {return (mMode==Client) ? true : false;};

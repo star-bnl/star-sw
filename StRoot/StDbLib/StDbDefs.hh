@@ -1,15 +1,23 @@
 /***************************************************************************
  *
- * $Id: StDbDefs.hh,v 1.7 2000/01/10 20:37:53 porter Exp $
+ * $Id: StDbDefs.hh,v 1.8 2000/01/27 05:54:33 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
  *
- * Description:  enum definitions for DataBase Type & Domain
+ * Description:  enum definitions for DataBase Type & Domain.
+ *               This allows compile-time checks for standard DB accesses.
+ *               The StDbManager _does_ support access by names (strings) for
+ *               greater flexibility - though poorer compile-time safegaurds
  *
  ***************************************************************************
  *
  * $Log: StDbDefs.hh,v $
+ * Revision 1.8  2000/01/27 05:54:33  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.7  2000/01/10 20:37:53  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -36,15 +44,20 @@
 #ifndef STDBDEFS_HH
 #define STDBDEFS_HH
 
+// enumerated standard set of database types
+
 enum StDbType { dbStDb=0, dbServer, dbRunLog, dbConfigurations, dbConditions, dbCalibrations, dbGeometry, dbRunCatalog, dbRunParams, dbTestScheme, dbUser};
+
+// enumerated standard set of database domains
 
 enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3 };
 
 
-
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
-// to get bool from object-space
+#ifndef ST_DBAPI_CC5
+// then get bool definition from object-space
 #include <ospace/config.h>
+#endif
 #endif
 
 #endif

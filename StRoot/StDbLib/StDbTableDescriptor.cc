@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.9 2000/01/19 20:20:07 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.10 2000/01/27 05:54:35 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.10  2000/01/27 05:54:35  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.9  2000/01/19 20:20:07  porter
  * - finished transaction model needed by online
  * - fixed CC5 compile problem in StDbNodeInfo.cc
@@ -53,7 +58,7 @@
 StDbTableDescriptor::StDbTableDescriptor(){
 
 mCur = 0;
-mMax = 4;
+mMax = 100;
 offsetToNextEmptyByte = 0;
 offsetToLast4Bytes = -4;
 mnumElements = 0;
@@ -196,14 +201,15 @@ bool ClientMode;
    char* mname = 0;
    buff->ReadScalar(mname,"name");
    if(mname)strcpy(mcols[i].name,mname);
+   if(mname) delete [] mname;
    if(buff->ReadScalar(mtype,"type")){
        mcols[i].type = getType(mtype);
+       if(mtype)delete [] mtype;
        char* length=0;
        if(buff->ReadScalar(length,"length"))fillSizeAndOffset(length,i);
+       if(length) delete [] length;
    }
 
-   //  cout << "Element Loaded "<< endl;
-   //  cout << " name = " << mcols[i].name << " type = " << mcols[i].type << "    //   size = " << mcols[i].size << " offset = " << mcols[i].offset << endl;
    mCur++;
    mnumElements++;
 
@@ -224,7 +230,7 @@ StDbTableDescriptor::reSize(){
 
   // simply add 10 elements
 
-  if(mCur==mMax){
+  if(mCur>mMax){
      int newMax = mMax+10+1;
      tableDescriptor* dScr = new tableDescriptor[newMax];
      memcpy(dScr,mcols,(mMax+1)*sizeof(tableDescriptor));

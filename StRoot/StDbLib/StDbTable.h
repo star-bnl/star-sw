@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.9 2000/01/19 20:20:07 porter Exp $
+ * $Id: StDbTable.h,v 1.10 2000/01/27 05:54:35 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.10  2000/01/27 05:54:35  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.9  2000/01/19 20:20:07  porter
  * - finished transaction model needed by online
  * - fixed CC5 compile problem in StDbNodeInfo.cc
@@ -111,7 +116,7 @@ public:
   virtual void         setBeginTime(unsigned int time) ;
   virtual void         setBeginTime(const char* time);
 
-  virtual int*         getElementID(int& nrows) const ;
+  virtual int*         getElementID(int& nrows);
   virtual int          getRowID(int rowNumber) const ;
   virtual void         setElementID(int* elements, int nrows=1) ; 
 
@@ -194,7 +199,7 @@ void StDbTable::setBeginTime(const char* time){
 mbeginTime.setDateTime(time); }
 
 inline 
-int* StDbTable::getElementID(int& nrows) const { nrows = mrows; 
+int* StDbTable::getElementID(int& nrows) { nrows = mrows; 
 return melementID; }
 
 inline

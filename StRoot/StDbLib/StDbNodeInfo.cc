@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNodeInfo.cc,v 1.3 2000/01/19 20:20:06 porter Exp $
+ * $Id: StDbNodeInfo.cc,v 1.4 2000/01/27 05:54:34 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbNodeInfo.cc,v $
+ * Revision 1.4  2000/01/27 05:54:34  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.3  2000/01/19 20:20:06  porter
  * - finished transaction model needed by online
  * - fixed CC5 compile problem in StDbNodeInfo.cc
@@ -52,7 +57,7 @@ StDbNodeInfo::copyInfo(StDbNodeInfo* node){
  nodeType=mstrDup(node->nodeType);
  structName=mstrDup(node->structName);
  elementID=mstrDup(node->elementID);
- dbName=mstrDup(node->dbName);
+ if(dbName) delete [] dbName; dbName=mstrDup(node->dbName);
  IsBaseLine=node->IsBaseLine;
  IsBinary=node->IsBinary;
  IsIndexed=node->IsIndexed;
@@ -197,9 +202,10 @@ while(id){
 
  int* tmpElements = new int[100000];
  char* p1=&tmpName[0];
- char* anID;
+ char* anID=0;
  anID = getNextID(p1);
  tmpElements[0] = atoi(anID);
+ if(anID)delete [] anID;
  numElements = 1;
  int iEnd, iStart, k;
  for(int ient=1;ient<numEntries;ient++){
@@ -244,6 +250,8 @@ ostrstream os(newString,4*nr+1);
 
  for(int i=0;i<nr-1;i++)os<<eid[i]<<",";
  os<<eid[nr-1]<<ends;
+
+ delete [] eid;
 
 return newString;
 }

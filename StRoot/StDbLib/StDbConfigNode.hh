@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.hh,v 1.12 2000/01/19 20:20:05 porter Exp $
+ * $Id: StDbConfigNode.hh,v 1.13 2000/01/27 05:54:33 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.hh,v $
+ * Revision 1.13  2000/01/27 05:54:33  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.12  2000/01/19 20:20:05  porter
  * - finished transaction model needed by online
  * - fixed CC5 compile problem in StDbNodeInfo.cc
@@ -64,7 +69,9 @@ class StDbTableIter;
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef list<StDbTable*, allocator<StDbTable*> > TableList;
 #else
+#if !defined(ST_NO_NAMESPACES)
 using std::list;
+#endif
 typedef list<StDbTable*> TableList;
 #endif
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.13 2000/01/19 20:20:04 porter Exp $
+ * $Id: StDbConfigNode.cc,v 1.14 2000/01/27 05:54:33 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.14  2000/01/27 05:54:33  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.13  2000/01/19 20:20:04  porter
  * - finished transaction model needed by online
  * - fixed CC5 compile problem in StDbNodeInfo.cc
@@ -72,8 +77,10 @@ StDbConfigNode::StDbConfigNode(StDbConfigNode* parent, const char* nodeName, con
 
   if(mnode.dbType==dbStDb){
     mnode.dbType=StDbManager::Instance()->getDbType(mnode.name);
+    misConfigured = false; 
   } else if(mnode.dbDomain==dbStar){
     mnode.dbDomain=StDbManager::Instance()->getDbDomain(mnode.name);
+    misConfigured = false;
   }
 
 }
@@ -187,11 +194,21 @@ StDbConfigNode::printTables(int depth){
     ostrstream os(pdepth,depth+1);
     for(int k=0;k<depth;k++)os<<" ";
     os<<ends;
+    int* elementID;
+    int nrows;
 
     TableList::iterator itr;
     for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
       cout <<pdepth<<"Table="<<(*itr)->getMyName();
-      cout <<" VersionKey = "<<(*itr)->getVersion() << endl;
+      cout <<" VersionKey = "<<(*itr)->getVersion()<<endl;
+      elementID = (*itr)->getElementID(nrows);
+      cout <<pdepth<<"ElementIDs = ";
+      if(elementID){
+        for(int j=0;j<nrows;j++)cout<<" "<<elementID[j]<<" ";
+      } else {
+        cout<< " None ";
+      }
+      cout << endl;
     }
  }
 
@@ -370,8 +387,8 @@ StDbConfigNode::resolveNodeInfo(StDbNodeInfo*& node){
   node->IsBaseLine=mnode.IsBaseLine;
   // if elementID="None" then Table-Node's elementID is used
   // else it is from this parent Object.
-  if(!strstr(mnode.elementID,"None")) mnode.mstrCpy(node->elementID,mnode.elementID);
-  
+  if(!strstr(mnode.elementID,"None"))mnode.mstrCpy(node->elementID,mnode.elementID);
+
 }
 
 
@@ -403,7 +420,19 @@ if(mfirstChildNode)delete mfirstChildNode;
 
 void
 StDbConfigNode::deleteChildren(){
-if(hasChildren())getFirstChildNode()->deleteTree();
+
+  if(mfirstChildNode){
+    StDbConfigNode* nextChild = mfirstChildNode->getNextNode();
+    delete mfirstChildNode; mfirstChildNode=0;
+    StDbConfigNode* node = 0;
+    while(nextChild){
+        node=nextChild->getNextNode();
+        delete nextChild;
+        nextChild = node;
+    }          
+
+  }        
+
 }
 
 ////////////////////////////////////////////////////////////////

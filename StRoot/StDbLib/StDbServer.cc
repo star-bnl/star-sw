@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServer.cc,v 1.8 2000/01/19 20:20:06 porter Exp $
+ * $Id: StDbServer.cc,v 1.9 2000/01/27 05:54:34 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbServer.cc,v $
+ * Revision 1.9  2000/01/27 05:54:34  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.8  2000/01/19 20:20:06  porter
  * - finished transaction model needed by online
  * - fixed CC5 compile problem in StDbNodeInfo.cc
@@ -131,6 +136,7 @@ StDbServer::~StDbServer(){
 
    if(mserverName)delete [] mserverName;
    if(mhostName)delete [] mhostName;
+   if(munixSocket)delete [] munixSocket;
    if(mdbName)delete [] mdbName;
    if(mdomainName) delete [] mdomainName;
    if(mtypeName) delete [] mtypeName;
@@ -374,7 +380,7 @@ StDbServer::QueryDb(StDbTable* table, unsigned int reqTime) {
   if(!mdatabase->QueryDb(table,reqTime)){
     cerr<<"WARNING:: ";
     if(table) cerr << "table ["<<table->getMyName()<<"] "; 
-    cerr<< " Table is Not Updated " << endl;
+    cerr<< " Table Data is not Filled from DB" << endl;
     return false;
   }
 
@@ -389,7 +395,7 @@ StDbServer::QueryDb(StDbTable* table, const char* whereClause) {
   if(!mdatabase->QueryDb(table,whereClause)){
     cerr<<"WARNING:: ";
     if(table) cerr << "table ["<<table->getMyName()<<"] "; 
-    cerr<< " Table is Not Updated " << endl;
+    cerr<< " Table Data is not Filled from DB " << endl;
     return false;
   }
 

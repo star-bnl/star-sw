@@ -1,6 +1,6 @@
-/***************************************************************************
+ /***************************************************************************
  *
- * $Id: mysqlAccessor.hh,v 1.7 2000/01/19 20:20:08 porter Exp $
+ * $Id: mysqlAccessor.hh,v 1.8 2000/01/27 05:54:36 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.hh,v $
+ * Revision 1.8  2000/01/27 05:54:36  porter
+ * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
+ * Fixed reConnect()+transaction model mismatch
+ * added some in-code comments
+ *
  * Revision 1.7  2000/01/19 20:20:08  porter
  * - finished transaction model needed by online
  * - fixed CC5 compile problem in StDbNodeInfo.cc
@@ -87,6 +92,8 @@ StDbBuffer buff;
   virtual int QueryDescriptor(StDbTable* table);
 
   virtual StDbBuffer* getBuffer(){return (StDbBuffer*) &buff;}; 
+  virtual bool  IsConnected();
+
 
   // DB & timestamp helper methods
 
