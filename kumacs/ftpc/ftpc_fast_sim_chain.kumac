@@ -1,4 +1,13 @@
 ************* FTPC fast simulation chain kumac  ****************************
+*
+* --> to run
+*    - change the inputs above as desired
+*    - CHANGE THE output_file !!!!!!!!!!
+*    - run staf++
+*    -   make ftpc/ffs ftpc/fpt ftpc/fte  (you'll get pams - ffs,fpt,fte)
+*    -   exec ftpc_fast_sim_chain
+*
+*
 ****************************************************************************
 
 macro ftpc_fast_sim_chain_
@@ -7,14 +16,6 @@ macro ftpc_fast_sim_chain_
        nskip=0_
        nevents=1
 
-*
-* --> to run
-*    - change the inputs above as desired
-*    - run staf++
-*    -   make ftpc/ffs ftpc/fpt ftpc/fte  (you'll get pams - ffs,fpt,fte)
-*    -   exec ftpc_fast_sim_chain
-*
-*
 
 * global macros
 
