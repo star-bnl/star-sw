@@ -1,15 +1,20 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.19 2004/05/05 21:37:37 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.20 2004/05/05 22:04:16 zolnie Exp $
 // doxygen info here
 /** 
  * \class  EEmcTTMMaker
+ * \brief  EEMC tower to track matching
+ *
+ * 
+ * This a MuDST based class to match TPC tracks to EEMC towers. Its main result is a list
+ * of towers with associated tracks (list of EEmcTTMatch objects)
+ * 
+ *
  * \author Piotr A. Zolnierczuk
  * \date   2003/12/08
  *
- * \brief  EEMC tower to track matching
- *
- * This a MuDST based class to match TPC tracks to EEMC towers
+
  */
 
 /*!
@@ -531,6 +536,9 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm)  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.20  2004/05/05 22:04:16  zolnie
+// forgor about EEmcTower
+//
 // Revision 1.19  2004/05/05 21:37:37  zolnie
 // ver 2.0 released
 //

@@ -1,5 +1,5 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTTMMaker.h,v 1.12 2004/05/05 21:37:37 zolnie Exp $
+// $Id: EEmcTTMMaker.h,v 1.13 2004/05/05 22:04:16 zolnie Exp $
 #ifndef STAR_EEmcTTMMaker
 #define STAR_EEmcTTMMaker
 
@@ -41,21 +41,21 @@ class EEmcTower;
 
 class EEmcTTMMaker : public StMaker {
 public: 
-  /// default values for the cuts
+  /// default value for the maximum CTB sum allowed
   static const Int_t    kDefMaxCTBsum      ;
-  /// default values for the cuts
+  /// default value for the minimum TPC hits/track allowed
   static const Int_t    kDefMinTrackHits   ;  
-  /// default values for the cuts
+  /// default value for the minimum track length allowed
   static const Double_t kDefMinTrackLength ;  
-  /// default values for the cuts
+  /// default value for the minimum track pT allowed
   static const Double_t kDefMinTrackPt     ;  
-  /// default values for the cuts
+  /// default value for the minimum track pseudorapidity at origin allowed
   static const Double_t kDefMinTrackEta    ;  
-  /// default values for the cuts
+  /// default value for the maximum track pseudorapidity at origin allowed
   static const Double_t kDefMaxTrackEta    ;  
-  /// default values for the cuts
+  /// default value for the maximum distance in phi from the tower center
   static const Double_t kDefDeltaPhiCut    ;
-  /// default values for the cuts
+  /// default value for the maximum distance in eta from the tower center
   static const Double_t kDefDeltaEtaCut    ;
   
   //! the TTM constructor
@@ -191,7 +191,7 @@ public:
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.12 2004/05/05 21:37:37 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.13 2004/05/05 22:04:16 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -203,6 +203,9 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm);
 #endif
 
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.13  2004/05/05 22:04:16  zolnie
+// forgor about EEmcTower
+//
 // Revision 1.12  2004/05/05 21:37:37  zolnie
 // ver 2.0 released
 //
