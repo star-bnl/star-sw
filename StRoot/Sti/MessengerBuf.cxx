@@ -23,6 +23,10 @@ streamsize MessengerBuf::xsputn (const char* text, streamsize n){
 
 int MessengerBuf::dispatchMessage(const char *szMessage, streamsize iLen){
 
+  // bail immediately if we aren't printing.
+  unsigned int routing = m_routing & Messenger::getRoutingMask();
+  if(routing == 0){ return 0; }
+
   // keep track of which unique streams (not routing bits) we have
   // written to
   unsigned int nMessageTypes = MessageType::getNtypes();
@@ -33,7 +37,6 @@ int MessengerBuf::dispatchMessage(const char *szMessage, streamsize iLen){
   // test our routing bits agains the global mask and output
   // to all relevant streams
 
-  unsigned int routing = m_routing & Messenger::getRoutingMask();
   for(unsigned int iMessageType = 0; iMessageType<nMessageTypes; 
       iMessageType++){
     

@@ -7,10 +7,8 @@
 #define MESSAGE_TYPE_H
 
 #include <string>
-#include <map>
 #include <iostream>
 
-using std::map;
 using std::string;
 using std::ostream;
 using std::cout;
@@ -22,16 +20,11 @@ using std::cerr;
 #define CREATE_MESSAGE(MSG) \
 unsigned int MessageType::k##MSG##Message = (new MessageType(#MSG))->getCode();
 
-class MessageType;
-typedef map<unsigned int, MessageType*> messageTypeMap;
-typedef messageTypeMap::const_iterator messageTypeMapIterator;
-typedef messageTypeMap::value_type messageTypeMapValueType;
-
 class MessageType{
 public:
 
 //-----------------------------------------------------------------------------
-// here is where you should add new message types, as well as MessageType.cxx
+// Here is where you should add new message types, as well as MessageType.cxx .
 ADD_MESSAGE(Hit);
 ADD_MESSAGE(Track);
 ADD_MESSAGE(Node);
@@ -85,9 +78,7 @@ protected:
     static unsigned int s_nTypes;
 
     /// look up type by index
-    static messageTypeMap s_typeByIndex;
-    /// look up type by code
-    static messageTypeMap s_typeByCode;
+    static MessageType* s_apTypes[32];
 
 };
 
