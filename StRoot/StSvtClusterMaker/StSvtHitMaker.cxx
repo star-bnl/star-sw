@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.18 2002/01/31 22:56:39 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.19 2002/01/31 23:53:25 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.19  2002/01/31 23:53:25  caines
+ * Return kStOK even if init fails so chain doesnt crash
+ *
  * Revision 1.18  2002/01/31 22:56:39  caines
  * Make code cope with database failing, now just sends error messages and quits but doesnt make chain end
  *
@@ -236,9 +239,9 @@ Int_t StSvtHitMaker::GetSvtGeometry()
   St_DataSet* dataSet;
   dataSet = GetDataSet("StSvtGeometry");
   if(!dataSet) {
-    gMessMgr->Error("Failure to get SVT geometry - THINGS HAVE GONE SERIOUSLY WRONG!!!!!");
+    gMessMgr->Error("Failure to get SVT geometry - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
     
-    return kStFatal;
+    return kStOK;
   }
 
   m_geom = (StSvtGeometry*)dataSet->GetObject();
