@@ -2,13 +2,16 @@
 #define StQACosmicMaker_HH
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.h,v 1.11 2000/02/05 01:26:11 snelling Exp $
+ * $Id: StQACosmicMaker.h,v 1.12 2000/07/03 04:10:29 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking, 
  *               geometry etc.)
  *
  * $Log: StQACosmicMaker.h,v $
+ * Revision 1.12  2000/07/03 04:10:29  snelling
+ * Fixed bug in ntuple (changed :: to :)
+ *
  * Revision 1.11  2000/02/05 01:26:11  snelling
  * Fixed multiple declaration loop variable (SUN compiler does not like it)
  *
@@ -55,7 +58,7 @@ class StQACosmicMaker : public StMaker {
   virtual void   WriteHistogramsOff(){WriteHistograms();}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.11 2000/02/05 01:26:11 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.12 2000/07/03 04:10:29 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  private:
 
@@ -81,7 +84,10 @@ class StQACosmicMaker : public StMaker {
   Int_t  writeOutPostscript();
 
   Int_t  initTNtuple();
-  Int_t  fillTNtuple();
+  Int_t  fillHitTNtuple();
+  Int_t  fillMorphTNtuple();
+  Int_t  fillHitTNtupleNoTrk();
+  Int_t  fillMorphTNtupleNoTrk();
   Int_t  writeOutTNtuple();
 
   Int_t  fillTablePointers();
@@ -132,8 +138,13 @@ class StQACosmicMaker : public StMaker {
   enum {nResHist = 4, nChargeHist = 4, nClusterHist = 4,
 	nMorphHist = 4 };
 
+  enum {hrow,hx,hy,hz,hq,dedx,halpha,hlambda,hdalpha,hdlambda,resy,resz,trknfit,trkp,enumLast};
+  float ntEntries[enumLast];
+ 
   TNtuple *mTNtupleTPC; //!
   TNtuple *mTNtupleMorph; //!
+  TNtuple *mTNtupleTPCNoTrk; //!
+  TNtuple *mTNtupleMorphNoTrk; //!
 
   struct ClusterHist {
     TH1F *mNPadsPerHit;
