@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbDefs.hh,v 1.10 2000/04/25 18:26:02 porter Exp $
+ * $Id: StDbDefs.hh,v 1.11 2000/05/04 15:13:11 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StDbDefs.hh,v $
+ * Revision 1.11  2000/05/04 15:13:11  porter
+ * added dbOnl, dbRich, dbMwc domains as standards
+ *
  * Revision 1.10  2000/04/25 18:26:02  porter
  * added flavor & production time as settable query fields in
  * table &/or node. Associated SQL updated in mysqlAccessor.
@@ -63,7 +66,7 @@ enum StDbType { dbStDb=0, dbServer, dbRunLog, dbConfigurations, dbConditions, db
 
 // enumerated standard set of database domains
 
-enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3 };
+enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3, dbOnl, dbRich, dbMwc };
 
 #include "dbstl.h"
 #include <string.h>
