@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.23 2002/02/20 16:14:20 pfachini Exp $
+// $Id: StLaserEventMaker.cxx,v 1.24 2003/01/21 02:47:59 jeromel Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.24  2003/01/21 02:47:59  jeromel
+// Prevent spurious crash and modify messaging. Fixed minTracks using enum.
+//
 // Revision 1.23  2002/02/20 16:14:20  pfachini
 // The clock is now obtained from Jon Gans offline db code
 //
@@ -720,24 +723,27 @@ void StLaserEventMaker::UndoExB(Float_t *x, Float_t *y, Float_t *z){
 
 //_____________________________________________________________________________
 Int_t StLaserEventMaker::Finish() {
-  if (numberTracks->GetMean()>=700){
-    WriteTableToFile();
-  }
-  else{
-    gMessMgr->Error() << "StLaserEventMaker::no laser events. Number Tracks = " << numberTracks->GetRMS() << " which is lower than the minimum of 600 tracks requested for good laser events. No table will be written" << endm;
+  if (numberTracks){
+    if (numberTracks->GetMean()>= minValidTracks){
+      WriteTableToFile();
+    } else{
+      gMessMgr->Error() << "StLaserEventMaker::no laser events. Number Tracks = " << numberTracks->GetRMS() << " which is lower than the minimum of " << minValidTracks << "tracks requested for good laser events. No table will be written" << endm;
+    }
+  } else {
+    gMessMgr->Error() << "StLaserEventMaker:: completly empty. Are sure you called this maker on laser events ?? No table will be written ... " << endm;
   }
 
   if (mHistOut){
     WriteHistFile();
   }
-    return StMaker::Finish();
+  return StMaker::Finish();
 }
 
 //_____________________________________________________________________________
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.23 2002/02/20 16:14:20 pfachini Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.24 2003/01/21 02:47:59 jeromel Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
