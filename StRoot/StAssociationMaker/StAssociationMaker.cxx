@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.34 2002/09/21 19:48:44 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.35 2003/05/28 17:57:50 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.35  2003/05/28 17:57:50  calderon
+ * No longer use find_if for FTPC to solve a bug for y<0 found by Frank Simon.
+ * Initialize tpcHitDistance and svtHitDistance to avoid a warning.
+ *
  * Revision 1.34  2002/09/21 19:48:44  calderon
  * change encoded method for IT tracks to 263 (was 32770 before)
  *
@@ -709,7 +713,7 @@ Int_t StAssociationMaker::Make()
 	mRcTpcHitMap = new rcTpcHitMapType;
 	mMcTpcHitMap = new mcTpcHitMapType;
 	
-	float tpcHitDistance;
+	float tpcHitDistance = 9999;
 	if (Debug()) cout << "In Sector : ";
 	for (unsigned int iSector=0;
 	     iSector<rcTpcHitColl->numberOfSectors(); iSector++) {
@@ -810,7 +814,7 @@ Int_t StAssociationMaker::Make()
 	mRcSvtHitMap = new rcSvtHitMapType;
 	mMcSvtHitMap = new mcSvtHitMapType;
 	
-	float svtHitDistance;
+	float svtHitDistance = 9999;
 	unsigned int nSvtHits = rcSvtHitColl->numberOfHits();
 	if (Debug()) cout << "In Barrel : ";
 	for (unsigned int iBarrel=0;  nSvtHits &&
@@ -925,9 +929,7 @@ Int_t StAssociationMaker::Make()
 		    
 		    //PR(mcFtpcHitColl->plane(iPlane)->hits().size());
 		    
-		    StMcFtpcHitIterator ftpcHitSeed = find_if (mcFtpcHitColl->plane(iPlane)->hits().begin(),
-							       mcFtpcHitColl->plane(iPlane)->hits().end(),
-							       ftpcComp);
+		    StMcFtpcHitIterator ftpcHitSeed = mcFtpcHitColl->plane(iPlane)->hits().begin();
 		    bool isFirst = true;
 		    for (StMcFtpcHitIterator jHit = ftpcHitSeed;
 			 jHit<mcFtpcHitColl->plane(iPlane)->hits().end();
