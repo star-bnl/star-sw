@@ -12,7 +12,6 @@
 
  macro run domain 
    
-   macro/global/import *
      
 * LOAD LIBRARIES
  if $vexist(make_done)=0 then
