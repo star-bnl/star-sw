@@ -19,7 +19,10 @@ EEfeeRunDescr ::  EEfeeRunDescr() {
 //--------------------------------------------------
 //
 //--------------------------------------------------
-EEfeeRunDescr ::  ~EEfeeRunDescr() { }
+EEfeeRunDescr ::  ~EEfeeRunDescr() 
+{ 
+  if(mComment) delete [] mComment;
+}
 
 
 

@@ -76,8 +76,8 @@ eemcfeerootopen_(long& run, long& runtime, char *chfile, int len)
   fprintf(stderr,"rootopen: file=%s\n",filename);
   fprintf(stderr,"rootopen: comment=%s\n",comment);
   fflush(stderr);
-  delete basefile;
-  delete comment;
+  if(basefile) delete [] basefile;
+  if(comment ) delete [] comment;
   return;
 }
 
@@ -157,6 +157,6 @@ eemcfeerootclose_()
     fprintf(stderr,"eemcfeerootclose: file %s written\n",filename);
   }
   fprintf(stderr,"eemcfeerootclose: OK (total events=%8d)\n",evnum); 
-  delete filename;
+  if(filename) delete [] filename;
   return;
 }

@@ -1,5 +1,8 @@
-// $Id: EEmcEventHeader.cxx,v 1.8 2003/09/05 15:04:20 zolnie Exp $ 
+// $Id: EEmcEventHeader.cxx,v 1.9 2003/09/17 22:05:25 zolnie Exp $ 
 // $Log: EEmcEventHeader.cxx,v $
+// Revision 1.9  2003/09/17 22:05:25  zolnie
+// delete mumbo-jumbo
+//
 // Revision 1.8  2003/09/05 15:04:20  zolnie
 // remove Stiostream/iostream from the source code
 //
@@ -47,7 +50,10 @@ EEmcEventHeader ::  EEmcEventHeader() {
 //--------------------------------------------------
 //
 //--------------------------------------------------
-EEmcEventHeader ::  ~EEmcEventHeader() { }
+EEmcEventHeader ::  ~EEmcEventHeader() 
+{ 
+  if(mComment) delete [] mComment;
+}
 
 //--------------------------------------------------
 void EEmcEventHeader :: setComment(const char* s) {
