@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.52 1999/07/11 21:04:06 fisyak Exp $
+// $Id: StMaker.cxx,v 1.53 1999/07/12 02:33:09 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.53  1999/07/12 02:33:09  perev
+// Add SetMode
+//
 // Revision 1.52  1999/07/11 21:04:06  fisyak
 // Clash resolion
 //
@@ -145,7 +148,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.52 1999/07/11 21:04:06 fisyak Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.53 1999/07/12 02:33:09 perev Exp $";
 return cvs;};
 static void doPs(const char *who,const char *where);
 
@@ -153,11 +156,13 @@ static void doPs(const char *who,const char *where);
 StMaker::StMaker()
 {
 ::doPs(GetName(),"constructor");
+  SetMode();
 }
 
 //_____________________________________________________________________________
 StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker")
 {
+   SetMode();
    m_Inputs = 0;
    if (!fgStChain) {	// it is first maker, it is chain
      fgStChain = this;
@@ -707,7 +712,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
 
   // Define the set of the subdirectories with the STAR class sources
   //                       | ----------------------  | ------------  | ------------------ |
-  //                       | Directory name            Class name      Share library name |
+  //                       | Directory name             Class name     Share library name |
   //                       | ----------------------  | ------------  | ------------------ |
   const Char_t *source[] = {"StRoot/St_base"         , "St_DataSet"  ,    "St_base"
                            ,"StRoot/StChain"         , "StMaker"     ,    "StChain"
@@ -725,6 +730,9 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   TString lookup = STAR;
   lookup += "/StRoot/";
   lookup += classname;
+
+  // Add class name base
+  
   Int_t i = 0;
   for (i=0;i<lsource-3;i+=3) {
     lookup += delim;
