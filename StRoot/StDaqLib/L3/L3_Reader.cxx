@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Reader.cxx,v 1.4 2000/07/26 02:12:28 struck Exp $
+ * $Id: L3_Reader.cxx,v 1.5 2000/07/26 02:38:06 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: L3_Reader.cxx,v $
+ * Revision 1.5  2000/07/26 02:38:06  struck
+ * minor changes
+ *
  * Revision 1.4  2000/07/26 02:12:28  struck
  * added i960 cluster reader
  *
@@ -380,11 +383,12 @@ int I960ClusterReader::initialize ()
 	      cld = pBankTPCMZCLD[rb-1][mz-1];
 	      if (!cld) continue;
 	      int *ptr = (int *)&cld->stuff;
+	      // count total number of clusters for memory allocation
 	      for (int ir=0; ir<cld->numberOfRows; ir++) {
 		    int row = *ptr++;
 		    int nHitsThisRow = *ptr++;  // bump pointer to beginning of space points
 		    nCluster += nHitsThisRow;   // add num space pts to running total
-		    ptr += 2*nHitsThisRow;
+		    ptr += 2 * nHitsThisRow;
 	      }
 	}
   }
