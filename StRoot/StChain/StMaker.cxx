@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.129 2003/07/01 16:59:16 perev Exp $
+// $Id: StMaker.cxx,v 1.130 2003/07/03 19:40:14 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -527,32 +527,28 @@ Int_t StMaker::Finish()
    Double_t totalRealTime = 0;   
    while ((maker = (StMaker*)next())) 
    {
-      Assert(maker->TestBit(kFiniBeg)==0);
-      if (maker->TestBit(kFiniEnd)) 
-         Warning("Finish","maker %s.%s Finished twice"
-                 ,maker->GetName(),maker->ClassName());
-      maker->SetBit(kFiniBeg);
-      if ( maker->Finish() ) nerr++;
-      maker->PrintTimer();
       totalCpuTime  += maker->CpuTime();
-      totalRealTime += maker->RealTime();
-      maker->ResetBit(kFiniBeg);
-      maker->SetBit  (kFiniEnd);
-      
+      totalRealTime += maker->RealTime();      
    }
 
    // Print relative time
    if (!totalRealTime) totalRealTime = 1;
-   if (!totalCpuTime) totalCpuTime = 1;
-   Printf("\n---------------------------------------------------------------------------------");
-   Printf("QAInfo: Total: %-12s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds"
-                             ,GetName(),totalRealTime,totalCpuTime);
-   Printf("---------------------------------------------------------------------------------");
+   if (!totalCpuTime ) totalCpuTime  = 1;
+
    next.Reset();
+   int fst=1;
    while ((maker = (StMaker*)next())) {
-      printf("QAInfo:%-20s: Real Time = %5.1f %%        Cpu Time = %5.1f %% "
-             ,maker->GetName()
+      if (fst) {
+        fst=0;
+        Printf("=================================================================================\n");
+        Printf("QAInfo: Chain %20s::%-20s Ast =%6.2f        Cpu =%6.2f "
+               ,ClassName(),GetName(),totalRealTime,totalCpuTime);
+      }
+      printf("QAInfo: Maker %20s::%-20s Ast =%6.2f(%4.1f%%) Cpu =%6.2f(%4.1f%%) "
+             ,maker->ClassName(),maker->GetName()
+             ,maker->RealTime()
              ,100*maker->RealTime()/totalRealTime
+             ,maker->CpuTime()
              ,100*maker->CpuTime()/totalCpuTime);
 
       static const char *ee[]={"nStOK","nStWarn","nStEOF","nStErr","nStFatal"};
@@ -561,6 +557,18 @@ Int_t StMaker::Finish()
       printf("\n");
 
    }
+
+   next.Reset();
+   while ((maker = (StMaker*)next())) 
+   {
+      if (maker->TestBit(kFiniEnd)) 
+        maker->Warning("Finish","maker %s.%s Finished twice"
+               ,maker->GetName(),maker->ClassName());
+      maker->SetBit(kFiniBeg);
+      if ( maker->Finish() ) nerr++;
+      maker->ResetBit(kFiniBeg);
+      maker->SetBit  (kFiniEnd);
+   }
    if (!GetParent()) {// Only for top maker
 
      printf("\n--------------Error Codes-------------------------\n");
@@ -568,7 +576,7 @@ Int_t StMaker::Finish()
      for( int i=0; i<=kStFatal; i++) printf("%10d",fgTallyMaker[i]); 
      printf("\n--------------------------------------------------\n");
    }  
-   Printf("=================================================================================\n");
+//VP   Printf("=================================================================================\n");
    
    Clear();
    if (GetParent()==0) TMemStat::Summary();
@@ -1151,6 +1159,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.130  2003/07/03 19:40:14  perev
+// Cleanup prints in Finish
+//
 // Revision 1.129  2003/07/01 16:59:16  perev
 // error codes for Maker added
 //
