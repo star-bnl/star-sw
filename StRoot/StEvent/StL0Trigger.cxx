@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.cxx,v 2.7 2002/11/26 02:19:11 perev Exp $
+ * $Id: StL0Trigger.cxx,v 2.8 2003/04/30 20:59:23 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.cxx,v $
+ * Revision 2.8  2003/04/30 20:59:23  ullrich
+ * Modified bunchCrossingId7bit() to deal with run
+ * numbers > 4000000. Code from Eleanor.
+ *
  * Revision 2.7  2002/11/26 02:19:11  perev
  * StEventMaker ITTF modif
  *
@@ -44,7 +48,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StL0Trigger.cxx,v 2.7 2002/11/26 02:19:11 perev Exp $";
+static const char rcsid[] = "$Id: StL0Trigger.cxx,v 2.8 2003/04/30 20:59:23 ullrich Exp $";
 
 ClassImp(StL0Trigger)
 
@@ -210,11 +214,27 @@ StL0Trigger::setBcDataArray(unsigned int i, unsigned short val)
 unsigned int
 StL0Trigger::bunchCrossingId7bit(int runNumber) const
 {
-    int b7=0, b7dat, ibits; 
+    unsigned int b7dat = mBcDataArray[2];
+    //
+    //  This code was added after discussions with
+    //  Akio, Jamie, and Eleanor. According to
+    //  Eleanor it's just the the 7 least significant
+    //  bits in mBcDataArray[2]. Jamie tested it and
+    //  says it works.
+    //  April 30, 2003 (tu)
+    //
+    if (runNumber>4000000)
+	return b7dat & 0x7f;
+
+    //
+    //  This code is the original version from Hank and
+    //  since it appears to work (Akio) I leave it as is.
+    //  April 30, 2003 (tu)
+    //
+    int b7=0, ibits; 
     if(runNumber<3010000) { ibits=7; }  /* before run 3010* this should be 7 */
     else { ibits=6; }     
 
-    b7dat = mBcDataArray[2];
     for (int i=0; i<7; i++) {
       b7 += (!((b7dat>>(ibits-i)) & 0x1) << (i)) & 0x7f;
     }
