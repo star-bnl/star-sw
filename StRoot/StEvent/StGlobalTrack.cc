@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cc,v 1.7 1999/02/22 19:25:18 genevb Exp $
+ * $Id: StGlobalTrack.cc,v 1.8 1999/02/22 19:53:51 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cc,v $
- * Revision 1.7  1999/02/22 19:25:18  genevb
- * StGlobalTrack constructor had a memory leak
+ * Revision 1.8  1999/02/22 19:53:51  wenaus
+ * cleaner deleting
+ *
+ * Revision 1.11  1999/03/23 22:00:09  ullrich
+ * Minor mods.
  *
  * Revision 1.10  1999/02/24 12:49:04  ullrich
  * Added argument (h) to constructor needed to instatiate helix
@@ -34,7 +37,7 @@
  * Revision 1.5  1999/02/15 16:17:02  wenaus
  * fix double& -> double referencing bug
  *
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.7 1999/02/22 19:25:18 genevb Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.8 1999/02/22 19:53:51 wenaus Exp $";
  * New track constructor to load helix params independently of table
  *
  * Revision 1.3  1999/02/10 21:50:30  wenaus
@@ -45,10 +48,10 @@ static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.7 1999/02/22 19:25:18 gen
  * Revision 1.2  1999/01/15 22:53:44  wenaus
  * version with constructors for table-based loading
  *
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.7 1999/02/22 19:25:18 genevb Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.8 1999/02/22 19:53:51 wenaus Exp $";
 #include "StEvent/StGlobalTrack.hh"
 StGlobalTrack::StGlobalTrack()
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.7 1999/02/22 19:25:18 genevb Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.8 1999/02/22 19:53:51 wenaus Exp $";
  
 StGlobalTrack::StGlobalTrack() : mPidTraits(*this)
 {
@@ -60,9 +63,9 @@ StGlobalTrack::StGlobalTrack() : mPidTraits(*this)
 
 StGlobalTrack::StGlobalTrack(dst_track_st* trk,
                              double curvature,
-  if (mTpcDedx) delete mTpcDedx; mTpcDedx=0;
-  if (mFtpcDedx) delete mFtpcDedx; mFtpcDedx=0;
-  if (mSvtDedx) delete mSvtDedx; mSvtDedx=0;
+                             double dip,
+  StTrack(trk, curvature, dip, phase, origin, h)
+                             StThreeVector<double>& origin,
 			     int h) : 
 
 void StGlobalTrack::setEmcHit(StEmcHit* val) { mEmcHit = val; }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cc,v 1.7 1999/02/10 23:26:53 wenaus Exp $
+ * $Id: StEvent.cc,v 1.8 1999/02/22 19:53:51 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cc,v $
- * Revision 1.7  1999/02/10 23:26:53  wenaus
- * fix setPrimaryVertex in StEvent to set the vertex type to primary
+ * Revision 1.8  1999/02/22 19:53:51  wenaus
+ * cleaner deleting
+ *
+ * Revision 1.9  1999/02/22 20:48:52  wenaus
+ * more delete cleanup
  *
  * Revision 1.8  1999/02/22 19:53:51  wenaus
  * cleaner deleting
@@ -36,13 +39,13 @@
  * Fix for Sun compiler peculiarity
  *
  * Revision 1.2  1999/01/15 22:53:39  wenaus
-static const char rcsid[] = "$Id: StEvent.cc,v 1.7 1999/02/10 23:26:53 wenaus Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.8 1999/02/22 19:53:51 wenaus Exp $";
  *
 #if !defined(ST_NO_NAMESPACES)
-static const char rcsid[] = "$Id: StEvent.cc,v 1.7 1999/02/10 23:26:53 wenaus Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.8 1999/02/22 19:53:51 wenaus Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEvent.cc,v 1.7 1999/02/10 23:26:53 wenaus Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.8 1999/02/22 19:53:51 wenaus Exp $";
 
 StEvent::StEvent()
 {
@@ -67,23 +70,23 @@ StEvent::StEvent(StRun* run, dst_event_header_st& hdr, dst_event_summary_st& sum
 StEvent::StEvent(const StEvent&) { /* noop */} // private
 
 const StEvent&
-    delete mSummary;
+StEvent::operator=(const StEvent&) { return *this;} // private
     for(StTrackIterator it=mTracks->begin(); it != mTracks->end(); it++) delete *it;
-    delete mTracks;            
+StEvent::~StEvent()
     for(StVertexIterator iv=mVertices->begin(); iv != mVertices->end(); iv++) delete *iv;
-    delete mVertices;
+    // delete mRun;             Open question?
     for(StTpcHitIterator iht=mTpcHits->begin(); iht != mTpcHits->end(); iht++) delete *iht;
-    delete mTpcHits;           
+    delete mSummary; mSummary=0;
     for(StSvtHitIterator ihs=mSvtHits->begin(); ihs != mSvtHits->end(); ihs++) delete *ihs;
-    delete mSvtHits;           
+    delete mTracks; mTracks=0;
     for(StFtpcHitIterator ihf=mFtpcHits->begin(); ihf != mFtpcHits->end(); ihf++) delete *ihf;
-    delete mFtpcHits;          
-    delete mTriggerDetectors;  
-    delete mL0Trigger;         
+    delete mVertices; mVertices=0;
+    if (mTpcHits) for(StTpcHitIterator iht=mTpcHits->begin(); iht != mTpcHits->end(); iht++) delete *iht;
+    delete mTpcHits; mTpcHits=0;
     for(StEmcHitIterator ihe=mEmcHits->begin(); ihe != mEmcHits->end(); ihe++) delete *ihe;
-    delete mEmcHits;         
+    delete mEmcHits; mEmcHits=0;
     for(StSmdHitIterator ihd=mSmdHits->begin(); ihd != mSmdHits->end(); ihd++) delete *ihd;
-    delete mSmdHits;         
+    delete mSmdHits; mSmdHits=0;
     delete mTriggerDetectors; mTriggerDetectors=0;
     delete mL0Trigger; mL0Trigger=0;
     delete mEmcTowerHits; mEmcTowerHits=0;   // collection contains hits by value, this kills them all

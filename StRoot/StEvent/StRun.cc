@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.cc,v 1.4 1999/02/10 21:50:31 wenaus Exp $
+ * $Id: StRun.cc,v 1.5 1999/02/22 19:53:52 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRun.cc,v $
+ * Revision 1.5  1999/02/22 19:53:52  wenaus
+ * cleaner deleting
+ *
  * Revision 1.4  1999/02/10 21:50:31  wenaus
  * Plug memory leaks
  *
@@ -25,7 +28,7 @@
  **************************************************************************/
 #include "StEvent/StRun.hh"
 
-static const char rcsid[] = "$Id: StRun.cc,v 1.4 1999/02/10 21:50:31 wenaus Exp $";
+static const char rcsid[] = "$Id: StRun.cc,v 1.5 1999/02/22 19:53:52 wenaus Exp $";
 
 StRun::StRun()
 {
@@ -67,7 +70,7 @@ StRun::StRun(dst_run_header_st& runHdr)
 
 StRun::~StRun()
 {
-    delete mSummary;
+    delete mSummary; mSummary=0;
 }
 
 const StRun& StRun::operator=(const StRun&) { return *this; } // private
