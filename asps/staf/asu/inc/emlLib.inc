@@ -33,7 +33,7 @@ c:----------------------------------------------------------------------
 
 C: #define STAF_STATUS_VECTOR(A) IQ(STAF_STATUS_LLOW+ A-1 )
 C: #define STAF_RESULT_VECTOR(A)  Q(STAF_RESULT_LLOW+ A-1 )
-
+#ifndef CERNLIB_GEANT321_GCBANK_INC
 C: HACK ---- CHECK THIS HACK ---- endif //EMLLIB_INC
 
       INTEGER*4 NWPAW,IXPAWC,IHBOOK,IXHIGZ,IXKUIP,IFENCE,LMAIN
@@ -50,7 +50,7 @@ c: From CERN Program Library Long Writeup I102 pg. 176
       EQUIVALENCE (Q(1),IQ(1),LQ(9)),(LQ(1),LMAIN)
 C     COMMON /QUEST/ IQUEST(100)
 *VP   COMMON /QUEST/ IQUEST(256)
-
+#endif
 c: Variables for STAF_STATUS and STAF_RESULT vectors.
 
       INTEGER*4 STAF_KUVEC_HISTORY
