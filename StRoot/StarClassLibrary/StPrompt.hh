@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrompt.hh,v 1.4 2000/06/22 01:57:29 ullrich Exp $
+ * $Id: StPrompt.hh,v 1.5 2002/05/01 01:09:50 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 15 1997
  ***************************************************************************
@@ -32,6 +32,9 @@
  ***************************************************************************
  *
  * $Log: StPrompt.hh,v $
+ * Revision 1.5  2002/05/01 01:09:50  ullrich
+ * Changed int to unsigned int to get rid of warning message.
+ *
  * Revision 1.4  2000/06/22 01:57:29  ullrich
  * Removed unused variable.
  *
@@ -120,7 +123,7 @@ inline void StPrompt(const char *text, bool& var)
 }
 
 
-inline void StPrompt(const char *text, char* var, int maxlength)
+inline void StPrompt(const char *text, char* var, unsigned int maxlength)
 {
     string line;
     unsigned char   c;
