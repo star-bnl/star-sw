@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.cc,v 1.7 1999/11/09 19:33:39 calderon Exp $
+ * $Id: StTrsDigitalSector.cc,v 1.8 2000/03/15 23:33:55 calderon Exp $
  *
  * Author: bl 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.cc,v $
+ * Revision 1.8  2000/03/15 23:33:55  calderon
+ * Remove extra messages
+ *
  * Revision 1.7  1999/11/09 19:33:39  calderon
  * Message of "removed row" replaced with total number of rows removed.
  *
@@ -110,7 +113,7 @@ int StTrsDigitalSector::cleanup()
 	    numberOfEmptyRows++;
 	}
     } // Rows are now clean
-    cout << "This sector had " << numberOfEmptyRows << " empty rows." << endl;
+    //cout << "This sector had " << numberOfEmptyRows << " empty rows." << endl;
     if (numberOfEmptyRows==mData.size()) return 1;
     else return 0;
 }    
