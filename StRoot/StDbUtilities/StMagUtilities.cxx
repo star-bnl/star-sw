@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.29 2002/02/06 18:39:45 hardtke Exp $
+ * $Id: StMagUtilities.cxx,v 1.30 2002/02/12 22:50:57 hardtke Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.30  2002/02/12 22:50:57  hardtke
+ * separate geometrical tpc rotation from field twist
+ *
  * Revision 1.29  2002/02/06 18:39:45  hardtke
  * Use Database for tpc Field cage parameters
  *
@@ -203,9 +206,9 @@ void StMagUtilities::CommonStart ( Int_t mode, StTpcDb* dbin, TDataSet* dbin2 )
       TPC_Z0      = thedb->PadPlaneGeometry()->outerSectorPadPlaneZ()-thedb->WirePlaneGeometry()
 	            ->outerSectorFrischGridPadPlaneSeparation() ;    
       // X Displacement of West end of TPC wrt magnet (mRad)
-      XTWIST      = 1e3*thedb->GlobalPosition()->TpcRotationAroundGlobalAxisY() ; 
+      XTWIST      = 1e3*thedb->GlobalPosition()->TpcEFieldRotationY() ; 
       // Y Displacement of West end of TPC wrt magnet (mRad)
-      YTWIST      = -1e3*thedb->GlobalPosition()->TpcRotationAroundGlobalAxisX() ;            
+      YTWIST      = -1e3*thedb->GlobalPosition()->TpcEFieldRotationX() ;            
       IFCShift = thedb->FieldCage()->InnerFieldCageShift();
       EASTCLOCKERROR = 1e3*thedb->FieldCage()->EastClockError();
       WESTCLOCKERROR = 1e3*thedb->FieldCage()->WestClockError();
