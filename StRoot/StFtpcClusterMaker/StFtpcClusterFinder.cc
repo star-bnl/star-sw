@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.36 2002/07/15 13:30:35 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.37 2002/08/02 11:26:33 oldi Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.37  2002/08/02 11:26:33  oldi
+// Chargestep corrected (it was looping over the sequences twice).
+//
 // Revision 1.36  2002/07/15 13:30:35  jcs
 // incorporate charge step histos into cluster finder and remove StFtpcChargeStep
 //
@@ -121,6 +124,8 @@
 #include "TH1.h"
 
 #include "PhysicalConstants.h"
+
+#include "asic_map_correction.h"
 
 //TH1F *clfradius;
 
@@ -289,7 +294,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 	  iHardRow = iRow%2 + 1;
 
 #ifdef DEBUG
-	  printf("Now on Sector %d, Row %d (iHardSec %d, iHardRow %d)\n",iSec,iRow,iHardSec,iHardRow);
+	  printf("Cluster Finder: Now on Sector %d, Row %d (iHardSec %d, iHardRow %d)\n",iSec,iRow,iHardSec,iHardRow);
 #endif
 
 	  // get list of occupied pads in sector
@@ -299,9 +304,28 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 
 	  // loop over occupied pads
 	  int iThPad;
-	  for(iThPad=0; iThPad<iOccPads; iThPad++)
+//===============================================================
+      int newpadlist[160];
+
+      for (iThPad=0; iThPad<160; iThPad++) 
+               newpadlist[iThPad]=0;
+  
+      for(iThPad=0; iThPad<iOccPads; iThPad++)
+      {
+         iPad=padlist[iHardRow-1][iThPad];
+//cout<<"iPad=padlist["<<iHardRow-1<<"]["<<iThPad<<"] = "<<iPad<<endl;
+         if ( iRow>=10 && (iPad>=65 && iPad<=96))
+             newpadlist[padkey[iPad-1]-1] = iPad; 
+         else
+             newpadlist[iPad-1] = iPad;
+      }
+      
+//===============================================================
+	  for(iThPad=0; iThPad<160; iThPad++)
 	    {
-	      iPad=padlist[iHardRow-1][iThPad];
+//cout<<"newpadlist["<<iThPad<<"] = "<<newpadlist[iThPad]<<endl;
+              if (newpadlist[iThPad] == 0 ) continue;
+	      iPad=iThPad+1;
 
 	      // search, fit and remove finished CUCs  
 	      for(CurrentCUC = FirstCUC; CurrentCUC!=0; 
@@ -381,9 +405,8 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 	      // reset beginning of sequence comparison
 	      iOldSeqBuf=0;
 
-
 	      // get sequences on this pad
-	      mReader->getSequences(iHardSec, iHardRow, iPad, &iNewSeqNumber,
+	      mReader->getSequences(iHardSec, iHardRow, newpadlist[iThPad], &iNewSeqNumber,
 				   SequencePointer[iHardRow]);
 	      NewSequences=SequencePointer[iHardRow];
 	      
@@ -392,26 +415,27 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 		  iNewSeqIndex++)
 		{
 //+++++++++++++++++++ fill charge step histograms +++++++++++++++
-              int iSeqIndex;
-              for(iSeqIndex=0; iSeqIndex < iNewSeqNumber; iSeqIndex++)
-                {
+		  // This loop is running already, but the running variable is called iNewSeqIndex instead of iSeqIndex .
+		  //int iSeqIndex;
+		  //for(iSeqIndex=0; iSeqIndex < iNewSeqNumber; iSeqIndex++)
+		  //{
                   int entry;
-                  for(entry=0; entry<NewSequences[iSeqIndex].Length; entry++)
+                  for(entry=0; entry<NewSequences[iNewSeqIndex].Length; entry++)
                     {
                       mHisto->Fill(iHardSec-1, // sector
-                                   entry+NewSequences[iSeqIndex].startTimeBin, //bin
-                                   NewSequences[iSeqIndex].FirstAdc[entry]); // weight
+                                   entry+NewSequences[iNewSeqIndex].startTimeBin, //bin
+                                   NewSequences[iNewSeqIndex].FirstAdc[entry]); // weight
                       if (iHardSec >= 1 && iHardSec <= 30 ) {
-                         mHistoW->Fill( entry+NewSequences[iSeqIndex].startTimeBin, //bin
-                                   NewSequences[iSeqIndex].FirstAdc[entry]); // weight
+			mHistoW->Fill( entry+NewSequences[iNewSeqIndex].startTimeBin, //bin
+				       NewSequences[iNewSeqIndex].FirstAdc[entry]); // weight
                       }
                       if (iHardSec >= 31 && iHardSec <= 60 ) {
-                         mHistoE->Fill( entry+NewSequences[iSeqIndex].startTimeBin, //bin
-
-                                   NewSequences[iSeqIndex].FirstAdc[entry]); // weight
+			mHistoE->Fill( entry+NewSequences[iNewSeqIndex].startTimeBin, //bin
+				       
+				       NewSequences[iNewSeqIndex].FirstAdc[entry]); // weight
                       }
                     }
-                }
+		  //}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
