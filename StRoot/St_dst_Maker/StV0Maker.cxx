@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.4 1999/07/08 19:09:52 fisyak Exp $
+// $Id: StV0Maker.cxx,v 1.5 1999/07/11 01:55:45 fisyak Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.5  1999/07/11 01:55:45  fisyak
+// Fix glob->impact
+//
 // Revision 1.4  1999/07/08 19:09:52  fisyak
 // Add tabs, remove St_glb_Maker
 //
@@ -147,13 +150,16 @@ Int_t StV0Maker::Make(){
     }
   }
   if (vrtx->vtx_id == 1) {
-    
+#if 0
+    // This was done in StPrimary ?    
     Float_t *v0 = &vrtx->x;
-    for( Int_t no_rows=0; no_rows<globtrk2->GetNRows(); no_rows++, glob++,glob2++)
+    for( Int_t no_rows=0; no_rows<globtrk2->GetNRows() &&
+	                  no_rows<globtrk->GetNRows(); no_rows++, glob++,glob2++)
       {
 	double qwe = pow(glob2->x0-v0[0],2)+pow(glob2->y0-v0[1],2)+pow(glob2->z0-v0[2],2);
 	glob->impact = TMath::Sqrt(qwe);
       }
+#endif
     // ev0
     if(Debug()) cout << "Calling ev0..." << endl;
     Int_t v0_limit = globtrk->GetNRows();
@@ -199,7 +205,7 @@ Int_t StV0Maker::Make(){
 //_____________________________________________________________________________
 void StV0Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StV0Maker.cxx,v 1.4 1999/07/08 19:09:52 fisyak Exp $\n");
+  printf("* $Id: StV0Maker.cxx,v 1.5 1999/07/11 01:55:45 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();

@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.3 1999/07/08 19:09:52 fisyak Exp $
+// $Id: StPrimaryMaker.cxx,v 1.4 1999/07/11 01:55:45 fisyak Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.4  1999/07/11 01:55:45  fisyak
+// Fix glob->impact
+//
 // Revision 1.3  1999/07/08 19:09:52  fisyak
 // Add tabs, remove St_glb_Maker
 //
@@ -198,7 +201,8 @@ Int_t StPrimaryMaker::Make(){
   if (vrtx->vtx_id == 1) {
     
     Float_t *v0 = &vrtx->x;
-    for( Int_t no_rows=0; no_rows<globtrk2->GetNRows(); no_rows++, glob++,glob2++)
+    for( Int_t no_rows=0; no_rows<globtrk2->GetNRows() &&
+                          no_rows<globtrk->GetNRows(); no_rows++, glob++,glob2++)
       {
 	double qwe = pow(glob2->x0-v0[0],2)+pow(glob2->y0-v0[1],2)+pow(glob2->z0-v0[2],2);
 	glob->impact = TMath::Sqrt(qwe);
@@ -232,7 +236,7 @@ Int_t StPrimaryMaker::Make(){
 //_____________________________________________________________________________
 void StPrimaryMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPrimaryMaker.cxx,v 1.3 1999/07/08 19:09:52 fisyak Exp $\n");
+  printf("* $Id: StPrimaryMaker.cxx,v 1.4 1999/07/11 01:55:45 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
