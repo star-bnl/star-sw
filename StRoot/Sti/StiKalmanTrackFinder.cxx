@@ -252,17 +252,39 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
     try
     {
       rawCount++;
-      if ((*it).second->extendToVertex(vertex))
-        goodCount++;
-      if ((*it).second->getCharge()>0)
+      StiKalmanTrack * track = dynamic_cast<StiKalmanTrack*>((*it).second);
+      if (!track) continue;
+      bool extended = false;
+
+      StiKalmanTrackNode * inner = track->getInnerMostNode();
+      extended = track->extendToVertex(vertex);
+      /*if (inner->_x < 4.5) 
+      else
+	{
+	  //xxxxxxxxxxxxxxxxx
+	  cout << " SPECIAL extend to vertex attempted" << endl;
+	  _detectorContainer->setToDetector(inner->getDetector());
+	  StiDetector * currentDet = **_detectorContainer;
+	  _detectorContainer->moveIn();
+	  StiDetector * tDet = **_detectorContainer;   
+	  if (!tDet || currentDet==tDet)
+	    {
+	      cout << "no more detectors to go to..."<<endl;
+	    }
+	  cout << *tDet<<endl;
+	  track->extendToVertex(vertex,tDet);
+	  cout << " SPECIAL extend to vertex - end" << endl;
+	  }*/
+      // simple diagnostics
+      if (extended) goodCount++;
+      if (track->getCharge()>0)
         plus++;
       else
         minus++;
-      const StiKalmanTrack* tempo = dynamic_cast<const StiKalmanTrack*>((*it).second);
-      if (tempo->getInnerMostHitNode()->getHelicity()>0)
-        helPlus++;
-      else
-        helMinus++;
+      //if (track->getHelicity()>0)
+      //  helPlus++;
+      //else
+      //  helMinus++;
 
     }
     catch (runtime_error & rte)

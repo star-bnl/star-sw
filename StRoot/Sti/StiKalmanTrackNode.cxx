@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.36 2004/10/26 06:45:37 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.37 2004/10/26 21:53:23 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.37  2004/10/26 21:53:23  pruneau
+ * No truncation but bad hits dropped
+ *
  * Revision 2.36  2004/10/26 06:45:37  perev
  * version V2V
  *
@@ -449,11 +452,22 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   StiShape * sh = tDet->getShape();
   planarShape = 0;
   cylinderShape = 0;
-  _refX = place->getLayerRadius();
+  //_refX = place->getLayerRadius(); // wrong. CP OCt 25, 04
+  _refX = place->getNormalRadius();
+  //if (_refX<4.5) cout << "refX<4.5 pNode:"<< *pNode;
   position = propagate(place->getNormalRadius(),sh->getShapeCode()); 
+  //if (_refX<4.5) 
+  //  {
+  //    cout << " position after propagate:"<<position;
+  //    cout << *this;
+  //  }
   if (position<0) 
     return position;
   position = locate(place,sh);
+  //if (_refX<4.5) 
+  //  {
+  //    cout << " position after locate:"<<position<<endl;
+  //  }
   if (position>kEdgeZplus || position<0) return position;
   propagateError();
   // Multiple scattering
@@ -516,16 +530,9 @@ int  StiKalmanTrackNode::propagate(double xk, int option)
       if (sq<0) return -2;
       sq = ::sqrt(sq);				
       double x_p = a*(x0+y0*sq)/r0sq;
-      if (x_p>0)
-				x2 = x_p;
-      else 
-	{
-	  double x_m = a*(x0-y0*sq)/r0sq;
-	  if (x_m>0)
-	    x2 = x_m;
-	  else
-	    return -3;
-	}
+      double x_m = a*(x0-y0*sq)/r0sq;
+      x2 = ( x_p>x_m) ? x_p : x_m;
+      if (x2<=0) return -3;
     }
   dx=x2-x1;  
   sinCA2=_p3*x2 - _p2; 
@@ -1205,6 +1212,10 @@ int StiKalmanTrackNode::locate(StiPlacement*place,StiShape*sh)
       }*/
   detHW = sh->getHalfWidth();
   detHD = sh->getHalfDepth();
+  if (_x<5.)
+    {
+      cout << " detHW:" << detHW << " detHD:"<<detHD<<endl;
+    }
   edge  = 2.;
   innerY = detHW - edge;
   outerY = innerY + 2*edge;
