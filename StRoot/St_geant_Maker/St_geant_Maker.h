@@ -1,4 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.20 2000/01/04 21:51:11 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.21 2000/02/03 16:15:54 fisyak Exp $
+// $Log: St_geant_Maker.h,v $
+// Revision 1.21  2000/02/03 16:15:54  fisyak
+// Add Kathy's histograms
+//
 
 #ifndef STAR_St_geant_Maker
 #define STAR_St_geant_Maker
@@ -12,6 +16,8 @@
 class St_Node;
 class TGeant3;
 class TRotMatrix;
+class TH1F;
+
 class St_geant_Maker : public StMaker {
 protected:
   Int_t  nwgeant;     // No. of words in GCBANK common block
@@ -22,6 +28,11 @@ protected:
   StEvtHddr *fEvtHddr;//! pointer to Event Header
   virtual TShape  *MakeShape(TString *name, Int_t ivo);
   virtual St_Node *MakeNode(TString *name, Int_t ivo, Int_t Nlevel, Int_t *Names, Int_t *Numbers);
+
+ private:
+  virtual void   BookHist();
+  virtual void   FillHist();
+
 public: 
                   St_geant_Maker(const char *name="geant");
    virtual       ~St_geant_Maker();
@@ -75,8 +86,16 @@ public:
  protected:
    static St_DataSet *fgGeom; //!
    static TGeant3    *geant3; //!
+
+   // histogram pointers:
+  TH1F     *m_histvx;        //! geant g2t_vertex table, x of prim vtx
+  TH1F     *m_histvy;        //! geant g2t_vertex table, y of prim vtx
+  TH1F     *m_histvz;        //! geant g2t_vertex table, z of prim vtx
+   
+
+
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.20 2000/01/04 21:51:11 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.21 2000/02/03 16:15:54 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
