@@ -1,7 +1,5 @@
 #include "StSpectraAnalysis.h"
 
-StSpectraAnalysis::StSpectraAnalysis() {
-}
 
 StSpectraAnalysis::~StSpectraAnalysis() {
 }

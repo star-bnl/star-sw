@@ -17,7 +17,7 @@ class StSpectraCutNhit : public StSpectraCut {
 
   ~StSpectraCutNhit();
  
-  bool satisfiesCut(const StGlobalTrack* track, const StEvent* event);
+  bool satisfiesCut(StGlobalTrack* track, StEvent* event);
 
 };
 

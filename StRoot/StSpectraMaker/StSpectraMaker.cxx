@@ -1,5 +1,8 @@
-// $Id: StSpectraMaker.cxx,v 1.3 1999/11/08 17:07:32 ogilvie Exp $
+// $Id: StSpectraMaker.cxx,v 1.4 1999/11/22 01:54:58 ogilvie Exp $
 // $Log: StSpectraMaker.cxx,v $
+// Revision 1.4  1999/11/22 01:54:58  ogilvie
+// generalised analysis containers to beany object that inherits from StSpectraAnalysis
+//
 // Revision 1.3  1999/11/08 17:07:32  ogilvie
 // *** empty log message ***
 //
@@ -22,7 +25,7 @@
 #include "StEfficiency.h"
 #include <vector>
 
-static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.3 1999/11/08 17:07:32 ogilvie Exp $";
+static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.4 1999/11/22 01:54:58 ogilvie Exp $";
 
 StSpectraMaker::StSpectraMaker(const Char_t *name) : StMaker(name) {
 }
@@ -55,14 +58,19 @@ Int_t StSpectraMaker::Init() {
     effic.setParticle(particleName);
 
     string comment;
-    float lYbin, uYbin;
+    float lYbin;
+    float uYbin;
     from >> lYbin >> uYbin >> comment;
     int nYbin ;
     from >> nYbin >> comment;
-    float lMtbin = particle->mass();
-    float mtRange, uMtbin;
-    from >> mtRange >> comment;
-    uMtbin = lMtbin + mtRange;
+    float lMt = particle->mass();
+    float mtRange;
+    from >> mtRange >> comment; 
+    cout << mtRange << endl;
+    //
+    // why does the following line not compile on solaris?
+    //
+    float uMt = lMt + mtRange;
     int nMtbin;
     from >> nMtbin >> comment;
 
@@ -72,8 +80,7 @@ Int_t StSpectraMaker::Init() {
     anal->setEfficiency(effic);
    
     anal->setYAxis(lYbin,uYbin,nYbin); 
-    anal->setMtAxis(lMtbin,uMtbin,nMtbin); 
-
+    anal->setMtAxis(lMt,uMt,nMtbin); 
     mSpectraAnalysisContainer.push_back(anal);
   }
   from.close();
@@ -84,14 +91,12 @@ Int_t StSpectraMaker::Init() {
   // spectra characteristics
   // 
 
-  StTpcDeviantSpectraAnalysis* analysis = new StTpcDeviantSpectraAnalysis;
-  vector<StTpcDeviantSpectraAnalysis*>::const_iterator analysisIter;
+  vector<StSpectraAnalysis*>::const_iterator analysisIter;
 
   for (analysisIter = mSpectraAnalysisContainer.begin();
 	 analysisIter != mSpectraAnalysisContainer.end();
 	 analysisIter++) {
-    analysis = *analysisIter;
-    analysis->bookHistograms();
+    (*analysisIter)->bookHistograms();
   }
  return StMaker::Init();
 }
@@ -104,14 +109,12 @@ Int_t StSpectraMaker::Make() {
   //
   // for each analysis, call fill histograms
   //
-  StTpcDeviantSpectraAnalysis* analysis = new StTpcDeviantSpectraAnalysis;
-  vector<StTpcDeviantSpectraAnalysis*>::const_iterator analysisIter;
+  vector<StSpectraAnalysis*>::const_iterator analysisIter;
 
   for (analysisIter = mSpectraAnalysisContainer.begin();
 	 analysisIter != mSpectraAnalysisContainer.end();
 	 analysisIter++) {
-    analysis = *analysisIter;
-    analysis->fillHistograms(ev);
+    (*analysisIter)->fillHistograms(ev);
   }  
   return kStOK;
 }
@@ -122,15 +125,13 @@ void StSpectraMaker::Clear(Option_t *opt) {
 }
 
 Int_t StSpectraMaker::Finish() {
-  
-  StTpcDeviantSpectraAnalysis* analysis = new StTpcDeviantSpectraAnalysis;
-  vector<StTpcDeviantSpectraAnalysis*>::const_iterator analysisIter;
+
+  vector<StSpectraAnalysis*>::const_iterator analysisIter;
 
   for (analysisIter = mSpectraAnalysisContainer.begin();
 	 analysisIter != mSpectraAnalysisContainer.end();
 	 analysisIter++) {
-    analysis = *analysisIter;
-    analysis->projectHistograms();
+    (*analysisIter)->projectHistograms();
   }
 
   // write out histograms
