@@ -1,12 +1,12 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: St_table_header_Table.cxx,v 1.3 2000/03/29 20:39:18 fine Exp $
+// $Id: St_table_header_Table.cxx,v 1.4 2000/03/30 05:20:52 fine Exp $
 //
 #include "St_table_header_Table.h"
 /////////////////////////////////////////////////////////////////////////
-//
-//  Class St_table+header fill the STAF "table header" to call STAF 
-//  the object of St_Moudle properly
-//
+//                                                                     //
+//  Class St_table_header fcreate and ill the STAF "table header"      //
+//  to call STAF module (pams) properly                                //
+//                                                                     //
 /////////////////////////////////////////////////////////////////////////
 
 #include "Stypes.h"
@@ -16,7 +16,7 @@ TableClassImp(St_table_header,table_head)
 
 //______________________________________________________________________________
 St_table_header::St_table_header(const TTable *table) 
-                : TTable("table_header",sizeof(table_head_st),1)
+                : TTable("table_header",1,sizeof(table_head_st))
 {
    SetType("table_header");
    table_head_st header;
@@ -52,6 +52,9 @@ void *ReAllocate(table_head_st *header, Int_t newsize)
 
 //______________________________________________________________________________
 // $Log: St_table_header_Table.cxx,v $
+// Revision 1.4  2000/03/30 05:20:52  fine
+// bug fixed
+//
 // Revision 1.3  2000/03/29 20:39:18  fine
 // bug fix
 //
