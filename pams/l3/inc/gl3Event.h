@@ -38,7 +38,7 @@ public:
 class gl3Event {
 
 public:
-   gl3Event(int mxTracks=5000 ):track(0),busy(0){
+   gl3Event(int mxTracks=15000 ):track(0),busy(0){
       mergingTrack = 0 ;
       trackContainer = 0 ;
       setup ( mxTracks ) ;
