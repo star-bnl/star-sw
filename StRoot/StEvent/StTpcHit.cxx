@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 1.3 1999/04/28 22:27:36 fisyak Exp $
+ * $Id: StTpcHit.cxx,v 1.4 1999/05/05 22:36:42 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
- * Revision 1.3  1999/04/28 22:27:36  fisyak
- * New version with pointer instead referencies
+ * Revision 1.4  1999/05/05 22:36:42  fisyak
+ * restore relatedTracks
+ *
+ * Revision 1.5  1999/06/27 22:45:28  fisyak
+ * Merge StRootEvent and StEvent
  *
  * Revision 1.4  1999/05/05 22:36:42  fisyak
  * restore relatedTracks
@@ -25,13 +28,13 @@
  * Revision 1.2  1999/01/15 22:53:58  wenaus
  * version with constructors for table-based loading
  *
-static const Char_t rcsid[] = "$Id: StTpcHit.cxx,v 1.3 1999/04/28 22:27:36 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StTpcHit.cxx,v 1.4 1999/05/05 22:36:42 fisyak Exp $";
 #include "tables/dst_point.h"
 #include "StGlobalTrack.h"
-static const Char_t rcsid[] = "$Id: StTpcHit.cxx,v 1.3 1999/04/28 22:27:36 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StTpcHit.cxx,v 1.4 1999/05/05 22:36:42 fisyak Exp $";
 #include "dst_point.h"
  * Inlined sector() and padrow().
-static const Char_t rcsid[] = "$Id: StTpcHit.cxx,v 1.3 1999/04/28 22:27:36 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StTpcHit.cxx,v 1.4 1999/05/05 22:36:42 fisyak Exp $";
 #include "tables/dst_point.h"
  * Memory now allocated using StMemoryPool via overloaded new/delete
  *
@@ -55,7 +58,7 @@ StTpcHit::StTpcHit(dst_point_st* pt)
 
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 1.3 1999/04/28 22:27:36 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 1.4 1999/05/05 22:36:42 fisyak Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
     mCharge = Float_t(tpcq)/(1<<16);
@@ -87,17 +90,16 @@ StTpcHit::StTpcHit(const StThreeVectorF& p,
     const Float_t maxRange   = 220;
     mPositionError.setX(Float_t(tpcx)/(1L<<17)); 
     ULong_t tpcy11 = pt.position[0]/(1L<<20);
-#if 0
     ULong_t tpcz   = pt.position[1]/(1L<<10);
 }
 
 StVecPtrGlobalTrack StTpcHit::relatedTracks(const StTrackCollection& c)
 {
-	const StVecPtrTpcHit &hits = track->tpcHits();
-	if (find(hits.begin(), hits.end(), this) != hits.end())
+	const StVecPtrTpcHit *hits = track->tpcHits();
+    StGlobalTrack        *track;
+	if (hits->FindObject(this))
     
     for (iter = c.begin(); iter != c.end(); iter++) {
-#endif
 	track = *iter;
 	const StVecPtrTpcHit &hits = track->tpcHits();
 	//	if (find(hits.begin(), hits.end(), this) != hits.end())

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.cxx,v 1.6 1999/04/28 22:27:32 fisyak Exp $
+ * $Id: StFtpcHit.cxx,v 1.7 1999/05/05 22:36:40 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.cxx,v $
- * Revision 1.6  1999/04/28 22:27:32  fisyak
- * New version with pointer instead referencies
+ * Revision 1.7  1999/05/05 22:36:40  fisyak
+ * restore relatedTracks
+ *
+ * Revision 1.7  1999/05/05 22:36:40  fisyak
+ * restore relatedTracks
  *
  * Revision 1.6  1999/04/28 22:27:32  fisyak
  * New version with pointer instead referencies
@@ -24,10 +27,10 @@
  *
 #include "tables/dst_point.h"
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
-static const Char_t rcsid[] = "$Id: StFtpcHit.cxx,v 1.6 1999/04/28 22:27:32 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StFtpcHit.cxx,v 1.7 1999/05/05 22:36:40 fisyak Exp $";
 #include "dst_point.h"
  * Changed method names xxxInCluster to xxxInHit
-static const Char_t rcsid[] = "$Id: StFtpcHit.cxx,v 1.6 1999/04/28 22:27:32 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StFtpcHit.cxx,v 1.7 1999/05/05 22:36:40 fisyak Exp $";
  * Revision 2.3  1999/11/09 19:35:09  ullrich
  * Memory now allocated using StMemoryPool via overloaded new/delete
  *
@@ -51,7 +54,7 @@ StFtpcHit::StFtpcHit(dst_point_st* pt)
 
 #include "StTrack.h"
 
-static const char rcsid[] = "$Id: StFtpcHit.cxx,v 1.6 1999/04/28 22:27:32 fisyak Exp $";
+static const char rcsid[] = "$Id: StFtpcHit.cxx,v 1.7 1999/05/05 22:36:40 fisyak Exp $";
 
 StMemoryPool StFtpcHit::mPool(sizeof(StFtpcHit));
 
@@ -88,14 +91,13 @@ StFtpcHit::clone() { return new StFtpcHit(*this); }
 
 StVecPtrGlobalTrack StFtpcHit::relatedTracks(const StTrackCollection* c)
 {
-#if 0    
     StVecPtrGlobalTrack    result;
     StGlobalTrack          *track;
-	const StVecPtrFtpcHit &hits = track->ftpcHits();
-	if (find(hits.begin(), hits.end(), this) != hits.end())
+	const StVecPtrFtpcHit *hits = track->ftpcHits();
+    for (iter = c->begin(); iter != c->end(); iter++) {
+	if (hits->FindObject(this))
 	const StVecPtrFtpcHit &hits = track->ftpcHits();
 	//	if (find(hits->begin(), hits->end(), this) != hits->end())
-#endif
 	if (hits.FindObject(this))
 	    result.push_back(track);
     }

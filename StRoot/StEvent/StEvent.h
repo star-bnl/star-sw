@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 1.7 1999/05/04 20:59:24 fisyak Exp $
+ * $Id: StEvent.h,v 1.8 1999/05/05 22:36:39 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 1.7  1999/05/04 20:59:24  fisyak
- * move CVS Tag to StRun
+ * Revision 1.8  1999/05/05 22:36:39  fisyak
+ * restore relatedTracks
+ *
+ * Revision 1.8  1999/05/05 22:36:39  fisyak
+ * restore relatedTracks
  *
  * Revision 1.7  1999/05/04 20:59:24  fisyak
  * move CVS Tag to StRun
@@ -143,52 +146,50 @@ struct pairL : public TObject
 #include "StTrackDetectorInfo.h"
     Int_t operator==(const StEvent &right) const;
     Int_t operator!=(const StEvent &right) const;
-    virtual const TString&   type() const;
-    virtual pairL            id() const;
-    virtual Long_t           time()        const {return GetTime();};
-    ULong_t     	     GetUTime()    const {return mTime.Get();};
-    Int_t     	             GetDate()     const {return ((TDatime *)&mTime)->GetDate();};
-    Int_t     	             GetTime()     const {return ((TDatime *)&mTime)->GetTime();};
-    TDatime                  GetDateTime() const {return mTime;};
+    virtual const char*      type() const {return (const char *) mType;};
+    void init(StRun* run=NULL);
+    virtual void     Browse(TBrowser *b);
+    virtual const char*      type() const ;
+    virtual pairL            id() const { return mId;};
+    virtual TDatime          GetDateTime() const {return mTime;};
+    virtual Long_t           time()        const {return GetDateTime().GetTime();};
     virtual ULong_t          GetUTime()    const {return GetDateTime().Get();};
-   
-    virtual ULong_t                runNumber() const;              
-    virtual ULong_t                triggerMask() const;
-    virtual ULong_t                bunchCrossingNumber() const;
-    virtual Double_t                       luminosity() const;
-    virtual void                   Print(Option_t *opt=""); // *MENU*
-    virtual StRun*                       run();
-    virtual StVertex*                    primaryVertex();
-    virtual StDstEventSummary*           summary();
-    virtual StGlobalTrackCollection*     trackCollection();
-    virtual StTpcHitCollection*          tpcHitCollection();
-    virtual StSvtHitCollection*          svtHitCollection();
-    virtual StFtpcHitCollection*         ftpcHitCollection();
-    virtual StEmcTowerHitCollection*     emcTowerHitCollection();
-    virtual StEmcPreShowerHitCollection* emcPreShowerHitCollection();
-    virtual StSmdPhiHitCollection*       smdPhiHitCollection();
-    virtual StSmdEtaHitCollection*       smdEtaHitCollection();
-    virtual StVertexCollection*          vertexCollection();
-    virtual StTriggerDetectorCollection* triggerDetectorCollection();
-    virtual StL0Trigger*                 l0Trigger();                        
-    virtual Float_t                      beamPolarization(StBeamDirection, 
-							  StBeamPolarizationAxis);
+    virtual Int_t     	     GetDate()     const {return GetDateTime().GetDate();};
+    virtual Int_t     	     GetTime()     const {return GetDateTime().GetTime();};
+//		must be in here in .h
+    virtual ULong_t          runNumber() const  { return mRunNumber;};             
+    virtual ULong_t          triggerMask() const{ return mTriggerMask;};
+    virtual StRun*                       run() { return mRun;};
+    virtual Double_t         luminosity() const{ return mLuminosity;};
+    virtual void     Print(Option_t *opt=""); // *MENU*
+    //    virtual StRun*                       run() { return mRun;};
+    virtual StVertex*                    primaryVertex(){ return mPrimaryVertex;};
+    virtual StDstEventSummary*           summary(){ return mSummary;};
+    virtual StGlobalTrackCollection*     trackCollection(){ return mTracks;};
+    virtual StTpcHitCollection*          tpcHitCollection(){ return mTpcHits;};
+    virtual StEmcPreShowerHitCollection* emcPreShowerHitCollection() { return mEmcPreShowerHits;};
+    virtual StFtpcHitCollection*         ftpcHitCollection(){ return mFtpcHits;};
+    virtual StEmcTowerHitCollection*     emcTowerHitCollection(){ return mEmcTowerHits;};
+    virtual StEmcPreShowerHitCollection* emcPreShowerHitCollection(){ return mEmcPreShowerHits;};
+    virtual StSmdPhiHitCollection*       smdPhiHitCollection(){ return mSmdPhiHits;};
+    virtual StL0Trigger*                 l0Trigger(){ return mL0Trigger;};                        
+    virtual StVertexCollection*          vertexCollection(){ return mVertices;};
+    virtual StTriggerDetectorCollection* triggerDetectorCollection(){ return mTriggerDetectors;};
+    virtual StL0Trigger*                 l0Trigger(){ return  mL0Trigger;};                        
+    virtual Float_t          beamPolarization(StBeamDirection, StBeamPolarizationAxis);
 
-    virtual void setType(const Char_t*);
-    virtual void setId(const pairL&);
-    virtual void setTime(Int_t dt)                 {SetDateTime(dt,0);};
-    virtual void SetDateTime(int iDate,int iTime){mTime.Set(iDate,iTime);};
-    virtual void SetDateTime(TDatime dt)	 {mTime=dt;};
-    virtual void setRunNumber(ULong_t);                
-    virtual void setTriggerMask(ULong_t);              
-    virtual void setBunchCrossingNumber(ULong_t);      
-    virtual void setLuminosity(Double_t);               
-    virtual void setRun(StRun*);                            
-    virtual void setPrimaryVertex(StVertex*);                  
-    virtual void setSummary(StDstEventSummary*);                        
-    virtual void setTrackCollection(StGlobalTrackCollection*);                
-    virtual void setTpcHitCollection(StTpcHitCollection*);               
-    virtual void setSvtHitCollection(StSvtHitCollection*);               
+    virtual void setType(const Char_t*);                                   // *MENU*
+    virtual void setId(const pairL&);                                      // *MENU*
+    virtual void setTime(Int_t dt)                 {SetDateTime(dt,0);};   // *MENU*
+    virtual void SetDateTime(int iDate,int iTime){mTime.Set(iDate,iTime);};// *MENU*
+    virtual void SetDateTime(TDatime dt)	 {mTime=dt;};              // *MENU*
+    virtual void setRunNumber(ULong_t);                                    // *MENU*
+    virtual void setRun(StRun*);                                           // *MENU*
+    virtual void setBunchCrossingNumber(ULong_t);                          // *MENU*
+    virtual void setLuminosity(Double_t);                                  // *MENU*
+    //    virtual void setRun(StRun*);                                           // *MENU*
+    virtual void setPrimaryVertex(StVertex*);                              
+    virtual void setSummary(StDstEventSummary*);                           
     virtual void setTrackCollection(StGlobalTrackCollection*);             
     virtual void setTpcHitCollection(StTpcHitCollection*);                 
     virtual void setSvtHitCollection(StSvtHitCollection*);                 
@@ -197,7 +198,7 @@ struct pairL : public TObject
     virtual void setEmcPreShowerHitCollection(StEmcPreShowerHitCollection*);              
     virtual void setSmdPhiHitCollection(StSmdPhiHitCollection*);              
     virtual void setSmdEtaHitCollection(StSmdEtaHitCollection*);              
-    virtual void setBeamPolarization(StBeamDirection, StBeamPolarizationAxis, Float_t);                   
+    virtual void setVertexCollection(StVertexCollection*);               
     virtual void setTriggerDetectorCollection(StTriggerDetectorCollection*);      
     virtual void setL0Trigger(StL0Trigger*);                      
     virtual void setBeamPolarization(StBeamDirection, StBeamPolarizationAxis, Float_t); // *MENU*
@@ -231,46 +232,7 @@ struct pairL : public TObject
     const StEvent& operator=(const StEvent&);
     StTriggerDetectorCollection* mTriggerDetectors;  
   ClassDef(StEvent,1)  //StEvent structure
-
-inline const TString& StEvent::type() const { return mType;}
-
-inline pairL StEvent::id() const { return mId;}
-
-inline ULong_t StEvent::runNumber() const { return mRunNumber;}             
-
-inline ULong_t StEvent::triggerMask() const { return mTriggerMask;}
-
-inline ULong_t StEvent::bunchCrossingNumber() const { return mBunchCrossingNumber;}
-
-inline Double_t StEvent::luminosity() const { return mLuminosity;}
-
-inline StRun* StEvent::run() { return mRun;}
-
-inline StVertex* StEvent::primaryVertex() { return mPrimaryVertex;}
-
-inline StDstEventSummary* StEvent::summary() { return mSummary;}
-
-inline StGlobalTrackCollection* StEvent::trackCollection() { return mTracks;}
-
-inline StTpcHitCollection* StEvent::tpcHitCollection() { return mTpcHits;}
-
-inline StSvtHitCollection* StEvent::svtHitCollection() { return mSvtHits;}
-
-inline StFtpcHitCollection* StEvent::ftpcHitCollection() { return mFtpcHits;}
-
-inline StEmcTowerHitCollection* StEvent::emcTowerHitCollection() { return mEmcTowerHits;}
-
-inline StEmcPreShowerHitCollection* StEvent::emcPreShowerHitCollection() { return mEmcPreShowerHits;}
-
-inline StSmdPhiHitCollection* StEvent::smdPhiHitCollection() { return mSmdPhiHits;}
-
-inline StSmdEtaHitCollection* StEvent::smdEtaHitCollection() { return mSmdEtaHits;}
-
-inline StVertexCollection* StEvent::vertexCollection() { return mVertices;}
-
-inline StTriggerDetectorCollection* StEvent::triggerDetectorCollection() { return mTriggerDetectors;}
-
-inline StL0Trigger* StEvent::l0Trigger() { return mL0Trigger;}                        
+    StL3Trigger*                 mL3Trigger;
 #ifndef __CINT__
 ostream&  operator<<(ostream& os, const StEvent&);
 #endif
@@ -279,7 +241,6 @@ inline Float_t StEvent::beamPolarization(StBeamDirection dir, StBeamPolarization
 {
     if (dir == east)
 	return mBeamPolarizationEast[axis];
-#endif
     else
 	return mBeamPolarizationWest[axis];
 }

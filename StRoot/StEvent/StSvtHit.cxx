@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 1.3 1999/04/28 22:27:35 fisyak Exp $
+ * $Id: StSvtHit.cxx,v 1.4 1999/05/05 22:36:41 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
- * Revision 1.3  1999/04/28 22:27:35  fisyak
- * New version with pointer instead referencies
+ * Revision 1.4  1999/05/05 22:36:41  fisyak
+ * restore relatedTracks
+ *
+ * Revision 1.4  1999/05/05 22:36:41  fisyak
+ * restore relatedTracks
  *
  * Revision 1.3  1999/04/28 22:27:35  fisyak
  * New version with pointer instead referencies
@@ -25,10 +28,10 @@
  * Revision 2.5  1999/12/13 20:16:19  ullrich
 #include "tables/dst_point.h"
 #include "StGlobalTrack.h"
-static const Char_t rcsid[] = "$Id: StSvtHit.cxx,v 1.3 1999/04/28 22:27:35 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StSvtHit.cxx,v 1.4 1999/05/05 22:36:41 fisyak Exp $";
 #include "dst_point.h"
  * Inlined layer(), sector() and ladder().
-static const Char_t rcsid[] = "$Id: StSvtHit.cxx,v 1.3 1999/04/28 22:27:35 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StSvtHit.cxx,v 1.4 1999/05/05 22:36:41 fisyak Exp $";
 #include "tables/dst_point.h"
  * Memory now allocated using StMemoryPool via overloaded new/delete
  *
@@ -53,7 +56,7 @@ StSvtHit::StSvtHit(dst_point_st* pt)
 
     //
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 1.3 1999/04/28 22:27:35 fisyak Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 1.4 1999/05/05 22:36:41 fisyak Exp $";
 
 ClassImp(StSvtHit)
     
@@ -88,17 +91,16 @@ StSvtHit::StSvtHit(const StThreeVectorF& p,
     ULong_t svtz   = pt.position[1]/(1L<<10);
     mPositionError.setZ(Float_t(svtz)/(1L<<26));
 
-#if 0
 StVecPtrGlobalTrack StSvtHit::relatedTracks(const StTrackCollection& c)
     //
     StVecPtrGlobalTrack  result;
     StGlobalTrack        *track;
     StTrackConstIterator iter;
+	const StVecPtrSvtHit *hits = track->svtHits();
+    for (iter = c.begin(); iter != c.end(); iter++) {
+	if (hits->FindObject(this))
 	const StVecPtrSvtHit &hits = track->svtHits();
-	if (find(hits.begin(), hits.end(), this) != hits.end())
-	    result.push_back(track);
 	//	if (find(hits.begin(), hits.end(), this) != hits.end())
-#endif
 	if (hits.FindObject(this))
 	  result.push_back(track);
     }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 1.5 1999/04/28 22:27:37 fisyak Exp $
+ * $Id: StTrack.cxx,v 1.6 1999/05/05 22:36:42 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
- * Revision 1.5  1999/04/28 22:27:37  fisyak
- * New version with pointer instead referencies
+ * Revision 1.6  1999/05/05 22:36:42  fisyak
+ * restore relatedTracks
+ *
+ * Revision 1.6  1999/05/05 22:36:42  fisyak
+ * restore relatedTracks
  *
  * Revision 1.5  1999/04/28 22:27:37  fisyak
  * New version with pointer instead referencies
@@ -34,21 +37,20 @@
  * Revision 1.2  1999/01/15 22:54:02  wenaus
  * version with constructors for table-based loading
  *
-static const Char_t rcsid[] = "$Id: StTrack.cxx,v 1.5 1999/04/28 22:27:37 fisyak Exp $";
+ * Revision 2.9  1999/12/01 15:58:08  ullrich
  * New decoding for dst_track::method. New enum added.
  *
-static const Char_t rcsid[] = "$Id: StTrack.cxx,v 1.5 1999/04/28 22:27:37 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StTrack.cxx,v 1.6 1999/05/05 22:36:42 fisyak Exp $";
  * Removed method unlink() and all calls to it.
 ClassImp(StTrack)
 ClassImp(StTrack)
 StTrack::StTrack() : mHelix(0, 0, 0, StThreeVectorD())
-static const char rcsid[] = "$Id: StTrack.cxx,v 1.5 1999/04/28 22:27:37 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 1.6 1999/05/05 22:36:42 fisyak Exp $";
     mStartVertex = 0;
     mStopVertex   = 0;
-  mHelix(0, 0, 0, StThreeVectorD()), mFitTraits(trk)
+    mTopologyMap(track.map), mFitTraits(track)
+{
 StTrack::StTrack(dst_track_st* trk) : 
-    mStartVertex = 0;
-    mStopVertex   = 0;
   mHelix(0, 0, 0, StThreeVectorD()), mFitTraits(trk), 
   mStartVertex(0), mStopVertex(0)
     mEncodedMethod = track.method;
@@ -57,7 +59,8 @@ StTrack::StTrack(dst_track_st* trk) :
 StTrack::StTrack(dst_track_st* trk,
                  Double_t curvature,
                  Double_t dip,
-  mHelix(curvature, dip, phase, origin, h), mFitTraits(trk)
+                 Double_t phase,
+                 StThreeVectorD& origin,
 		 Int_t h) : 
   mHelix(curvature, dip, phase, origin, h), mFitTraits(trk),
   mStartVertex(0), mStopVertex(0)
