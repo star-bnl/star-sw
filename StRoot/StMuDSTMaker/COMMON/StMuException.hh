@@ -9,11 +9,13 @@
 using namespace std;
 #endif
 
-#ifndef GNU_GCC
-#define __PRETTY_FUNCTION__ "NoScopeIdentifierAvailable"
+#if ! defined(__PRETTY_FUNCTION__) 
+# define PF (__FILE__)
+#else
+# define PF (__PRETTY_FUNCTION__)
 #endif
 
-#define PF __PRETTY_FUNCTION__
+
 
 
 enum StMuExceptionTypes {kUnknown=0, kNullPointer, kBadFlag, kBadValue, kEOF};
