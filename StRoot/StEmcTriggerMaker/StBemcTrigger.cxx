@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.5 2001/10/14 21:42:27 suaide Exp $
+// $Id: StBemcTrigger.cxx,v 1.6 2001/10/17 19:52:55 suaide Exp $
 //
 //    
 
@@ -10,8 +10,8 @@
   
 ClassImp(StBemcTrigger);
 // these vectors are for tower decoding ////////////////////////////////
-int sh =160;
-int Init_Crate[]={4660+sh,2420+sh,2580+sh,2740+sh,2900+sh,3060+sh,3220+sh,3380+sh,3540+sh,3700+sh,
+int sh =-0;
+int Init_Crate[]={2260+sh,2420+sh,2580+sh,2740+sh,2900+sh,3060+sh,3220+sh,3380+sh,3540+sh,3700+sh,
                   3860+sh,4020+sh,4180+sh,4340+sh,4500+sh,
                   2180,2020,1860,1700,1540,1380,1220,1060,900,740,
                   580,420,260,100,2340};
@@ -21,7 +21,7 @@ int TDC_Crate[]= {18,17,16,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,19,20,21,
 
 int Crate_TDC[30];
 ////////////////////////////////////////////////////////////////////////
-int Getjose_tower(int start,int crate_seq)
+int Getjose_towerWest(int start,int crate_seq)
 {
   int card=crate_seq/32;
   int card_seq=31-(crate_seq%32);
@@ -31,12 +31,22 @@ int Getjose_tower(int start,int crate_seq)
   if(jose_tower>2400)jose_tower-=2400;
   return jose_tower;
 }
-int GetTowerIdFromCrate(int Crate,int crate_sequency,
-                                             int& id)
+int Getjose_towerEast(int start,int crate_seq)
+{
+  int card=crate_seq/32;
+  int card_seq=31-(crate_seq%32);
+  int channel_seq=card_seq/4;
+  int channel=card_seq-(channel_seq*4)+1;
+  int jose_tower=start+channel_seq*20+card*4+(5-channel);
+  if(jose_tower<2400)jose_tower+=2400;
+  return jose_tower;
+}
+int GetTowerIdFromCrate(int Crate,int crate_sequency, int& id)
 {
   {
     int start=Init_Crate[Crate-1];
-    id=Getjose_tower(start,crate_sequency);
+    if(Crate>15) id=Getjose_towerWest(start,crate_sequency);
+    else id=Getjose_towerEast(start,crate_sequency);
     //cout <<"  Crate = "<<Crate<<"  seq = "<<crate_sequency<<"  id = "<<id<<endl;
     return 1;
   }
@@ -148,7 +158,8 @@ void StBemcTrigger::MakeTrigger()
     {
        Int_t positionInCrate=k+subpatch;
        Int_t id;
-       GetTowerIdFromCrate(crate,positionInCrate,id);        
+       GetTowerIdFromCrate(crate,positionInCrate,id); 
+       //cout <<"  crate = "<<crate<<"  position = "<<positionInCrate<<"  id = "<<id<<endl;       
        patchRows[patch-1].TowerId[ti]=id;
        ti++;
        if(e8bits[id-1]>=HT[patch-1]) 
@@ -283,6 +294,7 @@ void StBemcTrigger::GetCrateEtaPatch(Int_t patch,Int_t* mi,Int_t* ei)
 
   Int_t crate=(patch-1)/10+1; // crate number
   Int_t subpatch=(patch-1)%10*16;
+  //cout <<"patch = "<<patch<<"  crate = "<<crate <<"  subpatch = "<<subpatch<<endl;
     
   *mi=crate;
   *ei=subpatch;
