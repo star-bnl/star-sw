@@ -1,4 +1,7 @@
 #  $Log: MakePam.mk,v $
+#  Revision 1.11  1998/04/13 16:03:48  fisyak
+#  Correct HPUX flags
+#
 #  Revision 1.10  1998/04/10 14:03:14  fisyak
 #  Add supermodule in shared libraries
 #
@@ -58,11 +61,9 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/04/10 14:03:14 $ 
+#           Last modification $Date: 1998/04/13 16:03:48 $ 
 #  #. default setings
 include $(STAR)/mgr/MakeSYS.mk
-PWD       = /bin/pwd
-CWD      := $(shell $(PWD))
 ifdef SILENT
 .SILENT:
 endif       
@@ -115,7 +116,8 @@ endif
 ifeq ($(LEVEL),$(FOUR)) #subpackage level
 	ROOT    := $(shell cd $(INP_DIR)/../../../../; $(PWD))
 	DOM_DIR := $(shell cd $(INP_DIR)/../../; $(PWD))
-	PKG     := $(notdir $(shell cd $(INP_DIR)/../; $(PWD)))
+	PKG     := $(NAME)
+#	PKG     := $(notdir $(shell cd $(INP_DIR)/../; $(PWD)))
 endif                          
 ifndef OUT_DIR                 
 	override OUT_DIR := $(shell cd $(ROOT); $(PWD))/lib
@@ -154,7 +156,7 @@ FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(IDLS))
 endif                          
 FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g)
 #=========================================================
-ifeq ($(LEVEL),$(FOUR))        
+ifeq ($(LEVEL),$(FIVE))        
 .PHONY               : default
 all:
 	@echo "Please run make in parent directory"
@@ -433,6 +435,7 @@ test_mk:
 	@echo "F_EXTENDED=" $(F_EXTENDED)
 	@echo "LD        =" $(LD)	"; LDFLAGS	="	$(LDFLAGS)
 	@echo "LD_LIBS   =" $(LD_LIBS)  "; CC_LIBS	="	$(CC_LIBS)
+	@echo "LDS       =" $(LDS)      "; LDS_FLAGS    ="      $(LDS_FLAGS)
 	@echo "RM        =" $(RM)
 	@echo "SUBDIRS   =" $(SUBDIRS)
 	@echo "LIBRARIES =" $(LIBRARIES)
