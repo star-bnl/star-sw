@@ -1,6 +1,9 @@
-// $Id: StEventManager.hh,v 1.2 1999/07/11 23:27:50 fisyak Exp $
+// $Id: StEventManager.hh,v 1.3 1999/09/01 20:26:40 fisyak Exp $
 //
 // $Log: StEventManager.hh,v $
+// Revision 1.3  1999/09/01 20:26:40  fisyak
+// remove double includes
+//
 // Revision 1.2  1999/07/11 23:27:50  fisyak
 // dst_TriggerDetectors => dst_TrgDet
 //
@@ -60,25 +63,6 @@
 //#include "StUtil/Star.hh"   Not needed at present
  * Revised to build new StEvent version
  *
-#include "tables/dst_run_header.h"
-#include "tables/dst_run_summary.h"
-#include "tables/dst_TrgDet.h"
-#include "tables/dst_dedx.h"
-#include "tables/dst_event_header.h"
-#include "tables/dst_event_summary.h"
-#include "tables/dst_monitor_hard.h"
-#include "tables/dst_monitor_soft.h"
-#include "tables/dst_point.h"
-#include "tables/dst_tof_evt.h"
-#include "tables/dst_tof_trk.h"
-#include "tables/dst_track.h"
-#include "tables/dst_track_aux.h"
-#include "tables/dst_vertex.h"
-#include "tables/dst_v0_vertex.h"
-#include "tables/dst_xi_vertex.h"
-#include "tables/particle.h"
-#include "tables/gen_header.h"
-
 #include "tables/St_dst_run_header_Table.h"
 #include "tables/St_dst_run_summary_Table.h"
 #include "tables/St_dst_TrgDet_Table.h"
