@@ -1,7 +1,13 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.46 2003/12/04 05:58:15 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.47 2003/12/09 19:29:39 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.47  2003/12/09 19:29:39  calderon
+ * Changes to check the volume id of FTPC hits.
+ * new volume id's run from 1000 to 2906 (they include the sectors).
+ * For backward compatibility, include 101 - 2906 in the check for a good
+ * volume Id.
+ *
  * Revision 1.46  2003/12/04 05:58:15  calderon
  * Introduction of Endcap EMC collections into StMcEvent.  Read the corresponding
  * g2t table for the hits, decode the volume Id and add it to the proper
@@ -219,7 +225,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.46 2003/12/04 05:58:15 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.47 2003/12/09 19:29:39 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -938,7 +944,11 @@ Int_t StMcEventMaker::Make()
 	    long  nBadVolId = 0;
 	    long ihit;
 	    for(ihit=0; ihit<NHits; ihit++) {
-		if (ftpHitTable[ihit].volume_id < 101 || ftpHitTable[ihit].volume_id > 210) {
+		// old volume id scheme, 101 - 209
+		// changed in oct 2003
+		// planes are included, valid volume id's are from 1000 - 2906
+		// keep the checks from 101 to 2906 for backward compatibility.
+		if (ftpHitTable[ihit].volume_id < 101 || ftpHitTable[ihit].volume_id > 2906) {
 		    nBadVolId++;
 		    continue;
 		}
