@@ -1,5 +1,8 @@
-// $Id: St_smdst_Maker.cxx,v 1.3 1999/03/12 22:10:37 perev Exp $
+// $Id: St_smdst_Maker.cxx,v 1.4 1999/04/02 17:57:45 fisyak Exp $
 // $Log: St_smdst_Maker.cxx,v $
+// Revision 1.4  1999/04/02 17:57:45  fisyak
+// Add Gene's gif
+//
 // Revision 1.3  1999/03/12 22:10:37  perev
 // New maker schema
 //
@@ -164,7 +167,7 @@ void St_smdst_Maker::MakeHistograms() {
 // MakeHistograms() fills diagnostic histograms for the Maker.
 // The histograms are only redrawn once for every cycle of update events.
 /* Begin_Html
-<img src="gif/smdst_histo.gif">
+<P ALIGN=CENTER> <img src="gif/smdst_histo.gif">  </P> 
 End_Html */
 //
   if (m_DataSet && update) {
@@ -228,7 +231,7 @@ void St_smdst_Maker::PrintInfo() {
 // PrintInfo() prints information about the class to standard output.
 //
   printf("**************************************************************\n");
-  printf("* $Id: St_smdst_Maker.cxx,v 1.3 1999/03/12 22:10:37 perev Exp $\n");
+  printf("* $Id: St_smdst_Maker.cxx,v 1.4 1999/04/02 17:57:45 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   if (draw_histos) printf("* Strangeness Histograms are active\n");
   printf("**************************************************************\n");
