@@ -352,8 +352,8 @@ for my $repository (@repositories) {
   $CPPFLAGS .= " -I";
   $CPPFLAGS .= join " -I$repository/", @cpp;
 }
-$CPPFLAGS .= $ENV->{CPPFLAGS};
-$CPPFLAGS .= " -D__ROOT__";#print "CPPFLAGS = ", $CPPFLAGS, "\n";
+$CPPFLAGS .= " " . $ENV->{CPPFLAGS};
+#$CPPFLAGS .= " -D__ROOT__";#print "CPPFLAGS = ", $CPPFLAGS, "\n";
 return $CPPFLAGS;
 }
 #________________________________________
