@@ -1,23 +1,31 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2004/01/19
-// $Id: EEmcTTDisplay.cxx,v 1.9 2004/05/05 21:37:36 zolnie Exp $
+// $Id: EEmcTTDisplay.cxx,v 1.10 2004/05/06 16:02:48 zolnie Exp $
 // doxygen info here
 /**
- * \class  EEmcTTDisplay
- * \author Piotr A. Zolnierczuk
- * \date   2003/12/08
- *
- * \brief  EEmc Tower and Track display class
+ * \class   EEmcTTDisplay
+ * \brief   EEmc Tower and Track Display class
  *
  * This is a simple root TGeoXXXX based class. It displays EEMC tower geometry
- * (the class inherits from EEmcGeomSimple) and allows for "turining on/off" individual
- * towers as well as displays muDST tracks (StMuTrack).
-
+ * (the class inherits from EEmcGeomSimple) and allows for "turning on/off" individual
+ * towers as well as it displays muDST tracks (StMuTrack).
+ *
+ * \author  Piotr A. Zolnierczuk
+ * 
+ * $Date: 2004/05/06 16:02:48 $ 
+ * $Revision: 1.10 $
+ * 
  * \section displayexample  Short example how to use EEmcTTDisplay
  * for details consult  StRoot/StEEmcPool/macros/TTM/show.C
  * \include show.C
  *  
  * \image html snapshot.jpg "Sample snapshot"
+ *
+ * \section displayremarks Remarks
+ * \todo [medium] private member volumeName is not best implemented
+ * \todo [minor]  speed of light redefined (should be taken from StarClassLibrary)
+ * \bug  the class requires an explitic set of magnetic field via SetMagneticField
+ *
  */
 
 #include <ostream>
@@ -326,6 +334,9 @@ EEmcTTDisplay::volumeName(const EEmcTower& tower)
 
 
 // $Log: EEmcTTDisplay.cxx,v $
+// Revision 1.10  2004/05/06 16:02:48  zolnie
+// more docs
+//
 // Revision 1.9  2004/05/05 21:37:36  zolnie
 // ver 2.0 released
 //
