@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtVertexAnalysis.cxx,v 1.2 2000/07/16 22:23:17 laue Exp $
+ * $Id: StHbtVertexAnalysis.cxx,v 1.3 2000/08/11 16:35:41 rcwells Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtVertexAnalysis.cxx,v $
+ * Revision 1.3  2000/08/11 16:35:41  rcwells
+ * Added number of events processed to each HBT analysis
+ *
  * Revision 1.2  2000/07/16 22:23:17  laue
  * I forgot that we moved memberfunctions out of StHbtBaseAnalysis.
  * So my previous check-ins didn't compile with the library.
@@ -102,6 +105,7 @@ StHbtVertexAnalysis::StHbtVertexAnalysis(unsigned int bins, double min, double m
   mPairCut           = 0;
   mCorrFctnCollection= 0;
   mCorrFctnCollection = new StHbtCorrFctnCollection;
+  mNeventsProcessed = 0;
   mVertexBins = bins;
   mVertexZ[0] = min;
   mVertexZ[1] = max;
@@ -118,6 +122,7 @@ StHbtVertexAnalysis::StHbtVertexAnalysis(const StHbtVertexAnalysis& a) : StHbtBa
   mPairCut           = 0;
   mCorrFctnCollection= 0;
   mCorrFctnCollection = new StHbtCorrFctnCollection;
+  mNeventsProcessed = 0;
   mVertexBins = a.mVertexBins; 
   mVertexZ[0] = a.mVertexZ[0]; 
   mVertexZ[1] = a.mVertexZ[1]; 
@@ -223,6 +228,8 @@ StHbtString StHbtVertexAnalysis::Report()
 }
 //_________________________
 void StHbtVertexAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
+  // Add event to processed events
+  AddEventProcessed();
   // startup for EbyE 
   EventBegin(hbtEvent);  
   // get the right mixing buffer
@@ -409,3 +416,6 @@ void StHbtVertexAnalysis::Finish(){
   }
 }
 //_________________________
+void StHbtVertexAnalysis::AddEventProcessed() {
+  mNeventsProcessed++;
+}

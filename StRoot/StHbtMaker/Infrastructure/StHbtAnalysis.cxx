@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.cxx,v 1.12 2000/07/16 22:23:17 laue Exp $
+ * $Id: StHbtAnalysis.cxx,v 1.13 2000/08/11 16:35:40 rcwells Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.cxx,v $
+ * Revision 1.13  2000/08/11 16:35:40  rcwells
+ * Added number of events processed to each HBT analysis
+ *
  * Revision 1.12  2000/07/16 22:23:17  laue
  * I forgot that we moved memberfunctions out of StHbtBaseAnalysis.
  * So my previous check-ins didn't compile with the library.
@@ -148,6 +151,7 @@ StHbtAnalysis::StHbtAnalysis(){
   mCorrFctnCollection= 0;
   mCorrFctnCollection = new StHbtCorrFctnCollection;
   mMixingBuffer = new StHbtPicoEventCollection;
+  mNeventsProcessed = 0;
 }
 //____________________________
 
@@ -160,6 +164,7 @@ StHbtAnalysis::StHbtAnalysis(const StHbtAnalysis& a) : StHbtBaseAnalysis() {
   mCorrFctnCollection= 0;
   mCorrFctnCollection = new StHbtCorrFctnCollection;
   mMixingBuffer = new StHbtPicoEventCollection;
+  mNeventsProcessed = 0;
 
   // find the right event cut
   mEventCut = a.mEventCut->Clone();
@@ -260,6 +265,8 @@ StHbtString StHbtAnalysis::Report()
 }
 //_________________________
 void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
+  // Add event to processed events
+  AddEventProcessed();
   // startup for EbyE 
   EventBegin(hbtEvent);  
   // event cut and event cut monitor
@@ -440,4 +447,7 @@ void StHbtAnalysis::Finish(){
     (*iter)->Finish();
   }
 }
-
+//_________________________
+void StHbtAnalysis::AddEventProcessed() {
+  mNeventsProcessed++;
+}

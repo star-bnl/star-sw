@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.h,v 1.12 2000/06/15 18:54:08 willson Exp $
+ * $Id: StHbtAnalysis.h,v 1.13 2000/08/11 16:35:41 rcwells Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.h,v $
+ * Revision 1.13  2000/08/11 16:35:41  rcwells
+ * Added number of events processed to each HBT analysis
+ *
  * Revision 1.12  2000/06/15 18:54:08  willson
  * Methods to access cuts and correlation functions moved to derived analysis
  * classes.
@@ -135,13 +138,16 @@ public:
   virtual void ProcessEvent(const StHbtEvent*);
   void EventBegin(const StHbtEvent*); //startup for EbyE
   void EventEnd(const StHbtEvent*);   // cleanup for EbyE
+  int GetNeventsProcessed();
 
   virtual void Finish();
 
   friend class StHbtLikeSignAnalysis;
 
 private:
-  
+
+  void AddEventProcessed();
+
   StHbtPairCut*             mPairCut;
   StHbtCorrFctnCollection*  mCorrFctnCollection;
   StHbtEventCut*            mEventCut;
@@ -149,6 +155,7 @@ private:
   StHbtParticleCut*         mSecondParticleCut;
   StHbtPicoEventCollection*  mMixingBuffer;
   unsigned int mNumEventsToMix;
+  unsigned int mNeventsProcessed;
 
 #ifdef __ROOT__
   ClassDef(StHbtAnalysis, 0)
@@ -176,6 +183,7 @@ inline void StHbtAnalysis::SetSecondParticleCut(StHbtParticleCut* x) {mSecondPar
 
 inline void StHbtAnalysis::SetNumEventsToMix(const unsigned int& nmix){ mNumEventsToMix = nmix;}
 inline bool StHbtAnalysis::MixingBufferFull(){return (mMixingBuffer->size() >= mNumEventsToMix);}
+inline int StHbtAnalysis::GetNeventsProcessed() {return mNeventsProcessed;}
 
 
 #endif

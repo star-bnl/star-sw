@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtVertexAnalysis.h,v 1.2 2000/07/16 22:23:17 laue Exp $
+ * $Id: StHbtVertexAnalysis.h,v 1.3 2000/08/11 16:35:41 rcwells Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtVertexAnalysis.h,v $
+ * Revision 1.3  2000/08/11 16:35:41  rcwells
+ * Added number of events processed to each HBT analysis
+ *
  * Revision 1.2  2000/07/16 22:23:17  laue
  * I forgot that we moved memberfunctions out of StHbtBaseAnalysis.
  * So my previous check-ins didn't compile with the library.
@@ -72,16 +75,21 @@ public:
   virtual void ProcessEvent(const StHbtEvent*);
   void EventBegin(const StHbtEvent*); //startup for EbyE
   void EventEnd(const StHbtEvent*);   // cleanup for EbyE
-  
+  int GetNeventsProcessed();
+
 
   virtual void Finish();
 
   friend class StHbtLikeSignAnalysis;
 
 private:
+
+  void AddEventProcessed();
+
   double mVertexZ[2];
   unsigned int mVertexBins;
   unsigned int mNumEventsToMix;
+  unsigned int mNeventsProcessed;
   StHbtPairCut*             mPairCut;
   StHbtCorrFctnCollection*  mCorrFctnCollection;
   StHbtEventCut*            mEventCut;
@@ -114,5 +122,7 @@ inline void StHbtVertexAnalysis::SetSecondParticleCut(StHbtParticleCut* x) {mSec
 
 inline void StHbtVertexAnalysis::SetNumEventsToMix(const unsigned int& nmix){ mNumEventsToMix = nmix;}
 inline bool StHbtVertexAnalysis::MixingBufferFull(){return (mMixingBuffer->size() >= mNumEventsToMix);}
+inline int StHbtVertexAnalysis::GetNeventsProcessed() {return mNeventsProcessed;}
+
 
 #endif
