@@ -4,9 +4,6 @@
 **:             26sep97-v000a-ppy- 
 **: 
 **:<------------------------------------------------------------------*/
-#if defined(SunOS)
-inline int abs(int x) {return x > 0 ? x : -x;}
-#endif
 #include <math.h>
 #include "cpe.h"
 #include "ctfgeo.h"
