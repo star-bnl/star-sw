@@ -56,41 +56,18 @@ class St_sce_Maker : public StMaker {
    virtual Int_t  Make();
    virtual Int_t  Finish();
    virtual void   PrintInfo();
-<<<<<<< St_sce_Maker.h
 
    virtual const char *GetCVS()
-     {static const char cvs[]="Tag $Name:  $ $Id: St_sce_Maker.h,v 1.6 2003/10/08 03:23:01 suire Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_sce_Maker.h,v 1.7 2003/10/08 15:44:19 suire Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_sce_Maker, 1)   //StAF chain virtual base class for Makers
-=======
-
-   virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_sce_Maker.h,v 1.6 2003/10/08 03:23:01 suire Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-
-   ClassDef(St_sce_Maker,0)   //StAF chain virtual base class for Makers
->>>>>>> 1.5
 };
 #endif
-<<<<<<< St_sce_Maker.h
-
  /**************************************************************************
  *
  * $Log: St_sce_Maker.h,v $
- * Revision 1.6  2003/10/08 03:23:01  suire
- * *** empty log message ***
- *
- * Revision 1.3  2002/03/25 20:14:04  suire
- * Small memory leak fixes, doxygen documentation
- *
- *
- **************************************************************************/
-=======
-
- /**************************************************************************
- *
- * $Log: St_sce_Maker.h,v $
- * Revision 1.6  2003/10/08 03:23:01  suire
- * *** empty log message ***
+ * Revision 1.7  2003/10/08 15:44:19  suire
+ * Removed a bug that happen during last commit
  *
  * Revision 1.5  2003/09/10 19:47:33  perev
  * ansi corrs
@@ -103,4 +80,3 @@ class St_sce_Maker : public StMaker {
  *
  *
  **************************************************************************/
->>>>>>> 1.5
