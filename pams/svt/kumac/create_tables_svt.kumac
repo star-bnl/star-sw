@@ -43,19 +43,6 @@ macro/global/import *
   tdm/newtable stk_kine stk_kine 6000
   tdm/newtable stk_mctrack stk_track 6000
   tdm/newtable stk_mckine stk_kine 6000
-
-  *-------------------------------------------------------------------------
-  *  This section creates and initializes the vtx_direct table
-  *-------------------------------------------------------------------------
-  message 'initializing the stk vtx direct table...'
-
-  cd [data]/global/vertices
-
-  newtable stk_vtx_direct stk_vtx_direct 1
-  tdm/table/rowcount stk_vtx_direct 1
-
-  * sx = gaussian widths for vertex smearing
-  tdm/table/cell/putvalue 'stk_vtx_direct[0].sx' .0005 .0005 .0005
   
   cd /dui
   

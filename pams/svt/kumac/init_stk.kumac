@@ -17,25 +17,7 @@
 *     mark used space points --------> stkpar.spt_mark=1
 *     remove redundent short tracks -> stkpar.long_tracks=1 
 *****************************************************************
- 
- macro vtx
-   
- macro/global/import *
-         
- message ' !!! run_stk: vertex not found,  filled from MC ***'
- 
-  cd [params]/global
-  tdm/newtable stk_vtx stk_vtx 1
-  tdm/table/rowcount stk_vtx 1
-  tdm/table/cell/putvalue 'stk_vtx[0].id' 1
-  tdm/table/cell/putvalue 'stk_vtx[0].flag' 1
-  tdm/table/cell/putvalue 'stk_vtx[0].t' 0
-  tdm/table/cell/putvalue 'stk_vtx[0].x' 0.0 0.0 0.0
-  tdm/table/cell/putvalue 'stk_vtx[0].cov' 0.0 0.0 0.0 0.0 0.0 0.0 
-  cd /dui
-  
- return
-* *****************************************************************
+
  macro read
    
  macro/global/import *
@@ -63,8 +45,6 @@
    macro/global/import *
  return
  
-* ***************************************************
-
 
 * ******************************************************
 
