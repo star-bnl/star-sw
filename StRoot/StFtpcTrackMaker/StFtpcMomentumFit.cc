@@ -1,7 +1,11 @@
 //////////////////////////////////////////////////////////////////
-// $Id: StFtpcMomentumFit.cc,v 1.4 2000/11/23 01:33:16 oldi Exp $
+// $Id: StFtpcMomentumFit.cc,v 1.5 2000/11/30 21:35:18 oldi Exp $
 //
 // $Log: StFtpcMomentumFit.cc,v $
+// Revision 1.5  2000/11/30 21:35:18  oldi
+// Problem of negative particles (nan, overflow) solved.
+// Changed poor programming style.
+//
 // Revision 1.4  2000/11/23 01:33:16  oldi
 // Proper initialization of some variables to avoid Insure++ error messages.
 //
@@ -614,21 +618,21 @@ int StFtpcMomentumFit::CircleFit(double x[],double y[], double xw[], double yw[]
 
 void StFtpcMomentumFit::LineFit(double *xval, double *yval, double *zval, double *xw, double *yw, int num)
 {
-  double x_ss=0, x_sang=0, x_sz=0, x_szang=0, x_szz=0;
+  double x_ss = 0., x_sang = 0., x_sz = 0., x_szang = 0., x_szz = 0.;
   double weight, t;
   int i;
-  
+  double angle = 0., lastangle = 0.;
+
   for(i=0; i<num; i++)
     {
       // calculate angle and eliminate steps in atan function
-      double angle = atan((yval[i]-mYCenter)/(xval[i]-mXCenter));
+      angle = atan((yval[i]-mYCenter)/(xval[i]-mXCenter));
       if(xval[i]-mXCenter<0)
 	angle+=pi;
       else if(yval[i]-mYCenter<0)
 	angle+=twopi;
       
       // shift into same phase
-      double lastangle = 0.;
       if(i!=0)
 	{
 	  if(angle>lastangle+pi)
@@ -659,7 +663,7 @@ void StFtpcMomentumFit::LineFit(double *xval, double *yval, double *zval, double
       mArcSlope=0;
     }
 
-  double chi2=0, variance=0;
+  double chi2 = 0., variance = 0.;
   for(i=0;i<num;i++)
     {      
       double angle = atan((yval[i]-mYCenter)/(xval[i]-mXCenter));
@@ -687,9 +691,8 @@ void StFtpcMomentumFit::LineFit(double *xval, double *yval, double *zval, double
 	  variance+= temp;
 	}
     }
+
   variance/=(num-1);
   chi2/=variance;
-
-
   mChi2Lin = chi2;
 }
