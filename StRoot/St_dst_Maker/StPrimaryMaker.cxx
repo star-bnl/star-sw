@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.29 2000/01/31 15:07:30 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.30 2000/02/01 17:16:21 wdeng Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.30  2000/02/01 17:16:21  wdeng
+// Copy the preliminary primary vertex to the first four rows of vertex table.
+//
 // Revision 1.29  2000/01/31 15:07:30  caines
 // Set primary mxtry for fitting to 1 so no testing on chi2 is done
 //
@@ -235,9 +238,20 @@ Int_t StPrimaryMaker::Make(){
   St_dst_track     *globtrk  = (St_dst_track *) matchI("globtrk");
   St_svm_evt_match *evt_match = (St_svm_evt_match *) matchI("evt_match");
   St_dst_track     *primtrk     = 0;   
-  St_dst_vertex *vertex = new St_dst_vertex("vertex",1); 
+
+  St_DataSet     *preVertex = GetDataSet("preVertex"); 
+  St_DataSetIter  preVertexI(preVertex);         
+  St_dst_vertex  *preVtx  = (St_dst_vertex *) preVertexI("preVertex");
+
+  Int_t numRowPreVtx = preVtx->GetNRows();
+  St_dst_vertex *vertex = new St_dst_vertex("vertex", numRowPreVtx+4); 
   AddData(vertex);   
-  
+
+  dst_vertex_st *preVtxPtr = preVtx->GetTable();
+  dst_vertex_st *vertexPtr = vertex->GetTable();
+  Int_t sizeToCopy = sizeof(dst_vertex_st) * numRowPreVtx;
+  memcpy(vertexPtr, preVtxPtr, sizeToCopy);
+  vertex->SetNRows( numRowPreVtx );
   
   St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
   St_tpt_track  *tptrack   = 0;
@@ -316,7 +330,6 @@ Int_t StPrimaryMaker::Make(){
     }
     else{    
       // evr
-      vertex->Set(4);
       if(Debug()) gMessMgr->Debug() << "run_evr: calling evr_am" << endm;
       iRes = evr_am(m_evr_evrpar,globtrk,vertex);
       //	 ================================================
