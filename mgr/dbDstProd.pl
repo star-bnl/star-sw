@@ -236,15 +236,15 @@ print "Total files: $nDiskFiles\n";
 ##  find running jobs
 
 
-   my @CRS_JOB = `ssh rcf.rhic.bnl.gov crs_node_status.pl -c`;
-   foreach my $job_line (@CRS_JOB) {
-      chop $job_line; 
-     my @job_word = split ("_", $job_line);
-     my @word_part = split ("%", $job_word[10]);
-     $j_name[$jline] = $job_word[6]."_". $job_word[7]."_". $job_word[8]."_". $job_word[8]."_". $word_part[0];
-     $j_status[$jline] = $word_part[1];
-      $jline++; 
-  } 
+#   my @CRS_JOB = `ssh rcf.rhic.bnl.gov crs_node_status.pl -c`;
+#   foreach my $job_line (@CRS_JOB) {
+#      chop $job_line; 
+#     my @job_word = split ("_", $job_line);
+#     my @word_part = split ("%", $job_word[10]);
+#     $j_name[$jline] = $job_word[6]."_". $job_word[7]."_". $job_word[8]."_". $job_word[8]."_". $word_part[0];
+#     $j_status[$jline] = $word_part[1];
+#      $jline++; 
+#  } 
 
 
 
