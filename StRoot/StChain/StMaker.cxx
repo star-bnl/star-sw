@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.126 2003/04/30 20:36:23 perev Exp $
+// $Id: StMaker.cxx,v 1.127 2003/05/01 16:56:50 jeromel Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -45,7 +45,9 @@ StMaker *StMaker::fgStChain = 0;
 StMaker *StMaker::fgFailedMaker = 0;
 Int_t    StMaker::fgTallyMaker[kStFatal+1] = {0,0,0,0,0};
 Int_t MaxWarnings = 26;
-typedef TDataSet::EDataSetPass EDataSetPass;
+
+
+
 ClassImp(StMaker)
 
 static void doPs(const char *who,const char *where);
@@ -1141,6 +1143,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.127  2003/05/01 16:56:50  jeromel
+// Extraneous declaration removed
+//
 // Revision 1.126  2003/04/30 20:36:23  perev
 // Warnings cleanup. Modified lines marked VP
 //
