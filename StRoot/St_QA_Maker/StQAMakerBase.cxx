@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.26 2004/02/12 05:03:14 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.27 2004/02/12 16:54:24 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.27  2004/02/12 16:54:24  genevb
+// Separate MinBias histos
+//
 // Revision 2.26  2004/02/12 05:03:14  genevb
 // Year 4 AuAu changes. New SVT histos.
 //
@@ -246,7 +249,7 @@ void StQAMakerBase::BookHist() {
   // Real data with event classes for different triggers
 
     case (StQA_AuAu) : {
-      prefix[0] = QAMakerType;  // Minbias
+      (prefix[0] = QAMakerType) += "MB";  // Minbias
       (prefix[1] = QAMakerType) += "CL";  // Central
       (prefix[2] = QAMakerType) += "HT";  // HighTower
       eventClass = 3;
