@@ -1,7 +1,10 @@
 /*
- * $Id: acmain.cc,v 1.9 1998/08/11 01:41:00 perev Exp $
+ * $Id: acmain.cc,v 1.10 1998/12/06 01:48:30 perev Exp $
  *
  * $Log: acmain.cc,v $
+ * Revision 1.10  1998/12/06 01:48:30  perev
+ * Add noSTAF flags
+ *
  * Revision 1.9  1998/08/11 01:41:00  perev
  * prototype change
  *
@@ -44,7 +47,6 @@
 #include <string.h>
 #include <math.h>
 #include "PAM.h"
-
 #define agmain_ F77_NAME(agmain,AGMAIN)
 
 int        __argc_save=0;	// Pgf77
@@ -68,14 +70,16 @@ extern "C"  int  type_of_call  getarg_ (int*, char*, int);
 #define iargc_ F77_NAME(iargc,IARGC)
 extern "C"  int   type_of_call iargc_ ();
 extern "C"  void  k_setar (int , char** );
+#ifdef STAF
 extern "C"  void  asuMallocInit();
 extern "C"  int  asuStack(void *);
- 
+#endif 
 int main    (int argc, char *argv[])
 {
 /* Init of AsuStack test */
+#ifdef STAF
  asuStack(NULL);
-
+#endif
  __argc_save=argc;  __argv_save=argv;  k_setar(argc,argv);
        xargc=argc;      xargv = argv;
    f77argc = argc;    f77argv = argv;
@@ -83,8 +87,9 @@ int main    (int argc, char *argv[])
 #if defined(CERNLIB_HPUX)
   FTN_INITRAP();  fpsetmask(0);
 #endif
+#ifdef STAF
   asuMallocInit();
-
+#endif
 // Request Staf size
 
 #ifndef WIN32
