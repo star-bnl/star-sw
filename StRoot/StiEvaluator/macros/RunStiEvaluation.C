@@ -23,12 +23,12 @@ void SetResiduals()
 
 
 void RunStiEvaluation(
-		      const char* evalFName="/star/data22/ITTF/evaluation/Miller/Evaluation.root",
-		      const char* histFName="/star/data22/ITTF/evaluation/Miller/EvalHists.root",
-		      const char* postFName="/star/data22/ITTF/evaluation/Miller/EvalHists.ps",
-		      //const char* evalFName="Evaluation.root",
-		      //const char* histFName="EvalHists.root",
-		      //const char* postFName="EvalHists.ps",
+		      //const char* evalFName="/star/data22/ITTF/evaluation/Miller/Evaluation.root",
+		      //const char* histFName="/star/data22/ITTF/evaluation/Miller/EvalHists.root",
+		      //const char* postFName="/star/data22/ITTF/evaluation/Miller/EvalHists.ps",
+		      const char* evalFName="Evaluation.root",
+		      const char* histFName="EvalHists.root",
+		      const char* postFName="EvalHists.ps",
 		      Int_t debug = 1000)
 {
   //File stuff - input/output files open and setup
