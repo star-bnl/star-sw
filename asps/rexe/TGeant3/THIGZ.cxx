@@ -15,6 +15,9 @@
 
 /*
 $Log: THIGZ.cxx,v $
+Revision 1.2  2000/04/23 19:18:14  fisyak
+Merge with Alice V3.03
+
 Revision 1.1.1.1  2000/04/23 18:21:15  fisyak
 New version from ALICE
 
@@ -47,7 +50,7 @@ Introduction of the Copyright and cvs Log
 #include "TPaveLabel.h"
 #include "TText.h"
 #include "Rtypes.h" 
-#include "AliCallf77.h" 
+#include "StarCallf77.h" 
 #include "TPaveTree.h" 
 #include <string.h> 
 #include <ctype.h> 
@@ -666,7 +669,7 @@ extern "C" void type_of_call itx(Float_t &x,Float_t &y,const char *ptext, const 
    text->SetTextColor(higz->fTXCI);
    text->SetTextSize(higz->fCHHE);
    text->SetTextFont(higz->fTXFP);
-   text->SetTextAlign(higz->fTXAL);
+   text->SetTextStargn(higz->fTXAL);
    text->SetTextAngle(higz->fTANG);
    text->Draw();   
 }

@@ -15,11 +15,14 @@
 
 /*
 $Log: StarMC.cxx,v $
+Revision 1.2  2000/04/23 19:18:09  fisyak
+Merge with Alice V3.03
+
 Revision 1.1  2000/01/04 16:04:02  fisyak
 move TGeant3 to root4star executable
 
 Revision 1.1  1999/12/07 15:44:25  fisyak
-Add geane, new TGeant3 from Alice
+Add geane, new TGeant3 from Starce
 
 Revision 1.2  1999/09/29 09:24:29  fca
 Introduction of the Copyright and cvs Log

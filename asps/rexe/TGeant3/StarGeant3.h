@@ -1,29 +1,29 @@
-#ifndef ALIGEANT3_H
-#define ALIGEANT3_H
+#ifndef STARGEANT3_H
+#define STARGEANT3_H
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: AliGeant3.h,v 1.1.1.1 2000/04/23 18:21:13 fisyak Exp $ */
+/* $Id: StarGeant3.h,v 1.1 2000/04/23 19:18:09 fisyak Exp $ */
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
 //                                                                           //
-//    Generic interface to MC for AliRoot                                    //
+//    Generic interface to MC for StarRoot                                    //
 //                                                                           //
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <TGeant3.h>
+#include "TGeant3.h"
 
-class AliGeant3 : public TGeant3
+class StarGeant3 : public TGeant3
 {
 
 private:
 
 public:
-  AliGeant3(const char *title);
-  AliGeant3() {}
-  virtual ~AliGeant3() {}
+  StarGeant3(const char *title);
+  StarGeant3() {}
+  virtual ~StarGeant3() {}
 
   void   SetColors();
 
@@ -36,7 +36,7 @@ public:
   virtual void ProcessEvent();
   virtual void ProcessRun(Int_t nevent);
 
-  ClassDef(AliGeant3,1) //Generic MonteCarlo Class
+  ClassDef(StarGeant3,1) //Generic MonteCarlo Class
 
 };
 

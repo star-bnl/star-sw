@@ -3,14 +3,14 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3.h,v 1.5 2000/03/26 02:50:50 fine Exp $ */
+/* $Id: TGeant3.h,v 1.6 2000/04/23 19:18:09 fisyak Exp $ */
 
 //////////////////////////////////////////////// 
 //  C++ interface to Geant3 basic routines    // 
 //////////////////////////////////////////////// 
  
-#include "StarMC.h"
-typedef long int (*addrfun)();
+#include <StarMC.h> 
+  
 //______________________________________________________________
 //
 //       Geant3 prototypes for commons
@@ -274,6 +274,26 @@ typedef struct {
   Float_t gcuts[5]; 
 } Gccuts_t; 
 
+//----------GCMULO
+//      COMMON/GCMULO/SINMUL(101),COSMUL(101),SQRMUL(101),OMCMOL,CHCMOL
+//     +  ,EKMIN,EKMAX,NEKBIN,NEK1,EKINV,GEKA,GEKB,EKBIN(200),ELOW(200)
+typedef struct {
+  Float_t sinmul[101];
+  Float_t cosmul[101];
+  Float_t sqrmul[101];
+  Float_t omcmol;
+  Float_t chcmol;
+  Float_t ekmin;
+  Float_t ekmax;
+  Int_t   nekbin;
+  Int_t   nek1;
+  Float_t ekinv;
+  Float_t geka;
+  Float_t gekb;
+  Float_t ekbin[200];
+  Float_t elow[200];
+} Gcmulo_t;
+
 //----------GCPHYS
 //      COMMON/GCPHYS/IPAIR,SPAIR,SLPAIR,ZINTPA,STEPPA
 //     +             ,ICOMP,SCOMP,SLCOMP,ZINTCO,STEPCO
@@ -494,40 +514,45 @@ class TVolume;
 
 class TGeant3 : public StarMC { 
 
-private:
-  Int_t fNextVol;    //! Iterator for GeomIter
+protected:
+  Int_t fNextVol;    // Iterator for GeomIter
 
 //--------------Declarations for ZEBRA--------------------- 
-  Int_t *fZiq, *fZlq;  //!
-  Float_t *fZq;        //!
+  Int_t *fZiq, *fZlq; 
+  Float_t *fZq; 
 
-  Quest_t  *fQuest;    //!
-  Gcbank_t *fGcbank;   //!
-  Gclink_t *fGclink;   //! 
-  Gccuts_t *fGccuts;   //! 
-  Gcmate_t *fGcmate;   //! 
-  Gctpol_t *fGctpol;   //! 
-  Gcnum_t  *fGcnum;    //! 
-  Gcsets_t *fGcsets;   //! 
-  Gcopti_t *fGcopti;   //! 
-  Gctlit_t *fGctlit;   //! 
-  Gcvdma_t *fGcvdma;   //! 
-  Gcvolu_t *fGcvolu;   //! 
-  Gckine_t *fGckine;   //! 
-  Gcflag_t *fGcflag;   //! 
-  Gctmed_t *fGctmed;   //! 
-  Gcphys_t *fGcphys;   //! 
-  Gcking_t *fGcking;   //! 
-  Gckin2_t *fGckin2;   //! 
-  Gckin3_t *fGckin3;   //! 
-  Gctrak_t *fGctrak;   //! 
+  Quest_t  *fQuest; 
+  Gcbank_t *fGcbank;
+  Gclink_t *fGclink; 
+  Gccuts_t *fGccuts; 
+  Gcmulo_t *fGcmulo; 
+  Gcmate_t *fGcmate; 
+  Gctpol_t *fGctpol; 
+  Gcnum_t  *fGcnum; 
+  Gcsets_t *fGcsets; 
+  Gcopti_t *fGcopti; 
+  Gctlit_t *fGctlit; 
+  Gcvdma_t *fGcvdma; 
+  Gcvolu_t *fGcvolu; 
+  Gckine_t *fGckine; 
+  Gcflag_t *fGcflag; 
+  Gctmed_t *fGctmed; 
+  Gcphys_t *fGcphys; 
+  Gcking_t *fGcking; 
+  Gckin2_t *fGckin2; 
+  Gckin3_t *fGckin3; 
+  Gctrak_t *fGctrak; 
 
 
   // commons for GEANE
-  Ertrio_t *fErtrio;   //!
-  Eropts_t *fEropts;   //!
-  Eroptc_t *fEroptc;   //!
-  Erwork_t *fErwork;   //!
+  Ertrio_t *fErtrio;
+  Eropts_t *fEropts;
+  Eroptc_t *fEroptc;
+  Erwork_t *fErwork;
+
+  //Put here all volume names
+
+  char (*fVolNames)[5];           //! Names of geant volumes as C++ chars
 
   enum {kMaxParticles = 100};
 
@@ -537,8 +562,11 @@ private:
 
 public: 
   TGeant3(); 
-  TGeant3(const char *title, Int_t nwgeant=5000000, Int_t nwpaw=0, Int_t iwtype=1); 
-  virtual ~TGeant3() {} 
+  TGeant3(const char *title, Int_t nwgeant=5000000, Int_t nwpaw=0, Int_t iwtype=1);
+  virtual ~TGeant3() {if(fVolNames) {
+    delete [] fVolNames;
+    fVolNames=0;}
+  } 
   virtual void LoadAddress(); 
  
 ///////////////////////////////////////////////////////////////////////
@@ -557,7 +585,7 @@ public:
   Int_t CurrentVolOffID(Int_t off, Int_t &copy) const;
   const char* CurrentVolName() const;
   const char *CurrentVolOffName(Int_t off) const;
-  Int_t VolId(Text_t *name) const;
+  Int_t VolId(const Text_t *name) const;
   Int_t IdFromPDG(Int_t pdg) const;
   Int_t PDGFromId(Int_t pdg) const;
   void  DefineParticles();
@@ -578,7 +606,7 @@ public:
   Bool_t IsTrackOut() const;
   Bool_t IsTrackDisappeared() const;
   Bool_t IsTrackStop() const;
-  Bool_t IsTrackAlive() const;
+  Bool_t IsTrackStarve() const;
   Int_t  NSecondaries() const;
   Int_t  CurrentEvent() const;
   const char*  ProdProcess() const;
@@ -586,10 +614,11 @@ public:
   void   StopTrack();
   void   StopEvent();
   Float_t MaxStep() const;
-  void   SetColors();
   void  SetMaxStep(Float_t maxstep);
   void  SetMaxNStep(Int_t maxnstp);
   Int_t GetMaxNStep() const;
+  void SetCut(const char* cutName, Float_t cutValue);
+  void SetProcess(const char* flagName, Int_t flagValue);
   //  void GetParticle(const Int_t pdg, char *name, Float_t &mass) const;
   virtual Int_t GetMedium() const;
   virtual Float_t Edep() const;
@@ -616,6 +645,7 @@ public:
   virtual Gcbank_t* Gcbank() const {return fGcbank;}
   virtual Gclink_t* Gclink() const {return fGclink;}
   virtual Gccuts_t* Gccuts() const {return fGccuts;}
+  virtual Gcmulo_t* Gcmulo() const {return fGcmulo;}
   virtual Gcmate_t* Gcmate() const {return fGcmate;}
   virtual Gctpol_t* Gctpol() const {return fGctpol;}
   virtual Gcnum_t* Gcnum() const {return fGcnum;}
@@ -667,7 +697,12 @@ public:
    virtual  void  Gftmed(Int_t numed, char *name, Int_t &nmat, Int_t &isvol,  
                          Int_t &ifield, Float_t &fieldm, Float_t &tmaxfd, 
                          Float_t &stemax, Float_t &deemax, Float_t &epsil, 
-                         Float_t &stmin, Float_t *buf=0, Int_t *nbuf=0); 
+                         Float_t &stmin, Float_t *buf=0, Int_t *nbuf=0);
+   virtual  void  Gftmat(Int_t imate, Int_t ipart, char *chmeca, Int_t kdim,
+			 Float_t* tkin, Float_t* value, Float_t* pcut,
+			 Int_t &ixst);
+   virtual  Float_t Gbrelm(Float_t z, Float_t t, Float_t cut);
+   virtual  Float_t Gprelm(Float_t z, Float_t t, Float_t cut);
    virtual  void  Gmate(); 
    virtual  void  Gpart(); 
    virtual  void  Gsckov(Int_t itmed, Int_t npckov, Float_t *ppckov,
@@ -714,7 +749,7 @@ public:
    virtual  void  Gdcxyz(); 
 
       // functions from GGEOM 
-   virtual  void  Gdtom(Float_t *xd, Float_t *xm, Int_t &iflag); 
+   virtual  void  Gdtom(Float_t *xd, Float_t *xm, Int_t iflag); 
    virtual  void  Glmoth(const char* iudet, Int_t iunum, Int_t &nlev, 
                          Int_t *lvols, Int_t *lindx); 
    virtual  void  Gmedia(Float_t *x, Int_t &numed); 
@@ -737,8 +772,6 @@ public:
    virtual  void  Gprotm(Int_t nmat=0); 
    virtual  Int_t Gsvolu(const char *name, const char *shape, Int_t nmed,  
                          Float_t *upar, Int_t np); 
-   virtual  Int_t Glvolu(const Int_t Nlev, Int_t *Lnam, Int_t *Lnum);  
-
    virtual  void  Gsatt(const char *name, const char *att, Int_t val);
    virtual  void  Gfpara(const char *name, Int_t number, Int_t intext, Int_t& npar,
 			 Int_t& natt, Float_t* par, Float_t* att);
@@ -780,6 +813,8 @@ public:
    virtual  void  SetDCAY(Int_t par=1);
    virtual  void  SetDEBU(Int_t emin=1, Int_t emax=999, Int_t emod=1);
    virtual  void  SetDRAY(Int_t par=1);
+   virtual  void  SetERAN(Float_t ekmin=1.e-5, Float_t ekmax=1.e4,
+			  Int_t nekbin=90);
    virtual  void  SetHADR(Int_t par=1);
    virtual  void  SetKINE(Int_t kine, Float_t xk1=0, Float_t xk2=0, Float_t xk3=0, Float_t xk4=0,
                          Float_t xk5=0, Float_t xk6=0, Float_t xk7=0, Float_t xk8=0, Float_t xk9=0,
@@ -829,6 +864,8 @@ public:
 #endif
    static TGeant3  *Geant3(){ return fgGeant;}
    static TGeant3  *fgGeant; 
+   virtual void FinishGeometry();
+   virtual void BuildPhysics();
 
    ClassDef(TGeant3,1)  //C++ interface to Geant basic routines 
 }; 

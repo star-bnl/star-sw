@@ -15,8 +15,11 @@
 
 /*
 $Log: TPaveTree.cxx,v $
-Revision 1.1  2000/01/04 16:04:05  fisyak
-move TGeant3 to root4star executable
+Revision 1.2  2000/04/23 19:18:14  fisyak
+Merge with Alice V3.03
+
+Revision 1.1.1.1  2000/04/23 18:21:15  fisyak
+New version from ALICE
 
 Revision 1.5  1999/09/29 09:24:31  fca
 Introduction of the Copyright and cvs Log

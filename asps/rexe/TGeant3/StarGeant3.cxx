@@ -14,7 +14,10 @@
  **************************************************************************/
 
 /*
-$Log: AliGeant3.cxx,v $
+$Log: StarGeant3.cxx,v $
+Revision 1.1  2000/04/23 19:18:08  fisyak
+Merge with Alice V3.03
+
 Revision 1.1.1.1  2000/04/23 18:21:13  fisyak
 New version from ALICE
 
@@ -22,20 +25,22 @@ Revision 1.3  2000/04/07 11:12:35  fca
 G4 compatibility changes
 
 Revision 1.2  2000/02/29 19:11:17  fca
-Move gucode into AliGeant3.cxx
+Move gucode into StarGeant3.cxx
 
 Revision 1.1  2000/02/23 16:25:25  fca
-AliVMC and AliGeant3 classes introduced
-ReadEuclid moved from AliRun to AliModule
+StarVMC and StarGeant3 classes introduced
+ReadEuclid moved from StarRun to StarModule
 
 */
 
 #include <TParticle.h>
 
-#include "AliGeant3.h"
-#include "AliRun.h"
+#include "StarGeant3.h"
+#if 0
+#include <StarRun.h>
+#endif 
 #include "TGeant3.h"
-#include "AliCallf77.h" 
+#include "StarCallf77.h" 
 
 #ifndef WIN32
 
@@ -51,26 +56,27 @@ ReadEuclid moved from AliRun to AliModule
 # define rxouth  RXOUTH
 #endif
 
-ClassImp(AliGeant3)
+ClassImp(StarGeant3)
 
-AliGeant3::AliGeant3(const char *title) : 
+StarGeant3::StarGeant3(const char *title) : 
   TGeant3(title) {}
 
-void AliGeant3::FinishGeometry()
+void StarGeant3::FinishGeometry()
 {
   TGeant3::FinishGeometry();
   //Create the color table
   SetColors();
 }
 
-void AliGeant3::Init()
+void StarGeant3::Init()
 {
   //
   //=================Create Materials and geometry
-  TObjArray *modules = gAlice->Modules();
+#if 0
+  TObjArray *modules = gStarRun->Modules();
   TIter next(modules);
-  AliModule *detector;
-  while((detector = (AliModule*)next())) {
+  StarModule *detector;
+  while((detector = (StarModule*)next())) {
     // Initialise detector materials and geometry
     detector->CreateMaterials();
     detector->CreateGeometry();
@@ -80,21 +86,24 @@ void AliGeant3::Init()
 
   //Terminate building of geometry
   FinishGeometry();
+#endif
 }
 
 //____________________________________________________________________________
-void AliGeant3::ProcessRun(Int_t nevent)
+void StarGeant3::ProcessRun(Int_t nevent)
 {
+#if 0
   Int_t todo = TMath::Abs(nevent);
   for (Int_t i=0; i<todo; i++) {
   // Process one run (one run = one event)
-     gAlice->Reset();
+     gStarRun->Reset();
      ProcessEvent();
-     gAlice->FinishEvent();
+     gStarRun->FinishEvent();
   }
+#endif
 }
 
-void AliGeant3::ProcessEvent()
+void StarGeant3::ProcessEvent()
 {
   Gtrigi();
   Gtrigc();
@@ -102,7 +111,7 @@ void AliGeant3::ProcessEvent()
 }
 
 //_____________________________________________________________________________
-void AliGeant3::SetColors()
+void StarGeant3::SetColors()
 {
   //
   // Set the colors for all the volumes
@@ -158,10 +167,12 @@ extern "C" void type_of_call  rxgtrak (Int_t &mtrack, Int_t &ipart, Float_t *pmo
   //      vpos[3] Particle position
   //      tof     Particle time of flight in seconds
   //
+#if 0
   Int_t pdg;
-  gAlice->GetNextTrack(mtrack, pdg, pmom, e, vpos, polar, tof);
+  gStarRun->GetNextTrack(mtrack, pdg, pmom, e, vpos, polar, tof);
   ipart = gMC->IdFromPDG(pdg);
   mtrack++;
+#endif
 }
 
 //_____________________________________________________________________________
@@ -195,28 +206,32 @@ rxstrak (Int_t &keep, Int_t &parent, Int_t &ipart, Float_t *pmom,
   //              defined and it is not used inside the GALICE code.
   //      ntr     Number assigned to the particle in the ROOT stack.
   //
+#if 0
   char mecha[11];
   Float_t polar[3]={0.,0.,0.};
   for(int i=0; i<10 && i<cmlen; i++) mecha[i]=cmech[i];
   mecha[10]=0;
   Int_t pdg=gMC->PDGFromId(ipart);
-  gAlice->SetTrack(keep, parent-1, pdg, pmom, vpos, polar, tof, mecha, ntr);
+  gStarRun->SetTrack(keep, parent-1, pdg, pmom, vpos, polar, tof, mecha, ntr);
   ntr++;
+#endif
 }
 
 //_____________________________________________________________________________
 extern "C" void type_of_call  rxkeep(const Int_t &n)
 {
-  if( NULL==gAlice ) exit(1);
+#if 0
+  if( NULL==gStarRun ) exit(1);
   
-  if( n<=0 || n>gAlice->Particles()->GetEntries() )
+  if( n<=0 || n>gStarRun->Particles()->GetEntries() )
     {
       printf("  Bad index n=%d must be 0<n<=%d\n",
-	     n,gAlice->Particles()->GetEntries());
+	     n,gStarRun->Particles()->GetEntries());
       exit(1);
     }
   
-  ((TParticle*)(gAlice->Particles()->UncheckedAt(n-1)))->SetBit(Keep_Bit);
+  ((TParticle*)(gStarRun->Particles()->UncheckedAt(n-1)))->SetBit(Keep_Bit);
+#endif
 }
 
 //_____________________________________________________________________________
@@ -225,7 +240,9 @@ extern "C" void type_of_call  rxouth ()
   //
   // Called by Gtreve at the end of each primary track
   //
-  gAlice->FinishPrimary();
+#if 0
+  gStarRun->FinishPrimary();
+#endif
 }
 
 
@@ -627,20 +644,22 @@ void gutrak()
 //
 //    ------------------------------------------------------------------
 //
-     Int_t ndet = gAlice->Modules()->GetLast();
-     TObjArray &dets = *gAlice->Modules();
-     AliModule *module;
+#if 0
+     Int_t ndet = gStarRun->Modules()->GetLast();
+     TObjArray &dets = *gStarRun->Modules();
+     StarModule *module;
      Int_t i;
 
      for(i=0; i<=ndet; i++)
-       if((module = (AliModule*)dets[i]))
+       if((module = (StarModule*)dets[i]))
 	 module->PreTrack();
 
      gtrack();
 
      for(i=0; i<=ndet; i++)
-       if((module = (AliModule*)dets[i]))
+       if((module = (StarModule*)dets[i]))
 	 module->PostTrack();
+#endif
 }
 
 //______________________________________________________________________
@@ -665,12 +684,14 @@ void gutrev()
 //______________________________________________________________________
 void gufld(Float_t *x, Float_t *b)
 {
-      if(gAlice->Field()) {
-         gAlice->Field()->Field(x,b);
+#if 0
+      if(gStarRun->Field()) {
+         gStarRun->Field()->Field(x,b);
       } else {
          printf("No mag field defined!\n");
          b[0]=b[1]=b[2]=0;
       }
+#endif
 }
 
 //______________________________________________________________________
@@ -688,7 +709,7 @@ void gustep()
 //    *                                                                *
 //    ******************************************************************
 //
-
+#if 0
 
   TLorentzVector x;
   Float_t r;
@@ -704,7 +725,7 @@ void gustep()
   //     Stop particle if outside user defined tracking region 
   gMC->TrackPosition(x);
   r=TMath::Sqrt(x[0]*x[0]+x[1]*x[1]);
-  if (r > gAlice->TrackingRmax() || TMath::Abs(x[2]) > gAlice->TrackingZmax()) {
+  if (r > gStarRun->TrackingRmax() || TMath::Abs(x[2]) > gStarRun->TrackingZmax()) {
 	gMC->StopTrack();
   }
   // --- Add new created particles 
@@ -714,7 +735,7 @@ void gustep()
       ipp = Int_t (geant3->Gcking()->gkin[jk][4]+0.5);
       // --- Skip neutrinos! 
       if (ipp != 4) {
-	gAlice->SetTrack(1,gAlice->CurrentTrack(),gMC->PDGFromId(ipp), geant3->Gcking()->gkin[jk], 
+	gStarRun->SetTrack(1,gStarRun->CurrentTrack(),gMC->PDGFromId(ipp), geant3->Gcking()->gkin[jk], 
 			 geant3->Gckin3()->gpos[jk], polar,geant3->Gctrak()->tofg, chproc, nt);
       }
     }
@@ -725,7 +746,7 @@ void gustep()
       mom[0]=geant3->Gckin2()->xphot[jk][3]*geant3->Gckin2()->xphot[jk][6];
       mom[1]=geant3->Gckin2()->xphot[jk][4]*geant3->Gckin2()->xphot[jk][6];
       mom[2]=geant3->Gckin2()->xphot[jk][5]*geant3->Gckin2()->xphot[jk][6];
-      gAlice->SetTrack(1, gAlice->CurrentTrack(), gMC->PDGFromId(50),
+      gStarRun->SetTrack(1, gStarRun->CurrentTrack(), gMC->PDGFromId(50),
 		       mom,                             //momentum
 		       geant3->Gckin2()->xphot[jk],     //position
 		       &geant3->Gckin2()->xphot[jk][7], //polarisation
@@ -735,7 +756,8 @@ void gustep()
   }
   // --- Particle leaving the setup ?
   if (!gMC->IsTrackOut()) 
-    if ((id=gAlice->DetFromMate(geant3->Gctmed()->numed)) >= 0) gAlice->StepManager(id);
+    if ((id=gStarRun->DetFromMate(geant3->Gctmed()->numed)) >= 0) gStarRun->StepManager(id);
+#endif
 }
 
 //______________________________________________________________________
@@ -753,7 +775,9 @@ void gukine ()
 //
 //    ------------------------------------------------------------------
 //
-  gAlice->Generator()->Generate();
+#if 0
+  gStarRun->Generator()->Generate();
+#endif
 }
 
 
