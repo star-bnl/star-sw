@@ -102,6 +102,19 @@ if ($Dir !~ /pams\//) {
       while ($line = <In>) {if ($line =~/ClassDef/) {push @Defs, $h; next;}}
       close(In);
     }
+    else {      
+      foreach my $Rep (@Repo) {
+	my $RepDir = $Rep . "/" . $Dir;# print "RepDir = $RepDir\n";
+	if (-d $RepDir) {
+	  my $hh = $RepDir . "/" . $h;
+	  if (-r $hh) {
+	    open (In,$hh) or die "Can't open $hh";
+	    while ($line = <In>) {if ($line =~/ClassDef/) {push @Defs, $h; next;}}
+	    close(In);
+	  }
+	}
+      }
+    }
   }
 }
 else {
@@ -124,7 +137,6 @@ else {
 	  push @idlS, $idt; 
 	}
 	close (IN);
-	my @Deps = ($modh,$modi,$modH,$modC);
 	if ($STAR_SYS !~ /^intel_wnt$/) {
 	  Command $env2 [$modh], @idlS,  qq(stic.pl %> -r $STIC_CPPPATH -q %1);  
 	  Command $env2 [$modi], @idlS,  qq(stic.pl %> -r $STIC_CPPPATH -q %1);  
