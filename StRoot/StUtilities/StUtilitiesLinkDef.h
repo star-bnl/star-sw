@@ -21,6 +21,11 @@
 #pragma link C++ function StError_;
 #pragma link C++ function StDebug_;
 #pragma link C++ function QAInfo_;
+#pragma link C++ function StInfoOpt_;
+#pragma link C++ function StWarningOpt_;
+#pragma link C++ function StErrorOpt_;
+#pragma link C++ function StDebugOpt_;
+#pragma link C++ function QAInfoOpt_;
 #pragma link C++ function StMessAddType_;
 #pragma link C++ function MessageOut;
 #endif

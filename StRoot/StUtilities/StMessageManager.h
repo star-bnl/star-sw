@@ -1,5 +1,8 @@
-// $Id: StMessageManager.h,v 1.15 2000/01/25 16:01:29 fisyak Exp $
+// $Id: StMessageManager.h,v 1.16 2000/02/29 16:41:57 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.16  2000/02/29 16:41:57  genevb
+// Fortran-compliant interface
+//
 // Revision 1.15  2000/01/25 16:01:29  fisyak
 // Devorce with StAF
 //
@@ -73,32 +76,38 @@
 #define StError_ F77_NAME(sterror,STERROR)
 #define StDebug_ F77_NAME(stdebug,STDEBUG)
 #define QAInfo_ F77_NAME(qainfo,QAINFO)
+#define StInfoOpt_ F77_NAME(stinfoopt,STINFOOPT)
+#define StWarningOpt_ F77_NAME(stwarningopt,STWARNINGOPT)
+#define StErrorOpt_ F77_NAME(sterroropt,STERROROPT)
+#define StDebugOpt_ F77_NAME(stdebugopt,STDEBUGOPT)
+#define QAInfoOpt_ F77_NAME(qainfoopt,QAINFOOPT)
 #define StMessAddType_ F77_NAME(stmessaddtype,STMESSADDTYPE)
 extern "C" {
-void type_of_call Message_(const char* mess="", int *lines=0, int *id=0,
-                                  size_t len=0);
-void type_of_call Msg_Enable_(const char* mess="",
-                                  size_t len=0);
- int type_of_call Msg_Enabled_(const char* mess="", int *id=0,
-                                  size_t len=0);
-void type_of_call Msg_Disable_(const char* mess="",
-                                  size_t len=0);
-void type_of_call StMessage_(const char* mess="", const char* type="",
-                                  const char* opt=0, size_t len1=0,
-				  size_t len2=0, size_t len3=0);
-void type_of_call StInfo_(const char* mess="", const char* opt="O",
-                                  size_t len1=0, size_t len2=1);
-void type_of_call StWarning_(const char* mess="", const char* opt="E",
-                                  size_t len1=0, size_t len2=1);
-void type_of_call StError_(const char* mess="", const char* opt="E",
-                                  size_t len1=0, size_t len2=1);
-void type_of_call StDebug_(const char* mess="", const char* opt="O",
-                                  size_t len1=0, size_t len2=1);
-void type_of_call QAInfo_(const char* mess="", const char* opt="OTS",
-                                  size_t len1=0, size_t len2=3);
+void type_of_call Message_(const char* mess, int *lines, int *id, size_t len);
+void type_of_call Msg_Enable_(const char* mess, size_t len);
+ int type_of_call Msg_Enabled_(const char* mess, int *id, size_t len);
+void type_of_call Msg_Disable_(const char* mess, size_t len);
+void type_of_call MessageOut(const char* msg, int *lines, size_t len);
+void type_of_call StMessage_(const char* mess, const char* type,
+                                  const char* opt, size_t len1,
+				  size_t len2, size_t len3);
+void type_of_call StInfo_(const char* mess, size_t len);
+void type_of_call StWarning_(const char* mess, size_t len);
+void type_of_call StError_(const char* mess, size_t len);
+void type_of_call StDebug_(const char* mess, size_t len);
+void type_of_call QAInfo_(const char* mess, size_t len);
+void type_of_call StInfoOpt_(const char* mess, const char* opt,
+                                  size_t len1, size_t len2);
+void type_of_call StWarningOpt_(const char* mess, const char* opt,
+                                  size_t len1, size_t len2);
+void type_of_call StErrorOpt_(const char* mess, const char* opt,
+                                  size_t len1, size_t len2);
+void type_of_call StDebugOpt_(const char* mess, const char* opt,
+                                  size_t len1, size_t len2);
+void type_of_call QAInfoOpt_(const char* mess, const char* opt,
+                                  size_t len1, size_t len2);
 void type_of_call StMessAddType_(const char* type, const char* text,
-                                  size_t len1=0, size_t len2=0);
-void type_of_call MessageOut(const char* msg);
+                                  size_t len1, size_t len2);
 }
 #endif
 
