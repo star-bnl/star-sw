@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: StRichIonization.cxx,v 1.3 2000/02/08 16:27:34 lasiuk Exp $
+ * $Id: StRichIonization.cxx,v 1.4 2000/02/08 23:51:13 lasiuk Exp $
  *
  * Description:
  *  StRichIonization simulates the charged particle track through the gas.
@@ -22,9 +22,12 @@
  *
  *********************************************************************
  * $Log: StRichIonization.cxx,v $
- * Revision 1.3  2000/02/08 16:27:34  lasiuk
- * change to class.  Put dbs and random generators into
- * class as data members
+ * Revision 1.4  2000/02/08 23:51:13  lasiuk
+ * removal of rrs macro---CC4.2 cannot handle it!
+ *
+ *
+ * Revision 1.5  2000/02/11 21:11:37  lasiuk
+ * use new name in physics db interface
  *
  * Revision 1.4  2000/02/08 23:51:13  lasiuk
  * removal of rrs macro---CC4.2 cannot handle it!
@@ -91,7 +94,8 @@ StRichIonization::~StRichIonization() { /* nopt */ }
 	// number of electrons in this cluster
 	//
 	n = 1;
-	rrs << "StRichIonize::operator() n " <<  n << endl;
+	while ( n <= mPhysicsDb->e_distribut.size() && p >= mPhysicsDb->e_distribut[n-1] )
+	    n++;
 	
 	    StRichGHit aGHit(x,y,z,hit.id());
 	if (StRichViewer::histograms )

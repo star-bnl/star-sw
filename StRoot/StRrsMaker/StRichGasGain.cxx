@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichGasGain.cxx,v 1.3 2000/02/08 16:24:08 lasiuk Exp $
+ * $Id: StRichGasGain.cxx,v 1.4 2000/02/08 23:51:13 lasiuk Exp $
  *
  * Description:
  *  StRichGasGain computes an amplification factor of an
@@ -35,9 +35,12 @@
  *
  ****************************************************************
  * $Log: StRichGasGain.cxx,v $
- * Revision 1.3  2000/02/08 16:24:08  lasiuk
- * use of dbs
+ * Revision 1.4  2000/02/08 23:51:13  lasiuk
+ * removal of rrs macro---CC4.2 cannot handle it!
  *
+ *
+ * Revision 1.5  2000/02/14 01:13:25  lasiuk
+ * add track_p to the GHit c'tor
  *
  * Revision 1.4  2000/02/08 23:51:13  lasiuk
  * removal of rrs macro---CC4.2 cannot handle it!
@@ -88,7 +91,8 @@
 
 #ifdef RICH_WITH_VIEWER
     if ( StRichViewer::histograms )
-    rrs << "StRichGasGain::operator() q = " << q << endl;
+    q = mPhysicsDb->gasGainAmplification() * p;    
+#endif
     //q = mPhysDB->ampl_factor * p;
     feedbackPhoton( hit, q );
 
@@ -99,7 +103,8 @@
 void StRichGasGain::feedbackPhoton( const StRichGHit& hit, double q ) const
 }
     StRichInduceSignal induceSignal;
-    rrs << "StRichGasGain::feedbackPhoton() P = " << P << endl;
+void StRichGasGain::feedbackPhoton(StRichMiniHit* hit, double q, list<StRichMiniHit*>& theList)
+{
     //StRichInduceSignal induceSignal;
 
     double elec2feed = mPhotonFeedback*q;                
@@ -116,7 +121,8 @@ void StRichGasGain::feedbackPhoton( const StRichGHit& hit, double q ) const
 	y    = mAnodePadPlaneSeparation;
 	dist = mAnodePadPlaneSeparation * sqrt( 1 - cost*cost ) / cost;
 	StRichGHit aGHit(x,y,z, hit.id());
-	rrs << "StRichGasGain::feedbackPhoton()-->induceSignal! " << endl; 
+ 	y    = hit->position().y() + dist * sin(phi);
+ 	z    = mAnodePadPlaneSeparation;
 // 	x    = hit.position().x() + dist * sin(phi);
 	StRichGHit aGHit(x,y,z, hit.trackp(), hit.id());
 					    hit->id(),

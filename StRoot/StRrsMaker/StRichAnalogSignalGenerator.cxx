@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StRichAnalogSignalGenerator.cxx,v 1.3 2000/02/08 16:21:41 lasiuk Exp $
+ * $Id: StRichAnalogSignalGenerator.cxx,v 1.4 2000/02/08 23:51:13 lasiuk Exp $
  *
  * Description:
  *  StRichAnalogSignalGenerator generates signals on pads
@@ -32,9 +32,12 @@
  * 
  *************************************************************************
  * $Log: StRichAnalogSignalGenerator.cxx,v $
- * Revision 1.3  2000/02/08 16:21:41  lasiuk
- * use coordinate transformation routines for pad limits
- * incorporation of dbs
+ * Revision 1.4  2000/02/08 23:51:13  lasiuk
+ * removal of rrs macro---CC4.2 cannot handle it!
+ *
+ *
+ * Revision 1.5  2000/02/14 01:09:46  lasiuk
+ * add track_p to GHit c'tor
  *
  * Revision 1.4  2000/02/08 23:51:13  lasiuk
  * removal of rrs macro---CC4.2 cannot handle it!
@@ -78,7 +81,8 @@ using std::min;
     mNumberOfRowsInColumnQ = mGeomDb->numberOfRowsInAQuadrantColumn(); //n_pad_y;
     mPadLength             = mGeomDb->padLength(); //pad_side_y;
     mPadWidth              = mGeomDb->padWidth(); //pad_side_x;
-    rrs << "StRichAnalogSignalGenerator::operator() --> q= " << q << endl;
+StRichAnalogSignalGenerator::~StRichAnalogSignalGenerator() { /* nopt */ }
+{
 void StRichAnalogSignalGenerator::operator()( const StRichGHit& hit, double q ) const
     double x, z, q00, q10, q01, q11,s;
 
@@ -98,9 +102,12 @@ void StRichAnalogSignalGenerator::operator()( const StRichGHit& hit, double q ) 
     StRichLocalCoordinate local(hit->position());
 
     (*mTransform)(local, raw);
-    rrs << "rowLimits: (" << rowLimits.first << ", " << rowLimits.second << ')' << endl;
-    rrs << "padLimits: (" << padLimits.first << ", " << padLimits.second << ')' << endl;
 
+    //
+    pair<int, int> rowLimits = calculateRowLimits(raw);
+    pair<int, int> padLimits = calculatePadLimits(raw);
+
+    if(RRS_DEBUG) {
 	cout << "Calculate Limits for (local): " << local << endl;
 	cout << "Calculate Limits for (raw): " << raw << endl;
 	cout << "rowLimits: ("
@@ -124,7 +131,8 @@ void StRichAnalogSignalGenerator::operator()( const StRichGHit& hit, double q ) 
 	    q01 = induceTension (( (hit.position().y()-y) - mPadLength/2)/mAnodePadPlaneSpacing,     
 				 ( (hit.position().x()-x) + mPadWidth/2 )/mAnodePadPlaneSpacing);     
 	    q11 = induceTension (( (hit.position().y()-y) + mPadLength/2)/mAnodePadPlaneSpacing,    
-	    rrs << "s/sum " << s << '/' << sum << endl;
+				 ( (hit.position().x()-x) + mPadWidth/2 )/mAnodePadPlaneSpacing);   
+				 ( (hit->position().x()-x) + mPadWidth/2 )/mAnodePadPlaneSpacing);     
 	    q11 = induceTension (( (hit->position().y()-y) + mPadLength/2)/mAnodePadPlaneSpacing,    
 				 ( (hit->position().x()-x) + mPadWidth/2 )/mAnodePadPlaneSpacing);   
 	    mOutput->putSignal(i,j,s,hit.id());
