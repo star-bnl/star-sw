@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.48 2000/01/13 02:12:42 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.49 2000/01/14 00:44:18 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.49  2000/01/14 00:44:18  fisyak
+// Add calib to chain
+//
 // Revision 1.48  2000/01/13 02:12:42  fisyak
 // Add geometry year_1h
 //
@@ -209,16 +212,16 @@ BfcItem BFC[] = {
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"SD97"        ,""  ,"","db"                                ,"","","Turn on 1997 test parameters",kFALSE},
   {"SD98"        ,""  ,"","db"                                ,"","","Turn on 1998 test parameters",kFALSE},
-  {"Y1a"         ,""  ,"","db"                                  ,"","","Turn on Year 1a parameters",kFALSE},
-  {"Y1b"         ,""  ,"","db"                                          ,"","","Year 1b parameters",kFALSE},
-  {"Y1c"         ,""  ,"","db"                                  ,"","","Turn on Year 1c parameters",kFALSE},
+  {"Y1a"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1a parameters",kFALSE},
+  {"Y1b"         ,""  ,"","db,calib"                                    ,"","","Year 1b parameters",kFALSE},
+  {"Y1c"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1c parameters",kFALSE},
   {"ES99"        ,""  ,"","db"          ,"","","Turn on 1999 engineering run simulation parameters",kFALSE},
   {"ER99"        ,""  ,"","db"           ,"","","Turn on 1999 engineering run real data parameters",kFALSE},
   {"DC99"        ,""  ,"","db"       ,"","","Turn on December 1999 engineering run real parameters",kFALSE},
-  {"Y1d"         ,""  ,"","db"                                  ,"","","Turn on Year 1d parameters",kFALSE},
-  {"Y1e"         ,""  ,"","db"                                  ,"","","Turn on Year 1e parameters",kFALSE},
-  {"Y1h"         ,""  ,"","db"                                  ,"","","Turn on Year 1h parameters",kFALSE},
-  {"Y2a"         ,""  ,"","db"                                  ,"","","Turn on Year 2a parameters",kFALSE},
+  {"Y1d"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1d parameters",kFALSE},
+  {"Y1e"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1e parameters",kFALSE},
+  {"Y1h"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1h parameters",kFALSE},
+  {"Y2a"         ,""  ,"","db,calib"                            ,"","","Turn on Year 2a parameters",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"C H A I N S ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
@@ -264,6 +267,7 @@ BfcItem BFC[] = {
   {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
   {"geant","geant","","NoFieldSet,tables","St_geant_Maker","geometry,St_g2r,St_geant_Maker","GEANT",kFALSE}, 
   {"db"          ,""  ,"","tables"               ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
+  {"calib"       ,""  ,"","tables"               ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"magF"        ,"","","NoFieldSet,tables,db","StMagFMaker","StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpc"         ,"tpc","","tables,tls,db,tcl,tpt"                     ,"StChainMaker","StChain","",kFALSE},
