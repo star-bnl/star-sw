@@ -1,10 +1,10 @@
 #ifndef StDetectorDbTpcRDOMasks_h
 #define StDetectorDbTpcRDOMasks_h
 
-#include <iostream.h>
 #include "StMaker.h"
-#include "tables/St_tpcRDOMasks_Table.h"
 
+class ostream;
+class TTable;
 struct tpcRDOMasks_st;
 
 class StDetectorDbTpcRDOMasks{

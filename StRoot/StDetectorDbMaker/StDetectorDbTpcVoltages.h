@@ -1,10 +1,10 @@
 #ifndef StDetectorDbTpcVoltages_h
 #define StDetectorDbTpcVoltages_h
 
-#include <iostream.h>
 #include "StMaker.h"
-#include "tables/St_tpcHighVoltages_Table.h"
 
+class ostream;
+class TTable;
 struct tpcHighVoltages_st;
 
 class StDetectorDbTpcVoltages{

@@ -2,6 +2,11 @@
 #include "tables/St_starClockOnl_Table.h"
 #include "TUnixTime.h"
 
+/*!
+   This class provides an interface to get RHIC clock rate. It will also determine if the clock changes drastically durring a run.
+
+*/
+
 /// Initialize Instance
 StDetectorDbClock* StDetectorDbClock::sInstance = 0;
 

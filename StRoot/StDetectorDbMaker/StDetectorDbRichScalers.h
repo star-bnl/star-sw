@@ -1,9 +1,9 @@
 #ifndef StDetectorDbRichScalers_h
 #define StDetectorDbRichScalers_h
 
-#include <iostream.h>
 #include "StMaker.h"
 
+class  osstream;
 struct trigDetSums_st;
 struct richvoltages_st;
 struct y1Mult_st;
