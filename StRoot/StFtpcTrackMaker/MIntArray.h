@@ -1,5 +1,8 @@
-// $Id: MIntArray.h,v 1.3 2000/11/10 18:32:37 oldi Exp $
+// $Id: MIntArray.h,v 1.4 2001/07/12 08:24:12 oldi Exp $
 // $Log: MIntArray.h,v $
+// Revision 1.4  2001/07/12 08:24:12  oldi
+// New function CountAppearance() introduced.
+//
 // Revision 1.3  2000/11/10 18:32:37  oldi
 // Introduced new function ShiftByOneAndAddAtFirst(Int_t value).
 // Cleanup.
@@ -43,6 +46,7 @@ public:
     void   Fill(Int_t value);
     void   SetFill(Int_t size, Int_t value);
     void   ShiftByOneAndAddAtFirst(Int_t value);
+   Int_t   CountAppearance(Int_t value);
 
   ClassDef(MIntArray, 1)    // Class of an array of integers
 };

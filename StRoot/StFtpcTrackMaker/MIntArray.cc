@@ -1,5 +1,8 @@
-// $Id: MIntArray.cc,v 1.3 2000/11/10 18:32:36 oldi Exp $
+// $Id: MIntArray.cc,v 1.4 2001/07/12 08:24:11 oldi Exp $
 // $Log: MIntArray.cc,v $
+// Revision 1.4  2001/07/12 08:24:11  oldi
+// New function CountAppearance() introduced.
+//
 // Revision 1.3  2000/11/10 18:32:36  oldi
 // Introduced new function ShiftByOneAndAddAtFirst(Int_t value).
 // Cleanup.
@@ -55,9 +58,9 @@ void MIntArray::ShiftByOneAndAddAtFirst(Int_t value)
   
   Set(GetSize() + 1);
   
-  for (Int_t i = GetSize() - 2; i >= 0; i--) {
+  {for (Int_t i = GetSize() - 2; i >= 0; i--) {
     AddAt(At(i), i+1);
-  }
+  }}
   
   AddAt(value, 0);
   
@@ -65,3 +68,18 @@ void MIntArray::ShiftByOneAndAddAtFirst(Int_t value)
 }
 
 
+Int_t MIntArray::CountAppearance(Int_t value)
+{
+  // Loops over array and counts appearances of 'value'.
+
+  Int_t result = 0;
+
+  {for (Int_t i = 0; i < GetSize(); i++) {
+   
+    if (At(i) == value) {
+      result++;
+    }
+  }}
+
+  return result;
+}
