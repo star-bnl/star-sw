@@ -2,82 +2,72 @@
 //M.L. Miller (Yale Software)
 //07/01
 
-//Std
 #include <iostream>
 #include <stdio.h>
 #include <dirent.h>
 #include <sys/stat.h>
-
-//Sti
-#include "Messenger.h"
+#include <stdexcept>
+#include "Sti/Base/Messenger.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
 #include "StiCompositeTreeNode.h"
+#include "StiDetectorBuilder.h"
 #include "StiDetectorTreeBuilder.h"
 #include "StlUtilities.h"
-#include "StiCodedDetectorBuilder.h"
 #include "StiDetectorFinder.h" 
+#include "StiToolkit.h"
 
 ostream& operator<<(ostream&, const StiDetector&);
 
 StiDetectorTreeBuilder::StiDetectorTreeBuilder()
-    : mroot(0), mnodefactory(0), mdetfactory(0), mregion(0)
+  : mroot(0), 
+    mnodefactory(StiToolkit::instance()->getDetectorNodeFactory()), 
+    mregion(0),
+    _detectorFinder(StiDetectorFinder::instance() ),
+    _messenger( *Messenger::instance(MessageType::kDetectorMessage) )
 {
-    cout <<"StiDetectorTreeBuilder::StiDetectorTreeBuilder()\t";
-    mDetectorBuilder = new StiCodedDetectorBuilder();
-    cout <<"done"<<endl;
+  _messenger <<"StiDetectorTreeBuilder::StiDetectorTreeBuilder() - INFO - Started/Done"<<endl;
 }
 
 StiDetectorTreeBuilder::~StiDetectorTreeBuilder()
+{}
+
+StiDetectorNode* StiDetectorTreeBuilder::build(StiDetectorBuilder * builder)
 {
-  delete mDetectorBuilder;
-}
-
-StiDetectorNode* StiDetectorTreeBuilder::build(Factory<StiDetectorNode>* nodefactory,
-					 Factory<StiDetector>* detfactory)
-{
-    cout <<"StiDetectorTreeBuilder::build()"<<endl;
-    if (mroot) {
-	cout << "StiDetectorTreeBuilder::build()\tError!\t"
-	     << "root tree already built"<<endl;
-	return 0;
+  _messenger <<"StiDetectorTreeBuilder::build() - Started"<<endl;
+  if (mroot) 
+    {
+      _messenger << "StiDetectorTreeBuilder::build()\tError!\troot tree already built"<<endl;
+      throw logic_error("StiDetectorTreeBuilder::build() - ERROR - Attempting to build on top of an existing detector");
     }
-
-    if (!nodefactory && !detfactory) {
-	cout << "StiDetectorTreeBuilder::build()\tError!\t"
-	     << "null factory pointer.  ABORT"<<endl;
-	return 0;
-    }
-    
-    mnodefactory = nodefactory;
-    mdetfactory = detfactory;
-    cout <<"Build root"<<endl;
-    buildRoot();
-    cout <<"loopOnDetectors"<<endl;
-    loopOnDetectors();
-    cout <<"Sort Tree"<<endl;
-    //Now sort the tree:
-    SortDaughters<StiDetector> mysorter;
-    mysorter(mregion);
-
-    //Now index the tree to give efficient sibling traversal
-    cout <<"Index Tree"<<endl;
-    IndexDaughters<StiDetector> myindexer;
-    myindexer(mregion);
-    cout <<"Done"<<endl;
-    
-    return mroot;
+  if (!builder)
+    throw logic_error("StiDetectorTreeBuilder::build() - ERROR - no builder provided");
+  if (!mnodefactory)
+    throw logic_error("StiDetectorTreeBuilder::build() - ERROR - no Factory<StiDetectorNode> provided");
+  mDetectorBuilder = builder;
+  _messenger <<"StiDetectorTreeBuilder::build() - INFO - Build root"<<endl;
+  buildRoot();
+  loopOnDetectors();
+  _messenger <<"StiDetectorTreeBuilder::build() - INFO - Sort Tree"<<endl;
+  //Now sort the tree:
+  SortDaughters<StiDetector> mysorter;
+  mysorter(mregion);
+  
+  //Now index the tree to give efficient sibling traversal
+  _messenger <<"StiDetectorTreeBuilder::build() - INFO - Index Tree"<<endl;
+  IndexDaughters<StiDetector> myindexer;
+  myindexer(mregion);
+  _messenger <<"StiDetectorTreeBuilder::build() - INFO - Done"<<endl;
+  return mroot;
 }
 
 void StiDetectorTreeBuilder::buildRoot()
 {
     mroot = mnodefactory->getInstance();
     mroot->setName("star");
-
     //make 3 daughters
     StiDetectorNode* mid = mnodefactory->getInstance();
     mid->setName("midrapidity");
-
     mroot->add(mid);
     mregion = mid;
 }
@@ -119,7 +109,7 @@ StiDetectorNode* StiDetectorTreeBuilder::hangWhere(
                                             mySameOrderKey);
 
     if (where == parent->end()) {
-	//cout <<"hangWhere().  Start new node"<<endl;
+	//_messenger <<"hangWhere().  Start new node"<<endl;
 	StiDetectorNode* temp = mnodefactory->getInstance();
 	char* tempname = new char[100];
 	sprintf(tempname,"_%f", order.key);
@@ -140,19 +130,19 @@ StiDetectorNode* StiDetectorTreeBuilder::hangWhere(
 
 void StiDetectorTreeBuilder::loopOnDetectors()
 {
-
-  while(mDetectorBuilder->hasMore()){
- 
-    StiDetector* layer = mdetfactory->getInstance();
-    mDetectorBuilder->fillNext(layer);
-
-    addToTree(layer);
-
-    // add to by-name map
-    StiDetectorFinder *pFinder = StiDetectorFinder::instance();
-    pFinder->addDetector(layer);
-
-  }
-
+  _messenger << "StiDetectorTreeBuilder::loopOnDetectors() - INFO - Started"<<endl;
+  while(mDetectorBuilder->hasMore())
+    {
+      //StiDetector* layer = mdetfactory->getInstance();
+      //mDetectorBuilder->fillNext(layer);
+      StiDetector* detector = mDetectorBuilder->next();
+      if (!detector)
+	throw runtime_error("StiDetectorTreeBuilder::loopOnDetectors() - ERROR - detector==0");
+      detector->build();
+      addToTree(detector);
+      // add to by-name map
+      _detectorFinder->addDetector(detector);
+    }
+  _messenger << "StiDetectorTreeBuilder::loopOnDetectors() - INFO - Done"<<endl;
   return;
 }

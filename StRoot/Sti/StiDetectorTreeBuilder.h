@@ -49,10 +49,11 @@
 
 #include <vector>
 using std::vector;
-#include "Factory.h"
+#include "Sti/Base/Factory.h"
 #include "StiCompositeTreeNode.h"
 #include "StiDetector.h"
 class StiDetectorBuilder;
+class StiDetectorFinder;
 
 class StiDetectorTreeBuilder
 {
@@ -74,10 +75,9 @@ public:
       Additionaly, the root of the tree is assumed to be owned by the nodefactory.
     */
 
-    StiDetectorNode* build(Factory<StiDetectorNode>* nodefactory,
-		     Factory<StiDetector>* detfactory);
+    StiDetectorNode* build(StiDetectorBuilder * builder);
     
-private:
+protected:
     ///Iterate over the detector objects served by StiDetectorBuilder.
     void loopOnDetectors();
 
@@ -99,20 +99,16 @@ private:
     ///This is used for internal convenience.  This object is <b>not</b> owned by this class.
     Factory<StiDetectorNode>* mnodefactory;
     
-    ///Store a pointer to the factory of detector objects.
-    Factory<StiDetector>* mdetfactory;
-    ///This is used for internal convenience.  This object is <b>not</b> owned by this class.
-
     ///Store a pointer to the StiDetectorBuilder instance
     StiDetectorBuilder *mDetectorBuilder;
-    ///This object <b>is</b> owned by this class.   This object is polymorphic.  That is,
-    /// StiDetectorBuilder is a pure virtual class and thus can construct only instances
-    /// of derived types.  The current default is the following: \n
-    /// <code>mDetectorBuilder = new StiCodedDetectorBuilder()</code>
 
-    ///We store a pointer to the current region in the tree (e.g., mid rapidity)
+    ///Pointer to the current region in the tree (e.g., mid rapidity)
     StiDetectorNode* mregion;
-    
+
+    ///Convenience pointer to a detector finder
+    StiDetectorFinder *_detectorFinder;
+
+		Messenger&  _messenger;
 };
 
 #endif

@@ -10,15 +10,17 @@
 #include <sys/stat.h>
 #include <string>
 
+#include <stdexcept>
 #include <algorithm>
 using std::find_if;
 using std::for_each;
 using std::binary_search;
 
 //Sti
-#include "Messenger.h"
+#include "Sti/Base/Messenger.h"
 #include "StiMapUtilities.h"
 #include "StiDetector.h"
+#include "StiDetectorBuilder.h"
 #include "StiMaterial.h"
 #include "StiDetectorTreeBuilder.h"
 #include "StlUtilities.h"
@@ -55,7 +57,7 @@ StiDetectorContainer::StiDetectorContainer()
 
 StiDetectorContainer::~StiDetectorContainer()
 {
-    cout <<"StiDetectorContainer::~StiDetectorContainer()"<<endl;
+    mMessenger <<"StiDetectorContainer::~StiDetectorContainer()"<<endl;
     if (mLeafIt) {
 	delete mLeafIt;
 	mLeafIt=0;
@@ -109,7 +111,7 @@ void StiDetectorContainer::setToDetector(const StiDetector* layer)
 {
 
     if (!layer->getTreeNode()) {
-	cout <<"StiDetectorContainer::setToDetector(StiDetector*). ERROR:\t"
+	mMessenger <<"StiDetectorContainer::setToDetector(StiDetector*). ERROR:\t"
 	     <<"Detector has null node pointer.  Abort"<<endl;
 	return;
     }
@@ -121,14 +123,22 @@ void StiDetectorContainer::setToDetector(const StiDetector* layer)
  */
 void StiDetectorContainer::reset()
 {
-    mradial_it = mregion->begin();
-    mphi_it = (*mradial_it)->begin();
-    return;
+  mradial_it = mregion->begin();
+  mphi_it = (*mradial_it)->begin();
+  return;
 }
 
 StiDetector* StiDetectorContainer::operator*() const
 {
-    return (*mphi_it)->getData();
+  //cout << "StiDetectorContainer::operator*() const - INFO - Started" <<endl;
+  if (!mphi_it)
+    throw runtime_error("StiDetectorContainer::operator*() const - FATAL - mphi_it==0");
+  if (!(*mphi_it))
+    throw runtime_error("StiDetectorContainer::operator*() const - FATAL - *mphi_it==0");
+  StiDetector * det = (*mphi_it)->getData();
+  if (!det)
+    throw runtime_error("StiDetectorContainer::operator*() const - FATAL - *mphi_it==0");
+  return det;
 }
 
 /*! A call to moveIn() may not always alter the StiDetector to which the
@@ -147,8 +157,8 @@ StiDetector* StiDetectorContainer::operator*() const
 bool StiDetectorContainer::moveIn()
 {
     if (mradial_it == mregion->begin() ) {
-	// cout <<"StiDetectorContainer::moveIn():\t";
-	// cout <<"Nowhere to go. return false"<<endl;
+	// mMessenger <<"StiDetectorContainer::moveIn():\t";
+	// mMessenger <<"Nowhere to go. return false"<<endl;
 	return false;
     }
     
@@ -159,12 +169,12 @@ bool StiDetectorContainer::moveIn()
     mphi_it = (*mradial_it)->begin();
 
     if ( (*mradial_it)->getChildCount() == oldPhiNode->getParent()->getChildCount()) {
-	// cout <<"Index into array"<<endl;
+	// mMessenger <<"Index into array"<<endl;
 	mphi_it = (*mradial_it)->begin()+oldPhiNode->getOrderKey().index;
 	return true;
     }
     else {
-	// cout <<"Do linear search"<<endl;
+	// mMessenger <<"Do linear search"<<endl;
 	return setPhi( oldPhiNode->getOrderKey() );
     }
 }
@@ -174,12 +184,12 @@ bool StiDetectorContainer::setPhi(const StiOrderKey& oldOrder)
     mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
 				   (*mradial_it)->end(), oldOrder);
     if (mphi_it == (*mradial_it)->end()) {
-	cout <<"StiDetectorContainer::setPhiIterator()\tError:\t";
-	cout <<"Find Phi failed"<<endl;
+	mMessenger <<"StiDetectorContainer::setPhiIterator()\tError:\t";
+	mMessenger <<"Find Phi failed"<<endl;
 	reset();
 	return false;
     }
-    //cout <<"setPhi(): oldOrder: "<<oldOrder<<"\tnewOrder: "<<(*mphi_it)->getOrderKey()<<endl;
+    //mMessenger <<"setPhi(): oldOrder: "<<oldOrder<<"\tnewOrder: "<<(*mphi_it)->getOrderKey()<<endl;
     return true;
 }
 
@@ -204,19 +214,19 @@ bool StiDetectorContainer::moveOut()
     //if there's nowher to go, get out before doing work!
     // mMessenger <<"StiDetectorContainer::moveOut()"<<endl;
     if ( (++mradial_it<mregion->end())==false) {
-	// cout <<"StiDetectorContainer::moveOut():\t";
-	// cout <<"Nowhere to go. return false"<<endl;
+	// mMessenger <<"StiDetectorContainer::moveOut():\t";
+	// mMessenger <<"Nowhere to go. return false"<<endl;
 	--mradial_it;
 	return false;
     }
     
     if ( (*mradial_it)->getChildCount() == oldPhiNode->getParent()->getChildCount()) {
-	// cout <<"Index into array"<<endl;
+	// mMessenger <<"Index into array"<<endl;
 	mphi_it = (*mradial_it)->begin()+oldPhiNode->getOrderKey().index;
 	return true;
     }
     else {
-	// cout <<"Do linear search"<<endl;
+	// mMessenger <<"Do linear search"<<endl;
 	return setPhi( oldPhiNode->getOrderKey() );
     }
 }
@@ -251,43 +261,40 @@ void StiDetectorContainer::moveMinusPhi()
   more than once.
  */
 void
-StiDetectorContainer::buildDetectors(Factory<StiDetectorNode>* nodefactory,
-				     Factory<StiDetector>* detfactory)
+StiDetectorContainer::build(StiDetectorBuilder * builder)
 {
-    cout <<"StiDetectorContainer::buildDetectors"<<endl;
-    cout <<"Make builder"<<endl;
-    StiDetectorTreeBuilder mybuilder;
-    cout <<"Use builder"<<endl;
-    mroot = mybuilder.build(nodefactory, detfactory);
-
+    mMessenger <<"StiDetectorContainer::build() - INFO - Starting"<<endl;
+    mMessenger <<"StiDetectorContainer::build() - INFO - Building using builder:"<<builder->getName()<<endl;
+		// build the volumes
+		builder->build();
+		// pass volumes to TreeBuilder before we make like a tree and leave...
+    StiDetectorTreeBuilder treeBuilder;
+    mroot = treeBuilder.build(builder);
+		if (!mroot)
+			throw runtime_error("StiDetectorContainer::build() - ERROR - mroot==0");
     //Set region to midrapidity, hard-coded for now, update later to allow for other regions
     SameName<StiDetector> mySameName;
     mySameName.mname = "midrapidity";
     StiDetectorNodeVector::iterator where = find_if(mroot->begin(), mroot->end(), mySameName);
-    if (where==mroot->end()) {
-	cout <<"Error:\tmidrapidity region not found"<<endl;
-    }
-    //Find leaves
+    if (where==mroot->end()) 
+      throw runtime_error("StiDetectorContainer::build() - ERROR - mid-rapidity region not found - where==0");
+    if (!(*where))
+      throw runtime_error("StiDetectorContainer::build() - ERROR - mid-rapidity region not found - *where==0");
+    mMessenger <<"StiDetectorContainer::build() - INFO - Find Leaves and set mregion"<<endl;
     mLeafIt = new StiCompositeLeafIterator<StiDetector>(mroot);
-    
     //Sort by name for O(log(n)) calls to setDetector()
     //sort(mLeafIt->begin(), mLeafIt->end(), DataNameLessThan<StiDetector>() );
-    
     mregion = (*where);
+    mMessenger <<"StiDetectorContainer::build() - INFO - reset()"<<endl;
     reset();
-
-    //print();
-    cout <<"Done"<<endl;
-    
+    mMessenger <<"StiDetectorContainer::build() - INFO - Done"<<endl;
     return;
 }
 
 void StiDetectorContainer::print() const
 {
-    //ok, let's look at what we have:
     RecursiveStreamNode<StiDetector> myStreamer;
     myStreamer( mroot );
-
 }
 
 //We assume that the node is a leaf in phi
@@ -296,7 +303,7 @@ void StiDetectorContainer::setToLeaf(StiDetectorNode* leaf)
     //Now we try the new index-iterator scheme:
     mphi_it = leaf->whereInParent();
     if (mphi_it == leaf->end()) {
-	cout <<"StiDetectorContainer::setToLeaf(StiDetectorNode*). ERROR:\t"
+	mMessenger <<"StiDetectorContainer::setToLeaf(StiDetectorNode*). ERROR:\t"
 	     <<"Node not found in parent.  Abort"<<endl;
 	reset();
 	return;
@@ -305,14 +312,14 @@ void StiDetectorContainer::setToLeaf(StiDetectorNode* leaf)
     StiDetectorNode* parentInRadius = (*mphi_it)->getParent();
     mradial_it = parentInRadius->whereInParent();
     if (mradial_it == parentInRadius->end()) {
-	cout <<"StiDetectorContainer::setToLeaf(StiDetectorNode*). ERROR:\t"
+	mMessenger <<"StiDetectorContainer::setToLeaf(StiDetectorNode*). ERROR:\t"
 	     <<"Node not found in parent.  Abort"<<endl;
 	reset();
 	return;
     }
     
-    //cout <<"\nleaf: "<<leaf->getName()<<" "<<leaf->getOrderKey()<<endl;
-    //cout <<"*mradial_it: "<<(*mradial_it)->getName()<<" "<<(*mradial_it)->getOrderKey()<<endl;
-    //cout <<"*mphi_it: "<<(*mphi_it)->getName()<<" "<<(*mphi_it)->getOrderKey()<<endl;
+    //mMessenger <<"\nleaf: "<<leaf->getName()<<" "<<leaf->getOrderKey()<<endl;
+    //mMessenger <<"*mradial_it: "<<(*mradial_it)->getName()<<" "<<(*mradial_it)->getOrderKey()<<endl;
+    //mMessenger <<"*mphi_it: "<<(*mphi_it)->getName()<<" "<<(*mphi_it)->getOrderKey()<<endl;
 
 }
