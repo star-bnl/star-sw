@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cc,v 1.11 1999/03/23 22:00:09 ullrich Exp $
+ * $Id: StGlobalTrack.cc,v 1.12 1999/04/08 14:58:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cc,v $
- * Revision 1.11  1999/03/23 22:00:09  ullrich
- * Minor mods.
+ * Revision 1.12  1999/04/08 14:58:32  ullrich
+ * Moved PID traits from StTrack to StGlobalTrack.
  *
  * Revision 1.12  1999/04/08 14:58:32  ullrich
  * Moved PID traits from StTrack to StGlobalTrack.
@@ -49,10 +49,10 @@
  * Revision 1.2  1999/01/15 22:53:44  wenaus
  * version with constructors for table-based loading
  *
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.11 1999/03/23 22:00:09 ullrich Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.12 1999/04/08 14:58:32 ullrich Exp $";
 #include "StEvent/StGlobalTrack.hh"
-StGlobalTrack::StGlobalTrack()
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.11 1999/03/23 22:00:09 ullrich Exp $";
+
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.12 1999/04/08 14:58:32 ullrich Exp $";
  
 StGlobalTrack::StGlobalTrack() : mPidTraits(*this)
 {
@@ -64,7 +64,7 @@ StGlobalTrack::StGlobalTrack() : mPidTraits(*this)
 StGlobalTrack::StGlobalTrack(dst_track_st* trk,
                              double curvature,
                              double dip,
-  StTrack(trk, curvature, dip, phase, origin, h)
+                             double phase,
                              StThreeVector<double>& origin,
 			     int h) : 
     StTrack(trk, curvature, dip, phase, origin, h), mPidTraits(*this)

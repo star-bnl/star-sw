@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.hh,v 1.7 1999/03/23 21:47:39 ullrich Exp $
+ * $Id: StTrack.hh,v 1.8 1999/04/08 14:58:38 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.hh,v $
- * Revision 1.7  1999/03/23 21:47:39  ullrich
- * Member function made virtual
+ * Revision 1.8  1999/04/08 14:58:38  ullrich
+ * Moved PID traits from StTrack to StGlobalTrack.
  *
  * Revision 1.7  1999/03/23 21:47:39  ullrich
  * Member function made virtual
@@ -38,7 +38,6 @@
 #ifndef StTrack_hh
 #define StTrack_hh 
 #include "StPhysicalHelix.hh"
-#include "StEvent/StTrackPidTraits.hh"
 #include "StEvent/StTrackFitTraits.hh"
 #include "tables/dst_track.h"
 class StVertex;
@@ -64,7 +63,6 @@ public:
     virtual StVertex*         startVertex();
     virtual StVertex*         stopVertex();
     virtual StTrackFitTraits& fitTraits();
-    virtual StTrackPidTraits& pidTraits();
 
     virtual void setHelix(const StPhysicalHelix&);
     virtual void setStartVertex(StVertex*);
@@ -75,7 +73,6 @@ protected:
     StVertex*        mStartVertex;
     StVertex*        mStopVertex;
     StTrackFitTraits mFitTraits;
-    StTrackPidTraits mPidTraits;
 };
 
 inline StPhysicalHelix& StTrack::helix() { return mHelix; }
@@ -85,7 +82,5 @@ inline StVertex* StTrack::startVertex() { return mStartVertex; }
 inline StVertex* StTrack::stopVertex() { return mStopVertex; }
 
 inline StTrackFitTraits& StTrack::fitTraits() { return mFitTraits; }
-
-inline StTrackPidTraits& StTrack::pidTraits() { return mPidTraits; }
 
 #endif
