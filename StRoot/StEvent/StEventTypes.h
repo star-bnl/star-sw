@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.12 2001/04/27 02:37:46 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.13 2001/08/20 21:22:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.13  2001/08/20 21:22:46  ullrich
+ * L3 classes added.
+ *
  * Revision 2.12  2001/04/27 02:37:46  ullrich
  * Added ToF include files.
  *
@@ -80,6 +83,8 @@
 #include "StKinkVertex.h"
 #include "StL0Trigger.h"
 #include "StL3Trigger.h"
+#include "StL3EventSummary.h"
+#include "StL3AlgorithmInfo.h"
 #include "StL3SoftwareMonitor.h"
 #include "StMeasuredPoint.h"
 #include "StMwcTriggerDetector.h"
