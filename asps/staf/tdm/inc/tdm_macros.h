@@ -20,8 +20,10 @@
 /*- Maximum number of dataset elements. -*/
 #define DSET_DIM 128
 
+#define TDMOBJECT(OBJ) ((tdmObject*)(OBJ->ptr()))
 #define TDMTABLE(OBJ) ((tdmTable*)(OBJ->ptr()))
 #define TDMDATASET(OBJ) ((tdmDataset*)(OBJ->ptr()))
+#define TDMFACTORY(OBJ) ((tdmFactory*)(OBJ->ptr()))
 
 #endif /* TDM_MACROS_H */
 

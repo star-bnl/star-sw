@@ -94,22 +94,16 @@ interface tdmFactory_i : socFactory_i {
 
 //:----------------------------------------------- FUNCTIONS          --
 STAFCV_T deleteDataset(in string name);
-STAFCV_T findDataset(in string name
-		, out tdmDataset_i dataset);
-STAFCV_T getDataset(in IDREF_T id
-		, out tdmDataset_i dataset);
-STAFCV_T newDataset(in string name, in long setDim);
-STAFCV_T createDataset(in string name, in DSL_PTR_T pDS
-		, out tdmDataset_i dataset);
+tdmDataset_i findDataset(in string name);
+tdmDataset_i getDataset(in IDREF_T id);
+tdmDataset_i newDataset(in string name, in long setDim);
+tdmDataset_i createDataset(in string name, in DSL_PTR_T pDS);
 
 STAFCV_T deleteTable(in string name);
-STAFCV_T findTable(in string name
-		, out tdmTable_i table);
-STAFCV_T getTable(in IDREF_T id
-		, out tdmTable_i table);
-STAFCV_T newTable(in string name, in string spec, in long rows);
-STAFCV_T createTable(in string name, in DSL_PTR_T pDS
-		, out tdmTable_i table);
+tdmTable_i findTable(in string name);
+tdmTable_i getTable(in IDREF_T id);
+tdmTable_i newTable(in string name, in string spec, in long rows);
+tdmTable_i createTable(in string name, in DSL_PTR_T pDS);
 
 STAFCV_T getTypeName(in long tid, out string name);
 STAFCV_T getTypeSpecification(in long tid, out string spec);
