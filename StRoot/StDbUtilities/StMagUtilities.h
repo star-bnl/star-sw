@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.14 2001/10/05 03:44:25 jeromel Exp $
+ * $Id: StMagUtilities.h,v 1.15 2001/10/05 20:18:02 dunlop Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,10 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.15  2001/10/05 20:18:02  dunlop
+ * Tweaked enumeration of distortion selection to respect first three bits for
+ * year flag
+ *
  * Revision 1.14  2001/10/05 03:44:25  jeromel
  * Modifications by Jamie so we can turn on/off every corrections.
  *
@@ -50,12 +54,12 @@
 
 enum   EBField  { kUndefined=0, kConstant=1, kMapped=2, kChain=3 } ;
 enum   DistortSelect { kElectricField2001 = 1, 
-		       kBMap = 2,
-		       kPadrow13 = 4,
-		       kTwist = 8,
-		       kClock = 16,
-		       kMembrane = 32,
-		       kEndcap = 64 
+		       kBMap = 0x08,
+		       kPadrow13 = 0x10,
+		       kTwist = 0x20,
+		       kClock = 0x40,
+		       kMembrane = 0x80,
+		       kEndcap = 0x100 
 };
 
 
