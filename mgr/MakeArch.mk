@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.28  1998/09/21 14:46:51  perev
+#  add CERNLIB_SOLARIS
+#
 #  Revision 1.27  1998/09/16 21:52:13  fisyak
 #  Add dependencies for StRoot
 #
@@ -62,7 +65,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/09/16 21:52:13 $ 
+#             Last modification $Date: 1998/09/21 14:46:51 $ 
 #. default setings
 
 RM := rm -f
@@ -355,7 +358,7 @@ endif
 
 ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
-  OSFID :=  sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SUN
+  OSFID :=  sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SOLARIS CERNLIB_SUN
   STRID :=  sun
   CC :=  /opt/SUNWspro/bin/cc
   CXX := /opt/SUNWspro/bin/CC
