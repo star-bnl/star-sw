@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.14 2003/04/15 18:48:34 laue Exp $
+ * $Id: StMuDst.cxx,v 1.15 2003/08/04 14:38:10 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -260,7 +260,7 @@ StTrack* StMuDst::createStTrack(StMuTrack* track) {
 
   t->setLength(track->length());
   t->setImpactParameter((track->dca()).mag());
-  t->addPidTraits(new StDedxPidTraits(kTpcId, kTruncatedMeanId, track->nHitsDedx(), track->dEdx(),0));                                              
+  t->addPidTraits(new StDedxPidTraits(kTpcId, kTruncatedMeanId, track->nHitsDedx(), track->dEdx(),0));
   Float_t a[2],b[15];
   a[0]=track->chi2();
   StTrackFitTraits *traits=new StTrackFitTraits(0,track->nHitsFit(),a,b);
@@ -277,6 +277,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.15  2003/08/04 14:38:10  laue
+ * Alex Suaide's updated for the EMC. Now EEMC is included.
+ *
  * Revision 1.14  2003/04/15 18:48:34  laue
  * Minor changes to be able to filter MuDst.root files and an example
  * how to do this. The StMuDstFilterMaker is just an example, it has to be

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.29 2003/03/25 19:08:06 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.30 2003/08/04 14:38:10 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -408,7 +408,7 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
   
   // emc stuff
   for ( int i=0; i<__NEMCARRAYS__; i++) {
-    chain->SetBranchAddress(StMuArrays::emcArrayNames[i],&mEmcArrays[i]);
+      chain->SetBranchAddress(StMuArrays::emcArrayNames[i],&mEmcArrays[i]);
   } 
   
   mTTree = mChain->GetTree();
@@ -889,6 +889,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.30  2003/08/04 14:38:10  laue
+ * Alex Suaide's updated for the EMC. Now EEMC is included.
+ *
  * Revision 1.29  2003/03/25 19:08:06  laue
  * added StMuDst into TDataSet so that Valeri can pick it up for his
  * StEventDisplayMaker

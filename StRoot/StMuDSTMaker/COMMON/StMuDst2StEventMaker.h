@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst2StEventMaker.h,v 1.1 2003/01/09 18:59:45 laue Exp $
+ * $Id: StMuDst2StEventMaker.h,v 1.2 2003/08/04 14:38:10 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDst2StEventMaker_hh
@@ -29,12 +29,15 @@ class StMuDst2StEventMaker : public StMaker {
     int Finish(); ///< do nothing
     StEvent* event() { return  mStEvent; } ///< retunr pointer to StEvent, 0 if not created 
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StMuDst2StEventMaker.h,v 1.1 2003/01/09 18:59:45 laue Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StMuDst2StEventMaker.h,v 1.2 2003/08/04 14:38:10 laue Exp $ built "__DATE__" "__TIME__ ; 
 	return cvs;
     }
   
 
  private:
+    void printTriggerIds(StEvent*);
+    void loopOverTracks(StEvent*);
+
     StMuDstMaker* mMuDstMaker;
     StEvent* mStEvent;
     
@@ -47,6 +50,9 @@ class StMuDst2StEventMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StMuDst2StEventMaker.h,v $
+ * Revision 1.2  2003/08/04 14:38:10  laue
+ * Alex Suaide's updated for the EMC. Now EEMC is included.
+ *
  * Revision 1.1  2003/01/09 18:59:45  laue
  * initial check in of new EMC classes and the changes required
  *

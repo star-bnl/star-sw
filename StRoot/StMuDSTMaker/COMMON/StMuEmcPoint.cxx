@@ -11,7 +11,7 @@ ClassImp(StMuEmcPoint)
 
 StMuEmcPoint::StMuEmcPoint()
 {
-  for(Int_t i=0;i<4;i++) mEmc[i] = NULL;
+  for(Int_t i=0;i<8;i++) mEmc[i] = NULL;
 }
 StMuEmcPoint::StMuEmcPoint(StMuEmcPoint *point)
 {
@@ -22,10 +22,10 @@ StMuEmcPoint::StMuEmcPoint(StMuEmcPoint *point)
   mDeltaPhi=point->getDeltaPhi();
   mEnergy=point->getEnergy();
   mChiSquare=point->getChiSquare();
-  for(Int_t d=0;d<4;d++)
+  for(Int_t d=0;d<8;d++)
   {
     Int_t EmcDet=d+1;
-    setCluster(EmcDet,point->getCluster(EmcDet));
+    setCluster(point->getCluster(EmcDet),EmcDet);
   }
 }
 StMuEmcPoint::~StMuEmcPoint()

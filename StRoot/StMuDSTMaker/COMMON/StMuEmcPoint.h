@@ -31,7 +31,7 @@ class StMuEmcPoint: public TObject
     
     StMuEmcCluster*   getCluster(Int_t EmcDet){ return mEmc[EmcDet-1]; } ///< Return one cluster of the point
     
-    void              setCluster(Int_t EmcDet,StMuEmcCluster* cl) { mEmc[EmcDet-1] = cl;}    
+    void              setCluster(StMuEmcCluster* cl, Int_t EmcDet) { mEmc[EmcDet-1] = cl;}    
     void              setEta(float e)         { mEta = e;}
     void              setPhi(float p)         { mPhi = p;}
     void              setRadius(float r)      { mRadius = r;}
@@ -48,8 +48,8 @@ class StMuEmcPoint: public TObject
     float         mDeltaPhi;
     float         mEnergy;
     float         mChiSquare;    
-    StMuEmcCluster* mEmc[4];
+    StMuEmcCluster* mEmc[8];
         
-  ClassDef(StMuEmcPoint,1)
+  ClassDef(StMuEmcPoint,2)
 };
 #endif
