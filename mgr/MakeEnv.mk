@@ -1,5 +1,8 @@
-# $Id: MakeEnv.mk,v 1.13 1999/02/14 23:10:09 fisyak Exp $
+# $Id: MakeEnv.mk,v 1.14 1999/04/24 13:15:23 fisyak Exp $
 # $Log: MakeEnv.mk,v $
+# Revision 1.14  1999/04/24 13:15:23  fisyak
+# Add --sillent mode for set SILENT environmnet variable
+#
 # Revision 1.13  1999/02/14 23:10:09  fisyak
 # split tables for HP, remove duplicates for root4star
 #
@@ -183,6 +186,12 @@ endif
 
 ifndef Makeloop
   Makeloop :=$(STAR_MAKE_HOME)/Makeloop.mk
+endif
+ifdef SILENT
+  MakePam += --silent
+  MakeFun += --silent
+  MakeDll += --silent
+  Makeloop+= --silent
 endif
 export Makeloop
 export MakeDll

@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.72  1999/04/24 13:15:25  fisyak
+#  Add --sillent mode for set SILENT environmnet variable
+#
 #  Revision 1.71  1999/04/22 23:44:28  fisyak
 #  put St_io_Maker back in
 #
@@ -292,14 +295,10 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/04/22 23:44:28 $ 
+#           Last modification $Date: 1999/04/24 13:15:25 $ 
 #  default setings
 # Current Working Directory
 #
-ifdef SILENT
-.SILENT:.
-endif       
-
 ifndef STAR_MAKE_HOME
   STAR_MAKE_HOME := $(STAR)/mgr
 endif
@@ -371,48 +370,46 @@ endif
 #          I have subdrs
 .PHONY               :  all $(BASE)  $(St_Tables) test clean clean_lib clean_share clean_obj
 all:    $(BASE) $(addsuffix _loop, $(SUBDIRS)) $(addsuffix _$(branch),$(PKG)) $(St_Tables)
-	@echo $(TARGETS)
 $(BASE):
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/$(BASE)
 St_TablesDoc: 
 	root.exe -b -q MakeHtmlTables.cxx
 %_loop:
-	$(MAKE)  -f $(Makeloop) -C $(STEM) $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM)
 %_pams:
-	$(MAKE)  -f $(MakePam) $(MAKFLAGS)
-	$(MAKE)  -f $(MakeDll) $(MAKFLAGS) -C  $(GEN_DIR)
+	$(MAKE)  -f $(MakePam)
+	$(MAKE)  -f $(MakeDll) -C  $(GEN_DIR)
 %_StRoot:
-	$(MAKE)  -f $(MakeDll) $(MAKFLAGS)
+	$(MAKE)  -f $(MakeDll)
 StEvent_StEvent:
-	$(MAKE)  -f $(MakeDll) $(MAKFLAGS)
+	$(MAKE)  -f $(MakeDll)
 St_Tables: $(BASE)
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables \
          SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St_Tables.$(So) NODEBUG=YES
 test:   $(addsuffix _test, $(SUBDIRS))
 %_test:
-	$(MAKE)  -f $(Makeloop) -C $(STEM) test $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) test 
 clean: $(addsuffix _clean, $(SUBDIRS))
 %_clean: 
-	$(MAKE)  -f $(Makeloop) -C $(STEM) clean $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) clean 
 clean_lib: $(addsuffix _clean_lib, $(SUBDIRS))
 %_clean_lib: 
-	$(MAKE)  -f $(Makeloop) -C $(STEM) clean_lib $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) clean_lib 
 clean_share: $(addsuffix _clean_share, $(SUBDIRS))
 %_clean_share: 
-	$(MAKE)  -f $(Makeloop) -C $(STEM) clean_share $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) clean_share 
 clean_obj: $(addsuffix _clean_obj, $(SUBDIRS))
 %_clean_obj: 
-	$(MAKE)  -f $(Makeloop) -C $(STEM) clean $(MAKFLAGS) 
-clean:;      $(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean
-clean_lib:;  $(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean_lib
-clean_share:;$(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean_share
-clean_obj:;  $(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean_obj
-clean_test:; $(MAKE)  -f $(MakePam) $(MAKFLAGS)  test
+	$(MAKE)  -f $(Makeloop) -C $(STEM) clean 
+clean:;      $(MAKE)  -f $(MakePam)  clean
+clean_lib:;  $(MAKE)  -f $(MakePam)  clean_lib
+clean_share:;$(MAKE)  -f $(MakePam)  clean_share
+clean_obj:;  $(MAKE)  -f $(MakePam)  clean_obj
+clean_test:; $(MAKE)  -f $(MakePam)  test
 test: test_level
 test_level:
 	@echo MAKELEVEL = $(MAKELEVEL) 
 	@echo MAKEFILE  = $(MAKEFILE) 
-	@echo MAKFLAGS  = $(MAKFLAGS) 
 	@echo "PWD       = |"$(PWD)"|"
 	@echo "LEVEL     = |"$(LEVEL)"|"
 	@echo "SUBDIRS   = |"$(SUBDIRS)"|"

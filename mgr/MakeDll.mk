@@ -1,6 +1,9 @@
 
-# $Id: MakeDll.mk,v 1.75 1999/04/19 21:46:09 fisyak Exp $
+# $Id: MakeDll.mk,v 1.76 1999/04/24 13:15:22 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.76  1999/04/24 13:15:22  fisyak
+# Add --sillent mode for set SILENT environmnet variable
+#
 # Revision 1.75  1999/04/19 21:46:09  fisyak
 # Fix case of Multiple ClassDef in the same h-file
 #
@@ -124,16 +127,6 @@
 # Revision 1.33  1998/11/15 21:12:57  fisyak
 # fix shared libraries versioning for St_Root
 #
-#
-ifdef SILENT
-.SILENT:
-endif       
-
-
-
-###	Suppress all imlicit rules
-#.SUFFIXES:
-
 #
 ifndef STAR_MAKE_HOME
   STAR_MAKE_HOME := $(STAR)/mgr
@@ -577,7 +570,7 @@ endif
 else
 .PHONY : all
 all: 
-	@echo "Nothing to be done for Dll"
+	@echo "Nothing to be done for Dll: $(SRC_DIR)"
 endif # end of DoIt
 test: 
 	@echo MAKE        := $(MAKE)

@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.91 1999/04/18 23:35:29 fisyak Exp $
+# $Id: MakePam.mk,v 1.92 1999/04/24 13:15:24 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.92  1999/04/24 13:15:24  fisyak
+# Add --sillent mode for set SILENT environmnet variable
+#
 # Revision 1.91  1999/04/18 23:35:29  fisyak
 # Add SL_EXTRA_LIB
 #
@@ -144,9 +147,6 @@
 # Revision 1.40  1998/08/10 23:20:53  fisyak
 # Add test for base and tables
 #
-ifdef SILENT
-  .SILENT:.
-endif
 MAKEFLAGS := $(filter-out w, $(MAKEFLAGS))
 ifndef STAR_MAKE_HOME
   STAR_MAKE_HOME := $(STAR)/mgr

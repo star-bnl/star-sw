@@ -105,7 +105,6 @@ ALL_EXE_LIBS += packlib mathlib kernlib`
 
 ALL_EXE_LIBS += $(FLIBS) $(CLIBS)	
 
-#.SILENT:
 .SUFFIXES:
 .SUFFIXES:  .o .g .f .c .cc .cdf  .F
 #
