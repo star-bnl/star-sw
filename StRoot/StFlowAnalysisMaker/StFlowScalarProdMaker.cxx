@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowScalarProdMaker.cxx,v 1.8 2003/01/10 16:40:49 oldi Exp $
+// $Id: StFlowScalarProdMaker.cxx,v 1.9 2003/02/24 19:35:27 posk Exp $
 //
 // Authors: Method proposed by Art and Sergei, code written by Aihong
 //          Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -114,7 +114,7 @@ Int_t StFlowScalarProdMaker::Init() {
     histTitle = new TString("Flow_vObs_ScalarProd_Sel");
     histTitle->Append(*countSels);
     histFull[k].mHist_vObs = new TProfile(histTitle->Data(), histTitle->Data(),
-      Flow::nHars, 0.5, (float)(Flow::nHars) + 0.5, -100., 100., "");
+      Flow::nHars, 0.5, (float)(Flow::nHars) + 0.5, -10000., 10000., "");
     histFull[k].mHist_vObs->SetXTitle("Harmonic");
     histFull[k].mHist_vObs->SetYTitle("vObs (%)");
     delete histTitle;
@@ -131,7 +131,7 @@ Int_t StFlowScalarProdMaker::Init() {
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObs2D =	new TProfile2D(histTitle->Data(),
         histTitle->Data(), mNEtaBins, mEtaMin, mEtaMax, nPtBinsPart, 
-		 Flow::ptMin, ptMaxPart, -100., 100., "");
+		 Flow::ptMin, ptMaxPart, -10000., 10000., "");
       histFull[k].histFullHar[j].mHist_vObs2D->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHist_vObs2D->SetYTitle("Pt (GeV)");
       delete histTitle;
@@ -143,7 +143,7 @@ Int_t StFlowScalarProdMaker::Init() {
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObsEta = new TProfile(histTitle->Data(),
         histTitle->Data(), mNEtaBins, mEtaMin, mEtaMax, 
-							      -100., 100., "");
+							      -10000., 10000., "");
       histFull[k].histFullHar[j].mHist_vObsEta->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHist_vObsEta->SetYTitle("v (%)");
       delete histTitle;
@@ -153,7 +153,7 @@ Int_t StFlowScalarProdMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObsPt = new TProfile(histTitle->Data(),
-        histTitle->Data(), nPtBinsPart, Flow::ptMin, ptMaxPart, -100., 100., "");
+        histTitle->Data(), nPtBinsPart, Flow::ptMin, ptMaxPart, -10000., 10000., "");
       histFull[k].histFullHar[j].mHist_vObsPt->SetXTitle("Pt (GeV)");
       histFull[k].histFullHar[j].mHist_vObsPt->SetYTitle("v (%)");
       delete histTitle;
@@ -162,7 +162,7 @@ Int_t StFlowScalarProdMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowScalarProd", 2);
-  gMessMgr->Info("##### FlowScalarProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.8 2003/01/10 16:40:49 oldi Exp $");
+  gMessMgr->Info("##### FlowScalarProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.9 2003/02/24 19:35:27 posk Exp $");
 
   return StMaker::Init();
 }
@@ -249,7 +249,7 @@ void StFlowScalarProdMaker::FillParticleHistograms() {
 	  	  
 	  // Caculate v for all particles selected
           u_i.Set(cos(phi*order), sin(phi*order));
-	  float v = (mQ_i.X()*u_i.X() + mQ_i.Y()*u_i.Y());
+	  float v = (mQ_i.X()*u_i.X() + mQ_i.Y()*u_i.Y()) /perCent;
 	  float vFlip = v;
 	  if (eta < 0 && oddHar) vFlip *= -1;
 	  if (strlen(pFlowSelect->PidPart()) != 0) { 
@@ -303,10 +303,11 @@ Int_t StFlowScalarProdMaker::Finish() {
       char countHars[2];
       sprintf(countHars,"%d",j+1);
 
-      mRes[k][j] = sqrt(histFull[k].mHistRes->GetBinContent(j+1))*2.*perCent;
-      mResErr[k][j] = sqrt(histFull[k].mHistRes->GetBinError(j+1))*2.*perCent; 
+      //Calculate the resolution
+      mRes[k][j]    = sqrt(histFull[k].mHistRes->GetBinContent(j+1))*2.;
+      mResErr[k][j] = (histFull[k].mHistRes->GetBinError(j+1))*2./mRes[k][j];
 
-	// Create the v 2D histogram
+      // Create the v 2D histogram
       histTitle = new TString("Flow_v2D_ScalarProd_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -347,8 +348,10 @@ Int_t StFlowScalarProdMaker::Finish() {
 
       // Calulate v = vObs / Resolution or Q.u/(2sqrt(<Q_a.Q_b>))
       if (mRes[k][j]) {
+	cout << "##### Resolution of the " << j+1 << "th harmonic = " << 
+	  mRes[k][j] << " +/- " << mResErr[k][j] << endl;
 	// The systematic error of the resolution is not folded in.
-	histFull[k].histFullHar[j].mHist_v2D-> Scale(1. / mRes[k][j]);
+	histFull[k].histFullHar[j].mHist_v2D ->Scale(1. / mRes[k][j]);
 	histFull[k].histFullHar[j].mHist_vEta->Scale(1. / mRes[k][j]);
 	histFull[k].histFullHar[j].mHist_vPt ->Scale(1. / mRes[k][j]);
 	content = histFull[k].mHist_v->GetBinContent(j+1);
@@ -365,7 +368,7 @@ Int_t StFlowScalarProdMaker::Finish() {
       } else {
 	cout << "##### Resolution of the " << j+1 << "th harmonic was zero."
 	     << endl;
-	histFull[k].histFullHar[j].mHist_v2D-> Reset();
+	histFull[k].histFullHar[j].mHist_v2D ->Reset();
 	histFull[k].histFullHar[j].mHist_vEta->Reset();
 	histFull[k].histFullHar[j].mHist_vPt ->Reset();
 	histFull[k].mHist_v->SetBinContent(j+1, 0.);
@@ -393,8 +396,7 @@ void StFlowScalarProdMaker::SetHistoRanges(Bool_t ftpc_included) {
 	  mEtaMin = Flow::etaMin;
 	  mEtaMax = Flow::etaMax;
 	mNEtaBins = Flow::nEtaBins;
-    }
-    else {
+    } else {
 	  mEtaMin = Flow::etaMinTpcOnly;
  	  mEtaMax = Flow::etaMaxTpcOnly;
 	mNEtaBins = Flow::nEtaBinsTpcOnly;
@@ -406,6 +408,10 @@ void StFlowScalarProdMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowScalarProdMaker.cxx,v $
+// Revision 1.9  2003/02/24 19:35:27  posk
+// Corrected mistake in the error of the resolution.
+// This only affected doubly integrated v values.
+//
 // Revision 1.8  2003/01/10 16:40:49  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.
