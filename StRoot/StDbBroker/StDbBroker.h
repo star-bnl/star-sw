@@ -42,7 +42,7 @@ class StDbBroker  {
     char*        m_database;     // name of the database for this table
 
   public:
-    StDbBroker(): m_tableVersion(0), m_database(0) {}
+    StDbBroker(): m_structName(0), m_tableName(0), m_tableVersion(0), m_database(0) {}
 
     virtual ~StDbBroker(){}
     
@@ -86,16 +86,20 @@ class StDbBroker  {
                                      {m_nElements=nElements; m_descriptor = D;}
 
     void   SetTableName(const Char_t *table_name)
-                                  {m_tableName=new char[strlen(table_name)+1]; 
-                                  strcpy(m_tableName,table_name);};
+                                  {if(m_tableName) delete [] m_tableName;
+                                   m_tableName=new char[strlen(table_name)+1]; 
+                                   strcpy(m_tableName,table_name);};
     void   SetStructName(const Char_t *struct_name)
-                                {m_structName=new char[strlen(struct_name)+1];
-                                strcpy(m_structName,struct_name);};
+                                {if(m_structName) delete [] m_structName;
+                                 m_structName=new char[strlen(struct_name)+1];
+                                 strcpy(m_structName,struct_name);};
     void  SetVersionName(const char *version) 
-                                 {m_tableVersion= new char[strlen(version)+1];
+                                 {if(m_tableVersion) delete [] m_tableVersion;
+                                  m_tableVersion= new char[strlen(version)+1];
                                   strcpy(m_tableVersion,version);}
     void  SetDataBaseName(const char *dbName) 
-                                 {m_database= new char[strlen(dbName)+1]; 
+                                 {if(m_database) delete [] m_database;
+                                  m_database= new char[strlen(dbName)+1]; 
                                   strcpy(m_database,dbName);}
                                            
     void   SetStructSize(UInt_t size)     {m_sizeOfStruct=size;    };

@@ -89,9 +89,9 @@ mysql_init(&mysql);
 
 // Establish a connection to the MySQL database engine 
 
-char *dbName="params";
+char *dbName=new char[strlen("params")+1]; strcpy(dbName,"params");
 //only db1 is visible from rcas0202 machine
-char *dbHost="db1.star.bnl.gov";
+char *dbHost=new char[strlen("db1.star.bnl.gov")+1];strcpy(dbHost,"db1.star.bnl.gov");
 //char *dbHost="duvall.star.bnl.gov";
 
 //if (!mysql_real_connect(&mysql,"localhost","","",dbName,0,"/tmp/mysql.sock",0))
