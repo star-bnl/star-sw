@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMem.h,v 1.1 2000/07/30 01:40:12 perev Exp $
+ * $Id: StMem.h,v 1.2 2001/03/05 00:50:56 perev Exp $
  *
  * Author: Victor Perev, Jul 2000
  ***************************************************************************
@@ -18,6 +18,7 @@ class StMem {
 friend class nobody;
 public:
     static  double Used();
+    static  double ESize();
     static void   Print(const char *tit="");
 private:
     StMem(){};
