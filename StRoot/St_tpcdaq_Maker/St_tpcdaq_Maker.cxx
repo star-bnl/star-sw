@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.68  2002/10/11 18:10:53  jeromel
+// Changes to accomodate for DAQ100 Cluster reading or raw hit reading
+//
 // Revision 1.67  2002/02/20 20:45:02  ward
 // Implementation of RDO mask.  Mostly from Fabrice.
 //
@@ -211,7 +214,7 @@
 
 ClassImp(St_tpcdaq_Maker)
 
-#define PP printf(
+#define PP printf
 #define ALLOC 1.2  // Must be > 1.0.  Larger runs faster, but wastes memory.
 #define NSECT 24
 #define NROW  45
@@ -230,6 +233,7 @@ St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name),
 {
   printf("This is St_tpcdaq_Maker, name = \"%s\".\n",name);
   alreadySet=0; // FALSE
+  daq_flag  =1; // deafult value for DAQ Reading is to use pad_raw table filling
 }
 //________________________________________________________________________________
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
@@ -238,17 +242,17 @@ St_tpcdaq_Maker::~St_tpcdaq_Maker() {
 Int_t St_tpcdaq_Maker::Init() {
   
   m_seq_startTimeBin  = new TH1F("tpcdaq_startBin" , 
-                            "seq vs start bin" , 512 , 1.0 , 512.0 );
+				 "seq vs start bin" , 512 , 1.0 , 512.0 );
   m_seq_sequnceLength = new TH1F("tpcdaq_seqLen" , 
-                            "seq vs seq len" , 100 , 1.0 , 100.0 );
+				 "seq vs seq len" , 100 , 1.0 , 100.0 );
   m_seq_padNumber     = new TH1F("tpcdaq_padNum" , 
-                            "seq vs pad num" , 188 , 1.0 , 188.0 );
+				 "seq vs pad num" , 188 , 1.0 , 188.0 );
   m_seq_padRowNumber  = new TH1F("tpcdaq_padrowNum" , 
-                            "seq vs padrow num" , 45 , 1.0 , 45.0 );
+				 "seq vs padrow num" , 45 , 1.0 , 45.0 );
   m_pad_numSeq        = new TH1F("tpcdaq_numSeq" , 
-                            "pad vs num seq" , 40 , 1.0 , 40.0 );
+				 "pad vs num seq" , 40 , 1.0 , 40.0 );
   m_pix_AdcValue      = new TH1F("tpcdaq_adcVal" , 
-                            "pix vs ADC value" , 255 , 1.0 , 255.0 );
+				 "pix vs ADC value" , 255 , 1.0 , 255.0 );
   return StMaker::Init();
 }
 //________________________________________________________________________________
@@ -278,12 +282,12 @@ Int_t St_tpcdaq_Maker::InitRun(Int_t RunNumber) {
     assert(victorPrelim);
   } else if(m_Mode == 1) {// Trs
   } else {
-     PP"-----------------------------------------------------------------\n");
-     PP"The second argument of St_tpcdaq_Maker::St_tpcdaq_Maker() must be\n");
-     PP"either \"daq\" or \"trs\".  Fatal error.  Please fix bfc.C.\n");
-     assert(0); // Ctor called incorrectly. 
+    PP("-----------------------------------------------------------------\n");
+    PP("The second argument of St_tpcdaq_Maker::St_tpcdaq_Maker() must be\n");
+    PP("either \"daq\" or \"trs\".  Fatal error.  Please fix bfc.C.\n");
+    assert(0); // Ctor called incorrectly. 
   }
-  PP"end of St_tpcdaq_Maker::Init\n");
+  PP("end of St_tpcdaq_Maker::Init\n");
   return StMaker::InitRun(RunNumber);
 }
 //________________________________________________________________________________
@@ -481,6 +485,27 @@ int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequenc
 #endif
   return rv; // < 0 means serious error.
 }
+
+//________________________________________________________________________________
+/// Method to set the DAQ Reading mode.
+void St_tpcdaq_Maker::SetDAQFlag(Int_t mode)
+{
+  daq_flag = mode;
+  cout << "St_tpcdaq_Maker::SetDAQFlag : Setting mandatory DAQ flag to ";
+  if (daq_flag == 0){
+    cout << " no table filling ";
+  } else if (daq_flag & 0x01 ){
+    cout << " Using pad_raw ";
+  } else if (daq_flag & 0x02 ){
+    cout << " Using Clusters (DAQ100) ";
+  } else {
+    cout << " Unknown option" << daq_flag << endl;
+    assert(0);
+  }
+  cout << endl;
+}
+
+
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDaqLib/TPC/fee_pin.h"
 //________________________________________________________________________________
@@ -583,12 +608,12 @@ void St_tpcdaq_Maker::ExcludeTheseTimeBins(int lo1,int hi1,int lo2,int hi2,int l
 void St_tpcdaq_Maker::WriteStructToScreenAndExit() {
   int jj,ii;
   for(ii=0;ii<24;ii++) {
-    PP"---------------------------------------------- sector %2d\n",ii+1);
+    PP("---------------------------------------------- sector %2d\n",ii+1);
     for(jj=0;jj<noiseElim[ii].nbin;jj++) {
-      PP"Cut bins %3d to %3d.\n",noiseElim[ii].low[jj],noiseElim[ii].up[jj]);
+      PP("Cut bins %3d to %3d.\n",noiseElim[ii].low[jj],noiseElim[ii].up[jj]);
     }
     for(jj=0;jj<noiseElim[ii].npad;jj++) {
-      PP"Cut pad %3d of row %2d\n",noiseElim[ii].pad[jj],noiseElim[ii].row[jj]);
+      PP("Cut pad %3d of row %2d\n",noiseElim[ii].pad[jj],noiseElim[ii].row[jj]);
     }
   }
   assert(0); // This is in WriteStructToScreenAndExit().
@@ -792,19 +817,19 @@ Int_t St_tpcdaq_Maker::Make() {
   if(m_Mode != 1) { victor=victorPrelim->getTPCReader(); assert(victor); }
   printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
-    printf("Error: St_tpcdaq_Maker no event from TRS (%d).\n",errorCode);
+    PP("Error: St_tpcdaq_Maker no event from TRS (%d).\n",errorCode);
     return kStErr;
   }
   assert(!m_DataSet->GetList());
   if(Output()) {
-    PP"St_tpcdaq_Maker has detected .daq file corruption.  Skip this event.\n");
+    PP("St_tpcdaq_Maker has detected .daq file corruption.  Skip this event.\n");
     return kStErr; // See comment 66f.
   }
   if(mErr) {
-    PP"St_tpcdaq_Maker failed with error code %d.\n",mErr);
+    PP("St_tpcdaq_Maker failed with error code %d.\n",mErr);
     return kStFatal;
   } else {
-    printf("Got through St_tpcdaq_Maker OK.\n");
+    PP("Got through St_tpcdaq_Maker OK.\n");
   }
   return kStOK;
 }
