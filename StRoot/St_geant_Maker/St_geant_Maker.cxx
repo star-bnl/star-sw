@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.20 1999/02/20 20:23:45 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.21 1999/02/22 19:27:20 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.21  1999/02/22 19:27:20  fisyak
+// add gtrigi and gtigc
+//
 // Revision 1.20  1999/02/20 20:23:45  fisyak
 // Fix Aeast
 //
@@ -220,18 +223,19 @@ Int_t St_geant_Maker::Make(){
   if (!m_DataSet->GetList()){ 
     Int_t    nhits,nhit1,nhit2,link=1,ide=1,npart,irun,ievt,iwtfl;
     Float_t  vert[4],weigh;
-    Char_t   cgnam[20];
     St_DataSet *geom = gStChain->DataSet("geom");
     if (geom && !geom->GetList()) {agstroot_();}
+    gtrigi();
     gtrig();
+    // check EoF
+    if (cquest->iquest[0]) {return kStErr;}
     // empty g2t_event
     St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
     m_DataSet->Add(g2t_event);
-    agnzgete_(&link,&ide,&npart,&irun,&ievt,cgnam,vert,&iwtfl,&weigh);
+    agnzgete_(&link,&ide,&npart,&irun,&ievt,mGnam,vert,&iwtfl,&weigh);
     gStChain->SetRun(irun);
     gStChain->SetEvent(ievt);
-    TString EvenType(cgnam);
-    gStChain->SetEvenType(EvenType.Data());
+    gStChain->SetEvenType(mGnam);
     if (npart>0){
       St_particle  *particle   = new St_particle("particle",npart);
       Int_t Res_part = g2t_particle(particle);
@@ -352,7 +356,9 @@ Int_t St_geant_Maker::Make(){
     if (address) csjcal(&address,&narg);
 #endif
   }
-  return kStOK;
+  gtrigc();
+  if (cflag->ieorun) {return kStErr;} 
+  else {return kStOK;}
 }
 //_____________________________________________________________________________
 void St_geant_Maker::LoadGeometry(Char_t *option){
@@ -363,7 +369,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.20 1999/02/20 20:23:45 fisyak Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.21 1999/02/22 19:27:20 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
