@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.345 2003/07/24 21:35:58 lbarnby Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.346 2003/07/30 01:04:13 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -177,6 +177,7 @@ Bfc_st BFC1[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"svtfilt"     ,""  ,"",""                                  ,"","","Enable SVT Hit filter option",kFALSE},
   {"NoHits"      ,""  ,"",""                            ,"","","Don't write hits into Event.Branch",kFALSE},
   {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
@@ -675,6 +676,7 @@ Bfc_st BFC2[] = {
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"ITTF"        ,""  ,"",""                    ,"","","Turn on second option block for ITTF chain",kFALSE},
+  {"svtfilt"     ,""  ,"",""                                  ,"","","Enable SVT Hit filter option",kFALSE},
   {"NoHits"      ,""  ,"",""                            ,"","","Don't write hits into Event.Branch",kFALSE},
   {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
@@ -1448,6 +1450,16 @@ Int_t StBFChain::Instantiate()
 	    //mk->UseOnlyLaserDriftVelocity();    // uses laserDV database
 	    //mk->UseOnlyCathodeDriftVelocity();  // uses offl database
 	  }
+	  
+	  if (maker == "StHitFiltermaker"){
+	    if ( GetOption("svtfilt") ){
+	      // Placeholder for option
+	      printf("QAInfo: SVT hit filter is ON\n");
+	    } else {
+	      printf("QAInfo: Default hit filtering is ON\n");
+	    }
+	  }
+
 	  if (GetOption("dst") && GetOption("NoHits") && maker == "StEventMaker") {
 	    StEventMaker *EvMk = (StEventMaker *) mk;
 	    EvMk->doLoadTpcHits  = kFALSE;
