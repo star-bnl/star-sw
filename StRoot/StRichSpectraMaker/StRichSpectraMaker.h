@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.h,v 1.4 2001/08/22 19:33:35 lasiuk Exp $
+ * $Id: StRichSpectraMaker.h,v 1.5 2001/11/21 20:36:07 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,12 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRichSpectraMaker.h,v $
+ * Revision 1.5  2001/11/21 20:36:07  lasiuk
+ * azimuth angle calculation, trace and retracing algorithms, rotation
+ * matrices, clean up intersection calculation.  Addition of quick
+ * rings for graphics, change definition of ntuples, and
+ * removal of old PID method
+ *
  * Revision 1.4  2001/08/22 19:33:35  lasiuk
  * remove trace of StPairD, and move some include files that
  * should ease parsing of CINT
@@ -55,6 +61,7 @@ class StRichTrack;
 // RRS
 class StRichGeometryDb;
 class StRichMomentumTransform;
+class StRichCoordinateTransform;
 
 // Pad Monitor
 class StRichPadMonitor;
@@ -77,8 +84,6 @@ public:
     void   PrintInfo();
     Int_t  Finish();
 
-    StThreeVectorF normalRadiationPoint() const;
-
 protected:
     void  initCutParameters();
 
@@ -91,16 +96,20 @@ protected:
     void  printCutParameters(ostream& os=cout) const;
     
     // for use on .root files (not condensed)
-    bool evaluateEvent(StRichTrack*, StRichPidTraits*);
-    void lookAtPhotonInfo(StRichTrack*, StRichPidTraits*);
+    bool evaluateEvent();
 
+    bool evaluateRichTrack(StRichTrack*, StRichPidTraits*);
+
+    bool assignMipResidual(StTrack*);
+    
     void drawRichPixels(StRichCollection*) const;
     void drawRichHits(StRichCollection*)   const;
     void drawTracks()                      const;
+    void drawQuickRing(StThreeVectorF&, StThreeVectorF&);
     
     void qualityAssessment();
     void doIdentification(StTrack*);
-    StThreeVectorF calculateRadiationPoint(StTrack*);
+    StThreeVectorF calculateRadiationPoint(StTrack*, StThreeVectorF&);
     
 protected:
     StEvent*                    mEvent;//!
@@ -143,7 +152,12 @@ protected:
 
     float mMomentumThreshold;
     float mMomentumLimit;
+
+    StThreeVectorF mMipResidual;
+    StThreeVectorF mAssociatedMip;
+
     
+    StRichCoordinateTransform* mTransform;//!
     StRichMomentumTransform* mMomTform;//!
     StRichGeometryDb*        mGeometryDb;//!
 
@@ -160,17 +174,22 @@ protected:
     //
     // geometry
     //
-    StThreeVectorF mNormalRadiationPoint;
-    
+    //StThreeVectorF mNormalRadiationPoint;
+    // average point where expect the radiation to eminate from
+    StThreeVectorF mGlobalRichNormal;
+    StThreeVectorF mAverageRadiationPlanePoint;
+    StThreeVectorF mTopRadiator;
+    StThreeVectorF mBottomRadiator;
+
+
 #ifdef RICH_SPECTRA_HISTOGRAM
     TFile*   mFile; //!
-    TNtuple* mPhotons;   //!
-    TNtuple* mCorrected;   //!
 
     TNtuple* mEvt;//!
     TNtuple* mTrack;//!
     TNtuple* mCerenkov;//!
     TNtuple* mSim;//!
+    TNtuple* mSimEvent;//!
     
     int      mTupleSize;
     int      mTuple2Size;
@@ -178,7 +197,7 @@ protected:
     
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.4 2001/08/22 19:33:35 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.5 2001/11/21 20:36:07 lasiuk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 public:
@@ -189,7 +208,5 @@ private:
     // the following is a ROOT macro  that is needed in all ROOT code
     ClassDef(StRichSpectraMaker, 1)   //StAF chain virtual base class for Makers
 	};
-
-inline StThreeVectorF StRichSpectraMaker::normalRadiationPoint() const { return mNormalRadiationPoint;}
 
 #endif

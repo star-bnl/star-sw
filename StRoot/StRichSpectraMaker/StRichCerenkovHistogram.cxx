@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichCerenkovHistogram.cxx,v 1.1 2001/08/21 17:58:33 lasiuk Exp $
+ * $Id: StRichCerenkovHistogram.cxx,v 1.2 2001/11/21 20:36:06 lasiuk Exp $
  *
  * Author:  bl Mar 2, 2001
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StRichCerenkovHistogram.cxx,v $
+ * Revision 1.2  2001/11/21 20:36:06  lasiuk
+ * azimuth angle calculation, trace and retracing algorithms, rotation
+ * matrices, clean up intersection calculation.  Addition of quick
+ * rings for graphics, change definition of ntuples, and
+ * removal of old PID method
+ *
  * Revision 1.1  2001/08/21 17:58:33  lasiuk
  * for 2000 analysis
  *
@@ -88,16 +94,18 @@ bool StRichCerenkovHistogram::addEntry(StRichCerenkovPhoton gamma)
 void StRichCerenkovHistogram::clearData()
 {
     cout << "StRichCerenkovHistogram::clearData()" << endl;
-
+    PR(mHistogram.size());
     size_t ii;
     for(ii=0; ii<mHistogram.size(); ii++) {
 	mHistogram[ii].clear();
     }
 
+    cout << "try results" << endl;
+    PR(mResults.size());
     for(ii=0; ii<mResults.size(); ii++) {
 	mResults[ii].clear();
     }
-
+    cout << "done" << endl;
     mCalculationDone = false;
 }
 
