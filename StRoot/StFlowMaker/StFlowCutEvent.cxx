@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.24 2002/03/15 16:43:21 snelling Exp $
+// $Id: StFlowCutEvent.cxx,v 1.25 2002/05/24 11:04:18 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -67,6 +67,13 @@ Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
   StPrimaryVertex* pVertex = pEvent->primaryVertex(0);
   if (!pVertex) return kFALSE;
 
+  if (pEvent->l3Trigger() && pEvent->l3Trigger()->l3EventSummary() &&
+      !(pEvent->l3Trigger()->l3EventSummary()->unbiasedTrigger())) {
+    // cout << "FlowCutEvent: L3 biased trigger event " << endl;
+    return kFALSE;
+  }
+
+  // update normal event counter
   mEventN++;
 
   // Multiplicity
@@ -290,6 +297,9 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.25  2002/05/24 11:04:18  snelling
+// Added a cut to remove the events triggered by L3
+//
 // Revision 1.24  2002/03/15 16:43:21  snelling
 // Added a method to recalculate the centrality in StFlowPicoEvent
 //
