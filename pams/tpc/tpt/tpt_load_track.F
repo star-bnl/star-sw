@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.12 1999/11/07 05:54:48 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.13 1999/11/08 00:48:54 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.13  1999/11/08 00:48:54  sakrejda
+* A bug in track length calculation fixed - tanl was missing.
+*
 * Revision 1.12  1999/11/07 05:54:48  sakrejda
 * Calculation of dip and crossing angle added (moved here from two other places)
 * Track length calculation added
@@ -172,7 +175,7 @@ c
       hit( trk(ipt).ipnt(trk(ipt).nhit)).lambda =
      >hit( trk(ipt).ipnt(trk(ipt).nhit-1)).lambda
 C
-      track(ipt).length =ds*sqrt(1.0+track(ipt)**2)
+      track(ipt).length =ds*sqrt(1.0+track(ipt).tanl**2)
 C     azimuthal angle for the momentum at the first point
       sgn = sign(1.0,trk(ipt).p(2))
       track(ipt).psi = trk(ipt).p(5)-sgn*0.25*C_2PI
