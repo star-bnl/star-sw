@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcTriggerDetector.h,v 2.3 2004/02/11 01:42:09 ullrich Exp $
+ * $Id: StEmcTriggerDetector.h,v 2.4 2004/08/03 17:22:16 ullrich Exp $
  *
  * Author: Alex Suaide, Feb 2002
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcTriggerDetector.h,v $
+ * Revision 2.4  2004/08/03 17:22:16  ullrich
+ * Major update by Akio and Marco.
+ *
  * Revision 2.3  2004/02/11 01:42:09  ullrich
  * Added new constructor to load data from StTriggerData.
  *
@@ -46,15 +49,34 @@ public:
     
     int   highTower(unsigned int) const;
     int   patch(unsigned int) const;
+    int   highTowerEndcap(unsigned int) const;
+    int   patchEndcap(unsigned int) const;
+    unsigned short bemcLayer1(int idx) const;
+    unsigned short eemcLayer1(int idx) const;
+    unsigned short emcLayer2(int idx) const;
 
     void  setHighTower(unsigned int, int);
     void  setPatch(unsigned int, int);
+    void  setHighTowerEndcap(unsigned int, int);
+    void  setPatchEndcap(unsigned int, int);
         
 protected:
-    enum {mMaxTower = 300};
-    Char_t  mHighTower[mMaxTower];
-    Char_t  mPatch[mMaxTower];
+    enum {mNPatch = 300, mENPatch = 90, mNBemcLayer1 = 48, 
+	  mNEemcLayer1 = 16, mNEmcLayer2 = 8};
+
+private:    
+    // Layer0 DSM input (from detector)
+    Char_t  mHighTower[mNPatch];  // High tower info from trigger patches
+    Char_t  mPatch[mNPatch];      // Trigger patch sums
     
-    ClassDef(StEmcTriggerDetector,1)
+    Char_t mEHighTower[mENPatch]; // Endcap high tower per patch
+    Char_t mEPatch[mENPatch];     // Endcap trigger patch sums
+
+    // Higher DSM layer inputs (mainly for experts/debugging)
+    unsigned short mBemcLayer1[mNBemcLayer1];  // Barrel layer 1 input 
+    unsigned short mEemcLayer1[mNEemcLayer1];  // Endcap layer 1 input
+    unsigned short mEmcLayer2[mNEmcLayer2];    // Combined EMC layer 2 input
+    
+    ClassDef(StEmcTriggerDetector,2)
 };
 #endif
