@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleGeometry.cc,v 1.9 2000/06/07 02:03:11 lasiuk Exp $
+ * $Id: StTpcSimpleGeometry.cc,v 1.10 2001/03/30 21:23:40 jeromel Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleGeometry.cc,v $
+ * Revision 1.10  2001/03/30 21:23:40  jeromel
+ * Fixes for Insure smooth compilation
+ *
  * Revision 1.9  2000/06/07 02:03:11  lasiuk
  * exit/abort ultimatum
  *
@@ -280,8 +283,7 @@ int StTpcSimpleGeometry::numberOfPadsAtRow(int r) const
 	abort();
 #endif
     }
-    else
-	return (mPadsInRow[r-1]);  // careful indexing...
+    return (mPadsInRow[r-1]);  // careful indexing...
 }
 
 double StTpcSimpleGeometry::radialDistanceAtRow(int r) const
@@ -296,9 +298,7 @@ double StTpcSimpleGeometry::radialDistanceAtRow(int r) const
 	abort();
 #endif
     }
-    else {
-	return (mRadialDistanceAtRow[r-1]); // careful indexing...
-    }
+    return (mRadialDistanceAtRow[r-1]); // careful indexing...
 }
 
 double StTpcSimpleGeometry::outerSectorAnodeWire(int n) const

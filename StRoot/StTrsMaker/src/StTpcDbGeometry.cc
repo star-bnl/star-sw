@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcDbGeometry.cc,v 1.7 2000/06/07 02:03:11 lasiuk Exp $
+ * $Id: StTpcDbGeometry.cc,v 1.8 2001/03/30 21:22:52 jeromel Exp $
  *
  * Authors: Brain Lasiuk & Manuel Calderon de la Barca Sanchez September 8, 1999
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcDbGeometry.cc,v $
+ * Revision 1.8  2001/03/30 21:22:52  jeromel
+ * Fixes for Insure smooth compilation
+ *
  * Revision 1.7  2000/06/07 02:03:11  lasiuk
  * exit/abort ultimatum
  *
@@ -270,8 +273,7 @@ int StTpcDbGeometry::numberOfPadsAtRow(int r) const
 	abort();
 #endif
     }
-    else
-	return (mPadsInRow[r-1]);  // careful indexing...
+    return (mPadsInRow[r-1]);  // careful indexing...
 }
 
 double StTpcDbGeometry::radialDistanceAtRow(int r) const
@@ -286,9 +288,7 @@ double StTpcDbGeometry::radialDistanceAtRow(int r) const
 	abort();
 #endif
     }
-    else {
-	return (mRadialDistanceAtRow[r-1]); // careful indexing...
-    }
+    return (mRadialDistanceAtRow[r-1]); // careful indexing...
 }
 
 double StTpcDbGeometry::outerSectorAnodeWire(int n) const
