@@ -16,66 +16,71 @@ class StMagUtilities;
 
 class StiTrackFinder 
 {
- public:
-
+public:
+    
     typedef StiObjectFactory<StiTrackNode> StiTrackNodeFactory;
     
-  //_c-tor/d-tor__________________________________________________
-  StiTrackFinder();
-  virtual ~StiTrackFinder();
-  
-  //_action methods_______________________________________________
-  virtual void findTracks()=0;
+    //_c-tor/d-tor__________________________________________________
+    StiTrackFinder();
+    virtual ~StiTrackFinder();
+    
+    //_action methods_______________________________________________
+    virtual void findTracks()=0; //Do tracking
+    virtual void reset()=0; //Full internal reset
+    virtual bool isValid(bool debug=false) const = 0; //Check if everything is kosher
+    virtual void doNextAction() = 0;
+    
+    //_accessor methods_____________________________________________
+    void setTrackSeedFinder(StiSeedFinder * finder);
+    void setTrackFilter(StiTrackFilter * filter);
+    void setGeometryContainer(StiDetectorContainer* geometry);
+    void setHitContainer(StiHitContainer * hitContainer);
+    void setTrackContainer(StiTrackContainer * newTrackContainer);
+    void setTrackNodeFactory(StiTrackNodeFactory * factory);
+    void setMagneticField(StMagUtilities * magField);
+    
+    void setTrackFiltering(bool option);
+    void setElossCalculated(bool option);
+    void setMCSCalculated(bool option);
+    
+    StiSeedFinder             * getTrackSeedFinder()    const;
+    StiTrackFilter            * getTrackFilter()        const;
+    StiDetectorContainer      * getGeometryContainer()  const;
+    StiHitContainer           * getHitContainer()       const;
+    StiTrackContainer         * getTrackContainer()     const;
+    StiTrackNodeFactory       * getTrackNodeFactory()   const;
+    StMagUtilities            * getMagneticField()      const;
+    
+    
+    bool isTrackFiltering()   const;
+    bool isElossCalculated()  const;
+    bool isMCSCalculated()    const;
+    int  getAnalyzedTrackSeedCount()  const;
+    int  getFoundTrackCount()         const;
+    int  getAcceptedTrackCount()      const;
+    int  getStatus()                  const;
+    
+protected:
 
-
-  //_accessor methods_____________________________________________
-  void setTrackSeedFinder(StiSeedFinder * finder);
-  void setTrackFilter(StiTrackFilter * filter);
-  void setGeometryContainer(StiDetectorContainer* geometry);
-  void setHitContainer(StiHitContainer * hitContainer);
-  void setTrackContainer(StiTrackContainer * newTrackContainer);
-  void setTrackNodeFactory(StiTrackNodeFactory * factory);
-  void setMagneticField(StMagUtilities * magField);
-
-  void setTrackFiltering(bool option);
-  void setElossCalculated(bool option);
-  void setMCSCalculated(bool option);
-
-  StiSeedFinder             * getTrackSeedFinder()    const;
-  StiTrackFilter            * getTrackFilter()        const;
-  StiDetectorContainer      * getGeometryContainer()  const;
-  StiHitContainer           * getHitContainer()       const;
-  StiTrackContainer         * getTrackContainer()     const;
-  StiTrackNodeFactory       * getTrackNodeFactory()   const;
-  StMagUtilities            * getMagneticField()      const;
-
-
-  bool isTrackFiltering()   const;
-  bool isElossCalculated()  const;
-  bool isMCSCalculated()    const;
-  int  getAnalyzedTrackSeedCount()  const;
-  int  getFoundTrackCount()         const;
-  int  getAcceptedTrackCount()      const;
-  int  getStatus()                  const;
-
- protected:
-
-  StiSeedFinder             * trackSeedFinder;
-  StiTrackFilter            * trackFilter;
-  StiDetectorContainer      * geometryContainer;
-  StiHitContainer           * hitContainer;
-  StiTrackContainer         * trackContainer;
-  StiTrackNodeFactory       * trackNodeFactory;
-  StMagUtilities            * magField;
-
-  int analyzedTrackSeeds;
-  int acceptedTracks;
-  int foundTracks;
-
-  bool trackFiltering;
-  bool elossCalculated;
-  bool mcsCalculated;
-  int  status;
+    //Objects owned by this class
+    StiTrackFilter            * trackFilter;
+    
+    //Objects not owned by this class
+    StiSeedFinder             * trackSeedFinder;
+    StiTrackNodeFactory       * trackNodeFactory;
+    StMagUtilities            * magField;
+    StiDetectorContainer      * geometryContainer;
+    StiHitContainer           * hitContainer;
+    StiTrackContainer         * trackContainer;
+    
+    int analyzedTrackSeeds;
+    int acceptedTracks;
+    int foundTracks;
+    
+    bool trackFiltering;
+    bool elossCalculated;
+    bool mcsCalculated;
+    int  status;
 };
 
 

@@ -18,71 +18,56 @@
 #include "StiTrackFinder.h"
 
 StiTrackFinder::StiTrackFinder()
+    : trackFilter(0), trackSeedFinder(0), trackNodeFactory(0), magField(0),
+      geometryContainer(0), hitContainer(0), trackContainer(0)
 {
+    cout <<"StiTrackFinder::StiTrackFinder()"<<endl;
+
+    //Perform safe sets of tracking essentials
+
+    //Track Filter
+    setTrackFilter( new StiTrackFilter() );
+
+    //Detector Container
+    setGeometryContainer( StiDetectorContainer::instance() );
+
+    //Hit Container
+    setHitContainer( StiHitContainer::instance() );
+
+    //TrackContainer
+    setTrackContainer( StiTrackContainer::instance() );
+    
 }
 
 StiTrackFinder::~StiTrackFinder()
 {
+    cout <<"StiTrackFinder::~StiTrackFinder()"<<endl;
+
+    delete trackFilter;
+    trackFilter=0;
 }
 
-void StiTrackFinder::setMagneticField(StMagUtilities * magFieldDesc)
+bool StiTrackFinder::isValid(bool debug) const
 {
-  // Set the magnetic field descriptor used by this tracker.
-  // The current descriptor, if non null, and different from 
-  // the given descriptor, is destroyed.
-
-  if(magFieldDesc==0)
-    {
-      cout << "StiTrackFinder::setMagneticField() - ERROR - " << endl
-	   << "  The given magnetic field descriptor is NULL." << endl
-	   << "  A valid, non null value, MUST be supplied" << endl;
-      return;
+    bool val = trackSeedFinder && trackFilter && trackNodeFactory  && geometryContainer &&
+	hitContainer && trackContainer; //
+	//&& magField;
+    
+    if (debug) {
+	cout <<"\nStiTrackFinder::isValid()\n"<<endl;
+	cout <<"trackSeedFinder:\t"<<trackSeedFinder<<endl;
+	cout <<"trackFilter:\t\t"<<trackFilter<<endl;
+	cout <<"trackNodeFactory:\t"<<trackNodeFactory<<endl;
+	cout <<"magField:\t\t"<<magField<<endl;
+	cout <<"geometryContainer:\t"<<geometryContainer<<endl;
+	cout <<"hitContainer:\t\t"<<hitContainer<<endl;
+	cout <<"trackContainer:\t\t"<<trackContainer<<endl;
+	cout <<"Returning:\t\t"<< val<< endl;
     }
-  if (magFieldDesc==magField)
-    {
-      cout << "StiTrackFinder::setMagneticField() - WARNING - " << endl
-	   << "  The given magnetic field descriptor is identical to the one" << endl
-	   << "  currently in use. No change will be made" << endl;
-      return;
-    }
-  if (magField!=0)
-    delete magField;
-
-  magField = magFieldDesc;
+    return val;
 }
 
-void StiTrackFinder::setTrackSeedFinder(StiSeedFinder * finder)
-{
-  //----------------------------------------------------------------- 
-  // Set the seedFinder to be used by this finder to the given
-  // value. The current finder, if any, is destroyed.
-  // Nothing is done if the given finder is same as currently used
-  // by this track finder.
-  //----------------------------------------------------------------- 
-  if (finder==0)
-    {
-      cout << "StiTrackFinder::setTrackSeedFinder() - ERROR - " << endl
-	   << "  The given Track Seed Finder is NULL" << endl
-	   << "  A valid, non null value, MUST be supplied" << endl;
-      return;
-    }
-
-  // check whether current seed finder equals given finder, if so exit
-  if (trackSeedFinder==finder)
-    {
-      cout << "StiTrackFinder::setTrackSeedFinder() - WARNING - " << endl
-	   << "  The given Track Seed Finder is identical to the one" << endl
-	   << "  currently in use. No change will be made" << endl;
-      return;
-    }
-
-  // check whether a seed finder currently exist, if so destroy it.
-  if (trackSeedFinder!=0)
-    delete trackSeedFinder;
- 
-  // set seed finder used by this track finder to given value
-  trackSeedFinder = finder;  
-}
+//Set Owned Objects-------
 
 void StiTrackFinder::setTrackFilter(StiTrackFilter * filter)
 {
@@ -118,124 +103,82 @@ void StiTrackFinder::setTrackFilter(StiTrackFilter * filter)
   trackFilter = filter;  
 }
 
-void StiTrackFinder::setGeometryContainer(StiDetectorContainer* newGeometry)
+// Set Non-Owned objects ---------
+void StiTrackFinder::setTrackSeedFinder(StiSeedFinder * finder)
 {
-  //----------------------------------------------------------------- 
-  // Set the detector geometry to be used by this track finder to the given
-  // geometry container.
-  // Note: the current container is destroyed.
-  // Note: the current container is replaced only if the new container
-  //       is different.
-  //----------------------------------------------------------------- 
-  if (newGeometry==0)
-    {
-      cout << "StiTrackFinder::setGeometryContainer() - ERROR - " << endl
-	   << "  The geometry container is NULL." << endl
-	   << "  A valid, non null value, MUST be supplied" << endl;
-      return;
+    if (finder==0)    {
+	cout << "StiTrackFinder::setTrackSeedFinder() - ERROR - " << endl
+	     << "  The given Track Seed Finder is NULL" << endl
+	     << "  A valid, non null value, MUST be supplied" << endl;
+	return;
     }
 
-  // check whether current geometry equals given geometry, if so exit
-  if (newGeometry==geometryContainer)
-    {
-      cout << "StiTrackFinder::setGeometryContainer() - WARNING - " << endl
-	   << "  The geometry container is is identical to the one" << endl
-	   << "  currently in use. No change will be made" << endl;
-      return;
+    else {
+	trackSeedFinder = finder;
     }
-
-  // check whether a geometry currently exist, if so destroy it.
-  if (geometryContainer!=0)
-      //delete geometryContainer;
-      //Can't delete the singleton!
- 
-  // set geometry used by this track finder to given value
-  geometryContainer = newGeometry;
-}
-
-void StiTrackFinder::setHitContainer(StiHitContainer * newHitContainer)
-{
-  //----------------------------------------------------------------- 
-  // Set the hit container to be used by this track finder to the given
-  // hit container.
-  // Note: the current container is destroyed.
-  // Note: the current container is replaced only if the new container
-  //       is different.
-  //----------------------------------------------------------------- 
-  if (newHitContainer==0)
-    {
-      cout << "StiTrackFinder::setHitContainer() - ERROR - " << endl
-	   << "  The given hit container is NULL." << endl
-	   << "  A valid, non null value, MUST be supplied" << endl;
-      return;
-    }
-
-  // check whether current geometry equals given geometry, if so exit
-  if (newHitContainer==hitContainer)
-    {
-      cout << "StiTrackFinder::setHitContainer() - ERROR - " << endl
-	   << "  The given hit container is is identical to the one" << endl
-	   << "  currently in use. No change will be made" << endl;
-      return;
-    }
-
-  // check whether a hit container currently exist, if so destroy it.
-  if (hitContainer!=0)
-      //delete hitContainer;
-      //Can't delete the singleton
- 
-  // set hit container used by this track finder to given value
-  hitContainer = newHitContainer;
-}
-
-void StiTrackFinder::setTrackContainer(StiTrackContainer * newTrackContainer)
-{
-  //----------------------------------------------------------------- 
-  // Set the track container to be used by this track finder to the given
-  // track container.
-  // Note: the current container is destroyed.
-  // Note: the current container is replaced only if the new container
-  //       is different.
-  //----------------------------------------------------------------- 
-  if (newTrackContainer==0)
-    {
-      cout << "StiTrackFinder::setTrackContainer() - ERROR - " << endl
-	   << "  The given track container is NULL." << endl
-	   << "  A valid, non null value, MUST be supplied" << endl;
-      return;
-      
-    }
-  // check whether current container equals given container, if so exit
-  if (newTrackContainer==trackContainer)
-    {
-      cout << "StiTrackFinder::setTrackContainer() - WARNING - " << endl
-      	   << "  The given track container is is identical to the one" << endl
-	   << "  currently in use. No change will be made" << endl;
-      return;
-    }
-
-  // check whether a track container currently exist, if so destroy it.
-  if (trackContainer!=0)
-      //delete trackContainer;
-      //Can't delete the singleton
- 
-  // set track container used by this track finder to given value
-  trackContainer = newTrackContainer;
 }
 
 void StiTrackFinder::setTrackNodeFactory(StiTrackNodeFactory * factory)
 {
-  //----------------------------------------------------------------- 
-  // Set the track node factory to be used by this track finder to the given
-  // factory
-  // Note: the current factory is destroyed.
-  // Note: the current factory is replaced only if the new factory
-  //       is different.
-  // 
-  //----------------------------------------------------------------- 
-  if (trackNodeFactory!=0 && trackNodeFactory!=factory)
-      //delete trackNodeFactory;
-      //shouldn't delete the static instance
-  trackNodeFactory = factory;
+    if (factory!=0) {
+	trackNodeFactory = factory;
+    }
+    else {
+	cout <<"StiTrackFinder::setTrackNodeFactory():\tERROR! factory==0"<<endl;
+    }
+}
+
+void StiTrackFinder::setMagneticField(StMagUtilities * magFieldDesc)
+{
+    if(magFieldDesc==0)	{
+	cout << "StiTrackFinder::setMagneticField() - ERROR - " << endl
+	     << "  The given magnetic field descriptor is NULL." << endl
+	     << "  A valid, non null value, MUST be supplied" << endl;
+	return;
+    }
+    else {
+	magField = magFieldDesc;
+    }
+}
+
+void StiTrackFinder::setGeometryContainer(StiDetectorContainer* newGeometry)
+{
+    if (newGeometry==0)	{
+	cout << "StiTrackFinder::setGeometryContainer() - ERROR - " << endl
+	     << "  The geometry container is NULL." << endl
+	     << "  A valid, non null value, MUST be supplied" << endl;
+	return;
+    }
+
+    else {
+	geometryContainer = newGeometry;
+    }
+}
+
+void StiTrackFinder::setHitContainer(StiHitContainer * newHitContainer)
+{
+    if (newHitContainer==0) {
+	cout << "StiTrackFinder::setHitContainer() - ERROR - " << endl
+	     << "  The given hit container is NULL." << endl
+	     << "  A valid, non null value, MUST be supplied" << endl;
+	return;
+    }
+
+    else {
+	hitContainer = newHitContainer;
+    }
+}
+
+void StiTrackFinder::setTrackContainer(StiTrackContainer * newTrackContainer)
+{
+    if (newTrackContainer==0)    {
+	cout << "StiTrackFinder::setTrackContainer() - ERROR - " << endl
+	     << "  The given track container is NULL." << endl
+	     << "  A valid, non null value, MUST be supplied" << endl;
+	return;
+    }
+    else {
+	trackContainer = newTrackContainer;
+    }
 }
 

@@ -22,10 +22,15 @@ StiTrackSeedFinder::StiTrackSeedFinder(StiHitContainer* h)
     : mhitstore(h), miterator(new combo_iterator()), mtrackfactory(0),
       mdrawablehits(new StiRootDrawableHits()), mhitcombofilter(0)
 {
-    //miterator = new combo_iterator();
-    
+
+    //Setup a default 2 hit filter
+    mhitcombofilter;
+    StiRectangular2HitComboFilter* temp = new StiRectangular2HitComboFilter();
+    temp->deltaD = 1.; //TEMP
+    temp->deltaZ = 1.; //TEMP
+    mhitcombofilter = temp;
+
     //Look at seeds (temp, MLM 8/8/01)
-    //mdrawablehits = new StiRootDrawableHits();
     mdrawablehits->clear();
     mdrawablehits->setColor(3);
     mdrawablehits->setMarkerStyle(3);
