@@ -21,7 +21,6 @@ class StiHitFiller;
 class StiDisplayManager;
 class StiDetectorContainer;
 class StiTrackContainer;
-class StiDrawableHits;
 class StiEvaluableTrackSeedFinder;
 class StiTrackSeedFinder;
 class StiTrackFinder;
@@ -42,7 +41,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.20 2001/09/05 20:32:30 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.21 2001/09/06 15:15:36 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -53,7 +52,6 @@ public:
     //Gets/sets
     void setMaterialBuildPath(char* val);
     void setDetectorBuildPath(char* val);
-    void setDrawableStTrackType(StTrackType);
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
 
@@ -82,24 +80,17 @@ private:
 
     //Display
     StiDisplayManager* mdisplay; //!
-    StiDrawableHits* mdrawablehits; //!
     
     //Utilites
     StiHitFiller* mhitfiller; //!
-    StiEvaluableTrackSeedFinder* mEvaluableSeedFinder; //!
-    StiTrackSeedFinder* mkalmanseedfinder; //!
 
-    //TEST!!!!!!!
-    StiTrackSeedFinder* mtempseedfinder; //!
+    //SeedFinders
+    StiEvaluableTrackSeedFinder* mEvaluableSeedFinder; //!
+    StiTrackSeedFinder* mKalmanSeedFinder; //!
     StiCompositeSeedFinder* mcompseedfinder; //!
 
     //Tracker
     StiKalmanTrackFinder* mtracker; //!
-    
-    char* mmaterialbuildpath; //!
-    char* mdetectorbuildpath; //!
-
-    StTrackType mStTrackType;
     
     static StiMaker* sinstance; //!
 
@@ -112,11 +103,6 @@ private:
 };
 
 //inlines
-
-inline void StiMaker::setDrawableStTrackType(StTrackType val)
-{
-    mStTrackType = val;
-}
 
 inline void StiMaker::setMcEventMaker(StMcEventMaker* val)
 {
