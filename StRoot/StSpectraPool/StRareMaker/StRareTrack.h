@@ -11,22 +11,22 @@ class StRareTrack : public TObject{
   StRareTrack();
   StRareTrack(StPrimaryTrack* track);
   ~StRareTrack(){};
-  int tracknumber() const;
-  int iflag() const;
+  int   tracknumber() const;
+  int   iflag() const;
   float px() const;
   float py() const;
   float pz() const;
   float p() const;
-  int chargesign() const;
+  short chargesign() const;
   float rapidity(float mass) const;
   float pt() const;
   float dca() const;
   float dedx() const;
-  int   ndedx() const;
+  short ndedx() const;
   float chisqxy() const;
   float chisqz() const;
-  int   npntpossible() const;
-  int   npntfit() const;
+  short npntpossible() const;
+  short npntfit() const;
   float dedxExpected(float mass, float charge = 1) const;
   float dedxPi() const;
   float dedxProton() const;
@@ -34,8 +34,8 @@ class StRareTrack : public TObject{
   float dedxTriton() const;
   float dedxHe3() const;
   float dedxHe4() const;
-  int trigtype()  const; //33 = random track
-  void SetTrigType(int type);
+  int   trigtype()  const; //33 = random track
+  void  SetTrigType(int type);
 
  private:
   int   ftracknumber;
@@ -43,23 +43,17 @@ class StRareTrack : public TObject{
   float fpx;
   float fpy;
   float fpz;
-  int   fchargesign;
+  short fchargesign;
   float fdca;
   float fdedx;
-  int   fndedx;
+  short fndedx;
   float fchisqxy;
   float fchisqz;
-  int   fnpntpossible;
-  int   fnpntfit;
-  float fdedxPion;
-  float fdedxProton;
-  float fdedxDeuteron;
-  float fdedxTriton;
-  float fdedxHe3;
-  float fdedxHe4;
-  int ftrigtype;
+  short fnpntpossible;
+  short fnpntfit;
+  int   ftrigtype;
 
-  ClassDef(StRareTrack,1)
+  ClassDef(StRareTrack,2)
 };
  
 inline int   StRareTrack::tracknumber() const {return ftracknumber;}
@@ -69,14 +63,14 @@ inline float StRareTrack::py() const {return fpy;}
 inline float StRareTrack::pz() const {return fpz;}
 inline float StRareTrack::p() const {return sqrt(fpx*fpx+fpy*fpy+fpz*fpz);}
 inline float StRareTrack::pt() const {return sqrt(fpx*fpx+fpy*fpy);}
-inline int   StRareTrack::chargesign() const {return fchargesign;}
+inline short StRareTrack::chargesign() const {return fchargesign;}
 inline float StRareTrack::dca() const {return fdca;} 
 inline float StRareTrack::dedx() const {return fdedx;}
-inline int   StRareTrack::ndedx() const {return fndedx;}
+inline short StRareTrack::ndedx() const {return fndedx;}
 inline float StRareTrack::chisqxy() const {return fchisqxy;} 
 inline float StRareTrack::chisqz() const {return fchisqz;} 
-inline int   StRareTrack::npntpossible() const {return fnpntpossible;}
-inline int   StRareTrack::npntfit() const {return fnpntfit;}
+inline short StRareTrack::npntpossible() const {return fnpntpossible;}
+inline short StRareTrack::npntfit() const {return fnpntfit;}
 inline float StRareTrack::dedxPi() const {return dedxExpected(0.139,1);} 
 inline float StRareTrack::dedxProton() const {return dedxExpected(0.939,1);} 
 inline float StRareTrack::dedxDeuteron() const {return dedxExpected(1.88,1);} 

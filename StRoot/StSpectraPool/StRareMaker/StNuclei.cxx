@@ -33,7 +33,7 @@ int StNuclei::Accept(StPrimaryTrack* trk){
   if (dedx>dedxmin&&dedx>dedxbad) dedxOK=1;
   float random_number = (float)rand()/(float)RAND_MAX;
   //  cout << "random number = " << random_number << endl;
-  if (random_number<0.0005){dedxOK=1;}  //randomly select particles
+  if (random_number<0.005){dedxOK=1;}  //randomly select particles
   if (track.p()>pcut[0]&&track.p()<pcut[1]&&track.npntfit()>20&&track.iflag()>=0) pOK = 1;
   //  cout << "chargeOK = " << chargeOK << endl;
   //  cout << "dedxOK = " << dedxOK << endl;

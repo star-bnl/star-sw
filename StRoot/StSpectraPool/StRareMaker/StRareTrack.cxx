@@ -5,6 +5,7 @@ double dEdx_formula(double momentum, double mass);
 ClassImp(StRareTrack)
 
 StRareTrack::StRareTrack(){}
+
 StRareTrack::StRareTrack(StPrimaryTrack* track){
   StGlobalTrack* gtrack = static_cast<StGlobalTrack*>((StTrack*)track);
   fdca = gtrack->impactParameter();
@@ -17,12 +18,6 @@ StRareTrack::StRareTrack(StPrimaryTrack* track){
   fpx = track->geometry()->momentum().x();
   fpy = track->geometry()->momentum().y();
   fpz = track->geometry()->momentum().z();
-  fdedxPion = dedxPi();
-  fdedxProton = dedxProton();
-  fdedxDeuteron = dedxDeuteron();
-  fdedxTriton = dedxTriton();
-  fdedxHe3 = dedxHe3();
-  fdedxHe4 = dedxHe4();
   fchargesign = track->geometry()->charge();
   ftrigtype = 0;
   fdedx = 0.0;

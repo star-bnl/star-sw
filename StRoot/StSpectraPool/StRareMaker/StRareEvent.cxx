@@ -35,11 +35,17 @@ void StRareEvent::fillRareEvent(StEvent* event){
   StEvent& evt = *event;
   fnumberOfGoodPrimaryTracks = uncorrectedNumberOfNegativePrimaries(evt);
   if (event->primaryVertex()) {
-    fVertexZ = event->primaryVertex()->position().z();
+        fVertexZ = event->primaryVertex()->position().z();
   }
-  else{
-    fVertexZ = -999.0;
+  else {
+        fVertexZ = -999.0;
   }
+
+  StL0Trigger* myL0Trigger = event->l0Trigger();
+  if (!myL0Trigger) {
+        fTriggerWord = 0;
+  }
+  else fTriggerWord = myL0Trigger->triggerWord();
 }
 
 
@@ -56,6 +62,8 @@ void StRareEvent::fillL3Info(StL3Trigger *l3trigger)
         cout << "No l3 event summary found." << endl;
 	return;
   }
+
+  fL3Unbiased = l3EventSummary->unbiasedTrigger();
 
   fL3Flag = kFALSE;
 
