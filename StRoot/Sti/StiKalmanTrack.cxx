@@ -374,16 +374,16 @@ void StiKalmanTrack::initialize(double curvature,
     //StThreeVectorD stiOrigin;
     double alpha,alphaP,eta;  
     hitvector::const_iterator it;
-    double state[5];  
+    double state[5];
     double error[15];
     // These are constant for all hits
     state[3]=curvature;
     state[4]=tanl;
     // For the time being set a diagonal error matrx
-    error[0] = 1.;  
-    error[1] = 0.; error[2] = 1.;  
-    error[3] = 0.; error[4] = 0.; error[5] = 1.;  
-    error[6] = 0.; error[7] = 0.; error[8] = 0.;  error[9]  = 1.;  
+    error[0] = 1.;
+    error[1] = 0.; error[2] = 1.;
+    error[3] = 0.; error[4] = 0.; error[5] = 1.;
+    error[6] = 0.; error[7] = 0.; error[8] = 0.;  error[9]  = 1.;
     error[10]= 0.; error[11] = 0.;error[12] = 0.; error[13] = 0.;  error[14] = 1.;
     // do the transfer here
     StiKalmanTrackNode * node  = 0;
@@ -1050,7 +1050,7 @@ bool StiKalmanTrack::find(int direction)
       getOuterMostHitNode()->getGlobalMomentum(pp);
       // cout << "\nOut-x:" << getOuterMostHitNode()->fX<<" p:"<<pp[0]<<" "<<pp[1]<<" "<<pp[2]<<"\n"<<endl;
     }
-  reserveHits();  
+  reserveHits();
   setFlag(1);
   return trackExtended;
 }

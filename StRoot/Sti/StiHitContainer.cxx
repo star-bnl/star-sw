@@ -300,8 +300,10 @@ void StiHitContainer::setRefPoint(StiHit* ref)
     
     //Now search over distance along d
     for (hitvector::iterator cit=mstart; cit!=mstop; cit++) {
-	if (fabs( (*cit)->y() - ref->y() ) < mdeltad) 
-	    mcandidatevec.push_back((*cit));
+	if (fabs( (*cit)->y() - ref->y() ) < mdeltad)
+	    if ( (*cit)->timesUsed()==0) { //hack, MLM (9/27/02)  should be up to the user
+		mcandidatevec.push_back((*cit));
+	    }
     }
     mcurrent = mcandidatevec.begin();
     
