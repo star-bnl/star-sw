@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.108 2001/02/10 20:31:09 fisyak Exp $
+# $Id: Construct,v 1.109 2001/02/19 17:32:27 fisyak Exp $
 use Env;
 use lib $STAR . "/mgr"; # Modify perl include path
 use ConsDefs;
@@ -33,10 +33,10 @@ $repository = `echo $STAR`; chop ($repository);
 print "repository = $repository\n" unless ($param::quiet); 
 Repository ($repository);# unless $param::noRepository;
 my @Repo = Repository_List; 
-if ($#Repo > -1 and $USER ne 'fisyak') {
+if (defined($ARG{Salt}))       {$Salt = $ARG{Salt};}
+if ($#Repo > -1) {
   print "Repositories:  \"@Repo\";" unless ($param::quiet);
-  if (defined($ARG{Salt}))       {$Salt = $ARG{Salt};}
-  elsif (!defined($ARG{NoSalt}))  {$Salt = "user";}
+  if (!$Salt && !defined($ARG{NoSalt}))  {$Salt = "user";}
   if ($Salt) {Salt($Salt); print "\tSet Salt to \"$param::salt\"\n" unless ($param::quiet);}
 }
 else {$param::keep = 1;}
@@ -129,7 +129,8 @@ foreach my $dir ("pams","StRoot","StPiD"){
     }
     if ($#Repo == -1) {
       if ($STAR_HOST_SYS =~ /^sun4x_56/ && 
-	  ($sub_dir =~ /StHbtMaker/ || $sub_dir =~ /StMiniDstMaker/ || $sub_dir =~ /StppSpin/) 
+	  ($sub_dir =~ /StHbtMaker/ || $sub_dir =~ /StMiniDstMaker/
+	)#   || $sub_dir =~ /StppSpin/) 
 	  ) {
 	 print "skip dir: $sub_dir\n";
 	next;
