@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.11 1999/03/05 21:19:37 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.12 1999/03/07 16:53:32 fine Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.12  1999/03/07 16:53:32  fine
+// New method DrawHists
+//
 // Revision 1.11  1999/03/05 21:19:37  kathy
 // added new histograms
 //
@@ -54,6 +57,9 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include <string.h>
+#include "TStyle.h"
+#include "TCanvas.h"
+#include "TPostScript.h"
 #include "PhysicalConstants.h"
 #include <math.h>
 #include "TMath.h"
@@ -140,9 +146,72 @@ ClassImp(St_QA_Maker)
 St_QA_Maker::St_QA_Maker(const char *name, const char *title):StMaker(name,title)
 {
    drawinit=kFALSE;
+   SetZones();
+   SetPaperSize();
+   SetHistsNames();
 }
 //_____________________________________________________________________________
 St_QA_Maker::~St_QA_Maker(){
+  SafeDelete(m_QACanvas);
+}
+//_____________________________________________________________________________
+Int_t St_QA_Maker::DrawHists() 
+{
+  const Int_t numPads = m_PadColumns*m_PadRows;
+
+  gStyle->SetPaperSize(m_PaperWidth,m_PaperHeight);
+//  gStyle->SetOptStat(0);
+//   TCanvas *QACanvas = new TCanvas("Banner","Canvas Title",30*height,30*width);
+  TPostScript ps("exPsFile.ps");
+
+  gStyle->SetOptStat(111111);
+  SafeDelete(m_QACanvas);
+  TCanvas *QACanvas = new TCanvas("CanvasName","Canvas Title",30*m_PaperWidth,30*m_PaperHeight);
+  QACanvas->SetFillColor(19);
+  QACanvas->SetBorderSize(2);
+
+  QACanvas->Divide(m_PadColumns,m_PadRows);
+
+  ps.NewPage();
+  const Char_t *firstHistName = m_FirstHistName.Data();
+  const Char_t *lastHistName  = m_LastHistName.Data();
+  TObject *obj = 0;
+  TList *dirList = gDirectory->GetList();
+  Int_t padCount = 0;
+  //_____________________
+  // Create an itertor
+    TIter nextHist(dirList);
+    Int_t histCounter = 0;
+    Int_t histReadCounter = 0;
+    Bool_t started = kFALSE;
+    while (obj = nextHist()) {
+      if (obj->InheritsFrom("TH1")) { 
+          histReadCounter++;
+          printf(" %d. Reading ... %s::%s; Title=\"%s\"\n",histReadCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
+          if (! started && (strcmp("*",firstHistName)==0 || strcmp(obj->GetName(),firstHistName)==0 ))  started = kTRUE;
+          if (started) {
+            if (strcmp(obj->GetName(),lastHistName)==0) started = kFALSE;
+            histCounter++;
+            printf("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",histCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
+            if (padCount == numPads) {
+                ps.NewPage();
+                padCount=0;
+            }
+            QACanvas->cd(++padCount);
+
+            obj->Draw();   
+            if (gPad) gPad->Update();
+         }
+      }
+    }
+  ps.Close();
+  return histCounter;
+}
+
+//_____________________________________________________________________________
+Int_t St_QA_Maker::Finish() {
+   if (drawinit) DrawHists();
+   return StMaker::Finish();
 }
 //_____________________________________________________________________________
 Int_t St_QA_Maker::Init(){
@@ -397,7 +466,7 @@ void St_QA_Maker::BookHistEmsHitsBsmd(){
 void St_QA_Maker::MakeHistEvSum(){
  //  PrintInfo();
  // Fill histograms for event summary
-  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSet *dst = g_Chain->DataSet("dst");
   St_DataSetIter dstI(dst);         
    
   St_dst_event_summary *event_summary = (St_dst_event_summary *) dstI["event_summary"];
@@ -435,7 +504,7 @@ void St_QA_Maker::MakeHistEvSum(){
 void St_QA_Maker::MakeHistGlob(){
 
    // Fill histograms for globtrk
-  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSet *dst = g_Chain->DataSet("dst");
   St_DataSetIter dstI(dst);         
 
   St_dst_track *globtrk = (St_dst_track *) dstI["globtrk"];
@@ -479,7 +548,7 @@ void St_QA_Maker::MakeHistGlob(){
  void St_QA_Maker::MakeHistDE() {
    // Fill histograms for dE/dx
 
-  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSet *dst = g_Chain->DataSet("dst");
   St_DataSetIter dstI(dst);
 
   
@@ -500,7 +569,7 @@ void St_QA_Maker::MakeHistGlob(){
 
 void St_QA_Maker::MakeHistPrim(){
    cout << " *** in St_QA_Maker - filling primtrk histograms " << endl;
-  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSet *dst = g_Chain->DataSet("dst");
   St_DataSetIter dstI(dst);
   St_dst_track      *primtrk     = (St_dst_track *) dstI["primtrk"];
 
@@ -542,7 +611,7 @@ void St_QA_Maker::MakeHistPrim(){
 
 void St_QA_Maker::MakeHistGen(){
    cout << " *** in St_QA_Maker - filling particle histograms " << endl;
-  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSet *dst = g_Chain->DataSet("dst");
   St_DataSetIter dstI(dst);
 
   St_particle   *part     = (St_particle  *) dstI["particle"];
@@ -593,7 +662,7 @@ void St_QA_Maker::MakeHistGen(){
 
 void St_QA_Maker::MakeHistV0(){
    cout << " *** in St_QA_Maker - filling dst_v0_vertex histograms " << endl;
-  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSet *dst = g_Chain->DataSet("dst");
   St_DataSetIter dstI(dst);         
 
   St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex *) dstI["dst_v0_vertex"];
@@ -629,7 +698,7 @@ void St_QA_Maker::MakeHistV0(){
 void St_QA_Maker::MakeHistPID(){
    cout << " *** in St_QA_Maker - filling PID histograms " << endl;
 
-  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSet *dst = g_Chain->DataSet("dst");
   St_DataSetIter dstI(dst);        
 
   // spectra-PID diagnostic histograms
@@ -670,7 +739,7 @@ void St_QA_Maker::MakeHistPID(){
 
 void St_QA_Maker::MakeHistVertex(){
    cout << " *** in St_QA_Maker - filling vertex histograms " << endl;
-  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSet *dst = g_Chain->DataSet("dst");
   St_DataSetIter dstI(dst);
   St_dst_vertex      *vertex     = (St_dst_vertex *) dstI["vertex"];
 
@@ -806,8 +875,8 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.11 1999/03/05 21:19:37 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.12 1999/03/07 16:53:32 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (g_Chain->Debug()) StMaker::PrintInfo();
 }
