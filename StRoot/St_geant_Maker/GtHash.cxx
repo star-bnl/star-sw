@@ -11,8 +11,8 @@ GtCradle(int n);
 ~GtCradle(){ if (fArray) delete [] fArray;};
 
 protected:
-  virtual Bool_t  IsEqual(TObject* obj);
-  virtual ULong_t Hash();
+  virtual Bool_t  IsEqual(const TObject* obj) const;
+  virtual ULong_t Hash() const;
 };
 
 GtCradle::GtCradle(int n)
@@ -22,7 +22,7 @@ GtCradle::GtCradle(int n)
  fPointer=0;
 }
  
-Bool_t GtCradle::IsEqual(TObject* obj)
+Bool_t GtCradle::IsEqual(const TObject* obj) const
 { 
   GtCradle *He = (GtCradle*)obj;
   if (fNWords != He->fNWords) return 0; 
@@ -32,7 +32,7 @@ Bool_t GtCradle::IsEqual(TObject* obj)
   for (int i=1; i<fNWords; i++) if (me[i]!=he[i]) return 0;
   return 1;
 }
-ULong_t GtCradle::Hash()
+ULong_t GtCradle::Hash() const
 { 
   ULong_t *me = (ULong_t *)fArray;
   ULong_t ret = fNWords;
