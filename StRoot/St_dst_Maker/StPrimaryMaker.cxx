@@ -1,9 +1,12 @@
-//////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.49 2000/09/27 16:41:05 genevb Exp $
+// $Id: StPrimaryMaker.cxx,v 1.50 2001/02/02 16:09:50 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.50  2001/02/02 16:09:50  caines
+// Get svt tracks from est branch
+//
 // Revision 1.49  2000/09/27 16:41:05  genevb
 // Handle negative fields
 //
@@ -302,8 +305,6 @@ Int_t StPrimaryMaker::Make(){
 
   if (! globtrk)    {globtrk = new St_dst_track("globtrk",1); AddGarb(globtrk);}
 
-  St_svm_evt_match *evt_match = (St_svm_evt_match *) matchI("evt_match");
-  if (! globtrk)    {evt_match = new St_svm_evt_match("evt_match",1); AddGarb(evt_match);}
   St_dst_track     *primtrk     = 0;   
 
   St_dst_vertex *vertex = new St_dst_vertex("vertex", 4); 
@@ -342,31 +343,34 @@ Int_t StPrimaryMaker::Make(){
   St_sgr_groups     *tpc_groups = (St_sgr_groups *) matchI("tpc_groups");
   if (! tpc_groups)    {tpc_groups = new St_sgr_groups("tpc_groups",1); AddGarb(tpc_groups);} 
   
-  St_DataSet     *svtracks = GetInputDS("svt_tracks");
+  St_DataSet     *svtracks = GetInputDS("est");
   St_DataSet     *svthits  = GetInputDS("svt_hits");
   
   St_stk_track   *stk_track   = 0;
-  St_sgr_groups  *svt_groups      = 0;
+  St_sgr_groups  *svt_groups  = 0;
+  St_svm_evt_match *evt_match = 0;
   St_scs_spt     *scs_spt     = 0;
   
   // Case svt tracking performed
   if (svtracks) {
-    stk_track = (St_stk_track  *) svtracks->Find("stk_track");
-    svt_groups    = (St_sgr_groups *) svtracks->Find("groups");
+    stk_track = (St_stk_track  *) svtracks->Find("EstSvtTrk");
+    svt_groups= (St_sgr_groups *) svtracks->Find("EstGroups");
+    evt_match = (St_svm_evt_match *) svtracks->Find("EstMatch");
   }
   if (svthits) {
     scs_spt     = (St_scs_spt    *)  svthits->Find("scs_spt");
   }
   
   // Case silicon not there
-  if (!stk_track) {stk_track = new St_stk_track("stk_track",1); AddGarb(stk_track);}
-  if (!svt_groups)    {svt_groups = new St_sgr_groups("groups",1); AddGarb(svt_groups);}
+  if (!stk_track) {stk_track = new St_stk_track("EstSvtTrk",1); AddGarb(stk_track);}
+  if (!svt_groups)    {svt_groups = new St_sgr_groups("EstGroups",1); AddGarb(svt_groups);}
+  if (!evt_match)    {evt_match = new St_svm_evt_match("EstMatch",1); AddGarb(evt_match);}
   if (!scs_spt)   {scs_spt = new St_scs_spt("scs_spt",1); AddGarb(scs_spt);}
   // 			Case running est tpc -> Si space point tracking
   if ( !(svtracks && svthits) ){
-    svt_groups = new St_sgr_groups("groups",10000); AddGarb(svt_groups);
-    stk_track    = (St_stk_track *) m_GarbSet->Find("stk_tracks");
-    if( !stk_track){ stk_track = new St_stk_track("stk_tracks",5000); AddGarb(stk_track);}
+    svt_groups = new St_sgr_groups("EstGroups",1); AddGarb(svt_groups);
+    stk_track    = (St_stk_track *) m_GarbSet->Find("EstSvtTrk");
+    if( !stk_track){ stk_track = new St_stk_track("EstSVtTrk",1); AddGarb(stk_track);}
   } 
 
   long NGlbTrk = 0;
