@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.61 2000/02/07 23:42:25 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.62 2000/02/09 20:49:46 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.62  2000/02/09 20:49:46  fisyak
+// Change naming convention for Tables shared libraries
+//
 // Revision 1.61  2000/02/07 23:42:25  fisyak
 // Splitted tables, Don't call St_tpcdaq_Maker for Trs, only load its shared library
 //
@@ -286,22 +289,23 @@ BfcItem BFC[] = {
   {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
   {"tables"      ,""  ,"","",""
      ,"StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,mwc_T,sim_T,svt_T,tpc_T,trg_T,vpd_T","",kFALSE},
-  {"StDbT"       ,""  ,"","",""                                   ,"StDb_Tables","Load StDb_Tables",kFALSE},
-  {"ctf_T"       ,""  ,"","",""                                     ,"ctf_Tables","Load ctf_Tables",kFALSE},
-  {"ebyeT"       ,""  ,"","",""                                   ,"ebye_Tables","Load ebye_Tables",kFALSE},
-  {"emc_T"       ,""  ,"","",""                                     ,"emc_Tables","Load emc_Tables",kFALSE},
-  {"ftpcT"       ,""  ,"","",""                                   ,"ftpc_Tables","Load ftpc_Tables",kFALSE},
-  {"gen_T"       ,""  ,"","",""                                     ,"gen_Tables","Load gen_Tables",kFALSE},
-  {"geomT"       ,""  ,"","",""                           ,"geometry_Tables","Load geometry_Tables",kFALSE},
-  {"globT"       ,""  ,"","",""                               ,"global_Tables","Load global_Tables",kFALSE},
-  {"l3_T"        ,"",  "","",""                                       ,"l3_Tables","Load l3_Tables",kFALSE},
-  {"mwc_T"       ,""  ,"","",""                                     ,"mwc_Tables","Load mwc_Tables",kFALSE},
-  {"sim_T"       ,""  ,"","",""                                     ,"sim_Tables","Load sim_Tables",kFALSE},
-  {"svt_T"       ,""  ,"","",""                                     ,"svt_Tables","Load svt_Tables",kFALSE},
-  {"tpc_T"       ,""  ,"","",""                                     ,"tpc_Tables","Load tpc_Tables",kFALSE},
-  {"trg_T"       ,""  ,"","",""                                     ,"trg_Tables","Load trg_Tables",kFALSE},
-  {"vpd_T"       ,""  ,"","",""                                     ,"vpd_Tables","Load vpd_Tables",kFALSE},
+  {"StDbT"       ,""  ,"","",""                                ,"libStDb_Tables","Load StDb_Tables",kFALSE},
+  {"ctf_T"       ,""  ,"","",""                                  ,"libctf_Tables","Load ctf_Tables",kFALSE},
+  {"ebyeT"       ,""  ,"","",""                                ,"libebye_Tables","Load ebye_Tables",kFALSE},
+  {"emc_T"       ,""  ,"","",""                                  ,"libemc_Tables","Load emc_Tables",kFALSE},
+  {"ftpcT"       ,""  ,"","",""                                ,"libftpc_Tables","Load ftpc_Tables",kFALSE},
+  {"gen_T"       ,""  ,"","",""                                  ,"libgen_Tables","Load gen_Tables",kFALSE},
+  {"geomT"       ,""  ,"","",""                        ,"libgeometry_Tables","Load geometry_Tables",kFALSE},
+  {"globT"       ,""  ,"","",""                            ,"libglobal_Tables","Load global_Tables",kFALSE},
+  {"l3_T"        ,"",  "","",""                                    ,"libl3_Tables","Load l3_Tables",kFALSE},
+  {"mwc_T"       ,""  ,"","",""                                  ,"libmwc_Tables","Load mwc_Tables",kFALSE},
+  {"sim_T"       ,""  ,"","",""                                  ,"libsim_Tables","Load sim_Tables",kFALSE},
+  {"svt_T"       ,""  ,"","",""                                  ,"libsvt_Tables","Load svt_Tables",kFALSE},
+  {"tpc_T"       ,""  ,"","",""                                  ,"libtpc_Tables","Load tpc_Tables",kFALSE},
+  {"trg_T"       ,""  ,"","",""                                  ,"libtrg_Tables","Load trg_Tables",kFALSE},
+  {"vpd_T"       ,""  ,"","",""                                  ,"libvpd_Tables","Load vpd_Tables",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"vpd"         ,""  ,"","vpd_T",""                                                   ,"St_vpd","",kFALSE},
   {"tls"         ,""  ,"","",""                                                           ,"tls","",kFALSE},
   {"daq"         ,""  ,"","",""                         ,"StDaqLib,StDAQMakerLib","Load StDAQMaker",kFALSE},
   {"SCL"         ,""  ,"","","","StarClassLibrary",                         "Load StarClassLibrary",kFALSE},
@@ -324,7 +328,7 @@ BfcItem BFC[] = {
   {"in"          ,""  ,"","xin"                                               ,"","","Alias to xin",kFALSE},
   {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
   {"xdf2root"    ,""  ,"",""                                   ,"","xdf2root","Read XDF input file",kFALSE},
-  {"geant","geant","","NoFieldSet,geomT,sim_T"
+  {"geant","geant","","NoFieldSet,geomT,gen_T,sim_T"
                                          ,"St_geant_Maker","geometry,St_g2t,St_geant_Maker","GEANT",kFALSE}, 
   {"db"          ,""  ,"","StDbT,xdf2root"       ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"calib"       ,""  ,"","xdf2root"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
@@ -421,7 +425,7 @@ StBFChain::~StBFChain(){
 //_____________________________________________________________________________
 Int_t StBFChain::Load() 
 {
-  Int_t i, j, k, iok;
+  Int_t i, j, k, l, iok;
   for (i = 1; i< NoChainOptions; i++) {// Load Libraries if any
     if (BFC[i].Flag) {
       if (strlen(BFC[i].Libs) > 0) { 
@@ -433,9 +437,12 @@ Int_t StBFChain::Load()
 	for (j=0;j<=NParsed;j++) {
 	  TString libe(*Libs[j]);
 	  libe.Append(".so");
-	  for (k = 0; k < NLoaded; k++) {
-	    Char_t *Base =  gSystem->BaseName(LoadedLibs[k]->Data());
-	    if (!strcmp(Base,libe.Data())) goto ENDL;
+	  for (l = 0; l < 2; l++) { // so / sl
+	    if (l) libe.ReplaceAll(".so",".sl");
+	    for (k = 0; k < NLoaded; k++) {
+	      const Char_t *Base =  gSystem->BaseName(LoadedLibs[k]->Data());
+	      if (!strcmp(Base,libe.Data())) goto ENDL;
+	    }
 	  }
 	  //	  if (!strstr(lib,libe.Data())) {
 	  iok = gSystem->Load(Libs[j]->Data());
