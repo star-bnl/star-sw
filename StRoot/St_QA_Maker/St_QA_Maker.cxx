@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.71 1999/12/15 20:32:18 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.72 1999/12/16 19:52:37 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.72  1999/12/16 19:52:37  kathy
+// fix hist titles in QABookHist; unpack n_point,n_fit_point,n_max_point correctly for globtrk table - must still fix for primtrk table - in St_QA_Maker
+//
 // Revision 1.71  1999/12/15 20:32:18  kathy
 // separated the tpc and tpc+svt histograms for globtrk table; had to book and fill new histograms, add histograms to default logy list AND had to change what values of iflag I cut on for filling each different type of track in makehistglob method
 //
@@ -348,6 +351,80 @@ void St_QA_Maker::MakeHistGlob(){
 
       if (t->iflag>0) {
         cnttrkg++;
+// n_point,n_fit_point,n_max_point is packed on dst tables:
+//   n_point = 1*tpc_pnt + 1000*svt_pnt + 10000*ssd_pnt
+//   - must unpack and add together to get total #pnt
+       Int_t ssdpnt = 0;
+       Int_t  hold1 = 0;
+       Int_t svtpnt = 0;
+       Int_t  hold2 = 0;
+       Int_t tpcpnt = 0;
+       Int_t trkpnt = 0;
+
+       Int_t ssdfpnt = 0;
+       Int_t  holdf1 = 0;
+       Int_t svtfpnt = 0;
+       Int_t  holdf2 = 0;
+       Int_t tpcfpnt = 0;
+       Int_t trkfpnt = 0;
+
+       Int_t ssdmpnt = 0;
+       Int_t  holdm1 = 0;
+       Int_t svtmpnt = 0;
+       Int_t  holdm2 = 0;
+       Int_t tpcmpnt = 0;
+       Int_t trkmpnt = 0;
+
+       //if (cnttrkg<10){
+       //   cout << "Before: n_point = " << t->n_point << " n_fit = " << t->n_fit_point << 
+       //                  " n_max = " << t->n_max_point << endl;
+       //	}
+        ssdpnt = (t->n_point)/10000;
+         hold1 = ((t->n_point)%10000);
+        svtpnt = hold1/1000;
+         hold2 = (hold1%1000);
+        tpcpnt = hold2;
+        trkpnt = tpcpnt+svtpnt+ssdpnt;
+
+        ssdfpnt = (t->n_fit_point)/10000;
+         holdf1 = ((t->n_fit_point)%10000);
+        svtfpnt = holdf1/1000;
+         holdf2 = (holdf1%1000);
+        tpcfpnt = holdf2;
+        trkfpnt = tpcfpnt+svtfpnt+ssdfpnt;
+
+        ssdmpnt = (t->n_max_point)/10000;
+         holdm1 = ((t->n_max_point)%10000);
+        svtmpnt = holdm1/1000;
+         holdm2 = (holdm1%1000);
+        tpcmpnt = holdm2;
+        trkmpnt = tpcmpnt+svtmpnt+ssdmpnt;
+
+	//        if (cnttrkg<10){
+        //  cout << "After:  #ssd   = " << ssdpnt <<
+	//        " #hold1 = " << hold1  <<         
+	//        " #svt   = " << svtpnt <<
+	//        " #hold2 = " << hold2  << 
+        //        " #tpc   = " << tpcpnt <<
+	// 	" #tot   = " << trkpnt << endl; 
+        //}    
+        //if (cnttrkg<10){
+        //  cout << "After:  #ssdf   = " << ssdfpnt <<
+	//        " #hold1f = " << holdf1  <<         
+	//        " #svtf   = " << svtfpnt <<
+	//        " #hold2f = " << holdf2  << 
+        //        " #tpcf   = " << tpcfpnt <<
+	// 	" #totf   = " << trkfpnt << endl; 
+        //}    
+        //if (cnttrkg<10){
+        //  cout << "After:  #ssdm   = " << ssdmpnt <<
+	//        " #hold1m = " << holdm1  <<         
+	//        " #svtm   = " << svtmpnt <<
+	//        " #hold2m = " << holdm2  << 
+        //        " #tpcm   = " << tpcmpnt <<
+	// 	" #totm   = " << trkmpnt << endl; 
+        //}
+    
 	Float_t pT = -999.;
 	pT = 1./TMath::Abs(t->invpt);
         Float_t lmevpt = TMath::Log10(pT*1000.0);
@@ -357,11 +434,11 @@ void St_QA_Maker::MakeHistGlob(){
         Float_t lmevmom = TMath::Log10(gmom*1000.0); 
 	Float_t chisq0 = t->chisq[0];
 	Float_t chisq1 = t->chisq[1]; 
-	Float_t degoffree = t->n_fit_point;
-	Float_t chisq0_p = chisq0/(degoffree-3);
-	Float_t chisq1_p = chisq1/(degoffree-2);
-        Float_t nfitntot = (Float_t(t->n_fit_point))/(Float_t(t->n_point));
-        Float_t nfitnmax = (Float_t(t->n_fit_point))/(Float_t(t->n_max_point));
+	//	Float_t degoffree = t->n_fit_point;
+	//Float_t chisq0_p = chisq0/(degoffree-3);
+	//Float_t chisq1_p = chisq1/(degoffree-2);
+        Float_t nfitntot = (Float_t(trkfpnt))/(Float_t(trkpnt));
+        Float_t nfitnmax = (Float_t(trkmpnt))/(Float_t(trkpnt));
         Float_t x0s  =  t->r0 * TMath::Cos(t->phi0*degree);
         Float_t y0s  =  t->r0 * TMath::Sin(t->phi0*degree);
         Float_t xdif =  (t->x_first[0])-x0s;
@@ -391,9 +468,9 @@ void St_QA_Maker::MakeHistGlob(){
         m_glb_impactT->Fill(t->impact);
 	
 // these are tpc & ftpc
-	m_pointT->Fill(t->n_point);
-	m_max_pointT->Fill(t->n_max_point);
-	m_fit_pointT->Fill(t->n_fit_point);
+	m_pointT->Fill(trkpnt);
+	m_max_pointT->Fill(trkmpnt);
+	m_fit_pointT->Fill(trkfpnt);
         m_glb_chargeT->Fill(t->icharge);
         m_glb_r0T->Fill(t->r0);
         m_glb_phi0T->Fill(t->phi0);
@@ -418,8 +495,8 @@ void St_QA_Maker::MakeHistGlob(){
 // these are for tpc & ftpc
         m_globtrk_xf_yfT->Fill(t->x_first[0],t->x_first[1]);
         m_eta_trklengthT->Fill(eta,t->length);
-	m_npoint_lengthT->Fill(t->length,Float_t(t->n_point));
-	m_fpoint_lengthT->Fill(t->length,Float_t(t->n_fit_point));
+	m_npoint_lengthT->Fill(t->length,Float_t(trkpnt));
+	m_fpoint_lengthT->Fill(t->length,Float_t(trkfpnt));
 	
 // these are tpc only
 	m_pT_eta_recT->Fill(eta,lmevpt);
@@ -446,9 +523,9 @@ void St_QA_Maker::MakeHistGlob(){
         m_glb_zf0TS->Fill(zdif);
         m_glb_impactTS->Fill(t->impact);
 	
-	m_pointTS->Fill(t->n_point);
-	m_max_pointTS->Fill(t->n_max_point);
-	m_fit_pointTS->Fill(t->n_fit_point);
+	m_pointTS->Fill(trkpnt);
+	m_max_pointTS->Fill(trkmpnt);
+	m_fit_pointTS->Fill(trkfpnt);
         m_glb_chargeTS->Fill(t->icharge);
         m_glb_r0TS->Fill(t->r0);
         m_glb_phi0TS->Fill(t->phi0);
@@ -472,8 +549,8 @@ void St_QA_Maker::MakeHistGlob(){
 	
         m_globtrk_xf_yfTS->Fill(t->x_first[0],t->x_first[1]);
         m_eta_trklengthTS->Fill(eta,t->length);
-	m_npoint_lengthTS->Fill(t->length,Float_t(t->n_point));
-	m_fpoint_lengthTS->Fill(t->length,Float_t(t->n_fit_point));
+	m_npoint_lengthTS->Fill(t->length,Float_t(trkpnt));
+	m_fpoint_lengthTS->Fill(t->length,Float_t(trkfpnt));
 	
 	m_pT_eta_recTS->Fill(eta,lmevpt);
         m_tanl_zfTS->Fill(t->x_first[2],t->tanl);
@@ -495,9 +572,9 @@ void St_QA_Maker::MakeHistGlob(){
         if (t->iflag>700 && t->iflag<800 && t->det_id==5) {
 	
 // these are tpc & ftpc
-	m_pointFE->Fill(t->n_point);
-	m_max_pointFE->Fill(t->n_max_point);
-	m_fit_pointFE->Fill(t->n_fit_point);
+	m_pointFE->Fill(trkpnt);
+	m_max_pointFE->Fill(trkmpnt);
+	m_fit_pointFE->Fill(trkfpnt);
         m_glb_chargeFE->Fill(t->icharge);
         m_glb_xfFE->Fill(t->x_first[0]);
         m_glb_yfFE->Fill(t->x_first[1]);
@@ -517,8 +594,8 @@ void St_QA_Maker::MakeHistGlob(){
 	m_pT_eta_recFE->Fill(eta,lmevpt);
         m_globtrk_xf_yfFE->Fill(t->x_first[0],t->x_first[1]);
         m_eta_trklengthFE->Fill(eta,t->length);
-	m_npoint_lengthFE->Fill(t->length,Float_t(t->n_point));
-	m_fpoint_lengthFE->Fill(t->length,Float_t(t->n_fit_point));	
+	m_npoint_lengthFE->Fill(t->length,Float_t(trkpnt));
+	m_fpoint_lengthFE->Fill(t->length,Float_t(trkfpnt));	
 
         }
 
@@ -526,9 +603,9 @@ void St_QA_Maker::MakeHistGlob(){
         if (t->iflag>700 && t->iflag<800 && t->det_id==4) {
 
 // these are tpc & ftpc
-	m_pointFW->Fill(t->n_point);
-	m_max_pointFW->Fill(t->n_max_point);
-	m_fit_pointFW->Fill(t->n_fit_point);
+	m_pointFW->Fill(trkpnt);
+	m_max_pointFW->Fill(trkmpnt);
+	m_fit_pointFW->Fill(trkfpnt);
         m_glb_chargeFW->Fill(t->icharge);
         m_glb_xfFW->Fill(t->x_first[0]);
         m_glb_yfFW->Fill(t->x_first[1]);
@@ -548,8 +625,8 @@ void St_QA_Maker::MakeHistGlob(){
 	m_pT_eta_recFW->Fill(eta,lmevpt);
         m_globtrk_xf_yfFW->Fill(t->x_first[0],t->x_first[1]);
         m_eta_trklengthFW->Fill(eta,t->length);
-	m_npoint_lengthFW->Fill(t->length,Float_t(t->n_point));
-	m_fpoint_lengthFW->Fill(t->length,Float_t(t->n_fit_point));	        
+	m_npoint_lengthFW->Fill(t->length,Float_t(trkpnt));
+	m_fpoint_lengthFW->Fill(t->length,Float_t(trkfpnt));	        
         }
 
       }
@@ -625,9 +702,9 @@ void St_QA_Maker::MakeHistPrim(){
         Float_t lmevmom = TMath::Log10(gmom*1000.0); 
 	Float_t chisq0 = t->chisq[0];
 	Float_t chisq1 = t->chisq[1]; 
-	Float_t degoffree = t->n_fit_point;
-	Float_t chisq0_p = chisq0/(degoffree-3);
-	Float_t chisq1_p = chisq1/(degoffree-2);
+	//Float_t degoffree = t->n_fit_point;
+	//Float_t chisq0_p = chisq0/(degoffree-3);
+	//Float_t chisq1_p = chisq1/(degoffree-2);
         Float_t nfitntot = (Float_t(t->n_fit_point))/(Float_t(t->n_point));
         Float_t x0s  =  t->r0 * TMath::Cos(t->phi0*degree);
         Float_t y0s  =  t->r0 * TMath::Sin(t->phi0*degree);
