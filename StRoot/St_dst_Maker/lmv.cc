@@ -1,6 +1,6 @@
-// $Id: lmv.cc,v 1.2 1999/11/12 01:46:07 nystrand Exp $
+// $Id: lmv.cc,v 1.3 1999/11/12 02:28:24 nystrand Exp $
 // $Log: lmv.cc,v $
-// Revision 1.2  1999/11/12 01:46:07  nystrand
+// Revision 1.3  1999/11/12 02:28:24  nystrand
 // Update to include events with SVT tracks
 //
 // Revision 1.1  1999/10/27 19:30:08  nystrand
@@ -52,7 +52,7 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 //#include "StMagF.h"
 
 
-//static const char rcsid[] = "$Id: lmv.cc,v 1.2 1999/11/12 01:46:07 nystrand Exp $";
+//static const char rcsid[] = "$Id: lmv.cc,v 1.3 1999/11/12 02:28:24 nystrand Exp $";
 
 long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 {
@@ -315,7 +315,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 
     StThreeVectorD xpos = helices[jj].at(bpipepath);
     // Find momentum at this point
-    StThreeVector pmom = helices[jj].momentumAt(bpipepath, bfield*tesla);
+    StThreeVectorD pmom = helices[jj].momentumAt(bpipepath, bfield*tesla);
 
     double incang = acos( (xpos.x()/xpos.mag())*(pmom.x()/pmom.mag()) + (xpos.z()/xpos.mag())*(pmom.y()/pmom.mag()) );
     double lpath_bp = X_X0_BPipe/cos(incang); 
