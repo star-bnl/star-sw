@@ -57,7 +57,7 @@
 #include "StiGui/StiRootDrawableKalmanTrack.h"
 #include "StiGui/StiRootDrawableStiEvaluableTrack.h"
 #include "StiEvaluator/StiEvaluator.h"
-#include "StiEvaluator/StiEventAssociator.h"
+//#include "StiEvaluator/StiEventAssociator.h"
 #include "StAssociationMaker/StAssociationMaker.h"
 #include "Sti/StiHitErrorCalculator.h"
 
