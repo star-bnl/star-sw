@@ -1,8 +1,8 @@
 #!/usr/local/bin/perl
-# $Id: bfc_cas,v 1.3 2001/04/20 15:59:51 didenko Exp $
+# $Id: bfc_cas,v 1.4 2001/04/20 20:14:01 didenko Exp $
 # $Log: bfc_cas,v $
-# Revision 1.3  2001/04/20 15:59:51  didenko
-# put skip events
+# Revision 1.4  2001/04/20 20:14:01  didenko
+# fix string
 #
 # Revision 1.1  2000/06/01 15:27:20  didenko
 # script to run mixing events
@@ -126,12 +126,12 @@ my $NofEvents = 1000;
 my $outfile;
 #   $outfile = $input_file;
 #   $outfile =~ s/fzd/root/g; 
-$outfile = pds0200_01_100evts.root;
+$outfile = pds0200_01_1000evts.root;
 my $N1 = 10;
 my $N2 = 1200;
 
 
-my $inputcs = " gfile B " . $bfile .";" . "mode SVTT back  22022; mode FTPC back  000;  mode TPCE back 1881188; gback 188 188 0.0213 213. 2.5; rndm $N1 $N2; skip $N1 ";
+my $inputcs = " gfile B " . $bfile .";" . " mode SVTT back  22022; mode FTPC back  000;  mode TPCE back 1881188; gback 188 188 0.0213 213. 2.5; rndm $N1 $N2; skip $N1 ";
 my $cmd = " root4star -b -q 'bfc.C(" . $NofEvents . ",\"" . $Chain . "\",\"" . $input_file . ";" . $inputcs . "\",\"" . $outfile . "\")\'";
 print $cmd,"\n";
 system $cmd;
