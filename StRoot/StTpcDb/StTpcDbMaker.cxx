@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.7 2000/02/10 00:29:09 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.8 2000/02/17 19:43:20 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.8  2000/02/17 19:43:20  hardtke
+ * fixes to tpc functions
+ *
  * Revision 1.7  2000/02/10 00:29:09  hardtke
  * Add tpg functions to StTpcDbMaker, fix a few bugs
  *
@@ -43,16 +46,22 @@ int type_of_call tpc_row_to_y_(float *row,float *y) {
   StTpcCoordinateTransform transform(gStTpcDb);
   transform(raw,localSector);
   *y = localSector.position().y();
-  return 0;
+  return 1;
 }
 int type_of_call tpc_pad_to_x_(float *pad,float *row, float* x) {
-  StTpcPadCoordinate raw(12,(int)*row,(int)*pad,1); //sector 12, row row, pad pad, bucket 1
+  StTpcPadCoordinate raw(12,(int)*row,(int)floor(*pad),1); //sector 12, row row, pad pad, bucket 1
   StTpcLocalSectorCoordinate localSector;
   StTpcCoordinateTransform transform(gStTpcDb);
   transform(raw,localSector);
-  float offset = *pad - (float)(int)*pad;
-  *x = localSector.position().x() + offset*gStTpcDb->PadPlaneGeometry()->PadPitchAtRow((int)*row);
-  return 0;
+  float offset = fmod(*pad,floor(*pad));
+  *x = localSector.position().x() - offset*gStTpcDb->PadPlaneGeometry()->PadPitchAtRow((int)*row);
+  return 1;
+}
+int type_of_call tpc_x_to_pad_(float *row,float *x, float* pad) {
+  //copy code from tgc_x_to_pad.F
+  int irow = (int)(*row+0.5);
+  *pad = -(*x)/gStTpcDb->PadPlaneGeometry()->PadPitchAtRow(irow) + 0.5 + 0.5*gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(irow);
+  return 1;
 }
 int type_of_call tpc_global_to_local_(int *isect,float *xglobal, float* xlocal){
   StGlobalCoordinate global(xglobal[0],xglobal[1],xglobal[2]);
@@ -65,7 +74,7 @@ int type_of_call tpc_global_to_local_(int *isect,float *xglobal, float* xlocal){
   xlocal[0] = localSector.position().x(); 
   xlocal[1] = localSector.position().y(); 
   xlocal[2] = localSector.position().z();
-  return 0; 
+  return 1; 
 }
 int type_of_call tpc_local_to_global_(int *isect,float *xlocal, float* xglobal){
   StGlobalCoordinate global;
@@ -75,7 +84,7 @@ int type_of_call tpc_local_to_global_(int *isect,float *xlocal, float* xglobal){
   xglobal[0] = global.position().x(); 
   xglobal[1] = global.position().y(); 
   xglobal[2] = global.position().z(); 
-  return 0; 
+  return 1; 
 }
 int type_of_call tpc_time_to_z_(int *time,int *padin, int* row, int* sector,float *z){
 StTpcPadCoordinate pad(*sector,*row,*padin,*time);
@@ -86,11 +95,62 @@ transform(pad,localSector);
 //tph_fit_isolated_cluster wants return=1:
 return 1;
 }
+int type_of_call tpc_z_to_time_(float* z, int* padin, int* padrow, int* sector, int* time){
+  int temp[1];
+  *temp = 100;
+  StTpcPadCoordinate pad(*sector,*padrow,*padin,*temp);
+  StTpcLocalSectorCoordinate localSector;
+  StTpcCoordinateTransform transform(gStTpcDb);
+  transform(pad,localSector);
+  StTpcLocalSectorCoordinate localSector2(localSector.position().x(),localSector.position().y(),(double)*z,localSector.fromSector());
+  transform(localSector2,pad);
+  *time = pad.timeBucket();
+  return 1;
+}
 int type_of_call tpc_drift_velocity_(float *dvel){
 *dvel = gStTpcDb->DriftVelocity();
-return 0;
+return 1;
 }
-
+int type_of_call tpc_drift_volume_length_(float *length){
+  *length = gStTpcDb->Dimensions()->outerEffectiveDriftDistance();
+  return 1;
+}
+int type_of_call tpc_row_par_(int *isector, float *row, float *a, float *b){
+  //return ax+by = 1 parameterization of a TPC row
+  int time[1] = {10};
+  int ipad[2] = {20,40};
+  StTpcPadCoordinate pad1(*isector, (int)*row, ipad[0], *time);
+  StTpcPadCoordinate pad2(*isector, (int)*row, ipad[1], *time);
+  StGlobalCoordinate gc1,gc2;
+  StTpcCoordinateTransform transform(gStTpcDb);
+  transform(pad1,gc1);
+  transform(pad2,gc2);
+  cout << pad1 << gc1 << endl;
+  cout << pad2 << gc2 << endl;
+  float x1,y1,x2,y2;
+  float m,bb; // y = mx + bb
+  x1 = gc1.position().x();
+  y1 = gc1.position().y();
+  x2 = gc2.position().x();
+  y2 = gc2.position().y();
+  if (abs(x2-x1)<0.000001) return 0;
+  m = (y2 - y1)/(x2 - x1);
+  bb = y1 - m*x1;
+  if (bb == 0) return 0;
+  *a = -m/bb;
+  if (*isector<=12) *a = -*a;  // opposite sign to match tpg_row_par
+  *b = 1/bb;
+  return 1;
+}
+int type_of_call tpc_global_to_sector_(int *isector, float *xglobal){
+  StGlobalCoordinate gc(xglobal[0],xglobal[1],xglobal[2]);
+  StTpcPadCoordinate pad;
+  StTpcCoordinateTransform transform(gStTpcDb);
+  transform(gc,pad);
+  *isector = pad.sector();
+  return 1;
+}
+  
 //_____________________________________________________________________________
 StTpcDbMaker::StTpcDbMaker(const char *name):StMaker(name){
  m_TpcDb = 0;
@@ -153,10 +213,11 @@ void StTpcDbMaker::Update_tpg_detector(){
      St_tpg_detector &pp = *m_tpg_detector;
      pp[0].nsectors = 2*tpcDbInterface()->Dimensions()->numberOfSectors();
            // note tpg table define number of sectors as 48
-     pp[0].drift_length = tpcDbInterface()->PadPlaneGeometry()->outerSectorPadPlaneZ();
+     pp[0].drift_length = tpcDbInterface()->Dimensions()->outerEffectiveDriftDistance();
      pp[0].clock_frequency = 1e6*tpcDbInterface()->Electronics()->samplingFrequency();
-     pp[0].z_inner_offset = tpcDbInterface()->PadPlaneGeometry()->innerSectorPadPlaneZ()-tpcDbInterface()->PadPlaneGeometry()->outerSectorPadPlaneZ();
+     pp[0].z_inner_offset = tpcDbInterface()->Dimensions()->innerEffectiveDriftDistance() - tpcDbInterface()->Dimensions()->outerEffectiveDriftDistance();
      pp[0].vdrift = tpcDbInterface()->DriftVelocity();
  }
 }
+
 
