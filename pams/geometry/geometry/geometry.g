@@ -91,7 +91,7 @@ If LL>1
   on DECAY_ONLY { Some Physics: decays, mult.scat and energy loss;
                   {IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY}=0; Iloss=2}
   on TPC_ONLY   { Minimal geometry - only TPC;
-                               {pipe,svtt,ftpc,btof,vpdd,magp,calb,ecal}=off; }
+                     {pipe,svtt,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal}=off; }
   on FIELD_ONLY { No geometry - only magnetic field;           NtrSubEv=0;
       {cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,rich,upst,zcal}=off; }
   on FIELD_OFF  { no magnetic field;                field=0;                  }
@@ -143,6 +143,7 @@ If LL>1
    If (tpce &.not.pse) call AgDETP add ('tprs(1).super='  ,1,1) 
    if (tpce) Call tpcegeo
    if (ftpc) Call ftpcgeo
+   if (ftpc) Call supogeo
 
 * - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
    If (LL>1) call AgDETP new ('BTOF')

@@ -45,6 +45,12 @@ MODULE  CALBGEO is the geometry of the Barrel EM Calorimeter in (aG)STAR     *
 *               - remove unused constant in structure CALG
 *               - put new cuts for SMD detector
 *
+*      Version 2.7.1
+*               - modified by S. Chattopadhyay   99.10.18
+*               - readout layer structure changed from (1,20) to (2,19)
+*               - thickness of first two scin layers (preshower)
+*                  changed to 0.6cm,rest 0.5cm
+*
 *      Version 3.0
 *               - modified by A. OGAWA   99/10/13
 *	        - Clean up and addition of variables
@@ -58,7 +64,7 @@ external etsphit
               CSHI,CBTW
       Structure CALG { version,  Rmin,     Etacut,   CrackWd,
                        FrontThk, CompThk,  AirThk,   BackThk,  SpaceThk, 
-                       ScintThk, AbsorThk, AbPapThk, Sntchthk, g10SbThk,
+                       ScintThk(2),        AbsorThk, AbPapThk, g10SbThk,
                        SmAlfWdh, SmAlfThk, SmGasThk, SmGasWdh, SmGasRad,
                        SmAffWdh, SmAfbWdh, SmetaWdh, Seta1Wdh, Netfirst, 
                        Seta2Wdh, Netsecon, Set12Wdh, SphiWdh,  SphidWdh, 
@@ -69,7 +75,7 @@ external etsphit
 
       Real      RKB2sc/0.013/, RKB3sc/9.6E-6/
 *---- local definitions...
-      real      current_depth, current, layer_width, tan_theta,
+      real      current_depth, current, layer_width(2), tan_theta,
                 smd_width, smd_width1, smd_width2, smd_width3,
                 cut_length, cut_radius, future_depth,c_dep,c_lead_dep, 
                 eta_lenght, current_csda, h_eta1, h_eta2, h_phi1, h_phi2,
@@ -90,10 +96,9 @@ external etsphit
       AirThk   = 0.158       ! Air gap half thicness
       BackThk  = 1.5875      ! Module back plate half thicknes
       SpaceThk = 0.9525      ! Spacer back plate half thicknes
-      ScintThk = 0.250       ! active scintillator plate half thickness
+      ScintThk = {0.3,0.25}  ! active scintillator plate half thickness
       AbsorThk = 0.250       ! absorber plate thickness halfpThickness
       AbPapThk = 0.005       ! absorber paper plate thickness half thickness
-      SntchThk = 0.000       ! not used - Smd front notch width
       g10SbThk = 0.115       ! G10 SMD front and back plate half thickness
       SmAlfWdh =11.2014      ! SMD Al front back plate with Ar half width
       SmAlfThk = 0.3893      ! SMD Al front back plate with Ar half thickness
@@ -111,10 +116,10 @@ external etsphit
       NSmdAlw  = 30          ! Number SMD gaseus interval in tile
       Nsuper   = 2           ! number of readout superlayer
       Nsmd     = 5           ! SMD positioned after sandvich type layers EMC
-      NsubLay  = {1,20}      ! number of layers in a superlayer
+      NsubLay  = {2,19}      ! number of layers in a superlayer
       MaxModule= 60          ! max number of moudle
       NetaT    = 20          ! Number of eta division for tower/preshower
-      Nsub     = 2           ! Number of sub division in phi for tower/preshower
+      Nsub     = 2           ! Number of sub div. in phi for tower/preshower
       NetaSMDp = 10          ! Number of eta division in for SMD phi plane
       NPhistr  = 15          ! Number of the strip in phi direction
       Netfirst = 75.         ! Number of strip in first part eta=0-0.5
@@ -127,19 +132,19 @@ external etsphit
 * ---------------------------------------------------------------------------
 *                          primary geometrical constant
 *
-      layer_width = calg_ScintThk + calg_AbsorThk+2.*calg_AbPapThk
       smd_width=2.*calg_g10SbThk+2.*calg_SmAlfThk+2.*calg_AbPapThk
       smd_width1=2.*calg_g10SbThk+2.*calg_AbPapThk
       smd_width2=smd_width1+calg_SmGasThk+calg_SmGasRad
-      smd_width3=smd_width1+2.*calg_SmAlfThk-calg_SmGasThk-calg_SmGasRad
+      smd_width3=2.*smd_width-smd_width1-calg_SmGasThk-calg_SmGasRad
       R1=calg_Rmin+2.*calg_FrontThk
       R2=0.0
       do i=1,nint(calg_Nsuper)
-        R2+=(calg_NsubLay(i)-i+1)*layer_width*2.0
+        layer_width(i) = calg_ScintThk(i) + calg_AbsorThk+2.*calg_AbPapThk
+        R2+=(calg_NsubLay(i)-i+1)*layer_width(i)*2.0
 	RR(i)=R2 
       enddo
-      R3=calg_nsmd*layer_width*2.0
-      R4=(smd_width+calg_scintThk+2.*calg_AbPapThk)*2.0
+      R3=(calg_Nsuper*layer_width(1)+(calg_nsmd-calg_Nsuper)*layer_width(2))*2.
+      R4=(smd_width+calg_scintThk(2)+2.*calg_AbPapThk)*2.0
       cut_radius=R1+R2+R4
       Rmax=cut_radius+2.*(Calg_BackThk+calg_SpaceThk+Calg_CompThk+calg_AirThk)
       tan_theta  = tan(2*atan(exp(-calg_EtaCut)))
@@ -228,8 +233,8 @@ Block CPHI corresponds to a single module
 EndBlock
 *-----------------------------------------------------------------------------
 Block CSUP  is a super layer with few layers inside
-      future_depth=current_depth+(calg_NsubLay(super)-super+1)*layer_width*2+
-                     (smd_width+calg_scintThk+2.*calg_AbPapThk)*2.*(super-1)
+      future_depth=current_depth+(calg_NsubLay(super)-super+1)*layer_width(super)*2+
+                 (smd_width+calg_scintThk(super)+2.*calg_AbPapThk)*2.*(super-1)
 *Cellulose C6H10O5
       Component C  A=12.01   Z=6.    W=6./21.
       Component H  A=1.      Z=1.    W=10./21.
@@ -246,17 +251,17 @@ Block CSUP  is a super layer with few layers inside
          layer = layer + 1
          if(layer.lt.nint(calg_NsubLay(1)+calg_NsubLay(2))) then
            Create   CSCI 
-           Position CSCI  x=current_depth+calg_ScintThk+2.*calg_AbPapThk,
-                          z=current_depth/tan_theta/2 
+           Position CSCI x=current_depth+calg_ScintThk(super)+2.*calg_AbPapThk,
+                         z=current_depth/tan_theta/2 
            Create   CPBP 
-           c_lead_dep=2.*calg_ScintThk+4.*calg_AbPapThk
+           c_lead_dep=2.*calg_ScintThk(super)+4.*calg_AbPapThk
            Position CPBP x=current_depth+c_lead_dep+calg_AbsorThk,
-                          z=current_depth/tan_theta/2 
-           current_depth = current_depth + 2*layer_width
+                         z=current_depth/tan_theta/2 
+           current_depth = current_depth + 2*layer_width(super)
          else 
            Create   CSCI 
-           Position CSCI  x=current_depth+calg_ScintThk+2.*calg_AbPapThk,
-                          z=current_depth/tan_theta/2 
+           Position CSCI x=current_depth+calg_ScintThk(2)+2.*calg_AbPapThk,
+                         z=current_depth/tan_theta/2 
            current_depth = current_depth+c_lead_dep
          endif
 *                                    place SMD
@@ -285,7 +290,7 @@ Block CSCI a scintillator layer.
       Material  Cpolystyren   Isvol=1
       Medium    sens_sci
       attribute CSCI  seen=1  colo=4
-      Shape     BOX   dx=calg_ScintThk,  
+      Shape     BOX   dx=calg_ScintThk(super),  
                       dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
                       dz = current_depth/tan_theta/2
       Call CALBPAR(ag_imed,'ABSORBER')
@@ -503,20 +508,15 @@ EndBlock
       integer   imed
       character medium*(*)
 *
-
       if      ( medium=='ABSORBER' ) then    
 * --- cuts for EMC absorber and scintillator 
         Call GSTPAR (imed,'CUTGAM',0.00008)
         Call GSTPAR (imed,'CUTELE',0.001)
         Call GSTPAR (imed,'BCUTE' ,0.0001)
-
       else if ( medium=='SENSITIVE' ) then   
 * --- cuts for SMD light material and gas
         Call GSTPAR (imed,'CUTGAM',0.00001)
         Call GSTPAR (imed,'CUTELE',0.00001)    
-*        this is gstar default:
-*        CAll GSTPAR (imed,'LOSS',  1.0)
-*        CAll GSTPAR (imed,'DRAY',  1.0)
       endif
 
 *--- common cuts for hadrons and muons in EMC&SMD

@@ -14,6 +14,7 @@ module   TPCEGEO  is the TPC system in GSTAR
 *  PN  08/15/97: CSADDR,vect_inp/out not used anymore                       *
 *  PN  08/21/97: anything denser than TPC gas absorbs laserino              *
 *  PN  10/28/98: two more pseudo-padrows in the outer sector for Iwona      *
+*  PN  11/10/99: full gap between gating grid and the padplane is sensitive *
 *****************************************************************************
 +cde,AGECOM,GCUNIT,GCONST.     " - standart geant commons "
 Content   TPCE,TOFC,TOFS,TOST,TOKA,TONX,TOAD,TOHA,TPGV,TPSS,
@@ -26,7 +27,7 @@ Structure TPCG { version,rmin,rmax,length,WheelIR,WheelOR,WheelTHK,
 *
 Structure TECW { sec,GapRad,GapHeit,GapWidI,GapWidO,inwidth,ouwidth,
                  height,ppdepth,asdepth,ggdepth,MWCdepth,boundary,
-                 Rcenter,MWCinn,MWCout,MWChei,n,nex,
+                 Rcenter,MWCinn,MWCout,MWChei,MwcCent,MwcNwir,n,nex,
                  z(8),dz(8),xex(5),zex(5),dxex(5),dzex(5) } 
 *
 Structure TPRS { sec,Nrow,pitch,width,super,Rpads(40),Npads(40) }
@@ -105,12 +106,14 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
       ppdepth  = 1.35+0.32  ! padplane thickness (both Al and PCB)
       asdepth  = 6.99       ! depth of openings in aluminum structure
       ggdepth  = 1.0        ! MWC gap from gated grid to pad plane
-      MWCdepth = 0.4        ! sensitive MWC gas gap full thickness
+      MWCdepth = 1.0        ! sensitive MWC gas gap full thickness
       boundary = 3.74       ! al frame - boundary width
       Rcenter  = 86.669     ! sector center radius (set by precision holes)
-      MwcInn   = 2*13.24    ! MWC sensitive region inner size
-      MwcOut   = 2*30.38    ! MWC sensitive region outer size
+      MwcInn   = 2*12.804   ! MWC sensitive region inner size
+      MwcOut   = 2*29.953   ! MWC sensitive region outer size
       MwcHei   = 64         ! MWC sensitive region height (radial)
+      MwcCent  = -1.669     ! sensitive region center position
+      MwcNwir  = 160        ! number of MWC sensitive wires
       n        = 5          ! number of air gaps in Al
       nex      = 0          ! number of extra aluminum support pieces
       z    = { 6.67, 18.22, 34.22, 50.22, 62.65 }  ! positions of air gaps
@@ -132,12 +135,14 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
       ppdepth  = 0.95+0.32  ! padplane thickness (both Al and PCB)
       asdepth  = 6.99       ! depth of openings in aluminum structure
       ggdepth  = 1.4        ! MWC gap from gated grid to pad plane
-      MWCdepth = 0.8        ! sensitive MWC gas gap full thickness
+      MWCdepth = 1.4        ! sensitive MWC gas gap full thickness
       boundary = 3.74       ! al frame - boundary width
       Rcenter  = 157.488    ! sector center radius (set by precision holes)
-      MwcInn   = 2*31.99    ! MWC sensitive region inner size
-      MwcOut   = 2*49.14    ! MWC sensitive region outer size
+      MwcInn   = 2*32.202   ! MWC sensitive region inner size
+      MwcOut   = 2*49.351   ! MWC sensitive region outer size
       MwcHei   = 64         ! MWC sensitive region height (radial)
+      MwcCent  = -0.093     ! sensitive region center position
+      MwcNwir  = 160        ! number of MWC sensitive wires
       n        = 8          ! number of air gaps in Al
       nex      = 5          ! number of extra aluminum support pieces
       z    = { 8.216, 16.217, 24.218, 32.219, 
@@ -501,7 +506,8 @@ Block TMWC  is a wire chamber volume with both gated and sensitive volumes
       SHAPE     TRD1 dx1=tecw_inwidth/2       dx2=tecw_ouwidth/2,
                      dy=tecw_GgDepth/2,       dz=tecw_Height/2
       Check  tpcg_MWCread>0
-      create and position TMEA  y=+(tecw_GgDepth-tecw_MWCdepth)/2
+      create and position TMEA  y=+(tecw_GgDepth-tecw_MWCdepth)/2,
+                                z=tecw_MwcCent
 
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -516,17 +522,12 @@ endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Block TMSE  is a single sensitive volume
 
-*WJL shape definition was Iaxis=2 Ndiv=2
-      SHAPE     division  Iaxis=3 Ndiv=160
+      SHAPE   division  Iaxis=3 Ndiv=tecw_MwcNwir
       HITS    TMSE   Z:.01:S  Y:.01:   X:.01:    Sleng:0.1:(0,500),  
                      cx:10:   cy:10:   cz:10:    Step:.01:,  
                      ToF:16:(0,1.e-6)  Ptot:16:(0,100), 
                      LGAM:16:(-2,2)    Elos:16:(0,0.01) 
 
-*     HITS      TMSE  xx:16:SHX(-250,250) yy:16:(-250,250)   zz:16:(-250,250),
-*                     px:16:(-100,100)    py:16:(-100,100)   pz:16:(-100,100),
-*                     Slen:16:(0,1.e4)    Tof:16:(0,1.e-6)   Step:16:(0,100),
-*                     LGAM:16:(-2,2)      Elos:32:(0,1)   
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Block TIAG is an air gap in inner sector aluminum structure
