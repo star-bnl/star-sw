@@ -21,7 +21,11 @@ SUFF_IDL := idl
 .SUFFIXES:
 
 include $(STAF_MAKE_HOME)/MakeEnv.mk
+ifndef NODEBUG                 
 include $(STAF_MAKE_HOME)/MakeArch.mk
+else
+include $(STAF_MAKE_HOME)/MakeArch.mk NODEBUG=yes
+endif                          
 
 #
 #	INP_DIR & OUT_DIR could be declared in invoking
