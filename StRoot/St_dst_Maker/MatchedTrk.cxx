@@ -9,9 +9,9 @@
 MatchedTrk:: MatchedTrk(StVertexMaker* head, int *ipar, float *fpar, CtbResponse* ctbRes,St_dst_track * track ){
   assert(head);
   assert(ctbRes);
-  assert(track);
   float aa=gStTpcDb->DriftVelocity();
-  long Ntrk = track->GetNRows();
+  long Ntrk = 0;
+  if( track) Ntrk = track->GetNRows();
   printf("Do matching of %d dstTracks to CTB hist, drift vel=%f\n",(int)Ntrk,aa);
  
   const double Rctb=213.6; // (cm) radius of the CTB 
@@ -32,7 +32,8 @@ MatchedTrk:: MatchedTrk(StVertexMaker* head, int *ipar, float *fpar, CtbResponse
   double bfield = 0.1*b[2]; //This is now Tesla.
   if(fabs(bfield)<0.0001) bfield=0.00222; // to make helix heappy
 
-  dst_track_st *glb_track_pointer = track->GetTable();
+  dst_track_st *glb_track_pointer = 0;
+  if( track) glb_track_pointer = track->GetTable();
   int n1=0,n2=0,n3=0, n4=0,n5=0,n6=0;
   for (int l=0; l<Ntrk; l++,glb_track_pointer++) {
     if(glb_track_pointer->iflag<=0) continue;

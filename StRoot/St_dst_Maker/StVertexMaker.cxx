@@ -3,8 +3,10 @@
  * StVertexMaker class ( est + evr/lmv/pplmv )                          
  * Modes: 0 = lmv/evr                                                   
  *        1 = ppLMV                                                     
- *        2 = lmv/evr with VtxOffSet                                    
- *                                                                      
+ *        2 = lmv/evr with VtxOffSet
+ *        3 = lmv evr                                    
+ *        4 = pplmv using EST if around 
+ *        5 = lmv/evr with VtxOffset        
  */
 
 
@@ -68,13 +70,15 @@ Int_t StVertexMaker::Init(){
   switch(m_Mode) { // lmv/evr or ppLMV
 
   case 0:   // initialize lmv/evr
-  case 2: { // initialize lmv/evr with VtxOffSet
+  case 2:  // initialize lmv/evr with VtxOffSet
+  case 3:  // initialize lmv/evr using EST
+  case 5: { // initialize lmv/evr with VtxOffSet using EST
     // Create evr table
     m_evr_evrpar = new St_evr_evrpar("evr_evrpar",1);
     evr_evrpar_st row;
     //
     memset(&row,0,sizeof(row));
-    if (m_Mode & 2) row.fitoption = 2; // For Y2K real data set evrpar.fitoption = 2
+    if ((m_Mode & 2) || (m_Mode ==5) ) row.fitoption = 2; // For Y2K real data set evrpar.fitoption = 2
     else row.fitoption = 0;
     row.vcut	 =          3; // distance below where track is marked as default primary ;
     row.cut2	 =          2; // select tracks for 2nd vertex fit ;
@@ -85,7 +89,8 @@ Int_t StVertexMaker::Init(){
     m_evr_evrpar->AddAt(&row,0);
     AddRunCont(m_evr_evrpar);
     break; }
-  case 1: { // initialize ppLMV
+  case 1:  // initialize ppLMV
+  case 4: { // initialize ppLMV using EST
     int   ppLMVparIdef[10]={2, 10, 0, 0, 0, 0, 0, 0, 0, 9999};
     float ppLMVparFdef[10]={1., 3.9, 0.20, .02, 1.,180., 0, 0, 0, 8888};
     ppLMVuse(ppLMVparIdef,ppLMVparFdef);
@@ -148,6 +153,9 @@ Int_t StVertexMaker::Make(){
   
   St_DataSet *match = GetDataSet("match"); 
   St_DataSetIter matchI(match);
+  St_dst_track   *EstGlobal = 0;
+  EstGlobal = (St_dst_track *) matchI("EstGlobal");
+
   St_dst_track   *globtrk = (St_dst_track *) matchI("globtrk");
   if (! globtrk) {globtrk = new St_dst_track("globtrk",1); AddGarb(globtrk);}
 
@@ -181,14 +189,14 @@ Int_t StVertexMaker::Make(){
   }
 
   switch(m_Mode) { // lmv/evr or ppLMV
-
+    
   case 0:   // lmv/evr
-  case 2: { // lmv/evr with VtxOffSet
-
-
+  case 2:  // lmv/evr with VtxOffSet
+  case 3:  //lmv/evr using EST
+  case 5: { //lmv/evr with VtxOffSet using EST
     long NGlbTrk = 0;
     if (globtrk) NGlbTrk = globtrk->GetNRows();
-
+    
     // Using file of fixed vertices
     if (GetMatchedSize()) {                  // Match event/run IDs
       if (FixVertex(GetRunNumber(),GetEventNumber())) return kStErr;
@@ -211,7 +219,10 @@ Int_t StVertexMaker::Make(){
       } else {
         if(Debug()) gMessMgr->Debug() <<
             "run_evr: calling evr_am with fixed vertex" << endm;
-        iRes = evr_am(m_evr_evrpar,globtrk,vertex);
+	if( EstGlobal && (m_Mode == 3 || m_Mode == 5))
+	  iRes = evr_am(m_evr_evrpar,EstGlobal,vertex);
+	else
+	  iRes = evr_am(m_evr_evrpar,globtrk,vertex);
       }
     } else {  // Primary vertex is not fixed, find it
       // Switch to Low Multiplicity Primary Vertex Finder for multiplicities < NSWITCH
@@ -219,13 +230,18 @@ Int_t StVertexMaker::Make(){
 
         // lmv
         if(Debug()) gMessMgr->Debug("run_lmv: calling lmv");
-        iRes = lmv(globtrk,vertex,mdate);
+	if( EstGlobal && (m_Mode == 3 || m_Mode == 5) ) iRes = lmv(EstGlobal,vertex,mdate);
+	else
+	  iRes = lmv(globtrk,vertex,mdate);
 
       } else {
 
         // evr
         if(Debug()) gMessMgr->Debug("run_evr: calling evr_am");
-        iRes = evr_am(m_evr_evrpar,globtrk,vertex);
+	if( EstGlobal && (m_Mode == 3 || m_Mode == 5) ) 
+	  iRes = evr_am(m_evr_evrpar,EstGlobal,vertex);
+	else
+	  iRes = evr_am(m_evr_evrpar,globtrk,vertex);
       }
 
     }  // end section on finding a primary vertex if not fixed
@@ -234,8 +250,8 @@ Int_t StVertexMaker::Make(){
     break; }
 
 
-  case 1: { // ppLMV
-
+  case 1:  // ppLMV
+  case 4:{ //pplmv using EST
     gMessMgr->Info() << GetName() <<
       "-maker will use ppLMV with zCutppLMV=" << zCutppLMV << "/cm" << endm;
     
@@ -246,8 +262,10 @@ Int_t StVertexMaker::Make(){
 
     cout << "CTB Mode = " << this->GetCTBMode() << endl;
     CtbResponse ctbResponse(this, ppLMVparI, ppLMVparF,this->GetCTBMode());
-      
-    MatchedTrk maTrk(this, ppLMVparI, ppLMVparF, &ctbResponse,globtrk) ;
+    
+
+    MatchedTrk maEstTrk(this, ppLMVparI, ppLMVparF, &ctbResponse, EstGlobal) ;
+    MatchedTrk maTrk(this, ppLMVparI, ppLMVparF, &ctbResponse, globtrk) ;
             
     if (beam4ppLMV.isOn) {// take beam line params from DB
       TDataSet* dbDataSet = GetDataBase("Calibrations/rhic");
@@ -257,7 +275,8 @@ Int_t StVertexMaker::Make(){
 		    vSeed->dxdz, vSeed->dydz);
     }
       
-    iRes = ppLMV4(maTrk,globtrk,vertex,mdate);
+    if(EstGlobal and m_Mode == 4)  ppLMV4(maEstTrk,EstGlobal,vertex,mdate);
+    else iRes = ppLMV4(maTrk,globtrk,vertex,mdate);
 
     break; }
   default:
@@ -395,8 +414,11 @@ void StVertexMaker::UnFixVertex(){
 
 
 //_____________________________________________________________________________
-// $Id: StVertexMaker.cxx,v 1.5 2003/01/29 23:44:44 caines Exp $
+// $Id: StVertexMaker.cxx,v 1.6 2003/07/31 01:37:11 caines Exp $
 // $Log: StVertexMaker.cxx,v $
+// Revision 1.6  2003/07/31 01:37:11  caines
+// Set up code to find vertex using SVT matched tracks if that mode is selected
+//
 // Revision 1.5  2003/01/29 23:44:44  caines
 // Looks for SVT vertex finder output if prevertex doesnt exist
 //
