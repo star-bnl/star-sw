@@ -17,12 +17,12 @@
 struct Bank_EMCP: public Bank
 {
   struct Pointer EMCSecPointer[6] ; /* BEMC (tower,prs,smd), EEMC */
-} ;
+};
 
 struct Bank_EMCSECP: public Bank
 {
   struct Pointer FiberPointer[8] ; /* No of fibere to daq from each subdetector, can be maximum 8 */
-} ;
+};
 
 struct Bank_EMCRBP: public Bank
 {
@@ -30,28 +30,37 @@ struct Bank_EMCRBP: public Bank
   struct Pointer EMCADCD ; /* one tower block*/
   struct Pointer EMCPEDR; 
   struct Pointer EMCRMSR ; /* one tower block*/
-} ;
-
-struct Bank_TOWERADCR: public Bank{
-  //        int bankHeader[10] ;    // 40 bytes of the DAQ bank header
-        int dummy ;             // 4 bytes of junk - should read as  0x00c0ffee
-        short fiberHeader[64] ; // 128 bytes of standard FEE header
-        short TDCHeader[120] ; // TDC header - error flag etc
-        short fiberData[4800] ; // stuff on the fiber - (Raw data)
 };
 
+struct Bank_TOWERADCR: public Bank
+{
+  //        int bankHeader[10] ;    // 40 bytes of the DAQ bank header
+        int dummy ;                 // 4 bytes of junk - should read as  0x00c0ffee
+        short fiberHeader[64] ;     // 128 bytes of standard FEE header
+        short TDCHeader[120] ;      // TDC header - error flag etc
+        short fiberData[4800] ;     // stuff on the fiber - (Raw data)
+};
 
+struct BTOWERDATA
+{
+  char * BankType;                            // Will be filled with a 9 char array (8 letters + NULL)
+  unsigned int   DetFlag;                     // DAQ Detector flag for BEMC, PRS, SMDE or SMDP
+  unsigned int   EventNumber;                 // Token number
+  unsigned int   PedFlag;                     // Pedestal subtracted or not (??)
+  unsigned int   ReceivedByteCount;           // Total number of Bytes 
+  unsigned int   NTowerHits;                  // Total number of valid channels
+  unsigned int   TDCErrorFlag;                // Error from TDC
+  unsigned int   NTDCChannels;                // Total number of valid TDC channels      
 
-struct BTOWERDATA{
-  char * BankType; // Will be filled with a 9 char array (8 letters + NULL)
-  unsigned int DetFlag; //DAQ Detector flag for BEMC, PRS, SMDE or SMDP
-  unsigned int EventNumber; //Token number
-  unsigned int PedFlag; //Pedestal subtracted or not (??)
-  unsigned int TDCErrorFlag; // Error from TDC
-  unsigned int ReceivedByteCount; //Total number of Bytes 
-  unsigned int NTowerHits; //Total number of channels
-  unsigned short TowerMatrix[120][20][2] ; // Matrix of ADC's in Physical Positions
-  unsigned short TowerADCArray[4800] ; // Matrix of ADC's as obtained from daq
+  unsigned short TDCData[30][160];            // data from each TDC channel
+  unsigned short TDCError[30];                // vector with TDC error for each TDC channel
+  unsigned short TDCToken[30];                // vector with crate token for each TDC channel
+  unsigned short TDCTrigger[30];              // vector with trigger number for each TDC channel
+  unsigned short TDCCrateId[30];              // vector with crate Id for each TDC channel
+  unsigned short TDCCount[30];                // vector with byte count for each TDC channel
+  
+  unsigned short TowerMatrix[120][20][2];     // Matrix of ADC's in Physical Positions
+  unsigned short TowerADCArray[4800];         // Matrix of ADC's as obtained from daq
 };
 
 // similar banks for ADCR, ADCD, PED and RMS
@@ -61,19 +70,17 @@ struct Bank_BTOWERADCD: public BTOWERDATA{};
 struct Bank_BTOWERPEDR: public BTOWERDATA{};
 struct Bank_BTOWERRMSR: public BTOWERDATA{};
 
-
-
-struct Bank_SMDADCR: public Bank{  // We don't know yet, unless something
-                                   //is written for SMD
+struct Bank_SMDADCR: public Bank  // We don't know yet, unless something is written for SMD
+{   
   //        int bankHeader[10] ;    // 40 bytes of the DAQ bank header
-        int dummy ;             // 4 bytes of junk - should read as  0x00c0ffee
-        short fiberHeader[64] ; // 128 bytes of standard FEE header
-        short TDCHeader[120] ; // TDC header - error flag etc
-        short fiberData[4800] ; // stuff on the fiber - (Raw data)
+        int dummy ;                 // 4 bytes of junk - should read as  0x00c0ffee
+        short fiberHeader[64] ;     // 128 bytes of standard FEE header
+        short TDCHeader[120] ;      // TDC header - error flag etc
+        short fiberData[4800] ;     // stuff on the fiber - (Raw data)
 };
 
-
-struct BSMDDATA{
+struct BSMDDATA
+{
   char * BankType; // Will be filled with a 9 char array (8 letters + NULL)
   unsigned int DetFlag; //Daq detector flag
   unsigned int EventNumber; //Token number
@@ -95,50 +102,49 @@ struct Bank_BSMDRMSR: public BSMDDATA{};
 
 
 
-class EMC_Reader {
- void ProcessEvent(const Bank_EMCP *EmcPTR);
+class EMC_Reader 
+{
+      void ProcessEvent(const Bank_EMCP *EmcPTR);
 
-public:
-  //  move the constructor guts {...} to a .cxx file
-  EMC_Reader(EventReader *er, Bank_EMCP *pEMCP);
+  public:
+      //  move the constructor guts {...} to a .cxx file
+      EMC_Reader(EventReader *er, Bank_EMCP *pEMCP);
+      ~EMC_Reader(){}; 
 
-  Bank_BTOWERADCR& getBTOWERADCR();
-  int getTowerADC(int,int,int,unsigned short&); // int is indexes !!
-  int getTowerADC(int,unsigned short&);         // int is index   !!
-  int NTowerHits();
-  //  int getTowerADCR(unsigned short***);
+      Bank_BTOWERADCR& getBTOWERADCR();
+      int getTowerADC(int,int,int,unsigned short&); 
+      int getTowerADC(int,unsigned short&);         
+      int NTowerHits();
+      //  int getTowerADCR(unsigned short***);
 
-  Bank_BSMDADCR& getSMD_ADCR();
+      Bank_BSMDADCR& getSMD_ADCR();
 
-  int getSMD_ADC(int,int,unsigned short&);
-  int getSMDE_ADC(int,int,unsigned short&);      // int is indexes !!
-  int getSMDP_ADC(int,int,int,unsigned short&);
-  int getSMD_TIMEBIN(int,unsigned int&);
-  int NSmdHits();
+      int getSMD_ADC(int,int,unsigned short&);
+      int getSMDE_ADC(int,int,unsigned short&);     
+      int getSMDP_ADC(int,int,int,unsigned short&);
+      int getSMD_TIMEBIN(int,unsigned int&);
+      int NSmdHits();
 
-  //  int getTowerADCR(unsigned short***);
+      //  int getTowerADCR(unsigned short***);
 
+  protected:
 
-  ~EMC_Reader(){}; 
-protected:
+      // copy of EventReader pointer
+      EventReader *ercpy;
+      Bank_EMCP* pBankEMCP;
 
-  // copy of EventReader pointer
-  EventReader *ercpy;
-  Bank_EMCP* pBankEMCP;
+      // Data Banks
+      Bank_BTOWERADCR mTheTowerAdcR;
+      Bank_BTOWERADCD mTheTowerAdcD;
+      Bank_BTOWERPEDR mTheTowerPedR;
+      Bank_BTOWERRMSR mTheTowerRMSR;
 
-  // Data Banks
-  Bank_BTOWERADCR mTheTowerAdcR;
-  Bank_BTOWERADCD mTheTowerAdcD;
-  Bank_BTOWERPEDR mTheTowerPedR;
-  Bank_BTOWERRMSR mTheTowerRMSR;
-
-  Bank_BSMDADCR mTheSmdAdcR;
-  Bank_BSMDADCD mTheSmdAdcD;
-  Bank_BSMDPEDR mTheSmdPedR;
-  Bank_BSMDRMSR mTheSmdRMSR;
-  bool mTowerPresent;
-  bool mSmdPresent;
-
+      Bank_BSMDADCR mTheSmdAdcR;
+      Bank_BSMDADCD mTheSmdAdcD;
+      Bank_BSMDPEDR mTheSmdPedR;
+      Bank_BSMDRMSR mTheSmdRMSR;
+      bool mTowerPresent;
+      bool mSmdPresent;
 };
 
 EMC_Reader *getEMCReader(EventReader *er);
