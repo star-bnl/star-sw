@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.16 1999/07/25 04:29:57 genevb Exp $
+// $Id: StEventMaker.cxx,v 1.17 1999/07/28 02:03:30 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.17  1999/07/28 02:03:30  fisyak
+// Add protection against Gene
+//
 // Revision 1.16  1999/07/25 04:29:57  genevb
 // Correction for V0-Xi associated, better code in locating the primary vertex
 //
@@ -126,8 +129,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.16 1999/07/25 04:29:57 genevb Exp $
+// $Id: StEventMaker.cxx,v 1.17 1999/07/28 02:03:30 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.17  1999/07/28 02:03:30  fisyak
+// Add protection against Gene
+//
 // Revision 1.16  1999/07/25 04:29:57  genevb
 // Correction for V0-Xi associated, better code in locating the primary vertex
 //
@@ -268,7 +274,7 @@
 #include <new.h>
 static const char thisClass[] = "StEventMaker: ";
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.16 1999/07/25 04:29:57 genevb Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.17 1999/07/28 02:03:30 fisyak Exp $";
 #include "StEventManager.hh"
  * Revision 2.23  2000/05/22 21:53:41  ullrich
 #include <vector>
@@ -664,11 +670,11 @@ Int_t StEventMaker::Make(){
               startVertex = vtxPtr[idStartVertex];
             } else {
               startVertex = currentEvent->primaryVertex();
-              idStartVertex = startVertex->index();
+              if (startVertex) idStartVertex = startVertex->index();
                             << " Xi vertices, invalid foreign key to vertex table." << endm;
             trk->setStartVertex(startVertex);
             // Add track to start vertex daughters
-            startVertex->daughters().push_back(trk);
+            if (startVertex) startVertex->daughters().push_back(trk);
             // Check for any other vertices of which this may be a daughter
             long vertex_id;
             while (!(trackVertexIndex[track_id].empty())) {
@@ -676,7 +682,7 @@ Int_t StEventMaker::Make(){
               trackVertexIndex[track_id].pop_back();
               if (vertex_id != idStartVertex) {
                 startVertex = vtxPtr[vertex_id];
-                startVertex->daughters().push_back(trk);
+                if (startVertex) startVertex->daughters().push_back(trk);
               }
 			info->addHit(tpcHit);
           } else {
