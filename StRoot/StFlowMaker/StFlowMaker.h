@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.28 2001/12/18 19:22:29 posk Exp $
+//  $Id: StFlowMaker.h,v 1.29 2002/02/01 23:06:53 snelling Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -21,7 +21,7 @@
 #include "TString.h"
 #include "TTree.h"
 #include "StFlowConstants.h"
-class StEvtHddr;
+class StRunInfo;
 class StEvent;
 class StTrack;
 class StParticleDefinition;
@@ -58,7 +58,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.28 2001/12/18 19:22:29 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.29 2002/02/01 23:06:53 snelling Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -93,10 +93,10 @@ private:
   Bool_t           FillFromPicoVersion2DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent);
+  Bool_t           FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent);
   void             CloseEventRead();          // close StEvent
   void             PrintSubeventMults();      // for testing
   StFlowSelection* pFlowSelect;               //! selection object
-  StEvtHddr*       pHeader;                   //! pointer to Event header
   StEvent*         pEvent;                    //! pointer to DST data
   StFlowEvent*     pFlowEvent;                //! pointer flow event
   StFlowPicoEvent* pPicoEvent;                // pointer to pico-DST Event
@@ -134,6 +134,9 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.29  2002/02/01 23:06:53  snelling
+//  Added entries for header information in flowPico (not everthing is available yet)
+//
 //  Revision 1.28  2001/12/18 19:22:29  posk
 //  "proton" and "antiproton" changed to "pr+" and "pr-".
 //  Compiles on Solaris.

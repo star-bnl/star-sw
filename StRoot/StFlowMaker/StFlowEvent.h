@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.35 2002/01/31 01:04:47 posk Exp $
+// $Id: StFlowEvent.h,v 1.36 2002/02/01 23:06:26 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -34,6 +34,7 @@ public:
   Int_t          EventID() const;
   Int_t          RunID() const;
   Double_t       CenterOfMassEnergy() const;
+  Double_t       MagneticField() const;
   Short_t        BeamMassNumberEast() const;
   Short_t        BeamMassNumberWest() const;
   UInt_t         OrigMult() const;
@@ -74,6 +75,7 @@ public:
   void SetEventID(const Int_t&);
   void SetRunID(const Int_t&);
   void SetCenterOfMassEnergy(const Double_t&);
+  void SetMagneticField(const Double_t&);
   void SetBeamMassNumberEast(const Short_t&);
   void SetBeamMassNumberWest(const Short_t&);
   void SetOrigMult(const UInt_t&);
@@ -119,6 +121,7 @@ private:
 
   Int_t               mEventID;                                  // ID of the event
   Int_t               mRunID;                                    // ID of the run
+  Double_t            mMagneticField;                            // 
   Double_t            mCenterOfMassEnergy;                       // 
   Short_t             mBeamMassNumberEast;                       //
   Short_t             mBeamMassNumberWest;                       //
@@ -176,6 +179,8 @@ inline Int_t StFlowEvent::EventID() const { return mEventID; }
 inline Int_t StFlowEvent::RunID() const { return mRunID; }
 
 inline Double_t StFlowEvent::CenterOfMassEnergy() const { return mCenterOfMassEnergy; }
+
+inline Double_t StFlowEvent::MagneticField() const { return mMagneticField; }
 
 inline Short_t StFlowEvent::BeamMassNumberEast() const { return mBeamMassNumberEast; }
 
@@ -249,6 +254,8 @@ inline void StFlowEvent::SetPtFtpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t 
 inline void StFlowEvent::SetEventID(const Int_t& id) { mEventID = id; }
 
 inline void StFlowEvent::SetRunID(const Int_t& id) { mRunID = id; }
+
+inline void StFlowEvent::SetMagneticField(const Double_t& mf) { mMagneticField = mf; }
 
 inline void StFlowEvent::SetCenterOfMassEnergy(const Double_t& cms) { mCenterOfMassEnergy = cms; }
 
@@ -329,6 +336,9 @@ inline void StFlowEvent::SetPtWgt(Bool_t PtWgt) { mPtWgt = PtWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.36  2002/02/01 23:06:26  snelling
+// Added entries for header information in flowPico (not everthing is available yet)
+//
 // Revision 1.35  2002/01/31 01:04:47  posk
 // *** empty log message ***
 //
