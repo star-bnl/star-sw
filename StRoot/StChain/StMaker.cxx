@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.73 1999/09/24 14:51:51 fisyak Exp $
+// $Id: StMaker.cxx,v 1.74 1999/09/24 16:32:40 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.74  1999/09/24 16:32:40  fisyak
+// add return for Init/Finish Run
+//
 // Revision 1.73  1999/09/24 14:51:51  fisyak
 // Add implementation for InitRun/FinishRun
 //
@@ -1096,6 +1099,6 @@ void StMaker::SetDEBUG(Int_t l)
    while ((maker = (StMaker*)nextMaker())) maker->SetDEBUG(l);
 }
 //_____________________________________________________________________________
-Int_t StMaker::InitRun(int runumber) {}
+Int_t StMaker::InitRun(int runumber) {return 0;}
 //_____________________________________________________________________________
-Int_t StMaker::FinishRun(int runumber) {}
+Int_t StMaker::FinishRun(int runumber) {return 0;}
