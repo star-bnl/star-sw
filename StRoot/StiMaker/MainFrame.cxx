@@ -431,10 +431,26 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 	      case M_SeedFinderOptions: new SeedFinderIO(fClient->GetRoot(), this);break;
 	      case M_TrackFinderOptions:new KalmanTrackFinderIO(fClient->GetRoot(), this);break;
 	      case M_McTrackFilterOptions: 
-		StiRootSimpleTrackFilter * mcFilter;
-		mcFilter = static_cast<StiRootSimpleTrackFilter *>(StiToolkit::instance()->getTrackFinder()->getGuiMcTrackFilter());
-		new StiOptionFrame(fClient->GetRoot(), this, mcFilter);
-		break;
+		{
+		  StiRootSimpleTrackFilter * mcFilter;
+		  cout << "case M_McTrackFilterOptions: get Filter" << endl;
+		  StiTrackFinder * finder = StiToolkit::instance()->getTrackFinder();
+		  StiTrackFilter * filter = finder->getGuiMcTrackFilter();
+		  if (filter)
+		    cout << "filter OK" << endl;
+		  else
+		    cout << "filter is NULL" << endl;
+		  mcFilter = dynamic_cast<StiRootSimpleTrackFilter *>(filter);
+		  if (mcFilter)
+		    {
+		      cout << "case M_McTrackFilterOptions: Start StiOptionFrame" << endl;
+		      new StiOptionFrame(fClient->GetRoot(), this, mcFilter);
+		      cout << "case M_McTrackFilterOptions: Done StiOptionFrame" << endl;
+		    }
+		  else
+		    cout << "case M_McTrackFilterOptions: Null mcFilter." << endl;
+		  break;
+		}
 	      case M_TrackFilterOptions: 
 		StiRootSimpleTrackFilter * filter;
 		filter = static_cast<StiRootSimpleTrackFilter *>(StiToolkit::instance()->getTrackFinder()->getGuiMcTrackFilter());

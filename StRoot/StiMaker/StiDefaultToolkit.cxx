@@ -110,11 +110,15 @@ StiObjectFactoryInterface<StiTrackFilter>  * StiDefaultToolkit::getTrackFilterFa
     return trackFilterFactory;
   StiIOBroker * ioBroker = getIOBroker();
   if (ioBroker->useGui())
-    trackFilterFactory = new StiRootSimpleTrackFilterFactory("RootEditableTrackFilterterFactory");
+    {
+      cout << "StiDefaultToolkit::getTrackFilterFactory() - INFO - Instantiating StiRootSimpleTrackFilterFactory" << endl;
+      trackFilterFactory = new StiRootSimpleTrackFilterFactory("RootSimpleTrackFilterFactory",3,5,2);
+    }
   else
-    trackFilterFactory = new StiSimpleTrackFilterFactory("SimpleTrackFilterFactory");
-  trackFilterFactory->setIncrementalSize(500);
-  trackFilterFactory->setMaxIncrementCount(5);
+    {
+      cout << "StiDefaultToolkit::getTrackFilterFactory() - INFO - Instantiating StiSimpleTrackFilterFactory" << endl;
+      trackFilterFactory = new StiSimpleTrackFilterFactory("SimpleTrackFilterFactory",3,5,2);
+    }
   return trackFilterFactory;
 }
 

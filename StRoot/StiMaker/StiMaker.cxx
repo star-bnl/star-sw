@@ -7,6 +7,9 @@
 //
 //
 // $Log: StiMaker.cxx,v $
+// Revision 1.103  2002/09/05 21:27:10  pruneau
+// Fixed problem with StiRootSimpleTrackFilter::makeNewObject
+//
 // Revision 1.102  2002/09/05 05:47:30  pruneau
 // Adding Editable Parameters and dynamic StiOptionFrame
 //
@@ -84,7 +87,6 @@
 #include "Sti/StiTrackMerger.h"
 #include "Sti/StiLocalTrackMerger.h"
 #include "Sti/Messenger.h"
-#include "Sti/StiDynamicTrackFilter.h"
 #include "Sti/StiSimpleTrackFilter.h"
 
 //StiGui
@@ -103,7 +105,6 @@
 #include "StiDefaultToolkit.h"
 #include "StiStEventFiller.h"
 #include "StiMaker.h"
-#include "Sti/StiSimpleTrackFilter.h"
 #include "StiMaker/StiRootSimpleTrackFilter.h"
 
 StiMaker* StiMaker::sinstance = 0;
@@ -127,8 +128,6 @@ ClassImp(StiMaker)
 {
   cout <<"StiMaker::StiMaker()"<<endl;
   sinstance = this;
-  trackFilter = new StiSimpleTrackFilter();
-
   toolkit = StiDefaultToolkit::instance();
 }
 
@@ -149,9 +148,6 @@ void StiMaker::kill()
 StiMaker::~StiMaker() 
 {
   cout <<"StiMaker::~StiMaker()"<<endl;
-	
-  delete trackFilter;
-
   Messenger::kill();
 }
 
