@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.15 1999/12/09 20:42:47 fine Exp $
+// $Id: PadControlPanel.C,v 1.16 2000/07/17 17:35:30 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -198,7 +198,7 @@ static void AddGrid()
  
     TView *view = thisPad->GetView(); 
     if (!view) return;
-    Float_t min[3],max[3];
+    Double_t min[3],max[3];
     view->GetRange(min,max);
 
     TList *list      = thisPad->GetListOfPrimitives();
@@ -227,10 +227,10 @@ static void AdjustScales()
   if (thisPad) {
     TView *view = thisPad->GetView(); 
     if (!view) return;
-    Float_t min[3],max[3];
+    Double_t min[3],max[3];
     view->GetRange(min,max);
     int i;
-    Float_t maxSide = 0;
+    Double_t maxSide = 0;
     // Find the largest side
     for (i=0;i<3; i++) maxSide = TMath::Max(maxSide,max[i]-min[i]);
     //Adjust scales:
@@ -248,7 +248,7 @@ static void Centered3DImages()
   if (thisPad) {
     TView *view = thisPad->GetView(); 
     if (!view) return;
-    Float_t min[3],max[3];
+    Double_t min[3],max[3];
     view->GetRange(min,max);
     int i;
     for (i=0;i<3; i++) min[i]=-max[i];
@@ -265,7 +265,7 @@ static void Decrease3DScale()
   if (thisPad) {
     TView *view = thisPad->GetView(); 
     if (!view) return;
-    Float_t min[3],max[3];
+    Double_t min[3],max[3];
     view->GetRange(min,max);
     int i;
     for (i=0;i<3; i++) {max[i] /= 0.8; min[i]=max[i]*0.1;}
@@ -282,7 +282,7 @@ static void Inscrease3DScale()
   if (thisPad) {
     TView *view = thisPad->GetView(); 
     if (!view) return;
-    Float_t min[3],max[3];
+    Double_t min[3],max[3];
     view->GetRange(min,max);
     int i;
     for (i=0;i<3; i++) {max[i] *= 0.8; min[i]=max[i]*0.1;}
@@ -322,7 +322,7 @@ void MakeFourView(TVirtualPad *pad=0)
   TList *thisPrimitives = 0; 
   if (thisPad && (thisPrimitives = thisPad->GetListOfPrimitives()) && (view =  thisPad->GetView()) ) 
   {
-    Float_t min[3],max[3];
+    Double_t min[3],max[3];
     view->GetRange(min,max);
     Int_t system = view->GetSystem();
     TCanvas *c = new TCanvas(" 4 views", thisPad->GetTitle(),600,600);
@@ -366,6 +366,9 @@ StPadControlPanel __aa__;
 void PadControlPanel(){}
 
 // $Log: PadControlPanel.C,v $
+// Revision 1.16  2000/07/17 17:35:30  fine
+// Adjusted to new ROOT requirements: float / double
+//
 // Revision 1.15  1999/12/09 20:42:47  fine
 // Zoom
 //
