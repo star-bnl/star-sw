@@ -7,24 +7,13 @@
 use Env;
 use File::Basename;
 #
-#print "RootCint.pl ================\n"; my $rootcint = `which rootcint`; 
-#print "ROOTSYS = $ROOTSYS rootcint = $rootcint\n";
 my $Cint_cxx = shift;
 (my $Cint_h  = $Cint_cxx) =~ s/_Cint\.cxx/_Cint\.h/g;
 my $DirName = dirname($Cint_cxx);# print "DirName = $DirName\n";
 my $LinkDef = $DirName . "/" . "LinkDef.h"; #print "Cint Files :", $Cint_cxx, ",", $Cint_h,",",$LinkDef,"\n";
 my $sources  = shift; #print "sources =", $sources,"\n";
-my $CPPFLAGS = shift; print "CPPFLAGS = ", $CPPFLAGS, "\n";
+my $CPPFLAGS = shift; #print "CPPFLAGS = ", $CPPFLAGS, "\n";
 my @cpps = split / /,$CPPFLAGS;# print "cpps: @cpps \n";
-my $ROOTCINT_CPPPATH = "";
-#print "DirName = $DirName \n";
-(my $dir = $DirName) =~ s/\S*\//\.\.\//g;# print "dir = $dir\n";
-$dir =~ s/\/\S*/\/\.\./g;# print "dir = $dir\n";
-foreach my $c (@cpps) {
-  if ($c  !~ /^-I/ || $c =~ /^-I\//) {$ROOTCINT_CPPPATH .= " " . $c;}
-  else {(my $cc = $c) =~ s/-I//; $cc = "-I" . $dir . "/" . $cc; $ROOTCINT_CPPPATH .= " " . $cc;}
-}
-$CPPFLAGS = $ROOTCINT_CPPPATH;# print "CPPFLAGS = ", $CPPFLAGS, "\n";
 my %class_hfile = (); # class h-file map
 my %class_hfile_depens_on = (); # 
 my %class_written = (); 
@@ -32,7 +21,7 @@ my @classes = 0; # list of classes
 my $h_files = "";
 my $coll = 0;
 my $col  = 0;
-# count no. of classes i LinkDef's
+# count no. of classes in LinkDef's
 my $ListOfWrittenClasses = ":"; 
 my $ListOfDefinedClasses = "";
 my $off = 0;
@@ -57,12 +46,13 @@ for my $def  (split /\s/,$sources) {#  print "SRC:", $def, "\n";
 close (Out);
 for my $h  (split /\s/,$sources) {#  print "SRC:", $h, "\n";
   next if !$h;
+  next if $h =~ /LinkDef/;
   if ($h =~ /Stypes/)  {$h_files .= " " . basename($h); next;}
-  if ($h =~ /LinkDef/) {next;}
 #  print "h = $h\n";
   my $hh = $h;
   if (!-f $hh) {($hh = $h) =~ s/\.share/StRoot/;}
   if (!-f $hh) {($hh = $h) =~ s/\.share/asps/;} 
+  if (!-f $hh) {($hh = $h) =~ s/\.share//;} 
 #  if (!-f $hh) {($hh = $h) =~ s/\.share/asps\/rexe/;} 
   open (In,$hh) or die "Can't open $hh";
   my $dummy;
@@ -202,7 +192,7 @@ if ($coll) { # order h-files with Collections
 	       }
       #  print "class $class h = $h depends on $hd\n";# if $hd;
       next if $hd;
-      $h_files .= " " . $hh;  $add++;# print "add $add : $h_files\n";
+      $h_files .= " " . $hh; $add++;# print "add $hh : $h_files\n";
     }
     if (!$add) {$done = 1;}
   }
@@ -210,7 +200,8 @@ if ($coll) { # order h-files with Collections
 for my $class (@classes) {
   next if ! $class;
   my $h = $class_hfile{$class};#  print "Class: $class h: $h written: $class_written{$class} \n";
-  if (!$h) {my $hfile = $DirName . "/" . $class . ".h"; #print "hfile = $hfile\n";
+  if (!$h) {my $hfile = $DirName . "/" . $class . ".h";# print "hfile = $hfile\n";
+	    if (! -f $hfile) {$hfile =~ s/^\.share\///;}#print "hfile = $hfile\n";}
 	    if (-f $hfile ) {$h = $hfile;} 
 	  }
   if (!$h) {next;}
@@ -220,9 +211,10 @@ for my $class (@classes) {
 my $hfile = $DirName . "/Stypes.h";
 if (-f $hfile) {$h_files .= " Stypes.h";}
 if ($h_files) {
-  $h_files .= " " . "LinkDef.h";# print "files = ",$files,"\n";
+  $h_files .= " " . "LinkDef.h"; 
   my $local_cint = basename($Cint_cxx);#  print "files = $#files\n";
-  my $cmd  = "cd $DirName && rootcint -f $local_cint -c -DROOT_CINT -D__ROOT__ -I. $CPPFLAGS $h_files && rm -f $h_files";
+  $CPPFLAGS = " -I" . $DirName . " " . $CPPFLAGS;
+  my $cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ -I. $CPPFLAGS $h_files";
   print "cmd = ",$cmd,"\n";
   my $flag = `$cmd`; if ($?) {exit 2;}
   
