@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.0 1999/11/10 21:21:08 ullrich Exp $
+% $Id: StEvent.tex,v 2.1 1999/11/12 17:44:09 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -104,8 +104,8 @@
 % Revision 2.18  2000/02/11 16:23:45  ullrich
 % Add info on order in which primary vertices are stored
 % and added description of StPrimaryVertex::flag().
-  {\LARGE $ $Revision: 2.0 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/10 21:21:08 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.1 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/12 17:44:09 $ $}  % replaced by cvs with current revision
 % Added Helens description of iflag (see StTrack::flag()).
 %
 % Revision 2.16  2000/01/27 18:38:30  ullrich
@@ -143,8 +143,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.0 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/10 21:21:08 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.1 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/12 17:44:09 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -168,8 +168,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.0 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/10 21:21:08 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.1 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/12 17:44:09 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -177,8 +177,8 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.0 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/10 21:21:08 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.1 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/12 17:44:09 $ $}  % replaced by cvs with current revision
 \index{header files}
 \index{StEventTypes.h file}
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
@@ -202,7 +202,7 @@ To summarize: All you need when using StEvent is to include
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.0 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.1 $ $}  \\[5mm] % replaced by cvs with current revision
 \index{enumerations}
 \index{constants}
 \index{StDetectorId.h file}
@@ -371,6 +371,39 @@ stored you must write:
 Further documentation can be found in the StarClassLibrary manual
 (see Sec.~\ref{sec:furtherDoc}).\vfill
 \end{verbatim}
+
+programming language and C/C++ played only a minor role. Again, the only
+\index{ROOT}
+\index{persistence}
+All \StEvent\ classes inherit from \texttt{StObject} which itself inherits
+from \texttt{TObject}. During the build of \StEvent\ all classes run through
+\texttt{rootcint}. This adds the following features:
+\item \texttt{StTpcHit::padrow()}
+\item All \StEvent\ classes can be used on the \texttt{root4star} command line.
+\item Almost all \StEvent\ classes are persistent capable, i.e. they can be stored
+    in ROOT files.
+\item \textrm{StSvtHit::wafer(})
+As usual each coin has two sides. The disadvantage of this is that we cannot use
+some features of the ANSI/ISO C++ and from the Strandard C++ Library as:
+\end{itemize}
+See the corresponding reference sections for more.
+\item templates 
+\item STL containers and algorithms    
+\item namespaces    
+
+This however applies for the header files only. Source files are not processed
+via \texttt{rootcint} and therefore all the stuff mentioned above can be used.
+And indeed in the implementation of various \StEvent\ classes we make heavily
+use of STL features.
+\begin{figure}[hbt]
+for it you get it. Objects returned by pointer, however, are
+\emph{not} guaranteed to exist. You might get a \texttt{NULL} pointer
+back.  It is always a good idea to check if you really get what you
+asked for.  Dereferencing a \texttt{NULL} pointer can be painful.
+
+As you will see in the reference section many methods are provided in
+two versions: a constant and a non-constant version. Don't worry about
+cout << "STAR units:" << endl;
 cout << "a = " << a << " cm" << endl;
 cout << "b = " << b << " cm" << endl;
 \index{container}
@@ -431,13 +464,6 @@ Library as:
 All containers are based on modified ROOT \index{ROOT} collections. They
 allow to make \StEvent\ persistent. They good thing with \texttt{StArray}
 is that all those containers offer an almost ANSI/ISO compatible interface.
-\begin{figure}[htb]
-    \begin{center}
-        \includegraphics[width=0.9\textwidth]{cartoon4.eps}
-        \caption{Persistence saves the state and class of an object
-            across time or space.}
-    \end{center}
-\end{figure}
 This means that \emph{both} containers classes provide the essential methods
 listed below. Replace \texttt{ClassName} with whatever \StEvent\ class.
     \begin{center}
@@ -524,10 +550,47 @@ A warning at the end. Although StArray provides a interface compatible
 with the Standard C++ Library (former STL) it is not guaranteed that
 the standard algorithms will work (\texttt{sort}, \texttt{accumulate},
 \texttt{copy}, \texttt{find}, ...). You better check this from case to
-case. Don't say you haven't been warned.  \vfill
+case. Don't say you haven't been warned.
+
+For your own analysis (or reconstruction) code you might use the standard
+STL containers together with StEvent freely provided that you classes are not
+processed via \texttt{rootcint}. Since STL containers are transient they
+are more efficient if speed and use less memory if this is your concern.
+compatible interface.  This means that \emph{both} container classes
+provide the essential methods listed below. Replace \texttt{ClassName}
+with any \StEvent\ class one might find in a container.
+\begin{Entry}
+\item[Public\\ Constructors]
+    \verb+StPtrVecClassName();+\\
+    \verb+StSPtrVecClassName();+\\
+    Constructs an instance with zero length.
+
+    \verb+StPtrVecClassName(UInt_t nelem);+\\
+    \verb+StSPtrVecClassName(UInt_t nelem);+\\
+place and at the right time.  The only two methods you should be aware
+of are:
+    \verb+StPtrVecClassName(const StPtrVecClassName& vec);+\\
+
+    to structural containers the object gets also deleted.
     
-\subsection{Getting StEvent: StEventMaker}
-\subsection{A Standard Example}
+    Returns a pointer to the current StEvent object.
+    Returns the pointer to the \texttt{i}'th element where \texttt{i}
+    runs from 0 to \texttt{size()-1}.
+    Returns a pointer to the current StRun object.
+    This object is only updates for a new run, else you will
+    get always the same instance.
+
+Needless to say that every container comes with two iterators, a
+constant and a non-constant version.  The name of each iterator is
+composed of the name of the container and the
+suffix \texttt{Iterator} or \texttt{ConstIterator}.\\
+Example: For the structural container \texttt{StSPtrVecTrackNode} the
+iterators \texttt{StSPtrVecTrackNodeIterator} and
+
+if they iterate over structural or non-structural containers so there
+are different iterators for \texttt{StSPtrVecTrackNode} and
+\texttt{StPtrVecTrackNode} containers.
+    
     \verb+Bool_t  doPrintMemoryInfo;+\\
     Switch on/off checks on memory usage of \StEvent\
 
@@ -555,20 +618,20 @@ for (int i=0; i<theHits.size(); i++) {
 The fact that hits and vertices inherit from the same base class
 \texttt{StMeasuredPoint} can be used wherever positions and errors
 are what count. Take for an example a track fit. What you have to pass
-reference section of a derived class. Always check the section(s)
-of the base class(es) to get a complete overview on the available
+to the fitting algorithm are the points and the errors. A fitter usually
+gives a damn if the position was taken in the SVT or TPC. What counts
 are the coordinates and their weight which depends on the errors.
 \end{verbatim}
 Note that some constructors are omitted, especially the ones which
 take tables as arguments. They are for internal use only (even if
 public).
 
-Destructors, assignment operators and copy constructors are not
-listed.  \texttt{Inline} declarations are omitted throughout the
-documentation.
+Default constructors, destructors, assignment operators and copy
+constructors are not listed.  \texttt{Inline} declarations are omitted
+throughout the documentation.
 \begin{figure}[hb]
     \begin{center}
-        \includegraphics[width=0.47\textheight]{cartoon3.eps}
+        \includegraphics[width=0.45\textheight]{cartoon3.eps}
         \caption{Abstractions from a hierarchy.}
     \end{center}
 \end{figure}
