@@ -1,11 +1,15 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.38 2004/08/10 14:21:13 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.39 2004/08/17 04:53:05 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.39  2004/08/17 04:53:05  calderon
+ * When filling fit traits for primary tracks, set the new flag
+ * mPrimaryVertexUsedInFit.
+ *
  * Revision 2.38  2004/08/10 14:21:13  calderon
  * Use the firstHit from the dynamic_cast, to avoid a compiler warning
  * for an unused variable.
@@ -734,7 +738,9 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   fitTraits.setNumberOfFitPoints(static_cast<unsigned char>(stEventFitPoints(track,kTpcId)),kTpcId);
   fitTraits.setNumberOfFitPoints(static_cast<unsigned char>(stEventFitPoints(track,kSvtId)),kSvtId);
   fitTraits.setNumberOfFitPoints(static_cast<unsigned char>(stEventFitPoints(track,kSsdId)),kSsdId);
-  
+  if (gTrack->type()==primary) {
+     fitTraits.setPrimaryVertexUsedInFit(true);
+  }
   gTrack->setFitTraits(fitTraits);
   return;
 }
