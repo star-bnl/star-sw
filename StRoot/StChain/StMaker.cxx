@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.141 2004/03/15 23:57:01 jeromel Exp $
+// $Id: StMaker.cxx,v 1.142 2004/04/07 18:16:10 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -419,7 +419,8 @@ void StMaker::Clear(Option_t *option)
   m_MakeReturn = 0;
   if(option){};
   if (m_DataSet) m_DataSet->Delete();
-//    Reset lists of event objects
+
+//  Reset lists of event objects
    
    TIter next(GetMakeList(),kIterBackward);
    StMaker *maker;
@@ -436,6 +437,7 @@ void StMaker::Clear(Option_t *option)
       maker->ResetBit(kCleaBeg);
       StMkDeb::SetCurrent(curr);
    }
+   TCollection::EmptyGarbageCollection();
    return;
 
 }
@@ -522,7 +524,7 @@ void StMaker::EndMaker(int ierr)
   ::doPs(GetName(),"EndMaker");
   
   /*if (GetNumber()>3)*/ 
-  if (fMemStatMake) fMemStatMake->Start();
+  if (fMemStatMake) fMemStatMake->Stop();
   else              printf("StMaker::EndMaker : cannot use TMemStat (no Init()) in [%s]\n",GetName());
 
 
@@ -1225,6 +1227,9 @@ AGAIN: switch (fState) {
 }
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.142  2004/04/07 18:16:10  perev
+// MemStat for Make bug fixed
+//
 // Revision 1.141  2004/03/15 23:57:01  jeromel
 // Protect against NULL
 //
