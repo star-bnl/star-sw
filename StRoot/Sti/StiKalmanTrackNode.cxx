@@ -218,8 +218,8 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
     c = 1e-9;
   else if (c>-1e-9 && c<0)
     c = -1e-9;
-  
-  pt = kField/c;
+  // with "c" in 1/meter, kField in tesla, pt is in GeV/c
+  pt = 0.3*kField/c;
   sinPhi = c*fX-fP2;
   double ss = sinPhi*sinPhi;
   if (ss>1.)
@@ -241,6 +241,7 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
       sa = 0.;
     }
   sa = sqrt(sa);
+	// should I include a factor of 0.3 here???????????????
   double a00=kField*(fX-fP2/c)/sa;
   double a01=-kField*(fP2*fP2-fX*fP2*c-1)/(c*c*sa);
   double a02=0;
@@ -383,7 +384,7 @@ double StiKalmanTrackNode::getPt() const
     c = 1e-9;
   else if (c>-1e-9 && c<0)
     c = -1e-9;
-  pt = kField/c;
+  pt = 0.3*kField/c;
   return pt;
 }
 
@@ -481,7 +482,7 @@ void  StiKalmanTrackNode::propagate(double xk,
 			if (fP3==0.)
 				throw new Exception("StiKalmanTrackNode::propagate - Error - fP3 wass null");
 			
-      double pt = kField/fP3;
+      double pt = 0.3*kField/fP3;
       double p2=(1.+tanl*tanl)*pt*pt;
       double beta2=p2/(p2 + massHypothesis*massHypothesis);
       double theta2=14.1*14.1/(beta2*p2*1e6)*d/x0*rho;
