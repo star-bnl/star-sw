@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.16 2001/12/14 23:11:30 fretiere Exp $
+ * $Id: StHbtParticle.hh,v 1.17 2002/11/19 23:35:52 renault Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
+ * Revision 1.17  2002/11/19 23:35:52  renault
+ * Enable calculation of exit/entrance separation for V0 daughters
+ *
  * Revision 1.16  2001/12/14 23:11:30  fretiere
  * Add class HitMergingCut. Add class fabricesPairCut = HitMerginCut + pair purity cuts. Add TpcLocalTransform function which convert to local tpc coord (not pretty). Modify StHbtTrack, StHbtParticle, StHbtHiddenInfo, StHbtPair to handle the hit information and cope with my code
  *
@@ -118,6 +121,10 @@ public:
 
   const StHbtThreeVector& NominalTpcExitPoint() const;     // position track exits TPC assuming start at (0,0,0)
   const StHbtThreeVector& NominalTpcEntrancePoint() const; // position track crosses IFC assuming start at (0,0,0)
+  const StHbtThreeVector& TpcV0PosExitPoint() const;  
+  const StHbtThreeVector& TpcV0PosEntrancePoint() const;
+  const StHbtThreeVector& TpcV0NegExitPoint() const;  
+  const StHbtThreeVector& TpcV0NegEntrancePoint() const;
 
   // the following method is for explicit internal calculation to fill datamembers.
   // It is invoked automatically if StHbtParticle constructed from StHbtTrack
@@ -129,13 +136,34 @@ public:
   double mU[45];
   int mSect[45];
 
-
   void ResetFourMomentum(const StHbtLorentzVector& fourMomentum);
 
   const StHbtHiddenInfo*  HiddenInfo() const;
   // Fab private
   StHbtHiddenInfo*  getHiddenInfo() const;
   void SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo);
+  void CalculateTpcExitAndEntrancePoints( const StPhysicalHelixD* tHelix,
+					  StHbtThreeVector* PrimVert,
+					  StHbtThreeVector* tmpTpcEntrancePoint,
+					  StHbtThreeVector* tmpTpcExitPoint,
+					  StHbtThreeVector* tmpPosSample,
+					  double* tmpZ,double* tmpU,int* tmpSect);
+
+  // For V0 Daugthers TpcEntrance/ExitPoints
+  StHbtThreeVector mTpcV0PosPosSample[11];
+  double mV0PosZ[45];
+  double mV0PosU[45];
+  int mV0PosSect[45];
+  StHbtThreeVector mTpcV0NegPosSample[11];
+  double mV0NegZ[45];
+  double mV0NegU[45];
+  int mV0NegSect[45];
+  // test
+  StHbtThreeVector mTpcTrackTestPosSample[11];
+  double mTrackTestZ[45];
+  double mTrackTestU[45];
+  int mTrackTestSect[45];
+  // end test
 
 private:
   StHbtTrack* mTrack;  // copy of the track the particle was formed of, else Null
@@ -150,6 +178,22 @@ private:
   StHbtThreeVector mNominalTpcExitPoint;
   StHbtThreeVector mNominalTpcEntrancePoint;
   mutable StHbtHiddenInfo* mHiddenInfo;  // Fab private
+
+  // For V0 Daugthers TpcEntrance/ExitPoints
+  StHbtThreeVector mPrimaryVertex;
+
+  StPhysicalHelixD mHelixV0Pos;
+  StHbtThreeVector mTpcV0PosEntrancePoint;
+  StHbtThreeVector mTpcV0PosExitPoint;
+
+  StPhysicalHelixD mHelixV0Neg;
+  StHbtThreeVector mTpcV0NegEntrancePoint;
+  StHbtThreeVector mTpcV0NegExitPoint;
+  // test
+  //StHbtThreeVector mPrimaryVertexTrackTest;
+  StPhysicalHelixD mHelixTrackTest;
+  StHbtThreeVector mTpcTrackTestEntrancePoint;
+  StHbtThreeVector mTpcTrackTestExitPoint;
 };
 
 inline StHbtTrack* StHbtParticle::Track() const { return mTrack; }
@@ -158,7 +202,6 @@ inline const StHbtLorentzVector& StHbtParticle::FourMomentum() const {return mFo
 inline StPhysicalHelixD& StHbtParticle::Helix() {return mHelix;}
 inline unsigned long StHbtParticle::TopologyMap(const int word) const {return mMap[word];}
 inline int StHbtParticle::NumberOfHits() const {return mNhits;}
-
 inline StHbtV0* StHbtParticle::V0() const { return mV0; }
 inline unsigned short StHbtParticle::NegTrackId() const { return mV0->idNeg(); }
 inline unsigned short StHbtParticle::PosTrackId() const { return mV0->idPos(); }

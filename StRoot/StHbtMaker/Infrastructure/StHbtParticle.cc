@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.17 2001/12/14 23:11:30 fretiere Exp $
+ * $Id: StHbtParticle.cc,v 1.18 2002/11/19 23:36:00 renault Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.18  2002/11/19 23:36:00  renault
+ * Enable calculation of exit/entrance separation for V0 daughters
+ *
  * Revision 1.17  2001/12/14 23:11:30  fretiere
  * Add class HitMergingCut. Add class fabricesPairCut = HitMerginCut + pair purity cuts. Add TpcLocalTransform function which convert to local tpc coord (not pretty). Modify StHbtTrack, StHbtParticle, StHbtHiddenInfo, StHbtPair to handle the hit information and cope with my code
  *
@@ -121,8 +124,31 @@ StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass
   mNhits = hbtTrack->NHits();
   mHelix = hbtTrack->Helix();
   CalculateNominalTpcExitAndEntrancePoints();
+  // test
+  mHelixTrackTest = hbtTrack->Helix();
 
-  
+  StHbtThreeVector ZeroVectTrackTest(0.,0.,0.);
+  ZeroVectTrackTest = hbtTrack->Helix().origin();
+  CalculateTpcExitAndEntrancePoints(&mHelixTrackTest,&ZeroVectTrackTest,
+				    &mTpcTrackTestEntrancePoint,
+				    &mTpcTrackTestExitPoint,
+				    &mTpcTrackTestPosSample[0],&mTrackTestZ[0],
+				    &mTrackTestU[0],&mTrackTestSect[0]);
+//   cout <<"Entrance Orig ="<< mNominalTpcEntrancePoint << endl;
+//   cout <<"Entrance Modi ="<< mTpcTrackTestEntrancePoint << endl;
+//   cout <<"Exit Orig ="<< mNominalTpcExitPoint << endl;
+//   cout <<"Exit Modi ="<< mTpcTrackTestExitPoint << endl;
+//   cout <<"PosSample Orig0 ="<< mNominalPosSample[0] << endl;
+//   cout <<"PosSample Modi0 ="<< mTpcTrackTestPosSample[0] << endl;
+//   cout <<"PosSample Orig1 ="<< mNominalPosSample[1] << endl;
+//   cout <<"PosSample Modi1 ="<< mTpcTrackTestPosSample[1] << endl;
+//   cout <<"Z Orig0 ="<<mZ[0] << endl;
+//   cout <<"Z Modi0 ="<<mTrackTestZ[0] << endl;
+//   cout <<"U Orig0 ="<<mU[0] << endl;
+//   cout <<"U Modi0 ="<<mTrackTestU[0] << endl;
+//   cout <<"Sect Orig0 ="<<mSect[0] << endl;
+//   cout <<"Sect Modi0 ="<<mTrackTestSect[0] << endl;
+  // end test
   // ***
   mHiddenInfo= 0;
   if(hbtTrack->ValidHiddenInfo()){
@@ -143,6 +169,42 @@ StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mT
   mFourMomentum.setE(ener);
   //  cout << mPosTrackId << " " << mNegTrackId << " " << hbtV0->idPos() << " " << hbtV0->idNeg() << endl;
   //  mHelix = hbtTrack->Helix(); ?? what to do with mHelix for a Particle coming from a V0?
+  // Calculating TpcEntrancePoint for Positive V0 daugther
+  mPrimaryVertex = hbtV0->primaryVertex();
+//   cout <<"StHbtParticle---DEBUT_V0" << endl;
+
+
+
+  mHelixV0Pos = hbtV0->HelixPos();
+//   cout <<"StHbtParticle---mHelixV0Pos->x==" << mHelixV0Pos.origin().x() << endl;
+//   cout <<"StHbtParticle---mHelixV0Pos->y==" << mHelixV0Pos.origin().y() << endl;
+//   cout <<"StHbtParticle---mHelixV0Pos->z==" << mHelixV0Pos.origin().z() << endl;
+//   cout <<"StHbtParticle---==PrimVtx" << mPrimaryVertex << endl;
+
+  CalculateTpcExitAndEntrancePoints(&mHelixV0Pos,&mPrimaryVertex,&mTpcV0PosEntrancePoint,
+				    &mTpcV0PosExitPoint,&mTpcV0PosPosSample[0],&mV0PosZ[0],
+				    &mV0PosU[0],&mV0PosSect[0]);
+
+  mHelixV0Neg = hbtV0->HelixNeg();
+  CalculateTpcExitAndEntrancePoints(&mHelixV0Neg,&mPrimaryVertex,&mTpcV0NegEntrancePoint,
+				    &mTpcV0NegExitPoint,&mTpcV0NegPosSample[0],&mV0NegZ[0],
+				    &mV0NegU[0],&mV0NegSect[0]);
+//   cout <<"StHbtParticle---==mTpcV0PosEntrancePoint" << mTpcV0PosEntrancePoint << endl;
+//   cout <<"StHbtParticle---==mTpcV0PosExitPoint" << mTpcV0PosExitPoint << endl;
+//   cout <<"StHbtParticle---==mTpcV0PosPosSample[0]" << mTpcV0PosPosSample[0] << endl;
+//   cout <<"StHbtParticle---==mV0PosZ[0]" <<mV0PosZ[0]  << endl;
+//   cout <<"StHbtParticle---==mV0PosU[0]" << mV0PosU[0] << endl;
+//   cout <<"StHbtParticle---==mV0PosSect[0]" <<mV0PosSect[0]  << endl;
+
+//   cout <<"StHbtParticle---==mTpcV0MegEntrancePoint" << mTpcV0NegEntrancePoint << endl;
+//   cout <<"StHbtParticle---==mTpcV0MegExitPoint" << mTpcV0NegExitPoint << endl;
+//   cout <<"StHbtParticle---==mTpcV0MegMegSample[0]" << mTpcV0NegPosSample[0] << endl;
+//   cout <<"StHbtParticle---==mV0MegZ[0]" <<mV0NegZ[0]  << endl;
+//   cout <<"StHbtParticle---==mV0MegU[0]" << mV0NegU[0] << endl;
+//   cout <<"StHbtParticle---==mV0MegSect[0]" <<mV0NegSect[0]  << endl;
+
+//   cout <<"StHbtParticle---FIN_V0" << endl;
+
 }
 //_____________________
 StHbtParticle::StHbtParticle(const StHbtKink* const hbtKink,const double& mass) : mTrack(0), mV0(0) {
@@ -352,3 +414,145 @@ void StHbtParticle::CalculateNominalTpcExitAndEntrancePoints(){
   }
 }
 //_____________________
+void StHbtParticle::CalculateTpcExitAndEntrancePoints( const StPhysicalHelixD* tHelix,
+						       StHbtThreeVector*  PrimVert,
+						       StHbtThreeVector* tmpTpcEntrancePoint,
+						       StHbtThreeVector* tmpTpcExitPoint,
+						       StHbtThreeVector* tmpPosSample,
+						       double* tmpZ,double* tmpU,int* tmpSect){
+  // this calculates the exit point of a secondary track, 
+  // either through the endcap or through the Outer Field Cage
+  // We assume the track to start at tHelix.origin-PrimaryVertex
+  // it also calculates the entrance point of the secondary track, 
+  // which is the point at which it crosses the
+  // inner field cage
+  //  static StHbtThreeVector ZeroVec(0.,0.,0.);
+  StHbtThreeVector ZeroVec(0.,0.,0.);
+  ZeroVec.setX(tHelix->origin().x()-PrimVert->x());
+  ZeroVec.setY(tHelix->origin().y()-PrimVert->y());
+  ZeroVec.setZ(tHelix->origin().z()-PrimVert->z());
+  double dip, curv, phase;
+  int h;
+  curv = tHelix->curvature();
+  dip  = tHelix->dipAngle();
+  phase= tHelix->phase();
+  h    = tHelix->h();
+  
+  StHelixD hel(curv,dip,phase,ZeroVec,h);
+
+  pairD candidates;
+  double sideLength;  // this is how much length to go to leave through sides of TPC
+  double endLength;  // this is how much length to go to leave through endcap of TPC
+  // figure out how far to go to leave through side...
+  candidates = hel.pathLength(200.0);  // bugfix MAL jul00 - 200cm NOT 2cm
+  sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
+
+  static StHbtThreeVector WestEnd(0.,0.,200.);  // bugfix MAL jul00 - 200cm NOT 2cm
+  static StHbtThreeVector EastEnd(0.,0.,-200.); // bugfix MAL jul00 - 200cm NOT 2cm
+  static StHbtThreeVector EndCapNormal(0.,0.,1.0);
+
+  endLength = hel.pathLength(WestEnd,EndCapNormal);
+  if (endLength < 0.0) endLength = hel.pathLength(EastEnd,EndCapNormal);
+
+  if (endLength < 0.0) cout << "StHbtParticle::CalculateTpcExitAndEntrancePoints(): "
+                            << "Hey -- I cannot find an exit point out endcaps" << endl;
+
+  // OK, firstExitLength will be the shortest way out of the detector...
+  double firstExitLength = (endLength < sideLength) ? endLength : sideLength;
+
+  // now then, let's return the POSITION at which particle leaves TPC...
+  *tmpTpcExitPoint = hel.at(firstExitLength);
+
+  // Finally, calculate the position at which the track crosses the inner field cage
+  candidates = hel.pathLength(50.0);  // bugfix MAL jul00 - 200cm NOT 2cm
+
+  sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
+
+  *tmpTpcEntrancePoint = hel.at(sideLength);
+
+  if (isnan(tmpTpcExitPoint->x())) *tmpTpcExitPoint = StHbtThreeVector(-9999.,-9999.,-9999); 
+
+
+  // 03Oct00 - mal.  OK, let's try something a little more 
+  // along the lines of NA49 and E895 strategy.
+  // calculate the "nominal" position at N radii (say N=11) 
+  // within the TPC, and for a pair cut
+  // use the average separation of these N
+  for (int irad=0; irad<11; irad++){
+    float radius = 50.0 + irad*15.0;
+    candidates = hel.pathLength(radius);
+    sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
+    //    cout <<"StHbtParticle==sideLength==" << sideLength<< endl;
+    tmpPosSample[irad] = hel.at(sideLength);
+  }
+
+  static float tRowRadius[45] = {60,64.8,69.6,74.4,79.2,84,88.8,93.6,98.8, 
+				 104,109.2,114.4,119.6,127.195,129.195,131.195,
+				 133.195,135.195,137.195,139.195,141.195,
+				 143.195,145.195,147.195,149.195,151.195,
+				 153.195,155.195,157.195,159.195,161.195,
+				 163.195,165.195,167.195,169.195,171.195,
+				 173.195,175.195,177.195,179.195,181.195,
+				 183.195,185.195,187.195,189.195};
+  int tRow,tSect,tOutOfBound;
+  double tU,tLength,tPhi;
+  StHbtThreeVector tPoint;
+  StThreeVectorD tn(0,0,0);
+  StThreeVectorD tr(0,0,0);
+  for(int ti=0;ti<45;ti++){
+    // Find which sector it is on
+    candidates =  hel.pathLength(tRowRadius[ti]);
+    tLength = (candidates.first > 0) ? candidates.first : candidates.second;
+    tPoint = hel.at(tLength);
+    TpcLocalTransform(tPoint,tmpSect[ti],tRow,tU,tPhi);
+    // calculate crossing plane
+    //tPhi = tSectToPhi[tmpSect[ti]-1]*TMath::Pi()/6.;
+    tn.setX(cos(tPhi));
+    tn.setY(sin(tPhi));       
+    tr.setX(tRowRadius[ti]*cos(tPhi));
+    tr.setY(tRowRadius[ti]*sin(tPhi));
+    // find crossing point
+    tLength = hel.pathLength(tr,tn);
+    tPoint = hel.at(tLength);
+    tmpZ[ti] = tPoint.z();
+    tOutOfBound = TpcLocalTransform(tPoint,tSect,tRow,tmpU[ti],tPhi);
+    if(tOutOfBound || (tmpSect[ti] == tSect && tRow!=(ti+1))){
+      tmpSect[ti]=-1;
+    }
+    else{
+      if(tmpSect[ti] != tSect){
+	// Try again on the other sector
+	tn.setX(cos(tPhi));
+	tn.setY(sin(tPhi));       
+	tr.setX(tRowRadius[ti]*cos(tPhi));
+	tr.setY(tRowRadius[ti]*sin(tPhi));
+	// find crossing point
+	tLength = hel.pathLength(tr,tn);
+	tPoint = hel.at(tLength);
+	tmpZ[ti] = tPoint.z();
+	tmpSect[ti] = tSect;
+	tOutOfBound = TpcLocalTransform(tPoint,tSect,tRow,tmpU[ti],tPhi);
+	if(tOutOfBound || tSect!= tmpSect[ti] || tRow!=(ti+1)){
+	  tmpSect[ti]=-1;
+	}
+      }
+    }
+  }
+}
+//_____________________
+const StHbtThreeVector& StHbtParticle::TpcV0PosExitPoint() const{
+  return mTpcV0PosExitPoint;
+}
+//_____________________
+const StHbtThreeVector& StHbtParticle::TpcV0PosEntrancePoint() const{
+  return mTpcV0PosEntrancePoint;
+}
+//______________________
+const StHbtThreeVector& StHbtParticle::TpcV0NegExitPoint() const{
+  return mTpcV0NegExitPoint;
+}
+//_____________________
+const StHbtThreeVector& StHbtParticle::TpcV0NegEntrancePoint() const{
+  return mTpcV0NegEntrancePoint;
+}
+//______________________
