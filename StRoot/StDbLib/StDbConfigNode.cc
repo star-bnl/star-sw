@@ -117,11 +117,7 @@ StDbConfigNode::printTree(){
 void
 StDbConfigNode::addTable(const char* tableName, int version, int elementID){
 
-  if(!mfactory){
-    mfactory = StDbFactories::Instance()->getFactory(mdbType, mdbDomain);
-  } else {
-    cout << " already have factory " << endl;
-  }
+  if(!mfactory)mfactory = StDbFactories::Instance()->getFactory(mdbType, mdbDomain);
 
   StDbTableComponent* table = 0;
   table = mfactory->getDbTable(tableName,0);
