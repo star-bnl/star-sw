@@ -1,3 +1,20 @@
+// $Id: StAssociator.C,v 1.2 1999/07/23 10:53:48 kathy Exp $
+// $Log: StAssociator.C,v $
+// Revision 1.2  1999/07/23 10:53:48  kathy
+// put in header info in Manuel's macros
+//
+//////////////////////////////////////////////////////////////////////
+// owner: Manuel Calderon de la Barca Sanchez
+//
+// what it does: reads .geant.root file, 
+//               runs a chain of 4 makers: 
+//                 StEventReaderMaker, StMcEventMaker,StAssociationMaker,
+//                 StMcAnalysisMaker
+//
+// note: for more info on StMcEvent and StAssociationMaker, do a 
+//      cvs checkout and say "make" in the doc/tex directory - you'll
+//      get a ps file with user guide and reference manual.
+//////////////////////////////////////////////////////////////////////
 
 class StChain;
 StChain *chain=0;

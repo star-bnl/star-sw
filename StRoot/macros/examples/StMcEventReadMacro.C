@@ -1,7 +1,19 @@
-//  StMcEventReadMacro.C
-//  StMcEventReadMacro.C
+// $Id: StMcEventReadMacro.C,v 1.2 1999/07/23 10:53:52 kathy Exp $
+// $Log: StMcEventReadMacro.C,v $
+// Revision 1.2  1999/07/23 10:53:52  kathy
+// put in header info in Manuel's macros
 //
-// 
+//
+//////////////////////////////////////////////////////////////////////
+// owner: Manuel Calderon de la Barca Sanchez
+//
+// what it does: reads .geant.root file, 
+//               loads StMcEvent by putting StMcEventMaker in chain
+//
+// note: for more info on StMcEvent and StAssociationMaker, do a 
+//      cvs checkout and say "make" in the doc/tex directory - you'll
+//      get a ps file with user guide and reference manual.
+//////////////////////////////////////////////////////////////////////
 // 
 //
 //======================================================================
