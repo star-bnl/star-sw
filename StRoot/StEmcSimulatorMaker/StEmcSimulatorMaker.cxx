@@ -80,13 +80,16 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name)
    for(int i =0;i<MAXDET;i++)
    {
      mEmcMcHits[i] = NULL;
-     mEmcRawHits[i] = NULL;
+     mEmcRawHits[i]= NULL;
      mSimulator[i] = NULL; 
      mGeom[i] = NULL;
    }
    mEmcCollection = NULL;
-   mDbMaker = NULL;
-   mC1 = NULL;
+   mDbMaker       = NULL;
+   mC1            = NULL;
+
+   m_nhit         = 0;
+
 }
 
 StEmcSimulatorMaker::~StEmcSimulatorMaker() 
@@ -446,7 +449,7 @@ Int_t StEmcSimulatorMaker::makeBemcAndBprsMcHits()
     if (detector == BEMC || detector == BPRS) 
     {
       emchBemc = new StMcCalorimeterHit(module,eta,sub,de); // Don't trace for track
-      emchBprs = 0;                                         // For safety
+      if (emchBprs) delete emchBprs;  emchBprs = 0;         // For safety
       StMcEmcHitCollection::EAddHit bemcNew = mEmcMcHits[BEMC-1]->addHit(emchBemc);
 
       if (bemcNew == StMcEmcHitCollection::kNew)
@@ -459,7 +462,7 @@ Int_t StEmcSimulatorMaker::makeBemcAndBprsMcHits()
       }
       else if(bemcNew == StMcEmcHitCollection::kErr)
       { 
-	      delete emchBemc;
+	delete emchBemc;
         emchBprs = 0;
         if(mPrint) gMessMgr->Warning()<<" Bad hit in Bemc collection " << endm;
       }
@@ -469,6 +472,8 @@ Int_t StEmcSimulatorMaker::makeBemcAndBprsMcHits()
         StMcEmcHitCollection::EAddHit bprsNew = mEmcMcHits[BPRS-1]->addHit(emchBprs);
         if(bprsNew != StMcEmcHitCollection::kNew) delete emchBprs;
       }
+      if ( emchBemc) delete emchBemc; 
+
     }
   }
   return kStOk;
@@ -969,8 +974,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.20 2003/09/23 15:19:52 suaide Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.21 2003/09/28 01:57:55 jeromel Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.21  2003/09/28 01:57:55  jeromel
+// LEAK_SCOPE and LEAK_ASSIGN removed
+//
 // Revision 1.20  2003/09/23 15:19:52  suaide
 // fixed bugs and modifications for embedding
 //
