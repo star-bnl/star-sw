@@ -1,5 +1,13 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.14 2003/01/29 12:10:27 fsimon Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.15 2003/02/14 16:55:50 fsimon Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.15  2003/02/14 16:55:50  fsimon
+// Add functionality that allows for different temperature corrections
+// in west and east, important for embedding. In the absence af a daq
+// dataset, the standard temperature values will be used.
+//
+// In this version: Hardcoded values for temperatures with existing daq
+// datasets, set for dAu running with SVT on, runs 4036xxxx and 4035xxxx
+//
 // Revision 1.14  2003/01/29 12:10:27  fsimon
 // Change call of StFtpcRawWriter to allow for switch for inversion of ASIC 2
 // in FTPC E (error in Y2001-2002 DAQ mapping)
@@ -57,9 +65,16 @@
 #include "StFtpcSlowSimMaker.h"
 #include "StFtpcSlowSimulator.hh"
 #include "StFtpcRawWriter.hh"
+
+#include "StDaqLib/GENERIC/EventReader.hh"
+#include "StDAQMaker/StFTPCReader.h"
+#include "PhysicalConstants.h"
+
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
 #include "StFtpcClusterMaker/StFtpcDbReader.hh"
 #include "StFtpcClusterMaker/StFtpcGeantReader.hh"
+
+#include "StDetectorDbMaker/StDetectorDbFTPCGas.h"
 
 #include "StMessMgr.h"
 #include "StChain.h"
@@ -211,7 +226,7 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
 Int_t StFtpcSlowSimMaker::Init(){
 
 
-  // Create Histograms    
+  // Create Histograms
   m_nadc    = new TH1F("fss_total_adc","Total number of adcs in both FTPCs",1000,0.,2000000.);
   m_nsqndx  = new TH1F("fss_sqndx","FTPC raw data sequence index",100,0.,100000.);
   m_nadc_index1  = new TH2F("fss_nadc_index1","Total number of adcs vs. number of adcs in FTPC East",100,0.,2000000.,100,0.,1000000.);
@@ -220,13 +235,13 @@ Int_t StFtpcSlowSimMaker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StFtpcSlowSimMaker::Make(){
- 
+
   St_DataSetIter geant(GetInputDS("geant"));
   St_g2t_vertex  *g2t_vertex  = (St_g2t_vertex *)  geant("g2t_vertex");
   St_g2t_track   *g2t_track   = (St_g2t_track *)   geant("g2t_track");
   St_g2t_ftp_hit *g2t_ftp_hit = (St_g2t_ftp_hit *) geant("g2t_ftp_hit");
   if (g2t_vertex && g2t_track && g2t_ftp_hit){
-    
+
     St_DataSetIter local(m_DataSet); local.Cd("pixels");
     St_fcl_ftpcndx   *fcl_ftpcndx  = new St_fcl_ftpcndx("fcl_ftpcndx",2);
     local.Add(fcl_ftpcndx);
@@ -236,7 +251,7 @@ Int_t StFtpcSlowSimMaker::Make(){
     local.Add(fcl_ftpcadc);
 
     //cout <<" create data reader \n";
- 
+
    // create data reader
     StFtpcGeantReader *geantReader = new StFtpcGeantReader(g2t_vertex,
 							   g2t_track,
@@ -250,7 +265,7 @@ Int_t StFtpcSlowSimMaker::Make(){
                                                 m_deflection,
                                                 m_dvdriftdp,
                                                 m_ddeflectiondp,
-						m_gas,  
+						m_gas,
 						m_driftfield,
                                                 m_electronics,
 						m_ampslope,
@@ -264,8 +279,94 @@ Int_t StFtpcSlowSimMaker::Make(){
                                                            m_slowsimpars);
 
 
+  // get temperatures from online db, used for embedding!
+  // as long as there is no daq data, standard temperatures are used!
+
+  // currently, temperature values are hardcoded for dAu SVT on, runs 4036xxxx and 4035xxxx
+  St_DataSet *daqDataset;
+  StDAQReader *daqReader;
+  StFTPCReader *ftpcReader=NULL;
+  daqDataset=GetDataSet("StDAQReader");
+  if(daqDataset)
+    {
+      gMessMgr->Message("", "I", "OST") << "Using StDAQReader to get StFTPCReader" << endm;
+      assert(daqDataset);
+      daqReader=(StDAQReader *)(daqDataset->GetObject());
+      assert(daqReader);
+      ftpcReader=daqReader->getFTPCReader();
+      assert(ftpcReader);
+
+      if (!ftpcReader->checkForData()) {
+	gMessMgr->Message("", "W", "OST") << "No FTPC data available!" << endm;
+        delete paramReader;
+        delete dbReader;
+	return kStWarn;
+      }
+
+      // get pressure and gas temperature from online DB; test and use valid values
+      StDetectorDbFTPCGas * gas = StDetectorDbFTPCGas::instance();
+      if ( !gas ){
+          gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC Online database: Conditions"<<endm;
+          delete paramReader;
+          delete dbReader;
+          return kStWarn;
+      }
+      // Barometric Pressure
+      if (gas->getBarometricPressure() >= paramReader->minPressure() && gas->getBarometricPressure() <= paramReader->maxPressure()) {
+          gMessMgr->Info() <<"Change normalizedNowPressure from "<<paramReader->normalizedNowPressure()<<" to "<<gas->getBarometricPressure()<<endm;
+          paramReader->setNormalizedNowPressure(gas->getBarometricPressure());
+      }
+      else {
+          gMessMgr->Info() << "Invalid value ("<<gas->getBarometricPressure()<<") from online database for barometric pressure - using previous value ("<<paramReader->normalizedNowPressure()<<")"<<endm;
+      }
+
+      // FIX gasTemperatureWest AND gasTemperatureEast FOR SVT ON
+
+      cout<<"WARNING: THIS VERSION OF StFtpcSlowSimMaker USES FIXED GAS TEMPERATURES - IT IS ONLY VALID FOR dAu"<<endl;
+
+      paramReader->setGasTemperatureWest(26.4);
+      paramReader->setGasTemperatureEast(28.8);
+
+      /*   inactivate gas temperature code for dAu production
+     // valid database reading for both  Gas temperature FTPC West and FTPC East
+      if ( (gas->getGasOutWest() >= paramReader->minGasTemperature() && gas->getGasOutWest() <= paramReader->maxGasTemperature())
+         && (gas->getGasOutEast() >= paramReader->minGasTemperature() && gas->getGasOutEast() <= paramReader->maxGasTemperature()) ) {
+          gMessMgr->Info() <<"Change GasTemperatureWest from "<<paramReader->gasTemperatureWest()<<" to "<<gas->getGasOutWest()<<endm;
+          paramReader->setGasTemperatureWest(gas->getGasOutWest());
+          gMessMgr->Info() <<"Change GasTemperatureEast from "<<paramReader->gasTemperatureEast()<<" to "<<gas->getGasOutEast()<<endm;
+          paramReader->setGasTemperatureEast(gas->getGasOutEast());
+      }
+
+     // valid database reading for Gas temperature FTPC West only
+      else if (gas->getGasOutWest() >= paramReader->minGasTemperature() && gas->getGasOutWest() <= paramReader->maxGasTemperature()) {
+          gMessMgr->Info() <<"Change GasTemperatureWest from "<<paramReader->gasTemperatureWest()<<" to "<<gas->getGasOutWest()<<endm;
+          paramReader->setGasTemperatureWest(gas->getGasOutWest());
+          gMessMgr->Info() <<"Invalid value ("<<gas->getGasOutEast()<<") from online database for gasTemperatureEast - set GasTemperatureEast("<<paramReader->gasTemperatureEast()<<")  = GasTemperatureWest - ("<<dbReader->temperatureDifference()<<") = "<<paramReader->gasTemperatureWest()-dbReader->temperatureDifference()<<endm;
+           paramReader->setGasTemperatureEast(paramReader->gasTemperatureWest()-dbReader->temperatureDifference());
+      }
+
+     // valid database reading for Gas temperature FTPC East only
+      else if (gas->getGasOutEast() >= paramReader->minGasTemperature() && gas->getGasOutEast() <= paramReader->maxGasTemperature()) {
+          gMessMgr->Info() <<"Change GasTemperatureEast from "<<paramReader->gasTemperatureEast()<<" to "<<gas->getGasOutEast()<<endm;
+          paramReader->setGasTemperatureEast(gas->getGasOutEast());
+          gMessMgr->Info() <<"Invalid value ("<<gas->getGasOutWest()<<") from online database for gasTemperatureWest - set GasTemperatureWest("<<paramReader->gasTemperatureWest()<<")  = GasTemperatureEast + ("<<dbReader->temperatureDifference()<<") = "<<paramReader->gasTemperatureEast()+dbReader->temperatureDifference()<<endm;
+           paramReader->setGasTemperatureWest(paramReader->gasTemperatureEast()+dbReader->temperatureDifference());
+      }
+
+     end of inactivate gas temperature code for dAu production */
+
+      cout<<" using normalizedNowPressure = "<<paramReader->normalizedNowPressure()<<" gasTemperatureWest = "<<paramReader->gasTemperatureWest()<<" gasTemperatureEast = "<<paramReader->gasTemperatureEast()<<endl;
+
+       paramReader->setAdjustedAirPressureWest(paramReader->normalizedNowPressure()*((dbReader->baseTemperature()+STP_Temperature)/(paramReader->gasTemperatureWest()+STP_Temperature)));
+      gMessMgr->Info() <<" paramReader->setAdjustedAirPressureWest = "<<paramReader->adjustedAirPressureWest()<<endm;
+      paramReader->setAdjustedAirPressureEast(paramReader->normalizedNowPressure()*((dbReader->baseTemperature()+STP_Temperature)/(paramReader->gasTemperatureEast()+STP_Temperature)));
+     gMessMgr->Info() <<" paramReader->setAdjustedAirPressureEast = "<<paramReader->adjustedAirPressureEast()<<endm;
+    }
+
+
+
     //cout <<" create data writer \n";
- 
+
     // create data writer
     StFtpcRawWriter *dataWriter = new StFtpcRawWriter(fcl_ftpcndx,
 						      fcl_ftpcsqndx,
@@ -276,10 +377,10 @@ Int_t StFtpcSlowSimMaker::Make(){
     //cout <<"Create SlowSimulator \n";
 
     StFtpcSlowSimulator *slowsim = new StFtpcSlowSimulator(geantReader,
-							   paramReader, 
+							   paramReader,
                                                            dbReader,
 							   dataWriter);
- 
+
 
     gMessMgr->Info() << "FTPC SlowSimulator starting... " <<endm;
     Int_t Res_fss = slowsim->simulate();
@@ -295,7 +396,7 @@ Int_t StFtpcSlowSimMaker::Make(){
     }
   }
   MakeHistograms(); // FTPC slow simulator histograms
-  
+
   gMessMgr->Info() << "FTPC SlowSimulator done... " <<endm;
   return kStOK;
 }
@@ -306,7 +407,7 @@ void StFtpcSlowSimMaker::MakeHistograms() {
 
    // Create an iterator
    St_DataSetIter ftpc_raw(m_DataSet);
-   
+
    //Get the tables
    St_fcl_ftpcadc   *adc = 0;
    St_fcl_ftpcndx   *ndx = 0;
