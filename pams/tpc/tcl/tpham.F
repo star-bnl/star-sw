@@ -71,6 +71,25 @@ c
 c   modificattions:
 c   ==============
 C
+C   25-28 Nov 1994 - MA Lisa:
+C     -	Clusters with .ge. min_hit_seq (=2) sequences are kept as hits,
+C	instead of hard-wiring a .ge. 3 requirement
+C     -	Additional user array, npix_pad, filled by TPH_GET_CLS_DATA and
+C	passed to TPH_FIT_CLUSTER
+C     -	Restructured algorithm of extracting spatial information,
+C	simplifying it, and using more realistic parametrization of
+C	the pulse in time.  Now, for each cluster, this routine just
+C	calls two routines, TPH_GET_CLS_DATA and TPH_FIT_CLUSTER.
+C	The first fills user arrays ipad,itdc,iadc,npix_pad with information
+C	about sequences in the cluster, and the second extracts spatial
+C	information from these arrays.  The old (obsolete) routines
+C	originally used are stored at the end of this file (search for ****).
+C     -	New variable added to TPHIT table and filled below, TPHIT.PHI,
+C	which indicates the "orientation" of the hit with respect to
+C	the padplane.  (it is atan(delta_time/delta_pad)).  It is hoped
+C	that this variable, along with prf and zrf, will give information
+C	about the crossing and dip angles, alpha and lambda.
+C
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
@@ -148,6 +167,7 @@ C-----------------------------------------------------------------------
         integer nclpix_max
         parameter (nclpix_max = 1000)
         real ipad(nclpix_max),itdc(nclpix_max),iadc(nclpix_max)
+	integer npix_pad(50)
 
         integer isec,irow,itrk,krow
 
@@ -162,6 +182,8 @@ C-----------------------------------------------------------------------
         real pad_width, time_bucket, time_bin, tval
         real shaper_bin
         real rstat
+
+	integer min_hit_seq/2/	! this could go into switch table
 
         double precision invec(3),outvec(3)
 
@@ -205,76 +227,26 @@ c
               krow = irow
            endif
 
-           if(nseq.ge.3)then
+           if(nseq.ge.min_hit_seq)then
 
               call tph_get_cls_data(jseq, nseq, id_pad, krow
      +,                             tpseqh, tpseq 
      +,                             tppixel_h, tppixel
      +,                             tpmcpix_h, tpmcpix
-     +,                             nclspix, ipad, itdc, iadc, itrk)
+     +,                             nclspix, ipad, itdc, iadc, itrk
+     +,				    npix_pad)
  
               tphith.nok = tphith.nok + 1
               tphit(tphith.nok).cluster = jtpcl
               tphit(tphith.nok).row = krow
               tphit(tphith.nok).track = itrk   ! for now this is MC info
 
-              call tph_calc_cntr_of_grvty(nclspix, ipad, itdc, iadc
-     +,                                   tphith, tphit )
+	      call tph_fit_cluster(nseq, nclspix, npix_pad,
+     +				   ipad, itdc, iadc, tphith, tphit)
 
+           else
 c
-c             now use Gaussian prf assumption in order to refine 
-c             time dimension prf/coordinate; could use alternative
-c             methods here!
-c             ONLY IF ntime <= 4 !
-c
-              call tph_proj_tim(nclspix, ipad, itdc, iadc 
-     +,                             ntim)
-              if(ntim.le.4)then
-c
-c                warning, these units are in time buckets; later convert to cm...
-c
-                 rstat = tph_calc_prf_sigma(ntim, itdc
-     +,                                                           iadc)
-                 if(rstat .ne. 0.)then
-                    tphit(tphith.nok).zrf = rstat
-                 endif
-                 rstat = tph_calc_prf_pos(ntim, itdc, iadc
-     +,                                          tphit(tphith.nok).zrf)
-                 if(rstat .ne. 0.)then
-                    tphit(tphith.nok).z = rstat
-                 endif
-              endif
-c
-c             final adjustment to z coordinate--we must add the shaper response 
-c             in time bins!!!
-c  
-              tphit(tphith.nok).z = tphit(tphith.nok).z - 0.7*shaper_bin
-c
-c             now use Gaussian prf assumption in order to refine 
-c             pad dimension prf/coordinate; could use alternative
-c             methods here!
-c
-              call tph_proj_pad(jseq, nseq, id_pad, krow
-     +,                             tpseqh, tpseq 
-     +,                             tppixel_h, tppixel
-     +,                             ipad, iadc)
-c
-c             presumption of three pad hits and Gaussian prf-> 
-c             recalculate position and prf width using parameterisation
-c
-              rstat = tph_calc_prf_sigma(nseq, ipad
-     +,                                                        iadc)
-              if(rstat .ne. 0.)then
-                 tphit(tphith.nok).prf = rstat
-              endif
-              rstat = tph_calc_prf_pos(nseq, ipad, iadc
-     +,                                          tphit(tphith.nok).prf)
-              if(rstat .ne. 0.)then
-                 tphit(tphith.nok).x = rstat
-              endif
-           elseif(nseq.le.2)then
-c
-c             treat two pad hits separately
+c             do not store clusters with < min_hit_seq  sequences in them
 c
               goto 999
            endif
@@ -293,28 +265,37 @@ c
            tphit(tphith.nok).y = real(outvec(2))
            tphit(tphith.nok).z = real(outvec(3))
 c
-c          zrf in units of time bins --> cm**2
+c          zrf in units of time bins --> cm
 c
            tphit(tphith.nok).zrf 
-     +                         = sqrt(tphit(tphith.nok).zrf)*time_bucket
+     +                         = (tphit(tphith.nok).zrf)*time_bucket
 c
-c          prf in units of pads --> cm**2
+c          prf in units of pads --> cm
 c
 c
 c          perhaps consistency with simulation demands use of pad_sep_in/out ???
+c	   yes, I think so - mal
 c
            if(mod(isec,2).eq.0)then
-              pad_width = pad_plane(1).pad_wid_out
+              pad_width = pad_plane(1).pad_sep_out
            else
-              pad_width = pad_plane(1).pad_wid_in
+              pad_width = pad_plane(1).pad_sep_in
            endif
            tphit(tphith.nok).prf 
-     +                         = sqrt(tphit(tphith.nok).prf) * pad_width
+     +                         = (tphit(tphith.nok).prf) * pad_width
+
+c	also, calculate "orientation" of hit in terms of spatial quantities
+
+	if (tphit(tphith.nok).phi.gt.-990.0)
+     +	   tphit(tphith.nok).phi = atand(
+     +				  	tphit(tphith.nok).phi *
+     +					time_bucket / pad_width )
+
 c
 c       finally, should calculate dx, dy, and dz ...
 c       note that sigma_prf IS NOT sigma_x, etc...
 
- 999       continue   ! error return for two-pad hits!
+ 999       continue
         enddo
 
 c
@@ -327,7 +308,8 @@ C-----------------------------------------------------------------------
      +,                            tpseqh, tpseq 
      +,                            tppixel_h, tppixel
      +,                            tpmcpix_h, tpmcpix
-     +,                            nclspix, ipad, itdc, iadc, itrk)
+     +,                            nclspix, ipad, itdc, iadc, itrk
+     +,				   npix_pad)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -352,6 +334,7 @@ C     ipad:
 C     itdc:
 C     iadc:
 C     itrk:
+C     npix_pad:	(added 23 Nov 94) number of pixels in segment on each pad
 C
 C  Returns:
 C       Contained in the output arguments...
@@ -365,6 +348,8 @@ C   Copyright 1994    Lawrence Berkeley Laboratory
 c   
 c   modificattions:
 c   ==============
+C   23nov94 - m lisa - added output argument of npix_pad=number of pixels
+C			in each sequence
 C
 C   Error conditions : 
 C   ================
@@ -396,6 +381,7 @@ C-----------------------------------------------------------------------
         real iadc(*),itdc(*),ipad(*)
         integer id_pad(*), itrk
         integer jseq,nseq,nclspix,irow
+	integer npix_pad(*)
 C-----------------------------------------------------------------------
         integer ldatum
         integer*2 idatum(2),tdc_lo,tdc_hi
@@ -412,6 +398,7 @@ C-----------------------------------------------------------------------
         integer mtrk,jndx
 
         integer id
+	integer iseq_num
 C-----------------------------------------------------------------------
         data id/0/
         data seqmask/'3F00'X/,botmask/'FF'X/
@@ -422,6 +409,7 @@ C-----------------------------------------------------------------------
         call vzero(ltrk,maxtrk)
         call vzero(nocc,maxtrk)
 
+	iseq_num = 0
         do kseq = jseq, jseq+nseq-1
            jpix = tpseq(kseq).jpix
            iclspix = iclspix + 1
@@ -463,6 +451,8 @@ c
            ipad(iclspix) = real(tpseq(kseq).secpad-id_pad(irow))
 
            kseqpix = iand(idatum(2),seqmask)/'100'X
+	   iseq_num = iseq_num+1
+	   npix_pad(iseq_num) = kseqpix
 
            do indx = 2, kseqpix
               iclspix = iclspix + 1
@@ -497,6 +487,551 @@ c
         return
         end
 
+
+C-----------------------------------------------------------------------
+	Subroutine tph_fit_cluster(nseq, nclspix, npix_pad,
+     +				ipad, itdc, iadc, 
+     +				tphith, tphit)
+C-----------------------------------------------------------------------
+
+      IMPLICIT NONE
+
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     nseq:	number of sequences in cluster
+C     nclspix:	number of pixels in cluster
+C     npix_pad: number of pixels in each sequence in cluster
+C     ipad:	for each pixel, what is pad #
+C     itdc:	for each pixel, what is bucket #
+C     iadc:	for each pixel, what is adc value
+C
+C   Output arguments : 
+C
+C     tphith:	
+C     tphit:	tpc hit table.. this fills (in local coordinates):
+C			x     - position in pad direction
+C			z     - position in time direction
+C			dx,dz - uncertainties
+C			q     - sum of occupied pixels
+C			dq    - ??? not filled - how to do it???
+C			prf   - width of gaussian in pad direction
+C			zrf   - width in time direction
+C			phi   - orientation of the hit w.r.t. padplane
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C	This subroutine replaces what had been a messy set of routine
+C	calls in the main code.  It should help in fitting in a more
+C	truly 2-dimentional way.
+C	The pad direction is fit with a Gaussian parametrization.
+C	The time direction is fit with a form reflecting real signals
+C	measured in the lab.
+C
+C   Originally written 23 November 1994 by Mike Lisa
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C-----------------------------------------------------------------------
+#include "tas_structures.inc"
+#include "tas_user_codes.inc"
+
+#include "tcl_tphit_pars.inc"
+#include "tcl_tphit_st.inc"
+
+	RECORD / table_head_st/ tphith
+	RECORD / tphit_row_st/  tphit(*)
+
+C-----------------------------------------------------------------------
+	integer nseq,nclspix
+	real ipad(*),itdc(*),iadc(*)
+	integer npix_pad(*)
+
+	real centroid,sigma,uncertainty,sum
+C-----------------------------------------------------------------------
+	integer lvmax
+	integer iseq,iptr_lo,iptr_hi
+	integer itim,ipix
+	real padsum(50),padnum(50),padtime(50),padwidth(50)
+	real tseq(100),aseq(100)	! for passing to pulse-fitting routine
+	real t0,tau
+	real hitsum
+	real mom1,mom2
+	integer ngood_times
+	real adc_sum
+	integer id,imax
+	real dylin(50),slope,intercept
+	real dslope,dintercept
+	real padtime_arr(50),padwidth_arr(50)
+	real padsum_arr(50),padnum_arr(50)
+C-----------------------------------------------------------------------
+
+c loop over sequences to (1) make projection in pad direction 	(padnum,padsum)
+c			 (2) sum all adc counts in hit 		 (hitsum)
+c			 (3) determine and store t0 for each pad (padtime)
+c
+c (here it is assumed that each sequence is on a different pad)
+
+	hitsum = 0.0
+	ngood_times = 0
+	iptr_lo = 1
+	do iseq = 1,nseq
+	  padsum(iseq) = 0.0
+	  padnum(iseq) = ipad(iptr_lo)
+	  iptr_hi = iptr_lo + npix_pad(iseq) - 1
+	  itim = 0
+	  do ipix=iptr_lo,iptr_hi
+	    itim = itim+1
+	    padsum(iseq) = padsum(iseq) + iadc(ipix)
+	    tseq(itim) = itdc(ipix)
+	    aseq(itim) = iadc(ipix)
+	  enddo
+	  iptr_lo = iptr_hi + 1
+	  hitsum = hitsum + padsum(iseq)
+	  if (npix_pad(iseq).ge.3) then		! little time info if <3 bkts
+	    call tph_fit_pulse(tseq, aseq, itim, t0, tau)
+	    padtime(iseq) = t0
+	    padwidth(iseq) = tau
+	    if (tau.gt.0.0) then
+	      ngood_times = ngood_times + 1
+	      padtime_arr(ngood_times)  = padtime(iseq)
+	      padwidth_arr(ngood_times) = padwidth(iseq)
+	      padsum_arr(ngood_times)   = padsum(iseq)
+	      padnum_arr(ngood_times)   = padnum(iseq)
+	      dylin(ngood_times)	= 1.0/sqrt(padsum(iseq)) ! ad hoc
+	    endif
+	  else
+	    padwidth(iseq) = -1.0
+	  endif
+	enddo
+
+	tphit(tphith.nok).q = hitsum
+
+c calculate hit position along pad row: fit to gaussian.  If that does not
+c   work, do a weighted mean
+c
+	sigma = -1.0
+	if (nseq.ge.3) call tph_3point_gauss(padnum, padsum, nseq,
+     +					     centroid, sigma)
+	if (sigma.lt.0.0) then
+	  call tph_weighted_mean(padnum, padsum, nseq,
+     +				 centroid, sigma)
+	  sigma = -sigma		! use sign to flag different algorithm
+	endif
+
+	tphit(tphith.nok).x = centroid
+	tphit(tphith.nok).prf = sigma
+
+c Calculate hit position along time direction from sequences with well-defined
+c  t0's
+
+	if (ngood_times.ge.1) then
+	  call tph_weighted_mean(padtime_arr, padsum_arr, ngood_times,
+     +				 t0, mom2)
+	  call tph_weighted_mean(padwidth_arr, padsum_arr, ngood_times,
+     +				 tau, mom2)
+	else
+	  id = 0
+	  call message('TPH_FIT_CLUSTER no good time peaks - taking max',
+     +			1, id)
+	  imax = lvmax(iadc,nclspix)
+	  t0 = itdc(imax)
+	  tau = 0.0
+	endif
+
+	tphit(tphith.nok).z   = t0
+	tphit(tphith.nok).zrf = tau
+
+c now linear fit to padtime vs padnum:
+	if (ngood_times.gt.1) then	
+ 	  call tph_lin_fit(padnum_arr, padtime_arr, dylin, ngood_times,
+     +			   slope, dslope, intercept, dintercept)
+	else
+	  slope = -1000.0
+	endif
+
+	tphit(tphith.nok).phi = slope
+
+	return
+	end
+
+C-----------------------------------------------------------------------
+	Subroutine tph_fit_pulse(tseq, aseq, itim,
+     +				 t0, tau)
+C-----------------------------------------------------------------------
+
+      IMPLICIT NONE
+
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     tseq:	tdc values for the pulse to be fit
+C     aseq:	adc values for the pulse to be fit
+C     itim:	number of points in the pulse
+C
+C   Output arguments : 
+C
+C     t0:	"time-zero" of the pulse (not neccessarily gauss centroid)
+C     tau:	"width" of the pulse (not neccessarily gaussian width)
+C	
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C
+C	This routine fits a pad-pulse passed in the tseq, aseq arrays
+C	and returns the time and width of the pulse.
+C	Right now, we use the experimentally-realistic functional form:
+C
+C			N    -(t-t0)/tau
+C	y(t) = A * (t-t0) * e
+C
+C	for STAR, N=2, and tau ~ 59 ns.  Units used here are time buckets.
+C
+C   Originally written 25 November 1994 by Mike Lisa
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C-----------------------------------------------------------------------
+	real tseq(*),aseq(*)
+	integer itim
+	real t0,tau
+C-----------------------------------------------------------------------
+	integer lvmax
+	integer N
+	parameter(N=2)
+	real X
+	real y1,y2,y3,t1,t2,t3
+	real a,b,c		! coefficients in quadratic equation
+	integer imax
+	integer id,istart,jb
+	real radicand
+	real sum
+C-----------------------------------------------------------------------
+
+	imax = lvmax(aseq,itim)
+	if ((imax.ge.2.).and.(imax.lt.itim)) then
+	  istart=imax-1
+	elseif (imax.eq.1) then
+c	  id = 0
+c	  call message('TPH_FIT_PULSE peak at first bucket',
+c     +			1, id)
+	  istart=1
+	else
+c	  id = 0
+c	  call message('TPH_FIT_PULSE peak at last bucket',
+c     +			1, id)
+	  istart=itim-2
+	endif
+	t1 = tseq(istart)
+	t2 = tseq(istart+1)
+	t3 = tseq(istart+2)
+	y1 = aseq(istart)
+	y2 = aseq(istart+1)
+	y3 = aseq(istart+2)
+
+c	X = (y1*y3/(y2*y2))**(1.0/float(N))	! for arbitrary N
+	X = sqrt(y1*y3/(y2*y2))			! this is faster for N=2
+
+	a = X-1.0
+	if (a.eq.0.0) then			! this shoud be very rare
+c	  This happens if y1=y2=y3.  If so, try one more time by
+c	    shifting istart later in time (if possible)
+c
+	  if (itim.eq.3) then		   ! no room to shift
+	    id = 0
+	    call message('TPH_FIT_PULSE a=0; going to mean',
+     +			1,id)
+	    goto 99
+	  elseif (istart.ne.itim-2) then   ! shift sample later in time
+	    istart=istart+1
+	  else				   ! if we must, shift sample earlier
+	    istart=istart-1
+	  endif
+	  t1 = tseq(istart)
+	  t2 = tseq(istart+1)
+	  t3 = tseq(istart+2)
+	  y1 = aseq(istart)
+	  y2 = aseq(istart+1)
+	  y3 = aseq(istart+2)
+c	  X = (y1*y3/(y2*y2))**(1.0/float(N))	! for arbitrary N
+	  X = sqrt(y1*y3/(y2*y2))		! this is faster for N=2
+	  a = X-1.0
+	  if (a.eq.0.0) then	! if FOUR points are the same, give up!
+	    id = 0
+	    call message('TPH_FIT_PULSE a=0; going to mean',
+     +			1,id)
+	    goto 99
+	  endif
+	endif
+	b = 2.0*t2*(1-X)
+	c = X*t2*t2 - t1*t3
+
+	radicand = b*b - 4.0*a*c
+	if (radicand.gt.0.0) then
+c 	  2 solutions exist (normal) we want the *earlier* one
+	  if (a.lt.0) then
+	    t0 = (-b + sqrt(radicand) ) / (2.0*a)
+	  else
+	    t0 = (-b - sqrt(radicand) ) / (2.0*a)
+	  endif
+	elseif (radicand.eq.0) then
+c 	  1 solution (shouldn't happen)
+	  id = 0
+	  call message('TPH_FIT_PULSE one solution?',
+     +			1,id)
+	  t0 = -b/(2.0*a)
+	else
+c 	  no real solutions... error
+	  id = 0
+	  call message('TPH_FIT_PULSE no solutions! going to mean',
+     +			1,id)
+	  goto 99
+	endif
+
+c calculate "width" tau
+	tau = 1.0/(log(y2/y3)-float(N)*log((t2-t0)/(t3-t0)))
+
+	return
+
+ 99	continue	! what to do if normal fit fails
+
+	t0 = 0.0
+	sum = 0.0
+	do jb=1,itim
+	  t0 = t0 + aseq(jb)*tseq(jb)
+	  sum = sum + aseq(jb)
+	enddo
+	t0 = t0/sum
+	tau = -1.0
+
+	return
+	end
+
+
+C-----------------------------------------------------------------------
+	Subroutine tph_3point_gauss(x, y, npts,
+     +				centroid, sigma)
+C-----------------------------------------------------------------------
+
+      IMPLICIT NONE
+
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     y		- y(x) distribution to fit to gaussian
+C     x		- x coordinate for each point
+C     npts	- number of samples in distribution
+C
+C   Output arguments : 
+C
+C     centroid 	- Gaussian centroid from 3-point fit to y(x)
+C     sigma	- Gaussian width from 3-point fit to y(x)
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C
+C	Performs 3-point gaussian fit to passed distribution y(x)
+C
+C   Originally written 25 November 1994 by Mike Lisa
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C
+C	If the distribution is not well described by a gaussian, (i.e.
+C	it has a peak on one edge), a negative sigma is returned and no
+C	centroid is calculated
+C
+C-----------------------------------------------------------------------
+	real y(*),x(*)
+	integer npts
+	real centroid,sigma
+C-----------------------------------------------------------------------
+	integer lvmax
+	integer ipt,imax,istart,id
+	real y1,y2,y3,delta,r213
+
+	imax = lvmax(y,npts)
+
+	if ((imax.ge.2).and.(imax.lt.npts)) then
+	  istart=imax-1
+	elseif (imax.eq.1) then
+	  id = 0
+	  call message('TPH_3POINT_GAUSS peak at first point',
+     +			1,id)
+c	  istart=1
+	  sigma = -1.0
+	else
+	  id = 0
+	  call message('TPH_3POINT_GAUSS peak at last point',
+     +			1,id)
+c	  istart=npts-2
+	  sigma = -1.0
+	endif
+
+	y1 = y(istart)
+	y2 = y(istart+1)
+	y3 = y(istart+2)
+
+	delta = x(istart+1) - x(istart)
+	if (delta.ne.1.0) then
+	  id = 0
+	  call message('TPH_3POINT_GAUSS unexpected delta .ne. 1',
+     +			1,id)
+	endif
+
+	r213 = log(y2*y2/(y1*y3))
+	centroid = x(istart+1) + (delta/2.0) * log(y3/y1)/r213
+	sigma = delta/sqrt(r213)
+
+	return
+	end
+
+
+
+C-----------------------------------------------------------------------
+	Subroutine tph_lin_fit(x, y, dy, npts,
+     +			       slope, dslope,
+     +			       intercept, dintercept)
+C-----------------------------------------------------------------------
+
+      IMPLICIT NONE
+
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     x		- x coordinate of each point
+C     y		- y(x) distribution to fit to line
+C     dy	- uncertainty in y
+C     npts	- number of samples in distribution
+C
+C   Output arguments : 
+C
+C     slope	- slope of best fit line
+C     dslope	- uncertainty in slope
+C     intercept - y-intercept of best fit line
+C     dintercept- uncertainty in intercept
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C
+C	returns slope and intercept of best fit line to (x,y,dy) data
+C
+C   Originally written 25 November 1994 by Mike Lisa
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C
+C-----------------------------------------------------------------------
+	real x(*),y(*),dy(*)
+	integer npts
+	real slope,intercept,dslope,dintercept
+C-----------------------------------------------------------------------
+	real sxx,sxy,sx,sy,s,denom
+	integer ipt
+C-----------------------------------------------------------------------
+
+        sxx = 0.0
+        sxy = 0.0
+        sx = 0.0
+        sy = 0.0
+        s = 0.0
+        do ipt=1,npts
+           sxx = sxx + x(ipt)*x(ipt)/dy(ipt)**2
+           sxy = sxy + x(ipt)*y(ipt)/dy(ipt)**2
+           sx  = sx  + x(ipt)/dy(ipt)**2
+           sy  = sy  + y(ipt)/dy(ipt)**2
+           s   = s   + 1/dy(ipt)**2
+        enddo
+        denom = s*sxx-sx*sx
+        slope = (s*sxy - sx*sy)/denom
+        intercept = (sxx*sy - sx*sxy)/denom
+        dslope = sqrt(s/denom)
+        dintercept = sqrt(sxx/denom)
+
+	return
+	end
+
+
+C-----------------------------------------------------------------------
+	Subroutine tph_weighted_mean(x, y, npts,
+     +				     mom1, mom2)
+C-----------------------------------------------------------------------
+
+      IMPLICIT NONE
+
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     x		- x coordinate of each point
+C     y		- y(x) distribution
+C     npts	- number of samples in distribution
+C
+C   Output arguments : 
+C
+C     mom1	- first moment of y(x) distribution (mean x)
+C     mom2	- second moment of y(x) distribution (rms)
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C
+C	takes first and second moment of input distribution
+C
+C   Originally written 25 November 1994 by Mike Lisa
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C
+C-----------------------------------------------------------------------
+	real x(*),y(*)
+	integer npts
+	real mom1,mom2
+C-----------------------------------------------------------------------
+	real ysum
+	integer ipt
+C-----------------------------------------------------------------------
+
+	mom1 = 0.0
+	mom2 = 0.0
+	ysum = 0.0
+	do ipt=1,npts
+	  ysum = ysum + y(ipt)
+	  mom1 = mom1 + x(ipt)*y(ipt)
+	  mom2 = mom2 + x(ipt)*x(ipt)*y(ipt)
+	enddo
+	mom1 = mom1 / ysum
+	mom2 = mom2 / ysum
+	mom2 = sqrt(mom2 - mom1*mom1)
+	return
+	end
+
+
+c ****** what follows here are old routines no longer in use ******
+c********************************************************************
 C-----------------------------------------------------------------------
         Subroutine tph_calc_cntr_of_grvty(nclspix, ipad, itdc, iadc
      +,                            tphith, tphit )
@@ -797,6 +1332,8 @@ C   Error conditions :
 C   ================
 C-----------------------------------------------------------------------
       integer lvmax
+
+
 C-----------------------------------------------------------------------
         real iadc(*),ipad(*)
         integer nseq
