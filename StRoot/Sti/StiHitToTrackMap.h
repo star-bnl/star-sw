@@ -11,7 +11,7 @@ class StiHitToTrackMap : public HitToTrackMap
 
   StiHitToTrackMap();
   virtual ~StiHitToTrackMap();
-  void build(StiTrackContainer * trackContainer);
+  void build(StiTrackContainer & trackContainer);
 };
 
 

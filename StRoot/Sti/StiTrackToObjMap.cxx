@@ -17,13 +17,13 @@ void StiTrackToObjMap::build(StiTrackContainer* trackContainer,
 
 {
   StiTrackContainer::iterator trackIter;
-  HitVectorType::const_iterator hitIter;
+  vector<StiHit*>::const_iterator hitIter;
   for (trackIter = trackContainer->begin(); trackIter != trackContainer->end(); ++trackIter)
     {
       //create a new trackToIntMap obj 
       StiTrackToIntMap * trackToIntMap = new StiTrackToIntMap;
       //loops through tracks
-      const HitVectorType & hits = trackIter->first->getHits();
+      const vector<StiHit*> & hits = trackIter->first->getHits();
       for( hitIter = hits.begin();hitIter!=hits.end();++hitIter)
 	{ 
 	  HitToHitMap::const_iterator hitToHitMapIterator;

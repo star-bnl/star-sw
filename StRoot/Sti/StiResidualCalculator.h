@@ -1,11 +1,14 @@
 //StiResidualMaker.h
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.h,v 2.5 2003/09/07 03:49:08 perev Exp $
+ * $Id: StiResidualCalculator.h,v 2.6 2004/02/21 18:27:42 pruneau Exp $
  *
  * Author: Andrew Rose, Wayne State University, October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.h,v $
+ * Revision 2.6  2004/02/21 18:27:42  pruneau
+ * Updates to comply with changes made in abstract interfaces.
+ *
  * Revision 2.5  2003/09/07 03:49:08  perev
  * gcc 3.2 + WarnOff
  *
@@ -42,8 +45,6 @@
  */
 
 
-//VP #define TRACKMESSENGER *(Messenger::instance(MessageType::kResidualMessage))
-
 #ifndef StiResidualMaker_HH
 #define StiResidualMaker_HH
 
@@ -74,9 +75,9 @@ class StiResidualCalculator: public StiResiduals, public HistogramGroup
      void initDetector(StiDetectorBuilder*);
      int  trackResidue(const StiTrack *track);
      int  trackResidue(const StiKalmanTrack *track);
-     void NodeResidue(StiKalmanTrackNode iNode, HitVectorType hits, 
+     void NodeResidue(StiKalmanTrackNode iNode, vector<StiHit*> hits, 
 		       int histVecOffset);
-     void ResidualBackground(StiKalmanTrackNode iNode, HitVectorType hitVec);
+     void ResidualBackground(StiKalmanTrackNode iNode, vector<StiHit*> hitVec);
      void FillHist(int offset, double z, double y,
 		   double cross, double dip,
 		   double dz, double dy,

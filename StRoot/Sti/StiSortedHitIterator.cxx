@@ -30,21 +30,18 @@ StiSortedHitIterator::StiSortedHitIterator(StiHitContainer * hitContainer,
 	}
       else
 	{
-	  // Current detector has no hit, traverse detectors to 
-	  // look for the next detector with hits.
+	  // Current detector has no hit, traverse detectors to  look for the next detector with hits.
 	  bool go = true;
 	  while (_currentDet<_lastDet && go )
 	    {
 	      ++_currentDet;
 	      if (_currentDet<_lastDet)
-		{
-		  // valid detector
+		{  // valid detector
 		  _currentDetHit =  _hitContainer->hitsBegin(*_currentDet);
 		  _lastDetHit    =  _hitContainer->hitsEnd(*_currentDet);
 		  if (_currentDetHit < _lastDetHit)
 		    {
-		      // current detector has hits
-		      // done for now.
+		      // current detector has hits done for now.
 		      _currentHit = *_currentDetHit;
 		      go = false;
 		    }

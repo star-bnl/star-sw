@@ -257,7 +257,7 @@ class StiKalmanTrack : public StiTrack
   void initialize(double curvature,
 		  double tanl,
 		  const StThreeVectorD& origin,
-		  const HitVectorType &);
+		  const vector<StiHit*> &);
   
   /// Work method returns the node closest to the given position.
   /*! Work method returns the node closest to the given position. 

@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.29 2003/09/02 17:59:41 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.30 2004/02/21 18:27:34 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.30  2004/02/21 18:27:34  pruneau
+ * Updates to comply with changes made in abstract interfaces.
+ *
  * Revision 2.29  2003/09/02 17:59:41  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -275,11 +278,11 @@ StiKalmanTrackNode * StiKalmanTrack::findHit(StiHit * h)
 void StiKalmanTrack::initialize(double curvature,
 				double tanl,
 				const StThreeVectorD& origin,
-				const HitVectorType & hits)
+				const vector<StiHit*> & hits)
 {
   TRACKMESSENGER << "StiKalmanTrack::initialize() -I- Started"<<endl;
   reset();
-  HitVectorType::const_iterator it;
+  vector<StiHit*>::const_iterator it;
   //StiKalmanTrackNode * node  = 0;
   double eta   =-99999.;
   double alphaP=-99999.;
