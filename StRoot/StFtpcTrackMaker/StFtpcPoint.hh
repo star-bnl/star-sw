@@ -1,5 +1,16 @@
-// $Id: StFtpcPoint.hh,v 1.5 2000/11/10 18:37:46 oldi Exp $
+// $Id: StFtpcPoint.hh,v 1.6 2001/01/25 15:21:51 oldi Exp $
 // $Log: StFtpcPoint.hh,v $
+// Revision 1.6  2001/01/25 15:21:51  oldi
+// Review of the complete code.
+// Fix of several bugs which caused memory leaks:
+//  - Tracks were not allocated properly.
+//  - Tracks (especially split tracks) were not deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way). I changed all occurences to TObjArray which makes the
+//    program slightly slower but much more save (in terms of memory usage).
+// Speed up of HandleSplitTracks() which is now 12.5 times faster than before.
+// Cleanup.
+//
 // Revision 1.5  2000/11/10 18:37:46  oldi
 // New constructor added.
 // StThreeVector replaced by TVector3 to be able to use ROOT output (e.g. Write()).
@@ -37,7 +48,7 @@
 #define STAR_StFtpcPoint
 
 #include "TObject.h"
-#include "TClonesArray.h"
+#include "TObjArray.h"
 #include "TVector3.h"
 
 #include "tables/St_fcl_fppoint_Table.h"
@@ -108,7 +119,7 @@ public:
   Double_t GetSigmaPhi()   const { return mSigmaPhi;    }
   Double_t GetSigmaR()     const { return mSigmaR;      }
   
-  StFtpcTrack *GetTrack(TClonesArray *tracks) const;
+  StFtpcTrack *GetTrack(TObjArray *tracks) const;
          void  SetTrackedFlag(Bool_t tracked);
        Bool_t  GetTrackedFlag();
 
@@ -151,7 +162,7 @@ public:
 };
 
 
-inline StFtpcTrack *StFtpcPoint::GetTrack(TClonesArray *tracks) const
+inline StFtpcTrack *StFtpcPoint::GetTrack(TObjArray *tracks) const
 {
   // Returns the pointer to the track to which this hit belongs.
 

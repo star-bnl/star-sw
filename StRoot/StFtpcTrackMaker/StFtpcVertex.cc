@@ -1,5 +1,16 @@
-// $Id: StFtpcVertex.cc,v 1.5 2000/11/28 14:00:53 hummler Exp $
+// $Id: StFtpcVertex.cc,v 1.6 2001/01/25 15:22:39 oldi Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.6  2001/01/25 15:22:39  oldi
+// Review of the complete code.
+// Fix of several bugs which caused memory leaks:
+//  - Tracks were not allocated properly.
+//  - Tracks (especially split tracks) were not deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way). I changed all occurences to TObjArray which makes the
+//    program slightly slower but much more save (in terms of memory usage).
+// Speed up of HandleSplitTracks() which is now 12.5 times faster than before.
+// Cleanup.
+//
 // Revision 1.5  2000/11/28 14:00:53  hummler
 // protect vertex finder against nan
 //
@@ -170,9 +181,9 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints)
 }
 
 
-StFtpcVertex::StFtpcVertex(TClonesArray *hits)
+StFtpcVertex::StFtpcVertex(TObjArray *hits)
 {
-  // Constructor with TClonesArray of ftpc points - fits vertex from points
+  // Constructor with TObjArray of ftpc points - fits vertex from points
 
   // constants, to be moved to parameter database
 #define HISTOBINS 300

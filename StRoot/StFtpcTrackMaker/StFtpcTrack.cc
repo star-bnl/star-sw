@@ -1,5 +1,16 @@
-// $Id: StFtpcTrack.cc,v 1.10 2000/11/10 18:38:02 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.11 2001/01/25 15:21:57 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.11  2001/01/25 15:21:57  oldi
+// Review of the complete code.
+// Fix of several bugs which caused memory leaks:
+//  - Tracks were not allocated properly.
+//  - Tracks (especially split tracks) were not deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way). I changed all occurences to TObjArray which makes the
+//    program slightly slower but much more save (in terms of memory usage).
+// Speed up of HandleSplitTracks() which is now 12.5 times faster than before.
+// Cleanup.
+//
 // Revision 1.10  2000/11/10 18:38:02  oldi
 // Changes due to replacement of StThreeVector by TVector3.
 // Points can be added to a track on either end now.
@@ -89,12 +100,12 @@ StFtpcTrack::StFtpcTrack(Int_t tracknumber)
 }
 
 
-StFtpcTrack::StFtpcTrack(fpt_fptrack_st *track_st, TClonesArray *hits, Int_t tracknumber)
+StFtpcTrack::StFtpcTrack(fpt_fptrack_st *track_st, TObjArray *hits, Int_t tracknumber)
 {
   // Constructor if STAF table track is given.
   // Creates a ObjArray of the hits belonging to the track.
 
-  mPoints = new TObjArray(0, 0);
+  mPoints = new TObjArray(0);
   mPointNumbers = new MIntArray();
 
   SetTrackNumber(tracknumber);
@@ -154,7 +165,7 @@ void StFtpcTrack::SetDefaults()
 {
   // Executes the default setup for the track.
 
-  mPoints = new TObjArray(0, 0);
+  mPoints = new TObjArray(0);
   mPointNumbers = new MIntArray();
 
   mTrackNumber = -1;

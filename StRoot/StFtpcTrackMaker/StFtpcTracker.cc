@@ -1,5 +1,16 @@
-// $Id: StFtpcTracker.cc,v 1.10 2000/11/28 14:10:11 jcs Exp $
+// $Id: StFtpcTracker.cc,v 1.11 2001/01/25 15:22:31 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.11  2001/01/25 15:22:31  oldi
+// Review of the complete code.
+// Fix of several bugs which caused memory leaks:
+//  - Tracks were not allocated properly.
+//  - Tracks (especially split tracks) were not deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way). I changed all occurences to TObjArray which makes the
+//    program slightly slower but much more save (in terms of memory usage).
+// Speed up of HandleSplitTracks() which is now 12.5 times faster than before.
+// Cleanup.
+//
 // Revision 1.10  2000/11/28 14:10:11  jcs
 // set a_large_number frp fdepar
 //
@@ -98,13 +109,13 @@ StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3],
 
   mHitsCreated = (Bool_t)false;
   mMaxDca = max_Dca;
-  mTrack = new TClonesArray("StFtpcTrack", 0);
+  mTrack = new TObjArray(2000);
 
   Int_t n_clusters = fcl_fppoint->GetNRows();          // number of clusters
   fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
 
   if(vertexPos == NULL) {
-      mVertex = new StFtpcVertex(point_st, n_clusters);
+    mVertex = new StFtpcVertex(point_st, n_clusters);
   }
   
   else {
@@ -115,7 +126,7 @@ StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3],
 }
 
 
-StFtpcTracker::StFtpcTracker(TClonesArray *hits, StFtpcVertex *vertex, Bool_t bench, Double_t max_Dca)
+StFtpcTracker::StFtpcTracker(TObjArray *hits, StFtpcVertex *vertex, Bool_t bench, Double_t max_Dca)
 {
   // Constructor to take care of arbitrary hits.
 
@@ -127,14 +138,14 @@ StFtpcTracker::StFtpcTracker(TClonesArray *hits, StFtpcVertex *vertex, Bool_t be
   mHitsCreated = (Bool_t)false;
 
   mMaxDca = max_Dca;
-  mTrack = new TClonesArray("StFtpcTrack", 0);
+  mTrack = new TObjArray(2000);
 
   mVertex = vertex;
   mVertexCreated = (Bool_t)false;
 }
 
 
-StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TClonesArray *hit, TClonesArray *track, Bool_t bench, Double_t max_Dca)
+StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TObjArray *hit, TObjArray *track, Bool_t bench, Double_t max_Dca)
 {
   // Constructor to handle the case where everything is there already.
 
@@ -162,29 +173,26 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, 
   mVertex = vertex;
   mVertexCreated = (Bool_t)false;
 
-  // Copy clusters into ClonesArray.
+  // Copy clusters into ObjArray.
   Int_t n_clusters = fcl_fppoint->GetNRows();          // number of clusters
   fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
 
-  mHit = new TClonesArray("StFtpcPoint", n_clusters);    // create TClonesArray
+  mHit = new TObjArray(n_clusters);    // create TObjArray
   mHitsCreated = (Bool_t)true;
 
-  TClonesArray &hit = *mHit;
-  
   for (Int_t i = 0; i < n_clusters; i++) {
-    new(hit[i]) StFtpcPoint(point_st++);
+    mHit->AddAt(new StFtpcPoint(point_st++), i);
     ((StFtpcPoint *)mHit->At(i))->SetHitNumber(i);
   }
 
-  // Copy tracks into ClonesArray.
+  // Copy tracks into ObjArray.
   Int_t n_tracks = fpt_fptrack->GetNRows();  // number of tracks
   fpt_fptrack_st *track_st = fpt_fptrack->GetTable();  // pointer to first track structure
 
-  mTrack = new TClonesArray("StFtpcTrack", n_tracks);    // create TClonesArray
-  TClonesArray &track = *mTrack;
-  
+  mTrack = new TObjArray(n_tracks);    // create TObjArray
+
   for (Int_t i = 0; i < n_tracks; i++) {
-    new(track[i]) StFtpcTrack(track_st++, mHit, i);
+    mTrack->AddAt(new StFtpcTrack(track_st++, mHit, i), i);
   }
 
   mMaxDca = max_Dca;
@@ -303,7 +311,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
     
     // we accumulate all the charges inside the sensitive volume
     for (icluster = 0; icluster < track->GetNumberOfPoints(); icluster++) {
-      hit = (StFtpcPoint*)((TClonesArray*)track->GetHits())->At(icluster);
+      hit = (StFtpcPoint*)((TObjArray*)track->GetHits())->At(icluster);
       hit_p = hit->GetHitNumber();
 
       if(hit_p >= 0) {
@@ -337,7 +345,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
        
     // fill the array after correcting the track length
     for (icluster = 0, ihit = 0; icluster < track->GetNumberOfPoints(); icluster++) {
-      hit = (StFtpcPoint*)((TClonesArray*)track->GetHits())->At(icluster);
+      hit = (StFtpcPoint*)((TObjArray*)track->GetHits())->At(icluster);
       hit_p = hit->GetHitNumber();
 
       if(hit_p >= 0) {
@@ -424,6 +432,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
     gMessMgr->Message("", "I", "OST") << "Using truncated mean over whole chamber method by R. Witt." << endm;
     
     weighted = new Double_t[GetNumberOfClusters()];
+    if (index_arr) delete[] index_arr; // This line was missing; new index_arr was invoked twice
     index_arr = new Int_t[GetNumberOfClusters()];
     
     for(ihit=0; ihit<GetNumberOfClusters(); ihit++) {
@@ -443,7 +452,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
       average_dedx += track->GetdEdx();
       
       for (icluster = 0; icluster < track->GetNumberOfPoints(); icluster++) {
-	hit = (StFtpcPoint*)((TClonesArray*)track->GetHits())->At(icluster);
+	hit = (StFtpcPoint*)((TObjArray*)track->GetHits())->At(icluster);
 	hit_p = hit->GetHitNumber();
 	
 	if (hit_p >= 0) {
@@ -511,7 +520,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
 	pz  = track->GetPz();
 	pp  = track->GetP();
 	
-	hit = (StFtpcPoint*)((TClonesArray*)track->GetHits())->At(icluster);
+	hit = (StFtpcPoint*)((TObjArray*)track->GetHits())->At(icluster);
 	hit_p = hit->GetHitNumber();
 	
 	if(hit_p>=0) {
@@ -726,7 +735,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 
       // we accumulate all the charges inside the sensitive volume
       for (icluster = 0; icluster < track->GetNumberOfPoints(); icluster++) {
-	hit = (StFtpcPoint*)((TClonesArray*)track->GetHits())->At(icluster);
+	hit = (StFtpcPoint*)((TObjArray*)track->GetHits())->At(icluster);
 	hit_p = hit->GetHitNumber();
 
 	if (hit_p >= 0) {
@@ -750,7 +759,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
        
       // fill the array after correcting the track length
       for (icluster = 0, ihit = 0; icluster < track->GetNumberOfPoints(); icluster++) {
-	hit = (StFtpcPoint*)((TClonesArray*)track->GetHits())->At(icluster);
+	hit = (StFtpcPoint*)((TObjArray*)track->GetHits())->At(icluster);
 	hit_p = hit->GetHitNumber();
 
 	if(hit_p >= 0) {
@@ -824,6 +833,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
       gMessMgr->Message("", "I", "OST") << "Using truncated mean over whole chamber method by R. Witt." << endm;
     
       weighted = new Double_t[GetNumberOfClusters()];
+      if (index_arr) delete[] index_arr; // This line was missing; new index_arr was invoked twice
       index_arr = new Int_t[GetNumberOfClusters()];
     
       for(ihit=0; ihit<GetNumberOfClusters(); ihit++) {
@@ -843,7 +853,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 	average_dedx += track->GetdEdx();
       
 	for (icluster = 0; icluster < track->GetNumberOfPoints(); icluster++) {
-	  hit = (StFtpcPoint*)((TClonesArray*)track->GetHits())->At(icluster);
+	  hit = (StFtpcPoint*)((TObjArray*)track->GetHits())->At(icluster);
 	  hit_p = hit->GetHitNumber();
 	
 	  if (hit_p >= 0) {
@@ -911,7 +921,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 	  pz  = track->GetPz();
 	  pp  = track->GetP();
 	
-	  hit = (StFtpcPoint*)((TClonesArray*)track->GetHits())->At(icluster);
+	  hit = (StFtpcPoint*)((TObjArray*)track->GetHits())->At(icluster);
 	  hit_p = hit->GetHitNumber();
 	
 	  if(hit_p>=0) {

@@ -1,5 +1,16 @@
-// $Id: StFtpcConfMapper.cc,v 1.9 2000/11/10 18:37:01 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.10 2001/01/25 15:21:33 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.10  2001/01/25 15:21:33  oldi
+// Review of the complete code.
+// Fix of several bugs which caused memory leaks:
+//  - Tracks were not allocated properly.
+//  - Tracks (especially split tracks) were not deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way). I changed all occurences to TObjArray which makes the
+//    program slightly slower but much more save (in terms of memory usage).
+// Speed up of HandleSplitTracks() which is now 12.5 times faster than before.
+// Cleanup.
+//
 // Revision 1.9  2000/11/10 18:37:01  oldi
 // New functions introduced to be able to extend tracks after main vertex tracking.
 // This implied many changes in other parts of the class (loop over clusters can run backwards now).
@@ -102,7 +113,6 @@ StFtpcConfMapper::StFtpcConfMapper()
 
   mHit     = NULL;
   mVolume  = NULL;
-  mSegment = NULL;
 
   mVertexConstraint = (Bool_t)true;
 }
@@ -141,21 +151,18 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t v
 
   fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
 
-  mHit = new TClonesArray("StFtpcConfMapPoint", n_clusters);    // create TClonesArray
+  mHit = new TObjArray(n_clusters);    // create TObjArray
   mHitsCreated = (Bool_t)true;
 
-  TClonesArray &hit = *mHit;
-  
   for (Int_t i = 0; i < n_clusters; i++) {
-    new(hit[i]) StFtpcConfMapPoint(point_st++, mVertex);
+    mHit->AddAt(new StFtpcConfMapPoint(point_st++, mVertex), i);
     ((StFtpcConfMapPoint *)mHit->At(i))->SetHitNumber(i);
   }
 
-  mVolume = new TObjArray(mBounds, 0);  // create ObjArray for volume cells (of size bounds)
+  mVolume = new TObjArray(mBounds);  // create ObjArray for volume cells (of size bounds)
 
   for (Int_t i = 0; i < mBounds; i++) {
-    mSegment = new TObjArray(0, 0);     // Fill ObjArray with empty ObjArrays
-    mVolume->AddLast(mSegment);
+    mVolume->AddAt(new TObjArray(0), i);     // Fill ObjArray with empty ObjArrays
   }
 
   StFtpcConfMapPoint *h;
@@ -173,7 +180,7 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t v
 }
 
 
-StFtpcConfMapper::StFtpcConfMapper(TClonesArray *hits, StFtpcVertex *vertex, Bool_t bench, 
+StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t bench, 
 				   Int_t phi_segments, Int_t eta_segments) 
   : StFtpcTracker(hits, vertex, bench)
 {
@@ -205,11 +212,10 @@ StFtpcConfMapper::StFtpcConfMapper(TClonesArray *hits, StFtpcVertex *vertex, Boo
 
   mClustersUnused = mHit->GetEntriesFast();
 
-  mVolume = new TObjArray(mBounds, 0);  // create ObjArray for volume cells (of size bounds)
+  mVolume = new TObjArray(mBounds);  // create ObjArray for volume cells (of size bounds)
 
   for (Int_t i = 0; i < mBounds; i++) {
-    mSegment = new TObjArray(0, 0);     // Fill ObjArray with empty ObjArrays
-    mVolume->AddLast(mSegment);
+    mVolume->AddAt(new TObjArray(0), i);     // Fill ObjArray with empty ObjArrays
   }
 
   StFtpcConfMapPoint *h;
@@ -932,7 +938,6 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
 void StFtpcConfMapper::HandleSplitTracks(Double_t max_dist, Double_t ratio_min, Double_t ratio_max)
 {
   // Looks for split tracks and passes them to the track merger.
-
   Double_t ratio;
   Double_t dist;
 
@@ -945,6 +950,8 @@ void StFtpcConfMapper::HandleSplitTracks(Double_t max_dist, Double_t ratio_min, 
   Double_t Phi1;
   Double_t Phi2;
 
+  Int_t first_split = -1;
+ 
   StFtpcTrack *t1;
   StFtpcTrack *t2;
 
@@ -970,30 +977,40 @@ void StFtpcConfMapper::HandleSplitTracks(Double_t max_dist, Double_t ratio_min, 
 	// track t1 was removed before (already merged) - leave inner loop
 	break;
       }
-
-      r1 = t1->GetRLast();
-      r2 = t2->GetRLast();
-      phi1 = t1->GetAlphaLast();
-      phi2 = t2->GetAlphaLast();
-      R1 = t1->GetRFirst();
-      R2 = t2->GetRFirst();
-      Phi1 = t1->GetAlphaFirst();
-      Phi2 = t2->GetAlphaFirst();
       
-      dist = (TMath::Sqrt(r2*r2+r1*r1-2*r1*r2*(TMath::Cos(phi1)*TMath::Cos(phi2)+TMath::Sin(phi1)*TMath::Sin(phi2))) +
-	      TMath::Sqrt(R2*R2+R1*R1-2*R1*R2*(TMath::Cos(Phi1)*TMath::Cos(Phi2)+TMath::Sin(Phi1)*TMath::Sin(Phi2)))) / 2.;
-      ratio = (Double_t)(t1->GetNumberOfPoints() + t2->GetNumberOfPoints()) / (Double_t)(t1->GetNMax() + t2->GetNMax());
-
       if (!(t1->GetRowsWithPoints() & t2->GetRowsWithPoints()) && 
-	  (t1->GetHemisphere() == t2->GetHemisphere()) &&
-	  dist <= max_dist && ratio <= ratio_max && ratio >= ratio_min) {
-	MergeSplitTracks(t1, t2);
-	t1 = t2 = NULL;
-      }      
+	  (t1->GetHemisphere() == t2->GetHemisphere())) {
+	
+	r1 = t1->GetRLast();
+	r2 = t2->GetRLast();
+	phi1 = t1->GetAlphaLast();
+	phi2 = t2->GetAlphaLast();
+	R1 = t1->GetRFirst();
+	R2 = t2->GetRFirst();
+	Phi1 = t1->GetAlphaFirst();
+	Phi2 = t2->GetAlphaFirst();
+	
+	dist = (TMath::Sqrt(r2*r2+r1*r1-2*r1*r2*(TMath::Cos(phi1)*TMath::Cos(phi2)+TMath::Sin(phi1)*TMath::Sin(phi2))) +
+		TMath::Sqrt(R2*R2+R1*R1-2*R1*R2*(TMath::Cos(Phi1)*TMath::Cos(Phi2)+TMath::Sin(Phi1)*TMath::Sin(Phi2)))) / 2.;
+	ratio = (Double_t)(t1->GetNumberOfPoints() + t2->GetNumberOfPoints()) / (Double_t)(t1->GetNMax() + t2->GetNMax());
+	
+	if (dist <= max_dist && ratio <= ratio_max && ratio >= ratio_min) {
+	  
+	  if (first_split == -1) {
+	    first_split = i;
+	  }
+	  
+	  MergeSplitTracks(t1, t2);
+	  t1 = t2 = NULL;
+	}      
+      }
     }
   }
   
-  AdjustTrackNumbers();
+  if (first_split != -1) {
+    // adjust track numbers only if something has changed
+    AdjustTrackNumbers(first_split);
+  }
 
   return;
 }
@@ -1009,8 +1026,7 @@ void StFtpcConfMapper::MergeSplitTracks(StFtpcTrack *t1, StFtpcTrack *t2)
   TObjArray *t1_points = t1->GetHits();
   TObjArray *t2_points = t2->GetHits();
 
-  TClonesArray &track_init = *mTrack;
-  new(track_init[new_track_number]) StFtpcTrack(new_track_number);
+  mTrack->AddAt(new StFtpcTrack(new_track_number), new_track_number);
   StFtpcTrack *track = (StFtpcTrack *)mTrack->At(new_track_number);
 
   TObjArray *trackpoint = track->GetHits();
@@ -1046,6 +1062,8 @@ void StFtpcConfMapper::MergeSplitTracks(StFtpcTrack *t1, StFtpcTrack *t2)
 
   mTrack->Remove(t1);
   mTrack->Remove(t2);
+  delete t1;
+  delete t2;
 
   mMergedSplits++;
 
@@ -1128,9 +1146,9 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
 
   Int_t point;
   Int_t tracks = GetNumberOfTracks();
+  if (tracks >= mTrack->GetSize()) mTrack->Expand(mTrack->GetSize()+1000);
 
-  TClonesArray &track_init = *mTrack;
-  new(track_init[tracks]) StFtpcTrack(tracks);
+  mTrack->AddAt(new StFtpcTrack(tracks), tracks);
   track = (StFtpcTrack *)mTrack->At(tracks);
   TObjArray *trackpoint = track->GetHits();
 

@@ -1,5 +1,16 @@
-// $Id: StFtpcTracker.hh,v 1.7 2000/11/23 01:33:16 oldi Exp $
+// $Id: StFtpcTracker.hh,v 1.8 2001/01/25 15:22:34 oldi Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.8  2001/01/25 15:22:34  oldi
+// Review of the complete code.
+// Fix of several bugs which caused memory leaks:
+//  - Tracks were not allocated properly.
+//  - Tracks (especially split tracks) were not deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way). I changed all occurences to TObjArray which makes the
+//    program slightly slower but much more save (in terms of memory usage).
+// Speed up of HandleSplitTracks() which is now 12.5 times faster than before.
+// Cleanup.
+//
 // Revision 1.7  2000/11/23 01:33:16  oldi
 // Proper initialization of some variables to avoid Insure++ error messages.
 //
@@ -50,7 +61,7 @@
 #include "TObject.h"
 #include "TBenchmark.h"
 #include "StFtpcVertex.hh"
-#include "TClonesArray.h"
+#include "TObjArray.h"
 #include "tables/St_fpt_fptrack_Table.h"
 #include "tables/St_fcl_fppoint_Table.h"
 #include "tables/St_fde_fdepar_Table.h"
@@ -62,9 +73,9 @@ protected:
               TBenchmark   *mBench;         // benchmark object (just for run-time measurements)
 
             StFtpcVertex   *mVertex;        // pointer to the vertex
-            TClonesArray   *mHit;           // ClonesArray of clusters
-            TClonesArray   *mTrack;         // ClonesArray of tracks
-                  Bool_t    mHitsCreated;   // indicator if this class created the mHit ClonesArray
+               TObjArray   *mHit;           // ObjArray of clusters
+               TObjArray   *mTrack;         // ObjArray of tracks
+                  Bool_t    mHitsCreated;   // indicator if this class created the mHit ObjArray
                   Bool_t    mVertexCreated; // indicator if this class created the mVertex
                 Double_t    mMaxDca;        // cut value for momentum fit
 
@@ -76,11 +87,11 @@ public:
 			  Bool_t bench = (Bool_t)false, 
 			  Double_t max_Dca = 100.);           // real constructor
             StFtpcTracker(StFtpcVertex *vertex, 
-			  TClonesArray *hit, 
-			  TClonesArray *track, 
+			  TObjArray *hit, 
+			  TObjArray *track, 
 			  Bool_t bench = (Bool_t)false, 
 			  Double_t max_Dca = 100.);           // constructor if everything is already there
-            StFtpcTracker(TClonesArray *hits, 
+            StFtpcTracker(TObjArray *hits, 
 			  StFtpcVertex *vertex, 
 			  Bool_t bench = (Bool_t)false, 
 			  Double_t max_Dca = 100.);           // constructor to handle arbitrary hits 
@@ -104,8 +115,8 @@ public:
   StFtpcVertex  *GetVertex()            { return mVertex;                  }  // returns the vertex
          Int_t   GetNumberOfClusters()  { return mHit->GetEntriesFast();   }  // returns the number of clusters
          Int_t   GetNumberOfTracks()    { return mTrack->GetEntriesFast(); }  // returns the number of tracks
-  TClonesArray  *GetClusters()          { return mHit;                     }  // returns ClonesArray of clusters
-  TClonesArray  *GetTracks()            { return mTrack;                   }  // returns ClonesArray of tracks
+     TObjArray  *GetClusters()          { return mHit;                     }  // returns ObjArray of clusters
+     TObjArray  *GetTracks()            { return mTrack;                   }  // returns ObjArray of tracks
       Double_t   GetMaxDca()      const { return mMaxDca;                  }  // returns cut value for momentum fir
 
   // setter

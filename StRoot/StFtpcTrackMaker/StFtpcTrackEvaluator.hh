@@ -1,5 +1,16 @@
-// $Id: StFtpcTrackEvaluator.hh,v 1.5 2000/11/29 08:37:46 jcs Exp $
+// $Id: StFtpcTrackEvaluator.hh,v 1.6 2001/01/25 15:22:19 oldi Exp $
 // $Log: StFtpcTrackEvaluator.hh,v $
+// Revision 1.6  2001/01/25 15:22:19  oldi
+// Review of the complete code.
+// Fix of several bugs which caused memory leaks:
+//  - Tracks were not allocated properly.
+//  - Tracks (especially split tracks) were not deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way). I changed all occurences to TObjArray which makes the
+//    program slightly slower but much more save (in terms of memory usage).
+// Speed up of HandleSplitTracks() which is now 12.5 times faster than before.
+// Cleanup.
+//
 // Revision 1.5  2000/11/29 08:37:46  jcs
 // remove obsolete include statement
 //
@@ -35,7 +46,7 @@
 #define STAR_StFtpcTrackEvaluator
 
 #include "TObject.h"
-#include "TClonesArray.h"
+#include "TObjArray.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "MIntArray.h"
@@ -58,11 +69,11 @@ class StFtpcTrackEvaluator : public TObject {
 private:
                   Bool_t  mObjArraysCreated;        // flag to know which destructor to be called
 
-            TClonesArray *mGeantHits;               // ClonesArray of geant hits
-            TClonesArray *mFastSimHits;             // ClonesArray of fast simulated hits
-            TClonesArray *mFoundHits;               // ClonesArray of found hits
-            TClonesArray *mGeantTracks;             // ClonesArray of geant tracks
-            TClonesArray *mFoundTracks;             // ClonesArray of found tracks
+               TObjArray *mGeantHits;               // ObjArray of geant hits
+               TObjArray *mFastSimHits;             // ObjArray of fast simulated hits
+               TObjArray *mFoundHits;               // ObjArray of found hits
+               TObjArray *mGeantTracks;             // ObjArray of geant tracks
+               TObjArray *mFoundTracks;             // ObjArray of found tracks
 
                MIntArray *mFtpcTrackNum;            // array of numbers of found Ftpc tracks, [geant track]
 
@@ -236,15 +247,15 @@ public:
 				 St_fcl_fppoint *fcl_fppoint, St_fpt_fptrack *fpt_fptrack, 
 				 Char_t *filename = 0, Char_t *write_permission = 0);                  // real constructor
             StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_data, StFtpcVertex *main_vertex, 
-				 TClonesArray *hits, TClonesArray *tracks, 
+				 TObjArray *hits, TObjArray *tracks, 
 				 Char_t *filename = 0, Char_t *write_permission = 0);                  // another real constructor
   virtual  ~StFtpcTrackEvaluator();                                                                    // destructor
 
-  TClonesArray *GetGeantHits()   { return mGeantHits;   }
-  TClonesArray *GetGeantTracks() { return mGeantTracks; }
-  TClonesArray *GetFastSimHits() { return mFastSimHits; }
-  TClonesArray *GetFoundHits()   { return mFoundHits;   }
-  TClonesArray *GetFoundTracks() { return mFoundTracks; }
+  TObjArray *GetGeantHits()   { return mGeantHits;   }
+  TObjArray *GetGeantTracks() { return mGeantTracks; }
+  TObjArray *GetFastSimHits() { return mFastSimHits; }
+  TObjArray *GetFoundHits()   { return mFoundHits;   }
+  TObjArray *GetFoundTracks() { return mFoundTracks; }
 
   MIntArray *GetClusterArr()         { return mClusterArr;         }
   MIntArray *GetSplitTracksArr()     { return mSplitTracksArr;     }
@@ -290,7 +301,7 @@ public:
      void   FillParentHistos(Int_t t_counter);                    // Fills histogram of number of parents
      void   FillMomentumHistos();                                 // Fills histograms of rel. momentum difference
      void   FillMomentumHistos(Int_t t_counter);                  // Fills histograms of rel. momentum difference
-     void   FillHitsOnTrack(TClonesArray *trackarray, Char_t c);  // Fills histogram of hits on tracks
+     void   FillHitsOnTrack(TObjArray *trackarray, Char_t c);     // Fills histogram of hits on tracks
      void   FillHitsOnTrack();                                    // Fills all hits on all tracks
      void   FillFoundHitsOnTrack();                               // Fills found hits on tracks
      void   FillCutHistos();                                      // Fills cut histograms (geant and found tracks)
