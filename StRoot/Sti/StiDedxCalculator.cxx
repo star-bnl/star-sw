@@ -10,6 +10,8 @@ using std::less;
 
 #include "StiDedxCalculator.h"
 
+#include <math.h>
+
 StiDedxCalculator::StiDedxCalculator()
     : mFraction(0.) //Default to zero so that user must set
 {

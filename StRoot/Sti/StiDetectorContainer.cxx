@@ -4,6 +4,7 @@
 
 //Std
 #include <iostream.h>
+#include <math.h>
 #include <stdio.h>
 #include <dirent.h>
 #include <sys/stat.h>
