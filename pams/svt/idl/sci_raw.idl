@@ -1,6 +1,0 @@
-/* sci_raw.idl                                 */
-/* SVT raw data - zero suppressed pedestal subtracted ADC values */
-
-struct sci_raw{
-  long      adc;
-};
