@@ -253,10 +253,14 @@ endblock
 Block  TPGV is the Gas Volume placed in TPC
 *
 *     TPC default gas P10: Ar/methane 9:1 by weight
-      Component Ar    A=40  Z=18 W=.9
-      Component C     A=12  Z=6  W=.1*12./16.
-      Component H     A=1   Z=1  W=.1* 4./16.
-      Mixture   p10   Dens=1.78e-3
+*     Component Ar    A=40  Z=18 W=.9
+*     Component C     A=12  Z=6  W=.1*12./16.
+*     Component H     A=1   Z=1  W=.1* 4./16.
+*     TPC default gas P10: Ar/methane 9:1 by volume
+      Component Ar    A=40  Z=18 W=9
+      Component C     A=12  Z=6  W=1
+      Component H     A=1   Z=1  W=4
+      Mixture   p10   Dens=0.9*0.00166+0.1*0.000667    " g/cm**3 "
       SHAPE     TUBE  rmin=tpgvIR  rmax=tpcg_SenGasOR  dz=tpgvLeng/2
       Create    TPSS
 endblock
