@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.hh,v 1.1 1998/11/10 17:12:10 fisyak Exp $
+ * $Id: StTrsFastChargeTransporter.hh,v 1.2 2000/02/24 16:25:23 long Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.hh,v $
+ * Revision 1.2  2000/02/24 16:25:23  long
+ * transportToWire(StTrsMiniChargeSegment& )--->transportToWire(StTrsMiniChargeSegment&,double& ,double&)
+ *
  * Revision 1.1  1998/11/10 17:12:10  fisyak
  * Put Brian trs versin into StRoot
  *
@@ -45,15 +48,19 @@ public:
 
     static StTrsChargeTransporter* instance(StTpcGeometry*, StTpcSlowControl*, StTrsDeDx*, StMagneticField*);
     
-    void    transportToWire(StTrsMiniChargeSegment&)      ;
+    void    transportToWire(StTrsMiniChargeSegment&,double& ,double & ) ;
     double  chargeAttachment(double)                 const;
     double  wireGridTransmission()                        ;
-
+     int       fieldFactorTable(); 
 protected:
-    StTrsFastChargeTransporter(StTpcGeometry*, StTpcSlowControl*, StTrsDeDx*, StMagneticField*);
+    StTrsFastChargeTransporter(StTpcGeometry*, StTpcSlowControl*, StTrsDeDx*, StMagneticField*);protected:
     
 private:
     static StTrsChargeTransporter* mInstance;
+    double  mB2[4];
+    double  mK[4];
+    double  mb[4];
+
 };
 
 #endif
