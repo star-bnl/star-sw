@@ -5,7 +5,7 @@
 **:<------------------------------------------------------------------*/
 #include "mwg.h"
 
-extern "C" long mwg_(
+long type_of_call mwg_(
   TABLE_HEAD_ST           *geom_h,        MWC_GEO_ST             *geom ,
   TABLE_HEAD_ST            *cal_h,        MWC_CAL_ST              *cal )
 {

@@ -50,7 +50,7 @@
 /*	C code ported to STAF 8/97 by S. Margetis				*/
 /* 									*/
 /************************************************************/
-long tkf_(
+long type_of_call tkf_(
   TABLE_HEAD_ST         *tkfpar_h,     TKF_TKFPAR_ST           *tkfpar ,
   TABLE_HEAD_ST         *tkfout_h,     TKF_TKFOUT_ST           *tkfout ,
   TABLE_HEAD_ST      *g2t_track_h,      G2T_TRACK_ST        *g2t_track ,
@@ -131,7 +131,7 @@ long tkf_(
 
 	tracksFound = 0;
         ii = 0;
-        if((globtrk_h->nok) == 0) return;
+        if((globtrk_h->nok) == 0) return returnCode;
         for (i=0;i< globtrk_h->nok;i++)
           {
                  if (localTracks[ii] = (localTrack *) malloc(sizeof(localTrack)))

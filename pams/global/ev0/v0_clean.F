@@ -58,7 +58,8 @@ C---------------
 
  10   CONTINUE
 
-999   RETURN
+999   V0_CLEAN = 0
+      RETURN
       END
 
 

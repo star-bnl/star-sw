@@ -340,7 +340,8 @@ c     WRITE(7) rd,rv,rmin,inv_mass
  10     CONTINUE	
         
           
- 999    RETURN
+ 999    V0_RECONSTRUCT = 0
+        RETURN
         END
       
 

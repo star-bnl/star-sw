@@ -44,7 +44,7 @@ RETURN VALUE: STAF Condition Value
 int overlap (int b1, int b2, int e1, int e2);
 
 /* scs_finder */
-long scs_finder_(
+long type_of_call scs_finder_(
   TABLE_HEAD_ST            *seq_h,        SSF_SEQ_ST              *seq ,
   TABLE_HEAD_ST            *par_h,        SCS_PAR_ST              *par ,
   TABLE_HEAD_ST           *clus_h,    SCS_CLUSTER_ST              *clus ) 

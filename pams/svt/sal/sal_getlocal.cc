@@ -10,7 +10,7 @@
 # include <math.h>
 # include "svt.h"
 
-long sal_getlocal_( TABLE_HEAD_ST *config_h, SVG_CONFIG_ST *config,                     
+long type_of_call sal_getlocal_( TABLE_HEAD_ST *config_h, SVG_CONFIG_ST *config,                     
                     TABLE_HEAD_ST *svt_geom_h, SVG_GEOM_ST  *svt_geom ,
                     TABLE_HEAD_ST *g2t_svt_hit_h, G2T_SVT_HIT_ST  *g2t_svt_hit ,
                     TABLE_HEAD_ST *sal_spt_h, SAL_SPT_ST  *sal_spt,

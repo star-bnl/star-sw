@@ -13,7 +13,7 @@
 # include <math.h>
 # include "svt.h"
 
-long sal_get_( TABLE_HEAD_ST *config_h, SVG_CONFIG_ST *config,                     
+long type_of_call sal_get_( TABLE_HEAD_ST *config_h, SVG_CONFIG_ST *config,                     
                     TABLE_HEAD_ST *g2t_svt_hit_h, G2T_SVT_HIT_ST  *g2t_svt_hit ,
                     TABLE_HEAD_ST *g2t_track_h, G2T_TRACK_ST *g2t_track)
 {

@@ -1084,7 +1084,7 @@ c	implicit none
       RECORD      /SRS_SRSPAR_ST/               srspar(*)
 
 c	integer i,j,k,ii,jj,kk
-	real par(8),svt_charge,xmin,xmax,zmin,zmax
+	real*8 par(8),svt_charge,xmin,xmax,zmin,zmax
 	integer iix,iiz
 	real svt_integrate_2d_gauss
 c------------------------------------------------------------------------------c

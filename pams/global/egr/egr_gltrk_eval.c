@@ -91,7 +91,7 @@ static void bad_track ( EGR_GLOBTRK_EVAL_ST   *glbvl,
 
 /* ----------------- Begin main function ----------------- */
 
-long egr_gltrk_eval_(
+long type_of_call egr_gltrk_eval_(
   TABLE_HEAD_ST      *g2t_track_h,      G2T_TRACK_ST        *g2t_track ,
   TABLE_HEAD_ST     *g2t_vertex_h,     G2T_VERTEX_ST       *g2t_vertex ,
   TABLE_HEAD_ST    *g2t_svt_hit_h,    G2T_SVT_HIT_ST      *g2t_svt_hit ,

@@ -15,7 +15,7 @@
 # include <time.h>
 # include "svt.h"
 
-long sal_create_newgeom_(TABLE_HEAD_ST *config_h, SVG_CONFIG_ST *config,
+long type_of_call sal_create_newgeom_(TABLE_HEAD_ST *config_h, SVG_CONFIG_ST *config,
                          TABLE_HEAD_ST *sal_rotran_h, SAL_ROTRAN_ST *sal_rotran,
                          TABLE_HEAD_ST    *sal_geom_real_h, SAL_GEOM_ST  *sal_geom_real )
 {

@@ -9,7 +9,7 @@
 #include "sal_getallev.h"
 
 
-long sal_getallev_( 
+long type_of_call sal_getallev_( 
 TABLE_HEAD_ST    *g2t_svt_hit_h, G2T_SVT_HIT_ST  *g2t_svt_hit ,
 TABLE_HEAD_ST    *g2t_svt_allev_h, G2T_SVT_HIT_ST  *g2t_svt_allev)
 {

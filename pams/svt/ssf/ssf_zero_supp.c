@@ -26,7 +26,7 @@ geographical addresses of the values stored in the adc table.
 ------------------------------------------------------------------*/
 #include "ssf_zero_supp.h"
 
-long ssf_zero_supp_(  
+long type_of_call ssf_zero_supp_(  
   TABLE_HEAD_ST *zero_par_h,  SSF_ZERO_PAR_ST  *zero_par,
   TABLE_HEAD_ST *adc8_h,           SSF_ADC_ST  *adc8,
   TABLE_HEAD_ST *seq_h,            SSF_SEQ_ST  *seq,

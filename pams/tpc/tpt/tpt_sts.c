@@ -98,8 +98,14 @@ ARGUMENTS:
 #define TRUE  1
 #define FALSE 0
 #
+#define tgc_cross_and_dip_ F77_NAME(tgc_cross_and_dip,TGC_CROSS_AND_DIP)
+extern void type_of_call tgc_cross_and_dip_(long *,float *,float *,float *);
+
+#define tls_index_sort_i_ F77_NAME(tls_index_sort_i,TLS_INDEX_SORT_I)
+extern void type_of_call tls_index_sort_i_(long *, long *,long *,long *,long *);
+
 /* Underscore on next line is necessary to link with FORTRAN. */
-long tpt_sts_(
+long type_of_call tpt_sts_(
   TABLE_HEAD_ST            *par_h,      TPT_SPARS_ST              *par ,
   TABLE_HEAD_ST          *tphit_h,      TCL_TPHIT_ST            *tphit ,
   TABLE_HEAD_ST            *res_h,        TPT_RES_ST              *res ,

@@ -8,7 +8,7 @@
 **:<------------------------------------------------------------------*/
 #include "mwu.h"
 
-extern "C" long mwu_(
+long type_of_call mwu_(
   TABLE_HEAD_ST            *cal_h,        MWC_CAL_ST              *cal ,
   TABLE_HEAD_ST            *raw_h,        MWC_RAW_ST              *raw ,
   TABLE_HEAD_ST            *cor_h,        MWC_COR_ST              *cor )

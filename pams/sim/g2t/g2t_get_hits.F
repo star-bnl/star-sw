@@ -20,6 +20,7 @@ C : HISTORY:
 C :             31dec97-v000a-PLN
 C :>--------------------------------------------------------------------
       IMPLICIT   NONE
+
       INTEGER*4  G2T_GET_HITS
       Integer    AgFHIT0, AgFHIT1, IH, ITRA, JTRA, NUMBV(15)
       integer    tpgv,tpss,tpad,sector,isdet/1/,nh,i,k, LenH

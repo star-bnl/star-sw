@@ -10,7 +10,7 @@
 
 extern float ran0(long*);
 
-long fake_pedestal_(
+long type_of_call fake_pedestal_(
   TABLE_HEAD_ST     *ems_control_h,   EMS_CONTROL_ST          *ems_control ,
   TABLE_HEAD_ST *ems_cal_control_h,   EMS_CAL_CONTROL_ST  *ems_cal_control ,
   TABLE_HEAD_ST        *fake_ped_h,   EMC_PEDESTAL_ST            *fake_ped )

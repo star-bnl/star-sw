@@ -22,7 +22,7 @@ RETURN VALUE: STAF Condition Value
 ------------------------------------------------------------------*/
 #include "ssf_8to10_init.h"
 
-long ssf_8to10_init_(
+long type_of_call ssf_8to10_init_(
 		     TABLE_HEAD_ST  *map10to8_h, SSF_MAP_ST *map10to8,
 		     TABLE_HEAD_ST  *map8to10_h, SSF_MAP_ST *map8to10) 
 {
