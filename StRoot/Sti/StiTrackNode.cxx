@@ -2,21 +2,6 @@
 #include <stdlib.h>
 #include "StiTrackNode.h"
 //______________________________________________________________________________
-StiHit * StiTrackNode::getHit(int idx) const
-{ return _hits.getHit(idx);}
-//______________________________________________________________________________
-void StiTrackNode::setHit(StiHit *hit)
-{ return _hits.setHit(hit);}
-
-//______________________________________________________________________________
-double StiTrackNode::getChi2 () const 		
-{ return _hits.getChi2();}
-
-//______________________________________________________________________________
- void StiTrackNode::setChi2(double chi2)
-{ _hits.setChi2(chi2); }
- 
-//______________________________________________________________________________
 void StiTrackNode::errPropag6( double G[21],const double F[6][6],int nF )
 {
   enum {NP=6,NE=21};
