@@ -10,6 +10,7 @@ void loadSharedLibraries() {
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StTriggerDataMaker"); // new starting from April 2003
+  gSystem->Load("StBichsel");
   gSystem->Load("StEvent");
   gSystem->Load("StEventUtilities");
   gSystem->Load("StEmcUtil");
