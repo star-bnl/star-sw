@@ -159,6 +159,9 @@
 * 
 * 10/21/98 K. Turner - implement "tpt_r" chain
 * 10/28/98 K. Turner - implement "ev02" chain 
+* 10/29/98 K. Turner - implement "ev0d" chain - creates dst_v0_vertex table 
+*                      from ev0out table - then deletes ev0out table
+*                      - should be called AFTER ev02! and b4 smdst!
 * 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -365,7 +368,9 @@ macro bfc_init _
             exec create_tables_global#ev02
 * exec init_ev0#fill_ev02
 	    exec init_ev0#init_ev02
-    (ev0_e) exec create_tables_global#ev0_eval2
+   (ev0_e)  exec create_tables_global#ev0_eval2
+   (ev0d)   exec init_ev0#ev0_dst
+    (ev0d)  exec init_ev0#ev0_dst
     (ctf)   exec create_tables_ctf#init
             exec ctg_init#init
             exec ctg_init#ctg
@@ -653,9 +658,9 @@ return
       (evr)    exec run_evr#run
       (egr)    exec run_egr#egr	
       (ev0)    exec run_ev0#ev0_am 
-      (ev02)   
-               exec run_ev0#ev0_am2
-     (ev0_e)   exec run_ev0#ev0_eval2  
+      (ev02)   exec run_ev0#ev0_am2
+    (ev0_e)    exec run_ev0#ev0_eval2
+     (ev0d)    exec run_ev0#ev0_dst
       (ctf)    exec cts_run
                exec ctu_run 
       (mwc)    exec mws_run
