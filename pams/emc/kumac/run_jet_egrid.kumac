@@ -1,4 +1,5 @@
 MACRO run_jet_egrid     [hit]='/dui/data/emc/hits' _
+macro/global/import *
 			[par]='/dui/constants/emc/params' _
                         [glb]='/dui/data/global/tracks' _
                         [jet]='/dui/data/emc/tracks'

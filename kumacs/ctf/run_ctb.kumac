@@ -1,4 +1,5 @@
 macro run_ctb 1=a nevents=10
+macro/global/import *
 *
 if [1]=r goto run
 *

@@ -1,8 +1,9 @@
 macro ctu_init 
+macro/global/import *
 *
 *    Define some tables
 *
-cd /dui/data/ctf
+cd [data]/ctf
 *
 newtab ctb_raw   ctu_raw   240
 newtab ctb_cor   ctu_cor   240

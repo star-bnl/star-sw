@@ -1,4 +1,5 @@
 MACRO run_ems_interface [g2t]='/dui/geant/Event' _
+macro/global/import *
                         [par]='/dui/constants/emc/params' _
 			[hit]='/dui/data/emc/hits'
 

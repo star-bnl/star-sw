@@ -1,15 +1,16 @@
 macro cts_run 
+macro/global/import *
 *
 *   
 *    Call cts
 *
-ami/mod/call cts /dui/geant/Event/g2t_ctb_hit _
-                 /dui/geant/Event/g2t_track   _
-                 /dui/constants/ctf/geometry/ctb _ 
-                 /dui/constants/ctf/calib/ctb_slat _
-                 /dui/constants/ctf/geometry/ctb_slat_phi _
-                 /dui/constants/ctf/geometry/ctb_slat_eta _
-                 /dui/constants/ctf/params/cts            _
-                 /dui/data/ctf/ctb_event                  _
-                 /dui/data/ctf/ctb_mslat                  _
-                 /dui/data/ctf/ctb_raw
+ami/mod/call cts [geant]/Event/g2t_ctb_hit _
+                 [geant]/Event/g2t_track   _
+                 [geometry]/ctf/ctb _ 
+                 [calib]/ctf/ctb_slat _
+                 [geometry]/ctf/ctb_slat_phi _
+                 [geometry]/ctf/ctb_slat_eta _
+                 [params]/ctf/cts            _
+                 [data]/ctf/ctb_event                  _
+                 [data]/ctf/ctb_mslat                  _
+                 [data]/ctf/ctb_raw

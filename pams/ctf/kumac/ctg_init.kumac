@@ -1,4 +1,5 @@
 macro init out=1 
+macro/global/import *
 
 *
 *   Set number of counters in phi and eta
@@ -9,14 +10,13 @@ n_tot     = [n_tot_eta]*[n_tot_phi]
 *
 *    Define geometry and calibration tables
 *
-cd /dui/constants/ctf
-cd geometry
+cd [params]/ctf
 newtab ctb          ctg_geo        1
 newtab ctb_slat_phi ctg_slat_phi [n_tot_phi]
 newtab ctb_slat_eta ctg_slat_eta [n_tot_eta]
-cd ../calib
+cd [calib]/ctf
 newtab ctb_slat     ctg_slat     [n_tot]
-cd ../geometry
+cd [geometry]/ctf
 wait
 *
 *    Initialize ctb geometry tables
@@ -133,10 +133,10 @@ enddo
 *
 *   Call module
 *
-ami/module/call ctg /dui/constants/ctf/geometry/ctb _
-                    /dui/constants/ctf/geometry/ctb_slat_phi _
-                    /dui/constants/ctf/geometry/ctb_slat_eta _ 
-                    /dui/constants/ctf/calib/ctb_slat
+ami/module/call ctg [geometry]/ctf/ctb _
+                    [geometry]/ctf/ctb_slat_phi _
+                    [geometry]/ctf/ctb_slat_eta _ 
+                    [calib]/ctf/ctb_slat
 *
 if [out] .ne. 0 then
   cd /dui/constants
