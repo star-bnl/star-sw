@@ -35,6 +35,8 @@ memset(&row,0,tableSet->GetRowSize());
     row.p_normalized	 =    1013.25; // normalized air pressure (in hPa) ;
     row.padtrans_e_min	 =          0; // lowest e-field in padtrans database ;
     row.padtrans_e_max	 =          0; // highest e-field in padtrans database ;
+    row.t_zero           =          0; // time from collision to readout start [usec];
+    row.angle_factor     =          1; // multiplicative lorentz angle correction;
     row.pad_err_diff[0]	 =      0.015; // function of driftlength up to 2nd order;
     row.pad_err_diff[1]	 =     0.0003;
     row.pad_err_diff[2]	 =          0;
