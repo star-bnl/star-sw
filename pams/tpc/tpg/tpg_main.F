@@ -1,5 +1,8 @@
-* $Id: tpg_main.F,v 1.14 1998/01/27 01:56:45 fisyak Exp $
+* $Id: tpg_main.F,v 1.15 1998/07/12 05:29:57 sakrejda Exp $
 * $Log: tpg_main.F,v $
+* Revision 1.15  1998/07/12 05:29:57  sakrejda
+* flag moved to a common, so it is not overwritten, not good, but working...
+*
 * Revision 1.14  1998/01/27 01:56:45  fisyak
 * Split sources
 *
@@ -43,10 +46,13 @@ CCCCCCCCCCCC
       real xlocal(3), xglobal(3), xback(3), pad
       integer idummy
 CCCCCCCCCCCC
+      integer flag_length
+      common /mydum/flag_length
 
       save
 
       data init_flag/0/, idebug/0/
+      flag_length=1
 *
       if(init_flag.eq.0) then
          iret=tgc_drift_volume_length(dummy5,tpg_detector_h,tpg_detector)
