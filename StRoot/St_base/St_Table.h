@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.24 1999/01/19 03:13:32 fine Exp $
+// $Id: St_Table.h,v 1.25 1999/01/28 19:13:08 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.25  1999/01/28 19:13:08  fine
+// St_TableSorter has been made up
+//
 // Revision 1.24  1999/01/19 03:13:32  fine
 // St_DataSet::Fine and St_DataSet::FindObject methods have been introduced
 //
@@ -114,7 +117,7 @@ public:
   
    virtual     void       Adopt(Int_t n, void *array);
    virtual     void       AddAt(const void *c, Int_t i);
-   virtual     void      *At(Int_t i);
+   virtual     const void *At(Int_t i) const;
    virtual     void       Browse(TBrowser *b);
    virtual     void       CopySet(St_Table &array);
    virtual     void      *GetArray() const ;
@@ -161,11 +164,11 @@ inline  void   St_Table::SetHeader(table_head_st *table){s_TableHeader = table;}
 inline  void   St_Table::SetNRows(Int_t n) {SetUsedRows(n);} 
 //   ULong_t   &operator(){ return GetTable();}
 
-inline void *St_Table::At(Int_t i)
+inline const void *St_Table::At(Int_t i) const
 {
    if (!BoundsOk("St_Table::At", i))
       i = 0;
-   return (void *)(s_Table+i*(*s_Size));
+   return (const void *)(s_Table+i*(*s_Size));
 }
 #if 1
 inline void *St_Table::operator[](Int_t i)

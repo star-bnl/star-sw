@@ -9,6 +9,55 @@
 #include <TDataMember.h>
 #include <TDataType.h>
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+//  St_TableSorter  - Is an "observer" class to sort the St_Table objects
+//                    The class provides an interface to the standard "C/C++"
+//
+// qsort and bsearch subroutine (for further information see your local C/C++ docs)
+// =====     =======
+//
+//  - Any instance of this class is meaningful as long as the "host" object
+//    "St_Table" does exist and is not changed
+//  - Any attempt to access this St_TableSorter after the "host" object deleted
+//    causes the program abnormal termination
+//  - Any attempt to access this St_TableSorter after the "host" object been changed
+//    causes an unpredictable result
+//  - Any instance (object) of this class is NOT deleted "by automatic" just
+//    the "host object "St_Table" deleted. It is the responsibility of the user's code
+//    keeping St_TableSorter and the the "host" St_Table objects consistent.
+//  - For any St_Table object one can create as many different "sorter" as he/she finds
+//    useful for his/her code
+//
+// "To do" list
+//
+//  1. A separate method to provide lexicographical sort if the "sorted" column is a kind of array
+//  2. "home made" search to provide "nearest" value.
+//
+//  Usage: 
+//    1. Create an instanse of the sorter for the selected column of your table
+//
+//        new St_TableSorter(St_Table &table, TString &colName,Int_t firstRow,Int_t numberRows)
+//
+//        All sort actions are performed within St_TableSorter ctor. 
+//        This means one needs no extra effort to SORT table. "Sorter" contains 
+//        the "sorted index array" as soon as you create the sorter
+//
+//        St_TableSorter sorter(MyTable,"id",20, 34);
+//          - Creates a sorter for MyTable column "id" ordering
+//            its 34 rows from 20 row with standard "C" qsort subroutine
+//
+//    2.  You may use this instance to search any "id" value with operator [] 
+//          to get the table row index as follows:
+//
+//          Int_t id = 5;
+//          Int_t index =  sorter[id]; // Look for the row index with id = 5
+//                                     // using the standard "C"  "bsearch" binary search 
+//                                     // subroutine
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+
+
 ClassImp(St_TableSorter)
 //_____________________________________________________________________________
 St_TableSorter::St_TableSorter() : m_ParentTable(0)
@@ -19,9 +68,20 @@ St_TableSorter::St_TableSorter() : m_ParentTable(0)
   m_colType = kNAN;
 }
 //_____________________________________________________________________________
-St_TableSorter::St_TableSorter(St_Table &table, TString &colName,Int_t firstRow
+St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t firstRow
                                ,Int_t numberRows):m_ParentTable(table)
 {
+  //
+  // St_TableSorter ctor sort the input table along its column defined with colName
+  //
+  //    - colName    - may be followed by the square brackets with integer number inside, 
+  //                   if that columm is an array (for example "phys[3]").
+  //                   NO expression inside of [], only a single integer number allowed !
+  //    - firstRow   - the first table row to sort from (=0 by default)
+  //    - numberRows - the number of the table rows to sort (=0 by default)
+  //                   = 0 means sort all rows from the "firstRow" by the end of table
+  //
+  SetName(colName);
   m_SortIndex  = 0;
   m_searchMethod = 0;
   m_colType      = kNAN;
@@ -194,14 +254,14 @@ Int_t St_TableSorter::BSearch(const void *value){
       if (p) {
          const Char_t *res = (const Char_t *)(*p);
          // calculate index:
-         index =  m_firstRow + (res - (((const Char_t *)m_ParentTable[m_firstRow]) + m_colOffset))/m_ParentTable.GetRowSize();
+         index =  m_firstRow + (res - (((const Char_t *)m_ParentTable.At(m_firstRow)) + m_colOffset))/m_ParentTable.GetRowSize();
       }
     }
     return index;  
 }
 
 //_____________________________________________________________________________
-Int_t St_TableSorter::GetIndex(UInt_t index)
+Int_t St_TableSorter::GetIndex(UInt_t index) const
 {
    Int_t indx = -1;
    if (index < m_numberOfRows )  {
@@ -209,7 +269,7 @@ Int_t St_TableSorter::GetIndex(UInt_t index)
      if (p) {
          const Char_t *res = (const Char_t *)p;
          // calculate index:
-         indx = m_firstRow + (res - (((const Char_t *)m_ParentTable[m_firstRow]) + m_colOffset))/m_ParentTable.GetRowSize();
+         indx = m_firstRow + (res - (((const Char_t *)m_ParentTable.At(m_firstRow)) + m_colOffset))/m_ParentTable.GetRowSize();
      }
   }
   return indx;
@@ -236,9 +296,16 @@ int St_TableSorter::CompareChar   (const void *elem1, const void *elem2)
 void St_TableSorter::FillIndexArray(){
   if (!m_SortIndex) return;
   for (Int_t i=m_firstRow; i < m_firstRow+m_numberOfRows;i++) 
-           m_SortIndex[i-m_firstRow] = ((Char_t *)(m_ParentTable[i])) + m_colOffset;
+           m_SortIndex[i-m_firstRow] = ((Char_t *)(m_ParentTable.At(i))) + m_colOffset;
  
 }
+//_____________________________________________________________________________
+const Text_t * St_TableSorter::GetTableName() const { return m_ParentTable.GetName();}
+//_____________________________________________________________________________
+const Text_t * St_TableSorter::GetTableTitle() const { return m_ParentTable.GetTitle();}
+//_____________________________________________________________________________
+const Text_t * St_TableSorter::GetTableType() const { return m_ParentTable.GetType();}
+
 //_____________________________________________________________________________
 void  St_TableSorter::SortArray(){
    COMPAREMETHOD compare=0;
@@ -315,6 +382,7 @@ void St_TableSorter::LearnTable()
 
     TDataType *memberType = member->GetDataType();
     types = memberType->GetTypeName();
+    SetTitle(types);
     if (!strcmp("float", types)) 
       m_colType = kFloat ;  
     else if (!strcmp("int", types)) 
@@ -343,7 +411,8 @@ void St_TableSorter::LearnTable()
       // Check dimensions
         if (dim != m_colDimensions) {
            Error("LearnTable","Wrong dimension");
-           m_ParentTable.Print();
+           St_Table *t = &m_ParentTable;
+           t->Print();
            return;
         }
         // Calculate the global index
