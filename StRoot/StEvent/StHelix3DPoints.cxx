@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   21/05/99  (E-mail: fine@bnl.gov)
-// $Id: StHelix3DPoints.cxx,v 1.1 1999/05/22 18:59:30 fine Exp $
+// $Id: StHelix3DPoints.cxx,v 1.2 1999/05/31 18:37:44 fine Exp $
 // $Log: StHelix3DPoints.cxx,v $
-// Revision 1.1  1999/05/22 18:59:30  fine
-// New class to draw StHelix3D and StTrack has been introduced
+// Revision 1.2  1999/05/31 18:37:44  fine
+// 3D graphics interface clean up
+//
+// Revision 1.2  1999/05/31 18:37:44  fine
+// 3D graphics interface clean up
 //
 // Revision 1.1  1999/05/22 18:59:30  fine
 // New class to draw StHelix3D and StTrack has been introduced
@@ -30,14 +33,14 @@ StHelix3DPoints::StHelix3DPoints(StHelixD *trackHelix,Float_t step,Int_t lastPos
    else {
      SetLastPosition(-1);
      SetStep(0);
-StHelix3DPoints::StHelix3DPoints(StTrack *track, Float_t step,Int_t lastPosition)
+   }
 }
 //________________________________________________________________________________
 {
   m_Helix = 0;
   if (!track) return; 
     SetLastPosition(lastPosition);
-    SetStep(step);
+    SetStep(length/Size());
     if (lastPosition) SetLastPosition(lastPosition);
     else              SetLastPosition(1);
     SetStep(length/GetLastPosition());

@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   21/05/99  (E-mail: fine@bnl.gov)
-// $Id: StHelix3DPoints.h,v 1.1 1999/05/22 18:59:31 fine Exp $
+// $Id: StHelix3DPoints.h,v 1.2 1999/05/31 18:37:45 fine Exp $
 // $Log: StHelix3DPoints.h,v $
-// Revision 1.1  1999/05/22 18:59:31  fine
-// New class to draw StHelix3D and StTrack has been introduced
+// Revision 1.2  1999/05/31 18:37:45  fine
+// 3D graphics interface clean up
+//
+// Revision 1.2  1999/05/31 18:37:45  fine
+// 3D graphics interface clean up
 //
 // Revision 1.1  1999/05/22 18:59:31  fine
 // New class to draw StHelix3D and StTrack has been introduced
@@ -18,7 +21,7 @@ class StHelix3DPoints : public TPoints3DABC {
 private:
         StHelixD *m_Helix;
         Int_t     m_N;
-        StHelix3DPoints(StTrack *track,        Float_t step=0,Int_t lastPosition=50);
+        StHelix3DPoints(StTrack *track,        Float_t length=0,Int_t lastPosition=50);
         StHelix3DPoints(StTrack *track);
         StHelix3DPoints(StHelixD *trackHelix=0,Float_t step=0,Int_t lastPosition=50);
         StHelix3DPoints(StTrack *track,        Float_t length,Int_t lastPosition=50);
