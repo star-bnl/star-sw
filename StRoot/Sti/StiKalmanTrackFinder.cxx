@@ -97,8 +97,11 @@ void StiKalmanTrackFinder::doNextAction()
 						{
 							cout <<"StiKalmanTrackFinder::doNextAction()\t Got Valid track"
 									 <<endl;							
-							track->update(); //append to display if drawable							
-							fitInward(track->getFirstNode());
+							track->update(); //append to display if drawable	
+							StiKalmanTrackNode * f = track->getFirstNode();
+							StiKalmanTrackNode * ccc = dynamic_cast<StiKalmanTrackNode *>(f->getFirstChild());
+							//fitInward(track->getFirstNode());
+							fitInward(ccc);
 						}
 					
 				}
@@ -211,8 +214,8 @@ StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) throw (Exception)
 	{
 	  visitedDet++;
 	  tNode = trackNodeFactory->getObject();
-	  tNode->setState(sNode);
-	  position = tNode->propagate(tDet); // 
+		tNode->reset();
+	  position = tNode->propagate(sNode, tDet); // 
 	  if (position==kFailed) return sNode;
 	  if (tDet->isActive())  // active vol, look for hits
 	    {
@@ -317,17 +320,19 @@ void StiKalmanTrackFinder::fitInward(StiKalmanTrackNode * node) throw (Exception
 	cout << "StiKalmanTrackFinder::fitInward()" << endl
 			 << "FIRST NODE::" << endl
 			 << *pNode << endl;
+	int pos;
   while (pNode->getChildCount()>0)
     {
       cNode = dynamic_cast<StiKalmanTrackNode *>(pNode->getFirstChild());
+      cout << "Child:" <<  *cNode;
       cDet  = cNode->getHit()->detector();
-      cout << "CH:" <<  *cNode;
-      cNode->setState(pNode);   // copy state from pNode
-      cout << "CHsetState:" <<  *cNode << endl;
-      cNode->propagate(cDet);	  // evolve state from pDet to cDet
-      cout << "CH propagated:" <<  *cNode;
+      pos = cNode->propagate(pNode,cDet);	  // evolve state from pDet to cDet
+			if (pos<0)
+				{
+					cout << "POSITION < 0 =======================" << endl;
+					break;
+				}
       cNode->evaluateChi2();
-      cout << "Chi2: " <<  *cNode;
       cNode->updateNode();
       cout << "UPDATED: " <<  *cNode;
       pNode = cNode;
@@ -363,8 +368,7 @@ void StiKalmanTrackFinder::fitOutward(StiKalmanTrackNode * node) throw (Exceptio
   while (pNode)
     {
       pDet  = pNode->getHit()->detector();
-      pNode->setState(cNode);     // copy state from cNode
-      pNode->propagate(pDet);	// evolve state from cDet to pDet
+      pNode->propagate(cNode,pDet);	// evolve state from cDet to pDet
       pNode->evaluateChi2();
       pNode->updateNode();
       cNode = pNode;

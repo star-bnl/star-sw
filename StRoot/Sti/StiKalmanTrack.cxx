@@ -312,7 +312,7 @@ void StiKalmanTrack::initialize(double curvature,
   // Input parameters_________________________________________
   // origin    : origin of the track in global coordinates
   // curvature : 1/Radius of the track
-  // tanl      : tan(pith angle)
+  // tanl      : tan(pitch angle)
   // v         : vector of hits to be added to this track
   //
   // Generated parameters_____________________________________
@@ -370,13 +370,13 @@ void StiKalmanTrack::initialize(double curvature,
       }
       alpha = layer->getPlacement()->getNormalRefAngle();
       node = fac->getObject();
-      node->reset();
       if (node==0)
 				{
 					cout << "StiKalmanTrack::initialize() - Severe Error - "
 							 << "trackNodeFactor returned null object" << endl;
 					return;
 				}
+      node->reset();
       if (pNode==0)
 				alphaP = -99999.; // no parent, set crazy value
       else
@@ -384,7 +384,9 @@ void StiKalmanTrack::initialize(double curvature,
       if (alphaP!=alpha)
 				{
 				    StThreeVectorD temp = origin;
+						cout << "OG:" << temp << endl;
 				    temp.rotateZ(alpha);
+						cout << "OL:" << temp << endl;
 				    eta = curvature*temp.x();
 				}
       state[0] = (*it)->y(); 

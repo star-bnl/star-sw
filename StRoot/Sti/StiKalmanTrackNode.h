@@ -38,7 +38,7 @@ class StiKalmanTrackNode : public StiTrackNode
   double getPt() const;
   void getGlobalMomentum(double p[3], double e[6]=0) const;
   void setAsCopyOf(const StiKalmanTrackNode * node);
-  int  propagate(StiDetector * tDet)	throw (Exception);
+  int  propagate(StiKalmanTrackNode *p, StiDetector * tDet)	throw (Exception);
   void propagate(double x, 
 		 double x0,   
 		 double rho) throw (Exception); // mass hypothesis
