@@ -1,3 +1,22 @@
+/** 
+ * @file  StiKalmanTrack.h
+ * @brief Definition of Kalman Track
+ * 
+ * Subclass of StiTrack defining a Kalman track to be used by the Kalman Track Finder.
+ *
+ * @author Claude A Pruneau, Wayne State University, 
+ * @date   March 2001
+ * @copyright 2001, STAR  Experiment at BNL, All rights reserved.  
+ *  
+ * Permission to use, copy, modify and distribute this software and its
+ * documentation strictly for non-commercial purposes is hereby granted 
+ * without fee, provided that the above copyright notice appears in all
+ * copies and that both the copyright notice and this permission notice
+ * appear in the supporting documentation. The authors make no claims 
+ * about the suitability of this software for any purpose. It is     
+ * provided "as is" without express or implied warranty.             
+ */
+
 /*! \class StiKalmanTrack
   A concrete class used in the reconstruction of tracks within the Star detector. The track reconstruction 
   is driven by an instance of class StiKalmanTrackFinder while the Kalman state of the track at any given 
@@ -30,7 +49,12 @@
 #include "StiKalmanTrackNode.h"
 #include "StiHitContainer.h"
 
-
+/** 
+ * @enum StiDirection
+ * @brief Definition of directions used in track finding and fitting.
+ * This enumeration defines the Outside-In and Inside-Out directions 
+ * used in track finding and fitting.
+ */
 enum StiTrackingDirection {kOutsideIn=0, kInsideOut};
 
 class StiKalmanTrack : public StiTrack 
@@ -166,6 +190,10 @@ public:
     /*! Accessor method returns the number of nodes containing a hit. 
      */
     virtual int     getPointCount()      const;  
+
+    /*! Accessor method returns the number of gaps on this track
+     */
+    virtual int     getGapCount()      const;  
 
     /// Accessor method to set the charge of this track.
     virtual void  setCharge(int v);

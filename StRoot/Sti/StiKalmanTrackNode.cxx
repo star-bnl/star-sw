@@ -28,18 +28,19 @@ using namespace std;
 
 // initialize static vairables
 bool StiKalmanTrackNode::recurse = false;
-bool StiKalmanTrackNode::elossCalculated = false;
-bool StiKalmanTrackNode::mcsCalculated   = false;
-double StiKalmanTrackNode::kField = 0.5;
-double StiKalmanTrackNode::massHypothesis = 0.13957018;
+//bool StiKalmanTrackNode::elossCalculated = false;
+//bool StiKalmanTrackNode::mcsCalculated   = false;
+//double StiKalmanTrackNode::kField = 0.5;
+//double StiKalmanTrackNode::massHypothesis = 0.13957018;
 
 
-int StiKalmanTrackNode::minContiguousHitCountForNullReset = 2;
-int StiKalmanTrackNode::maxNullCount = 40;  
-int StiKalmanTrackNode::maxContiguousNullCount = 25;
-double StiKalmanTrackNode::minSearchWindow = 0.5;
-double StiKalmanTrackNode::maxSearchWindow = 4.;
-double StiKalmanTrackNode::searchWindowScale = 5.;
+//int StiKalmanTrackNode::minContiguousHitCountForNullReset = 2;
+//int StiKalmanTrackNode::maxNullCount = 40;  
+//int StiKalmanTrackNode::maxContiguousNullCount = 25;
+//double StiKalmanTrackNode::minSearchWindow = 0.5;
+//double StiKalmanTrackNode::maxSearchWindow = 4.;
+//double StiKalmanTrackNode::searchWindowScale = 5.;
+
 int    StiKalmanTrackNode::shapeCode = 0;
 double StiKalmanTrackNode::x1=0;
 double StiKalmanTrackNode::x2= 0; 
@@ -238,6 +239,7 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
     double cc = c*c;
     sa = sqrt(sa);
     // should I include a factor of 0.3 here???????????????
+		double kField = pars->field;
     double a00=kField*(fX-fP2/c)/sa;
     double a01=-kField*(fP2*fP2-fX*fP2*c-1)/(cc*sa);
     double a02=0;
@@ -377,9 +379,9 @@ double StiKalmanTrackNode::getPt() const
     double c;
     c = fabs(fP3);
     if (c<1e-12) 
-	return 0.003e12*kField;
+	return 0.003e12*pars->field;
     else
-	return 0.003*kField/c;
+	return 0.003*pars->field/c;
 }
 
 
@@ -609,7 +611,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   fC41 += b41; 
     
   // Multiple scattering
-  if (mcsCalculated)
+  if (pars->mcsCalculated)
     {
       prevGas = gas;
       prevMat = mat;
@@ -651,7 +653,8 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
       double tanl  = fP4;
       double pt = getPt();
       double p2=(1.+tanl*tanl)*pt*pt;
-      double beta2=p2/(p2 + massHypothesis*massHypothesis);
+			double m2= pars->massHypothesis; m2=m2*m2;
+      double beta2=p2/(p2 + m2);
       double theta2=14.1*14.1/(beta2*p2*1e6)*d/radThickness*density;
       //double theta2=1.0259e-6*10*10/20/(beta2*p2)*d*density;
       double ey=fP3*fX - fP2, ez=fP4;
@@ -664,16 +667,16 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
       fC42 = fC42 + ez*zz1*xy*theta2;
       fC44 = fC44 + zz1*zz1*theta2;
       // Energy losses
-      if (elossCalculated)
-	{
-	  double dE=0.153e-3/beta2*(log(5940*beta2/(1-beta2)) - beta2)*d*density;
-	  if (x1 < x2) dE=-dE;
-	  cc=fP3;
-	  //cout << "ELOSS: c:" << cc;
-	  fP3 = fP3 *(1.- sqrt(p2+massHypothesis*massHypothesis)/p2*dE);
-	  //cout << " c':" << fP3 << endl;
-	  fP2 = fP2 + fX*(fP3-cc);
-	}
+      if (pars->elossCalculated)
+				{
+					double dE=0.153e-3/beta2*(log(5940*beta2/(1-beta2)) - beta2)*d*density;
+					if (x1 < x2) dE=-dE;
+					cc=fP3;
+					//cout << "ELOSS: c:" << cc;
+					fP3 = fP3 *(1.- sqrt(p2+m2)/p2*dE);
+					//cout << " c':" << fP3 << endl;
+					fP2 = fP2 + fX*(fP3-cc);
+				}
     }
   return position;
 }
@@ -983,41 +986,41 @@ void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
 //_____________________________________________________________________________
 void StiKalmanTrackNode::add(StiKalmanTrackNode * newChild)
 {
-    // set counters of the newChild node
-    if (newChild->hit!=0)
-	{
+	// set counters of the newChild node
+	if (newChild->hit!=0)
+		{
 	    //cout << "SKTN::add() Has a HIT" << endl;
 	    // newChild has an associate hit
 	    newChild->hitCount = hitCount+1;
 	    newChild->contiguousHitCount = contiguousHitCount+1; 
-	    if (contiguousHitCount>minContiguousHitCountForNullReset)
-		newChild->contiguousNullCount = 0;
+	    if (contiguousHitCount>pars->minContiguousHitCountForNullReset)
+				newChild->contiguousNullCount = 0;
 	    else
-		newChild->contiguousNullCount = contiguousNullCount;
+				newChild->contiguousNullCount = contiguousNullCount;
 	    newChild->nullCount = nullCount;
-	}
-    else
-	{
+		}
+	else
+		{
 	    // a null hit
 	    //cout << "SKTN::add() NO HIT" << endl;
 	    newChild->nullCount            = nullCount+1;
 	    newChild->contiguousNullCount  = contiguousNullCount+1;
 	    newChild->hitCount             = hitCount;
 	    newChild->contiguousHitCount   = 0;//contiguousHitCount; 
-	}
-    /*
-     *s_pMessenger
-     << "SKTN::add()"
-     << "            hitCount:" << newChild->hitCount << endl
-     << "  contiguousHitCount:" << newChild->contiguousHitCount << endl
-     << "           nullCount:" << newChild->nullCount << endl
-     << " contiguousNullCount:" << newChild->contiguousNullCount << endl;
-    */
-// insert the newChild node as a child to this
- if(newChild != 0 && newChild->getParent() == this)
-     insert(newChild, getChildCount() - 1);
- else
-     insert(newChild, getChildCount());
+		}
+	/*
+	 *s_pMessenger
+	 << "SKTN::add()"
+	 << "            hitCount:" << newChild->hitCount << endl
+	 << "  contiguousHitCount:" << newChild->contiguousHitCount << endl
+	 << "           nullCount:" << newChild->nullCount << endl
+	 << " contiguousNullCount:" << newChild->contiguousNullCount << endl;
+	*/
+	// insert the newChild node as a child to this
+	if(newChild != 0 && newChild->getParent() == this)
+		insert(newChild, getChildCount() - 1);
+	else
+		insert(newChild, getChildCount());
 }
 
 
@@ -1034,42 +1037,6 @@ void StiKalmanTrackNode::extendToVertex() //throw (Exception)
     double snf=tgf/sqrt(1.+ tgf*tgf);
     double xv=(fP2+snf)/fP3;
     propagate(xv);//,0.,0.);
-}
-
-//_____________________________________________________________________________
-void StiKalmanTrackNode::setElossCalculated(bool option)
-{
-    elossCalculated = option;
-}
-
-//_____________________________________________________________________________
-void StiKalmanTrackNode::setMCSCalculated(bool option)
-{
-    mcsCalculated = option;
-}
-
-//_____________________________________________________________________________
-bool StiKalmanTrackNode::getElossCalculated()
-{
-    return elossCalculated;
-}
-
-//_____________________________________________________________________________
-bool StiKalmanTrackNode::getMCSCalculated()
-{
-    return mcsCalculated;
-}
-
-//_____________________________________________________________________________
-void   StiKalmanTrackNode::setMassHypothesis(double m) 
-{
-    massHypothesis=m;
-}
-
-//_____________________________________________________________________________
-double StiKalmanTrackNode::getMassHypothesis() 
-{ 
-    return massHypothesis;
 }
 
 //_____________________________________________________________________________
@@ -1132,22 +1099,22 @@ const StiDetector * StiKalmanTrackNode::getTargetDet()
 //_____________________________________________________________________________
 double StiKalmanTrackNode::getWindowY() const
 {	 
-  double window = searchWindowScale*fC00;
-  if (window<minSearchWindow)
-    window = minSearchWindow;
-  else if (window>maxSearchWindow)
-    window = maxSearchWindow;
+  double window = pars->searchWindowScale*fC00;
+  if (window<pars->minSearchWindow)
+    window = pars->minSearchWindow;
+  else if (window>pars->maxSearchWindow)
+    window = pars->maxSearchWindow;
   return window;
 }
 
 //_____________________________________________________________________________
 double StiKalmanTrackNode::getWindowZ() const
 {	 
-  double window = searchWindowScale*fC11;
-  if (window<minSearchWindow)
-    window = minSearchWindow;
-  else if (window>maxSearchWindow)
-    window = maxSearchWindow;
+  double window = pars->searchWindowScale*fC11;
+  if (window<pars->minSearchWindow)
+    window = pars->minSearchWindow;
+  else if (window>pars->maxSearchWindow)
+    window = pars->maxSearchWindow;
   return window;
 }
 
@@ -1158,6 +1125,7 @@ StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
   // get xx0,yy0,zz0, the center of the helix, in local coordinates...
   double xx0,yy0,zz0;
   
+
   c1=fP3*fX - fP2;
   c1sq = c1*c1; 
   if (c1sq>1.) // Error

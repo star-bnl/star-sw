@@ -562,6 +562,11 @@ int    StiKalmanTrack::getPointCount()       const
     return npoints;
 }
 
+int StiKalmanTrack::getGapCount() const
+{
+	return 0;
+}
+
 
 void  StiKalmanTrack::setCharge(int v)         
 {

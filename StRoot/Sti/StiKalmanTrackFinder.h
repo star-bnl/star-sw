@@ -6,6 +6,7 @@ using std::cout;
 using std::endl;
 
 #include "StiTrackFinder.h"
+#include "StiKalmanTrackFinderParameters.h"
 #include "Messenger.h"
 #include "SubjectObserver.h"
 
@@ -36,6 +37,10 @@ public:
     virtual void doTrackFind();
     virtual bool hasMore();
     
+		void setParameters(StiKalmanTrackFinderParameters *par);
+		StiKalmanTrackFinderParameters * getParameters();
+
+		/*
     virtual void setElossCalculated(bool option);
     virtual void setMCSCalculated(bool option);
     void   setMassHypothesis(double m);
@@ -51,7 +56,7 @@ public:
     double getMinSearchWindow();
     double getMaxSearchWindow();
     double getSearchWindowScale();
-
+		*/
     //Local
     virtual void findTrack(StiTrack * t); //throw ( Exception);
     virtual StiKalmanTrackNode * followTrackAt(StiKalmanTrackNode * node); //throw (Exception);
@@ -76,34 +81,24 @@ public:
 	return mode;
     }
     
-    //double getYWindow(StiKalmanTrackNode * n, StiHit * h) const;
-    //double getZWindow(StiKalmanTrackNode * n, StiHit * h) const;
-    
 protected:
+
     void getNewState();
     
     int    singleNodeFrom;
     bool   singleNodeDescent;
     double massHypothesis;
     double maxChi2ForSelection;
-    
-    
     void printState();
     
 private:
     
     StiFindStep mode;
     int       state;
-    //int       hitCount;
-    //int       nullCount; 
-    //int       contiguousHitCount;	
-    //int       contiguousNullCount;	
     int       visitedDet ;
     int       position;
     int       lastMove;
     
-    //double    sAlpha, tAlpha;
-    //double    yWindow,zWindow;
     double    chi2;
     double    bestChi2;
     StiKalmanTrack         * track;
@@ -125,10 +120,13 @@ private:
     void search();
     
     Messenger & trackMes;
-    Subject* mSubject;
+		StiKalmanTrackFinderParameters * pars;
+		Subject * mSubject;
+
 };
 
 //inlines
+
 
 inline void StiKalmanTrackFinder::update(Subject* changedSubject)
 {

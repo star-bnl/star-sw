@@ -26,19 +26,6 @@ void StiTrackFilter::reset()
   acceptedTrackCount = 0;
 }
 
-bool StiTrackFilter::accept(StiTrack * event)
-{
-  //----------------------------------------------------------
-  // Determine whether the given track is acceptable given 
-  // the constraints encapsulated by this filter.
-  // Instances of this base class will accept all tracks
-  // incondionally. This method must be overiden in derived 
-  // to perform actual track filtering... 
-  //----------------------------------------------------------
-  incrementAccepted();
-  return true;
-}
-
 int StiTrackFilter::getAnalyzedTrackCount()
 {
   //----------------------------------------------------------

@@ -56,8 +56,8 @@ public:
     virtual double  getDca2(StiTrack *t)   const=0;   // distance of closest approach to given track - 2D calc
     virtual double  getDca3(StiTrack *t)   const=0;   // distance of closest approach to given track - 3D calc
     
-    virtual int    getFitPointCount()   const=0;  // number of points used in fit
-    
+    virtual int    getFitPointCount()  const=0;  // number of points used in fit
+    virtual int    getGapCount()  const=0;
     // number of total number of points currently assigned to the track
     virtual int    getPointCount()      const=0;
 

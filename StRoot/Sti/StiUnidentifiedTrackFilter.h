@@ -1,18 +1,81 @@
 #ifndef StiUnidentifiedTrackFilter_H
 #define StiUnidentifiedTrackFilter_H 1
 
-#include <iostream.h>
-#include <stdlib.h>
-
+#include "StiFilter.h"
 #include "StiTrackFilter.h"
+
 
 class StiTrack;
 
 /**
- * StiUnidentified track filter. This filter shall be used to 
- * permit filtering of tracks based on their pseudo-rapidity and other 
+ * StiUnidentifiedTrackFilter. Instances of this class are track filter
+ * enabling filtering of tracks based on their pseudo-rapidity, pt,  and other 
  * features that do not require the track particle species to be identified.
+ *
+ * kChi2     : Chisquare of the track
+ * kPhi      : Azimuthal angle of the track 
+ * kPt       : Transverse Momentum of the track (GeV/c)
+ * kPseudoRapidity : Pseudo-rapidity of the track
+ * kRapidity       : Rapidity
+ * kNPts           : Number of nodes (with hits) on the track
+ * kNFitPts        : Number of nodes (with hits) used in the fit of the track
+ * kNGaps          : Number of active layers without hits on the track
+ * kFitToTotalPts  : Ratio of fit to total points on the track
+ * kPrimaryDca     : Distance to closest approach (DCA) to primary vertex
+ * kNTpcPts        : Number of TPC hits
+ * kNSvtPts        : Number of SVT hits
+ * kTpcDedx        : Value of TPC truncated Dedx Mean
+ * kSvtDedx        : Value of SVT truncated Dedx Mean
+ * kTrackType      : Type of Track
+ *                   0  - All types selected - same as not using this filter
+ *                   1  - Primary tracks only - track which include primary vertex
+ *                   2  - Secondary tracks only - tracks which do not primary vertex
+ * kCharged        : Charge of track
+ *                   -1 - Negative only
+ *                    0 - Neutral only
+ *                    1 - Positive only
+ *                    2 - Negative or Positive only
+ *                   other - All accepted - same as not using this filter
  */
+
+class StiUnidentifiedTrackFilter : public StiTrackFilter
+{
+ public:
+	
+	enum StiTrackFilterIdentifier {kChi2=0,
+																 kPhi,
+																 kPt,
+																 kPseudoRapidity,
+																 kRapidity,
+																 kNPts,
+																 kNFitPts,
+																 kNGaps,
+																 kFitToTotalPts,
+																 kPrimaryDca,
+																 kNTpcPts,
+																 kNSvtPts,
+																 kTpcDedx,
+																 kSvtDedx,
+																 kTrackType,
+																 kCharged};
+  StiUnidentifiedTrackFilter();
+  virtual ~StiUnidentifiedTrackFilter()
+    {}
+  virtual void setDefaults();
+  virtual bool accept(StiTrack * track);
+
+protected:
+
+  StiFilterVec filters;
+};
+
+
+#endif
+
+
+//////////////
+/*
+
 class StiUnidentifiedTrackFilter : public StiTrackFilter
 {
  public:
@@ -57,3 +120,4 @@ class StiUnidentifiedTrackFilter : public StiTrackFilter
 };
 
 #endif
+*/

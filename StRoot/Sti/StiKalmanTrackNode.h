@@ -5,6 +5,7 @@
 #include "Exception.h"
 #include "StiTrackNode.h"
 #include "StThreeVector.hh"
+#include "StiKalmanTrackFinderParameters.h"
 
 class StiHit;
 class StiDetector;
@@ -125,8 +126,15 @@ public:
     
     // static methods
     
+
+		static void   setParameters(StiKalmanTrackFinderParameters *parameters)
+			{
+				pars = parameters;
+			}
+
+    static double  getFieldConstant()         { return pars->field;}; 
+		/*
     static void    setFieldConstant(double f) { kField = f;};
-    static double  getFieldConstant()         { return kField;}; 
     static void    setMassHypothesis(double m);
     static double  getMassHypothesis(); 
     static void    setElossCalculated(bool option);
@@ -139,7 +147,7 @@ public:
     static double minSearchWindow;
     static double maxSearchWindow;
     static double searchWindowScale;
-
+		*/
     friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
     
     static bool  recurse;
@@ -147,13 +155,17 @@ public:
     
  protected:   
     
+		static StiKalmanTrackFinderParameters * pars;
+
     const StiDetector * targetDet; // not persistent
     
+		/*
     static double kField;
     static bool   elossCalculated;
     static bool   mcsCalculated;
     static double massHypothesis;
-    
+    */
+
     static int   shapeCode;
     static const StiDetector * det;
     static const StiPlanarShape * planarShape;

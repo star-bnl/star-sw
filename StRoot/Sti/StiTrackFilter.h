@@ -48,7 +48,19 @@ class StiTrackFilter
   StiTrackFilter();
   
   virtual void setDefaults();
-  virtual bool accept(StiTrack * track);
+  virtual bool accept(StiTrack * track)
+		{
+			return true;
+		}
+
+  bool filter(StiTrack * track)
+		{
+			analyzedTrackCount++;
+			bool acc = accept(track);
+			if (acc) acceptedTrackCount++;
+			return acc;
+		}
+
   void reset();
 
   void incrementAccepted()  
