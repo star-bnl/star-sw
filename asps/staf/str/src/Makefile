@@ -47,10 +47,10 @@ strlib_dbg.o : strlib.f
 	f77 $(FFLAGS_DBG) strlib.f -o strlib_dbg.o
 
 
-strlib$(ARCH_TAG).o : strlib$(ARCH_TAG).f
+strlib$(ARCH_TAG).o : strlib$(ARCH_TAG).f str_time_inc
 	f77 $(FFLAGS) strlib$(ARCH_TAG).f
 
-strlib$(ARCH_TAG)_dbg.o : strlib$(ARCH_TAG).f
+strlib$(ARCH_TAG)_dbg.o : strlib$(ARCH_TAG).f str_time_inc
 	f77 $(FFLAGS_DBG) strlib$(ARCH_TAG).f -o strlib$(ARCH_TAG)_dbg.o
 
 
@@ -124,10 +124,14 @@ str_file_inc : str_file.inc
 str_parse_inc : str_parse.inc
 	ln -s str_parse.inc str_parse_inc
 
+str_time_inc : str_time.inc
+	ln -s str_time.inc str_time_inc
+
 
 strterm_sun.f : strterm_sgi.f
 	rm -f strterm_sun.f
 	ln -s strterm_sgi.f strterm_sun.f
+
 
 strtermc_sun.c : strtermc_sgi.c
 	rm -f strtermc_sun.c

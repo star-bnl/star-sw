@@ -9,8 +9,9 @@
 
 
 
-	SUBROUTINE STRASCCPU(TCPU_TIME,DCPU_TIME,TCPU_ASC,DCPU_ASC,
-     1	                     ASC_DATE,ASC_WEEKDAY,ASC_TIME)
+	SUBROUTINE STRASCCPU( TCPU_TIME, DCPU_TIME
+     1	                    , TCPU_ASC , DCPU_ASC
+     1	                    ,  ASC_DATE, ASC_WEEKDAY, ASC_TIME )
 
 	IMPLICIT NONE
 
@@ -139,17 +140,20 @@
 	RETURN
 	END
 *
-	SUBROUTINE STRASCDATETIME(TIM_ASC)
+	SUBROUTINE STRASCDateTime( TIM_ASC )
 
 	IMPLICIT NONE
 
 *  Output:
-	CHARACTER*23 TIM_ASC !Standard time & date: dd-mmm-yy hh:mm:ss bbbb
-*                             (Last five characters are blank.)
+	CHARACTER*23 TIM_ASC !Standard time & date: dd-mmm-yy hh:mm:ss zone
+*                             (Last four characters are time-zone.)
 
 *  Description:
 *	Return standard 23 character ASCII years, months, days,
 *	hours, minutes and seconds.
+
+	INTEGER     Zone
+	CHARACTER*4 Zone_Name
 
 	CHARACTER*3 TIM_AMON(12)
 	DATA TIM_AMON/'Jan','Feb','Mar','Apr','May','Jun'
@@ -160,16 +164,18 @@
 *	Get the standard date and time:
 	CALL STRDATE(YEAR,MONTH,DAY)
 	IF (YEAR.GT.1900) YEAR=YEAR-1900 !Subtract off the upper 2 digits.
-	CALL STRTIME(HOURS,MINS,SECS)
+	CALL STRTIME(HOURS,MINS,SECS) !Time comes back in current zone.
 
 	TIM_ASC='No date or time'
 	IF (MONTH.GT.12) RETURN
 	IF (MONTH.LE.0) RETURN
 
+	CALL STRTime_Get_Current_Zone( Zone, Zone_Name )
+
 	WRITE(TIM_ASC,101)
      1	   DAY,TIM_AMON(MONTH),YEAR
-     2	  ,HOURS,MINS,SECS
-101	FORMAT(I2'-'A3'-'I2' 'I2.2':'I2.2':'I2.2)
+     2	  ,HOURS,MINS,SECS, Zone_Name
+101	FORMAT(I2'-'A3'-'I2' 'I2.2':'I2.2':'I2.2' 'A4)
 
 	RETURN
 	END
@@ -598,8 +604,8 @@
 	INTEGER TIME(2) !TIME(1) is seconds since midnight, 1-jan-1970.
 	                !TIME(2) is (additional) days since 1-jan-1970.
 *  Output:
-	CHARACTER*23 ASC !ASCII representation of TIME: dd-mmm-yy_hh:mm:ss_____
-                         !("_" = "blank" -- last five characters are blank.)
+	CHARACTER*23 ASC !Standard time & date: dd-mmm-yy hh:mm:ss zone
+	                 !(Last four characters are time-zone.)
 
 *  Brief Description:  Convert seconds since 1970 to 23-char ASCII date-time.
 
@@ -610,6 +616,9 @@
 	INTEGER HOURS,MINS,SECS
 	INTEGER DAYS,DAY,MON,YEARS,YEAR,LEAPS
 	INTEGER BAL
+
+	INTEGER     Zone
+	CHARACTER*4 Zone_Name
 
 	INTEGER MONTH_DAYS(12)
 	CHARACTER*3 AMON(12)
@@ -647,8 +656,10 @@
 
 	DAY = DAY + 1 !1st day of month is 1, not 0.
 
-	WRITE(ASC,101) DAY,AMON(MON),YEAR,HOURS,MINS,SECS
-101	FORMAT(I2'-'A3'-'I2' 'I2.2':'I2.2':'I2.2)
+	CALL STRTime_Get_Current_Zone( Zone, Zone_Name )
+
+	WRITE(ASC,101) DAY,AMON(MON),YEAR,HOURS,MINS,SECS, Zone_Name
+101	FORMAT(I2'-'A3'-'I2' 'I2.2':'I2.2':'I2.2' 'A4)
 
 	RETURN
 	END
