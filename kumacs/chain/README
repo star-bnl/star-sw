@@ -245,3 +245,8 @@
 *   - run g2t
 *   - write xdf file containing full directories
 * 
+* 14. call_bfc_run_hijing.kumac
+*    - must have hijev.inp in directory that you're running in
+*       - get from $STAR/kumacs/gen directory
+*    - run hijing
+*    - write xdf file out
