@@ -4,6 +4,7 @@
 *:DESCRIPTION:	Show DSL datasets and tables.
 *:AUTHOR:	cet - Craig E. Tull, cetull@lbl.gov
 *:BUGS:		-- STILL IN DEVELOPMENT --
+*:HISTORY:	23dec96-v010a-cet- adapt to NEW_DSL
 *:HISTORY:	12jun95-v000a-cet- extraction from other files
 *:<---------------------------------------------------------------------
 */
@@ -31,7 +32,11 @@ long dsuPrintDataset(DS_DATASET_T *pDataset)
       printf("[%d%%%d]\n",pDataset->elcount,pDataset->maxcount);
       for (i=0;i<pDataset->elcount;i++) {
          printf(" %4d - ",i);
+#ifndef OLD_DSL
+         dsuPrintDataset(pDataset->p.link[i]);
+#else	/* OLD_DSL */
          dsuPrintDataset(&pDataset->p.child[i]);
+#endif	/* OLD_DSL */
       }
    }else{
       printf(" ---------------------------------------- \n");
@@ -62,7 +67,11 @@ long dsuListDataset(DS_DATASET_T *pDataset)
       printf("[%d%%%d]\n",pDataset->elcount,pDataset->maxcount);
       for (i=0;i<pDataset->elcount;i++) {
          printf(" %4d - ",i);
+#ifndef OLD_DSL
+         dsuListDataset(pDataset->p.link[i]);
+#else	/* OLD_DSL */
          dsuListDataset(&pDataset->p.child[i]);
+#endif	/* OLD_DSL */
       }
    }else{
       printf("%s",pDataset->name);

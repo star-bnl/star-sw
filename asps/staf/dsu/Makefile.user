@@ -1,1 +1,7 @@
-# Makefile.user
+# Makefile.user - user customization of SLM
+#? - Use this file to override SLMakefile behavior.
+######################################################################
+#
+mytarget:
+	@echo "Put any special make targets in this file."
+#
