@@ -1,4 +1,4 @@
-MACRO ev0_am 
+macro ev0_am 
    
    macro/global/import *
      
@@ -24,7 +24,7 @@ RETURN
 ***********************************************************************
 
 
-MACRO ev0_eval2 
+macro ev0_eval2 
   
  macro/global/import *
  message ' Calling ev0_eval2..'

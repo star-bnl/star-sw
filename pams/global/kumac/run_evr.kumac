@@ -1,4 +1,4 @@
-MACRO run
+macro run
 
  macro/global/import *
 
