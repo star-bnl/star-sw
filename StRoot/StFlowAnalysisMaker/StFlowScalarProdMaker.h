@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowScalarProdMaker.h,v 1.2 2001/12/21 17:01:59 aihong Exp $
+// $Id: StFlowScalarProdMaker.h,v 1.3 2002/01/14 23:42:55 posk Exp $
 //
 // Authors: method proposed by Art and Sergei, code written by Aihong
 //          Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -23,7 +23,7 @@ class TH1F;
 class TH1D;
 class TH2F;
 class TH2D;
-class TH3F;
+//class TH3F;
 class TProfile;
 class TProfile2D;
 
@@ -41,11 +41,10 @@ public:
   Int_t    Make();
   Int_t    Finish();
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowScalarProdMaker.h,v 1.2 2001/12/21 17:01:59 aihong Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowScalarProdMaker.h,v 1.3 2002/01/14 23:42:55 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
-
 
   void     FillFromFlowEvent();
   void     FillEventHistograms();
@@ -63,7 +62,6 @@ private:
 
   // for each harmonic and each selection
   struct histFullHars {
-
     TProfile2D* mHist_vObs2D;
     TProfile*   mHist_vObsEta;
     TProfile*   mHist_vObsPt;
@@ -76,7 +74,7 @@ private:
   struct histFulls;	
   friend struct histFulls;
   struct histFulls {
-    TProfile*     mHistRes;
+    TProfile* mHistRes;
     TProfile* mHist_vObs;
     TH1D*     mHist_v;
     struct histFullHars histFullHar[Flow::nHars];
@@ -93,6 +91,9 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowScalarProdMaker.h,v $
+// Revision 1.3  2002/01/14 23:42:55  posk
+// Renamed ScalerProd histograms. Moved print commands to FlowMaker::Finish().
+//
 // Revision 1.2  2001/12/21 17:01:59  aihong
 // minor changes
 //
