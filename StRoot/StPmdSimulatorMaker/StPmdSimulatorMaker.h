@@ -4,24 +4,18 @@
  */
 /******************************************************************
  *
- * $Id: StPmdSimulatorMaker.h,v 1.4 2003/09/10 19:47:27 perev Exp $
+ * $Id: StPmdSimulatorMaker.h,v 1.5 2003/10/15 10:40:12 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay 
- *         Premomoy Ghosh
+ *
  ******************************************************************
  *
  * Description: This is the Slow (fast) simulator for PMD
  ******************************************************************
  *
  * $Log: StPmdSimulatorMaker.h,v $
- * Revision 1.4  2003/09/10 19:47:27  perev
- * ansi corrs
- *
- * Revision 1.3  2003/05/12 11:37:35  subhasis
- * Stevent added
- *
- * Revision 1.2  2002/09/05 06:20:58  subhasis
- * Calibration and readout resolution added
+ * Revision 1.5  2003/10/15 10:40:12  subhasis
+ * Changes by Dipak (eg GeV to keV
  *
  ******************************************************************/
  
@@ -43,47 +37,44 @@ class StPmdDetector;
 
 class StPmdSimulatorMaker : public StMaker {
 private:
+  Float_t mlcon0;  
+  Float_t mlcon1;
+  Float_t mlcon2;
+  Float_t mpcon0;  
+  Float_t mpcon1;  
+  Float_t mpcon2;
 
- Float_t mlcon0;  
- Float_t mlcon1;
- Float_t mlcon2;
- Float_t mpcon0;  
- Float_t mpcon1;  
- Float_t mpcon2;
-
-  
- protected:
+protected:
   StPmdCollection *       mPmdCollection;   //!Pmd and CPV collections
-  StPhmdCollection *        mevtPmdCollection;   //!Pmd and CPV collections for Stevent
+  StPhmdCollection *      mevtPmdCollection;   //!Pmd and CPV collections for Stevent
 
-  //!booking PMD histograms on cell (summing edep of hits on each cell) parameters
-
-  TH1F *mEdepPmd;    //! total edep on Pmd
-  TH1F *mHitPmd;     //!  total no of cells hit on Pmd
-  TH1F *mPmdAdc;
-  TH1F *mEdepCpv;    //!  Total edep on CPV
-  TH1F *mHitCpv;     //!  total no of cells hit on Cpv
-  TH1F *mCpvAdc;
-  TH1F *m_pmdsuper;  //!  total no of Supermodules for PMD
-  TH1F *m_cpvsuper;  //!  total no of Supermodules for CPV
-  TH2F *m_pmdrow;    //!  Pmd super vs row
-  TH2F *m_cpvrow;    //!  Cpv super vs row
-  TH2F *m_pmdcol;    //!  Pmd super vs col
-  TH2F *m_cpvcol;    //!  Cpv super vs col
+  //!booking PMD histograms
   TH2F *m_pmdEdep2D;    //! 2D-Edep Display of Pmd
   TH2F *m_cpvEdep2D;    //! 2D-Edep Display of Cpv
-  TH2F *mEdepAdc_Cpv;    //! 2D-Edep vs Adc
-  TH2F *mEdepAdc_Pmd;    //! 2D-Edep vs Adc
 
+  TH1F *mEdepPmd;      //! cell edep on Pmd
+  TH1F *mEdepPmd_part; //! total edep on Pmd
+  TH1F *mPmdAdc;       //! total ADC on PMD
+  TH1F *mHitPmd;       //!  total no of hits on Pmd
+  TH1F *mEdepCpv;      //!  cell edep on CPV
+  TH1F *mEdepCpv_part; //!  Total edep on CPV
+  TH1F *mCpvAdc;       //!  Total ADC on CPV
+  TH1F *mHitCpv;       //!  total no of hits on Cpv
+  TH1F *m_pmdsuper;    //!  total no of Supermodules for PMD
+  TH1F *m_cpvsuper;    //!  total no of Supermodules for CPV
+  TH2F *m_pmdrow;      //!  Pmd super vs row
+  TH2F *m_cpvrow;      //!  Cpv super vs row
+  TH2F *m_pmdcol;      //!  Pmd super vs col
+  TH2F *m_cpvcol;      //!  Cpv super vs col
 
 
   void adcconstants();
 
-
 public: 
-  StPmdSimulatorMaker(const char *name="PmdSimulator");  //! A constructor 
+ //! A constructor 
+  StPmdSimulatorMaker(const char *name="PmdSimulator"); 
   ~StPmdSimulatorMaker();                               //! A destructor
-  virtual Int_t Init();
+  virtual Int_t Init(); //!
   virtual Int_t Make();   //! Getting GEANT tables from input file
   Int_t GetPmd();         //! Getting Pmdhits from geant
   Int_t makePmdHits();    //! Making Pmd hits after slow simulation
@@ -93,15 +84,12 @@ public:
   void calAdc(StPmdDetector*,Int_t);
   Float_t keV_ADC(Float_t,Float_t&);
   Float_t ADC_Readout(Float_t,Int_t&);
-  Int_t  fillStEvent(StPmdDetector*, StPmdDetector*);
-
   void  bookHistograms();  //! Booking histograms
-
-  void  FillHistograms(StPmdDetector*, StPmdDetector*, Int_t);
-
+  void FillHistograms(StPmdDetector*,StPmdDetector*,Int_t);
+  Int_t  fillStEvent(StPmdDetector*, StPmdDetector*);
   void  Browse(TBrowser* b); //! StEvent staf will be visible in browser
 
-  ClassDef(StPmdSimulatorMaker,0)  //! Simulation maker for PMD
+  ClassDef(StPmdSimulatorMaker, 1)  //! Simulation maker for PMD
 };
 
 inline void StPmdSimulatorMaker::adcconstants()
