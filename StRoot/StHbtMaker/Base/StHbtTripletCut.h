@@ -1,9 +1,21 @@
 /***************************************************************************
  *
- * Description: part of STAR HBT Framework: StHbtMaker package
- *         base class for triplet-wise cuts
- *         Users inherit from this class and must add their own quantities
+ * $Id: StHbtTripletCut.h,v 1.2 2000/04/12 01:53:00 willson Exp $
  *
+ * Author: Robert Willson, Ohio State, willson@bnl.gov
+ ***************************************************************************
+ *
+ * Description: part of STAR HBT Framework: StHbtMaker package
+ *   base class for triplet-wise cuts. Users inherit from 
+ *   this class and must add their own quantities.
+ *
+ ***************************************************************************
+ *
+ * $Log: StHbtTripletCut.h,v $
+ * Revision 1.2  2000/04/12 01:53:00  willson
+ * Initial Installation - Comments Added
+ *
+ * 
  ***************************************************************************/
 
 #ifndef StHbtTripletCut_hh

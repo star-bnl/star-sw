@@ -1,8 +1,20 @@
 /***************************************************************************
  *
- * Description: part of STAR HBT Framework: StHbtMaker package
- *   a do-nothing triplet cut that simply says "true" to every triplet
+ * $Id: GenericTripletCut.cxx,v 1.3 2000/04/12 01:53:35 willson Exp $
  *
+ * Author: Robert Willson, Ohio State, willson@bnl.gov
+ ***************************************************************************
+ *
+ * Description: part of STAR HBT Framework: StHbtMaker package.
+ *   A do-nothing triplet cut that simply says "true" to every triplet.
+ *
+ ***************************************************************************
+ *
+ * $Log: GenericTripletCut.cxx,v $
+ * Revision 1.3  2000/04/12 01:53:35  willson
+ * Initial Installation - Comments Added
+ *
+ * 
  ***************************************************************************/
 
 #include "StHbtMaker/Cut/GenericTripletCut.h"

@@ -1,12 +1,23 @@
 /***************************************************************************
  *
+ * $Id: StHbtThreeParticleCorrFctnCollection.hh,v 1.3 2000/04/12 01:54:45 willson Exp $
+ *
+ * Author: Robert Willson, Ohio State, willson@bnl.gov
+ ***************************************************************************
+ *  
  * Description: part of STAR HBT Framework: StHbtMaker package
  *   The ThreeParticleCorrFctnCollection contains pointers to all 
  *   ThreeParticleCorrelation Functions that are associated with a 
  *   particular ThreeParticleAnalysis object.
  *
+ ***************************************************************************
+ *
+ * $Log: StHbtThreeParticleCorrFctnCollection.hh,v $
+ * Revision 1.3  2000/04/12 01:54:45  willson
+ * Initial Installation - Comments Added
+ *
+ *
  ***************************************************************************/
-
 
 #ifndef StHbtThreeParticleCorrFctnCollection_hh
 #define StHbtThreeParticleCorrFctnCollection_hh

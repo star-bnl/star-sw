@@ -1,8 +1,20 @@
 /***************************************************************************
  *
- * Description: part of STAR HBT Framework: StHbtMaker package
- *   a simple Q-invariant correlation function for three particle analyses    
+ * $Id: Q3invCorrFctn.h,v 1.2 2000/04/12 01:53:28 willson Exp $
  *
+ * Author: Robert Willson, Ohio State, willson@bnl.gov 
+ ***************************************************************************
+ *
+ * Description: part of STAR HBT Framework: StHbtMaker package
+ *   A simple Q-invariant correlation function for three particle analyses.    
+ *
+ ***************************************************************************
+ *
+ * $Log: Q3invCorrFctn.h,v $
+ * Revision 1.2  2000/04/12 01:53:28  willson
+ * Initial Installation - Comments Added
+ *
+ * 
  ***************************************************************************/
 
 
