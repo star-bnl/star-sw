@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.4 2000/05/26 21:29:33 posk Exp $
+// $Id: StFlowSelection.h,v 1.5 2000/08/09 21:38:23 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.5  2000/08/09 21:38:23  snelling
+// PID added
+//
 // Revision 1.4  2000/05/26 21:29:33  posk
 // Protected Track data members from overflow.
 //
@@ -64,7 +67,8 @@ class StFlowSelection : public StObject {
 
   Char_t mNumber[3];                        // selection number
   UInt_t mCentrality;                       // centrality bin
-  Char_t mPid[10];                          // "pi-", "pi+", "pi", or "proton"
+  Char_t mPid[10];                          // "pi-", "pi+", "pi", "k+", "k-", 
+                                            //"pbar", "proton" or "deuteron"
   Char_t mPidPart[10];                      // PID for particles wrt plane
   Int_t  mHarmonic;
   Int_t  mSelection;

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.7 2000/06/01 18:26:41 posk Exp $
+// $Id: StFlowTrack.h,v 1.8 2000/08/09 21:38:23 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.8  2000/08/09 21:38:23  snelling
+// PID added
+//
 // Revision 1.7  2000/06/01 18:26:41  posk
 // Increased precision of Track integer data members.
 //
@@ -77,9 +80,14 @@ public:
   Float_t       PidPiPlus()  const;
   Float_t       PidPiMinus() const;
   Float_t       PidProton()  const;
+  Float_t       PidKaonMinus()  const;
+  Float_t       PidKaonPlus()   const;
+  Float_t       PidAntiProton() const;
+  Float_t       PidDeuteron()   const;
   const Char_t* Pid()        const;
   Float_t       Phi()        const;
   Float_t       Eta()        const;
+  Float_t       Dedx()       const;
   Float_t       Pt()         const;
   Short_t       Charge()     const;
   Float_t       Dca()        const;
@@ -91,9 +99,14 @@ public:
   void SetPidPiPlus(Float_t);
   void SetPidPiMinus(Float_t);
   void SetPidProton(Float_t);
+  void SetPidKaonMinus(Float_t);
+  void SetPidKaonPlus(Float_t);
+  void SetPidAntiProton(Float_t);
+  void SetPidDeuteron(Float_t);
   void SetPid(const Char_t*);
   void SetPhi(Float_t);
   void SetEta(Float_t);
+  void SetDedx(Float_t);
   void SetPt(Float_t);
   void SetCharge(Short_t);
   void SetDca(Float_t);
@@ -108,9 +121,14 @@ private:
   Int_t   mPidPiPlus;
   Int_t   mPidPiMinus;
   Int_t   mPidProton;
+  Int_t   mPidKaonPlus;
+  Int_t   mPidKaonMinus;
+  Int_t   mPidAntiProton;
+  Int_t   mPidDeuteron;
   Char_t  mPid[10];
   Float_t mPhi;
   Float_t mEta;
+  Float_t mDedx;
   Float_t mPt;
   Short_t mCharge;
   UInt_t  mDca;
@@ -128,9 +146,14 @@ private:
 inline Float_t  StFlowTrack::PidPiPlus()  const { return mPidPiPlus/1000.; }
 inline Float_t  StFlowTrack::PidPiMinus() const { return mPidPiMinus/1000.; }
 inline Float_t  StFlowTrack::PidProton()  const { return mPidProton/1000.; }
+inline Float_t  StFlowTrack::PidKaonMinus()  const { return mPidKaonMinus/1000.; }
+inline Float_t  StFlowTrack::PidKaonPlus()   const { return mPidKaonPlus/1000.; }
+inline Float_t  StFlowTrack::PidAntiProton() const { return mPidAntiProton/1000.; }
+inline Float_t  StFlowTrack::PidDeuteron() const { return mPidDeuteron/1000.; }
 inline const Char_t* StFlowTrack::Pid()   const { return mPid; }
-inline Float_t  StFlowTrack::Phi()        const { return mPhi; }                
-inline Float_t  StFlowTrack::Eta()        const { return mEta; }                
+inline Float_t  StFlowTrack::Phi()        const { return mPhi; }   
+inline Float_t  StFlowTrack::Eta()        const { return mEta; }     
+inline Float_t  StFlowTrack::Dedx()       const { return mDedx; }     
 inline Float_t  StFlowTrack::Pt()         const { return mPt; }                
 inline Short_t  StFlowTrack::Charge()     const { return mCharge; }   
 inline Float_t  StFlowTrack::Dca()        const { return mDca/10000.; }
@@ -156,11 +179,25 @@ inline void StFlowTrack::SetPidPiMinus(Float_t pid) {
 inline void StFlowTrack::SetPidProton(Float_t pid)  {
   if (pid > maxInt) pid = maxInt; mPidProton = (Int_t)(pid*1000.); }
 
+inline void StFlowTrack::SetPidKaonMinus(Float_t pid)  {
+  if (pid > maxInt) pid = maxInt; mPidKaonMinus = (Int_t)(pid*1000.); }
+
+inline void StFlowTrack::SetPidKaonPlus(Float_t pid)  {
+  if (pid > maxInt) pid = maxInt; mPidKaonPlus = (Int_t)(pid*1000.); }
+
+inline void StFlowTrack::SetPidAntiProton(Float_t pid)  {
+  if (pid > maxInt) pid = maxInt; mPidAntiProton = (Int_t)(pid*1000.); }
+
+inline void StFlowTrack::SetPidDeuteron(Float_t pid)  {
+  if (pid > maxInt) pid = maxInt; mPidDeuteron = (Int_t)(pid*1000.); }
+
 inline void StFlowTrack::SetPid(const Char_t* pid)  { strncpy(mPid, pid, 9);
                                                          mPid[9] = '\0'; }
-inline void StFlowTrack::SetPhi(Float_t phi)        { mPhi = phi; }              
+inline void StFlowTrack::SetPhi(Float_t phi)        { mPhi = phi; }      
 
-inline void StFlowTrack::SetEta(Float_t eta)        { mEta = eta; }              
+inline void StFlowTrack::SetEta(Float_t eta)        { mEta = eta; }       
+
+inline void StFlowTrack::SetDedx(Float_t dedx)      { mDedx = dedx; }       
 
 inline void StFlowTrack::SetPt(Float_t pt)          { mPt = pt; }              
 
