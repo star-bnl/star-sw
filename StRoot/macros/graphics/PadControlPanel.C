@@ -2,8 +2,11 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.10 1999/06/11 19:14:01 fine Exp $
+// $Id: PadControlPanel.C,v 1.11 1999/07/13 00:34:16 fine Exp $
 // $Log: PadControlPanel.C,v $
+// Revision 1.11  1999/07/13 00:34:16  fine
+// new button has been added to draw 3D axes
+//
 // Revision 1.10  1999/06/11 19:14:01  fine
 // Some extra protections agaist of view == 0
 //
@@ -109,6 +112,8 @@ static TControlBar *PadControlPanel(TControlBar *bar=0){
    bar->AddButton("Side View","StPadControlPanel::SideView();","Show the side view");
    bar->AddButton("Front View","StPadControlPanel::FrontView();","Show the front view");
    bar->AddButton("4 views","StPadControlPanel::MakeFourView();","4 view");
+   bar->AddButton("Add Axes","StPadControlPanel::AddAxes();","Add 3D axes to the current TPad view");
+
 
    bar->Show();
    return bar;
@@ -297,6 +302,16 @@ void MakeFourView(TVirtualPad *pad=0)
   }
 }
 //_______________________________________________________________________________________
+void AddAxes(TVirtualPad *pad=0)
+{
+  // Add red, green, blue - X, Y, Z axice to the "pad"
+  TVirtualPad *thisPad = pad;
+  if (!thisPad) thisPad = gPad;
+  if (thisPad) {
+    if (!gROOT->GetClass("St_PolyLine3D"))  gSystem->Load("St_base");
+    if ( gROOT->GetClass("St_PolyLine3D"))  gROOT->ProcessLineFast("St_PolyLine3D::Axis();");
+  }
+}
 };
 
 StPadControlPanel __aa__;
