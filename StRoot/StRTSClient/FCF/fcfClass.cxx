@@ -6,7 +6,7 @@
 	the author.
 
 
-	
+	Version 5.30	Added ADC roundoff
 	Version 5.21	General Cleanup
 	Version 5.20	Added ADC cluster back-annotation if defined
 	Version 5.12	Added track ID
@@ -34,8 +34,9 @@
 #include <stdarg.h>
 
 
-#define FCF_VERSION	"5.21"	
+#define FCF_VERSION	"5.30"	
 
+#define FCF_NEW_ADC_ROUNDOFF
 
 #include <rts.h>
 #include <rtsSystems.h>
@@ -212,6 +213,9 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 	}
 	else {
 		simout = 0 ;
+		// WATCH IT!
+		sim_found_ptr = simout ;
+		sim_row_ptr = simout ;
 	}
 
 	u_short cl_id = 1 ;	// start global cluster id with 1
@@ -534,8 +538,11 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 				} while(likely(adc_p <= adc_end)) ;
 				//asm("#third") ;
 
-
-
+#ifdef FCF_NEW_ADC_ROUNDOFF
+				// new! correcting ADC roundoff errors
+				charge += ((start-stop)+1)/2 ;	// Note that "start-1" is the last while "stop" is the first
+								// pixel. Note that I also try to roundoff correctly the div. by 2.
+#endif
 				// t0Corr is (gain*t0*64)!
 				// This value may go negative here due to the t0 corrections!!!
 				// Time sum is now 64 times larger!!!
