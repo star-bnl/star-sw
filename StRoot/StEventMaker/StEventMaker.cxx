@@ -42,7 +42,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.53 2003/02/19 16:35:04 jeromel Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.54 2003/04/08 18:44:03 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -307,41 +307,44 @@ StEventMaker::makeEvent()
 
         StTrigSummary* trigSummary =
             ((StDAQReader*) (daqReaderSet->GetObject()))->getTrigSummary();
+	if (!trigSummary) gMessMgr->Warning("StEventMaker: No StTrigSummary found");
+      
+	StDetectorDbTriggerID* dbTriggerId = StDetectorDbTriggerID::instance();
+	if (!dbTriggerId) gMessMgr->Warning("StEventMaker: No StDetectorDbTriggerID found");
 
-	// The nominal is a pointer to one of the above. 
-        trigId[0]->setMask(trigSummary->L1summary[0]);
-        trigId[1]->setMask(trigSummary->L2summary[0]);
-        trigId[2]->setMask(trigSummary->L3summary[0]);
-
-        StDetectorDbTriggerID* dbTriggerId = StDetectorDbTriggerID::instance();
-
-	// Loop over trigger level
-	for(unsigned int trglevel=0 ; trglevel < 3 ; trglevel++){
-	  StTriggerId* whichTrig =  trigId[trglevel];
-
-	  // Loop over the triggers within this level
-	  for (unsigned int iTrg = 0; iTrg < dbTriggerId->getIDNumRows() ; iTrg++){
-	    // Shift the mask by daqTrigId bits to examine that bit
-            if ( whichTrig->mask() &  (1 << (dbTriggerId->getDaqTrgId(iTrg)) )  ) {
-	      whichTrig->addTrigger(
-				    dbTriggerId->getOfflineTrgId(iTrg),
-				    dbTriggerId->getTrgVersion(iTrg),
-				    dbTriggerId->getTrgNameVersion(iTrg),
-				    dbTriggerId->getThreashVersion(iTrg),
-				    dbTriggerId->getPsVersion(iTrg)
-				    );
-            }
-	  }
+	if (trigSummary && dbTriggerId) {
+	    
+	    // The nominal is a pointer to one of the above. 
+	    trigId[0]->setMask(trigSummary->L1summary[0]);
+	    trigId[1]->setMask(trigSummary->L2summary[0]);
+	    trigId[2]->setMask(trigSummary->L3summary[0]);
+	    
+	    
+	    // Loop over trigger level
+	    for(unsigned int trglevel=0 ; trglevel < 3 ; trglevel++){
+		StTriggerId* whichTrig =  trigId[trglevel];
+		
+		// Loop over the triggers within this level
+		for (unsigned int iTrg = 0; iTrg < dbTriggerId->getIDNumRows() ; iTrg++){
+		    // Shift the mask by daqTrigId bits to examine that bit
+		    if ( whichTrig->mask() &  (1 << (dbTriggerId->getDaqTrgId(iTrg)) )  ) {
+			whichTrig->addTrigger(
+					      dbTriggerId->getOfflineTrgId(iTrg),
+					      dbTriggerId->getTrgVersion(iTrg),
+					      dbTriggerId->getTrgNameVersion(iTrg),
+					      dbTriggerId->getThreashVersion(iTrg),
+					      dbTriggerId->getPsVersion(iTrg)
+					      );
+		    }
+		}
+	    }	    
+	    triggerIdColl->setNominal(new StTriggerId(*(trigId[dbTriggerId->getDefaultTriggerLevel()-1])));
 	}
-
-        triggerIdColl->setNominal(new StTriggerId(*(trigId[dbTriggerId->getDefaultTriggerLevel()-1])));
-
-
-    } else {
-      gMessMgr->Warning("StEventMaker: No StDAQReader found");
     }
-
-
+    else {
+	gMessMgr->Warning("StEventMaker: No StDAQReader found");
+    }
+    
     //
     //  Some variables we need in the following
     //
@@ -1479,8 +1482,12 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.53 2003/02/19 16:35:04 jeromel Exp $
+ * $Id: StEventMaker.cxx,v 2.54 2003/04/08 18:44:03 ullrich Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.54  2003/04/08 18:44:03  ullrich
+ * Added protection for cases where StDetectorDbTriggerID and
+ * StTrigSummary couldn't be obtained (see Trigger Id summary).
+ *
  * Revision 2.53  2003/02/19 16:35:04  jeromel
  * $LINK mechanism removed
  *
