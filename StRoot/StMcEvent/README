@@ -1,3 +1,10 @@
+$Id: README,v 2.1 1999/11/17 02:23:06 calderon Exp $
+$Log: README,v $
+Revision 2.1  1999/11/17 02:23:06  calderon
+Added comments on changes in version 2.0
+
+
+//////////////////////////////////////////////////////////////
 README File for Transient OO Monte Carlo Data Model developer.
 Time-stamp:<99/06/28 16:20 calderon>
 
@@ -7,16 +14,33 @@ Modification History
 ====================
 
 06/28/99 Original version. Authors: Mike Lisa, Manuel Calderon de la Barca S.
+11/16/99 Version 2.0
 
 Description
 ===========
 
+VERSION 2.0
+Lots of changes, I'll probably forget to list them all.
+Here are some of the more important ones:
+
+Modified structure of hit collections.  These now
+reflect the structure of the detectors.
+The StMcTpcHit uses the coordinate transforms (which
+in turn use the database).
+The StMcTrack now has a 4-vector instead of a 3
+vector.
+McVertex and McHit now inherit from GlobalCoordinate.
+Use memory pool.
+List all vectors in StMcContainers.
+Introduction of Track Topology map.
+
+--------------
 Classes to reflect the contents of the g2t tables.
 This package keeps the same spirit as StEvent, but
 there are some differences.
 
 The structures have to be filled by hand, this is
-done in the maker StMcEventReaderMaker.
+done in the maker StMcEventMaker.
 
 Memory Management:
 ------------------
