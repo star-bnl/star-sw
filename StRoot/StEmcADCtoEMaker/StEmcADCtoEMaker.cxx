@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.74 2004/09/03 03:09:06 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.75 2004/09/07 14:31:48 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.75  2004/09/07 14:31:48  suaide
+// small change on histograms
+//
 // Revision 1.74  2004/09/03 03:09:06  suaide
 // changes in the histograms
 //
@@ -250,7 +253,7 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
   mDb = NULL;
   mEmc = NULL;            
   mDBRunNumber = 0;
-  mFillHisto = kFALSE;
+  mFillHisto = kTRUE;
   mDebug = kFALSE;
   mSaveAllStEvent = kFALSE;
   mRawData = NULL;               
@@ -284,7 +287,7 @@ Int_t StEmcADCtoEMaker::Init()
   }
 
   // histograms in reco controlled by bfc  
-  // if(!IAttr(".histos")) mFillHisto = kFALSE;
+   if(!IAttr(".histos")) mFillHisto = kFALSE;
 
   //Making QA histgrams
 	
