@@ -1,5 +1,8 @@
-// $Id: St_TableNtuple.cxx,v 1.2 1999/02/17 22:54:13 genevb Exp $
+// $Id: St_TableNtuple.cxx,v 1.3 1999/02/18 00:25:52 genevb Exp $
 // $Log: St_TableNtuple.cxx,v $
+// Revision 1.3  1999/02/18 00:25:52  genevb
+// St_TableNtuple: Histogramming ranges fixed, buffer size increased
+//
 // Revision 1.2  1999/02/17 22:54:13  genevb
 // Fixed errors when no tables/datasets found in St_TableNtuple
 //
@@ -304,6 +307,7 @@ Int_t St_TableNtuple::Fill(const St_Table &table, Int_t firstRow, Int_t nRows) {
     TTree::Fill();
     thisRow += rowSize;
   }
+  TTree::SetEstimate(TTree::GetEntries());
   return nRows;
 }
 //_____________________________________________________________________________
@@ -429,7 +433,7 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
 //_____________________________________________________________________________
 void St_TableNtuple::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_TableNtuple.cxx,v 1.2 1999/02/17 22:54:13 genevb Exp $\n");
+  printf("* $Id: St_TableNtuple.cxx,v 1.3 1999/02/18 00:25:52 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("* Using %d columns from table with:\n",mNvar);
   printf("*   Name: %s\n",GetName());

@@ -1,5 +1,8 @@
-// $Id: St_TableNtuple.h,v 1.2 1999/02/17 22:54:15 genevb Exp $
+// $Id: St_TableNtuple.h,v 1.3 1999/02/18 00:25:53 genevb Exp $
 // $Log: St_TableNtuple.h,v $
+// Revision 1.3  1999/02/18 00:25:53  genevb
+// St_TableNtuple: Histogramming ranges fixed, buffer size increased
+//
 // Revision 1.2  1999/02/17 22:54:15  genevb
 // Fixed errors when no tables/datasets found in St_TableNtuple
 //
@@ -53,11 +56,11 @@ class St_TableNtuple : public TTree {
     Int_t  *mOffset;     //! Offset values for pointers to table columns
 
  protected:
-   virtual    void LearnTable(const St_Table &table, Bool_t buildTree=kFALSE, Int_t bufsize=25000);
+   virtual    void LearnTable(const St_Table &table, Bool_t buildTree=kFALSE, Int_t bufsize=1000000);
 
  public:
                    St_TableNtuple();
-                   St_TableNtuple(const St_Table &table, Int_t bufsize=25000);
+                   St_TableNtuple(const St_Table &table, Int_t bufsize=1000000);
                    ~St_TableNtuple();
    virtual   Int_t AddTFile(const Char_t *file, Char_t *dataset, Char_t *tname, Int_t firstEvent=1, Int_t nEvents=-1);
    virtual   Int_t AddTFile(TFile &f, Char_t *dataset, Char_t *tname, Int_t firstEvent=1, Int_t nEvents=-1);
