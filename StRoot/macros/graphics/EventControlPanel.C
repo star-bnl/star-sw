@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: EventControlPanel.C,v 1.1 2001/08/14 21:03:47 fine Exp $
+// $Id: EventControlPanel.C,v 1.2 2001/08/14 21:06:27 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -108,16 +108,23 @@ class StEventControlPanel {
 //_______________________________________________________________________________________
 static void PrintNames()
 {
-    StEventDisplayMaker *dsm = (StEventDisplayMaker *)chain->Maker("EventDisplay");
-    if (dsm) dsmfDsmk->PrintNames();
+    if (chain) {
+      StEventDisplayMaker *dsm = (StEventDisplayMaker *)chain->Maker("EventDisplay");
+      if (dsm) dsmfDsmk->PrintNames();
+    }
 }
 //_______________________________________________________________________________________
 static void ToggleDisplayName(const char *name)
 {
+  if (!chain) return;
   StEventDisplayMaker *dsm = (StEventDisplayMaker *)chain->Maker("EventDisplay");
-  TList *l = dsm->GetNameList();
-  if (!l || !(o=l->FindObject(name))) dsm->AddName(name);
-  else dsm->RemoveName(name);
+  if (dsm) {
+    TList *l = dsm->GetNameList();
+    if (!l || !(o=l->FindObject(name))) dsm->AddName(name);
+    else dsm->RemoveName(name);
+  } else {
+    printf("there is no StEventDisplayMaker yet\n");
+  }
 }
 //_______________________________________________________________________________________
 };
