@@ -1,5 +1,8 @@
-// $Id: StKinkController.cxx,v 3.0 2000/07/14 12:56:47 genevb Exp $
+// $Id: StKinkController.cxx,v 3.1 2000/07/14 21:28:34 genevb Exp $
 // $Log: StKinkController.cxx,v $
+// Revision 3.1  2000/07/14 21:28:34  genevb
+// Added V0Mc index for XiMc, fixed bug with entries for XiMc, cleaned up controllers
+//
 // Revision 3.0  2000/07/14 12:56:47  genevb
 // Revision 3 has event multiplicities and dedx information for vertex tracks
 //
@@ -75,14 +78,21 @@ Int_t StKinkController::MakeCreateMcDst(StMcVertex* mcVert) {
     theMcTrackMap = assocMaker->mcTrackMap();
   }
   StKinkVertex* rcKinkPartner = 0;
+  StMcTrack* Daughter = 0;
   Int_t indexRecoArray = -1;
   Int_t count = theMcKinkMap->count(mcVert);
   StSPtrVecMcTrack& Daughters = mcVert->daughters();	
   
   for (StMcTrackIterator DTrackIt = Daughters.begin();
                          DTrackIt != Daughters.end(); DTrackIt++) {
-    if (!(Int_t)(*DTrackIt)->particleDefinition()->charge()) continue;
-    new((*mcArray)[mcEntries++]) StKinkMc(mcVert,(*DTrackIt));
+    if ((Int_t)(*DTrackIt)->particleDefinition()->charge()) {
+      Daughter = (*DTrackIt);
+      break;
+    }
+  }
+
+  if (Daughter) {
+    StKinkMc* kinkMc = new((*mcArray)[mcEntries++]) StKinkMc(mcVert,Daughter);
     if ((assocMaker)&&(count>0)) {
       pair<mcKinkMapIter,mcKinkMapIter> mcKinkBounds =
             theMcKinkMap->equal_range(mcVert);
@@ -90,9 +100,9 @@ Int_t StKinkController::MakeCreateMcDst(StMcVertex* mcVert) {
 
       rcKinkPartner = (*mcKinkBounds.first).second;
       float x, y, z, delta;
-      x = (mcVert)->position().x();
-      y = (mcVert)->position().y();
-      z = (mcVert)->position().z();
+      x = mcVert->position().x();
+      y = mcVert->position().y();
+      z = mcVert->position().z();
       delta = (x - rcKinkPartner->position().x())*(x - rcKinkPartner->position().x())+
         (y - rcKinkPartner->position().y())*(y - rcKinkPartner->position().y())+
         (z - rcKinkPartner->position().z())*(z - rcKinkPartner->position().z());
@@ -118,7 +128,7 @@ Int_t StKinkController::MakeCreateMcDst(StMcVertex* mcVert) {
 		    StStrangeAssoc(indexRecoArray,mcEntries-1);
       if(indexRecoArray!=-1) {
         pair<mcTrackMapIter,mcTrackMapIter> mcTrackBounds = 
-              theMcTrackMap->equal_range(*DTrackIt);
+              theMcTrackMap->equal_range(Daughter);
         StTrackPairInfo*   bestPairInfo = (*mcTrackBounds.first).second;
         for(mcTrackMapIter mcMapIt = mcTrackBounds.first;
                            mcMapIt != mcTrackBounds.second; ++mcMapIt) {
@@ -126,12 +136,10 @@ Int_t StKinkController::MakeCreateMcDst(StMcVertex* mcVert) {
 	         bestPairInfo = (*mcMapIt).second;
         } 
         if (mcTrackBounds.first != mcTrackBounds.second) {
-          ((StKinkMc*)
-	   mcArray->At(mcEntries-1))->SetHitInfo(bestPairInfo->commonTpcHits());
+          kinkMc->SetHitInfo(bestPairInfo->commonTpcHits());
         }
       }
     }
-    break;
   }
   
   return kStOK;

@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.0 2000/07/14 12:56:49 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.1 2000/07/14 21:28:34 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.1  2000/07/14 21:28:34  genevb
+// Added V0Mc index for XiMc, fixed bug with entries for XiMc, cleaned up controllers
+//
 // Revision 3.0  2000/07/14 12:56:49  genevb
 // Revision 3 has event multiplicities and dedx information for vertex tracks
 //
@@ -271,17 +274,35 @@ Int_t StStrangeMuDstMaker::MakeCreateMcDst() {
                           mcVertexIt != mcVertices.end(); mcVertexIt++) {
     const StMcTrack* parent = (*mcVertexIt)->parent();
     if (parent) {
-      if (doV0) // looking for V0s
-        if ((parent->geantId()==16)||(parent->geantId()==18)||
-            (parent->geantId()==26)) 
-	  v0->MakeCreateMcDst(*mcVertexIt);
-      if (doXi) // looking for Xis
+      if (doXi) { // looking for Xis
         if ((parent->geantId()==23)||(parent->geantId()==24)||
             (parent->geantId()==31)||(parent->geantId()==32))
 	  xi->MakeCreateMcDst(*mcVertexIt);
-      if (doKink) // looking for Kinks
+      } else if (doV0) { // looking for V0s
+        if ((parent->geantId()==16)||(parent->geantId()==18)||
+            (parent->geantId()==26)) 
+	  v0->MakeCreateMcDst(*mcVertexIt);
+      }
+      if (doKink) { // looking for Kinks
 	if ((parent->geantId()==11)||(parent->geantId()==12))
 	  kink->MakeCreateMcDst(*mcVertexIt);
+      }
+    }
+  }//end of loop over MC  vertices
+
+  // Do all non-Xi V0's at the end...
+  if (doXi && doV0) {
+    for (StMcVertexIterator mcVertexIt = mcVertices.begin();
+                          mcVertexIt != mcVertices.end(); mcVertexIt++) {
+      const StMcTrack* parent = (*mcVertexIt)->parent();
+      if ((parent) && ((parent->geantId()==16)||(parent->geantId()==18)||
+            (parent->geantId()==26))) {
+        const StMcTrack* parent2 = parent->parent();
+        // Check for cascade parentage
+        if (!((parent2) && ((parent2->geantId()==23)||(parent2->geantId()==24)||
+            (parent2->geantId()==31)||(parent2->geantId()==32))))
+	  v0->MakeCreateMcDst(*mcVertexIt);
+      }
     }
   }//end of loop over MC  vertices
   EachController(PrintNumMc());
