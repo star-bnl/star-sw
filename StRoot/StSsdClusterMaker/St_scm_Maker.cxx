@@ -3,24 +3,31 @@
  **************************************************************************
  *
  * $Log: St_scm_Maker.cxx,v $
- * Revision 1.4  2003/09/02 17:59:03  perev
- * gcc 3.2 updates + WarnOff
+ * Revision 1.5  2003/10/08 03:18:09  suire
+ * *** empty log message ***
  *
  * Revision 1.3  2002/03/25 20:13:05  suire
  * Small memory leak fixes, doxygen documentation
  *
  *
  **************************************************************************/
-#include <Stiostream.h>
 #include <stdlib.h>
 #include "St_scm_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
-#include "svt/St_scm_am_Module.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TFile.h"
 #include "StMessMgr.h"
+
+#include "StScmBarrel.hh"
+#include "tables/St_scf_cluster_Table.h"
+#include "tables/St_scm_spt_Table.h"
+#include "tables/St_sdm_geom_par_Table.h"
+#include "tables/St_sls_ctrl_Table.h"
+#include "tables/St_scm_ctrl_Table.h"
+
+
 ClassImp(St_scm_Maker)
 //_____________________________________________________________________________
 St_scm_Maker::St_scm_Maker(const char *name):
@@ -76,7 +83,7 @@ Int_t St_scm_Maker::Init(){
   matchisto->SetNdivisions(5,"X");
   matchisto->SetNdivisions(5,"Y");
   matchisto->SetNdivisions(10,"Z");
-  orthoproj = new TH1S("Projection Ortho","Perfect Matching Deviation",80,-80,80);
+  orthoproj = new TH1S("ProjectionOrtho","Perfect Matching Deviation",80,-80,80);
 
   return StMaker::Init();
 }
@@ -93,10 +100,34 @@ Int_t St_scm_Maker::Make()
   St_scm_spt *scm_spt = new St_scm_spt("scm_spt",5000);
   m_DataSet->Add(scm_spt);
 
-  res = scm_am(m_geom_par, m_condition_db, m_geom,
-        scf_cluster, m_sls_ctrl, m_scm_ctrl, scm_spt);
-
-   if(res!=kSTAFCV_OK){
+  sdm_geom_par_st  *geom_par = m_geom_par->GetTable();
+  sls_ctrl_st      *sls_ctrl = m_sls_ctrl->GetTable();
+  scm_ctrl_st      *scm_ctrl = m_scm_ctrl->GetTable();
+    
+  cout<<"#################################################"<<endl;
+  cout<<"####      START OF SSD CLUSTER MATCHING      ####"<<endl;
+  cout<<"####        SSD BARREL INITIALIZATION        ####"<<endl;
+  StScmBarrel *mySsd = new StScmBarrel(geom_par);
+  cout<<"####        SSD WAFERS INITIALIZATION        ####"<<endl;
+  mySsd->initWafers(m_geom);
+  //   int deadStripTableSize = mySsd->readDeadStripFromTable(condition_db_h, condition_db);
+  //   cout<<"####   -> "<<deadStripTableSize<<" DEAD STRIPS IN THE SSD ####"<<endl;
+  int nReadCluster = mySsd->readClusterFromTable(scf_cluster);
+  cout<<"####   -> "<<nReadCluster<<" CLUSTERS READ FROM TABLE      ####"<<endl;
+  mySsd->sortListCluster();
+  int nPackage = mySsd->doClusterMatching(geom_par, scm_ctrl);
+  cout<<"####   -> "<<nPackage<<" PACKAGES IN THE SSD           ####"<<endl;
+  mySsd->convertDigitToAnalog(sls_ctrl);
+  mySsd->convertUFrameToOther(geom_par);
+  int nSptWritten = mySsd->writePointToTable(scm_spt);
+  cout<<"####   -> "<<nSptWritten<<" HITS WRITTEN INTO TABLE       ####"<<endl;
+  scm_spt->Purge();
+  cout<<"####       END OF SSD CLUSTER MATCHING       ####"<<endl;
+  cout<<"#################################################"<<endl;
+  delete mySsd;
+  if (nSptWritten) res = kStOK;
+ 
+   if(res!=kStOK){
      gMessMgr->Warning("St_scm_Maker: no output");
      return kStWarn;
    }
@@ -116,7 +147,7 @@ void St_scm_Maker::makeScmCtrlHistograms()
   if (scm_spt->GetNRows()){
     scm_spt_st *dSpt = scm_spt->GetTable();
     sls_ctrl_st *sls_ctrl_t = m_sls_ctrl->GetTable();
-    Float_t convMeVToAdc = (int)::pow(2,sls_ctrl_t[0].NBitEncoding)/(sls_ctrl_t[0].PairCreationEnergy*sls_ctrl_t[0].ADCDynamic*sls_ctrl_t[0].NElectronInAMip);
+    Float_t convMeVToAdc = (int)pow(2.0,sls_ctrl_t[0].NBitEncoding)/(sls_ctrl_t[0].PairCreationEnergy*sls_ctrl_t[0].ADCDynamic*sls_ctrl_t[0].NElectronInAMip);
     for (Int_t iScm = 0; iScm < scm_spt->GetNRows(); iScm++, dSpt++)
       {
 	if (dSpt->id_match == 11)// case 11  		    

@@ -1,8 +1,26 @@
+<<<<<<< St_sce_Maker.cxx
 /**************************************************************************
  * Class      : St_sce_maker.cxx
  ***************************************************************************
  *
  * $Log: St_sce_Maker.cxx,v $
+ * Revision 1.7  2003/10/08 03:23:01  suire
+ * *** empty log message ***
+ *
+ * Revision 1.5  2002/03/25 20:14:04  suire
+ * Small memory leak fixes, doxygen documentation
+ *
+ *
+ **************************************************************************/
+=======
+/**************************************************************************
+ * Class      : St_sce_maker.cxx
+ ***************************************************************************
+ *
+ * $Log: St_sce_Maker.cxx,v $
+ * Revision 1.7  2003/10/08 03:23:01  suire
+ * *** empty log message ***
+ *
  * Revision 1.6  2003/09/02 17:59:03  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -12,14 +30,23 @@
  *
  **************************************************************************/
 #include <Stiostream.h>
+>>>>>>> 1.6
 #include <stdlib.h>
 #include "St_sce_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
-#include "svt/St_sce_am_Module.h"
 #include "TH1.h"
 #include "TFile.h"
 #include "StMessMgr.h"
+
+#include "StSceBarrel.hh" 
+#include "tables/St_g2t_svt_hit_Table.h"
+#include "tables/St_scf_cluster_Table.h"
+#include "tables/St_scm_spt_Table.h"
+#include "tables/St_sce_dspt_Table.h"
+
+#include "tables/St_sdm_geom_par_Table.h"
+#include "tables/St_sce_ctrl_Table.h"
 
 ClassImp(St_sce_Maker)
 //_____________________________________________________________________________
@@ -86,27 +113,66 @@ Int_t St_sce_Maker::Make()
 {
   if (Debug())  gMessMgr->Debug() << "In St_sce_Maker::Make() ... "
                                << GetName() << endm;
+  int res = 0;
   // 		Create output tables
   St_DataSetIter geant(GetInputDS("geant"));
   St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
+
   St_scf_cluster *scf_cluster = (St_scf_cluster *)GetDataSet("scf_cluster/.data/scf_cluster");
+
   St_scm_spt *scm_spt = (St_scm_spt *)GetDataSet("scm_spt/.data/scm_spt");
 
   St_sce_dspt *sce_dspt = new St_sce_dspt("sce_dspt",5000);
   m_DataSet->Add(sce_dspt);
 
-  Int_t res = sce_am(g2t_svt_hit, scf_cluster, scm_spt, m_geom, m_geom_par, sce_dspt, m_ctrl);
-;
-   if(res!=kSTAFCV_OK){
-     gMessMgr->Warning("St_sce_Maker: no output");
-     return kStWarn;
-   }
-  
-  makeScfStats();
-  showScfStats();
-  makeScmStats();
-  showScmStats();
+  sdm_geom_par_st  *geom_par = m_geom_par->GetTable();
+  sce_ctrl_st  *ctrl = m_ctrl->GetTable();
 
+  cout<<"#################################################"<<endl;
+  cout<<"####      START OF SSD CHAIN EVALUATOR       ####"<<endl;
+  cout<<"####        SSD BARREL INITIALIZATION        ####"<<endl;
+  StSceBarrel *mySsd = new StSceBarrel(geom_par);
+  cout<<"####        SSD WAFERS INITIALIZATION        ####"<<endl;
+  mySsd->initWafers(m_geom);
+  int nSsdHits = mySsd->readPointFromTable(g2t_svt_hit);
+  cout<<"####    ->  "<<nSsdHits<<" HITS READ FROM TABLE        ####"<<endl;
+  mySsd->convertGlobalFrameToOther();
+  if (scf_cluster) {
+  int nReadCluster = mySsd->readClusterFromTable(scf_cluster);
+  cout<<"####   -> "<<nReadCluster<<" CLUSTERS READ FROM TABLE      ####"<<endl;
+  int nEvaluatedCluster = mySsd->doEvalCluster(ctrl);
+  cout<<"####   -> "<<nEvaluatedCluster<<" CLUSTERS EVALUATED            ####"<<endl;
+  }
+  else cout<<"Tables for clusters are not there\n";
+  if (scm_spt){ 
+  int nSsdRecSpt = mySsd->readRecPointFromTable(scm_spt);
+  cout<<"####   -> "<<nSsdRecSpt<<" RECONSTRUCTED POINTS READ     ####"<<endl;
+  int nEvaluatedSpt = mySsd->doEvalSpt(ctrl);
+  cout<<"####   -> "<<nEvaluatedSpt<<" SPACE POINTS EVALUATED        ####"<<endl;
+  }
+  else cout<<"Tables for points are not there\n";
+  int nSsdWrittenCompSpt = mySsd->writeComPointToTable(sce_dspt);
+  sce_dspt->Purge();
+  cout<<"####   -> "<<nSsdWrittenCompSpt<<" COMPARED WRITTEN TO TABLE     ####"<<endl;
+  cout<<"####       END OF SSD CHAIN EVALUATOR        ####"<<endl;
+  cout<<"#################################################"<<endl;
+  delete mySsd;
+  if (nSsdWrittenCompSpt)  res = kStOK;
+
+  if(res!=kStOK){
+    gMessMgr->Warning("St_sce_Maker: no output");
+    return kStWarn;
+  }
+  
+  if (scf_cluster) {
+    makeScfStats();
+    showScfStats();
+  }
+
+  if (scm_spt) {
+    makeScmStats();
+    showScmStats();
+  }
   makeScmHistograms();
 
   return kStOK;
@@ -253,13 +319,17 @@ void St_sce_Maker::showScmStats()
   printf("***  23:\t%d \t%d \t%d \t%.2f%s \t%.2f%s ***\n",statSpt[0][3],statSpt[1][3],statSpt[2][3],100*float(statSpt[0][3])/(statSpt[0][3]+statSpt[2][3]),"%",100*float(statSpt[0][3])/(statSpt[0][3]+statSpt[1][3]),"%");
   printf("***  33:\t%d \t%d \t%d \t%.2f%s \t%.2f%s ***\n",statSpt[0][4],statSpt[1][4],statSpt[2][4],100*float(statSpt[0][4])/(statSpt[0][4]+statSpt[2][4]),"%",100*float(statSpt[0][4])/(statSpt[0][4]+statSpt[1][4]),"%");
   printf("*************************************************\n");
-  Int_t   totTrueScm = statSpt[0][0]+statSpt[0][1]+statSpt[0][2]+statSpt[0][3]+statSpt[0][4];
+  Int_t   totTrueScm  = statSpt[0][0]+statSpt[0][1]+statSpt[0][2]+statSpt[0][3]+statSpt[0][4];
   Int_t   totGhostScm = statSpt[1][0]+statSpt[1][1]+statSpt[1][2]+statSpt[1][3]+statSpt[1][4];
-  Int_t   totTrueSim = 0;
-  if((statCluster[0][0]+statCluster[2][0]) >= (statCluster[0][1]+statCluster[2][1]))
-    {totTrueSim =statCluster[0][0]+statCluster[2][0];}
-  else
-    {totTrueSim =statCluster[0][1]+statCluster[2][1];}
+  Int_t   totLostScm  = statSpt[2][0]+statSpt[2][1]+statSpt[2][2]+statSpt[2][3]+statSpt[2][4];
+  Int_t   totTrueSim  = 0;
+  if(statCluster[0][0]+statCluster[2][0]+statCluster[0][1]+statCluster[2][1]){
+    if((statCluster[0][0]+statCluster[2][0]) >= (statCluster[0][1]+statCluster[2][1]))
+      {totTrueSim =statCluster[0][0]+statCluster[2][0];}
+    else
+      {totTrueSim =statCluster[0][1]+statCluster[2][1];}
+  }
+  else totTrueSim = totTrueScm+totLostScm;
   Float_t effi = 100*float(totTrueScm)/totTrueSim;
   Float_t pure = 100*float(totTrueScm)/(totTrueScm+totGhostScm);
   printf("***  Global:\t%d \t%d \t%d \t%.2f%s \t%.2f%s ***\n",statSpt[0][0]+statSpt[0][1]+statSpt[0][2]+statSpt[0][3]+statSpt[0][4],statSpt[1][0]+statSpt[1][1]+statSpt[1][2]+statSpt[1][3]+statSpt[1][4],statSpt[2][0]+statSpt[2][1]+statSpt[2][2]+statSpt[2][3]+statSpt[2][4],effi,"%",pure,"%");
@@ -275,15 +345,17 @@ void St_sce_Maker::makeScmHistograms()
 // 		Fill histograms
   if (sce_dspt->GetNRows()){
       sce_dspt_st *dSpt = sce_dspt->GetTable();
-       for (Int_t iSce = 0; iSce < sce_dspt->GetNRows(); iSce++, dSpt++){
-	  devXl0->Fill(10000*dSpt->dxl[0]);
-	  devXl1->Fill(10000*dSpt->dxl[1]);
-	  devNrg->Fill(dSpt->d2e[0]);
-	  devXg0->Fill(10000*dSpt->dx[0]);
-	  devXg1->Fill(10000*dSpt->dx[1]);
-	  devXg2->Fill(10000*dSpt->dx[2]);
+       for (Int_t iSce = 0; iSce < sce_dspt->GetNRows(); iSce++){
+	  devXl0->Fill(10000*dSpt[iSce].dxl[0]);
+	  devXl1->Fill(10000*dSpt[iSce].dxl[1]);
+	  devNrg->Fill(dSpt[iSce].d2e[0]);
+	  devXg0->Fill(10000*dSpt[iSce].dx[0]);
+	  devXg1->Fill(10000*dSpt[iSce].dx[1]);
+	  devXg2->Fill(10000*dSpt[iSce].dx[2]);
 	}
   }
+  //  sce_dspt->Print(0,5000);
+
 }
 //_____________________________________________________________________________
 void St_sce_Maker::writeScmHistograms()
@@ -302,9 +374,12 @@ void St_sce_Maker::writeScmHistograms()
 //_____________________________________________________________________________
 void St_sce_Maker::PrintInfo()
 {
+<<<<<<< St_sce_Maker.cxx
+=======
   printf("**************************************************************\n");
-  printf("* $Id: St_sce_Maker.cxx,v 1.6 2003/09/02 17:59:03 perev Exp $\n");
+  printf("* $Id: St_sce_Maker.cxx,v 1.7 2003/10/08 03:23:01 suire Exp $\n");
   printf("**************************************************************\n");
+>>>>>>> 1.6
   if (Debug()) StMaker::PrintInfo();
 }
 //_____________________________________________________________________________
