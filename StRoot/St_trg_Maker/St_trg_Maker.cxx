@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.10 2000/05/04 22:25:21 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.11 2000/05/16 02:01:46 fisyak Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.11  2000/05/16 02:01:46  fisyak
+// Correction for removed  trg_fillDst
+//
 // Revision 1.10  2000/05/04 22:25:21  ward
 // New 3d DST tables, and some support for sim.
 //
@@ -67,8 +70,9 @@
 #include "tables/St_dst_L1_Trigger_Table.h" // 02feb00
 #include "tables/St_dst_L2_Trigger_Table.h" // 02feb00
 #include "tables/St_dst_TrgDet_Table.h" // 24dec99
-#include "trg/St_trg_fillDst_Module.h"
-
+#include "tables/St_ctu_cor_Table.h"
+#include "tables/St_mwc_raw_Table.h"
+#include "tables/St_dst_TrgDet_Table.h"
 #include "trgStructures.h" // From the STAR trigger group, and may need occasional updating.
 // The structure MarilynMonroe_t is like the trigger group's TrgDataType, except that
 // it does not include TrgEvtHeader, which they don't pass to DAQ.
