@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.136  2004/02/19 22:18:07  pruneau
+// Modified call to StMcEventMaker structure
+//
 // Revision 1.135  2004/02/13 17:36:24  andrewar
 // Changed name of StMcEventMaker to StMcEvent... this allows me to run
 // simulation. It doesn't seem like this follows the Maker name scheme, though...
@@ -283,35 +286,35 @@ Int_t StiMaker::InitDetectors()
 {
   StiDetectorGroup<StEvent,StMcEvent> * group;
   cout<<"StiMaker::InitDetectors() -I- Adding detector group:Star"<<endl;
-  _toolkit->add(new StiStarDetectorGroup());
+  _toolkit->add(new StiStarDetectorGroup(false,"none"));
   if (_pars->useTpc)
     {
       cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
-      _toolkit->add(group = new StiTpcDetectorGroup(_pars->activeTpc));
+      _toolkit->add(group = new StiTpcDetectorGroup(_pars->activeTpc,_pars->tpcInputFile));
       group->setGroupId(kTpcId);
     }
   if (_pars->useSvt)
     {
       cout<<"StiMaker::Init() -I- Adding detector group:SVT"<<endl;
-      _toolkit->add(group = new StiSvtDetectorGroup(_pars->activeSvt));
+      _toolkit->add(group = new StiSvtDetectorGroup(_pars->activeSvt,_pars->svtInputFile));
       group->setGroupId(kSvtId);
     }
   if (_pars->usePixel)
       {
 	  cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
-	  _toolkit->add(group = new StiPixelDetectorGroup(_pars->activePixel));
+	  _toolkit->add(group = new StiPixelDetectorGroup(_pars->activePixel,_pars->pixelInputFile));
 	  group->setGroupId(9999);
       }
   if (_pars->useFtpc)
     {
       cout<<"StiMaker::Init() -I- Adding detector group:FTPC"<<endl;
-      _toolkit->add(group = new StiFtpcDetectorGroup(_pars->activeFtpc));
+      _toolkit->add(group = new StiFtpcDetectorGroup(_pars->activeFtpc,_pars->ftpcInputFile));
       group->setGroupId(kFtpcWestId);
     }
   if (_pars->useEmc)
     {
       cout<<"StiMaker::Init() -I- Adding detector group:BEMC"<<endl;
-      _toolkit->add(group = new StiEmcDetectorGroup(_pars->activeEmc));
+      _toolkit->add(group = new StiEmcDetectorGroup(_pars->activeEmc,_pars->emcInputFile));
       group->setGroupId(kBarrelEmcTowerId);
     }
   return kStOk;
@@ -323,42 +326,7 @@ Int_t StiMaker::InitRun(int run)
     {
       cout <<"StiMaker::InitRun() -I- Initialization Segment Started"<<endl;
 
-			// load db parameters
-			TDataSet * ds = GetDataBase("Calibrations/tracker");
-			if (ds)
-				{
-					try
-						{
-							cout << "StiMaker::InitRun() -I- Attempting to load the track finder and fitter parameter from the database"<< endl;
-							// Load Kalman Track Finder Parameters
-							//StiKalmanTrackFinderParameters & finderPars = static_cast<StiKalmanTrackFinderParameters&>(_tracker->getParameters());
-							//StiKalmanTrackFinderParameters & finderPars = 
-							_tracker->_pars.load(ds);
-							cout << "====got it"<<endl;
-							//finderPars.setName("KalmanTrackFinderParameters");
-							//cout << "name set"<<endl;
-							//finderPars.load(ds);
-							cout << "black";
-							//_tracker->setParameters(finderPars);
-							cout << "more black"<<endl;
-							// Load Kalman Track Fitter Parameters
-							cout << " --1"<<endl;
-							StiKalmanTrackFitterParameters fitterPars = static_cast<StiKalmanTrackFitterParameters&>(_fitter->getParameters());
-							cout << " --2"<< endl;
-							fitterPars.setName("KalmanTrackFitterParameters");
-							cout << " --3"<<endl;
-							fitterPars.load(ds);
-							cout << " -- 4"<<endl;
-							//_fitter->setParameters(fitterPars);
-							cout << "done "<<endl;
-						}
-					catch (runtime_error & err)
-						{
-							cout << "StiMaker::InitRun() - Run Time Error :" << err.what() << endl;
-						}
-				}
-			else
-				cout << "StiMaker::InitRun() -W- Using DEFAULT tracking and fitting control parameters"<<endl;
+
 			// Load Detector related parameters
 			StiMasterDetectorBuilder * masterBuilder = _toolkit->getDetectorBuilder();
 			masterBuilder->build(*this);
@@ -370,14 +338,14 @@ Int_t StiMaker::InitRun(int run)
 					_residualCalculator = _toolkit->getResidualCalculator();
 					_residualCalculator->initialize(_toolkit->getDetectorBuilder());
 				}
-      StiTrackSeedFinder * trackSeedFinder   = _toolkit->getTrackSeedFinder();
-      trackSeedFinder->initialize();
-      _hitLoader = _toolkit->getHitLoader();
+			_seedFinder = _toolkit->getTrackSeedFinder();
+      _seedFinder->initialize();
+      _hitLoader  = _toolkit->getHitLoader();
       _hitLoader->setUseMcAsRec(_pars->useMcAsRec);
-      _seedFinder = _toolkit->getTrackSeedFinder();
-      cout << "StiMaker::Make() -I- Instantiate Tracker" <<  endl;
       _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
       _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
+			_tracker->load("trackFinderPars.dat",*this);
+			_fitter->load("trackFitterPars.dat",*this);
       _eventFiller =  new StiStEventFiller();
       _trackContainer = _toolkit->getTrackContainer();
       _vertexFinder   = _toolkit->getVertexFinder();
@@ -399,16 +367,12 @@ Int_t StiMaker::InitRun(int run)
       _initialized=true;
       cout <<"StiMaker::InitRun() -I- Initialization Segment Completed"<<endl;
     }
-	///
-
-
-
   return StMaker::InitRun(run);
 }
 
 Int_t StiMaker::Make()
 {
-  cout <<"StiMaker::Make() -I- Starting on new event ======================================"<<endl;
+  cout <<"StiMaker::Make() -I- Starting on new event"<<endl;
 
   eventIsFinished = false;
   StMcEvent * mcEvent;
@@ -428,37 +392,32 @@ Int_t StiMaker::Make()
     }
   if (_toolkit->isMcEnabled() )
     {
-			mMcEventMaker = dynamic_cast<StMcEventMaker*>(GetMaker("StMcEvent"));
-			if (mMcEventMaker)
-				{
-					mcEvent= mMcEventMaker->currentMcEvent();
-					if (!mcEvent) 
-						throw runtime_error("StiMaker::Make() -E- mcEvent == 0");
-				}
+      if (!mMcEventMaker)
+	mMcEventMaker = dynamic_cast<StMcEventMaker*>(GetMaker("StMcEvent"));
+      if (mMcEventMaker)
+	{
+	  mcEvent= mMcEventMaker->currentMcEvent();
+	  if (!mcEvent) 
+	    throw runtime_error("StiMaker::Make() -E- mcEvent == 0");
+	}
       else
-				throw runtime_error("StiMaker::Make() -E- mMcEventMaker == 0");
+	throw runtime_error("StiMaker::Make() -E- mMcEventMaker == 0");
     }
   else 
     mcEvent = 0;
+  
+  _tracker->clear();
+  _hitLoader->loadEvent(event,mcEvent,_loaderTrackFilter,_loaderHitFilter);
+  _seedFinder->reset();
   if (_toolkit->isGuiEnabled())
-    {
-      //cout << "StiMaker::Make() -I- Loading EVENT"<<endl;
-      _tracker->clear();
-      _hitLoader->loadEvent(event,mcEvent,_loaderTrackFilter,_loaderHitFilter);
-      _seedFinder->reset();
-      _eventDisplay->draw();
-    }
+    _eventDisplay->draw();
   else
     {
-      _tracker->clear();
-      _hitLoader->loadEvent(event,mcEvent,_loaderTrackFilter,_loaderHitFilter);
-      _seedFinder->reset();
       _tracker->findTracks();
       try
 	{
 	  if (_eventFiller && !_pars->useMcAsRec)
 	    _eventFiller->fillEvent(event, _trackContainer);
-	  //cout << "SKTF::findTracks() -I- Global Track StEvent Fill Completed"<<endl;
 	}
       catch (runtime_error & rte)
 	{
