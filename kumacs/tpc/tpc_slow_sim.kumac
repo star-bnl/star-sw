@@ -6,7 +6,6 @@ macro tpc_slow_sim__
           num_events=1_
           tpc_sector_first=18_
           tpc_sector_last=18_
-          magfield=0.5_
           funit=21 _
           nfile=tphit.ntup _
           nid=111_
@@ -29,7 +28,6 @@ message ' *** Data sample directory -->  ' [INPUT_DATA_DIR]
 message ' *** Input G2T file -->         ' [input_g2t_file]
 message ' *** Num Events to process -->  ' [num_events]
 message ' *** TPC Sector first,last -->  ' [tpc_sector_first],[tpc_sector_last]
-message ' *** Magnetic Field -->         ' [magfield]
 message ' *** ntup file unit -->         ' [funit]
 message ' *** output Ntuple filename  -->' [nfile]
 message ' *** Ntuple ID # -->            ' [nid]
@@ -89,7 +87,17 @@ $STAR/pams/trg/kumac
   exec tpg_init#init
 
 * tpc slow sim init
-  exec initialize [tpc_sector_first] [tpc_sector_last] [magfield] [adcxyzon]
+  exec initialize [adcxyzon]
+
+* now overwrite which sector you want to run (in case you don't want default)
+   cd /dui/constants/tpc/params/tsspars
+   tdm/table/cell/putvalue 'tsspar[0].min_sect' [tpc_sector_first]
+   tdm/table/cell/putvalue 'tsspar[0].max_sect' [tpc_sector_last]
+   message 'Minimum and Maximum Sector numbers for tpc slow simulation: '
+   tdm/table/cell/getvalue 'tsspar[0].min_sect'
+   tdm/table/cell/getvalue 'tsspar[0].max_sect'
+   tdm/table/cell/getvalue 'tsspar[0].bfield'
+   cd /dui
 
 * init to write table from tpc fast sim to ntuple
    exec write_table_to_ntuple#init_disk _
@@ -100,7 +108,7 @@ $STAR/pams/trg/kumac
     message ' processing event ' [i]
     exec input_g2t_file#read
     if STAF_STATUS(1).eq.0 goto ENDOFDATA    
-    exec process_event [i] 
+    exec process_event [i] [adcxyzon]
 * write table from tpc fast sim to ntuple
     if [num_events]=1 then
       exec write_table_to_ntuple#write_event_disk [nid] [table]
@@ -129,14 +137,10 @@ return
 ************************************************************************
 *--------------------------------------------------------------------
 
-macro initialize_
-               tpc_sector_first_ 
-               tpc_sector_last_ 
-               magfield_
-               adcxyzon
+macro initialize adcxyzon
 
   message ' Initializing for tpc slow simulator '
-
+*  message ' adc xyz on = ', [adcxyzon]
 
 *
 *  create tables
@@ -148,8 +152,7 @@ macro initialize_
 
 
 *   initialization for tpc slow simulator
-    exec tss_init#init _
-                      [tpc_sector_first] [tpc_sector_last] [magfield]
+    exec tss_init#init 
     exec tcl_init#init
 
  return
@@ -160,7 +163,7 @@ macro process_event  nev adcxyzon
 
 
    message ' TPC slow sim: Processing Event # ' [nev]
-
+*   message '  adcxyzon = ',[adcxyzon]
 
 * call tssam - simulated tpc pixels
   exec tss_run#run
