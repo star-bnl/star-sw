@@ -1,14 +1,14 @@
 ############################################################################
 #
-# $Id: GNUmakefile.architecture,v 1.2 2000/02/08 16:36:00 lasiuk Exp $
+# $Id: GNUmakefile.architecture,v 1.3 2000/04/05 16:12:26 lasiuk Exp $
 #
 # Author: brian
 #
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile.architecture,v $
-# Revision 1.2  2000/02/08 16:36:00  lasiuk
-# hp compatible
+# Revision 1.3  2000/04/05 16:12:26  lasiuk
+# misc
 #
 # Revision 1.2  2000/02/08 16:36:00  lasiuk
 # hp compatible
@@ -48,7 +48,8 @@ ROOTLIBS := -L$(ROOTSYS)/lib -lNew -lBase -lCint -lClib -lFunc \
 	-lPostscript -lProof -lTree -lUnix -lZip -lRint -lCont
 else
 #use a local copy (Make sure SCL_WITHOUT_ROOT is defined
-SCL_HOME := /home/star/lasiuk/SCL/StarClassLibrary/
+#SCL_HOME := /home/star/lasiuk/SCL/StarClassLibrary/
+ SCL_HOME := /home/star/lasiuk/scl/StRoot/StarClassLibrary/
 endif
 
 #

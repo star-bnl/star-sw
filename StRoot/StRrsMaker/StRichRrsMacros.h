@@ -1,13 +1,13 @@
 /*********************************************************************
- * $Id: StRichRrsMacros.h,v 1.4 2000/03/17 14:55:04 lasiuk Exp $
+ * $Id: StRichRrsMacros.h,v 1.5 2000/04/05 16:09:18 lasiuk Exp $
  *  This file contains macros defined explicitly for RRS.
  *  The can be defined to limit the initialization/debug
  *  output of the code.
  *********************************************************************
  *
  * $Log: StRichRrsMacros.h,v $
- * Revision 1.4  2000/03/17 14:55:04  lasiuk
- * Large scale revisions after ROOT dependent memory leak
+ * Revision 1.5  2000/04/05 16:09:18  lasiuk
+ * misc
  *
  * Revision 1.4  2000/03/17 14:55:04  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -17,7 +17,6 @@
  *
  * Revision 1.2  2000/02/08 16:30:23  lasiuk
  * addition of bounds check and diagnostic rrs debug
- *
  *********************************************************************/
 #define uSE_MEMORY_INFO 1
 #define RRS_DEBUG 0
