@@ -317,7 +317,7 @@ C     z - z coodinate in the local coordinate system
 
       real dummy1, dvel, clock, z
       real dvel_local, clock_local, t0_offset
-      real z_inner_offset, z_offset
+      real z_inner_offset, z_offset, zoff
       save
 
       if (flag.eq.1) then
@@ -333,7 +333,9 @@ C     z - z coodinate in the local coordinate system
 *     iret = tgc_t0(t0, pad, padrow, sector, dummy1, dummy1)
       t0_offset=0.0
 
-      z = dvel_local*(time/clock_local - t0_offset)-z_offset
+      zoff=0
+      if(padrow.lt.14)zoff=z_offset
+      z = dvel_local*(time/clock_local - t0_offset)-zoff
 
       tgc_time_to_z = STAFCV_OK      
 
@@ -360,7 +362,7 @@ C     time - time bucket number
       integer iret, pad, padrow, sector, time
       real dummy1, dvel, clock, z
       real vdrift, clock_local, t0_offset
-      real z_offset, z_inner_offset
+      real z_offset, z_inner_offset, zoff
       save
 
       if (flag.eq.1) then
@@ -374,7 +376,11 @@ C     time - time bucket number
       endif
 *     iret = tgc_t0(t0, pad, padrow, sector, dummy1, dummy1)
       t0_offset=0.0
-      time=((z+z_offset)/vdrift + t0_offset)*clock_local
+
+
+      zoff=0
+      if(padrow.lt.14)zoff=z_offset
+      time=((z+zoff)/vdrift + t0_offset)*clock_local
 
       tgc_z_to_time = STAFCV_OK      
 
