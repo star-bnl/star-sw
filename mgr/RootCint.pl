@@ -100,7 +100,7 @@ for my $h  (split / /,$sources) {#  print "SRC:", $h, "\n";
       else {print OUTPUT $line;}
     }
     close (OUTPUT);
-    my $flag = `mv $tmp $h;`; print "mv $tmp $h;\n";
+    my $flag = rename $tmp, $h; #`mv $tmp $h;`; print "mv $tmp $h;\n";
   }
 }
 my $opened = "";

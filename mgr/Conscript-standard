@@ -80,7 +80,7 @@ else {
       push @Deps,$DIR . $stem . ".inc";
       push @Deps,$DIR . "St_" . $stem . "_Module.h";
       push @Deps,$DIR . "St_" . $stem . "_Module.cxx";#    print "@Deps\n";
-      my $cmd = "cd $dir &&  stic -r $CPPPATH -q $idl"; print "stic cmd: $cmd\n";
+      my $cmd = "cd $dir &&  stic -r $CPPPATH -q $idl";# print "stic cmd: $cmd\n";
       Command $env [@Deps], @idlS, 
       qq(
 	 $cmd
