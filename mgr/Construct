@@ -197,7 +197,8 @@ my $ROOTLIBS    = " -L$ROOTSYS/lib -lRint -lNew -lBase -lCint -lClib -lCont -lFu
 my $ROOTGLIBS   = " -lGpad -lGui -lGX11 -lX3d";
 my $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/ROOT/src";
 $CPPPATH = $INCLUDE . ":#StRoot:#pams:" . $INCLUDE . "/tables:" .  $ROOTSRC . ":" . $STAF . "/inc:/opt/star/include:";
-$FCPPPATH = "-I" . $STAR ."/cern/geant321 -I" . $STAR . "/cern/geant321/geant321";
+$FCPPPATH = "-I" . $CERN_ROOT ."/include/geant321";
+#                                                   -I" . $CERN_ROOT . "/include/geant321/geant321";
 print "CPPPATH  = \t$CPPPATH\n";
 Repository ($STAR);
 (my $DirPath  = cwd()) =~ s/\/$//g;#print " in DirPath=$DirPath\n";
