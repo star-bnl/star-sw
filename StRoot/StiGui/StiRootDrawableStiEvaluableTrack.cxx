@@ -18,6 +18,7 @@
 #include "StParticleTypes.hh"
 
 //Sti
+#include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiMapUtilities.h"
 
 //StiGui
@@ -61,7 +62,11 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
     
     mline->ResetBit(kCanDelete);
 
-    for (double xLocal=0.; xLocal<200.; xLocal+=1.) {
+    //Let's try to find out where the first node is:
+    StiKalmanTrackNode* inner = getNodeNear(0.);
+    double xStart = inner->fX;
+    
+    for (double xLocal=xStart; xLocal<200.; xLocal+=1.) {
 	StThreeVector<double> pos = getGlobalPointNear(xLocal);
 	//cout <<"Adding Position:\t"<<pos<<endl;
 	mline->SetNextPoint( pos.x(), pos.y(), pos.z() );
