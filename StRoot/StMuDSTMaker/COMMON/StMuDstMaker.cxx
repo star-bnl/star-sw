@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.44 2003/11/03 22:24:45 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.45 2003/11/09 01:02:59 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -160,9 +160,7 @@ StMuDstMaker::~StMuDstMaker() {
   DEBUGMESSAGE1("");
   clear();
   delete mStMuDst;
-  for ( int i=0; i<__NARRAYS__; i++) { delete arrays[i]; arrays[i]=0;} 
-  for ( int i=0; i<__NSTRANGEARRAYS__; i++) { delete strangeArrays[i];strangeArrays[i]=0;}
-  for ( int i=0; i<__NEMCARRAYS__; i++) { delete emcArrays[i]; emcArrays[i]=0;}
+  clear(999);
   DEBUGMESSAGE3("after arrays");
   saveDelete(mProbabilityPidAlgorithm);
   saveDelete(mTrackFilter);
@@ -216,40 +214,49 @@ void StMuDstMaker::createArrays() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDstMaker::clear(){
+void StMuDstMaker::clear(int del){
   DEBUGMESSAGE2("");
   /// from muDst
+  int dell = 0; if (del) dell = 999;
 
   for ( int i=0; i<__NARRAYS__; i++) {
-    clear(mArrays[i],StMuArrays::arrayCounters[i]);
+    clear(mArrays[i],StMuArrays::arrayCounters[i]		,dell);
   }
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
-    clear(mStrangeArrays[i],StMuArrays::strangeArrayCounters[i]);
+    clear(mStrangeArrays[i],StMuArrays::strangeArrayCounters[i]	,dell);
   }
   for ( int i=0; i<__NEMCARRAYS__; i++) {
-    clear(mEmcArrays[i],StMuArrays::emcArrayCounters[i]);
+    clear(mEmcArrays[i],StMuArrays::emcArrayCounters[i]		,dell);
   }
   DEBUGMESSAGE2("out");
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDstMaker::clear(TClonesArray* t, int& counter,int del){
+void StMuDstMaker::clear(TClonesArray* &t, int& counter,int del){
+//	del == 0 : objects are flat, standard Clear()
+//	del == 1 : objects are complex, destructor must be called
+//      del >  1 : all objects(hidden too)  must be destroed
+
   DEBUGMESSAGE3("");
-  if (!t)  return;
-  int num = t->GetLast()+1;
-  if(!num) return;
+  counter=0;
+  if (!t)  				return;
+  if (mIoMode==ioWrite) {t->Delete(); 	return;}// in write all objects must be DEAD
   if (del) {
+    int num = t->GetLast()+1;
+    if (del>1) num = t->Capacity();		// ALL objects edited
+    if(!num) 				return;
     t->Delete(); 
     for (int i=0;i<num; i++) {
       TObject *to = (*t)[i];
-      if (!to) 				continue;
+      if (del>1) 			continue;//No need to reanimate
       if (to->TestBit(kNotDeleted)) 	continue;
       t->New(i);
     }
   }
-  t->Clear();
-  counter=0;
+  if (del> 1) {delete t; t=0;}
+  else        {t->Clear()   ;}
+
   DEBUGMESSAGE3("out");
 }
 //-----------------------------------------------------------------------
@@ -924,6 +931,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.45  2003/11/09 01:02:59  perev
+ * more sofisticated clear() to fix leaks
+ *
  * Revision 1.44  2003/11/03 22:24:45  perev
  * TClones::Clear added into StMuDstMaker::clear to avoid empty ebjects writing
  *
