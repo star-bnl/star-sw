@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.24 2001/04/24 16:22:18 hardtke Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.25 2003/11/27 03:06:12 perev Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.25  2003/11/27 03:06:12  perev
+* test for zeros before call lfitw
+*
 * Revision 1.24  2001/04/24 16:22:18  hardtke
 * remove uneeded variable ipad_last
 *
@@ -121,6 +124,7 @@ c
       integer nbuck             ! Total number of time buckets
       integer nmc_tracks_max    ! Max. number of MC tracks
       integer npads_max         ! Largest number of pads in any row
+      integer nonzeros          ! Number of nonzeros for LFITW
 c     
       parameter(nbuck_max = 511)
       parameter(nbuck = 512)
@@ -255,7 +259,7 @@ c     pad direction projection
             if(iret .eq. 1) z_vector(ipix) = zdummy + pad_t0_cm(ipad_ipix)
          endif
       enddo
-      if (adc_sum .eq. 0.) then
+      if (adc_sum .le. 1.e-10) then
          write(m132,*) 'TPH Fit_I_Cluster - ADCSUM = 0!!!!'
          call StWarning(m132)
          write(m132,*) 'number of pixels in empty cluster = ', nclspix
@@ -353,15 +357,17 @@ c     z,dz,zrf: - do weighted mean
 
 c     orientation phi:
 c     ??? If pad_proj *is* 0, rvec is peculiar...but I left existing *logic*
+      nonzeros = 0
       do indx=ipad_lo,ipad_hi
          d_rvec(indx) = pad_proj(indx)
-         if (pad_proj(indx) .ne. 0.) then
+         if (abs(pad_proj(indx)) .gt. 1.e-10) then
             rvec(indx) = tdc_x_adc(indx)/d_rvec(indx)
+            if (rvec(indx).gt.0) nonzeros = nonzeros + 1;
          else
             rvec(indx) = tdc_x_adc(indx)
          end if
       enddo
-      if(ipad_range .lt. 3) then
+      if(nonzeros .lt. 3) then
          phi(1)=-1.0
       else
          call lfitw(identity_vector(ipad_lo), rvec(ipad_lo),
