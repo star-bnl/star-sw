@@ -1,0 +1,25 @@
+<pre><h3>	void	msg_display_</h3></pre>
+<pre>
+( const char *msg, int *Lines, int *ID, int msglen )
+/*  Fortran callable interface to msg;  Fortran equivalent to:
+	SUBROUTINE			MSG_Display( msg, Lines, ID )
+
+*   Inputs:
+	CHARACTER*(*) msg(*) !1 or more line character-string message
+	                     !submitted for display.
+	INTEGER Lines       !Number of lines in msg.
+
+*   Input/Output:
+	INTEGER ID     !Message ID.  Set to zero by caller 
+                       !before first call, set by Message on first call by
+                       !looking up or entering the prefix contained in msg
+                       !(prefix is everything before the first space) in
+	               !the index of message prefixes.
+	               !If ID is negative, ID remains unchanged, and lookup
+	               !is then always by prefix.
+
+*   Description:  Display a message on the terminal (only).
+	Conditionally display & count a message msg, containing Lines lines,
+	on the terminal.
+*/
+</pre>

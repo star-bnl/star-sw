@@ -1,0 +1,16 @@
+<pre><h3>	void	msgalarmregister_</h3></pre>
+<pre>
+( funcPoint AlarmRoutine )
+/*  Fortran callable interface to msg;  Fortran equivalent to:
+	SUBROUTINE			MsgAlarmRegister( AlarmRoutine )
+
+*   Input:
+	EXTERNAL AlarmRoutine ! Application-specified Alarm routine to use by msg.
+* Description:   Register an alarm-routine to be called by active-alarm messages.  For Fortran.
+	         Note that if "alarmroutine" is defined as a c-procedure, its name as defined
+	         must contain the suffix "_" and must be in lower-case, in order to be used
+	         with this call.  If it does not contain the suffix "_" or is not all in lower
+	         case, the call must be made from a c-procedure, in which case a call to
+	         MsgAlarmRegister is better than msgalarmregister_ .
+*/
+</pre>

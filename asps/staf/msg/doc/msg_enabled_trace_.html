@@ -1,0 +1,39 @@
+<pre><h3>	int	msg_enabled_trace_</h3></pre>
+<pre>
+( const char *Prefix, int *ID, int length )
+/*  Fortran callable interface to msg;  Fortran equivalent to:
+	LOGICAL FUNCTION		MSG_Enabled_Trace( Prefix, ID )
+
+*	This routine is obviated by the introduction of classes,
+*	but is retained for back-compatibility.
+
+*  Input:
+	CHARACTER*(*) Prefix !A message prefix.
+
+*  Input/Output:
+	INTEGER ID     !Message ID.  Set to zero by caller 
+                       !before first call, set on first call by
+                       !looking up or entering the prefix contained in msg
+                       !(prefix is everything before the first space) in
+	               !the index of message prefixes.
+	               !If ID is negative, ID remains unchanged, and lookup
+	               !is then always by prefix.
+
+*  Description:  Return enabled-status for a prefix;  define new prefix "disabled".
+*	Returns the message-enabled-status for the message with
+*	stored prefix Prefix, message-index ID.  If the message is not
+*	defined, it is defined, but not enabled nor does it count, until
+*	explicitly requested.
+*	Identical to Msg_Enabled, except that if a message is defined here,
+*	it is defined to be inactive and non-counting, regardless of whether
+*	"enable *" (enable all) has been set.  "Trace" messages must be
+*	specifically enabled.
+*	This is intended to be used with trace messages, which normally
+*	reside in code, but are intended to be inactive until explicitly
+*	activated to trace the flow of the code, as in debugging.
+
+*   Return conditions:
+*	.TRUE. if the message is enabled (active),
+*	.FALSE. if the message is disabled (inactive).
+*/
+</pre>
