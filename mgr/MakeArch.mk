@@ -1,6 +1,9 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.36  1998/10/29 20:53:31  perev
+#  ObjectSpace added
+#
 #  Revision 1.35  1998/10/24 22:32:33  perev
-#  Corr for RedHat5.1
+#   Corr for RedHat5.1
 #
 #  Revision 1.34  1998/10/20 01:41:59  fisyak
 #  debug only for db
@@ -86,7 +89,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/10/24 22:32:33 $ 
+#             Last modification $Date: 1998/10/29 20:53:31 $ 
 #. default setings
 
 RM := rm -f
@@ -426,6 +429,9 @@ endif
 
 ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
+  STDHOME := /afs/rhic/star/packages/ObjectSpace/2.0m
+  STAF_UTILS_INCS += $(STDHOME) $(STDHOME)/ospace/std
+
   OSFID :=  sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SOLARIS CERNLIB_SUN
   STRID :=  sun
   CC :=  /opt/SUNWspro/bin/cc
@@ -477,3 +483,7 @@ ifeq ($(EXEFLAGS),NONE)
   EXEFLAGS := $(LDFLAGS)
 endif
 
+ifdef STDHOME
+  CLIBS += -L$(STDHOME)/lib -lospace
+endif  
+  
