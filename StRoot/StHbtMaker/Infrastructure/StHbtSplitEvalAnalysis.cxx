@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtSplitEvalAnalysis.cxx,v 1.1 2000/08/15 22:18:47 lisa Exp $
+ * $Id: StHbtSplitEvalAnalysis.cxx,v 1.2 2001/11/05 14:11:19 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtSplitEvalAnalysis.cxx,v $
+ * Revision 1.2  2001/11/05 14:11:19  lisa
+ * small modifications to Splitting Analysis class and macro
+ *
  * Revision 1.1  2000/08/15 22:18:47  lisa
  * Add a special HbtAnalysis class that estimates amount of splitting and add a macro to use it
  *
@@ -152,10 +155,17 @@ StHbtSplitEvalAnalysis::StHbtSplitEvalAnalysis(){
   mCorrFctnCollection = new StHbtCorrFctnCollection;
   mMixingBuffer = new StHbtPicoEventCollection;
 
-  mRealSplits = new StHbt1DHisto("realSplit","realSplit",20,0.0,2.0);
-  mRealAll = new StHbt1DHisto("realAll","realAll",20,0.0,2.0);
-  mMixedSplits = new StHbt1DHisto("mixedSplit","mixedSplit",20,0.0,2.0);
-  mMixedAll = new StHbt1DHisto("mixedAll","mixedAll",20,0.0,2.0);
+  mQinvCut = 0.05;
+
+  int npTbins = 20;
+  float pTbinmax = 2.0;
+  mRealSplits = new StHbt1DHisto("realSplit","realSplit",npTbins,0.0,pTbinmax);
+  mRealAll = new StHbt1DHisto("realAll","realAll",npTbins,0.0,pTbinmax);
+  mMixedSplits = new StHbt1DHisto("mixedSplit","mixedSplit",npTbins,0.0,pTbinmax);
+  mMixedAll = new StHbt1DHisto("mixedAll","mixedAll",npTbins,0.0,pTbinmax);
+
+  mSplitFractionUpperLimit = new StHbt1DHisto("SplitFracUpperLimit","SplitFracUpperLImit",npTbins,0.0,pTbinmax);
+  mSplitFractionLowerLimit = new StHbt1DHisto("SplitFracLowerLimit","SplitFracLowerLImit",npTbins,0.0,pTbinmax);
 
 }
 //____________________________
@@ -313,6 +323,15 @@ void StHbtSplitEvalAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 
     bool isSplit;
     double trackPT;
+
+    /* NOTE: the reason this "special analysis" requires a StHbtAnalysis class is that
+       we make plots of TRACKS not PAIRS (so that it cannot be done with a StHbtCorrFctn class).
+       Also note that in what we do below, if there is deemed to be a tracksplit, then one
+       of the daughters fills the "split" histogram, and the other the "all" histogram.
+       This is the correct thing to do, so we don't double-count in the "all" histogram.
+    */
+
+
     for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
       isSplit=0;
       if (AnalyzeIdenticalParticles()){
@@ -323,8 +342,8 @@ void StHbtSplitEvalAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
       trackPT = ThePair->track1()->FourMomentum().vect().perp();
       for (PartIter2 = StartInnerLoop; PartIter2!=EndInnerLoop;PartIter2++){
 	ThePair->SetTrack2(*PartIter2);
-	//	if (fabs(ThePair->qInv()) < 0.03){
-	if (fabs(ThePair->qInv()) < (0.05*trackPT)){
+	if (fabs(ThePair->qInv()) < mQinvCut){
+	  //	if (fabs(ThePair->qInv()) < (0.05*trackPT)){
 	  if (!(mPairCut->Pass(ThePair))){
 	    isSplit=1;
 	  }  // if failed pair cut
@@ -364,8 +383,8 @@ void StHbtSplitEvalAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 	    for (PartIter2=StartInnerLoop;PartIter2!=EndInnerLoop;PartIter2++){
 	      ThePair->SetTrack2(*PartIter2);
 	      // testing...	      cout << "ThePair defined... going to pair cut... ";
-	      //	      if (fabs(ThePair->qInv()) < 0.03){
-		if (fabs(ThePair->qInv()) < (0.05*trackPT)){
+	      if (fabs(ThePair->qInv()) < mQinvCut){
+		//		if (fabs(ThePair->qInv()) < (0.05*trackPT)){
 		if (!(mPairCut->Pass(ThePair))){
 		  isSplit=1;
 		}  // if failed pair cut
@@ -459,5 +478,11 @@ void StHbtSplitEvalAnalysis::Finish(){
   for (iter=mCorrFctnCollection->begin(); iter!=mCorrFctnCollection->end();iter++){
     (*iter)->Finish();
   }
+  //  now divide histos etc to make splitting estimates...
+  mSplitFractionUpperLimit->Divide(mRealSplits,mRealAll);
+
+  //  mSplitFractionLowerLimit->Subtract(mRealSplits,mMixedSplits);
+  mSplitFractionLowerLimit->Add(mRealSplits,mMixedSplits,1.0,-1.0);
+  mSplitFractionLowerLimit->Divide(mRealAll);
 }
 
