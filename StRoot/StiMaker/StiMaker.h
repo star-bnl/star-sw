@@ -11,14 +11,12 @@ using std::string;
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiKalmanTrackFitter.h"
 
-class TH1D;
 class StEvent;
 class StMcEvent;
 class StiHit;
 class StiTrack;
 class StiStEventFiller;
 class StiTrackContainer;
-class StiEvaluableTrack;
 class StiTrackFinder;
 class StiKalmanTrackFinder;
 class StiKalmanTrackFitter;
@@ -53,7 +51,7 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.13 2004/02/21 18:28:32 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.14 2004/02/21 19:17:39 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
