@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Reader.cxx,v 1.11 2001/08/20 05:37:45 struck Exp $
+ * $Id: L3_Reader.cxx,v 1.12 2001/09/24 21:42:56 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: L3_Reader.cxx,v $
+ * Revision 1.12  2001/09/24 21:42:56  struck
+ * cs: changed vertex info to float (unit [cm]) in Bank_L3_GTD
+ *
  * Revision 1.11  2001/08/20 05:37:45  struck
  * removed naming conflicts with 'Stl3Utils/foreign/L3Formats.h'
  *
@@ -507,9 +510,9 @@ int GlobalTrackReader::initialize ()
   mNTracks = mL3GTD->nTracks;
   mNHits   = mL3GTD->nHits;
 
-  mGlobalVertex.x = mL3GTD->xVert * 1e-6;
-  mGlobalVertex.y = mL3GTD->yVert * 1e-6;
-  mGlobalVertex.z = mL3GTD->zVert * 1e-6;
+  mGlobalVertex.x = mL3GTD->xVert; // now read out as [cm]
+  mGlobalVertex.y = mL3GTD->yVert;
+  mGlobalVertex.z = mL3GTD->zVert;
 
   return TRUE;
 }

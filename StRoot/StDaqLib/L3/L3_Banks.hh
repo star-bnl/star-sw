@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Banks.hh,v 1.3 2001/08/20 05:37:45 struck Exp $
+ * $Id: L3_Banks.hh,v 1.4 2001/09/24 21:42:56 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: L3_Banks.hh,v $
+ * Revision 1.4  2001/09/24 21:42:56  struck
+ * cs: changed vertex info to float (unit [cm]) in Bank_L3_GTD
+ *
  * Revision 1.3  2001/08/20 05:37:45  struck
  * removed naming conflicts with 'Stl3Utils/foreign/L3Formats.h'
  *
@@ -204,9 +207,9 @@ struct Bank_L3_GTD: public Bank
 {
     unsigned int  nHits;         // Nr of space points
     unsigned int  nTracks;       // Nr of Tracks
-    int           xVert;         // x vertex position in 10**-6 cm
-    int           yVert;         // y vertex position
-    int           zVert;         // z vertex postion
+    float         xVert;         // x vertex position in [cm], !! unusable before !!
+    float         yVert;         // y vertex position
+    float         zVert;         // z vertex postion
     globalTrack   track[1];
 
     int swap();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Reader.hh,v 1.8 2001/08/20 05:37:45 struck Exp $
+ * $Id: L3_Reader.hh,v 1.9 2001/09/24 21:42:56 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: L3_Reader.hh,v $
+ * Revision 1.9  2001/09/24 21:42:56  struck
+ * cs: changed vertex info to float (unit [cm]) in Bank_L3_GTD
+ *
  * Revision 1.8  2001/08/20 05:37:45  struck
  * removed naming conflicts with 'Stl3Utils/foreign/L3Formats.h'
  *
@@ -114,15 +117,15 @@ private:
 class GlobalTrackReader {
 
 public:
-  globalTrack *getTrackList () { return mTracks; }
-  int getNumberOfTracks () { return mNTracks; }
-  int getNumberOfHits () { return mNHits; }
-  vertex getVertex () { return mGlobalVertex; }
+  globalTrack *getTrackList() { return mTracks; }
+  int getNumberOfTracks() { return mNTracks; }
+  int getNumberOfHits() { return mNHits; }
+  vertex getVertex() { return mGlobalVertex; }
 
-  int initialize ();
+  int initialize();
 
-  GlobalTrackReader (L3_Reader *l3r);
-  ~GlobalTrackReader () {};
+  GlobalTrackReader(L3_Reader *l3r);
+  ~GlobalTrackReader() {};
   
 private:
   Bank_L3_GTD *mL3GTD;
@@ -143,13 +146,13 @@ private:
 class Sl3ClusterReader {
 
 public:
-  L3_Cluster *getClusterList () { return mCluster; }
-  int getNumberOfClusters () { return mNCluster; }
+  L3_Cluster *getClusterList() { return mCluster; }
+  int getNumberOfClusters() { return mNCluster; }
 
-  int initialize (int sector);
+  int initialize(int sector);
 
-  Sl3ClusterReader (L3_Reader *l3r);
-  ~Sl3ClusterReader () {};
+  Sl3ClusterReader(L3_Reader *l3r);
+  ~Sl3ClusterReader() {};
 
 private:
   Bank_L3_SECCD *mL3SECCD;
@@ -168,18 +171,18 @@ private:
 class Sl3TrackReader {
 
 public:
-  localTrack *getLocalTrackList () { return mTracks; }
-  int getNumberOfTracks () { return mNTracks; }
-  int getNumberOfHits () { return mNHits; }
-  int getCpuTime () { return mCpuTime; }
-  int getRealTime () { return mRealTime; }
-  int getParameterSetId () {return mParaSet; }
-  vertex getVertex () { return mSectorVertex; }
+  localTrack *getLocalTrackList() { return mTracks; }
+  int getNumberOfTracks() { return mNTracks; }
+  int getNumberOfHits() { return mNHits; }
+  int getCpuTime() { return mCpuTime; }
+  int getRealTime() { return mRealTime; }
+  int getParameterSetId() {return mParaSet; }
+  vertex getVertex() { return mSectorVertex; }
 
-  int initialize (int sector);
+  int initialize(int sector);
 
-  Sl3TrackReader (L3_Reader *l3r);
-  ~Sl3TrackReader () {};
+  Sl3TrackReader(L3_Reader *l3r);
+  ~Sl3TrackReader() {};
 
 private:
   Bank_L3_SECTP *mL3SECTP;
@@ -205,12 +208,13 @@ private:
 class I960ClusterReader {
 
 public:
-  L3_Cluster *getClusterList () { return mCluster; }
-  int getNumberOfClusters () { return mNCluster; }
+  L3_Cluster *getClusterList() { return mCluster; }
+  int getNumberOfClusters() { return mNCluster; }
 
-  int initialize (int sector);
-  I960ClusterReader (L3_Reader *l3r);
-  ~I960ClusterReader ();
+  int initialize(int sector);
+
+  I960ClusterReader(L3_Reader *l3r);
+  ~I960ClusterReader();
 
 private:
   Bank_TPCMZCLD *mBankTPCMZCLD[12][3];  // pointers to banks of one sector
