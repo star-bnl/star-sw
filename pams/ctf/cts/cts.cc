@@ -404,8 +404,8 @@ long cts_detector_response (
       float time = mhit[i_hit].tof + mpara->delay*Length ;
       float resl = mpara->time_res*sqrt(fabs(Length));            //WJL
       if (resl < 50.e-12) resl = 50.e-12;                         //WJL practical lower limit
-      float tt  = mhit[i_hit].tof + rg32_(1)*resl;
-      float ttl = mhit[i_hit].tof + rg32_(1)*resl + mpara->delay*Length;
+      float tt   = mhit[i_hit].tof + rg32_(1)*resl;
+      float ttl  = tt + mpara->delay*Length + rg32_(1)*mpara->start_res;
 
 #ifdef TEST
 	if(geo->detector == 2){     //WJL
@@ -434,11 +434,6 @@ long cts_detector_response (
              mslat[i_slat].ptot      = sqrt(px*px+py*py+pz*pz) ; //WJL from below...
              mslat[i_slat].mc_trk_id = mhit[i_hit].track_p ;     //WJL from below...
       }
-//
-//---- Keep some information about the last particle 
-//
-//WJL why useful? should this be the info corresponding to the earliest hit?
-//WJL these lines moved up (just above)...
 //
 //---- Generate noise only in phys_noise% of slats
       if ( rndm_(1) < mpara->phys_noise ) 
