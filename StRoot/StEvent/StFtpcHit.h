@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.h,v 2.2 1999/11/09 19:35:12 ullrich Exp $
+ * $Id: StFtpcHit.h,v 2.3 1999/12/06 18:28:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.h,v $
- * Revision 2.2  1999/11/09 19:35:12  ullrich
- * Memory now allocated using StMemoryPool via overloaded new/delete
+ * Revision 2.3  1999/12/06 18:28:24  ullrich
+ * Changed method names xxxInCluster to xxxInHit
  *
  * Revision 2.3  1999/12/06 18:28:24  ullrich
  * Changed method names xxxInCluster to xxxInHit
@@ -46,8 +46,8 @@ public:
 
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
-    ULong_t padsInCluster() const;
-    ULong_t timebinsInCluster() const;
+  
+    ULong_t sector() const;        // 0-5
     ULong_t plane() const;         // 0-19
     ULong_t padsInHit() const;
     ULong_t timebinsInHit() const;
