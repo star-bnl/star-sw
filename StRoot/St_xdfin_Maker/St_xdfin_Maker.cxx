@@ -3,6 +3,7 @@
 // St_xdfin_Maker class for Makers                                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
+#include <iostream.h>
 #include "StChain.h"
 #include "St_xdfin_Maker.h"
 #include "St_particle_Table.h"
@@ -45,7 +46,15 @@ void St_xdfin_Maker::Init(){
         geant->Add(set);
       }
       else {//Raw data format
+	//Skip a ROSIE_RESET record.
+        if (strcmp(set->GetName(),"ROSIE_RESET")==0){
+          delete set;
+	  cout << " St_xdfin_Maker::Init dropping ROSIE_RESET dataset" <<endl;
+          set = gStChain->XDFFile()->NextEventGet();
+	}
+	cout << "Looking for BEGIN_RUN" << endl;
         if (strcmp(set->GetName(),"BEGIN_RUN")==0){
+	  cout << "St_xdfin_Maker::Init found BEGIN_RUN dataset" << endl;
           St_DataSetIter local(gStChain->GetParams());
           St_DataSet *tpc = local("tpc");
           if (!tpc) tpc = local.Mkdir("tpc");
@@ -67,7 +76,21 @@ void St_xdfin_Maker::Init(){
 Int_t St_xdfin_Maker::Make(){
   PrintInfo();
    St_DataSet *set = gStChain->XDFFile()->NextEventGet();
-   if (set){
+  while(1) {
+   if (set) {
+     // Drop any ROSIE_RESET or SLOW_CONTROL records.
+     if (strcmp(set->GetName(),"ROSIE_RESET")==0){
+          delete set;
+	  cout << " St_xdfin_Maker::Make drop ROSIE_RESET dataset" <<endl;
+          set = gStChain->XDFFile()->NextEventGet();
+	  continue;
+     }
+     if (strcmp(set->GetName(),"SLOW_CONTROL")==0){
+          delete set;
+	  cout << " St_xdfin_Maker::Make drop SLOW_CONTROL dataset" <<endl;
+          set = gStChain->XDFFile()->NextEventGet();
+	  continue;
+     }
      const Char_t *makertype = GetTitle();
      const Char_t *type = 0;
      St_DataSetIter    top(gStChain->DataSet());
@@ -89,6 +112,8 @@ Int_t St_xdfin_Maker::Make(){
        }
      }
    }
+   break;
+  }
   return set ? 0:-1;
 }
 //_____________________________________________________________________________
