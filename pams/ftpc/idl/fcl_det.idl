@@ -39,5 +39,5 @@
        char padtranspath[200];/* path and name of padtrans database */
    };
 
-/*  Last mod. for fcl_det: $Date: 1998/04/22 14:24:55 $ */
+/*  Last mod. for fcl_det: $Date: 1998/06/24 13:30:41 $ */
 
