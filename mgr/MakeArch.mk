@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.38  1998/11/05 21:47:40  fisyak
+#  Move OBJY definition to bottom
+#
 #  Revision 1.37  1998/11/05 20:09:23  fisyak
 #  add OBJY CPPFLAGS
 #
@@ -92,7 +95,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/11/05 20:09:23 $ 
+#             Last modification $Date: 1998/11/05 21:47:40 $ 
 #. default setings
 
 RM := rm -f
@@ -147,10 +150,6 @@ FLIBS    :=
 CPPFLAGS := $(UNAMES) $(STAF_ARCH) $(TULL_ARCH) QUIET_ASP 
 ifndef ASU_MALLOC_OFF
   CPPFLAGS += ASU_MALLOC_ON
-endif
-# for Objy
-ifdef OBJY_HOME
-  CPPFLAGS += -DOBJYBASE -I$(BFWORK)/include -I$(BFWORK)/tmp/$(BFARCH) -I$(BFDIST)/releases/$(BFCURRENT)/include -I$(OBJYBASE)/$(OBJY_ARCH)/include
 endif
 
 MKDEPFLAGS:= -MG -MM -w -nostdinc
@@ -483,6 +482,10 @@ endif
 
 CPPFLAGS := $(filter-out HP-UX,$(CPPFLAGS) $(OSFID))
 CPPFLAGS := $(sort $(addprefix -D,$(CPPFLAGS)))
+# for Objy
+ifdef OBJY_HOME
+  CPPFLAGS += -DOBJYBASE -I$(BFWORK)/include -I$(BFWORK)/tmp/$(BFARCH) -I$(BFDIST)/releases/$(BFCURRENT)/include -I$(OBJYBASE)/$(OBJY_ARCH)/include
+endif
 
 FOR72 := $(FC)
 FC  := $(FC) $(FEXTEND)
