@@ -2,15 +2,16 @@
 #define STDBFACTORYI_HH
 
 #include "StDbDefs.hh"
-#include "StDbTableComponent.h"
+#include "StDbTableID.h"
+#include <fstream.h>
 
-//class StDbTableComponent;
+class StDbTable;
 
 #include <list>
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
-typedef list<StDbTableComponent*, allocator<StDbTableComponent*> > TableList;
+typedef list<StDbTableID*, allocator<StDbTableID*> > IDList;
 #else
-typedef list<StDbTableComponent*> TableList;
+typedef list<StDbTableID*> IDList;
 #endif
 
 
@@ -19,40 +20,30 @@ class StDbFactoryI {
 protected:
 
   bool isloaded;
-  StDbDomain mdbDomain;
   StDbType mdbType;
-  TableList mTableList;
+  IDList mIDList;
+
+  virtual void initIDList(); // Here's all the work in derived classes
 
 public:
 
-  StDbFactoryI() : isloaded(false) {};
-  virtual ~StDbFactoryI(){};
-  virtual StDbType getDbType() { return mdbType; }
-  virtual StDbDomain getDbDomain() { return mdbDomain; }  
-  virtual StDbTableComponent* getDbTable(const char* tableName, int option);
-  
-  virtual void initTableList() {};// = 0; // Here's all the work
-  //  virtual void deleteTableList();
+  StDbFactoryI() : isloaded(false), mdbType(0) {};
+  virtual ~StDbFactoryI(){ deleteIDList();};
+  virtual StDbType getDbType() { return mdbType; };
+
+  virtual int findTableID(const char* tableName);
+  virtual StDbTable* getDbTable(const char* tableName, int option);
+  virtual void deleteIDList();
+  virtual void initIDList(ifstream& is);
 
 };
 
-/*
-void
-StDbFactoryI::deleteTableList(){
-
-  StDbTableComponent* table;
-  TableList::iterator itr;
-
-  do {
-      for(itr = mTableList.begin(); itr != mTableList.end(); ++itr){
-         table = *itr;
-         mTableList.erase(itr);
-         delete table;
-         break;
-        }
-     } while( mTableList.begin() != mTableList.end() );
+inline void
+StDbFactoryI::initIDList() {
+ cerr<< "StDbFactoryI:: Has No default Tables in Base Class"<< endl;
 }
-*/
+
+
 #endif
 
 

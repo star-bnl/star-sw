@@ -1,33 +1,40 @@
-#ifndef STDBXMLWRITER_HH
-#define STDBXMLWRITER_HH
+#ifndef STDBXmlReader_HH
+#define STDBXmlReader_HH
 
-#include "tableAcceptor.hh"
+#include "typeAcceptor.hh"
 #include <iostream.h>
 #include <fstream.h>
 #include <stdlib.h>
 #include <strstream.h>
 #include <string.h>
 
-//#include "TObject.h"
+#include "TObject.h"
 
-class StDbXmlWriter : public tableAcceptor {
+class dbTable;
+class elem;
+class accessor;
+
+class StDbXmlReader : public typeAcceptor {
 
 protected:
 
-  ostream* os;//!
+  //  ofstream* os;//!
+
+  char* loca[256];//!
+  dbTable* tab;//!
+
+   void buildDbTable();
+   void buildStruct();
+   void fillElements(accessor* a);
+   elem* findElement(char* name);
 
 public:
 
-  StDbXmlWriter() {};
-  StDbXmlWriter(ostream& ofs){ os=&ofs;};
-  virtual ~StDbXmlWriter(){};
+  StDbXmlReader();
+  //  StDbXmlReader(ofstream& ofs){ os=&ofs;};
+  virtual ~StDbXmlReader();
 
-  virtual void streamHeader(const char* name);
-  virtual void streamTableName(const char* name);
-  virtual void streamEndTableName();
-  virtual void streamAccessor();
-  virtual void endAccessor();
-  virtual void streamTail();
+  void readTable(ifstream &is);
 
   virtual void pass(char* name, short& i, int len) ;  
   virtual void pass(char* name, int& i, int len);  
@@ -49,10 +56,14 @@ public:
   virtual void pass(char* name, float* i, int len);
   virtual void pass(char* name, double* i, int len);
 
-  //ClassDef(StDbXmlWriter,1)
+  //ClassDef(StDbXmlReader,1)
 
 };
 
 #endif
+
+
+
+
 
 

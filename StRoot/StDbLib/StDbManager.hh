@@ -2,14 +2,12 @@
 #define STDBMANAGER_HH
 
 #include "StDbDefs.hh"
-//#include "StDbLists.hh"
-//#include "StDbConfigNode.hh"
-//#include "StDbServer.hh"
 
 class dbType;
 class dbDomain;
 class StDbServer;
-class StDbTableComponent;
+class StDbTable;
+class StDbTableI;
 class StDbConfigNode;
 
 #ifndef __CINT__
@@ -39,9 +37,8 @@ private:
   dbDomains mDomains; // enum mapping shortcut
 
   ServerList mservers;  // servers handle the Query 
-  StDbConfigNode* m_configNode;  // handles the StDbTables & Named Configurations
 
-  StDbManager(): m_configNode(0) { initTypes(); initDomains(); initServers();};
+  StDbManager() { initTypes(); initDomains(); };
   static StDbManager* mInstance;
   
 protected:
@@ -62,26 +59,22 @@ public:
    return mInstance;
   }
 
-
   virtual ~StDbManager();
 
-  virtual StDbConfigNode* getConfig() { return m_configNode; };
   virtual StDbConfigNode* initConfig(const char* configName);
   virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain, const char* configName);
-  //  virtual StDbConfigNode* initConfig();
-  virtual StDbConfigNode* resetConfig(StDbType type, StDbDomain domain, const char* configName);
 
   virtual StDbServer* findServer(StDbType type, StDbDomain domain);
 
   // helper functions to map enumeration to type
+
   virtual char* getDbTypeName(StDbType type);
   virtual char* getDbDomainName(StDbDomain domain);
   virtual StDbType getDbType(const char* typeName);
   virtual StDbDomain getDbDomain(const char* domainName);
 
-  virtual bool IsValid(StDbTableComponent* table, int time);
-  virtual void fetchDbTable(StDbTableComponent* table, int time);
-
+  virtual bool IsValid(StDbTableI* table, int time);
+  virtual void fetchDbTable(StDbTableI* table, int time);
 
 };
 

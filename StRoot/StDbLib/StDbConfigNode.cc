@@ -5,7 +5,7 @@
 #include "StDbManager.hh"
 #include "StDbFactories.hh"
 #include "TableIter.hh"
-#include "StDbTableComponent.h"
+#include "StDbTable.h"
 #include "StDbServer.hh"
 
 ////////////////////////////////////////////////////////////////
@@ -54,6 +54,18 @@ StDbConfigNode::StDbConfigNode(StDbType type, StDbDomain domain, const char* nod
   }
   */
 }
+////////////////////////////////////////////////////////////////
+
+StDbConfigNode::~StDbConfigNode(){
+
+deleteTables();
+deleteChildren();
+if(mconfigName) delete [] mconfigName;
+if(mnodeName) delete [] mnodeName;
+
+};
+
+
 
 ////////////////////////////////////////////////////////////////
 
@@ -82,8 +94,18 @@ strcpy(mconfigName,name);
 void
 StDbConfigNode::buildTree(){
 
- StDbServer* server = StDbManager::Instance()->findServer(mdbType, mdbDomain);
- server->QueryDb(this);
+ StDbServer* server=0;
+ TableIter* itr=0;
+ StDbTableI* table=0;
+
+ server = StDbManager::Instance()->findServer(mdbType, mdbDomain);
+ if(server)server->QueryDb(this);
+ itr = getTableIter();
+ while(!itr->done()){
+   table = itr->next();
+   server->QueryDescriptor((StDbTable*)table);
+ }
+ if(itr)delete itr;
  if(mfirstChildNode)mfirstChildNode->buildTree();
  if(mnextNode)mnextNode->buildTree();
 
@@ -94,13 +116,6 @@ StDbConfigNode::buildTree(){
 void
 StDbConfigNode::printTree(){
 
-  /*  cout << "My Name = " << mnodeName<< " my config= "<< mconfigName << endl;
-  if(mhasData){
-    cout << mnodeName << " have data" << endl;
-  } else {
-    cout << mnodeName << " has no data" << endl;
-  }
-  */
  if(mfirstChildNode){
    //   cout << mnodeName << " Sends to Child" << mfirstChildNode->getName() << endl;
    mfirstChildNode->printTree();
@@ -112,14 +127,15 @@ StDbConfigNode::printTree(){
 
 }
 
-///////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 
-void
-StDbConfigNode::addTable(const char* tableName, int version, int elementID){
+StDbTable*
+StDbConfigNode::addTable(const char* tableName, char* version, int elementID){
 
-  if(!mfactory)mfactory = StDbFactories::Instance()->getFactory(mdbType, mdbDomain);
+  if(!mfactory)mfactory = StDbFactories::Instance()->getFactory(mdbType);
 
-  StDbTableComponent* table = 0;
+  if(!mfactory) cout << " No Factory " << endl;
+  StDbTable* table = 0;
   table = mfactory->getDbTable(tableName,0);
 
   if(table){
@@ -132,6 +148,8 @@ StDbConfigNode::addTable(const char* tableName, int version, int elementID){
   } else {
     cout << " Could not Find table " << tableName << endl;
   }
+
+return table;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -157,10 +175,25 @@ if(mfirstChildNode)delete mfirstChildNode;
 
 }
 
+
+////////////////////////////////////////////////////////////////
+
+void
+StDbConfigNode::deleteChildren(){
+if(hasChildren())getFirstChildNode()->deleteTree();
+}
+
 ////////////////////////////////////////////////////////////////
 
 StDbConfigNode*
 StDbConfigNode::findConfigNode(StDbType type, StDbDomain domain){
+
+  //
+  // Searches for the "highest" node of type & domain
+  // e.g. if request Calibrations , tpc & node is of that
+  // type & domain it checks parent 1st and if it is also
+  // that type & domain returns this call to the parent node
+  // .. else continue down the tree ...
 
 StDbConfigNode* node = 0;
 
@@ -237,7 +270,7 @@ void
 StDbConfigNode::deleteTables(){
 
   TableList::iterator itr;
-  StDbTableComponent* table;
+  StDbTable* table;
 
   do {
     for(itr = mTables.begin(); itr!=mTables.end(); ++itr){

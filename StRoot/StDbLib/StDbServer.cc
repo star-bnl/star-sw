@@ -1,7 +1,7 @@
 #include "StDbServer.hh"
 #include "mysqlAccessor.hh"
 #include "StDbManager.hh"
-#include "StDbTableComponent.h"
+#include "StDbTable.h"
 #include "StDbConfigNode.hh"
 #include <strstream.h>
 
@@ -15,9 +15,9 @@ StDbServer::StDbServer(StDbType type, StDbDomain domain, const char* typeName, c
   mconnectState = false;
   mdatabase = 0;
 
-  char* mtypeName = new char[strlen(typeName)+1];
+  mtypeName = new char[strlen(typeName)+1];
   strcpy(mtypeName,typeName);
-  char* mdomainName = new char[strlen(domainName)+1];
+  mdomainName = new char[strlen(domainName)+1];
   strcpy(mdomainName,domainName);
 
   int len = strlen(mtypeName);
@@ -43,9 +43,8 @@ StDbServer::StDbServer(StDbType type, StDbDomain domain){
   mdatabase = 0;
   mconnectState = false;
 
-  char* mtypeName = StDbManager::Instance()->getDbTypeName(type);
-  char* mdomainName = StDbManager::Instance()->getDbDomainName(domain);
-
+  mtypeName = StDbManager::Instance()->getDbTypeName(type);
+  mdomainName = StDbManager::Instance()->getDbDomainName(domain);
 
   int len = strlen(mtypeName);
   if(mdomainName && strcmp(mdomainName,"Star") != 0){
@@ -64,22 +63,18 @@ StDbServer::StDbServer(StDbType type, StDbDomain domain){
 
 void
 StDbServer::initServer(){
+
   if(!mdbName){
-    cerr << "DataBase not Identified" << endl;
+    cerr << "StDbServer:: DataBase not Identified" << endl;
   } else {
 
     // just now for testing only one duvall.star.bnl.gov.....
 
     cout << "Server connection to database " << mdbName << endl;
-    //   mquery.init(mdbName,"dummy","localhost",0);   
+
     mdatabase = new mysqlAccessor();
     mdatabase->initDbQuery(mdbName,"dummy","duvall.star.bnl.gov", 0);
     mconnectState = true;
- 
-   // mysql_init(&stardb);
-   //if(!mysql_real_connect(&stardb,"localhost","","",mdbName,0,NULL,0)){
-   // cerr << "Connection to db failed" << endl;
-   // }
 
   }
 }
@@ -108,6 +103,9 @@ StDbServer::~StDbServer(){
    if(mserverName)delete [] mserverName;
    if(mhostName)delete [] mhostName;
    if(mdbName)delete [] mdbName;
+   if(mdomainName) delete [] mdomainName;
+   if(mtypeName) delete [] mtypeName;
+   if(mdatabase) delete mdatabase;
 
 }
 
@@ -148,39 +146,37 @@ return mportNumber;
 ////////////////////////////////////////////////////////////////
 
 void 
-StDbServer::QueryDb(StDbTableComponent* table) { 
-  if(mdatabase->QueryDb(table)){
-  table->StreamAccessor(mdatabase->getReader());
-  table->Streamer(mdatabase->getReader());
-  } else {
+StDbServer::QueryDb(StDbTable* table) { 
+
+  if(!mdatabase->QueryDb(table)){
     if(table) cout << "table ["<<table->getTableName()<<"] ";
     cout << "Table is not Updated" << endl;
   }
-  //  mdatabase.freeQuery();
 }
-
 
 ////////////////////////////////////////////////////////////////
 
 void 
+StDbServer::QueryDescriptor(StDbTable* table) { 
+
+  if(!mdatabase->QueryDescriptor(table)){
+    if(table) cout << "table ["<<table->getTableName()<<"] ";
+    cout << "Table Descriptor is not found " << endl;
+  }
+}
+
+
+///////////////////////////////////////////////////////////////////////
+
+void 
 StDbServer::QueryDb(StDbConfigNode* node) { 
 
+  // simple call to database navigation
   mdatabase->QueryDb(node);
-//mdatabase.freeQuery();
 
 }
 
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
+/////////////////////////////////////////////////////////////////////
 
 
 

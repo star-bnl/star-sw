@@ -1,23 +1,25 @@
 #ifndef TABLEITR_HH
 #define TABLEITR_HH
 
-
-#include "StDbConfigNode.hh"
-//#include "StDbTableComponent.h"
-
+#include "StDbConfigNode.hh" // also includes StDbTable.h
+#include "StDbTableI.h"
 
 class TableIter {
 
   TableList::iterator itr;
+  StDbConfigNode* mnode;
 
 public:
 
-  TableIter(){};
+  TableIter() : mnode(0){};
+  TableIter(StDbConfigNode* node){ init(node);};
   ~TableIter(){};
 
   void init(StDbConfigNode* node);
-  StDbTableComponent* next(char*& tableName);
-  bool done(StDbConfigNode* node);
+
+  StDbTableI* next();
+  StDbTableI* operator++();
+  bool done();
 
 };
 

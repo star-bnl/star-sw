@@ -3,7 +3,7 @@
 
 #include "StDbDefs.hh"    // enumeration of type & domain
 
-class StDbTableComponent;
+class StDbTable;
 class StDbConfigNode;
 
 #include "tableQuery.hh" // includes the query
@@ -24,10 +24,7 @@ private:
   char* mtypeName;
   bool  mconnectState;
 
-  // will become dbQuery & tableReader not "mysqlQuery" & "mysqlReader. 
-
-  //  mysqlQuery mquery;
-  tableQuery* mdatabase; 
+  tableQuery* mdatabase; // low level query access of DataBase
 
 protected:
 
@@ -42,25 +39,28 @@ public:
   StDbServer(const char* server, const char* hostname, int port);
   virtual ~StDbServer();
 
-
-  // Interface 
-
   virtual StDbType getDbType() { return mdbType; };
   virtual StDbDomain getDbDomain() { return mdbDomain; };
  
   virtual char* getServerName() const ;
   virtual char* getHostName() const ;
   virtual int   getPortNumber() const ;
-  virtual void init() { initServer(); };
-  virtual bool isconnected() { return mconnectState;};
+  virtual void  init() { initServer(); };
+  virtual bool  isconnected() { return mconnectState;};
   
-  virtual void QueryDb(StDbTableComponent* table);
+  virtual void QueryDb(StDbTable* table);
   virtual void QueryDb(StDbConfigNode* node);
+  virtual void QueryDescriptor(StDbTable* table);
 
 };
 
 
 #endif
+
+
+
+
+
 
 
 

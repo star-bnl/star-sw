@@ -1,12 +1,11 @@
 #include "StDbXmlWriter.h"
 
-ClassImp(StDbXmlWriter)
 
 //----------------------------------------------------
 
 void
 StDbXmlWriter::streamHeader(const char* name){
-  *os << "<StDbClass> StDb_"<<name<< endl;
+  *os << "<StDbName>"<<name<< endl;
 }
 
 //----------------------------------------------------
@@ -27,152 +26,280 @@ StDbXmlWriter::endAccessor(){
 
 void
 StDbXmlWriter::streamTail(){
-  *os << "</StDbClass>" << endl;
+  *os << "</StDbName>" << endl;
 }
 
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, char* i,  unsigned int size){
-*os << "<element String> <name> "<<name<<" </name>"<< i <<"</element String>" << endl;
+StDbXmlWriter::streamTableName(const char* name){
+  *os << "<dbTable>"<<name << endl;
 }
-
-
-
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, int& i,  unsigned int size){
-*os << "<element Int> <name> "<<name<<" </name>"<< i <<"</element Int>" << endl;
+StDbXmlWriter::streamEndTableName(){
+  *os << "</dbTable>"<< endl;
 }
 
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, int* i,  unsigned int size){
+StDbXmlWriter::pass(char* name, char* i,  int len){
+*os << "<dbString> "<<name<<" <value> "<< i <<" </value> </dbString>" << endl;
+}
 
-  *os << "<element IntArray> <name>" << name << "</name> <length> ";
-  *os << size << "</length>" << endl;
+void
+StDbXmlWriter::pass(char* name, unsigned char* i,  int len){
+*os << "<dbUChar> "<<name<<" <value> "<< i <<" </value> </dbUChar>" << endl;
+}
 
-  int d = 0;
-  int len = sizeof(d);
-  int iend = (int)(size/len);
+
+//----------------------------------------------------
+//----------------------------------------------------
+void
+StDbXmlWriter::pass(char* name, short& i,  int len){
+*os << "<dbShort> "<<name<<" <value> "<< i <<" </value> </dbShort>" << endl;
+}
+
+//----------------------------------------------------
+
+void
+StDbXmlWriter::pass(char* name, short* i,  int len){
+
+  *os << "<dbShortArray> " << name << " <length> ";
+  *os << len << " </length>" << endl;
+  *os << "<value>" << endl;
 
   int icount = 0;
-  for(int j=0; j<iend-1;j++){ 
+  for(int j=0; j<len-1;j++){ 
     *os << i[j] << ", ";
     icount++;
-    if(icount==10){
+    if(icount==8){
       *os << endl;
       icount = 0;
     }
   }   
 
-  *os << i[iend-1] << endl;
-  *os << "</element IntArray> " << endl;
+  *os << i[len-1] << endl;
+  *os << "</value> </dbShortArray> " << endl;
 }
 
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, float& i,  unsigned int size){
-*os << "<element Float> <name> "<<name<<" </name>"<< i <<"</element Float>" << endl;
+StDbXmlWriter::pass(char* name, unsigned short& i,  int len){
+*os << "<dbUShort> "<<name<<" <value> "<< i <<" </value> </dbUShort>" << endl;
 }
 
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, float* i,  unsigned int size){
+StDbXmlWriter::pass(char* name, unsigned short* i,  int len){
 
-  *os << "<element FloatArray> <name>" << name << "</name> <length> ";
-  *os << size << "</length>" << endl;
-
-  float d = 0;
-  int len = sizeof(d);
-  int iend = (int)(size/len);
+  *os << "<dbUShortArray> " << name << " <length> ";
+  *os << len << " </length>" << endl;
+  *os << "<value>" << endl;
 
   int icount = 0;
-  for(int j=0; j<iend-1;j++){ 
+  for(int j=0; j<len-1;j++){ 
     *os << i[j] << ", ";
     icount++;
-    if(icount==10){
+    if(icount==8){
       *os << endl;
       icount = 0;
     }
   }   
 
-  *os << i[iend-1] << endl;
-  *os << "</element FloatArray> " << endl;
+  *os << i[len-1] << endl;
+  *os << "</value> </dbUShortArray> " << endl;
 }
 
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, double& i,  unsigned int size){
-*os << "<element Double> <name> "<<name<<" </name>"<< i <<"</element Double>" << endl;
+StDbXmlWriter::pass(char* name, int& i,  int len){
+*os << "<dbInt> "<<name<<" <value> "<< i <<" </value> </dbInt>" << endl;
 }
 
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, double* i,  unsigned int size){
+StDbXmlWriter::pass(char* name, int* i,  int len){
 
-  *os << "<element DoubleArray> <name>" << name << "</name> <length> ";
-  *os << size << "</length>" << endl;
-
-  double d = 0;
-  int len = sizeof(d);
-  int iend = (int)(size/len);
+  *os << "<dbIntArray> " << name << " <length> ";
+  *os << len << " </length>" << endl;
+  *os << "<value>" << endl;
 
   int icount = 0;
-  for(int j=0; j<iend-1;j++){ 
+  for(int j=0; j<len-1;j++){ 
     *os << i[j] << ", ";
     icount++;
-    if(icount==10){
+    if(icount==8){
       *os << endl;
       icount = 0;
     }
   }   
 
-  *os << i[iend-1] << endl;
-  *os << "</element DoubleArray> " << endl;
+  *os << i[len-1] << endl;
+  *os << "</value> </dbIntArray> " << endl;
 }
 
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, long& i,  unsigned int size){
-*os << "<element Long> <name> "<<name<<" </name>"<< i <<"</element Long>" << endl;
+StDbXmlWriter::pass(char* name, unsigned int& i,  int len){
+*os << "<dbUInt> "<<name<<" <value> "<< i <<" </value> </dbUInt>" << endl;
 }
 
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, long* i,  unsigned int size){
+StDbXmlWriter::pass(char* name, unsigned int* i,  int len){
 
-  *os << "<element LongArray> <name>" << name << "</name> <length> ";
-  *os << size << "</length>" << endl;
-
-  long d = 0;
-  int len = sizeof(d);
-  int iend = (int)(size/len);
+  *os << "<dbUIntArray> " << name << " <length> ";
+  *os << len << " </length>" << endl;
+  *os << "<value>" << endl;
 
   int icount = 0;
-  for(int j=0; j<iend-1;j++){ 
+  for(int j=0; j<len-1;j++){ 
     *os << i[j] << ", ";
     icount++;
-    if(icount==10){
+    if(icount==8){
       *os << endl;
       icount = 0;
     }
   }   
 
-  *os << i[iend-1] << endl;
-  *os << "</element LongArray> " << endl;
+  *os << i[len-1] << endl;
+  *os << "</value> </dbUIntArray> " << endl;
 }
 
+//----------------------------------------------------
+
+void
+StDbXmlWriter::pass(char* name, float& i,  int len){
+*os << "<dbFloat> "<<name<<" <value> "<< i <<" </value> </dbFloat>" << endl;
+}
 
 //----------------------------------------------------
+
+void
+StDbXmlWriter::pass(char* name, float* i,  int len){
+
+  *os << "<dbFloatArray> " << name << " <length> ";
+  *os << len << " </length>" << endl;
+  *os << "<value>" << endl;
+
+  int icount = 0;
+  for(int j=0; j<len-1;j++){ 
+    *os << i[j] << ", ";
+    icount++;
+    if(icount==8){
+      *os << endl;
+      icount = 0;
+    }
+  }   
+
+  *os << i[len-1] << endl;
+  *os << "</value> </dbFloatArray> " << endl;
+}
+
+//----------------------------------------------------
+
+void
+StDbXmlWriter::pass(char* name, double& i,  int len){
+*os << "<dbDouble> "<<name<<" <value> "<< i <<" </value> </dbDouble>" << endl;
+}
+
+//----------------------------------------------------
+
+void
+StDbXmlWriter::pass(char* name, double* i,  int len){
+
+  *os << "<dbDoubleArray> " << name << " <length> ";
+  *os << len << " </length>" << endl;
+  *os << "<value>" << endl;
+
+  int icount = 0;
+  for(int j=0; j<len-1;j++){ 
+    *os << i[j] << ", ";
+    icount++;
+    if(icount==8){
+      *os << endl;
+      icount = 0;
+    }
+  }   
+
+  *os << i[len-1] << endl;
+  *os << "</value> </dbDoubleArray> " << endl;
+}
+
+//----------------------------------------------------
+void
+StDbXmlWriter::pass(char* name, long& i,  int len){
+*os << "<dbLong> "<<name<<" <value> "<< i <<" </value> </dbLong>" << endl;
+}
+
+//----------------------------------------------------
+
+void
+StDbXmlWriter::pass(char* name, long* i,  int len){
+
+  *os << "<dbLongArray> " << name << " <length> ";
+  *os << len << " </length>" << endl;
+  *os << "<value>" << endl;
+
+  int icount = 0;
+  for(int j=0; j<len-1;j++){ 
+    *os << i[j] << ", ";
+    icount++;
+    if(icount==8){
+      *os << endl;
+      icount = 0;
+    }
+  }   
+
+  *os << i[len-1] << endl;
+  *os << "</value> </dbLongArray> " << endl;
+}
+
+//----------------------------------------------------
+
+void
+StDbXmlWriter::pass(char* name, unsigned long& i,  int len){
+*os << "<dbULong> "<<name<<" <value> "<< i <<" </value> </dbULong>" << endl;
+}
+
+//----------------------------------------------------
+
+void
+StDbXmlWriter::pass(char* name, unsigned long* i,  int len){
+
+  *os << "<dbULongArray> " << name << " <length> ";
+  *os << len << " </length>" << endl;
+  *os << "<value>" << endl;
+
+  int icount = 0;
+  for(int j=0; j<len-1;j++){ 
+    *os << i[j] << ", ";
+    icount++;
+    if(icount==8){
+      *os << endl;
+      icount = 0;
+    }
+  }   
+
+  *os << i[len-1] << endl;
+  *os << "</value> </dbULongArray> " << endl;
+}
+//----------------------------------------------------
+
+
+
+
+
+
 
 
 

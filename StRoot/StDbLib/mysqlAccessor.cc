@@ -1,153 +1,223 @@
 #include "mysqlAccessor.hh"
+#include "StDbTableDescriptor.h"
 #include <strings.h>
 
 ////////////////////////////////////////////////////////////
 
 int
 mysqlAccessor::QueryDb(StDbConfigNode* node){
-
-
-char* keyTable = getKeyName(node->getName());
-char* queryString = prepareConfigQuery(node->getConfigName());
-mresult = mquery.selectFromWhere("*",keyTable,queryString);
-delete [] queryString; delete [] keyTable;
- if(mresult){
-   int mnum_rows = mysql_num_rows(mresult);
-   if(mnum_rows != 1){
-     cerr << "Cannot Fullfil Query " << mnum_rows << endl;
-     return 0;
-   }
-     
-     mrow = mysql_fetch_row(mresult);
-     mnum_fields = mysql_num_fields(mresult);
-     mfields = mysql_fetch_fields(mresult);
-
-     int iversion;
-     int elementID;
-     StDbConfigNode* newNode;
   
+  char* configName = node->getConfigName();
 
-     for(int i=1;i<mnum_fields;i++){ // Table Name & Version
-       //cout << i << " field = " << mfields[i].name << endl;
-       //cout << i << " row = " << mrow[i] << endl;
-       if(!mrow[i] || mrow[i]==NULL || strlen(mrow[i])==0)continue;  // null field
-       //cout << i << " field = " << mfields[i].name << endl;
+    Db<< "SELECT NodeKeys.ID FROM NodeKeys WHERE NodeKeys.KeyName='";
+    Db<<configName<<"'"<<endsql;
 
-       if(isConfig(mfields[i].name)){ // it is a configKey
+    Db.Output(&buff);
 
-         char* nodeName = getNodeName(mfields[i].name);
-         newNode = new StDbConfigNode(node,nodeName,mrow[i]);
-         delete [] nodeName;
-        
-         } else {
-         
-         elementID = getElementID(node->getName());
-         //cout << "element id = " << elementID << endl;
-         iversion = getVersionIndex(mrow[i]);
-         //cout << " version id = " << iversion << endl;
-         node->addTable(mfields[i].name,iversion,elementID);
-         //cout << "Table = " << mfields[i].name << " is added" << endl;
-       } // !isConfig
+    int TableID;
+    buff.SetClientMode();
+    //    buff.Print();
+    if(!buff.ReadScalar(TableID,"ID")){
+      cerr <<"QueryDb::Config: No Key = "<< configName<< " found " << endl;
+      return 0;
+    }
 
+   Db.Release(); 
+   buff.Raz();
 
-     } // table/config loop
-   } // if(mresult)
+    //    Db<<"SELECT NodeKeys.ID, Nodes.NodeName, Nodes.ID, ";
+    //    Db<<"Nodes.versionName, Nodes.elementID, NodeRelation.ID ";
+    Db<<"SELECT Nodes.NodeName, ";
+    Db<<"Nodes.versionName, Nodes.elementID ";
+    Db<<"FROM NodeKeys LEFT JOIN NodeRelation ON ";
+    Db<<"NodeKeys.ID=NodeRelation.KeyID LEFT JOIN Nodes ON ";
+    Db<<"NodeRelation.NodeID=Nodes.ID WHERE NodeKeys.KeyName='";
+    Db<< configName <<"'"<<endsql;
 
-mysql_free_result(mresult);
-return 1;
+    delete [] configName;
+
+  if(Db.NbRows() == 0){
+    cerr << "No Rows Satisfying Query " << Db.NbRows()<< endl;
+    Db.Release();
+    return 0;
+  }
+
+  int elementID;
+  char* eID;
+  char* version;
+  StDbConfigNode* newNode;
+  //  cout << "Will Loop through results " << endl;
+  while(Db.Output(&buff)){
+   //    cout << "loop check " << chck << endl;
+   //      buff.Print();
+
+     buff.SetClientMode();
+
+   char* ConfigName = 0;
+
+   if(!buff.ReadScalar(ConfigName,"NodeName")){ 
+     delete [] ConfigName;
+     buff.Raz();
+     continue;
+   }
+
+   //   cout << ConfigName << endl;
+    if(isConfig(ConfigName)){ // it is a configKey
+      //      cout << "is config " << ConfigName << endl;
+      char* nodeName = getNodeName(ConfigName);
+      delete [] ConfigName;
+      if(!buff.ReadScalar(ConfigName,"versionName"))cout << "Config err reading version" << endl; 
+      newNode = new StDbConfigNode(node,nodeName,ConfigName);
+      delete [] nodeName;
+      delete [] ConfigName;
+
+    } else { // it is a table
+      //  cout << "is Table " << ConfigName << endl;
+      //      buff.Print();
+      
+      if(!buff.ReadScalar(version,"versionName"))cout << "Table err reading versoin" << endl;
+      if(!buff.ReadScalar(eID,"elementID"))cout << "Table err reading elementID " << endl;
+      elementID = getElementID(eID);
+      
+      StDbTable* table = node->addTable(ConfigName,version,elementID);
+  
+      //     QueryDescriptor(table);
+      delete [] ConfigName;
+      delete [] version;
+      delete [] eID;
+    } // !isConfig
+
+  buff.Raz();
+
+  } // table/config loop
+
+  Db.Release();
+  return 1;
 }
 
 ////////////////////////////////////////////////////////////////
 
 int
-mysqlAccessor::QueryDb(StDbTableComponent* table){
+mysqlAccessor::QueryDb(StDbTable* table){
 
-char* tableName = table->getTableName();
-int iversion = table->getVersion();
-int requestTime = table->getRequestTime();
-char* queryString = prepareDataQuery(requestTime,iversion);
 
-mresult = mquery.selectFromWhere("*",tableName,queryString);
+  char* tableName = table->getTableName();
 
-delete [] queryString; delete [] tableName;
- if(mresult){
+  if(!table->hasDescriptor())QueryDescriptor(table);
 
-   int mnum_rows = mysql_num_rows(mresult);
-  
-  if(mnum_rows != 1) { 
-    cerr << "Cannot Fullfil Query " << mnum_rows << endl;
-    return 0;
+  // now query for data. This will return both the data-row and the
+  // index row as 1 row.
+
+  Db<< "Select * from " << tableName <<" LEFT JOIN " <<tableName<<"Index on ";
+  Db<<  tableName<<"Index.dataID="<<tableName<<".dataID";
+ 
+  char* version = table->getVersion();
+  int requestTime = table->getRequestTime();
+  char rTime[80];
+
+  ostrstream os(rTime,80);
+  os<<requestTime<<ends;
+
+  Db<<" Where beginTime<="<<rTime<<" AND " <<"endTime>"<<rTime;
+  Db<<" AND version='"<<version<<"'"<<endsql;
+
+  if(Db.Output(&buff)){
+   table->StreamAccessor(&buff,true);
+   table->dbStreamer(&buff,true);
+   buff.Raz();
   } else {
-   mrow = mysql_fetch_row(mresult);
-   mnum_fields = mysql_num_fields(mresult);
-   //int nextcolumn = fillMetaData(mrow);
-
-   int nextcolumn = 1;
-
-   mfields = mysql_fetch_fields(mresult);
-   unsigned long* col_length = mysql_fetch_lengths(mresult);
-   if(mReader->initArray(mrow,mfields,nextcolumn,mnum_fields,col_length)){
-        return nextcolumn;
-   } else {
-     return 0;
-   }
+    buff.Raz();
+    Db.Release();
+    cerr << "QueryDb::Table: Error in data query" << endl;
+    return 0;
   }
+   
+  delete [] tableName;
+  Db.Release();
 
- }  
+  return 1; 
+}  
 
- //mysql_free_result(mresult);
-return 1;
-}
 
 ////////////////////////////////////////////////////////////////
 
 int
-mysqlAccessor::WriteDb(StDbTableComponent* table){
-
-char* tableName = table->getTableName();
-int iversion = table->getVersion();
-//int requestTime = table->getRequestTime();
-char* queryString = prepareDataQuery(0,iversion);
-
-mresult = mquery.selectFromWhere("*",tableName,queryString);
-
-
- if(mresult){
-
-   int mnum_rows = mysql_num_rows(mresult);
+mysqlAccessor::WriteDb(StDbTable* table){
   
-  if(mnum_rows != 1) { 
-    cerr << "Cannot Fullfil Query " << mnum_rows << endl;
-    return 0;
-  } else {
-   mrow = mysql_fetch_row(mresult);
-   mnum_fields = mysql_num_fields(mresult);
-   //int nextcolumn = fillMetaData(mrow);
+  char* tableName = table->getTableName();
+  //int iversion = table->getVersion();
+  //int requestTime = table->getRequestTime();
+  //char* queryString = prepareDataQuery(0,iversion);
+  
+  Db << "select * from " << tableName << " where null" << endsql;
+  //  Db.InitBuff(&buff);
+  Db.Release();
 
-   mrow[0] = NULL; // to increment autocounter
-   int nextcolumn = 1;
+  
+  return 1;
+}
 
-   mfields = mysql_fetch_fields(mresult);
-   unsigned long* col_length = mysql_fetch_lengths(mresult);
-   if(mWriter->initArray(mrow,mfields,nextcolumn,mnum_fields,col_length)){
-        return nextcolumn;
-   } else {
-     return 0;
-   }
+////////////////////////////////////////////////////////////////
+int
+mysqlAccessor::QueryDescriptor(StDbTable* table){
+
+
+  if(!table->hasDescriptor()){
+
+    char* tableName=table->getTableName();
+    cout << "Getting Descriptor for table = " << tableName << endl;  
+
+    Db<< "SELECT structure.KeyID FROM structure WHERE structure.name='";
+    Db<<tableName<<"'"<<endsql;
+    Db.Output(&buff);
+    int TableID;
+    buff.SetClientMode();
+    if(!buff.ReadScalar(TableID,"KeyID")){
+      cerr <<"QueryDb::Table: No structure = "<< tableName<< " found " << endl;
+      return 0;
+    }
+
+    Db.Release();
+    buff.Raz();
+
+    Db<<"SELECT structure.KeyID, schema.name, ";
+    Db<<"schema.mask, schema.type, schema.length, ";
+    Db<<"relation.position FROM structure LEFT JOIN relation ON ";
+    Db<<"structure.ID=relation.structID LEFT JOIN schema ON ";
+    Db<<"relation.memberID=schema.ID WHERE structure.name='";
+    Db<< tableName <<"' ORDER BY relation.position"<<endsql;
+    
+    StDbTableDescriptor* descriptor = 0;
+    int tabID = table->getTableID();
+
+    while(Db.Output(&buff)){
+      if(!descriptor)descriptor = new StDbTableDescriptor();
+      descriptor->fillElement(&buff,tabID);
+      buff.Raz();
+    }
+
+    if(descriptor){
+      table->setDescriptor(descriptor);    
+      //      cout << "Setting Descriptor into StDbTable " << endl;
+      //      cout << "check " << table->hasDescriptor() << endl;
+    }
+    Db.Release();
+    delete [] tableName;
   }
 
- }  
-
 return 1;
+
 }
+
 
 ////////////////////////////////////////////////////////////////
 
 bool
 mysqlAccessor::isConfig(const char* name){
  bool retVal = false;
-
+ // cout << "isConfig:: " << name << endl;
  char* teststr = strstr(name,"Keys");
+ // cout << " isCongif:: teststr" << teststr << endl;
  if(teststr)retVal=true;
 
  return retVal;
@@ -158,22 +228,23 @@ mysqlAccessor::isConfig(const char* name){
 
 char*
 mysqlAccessor::getKeyName(const char* nodeName){
-
- char* keys = "Keys";
- int len = strlen(nodeName)+strlen(keys);
- char* keyName = new char[len+1];
- ostrstream os(keyName,len+1);
- os << nodeName << "Keys" << ends;
- // strcat(keyName,nodeName);
- // strcat(keyName,keys);
-
-return keyName;
+  
+  // appends "Keys" to node name
+  char* keys = "Keys";
+  int len = strlen(nodeName)+strlen(keys);
+  char* keyName = new char[len+1];
+  ostrstream os(keyName,len+1);
+  os << nodeName << "Keys" << ends;
+  return keyName;
+  delete [] keys; 
 }
 
 ////////////////////////////////////////////////////////////////
 
 char*
 mysqlAccessor::getNodeName(const char* keyName){
+
+  // strips "Keys" from keyName
 
 char* nodeName=0;
 char* aname = new char[strlen(keyName)+1];
@@ -182,15 +253,16 @@ strcpy(aname,keyName);
  char* id = strstr(aname,"Keys");
  if(!id)return nodeName;
  int i = id-aname;
-
  char* p= &aname[0];
  int size = i;
- nodeName = new char[size];
- strncpy(nodeName,p,size);
- nodeName[size]='\0';
- delete [] aname;
 
-return strdup(nodeName);
+ nodeName = new char[size+1];
+ strncpy(nodeName,p,size);
+
+ nodeName[size]='\0';
+ delete [] aname;   
+
+return nodeName;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -198,92 +270,17 @@ return strdup(nodeName);
 int
 mysqlAccessor::getElementID(const char* nodeName){
 
-char* id=strstr(nodeName,"_");
-if(!id)return 0;
-id++;
-return atoi(id);
+char* id=strstr(nodeName,"None");
+if(id)return 0;
+return atoi(nodeName);
 }
 
-////////////////////////////////////////////////////////////
-
-int
-mysqlAccessor::fillMetaData(MYSQL_ROW row){
-
-  if(row){ // note row[0] is simply a counter so skip it
-           // row[1] & row[2] are object & struct names (sanity checks) 
-//      mmetaData->setVersion(atoi(row[3]));
-//      mmetaData->setBeginTime(atoi(row[1]));
-//      mmetaData->setEndTime(atoi(row[2]));
-      //      mmetaData->setFileType(atoi(row[4]));  
-    } else {
-      cerr << "fillMetaData: row is Null" << endl;
-      return 0;
-    }
-
-return 4;
-}
-
-////////////////////////////////////////////////////////////
-
-char*
-mysqlAccessor::prepareDataQuery(int timeStamp, int version){
-
-char hquery[1024];
-ostrstream ost(hquery,1024);
-
- ost << " beginTime<=" << timeStamp << " AND endTime>" << timeStamp << " AND version=" << version << ends;
-
- char * queryString = new char[strlen(hquery)+1];
- strcpy(queryString,hquery);
-
-return queryString;
-}
-
-
-char*
-mysqlAccessor::prepareInitialQuery(int icount, int version){
-
-char hquery[1024];
-ostrstream ost(hquery,1024);
-
- ost << " count=" << icount << " AND version=" << version << ends;
-
- char * queryString = new char[strlen(hquery)+1];
- strcpy(queryString,hquery);
-
-return strdup(queryString);
-
-}
-
-char*
-mysqlAccessor::prepareConfigQuery(const char* configName){
-
-char hquery[1024];
-ostrstream ost(hquery,1024);
-
- ost << " KeyName='" << configName << "'"<< ends; 
-
- char * queryString = new char[strlen(hquery)+1];
- strcpy(queryString,hquery);
-
-return queryString;
-
-}
+/////////////////////////////////////////////////////////////////
 
 bool
 mysqlAccessor::execute(const char* name){
-
-  //char dataString;
-
- ostrstream ost;
- if(mrow){ 
-    for(int i=0; i<mnum_fields-1;i++){
-      ost << mrow[i] << ",";
-    }
-    ost << mrow[mnum_fields-1] << ends;
-    mquery.insertSET(name,ost.str());
-  }
-return true;
+  Db.Input(name,&buff);
+  return true;
 }
 
 

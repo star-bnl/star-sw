@@ -2,7 +2,7 @@
 #include "StDbLists.hh"
 #include "StDbConfigNode.hh"
 #include "StDbServer.hh"
-#include "StDbTableComponent.h"
+#include "StDbTable.h"
 
 StDbManager* StDbManager::mInstance=0;
 
@@ -10,9 +10,9 @@ StDbManager* StDbManager::mInstance=0;
 ////////////////////////////////////////////////////////////////
 
 StDbManager::~StDbManager(){
+ 
 
-
-  if(m_configNode)m_configNode->deleteTree();
+  //  if(m_configNode)m_configNode->deleteTree();
   deleteServers();
   deleteDomains();
   deleteTypes();
@@ -154,6 +154,10 @@ return retType;
 void
 StDbManager::initServers(const char* refFile){
 
+  //
+  // No longer called. servers are created as needed 
+  //
+
 StDbServer* mserver = 0;
 
 /* just now only one server
@@ -194,8 +198,19 @@ StDbManager::findServer(StDbType type, StDbDomain domain){
    }
  }
 
-if(server && !server->isconnected())server->init();
- if(!server) {
+ if(!server){
+    char * typeName = getDbTypeName(type);
+    char * domainName = getDbDomainName(domain);
+    if(typeName && domainName) {
+      server = new StDbServer(type,domain,typeName,domainName);
+      if(server){
+        mservers.push_back(server);
+        if(!server->isconnected())server->init();
+      }
+    }
+ }
+
+if(!server) {
    cout << "No Such Server " << endl;
    cout << "Type = " << type << " & name= " << getDbTypeName(type) << endl;
    cout << "Domain = "<< domain << " & name = " << getDbDomainName(domain) << endl;
@@ -208,21 +223,17 @@ return server;
 StDbConfigNode*
 StDbManager::initConfig(const char* configName){
 
-m_configNode = new StDbConfigNode(StarDb,Star,"StarDb",configName);
-m_configNode->buildTree();
+StDbConfigNode* configNode = new StDbConfigNode(StarDb,Star,"StarDb",configName);
+configNode->buildTree();
 
-return getConfig();
+return configNode;
 }
 
 ////////////////////////////////////////////////////////////////
 StDbConfigNode*
 StDbManager::initConfig(StDbType type, StDbDomain domain, const char* configName){
 
-StDbConfigNode * node = 0;
-  if(m_configNode){
-    cout << "Error: already configured, use [resetConfig] function" << endl; 
-    return node;
-  }
+StDbConfigNode * configNode = 0;
 
 char* name;
  if(domain == Star){
@@ -231,27 +242,17 @@ char* name;
   name = getDbDomainName(domain);
  }
 
- m_configNode = new StDbConfigNode(type,domain,name,configName);
- m_configNode->buildTree();
- return getConfig();
+ configNode = new StDbConfigNode(type,domain,name,configName);
+ configNode->buildTree();
+ return configNode;
 
 }
 
 ////////////////////////////////////////////////////////////////
-
-StDbConfigNode*
-StDbManager::resetConfig(StDbType type, StDbDomain domain, const char* configName){
-
-StDbConfigNode* node= m_configNode->findConfigNode(type,domain);
-node->resetConfig(configName);
-
-return getConfig();
-}
-
 ////////////////////////////////////////////////////////////////
 
 bool
-StDbManager::IsValid(StDbTableComponent* table, int time){
+StDbManager::IsValid(StDbTableI* table, int time){
 
  bool retVal = false;
  if(!table) return retVal;
@@ -261,7 +262,7 @@ return retVal;
 }
 
 void
-StDbManager::fetchDbTable(StDbTableComponent* table, int time){
+StDbManager::fetchDbTable(StDbTableI* table, int time){
 
   if(!table){
     cout << "Cannot Update StDbTable=0" << endl;
@@ -269,19 +270,9 @@ StDbManager::fetchDbTable(StDbTableComponent* table, int time){
 
   table->setRequestTime(time);
 
-    // make sure to return table from the configNode in case it has been
-    // copied
-  /*
-  StDbTableComponent* mytable = m_configNode->findTable(table->getDbType(), table->getDbDomain, table->getTableName());
-
-  if(table->getVersion() != mytable->getVersion()){
-     delete table;
-     table = mytable;
-  }
-  */
-
   StDbServer* server = findServer(table->getDbType(),table->getDbDomain());
-  server->QueryDb(table);  // table is filled 
+  server->QueryDb((StDbTable*)table);  // table is filled 
+
   }
 }
 
