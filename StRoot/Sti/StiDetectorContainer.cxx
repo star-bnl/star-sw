@@ -110,16 +110,28 @@ StiDetector* StiDetectorContainer::operator*() const
 bool StiDetectorContainer::moveToNextRegion()
 {
     cout <<"StiDetectorContainer::moveToNextRegion()"<<endl;
-    
-    if ( (++mregion < mroot->end() )==false) { 
-	cout <<"StiDetectorContainer::moveToNextRegion():\tNowhere to go. return false"<<endl;
-	--mregion; 
+    StiDetectorNodeVector::const_iterator region = mregion;
+    if ( ++region == mroot->end() )
+      {
+	cout <<"StiDetectorContainer::moveToNextRegion() -I- Nowhere to go."<<endl;
 	return false;
-    }
+      }
+    //cout <<"StiDetectorContainer::moveToNextRegion() -I- new region OK"<<endl;
     
-    //now reset to beginning of region
-    mradial_it = (*mregion)->begin();
-    mphi_it = (*mradial_it)->begin();
+    StiDetectorNodeVector::const_iterator radial_it = (*mregion)->begin();
+    //cout <<"StiDetectorContainer::moveToNextRegion() -I- new region OK 2"<<endl;
+    if (radial_it==(*mregion)->end())
+      return false;
+    StiDetectorNodeVector::const_iterator phi_it = (*radial_it)->begin();
+    //cout <<"StiDetectorContainer::moveToNextRegion() -I- new region OK 3"<<endl;
+    if (phi_it==(*radial_it)->end())
+      return false;
+    //cout <<"StiDetectorContainer::moveToNextRegion() -I- new region OK 4"<<endl;
+   
+    mregion    = region;
+    mradial_it = radial_it;
+    mphi_it    = phi_it;
+    //cout <<"StiDetectorContainer::moveToNextRegion() -I- moved to new region OK"<<endl;
     return true;
 }
 
