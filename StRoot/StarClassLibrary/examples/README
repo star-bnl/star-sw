@@ -1,0 +1,51 @@
+$Id: README,v 1.1 1999/05/19 22:23:48 ullrich Exp $
+
+This directory contains example programs to test
+the different classes and functions from the
+StarClassLibrary (SCL).
+
+Do the usual:
+	mkdir wrk
+	cd wrk
+	cvs checkout StRoot/StarClassLibrary
+	cd StRoot/StarClassLibrary/examples
+(If you read this you probably have done this already)
+
+The GNUmakefile compiles the individual test programs.
+As the name already implies you have to use the GNU make
+program. On Linux this is the standard:
+
+linux> make <example>
+
+On other platforms the GNU make is often called 'gmake':
+
+hp/sun> gmake <example>
+
+where <example> is the name of one of the examples.
+
+The following environment variable must be defined:
+CERN
+STAR_SYS
+If you run the standard STAR login script you don't have
+to worry. If not, you have to set them by hand.
+
+Please note, that in order to compile and link the various
+examples the SCL classes are directly compiled, i.e. the
+official STAR distribution $STAR/lib is NOT used. This
+is necessary since $STAR/lib/StarClassLibrary.so contains
+dependencies to ROOT classes (TObject, TBuffer) which
+would require to link with all ROOT libraries. Here we
+only want to test small stand-alone classes. This also
+eases the work of the developer.
+The makefile requires the SCL sources to be one directory
+up (-I..).
+
+There are also two small shell scripts 'makeall.sh' and
+'runall.sh' which do exactly what their name imply.
+
+If you want to get rid of all the *.o and executables use
+'gmake clean'. 
+
+The GNUmakefile was tested on HP (aCC), Sun (CC4.2) and
+Linux (egcs).
+
