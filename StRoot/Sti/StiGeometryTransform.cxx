@@ -536,16 +536,18 @@ pair<double, double> StiGeometryTransform::angleAndPosition(const StTpcHit *pHit
 
 
 void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* sti,
-				       const StTpcHitFilter* filter) const
+				       unsigned int maxHits, const StTpcHitFilter* filter) const
 {
-    //cout <<"StiEvaluableTrackSeedFinder::operator()(StTrack*, StiKalmanTrack*, StiDetector*)"<<endl;
+    cout <<"\n\n\nmaxHits:\t"<<maxHits<<"\tfilter"<<filter<<endl;
+    
     //now get hits
     StPtrVecHit hits = st->detectorInfo()->hits(kTpcId);
     sort( hits.begin(), hits.end(), StHitRadiusGreaterThan() );
     //sort( hits.begin(), hits.end(), StHitRadiusLessThan() );
     hitvector hitvec;
-    
-    for (vector<StHit*>::iterator it=hits.begin(); it!=hits.end(); ++it) {
+
+    for (vector<StHit*>::iterator it=hits.begin();
+	 it!=hits.end() && hitvec.size()<=maxHits; ++it) {
 	StTpcHit* hit = dynamic_cast<StTpcHit*>(*it);
 	if (!hit) {
 	    cout <<"StiGeometryTransform::operator(GlobalTrack->KalmanTrack). Error:\t";
@@ -558,7 +560,8 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 		passedFilter = filter->operator()(*hit);
 	    
 	    if (passedFilter) {
-		pair<double, double> myPair = StiGeometryTransform::instance()->angleAndPosition(hit);
+		pair<double, double> myPair =
+		    StiGeometryTransform::instance()->angleAndPosition(hit);
 		double refAngle=myPair.first;
 		double position=myPair.second;
 		
@@ -570,7 +573,8 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 		}
 		SameStHit mySameStHit;
 		mySameStHit.stHit = hit;
-		hitvector::const_iterator where = find_if(stiHits.begin(), stiHits.end(), mySameStHit);
+		hitvector::const_iterator where = find_if(stiHits.begin(), stiHits.end(),
+							  mySameStHit);
 		if (where==stiHits.end()) {
 		    cout <<"Error, no StiHit with this StHit was found"<<endl;
 		    sti=0;
@@ -592,7 +596,8 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
     //Now get the helix
     StPhysicalHelixD sthelix = st->geometry()->helix();
     
-    //Get the (x-y) center of the circle and z0 in global coordinates, that's what StiKalmanTrack needs:
+    //Get the (x-y) center of the circle and z0 in global coordinates,
+    //that's what StiKalmanTrack needs:
     //note, StHelix origin is the first point on the track, not the center of the circle!
     StThreeVectorD stiGlobalOrigin( sthelix.xcenter(), sthelix.ycenter(), sthelix.origin().z());
     
@@ -605,11 +610,14 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
     //cout <<"tanLambda: "<<tanLambda<<endl;
 
     //Test transform:
-    //bool worked = StiHelixFitter::instance()->refit(hitvec);
-    //cout <<*(StiHelixFitter::instance())<<endl;
+    bool worked = StiHelixFitter::instance()->fit(hitvec);
+    cout <<*(StiHelixFitter::instance())<<endl;
     cout <<"\t"<<stiGlobalOrigin<<" curvature: "<<curvature<<" tanLambda: "<<tanLambda<<endl;
     
     sti->initialize(curvature, tanLambda, stiGlobalOrigin, hitvec);
+    //StiHelixFitter* fitter = StiHelixFitter::instance();
+    //StThreeVectorF fitOrigin(fitter->xCenter(), fitter->yCenter(), fitter->z0());
+    //sti->initialize(fitter->curvature(), fitter->tanLambda(), fitOrigin, hitvec);
 
     //Test track!
     //cout <<"Test the track:"<<endl;
