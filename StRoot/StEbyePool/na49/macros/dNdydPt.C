@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: dNdydPt.C,v 1.3 2001/05/14 23:22:38 posk Exp $
+// $Id: dNdydPt.C,v 1.4 2001/11/06 18:02:40 posk Exp $
 //
 // Author:       Glenn Cooper with help from Art Poskanzer, May '00
 // Description:  Calculates dNdydPt .
@@ -9,6 +9,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: dNdydPt.C,v $
+// Revision 1.4  2001/11/06 18:02:40  posk
+// 40 GeV compatability.
+//
 // Revision 1.3  2001/05/14 23:22:38  posk
 // Minor changes.
 //
@@ -21,30 +24,29 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>
-
 enum Pid_t { kPionPlus, kPionMinus, kKaonPlus, kKaonMinus, kProton, kPbar };
 enum Charge_t { kplus=0, kMinus=1 };
 Char_t *PidName[] = { "pi+", "pi-", "K+", "K-", "pr", "pbar" };
 Double_t Mass[6]  = { 0.140, 0.140, 0.494, 0.494, 0.938, 0.938 };
 Int_t Charge[6]   = { kplus, kMinus, kplus, kMinus, kplus, kMinus };
 Double_t YMax[6]  = { 3.8, 3.8, 3.2, 3.2, 2.91, 2.91 };
+Int_t eBeamSav = 0;
 //Double_t NPart[6] = { 366, 309, 242, 178, 132, 85 };
 
 void dNdydPt()
-  //help
+ //help
 {
-  cout << "// At the point y,Pt: " << endl << "Double_t dNdydPt(Int_t pid, Double_t y, Double_t pt, Int_t cent)" << endl;
-  cout << "// Integrated from ptmin to ptmax: " << endl << "Double_t dNdy(Int_t pid, Double_t ptmin, Double_t ptmax, Double_t y, Int_t cent)" << endl;
-  cout << "// Averaged between ptman and ptmax: " << endl << "Double_t dNdydPt(Int_t pid, Double_t ptmin, Double_t ptmax, Double_t y, Int_t cent)" << endl;
-  cout << "// Integrated between ymin-ymax and ptmin-ptmax: " << endl << "Double_t dN(Int_t pid, Double_t ymin, Double_t ymax, Double_t ptmin, Double_t ptmax, Int_t cent)" << endl;
-  cout << "// Averaged between ymin-ymax and ptmin-ptmax: " << endl << "Double_t dNdydPt(Int_t pid, Double_t ymin, Double_t ymax, Double_t ptmin, Double_t ptmax, Int_t cent)" << endl;
+  cout  << endl << "// At the point y,Pt: " << endl << "Double_t dNdydPt(Int_t pid, Double_t y, Double_t pt, Int_t cent, Int_t eBeam)" << endl << endl;
+  cout << "// Integrated from ptmin to ptmax: " << endl << "Double_t dNdy(Int_t pid, Double_t ptmin, Double_t ptmax, Double_t y, Int_t cent, Int_t eBeam)" << endl << endl;
+  cout << "// Averaged between ptman and ptmax: " << endl << "Double_t dNdydPt(Int_t pid, Double_t ptmin, Double_t ptmax, Double_t y, Int_t cent, Int_t eBeam)" << endl << endl;
+  cout << "// Integrated between ymin-ymax and ptmin-ptmax: " << endl << "Double_t dN(Int_t pid, Double_t ymin, Double_t ymax, Double_t ptmin, Double_t ptmax, Int_t cent, Int_t eBeam)" << endl << endl;
+  cout << "// Averaged between ymin-ymax and ptmin-ptmax: " << endl << "Double_t dNdydPt(Int_t pid, Double_t ymin, Double_t ymax, Double_t ptmin, Double_t ptmax, Int_t cent, Int_t eBeam)" << endl << endl;
 }
 
-Double_t dNdydPt(Int_t pid, Double_t y, Double_t pt, Int_t cent)
+Double_t dNdydPt(Int_t pid, Double_t y, Double_t pt, Int_t cent, Int_t eBeam = 158)
   // At the point y,Pt
 {
-  if (CheckInput(pid, y, pt, cent)) {
+  if (CheckInput(pid, y, pt, cent, eBeam)) {
     Double_t dNdy    = dNdy(y, pid, cent);
     Double_t dNdPt   = dNdPt(y, pt, pid, cent);
     Double_t dNdydPt = dNdy * dNdPt;
@@ -56,10 +58,12 @@ Double_t dNdydPt(Int_t pid, Double_t y, Double_t pt, Int_t cent)
   }
 }
 
-Double_t dNdy(Int_t pid, Double_t ptmin, Double_t ptmax, Double_t y, Int_t cent)
+Double_t dNdy(Int_t pid, Double_t ptmin, Double_t ptmax, Double_t y, Int_t cent,
+	      Int_t eBeam = 158)
   // Integrated from ptmin to ptmax
 {
-  if (CheckInput(pid, y, ptmin, cent) && CheckInput(pid, y, ptmax, cent)) {
+  if (CheckInput(pid, y, ptmin, cent, eBeam) && 
+      CheckInput(pid, y, ptmax, cent, eBeam)) {
     TF1* fdndPt = (TF1*)gROOT->FindObject("fdNdPt");
     if (!fdndPt) fdndPt = new TF1("fdNdPt", fdNdPt, 0., 2., 3);
     fdndPt->SetParameter(0, pid);
@@ -68,19 +72,20 @@ Double_t dNdy(Int_t pid, Double_t ptmin, Double_t ptmax, Double_t y, Int_t cent)
     Double_t dNdPt   = fdndPt->Integral(ptmin, ptmax);
     Double_t dNdy    = dNdy(y, pid, cent); 
     Double_t dNdydPt = dNdy * dNdPt;
-    printf("dNdy= %.2f for %4s, PtMin= %.2f, PtMax= %.2f, y= %.2f GeV, Cent= %d:\n",
-	   dNdydPt, PidName[pid], ptmin, ptmax, y, cent);
+//     printf("dNdy= %.2f for %4s, PtMin= %.2f, PtMax= %.2f, y= %.2f GeV, Cent= %d:\n",
+// 	   dNdydPt, PidName[pid], ptmin, ptmax, y, cent);
     return dNdydPt;
   } else {
     return 0.;
   }
 }
 
-Double_t dNdydPt(Int_t pid, Double_t ptmin, Double_t ptmax, Double_t y, Int_t cent)
+Double_t dNdydPt(Int_t pid, Double_t ptmin, Double_t ptmax, Double_t y, Int_t cent,
+		 Int_t eBeam = 158)
   // Averaged between ptman and ptmax
 {
   if (ptmax<=ptmin) return 0.; 
-  Double_t dNdydPt   = dNdy(pid, ptmin, ptmax, y, cent) / (ptmax - ptmin);
+  Double_t dNdydPt   = dNdy(pid, ptmin, ptmax, y, cent, eBeam) / (ptmax - ptmin);
   printf("dNdydPt= %.2f per GeV/c for %4s, PtMin= %.2f, PtMax= %.2f, 
     y= %.2f GeV, Cent= %d:\n", dNdydPt, PidName[pid], ptmin, ptmax, y, cent);
 
@@ -88,10 +93,11 @@ Double_t dNdydPt(Int_t pid, Double_t ptmin, Double_t ptmax, Double_t y, Int_t ce
 }
 
 Double_t dN(Int_t pid, Double_t ymin, Double_t ymax, Double_t ptmin,
-		 Double_t ptmax, Int_t cent)
+		 Double_t ptmax, Int_t cent, Int_t eBeam = 158)
   // Integrated between ymin-ymax and ptmin-ptmax
 {
-  if (CheckInput(pid, ymin, ptmin, cent) && CheckInput(pid, ymax, ptmax, cent)) {
+  if (CheckInput(pid, ymin, ptmin, cent, eBeam) && 
+      CheckInput(pid, ymax, ptmax, cent, eBeam)) {
     TF2* fdndydPt = (TF2*)gROOT->FindObject("fdNdydPt");
     if (!fdndydPt) fdndydPt = new TF2("fdNdydPt", fdNdydPt, -YMax[pid], YMax[pid],
 				      0., 2., 3);
@@ -108,11 +114,11 @@ Double_t dN(Int_t pid, Double_t ymin, Double_t ymax, Double_t ptmin,
 }
 
 Double_t dNdydPt(Int_t pid, Double_t ymin, Double_t ymax, Double_t ptmin,
-		 Double_t ptmax, Int_t cent)
+		 Double_t ptmax, Int_t cent, Int_t eBeam = 158)
   // Averaged between ymin-ymax and ptmin-ptmax
 {
   if (ptmax<=ptmin || ymax<=ymin) return 0.; 
-  Double_t dNdydPt = dN(pid, ymin, ymax, ptmin, ptmax, cent) /
+  Double_t dNdydPt = dN(pid, ymin, ymax, ptmin, ptmax, cent, eBeam) /
     ((ymax - ymin) * (ptmax - ptmin));
   printf("dNdydPt= %.2f per GeV/c for %4s, ymin= %.2f, ymax= %.2f, 
     ptmin= %.2f GeV, ptmax= %.2f GeV, Cent= %d:\n", dNdydPt, 
@@ -123,7 +129,7 @@ Double_t dNdydPt(Int_t pid, Double_t ymin, Double_t ymax, Double_t ptmin,
 
 /////////////////////////////////////////////////////////////////
 
-Bool_t CheckInput(Int_t pid, Double_t y, Double_t pt, Int_t cent)
+Bool_t CheckInput(Int_t pid, Double_t y, Double_t pt, Int_t cent, Int_t eBeam)
 {
   if (pid < 0 || pid > 5) {
     printf("parameter pid= %d out of range\n", pid);
@@ -137,7 +143,14 @@ Bool_t CheckInput(Int_t pid, Double_t y, Double_t pt, Int_t cent)
   } else if (cent < 1 || cent > 6) {
     printf("parameter cent= %d out of range\n", cent);
     return kFALSE;
+  } else if (eBeam != 158 && eBeam != 40) {
+    printf("parameter eBeam= %d out of range\n", eBeam);
+    return kFALSE;
   } else {
+    if (eBeam != eBeamSav) {
+      SetParameters(eBeam);
+      eBeamSav = eBeam;
+    }
     return kTRUE;
   }
 }
@@ -293,8 +306,10 @@ Double_t fdNdydPt(Double_t *x, Double_t *par)
   return dndydPt(par[0]+0.5, x[0], x[1], par[1]+0.5);
 }
 
-typedef Double_t par_charge_cent[2][6];
-typedef Double_t par_cent[6];
+const Int_t nCens = 6;
+const Int_t nChars = 2;
+typedef Double_t par_charge_cent[nChars][nCens];
+typedef Double_t par_cent[nCens];
 
 par_charge_cent piA;
 par_charge_cent pisigy;
@@ -303,217 +318,11 @@ par_charge_cent piyT1;
 par_charge_cent piT20;
 par_charge_cent pixi20;
 
-// part, plus/minus, cent
-
-// pipl1
-
-piA[0][0] =  563.7 ;
-pisigy[0][0] = 1.47 ;
-piT10[0][0] = 0.208 ;
-piyT1[0][0] = 3.99 ;
-piT20[0][0] = 0.089 ;
-pixi20[0][0] = 0.246 ;
-
-// pipl2
-
-piA[0][1] =  466.1 ;
-pisigy[0][1] = 1.51 ;
-piT10[0][1] = 0.211 ;
-piyT1[0][1] = 3.38 ;
-piT20[0][1] = 0.089 ;
-pixi20[0][1] = 0.262 ;
-
-// pipl3
-
-piA[0][2] =  345.6 ;
-pisigy[0][2] = 1.54 ;
-piT10[0][2] = 0.207 ;
-piyT1[0][2] = 3.83 ;
-piT20[0][2] = 0.084 ;
-pixi20[0][2] = 0.255 ;
-
-// pipl4
-
-piA[0][3] =  243.2 ;
-pisigy[0][3] = 1.58 ;
-piT10[0][3] = 0.207 ;
-piyT1[0][3] = 3.46 ;
-piT20[0][3] = 0.084 ;
-pixi20[0][3] = 0.266 ;
-
-// pipl5
-
-piA[0][4] =  168.6 ;
-pisigy[0][4] = 1.62 ;
-piT10[0][4] = 0.207 ;
-piyT1[0][4] = 3.33 ;
-piT20[0][4] = 0.083 ;
-pixi20[0][4] = 0.265 ;
-
-// pipl6
-
-piA[0][5] =  109.1 ;
-pisigy[0][5] = 1.72 ;
-piT10[0][5] = 0.198 ;
-piyT1[0][5] = -4.0 ;
-piT20[0][5] = 0.081 ;
-pixi20[0][5] = 0.244 ;
-
-// pimi1
-
-piA[1][0] =  606.6 ;
-pisigy[1][0] = 1.41 ;
-piT10[1][0] = 0.213 ;
-piyT1[1][0] = 2.73 ;
-piT20[1][0] = 0.081 ;
-pixi20[1][0] = 0.261 ;
-
-// pimi2
-
-piA[1][1] =  495.8 ;
-pisigy[1][1] = 1.46 ;
-piT10[1][1] = 0.212 ;
-piyT1[1][1] = 2.92 ;
-piT20[1][1] = 0.080 ;
-pixi20[1][1] = 0.274 ;
-
-// pimi3
-
-piA[1][2] =  370.0 ;
-pisigy[1][2] = 1.49 ;
-piT10[1][2] = 0.211 ;
-piyT1[1][2] = 2.88 ;
-piT20[1][2] = 0.075 ;
-pixi20[1][2] = 0.282 ;
-
-// pimi4
-
-piA[1][3] =  256.5 ;
-pisigy[1][3] = 1.51 ;
-piT10[1][3] = 0.209 ;
-piyT1[1][3] = 2.93 ;
-piT20[1][3] = 0.079 ;
-pixi20[1][3] = 0.279 ;
-
-// pimi5
-
-piA[1][4] =  179.8 ;
-pisigy[1][4] = 1.58 ;
-piT10[1][4] = 0.204 ;
-piyT1[1][4] = 3.03 ;
-piT20[1][4] = 0.078 ;
-pixi20[1][4] = 0.272 ;
-
-// pimi6
-
-piA[1][5] =  116.67 ;
-pisigy[1][5] = 1.67 ;
-piT10[1][5] = 0.199 ;
-piyT1[1][5] = 3.03 ;
-piT20[1][5] = 0.077 ;
-pixi20[1][5] = 0.260 ;
-
 par_charge_cent kA;
 par_charge_cent kmuy;
 par_charge_cent ksigy;
 par_charge_cent kT0;
 par_charge_cent kyT;
-
-// kpl1
-
-kA[0][0] =  102.1 ;
-kmuy[0][0] =  0.77 ;
-ksigy[0][0] =  0.85 ;
-kT0[0][0] =  0.251 ;
-kyT[0][0] =  2.37 ;
-
-// kpl2
-
-kA[0][1] =   81.1 ;
-kmuy[0][1] =  0.79 ;
-ksigy[0][1] =  0.87 ;
-kT0[0][1] =  0.246 ;
-kyT[0][1] =  2.85 ;
-
-// kpl3
-
-kA[0][2] =   58.4 ;
-kmuy[0][2] =  0.80 ;
-ksigy[0][2] =  0.88 ;
-kT0[0][2] =  0.243 ;
-kyT[0][2] =  2.59 ;
-
-// kpl4
-
-kA[0][3] =   38.25 ;
-kmuy[0][3] =  0.80 ;
-ksigy[0][3] =  0.88 ;
-kT0[0][3] =  0.237 ;
-kyT[0][3] =  2.48 ;
-
-// kpl5
-
-kA[0][4] =   24.71 ;
-kmuy[0][4] =  0.83 ;
-ksigy[0][4] =  0.88 ;
-kT0[0][4] =  0.219 ;
-kyT[0][4] =  3.6 ;
-
-// kpl6
-
-kA[0][5] =   14.38 ;
-kmuy[0][5] =  0.87 ;
-ksigy[0][5] =  0.88 ;
-kT0[0][5] =  0.214 ;
-kyT[0][5] =  3.01 ;
-
-// kmi1
-
-kA[1][0] =  45.68 ;
-kmuy[1][0] = 0.72 ;
-ksigy[1][0] = 0.80 ;
-kT0[1][0] = 0.233 ;
-kyT[1][0] = 2.25 ;
-
-// kmi2[1][0] =;
-
-kA[1][1] =  36.46 ;
-kmuy[1][1] = 0.71 ;
-ksigy[1][1] = 0.83 ;
-kT0[1][1] = 0.232 ;
-kyT[1][1] = 2.25 ;
-
-// kmi3
-
-kA[1][2] =  26.33 ;
-kmuy[1][2] = 0.73 ;
-ksigy[1][2] = 0.81 ;
-kT0[1][2] = 0.229 ;
-kyT[1][2] = 2.28 ;
-
-// kmi4
-
-kA[1][3] =  17.30 ;
-kmuy[1][3] = 0.71 ;
-ksigy[1][3] = 0.87 ;
-kT0[1][3] = 0.218 ;
-kyT[1][3] = 2.45 ;
-
-// kmi5
-
-kA[1][4] =  11.31 ;
-kmuy[1][4] = 0.70 ;
-ksigy[1][4] = 0.87 ;
-kT0[1][4] = 0.214 ;
-kyT[1][4] = 2.33 ;
-
-// kmi6
-
-kA[1][5] =  6.48 ;
-kmuy[1][5] = 0.67 ;
-ksigy[1][5] = 0.91 ;
-kT0[1][5] = 0.195 ;
-kyT[1][5] = 2.77 ;
 
 par_cent prA;
 par_cent prmuy;
@@ -525,121 +334,315 @@ par_cent pryxi2;
 par_cent prT20;
 par_cent pryT2;
 
-// proton1
-
-prA[0] =  137.1 ;
-prmuy[0] = 1.435 ;
-prsigy[0] = 0.976 ;
-prT10[0] = 0.308 ;
-pryT1[0] = 2.08 ;
-prxi20[0] = 0.09 ;
-pryxi2[0] = 100 ;
-prT20[0] = 0.109 ;
-pryT2[0] = 2.6 ;
-
-// proton2
-
-prA[1] =  126.2 ;
-prmuy[1] = 1.581 ;
-prsigy[1] = 1.057 ;
-prT10[1] = 0.299 ;
-pryT1[1] = 2.23 ;
-prxi20[1] = 0.10 ;
-pryxi2[1] = 2.2 ;
-prT20[1] = 0.115 ;
-pryT2[1] = 2.1 ;
-
-// proton3
-
-prA[2] =  112.3 ;
-prmuy[2] = 1.825 ;
-prsigy[2] = 1.164 ;
-prT10[2] = 0.295 ;
-pryT1[2] = 2.32 ;
-prxi20[2] = 0.09 ;
-pryxi2[2] = 1.47 ;
-prT20[2] = 0.110 ;
-pryT2[2] = 2.1 ;
-
-// proton4
-
-prA[3] =  98.5 ;
-prmuy[3] = 2.12 ;
-prsigy[3] = 1.264 ;
-prT10[3] = 0.283 ;
-pryT1[3] = 2.44 ;
-prxi20[3] = 0.04 ;
-pryxi2[3] = -1.8 ;
-prT20[3] = 0.115 ;
-pryT2[3] = 1.24 ;
-
-// proton5
-
-prA[4] =  87 ;
-prmuy[4] = 2.46 ;
-prsigy[4] = 1.36 ;
-prT10[4] = 0.284 ;
-pryT1[4] = 2.14 ;
-prxi20[4] = 0.02 ;
-pryxi2[4] = 100 ;
-prT20[4] = 0.097 ;
-pryT2[4] = -1.4 ;
-
-// proton6
-
-prA[5] =  105 ;
-prmuy[5] = 3.43 ;
-prsigy[5] = 1.64 ;
-prT10[5] = 0.277 ;
-pryT1[5] = 2.06 ;
-prxi20[5] = 0.05 ;
-pryxi2[5] = 100.0 ;
-prT20[5] = 0.12 ;
-pryT2[5] = 0.12 ;
-
 par_cent pbarA;
 par_cent pbarsigy;
 par_cent pbarT0;
 par_cent pbaryT;
 
-// pbar1
+void SetParameters(Int_t eBeam) {
+  // part, plus/minus, cent
 
-pbarA[0] = 4.90 ;
-pbarsigy[0] =1.60 ;
-pbarT0[0] =0.360 ;
-pbaryT[0] =1.9 ;
+  // pipl1
+  piA[0][0] =  563.7 ;
+  pisigy[0][0] = 1.47 ;
+  piT10[0][0] = 0.208 ;
+  piyT1[0][0] = 3.99 ;
+  piT20[0][0] = 0.089 ;
+  pixi20[0][0] = 0.246 ;
+  
+  // pipl2
+  piA[0][1] =  466.1 ;
+  pisigy[0][1] = 1.51 ;
+  piT10[0][1] = 0.211 ;
+  piyT1[0][1] = 3.38 ;
+  piT20[0][1] = 0.089 ;
+  pixi20[0][1] = 0.262 ;
+  
+  // pipl3  
+  piA[0][2] =  345.6 ;
+  pisigy[0][2] = 1.54 ;
+  piT10[0][2] = 0.207 ;
+  piyT1[0][2] = 3.83 ;
+  piT20[0][2] = 0.084 ;
+  pixi20[0][2] = 0.255 ;
+  
+  // pipl4
+  piA[0][3] =  243.2 ;
+  pisigy[0][3] = 1.58 ;
+  piT10[0][3] = 0.207 ;
+  piyT1[0][3] = 3.46 ;
+  piT20[0][3] = 0.084 ;
+  pixi20[0][3] = 0.266 ;
+  
+  // pipl5
+  piA[0][4] =  168.6 ;
+  pisigy[0][4] = 1.62 ;
+  piT10[0][4] = 0.207 ;
+  piyT1[0][4] = 3.33 ;
+  piT20[0][4] = 0.083 ;
+  pixi20[0][4] = 0.265 ;
+  
+  // pipl6
+  piA[0][5] =  109.1 ;
+  pisigy[0][5] = 1.72 ;
+  piT10[0][5] = 0.198 ;
+  piyT1[0][5] = -4.0 ;
+  piT20[0][5] = 0.081 ;
+  pixi20[0][5] = 0.244 ;
+  
+  // pimi1
+  piA[1][0] = 606.6;
+  pisigy[1][0] = 1.41;
+  piT10[1][0] = 0.213 ;
+  piyT1[1][0] = 2.73 ;
+  piT20[1][0] = 0.081 ;
+  pixi20[1][0] = 0.261 ;
+  
+  // pimi2
+  piA[1][1] =  495.8 ;
+  pisigy[1][1] = 1.46 ;
+  piT10[1][1] = 0.212 ;
+  piyT1[1][1] = 2.92 ;
+  piT20[1][1] = 0.080 ;
+  pixi20[1][1] = 0.274 ;
+  
+  // pimi3
+  piA[1][2] =  370.0 ;
+  pisigy[1][2] = 1.49 ;
+  piT10[1][2] = 0.211 ;
+  piyT1[1][2] = 2.88 ;
+  piT20[1][2] = 0.075 ;
+  pixi20[1][2] = 0.282 ;
+  
+  // pimi4
+  piA[1][3] =  256.5 ;
+  pisigy[1][3] = 1.51 ;
+  piT10[1][3] = 0.209 ;
+  piyT1[1][3] = 2.93 ;
+  piT20[1][3] = 0.079 ;
+  pixi20[1][3] = 0.279 ;
 
-// pbar2
+  // pimi5
+  piA[1][4] =  179.8 ;
+  pisigy[1][4] = 1.58 ;
+  piT10[1][4] = 0.204 ;
+  piyT1[1][4] = 3.03 ;
+  piT20[1][4] = 0.078 ;
+  pixi20[1][4] = 0.272 ;
+  
+  // pimi6
+  piA[1][5] =  116.67 ;
+  pisigy[1][5] = 1.67 ;
+  piT10[1][5] = 0.199 ;
+  piyT1[1][5] = 3.03 ;
+  piT20[1][5] = 0.077 ;
+  pixi20[1][5] = 0.260 ;
+  
+  // kpl1
+  kA[0][0] =  102.1 ;
+  kmuy[0][0] =  0.77 ;
+  ksigy[0][0] =  0.85 ;
+  kT0[0][0] =  0.251 ;
+  kyT[0][0] =  2.37 ;
+  
+  // kpl2
+  kA[0][1] =   81.1 ;
+  kmuy[0][1] =  0.79 ;
+  ksigy[0][1] =  0.87 ;
+  kT0[0][1] =  0.246 ;
+  kyT[0][1] =  2.85 ;
+  
+  // kpl3
+  kA[0][2] =   58.4 ;
+  kmuy[0][2] =  0.80 ;
+  ksigy[0][2] =  0.88 ;
+  kT0[0][2] =  0.243 ;
+  kyT[0][2] =  2.59 ;
+  
+  // kpl4
+  kA[0][3] =   38.25 ;
+  kmuy[0][3] =  0.80 ;
+  ksigy[0][3] =  0.88 ;
+  kT0[0][3] =  0.237 ;
+  kyT[0][3] =  2.48 ;
+  
+  // kpl5
+  kA[0][4] =   24.71 ;
+  kmuy[0][4] =  0.83 ;
+  ksigy[0][4] =  0.88 ;
+  kT0[0][4] =  0.219 ;
+  kyT[0][4] =  3.6 ;
+  
+  // kpl6
+  kA[0][5] =   14.38 ;
+  kmuy[0][5] =  0.87 ;
+  ksigy[0][5] =  0.88 ;
+  kT0[0][5] =  0.214 ;
+  kyT[0][5] =  3.01 ;
+  
+  // kmi1
+  kA[1][0] =  45.68 ;
+  kmuy[1][0] = 0.72 ;
+  ksigy[1][0] = 0.80 ;
+  kT0[1][0] = 0.233 ;
+  kyT[1][0] = 2.25 ;
+  
+  // kmi2[1][0] =;
+  kA[1][1] =  36.46 ;
+  kmuy[1][1] = 0.71 ;
+  ksigy[1][1] = 0.83 ;
+  kT0[1][1] = 0.232 ;
+  kyT[1][1] = 2.25 ;
+  
+  // kmi3
+  kA[1][2] =  26.33 ;
+  kmuy[1][2] = 0.73 ;
+  ksigy[1][2] = 0.81 ;
+  kT0[1][2] = 0.229 ;
+  kyT[1][2] = 2.28 ;
+  
+  // kmi4
+  kA[1][3] =  17.30 ;
+  kmuy[1][3] = 0.71 ;
+  ksigy[1][3] = 0.87 ;
+  kT0[1][3] = 0.218 ;
+  kyT[1][3] = 2.45 ;
 
-pbarA[1] = 3.62 ;
-pbarsigy[1] =1.55 ;
-pbarT0[1] =0.328 ;
-pbaryT[1] =1.88 ;
-
-// pbar3
-
-pbarA[2] = 2.88 ;
-pbarsigy[2] =1.52 ;
-pbarT0[2] =0.369 ;
-pbaryT[2] =1.42 ;
-
-// pbar4
-
-pbarA[3] = 1.95 ;
-pbarsigy[3] =1.47 ;
-pbarT0[3] =0.329 ;
-pbaryT[3] =1.47 ;
-
-// pbar5
-
-pbarA[4] = 1.35 ;
-pbarsigy[4] =1.44 ;
-pbarT0[4] =0.302 ;
-pbaryT[4] =4.3 ;
-
-// pbar6
-
-pbarA[5] = 0.84 ;
-pbarsigy[5] =1.40 ;
-pbarT0[5] =0.31 ;
-pbaryT[5] =2.8 ;
+  // kmi5
+  kA[1][4] =  11.31 ;
+  kmuy[1][4] = 0.70 ;
+  ksigy[1][4] = 0.87 ;
+  kT0[1][4] = 0.214 ;
+  kyT[1][4] = 2.33 ;
+  
+  // kmi6
+  kA[1][5] =  6.48 ;
+  kmuy[1][5] = 0.67 ;
+  ksigy[1][5] = 0.91 ;
+  kT0[1][5] = 0.195 ;
+  kyT[1][5] = 2.77 ;
+  
+  // proton1
+  prA[0] =  137.1 ;
+  prmuy[0] = 1.435 ;
+  prsigy[0] = 0.976 ;
+  prT10[0] = 0.308 ;
+  pryT1[0] = 2.08 ;
+  prxi20[0] = 0.09 ;
+  pryxi2[0] = 100 ;
+  prT20[0] = 0.109 ;
+  pryT2[0] = 2.6 ;
+  
+  // proton2
+  prA[1] =  126.2 ;
+  prmuy[1] = 1.581 ;
+  prsigy[1] = 1.057 ;
+  prT10[1] = 0.299 ;
+  pryT1[1] = 2.23 ;
+  prxi20[1] = 0.10 ;
+  pryxi2[1] = 2.2 ;
+  prT20[1] = 0.115 ;
+  pryT2[1] = 2.1 ;
+  
+  // proton3
+  prA[2] =  112.3 ;
+  prmuy[2] = 1.825 ;
+  prsigy[2] = 1.164 ;
+  prT10[2] = 0.295 ;
+  pryT1[2] = 2.32 ;
+  prxi20[2] = 0.09 ;
+  pryxi2[2] = 1.47 ;
+  prT20[2] = 0.110 ;
+  pryT2[2] = 2.1 ;
+  
+  // proton4
+  prA[3] =  98.5 ;
+  prmuy[3] = 2.12 ;
+  prsigy[3] = 1.264 ;
+  prT10[3] = 0.283 ;
+  pryT1[3] = 2.44 ;
+  prxi20[3] = 0.04 ;
+  pryxi2[3] = -1.8 ;
+  prT20[3] = 0.115 ;
+  pryT2[3] = 1.24 ;
+  
+  // proton5
+  prA[4] =  87 ;
+  prmuy[4] = 2.46 ;
+  prsigy[4] = 1.36 ;
+  prT10[4] = 0.284 ;
+  pryT1[4] = 2.14 ;
+  prxi20[4] = 0.02 ;
+  pryxi2[4] = 100 ;
+  prT20[4] = 0.097 ;
+  pryT2[4] = -1.4 ;
+  
+  // proton6
+  prA[5] =  105 ;
+  prmuy[5] = 3.43 ;
+  prsigy[5] = 1.64 ;
+  prT10[5] = 0.277 ;
+  pryT1[5] = 2.06 ;
+  prxi20[5] = 0.05 ;
+  pryxi2[5] = 100.0 ;
+  prT20[5] = 0.12 ;
+  pryT2[5] = 0.12 ;
+  
+  // pbar1
+  pbarA[0] = 4.90 ;
+  pbarsigy[0] =1.60 ;
+  pbarT0[0] =0.360 ;
+  pbaryT[0] =1.9 ;
+  
+  // pbar2
+  pbarA[1] = 3.62 ;
+  pbarsigy[1] =1.55 ;
+  pbarT0[1] =0.328 ;
+  pbaryT[1] =1.88 ;
+  
+  // pbar3
+  pbarA[2] = 2.88 ;
+  pbarsigy[2] =1.52 ;
+  pbarT0[2] =0.369 ;
+  pbaryT[2] =1.42 ;
+  
+  // pbar4
+  pbarA[3] = 1.95 ;
+  pbarsigy[3] =1.47 ;
+  pbarT0[3] =0.329 ;
+  pbaryT[3] =1.47 ;
+  
+  // pbar5
+  pbarA[4] = 1.35 ;
+  pbarsigy[4] =1.44 ;
+  pbarT0[4] =0.302 ;
+  pbaryT[4] =4.3 ;
+  
+  // pbar6
+  pbarA[5] = 0.84 ;
+  pbarsigy[5] =1.40 ;
+  pbarT0[5] =0.31 ;
+  pbaryT[5] =2.8 ;
+  
+  // 40 GeV changes
+  if (eBeam==40) {
+    Float_t piA40  = 0.55;               // pion total yield
+    Float_t sigy40 = 0.8;                // pion and kaon gaussian widths
+    Float_t y40    = 2.24/2.92;          // ratio of yCM values
+    Float_t KAm    = 0.4;                // K- total yield
+    Float_t KAp    = 0.52;               // K+ total yield
+    Float_t pBar   = 0.5;                // p bar total yield
+    for (int n = 0; n < nCens; n++) {
+      for (int c = 0; c < nChars; c++) {
+	piA[c][n]    *= piA40;
+	pisigy[c][n] *= sigy40;
+	kA[c][n]     *= (c) ? KAm : KAp;
+	ksigy[c][n]  *= sigy40;
+	kmuy[c][n]   *= y40;             // separation between the 2 gaussians
+      }
+      prmuy[n]     *= y40;               // separation between the 2 gaussians
+      pbarA[n]     *= pBar;
+    }
+  }
+  
+}

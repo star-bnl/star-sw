@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEventsVar.C,v 1.3 2001/08/17 22:14:48 posk Exp $
+// $Id: doFlowEventsVar.C,v 1.4 2001/11/06 18:02:45 posk Exp $
 //
 // Description: 
 // Chain to read events from microDST files into StFlowEvent and analyze.
@@ -41,6 +41,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEventsVar.C,v $
+// Revision 1.4  2001/11/06 18:02:45  posk
+// 40 GeV compatability.
+//
 // Revision 1.3  2001/08/17 22:14:48  posk
 // Updated to also do 40 GeV.
 //
@@ -218,39 +221,41 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
   if(centrality == 2)
     StFlowEvent::SetPtCut(0., .6, 0, 1);
 
-    if(Flow::eBeam == 40){
-      StFlowCutEvent::SetVertexZ(-581.7, -580.5));
-//       StFlowEvent::SetYCut(2.5, 4., 0, 1); // harmonic 1, selection 2
-//       StFlowEvent::SetYCut(1.8, 3.5, 1, 1); // harmonic 2, selection 2
-//       StFlowEvent::SetYCut(2.5, 4., 2, 1); // harmonic 3, selection 2
-      StFlowEvent::SetYCut(3., 5., 0, 1); // harmonic 1, selection 2
-      //StFlowEvent::SetYCut(1.8, 4., 1, 1); // harmonic 2, selection 2
-      StFlowEvent::SetYCut(3., 5., 1, 1); // harmonic 2, selection 2
-      StFlowEvent::SetPtCut(0., 0.5, 1, 1);
-      StFlowEvent::SetYCut(3., 5., 2, 1); // harmonic 3, selection 2
-      StFlowCutEvent::SetEtaSym(0.36, 0.84);
-    }
+  if(Flow::eBeam == 40){
+    StFlowCutEvent::SetVertexZ(-581.7, -580.5);
+    //       StFlowEvent::SetYCut(2.5, 4., 0, 1); // harmonic 1, selection 2
+    //       StFlowEvent::SetYCut(1.8, 3.5, 1, 1); // harmonic 2, selection 2
+    //       StFlowEvent::SetYCut(2.5, 4., 2, 1); // harmonic 3, selection 2
+    StFlowEvent::SetYCut(3., 5., 0, 1); // harmonic 1, selection 2
+    //StFlowEvent::SetYCut(1.8, 4., 1, 1); // harmonic 2, selection 2
+    StFlowEvent::SetYCut(3., 5., 1, 1); // harmonic 2, selection 2
+    StFlowEvent::SetPtCut(0., 0.5, 1, 1);
+    StFlowEvent::SetYCut(3., 5., 2, 1); // harmonic 3, selection 2
+    StFlowCutEvent::SetEtaSym(0.36, 0.84);
+    //Method using only sin correlation terms for bad acceptance
+    StFlowEvent::SetSinOnly();
+  }
+  
+  //StFlowEvent::SetPid("");
 
-    //StFlowEvent::SetPid("");
-
-    //StFlowEvent::SetMeanSinCosCut(-0.1, 0.1);
+  //StFlowEvent::SetMeanSinCosCut(-0.1, 0.1);
+  
+  // Use weights in the event plane calcualtion
+  StFlowEvent::SetPtWgt();
+  StFlowEvent::SetYWgt();
     
-    // Use weights in the event plane calcualtion
-    StFlowEvent::SetPtWgt();
-    StFlowEvent::SetYWgt();
+  // Calculate v2 from the 1st harmonic event plane
+  //StFlowAnalysisMaker::SetV21();
     
-    // Calculate v2 from the 1st harmonic event plane
-    //StFlowAnalysisMaker::SetV21();
+  //Make striped subevents
+  //StFlowEvent::SetStripes(1);  // either 1 or 2
+  
+  // Use probability PID method
+  //  StFlowEvent::SetProbPid();
     
-    //Make striped subevents
-    //StFlowEvent::SetStripes(1);  // either 1 or 2
-    
-    // Use probability PID method
-    //  StFlowEvent::SetProbPid();
-    
-    //
-    // Event loop
-    //
+  //
+  // Event loop
+  //
   int istat=0, i=1;
  EventLoop: if (i <= nevents && istat!=2) {
    
