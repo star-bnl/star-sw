@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.hh,v 2.0 1999/11/04 19:03:00 ullrich Exp $
+ * $Id: StRootEventManager.hh,v 2.1 2000/05/25 14:44:51 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,8 +12,8 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.hh,v $
- * Revision 2.0  1999/11/04 19:03:00  ullrich
- * Revised to build new StEvent version
+ * Revision 2.1  2000/05/25 14:44:51  ullrich
+ * Removed remaining pieces of the RICH pixel table.
  *
  * Revision 2.1  2000/05/25 14:44:51  ullrich
  * Removed remaining pieces of the RICH pixel table.
@@ -53,7 +53,6 @@ public:
     virtual dst_mon_soft_glob_st*  returnTable_dst_mon_soft_glob(long&) const;           
     virtual dst_mon_soft_l3_st*    returnTable_dst_mon_soft_l3(long&)   const;             
     virtual dst_mon_soft_rich_st*  returnTable_dst_mon_soft_rich(long&) const;           
-    virtual dst_rch_pixel_st*      returnTable_dst_rch_pixel(long&)     const;               
     virtual dst_mon_soft_svt_st*   returnTable_dst_mon_soft_svt(long&)  const;            
     virtual dst_mon_soft_tpc_st*   returnTable_dst_mon_soft_tpc(long&)  const;            
     virtual dst_point_st*          returnTable_dst_point(long&)         const;                   

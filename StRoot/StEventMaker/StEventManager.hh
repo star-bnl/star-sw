@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventManager.hh,v 2.0 1999/11/04 19:03:00 ullrich Exp $
+ * $Id: StEventManager.hh,v 2.1 2000/05/25 14:45:36 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,8 +12,8 @@
  ***************************************************************************
  *
  * $Log: StEventManager.hh,v $
- * Revision 2.0  1999/11/04 19:03:00  ullrich
- * Revised to build new StEvent version
+ * Revision 2.1  2000/05/25 14:45:36  ullrich
+ * Removed remaining pieces of the RICH pixel table.
  *
  * Revision 2.1  2000/05/25 14:45:36  ullrich
  * Removed remaining pieces of the RICH pixel table.
@@ -39,7 +39,6 @@
 #include "tables/St_dst_mon_soft_glob_Table.h"       
 #include "tables/St_dst_mon_soft_l3_Table.h"         
 #include "tables/St_dst_mon_soft_rich_Table.h"       
-#include "tables/St_dst_rch_pixel_Table.h"           
 #include "tables/St_dst_mon_soft_svt_Table.h"        
 #include "tables/St_dst_mon_soft_tpc_Table.h"        
 #include "tables/St_dst_point_Table.h"               
@@ -82,7 +81,6 @@ public:
     virtual dst_mon_soft_glob_st*  returnTable_dst_mon_soft_glob(long&) const =0;           
     virtual dst_mon_soft_l3_st*    returnTable_dst_mon_soft_l3(long&)   const =0;             
     virtual dst_mon_soft_rich_st*  returnTable_dst_mon_soft_rich(long&) const =0;           
-    virtual dst_rch_pixel_st*      returnTable_dst_rch_pixel(long&)     const =0;               
     virtual dst_mon_soft_svt_st*   returnTable_dst_mon_soft_svt(long&)  const =0;            
     virtual dst_mon_soft_tpc_st*   returnTable_dst_mon_soft_tpc(long&)  const =0;            
     virtual dst_point_st*          returnTable_dst_point(long&)         const =0;                   

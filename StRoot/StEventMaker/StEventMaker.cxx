@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.24 2000/05/24 15:48:15 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.25 2000/05/25 14:44:43 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,9 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.24  2000/05/24 15:48:15  ullrich
- * Instance of StEvent now also created if no DST dataset
- * is available.
+ * Revision 2.25  2000/05/25 14:44:43  ullrich
+ * Removed remaining pieces of the RICH pixel table.
  *
  * Revision 2.28  2000/08/17 00:38:48  ullrich
  * Allow loading of tpt tracks.
@@ -133,14 +132,14 @@ using std::pair;
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.24 2000/05/24 15:48:15 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.25 2000/05/25 14:44:43 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.24 2000/05/24 15:48:15 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.25 2000/05/25 14:44:43 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
-    doPrintEventInfo  = kFALSE;
+StEventMaker::StEventMaker(const char *name, const char *title) : StMaker(name)
 {
     if(title) SetTitle(title);
     mEventManager = new StRootEventManager();
@@ -1205,8 +1204,6 @@ StEventMaker::printEventInfo()
     cout << "globtrk:    ";
     if (mEventManager->returnTable_dst_primtrk(nrows))    cout << nrows << endl; else cout << "n/a" << endl;
     cout << "tpt:        ";
-    cout << "rch_pixel:  ";
-    if (mEventManager->returnTable_dst_rch_pixel(nrows))  cout << nrows << endl; else cout << "n/a" << endl;
     if (mEventManager->returnTable_CpyTrk(nrows))         cout << nrows << endl; else cout << "n/a" << endl;
     cout << "dedx:       ";
     if (mEventManager->returnTable_dst_dedx(nrows))       cout << nrows << endl; else cout << "n/a" << endl;
