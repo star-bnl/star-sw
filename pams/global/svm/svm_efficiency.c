@@ -1,5 +1,6 @@
-
+#include <stdio.h>
 #include "svm_efficiency.h"
+
 
 long type_of_call svm_efficiency_(
 		TABLE_HEAD_ST *svt_spt_h, SCS_SPT_ST *svt_spt,
