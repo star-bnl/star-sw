@@ -1,48 +1,74 @@
-/* cfortran.doc */            /* anonymous ftp: zebra.desy.de */
-/* Burkhard Burow, burow@vxdesy.cern.ch, U. of Toronto, 1993. */
+/* cfortran.doc 3.9 */         /* anonymous ftp@zebra.desy.de */
+/* Burkhard Burow  burow@desy.de                 1990 - 1997. */
 
 
-                 cfortran.h 2.8  :  Interfacing C and FORTRAN
+              cfortran.h :  Interfacing C or C++ and FORTRAN
 
 Supports: Alpha and VAX VMS, Alpha OSF, DECstation and VAX Ultrix, IBM RS/6000, 
-          Silicon Graphics, Sun, CRAY, Apollo, HP9000, LynxOS, f2c, NAG f90.
+          Silicon Graphics, Sun, CRAY, Apollo, HP9000, LynxOS, Convex, Absoft,
+          f2c, g77, NAG f90, PowerStation Fortran with Visual C++, NEC SX-4.
+
+C and C++ are generally equivalent as far as cfortran.h is concerned.
+Unless explicitly noted otherwise, mention of C implicitly includes C++.
+C++ compilers tested include: 
+  SunOS> CC +p +w      # Clean compiles.
+  IRIX>  CC            # Clean compiles.
+  IRIX>  CC -fullwarn  # Still some warnings to be overcome.
+  GNU>   g++ -Wall     # Compiles are clean, other than warnings for unused
+                       #   cfortran.h static routines.
+
+N.B.: The best documentation on interfacing C or C++ and Fortran is in
+      the chapter named something like 'Interfacing C and Fortran'
+      to be found in the user's guide of almost every Fortran compiler.
+      Understanding this information for one or more Fortran compilers
+      greatly clarifies the aims and actions of cfortran.h.
+      Such a chapter generally also addresses issues orthogonal to cfortran.h,
+      for example the order of array indices, the index of the first element,
+      as well as compiling and linking issues.
 
 
 0 Short Summary of the Syntax Required to Create the Interface
 --------------------------------------------------------------
 
-e.g. Prototyping a FORTRAN subroutine for C: [other argument types.]
-                               - -
-                              | 0 |
-                              | 1 |
-                               - -
+e.g. Prototyping a FORTRAN subroutine for C:
+
+/* PROTOCCALLSFSUBn is optional for C, but mandatory for C++. */
+
+                 PROTOCCALLSFSUB2(SUB_NAME,sub_name,STRING,PINT)
 #define SUB_NAME(A,B) CCALLSFSUB2(SUB_NAME,sub_name,STRING,PINT, A,B)
-                               - -    -                                       -
-                              | 3 |  |   STRING   BYTE    PBYTE       BYTEV(..)|
-                              | 4 |  |   STRINGV  DOUBLE  PDOUBLE   DOUBLEV(..)|
-                              | : |  |  PSTRING   FLOAT   PFLOAT     FLOATV(..)|
-                              | : |  | PNSTRING   INT     PINT         INTV(..)|
-                              |19 |  | PPSTRING   LOGICAL PLOGICAL LOGICALV(..)|
-                              |20 |  |  PSTRINGV  LONG    PLONG       LONGV(..)|
-                              | : |  |   ZTRINGV  SHORT   PSHORT     SHORTV(..)|
-                              | : |  |  PZTRINGV  ROUTINE PVOID      SIMPLE    |
-                               - -    -                                       -
+
+                                ^     -                                       -
+       number of arguments _____|    |   STRING   BYTE    PBYTE       BYTEV(..)|
+                                  /  |   STRINGV  DOUBLE  PDOUBLE   DOUBLEV(..)|
+                                 /   |  PSTRING   FLOAT   PFLOAT     FLOATV(..)|
+        types of arguments ____ /    | PNSTRING   INT     PINT         INTV(..)|
+                                \    | PPSTRING   LOGICAL PLOGICAL LOGICALV(..)|
+                                 \   |  PSTRINGV  LONG    PLONG       LONGV(..)|
+                                  \  |   ZTRINGV  SHORT   PSHORT     SHORTV(..)|
+                                     |  PZTRINGV  ROUTINE PVOID      SIMPLE    |
+                                      -                                       -
+
 
 e.g. Prototyping a FORTRAN function for C:
+/* PROTOCCALLSFFUNn is mandatory for both C and C++. */
 PROTOCCALLSFFUN1(INT,FUN_NAME,fun_name,STRING)
 #define FUN_NAME(A)  CCALLSFFUN1(FUN_NAME,fun_name,STRING, A)
 
 e.g. calling FUN_NAME from C:    {int a; a = FUN_NAME("hello");}
 
+
 e.g. Creating a FORTRAN-callable wrapper for
      a C function returning void, with a 7 dimensional integer array argument:
+     [Not supported from C++.]
 FCALLSCSUB1(csub_name,CSUB_NAME,csub_name,INTVVVVVVV)
+
 
 e.g. Creating a FORTRAN-callable wrapper for other C functions:
 FCALLSCFUN1(STRING,cfun_name,CFUN_NAME,cfun_name,INT)
            [ ^-- BYTE, DOUBLE, FLOAT, INT, LOGICAL, LONG, SHORT, VOID  
              are other types returned by functions.       ]
        
+
 e.g. COMMON BLOCKs:
 FORTRAN:                         common /fcb/  v,w,x
                                  character *(13) v, w(4), x(3,2)
@@ -50,6 +76,7 @@ C:
 typedef struct { char v[13],w[4][13],x[2][3][13]; } FCB_DEF;
 #define FCB COMMON_BLOCK(FCB,fcb)
 COMMON_BLOCK_DEF(FCB_DEF,FCB);
+FCB_DEF FCB;    /* Define, i.e. allocate memory, in exactly one *.c file. */
 
 e.g. accessing FCB in C:          printf("%.13s",FCB.v);
 
@@ -58,10 +85,10 @@ e.g. accessing FCB in C:          printf("%.13s",FCB.v);
 I Introduction
 --------------
 
-cfortran.h is an easy-to-use powerful bridge between C and FORTRAN. It provides
-a completely transparent, machine independent interface between C and FORTRAN
-routines (= subroutines and/or functions) and global data, i.e. structures and
-COMMON blocks.
+cfortran.h is an easy-to-use powerful bridge between C and FORTRAN.
+It provides a completely transparent, machine independent interface between
+C and FORTRAN routines (= subroutines and/or functions) and global data,
+i.e. structures and COMMON blocks.
 
 The complete cfortran.h package consists of 4 files: the documentation in
 cfortran.doc, the engine cfortran.h, examples in cfortest.c and 
@@ -71,17 +98,28 @@ The cfortran.h package continues to be developed. The most recent version is
 available via anonymous ftp at zebra.desy.de (131.169.2.244).
 
 The examples may be run using one of the following sets of instructions:
-[The first set of instructions is also required with, and only with, ANSI C.]
 
-ANSI> # cfortran.h is distributed with the /**/ prepro-token-catenation kludge.
-ANSI> # To make cfortran.h ANSI compliant and for it to run on:
-ANSI> # -- RS/6000, CRAY, Apollo C >=Rev6.8, LynxOS, gcc, SGI ANSI C --------
-ANSI> # -----------DEC C for OpenVMS 1.3 or OSF, HP 'cc -Aa' ----------------
-ANSI> # -------------------- and other ANSI C compilers ---------------------
-ANSI> # --------- [Non-ANSI compilers CAN NOT use an ANSI cfortran.h.] ------
-ANSI> # Do the following once to cfortran.h to replace all '/**/' with '##":
-unix> mv cfortran.h cf_temp.h &&sed 's/\/\*\*\//##/g' cf_temp.h >cfortran.h
-VMS > ! [Please e-mail the VMS equivalent to the author for inclusion here.]
+N.B. Unlike earlier versions, cfortran.h 3.0 and later versions
+     automatically uses the correct ANSI ## or pre-ANSI /**/
+     preprocessor operator as required by the C compiler.
+
+N.B. As a general rule when trying to determine how to link C and Fortran,
+     link a trivial Fortran program using the Fortran compilers verbose option,
+     in order to see how the Fortran compiler drives the linker. e.g.
+       unix> cat f.f
+                END
+       unix> f77 -v f.f
+       .. lots of info. follows ...
+
+N.B. If using a C main(), i.e. Fortran PROGRAM is not entry of the executable,
+     and if the link bombs with a complaint about
+     a missing "MAIN" (e.g. MAIN__, MAIN_, f90_main or similar),
+     then Fortran has hijacked the entry point to the executable
+     and wishes to call the rest of the executable via "MAIN".
+     This can usually be satisfied by doing e.g. 'cc -Dmain=MAIN__ ...'
+     but often kills the command line arguments in argv and argc.
+     The f77 verbose option, usually -v, may point to a solution.
+     
 
 RS/6000> # Users are strongly urged to use f77 -qextname and cc -Dextname
 RS/6000> xlf -c -qextname cfortex.f
@@ -92,8 +130,12 @@ DECFortran> #Only DECstations with DECFortran for Ultrix RISC Systems.
 DECFortran> cc -c -DDECFortran cfortest.c
 DECFortran> f77 -o cfortest cfortest.o cfortex.f  &&  cfortest
 
+IRIX xxxxxx 5.2 02282015 IP20 mips
 MIPS> # DECstations and Silicon Graphics using the MIPS compilers.
 MIPS> cc -o cfortest cfortest.c cfortex.f -lI77 -lU77 -lF77  &&  cfortest
+MIPS> # Can also let f77 drive linking, e.g.
+MIPS> cc -c cfortest.c
+MIPS> f77 -o cfortest cfortest.o cfortex.f  &&  cfortest
 
 Apollo> # Some 'C compiler 68K Rev6.8' break. [See Section II o) Notes: Apollo]
 Apollo> f77 -c cfortex.f && cc -o cfortest cfortest.c cfortex.o  &&  cfortest
@@ -104,22 +146,24 @@ VMS> fortran cfortex.for
 VMS> link/exec=cfortest cfortest,cfortex
 VMS> run cfortest
 
-Alpha/OSF> cc -c -Dmain=MAIN__ cfortest.c
-Alpha/OSF> f77 -o cfortest cfortest.o cfortex.f  &&  cfortest
+OSF1 xxxxxx V3.0 347 alpha
+Alpha/OSF> # Probably better to let cc drive linking, e.g.
+Alpha/OSF> f77 -c cfortex.f
+Alpha/OSF> cc  -o cfortest cfortest.c cfortex.o -lUfor -lfor -lFutil -lots -lm
+Alpha/OSF> cfortest
+Alpha/OSF> # Else may need 'cc -Dmain=MAIN__' to let f77 drive linking.
 
 Sun> # Some old cc(1) need a little help. [See Section II o) Notes: Sun]
 Sun> f77 -o cfortest cfortest.c cfortex.f -lc -lm  &&  cfortest
-Sun> # Some f77 don't invoke cc and the libF77.a requires _MAIN_, so instead do:
-Sun> f77 -c cfortex.f
-Sun> cc -o cfortest -c -Dmain=MAIN_ cfortest.c cfortex.o -lF77 -lc
-Sun> # or
-Sun> cc -c -Dmain=MAIN_ cfortest.c
-Sun> f77 -o cfortest cfortest.o cfortex.f -lc -lm
+Sun> # Some older f77 may require 'cc -Dmain=MAIN_'.
 
 CRAY> cft77 cfortex.f
 CRAY> cc -c cfortest.c
 CRAY> segldr -o cfortest.e cfortest.o cfortex.o
 CRAY> ./cfortest.e
+
+NEC> cc -c -Xa cfortest.c
+NEC> f77 -o cfortest cfortest.o cfortex.f  &&  cfortest
 
 VAX/Ultrix/cc> # For cc on VAX Ultrix only, do the following once to cfortran.h.
 VAX/Ultrix/cc> mv cfortran.h cftmp.h && grep -v "^#pragma" <cftmp.h >cfortran.h
@@ -146,6 +190,11 @@ HP9000> # Older f77 may need
 HP9000> f77 -c cfortex.f
 HP9000> CC -o cfortest cfortest.c cfortex.o -lI77 -lF77 && cfortest
 
+HP0000> # If old-style f77 +800 compiled objects are required:
+HP9000> # #define hpuxFortran800
+HP9000> cc -c -Aa -DhpuxFortran800 cfortest.c
+HP9000> f77 +800 -o cfortest cfortex.f
+
 f2c> # In the following, 'CC' is any C compiler.
 f2c> f2c -R cfortex.f
 f2c> CC -o cfortest -Df2cFortran cfortest.c cfortex.c -lf2c  &&  cfortest
@@ -157,9 +206,35 @@ NAGf90> # In the following, 'CC' is any C compiler.
 NAGf90> CC -c -DNAGf90Fortran cfortest.c
 NAGf90> f90 -o cfortest cfortest.o cfortex.f &&  cfortest
 
+PC> # On a PC with PowerStation Fortran and Visual_C++
+PC> cl /c cftest.c
+PC> fl32  cftest.obj cftex.for
+
+GNU> # GNU Fortran
+GNU> # See Section VI caveat on using 'gcc -traditional'.
+GNU> gcc -ansi -Wall -O -c -Df2cFortran cfortest.c
+GNU> g77 -ff2c -o cfortest cfortest.o cfortex.f &&  cfortest
+
+AbsoftUNIX> # Absoft Fortran for all UNIX based operating systems.
+AbsoftUNIX> # e.g. Linux or Next on Intel or Motorola68000.
+AbsoftUNIX> # Absoft f77 -k allows Fortran routines to be safely called from C.
+AbsoftUNIX> gcc -ansi -Wall -O -c -DAbsoftUNIXFortran cfortest.c
+AbsoftUNIX> f77 -k -o cfortest cfortest.o cfortex.f && cfortest
+
+CLIPPER> # INTERGRAPH CLIX using CLIPPER C and Fortran compilers.
+CLIPPER> # N.B. - User, not cfortran.h, is responsible for
+CLIPPER> #        f77initio() and f77uninitio() if required.
+CLIPPER> #      - LOGICAL values are not mentioned in CLIPPER doc.s,
+CLIPPER> #        so they may not yet be correct in cfortran.h.
+CLIPPER> #      - K&R mode (-knr or Ac=knr) breaks FLOAT functions
+CLIPPER> #        (see CLIPPER doc.s) and cfortran.h does not fix it up.
+CLIPPER> #        [cfortran.h ok for old sun C which made the same mistake.]
+CLIPPER> acc cfortest.c -c -DCLIPPERFortran
+CLIPPER> af77 cfortex.f cfortest.o -o cfortest
+
 
 By changing the SELECTion ifdef of cfortest.c and recompiling one can try out
-two dozen different few-line examples.
+a few dozen different few-line examples.
 
 
 
@@ -176,8 +251,9 @@ C FORTRAN
 /* Setting up a FORTRAN routine to be called by C.
    ID,...,VMX are merely the names of arguments.
    These tags must be unique w.r.t. each other but are otherwise arbitrary. */
-#define HBOOK1(ID,CHTITLE,NX,XMI,XMA,VMX)                    \
- CCALLSFSUB6(HBOOK1,hbook1,INT,STRING,INT,FLOAT,FLOAT,FLOAT, \
+PROTOCCALLSFSUB6(HBOOK1,hbook1,INT,STRING,INT,FLOAT,FLOAT,FLOAT)
+#define HBOOK1(ID,CHTITLE,NX,XMI,XMA,VMX)                        \
+     CCALLSFSUB6(HBOOK1,hbook1,INT,STRING,INT,FLOAT,FLOAT,FLOAT, \
                ID,CHTITLE,NX,XMI,XMA,VMX) 
 
 4. Source code is NOT required for the C routines exported to FORTRAN, nor for
@@ -224,7 +300,8 @@ Example 1 - cfortran.h has been used to make the C header file hbook.h,
 /* hbook.h */
 #include "cfortran.h"
         :
-#define HBOOK1(ID,CHTITLE,NX,XMI,XMA,VMX) \
+PROTOCCALLSFSUB6(HBOOK1,hbook1,INT,STRING,INT,FLOAT,FLOAT,FLOAT)
+#define HBOOK1(ID,CHTITLE,NX,XMI,XMA,VMX)                        \
      CCALLSFSUB6(HBOOK1,hbook1,INT,STRING,INT,FLOAT,FLOAT,FLOAT, \
                ID,CHTITLE,NX,XMI,XMA,VMX) 
         :
@@ -264,7 +341,8 @@ Example 2 - Many VMS System calls are most easily called from FORTRAN, but
 
 #include "cfortran.h"
 
-#define LIB$SPAWN(command,input_file,output_file) \
+PROTOCCALLSFSUB3(LIB$SPAWN,lib$spawn,STRING,STRING,STRING)
+#define LIB$SPAWN(command,input_file,output_file)          \
      CCALLSFSUB3(LIB$SPAWN,lib$spawn,STRING,STRING,STRING, \
                   command,input_file,output_file)
 
@@ -311,8 +389,8 @@ routines.
 II Using cfortran.h
 -------------------
 
-The user is asked to look at the source files CFORTEST.C and CFORTEX.FOR for
-clarification by example.
+The user is asked to look at the source files cfortest.c and cfortex.f
+for clarification by example.
 
 o) Notes: 
 
@@ -324,18 +402,21 @@ can be overridden by defining,
 one of the following before including cfortran.h:
  NAGf90Fortran   f2cFortran  hpuxFortran  apolloFortran  sunFortran
   IBMR2Fortran  CRAYFortran  mipsFortran     DECFortran  vmsFortran
+ CONVEXFortran       PowerStationFortran          AbsoftUNIXFortran
+     SXFortran
 This also allows crosscompilation.
-NAGf90Fortran, f2cFortran, DECFortran must be requested by the user if wanted.
+If wanted, NAGf90Fortran, f2cFortran, DECFortran and AbsoftUNIXFortran
+must be requested by the user.
 
 o /**/
-  cfortran.h (ab)uses the comment kludge, /**/, when the ANSI C preprocessor
-catenation operator, ##, doesn't exist. In at least MIPS C, this kludge is
+  cfortran.h (ab)uses the comment kludge /**/ when the ANSI C preprocessor
+catenation operator ## doesn't exist. In at least MIPS C, this kludge is
 sensitive to  blanks surrounding arguments to macros.
   Therefore, for applications using non-ANSI C compilers, the argtype_i,
 routine_name, routine_type and common_block_name arguments to the
 PROTOCCALLSFFUNn, CCALLSFSUB/FUNn, FCALLSCSUB/FUNn and COMMON_BLOCK macros 
---- MUST NOT --- be surrounded by any white space characters, [e.g. blanks,
-tabs, newlines.]
+--- MUST NOT --- be followed by any white space characters such as
+blanks, tabs or newlines.
 
 o LOGICAL
   FORTRAN LOGICAL values of .TRUE. and .FALSE. do not agree with the C
@@ -398,19 +479,87 @@ BYTE. If neither is defined, cfortran.h assumes SIGNED_BYTE.
 
 o CRAY
   The type DOUBLE in cfortran.h corresponds to FORTRAN's DOUBLE PRECISION.
-This implies DOUBLE corresponds to C's double on all machines except for the
-CRAY where C's double is the same as float and DOUBLE corresponds instead to
-C's long double. Therefore when moving a mixed C and FORTRAN to/from the CRAY,
-either the C code will have to change, or the FORTRAN code and cfortran.h
-commands will have to change.
+  The type FLOAT  in cfortran.h corresponds to FORTRAN's REAL.
 
-To help applications move effortlessly to/from the CRAY, cfortran.h defines the
-preprocessor constant DOUBLE_PRECISION, which declares variables which are
-equivalent to FORTRAN's DOUBLE PRECISION on all machines, including CRAY.
+On a classic CRAY [i.e. all models except for the t3e]:
+( 64 bit) C float       == C double == Fortran REAL
+(128 bit) C long double             == Fortran DOUBLE PRECISION
+Therefore when moving a mixed C and FORTRAN app. to/from a classic CRAY,
+either the C code will have to change,
+or the FORTRAN code and cfortran.h declarations will have to change.
+DOUBLE_PRECISION is a cfortran.h macro which provides the former option,
+i.e. the C code is automatically changed.
+DOUBLE_PRECISION is 'long double' on classic CRAY and 'double' elsewhere.
+DOUBLE_PRECISION thus corresponds to FORTRAN's DOUBLE PRECISION
+on all machines, including classic CRAY.
+
+On a classic CRAY with the fortran compiler flag '-dp':
+Fortran DOUBLE PRECISION thus is also the faster 64bit type.
+(This switch is often used since the application is usually satisfied by
+ 64 bit precision and the application needs the speed.)
+DOUBLE_PRECISION is thus not required in this case,
+since the classic CRAY behaves like all other machines.
+If DOUBLE_PRECISION is used nonetheless, then on the classic CRAY
+the default cfortran.h behavior must be overridden,
+for example by the C compiler option '-DDOUBLE_PRECISION=double'.
+
+On a CRAY t3e:
+(32 bit) C float                   == Fortran Unavailable
+(64 bit) C double == C long double == Fortran REAL == Fortran DOUBLE PRECISION
+Notes:
+- (32 bit) is available as Fortran REAL*4 and
+  (64 bit) is available as Fortran REAL*8.
+  Since cfortran.h is all about more portability, not about less portability,
+  the use of the nonstandard REAL*4 and REAL*8 is strongly discouraged.
+- Fortran DOUBLE PRECISION is folded to REAL with the following warning:
+    'DOUBLE PRECISION is not supported on this platform.  REAL will be used.'
+  Similarly, Fortran REAL*16 is mapped to REAL*8 with a warning.
+This behavior differs from that of other machines, including the classic CRAY.
+FORTRAN_REAL is thus introduced for the t3e,
+just as DOUBLE_PRECISION is introduced for the classic CRAY.
+FORTRAN_REAL is 'double' on t3e and 'float' elsewhere.
+FORTRAN_REAL thus corresponds to FORTRAN's REAL on all machines, including t3e.
+
 
 o f2c
   f2c, by default promotes REAL functions to double. cfortran.h does not (yet)
 support this, so the f2c -R option must be used to turn this promotion off.
+
+o f2c
+[Thanks to Dario Autiero for pointing out the following.]
+f2c has a strange feature in that either one or two underscores are appended
+to a Fortran name of a routine or common block,
+depending on whether or not the original name contains an underscore.
+
+   S.I. Feldman et al., "A fortran to C converter",
+   Computing Science Technical Report No. 149.
+
+   page 2, chapter 2: INTERLANGUAGE conventions
+   ...........
+   To avoid conflict with the names of library routines and with names that
+   f2c generates,
+   Fortran names may have one or two underscores appended. Fortran names are
+   forced to lower case (unless the -U option described in Appendix B is in
+   effect); external names, i.e. the names of fortran procedures and common
+   blocks, have a single underscore appended if they do not contain any
+   underscore and have a pair of underscores appended if they do contain
+   underscores. Thus fortran subroutines names ABC, A_B_C and A_B_C_ result
+   in C functions named abc_, a_b_c__ and a_b_c___.
+   ...........
+
+cfortran.h is unable to change the naming convention on a name by name basis.
+Fortran routine and common block names which do not contain an underscore
+are unaffected by this feature.
+Names which do contain an underscore may use the following work-around:
+
+/* First 2 lines are a completely standard cfortran.h interface
+   to the Fortran routine E_ASY . */
+                  PROTOCCALLSFSUB2(E_ASY,e_asy, PINT, INT)
+#define E_ASY(A,B)     CCALLSFSUB2(E_ASY,e_asy, PINT, INT, A, B)
+#ifdef f2cFortran
+#define e_asy_ e_asy__
+#endif
+/* Last three lines are a work-around for the strange f2c naming feature. */
 
 o NAG f90
   The Fortran 77 subset of Fortran 90 is supported. Extending cfortran.h to 
@@ -424,7 +573,7 @@ common block names instead of the usual _. To fix, add this to cfortran.h:
 #ifdef old_NAG_f90_CB_COMMON
 #define COMMON_BLOCK                 CFC_  /* for all other Fortran compilers */
 #else
-#define COMMON_BLOCK(UN,LN)          LN/**/_CB
+#define COMMON_BLOCK(UN,LN)          _(LN,_CB)
 #endif
 
 o RS/6000
@@ -457,11 +606,17 @@ K&R C, as with old HP compilers which don't support function prototyping.
 cfortran.h has to be informed that K&R C is to being used, e.g.
 HP9000> cc -D__CF__KnR -c source.c
 
+o AbsoftUNIXFortran
+By default, cfortran.h follows the default AbsoftUNIXFortran and prepends _C
+to each COMMON BLOCK name. To override the cfortran.h behavior
+#define COMMON_BLOCK(UN,LN) before #including cfortran.h.
+[Search for COMMON_BLOCK in cfortran.h for examples.]
+
 o Apollo
 On at least one release, 'C compiler 68K Rev6.8(168)', the default C 
 preprocessor, from cc -A xansi or cc -A ansi, enters an infinite loop when 
 using cfortran.h. This Apollo bug can be circumvented by using:
-     . The standard cfortran.h, i.e. do not convert the '/**/' to '##'.
+     . cc -DANSI_C_preprocessor=0 to force use of /**/, instead of '##'.
  AND . The pre-ANSI preprocessor, i.e. use cc -Yp,/usr/lib
 The same problem with a similar solution exists on the HP.
 
@@ -570,14 +725,6 @@ caveats for expressions in arguments apply. The expressions to the routines may
 be evaluated more than once, leading to lower performance and in the worst case
 bizarre bugs.
 
-o Not supported:
-- C calling FORTRAN functions with (P)ZTRINGV arguments, can't have as an
-  argument a call to a FORTRAN function with (P)ZTRINGV arguments. 
-- Similarly disallowed is nesting of C calls to any FORTRAN functions with
-  (P)ZTRINGV arguments, recursive [which is an extension to FORTRAN/77], or 
-  otherwise.
-[The restrictions are actually less severe, but these are sufficient.]
-
 o For those who wish to use cfortran.h in large applications. [See Section IV.]
 This release is intended to make it easy to get applications up and running. 
 This implies that applications are not as efficient as they could be:
@@ -594,26 +741,23 @@ This implies that applications are not as efficient as they could be:
 i) Calling FORTRAN routines from C:
    --------------------------------
 
-FORTRAN FUNCTIONs are prototyped by the following macro.
-[FORTRAN SUBROUTINEs don't require a similar instruction.]
-
-PROTOCCALLSFFUNn(routine_type,ROUTINE_NAME,routine_name,argtype_1,...,argtype_n)
-
-
-The FORTRAN routines are defined by one of the following two instructions.
+The FORTRAN routines are defined by one of the following two instructions:
 
 for a SUBROUTINE:
+/* PROTOCCALLSFSUBn is optional for C, but mandatory for C++. */
+PROTOCCALLSFSUBn(ROUTINE_NAME,routine_name,argtype_1,...,argtype_n)
 #define     Routine_name(argname_1,..,argname_n)               \
 CCALLSFSUBn(ROUTINE_NAME,routine_name,argtype_1,...,argtype_n, \
                          argname_1,..,argname_n) 
 
 for a FUNCTION:
+PROTOCCALLSFFUNn(routine_type,ROUTINE_NAME,routine_name,argtype_1,...,argtype_n)
 #define     Routine_name(argname_1,..,argname_n)               \
 CCALLSFFUNn(ROUTINE_NAME,routine_name,argtype_1,...,argtype_n, \
                          argname_1,..,argname_n) 
 
 Where:
-'n' = 0->10 [SUBROUTINE's ->20] (easily expanded in cfortran.h to > 10 [20]) is 
+'n' = 0->14 [SUBROUTINE's ->20] (easily expanded in cfortran.h to > 14 [20]) is 
     the number of arguments to the routine.
 Routine_name = C       name of the routine (IN UPPER CASE LETTERS).[see 2.below]
 ROUTINE_NAME = FORTRAN name of the routine (IN UPPER CASE LETTERS).
@@ -660,17 +804,16 @@ To define types requiring little or no massaging when passed between Fortran
 and C, the pseudo argument type SIMPLE may be used.
 For a user defined type called 'newtype', the definitions required are:
 
-/* The follwing 8 lines are required verbatim, 'newtype' is the name of the 
-new user defined argument type.
+/* The following 7 lines are required verbatim.
+   'newtype' is the name of the new user defined argument type.
 */
-#define Vnewtype              VSIMPLE
-#define SEP_newtype        SEP_SIMPLE
-#define INT_newtype        INT_SIMPLE
-#define Znewtype              ZSIMPLE
-#define STR_newtype        STR_SIMPLE
-#define CCnewtype            CCSIMPLE
-#define AAnewtype( T,A,B)     Bnewtype(T,A)   /* Argument B is not used here. */
-#define Unewtype(  T,A)       Nnewtype(T,A)
+#define newtype_cfV(  T,A,B,F)       SIMPLE_cfV(T,A,B,F)
+#define newtype_cfSEP(T,  B)         SIMPLE_cfSEP(T,B)
+#define newtype_cfINT(N,A,B,X,Y,Z)   SIMPLE_cfINT(N,A,B,X,Y,Z)
+#define newtype_cfSTR(N,T,A,B,C,D,E) SIMPLE_cfSTR(N,T,A,B,C,D,E)
+#define newtype_cfCC( T,A,B)         SIMPLE_cfCC(T,A,B)
+#define newtype_cfAA( T,A,B)         newtype_cfB(T,A) /* Argument B not used. */
+#define newtype_cfU(  T,A)           newtype_cfN(T,A)
 
 /* 'parameter_type(A)' is a declaration for 'A' and describes the type of the 
 parameter expected by the Fortran function.  This type will be used in the
@@ -680,23 +823,23 @@ Valid 'parameter_type(A)' include: int A
                                    void (*A)()
                                    double A[17]
 */
-#define Nnewtype(  T,A)     parameter_type(A) /* Argument T is not used here. */
+#define newtype_cfN(  T,A)     parameter_type(A)      /* Argument T not used. */
 
 /* Before any argument of the new type is passed to the Fortran routine, it may
 be massaged as given by 'massage(A)'.
 */
-#define Bnewtype(  T,A)     massage(A)        /* Argument T is not used here. */
+#define newtype_cfB(  T,A)     massage(A)             /* Argument T not used. */
 
-An example of a simple user defined type is given cfortex.for and cfortest.c.
-Two uses of SIMPLE user defined types are [don't show the 8 verbatim #defines]:
+An example of a simple user defined type is given cfortex.f and cfortest.c.
+Two uses of SIMPLE user defined types are [don't show the 7 verbatim #defines]:
 
 /* Pass the address of a structure, using a type called PSTRUCT */
-#define NPSTRUCT(  T,A)        void *A
-#define BPSTRUCT(  T,A)       (void *) &(A)
+#define PSTRUCT_cfN(  T,A)        void *A
+#define PSTRUCT_cfB(  T,A)       (void *) &(A)
 
 /* Pass an integer by value, (not standard F77 ), using a type called INTVAL */
-#define NINTVAL(   T,A)      int A
-#define BINTVAL(   T,A)         (A)
+#define INTVAL_cfN(   T,A)      int A
+#define INTVAL_cfB(   T,A)         (A)
 
 [If using VAX VMS, surrounding the #defines with "#pragma (no)standard" allows
  the %CC-I-PARAMNOTUSED messages to be avoided.]
@@ -707,9 +850,8 @@ types are less of a risk since they require so little effort in their creation.
 If a user defined type is required in more than one C header file of interfaces
 to libraries of Fortran routines, good programming practice, and ease of code
 maintenance, suggests keeping any user defined type within a single file which
-is #included as required.
-In fact, argument 'A' in Nnewtype(T,A), and its change to the definition of
-Unewtype(T,A), was first introduced with version 2.6.
+is #included as required. To date, changes to the SIMPLE macros were introduced
+in versions 2.6, 3.0 and 3.2 of cfortran.h.
 
 
 2. Routine_name is the name of the macro which the C programmer will use in
@@ -756,7 +898,14 @@ position. i.e. The padding blanks are never visible to the C code.
 FORTRAN routine. On return, the argument has all trailing blanks removed,
 regardless of whether the argument was a pointer or an array.
 
-- (P)STRINGV - Only supports char arrays. e.g. char bb[6][8];
+- (P)STRINGV - Passes a 1- or 2-dimensional char array. e.g. char a[7],b[6][8];
+STRINGV may thus also pass a string constant, e.g. "hiho".
+(P)STRINGV does NOT pass a pointer, e.g. char *, to either a 1- or a
+2-dimensional array, since it cannot determine the array dimensions.
+A pointer can only be passed using (P)ZTRINGV.
+N.B. If a C routine receives a character array argument, e.g. char a[2][3],
+     such an argument is actually a pointer and my thus not be passed by
+     (P)STRINGV. Instead (P)ZTRINGV must be used.
 
 - STRINGV - The elements of the argument are copied into space malloc'd, and
 each element is padded with blanks. The useful size of each element is the same
@@ -775,24 +924,36 @@ are stripped off.
 
 
 5. (P)ZTRINGV:
-- (P)ZTRINGV - is identical to (P)STRINGV, except that the dimensions of the
-array of strings is explicitly specified, [users of (P)ZTRINGV should examine
-cfortest.c for a working example.]:
+- (P)ZTRINGV - is identical to (P)STRINGV,
+except that the dimensions of the array of strings is explicitly specified,
+which thus also allows a pointer to be passed.
+(P)ZTRINGV can thus pass a 1- or 2-dimensional char array, e.g. char b[6][8],
+or it can pass a pointer to such an array, e.g. char *p;.
+ZTRINGV may thus also pass a string constant, e.g. "hiho".
+If passing a 1-dimensional array, routine_name_ELEMS_j (see below) must be 1.
+[Users of (P)ZTRINGV should examine cfortest.c for examples.]:
 
-- (P)ZTRINGV must replace (P)STRINGV wherever the sizeof() can't be used to
-determine the dimensions of the vector of strings. e.g. when calling FORTRAN
-from C with a char[][] which the C routine receives as an argument.
+- (P)ZTRINGV must thus be used instead of (P)STRINGV whenever sizeof()
+can't be used to determine the dimensions of the array of string or strings.
+e.g. when calling FORTRAN from C with a char * received by C as an argument.
 
-- To specify the numbers of elements:
+- There is no (P)ZTRING type, since (P)ZTRINGV can pass a 1-dimensional
+array or a pointer to such an array, e.g. char a[7], *b;
+If passing a 1-dimensional array, routine_name_ELEMS_j (see below) must be 1.
+
+- To specify the numbers of elements,
+routine_name_ELEMS_j and routine_name_ELEMLEN_j must be defined as shown below
+before interfacing the routine with CCALLSFSUBn, PROTOCCALLSFFUNn, etc.
+
 #define routine_name_ELEMS_j   ZTRINGV_ARGS(k)       
                                  [..ARGS for subroutines, ..ARGF for functions.]
 or
 #define routine_name_ELEMS_j   ZTRINGV_NUM(l)
 Where: routine_name is as above.
        j            [1-n], is the argument being specifying.
-       k            [1-n], the value of this argument is the dynamic number of 
-                    elements for argument j. The argument must be of type 
-                    (P)BYTE, (P)DOUBLE, (P)FLOAT, (P)INT, (P)LONG or (P)SHORT.
+       k            [1-n], the value of the k'th argument is the dynamic number
+                    of elements for argument j. The k'th argument must be
+                    of type BYTE, DOUBLE, FLOAT, INT, LONG or SHORT.
        l            the number of elements for argument j. This must be an
                     integer constant available at compile time.
                     i.e. it is static.
@@ -830,7 +991,7 @@ See ii) 4. of this section for when and how to redefine fcallsc.
 ROUTINE was introduced with cfortran.h version 2.6. Earlier versions of
 cfortran.h used PVOID to pass external procedures as arguments. Using PVOID for
 this purpose is no longer recommended since it won't work 'as is' for
-apolloFortran.
+apolloFortran, hpuxFortran800, AbsoftUNIXFortran.
 
 7. CRAY only: 
 In a given piece of source code, where FFUNC is any FORTRAN routine,
@@ -858,7 +1019,7 @@ for all other C functions:
 FCALLSCFUNn(routine_type,Routine_name,ROUTINE_NAME,routine_name,argtype_1,...,argtype_n)
 
 Where:
-'n' = 0->10 (easily expanded to > 10) stands for the number of arguments to the 
+'n' = 0->14 (easily expanded to > 14) stands for the number of arguments to the 
     routine.
 Routine_name = the C       name of the routine. [see 9. below]
 ROUTINE_NAME = the FORTRAN name of the routine (IN UPPER CASE LETTERS).
@@ -873,7 +1034,7 @@ argtype_i    = the type of argument passed to the FORTRAN routine and must be
              = BYTEV, DOUBLEV, FLOATV, INTV, LOGICALV, LONGV, SHORTV, STRINGV.
              For vectors of vectors, 2 dim. arrays use
              = BYTEVV, DOUBLEVV, FLOATVV, INTVV, LOGICALVV, LONGVV, SHORTVV.
-             For n-dim. arrays use [currently implement n=1,2. n>2 easily done.]
+             For n-dim. arrays use
              = BYTEV..nV's..V, DOUBLEV..V, FLOATV..V, INTV..V, LOGICALV..V, 
                LONGV..V, SHORTV..V.
              For routines changing the values of an argument, the keyword is 
@@ -889,6 +1050,14 @@ argtype_i    = the type of argument passed to the FORTRAN routine and must be
 
 
 Notes:
+
+0. For Fortran calling C++ routines, C++ does NOT easily allow support for: 
+   STRINGV.
+   BYTEVV, DOUBLEVV, FLOATVV, INTVV, LOGICALVV, LONGVV, SHORTVV.
+   BYTEV..V, DOUBLEV..V, FLOATV..V, INTV..V, LOGICALV..V, LONGV..V, SHORTV..V.
+Though there are ways to get around this restriction,
+the restriction is not serious since these types are unlikely to be used as
+arguments for a C++ routine.
 
 1. FCALLSCSUB/FUNn expect that the routine to be 'wrapped' has been properly
 prototyped, or at least declared.
@@ -1030,8 +1199,9 @@ This mechanism is provided for two reasons:
 For arguments passed via PPSTRING, the argument passed may also be an array of
 strings.
 
+
 7. ROUTINE
-ANSI C requires that the type of the value returned by the routine by known,
+ANSI C requires that the type of the value returned by the routine be known,
 For all ROUTINE arguments passed from Fortran to C, the type of ROUTINE is
 specified by defining a cast as follows:
 
@@ -1048,13 +1218,39 @@ e.g. To create a Fortran wrapper for qsort(3C):
 FCALLSCSUB4(qsort,FQSORT,fqsort,PVOID,INT,INT,ROUTINE)
 
 In order to maintain backward compatibility, cfortran.h defines a generic cast
-for ROUTINE_1, ROUTINE_2, ..., ROUTINE_10. The user's definition is therefore
+for ROUTINE_1, ROUTINE_2, ..., ROUTINE_14. The user's definition is therefore
 strictly required only for DEC C, which at the moment is the only compiler
 which insists on the correct cast for pointers to functions.
 
-Apollo only:
-The Apollo passes Fortran routines via double indirection, so unless you know
-what you are doing, do NOT redefine ROUTINE_1, ROUTINE_2, ..., ROUTINE_10.
+When using the ROUTINE argument inside some Fortran code:
+- it is difficult to pass a C routine as the parameter,
+  since in many Fortran implementations,
+  Fortran has no access to the normal C namespace.
+  e.g. For most UNIX,
+       Fortran implicitly only has access to C routines ending in _.
+  If the calling Fortran code receives the routine as a parameter
+  it can of course easily pass it along.
+- if a Fortran routine is passed directly as the parameter,
+  the called C routine must call the parameter routine
+  using the Fortran argument passing conventions.
+- if a Fortran routine is to be passed as the parameter,
+  but if Fortran can be made to pass a C routine as the parameter,
+  then it may be best to pass a C-callable wrapper for the Fortran routine.
+  The called C routine is thus spared all Fortran argument passing conventions.
+  cfortran.h can be used to create such a C-callable wrapper
+  to the parameter Fortran routine.
+
+ONLY PowerStationFortran:
+This Fortran provides no easy way to pass a Fortran routine as an argument to a
+C routine. The problem arises because in Fortran the stack is cleared by the
+called routine, while in C/C++ it is cleared by the caller.
+The C/C++ stack clearing behavior can be changed to that of Fortran by using
+stdcall__ in the function prototype. The stdcall__ cannot be applied in this
+case since the called C routine expects the ROUTINE parameter to be a C routine
+and does not know that it should apply stdcall__.
+In principle the cfortran.h generated Fortran callable wrapper for the called C
+routine should be able to massage the ROUTINE argument such that stdcall__ is
+performed, but it is not yet known how this could be easily done.
 
 
 8. THE FOLLOWING INSTRUCTIONS ARE NOT REQUIRED FOR VAX VMS
@@ -1095,7 +1291,8 @@ element beginning with 2 blank, ' ', characters.
 9. INSTRUCTIONS REQUIRED ONLY FOR FORTRAN COMPILERS WHICH GENERATE
                 -------------     
    ROUTINE NAMES WHICH ARE UNDISTINGUISHABLE FROM C ROUTINE NAMES
-   i.e. VAX VMS 
+   i.e. VAX VMS
+        AbsoftUNIXFortran
         HP9000      if not using the +ppu      option of f77
         IBM RS/6000 if not using the -qextname option of xlf
    Call them the same_namespace compilers.
@@ -1155,8 +1352,9 @@ In the above, the C compiler generates the original routine with the name
 'name_' and a wrapper called 'NAME'. This assumes that the name of the routine,
 as seen by the C programmer, is not in upper case. The VAX VMS linker is not
 case sensitive, allowing cfortran.h to export the upper case name as the
-wrapper, which then doesn't conflict with the routine name in C. Since the IBM
-and the HP have case sensitive linkers this technique is not available to them.
+wrapper, which then doesn't conflict with the routine name in C. Since the IBM,
+HP and AbsoftUNIXFortran platforms have case sensitive linkers
+this technique is not available to them.
 
 The above technique is required even if the C name is in mixed case, see 
 Option a) for the other compilers, but is obviously not required when 
@@ -1224,7 +1422,7 @@ The original behavior of FCALLSCSUB/FUN/n, where FORTRAN routine names are left
 identical to those of C, is returned using:
 
 #undef  fcallsc
-#define fcallsc orig_fcallsc
+#define fcallsc(UN,LN) orig_fcallsc(UN,LN)
 
 
 In C, when passing a C routine, i.e. its wrapper, as an argument to a FORTRAN
@@ -1232,8 +1430,9 @@ routine, the FORTRAN name declared is used and the correct fcallsc must be in
 effect. E.g. Passing 'name' and 'routine' of the above examples to the FORTRAN
 routines, FT1 and FT2, respectively:
 
-#undef  fcallsc                  /* This might not be needed            */
-#define fcallsc orig_fcallsc     /* if fcallsc is already orig_fcallsc. */
+/* This might not be needed if fcallsc is already orig_fcallsc. */
+#undef  fcallsc
+#define fcallsc(UN,LN) orig_fcallsc(UN,LN)
 FT1(C_FUNCTION(CFNAME,cfname));
 
 #undef  fcallsc
@@ -1251,6 +1450,7 @@ DESCRIBED HERE, NOTE 9. of II ii),
 APPLY ONLY FOR VAX VMS,
                IBM RS/6000 WITHOUT THE -qextname OPTION FOR xlf, OR
                HP-UX       WITHOUT THE +ppu      OPTION FOR f77
+               AbsoftUNIXFortran
 AND APPLY ONLY WHEN CREATING WRAPPERS WHICH ENABLE FORTRAN TO CALL C ROUTINES.
 
 
@@ -1258,23 +1458,71 @@ AND APPLY ONLY WHEN CREATING WRAPPERS WHICH ENABLE FORTRAN TO CALL C ROUTINES.
 iii) Using C to manipulate FORTRAN COMMON BLOCKS:
      -------------------------------------------------------
 
-FORTRAN common blocks are set up with the following two constructs:
+FORTRAN common blocks are set up with the following three constructs:
 
+1.
 #define Common_block_name COMMON_BLOCK(COMMON_BLOCK_NAME,common_block_name)
 
 Common_block_name is in UPPER CASE. 
 COMMON_BLOCK_NAME is in UPPER CASE.
 common_block_name is in lower case. 
 [Common_block_name actually follows the same 'rules' as Routine_name in Note 2.
-of II i).] This construct exists to ensure that C code accessing the common
+ of II i).] This construct exists to ensure that C code accessing the common
 block is machine independent.
 
+2.
 COMMON_BLOCK_DEF(TYPEDEF_OF_STRUCT, Common_block_name);
 
 where 
 typedef { ... } TYPEDEF_OF_STRUCT;
 declares the structure which maps on to the common block. The #define of
 Common_block_name must come before the use of COMMON_BLOCK_DEF.
+
+3.
+In exactly one of the C source files, storage should be set aside for the
+common block with the definition: 
+
+TYPEDEF_OF_STRUCT  Common_block_name;
+
+The above definition may have to be omitted on some machines for a common block
+which is initialized by Fortran BLOCK DATA or is declared with a smaller size
+in the C routines than in the Fortran routines.
+
+The rules for common blocks are not well defined when linking/loading a mixture
+of C and Fortran, but the following information may help resolve problems.
+
+From the 2nd or ANSI ed. of K&R C, p.31, last paragraph:
+i)
+ An external variable must be defined, exactly once, outside of any function;
+ this sets aside storage for it.
+ii)
+ The variable must also be declared in each function that wants to access it;
+ ...
+ The declaration ... may be implicit from context.
+
+In Fortran, every routine says 'common /bar/ foo',
+i.e. part ii) of the above, but there's no part i) requirement.
+cc/ld on some machines don't require i) either.
+Therefore, when handling Fortran, and sometimes C,
+the loader/linker must automagically set aside storage for common blocks.
+
+Some loaders, including at least one for the CRAY, turn off the
+'automagically set aside storage' capability for Fortran common blocks,
+if any C object declares that common block.
+Therefore, C code should define, i.e. set aside storage,
+for the the common block as shown above.
+
+e.g.
+C Fortran
+      common /fcb/  v,w,x
+      character *(13) v, w(4), x(3,2)
+
+/* C */
+typedef struct { char v[13],w[4][13],x[2][3][13]; } FCB_DEF;
+#define Fcb COMMON_BLOCK(FCB,fcb)
+COMMON_BLOCK_DEF(FCB_DEF,Fcb);
+FCB_DEF Fcb;      /* Definition, which sets aside storage for Fcb, */
+                  /* may appear in at most one C source file.      */
 
 
 C programs can place a string (or a multidimensional array of strings) into a
@@ -1319,7 +1567,7 @@ trailing blanks.
 
 
 cfortran.h USERS ARE STRONGLY URGED TO EXAMINE THE COMMON BLOCK EXAMPLES IN
-CFORTEST.C AND CFORTEX.FOR. The use of strings in common blocks is
+cfortest.c AND cfortex.f. The use of strings in common blocks is
 demonstrated, along with a suggested way for C to imitate FORTRAN EQUIVALENCE'd
 variables.
 
@@ -1409,16 +1657,19 @@ constants if creating an application.h for compiler other than that of the
 preprocessor being used, e.g. cpp -Umips -DCRAY ... ] :
 
 #include "cfortran.h"
+PROTOCCALLSFSUB6(HBOOK1,hbook1,INT,STRING,INT,FLOAT,FLOAT,FLOAT)
 /*#define HBOOK1(ID,CHTITLE,NX,XMI,XMA,VMX)                 \*/
      CCALLSFSUB6(HBOOK1,hbook1,INT,STRING,INT,FLOAT,FLOAT,FLOAT, \
                  ID,CHTITLE,NX,XMI,XMA,VMX) 
 
+A function prototype is produced by the PROTOCCALLSFSUB6(...).
 Interface code is produced, based on the 'variables', 
 ID,CHTITLE,NX,XMI,XMA,VMX, which will correctly massage a HBOOK1 call.
 Therefore, adding the #define line:
 
+'prototype code'
 #define HBOOK1(ID,CHTITLE,NX,XMI,XMA,VMX)                 \
- 'interface_code'(ID,CHTITLE,NX,XMI,XMA,VMX)
+ 'interface code'(ID,CHTITLE,NX,XMI,XMA,VMX)
 
 which is placed into final_application.h.
 
@@ -1466,8 +1717,175 @@ able to offer alternate kludges.
 
 
 
-VI History and Acknowledgements
--------------------------------
+VI Bugs in vendors C compilers and other curiosities
+----------------------------------------------------
+
+1. ULTRIX xxxxxx 4.3 1 RISC
+
+Condolences to long suffering ultrix users!
+DEC supplies a working C front end for alpha/OSF, but not for ultrix.
+
+From K&R ANSI C p. 231:
+   ultrix> cat cat.c
+   #define cat(x, y) x ## y
+   #define xcat(x,y) cat(x,y)
+   cat(cat(1,2),3)
+   xcat(xcat(1,2),3)
+   ultrix> cc -E cat.c
+   123                  <---- Should be: cat(1,2)3
+   123                  <---- Correct.
+   ultrix> 
+
+The problem for cfortran.h, preventing use of -std and -std1:
+   ultrix> cat c.c
+   #define cat(x, y) x ## y
+   #define xcat(x,y) cat(x,y)
+   #define AB(X) X+X
+   #define C(E,F,G)  cat(E,F)(G)
+   #define X(E,F,G) xcat(E,F)(G)
+   C(A,B,2)
+   X(A,B,2)
+   ultrix> cc -std1 -E c.c
+   2+2  
+   AB  (2)              <---- ?????????????
+   ultrix>
+   ultrix> cc -std0 -E c.c
+   2+2  
+   AB(2)                <---- ?????????????
+   ultrix>
+
+Due to further ultrix preprocessor problems,
+for all definitions of definitions with arguments,
+cfortran.h >= 3.0 includes the arguments and recommends the same,
+even though it is not required by ANSI C.
+e.g. Users are advised to do
+   #define fcallsc(UN,LN) orig_fcallsc(UN,LN)
+instead of
+   #define fcallsc        orig_fcallsc
+since ultrix fails to properly preprocess the latter example.
+CRAY used to (still does?) occasionally trip up on this problem.
+
+
+2. ConvexOS convex C210 11.0 convex
+
+In a program with a C main, output to LUN=6=* from Fortran goes into
+$pwd/fort.6 instead of stdout. Presumably, a magic incantation can be called
+from the C main in order to properly initialize the Fortran I/O.
+
+
+3. SunOS 5.3 Generic_101318-69 sun4m sparc
+
+The default data and code alignments produced by cc, gcc and f77 are compatible.
+If deviating from the defaults, consistent alignment options must be used
+across all objects compiled by cc and f77. [Does gcc provide such options?]
+
+
+4. SunOS 5.3 Generic_101318-69 sun4m sparc with cc: SC3.0.1 13 Jul 1994
+   or equivalently
+   ULTRIX 4.4 0 RISC using cc -oldc
+   are K&R C preprocessors that suffer from infinite loop macros, e.g.
+
+  zedy03> cat src.c
+  #include "cfortran.h"
+                            PROTOCCALLSFFUN1(INT,FREV,frev, INTV)
+  #define FREV(A1)               CCALLSFFUN1(    FREV,frev, INTV, A1)
+  /* To avoid the problem, deletete these ---^^^^--- spaces.    */
+  main() { static int a[] = {1,2}; FREV(a); return EXIT_SUCCESS; }
+
+  zedy03> cc -c -Xs -v -DMAX_PREPRO_ARGS=31 -D__CF__KnR src.c
+  "src.c", line 4: FREV: actuals too long
+  "src.c", line 4: FREV: actuals too long
+  .... 3427 more lines of the same message
+  "src.c", line 4: FREV: actuals too long
+  cc : Fatal error in /usr/ccs/lib/cpp
+  Segmentation fault (core dumped) 
+
+
+5. Older sun C compilers
+
+To link to f77 objects, older sun C compilers require the math.h macros:
+
+#define RETURNFLOAT(x)   { union {double _d; float _f; } _kluge; \
+                           _kluge._f = (x); return _kluge._d;   }
+#define ASSIGNFLOAT(x,y) { union {double _d; float _f; } _kluge; \
+                           _kluge._d = (y); x = _kluge._f;      }
+
+Unfortunately, in at least some copies of the sun math.h, the semi-colon
+for 'float _f;' is left out, leading to compiler warnings.
+
+The solution is to correct math.h, or to change cfortran.h to #define 
+RETURNFLOAT(x) and ASSIGNFLOAT(x,y) instead of including math.h.
+
+
+6. gcc version 2.6.3 and probably all other versions as well
+
+Unlike all other C compilers supported by cfortran.h,
+'gcc -traditional' promotes to double all functions returning float
+as demonstrated bu the following example.
+
+/* m.c */
+#include <stdio.h>
+int main() { FLOAT_FUNCTION d(); float f; f = d(); printf("%f\n",f); return 0; }
+
+/* d.c */
+float d() { return -123.124; }
+
+burow[29] gcc -c -traditional d.c
+burow[30] gcc -DFLOAT_FUNCTION=float m.c d.o && a.out
+0.000000
+burow[31] gcc -DFLOAT_FUNCTION=double m.c d.o && a.out
+-123.124001
+burow[32]
+
+Thus, 'gcc -traditional' is not supported by cfortran.h.
+Support would require the same RETURNFLOAT, etc. macro machinery
+present in old sun math.h, before sun gave up the same promotion.
+
+
+7. CRAY
+
+At least some versions of the t3e and t3d C preprocessor are broken
+in the fashion described below.
+At least some versions of the t90 C preprocessor do not have this problem.
+
+On the CRAY, all Fortran names are converted to uppercase.
+Generally the uppercase name is also used for the macro interface
+created by cfortran.h.
+
+For example, in the following interface,
+EASY is both the name of the macro in the original C code
+and EASY is the name of the resulting function to be called.
+
+#define EASY(A,B)      CCALLSFSUB2(EASY,easy, PINT, INTV, A, B)
+
+The fact that a macro called EASY() expands to a function called EASY()
+is not a problem for a working C preprocessor.
+From Kernighan and Ritchie, 2nd edition, p.230:
+
+    In both kinds of macro, the replacement token sequence is repeatedly
+  rescanned for more identifiers. However, once a given identifier has been
+  replaced in a given expansion, it is not replaced if it turns up again during
+  rescanning; instead it is left unchanged.
+
+Unfortunately, some CRAY preprocessors are broken and don't obey the above rule.
+A work-around is for the user to NOT use the uppercase name
+of the name of the macro interface provided by cfortran.h. For example:
+
+#define Easy(A,B)      CCALLSFSUB2(EASY,easy, PINT, INTV, A, B)
+
+Luckily, the above work-around is not required since the following
+work-around within cfortran.h also circumvents the bug:
+
+   /* (UN), not UN, is required in order to get around  CRAY preprocessor bug.*/
+   #define CFC_(UN,LN)            (UN)      /* Uppercase FORTRAN symbols.     */
+
+Aside: The Visual C++ compiler is happy with UN, but barfs on (UN),
+       so either (UN) causes nonstandard C/C++ or Visual C++ is broken.
+
+
+
+VII History and Acknowledgements
+--------------------------------
 
 1.0 - Supports VAX VMS using C 3.1 and FORTRAN 5.4.                    Oct. '90.
 1.0 - Supports Silicon Graphics w. Mips Computer 2.0 f77 and cc.       Feb. '91.
@@ -1508,11 +1926,49 @@ VI History and Acknowledgements
     - Minor mod. of Fortran NULL to C via (P)STRING.
     - Specify the type of ROUTINE passed from Fortran to C [ANSI C requirement.]
     - Macros never receive a null parameter [RS/6000 requirement.]
-2.8 - PSTRING for Fortran calls C no longer provides escape to pass     April'93
+2.8 - PSTRING for Fortran calls C no longer provides escape to pass    April'93.
       NULL pointer nor to pass address of original string.
       PNSTRING introduced with old PSTRING's behavior.
       PPSTRING introduced to always pass original address of string.
     - Support Alpha/OSF.
+    - Document that common blocks used in C should be declared AND defined.
+
+3.0 - Automagic handling of ANSI ## versus K&R /**/ preprocessor op.   March'95.
+    - Less chance of name space collisions between cfortran.h and other codes.
+    - SIMPLE macros, supporting user defined types, have changed names.
+3.1 - Internal macro name _INT not used. Conflicted with IRIX 5.3.     May  '95.
+    - SunOS, all versions, should work out of the box.
+    - ZTRINGV_ARGS|F(k) may no longer point to a PDOUBLE or PFLOAT argument.
+    - ConvexOS 11.0 supported.
+3.2 - __hpux no longer needs to be restricted to MAX_PREPRO_ARGS=31.   Oct. '95.
+    - PSTRING bug fixed.
+    - ZTRINGV_ARGS|F(k) may not point to a PBYTE,PINT,PLONG or PSHORT argument.
+    - (P)ZTRINGV machinery improved. Should lead to fewer compiler warnings.
+      (P)ZTRINGV no longer limits recursion or the nesting of routines.
+    - SIMPLE macros, supporting user defined types, have changed slightly.
+3.3 - Supports PowerStation Fortran with Visual C++.                   Nov. '95.
+    - g77 should work using f2cFortran, though no changes made for it.
+    - (PROTO)CCALLSFFUN10 extended to (PROTO)CCALLSFFUN14.
+    - FCALLSCFUN10 and SUB10 extended to FCALLSCFUN14 and SUB14.
+3.4 - C++ supported,                                                   Dec. '95.
+      but it required the reintroduction of PROTOCCALLSFSUBn for users.
+    - HP-UX f77 +800 supported.
+3.5 - Absoft UNIX Fortran supported.                                   Sept.'96.
+3.6 - Minor corrections to cfortran.doc.                               Oct. '96.
+    - Fixed bug for 15th argument. [Thanks to Tom Epperly at Aspen Tech.]
+    - For AbsoftUNIXFortran, obey default of prepending _C to COMMON BLOCK name.
+    - Fortran calling C with ROUTINE argument fixed and cleaned up.
+3.7 - Circumvent IBM and HP "null argument" preprocessor warning.      Oct. '96
+3.8 - (P)STRINGV and (P)ZTRINGV can pass a 1- or 2-dim. char array.    Feb. '97
+      (P)ZTRINGV thus effectively also provides (P)ZTRING.
+    - (P)ZTRINGV accepts a (char *) pointer.
+3.9 - Bug fixed for *VVVVV.                                            May  '97
+    - f2c: Work-around for strange underscore-dependent naming feature.
+    - NEC SX-4 supported.
+    - CRAY: LOGICAL conversion uses _btol and _ltob from CRAY's fortran.h.
+    - CRAY: Avoid bug of some versions of the C preprocessor.
+    - CRAY T3E: FORTRAN_REAL introduced.
+
 
 ['Support' implies these and more recent releases of the respective
  OS/compilers/linkers can be used with cfortran.h. 
@@ -1520,10 +1976,19 @@ VI History and Acknowledgements
 
 
 Acknowledgements:
-M.L.Luvisetto (Istituto Nazionale Fisica Nucleare - Centro Nazionale
-Analisi Fotogrammi, Bologna, Italy) provided all the support for the port to
-the CRAY. Marisa's encouragement and enthusiasm was also much appreciated.
-
+- CERN very generously sponsored a week in 1994 for me to work on cfortran.h.
+- M.L.Luvisetto (Istituto Nazionale Fisica Nucleare - Centro Nazionale
+  Analisi Fotogrammi, Bologna, Italy) provided all the support for the port to
+  the CRAY. Marisa's encouragement and enthusiasm was also much appreciated.
+- J.Bunn (CERN) supported the port to PowerStation Fortran with Visual C++.
+- Paul Schenk (UC Riverside, CERN PPE/OPAL) in June 1993 extended cfortran.h 2.7
+  to have C++ call Fortran. This was the starting point for full C++ in 3.4.
+- Glenn P.Davis of University Corp. for Atmospheric Research (UCAR) / Unidata
+  supported the NEC SX-4 port and helped understand the CRAY.
+- Tony Goelz of Absoft Corporation ported cfortran.h to Absoft UNIX Fortran.
+- Though cfortran.h has been created in my 'copious' free time, I thank 
+  NSERC for their generous support of my grad. student and postdoc years.
+- Univ.Toronto, DESY, CERN and others have provided time on their computers.
 
 
 THIS PACKAGE, I.E. CFORTRAN.H, THIS DOCUMENT, AND THE CFORTRAN.H EXAMPLE
@@ -1550,12 +2015,13 @@ OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION. THE AUTHOR IS NOT RESPONSIBLE
 FOR ANY SUPPORT OR SERVICE OF THE CFORTRAN.H PACKAGE.
 
                                               Burkhard Burow 
-                                              burow@vxdesy.cern.ch
+                                              burow@desy.de
 
 P.S. Your comments and questions are welcomed and usually promptly answered.
 
 VAX VMS and Ultrix, Alpha, OSF, Silicon Graphics (SGI), DECstation, Mips RISC,
-Sun, CRAY, IBM RS/6000, Apollo DomainOS, HP, LynxOS, f2c and NAG 
-are registered trademarks.
+Sun, CRAY, Convex, IBM RS/6000, Apollo DomainOS, HP, LynxOS, f2c, NAG, Absoft,
+NEC SX-4, PowerStation and Visual C++ are registered trademarks of their
+respective owners.
         
 /* end: cfortran.doc */
