@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.13 2004/01/26 13:59:26 calderon Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.14 2004/03/15 18:59:47 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,6 +7,13 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.14  2004/03/15 18:59:47  calderon
+ * - Added support for encoded common hits.  Now the common hits of the TPC and
+ * the SVT are stored, with the corresponding methods to decode and return these
+ * values.
+ * - Added protection for tracks with no particle definition.
+ * - Added () around call to mcMergedPair[i] to make Insure++ happy.
+ *
  * Revision 1.13  2004/01/26 13:59:26  calderon
  * Added the code to fill the global track matches of StMiniMcEvent.
  *
@@ -67,6 +74,13 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.14  2004/03/15 18:59:47  calderon
+ * - Added support for encoded common hits.  Now the common hits of the TPC and
+ * the SVT are stored, with the corresponding methods to decode and return these
+ * values.
+ * - Added protection for tracks with no particle definition.
+ * - Added () around call to mcMergedPair[i] to make Insure++ happy.
+ *
  * Revision 1.13  2004/01/26 13:59:26  calderon
  * Added the code to fill the global track matches of StMiniMcEvent.
  *
@@ -123,7 +137,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.13 2004/01/26 13:59:26 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.14 2004/03/15 18:59:47 calderon Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -473,7 +487,7 @@ StMiniMcMaker::trackLoop()
   // I won't do any more merging accounting, as that is already done for primaries.
   vector<int> enteredGlobalTracks;
   const StPtrVecMcTrack& allmcTracks = mMcEvent->tracks();
-  cout << "size of Mc tracks : " << allmcTracks.size() << endl;
+  cout << "size of mcEvent->tracks() : " << allmcTracks.size() << endl;
   
   StMcTrackConstIterator allMcTrkIter = allmcTracks.begin();
   for ( ; allMcTrkIter != allmcTracks.end(); ++allMcTrkIter) {
@@ -489,7 +503,7 @@ StMiniMcMaker::trackLoop()
 	      if (find(enteredGlobalTracks.begin(),enteredGlobalTracks.end(),glTrack->key())!=enteredGlobalTracks.end()) continue; //if it's already matched, skip it.
 	      fillTrackPairInfo(miniMcPair, mcGlobTrack,
 				0, glTrack, 
-				candTrackPair->commonTpcHits(), mRcTrackMap->count(glTrack),
+				candTrackPair->commonTpcHits()+((candTrackPair->commonSvtHits())*100), mRcTrackMap->count(glTrack),
 				mMcTrackMap->count(mcGlobTrack), 0,
 				kTRUE);
 	      mMiniMcEvent->addTrackPair(miniMcPair,MATGLOB);
@@ -508,7 +522,7 @@ StMiniMcMaker::trackLoop()
 
   const StPtrVecMcTrack& mcTracks = mMcEvent->primaryVertex()->daughters();
 
-  cout << "size of mctracks : " << mcTracks.size() << endl;
+  cout << "size of MC primary tracks : " << mcTracks.size() << endl;
 
   StMcTrackConstIterator mcTrkIter = mcTracks.begin();
   for( ; mcTrkIter != mcTracks.end(); mcTrkIter++){
@@ -526,7 +540,7 @@ StMiniMcMaker::trackLoop()
 	if(mcTrack->particleDefinition()->charge()!=0) nMcNch++;
 	if(mcTrack->particleDefinition()->charge()<0) nMcHminus++;
     }
-    if(mcTrack->particleDefinition()->charge()!=0 && isPrimaryTrack(mcTrack) ) {
+    if(mcTrack->particleDefinition() && mcTrack->particleDefinition()->charge()!=0 && isPrimaryTrack(mcTrack) ) {
         if(mcTrack->pseudoRapidity()<-2.8 && mcTrack->pseudoRapidity()>-3.8) nMcFtpcENch++;
         if(mcTrack->pseudoRapidity()>2.8 && mcTrack->pseudoRapidity()<3.8) nMcFtpcWNch++;
     }
@@ -655,8 +669,8 @@ StMiniMcMaker::trackLoop()
 	  Bool_t isBestContam = kFALSE; // the best 'best matched' mc track
 	                                // is not a primary mc 
 	  for(unsigned int i=0; i<mcMergedPair.size(); i++){
-	    StMcTrack* mergedMcTrack = mcMergedPair[i]->partnerMcTrack();
-	    UInt_t mergedCommonHits = mcMergedPair[i]->commonTpcHits();
+	    StMcTrack* mergedMcTrack = (mcMergedPair[i])->partnerMcTrack();
+	    UInt_t mergedCommonHits = (mcMergedPair[i])->commonTpcHits();
 	   	    
 	    if(mDebug==2 && mcMergedPair.size()>1) {
 	      TString hello = (foundBest) ? "yes" : "no";
@@ -675,7 +689,7 @@ StMiniMcMaker::trackLoop()
 	      if(acceptPt(glTrack) || acceptPt(prTrack)){
 		fillTrackPairInfo(miniMcPair, mergedMcTrack, 
 				  prTrack, glTrack, 
-				  mergedCommonHits, nAssocMc,
+				  mergedCommonHits+((mcMergedPair[i]->commonSvtHits())*100), nAssocMc,
 				  nAssocGlVec[i], nAssocPrVec[i],
 				  isBestContam);
 		mMiniMcEvent->addTrackPair(miniMcPair,MATCHED);
@@ -688,7 +702,7 @@ StMiniMcMaker::trackLoop()
 	      // 02/02/02 rc pt cut
 	      if(acceptPt(glTrack) || acceptPt(prTrack)){
 		fillTrackPairInfo(miniMcPair,mergedMcTrack,prTrack,glTrack,
-				  mergedCommonHits, nAssocMc,nAssocGlVec[i], 
+				  mergedCommonHits+((mcMergedPair[i]->commonSvtHits())*100), nAssocMc,nAssocGlVec[i], 
 				  nAssocPrVec[i]);
 		 mMiniMcEvent->addTrackPair(miniMcPair,MERGED);
 	      }
@@ -745,7 +759,8 @@ StMiniMcMaker::trackLoop()
 
     StGlobalTrack* glTrack 
       = static_cast<StGlobalTrack*>(prTrack->node()->track(global));
-
+    
+    
     //
     // centrality 
     //
@@ -831,7 +846,7 @@ StMiniMcMaker::trackLoop()
 	if(isPrimaryTrack(mcTrack)){
 	  
 	  fillTrackPairInfo(miniMcPair,mcTrack,prTrack,glTrack,
-			    commonHits, nAssocMc, nAssocGl, nAssocPr);
+			    commonHits+(((*iterBestMatchPair)->commonSvtHits())*100), nAssocMc, nAssocGl, nAssocPr);
 	  mMiniMcEvent->addTrackPair(miniMcPair,SPLIT);
 	  
 	  nSplit++; 
@@ -844,7 +859,7 @@ StMiniMcMaker::trackLoop()
 	else{ // no, it's best matched to a non primary, contamination
 	  
 	  fillTrackPairInfo(contamPair,mcTrack,
-			    prTrack,glTrack,commonHits,
+			    prTrack,glTrack,commonHits+(((*iterBestMatchPair)->commonSvtHits())*100),
 			    nAssocMc,nAssocGl,nAssocPr);
 	  mMiniMcEvent->addTrackPair(contamPair,CONTAM);
 	  
@@ -870,7 +885,8 @@ StMiniMcMaker::trackLoop()
 	cout << "#############" << endl;
 	cout << "GHOST!" << endl;
 	cout << "pr pt: " << prTrack->geometry()->momentum().perp() << endl
-	     << "fit hits : " << glTrack->fitTraits().numberOfFitPoints(kTpcId)
+	     << "TPC fit hits : " << glTrack->fitTraits().numberOfFitPoints(kTpcId)
+	     << "SVT fit hits : " << glTrack->fitTraits().numberOfFitPoints(kSvtId)
 	     << endl;
       }
     }
@@ -1177,7 +1193,7 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   tinyRcTrack->setDcaXYGl(computeXY(mRcVertexPos,glTrack));
   //tinyRcTrack->setDcaZGl(computeZDca(mRcVertexPos,glTrack));
   tinyRcTrack->setDcaZGl(dcaz(glHelix,*mRcVertexPos,glTrack));
-    
+  
   StDedxPidTraits* pid = findDedxPidTraits(glTrack);
   float meanDedx = (pid) ? pid->mean() : -999;
   tinyRcTrack->setDedx(meanDedx);
@@ -1281,7 +1297,9 @@ StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
   tinyMcTrack->setNSvtHitMc(mcTrack->svtHits().size());
   tinyMcTrack->setNFtpcHitMc(mcTrack->ftpcHits().size());
   tinyMcTrack->setGeantId(mcTrack->geantId());
-  tinyMcTrack->setChargeMc(static_cast<short>(mcTrack->particleDefinition()->charge()));
+  short chargeMc = -9999;
+  if (mcTrack->particleDefinition()) chargeMc = static_cast<short>(mcTrack->particleDefinition()->charge());
+  tinyMcTrack->setChargeMc(chargeMc);
 
   tinyMcTrack->setNAssocGl(nAssocGl);
   tinyMcTrack->setNAssocPr(nAssocPr);
@@ -1726,8 +1744,10 @@ StMiniMcMaker::checkSplit(StMcTrack* mcTrack, StTrack* glTrack,
        << mcTrack->momentum().perp() << endl;
   cout << "mc key: " 
        << mcTrack->key() << endl;
-  cout << "mc charge: " 
-       << mcTrack->particleDefinition()->charge() << endl;
+  if (mcTrack->particleDefinition()) {
+      cout << "mc charge: " 
+	   << mcTrack->particleDefinition()->charge() << endl;
+  }
   cout << "mc eta : " 
        << mcTrack->momentum().pseudoRapidity() << endl;
   cout << "mc pts: " 
