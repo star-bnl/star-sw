@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.2 1999/09/03 01:01:30 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.3 1999/09/08 00:14:06 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.3  1999/09/08 00:14:06  fisyak
+// Add kReverseField option
+//
 // Revision 1.2  1999/09/03 01:01:30  fisyak
 // remove includes for St_[V0,tcl,tpt]_Makers
 //
@@ -46,15 +49,14 @@
 #include "TSystem.h"
 #include "StBFChain.h"
 #include "StEvtHddr.h"
-#include "StRoot/St_base/St_DataSet.h"
-#include "StRoot/StChain/StChain.h"
-#include "StRoot/xdf2root/St_XDFFile.h"
-#include "StRoot/StMagF/StMagF.h"
-#include "St_geant_Maker/St_geant_Maker.h"
-#include "StRoot/St_db_Maker/St_db_Maker.h"
-#include "StRoot/StTreeMaker/StTreeMaker.h"
-#include "StRoot/StIOMaker/StIOMaker.h"
-
+#include "St_DataSet.h"
+#include "StChain.h"
+#include "St_XDFFile.h"
+#include "StMagF.h"
+#include "St_geant_Maker.h"
+#include "St_db_Maker.h"
+#include "StTreeMaker.h"
+#include "StIOMaker.h"
 //_____________________________________________________________________
 Char_t  *ChainOptions[] = {
   "FIRST"
@@ -62,7 +64,7 @@ Char_t  *ChainOptions[] = {
  ,"ES99"   ,"ER99"   ,"Y1d"    ,"Y1e"    ,"Y2a"
  ,"Eval"   ,"OFF"    ,"XIN"    ,"XOUT"   ,"GSTAR"
  ,"TDAQ"   ,"FZIN"   ,"GEANT"
- ,"FieldOn","FieldOff","HalfField"
+ ,"FieldOn","FieldOff","HalfField","ReverseField"
  ,"TPC"    ,"TSS"    ,"TRS"    ,"MINIDAQ","TFS"    ,"TCL"    ,"TPT"
  ,"SVT"    ,"SRS"    ,"STK"
  ,"FTPC"   ,"FSS"    ,"FCL"    ,"FTP"
@@ -91,7 +93,7 @@ Char_t *ChainComments[] = {
   "Turn on Year 2a geometry (and corresponding Makers)",
   "Turn on evaluation switch for different makers",
   "Turn off default chain",
-  "Read XDF input file with g2t",
+  "Read [XDF|DAQ|ROOT] input file",
   "Write dst to XDF file",
   "Run gstar for 10 muon track with pT = 10 GeV in |eta|<1",
   "TPC DAQ chain",
@@ -100,6 +102,7 @@ Char_t *ChainComments[] = {
   "Use nominal STAR field",
   "No Field option",
   "Half Field option",
+  "Reverse Field option",
   "TPC            \tin Chain (St_[tcl_+tpt]_Maker)",
   "St_tss_Maker   \tin Chain",
   "StTrsMaker     \tin Chain",
@@ -148,7 +151,6 @@ StEvent *Event;
 class StIOMaker; StIOMaker *inpMk=0;     
 class St_geant_Maker; St_geant_Maker *geant   = 0;   
 class St_db_Maker;    St_db_Maker    *dbMk    = 0; St_db_Maker *calibMk = 0;
-class StMagFC;         StMagFC        *field   = 0;           
 class StTreeMaker;    StTreeMaker    *treeMk  = 0;
 
 ClassImp(StBFChain)
@@ -156,7 +158,9 @@ ClassImp(StBFChain)
 //_____________________________________________________________________________
 StBFChain::StBFChain(const char *name):StChain(name),xdf_out(0){}
 //_____________________________________________________________________________
-StBFChain::~StBFChain(){}
+StBFChain::~StBFChain(){
+  Finish();
+}
 //_____________________________________________________________________________
 void StBFChain::SetFlags(const Char_t *Chain )
 {
@@ -233,7 +237,10 @@ Int_t StBFChain::Load()
   //gSystem->Load("libmsg");
   gSystem->Load("libtls");
   gSystem->Load("St_db_Maker");
-  if (GetOption(kFieldOff) || GetOption(kFieldOn) || GetOption(kHalfField))
+  if (GetOption(kFieldOff) || 
+      GetOption(kFieldOn)  || 
+      GetOption(kHalfField)||  
+      GetOption(kReverseField))
        gSystem->Load("StMagF");
   else gSystem->Load("geometry");
   if (GetOption(kXIN)) gSystem->Load("StIOMaker");
@@ -312,25 +319,6 @@ Int_t StBFChain::Load()
   //  gSystem->Exit(1);
   // Instantiate makers
   //  Create the makers to be called by the current chain
-  const char *mainDB = "$STAR/StDb/params";
-  dbMk = new St_db_Maker("db",mainDB);
-  if (GetOption(kSD97)) { dbMk->SetDateTime("sd97");}
-  if (GetOption(kSD98)) { dbMk->SetDateTime("sd98");}
-  if (GetOption(kY1a))  { dbMk->SetDateTime("year_1a");}
-  if (GetOption(kY1b))  { dbMk->SetDateTime("year_1b");}
-  if (GetOption(kY1c))  { dbMk->SetDateTime("year_1c");}
-  if (GetOption(kES99)) { dbMk->SetDateTime("es99");}
-  if (GetOption(kER99)) { dbMk->SetDateTime("er99");}
-  if (GetOption(kY1d))  { dbMk->SetDateTime("year_1d");}
-  if (GetOption(kY1e))  { dbMk->SetDateTime("year_1e");}
-  if (GetOption(kY2a))  { dbMk->SetDateTime("year_2a");}
-  printf ("QAInfo:db Maker set time = %d %d \n",dbMk->GetDateTime().GetDate(),
-	  dbMk->GetDateTime().GetTime());
-  const char *calibDB = "$STAR_ROOT/calib";
-  calibMk = new St_db_Maker("calib",calibDB);
-  if (GetOption(kFieldOff)) field   = new StMagFC("field","STAR no field",0.00002);
-  if (GetOption(kFieldOn))  field   = new StMagFC("field","STAR Normal field",1.);
-  if (GetOption(kHalfField))field   = new StMagFC("field","STAR Half field",0.5);
   if (GetOption(kXIN)) {
     StIOMaker *inpMk = new StIOMaker("inputStream","r",InFile->Data());
     if (inpMk) {
@@ -383,7 +371,33 @@ Int_t StBFChain::Load()
       }
     }
   }
-  
+  const char *mainDB = "$STAR/StDb/params";
+  dbMk = new St_db_Maker("db",mainDB);
+  if (GetOption(kSD97)) { dbMk->SetDateTime("sd97");}
+  if (GetOption(kSD98)) { dbMk->SetDateTime("sd98");}
+  if (GetOption(kY1a))  { dbMk->SetDateTime("year_1a");}
+  if (GetOption(kY1b))  { dbMk->SetDateTime("year_1b");}
+  if (GetOption(kY1c))  { dbMk->SetDateTime("year_1c");}
+  if (GetOption(kES99)) { dbMk->SetDateTime("es99");}
+  if (GetOption(kER99)) { dbMk->SetDateTime("er99");}
+  if (GetOption(kY1d))  { dbMk->SetDateTime("year_1d");}
+  if (GetOption(kY1e))  { dbMk->SetDateTime("year_1e");}
+  if (GetOption(kY2a))  { dbMk->SetDateTime("year_2a");}
+  printf ("QAInfo:db Maker set time = %d %d \n",dbMk->GetDateTime().GetDate(),
+	  dbMk->GetDateTime().GetTime());
+  const char *calibDB = "$STAR_ROOT/calib";
+  calibMk = new St_db_Maker("calib",calibDB);
+  if (GetOption(kFieldOff) ||
+      GetOption(kHalfField)||
+      GetOption(kFieldOn)  ||
+      GetOption(kReverseField)) {
+    Float_t Scale = 1.0;
+    TString FieldName("STAR Normal field");
+    if (GetOption(kFieldOff))     {Scale = 0.00002; FieldName = "STAR no field";}
+    if (GetOption(kHalfField))    {Scale = 0.5;     FieldName = "STAR Normal field";}
+    if (GetOption(kReverseField)) {Scale = - Scale; FieldName += " Reverse";}
+    new StMagFC("field",FieldName.Data(),Scale);
+  }
   if (GetOption(kMINIDAQ)) New("StMinidaqMaker","tpc_raw");
   else {
     //  S I M U L A T I O N  or D A Q
