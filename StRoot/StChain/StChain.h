@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.10 1998/09/08 22:43:09 fisyak Exp $
+// $Id: StChain.h,v 1.11 1998/09/18 14:35:29 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.11  1998/09/18 14:35:29  fisyak
+// Fix makers
+//
 // Revision 1.10  1998/09/08 22:43:09  fisyak
 // Modify St_dst_Maker to account new calling sequence
 //
@@ -47,7 +50,7 @@
 class TBrowser;
 class TChain;
 class St_XDFFile; 
-//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.10 1998/09/08 22:43:09 fisyak Exp $";//StChain header CVS version
+//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.11 1998/09/18 14:35:29 fisyak Exp $";//StChain header CVS version
 
 class StChain : public StMaker {
 public:
@@ -84,6 +87,7 @@ public:
    virtual void       GetEvent(Int_t event=1);  // *MENU*
    St_DataSet        *GetRun(); 
    St_DataSet        *GetCalib();
+   St_DataSet        *GetEventSet(){return m_EventSet;}
    St_DataSet        *GetGeant();
    St_DataSet        *GetGeometry();
    St_DataSet        *GetParams();
