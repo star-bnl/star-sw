@@ -8,7 +8,7 @@
          ivid        = ivid - smd_chid(i)*smd_ivid(i)
       enddo
       if(ivid.ne.0)then
-         type *,'VOLID_ESMD -- error decoding ESMD volume_id...',ivid
+         print *,'VOLID_ESMD -- error decoding ESMD volume_id...',ivid
          return
       end if
       rl     = smd_chid(1)        ! right/left: =1 for Z>0, and =2 for Z<0
