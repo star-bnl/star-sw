@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.28 1999/02/17 20:50:57 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.29 1999/02/17 23:58:11 caines Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.29  1999/02/17 23:58:11  caines
+// changed ev0 cuts
+//
 // Revision 1.28  1999/02/17 20:50:57  fisyak
 // reduce no. of reconstructed tracks/verteces from 100K to 20K
 //
@@ -234,12 +237,11 @@ Int_t St_glb_Maker::Init(){
   // TPC only cuts
 
   ev0par2->dca        =  0.8;
-  ev0par2->dcav0      =  0.3;
-  //  ev0par2->dlen       =  2.;
-  ev0par2->dlen       =  0.6;
+  ev0par2->dcav0      =  0.7;
+  ev0par2->dlen       =  2.0;
   ev0par2->alpha_max  = 1.2;
   ev0par2->ptarm_max  = 0.3;
-  ev0par2->dcapnmin   = 0.1;
+  ev0par2->dcapnmin   = 0.7;
   ev0par2++;
 
   //SVT only cuts
@@ -258,7 +260,7 @@ Int_t St_glb_Maker::Init(){
   ev0par2->dlen       = 0.6;
   ev0par2->alpha_max  = 1.2;
   ev0par2->ptarm_max  = 0.3;
-  ev0par2->dcapnmin   = 0.1;
+  ev0par2->dcapnmin   = 0.7;
   //exi
   if (!m_exiaux) m_exiaux = new St_exi_aux("exi_aux",10000);
   m_exipar = (St_exi_exipar *)  params("global/exipars/exipar");
@@ -729,7 +731,7 @@ void St_glb_Maker::Histograms(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.28 1999/02/17 20:50:57 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.29 1999/02/17 23:58:11 caines Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
