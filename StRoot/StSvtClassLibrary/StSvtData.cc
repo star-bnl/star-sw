@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtData.cc,v 1.4 2001/10/24 16:48:50 munhoz Exp $
+ * $Id: StSvtData.cc,v 1.5 2002/01/15 01:01:42 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtData.cc,v $
+ * Revision 1.5  2002/01/15 01:01:42  caines
+ * Fix memory leak when deleting this class - have to delete what it points to too
+ *
  * Revision 1.4  2001/10/24 16:48:50  munhoz
  * adding capability to retrieve t0 and first SCA
  *
@@ -61,7 +64,11 @@ StSvtData::StSvtData(StSvtConfig* config, int run, int event, int trigger, int t
 }
 
 StSvtData::~StSvtData()
-{}
+{
+ for(int i=0; i<getTotalNumberOfHybrids(); i++){
+     delete (StSvtHybridObject*)at(i);
+  }
+}
 
 StSvtData::StSvtData(const StSvtData& data):StSvtHybridCollection(data.mConfig)
 {
