@@ -11,8 +11,8 @@ use Sys::Hostname;
 #my $debugOn=0;
 
 my $hostname     = hostname();
-my $dir_log      = "/star/rcf/prodlog/P01hc/log/daq";
-my $dir_sum      = "/star/rcf/prodlog/P01hc/sum/daq";   
+my $dir_log      = "/star/rcf/disk00001/star/P00hk/log/daq";
+my $dir_sum      = "/star/rcf/disk00001/star/P00hk/sum/daq";   
 my @set ;
 my @list;
 my $nlist = 0; 
@@ -70,7 +70,7 @@ foreach my $logFile (@list) {
          $msize = ($$logFile)->lsize;
        
         my $ltime = `mod_time $mfile`;
-           if( $ltime > 3600){
+           if( $ltime > 7200){
 		    if ($msize < 25000 )  {
 #     print "Crashed job :", $mfile, "\n";
    }else { 
@@ -213,10 +213,10 @@ sub parse_log($) {
   my @tag_word;
   my $last_tag_line;
   my $last_tag = "last";
-  my $node_name = "n/a";
+  my $node_name = "n/\a";
   my $first_line;
-  my $star_level = "n/a";
-  my $root_level = "n/a"; 
+  my $star_level = "n/\a";
+  my $root_level = "n/\a"; 
    my $Anflag = 0;
 #---------------------------------------------------------
   
@@ -269,13 +269,13 @@ sub parse_log($) {
      if ($num_line > 100){
      if( $line =~ /EndMaker/){
        @size_line = split(" ",$line); 
-       if($size_line[0] eq "QAInfo:" and $size_line[4] eq "EndMaker") {
-        $size_line[6] =~ s/=//g;      
-        $maker_size[$num_maker] += $size_line[6];
+       if($size_line[0] eq "QAInfo:" and $size_line[5] eq "starreco") {
+     
+        $maker_size[$num_maker] += $size_line[9];
          $mymaker = $size_line[3];
        $maker_name[$num_maker] = $mymaker;
        $num_maker++;
-       if( $mymaker eq "outputStream:"){
+       if( $mymaker eq "tree:"){
          $last_maker = $num_maker;
          $num_maker = 0; 
        }
@@ -341,11 +341,9 @@ sub parse_log($) {
  }   
 # check if job crashed due to break_buss_error
      if($line =~ /bus error/) {
-         $Err_messg = "Bus error";
+         $Err_messg = "Break bus error";
        }
-     elsif($line =~ /Bus error/) {
-         $Err_messg = "Bus error";
-       }
+
 
 # check if job crashed due to segmentation violation
     if ($line =~ /segmentation violation/) {
@@ -355,10 +353,7 @@ sub parse_log($) {
      if ($line =~ /Interpreter error recovered/)  {
              $Err_messg = "Interpreter error recovered";
 	   }
-    
-#    if ($line =~ /EventReader::eventIsCorrupted/)  {
-#             $Err_messg = "Corrupted event";
-#	   }
+
     $previous_line = $line;
 
 # check how many events have been skiped
@@ -547,7 +542,7 @@ sub parse_log($) {
           chop $end_line;
    if ($end_line =~ /seconds Cpu Time/) {
      @part = split (" ", $end_line); 
-    if($part[0] =~ /QAInfo/ and $part[2] =~ /Real/) {        
+    if($part[0] ne "QAInfo:" and $part[2] =~ /Real/) {        
      @myword = split /:/, $end_line; 
      $Maker = $myword[1]; 
      @words = split(" ",$myword[2]);

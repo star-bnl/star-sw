@@ -1,4 +1,3 @@
-#include <cmath>
 #include "StEmcMath.h"
 #include "StEvent/StMeasuredPoint.h"
 #include "StarClassLibrary/StThreeVectorF.hh"
@@ -63,13 +62,3 @@ StEmcMath::detectorId(const UInt_t id)
   return kUnknownId;
   else return stId; 
 }
-
-Double_t 
-StEmcMath::getPhiPlusMinusPi(const Double_t phi)
-{
-  // convert phi to the range from -pi to +pi 
-  Double_t phiw = phi;
-  while(phiw >  M_PI) phiw -= 2.*M_PI;
-  while(phiw < -M_PI) phiw += 2.*M_PI;
-  return phiw;
-}  

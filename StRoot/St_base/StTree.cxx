@@ -441,13 +441,13 @@ void StBranch::OpenTFile()
   fTFile = tf;
   if (!fTFile) {
     fTFile = StIO::Open(GetFile(),TFOPT[fIOMode],GetName());
-//    if (fTFile && fIOMode==2 ) {//HACK VP
-//
-//      static const char *bra[] = {".geant.root",".dst.root",".hist.root",".runco.root",0};
-//      int i;
-//      for (i=0;bra[i];i++) {if(strstr(fTFile->GetName(),bra[i])) break;}    
-//    if (!bra[i]) fTFile->SetFormat(3);
-//    }
+    if (fTFile && fIOMode==2 ) {//HACK VP
+
+      static const char *bra[] = {".geant.root",".dst.root",".hist.root",".runco.root",0};
+      int i;
+      for (i=0;bra[i];i++) {if(strstr(fTFile->GetName(),bra[i])) break;}    
+      if (!bra[i]) fTFile->SetFormat(3);
+    }
 
   }
   if (!fTFile) {

@@ -19,7 +19,7 @@ class StEmcMath {
 
 private:
 public:
-  static Bool_t   etaPhi(StMeasuredPoint* point, StMeasuredPoint* vertex,
+  static Bool_t etaPhi(StMeasuredPoint* point, StMeasuredPoint* vertex,
                        Double_t &eta, Double_t &phi);
   static Double_t pseudoRapidity(StMeasuredPoint* point, StMeasuredPoint* vertex=0);
   static Double_t eta(StMeasuredPoint* point, StMeasuredPoint* vertex=0) 
@@ -29,16 +29,11 @@ public:
   static UInt_t       detectorId(const StDetectorId); 
   static StDetectorId detectorId(const UInt_t); 
 
-  static Double_t getPhiPlusMinusPi(const Double_t phi);   
-
   ClassDef(StEmcMath, 1)   // Definition of patch
 };
 #endif
-// $Id: StEmcMath.h,v 1.4 2001/04/16 22:02:08 pavlinov Exp $
+// $Id: StEmcMath.h,v 1.3 2001/04/03 16:13:05 pavlinov Exp $
 // $Log: StEmcMath.h,v $
-// Revision 1.4  2001/04/16 22:02:08  pavlinov
-// added function StEmcMath::getPhiPlusMinusPi
-//
 // Revision 1.3  2001/04/03 16:13:05  pavlinov
 // Added function from STAR detector Id to internal EMC Id
 //
