@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.h,v 1.17 1999/03/04 01:19:22 fisyak Exp $
+// $Id: St_glb_Maker.h,v 1.18 1999/03/11 03:12:19 perev Exp $
 // $Log: St_glb_Maker.h,v $
+// Revision 1.18  1999/03/11 03:12:19  perev
+// new schema
+//
 // Revision 1.17  1999/03/04 01:19:22  fisyak
 // Put release tag to run_summary table
 //
@@ -81,13 +84,18 @@ class St_exi_exipar;
 class St_exi_aux;
 class St_mft_control; 
 class St_particle_dst_param;
+class St_svg_shape; 
+class St_svg_config; 
+class St_svg_geom ;
+class St_srs_activea;
+class St_srs_srspar;
 class St_dst_summary_param;
 
 class St_glb_Maker : public StMaker {
 
  private:
   Bool_t drawinit;
-  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.17 1999/03/04 01:19:22 fisyak Exp $";
+  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.18 1999/03/11 03:12:19 perev Exp $";
   // egr
   Int_t         m_scenario;   
   //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
@@ -147,13 +155,20 @@ class St_glb_Maker : public StMaker {
   St_particle_dst_param *m_particle_dst_param; //!
   St_est_ctrl    *m_est_ctrl; //!
 
+  St_svg_shape   *m_svt_shape  ; //!
+  St_svg_config  *m_svt_config ; //!
+  St_svg_geom    *m_svt_geom   ; //!
+  St_srs_activea *m_srs_activea; //!
+  St_srs_srspar  *m_srspar     ; //!
+  
+
   St_dst_summary_param *m_dst_summary_param; //!
 
  protected:
 
   
  public: 
-  St_glb_Maker(const char *name="global", const char *title="event/data/global");
+  St_glb_Maker(const char *name="global");
   virtual       ~St_glb_Maker();
   virtual Int_t Init();
   virtual Int_t  Make();

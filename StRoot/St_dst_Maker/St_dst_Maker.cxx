@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.8 1999/02/26 02:31:55 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.9 1999/03/11 03:12:17 perev Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.9  1999/03/11 03:12:17  perev
+// new schema
+//
 // Revision 1.8  1999/02/26 02:31:55  fisyak
 // Replace emc hits by emc raw tables
 //
@@ -47,128 +50,50 @@
 
 #include "TClass.h"
 #include "St_dst_Maker.h"
-#include "StChain.h"
 #include "St_ObjectSet.h"
 #include "St_DataSetIter.h"
-#include "TRandom.h"
-#include "TSystem.h"
-#include "St_particle_Table.h"
-#include "St_dst_event_header_Table.h"
-#include "St_dst_track_Table.h"
-#include "St_dst_track_aux_Table.h"
-#include "St_dst_vertex_Table.h"
-#include "St_dst_v0_vertex_Table.h"
-#include "St_dst_xi_vertex_Table.h"
-#include "St_dst_dedx_Table.h"
-#include "St_dst_point_Table.h"
-#include "St_dst_event_summary_Table.h"
-#include "St_dst_monitor_soft_Table.h"
-#include "St_dst_TriggerDetectors_Table.h"
-#include "St_tpt_track_Table.h"
-#include "St_g2t_rch_hit_Table.h"
-#include "St_dst_rch_Table.h"
-#include "St_dst_tof_trk_Table.h"
-#include "St_dst_tof_evt_Table.h"
-#include "St_ems_hits_Table.h"
 
 ClassImp(St_dst_Maker)
 
 //_____________________________________________________________________________
-St_dst_Maker::St_dst_Maker(const char *name, const char *title):StMaker(name,title){
-   drawinit=kFALSE;
+St_dst_Maker::St_dst_Maker(const char *name):StMaker(name){
+  fSelect = 0;
 }
 //_____________________________________________________________________________
 St_dst_Maker::~St_dst_Maker(){
 }
+
 //_____________________________________________________________________________
 Int_t St_dst_Maker::Init(){
+  static const char *todst[] = {
+
+  "global:",	"dst",
+  "geant:", 	"particle", "g2t_rch_hit",
+  "trg:", 	"dst_TriggerDetectors",
+  0};
+
+  if (!fSelect) fSelect = todst;   
+
 // Create Histograms    
    return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_dst_Maker::Make(){
-  if (!m_DataSet->GetList())  {//if DataSet is empty fill it
-    St_DataSet *geant = gStChain->DataSet("geant");
-    if (geant) {
-      St_DataSetIter geantI(geant);
-      St_particle *particle = (St_particle *) geantI["particle"];
-      if (particle) m_DataSet->Shunt(particle);
-      St_g2t_rch_hit *g2t_rch_hit = (St_g2t_rch_hit *) geantI("g2t_rch_hit");
-      if (g2t_rch_hit) m_DataSet->Shunt(g2t_rch_hit);
-    }
-    St_DataSet *global = gStChain->DataSet("global");
-    if (global) {
-      St_DataSetIter dstI(global);
-      St_DataSet *dst = dstI("dst");
-      m_DataSet->Update(dst);
-#if 0
-      dstI.Cd("dst");
-      St_dst_event_header  *event_header  = (St_dst_event_header  *) dstI("event_header");
-      St_dst_track      *globtrk     = (St_dst_track     *) dstI("globtrk");
-      St_dst_track_aux  *globtrk_aux = (St_dst_track_aux *) dstI("globtrk_aux");
-      St_dst_track      *globtrk2     = (St_dst_track     *) dstI("globtrk2");
-      St_dst_track      *primtrk     = (St_dst_track     *) dstI("primtrk");
-      St_dst_track_aux  *primtrk_aux = (St_dst_track_aux *) dstI("primtrk_aux");
-      St_dst_vertex     *vertex      = (St_dst_vertex    *) dstI("vertex");
-      St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex    *) dstI("dst_v0_vertex"); 
-      St_dst_xi_vertex  *dst_xi_vertex = (St_dst_xi_vertex    *) dstI("dst_xi_vertex");
-      St_dst_dedx       *dst_dedx    = (St_dst_dedx      *) dstI("dst_dedx");
-      St_dst_point      *point       = (St_dst_point     *) dstI("point");
-      St_dst_event_summary *event_summary = (St_dst_event_summary *) dstI("event_summary");
-      St_dst_monitor_soft  *monitor_soft  = (St_dst_monitor_soft  *) dstI("monitor_soft");
-      
 
-      if (event_header) m_DataSet->Shunt(event_header);
-      if (globtrk)      m_DataSet->Shunt(globtrk);
-      if (globtrk2)     m_DataSet->Shunt(globtrk2);
-      if (globtrk_aux)  m_DataSet->Shunt(globtrk_aux);
-      if (primtrk)      m_DataSet->Shunt(primtrk);
-      if (primtrk_aux)  m_DataSet->Shunt(primtrk_aux);
-      if (vertex)       m_DataSet->Shunt(vertex);
-      if (dst_v0_vertex)m_DataSet->Shunt(dst_v0_vertex);
-      if (dst_xi_vertex)m_DataSet->Shunt(dst_xi_vertex);
-      if (dst_dedx)     m_DataSet->Shunt(dst_dedx);
-      if (point)        m_DataSet->Shunt(point);
-      if (event_summary)m_DataSet->Shunt(event_summary);
-      if (monitor_soft) m_DataSet->Shunt(monitor_soft);
-#endif
-    }
-    St_DataSet *ctf = gStChain->DataSet("ctf");
-    if (ctf) {
-      St_DataSetIter ctfI(ctf);
-      St_dst_tof_trk *dst_tof_trk = (St_dst_tof_trk *) ctfI["dst_tof_trk"];
-      St_dst_tof_evt *dst_tof_evt = (St_dst_tof_evt *) ctfI["dst_tof_evt"];
-      if (dst_tof_trk) m_DataSet->Shunt(dst_tof_trk);
-      if (dst_tof_evt) m_DataSet->Shunt(dst_tof_evt);
-    }
-    St_DataSet *trg = gStChain->DataSet("trg");
-    if (trg) {
-      St_DataSetIter trgI(trg);
-      St_dst_TriggerDetectors *dst = (St_dst_TriggerDetectors *) trgI["dst_TriggerDetectors"];
-      if (dst)          m_DataSet->Shunt(dst);
-    }
-    St_DataSet *l3t = gStChain->DataSet("l3Tracks");
-    if (l3t) {
-      St_DataSetIter l3tI(l3t);
-      St_tpt_track   *track = (St_tpt_track *) l3tI["l3Track"];
-      if (track)         m_DataSet->Shunt(track);
-    }
-#if 0
-    St_DataSet *emc = gStChain->DataSet("emc_hits");
-    if (emc) {m_DataSet->Shunt(emc);}
-#endif
-    St_DataSet *emc = gStChain->DataSet("emc_raw");
-    if (emc) {
-      St_DataSetIter emcI(emc);
-      St_ems_hits *ems_hits_bemc = (St_ems_hits *) emcI["ems_hits_bemc"];
-      if (ems_hits_bemc) m_DataSet->Shunt(ems_hits_bemc);
-      St_ems_hits *ems_hits_bsmd = (St_ems_hits *) emcI["ems_hits_bsmd"];
-      if (ems_hits_bsmd) m_DataSet->Shunt(ems_hits_bsmd);
-      St_ems_hits *ems_hits_eemc = (St_ems_hits *) emcI["ems_hits_eemc"];
-      if (ems_hits_eemc) m_DataSet->Shunt(ems_hits_eemc);
-      St_ems_hits *ems_hits_esmd = (St_ems_hits *) emcI["ems_hits_esmd"];
-      if (ems_hits_esmd) m_DataSet->Shunt(ems_hits_esmd);
-    }
+  St_DataSet *ds=0,*mk=0;
+  const char *name,*mkname;
+  
+ 
+  for (int idst=0; (name=fSelect[idst]); idst++) {
+  
+    if (strchr(name,':')) {
+      mkname = name; mk = GetInputDS(name); continue;}
+
+    if (!mk) continue;
+    ds = mk->Find(name);
+    if (!ds) continue;
+    ds->Shunt(m_DataSet);
+    if (Debug()) printf("\n*** <%s::Make> *** selected %s%s\n",ClassName(),mkname,name);
   }
   
   return kStOK;
@@ -176,9 +101,9 @@ Int_t St_dst_Maker::Make(){
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_dst_Maker.cxx,v 1.8 1999/02/26 02:31:55 fisyak Exp $\n");
+  printf("* $Id: St_dst_Maker.cxx,v 1.9 1999/03/11 03:12:17 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
 

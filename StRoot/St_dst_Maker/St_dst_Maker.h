@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.h,v 1.3 1999/02/19 16:28:55 fisyak Exp $
+// $Id: St_dst_Maker.h,v 1.4 1999/03/11 03:12:18 perev Exp $
 // $Log: St_dst_Maker.h,v $
+// Revision 1.4  1999/03/11 03:12:18  perev
+// new schema
+//
 // Revision 1.3  1999/02/19 16:28:55  fisyak
 // Reactivate dst Maker
 //
@@ -37,28 +40,18 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "StMaker.h"
-#include "TClonesArray.h"
 
 //class St_stk_stkpar;
 class St_dst_Maker : public StMaker {
  private:
-   Bool_t drawinit;
-   // CloneArrays
-   Int_t  fNvertex;
-   Int_t  fNtrack;
-   Int_t  fNpoint;
-   static const Int_t maxNoVertex;
-   static const Int_t maxNoTrack;
-   static const Int_t maxNoPoint;
-   TClonesArray *m_Vertex;  //!
-   TClonesArray *m_Track;   //!
-   //   TClonesArray *m_Point;
+ const Char_t **fSelect;
  protected:
  public: 
-                  St_dst_Maker(const char *name="dst", const char *title="dst");
+                  St_dst_Maker(const char *name="dst");
    virtual       ~St_dst_Maker();
    virtual Int_t  Init();
    virtual Int_t  Make();
+   virtual void   SetSelection(const Char_t **sel ){fSelect=sel;};
    virtual void   PrintInfo();
    
    ClassDef(St_dst_Maker, 1)   //StAF chain virtual base class for Makers
