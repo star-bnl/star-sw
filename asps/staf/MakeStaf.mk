@@ -116,13 +116,13 @@ all : incs libs exes
 
 libs : $(ASPSLIB)
 $(ASPSLIB): %_LIB:
-	$(MAKE) -f $(STAF_HOME)/MakeAsp.mk lib INP_DIR=$(INP_DIR)/$(STEM) OUT_DIR=$(OUT_DIR)
+	$(MAKE) -f $(STAF_MAKE_HOME)/MakeAsp.mk lib INP_DIR=$(INP_DIR)/$(STEM) OUT_DIR=$(OUT_DIR)
 
 
 exes : $(ASPSEXE)
 
 $(ASPSEXE): %_EXE : 
-	$(MAKE) -f $(STAF_HOME)/MakeAsp.mk exe INP_DIR=$(INP_DIR)/$(STEM) OUT_DIR=$(OUT_DIR)
+	$(MAKE) -f $(STAF_MAKE_HOME)/MakeAsp.mk exe INP_DIR=$(INP_DIR)/$(STEM) OUT_DIR=$(OUT_DIR)
 
 incs : $(ALL_INC_INST)
 
