@@ -1,7 +1,8 @@
-// Using StV0MiniDstMaker to read a v0 mini-DST
-// Peter G. Jones, University of Birmingham, p.g.jones@bham.ac.uk
-// $Id: readV0MiniDst.C,v 1.7 1999/09/02 09:12:27 jones Exp $
+// $Id: readV0MiniDst.C,v 1.8 2000/01/05 22:18:07 genevb Exp $
 // $Log: readV0MiniDst.C,v $
+// Revision 1.8  2000/01/05 22:18:07  genevb
+// Put comments in order that QA wants
+//
 // Revision 1.7  1999/09/02 09:12:27  jones
 // Changes reflect new I/O file handling
 //
@@ -23,6 +24,12 @@
 // Revision 1.1  1999/07/13 12:51:02  jones
 // Added macros for making and reading v0 mini-DSTs using StV0MiniDstMaker
 //
+//======================================================
+// owner:  Peter G. Jones, University of Birmingham, p.g.jones@bham.ac.uk
+// what it does:  uses StV0MiniDstMaker to read a V0 mini-DST
+//                and draw some histograms from it
+//======================================================
+
 
 int n_v0 = 0;
 TOrdCollection *collection = 0;
