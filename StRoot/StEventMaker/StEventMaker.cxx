@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.4 1999/05/10 16:53:12 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.5 1999/05/22 17:59:01 perev Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.5  1999/05/22 17:59:01  perev
+// Can read also mdc2 and last format
+//
 // Revision 1.4  1999/05/10 16:53:12  fisyak
 // Rename reader
 //
@@ -96,8 +99,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.4 1999/05/10 16:53:12 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.5 1999/05/22 17:59:01 perev Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.5  1999/05/22 17:59:01  perev
+// Can read also mdc2 and last format
+//
 // Revision 1.4  1999/05/10 16:53:12  fisyak
 // Rename reader
 //
@@ -168,64 +174,88 @@
 //////////////////////////////////////////////////////////////////////////
 
  * no dst dataset is available.
-#include "StEventMaker.h"
+ *
  *
  * Revision 2.24  2000/05/24 15:48:15  ullrich
  * Instance of StEvent now also created if no DST dataset
  * is available.
-#include "StRun.h"
-#include "StEvent.h"
-#include "StGlobalTrack.h"
-#include "StDedx.h"
-#include "StTpcHit.h"
-#include "StFtpcHit.h"
-#include "StSvtHit.h"
-#include "StHit.h"
-#include "StVertex.h"
-#include "StV0Vertex.h"
-#include "StXiVertex.h"
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.4 1999/05/10 16:53:12 fisyak Exp $";
-#include "StEventManager.h"
-StEventManager MakerEventManager;
+#ifndef TRANSIENT_STEVENT
+  #include "StThreeVectorD.hh"
+  #include "StThreeVectorF.hh"
+  #include "StRun.h"
+  #include "StEvent.h"
+  #include "StGlobalTrack.h"
+  #include "StDedx.h"
+  #include "StTpcHit.h"
+  #include "StFtpcHit.h"
+  #include "StSvtHit.h"
+  #include "StHit.h"
+  #include "StVertex.h"
+  #include "StV0Vertex.h"
+  #include "StXiVertex.h"
+#else
+  #include "StEvent/StRun.hh"
+  #include "StEvent/StEvent.hh"
+  #include "StEvent/StGlobalTrack.hh"
+  #include "StEvent/StDedx.hh"
+  #include "StEvent/StTpcHit.hh"
+  #include "StEvent/StFtpcHit.hh"
+  #include "StEvent/StSvtHit.hh"
+  #include "StEvent/StHit.hh"
+  #include "StEvent/StVertex.hh"
+  #include "StEvent/StV0Vertex.hh"
+  #include "StEvent/StXiVertex.hh"
+  typedef StThreeVector<float> StThreeVectorF;
+  typedef StThreeVector<double> StThreeVectorD;
+#endif
+#include "StEventMaker/StRootEventManager.hh"
+
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.5 1999/05/22 17:59:01 perev Exp $";
+#include "StEventManager.hh"
  * Revision 2.23  2000/05/22 21:53:41  ullrich
 const long detid_tpc = 1;
 const long detid_svt = 2;
 const long detid_ftpcWest = 4;
 const long detid_ftpcEast = 5;
 
-ooStatus status;
-
-// For local use
-dst_run_header_st dummy_hdr;
-dst_event_header_st dstEventHeader;
-dst_event_summary_st dstEventSummary;
-dst_monitor_hard_st dstMonitorHard;
-dst_monitor_soft_st dstMonitorSoft;
-gen_header_st genHeader;
-particle_st particle;
-dst_TriggerDetectors_st dstTriggerDetectors;
-long i;
-//#include "fortranc.h"
-//#define gufld_ F77_NAME(gufld,GUFLD)
-//R__EXTERN  void type_of_call gufld_(Float_t *x, Float_t *b);
-// Option to suppress loading of StEvent, for debugging & leak checking
-#define gufld   gufld_
-//#define gufld   GUFLD
+#define gufld gufld_
 extern "C" {void gufld(Float_t *, Float_t *);}
-Bool_t doLoad = kTRUE;
 #include "StTrack.h"
 
  * zero length. Added for primary and global tracks.
 #include "St_ObjectSet.h"
   //_____________________________________________________________________________
-  StEventMaker::StEventMaker(const char *name):StMaker(name){
-  setEventManager(&MakerEventManager);
+  StEventMaker::StEventMaker(const char *name,const char *titl):StMaker(name){
+  if(titl) SetTitle(titl);
+  setEventManager(new StRootEventManager());
+  theEventManager = new StRootEventManager();
+  theEventManager->setMaker(this);
   currentRun = 0;
   currentEvent = 0;
+
+//		create empty objects
+  defRunHeader		= new dst_run_header_st   ();	
+  defEventHeader	= new dst_event_header_st ();	
+  defEventSummary	= new dst_event_summary_st();	
+  defMonitorHard	= new dst_monitor_hard_st ();	
+  defMonitorSoft	= new dst_monitor_soft_st ();	
+  defTriggerDetectors	= new dst_TriggerDetectors_st();	
+//		...and fill it by zeros
+  memset(defRunHeader	    ,0,sizeof(dst_run_header_st      ));	
+  memset(defEventHeader	    ,0,sizeof(dst_event_header_st    ));	
+  memset(defEventSummary    ,0,sizeof(dst_event_summary_st   ));	
+  memset(defMonitorHard	    ,0,sizeof(dst_monitor_hard_st    ));	
+  memset(defMonitorSoft	    ,0,sizeof(dst_monitor_soft_st    ));	
+  memset(defTriggerDetectors,0,sizeof(dst_TriggerDetectors_st));	
+//
+ * Revision 2.17  2000/02/08 21:14:16  genevb
+    doLoadTpcHits  = kTRUE;
+  doLoad=kTRUE;
     doPrintEventInfo  = kTRUE;  // TMP, set to fFALSE later
 //_____________________________________________________________________________
-StEventMaker::~StEventMaker(){
+StEventMaker::~StEventMaker()
+    doPrintEventInfo  = kFALSE;
  *
  * Revision 2.7  1999/11/17 14:10:27  ullrich
 //_____________________________________________________________________________
@@ -235,84 +265,89 @@ Int_t StEventMaker::Init(){
     doPrintRunInfo    = kTRUE;  // TMP 
 //_____________________________________________________________________________
 Int_t StEventMaker::Make(){
-  dst_run_header_st& dstRunHeader = dummy_hdr;
-  St_DataSet *global = GetInputDS("dst");
-  if (! global) return kStErr;
-  theEventManager->ResetDstIter(global);
-  status = theEventManager->readRunHeader(dstRunHeader);
-  if (status) {
-    cout << "StEventMaker: Run header: ID " << dstRunHeader.run_id << endl;
+  long nrows;
+  int i;
+
+  status = theEventManager->openEvent("dst");
+
+  dstRunHeader = theEventManager->returnTable_dst_run_header (nrows);
+  if (!dstRunHeader) dstRunHeader = defRunHeader;
+
+  if (dstRunHeader!=defRunHeader) {
+    cout << "StEventMaker: Run header: ID " << dstRunHeader->run_id << endl;
     /* run summary not used
-       dst_run_summary_st dummy_sum;
-       dst_run_summary_st& dstRunSummary = dummy_sum;
-       status = theEventManager->readRunSummary(dstRunSummary);
-       if (status) {
+       dstRunsummary_st* dstRunSummary = theEventManager->returnTable_dst_run_summary (nrows);
+       delete currentRun;
+       if (dstRunSummary) {
        cout << "StEventMaker: Run summary found" << endl;
        // Create transient run header
-       currentRun = new StRun(dstRunHeader, dstRunSummary);
+       currentRun = new StRun(*dstRunHeader, *dstRunSummary);
        } else {
-       currentRun = new StRun(dstRunHeader);
+       currentRun = new StRun(*dstRunHeader);
        }
     */
-    if (doLoad) {
-      if (currentRun) delete currentRun;
-      currentRun = new StRun(dstRunHeader);
-      AddConst(currentRun);
-    }
- * Revised to build new StEvent version
-    // Since this is a run header record, there is no event data
-    // so we're finished
-    //    currentEvent = 0;
-    //    theEventManager->closeEvent();
-    return kStOK;
   }
+  if (doLoad) {
+    currentRun = new StRun(*dstRunHeader);
+#ifndef TRANSIENT_STEVENT
+      AddConst(currentRun);
+#endif
+  }
+ * Revised to build new StEvent version
   
   cout << "StEventMaker: Reading Event" << endl;
-  theEventManager->readHeader(dstEventHeader);
-  status = theEventManager->readTable(dstEventSummary);
+  dstEventHeader = theEventManager->returnTable_dst_event_header(nrows);
+  if(!dstEventHeader) dstEventHeader=defEventHeader;
+
+  dstEventSummary = theEventManager->returnTable_dst_event_summary(nrows);
+  if(!dstEventSummary) dstEventSummary = defEventSummary;
+
   // Create transient event header
-  if (doLoad) {
+  if (doLoad ) {
     currentEvent = new StEvent(currentRun,
-                               dstEventHeader,
-                               dstEventSummary);
+                               *dstEventHeader,
+                               *dstEventSummary);
+#ifndef TRANSIENT_STEVENT
     AddData(currentEvent);
-  }
+#endif
+  }//endif doLoad
   
-  status = theEventManager->readTable(dstMonitorHard);
-  if (status) {
-    cout << "StEventMaker: Found dstMonitorHard" << endl;
-  }
-  status = theEventManager->readTable(dstMonitorSoft);
-  if (status) {
-    cout << "StEventMaker: Found dstMonitorSoft" << endl;
-  }
+    dstMonitorHard = theEventManager->returnTable_dst_monitor_hard(nrows);
+    if (dstMonitorHard) 
+          cout << "StEventMaker: Found dstMonitorHard" << endl;
+    else  dstMonitorHard = defMonitorHard;
+
+    dstMonitorSoft = theEventManager->returnTable_dst_monitor_soft(nrows);
+    if (dstMonitorSoft) 
+         cout << "StEventMaker: Found dstMonitorSoft" << endl;
+    else dstMonitorSoft=defMonitorSoft;
   
-  // Read and load trigger detector data
-  St_DataSet *trg = GetInputDS("trg");
-  if (!trg) trg = GetInputDS("dst");
-  if (trg) {
-    theEventManager->ResetDstIter(trg);
-    status = theEventManager->readTable(dstTriggerDetectors);
-    if (status) {
+// 		Read and load trigger detector data
+        else
+  status =   theEventManager->openEvent("trg");
+	theEventManager->closeEvent();
+  if (status) {
+    dstTriggerDetectors = theEventManager->returnTable_dst_TriggerDetectors(nrows); 
+    if (dstTriggerDetectors){
       cout << "StEventMaker: Loading triggerDetectors" << endl;
       StTriggerDetectorCollection *trgDets =
 	currentEvent->triggerDetectorCollection();
       // Load CTB data
       StCtbCounter* ctb;
       for (i=0; i<240; i++) {
-	if (dstTriggerDetectors.nCtb[i] > 0) {
+	if (dstTriggerDetectors->nCtb[i] > 0) {
 	  ctb = new StCtbCounter( i, 
-				  dstTriggerDetectors.nCtb[i],
-				  dstTriggerDetectors.timeCtb[i]);
-	  trgDets->ctbCounters().push_back(ctb);
+				  dstTriggerDetectors->nCtb[i],
+				  dstTriggerDetectors->timeCtb[i]);
+	  trgDets->ctbCounters().push_back(*ctb);
 	}
       }
       // Load MWC data
       StMwcSector* mwc;
       for (i=0; i<96; i++) {
-	if (dstTriggerDetectors.nMwc[i] > 0) {
-	  mwc = new StMwcSector( i, dstTriggerDetectors.nMwc[i]);
-	  trgDets->mwcSectors().push_back(mwc);
+	if (dstTriggerDetectors->nMwc[i] > 0) {
+	  mwc = new StMwcSector( i, dstTriggerDetectors->nMwc[i]);
+	  trgDets->mwcSectors().push_back(*mwc);
 	}
       }
       // Load VPD data
@@ -320,34 +355,33 @@ Int_t StEventMaker::Make(){
       for (i=0; i<48; i++) {
 	// No filling code exists, so no criteria to ignore empty bins
 	vpd = new StVpdCounter( i,
-				dstTriggerDetectors.adcVPD[i],
-				dstTriggerDetectors.timeVPD[i]);
-	trgDets->vpdCounters().push_back(vpd);
+				dstTriggerDetectors->adcVPD[i],
+				dstTriggerDetectors->timeVPD[i]);
+	trgDets->vpdCounters().push_back(*vpd);
       }
-      trgDets->vpdSummary().setVertexZ(dstTriggerDetectors.vertexZ);
-      trgDets->vpdSummary().setMinimumTime(east,dstTriggerDetectors.TimeEastVpd);
-      trgDets->vpdSummary().setMinimumTime(west,dstTriggerDetectors.TimeWestVpd);
+      trgDets->vpdSummary().setVertexZ(dstTriggerDetectors->vertexZ);
+      trgDets->vpdSummary().setMinimumTime(east,dstTriggerDetectors->TimeEastVpd);
+      trgDets->vpdSummary().setMinimumTime(west,dstTriggerDetectors->TimeWestVpd);
       // Load ZDC data
       StZdcSegment* zdc;
       for (i=0; i<6; i++) {
 	// No filling code exists, so no criteria to ignore empty bins
 	zdc = new StZdcSegment( i,
-				dstTriggerDetectors.adcZDC[i],
-				dstTriggerDetectors.tdcZDC[i]);
-	trgDets->zdcSegments().push_back(zdc);
+				dstTriggerDetectors->adcZDC[i],
+				dstTriggerDetectors->tdcZDC[i]);
+	trgDets->zdcSegments().push_back(*zdc);
       }
-      trgDets->zdcSummary().setAdcSum(dstTriggerDetectors.adcZDCsum);
-      trgDets->zdcSummary().setAdcSum(east,dstTriggerDetectors.adcZDCEast);
-      trgDets->zdcSummary().setAdcSum(west,dstTriggerDetectors.adcZDCWest);
+      trgDets->zdcSummary().setAdcSum(dstTriggerDetectors->adcZDCsum);
+      trgDets->zdcSummary().setAdcSum(east,dstTriggerDetectors->adcZDCEast);
+      trgDets->zdcSummary().setAdcSum(west,dstTriggerDetectors->adcZDCWest);
     }
   } // end of Trigger part
-  St_DataSet *geant = GetInputDS("geant");
-  if (!geant) geant = GetInputDS("dst");
-  if (geant) {
-    theEventManager->ResetDstIter(geant);
-    status = theEventManager->readTable(particle);
+
+  status =   theEventManager->openEvent("geant");
     if (status) {
-      /*
+      particle = theEventManager->returnTable_particle(nrows); 
+      if (particle) {      
+/* skip particle
 	// load genHeader table from particle
 	genHeader.bimp = particle.phep[0];
 	genHeader.phi = particle.phep[1];
@@ -362,12 +396,14 @@ Int_t StEventMaker::Make(){
 	genHeader.date = particle.vhep[2];
 	genHeader.time = particle.vhep[3];
 	objyEventManager->loadTable(&genHeader);
-      */
+*/
         return kStWarn;
   }
-  if (global) {
-    theEventManager->ResetDstIter(global);
-    // Load and create tracks, vertices etc. and add to collections
+  
+  status = theEventManager->openEvent("dst");
+  if (status) {
+        mCurrentEvent = new StBrowsableEvent(*dstEventHeader, *dstEventSummary, *mDstSummaryParam);
+// 		Load and create tracks, vertices etc. and add to collections
     long nDedx, nPoint, nTrack, nTrackAux, nVertex, nV0Vertex, nXiVertex;
     long nTofTrk, nTofEvt;
     
@@ -377,7 +413,11 @@ Int_t StEventMaker::Make(){
     // vertices are ordered
     
     // First, find the total number of vertices
+#ifdef TRANSIENT_STEVENT
+    StVertexCollection vtxPtr;
+#else
     StVertexCollection vtxPtr("MyVertices");
+#endif
     int indexCount = 0;                    // count vertices added to collection
     int vertexMatchIndex[20000];
     dst_vertex_st* dstVertex = theEventManager->returnTable_dst_vertex(nVertex);
@@ -545,46 +585,12 @@ Int_t StEventMaker::Make(){
 	    // $$$ where to put resids. They aren't loaded at present either.
 	    //        = dstTrackAux[i].residuals[0];
 	    //        = dstTrackAux[i].residuals[1];
-	    theTrack->fitTraits().covariantMatrix()(1,2) = 
-	      dstTrackAux[i].covar_off_diag[0];
-	    theTrack->fitTraits().covariantMatrix()(2,1) = 
-	      dstTrackAux[i].covar_off_diag[0];
-	    theTrack->fitTraits().covariantMatrix()(1,3) = 
-	      dstTrackAux[i].covar_off_diag[1];
-	    theTrack->fitTraits().covariantMatrix()(3,1) = 
-	      dstTrackAux[i].covar_off_diag[1];
-	    theTrack->fitTraits().covariantMatrix()(2,3) = 
-	      dstTrackAux[i].covar_off_diag[2];
-	    theTrack->fitTraits().covariantMatrix()(3,2) = 
-	      dstTrackAux[i].covar_off_diag[2];
-	    theTrack->fitTraits().covariantMatrix()(1,4) = 
-	      dstTrackAux[i].covar_off_diag[3];
-	    theTrack->fitTraits().covariantMatrix()(4,1) = 
-	      dstTrackAux[i].covar_off_diag[3];
-	    theTrack->fitTraits().covariantMatrix()(2,4) = 
-	      dstTrackAux[i].covar_off_diag[4];
-	    theTrack->fitTraits().covariantMatrix()(4,2) = 
-	      dstTrackAux[i].covar_off_diag[4];
-	    theTrack->fitTraits().covariantMatrix()(3,4) = 
-	      dstTrackAux[i].covar_off_diag[5];
-	    theTrack->fitTraits().covariantMatrix()(4,3) = 
-	      dstTrackAux[i].covar_off_diag[5];
-	    theTrack->fitTraits().covariantMatrix()(5,1) = 
-	      dstTrackAux[i].covar_off_diag[6];
-	    theTrack->fitTraits().covariantMatrix()(1,5) = 
-	      dstTrackAux[i].covar_off_diag[6];
-	    theTrack->fitTraits().covariantMatrix()(5,2) = 
-	      dstTrackAux[i].covar_off_diag[7];
-	    theTrack->fitTraits().covariantMatrix()(2,5) = 
-	      dstTrackAux[i].covar_off_diag[7];
-	    theTrack->fitTraits().covariantMatrix()(5,3) = 
-	      dstTrackAux[i].covar_off_diag[8];
-	    theTrack->fitTraits().covariantMatrix()(3,5) = 
-	      dstTrackAux[i].covar_off_diag[8];
-	    theTrack->fitTraits().covariantMatrix()(5,4) = 
-	      dstTrackAux[i].covar_off_diag[9];
-	    theTrack->fitTraits().covariantMatrix()(4,5) = 
-	      dstTrackAux[i].covar_off_diag[9];
+
+const static int iTab[]={1,2, 1,3, 2,3, 1,4, 2,4, 3,4, 1,5, 2,5, 3,5, 4,5, 0};
+            for (const int *jTab=iTab; jTab[0]; jTab+=2) {
+              double qwe = dstTrackAux[i].covar_off_diag[0];
+	      theTrack->fitTraits().covariantMatrix()(jTab[0],jTab[1]) = qwe; 
+	      theTrack->fitTraits().covariantMatrix()(jTab[1],jTab[0]) = qwe;}
 	  } else {
 	    cout << "StEventMaker: ERROR: Track find failed for ID " << itrk << endl;
 	  }
@@ -686,11 +692,17 @@ Int_t StEventMaker::Make(){
       }
     }    
   }
-  // theEventManager->closeEvent();
+  theEventManager->closeEvent();
   return kStOK;
 }
-
-
+void StEventMaker::Clear(const char*)
+{ 
+#ifdef TRANSIENT_STEVENT
+  delete currentEvent;
+#endif
+  currentEvent=0;
+  StMaker::Clear();
+}
 void StEventMaker::setEventManager(StEventManager* mgr)
 {
   theEventManager = mgr;
@@ -698,7 +710,7 @@ void StEventMaker::setEventManager(StEventManager* mgr)
 //_____________________________________________________________________________
 void StEventMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StEventMaker.cxx,v 1.4 1999/05/10 16:53:12 fisyak Exp $\n");
+  printf("* $Id: StEventMaker.cxx,v 1.5 1999/05/22 17:59:01 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
