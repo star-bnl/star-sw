@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.170 2001/02/13 01:31:52 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.171 2001/02/15 00:44:36 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -53,10 +53,10 @@ Bfc_st BFC[] = {
   {"doEvents"    ,""  ,"","xin,event,analysis,NoDb"                                       ,"","","",kFALSE},
   {"drawDst"     ,""  ,"","xin,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                  ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
-  {"C1default"   ,""  ,"","tpc,rrs,rich,l0,l3,Cdst,Kalman,tags,Tree,EvOut,NoHits"
+  {"C1default"   ,""  ,"","tpc,rrs,rich,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits"
                                                                               ,"","","Year 1 chain",kFALSE}, 
   {"C2default"   ,""  ,"","C1default,ftpc,svt"                                ,"","","Year 2 chain",kFALSE}, 
-  {"CAdefault"   ,""  ,"","tpc,l0,l3,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt"
+  {"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt"
                                                                          ,"","","Assymptotic chain",kFALSE}, 
   {"Cy1a"        ,""  ,"","y1a,C1default"                                ,"","","Turn on chain y1a",kFALSE},
   {"Cy1b"        ,""  ,"","y1b,C1default"                                ,"","","Turn on chain y1b",kFALSE},
@@ -134,6 +134,7 @@ Bfc_st BFC[] = {
   {"tls"         ,""  ,"","",""                                                           ,"tls","",kFALSE},
   {"daq"         ,""  ,"","",""                         ,"StDaqLib,StDAQMakerLib","Load StDAQMaker",kFALSE},
   {"SCL"         ,""  ,"","",""                         ,"StarClassLibrary","Load StarClassLibrary",kFALSE},
+  {"SvtCL"       ,""  ,"","",""                                             ,"StSvtClassLibrary","",kFALSE},
   {"TbUtil"      ,""  ,"","sim_T,tpc_t,globT,SCL",""    ,"StTableUtilities","Load StTableUtilities",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -184,17 +185,17 @@ Bfc_st BFC[] = {
   {"PreVtx"     ,"","tpcChain","tpt,SCL,sim_T,tpc_T,svt_T,ftpcT,globT,ctf_T",
                                        "StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
   {"svt"         ,"svtChain","","svt_T,srs,Est"                             ,"StMaker","StChain","",kFALSE},
-  {"SvtSlowSim"  ,"SvtSlowSim","svtChain","",      "StSvtSimulationMaker","StSvtSimulationMaker","",kFALSE},
+  {"SvtSlowSim"  ,"SvtSlowSim","svtChain","SvtCL", "StSvtSimulationMaker","StSvtSimulationMaker","",kFALSE},
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                                             ,"","","",kFALSE},
-  {"srs"         ,"svt_hits","svtChain","tls,Simu"  ,"St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
-  {"sls"      ,"","svtChain","tls,Simu"     ,"St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
-  {"spa"      ,"","svtChain","tls,Simu"     ,"St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
-  {"svt_daq"     ,"svt_raw","svtChain",""                       ,"StSvtDaqMaker","StSvtDaqMaker","",kFALSE},
-  {"SvtSeqAdj"   ,"SvtSeqAdj","svtChain",""               ,"StSvtSeqAdjMaker","StSvtSeqAdjMaker","",kFALSE},
-  {"SvtClu"      ,"SvtClu","svtChain",""                ,"StSvtClusterMaker","StSvtClusterMaker","",kFALSE},  
-  {"SvtCluAnal"  ,"SvtCluAnal","svtChain",""    ,"StSvtClusterAnalysisMaker","StSvtClusterMaker","",kFALSE},  
-  {"SvtHit"      ,"svt_hits","svtChain",""                  ,"StSvtHitMaker","StSvtClusterMaker","",kFALSE},  
-  {"stk"         ,"svt_tracks","svtChain","tls"     ,"St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},  
+  {"srs"     ,"svt_hits","svtChain","tls,Simu,SvtCL","St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
+  {"sls"     ,"","svtChain","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
+  {"spa"     ,"","svtChain","tls,Simu,SvtCL","St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
+  {"svt_daq"     ,"svt_raw","svtChain","SvtCL"                  ,"StSvtDaqMaker","StSvtDaqMaker","",kFALSE},
+  {"SvtSeqAdj"   ,"SvtSeqAdj","svtChain","SvtCL"          ,"StSvtSeqAdjMaker","StSvtSeqAdjMaker","",kFALSE},
+  {"SvtClu"      ,"SvtClu","svtChain","SvtCL"   ,"StSvtClusterMaker","StEvent,StSvtClusterMaker","",kFALSE},  
+  {"SvtCluAnal" ,"SvtCluAnal","svtChain","SvtCL","StSvtClusterAnalysisMaker","StSvtClusterMaker","",kFALSE},  
+  {"SvtHit"      ,"svt_hits","svtChain","SvtCL"             ,"StSvtHitMaker","StSvtClusterMaker","",kFALSE},  
+  {"stk"        ,"svt_tracks","svtChain","tls,SvtCL","St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},  
   {"scf"      ,"","svtChain",""                ,"St_scf_Maker","St_tpc,St_svt,StSsdClusterMaker","",kFALSE},
   {"scm"      ,"","svtChain",""                ,"St_scm_Maker","St_tpc,St_svt,StSsdClusterMaker","",kFALSE},
   {"sce"      ,"","svtChain",""                   ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker","",kFALSE},
