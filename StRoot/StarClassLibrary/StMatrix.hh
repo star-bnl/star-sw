@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.1 1999/01/30 03:59:03 fisyak Exp $
+ * $Id: StMatrix.hh,v 1.2 1999/02/14 23:11:43 fisyak Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,8 +18,11 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
- * Revision 1.1  1999/01/30 03:59:03  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/02/14 23:11:43  fisyak
+ * Fixes for Rootcint
+ *
+ * Revision 1.4  1999/03/04 18:12:24  ullrich
+ * Added namespace 'std'.
  *
  * Revision 1.3  1999/02/17 11:38:54  ullrich
  * Removed specialization for 'long double'.
@@ -1683,30 +1686,30 @@ ostream& operator<<(ostream& s, const StMatrix<DataType>& q)
     for(unsigned int irow = 1; irow<= q.numRow(); irow++)
 	{
 	    for(unsigned int icol=1; icol<=q.numCol(); icol++)
-#ifdef __HP_aCC
-// Print the Matrix.  (long double)  HP does not overload long double
- ostream& operator<<(ostream& s, const StMatrix<long double>& q)
-{
-    s << "\n";
-    // Fixed format needs 3 extra characters for field
-    // Scientific format needs 7
-    unsigned int width;
-    if(s.flags()&ios::fixed)
-	width = s.precision()+3;
-    else
-	width = s.precision()+7;
-    for(unsigned int irow = 1; irow<= q.numRow(); irow++)
-	{
-	    for(unsigned int icol=1; icol<=q.numCol(); icol++)
 		{
 		    s.width(width);
-		    s << (static_cast<double>(q(irow,icol))) << " ";
-		}
-	    s<< endl;
-	}
-    return s;
-}
-#endif
+
+// #ifdef __HP_aCC
+// // Print the Matrix.  (long double)  HP does not overload long double
+//  ostream& operator<<(ostream& s, const StMatrix<long double>& q)
+// {
+//     s << "\n";
+//     // Fixed format needs 3 extra characters for field
+//     // Scientific format needs 7
+//     unsigned int width;
+//     if(s.flags()&ios::fixed)
+// 	width = s.precision()+3;
+//     else
+// 	width = s.precision()+7;
+//     for(unsigned int irow = 1; irow<= q.numRow(); irow++)
+// 	{
+// 	    for(unsigned int icol=1; icol<=q.numCol(); icol++)
+// 		{
+// 		    s.width(width);
+// 		    s << (static_cast<double>(q(irow,icol))) << " ";
+// 		}
+// 	    s<< endl;
+// 	}
 //     return s;
 // }
 // #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.hh,v 1.1 1999/01/30 03:59:06 fisyak Exp $
+ * $Id: StThreeVectorF.hh,v 1.2 1999/02/14 23:11:51 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.hh,v $
- * Revision 1.1  1999/01/30 03:59:06  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/02/14 23:11:51  fisyak
+ * Fixes for Rootcint
+ *
+ * Revision 1.4  1999/12/21 15:14:33  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.3  1999/06/04 18:00:14  ullrich
  * Added new constructor which takes C-style array as argument.
@@ -22,9 +25,10 @@
  * as lvalues.
  *
  * Revision 1.2  1999/02/14 23:11:51  fisyak
-
+ * Fixes for Rootcint
  *
  * Revision 1.1  1999/01/30 03:59:06  fisyak
+ * Root Version of StarClassLibrary
  *
  * Revision 1.1  1999/01/23 00:28:07  ullrich
  * Initial Revision
@@ -108,7 +112,7 @@ class StThreeVectorF
     StThreeVectorF& operator+= (const StThreeVectorF&);
     StThreeVectorF& operator-= (const StThreeVectorF&);
     
-
+    int operator == (const StThreeVectorD& v) const;
     int operator != (const StThreeVectorD& v) const;
     StThreeVectorF& operator+= (const StThreeVectorD&);
     StThreeVectorF& operator-= (const StThreeVectorD&);
@@ -453,7 +457,7 @@ inline float operator* (const StThreeVectorF& v1, const StThreeVectorD& v2)
 inline StThreeVectorF operator* (const StThreeVectorF& v, double c)
 {
     return StThreeVectorF(v) *= c;
-
+}
 
 inline StThreeVectorF operator* (double c, const StThreeVectorF& v)
 {
