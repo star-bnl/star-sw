@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.29 2002/01/17 21:14:38 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.30 2002/12/19 22:28:19 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.30  2002/12/19 22:28:19  perev
+ * PMD added
+ *
  * Revision 1.29  2002/01/17 21:14:38  perev
  * Akio FPD reader
  *
@@ -111,6 +114,7 @@
 #include "StDAQReader.h"
 #include "StTPCReader.h"
 #include "StEMCReader.h"
+#include "StPMDReader.h"
 #include "StFTPCReader.h"
 #include "StTRGReader.h"
 #include "StSVTReader.h"
@@ -126,6 +130,7 @@ StDAQReader::StDAQReader(const char *file)
   fEventReader	= 0;
   fTPCReader 	= 0;
   fEMCReader 	= 0;
+  fPMDReader 	= 0;
   fRICHReader 	= 0;
   fL3Reader 	= 0;
   fSVTReader 	= 0;
@@ -169,6 +174,7 @@ int StDAQReader::close()
 
   if(fTPCReader) 	fTPCReader ->close();  
   if(fEMCReader) 	fEMCReader ->close();  
+  if(fPMDReader) 	fPMDReader ->close();  
   if(fSVTReader) 	fSVTReader ->close();  
 //if (fRICHReader) 	fRICHReader->close();  
   if(fFTPCReader)       fFTPCReader->close();
@@ -206,6 +212,7 @@ int StDAQReader::readEvent()
   if (fTRGReader) 	fTRGReader ->Update();
   if (fSVTReader) 	fSVTReader ->Update();
   if (fEMCReader) 	fEMCReader ->Update();
+  if (fPMDReader) 	fPMDReader ->Update();
   return 0;
 }
 //_____________________________________________________________________________
@@ -258,6 +265,8 @@ void StDAQReader::setFTPCVersion(const char* vers)
 //_____________________________________________________________________________
    int StDAQReader::EMCPresent()  const {return  fEventInfo->EMCPresent;}
 //_____________________________________________________________________________
+   int StDAQReader::PMDPresent()  const {return  fEventInfo->PMDPresent;}
+//_____________________________________________________________________________
    int StDAQReader::SMDPresent()  const {return  fEventInfo->SMDPresent;}
 //_____________________________________________________________________________
    int StDAQReader::FTPCPresent() const {return  fEventInfo->FTPCPresent;}
@@ -286,6 +295,16 @@ StEMCReader *StDAQReader::getEMCReader()
     fEMCReader = new StEMCReader(this);
   }
   return fEMCReader;
+} 
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+StPMDReader *StDAQReader::getPMDReader()
+{
+  if (!fPMDReader) {
+    fPMDReader = new StPMDReader(this);
+//     fPMDReader->Update(); 
+  }
+  return fPMDReader;
 } 
 //_____________________________________________________________________________
 StRICHReader *StDAQReader::getRICHReader() 

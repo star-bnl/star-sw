@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.19 2002/01/17 21:14:38 perev Exp $
+ * $Id: StDAQReader.h,v 1.20 2002/12/19 22:28:27 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.20  2002/12/19 22:28:27  perev
+ * PMD added
+ *
  * Revision 1.19  2002/01/17 21:14:38  perev
  * Akio FPD reader
  *
@@ -76,6 +79,7 @@ typedef  EventInfo DAQEventInfo;
 class EventReader ;  
 class StTPCReader ;  
 class StEMCReader ;  
+class StPMDReader ;  
 class StFTPCReader;  
 class StTRGReader ;
 class StSVTReader ;
@@ -128,6 +132,7 @@ public:
   virtual int TOFPresent () const;
   virtual int FPDPresent () const;
   virtual int EMCPresent () const;
+  virtual int PMDPresent () const;
   virtual int SMDPresent () const;
   virtual int FTPCPresent() const;
   virtual int RICHPresent() const;
@@ -140,6 +145,7 @@ public:
   virtual const char *getFTPCVersion() const {return fFTPCVersion;} 
   StTPCReader  *getTPCReader (); 
   StEMCReader  *getEMCReader (); 
+  StPMDReader  *getPMDReader (); 
   StRICHReader *getRICHReader(); 
   StFTPCReader *getFTPCReader(); 
   StTRGReader  *getTRGReader ();
@@ -157,6 +163,7 @@ protected:
   EventReader  *fEventReader;  
   StTPCReader  *fTPCReader;  
   StEMCReader  *fEMCReader;  
+  StPMDReader  *fPMDReader;  
   StFTPCReader *fFTPCReader;  
   StRICHReader *fRICHReader;
   StTRGReader  *fTRGReader;
@@ -175,5 +182,6 @@ protected:
 #include "StTPCReader.h"
 #include "StFTPCReader.h"
 #include "StEMCReader.h"
+#include "StPMDReader.h"
 #endif /*__CINT__*/
 #endif /*end*/
