@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.8 2000/04/18 17:31:28 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 2.7  2000/03/29 16:54:11  ullrich
- * Added L3 trigger.
+ * Revision 2.8  2000/04/18 17:31:28  perev
+ * StEvent::Browse overload of TDataSet:;One
+ *
+ * Revision 2.13  2000/05/24 15:46:05  ullrich
+ * Added setSummary() method.
  *
  * Revision 2.12  2000/05/22 21:47:12  ullrich
  * Added RICH collection and related methods.
@@ -52,16 +55,16 @@
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.0  1999/10/12 18:41:53  ullrich
-
+ *
 #include "StRichPixelCollection.h"
 #include <typeinfo>
 #include <algorithm>
 #include "StEvent.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.8 2000/04/18 17:31:28 perev Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.8 2000/04/18 17:31:28 perev Exp $";
 #include "StTpcHitCollection.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.8 2000/04/18 17:31:28 perev Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.8 2000/04/18 17:31:28 perev Exp $";
 #include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
 #include "StRichCollection.h"
@@ -69,8 +72,8 @@ static const char rcsid[] = "$Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich 
 #include "StTriggerDetectorCollection.h"
 #include "StPrimaryVertex.h"
 #include "StL0Trigger.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.8 2000/04/18 17:31:28 perev Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.8 2000/04/18 17:31:28 perev Exp $";
 #include "tables/St_dst_event_summary_Table.h"
 #include "tables/St_dst_summary_param_Table.h"
 #include "StAutoBrowse.h"
@@ -93,7 +96,7 @@ using std::swap;
     mV0Vertices = 0;
     mXiVertices = 0;
     mKinkVertices = 0;
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.7 2000/03/29 16:54:11 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.8 2000/04/18 17:31:28 perev Exp $";
 void
 StEvent::initToZero()
 
@@ -376,6 +379,8 @@ StEvent::setRichPixelCollection(StRichPixelCollection* val)
                 swap(mPrimaryVertices[i], mPrimaryVertices[i-1]);
         if (!mContent[mPrimaryVertices])
             mContent[mPrimaryVertices] = new StSPtrVecPrimaryVertex;
+
+void StEvent::Browse(TBrowser* b){StAutoBrowse::Browse(this,b);}
     if (vertex) {
         for (int i=mPrimaryVertices->size()-1; i>0; i--) {
 {StAutoBrowse::Browse(this,b);TDataSet::Browse(b);}
