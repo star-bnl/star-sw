@@ -6,12 +6,11 @@ StChain *chain;
 int total=0;
 
 void RunJetFinder2(
-		   //const char* dir = "/star/data42/reco/ppLong-1/FullField/P04if/2003/145/",
-		   //const char* file = "st_physics_4145041_raw_0040025.MuDst.root"
 		   const char* dir = "",
+		   //const char *file = "/star/data29/reco/pp200/pythia6_203/default/pt15/year2003/gheisha_on/trs_if/rcf1205_2012_1000evts.MuDst.root",
 		   const char* file = "/star/data16/reco/dAuCombined/FullField/P03ih/2003/065/st_physics_4065003_raw_0040054.MuDst.root",
-		  const char *filter = "",
-		  const char *outfile="Jets_out_")
+		   const char *filter = "",
+		   const char *outfile="Jets_out_")
 {
     if (gClassTable->GetID("TTable") < 0) {
 	gSystem->Load("libStar");
@@ -30,6 +29,7 @@ void RunJetFinder2(
     gSystem->Load("St_db_Maker");
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetMaker");
+    gSystem->Load("StSpinPoolThomasUtilities");
 
     double pi = atan(1.0)*4.0;
     cout << " loading done " << endl;
@@ -63,7 +63,10 @@ void RunJetFinder2(
     //Instantiate the StEmcTpcFourPMaker
     StEmcTpcFourPMaker* emcFourPMaker = new StEmcTpcFourPMaker("EmcTpcFourPMaker", muDstMaker, 30, 30, .3, .3, .003, adc);
     emcFourPMaker->setUseType(StEmcTpcFourPMaker::Hits);//if don't have this line then default is 0 (which is hits)
-    emcFourPMaker->UseSimpleADCCal();
+    //emcFourPMaker->UseSimpleADCCal(); //turn this on for simulation only!
+    //emcFourPMaker->UsePedSubKludge();
+    emcFourPMaker->setMaxPoints(150);
+    emcFourPMaker->setMinPointThreshold(.3);
 
     //Instantiate the JetMaker
     char* emcOutfile = new char[256];
@@ -88,7 +91,7 @@ void RunJetFinder2(
     cpars->setConeRadius(0.7);
     cpars->setSeedEtMin(0.5);
     cpars->setAssocEtMin(0.1);
-    cpars->setSplitFraction(0.0);
+    cpars->setSplitFraction(0.5);
     cpars->setPerformMinimization(true);
     cpars->setAddMidpoints(true);
     cpars->setRequireStableMidpoints(true);
@@ -96,7 +99,17 @@ void RunJetFinder2(
     cpars->setDebug(false);
     emcJetMaker->addAnalyzer(anapars, cpars, "MkConeJetsPt02R07");
 
-    //Setup the cone finder (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
+    //Setup the cone finder (See StJetFinder/StCdfChargedConeJetFinder.h -> class StCdfChargedConePars)
+    StCdfChargedConePars* ccdfpars = new StCdfChargedConePars();
+    ccdfpars->setGridSpacing(56, -1.6, 1.6, 120, -pi, pi);
+    ccdfpars->setConeRadius(0.7);
+    ccdfpars->setSeedEtMin(1.0);
+    ccdfpars->setAssocEtMin(0.1);
+    ccdfpars->setDebug(false);
+    emcJetMaker->addAnalyzer(anapars, ccdfpars, "MkCdfChargedJetsPt02R07");
+
+
+    //Setup the kt=finder (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
     StKtCluPars* ktpars = new StKtCluPars();
     ktpars->setR(1.0);
     ktpars->setDebug(false);
