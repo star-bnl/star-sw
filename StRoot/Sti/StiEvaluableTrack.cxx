@@ -29,3 +29,33 @@ void StiEvaluableTrack::reset()
     this->StiKalmanTrack::reset();
 }
 
+/*
+ostream& operator<<(ostrea& os, const StiEvaluableTrack& track)
+{
+    StTrackPairInfo* info = track.stTrackPairInfo();
+    StTrack* stTrack = info->partnerTrack();
+    StMcTrack* mcTrack = info->partnerMcTrack();
+    
+    os <<"\n\tFound Sti Track:"<<endl;
+    os << track <<endl;
+
+    os <<"\tFound Global Track:"<<endl;
+    const StThreeVectorF& mom = stTrack->;
+
+    os <<"\tOriginal Mc Track:"<<endl;
+    os <<"q: Unknown"
+       <<"pt: "<<mcTrack->momentum.perp()
+       <<" eta: "<<mcTrack->momentum.pseudoRapidity()
+       <<"";
+    
+    os <<"q: "<<track.getCharge()
+       <<" pt: "<<track.getPt()
+       <<" eta: "<<track.getPseudoRapidity()
+       <<" tanLambda: "<<track.getTanL()
+       <<" Chi2: "<<track.getChi2()
+       <<" points: "<<track.getPointCount()
+       <<" fitPoints: "<<track.getFitPointCount();
+       
+}
+
+*/
