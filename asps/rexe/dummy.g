@@ -43,3 +43,5 @@ subroutine TDM_NEW_TABLE;              print *,' dummy TDM_NEW_TABLE called ';  
 subroutine AMI_CALL;              print *,' dummy AMI_CALL called ';          end
 subroutine dui_cdir;              print *,' dummy dui_cdir called ';          end
 
+subroutine set_staf_result;              print *,' dummy set_staf_result called ';          end
+subroutine get_staf_result;              print *,' dummy get_staf_result called ';          end
