@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.43 2004/04/06 17:50:47 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.44 2004/04/13 15:22:12 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.44  2004/04/13 15:22:12  suaide
+// svaeHistograms method added and small bug fixed
+//
 // Revision 1.43  2004/04/06 17:50:47  suaide
 // ghost pedestal removal procedure introduced
 //
@@ -245,8 +248,10 @@ class StEmcADCtoEMaker : public StMaker
   void                      saveAllStEvent(Bool_t a) { mSaveAllStEvent = a;} ///< Set to kTRUE if all hits are to be saved on StEvent
   
   void                      printMap(Int_t,char*); ///< print map for an EMC detector
+
+  void                      saveHistograms(char*); ///<saves the histograms in a ROOT file
   
-  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.43 2004/04/06 17:50:47 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.44 2004/04/13 15:22:12 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcADCtoEMaker, 2)  
 };
