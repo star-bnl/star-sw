@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.22 1999/05/23 04:05:03 fine Exp $
+// $Id: StMaker.h,v 1.23 1999/06/27 23:09:22 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.23  1999/06/27 23:09:22  fisyak
+// Add __DATE__ & __TIME__ to tag
+//
 // Revision 1.22  1999/05/23 04:05:03  fine
 // The lost since 1.35 Wed Mar 10 20:23:58 timer functions have been re-introduced
 //
@@ -187,10 +190,10 @@ public:
 
 //		must be in here in .h
    static const char   *GetCVSIdH() 
-    {static const char cvs[]="$Id: StMaker.h,v 1.22 1999/05/23 04:05:03 fine Exp $";
+    {static const char cvs[]="$Id: StMaker.h,v 1.23 1999/06/27 23:09:22 fisyak Exp $";
      return cvs;};
    static const char   *GetCVSTag()
-     {static const char cvs[]="$Name:  $"; return cvs;};
+     {static const char cvs[]="Tag $Name:  $ built "__DATE__" "__TIME__; return cvs;};
 
 protected:
 TObject        *GetDirObj(const char *dir) const;
