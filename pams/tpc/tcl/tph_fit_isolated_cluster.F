@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.1 1998/01/27 00:49:16 fisyak Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.2 1998/02/17 18:11:04 love Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.2  1998/02/17 18:11:04  love
+* Repaired z position calculation
+*
 * Revision 1.1  1998/01/27 00:49:16  fisyak
 * Split sources
 *
@@ -75,6 +78,11 @@ c   11-NOV-1997 --- R.Bossingham
 c       * Change pad_proj, numpix_pad_proj arrays from integer to real
 c       * Change time_proj, numpix_time_proj arrays from integer to real
 c       * Change tdc_x_adc array from integer to real
+C
+C   13-Feb-1998 --- Bill Love
+C       * Around Xmas I messed up the conversion of the z fit to work 
+C         with a real z value for each pixel somewhat - try to fix it 
+C         today.
 C
 C   Error conditions : 
 C   ================
@@ -154,15 +162,13 @@ c
         real diff(4)                  ! Temp. values for effic.
         real identity_vector(npads_max)  ! useful for x-axis of proj.
         real numpix_pad_proj(npads_max)  ! Sum of pixels used in proj.
-        real numpix_time_proj(nbuck_max) ! Sum of pixels used in proj.
-        real z_vector(nbuck_max)      ! Z's for every time bin.
+        real z_vector(nbuck_max)      ! Z's for every time bin in cluster.
         real zdummy                   ! Local debug aid
         real pad_proj(npads_max)      ! Pad projection of cluster
         real rmu(4)                   ! Cluster moments
         real rvec(nbuck_max)          ! temp array
         real slope                    ! Slope of linear fit
         real tdc_x_adc(npads_max)     ! Sum of tdc*adc of cluster
-        real time_proj(nbuck_max)     ! Time projection of cluster
 c
         logical first                 ! .T. iff first call
         logical lookat_mc             ! Look at Monte Carlo info.
@@ -198,8 +204,8 @@ c set up the identity vector for x (pad) calculation
 c loop over all pixels, in the process:
 c 1) sum all adc counts == q
 c 2) project onto padrow (will fit projection to find x,dx,prf)
-c 3) project onto time axis (will fit projection to find z,dz,zrf)
-c 4) get time average for each pad (fit each and obtain orientation)
+c 3) convert time values of all pixels to z coordinates.
+c 4) get time average for the cluster (and obtain orientation)
 c 5) sum up adc contribs from all MC tracks (will check to see who gave most)
 
         ipad_range = ipad_hi - ipad_lo + 1
@@ -208,11 +214,6 @@ c
            pad_proj(indx) = 0.
            tdc_x_adc(indx) = 0.
            numpix_pad_proj(indx) = 0.
-        end do
-c
-        do indx=itdc_lo,itdc_hi
-           time_proj(indx) = 0.
-           numpix_time_proj(indx) = 0.
         end do
 c
         adc_sum = 0.
@@ -227,11 +228,9 @@ C pad direction projection
            tdc_x_adc(ipad_ipix) = tdc_x_adc(ipad_ipix)
      +                          + FLOAT(itdc_ipix)*adc_ipix
            numpix_pad_proj(ipad_ipix)  = numpix_pad_proj(ipad_ipix)+1.
-C time direction projection
-           time_proj(ipix) = time_proj(ipix) + adc_ipix
+C time direction no longer a projection - WAL 13 Feb 98
            iret=tgc_time_to_z(itdc_ipix,ipad_ipix,irow,isec,zdummy) 
            if(iret.eq.1)z_vector(ipix) = zdummy
-           numpix_time_proj(ipix) = numpix_time_proj(ipix)+1.
         enddo
 	if (adc_sum.eq.0.) stop 'Hey -- ADCSUM=0!!!!'
 
@@ -307,30 +306,14 @@ c z,dz,zrf: - do weighted mean
 c  for uncertainties, see notebook2 p113
 c
         do indx=1,nclspix
-           rvec(indx) = time_proj(indx)
-           if (time_proj(indx).ne.0.) then
-              d_rvec_cor(indx) = 
-     +             sqrt(numpix_time_proj(indx))*filtered_noise
-              d_rvec_uncor(indx) = 
-     +             sqrt(numpix_time_proj(indx))*white_noise
-           else
-              d_rvec_cor(indx) = 0.0
-              d_rvec_uncor(indx) = 0.0
-           endif
+           rvec(indx) = float(iadc(indx))
+           d_rvec_cor(indx) = filtered_noise
+           d_rvec_uncor(indx) = white_noise
         enddo
-c        if (tclpar(1).tfit.eq.1) then ! fancy fit - not recommended...
-c           call tph_fit_pulse(identity_vector, rvec,
-c     +                        d_rvec,
-c     +                        itdc_lo, itdc_hi, nbuck_max,
-c     +                        centroid, sigma, uncertainty)
-c       else                          ! simple weighted mean
         call tph_weighted_mean(z_vector, rvec,
      +       d_rvec_cor, d_rvec_uncor,
      +       1, nclspix, nbuck_max,
      +       centroid, sigma, uncertainty)
-c ??? Curious line?
-        centroid = centroid     ! phase correction done at top level....
-c       endif
 c
         z(1) = centroid
         dz(1) = uncertainty
