@@ -147,7 +147,7 @@ void St_QA_Maker::MakeHistEvSum(){
       else
 	tpcChgEast += t->chrg_tpc_in[i]+t->chrg_tpc_out[i];
     }
-    m_glb_trk_chg->Fill(tpcChgEast/tpcChgWest,(float) eventClass);
+    m_glb_trk_chg->Fill(tpcChgEast/(tpcChgWest+1e-10),(float) eventClass);
   }
 }
 
@@ -344,12 +344,12 @@ void St_QA_Maker::MakeHistGlob(){
 	Float_t theta  = TMath::ASin(1.) - TMath::ATan(t->tanl);
         Float_t thetad = theta *(360./twopi);
 	Float_t eta    =-TMath::Log(TMath::Tan(theta/2.));
-	Float_t gmom   = pT/TMath::Sin(theta);
+	Float_t gmom   = pT/(TMath::Sin(theta)+1.e-10);
         Float_t lmevmom = TMath::Log10(gmom*1000.0); 
 	Float_t chisq0 = t->chisq[0];
 	Float_t chisq1 = t->chisq[1]; 
-        Float_t nfitntot = (Float_t(trkfpnt))/(Float_t(trkpnt));
-        Float_t nfitnmax = (Float_t(trkfpnt))/(Float_t(trkmpnt));
+        Float_t nfitntot = (Float_t(trkfpnt))/(Float_t(trkpnt)+1.e-10);
+        Float_t nfitnmax = (Float_t(trkfpnt))/(Float_t(trkmpnt)+1.e-10);
         Float_t x0s  = t->r0 * TMath::Cos(t->phi0*degree);
         Float_t y0s  = t->r0 * TMath::Sin(t->phi0*degree);
         Float_t xdif = (t->x_first[0])-x0s;
@@ -358,9 +358,9 @@ void St_QA_Maker::MakeHistGlob(){
         Float_t radf = TMath::Power((t->x_first[0]),2) + 
                        TMath::Power((t->x_first[1]),2);
 	radf = TMath::Sqrt(radf); 
-	Float_t xcenter = x0s - TMath::Cos(t->phi0*degree)/t->curvature;
-	Float_t ycenter = y0s - TMath::Sin(t->phi0*degree)/t->curvature;
-	Float_t rcircle = 1./t->curvature;
+	Float_t xcenter = x0s - TMath::Cos(t->phi0*degree)/(t->curvature+1.e-10);
+	Float_t ycenter = y0s - TMath::Sin(t->phi0*degree)/(t->curvature+1.e-10);
+	Float_t rcircle = 1./(t->curvature+1.e-10);
 	Float_t centerOfCircleToFP = ::sqrt(::pow(xcenter-t->x_first[0],2) +
 					  ::pow(ycenter-t->x_first[1],2));
 	Float_t azimdif = ::sqrt(::pow(xdif,2)+::pow(ydif,2));
@@ -740,8 +740,8 @@ void St_QA_Maker::MakeHistPrim(){
         Float_t lmevmom = TMath::Log10(gmom*1000.0); 
 	Float_t chisq0 = t->chisq[0];
 	Float_t chisq1 = t->chisq[1]; 
-        Float_t nfitntot = (Float_t(trkfpnt))/(Float_t(trkpnt));
-        Float_t nfitnmax = (Float_t(trkfpnt))/(Float_t(trkmpnt));
+        Float_t nfitntot = (Float_t(trkfpnt))/(Float_t(trkpnt )+1.e-10);
+        Float_t nfitnmax = (Float_t(trkfpnt))/(Float_t(trkmpnt)+1.e-10);
         Float_t logImpact = TMath::Log10(t->impact); 
         Float_t logCurvature = TMath::Log10(t->curvature); 
 
@@ -1351,8 +1351,11 @@ void St_QA_Maker::MakeHistEval(){
 }
 
 //_____________________________________________________________________________
-// $Id: St_QA_Maker.cxx,v 2.17 2003/09/19 22:58:11 genevb Exp $
+// $Id: St_QA_Maker.cxx,v 2.18 2003/11/25 04:19:51 perev Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.18  2003/11/25 04:19:51  perev
+// FPE protection
+//
 // Revision 2.17  2003/09/19 22:58:11  genevb
 // Initialize pointers to zero, some doxygenization
 //
