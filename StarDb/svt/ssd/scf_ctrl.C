@@ -9,7 +9,7 @@ scf_ctrl_st row;
 St_scf_ctrl *tableSet = new St_scf_ctrl("scf_ctrl",1);
 //
 memset(&row,0,tableSet->GetRowSize());
-    row.high_cut	 =        4.5; // high cut for central strip ;
+    row.high_cut	 =          5; // high cut for central strip ;
     row.testTolerance	 =        0.2; // set to 20% ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
