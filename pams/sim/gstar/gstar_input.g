@@ -336,7 +336,7 @@ Replace [READ[DIGIT](#)#;] with _
    author  Pavel Nevski
    created sometime ago
 *************************************************************************
-+CDE,GCBANK,GCTIME,SCLINK.
++CDE,GCBANK,GCUNIT,GCTIME,SCLINK.
 *
   old STRUCTURE EGRN {               " Event generator run structure  "_
         INT   generator              " event generator identification ",
