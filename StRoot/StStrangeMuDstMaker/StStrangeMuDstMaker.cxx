@@ -462,10 +462,10 @@ void StStrangeMuDstMaker::ClearForReal(Option_t *option) {
     if (dstMaker) {                                   // Making a subDST
       MakeCreateSubDst();
     } else {
-      if (evClonesArray) evClonesArray->Clear();      // Not if making a subDST
-      if (evMcArray) evMcArray->Clear();              // Not if making a subDST
+      if (evClonesArray) evClonesArray->Delete();      // Not if making a subDST
+      if (evMcArray) evMcArray->Delete();              // Not if making a subDST
     }
-    cutsArray->Clear();
+    cutsArray->Delete();
 
     EachController(Clear());
     if (GetMode() == StrangeNoKeep) tree->Reset();
@@ -655,8 +655,11 @@ char* StStrangeMuDstMaker::GetFile() const {
 }       
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.27 2003/11/10 04:06:47 perev Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.28 2003/11/13 02:57:08 perev Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.28  2003/11/13 02:57:08  perev
+// LeakOff TClonesArray::Clear() ==> Delete()
+//
 // Revision 3.27  2003/11/10 04:06:47  perev
 // delete controllers added in dtr
 //
