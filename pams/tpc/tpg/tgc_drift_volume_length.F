@@ -1,5 +1,8 @@
-* $Id: tgc_drift_volume_length.F,v 1.3 1998/07/12 05:29:57 sakrejda Exp $
+* $Id: tgc_drift_volume_length.F,v 1.4 1998/10/31 00:18:57 fisyak Exp $
 * $Log: tgc_drift_volume_length.F,v $
+* Revision 1.4  1998/10/31 00:18:57  fisyak
+* Remove your common
+*
 * Revision 1.3  1998/07/12 05:29:57  sakrejda
 * flag moved to a common, so it is not overwritten, not good, but working...
 *
@@ -21,11 +24,11 @@ c     tpg_detector - contains drift distance length
       real    length , xlength
 
       integer flag
-      common /mydum/flag
+*YF   common /mydum/flag
 
       save
 
-*      data flag /1/
+      data flag /1/
 C
       if(flag.eq.1) then
           length=tpg_detector(1).drift_length
