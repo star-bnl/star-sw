@@ -1,12 +1,8 @@
-// $Id: StFtpcRawWriter.cc,v 1.3 2002/06/07 09:50:37 fsimon Exp $
+// $Id: StFtpcRawWriter.cc,v 1.4 2002/09/13 13:36:17 fsimon Exp $
 // $Log: StFtpcRawWriter.cc,v $
-// Revision 1.3  2002/06/07 09:50:37  fsimon
-// Adapted to readout geometry of east and west FTPC, matches DAQ Format
-// For West x -> -x
-// For East pad numbering mirrored wrt sector numbering
-//
-// Revision 1.2  2002/04/19 22:24:12  perev
-// fixes for ROOT/3.02.07
+// Revision 1.4  2002/09/13 13:36:17  fsimon
+// Include correction for wrong pad numbering in central FEE Card in
+// each sector of the East FTPC
 //
 // Revision 1.1  2000/11/23 10:16:43  hummler
 // New FTPC slow simulator in pure maker form
@@ -17,12 +13,7 @@
 // used by StFtpcSlowSimulator to write simulated data to tables
 
 
-#include <iostream.h>
 #include "StFtpcRawWriter.hh"
-
-#ifndef DEBUG
-#define DEBUG 0
-#endif
 
 StFtpcRawWriter::StFtpcRawWriter(St_fcl_ftpcndx *ftpcndxIn,
 				 St_fcl_ftpcsqndx *ftpcsqndxIn,
@@ -47,7 +38,12 @@ StFtpcRawWriter::~StFtpcRawWriter()
 {
     ftpcndx->SetNRows(numNdx);
     ftpcsqndx->SetNRows(numSqndx);
-    ftpcadc->SetNRows(numAdc);    
+    ftpcadc->SetNRows(numAdc); 
+     
+    // cout <<"Printing... \n";
+  
+    //ftpcsqndx->Print(0, ftpcsqndx->GetNRows());
+    //ftpcadc->Print(0, ftpcadc->GetNRows());
 }
 
 int StFtpcRawWriter::writeArray(float *array, 
@@ -71,8 +67,11 @@ int StFtpcRawWriter::writeArray(float *array,
 			    *numberPads
 			    *numberTimebins];      
   
-  if(DEBUG)
-    cout << " Creating copy array "<<numberPadrows<<"; "<<numberSectors<<"; "<<numberPads<<"; "<<numberTimebins<<endl;
+
+  // cout << " Creating copy array "<<numberPadrows<<"; "<<numberSectors<<"; "<<numberPads<<"; "<<numberTimebins<<endl;
+
+
+  // Correct different pad & sector numbering scheme for east & west FTPC
 
   for (int row=0; row<numberPadrows; row++) { 
     for (int sec=0; sec<numberSectors; sec++) {
@@ -84,43 +83,97 @@ int StFtpcRawWriter::writeArray(float *array,
 	    +numberTimebins*numberPads*sec
 	    +numberTimebins*numberPads*numberSectors*row;
 	  if (row>=10)
-	     newi=bin
-	      +numberTimebins*(numberPads-pad-1)
-	      +numberTimebins*numberPads*sec
-	      +numberTimebins*numberPads*numberSectors*row;
+	    if ((pad>63)&&(pad<96)) // no turning for center FEE card in each sector
+	      newi=bin
+		+numberTimebins*pad
+		+numberTimebins*numberPads*sec
+		+numberTimebins*numberPads*numberSectors*row; 
+	    else
+	      newi=bin
+		+numberTimebins*(numberPads-pad-1)
+		+numberTimebins*numberPads*sec
+		+numberTimebins*numberPads*numberSectors*row;
 	  else
 	    newi=bin
 	      +numberTimebins*(numberPads-pad-1)
 	      +numberTimebins*numberPads*(numberSectors-sec-1)
 	      +numberTimebins*numberPads*numberSectors*row;
 	  cArray[newi]=array[i];
-	   if(DEBUG){
-	     if (array[i] >0.1) cout << "Copying value "<< array[i] <<" for pad "<<pad << " Sec: " << sec <<" Row: "<< row <<endl; 
-	   }
+	  //if (array[i] >0.1) cout << "Copying value "<< array[i] <<" for pad "<<pad << " Sec: " << sec <<" Row: "<< row <<endl; 
 	}
       }
     }
   }
 
-  if(DEBUG)
-    cout << "RawWriter using threshold " << threshold<<endl;
+  Double_t th_high = 5;
+  Double_t th_low = 2; 
+  Int_t minAboveLow = 2;
+
+
+	
+  Int_t valid_seq;
+  Int_t nAboveLow = 0;
+  Int_t highReached = 0;
+  pixel_per_seq=0;
+  start_pixel=0;
+  seq_index=0;
+  adc_index=0;
+  seq_flag=0;
+
+  //cout << "RawWriter using threshold high:" << th_high << " and threshold low "<< th_low<<endl;
 	  
- 
+
+  // Fill sequences
+
   ndx[0].index=0;
   for (int row=0; row<numberPadrows; row++) { 
     for (int sec=0; sec<numberSectors; sec++) {
       last_pad=-100;
       for (int pad=0; pad<numberPads; pad++) {
 	pad_flag=0;
+	
 	for (int bin=0; bin<numberTimebins; bin++) {
 	  int i=bin
 	    +numberTimebins*pad
 	    +numberTimebins*numberPads*sec
 	    +numberTimebins*numberPads*numberSectors*row;
-	  if(DEBUG){if (cArray[i] >0.1) cout << "Table value "<< cArray[i] <<" for pad "<<pad << " Sec: " << sec <<" Row: "<< row <<endl; }
+	  //if (cArray[i] >1) cout << "Table value "<< cArray[i] <<" for pad "<<pad << " Sec: " << sec <<" Row: "<< row <<endl; 
 
-	  if((int) cArray[i] >= threshold) {
-	    	    
+	  if((int) cArray[i] < th_low) {
+	    valid_seq = 0; 
+	    nAboveLow = 0;
+	    highReached = 0;
+	  }
+	  
+	  if((int) cArray[i] >= th_low) {
+	    
+	    //cout <<"Over threshold, seq_index = "<<seq_index <<endl;
+	    
+	    // Check if sequence is valid, apply ASIC parameters
+	    if (!valid_seq){
+	      for (int t = bin; t < numberTimebins; t ++) {
+		int s = t
+		  +numberTimebins*pad
+		  +numberTimebins*numberPads*sec
+		  +numberTimebins*numberPads*numberSectors*row;
+		if (cArray[s]>= th_low) nAboveLow++;
+		if (cArray[s]>= th_high) highReached = 1;
+		if (highReached && (nAboveLow >= minAboveLow)) {
+		  valid_seq = 1;
+		  t = numberTimebins;
+		}
+		if (cArray[s]< th_low) {
+		  valid_seq=0;
+		  bin = t;
+		  t = numberTimebins;
+		}
+	      }
+	      //if (valid_seq) cout << "Sequence "<<seq_index<< " validated! Pad " << pad << " nAboveLow "<<nAboveLow <<endl;
+	    }
+
+
+	    if (!valid_seq) continue;
+
 	    // beginning of second FTPC?
 	    if(row>=10 && ndx[1].index==0) {
 	      if(maxNdx<2) {
@@ -134,7 +187,6 @@ int StFtpcRawWriter::writeArray(float *array,
 
 	    // beginning of new sequence?
 	    if(seq_flag == 0 || pixel_per_seq == 32) {
-
 	      // is there a previous sequence?
 	      if(pixel_per_seq > 0) {
 		// set index for previous sequence
@@ -146,7 +198,9 @@ int StFtpcRawWriter::writeArray(float *array,
 		  seq_index=maxSqndx -1;
  		  cout << "sqndx overflow!" << endl;
 		}
+	
 		pixel_per_seq=0;
+	
 	      }
 
 	      // set beginning of this sequence
@@ -172,10 +226,10 @@ int StFtpcRawWriter::writeArray(float *array,
 		last_pad=pad;
 	      }
 	    }
-
+	   
+	    
 	    adc[adc_index++].data=(char) cArray[i];
-	    if (DEBUG)
-	      cout << "adc[" << adc_index-1 << "].data=" << (int) adc[adc_index-1].data << " at " <<row << " " << sec << " " << pad << " " << bin << endl;
+	    //cout << "adc[" << adc_index-1 << "].data=" << (int) adc[adc_index-1].data << " at " <<row << " " << sec << " " << pad << " " << bin << endl;
 	    if(adc_index >= maxAdc) {
 	      // reset overflow
 	      adc_index=maxAdc -1;
@@ -195,8 +249,9 @@ int StFtpcRawWriter::writeArray(float *array,
 
   // Delete copy array
   delete[] cArray;
-
-  // is there a sequence?
+  
+ 
+ // is there a sequence?
   if(pixel_per_seq > 0) {
     // set index for last sequence
     sqndx[seq_index++].index = (pixel_per_seq-1) + (start_pixel<<6)+32;
@@ -213,3 +268,4 @@ int StFtpcRawWriter::writeArray(float *array,
   return 1;
 }
 
+ 
