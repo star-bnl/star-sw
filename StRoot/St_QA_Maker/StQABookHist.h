@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.10 2001/11/20 21:53:46 lansdell Exp $ 
+// $Id: StQABookHist.h,v 2.11 2002/01/21 22:09:24 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.11  2002/01/21 22:09:24  genevb
+// Include some ftpc histograms from StFtpcClusterMaker
+//
 // Revision 2.10  2001/11/20 21:53:46  lansdell
 // added x-y dist of hits, tpc east&west histos
 //
@@ -61,7 +64,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.10 2001/11/20 21:53:46 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.11 2002/01/21 22:09:24 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -145,6 +148,10 @@ class StQABookHist : public TObject {
   TH2F     *m_zDcaZf;           //! z-dca vs z-first
   TH2F     *m_zDcaPsi;          //! z-dca vs psi
   TH2F     *m_zDcaPhi0;         //! z-dca vs phi0
+
+  TH1F     *m_ftpc_chargestepW; //! Chargestep from ftpc west
+  TH1F     *m_ftpc_chargestepE; //! Chargestep from ftpc east
+  TH1F     *m_ftpc_fcl_radius;  //! ftpc cluster radial position
 
   TH1F     *m_pointT;        //! number of points on the track - tpc
   TH1F     *m_pointTS;       //! number of points on the track - tpc+svt

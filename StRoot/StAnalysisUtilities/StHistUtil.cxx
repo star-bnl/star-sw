@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.7 2001/08/27 21:16:03 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.8 2002/01/21 22:09:23 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.8  2002/01/21 22:09:23  genevb
+// Include some ftpc histograms from StFtpcClusterMaker
+//
 // Revision 2.7  2001/08/27 21:16:03  genevb
 // Better filename hanlding
 //
@@ -968,7 +971,9 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
     TString listString;
     if (strcmp(sdefList[ilg],"QaInnerSectorDeDx") &&
 	strcmp(sdefList[ilg],"QaOuterSectorDeDx") &&
-	strcmp(sdefList[ilg],"QaDedxAllSectors")) {
+	strcmp(sdefList[ilg],"QaDedxAllSectors") &&
+	strcmp(sdefList[ilg],"fcl_chargestepW") &&
+	strcmp(sdefList[ilg],"fcl_chargestepE")) {
       for (Int_t k=0; k<numOfPosPrefixes; k++) {
         ((listString = type) += possiblePrefixes[k]) += sdefList[ilg];
         numLog = AddToLogYList(listString.Data());

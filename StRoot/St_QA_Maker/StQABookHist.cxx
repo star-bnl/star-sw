@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.27 2001/12/28 09:19:13 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.28 2002/01/21 22:09:24 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.28  2002/01/21 22:09:24  genevb
+// Include some ftpc histograms from StFtpcClusterMaker
+//
 // Revision 2.27  2001/12/28 09:19:13  genevb
 // Adjustments for pp running
 //
@@ -182,6 +185,10 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_zDcaZf=0;
   m_zDcaPsi=0;
   m_zDcaPhi0=0;
+
+  m_ftpc_chargestepW=0;
+  m_ftpc_chargestepE=0;
+  m_ftpc_fcl_radius=0;
 
   m_pointT=0;
   m_pointF=0;

@@ -1,5 +1,8 @@
-// $Id: QAhlist_logy.h,v 2.5 2001/08/29 20:45:15 genevb Exp $
+// $Id: QAhlist_logy.h,v 2.6 2002/01/21 22:09:24 genevb Exp $
 // $Log: QAhlist_logy.h,v $
+// Revision 2.6  2002/01/21 22:09:24  genevb
+// Include some ftpc histograms from StFtpcClusterMaker
+//
 // Revision 2.5  2001/08/29 20:45:15  genevb
 // Trigger word histos
 //
@@ -279,4 +282,7 @@
  "bsmdpAdc",
  "bemcClNum",
  "bemcClEnergy",
- "EmcCat4_Point_Energy"
+ "EmcCat4_Point_Energy",
+
+ "fcl_chargestepW",
+ "fcl_chargestepE"
