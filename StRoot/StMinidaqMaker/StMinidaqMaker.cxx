@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.8 1999/03/31 20:29:40 liq Exp $
+// $Id: StMinidaqMaker.cxx,v 1.9 1999/04/08 16:29:51 sakrejda Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.9  1999/04/08 16:29:51  sakrejda
+// a call to tpg and seting parametrs in the maker removed
+//
 // Revision 1.8  1999/03/31 20:29:40  liq
 // take off call module xyz_newtab
 //
@@ -57,7 +60,6 @@
 #include "TH2.h"
 #include "TH3.h"
 #include "TRandom.h"
-#include "tpc/St_tpg_main_Module.h"
 #include "tpc/St_tfc_load_native_gains_Module.h"
 #include "tpc/St_init_raw_table_Module.h"
 #include "tpc/St_reformat_new_Module.h"
@@ -68,19 +70,11 @@ ClassImp(StMinidaqMaker)
 //_____________________________________________________________________________
 StMinidaqMaker::StMinidaqMaker(const char *name):StMaker(name),
 
-m_tpg_pad_plane(0),
-m_tpg_detector(0),
-m_tpg_pad(0),
 m_Params(0)
 
 {
    m_first_sector=1;
    m_last_sector=no_of_sectors;
-//   m_clock_frequency = 13359400.0;  //Nominal for tss
-   m_clock_frequency = 9.4345e+6; // For 1997 and 1998 tpc test runs.
-   m_z_inner_offset  = -0.35; // for run t28f5(1997)
-   m_drift_velocity = 5.37e+6;  // calibrated from t28f5(1997).
-   m_trigger_offset = 0.8e-6; // for run t28f5(1997)
 }
 //_____________________________________________________________________________
 StMinidaqMaker::~StMinidaqMaker(){
@@ -109,33 +103,7 @@ Int_t StMinidaqMaker::Init() {
            tsspar->min_sect <<" to "<< tsspar->max_sect << endl;
        }
    }
-// geometry parameters
-   //   St_DataSetIter atpc = local(GetDataBase("params/tpc"));
-   //  St_DataSet *tpc(atpc);
-   St_DataSet *tpgpar = local("tpgpar");
-   if (tpgpar){
-       m_tpg_pad_plane = (St_tpg_pad_plane *) tpgpar->Find("tpg_pad_plane");
-       m_tpg_detector  = (St_tpg_detector  *) tpgpar->Find("tpg_detector");
-       if (!(m_tpg_pad_plane && m_tpg_detector)) {
-         cout << "TPC geometry parameter tables are incomplete."<< endl;
-         SafeDelete(tpgpar);
-       }
-    // set the clock and the velocity for the TPC system tests
-       tpg_detector_st *tpg_detector = m_tpg_detector->GetTable();
-       tpg_detector->clock_frequency = m_clock_frequency;
-       tpg_detector->z_inner_offset = m_z_inner_offset;
-       tpg_detector->vdrift = m_drift_velocity;
-       tpg_detector->trigger_offset = m_trigger_offset;
-       m_tpg_pad       = (St_tpg_pad       *) tpgpar->Find("tpg_pad");
-       if (!m_tpg_pad) {
-         m_tpg_pad       = new St_tpg_pad("tpg_pad",1); AddConst(m_tpg_pad);
-       }
-       Int_t res = tpg_main(m_tpg_pad_plane,m_tpg_detector,m_tpg_pad); 
-       if(res!=kSTAFCV_OK) Warning("Make","tpg_main==%d",res);
 
-   }
-   // add the params/tpc/tfcpars/tfc_sector_index table
-//   St_DataSet *tfspars = local("tfcpars");
    if (!m_tfc_sector_index) {
          St_DataSetIter  loc(tpc);
          loc.Cd("tfcpars");
@@ -404,7 +372,7 @@ void StMinidaqMaker::TransferData(){
 //_____________________________________________________________________________
 void StMinidaqMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StMinidaqMaker.cxx,v 1.8 1999/03/31 20:29:40 liq Exp $\n");
+  printf("* $Id: StMinidaqMaker.cxx,v 1.9 1999/04/08 16:29:51 sakrejda Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
