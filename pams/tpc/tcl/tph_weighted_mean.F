@@ -1,5 +1,8 @@
-* $Id: tph_weighted_mean.F,v 1.4 2000/11/14 22:29:04 genevb Exp $
+* $Id: tph_weighted_mean.F,v 1.5 2003/12/02 15:18:22 fisyak Exp $
 * $Log: tph_weighted_mean.F,v $
+* Revision 1.5  2003/12/02 15:18:22  fisyak
+* fix protection for sqrt from negative number
+*
 * Revision 1.4  2000/11/14 22:29:04  genevb
 * Switched from float to double in many places
 *
@@ -84,7 +87,6 @@ c
 C-----------------------------------------------------------------------
 
         npts = ihi - ilo + 1
-
 	m1 = 0.0
 	m2 = 0.0
 	ysum = 0.0
@@ -96,8 +98,8 @@ C-----------------------------------------------------------------------
 	enddo
 	m1 = m1 / ysum
         m2 = m2/ysum - m1**2
-        if (mom2.ge.0.) then
-         m2=dsqrt(m2)
+        if (m2.ge.0.) then
+         m2= sqrt(m2)
         else
          m2 = 0.0
         endif
@@ -112,11 +114,11 @@ c  is estimated below...
 	  unc_uncor = unc_uncor+(tmp*dy_uncor(ipt))**2
 	enddo
         unc_cor = unc_cor/ysum
-	unc_uncor = dsqrt(unc_uncor)/ysum
+	unc_uncor = sqrt(unc_uncor)/ysum
 
         uncertainty_cor = unc_cor
         uncertainty_uncor = unc_uncor
-	uncertainty = dsqrt(unc_cor**2+unc_uncor**2)
+	uncertainty = sqrt(unc_cor**2+unc_uncor**2)
         mom1 = m1
         mom2 = m2
 
