@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 1.5 1999/06/27 22:45:28 fisyak Exp $
+ * $Id: StTpcHit.cxx,v 1.6 1999/08/25 12:50:07 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
- * Revision 1.5  1999/06/27 22:45:28  fisyak
- * Merge StRootEvent and StEvent
+ * Revision 1.6  1999/08/25 12:50:07  ullrich
+ * Buf fixed in unpacking the charge.
  *
  * Revision 1.6  1999/08/25 12:50:07  ullrich
  * Buf fixed in unpacking the charge.
@@ -34,10 +34,10 @@
  * Revision 2.5  1999/12/01 15:56:28  ullrich
 #include "tables/dst_point.h"
 #include "StGlobalTrack.h"
-static const Char_t rcsid[] = "$Id: StTpcHit.cxx,v 1.5 1999/06/27 22:45:28 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StTpcHit.cxx,v 1.6 1999/08/25 12:50:07 ullrich Exp $";
 #include "dst_point.h"
  * Inlined sector() and padrow().
-static const Char_t rcsid[] = "$Id: StTpcHit.cxx,v 1.5 1999/06/27 22:45:28 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StTpcHit.cxx,v 1.6 1999/08/25 12:50:07 ullrich Exp $";
 #include "tables/dst_point.h"
  * Memory now allocated using StMemoryPool via overloaded new/delete
  *
@@ -61,10 +61,10 @@ StTpcHit::StTpcHit(dst_point_st* pt)
 
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 1.5 1999/06/27 22:45:28 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 1.6 1999/08/25 12:50:07 ullrich Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
-    mCharge = Float_t(tpcq)/(1<<16);
+
     const ULong_t tpcdq = pt->charge/(1L<<16);
     const ULong_t tpcq  = pt->charge - tpcdq*(1L<<16);
 StTpcHit::StTpcHit() { /* noop */ }
