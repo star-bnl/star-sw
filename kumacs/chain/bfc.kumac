@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.33 1998/08/13 20:33:26 fisyak Exp $
+* $Id: bfc.kumac,v 1.34 1998/08/17 14:34:09 fisyak Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.34  1998/08/17 14:34:09  fisyak
+* Add splitted output
+*
 * Revision 1.33  1998/08/13 20:33:26  fisyak
 * Add log_file as parameters for fmessage
 *
@@ -275,6 +278,7 @@ MACRO bfc _
    gstar_settings=' field_only' _
    domain=' geometry tpc svt global ' _
    chain='  g2tin svg tpg srs tfs sgr tpt tte_e tid svm egr ev0 evout' _
+   skip=0 _
    first=1 _
    no_events=1 _
    input_data_prefix=$AFS_RHIC/star/data/samples/ _
@@ -334,7 +338,12 @@ MACRO bfc _
  macro/global/import *
  log_file = [log] 
  message ' *** log_file                --> ' [log_file]
-   
+ string =   '---<bfc>-- i:'//[input_file]//' o:'//[output_file]
+ fmessage $quote([string])  [log_file]
+ string =   '---<bfc>-- f:'//[first]//' s:'//[skip]//' l:'//[last]
+ fmessage $quote([string])  [log_file]
+ string =  '---<bfc>-- c:'//[chain]
+ fmessage $quote([string])  [log_file]
  if $iquest(1)<>0 goto ABEND
  exec bfc_util#bfc_init chain=[chain]
  
@@ -342,14 +351,14 @@ MACRO bfc _
 * SKIP EVENTS 
 * **********************************************************
 
-   if [first].gt.1 then
+   if [skip].ge.1 then
      test=[chain]
      nw=$words([test])
      do i=1,[nw]
        mod=$word([test],[i],1)
        if [mod].eq.evgin.or.[mod].eq.g2tin.or.[mod].eq.evin  then 
            message ' going to skip events for ' [mod]
-	   do ievent = 1,[first]-1
+	   do ievent = 1,[skip]-1
 	       message 'skip event # ',[ievent]
                exec [TOP]/kumacs/chain/bfc_util#bfc_process chain=[mod]
            enddo
