@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.21 2003/09/26 06:08:57 oldi Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.22 2003/09/30 00:10:29 oldi Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.22  2003/09/30 00:10:29  oldi
+// mMagField set to 0.
+//
 // Revision 1.21  2003/09/26 06:08:57  oldi
 // Check if the magentic field was reversed 'by hand' with a chain option.
 // If yes, multiply the scaleFactor of the field with -1.
@@ -1011,6 +1014,8 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
 Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog, StBFChain *chain) {
   // Resets magnetic field if field configuration has changed.
   
+  mMagField = 0;
+
   if (RunLog) {
     St_MagFactor *fMagFactor = (St_MagFactor *)RunLog->Find("MagFactor");     
     Double_t newFactor = (*fMagFactor)[0].ScaleFactor;
