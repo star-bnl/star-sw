@@ -11,7 +11,10 @@
 	message ***** You get this when you are analyzing data with ******
 	message ***** old CALB geometry by newer verion of software ******
 	message ***** Now calb_calg table is going to be updated    ******
-	trace on
+* 
+* PN: Users kumacs SHOULD NOT contain trace on/off
+* otherwise debugging is impossible
+* trace on
 	dui/rm [geant_Run]/calb_calg	
 	call calbupdate
        	tables calb/* [geant_Run]
@@ -21,7 +24,7 @@
 	else
            message ***** calb_calg has been updated to ver.2.5 ******
 	endif
-	trace off
+* trace off
    endif
    cd /dui
 
