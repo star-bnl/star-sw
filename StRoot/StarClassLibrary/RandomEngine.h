@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandomEngine.h,v 1.1 1999/01/30 03:59:01 fisyak Exp $
+ * $Id: RandomEngine.h,v 1.2 1999/03/07 15:02:50 wenaus Exp $
  *
  * Author: Gabriele Cosmo - Created: 5th September 1995
  *         modified for SCL bl
@@ -32,8 +32,11 @@
  ***************************************************************************
  *
  * $Log: RandomEngine.h,v $
- * Revision 1.1  1999/01/30 03:59:01  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/03/07 15:02:50  wenaus
+ * missing std
+ *
+ * Revision 1.2  1999/03/07 15:02:50  wenaus
+ * missing std
  *
  * Revision 1.1  1999/01/30 03:59:01  fisyak
  * Root Version of StarClassLibrary
@@ -46,6 +49,9 @@
 #define HepRandomEngine_h 1
 
 #include <iostream.h>
+#include <fstream.h>
+#include <math.h>
+#include <vector>
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif
