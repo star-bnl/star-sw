@@ -468,7 +468,8 @@ void StiKalmanTrackFinder::doNextDetector()
 		    hitContainer->setDeltaD(10.); //yWindow);
 		    hitContainer->setDeltaZ(10.); //zWindow);
 		    //void setRefPoint(double position, double refAngle, double y, double z);
-		    double a = tNode->fAlpha;
+		    //double a = tNode->fAlpha;
+		    double a = tDet->getPlacement()->getCenterRefAngle();
 		    //trackMes << "Ref Angle:" << (a*180./M_PI) << endl;
 
 		    //if (a<0) a+=2.*M_PI; 
