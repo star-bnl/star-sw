@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + egr )                                     //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.37 2001/05/01 18:00:41 lbarnby Exp $
+// $Id: StMatchMaker.cxx,v 1.38 2001/07/25 16:34:32 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.38  2001/07/25 16:34:32  caines
+// Fix some flipped field problems
+//
 // Revision 1.37  2001/05/01 18:00:41  lbarnby
 // Zero globtrk map before filling
 //
@@ -237,7 +240,7 @@ Int_t StMatchMaker::InitRun(int runnumber){
   gufld(x,b);
   Double_t B = b[2]*kilogauss;
   gMessMgr->Info() << "StMatchMaker::InitRun:B field is " << B/kilogauss << " kilogauss" << endm;
-  if (B/kilogauss < 0.005){
+  if (fabs(B/kilogauss) < 0.005){
     gMessMgr->Info() <<
       "StMatchMaker::InitRun: No field run: no refit, copy tracks into globtrk table" << endm;
     egr_egrpar_st *egr_egrpar = m_egr_egrpar->GetTable();
@@ -255,6 +258,12 @@ Int_t StMatchMaker::Make(){
   int iRes = 0, i;
   const Float_t deltaZCut = 1; //(cm) Cut used in track length calc.
 
+  // Get Field
+  Float_t x[3] = {0,0,0};
+  Float_t b[3];
+  gufld(x,b);
+
+  
   St_dst_track     *globtrk     = new St_dst_track("globtrk",20000);  
   AddData(globtrk);
   
@@ -424,7 +433,7 @@ Int_t StMatchMaker::Make(){
       globtrkPtr1->map[0]= 0UL; globtrkPtr1->map[1]= 0UL;
       if( globtrkPtr1->iflag<0 ) { globtrkPtr1->length = 0; continue; }
       Float_t dip   = atan(globtrkPtr1->tanl);
-      Int_t    h    = (globtrkPtr1->icharge > 0 ? -1 : 1);
+      Int_t    h    = (b[2]*globtrkPtr1->icharge > 0 ? -1 : 1);
       Float_t phase = globtrkPtr1->psi*degree-h*pi/2;
       Float_t curvature = globtrkPtr1->curvature;
       Float_t x0 = globtrkPtr1->r0 * cos(globtrkPtr1->phi0 * degree);
