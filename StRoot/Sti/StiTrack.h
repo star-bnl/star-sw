@@ -2,29 +2,35 @@
 #define StiTrack_H 1
 
 #include <math.h>
-#include "StiTrackNode.h"
-
+#include "Exception.h"
 class StiHit;
+class StiTrackFitter;
 
 class StiTrack 
 {
 public:
 
-    // constructor/destructor/copy/etc
-    
-    StiTrack();
-    virtual ~StiTrack();
-    
-    // action methods
-    
-    virtual void reset();
-    
-    // accessor methods
-    
-    double  getMass()           const;   // mass when pid known
-    int     getCharge()         const;   // charge of the particle
-    double  getChi2()           const;   // chi2 of fit
+  // static methods
 
+  static void setTrackFitter(StiTrackFitter * fitter);
+  static StiTrackFitter * getTrackFitter();
+
+  // constructor/destructor/copy/etc
+  
+  StiTrack();
+  virtual ~StiTrack();
+  
+  // action methods
+  
+  virtual void reset();
+  virtual void fit() throw (Exception);
+
+  // accessor methods
+  
+  virtual double  getMass()           const=0;   // mass when pid known
+  virtual int     getCharge()         const=0;   // charge of the particle
+  virtual double  getChi2()           const=0;   // chi2 of fit
+  
     virtual void    getMomentum(double p[3], double e[6]) const =0;
     virtual double  getPt()             const                   =0;   // transverse momentum
     virtual double  getRapidity()       const                   =0;   // rapidity
@@ -35,9 +41,11 @@ public:
     virtual double  getDca2(StiTrack *t)   const=0;   // distance of closest approach to given track - 2D calc
     virtual double  getDca3(StiTrack *t)   const=0;   // distance of closest approach to given track - 3D calc
     
-    int    getFitPointCount()   const;  // number of points used in fit
-    int    getPointCount()      const;  // number of total number of points currently assigned to the track
-    int    getStatus()          const;  // status of track
+    virtual int    getFitPointCount()   const=0;  // number of points used in fit
+    // number of total number of points 
+    // currently assigned to the track
+    virtual int    getPointCount()      const=0;  
+    virtual int    getStatus()          const=0;  // status of track
     
     StiHit * getVertex() const;  // return pointer to vertex associated with this track if any. 
     
@@ -48,8 +56,10 @@ public:
     void  setStatus(int v)      ;  // status of track
     void  setVertex(StiHit *v);
   
-
+    
 protected:
+    static StiTrackFitter * trackFitter;
+
     friend ostream& operator<<(ostream& os, const StiTrack& track);
 
     int    q;          // charge of the track 
@@ -61,82 +71,10 @@ protected:
     double  chi2;
 };
 
-
-inline  double  StiTrack::getMass()           const   
-{
-  // return mass of particle
-  // mass is value of identified particle mass
-  return m;
-}
-
-
-inline  int    StiTrack::getCharge()              const   
-{
-  // return charge of particle
-  return q;
-}
-
-inline  double  StiTrack::getChi2()           const  
-{
-  // return fit chi2
-  return chi2;
-}
-
-inline  int    StiTrack::getFitPointCount()    const  
-{
-  // return number of points used in fit
-  return nFitPts;
-}
-
-inline  int    StiTrack::getPointCount()       const  
-{
-  // return number of points associated with track
-  return nPts;
-}
-
-
-inline  int    StiTrack::getStatus()         const  
-{
-  // return track status 
-  // see class documentation for definition of possible status
-  return status;
-}
-
 inline StiHit * StiTrack::getVertex() const
 {
   return vertex;
 }
-
-inline  void  StiTrack::setCharge(int v)         
-{
-  // set value of charge
-  q = v;
-}
-
-inline  void  StiTrack::setChi2(double v)        
-{
-  // set value of chi2 of track
-  chi2 = v;
-}
-
-inline  void  StiTrack::setFitPointCount(int v)   
-{
-  // set number of points used in fit
-  nFitPts = v;
-}
-
-inline  void  StiTrack::setPointCount(int v)      
-{
-  // set value of number of points associated with track
-  nPts = v;
-}
-
-inline  void  StiTrack::setStatus(int v)        
-{
-  // set value of track status
-  status = v;
-}
-
 
 inline void  StiTrack::setVertex(StiHit *v)
 {

@@ -8,6 +8,7 @@
 #include "StiHit.h"
 #include "StiConstants.h"
 #include "StiTrack.h"
+#include "StiTrackFitter.h"
 
 StiTrack::StiTrack()
 {
@@ -28,6 +29,12 @@ void StiTrack::reset()
   m      = 0.139;
   chi2   = 0.;
 }
+
+void StiTrack::fit() throw (Exception)
+{
+  trackFitter->fit(this);
+}
+
 
 ostream& operator<<(ostream& os, const StiTrack& track)
 {
