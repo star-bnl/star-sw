@@ -90,7 +90,7 @@ private:
   Int_t GetConfig();
   Int_t GetDaqParams();
   void  GetBadAnodes();
-  void  GetPixelData();
+  Int_t  GetPixelData();
   void  SetRawData();
 
   void  Conversion10to8bit();

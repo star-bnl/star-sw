@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.cxx,v 1.5 2004/02/24 15:53:21 caines Exp $
+ * $Id: StSvtEmbeddingMaker.cxx,v 1.6 2004/03/30 21:27:12 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.cxx,v $
- * Revision 1.5  2004/02/24 15:53:21  caines
- * Read all params from database
+ * Revision 1.6  2004/03/30 21:27:12  caines
+ * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * Revision 1.4  2004/01/22 16:30:47  caines
  * Getting closer to a final simulation
@@ -106,6 +106,8 @@ Int_t StSvtEmbeddingMaker::Make()
   GetSvtData();
   ClearMask(); //it has to be cleared here - needed for plain simulation
 
+  if (mSimPixelColl==NULL) return kStErr;
+
   for(int Barrel = 1;Barrel <= mSimPixelColl->getNumberOfBarrels();Barrel++) {
     for (int Ladder = 1;Ladder <= mSimPixelColl->getNumberOfLadders(Barrel);Ladder++) {
       for (int Wafer = 1;Wafer <= mSimPixelColl->getNumberOfWafers(Barrel);Wafer++) {
@@ -185,12 +187,23 @@ void  StSvtEmbeddingMaker::GetPedRMS()
 void StSvtEmbeddingMaker::GetSvtData()
 {
   //EmbeddingMaker requires some data(at least empty) from the SimulationMaker
+  mSimPixelColl=NULL;
+  mRealDataColl=NULL;
+  
   St_DataSet* dataSet = GetDataSet("StSvtPixelData");
   assert(dataSet); 
+  if (dataSet==NULL){
+   gMessMgr->Error()<<"BIG TROUBLE:No data from simulator to work with!!!!"<<endm;
+   return;
+   }
   mSimPixelColl= (StSvtData*)(dataSet->GetObject());
-  assert(mSimPixelColl);
+  if ( mSimPixelColl==NULL){
+   gMessMgr->Error()<<"BIG TROUBLE:Data from simulator is empty!!!!"<<endm;
+   return;
+   }
+ 
   
-  mRealDataColl=NULL;
+ 
   if (!mRunningEmbedding) return; //in case it's forbiden to embed
   dataSet = GetDataSet("StSvtRawData");
   if (dataSet) mRealDataColl= (StSvtData*)(dataSet->GetObject());

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.4 2004/02/24 15:53:22 caines Exp $
+ * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.5 2004/03/30 21:27:12 caines Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -72,13 +72,21 @@ Int_t StSvtOnlineSeqAdjSimMaker::GetConfig()
 //__________________________________________________________________________________________________
 Int_t  StSvtOnlineSeqAdjSimMaker::GetDaqParams()
 {
-    
+  mDaq=NULL;    
+
   St_DataSet* dataSet;
   dataSet = GetDataSet("StSvtDaq");
-  assert(dataSet);
+  if (dataSet==NULL){
+      gMessMgr->Error()<<"BIG TROUBLE:No DAQ parameters from database!!!!"<<endm;
+      return kStErr;
+      }
 
   mDaq = (StSvtDaq*)dataSet->GetObject();
-  assert(mDaq);
+  if (mDaq==NULL){
+      gMessMgr->Error()<<"BIG TROUBLE:No DAQ parameters are empty!!!!"<<endm;
+      return kStErr;
+      }
+
 
   SetNumberTBinsToClear(mDaq->getClearedTimeBins());
   SetExtraPixelsBefore(mDaq->getPixelsBefore());
@@ -93,18 +101,21 @@ Int_t  StSvtOnlineSeqAdjSimMaker::GetDaqParams()
 }
 
 //____________________________________________________________________________
-void StSvtOnlineSeqAdjSimMaker::GetPixelData()
+Int_t StSvtOnlineSeqAdjSimMaker::GetPixelData()
 {
+  m8bitPixelColl=NULL;
+  mPixelColl=NULL;
+
   St_DataSet* dataSet=NULL;
   dataSet = GetDataSet("StSvtPixelData");
   if (!dataSet) {
     gMessMgr->Error()<<"no StSvtPixelData dataset"<<endm;
-    assert(dataSet);
+    return kStErr;//assert(dataSet);
     }
   mPixelColl=(StSvtData*)dataSet->GetObject();
   if (!mPixelColl){
       gMessMgr->Error()<<"StSvtPixelData is empty"<<endm;
-      assert(mPixelColl);
+      return kStErr;//assert(mPixelColl);
       }
       
   dataSet=NULL;
@@ -112,13 +123,15 @@ void StSvtOnlineSeqAdjSimMaker::GetPixelData()
   dataSet = GetDataSet("StSvt8bitPixelData");
   if (!dataSet) {
     gMessMgr->Error()<<"no StSvt8bitPixelData dataset"<<endm;
-    assert(dataSet);
+    return kStErr;//assert(dataSet);
     }
   m8bitPixelColl=(StSvtData*)dataSet->GetObject();
   if (!m8bitPixelColl){
       gMessMgr->Error()<<"StSvt8bitPixelData is empty"<<endm;
-      assert(m8bitPixelColl);
+      return kStErr;//assert(m8bitPixelColl);
       }
+      
+  return kStOk; 
 }  
 
 //____________________________________________________________________________
@@ -208,8 +221,9 @@ m_n_seq_hi =n_seq_hi;
 Int_t  StSvtOnlineSeqAdjSimMaker::Make()
 {
   if (Debug()) gMessMgr->Info()<<"StSvtOnlineSeqAdjSimMaker::Make"<<endm;	
-  SetRawData();
-  GetPixelData();
+  
+  SetRawData(); ;
+  if (GetPixelData()!= kStOk) return kStErr;
   
   for(int Barrel = 1;Barrel <= mPixelColl->getNumberOfBarrels();Barrel++) {
     for (int Ladder = 1;Ladder <= mPixelColl->getNumberOfLadders(Barrel);Ladder++) {
