@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiI.hh,v 3.1 2001/05/04 20:15:15 genevb Exp $
+ * $Id: StXiI.hh,v 3.2 2001/08/23 13:20:59 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 24-Apr-2001
  *
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiI.hh,v $
+ * Revision 3.2  2001/08/23 13:20:59  genevb
+ * Many bug workarounds...
+ *
  * Revision 3.1  2001/05/04 20:15:15  genevb
  * Common interfaces and reorganization of components, add MC event info
  *
@@ -21,6 +24,10 @@
 #define StXiI_hh
 
 #include "StV0I.hh"
+static const Float_t M_OMEGA_2 = pow(M_OMEGA_MINUS,2);
+static const Float_t M_XI_2 = pow(M_XI_MINUS,2);
+static const Float_t M_KAON_MINUS_2 = pow(M_KAON_MINUS,2);
+
 
 class StXiI : public virtual StV0I {
 public:
@@ -60,6 +67,10 @@ public:
   virtual Float_t ptotBachelor();           // Total momentum of bachelor
   virtual Float_t ptXi();                   // Transverse momentum of Xi/Omega
   virtual Float_t ptotXi();                 // Total momentum of Xi/Omega
+  virtual Float_t mtOmega();                // Transverse mass assuming (anti)Omega
+  virtual Float_t mtXi();                   // Transverse mass assuming (anti)Xi
+  virtual Float_t mtm0Omega();              // mt-m0 assuming (anti)Omega
+  virtual Float_t mtm0Xi();                 // mt-m0 assuming (anti)Xi
 
 // ************************************************************************
 // The next few functions are presently used only by MC
@@ -134,19 +145,19 @@ inline Float_t StXiI::ptArmXi() {
 }
 
 inline Float_t StXiI::eOmega() {
-  return sqrt(Ptot2Xi()+pow(M_OMEGA_MINUS,2));
+  return sqrt(Ptot2Xi()+M_OMEGA_2);
 }
 
 inline Float_t StXiI::eXi() {
-  return sqrt(Ptot2Xi()+pow(M_XI_MINUS,2));
+  return sqrt(Ptot2Xi()+M_XI_2);
 }
 
 inline Float_t StXiI::eBachelorPion() {
-  return sqrt(Ptot2Bachelor()+pow(M_PION_MINUS,2));
+  return sqrt(Ptot2Bachelor()+M_PION_MINUS_2);
 }
 
 inline Float_t StXiI::eBachelorKaon() {
-  return sqrt(Ptot2Bachelor()+pow(M_KAON_MINUS,2));
+  return sqrt(Ptot2Bachelor()+M_KAON_MINUS_2);
 }
 
 inline Float_t StXiI::massOmega() {
@@ -191,6 +202,22 @@ inline Float_t StXiI::ptXi() {
 
 inline Float_t StXiI::ptotXi() {
   return sqrt(Ptot2Xi());
+}
+
+inline Float_t StXiI::mtOmega() {
+  return sqrt(Pt2Xi() + M_OMEGA_2);
+}
+
+inline Float_t StXiI::mtXi() {
+  return sqrt(Pt2Xi() + M_XI_2);
+}
+
+inline Float_t StXiI::mtm0Omega() {
+  return (mtOmega() - M_OMEGA_MINUS);
+}
+
+inline Float_t StXiI::mtm0Xi() {
+  return (mtXi() - M_XI_MINUS);
 }
 
 inline Float_t StXiI::Ptot2Bachelor () {

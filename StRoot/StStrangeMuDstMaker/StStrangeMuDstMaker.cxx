@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.11 2001/05/04 20:15:14 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.12 2001/08/23 13:20:55 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.12  2001/08/23 13:20:55  genevb
+// Many bug workarounds...
+//
 // Revision 3.11  2001/05/04 20:15:14  genevb
 // Common interfaces and reorganization of components, add MC event info
 //
@@ -85,6 +88,7 @@
 #include "StParticleDefinition.hh"
 #include "StMessMgr.h"
 #include "StuJitterBug.hh"
+#include "TStreamerInfo.h"
 
 // Set maximum file size to 1.9 GB (Root has a 2GB limit)
 #define MAXFILESIZE 1900000000
@@ -217,7 +221,7 @@ void StStrangeMuDstMaker::InitCreateSubDst() {
   branch->SetFile(file[evT]);
   if (doMc) {
     evMcArray = dstMaker->GetEvMcArray();
-    TBranch* branch = tree->Branch("McEvent",&evMcArray,bsize[evT],split);
+    branch = tree->Branch("McEvent",&evMcArray,bsize[evT],split);
     branch->SetFile(file[evT]);
   }
   EachController(InitCreateSubDst());
@@ -258,7 +262,7 @@ Int_t StStrangeMuDstMaker::MakeReadDst() {
   }
   Int_t tree_size = (Int_t) tree->GetEntries();
   if (event_number >= tree_size) {
-    if (files[evT]) {                                     // If reading from
+    if (files[evT]) {                                  // If reading from
       SetStFiles();                                    // multiple files, then
       if (!file[evT]) return kStErr;                   // get the next file
       CloseFile();                                     // names, close the old
@@ -489,6 +493,14 @@ Int_t StStrangeMuDstMaker::OpenFile() {
 Int_t StStrangeMuDstMaker::CloseFile() {
   if (muDst) {
     if (rw == StrangeWrite) {
+
+      // This section is to overcome a bug in Root which prevents the
+      // MC class TStreamerInfo from being written in filter mode
+      if (doMc) {
+        muDst->cd();
+        EachController(GetMcClass()->GetStreamerInfo()->ForceWriteInfo());
+      }
+
       muDst->Write();
       muDst->cd();
       cuts->Store();
@@ -539,5 +551,13 @@ void StStrangeMuDstMaker::SelectEvent() {
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::UnselectEvent() {
   EachController(Unselect(-1));
+}
+//_____________________________________________________________________________
+void StStrangeMuDstMaker::SetCorrectionFile(char* fname) {
+  StStrangeEvMuDst::SetCorrectionFile(fname);
+}
+//_____________________________________________________________________________
+void StStrangeMuDstMaker::SetFractionFile(char* fname) {
+  StStrangeEvMuDst::SetFractionFile(fname);
 }
 

@@ -1,7 +1,7 @@
-// $Id: StStrangeControllerBase.cxx,v 3.4 2001/05/31 02:47:18 perev Exp $
+// $Id: StStrangeControllerBase.cxx,v 3.5 2001/08/23 13:20:53 genevb Exp $
 // $Log: StStrangeControllerBase.cxx,v $
-// Revision 3.4  2001/05/31 02:47:18  perev
-// const(ing)
+// Revision 3.5  2001/08/23 13:20:53  genevb
+// Many bug workarounds...
 //
 // Revision 3.3  2000/12/18 21:35:18  genevb
 // Introduced variable buffer-sizing
@@ -34,6 +34,7 @@
 #include "TBranch.h"
 
 StStrangeMuDstMaker* StStrangeControllerBase::currentMaker = 0;
+static int bfirst=1;
 
 ClassImp(StStrangeControllerBase)
 //_____________________________________________________________________________
@@ -54,14 +55,18 @@ TNamed(strTypeNames[type],"StStrangeController") {
   mcName += "Mc";
   assocName = GetName();
   assocName += "Assoc";
+
   TString str;
   ((str = "St") += GetName()) += "MuDst";
-  dataArray = new TClonesArray(str.Data(),max);
   dataClass = gROOT->GetClass(str.Data());
+  (str = "St") += mcName;
+  mcClass = gROOT->GetClass(str.Data());
+  assocClass = gROOT->GetClass("StStrangeAssoc");
+
+  dataArray = new TClonesArray(dataClass->GetName(),max);
   if (doMc && !(dstMaker)) {
-    (str = "St") += mcName;
-    mcArray = new TClonesArray(str.Data(),max);
-    assocArray = new TClonesArray("StStrangeAssoc",max);
+    mcArray = new TClonesArray(mcClass->GetName(),max);
+    assocArray = new TClonesArray(assocClass->GetName(),max);
     assocMaker =
         (StAssociationMaker*) (masterMaker->GetMaker("StAssociationMaker"));
   } else {
@@ -127,6 +132,8 @@ void StStrangeControllerBase::InitCreateSubDst() {
   tempArray = dstController->GetDataArray();
   if (doMc) {
     if (!dstMaker->GetTree()->GetBranch(mcName.Data())) {
+      gMessMgr->Warning() << IsA()->GetName() <<
+                        ": No MC data available, continuing without." << endm;
       doMc = kFALSE;
     } else {
       mcArray = dstController->GetMcArray();
@@ -139,6 +146,32 @@ void StStrangeControllerBase::InitCreateSubDst() {
 //_____________________________________________________________________________
 TBranch* StStrangeControllerBase::AssignBranch(const char* name,
                                                TClonesArray** address) {
+
+  // This is a *temporary* workaround for a bug in TBranchElement.
+  // Through Root 3.01/06, it is unable to handle inherited abstract classes.
+  // GVB - Aug. 14, 2001
+  if (bfirst==1) {
+    bfirst=0;
+    long propl, *prop, pabs = 64;
+    TClass* procl;
+    
+    procl = gROOT->GetClass("StV0I",kTRUE);
+    propl = procl->Property();
+    prop = (long*) (procl->GetClassInfo());
+    if (propl & pabs) prop[1] = propl - pabs;
+    
+    procl = gROOT->GetClass("StXiI",kTRUE);
+    propl = procl->Property();
+    prop = (long*) (procl->GetClassInfo());
+    if (propl & pabs) prop[1] = propl - pabs;
+    
+    procl = gROOT->GetClass("StKinkI",kTRUE);
+    propl = procl->Property();
+    prop = (long*) (procl->GetClassInfo());
+    if (propl & pabs) prop[1] = propl - pabs;
+  }
+  // End of bug workaround.
+
   static Int_t split=2;
   TBranch* branch = tree->Branch(name,address,bsize,split);
   if (masterMaker->GetMode() == StrangeWrite) branch->SetFile(file);
@@ -190,7 +223,7 @@ Int_t StStrangeControllerBase::MakeCreateSubDst() {
   return kStOK;
 }
 //_____________________________________________________________________________
-void StStrangeControllerBase::Clear(const char *) {
+void StStrangeControllerBase::Clear(Option_t* opt) {
   if (dstMaker) {                                // Making a subDST
     selections->Reset();
     if (tree->GetBranch(GetName())->GetAddress() != (char*) &dataArray) {

@@ -1,7 +1,10 @@
 /***********************************************************************
  *
- * $Id: StXiMc.hh,v 3.2 2001/05/04 20:15:15 genevb Exp $
+ * $Id: StXiMc.hh,v 3.3 2001/08/23 13:21:00 genevb Exp $
  * $Log: StXiMc.hh,v $
+ * Revision 3.3  2001/08/23 13:21:00  genevb
+ * Many bug workarounds...
+ *
  * Revision 3.2  2001/05/04 20:15:15  genevb
  * Common interfaces and reorganization of components, add MC event info
  *
@@ -61,6 +64,9 @@ public:
   Float_t momV0Y()  const {return 999;}
   Float_t momV0Z()  const {return 999;}
 
+  Int_t decayMode() const;
+  Int_t geantIdParent() const;
+
 protected:
   Int_t v0;
   ClassDef(StXiMc,4)
@@ -76,6 +82,8 @@ inline Float_t StXiMc::momBachelorZ() const {return daughterMomentumZ();}
 inline Float_t StXiMc::momXiX() const {return parentMomentumX();}
 inline Float_t StXiMc::momXiY() const {return parentMomentumY();}
 inline Float_t StXiMc::momXiZ() const {return parentMomentumZ();}
-inline Int_t   StXiMc::V0Index() { return v0; }
-inline void    StXiMc::SetV0Index(Int_t index) { v0=index; }
+inline Int_t   StXiMc::V0Index() {return v0;}
+inline void    StXiMc::SetV0Index(Int_t index) {v0=index;}
+inline Int_t   StXiMc::geantIdParent() const {return StKinkMc::geantIdParent();}
+inline Int_t   StXiMc::decayMode() const {return StKinkMc::decayMode();}
 #endif
