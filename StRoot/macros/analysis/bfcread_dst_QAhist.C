@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.36 2000/07/26 19:53:44 lansdell Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.37 2001/04/25 01:52:51 genevb Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.37  2001/04/25 01:52:51  genevb
+// Get TPC lib load ordering correct
+//
 // Revision 1.36  2000/07/26 19:53:44  lansdell
 // made changes for creating new QA histograms
 //
@@ -199,8 +202,8 @@ void bfcread_dst_QAhist(
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
-  gSystem->Load("StTpcDb");
   gSystem->Load("libtpc_Tables");
+  gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
   gSystem->Load("St_QA_Maker");
   gSystem->Load("tls");
