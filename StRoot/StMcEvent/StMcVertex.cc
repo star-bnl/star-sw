@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.cc,v 2.5 2000/03/06 18:05:24 calderon Exp $
+ * $Id: StMcVertex.cc,v 2.6 2000/03/29 16:15:54 calderon Exp $
  * $Log: StMcVertex.cc,v $
+ * Revision 2.6  2000/03/29 16:15:54  calderon
+ * Added more information from g2t_vertex table
+ *
  * Revision 2.5  2000/03/06 18:05:24  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.
@@ -42,7 +45,7 @@ using std::find;
 #include "StMcTrack.hh"
 #include "tables/St_g2t_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StMcVertex.cc,v 2.5 2000/03/06 18:05:24 calderon Exp $";
+static const char rcsid[] = "$Id: StMcVertex.cc,v 2.6 2000/03/29 16:15:54 calderon Exp $";
 
 StMcVertex::StMcVertex()
 {
@@ -63,7 +66,9 @@ StMcVertex::StMcVertex(g2t_vertex_st* vtx)
   mGeantVolume=vtx->ge_volume;
   mTof = vtx->ge_tof;
   mGeantProcess = vtx->ge_proc;
-  
+  mGeneratorProcess = vtx->eg_proc;
+  mKey = vtx->id;
+  mGeantMedium = vtx->ge_medium;
   mParent = 0;
     
 }
@@ -78,7 +83,8 @@ int StMcVertex::operator==(const StMcVertex& v) const
 {
     return (mGeantProcess == v.mGeantProcess &&
 	    mPosition     == v.mPosition     &&
-	    mTof          == v.mTof);
+	    mTof          == v.mTof          &&
+	    mKey          == v.mKey);
 }
 
 int StMcVertex::operator!=(const StMcVertex& v) const
