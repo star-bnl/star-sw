@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.33 1999/08/06 15:58:11 fisyak Exp $
+// $Id: doEvents.C,v 1.34 1999/08/06 20:23:22 kathy Exp $
 // $Log: doEvents.C,v $
-// Revision 1.33  1999/08/06 15:58:11  fisyak
-// Fix of merge with Kathy
+// Revision 1.34  1999/08/06 20:23:22  kathy
+// back to old version that didn't call different types of StAnalysisMaker, with and without qaflag to write out QA file; However, I've still left qaflag as macro input (switched off) so that we can use it to turn off and on QA histogram package when we get it working
+//
+// Revision 1.34  1999/08/06 20:23:22  kathy
+// back to old version that didn't call different types of StAnalysisMaker, with and without qaflag to write out QA file; However, I've still left qaflag as macro input (switched off) so that we can use it to turn off and on QA histogram package when we get it working
 //
 // Revision 1.33  1999/08/06 15:58:11  fisyak
 // Fix of merge with Kathy
@@ -89,7 +92,7 @@
 //
 //
 //=======================================================================
-//          - set qaflag ON to create the QA output file
+// owner: Victor Perevoztchikov
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
 //          to fill StEvent and StAnalysisMaker to show example of analysis
 //          
@@ -136,7 +139,7 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 
 // ----------- Ways to run -------------------------------------------
 // If you specify a path, all DST files below that path will be
-// If 'file ends in '.root', ROOT DSTs are searched for.
+// found, and 'nevents' events from each will be analyzed.
 // The type of DST files searched for is taken from the 'file' parameter.
 // If 'file ends in '.xdf', XDF DSTs are searched for.
 // If 'file ends in '.dst.root', ROOT DSTs are searched for.
@@ -148,7 +151,10 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 // .x doEvents.C(10,"-","/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
 //
 // example ROOT file invocation:
-// .x doEvents.C(9999,"/disk00001/star/auau200/hijing/b0_3/jet05/year_1b/hadronic_on/tfs/","*.root")
+// .x doEvents.C(10,"-","/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/gstardata/psc0033_01_40evts.dst.root")
+//
+// example multi-ROOT file invocation:
+// .x doEvents.C(9999,"/disk00001/star/auau200/hijing/b0_3/jet05/year_1b/hadronic_on/tfs/","*.dst.root")
 TBrowser *b=0;
 //===================================================================================================
 //
@@ -198,14 +204,7 @@ void doEvents(Int_t,const Char_t **,const char *qaflag = "");
 // Maker to read events from file or database into StEvent
 //  StEventReaderMaker readerMaker("events","title");
   StEventMaker *readerMaker =  new StEventMaker("events","title");
-  StAnalysisMaker *analysisMaker;
-  const char *fname="qa_doevents.log";
-  if (strcmp(qaflag,"ON") == 0 || strcmp(qaflag,"on") == 0) {
-    cout << endl << "-> QA testing is ON" << endl;
-    analysisMaker = new StAnalysisMaker(fname,nevents,"analysis");
-  }
-  else
-    analysisMaker = new StAnalysisMaker("analysis");
+
 
 //  Sample analysis maker
   StAnalysisMaker *analysisMaker = new StAnalysisMaker("analysis");
