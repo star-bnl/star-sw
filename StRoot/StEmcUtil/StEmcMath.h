@@ -14,6 +14,7 @@
 #include "StDetectorId.h" // see $STAR/include
 
 class StMeasuredPoint;
+class TArrayD;
 
 class StEmcMath {
 
@@ -29,13 +30,17 @@ public:
   static UInt_t       detectorId(const StDetectorId); 
   static StDetectorId detectorId(const UInt_t); 
 
-  static Double_t getPhiPlusMinusPi(const Double_t phi);   
+  static Double_t getPhiPlusMinusPi(const Double_t phi); 
+  static TArrayD  *binForSmde(Bool_t kprint=kFALSE);
 
   ClassDef(StEmcMath, 1)   // Definition of patch
 };
 #endif
-// $Id: StEmcMath.h,v 1.4 2001/04/16 22:02:08 pavlinov Exp $
+// $Id: StEmcMath.h,v 1.5 2001/04/17 23:44:22 pavlinov Exp $
 // $Log: StEmcMath.h,v $
+// Revision 1.5  2001/04/17 23:44:22  pavlinov
+// Clean up
+//
 // Revision 1.4  2001/04/16 22:02:08  pavlinov
 // added function StEmcMath::getPhiPlusMinusPi
 //
