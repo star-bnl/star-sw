@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstBranch.cc,v 1.5 2001/07/15 20:31:33 caines Exp $
+ * $Id: StEstBranch.cc,v 1.6 2004/11/12 23:20:26 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstBranch.cc,v $
+ * Revision 1.6  2004/11/12 23:20:26  caines
+ * Initialization fixes
+ *
  * Revision 1.5  2001/07/15 20:31:33  caines
  * Fixes from Insure++ debugging
  *
@@ -42,6 +45,10 @@ StEstBranch::StEstBranch(StEstTrack *tr,
 			     int isgood) {
 
   int i;
+
+  // zap all to zero to be sure
+  memset(MemBegin,0,MemEnd-MemBegin);
+
   mDebugLevel = 0;
   mMaxHits    = maxhits;
   mNHits      = nh;
