@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.38 1998/12/03 23:39:55 fisyak Exp $
+# $Id: MakeDll.mk,v 1.39 1998/12/04 01:17:30 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.39  1998/12/04 01:17:30  fisyak
+# fix for fortran source in StRoot
+#
 # Revision 1.38  1998/12/03 23:39:55  fisyak
 # Add geant to StRoot
 #
@@ -155,11 +158,16 @@ CPPFLAGS += -D__ROOT__ -I$(STAF_SYS_INCS) \
 #	If NO source , NOTHING to do
 #	Skip up to the end
 #
-FILES_SRC := $(wildcard $(addprefix $(SRC_DIR)/, *.c *.cxx *.cc *.f *.F *.g))
-FILES_SRC += $(wildcard $(addprefix $(SRC_DIR)/src/, *.c *.cxx *.cc *.f *.F *.g))
-ifdef NT
-FILES_SRC := $(filter-out %_init.cc %_i.cc, $(FILES_SRC)) 
+FILES_SRC := $(wildcard $(addprefix $(SRC_DIR)/, *.c *.cxx *.cc))
+FILES_SRC += $(wildcard $(addprefix $(SRC_DIR)/src/, *.c *.cxx *.cc))
+ifneq ($(GEN_DIR),$(SRC_DIR))
+FILES_SRC += $(wildcard $(addprefix $(SRC_DIR)/, *.f *.F *.g))
 endif
+FILES_SRC := $(filter-out %/.share/%/*.F, $(FILES_SRC))
+FILES_SRC := $(filter-out %/.share/%/*.f, $(FILES_SRC))
+FILES_SRC := $(filter-out %/.share/%/*.c, $(FILES_SRC))
+FILES_SRC := $(filter-out %/.share/%/*.g, $(FILES_SRC))
+FILES_SRC := $(filter-out %_init.cc %_i.cc, $(FILES_SRC)) 
 ifeq ($(PKGNAME),xdf2root)
 ifndef NT
   FILES_SRC  += $(wildcard $(STAR)/asps/staf/dsl/src/*.c)
