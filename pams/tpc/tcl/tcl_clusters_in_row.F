@@ -1,5 +1,8 @@
-* $Id: tcl_clusters_in_row.F,v 1.2 1998/05/22 00:18:17 hardtke Exp $
+* $Id: tcl_clusters_in_row.F,v 1.3 1998/06/02 22:54:16 hardtke Exp $
 * $Log: tcl_clusters_in_row.F,v $
+* Revision 1.3  1998/06/02 22:54:16  hardtke
+* fix bug in pixel table indexing
+*
 * Revision 1.2  1998/05/22 00:18:17  hardtke
 * modified hit finder with new data format
 *
@@ -87,6 +90,10 @@ c   21-May-1998 D. Hardtke
 c     * in order to make hit finding possible, add the low and high
 c       tdc vaules for each sequence to tpseq (which is now follows the
 c       structure tcl_tp_seq).
+c
+c   2-June-1998 D. Hardtke
+c     *  Corrected bug in pixel table indexing
+c
 
 #include "PAM.inc"
 #include "tpg_pad_plane.inc"
@@ -255,7 +262,8 @@ CDH now loop over all pads in this row and sequences on these pads
             if (ipad(nrowseqs).lt.0) then
              ipad(nrowseqs) = 256 + ipad(nrowseqs)
             endif
-           ipix(nrowseqs) = row_pixeloffset + pad_pixeloffset + npixel_pad 
+           ipix(nrowseqs) = row_pixeloffset + pad_pixeloffset + 
+     +                      npixel_pad + 1     
            sequence_break = raw_pad(pad_table).SeqModBreak
             if (sequence_break.lt.0) then
              sequence_break = 256 + sequence_break
@@ -264,6 +272,7 @@ CDH now loop over all pads in this row and sequences on these pads
             if (itlo(nrowseqs).lt.0) then
               itlo(nrowseqs) = 256 + itlo(nrowseqs)
             endif
+            itlo(nrowseqs)  = itlo(nrowseqs) + 1  ! want 1-512, not 0-511
            if (iseq.gt.sequence_break) then
             itlo(nrowseqs) = itlo(nrowseqs) + 256
            endif 
@@ -271,7 +280,7 @@ CDH now loop over all pads in this row and sequences on these pads
            if (length_of_sequence.lt.0) then
             length_of_sequence = 256 + length_of_sequence
            endif
-           npixel_pad = npixel_pad + length_of_sequence
+           npixel_pad = npixel_pad + length_of_sequence + 1
            ithi(nrowseqs) = itlo(nrowseqs) + length_of_sequence
            itid(nrowseqs) = 0
          enddo              ! loop over sequences
@@ -441,6 +450,7 @@ c
            tpcluster(tpcluster_h.nok).jseq = tpseq_h.nok + 1
            tpcluster(tpcluster_h.nok).nseq = nseq_in_cluster
            tpcluster(tpcluster_h.nok).tpc_row = 100*sector + row
+           tpcluster(tpcluster_h.nok).flag = 0
            do iseq=1,nseq_in_cluster
               if (tpseq_h.nok.eq.tpseq_h.maxlen) then
                  write(6,*)'TPSEQ table full- abort sec,row',
