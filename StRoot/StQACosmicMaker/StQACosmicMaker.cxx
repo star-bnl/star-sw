@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.cxx,v 1.12 1999/11/23 21:21:05 snelling Exp $
+ * $Id: StQACosmicMaker.cxx,v 1.13 2000/01/20 23:14:59 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking etc.)
  *
  * $Log: StQACosmicMaker.cxx,v $
+ * Revision 1.13  2000/01/20 23:14:59  snelling
+ * Made writing histograms default
+ *
  * Revision 1.12  1999/11/23 21:21:05  snelling
  * removed references to tphitclus table
  *
@@ -59,7 +62,7 @@ StQACosmicMaker::StQACosmicMaker(const char *name):
   bSectorSelectionOn(kFALSE),
   bWriteTNtupleOn(kFALSE),
   bWritePostscriptOn(kFALSE),
-  bWriteHistogramsOn(kFALSE),
+  bWriteHistogramsOn(kTRUE),
   nXBins(50),
   MakerName(name) {
   
@@ -103,7 +106,7 @@ Int_t StQACosmicMaker::Make() {
 
 void StQACosmicMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StQACosmicMaker.cxx,v 1.12 1999/11/23 21:21:05 snelling Exp $\n");
+  printf("* $Id: StQACosmicMaker.cxx,v 1.13 2000/01/20 23:14:59 snelling Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
