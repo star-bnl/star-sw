@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.12 2002/10/23 09:13:58 fsimon Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.13 2003/01/14 12:58:25 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.13  2003/01/14 12:58:25  jcs
+// use Geometry_ftpc/ftpcAsicMap to control corrections for error in Y2001-2002
+// FTPC asic mapping
+//
 // Revision 1.12  2002/10/23 09:13:58  fsimon
 // Use calibration Db instead of local (local commented out, uncomment for use)
 //
@@ -79,6 +83,7 @@ StMaker(name),
     m_slowsimgas(0),
     m_slowsimpars(0),
     m_dimensions(0),
+    m_asicmap(0),
     m_efield(0),
     m_vdrift(0),
     m_deflection(0),
@@ -146,6 +151,7 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
   St_DataSetIter       dblocal_geometry(ftpc_geometry_db);
 
   m_dimensions = (St_ftpcDimensions *)dblocal_geometry("ftpcDimensions");
+  m_asicmap   = (St_ftpcAsicMap *)dblocal_geometry("ftpcAsicMap");
 
   St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
   if ( !ftpc_calibrations_db ){
@@ -240,6 +246,7 @@ Int_t StFtpcSlowSimMaker::Make(){
     // cout << "create FTPC database reader\n";
     //create FTPC database reader
     StFtpcDbReader *dbReader = new StFtpcDbReader(m_dimensions,
+		                                m_asicmap,
                                                 m_efield,
                                                 m_vdrift,
                                                 m_deflection,

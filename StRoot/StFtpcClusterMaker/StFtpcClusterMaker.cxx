@@ -1,5 +1,9 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.40 2002/08/02 11:24:29 oldi Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.41 2003/01/14 12:58:01 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.41  2003/01/14 12:58:01  jcs
+// use Geometry_ftpc/ftpcAsicMap to control corrections for error in Y2001-2002
+// FTPC asic mapping
+//
 // Revision 1.40  2002/08/02 11:24:29  oldi
 // Used database values are printed to screen, now.
 //
@@ -180,6 +184,7 @@ StMaker(name),
     m_fastsimpars(0),
     m_dimensions(0),
     m_padrow_z(0),
+    m_asicmap(0),
     m_efield(0),
     m_vdrift(0),
     m_deflection(0),
@@ -299,7 +304,8 @@ Int_t StFtpcClusterMaker::Make()
   St_DataSetIter       dblocal_geometry(ftpc_geometry_db);
  
   m_dimensions = (St_ftpcDimensions *)dblocal_geometry("ftpcDimensions");
-  m_padrow_z   = (St_ftpcPadrowZ  *)dblocal_geometry("ftpcPadrowZ");
+  m_padrow_z   = (St_ftpcPadrowZ *)dblocal_geometry("ftpcPadrowZ");
+  m_asicmap    = (St_ftpcAsicMap *)dblocal_geometry("ftpcAsicMap");
 
   St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
   if ( !ftpc_calibrations_db ){
@@ -329,6 +335,7 @@ Int_t StFtpcClusterMaker::Make()
   // create FTPC data base reader
   StFtpcDbReader *dbReader = new StFtpcDbReader(m_dimensions,
                                                 m_padrow_z,
+						m_asicmap,
                                                 m_efield,
                                                 m_vdrift,
                                                 m_deflection,

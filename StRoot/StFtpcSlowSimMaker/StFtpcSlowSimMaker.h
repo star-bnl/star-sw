@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimMaker.h,v 1.7 2002/10/16 12:29:18 fsimon Exp $
+// $Id: StFtpcSlowSimMaker.h,v 1.8 2003/01/14 12:58:25 jcs Exp $
 // $Log: StFtpcSlowSimMaker.h,v $
+// Revision 1.8  2003/01/14 12:58:25  jcs
+// use Geometry_ftpc/ftpcAsicMap to control corrections for error in Y2001-2002
+// FTPC asic mapping
+//
 // Revision 1.7  2002/10/16 12:29:18  fsimon
 // Include ftpcAmpSlope, ftpcAmpOffset and ftpcTimeOffset in Database access
 // permits usage of gain factors and time offset in the simulator
@@ -39,6 +43,7 @@ class St_ftpcClusterPars;
 class St_ftpcFastSimGas;
 class St_ftpcFastSimPars;
 class St_ftpcDimensions;
+class St_ftpcAsicMap;
 class St_ftpcEField;
 class St_ftpcVDrift;
 class St_ftpcDeflection;
@@ -58,7 +63,7 @@ class TH2F;
 
 class StFtpcSlowSimMaker : public StMaker {
  private:
-  // static Char_t m_VersionCVS = "$Id: StFtpcSlowSimMaker.h,v 1.7 2002/10/16 12:29:18 fsimon Exp $";
+  // static Char_t m_VersionCVS = "$Id: StFtpcSlowSimMaker.h,v 1.8 2003/01/14 12:58:25 jcs Exp $";
   // Int_t         m_mode;        // mode 1 = primaries;
    St_ftpcClusterPars   *m_clusterpars;           //!
    //St_ftpcFastSimGas    *m_fastsimgas;            //!
@@ -66,6 +71,7 @@ class StFtpcSlowSimMaker : public StMaker {
    St_ftpcSlowSimGas    *m_slowsimgas;     //!
    St_ftpcSlowSimPars   *m_slowsimpars;    //!   
    St_ftpcDimensions    *m_dimensions;            //!
+   St_ftpcAsicMap       *m_asicmap;               //!
    St_ftpcEField        *m_efield;                //!
    St_ftpcVDrift        *m_vdrift;                //!
    St_ftpcDeflection    *m_deflection;            //!
@@ -92,7 +98,7 @@ class StFtpcSlowSimMaker : public StMaker {
   virtual Int_t  Make();
   // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcSlowSimMaker.h,v 1.7 2002/10/16 12:29:18 fsimon Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcSlowSimMaker.h,v 1.8 2003/01/14 12:58:25 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StFtpcSlowSimMaker, 1)   //StAF chain virtual base class for Makers
 };
