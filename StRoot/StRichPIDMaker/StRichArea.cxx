@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichArea.cxx,v 2.3 2000/11/22 21:49:48 horsley Exp $
+ * $Id: StRichArea.cxx,v 2.4 2000/11/22 23:24:49 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichArea.cxx,v $
+ *  Revision 2.4  2000/11/22 23:24:49  horsley
+ *  StRichArea.cxx monte carlo integration fix to the return value
+ *
  *  Revision 2.3  2000/11/22 21:49:48  horsley
  *  StRichArea.cxx changed to remove the abort commands and replace with return false tp avoid aborting whole chain.
  *
@@ -1587,7 +1590,7 @@ void StRichArea::getMonteCarloArea(double angleCut, TArrayD& array, int points) 
 	cout << "angle = " << ang/degree << endl;
 	cout << "areaIndex > array size " << areaIndex << "    " << array.GetSize() - 1 << endl;
 	//abort();
-	return -999;
+	return ;
       }
     }
 
