@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpMatchMaker.cxx,v 1.5 2003/09/17 19:40:12 geurts Exp $
+ * $Id: StTofpMatchMaker.cxx,v 1.6 2003/12/05 08:17:27 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofpMatchMaker.cxx,v $
+ * Revision 1.6  2003/12/05 08:17:27  geurts
+ * changed default TDC and ADC ranges
+ *
  * Revision 1.5  2003/09/17 19:40:12  geurts
  * zeroed event counters and one pointer
  *
@@ -70,8 +73,8 @@ StTofpMatchMaker::StTofpMatchMaker(const Char_t *name): StMaker(name){
   // set default values
   setHistoFileName("");
   //setHistoFileName("tofana.root");
-  setValidAdcRange(30,1200);
-  setValidTdcRange(1,2047);
+  setValidAdcRange(0,1024);
+  setValidTdcRange(30,1200);
   setOuterTrackGeometry();
   setMinHitsPerTrack(0);
   setMinFitPointsPerTrack(0);
