@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV1P0.hh,v 1.3 1999/07/04 01:43:24 levine Exp $
+ * $Id: TPCV1P0.hh,v 1.4 1999/07/22 17:54:49 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description:  Declarations For TPC version 1.0
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: TPCV1P0.hh,v $
+ * Revision 1.4  1999/07/22 17:54:49  levine
+ * include function prototype for getSpacePts()
+ *
  * Revision 1.3  1999/07/04 01:43:24  levine
  * minor changes to make solaris CC compiler happy
  *
@@ -43,6 +46,7 @@ class TPCV1P0_ZS_SR : public ZeroSuppressedReader
 public:
   int getPadList(int PadRow, unsigned char **padList);
   int getSequences(int PadRow, int Pad, int *nSeq, Sequence **SeqData);
+  int getSpacePts(int PadRow, int *nSpacePts, SpacePt **SpacePts);
   int MemUsed();
 
   TPCV1P0_ZS_SR(int sector, TPCV1P0_Reader *);
@@ -55,6 +59,7 @@ private:
   classname(Bank_TPCADCD) *adcd_p[6][3];
   classname(Bank_TPCADCX) *adcx_p[6][3];
   classname(Bank_TPCSEQD) *seqd_p[6][3];
+
   int sector;
   struct Pad Pad_array[TPC_PADROWS][TPC_MAXPADS];
   struct PadRow Row_array[TPC_PADROWS];
