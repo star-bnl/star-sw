@@ -1,0 +1,40 @@
+#!/usr/local/bin/perl
+# Find all DST files on disk and create kumac to load new ones
+# into DB
+# T. Wenaus
+$topPrefix="/disk1/star/";
+#$topLevel="auau200";
+#$topLevel="tfs_dst";
+$topLevel = shift(@ARGV) || "auau200";
+if ( open(SCRIPT,"> newdst2db.kumac") ) {
+    print "newdst2db.kumac created to load DST files into DB\n";
+    print "To be used with \$STAR_DB/StafObjy/newdst2db.csh\n";
+} else {
+    print "Unable to create DB loader kumac; cannot write locally\n";
+}
+$theTime = localtime(time());
+print SCRIPT "* New XDF DST files as of $theTime\n";
+open(FILES, "cd $topPrefix; find $topLevel/ -name '*dst.xdf' |")
+ or die "Failed on xdf file seek\n";
+$totalsize = 0;
+$nfiles = 0;
+$nnew = 0;
+while (<FILES>) {
+  $fullpath = $_;
+  @tokens = split(/\//);
+  $totalsize += $tokens[4];
+  $nfiles++;
+  $fname = $tokens[$#tokens];
+  $thepath = $topPrefix.$fullpath;
+  $thepath =~ s/$fname//;
+  chomp($fname);
+  $dbname = "/star/sol/db/stardb/dst/$fname.STAR.DB";
+  if ( -e $dbname ) {
+#    print "File $dbname exists\n";
+  } else {
+#    print "$fname not in database\n";
+    print SCRIPT "exec xdf2db XDFPATH=$thepath XDFFILE=$fname\n";
+    $nnew++;
+  }
+}
+print "Total of ",$nfiles," files under $topLevel, ",$nnew," of them new and not in DB\n";
