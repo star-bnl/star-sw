@@ -1,5 +1,9 @@
-* $Id: tpt_make_segment_uv.F,v 1.12 2000/02/23 21:05:53 hardtke Exp $
+* $Id: tpt_make_segment_uv.F,v 1.13 2000/03/04 00:37:08 sakrejda Exp $
 * $Log: tpt_make_segment_uv.F,v $
+* Revision 1.13  2000/03/04 00:37:08  sakrejda
+* Weigth of edge and deconvoluted hits suppressed in the fit - not quite right as
+* tfs and the hit finder are not quite consistent in how hits are flagged - needs more work.
+*
 * Revision 1.12  2000/02/23 21:05:53  hardtke
 * replace tpg functions with tpc functions
 *
@@ -290,13 +294,15 @@ C            no candidate found in this row
 C            candidate found reset gap counter
              ngap = 0
              ip = trk(ntrk).ipnt(3+nf)
-             irets=tpt_fit_uv(x0,y0,1,hit(ip).x,hit(ip).y,at,bt)
-             irets=tpt_fit_sz(x0,y0,at,bt,xlast,ylast,1,
+             if(hit(ip).flag.eq.0) then
+               irets=tpt_fit_uv(x0,y0,1,hit(ip).x,hit(ip).y,at,bt)
+               irets=tpt_fit_sz(x0,y0,at,bt,xlast,ylast,1,
      >         hit(ip).x,hit(ip).y,hit(ip).z, az,bz,stot)
-             xlast=hit(ip).x
-             ylast=hit(ip).y
-             zlast=hit(ip).z
-             irlast=ir1
+               xlast=hit(ip).x
+               ylast=hit(ip).y
+               zlast=hit(ip).z
+               irlast=ir1
+             endif
            endif
          else
            ngap=ngap+1
