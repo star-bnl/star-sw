@@ -12,6 +12,10 @@
 #include "StiSeedFinder.h"
 #include "StEvent/StEnumerations.h"
 
+#include "StiFactoryTypedefs.h"
+//#include "StiEvaluableTrack.h"
+//#include "StiObjectFactory.h"
+
 class StEvent;
 class StiKalmanTrack;
 class StTrack;
@@ -20,14 +24,16 @@ class StMcEvent;
 
 class StiEvaluableTrackSeedFinder : public StiSeedFinder
 {
-    typedef vector<StiStTrackFilter*> st_trackfilter_vector;
-    
 public:
+    typedef vector<StiStTrackFilter*> st_trackfilter_vector;
+    //typedef StiObjectFactory<StiEvaluableTrack> StiEvaluableTrackFactory;
+    
     StiEvaluableTrackSeedFinder();
     virtual ~StiEvaluableTrackSeedFinder();
     
     //Sets
     void setEvent(StEvent*, StMcEvent* mcevt=0);
+    void setFactory(StiEvaluableTrackFactory* val);
     
     void addStTrackFilter(StiStTrackFilter*);
     void setStTrackType(StTrackType);
@@ -38,10 +44,14 @@ public:
 
     //Utilites
     void printStTracks() const;
+
+protected:
+    StiEvaluableTrack* makeTrack(StTrack*);
     
 private:
     StEvent* mevent; //cache pointer
     StMcEvent* mmcevent;
+    StiEvaluableTrackFactory* mfactory;
     
     StTrackType mtype; //enumeration to the type of track we get from StEvent
     st_trackfilter_vector mfiltervector;
@@ -50,6 +60,11 @@ private:
     StSPtrVecTrackNodeIterator mbegin; 
     StSPtrVecTrackNodeIterator mend;
 };
+
+inline void StiEvaluableTrackSeedFinder::setFactory(StiEvaluableTrackFactory* val)
+{
+    mfactory=val;
+}
 
 #endif
 
