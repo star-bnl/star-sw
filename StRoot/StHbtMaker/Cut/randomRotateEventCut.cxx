@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: randomRotateEventCut.cxx,v 1.1 2000/05/25 21:47:27 laue Exp $
+ * $Id: randomRotateEventCut.cxx,v 1.2 2001/04/02 16:16:34 jeromel Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: randomRotateEventCut.cxx,v $
+ * Revision 1.2  2001/04/02 16:16:34  jeromel
+ * Type cast in sprintf() statement for bool conversion (insure++ issue)
+ *
  * Revision 1.1  2000/05/25 21:47:27  laue
  * new event cut which can be used to rotate an event around the z-axis
  *
@@ -67,7 +70,7 @@ StHbtString randomRotateEventCut::Report(){
   char Ctemp[100];
   sprintf(Ctemp,"\n randomRotateEventCut:");
   Stemp += Ctemp;
-  sprintf(Ctemp,"\n Rotation :\t %d",mRotation);
+  sprintf(Ctemp,"\n Rotation :\t %d",(int) mRotation);
   Stemp += Ctemp;
   sprintf(Ctemp,"\n Multiplicity:\t %d-%d",mEventMult[0],mEventMult[1]);
   Stemp += Ctemp;
