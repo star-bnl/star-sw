@@ -11,6 +11,7 @@
    bar->AddButton("Plot histogram",".x  MakeHists.cxx", "Read XDF file with \"particle\" table and plot some histograms");
    bar->AddButton("Make analysis", ".x  par_anal.cxx",  "Another example of the analysis of the \"particle\" table");
    bar->AddButton("Big Full Chain",".x  bfc.C",         "An example of production chain (1 event only)");
+   bar->AddButton("Multiple dst analysis",".x  ana.C",         "An example of multiple dst files analysis");
    bar->Show();
    gROOT->SaveContext();
    printf("Look for the new ROOT control bar window and pop it up !!!\n");
