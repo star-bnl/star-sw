@@ -1,22 +1,6 @@
 class St_geant_Maker;
 St_geant_Maker *geant=0;
-void GeomDraw(const char *fzFile="complete") 
-{
-   // Read the ZEBRA file with GEANT geometry
-   // Convert it to TVolume format 
-   // draw it out with OpenGL Viewer
-  TString geomAccess = fzFile;
-  TString geomKuipCmd;
-  if (gSystem->AccessPathName(geomAccess.Data()) ) 
- //    geant->SetInputFile(fzFile);
-  else {
-     // Check 
-     geomAccess.Strip(TString::kBoth);
-     if (!geomAccess.CountChar(' ') && (geomAccess.Contains("y") || geomAccess.Contains("complete")) ) {
-       geomKuipCmd = "detp geometry ";
-       geomKuipCmd += geomAccess; geomAccess = "" ;
-//       geant->LoadGeometry(geomKuipCmd.Data());            
-     } else {
+void GeomDrawUsage() {
           printf("\n");
           printf("Usage: root4star \'GeomDraw.C(const char *geomDescriptor)\' \n");
           printf("-----  where \"geomDescriptor\" can be either \n");
@@ -26,8 +10,8 @@ void GeomDraw(const char *fzFile="complete")
           printf("            example: root4star \'GeomDraw.C(\"/star/u/potekhin/gstardata/y2003x_complete.fz \")\'\n\n"); 
           printf("---------------\n"); 
           printf(" One can adjust the view via ROOT Browser or ROOT TCanvas \n"); 
-          printf(" 1. Select the volume you are ineresting in with left mouse button\n"); 
-          printf(" 2. Bring up the ROOT context menu with the right mouse button click\n"); 
+          printf(" 1. Select the volume you are interesting in with left mouse button\n"); 
+          printf(" 2. Bring the ROOT context menu up with the right mouse button click\n"); 
           printf(" 3. Select class method to execute and click it with left mouse button\n");           
           printf("---------------\n"); 
           printf("     List of the usefull TVolume methods and its parameters:\n"); 
@@ -38,7 +22,26 @@ void GeomDraw(const char *fzFile="complete")
           printf("                         2 - this invisible, but sons are visible\n");
           printf("                         1 - this visible but sons\n");
           printf("                         3 - neither this nor its sons are visible\n\n");       
-          printf(" $Id: GeomDraw.C,v 1.2 2004/07/23 19:38:16 fine Exp $\n");
+          printf(" $Id: GeomDraw.C,v 1.3 2004/07/23 20:00:20 fine Exp $\n");
+}                 
+
+void GeomDraw(const char *fzFile="complete") 
+{
+   // Read the ZEBRA file with GEANT geometry
+   // Convert it to TVolume format 
+   // draw it out with OpenGL Viewer
+  TString geomAccess = fzFile;
+  TString geomKuipCmd;
+  if (gSystem->AccessPathName(geomAccess.Data()) ) 
+  {
+     // Check 
+     geomAccess.Strip(TString::kBoth);
+     if (!geomAccess.CountChar(' ') && (geomAccess.Contains("y") || geomAccess.Contains("complete")) ) {
+       geomKuipCmd = "detp geometry ";
+       geomKuipCmd += geomAccess; geomAccess = "" ;
+     } else {
+          printf("\n *** Error ***   Wrong input parameter: <%s>\n", fzFile);
+          GeomDrawUsage();
           return;              
      }
    }
@@ -53,17 +56,19 @@ void GeomDraw(const char *fzFile="complete")
   chain = new StChain(); 
   geant = new St_geant_Maker();
   geant->SetActive(kFALSE);
-  printf(" <%s> <%s> \n", geomAccess.Data(), geomKuipCmd.Data());
-  if (! geomAccess.IsNull() ) 
+  if (! geomAccess.IsNull() ) {
+     printf(" Draw the GEANT geometry from <%s> file\n", geomAccess.Data());
      geant->SetInputFile(geomAccess.Data());
-  else {
+  } else {
+       printf(" Draw the GEANT generated geometry <%s> \n", geomKuipCmd.Data());
        gSystem->Load("geometry");
        geant->LoadGeometry(geomKuipCmd.Data());            
-    }
+  }
   chain->Init();
   TVolume *v = (TVolume *)geant->Work();
   new TBrowser("STAR Geometry", v);
   v->Draw();
+  GeomDrawUsage();
   gPad->Modified();
   gPad->Update();
 }
