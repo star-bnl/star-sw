@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.h,v 1.9 2004/04/20 18:49:10 perev Exp $
+ * $Id: StMuIOMaker.h,v 1.10 2004/07/02 01:51:09 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  * Made it integrated to StIOMaker for applying Grid Collector 
@@ -57,6 +57,9 @@ class StMuIOMaker : public StMuDstMaker {
 // virtual methods of inherited StIOInterFace
   virtual Int_t  Open(const Char_t *ioFile=0);
   virtual void  Close(Option_t *opt=0);
+  virtual Int_t MakeRead(const StUKey &RunEvent);
+  virtual Int_t MakeRead(){StUKey uk; return MakeRead(uk);};
+
 
   int currentIndex() { return mCurrentIndex; }
   int eventCounter() { return mEventCounter; }
@@ -64,21 +67,27 @@ class StMuIOMaker : public StMuDstMaker {
 
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
-    static const char cvs[]="Tag $Name:  $ $Id: StMuIOMaker.h,v 1.9 2004/04/20 18:49:10 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuIOMaker.h,v 1.10 2004/07/02 01:51:09 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
 protected:
+
+  TTree* mOutTree;     //!
+  
   string mOutFileName; //!
   TFile* mOutFile;     //!
-
 
   int mNumberOfEvents; //! holds the # of events in the current chain (file)
   int mCurrentIndex;   //! holds the index of the last event read
   bool mMuSave;        //!
   bool mBadInFile;     //!
+  bool mCloseWrite;    //!
 
   int  openRead();
+  void openMuWrite();
+  void closeMuWrite();
+
 //@
 
   ClassDef(StMuIOMaker, 0)
@@ -89,6 +98,9 @@ protected:
 /***************************************************************************
  *
  * $Log: StMuIOMaker.h,v $
+ * Revision 1.10  2004/07/02 01:51:09  perev
+ * Wei-Ming Zhang developments
+ *
  * Revision 1.9  2004/04/20 18:49:10  perev
  * Big reorganization, now StMuIOMkaer inherits from StMuDstMaker
  *
