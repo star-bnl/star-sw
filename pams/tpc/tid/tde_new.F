@@ -1,5 +1,8 @@
-* $Id: tde_new.F,v 1.10 1999/02/19 21:14:37 ogilvie Exp $
+* $Id: tde_new.F,v 1.11 1999/04/13 13:49:55 ogilvie Exp $
 * $Log: tde_new.F,v $
+* Revision 1.11  1999/04/13 13:49:55  ogilvie
+* Shortened several lines to less than 72 characters
+*
 * Revision 1.10  1999/02/19 21:14:37  ogilvie
 * added new method 3 = use weights to calc de/dx
 *
@@ -27,6 +30,7 @@
 * Revision 1.2  1998/01/27 01:54:47  fisyak
 * Split sources
 *
+*23456789012345678901234567890123456789012345678901234567890123456789012
       INTEGER FUNCTION tde_new(tdpar_h,tdpar,hit_h,hit,
      >                         track_h,track,pad_h,pad)
 
@@ -202,7 +206,7 @@ c old hardwired B=0.5
 c         radius = 1. / (track(j).invp * 0.5 * bconv)
 c
          radius=1.0 / (track(j).invp*bfield(3)*C_D_CURVATURE)
-         psic = track(j).psi*C_RAD_PER_DEG + sign(1,track(j).q)*C_PI*0.5
+         psic=track(j).psi*C_RAD_PER_DEG+sign(1,track(j).q)*C_PI*0.5
 
          xc = x1 - radius*cos(psic)
          yc = y1 - radius*sin(psic)
@@ -298,7 +302,7 @@ c check on quality of hit before including it into dedx
 c but currently (June 98) merged hits are filtered out before
 c they reach tde_new
 c
-                  if ((hit(loc_hit(l)).flag.eq.0).and.(nde.lt.ndemax)) then
+             if ((hit(loc_hit(l)).flag.eq.0).and.(nde.lt.ndemax)) then
                     nde=nde+1
                     dedx(nde).length=ds
                     dedx(nde).charge=hit(loc_hit(l)).q
@@ -307,11 +311,14 @@ c
 c               else if((xc-hit(loc_hit(l)).x)**2+
 c     >            (yc-hit(loc_hit(l)).y)**2
 c     >            .gt.radius**2) then
-c  include the flag cuts for the merged tracks. Because after merged, some hits from other recid can't 
-c  fit this circle parameter, so cause the track.flag=-1 or -999  liqun 10/08/98
+c  include the flag cuts for the merged tracks. 
+c  Because after merged, some hits from other recid can't 
+c  fit this circle parameter, so cause the track.flag=-1 or -999  
+c  liqun 10/08/98
                else if((xc-hit(loc_hit(l)).x)**2+
      >            (yc-hit(loc_hit(l)).y)**2
      >            .gt.radius**2.and.track(j).flag.ne.100) then
+
                   hit(loc_hit(l)).dq=-1.0
                   track(j).flag=-1
                else if(track(j).flag.ne.100) then
@@ -369,7 +376,7 @@ c
             sum_weight = 0.
             do k=1,nde
                weight = sqrt(abs(dedx(k).charge))
-               track(j).dedx(1)= track(j).dedx(1)+ weight*dedx(k).adedx
+               track(j).dedx(1)=track(j).dedx(1)+weight*dedx(k).adedx
                sum_weight=sum_weight+weight
                track(j).dedx(2)=track(j).dedx(2)+ dedx(k).charge
             end do
@@ -418,8 +425,8 @@ c            hpmin(2)=0.
 c            hpmax(2)=hxmax
 c            hstep(1)=0.001
 c            hstep(2)=hxmax/100.
-
-           call hfith(hhid,landau2,'QL',3,hparam,hstep,hpmin,hpmax,hsig,hchi2)
+            call hfith(hhid,landau2,'QL',3,
+     >        hparam,hstep,hpmin,hpmax,hsig,hchi2)
             track(j).dedx(1)=hparam(2)
             track(j).dedx(2)=hsig(2)
             write(6,*) 'resoultion' , hsig(2)/hparam(2)
