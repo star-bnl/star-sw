@@ -1,14 +1,14 @@
 #ifndef STMCEVENTINTERFACE_H
 #define STMCEVENTINTERFACE_H
 
-/* $Id: StMcEventInterface.h,v 1.1 2004/07/13 19:05:41 potekhin Exp $ */
+/* $Id: StMcEventInterface.h,v 1.2 2004/07/16 22:57:44 potekhin Exp $ */
 
 ////////////////////////////////////////////////////////
 //                                                    //
 //                                                    //
 ////////////////////////////////////////////////////////
 
-#include <TNamed.h>
+#include <TObjArray.h>
 #include "StMcEvent.hh"
 
 
@@ -19,7 +19,7 @@ class StMcEventInterface {
   StMcEventInterface() {};
   virtual ~StMcEventInterface() {};
 
-  static void FinishEventCB(void);
+  static void FinishEventCB(TObjArray* hits_);
 
 
  private:
