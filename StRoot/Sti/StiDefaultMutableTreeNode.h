@@ -65,8 +65,6 @@ class StiDefaultMutableTreeNode : public StiTreeNode
   //void set(int depth);
   void setAsCopyOf(const StiDefaultMutableTreeNode * node);
 
-  //void initialize(bool allowsChildren);
-  void initialize();
   void insert(StiTreeNode * newChild, int childIndex);
   void remove(int childIndex) ;
   void setParent(StiTreeNode *  newParent) ;
@@ -111,8 +109,6 @@ class StiDefaultMutableTreeNode : public StiTreeNode
   void appendChildrenToVector(StiDefaultMutableTreeNode *node, 
 			      StiDefaultMutableTreeNodeVector *v);
  protected:
-	//  int           mDepth;
-  //  bool          allowsChildren;
   StiTreeNode * parent;
   StiDefaultMutableTreeNodeVector children;
 

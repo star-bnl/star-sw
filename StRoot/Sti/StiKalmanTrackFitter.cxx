@@ -35,48 +35,48 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
       //cout << "set =="<<endl;
       first = track->begin();
       last  = track->end();
-			for (source=first;source!=last;)
-				{
-					targetNode= static_cast<StiKalmanTrackNode*>((*source).getFirstChild());
-					targetDet = targetNode->getDetector();
-					targetHit = targetNode->getHit();
-					// evolve state from that of source using dets source to target
-					if (targetDet)
-						targetNode->propagate(&(*source),targetDet);	// hit
-					else
-						targetNode->propagate(&(*source),targetHit);  // vertex
-					// if targetNode has hit, get chi2 and update track parameters accordingly
-					if (targetHit)
-						{
-							targetNode->evaluateChi2();
-							targetNode->updateNode();
-						}
-					source++;//cout<<"=="<<endl;
-				}
+      for (source=first;source!=last;)
+	{
+	  targetNode= static_cast<StiKalmanTrackNode*>((*source).getFirstChild());
+	  targetDet = targetNode->getDetector();
+	  targetHit = targetNode->getHit();
+	  // evolve state from that of source using dets source to target
+	  if (targetDet)
+	    targetNode->propagate(&(*source),targetDet);	// hit
+	  else
+	    targetNode->propagate(&(*source),targetHit);  // vertex
+	  // if targetNode has hit, get chi2 and update track parameters accordingly
+	  if (targetHit)
+	    {
+	      targetNode->evaluateChi2();
+	      targetNode->updateNode();
+	    }
+	  source++;//cout<<"=="<<endl;
+	}
     }
   else
     {
       //cout << "set !="<<endl;
       last  = track->begin();
       first = track->end();
-			for (source=first;source!=last;)
-				{
-					targetNode= static_cast<StiKalmanTrackNode*>((*source).getParent());
-					targetDet = targetNode->getDetector();
-					targetHit = targetNode->getHit();
-					// evolve state from that of source using dets source to target
-					if (targetDet)
-						targetNode->propagate(&(*source),targetDet);	// hit
-					else
-						targetNode->propagate(&(*source),targetHit);  // vertex
-					// if targetNode has hit, get chi2 and update track parameters accordingly
-					if (targetHit)
-						{
-							targetNode->evaluateChi2();
-							targetNode->updateNode();
-						}
-					source--;//cout<<"!="<<endl;
-				}
+      for (source=first;source!=last;)
+	{
+	  targetNode= static_cast<StiKalmanTrackNode*>((*source).getParent());
+	  targetDet = targetNode->getDetector();
+	  targetHit = targetNode->getHit();
+	  // evolve state from that of source using dets source to target
+	  if (targetDet)
+	    targetNode->propagate(&(*source),targetDet);	// hit
+	  else
+	    targetNode->propagate(&(*source),targetHit);  // vertex
+	  // if targetNode has hit, get chi2 and update track parameters accordingly
+	  if (targetHit)
+	    {
+	      targetNode->evaluateChi2();
+	      targetNode->updateNode();
+	    }
+	  source--;//cout<<"!="<<endl;
+	}
     }
 }
 

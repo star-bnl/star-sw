@@ -893,8 +893,9 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
 */
 bool  StiKalmanTrack::isPrimary() const
 {
-	StiKalmanTrackNode * node = getInnerMostHitNode();
-	return (node->fX<2.)?true:false;
+  //StiKalmanTrackNode * node = getInnerMostHitNode();
+  //return (node->fX<2.)?true:false;
+  return true;
 }
 
 /*! Swap the track node sequence inside-out
@@ -1052,35 +1053,37 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   if (trackingDirection==kInsideOut)
     throw logic_error("SKT::extendToVertex(const StiHit*) - LOGIC ERROR - Extension to vtx only allowed for OutsideIn");
   
-	//cout << "SKT::extendToVertex(StiHit* vertex) - starting"<<endl;
+  //cout << "SKT::extendToVertex(StiHit* vertex) - starting"<<endl;
   double chi2;
   StiKalmanTrackNode * sNode=0;
-	StiKalmanTrackNode * tNode=0;
-	bool trackExtended = false;
-  
+  StiKalmanTrackNode * tNode=0;
+  bool trackExtended = false;
+
+  if (true)
+    return true;
   sNode = lastNode;
-	tNode = trackNodeFactory->getObject();
+  tNode = trackNodeFactory->getObject();
   if (tNode==0) 
     throw logic_error("SKTF::extendTrackToVertex()\t- ERROR - tNode==null");
   tNode->reset();
-	//cout  << "tNode->propagate(sNode, vertex)"<<endl;
+  //cout  << "tNode->propagate(sNode, vertex)"<<endl;
   tNode->propagate(sNode, vertex);
-	//cout  << "tNode->setHit(vertex);"<<endl;
+  //cout  << "tNode->setHit(vertex);"<<endl;
   tNode->setHit(vertex);
-	//cout << "chi2 = tNode->evaluateChi2()"<<endl;
-	chi2 = tNode->evaluateChi2(); 
-	//cout << "if (chi2<pars->maxChi2ForSelection)"<<endl;
+  //cout << "chi2 = tNode->evaluateChi2()"<<endl;
+  chi2 = tNode->evaluateChi2(); 
+  //cout << "if (chi2<pars->maxChi2ForSelection)"<<endl;
   if (chi2<pars->maxChi2ForSelection)
     {
-			//cout << "	tNode->updateNode();"<<endl;
-			tNode->updateNode();
-			//cout << "sNode->add(tNode);"<<endl;
+      //cout << "	tNode->updateNode();"<<endl;
+      tNode->updateNode();
+      //cout << "sNode->add(tNode);"<<endl;
       sNode->add(tNode);	
       lastNode = tNode;
-			trackExtended = true;
+      trackExtended = true;
     }
-	//cout << "SKT::extendToVertex(StiHit* vertex) - done"<<endl;
-	return trackExtended;
+  //cout << "SKT::extendToVertex(StiHit* vertex) - done"<<endl;
+  return trackExtended;
 }
 
 bool StiKalmanTrack::find(int direction)
