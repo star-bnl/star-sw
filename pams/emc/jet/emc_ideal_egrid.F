@@ -8,7 +8,8 @@ c:>------------------------------------------------------------------
       INTEGER*4 FUNCTION EMC_IDEAL_EGRID(
      1         g2t_track_h,         g2t_track ,
      2       ems_control_h,       ems_control ,
-     3        emc_energy_h,        emc_energy )
+     3     emc_egrid_par_h,     emc_egrid_par ,
+     4        emc_energy_h,        emc_energy )
 c:>------------------------------------------------------------------
 C:ROUTINE:      INTEGER*4 EMC_IDEAL_EGRID
 C:DESCRIPTION:  g2t_track energy in (eta,phi) grids...
@@ -19,6 +20,7 @@ c:>------------------------------------------------------------------
       IMPLICIT NONE
 C
 #include "emc_ideal_egrid.inc"
+#include "math_constants.inc"
 
 c---energy grid id
       integer MAXP,MAXE
@@ -27,17 +29,9 @@ c---energy grid id
 c---local variables
       integer i,nout,mout,pid,pbin,ebin
       real eta,phi,e_vtx,pt,etot
-c---keep variables
-      COMMON/keep_ideal_egrid/ PI,PI2,deg_to_rad
-      real PI,PI2,deg_to_rad
 
 c---start executable statements...
       emc_ideal_egrid = STAFCV_OK     
-
-c---initialization. Only once at first call, or if you want to change setting 
-      PI           = ACOS(-1.0)
-      PI2          = 2.0*PI
-      deg_to_rad   = PI/180.0
 
 C---- Initialize nok counter and variable arrays
       emc_energy_h.nok = 0
@@ -63,21 +57,21 @@ C*- Load g2t_track energy
 C*-Calculate (phi,eta) bin for Track at vertex
          pt=sqrt(g2t_track(i).p(1)**2+g2t_track(i).p(2)**2)
          eta=-1.0*log(tan(atan2(pt,g2t_track(i).p(3))/2.0))
-         ebin=int((eta-ems_control(1).chrg_eta_min)
-     +        * float(ems_control(1).chrg_eta_nbin)
-     +        /(ems_control(1).chrg_eta_max
-     +        -ems_control(1).chrg_eta_min))+1            
+         ebin=int((eta-emc_egrid_par(1).chrg_eta_min)
+     +        * float(emc_egrid_par(1).ideal_eta_nbin)
+     +        /(emc_egrid_par(1).chrg_eta_max
+     +        -emc_egrid_par(1).chrg_eta_min))+1            
          if(ebin.lt.1 .or. 
-     +        ebin.gt.ems_control(1).chrg_eta_nbin)
+     +        ebin.gt.emc_egrid_par(1).ideal_eta_nbin)
      +        goto 100
          phi=atan2(g2t_track(i).p(2),g2t_track(i).p(1))
-         do while(phi .ge. PI2)
-            phi=phi-PI2
+         do while(phi .ge. C_2PI)
+            phi=phi-C_2PI
          enddo
          do while(phi .lt. 0.0)
-            phi=phi+PI2
+            phi=phi+C_2PI
          enddo
-         pbin=int(phi/PI2*float(ems_control(1).chrg_phi_nbin))+1
+         pbin=int(phi/C_2PI*float(emc_egrid_par(1).ideal_phi_nbin))+1
          e_vtx=g2t_track(i).e
          if(id(pbin,ebin).eq.0) then
             nout=nout+1
@@ -87,16 +81,17 @@ C*-Calculate (phi,eta) bin for Track at vertex
                return
             endif
             eta=(ebin-0.5)
-     +           /float(ems_control(1).chrg_eta_nbin)
-     +           *(ems_control(1).chrg_eta_max
-     +           -ems_control(1).chrg_eta_min)
-     +           +ems_control(1).chrg_eta_min
-            phi=(pbin-0.5)*PI2
-     +           /float(ems_control(1).chrg_phi_nbin)
+     +           /float(emc_egrid_par(1).ideal_eta_nbin)
+     +           *(emc_egrid_par(1).chrg_eta_max
+     +           -emc_egrid_par(1).chrg_eta_min)
+     +           +emc_egrid_par(1).chrg_eta_min
+            phi=(pbin-0.5)*C_2PI
+     +           /float(emc_egrid_par(1).ideal_phi_nbin)
             id(pbin,ebin)=nout
-            emc_energy(nout).det   =0
-            emc_energy(nout).ieta  =ebin
-            emc_energy(nout).iphi  =pbin
+            emc_energy(nout).det   =-2
+            emc_energy(nout).module=pbin
+            emc_energy(nout).ebin  =ebin
+            emc_energy(nout).sub   =1
             emc_energy(nout).eta   =eta
             emc_energy(nout).phi   =phi
             emc_energy(nout).energy=e_vtx

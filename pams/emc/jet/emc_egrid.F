@@ -1,6 +1,6 @@
 c:>------------------------------------------------------------------
 C:FILE:         emc_egrid.F
-C:DESCRIPTION:  EMC Analysis Module, package emc, STAF compliant.
+C:DESCRIPTION:  EMC Aalysis Module, package emc, STAF compliant.
 c:AUTHOR:       OGAWA, Akio
 c:AUTHOR:       Originaly by W.J. Llope, Rice University
 c:AUTHOR:       TAS Version by B. Christie
@@ -8,11 +8,15 @@ C:BUGS:         None known.
 C:HISTORY:      3Sep97-v1.0-akio- Creation.
 c:>------------------------------------------------------------------
       INTEGER*4 FUNCTION EMC_EGRID(
-     1     ems_hits_bemc_h,     ems_hits_bemc ,
-     2     ems_hits_eemc_h,     ems_hits_eemc ,
+     1     emc_hits_bemc_h,     emc_hits_bemc ,
+     2     emc_hits_eemc_h,     emc_hits_eemc ,
      3         dst_track_h,         dst_track ,
      4       ems_control_h,       ems_control ,
-     5        emc_energy_h,        emc_energy )
+     5     emc_egrid_par_h,     emc_egrid_par ,
+     6        emc_energy_h,        emc_energy )
+#include "emc_def.h"
+#include "math_constants.h"
+#include "phys_constants.h"
 c:>------------------------------------------------------------------
 C:ROUTINE:      INTEGER*4 EMC_EGRID
 C:DESCRIPTION:  charged and neutral energy in (eta,phi) grids...
@@ -26,112 +30,134 @@ C     neutrals) in e_n table. This module then projects the tracks
 C     back to the primary vertex, claculates the Energy, eta, and phi
 C     for the tracks and loads a table with the charged energy at the
 C     vertex.
-C:ARGUMENTS:    ems_hits_bemc ems_hits_eemc dst_track ems_control
+C:ARGUMENTS:    emc_hits_bemc emc_hits_eemc dst_track ems_control
 C:ARGUMENTS:    emc_energy
 C:RETURN VALUE: STAFCV_OK on successful completion
 c:>------------------------------------------------------------------
       IMPLICIT NONE
-C
 #include "emc_egrid.inc"
 
 c---energy grid id
-      integer MAXR,MAXP,MAXE
-      parameter(MAXR=4, MAXP=120, MAXE=80)
-      real id(0:MAXR,MAXP,MAXE)
+      integer MAXID,MAXM,MAXE,MAXS
+      parameter(MAXID=3, MAXM=120, MAXE=20, MAXS=5)
+      real id(MAXID,MAXM,MAXE,MAXS)
 c---local variables
-      integer i,j,k,nout,mout,itwr,ihit,i_flag,nphi(3),neta(3)
+      integer detid(0:MAXDET)
+      integer i,j,k,nout,mout,itwr,ihit,mod,sub,idet
       integer eta_bin,phi_bin,det,phi_trk,eta_trk,pbin,ebin
-      real trk_qual_cut,b_field,cal,trk_qual,r_int
+      real trk_qual_cut,b_field,trk_qual,r_int,emin,emax
       real trkchar,pt,pz,p_tot,crad,x_strt,y_strt
       real cap_phi0,xc,yc,p_input(6),z_int,rval,rval1,rval2
       real zval,ang_int,td_ang,cosphi_int,int_yn,dirvec(3)
       real eta_hit,phi_hit,ene_sub,err_sub,sign
       real trak(6),trk1(6),xc1(2),r1,xp(2),xn1(2)
       real eta,phi,e_vtx,diff,ener_subt,etot
-c---keep variables
-      COMMON/keep/PI,PI2,deg_to_rad
-      real PI,PI2,deg_to_rad
+      real pos(3) /0.0, 0.0, 0.0/
+      real mfld(3)
 
 c---start executable statements...
       emc_egrid = STAFCV_OK     
 
-c---initialization. Only once at first call, or if you want to change setting 
-      PI           = ACOS(-1.0)
-      PI2          = 2.0*PI
-      deg_to_rad   = PI/180.0
       trk_qual_cut = ems_control(1).trk_qual_cut
-      b_field      = ems_control(1).b_field
-      cal          = ems_control(1).sampfrac
+      call gufld(pos,mfld)
+      b_field=mfld(3)
+      
+      do i=0,MAXDET
+         detid(i)=-2
+      enddo
+      detid(0)=1
+      detid(BEMC)=2
+      detid(EEMC)=3
 
 C---- Initialize nok counter and variable arrays
       emc_energy_h.nok = 0
       nout = 0
       etot = 0.0
-      call vzero(id,MAXR*MAXP*MAXE)
-      nphi(1)=ems_control(1).eemc_phi_nbin
-      nphi(2)=nphi(1)
-      nphi(3)=ems_control(1).bemc_phi_nbin
-      neta(1)=ems_control(1).eemc_eta_nbin
-      neta(2)=neta(1)
-      neta(3)=ems_control(1).bemc_eta_nbin
-
-C*- Load EMC energy to neutral energy
+      call vzero(id,MAXID*MAXM*MAXE*MAXS)
+      emin=emc_egrid_par(1).chrg_eta_min
+      emax=emc_egrid_par(1).chrg_eta_max
+      if(emin.lt.-2.0) then
+         write(*,*)"emc_egrid: chrg_eta_min should be >-2.0 Ignored" 
+         emin=-2.0
+      endif
+           if(emin.gt.2.0) then
+         write(*,*)"emc_egrid: chrg_eta_max should be <2.0 Ignored"
+         emax=2.0
+      endif
+          
+C*- Load Barrel EMC energy
+      write(*,*)'EMC_EGRID : No. barrel hits in =',emc_hits_bemc_h.nok
       if(ems_control(1).bemc_on.eq.1) then
-         if(ems_hits_bemc_h.nok. ge. emc_energy_h.maxlen)then
-            write(*,*) 'EMC_GRID:Need more memory:EMC_ENERGY'
-            EMC_EGRID=STAFCV_BAD
-            return
-         endif
-         det=1
-         do itwr = 1,ems_hits_bemc_h.nok
-            if(ems_hits_bemc(itwr).tower_dep.eq.0)then  !tower sum in depth=0...
-               pbin=ems_hits_bemc(itwr).phi_bin
-               ebin=ems_hits_bemc(itwr).eta_bin
+         idet=2
+         do itwr = 1,emc_hits_bemc_h.nok
+            if(emc_hits_bemc(itwr).det .eq. BEMC) then
                nout=nout+1
-               id(det,pbin,ebin)=nout                  
-               call find_pos_emc(ems_control,det,pbin,ebin,phi,eta)
-               emc_energy(nout).det   =det
-               emc_energy(nout).ieta  =ebin
-               emc_energy(nout).iphi  =pbin
-               emc_energy(nout).eta   =eta
-               emc_energy(nout).phi   =phi
-               emc_energy(nout).energy=cal*ems_hits_bemc(itwr).e_sum
-               emc_energy(nout).error =0.0
-               emc_energy(nout).n_track=1000
-               etot=etot+cal*ems_hits_bemc(itwr).e_sum
+               if(nout .gt. emc_energy_h.maxlen)then
+                  write(*,*) '***EMC_EGRID:Need more memory in EMC_ENERGY'
+                  EMC_EGRID=STAFCV_BAD
+                  return
+               endif 
+               mod =emc_hits_bemc(itwr).module
+               ebin=emc_hits_bemc(itwr).eta
+               sub =emc_hits_bemc(itwr).sub
+               id(idet,mod,ebin,sub)=nout                  
+               call find_pos_emc
+     +              (ems_control,BEMC,mod,ebin,sub,phi,eta)
+               emc_energy(nout).det       =BEMC
+               emc_energy(nout).module    =mod
+               emc_energy(nout).ebin      =ebin
+               emc_energy(nout).sub       =sub
+               emc_energy(nout).eta       =eta
+               emc_energy(nout).phi       =phi
+               emc_energy(nout).energy    =emc_hits_bemc(itwr).energy
+               emc_energy(nout).energy_twr=emc_hits_bemc(itwr).energy
+               emc_energy(nout).energy_trk=0.0
+               emc_energy(nout).energy_chg=0.0
+               emc_energy(nout).error     =0.0
+               emc_energy(nout).n_track   =0
+               emc_energy(nout).n_charge  =0
+               etot=etot+emc_hits_bemc(itwr).energy
             end if
          enddo
       endif
 c*- and for Endcap
       if(ems_control(1).eemc_on.eq.1) then
-         if(nout+ems_hits_eemc_h.nok .ge. emc_energy_h.maxlen)then
-            write(*,*) 'EMC_GRID:Need more memory:EMC_ENERGY'
-            EMC_EGRID=STAFCV_BAD
-            return
-         endif
-         det=2
-         do itwr = 1,ems_hits_eemc_h.nok
-            if(ems_hits_eemc(itwr).tower_dep.eq.0)then ! tower sum in depth=0...       
-               pbin=ems_hits_eemc(itwr).phi_bin
-               ebin=ems_hits_eemc(itwr).eta_bin
+         idet=3
+         write(*,*)'EMC_EGRID : No. endcap hits in =',emc_hits_eemc_h.nok
+         do itwr = 1,emc_hits_eemc_h.nok
+            if(emc_hits_eemc(itwr).det .eq. EEMC) then
                nout=nout+1
-               id(det,pbin,ebin)=nout     
-               call find_pos_emc(ems_control,det,pbin,ebin,phi,eta)
-               emc_energy(nout).det   =det
-               emc_energy(nout).ieta  =ebin
-               emc_energy(nout).iphi  =pbin
-               emc_energy(nout).eta   =eta
-               emc_energy(nout).phi   =phi
-               emc_energy(nout).energy=cal*ems_hits_eemc(itwr).e_sum
-               emc_energy(nout).error =0.0
-               emc_energy(nout).n_track=1000
-               etot=etot+cal*ems_hits_eemc(itwr).e_sum
+               if(nout .gt. emc_energy_h.maxlen)then
+                  write(*,*) '***EMC_EGRID:Need more memory in EMC_ENERGY'
+                  EMC_EGRID=STAFCV_BAD
+                  return
+               endif
+               mod =emc_hits_eemc(itwr).module
+               ebin=emc_hits_eemc(itwr).eta
+               sub =emc_hits_eemc(itwr).sub
+               id(idet,mod,ebin,sub)=nout     
+               call find_pos_emc
+     +              (ems_control,EEMC,mod,ebin,sub,phi,eta)
+               emc_energy(nout).det       =EEMC
+               emc_energy(nout).module    =mod
+               emc_energy(nout).ebin      =ebin
+               emc_energy(nout).sub       =sub
+               emc_energy(nout).eta       =eta
+               emc_energy(nout).phi       =phi
+               emc_energy(nout).energy    =emc_hits_eemc(itwr).energy
+               emc_energy(nout).energy_twr=emc_hits_eemc(itwr).energy
+               emc_energy(nout).energy_trk=0.0
+               emc_energy(nout).energy_chg=0.0
+               emc_energy(nout).error     =0.0
+               emc_energy(nout).n_track   =0
+               emc_energy(nout).n_charge  =0
+               etot=etot+emc_hits_eemc(itwr).energy
             end if
          enddo
       endif
 
-C*- get the tracks from GLOBTRK table
-      write(*,*)'EMC_EGRID -- No. tracks in =',dst_track_h.nok
+C*- get tracks from DST_TRACK table
+      write(*,*)'EMC_EGRID : No. tracks in =',dst_track_h.nok
       do ihit = 1, dst_track_h.nok       ! Loop over input tracks
          trk_qual=(dst_track(ihit).chisq(1)+
      +             dst_track(ihit).chisq(2))/2.0
@@ -141,10 +167,10 @@ C*- get the tracks from GLOBTRK table
             pt      = 1.0/dst_track(ihit).invpt
             pz      = pt*dst_track(ihit).tanl
             p_tot   = sqrt(pt**2 + pz**2)
-            crad    = pt/abs(trkchar*0.0003*b_field)
+            crad    = pt/abs(trkchar*C_D_CURVATURE*b_field)
             x_strt  = dst_track(ihit).x0
             y_strt  = dst_track(ihit).y0
-            cap_phi0= dst_track(ihit).psi*deg_to_rad+trkchar*0.5*pi
+            cap_phi0= dst_track(ihit).psi*C_RAD_PER_DEG+trkchar*C_PI_2
             xc      = x_strt - crad*cos(cap_phi0)
             yc      = y_strt - crad*sin(cap_phi0)
             p_input(1) = xc
@@ -154,86 +180,99 @@ C*- get the tracks from GLOBTRK table
             p_input(5) = dst_track(ihit).tanl 
             p_input(6) = cap_phi0
             z_int = 10000.
-c*-Flag for track which go through
-c*-barrel=1, endcap=2, non=0
-            i_flag=0  
-c*-Barrel
+
+            det=0  
+c*-Check if it hits Barrel
             if(ems_control(1).bemc_on.eq.1)then
                rval  = ems_control(1).bemc_inner_r
                zval  = ems_control(1).bemc_max_z
                call eut_extra_rad(p_input,zval,trkchar,ang_int,
      +              td_ang,cosphi_int,z_int,int_yn,dirvec)          
                if(int_yn.eq.0.and.abs(z_int).le.zval)then ! Trk hits EMC Barrel?
-                  i_flag=1
                   eta_hit = -1.0*log(tan(atan2(rval,z_int)/2.0))
-                  det=1
+                  det=BEMC
                endif
             endif
-c*-Endcap
-            if(ems_control(1).eemc_on.eq.1 .and. i_flag.eq.0)then
+c*-or Endcap
+            if(ems_control(1).eemc_on.eq.1 .and. det.eq.0)then
                rval1 = ems_control(1).eemc_inner_r
                rval2 = ems_control(1).eemc_outer_r
                sign  = pz/abs(pz)
-               det   = 2
                zval  = sign*ems_control(1).eemc_inner_z
                call eut_extra_z(p_input,zval,trkchar,
      1              ang_int,td_ang,r_int,int_yn,dirvec)          
                if(int_yn.eq.0 .and. 
      1              r_int.le.rval2.and.r_int.gt.rval1) then ! Trk hits EMC Endcap?
-                  i_flag=2
+                  det=EEMC
                   eta_hit = -1.0*log(tan(atan2(r_int,zval)/2.0))
                endif
             endif
-c*-Fill tables            
-            if(i_flag.gt.0) then
+c*-Subtract expected energy deposit from charged track
+            if(det.gt.0) then
+               ene_sub=0.0
+               err_sub=0.0
                call find_bin_emc
-     +              (ems_control,ang_int,eta_hit,det,pbin,ebin)
-               call pion_energy_deposit(det,p_tot,ene_sub,err_sub)
-               if(id(det,pbin,ebin).eq.0) then
-                  nout=nout+1
-                  if(nout. ge. emc_energy_h.maxlen)then
-                     write(*,*)'EMC_GRID:Need more memory:EMC_ENERGY'
+     +              (ems_control,ang_int,eta_hit,det,mod,ebin,sub)
+               if(det.gt.0) then
+                  call pion_energy_deposit(det,p_tot,ene_sub,err_sub)
+                  idet=detid(det)
+               else
+                  goto 10    ! the track didn't hit emc
+               endif
+               if(id(idet,mod,ebin,sub).eq.0) then ! No EMC hits for track,
+                  nout=nout+1                      ! then give negative energy
+                  if(nout .gt. emc_energy_h.maxlen)then
+                     write(*,*) '***EMC_EGRID:Need more memory in EMC_ENERGY'
                      EMC_EGRID=STAFCV_BAD
                      return
                   endif
-                  id(det,pbin,ebin)=nout
-                  call find_pos_emc(ems_control,det,pbin,ebin,phi,eta)
-                  emc_energy(nout).det   =det
-                  emc_energy(nout).ieta  =ebin
-                  emc_energy(nout).iphi  =pbin
-                  emc_energy(nout).eta   =eta
-                  emc_energy(nout).phi   =phi
-                  emc_energy(nout).energy=-cal*ene_sub
-                  emc_energy(nout).error =cal*err_sub
-                  emc_energy(nout).n_track=1
+                  id(idet,mod,ebin,sub)=nout
+                  call find_pos_emc
+     +                 (ems_control,det,mod,ebin,sub,phi,eta)
+                  emc_energy(nout).det       =det
+                  emc_energy(nout).module    =mod
+                  emc_energy(nout).ebin      =ebin
+                  emc_energy(nout).sub       =sub
+                  emc_energy(nout).eta       =eta
+                  emc_energy(nout).phi       =phi
+                  emc_energy(nout).energy    =-ene_sub
+                  emc_energy(nout).energy_twr=0.0
+                  emc_energy(nout).energy_trk=0.0
+                  emc_energy(nout).energy_chg=ene_sub
+                  emc_energy(nout).error     =err_sub
+                  emc_energy(nout).n_track   =0
+                  emc_energy(nout).n_charge  =1
                else
-                  mout=id(det,pbin,ebin)
+                  mout=id(idet,mod,ebin,sub)
                   emc_energy(mout).energy =
-     +                 emc_energy(mout).energy - cal*ene_sub
+     +                 emc_energy(mout).energy - ene_sub
+                  emc_energy(mout).energy_chg =
+     +                 emc_energy(mout).energy_chg + ene_sub
                   emc_energy(mout).error  =
-     +                 emc_energy(mout).error  + cal*ene_sub
-                  emc_energy(mout).n_track=
-     +                 emc_energy(mout).n_track  + 1
+     +                 emc_energy(mout).error  + err_sub     !??? temporaly
+                  emc_energy(mout).n_charge=
+     +                 emc_energy(mout).n_charge  + 1
                endif
-               etot=etot-cal*ene_sub
+               etot=etot-ene_sub
             endif
-            
-C*-Project Track back to the primary Vertex. Calculate Energy
+ 10         continue
+
+C*-Project Tracks back to the primary Vertex. Calculate Energy
 C*-of charged tracks and load energy into eta-phi grid at Vertex
             trak(1)  = sqrt(dst_track(ihit).x0**2
      +                     +dst_track(ihit).y0**2)    !r0
             trak(2)  = trak(1)
      +               *ATAN2(dst_track(ihit).x0,dst_track(ihit).y0)
-     +               *deg_to_rad                      !r0*phi0
+     +               *C_RAD_PER_DEG                      !r0*phi0
             trak(3)  = dst_track(ihit).z0 !z0
-            trak(4)  = dst_track(ihit).psi*deg_to_rad !psi
+            trak(4)  = dst_track(ihit).psi*C_RAD_PER_DEG !psi
             trak(5)  = dst_track(ihit).tanl !tanl
             trak(6)  = FLOAT(dst_track(ihit).icharge)
      +               * (0.2997*5.)*dst_track(ihit).invpt/1000.        !q/R
 
 C*-At present assume that primary vertex is at X = Y = Z = 0
 C*- Shall we use vertex position? If yes, how do we treat 
-C*- eta,phi for EMC energy grid? Need to improve! -akio
+C*- phi,eta for EMC energy grid? Need to improve! -akio
             xp(1) = 0.0
             xp(2) = 0.0
             
@@ -241,138 +280,66 @@ C*- eta,phi for EMC energy grid? Need to improve! -akio
             call ev0_project_track(xc1,r1,xp,xn1)
             call ev0_update_track_param(xc1,r1,xn1,trak,trk1) 
             
-C*-Calculate (phi,eta) bin for Track at vertex
-            det=0
+C*-Calculate (phi,eta) bin for Track at vertex            
             eta=-1.0*ALOG(TAN(ATAN2(pt,pz)/2.0))
-            ebin=int((eta-ems_control(1).chrg_eta_min)
-     +          * float(ems_control(1).chrg_eta_nbin)
-     +          /(ems_control(1).chrg_eta_max
-     +           -ems_control(1).chrg_eta_min))+1            
-            if(ebin.lt.1 .or. 
-     +         ebin.gt.ems_control(1).chrg_eta_nbin)
-     +         goto 100
+            if(eta.lt.emin .or. eta.gt.emax) goto 100
+            e_vtx=sqrt(p_tot**2 + M_PION_PLUS**2) !assume pion
             phi=trk1(4)
-            do while(phi .ge. PI2)
-               phi=phi-PI2
+            do while(phi .ge. C_2PI)
+               phi=phi-C_2PI
             enddo
             do while(phi .lt. 0.0)
-               phi=phi+PI2
+               phi=phi+C_2PI
             enddo
-            pbin=int(phi/PI2*float(ems_control(1).chrg_phi_nbin))+1
-c            write(*,*) phi,eta,pbin,ebin
-            e_vtx=sqrt(p_tot**2 + 0.13957**2)        !assume pion
-            if(id(det,pbin,ebin).eq.0) then
+            call find_bin_emc
+     +           (ems_control,phi,eta,det,mod,ebin,sub)
+            if(det.lt.0) then
+               goto 100
+            else
+               idet=detid(det)
+            endif
+            if(id(idet,mod,ebin,sub).eq.0) then ! No EMC hits for track. 
                nout=nout+1
-               if(nout. ge. emc_energy_h.maxlen)then
-                  write(*,*) 'EMC_GRID: Need more memory EMC_ENERGY'
+               if(nout. gt. emc_energy_h.maxlen)then
+                  write(*,*)'***EMC_GRID:Need more memory in EMC_ENERGY'
                   EMC_EGRID=STAFCV_BAD
                   return
                endif
-               eta=(ebin-0.5)
-     +            /float(ems_control(1).chrg_eta_nbin)
-     +            *(ems_control(1).chrg_eta_max
-     +            -ems_control(1).chrg_eta_min)
-     +            +ems_control(1).chrg_eta_min
-               phi=(pbin-0.5)*PI2
-     +            /float(ems_control(1).chrg_phi_nbin)
-               id(det,pbin,ebin)=nout
-               emc_energy(nout).det   =det
-               emc_energy(nout).ieta  =ebin
-               emc_energy(nout).iphi  =pbin
-               emc_energy(nout).eta   =eta
-               emc_energy(nout).phi   =phi
-               emc_energy(nout).energy=e_vtx
-               emc_energy(nout).error =0
-               emc_energy(nout).n_track=1
+               id(idet,mod,ebin,sub)=nout
+               call find_pos_emc
+     +              (ems_control,det,mod,ebin,sub,phi,eta)
+               emc_energy(nout).det       =det
+               emc_energy(nout).module    =mod
+               emc_energy(nout).ebin      =ebin
+               emc_energy(nout).sub       =sub
+               emc_energy(nout).eta       =eta
+               emc_energy(nout).phi       =phi
+               emc_energy(nout).energy    =e_vtx
+               emc_energy(nout).energy_twr=0.0
+               emc_energy(nout).energy_trk=e_vtx
+               emc_energy(nout).energy_chg=0.0
+               emc_energy(nout).error     =0.0
+               emc_energy(nout).n_track   =1
+               emc_energy(nout).n_charge  =0
             else
-               mout=id(det,pbin,ebin)
+               mout=id(idet,mod,ebin,sub)
                emc_energy(mout).energy =
-     +              emc_energy(mout).energy + e_vtx
-               emc_energy(mout).error  =
-     +              emc_energy(mout).error  + 0.0
-               emc_energy(mout).n_track=
-     +              emc_energy(mout).n_track+ 1
+     +              emc_energy(mout).energy + e_vtx 
+               emc_energy(mout).energy_trk =
+     +              emc_energy(mout).energy_trk + e_vtx
+               emc_energy(mout).n_track =
+     +              emc_energy(mout).n_track + 1
             endif
             etot=etot+e_vtx
          endif                  ! good tracks
  100     continue
       enddo                     ! End loop over input tracks
       
-c*-Check negative cell and subtract from suround 8 cells.
-      do k=1, nout
-       if(emc_energy(k).energy. lt. 0.0)then
-        ener_subt=-emc_energy(k).energy
-        do i=-1,1
-         pbin=emc_energy(k).iphi+i
-         det=emc_energy(k).det
-         if(pbin.lt.1)         pbin=nphi(det)
-         if(pbin.gt.nphi(det)) pbin=1
-         do j=-1,1
-          if(i.ne.0 .or. j.ne.0) then
-           ebin=emc_energy(k).ieta+j                  
-           if(ebin.ge.1 .and. ebin.le.neta(det)) then
-            mout=id(det,pbin,ebin)
-            if(mout.ne.0) then
-             diff=emc_energy(mout).energy-ener_subt
-             if(diff.ge.0.0) then
-               emc_energy(mout).energy = diff
-               emc_energy(mout).n_track=emc_energy(mout).n_track+1
-               emc_energy(k).energy = 0.0
-               goto 99
-             else
-               ener_subt=-diff
-               emc_energy(mout).energy=0.0
-               emc_energy(mout).n_track=emc_energy(mout).n_track+1
-             endif
-            endif
-           endif
-          endif
-         enddo
-        enddo
-        emc_energy(k).energy = -ener_subt
-       endif
- 99    continue
-      enddo     
-
-*- Test
-c      do ebin=1,20
-c         call find_pos_emc(ems_control,1,1,ebin,phi,eta)
-c         write(*,*) 'find_pos/b/eta; ', ebin, eta 
-c      enddo
-c      do ebin=1,12
-c         call find_pos_emc(ems_control,2,1,ebin,phi,eta)
-c         write(*,*) 'find_pos/e/eta; ', ebin, eta 
-c      enddo
-c      do pbin=1,60
-c         call find_pos_emc(ems_control,1,pbin,1,phi,eta)
-c         write(*,*) 'find_pos/b/phi; ', pbin, phi
-c      enddo
-c      do pbin=1,60
-c         call find_pos_emc(ems_control,2,pbin,1,phi,eta)
-c         write(*,*) 'find_pos/e/phi; ', pbin, phi 
-c      enddo
-c      do i=1,220
-c        eta=float(i)/220.0*4.4-2.2
-c         call find_bin_emc(ems_control,0.0,eta,det,pbin,ebin)
-c         write(*,*) 'find_bin/eta; ', det,eta, ebin
-c      enddo
-c      do i=1,240
-c         phi=float(i)/240.0*PI2
-c         call find_bin_emc(ems_control,phi,0.0,det,pbin,ebin)
-c         write(*,*) 'find_bin/b/phi; ', phi, pbin
-c      enddo
-c      do i=1,240
-c         phi=float(i)/240.0*PI2
-c         call find_bin_emc(ems_control,phi,1.1,det,pbin,ebin)
-c         write(*,*) 'find_bin/e/phi; ', phi, pbin
-c      enddo
-
-      write(*,*) 'EMC_GRID done : ',nout,' wrote out' 
-      write(*,*) 'EMC_GRID done : Total energy : ', etot
+      write(*,*) 'EMC_EGRID done :',nout,' grid wrote out' 
+      write(*,*) 'EMC_EGRID done : Total energy = ', etot
       emc_energy_h.nok = nout
       EMC_EGRID=STAFCV_OK
 999   RETURN
       END
-
 
 

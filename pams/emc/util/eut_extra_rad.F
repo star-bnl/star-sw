@@ -15,6 +15,7 @@ C:ARGUMENTS:    see code
 C:RETURN VALUE: 
 c:>------------------------------------------------------------------
       IMPLICIT NONE
+#include "math_constants.inc"
 CCC
 CCC   NEW SUBR: eut_extra_rad 
 CCC
@@ -39,8 +40,6 @@ CCC                    particle momentum at the intercept point.
 CCC
 CCC  Variable and array type declarations
 CCC
-      REAL    pi
-      PARAMETER (pi=3.14159265)
       REAL    ang,cosphi,ddd,dsx,dsy,dsz,eq
       REAL    fac1,sfac, fac2,r,rd,sl,t0,td,deltat
       REAL    xc,yc,z0,zint,zp
@@ -83,9 +82,9 @@ CCC
 CCC   Intersection in z
 CCC
 *     zint = z0 + r*sl*(-eq*td + eq*t0)
-      if ( td .lt. 0 ) td = td + 2. * pi
-      deltat = mod((-eq*td + eq*t0),2*pi)
-      if ( deltat .lt. 0. ) deltat = deltat + 2. * pi
+      if ( td .lt. 0 ) td = td + 2. * C_PI
+      deltat = mod((-eq*td + eq*t0),2* C_PI)
+      if ( deltat .lt. 0. ) deltat = deltat + 2. * C_PI
       zint = z0 + r * sl * deltat
 CCC
 CCC   Momentum trajectory at intersection

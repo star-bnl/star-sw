@@ -7,6 +7,7 @@ C:ARGUMENTS:    see code
 C:ARGUMENTS:    see code
 C:RETURN VALUE: 
 c:>------------------------------------------------------------------
+#include "math_constants.inc"
       IMPLICIT NONE
 CCC
 CCC   NEW SUBR: eut_extra_z 
@@ -30,7 +31,6 @@ CCC                    particle momentum at the intercept point.
 CCC
 CCC  Variable and array type declarations
 CCC
-      REAL    pi
       REAL    ddd,dsx,dsy,dsz,eq
       REAL    r,rd,sl,t0,td,deltat,xc,yc,z0,zp
       REAL    z,phi_int,x_int,y_int,r_int,dz
@@ -40,7 +40,6 @@ CCC
 CCC   Set to zero
 CCC
       iercod = 0
-      pi = acos(-1.0)
 CCC
 CCC   Copy input array
 CCC
@@ -59,10 +58,10 @@ CCC
       td      = t0-deltat
  100  continue
       if(td.lt.0.0) then
-         td = td + 2. * pi
+         td = td + 2. * C_PI
          goto 100
       endif
-      td = mod(td, 2.0*pi)
+      td = mod(td, 2.0*C_PI)
       x_int   = xc + r*cos(td)
       y_int   = yc + r*sin(td)
       phi_int = atan2(y_int,x_int)

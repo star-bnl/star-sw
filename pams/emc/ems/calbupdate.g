@@ -1,4 +1,4 @@
-      module    calbupdate is a system
+module    calbupdate is a system
       author    OGAWA, Akio
       created   1998.Sep.21
       integer   iprin,istat/0/
@@ -10,17 +10,38 @@
                        SmAffWdh, SmAfbWdh, SmetaWdh, Seta1Wdh, Netfirst,
                        Seta2Wdh, Netsecon, Set12Wdh, SphiWdh,  SphidWdh,
                        NPhistr,  NSmdAlw,  Nsuper  , Nsmd,     NsubLay(2),
-                       Nmodule(2), Shift }
+                       Nmodule(2), Shift(2) }
       begin
-      calg_nmodule(1) =60
-      calg_nmodule(2) =60
-      calg_shift =75
-      use  CALBGEO/CALG  
-      print *,'Old version was ',calg_version 
+ 
+      use  CALBGEO/CALG 
+      print *,'Update CALB/CALG to version 2.7'
+      print *,'Old version(in GBANK) was ',calg_version 
+*   
       flag_calg = 0
-      fill CALG(1)  		! more system data
-      version = 2.5             !  bank version
-      print *,'Update CALB/CALG to version 2.5'
-      print *,'version, Nmodule, Shift ', 
-     +  calg_version, calg_Nmodule(1),calg_Nmodule(2), calg_Shift
+
+      if (calg_version=2.7) then   ! only g2t table was old verion
+	fill CALG(1)            ! a better calg bank
+          version  = 2.71       !  bank version
+        endfill
+      elseif (calg_shift(1)>0) then		
+        calg_shift(2) = calg_shift(1)
+ 	fill CALG(1)            ! a better calg bank
+          version  = 2.72       !  bank version
+        endfill	
+      else
+        fill CALG(1)            ! a better calg bank
+          version  = 2.73       !  bank version
+          nmodule  = {60,60}    !  number of modules
+          shift    = {75,75}    !  offset of the first sector
+        endfill
+      endif
+*
+      print *,'New version(in GBANK) is ',calg_version
+      print *,'Nmodule(1,2), Shift(1,2) ', 
+      calg_Nmodule(1),calg_Nmodule(2),calg_Shift(1),calg_Shift(2)
+
       end
+
+
+
+
