@@ -51,7 +51,7 @@ public:
     void setName(const string& val){ name=val;}
 
     //action
-    virtual void build();  //for now, build from SCL parsable ascii file
+    virtual void build(){}  //for now, build from SCL parsable ascii file
 
     virtual void copy(StiDetector &detector);
     
