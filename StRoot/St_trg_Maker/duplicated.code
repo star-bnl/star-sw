@@ -58,25 +58,45 @@ Int_t St_trg_Maker::SWITCH(SanityCheck)() {
 }
 ///////////////////////////// Here begins the stuff from Jennifer Klay.  Oct 16 2001.
 #ifdef LATER_THAN_YEAR_2000  // Year 2000 trgStructures.h does not have BEMC.
-#define NUMDSM 5      //AuAu2001 = 5, -- As more EMC is intrumented, this will go up
-//#define NUMDSM 7      //pp01-02 = 7 -- As more EMC is intrumented, this will go up
 #define BYTESPERDSM 16  //The number of output bytes the 20 signals are packed into
 typedef unsigned char byte;
 
 int tower_map[10] = {4,3,2,1,0,9,8,7,6,5};
 int swapByteOrder[16] = {7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8};
 
-int dsm_to_patch[5] = {0,0,15,16,17};	//Au+Au 2001: First 2 are L2,L1, others are L0
-//int dsm_to_patch[7] = {0,0,15,28,16,29,17};  //pp 2001-02: (After 1-Dec-2001)
-	//dsm_to_patch follows the numbering scheme in the offline software, since
-	//it fills a table that is used in offline.  The numbers correspond to the 
-	//numbering of the EMC Crates with respect to the Tower ID's from Jose
-	//Riso, which seems to count backward.  i.e. Patch 1 contains Tower 4800,
-	//while Patch 300 contains Tower 1.		J.L. Klay 18-Feb-2002
+//dsm_to_patch follows the numbering scheme in the offline software, since
+//it fills a table that is used in offline.  The numbers correspond to the 
+//numbering of the EMC Crates with respect to the Tower ID's from Jose
+//Riso, which seems to count backward.  i.e. Patch 1 contains Tower 4800,
+//while Patch 300 contains Tower 1.		J.L. Klay 18-Feb-2002
+////////
+int AA_dsm_to_patch[5] = {0,0,15,16,17};  //AuAu 2001
+int pp_dsm_to_patch[7] = {0,0,15,28,16,29,17};  //pp 2001-02: (After 1-Dec-2001)
+////////
+//See below - timestamp check determines which one to use
 
 void St_trg_Maker::SWITCH(Emc)(St_dst_TrgDet *dst1) {
   dst_TrgDet_st *tt = dst1->GetTable();
-  
+
+  int NUMDSM;
+
+  //Check timestamp of events to decide which mapping to use
+  //pp_dsm_to_patch[7] for after 01-Dec-2001, AA_dsm_to_patch[5] for before that date
+  EventReader *er=fVictorPrelim->getEventReader();
+  EventInfo info=er->getEventInfo();
+  unsigned int UnixTime=info.UnixTime;
+  struct tm *time=gmtime((time_t*) &UnixTime);
+  int year=1900+time->tm_year;
+  int month=1+time->tm_mon;
+  int day=time->tm_mday;
+  char text1[80];
+  sprintf(text1,"%04d%02d%02d",year,month,day);
+  unsigned int date=atoi(text1);
+  if (date < 20011201) {	//Before 01-Dec-2001
+    NUMDSM = 5;
+  } else {
+    NUMDSM = 7;
+  }   
   byte dsmval[NUMDSM][BYTESPERDSM];
   byte val[BYTESPERDSM];
   byte hi_tower,tower_sum;
@@ -93,7 +113,11 @@ void St_trg_Maker::SWITCH(Emc)(St_dst_TrgDet *dst1) {
 
   for (i=2; i<NUMDSM; i++) {  //Loop through L0 DSMs, skipping L1 and L2
     //Convert the DSM output byte ordering to EMC software ordering
-    patch = dsm_to_patch[i];
+    if (date < 20011201) {
+      patch = AA_dsm_to_patch[i];	//AuAu run had 5 boards
+    } else {
+      patch = pp_dsm_to_patch[i];	//pp run had 7 boards
+    }
     for (j=0; j<BYTESPERDSM; j++) {
       k = swapByteOrder[j];
       val[k] = dsmval[i][j];
