@@ -28,7 +28,7 @@ St_emcCalibration*   cal;
    
 //--------------------------------------------------------------
 
-    StEmcTowerInput::StEmcTowerInput(const StEvent*event, const StEMCReader* emcreader,const TDataSet* calibdb)
+    StEmcTowerInput::StEmcTowerInput(StEvent*event, StEMCReader* emcreader,TDataSet* calibdb)
       : mevent(event), mTheEmcReader(emcreader),m_calibdb(calibdb)
 {
 }

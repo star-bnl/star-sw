@@ -46,7 +46,7 @@ private:
 protected:
     
 public: 
-    StEmcHandleDB(const TDataSet*);
+    StEmcHandleDB(TDataSet*);
     virtual       ~StEmcHandleDB();
 
     //Towers DB

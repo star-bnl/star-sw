@@ -39,7 +39,7 @@ private:
 protected:
     
 public: 
-    StEmcApplyCalib(const StEvent*, const TDataSet*);
+    StEmcApplyCalib(StEvent*, TDataSet*);
     virtual       ~StEmcApplyCalib();
     virtual Int_t  Calibrate();
     Int_t Calibrate_Tower(StEmcHandleDB*,StEmcCollection *);

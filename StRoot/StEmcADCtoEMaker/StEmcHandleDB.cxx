@@ -18,7 +18,7 @@ ClassImp(StEmcHandleDB) // macro
 StEmcGeom*  geo[4];   
 //-----------------------------------------------------------------
 
-    StEmcHandleDB::StEmcHandleDB(const TDataSet* calibdb)
+    StEmcHandleDB::StEmcHandleDB(TDataSet* calibdb)
       : m_calibdbptr(calibdb)
 {}
 

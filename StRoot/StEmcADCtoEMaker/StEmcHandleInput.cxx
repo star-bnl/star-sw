@@ -27,7 +27,7 @@ ClassImp(StEmcHandleInput) // macro
    
 //-----------------------------------------------------------------
 
-    StEmcHandleInput::StEmcHandleInput(const StEvent*event, const StEMCReader* emcreader,const TDataSet* calibdb)
+    StEmcHandleInput::StEmcHandleInput(StEvent*event, StEMCReader* emcreader, TDataSet* calibdb)
       : mevent(event), mTheEmcReader(emcreader),m_calibdb(calibdb)
 {}
 
