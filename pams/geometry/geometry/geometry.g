@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.87 2004/04/14 20:54:27 potekhin Exp $
+* $Id: geometry.g,v 1.88 2004/04/28 00:35:40 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.88  2004/04/28 00:35:40  potekhin
+* Extra detail in steering the PHMD geo, see the PHMD code
+*
 * Revision 1.87  2004/04/14 20:54:27  potekhin
 * Changed the Y2004A to Y2004X to emphasize the fact
 * that this is a variation of asymptotic geometry
@@ -760,7 +763,7 @@ If LL>1
 * stumbles, hence the order of tags is sometimes important and we have to list
 * the y2004x prior to y2004
 
-  on Y2004X    { hypothetical 2004 geometry: full barrel;
+  on Y2004X    { hypothetical 2004 geometry: full barrel. Standard cuts in PHMD.;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -803,11 +806,67 @@ If LL>1
 
                   "Photon Multiplicity Detector Version "
                      phmd=on;
-                     PhmdVersion = 1;
+                     PhmdVersion = 2;
 
                   "Silicon Strip Detector Version "
                      sisd=on;
                      SisdConfig = 2;
+                }
+
+****************************************************************************************
+  on Y2004A    { baseline 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD with standard GSTPAR in PHMD; 
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+* note the upgrade with respect to previous years:
+                     BtofConfig=7;
+
+                  "calb" 
+                     ems=on
+                     CalbConfig = 1
+* remember that with this config, the following parameters have
+* a different meaning because we have to (unfortunately) switch
+* from divisions to copies and introduce a map, which DOES
+* control the configuration
+                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
+
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                  "geometry correction "
+                     CorrNum = 3;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdVersion = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 1;
                 }
 
 *
@@ -820,7 +879,7 @@ If LL>1
 *                >>>THIS IS THE MASTER GEOMETRY FOR THE SPRING'04<<<
 *
 ****************************************************************************************
-  on Y2004     { baseline 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD; 
+  on Y2004     { baseline 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD with low cuts GSTPAR in PHMD; ; 
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -1114,7 +1173,9 @@ If LL>1
 * and create it:
 
    if  (phmd.and.PhmdVersion>0) then
+      call AgDETP new ('PHMD')
       call AgDETP add ('PMDG.version=',PhmdVersion,1)
+      call AgDETP add ('PMVR.Config=', PhmdVersion,1)
       call phmdgeo
    endif
 
