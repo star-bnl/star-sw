@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.33 1999/11/17 15:22:53 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.34 1999/11/18 16:49:30 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.34  1999/11/18 16:49:30  fisyak
+// Janet Seyboth fix when there is no globtrk table
+//
 // Revision 1.33  1999/11/17 15:22:53  fisyak
 // Add soft monitor tables removed from dst_monitor_soft_filler
 //
@@ -105,7 +108,7 @@
 #include "tables/St_dst_mon_soft_l3_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.33 1999/11/17 15:22:53 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.34 1999/11/18 16:49:30 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -346,8 +349,11 @@ Int_t  St_dst_Maker::Filler(){
   if (ftpc_tracks)  fpt_fptrack = (St_fpt_fptrack *) ftpc_tracks->Find("fpt_fptrack");
   if (point && fcl_fppoint &&  fpt_fptrack) {
     if(Debug()) gMessMgr->Debug()<<" run_dst: Calling fill_ftpc_dst"<<endm;
-    Int_t No_of_Tracks = globtrk->GetNRows() + fpt_fptrack->GetNRows();
-    globtrk->ReAllocate(No_of_Tracks);
+    Int_t No_of_Tracks = 0;
+    if (globtrk) No_of_Tracks += globtrk->GetNRows();
+    if (fpt_fptrack) No_of_Tracks += fpt_fptrack->GetNRows();
+    if (globtrk) globtrk->ReAllocate(No_of_Tracks);
+    else {globtrk     = new St_dst_track("globtrk", No_of_Tracks); AddData(globtrk);}
     dst_dedx->ReAllocate(No_of_Tracks);
     iRes = fill_ftpc_dst(fpt_fptrack, fcl_fppoint, globtrk,
                          point,vertex,dst_dedx);
