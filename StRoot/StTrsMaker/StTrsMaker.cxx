@@ -1,6 +1,13 @@
-// $Id: StTrsMaker.cxx,v 1.42 1999/10/04 16:13:14 long Exp $
+// $Id: StTrsMaker.cxx,v 1.43 1999/10/11 23:54:31 calderon Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.43  1999/10/11 23:54:31  calderon
+// Version with Database Access and persistent file.
+// Not fully tested due to problems with cons, it
+// doesn't find the local files at compile time.
+// Yuri suggests forcing commit to work directly with
+// files in repository.
+//
 // Revision 1.42  1999/10/04 16:13:14  long
 // minor change on how to loop over geant hits
 //
@@ -131,8 +138,9 @@
 #define vERBOSITY  0
 //
 // You must select a data base initializer method
-#define ROOT_DATABASE_PARAMETERS
-#define aSCII_DATABASE_PARAMETERS
+//#define tPC_DATABASE_PARAMETERS
+//#define rOOT_DATABASE_PARAMETERS
+#define ASCII_DATABASE_PARAMETERS
 //////////////////////////////////////////////////////////////////////////
 
 #include "StTrsMaker.h"
@@ -163,6 +171,15 @@
 
 // TRS
 // DataBase Initialization
+#ifdef TPC_DATABASE_PARAMETERS
+// Dave's Header file
+#include "StTpcDb/StTpcDb.h"
+
+#include "StTpcDbGeometry.hh"
+#include "StTpcDbSlowControl.hh"
+#include "StTpcDbElectronics.hh"
+//#include "StDbMagneticField.hh" // To be done
+#endif
 #ifdef ROOT_DATABASE_PARAMETERS
 #include "StTpcROOTGeometry.hh"
 #include "StTpcROOTSlowControl.hh"
@@ -194,6 +211,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 #include "StTrsParameterizedAnalogSignalGenerator.hh"
 //*****************************
 #include "StTrsParameterizedDigitalSignalGenerator.hh"
+#include "StTrsFastDigitalSignalGenerator.hh"
 
 // containers
 #include "StTrsChargeSegment.hh"
@@ -209,6 +227,8 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 #include "StTrsRawDataEvent.hh"
 #include "StTrsUnpacker.hh"
 #include "StSequence.hh"
+#include "StTrsIstream.hh"
+#include "StTrsOstream.hh"
 
 // g2t tables
 #include "tables/St_g2t_tpc_hit_Table.h"
@@ -217,7 +237,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.42 1999/10/04 16:13:14 long Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.43 1999/10/11 23:54:31 calderon Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -233,13 +253,58 @@ mMiniSegmentLength(4.*millimeter),  // test trial,Hui Long
 mFirstSectorToProcess(1),
 mLastSectorToProcess(24), 
 mUseParameterizedSignalGenerator(1), // test trial,Hui Long
+mReadFromFile(0),
+mWriteToFile(0),
 StMaker(name)
 {/* nopt */ }
 
 StTrsMaker::~StTrsMaker() { /* nopt */ }
 
+int StTrsMaker::readFile(char* file)
+{
+    mInputFileName = file;
+    mReadFromFile = 1;
+    PR(mReadFromFile);
+    return kStOK;
+}
+
+int StTrsMaker::writeFile(char* file, int numEvents)
+{
+    mOutputFileName = file;
+    mNumberOfEvents = numEvents;
+    mWriteToFile = 1;
+    return kStOK;
+}
+
+
 Int_t StTrsMaker::Init()
 {
+#ifdef TPC_DATABASE_PARAMETERS
+    // The global pointer to the Db is gStTpcDb and it should be created in the macro.
+    
+    
+    mGeometryDb =
+     StTpcDbGeometry::instance(gStTpcDb);
+  //mGeometryDb->print();
+
+    // The print statements are done in Make() because the SlowControl DB is only available then.
+
+  mElectronicsDb =
+      StTpcDbElectronics::instance(gStTpcDb);
+  //mElectronicsDb->print();
+
+  mSlowControlDb =
+       StTpcDbSlowControl::instance(gStTpcDb);
+  //mSlowControlDb->print();
+
+//   mMagneticFieldDb =
+//       StROOTMagneticField::instance();  // default is .5T field in z direction
+  
+  
+
+#endif
+#ifdef ROOT_DATABASE_PARAMETERS
+    
 //     // Create tables
 //     St_DataSetIter       local(GetDataBase("params"));
   
@@ -255,7 +320,6 @@ Int_t StTrsMaker::Init()
   slowcontrolDataSet *SlowControl =
       static_cast<slowcontrolDataSet*>(TrsPars->Find("Trs/SlowControl"));
 
-#ifdef ROOT_DATABASE_PARAMETERS
   mGeometryDb =
      StTpcROOTGeometry::instance(Geometry);
   //mGeometryDb->print();
@@ -339,6 +403,13 @@ Int_t StTrsMaker::Init()
    PR(Bfield/tesla);
    mMagneticFieldDb =
       StSimpleMagneticField::instance(Bfield);  // default is .5T field in z direction
+
+   // Stream Instantiation
+   if (mWriteToFile) mOutputStream = new StTrsOstream(mOutputFileName,mNumberOfEvents,mGeometryDb);
+   if (mReadFromFile)  {
+       mInputStream = new StTrsIstream(mInputFileName,mGeometryDb);
+   }
+   else {
    
    //
    // Containers
@@ -409,9 +480,16 @@ Int_t StTrsMaker::Init()
    mAnalogSignalGenerator->generateNoiseUnderSignalOnly(false);
    mAnalogSignalGenerator->setNoiseRMS(900);  // set in  #e
    }
+   if(mUseParameterizedSignalGenerator) {
 
    mDigitalSignalGenerator =
        StTrsParameterizedDigitalSignalGenerator::instance(mElectronicsDb, mSector);
+   }
+   else mDigitalSignalGenerator =
+	    StTrsFastDigitalSignalGenerator::instance(mElectronicsDb, mSector);
+   
+   } // 'else' from condition to read from file or process normally 
+   //
 
    //
    // Output is into an StTpcRawDataEvent* vector<StTrsDigitalSector*>
@@ -431,7 +509,7 @@ Int_t StTrsMaker::Init()
    //
    // Construct constant data sets.  This is what is passed downstream
    mUnPacker = new StTrsUnpacker();
-   mAllTheData = new StTrsRawDataEvent();
+   mAllTheData = new StTrsRawDataEvent(mGeometryDb->numberOfSectors());
    AddConst(new St_ObjectSet("Event"  , mAllTheData));
    AddConst(new St_ObjectSet("Decoder", mUnPacker));
 
@@ -476,6 +554,11 @@ Int_t StTrsMaker::Make(){
     //
     //
     
+    if (mReadFromFile) { // Read mAllTheData from file
+	mInputStream->fillTrsEvent(mAllTheData);
+	cout << "Filled mAllTheData" << endl;
+    }
+    else { // Normal processing of TRS through GEANT   
     //cout << "Make ofstream" << endl;
     //ofstream ofs("/star/u2b/lasiuk/geantdebug.txt", ios::out);
     //ofstream raw("/star/u2b/lasiuk/event.txt",ios::out);
@@ -510,18 +593,16 @@ Int_t StTrsMaker::Make(){
     //  no_tpc_hits = 4;
       for (int i=1; i<=no_tpc_hits; i++,tpc_hit++){
         
-	//	cout << "--> tpc_hit:  " << i << endl;
-	//	cout << tpc_hit->volume_id   << ' '
-	//	    << tpc_hit->de          << ' '
-  	//    << tpc_hit->ds          << ' '
-	//	    << tpc_hit->x[0]        << ' '
-	//	    << tpc_hit->x[1]        << ' '
-  	//    << tpc_hit->x[2]        << ' '
-  	//    << tpc_hit->p[0]        << ' '
-	//	    << tpc_hit->p[1]        << ' '
-  	//    << tpc_hit->p[2]        << ' '  << endl;
-	// int sss;
-	//  cin>>sss;
+// 		cout << "--> tpc_hit:  " << i << endl;
+// 		raw << tpc_hit->volume_id   << ' '
+// 		    << tpc_hit->de          << ' '
+// 		    << tpc_hit->ds          << ' '
+// 		    << tpc_hit->x[0]        << ' '
+// 		    << tpc_hit->x[1]        << ' '
+// 		    << tpc_hit->x[2]        << ' '
+// 		    << tpc_hit->p[0]        << ' '
+// 		    << tpc_hit->p[1]        << ' '
+// 		    << tpc_hit->p[2]        << ' '  << endl;
         
 	whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
 	//	PR(bsectorOfHit);
@@ -576,7 +657,7 @@ Int_t StTrsMaker::Make(){
 	    
 	    StThreeVector<double> hitPosition(tpc_hit->x[0]*centimeter,
 	    				      tpc_hit->x[1]*centimeter,
-	    				      (tpc_hit->x[2])*centimeter); 
+	    				      tpc_hit->x[2]*centimeter); 
 	    //PR(hitPosition);
 
 // 	    // Drift Length is calculated with respect to the FG!
@@ -636,7 +717,7 @@ Int_t StTrsMaker::Make(){
 	    // WARNING:  cannot use "abs" (not overloaded (double) for LINUX!
 	    StTrsChargeSegment aSegment(sector12Coordinate,
 					hitMomentum,
-					tpc_hit->de*GeV,
+					(fabs(tpc_hit->de*GeV)),
 					tpc_hit->ds*centimeter,
 					geantPID);
 
@@ -763,6 +844,8 @@ Int_t StTrsMaker::Make(){
 	//
     } // loop over all segments: for(int i...
   } // mDataSet
+  } // normal processing of TRS
+  if(mWriteToFile) mOutputStream->writeTrsEvent((mAllTheData));
   
   // The access stuff:
 #ifdef UNPACK_ALL
@@ -858,6 +941,8 @@ Int_t StTrsMaker::Finish()
     delete mAnalogSignalGenerator;
     delete mDigitalSignalGenerator;
 
+    if(mInputStream) delete mInputStream;
+    if(mOutputStream) delete mOutputStream;
     return kStOK;
 }
 

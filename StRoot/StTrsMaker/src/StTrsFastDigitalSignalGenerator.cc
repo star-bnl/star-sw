@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.16 1999/04/11 00:32:54 lasiuk Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.17 1999/10/11 23:55:22 calderon Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
+ * Revision 1.17  1999/10/11 23:55:22  calderon
+ * Version with Database Access and persistent file.
+ * Not fully tested due to problems with cons, it
+ * doesn't find the local files at compile time.
+ * Yuri suggests forcing commit to work directly with
+ * files in repository.
+ *
  * Revision 1.16  1999/04/11 00:32:54  lasiuk
  * ?reported hang from Herb...check diagnostics.
  * Seems okay.
@@ -189,29 +196,33 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 	    } // the iterator (mTimeSequence)
 
 	    if(currentTimeBin<mNumberOfTimeBins) {
-		int remainingTimeBins = mNumberOfTimeBins - (currentTimeBin+1);
+		int remainingTimeBins = mNumberOfTimeBins - (currentTimeBin);
  // 		PR(currentTimeBin);
 		do {
-		    if(digitalPadData.back() == 0) {
+		    if(digitalPadData.back() != 0) {
+			digitalPadData.push_back(static_cast<unsigned char>(0));
 			if(remainingTimeBins>255) {
-			    digitalPadZeros.back() += 254;
-			    remainingTimeBins -= 254;
+			    digitalPadZeros.push_back(static_cast<unsigned char>(255));
+			    remainingTimeBins -= 255;
+			    digitalPadData.push_back(static_cast<unsigned char>(0));
+			    digitalPadZeros.push_back(static_cast<unsigned char>(0));
 			}
 			else {
-			    digitalPadZeros.back() += remainingTimeBins;
-			    break;
+			    digitalPadZeros.push_back(remainingTimeBins);
+			    remainingTimeBins=0;
 			}
 		    }
-		    if(remainingTimeBins>255) {
-			digitalPadData.push_back(static_cast<unsigned char>(0));
-			digitalPadZeros.push_back(static_cast<unsigned char>(255));
-			remainingTimeBins -= 255;
-		    }
 		    else {
-			digitalPadData.push_back(static_cast<unsigned char>(0));
-			digitalPadZeros.push_back(static_cast<unsigned char>(remainingTimeBins));
+			if(remainingTimeBins+digitalPadZeros.back()>255) {
+			    remainingTimeBins += (digitalPadZeros.back()-255);
+			    digitalPadZeros.back() = static_cast<unsigned char>(255);
+			    digitalPadData.push_back(static_cast<unsigned char>(0));
+			    digitalPadZeros.push_back(static_cast<unsigned char>(0));
+			}
+			else {
+			digitalPadZeros.back() += static_cast<unsigned char>(remainingTimeBins);
 			remainingTimeBins = 0;
-			break;
+			}
 		    }
 		} while (remainingTimeBins > 0);
 	    }

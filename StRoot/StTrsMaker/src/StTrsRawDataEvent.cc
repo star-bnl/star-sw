@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsRawDataEvent.cc,v 1.4 1999/04/29 00:16:17 lasiuk Exp $
+ * $Id: StTrsRawDataEvent.cc,v 1.5 1999/10/11 23:55:23 calderon Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsRawDataEvent.cc,v $
+ * Revision 1.5  1999/10/11 23:55:23  calderon
+ * Version with Database Access and persistent file.
+ * Not fully tested due to problems with cons, it
+ * doesn't find the local files at compile time.
+ * Yuri suggests forcing commit to work directly with
+ * files in repository.
+ *
  * Revision 1.4  1999/04/29 00:16:17  lasiuk
  * add the member function clear() to take care of
  * allocated memory within the event loop.
@@ -26,7 +33,7 @@
  **************************************************************************/
 #include "StTrsRawDataEvent.hh"
 
-StTrsRawDataEvent::StTrsRawDataEvent()
+StTrsRawDataEvent::StTrsRawDataEvent(int numSectors)
 {
     // Please do not hard-code this
     // You should actually pass the geometry data
@@ -35,7 +42,7 @@ StTrsRawDataEvent::StTrsRawDataEvent()
     // USE resize() for LINUX compatibility
 
     //cout << "StTrsRawDataEvent::StTrsRawDataEvent()" << endl;
-    mSectors.resize(24);
+    mSectors.resize(numSectors);
     //PR(mSectors.size());
 
     for(int ii=0; ii<mSectors.size(); ii++) {

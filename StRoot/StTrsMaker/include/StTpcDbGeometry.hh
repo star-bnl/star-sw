@@ -1,52 +1,46 @@
 /**********************************************************************
  *
- * $Id: StTpcROOTGeometry.hh,v 1.3 1999/10/11 23:55:10 calderon Exp $
+ * $Id: StTpcDbGeometry.hh,v 1.1 1999/10/11 23:55:09 calderon Exp $
  *
- * Author: brian March 22, 1999
+ * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  *
  **********************************************************************
  *
  * Description:  Database interface for Geometrical parameters
- *               for the STAR Main TPC
+ *               for the STAR Main TPC using the Star Tpc DB.
  *
  **********************************************************************
  *
- * $Log: StTpcROOTGeometry.hh,v $
- * Revision 1.3  1999/10/11 23:55:10  calderon
+ * $Log: StTpcDbGeometry.hh,v $
+ * Revision 1.1  1999/10/11 23:55:09  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
  * doesn't find the local files at compile time.
  * Yuri suggests forcing commit to work directly with
  * files in repository.
  *
- * Revision 1.2  1999/04/07 00:47:50  lasiuk
- * add z offset for driftLength
- *
- * Revision 1.1  1999/03/23 03:38:48  lasiuk
- * Initial Revision
- *
- **********************************************************************/
+ ***********************************************************************/
 #ifdef __ROOT__
-#ifndef ST_TPC_ROOT_GEOMETRY_HH
-#define ST_TPC_SIMPLE_GEOMETRY_HH
+#ifndef ST_TPC_DB_GEOMETRY_HH
+#define ST_TPC_DB_GEOMETRY_HH
 #include <iostream.h>
 #include <vector>
 
-#include "geometryDataSet.h"
 
 #include "StGlobals.hh"
 #include "StThreeVector.hh"
 #include "StTpcGeometry.hh"
 
-class StTpcROOTGeometry : public StTpcGeometry {
+class StTpcDb;
+class StTpcDbGeometry : public StTpcGeometry {
     
 public:
-    ~StTpcROOTGeometry();
-    //StTpcROOTGeometry(const StTpcROOTGeometry&);
-    //StTpcROOTGeometry& operator=(cont StTpcROOTGeometry&);
+    ~StTpcDbGeometry();
+    //StTpcDbGeometry(const StTpcDbGeometry&);
+    //StTpcDbGeometry& operator=(cont StTpcDbGeometry&);
     
     static StTpcGeometry* instance();
-    static StTpcGeometry* instance(geometryDataSet*);
+    static StTpcGeometry* instance(StTpcDb*);
 
     // Rows
     int    numberOfRows()                  const;
@@ -118,14 +112,14 @@ public:
     // Diagnostic: print out complete database
     void print(ostream& os = cout)              const;
 
-protected:
-    StTpcROOTGeometry();
-    StTpcROOTGeometry(geometryDataSet*);
+private:
+    //StTpcDbGeometry();
+    StTpcDbGeometry(StTpcDb*);
 
 private:
     static StTpcGeometry*    mInstance;
-    
-private:
+    StTpcDb* gTpcDbPtr;
+
     int    mPadRows;
     int    mInnerPadRows;
     int    mInnerPadRows48;
@@ -162,13 +156,17 @@ private:
     double mInnerSectorzOffSet;
     double mOuterSectorzOffSet;
     
-    
+#ifdef __CINT__    
+typedef int mPadsInRow;
+typedef double mRadialDistanceAtRow;
+#else
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<int> mPadsInRow;
     vector<double> mRadialDistanceAtRow;
 #else
     vector<int, allocator<int> > mPadsInRow;
     vector<double, allocator<double> > mRadialDistanceAtRow;
+#endif
 #endif
     // Wires
     double mAnodeWireRadius;
@@ -194,63 +192,64 @@ private:
     double mFirstOuterSectorAnodeWire;
     double mLastOuterSectorAnodeWire;
     int    mNumberOfOuterSectorAnodeWires;
+ // ClassDef(StTpcDbGeometry,0)
 };
 
-inline int StTpcROOTGeometry::numberOfRows() const {return(mPadRows);}
-inline int StTpcROOTGeometry::numberOfInnerRows() const {return(mInnerPadRows);}
-inline int StTpcROOTGeometry::numberOfInnerRows48() const {return(mInnerPadRows48);}
-inline int StTpcROOTGeometry::numberOfInnerRows52() const {return(mInnerPadRows52);}
-inline int StTpcROOTGeometry::numberOfOuterRows() const {return(mOuterPadRows);}
-inline int StTpcROOTGeometry::numberOfTimeBuckets() const {return(mTimeBuckets);}
-inline int StTpcROOTGeometry::numberOfSectors() const {return(mSectors);}
-inline double StTpcROOTGeometry::innerSectorRowPitch1() const {return (mInnerSectorRowPitch1);}
-inline double StTpcROOTGeometry::innerSectorRowPitch2() const {return (mInnerSectorRowPitch2);}
-inline double StTpcROOTGeometry::outerSectorRowPitch() const {return (mOuterSectorRowPitch);}
+inline int StTpcDbGeometry::numberOfRows() const {return(mPadRows);}
+inline int StTpcDbGeometry::numberOfInnerRows() const {return(mInnerPadRows);}
+inline int StTpcDbGeometry::numberOfInnerRows48() const {return(mInnerPadRows48);}
+inline int StTpcDbGeometry::numberOfInnerRows52() const {return(mInnerPadRows52);}
+inline int StTpcDbGeometry::numberOfOuterRows() const {return(mOuterPadRows);}
+inline int StTpcDbGeometry::numberOfTimeBuckets() const {return(mTimeBuckets);}
+inline int StTpcDbGeometry::numberOfSectors() const {return(mSectors);}
+inline double StTpcDbGeometry::innerSectorRowPitch1() const {return (mInnerSectorRowPitch1);}
+inline double StTpcDbGeometry::innerSectorRowPitch2() const {return (mInnerSectorRowPitch2);}
+inline double StTpcDbGeometry::outerSectorRowPitch() const {return (mOuterSectorRowPitch);}
 
-inline double StTpcROOTGeometry::innerSectorPadWidth() const {return (mInnerSectorPadWidth);}
-inline double StTpcROOTGeometry::outerSectorPadWidth() const {return (mOuterSectorPadWidth);}
-inline double StTpcROOTGeometry::innerSectorPadLength() const {return (mInnerSectorPadLength);}
-inline  double StTpcROOTGeometry::outerSectorPadLength() const {return (mOuterSectorPadLength);}
+inline double StTpcDbGeometry::innerSectorPadWidth() const {return (mInnerSectorPadWidth);}
+inline double StTpcDbGeometry::outerSectorPadWidth() const {return (mOuterSectorPadWidth);}
+inline double StTpcDbGeometry::innerSectorPadLength() const {return (mInnerSectorPadLength);}
+inline  double StTpcDbGeometry::outerSectorPadLength() const {return (mOuterSectorPadLength);}
 
-inline double StTpcROOTGeometry::innerSectorPadPitch() const {return (mInnerSectorPadPitch);}
-inline double StTpcROOTGeometry::outerSectorPadPitch() const {return (mOuterSectorPadPitch);}
+inline double StTpcDbGeometry::innerSectorPadPitch() const {return (mInnerSectorPadPitch);}
+inline double StTpcDbGeometry::outerSectorPadPitch() const {return (mOuterSectorPadPitch);}
 
-inline double StTpcROOTGeometry::frischGrid() const {return (mFrischGrid);}
-inline double StTpcROOTGeometry::endCapZ()    const {return (mEndCapZ);}
-inline double StTpcROOTGeometry::driftDistance() const {return (mDriftDistance);}
-inline double StTpcROOTGeometry::innerSectorzOffSet() const {return mInnerSectorzOffSet;}
-inline double StTpcROOTGeometry::outerSectorzOffSet() const {return mOuterSectorzOffSet;}
+inline double StTpcDbGeometry::frischGrid() const {return (mFrischGrid);}
+inline double StTpcDbGeometry::endCapZ()    const {return (mEndCapZ);}
+inline double StTpcDbGeometry::driftDistance() const {return (mDriftDistance);}
+inline double StTpcDbGeometry::innerSectorzOffSet() const {return mInnerSectorzOffSet;}
+inline double StTpcDbGeometry::outerSectorzOffSet() const {return mOuterSectorzOffSet;}
 
-inline double StTpcROOTGeometry::ifcRadius()    const {return (mIfcRadius);}
-inline double StTpcROOTGeometry::ofcRadius()    const {return (mOfcRadius);}
+inline double StTpcDbGeometry::ifcRadius()    const {return (mIfcRadius);}
+inline double StTpcDbGeometry::ofcRadius()    const {return (mOfcRadius);}
 
 // Wires
-inline double StTpcROOTGeometry::anodeWireRadius() const {return mAnodeWireRadius;}
-inline double StTpcROOTGeometry::frischGridWireRadius() const {return mFrischGridWireRadius;}
-inline double StTpcROOTGeometry::gateWireRadius() const {return mGateWireRadius;}
+inline double StTpcDbGeometry::anodeWireRadius() const {return mAnodeWireRadius;}
+inline double StTpcDbGeometry::frischGridWireRadius() const {return mFrischGridWireRadius;}
+inline double StTpcDbGeometry::gateWireRadius() const {return mGateWireRadius;}
     
-inline double StTpcROOTGeometry::anodeWirePitch() const {return mAnodeWirePitch;}
-inline double StTpcROOTGeometry::frischGridPitch() const {return mFrischGridWirePitch;}
-inline double StTpcROOTGeometry::gatePitch() const {return mGateWirePitch;}
+inline double StTpcDbGeometry::anodeWirePitch() const {return mAnodeWirePitch;}
+inline double StTpcDbGeometry::frischGridPitch() const {return mFrischGridWirePitch;}
+inline double StTpcDbGeometry::gatePitch() const {return mGateWirePitch;}
 
-inline double StTpcROOTGeometry::innerSectorAnodeWirePadPlaneSeparation() const {return mInnerSectorAnodeWirePadPlaneSeparation;}
-inline double StTpcROOTGeometry::innerSectorFrischGridPadPlaneSeparation() const {return mInnerSectorFrischGridPadPlaneSeparation;}
-inline double StTpcROOTGeometry::innerSectorGatingGridPadPlaneSeparation() const {return mInnerSectorGatingGridPadPlaneSeparation;}
-inline double StTpcROOTGeometry::outerSectorAnodeWirePadPlaneSeparation() const {return mOuterSectorAnodeWirePadPlaneSeparation;}
-inline double StTpcROOTGeometry::outerSectorFrischGridPadPlaneSeparation() const {return mOuterSectorFrischGridPadPlaneSeparation;}
-inline double StTpcROOTGeometry::outerSectorGatingGridPadPlaneSeparation() const {return mOuterSectorGatingGridPadPlaneSeparation;}
+inline double StTpcDbGeometry::innerSectorAnodeWirePadPlaneSeparation() const {return mInnerSectorAnodeWirePadPlaneSeparation;}
+inline double StTpcDbGeometry::innerSectorFrischGridPadPlaneSeparation() const {return mInnerSectorFrischGridPadPlaneSeparation;}
+inline double StTpcDbGeometry::innerSectorGatingGridPadPlaneSeparation() const {return mInnerSectorGatingGridPadPlaneSeparation;}
+inline double StTpcDbGeometry::outerSectorAnodeWirePadPlaneSeparation() const {return mOuterSectorAnodeWirePadPlaneSeparation;}
+inline double StTpcDbGeometry::outerSectorFrischGridPadPlaneSeparation() const {return mOuterSectorFrischGridPadPlaneSeparation;}
+inline double StTpcDbGeometry::outerSectorGatingGridPadPlaneSeparation() const {return mOuterSectorGatingGridPadPlaneSeparation;}
 
 
-inline double StTpcROOTGeometry::firstInnerSectorAnodeWire() const {return (mFirstInnerSectorAnodeWire);}
-inline double StTpcROOTGeometry::lastInnerSectorAnodeWire() const {return (mLastInnerSectorAnodeWire);}
-inline int StTpcROOTGeometry::numberOfInnerSectorAnodeWires() const {return (mNumberOfInnerSectorAnodeWires);}
+inline double StTpcDbGeometry::firstInnerSectorAnodeWire() const {return (mFirstInnerSectorAnodeWire);}
+inline double StTpcDbGeometry::lastInnerSectorAnodeWire() const {return (mLastInnerSectorAnodeWire);}
+inline int StTpcDbGeometry::numberOfInnerSectorAnodeWires() const {return (mNumberOfInnerSectorAnodeWires);}
 
-inline double StTpcROOTGeometry::firstOuterSectorAnodeWire() const{ return (mFirstOuterSectorAnodeWire);}
-inline double StTpcROOTGeometry::lastOuterSectorAnodeWire() const{ return (mLastOuterSectorAnodeWire);}
-inline int StTpcROOTGeometry::numberOfOuterSectorAnodeWires() const { return (mNumberOfOuterSectorAnodeWires);}
+inline double StTpcDbGeometry::firstOuterSectorAnodeWire() const{ return (mFirstOuterSectorAnodeWire);}
+inline double StTpcDbGeometry::lastOuterSectorAnodeWire() const{ return (mLastOuterSectorAnodeWire);}
+inline int StTpcDbGeometry::numberOfOuterSectorAnodeWires() const { return (mNumberOfOuterSectorAnodeWires);}
 
-inline double StTpcROOTGeometry::innerSectorEdge() const { return (mInnerSectorEdge);}
-inline double StTpcROOTGeometry::outerSectorEdge() const { return (mOuterSectorEdge);}
-inline double StTpcROOTGeometry::ioSectorSpacing() const { return (mIoSectorSpacing);}
+inline double StTpcDbGeometry::innerSectorEdge() const { return (mInnerSectorEdge);}
+inline double StTpcDbGeometry::outerSectorEdge() const { return (mOuterSectorEdge);}
+inline double StTpcDbGeometry::ioSectorSpacing() const { return (mIoSectorSpacing);}
 #endif
 #endif // __ROOT__

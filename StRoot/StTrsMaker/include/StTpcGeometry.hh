@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcGeometry.hh,v 1.3 1999/04/07 00:47:49 lasiuk Exp $
+ * $Id: StTpcGeometry.hh,v 1.4 1999/10/11 23:55:10 calderon Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -11,6 +11,13 @@
  **********************************************************************
  *
  * $Log: StTpcGeometry.hh,v $
+ * Revision 1.4  1999/10/11 23:55:10  calderon
+ * Version with Database Access and persistent file.
+ * Not fully tested due to problems with cons, it
+ * doesn't find the local files at compile time.
+ * Yuri suggests forcing commit to work directly with
+ * files in repository.
+ *
  * Revision 1.3  1999/04/07 00:47:49  lasiuk
  * add z offset for driftLength
  *
@@ -60,6 +67,7 @@ public:
     virtual int    numberOfPadsAtRow(int)   const = 0;
     virtual double radialDistanceAtRow(int) const = 0;
 
+    virtual int    numberOfSectors()      const = 0;
     // Time buckets
     virtual int    numberOfTimeBuckets()  const = 0;
     

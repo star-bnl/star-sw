@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcSimpleGeometry.hh,v 1.3 1999/04/07 00:47:50 lasiuk Exp $
+ * $Id: StTpcSimpleGeometry.hh,v 1.4 1999/10/11 23:55:10 calderon Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -12,6 +12,13 @@
  **********************************************************************
  *
  * $Log: StTpcSimpleGeometry.hh,v $
+ * Revision 1.4  1999/10/11 23:55:10  calderon
+ * Version with Database Access and persistent file.
+ * Not fully tested due to problems with cons, it
+ * doesn't find the local files at compile time.
+ * Yuri suggests forcing commit to work directly with
+ * files in repository.
+ *
  * Revision 1.3  1999/04/07 00:47:50  lasiuk
  * add z offset for driftLength
  *
@@ -75,7 +82,8 @@ public:
     double innerSectorRowPitch2()          const;
     double outerSectorRowPitch()           const;
     double ioSectorSpacing()               const;
-
+    
+    int    numberOfSectors()      const;
     // TimeBuckets
     int    numberOfTimeBuckets()           const;
     
@@ -214,6 +222,7 @@ inline int StTpcSimpleGeometry::numberOfInnerRows48() const {return(mInnerPadRow
 inline int StTpcSimpleGeometry::numberOfInnerRows52() const {return(mInnerPadRows52);}
 inline int StTpcSimpleGeometry::numberOfOuterRows() const {return(mOuterPadRows);}
 inline int StTpcSimpleGeometry::numberOfTimeBuckets() const {return(mTimeBuckets);}
+inline int StTpcSimpleGeometry::numberOfSectors() const {return(mSectors);}
 inline double StTpcSimpleGeometry::innerSectorRowPitch1() const {return (mInnerSectorRowPitch1);}
 inline double StTpcSimpleGeometry::innerSectorRowPitch2() const {return (mInnerSectorRowPitch2);}
 inline double StTpcSimpleGeometry::outerSectorRowPitch() const {return (mOuterSectorRowPitch);}

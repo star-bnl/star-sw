@@ -1,6 +1,13 @@
-// $Id: StTrsMaker.h,v 1.11 1999/10/04 17:33:43 long Exp $
+// $Id: StTrsMaker.h,v 1.12 1999/10/11 23:54:32 calderon Exp $
 //
 // $Log: StTrsMaker.h,v $
+// Revision 1.12  1999/10/11 23:54:32  calderon
+// Version with Database Access and persistent file.
+// Not fully tested due to problems with cons, it
+// doesn't find the local files at compile time.
+// Yuri suggests forcing commit to work directly with
+// files in repository.
+//
 // Revision 1.11  1999/10/04 17:33:43  long
 // add mUseParameterizedSignalGenerator
 //
@@ -77,10 +84,12 @@ class StTrsDigitalSector;
 // Output Data
 class StTrsRawDataEvent;
 class StTrsUnpacker;
+class StTrsIstream;
+class StTrsOstream;
 
 class StTrsMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.11 1999/10/04 17:33:43 long Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.12 1999/10/11 23:54:32 calderon Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
@@ -106,12 +115,21 @@ class StTrsMaker : public StMaker {
     StTrsUnpacker               *mUnPacker;//!
     StTrsRawDataEvent           *mAllTheData;//!
 
+    // I/O streams
+    char*                        mInputFileName;//!
+    char*                        mOutputFileName;//!
+    StTrsIstream*                mInputStream;//!
+    StTrsOstream*                mOutputStream;//!
+    int                          mNumberOfEvents;//!
+
     // Calculation and Initialization Done Internally in the Maker
     double                       mMiniSegmentLength;
     int                          mFirstSectorToProcess;
     int                          mLastSectorToProcess;
     // should be a boolean
     int                         mProcessPseudoPadRows;
+    int                         mWriteToFile;
+    int                         mReadFromFile;
     
     // Which Algorithm to be used:
   int                           mUseParameterizedSignalGenerator;
@@ -128,10 +146,13 @@ public:
     void   setMiniSegmentLength(double len=4.) {mMiniSegmentLength = len*millimeter;} // *MENU*
     void   setFirstSectorToProcess(int first=1){mFirstSectorToProcess = first;}       // *MENU*
     void   setLastSectorToProcess(int last=24) {mLastSectorToProcess = last;}         // *MENU*
+
+    int   readFile(char*);//!
+    int   writeFile(char*, int);//!
     
   virtual const char *GetCVS() const
   {
-      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.11 1999/10/04 17:33:43 long Exp $ built __DATE__ __TIME__" ; return cvs;}
+      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.12 1999/10/11 23:54:32 calderon Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StTrsMaker, 1)   //StAF chain virtual base class for Makers
 
