@@ -1,11 +1,15 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.3 2002/03/28 04:29:49 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 1.4 2002/04/03 16:35:03 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 1.4  2002/04/03 16:35:03  calderon
+ * Check if primary vertex is available in StiStEventFiller::impactParameter(),
+ * if not, return DBL_MAX;
+ *
  * Revision 1.3  2002/03/28 04:29:49  calderon
  * First test version of Filler
  * Currently fills only global tracks with the following characteristics
@@ -385,6 +389,10 @@ unsigned short StiStEventFiller::encodedStEventFitPoints(const StiTrack* track) 
 }
 float StiStEventFiller::impactParameter(const StiTrack* track) {
     cout << "StiStEventFiller::impactParameter" << endl;
+    if (!mEvent->primaryVertex()) {
+	return DBL_MAX;
+    }
+    
     // get the innermost hit node
     const StiKalmanTrack* kTrack = dynamic_cast<const StiKalmanTrack*>(track);
     StiKalmanTrackNode*	node = kTrack->getInnerMostHitNode();
