@@ -9,5 +9,5 @@ ${run} ${*}
 EOF
 more ${batch}
 set PWD = `pwd`
-echo qsub -M ${USER} ${PWD}/${batch}
-qsub -l test -M ${USER} ${PWD}/${batch}   
+echo qsub  -o ${PWD}/${batch}.log -e ${PWD}/${batch}.err ${PWD}/${batch}
+qsub -l test -o ${PWD}/${batch}.log -e ${PWD}/${batch}.err ${PWD}/${batch}
