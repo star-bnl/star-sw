@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.43 2004/11/24 17:59:26 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.44 2004/12/01 14:04:57 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.44  2004/12/01 14:04:57  pruneau
+ * z propagation fix
+ *
  * Revision 2.43  2004/11/24 17:59:26  fisyak
  * Set ionization potential for Ar in eloss calculateion instead 5
  *
@@ -490,7 +493,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   //cylinderShape = 0;
 
 
-  if (false&&_refX<20.) cout << "Node:refX<4.5 pNode:"<< *pNode;
+  //if (false&&_refX<20.) cout << "Node:refX<4.5 pNode:"<< *pNode;
   position = propagate(place->getNormalRadius(),sh->getShapeCode()); 
   if (position<0) 
     {
@@ -615,7 +618,17 @@ int  StiKalmanTrackNode::propagate(double xk, int option)
   sumCos   = cosCA1+cosCA2;
   _p0      += dx*sumSin/sumCos;
   //	if (fabs(_p1)>200.) cout << "propagate()[1] -W- _p0:"<<_p0<<" _p1:"<<_p1<<endl;
-  _p1      += dx*_p4*sumSin/sinCA1plusCA2;
+  if (fabs(dx)<4.)
+    _p1      += dx*_p4*sumSin/sinCA1plusCA2;
+  else if (fabs(_p3)>0)
+    {
+      double inc1 = _p4*asin(sinCA2*cosCA1-cosCA2*sinCA1)/_p3;
+      //double inc2 = dx*_p4*sumSin/sinCA1plusCA2;
+      //cout << " dx:" << dx << " inc1:" << inc1 << " inc2:" << inc2 << endl;
+      _p1 += inc1;
+    }
+  else
+    return -666;
   //if (fabs(_p1)>200.) cout << "propagate()[2] -W- _p0:"<<_p0<<" _p1:"<<_p1<<endl;
   // sanity check - to abandon the track
   if (fabs(_p0)>200. || fabs(_p1)>200. ) return -6;
