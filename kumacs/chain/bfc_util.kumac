@@ -99,8 +99,10 @@
 *                             event/data/global/dst directories to a file
 * editted 9/11/98 K. Turner - now write out run tables in bfc_finish
 *                             only if DRSUM is in chain
-*                           - in evin: check if error from read_table_from_file 
+*                           - in evin: check  error if from 
+*                             read_table_from_file
 *                             and skip out if vector is set 
+*                           - change emc to ems in chain 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -265,7 +267,7 @@ macro bfc_init _
       (trg) exec l3cl_init
 	    exec l3t_init
 	    exec create_tables_l3
-      (emc) exec create_tables_emc#ems
+      (ems) exec create_tables_emc#ems
 	    exec init_ems#init
       (jet) exec create_tables_emc#jet
 	    exec init_jet#init
@@ -451,7 +453,7 @@ ABEND:
 	       exec mwu_run
       (trg)    exec l3cl_run
 	       exec ftf_run
-      (emc)    exec run_ems#ems_interface2  
+      (ems)    exec run_ems#ems_interface2  
       (jet)    exec run_jet#egrid
                exec run_jet#erj
      (dehd)    exec init_dst#init_ehead
