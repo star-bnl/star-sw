@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.15 2000/02/25 02:38:27 caines Exp $
+// $Id: StMatchMaker.cxx,v 1.16 2000/02/25 03:28:58 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.16  2000/02/25 03:28:58  caines
+// Stuff to fill bit map, cov correctly
+//
 // Revision 1.15  2000/02/25 02:38:27  caines
 // Stuff to fill bit map, cov correctly
 //
@@ -597,7 +600,7 @@ Int_t StMatchMaker::Make(){
 	  y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(2,30));
 	  if( !fmod(y,2)){
 	    track[spc[spt_id].id_globtrk-1].map[1]+= (1UL<<30);
-	    cout << "Got here " << endl;
+	    // cout << "Got here " << endl;
 	  }
 	}
 	
@@ -644,6 +647,6 @@ char* StMatchMaker::PrintMap( unsigned long x){
       b[30-i]='-';
     }
   }
-  cout << b << endl;
+  // cout << b << endl;
   return &b[0];
 }
