@@ -94,7 +94,7 @@ int main ( ) {
 
   tracker.nHits = counter ;
 
-  int nLoops = 100 ;
+  int nLoops = 1 ;
   int   lastNTracks = 0 ;
   float sectorTime ;
   float averageTime       = 0.F ;
@@ -146,6 +146,10 @@ int main ( ) {
   printf ( "\n **************************************************** " ) ;
   printf ( "\n " ) ;
 //
+  printf ( "before nPhi %d \n", tracker.para.nPhi ) ;
+  tracker.para.read ( "parameters.txt" ) ; 
+  printf ( "nPhi %d \n", tracker.para.nPhi ) ;
+  tracker.para.write( "parameter2.txt" ) ; 
 //
 //
    return 1;

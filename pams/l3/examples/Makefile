@@ -18,7 +18,7 @@ CFLAGS    = -g -D DEBUG -D SL3ROOT -I$(ROOTSYS)/include -I$(ROOTSYS)/src
 #
 #   Option for stand alone versions
 # for alphas -mcpu=ev6 should be added, much faster!!! :)
-#CFLAGS	  = -O2  -I/DAQ/include 
+CFLAGS	  = -O2  -I/DAQ/include 
 LIBS      = -lm
 
 #-----------------------------------
@@ -35,7 +35,7 @@ GRAPHTRACK      = FtfGraphic.o FtfBaseHitDict.o FtfHitDict.o FtfBaseTrackDict.o 
 		  FtfTrackDict.o FtfFinderDict.o FtfParaDict.o FtfSl3Dict.o \
 		  FtfGraphicDict.o
 
-SL3TRACKER     	= $(TRACKER) FtfSl3.o sl3Swap.o 
+SL3TRACKER     	= $(TRACKER) FtfSl3.o FtfDedx.o sl3Swap.o 
 
 
 .cxx.o:
@@ -46,7 +46,7 @@ SL3TRACKER     	= $(TRACKER) FtfSl3.o sl3Swap.o
 #===================================
 
 
-sl3A:$(SL3TRACKER) sl3StandAlone.o
+sl3A:$(SL3TRACKER) sl3StandAlone.o $(TRACKER)
 	$(CC) sl3StandAlone.o $(SL3TRACKER) $(CFLAGS) $(LIBS) -I $(INC) -I $(SRC) -o sl3A
 
 sl3D:$(SL3TRACKER) sl3DumpTracks.o
@@ -66,9 +66,9 @@ FtfFinder.o: $(INC)/FtfFinder.h $(SRC)/FtfFinder.cxx
 	$(CC) $(CFLAGS) -I $(INC) -c $(SRC)/FtfFinder.cxx
 FtfTrack.o: $(INC)/FtfTrack.h
 	$(CC) $(CFLAGS) -I $(INC) -c $(SRC)/FtfTrack.cxx
-FtfHit.o: $(INC)/FtfHit.h 
+FtfHit.o:  $(INC)/FtfHit.h $(SRC)/FtfHit.cxx
 	$(CC) $(CFLAGS) -I $(INC) -c $(SRC)/FtfHit.cxx
-FtfPara.o: $(INC)/FtfPara.h 
+FtfPara.o: $(INC)/FtfPara.h $(SRC)/FtfPara.cxx 
 	$(CC) $(CFLAGS) -I $(INC) -c $(SRC)/FtfPara.cxx
 FtfBaseHit.o: $(INC)/FtfBaseHit.h 
 	$(CC) $(CFLAGS) -I $(INC) -c $(SRC)/FtfBaseHit.cxx
@@ -81,6 +81,8 @@ FtfUtilities.o:
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 FtfSl3.o: $(INC)/FtfSl3.h $(SRC)/FtfSl3.cxx
 	$(CC) $(CFLAGS) -I $(SRC) -I $(INC) -c $(SRC)/FtfSl3.cxx
+FtfDedx.o: $(INC)/FtfDedx.h $(SRC)/FtfDedx.cxx
+	$(CC) $(CFLAGS) -I $(SRC) -I $(INC) -c $(SRC)/FtfDedx.cxx
 sl3Swap.o: 
 	$(CC) $(CFLAGS) -I $(INC) -c $(SRC)/sl3Swap.cxx
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
