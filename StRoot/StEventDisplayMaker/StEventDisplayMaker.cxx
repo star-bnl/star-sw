@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.106 2004/11/09 19:40:00 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.107 2004/11/16 04:33:05 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -163,6 +163,7 @@ ClassImp(StEventDisplayMaker)
 //_____________________________________________________________________________
 StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
 {
+  mRedraw    =  0;
   mEventHelper    =  0;
   m_Hall          =  0;  
   m_FullView      =  0;  
@@ -224,6 +225,15 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
 #endif
 
 }
+//_____________________________________________________________________________
+Int_t StEventDisplayMaker::Redraw()
+{
+   mRedraw=1;
+   int ans = Make();
+   mRedraw=0;
+   return ans;
+}
+
 //_____________________________________________________________________________
 StEventDisplayMaker::~StEventDisplayMaker(){
   gROOT->GetListOfBrowsables()->RecursiveRemove(this);
@@ -429,6 +439,7 @@ Int_t StEventDisplayMaker::CreateTrackNodes()
 //______________________________________________________________________________
 void StEventDisplayMaker::Clear(Option_t *)
 {
+  mRedraw=0;
   ClearEvents();
 //  StMaker::Clear();
 }
@@ -748,7 +759,7 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
   memset(fColCash,0,sizeof(fColCash));
 
   if (!mEventHelper) mEventHelper = new StEventHelper;
-  mEventHelper->Reset(event,"StL3.*");
+  if (!mRedraw) mEventHelper->Reset(event,"StL3.*");
   mEventHelper->ls();
 
   int keyLen = strchr(pos[1],' ') - pos[1];
@@ -1189,6 +1200,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.107  2004/11/16 04:33:05  perev
+// Bug fix. Check for same value of StEvent pointer removed
+//
 // Revision 1.106  2004/11/09 19:40:00  fine
 // Set the filter invokation after the default parameters set
 //

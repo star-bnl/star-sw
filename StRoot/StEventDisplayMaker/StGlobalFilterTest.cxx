@@ -1,4 +1,4 @@
-// $Id: StGlobalFilterTest.cxx,v 1.4 2004/10/19 22:35:49 perev Exp $
+// $Id: StGlobalFilterTest.cxx,v 1.5 2004/11/16 04:33:05 perev Exp $
 #include "TError.h"
 #include "TSystem.h"
 #include "TCanvas.h"
@@ -102,6 +102,9 @@ void StGlobalFilterTest::Filter(TObjArray *eArr,int flag)
       double dist ;
       double myHit[3],myClose[2][3],myDlose[2][3],myDist[3][3],s[3];
       s[2] = hlx[0]->pathLength(pnt);
+      double per = hlx[0]->period();
+      while (s[2]<-per) s[2]+=per;
+      while (s[2]> per) s[2]-=per;
 
       myHit[0]=pnt.x();myHit[1]=pnt.y(); myHit[2]=pnt.z();
       int iSel=0;
@@ -112,7 +115,13 @@ void StGlobalFilterTest::Filter(TObjArray *eArr,int flag)
 	if (iSel) { break;}
         TCL::vsub(myHit,myClose[i],myDist[i],3);
         double tmp = sqrt(TCL::vdot(myDist[i],myDist[i],3));
-        Assert(i || tmp>2. || fabs(s[0]-s[2])< 0.1 );
+        int noProblem = (i || tmp>2. || fabs(s[0]-s[2])< 0.1 );
+        if (!noProblem) {
+	  printf("***Problem***	tmp=%g,s[0]=%g, s[2]=%g\n",tmp,s[0],s[2]);
+	  printf("MyHit	= %g %g %g\n",myHit[0],myHit[1],myHit[2]);
+          myHlx[0].Print();
+//	Assert(noProblem);
+        }
       }
       double wt0 = pow(s[0],3);
       double wt1 = pow(s[1],3);
@@ -136,7 +145,7 @@ void StGlobalFilterTest::Filter(TObjArray *eArr,int flag)
       fPlot[0]->Fill(mom,maxRes[0]);
 
     }
-    if (maxRes[0]>5.) iSel|=64;
+    if (maxRes[0]>0.6) iSel|=64;
     if (iSel) 	{nSel++;continue;}
     (*eArr)[ioj]=0;(*eArr)[ioj+1]=0;
   }
