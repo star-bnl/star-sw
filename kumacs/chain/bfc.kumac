@@ -36,6 +36,7 @@
 * editted 6/25/98 Kathy Turner - fixing up after Yuri - get all pkgs working
 * editted 6/26/98 Kathy Turner - put in dictionary of input values &
 *                                example chains
+* editted 7/2/98 Kathy Turner - tpc code now required geometry libraries!
 * 
 * ******************************************************************************
 * DICTIONARY OF INPUTS TO BFC.KUMAC
@@ -115,7 +116,7 @@ MACRO bfc _
    adcxyzon=0 _
    tpc_sector_first=18 _
    tpc_sector_last=18 _
-   domain='tpc svt global ' _
+   domain='geometry tpc svt global ' _
    chain='g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0  evout'_ 
    first=1 _
    no_events=1 _
