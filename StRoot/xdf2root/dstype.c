@@ -1,54 +1,72 @@
-/* Copyright 1993, Lawrence Berkeley Laboratory */
+/* Copyright 1995, Lawrence Berkeley Laboratory */
 
-/* dstype.c - routine to define data structure type */
+/* dstype.c - routines to parse a subset of CORBA style types */
 
 /*
 modification history
 --------------------
-01a,24apr93,whg  written.
+12feb95,whg	written.
 */
 
 /*
 DESCRIPTION
-TBS ...
+These routines parse struct defs defined by the CORBA IDL version 1.2
 */
 #include <ctype.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #define DS_PRIVATE
+#define DS_GLOBAL_ONE
 #include "dscodes.h"
 #include "dstype.h"
 
+/*****************************************************************************
+*
+* prototypes for static functions
+*
+*/
 static int dsBasicInit(void);
-static DS_TYPE_T *dsFindTag(char *tag, DS_MEM_T *mem);
-static int dsCreateTypeR(DS_TYPE_T **pType,
-	char *str, char **ptr, DS_MEM_T *mem);
-static int dsFmtTypeDefR(DS_MEM_T *bp, DS_TYPE_T *type, int level,
-	size_t *pNTag, DS_TYPE_T **tag);
-
+static int dsParseTypeR(DS_TYPE_T **pType, DS_BUF_T *bp,
+	DS_MEM_T *mem, DS_TYPE_T **scope, unsigned level);
+static int dsSearchScope(DS_TYPE_T **ppType, char *name,
+	DS_TYPE_T **scope, unsigned level, int top);
+static int dsFormatTypeSpecifierR(DS_BUF_T *bp,
+	DS_TYPE_T *type, int level, size_t *pNTag, DS_TYPE_T **tag);
 /******************************************************************************
 *
 * basicType - definition of basic types
 *
 */
-#define INIT_BASIC(n, c, t, s) {if (0 >= nt--) goto fail;strcpy(type->name, n);\
-	type->code = c; type->flags = sizeof(t) == (s) ? repFlag : 0;\
-	type->size = sizeof(t); type->modulus = DS_MODULUS(t);\
-	type->stdsize = s; type->stdmodulus = s; type++;}
+DS_MODULUS_STRUCT(1, DS_TYPE_CHAR,    char);
+DS_MODULUS_STRUCT(1, DS_TYPE_OCTET,   octet);
+DS_MODULUS_STRUCT(2, DS_TYPE_SHORT,   short);
+DS_MODULUS_STRUCT(2, DS_TYPE_U_SHORT, unsigned short);
+DS_MODULUS_STRUCT(4, DS_TYPE_LONG,    long);
+DS_MODULUS_STRUCT(4, DS_TYPE_U_LONG,  unsigned long);
+DS_MODULUS_STRUCT(4, DS_TYPE_FLOAT,   float);
+DS_MODULUS_STRUCT(8, DS_TYPE_DOUBLE,  double);
 
-static DS_TYPE_T basicType[DS_TYPE_COUNT];
+static DS_TYPE_T basicType[] = {
+	DS_TYPE_INIT(1, DS_TYPE_CHAR,    char),
+	DS_TYPE_INIT(1, DS_TYPE_OCTET,   octet),
+	DS_TYPE_INIT(2, DS_TYPE_SHORT,   short),
+	DS_TYPE_INIT(2, DS_TYPE_U_SHORT, unsigned short),
+	DS_TYPE_INIT(4, DS_TYPE_LONG,    long),
+	DS_TYPE_INIT(4, DS_TYPE_U_LONG,  unsigned long),
+	DS_TYPE_INIT(4, DS_TYPE_FLOAT,   float),
+	DS_TYPE_INIT(8, DS_TYPE_DOUBLE,  double)};
+	
 static size_t nBasic = 0;
 /******************************************************************************
 *
 * dsBasicInit - initialize basic types
 *
+* RETURNS: TRUE if success else FALSE
 */
 static int dsBasicInit()
 {
-	int nt = DS_TYPE_COUNT;
-	unsigned repFlag = DS_STD_REP;
-	DS_TYPE_T *type = basicType;
+	size_t i, n = sizeof(basicType)/sizeof(basicType[0]);
+	DS_TYPE_T *t;
 
 	/********** start critical section *******************************/
 	if (!dsTypeLock()) {
@@ -57,31 +75,20 @@ static int dsBasicInit()
 	if (nBasic != 0) {
 		return dsTypeUnlock();
 	}
-	memset((char *)basicType, 0, sizeof(basicType));
-
-	INIT_BASIC("char",	DS_TYPE_CHAR,		char,		1);
-	INIT_BASIC("byte",	DS_TYPE_BYTE,		signed char,	1);
-	INIT_BASIC("u_byte",	DS_TYPE_U_BYTE,		unsigned char,	1);
-
-	if (!DS_IS_BIG_ENDIAN) {
-		repFlag = 0;
+	for (i = 0, t = basicType; i < n; i++, t++) {
+		if (i != (size_t)t->code || t->flags != 0 || t->modulus == 0 ||
+			t->size != t->stdsize || t->size != t->stdmodulus || 
+			t->nField != 0) {
+			goto fail;		
+		}
+		if ((t->size > 1 && !DS_IS_BIG_ENDIAN) ||
+			(DS_IS_REAL(t) && !DS_IS_IEEE_FLOAT)) {
+			t->flags = DS_NOT_STD_REP;
+		}
 	}
-	INIT_BASIC("short",	DS_TYPE_SHORT,		short,		2);
-	INIT_BASIC("u_short",	DS_TYPE_U_SHORT,	unsigned short,	2);
-	INIT_BASIC("int",	DS_TYPE_INT,		int,		4);
-	INIT_BASIC("u_int",	DS_TYPE_U_INT,		unsigned int,	4);
-	INIT_BASIC("long",	DS_TYPE_LONG,		long,		4);
-	INIT_BASIC("u_long",	DS_TYPE_U_LONG,		unsigned long,	4);
-
-	if (!DS_IS_IEEE_FLOAT) {
-		repFlag = 0;
-	}
-	INIT_BASIC("float",	DS_TYPE_FLOAT,		float,		4);
-	INIT_BASIC("double",	DS_TYPE_DOUBLE,		double,		8);
-
-	nBasic = type - basicType;
+	nBasic = n;
 	return dsTypeUnlock();
-
+	
 fail:
 	if (!dsTypeUnlock()) {
 		return FALSE;
@@ -89,10 +96,11 @@ fail:
 	/********** end critical section *******************************/
 	DS_ERROR(DS_E_SYSTEM_ERROR);
 }
-/******************************************************************************************
+/*****************************************************************************
 *
 * dsCmpFieldType - compare two fields for project compatibility
 *
+* RETURN: zero if equal, one if not equal
 */
 int dsCmpFieldType(DS_FIELD_T *f1, DS_FIELD_T *f2)
 {
@@ -109,24 +117,177 @@ int dsCmpFieldType(DS_FIELD_T *f1, DS_FIELD_T *f2)
 			break;
 		}
 	}
-	return 0; 
+	return 0;
 }
 /******************************************************************************
 *
-* dsCreateType - create a type structure for a type declaration string
+* dsDumpTypes - dump basicType struct
 *
+* RETURNS: TRUE
 */
-int dsCreateType(DS_TYPE_T **pType, size_t *pSize, char *str, char **ptr)
+int dsDumpTypes(void)
+{
+	char c = 0;
+	size_t i;
+
+	if (nBasic == 0) {
+		dsBasicInit();
+	}
+	printf("char type is %s\n", --c > 0 ? "unsigned": "signed");
+	printf("addressing is %s\n",
+		DS_IS_BIG_ENDIAN ? "BIG_ENDIAN" : "LITTLE_ENDIAN");
+	printf("floating point is %s \n", DS_IS_IEEE_FLOAT ? "IEEE" : "UNKNOWN");
+	printf("code\tflags\tmod\tsize\tstdmod\tstdsize\tnField\tname\n");
+	for (i = 0; i < nBasic; i++) {
+		printf("%d\t%X\t%d\t%d\t%d\t%d\t%d\t%s\n",
+			basicType[i].code, basicType[i].flags, basicType[i].modulus,
+			basicType[i].size, basicType[i].stdmodulus,
+			basicType[i].stdsize, basicType[i].nField, basicType[i].name);
+	}
+	return TRUE;
+}
+/******************************************************************************
+*
+* dsFindField - return a pointer to a named field
+*
+* RETURN: -1 if name collision, 0 if found or 1 if not found
+*/
+int dsFindField(DS_FIELD_T **ppField, DS_TYPE_T *pType, char *name)
+{
+	int c;
+	size_t i;
+	DS_FIELD_T *field;
+
+	field = DS_FIELD_PTR(pType);
+	for (i = 0; i < pType->nField; i++) {
+		if (( c = dsCmpName(field[i].name, name)) <= 0) {
+			*ppField = &field[i];
+			return c;
+		}
+	}
+	return 1;
+}
+/******************************************************************************
+*
+* dsFormatTypeSpecifier - format a declaration string for a structure
+*
+* RETURNS: TRUE if success else FALSE
+*/
+int dsFormatTypeSpecifier(char *str, size_t maxSize, DS_TYPE_T *type)
+{
+	size_t nTag = 0;
+	DS_TYPE_T *tags[DS_MAX_STRUCT];
+	DS_BUF_T bp;
+
+	DS_PUT_INIT(&bp, str, maxSize);
+	if (!dsFormatTypeSpecifierR(&bp, type, 0, &nTag, tags)) {
+		return FALSE;
+	}
+	if (dsPutc('\0', &bp) < 0) {
+		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+	}
+	return TRUE;
+}
+/******************************************************************************
+*
+* dsFormatTypeSpecifierR - recursive part of format type declaration string
+*
+* RETURNS: TRUE if success else FALSE
+*/
+static int dsFormatTypeSpecifierR(DS_BUF_T *bp,
+	DS_TYPE_T *type, int level, size_t *pNTag, DS_TYPE_T **tag)
+{
+	size_t i, j;
+	DS_TYPE_T *ft, *lastType = NULL;
+	DS_FIELD_T *field;
+
+	if (dsPutTabs(level, bp) < 0) {
+		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+	}
+	if (type->code != DS_TYPE_STRUCT) {
+		if (dsPuts(type->name, bp) < 0) {
+			DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+		}
+		return TRUE;
+	}
+	for (i = 0; i < *pNTag; i++) {
+		if (tag[i] == type) {
+			if (dsPuts(type->name, bp) < 0) {
+				DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+			}
+			return TRUE;
+		}
+	}
+	if (dsPuts("struct ", bp) < 0 ||
+		dsPuts(type->name, bp) < 0 ||
+		dsPuts(" {\n", bp) < 0) {
+		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+	}
+	field = DS_FIELD_PTR(type);
+	if (!dsCheckDuplicate(field->name, type->nField, sizeof(DS_FIELD_T))) {
+		return FALSE;
+	}
+	for (i = 0; i < type->nField; i++) {
+		ft = field[i].type;
+		if (ft != lastType) {
+			if (lastType && dsPuts(";\n", bp) < 0) {
+				DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+			}
+			if (!dsFormatTypeSpecifierR(bp, ft, level + 1, pNTag, tag)) {
+				return FALSE;
+			}
+			lastType = ft;
+		}
+		else {
+			if (dsPuts(", ", bp) < 0) {
+				DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+			}
+		}
+		if (dsPutc(' ', bp) < 0 || dsPuts(field[i].name, bp) < 0) {
+			DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+		}
+
+		for (j = 0; j < DS_MAX_DIMS && field[i].dim[j]; j++) {
+			if (dsPutc('[', bp) < 0 ||
+				dsPutNumber(field[i].dim[j], bp) < 0 ||
+				dsPutc(']', bp) < 0) {
+				DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+			}
+		}
+	}
+	if (dsPuts(";\n", bp) < 0|| dsPutTabs(level, bp) < 0 ||
+		dsPuts("}", bp) < 0) {
+		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+	}
+	if (type->name[0] != '\0') {
+		if ((i = *pNTag) >= DS_MAX_STRUCT) {
+			DS_ERROR(DS_E_TOO_MANY_STRUCT_TAGS);
+		}
+		tag[i] = type;
+		*pNTag = i + 1;
+	}
+	return TRUE;
+}
+/******************************************************************************
+*
+* dsParseType - create a type structure for a type declaration string
+*
+* RETURNS: TRUE if success else FALSE
+*/
+int dsParseType(DS_TYPE_T **pType, size_t *pSize, char *str, char **ptr)
 {
 	int map[DS_MAX_STRUCT], nMap, nSep;
 	size_t size;
+	DS_BUF_T bp;
 	DS_MEM_T mem;
-	DS_TYPE_T *type;
+	DS_TYPE_T *scope[DS_MAX_NEST], *type;
 
+	DS_GET_INIT(&bp, str)
 	if (nBasic == 0  && !dsBasicInit()) {
 		return FALSE;
 	}
-	if (!dsMapDef(&nSep, map, &nMap, DS_MAX_STRUCT, str)) {
+
+	if (!dsFirstPass(&nSep, map, &nMap, DS_MAX_STRUCT, str)) {
 		return FALSE;
 	}
 	if (nMap == 0) {
@@ -145,7 +306,11 @@ int dsCreateType(DS_TYPE_T **pType, size_t *pSize, char *str, char **ptr)
 	mem.next = mem.first;
 	mem.limit = mem.first + size;
 	mem.map = map;
-	if (!dsCreateTypeR(&type, str, ptr, &mem)) {
+	if (!dsParseTypeR(&type, &bp, &mem, scope, 0)) {
+		goto fail;
+	}
+	if (type->code != DS_TYPE_STRUCT) {
+		DS_LOG_ERROR(DS_E_STRUCT_REQUIRED);
 		goto fail;
 	}
 	if (mem.limit != mem.next) {
@@ -155,59 +320,83 @@ int dsCreateType(DS_TYPE_T **pType, size_t *pSize, char *str, char **ptr)
 	if (pSize != NULL) {
 		*pSize = size;
 	}
+	if (ptr) {
+		*ptr = bp.out;
+	}
 	*pType = type;
 	return TRUE;
 fail:
 	if (*pType == NULL) {
-		dsTidFree(mem.first, size);
+		dsTypeFree(mem.first, size);
 	}
 	return FALSE;
 }
 /******************************************************************************
 *
-* dsCreateTypeR - second pass for parse of type declaration
+* dsParseTypeR - second pass for parse of type declaration
 *
+* RETURNS: TRUE if success else FALSE
 */
-static int dsCreateTypeR(DS_TYPE_T **pType, char *str, char **ptr, DS_MEM_T *mem)
+static int dsParseTypeR(DS_TYPE_T **pType, DS_BUF_T *bp,
+	DS_MEM_T *mem, DS_TYPE_T **scope, unsigned level)
 {
-	char tag[DS_NAME_DIM], *tst;
-	int j, n, nField;
-	size_t i;
+	char name[DS_NAME_DIM], tmp[DS_NAME_DIM];
+	int c, j, nField;
+	size_t dim, i, isUnsigned;
 	DS_FIELD_T *field;
 	DS_TYPE_T *fieldType, *type;
 
-	for (i = 0; i < nBasic; i++) {
-		if (dsNextName(str, ptr, basicType[i].name)) {
-			*pType = &basicType[i];
-			return TRUE;
-		}
-	}
-
-	if (!dsNextName(str, &str, "struct")) {
+	if (dsGetName(name, bp) < 0) {
 		DS_ERROR(DS_E_INVALID_TYPE_NAME);
 	}
-
-	if(dsIsName(str)) {
-		if (!dsIdentifier(tag, str, &str)) {
-			return FALSE;
-		}
-		if ((type = dsFindTag(tag, mem)) != NULL) {
-			if (ptr != NULL) {
-				*ptr = str;
-			}
-			*pType = type;
-			return TRUE;
-		}
+	if ((c = dsCmpName("unsigned", name)) == 0) {
+ 	 	if (dsGetName(tmp, bp) < 0 ||
+  			(strlen(tmp) + strlen(name)) >= DS_MAX_NAME_LEN) {
+  	 		DS_ERROR(DS_E_INVALID_TYPE_NAME);
+  	 	}
+  	 	strcat(name, " ");
+  	 	strcat(name, tmp);
+  	 	isUnsigned = TRUE;
+  	}
+  	else {
+		if (c < 0) {
+			DS_ERROR(DS_E_NAMES_COLLIDE);
+  	 	}
+  		isUnsigned = FALSE;
+  	}
+  	for (i = 0; i < nBasic; i++) {
+  		if ((c = dsCmpName(name, basicType[i].name)) <= 0) {
+			if (c < 0) {
+				DS_ERROR(DS_E_NAMES_COLLIDE);
+	  	 	}
+	  	 	*pType = &basicType[i];
+	  	 	return TRUE;
+	  	 }
 	}
-	else {
-		tag[0] = '\0';
+	if (isUnsigned) {
+		DS_ERROR(DS_E_INVALID_TYPE_NAME);
 	}
-
-	if (!dsNextChar(str, &str, '{')) {
+	if ((c = dsCmpName(name, "struct")) != 0) {
+		if (c < 0 ) {
+			DS_ERROR(DS_E_NAMES_COLLIDE);
+		}
+		if (dsSearchScope(&type, name, scope, level, FALSE) != 0) {	
+			DS_ERROR(DS_E_INVALID_TYPE_NAME);
+		}
+		*pType = type;
+		return TRUE;
+	}
+	if (dsGetName(name, bp) < 0) {
+		DS_ERROR(DS_E_INVALID_TYPE_NAME);
+	}
+	if (dsGetNonSpace(bp) != '{') {
 		DS_ERROR(DS_E_SYNTAX_ERROR);
 	}
+	if (dsSearchScope(&type, name, scope, level, TRUE) <= 0) {
+		DS_ERROR(DS_E_STRUCT_REDEFINITION);
+	}
 	type = (DS_TYPE_T *)mem->next;
-	field = (DS_FIELD_T *)&type[1];
+	field = DS_FIELD_PTR(type);
 	nField = *mem->map++;
 	if (nField == 0) {
 		DS_ERROR(DS_E_SYNTAX_ERROR);
@@ -217,11 +406,14 @@ static int dsCreateTypeR(DS_TYPE_T **pType, char *str, char **ptr, DS_MEM_T *mem
 		DS_ERROR(DS_E_SYSTEM_ERROR);
 	}
 	type->code = DS_TYPE_STRUCT;
-	type->flags = DS_STD_REP;
 	type->nField = nField;
+	if (level >= DS_MAX_NEST) {
+		DS_ERROR(DS_E_NESTED_TOO_DEEP);
+	}
+	scope[level] = type;
 	for(i = type->nField, fieldType = NULL; i-- > 0 ; field++) {
 		if (fieldType == NULL) {
-			if (!dsCreateTypeR(&fieldType, str, &str, mem)) {
+			if (!dsParseTypeR(&fieldType, bp, mem, scope, level + 1)) {
 				return FALSE;
 			}
 			type->size += DS_PAD(type->size, fieldType->modulus);
@@ -237,35 +429,34 @@ static int dsCreateTypeR(DS_TYPE_T **pType, char *str, char **ptr, DS_MEM_T *mem
 			}
 			if (!DS_REP_IS_STD(fieldType) ||
 				type->size != type->stdsize) {
-				type->flags &= ~DS_STD_REP;
+				type->flags |= DS_NOT_STD_REP;
 			}
 		}
-		if (!dsIdentifier(field->name, str, &str)) {
-			return FALSE;
+		if (dsGetName(field->name, bp) < 0) {
+			DS_ERROR(DS_E_INVALID_NAME);
 		}
 		field->type = fieldType;
 		field->count = 1;
-		for (j = 0; dsNextChar(str, &str, '['); j++) {
+		for (j = 0; (c = dsGetNonSpace(bp)) == '['; j++) {
 			if (j == DS_MAX_DIMS) {
 				DS_ERROR(DS_E_TOO_MANY_DIMENSIONS);
 			}
-			n = (int)strtol(str, &tst, 10);
-			if (str == tst || n <= 0 ||
-				!dsNextChar(tst, &str, ']')) {
+			if (dsGetNumber(&dim, bp) < 0 ||
+				 dim < 1 || dsGetNonSpace(bp) != ']') {
 				DS_ERROR(DS_E_INVALID_DIMENSION);
 			}
-			field->dim[j] = n;
-			field->count *= n;
+			field->dim[j] = (unsigned)dim;
+			field->count *= (unsigned)dim;
 		}
 		field->offset = type->size;
 		field->stdoffset = type->stdsize;
 		type->size += field->count*fieldType->size;
 		type->stdsize += field->count*fieldType->stdsize;
 
-		if (dsNextChar(str, &str, ';')) {
+		if (c ==';') {
 			fieldType = NULL;
 		}
-		else if (!dsNextChar(str, &str, ',')) {
+		else if (c != ',') {
 			DS_ERROR(DS_E_SYNTAX_ERROR);
 		}
 	}
@@ -273,198 +464,53 @@ static int dsCreateTypeR(DS_TYPE_T **pType, char *str, char **ptr, DS_MEM_T *mem
 	if (!dsCheckDuplicate(field->name, type->nField, sizeof(DS_FIELD_T))) {
 		return FALSE;
 	}
-	if (!dsNextChar(str, &str, '}')) {
+	if (dsGetNonSpace(bp) != '}') {
 		DS_ERROR(DS_E_SYNTAX_ERROR);
 	}
 	type->size += DS_PAD(type->size, type->modulus);
 	type->stdsize += DS_PAD(type->stdsize, type->stdmodulus);
 	if (type->size != type->stdsize) {
-		type->flags &= ~DS_STD_REP;
+		type->flags |= DS_NOT_STD_REP;
 	}
-
-	if (tag[0] != '\0') {
-		if (dsFindTag(tag, mem)) {
-			DS_ERROR(DS_E_DUPLICATE_STRUCT_TAG);
-		}
-		strcpy(type->name, tag);
-	}
-
-	if (ptr != NULL) {
-		*ptr = str;
-	}
+	strcpy(type->name, name);
 	*pType = type;
 	return TRUE;
 }
 /******************************************************************************
 *
-* dsDumpTypes - dump basicType struct
+* dsSearchScope - look for type name in fields of scope
 *
+* RETURNS: one if not found, zero if found, -1 if name collision
 */
-int dsDumpTypes(void)
+static int dsSearchScope(DS_TYPE_T **ppType, char *name,
+	DS_TYPE_T **scope, unsigned level, int top)
 {
-	size_t i;
-
-	if (nBasic == 0) {
-		dsBasicInit();
-	}
-	printf("name\tcode\tflags\tmod\tsize\tstdmod\tstdsize\tnField\tptr\n");
-	for (i = 0; i < nBasic; i++) {
-		printf("%s\t%d\t%X\t%d\t%d\t%d\t%d\t%d\t%X\n",
-			basicType[i].name, basicType[i].code,
-			basicType[i].flags, basicType[i].modulus,
-			basicType[i].size, basicType[i].stdmodulus,
-			basicType[i].stdsize, basicType[i].nField,
-			(size_t)DS_FIELD_PTR(&basicType[i]));
-	}
-	return TRUE;
-}
-/******************************************************************************
-*
-* dsFindTag - find a structure tag and return a pointer to its type
-*
-*/
-static DS_TYPE_T *dsFindTag(char *tag, DS_MEM_T *mem)
-{
+	unsigned c, i;
+	DS_FIELD_T *field;
 	DS_TYPE_T *type;
 
-	type = (DS_TYPE_T *)mem->first;
-	while ((char *)type < mem->next) {
-		if (strcmp(tag, type->name) == 0) {
-			return type;
-		}
-		type = (DS_TYPE_T *)&(DS_FIELD_PTR(type)[type->nField]);
-	}
-	return NULL;
-}
-/******************************************************************************
-*
-*/
-int dsFindField(DS_FIELD_T **ppField, DS_TYPE_T *pType, char *name)
-{
-	size_t i;
-	DS_FIELD_T *field;
-
-	if (pType->code != DS_TYPE_STRUCT) {
-		DS_ERROR(DS_E_STRUCT_REQUIRED);
-	}
-	field = DS_FIELD_PTR(pType);
-	for (i = 0; i < pType->nField; i++) {
-		if (strcmp(field[i].name, name) == 0) {
-			if (ppField != NULL) {
-				*ppField = &field[i];
-			}
-			return TRUE;
-		}
-	}
-	DS_ERROR(DS_E_FIELD_NOT_FOUND);
-}
-/******************************************************************************
-*
-* dsFmtTypeDef - format a declaration string for a type structure
-*
-*/
-int dsFmtTypeDef(char *str, size_t maxSize, DS_TYPE_T *type)
-{
-	size_t nTag = 0;
-	DS_TYPE_T *tags[DS_MAX_STRUCT];
-	DS_MEM_T bp;
-
-	bp.first = bp.next = str;
-	bp.limit = str + maxSize;
-	if (!dsStrToMem(&bp, "type ") ||
-		!dsFmtTypeDefR(&bp, type, 0, &nTag, tags) ||
-		!dsStrToMem(&bp, "\n")) {
-		return FALSE;
-	}
-	return TRUE;
-}
-/******************************************************************************
-*
-* dsFmtTypeDefR - recursive part of format type declaration string
-*
-*/
-static int dsFmtTypeDefR(DS_MEM_T *bp,
-	DS_TYPE_T *type, int level, size_t *pNTag, DS_TYPE_T **tag)
-{
-	size_t i, j;
-	DS_TYPE_T *ft, *lastType = NULL;
-	DS_FIELD_T *field;
-
-	if (!dsIndent(bp, level)) {
-		return FALSE;
-	}
-	if (type->code != DS_TYPE_STRUCT) {
-		if (!dsNameToMem(bp, type->name)) {
-			return FALSE;
-		}
-		return TRUE;
-	}
-	if (!dsStrToMem(bp, "struct ")) {
-		return FALSE;
-	}
-	if (type->name[0] != '\0') {
-		if (!dsNameToMem(bp, type->name)) {
-			return FALSE;
-		};
-		for (i = 0; i < *pNTag; i++) {
-			if (tag[i] == type)
-				return TRUE;
-		}
-	}
-	if (!dsStrToMem(bp, " {\n")) {
-		return FALSE;
-	}
-	field = DS_FIELD_PTR(type);
-	if (!dsCheckDuplicate(field->name, type->nField, sizeof(DS_FIELD_T))) {
-		return FALSE;
-	}
-	for (i = 0; i < type->nField; i++) {
-		ft = field[i].type;
-		if (ft != lastType) {
-			if (lastType && !dsStrToMem(bp, ";\n")) {
-				return FALSE;
-			}
-			if (!dsFmtTypeDefR(bp, ft, level + 1, pNTag, tag)) {
-				return FALSE;
-			}
-			lastType = ft;
-		}
-		else {
-			if (!dsStrToMem(bp, ", ")) {
-				return FALSE;
+	for (; level-- > 0;) {
+		type = scope[level];
+		field = DS_FIELD_PTR(type);
+		for (i = 0; i < type->nField && field[i].type; i++) {
+			if ((c = dsCmpName(name, field[i].type->name)) <= 0) {
+				if (c == 0) {
+					*ppType =  field[i].type;
+				}
+				return c;
 			}
 		}
-		if (!dsStrToMem(bp, " ") ||
-			!dsNameToMem(bp, field[i].name)) {
-			return FALSE;
-		}
-
-		for (j = 0; j < DS_MAX_DIMS && field[i].dim[j]; j++) {
-			if (!dsStrToMem(bp, "[") ||
-				!dsNumToMem(bp, field[i].dim[j]) ||
-				!dsStrToMem(bp, "]")) {
-				return FALSE;
-			}
+		if (top) {
+			break;
 		}
 	}
-	if (!dsStrToMem(bp, ";\n") ||
-		!dsIndent(bp, level) ||
-		!dsStrToMem(bp, "}")) {
-		return FALSE;
-	}
-	if (type->name[0] != '\0') {
-		if ((i = *pNTag) >= DS_MAX_STRUCT) {
-			DS_ERROR(DS_E_TOO_MANY_STRUCT_TAGS);
-		}
-		tag[i] = type;
-		*pNTag = i + 1;
-	}
-	return TRUE;
-}
+	return 1;
+}	
 /******************************************************************************
 *
 * dsTypeCmp - compare two type structures
 *
+* RETURN: zero if equal, negative if t1 < t2. posative if t1 > t2
 */
 int dsTypeCmp(DS_TYPE_T *t1, DS_TYPE_T *t2)
 {
@@ -502,28 +548,3 @@ int dsTypeCmp(DS_TYPE_T *t1, DS_TYPE_T *t2)
 	}
 	return 0;
 }
-/******************************************************************************
-*
-* dsTypeLimit - find limit for memory allocated to type
-*
-*/
-char *dsTypeLimit(DS_TYPE_T *type)
-{
-	char *l, *limit;
-	unsigned i;
-	DS_FIELD_T *field;
-
-	if (type->code != DS_TYPE_STRUCT) {
-		return NULL;
-	}
-	field = DS_FIELD_PTR(type);
-	limit = (char *)&field[type->nField];
-	for (i = 0; i < type->nField; i++) {
-		l = dsTypeLimit(field[i].type);
-		if (l > limit) {
-			limit = l;
-		}
-	}
-	return limit;
-}
-		 

@@ -5,19 +5,17 @@
 /*
 modification history
 --------------------
-01a,26jul93,whg  made from testadt.c testhash.c testtree.c testxdr.c.
-
+26jul93,whg  made from testadt.c testhash.c testtree.c testxdr.c.
+25feb95,whg  modify for CORBA IDL type system
 */
 
 /*
 DESCRIPTION
-TBS ...
+collection of routine to test ds lib
 */
 #include <stddef.h>
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <rpc/rpc.h>
 
 #define DS_PRIVATE
 #include "dscodes.h"
@@ -25,67 +23,33 @@ TBS ...
 #include "dsxdr.h"
 
 
-#define NROW 100
-#define NLOOP 40
 #ifdef _MSDOS
-#define XDR_MEM_SIZE 260
+#define NLOOP 20
 #else
-#define XDR_MEM_SIZE 26000
+#define NLOOP 100
 #endif
-
-#define byte signed char
-#define u_byte unsigned char
-#define u_short unsigned short
-#define u_int unsigned
-#define u_long unsigned long
-
-char *def = "struct table_tag {char c; byte b; u_byte ub; short s;"
-"u_short us; int i; u_int ui; long l; u_long ul; float f; double d;"
-"short sa[5][20]; struct {float x; long n;}v;};";
-
-struct table_tag {
-	char c;
-	byte b;
-	u_byte ub;
-	short s;
-	u_short us;
-	int i;
-	u_int ui;
-	long l;
-	u_long ul;
-	float f;
-	double d;
-	short sa[5][20];
-	struct {float x; long n;}v;
-};
-
-void dumpMem(char *ptr, int count);
+#define XDR_MEM_SIZE(nloop) ((nloop)*(300 + 40*(nloop)))
 void dumpType(DS_TYPE_T *type);
 static void dumpTypeR(DS_TYPE_T *type, char *prefix);
-static void setTable(struct table_tag *table);
-int xdr_read(XDR *xdrs, int fast);
-int xdr_write(XDR *xdrs);
-
-
 /******************************************************************************
 *
 * dsTestAdt - simple test of abstract data type routines
 *
 */
-int dsTestAdt()
+int dsTestType()
 {
 	char *str =	"struct test {struct s {double d; long l;}h;\n"
-			"\tstruct  {short v; struct s r; long t;}a;\n"
-			"\tstruct t {struct s r[5][20]; short y; byte z;}b;\n"
-			"\tstruct m {struct t w; struct s v;}u;\n"
-			"\tstruct m e;\n"
+			"\tstruct z {short v; struct s{char c;}r; long t;}a;\n"
+			"\tstruct t {z r[5][20]; short y; octet z;}b;\n"
+			"\tstruct m {t w; struct s{long l;}v;}u;\n"
+			"\t m e;\n"
 			"\tchar end;}\n";
 	char *str2 =	"struct  test  {struct s {double d; long l;}h;\n"
-			"\tstruct  {short v; struct s r; long t;}a;\n"
-			"\tstruct t {struct s r[5][20]; short y; byte z;}b;\n"
-			"\tstruct m {struct t w;\n"
-			"\tstruct s v;}u;\n"
-			"\tstruct m e;\n"
+			"\tstruct z {short v; struct s{char c;}r; long t;}a;\n"
+			"\tstruct t {z r[5][20]; short y; octet z;}b;\n"
+			"\tstruct m {t w; struct\n"
+			" s{long l;}v;}u;\n"
+			"\t m e;\n"
 			"\tchar end;}\n";
 	char *ptr;
 	size_t i, n, tid;
@@ -96,8 +60,8 @@ int dsTestAdt()
 		dsPerror("dsTypeId failed");
 		return FALSE;
 	}
-	if (!dsTypeDef(&ptr, &i, tid)) {
-		dsPerror("dsTypeDef failed");
+	if (!dsTypeSpecifier(&ptr, &i, tid)) {
+		dsPerror("dsTypeSpecifier failed");
 		return FALSE;
 	}
 	printf("len: %d\n%s\n", i, ptr);
@@ -128,11 +92,70 @@ int dsTestAdt()
 }
 /******************************************************************************
 *
+* dsTestCorba - simple test of abstract data type routines
+*
+*/
+int dsTestCorba()
+{
+	char *str1 = "struct test {struct s {long x, y;}z;\n"
+		"long l; struct k{struct s{double u, v;}news;}kk;\n"
+		"short sh[10][12]; s q; k v;}";
+	char buf[200], *ptr;
+	size_t i, n, tid;
+	DS_TYPE_T *type = NULL;
+
+	char *str2 = str1;
+	printf("strlen %d\n\n%s\n", strlen(str1), str1);
+	
+	if (!dsParseType(&type, &n, str1, NULL)) {
+		dsPerror("dsParseType failed");
+		return FALSE;
+	}
+	if (!dsFormatTypeSpecifier(buf, sizeof(buf), type)) {
+		dsPerror("dsFormatTypeSpecifier failed");
+		return FALSE;
+	}
+	printf("\ndsFormatTypeSpecifier: len %d\n%s\n", strlen(buf), buf);
+	if (!dsTypeId(&tid, str1, &ptr)) {
+		dsPerror("dsTypeId failed");
+		return FALSE;
+	}
+	if (!dsTypeSpecifier(&ptr, &i, tid)) {
+		dsPerror("dsTypeSpecifier failed");
+		return FALSE;
+	}
+	printf("len: %d\n%s\n", i, ptr);
+	printf("first tid %d\n", tid);
+	if (!dsTypeId(&tid, str1, &ptr)) {
+		dsPerror("dsTypeId failed");
+		return FALSE;
+	}
+	printf("second tid %d\n", tid);
+	if (!dsTypePtr(&type, tid)) {
+		dsPerror("dsTypePtr failed");
+		return FALSE;
+	}
+	for (i = 0; i < 1000; i++) {
+		if (!dsTypeId(&n, str2, &ptr)) {
+			dsPerror("dsTypeId failed");
+			return FALSE;
+		}
+		if (n != tid) {
+			printf("tidCmp failure %d != %d\n", n, tid);
+			dsPerror("");
+			return FALSE;
+		}
+	}
+	dumpType(type);
+	return TRUE;
+
+}
+/******************************************************************************
+*
 * dumpType - print info about type
 *
 */
-void dumpType(type)
-DS_TYPE_T *type;
+void dumpType(DS_TYPE_T *type)
 {
 	printf(" offset  count std type\n\n");
 	dumpTypeR(type, "");
@@ -142,9 +165,7 @@ DS_TYPE_T *type;
 * dumpTypeR - recursive part of dumpType
 *
 */
-static void dumpTypeR(type, prefix)
-DS_TYPE_T *type;
-char *prefix;
+static void dumpTypeR(DS_TYPE_T *type, char *prefix)
 {
 	char s[100];
 	size_t i, j;
@@ -190,35 +211,6 @@ int dsTestErr()
 }
 /******************************************************************************
 *
-* dsTestMisc - dump basic type struct and simple test of type parse
-*
-*/
-int dsTestMisc()
-{
-	char *ptr;
-	size_t len, size, tid;
-	DS_TYPE_T *type = NULL;
-
-	if (!dsCreateType(&type, &size, def, &ptr)) {
-		dsPerror("dsCreateType failed");
-		return FALSE;
-	}
-	free((char *)type);
-	printf("typeSize %d\n", size);
-	if (!dsTypeId(&tid, def, &ptr)) {
-		dsPerror("dsTypeId failed");
-		return FALSE;
-	}
-	if (!dsTypeDef(&ptr, &len, tid)) {
-		dsPerror("dsTypeDef failed");
-        return FALSE;
-       }
-	printf("%s", ptr);
-	dsDumpTypes();
-	return TRUE;
-}
-/******************************************************************************
-*
 * dsTestTree - test dataset routines
 *
 */
@@ -226,11 +218,11 @@ int dsTestTree()
 {
 	char *ptr;
 	DS_DATASET_T dataset, *pDataset;
-	char *typeDef1 = "struct type1 {int v1, v2;}";
-	char *typeDef2 = "struct tableType {int v1, v2; char name[20];}";
-	char *treeDef = "event{first{table1(type1,4000), table2(),"
-		"sub{table3(), table4()}}, second{t1(),t2(),t3(),t4()}}";
-	char *table ="table(tableType)";
+	char *typeDef1 = "struct type1 {long v1, v2;}";
+	char *typeDef2 = "struct tableType {long v1, v2; char name[20];}";
+	char *treeDef = "event{first{table1(type1,4000), table2(tableType, 0),"
+		"sub{table3(type1,5)}}, second{t1(type1, 4),t2(type1, 5)},empty{}}";
+	char *table ="table(tableType, 7)";
 
 	size_t typeList[256], *pList = typeList;
 
@@ -252,8 +244,8 @@ int dsTestTree()
 		return FALSE;
 	}
 	printf("dsCreateDataset success for dataset, ptr = %s\n", ptr);
-	if (!dsPrintDataset(pDataset)) {
-		dsPerror("dsPrintDataset failed for dataset");
+	if (!dsPrintDatasetSpecifier(stdout, pDataset)) {
+		dsPerror("dsPrintDatasetSpecifier failed for dataset");
 		return FALSE;
 	}
 	if (!dsFreeDataset(pDataset)) {
@@ -267,22 +259,22 @@ int dsTestTree()
 	}
 	printf("dsCreateDataset success for table\n");
 	printf("ptr = %s\n", ptr);
-	if (!dsPrintDataset(pDataset)) {
-		dsPerror("dsPrintDataset failed for table");
+	if (!dsPrintDatasetSpecifier(stdout, pDataset)) {
+		dsPerror("dsPrintDatasetSpecifier failed for table");
 		return FALSE;
 	}
 	return TRUE;
 }
 /******************************************************************************
 *
-* dsTestDset - simple tests of table set routines
+* dsTestDset - simple tests of dataset routines
 *
 */
 int dsTestDset()
 {
 	char buf[10], *ptr;
-	char *tblDecl[] = {"struct type1 {int a;}", "struct type2 {long l;}",
-		"struct type3 {float f;}", "struct type4 {int x;}"};
+	char *tblDecl[] = {"struct type1 {short a;}", "struct type2 {long l;}",
+		"struct type3 {float f;}", "struct type4 {unsigned long x;}"};
 	int i, a[21];
 	long l[5];
 	char *pData[] = {NULL, NULL, NULL, NULL};
@@ -298,146 +290,19 @@ int dsTestDset()
 	}
 	for (i = 0; i < 20; i++) {
 		sprintf(buf, "tbl%d", i);
-		ptr =pData[i%4];
+		ptr =pData[i%2];
 		if (!dsAddTable(pDataset,
 			buf, tblDecl[i%4], dim[i%8], &ptr)) {
 			dsPerror("dsAddTable failed");
 			return FALSE;
 		}
 	}
-	if (!dsPrintDataset(pDataset)) {
-		dsPerror("dsPrintDataSet failed");
+	if (!dsPrintDatasetSpecifier(stdout, pDataset)) {
+		dsPerror("dsPrintDatasetSpecifier failed");
 		return FALSE;
 	}
 	dsFreeDataset(pDataset);
 	return TRUE;
-}
-/******************************************************************************
-*
-* print offsets
-*
-*/
-void printOffset(void)
-{
-	printf("offsetof\tb\t%d\n", offsetof(struct table_tag, b));
-	printf("offsetof\tub\t%d\n", offsetof(struct table_tag, ub));
-	printf("offsetof\ts\t%d\n", offsetof(struct table_tag, s));
-	printf("offsetof\tus\t%d\n", offsetof(struct table_tag, us));
-	printf("offsetof\ti\t%d\n", offsetof(struct table_tag, i));
-	printf("offsetof\tui\t%d\n", offsetof(struct table_tag, ui));
-	printf("offsetof\tl\t%d\n", offsetof(struct table_tag, l));
-	printf("offsetof\tul\t%d\n", offsetof(struct table_tag, ul));
-	printf("offsetof\tf\t%d\n", offsetof(struct table_tag, f));
-	printf("offsetof\td\t%d\n", offsetof(struct table_tag, d));
-	printf("offsetof\tsa\t%d\n", offsetof(struct table_tag, sa));
-	printf("offsetof\tv\t%d\n", offsetof(struct table_tag, v));
-	printf("sizeof  table_tag\t%d\n", sizeof(struct table_tag));
-	
-}
-/******************************************************************************
-*
-* checkDataset - verify data read by xdr_dataset
-*
-*/
-int checkDataset(DS_DATASET_T *dataset)
-{
-	int i, j, r;
-	struct table_tag *table = (struct table_tag *)dataset->p.data;
-	DS_TYPE_T *type;
-
-	if (dataset->elcount != NROW) {
-		printf("checkDataset bad elcount %d", dataset->elcount);
-		return FALSE;
-	}
-	for (r = 0; r < NROW; r++) {
-		if (table[r].c  != 0 ||
-			table[r].b  != 1 ||
-			table[r].ub != 2 ||
-			table[r].s  != 3 ||
-			table[r].us != 4 ||
-			table[r].i  != 5 ||
-			table[r].ui != 6 ||
-			table[r].l  != 7 ||
-			table[r].ul != 8 ||
-			table[r].f  != 9 ||
-			table[r].d  != 10) {
-			printf("compare failed for basic types, row %d\n", r);
-			printf("%d %d %d %d %d %d %d %ld %ld %g %g\n", table[r].c, table[r].b,
-				table[r].ub, table[r].s, table[r].us, table[r].i, table[r].ui,
-				table[r].l, table[r].ul, table[r].f, table[r].d);
-			dumpMem((char *)&table[r], sizeof(struct table_tag));
-			if (dsTypePtr(&type, dataset->tid)) {
-				dumpType(type);
-			}
-			printOffset();
-			return FALSE;
-		}
-		if ( table[r].v.x != 3.0 ||
-			table[r].v.n != 1234) {
-			printf("compare failed for struct types, row %d\n", r);
-			return FALSE;
-		}
-		for (i = 0; i < 5; i++) {
-			for (j = 0; j < 20; j++) {
-				if (table[r].sa[i][j] != (i + 5*j)) {
-					printf("compare failed for array, row %d\n", r);
-					return FALSE;
-				}
-			}
-		}
-	}
-	return TRUE;
-}
-/******************************************************************************
-*
-* dumpMem - print contents of memory
-*
-*/
-void dumpMem(char *ptr, int count)
-{
-	unsigned char *ucp = (unsigned char *)ptr;
-	int i;
-	 
-	printf("offset %X\n", (size_t)ptr);
-	for (i = 0; i < count; i++) {
-		if (i%16 == 0) {
-			printf("\n%.6i ", i);
-		}
-		printf(" %.2X", ucp[i]);
-	}
-	printf("\n");
-}
-/******************************************************************************
-*
-* setTable - set values for table written by xdr_dataset
-*
-*/
-static void setTable(struct table_tag *table)
-{
-	int i, j, r;
-    
-    memset((char *)table, 0, NROW*sizeof(struct table_tag));
-	for (r = 0; r < NROW; r++) {
-		table[r].c  = 0;
-		table[r].b  = 1;
-		table[r].ub = 2;
-		table[r].s  = 3;
-		table[r].us = 4;
-		table[r].i  = 5;
-		table[r].ui = 6;
-		table[r].l  = 7;
-		table[r].ul = 8;
-		table[r].f  = (float)9;
-		table[r].d  = 10;
-		table[r].v.x = 3.0f;
-		table[r].v.n = 1234;
-	
-		for (i = 0; i < 5; i++) {
-			for (j = 0; j < 20; j++) {
-				table[r].sa[i][j] = i + 5*j;
-			}
-		}
-	}
 }
 /******************************************************************************
 *
@@ -450,24 +315,26 @@ int xdrMemTest(void)
 	char *addr;
 	XDR xdr;
 
-	size = NLOOP*XDR_MEM_SIZE;
+	size = XDR_MEM_SIZE(NLOOP);
+	printf("xdrMemTest: size %d\n", size);
 	if ((addr = malloc(size)) == NULL) {
 		printf("xdrMemTest - malloc(%d) failed \n", size);
 		goto fail;
 	}
 	xdrmem_create(&xdr, addr, size, XDR_ENCODE);
 
-	if (!xdr_write(&xdr)) {
+	if (!dsWriteTest(&xdr, NLOOP)) {
 		printf("xdrMemTest - xdr_write failed\n");
 		goto fail;
 	}
-
+	printf("%d bytes\n\n", xdr_getpos(&xdr));
 	xdrmem_create(&xdr, addr, size, XDR_DECODE);
 
-	if (!xdr_read(&xdr, 0)) {
+	if (!dsReadTest(&xdr, NLOOP)) {
 		printf("xdrMemTest - xdr_read failed\n");
 		goto fail;
 	}
+	printf("%d bytes\n\n", xdr_getpos(&xdr));
 	free(addr);
 	return TRUE;
 fail:
@@ -491,38 +358,12 @@ int xdrReadTest(int fast)
 		return FALSE;
 	}
 	xdrstdio_create(&xdr, stream, XDR_DECODE);
-	return xdr_read(&xdr, fast);
-}
-/******************************************************************************
-*
-* xdr_read - read from xdr stream using xdr_dataset
-*
-*/
-int xdr_read(XDR *xdrs, int fast)
-{
-	size_t l;
-	DS_DATASET_T *dataset;
-
-	for(l = 0; l < NLOOP; l++) {
-		dataset = NULL;
-		if (!xdr_dataset(xdrs, &dataset)) {
-			printf("loop count %d\n", l);
-			dsPerror("xdr_dataset failed for DECODE");
-			return FALSE;
-		}
-		if (!fast) {
-			if (!checkDataset(dataset)) {
-				printf("record %d\n", l);
-				return FALSE;
-			}
-		}
-		if (!dsFreeDataset(dataset)) {
-			dsPerror("dsFreeDataset failed");
-			return FALSE;
-		}
+	if (fast) {
+		dsReadAll(&xdr);
+		return TRUE;
 	}
-	printf("DECODE success\n");
-	return TRUE;
+	return dsReadTest(&xdr, NLOOP);
+
 }
 /******************************************************************************
 *
@@ -540,48 +381,10 @@ int xdrWriteTest()
 		return FALSE;
 	}
 	xdrstdio_create(&xdr, stream, XDR_ENCODE);
+	return dsWriteTest(&xdr, NLOOP);
+	/*
 	return xdr_write(&xdr);
-}
-/******************************************************************************
-*
-* xdr_write - write test data using xdr_dataset
-*
-*/
-int xdr_write(XDR *xdrs)
-{
-	char *ptr;
-	size_t l, tid;
-	struct table_tag *table;
-	DS_DATASET_T dataset, *pDataset = &dataset;
-
-	/* create dataset */
-
-	if (!dsTypeId(&tid, def, &ptr)) {
-		dsPerror("writeTest: sdStrToTid failed");
-		return FALSE;
-	}
-	table = (struct table_tag *)malloc(NROW*sizeof(struct table_tag));
-	if (table == NULL) {
-		printf("malloc failed for ENCODE\n");
-		return FALSE;
-	}
-	setTable(table);
-	memset((char *)&dataset, 0, sizeof(dataset));
-	strcpy(dataset.name, "xdrDataset");
-	dataset.tid = tid;
-	dataset.elcount = NROW;
-	dataset.p.data = (void *)table;
-
-	for (l = 0; l < NLOOP; l++) {
-		if (!xdr_dataset(xdrs, &pDataset)) {
-			free(table);
-			dsPerror("xdr_dataset failed for ENCODE");
-			return FALSE;
-		}
-	}
-	free(table);
-	printf("ENCODE success\n");
-	return TRUE;
+	*/
 }
 /******************************************************************************
 *

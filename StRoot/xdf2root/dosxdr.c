@@ -11,21 +11,42 @@ modification history
 
 /*
 DESCRIPTION
-TBS ...
+xdr routines for intel based OS ...
 */
 #ifdef _MSC_VER /* only if Microsoft compiler */
 #include <limits.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <rpc/rpc.h>
 #define DS_PRIVATE
 #include "dstype.h"
 #include "dsxdr.h"
+/******************************************************************************
+*
+* define static used to create XDR structure for mem
+*/
+static bool_t xdrmem_getlong(XDR *xdrs, long *lp);
+static bool_t xdrmem_putlong(XDR *xdrs, long *lp);
+static bool_t xdrmem_getbytes(XDR *xdrs, char *cp, unsigned len);
+static bool_t xdrmem_putbytes(XDR *xdrs, char *cp, unsigned len);
+static unsigned xdrmem_getpos(XDR *xdrs);
+static bool_t xdrmem_setpos(XDR *xdrs, unsigned pos);
+static long *xdrmem_inline(XDR *xdrs, unsigned pos);
+static void xdrmem_destroy(XDR *xdrs);
+
+static struct xdr_ops xdrmem_ops = {
+	xdrmem_getlong,
+	xdrmem_putlong,
+	xdrmem_getbytes,
+	xdrmem_putbytes,
+	xdrmem_getpos,
+	xdrmem_setpos,
+	xdrmem_inline,
+	xdrmem_destroy,
+};
 
 /******************************************************************************
 *
-* define static used to create XDR structure
+* define static used to create XDR structure for stdio
 */
 static bool_t xdrstdio_getlong(XDR *xdrs, long *lp);
 static bool_t xdrstdio_putlong(XDR *xdrs, long *lp);
@@ -47,6 +68,38 @@ static struct xdr_ops xdrstdio_ops = {
 	xdrstdio_destroy,
 };
 /******************************************************************************
+*/
+long htonl(long l)
+{
+	char *cp = (char *)&l;
+	union {char c[4]; long l;}rtn;
+
+	if (DS_IS_BIG_ENDIAN) {
+		return l;
+	}
+	rtn.c[0] = cp[3];
+	rtn.c[1] = cp[2];
+	rtn.c[2] = cp[1];
+	rtn.c[3] = cp[0];
+	return rtn.l;
+}
+/******************************************************************************
+*/
+long ntohl(long l)
+{
+	char *cp = (char *)&l;
+	union {char c[4]; long l;}rtn;
+
+	if (DS_IS_BIG_ENDIAN) {
+		return l;
+	}
+	rtn.c[0] = cp[3];
+	rtn.c[1] = cp[2];
+	rtn.c[2] = cp[1];
+	rtn.c[3] = cp[0];
+	return rtn.l;
+}
+/******************************************************************************
 *
 * xdr_bytes - counted block opaque bytes
 *
@@ -62,7 +115,6 @@ bool_t xdr_bytes(XDR *xdrs, char **cpp, unsigned *sizep, unsigned maxsize)
 	if ((nodesize = *sizep) > maxsize && xdrs->x_op != XDR_FREE) {
 		return FALSE;
 	}
-
 	switch (xdrs->x_op) {
 
 	case XDR_DECODE:
@@ -73,10 +125,10 @@ bool_t xdr_bytes(XDR *xdrs, char **cpp, unsigned *sizep, unsigned maxsize)
 			*cpp = sp = (char *)malloc(nodesize);
 		}
 		if (sp == NULL) {
-			fprintf(stderr, "xdr_bytes: out of memory\n");
+			dsErrorPrint("xdr_bytes: out of memory\n");
 			return FALSE;
 		}
-		/* fall into ... */
+		return xdr_opaque(xdrs, sp, nodesize);
 	case XDR_ENCODE:
 		return xdr_opaque(xdrs, sp, nodesize);
 	case XDR_FREE:
@@ -99,7 +151,13 @@ bool_t xdr_double(XDR *xdrs, double *dp)
 {
 	char c[8], *cp = (char *)dp;
 
+	if (!DS_IS_IEEE_FLOAT) {
+		return FALSE;
+	}		
 	if (xdrs->x_op == XDR_DECODE) {
+		if (DS_IS_BIG_ENDIAN) {
+			return XDR_GETBYTES(xdrs, (char *)dp, 8);
+		}
 		if (!XDR_GETBYTES(xdrs, c, 8)) {
 			return FALSE;
 		}
@@ -114,6 +172,9 @@ bool_t xdr_double(XDR *xdrs, double *dp)
 		return TRUE;
 	}
 	if (xdrs->x_op == XDR_ENCODE) {
+		if (DS_IS_BIG_ENDIAN) {
+			return XDR_PUTBYTES(xdrs, (char *)dp, 8);
+		}
 		c[0] = cp[7];
 		c[1] = cp[6];
 		c[2] = cp[5];
@@ -136,6 +197,9 @@ bool_t xdr_double(XDR *xdrs, double *dp)
 */
 bool_t xdr_float(XDR *xdrs, float *fp)
 {
+	if (!DS_IS_IEEE_FLOAT) {
+		return FALSE;
+	}
 	return xdr_long(xdrs, (long *)fp);
 }
 /******************************************************************************
@@ -300,7 +364,7 @@ bool_t xdr_string(XDR *xdrs, char **cpp, unsigned maxsize)
 			*cpp = sp = malloc((unsigned)size + 1);
 		}
 		if (sp == NULL) {
-			fprintf(stderr, "xdr_string out of memory\n");
+			dsErrorPrint("xdr_string out of memory\n");
 			return FALSE;
 		}
 		sp[(unsigned)size] = '\0';
@@ -316,17 +380,111 @@ bool_t xdr_string(XDR *xdrs, char **cpp, unsigned maxsize)
 }
 /******************************************************************************
 *
-* xdrmem_create - dummy create xdr memory region
+* xdrmem_create - create xdr memory region
 *
 */
 void xdrmem_create(XDR *xdrs, char *addr, unsigned size, enum xdr_op op)
 {
 	xdrs->x_op = op;
-	xdrs->x_ops = NULL;
+	xdrs->x_ops = &xdrmem_ops;
 	xdrs->x_private = xdrs->x_base = addr;
 	xdrs->x_handy = size;
-	printf("no xdrmem\n");
-	exit(0);
+}
+/******************************************************************************
+*
+*/
+static void xdrmem_destroy(XDR *xdrs)
+{
+	xdrs->x_private = xdrs->x_base = NULL;
+	xdrs->x_handy = 0;
+}
+/******************************************************************************
+*
+*/ 
+static bool_t xdrmem_getlong(XDR *xdrs, long *lp)
+{
+	if (xdrs->x_handy < sizeof(long)) {
+		return FALSE;
+	}
+	*lp = (long)ntohl((u_long)(*((long *)(xdrs->x_private))));
+	xdrs->x_handy -= sizeof(long);
+	xdrs->x_private += sizeof(long);
+	return TRUE;
+}
+/******************************************************************************
+*
+*/ 
+static bool_t xdrmem_putlong(XDR *xdrs, long *lp)
+{
+	if (xdrs->x_handy < sizeof(long)) {
+		return FALSE;
+	}
+	*(long *)xdrs->x_private = (long)htonl((u_long)(*lp));
+	xdrs->x_handy -= sizeof(long);
+	xdrs->x_private += sizeof(long);
+	return TRUE;
+}
+/******************************************************************************
+*
+*/ 
+static bool_t xdrmem_getbytes(XDR *xdrs, caddr_t addr, u_int len)
+{
+	if (xdrs->x_handy < (int)len) {
+		return FALSE;
+	}
+	memcpy(addr, xdrs->x_private, len);
+	xdrs->x_handy -= len; 
+	xdrs->x_private += len;
+	return TRUE;
+}
+/******************************************************************************
+*
+*/ 
+static bool_t xdrmem_putbytes(XDR *xdrs, caddr_t addr, u_int len)
+{
+	if (xdrs->x_handy < (int)len) {
+		return FALSE;
+	}
+	memcpy(xdrs->x_private, addr, len);
+	xdrs->x_handy -= len; 
+	xdrs->x_private += len;
+	return TRUE;
+}
+/******************************************************************************
+*
+*/ 
+static u_int xdrmem_getpos(XDR *xdrs)
+{
+	return (u_int)(xdrs->x_private - xdrs->x_base);
+}
+/******************************************************************************
+*
+*/ 
+static bool_t xdrmem_setpos(XDR *xdrs, u_int pos)
+{
+	caddr_t newaddr = xdrs->x_base + pos;
+	caddr_t lastaddr = xdrs->x_private + xdrs->x_handy;
+
+	if (newaddr > lastaddr) {
+		return FALSE;
+	}
+	xdrs->x_private = newaddr;
+	xdrs->x_handy = (int)(lastaddr - newaddr);
+	return TRUE;
+}
+/******************************************************************************
+*
+*/ 
+static long *xdrmem_inline(XDR *xdrs, unsigned len)
+{
+	long *buf = 0;
+
+	if (xdrs->x_handy >= (int)len) {
+		xdrs->x_handy -= len;
+		buf = (long *) xdrs->x_private;
+		xdrs->x_private += len;
+	}
+	return buf;
 }
 /******************************************************************************
 *
@@ -381,15 +539,12 @@ static bool_t xdrstdio_putbytes(XDR *xdrs, char *cp, unsigned len)
 */
 static bool_t xdrstdio_getlong(XDR *xdrs, long *lp)
 {
-	char c[4], *cp = (char *)lp;
+	long l;
 
-	if (!XDR_GETBYTES(xdrs, c, 4)) {
+	if (!XDR_GETBYTES(xdrs, (char *)&l, sizeof(long))) {
 		return FALSE;
 	}
-	cp[0] = c[3];
-	cp[1] = c[2];
-	cp[2] = c[1];
-	cp[3] = c[0];
+	*lp = ntohl(l); 
 	return TRUE;
 }
 /******************************************************************************
@@ -399,13 +554,10 @@ static bool_t xdrstdio_getlong(XDR *xdrs, long *lp)
 */
 static bool_t xdrstdio_putlong(XDR *xdrs, long *lp)
 {
-	char c[4], *cp = (char *)lp;
+	long l;
 
-	c[0] = cp[3];
-	c[1] = cp[2];
-	c[2] = cp[1];
-	c[3] = cp[0];
-	return XDR_PUTBYTES(xdrs, c, 4);
+	l = htonl(*lp);
+	return XDR_PUTBYTES(xdrs, (char *)&l, sizeof(long));
 }
 /******************************************************************************
 *
@@ -414,10 +566,7 @@ static bool_t xdrstdio_putlong(XDR *xdrs, long *lp)
 */
 static unsigned xdrstdio_getpos(XDR *xdrs)
 {
-	if(xdrs) { /* not useful if unsigned */
-		return FALSE;
-	}
-	return FALSE;
+	return (unsigned)ftell((FILE *)xdrs->x_private);
 }
 /******************************************************************************
 *

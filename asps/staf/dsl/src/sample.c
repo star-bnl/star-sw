@@ -5,120 +5,48 @@
 /*
 modification history
 --------------------
-01a,31jul93,whg  written.
+31jul93,whg  written.
 */
 
 /*
 DESCRIPTION
 TBS ...
 */
-#include <stdio.h>
 #include <stdlib.h>
-#include <rpc/rpc.h>
-
-#define DS_PRIVATE
-
 #include "dstype.h"
 #include "dsxdr.h"
 #include "sample.h"
 
-void dbgTest(void);
-int xdrCreate(XDR *xdrs, char *fileName, int op);
-int readDynamic(XDR *xdrs);
-int readVars(XDR *xdrs);
-int writeDynamic(XDR *xdrs);
-int writeProg(XDR *xdrs);
 /******************************************************************************
-*
-* example data structure I/O
-*
 */
-void main(int argc, char **argv)
+#ifdef SAMPLE_MAIN
+void main()
 {
-	char *file = "xtest.bin", *ptr = argv[1];
-	int (*fcn)(XDR *xdrs), i, n = 3, op;
-	XDR xdr;
-
-	switch (argc == 2 && ptr[1] == '\0' ? *ptr : '?') {
-	case 'd':
-		fcn = readDynamic;
-		op = XDR_DECODE;
-		break;
-
-	case 'r':
-		fcn = readVars;
-		op = XDR_DECODE;
-		break;
-
-	case 't':
-		dbgTest();
-		exit(0);
-
-	case 'v':
-		fcn = writeDynamic;
-		op = XDR_ENCODE;
-		break;
-
-	case 'w':
-		fcn = writeProg;
-		op = XDR_ENCODE;
-		break;
-
-	default:
-		printf("sample d | r | v | w\n");
-		printf("\td - read to dynamic memory\n");
-		printf("\tr - read to program variables\n");
-		printf("\tv - write from dynamic memory, type B table5\n");
-		printf("\tw - write from program variables, type A table5\n");
-		exit(0);
-	}
-	if (xdrCreate(&xdr, file, op)) {
-		for (i = 0; i < n; i++) {
-			if (!fcn(&xdr)) {
-				break;
-			}
-		}
-		printf("\nsample %s - %s\n\n",
-			ptr, i == n ? "success" : "failure");
-	}
-	dsDatasetAllocStats();
-	dsTypeLockStats();
-	dsTidHashStats();
+	sample();
 }
+#endif
 /******************************************************************************
 *
-* dbgTest - spot for development unit test
+* sample data structure I/O
+*
 */
-void dbgTest(void)
+int sample(void)
 {
-	char *limit;
-	DS_TYPE_T *type = NULL;
-
-	if (!dsCreateType(&type, NULL, TYPE_D_S, NULL)) {
-		dsPerror("dbgTest - dsCreateType failed \n");
-		exit(0);
+	if (writeVars() &&
+		readVars() &&
+		readDynamic() &&
+		readProject() &&
+		writeDynamic() &&
+		readVars() &&
+		readProject() &&
+		readDynamic()) {
+		printf("All tests OK\n");
+		return TRUE;
 	}
-	limit = dsTypeLimit(type);
-	printf("TYPE size %d, FIELD size %d\n", sizeof(DS_TYPE_T), sizeof(DS_FIELD_T));
-	printf("size: %d\n", limit - (char *)type);
-}
-/******************************************************************************
-*
-* xdrCreate - open file and create XDR structure
-*
-*/
-int xdrCreate(XDR *xdrs, char *fileName, int op)
-{
-	char *type;
-	FILE *stream;
-
-	type = op == XDR_ENCODE ? "wb" : "rb";
-	if ((stream = fopen(fileName, type)) == NULL) {
-		printf("fopen(%s, %s) failed\n", fileName, type);
+	else {
+		printf("A test FAILED\n");
 		return FALSE;
 	}
-	xdrstdio_create(xdrs, stream, op);
-	return TRUE;
 }
 /******************************************************************************
 *
@@ -142,7 +70,7 @@ int checkTable5(DS_DATASET_T *pDataset)
 		dsPerror("checkTable5 map failed");
 		return FALSE;
 	}
-	if (!checkTable(table5, typeStr, nRow5, NROW_TABLE5)) {
+	if (!dsCheckTable(table5, typeStr, nRow5, NROW_TABLE5)) {
 		printf("checkTable5 check failed\n");
 		return FALSE;
 	}
@@ -153,7 +81,7 @@ int checkTable5(DS_DATASET_T *pDataset)
 * readDynamic - read into dynamic memory
 *
 */
-int readDynamic(XDR *xdrs)
+int readDynamic(void)
 {
 	TYPE_A_T *table1 = NULL;
 	TYPE_B_T *table2 = NULL;
@@ -161,10 +89,20 @@ int readDynamic(XDR *xdrs)
 	TYPE_D_T *table4 = NULL;
 	size_t nRow1, nRow2, nRow3, nRow4;
 	DS_DATASET_T *pDataset = NULL;
+	FILE *stream;
+	XDR xdr;
+	int rtn;
+	
+	/* open file and initialize xdr structure */
+	if ((stream = fopen(SAMPLE_FILE, "rb")) == NULL) {
+		printf("readDynamic: fopen failed\n");
+		return FALSE;
+	}
+	xdrstdio_create(&xdr, stream, XDR_DECODE);
 
 	/* read dataset and set table row counts and pointers */
 	if (
-		!xdr_dataset(xdrs, &pDataset) ||
+		!xdr_dataset(&xdr, &pDataset) ||
 		!dsMapTable(pDataset, "table1", TYPE_A_S, &nRow1, &table1) ||
 		!dsMapTable(pDataset, "table2", TYPE_B_S, &nRow2, &table2) ||
 		!dsMapTable(pDataset, "table3", TYPE_C_S, &nRow3, &table3) ||
@@ -175,30 +113,35 @@ int readDynamic(XDR *xdrs)
 	}
 	/* check data */
 	if (
-		!checkTable(table1, TYPE_A_S, nRow1, NROW_TABLE1) ||
-		!checkTable(table2, TYPE_B_S, nRow2, NROW_TABLE2) ||
-		!checkTable(table3, TYPE_C_S, nRow3, NROW_TABLE3) ||
-		!checkTable(table4, TYPE_D_S, nRow4, NROW_TABLE4) ||
+		!dsCheckTable(table1, TYPE_A_S, nRow1, NROW_TABLE1) ||
+		!dsCheckTable(table2, TYPE_B_S, nRow2, NROW_TABLE2) ||
+		!dsCheckTable(table3, TYPE_C_S, nRow3, NROW_TABLE3) ||
+		!dsCheckTable(table4, TYPE_D_S, nRow4, NROW_TABLE4) ||
 		!checkTable5(pDataset)
 	) {
+		printf("readDynamic - dsCheckTable failed\n");
 		goto fail;
 	}
-
-	dsFreeDataset(pDataset);
-	return TRUE;
-
+	printf("readDynamic - success\n");
+	rtn = TRUE;
+	goto done;
 fail:
+	rtn = FALSE;
+	goto done;
+done:
 	if (pDataset != NULL) {
 		dsFreeDataset(pDataset);
 	}
-	return FALSE;
+	xdr_destroy(&xdr);
+	fclose(stream);
+	return rtn;
 }
 /******************************************************************************
 *
 * readVars - read dataset into program variables
 *
 */
-int readVars(XDR *xdrs)
+int readVars(void)
 {
 	TYPE_A_T table1[NROW_TABLE1], *pTable1 = table1;
 	TYPE_B_T table2[NROW_TABLE2], *pTable2 = table2;
@@ -207,46 +150,139 @@ int readVars(XDR *xdrs)
 	size_t nRow1 = NROW_TABLE1, nRow2 = NROW_TABLE2;
 	size_t nRow3 = NROW_TABLE3, nRow4 = NROW_TABLE4;
 	DS_DATASET_T dataset[DSET_DIM], *pDataset = dataset;
+	FILE *stream;
+	XDR xdr;
+	int rtn;
+	
+	/* open file and initialize xdr structure */
+	if ((stream = fopen(SAMPLE_FILE, "rb")) == NULL) {
+		printf("readVars: fopen failed\n");
+		return FALSE;
+	}
+	xdrstdio_create(&xdr, stream, XDR_DECODE);
 
 	/* read dataset into program vars */
 	if (
-		!xdr_dataset_type(xdrs, &pDataset, DSET_DIM) ||
+		!xdr_dataset_type(&xdr, &pDataset, DSET_DIM) ||
 		!dsMapTable(pDataset, "table1", TYPE_A_S, &nRow1, &pTable1) ||
 		!dsMapTable(pDataset, "table2", TYPE_B_S, &nRow2, &pTable2) ||
 		!dsMapTable(pDataset, "table3", TYPE_C_S, &nRow3, &pTable3) ||
 		!dsMapTable(pDataset, "table4", TYPE_D_S, &nRow4, &pTable4) ||
 		!dsAllocTables(pDataset) ||
-		!xdr_dataset_data(xdrs, pDataset)
+		!xdr_dataset_data(&xdr, pDataset)
 	) {
 		dsPerror("readVars failed");
 		goto fail;
 	}
 	/* check data */
 	if (
-		!checkTable(table1, TYPE_A_S, nRow1, NROW_TABLE1) ||
-		!checkTable(table2, TYPE_B_S, nRow2, NROW_TABLE2) ||
-		!checkTable(table3, TYPE_C_S, nRow3, NROW_TABLE3) ||
-		!checkTable(table4, TYPE_D_S, nRow4, NROW_TABLE4) ||
+		!dsCheckTable(table1, TYPE_A_S, nRow1, NROW_TABLE1) ||
+		!dsCheckTable(table2, TYPE_B_S, nRow2, NROW_TABLE2) ||
+		!dsCheckTable(table3, TYPE_C_S, nRow3, NROW_TABLE3) ||
+		!dsCheckTable(table4, TYPE_D_S, nRow4, NROW_TABLE4) ||
 		!checkTable5(pDataset)
 	) {
+		printf("readVars - dsCheckTable failed\n");	
 		goto fail;
 	}
-	dsFreeDataset(pDataset);
-	return TRUE;
-
+	printf("readVars - success\n");
+	rtn = TRUE;
+	goto done;
 fail:
+	rtn = FALSE;
+	goto done;
+done:
 	dsFreeDataset(pDataset);
-	return FALSE;
+	xdr_destroy(&xdr);
+	fclose(stream);
+	return rtn;
+
+}
+/******************************************************************************
+*
+* readProject - read into dynamic memory, project to program variables
+*
+*/
+int readProject(void)
+{
+	TYPE_A_T table1[NROW_TABLE1], *pTable1 = table1;
+	TYPE_B_T table2[NROW_TABLE2], *pTable2 = table2;
+	TYPE_C_T table3[NROW_TABLE3], *pTable3 = table3;
+	TYPE_D_T table4[NROW_TABLE4], *pTable4 = table4;
+	size_t nRow1 = NROW_TABLE1, nRow2 = NROW_TABLE2;
+	size_t nRow3 = NROW_TABLE3, nRow4 = NROW_TABLE4;
+	DS_DATASET_T *pDataset = NULL;
+	FILE *stream;
+	XDR xdr;
+	int rtn;
+	
+	/* open file and initialize xdr structure */
+	if ((stream = fopen(SAMPLE_FILE, "rb")) == NULL) {
+		printf("readProject: fopen failed\n");
+		return FALSE;
+	}
+	xdrstdio_create(&xdr, stream, XDR_DECODE);
+
+	/* read dataset into program vars */
+	if (
+		!xdr_dataset(&xdr, &pDataset) ||
+		!dsTasProject(pDataset, "table1", TYPE_A_S, &nRow1, &pTable1) ||
+		!dsTasProject(pDataset, "table2", TYPE_B_S, &nRow2, &pTable2) ||
+		!dsTasProject(pDataset, "table3", TYPE_C_S, &nRow3, &pTable3) ||
+		!dsTasProject(pDataset, "table4", TYPE_D_S, &nRow4, &pTable4)
+	) {
+		dsPerror("readProject failed");
+		goto fail;
+	}
+	/* check data */
+	if (
+		!dsCheckTable(table1, TYPE_A_S, nRow1, NROW_TABLE1) ||
+		!dsCheckTable(table2, TYPE_B_S, nRow2, NROW_TABLE2) ||
+		!dsCheckTable(table3, TYPE_C_S, nRow3, NROW_TABLE3) ||
+		!dsCheckTable(table4, TYPE_D_S, nRow4, NROW_TABLE4) ||
+		!checkTable5(pDataset)
+	) {	
+	printf("readProject - dsCheckTable failed\n");
+		goto fail;
+	}
+	nRow1 = NROW_TABLE1;
+	if (!dsTasProject(pDataset, "table5", TYPE_A_S, &nRow1, &pTable1)) {
+		dsPerror("result of project table5 into table1");
+	}
+	nRow2 = NROW_TABLE2;
+	if (!dsTasProject(pDataset, "table5", TYPE_B_S, &nRow2, &pTable2)) {
+		dsPerror("result of project table5 into table2");
+	}
+	printf("readProject - success\n");
+	rtn = TRUE;
+	goto done;
+fail:
+	rtn = FALSE;
+	goto done;
+done:
+	dsFreeDataset(pDataset);
+	xdr_destroy(&xdr);
+	fclose(stream);
+	return rtn;
 }
 /******************************************************************************
 *
 * writeDynamic - allocate memory and write dataset
 *
 */
-int writeDynamic(XDR *xdrs)
+int writeDynamic(void)
 {
 	DS_DATASET_T *pDataset = NULL;
-
+	FILE *stream;
+	XDR xdr;
+	int rtn;
+	
+	/* open file and initialize xdr structure */
+	if ((stream = fopen(SAMPLE_FILE, "wb")) == NULL) {
+		printf("writeDynamic: fopen failed\n");
+		return FALSE;
+	}
+	xdrstdio_create(&xdr, stream, XDR_ENCODE);
 	if (
 		!dsNewDataset(&pDataset, "example", DSET_DIM) ||
 		!dsAddTable(pDataset, "table1", TYPE_A_S, NROW_TABLE1, NULL) ||
@@ -254,31 +290,36 @@ int writeDynamic(XDR *xdrs)
 		!dsAddTable(pDataset, "table3", TYPE_C_S, NROW_TABLE3, NULL) ||
 		!dsAddTable(pDataset, "table4", TYPE_D_S, NROW_TABLE4, NULL) ||
 		!dsAddTable(pDataset, "table5", TYPE_B_S, NROW_TABLE5, NULL) ||
-		!setDataset(pDataset)
+		!dsSetDataset(pDataset)
 	) {
 		dsPerror("writeDynamic setup failed");
 		goto fail;
 	}
 	/* write tables */
-	if (!xdr_dataset(xdrs, &pDataset)) {
+	if (!xdr_dataset(&xdr, &pDataset)) {
 		dsPerror("writeDynamic xdr_dataset failed");
 		goto fail;
 	}
-	dsFreeDataset(pDataset);
-	return TRUE;
-
+	printf("writeDynamic - success\n");
+	rtn = TRUE;
+	goto done;
 fail:
+	rtn = FALSE;
+	goto done;
+done:
 	if (pDataset != NULL) {
 		dsFreeDataset(pDataset);
 	}
-	return FALSE;
+	xdr_destroy(&xdr);
+	fclose(stream);
+	return rtn;
 }
 /******************************************************************************
 *
-* writeProg - write dataset from program variables
+* writeVars - write dataset from program variables
 *
 */
-int writeProg(XDR *xdrs)
+int writeVars(void)
 {
 	TYPE_A_T table1[NROW_TABLE1], *pTable1 = table1;
 	TYPE_B_T table2[NROW_TABLE2], *pTable2 = table2;
@@ -289,17 +330,17 @@ int writeProg(XDR *xdrs)
 	size_t nRow3 = NROW_TABLE3, nRow4 = NROW_TABLE4;
 	size_t nRow5 = NROW_TABLE5;
 	DS_DATASET_T dataset[DSET_DIM], *pDataset = dataset;
-
-	/* put test data in tables */
-	if (
-		!setTable(table1, TYPE_A_S, nRow1) ||
-		!setTable(table2, TYPE_B_S, nRow2) ||
-		!setTable(table3, TYPE_C_S, nRow3) ||
-		!setTable(table4, TYPE_D_S, nRow4) ||
-		!setTable(table5, TYPE_A_S, nRow5) 
-	){
+	FILE *stream;
+	XDR xdr;
+	int rtn;
+	
+	/* open file and initialize xdr structure */
+	if ((stream = fopen(SAMPLE_FILE, "wb")) == NULL) {
+		printf("writeVars: fopen failed\n");
 		return FALSE;
 	}
+	xdrstdio_create(&xdr, stream, XDR_ENCODE);
+
 	/* build and write dataset */
 	if (
 		!dsNewDataset(&pDataset, "example", DSET_DIM) ||
@@ -308,10 +349,20 @@ int writeProg(XDR *xdrs)
 		!dsAddTable(pDataset, "table3", TYPE_C_S, nRow3, &pTable3) ||
 		!dsAddTable(pDataset, "table4", TYPE_D_S, nRow4, &pTable4) ||
 		!dsAddTable(pDataset, "table5", TYPE_A_S, nRow5, &pTable5) ||
-		!xdr_dataset(xdrs, &pDataset)
+		!dsSetDataset(pDataset) ||
+		!xdr_dataset(&xdr, &pDataset)
 	) {
-		dsPerror("writeProg failed");
-		return FALSE;
+		dsPerror("writeVars failed");
+		goto fail;
 	}
-	return TRUE;
+	printf("writeVars - success\n");
+	rtn = TRUE;
+	goto done;
+fail:
+	rtn = FALSE;
+	goto done;
+done:
+	xdr_destroy(&xdr);
+	fclose(stream);
+	return rtn;
 }
