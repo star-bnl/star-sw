@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiMicroMaker.h,v 1.1 2002/04/02 20:00:41 jklay Exp $
+ * $Id: StHiMicroMaker.h,v 1.2 2002/04/03 00:37:41 jklay Exp $
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHiMicroMaker.h,v $
+ * Revision 1.2  2002/04/03 00:37:41  jklay
+ * Fixed some bugs, added new version of dcaz
+ *
  * Revision 1.1  2002/04/02 20:00:41  jklay
  * Bums highpt uDST Maker
  *
@@ -74,6 +77,7 @@ class StHiMicroMaker : public StMaker {
     void     dump(StTrack* prTrack,StTrack* glTrack);
     Float_t  computeXY(const StThreeVectorF&, const StTrack*);
     double dcaz(const StPhysicalHelixD& helix, const StThreeVectorF& point);
+    double dcaz(const StPhysicalHelixD& helix, const StThreeVectorF& point, const StTrack* track);
 
     Int_t    openFile();
     Int_t    closeFile();
