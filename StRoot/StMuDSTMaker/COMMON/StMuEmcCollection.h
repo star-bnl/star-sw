@@ -22,7 +22,7 @@ Tower id starts from 1 and goes to 4800 to match EMC Id
 
 #include <iostream>
 
-enum {bemc=0, bprs=1, bsmde=2, bsmdp=3};
+enum {bemc=1, bprs=2, bsmde=3, bsmdp=4, eemc=5, eprs=6, esmde=7, esmdp=8};
 
 class StMuEmcCollection: public TObject
 {
@@ -30,37 +30,46 @@ class StMuEmcCollection: public TObject
                       StMuEmcCollection();
                       StMuEmcCollection(StMuEmcCollection&);
     virtual           ~StMuEmcCollection();
-    
-    int               getTowerADC(int);    
-    int               getNSmdHits(int);
-    StMuEmcHit*       getSmdHit(int,int);    
-    int               getNPrsHits();
-    StMuEmcHit*       getPrsHit(int);    
-    int               getNClusters(int);
-    StMuEmcCluster*   getCluster(int,int);    
-    int               getNPoints();
-    StMuEmcPoint*     getPoint(int);
-        
-    void              setTowerADC(int,int);
-    void              addSmdHit(int);
-    void              addPrsHit();
-    void              addCluster(int);
-    void              addPoint();
-    
     void              clear(Option_t *option="");     
     void              DeleteThis() {}
+    
+    int               getTowerADC(int id, int detector = bemc);    
+    int               getNSmdHits(int detector);
+    StMuEmcHit*       getSmdHit(int hitId, int detector = bsmde);    
+    int               getNPrsHits(int detector = bprs);
+    StMuEmcHit*       getPrsHit(int hitId, int detector = bprs);    
+    int               getNClusters(int detector);
+    StMuEmcCluster*   getCluster(int clusterId,int detector);    
+    int               getNPoints();
+    StMuEmcPoint*     getPoint(int);
+    int               getNEndcapPoints();
+    StMuEmcPoint*     getEndcapPoint(int);
+        
+    void              setTowerADC(int,int, int detector = bemc);
+    void              addSmdHit(int detector);
+    void              addPrsHit(int detector = bprs);
+    void              addCluster(int detector);
+    void              addPoint();
+    void              addEndcapPoint();
+        
   private:
     void              packbits(unsigned char*, unsigned int, unsigned int, unsigned int);
     unsigned int      unpackbits(unsigned char*, unsigned int, unsigned int);
     
     unsigned char     mTowerADC[7200];
+    unsigned char     mEndcapTowerADC[1080];
     
     TClonesArray*     mPrsHits;
     TClonesArray*     mSmdHits[2];
     TClonesArray*     mEmcClusters[4];
     TClonesArray*     mEmcPoints;
     
-    ClassDef(StMuEmcCollection,1)
+    TClonesArray*     mEndcapPrsHits;
+    TClonesArray*     mEndcapSmdHits[2];
+    TClonesArray*     mEndcapEmcClusters[4];
+    TClonesArray*     mEndcapEmcPoints;
+    
+    ClassDef(StMuEmcCollection,2)
 };
 
 

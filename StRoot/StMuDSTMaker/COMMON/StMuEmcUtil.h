@@ -24,6 +24,8 @@ class StMuEmcUtil : public TObject
     StEmcCollection*   getEmc(StMuEmcCollection*);
     void               fillMuEmc(StMuEmcCollection*,StEmcCollection*);
     void               fillEmc(StEmcCollection*,StMuEmcCollection*);
+    void               getEndcapId(int,int,int,int,int&);
+    void               getEndcapBin(int,int,int&,int&,int&);
               
   ClassDef(StMuEmcUtil,1)
 };

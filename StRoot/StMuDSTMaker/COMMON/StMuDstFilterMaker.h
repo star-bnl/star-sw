@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.h,v 1.1 2003/04/15 18:48:36 laue Exp $
+ * $Id: StMuDstFilterMaker.h,v 1.2 2003/08/04 14:38:10 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstFilterMaker_hh
@@ -36,7 +36,7 @@ class StMuDstFilterMaker : public StMaker {
     int Make();   ///< Filters the muDst and writes the filtered version
     int Finish(); ///< Writes and closes the output file
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StMuDstFilterMaker.h,v 1.1 2003/04/15 18:48:36 laue Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StMuDstFilterMaker.h,v 1.2 2003/08/04 14:38:10 laue Exp $ built "__DATE__" "__TIME__ ; 
 	return cvs;
     }
   
@@ -46,7 +46,7 @@ class StMuDstFilterMaker : public StMaker {
     /// specialize this function to apply filters to the individual branches
     template<class T> bool filter(T* t) { return false;}
     /// If this function returns false, the whole event is discarded
-    bool filter(StMuDst* mu) {return fabs(mu->event()->primaryVertexPosition().z())<50 ;}
+    bool filter(StMuDst* mu) {return fabs(mu->event()->primaryVertexPosition().z())<100 ;}
     /// Now I specialize the filter function to select individual object
     bool filter(StMuEvent* ev) {return true; }             // keep all event-wise information
     bool filter(StMuTrack* track);
@@ -84,6 +84,9 @@ class StMuDstFilterMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.h,v $
+ * Revision 1.2  2003/08/04 14:38:10  laue
+ * Alex Suaide's updated for the EMC. Now EEMC is included.
+ *
  * Revision 1.1  2003/04/15 18:48:36  laue
  * Minor changes to be able to filter MuDst.root files and an example
  * how to do this. The StMuDstFilterMaker is just an example, it has to be

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.cxx,v 1.1 2003/04/15 18:48:35 laue Exp $
+ * $Id: StMuDstFilterMaker.cxx,v 1.2 2003/08/04 14:38:10 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDstFilterMaker.h"
@@ -143,7 +143,6 @@ int StMuDstFilterMaker::Make(){  ///< create a StEvent from the muDst and put it
 	addType( mEmcArrays[0], *emc );
     }
     
-    
     // write the event only if it has at least one primary track
     if ( mArrays[muPrimary]->GetEntries()>0) mTTree->Fill();
     return 0;
@@ -206,7 +205,7 @@ void StMuDstFilterMaker::createArrays() {
  */
 /// and I want to keep all tracks with p > 1 and 0<eta<1
 bool StMuDstFilterMaker::filter(StMuTrack* track) {
-    return ( track->p().mag()>1. ) && ( fabs(track->eta()-0.5)<0.5 );
+    return ( track->p().mag()>1. ) && ( fabs(track->eta())<1.0 );
 }
 
 
@@ -215,6 +214,9 @@ ClassImp(StMuDstFilterMaker)
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.cxx,v $
+ * Revision 1.2  2003/08/04 14:38:10  laue
+ * Alex Suaide's updated for the EMC. Now EEMC is included.
+ *
  * Revision 1.1  2003/04/15 18:48:35  laue
  * Minor changes to be able to filter MuDst.root files and an example
  * how to do this. The StMuDstFilterMaker is just an example, it has to be
