@@ -995,7 +995,7 @@ void StiZoomSkeletonView::setToDefault()
     
     //Keep all silicon layers visible
     const string& name = layer->StiDrawable::name();
-    string::size_type where = name.find("Svg");
+    string::size_type where = name.find("Svt");
 
     if ( where != name.npos && layer->isOn() ) {
 	layer->setVisibility(true);
@@ -1026,7 +1026,7 @@ void StiSkeletonView::setToDefault()
     
     //Keep all active silicon layers visible
     const string& name = layer->StiDrawable::name();
-    string::size_type where = name.find("Svg");
+    string::size_type where = name.find("Svt");
     
     if ( where != name.npos && layer->isOn() ) {
 	layer->setVisibility(true);

@@ -21,12 +21,17 @@
 #include "StDbUtilities/StSvtLocalCoordinate.hh"
 #include "StDbUtilities/StGlobalCoordinate.hh"
 #include "StTpcDb/StTpcDb.h"
+//#include "St_db_Maker/St_db_Maker.h"
+#include "StSvtDbMaker/StSvtDbMaker.h"
+#include "StSvtDbMaker/St_SvtDb_Reader.hh"
 
 //Svt Tables
 
-#include "tables/St_svg_geom_Table.h"
-#include "tables/St_svg_config_Table.h"
-#include "tables/St_svg_shape_Table.h"
+//XX#include "tables/St_svg_geom_Table.h"
+//XX#include "tables/St_svg_config_Table.h"
+//XX#include "tables/St_svg_shape_Table.h"
+#include "StSvtClassLibrary/StSvtConfig.hh"
+#include "StSvtClassLibrary/StSvtGeometry.hh"
 
 //StiMaker
 #include "StiMaker/StiMaker.h"
@@ -99,27 +104,33 @@ StiGeometryTransform::StiGeometryTransform()
     // read in svt geometry tables
     //*(Messenger::instance(MessageType::kGeometryMessage)) <<"Read in svt geometry tables: preparing to seg-fualt"<<endl;
 
-    St_DataSetIter local(StiMaker::instance()->GetInputDB("svt"));
+//XX    St_DataSetIter local(StiMaker::instance()->GetInputDB("svt"));
     //*(Messenger::instance(MessageType::kGeometryMessage)) <<"Instantiated local"<<endl;
 
-    svgConfig = 
-	dynamic_cast<St_svg_config *>(local("svgpars/config"))->GetTable()[0];
+//XX    svgConfig = 
+//XX	dynamic_cast<St_svg_config *>(local("svgpars/config"))->GetTable()[0];
     //*(Messenger::instance(MessageType::kGeometryMessage)) <<"Instantiated svgConfig"<<endl;
 
-    aSvgGeom = dynamic_cast<St_svg_geom *>(local("svgpars/geom"))->GetTable();
+//XX    aSvgGeom = dynamic_cast<St_svg_geom *>(local("svgpars/geom"))->GetTable();
     //*(Messenger::instance(MessageType::kGeometryMessage)) <<"Instantiated aSvgGeom"<<endl;
 
-    aSvgShape = dynamic_cast<St_svg_shape *>(local("svgpars/shape"))->GetTable();
+//XX    aSvgShape = dynamic_cast<St_svg_shape *>(local("svgpars/shape"))->GetTable();
     //*(Messenger::instance(MessageType::kGeometryMessage)) <<"Instantiated aSvgShape"<<endl;
     
+    StSvtDbMaker *pDbMaker = (StSvtDbMaker*) 
+        StiMaker::instance()->GetMaker("svtDb");
+    St_SvtDb_Reader *pDbReader = pDbMaker->get_SvtDb_Reader();
+    m_pSvtGeometry = pDbReader->getGeometry();
+    m_pSvtConfig = pDbReader->getConfiguration();
+
     //*(Messenger::instance(MessageType::kGeometryMessage)) <<"instantiate TPC coord x-form"<<endl;
     tpcTransform = new StTpcCoordinateTransform(gStTpcDb);
 
     *(Messenger::instance(MessageType::kGeometryMessage)) <<"Generating Padrow Radius Map"<<endl;
 
-    // store svt + ssd as padrows 1-7
-    for (unsigned int padrow=1; padrow<=7; ++padrow){
-      double center = centerForSvgLadder(padrow, 1).perp();
+    // store svt as padrows 1-6
+    for (unsigned int padrow=1; padrow<=6; ++padrow){
+      double center = centerForSvtLadder(padrow, 2 - padrow%2).perp();
       mpadrowradiusmap.insert( padrow_radius_map_ValType( padrow, center ) );
     }
 
@@ -244,7 +255,7 @@ int StiGeometryTransform::eastSectorForPhi(double phi, int nSectors) const
     
 } // eastSectorForPhi
 
-// returns a vector (with z==0) pointing from the origin to  the center of the given padrow or ladder.
+// returns a vector (with z==0) pointing from the origin to  the center of the given padrow or ladder.((St_db_Maker*) GetMaker("db")
 StThreeVector<double> StiGeometryTransform::centerForTpcPadrow(int sector, int padrow) const
 {
     double radius = gStTpcDb->PadPlaneGeometry()->radialDistanceAtRow(padrow);
@@ -253,12 +264,13 @@ StThreeVector<double> StiGeometryTransform::centerForTpcPadrow(int sector, int p
     return StThreeVector<double>(radius*cos(phi), radius*sin(phi), 0.);
 }
 
-// this uses the database convention of 6 svt layers + 1 ssd layer.
-// Every other svt ladder is thus bogus (1,3,5,7 on layer 1, eg), but the xform  works regardless
-StThreeVector<double> StiGeometryTransform::centerForSvgLadder(int layer, int ladder) const
+// this uses the database convention of 6 svt layers == 3 svt barrels.
+StThreeVector<double> StiGeometryTransform::centerForSvtLadder(int barrel, int ladder) const
 {
-    double radius = svgConfig.layer_radius[layer - 1];
-    int nLadders = 2*svgConfig.n_ladder[layer - 1];
+  // "Barrel" here really means Layer (1-6)
+    double radius = m_pSvtGeometry->getBarrelRadius(2*barrel - 1 + ladder%2);
+  // "Barrel" here means Barrel (1-3)
+    int nLadders = m_pSvtConfig->getNumberOfLadders(barrel);
     double phi = phiForWestSector(ladder, nLadders);
     
     return StThreeVector<double>(radius*cos(phi), radius*sin(phi), 0.);
@@ -275,31 +287,54 @@ int StiGeometryTransform::padrowForTpcCoords(const StThreeVector<double> &vec) c
     return tpcTransform->rowFromLocal( tpcTransform->rotateToLocal(vec, sector));
 }
 
-int StiGeometryTransform::barrelForSvgCoords(const StThreeVector<double> &vec) const
-{
-  double minDeltaR = 200.;
-  int minBarrel = 0;
-  for(int barrel = 1; barrel <= 4; barrel++){
-    double dBarrelRadius = svgConfig.layer_radius[2*(barrel - 1)];
-    if(barrel<4){
-      dBarrelRadius += svgConfig.layer_radius[2*barrel - 1];
-      dBarrelRadius /= 2;
-    }
-    if( fabs(dBarrelRadius - vec.perp()) < minDeltaR){
-      minDeltaR = fabs(dBarrelRadius - vec.perp());
-      minBarrel = barrel;
-    }
-  }
-  return minBarrel;
+int StiGeometryTransform::barrelForSvtCoords(const StThreeVector<double> &vec) const{
+  return (layerAndLadderForSvtCoords(vec).first - 1)/2;
 }
 
-int StiGeometryTransform::ladderForSvgCoords(const StThreeVector<double> &vec) const
+pair<int,int> StiGeometryTransform::layerAndLadderForSvtCoords(const StThreeVector<double> &vec) const
 {
-    int barrel = barrelForSvgCoords(vec);
-    int nLadders = svgConfig.n_ladder[2*(barrel - 1)];
-    if(barrel<4){ nLadders *= 2; }
-    int iSector = westSectorForPhi(vec.phi(), nLadders);
-    return iSector;
+  int iLayer = 0, iLadder=0;
+  int nBarrels = m_pSvtConfig->getNumberOfBarrels();
+  for(int iBarrel = 1; iBarrel <= nBarrels; iBarrel++){
+
+    // first, rotate to local coordinates
+    int nLadders = m_pSvtConfig->getNumberOfLadders(iBarrel);
+    double dRadius1 = m_pSvtGeometry->getBarrelRadius(2*iBarrel - 1);
+    double dRadius2 = m_pSvtGeometry->getBarrelRadius(2*iBarrel);
+    StThreeVector<double> vecLocal(vec);
+    double dDeltaPhi = 2.*M_PI/nLadders;
+    iLadder = nLadders/4;
+    while(vecLocal.phi()>  dDeltaPhi/2.){ 
+      vecLocal.rotateZ(-dDeltaPhi); 
+      iLadder--;
+    }
+    while(vecLocal.phi()<=-dDeltaPhi/2.){ 
+      vecLocal.rotateZ( dDeltaPhi); 
+      iLadder++;
+    }
+
+    if(fabs(vecLocal.x() - dRadius1)<0.1){
+      iLayer = 2*iBarrel - 1;
+      if((iLadder + iLayer)%2==0){
+        // case when ladder overlap puts the point in another svt "sector"
+        iLadder += (vecLocal.phi()>0 ? -1 : 1);
+      }
+      if(iLadder<1){        iLadder += nLadders; }
+      if(iLadder>nLadders){ iLadder -= nLadders; }
+      break;
+    }else if(fabs(vecLocal.x() - dRadius2)<0.1){
+      iLayer = 2*iBarrel;
+      if((iLadder + iLayer)%2==0){
+        // case when ladder overlap puts the point in another svt "sector"
+        iLadder += (vecLocal.phi()>0 ? -1 : 1);
+      }
+      if(iLadder<1){        iLadder += nLadders; }
+      if(iLadder>nLadders){ iLadder -= nLadders; }
+      break;
+    }
+  }
+
+  return pair<int, int>(iLayer, iLadder);
 }
     
 double StiGeometryTransform::phiForSector(int iSector, int nSectors) const
@@ -419,15 +454,15 @@ void StiGeometryTransform::operator() (const StSvtHit* svthit, StiHit* stihit){
   StThreeVector<double> position(svthit->position().x(),
                                  svthit->position().y(),
                                  svthit->position().z());
-  int iLadder = ladderForSvgCoords(position);
-  int iBarrel = barrelForSvgCoords(position);
-  int iLayer = 2*iBarrel - 1;
-  if(iLadder%2==1){ iLayer++; }
+  pair<int, int> layerAndLadder = layerAndLadderForSvtCoords(position);
+  int iLayer = layerAndLadder.first;
+  int iLadder = layerAndLadder.second;
+  int iBarrel = (iLayer + 1)/2;
 
   // first the position & ref angle
-  int nLadders = svgConfig.n_ladder[iLayer - 1]*2; // 0-indexed
+  int nLadders = m_pSvtConfig->getNumberOfLadders(iBarrel);
   double dRefAngle = phiForSector( iLadder, nLadders );
-  double dPosition = mpadrowradiusmap[iLayer]; // this is 1-indexed
+  double dPosition = m_pSvtGeometry->getBarrelRadius(iLayer);
   stihit->setRefangle( dRefAngle );
   stihit->setPosition( dPosition );
 
@@ -449,10 +484,11 @@ void StiGeometryTransform::operator() (const StSvtHit* svthit, StiHit* stihit){
   // find detector for this hit
   char szBuf[100];
 
-  sprintf(szBuf, "Svg/Layer_%d/Ladder_%d/Ladder", iLayer, iLadder);
+  sprintf(szBuf, "Svt/Layer_%d/Ladder_%d/Wafers", iLayer, iLadder);
   StiDetector* layer = StiDetectorFinder::instance()->findDetector(szBuf);
   if (!layer) {
     *(Messenger::instance(MessageType::kGeometryMessage)) <<"Error, no detector for layer "<<iLayer<<"\tladder: "<<iLadder<<"\tABORT"<<endl;
+    cerr <<"Error, no detector " << szBuf << endl;
     return;
   }
   
@@ -464,7 +500,8 @@ void StiGeometryTransform::operator() (const StiHit* stihit, StSvtHit* svthit){
 }
 
 void StiGeometryTransform::operator() (const StSsdHit* ssdhit, StiHit* stihit){
-  
+
+/* //XX  
   //We'll temporarily keep
   stihit->setStHit(const_cast<StSsdHit*>(ssdhit));
 
@@ -494,6 +531,7 @@ void StiGeometryTransform::operator() (const StSsdHit* ssdhit, StiHit* stihit){
   char szBuf[100];
   sprintf(szBuf, "Svg/Layer_7/Ladder_%d/Ladder", (int) ssdhit->ladder());
   stihit->setDetector( pFinder->findDetector(szBuf) );
+*/
 }
 
 void StiGeometryTransform::operator() (const StiHit* stihit, StSsdHit* ssdhit){

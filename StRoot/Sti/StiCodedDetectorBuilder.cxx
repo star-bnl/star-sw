@@ -12,8 +12,10 @@ using std::string;
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcDb/StTpcPadPlaneI.h"
 #include "StTpcDb/StTpcDimensionsI.h"
-#include "tables/St_svg_config_Table.h"
-#include "tables/St_svg_shape_Table.h"
+//XX#include "tables/St_svg_config_Table.h"
+//XX#include "tables/St_svg_shape_Table.h"
+#include "StSvtClassLibrary/StSvtConfig.hh"
+#include "StSvtClassLibrary/StSvtGeometry.hh"
 
 //Sti
 #include "StiGeometryTransform.h"
@@ -86,7 +88,7 @@ void StiCodedDetectorBuilder::buildShapes()
 
   int nPadrows = pPadPlane->numberOfRows();
   int nInnerPadrows = pPadPlane->numberOfInnerRows();
-  for(int iPadrow = 0; iPadrow<nPadrows; iPadrow++){
+  for(int iPadrow = 1; iPadrow<=nPadrows; iPadrow++){
     StiPlanarShape *pShape = new StiPlanarShape;
     
     if(iPadrow<nInnerPadrows){
@@ -97,54 +99,50 @@ void StiCodedDetectorBuilder::buildShapes()
           
     pShape->setHalfDepth(pDimensions->tpcTotalLength()/2.);
 
-    pShape->setHalfWidth(pPadPlane->PadPitchAtRow(iPadrow + 1) *
-                         pPadPlane->numberOfPadsAtRow(iPadrow + 1) / 2.);
+    pShape->setHalfWidth(pPadPlane->PadPitchAtRow(iPadrow) *
+                         pPadPlane->numberOfPadsAtRow(iPadrow) / 2.);
 
-    sprintf(szName, "Tpc/Padrow_%d", iPadrow + 1);
+    sprintf(szName, "Tpc/Padrow_%d", iPadrow);
     NameMapKey key(szName);
     mShapeMap.insert( shapeMapValType(key, pShape) );
 
   } // for iPadrow
   
   //---------------------------------------------------------------------------
-  // svg (svt + ssd)
+  // svt
   //---------------------------------------------------------------------------
   
   // get the configuration & geometry tables
   StiGeometryTransform *pGeometryTransform = StiGeometryTransform::instance();
-  svg_config_st svgConfig = pGeometryTransform->getSvgConfig();
-  svg_shape_st *pSvgShape = pGeometryTransform->getSvgShape();
+  StSvtConfig *pSvtConfig = pGeometryTransform->getSvtConfig();
+  StSvtGeometry *pSvtGeometry = pGeometryTransform->getSvtGeometry();
+  //XXsvg_config_st svgConfig = pGeometryTransform->getSvgConfig();
+  //XXsvg_shape_st *pSvgShape = pGeometryTransform->getSvgShape();
 
-  // extract the wafer shape parameters by looking up the shape code used by
-  // the first wafer (assume SVT) and last wafer (assume SSD).
-  svg_shape_st svtWaferShape = pSvgShape[ 0 ];
-  svg_shape_st ssdWaferShape = pSvgShape[ 1 ];
+//XX  // extract the wafer shape parameters by looking up the shape code used by
+//XX  // the first wafer (assume SVT) and last wafer (assume SSD).
+//XX  svg_shape_st svtWaferShape = pSvgShape[ 0 ];
+//XX  svg_shape_st ssdWaferShape = pSvgShape[ 1 ];
 
-  Int_t nLayers = svgConfig.n_layer; // last layer is ssd
-  for(Int_t iLayer = 0; iLayer<nLayers; iLayer++){
+  Int_t nLayers = 2*pSvtConfig->getNumberOfBarrels();
+  for(Int_t iLayer = 1; iLayer<=nLayers; iLayer++){
     StiPlanarShape *pShape = new StiPlanarShape;
 
-    Int_t nWafers = svgConfig.n_wafer[iLayer];
+    Int_t nWafers = pSvtConfig->getNumberOfWafers((iLayer + 1)/2);
 
-    if (iLayer < nLayers - 1){ // svt
-      pShape->setHalfWidth(svtWaferShape.shape[0]);
-      pShape->setHalfDepth(svtWaferShape.shape[1] * nWafers);
-      pShape->setThickness(2.*svtWaferShape.shape[2]);
-    } else { // ssd
-      pShape->setHalfWidth(ssdWaferShape.shape[0]);
-      pShape->setHalfDepth(ssdWaferShape.shape[1] * nWafers);
-      pShape->setThickness(2.*ssdWaferShape.shape[2]);
-    }
+    pShape->setHalfWidth(pSvtGeometry->getWaferWidth());
+    pShape->setHalfDepth(nWafers*pSvtGeometry->getWaferLength());
+    pShape->setThickness(2.*pSvtGeometry->getWaferThickness());
 
-    sprintf(szName, "Svg/Layer_%d/Ladder", iLayer + 1);
+    sprintf(szName, "Svt/Layer_%d/Wafers", iLayer);
     NameMapKey key(szName);
     mShapeMap.insert( shapeMapValType(key, pShape) );
 
     // now do hybrids
-    if(iLayer == nLayers - 1){ continue; }
 
-    pShape = new StiPlanarShape( ssdWaferShape.shape[1] * nWafers, 0.1, 1.);
-    sprintf(szName, "Svg/Layer_%d/Hybrid", iLayer + 1);
+    pShape = new StiPlanarShape(nWafers*pSvtGeometry->getWaferLength(),
+                                0.1, 1.);
+    sprintf(szName, "Svt/Layer_%d/Hybrids", iLayer);
     NameMapKey key2(szName);
     mShapeMap.insert( shapeMapValType(key2, pShape) );
 
@@ -185,23 +183,23 @@ void StiCodedDetectorBuilder::buildDetectors(){
   StiMaterial *pGas = findMaterial("P10");
 
   int nPadrows = pPadPlane->numberOfRows();
-  for(int iPadrow = 0; iPadrow<nPadrows; iPadrow++){
+  for(int iPadrow = 1; iPadrow<=nPadrows; iPadrow++){
 
     // create properties shared by all sectors in this padrow
-    float fRadius = pPadPlane->radialDistanceAtRow(iPadrow + 1);
-    sprintf(szName, "Tpc/Padrow_%d", iPadrow + 1);
+    float fRadius = pPadPlane->radialDistanceAtRow(iPadrow);
+    sprintf(szName, "Tpc/Padrow_%d", iPadrow);
     StiPlanarShape *pShape = (StiPlanarShape *)findShape(szName);
 
-    for(int iSector = 0; iSector<12; iSector++){
+    for(int iSector = 1; iSector<=12; iSector++){
 
       // create unique detector properties (placement & name)
       StiPlacement *pPlacement = new StiPlacement;
       pPlacement->setZcenter(0.);
       pPlacement->setNormalRep(
-          pGeometryTransform->phiForSector(iSector + 1, 12), fRadius, 0.); 
+          pGeometryTransform->phiForSector(iSector, 12), fRadius, 0.); 
       pPlacement->setLayerRadius(fRadius);
 
-      sprintf(szName, "Tpc/Padrow_%d/Sector_%d", iPadrow + 1, iSector + 1);
+      sprintf(szName, "Tpc/Padrow_%d/Sector_%d", iPadrow, iSector);
 
       // now fill in the detector object and save it in our vector
       StiDetector *pDetector = new StiDetector;
@@ -227,34 +225,35 @@ void StiCodedDetectorBuilder::buildDetectors(){
   }// for iPadrow
 
   //---------------------------------------------------------------------------
-  // svg (svt + ssd)
+  // svt
   //---------------------------------------------------------------------------
   
   // get the configuration & geometry tables
-  svg_config_st svgConfig = pGeometryTransform->getSvgConfig();
+  StSvtConfig *pSvtConfig = pGeometryTransform->getSvtConfig();
+  StSvtGeometry *pSvtGeometry = pGeometryTransform->getSvtGeometry();
 
   pGas = findMaterial("Air");
   StiMaterial *pLadderMaterial = findMaterial("Si");
   StiMaterial *pHybridMaterial = findMaterial("Hybrid");
 
-  int nLayers = svgConfig.n_layer; // last layer is ssd
-  for(int iLayer = 0; iLayer<nLayers; iLayer++){
+  int nLayers = 2*pSvtConfig->getNumberOfBarrels();
+  for(int iLayer = 1; iLayer<=nLayers; iLayer++){
  
     //-----------------------------------------
     // calculate generic params for this layer
  
-    sprintf(szName, "Svg/Layer_%d/Ladder", iLayer + 1);
+    sprintf(szName, "Svt/Layer_%d/Wafers", iLayer);
     StiPlanarShape *pLadderShape = (StiPlanarShape *)findShape(szName);
-    sprintf(szName, "Svg/Layer_%d/Hybrid", iLayer + 1);
+    sprintf(szName, "Svt/Layer_%d/Hybrids", iLayer);
     StiPlanarShape *pHybridShape = (StiPlanarShape *)findShape(szName);
 
-    // phi increment between ladders
-    int nLadders = svgConfig.n_ladder[iLayer];
+    // number of ladders per layer (not barrel) & phi increment between ladders
+    int nLadders = pSvtConfig->getNumberOfLadders((iLayer + 1)/2)/2;
     float fDeltaPhi = 2.*M_PI/nLadders;
 
     // width of gap between the edges of 2 adjacent ladders:
     //   first, the angle subtended by 1/2 of the ladder
-    float fLadderRadius = svgConfig.layer_radius[iLayer];
+    float fLadderRadius = pSvtGeometry->getBarrelRadius(iLayer);
     float fHalfLadderPhi = atan(pLadderShape->getHalfWidth()/fLadderRadius);
     float fHalfGapPhi = fDeltaPhi/2. - fHalfLadderPhi;    
 
@@ -265,34 +264,21 @@ void StiCodedDetectorBuilder::buildDetectors(){
     //   finally half the gap distance
     float fHalfGap = fGapRadius*tan(fHalfGapPhi);
 
-    // determine the radius for the detector's (ladders + hybrids)
-    float fLayerRadius = fLadderRadius;
-    if(iLayer < nLayers - 1){
-      fLayerRadius += fGapRadius;
-      fLayerRadius /= 2.;
-    }
+    // determine the radius for the detector (ladders + hybrids)
+    float fLayerRadius = (fLadderRadius + fGapRadius)/2.;
 
-    for(Int_t iLadder = 0; iLadder<nLadders; iLadder++){
+    for(Int_t iLadder = 1; iLadder<=nLadders; iLadder++){
 
-      // ladder
-      int jLadder = iLadder + 1; // formal ladder number
-      if(iLayer<nLayers-1){
-        jLadder = 2*(iLadder + 1) - iLayer%2; // count by 2s in svt
-      }
+      // formal ladder number within barrel (odd or even, depending on layer)
+      int jLadder = 2*(iLadder) - (iLayer + 1)%2; // count by 2s in svt
 
       StiPlacement *pPlacement = new StiPlacement;
       pPlacement->setZcenter(0.);
       pPlacement->setLayerRadius(fLayerRadius);
-      float fLadderPhi = pGeometryTransform->phiForSector(
-          jLadder, (iLayer<nLayers-1) ? 2*nLadders : nLadders);
+      float fLadderPhi = pGeometryTransform->phiForSector(jLadder, 2*nLadders);
 
-      if(iLayer < nLayers - 1){
-        pPlacement->setCenterRep(fLadderPhi, fLadderRadius, 0.); 
-      }else{ // svt ladders have slight tilt
-        pPlacement->setCenterRep(fLadderPhi, fLadderRadius, 0.09); 
-      }
-      sprintf(szName, "Svg/Layer_%d/Ladder_%d/Ladder", 
-              iLayer + 1, jLadder);
+      pPlacement->setCenterRep(fLadderPhi, fLadderRadius, 0.); 
+      sprintf(szName, "Svt/Layer_%d/Ladder_%d/Wafers", iLayer, jLadder);
 
       StiDetector *pLadder = new StiDetector;
       pLadder->setName(szName);
@@ -311,8 +297,6 @@ void StiCodedDetectorBuilder::buildDetectors(){
       NameMapKey key(szName);
       mDetectorMap.insert( detectorMapValType(key, pLadder) );
 
-      if(iLayer == nLayers - 1){ continue; }
-
       // hybrid 1
       pPlacement = new StiPlacement;
       pPlacement->setZcenter(0.);
@@ -320,8 +304,7 @@ void StiCodedDetectorBuilder::buildDetectors(){
       pPlacement->setNormalRep(fLadderPhi + fDeltaPhi/2., fGapRadius,
                                pHybridShape->getHalfWidth() - fHalfGap);
       
-      sprintf(szName, "Svg/Layer_%d/Ladder_%d/Hybrid_1", 
-              iLayer + 1, jLadder);
+      sprintf(szName, "Svt/Layer_%d/Ladder_%d/Hybrids_1", iLayer, jLadder);
 
       StiDetector *pHybrid1 = new StiDetector;
       pHybrid1->setName(szName);
@@ -348,8 +331,7 @@ void StiCodedDetectorBuilder::buildDetectors(){
       pPlacement->setNormalRep(fLadderPhi - fDeltaPhi/2., fGapRadius,
                                fHalfGap - pHybridShape->getHalfWidth());
       
-      sprintf(szName, "Svg/Layer_%d/Ladder_%d/Hybrid_2", 
-              iLayer + 1, jLadder);
+      sprintf(szName, "Svt/Layer_%d/Ladder_%d/Hybrids_2", iLayer, jLadder);
 
       StiDetector *pHybrid2 = new StiDetector;
       pHybrid2->copy(*pHybrid1);
@@ -405,4 +387,3 @@ void StiCodedDetectorBuilder::buildDetectors(){
   } // for iSector
 
 } // buildDetectors()
-
