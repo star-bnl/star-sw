@@ -2,6 +2,10 @@ CC:>--------------------------------------------------------------------
 CC: FILE:       dst_monitor_soft_filler.F
 CC: HISTORY:
 CC:           Created on August 12, 1998 - First Version
+CC:
+CC:           Modified on January 21, 1999 - include FTPC data
+CC:                       Janet Seyboth, jcs@mppmu.mpg.de
+CC:
 CC:<--------------------------------------------------------------------
 
       INTEGER*4 FUNCTION DST_MONITOR_SOFT_FILLER(
@@ -9,8 +13,10 @@ CC:<--------------------------------------------------------------------
      2       scs_cluster_h,       scs_cluster ,
      3         tcl_tphit_h,         tcl_tphit ,
      4           scs_spt_h,           scs_spt ,
+     4       fcl_fppoint_h,       fcl_fppoint ,
      5         tpt_track_h,         tpt_track ,
      6         stk_track_h,         stk_track ,
+     6       fpt_fptrack_h,       fpt_fptrack ,
      7     svm_evt_match_h,     svm_evt_match ,
      8           ctu_cor_h,           ctu_cor ,
      9        dst_vertex_h,        dst_vertex ,
@@ -34,10 +40,14 @@ CC:        tcl_tphit     - TPC reconstructed space points
 CC:      tcl_tphit_h     - Header Structure for tcl_tphit
 CC:          scs_spt     - SVT reconstructed space points
 CC:        scs_spt_h     - Header Structure for scs_spt
+CC:      fcl_fppoint     - FTPC reconstructed space points
+CC:    fcl_fppoint_h     - Header Structure for fcl_fppoint
 CC:        tpt_track     - TPC reconstructed tracks
 CC:      tpt_track_h     - Header Structure for tpt_track
 CC:        stk_track     - SVT reconstructed tracks
 CC:      stk_track_h     - Header Structure for stk_track
+CC:      fpt_fptrack     - FTPC reconstructed tracks
+CC:    fpt_fptrack_h     - Header Structure for fpt_fptrack
 CC:    svm_evt_match     - SVT-TPC track-track match list
 CC:  svm_evt_match_h     - Header Structure for svm_evt_match
 CC:          ctu_cor     - CTB hits
@@ -59,6 +69,9 @@ CC:  Local Variable Type Declarations:
       integer*4 tpc_track,n_svt_trk_pad,n_svt_trk_drf
       parameter (ntpc_max = 10000)
       integer*4 track_index(ntpc_max), tpc_trk_row
+      integer*4 iftpc, ihit, nhits(2)
+      integer*4 max_ftpc_hits
+      parameter (max_ftpc_hits = 10)
 
       real*4  zbin(11), zstep, zmin
       parameter (zmin = -200.0)
@@ -72,21 +85,7 @@ CC:  Set all unused (at this time) monitor values to zero
 
       dst_monitor_soft(1).n_clus_ftpc(1)          = 0
       dst_monitor_soft(1).n_clus_ftpc(2)          = 0
-      dst_monitor_soft(1).n_pts_ftpc(1)           = 0
-      dst_monitor_soft(1).n_pts_ftpc(2)           = 0
-      dst_monitor_soft(1).chrg_ftpc_tot(1)        = 0.0
-      dst_monitor_soft(1).chrg_ftpc_tot(2)        = 0.0
       dst_monitor_soft(1).energy_emc              = 0.0
-      dst_monitor_soft(1).n_trk_ftpc(1)           = 0
-      dst_monitor_soft(1).n_trk_ftpc(2)           = 0
-      dst_monitor_soft(1).hit_frac_ftpc(1)        = 0.0
-      dst_monitor_soft(1).hit_frac_ftpc(2)        = 0.0
-      dst_monitor_soft(1).avg_trkL_ftpc(1)        = 0.0
-      dst_monitor_soft(1).avg_trkL_ftpc(2)        = 0.0
-      dst_monitor_soft(1).res_pad_ftpc(1)         = 0.0
-      dst_monitor_soft(1).res_pad_ftpc(2)         = 0.0
-      dst_monitor_soft(1).res_drf_ftpc(1)         = 0.0
-      dst_monitor_soft(1).res_drf_ftpc(2)         = 0.0
 
       do i = 1,20
          dst_monitor_soft(1).cpu_time(i)          = 0.0
@@ -447,6 +446,125 @@ CC:  Fraction of SVT hits used in SVT tracks
      1      dst_monitor_soft(1).hit_frac_svt/float(scs_spt_h.nok)
       end if
 
+CC:  Fill FTPC monitor information
+
+      dst_monitor_soft(1).n_pts_ftpc(1)           = 0
+      dst_monitor_soft(1).n_pts_ftpc(2)           = 0
+      dst_monitor_soft(1).chrg_ftpc_tot(1)        = 0.0
+      dst_monitor_soft(1).chrg_ftpc_tot(2)        = 0.0
+      dst_monitor_soft(1).n_trk_ftpc(1)           = 0
+      dst_monitor_soft(1).n_trk_ftpc(2)           = 0
+      dst_monitor_soft(1).hit_frac_ftpc(1)        = 0.0
+      dst_monitor_soft(1).hit_frac_ftpc(2)        = 0.0
+      dst_monitor_soft(1).avg_trkL_ftpc(1)        = 0.0
+      dst_monitor_soft(1).avg_trkL_ftpc(2)        = 0.0
+      dst_monitor_soft(1).res_pad_ftpc(1)         = 0.0
+      dst_monitor_soft(1).res_pad_ftpc(2)         = 0.0
+      dst_monitor_soft(1).res_drf_ftpc(1)         = 0.0
+      dst_monitor_soft(1).res_drf_ftpc(2)         = 0.0
+
+CC:   Loop over FTPC space points
+    
+      if(fcl_fppoint_h.nok .gt. 0) then
+         do i = 1,fcl_fppoint_h.nok
+CC:         Determine if space point is in FTPC West
+            if (fcl_fppoint(i).row.ge.1 .and. 
+     1              fcl_fppoint(i).row.le.10) then 
+               iftpc = 1 
+CC:         or in FTPC East
+            else if (fcl_fppoint(i).row.ge.11 .and. 
+     1              fcl_fppoint(i).row.le.20) then
+               iftpc = 2
+            end if
+CC:         Count total number of space points in FTPC West and in FTPC East
+            dst_monitor_soft(1).n_pts_ftpc(iftpc) =
+     1         dst_monitor_soft(1).n_pts_ftpc(iftpc) + 1
+CC:         Accumulate total charge deposition in FTPC West and in FTPC East
+            dst_monitor_soft(1).chrg_ftpc_tot(iftpc) =
+     1         dst_monitor_soft(1).chrg_ftpc_tot(iftpc) + fcl_fppoint(i).charge
+         end do
+      end if
+
+
+CC:   Loop over FTPC reconstructed tracks
+
+      if(fpt_fptrack_h.nok .gt. 0) then
+         nhits(1) = 0
+         nhits(2) = 0
+         do i = 1,fpt_fptrack_h.nok
+CC:        Determine if track is in FTPC West
+           do ihit = 1,max_ftpc_hits
+            if (fpt_fptrack(i).hitid(ihit) .gt. -1 ) then
+              if (fcl_fppoint(fpt_fptrack(i).hitid(ihit)).row .ge. 1 .and.
+     1          fcl_fppoint(fpt_fptrack(i).hitid(ihit)).row .le. 10) then
+                iftpc = 1
+CC:        or in FTPC East
+              else if (fcl_fppoint(fpt_fptrack(i).hitid(ihit)).row .ge. 11
+     1         .and. fcl_fppoint(fpt_fptrack(i).hitid(ihit)).row .le. 20) then
+                  iftpc = 2
+              end if
+            end if
+           end do
+
+CC:        Count total number of reconstructed tracks in FTPC West and East
+
+           dst_monitor_soft(1).n_trk_ftpc(iftpc) =
+     1         dst_monitor_soft(1).n_trk_ftpc(iftpc) + 1
+
+CC:        Count number of hits used in FTPC West and East
+
+           nhits(iftpc) = nhits(iftpc) + fpt_fptrack(i).nrec
+
+CC:        Accumulate residual, pad direction for FTPC West and East
+
+           dst_monitor_soft(1).res_pad_ftpc(iftpc) =
+     1        dst_monitor_soft(1).res_pad_ftpc(iftpc) + fpt_fptrack(i).chisq(1)
+
+CC:        Accumulate residual, drift direction for FTPC West and East
+
+           dst_monitor_soft(1).res_drf_ftpc(iftpc) =
+     1        dst_monitor_soft(1).res_drf_ftpc(iftpc) + fpt_fptrack(i).chisq(2)
+
+         end do 
+      print *," res_pad_ftpc = ",dst_monitor_soft(1).res_pad_ftpc(1),
+     1            dst_monitor_soft(1).res_pad_ftpc(2)
+      print *," res_drf_ftpc = ",dst_monitor_soft(1).res_drf_ftpc(1),
+     1            dst_monitor_soft(1).res_drf_ftpc(2)
+ 
+CC:      Compute fraction of space points used in FTPC West and East
+
+         dst_monitor_soft(1).hit_frac_ftpc(1) = 
+     1       float(nhits(1))/float(dst_monitor_soft(1).n_pts_ftpc(1))
+         dst_monitor_soft(1).hit_frac_ftpc(2) = 
+     1        float(nhits(2))/float(dst_monitor_soft(1).n_pts_ftpc(2))
+
+CC:      Compute average number of space points per reconstructed track
+CC:      used in FTPC West and East
+
+         dst_monitor_soft(1).avg_trkL_ftpc(1) = 
+     1        float(nhits(1))/float(dst_monitor_soft(1).n_trk_ftpc(1))
+         dst_monitor_soft(1).avg_trkL_ftpc(2) =
+     1        float(nhits(2))/float(dst_monitor_soft(1).n_trk_ftpc(2))
+
+CC:      Compute average residual, pad direction for FTPC West and East
+
+         dst_monitor_soft(1).res_pad_ftpc(1) =
+     1    dst_monitor_soft(1).res_pad_ftpc(1)/dst_monitor_soft(1).n_trk_ftpc(1)
+         dst_monitor_soft(1).res_pad_ftpc(2) =
+     1    dst_monitor_soft(1).res_pad_ftpc(2)/dst_monitor_soft(1).n_trk_ftpc(2)
+
+CC:      Compute average residual, drift direction for FTPC West and East
+
+         dst_monitor_soft(1).res_drf_ftpc(1) =
+     1    dst_monitor_soft(1).res_drf_ftpc(1)
+     2        /dst_monitor_soft(1).n_trk_ftpc(1)
+         dst_monitor_soft(1).res_drf_ftpc(2) =
+     1    dst_monitor_soft(1).res_drf_ftpc(2)
+     2       /dst_monitor_soft(1).n_trk_ftpc(2)
+
+      end if
+ 
+
 CC:  Fill primary vertex monitor information
 
       do i = 1,10
@@ -467,6 +585,23 @@ CC:  Fill primary vertex monitor information
          end do
       end if
 
+      print *,"  n_clus_ftpc = ",dst_monitor_soft(1).n_clus_ftpc(1),
+     1          dst_monitor_soft(1).n_clus_ftpc(2)
+      print *," n_pts_ftpc = ",dst_monitor_soft(1).n_pts_ftpc(1),
+     1           dst_monitor_soft(1).n_pts_ftpc(2)
+      print *," chrg_ftpc_tot = ",dst_monitor_soft(1).chrg_ftpc_tot(1),
+     1           dst_monitor_soft(1).chrg_ftpc_tot(2)
+      print *," n_trk_ftpc = ",dst_monitor_soft(1).n_trk_ftpc(1),
+     1           dst_monitor_soft(1).n_trk_ftpc(2)
+      print *," nhits = ",nhits(1),nhits(2)
+      print *," hit_frac_ftpc = ",dst_monitor_soft(1).hit_frac_ftpc(1),
+     1           dst_monitor_soft(1).hit_frac_ftpc(2)
+      print *," avg_trkL_ftpc = ",dst_monitor_soft(1).avg_trkL_ftpc(1),
+     1            dst_monitor_soft(1).avg_trkL_ftpc(2)
+      print *," res_pad_ftpc = ",dst_monitor_soft(1).res_pad_ftpc(1),
+     1            dst_monitor_soft(1).res_pad_ftpc(2)
+      print *," res_drf_ftpc = ",dst_monitor_soft(1).res_drf_ftpc(1),
+     1            dst_monitor_soft(1).res_drf_ftpc(2)
 CC:  Successful completion of dst_monitor_soft_filler PAM
 
 
