@@ -551,9 +551,10 @@ return
           for/call g2t
 * try this - error check
           if ($iquest(100) <1 .or. $iquest(100) > 100000) then
+            message ..... g2t bad .....
 	    nev_proc = [nev_proc] - 1
 	    nev_total = [nev_total] - 1
-	    goto EOF
+	    goto NEXT_EVENT
 	  endif
             cd /dui
             tdm/table/rowcount event/geant/Event/g2t_vertex
