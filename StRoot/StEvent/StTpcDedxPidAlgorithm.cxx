@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.14 2002/02/06 23:00:54 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.15 2002/03/25 21:02:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.15  2002/03/25 21:02:51  ullrich
+ * Made BetheBloch a static global variable.
+ *
  * Revision 2.14  2002/02/06 23:00:54  ullrich
  * Added float.h.
  *
@@ -74,7 +77,8 @@
 #include "StTrackGeometry.h"
 #include "BetheBloch.h"
 
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.14 2002/02/06 23:00:54 ullrich Exp $";
+static BetheBloch theBetheBloch;
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.15 2002/03/25 21:02:51 ullrich Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -164,21 +168,7 @@ StTpcDedxPidAlgorithm::meanPidFunction(const StParticleDefinition* particle) con
     if (!mTrack) return 0;
 
     double momentum  = abs(mTrack->geometry()->momentum());
-    
-    // placeholder constants for charcaterizeing bethe-bloch curve
-    // use some data-base solution
-    
-    //double bpar[3] = {0.1221537e-06,-4.608514, 5613.} ;
-    
-    //double gamma =sqrt(pow(momentum/particle->mass(),2)+1.);
-    //double beta = sqrt(1. - 1./pow(gamma,2));
-    //double rise = bpar[2]*pow(beta*gamma,2);
-    //return beta > 0 ? bpar[0]/pow(beta,2)*(0.5*log(rise)-pow(beta,2)-bpar[1]) : 1000;
-
-    //MLM (7/27/00)
-    BetheBloch bb;
-    return bb(momentum/particle->mass());
-
+    return theBetheBloch(momentum/particle->mass());
 }
 
 double
@@ -187,7 +177,7 @@ StTpcDedxPidAlgorithm::sigmaPidFunction(const StParticleDefinition* particle) co
     if (!mTraits) return 0;
     
     // calcuates average resolution of tpc dedx
-//     double dedx_expected = meanPidFunction(particle);
+    // double dedx_expected = meanPidFunction(particle);
     
     // resolution depends on the number of points used in truncated mean
     
