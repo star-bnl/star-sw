@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.48 2005/01/27 05:28:25 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.49 2005/02/08 17:22:46 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.49  2005/02/08 17:22:46  genevb
+// PMD histo changes, handle estGlobal/ITTF tracks
+//
 // Revision 2.48  2005/01/27 05:28:25  genevb
 // PMD changes
 //
@@ -2002,24 +2005,24 @@ void StQABookHist::BookHistFPD(){
 void StQABookHist::BookHistPMD(){
 
   QAH::MMH1F(m_pmd_sm_hit,12,"QaPmdSmHit%d",
-	     "PMD SM-wise Hit Multiplicity %02d-%02d",1000,0.,5000.,2);
+	     "PMD SM-wise Hit Multiplicity %02d-%02d",1000,0.,500.,2);
   QAH::MMH1F(m_pmd_sm_adc,12,"QaPmdSmAdcHit%d",
-	     "PMD SM-wise ADC/Hit Multiplicity %02d-%02d",100,0.,1000.,2);
+	     "PMD SM-wise ADC/Hit Multiplicity %02d-%02d",100,0.,600.,2);
   QAH::MMH1F(m_pmd_chain_hit,24,"QaPmdChHitChain%d",
 	     "PMD Channel-wise Hit, Chain %02d-%02d",1728,-0.5,1727.5,2);
   QAH::MMH1F(m_pmd_chain_adc,24,"QaPmdChAdcChain%d",
 	     "PMD Channel-wise ADC, Chain %02d-%02d",1728,-0.5,1727.5,2);
 
-  m_pmd_total_hit = QAH::H2F("QaPmdTotalHit","PMD Total Hits",100,0.,1e5,100,0.,4.);
+  m_pmd_total_hit = QAH::H2F("QaPmdTotalHit","PMD Total Hits",100,0.,2e5,100,0.,4.);
   m_pmd_total_hit->SetXTitle("event id");
   m_pmd_total_hit->SetYTitle("log10");
-  m_pmd_total_adc = QAH::H2F("QaPmdTotalAdc","PMD Total ADC",100,0.,1e5,100,0.,6.);
+  m_pmd_total_adc = QAH::H2F("QaPmdTotalAdc","PMD Total ADC",100,0.,2e5,100,0.,6.);
   m_pmd_total_adc->SetXTitle("event id");
   m_pmd_total_adc->SetYTitle("log10");
-  m_cpv_total_hit = QAH::H2F("QaCpvTotalHit","CPV Total Hits",100,0.,1e5,100,0.,4.);
+  m_cpv_total_hit = QAH::H2F("QaCpvTotalHit","CPV Total Hits",100,0.,2e5,100,0.,4.);
   m_cpv_total_hit->SetXTitle("event id");
   m_cpv_total_hit->SetYTitle("log10");
-  m_cpv_total_adc = QAH::H2F("QaCpvTotalAdc","CPV Total ADC",100,0.,1e5,100,0.,6.);
+  m_cpv_total_adc = QAH::H2F("QaCpvTotalAdc","CPV Total ADC",100,0.,2e5,100,0.,6.);
   m_cpv_total_adc->SetXTitle("event id");
   m_cpv_total_adc->SetYTitle("log10");
   

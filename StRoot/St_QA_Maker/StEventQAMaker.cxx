@@ -374,14 +374,42 @@ void StEventQAMaker::MakeHistGlob() {
   Int_t cnttrkgFW=0;
   
   // Determine if Sti was run:
-  if ((GetChain()->GetMaker("StiMaker")) ||
-      (GetChain()->FindByName("StiRunco")) )
+  if ((!ITTF) &&
+      ((GetChain()->GetMaker("StiMaker")) ||
+       (GetChain()->FindByName("StiRunco"))) ) {
     ITTF = kTRUE;
+    EST = 0;
+  }
+
+  // Determine if EST was run:
+  // If ITTF, definitely no EST
+  // If estGlobal tracks, definitely EST
+  // Otherwise we are never really sure...?
+  //   (could be global tracks with no estGlobal tracks)
+  if ((!ITTF) && (EST <= 0)) {
+    int estTrackCount = 0;
+    int gloTrackCount = 0;
+    for (UInt_t i=0; i<theNodes.size(); i++) {
+      StTrack *globtrk = theNodes[i]->track(estGlobal);
+      if (!globtrk) continue;
+      estTrackCount += theNodes[i]->entries(estGlobal);
+    }
+    for (UInt_t i=0; i<theNodes.size(); i++) {
+      StTrack *globtrk = theNodes[i]->track(global);
+      if (!globtrk) continue;
+      gloTrackCount += theNodes[i]->entries(global);
+    }
+    if (estTrackCount > 0) EST = 1; // EST was run
+    else if (gloTrackCount > 0) EST = 0; // EST appears not to have been run
+    // else whatever state we were in before
+  }
+  StTrackType estOrGlobal = global;
+  if (EST > 0) estOrGlobal = estGlobal;
 
   for (UInt_t i=0; i<theNodes.size(); i++) {
-    StTrack *globtrk = theNodes[i]->track(global);
+    StTrack *globtrk = theNodes[i]->track(estOrGlobal);
     if (!globtrk) continue;
-    cnttrk += theNodes[i]->entries(global);
+    cnttrk += theNodes[i]->entries(estOrGlobal);
     hists->m_globtrk_iflag->Fill(globtrk->flag());
     const StTrackTopologyMap& map=globtrk->topologyMap();
     if (map.trackTpcOnly()) cnttrkT++;
@@ -957,6 +985,9 @@ void StEventQAMaker::MakeHistPrim() {
     cnttrk = primVtx->numberOfDaughters();
     hists->m_primtrk_tot->Fill(cnttrk);
     hists->m_primtrk_tot_sm->Fill(cnttrk);
+
+    StTrackType estOrGlobal = global;
+    if (EST > 0) estOrGlobal = estGlobal;
     
     for (UInt_t i=0; i<primVtx->numberOfDaughters(); i++) {
       StTrack *primtrk = primVtx->daughter(i);
@@ -975,7 +1006,7 @@ void StEventQAMaker::MakeHistPrim() {
 	StPhysicalHelixD hx = geom->helix();
 	StPhysicalHelixD ohx = outerGeom->helix();
 	
-	StTrack *gtrack = primtrk->node()->track(global);
+	StTrack *gtrack = primtrk->node()->track(estOrGlobal);
         if (!gtrack || gtrack->bad()) continue;
 	StTrackFitTraits& gfTraits = gtrack->fitTraits();
 	Int_t nhit_prim_fit = fTraits.numberOfFitPoints();
@@ -2101,7 +2132,7 @@ void StEventQAMaker::MakeHistPMD() {
     mPmdGeom->readBoardDetail(mRunNumber);
     if (maputil) delete maputil;
     maputil = new StPmdMapUtil();
-    maputil->StoreMapInfo();
+    maputil->StoreMapInfo(mRunNumber);
   }
   //get PhmdCollection
   StPhmdCollection* phmdcl = (StPhmdCollection*) (event->phmdCollection());
@@ -2130,14 +2161,19 @@ void StEventQAMaker::MakeHistPMD() {
 		Int_t adc=rawHit[k]->adc();
 		TotalAdc+=adc;
 		TotalHit++;
-		Int_t channel=-1;
-		Int_t chain=-1;
-		maputil->ReverseChannelOriginal(sm+1,row+1,col+1,channel);
-		maputil->ChainNumber(sm+1,row+1,col+1,chain);
-		if (chain>0 && channel>=0 && chain<=49) {
-		  Int_t ch1 = chain-1;
-		  hists->m_pmd_chain_adc[ch1/2]->Fill(channel,ch1%2,adc);
-		  hists->m_pmd_chain_hit[ch1/2]->Fill(channel,ch1%2);
+		Int_t chainR, channelOR, channelCR;
+		if (d==0) {
+		  maputil->ReverseChannelOriginal(sm+13,row+1,col+1,channelOR);
+		  maputil->ReverseChannelConverted(sm+13,row+1,col+1,channelCR);
+		  maputil->ChainNumber(sm+13,row+1,col+1,chainR);
+		} else {
+		  maputil->ReverseChannelOriginal(sm+1,row+1,col+1,channelOR);
+		  maputil->ReverseChannelConverted(sm+1,row+1,col+1,channelCR);
+		  maputil->ChainNumber(sm+1,row+1,col+1,chainR);
+		}
+		if (chainR>0 && channelCR>=0 && chainR<=49) {
+		  hists->m_pmd_chain_adc[chainR/2]->Fill(channelCR,chainR%2,adc);
+		  hists->m_pmd_chain_hit[chainR/2]->Fill(channelCR,chainR%2);
 		}
                 TOTAL_HIT_DETECTOR++;;
                 TOTAL_ADC_DETECTOR+=adc;
@@ -2161,8 +2197,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.65 2005/02/05 01:12:25 perev Exp $
+// $Id: StEventQAMaker.cxx,v 2.66 2005/02/08 17:22:46 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.66  2005/02/08 17:22:46  genevb
+// PMD histo changes, handle estGlobal/ITTF tracks
+//
 // Revision 2.65  2005/02/05 01:12:25  perev
 // test for zero pt added
 //

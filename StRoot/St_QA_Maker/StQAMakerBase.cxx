@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.28 2004/12/13 15:52:37 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.29 2005/02/08 17:22:46 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.29  2005/02/08 17:22:46  genevb
+// PMD histo changes, handle estGlobal/ITTF tracks
+//
 // Revision 2.28  2004/12/13 15:52:37  genevb
 // Numerous updates: PMD, primtrk, FPD, QAShift lists
 //
@@ -108,6 +111,7 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
   histsSet = StQA_Undef;
   eventClass = 3;
   ITTF = kFALSE;
+  EST = -1; // -1 = unknown
 
 //  - Set all the histogram booking constants
 
