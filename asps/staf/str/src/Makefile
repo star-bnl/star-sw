@@ -1,6 +1,4 @@
-MSG = ../msg
-
-ARCH_TAG     = _sun
+ARCH_TAG     = _sgi
 ARFLAGS      = vqs
 FFLAGS       = -c -O -w
 FFLAGS_DBG   = -c -g -w
@@ -88,19 +86,6 @@ strtermc$(ARCH_TAG)_dbg.o : strtermc$(ARCH_TAG).c
 
 
 
-#	strnorm is an executable which puts the terminal into "normal"
-#	mode, as defined by strterm_norm, and is primarily used after
-#	other strterm routines have been called to change the mode of
-#	the terminal, and when program execution was terminated before
-#	the terminal was reset.
-
-strnorm : strnorm.o ${STR}/libstr.a ${MSG}/libmsg.a
-	f77 -o strnorm strnorm.o -L. -L${MSG} -lstr -lmsg -lstr
-
-strnorm.o : strnorm.f
-	f77 $(FFLAGS) strnorm.f
-
-
 strlib_inc : strlib.inc
 	ln -s strlib.inc strlib_inc
 
@@ -111,3 +96,11 @@ str_ret_inc : str_ret.inc
 strterm_sun.f : strterm_sgi.f
 	rm -f strterm_sun.f
 	ln -s strterm_sgi.f strterm_sun.f
+
+strtermc_sun.c : strtermc_sgi.c
+	rm -f strtermc_sun.c
+	ln -s strtermc_sgi.c strtermc_sun.c
+
+strbyte_sun.c : strbyte_sgi.c
+	rm -f strbyte_sun.c
+	ln -s strbyte_sgi.c strbyte_sun.c
