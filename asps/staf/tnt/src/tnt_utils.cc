@@ -87,7 +87,7 @@ tntLongwordifyRowSize(tdmTable *table)
   
   /*- Calculate longwordified size of row */
   if(table->columnCount() <= 0) {
-    EML_CONTEXT("ERROR: table has fewer than 1 rows.\n");
+    EML_CONTEXT("ERROR: table has fewer than 1 columns.\n");
     EML_ERROR(INVALID_TABLE);
   }
 

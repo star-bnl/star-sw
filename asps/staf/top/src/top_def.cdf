@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_OPerators commands.
 .
- #(@)$Id: top_def.cdf,v 1.9 1998/01/24 19:06:27 ward Exp $
+ #(@)$Id: top_def.cdf,v 1.10 1998/03/11 21:40:40 ward Exp $
 .
 TOP is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -47,10 +47,17 @@ DESCRIPTION:
 COUNT is a readonly long attribute which reflects the number of TOP
 worker objects currently registered with the TOP object factory.
 Constructing a new TOP worker object increments COUNT by 1,
-destructing an existing TOP worker object decrements COUNT by 1.
+destroying an existing TOP worker object decrements COUNT by 1.
 .
 TOP worker objects include:
-   More guidance needed here.
+   topCut - See TOP/CUT_AGENT
+      - An operator object for selecting rows from a table.
+   topJoin - See TOP/JOIN_AGENT
+      - An operator object for joining row-by-row data from two tables.
+   topProject - See TOP/PROJECT_AGENT
+      - An operator object for selecting columns from a table.
+   topSort - See TOP/SORT_AGENT
+      - An operator object for reordering rows in a table.
 .
 ARGUMENTS: 
 .
@@ -103,20 +110,27 @@ of that object's listing method. The typical content of this listing is:
 	   LOCK attribute is FALSE (can be deleted) uses "|" character.
 	2> NAME:OBJECT
 	   The object's NAME attribute (see SOC) presented as "%-15s".
-	   Object names longer than 15 characters are abreviated with a
+	   Object names longer than 15 characters are abbreviated with a
 	   "~" character at midpoint.
 	   An object name is synonymous with an object instance.
 	3> TYPE:CLASS
 	   The object's TYPE attribute (see SOC) presented as "%-15s".
-	   Object types longer than 15 characters are abreviated with a
+	   Object types longer than 15 characters are abbreviated with a
 	   "~" character at midpoint. 
 	   An object type is synonymous with an object class.
 	4> DESCRIPTION
 	   A class-specific description of the object.
-	   More guidance needed here.
+	   Sorts list nothing.  Joins lists too much to fit the field.
 .
 TOP worker objects include:
-   More guidance needed here.
+   topCut - See TOP/CUT_AGENT
+      - An operator object for selecting rows from a table.
+   topJoin - See TOP/JOIN_AGENT
+      - An operator object for joining row-by-row data from two tables.
+   topProject - See TOP/PROJECT_AGENT
+      - An operator object for selecting columns from a table.
+   topSort - See TOP/SORT_AGENT
+      - An operator object for reordering rows in a table.
 .
 ARGUMENTS: 
 .
@@ -132,13 +146,19 @@ EXAMPLES:
 .
 EG1. List all currently registered TOP worker objects.
 .
-   StAF> TOP/LIST
-   +-------------------------------------------------------------------
-   |*********************** TOP - Not a valid TOP listing *************
-   +-------+-----------------+-----------------+-----------------------
-   | OID   | NAME:OBJECT     | TYPE:CLASS      | DESCRIPTION
-   +-------+-----------------+-----------------+-----------------------
-   +-------+-----------------+-----------------+-----------------------
+ staf++ > top/list
+ 
+ +---------------------------------------------------------------------
+ |*********************** TOP - Table Operators listing ***************
+ +-------+-----------------+-----------------+-------------------------
+ | IDREF | NAME:OBJECT     | TYPE:CLASS      | DESCRIPTION             
+ +-------+-----------------+-----------------+-------------------------
+ |    58 | s025            | topSort         |                         
+ |    59 | j025            | topJoin         | {tphit.id id, t#{tphit.i 
+ |    60 | s050            | topSort         |                          
+ |    61 | s050a           | topSort         |                          
+ |    62 | j050            | topJoin         | {id, alpha, lam#{ntphit. 
+ +---------------------------------------------------------------------
 .
 EXCEPTIONS: 
 .
@@ -172,7 +192,6 @@ ARGUMENTS:
    NAME - Case-sensitive alphanumeric name for new topCut object.
    - Use this name as part of SOREF (see SOC) to specify this particular
      topCut object in subsequent commands.
-   - More guidance needed here.
 .
    CUTFUNC - Cut function.
    - A FORTRAN-like string defining a criterion on a table row.
@@ -236,10 +255,10 @@ ARGUMENTS:
    - More guidance needed here.
 .
    SELECT - Selection specification.
-          - See TOP/PROJECT for syntax of SELECT.
+          - See TOP/PROJECT_AGENTfor syntax of SELECT.
 .
    WHERE - Where clause specification.
-         - See TOP/JOIN for syntax of WHERE.
+         - See TOP/JOIN_AGENT for syntax of WHERE.
 .
 RETURN:
 .
@@ -249,20 +268,23 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. Create a new topJoin with NAME "bob" 
-which will join all columns of two tables with the function
-(table1.primaryKey == table2.foriegnKey).
+EG1. Create a new topJoin with NAME "j050" which will join 16 columns 
+of the ntphit and strack tables where ntphit.track matches strack.trk
 .
-   StAF> TOP/NEWJOIN bob ! '{primaryKey foriegnKey}' 
+ STAF[1] newjoin j050 '{id, alpha, lambda, row, x, y, z, track, cluster, _
+ STAF[1]_    q, xave, sigma, skew, kurto, npnt, chisqxy, chisqz}' _
+ STAF[1]_    '{ntphit.track strack.trk}'
+
 .
 EXCEPTIONS: 
 .
    OBJECT_NOT_CREATED - The object creation failed. See error stack for
-      detailed explaination of failure.
+      detailed explanation of failure.
 .
 BUGS: 
 .
-   None known.
+   If a join of the name given already exists newjoin fails w/o any 
+ message.
 .
 SEE ALSO: 
 .
@@ -294,7 +316,7 @@ ARGUMENTS:
    - More guidance needed here.
 .
    SELECT - Selection specification.
-          - See TOP/PROJECT for syntax of SELECT.
+          - See TOP/PROJECT_AGENT for syntax of SELECT.
 .
 RETURN:
 .
@@ -330,7 +352,7 @@ SEE ALSO:
 NAME 'Name for new topSort object' C
 COLUMN  'Column name upon which to sort' C
 >GUIDANCE
-Create a new topSort object.
+Create a new topSort object to sort rows of a table.
 .
 DESCRIPTION: 
 .
@@ -343,7 +365,6 @@ ARGUMENTS:
    NAME - Case-sensitive alphanumeric name for new topSort object.
    - Use this name as part of SOREF (see SOC) to specify this particular
      topSort object in subsequent commands.
-   - More guidance needed here.
 .
    COLUMN - Column name upon which to sort.
 .
@@ -578,7 +599,7 @@ Commands found under the TOP/JOIN_AGENT menu can be applied to objects
 which implement the topJoin interface.
 .
 A JOIN (or FASTJOIN) operation in TOP is analogous to a join operation
-in any Relational DataBase system. A topJoin object combindes data
+in any Relational DataBase system. A topJoin object combines data
 from two tables into a third table on a row-by-row basis subject to a 
 condition on one or more column variables as defined by a where clause
 specification string.
@@ -637,7 +658,7 @@ performed by the topJoin SOREF. Readonly attributes cannot be changed
 from the user interface.
 .
 SELECTSPEC is the SQL-like Selection Specification string for a topJoin
-object.  See TOP/PROJECT for syntax of Selection Specification strings.
+object.  See TOP/PROJECT_AGENT for syntax of Selection Specification strings.
 .
 ARGUMENTS: 
 .
@@ -687,7 +708,7 @@ tables match for JOIN (or FASTJOIN) operations performed by topJoin
 SOREF. Readonly attributes cannot be changed from the user interface.
 .
 WHERECLAUSE is the SQL-like Where Clause string for a topJoin object.
-See TOP/JOIN for syntax of Where Clause strings.
+See TOP/JOIN_AGENT for syntax of Where Clause strings.
 .
 ARGUMENTS: 
 .
@@ -778,12 +799,12 @@ ARGUMENTS:
 	    proper columns as defined by topJoin object SOREF.
 .
    SELECT - Selection specification.
-	  - See TOP/PROJECT for syntax of SELECT.
+	  - See TOP/PROJECT_AGENT for syntax of SELECT.
           - If topJoin object SOREF does not exist, create it with
 	    selection specification string SELECT.
 .
    WHERE - Where clause specification.
-	 - See TOP/JOIN for syntax of WHERE.
+	 - See TOP/JOIN_AGENT for syntax of WHERE.
          - If topJoin object SOREF does not exist, create it with
 	   where clause string WHERE.
 .
@@ -795,7 +816,12 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Use an existing join object, j050 (defined by top/newjoin)
+     to join selected rows of the presorted ntphit and strack tables
+     into table newhit.
+
+ staf++ > fastjoin j050 ntphit  ProducedData/Tracks/strack  newhit.
+ Real time 00:00:00, CP time 0.000
 .
 EXCEPTIONS: 
 .
@@ -809,8 +835,8 @@ BUGS:
    None known.
 .
 SEE ALSO: 
-   TOP/PROJECT
-   TOP/JOIN
+   TOP/PROJECT_AGENT
+   TOP/JOIN_AGENT/JOIN
 .
 >ACTION KAM_TOPJOIN_AGENT_FASTJOIN
 **
@@ -833,8 +859,6 @@ DESCRIPTION:
 JOIN is a member function of objects which implement the topJoin
 interface.
 .
-See TOP/JOIN for details.
-.
 ARGUMENTS: 
 .
    SOREF - Stringified Object REFerence (see SOC).
@@ -850,12 +874,12 @@ ARGUMENTS:
 	    proper columns as defined by topJoin object SOREF.
 .
    SELECT - Selection specification.
-          - See TOP/PROJECT for syntax of SELECT.
+          - See TOP/PROJECT_AGENT for syntax of SELECT.
           - If topJoin object SOREF does not exist, create it with
 	    selection specification string SELECT.
 .
    WHERE - Where clause specification.
-         - See TOP/JOIN for syntax of WHERE.
+         - See TOP/JOIN_AGENT for syntax of WHERE.
          - If topJoin object SOREF does not exist, create it with
 	   where clause specification string WHERE.
 .
@@ -867,7 +891,12 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Use an existing join object, j050 (defined by top/newjoin)
+     to join selected rows of the unsorted ntphit and strack tables
+     into table newhit.
+.
+ staf++ >   join j050 ntphit  ProducedData/Tracks/strack  newhit         
+ Real time 00:00:00, CP time 0.010
 .
 EXCEPTIONS: 
 .
@@ -905,7 +934,7 @@ with columns a,e,c (as an example). The definition of the projection is
 contained in a selection specification string.
 .
     +--------------------------------------+
-    | Selection Specifcation               |
+    | Selection Specification              |
     +--------------------------------------+
     A selection specification is used to select columns for a
     table output from a project (or join and project).
@@ -952,7 +981,7 @@ by the topProject SOREF. Readonly attributes cannot be changed from the
 user interface.
 .
 SELECTSPEC is the SQL-like Selection Specification string for a
-topProject object. See TOP/PROJECT for syntax of Selection
+topProject object. See TOP/PROJECT_AGENT for syntax of Selection
 Specification strings.
 .
 ARGUMENTS: 
@@ -1019,7 +1048,7 @@ ARGUMENTS:
 	    proper columns as defined by topProject object SOREF.
 .
    SELECT - Selection specification.
-          - See TOP/PROJECT for syntax of SELECT.
+          - See TOP/PROJECT_AGENT for syntax of SELECT.
           - If topProject object SOREF does not exist, create it with
 	    selection specification string SELECT.
 .
@@ -1118,7 +1147,7 @@ Sort table on column variable.
 DESCRIPTION: 
 .
 SORT reorders the rows in a table so that the column denoted by the
-COLUMN attribute of topSort object SOREF is sorted in accending order.
+COLUMN attribute of topSort object SOREF is sorted in ascending order.
 .
 ARGUMENTS: 
 .
@@ -1135,9 +1164,11 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Use the sort agent s025, defined by TOP/NEWSORT to sort the
+     table named.  
 .
-   StAF> TOP/SORT_AGENT/SORT bob 
+ staf++ >  TOP/SORT_AGENT/SORT s025 ProducedData/Hits/tphitau
+ number of rows is 71.
 .
 EXCEPTIONS: 
 .

@@ -25,7 +25,7 @@ dsuCWNdsSpec2chform(char *spec) {
    pData = NULL;
    if( !dsNewTable(&pTable,"dsu__temp",spec,0,pData)
    ||  NULL == (chform = dsuTableChform(pTable))
-   ||  !dsFreeDataset(&pTable)
+   ||  !dsFreeDataset(pTable)
    ){
       EML_ERROR(INVALID_TABLE_SPEC);
    }

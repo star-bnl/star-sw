@@ -1,6 +1,5 @@
 **######################################################################
 **######################################################################
-**######################################################################
 **:Copyright 1997, Lawrence Berkeley National Laboratory
 **:>--------------------------------------------------------------------
 **:FILE:        tnt_def.cdf
@@ -15,11 +14,12 @@
 >GUIDANCE
 Table_to_NTuple commands.
 .
- #(@)$Id: tnt_def.cdf,v 1.5 1998/01/24 19:06:16 ward Exp $
+ #(@)$Id: tnt_def.cdf,v 1.6 1998/03/11 21:40:37 ward Exp $
+ #Edited by Bill Love 23-25 Feb 98
 .
 TNT is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
-into the software bus archictecture of StAF in a CORBA compliant
+into the software bus architecture of StAF in a CORBA compliant
 interface layer.
 .
 Each ASP is comprised of an object factory interface (eg. tntFactory)
@@ -32,7 +32,7 @@ TNT worker objects include:
 .
 The TNT package provides an interface for importing DSL table data into
 HBOOK Column-Wise Ntuples and for exporting HBOOK Column-Wise Ntuple
-data to DSL tables.
+data to DSL tables (See notice below).
 .
 Although Column-Wise Ntuples do not gracefully handle all the data
 types contained in DSL tables, data conversion is performed on import
@@ -54,10 +54,10 @@ DESCRIPTION:
 COUNT is a readonly long attribute which reflects the number of TNT
 worker objects currently registered with the TNT object factory.
 Constructing a new TNT worker object increments COUNT by 1,
-destructing an existing TNT worker object decrements COUNT by 1.
+destroying an existing TNT worker object decrements COUNT by 1.
 .
-TNT worker objects include:
-   More guidance needed here.
+TNT worker objects now include:
+   tntCWNtuple.
 .
 ARGUMENTS: 
 .
@@ -94,9 +94,8 @@ List all currently registered TNT worker objects.
 .
 DESCRIPTION: 
 .
-Show a one-line description for each TNT worker object currently
-registered with the TNT object factory in a table for quick,
-simple perusal.
+Show in a table a one-line description for each TNT worker object currently
+registered with the TNT object factory.
 .
 The one-line description for each object is the result of an invokation
 of that object's listing method. The typical content of this listing is:
@@ -110,20 +109,19 @@ of that object's listing method. The typical content of this listing is:
 	   LOCK attribute is FALSE (can be deleted) uses "|" character.
 	2> NAME:OBJECT
 	   The object's NAME attribute (see SOC) presented as "%-15s".
-	   Object names longer than 15 characters are abreviated with a
+	   Object names longer than 15 characters are abbreviated with a
 	   "~" character at midpoint.
 	   An object name is synonymous with an object instance.
 	3> TYPE:CLASS
 	   The object's TYPE attribute (see SOC) presented as "%-15s".
-	   Object types longer than 15 characters are abreviated with a
+	   Object types longer than 15 characters are abbreviated with a
 	   "~" character at midpoint. 
 	   An object type is synonymous with an object class.
 	4> DESCRIPTION
 	   A class-specific description of the object.
-	   More guidance needed here.
+	   for tntCWNtuples this is a blank.
 .
-TNT worker objects include:
-   More guidance needed here.
+TNT worker objects so far include only tntCWNtuple:
 .
 ARGUMENTS: 
 .
@@ -139,13 +137,11 @@ EXAMPLES:
 .
 EG1. List all currently registered TNT worker objects.
 .
-   StAF> TNT/LIST
-   +-------------------------------------------------------------------
-   |*********************** TNT - Not a valid TNT listing *************
-   +-------+-----------------+-----------------+-----------------------
-   | OID   | NAME:OBJECT     | TYPE:CLASS      | DESCRIPTION
-   +-------+-----------------+-----------------+-----------------------
-   +-------+-----------------+-----------------+-----------------------
+  staf++ > tnt/list
+ +-------+-----------------+-----------------+---------------
+ | IDREF | NAME:OBJECT     | TYPE:CLASS      | DESCRIPTION   
+ +-------+-----------------+-----------------+---------------
+ |   105 | tntCWNtuple100  | tntCWNtuple     |                
 .
 EXCEPTIONS: 
 .
@@ -153,7 +149,9 @@ BUGS:
 .
    None known.
 .
-SEE ALSO: 
+SEE ALSO:
+.
+Ntuple/list 
 .
 >ACTION KAM_TNT_LIST
 **
@@ -164,23 +162,25 @@ SEE ALSO:
 HID     'HBOOK ID for CWNtuple.' I
 TABLE   'tdmTable name' C
 >GUIDANCE
-Create a new tntCwntuple object.
+Create a new tntCwntuple object.  Fill it with the current TABLE contents.
 .
 DESCRIPTION: 
 .
 Each tntCwntuple created by the tntFactory shows up as an object
 managed by the tntFactory (see TNT/COUNT and TNT/LIST) and
 registered with the socCatalog (see SOC/COUNT and SOC/LIST).
+The names of the HBOOK ntuple columns are those of the table columns.  Each
+row of the table produces an entry in the Column Wise Ntuple.
 .
 ARGUMENTS: 
 .
-   HID 'More guidance needed here' I 
+   HID  - HBOOK ID of the Ntuple. 
    - Use this HID to specify this particular
      tntCwntuple object in subsequent commands.
-   - More guidance needed here.
+   - Currently HBOOK ntuple ID's are integers.
 .
    TABLE - tdmTable name.
-   - More guidance needed here.
+   - Name of the StAF table to be loaded into the HBOOK ntuple.
 .
 RETURN:
 .
@@ -190,14 +190,14 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. Create a new tntCwntuple with NAME "bob"
+EG1. Create a new tntCwntuple from table "bob"
 .
-   StAF> TNT/NEWCWNTUPLE bob
+   StAF> TNT/NEWCWNTUPLE 100 bob
 .
 EXCEPTIONS: 
 .
    OBJECT_NOT_CREATED - The object creation failed. See error stack for
-      detailed explaination of failure.
+      detailed explanation of failure.
 .
 BUGS: 
 .
@@ -216,9 +216,8 @@ SEE ALSO:
 tntCwntuple object commands.
 .
 Commands found under the TNT/CWNTUPLE menu can be applied to objects
-which implement the tntCwntuple interface.
-.
-More guidance needed here.
+which implement the tntCwntuple interface.  Currently refers to HBOOK
+Columnwise Ntuples.
 .
 **
 ** ---------------------------------------------------------------------
@@ -227,7 +226,7 @@ More guidance needed here.
 >PARAMETERS
 HID     'HBOOK ID for CWNtuple.' I
 >GUIDANCE
-Get the HID attribute of the tntCwntuple HID.
+Get the HID attribute of the tntCwntuple HID.  Useful?
 .
 DESCRIPTION: 
 .
@@ -250,9 +249,9 @@ RETURN:
 EXAMPLES: 
 .
 EG1. Show the current value of the HID attribute of
-    tntCwntuple "bob".
+    tntCwntuple 100.
 .
-   StAF> TNT/CWNTUPLE/HID bob
+   StAF> TNT/CWNTUPLE/HID 100
 .
 EXCEPTIONS: 
 .
@@ -298,9 +297,9 @@ RETURN:
 EXAMPLES: 
 .
 EG1. Show the current value of the TITLE attribute of
-    tntCwntuple "bob".
+    tntCwntuple 100.
 .
-   StAF> TNT/CWNTUPLE/TITLE bob
+   StAF> TNT/CWNTUPLE/TITLE 100
 .
 EXCEPTIONS: 
 .
@@ -323,7 +322,7 @@ SEE ALSO:
 >PARAMETERS
 HID     'HBOOK ID for CWNtuple.' I
 >GUIDANCE
-Get the ENTRYCOUNT attribute of the tntCwntuple HID.
+Get the ENTRYCOUNT attribute of tntCwntuple HID. I.e. number of rows filled.
 .
 DESCRIPTION: 
 .
@@ -346,9 +345,9 @@ RETURN:
 EXAMPLES: 
 .
 EG1. Show the current value of the ENTRYCOUNT attribute of
-    tntCwntuple "bob".
+    tntCwntuple 100.
 .
-   StAF> TNT/CWNTUPLE/ENTRYCOUNT bob
+   StAF> TNT/CWNTUPLE/ENTRYCOUNT 100
 .
 EXCEPTIONS: 
 .
@@ -394,9 +393,9 @@ RETURN:
 EXAMPLES: 
 .
 EG1. Show the current value of the COLUMNCOUNT attribute of
-    tntCwntuple "bob".
+    tntCwntuple 100.
 .
-   StAF> TNT/CWNTUPLE/COLUMNCOUNT bob
+   StAF> TNT/CWNTUPLE/COLUMNCOUNT 100
 .
 EXCEPTIONS: 
 .
@@ -420,14 +419,13 @@ SEE ALSO:
 HID     'HBOOK ID for CWNtuple.' I
 TABLE   'tdmTable name' C
 >GUIDANCE
-More guidance needed here.
+Add the contents of the table to the current contents of the ntuple.
 .
 DESCRIPTION: 
 .
 APPEND is a member function of objects which implement the tntCwntuple
-interface.
-.
-More guidance needed here.
+interface.  The contents of the table are added to the existing contents
+of the ntuple. 
 .
 ARGUMENTS: 
 .
@@ -435,7 +433,7 @@ ARGUMENTS:
    - denoting an object implementing the tntCwntuple interface.
 .
    TABLE - tdmTable name.
-   - More guidance needed here.
+   - A table whose type matches the definition of the ntuple.
 .
 RETURN:
 .
@@ -445,10 +443,9 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. Invoke the APPEND method function of tntCwntuple "bob"
-     More guidance needed here.
+EG1. Invoke the APPEND method function of tntCwntuple 100 on table bob
 .
-   StAF> TNT/CWNTUPLE/APPEND bob 
+   StAF> TNT/CWNTUPLE/APPEND 100 bob 
 .
 EXCEPTIONS: 
 .
@@ -472,22 +469,22 @@ SEE ALSO:
 HID     'HBOOK ID for CWNtuple.' I
 TABLE   'tdmTable name' C
 >GUIDANCE
-More guidance needed here.
+Load the contents of a table into an existing Ntuple.  
 .
 DESCRIPTION: 
 .
 IMPORT is a member function of objects which implement the tntCwntuple
-interface.
-.
-More guidance needed here.
+interface. Though the name seems backwards, it loads a table into an
+existing ntuple, not the reverse.  Previous contents of the ntuple are
+replaced.  The ntuple definition and the table type must match.
 .
 ARGUMENTS: 
 .
    HID - HBOOK ID for CWNtuple.
-   - denoting an object implementing the tntCwntuple interface.
+   - denoting an ntuple object.
 .
    TABLE - tdmTable name.
-   - More guidance needed here.
+   - A StAF table of a type whose columns match those of the ntuple.
 .
 RETURN:
 .
@@ -497,10 +494,9 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. Invoke the IMPORT method function of tntCwntuple "bob"
-     More guidance needed here.
+EG1. Replace contentes of ntuple 20 with table "bob"
 .
-   StAF> TNT/CWNTUPLE/IMPORT bob 
+   StAF> TNT/CWNTUPLE/IMPORT 20 bob 
 .
 EXCEPTIONS: 
 .
@@ -511,9 +507,13 @@ EXCEPTIONS:
 .
 BUGS: 
 .
-   None known.
+   If the specified table does not exist, IMPORT is a quiet no-op.
+   Similarly, if the table type is wrong, no message, no action.
+   Despite the Exception advertised above, if the ntuple doesn't
+   exist, no message appears.
 .
-SEE ALSO: 
+SEE ALSO:
+ TNT/NEWCWNTUPLE, TNT/CWNTUPLE/APPEND
 .
 >ACTION KAM_TNTCWNTUPLE_IMPORT
 **

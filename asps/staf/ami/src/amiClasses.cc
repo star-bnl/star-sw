@@ -1,4 +1,4 @@
-static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.14 1998/03/05 22:39:51 fisyak Exp $";
+static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.15 1998/03/11 21:39:41 ward Exp $";
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
 //:FILE:        amiClasses.C
@@ -270,7 +270,7 @@ STAFCV_T amiBroker:: deleteInvoker (const char * name ) {
 
 //----------------------------------//INS++:PARSER_WARNING
 amiInvoker * amiBroker:: findInvoker (const char * name) {
-   amiInvoker*& invoker=NULL;
+   amiInvoker* invoker=NULL;
    socObject* obj;
    if( NULL == (obj = soc->findObject(name,"amiInvoker")) ){
       invoker = NULL;
