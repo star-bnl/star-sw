@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.45 2000/03/01 14:48:09 caines Exp $
+// $Id: St_dst_Maker.cxx,v 1.46 2000/04/13 21:48:08 lbarnby Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.46  2000/04/13 21:48:08  lbarnby
+// No longer write particle and g2t_rch_hit tables to dst branch
+//
 // Revision 1.45  2000/03/01 14:48:09  caines
 // Removed references to scs_cluster
 //
@@ -138,7 +141,7 @@
 #include "tables/St_dst_mon_soft_l3_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.45 2000/03/01 14:48:09 caines Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.46 2000/04/13 21:48:08 lbarnby Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -160,7 +163,6 @@ Int_t St_dst_Maker::Init(){
     "v0:",     "dst_v0_vertex","ev0_eval",
     "xi:",     "dst_xi_vertex",
     "kink:",   "kinkVertex",
-    "geant:",  "particle", "g2t_rch_hit",
     "rch:",    "dst_rch_pixel",
     "trg:",    "TrgDet", "L0_Trigger","L1_Trigger","L2_Trigger",
     "l3Tracks:","l3Track",
