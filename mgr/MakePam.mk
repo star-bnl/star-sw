@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.73 1998/12/12 00:58:36 fisyak Exp $
+# $Id: MakePam.mk,v 1.74 1998/12/29 20:06:56 didenko Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.74  1998/12/29 20:06:56  didenko
+# take back .didl
+#
 # Revision 1.73  1998/12/12 00:58:36  fisyak
 # remove STAF
 #
@@ -259,7 +262,7 @@ endif
 FILES_O  := $(strip $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_F) $(NAMES_C) $(NAMES_CC))))
 ifndef NODEPEND                
 FILES_D  := $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_O)))))
-#FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
+FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
 endif                          
 FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O),   $(notdir $(basename $(FILES_ICC)))))
 NAMES_O   = $(notdir $(FILES_O))
