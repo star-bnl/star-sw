@@ -21,6 +21,7 @@ public:
     StiDetectorLayerContainer();
     virtual ~StiDetectorLayerContainer();
 
+    virtual void build(const char* buildDirectory); //Temp build from txt file using SCL parser
     void push_back(StiDetector* layer);
     void clearAndDestroy();
     void print() const;

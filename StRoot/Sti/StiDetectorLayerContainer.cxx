@@ -38,11 +38,27 @@ void StiDetectorLayerContainer::push_back(StiDetector* layer)
   return;
 }
 
+void StiDetectorLayerContainer::build(const char* buildDirectory)
+{
+    char* buildfile = new char[200];
+    for (int sector=1; sector<=24; ++sector) {
+	for (int padrow=1; padrow<=45; ++padrow) {
+	    
+	    sprintf(buildfile, "%sTpc/Sector_%i/Padrow_%i.txt", buildDirectory, static_cast<int>(sector), padrow);
+	    //cout <<"buildfile:\t"<<buildfile<<endl;
+	    StiDetector* layer = new StiDetector();
+	    layer->build(buildfile);
+	    if (layer->isOn()) push_back(layer);
+	}
+    }
+    return;
+}
+
 void StiDetectorLayerContainer::print() const
 {
     cout <<"\nStiDetectorLayerContainer::print()"<<endl;
     for (detectormap::const_iterator it= begin(); it!=end(); it++) {
-	//cout <<"\tKey:\t"<<(*it).first<<"\tDetectorLayer:\t"<<*(*it).second<<endl;
+	cout <<"\tKey:\t"<<(*it).first<<"\tDetectorLayer:\t"<<*(*it).second<<endl;
     }
     return;
 }

@@ -20,6 +20,7 @@ public:
     virtual ~StiDetector();
     
     //Gets
+    Bool_t isOn() const {return on;}
     Bool_t isActive() const { return active; }
     Bool_t isContinuousMedium() const { return continuousMedium; }
     Bool_t isDiscreteScatterer() const { return discreteScatterer; }
@@ -35,6 +36,7 @@ public:
     Int_t getShapeCode() const { return shapeCode; }
     
     //Sets
+    void setIsOn(bool val) {on = val;}
     void setIsActive(bool val) {active = val;}
     void setIsContinuousMedium(bool val) {continuousMedium = val;}
     void setIsDiscreteScatterer(bool val) {discreteScatterer = val;}
@@ -47,9 +49,13 @@ public:
     void setPosition(double val) {position = val;}
     void setRefAngle(double val) {refAngle = val;}
     void setShapeCode(StiShapeCode val) {shapeCode = val;}
+
+    //action
+    virtual void build(const char* infile);  //for now, build from SCL parsable ascii file
     
 protected:
 
+    Bool_t on;                  // toggle this layer on/off.  off -> NOT added to detector container
     Bool_t active;              // does the object provide hit information?
     Bool_t continuousMedium;    // is this a continuous scatterer?
     Bool_t discreteScatterer;   // is this a discrete scatterer?
@@ -65,5 +71,8 @@ protected:
 
 };
 
+//Non-members--------------------------
+
+ostream& operator<<(ostream&, const StiDetector&);
 
 #endif

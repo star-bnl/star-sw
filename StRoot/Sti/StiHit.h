@@ -7,13 +7,15 @@
 #ifndef StiHit_HH
 #define StiHit_HH
 
+#include "TObject.h"
+
 class ostream;
 
-class StiHit
+class StiHit : public TObject
 {
  public:
   StiHit() {};
-
+  
   StiHit(const StiHit& rhs) {
     if (*this==rhs) return;
     copyToThis(rhs);
