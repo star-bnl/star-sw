@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSector.cc,v 1.1 1998/11/10 17:12:26 fisyak Exp $
+ * $Id: StTrsSector.cc,v 1.2 1998/11/16 14:49:06 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsSector.cc,v $
- * Revision 1.1  1998/11/10 17:12:26  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1998/11/16 14:49:06  lasiuk
+ * make sure of index when filling sector
  *
  * Revision 1.3  1999/01/18 21:02:57  lasiuk
  * comment diagnostics
@@ -68,11 +68,12 @@ void StTrsSector::clear() // clears only the time bins
     for(int irow=0; irow<mSector.size(); irow++) {
 	for(int ipad=0; ipad<mSector[irow].size(); ipad++) {
 	    mSector[irow][ipad].clear();
+	}
 void StTrsSector::addEntry(int row, int pad, StTrsAnalogSignal& sign)
-    if( (row>0 && row<mSector.size()) )
-	if( (pad>0 && pad<mSector[row].size()) )
+// Caution: rowN specifies rowNumber 1..45
+    cout << "row " << row << " pad " << pad << endl;
 void StTrsSector::addEntry(int rowN, int padN, StTrsAnalogSignal& signl)
-	    mSector[row][pad].push_back(sign);
+    if( (row > 1 && row <= mSector.size()) )
 	if( (pad > 1 && pad <= mSector[row].size()) )
 #ifdef ST_SECTOR_BOUNDS_CHECK
 	    mSector[(row-1)][(pad-1)].push_back(sign);
@@ -83,10 +84,10 @@ void StTrsSector::addEntry(int rowN, int padN, StTrsAnalogSignal& signl)
 
 void StTrsSector::addEntry(StTpcPadCoordinate& coord, StTrsAnalogSignal& sig)
 {
-    if( (row>0 && row<mSector.size()) )
-	if( (pad>0 && pad<mSector[row].size()) )
+void StTrsSector::assignTimeBins(int row, int pad, tpcTimeBins& tbins)
+// Caution: rowIndex specifies index 0..44
 // Above: rowN specifies rowNumber 1..45
-	    mSector[row][pad] = tbins;
+    if( (row > 1 && row <= mSector.size()) )
 	if( (pad > 1 && pad <= mSector[row].size()) )
 #ifdef ST_SECTOR_BOUNDS_CHECK
 	    mSector[(row-1)][(pad-1)] = tbins;
