@@ -219,14 +219,17 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     } elsif ( $pkg =~ m/^StDaqLib$/ ) {
 	$CPPPATH = "#" . $Dir . $main::PATH_SEPARATOR . $env->{CPPPATH};
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
-    } elsif ( $pkg =~ m/^gcalor$/ ) {
+    } elsif ( $pkg =~ m/^gcalor$/ || $pkg =~ m/^geant321$/ ) {
         $LIBPKG = "lib" . $pkg . "." . $env->{SUFLIB};
 	$SO_PKG = "";
-	$FCPATH = "#" . $Dir . "/../" . $main::PATH_SEPARATOR . "#" . $Dir . "/../gcalor/include" . $main::PATH_SEPARATOR .$env->{FCPATH};
-	$FPPFLAGS = " -DCOMMONS_CONFIG_H -DCERNLIB_LINUX";
-	if ($STAR_SYS =~ /^rh/) { 
-	  $FC = "g77";
-	  $FFLAGS   = "-pipe -fno-second-underscore -Wall -W -Wsurprising -fPIC";
+	$FCPATH = "#" . $Dir . "/../geant321" .
+	  $main::PATH_SEPARATOR . "#" . $Dir . "/../starsim/include" . 
+	    $main::PATH_SEPARATOR . "#" . $Dir . "/../gcalor/include" . 
+	      $main::PATH_SEPARATOR . $env->{FCPATH};
+	$FPPFLAGS = " -DCOMMONS_CONFIG_H -DCERNLIB_LINUX -DCPP_VERS=\"'W'\"";
+	if ($env->{ENV}->{PGI} && $STAR_SYS =~ /^rh/) { 
+	  $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
+	  $FFLAGS   = $env->{G77FLAGS}; 
 	  $FEXTEND  = ""; 
 	}
     }
