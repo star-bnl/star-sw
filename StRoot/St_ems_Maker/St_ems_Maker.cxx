@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.cxx,v 1.9 1999/03/03 17:34:15 akio Exp $
+// $Id: St_ems_Maker.cxx,v 1.10 1999/03/04 01:17:24 akio Exp $
 // $Log: St_ems_Maker.cxx,v $
+// Revision 1.10  1999/03/04 01:17:24  akio
+// change calib name
+//
 // Revision 1.9  1999/03/03 17:34:15  akio
 // small corrections
 //
@@ -72,7 +75,7 @@ Int_t St_ems_Maker::Init(){
 Int_t St_ems_Maker::Make(){
   if (gStChain->DataSet("geom")){
     St_DataSetIter       geom(gStChain->DataSet("geom"));
-    m_calb_calg   = (St_calb_calg   *) geom("Run/calb_calg");
+    m_calb_calg   = (St_calb_calg   *) geom("calb_calg");
     if (!m_DataSet->GetList())  {    //if DataSet is empty, create table and fill it
       St_ems_hits *ems_hits_bemc = new St_ems_hits("ems_hits_bemc", 9600);m_DataSet->Add(ems_hits_bemc);
       St_ems_hits *ems_hits_bsmd = new St_ems_hits("ems_hits_bsmd",38000);m_DataSet->Add(ems_hits_bsmd);
@@ -146,7 +149,7 @@ Int_t St_ems_Maker::Make(){
 //_____________________________________________________________________________
 void St_ems_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ems_Maker.cxx,v 1.9 1999/03/03 17:34:15 akio Exp $\n");
+  printf("* $Id: St_ems_Maker.cxx,v 1.10 1999/03/04 01:17:24 akio Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
