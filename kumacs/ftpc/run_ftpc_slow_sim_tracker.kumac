@@ -6,15 +6,17 @@
 *                        (with lots of help from Kathy Turner)
 *                      - this is now the kumac that drives the ftpc slow 
 *                        chain: simulation,tracking, track evaluation
+* editted July 29,1998 - K. Turner
+*                         changed some names of utility kumacs
 ************************************************************************
 ************************************************************************
 
  macro run__
           TOP=$STAR _
           domain='ftpc' _
-          INPUT_DATA_DIR=$AFS_RHIC/star/users/jcs/public/ _
-          input_g2t_file=auau_gstar_g2t.tab _
-          num_events=1 _
+          input_data_prefix=$AFS_RHIC/star/users/jcs/public/ _
+          input_data_file=auau_gstar_g2t.tab _
+          no_events=1 _
           funit=21 _
           nfile=ftpc_tracks.ntup _
           nid=111 _
@@ -25,43 +27,65 @@
 * --> to run
 *    - change the inputs above as desired
 *    - run staf
-*    -   exec run_ftpc_slow_sim_chain
+*    -   exec run_ftpc_slow_sim_tracker
 * 
-	  
-  message ' *** TOP directory to search for kumacs --> ' [TOP]
-  message ' *** domains to load  -->                   ' [domain]
-  message ' *** Data Sample directory -->              ' [INPUT_DATA_DIR]
-  message ' *** Input G2T file -->                     ' [input_g2t_file]
-  message ' *** Num Events to process -->              ' [num_events]
+
+***********************************************************
+* CALCULATE STUFF FROM MACRO INPUTS 
+***********************************************************
+    
+ input_file = [input_data_prefix][input_data_file]
+
+ ***********************************************************
+* PRINT OUT INPUT VALUES
+***********************************************************
+   
+ message ' *** TOP level directory     --> ' [TOP]
+ message ' *** Input file              --> ' [input_file]        
+ message ' *** Num Events to process   --> ' [no_events]
+ message ' *** domains to load         --> ' [domain]
+ 
   message ' *** ntup file unit -->                     ' [funit]
   message ' *** output Ntuple filename  -->            ' [nfile]
   message ' *** Ntuple ID # -->                        ' [nid]
   message ' *** Table to write to ntup -->             ' [table]
- 
- 
-* ----------- General setup stuff ------------------------*
-  macro/global/create TOP              [TOP]
+  
+  
+***********************************************************
+* GLOBAL VARIABLES 
+***********************************************************
     
-* setup default directories to search for kumacs in
-* setup default table directory structure in STAF
-* load libraries [domain]
-    
- exec [TOP]/kumacs/chain/bfc_util#bfc_start [domain]
-     
+ macro/global/create input_file  [input_file]   'Input file name'
+ macro/global/create TOP              [TOP]
+   
  macro/global/import *
    
-* **************************************************************
-* --------- Setup and run ftpc slow simulator & tracker pams -------------*
+***********************************************************
+* BEGINNING STUFF 
+***********************************************************
    
+ exec $STAR/kumacs/util/setup_defaults domain=[domain]
+   
+ exec setup#setup 
+ 
+ exec load_libraries#run        [domain]   
+   
+* **************************************************************
+* OPEN FILES
+* ***************************************************************
+ 
 * open input g2t data file
-  exec input_g2t_file#init [INPUT_DATA_DIR][input_g2t_file]
+  exec input_g2t_file#init [input_file]
 
   if STAF_STATUS(1).eq.0 goto ENDOFDATA
   
 * open output ntuple
   exec write_table_to_ntuple#init_disk [funit] [nfile]  
    
-* --------------------- initialization ----------------------------*
+* **************************************************************
+* --------- Setup and run ftpc slow simulator & tracker pams -------------*
+* ****************************************************************
+  
 
 * create tables
     
@@ -71,18 +95,19 @@
     exec create_tables_ftpc#fte_tables
 
 * initialize tables
-
+    
     exec fss_init#init
     exec fcl_init#init 
     exec fpt_init#init
     exec fte_init#init
 
+
   
 * ------------------- process events ------------------------------*
 
-* read event and then process thru ftpc slow sim, cluster finder & then tracker
-  do i=1,[num_events]
-    message ' run_ftpc_slow_sim_chain: processing event ' [i]
+* read event and then process thru tpc slow sim & then tracker
+  do i=1,[no_events]
+    message ' run_ftpc_slow_sim_tracker: processing event ' [i]
 * clear all event tables
     tabclear [event]
 * read input file
@@ -116,7 +141,7 @@
 * -------------------- end stuff -----------------------------*
   
   ENDOFDATA:
-    if [i].lt.[num_events] then
+    if [i].lt.[no_events] then
     message ' End of input file'
   endif  
 
@@ -131,3 +156,4 @@
 return
  
 ************************************************************************
+
