@@ -16,6 +16,10 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#include "tables/St_emcStatus_Table.h"
+#include "tables/St_smdStatus_Table.h"
+#include "tables/St_emcCalib_Table.h"
+#include "tables/St_smdCalib_Table.h"
 #include "tables/St_emcPed_Table.h"
 #include "tables/St_smdPed_Table.h"
 
@@ -46,6 +50,9 @@ class StEmcCalibrationMaker : public StMaker
            StEmcPedSpectra*       mPedSpec; ///< Pedestal spectra
            StEmcMipSpectra*       mMipSpec; ///< Mip spectra
            //StEmcElecSpectra*      mElecSpec; ///< Electron spectra
+           
+           St_emcStatus         *mBemc;
+           St_smdStatus         *mBsmd;
                       
            StEmcGeom*           mCalibGeo;//!
            StEmcCollection*     mEmc;     //!
@@ -73,6 +80,7 @@ class StEmcCalibrationMaker : public StMaker
            Bool_t  mUseLocalPed;
            Bool_t  mSavePedToDB;
            Bool_t  mSaveCalibToDB;
+           Bool_t  mFakeRun;
 
            Int_t   mGainMode;
 					 Int_t   mDetNum;
@@ -143,6 +151,7 @@ class StEmcCalibrationMaker : public StMaker
            void    SetUseLocalPed(Bool_t a)       {   mUseLocalPed = a; }
            void    SetSavePedToDB(Bool_t a)       {   mSavePedToDB = a; }
            void    SetSaveCalibToDB(Bool_t a)     {   mSaveCalibToDB = a; }
+           void    SetFakeRun(Bool_t a)           {   mFakeRun = a; }
 
            void    SetGainMode(Int_t a)           {   mGainMode = a; }
 					 void    SetDetNum(Int_t a)             {   mDetNum = a; }

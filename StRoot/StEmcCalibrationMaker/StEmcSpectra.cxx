@@ -48,7 +48,7 @@ StEmcSpectra::StEmcSpectra(const char* cdet,Int_t nb, Float_t bin0, Float_t bin1
   mNEta=mGeo->NEta();
   mNSub=mGeo->NSub();
   mNBins=mNModules*mNEta*mNSub;
-	mMinMult = 50;
+	mMinMult = 0;
 	mMaxMult = 50000;
 	mMinOcc = 0.9496;
 	mMinHits = 4000;
@@ -75,6 +75,7 @@ StEmcSpectra::~StEmcSpectra()
 { 
   if(mSpectra) delete mSpectra;
 	if(mSum) delete mSum;
+  if(mEventCount) delete mEventCount;
 	if(mRebinTmp) delete mRebinTmp;
 	if(mEtaBinTmp) delete mEtaBinTmp;
 }
@@ -83,6 +84,7 @@ Bool_t StEmcSpectra::ZeroAll()
 {
   if(mSpectra) mSpectra->Reset();
 	if(mSum) mSum->Reset();
+  
   return kTRUE;
 }
 //_____________________________________________________________________________

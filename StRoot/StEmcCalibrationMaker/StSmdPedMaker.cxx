@@ -12,14 +12,6 @@
 #include <fstream.h>
 #include "TFile.h"
 #include "StEmcUtil/StEmcGeom.h"
-/*#include "StEmcUtil/StEmcFilter.h"
-#include "StEmcUtil/StEmcPosition.h"
-#include "StMessMgr.h"
-#include "StEmcUtil/emcDetectorName.h"
-#include "StarClassLibrary/SystemOfUnits.h"
-#include "tables/St_MagFactor_Table.h"
-#include "stdlib.h"
-#include "StThreeVectorD.hh"*/
 #include "time.h"
 #include "TDatime.h"
 
@@ -28,6 +20,7 @@
 #include "StDbLib/StDbConfigNode.hh"
 
 #include "tables/St_smdPed_Table.h"
+#include "StDaqLib/EMC/StEmcDecoder.h"
 
 ClassImp(StSmdPedMaker);
 
@@ -39,12 +32,16 @@ StSmdPedMaker::StSmdPedMaker(const char *name):StMaker(name)
   mPedInterval = 6; //in hours
   mMinEvents = 10000;
   mSaveToDB = kFALSE;
+  mFakeRun = kFALSE;
+  mMaxMultiplicity = 10;
   mGeo[0] = StEmcGeom::instance("bsmde");
   mGeo[1] = StEmcGeom::instance("bsmdp");
+  mCapacitor = new TH2F("capacitor","Capacitor distributionn", 8,0,8,128,0,128);
 }
 //_____________________________________________________________________________
 StSmdPedMaker::~StSmdPedMaker()
 {
+  if(mCapacitor) delete mCapacitor;
 }
 //_____________________________________________________________________________
 Int_t StSmdPedMaker::Init()
@@ -81,11 +78,12 @@ Int_t StSmdPedMaker::Make()
   if(mPedStatus>=0)
   {
     FillPedestal();
+    cout <<"Number of events processed = "<<mNEvents<<endl;
     if(mNEvents>mMinEvents) mPedStatus=1;
     if(mPedStatus==1)
     {
       CalculatePedestals();
-      if(mSaveToDB) SavePedestals(mPedDate,mPedTime);
+      SavePedestals(mPedDate,mPedTime);
       ZeroAll();
     }
   }
@@ -107,21 +105,36 @@ Bool_t StSmdPedMaker::GetEvent()
   if(!Event) return kFALSE;
   mEmc=Event->emcCollection();
   if(!mEmc) return kFALSE;    	
-	/*StL0Trigger* trg = Event->l0Trigger();
-	Int_t trigger=0;
-	if(trg) trigger = trg->triggerWord();
-	if(trigger!=8192 && trigger!=4096) return kFALSE;*/
+  if(!mFakeRun)
+  {
+	  StL0Trigger* trg = Event->l0Trigger();
+	  Int_t trigger=8192;
+	  if(trg) trigger = trg->triggerWord();
+	  if(trigger!=8192 && trigger!=4096) return kFALSE;
+    
+    if(Event->l3Trigger())
+    {
+      StSPtrVecTrackNode& tracks=Event->l3Trigger()->trackNodes();
+      Int_t NTracks=tracks.size();
+      if(NTracks>mMaxMultiplicity) return kFALSE;        
+    }
+  }
 	return kTRUE;
 }
 //_____________________________________________________________________________
 void StSmdPedMaker::FillPedestal()
 { 
+  StEmcDecoder *decoder = new StEmcDecoder(GetDate(),GetTime());
+  Int_t CAP[8];
+  for(Int_t i=0;i<8;i++) CAP[i]=-1;
+  Bool_t ok = kFALSE;
   for(Int_t i=0; i<2; i++)
   {  
     StDetectorId id = static_cast<StDetectorId>(i+2+kBarrelEmcTowerId);
     StEmcDetector* detector=mEmc->detector(id);
     if(detector) for(UInt_t j=1;j<121;j++)
     {
+      ok = kTRUE;
       StEmcModule* module = detector->module(j);
       StSPtrVecEmcRawHit& rawHit=module->hits();
       for(Int_t k=0;k<rawHit.size();k++)
@@ -136,6 +149,9 @@ void StSmdPedMaker::FillPedestal()
         Int_t c = 0;
         if(cap==124) c=1;
         if(cap==125) c=2;
+        Int_t RDO,INDEX;
+        decoder->GetSmdRDO(i+3,m,e,s,RDO,INDEX);
+        CAP[RDO]=cap;
         if(adc>0)
         {
           mSmdPedX[i][c][id-1]+=adc;
@@ -145,11 +161,17 @@ void StSmdPedMaker::FillPedestal()
       }
     }
   }
-  mNEvents++;
+  delete decoder;
+  if(ok)
+  {
+    for(Int_t i=0;i<8;i++) if(CAP[i]!=-1) mCapacitor->Fill((Float_t)i,(Float_t)CAP[i]);
+    mNEvents++;
+  }
 } 
 //_____________________________________________________________________________
 void StSmdPedMaker::CalculatePedestals()
 {  
+  cout <<"Calculating SMD pedestals\n";
   for(Int_t i=0;i<2;i++)
     for(Int_t j=0;j<3;j++)
       for(Int_t k=0;k<18000;k++)
@@ -225,7 +247,56 @@ void StSmdPedMaker::SavePedestals(Int_t date, Int_t time)
 	TDatime *tt = new TDatime(date,time);
   TString timestamp = tt->AsSQLString();
   delete tt;
-          
+  
+  char file[100];
+  sprintf(file ,"SmdPedestal.%08d.%06d.data.root",date,time);
+  TFile *f=new TFile(file,"RECREATE");
+  for(Int_t i=0;i<2;i++)
+  {
+    TString detname0 = "Bsmde";
+    if(i==1) detname0 = "Bsmdp";
+    
+    for(Int_t k=0;k<3;k++)
+    {
+      char tmp[20];
+      sprintf(tmp,"%s-%i-",detname0.Data(),k);
+      TString detname = tmp;
+      
+      TString name = detname+"Pedestals";
+      TString title = detname+" pedestals values";
+      TH1F *h1=new TH1F(name.Data(),title.Data(),18000,1.0,18001.);
+    
+      name = detname+"RMS";
+      title = detname+" RMS values";
+      TH1F *h2=new TH1F(name.Data(),title.Data(),18001,1.0,18001.);
+    
+      name = detname+"Status";
+      title = detname+" Status values";    
+      TH1F *h4=new TH1F(name.Data(),title.Data(),18001,1.0,18001.);
+    
+	    for(Int_t j=0;j<18000;j++)
+	    {
+        Float_t ped  = mSmdPed[i][k][j];
+        Float_t rms  = mSmdRMS[i][k][j];
+        Float_t status=1;
+        if(k==0 && (ped==0 || rms ==0)) status =0;
+        h1->Fill((Float_t)j+1,ped);
+        h2->Fill((Float_t)j+1,rms);
+        h4->Fill((Float_t)j+1,status);
+      }
+      h1->Write();
+      h2->Write();
+      h4->Write();
+      delete h1; delete h2;  delete h4;
+    }
+  }
+  mCapacitor->Write();
+  f->Close();
+  delete f;
+  mCapacitor->Reset();
+  
+  
+  if(!mSaveToDB) return;         
   StDbManager* mgr=StDbManager::Instance();
 	StDbConfigNode* node=mgr->initConfig(dbCalibrations,dbEmc);
 		  
@@ -243,7 +314,7 @@ void StSmdPedMaker::SavePedestals(Int_t date, Int_t time)
       {
         short int ped = (short int)(100*mSmdPed[i][k][j]);
         short int rms = (short int)(100*mSmdRMS[i][k][j]);
-        if(ped==0 && rms==0) status =0;
+        if(k==0 && (ped==0 || rms==0)) status =0;
         tnew.AdcPedestal[j][k] = ped;
         tnew.AdcPedestalRMS[j][k] = rms;
       }
