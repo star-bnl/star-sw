@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.18 2004/04/29 14:05:00 fisyak Exp $
+ * $Id: StEnumerations.h,v 2.19 2004/10/14 19:59:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.19  2004/10/14 19:59:42  ullrich
+ * Added enum for EMC crate status.
+ *
  * Revision 2.18  2004/04/29 14:05:00  fisyak
  * Add track finding method Id defines (for StTrackMethod.inc and sync. with StEnumerations)
  *
@@ -81,9 +84,9 @@
  * \enum StBeamDirection 
  */
 enum StBeamDirection {east = 0,
-		      yellow = 0,  // yellow beam is going west -> east
-		      west = 1,
-		      blue = 1};   // blue beam is going east -> west
+		  yellow = 0,  // yellow beam is going west -> east
+		  west = 1,
+		  blue = 1};   // blue beam is going east -> west
 
 /*!
  * \enum StBeamPolarizationAxis 
@@ -178,4 +181,10 @@ enum StPwg         {generic,                                           /**< enum
                     spectra,                                           /**< enum value spectra */
                     spin,                                              /**< enum value spin */
                     strangeness};
+
+enum StEmcCrateStatus { crateUnknown = 0,
+		    crateNotPresent = 1,
+		    crateOK = 2,
+		    crateHeaderCorrupt = 3 };
+		    
 #endif
