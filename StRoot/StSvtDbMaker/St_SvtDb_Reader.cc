@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.cc,v 1.10 2004/07/26 00:06:08 munhoz Exp $
+ * $Id: St_SvtDb_Reader.cc,v 1.11 2004/07/29 01:36:00 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.cc,v $
+ * Revision 1.11  2004/07/29 01:36:00  caines
+ * Changes for the drift curve usage
+ *
  * Revision 1.10  2004/07/26 00:06:08  munhoz
  * read drift curve
  *
@@ -332,7 +335,7 @@ StSvtHybridCollection* St_SvtDb_Reader::getDriftCurve()
           for (int i=1; i<=3; i++)
 	    for (int j=1; j<=10; j++) {
 	      hybridDriftCurve->setParameter(i,j,driftCurve->driftCurve[i-1][j-1]);
-	      //cout << "adc = " << i << ", parameter = " << j << ", value = " << driftCurve->driftCurve[i-1][j-1] << endl;
+	      // cout << "adc = " << i << ", parameter = " << j << ", value = " << driftCurve->driftCurve[i-1][j-1] << endl;
 	    }
 	  
           mSvtDriftCurve->put_at(hybridDriftCurve,index);

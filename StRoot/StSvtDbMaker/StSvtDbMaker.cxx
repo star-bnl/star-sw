@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.13 2004/07/26 00:06:08 munhoz Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.14 2004/07/29 01:36:00 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.14  2004/07/29 01:36:00  caines
+ * Changes for the drift curve usage
+ *
  * Revision 1.13  2004/07/26 00:06:08  munhoz
  * read drift curve
  *
@@ -88,7 +91,7 @@ int type_of_call SvtGtoL_(float *x,float *xp, int* index){
   St_DataSet* dataSet;
   dataSet = gStSvtDbMaker->GetDataSet("StSvtGeometry");
   StSvtGeometry *GeomDataBase = (StSvtGeometry*)dataSet->GetObject();
-  if(GeomDataBase)   transform.setParamPointers(GeomDataBase, NULL, NULL);
+  if(GeomDataBase)   transform.setParamPointers(GeomDataBase, NULL, NULL, NULL, NULL); // RW added 2 NULLs to remove ambiguity
   StSvtLocalCoordinate b;
 
   transform.GlobaltoLocal(a, b,*index, -1);
@@ -110,7 +113,7 @@ int type_of_call SvtLtoG_(float *xp, float *x, int* index){
   St_DataSet* dataSet;
   dataSet = gStSvtDbMaker->GetDataSet("StSvtGeometry");
   StSvtGeometry *GeomDataBase = (StSvtGeometry*)dataSet->GetObject();
-  if(GeomDataBase)   transform.setParamPointers(GeomDataBase, NULL, NULL);
+  if(GeomDataBase)   transform.setParamPointers(GeomDataBase, NULL, NULL, NULL, NULL); // RW added 2 NULLs to remove ambiguity
 
   StThreeVector<double> b(0,0,0);
   StGlobalCoordinate c;
