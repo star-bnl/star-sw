@@ -1,5 +1,8 @@
-* $Id: tpt_row_sect_pnt.F,v 1.8 1998/09/04 14:44:19 sakrejda Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.9 1998/11/30 19:07:56 sakrejda Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.9  1998/11/30 19:07:56  sakrejda
+* double declaration for isect (found by Valeri) removed
+*
 * Revision 1.8  1998/09/04 14:44:19  sakrejda
 * sector assignement for poorly reconstructed hits around sector edges fixed
 *
@@ -67,7 +70,7 @@ C______________________________________________________________________
       INTEGER iret, tls_Index_Sort_r,nhalf,itim1,ipos1,kc
 
       INTEGER rhit(tpt_mxhit)
-      integer isec2, isec3, isect
+      integer isec2, isec3
       INTEGER tls_Index_Sort_i
 C             sort hits in the TPC table according to row/sec field
       real    xglobal(3)
