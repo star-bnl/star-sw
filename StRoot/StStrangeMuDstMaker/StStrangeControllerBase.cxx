@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.cxx,v 3.3 2000/12/18 21:35:18 genevb Exp $
+// $Id: StStrangeControllerBase.cxx,v 3.4 2001/05/31 02:47:18 perev Exp $
 // $Log: StStrangeControllerBase.cxx,v $
+// Revision 3.4  2001/05/31 02:47:18  perev
+// const(ing)
+//
 // Revision 3.3  2000/12/18 21:35:18  genevb
 // Introduced variable buffer-sizing
 //
@@ -187,7 +190,7 @@ Int_t StStrangeControllerBase::MakeCreateSubDst() {
   return kStOK;
 }
 //_____________________________________________________________________________
-void StStrangeControllerBase::Clear() {
+void StStrangeControllerBase::Clear(const char *) {
   if (dstMaker) {                                // Making a subDST
     selections->Reset();
     if (tree->GetBranch(GetName())->GetAddress() != (char*) &dataArray) {

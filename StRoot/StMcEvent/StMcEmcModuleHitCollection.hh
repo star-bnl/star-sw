@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEmcModuleHitCollection.hh,v 2.2 2000/08/30 14:52:03 calderon Exp $
+ * $Id: StMcEmcModuleHitCollection.hh,v 2.3 2001/05/31 02:45:55 perev Exp $
  *
  * Author: Aleksei Pavlinov, May 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEmcModuleHitCollection.hh,v $
+ * Revision 2.3  2001/05/31 02:45:55  perev
+ * const(ing)
+ *
  * Revision 2.2  2000/08/30 14:52:03  calderon
  * New changes made by Aleksei.
  *
@@ -38,7 +41,7 @@ public:
     StSPtrVecMcCalorimeterHit&       hits();
     const StSPtrVecMcCalorimeterHit& hits() const;
 
-    virtual Bool_t IsFolder() {return kFALSE;}
+//VP    virtual Bool_t IsFolder() const {return kFALSE;}
     virtual void   Browse(TBrowser *b);
 
     void operator()(const unsigned int m) { init(m); } 
