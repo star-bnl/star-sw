@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.30 2001/09/28 20:47:38 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.31 2001/10/02 22:55:57 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.31  2001/10/02 22:55:57  caines
+ * Jun was coorect about B2L8D2H2
+ *
  * Revision 1.30  2001/09/28 20:47:38  caines
  * Fix typo in bad anode listing
  *
@@ -375,8 +378,8 @@ Int_t StSvtSeqAdjMaker::GetBadAnodes()
     {for( int i=1; i<81; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
     cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
     
-    // L08B2-D2H1
-    index = mSvtRawData->getHybridIndex(2,8,2,1);
+    // L08B2-D2H2
+    index = mSvtRawData->getHybridIndex(2,8,2,2);
     mHybridBadAnodeData = new StSvtBadAnode();
     mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
     {for( int i=177; i<193; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
