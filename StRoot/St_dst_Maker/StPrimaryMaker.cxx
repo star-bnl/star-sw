@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.38 2000/04/10 22:36:46 wdeng Exp $
+// $Id: StPrimaryMaker.cxx,v 1.39 2000/04/11 17:44:37 wdeng Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.39  2000/04/11 17:44:37  wdeng
+// Calculate lengths for globtrk and primtrk using StHelix model. Flip sign if length is negative! Length can't be less than zero according to Spiros.
+//
 // Revision 1.38  2000/04/10 22:36:46  wdeng
 // Use StHelix model to calculate impact parameters for globtrk and primtrk as Spiros suggested.
 //
@@ -422,6 +425,10 @@ Int_t StPrimaryMaker::Make(){
 	
 	StThreeVectorD primVertex(pv[0],pv[1],pv[2]);
 	glob->impact = globHelix.distance(primVertex);
+
+	StThreeVectorD lastPoint(glob->x_last[0], glob->x_last[1],glob->x_last[2]);
+	Float_t globLength = globHelix.pathLength(lastPoint); 
+	glob->length = (globLength>0) ? globLength : (-globLength);  
       }
     
     if(Debug()) gMessMgr->Debug() << " finished calling track-propagator" << endm;
@@ -535,6 +542,11 @@ Int_t StPrimaryMaker::Make(){
 	  
 	  StThreeVectorD primVertex(pv[0],pv[1],pv[2]);
           primtrkPtr->impact = primHelix.distance(primVertex);
+
+	  StThreeVectorD lastPoint(primtrkPtr->x_last[0], 
+				   primtrkPtr->x_last[1],primtrkPtr->x_last[2]);
+	  Float_t primLength = primHelix.pathLength(lastPoint);
+	  primtrkPtr->length = (primLength>0) ? primLength : (-primLength);
         }
     } 
   
