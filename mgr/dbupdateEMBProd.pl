@@ -21,7 +21,7 @@ my $debugOn=0;
 
 my $DISK1 = "/star/rcf/data06/reco";
 
-my $prodSr = "P00hg";
+my $prodSr = "P00hi";
 my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
 
 my $topHpssReco  =  "/home/starreco/reco";
@@ -47,8 +47,10 @@ my @EmSet = (
 #              "embedding_alamlopt",
 #              "embedding_lamhipt",
 #              "embedding_lamlopt",
-               "embedding_phi",
-               "embedding_pbar",
+#               "embedding_phi",
+#               "embedding_pbar",
+                "embedding_pi+",
+                "embeddingp",
 );
               
 
