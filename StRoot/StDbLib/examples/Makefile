@@ -8,9 +8,12 @@
 #  for solaris, setenv GNU_GCC to use gcc
 #
 ###########################################
-
+#
+# this exec
+#
 ReadConfig = ReadConfig
 all :: $(ReadConfig)
+
 #
 #  set pointer to db-api which include 'rules.make'
 #
@@ -21,10 +24,6 @@ include $(STDB_API)/rules.make
 # set pointer to db-cstruct repository
 #
 CSTRUCTS= $(STAR)/StDb/include
-
-#
-# this exec
-#
 
 ALL_CPPFLAGS += -I$(STDB_API) 
 ALL_CPPFLAGS += -I$(CSTRUCTS)
