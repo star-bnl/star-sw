@@ -102,7 +102,7 @@ C
       if ( vpar(1).n_pmt .eq. 0 ) vpar(1).n_pmt = 48
       if ( vpar(1).c_light .eq. 0 ) vpar(1).c_light = 2.99792458e10
       if ( vpar(1).refractive_index .eq. 0 ) 
-     #     vpar(1).refractive_index = 1.46
+     &     vpar(1).refractive_index = 1.46
       if ( vpar(1).thick_rad .eq. 0 ) vpar(1).thick_rad = 0.635
       if ( vpar(1).time_res .eq. 0 ) vpar(1).time_res = 75.0e-12
       if ( vpar(1).adc_range .eq. 0 ) vpar(1).adc_range = 1024
@@ -159,7 +159,7 @@ C
                 vpd_iudet = 2
            endif
            ipmt = (vpd_numbv - 1)*npmt/2 + 
-     #            8*(vpd_iudet - 1) + div_number
+     &            8*(vpd_iudet - 1) + div_number
     
 *          -----------------------
 *          get photon info
@@ -189,8 +189,8 @@ C
                  CALL RANNOR(random1,random2)
 *    
                  tim(ipmt)  = vpd_Tof + t_rad/clt*
-     #                       ref_in + 
-     #                       t_res*random1
+     &                       ref_in + 
+     &                       t_res*random1
 *    
 *          ----------------------------------
 *          Large time will be equal to 1 here
@@ -225,7 +225,7 @@ C
            vraw(vraw_h.nok).id           = vraw_h.nok 
            vraw(vraw_h.nok).pmt          = ipmt
            vraw(vraw_h.nok).vpd_adc      = 
-     #                             arang*tot_photons(ipmt)/mphot
+     &                             arang*tot_photons(ipmt)/mphot
            vraw(vraw_h.nok).vpd_tdc      = trang*vpd_tim(ipmt)/mtime
 *    
         endif
