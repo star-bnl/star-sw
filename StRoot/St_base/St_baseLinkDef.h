@@ -6,4 +6,5 @@
 #pragma link C++ class StBranch;
 #pragma link C++ class StIOEvent-;
 #pragma link C++ class StIO-;
+#pragma link C++ class St_TableSorter!;
 #endif

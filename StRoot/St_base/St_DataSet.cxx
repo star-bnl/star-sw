@@ -402,7 +402,8 @@ void St_DataSet::SetWrite()
 void St_DataSet::Shunt(St_DataSet *dataset)
 {
 // 	Remove the object from the original and add it to dataset 
-  SetParent();
+  if (fParent) fParent->Remove(this);
+  SetParent(0);
   if (dataset) dataset->Add(this);
 }
 
