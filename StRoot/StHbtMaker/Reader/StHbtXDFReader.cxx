@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtXDFReader.cxx,v 1.2 2000/02/26 19:06:12 laue Exp $
+ * $Id: StHbtXDFReader.cxx,v 1.3 2000/03/16 02:07:55 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -37,7 +37,7 @@ ClassImp(StHbtXDFReader)
 
 
 inline double min(double a, double b) { return (a<b) ? a : b; }
-inline double max(double a, double b) { return (a>b) ? b : a; }
+inline double max(double a, double b) { return (a<b) ? b : a; }
 
 //__________________
 StHbtXDFReader::StHbtXDFReader(const char* dataSetName, const char* particleTableDirectory){
@@ -135,26 +135,34 @@ StHbtEvent* StHbtXDFReader::ReturnHbtEvent(){
   cout << "StHbtXDFReader::ReturnHbtEvent" << endl;
 
   StEvtHddr* fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
+#ifdef STHBTDEBUG
   if (fEvtHddr) {
     cout << " got event headder " << fEvtHddr << endl;
   }
+#endif
 
   St_DataSet* event; 
   event = GetDataSet(mDataSetName);
+#ifdef STHBTDEBUG
   cout << " event " << event << endl;
+#endif
   if (!event) {
     cout << "StHbtXDFReader - no Event found, check dataSetName !!! " << endl;
     return 0;
   }
   St_DataSetIter iter(event);	// create a new iterator object for each event pointing to latest event gotten
+#ifdef STHBTDEBUG
   cout << " iter " << endl;
+#endif
   St_DataSet* set = iter.Cd(mParticleTableDirectory); // change directory to where particles are and pass address to set
   if (!set) {
     cout << "StHbtXDFReader - ,could 'nt change to particle table directory, check particleTableDirectory !!! " << endl;
     return 0;
   }
   St_particle* part = (St_particle *)set;	// pass that address to part (casting set to type St_particle)
+#ifdef STHBTDEBUG
   cout << " part " << part << endl;
+#endif
   particle_st* particle = part->GetTable();	// get the table and have 'particle' point to it
   if (!particle) {
     cout << "StHbtXDFReader - couldn't find  particle table!!! " << endl;
@@ -175,8 +183,9 @@ StHbtEvent* StHbtXDFReader::ReturnHbtEvent(){
 
   StHbtThreeVector VertexPosition(0.,0.,0.); // vertex position is 0.,0.,0. for the event generators
   hbtEvent->SetPrimVertPos(VertexPosition);
+#ifdef STHBTDEBUG
   cout << " primary vertex : " << VertexPosition << endl;
-  
+#endif  
   // By now, all event-wise information has been extracted and stored in hbtEvent
   // see if it passes any front-loaded event cut
   if (mEventCut){
@@ -199,19 +208,24 @@ StHbtEvent* StHbtXDFReader::ReturnHbtEvent(){
   cout << "StHbtXDFReader::ReturnHbtEvent - We have " << mult << " tracks to store " << endl;
   // loop over all the tracks
   for (int icount=0; icount<mult; icount++){
-    //cout << " track# " << icount << endl;
-    
+#ifdef STHBTDEBUG
+    cout << " track# " << icount << endl;
+#endif    
      // particle identification
     long particleId=particle[icount].idhep; // according to the PDG standard
     //cout << " particleId " << particleId << endl;
     StParticleDefinition* StParticle= StParticleTable::instance()->findParticle(particleId);
     if (!StParticle) {
-      //cout << " unknown particleId " << particleId << endl;
+#ifdef STHBTDEBUG
+      cout << " unknown particleId " << particleId << endl;
+#endif
       continue;
     }
     
     if ( StParticle->charge()==0 ) {
-      //cout << " neutral particle, track deleted " << endl; 
+#ifdef STHBTDEBUG
+      cout << " neutral particle, track deleted " << endl; 
+#endif
       continue;
     }
     
@@ -225,14 +239,18 @@ StHbtEvent* StHbtXDFReader::ReturnHbtEvent(){
       // check mothers
       for (int iMother=0; iMother<2; iMother++) { 
 	checkMother+= CheckPdgIdList(mAcceptedMothers,particle[particle[icount].jmohep[iMother]].idhep);
-	//cout << " motherID " << particle[particle[icount].jmohep[iMother]].idhep << " " << checkMother << endl;
+#ifdef STHBTDEBUG
+	cout << " motherID " << particle[particle[icount].jmohep[iMother]].idhep << " " << checkMother << endl;
+#endif
       }
       // check daughters
       int firstDaughterPosition = particle[icount].jdahep[0];
       int lastDaughterPosition = particle[icount].jdahep[1];
       for (int iDaughter=firstDaughterPosition; iDaughter<=lastDaughterPosition; iDaughter++) {
 	checkDaughter+= CheckPdgIdList(mAcceptedDaughters,particle[iDaughter].idhep);
-	//cout << " daughterID " << particle[iDaughter].idhep << " " << checkDaughter << endl;
+#ifdef STHBTDEBUG
+	cout << " daughterID " << particle[iDaughter].idhep << " " << checkDaughter << endl;
+#endif
       }
       // all together
       if ( !(checkParticle && checkMother && checkDaughter) ) {
@@ -242,8 +260,9 @@ StHbtEvent* StHbtXDFReader::ReturnHbtEvent(){
     
 
     StHbtTrack* hbtTrack = new StHbtTrack;
-    //cout << "StHbtTrack instantiated " << endl;
-    
+#ifdef STHBTDEBUG
+    cout << "StHbtTrack instantiated " << endl;
+#endif    
     switch (particleId) {
     case 211:  // intentional fall-through
     case -211:  // gid=211,-211 is pion
@@ -272,19 +291,23 @@ StHbtEvent* StHbtXDFReader::ReturnHbtEvent(){
     
     StHbtThreeVector p(particle[icount].phep[0],particle[icount].phep[1],particle[icount].phep[2]); 
     hbtTrack->SetP(p);
-    //cout << "p: " << p << endl;
-
+#ifdef STHBTDEBUG
+    cout << "p: " << p << endl;
+#endif
     hbtTrack->SetPt( p.perp() );   
-    //cout << " Pt " << hbtTrack->Pt() << endl;
-
+#ifdef STHBTDEBUG
+    cout << " Pt " << hbtTrack->Pt() << endl;
+#endif
 
 
     hbtTrack->SetCharge( StParticle->charge() ); 
-    //cout << " charge " << hbtTrack->Charge() << endl;
- 
+#ifdef STHBTDEBUG
+    cout << " charge " << hbtTrack->Charge() << endl;
+#endif 
     hbtTrack->SetdEdx( dedxMean( StParticle->mass(), p.mag() ) ); 
-    //cout << " dedx " << hbtTrack->dEdx() << endl;
-    
+#ifdef STHBTDEBUG
+    cout << " dedx " << hbtTrack->dEdx() << endl;
+#endif    
    StHbtThreeVector productionVertex(particle[icount].vhep[0], particle[icount].vhep[1], particle[icount].vhep[2]);
    productionVertex*=millimeter;
 #ifdef TheWorldIsNice
@@ -299,18 +322,22 @@ StHbtEvent* StHbtXDFReader::ReturnHbtEvent(){
     hbtTrack->SetHelix(helix);
 
     double pathlength = helix.pathLength(VertexPosition);
-    //cout << "pathlength\t" << pathlength << endl;
-    StHbtThreeVector  DCAxyz = helix.at(pathlength)-VertexPosition;
-    //cout << "DCA\t\t" << DCAxyz << " " << DCAxyz.perp() << endl;
-
+#ifdef STHBTDEBUG
+    cout << "pathlength\t" << pathlength << endl;
+#endif    
+    StHbtThreeVector DCAxyz = helix.at(pathlength)-VertexPosition;
+#ifdef STHBTDEBUG
+    cout << "DCA\t\t" << DCAxyz << " " << DCAxyz.perp() << endl;
+#endif
     double maxRadius1 = min( fabs(200.*p.perp()/p.z()), 200.); //
     double maxRadius2 = min( fabs(1./helix.curvature()), 200.);
     double maxRadius =  max( maxRadius1, maxRadius2 );
-    int maxHits = (int) floor( max((maxRadius-50.)*45./150., 0.) ); // 45 padRows from r=50cm---200cm 
+    unsigned short maxHits = (unsigned short) floor( max((maxRadius-50.)*45./150., 0.) ); // 45 padRows from r=50cm---200cm 
     hbtTrack->SetNHits(maxHits); // for now
     hbtTrack->SetNHitsPossible(maxHits); // for now
-    // cout << maxHits << endl;
-
+#ifdef STHBTDEBUG
+    cout << maxHits << endl;
+#endif
     hbtTrack->SetDCAxy( DCAxyz.perp() );     // in xy-plane
     hbtTrack->SetDCAz( DCAxyz.z() );         // in z direction
 
@@ -318,9 +345,9 @@ StHbtEvent* StHbtXDFReader::ReturnHbtEvent(){
     hbtTrack->SetChiSquaredZ( 0.); 
 
     hbtTrack->SetPt(p.perp());
-    
-    //cout << "pushing..." <<endl;
-    
+#ifdef STHBTDEBUG
+    cout << "pushing..." <<endl;
+#endif
     // By now, all track-wise information has been extracted and stored in hbtTrack
     // see if it passes any front-loaded event cut
     if (mTrackCut){

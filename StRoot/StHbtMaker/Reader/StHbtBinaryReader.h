@@ -31,6 +31,19 @@
 #include "StIOInterFace.h"
 #endif
 
+#include <list>
+#if !defined(ST_NO_NAMESPACES)
+using std::list;
+#endif
+#ifdef ST_NO_TEMPLATE_DEF_ARGS
+typedef list<StHbtString*, allocator<StHbtString*> >            fileCollection;
+typedef list<StHbtString*, allocator<StHbtString*> >::iterator  fileIterator;
+#else
+typedef list<StHbtString*>            fileCollection;
+typedef list<StHbtString*>::iterator  fileIterator;
+#endif
+
+
 class StHbtBinaryReader : public StHbtEventReader{
 
 private:
@@ -38,14 +51,19 @@ private:
 
   ifstream* mInputStream;              //!
   ofstream* mOutputStream;             //! 
-#ifdef __ROOT__
-  StIOMaker* mIOMaker;                 //!
-#endif
-  const char* mFileName;               //!
   int mReaderStatus;                   //!
+  const char* mFileName;               //!
+  fileCollection* mFileList;           //!
 
   StHbtString mTheMessage;
   StHbtString mCurrentFile;
+
+  void FillFileList(char* fileList);
+  int NextFile();
+
+#ifdef __ROOT__
+  StIOMaker* mIOMaker;                 //!
+#endif
 
 public:
   StHbtBinaryReader();
@@ -63,14 +81,14 @@ public:
   void Finish();
 
   // methods special to this Reader
-  void SetFileName(char* file);
+  void SetFileName(char*);
+  void AddFileList(char*);
 
 #ifdef __ROOT__
   ClassDef(StHbtBinaryReader, 0)
 #endif
 };
 
-inline void StHbtBinaryReader::SetFileName(char* file){mFileName=file;}
 
 
 #endif
