@@ -26,7 +26,7 @@ replace[;ON#{#;] with [
 *
    call ASLGETBA ('GEOM','DETP',1000,LL,Par)
    If (JVOLUM>0) call AGDROP ('*')
-   IDEB = IDEBUG
+   IDEB = IDEBUG; J=1
 *
 * -------------------- set GSTAR absolute default ------------------------
 * Set only flags for the main configuration (everthing on, except for tof),
@@ -47,8 +47,7 @@ replace[;ON#{#;] with [
 * 
 If LL>1   
 { Call AGSFLAG  ('GEOM',1)
-  CALL UHTOC(PAR(2),4,Commands,LL*4-4); 
-  Call CLTOU(Commands); i=Index(Commands,'FIELD=');
+  CALL UHTOC(PAR(2),4,Commands,LL*4-4);  Call CLTOU(Commands);
 
   * set geant processes and cuts only if any detp geometry was issued:
    
@@ -58,6 +57,7 @@ If LL>1
   TOFMAX        = 1.e-4 
   NtrSubEv      = 1000
 *
+  do while (j>0)
   on HELP       { you may select the following keywords: ;
                   <W>;('---------------:----------------------------- ');
                   <W>;('Configurations : complete,tpc_only,field_only ');
@@ -88,6 +88,7 @@ If LL>1
                   {cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal}=off;    }
   on FIELD_OFF  { no magnetic field;                field=0;                  }
   on FIELD_ON   { Standard (5 KGs) field on;        field=5;                  }
+  i=Index(Commands,'FIELD=')
   if i>0        { j=i/4+3; field=Par(1+j);  Commands(i:j*4)=' ';
                   <W> field; (' Modified field value =',F6.2,' KGS');         }
   on MWC_OFF    { Trigger Multy-wire readout off;   mwc=off;                  }
@@ -97,6 +98,7 @@ If LL>1
   on SPLIT_ON   { events will be split into subevents;         NtrSubEv=1000; }
   on DEBUG_ON   { verbose mode, some graphics; Idebug=max(Idebug,1); Itest=1; }
   on DEBUG_OFF  { standard debug mode;         {Idebug,Itest}=0;              }
+  enddo
  }
 
 * sanity check - if something left in commands (unknown keyword), we stop!
