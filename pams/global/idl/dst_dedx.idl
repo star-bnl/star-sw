@@ -7,13 +7,14 @@
  *  with one track/detector segment and/or one dE/dx averaging method entry 
  *  per table row.  It also includes the number of space points used.
  *  The following cases can be accommodated:
- *
- *    (1)  Separate contributions from SVT, SSD, FTPC and/or TPC space 
+ */
+/*    (1)  Separate contributions from SVT, SSD, FTPC and/or TPC space 
  *         points to an individual track-
  *         The separate dE/dx values are listed on separate rows which refer
  *         to the same track via 'id_track' and which are distinguished by
  *         the value of 'det_id'.
- *    (2)  Different dE/dx averaging procedures (e.g. truncated mean, 
+ */
+/*    (2)  Different dE/dx averaging procedures (e.g. truncated mean, 
  *         ensemble average, most probable value, Landau fit, etc.) for
  *         some or all tracks-
  *         This can be handled by filling additional rows and distinguishing
@@ -22,8 +23,8 @@
  *         algorithms (e.g. 3D helix, analytic E-loss, Kalman, etc.)-
  *         For additional space point-track assignments additional instances
  *         of the dst_dedx table can be filled.
- *
- *  The rows in dst_dedx refer to the track table instance corresponding to
+ */
+/*  The rows in dst_dedx refer to the track table instance corresponding to
  *  the fitted space points from the tracking detectors; i.e. dst_dedx does
  *  not refer to a track table instance in which the primary vertex was
  *  included in the fitting.
@@ -44,5 +45,5 @@
   long   method;     /* dE/dx calculation method (see  comments above)   */
   long   ndedx;      /* number of points used in dE/dx calcu.            */
  } ;
-/*  Last mod. for dst_dedx:   $Date: 2000/01/05 20:19:25 $ */
+/*  Last mod. for dst_dedx:   $Date: 2000/02/09 21:43:02 $ */
 
