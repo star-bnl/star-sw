@@ -158,9 +158,9 @@
  *              map[0]   Bit number  Quantity
  *              ------   ----------  --------
  *                           0       Primary Vertex used or not
- *                          1-10     FTPC East pad rows, increasing away from
+ *                          1-10     FTPC West pad rows, increasing away from
  *                                   STAR coord. sys. origin at (0,0,0)
- *                          11-20    FTPC West pad rows, increasing away from
+ *                          11-20    FTPC East pad rows, increasing away from
  *                                   STAR coord. sys. origin at (0,0,0)
  *                          21-31    not used; for future use
  *
@@ -236,7 +236,7 @@
   long       id_start_vertex;  /* Packed variable for primary vertex     */
                                /* final fit and primary track candidates */
  } ;
-/*  Last mod. for dst_track:   $Date: 2000/07/04 19:44:53 $ */
+/*  Last mod. for dst_track:   $Date: 2001/05/10 19:12:25 $ */
 
 
 

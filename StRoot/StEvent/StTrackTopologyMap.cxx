@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.12 2001/04/24 21:32:07 genevb Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.13 2001/05/10 19:12:15 genevb Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
+ * Revision 2.13  2001/05/10 19:12:15  genevb
+ * Switch FTPC definitions
+ *
  * Revision 2.12  2001/04/24 21:32:07  genevb
  * Additional helper functions
  *
@@ -57,7 +60,7 @@ using std::adjacent_difference;
 using std::max_element;
 #endif
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.12 2001/04/24 21:32:07 genevb Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.13 2001/05/10 19:12:15 genevb Exp $";
 
 ClassImp(StTrackTopologyMap)
 
@@ -121,10 +124,10 @@ StTrackTopologyMap::hasHitInRow(StDetectorId id, unsigned int row) const
         return !ftpcFormat() && bit(row+7);
         break;
     case kFtpcWestId:
-        return ftpcFormat() && bit(row+10);
+        return ftpcFormat() && bit(row);
         break;
     case kFtpcEastId:
-        return ftpcFormat() && bit(row);
+        return ftpcFormat() && bit(row+10);
         break;
     default:
         return kFALSE;
