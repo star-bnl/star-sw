@@ -1,11 +1,9 @@
 StHbtMaker - STAR HBT analysis framework
 
-O6jul99 - MALisa - StHbtMaker works now in new/ and pro/
-  	  on linux and solaris.
+for documentation see
+http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StHbtMaker/doc/
 
-IMPT!! - although you should be in "pro" or "new", you MUST
-	 use the "dev" version of the makefile, since StHbtMaker
-	 has subdirectories.  To do this, type the following:
+26jul99 - MALisa - StHbtMaker works now in dev/
+	- do NOT have to do any fancy stuff with MakeDll
 
-	setenv MakeDll /afs/rhic/star/packages/dev/mgr/MakeDll.mk
 
