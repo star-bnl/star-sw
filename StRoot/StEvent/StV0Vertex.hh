@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.hh,v 1.4 1999/01/30 23:03:18 wenaus Exp $
+ * $Id: StV0Vertex.hh,v 1.5 1999/02/18 15:41:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.hh,v $
- * Revision 1.4  1999/01/30 23:03:18  wenaus
- * table load intfc change; include ref change
+ * Revision 1.5  1999/02/18 15:41:42  ullrich
+ * Momemtum of daughter tracks added.
  *
  * Revision 1.5  1999/02/18 15:41:42  ullrich
  * Momemtum of daughter tracks added.
@@ -30,6 +30,7 @@
  * version with constructors for table-based loading
  *
  **************************************************************************/
+#ifndef StV0Vertex_hh
 #include "StEvent/StVertex.hh"
 #include "StEvent/StEnumerations.hh"
 #include "tables/dst_vertex.h"
@@ -41,28 +42,34 @@ class StV0Vertex : public StVertex {
     StV0Vertex();
     ~StV0Vertex();
     StV0Vertex(dst_v0_vertex_st*,dst_vertex_st*);
-    float dcaDaughterToPrimaryVertex(unsigned int i) const;
+    // StV0Vertex(const StV0Vertex&);        use default
     // const StV0Vertex & operator=(const StV0Vertex&);
 
+    float dcaDaughterToPrimaryVertex(StTrackSign sign) const;
     float dcaDaughters() const;
-    void setDcaDaughtersToPrimaryVertex(unsigned int, float);
+    float dcaParentToPrimaryVertex() const;
+    const StThreeVector<float>& momentumOfDaughter(StTrackSign sign) const;
 
     void setDcaDaughterToPrimaryVertex(StTrackSign sign, float);
     void setMomentumOfDaughter(StTrackSign sign, const StThreeVector<float>&);
     void setDcaDaughters(float);
     void setDcaParentToPrimaryVertex(float);
     
-    float mDcaDaughtersToPrimaryVertex[2];
-    float mDcaDaughters;
-    float mDcaParentToPrimaryVertex;
+    void setType(StVertexType);     // overwrite from base class          
+
+protected:
+    float                mDcaDaughtersToPrimaryVertex[2];
     StThreeVector<float> mMomentumOfDaughters[2];
     float                mDcaDaughters;
-inline float StV0Vertex::dcaDaughterToPrimaryVertex (unsigned int i) const
+    float                mDcaParentToPrimaryVertex;
 };
-    if (i < 2)
-	return mDcaDaughtersToPrimaryVertex[i];
-    else
-	return FLT_MAX;
+
+inline float StV0Vertex::dcaDaughterToPrimaryVertex (StTrackSign sign) const
+{
+    return mDcaDaughtersToPrimaryVertex[sign];
+}
+
+inline const StThreeVector<float>&
 StV0Vertex::momentumOfDaughter(StTrackSign sign) const
 {
     return mMomentumOfDaughters[sign];
