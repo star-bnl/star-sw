@@ -73,10 +73,10 @@ endif
 
 message ' run_dst: finished calling fill_dst_run_summary'
  return
-******************************************************
  
+******************************************************
 ***************************************************************
-*
+
 macro dst_ehead
  macro/global/import *
 
@@ -84,7 +84,7 @@ cd [dst]
 
 tdm/table/rowcount event_header   1
 
-tdm/table/cell/putvalue 'event_header[0].n_event'      [nevdsttot] 
+tdm/table/cell/putvalue 'event_header[0].n_event'      [nev_total] 
 tdm/table/cell/putvalue 'event_header[0].n_run'        0
 tdm/table/cell/putvalue 'event_header[0].event_type'  'Collision'
 tdm/table/cell/putvalue 'event_header[0].time'         0
@@ -179,5 +179,12 @@ macro particle_dst_filler
 RETURN
  
 ****************************************************************
+
+
+
+
+
+
+
 
 
