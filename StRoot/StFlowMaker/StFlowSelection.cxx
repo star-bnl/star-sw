@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.8 2000/09/15 01:20:02 snelling Exp $
+// $Id: StFlowSelection.cxx,v 1.9 2000/09/15 22:51:34 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.9  2000/09/15 22:51:34  posk
+// Added pt weighting for event plane calcualtion.
+//
 // Revision 1.8  2000/09/15 01:20:02  snelling
 // Added methods for P and Y and added selection on Y
 //
@@ -51,24 +54,23 @@ ClassImp(StFlowSelection)
 
 StFlowSelection::StFlowSelection() : mCentrality(0), mSubevent(-1) {
   // To make selections
-  mNumber[0] = '\0';
-  mPid[0] = '\0';
+  mNumber[0]  = '\0';
+  mPid[0]     = '\0';
   mPidPart[0] = '\0';
-  mPtPart[0] = 0.;
-  mPtPart[1] = 0.;
-  mEtaPart[0] = 0.;
-  mEtaPart[1] = 0.;
-
-  mFitPtsPart[0] = 0;
-  mFitPtsPart[1] = 0;
+  mPtPart[0]            = 0.;
+  mPtPart[1]            = 0.;
+  mEtaPart[0]           = 0.;
+  mEtaPart[1]           = 0.;
+  mFitPtsPart[0]        = 0;
+  mFitPtsPart[1]        = 0;
   mFitOverMaxPtsPart[0] = 0.;
   mFitOverMaxPtsPart[1] = 0.;
-  mChiSqPart[0] = 0.;
-  mChiSqPart[1] = 0.;
-  mDcaPart[0] = 0.;
-  mDcaPart[1] = 0.;
-  mYPart[0] = 0.;
-  mYPart[1] = 0.;
+  mChiSqPart[0]         = 0.;
+  mChiSqPart[1]         = 0.;
+  mDcaPart[0]           = 0.;
+  mDcaPart[1]           = 0.;
+  mYPart[0]             = 0.;
+  mYPart[1]             = 0.;
 }
 
 //-----------------------------------------------------------------------

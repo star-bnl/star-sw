@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.8 2000/09/15 01:20:03 snelling Exp $
+// $Id: StFlowSelection.h,v 1.9 2000/09/15 22:51:34 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.9  2000/09/15 22:51:34  posk
+// Added pt weighting for event plane calcualtion.
+//
 // Revision 1.8  2000/09/15 01:20:03  snelling
 // Added methods for P and Y and added selection on Y
 //
@@ -88,11 +91,11 @@ class StFlowSelection : public StObject {
   Char_t  mNumber[3];                        // selection number
   UInt_t  mCentrality;                       // centrality bin
   Char_t  mPid[10];                          // pi-, pi+, pi, k+, k-, 
-                                             // pbar, proton or deuteron
+                                             // pbar, proton, d, dbar, e+, e-
   Char_t  mPidPart[10];                      // PID for particles wrt plane
-  Float_t mPtPart[2];                        // pt cuts for parts. wrt plane
-  Float_t mEtaPart[2];                       // eta cuts for parts. wrt plane
-  Float_t mYPart[2];                         // rapidity cuts 
+  Float_t mPtPart[2];                        // for parts. wrt plane
+  Float_t mEtaPart[2];                       // for parts. wrt plane
+  Float_t mYPart[2];                         // for parts. wrt plane 
   Int_t   mFitPtsPart[2];                    // for parts. wrt plane
   Float_t mFitOverMaxPtsPart[2];             // for parts. wrt plane
   Float_t mChiSqPart[2];                     // for parts. wrt plane

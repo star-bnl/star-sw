@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.13 2000/09/12 01:30:23 snelling Exp $
+// $Id: StFlowEvent.cxx,v 1.14 2000/09/15 22:51:28 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.14  2000/09/15 22:51:28  posk
+// Added pt weighting for event plane calcualtion.
+//
 // Revision 1.13  2000/09/12 01:30:23  snelling
 // Changed PID selection
 //
@@ -122,6 +125,7 @@ Float_t  StFlowEvent::mEtaCuts[2][Flow::nHars][Flow::nSels] = {{{0.,0.5},
 								{1.0,1.},
 								{1.0,2.},
 								{1.0,1.}}};
+//For gap of |eta| < 0.05
 // Float_t  StFlowEvent::mEtaCuts[2][Flow::nHars][Flow::nSels] = {{{0.05,0.5},
 // 								{0.05,0.},
 // 								{0.05,0.5},
@@ -134,6 +138,7 @@ Float_t  StFlowEvent::mEtaCuts[2][Flow::nHars][Flow::nSels] = {{{0.,0.5},
 // 								{1.0,1.},
 // 								{1.0,2.},
 // 								{1.0,1.}}};
+
 Float_t  StFlowEvent::mPtCuts[2][Flow::nHars][Flow::nSels] =  {{{0.1,0.1},
 								{0.1,0.1},
 								{0.1,0.1},
@@ -157,6 +162,7 @@ Float_t StFlowEvent::mDeuteronCuts[2]      = {-3., 3.};
 Float_t StFlowEvent::mAntiDeuteronCuts[2]  = {-3., 3.};
 Float_t StFlowEvent::mElectronCuts[2]      = {-3., 3.};
 Float_t StFlowEvent::mPositronCuts[2]      = {-3., 3.};
+Bool_t  StFlowEvent::mPtWgt                = kFALSE;
 
 //-----------------------------------------------------------
 
@@ -236,6 +242,10 @@ TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
       Float_t mPhi = pFlowTrack->Phi();
       double phiWgt = PhiWeight(mPhi, selN, harN);
       if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
+      if (mPtWgt) {
+	float pt = pFlowTrack->Pt();
+	phiWgt *= pt;
+      }
       mQx += phiWgt * cos(mPhi * order);
       mQy += phiWgt * sin(mPhi * order);
     }
@@ -267,7 +277,11 @@ Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) {
   TVector2 mQ  = Q(pFlowSelect);
   UInt_t mult  = Mult(pFlowSelect);
   
-  return (mult) ? mQ.Mod() / sqrt((double)mult) : 0.;
+  if (mPtWgt) {
+    return 0.;
+  } else {
+    return (mult) ? mQ.Mod() / sqrt((double)mult) : 0.;
+  }
 }
 
 //-----------------------------------------------------------------------
@@ -379,7 +393,6 @@ void StFlowEvent::MakeSubEvents() {
 
 void StFlowEvent::SetPids() {
   
-
   StFlowTrackIterator itr;
 
   for (itr = TrackCollection()->begin(); 
@@ -389,23 +402,23 @@ void StFlowEvent::SetPids() {
     Char_t pid[10] = "none";
     Short_t charge  = pFlowTrack->Charge();
 
-    Bool_t bPiPlus = kFALSE;
-    Bool_t bPiMinus = kFALSE;
-    Bool_t bProton = kFALSE;
-    Bool_t bAntiProton = kFALSE;
-    Bool_t bKplus = kFALSE;
-    Bool_t bKminus = kFALSE;
-    Bool_t bDeuteron = kFALSE;
+    Bool_t bPiPlus       = kFALSE;
+    Bool_t bPiMinus      = kFALSE;
+    Bool_t bProton       = kFALSE;
+    Bool_t bAntiProton   = kFALSE;
+    Bool_t bKplus        = kFALSE;
+    Bool_t bKminus       = kFALSE;
+    Bool_t bDeuteron     = kFALSE;
     Bool_t bAntiDeuteron = kFALSE;
-    Bool_t bElectron = kFALSE;
-    Bool_t bPositron = kFALSE;
+    Bool_t bElectron     = kFALSE;
+    Bool_t bPositron     = kFALSE;
     
     if (charge == 1) {
-      Float_t piPlus  = pFlowTrack->PidPiPlus();
-      Float_t proton  = pFlowTrack->PidProton();
-      Float_t kPlus   = pFlowTrack->PidKaonPlus();
-      Float_t deuteron   = pFlowTrack->PidDeuteron();
-      Float_t positron   = pFlowTrack->PidPositron();
+      Float_t piPlus    = pFlowTrack->PidPiPlus();
+      Float_t proton    = pFlowTrack->PidProton();
+      Float_t kPlus     = pFlowTrack->PidKaonPlus();
+      Float_t deuteron  = pFlowTrack->PidDeuteron();
+      Float_t positron  = pFlowTrack->PidPositron();
       if (piPlus > mPiPlusCuts[0] && 
 	  piPlus < mPiPlusCuts[1]) {
 	bPiPlus = kTRUE;
@@ -427,11 +440,11 @@ void StFlowEvent::SetPids() {
 	bPositron = kTRUE;
       }
     } else if (charge == -1) {
-      Float_t piMinus = pFlowTrack->PidPiMinus();
-      Float_t antiProton  = pFlowTrack->PidAntiProton();
-      Float_t kMinus   = pFlowTrack->PidKaonMinus();
-      Float_t antiDeuteron   = pFlowTrack->PidAntiDeuteron();
-      Float_t electron   = pFlowTrack->PidElectron();
+      Float_t piMinus      = pFlowTrack->PidPiMinus();
+      Float_t antiProton   = pFlowTrack->PidAntiProton();
+      Float_t kMinus       = pFlowTrack->PidKaonMinus();
+      Float_t antiDeuteron = pFlowTrack->PidAntiDeuteron();
+      Float_t electron     = pFlowTrack->PidElectron();
       if (piMinus > mPiMinusCuts[0] && 
 	  piMinus < mPiMinusCuts[1]) {
 	bPiMinus = kTRUE;
@@ -498,32 +511,23 @@ void StFlowEvent::SetCentrality(const UInt_t& tracks) {
   if (tracks < cent[0]) {
     mCentrality = 0;
   }
-  else if (tracks >= cent[0] && tracks < cent[1]) {
-    mCentrality = 1;
+  else if (tracks < cent[1]) { mCentrality = 1;
   }
-  else if (tracks >= cent[1] && tracks < cent[2]) {
-    mCentrality = 2;
+  else if (tracks < cent[2]) { mCentrality = 2;
   }
-  else if (tracks >= cent[2] && tracks < cent[3]) {
-    mCentrality = 3;
+  else if (tracks < cent[3]) { mCentrality = 3;
   }
-  else if (tracks >= cent[3] && tracks < cent[4]) {
-    mCentrality = 4;
+  else if (tracks < cent[4]) { mCentrality = 4;
   }
-  else if (tracks >= cent[4] && tracks < cent[5]) {
-    mCentrality = 5;
+  else if (tracks < cent[5]) { mCentrality = 5;
   }
-  else if (tracks >= cent[5] && tracks < cent[6]) {
-    mCentrality = 6;
+  else if (tracks < cent[6]) { mCentrality = 6;
   }
-  else if (tracks >= cent[6] && tracks < cent[7]) {
-    mCentrality = 7;
+  else if (tracks < cent[7]) { mCentrality = 7;
   }
-  else if (tracks >= cent[7] && tracks < cent[8]) {
-    mCentrality = 8;
+  else if (tracks < cent[8]) { mCentrality = 8;
   }
-  else if (tracks >= cent[8]) {
-    mCentrality = 9;
+  else if (tracks >= cent[8]) { mCentrality = 9;
   }
 
 }
@@ -534,6 +538,9 @@ void StFlowEvent::PrintSelectionList() {
   // Prints the list of selection cuts
   // Call in Finish
 
+  cout << "#######################################################" << endl;
+  cout << "# Pt Weighting:" << endl; 
+  cout << "#    PtWgt=  " << mPtWgt << endl;
   cout << "#######################################################" << endl;
   cout << "# Pid Cuts:" << endl; 
   cout << "#    PiPlus cuts=  " << mPiPlusCuts[0] << ", " 

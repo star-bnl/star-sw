@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoTrack.h,v 1.1 2000/09/05 16:11:38 snelling Exp $
+// $Id: StFlowPicoTrack.h,v 1.2 2000/09/15 22:51:33 posk Exp $
 //
 // Author: Raimond Snellings, March 2000
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoTrack.h,v $
+// Revision 1.2  2000/09/15 22:51:33  posk
+// Added pt weighting for event plane calcualtion.
+//
 // Revision 1.1  2000/09/05 16:11:38  snelling
 // Added global DCA, electron and positron
 //
@@ -45,21 +48,21 @@ public:
    Float_t  PidElectron()   const { return mPidElectron/1000.; }
    Float_t  Dedx()          const { return mDedx; }
 
-   void  SetPt(Float_t pt) {mPt = pt;}
-   void  SetEta(Float_t eta) {mEta = eta;}
-   void  SetDedx(Float_t Dedx) {mDedx = Dedx;}
-   void  SetPhi(Float_t phi) {mPhi = phi;}
-   void  SetCharge(Short_t charge) {mCharge =  charge;}
-   void  SetDca(Float_t dca) {mDca = dca;}
-   void  SetDcaGlobal(Float_t gdca) {mDcaGlobal = gdca;}
-   void  SetChi2(Float_t chi2) {mChi2 = chi2;}
-   void  SetFitPts(Int_t fitPts) {mFitPts = fitPts;}
-   void  SetMaxPts(Int_t maxPts) {mMaxPts = maxPts;}
-   void  SetPidPion(Float_t pid) { mPidPion =  (Int_t)(pid*1000.);}
-   void  SetPidProton(Float_t pid) { mPidProton =  (Int_t)(pid*1000.);}
-   void  SetPidKaon(Float_t pid) { mPidKaon =  (Int_t)(pid*1000.);}
-   void  SetPidDeuteron(Float_t pid) {mPidDeuteron =  (Int_t)(pid*1000.);}
-   void  SetPidElectron(Float_t pid) {mPidElectron =  (Int_t)(pid*1000.);}
+   void  SetPt(Float_t pt)           { mPt = pt; }
+   void  SetEta(Float_t eta)         { mEta = eta; }
+   void  SetDedx(Float_t Dedx)       { mDedx = Dedx; }
+   void  SetPhi(Float_t phi)         { mPhi = phi; }
+   void  SetCharge(Short_t charge)   { mCharge = charge; }
+   void  SetDca(Float_t dca)         { mDca = dca; }
+   void  SetDcaGlobal(Float_t gdca)  { mDcaGlobal = gdca; }
+   void  SetChi2(Float_t chi2)       { mChi2 = chi2; }
+   void  SetFitPts(Int_t fitPts)     { mFitPts = fitPts; }
+   void  SetMaxPts(Int_t maxPts)     { mMaxPts = maxPts; }
+   void  SetPidPion(Float_t pid)     { mPidPion = (Int_t)(pid*1000.); }
+   void  SetPidProton(Float_t pid)   { mPidProton = (Int_t)(pid*1000.); }
+   void  SetPidKaon(Float_t pid)     { mPidKaon = (Int_t)(pid*1000.); }
+   void  SetPidDeuteron(Float_t pid) { mPidDeuteron = (Int_t)(pid*1000.); }
+   void  SetPidElectron(Float_t pid) { mPidElectron = (Int_t)(pid*1000.); }
 
 private:
 
