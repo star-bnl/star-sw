@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0.Banks.hh,v 1.1 2000/06/06 18:08:31 jml Exp $
+ * $Id: SVTV1P0.Banks.hh,v 1.2 2000/09/30 16:14:31 fisyak Exp $
  *      
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0.Banks.hh,v $
+ * Revision 1.2  2000/09/30 16:14:31  fisyak
+ * Add hp
+ *
  * Revision 1.1  2000/06/06 18:08:31  jml
  * Initial version of SVT Readers (author: marcello munholz, helen caines)
  *
@@ -99,7 +102,7 @@ struct classname(Bank_SVTADCR) : public Bank   // Mezzanine ADC Raw
 
 struct SVTCoordinates
 {
-#ifdef sparc
+#if defined (sparc) || defined (__hpux)
   u_char barrel;
   u_char ladder;
   u_char waferID;  // 4:hybrid, 4:wafer
