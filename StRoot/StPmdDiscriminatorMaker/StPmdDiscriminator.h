@@ -4,7 +4,7 @@
  */
 /******************************************************************
  *
- * $Id: StPmdDiscriminator.h,v 1.1 2002/08/27 12:11:51 subhasis Exp $
+ * $Id: StPmdDiscriminator.h,v 1.2 2003/05/29 13:12:51 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -14,8 +14,8 @@
  ******************************************************************
  *
  * $Log: StPmdDiscriminator.h,v $
- * Revision 1.1  2002/08/27 12:11:51  subhasis
- * First version
+ * Revision 1.2  2003/05/29 13:12:51  subhasis
+ * several changes to include NN
  *
  ******************************************************************/
 
