@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: calculateEventPlaneEventCut.cxx,v 1.6 2003/08/05 00:29:55 perev Exp $
+ * $Id: calculateEventPlaneEventCut.cxx,v 1.7 2004/02/20 20:30:45 magestro Exp $
  *
  * Author: Randall Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: calculateEventPlaneEventCut.cxx,v $
+ * Revision 1.7  2004/02/20 20:30:45  magestro
+ * Added Vz, multiplicity event cuts
+ *
  * Revision 1.6  2003/08/05 00:29:55  perev
  * warnOff
  *
@@ -48,6 +51,12 @@ calculateEventPlaneEventCut::calculateEventPlaneEventCut(){
   mFlowAnalysisMaker = 0;
   mFromHBT = 0;
   mNEventsPassed =  mNEventsFailed = 0;
+
+  mVertZPos[0] = -1.e4;  
+  mVertZPos[1] = 1.e4;
+  mEventMult[0] = 0;   
+  mEventMult[1] = 9999;
+  
 } 
 //------------------------------
 //calculateEventPlaneEventCut::~calculateEventPlaneEventCut(){
@@ -55,62 +64,74 @@ calculateEventPlaneEventCut::calculateEventPlaneEventCut(){
 //}
 //------------------------------
 bool calculateEventPlaneEventCut::Pass(const StHbtEvent* ConstantEventIn){
-  cout << "calculateEventPlaneEventCut::Pass()" << endl;
 
   /* this next line makes it explicit that we are PURPOSELY ignoring the
      "const" nature of the StHbtEvent for this special case - mike lisa 14nov01
   */
   StHbtEvent* event = (StHbtEvent*)ConstantEventIn;
 
-  bool goodEvent = true;
-  if (event) {
-    if (mFromHBT) mFlowMaker->FillFlowEvent(event);
-    if (mFlowMaker->FlowEventPointer()) {
-      StFlowEvent::SetPtWgt(false);
-      // First get RP for whole event
-      mFlowMaker->FlowSelection()->SetSubevent(-1);
-      double reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-      cout << "Reaction Plane        " << reactionPlane << endl;
-      event->SetReactionPlane(reactionPlane,0);
-      // Sub event RPs
-      mFlowMaker->FlowSelection()->SetSubevent(0);
-      double RP1 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-      mFlowMaker->FlowSelection()->SetSubevent(1);
-      double RP2 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-      event->SetReactionPlaneSubEventDifference(RP1-RP2,0);
-      // Now with Pt Weighting
-      StFlowEvent::SetPtWgt(true);
-      // First get RP for whole event
-      mFlowMaker->FlowSelection()->SetSubevent(-1);
-      reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-      cout << "Reaction Plane ptWgt  " << reactionPlane << endl;
-      event->SetReactionPlane(reactionPlane,1);
-      // Sub event RPs
-      mFlowMaker->FlowSelection()->SetSubevent(0);
-      RP1 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-      mFlowMaker->FlowSelection()->SetSubevent(1);
-      RP2 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-      event->SetReactionPlaneSubEventDifference(RP1-RP2,1);
-      // if Flow Analysis is switched on ... make correction histogram
-      if (mFlowAnalysisMaker) mFlowAnalysisMaker->Make();
+  bool goodEvent = false;
+
+  if(event) {
+
+    double VertexZPos = event->PrimVertPos().z();
+    goodEvent = ( (VertexZPos >= mVertZPos[0]) && (VertexZPos <= mVertZPos[1]) );
+    // cout << "eventCut:: VertexZPos: " << mVertZPos[0] << " < " << VertexZPos << " < " << mVertZPos[1] << endl;
+
+    if (goodEvent) {
+      int mult = event->UncorrectedNumberOfPrimaries();
+      goodEvent = (goodEvent && (mult >= mEventMult[0]) && (mult <= mEventMult[1]));
+      // cout << "eventCut:: mult:       " << mEventMult[0] << " < " << mult << " < " << mEventMult[1] << endl;
     }
-    else {
-      cout << "No flow event found" << endl;
-      event->SetReactionPlane(-999,0);
-      event->SetReactionPlane(-999,1);
-      event->SetReactionPlaneSubEventDifference(-999,0);
-      event->SetReactionPlaneSubEventDifference(-999,1);
+
+    if (goodEvent && mFlowMaker) {
+      if (mFromHBT) mFlowMaker->FillFlowEvent(event);
+      if (mFlowMaker->FlowEventPointer()) {
+        StFlowEvent::SetPtWgt(false);
+        // First get RP for whole event
+        mFlowMaker->FlowSelection()->SetSubevent(-1);
+        double reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+        cout << "Reaction Plane        " << reactionPlane << endl;
+        event->SetReactionPlane(reactionPlane,0);
+        // Sub event RPs
+        mFlowMaker->FlowSelection()->SetSubevent(0);
+        double RP1 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+        mFlowMaker->FlowSelection()->SetSubevent(1);
+        double RP2 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+        event->SetReactionPlaneSubEventDifference(RP1-RP2,0);
+        // Now with Pt Weighting
+        StFlowEvent::SetPtWgt(true);
+        // First get RP for whole event
+        mFlowMaker->FlowSelection()->SetSubevent(-1);
+        reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+        cout << "Reaction Plane ptWgt  " << reactionPlane << endl;
+        event->SetReactionPlane(reactionPlane,1);
+        // Sub event RPs
+        mFlowMaker->FlowSelection()->SetSubevent(0);
+        RP1 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+        mFlowMaker->FlowSelection()->SetSubevent(1);
+        RP2 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+        event->SetReactionPlaneSubEventDifference(RP1-RP2,1);
+        // if Flow Analysis is switched on ... make correction histogram
+        if (mFlowAnalysisMaker) mFlowAnalysisMaker->Make();
+      }
+      else {
+        cout << "No flow event found" << endl;
+        event->SetReactionPlane(-999,0);
+        event->SetReactionPlane(-999,1);
+        event->SetReactionPlaneSubEventDifference(-999,0);
+        event->SetReactionPlaneSubEventDifference(-999,1);
+      }
     }
   }
   else {
     cout << "Something wrong with HbtEvent" << endl;
-    event->SetReactionPlane(-999,0);
-    event->SetReactionPlane(-999,1);
-    event->SetReactionPlaneSubEventDifference(-999,0);
-    event->SetReactionPlaneSubEventDifference(-999,1);
+    event->SetReactionPlane(-99,0);
+    event->SetReactionPlane(-99,1);
+    event->SetReactionPlaneSubEventDifference(-99,0);
+    event->SetReactionPlaneSubEventDifference(-99,1);
   }
   goodEvent ? mNEventsPassed++ : mNEventsFailed++ ;
-  cout << "calculateEventPlaneEventCut:: return : " << goodEvent << endl;
   return (goodEvent);
 }
 //------------------------------
