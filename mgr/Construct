@@ -1,5 +1,5 @@
 #!/opt/star/bin/perl
-# $Id: Construct,v 1.88 2000/02/21 00:48:26 fisyak Exp $
+# $Id: Construct,v 1.89 2000/02/29 01:56:37 fisyak Exp $
 use Env;
 #use lib qw($STAR . "/mgr"); # Modify perl include path
 use lib $STAR . "/mgr"; # Modify perl include path
@@ -20,6 +20,7 @@ foreach my $dir ("pams","StRoot"){#,"StDb") {
       if ($sub_dir =~  /\./ || $sub_dir =~ /\.\./ || $sub_dir =~ /CVS/ || 
 	  $sub_dir =~ /^html$/ || $sub_dir =~ /^test$/ || $sub_dir =~ /^doc/) {next;}
       if ($sub_dir =~ /^St_base$/ ||
+	  $sub_dir =~ /^Star2Root$/ ||
 	  $sub_dir =~ /^StChain$/ ||
 	  $sub_dir =~ /^StBFChain$/ ||
 	  $sub_dir =~ /^StUtilities$/ ||
