@@ -1,7 +1,6 @@
  macro estmatch
    macro/global/import *
      
-     message $cptime  
      message 'Calling EST_AM'
      ami/module/call est_am _
        [params]/svt/svgpars/geom _
@@ -14,10 +13,10 @@
        [data]/tpc/tracks/tptrack _
        [data]/tpc/tracks/evaltrk _
        [data]/tpc/tracks/mctrk _
-       [params]/global/est_ctrl _
+       [params]/global/estpars/est_ctrl _
        [data]/global/tracks/est_match _
+       [geant_Event]/g2t_track _
        [params]/global/egrpars/egr_egrpar
-     message 'time spent in est_am' $cptime
      
    return
  
@@ -35,7 +34,6 @@
  macro toglob2   
    macro/global/import *
      message 'Calling EST_TOGLOB2'
-     message $cptime     
      ami/module/call est_toglob2 _
        [data]/global/tracks/est_match _
        [data]/tpc/hits/tphit _
@@ -44,22 +42,19 @@
        [data]/svt/tracks/groups _
        [data]/svt/tracks/stk_track _
        [data]/global/tracks/evt_match 
-     message 'time spent in est_toglob2' $cptime
    return 
  
  macro esteval
    macro/global/import *     
      message 'Calling EST_EVAL'     
-     message $cptime     
      ami/module/call est_eval _
        [geant_Event]/g2t_track _
        [data]/tpc/tracks/tptrack _
        [data]/tpc/tracks/mctrk _
-       [params]/global/est_ctrl _
+       [params]/global/estpars/est_ctrl _
        [data]/global/tracks/est_match _
        [data]/global/tracks/est_ev _
        [data]/svt/hits/scs_spt      
-     message 'time spent in est_eval' $cptime
    return
 
 
