@@ -24,6 +24,14 @@
  *  
  *  Description of selected variables:
  *  ----------------------------------
+ *
+ *    r0,phi0,z0         These refer to the reference point on the helix. It is
+ *                       a point in the proximity of the first/innermost measured
+ *			 point on the track as it travels away from the vertex.
+ * 			 The exact location of this point depends on the fitting
+ * 			 method used, e.g. for circle/line (2+2) fits is the
+ *			 x-y plane dca point.
+ *
  *       id              Primary key; unique identification for each
  *                       collection of hits from tracking detectors (TPC,
  *                       SVT, SSD, FTPC East and West) which constitutes
@@ -196,7 +204,7 @@
  */
 
  struct dst_track  {
-  float      r0;               /* radius at start (cm)                   */
+  float      r0;               /* radius at start (cm). See also comments*/
   float      phi0;             /* azimuthal angle at start (deg)         */
   float      z0;               /* z-coord. at start (cm)                 */
   float      psi;              /* azimuthal angle of pT vector (deg)     */
@@ -228,7 +236,7 @@
   long       id_start_vertex;  /* Packed variable for primary vertex     */
                                /* final fit and primary track candidates */
  } ;
-/*  Last mod. for dst_track:   $Date: 2000/01/05 20:19:26 $ */
+/*  Last mod. for dst_track:   $Date: 2000/07/04 19:44:53 $ */
 
 
 
