@@ -1,5 +1,8 @@
-// $Id: StTpcHitFilterMaker.cxx,v 1.2 2001/04/12 22:04:56 hardtke Exp $
+// $Id: StTpcHitFilterMaker.cxx,v 1.3 2001/04/13 21:34:46 hardtke Exp $
 // $Log: StTpcHitFilterMaker.cxx,v $
+// Revision 1.3  2001/04/13 21:34:46  hardtke
+// Add option to disable hit deletion
+//
 // Revision 1.2  2001/04/12 22:04:56  hardtke
 // Add option for setting large hit errors
 //
@@ -40,6 +43,7 @@ ClassImp(StTpcHitFilterMaker)
  membrane_cut = -10;
  BigErrorsInner = kFALSE;
  BigErrorsOuter = kFALSE;
+ DeleteHits = kTRUE;
 }
 //----------------------------------------------------------------------------
 StTpcHitFilterMaker::~StTpcHitFilterMaker(){}
@@ -92,22 +96,27 @@ Int_t StTpcHitFilterMaker::Make(){
           spc->dy = 100*dely;
           spc->dz = 100*delz;
         }
-	if(zhit>z_max||zhit<z_min||rowhit<minrow||rowhit>maxrow||(!RowOn[rowhit-1])||(!SectorOn[sectorhit-1]) ){
-	 if (iflaghit>=0) iflaghit = -123;
+	if (DeleteHits) {
+	 if(zhit>z_max||zhit<z_min||rowhit<minrow||rowhit>maxrow||(!RowOn[rowhit-1])||(!SectorOn[sectorhit-1]) ){
+	  if (iflaghit>=0) iflaghit = -123;
 	   spc->flag = iflaghit;  //remove hit for tracking
-        }
+         }
 	   if ((sectorhit<13&&zhit<membrane_cut)||(sectorhit>12&&zhit>-membrane_cut)){
 	   if (iflaghit>=0) iflaghit = -123;
 	   spc->flag = iflaghit;  //remove hit for tracking
+           }
         }
-      }
+      }  
 
     //now discard the hits:
 
-   Int_t Res_tfs_filt = tfs_filt(tphit);
-     if ( Res_tfs_filt !=  kSTAFCV_OK){ 
+    if (DeleteHits){
+     Int_t Res_tfs_filt = tfs_filt(tphit);
+      if ( Res_tfs_filt !=  kSTAFCV_OK){ 
 	 gMessMgr->Info() << " Problem running tfs_filt..." << endm;
-     }
+      }
+    }
+  printf(" Output hit table size is %d\n\n",(int)tphit->GetNRows());
 
 
   return kStOK;
@@ -267,6 +276,16 @@ void StTpcHitFilterMaker::RidiculousErrorsInner(){
 void StTpcHitFilterMaker::RidiculousErrorsOuter(){
   gMessMgr->Info() << "StTpcHitFilterMaker::Setting Huge Errors in Outer section " <<  endm;
   BigErrorsOuter = kTRUE;
+}
+//-----------------------------------------------------------------------------
+void StTpcHitFilterMaker::DoNotDeleteHits(){
+  gMessMgr->Info() << "StTpcHitFilterMaker::Disabling Hit Deletion " <<  endm;
+  DeleteHits = kFALSE;
+}
+//-----------------------------------------------------------------------------
+void StTpcHitFilterMaker::CanDeleteHits(){
+  gMessMgr->Info() << "StTpcHitFilterMaker::Enabling Hit Deletion " <<  endm;
+  DeleteHits = kTRUE;
 }
 
 
