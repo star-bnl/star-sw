@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.42 1999/01/01 01:46:09 fisyak Exp $
+# $Id: MakeDll.mk,v 1.43 1999/01/01 02:38:55 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.43  1999/01/01 02:38:55  fisyak
+# restore GEN_DIR in OUTPUT_DIRS
+#
 # Revision 1.42  1999/01/01 01:46:09  fisyak
 # Clean up include path
 #
@@ -191,8 +194,8 @@ ifneq (,$(DOIT))
 
 DEP_DIR := $(SYS_DIR)/dep/$(PKGNAME)
 
-OUTPUT_DIRS := $(LIB_DIR) $(OBJ_DIR) $(DEP_DIR) $(BIN_DIR) $(TMP_DIR) 
-#                                                                     $(GEN_DIR) $(SRC_DIR) 
+OUTPUT_DIRS := $(LIB_DIR) $(OBJ_DIR) $(DEP_DIR) $(BIN_DIR) $(TMP_DIR) $(GEN_DIR) 
+#                                                                      $(SRC_DIR) 
 INPUT_DIRS += $(SRC_DIR) $(SRC_DIR)/src
 
 # 	Make dirs before make real work. Othervice VPATH does not see
