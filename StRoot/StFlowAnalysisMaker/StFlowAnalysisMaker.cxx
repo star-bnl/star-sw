@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFlowAnalysisMaker.cxx,v 1.3 1999/08/24 18:02:37 posk Exp $
+ * $Id: StFlowAnalysisMaker.cxx,v 1.4 1999/09/03 01:05:59 fisyak Exp $
  *
  * Author: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
  * Description:  Maker to analyze Flow using the FlowTags
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFlowAnalysisMaker.cxx,v $
+ * Revision 1.4  1999/09/03 01:05:59  fisyak
+ * replace iostream/stdlib by iostream.h/stdlib.h
+ *
  * Revision 1.3  1999/08/24 18:02:37  posk
  * Calculates event plane resolution.
  * Added macros for plotting histograms.
@@ -22,6 +25,8 @@
  *
  *  
  **************************************************************************/
+#include <iostream.h>
+#include <stdlib.h>
 #include "StFlowTagMaker/StFlowTagMaker.h"
 #include "StFlowAnalysisMaker.h"
 #include "PhysicalConstants.h"
@@ -59,7 +64,7 @@ Int_t StFlowAnalysisMaker::Make() {
 }
 
 void StFlowAnalysisMaker::PrintInfo() {
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.3 1999/08/24 18:02:37 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.4 1999/09/03 01:05:59 fisyak Exp $"
        << endl;
   if (Debug()) StMaker::PrintInfo();
 }
