@@ -1,6 +1,14 @@
-// $Id: StTrsMaker.cxx,v 1.67 2001/11/14 22:24:32 jeromel Exp $
+// $Id: StTrsMaker.cxx,v 1.68 2001/11/21 01:49:25 long Exp $
 //
+
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.68  2001/11/21 01:49:25  long
+// add log message for 3/2001 long;
+// adding in Make():
+// < //update the gain for very events
+// <    mWireHistogram->setGasGainInnerSector(mSlowControlDb->innerSectorGasGain());
+// <    mWireHistogram->setGasGainOuterSector(mSlowControlDb->outerSectorGasGain());
+//
 // Revision 1.67  2001/11/14 22:24:32  jeromel
 // mAllTheData deleted in maker. Was in maker AND in Event (destroyed
 // twice) causing a crash.
@@ -362,7 +370,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.67 2001/11/14 22:24:32 jeromel Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.68 2001/11/21 01:49:25 long Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
