@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 2.5 2000/11/07 14:12:44 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 2.6 2000/11/21 19:45:04 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,9 +11,8 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
- * Revision 2.5  2000/11/07 14:12:44  lasiuk
- * init() information and
- * quadrant threshold cuts default is 200 ADC counts
+ * Revision 2.6  2000/11/21 19:45:04  lasiuk
+ * Include threshold for different sectors
  *
  * Revision 2.5  2000/11/07 14:12:44  lasiuk
  * init() information and
@@ -150,17 +149,22 @@ void StRichClusterAndHitFinder::init()
     // do not use the index 0 for quadrant
     // index definitions:  [quad][decon]
     //
-    
+
+    //
+    // numbers taken from Jamie-arich
+    // e-mail Nov7,2000 (Gains)
+    // reference /plots/Data/Gain/vsrun
+    //
     mQuadrantThresholdCharge[0][0] = 0;
     mQuadrantThresholdCharge[0][1] = 0;
-    mQuadrantThresholdCharge[1][0] = 200;
-    mQuadrantThresholdCharge[1][1] = 200;
-    mQuadrantThresholdCharge[2][0] = 200;
-    mQuadrantThresholdCharge[2][1] = 200;
-    mQuadrantThresholdCharge[3][0] = 200;
-    mQuadrantThresholdCharge[3][1] = 200;
-    mQuadrantThresholdCharge[4][0] = 200;
-    mQuadrantThresholdCharge[4][1] = 200;
+    mQuadrantThresholdCharge[1][0] = 251;
+    mQuadrantThresholdCharge[1][1] = 251;
+    mQuadrantThresholdCharge[2][0] = 227;
+    mQuadrantThresholdCharge[2][1] = 227;
+    mQuadrantThresholdCharge[3][0] = 193;
+    mQuadrantThresholdCharge[3][1] = 193;
+    mQuadrantThresholdCharge[4][0] = 177;
+    mQuadrantThresholdCharge[4][1] = 177;
     mGainVoltage = 2100;
 
     this->printQuadrantThreshold();
