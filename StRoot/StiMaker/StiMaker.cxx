@@ -6,12 +6,6 @@
 #include <math.h>
 #include <string>
 
-//Root (Temp)
-#include "TCanvas.h"
-#include "TPolyMarker3D.h"
-#include "TNode.h"
-#include "TTUBE.h"
-
 // StRoot
 #include "StChain.h"
 #include "St_DataSet.h"
@@ -43,6 +37,7 @@
 #include "Sti/StiDetectorFinder.h"
 //#include "Sti/TrackNodeTest.h"
 #include "Sti/StiCompositeSeedFinder.h"
+#include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/Messenger.h"
 
@@ -229,6 +224,7 @@ Int_t StiMaker::Init()
 	new StiKalmanTrackNodeFactory("StiKalmanTrackNodeFactory");
     mktracknodefactory->setIncrementalSize(1000);
     mktracknodefactory->setMaxIncrementCount(100);
+    
     StiKalmanTrack::setKalmanTrackNodeFactory( mktracknodefactory );
     
 
