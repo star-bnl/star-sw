@@ -1,5 +1,8 @@
-// $Id: ppLMV4.cxx,v 1.1 2001/11/29 00:19:08 balewski Exp $
+// $Id: ppLMV4.cxx,v 1.2 2001/12/04 01:48:34 balewski Exp $
 // $Log: ppLMV4.cxx,v $
+// Revision 1.2  2001/12/04 01:48:34  balewski
+// *** empty log message ***
+//
 // Revision 1.1  2001/11/29 00:19:08  balewski
 // *** empty log message ***
 //
@@ -47,7 +50,7 @@ using namespace units;
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 
-//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.1 2001/11/29 00:19:08 balewski Exp $";
+//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.2 2001/12/04 01:48:34 balewski Exp $";
 
 struct Jcyl {float eta,phi;};
 
@@ -212,7 +215,7 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
 
   {// fill some histos
     hPiFi[13]->Fill((*tracks).size());
-    for(int j=0;j<(*tracks).size();j++) {
+    for(uint j=0;j<(*tracks).size();j++) {
       float pt=1./(*tracks)[j].glb_track_pointer->invpt;
       int npoint=(*tracks)[j].glb_track_pointer->n_point;
      hPiFi[14]->Fill(pt);
