@@ -12,6 +12,12 @@
       call g2tmain
       end
 
+      subroutine g2t_start
+      external   g2t
+      call this_is_amodule ('g2t'//char(0),g2t)
+      call g2t
+      end
+
 
 **:>--------------------------------------------------------------------
 module    G2Tmain  is g2t converter
