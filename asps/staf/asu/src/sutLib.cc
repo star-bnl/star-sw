@@ -23,7 +23,7 @@
 #include <libgen.h>
 #endif /*IRIX*/
 
-#ifdef SOLARIS
+#if defined(SOLARIS) || defined(SunOS)
 #include <libgen.h>
 #endif /*SOLARIS*/
 
@@ -65,7 +65,7 @@ sutMatchWild(char *pattern,char* string)
    int flags=0;		/* I DONT KNOW WHAT THIS SHOULD BE */
    return !fnmatch(pattern,string,flags);
 #endif /*HPUX*/
-#ifdef SOLARIS
+#if defined(SOLARIS) || defined(SunOS)
    return gmatch(string,pattern);
 #endif /*SOLARIS*/
 #ifdef IRIX
