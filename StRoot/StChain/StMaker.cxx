@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.159 2004/11/04 22:26:38 fine Exp $
+// $Id: StMaker.cxx,v 1.160 2004/11/13 00:28:57 fine Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -75,7 +75,10 @@ static const int   DBtimes[]=  {
 };
 
 // Turn the logger of the current maker
-#define TURN_LOGGER(maker) StTurnLogger(maker->GetLogger())
+#define TURN_LOGGER(maker) {                                      \
+        if (!fLogger) fLogger = StMessMgr::Instance(ClassName()); \
+        StTurnLogger(maker->GetLogger());                         \
+        }                        
 
         
 ClassImp(StMaker)
@@ -83,7 +86,7 @@ ClassImp(StMaker)
 static void doPs(const char *who,const char *where);
 
 //_____________________________________________________________________________
-StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),fLoggerHold(0)
+StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),fLogger(0),fLoggerHold(0)
 {
    SetActive();
    SetMode();
@@ -111,8 +114,6 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),fLoggerH
    fMemStatClear = 0;
    memset(fTallyMaker,0,(kStFatal+1)*sizeof(Int_t));
    StMkDeb::Register(this);
-
-   fLogger = StMessMgr::Instance(ClassName());   
 }
 
 //_____________________________________________________________________________
@@ -1578,6 +1579,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.160  2004/11/13 00:28:57  fine
+// move the logger instantiation away of the ctor to be able to get the csubclass name
+//
 // Revision 1.159  2004/11/04 22:26:38  fine
 // populate the package with save/restore the logger and edit some messages
 //
