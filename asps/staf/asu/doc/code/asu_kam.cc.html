@@ -1,0 +1,143 @@
+<HTML>
+<PRE>
+<H2>file: asu/src/asu_kam.cc</H2>
+
+
+/*:Copyright 1995, Lawrence Berkeley National Laboratory
+*:&gt;---------------------------------------------------------------------
+*:FILE:         asu_kam.c
+*:DESCRIPTION:  C KUIP Action Modules for <A HREF="asu_macros.h.html#ASU">ASU</A>
+*:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+*:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      12feb96-v000a-cet- creation
+*:&lt;---------------------------------------------------------------------
+*/
+#undef CORBA
+
+/*-------------------------------------------- INCLUDES             --*/
+
+#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;time.h&gt;
+
+#include "<A HREF="kuip.h.html">kuip.h</A>"
+
+#include "asuAlloc.h"
+#include "<A HREF="asuLib.h.html">asuLib.h</A>"
+#include "emlLib.h"	/* Error Messaging & Logging */
+
+/*-------------------------------------------- TYPEDEFS             --*/
+/*-------------------------------------------- GLOBALS              --*/
+/*-------------------------------------------- PROTOTYPES           --*/
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_asu_hello_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="asu_macros.h.html#ASU">ASU</A>/HELLO [ MESSAGE ]
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_asu_hello_">kam_asu_hello_(</A>){<A HREF="#kam_asu_hello">kam_asu_hello(</A>);}</B>
+<B>int <A NAME="kam_asu_hello">kam_asu_hello(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char*  msg = ku_gets();	/* message */
+
+   printf("<A HREF="asu_macros.h.html#ASU">ASU</A>:\tHello, %s \n",msg);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_asu_time_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="asu_macros.h.html#ASU">ASU</A>/TIME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_asu_time_">kam_asu_time_(</A>){<A HREF="#kam_asu_time">kam_asu_time(</A>);}</B>
+<B>int <A NAME="kam_asu_time">kam_asu_time(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   time_t it,*pt=&it;
+
+   *pt = time(0);
+   printf("<A HREF="asu_macros.h.html#ASU">ASU</A>:\tTime = %s \n",ctime(pt));
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_asuallocstats_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="asu_macros.h.html#ASU">ASU</A>/TIME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_asuallocstats_">kam_asuallocstats_(</A>){<A HREF="#kam_asuallocstats">kam_asuallocstats(</A>);}</B>
+<B>int <A NAME="kam_asuallocstats">kam_asuallocstats(</A>)</B>
+{
+   <A HREF="asuAlloc.c.html#asuAllocStats">asuAllocStats(</A>);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

@@ -1,0 +1,113 @@
+<HTML>
+<PRE>
+<H2>file: asu/inc/asu_types.h</H2>
+
+
+/*:Copyright 1995, Lawrence Berkeley National Laboratory
+*:&gt;---------------------------------------------------------------------
+*:FILE:         asu_types.h
+*:DESCRIPTION:  Variable types for <A HREF="asu_macros.h.html#ASU">ASU</A>
+*:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+*:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      20nov95-v000a-cet- create
+*:&lt;---------------------------------------------------------------------
+*/
+#ifndef <A HREF="#ASU_TYPES_H">ASU_TYPES_H</A>
+<B>#define <A NAME="ASU_TYPES_H">ASU_TYPES_H</A></B>
+
+/*-------------------------------------------- INCLUDES             --*/
+#ifdef CORBA
+#include "asu_i.hh"
+#endif
+
+#include "emlLib.h"
+
+/*-------------------------------------------- TYPEDEFS             --*/
+
+/*-------------------------------------------- PROTOTYPES           --*/
+extern <U>CC_P</U> int <A HREF="asu_init.cc.html#asu_init">asu_init(</A>);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+extern <U>CC_P</U> int <A HREF="asu_init.cc.html#asu_start">asu_start(</A>);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+extern <U>CC_P</U> int <A HREF="asu_init.cc.html#asu_stop">asu_stop(</A>);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+
+#ifndef NOKUIP
+extern <U>CC_P</U> void asu_def_();        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+extern <U>CC_P</U> void <A HREF="asu_kam.cc.html#kam_asu_hello_">kam_asu_hello_(</A>);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+extern <U>CC_P</U> int <A HREF="asu_kam.cc.html#kam_asu_hello">kam_asu_hello(</A>);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+extern <U>CC_P</U> void <A HREF="asu_kam.cc.html#kam_asu_time_">kam_asu_time_(</A>);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+extern <U>CC_P</U> int <A HREF="asu_kam.cc.html#kam_asu_time">kam_asu_time(</A>);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+extern <U>CC_P</U> void <A HREF="asu_kam.cc.html#kam_asuallocstats_">kam_asuallocstats_(</A>);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+extern <U>CC_P</U> int <A HREF="asu_kam.cc.html#kam_asuallocstats">kam_asuallocstats(</A>);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+
+extern <U>CC_P</U> void asu_kuip_init_();        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+#endif /*NOKUIP*/
+
+/*- F77 prototypes for STAF vector functions. -*/
+extern <U>CC_P</U> void set_staf_status_(long* status);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+extern <U>CC_P</U> long get_staf_status_(long* n);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+extern <U>CC_P</U> void set_staf_result_(float* result);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+extern <U>CC_P</U> float get_staf_result_(long* n);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+
+/*- C Stubs for STAF vector functions. -*/
+extern <U>CC_P</U> void <A HREF="eml_stubs.cc.html#set_staf_status">set_staf_status(</A>long status);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+extern <U>CC_P</U> long <A HREF="eml_stubs.cc.html#get_staf_status">get_staf_status(</A>long n);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+extern <U>CC_P</U> void <A HREF="eml_stubs.cc.html#set_staf_result">set_staf_result(</A>float result);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+extern <U>CC_P</U> float <A HREF="eml_stubs.cc.html#get_staf_result">get_staf_result(</A>long n);        //OVERLOAD CALL: CC_P: <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="stafGeneric.h.html#CC_P">stafGeneric.h(?)</A>, <A HREF="sutLib.h.html#CC_P">sutLib.h(?)</A>
+
+#endif /* <A HREF="#ASU_TYPES_H">ASU_TYPES_H</A> */
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>
