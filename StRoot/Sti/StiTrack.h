@@ -11,10 +11,9 @@ using namespace std;
 #include "StThreeVectorF.hh"
 
 //sti
-#include "Exception.h"
+#include "StiTrackFitter.h"
 
 class StiHit;
-class StiTrackFitter;
 class StHit;
 
 class StiTrack 
@@ -29,14 +28,19 @@ public:
 
   // constructor/destructor/copy/etc
   
-  StiTrack();
-  virtual ~StiTrack();
+  StiTrack()
+		{
+			reset();
+		};
+
+  virtual ~StiTrack()
+		{
+		}
   
   // action methods
   
   virtual void reset();
-	virtual void fit(); //throw (Exception);
-	
+	virtual void fit(); 
 	
 	//This is for full state (3 mom + error matrix) 
 	virtual void    getMomentum(double p[3], double e[6]) const =0;
@@ -65,7 +69,7 @@ public:
 	/// number of hits used to seed the track
 	int getSeedHitCount() const {return mSeedHitCount;}
 	
-	StiHit * getVertex() const;  // return pointer to vertex associated with this track if any. 
+	//StiHit * getVertex() const;  // return pointer to vertex associated with this track if any. 
 
 	virtual vector<StHit*> stHits() const=0;
 	
@@ -78,51 +82,46 @@ public:
 		}
 	
 	/// Get charge of the particle that produced this track
-	virtual int     getCharge() const
-		{
-			return q;
-		}
+	virtual int     getCharge() const=0;
 	
 	/// Get chi2 of this track
-	virtual double  getChi2() const
-		{
-			return chi2;
-		}
+	virtual double  getChi2() const=0;
 	
 	/// Set charge  of the particle that produced this track
-	void  setCharge(int v)
-		{
-			q = v;
-		}
+	//void  setCharge(int v)
+	//	{
+	//		q = v;
+	//	}
 	
 	/// Set chi2 of the track
-	void  setChi2(double v)
-		{
-			chi2 = v;
-		}
+	//void  setChi2(double v)
+	//	{
+	//chi2 = v;
+	//	}
 	
-	void  setVertex(StiHit *v);
+	//void  setVertex(StiHit *v);
 	void setSeedHitCount(int c) {mSeedHitCount=c;}
 	
 	//Flag:
 	void setFlag(long v) {mFlag = v;}
 	long getFlag() const {return mFlag;}
-  
+
  protected:
 	static StiTrackFitter * trackFitter;
 	
 	friend ostream& operator<<(ostream& os, const StiTrack& track);
 	
-	int q;          // charge of the track 
-	int nPts;       // number of points on the track
-	int nFitPts;    // number of points included in the fit of the track
+	//int q;          // charge of the track 
+	//int nPts;       // number of points on the track
+	//int nFitPts;    // number of points included in the fit of the track
 	int mSeedHitCount; //number of points used to seed the track
 	long mFlag; //A flag to pack w/ topo info
-	StiHit * vertex; // parent vertex of this track
+	//StiHit * vertex; // parent vertex of this track
 	double  m;          // mass hypothesis
-	double  chi2;
+	//double  chi2;
 };
 
+/*
 inline StiHit * StiTrack::getVertex() const
 {
   return vertex;
@@ -132,6 +131,11 @@ inline void  StiTrack::setVertex(StiHit *v)
 {
   vertex = v;
 }
+*/
 
+inline void StiTrack::fit()
+{
+  trackFitter->fit(this);
+}
 
 #endif

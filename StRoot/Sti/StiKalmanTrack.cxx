@@ -283,11 +283,12 @@ void StiKalmanTrack::initialize(double curvature,
     
     //cout <<"StiKalmanTrack::initialize()"<<endl;
     if (!trackNodeFactory) 
-	{
-	    cout <<"StiKalmanTrack::initialize()\tERROR:\t";
-	    cout <<"trackNodeFactory==0.  Abort"<<endl;
-	    return;
-	}
+			{
+				cout <<"StiKalmanTrack::initialize()\tERROR:\t";
+				cout <<"trackNodeFactory==0.  Abort"<<endl;
+				return;
+			}
+
     StiObjectFactoryInterface<StiKalmanTrackNode>* fac = trackNodeFactory;
     if (!fac) 
 	{
@@ -490,60 +491,104 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
     return p3;
 }
 
+/*! Return the mass hypothesis used in the resconstruction of this track.
+*/
 double  StiKalmanTrack::getMass() const   
 {
   return m;
 }
 
+/*! Return the track sign
+   <h3>Notes</h3> 
+   <ol>
+   <li>Use the last node and the field.</li>
+   </ol>
+*/
 int StiKalmanTrack::getCharge() const
 {
-  return q;
+	return  (lastNode->fP3*StiKalmanTrackNode::getFieldConstant()>0)?-1:1;
 }
+
+/*! Return the track chi2
+   <h3>Notes</h3> 
+   <ol>
+   <li>Use the chi2 held by the last hit node used in the fit.</li>
+   </ol>
+*/
 double  StiKalmanTrack::getChi2() const
 {
-  return chi2;
+	if (fittingDirection==kOutsideIn)
+		{
+			if (trackingDirection==kOutsideIn)
+				return lastNode->fChi2;
+			else
+				return firstNode->fChi2;
+		}
+	else
+		{
+			if (trackingDirection==kOutsideIn)
+				return firstNode->fChi2;
+			else
+				return lastNode->fChi2;			
+		}
 }
 
+/*! Calculate and return the distance of closest approach to given hit
+   <h3>Notes</h3> 
+   <ol>
+   <li>No implementation.</li>
+   <li>Returns 0</li>
+   </ol>
+*/
 double  StiKalmanTrack::getDca(StiHit * h)    const
 {
-  // Return the distance of closest approach to given point/hit
-  // If no hit is specified assume the primary vertex i.e the last point 
-  // on the track
-  // set to 0 for now
-  return 0;
+	return 0;
 }
 
+/*! Calculate and return the distance of closest approach to given track
+   <h3>Notes</h3> 
+   <ol>
+   <li>No implementation.</li>
+   <li>Returns 0</li>
+   </ol>
+*/
 double  StiKalmanTrack::getDca(StiTrack *t)   const
 {
-  // distance of closest approach to given track
   return 0;
 }
 
+/*! Calculate and return the distance of closest approach to given track - 2D calc
+   <h3>Notes</h3> 
+   <ol>
+   <li>No implementation.</li>
+   <li>Returns 0</li>
+   </ol>
+*/
 double  StiKalmanTrack::getDca2(StiTrack *t)   const
 {
-    // distance of closest approach to given track - 2D calc
     return 0;
 }
 
+/*! Calculate and return the distance of closest approach to given track - 3D calc
+   <h3>Notes</h3> 
+   <ol>
+   <li>No implementation.</li>
+   <li>Returns 0</li>
+   </ol>
+*/
 double  StiKalmanTrack::getDca3(StiTrack *t)   const
 {
-    // distance of closest approach to given track - 3D calc
     return 0;
 }
 
-//int StiKalmanTrack::getPointCount(StiTrackType type) const
+/*! Calculate and return the number of hits on this track. 
+   <h3>Notes</h3> 
+   <ol>
+   <li>Iterate through all nodes of this track.</li>
+   <li>Count number of hits.</li>
+   </ol>
+*/
 int StiKalmanTrack::getPointCount() const
-{
-	return calculatePointCount();
-}
-
-//int StiKalmanTrack::getMaxPointCount(StiTrackType type) const
-int StiKalmanTrack::getMaxPointCount() const
-{
-	return calculateMaxPointCount();
-}
-
-int StiKalmanTrack::calculatePointCount() const
 {
 	int nPts = 0;
 	if (firstNode)
@@ -551,14 +596,23 @@ int StiKalmanTrack::calculatePointCount() const
 		  StiKTNBidirectionalIterator it;
 		  for (it=begin();it!=end();it++)
 		    {
-		      if ((*it).getDetector()->isActive() && (*it).getHit())
-			nPts++;
+		      if ((*it).getHit())
+						nPts++;
 		    }
 		}
 	return nPts;
 }
 
-int StiKalmanTrack::calculateMaxPointCount() const
+/*! Calculate and return the maximum possible number of hits on this track. 
+  <h3>Notes</h3> 
+   <ol>
+   <li>Iterate through all nodes of this track.</li>
+   <li>Count active layers.</li>
+   <li>Use the (y,z) position of the node to determine whether point is on
+       active region of the detector i.e. RDO were functional.</li>
+   </ol>
+*/
+int StiKalmanTrack::getMaxPointCount() const
 {
   int nPts = 0;
   if (firstNode)
@@ -566,14 +620,23 @@ int StiKalmanTrack::calculateMaxPointCount() const
       StiKTNBidirectionalIterator it;
       for (it=begin();it!=end();it++)
 	{
-	  if ((*it).getDetector()->isActive() && 
-	      (*it).getDetector()->isOn())   // (y,z) should be used here...
+	  //if ((*it).getDetector()->isActive((*it).fP0,(*it).fP1)) // this comes next...!!!!!
+	  if ((*it).getDetector()->isActive())
 	    nPts++;
 	}
     }
   return nPts;
 }
 
+
+/*! Return the number of gaps (active layers with no hits) along this track.
+  <h3>Notes</h3> 
+   <ol>
+   <li>A gap consists of one or multiple contiguous active layers through which this track
+       passes.</li>
+   <li>There can be gaps on the inside or the outside of the track if no hits are found there.</li>
+   </ol>
+*/
 int    StiKalmanTrack::getGapCount()    const  
 {
   int gaps = 0;
@@ -604,94 +667,166 @@ int    StiKalmanTrack::getGapCount()    const
   return gaps;
 }
 
-int    StiKalmanTrack::getFitPointCount()    const  
+/*! Return the number of hits (points) used in the fit of this track.
+  <h3>Notes</h3> 
+   <ol>
+   <li>Currently no difference is made between points on the track and fit points 
+       on the track.</li>
+   <li>Call "getPointCount()" to get the count.</li>
+   </ol>
+*/
+int StiKalmanTrack::getFitPointCount()    const  
 {
-	// currently no difference is made between points on the track and 
-	// fit points on the track. 
+	//  
 	return getPointCount();
 }
 
+/*! Return track length.
+  <h3>Notes</h3> 
+   <ol>
+   <li>Call "calculateTrackLength" method.</li>
+   <li>Using only inner most and outer most hits associated with this track.</li>
+   <li>First node reference frame used for this calculation: local geometry transform
+       done on 2nd point as needed to use the same reference frame. </li>  
+   </ol>
+*/
 double StiKalmanTrack::getTrackLength() const
 {
   return calculateTrackLength();
 }
 
 
+/*! Convenience method used to return a track node iterator initialized to the track first node.
+*/
 StiKTNBidirectionalIterator StiKalmanTrack::begin() const 
 {
   return StiKTNBidirectionalIterator(firstNode);
 }
 
+/*! Convenience method used to return a track node iterator initialized to the track last node.
+*/
 StiKTNBidirectionalIterator StiKalmanTrack::end() const 
 {
 	return StiKTNBidirectionalIterator(lastNode);
 }
 
-
+/*! Work method used to calculate the track length.
+  <h3>Note</h3> 
+   <ol>
+   <li>Using helix track model in local reference frame.</li>
+   <li>Using only inner most and outer most hits associated with this track.</li>
+   <li>First node reference frame used for this calculation: local geometry transform
+       done on 2nd point as needed to use the same reference frame. </li>  
+   </ol>
+*/
 double StiKalmanTrack::calculateTrackLength() const
 {
   double length = 0;
+	double x1,y1,z1,a1,c1,t1,e1,x2,y2,z2,a2,c2,t2,e2;
+	double dx,dy,dz,cos1,cos2,xp,yp,cda,sda,da,d;
+	double x0,y0;
   if (firstNode)
     {
       StiKTNBidirectionalIterator first(getOuterMostHitNode());
       StiKTNBidirectionalIterator last(getInnerMostHitNode());
-      StiKTNBidirectionalIterator it1;
-      StiKTNBidirectionalIterator it2;
-      it1 = first;
-      it2 = first; it2++;
-      while (it1!=last)
-	{
-	  length += calculateTrackSegmentLength((*it1),(*it2));
-	}
-    }
-  cout << "Track length:" << length << endl;
-  return length;
+      StiKTNBidirectionalIterator it;
+			//cout << "Outer:" << (*first) << endl;
+			x1=(*first).fX; y1=(*first).fP0; z1=(*first).fP1; 
+			e1=(*first).fP2; a1=(*first).fAlpha; c1=(*first).fP3; t1=(*first).fP4;
+			cos1=c1*x1-e1;
+			//cout << "Inner:" << (*last) << endl;
+			//cout << "(x1,y1)="<<x1<<"\t"<<y1<<endl;
+			x2=(*last).fX; y2=(*last).fP0; z2=(*last).fP1; 
+			e2=(*last).fP2; a2=(*last).fAlpha; c2=(*last).fP3; t2=(*last).fP4;
+			if (a2!=a1)
+				{//rotate (x0,y0) first as we need x2,y2 in the original frame
+					da=a2-a1; cda=cos(da); sda=sin(da);
+					//cout << " rotby:" << da*180/3.1415<<endl;
+					x0=e2/c2; //center of circle
+					d=c2*x2-e2;
+					y0=y2+sqrt(1-d*d)/c2;
+					//cout << "(x0,y0)="<<x0<<"\t"<<y0<<endl;
+					xp=cda*x0-sda*y0;
+					e2=c2*xp;
+					// now rotate (x2,y2)
+					//cout << "(x2,y2)="<<x2<<"\t"<<y2<<endl;
+					xp=cda*x2-sda*y2;
+					yp=sda*x2+cda*y2;
+					x2=xp;y2=yp;
+					//cout << "(x2',y2')="<<x2<<"\t"<<y2<<endl;
+				}
+			cos2=c2*x2-e2;
+			if (c1<1e-12 || (fabs(cos1)>1.) || (fabs(cos2)>1.) )
+				{	// straight track case
+					dx = x2-x1;	dy = y2-y1;	dz = z2-z1;
+					length += sqrt(dx*dx+dy*dy+dz*dz);
+				}
+			else
+				{	// helix case
+					length += fabs(acos(cos1)-acos(cos2))*sqrt(1+t1*t1)/c1;
+				}
+			//x1=x2;y1=y2;z1=z2;e1=e2;c1=c2;t1=t2,cos1=cos2; //a does not change...
+			/*
+				it = first;
+			x1=(*it).fX; y1=(*it).fP0; z1=(*it).fP1; e1=(*it).fP2; a1=(*it).fAlpha; c1=(*it).fP3; t1=(*it).fP4;
+			cos1=c1*x1-e1;
+      while (it!=last)
+				{
+					cout << " a1:"<<a1<<" c1:"<<c1<<" cos1:"<<cos1;
+					it++;
+					x2=(*it).fX; y2=(*it).fP0; z2=(*it).fP1; e2=(*it).fP2; a2=(*it).fAlpha; c2=(*it).fP3; t2=(*it).fP4;
+					if (a2!=a1)
+						{//rotate (x0,y0) first as we need x2,y2 in the original frame
+							da=a2-a1; cda=cos(da); sda=sin(da);
+							cout << " rotby:" << da*180/3.1415;
+							x0=e2/c2; //center of circle
+							d=c2*x2-e2;
+							y0=y2+sqrt(1-d*d)/c2;
+							xp=cda*x0-sda*y0;
+							// now rotate (x2,y2)
+							e2=c2*xp;
+							xp=cda*x2-sda*y2;
+							yp=sda*x2+cda*y2;
+							x2=xp;y2=yp;
+						}
+					cos2=c2*x2-e2;
+					if (c1<1e-12 || (fabs(cos1)>1.) || (fabs(cos2)>1.) )
+						{	// straight track case
+							dx = x2-x1;	dy = y2-y1;	dz = z2-z1;
+							length += sqrt(dx*dx+dy*dy+dz*dz);
+						}
+					else
+						{	// helix case
+							length += fabs(acos(cos1)-acos(cos2))*sqrt(1+t1*t1)/c1;
+						}
+					x1=x2;y1=y2;z1=z2;e1=e2;c1=c2;t1=t2,cos1=cos2; //a does not change...
+					cout << "\n : " << length<<endl;
+				}
+			*/
+		}
+	return length;
 }
 
-double StiKalmanTrack::calculateTrackSegmentLength(const StiKalmanTrackNode &p1, const StiKalmanTrackNode &p2) const
-{
-  double dx, dy, dz, s, c, tanl;
-  double cos1, cos2;
-  c = fabs(p1.fP3);// curvature
-  if (c<1e-12)
-    {
-      // straight track case
-      dx = p1.fX  - p2.fX;
-      dy = p1.fP0 - p2.fP0;
-      dz = p1.fP1 - p2.fP1;
-      s = sqrt(dx*dx+dy*dy+dz*dz);
-    }
-  else
-    {
-      // helix case
-      tanl=p1.fP4;
-      cos1 = p1.fP3*p1.fX - p1.fP2;
-      cos2 = p2.fP3*p2.fX - p2.fP2;
-      if (fabs(cos1)>1. || fabs(cos2)>1.)
-	{
-	  // straight track case
-	  dx = p1.fX  + p2.fX;
-	  dy = p1.fP0 + p2.fP0;
-	  dz = p1.fP1 + p2.fP1;
-	  s = sqrt(dx*dx+dy*dy+dz*dz);
-	}
-      else
-	{
-	  // "normal" helix case
-	  s = fabs(acos(cos1)-acos(cos2))*sqrt(1+tanl*tanl)/c;
-	}
-    }
-  return s;
-}
-
-
+/*! Accessor method to get the dca.
+  <h3>Note</h3> 
+   <ol>
+   <li>Not implemented</li>
+   </ol>
+*/
 double StiKalmanTrack::getPrimaryDca() const
 {
   return 0;
 }
 
 
-/// Accessor method returns the outer most node associated with the track.
+/*! Accessor method returns the outer most node associated with the track.
+   <h3>Notes</h3>
+   <ol>
+   <li>Node returned depends on the direction of tracking. </li>
+   <li>Return firstNode if tracking was done outside-in, lastNode otherwise.</li>
+   <li>No check done to determine whether returned value is non null.</li>
+   </ol>
+*/
 StiKalmanTrackNode * StiKalmanTrack::getOuterMostNode()  const 
 { 
   if (trackingDirection==kOutsideIn)
@@ -700,7 +835,14 @@ StiKalmanTrackNode * StiKalmanTrack::getOuterMostNode()  const
     return lastNode;
 }
 
-/// Accessor method returns the inner most node associated with the track.
+/*! Accessor method returns the inner most node associated with the track.
+   <h3>Notes</h3>
+   <ol>
+   <li>Node returned depends on the direction of tracking. </li>
+   <li>Return firstNode if tracking was done inside-out, lastNode otherwise.</li>
+   <li>No check done to determine whether returned value is non null.</li>
+   </ol>
+*/
 StiKalmanTrackNode * StiKalmanTrack::getInnerMostNode()   const 
 { 
   if (trackingDirection==kInsideOut)
@@ -709,6 +851,14 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostNode()   const
     return lastNode;
 }
 
+/*! Return the inner most hit associated with this track.
+   <h3>Notes</h3>
+   <ol>
+   <li>Throws logic_error exception if firstNode or lastNode are not defined, or if track has no hit.</li>
+   <li>Loop through all nodes from end() to begin() (or vice versa if tracking 
+       direction is outside-in) and search for node with hit. Return first hit found.</li>
+   </ol>
+*/
 StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode()  const
 {
   if (firstNode==0 || lastNode==0)
@@ -734,6 +884,15 @@ StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode()  const
   throw logic_error("StiKalmanTrack::getOuterMostHitNode() - ERROR - Track has no hit");
 }
 
+
+/*! Return the inner most hit associated with this track.
+   <h3>Notes</h3>
+   <ol>
+   <li>Throws logic_error exception if firstNode or lastNode are not defined, or if track has no hit.</li>
+   <li>Loop through all nodes from begin() to end() (or vice versa if tracking 
+       direction is outside-in) and search for node with hit. Return first hit found.</li>
+   </ol>
+*/
 StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
 {
   if (firstNode==0 || lastNode==0)
@@ -759,30 +918,63 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
   throw logic_error("StiKalmanTrack::getInnerMostHitNode() - ERROR - Track has no hit");
 }
 
-
+/*! Return true if inner most hit associated with this track is main vertex.
+   <h3>Algorithm</h3>
+   <ol>
+   <li>Find the inner most hit node associated with this tracks.</li>
+   <li>Return true if "x" of inner most hit is less than 2 cm.
+   </ol>
+*/
 bool  StiKalmanTrack::isPrimary() const
 {
-  return false;
+	StiKalmanTrackNode * node = getInnerMostHitNode();
+	return (node->fX<2.)?true:false;
 }
 
-/**
-void swap()
+/*! Swap the track node sequence inside-out
+   <h3>Algorithm</h3>
+   <ol>
+   <li>Loop through the node sequence starting with the firstNode and invert the parent child relationships.</li>
+   <li>Include removal of all children for each node.</li>
+   <li>Include change of parent</li>
+   <li>Set parent of last node as "0" to complete swap.</li>
+   <li>Change the "trackingDirection" flag to reflect the swap.
+   </ol>
+ */
+void StiKalmanTrack::swap()
 {
-StiKalmanTrackNode * node;
-StiKalmanTrackNode * pnode;
-StiKalmanTrackNode * cnode;
-
-do while (node)
-{
-	cnode = node->getFirstChild();
-	pnode = node->getParent();
-	node->setParent(cnode);
-	node->add(pnode);
-	node = cnode;
+	StiKalmanTrackNode * parent = 0;
+	StiKalmanTrackNode * child  = 0;
+	StiKalmanTrackNode * grandChild = 0;
+	
+	parent = firstNode;
+	firstNode = lastNode;
+	lastNode = parent; 
+	if (parent && parent->getChildCount()>0)
+		{
+			child  = dynamic_cast<StiKalmanTrackNode *>(parent->getFirstChild());
+			parent->removeAllChildren();			
+			while (child)
+				{
+					if (child->getChildCount()>0)
+						{
+							grandChild = dynamic_cast<StiKalmanTrackNode *>(child->getFirstChild());
+							child->removeAllChildren();
+						}
+					else
+						grandChild = 0;
+					child->addChild(parent);
+					parent = child;
+					child = grandChild;
+				}
+			// last parent has no parent
+			parent->setParent(0);
+		}
+	if (trackingDirection==kOutsideIn)
+		trackingDirection = kInsideOut;
+	else
+		trackingDirection = kOutsideIn;
 }
-
-}
-*/
 
 ///return hits;
 vector<StHit*> StiKalmanTrack::stHits() const

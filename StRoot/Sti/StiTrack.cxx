@@ -12,31 +12,18 @@
 #include "StiTrackFitter.h"
 StiTrackFitter * StiTrack::trackFitter = 0;
 
-StiTrack::StiTrack()
-{
-  reset();
-}
- 
-StiTrack::~StiTrack()
-{
-}
-
 void StiTrack::reset()
 {
-  q = 0;
-  nPts = 0;
-  nFitPts = 0;
+  //q = 0;
+  //nPts = 0;
+  //nFitPts = 0;
   mSeedHitCount = 0;
-  vertex = 0;
+  //vertex = 0;
   m      = -1.;
-  chi2   = 0.;
+  //chi2   = 0.;
   mFlag = 0;
 }
 
-void StiTrack::fit() //throw (Exception)
-{
-  trackFitter->fit(this);
-}
 
 
 ostream& operator<<(ostream& os, const StiTrack& track)

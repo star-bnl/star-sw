@@ -27,7 +27,7 @@ public:
     //_action methods_______________________________________________
     virtual void findTracks()=0; 
     virtual void fitTracks()=0; 
-		virtual void extendTracksToVertex()=0;
+		virtual void extendTracksToVertex(StiHit * vertex)=0;
 		virtual void findNextTrack()=0;
 		virtual void fitNextTrack()=0;
 		virtual void findNextTrackSegment()=0;

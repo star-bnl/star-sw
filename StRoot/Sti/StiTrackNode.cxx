@@ -62,8 +62,8 @@ void StiTrackNode::reset()
 //_____________________________________________________________________________
 void StiTrackNode::set(int depth, StiHit * h)
 {
-    StiDefaultMutableTreeNode::set(depth);
-    hit = h;
+	//StiDefaultMutableTreeNode::set(depth);
+	hit = h;
 }
 
 //_____________________________________________________________________________
@@ -73,4 +73,9 @@ void StiTrackNode::setAsCopyOf(const StiTrackNode * node)
     hit = node->hit;
 }
 
-
+//_____________________________________________________________________________
+void StiTrackNode::addChild(StiTrackNode * newChild)
+{	
+	newChild->setParent(this);
+	children.push_back(newChild);
+}
