@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.41 2000/04/12 20:33:52 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.42 2000/04/19 19:05:34 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.42  2000/04/19 19:05:34  caines
+// Fixed loop hole that not ALL tpc hits are on tracks
+//
 // Revision 1.41  2000/04/12 20:33:52  caines
 // Fill bit map for primaries flag in one place
 //
@@ -471,19 +474,28 @@ Int_t StPrimaryMaker::Make(){
       bool isset;
       
       for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
-	if( tgroup->ident >= 0){
+	if( tgroup->id1 != 0 && tgroup->ident >= 0){
 	  spt_id = tgroup->id2-1;
-	  row = spc[spt_id].row/100;
-	  row = spc[spt_id].row - row*100;
-	  if( row < 25){
-	    isset = track[spc[spt_id].id_globtrk-1].map[0] & 1UL<<(row+7);
-	    track[spc[spt_id].id_globtrk-1].map[0] |= 1UL<<(row+7);
+	  if( spt_id <0) {
+	    cout << spt_id << endl;
 	  }
-	  else{
-	    isset = track[spc[spt_id].id_globtrk-1].map[1] & 1UL<<(row-25);
-	    track[spc[spt_id].id_globtrk-1].map[1] |= 1UL<<(row-25);
+          else{
+	    row = spc[spt_id].row/100;
+	    row = spc[spt_id].row - row*100;
+	    if( spc[spt_id].id_globtrk-1 < 0){
+	      cout << spc[spt_id].id_globtrk-1 << endl;
+	      cout << tgroup->ident << " " << tgroup->id1 << " " << tgroup->id2 << " " << spc[spt_id].id << " " << endl;
+	    }
+	    if( row < 25){
+	      isset = track[spc[spt_id].id_globtrk-1].map[0] & 1UL<<(row+7);
+	      track[spc[spt_id].id_globtrk-1].map[0] |= 1UL<<(row+7);
+	    }
+	    else{
+	      isset = track[spc[spt_id].id_globtrk-1].map[1] & 1UL<<(row-25);
+	      track[spc[spt_id].id_globtrk-1].map[1] |= 1UL<<(row-25);
+	    }
+	    if (isset) track[spc[spt_id].id_globtrk-1].map[1] |= 1UL<<30; 
 	  }
-	  if (isset) track[spc[spt_id].id_globtrk-1].map[1] |= 1UL<<30; 
 	}
       }
       
