@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.58 2004/05/19 09:53:38 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.59 2004/05/24 13:38:47 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.59  2004/05/24 13:38:47  jcs
+// save number of clusters found in StFtpcSoftwareMonitor
+//
 // Revision 1.58  2004/05/19 09:53:38  jcs
 // print out number of clusters found for both Ftpcsy
 //
@@ -200,6 +203,7 @@
 StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,  
 					 StFtpcParamReader *paramReader,
                                          StFtpcDbReader *dbReader,
+					 StFtpcSoftwareMonitor *ftpcMon,
 					 TObjArray *pointarray,
 					 TH2F *hpad,
 					 TH2F *htime,
@@ -211,6 +215,7 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
   mReader = reader;
   mParam = paramReader; 
   mDb    = dbReader;
+  mFtpcMon = ftpcMon;
   mPoint = pointarray;
   mHisto=histo;
   mHistoW=histoW;
@@ -805,9 +810,14 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 	} // end of: for(iSec...)
     } // end of: for(iRow...)
 
-  if (iftpc == 0 ) gMessMgr->Message("", "I", "OS") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  mPoint->GetEntriesFast() << " hits in Ftpc West." << endm;
-  if (iftpc == 1 ) gMessMgr->Message("", "I", "OS") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  mPoint->GetEntriesFast() << " hits in Ftpc East." << endm;
-  
+  if (iftpc == 0 ) {
+  	  mFtpcMon->n_clus_ftpc[1] = clusters;
+	  gMessMgr->Message("", "I", "OS") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  mPoint->GetEntriesFast() << " hits in Ftpc West." << endm;
+  }	  
+  if (iftpc == 1 ) {
+	  mFtpcMon->n_clus_ftpc[0] = clusters;
+	  gMessMgr->Message("", "I", "OS") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  mPoint->GetEntriesFast() << " hits in Ftpc East." << endm;
+  }
 }  // end of: for(iftpc
   
 #ifdef DEBUGFILE
