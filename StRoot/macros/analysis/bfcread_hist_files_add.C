@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.6 2000/06/23 20:57:21 kathy Exp $
+// $Id: bfcread_hist_files_add.C,v 2.7 2000/06/23 21:34:21 kathy Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.7  2000/06/23 21:34:21  kathy
+// remove unneeded macro; make bfcread_hist_files_add work with a chain - cleanup
+//
 // Revision 2.6  2000/06/23 20:57:21  kathy
 // getting ready to write output hist file
 //
@@ -63,6 +66,7 @@ void bfcread_hist_files_add(
     "/star/rcf/test/dev/tfs_redhat61/Tue/year_1h/hc_standard/hc_standard.40_evts.hist.root",
  const Char_t *MainFile2=
     "/star/rcf/test/dev/tfs_redhat61/Tue/year_1h/hc_lowdensity/hc_lowdensity.400_evts.hist.root",
+  const Char_t *outHistFile="kathy",
   const Char_t *MakerHistDir="QA",
   const Char_t *TopDirTree="bfcTree")
 {
@@ -89,6 +93,9 @@ void bfcread_hist_files_add(
     gSystem->Load("StAnalysisUtilities");
     gSystem->Load("libglobal_Tables");
 
+//  Setup top part of chain
+   chain = new StChain("MyChain");
+
 // constructor for other maker (not used in chain)
    StHistUtil   *HU  = new StHistUtil;
 
@@ -100,26 +107,28 @@ void bfcread_hist_files_add(
 
  cout << endl << " NOW GOING TO POINT TO FILE " << ifl <<  endl;
 
-// clone(copy) histograms from first file  -----------------------------
- if (ifl==1) {
-
-// read in file 1:
-  StIOMaker *IOMk = new StIOMaker("IO","r",MainFile1,TopDirTree);
-  IOMk->SetIOMode("r");
-  IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-  IOMk->SetBranch("histBranch",0,"r"); //activate hist Branch
-
-// --- each file contains only histograms (1 "event" == 1 Make call)
-  IOMk->Init();
-  IOMk->Clear();
-  IOMk->Make();
-// - end of read
+ Char_t *MainFile=0;
+ if (ifl==1) MainFile=MainFile1;
+ if (ifl==2) MainFile=MainFile2;
+  
+ StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,TopDirTree);
+    IOMk->SetIOMode("r");
+    IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+    IOMk->SetBranch("histBranch",0,"r"); //activate hist Branch
 
   HU->SetPntrToMaker((StMaker *)IOMk);
+
+// --- each file contains only histograms (1 "event" == 1 Make call)
+  chain->Init();
+  chain->Clear();
+  chain->Make();
 
 // get the TList pointer to the histograms:
   TList  *dirList = 0;
   dirList = HU->FindHists(MakerHistDir);
+
+// clone(copy) histograms from first file  -----------------------------
+ if (ifl==1) {
 
 // now make a copy of all histograms into my new histograms!
   hCCount = HU->CopyHists(dirList);
@@ -130,26 +139,6 @@ void bfcread_hist_files_add(
  }  // if ifl==1
 
  else{
-
-  if (ifl==2) {
-// 
-    StIOMaker *IOMk = new StIOMaker("IO","r",MainFile2,TopDirTree);
-    IOMk->SetIOMode("r");
-    IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-    IOMk->SetBranch("histBranch",0,"r"); //activate hist Branch
-
-// --- each file contains only histograms (1 "event" == 1 Make call)
-    IOMk->Init();
-    IOMk->Clear();
-    IOMk->Make();
-
-    HU->SetPntrToMaker((StMaker *)IOMk);
-
-  } // if ifl=2
-
-// get the TList pointer to the histograms:
-  TList  *dirList = 0;
-  dirList = HU->FindHists(MakerHistDir);
 
 // now make a copy of all histograms into my new histograms!
   Int_t hACount=0;
@@ -177,11 +166,21 @@ void bfcread_hist_files_add(
        } // if strcmp -- to draw
    } // for -- end of example
 
+
 // constructor 
-   StHistMaker   *HM  = new StHistMaker;
-     HM->SetHArray(kathyArray);
-     HM->Init();
-     HM->Make();
+   //   StHistMaker   *HM  = new StHistMaker;
+   //  HM->SetHArray(kathyArray);
+   // need HM->SetHArraySize 
+
+// output hist.root file:
+   //StTreeMaker* treeMk = new StTreeMaker("tree",outHistFile,TopDirTreeOut);
+   //  treeMk->SetIOMode("w");
+   // treeMk->SetBranch("histBranch");
+
+   //HM->Init();
+   // treeMk->Init();
+   // HM->Make();
+   // treeMk->Make();
 
 } // end of the macro!
  
