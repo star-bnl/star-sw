@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.70 2000/02/15 22:29:17 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.71 2000/02/18 23:02:46 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.71  2000/02/18 23:02:46  fisyak
+// Fix bug for tables, add sim_T to PreVtx
+//
 // Revision 1.70  2000/02/15 22:29:17  fisyak
 // Add rrs into chain
 //
@@ -311,8 +314,8 @@ BfcItem BFC[] = {
   {"Tables      ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
-  {"tables"      ,""  ,"","",""
-     ,"StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,mwc_T,sim_T,svt_T,tpc_T,trg_T,vpd_T","",kFALSE},
+  {"tables"      ,""  ,"",
+"StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,mwc_T,sim_T,svt_T,tpc_T,trg_T,vpd_T","","","",kFALSE},
   {"StDbT"       ,""  ,"","",""                                ,"libStDb_Tables","Load StDb_Tables",kFALSE},
   {"ctf_T"       ,""  ,"","",""                                  ,"libctf_Tables","Load ctf_Tables",kFALSE},
   {"ebyeT"       ,""  ,"","",""                                ,"libebye_Tables","Load ebye_Tables",kFALSE},
@@ -368,7 +371,7 @@ BfcItem BFC[] = {
   {"tpt"         ,"tpc_tracks","tpc","tpc_T,tls,"          ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
   {"laser"       ,"tpc_tracks","tpc","tdaq,tpc,-tpt"
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},  
-  {"PreVtx"      ,"","","tpt,SCL"     ,"StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"PreVtx"     ,"","","tpt,SCL,sim_T","StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
   {"svt"         ,"svt","","svt_T,srs,stk"                             ,"StChainMaker","StChain","",kFALSE},
   {"srs"         ,"svt_hits","svt","tls"            ,"St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
   {"stk"         ,"svt_tracks","svt","tls"          ,"St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},
