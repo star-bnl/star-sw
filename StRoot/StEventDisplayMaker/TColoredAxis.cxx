@@ -5,7 +5,9 @@
 ClassImp(TColoredAxis)
 
 //_____________________________________________________________________________
-TColoredAxis::TColoredAxis(): TGaxis(), TAttFill(){ fNColors = 0; }
+TColoredAxis::TColoredAxis(): TGaxis(), TAttFill(){ 
+   fNColors = 0;fLookup  = 0; fNlookup = 0;  
+}
 
 //_____________________________________________________________________________
 TColoredAxis::TColoredAxis(Float_t xmin,Float_t ymin,Float_t xmax,Float_t ymax,
@@ -14,7 +16,21 @@ TColoredAxis::TColoredAxis(Float_t xmin,Float_t ymin,Float_t xmax,Float_t ymax,
                TGaxis(xmin,ymin,xmax,ymax,wmin,wmax,ndiv,chopt,gridlength)
 {
     fNColors = nColors;
+    fLookup  = 0;
+    fNlookup = 0;
 }
+//_____________________________________________________________________________
+TColoredAxis::TColoredAxis(Float_t xmin,Float_t ymin,Float_t xmax,Float_t ymax,
+                Float_t wmin,Float_t wmax, Double_t *wval, Int_t lookupsize,
+                Int_t ndiv, Option_t *chopt, Float_t gridlength,Int_t nColors) :
+               TGaxis(xmin,ymin,xmax,ymax,wmin,wmax,ndiv,chopt,gridlength)
+{
+    // fLookup - the array [nColors+1] to map Axis_t values to color
+    fNColors = nColors;
+    fLookup  = wval;
+    fNlookup = lookupsize;
+}
+
 //_____________________________________________________________________________
 TColoredAxis::TColoredAxis(Float_t xmin,Float_t ymin,Float_t xmax,Float_t ymax,
                const char *funcname, Int_t ndiv, Option_t *chopt,
@@ -23,6 +39,7 @@ TColoredAxis::TColoredAxis(Float_t xmin,Float_t ymin,Float_t xmax,Float_t ymax,
 {
     fNColors = nColors;
 }
+
 //______________________________________________________________________________
 void TColoredAxis::Paint(Option_t *)
 {
@@ -39,8 +56,8 @@ void TColoredAxis::Paint(Option_t *)
 //_____________________________________________________________________________
 void TColoredAxis::PaintPalette()
 {
-//*-*-*-*-*-*-*-*Paint the color palette on the right side of the pad*-*-*-*-*
-//*-*            ====================================================
+//*-*-*-*-*-*-*-*Paint the color palette on the right side of the axis*-*-*-*-*
+//*-*            =====================================================
  
    Float_t xup  = GetX1();
    Float_t x2   = GetX2();
@@ -54,9 +71,33 @@ void TColoredAxis::PaintPalette()
    Int_t ncolors = fNColors;
    if (!ncolors) ncolors  = gStyle->GetNumberOfColors();
    Float_t dy = (ymax-ymin)/ncolors;
-   for (Int_t i=0;i<ncolors;i++) {
-      SetFillColor(gStyle->GetColorPalette(i));
+   Float_t dUp = ymin;
+   Float_t dLow = dUp;
+   Int_t j = 1; 
+   Int_t c = 0;
+   Int_t nextColor = 0;
+   Int_t iColor = nextColor;
+   Double_t deltaColor = 0;
+   while (iColor<ncolors) {
+      if (fLookup) {
+        while((deltaColor = fLookup[j]-fLookup[0]) < (iColor+1.)/ncolors  )  j++;
+        if (fLookup[fNlookup-1]-fLookup[j] <= 1./ncolors) {
+          // this is the last color slide 
+          deltaColor = 1.;
+          j =  fNlookup;
+        }
+        nextColor = Int_t(deltaColor*ncolors+0.5);
+        dy = (j-c)*(ymax-ymin)/fNlookup;
+        c = j; j++;
+      } else {
+        nextColor++;
+      }
+      SetFillColor(gStyle->GetColorPalette(iColor));
+      iColor = nextColor;
       TAttFill::Modify();
-      gPad->PaintBox(xmin,ymin+i*dy,xmax,ymin+(i+1)*dy);
+      dLow = dUp;
+      dUp  = dLow + dy;
+      if (dUp == dLow) continue;
+      gPad->PaintBox(xmin,dLow,xmax,dUp);
    }   
 }
