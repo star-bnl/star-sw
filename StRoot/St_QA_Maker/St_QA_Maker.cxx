@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.69 1999/12/15 17:17:33 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.70 1999/12/15 18:31:05 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.70  1999/12/15 18:31:05  kathy
+// added 4 new histogram to globtrk for tpc - r0,phi0,z0,curvature; also put 3 of these in default logY list; also changed scale on iflag hist. for globtrk & primtrk
+//
 // Revision 1.69  1999/12/15 17:17:33  kathy
 // changed the dedx histograms to the scale GeV/cm - which is the scale in the dst table
 //
@@ -389,6 +392,10 @@ void St_QA_Maker::MakeHistGlob(){
 	m_max_pointT->Fill(t->n_max_point);
 	m_fit_pointT->Fill(t->n_fit_point);
         m_glb_chargeT->Fill(t->icharge);
+        m_glb_r0T->Fill(t->r0);
+        m_glb_phi0T->Fill(t->phi0);
+        m_glb_z0T->Fill(t->z0);
+        m_glb_curvT->Fill(t->curvature);
         m_glb_xfT->Fill(t->x_first[0]);
         m_glb_yfT->Fill(t->x_first[1]);
         m_glb_zfT->Fill(t->x_first[2]);
