@@ -1,4 +1,4 @@
-// $Id: bfcread_tagsBranch.C,v 1.5 2000/03/23 16:56:15 kathy Exp $
+// $Id: bfcread_tagsBranch.C,v 1.6 2000/03/23 19:54:36 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -14,27 +14,41 @@
 // branches -> tables
 // leaves   -> entries (tags) in tables
 //
+//  Inputs to macro:
+//     MainFile - input *.tags.root file
+//     printEvent - event # to print out details for
+//     fname - output file name to write QAInfo
+//
 //=======================================================================
 
-void bfcread_tagsBranch(const char *MainFile=
- "/afs/rhic/star/data/samples/gstar.tags.root",Int_t printEvent=1)
+void bfcread_tagsBranch(
+ const char *MainFile="/afs/rhic/star/data/samples/gstar.tags.root",
+  Int_t printEvent=1,
+  const char *fname="qa_tags.out") 
 {
-  // fill tags table
 
   // start timer
   TStopwatch timer;
   timer.Start();
 
-  cout << " Input Tags File Name = " << MainFile << endl;
-   
+  cout << " Input .tags.root File Name = " << MainFile << endl;
+  cout << " event # for which to  print details  = " << printEvent << endl;
+  cout << " Output file containing QAInfo printouts = " << fname << endl;
 
-  // gather all files from the same Run into one chain for loading to tagDB
-  // can .Add more on here and then we will loop over them all 
+  ofstream fout(fname);
+  fout << " Running: bfcread_tagsBranch.C " << endl;
+  fout << " Input .tags.root File Name = " << MainFile << endl;
+  fout << " event # for which to  print details  = " << printEvent << endl;
+  fout << " Output file containing QAInfo printouts = " << fname << endl;
+
+// gather all files from the same Run into one chain for loading to tagDB
+// can .Add more on here and then we will loop over them all 
 
   TChain chain("Tag");
   chain.Add(MainFile);
 
   cout << "   Total # events  = " << chain->GetEntries() << endl;
+  fout << "   Total # events  = " << chain->GetEntries() << endl;
 
   TObjArray *files = chain.GetListOfFiles();
   TObjArray *branches = chain.GetListOfBranches();
@@ -43,6 +57,7 @@ void bfcread_tagsBranch(const char *MainFile=
   Int_t nleaves = leaves->GetEntriesFast();
   Int_t nbranches = branches->GetEntriesFast();
   cout << "    tot num tables,tags = " << nbranches << "   " << nleaves << endl;
+  fout << "    tot num tables,tags = " << nbranches << "   " << nleaves << endl;
 
   TString file;
 
@@ -82,9 +97,13 @@ void bfcread_tagsBranch(const char *MainFile=
     //    if (k == *(chain.GetTreeOffset()+chain.GetTreeNumber()))
 
 	file = (files->UncheckedAt(chain.GetTreeNumber()))->GetTitle();
-        if (!k) cout <<"    now reading file: " << file.Data() << endl;
+        if (!k) {
+            cout <<"    now reading file: " << file.Data() << endl;
+            fout <<"    now reading file: " << file.Data() << endl;
+        }
 
         cout <<" ----- Event # " << countEvents << endl;
+        fout <<" ----- Event # " << countEvents << endl;
     
 // must renew leaves for each file
 	leaves = chain.GetListOfLeaves();
@@ -104,6 +123,12 @@ void bfcread_tagsBranch(const char *MainFile=
 	  if (countEvents == printEvent) 
           { 
             cout << 
+	      " QAInfo: table#,name: " << branches->IndexOf(branch) <<
+	      ", " << branch->GetName() << 
+              " -- has  tag: " << leaf->GetName() <<
+              " = " << leaf->GetValue() << endl; 
+
+            fout << 
 	      " QAInfo: table#,name: " << branches->IndexOf(branch) <<
 	      ", " << branch->GetName() << 
               " -- has  tag: " << leaf->GetName() <<
@@ -176,6 +201,7 @@ void bfcread_tagsBranch(const char *MainFile=
 // print out for all events
         for (Int_t m=0; m<4; m++){
           cout << "  table "<< m << " has " << countTags[m] << " tags" << endl;
+          fout << "  table "<< m << " has " << countTags[m] << " tags" << endl;
           countTables++;
         }
 	
@@ -184,19 +210,23 @@ void bfcread_tagsBranch(const char *MainFile=
 
 // print out at end of processing all events:
 
+  countTables /= countEvents;
+
   cout << endl << endl << 
     " QAInfo:  Read total # events = " << countEvents << endl;
-  //  cout << " QAInfo:  Read total # tables = " << countTables << endl;
-  countTables /= countEvents;
   cout << " QAInfo:  #tables/event = " << countTables << endl << endl;
+  fout << endl << endl << 
+    " QAInfo:  Read total # events = " << countEvents << endl;
+  fout << " QAInfo:  #tables/event = " << countTables << endl << endl;
 
   for (Int_t j=0; j<4; j++){
     countTagsTot[j] /= countEvents;
      cout << " QAInfo: table "<< j << " had " 
           << countTagsTot[j] << " tags per event" <<endl;
+     fout << " QAInfo: table "<< j << " had " 
+          << countTagsTot[j] << " tags per event" <<endl;
   }
   
-
 
         AsumEvtHddr /= AcntEvtHddr;
         AsumFlowqx  /= AcntFlowqx;
@@ -225,6 +255,25 @@ void bfcread_tagsBranch(const char *MainFile=
         cout << " QAInfo: ALL evt,  avg Sca An. Mtrx = " 
             << AsumScaAM   << endl; 
         cout << " QAInfo: ALL evt,  avg Evt Hddr     = " 
+            << AsumEvtHddr << endl;
+
+	fout << endl <<  " QAInfo: ALL evt,  avg Flow qx      = " 
+            << AsumFlowqx << endl;
+        fout << " QAInfo: ALL evt,  avg Flow qy      = " 
+            << AsumFlowqy << endl;
+        fout << " QAInfo: ALL evt,  avg Flow n       = " 
+            << AsumFlown  << endl; 
+        fout << " QAInfo: ALL evt,  avg Flow m       = " 
+            << AsumFlowm  << endl; 
+        fout << " QAInfo: ALL evt,  avg Strange      = "
+            << AsumStrange << endl; 
+        fout << " QAInfo: ALL evt,  avg Sca CP mean  = " 
+            << AsumScaCPM  << endl; 
+        fout << " QAInfo: ALL evt,  avg Sca CP sig   = " 
+            << AsumScaCPS  << endl; 
+        fout << " QAInfo: ALL evt,  avg Sca An. Mtrx = " 
+            << AsumScaAM   << endl; 
+        fout << " QAInfo: ALL evt,  avg Evt Hddr     = " 
             << AsumEvtHddr << endl;
        
 
