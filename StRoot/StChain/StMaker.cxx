@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.46 1999/06/11 22:56:03 perev Exp $
+// $Id: StMaker.cxx,v 1.47 1999/06/11 23:45:31 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.47  1999/06/11 23:45:31  perev
+// cleanup
+//
 // Revision 1.46  1999/06/11 22:56:03  perev
 // Merge 2 updates
 //
@@ -127,7 +130,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.46 1999/06/11 22:56:03 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.47 1999/06/11 23:45:31 perev Exp $";
 return cvs;};
 static void doPs(const char *who,const char *where);
 
@@ -474,13 +477,11 @@ void StMaker::StartMaker()
 void StMaker::EndMaker(int ierr)
 {
   if (ierr){};
-  ::doPs(GetName(),"EndMaker");
   St_DataSet *dat = Find(".data");
   if (dat) dat->Pass(ClearDS,0);
   St_DataSet *gar = Find(".garb");
   if (gar) gar->Delete();
-
-  if (ps[0]) gSystem->Exec(ps);
+  ::doPs(GetName(),"EndMaker");
   
 //VP  gBenchmark->Stop(GetName());
   StopTimer();
