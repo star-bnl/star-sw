@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbUse.cxx,v 1.8 2000/03/26 16:47:13 fine Exp $
+ * $Id: DbUse.cxx,v 1.9 2000/04/13 20:22:56 porter Exp $
  *
  * Author: S. Vanyashin
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: DbUse.cxx,v $
+ * Revision 1.9  2000/04/13 20:22:56  porter
+ * - reconnected tableDescriptor that had been broken via St_tableDescriptor.
+ * - added unix timestamp as standard
+ * - top node returned via InitConfig will be a database type
+ *
  * Revision 1.8  2000/03/26 16:47:13  fine
  * Adjusted to ROOT 2.24
  *
@@ -60,7 +65,7 @@ extern "C" void * DbUse(uint *nRows,
 			const char * structName,
 			uint nVar,
 			uint sizeOfStruct,
-			StDbBroker::Descriptor *d) 
+			StDbBroker::oldDescriptor *d) 
 {
   enum EColumnType {kNAN, kFloat, kInt, kLong, kShort, kDouble, kUInt
 		    ,kULong, kUShort, kUChar, kChar };

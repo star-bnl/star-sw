@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbFill.cxx,v 1.4 2000/03/26 16:47:13 fine Exp $
+ * $Id: DbFill.cxx,v 1.5 2000/04/13 20:22:56 porter Exp $
  *
  * Author: S. Vanyashin
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: DbFill.cxx,v $
+ * Revision 1.5  2000/04/13 20:22:56  porter
+ * - reconnected tableDescriptor that had been broken via St_tableDescriptor.
+ * - added unix timestamp as standard
+ * - top node returned via InitConfig will be a database type
+ *
  * Revision 1.4  2000/03/26 16:47:13  fine
  * Adjusted to ROOT 2.24
  *
@@ -46,7 +51,7 @@ extern "C" void DbFill(uint * datetime,
 		       const char * tableName,
 		       const char * structName,
 		       uint nVar,
-		       StDbBroker::Descriptor *d,//array (for each of nVar)
+		       StDbBroker::oldDescriptor *d,//array (for each of nVar)
 		       const char **Comments,
 		       uint nRows,
 		       uint sizeOfStruct,

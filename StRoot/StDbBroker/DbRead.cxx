@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbRead.cxx,v 1.5 2000/01/10 20:31:16 porter Exp $
+ * $Id: DbRead.cxx,v 1.6 2000/04/13 20:22:56 porter Exp $
  *
  * Author: S. Vanyashin 
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,11 @@
  ***************************************************************************
  *
  * $Log: DbRead.cxx,v $
+ * Revision 1.6  2000/04/13 20:22:56  porter
+ * - reconnected tableDescriptor that had been broken via St_tableDescriptor.
+ * - added unix timestamp as standard
+ * - top node returned via InitConfig will be a database type
+ *
  * Revision 1.5  2000/01/10 20:31:16  porter
  * modified StDbBroker to be an interface to the DB-interface, StDbLib.
  *  - old functionality is retained for the short-term & modifications
@@ -38,7 +43,7 @@ extern "C" void * DbRead(unsigned int *nRows,
             const char * structName,
 			unsigned int nVar,
 			unsigned int sizeOfStruct,
-			StDbBroker::Descriptor *d,
+			StDbBroker::oldDescriptor *d,
             const char* database,
             const char* tableVersion)
 {

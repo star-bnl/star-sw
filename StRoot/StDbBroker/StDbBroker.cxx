@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.17 2000/04/04 14:04:07 perev Exp $
+ * $Id: StDbBroker.cxx,v 1.18 2000/04/13 20:22:57 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,11 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.18  2000/04/13 20:22:57  porter
+ * - reconnected tableDescriptor that had been broken via St_tableDescriptor.
+ * - added unix timestamp as standard
+ * - top node returned via InitConfig will be a database type
+ *
  * Revision 1.17  2000/04/04 14:04:07  perev
  * table descriptor modif
  *
@@ -121,7 +126,7 @@ char **StDbBroker::GetComments(St_Table *parentTable)
 }
 
 //_____________________________________________________________________________
-StDbBroker::StDbBroker(): m_structName(0), m_tableName(0), m_tableVersion(0), m_database(0), m_isVerbose(0), m_Nodes(0), m_Tree(0) {
+StDbBroker::StDbBroker(): m_structName(0), m_tableName(0), m_requestTimeStamp(0), m_tableVersion(0), m_database(0), m_ParentType(0), m_isVerbose(0), m_Nodes(0), m_Tree(0) {
 
   mgr=StDbManager::Instance();
 
@@ -144,12 +149,6 @@ void StDbBroker::CloseAllConnections(){
 };
 
 //_____________________________________________________________________________
-// int StDbBroker::Init(const char *dbname)
-// {
-//   return DbInit(dbname);
-// }
-//______________________________________________________________________________
-
 void StDbBroker::Fill(void * pArray, const char **Comments)
 {
   if ( m_nElements==0 ) return;
@@ -186,71 +185,79 @@ StDbBroker::GetTableDescriptor(){
 
 StDbBuffer buff;
 StDbTableDescriptor* descriptor = new StDbTableDescriptor();
+unsigned int numElements = mdescriptor->NumberOfColumns();
 
- for(int i=0;i<(int)m_nElements;i++){
+ for(int i=0;i<(int)numElements;i++){
 
-   buff.WriteScalar(m_descriptor[i].fColumnName,"name");
+   buff.WriteScalar(mdescriptor->ColumnName(i),"name");
 
    // array designation & lengths 
-   char lengthString[100];
-   ostrstream os(lengthString,100);
-   for(int k=0; k<(int)m_descriptor[i].fDimensions-1;k++) os<<m_descriptor[i].fIndexArray[k]<<",";
-   os<<m_descriptor[i].fIndexArray[m_descriptor[i].fDimensions-1]<<ends;
-   buff.WriteScalar(lengthString,"length");
+   if(!mdescriptor->Dimensions(i)){
+      buff.WriteScalar("1","length");
+   } else {
+     char* lengthString=new char[100];
+     ostrstream os(lengthString,100);
+     unsigned int* index = mdescriptor->IndexArray(i);
+     for(int k=0; k<(int)mdescriptor->Dimensions(i)-1;k++) 
+       os<<index[k]<<",";
+     os<<index[mdescriptor->Dimensions(i)-1]<<ends;
+     buff.WriteScalar(lengthString,"length");
+     delete [] lengthString;
+   }
 
    // position in struct
-   buff.WriteScalar(i,"position");
+   buff.WriteScalar(i+1,"position");
 
    // Type identification
-  switch ((EColumnType)m_descriptor[i].fType) {
+  switch ((EColumnType)mdescriptor->ColumnType(i)) {
   case kFloat:
     {
-      buff.WriteScalar("Stfloat","type");
+      buff.WriteScalar("float","type");
       break;
     }
   case kInt:
     {
-      buff.WriteScalar("Stint","type");
+      buff.WriteScalar("int","type");
       break;
     }
   case kLong:
     {
-      buff.WriteScalar("Stlong","type");
+      buff.WriteScalar("long","type");
       break;
     }
   case kShort:
     {
-      buff.WriteScalar("Stshort","type");
+      buff.WriteScalar("short","type");
       break;
     }
   case kDouble:
     {
-      buff.WriteScalar("Stdouble","type");
-      break;
+      buff.WriteScalar("double","type");
+     break;
     }
   case kUInt:
     {
-      buff.WriteScalar("Stuint","type");
+      buff.WriteScalar("uint","type");
       break;
     }
   case kULong:
     {
-      buff.WriteScalar("Stulong","type");
+      buff.WriteScalar("ulong","type");
       break;
     }
   case kUShort:
     {
-      buff.WriteScalar("Stushort","type");
+      buff.WriteScalar("ushort","type");
       break;
     }
   case kUChar:
     {
-      buff.WriteScalar("Stuchar","type");
+      buff.WriteScalar("uchar","type");
       break;
     }
   case kChar:
     {
-      buff.WriteScalar("Stchar","type");
+      buff.WriteScalar("char","type");
       break;
     }
   default:
@@ -303,21 +310,30 @@ void * StDbBroker::Use(int tabID, int parID)
 {
 
   // This is an "Offline" requirement of only 31 char per element name 
-  UInt_t i;
-  for (i=0;i<m_nElements;i++) {
-      m_descriptor[i].fColumnName[31]='\0';
-  }
+  // UInt_t i;
+  //  for (i=0;i<m_nElements;i++) {
+  //      m_descriptor[i].fColumnName[31]='\0';
+  //  }
 
   void* pData = 0;
+  m_nRows = 0;
 
   StDbNode* anode = m_Nodes->getNode(tabID);
   StDbTable* node=0;
   if(anode && !anode->IsNode())node=(StDbTable*)anode;
+  // 0 endtime means no requests yet  
+  if(node && !(node->getEndTime()))node->setDescriptor(GetTableDescriptor());
+  
+
   if(node && mgr->fetchDbTable(node)){
-    char* thisTime;
     m_nRows= node->GetNRows();
     pData  = node->GetTableCpy(); // gives the "malloc'd version"
+  }
 
+  if(node){
+
+    char* thisTime;
+    m_beginTimeStamp = node->getBeginTime();
     thisTime = node->getBeginDateTime();
     char* tmp1 = new char[strlen(thisTime)+1];
     char* tmp2 = new char[strlen(thisTime)+1];
@@ -328,6 +344,7 @@ void * StDbBroker::Use(int tabID, int parID)
     m_BeginTime = (UInt_t)atoi(tmp2);
     delete [] tmp1; tmp2-=8; delete [] tmp2;
 
+    m_endTimeStamp = node->getEndTime();
     thisTime = node->getEndDateTime();
     tmp1 = new char[strlen(thisTime)+1];
     tmp2 = new char[strlen(thisTime)+1];
@@ -343,11 +360,12 @@ void * StDbBroker::Use(int tabID, int parID)
     //cout<<"Broker is Returning Null for table = " << node->getMyName()<<endl;
       SetNRows(0);
       SetBeginDate(19950101);
+      SetBeginTimeStamp(788918400);
       SetBeginTime(0);
       SetEndDate(20380101);
+      SetEndTimeStamp(2145916799);
       SetEndTime(0);
-      return pData;
-  }
+   }
 
 return pData;
 }
@@ -440,13 +458,31 @@ StDbBroker::InitConfig(const char* configName, int& numRows, char* versionName)
 
 if(m_Tree) delete m_Tree;
 
+char* dbTypeName=new char[20];
+char* dbDomainName=new char[20];
+if(m_ParentType) delete [] m_ParentType;
+m_ParentType = 0;
+
+ if(mgr->getDataBaseInfo(configName,dbTypeName,dbDomainName)){
+   if(strcmp(dbDomainName,"Star")!=0){
+      int tlen = strlen(dbTypeName);
+      m_ParentType = new char[tlen+1];
+      strcpy(m_ParentType,dbTypeName);
+   }
+ }
+
+ delete [] dbTypeName;
+ delete [] dbDomainName;
  if(m_isVerbose)mgr->setVerbose(true);
 if(!versionName){
-  m_Tree=mgr->initConfig(configName,"reconV0");
+  m_Tree=mgr->initConfig(configName,"reconV0",1); // 1=don't get db-descriptors
 }else{
-  m_Tree=mgr->initConfig(configName,versionName);
+  m_Tree=mgr->initConfig(configName,versionName,1);//1=don't get db-descriptors
 }
 
+ dbConfig_st* configTable = 0;
+ if(!m_Tree) return configTable;
+ 
  if(m_isVerbose){
  cout << "****************************************************************"<<endl;
  cout << "***    Will Print the Tree "<<endl;
@@ -457,11 +493,11 @@ if(!versionName){
  cout << "***    End Print the Tree "<<endl;
  cout << "****************************************************************"<<endl;
  };
-dbConfig_st* configTable = 0;
 numRows = 0;
+
 if(!buildNodes(m_Tree,0)) return configTable;
 
-numRows = m_Nodes->getNumNodes()-1;
+//numRows = m_Nodes->getNumNodes()-1;
 return buildConfig(numRows);
 }
 
@@ -507,18 +543,12 @@ return 1;
 
 //_____________________________________________________________________________
 dbConfig_st*
-StDbBroker::buildConfig(int numRows){
+StDbBroker::buildConfig(int& numRows){
 
 dbConfig_st* cTab= 0;
 m_Nodes->reset();
 int numNodes = m_Nodes->getNumNodes();
 
-if(numNodes-1 != numRows){
-  cerr<<"Error::#-mismatch, rows("<<numRows<<") & nodes("<<numNodes<<")"<<endl;
-  return cTab;
-}
-
-cTab=(dbConfig_st*)calloc(numRows,sizeof(dbConfig_st));
 
 StDbNode* node;
 StDbNode* parent;
@@ -530,6 +560,30 @@ unsigned int parsize=sizeof(cTab[0].parname)-1;
 unsigned int tabsize=sizeof(cTab[0].tabname)-1;
 unsigned int typsize=sizeof(cTab[0].tabtype)-1;
 int parID;
+int cRow;
+
+// if m_ParentType, then 1st row is built for dbType information
+
+ if(m_ParentType){
+
+    numRows = numNodes;
+
+    cTab=(dbConfig_st*)calloc(numRows,sizeof(dbConfig_st));
+    node  = m_Nodes->getNode(0);
+    strncpy(cTab[0].parname,m_ParentType,parsize); 
+    cTab[0].parname[parsize]='\0';  
+    strncpy(cTab[0].tabname,node->getMyName(),tabsize); 
+    cTab[0].tabname[tabsize]='\0';  
+    strncpy(cTab[0].tabtype,".node",typsize); 
+    cTab[0].tabtype[typsize]='\0';
+    cTab[0].parID=cTab[0].tabID=0;
+    cRow = 1;
+
+ } else {
+    numRows = numNodes-1;
+    cTab=(dbConfig_st*)calloc(numRows,sizeof(dbConfig_st));
+    cRow = 0;
+ }
 
  for(int i=1; i<numNodes;i++){
 
@@ -541,19 +595,22 @@ int parID;
    typeName = node->getCstrName();
    parName  = parent->getMyName();
 
-   strncpy(cTab[i-1].parname,parName,parsize); cTab[i-1].parname[parsize]='\0';
-   strncpy(cTab[i-1].tabname,nodeName,tabsize); cTab[i-1].tabname[tabsize]='\0';
+   strncpy(cTab[cRow].parname,parName,parsize); 
+    cTab[cRow].parname[parsize]='\0';
+   strncpy(cTab[cRow].tabname,nodeName,tabsize); 
+    cTab[cRow].tabname[tabsize]='\0';
 
-   id=cTab[i-1].tabtype; *id='.'; id++;
+   id=cTab[cRow].tabtype; *id='.'; id++;
 
    if(strstr(typeName,"None")){
      strcpy(id,"node");
    } else {
-     strncpy(id,typeName,typsize-1); cTab[i-1].tabtype[typsize]='\0';
+     strncpy(id,typeName,typsize); cTab[cRow].tabtype[typsize]='\0';
    }
 
-   cTab[i-1].tabID=i;
-   cTab[i-1].parID=parID;
+   cTab[cRow].tabID=i;
+   cTab[cRow].parID=parID;
+   cRow++;
 
  }
 
@@ -576,6 +633,12 @@ return cTab;
 //_____________________________________________________________________________
 int StDbBroker::DbInit(const char * dbName)
 {  return ::DbInit(dbName) ;}
+
+
+
+
+
+
 
 
 
