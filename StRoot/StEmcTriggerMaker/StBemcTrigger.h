@@ -1,22 +1,63 @@
 //
-// $Id: StBemcTrigger.h,v 1.3 2002/01/03 21:41:15 suaide Exp $
+// $Id: StBemcTrigger.h,v 1.4 2004/08/04 17:53:08 suaide Exp $
 //
 //    
 
 #ifndef STAR_StBemcTrigger
 #define STAR_StBemcTrigger
+#include "TObject.h"
 
-#include "StEmcTrigger.h" 
+#define kNPatches 300
+#define kNJet 10
+#define kNTowers 4800
+#define k12bits 4096
 
-class StBemcTrigger : public StEmcTrigger
+class StEmcGeom;
+class StEmcDecoder;
+class StEvent;
+
+struct emcTrigger 
+{ 
+  short    TowerPedestal[kNTowers];      /* single tower pedestals used for trigger (ID -1)*/
+  short    TowerStatus[kNTowers];        /* single tower masks used for trigger  (ID -1)*/
+
+  short    HTBits;                       /* High tower bits selection */
+  short    PatchStatus[kNPatches];       /* trigger tower status */
+  short    PatchLUT[kNPatches][k12bits]; /* Patch LUT */       
+    
+  short    HT[kNPatches];
+  short    Patch[kNPatches];
+  short    Jet[kNJet];
+  short    Et;
+};
+
+class StBemcTrigger: public TObject
 {  
+  private:
+    char           mHighTower[kNPatches];
+    char           mPatch[kNPatches];
+    char           mJetPatch[kNJet];
+    char           mEt;
+    
+    StEmcGeom*     mGeo;
+    StEmcDecoder*  mDecoder;
+    StEvent*       mEvent;
+
+    emcTrigger     mTrigger;
+    
+    bool           mPrint;
   public: 
-                 StBemcTrigger(Int_t date =20300101, Int_t time = 120000);
-    virtual     ~StBemcTrigger();
-    void         MakeTrigger();
-    void         GetCrateEtaPatch(Int_t,Int_t*,Int_t*);
-    Float_t      GetEtaPatch(Int_t);
-    Int_t        GetJetId(Int_t);
+                   StBemcTrigger();
+    virtual        ~StBemcTrigger();
+    
+    void           resetConf();
+    void           makeTrigger();
+    
+    void           zero();
+    void           setEvent(StEvent* e) { mEvent = e;}
+    void           setPrint(bool a)     { mPrint = a;}
+    
+    emcTrigger     getTrigger()        { return mTrigger;}
 
   ClassDef(StBemcTrigger, 1) 
 };
