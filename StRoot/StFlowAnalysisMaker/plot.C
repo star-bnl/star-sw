@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.19 2000/05/03 16:38:35 posk Exp $
+// $Id: plot.C,v 1.20 2000/05/26 21:25:23 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -17,6 +17,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.20  2000/05/26 21:25:23  posk
+// Use TProfile2D class and profile projection methods.
+// Correction needed for >2 subevents.
+//
 // Revision 1.19  2000/05/03 16:38:35  posk
 // Compatable with ROOT 2.24/02.
 //
@@ -119,7 +123,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_Yield2D_Sel",
 			     "Flow_Yield.Eta_Sel",
 			     "Flow_Yield.Pt_Sel",
-			     "Flow_Sum_v2D_Sel",
 			     "Flow_vObs2D_Sel",
 			     "Flow_vObsEta_Sel",
 			     "Flow_vObsPt_Sel",

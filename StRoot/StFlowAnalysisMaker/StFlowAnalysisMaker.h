@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.14 2000/05/16 17:30:21 snelling Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.15 2000/05/26 21:25:22 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.15  2000/05/26 21:25:22  posk
+// Use TProfile2D class and profile projection methods.
+// Correction needed for >2 subevents.
+//
 // Revision 1.14  2000/05/16 17:30:21  snelling
 // removed the dependencies cint did not like
 //
@@ -77,6 +81,7 @@ class TH2F;
 class TH2D;
 class TH3F;
 class TProfile;
+class TProfile2D;
 
 class StFlowAnalysisMaker : public StMaker {
 
@@ -93,8 +98,8 @@ public:
   Int_t    Finish();
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
-  virtual  const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.14 2000/05/16 17:30:21 snelling Exp $ built "__DATE__" "__TIME__ ;
+  virtual  const char *GetCVS() const {static const char cvs[]=
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.15 2000/05/26 21:25:22 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -109,10 +114,10 @@ private:
   UInt_t   mMult[Flow::nSels][Flow::nHars];                  // multiplicity
   Float_t  mMeanPt[Flow::nSels][Flow::nHars];                // mean Pt
   Float_t  m_q[Flow::nSels][Flow::nHars];                    // Q/sqrt(Mult)
-  TVector2 mQSub[Flow::nSels+Flow::nSubs][Flow::nHars];      // flow vector subs
-  Float_t  mPsiSub[Flow::nSels+Flow::nSubs][Flow::nHars];    // plane angle subs
-  Float_t  mMeanPtSub[Flow::nSels+Flow::nSubs][Flow::nHars]; // mean Pt subs
-  UInt_t   mMultSub[Flow::nSels+Flow::nSubs][Flow::nHars];   // multiplicity subs
+  TVector2 mQSub[Flow::nSels*Flow::nSubs][Flow::nHars];      // flow vector subs
+  Float_t  mPsiSub[Flow::nSels*Flow::nSubs][Flow::nHars];    // plane angle subs
+  Float_t  mMeanPtSub[Flow::nSels*Flow::nSubs][Flow::nHars]; // mean Pt subs
+  UInt_t   mMultSub[Flow::nSels*Flow::nSubs][Flow::nHars];   // multiplicity subs
   Float_t  mRes[Flow::nSels][Flow::nHars];      // event plane resolution
   Float_t  mResErr[Flow::nSels][Flow::nHars];   // event plane resolution error
  
@@ -154,28 +159,27 @@ private:
   struct histSubs {
     struct histSubHars histSubHar[Flow::nHars];
   };
-  struct histSubs histSub[Flow::nSels+Flow::nSubs]; //!
+  struct histSubs histSub[Flow::nSels*Flow::nSubs]; //!
 
   // for each harmonic and each selection
   struct histFullHars {
-    TH1D*     mHistPhi;
-    TH1D*     mHistPhiWgt;
-    TH1D*     mHistPhiFlat;
-    TH1F*     mHistPhiCorr;
-    TH1F*     mHistPsiSubCorr;
-    TH1F*     mHistPsiSubCorrDiff;
-    TH1F*     mHistPsi;
-    TH1F*     mHistMult;
-    TH1F*     mHistMeanPt;
-    TH1F*     mHist_q;
-    TH2D*     mHistYield2D;
-    TH2D*     mHistSum_v2D;
-    TH2F*     mHist_vObs2D;
-    TProfile* mHist_vObsEta;
-    TProfile* mHist_vObsPt;
-    TH2F*     mHist_v2D;
-    TH1F*     mHist_vEta;
-    TH1F*     mHist_vPt;
+    TH1D*       mHistPhi;
+    TH1D*       mHistPhiWgt;
+    TH1D*       mHistPhiFlat;
+    TH1F*       mHistPhiCorr;
+    TH1F*       mHistPsiSubCorr;
+    TH1F*       mHistPsiSubCorrDiff;
+    TH1F*       mHistPsi;
+    TH1F*       mHistMult;
+    TH1F*       mHistMeanPt;
+    TH1F*       mHist_q;
+    TH2D*       mHistYield2D;
+    TProfile2D* mHist_vObs2D;
+    TProfile*   mHist_vObsEta;
+    TProfile*   mHist_vObsPt;
+    TH2D*       mHist_v2D;
+    TH1D*       mHist_vEta;
+    TH1D*       mHist_vPt;
   };
 
   // for each selection
