@@ -1,5 +1,8 @@
-// $Id: StBemcRaw.h,v 1.7 2004/12/21 12:53:49 suaide Exp $
+// $Id: StBemcRaw.h,v 1.8 2005/01/07 20:33:18 suaide Exp $
 // $Log: StBemcRaw.h,v $
+// Revision 1.8  2005/01/07 20:33:18  suaide
+// created a new method to correct for the PSD map problem
+//
 // Revision 1.7  2004/12/21 12:53:49  suaide
 // moved StBemcTables to StEmcUtil
 // corrected for y2005 PSD data banks
@@ -69,6 +72,7 @@ class StBemcRaw : public TObject
    controlADCtoE_st*        mControlADCtoE;
    
    Bool_t                   mSaveAllStEvent;
+   Bool_t                   mPsdMapBug;
    
    Int_t                    mDate;
    Int_t                    mNZ[MAXDETBARREL];
@@ -111,6 +115,7 @@ class StBemcRaw : public TObject
   
   void                      setDate(Int_t d)           { mDate = d;} ///<Set event date.
   void                      saveAllStEvent(Bool_t a)   { mSaveAllStEvent = a;} ///< Set to kTRUE if all hits are to be saved on StEvent
+  void                      psdMapBug(Bool_t a)        { mPsdMapBug = a;} ///< Set to ktrue to correct PSD map inthe P04* productions
   
   StBemcTables*             getTables()                { return mTables;} ///< Return the StBemcTable pointer
   StEmcDecoder*             getDecoder()               { return mDecoder;}///< Return the StEmcDecoder pointer

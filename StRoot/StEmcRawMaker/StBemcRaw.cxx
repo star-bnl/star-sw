@@ -1,6 +1,9 @@
 // 
-// $Id: StBemcRaw.cxx,v 1.10 2004/12/21 12:53:48 suaide Exp $
+// $Id: StBemcRaw.cxx,v 1.11 2005/01/07 20:33:18 suaide Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.11  2005/01/07 20:33:18  suaide
+// created a new method to correct for the PSD map problem
+//
 // Revision 1.10  2004/12/21 12:53:48  suaide
 // moved StBemcTables to StEmcUtil
 // corrected for y2005 PSD data banks
@@ -59,6 +62,7 @@ ClassImp(StBemcRaw)
 StBemcRaw::StBemcRaw():TObject()
 {  
   mSaveAllStEvent = kFALSE;
+  mPsdMapBug = kFALSE;
   mDecoder = 0;
   mDate = 0;
   mTables = new StBemcTables();    
@@ -542,6 +546,18 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
   {
     detector = new StEmcDetector(did,BEMCMODULES); 
     emc->setDetector(detector);
+  }
+  if(det==BPRS && mPsdMapBug)
+  {
+    Int_t PsdOffset_bug[40] = {20,21,22,23,0,1,2,3,24,25,26,27,4,5,6,7,28,29,30,31,
+                               8,9,10,11,32,33,34,35,12,13,14,15,36,37,38,39,16,17,18,19};
+    Int_t PsdOffset_ok[40]  = {36,37,38,39,16,17,18,19,32,33,34,35,12,13,14,15,28,29,30,31,
+                               8,9,10,11,24,25,26,27,4,5,6,7,20,21,22,23,0,1,2,3};
+    Int_t RDO,index,PMT,wire,A_value;
+    mDecoder->GetPsdRDO(id,RDO,index);
+    mDecoder->GetPsdId(RDO,index,id,PMT,wire,A_value);
+    id-=PsdOffset_bug[wire-1];
+    id-=PsdOffset_ok[wire-1];
   }
   Int_t m,e,s;
   geo->getBin(id,m,e,s);
