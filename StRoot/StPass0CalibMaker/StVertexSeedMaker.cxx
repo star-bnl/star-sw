@@ -253,7 +253,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.8 2002/03/23 00:23:54 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.9 2002/03/23 01:05:15 jeromel Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -298,7 +298,8 @@ St_vertexSeed* StVertexSeedMaker::VertexSeedTable(){
 //_____________________________________________________________________________
 void StVertexSeedMaker::WriteHistFile(){
   char filename[80]; 
-  sprintf(filename,"%s/vertexseedhist.%08d.%06d.root",defDir,date,time);
+  // .ROOT is NOT a typo !!!
+  sprintf(filename,"%s/vertexseedhist.%08d.%06d.ROOT",defDir,date,time);
   gMessMgr->Info() << "StVertexSeedMaker: Writing new histograms to:\n  "
     << filename << endm;
   TFile out(filename,"RECREATE");
@@ -533,8 +534,12 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.8 2002/03/23 00:23:54 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.9 2002/03/23 01:05:15 jeromel Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.9  2002/03/23 01:05:15  jeromel
+// Create files with extension .ROOT instead of .root (db_Maker will read the .root
+// and crash otherwise). Will fix this with a more elegant scheme later.
+//
 // Revision 1.8  2002/03/23 00:23:54  genevb
 // switch from float arrays to TArrayF
 //
