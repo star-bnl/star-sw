@@ -221,6 +221,7 @@ long    StiMcTrack::getFlag() const
 }
 
 
+
 bool StiMcTrack::isPrimary() const
 {
   const StThreeVectorF & pos = mcTrack->startVertex()->position();
