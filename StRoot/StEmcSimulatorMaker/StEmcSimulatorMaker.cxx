@@ -7,6 +7,7 @@
 #include <iostream.h>
 #include <assert.h>
 #include <math.h>
+#include "TROOT.h"
 #include <TRandom.h>
 #include <TBrowser.h>
 #include <TPad.h>
@@ -60,7 +61,9 @@ StEmcSimulatorMaker::~StEmcSimulatorMaker()
 Int_t StEmcSimulatorMaker::Init()
 {
   // 21-mar-2001 for comparing
-  StBFChain *chain = (StBFChain*)(GetParent()->GetParent());
+  StBFChain *chain;  // see StEmcGeom::StEmcGeom()
+  TList *tl = (TList*)gROOT->GetListOfBrowsables();
+  if(tl) chain = static_cast<StBFChain*>(tl->FindObject("bfc")); 
   // Old simulator exist => switch on comparing
   if(chain && chain->GetOption("ems")) mCompare = kTRUE;
   printf("<I> #### Compare mode => %i ##### \n",mCompare);
@@ -628,8 +631,11 @@ void StEmcSimulatorMaker::pictureCompareDe(Int_t print)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.4 2001/03/22 22:04:38 pavlinov Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.5 2001/03/23 19:02:51 pavlinov Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.5  2001/03/23 19:02:51  pavlinov
+// Get pointer to chain via list of browsables
+//
 // Revision 1.4  2001/03/22 22:04:38  pavlinov
 // Clean up for mdc4
 //
