@@ -87,7 +87,7 @@ public:
     ///Return the (y,z) component of the error matrix.
     double syz() const;
 
-		double getEloss();
+    double getEloss();
 
     ///Return the refAngle of the detector plane from which the hit arose.
     double refangle() const;
@@ -129,6 +129,15 @@ public:
     void setRefangle(double);
     ///Set the position of the detector plane from the hit arose.
     void setPosition(double);
+
+    ///Set the error-matrix components one by one:
+    void setSxx(double);
+    void setSyy(double);
+    void setSzz(double);
+    void setSxy(double);
+    void setSxz(double);
+    void setSyz(double);
+    
     ///Set the position error matrix for the measurement from an StMatrixF
     ///object.
     void setError(const StMatrixF&);
@@ -163,6 +172,36 @@ private:
 };
 
 //Inlines-----------------------------------------------------------
+
+inline void StiHit::setSxx(double val)
+{
+    msxx=val;
+}
+
+inline void StiHit::setSyy(double val)
+{
+    msyy=val;
+}
+
+inline void StiHit::setSzz(double val)
+{
+    mszz=val;
+}
+
+inline void StiHit::setSxy(double val)
+{
+    msxy=val;
+}
+
+inline void StiHit::setSxz(double val)
+{
+    msxz=val;
+}
+
+inline void StiHit::setSyz(double val)
+{
+    msyz=val;
+}
 
 inline void StiHit::reset()
 {
