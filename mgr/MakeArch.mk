@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.76  1999/06/16 12:37:01  fisyak
+#  Changes for egcs-1.1.2 on Solaris
+#
 #  Revision 1.75  1999/06/11 12:47:08  fisyak
 #  Add rtti & exceptions, more fixes for StDaqLib
 #
@@ -203,7 +206,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/06/11 12:47:08 $ 
+#             Last modification $Date: 1999/06/16 12:37:01 $ 
 #. default setings
 
 MAKE  := gmake
@@ -420,7 +423,7 @@ ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_re
   FOREXE      := g77 -fno-automatic -fno-second-underscore -fugly-complex
   LD       := $(CXX)
   SO	   := $(CXX)
-  CXXFLAGS := $(DEBUG) -fPIC -Wall -fno-for-scope -I/usr/include/g++
+  CXXFLAGS := $(DEBUG) -fPIC -Wall -I/usr/include/g++
 #                                             -fpipe
   CFLAGS   := $(DEBUG) -fPIC -Wall
   CPPFLAGS += f2cFortran
@@ -603,23 +606,51 @@ endif
 
 
 ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
+  ROOTCINTD = -DSOLARIS
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
-  ifneq ($(STAR_HOST_SYS),sun4x_56_CC5)
+  STRID :=  sun
+  OSFID :=  sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SOLARIS CERNLIB_SUN ST_NO_MEMBER_TEMPLATES ST_NO_NUMERIC_LIMITS 
+  CC    := /opt/SUNWspro/bin/cc
+  CXX   := /opt/SUNWspro/bin/CC
+  FC    := /opt/SUNWspro/bin/f77
+  CXXFLAGS :=  $(DEBUG)  -KPIC -features=no%castop -features=no%anachronisms +w
+  CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
+  FLIBS    := -lM77 -lF77 -lsunmath
+  FFLAGS   :=  $(DEBUG)  -KPIC -w 
+  FEXTEND  :=  -e
+  CFLAGS   :=  $(DEBUG)  -KPIC 
+  LDFLAGS  :=  $(DEBUG)  -Bstatic 
+  EXEFLAGS :=  $(DEBUG)  -z muldefs -Bdynamic -t 
+  SOFLAGS  :=  $(DEBUG) -G
+ifdef NEVR
+# for Objy
+  ifdef OBJY_HOME
+    OBJY_HOME := $(subst /.,,$(wildcard $(OBJY_HOME)/.))
+    ifdef OBJY_HOME
+      CPPFLAGS += -DOBJYBASE -I$(BFWORK)/include -I$(BFWORK)/tmp/$(BFARCH) -I$(BFDIST)/releases/$(BFCURRENT)/include -I$(OBJYBASE)/$(OBJY_ARCH)/include
+    endif
+  endif
+endif
+  ifeq ($(STAR_HOST_SYS),sun4x_56egcs)
+    OSFID += ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES ASU_MALLOC_OFF GNU_GCC
+    CC       := /usr/local/bin/gcc
+    CXX      := /usr/local/bin/g++
+    CXXFLAGS := -gstabs -fPIC -Wall
+    CFLAGS   := -gstabs -fPIC -Wall
+    LDFLAGS  := -gstabs -Wl,-Bstatic
+    EXEFLAGS := -gstabs -Wl,-Bdynamic   
+    SOFLAGS  := -gstabs -shared  
+  else
     STDHOME := /afs/rhic/star/packages/ObjectSpace/2.0m
     STAF_UTILS_INCS += $(STDHOME) $(STDHOME)/ospace/std  $(STDHOME)/ospace
+    OSFID += ST_NO_EXCEPTIONS ST_NO_TEMPLATE_DEF_ARGS ST_NO_NAMESPACES
   endif
-  ROOTCINTD = -DSOLARIS
-  ifneq ($(STAR_HOST_SYS),sun4x_56_CC5)
-    OSFID :=  sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SOLARIS CERNLIB_SUN ST_NO_MEMBER_TEMPLATES ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_TEMPLATE_DEF_ARGS ST_NO_NAMESPACES
-  else
-    OSFID :=  sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SOLARIS CERNLIB_SUN ST_NO_MEMBER_TEMPLATES ST_NO_NUMERIC_LIMITS 
-  endif
-  STRID :=  sun
-  CC :=  /opt/SUNWspro/bin/cc
-  CXX := /opt/SUNWspro/bin/CC
   ifeq ($(STAR_HOST_SYS),sun4x_56_CC5)
     CC :=  /opt/WS5.0/bin/cc
     CXX := /opt/WS5.0/bin/CC
+    FC  := /opt/WS5.0/bin/f77
+    CXXFLAGS :=  $(DEBUG)  -KPIC +w
+    CLIBS    := -L/opt/WS5.0/lib -L/opt/WS5.0/SC5.0/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
   endif
   ifdef INSURE
     CC       :=  insure -g -Zoi "compiler_c cc"
@@ -631,27 +662,6 @@ ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
   endif
   LD  := $(CXX)
   SO  := $(CXX)
-  FC  := /opt/SUNWspro/bin/f77
-  ifeq ($(STAR_HOST_SYS),sun4x_56_CC5)
-    FC  := /opt/WS5.0/bin/f77
-  endif
-  FFLAGS   :=  $(DEBUG)  -KPIC -w 
-  FEXTEND  :=  -e
-  CFLAGS   :=  $(DEBUG)  -KPIC 
-  ifeq ($(STAR_HOST_SYS),sun4x_56_CC5)
-    CXXFLAGS :=  $(DEBUG)  -KPIC +w
-  else
-    CXXFLAGS :=  $(DEBUG)  -KPIC -features=no%castop -features=no%anachronisms +w
-  endif
-  LDFLAGS  :=  $(DEBUG)  -Bstatic 
-  EXEFLAGS :=  $(DEBUG)  -z muldefs -Bdynamic -t 
-  SOFLAGS  :=  $(DEBUG) -G
-  ifeq ($(STAR_HOST_SYS),sun4x_56_CC5)
-    CLIBS    := -L/opt/WS5.0/lib -L/opt/WS5.0/SC5.0/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
-  else
-    CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
-  endif
-  FLIBS    := -lM77 -lF77 -lsunmath
 endif
 
 
@@ -698,13 +708,6 @@ endif
 ROOTDIR:= $(word 1,$(subst $(PAMS), ,$(INPDIR)))
 CPPFLAGS += -I$(ROOTDIR)
 
-# for Objy
-ifdef OBJY_HOME
-OBJY_HOME := $(subst /.,,$(wildcard $(OBJY_HOME)/.))
-ifdef OBJY_HOME
-  CPPFLAGS += -DOBJYBASE -I$(BFWORK)/include -I$(BFWORK)/tmp/$(BFARCH) -I$(BFDIST)/releases/$(BFCURRENT)/include -I$(OBJYBASE)/$(OBJY_ARCH)/include
-endif
-endif
 
 ifndef FOR72 
   FOR72:= $(FC)

@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.78  1999/06/16 12:37:03  fisyak
+#  Changes for egcs-1.1.2 on Solaris
+#
 #  Revision 1.77  1999/06/11 12:47:09  fisyak
 #  Add rtti & exceptions, more fixes for StDaqLib
 #
@@ -310,7 +313,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/06/11 12:47:09 $ 
+#           Last modification $Date: 1999/06/16 12:37:03 $ 
 #  default setings
 # Current Working Directory
 #
@@ -381,7 +384,7 @@ endif
 #  endif
  ifneq (,$(findstring $(STAR_SYS),sun4x_56 hp_ux102))
     SUBDIRS := $(filter-out StDaqLib StNoiseMaker, $(SUBDIRS))
-    SUBDIRS := $(filter-out StFtpcV0Maker, $(SUBDIRS))
+#    SUBDIRS := $(filter-out StFtpcV0Maker, $(SUBDIRS))
  endif
   ifdef PKG
     SUBDIRS:=

@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.94 1999/06/11 15:41:56 fisyak Exp $
+# $Id: MakePam.mk,v 1.95 1999/06/16 12:37:02 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.95  1999/06/16 12:37:02  fisyak
+# Changes for egcs-1.1.2 on Solaris
+#
 # Revision 1.94  1999/06/11 15:41:56  fisyak
 # Move mortran generated files to OBJ instead of GEN
 #
@@ -447,14 +450,14 @@ $(FILES_THH) : $(GEN_TAB)/St_%_Table.h : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc
 endif #NOROOT
 endif #ALL_TAB
 #--- compilation -
-$(GEN_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
-	@test -h $(GEN_DIR)/geant3.def || $(RM)  $(GEN_DIR)/geant3.def
-	@test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def 
-#$(LIB_PKG)($(notdir $(FILES_OG)): $(OBJ_DIR)/%.o:%.g $(GEN_DIR)/geant3.def
-$(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(GEN_DIR)/geant3.def
+$(OBJ_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
+	@test -h $(OBJ_DIR)/geant3.def || $(RM)  $(OBJ_DIR)/geant3.def
+	@test -h $(OBJ_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(OBJ_DIR)/geant3.def 
+#$(LIB_PKG)($(notdir $(FILES_OG)): $(OBJ_DIR)/%.o:%.g $(OBJ_DIR)/geant3.def
+$(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(OBJ_DIR)/geant3.def
 	$(CP) $(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
 	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  -o  $(OBJ_DIR)/$(STEM).o
-$(LIB_PKG)(%.o):%.g $(GEN_DIR)/geant3.def
+$(LIB_PKG)(%.o):%.g $(OBJ_DIR)/geant3.def
 	cp $(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
 	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  -o  $(OBJ_DIR)/$(STEM).o
 #	$(RM) $(OBJ_DIR)/$(STEM).F 

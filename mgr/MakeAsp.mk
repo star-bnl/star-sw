@@ -1,5 +1,8 @@
-# $Id: MakeAsp.mk,v 1.17 1998/12/12 00:58:33 fisyak Exp $
+# $Id: MakeAsp.mk,v 1.18 1999/06/16 12:37:01 fisyak Exp $
 # $Log: MakeAsp.mk,v $
+# Revision 1.18  1999/06/16 12:37:01  fisyak
+# Changes for egcs-1.1.2 on Solaris
+#
 # Revision 1.17  1998/12/12 00:58:33  fisyak
 # remove STAF
 #
@@ -420,6 +423,7 @@ show:
 	@echo MAKE        	:= $(MAKE)
 	@echo MAKEFLAGS   	:= $(MAKEFLAGS)
 	@echo MAKEFILES   	:= $(MAKEFILES)
+	@echo STAF_ARCH   	:= $(STAF_ARCH)
 	@echo STAR_MAKE_HOME   	:= $(STAR_MAKE_HOME)
 	@echo SUFF_IDM    	:= $(SUFF_IDM) 
 	@echo SUFF_IDL    	:= $(SUFF_IDL) 

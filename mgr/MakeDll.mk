@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.87 1999/06/11 15:41:55 fisyak Exp $
+# $Id: MakeDll.mk,v 1.88 1999/06/16 12:37:01 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.88  1999/06/16 12:37:01  fisyak
+# Changes for egcs-1.1.2 on Solaris
+#
 # Revision 1.87  1999/06/11 15:41:55  fisyak
 # Move mortran generated files to OBJ instead of GEN
 #
@@ -208,7 +211,7 @@ INCINT   := $(addprefix -I,$(INCINT))
 CPPFLAGS += -D__ROOT__ 
 
 DINCINT  :=  -DROOT_CINT $(filter-out -DST_NO_TEMPLATE_DEF_ARGS, $(CPPFLAGS)) $(ROOTCINTD) $(INCINT)
-ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
+ifeq ($(STAR_HOST_SYS),sun4x_56)
 CXXFLAGS +=-ptr$(OBJ_DIR)
 endif
 #
@@ -221,7 +224,7 @@ FILES_ALL := $(wildcard $(addprefix $(SRC_DIR)/*,$(suffixes)))
 ALL_DIRS  :=$(strip $(sort $(dir $(wildcard $(addprefix $(SRC_DIR)/*/*,$(suffixes))))))
 ifneq (,$(ALL_DIRS))
 ALL_DIRS  := $(subst / , ,$(ALL_DIRS) )
-ALL_DIRS  := $(strip $(filter-out $(addprefix $(SRC_DIR)/,run examples doc local), $(ALL_DIRS)))
+ALL_DIRS  := $(strip $(filter-out $(addprefix $(SRC_DIR)/,run examples doc local hold), $(ALL_DIRS)))
 endif
 ifneq (,$(ALL_DIRS))
 FILES_ALL += $(foreach dir, $(ALL_DIRS), $(wildcard $(addprefix $(dir)/*,$(suffixes))))
@@ -484,15 +487,15 @@ $(OBJ_DIR)/%.$(O) : %.cc
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
 $(OBJ_DIR)/%.$(O) : %.cxx 
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
-$(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(GEN_DIR)/geant3.def
+$(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(OBJ_DIR)/geant3.def
 	$(CP)$(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
 	$(FOR72) $(subst /,\\,$(subst \,/,$(CPPFLAGS) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  $(FOUT)$(ALL_TAGS)))
 $(FILES_OBJ) $(FILES_ORJ) $(FILES_OTJ): $(OBJ_DIR)/%.$(O): %.cxx
 	$(CXX) $(CXXFLAGS) $(CXXOPT) $(subst \,/, $(CPPFLAGS)  -c $(CXXINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN)
-$(GEN_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
-	test -h $(GEN_DIR)/geant3.def || $(RM)  $(GEN_DIR)/geant3.def
-	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def 
-$(OBJ_DIR)/%.$(O):%.g $(GEN_DIR)/geant3.def
+$(OBJ_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
+	test -h $(OBJ_DIR)/geant3.def || $(RM)  $(OBJ_DIR)/geant3.def
+	test -h $(OBJ_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(OBJ_DIR)/geant3.def 
+$(OBJ_DIR)/%.$(O):%.g $(OBJ_DIR)/geant3.def
 	cp $(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
 	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  -o  $(ALL_TAGS)
 $(OBJ_DIR)/%.$(O): %.F
