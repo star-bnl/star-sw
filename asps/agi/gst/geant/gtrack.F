@@ -1,15 +1,17 @@
 *
-* $Id: gtrack.F,v 1.2 1998/04/16 16:59:47 fisyak Exp $
+* $Id: gtrack.F,v 1.3 1998/06/11 21:48:40 nevski Exp $
 *
 * $Log: gtrack.F,v $
-* Revision 1.2  1998/04/16 16:59:47  fisyak
-* 2nd pass with gstar
+* Revision 1.3  1998/06/11 21:48:40  nevski
+* MANY logic corrected
+*
+* Revision 1.1.1.1  1995/10/24 10:21:44  cernlib
+* Geant
 *
 *
 #include "geant321/pilot.h"
-*CMZ :          27/03/98  16.51.21  by  Pavel Nevski
-*CMZ :  1.30/00 17/04/97  14.00.58  by  Pavel Nevski
-*CMZU:  1.00/00 11/07/94  15.46.40  by  Pavel Nevski
+*CMZ :          05/06/98  15.08.35  by  Pavel Nevski
+*CMZ :  3.21/02 29/03/94  15.41.24  by  S.Giani
 *-- Author :
       SUBROUTINE GTRACK
 C.
@@ -154,7 +156,7 @@ C.    ------------------------------------------------------------------
          IF(MOD(NSTOUT,5).EQ.0) THEN
             EPSCUR=NSTOUT*EPSMAC
 *            WRITE(CHMAIL,10000)ITRA,ISTAK,NTMULT,NAPART
-*10000          FORMAT(' *** GTRAcCK *** Boundary loop: track ',
+*10000          FORMAT(' *** GTRACK *** Boundary loop: track ',
 *     +         I6,' stack ',I6,' NTMULT ',I8,1X,5A4)
 *            CALL GMAIL(1,0)
 *            WRITE (CHMAIL,10250) IEVENT,IDEVT,(NRNDM(I),I = 1,2)
@@ -269,8 +271,8 @@ C.    ------------------------------------------------------------------
      +             ' steps, tracking abandoned!')
 10250       FORMAT('                IEVENT=',I7,' IDEVT=',I7,
      +             ' Random Seeds = ',I10,2X,I10)
-10300       FORMAT('                Track',I6,' stack',I6,' NTMULT',
-     +             I8,1X,5A4,'Time of flight ',F10.3,' ns')
+10300       FORMAT('                Track',I7,' stack',I7,' NTMULT',
+     +             I9,1X,5A4,1X,'Time of flight ',F10.3,' ns')
             ENDIF
          ENDIF
       ENDIF
@@ -284,7 +286,7 @@ C.    ------------------------------------------------------------------
 #if defined(CERNLIB_USRJMP)
       CALL JUMPT0(JUSTEP)
 #endif
-C - pln - 11/7/94  - add user control over loopers
+* - pln - 11/7/94  - add user control over loopers
       CALL GUSCNTR(PRECOR)
 *
       IF (ISTOP.NE.0) GO TO 999
@@ -300,17 +302,9 @@ C - pln - 11/7/94  - add user control over loopers
       ENDIF
 *
       IF (INWVOL.EQ.0) then
-         if   (GONLY(NLEVEL).gt.0
-     +    .or. Safety.gt.0
-     +    .or. Iswit(10).lt.0) then
-                                     GO TO 80
-         else
-            CALL GTMEDI(VECT,NUMED)
-            if (NUMED.EQ.NUMOLD)     GO TO 80
-         endif
-         WRITE(CHMAIL,10003) NAMES(NLEVEL)
-10003    FORMAT(' *** GTRACK *** Logic problem in ',A4)
-         if (IDEBUG.GT.0) CALL GMAIL(1,0)
+         if (GONLY(NLEVEL).eq.0.and.Safety.eq.0.and.Iswit(10).ge.0)
+     +                                           CALL GTMEDI(VECT,NMED)
+         GO TO 80
       endif
 *
       IF (NJTMAX.GT.0) THEN
