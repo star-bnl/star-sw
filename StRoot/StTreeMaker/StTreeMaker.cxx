@@ -234,6 +234,33 @@ Int_t StTreeMaker::Finish()
   Close(); return 0;
 }
 //_____________________________________________________________________________
+Int_t StTreeMaker::Save()
+{ 
+  St_DataSetIter  nextBr(fTree);
+  StBranch *br,*brSave=0;
+  TString saveFile;
+  fTree->Clear(); 
+  while ((br = (StBranch*)nextBr())) {
+    if (strncmp("hist",br->GetName(),4)) continue;
+    brSave=br;
+    FillHistBranch(br);
+  }
+  if (!brSave) return 0;
+  saveFile = brSave->GetFile();
+  if (!saveFile.Contains(".root")) return 0;
+  saveFile.ReplaceAll(".root",".save.root");
+  brSave->SetFile((const char*)saveFile);
+  fTree->WriteEvent((ULong_t)(-2));	
+  brSave->Close();
+  fTree->Clear(); 
+  saveFile.ReplaceAll(".save.root",".root"); 
+  brSave->SetFile((const char*)saveFile); 
+  brSave->Open();  
+  
+   
+  return 0;
+}
+//_____________________________________________________________________________
 void StTreeMaker::Close(Option_t *)
 { 
   fTree->Close(); fTree->SetUKey(0);
@@ -285,7 +312,7 @@ void StTreeMaker::FillHistBranch(StBranch *histBr)
       if (!dothist)			continue;
       TList *tl = (TList*)((St_ObjectSet*)dothist)->GetObject();
       if (!tl || !tl->First())		continue;
-      os->SetObject(tl);}
+      os->SetObject(tl,0);}
       
     if (strncmp(bname,"runcont",7)==0) {//Run Control Branch
       dotrcp = ds->Find(".runcont");
