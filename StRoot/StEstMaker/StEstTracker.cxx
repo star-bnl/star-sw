@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.cxx,v 1.15 2003/09/02 17:58:04 perev Exp $ 
+ * $Id: StEstTracker.cxx,v 1.16 2003/09/19 16:39:15 caines Exp $ 
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.cxx,v $
+ * Revision 1.16  2003/09/19 16:39:15  caines
+ * More fixed for the redhot upgrade
+ *
  * Revision 1.15  2003/09/02 17:58:04  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -89,6 +92,12 @@ StEstTracker::StEstTracker(int npass,
   mNGoodSeco=0;
   mNBadPrim=0;
   mNBadSeco=0;
+  mNSvtHit = 0;
+  mNTPCTrack = 0;
+  mNTrack = 0;
+  mNWafers = 0;
+  mPreprojNumber = 0;
+
 }
 
 StEstTracker::~StEstTracker() {
@@ -712,6 +721,7 @@ void StEstTracker::CleanUp(){
     for (i=0;i<mNTPCTrack;i++)
       delete [] Eval_mchits[i];
     delete [] Eval_mchits;
+    delete [] Eval_id_mctrk2est_Track;
   }
 
   for (i=0;i<mNSvtHit;i++) mSvtHit[i]->DetachFromWafer();
@@ -724,7 +734,6 @@ void StEstTracker::CleanUp(){
   delete [] mIndexWaf;
 
   delete [] mTptIndex;
-  delete [] Eval_id_mctrk2est_Track;
 
   if (mDebugLevel>0) gMessMgr->Info()<<" CleanUp : Done"<<endm;
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstInit.cxx,v 1.14 2003/09/02 17:58:04 perev Exp $
+ * $Id: StEstInit.cxx,v 1.15 2003/09/19 16:39:15 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstInit.cxx,v $
+ * Revision 1.15  2003/09/19 16:39:15  caines
+ * More fixed for the redhot upgrade
+ *
  * Revision 1.14  2003/09/02 17:58:04  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -222,7 +225,6 @@ int StEstTracker::SVTInit(StSvtGeometry*   svggeom,
   // Now get hits
   scsspt   = Stscsspt->GetTable();
 
-
   if (mDebugLevel>2) 
     gMessMgr->Info()<<"SVTInit **** Creating "<<mNWafers<<" wafers ****"<<endm;  
   mIndexGeom = new StEstIndexGeom(mNPhiBins,mNZBins);
@@ -239,6 +241,7 @@ int StEstTracker::SVTInit(StSvtGeometry*   svggeom,
   // We scan once the scs_spt table the count the number of hits in each 
   // wafer and allocate suited memory space for the hits in the wafer object.
   int HitPerWafer[9000]={0,}; 
+
   for (il=0;il<Stscsspt->GetNRows();il++) {
     if( scsspt[il].flag < 4){
       HitPerWafer[scsspt[il].id_wafer]++; 
