@@ -1,23 +1,23 @@
-//StiDrawableDetector.h
+//StiRootDrawableDetector.h
 //M.L. Miller (Yale Software)
 //04/01
 
-#ifndef StiDrawableDetector_HH
-#define StiDrawableDetector_HH
+#ifndef StiRootDrawableDetector_HH
+#define StiRootDrawableDetector_HH
 
 #include "Sti/StiDetector.h"
-#include "StiDrawable.h"
+#include "StiRootDrawable.h"
 
-class StiDrawableDetector : public StiDetector , public StiDrawable
+class StiRootDrawableDetector : public StiDetector , public StiRootDrawable
 {
 public:
 
-    StiDrawableDetector();
-    virtual ~StiDrawableDetector();
+    StiRootDrawableDetector();
+    virtual ~StiRootDrawableDetector();
     
 protected:
 
-    //Implement StiDrawable interface
+    //Implement StiRootDrawable interface
     virtual void draw();
     virtual void update();
     virtual const char* name() const;
