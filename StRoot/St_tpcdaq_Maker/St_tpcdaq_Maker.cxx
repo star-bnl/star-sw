@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.80  2004/01/02 17:53:18  ward
+// Add receiver board and mezzanine to daq100cl output table.
+//
 // Revision 1.79  2004/01/02 17:05:46  ward
 // Bug fixes from Jeff Landgraf after testing.
 //
@@ -890,7 +893,8 @@ char St_tpcdaq_Maker::WhetherToSwap(unsigned int x) {
 }
 //________________________________________________________________________________
 #define MAXPADROWSPERBANK 50
-void St_tpcdaq_Maker::DAQ100clTableOut(unsigned int sectorCntsFrom1,char swap,
+void St_tpcdaq_Maker::DAQ100clTableOut(unsigned int receiverBoard,unsigned int mezzanine,
+      unsigned int sectorCntsFrom1,char swap,
       const unsigned int *data) {
   int nAlloc,nUsed;
   unsigned int wordNumber[MAXPADROWSPERBANK],npadrow,ipadrow;
@@ -939,6 +943,7 @@ void St_tpcdaq_Maker::DAQ100clTableOut(unsigned int sectorCntsFrom1,char swap,
       singlerow.timebucket=Swap2(swap,*time);
       singlerow.charge=Swap2(swap,*charge);
       singlerow.flag=Swap2(swap,*flag);
+      singlerow.rb_mz=receiverBoard*mezzanine; // range = (1,36) = (1,12)*(1,3)
       nAlloc=daq100cl->GetTableSize(); nUsed=daq100cl->GetNRows();
       if(nUsed>nAlloc-10) { daq100cl->ReAllocate(Int_t(nAlloc*ALLOC+10)); }
       daq100cl->AddAt(&singlerow,totalRowCount++);
@@ -1009,7 +1014,8 @@ void St_tpcdaq_Maker::DAQ100clOutput(const unsigned int *pTPCP) {
         if(length==0) continue;
         pTPCMZCLD=pTPCRBCLP+offset; assert(!strncmp((char*)pTPCMZCLD,"TPCMZCLD",8));
         swapTPCMZCLD=WhetherToSwap(*(pTPCMZCLD+5));
-        DAQ100clTableOut(sector+map,swapTPCMZCLD,pTPCMZCLD+10); // Decodes data words of TPCMZCLD.
+        DAQ100clTableOut(irb+1,imz+1,
+            sector+map,swapTPCMZCLD,pTPCMZCLD+10); // Decodes data words of TPCMZCLD.
       }
     }
 
