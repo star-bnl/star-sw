@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.74 1998/10/26 21:45:43 kathy Exp $
+* * $Id: bfc.kumac,v 1.75 1998/11/04 16:50:32 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.75  1998/11/04 16:50:32  kathy
+* implement ntup2 chain and inputs to bfc macro - now can write 2 ntuples while processing
+*
 * Revision 1.74  1998/10/26 21:45:43  kathy
 * add input to run bfc_cleanup at end of job
 *
@@ -303,7 +306,11 @@ MACRO bfc _
    nunit=21 _
    nfile=globtrk.ntup _
    nid=111 _
-   ntable=global/dst/globtrk _
+   ntable=event/data/global/dst/globtrk _
+   nunit2=22 _
+   nfile2=event_summary.ntup _
+   nid2=112 _
+   ntable2=event/data/global/dst/event_summary _
    cleanup=0
   
 * **********************************************************
@@ -367,6 +374,10 @@ MACRO bfc _
  macro/global/create nfile            [nfile]
  macro/global/create nid              [nid]
  macro/global/create ntable           [ntable]
+ macro/global/create nunit2           [nunit2]
+ macro/global/create nfile2           [nfile2]
+ macro/global/create nid2             [nid2]
+ macro/global/create ntable2          [ntable2]
 	   
 
 ***********************************************************
