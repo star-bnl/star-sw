@@ -36,20 +36,22 @@ TOrdCollection *collection = 0;
 TStopwatch clock;
 
 void load() {
-  gSystem->Load("St_base.so");
-  gSystem->Load("St_Tables.so");
-  gSystem->Load("StChain.so");
+  gSystem->Load("St_base");
+  gSystem->Load("St_Tables");
+  gSystem->Load("StChain");
   gSystem->Load("StUtilities");
+  gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StarClassLibrary");
-  gSystem->Load("StEvent.so");
-  gSystem->Load("StV0MiniDstMaker.so");
+  gSystem->Load("StEvent");
+  gSystem->Load("StV0MiniDstMaker");
   
   // Create and start new stopwatch
   clock = new TStopwatch;
   clock.Start(kTRUE);
 
   // Open V0 micro-DST
-  StV0MiniDstMaker* v0dst = new StV0MiniDstMaker("v0dst","V0MicroDst.root");
+  StV0MiniDstMaker* v0dst = new StV0MiniDstMaker("v0dst");
+  v0dst->SetInputFile("V0MicroDst.root");
   v0dst->SetV0VertexType();
   collection = v0dst->Read(&n_v0);
 
