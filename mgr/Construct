@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.136 2003/09/27 18:58:47 jeromel Exp $
+# $Id: Construct,v 1.137 2003/10/28 20:39:44 jeromel Exp $
 use Env;
 use lib $ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -59,7 +59,9 @@ if ($def->{CXX}  =~ m/-Zoi/ ){
     $BIN = $BUILD . "/BIN";
     $OBJ = $BUILD . "/OBJ";
 }
+
 $INCLUDE = "#" . $include;
+
 #$EXPORT  = "#.share";
 $EXPORT  = $BUILD . "/share";
 $LIBPATH = $LIB;
@@ -91,9 +93,10 @@ if ( defined( $ARG{ROOTLIBS} ) ) {
 if( defined( $ARG{CPPPATH} ) ){
     $CPPPATH = $ARG{CPPPATH};
 } else {
-    $CPPPATH = $INCLUDE . ":#StRoot:" . $ROOTSRC;
+    $CPPPATH  = "#StRoot:" . $INCLUDE . ":" . $ROOTSRC;
     $CPPPATH .= $main::PATH_SEPARATOR . 
 	$CERN_ROOT . "/include" . $EXTRA_CPPPATH;
+    #$CPPPATH .= ":$INCLUDE";
 }
 
 $FCPPPATH = "";
