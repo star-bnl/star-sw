@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: doEvents.C,v 1.96 2004/08/16 02:27:39 perev Exp $
+// $Id: doEvents.C,v 1.97 2004/08/17 15:58:59 perev Exp $
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
@@ -339,6 +339,7 @@ void loadLibs(const char *opt)
     gSystem->Load("StMuDSTMaker");  
     gSystem->Load("StMagF");
     gSystem->Load("StAnalysisMaker");
+    gSystem->Load("StMuAnalysisMaker");
     cout << " loading of shared libraries done" << endl;
     return;
   }
@@ -458,6 +459,9 @@ int gcInit(const char *request)
 //____________________________________________________________________________
 //////////////////////////////////////////////////////////////////////////////
 // $Log: doEvents.C,v $
+// Revision 1.97  2004/08/17 15:58:59  perev
+// StMuAnalysisMaker loading added
+//
 // Revision 1.96  2004/08/16 02:27:39  perev
 // delete setfiles again
 //
