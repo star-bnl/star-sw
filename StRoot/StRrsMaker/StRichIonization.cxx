@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: StRichIonization.cxx,v 1.8 2000/03/17 14:54:44 lasiuk Exp $
+ * $Id: StRichIonization.cxx,v 1.9 2000/04/05 16:00:38 lasiuk Exp $
  *
  * Description:
  *  StRichIonization simulates the charged particle track through the gas.
@@ -22,8 +22,8 @@
  *
  *********************************************************************
  * $Log: StRichIonization.cxx,v $
- * Revision 1.8  2000/03/17 14:54:44  lasiuk
- * Large scale revisions after ROOT dependent memory leak
+ * Revision 1.9  2000/04/05 16:00:38  lasiuk
+ * viewer, gid, update
  *
  * Revision 1.8  2000/03/17 14:54:44  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -61,6 +61,13 @@ using namespace units;
 
 #ifdef RICH_WITH_VIEWER
 #include "StRichViewer.h"
+#endif
+
+#include "SystemOfUnits.h"
+#include "PhysicalConstants.h"
+
+#ifndef ST_NO_NAMESPACES
+using namespace units;
 #endif
 
 StRichIonization::StRichIonization()
@@ -167,6 +174,7 @@ void StRichIonization::splitSegment(const StRichGHit* hit, list<StRichMiniHit*>&
 					      hit->momentum(),
 					      hit->trackp(),
 					      hit->id(),
+					      hit->gid(),
 					      hit->mass(),
 					      eCharged));
 	}

@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichGasGain.cxx,v 1.7 2000/03/17 14:54:34 lasiuk Exp $
+ * $Id: StRichGasGain.cxx,v 1.8 2000/04/05 16:00:33 lasiuk Exp $
  *
  * Description:
  *  StRichGasGain computes an amplification factor of an
@@ -35,8 +35,8 @@
  *
  ****************************************************************
  * $Log: StRichGasGain.cxx,v $
- * Revision 1.7  2000/03/17 14:54:34  lasiuk
- * Large scale revisions after ROOT dependent memory leak
+ * Revision 1.8  2000/04/05 16:00:33  lasiuk
+ * viewer, gid, update
  *
  * Revision 1.7  2000/03/17 14:54:34  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -82,6 +82,10 @@ StRichGasGain::StRichGasGain()
     mPhotoConversion         = tmpPhysicsDb->photoConversionEfficiency();
     mGasGainAmplification    = tmpPhysicsDb->gasGainAmplification();
     mPolia                   = tmpPhysicsDb->polia();
+
+//     PR(mPhotonFeedback);
+//     PR(mPhotoConversion);
+//     PR(mGasGainAmplification);
 }
 
 StRichGasGain::~StRichGasGain()
@@ -108,6 +112,7 @@ double StRichGasGain::avalanche(StRichMiniHit* hit, double wirePos, list<StRichM
     feedbackPhoton(hit, q, aList);
     if(RRS_DEBUG)
 	cout << "StRichGasGain::operator() q = " << q << endl;
+
     return q ; 
 }
 
@@ -115,25 +120,37 @@ void StRichGasGain::feedbackPhoton(StRichMiniHit* hit, double q, list<StRichMini
 {
     //StRichInduceSignal induceSignal;
 
-    double elec2feed = mPhotonFeedback*q;                
-    double phot2elec = elec2feed*(mPhotoConversion)/2;
+    double elec2feed = mPhotonFeedback*q;
+    //
+    // put 2 in for solid angle effects
+    double phot2elec = elec2feed*(mPhotoConversion)/2.;
+    //double phot2elec = .95;
     int P = mRandom.Poisson(phot2elec);
     if(RRS_DEBUG)
 	cout << "StRichGasGain::feedbackPhoton() P = " << P << endl;
 #ifdef RICH_WITH_VIEWER
-    if ( StRichViewer::histograms )
+    if ( StRichViewer::histograms ) {
 	StRichViewer::getView()->mFeedback->Fill(P);
+	StRichViewer::getView()->mPoissonMean->Fill(phot2elec);	
+    }
 #endif
     double dist, x, y, z, cost, phi;
 	
     for (int i=1; i<=P; i++) {
-	cost = mRandom.Flat();
-	phi  = 2*M_PI *  mRandom.Flat();
+	cost = 	mRandom.Flat();
+	phi  =  2*M_PI *  mRandom.Flat();
 	
 	dist = mAnodePadPlaneSeparation * sqrt( 1 - cost*cost ) / cost;
-	x    = hit->position().x() + dist * cos(phi);
- 	y    = hit->position().y() + dist * sin(phi);
- 	z    = mAnodePadPlaneSeparation;
+#ifdef RICH_WITH_VIEWER
+	if ( StRichViewer::histograms ) {
+	    StRichViewer::getView()->mDist->Fill(dist);
+	    StRichViewer::getView()->mPhi->Fill(phi);	
+	    StRichViewer::getView()->mCost->Fill(cost);	
+	}
+#endif
+ 	x    = hit->position().x() + dist * cos(phi);
+  	y    = hit->position().y() + dist * sin(phi);
+  	z    = mAnodePadPlaneSeparation;
 // 	x    = hit.position().x() + dist * sin(phi);
 // 	z    = hit.position().z() + dist * cos(phi);
 // 	y    = mAnodePadPlaneSeparation;
@@ -142,11 +159,12 @@ void StRichGasGain::feedbackPhoton(StRichMiniHit* hit, double q, list<StRichMini
 					    hit->momentum(),
 					    hit->trackp(),
 					    hit->id(),
+					    hit->gid(),
 					    hit->mass(),
 					    eFeedback));
-    if(RRS_DEBUG)
-	cout << "StRichGasGain::feedbackPhoton()-->induceSignal! " << endl; 
+	if(RRS_DEBUG)
+	    cout << "StRichGasGain::feedbackPhoton()-->x= "
+		 << theList.back()->position()  <<endl; 
 
-    //induceSignal(aGHit);
     }
 }
