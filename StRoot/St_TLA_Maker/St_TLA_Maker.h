@@ -1,5 +1,8 @@
-// $Id: St_TLA_Maker.h,v 1.9 1999/03/11 03:33:16 perev Exp $
+// $Id: St_TLA_Maker.h,v 1.10 1999/07/10 22:59:17 fine Exp $
 // $Log: St_TLA_Maker.h,v $
+// Revision 1.10  1999/07/10 22:59:17  fine
+// Some comments have been introduced to show html docs
+//
 // Revision 1.9  1999/03/11 03:33:16  perev
 // new schema
 //
@@ -40,7 +43,7 @@
 //class St_stk_stkpar;
 class St_TLA_Maker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.9 1999/03/11 03:33:16 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.10 1999/07/10 22:59:17 fine Exp $";
  
  protected:
  public: 
@@ -50,6 +53,9 @@ class St_TLA_Maker : public StMaker {
    virtual Int_t  Make();
    virtual void   PrintInfo();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
+  virtual const char *GetCVS()
+  {static const char cvs[]="Tag $Name:  $ $Id: St_TLA_Maker.h,v 1.10 1999/07/10 22:59:17 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
    ClassDef(St_TLA_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
