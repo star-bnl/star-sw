@@ -62,7 +62,7 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
   file = defFileName;
 
   doMc = kFALSE;
-  rw = StrangeNoFile;
+  SetMode(StrangeNoFile);
   abortEvent = kFALSE;
 
   bsize[evT] = 64000;
@@ -90,7 +90,7 @@ Int_t StStrangeMuDstMaker::Init() {
   firstEvent = kTRUE;
   if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Init() ... "
                                << GetName() << endm; 
-  if ((rw == StrangeWrite) && (OpenFile() == kStErr)) return kStErr;
+  if ((GetMode() == StrangeWrite) && (OpenFile() == kStErr)) return kStErr;
   if (!dstMaker) {
     evClonesArray = new TClonesArray("StStrangeEvMuDst",1);
     if (doMc) evMcArray = new TClonesArray("StStrangeEvMuDst",1);
@@ -107,13 +107,13 @@ Int_t StStrangeMuDstMaker::Init() {
   xi = cont[xiT];
   kink = cont[kinkT];
 
-  if (rw == StrangeNoKeep) {
+  if (GetMode() == StrangeNoKeep) {
     {EachDoT( cont[i]->SetBufferSize(32000) );}
   } else {
     {EachDoT( if (bsize[i]) cont[i]->SetBufferSize(bsize[i]) );}
   }
 
-  if (rw == StrangeRead) {            // READING  the Micro Dst
+  if (GetMode() == StrangeRead) {            // READING  the Micro Dst
     InitReadDst();
     if (dstMaker) {
       gMessMgr->Error() << "StStrangeMuDstMaker: cannot read a dst and create "
@@ -211,7 +211,7 @@ Int_t StStrangeMuDstMaker::Make() {
   if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Make() ... "
                                << GetName() << endm; 
 
-  if (rw == StrangeRead) {            // READING  the Micro Dst
+  if (GetMode() == StrangeRead) {            // READING  the Micro Dst
     return MakeReadDst();
   } else if (!dstMaker) {             // CREATING a new Micro Dst
     return MakeCreateDst();
@@ -466,7 +466,7 @@ void StStrangeMuDstMaker::ClearForReal(Option_t *option) {
     cutsArray->Clear();
 
     EachController(Clear());
-    if (rw == StrangeNoKeep) tree->Reset();
+    if (GetMode() == StrangeNoKeep) tree->Reset();
   }
 
   abortEvent = kFALSE;
@@ -477,7 +477,7 @@ Int_t StStrangeMuDstMaker::Finish() {
 
   if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Finish() ... "
                                << GetName() << endm; 
-  if (rw==StrangeWrite) CloseFile();
+  if (GetMode() == StrangeWrite) CloseFile();
   //printf("DEBUG :: >>>>>>>> %d \n",strDstT);  
   EachController(Finish());
 
@@ -485,12 +485,12 @@ Int_t StStrangeMuDstMaker::Finish() {
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::SetWrite(const char* eFile) {
-  rw = StrangeWrite;
+  SetMode(StrangeWrite);
   SetFile(eFile);
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::SetRead(const char* eFile, char* treeName) {
-  rw = StrangeRead;
+  SetMode(StrangeRead);
   if (!eFile) eFile = defFileName;
 
   if (tree) {
@@ -536,13 +536,13 @@ void StStrangeMuDstMaker::SetRead(const char* eFile, char* treeName) {
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::SetRead(StFile* eFiles, char* treeName) {
-  rw = StrangeRead;
+  SetMode(StrangeRead);
   while (!(eFiles->GetNextBundle()))
     SetRead(eFiles->GetFileName(0),treeName);
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::SetNoKeep() {
-  rw = StrangeNoKeep;
+  SetMode(StrangeNoKeep);
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::SetFile(const char* eFile) {
@@ -653,8 +653,11 @@ char* StStrangeMuDstMaker::GetFile() const {
 }       
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.25 2003/05/14 00:12:41 jones Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.26 2003/07/09 21:58:30 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.26  2003/07/09 21:58:30  genevb
+// Use Get/SetMode() from StMaker
+//
 // Revision 3.25  2003/05/14 00:12:41  jones
 // Stops if StFile input file doesn't exist. Added some debugging info on branch status
 //

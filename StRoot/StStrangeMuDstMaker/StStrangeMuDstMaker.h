@@ -69,7 +69,6 @@ class StStrangeMuDstMaker : public StMaker {
   void SetRead (StFile* eFiles, char* treeName=0);
   void SetWrite(const char* eFile=0);
   void SetNoKeep();
-  StrangeEnum GetMode();
   char* GetFile() const;
   //@}
 
@@ -159,7 +158,7 @@ class StStrangeMuDstMaker : public StMaker {
   virtual void  Clear(Option_t *option="");
   virtual Int_t Finish();
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.13 2003/05/30 21:20:19 genevb Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.14 2003/07/09 21:58:30 genevb Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   //@}
@@ -242,7 +241,6 @@ class StStrangeMuDstMaker : public StMaker {
 
   Bool_t doT0JitterAbort;
 
-  StrangeEnum rw;
   TClonesArray* evClonesArray;   //!
   TClonesArray* evMcArray;       //!
   TClonesArray* cutsArray;       //!
@@ -262,8 +260,6 @@ class StStrangeMuDstMaker : public StMaker {
   ClassDef(StStrangeMuDstMaker,4)
 };
 
-inline StrangeEnum StStrangeMuDstMaker::GetMode()
-            { return rw; }
 inline void StStrangeMuDstMaker::DoT0JitterAbort(Bool_t doIt) 
             { doT0JitterAbort = doIt; }
 inline void StStrangeMuDstMaker::DoV0(Bool_t doIt)
@@ -345,8 +341,11 @@ inline Int_t StStrangeMuDstMaker::MatchName(const char* name) const
 
 //____________________________________________________________________
 //
-// $Id: StStrangeMuDstMaker.h,v 3.13 2003/05/30 21:20:19 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.14 2003/07/09 21:58:30 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.14  2003/07/09 21:58:30  genevb
+// Use Get/SetMode() from StMaker
+//
 // Revision 3.13  2003/05/30 21:20:19  genevb
 // doxygen savvy, encoding of FTPC mults, change virtual funcs
 //
