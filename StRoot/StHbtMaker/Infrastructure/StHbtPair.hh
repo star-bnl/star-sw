@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.10 2000/10/05 23:09:05 lisa Exp $
+ * $Id: StHbtPair.hh,v 1.11 2000/10/26 16:09:16 lisa Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
+ * Revision 1.11  2000/10/26 16:09:16  lisa
+ * Added OpeningAngle PairCut class and method to StHbtPair
+ *
  * Revision 1.10  2000/10/05 23:09:05  lisa
  * Added kT-dependent radii to mixed-event simulator AND implemented AverageSeparation Cut and CorrFctn
  *
@@ -115,6 +118,8 @@ public:
   double NominalTpcEntranceSeparation() const;
 
   double NominalTpcAverageSeparation() const;
+
+  double OpeningAngle() const;
 
 private:
   StHbtParticle* mTrack1;
