@@ -72,20 +72,23 @@ Int_t StIO::Write(TFile *file, const Char_t *name, ULong_t  ukey, TObject  *obj)
 //_______________________________________________________________________________
 TObject *StIO::Read(TFile *file, const Char_t *name)
 {
+  TObject *toread=0;
+  TKey *key = 0;
   assert(file);
 
   TFile *bakfile = gFile; TDirectory *bakdir = gDirectory; file->cd();
 
-  if (!gFile) { 
-    printf("<StIO::Read> No file open \n"); 
-    gFile=bakfile; gDirectory=bakdir;return 0; }
-  TKey *key = 0;
+  if (!gFile) { printf("<StIO::Read> No file open \n"); goto RETURN;}
+    
   if (name[0]=='*') 
        key = (TKey*)gDirectory->GetListOfKeys()->First();
   else key = (TKey*)gDirectory->GetListOfKeys()->FindObject(name);
-  if (!key)   { printf("<StIO::Read> Key not found\n"); return 0; }
-  gFile=bakfile; gDirectory=bakdir;
-  return key->ReadObj();
+
+  if (!key)  { printf("<StIO::Read> Key not found\n"); goto RETURN; }
+
+  toread = key->ReadObj();
+
+RETURN: gFile=bakfile; gDirectory=bakdir; return toread;
 }
 //_______________________________________________________________________________
 TObject *StIO::Read(TFile *file, const Char_t *name, ULong_t  ukey)
