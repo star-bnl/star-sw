@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.79 2003/11/14 20:00:40 oldi Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.80 2003/12/09 01:40:15 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -1153,7 +1153,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.79 2003/11/14 20:00:40 oldi Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.80 2003/12/09 01:40:15 oldi Exp $");
 
   return StMaker::Init();
 }
@@ -2187,7 +2187,7 @@ void StFlowAnalysisMaker::SetHistoRanges(Bool_t ftpc_included) {
 
 //------------------------------------------------------------------------
 
-inline void StFlowAnalysisMaker::SetPtRange_for_vEta(Float_t lo, Float_t hi) {
+void StFlowAnalysisMaker::SetPtRange_for_vEta(Float_t lo, Float_t hi) {
 
   // Sets the pt range for the v(eta) histograms.
 
@@ -2199,7 +2199,7 @@ inline void StFlowAnalysisMaker::SetPtRange_for_vEta(Float_t lo, Float_t hi) {
 
 //------------------------------------------------------------------------
 
-inline void StFlowAnalysisMaker::SetEtaRange_for_vPt(Float_t lo, Float_t hi) {
+void StFlowAnalysisMaker::SetEtaRange_for_vPt(Float_t lo, Float_t hi) {
   
   // Sets the |eta| range for the v(pt) histograms.
 
@@ -2211,7 +2211,7 @@ inline void StFlowAnalysisMaker::SetEtaRange_for_vPt(Float_t lo, Float_t hi) {
 
 //------------------------------------------------------------------------
 
-inline void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
+void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
   
   // Switches the v_1{EP1,EP2} calculation on/off.
 
@@ -2224,6 +2224,9 @@ inline void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.80  2003/12/09 01:40:15  oldi
+// Removed 'inline' of some functions to cope with new compiler.
+//
 // Revision 1.79  2003/11/14 20:00:40  oldi
 // Implementation of v1{EP1,EP2}. This method is set to be the default for v1 now!
 // Minor code clean-ups.
