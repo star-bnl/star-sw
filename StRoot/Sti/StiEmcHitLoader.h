@@ -1,12 +1,12 @@
-#ifndef StiSsdHitLoader_H
-#define StiSsdHitLoader_H
+#ifndef StiEmcHitLoader_H
+#define StiEmcHitLoader_H
 
 #include "StiHitLoader.h"
 class StEvent;
 class StiGeometryTransform;
 
-/*! \class StiSsdHitLoader
-  StiSsdHitLoader is a concrete class implementing the StiHitLoader abstract
+/*! \class StiEmcHitLoader
+  StiEmcHitLoader is a concrete class implementing the StiHitLoader abstract
   interface. It is used to load hits from Star StEvent into the StiHitContainer
   for Sti tracking. StEvent hits from the TPC are converted using the 
   StiGeometryTransform class.
@@ -14,18 +14,19 @@ class StiGeometryTransform;
   This class is essentially morphed from the class StiHitFiller 
   originally written by Mike Miller.
 
-  \author Claude A Pruneau (Wayne) and M.L. Miller (Yale Software)
+  \author Claude A Pruneau (Wayne State University) 
  */
-class StiSsdHitLoader : public StiHitLoader<StEvent,StiGeometryTransform>
+class StiEmcHitLoader : public StiHitLoader<StEvent,StiGeometryTransform>
 {
 public:
 
-    StiSsdHitLoader();
-    StiSsdHitLoader(StiHitContainer      * hitContainer,
-		    Factory<StiHit>      * hitFactory,
+    StiEmcHitLoader();
+    StiEmcHitLoader(StiHitContainer * hitContainer,
+		    Factory<StiHit> * hitFactory,
 		    StiGeometryTransform * transform);
-    virtual ~StiSsdHitLoader();
+    virtual ~StiEmcHitLoader();
     virtual void loadHits(StEvent* source);
 };
+
 
 #endif
