@@ -61,9 +61,10 @@
 #define kPhmdIdentifier               26
 #endif /*STDETECTORDEFINITIONS*/
 
-// $Id: StDetectorDefinitions.h,v 1.9 2002/12/18 02:28:37 lbarnby Exp $
-//
-// $Log: StDetectorDefinitions.h,v $
-// Revision 1.9  2002/12/18 02:28:37  lbarnby
-// PMD identifiers added
-//
+/* $Id: StDetectorDefinitions.h,v 1.10 2002/12/19 21:52:38 lbarnby Exp $
+**
+** $Log: StDetectorDefinitions.h,v $
+** Revision 1.10  2002/12/19 21:52:38  lbarnby
+** Corrected CVS tags
+**
+*/
