@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.9 2001/07/25 14:47:47 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.10 2001/08/24 20:57:46 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.10  2001/08/24 20:57:46  caines
+// Do common mode noise suppression from first two anodes
+//
 // Revision 1.9  2001/07/25 14:47:47  caines
 // Fix filling histogram only when debug is on
 //
@@ -72,6 +75,7 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t GetPedOffset(){return mPedOffSet;};
   void CommonModeNoiseCalc(int iAnode);
   void CommonModeNoiseSub(int iAnode);
+  void SubtractFirstAnode(int iAnode);
   Int_t AdjustSequences1( int iAnode, int Anode); // Find sequences  based on ASICS
   Int_t AdjustSequences2(int iAnode, int Anode); //adjust sequences base on LowInvProd
 
