@@ -1,4 +1,5 @@
 #include "StMessMgr.h"
+#include <string.h>
 
 #ifdef __ROOT__
 ClassImp(StMessMgr)
@@ -218,4 +219,4 @@ void type_of_call StMessAddType_(const char* type, const char* text,
 }
 
 //_____________________________________________________________________________
-// $Id: StMessMgr.cxx,v 1.1 2004/04/15 16:01:59 fine Exp $
+// $Id: StMessMgr.cxx,v 1.2 2004/05/03 20:51:54 fine Exp $
