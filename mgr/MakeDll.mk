@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.88 1999/06/16 12:37:01 fisyak Exp $
+# $Id: MakeDll.mk,v 1.89 1999/06/19 20:31:50 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.89  1999/06/19 20:31:50  fisyak
+# Fix bugs with include path
+#
 # Revision 1.88  1999/06/16 12:37:01  fisyak
 # Changes for egcs-1.1.2 on Solaris
 #
@@ -202,7 +205,8 @@ ifneq ($(ROOT_DIR),$(STAR))
 INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
 endif
 INCINT    := $(INC_DIRS) $(CERN_ROOT)/include $(ROOTSYS)/src
-INC_DIRS   = $(INCINT) $(STAF_UTILS_INCS) 
+FFLAGS   += -DCERNLIB_TYPE
+INC_DIRS  += $(INCINT) $(STAF_UTILS_INCS) 
 
 INC_DIRS += $(CERN_ROOT)/include
 INCLUDES := $(addprefix -I,$(INC_DIRS))
@@ -489,7 +493,7 @@ $(OBJ_DIR)/%.$(O) : %.cxx
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
 $(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(OBJ_DIR)/geant3.def
 	$(CP)$(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
-	$(FOR72) $(subst /,\\,$(subst \,/,$(CPPFLAGS) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  $(FOUT)$(ALL_TAGS)))
+	$(FOR72) $(CPPFLAGS) $(INCLUDES) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  $(FOUT)$(ALL_TAGS)))
 $(FILES_OBJ) $(FILES_ORJ) $(FILES_OTJ): $(OBJ_DIR)/%.$(O): %.cxx
 	$(CXX) $(CXXFLAGS) $(CXXOPT) $(subst \,/, $(CPPFLAGS)  -c $(CXXINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN)
 $(OBJ_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
@@ -497,7 +501,7 @@ $(OBJ_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
 	test -h $(OBJ_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(OBJ_DIR)/geant3.def 
 $(OBJ_DIR)/%.$(O):%.g $(OBJ_DIR)/geant3.def
 	cp $(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
-	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  -o  $(ALL_TAGS)
+	$(FOR72)  $(CPPFLAGS) $(INCLUDES) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  -o  $(ALL_TAGS)
 $(OBJ_DIR)/%.$(O): %.F
 	$(FC)  $(CPPFLAGS)  $(INCLUDES) $(FFLAGS) $(FEXTEND)   -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).$(O)
 ifdef $(LIB_PKG)
@@ -541,6 +545,7 @@ test:
 	@echo OUTPUT_DIRS := $(OUTPUT_DIRS)
 	@echo INPUT_DIRS  := $(INPUT_DIRS)
 	@echo INCLUDES    := $(INCLUDES)
+	@echo CPPFLAGS    := $(CPPFLAGS)
 	@echo VPATH       := $(VPATH)
 	@echo OSFID       := $(OSFID)
 	@echo SO_LIB      := $(SO_LIB)
