@@ -78,7 +78,7 @@ long type_of_call adc_to_energy_(
 	    }
 	  } else {
 	    puts("***adc_to_energy: Adcslope data is less equal 0.0");
-	    printf("***adc_to_energy: module,eta,sub= %d %d %d\n",module,eta,sub);
+	    printf("***adc_to_energy: module,eta,sub= %ld %ld %ld\n",module,eta,sub);
 	    emc_hits[i].energy = -1.0;
 	  }
 	}    

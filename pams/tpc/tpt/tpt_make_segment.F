@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment.F,v 1.13 2000/11/14 22:29:08 genevb Exp $
+* $Id: tpt_make_segment.F,v 1.14 2003/04/30 20:42:08 perev Exp $
 * $Log: tpt_make_segment.F,v $
+* Revision 1.14  2003/04/30 20:42:08  perev
+* Warnings cleanup. Modified lines marked VP
+*
 * Revision 1.13  2000/11/14 22:29:08  genevb
 * Switched from float to double in many places
 *
@@ -93,7 +96,7 @@ C     Local variables
       INTEGER tpc_row_par, tpt_ptcrs
       INTEGER next_hit(*),slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic)
-      INTEGER nf,drow,i,nh1,ilc
+      INTEGER nf,drow,nh1,ilc
       INTEGER tpt_fit_track
       INTEGER is_pnt,islic,ipass,tte_skip
       INTEGER tpt_find_slic

@@ -1,5 +1,7 @@
 /* bring in the math library explicitly */
 #include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "PAM.h"
 #include "tss_tsspar.h"

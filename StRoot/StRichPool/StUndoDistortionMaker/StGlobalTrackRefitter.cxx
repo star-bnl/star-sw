@@ -429,7 +429,7 @@ StGlobalTrackRefitter::doHelixRefit(double h)
   StThreeVectorD origin(x0, y0, z0);
   double phase = phi0; //
   
-  mRefitHelix->setParameters( curvature, dipangle, phase, origin, h);
+  mRefitHelix->setParameters( curvature, dipangle, phase, origin, (int)h);
   mRefitPoints = mLineFitter->numberOfPoints();
 
   if(mRefitPoints!=nHit){
@@ -592,7 +592,7 @@ StGlobalTrackRefitter::doLineRefit()
   double dipangle = atan(rzslope);
   StThreeVectorD origin(atDca.x(),atDca.y(),zintercept);
 
-  mRefitHelix->setParameters( curvature, dipangle, phase, origin, h);
+  mRefitHelix->setParameters( curvature, dipangle, phase, origin, (int)h);
   mRefitPoints = mLineFitter->numberOfPoints();
 
   return mRefitHelix;

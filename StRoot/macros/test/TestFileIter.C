@@ -1,9 +1,9 @@
-// $Id: TestFileIter.C,v 1.2 2001/03/03 00:08:44 fine Exp $
+// $Id: TestFileIter.C,v 1.3 2003/04/30 20:40:19 perev Exp $
 // Author: Valery Fine(fine@bnl.gov)   01/03/2001
 // Copyright(c) 2001 [BNL] Brookhaven National Laboratory, Valeri Fine (fine@bnl.gov). All right reserved",
 void TestFileIter(){
 // This macros tests the various methods of TFileIter class.
-  gSystem->Load("libStar");
+  gSystem->Load("libTable");
 
   //First create simple ROOT file
   TDataSet *ds = new TDataSet("event");

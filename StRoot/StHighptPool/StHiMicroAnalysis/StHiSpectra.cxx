@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiSpectra.cxx,v 1.3 2002/05/31 21:58:29 jklay Exp $                                    
+ * $Id: StHiSpectra.cxx,v 1.4 2003/04/30 20:37:30 perev Exp $                                    
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  * 
  * $Log: StHiSpectra.cxx,v $
+ * Revision 1.4  2003/04/30 20:37:30  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.3  2002/05/31 21:58:29  jklay
  * Updated analysis code to use new cut class
  *
@@ -116,7 +119,7 @@ StHiSpectra::initHistograms()
 
   //  gStyle->SetPalette(1,0);
 
-  char title[500],name[500];
+  char name[500];
 
   h1CentralityCut = new TH1D("h1CentralityCut","centrality cut",
 			     nFlowCentBin,flowCentMin,flowCentMax);
@@ -304,7 +307,7 @@ StHiSpectra::trackLoop()
   Int_t nTrack = mHiMicroEvent->NTrack();
   StHiMicroTrack* track;
   
-  Float_t vertexZ = mHiMicroEvent->VertexZ();
+//VPunused  Float_t vertexZ = mHiMicroEvent->VertexZ();
 
   for(Int_t i=0; i<nTrack; i++){
     track =(StHiMicroTrack*) mHiMicroEvent->tracks()->At(i);
@@ -318,7 +321,7 @@ StHiSpectra::trackLoop()
     //**************************************************************
     Float_t ptPr = track->PtPr();
     Float_t eta = track->EtaPr();
-    Float_t ptGl = track->PtGl();
+//VPunused    Float_t ptGl = track->PtGl();
     //Float_t midZ = 100*TMath::Tan(track->DipAnglePr()) + vertexZ ;
     //Float_t exitZ = 200*TMath::Tan(track->DipAnglePr()) + vertexZ ;
     //

@@ -1,5 +1,8 @@
-// $Id: FtpcDriftMapMaker.C,v 1.7 2001/10/29 13:02:19 jcs Exp $
+// $Id: FtpcDriftMapMaker.C,v 1.8 2003/04/30 20:40:11 perev Exp $
 // $Log: FtpcDriftMapMaker.C,v $
+// Revision 1.8  2003/04/30 20:40:11  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.7  2001/10/29 13:02:19  jcs
 // select FTPC drift maps according to flavor of magnetic field
 //
@@ -33,7 +36,7 @@
 
 void FtpcDriftMapMaker(const Int_t map=2, const Float_t factor=1.0)
 {
-    if (gClassTable->GetID("TTable") < 0) gSystem->Load("libStar");
+    if (gClassTable->GetID("TTable") < 0) gSystem->Load("libTable");
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");

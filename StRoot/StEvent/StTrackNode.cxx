@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackNode.cxx,v 2.10 2002/04/24 02:26:57 ullrich Exp $
+ * $Id: StTrackNode.cxx,v 2.11 2003/04/30 20:37:06 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackNode.cxx,v $
+ * Revision 2.11  2003/04/30 20:37:06  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 2.10  2002/04/24 02:26:57  ullrich
  * Replaced iterator loop by index loop in entries(StTrackType).
  *
@@ -49,7 +52,7 @@
 
 ClassImp(StTrackNode)
 
-static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.10 2002/04/24 02:26:57 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.11 2003/04/30 20:37:06 perev Exp $";
 
 StTrackNode::StTrackNode() { /* noop */ }
 
@@ -148,8 +151,8 @@ unsigned int
 StTrackNode::entries(StTrackType type) const
 {
     unsigned int i;
-    StSPtrVecTrackConstIterator iterS;
-    StPtrVecTrackConstIterator  iter;
+    //VPunused StSPtrVecTrackConstIterator iterS;
+    //VPunused StPtrVecTrackConstIterator  iter;
     unsigned int                counter;
 
     switch (type) {

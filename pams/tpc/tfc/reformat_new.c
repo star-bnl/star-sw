@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include "reformat_new.h"
 
 /* bring in the math library explicitly */

@@ -7,7 +7,7 @@ HistMaker* myHistMaker;
 
 void TestRead(const char* infile, const char* outfile)
 {
-    if (gClassTable->GetID("TTable") < 0) gSystem->Load("libStar");
+    if (gClassTable->GetID("TTable") < 0) gSystem->Load("libTable");
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");

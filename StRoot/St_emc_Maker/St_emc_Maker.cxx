@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.cxx,v 1.11 2000/01/29 00:04:58 akio Exp $
+// $Id: St_emc_Maker.cxx,v 1.12 2003/04/30 20:39:16 perev Exp $
 // $Log: St_emc_Maker.cxx,v $
+// Revision 1.12  2003/04/30 20:39:16  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.11  2000/01/29 00:04:58  akio
 // temprary fix for endcap. need more work, but no more junk messages and crash
 //
@@ -97,7 +100,7 @@ Int_t St_emc_Maker::Make(){
 
     St_emc_hits *adc = 0;
     St_emc_hits dummy; TString tit = dummy.GetTitle();
-    while (adc = (St_emc_hits *)itr()) {
+    while ((adc = (St_emc_hits *)itr())) {
       if(adc->GetTitle() == tit){  // Get only emc_hits
 	TString name = adc->GetName(); 
         name.ReplaceAll("emc_hits_","");
@@ -115,7 +118,7 @@ Int_t St_emc_Maker::Make(){
     St_DataSetIter itr(m_DataSet);
     StEmcHitCollection *hit = 0;
     StEmcHitCollection dummy; TString tit = dummy.GetTitle();
-    while (hit = (StEmcHitCollection *)itr()) {
+    while ((hit = (StEmcHitCollection *)itr())) {
       if(hit->GetTitle() == tit){
 	TString name_hits = "emc_hits_" + TString(hit->GetName());
         m_DataSet->Add(hit->copyToTable(name_hits));
@@ -137,7 +140,7 @@ void St_emc_Maker::MakeHistograms(){
     StEmcHitCollection *hit = 0;
     StEmcHitCollection dummy;
     TString tit = dummy.GetTitle(); 
-    while (hit = (StEmcHitCollection *)itr()) {
+    while ((hit = (StEmcHitCollection *)itr())) {
        if(hit->GetTitle() == tit){	 
 	n = hit->NHit();
 	if(n>0){

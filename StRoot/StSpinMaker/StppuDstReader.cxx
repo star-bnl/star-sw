@@ -128,7 +128,7 @@ StppEvent* StppuDstReader::getEvent(int i)
 	return 0;
     }
     //cout <<"GetEntry("<<i<<")"<<endl;
-    int status = mTree->GetEntry(i);
+    int status = mTree->GetEntry(i); if(status){/*nothing*/};
     //gStatus(status,"Entire Tree");
     
     /*

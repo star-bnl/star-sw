@@ -89,7 +89,7 @@ int gl3RICH::decide ( )
     // printf ( "doing gl3RICH process!!!\n");
 
     // init
-    short sector = 0 ;
+//VPunused    short sector = 0 ;
     gl3Track* gTrack ;
 
 
@@ -114,7 +114,7 @@ int gl3RICH::decide ( )
 		      - a*mLocalOriginR*cos(mLocalOriginPhi) );
 
     Ftf3DHit closestHitToEventVertex;
-    Ftf3DHit richHit1, richHit2, lastHit;
+    Ftf3DHit richHit1, /*richHit2,*/ lastHit; 
 
     // loop over gtracks
     for (int trkcnt = 0 ; trkcnt<event->getNTracks(); trkcnt++ )

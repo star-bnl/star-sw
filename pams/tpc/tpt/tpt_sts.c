@@ -109,6 +109,11 @@ extern void type_of_call tgc_cross_and_dip_(long *,float *,float *,float *);
 
 #define tls_index_sort_i_ F77_NAME(tls_index_sort_i,TLS_INDEX_SORT_I)
 extern void type_of_call tls_index_sort_i_(long *, void *,void *,long *,long *);
+
+/* VP hack , to avoid clash y1,jn from math.h and users one*/
+#define y1 y1Hack
+#define jn jnHack
+
 int reject (TABLE_HEAD_ST *par_h,
 	    TPT_SPARS_ST *par,
 	    long rskip[MAX_SECS][MAX_ROWS])
@@ -291,7 +296,7 @@ long type_of_call tpt_sts_(
     for (k=0; k<MAX_ROWS; k++) row_count[k]=row_pnt[k]=0;
 
 /* Sort all the hits according to sector/row*/
-    tls_index_sort_i_(&tphit_h[0].nok, &tphit[0].row,
+    tls_index_sort_i_((long*)&tphit_h[0].nok, &tphit[0].row,
 		      &tphit[1].row,loc_hit,&len);
 /*
  * loc_hit was sorted for fortran, so the index starts at 1; fix it,

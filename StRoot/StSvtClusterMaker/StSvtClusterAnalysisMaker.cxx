@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.23 2003/01/28 20:28:00 munhoz Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.24 2003/04/30 20:38:45 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.24  2003/04/30 20:38:45  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.23  2003/01/28 20:28:00  munhoz
  * new filters for clusters
  *
@@ -543,9 +546,9 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
   
   int mSequence;
   int listAn, actualAn,seq,stTimeBin,len;
-  int raw_stTimeBin,raw_len;
+  
   unsigned char* adc;
-  unsigned char* raw_adc;
+
   int index = 0;
 
   StSequence* svtSequence;

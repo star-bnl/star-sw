@@ -338,7 +338,7 @@ void StEmcSimulatorMaker::makeHistograms(const Int_t det)
 
 Int_t StEmcSimulatorMaker::Make()
 {
-    TDataSet *simEmcPar = GetInputDB("emc/simulator");
+//VPunused    TDataSet *simEmcPar = GetInputDB("emc/simulator");
   // Changed the order of searching - xdf first.
   static Char_t* typeOfFile[3]={"xdf", "fz", "geant.root"};
   static Char_t* nameIn[3]={"event/geant/Event", "geant", "geantBranch"};
@@ -633,8 +633,8 @@ Int_t StEmcSimulatorMaker::makeAllRawHitsForBemc()
                   if(i<BPRS) calCoef  = calibRec[0].AdcToE[cellInd][1]; // AdcToE[0] - discard now
                   else calCoef = calibSmdRec[0].AdcToE[cellInd][1];
                   
-                  if(Debug()>=2) printf("det %i cellID %4i m %3i eta %3i sub %2i AdcToE[0] %f AdcToE[1] %f \n",
-		                                    i+1, cellID, mf, eta, sub, calibRec->AdcToE[0], calibRec->AdcToE[1]); 
+                  if(Debug()>=2) printf("det %i cellID %4i m %3i eta %3i sub %2i AdcToE[0][0] %f AdcToE[1][0] %f \n",
+		                                    i+1, cellID, mf, eta, sub, calibRec->AdcToE[0][0], calibRec->AdcToE[1][0]); //VP
                   if(calCoef < 1.e-7) 
                   {
 		                printf("det %i cellID %4i m %3i eta %3i sub %2i c %f \n", i+1,cellID,mf,eta,sub,calCoef);
@@ -948,8 +948,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.16 2003/01/23 03:09:02 jeromel Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.17 2003/04/30 20:36:47 perev Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.17  2003/04/30 20:36:47  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.16  2003/01/23 03:09:02  jeromel
 // Include modif
 //

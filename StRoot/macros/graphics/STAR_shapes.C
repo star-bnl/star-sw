@@ -10,7 +10,7 @@
 //=======================================================================
    //
    gROOT->Reset();
-   gSystem->Load("libStar");
+   gSystem->Load("libTable");
    c1 = new TCanvas("c1","Geometry Shapes",200,10,700,500);
 
    //  Define some volumes

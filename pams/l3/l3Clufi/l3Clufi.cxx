@@ -220,7 +220,7 @@ long type_of_call l3Clufi_(
 	  if( (bank_limit-receiver) < 3*2*1000 )
 	      {
 		  bank_overflow = 1;
-		  Int_t aa = bank_limit-receiver;
+//VPunused	  Int_t aa = bank_limit-receiver;
 		  break ;
 	      }
 

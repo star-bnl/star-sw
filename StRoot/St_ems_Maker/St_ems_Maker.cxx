@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.cxx,v 1.19 2001/02/02 22:07:47 pavlinov Exp $
+// $Id: St_ems_Maker.cxx,v 1.20 2003/04/30 20:39:17 perev Exp $
 // $Log: St_ems_Maker.cxx,v $
+// Revision 1.20  2003/04/30 20:39:17  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.19  2001/02/02 22:07:47  pavlinov
 // added method for getting pointer to StEmcCollection directly
 //
@@ -303,7 +306,7 @@ Int_t St_ems_Maker::Make(){
 }
 //_____________________________________________________________________________
 Int_t St_ems_Maker::fillStEvent(){
-  unsigned int  i, j, k;
+  unsigned int  i, j;
 
   //Create StEmcHitCollection  
   mEmcCollection = new StEmcCollection();
@@ -328,7 +331,7 @@ Int_t St_ems_Maker::fillStEvent(){
       //Get table
       emc_hits_st *t = table->GetTable();
       //Create StEmcHit
-      for(j=0; j<table->GetNRows(); j++){
+      for(j=0; (int)j<table->GetNRows(); j++){
 	StEmcRawHit* hit = new StEmcRawHit(id, 
 			  	           t[j].module, t[j].eta, t[j].sub,
 				           t[j].adc, t[j].energy);

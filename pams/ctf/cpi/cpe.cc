@@ -211,7 +211,7 @@ long type_of_call cpe_(
             lkine[nkine].p[2] = lparticle[ikine].p[2]  ; 
          }
          else
-            printf ( " \n CPE_MAIN : nkine %i out of range ", nkine ) ;
+            printf ( " \n CPE_MAIN : nkine %li out of range ", nkine ) ;
       }
    } 
 
@@ -364,7 +364,7 @@ void cpe_get_mkine (  long itof ) {
      }
   } 
   else
-     printf ( " \n CPE_MAIN : iphi %d ieta %d out of range ", iphi, ieta ) ;
+     printf ( " \n CPE_MAIN : iphi %ld ieta %ld out of range ", iphi, ieta ) ;
 
 
   return ;
@@ -423,7 +423,7 @@ void cpe_get_mkine (  long itof ) {
       } 
    }
    else
-     printf ( " \n CPE_GET_HYPO_PID : globtrk %i out of range ", id ) ;
+     printf ( " \n CPE_GET_HYPO_PID : globtrk %li out of range ", id ) ;
 }
 
 
@@ -620,10 +620,10 @@ void cpe_get_mkine (  long itof ) {
            }
          } 
          else
-            printf ( "\n CPE_MHITS_CTF_PNT - ieta %d out of range \n", ieta ) ;
+            printf ( "\n CPE_MHITS_CTF_PNT - ieta %ld out of range \n", ieta ) ;
       }
       else
-         printf ( "\n CPE_MHITS_CTF_PNT - iphi %d out of range \n", iphi ) ;
+         printf ( "\n CPE_MHITS_CTF_PNT - iphi %ld out of range \n", iphi ) ;
    }
    return STAFCV_OK ;
 }
@@ -662,10 +662,10 @@ void cpe_get_mkine (  long itof ) {
            mslat_pointer[iphi][ieta] = i ;
          }
          else
-            printf ( "\n CPE_MSLAT_PNT - ieta %d out of range \n", ieta ) ;
+            printf ( "\n CPE_MSLAT_PNT - ieta %ld out of range \n", ieta ) ;
       }
       else
-         printf ( "\n CPE_MSLAT_PNT - iphi %d out of range \n", iphi ) ;
+         printf ( "\n CPE_MSLAT_PNT - iphi %ld out of range \n", iphi ) ;
    }
    return STAFCV_OK ;
 }

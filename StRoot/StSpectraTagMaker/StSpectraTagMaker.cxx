@@ -31,7 +31,7 @@ Int_t StSpectraTagMaker::Make(){
 
   // Create a data set and add the table to it.
   St_SpectraTag *tagtab= new St_SpectraTag("SpectraTag",1); m_DataSet->Add(tagtab);
-  SpectraTag_st *tagtab_st = (SpectraTag_st *) tagtab->GetTable();  
+//VPunused  SpectraTag_st *tagtab_st = (SpectraTag_st *) tagtab->GetTable();  
  
   SpectraTag_st row;
   //fill default values for the Spectra Tags
@@ -83,7 +83,7 @@ Int_t StSpectraTagMaker::Make(){
      ndedx = 0;
      StSPtrVecTrackPidTraits& traits=track->pidTraits();
      StDedxPidTraits* dedxPidTr;
-      for (int itrait = 0; itrait < traits.size(); itrait++){
+      for (int itrait = 0; itrait < (int)traits.size(); itrait++){
        dedxPidTr = 0;
         if (traits[itrait]->detector() == kTpcId) {
              StTrackPidTraits* thisTrait = traits[itrait];

@@ -277,7 +277,7 @@ long sca_deltad(
   prev_rank = 0;
   for ( irow=0; irow < sca_out_h->nok; irow++ ) {
     if (prev_rank != sca_out[irow].rank ) {
-      prev_rank = sca_out[irow].rank ;
+      prev_rank = (int)sca_out[irow].rank ;
       nranks++;
     }
   }

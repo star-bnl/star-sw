@@ -1,4 +1,4 @@
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <sys/types.h>
@@ -30,16 +30,16 @@ int eut_circles_x_ ( float *lx0, float *ly0, float *la0, float *lr0,
 **: AUTHOR:     ppy - P.P. Yepes,  yepes@physics.rice.edu
 **: ARGUMENTS:
 **:          IN:
-**:             x0,y0,a0        - First circle center and radius
+**:             x0,yo,a0        - First circle center and radius
 **:             r0              - Second circle radius [center (0,0)] 
 **:         OUT:
-**:             x1,y1,x2,y2     - Intersection coordinates
+**:             x1,yi,x2,y2     - Intersection coordinates
 **:
 **: RETURNS:    number of solutions
 **:>------------------------------------------------------------------*/
 {
    int   nsol ;
-   double x0, y0, a0, r0 ;
+   double x0, yo, a0, r0 ;
    double Bb, a, b, c ;
    double xs, ys, fs  ;
    double xf[5], yf[5] ; 
@@ -49,7 +49,7 @@ int eut_circles_x_ ( float *lx0, float *ly0, float *la0, float *lr0,
      Make pointers into variables
 ---------------------------------------------------------------------- */
    x0  = *lx0 ;
-   y0  = *ly0 ;
+   yo  = *ly0 ;
    a0  = *la0 ;
    r0  = *lr0 ;
 
@@ -66,10 +66,10 @@ int eut_circles_x_ ( float *lx0, float *ly0, float *la0, float *lr0,
     The solution is given by a second order equation
 -------------------------------------------------------------------------*/
 
-   Bb = 0.5 * ( x0*x0 + y0*y0 + r0*r0 - a0*a0 ) ;
+   Bb = 0.5 * ( x0*x0 + yo*yo + r0*r0 - a0*a0 ) ;
       
-   a  = y0*y0 + x0*x0 ;
-   b  = - 2 * Bb * y0 ;
+   a  = yo*yo + x0*x0 ;
+   b  = - 2 * Bb * yo ;
    c  = Bb*Bb - x0*x0 * r0*r0 ;
 
    fact = b*b - 4 * a * c ;
@@ -90,7 +90,7 @@ int eut_circles_x_ ( float *lx0, float *ly0, float *la0, float *lr0,
 ------------------------------------------------------------------------ */
       {
          xs =  sqrt(fs) ;
-         dr = fabs((xs-x0)*(xs-x0)+(ys-y0)*(ys-y0)-a0*a0) ;
+         dr = fabs((xs-x0)*(xs-x0)+(ys-yo)*(ys-yo)-a0*a0) ;
          if ( dr < prec ) 
          { 
             nsol++ ;
@@ -101,7 +101,7 @@ int eut_circles_x_ ( float *lx0, float *ly0, float *la0, float *lr0,
        Now the x negative solution
 ------------------------------------------------------------------------ */
          xs = - xs ;
-         dr = fabs((xs-x0)*(xs-x0)+(ys-y0)*(ys-y0)-a0*a0) ;
+         dr = fabs((xs-x0)*(xs-x0)+(ys-yo)*(ys-yo)-a0*a0) ;
          if ( dr < prec )
          {
             nsol++ ;
@@ -120,7 +120,7 @@ int eut_circles_x_ ( float *lx0, float *ly0, float *la0, float *lr0,
 ------------------------------------------------------------------------ */
       {
          xs =  sqrt(fs) ;
-         dr = fabs((xs-x0)*(xs-x0)+(ys-y0)*(ys-y0)-a0*a0) ;
+         dr = fabs((xs-x0)*(xs-x0)+(ys-yo)*(ys-yo)-a0*a0) ;
          if ( dr < prec )
          {
             nsol++ ;
@@ -131,7 +131,7 @@ int eut_circles_x_ ( float *lx0, float *ly0, float *la0, float *lr0,
        Now the x negative solution
 ------------------------------------------------------------------------ */
          xs = - xs ;
-         dr = fabs((xs-x0)*(xs-x0)+(ys-y0)*(ys-y0)-a0*a0) ;
+         dr = fabs((xs-x0)*(xs-x0)+(ys-yo)*(ys-yo)-a0*a0) ;
          if ( dr < prec )
          {
             nsol++ ;
@@ -184,7 +184,7 @@ int eut_clo_ ( float* xc, float* yc, float* rr, float* xp, float* yp )
 **: RETURNS:    1
 **:>------------------------------------------------------------------*/
 {
-   float x1, y1, x2, y2, d1, d2, f1, f2, fact ;
+   float x1, yi, x2, y2, d1, d2, f1, f2, fact ;
 /*----------------------------------------------------------
        Solve the equations 
 ----------------------------------------------------------*/          
@@ -193,8 +193,8 @@ int eut_clo_ ( float* xc, float* yc, float* rr, float* xp, float* yp )
    f2   = 1. - fact ;
 
    x1 = *xc * f1 ;
-   y1 = *yc * f1 ;
-   d1 = sqrt ( x1 * x1 + y1 * y1 ) ;
+   yi = *yc * f1 ;
+   d1 = sqrt ( x1 * x1 + yi * yi ) ;
 
    x2 = *xc * f2 ;
    y2 = *yc * f2 ;
@@ -204,7 +204,7 @@ int eut_clo_ ( float* xc, float* yc, float* rr, float* xp, float* yp )
 --------------------------------------------------------------------- */
    if ( d1 < d2 ) {
       *xp = x1 ;
-      *yp = y1 ;
+      *yp = yi ;
    }
    else {
       *xp = x2 ;
@@ -233,7 +233,7 @@ int eut_closest_ ( float b_field,
 **: RETURNS:    1
 **:>------------------------------------------------------------------*/
 {
-   float phi0, x0, y0      ; /*  phi and coord. of first point in the track */
+   float phi0, x0, yo      ; /*  phi and coord. of first point in the track */
    float rr                ; /*  radius track                               */
    float xc, yc            ; /*  center track circle in x-y plane           */
    float stot              ; /*  trajectory length in xy                    */
@@ -241,7 +241,7 @@ int eut_closest_ ( float b_field,
    int   ok                ;
 
 
-   float x1, y1, x2, y2, d1, d2, f1, f2 ;
+/*VPunused   float x1, yi, x2, y2, d1, d2, f1, f2 ;*/
 
 /*----------------------------------------------------------
        Get track parameters
@@ -253,10 +253,10 @@ int eut_closest_ ( float b_field,
       phi0 = phi0 + 2.0 * MPI ;
 
    x0    = track->r0 * cos((track->phi0)/todeg) ;
-   y0    = track->r0 * sin((track->phi0)/todeg) ;
+   yo    = track->r0 * sin((track->phi0)/todeg) ;
    rr    = 1.0 / ( track->invpt * b_fact * b_field )  ;
    xc    = x0 - rr * cos(phi0) ;
-   yc    = y0 - rr * sin(phi0) ;
+   yc    = yo - rr * sin(phi0) ;
 
 /*----------------------------------------------------------
        Find point closest approach
@@ -344,8 +344,8 @@ int eut_extra_r_cyl_ ( float b_field, EGR_GLOBTRK_ST *track,
 **:>------------------------------------------------------------------*/
 {
    float q     ;
-   float td, cosphi        ;
-   float phi0, x0, y0      ; /*  phi and coord. of first point in the track */
+   float td/*VP, cosphi*/ ;
+   float phi0, x0, yo      ; /*  phi and coord. of first point in the track */
    float fac1,sfac, fac2,deltat ;
 
 
@@ -356,10 +356,10 @@ int eut_extra_r_cyl_ ( float b_field, EGR_GLOBTRK_ST *track,
    phi0 = track->psi/todeg + q * 0.5 * MPI / fabs(q) ;
 
    x0    = track->r0 * cos((track->phi0)/todeg) ;
-   y0    = track->r0 * sin((track->phi0)/todeg) ;
+   yo    = track->r0 * sin((track->phi0)/todeg) ;
    *rc   = 1.0 / ( track->invpt * b_fact * b_field )  ;
    *xc   = x0 - *rc * cos(phi0) ;
-   *yc   = y0 - *rc * sin(phi0) ;
+   *yc   = yo - *rc * sin(phi0) ;
 /*  
        Check helix and cylinder intersect
 */ 
@@ -393,7 +393,7 @@ int eut_extra_r_cyl_ ( float b_field, EGR_GLOBTRK_ST *track,
 
 
 float eut_length_ ( float b_field, EGR_GLOBTRK_ST* track, 
-                    float x1, float y1, float x2, float y2 )
+                    float x1, float yi, float x2, float y2 )
 /*:>--------------------------------------------------------------------
 **: ROUTINE:   Calculates trajectory length between two points on a track
 **:
@@ -402,29 +402,29 @@ float eut_length_ ( float b_field, EGR_GLOBTRK_ST* track,
 **: ARGUMENTS:
 **:          IN:
 **:             track           - Track pointer
-**:             x1, y1          - Point 1
+**:             x1, yi          - Point 1
 **:             x2, y2          - Point 2
 **:         OUT:
 **:
 **: RETURNS:    0=ok, <>0 error
 **:>------------------------------------------------------------------*/
 {
-   float q, x0, y0, xc, yc, rc, phi0 ;
+   float q, x0, yo, xc, yc, rc, phi0 ;
    float angle_1, angle_2, d_angle, sleng_xy, sleng ;
 /*----------------------------------------------------------
        Get track parameters
 ----------------------------------------------------------*/
    q    = (track->icharge)/fabs(track->icharge) ;
    x0    = track->r0 * cos((track->phi0)/todeg) ;
-   y0    = track->r0 * sin((track->phi0)/todeg) ;
+   yo    = track->r0 * sin((track->phi0)/todeg) ;
    rc   = 1.0 / ( track->invpt * b_fact * b_field )  ;
    phi0 = track->psi/todeg + q * 0.5 * MPI / fabs(q) ;
    xc   = x0 - rc * cos(phi0) ;
-   yc   = y0 - rc * sin(phi0) ;
+   yc   = yo - rc * sin(phi0) ;
 /*
     Get angle difference 
 */
-   angle_1  = atan2 ( (y1-yc), (x1-xc) ) ;
+   angle_1  = atan2 ( (yi-yc), (x1-xc) ) ;
    if ( angle_1 < 0 ) angle_1 = angle_1 + 2. * MPI ;
    angle_2  = atan2 ( (y2-yc), (x2-xc) ) ;
    if ( angle_2 < 0 ) angle_2 = angle_2 + 2. * MPI ;
@@ -463,20 +463,20 @@ int eut_x_r_ ( xc, yc, r, xf, yf, q, r_extra, x, y )
    int                *q ;
 {
    int   nsol ;
-   float x1, y1, x2, y2    ; /*  intersections both circles                 */
+   float x1, yi, x2, y2    ; /*  intersections both circles                 */
    float angle0, angle1, angle2, dangle1, dangle2 ;
 
 /*----------------------------------------------------------
        Look for the intersection with cylinder
 ----------------------------------------------------------*/
-   nsol = eut_circles_x_ ( xc, yc, r, r_extra, &x1, &y1, &x2, &y2 ) ;
+   nsol = eut_circles_x_ ( xc, yc, r, r_extra, &x1, &yi, &x2, &y2 ) ;
    if ( nsol > 1 )
    {
 /*----------------------------------------------------------
        Choose the closest solution
 ----------------------------------------------------------*/
       angle0  = atan2 ( (*yf-*yc), (*xf-*xc) ) ;
-      angle1  = atan2 ( (y1-*yc) , (x1-*xc ) ) ;
+      angle1  = atan2 ( (yi-*yc) , (x1-*xc ) ) ;
       dangle1 = *q * ( angle0 - angle1 ) ;
       dangle1 = fmod ( dangle1, 2.* MPI ) ;
       if ( dangle1 < 0 ) dangle1 = dangle1 + 2. * MPI ; 
@@ -489,7 +489,7 @@ int eut_x_r_ ( xc, yc, r, xf, yf, q, r_extra, x, y )
       if ( dangle1 < dangle2 )
       {
          *x      = x1 ;
-         *y      = y1 ;
+         *y      = yi ;
       }
       else
       {

@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.70 2003/04/10 21:30:34 hardtke Exp $
+// $Id: StTrsMaker.cxx,v 1.71 2003/04/30 20:38:56 perev Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.71  2003/04/30 20:38:56  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.70  2003/04/10 21:30:34  hardtke
 // only call Init Run once per job
 //
@@ -376,7 +379,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.70 2003/04/10 21:30:34 hardtke Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.71 2003/04/30 20:38:56 perev Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -935,9 +938,9 @@ Int_t StTrsMaker::Make(){
 //   	    PR(aSegment);
 	    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
-	    vector<int> all[3];
+//VPunused	    vector<int> all[3];
 #else
-	    vector<int,allocator<int> > all[3];
+//VPunused	    vector<int,allocator<int> > all[3];
 #endif
 	    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS

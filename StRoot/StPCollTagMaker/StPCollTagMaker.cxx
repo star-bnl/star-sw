@@ -37,7 +37,7 @@ Int_t StPCollTagMaker::Make(){
 
   // Create a data set and add the table to it.
   St_PCollTag *tagtab= new St_PCollTag("PCollTag",1); m_DataSet->Add(tagtab);
-  PCollTag_st *tagtab_st = (PCollTag_st *) tagtab->GetTable();  
+//VPunused  PCollTag_st *tagtab_st = (PCollTag_st *) tagtab->GetTable();  
  
   PCollTag_st row;
   //fill default values for the PColl Tags

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StPidAmpMaker.cxx,v 1.10 2002/02/25 19:30:07 jeromel Exp $
+// $Id: StPidAmpMaker.cxx,v 1.11 2003/04/30 20:37:56 perev Exp $
 //
 // Authors: Aihong Tang
 //
@@ -106,7 +106,7 @@ Int_t StPidAmpMaker::Init() {
 
 
   gMessMgr->SetLimit("##### StPidAmp", 2);
-  gMessMgr->Info("##### StPidAmp: $Id: StPidAmpMaker.cxx,v 1.10 2002/02/25 19:30:07 jeromel Exp $");
+  gMessMgr->Info("##### StPidAmp: $Id: StPidAmpMaker.cxx,v 1.11 2003/04/30 20:37:56 perev Exp $");
 
   return StMaker::Init();
 }
@@ -130,8 +130,8 @@ void StPidAmpMaker::FillParticleHistograms() {
 
     float eta       = pFlowTrack->Eta();
     int   charge    = pFlowTrack->Charge();
-    float dca       = pFlowTrack->Dca();
-    float dcaGlobal = pFlowTrack->DcaGlobal();
+//VPunused    float dca       = pFlowTrack->Dca();
+//VPunused    float dcaGlobal = pFlowTrack->DcaGlobal();
     int   fitPts    = pFlowTrack->FitPts();
     float mtm       = pFlowTrack->P();
     float dedx      = pFlowTrack->Dedx();
@@ -283,6 +283,9 @@ Int_t StPidAmpMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StPidAmpMaker.cxx,v $
+// Revision 1.11  2003/04/30 20:37:56  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.10  2002/02/25 19:30:07  jeromel
 // ... SetFormat() again
 //

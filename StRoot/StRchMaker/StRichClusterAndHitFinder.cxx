@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 2.9 2002/02/23 02:37:07 dunlop Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 2.10 2003/04/30 20:38:00 perev Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
+ * Revision 2.10  2003/04/30 20:38:00  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 2.9  2002/02/23 02:37:07  dunlop
  * Tweak the output a bit.  Keep a counter of clusters removed.
  *
@@ -980,8 +983,8 @@ bool StRichClusterAndHitFinder::useTheMovingMatrix(StRichSinglePixel* pix, int c
 
     //double totalCharge = 0;
     
-    double iPad = pix->pad();
-    double iRow = pix->row();
+    int iPad = pix->pad();
+    int iRow = pix->row();
 
     vector<StRichSinglePixel*> aVectorOfPixels;
     size_t ii;

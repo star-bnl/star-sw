@@ -14,7 +14,7 @@ void Example_tags(TString topDir = "/star/rcf/GC/daq/tags")
 // owner: Alexandre V. Vaniachine <AVVaniachine@lbl.gov>                //
 //////////////////////////////////////////////////////////////////////////
 
-  gSystem->Load("libStar");
+  gSystem->Load("libTable");
   gSystem->Load("St_base");
   // start benchmarks
   gBenchmark = new TBenchmark();

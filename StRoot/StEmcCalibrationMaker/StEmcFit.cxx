@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide and Marcia Moura
 // 
-// $Id: StEmcFit.cxx,v 1.5 2002/12/02 21:30:56 suaide Exp $
+// $Id: StEmcFit.cxx,v 1.6 2003/04/30 20:36:43 perev Exp $
 // $Log: StEmcFit.cxx,v $
+// Revision 1.6  2003/04/30 20:36:43  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.5  2002/12/02 21:30:56  suaide
 // New EMC calibration maker
 //
@@ -213,7 +216,7 @@ void StEmcFit::Fit()
   
   do
   {
-    Float_t oldlamda=alamda;
+//VPunused    Float_t oldlamda=alamda;
     mrqmin();
     deltao=fabs(chisq-old)/old;
     old=chisq;
@@ -240,7 +243,7 @@ void StEmcFit::Fit(Int_t max)
   
   do
   {
-    Float_t oldlamda=alamda;
+//VPunused    Float_t oldlamda=alamda;
     mrqmin();
     deltao=fabs(chisq-old)/old;
     old=chisq;

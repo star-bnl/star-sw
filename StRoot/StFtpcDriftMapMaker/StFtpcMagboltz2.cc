@@ -1,6 +1,9 @@
-// $Id: StFtpcMagboltz2.cc,v 1.2 2002/03/05 16:59:15 jcs Exp $
+// $Id: StFtpcMagboltz2.cc,v 1.3 2003/04/30 20:37:15 perev Exp $
 //
 // $Log: StFtpcMagboltz2.cc,v $
+// Revision 1.3  2003/04/30 20:37:15  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.2  2002/03/05 16:59:15  jcs
 // force double to long for HepRandom
 //
@@ -1681,7 +1684,7 @@ int StFtpcMagboltz2::montea_()
     /* Local variables */
     static double sdif;
     static int ncol;
-    static double csqd, tlim, rdum, argz, vtot, dftp1, dftp2;
+    static double csqd, tlim, argz, vtot, dftp1, dftp2; static long rdum;
     static double sume2, a, b, d__, e;
     static int i__;
     static double q, t, u;
@@ -2043,7 +2046,7 @@ int StFtpcMagboltz2::monteb_()
     /* Local variables */
     static double ebar;
     static int ncol;
-    static double delt, csqd, rdum, tlim, argz, vtot;
+    static double delt, csqd, tlim, argz, vtot; static long rdum; 
     static double sume2, d__, e;
     static int i__;
     static double q, t, u;
@@ -2450,7 +2453,7 @@ int StFtpcMagboltz2::montec_()
   /* Local variables */
   double ebar;
   int ncol;
-  double delt, csqd, rdum, tlim, argz, vtot, efx100, efz100;
+  double delt, csqd, tlim, argz, vtot, efx100, efz100; static long rdum;
   double sume2, d__, e;
   int i__;
   double q, t, u;
@@ -2861,7 +2864,7 @@ int StFtpcMagboltz2::elimit_(int *ielow)
     int i__1;
 
     /* Local variables */
-    static double csqd, tlim, rdum, argz;
+    static double csqd, tlim, argz; static long rdum;
     static double d__, e;
     static int i__;
     static double q, t, u;
@@ -3078,7 +3081,7 @@ int StFtpcMagboltz2::elimitb_(int *ielow)
     int i__1;
 
     /* Local variables */
-    static double csqd, tlim, rdum, argz, vtot;
+    static double csqd, tlim, argz, vtot; static long rdum;
     static double d__, e;
     static int i__;
     static double q, t, u;
@@ -3311,7 +3314,7 @@ int StFtpcMagboltz2::elimitc_(int *ielow)
     int i__1;
 
     /* Local variables */
-    static double csqd, tlim, rdum, argz, vtot, efx100, efz100, eovb1;
+    static double csqd, tlim, argz, vtot, efx100, efz100, eovb1; static long rdum;
     static double d__, e;
     static int i__;
     static double q, t, u;

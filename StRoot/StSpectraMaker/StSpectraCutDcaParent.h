@@ -15,6 +15,8 @@ class StSpectraCutDcaParent : public StSpectraCut {
 
   ~StSpectraCutDcaParent();
  
+  bool satisfiesCut(StTrack* t, StEvent* event)
+       {return StSpectraCut::satisfiesCut(t,event);}
   bool satisfiesCut(StV0Vertex* v0, StEvent* event);
 
 };

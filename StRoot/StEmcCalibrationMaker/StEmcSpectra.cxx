@@ -21,12 +21,13 @@ ClassImp(StEmcSpectra);
 const char* StEmcSpectra::GetDetName()   
 { 
   #include "StEmcUtil/others/emcDetectorName.h"
-  return detname[mDetNum].Data(); 
+  return detname[mDetNum]; 
 }
 //_____________________________________________________________________________
 StEmcSpectra::StEmcSpectra(const char* cdet,Int_t nb, Float_t bin0, Float_t bin1):St_DataSet(cdet)
 {
   #include "StEmcUtil/others/emcDetectorName.h"
+  if(detname) {/*touch*/}
   Float_t nadc[4]={4096,1024,1024,1024};
   SetTitle(cdet);
   for(Int_t i=0;i<MAXHIST;i++) mHistTmp[i]=NULL;
@@ -59,6 +60,7 @@ StEmcSpectra::StEmcSpectra(const char* cdet,Int_t nb, Float_t bin0, Float_t bin1
 void StEmcSpectra::Init()
 {
   #include "StEmcUtil/others/emcDetectorName.h"
+  if(detname) {/*touch*/}
   if(mSpectra) delete mSpectra;
 	if(mSum) delete mSum;
 	
@@ -337,7 +339,7 @@ void StEmcSpectra::DrawAllEtaBin(Int_t etabin,Float_t Norm)
   if(etabin>mNEtaBins || etabin<1) return;
   if(!mEqual) return;
   TCanvas* canvas8=new TCanvas("canvas8","EMC Eta Bin Spectrum",500,700);  
-  TH1D* hist=GetEtaBinSpectra(etabin);
+  TH1D* hist=GetEtaBinSpectra(etabin); if(hist){/*unused*/};
   canvas8->Divide(1,2);
   canvas8->cd(1);
 

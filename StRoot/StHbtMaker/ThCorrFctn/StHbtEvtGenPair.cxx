@@ -47,8 +47,8 @@ StHbtEvtGenPair::~StHbtEvtGenPair(){
 }
 
 void StHbtEvtGenPair::setVariables(const StHbtPair* aPair){
-  double tTimeShift = 3.75;
-  double SpaceShift = -4.21;
+  double tTimeShift = 3.75; 
+  double SpaceShift = -4.21;   if(SpaceShift){/*touch*/};
  
   StHbtEvtGenHiddenInfo* tEvtGenHiddenInfoV[2];
   tEvtGenHiddenInfoV[0] =

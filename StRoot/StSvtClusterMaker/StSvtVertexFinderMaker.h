@@ -30,8 +30,8 @@ class StSvtVertexFinderMaker : public StMaker
   virtual Int_t Finish();
   void MakeHistograms( St_dst_vertex* vtx, long event);
 
-  virtual const char *GetCVS()
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtVertexFinderMaker.h,v 1.5 2003/01/28 20:29:10 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtVertexFinderMaker.h,v 1.6 2003/04/30 20:38:46 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  
  protected:
 

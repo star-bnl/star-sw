@@ -134,7 +134,7 @@ Int_t StSvtVertexFinderMaker::Make()
   }
   else if( event){
     
-    for( int i=0; i<event->numberOfPrimaryVertices(); i++){
+    for( int i=0; i<(int)event->numberOfPrimaryVertices(); i++){
       
       if( event->primaryVertex(i)->flag() == 1){
 	xtpc = event->primaryVertex(i)->position().x();

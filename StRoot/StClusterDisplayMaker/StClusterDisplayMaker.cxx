@@ -1,5 +1,5 @@
 // Author : Dominik Flierl 
-// $Id: StClusterDisplayMaker.cxx,v 1.7 2001/08/21 23:53:13 struck Exp $
+// $Id: StClusterDisplayMaker.cxx,v 1.8 2003/04/30 20:36:27 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 //                                                                      //
@@ -1029,7 +1029,7 @@ Int_t StClusterDisplayMaker::Get_matched_points(Int_t& num_not_matched)
     // counters
   Int_t num_matched = 0 ;
   Int_t num_off = 0 ;
-  Int_t num_l3 = 0 ;
+//VPunused  Int_t num_l3 = 0 ;
   Int_t badcluster = 0 ;
         
     ////

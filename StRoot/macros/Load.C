@@ -1,11 +1,11 @@
-// $Id: Load.C,v 1.16 2003/04/26 03:36:24 jeromel Exp $
+// $Id: Load.C,v 1.17 2003/04/30 20:40:02 perev Exp $
 //=======================================================================
 // owner: Yuri Fisyak
 // what it does: 
 //=======================================================================
 
 void Load(){
-    if (gClassTable->GetID("TTable") < 0) gSystem->Load("libStar");
+    if (gClassTable->GetID("TTable") < 0) gSystem->Load("libTable");
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("StUtilities");

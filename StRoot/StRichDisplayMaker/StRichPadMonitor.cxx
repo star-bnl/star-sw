@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPadMonitor.cxx,v 2.9 2002/02/01 18:01:42 lasiuk Exp $
+ * $Id: StRichPadMonitor.cxx,v 2.10 2003/04/30 20:38:04 perev Exp $
  * Description:
  *  A Pad Monitor for the STAR-RICH.
  *  Runs only in ROOT
@@ -7,6 +7,9 @@
  *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
+ * Revision 2.10  2003/04/30 20:38:04  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 2.9  2002/02/01 18:01:42  lasiuk
  * remove getentries() from loops where appropriate
  *
@@ -543,8 +546,8 @@ void StRichPadMonitor::doResiduals(double zVertex,long numPrim[],int runId,int e
 		if(currentRing){
 		    for(int hitCounter = 0;hitCounter < currentRing->numberOfHits();hitCounter++){
 			StRichDrawableTHit * loopHit = currentRing->getHit(hitCounter);
-			if((abs(loopHit->GetX() - curHitX) < .0001) &&
-			   (abs(loopHit->GetY() - curHitY) < .0001)){
+			if((fabs(loopHit->GetX() - curHitX) < .0001) &&
+			   (fabs(loopHit->GetY() - curHitY) < .0001)){
 			    tempArray[11] = 1;
 			    StParticleDefinition * currPart = currentRing->getParticle();
 			    if(currPart == pionplus || currPart == pionminus)

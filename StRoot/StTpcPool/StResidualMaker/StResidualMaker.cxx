@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StResidualMaker.cxx,v 1.2 2002/03/23 22:47:04 lisa Exp $
+ * $Id: StResidualMaker.cxx,v 1.3 2003/04/30 20:38:53 perev Exp $
  *
  * Author: malisa
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StResidualMaker.cxx,v $
+ * Revision 1.3  2003/04/30 20:38:53  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.2  2002/03/23 22:47:04  lisa
  * macros and documentation added - small changes to code itself
  *
@@ -264,7 +267,7 @@ void StResidualMaker::fill3Dhistos(StTrack* track, TH1** histos)
   StThreeVectorD xyzProjected,momentumProjected;  // position and momentum at padrow, according to helix
   StThreeVectorD delXYZ;
 
-  for (int i=0; i<TpcHits.size(); i++){
+  for (int i=0; i<(int)TpcHits.size(); i++){
     tpcHit = (StTpcHit*)TpcHits[i];
     // Helen points out that we should only plot residuals for "used" hits
     if (!(tpcHit->usedInFit())) continue;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.cc,v 1.9 2003/01/22 15:54:24 genevb Exp $
+ * $Id: StThreeVectorF.cc,v 1.10 2003/04/30 20:39:42 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.cc,v $
+ * Revision 1.10  2003/04/30 20:39:42  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.9  2003/01/22 15:54:24  genevb
  * Remove superfluous inline
  *
@@ -140,7 +143,6 @@ void StThreeVectorF::Streamer(TBuffer &R__b)
 {
 //	Stream an object of class StThreeVectorF.
 
-   int offset = 0;
    if (R__b.IsReading()) {
       Version_t R__v = R__b.ReadVersion();if (R__v){/*touch*/}; 
       R__b >> mX1;

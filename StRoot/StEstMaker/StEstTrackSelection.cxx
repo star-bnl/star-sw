@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrackSelection.cxx,v 1.12 2002/02/20 17:22:03 caines Exp $
+ * $Id: StEstTrackSelection.cxx,v 1.13 2003/04/30 20:36:55 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrackSelection.cxx,v $
+ * Revision 1.13  2003/04/30 20:36:55  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.12  2002/02/20 17:22:03  caines
  * Comment out some of the print statements
  *
@@ -239,7 +242,7 @@ void StEstTracker::RemoveHitSharing2() {
   // here that when this method is called only one branch per track survives
   // the previous selection (such as ChooseBestBranch).
   
-  int brmax,i,j,k,brmin;
+  int brmax,i,j,brmin; //VP unused k removed
   int HowMany;
   double minbr;
 

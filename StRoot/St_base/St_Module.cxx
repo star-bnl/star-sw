@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Module.cxx,v 1.17 2001/07/16 23:58:35 fine Exp $
+// $Id: St_Module.cxx,v 1.18 2003/04/30 20:39:12 perev Exp $
 
 #include <assert.h>
 #include <string.h>
@@ -289,7 +289,7 @@ void St_Module::SetEntryName()
       atoi(buftmp,fN*4,10);   
       strcat(st_Name,buftmp);
 # endif  
-#else if defined(uscope)
+#else //VP if defined(uscope)
       strcat(st_Name,"_");
 #endif
      }
@@ -323,6 +323,9 @@ void St_Module::Streamer(TBuffer &)
 
 //________________________________________________________________________
 // $Log: St_Module.cxx,v $
+// Revision 1.18  2003/04/30 20:39:12  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.17  2001/07/16 23:58:35  fine
 // suppressing the compilation warning
 //

@@ -21,6 +21,8 @@
 #endif
 #include <TStopwatch.h>
 
+typedef TDataSet::EDataSetPass EDataSetPass;
+
 class TList;
 class TBrowser;
 class TChain;
@@ -179,7 +181,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.58 2002/04/14 21:51:12 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.59 2003/04/30 20:36:24 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -208,8 +210,11 @@ private:
 #endif
 
 
-// $Id: StMaker.h,v 1.58 2002/04/14 21:51:12 perev Exp $
+// $Id: StMaker.h,v 1.59 2003/04/30 20:36:24 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.59  2003/04/30 20:36:24  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.58  2002/04/14 21:51:12  perev
 // Obsolete StBroadcast
 //

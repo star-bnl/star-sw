@@ -302,7 +302,7 @@ Bool_t StEmcMipSpectra::Fill(TH1F* hits, StEvent* event)
     StTrack* track = GetTrack(event,i);
     
     Float_t p = track->geometry()->momentum().mag();
-    Float_t pt = track->geometry()->momentum().perp();
+//VPunused    Float_t pt = track->geometry()->momentum().perp();
     if(p>=GetMinMomentum())
     {
 			StThreeVectorD momentum,position;

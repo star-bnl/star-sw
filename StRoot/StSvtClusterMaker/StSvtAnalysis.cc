@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.17 2003/01/28 20:27:30 munhoz Exp $
+ * $Id: StSvtAnalysis.cc,v 1.18 2003/04/30 20:38:45 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -62,6 +62,9 @@
  *           
  * 
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.18  2003/04/30 20:38:45  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.17  2003/01/28 20:27:30  munhoz
  * new filters for clusters
  *
@@ -568,7 +571,7 @@ void StSvtAnalysis::calcMoments(int clu){
       ADC=ADC*mAnodeGain[m_hybIndex][actualAn];
       //do this else we distort the means of small clusters.
       if (mPeakADC<ADC) { 
-	mPeakADC=ADC; peakPosAn=actualAn; peakPosTim=stTimeBin+j; peakMem=mem; peakPixel=j;
+	mPeakADC=(int)ADC; peakPosAn=actualAn; peakPosTim=stTimeBin+j; peakMem=mem; peakPixel=j;
       }
       
       if (ADC>1 && ADC<4000 && (stTimeBin+j)>=0 && (stTimeBin+j)<128 && actualAn>0 && actualAn<=240){
@@ -578,8 +581,8 @@ void StSvtAnalysis::calcMoments(int clu){
 	mAnodeMom1 += ADC * (actualAn - 0.5);
 	mDriftMom2 += ADC * (stTimeBin + j + 0.5) * (stTimeBin + j + 0.5);
 	mAnodeMom2 += ADC * (actualAn - 0.5) * (actualAn - 0.5);
-	mNeff       += ADC * ADC;
-	mSumAdc     += ADC;
+	mNeff       += (int)(ADC * ADC);
+	mSumAdc     += (int)ADC;
       } 
       else {
 	//mHitId += -1;
@@ -623,12 +626,12 @@ void StSvtAnalysis::oneOrTwoAnodeMoments(int clu, int peakPosTim)
 	    ADC=ADC*mAnodeGain[m_hybIndex][i];
 	    
 	    if (ADC>0 && ADC<mPeakADC/2){                    /*since we do this blindly lets at least put*/ 
-	      mSumAdc     += ADC;                            /*some safety checks in*/ 
+	      mSumAdc     += (int)ADC;                       /*some safety checks in*/ 
 	      mDriftMom1 += ADC * (j+0.5);
 	      mAnodeMom1 += ADC * (i-0.5);
 	      mDriftMom2 += ADC * (j+0.5) * (j+0.5);
 	      mAnodeMom2 += ADC * (i-0.5) * (i-0.5);
-	      mNeff       += ADC * ADC;
+	      mNeff       += int(ADC * ADC);
 	      mNumPixels++;                                 // Added this new line. JT.
 	    }
 	  }

@@ -40,7 +40,7 @@ using namespace units;
 #include <algorithm>
 #include <functional>
 
-static const char rcsid[] = "$Id: StRichSimpleUst.cxx,v 1.1 2002/11/19 18:27:00 dunlop Exp $";
+static const char rcsid[] = "$Id: StRichSimpleUst.cxx,v 1.2 2003/04/30 20:38:12 perev Exp $";
 
 Int_t StRichSimpleUst::Make() 
 { 
@@ -272,7 +272,7 @@ Int_t StRichSimpleUst::Make()
 	for (size_t nodeIndex=0; nodeIndex<theNodes.size(); ++nodeIndex) {
 	    int foundGlobal = -999;
 	    int foundPrimary = -999;
-	    size_t numberOfGlobalsInNode = theNodes[nodeIndex]->entries(global);
+//VPunused  size_t numberOfGlobalsInNode = theNodes[nodeIndex]->entries(global);
 	    size_t numberOfPrimariesInNode = theNodes[nodeIndex]->entries(primary);
 
 	    for (size_t primaryIndex = 0; primaryIndex<numberOfPrimariesInNode;
@@ -363,8 +363,8 @@ Int_t StRichSimpleUst::Make()
 
     
 	
-    mRichUstStruct->SetNCTB(ctbsum);
-    mRichUstStruct->SetNCTBpre(ctbpre);
+    mRichUstStruct->SetNCTB((int)ctbsum);
+    mRichUstStruct->SetNCTBpre((int)ctbpre);
 
     mRichUstStruct->SetZdcSum(zdcsum);
     mRichUstStruct->SetTriggerWord(theTriggerWord);
@@ -856,8 +856,8 @@ Int_t StRichSimpleUst::Make()
     for (StSPtrVecRichHitConstIterator iter = theHits.begin();
 	 iter != theHits.end(); ++iter) {
 	StRichUstHit blah;
-	blah.SetCharge((*iter)->charge());
-	blah.SetMaxAdc((*iter)->maxAmplitude());
+	blah.SetCharge((int)(*iter)->charge());
+	blah.SetMaxAdc((int)(*iter)->maxAmplitude());
 	blah.SetNPads((*iter)->numberOfPads());
 	blah.SetFlag((*iter)->reservedLong());
 	
@@ -866,7 +866,7 @@ Int_t StRichSimpleUst::Make()
 	blah.SetClusterFirstPad(theClusters[theClusterNumber]->firstPad());
 	blah.SetNClusterPads(theClusters[theClusterNumber]->numberOfPads());
 	blah.SetNClusterLocalMax(theClusters[theClusterNumber]->numberOfLocalMax());
-	blah.SetClusterMinAmp(theClusters[theClusterNumber]->minimumAmplitudeOfLocalMax());
+	blah.SetClusterMinAmp((int)theClusters[theClusterNumber]->minimumAmplitudeOfLocalMax());
 	
 
 	blah.SetRawX((*iter)->internal().x());
@@ -930,7 +930,7 @@ Int_t StRichSimpleUst::Finish()
     return kStOK; 
 }
 
-//const char* StRichSimpleUst::GetCVS() {static const char cvs[]="Tag $Name:  $ $Id: StRichSimpleUst.cxx,v 1.1 2002/11/19 18:27:00 dunlop Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+//const char* StRichSimpleUst::GetCVS() {static const char cvs[]="Tag $Name:  $ $Id: StRichSimpleUst.cxx,v 1.2 2003/04/30 20:38:12 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 

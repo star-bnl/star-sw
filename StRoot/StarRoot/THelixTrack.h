@@ -5,6 +5,7 @@ class THelixTrack : public TObject
 {
 public:
 
+	THelixTrack();
 	THelixTrack(const double *xyz,const double *dir,double rho,const double *hxyz=0);
 	THelixTrack(const double *pnts,int npnts, int size = 3);
 	THelixTrack(const THelixTrack &from);

@@ -1,5 +1,8 @@
-// $Id: Root2XDF.C,v 1.10 2000/08/02 21:44:31 fine Exp $
+// $Id: Root2XDF.C,v 1.11 2003/04/30 20:40:06 perev Exp $
 // $Log: Root2XDF.C,v $
+// Revision 1.11  2003/04/30 20:40:06  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.10  2000/08/02 21:44:31  fine
 // *** empty log message ***
 //
@@ -59,7 +62,7 @@ void Root2XDF(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
 
   if (numberOfEvents < 0) return;
 
-  gSystem->Load("libStar");
+  gSystem->Load("libTable");
   gSystem->Load("St_base");
   gSystem->Load("StChain");
     

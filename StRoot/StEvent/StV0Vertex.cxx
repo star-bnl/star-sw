@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.cxx,v 2.7 2002/11/26 02:19:11 perev Exp $
+ * $Id: StV0Vertex.cxx,v 2.8 2003/04/30 20:37:08 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.cxx,v $
+ * Revision 2.8  2003/04/30 20:37:08  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 2.7  2002/11/26 02:19:11  perev
  * StEventMaker ITTF modif
  *
@@ -48,7 +51,7 @@ using std::copy;
 
 ClassImp(StV0Vertex)
 
-static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.7 2002/11/26 02:19:11 perev Exp $";
+static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.8 2003/04/30 20:37:08 perev Exp $";
 
 StV0Vertex::StV0Vertex()
 {
@@ -213,7 +216,7 @@ void StV0Vertex::Streamer(TBuffer &R__b)
 	// with StThreeVectorF having a custom streamer (therefore the
 	// extra version).
 	UInt_t R__s2, R__c2;
-	if (R__v==1) {Version_t R__v2 = R__b.ReadVersion(&R__s2, &R__c2);}
+	if (R__v==1) {R__b.ReadVersion(&R__s2, &R__c2);}
 	mMomentumOfDaughters[0].Streamer(R__b);
 	mMomentumOfDaughters[1].Streamer(R__b);
 

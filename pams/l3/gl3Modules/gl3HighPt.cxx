@@ -18,8 +18,8 @@ int gl3HighPt::init ( l3List* histos ) {
 //####################################################################
 int gl3HighPt::process ( gl3Event* event ) {
 // printf ( "hello I am in gl3HighPt process!!!\n");
-   gl3Hit* hitP ;
-   gl3Track* trackP ;
+//VPunused   gl3Hit* hitP ;
+//VPunused   gl3Track* trackP ;
 /*
    for ( int i = 0 ; i < event->getNTracks() ; i++ ) {
       trackP = event->getTrack(i); 

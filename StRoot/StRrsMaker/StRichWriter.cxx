@@ -1,10 +1,13 @@
 /*****************************************************
- * $Id: StRichWriter.cxx,v 2.0 2000/08/09 16:17:05 gans Exp $
+ * $Id: StRichWriter.cxx,v 2.1 2003/04/30 20:38:20 perev Exp $
  *
  * Description:
  *  Implementation of the StRichWriter output object.
  ******************************************************
  * $Log: StRichWriter.cxx,v $
+ * Revision 2.1  2003/04/30 20:38:20  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 2.0  2000/08/09 16:17:05  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -105,7 +108,7 @@ void StRichWriter::putSignal(int row, int col, double s, int id, int gid, int tr
     unsigned long ii;
     (*mStorage)[row][col].signal += s;
 
-    StRichID theMCInfo(id,gid,track_p,s,signalType);
+    StRichID theMCInfo(id,gid,track_p,(int)s,signalType);
     int addTheInfo = 1;
 
     for(ii=0; ii<(*mStorage)[row][col].IDs.size(); ii++) {
