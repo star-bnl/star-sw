@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.34 1999/11/18 23:34:17 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.35 1999/11/20 20:50:52 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.35  1999/11/20 20:50:52  fisyak
+// Rewmove consistency check from BFC table
+//
 // Revision 1.34  1999/11/18 23:34:17  fisyak
 // Add l3 chain with new clustering, add ChainMaker to remove ugly print out
 //
@@ -203,20 +206,20 @@ BfcItem BFC[] = {
   // Makers
   {"NoEvent"     ,""  ,"","-event,-analysis"      ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
   {"geant","geant","","tables","St_geant_Maker","geometry,St_g2r,St_geant_Maker","initailize geant",kFALSE}, 
-  {"tpc"         ,"tpc","","tables,tls,db,-tss,-trs,tcl,tpt"           ,"StChainMaker","StChain","",kFALSE},
-  {"tss"         ,"tpc_raw","tpc","tls,-trs"               ,"St_tss_Maker","St_tpc,St_tss_Maker","",kFALSE},  
-  {"Trs"         ,"","tpc","scl,-tss,tpc_daq"                         ,"StTrsMaker","StTrsMaker","",kFALSE},
+  {"tpc"         ,"tpc","","tables,tls,db,tcl,tpt"                     ,"StChainMaker","StChain","",kFALSE},
+  {"tss"         ,"tpc_raw","tpc","tls"                    ,"St_tss_Maker","St_tpc,St_tss_Maker","",kFALSE},  
+  {"Trs"         ,"","tpc","scl,tpc_daq"                              ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"miniDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
   {"tpc_daq"     ,"tpc_raw","tpc",""                        ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
-  {"tfs"         ,""  ,"","tpc,-trs,-tss","",""     ,"use tfs       (no St_[tss_ and no Trs]Maker)",kFALSE},
+  {"tfs"         ,""  ,"tpc","","",""               ,"use tfs       (no St_[tss_ and no Trs]Maker)",kFALSE},
   {"tcl"         ,"tpc_hits","tpc","tables,tls"            ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
   {"tpt"         ,"tpc_tracks","tpc","tables,tls"          ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
   {"laser"       ,"tpc_tracks","tpc","tdaq,tpc,-tpt"
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},  
-  {"svt"         ,"svt"     ,""     ,"tables,srs,stk"                  ,"StChainMaker","StChain","",kFALSE},
+  {"svt"         ,"svt","","tables,srs,stk"                            ,"StChainMaker","StChain","",kFALSE},
   {"srs"         ,"svt_hits","svt","tls"                   ,"St_srs_Maker","St_svt,St_srs_Maker","",kFALSE},
   {"stk"         ,"svt_tracks","svt","tls"                 ,"St_stk_Maker","St_svt,St_stk_Maker","",kFALSE},
-  {"Ftpc"        ,"ftpc"  ,"","tables,-fss,fcl,fpt"                    ,"StChainMaker","StChain","",kFALSE},
+  {"Ftpc"        ,"ftpc"  ,"","tables,fcl,fpt"                         ,"StChainMaker","StChain","",kFALSE},
   {"fss"         ,"ftpc_raw","ftpc","SCL"                 ,"St_fss_Maker","St_ftpc,St_fss_Maker","",kFALSE},
   {"Fcl"         ,"ftpc_hits","ftpc","SCL"    ,"StFtpcClusterMaker","St_ftpc,StFtpcClusterMaker","",kFALSE},
   {"fpt"         ,"ftpc_tracks","ftpc","SCL"              ,"St_fpt_Maker","St_ftpc,St_fpt_Maker","",kFALSE},
