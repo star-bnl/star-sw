@@ -20,7 +20,7 @@ public:
    friend FtfTrack ;
 	
    void   dEdx                    ( ) ;
-   void   getTracks               ( ) ;
+   int    getTracks               ( ) ;
    void   mergePrimaryTracks      ( ) ;
    float  process ( ) ;
    int    reset                   ( ) ;

@@ -79,8 +79,9 @@ extern "C" long type_of_call ftfTpc_(
      pHit[0] = new FtfHit[tphit_h->nok] ;
 
      for ( int i = 0 ; i < tphit_h->nok ; i++ ) {
-        (pHit[0])[i].id  = i ;
-        tphit[i].track   = 0 ;
+        (pHit[0])[i].id     = i ;
+        tphit[i].track      = 0 ;
+        (pHit[0])[i].track  = 0 ;
         (pHit[0])[i].row = (short)fmod(tphit[i].row,100)   ;
         if ( tphit[i].row == 4600 ) (pHit[0])[i].row = 46 ;
         if ( tphit[i].row == 4600 ) tphit[i].row = 46 ;
@@ -160,15 +161,16 @@ extern "C" long type_of_call ftfTpc_(
         }
 //
         j = nSectorHits[sectorIndex] ;
-        tphit[i].track             = 0 ;
-        (pHit[sectorIndex])[j].id  = i ;
-        (pHit[sectorIndex])[j].row = (short)fmod(tphit[i].row,100)   ;
-        (pHit[sectorIndex])[j].x   = tphit[i].x ;
-        (pHit[sectorIndex])[j].y   = tphit[i].y ;
-        (pHit[sectorIndex])[j].z   = tphit[i].z ;
-        (pHit[sectorIndex])[j].dx  = tphit[i].dx ;
-        (pHit[sectorIndex])[j].dy  = tphit[i].dy ;
-        (pHit[sectorIndex])[j].dz  = tphit[i].dz ;
+        tphit[i].track               = 0 ;
+        (pHit[sectorIndex])[j].id    = i ;
+        (pHit[sectorIndex])[j].track = 0 ;
+        (pHit[sectorIndex])[j].row   = (short)fmod(tphit[i].row,100)   ;
+        (pHit[sectorIndex])[j].x     = tphit[i].x ;
+        (pHit[sectorIndex])[j].y     = tphit[i].y ;
+        (pHit[sectorIndex])[j].z     = tphit[i].z ;
+        (pHit[sectorIndex])[j].dx    = tphit[i].dx ;
+        (pHit[sectorIndex])[j].dy    = tphit[i].dy ;
+        (pHit[sectorIndex])[j].dz    = tphit[i].dz ;
         nSectorHits[sectorIndex]++ ;
      }   
   } // end if for sector by sector logic
