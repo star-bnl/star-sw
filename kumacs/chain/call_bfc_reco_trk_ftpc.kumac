@@ -1,4 +1,4 @@
-* 9/1/98 K. Turner (for 98g)
+* 9/14/98 K. Turner (for 98h)
 * Run BFC in following manner:
 * - read in simulated data file (thru tss & srs)
 * - run tpc & svt clustering
@@ -15,7 +15,6 @@
    skip=0 _
    first=1 _
    no_events=5 _
-   input_data_prefix=/star/data/kathy/ _
-   input_data_file=set100_01_5ev.xdf _ 
+   input_data_file=/star/data/kathy/set100_01_5ev.xdf _ 
    output_file=set100_01_5ev_tpc_svt_tracks_ftpc _
-   log=bfc_reco_trk__ftpc_set100_01_5ev.log
+   log=bfc_reco_trk_ftpc_set100_01_5ev.log

@@ -1,4 +1,4 @@
-* 9/3/98 K. Turner (for 98g)
+* 9/14/98 K. Turner (for 98h)
 * Run BFC in following manner:
 * - read in event generator file (e.g. from hijing)
 * - run gstar
@@ -15,7 +15,6 @@
    skip=0 _
    first=1 _
    no_events=1 _
-   input_data_prefix=/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/ _
-   input_data_file=auau_ce_b0-2_1_200.xdf _
+   input_data_file=/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2_1_200.xdf _
    output_file=auau_ce_b0-2_1_200_g2t _
    log=bfc_gstar_g2t.log
