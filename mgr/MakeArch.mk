@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.54  1999/01/14 13:56:39  fisyak
+#  Add Victors MakeFun.mk, Add StMagF
+#
 #  Revision 1.53  1998/12/24 16:39:40  fine
 #  Some extra checl of env variable INCLUDE under Windows
 #
@@ -137,7 +140,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/12/24 16:39:40 $ 
+#             Last modification $Date: 1999/01/14 13:56:39 $ 
 #. default setings
 
 MAKE  := gmake
@@ -376,8 +379,8 @@ else
 #   	EGCS compiler
 
 #  EGCS := /afs/rhic/asis/i386_linux2/usr.local/egcs
-#  CC  :=$(EGCS)/bin/gcc 
-#  CXX :=$(EGCS)/bin/g++ 
+   CC  := /usr/local/egcs/bin/gcc 
+   CXX := /usr/local/egcs/bin/g++ 
 
   MOTIF :=
   LINUX :=YESS
@@ -394,10 +397,10 @@ else
   LDFLAGS  := $(DEBUG) -Wl,-Bstatic
   EXEFLAGS := $(DEBUG) -Wl,-Bdynamic    
   SOFLAGS  := $(DEBUG) -shared  
-##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
-  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -lXt -lXpm -lX11 -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
+##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lpgc -lm -ldl -rdynamic
+  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic
 ##FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
-  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A 
+  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -lg2c
   FFLAGS   := -DPGI  $(DEBUG)
   FEXTEND  := -Mextend
   YACC     := bison -y

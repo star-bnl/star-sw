@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.41  1999/01/14 13:56:41  fisyak
+#  Add Victors MakeFun.mk, Add StMagF
+#
 #  Revision 1.40  1999/01/04 16:24:21  fisyak
 #  Add StDisplay
 #
@@ -199,7 +202,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/01/04 16:24:21 $ 
+#           Last modification $Date: 1999/01/14 13:56:41 $ 
 #  default setings
 # Current Working Directory
 #
@@ -230,6 +233,9 @@ endif
 ifndef MakePam
   MakePam := $(STAR_MAKE_HOME)/MakePam.mk
 endif
+ifndef MakeFun
+  MakeFun := $(STAR_MAKE_HOME)/MakeFun.mk
+endif
 
 ifndef MakeDll
 MakeDll :=$(STAR_MAKE_HOME)/MakeDll.mk
@@ -242,7 +248,7 @@ endif
 export Makeloop
 export MakeDll
 export MakePam
-
+export MakeFun
 ifndef INP_DIR 
   INP_DIR := $(CWD)
 endif           
@@ -358,7 +364,8 @@ endif
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/StChain))
 StRoot += StChain
 endif
-Makers  :=  $(notdir $(wildcard $(ROOT_DIR)/StRoot/St_*_Maker)) 
+Makers  :=  $(notdir $(wildcard $(ROOT_DIR)/StRoot/St*Maker)) 
+#Makers  :=  $(notdir $(wildcard $(ROOT_DIR)/StRoot/St*)) 
 Makers  :=  $(filter-out St_ebye_Maker, $(Makers))
 Makers  :=  $(filter-out St_laser_Maker, $(Makers))
 Makers  :=  $(filter-out St_mev_Maker, $(Makers))
@@ -388,11 +395,13 @@ StChain:
 St_Tables:
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables   SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/St_Tables.$(So) NODEBUG=YES
 ifneq ($(EMPTY),$(findstring $(STAR_LEVEL),dev))
+StMagF: 
+	$(MAKE) -f $(MakeFun) fun=StMagF -C $(ROOT_DIR)/StRoot/StMagF   SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/StMagF.$(So)
 St_TablesDoc: 
 	root.exe -b -q MakeHtmlTables.cxx
 endif
-St_%_Maker: 
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St_$(STEM)_Maker  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/St_$(STEM)_Maker.$(So)
+St%Maker: 
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St$(STEM)Maker  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/St$(STEM)Maker.$(So)
 endif
 %_all:  $(BASE)
 	$(MAKE)  -f $(Makeloop) -C $(STEM) $(MAKEFLG) 
@@ -447,4 +456,4 @@ test_level:
 	@echo "STAR_MAKE_HOME=|"$(STAR_MAKE_HOME)"|"
 	@echo "DIRS=|"$(DIRS)"|"
 	@echo "Makers    = |"$(Makers)"|"
-	@echo "NT        ="$(NT)"
+#	@echo "NT        ="$(NT)"
