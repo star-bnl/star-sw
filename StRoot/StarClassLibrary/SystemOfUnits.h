@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: SystemOfUnits.h,v 1.3 1999/03/11 14:53:07 ullrich Exp $
+ * $Id: SystemOfUnits.h,v 1.4 1999/03/22 16:21:38 fisyak Exp $
  *
  * Author: blasiuk adapted from CLHEP
  ***************************************************************************
@@ -35,6 +35,9 @@
  ***************************************************************************
  *
  * $Log: SystemOfUnits.h,v $
+ * Revision 1.4  1999/03/22 16:21:38  fisyak
+ * Add anti CINT flags
+ *
  * Revision 1.3  1999/03/11 14:53:07  ullrich
  * Added definition of inch.
  *
@@ -93,8 +96,9 @@ namespace units {
     //
     static const double      radian = 1.;
     static const double milliradian = 1.e-3*radian;
+#ifndef __CINT__
     static const double      degree = (M_PI/180.0)*radian;
-    
+#endif    
     static const double   steradian = 1.;
 
     //
@@ -155,12 +159,16 @@ namespace units {
     // Force [E][L^-1]
     //
     static const double newton  = joule/meter;
-    
+
     //
     // Pressure [E][L^-3]
     //
+#ifndef __CINT__    
 #define pascal hep_pascal       // a trick to avoid warnings 
     static const double hep_pascal = newton/meter2;
+#else
+    static const double pascal     = newton/meter2;
+#endif
     static const double bar        = 100000*pascal;
     static const double atmosphere = 101325*pascal;
 
