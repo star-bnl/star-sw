@@ -7,16 +7,17 @@ void myLoad(Char_t  *file){
 Load(){
   //  myLoad("/opt/SUNWspro/lib/libF77.so");
   //  myLoad("/opt/SUNWspro/lib/libM77.so");
-  myLoad("$STAR_LIB/St_base.so");
-  myLoad("$STAR_LIB/St_Tables.so");
+  myLoad("/afs/rhic/star/packages/dev/lib/St_base.so");
+  myLoad("/afs/rhic/star/packages/dev/lib/St_Tables.so");
   myLoad("$STAF_LIB/libmsg.so");
   myLoad("$STAF_LIB/libtls.so");
-  myLoad("$STAR_LIB/tpc.sl");
-  myLoad("$STAR_LIB/St_tpc.so");
-  myLoad("$STAR_LIB/svt.sl");   
-  myLoad("$STAR_LIB/St_svt.so");
-  //  myLoad("$STAR_LIB/emc.sl");
-  //  myLoad("$STAR_LIB/St_emc.so");
-  myLoad("$STAR_LIB/global.sl");
-  myLoad("$STAR_LIB/St_global.so");
+  myLoad("/afs/rhic/star/packages/dev/lib/tpc.sl");
+  myLoad("/afs/rhic/star/packages/dev/lib/St_tpc.so");
+  //  myLoad("/afs/rhic/star/packages/dev/lib/svt.sl");   
+  //  myLoad("/afs/rhic/star/packages/dev/lib/St_svt.so");
+  //  myLoad("/afs/rhic/star/packages/dev/lib/emc.sl");
+  //  myLoad("/afs/rhic/star/packages/dev/lib/St_emc.so");
+  //  myLoad("/afs/rhic/star/packages/dev/lib/global.sl");
+  //  myLoad("/afs/rhic/star/packages/dev/lib/St_global.so");
+  myLoad("/afs/rhic/star/packages/dev/lib/StChain.so");
 }
