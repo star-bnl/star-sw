@@ -1,7 +1,0 @@
-
-struct cts_event { 
-    long      adc_sum ;        // Sum of all adc signals
-    long      n_ctf   ;        // Total number of particles thru CTF
-    long      n_ctf_prim  ;    // Total number of primaries thru CTF
-    long      n_prim      ;    // # primaries in event 
-} ;
