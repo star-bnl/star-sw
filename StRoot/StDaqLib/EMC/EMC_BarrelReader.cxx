@@ -10,13 +10,36 @@
 #include <assert.h>
 #define MAX_ADC 0xFFF
 #include <fstream.h>
+#include <time.h>
+#include <stdlib.h>
+#include <iostream.h>
+#include <stdio.h>
 
 //ofstream fout("decode.out");
 
 EMC_BarrelReader::EMC_BarrelReader(EventReader *er,Bank_EMCP *pEMCP):pBankEMCP(pEMCP),ercpy(er)
 {
-  cout<<"ctor EMC_Barrelreader**"<<endl;
+  EventInfo info=er->getEventInfo();
+  unsigned int UnixTime=info.UnixTime;
+  struct tm *time=gmtime((time_t*) &UnixTime);
+  int year=1900+time->tm_year;
+  int month=1+time->tm_mon;
+  int day=time->tm_mday;
+  int hour1=time->tm_hour;
+  int min=time->tm_min;
+  int sec=time->tm_sec;  
+  char text1[80],text2[80];
+  sprintf(text1,"%04d%02d%02d",year,month,day);
+  sprintf(text2,"%02d%02d%02d",hour1,min,sec);
+  unsigned int date=atoi(text1);
+  unsigned int hour=atoi(text2);
+  decoder=new StEmcDecoder(date,hour);
+  cout<<"EMC_Barrelreader** Event time (Unix time) = "<<UnixTime<<endl;
   Initialize();
+}
+EMC_BarrelReader::~EMC_BarrelReader()
+{
+  if(decoder) delete decoder;
 }
 ////////////////////////////////////////////////////////////
 void EMC_BarrelReader::Initialize()
@@ -42,31 +65,6 @@ void EMC_BarrelReader::Initialize()
       }
 }
 
-////////////////////////////////////////////////////////////
-// conversion from FEE Tower number to m,e,s for Tower
-int EMC_BarrelReader::getTowerBin(const int rid,int &m,int &e,int &s)
-{
-  //Transiion from environment Id to m,e,s to fill the arrays
-  // Copy of StEmcGeom version
-
-  if(checkTowerId(rid) == 0) return 0;
- 
-  int idw;
-  m   = (rid - 1) / 40 + 1; // Module number
-  idw = (rid - 1) % 40;     // change from 0 to 39
-  s   = idw/20 + 1;
-  e   = idw%20+1;
-//  e   = 20 - idw%20;
-  return 1;                   // zero is bad
-}
-////////////////////////////////////////////////////////////////////
-int EMC_BarrelReader::checkTowerId(const int rid)
-{
-  int MaxRaw=4800;
-  if(rid>=1 && rid<=MaxRaw) return 1; 
-  else cout<<" Bad TOWER raw# "<<rid<<"Max  "<<MaxRaw<<endl; return 0;
-}
-////////////////////////////////////////////////////////////////////
 Bank_EMCSECP* EMC_BarrelReader::getBarrelSection(const Bank_EMCP* pBankEMCP,int section)
 {
 
@@ -191,28 +189,6 @@ Bank_TOWERADCR* EMC_BarrelReader::getBarrelADC(Bank_EMCRBP* rbp)
 ////////////////////////////////////////////////////////////////////
 int EMC_BarrelReader::FillBarrelTower(Bank_TOWERADCR* pADCR)
 {
-  //fiber header
-  /*for(int i=0;i<8;i++)
-  {
-    for(int j=0;j<8;j++)
-    {
-      int k=i*8+j;
-      cout<<"  "<<pADCR->fiberHeader[k];
-    }
-    cout <<endl;
-  }
-  cout <<"***************************\n";*/
-  /*for(int i=0;i<12;i++)
-  { 
-    for(int j=0;j<10;j++)
-    {
-      int k=i*10+j;
-      cout<<"  "<<pADCR->TDCHeader[k];
-    }
-    cout <<endl;
-  }
-  cout <<"***************************\n";*/
-  
   mTheTowerAdcR.BankType="TOWRADCR\n";
   mTheTowerAdcR.DetFlag=1;                          // Detector flag for BEMC=1,
   mTheTowerAdcR.EventNumber=pADCR->header.Token;    // Token number
@@ -254,15 +230,17 @@ int EMC_BarrelReader::FillBarrelTower(Bank_TOWERADCR* pADCR)
         mTheTowerAdcR.NTowerHits++; 
       
         int index_jose=-1;
-        int stat_index=get_index_jose(index,index_jose);
+        int stat_index=decoder->GetTowerIdFromDaqId(index,index_jose);
         // Index-jose runs here from 1 to 4800
+        //cout <<"index "<<index<<" index_jose "<<index_jose<<" stat_index "<<stat_index<<endl;
 
         int m=0,e=0,s=0;
         if(index_jose!=-1)
         {
           if(stat_index)
           {
-            int binstat=getTowerBin(index_jose,m,e,s);
+            int binstat=decoder->GetTowerBin(index_jose,m,e,s);
+            //cout <<"index = "<<index<<"  soft = "<<index_jose<<"  module = "<<m<<"  eta = "<<e<<"  sub = "<<s<<" adc = "<<pADCR->fiberData[index]<<endl;
             
             if(!binstat)  cout<<" problem in bin conversion "<<index<<endl;
             else  mTheTowerAdcR.TowerMatrix[m-1][e-1][s-1]=pADCR->fiberData[index]; 
@@ -324,47 +302,3 @@ Bank_BTOWERADCR& EMC_BarrelReader::getBTOWERADCR()
 {
   return mTheTowerAdcR;
 }
-////////////////////////////////////////////////////////////////////
-int EMC_BarrelReader::get_index_jose(int daq_tower,int& index_jose)
-{
-  int Init_Crate[15]={2180,2020,1860,1700,1540,1380,1220,1060,900,740,580,420,260,100,2340};
-  //int TDC2Crate[]= {3,2,1,15,14,0,0,0,0,0,0,0,0,0,0};
-  int TDC2Crate[]= {3,2,1,0,0,0,0,0,0,0,0,0,0,0,0};
- 
-  int crate_seq=0;
-  int Crate=-1;
-  if(daq_tower<0 || daq_tower>4799)return 0;
-  
-  int tdc=GetCrate(daq_tower,crate_seq);
-  if(tdc<0 || tdc>14)return 0;
-  if(tdc>=0 && tdc<15)Crate=TDC2Crate[tdc];
-
-  if(Crate<=15 && Crate>0)
-  {
-    int start=Init_Crate[Crate-1];
-    index_jose=Getjose_tower(start,crate_seq);
-  }
-  else
-  {
-    return 0;
-  }
-  return 1;
-}
-////////////////////////////////////////////////////////////////////
-int EMC_BarrelReader::GetCrate(int daq_tower,int& crate_seq)
-{
-  int tdc=daq_tower%30;
-  crate_seq=daq_tower/30;
-  return tdc;
-}
-////////////////////////////////////////////////////////////////////
-int EMC_BarrelReader::Getjose_tower(int start,int& crate_seq)
-{
-  int card=crate_seq/32;
-  int card_seq=31-(crate_seq%32);
-  int channel_seq=card_seq/4;
-  int channel=card_seq-(channel_seq*4)+1;
-  int jose_tower=start+channel_seq*20+card*4+(5-channel);
-  if(jose_tower>2400)jose_tower-=2400;
-  return jose_tower;
-}                                                                                              
