@@ -39,6 +39,12 @@ MODULE  CALBGEO is the geometry of the Barrel EM Calorimeter in (aG)STAR     *
 *               - modified by A. OGAWA   98.9.23
 *	        - modification for path (year1, 2 or 3)
 *	        - modification for STAR NOTE 229 numbering scheme
+*
+*      Version 2.7
+*               - modified by K.Shestermanov 99.10.08
+*               - remove unused constant in structure CALG
+*               - put new cuts for SMD detector
+*         
 ******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
 *
@@ -48,7 +54,7 @@ external etsphit
               CSHI,CBTW
       Structure CALG { version,  Rmin,     Etacut,   CrackWd,
                        FrontThk, CompThk,  AirThk,   BackThk,  SpaceThk, 
-                       ScintThk, AbsorThk, AbPapThk, Sntchthk, g10SbThk,
+                       ScintThk, AbsorThk, AbPapThk, g10SbThk,
                        SmAlfWdh, SmAlfThk, SmGasThk, SmGasWdh, SmGasRad,
                        SmAffWdh, SmAfbWdh, SmetaWdh, Seta1Wdh, Netfirst, 
                        Seta2Wdh, Netsecon, Set12Wdh, SphiWdh,  SphidWdh, 
@@ -76,8 +82,7 @@ external etsphit
       SpaceThk = 0.9525      ! Spacer back plate half thicknes
       ScintThk = 0.250       ! active scintillator plate half thickness
       AbsorThk = 0.250       ! absorber plate thickness halfpThickness
-      AbPapThk = 0.005       ! absorber paper plate thickness half thicness
-      SntchThk = 0.000       ! Smd front notch width
+      AbPapThk = 0.005       ! absorber paper plate thickness half thickness
       g10SbThk = 0.115       ! G10 SMD front and back plate half thickness
       SmAlfWdh =11.2014      ! SMD Al front back plate with Ar half width
       SmAlfThk = 0.3893      ! SMD Al front back plate with Ar half thickness
@@ -204,12 +209,8 @@ Block CSUP  is a super layer with few layers inside
                       zi ={0, current_depth/tan_theta, future_depth/tan_theta},
                       rmn={ current_depth,    current_depth,    future_depth },
                       rmx={ future_depth,     future_depth,     future_depth };
-      Call GSTPAR (ag_imed,'CUTGAM',0.00008)
-      Call GSTPAR (ag_imed,'CUTELE',0.001)
-      Call GSTPAR (ag_imed,'BCUTE',0.0001)
-      Call GSTPAR (ag_imed,'CUTNEU',0.001)
-      Call GSTPAR (ag_imed,'CUTHAD',0.001)
-      Call GSTPAR (ag_imed,'CUTMUO',0.001)   
+      Call CALBPAR(ag_imed,'ABSORBER')
+
       Do sub = 1,nint(calg_NsubLay(super))
          layer = layer + 1
          if(layer.lt.nint(calg_NsubLay(1)+calg_NsubLay(2))) then
@@ -244,12 +245,8 @@ Block CPBP
       SHAPE  BOX  dx = calg_AbsorThk,
                   dy = current_depth*tan(TwoPi/120.)-calg_CrackWd,
                   dz = current_depth/tan_theta/2
-      Call GSTPAR (ag_imed,'CUTGAM',0.00008)
-      Call GSTPAR (ag_imed,'CUTELE',0.001)
-      Call GSTPAR (ag_imed,'BCUTE',0.0001)
-      Call GSTPAR (ag_imed,'CUTNEU',0.001)
-      Call GSTPAR (ag_imed,'CUTHAD',0.001)
-      Call GSTPAR (ag_imed,'CUTMUO',0.001)
+      Call CALBPAR(ag_imed,'ABSORBER')
+
 Endblock
 *
 Block CSCI a scintillator layer.
@@ -260,12 +257,8 @@ Block CSCI a scintillator layer.
       Shape     BOX   dx=calg_ScintThk,  
                       dy = current_depth*tan(TwoPi/120.)-calg_CrackWd,
                       dz = current_depth/tan_theta/2
-      Call GSTPAR (ag_imed,'CUTGAM',0.00008)
-      Call GSTPAR (ag_imed,'CUTELE',0.001)
-      Call GSTPAR (ag_imed,'BCUTE',0.0001)
-      Call GSTPAR (ag_imed,'CUTNEU',0.001)
-      Call GSTPAR (ag_imed,'CUTHAD',0.001)
-      Call GSTPAR (ag_imed,'CUTMUO',0.001)
+      Call CALBPAR(ag_imed,'ABSORBER')
+
 * define Birks law parameters
       Call GSTPAR (ag_imed,'BIRK1',1.)
       Call GSTPAR (ag_imed,'BIRK2',RKB2sc)
@@ -286,12 +279,8 @@ Block CBTW  is the  Module Front Back Plate
       attribute CBTW  seen=1  colo=6
       Shape     BOX   dy = current_depth*tan(TwoPi/120.)-calg_CrackWd,
                       dz = current_depth/tan_theta/2
-      Call GSTPAR (ag_imed,'CUTGAM',0.00008)
-      Call GSTPAR (ag_imed,'CUTELE',0.001)
-      Call GSTPAR (ag_imed,'BCUTE',0.0001)
-      Call GSTPAR (ag_imed,'CUTNEU',0.001)
-      Call GSTPAR (ag_imed,'CUTHAD',0.001)
-      Call GSTPAR (ag_imed,'CUTMUO',0.001)
+      Call CALBPAR(ag_imed,'ABSORBER')
+
 EndBlock
 * ----------------------------------------------------------------------------
 Block CSMD is the shower maximum detector envelope
@@ -303,14 +292,9 @@ Block CSMD is the shower maximum detector envelope
       Mixture   Cellulose Dens=0.35 Isvol=1       
       attribute CSMD  seen=1  colo=6
       Shape BOX dx=smd_width,
-                dy=current_depth*tan(TwoPi/120.)-calg_CrackWd-calg_SntchThk,
+                dy=current_depth*tan(TwoPi/120.)-calg_CrackWd,
                 dz=current_depth/tan_theta/2
-      Call GSTPAR (ag_imed,'CUTGAM',0.00008)
-      Call GSTPAR (ag_imed,'CUTELE',0.001)
-      Call GSTPAR (ag_imed,'BCUTE',0.0001)
-      Call GSTPAR (ag_imed,'CUTNEU',0.001)
-      Call GSTPAR (ag_imed,'CUTHAD',0.001)
-      Call GSTPAR (ag_imed,'CUTMUO',0.001)
+      Call CALBPAR(ag_imed,'SENSITIVE')
 *
 * front back G10 plate
       Create CSMG 
@@ -373,14 +357,8 @@ Block CSMG is G10 front back plate
       Mixture   g10   Dens=1.7 Isvol=0
       attribute CSMG seen=1 colo=1
       Shape BOX dx=calg_g10SbThk
-      Call GSTPAR (ag_imed,'CUTGAM',0.00001)
-      Call GSTPAR (ag_imed,'CUTELE',0.00001)
-      Call GSTPAR (ag_imed,'CUTNEU',0.001)
-      Call GSTPAR (ag_imed,'CUTHAD',0.001)
-      Call GSTPAR (ag_imed,'CUTMUO',0.001)
-      CAll GSTPAR (ag_imed,'LOSS',1.0)
-      CAll GSTPAR (ag_imed,'DRAY',1.0)
-      CAll GSTPAR (ag_imed,'STRA',1.0)
+      Call CALBPAR(ag_imed,'SENSITIVE')
+
 EndBlock
 *
 Block CSDA is Al block with sensitive gas volume
@@ -391,14 +369,8 @@ Block CSDA is Al block with sensitive gas volume
       Shape BOX   dx = calg_SmAlfThk,
                   dy = calg_SmAlfWdh, 
                   dz = eta_lenght
-      Call GSTPAR (ag_imed,'CUTGAM',0.00001)
-      Call GSTPAR (ag_imed,'CUTELE',0.00001) 
-      Call GSTPAR (ag_imed,'CUTNEU',0.001)
-      Call GSTPAR (ag_imed,'CUTHAD',0.001)
-      Call GSTPAR (ag_imed,'CUTMUO',0.001)
-      CAll GSTPAR (ag_imed,'LOSS',1.0)
-      CAll GSTPAR (ag_imed,'DRAY',1.0)
-      CAll GSTPAR (ag_imed,'STRA',1.0)
+      Call CALBPAR(ag_imed,'SENSITIVE')
+
       Create CSME
 EndBlock
 *
@@ -409,14 +381,8 @@ Block CSMC is the front first (last) Al rib
       attribute CSMC seen=1 colo=6
       Shape BOX dx = calg_SmAlfThk,
                 dy = calg_SmAffWdh
-      Call GSTPAR (ag_imed,'CUTGAM',0.00001)
-      Call GSTPAR (ag_imed,'CUTELE',0.00001)
-      Call GSTPAR (ag_imed,'CUTNEU',0.001)
-      Call GSTPAR (ag_imed,'CUTHAD',0.001)
-      Call GSTPAR (ag_imed,'CUTMUO',0.001)
-      CAll GSTPAR (ag_imed,'LOSS',1.0)
-      CAll GSTPAR (ag_imed,'DRAY',1.0)
-      CAll GSTPAR (ag_imed,'STRA',1.0)
+      Call CALBPAR(ag_imed,'SENSITIVE')
+
 EndBlock
 *
 Block CSMB is the back first (last) Al rib 
@@ -426,14 +392,8 @@ Block CSMB is the back first (last) Al rib
       attribute CSMB seen=1 colo=6
       Shape BOX dx = calg_SmAlfThk,
                 dy = calg_SmAfbWdh
-      Call GSTPAR (ag_imed,'CUTGAM',0.00001)
-      Call GSTPAR (ag_imed,'CUTELE',0.00001)
-      Call GSTPAR (ag_imed,'CUTNEU',0.001)
-      Call GSTPAR (ag_imed,'CUTHAD',0.001)
-      Call GSTPAR (ag_imed,'CUTMUO',0.001)
-      CAll GSTPAR (ag_imed,'LOSS',1.0)
-      CAll GSTPAR (ag_imed,'DRAY',1.0)
-      CAll GSTPAR (ag_imed,'STRA',1.0)
+      Call CALBPAR(ag_imed,'SENSITIVE')
+
 EndBlock
 *
 Block CSME is the part of CSDA Al box with Ar/CO2 sensiteve gas 
@@ -442,14 +402,8 @@ Block CSME is the part of CSDA Al box with Ar/CO2 sensiteve gas
       Medium Al_smd
       attribute CSME seen=1 colo=6
       Shape Division Iaxis=2 Ndiv = nint(calg_NSmdAlw)
-      Call GSTPAR (ag_imed,'CUTGAM',0.00001)
-      Call GSTPAR (ag_imed,'CUTELE',0.00001) 
-      Call GSTPAR (ag_imed,'CUTNEU',0.001)
-      Call GSTPAR (ag_imed,'CUTHAD',0.001)
-      Call GSTPAR (ag_imed,'CUTMUO',0.001)
-      CAll GSTPAR (ag_imed,'LOSS',1.0)
-      CAll GSTPAR (ag_imed,'DRAY',1.0)
-      CAll GSTPAR (ag_imed,'STRA',1.0)
+      Call CALBPAR(ag_imed,'SENSITIVE')
+
 * sensitive Ar/CO2 box 
       do i=1,2
           Create CSHI
@@ -475,14 +429,9 @@ Block CSHI is a sensiteve Ar/CO2 box
                    Dx = calg_SmGasWdh,
                    Phi1 = 270 phi2 = 450
       endif
-* PN: 100 KeV is a reasonable cut
-      Call GSTPAR (ag_imed,'CUTGAM',0.0001)
-      Call GSTPAR (ag_imed,'CUTELE',0.0001)    
-      Call GSTPAR (ag_imed,'CUTNEU',0.001)
-      Call GSTPAR (ag_imed,'CUTHAD',0.001)
-      Call GSTPAR (ag_imed,'CUTMUO',0.001)
+      call CALBPAR(ag_imed','SENSITIVE')
       CAll GSTPAR (ag_imed,'STRA',1.0)
-
+*
       h_eta1=2.*(calg_Seta1Wdh+calg_Set12Wdh)
       sh_eta1=calg_Netfirst*h_eta1
       h_eta2=2.*(calg_Seta2Wdh+calg_Set12Wdh) 
@@ -517,6 +466,36 @@ Block CSHI is a sensiteve Ar/CO2 box
 EndBlock
 *
       end
+******************************************************************************
+      subroutine  CALBPAR(imed,medium)
+*
+      integer   imed
+      character medium*(*)
+*
+
+      if      ( medium=='ABSORBER' ) then    
+* --- cuts for EMC absorber and scintillator 
+        Call GSTPAR (imed,'CUTGAM',0.00008)
+        Call GSTPAR (imed,'CUTELE',0.001)
+        Call GSTPAR (imed,'BCUTE' ,0.0001)
+
+      else if ( medium=='SENSITIVE' ) then   
+* --- cuts for SMD light material and gas
+        Call GSTPAR (imed,'CUTGAM',0.00001)
+        Call GSTPAR (imed,'CUTELE',0.00001)    
+*        this is gstar default:
+*        CAll GSTPAR (imed,'LOSS',  1.0)
+*        CAll GSTPAR (imed,'DRAY',  1.0)
+      endif
+
+*--- common cuts for hadrons and muons in EMC&SMD
+
+      Call GSTPAR (imed,'CUTNEU',0.001)
+      Call GSTPAR (imed,'CUTHAD',0.001)
+      Call GSTPAR (imed,'CUTMUO',0.001)
+*
+      end
+
 ******************************************************************************
                 Subroutine  etsphit(j,Hit)
 *
