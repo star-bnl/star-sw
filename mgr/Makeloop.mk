@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.21  1998/10/08 15:37:37  perev
+#  add strip
+#
 #  Revision 1.20  1998/10/07 20:23:47  perev
 #  cleanup of .mk
 #
@@ -139,7 +142,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/10/07 20:23:47 $ 
+#           Last modification $Date: 1998/10/08 15:37:37 $ 
 #  default setings
 # Current Working Directory
 #
@@ -157,28 +160,28 @@ THREE      :=3
 FOUR       :=4
 FIVE       :=5
 
-MakePam := $(wildcard $(CWD)/MakePam.mk)
+MakePam := $(strip $(wildcard $(CWD)/MakePam.mk))
 ifndef MakePam
-  MakePam := $(wildcard $(CWD)/mgr/MakePam.mk)  
+  MakePam := $(strip $(wildcard $(CWD)/mgr/MakePam.mk))  
 endif
 ifndef MakePam
-  MakePam := $(wildcard $(STAR)/mgr/MakePam.mk)  
+  MakePam := $(strip $(wildcard $(STAR)/mgr/MakePam.mk))  
 endif
 
-MakeDll := $(wildcard $(CWD)/MakeDll.mk)
+MakeDll := $(strip $(wildcard $(CWD)/MakeDll.mk))
 ifndef MakeDll
-  MakeDll := $(wildcard $(CWD)/mgr/MakeDll.mk)  
+  MakeDll := $(strip $(wildcard $(CWD)/mgr/MakeDll.mk))  
 endif
 ifndef MakeDll
-  MakeDll := $(wildcard $(STAR)/mgr/MakeDll.mk)  
+  MakeDll := $(strip $(wildcard $(STAR)/mgr/MakeDll.mk))  
 endif
 
-Makeloop := $(wildcard $(CWD)/Makeloop.mk)
+Makeloop := $(strip $(wildcard $(CWD)/Makeloop.mk))
 ifndef Makeloop
-  Makeloop := $(wildcard $(CWD)/mgr/Makeloop.mk)  
+  Makeloop := $(wildcard $(CWD)/mgr/Makeloop.mk))  
 endif
 ifndef Makeloop
-  Makeloop := $(wildcard $(STAR)/mgr/Makeloop.mk)  
+  Makeloop := $(strip $(wildcard $(STAR)/mgr/Makeloop.mk))  
 endif
 
 ifndef INP_DIR 
