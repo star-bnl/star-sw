@@ -10,6 +10,9 @@ void St2print(Int_t nevents=1,char *fname="R5086033c3.event.root")
 {
 
   fname="/star/data27/reco/dev/2004/05/st_physics_adc_5135048_raw_2070001.event.root";
+  fname="/star/data46/reco/dAuMinBias/FullField/P04if/2003/035/st_physics_4035002_raw_0010010.event.root";
+  fname="./st_physics_4145041_raw_0040001.event.root";
+
   //
   // First load some shared libraries we need
   //    
@@ -81,21 +84,29 @@ void St2print(Int_t nevents=1,char *fname="R5086033c3.event.root")
       
       StEvent* mEvent = (StEvent*)chain->GetInputDS("StEvent");
       assert(mEvent);// fix your chain or open the right event file
-      StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection(); 
-      assert(emcC);
-   // print Endcap hits in StEvent
-   //   printETOW(emcC->detector(13));
+
+      StPrimaryVertex *primVer=mEvent->primaryVertex();
+      if(primVer==0) {
+	printf("eveID=%d no vert\n", mEvent->id()); 
+      } else {
+	StThreeVectorF &ver=primVer->position();
+	int nPrim=primVer->numberOfDaughters();
+	printf("eveID=%d nPrim=%d, Vz=%f \n",mEvent->id() ,nPrim,ver.z() );
+      }
+      
+      //      StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection(); assert(emcC);
+      // print Endcap hits in StEvent
+      //   printETOW(emcC->detector(13));
       //    printEPRE(emcC->detector(14));
       //printESMD(emcC->detector(15));
       //     printESMD(emcC->detector(16));
   
       // printRaw(emcC->eemcRawData());
       
-      printRawBEMC(emcC->bemcRawData());
+      // printRawBEMC(emcC->bemcRawData());
       
-
-
-    if(iev<=2)      goto EventLoop;
+      //  if(iev<=2) 
+      goto EventLoop;
     } // Event Loop
     chain->Finish();
     //    delete myMk2;
