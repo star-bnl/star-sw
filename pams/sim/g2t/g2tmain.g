@@ -224,6 +224,7 @@ created   22 april 98
       G2T_MAIN = i
       END
 
+****************************************************************************
 
       FUNCTION   G2T_NEW_TABLE (name,spec,L)
       implicit   none
@@ -257,58 +258,18 @@ created   22 april 98
   G2T_NEW_TABLE=i
   end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%obsolete%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+****************************************************************************
 
-      Record /G2T_EVENT_ST/  g2t_event
-      save                   g2t_event
+  Function   G2T_FIELD(x)
+  Implicit   NONE
+  Real       G2T_field,x
+  Structure  MFLG  {version, BField }
+  Integer    imag/0/
 
-      call g2t_get_event(g2t_event)
+  Call RbPUSHD
+  USE /DETM/MFLD/MFLG  stat=imag
+  G2T_field = mflg_Bfield
+  Call RbPOPD
 
-      subroutine g2t_get_event(g2t_event)
-      implicit   none
-#include "g2t_event.inc"
-      Integer                TDM_MAP_TABLE
-      Integer                NwHEAD,IHEAD(100),Nu,IBUF(100),i,j,in,ip,jn,jp
-      Integer                Ntra,IRUN,Ievt,IwtFL,Istat,IDPDG,MOTH(2),IDAU1
-      Real                   VERT(4),PP(4),TIME,AMASS,WEIGH
-      Character              GeName*8
-      INTEGER                NUMPRIM,NUMFINS
-      common /g2tevtcnt/     NUMPRIM,NUMFINS 
-      Record /G2T_EVENT_ST/  g2t_event
-*
-*     make g2t_event:
-      call GFHEAD  (NwHead,IHEAD,Nu,IBUF)
-      call AgNZGETE(1,1,Ntra,IRUN,IEVT,GeName,VERT,IWTFL,WEIGH)
-      call AgNZGETP(1,1,1,Istat,IDPDG,PP,AMASS,MOTH,TIME,IDAU1,VERT)
-
-      call VZERO(g2t_event.merge_info,  10)
-      call VZERO(g2t_event.polarization,10)
-      g2t_event.ge_rndm(1)         = IHEAD(3)
-      g2t_event.ge_rndm(2)         = IHEAD(4)
-      g2t_event.n_event            = IHEAD(2)
-
-      if (Istat==10) then
-        g2t_event.eg_label         = VERT(2)    ! run number
-        g2t_event.event_type       = VERT(1)    ! event number
-        i= AMASS                                ! Awest.Aeast
-        j=(AMASS-i)*1000                        !
-        if (i<=100) { in=0;   ip=i;     }       ! west
-        if (j<=100) { jn=0;   jp=j;     }       ! east
-        if (i> 100) { in=100*i/197; ip=i-in; }  ! west
-        if (j> 100) { jn=100*j/197; jp=j-jn; }  ! east
-        g2t_event.n_part_neut_east = jn  
-        g2t_event.n_part_neut_west = in
-        g2t_event.n_part_prot_east = jp
-        g2t_event.n_part_prot_west = ip
-        g2t_event.n_run            = MOTH(1)
-        g2t_event.b_impact         = PP(1)
-        g2t_event.phi_impact       = PP(2)
-      endif
-      g2t_event.n_track_eg_fs      = NUMPRIM
-      g2t_event.n_track_prim       = NUMFINS
-      g2t_event.prim_vertex_p      = 1
-      g2t_event.time_offset        = 0
-
-      END
-
+  end
 
