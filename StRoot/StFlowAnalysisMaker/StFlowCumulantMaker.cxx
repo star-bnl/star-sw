@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.18 2004/11/16 21:22:22 aihong Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.19 2004/12/09 23:47:08 posk Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -115,8 +115,6 @@ Int_t StFlowCumulantMaker::Init() {
   TString* histTitle;
 
   for (int k = 0; k < Flow::nSels; k++) {
-    char countSels[2];
-    sprintf(countSels,"%d",k+1);
 
     // for each selection
     histFull[k].mHistCumul = new TProfile*[Flow::nCumulDiffOrders];
@@ -125,9 +123,9 @@ Int_t StFlowCumulantMaker::Init() {
       char theCumulOrder[2]; // if >10, need to use char*
       sprintf(theCumulOrder,"%d",(ord+1)*2);
       histTitle = new TString("Flow_Cumul_Order"); 
-      histTitle->Append(*theCumulOrder);           
+      *histTitle->Append(*theCumulOrder);           
       histTitle->Append("_Sel");                      
-      histTitle->Append(*countSels);          
+      *histTitle += k+1;          
       histFull[k].mHistCumul[ord] =  
 	new TProfile(histTitle->Data(), histTitle->Data(), Flow::nHars, 0.5,
 		     (float)(Flow::nHars) + 0.5, -1.*FLT_MAX, FLT_MAX, "");
@@ -137,22 +135,20 @@ Int_t StFlowCumulantMaker::Init() {
     
     // for each harmonic
     for (int j = 0; j < Flow::nHars; j++) {
-      char countHars[2];
-      sprintf(countHars,"%d",j+1);
 
       histTitle = new TString("Flow_CumulMultSum_Sel");
-      histTitle->Append(*countSels);
+      *histTitle += k+1;
       histTitle->Append("_Har");
-      histTitle->Append(*countHars);
+      *histTitle += j+1;
       histFull[k].histFullHar[j].mHistMultSum =
         new TH1D(histTitle->Data(),histTitle->Data(),1,0.,1.);
       delete histTitle;
 
 
       histTitle = new TString("Flow_CumulNEvent_Sel");
-      histTitle->Append(*countSels);
+      *histTitle += k+1;
       histTitle->Append("_Har");
-      histTitle->Append(*countHars);
+      *histTitle += j+1;
       histFull[k].histFullHar[j].mHistNEvent =
         new TH1D(histTitle->Data(),histTitle->Data(),1,0.,1.);
       delete histTitle;
@@ -186,9 +182,9 @@ Int_t StFlowCumulantMaker::Init() {
 	histTitle = new TString("Flow_Cumul2D_Order");
 	histTitle->Append(*theCumulOrder);
 	histTitle->Append("_Sel");
-	histTitle->Append(*countSels);
+	*histTitle += k+1;
 	histTitle->Append("_Har");
-	histTitle->Append(*countHars);
+	*histTitle += j+1;
 	histFull[k].histFullHar[j].mHistCumul2D[ord] =	
 	  new TProfile2D(histTitle->Data(),histTitle->Data(), mNEtaBins,
 			 mEtaMin, mEtaMax, Flow::nPtBins, Flow::ptMin,
@@ -200,9 +196,9 @@ Int_t StFlowCumulantMaker::Init() {
 	histTitle = new TString("Flow_CumulEta_Order");
 	histTitle->Append(*theCumulOrder);
 	histTitle->Append("_Sel");
-	histTitle->Append(*countSels);
+	*histTitle += k+1;
 	histTitle->Append("_Har");
-	histTitle->Append(*countHars);
+	*histTitle += j+1;
 	histFull[k].histFullHar[j].mHistCumulEta[ord] =  
 	  new TProfile(histTitle->Data(),histTitle->Data(), mNEtaBins,
 		       mEtaMin, mEtaMax, -1.*FLT_MAX, FLT_MAX, "");
@@ -212,9 +208,9 @@ Int_t StFlowCumulantMaker::Init() {
 	histTitle = new TString("Flow_CumulPt_Order");
 	histTitle->Append(*theCumulOrder);
 	histTitle->Append("_Sel");
-	histTitle->Append(*countSels);
+	*histTitle += k+1;
 	histTitle->Append("_Har");
-	histTitle->Append(*countHars);
+	*histTitle += j+1;
 	histFull[k].histFullHar[j].mHistCumulPt[ord] =  
 	  new TProfile(histTitle->Data(), histTitle->Data(), Flow::nPtBins,
 		       Flow::ptMin, ptMaxPart, -1.*FLT_MAX, FLT_MAX, "");
@@ -249,9 +245,9 @@ Int_t StFlowCumulantMaker::Init() {
 	histTitle->Append("_GenFcnqIdx");
 	histTitle->Append(*qIndexOrderChar);
 	histTitle->Append("_Sel");
-	histTitle->Append(*countSels);
+	*histTitle += k+1;
 	histTitle->Append("_Har");
-	histTitle->Append(*countHars);
+	*histTitle += j+1;
 	histFull[k].histFullHar[j].mCumulG0Denom[pq] = 
 	  new TProfile(histTitle->Data(),histTitle->Data(), 1,0., 1., -1.*FLT_MAX, FLT_MAX, "");
 	histFull[k].histFullHar[j].mCumulG0Denom[pq]->SetYTitle("<G>");
@@ -326,9 +322,9 @@ Int_t StFlowCumulantMaker::Init() {
 	histTitle->Append("_GenFunIdx");
 	histTitle->Append(*qIndexOrderChar);
 	histTitle->Append("_Sel");
-	histTitle->Append(*countSels);
+	*histTitle += k+1;
 	histTitle->Append("_Har");
-	histTitle->Append(*countHars);
+	*histTitle += j+1;
 	histFull[k].histFullHar[j].mHistCumulIntegG0Sum[pq] =
           new TH1D(histTitle->Data(),histTitle->Data(),1,0.,1.);
         delete histTitle;   
@@ -341,7 +337,7 @@ Int_t StFlowCumulantMaker::Init() {
   }
   
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.18 2004/11/16 21:22:22 aihong Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.19 2004/12/09 23:47:08 posk Exp $");
 
   return StMaker::Init();
 }
@@ -565,8 +561,6 @@ Int_t StFlowCumulantMaker::Finish() {
   
   cout << endl << "##### Cumulant Maker:" << endl;
   for (int k = 0; k < Flow::nSels; k++) {
-    char countSels[2];
-    sprintf(countSels,"%d",k+1);
     
     cout << "##### selection "<< k+1 <<"  #### "<<endl;
     
@@ -580,7 +574,7 @@ Int_t StFlowCumulantMaker::Finish() {
       histTitle = new TString("Flow_Cumul_v_Order");
       histTitle->Append(*theCumulOrder);
       histTitle->Append("_Sel");
-      histTitle->Append(*countSels);
+      *histTitle += k+1;
       histFull[k].mHist_v[ord] = 
 	new  TH1D(*(histFull[k].mHistCumul[ord]->ProjectionX(histTitle->Data(),"e")));
       histFull[k].mHist_v[ord]->SetTitle(histTitle->Data());
@@ -610,8 +604,6 @@ if (ord>0)  histFull[k].mHist_v[ord]->Scale(1./profScale);
     }
     
     for (int j = 0; j < Flow::nHars; j++) {
-      char countHars[2];
-      sprintf(countHars,"%d",j+1);
       
       double mAvMult = // average multiplicity
 	float(histFull[k].histFullHar[j].mMultSum)/
@@ -674,9 +666,9 @@ if (ord>0)  histFull[k].mHist_v[ord]->Scale(1./profScale);
 	histTitle = new TString("Flow_Cumul_v2D_Order");
 	histTitle->Append(*theCumulOrder);
 	histTitle->Append("_Sel");
-	histTitle->Append(*countSels);
+	*histTitle += k+1;
 	histTitle->Append("_Har");
-	histTitle->Append(*countHars);
+	*histTitle += j+1;
 	histFull[k].histFullHar[j].mHist_v2D[ord] = 
 	  new TH2D(*(histFull[k].histFullHar[j].mHistCumul2D[ord]->
 		     ProjectionXY(histTitle->Data(),"e")));
@@ -691,9 +683,9 @@ if (ord>0) histFull[k].histFullHar[j].mHist_v2D[ord]->Scale(1./profScale);
 	histTitle = new TString("Flow_Cumul_vEta_Order");
 	histTitle->Append(*theCumulOrder);
 	histTitle->Append("_Sel");
-	histTitle->Append(*countSels);
+	*histTitle += k+1;
 	histTitle->Append("_Har");
-	histTitle->Append(*countHars);
+	*histTitle += j+1;
 	histFull[k].histFullHar[j].mHist_vEta[ord] = 
 	  new  TH1D(*(histFull[k].histFullHar[j].mHistCumulEta[ord]->
 		      ProjectionX(histTitle->Data(),"e")));
@@ -707,9 +699,9 @@ if (ord>0) histFull[k].histFullHar[j].mHist_vEta[ord]->Scale(1./profScale);
 	histTitle = new TString("Flow_Cumul_vPt_Order");
 	histTitle->Append(*theCumulOrder);
 	histTitle->Append("_Sel");
-	histTitle->Append(*countSels);
+	*histTitle += k+1;
 	histTitle->Append("_Har");
-	histTitle->Append(*countHars);
+	*histTitle += j+1;
 	histFull[k].histFullHar[j].mHist_vPt[ord] = 
 	  new  TH1D(*(histFull[k].histFullHar[j].mHistCumulPt[ord]->
 		      ProjectionX(histTitle->Data(),"e")));
@@ -916,6 +908,10 @@ void StFlowCumulantMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.19  2004/12/09 23:47:08  posk
+// Minor changes in code formatting.
+// Added hist for TPC primary dca to AnalysisMaker.
+//
 // Revision 1.18  2004/11/16 21:22:22  aihong
 // removed old cumulant method
 //

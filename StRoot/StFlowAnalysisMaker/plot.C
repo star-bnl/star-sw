@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.61 2004/12/07 23:10:23 posk Exp $
+// $Id: plot.C,v 1.62 2004/12/09 23:47:11 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -70,6 +70,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_Charge_Ftpc",
     "Flow_DcaGlobal_Tpc",
     "Flow_DcaGlobal_Ftpc",
+    "Flow_Dca_Tpc",
     "Flow_Dca_Ftpc",
     "Flow_Chi2_Tpc",
     "Flow_Chi2_Ftpc",
@@ -165,6 +166,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_MultOverOrig",
     "Flow_MultEta",
     "Flow_MultPart",
+    "Flow_Dca_Tpc",
     "Flow_DcaGlobal_Tpc",
     "Flow_Chi2_Tpc",
     "Flow_FitPts_Tpc",
@@ -233,10 +235,10 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   int nSingles;
   if (includeFtpc) {
     const int nNames = sizeof(baseName1) / sizeof(char*);
-    nSingles = 48 + 1;
+    nSingles = 49 + 1;
   } else {
     const int nNames = sizeof(baseName2) / sizeof(char*);
-    nSingles = 48 + 1 - 19;
+    nSingles = 49 + 1 - 19;
   }
 
   // construct arrays of base and short names
@@ -354,12 +356,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   TLine* lineYcm    = new TLine(Ycm, -10., Ycm, 10.);
   TLine* lineOnePhi = new TLine(0., 1., phiMax, 1.);
   for (int j = firstJ; j < lastJ; j++) {
-    char countRows[2];
-    sprintf(countRows,"%d",j+1);
     float order = (float)(j+1);
     for (int k = firstK ; k < lastK; k++) {
-      char countColumns[2];
-      sprintf(countColumns,"%d",k+1);
       int padN = j*columns + k + 1;                    // pad number
 
       // construct histName and histProjName
@@ -382,17 +380,17 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	TString* histName = new TString(temp);
 	histProjName = new TString(baseName[pageNumber]);
 	if (!singleGraph) {
-	  histProjName->Append(*countColumns);
+	  *histProjName += k+1;
 	  histProjName->Append("_Har");
-	  histProjName->Append(*countRows);
+	  *histProjName += j+1;
 	}
       } else {                                         // not projection
 	TString* histName = new TString(baseName[pageNumber]);
       }
       if (!singleGraph) {
-	histName->Append(*countColumns);
+	*histName += k+1;
 	histName->Append("_Har");
-	histName->Append(*countRows);
+	*histName += j+1;
       }
       cout << " col= " << k+1 << " row= " << order << " pad= " << padN << "\t" 
 	   << histName->Data() << endl;
@@ -558,9 +556,9 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	float n_qBins = (float)hist->GetNbinsX();
 	double area = hist->Integral() * max / n_qBins; 
 	TString* histName = new TString("Flow_Mul_Sel");
-	histName->Append(*countColumns);
+	*histName += k+1;
 	histName->Append("_Har");
-	histName->Append(*countRows);
+	*histName += j+1;
 	TH1* histMult = dynamic_cast<TH1*>(histFile->Get(histName->Data()));
 	if (!histMult) {
 	  cout << "### Can't find histogram " << histName->Data() << endl;
@@ -697,11 +695,9 @@ TCanvas* plotResolution(){
     int resNumber = j;
     cout << "resolution name= " << resName[resNumber] << endl;
     for (int k = 0; k < columns; k++) {
-      char countColumns[2];
-      sprintf(countColumns,"%d",k+1);
       int padN = j*columns + k +1;
       TString* histName = new TString(resName[resNumber]);
-      histName->Append(*countColumns);
+      *histName += k+1;
       cout << "row= " << j << " col= " << k << " pad= " << padN << "\t" 
 	   << histName->Data() << endl;
       TH1* hist = dynamic_cast<TH1*>(histFile->Get(histName->Data()));
@@ -781,6 +777,10 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.62  2004/12/09 23:47:11  posk
+// Minor changes in code formatting.
+// Added hist for TPC primary dca to AnalysisMaker.
+//
 // Revision 1.61  2004/12/07 23:10:23  posk
 // Only odd and even phiWgt hists. If the old phiWgt file contains more than
 // two harmonics, only the first two are read. Now writes only the first two.
