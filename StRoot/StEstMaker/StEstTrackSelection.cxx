@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrackSelection.cxx,v 1.8 2001/02/23 08:50:19 lmartin Exp $
+ * $Id: StEstTrackSelection.cxx,v 1.9 2001/04/20 16:22:40 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrackSelection.cxx,v $
+ * Revision 1.9  2001/04/20 16:22:40  lmartin
+ * New version of ChooseBestNBranches.
+ *
  * Revision 1.8  2001/02/23 08:50:19  lmartin
  * StMessMgr.h included in order to use gMessMgr.
  *
@@ -70,21 +73,24 @@ void StEstTracker::ChooseBestNBranches(StEstTrack *tr, int slay) {
   // For a given track in a given layer the mParams[mPass]->ntotBranch[slay]
   // branches with the best chisq are selected.
   // The branches are sorted according to their chisq (weighted by the number of hits)
-  // The unselected branches are deleted.
-  int i, j;
+  // The branches are then swapped according to the sorted list.
+  // The unselected branches are removed from the track.
+  int i,j;
+  int itemp,j_2swap;
   int indtmp, *indchi;
   double chii, chij;
-
-  if(mDebugLevel>0)
-    gMessMgr->Info()<<"StEstMaker::ChooseBestNBranches ****START****"<<endm;
-
-  StEstBranch **br_tmp = new StEstBranch*[tr->GetNBranches()];
+  StEstBranch *br_2swap;
 
   if(mDebugLevel>1)
-    gMessMgr->Info()<<"tr->GetNBranches()= "<<tr->GetNBranches()<<endm;
+    gMessMgr->Info()<<"StEstMaker::ChooseBestNBranches ****START****"<<endm;
 
+
+  if(mDebugLevel>1)
+    gMessMgr->Info()<<"tr->GetNBranches()= "<<tr->GetNBranches()
+		    <<" Keeping "<<mParams[mPass]->ntotbranch[slay]<<" branches"<<endm;
+
+  // filling the indchi array from smallest to biggest chisq
   indchi = new int[mParams[0]->maxbranches];
-
   for (i=0;i<tr->GetNBranches();i++)
     indchi[i] = i;
   for (i=0;i<tr->GetNBranches()-1;i++) {
@@ -98,22 +104,30 @@ void StEstTracker::ChooseBestNBranches(StEstTrack *tr, int slay) {
       }
     }
   }
-  
-  for (i=mParams[mPass]->ntotbranch[slay]; i<tr->GetNBranches();i++) {
-    br_tmp[i] = tr->GetBranch(indchi[i]);
+
+  // swapping the branches according to the indchi list
+  for (i=0;i<tr->GetNBranches();i++) {
+    br_2swap=tr->GetBranch(i);
+    tr->SetBranch(i,tr->GetBranch(indchi[i]));
+    tr->SetBranch(indchi[i],br_2swap);
+    for (j=0;j<tr->GetNBranches();j++)
+      if (indchi[j]==i) j_2swap=j;
+    itemp=indchi[i];
+    indchi[i]=i;
+    indchi[j_2swap]=itemp;
   }
+
+  // removing the worst branches
   int brmax = tr->GetNBranches();
-  for (i=mParams[mPass]->ntotbranch[slay]; i<brmax;i++) {
-    delete br_tmp[i];
-  }
+  for (i=brmax-1;i>mParams[mPass]->ntotbranch[slay];i--)
+    tr->RemoveBranch(i);
 
   if(mDebugLevel>1)
     gMessMgr->Info()<<"tr->GetNBranches()= "<<tr->GetNBranches()<<endm;
 
   delete[] indchi;
-  delete[] br_tmp;
 
-  if(mDebugLevel>0)
+  if(mDebugLevel>1)
     gMessMgr->Info()<<"StEstMaker::ChooseBestNBranches ****STOP****" <<endm;
 }
        
