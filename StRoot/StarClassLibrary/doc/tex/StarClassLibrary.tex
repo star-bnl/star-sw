@@ -2,16 +2,15 @@
 %
 % STAR Class Library - User Guide and Reference Manual -- LaTeX Source 
 %
-% $Id: StarClassLibrary.tex,v 1.4 1999/03/30 19:06:25 ullrich Exp $
+% $Id: StarClassLibrary.tex,v 1.5 1999/04/27 19:58:08 ullrich Exp $
 %
 % Author: LaTeX template by Thomas Ullrich, March 19 1998
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StarClassLibrary.tex,v $
-% Revision 1.4  1999/03/30 19:06:25  ullrich
-% Added description of dca between two helices to
-% appendix. Corrected some typos.
+% Revision 1.5  1999/04/27 19:58:08  ullrich
+% Added description of StTimer
 %
 % Revision 1.19  2000/04/06 23:01:45  ullrich
 % Added reference section for StMath. Particle section updated.
@@ -160,8 +159,8 @@
   \mbox{\includegraphics[width=\textwidth]{StarClassLibraryTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.4 $ $}  \\[5mm] % replaced by cvs with current revision  
-  {\LARGE $ $Date: 1999/03/30 19:06:25 $ $}  % replaced by cvs with current revision  
+  {\LARGE $ $Revision: 1.5 $ $}  \\[5mm] % replaced by cvs with current revision  
+  {\LARGE $ $Date: 1999/04/27 19:58:08 $ $}  % replaced by cvs with current revision  
   \vfill
 \end{center}
 \cleardoublepage
@@ -3593,6 +3592,79 @@ pseudo rapidity(c) = 0.364012
     version. Operations can be mixed with the non-template single precision version
     \texttt{StThreeVectorF} but not with any instance of \verb+StThreeVector<T>+.
     The templated version should be preferred where possible.
+    
+\item[Related Classes]
+    StThreeVectorD inherits from TObject \index{TObject}
+    if the SCL was compiled with the \name{\_\_ROOT\_\_} flag set.
+
+\item[Persistence]
+    Within the ROOT framework.
+
+    if the SCL was compiled without the \name{SCL\_WITHOUT\_ROOT} flag set.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: StThreeVectorF
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{StThreeVectorF \index{StThreeVectorF|textbf}}
+\begin{Entry}
+\item[Summary]
+    StThreeVectorF is a non-template version of \verb+StThreeVector<float>+
+    (see \ref{StThreeVector}). The code does not contain templates nor
+    does it make use of the Standard C++ library. All data member are of
+    type \texttt{float}.
+    
+\item[Synopsis]
+    \verb+#include "StThreeVectorF.hh"+ \\
+    \verb+StThreeVectorF;+
+    
+\item[Description]       
+    The member functions, operators and non-member functions are identical
+    to those of StThreeVector but might be slightly slower in execution speed
+    since the inline mechanism cannot be used as extensive as for the template
+    version. Operations can be mixed with the non-template double precision version
+    \texttt{StThreeVectorD} but not with any instance of \verb+StThreeVector<T>+.
+    The templated version should be preferred where possible.
+
+\item[Related Classes]
+    StThreeVectorF inherits from TObject \index{TObject}
+    if the SCL was compiled with the \name{\_\_ROOT\_\_} flag set.
+
+\end{Entry}
+
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: StTimer
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{StTimer \index{StTimer|textbf}}
+\index{timer}
+\index{CPU timer}
+\begin{Entry}
+\item[Summary]
+    CPU timer
+    
+\item[Synopsis]
+    \verb+#include "StTimer.hh"+ \\
+    \verb+StTimer timer;+
+    
+\item[Description]    
+    This class can measure elapsed CPU (user) time. The timer has two
+    states: running and stopped. The timer measures the total amount
+    of time spent in the "running" state since it was either
+    constructed or reset.
+    
+    The timer is put into the "running" state by calling member
+    function \comp{start()}. It is put into the "stopped" state by
+    calling \comp{stop()}.
+    
+    StTimer uses the system-dpendent function \comp{clock()} which
+    cout << "Test 1:" << endl;
+    cout << "This test should require less than 5 sec CPU time. \n"
+         << "The exact amount depends strongly on the system." << endl;
     cout << "The measured elapsed CPU time is: "
          << timer.elapsedTime() << " sec\n" << endl;
     
