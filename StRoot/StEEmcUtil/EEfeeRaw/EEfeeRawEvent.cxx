@@ -31,7 +31,9 @@ EEfeeRawEvent ::  ~EEfeeRawEvent() {
 
 void EEfeeRawEvent :: clear(){
   ID=-1;
-  block->Delete(); // preserve memory
+  //block->Delete(); // preserve memory
+  block->Clear();
+
 }
 
 //--------------------------------------------------

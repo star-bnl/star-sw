@@ -2,9 +2,12 @@
 #ifndef EEmcL3Tracks_h
 #define EEmcL3Tracks_h
 /*********************************************************************
- * $Id: EEmcL3Tracks.h,v 1.2 2003/05/26 14:44:34 zolnie Exp $
+ * $Id: EEmcL3Tracks.h,v 1.3 2003/05/27 19:11:44 zolnie Exp $
  *********************************************************************
  * $Log: EEmcL3Tracks.h,v $
+ * Revision 1.3  2003/05/27 19:11:44  zolnie
+ * added dE/dx info
+ *
  * Revision 1.2  2003/05/26 14:44:34  zolnie
  * rewritten implementation of EEmcL3Tracks using TClonesArray
  * introduced a common Makefile and mklinkdef.pl
@@ -13,7 +16,12 @@
  * new additions for ..... :)
  *
  *********************************************************************/
+#include <math.h>
 #include <time.h>
+
+#ifndef MAXFLOAT
+#define MAXFLOAT 3E38
+#endif
 
 
 #include "TObject.h"
@@ -53,31 +61,36 @@ private:
   Float_t mPy;  // y momentum at origin
   Float_t mPz;  // z momentum at origin
   Float_t mB;   // field
-   Int_t   mQ;   // charge
+  Int_t   mQ;   // charge
 
-  ClassDef(EEmcHelix,1)   
+  ClassDef(EEmcHelix,2)   
 };
 
 class EEmcL3Tracks : public TObject {
 public:
   EEmcL3Tracks();
   virtual ~EEmcL3Tracks();
-  int  add(EEmcHelix &h, Float_t dedx);
+  int  add  (EEmcHelix &h, Float_t dedx);
   void clear();
-  
   void setVertex(float  x,float  y,float  z) {mVertX=x; mVertY=y; mVertZ=z;};
-  void getVertex(float& x,float& y,float& z) {x=mVertX; y=mVertY; z=mVertZ;};
+
+  void       getVertex(float& x,float& y,float& z) {x=mVertX; y=mVertY; z=mVertZ;};
+  Float_t    getdEdx  (int i) { return (0<=i && i<mNTracks) ?  mDedx[i] : -MAXFLOAT; }
+  EEmcHelix* getHelix (int i) ; 
+  
 
   void print(FILE *f = stdout) const;
 
 private:
-  Int_t              mNTracks; //
-  Float_t            mVertX;   //
-  Float_t            mVertY;   //
-  Float_t            mVertZ;   //
-  TClonesArray      *mHelix;   //-> array with helices
- 
-   ClassDef(EEmcL3Tracks,1) 
+  static const Int_t mAllocTracks;//!
+  Int_t              mTrackSize;//!
+  Int_t              mNTracks;  //
+  Float_t            mVertX;    //
+  Float_t            mVertY;    //
+  Float_t            mVertZ;    //
+  TClonesArray      *mHelix;    //-> array with helices
+  Float_t           *mDedx;     //[mNTracks]
+  ClassDef(EEmcL3Tracks,2) 
 };
 #endif
 
