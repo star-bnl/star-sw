@@ -19,7 +19,8 @@ At the moment, only MIP calibration is working. <br><br>
 There are two ways of doing EMC calibration:
   - Tower by tower calibration
     - In this case, each tower is calibrated independtly. This requires a very high number of events to get enough statistics on each tower
-    - Eta bin calibration. In this case, all towers in the same eta bin are equalized and theier ststistics are added. In this case fewer events are necessary
+  - Eta bin calibration. 
+    - In this case, all towers in the same eta bin are equalized and theier ststistics are added. In this case fewer events are necessary
     
 To set the way calibration is going to be done, it is necessary to fill two calibration structures:
   - St_emcCalSummary
