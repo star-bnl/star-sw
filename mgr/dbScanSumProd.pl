@@ -47,6 +47,8 @@ my @SetS = (
              "auau200/dtunuc/two_photon/halffield/year_1h/hadronic_on",
              "auau200/dtunuc/two_photon/none/year_1h/hadronic_on",
              "auau200/hemicosm/default/none/year_1h/hadronic_on",
+             "auau200/hijing/beamgas/hydrogen/year_1h/hadronic_on",
+             "auau200/hijing/beamgas/nitrogen/year_1h/hadronic_on", 
              "pau200/hijing/b0_7/gam15/year_1h/hadronic_on",
              "pau200/hijing/b0_7/jet15/year_1h/hadronic_on",
              "pau200/hijing/b0_7/gam15/year_2a/hadronic_on",
@@ -60,7 +62,7 @@ my @SetS = (
              "auau200/hijing_quark/b0_3_jetq_on/jet05/year_1h/hadronic_on",
              "auau200/hijing_antinuc/b0_3_jetq_off/jet05/year_1h/hadronic_on",
              "auau200/hijing_antinuc/b0_3_jetq_on/jet05/year_1h/hadronic_on",
-                        
+             "pp200/pythia/default/minibias/year_2a/hadronic_on",           
  );
 
 my $SetD = "daq/2000/02/";
