@@ -29,7 +29,8 @@ $(STDBLIBSO): $(LINK_OBJS)
 
 $(STDBLIBA): $(LINK_OBJS) 
 	rm -f $@
-	$(AR) $(LDFLAGS) $@ $(LINK_OBJS)  
+	$(AR) $@ $(LINK_OBJS)  
+#	$(AR) $(LDFLAGS) $@ $(LINK_OBJS)  
 
 $(LINK_OBJS): $(HEADERS) $(HHEADERS)
 

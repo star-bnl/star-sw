@@ -26,17 +26,17 @@ AR       := ar -rvu
 ifeq (SunOS,$(SYSTYPE))
 
   OSDEFS   := sun SUN SOLARIS Solaris ST_NO_NUMERIC_LIMITS 
-  OSDEFS   += ST_NO_EXCEPTIONS ST_NO_NAMESPACES 
+  OSDEFS   += ST_NO_EXCEPTIONS 
   CXXFLAGS := -g -fPIC -Wall
   CFLAGS   := -g -fPIC -Wall
   EXEFLAGS := -g -Wl,-Bdynamic   
   SOFLAGS  := -g -shared  
-  LIBS     := -lnsl -lsocket
+  LIBS     := -lnsl -lsocket -lgen
 
 ifndef GNU_GCC
 #--> then were using native Sun
 
-  OSDEFS   += ST_NO_MEMBER_TEMPLATES
+  OSDEFS   += ST_NO_MEMBER_TEMPLATES 
   LDFLAGS  :=  -g  -xar -o
   SOFLAGS  :=  -g  -G
 
@@ -46,14 +46,14 @@ ifndef ONL_solaris
   CC        :=  /opt/WS5.0/bin/cc
   CXX       := /opt/WS5.0/bin/CC
   CXXFLAGS  := -g  -KPIC +w -features=no%anachronisms -features=rtti 
-  CXXFLAGES += -library=iostream,no%Cstd 
+  CXXFLAGS  += -library=iostream,no%Cstd 
   CLIBS     := -L/opt/WS5.0/lib -L/opt/WS5.0/SC5.0/lib -liostream 
   CLIBS     += -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
 
 else
 #-->CC4.2 with rogue wave
 
- OSDEFS   += ST_NO_TEMPLATE_DEF_ARGS ONL_solaris
+ OSDEFS   += ST_NO_TEMPLATE_DEF_ARGS ONL_solaris ST_NO_NAMESPACES 
  STLHOME  := /online/production/packages/rogue/workspaces/SOLARIS25/SUNPRO42/15d
  CC       := /opt/WS4.0/bin/cc
  CXX      := /opt/WS4.0/bin/CC
@@ -65,6 +65,8 @@ else
 
 endif
   AR  := $(CXX)
+else
+ OSDEFS   += ST_NO_NAMESPACES
 endif
 endif
 
