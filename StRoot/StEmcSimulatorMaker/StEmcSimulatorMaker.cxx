@@ -48,7 +48,6 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name)
    mBEMC        = 2;  // >0 BEMC 
    mEEMC        = 0;  // EEMC  of
    mHistControl = 1;  // Hist  on
-   SetDebug(0);       // Debug of
    mCompare     = kFALSE;
    gMessMgr->SetLimit("StEmcSimulator",100);
 }
@@ -95,7 +94,7 @@ Int_t StEmcSimulatorMaker::Init()
     printmBEMC(); 
     for(Int_t i=BEMC-1; i<BSMDP; i++,pmtTable++) {
       if(!mGeom[i]) {
-        mGeom[i] = new StEmcGeom(i+1);
+        mGeom[i] = StEmcGeom::getEmcGeom(i+1);
       }
 
       if(!mGeom[i]) {
@@ -210,17 +209,22 @@ void StEmcSimulatorMaker::bookHistograms(const Int_t i)
   Int_t maxAdc= mGeom[i]->getMaxAdc();
   m_adc[i]    = new TH1F(name_adc,title_adc, maxAdc+1, -0.5, float(maxAdc)+0.5); // ??
 
-  TString nameM    = detname[i] + "M";
-  TString titModule= tit[ind] + detname[i] + " #Module dist.";
-  mModule[i]       = new TH1F(nameM,titModule, 121, -0.5, 120.5);
+  if(mHistControl >= 2) {
+    TString nameM    = detname[i] + "M";
+    TString titModule= tit[ind] + detname[i] + " #Module dist.";
+    mhModule[i]      = new TH1F(nameM,titModule, 121, -0.5, 120.5);
+    nameM     = detname[i] + "Sub";
+    titModule = tit[ind] + detname[i] + " #Sub. dist.";
+    mhSub[i]  = new TH1F(nameM,titModule, 15, 0.5, 15.5);
+  }
 
   if(mCompare){
     TString name=detname[i] + "NDif";
     TString tit=detname[i] + " Diff. of hits number";
-    mDiffNumHits[i] = new TH1F(name,tit, 11,-5.5,+5.5);
+    mhDiffNumHits[i] = new TH1F(name,tit, 11,-5.5,+5.5);
     name = detname[i] + "DifDe";
     tit  = detname[i] + " Difference of DE"; 
-    mDiffDe[i] = new TH1F(name,tit, 11,-5.5e-5,+5.5e-5);
+    mhDiffDe[i] = new TH1F(name,tit, 11,-5.5e-5,+5.5e-5);
   }
 
 }
@@ -254,7 +258,10 @@ void StEmcSimulatorMaker::makeHistograms(const Int_t det)
            nhit      += 1; 
            energysum += E; 
            etsum     += E/cosh(eta);  // Et = E*sin(theta); sin(theta) = 1./cos(eta)
-           mModule[det-1]->Fill(float(m));
+           if(mHistControl >= 2) {
+             if(mhModule[det-1]) mhModule[det-1]->Fill(Axis_t(m));
+             if(mhSub[det-1])    mhSub[det-1]->Fill(Axis_t(s));
+           }
          }
        }
        else gMessMgr->Warning()<<"StEmcSimulatorMaker::makeHistograms=>bad index det "
@@ -537,7 +544,7 @@ void StEmcSimulatorMaker::compareOldSimulator()
       for(Int_t mh=0; mh<hits.size(); mh++){
         hMC = hits[mh];
         if(m==hMC->module() && e==hMC->eta() && s==hMC->sub()) {
-          mDiffDe[det-1]->Fill(de-hMC->dE());
+          mhDiffDe[det-1]->Fill(de-hMC->dE());
           goto ENDCYCLE;
         }
       }
@@ -551,7 +558,7 @@ void StEmcSimulatorMaker::compareOldSimulator()
     Int_t det=i+1;
     Int_t nOld = nbemc[i];
     Int_t nNew = getEmcMcHits(det)->numberOfHits();
-    mDiffNumHits[i]->Fill(float(nOld-nNew));
+    mhDiffNumHits[i]->Fill(float(nOld-nNew));
   }
 }
 
@@ -618,11 +625,11 @@ void StEmcSimulatorMaker::pictureCompareDe(Int_t print)
     mC1->Divide(2,4);
     for(Int_t i=0; i<4; i++){
       mC1->cd(2*i+1); 
-      mDiffNumHits[i]->SetLineWidth(4);
-      mDiffNumHits[i]->Draw();
+      mhDiffNumHits[i]->SetLineWidth(4);
+      mhDiffNumHits[i]->Draw();
       mC1->cd(2*i+2);
-      mDiffDe[i]->SetLineWidth(4);
-      mDiffDe[i]->Draw();
+      mhDiffDe[i]->SetLineWidth(4);
+      mhDiffDe[i]->Draw();
     }
     mC1->Update();
     if(print) mC1->Print("ps/newSim/CompareOldNewDe.ps");
@@ -631,8 +638,11 @@ void StEmcSimulatorMaker::pictureCompareDe(Int_t print)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.6 2001/05/14 01:21:45 pavlinov Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.7 2001/09/22 00:29:42 pavlinov Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.7  2001/09/22 00:29:42  pavlinov
+// No public constructor for StEmcGeom
+//
 // Revision 1.6  2001/05/14 01:21:45  pavlinov
 // In method StMcEmcHitCollection::module(m) m is module number, not index
 //

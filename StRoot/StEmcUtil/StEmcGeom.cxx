@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.12 2001/07/30 00:16:07 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.13 2001/09/22 00:29:05 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.13  2001/09/22 00:29:05  pavlinov
+ * No public constructor for StEmcGeom
+ *
  * Revision 1.12  2001/07/30 00:16:07  pavlinov
  * Correct numbering scheme for BSMDE
  *
@@ -86,16 +89,69 @@
 
 ClassImp(StEmcGeom)
 
+StEmcGeom *StEmcGeom::mGeom[8] = {0,0,0,0,0,0,0,0};
+
 const Float_t perr=0.01;
 Float_t rmin, rsmdEta, rsmdPhi;
 
-// _____________________________________________________________________
+StEmcGeom 
+*StEmcGeom::instance(const Int_t det)
+{
+  return getEmcGeom(det);
+}
+StEmcGeom 
+*StEmcGeom::getEmcGeom(const Int_t det)
+{
+  if(det>=1 && det<=4) {
+    Int_t indDet = det - 1;
+    if(mGeom[indDet] == 0) mGeom[indDet]  = new StEmcGeom(det);
+    return mGeom[indDet];
+  } else return 0; // wrong index
+}
+
+
+StEmcGeom 
+*StEmcGeom::instance(const Char_t *cdet)
+{
+  return getEmcGeom(cdet);
+}
+StEmcGeom 
+*StEmcGeom::getEmcGeom(const Char_t *cdet)
+{
+  Int_t det=getDetNumFromName(cdet);
+  return getEmcGeom(det);
+}
+
+
+StEmcGeom 
+*StEmcGeom::instance(const Int_t det, const Char_t* mode)
+{
+  return getEmcGeom(det,mode);
+}
+StEmcGeom 
+*StEmcGeom::getEmcGeom(const Int_t det, const Char_t* mode)
+{
+  if(det>=1 && det<=4) {
+    Int_t indDet = det - 1;
+    if(mGeom[indDet] == 0) mGeom[indDet]  = new StEmcGeom(det, mode);
+    return mGeom[indDet];
+  } else return 0; // wrong index
+}
+
+//===============================================
 StEmcGeom::StEmcGeom(const Int_t det) 
 {
   initGeom(det);
 }
-// _____________________________________________________________________
+
 StEmcGeom::StEmcGeom(const Char_t *cdet) 
+{
+  Int_t det=getDetNumFromName(cdet);
+  if(det) initGeom(det);
+}
+
+Int_t 
+StEmcGeom::getDetNumFromName(const Char_t *cdet) 
 {
   Int_t det=0;
   if     (!strcmp(cdet,"bemc")) {det=1;}
@@ -107,12 +163,11 @@ StEmcGeom::StEmcGeom(const Char_t *cdet)
   else if(!strcmp(cdet,"esmde")){det=7;}
   else if(!strcmp(cdet,"esmdp")){det=8;}
   else {printf(" StEmcGeom: Bad value of cdet %s \n", cdet);}
-
-  if(det) initGeom(det);
+  return det;
 }
-// _____________________________________________________________________
+
 StEmcGeom::~StEmcGeom() { /* Nobody */ } 
-// _____________________________________________________________________
+
 void StEmcGeom::initGeom(const Int_t det) 
 {
   mMode="default";
@@ -755,6 +810,9 @@ void  StEmcGeom::printGeom()
     printf("\n");
   }
   cout<<"\n == "<<endl; 
+  for(Int_t i=0;i<4; i++){
+    cout<<" Pointer for det = "<<i+1<<" -> "<<mGeom[i]<<endl;
+  }
 }
 // _____________________________________________________________________
 void  StEmcGeom::compare(StEmcGeom &g, Bool_t key=kFALSE)

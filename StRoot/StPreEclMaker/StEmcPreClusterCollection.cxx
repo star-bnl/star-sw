@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.cxx,v $
+// Revision 1.13  2001/09/22 00:30:09  pavlinov
+// No public constructor for StEmcGeom
+//
 // Revision 1.12  2001/04/25 18:13:35  perev
 // HPcorrs
 //
@@ -122,7 +125,7 @@ StEmcPreClusterCollection::StEmcPreClusterCollection(const Char_t *Name, StEmcDe
   mNclusters=0;
   
   mDet=stdet;
-  geo=new StEmcGeom(Name);
+  geo = StEmcGeom::getEmcGeom(Name);
   kCheckClustersOk=kFALSE;
    
   // Default values were tuned for PI0 business at 20-apr by PAI 
