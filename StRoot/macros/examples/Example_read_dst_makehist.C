@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_makehist.C,v 1.4 1999/11/30 20:04:17 kathy Exp $
+// $Id: Example_read_dst_makehist.C,v 1.5 2000/01/19 15:46:04 kathy Exp $
 // $Log: Example_read_dst_makehist.C,v $
+// Revision 1.5  2000/01/19 15:46:04  kathy
+// change default input files to point to ones in /afs/rhic/star/data/samples
+//
 // Revision 1.4  1999/11/30 20:04:17  kathy
 // fix Example macros so that they work from .dst.root files or .dst.xdf files & update documentation; also had to change which values printed in *read_dst_print_tables* macro since the names have changed in dst tables
 //
@@ -28,7 +31,7 @@
 void Example_read_dst_makehist(
   Int_t nevents=3, 
   const char *MainFile=
-  "/star/rcf/test/dev/tfs_Solaris/Fri/year_1b/set0352_01_35evts.dst.root")
+"/afs/rhic/star/data/samples/gstar.dst.root")
 {
  
     gSystem->Load("St_base");
