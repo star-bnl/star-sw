@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.cxx,v 1.2 1998/12/15 22:39:49 akio Exp $
+// $Id: St_emc_Maker.cxx,v 1.3 1999/02/12 19:16:30 akio Exp $
 // $Log: St_emc_Maker.cxx,v $
+// Revision 1.3  1999/02/12 19:16:30  akio
+// *** empty log message ***
+//
 // Revision 1.2  1998/12/15 22:39:49  akio
 // Add emc_hit object and  adc_to_energy in here.
 //
@@ -70,8 +73,8 @@ Int_t St_emc_Maker::Make(){
     while (adc = (St_emc_hits *)itr()) {
       if(adc->GetTitle() == tit){
 	TString name = adc->GetName(); name.ReplaceAll("emc_hits_","");
-	St_emc_hit *hit = new St_emc_hit(name); m_DataSet->Add(hit);
-	if(hit->Fill(adc) != kStOK) return kStErr;
+	StEmcHitCollection *hit = new StEmcHitCollection(name); m_DataSet->Add(hit);
+	if(hit->fill(adc) != kStOK) return kStErr;
       }
     }
   }
@@ -83,12 +86,12 @@ Int_t St_emc_Maker::Make(){
     //   TString n_emc = "emc_hits_" + TString(hit->GetDetName());
     //   m_DataSet->Add(hit->CopyToTable(n_emc));
     // }
-    St_emc_hit *hit = 0;
-    St_emc_hit dummy; TString tit = dummy.GetTitle();
-    while (hit = (St_emc_hit *)itr()) {
+    StEmcHitCollection *hit = 0;
+    StEmcHitCollection dummy; TString tit = dummy.GetTitle();
+    while (hit = (StEmcHitCollection *)itr()) {
       if(hit->GetTitle() == tit){
-	TString name_hits = "emc_hits_" + TString(hit->GetDetName());
-        m_DataSet->Add(hit->CopyToTable(name_hits));
+	TString name_hits = "emc_hits_" + TString(hit->getDetName());
+        m_DataSet->Add(hit->copyToTable(name_hits));
       }
     }
   }
@@ -103,21 +106,21 @@ void St_emc_Maker::MakeHistograms(){
     Int_t det, i, n, ieta, iphi;
     Float_t eta, phi, ene;
     St_DataSetIter itr(m_DataSet);
-    St_emc_hit *hit = 0;
-    St_emc_hit dummy; TString tit = dummy.GetTitle();
-    while (hit = (St_emc_hit *)itr()) {
+    StEmcHitCollection *hit = 0;
+    StEmcHitCollection dummy; TString tit = dummy.GetTitle();
+    while (hit = (StEmcHitCollection *)itr()) {
        if(hit->GetTitle() == tit){	 
-	n = hit->GetNraw();
+	n = hit->getNRaw();
 	if(n>0){
-	  det = hit->GetDetector();
-	  m_nhit->Fill(log10((Float_t)hit->GetNhit()),(Float_t)det);
-	  m_etot->Fill(log10(hit->GetEtot()),(Float_t)det);
+	  det = hit->getDetector();
+	  m_nhit->Fill(log10((Float_t)hit->getNHit()),(Float_t)det);
+	  m_etot->Fill(log10(hit->getEnergySum()),(Float_t)det);
 	  for(i = 0; i < n; i++){
-	    ene = hit->GetEnergy(i);
+	    ene = hit->getEnergy(i);
 	    if(ene > 0.0){
-	      hit->GetPos(i,&eta,&phi);
+	      hit->getPos(i,&eta,&phi);
 	      if(det>=EEMC){
-		hit->GetGrid(i,&ieta,&iphi);
+		hit->getGrid(i,&ieta,&iphi);
 		eta=(Float_t)ieta;
 	      }
 	      m_hits[det-1]->Fill(eta,phi+offset);
@@ -132,7 +135,7 @@ void St_emc_Maker::MakeHistograms(){
 //_____________________________________________________________________________
 void St_emc_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_emc_Maker.cxx,v 1.2 1998/12/15 22:39:49 akio Exp $\n");
+  printf("* $Id: St_emc_Maker.cxx,v 1.3 1999/02/12 19:16:30 akio Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
