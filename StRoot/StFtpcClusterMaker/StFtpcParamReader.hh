@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.18 2002/01/21 22:14:56 jcs Exp $
+// $Id: StFtpcParamReader.hh,v 1.19 2002/02/26 13:16:40 jcs Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.19  2002/02/26 13:16:40  jcs
+// get cluster unfolding paramteres from ftpcClusterPars
+//
 // Revision 1.18  2002/01/21 22:14:56  jcs
 // added values for temperature/pressure calculations to ftpcClusterPars
 //
@@ -150,6 +153,14 @@ protected:
   Float_t mSigmaPadResponseFuntion;
   Float_t mReadoutShaperTime;
   Float_t mSlowSimPressure;
+  Int_t mMaxNumSequences; 
+  Int_t mMaxNumSeqPeaks;
+  Int_t mMaxNumPeaks;          
+  Int_t mMaxNumCUC;           
+  Int_t mMaxLoops;         
+  Int_t mMaxFastLoops;    
+  Float_t mUnfoldLimit;      
+  Float_t mUnfoldFailedLimit; 
   
 public:
   // constructor used by StFtpcClusterMaker:
@@ -235,6 +246,14 @@ public:
   Float_t sigmaPadResponseFuntion() {return mSigmaPadResponseFuntion;}
   Float_t readoutShaperTime() {return mReadoutShaperTime;}
   Float_t slowSimPressure() {return mSlowSimPressure;}
+  Int_t maxNumSequences() {return mMaxNumSequences;}
+  Int_t maxNumSeqPeaks() {return mMaxNumSeqPeaks;}
+  Int_t maxNumPeaks() {return mMaxNumPeaks;}
+  Int_t maxNumCUC() {return mMaxNumCUC;}
+  Int_t maxLoops() {return mMaxLoops;}
+  Int_t maxFastLoops() {return mMaxFastLoops;}
+  Float_t unfoldLimit() {return mUnfoldLimit;}
+  Float_t unfoldFailedLimit() {return mUnfoldFailedLimit;}  
 
 };
 
