@@ -31,6 +31,7 @@ Replace[LIST #;] with [ #1 _
   ix = SystemF(' ')
   x  = sind(x)+asind(x)+cosd(x)+acosd(x)+tand(x)+atand(x)+atan2d(x,x)
   d  = dsind(d)+dasind(d)+dcosd(d)+dacosd(d)+dtand(d)+datand(d)+datan2d(d,d)
+  x  = mod(Ix,ix+1)+amod(x,x+1)+dmod(d,d+1.);
 * now fake calls to library - no need for arguments
   list ref;
 *
