@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.h,v 2.9 2001/09/28 22:22:05 ullrich Exp $
+ * $Id: StEventMaker.h,v 2.10 2002/02/25 19:34:14 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.h,v $
+ * Revision 2.10  2002/02/25 19:34:14  ullrich
+ * Fill parts of StRunInfo from StDetectorDbBeamInfo.
+ *
  * Revision 2.9  2001/09/28 22:22:05  ullrich
  * Load helix geometry at last point of each track.
  *
@@ -67,7 +70,7 @@ public:
        
     virtual const char *GetCVS() const
     {
-	static const char cvs[]="$Id: StEventMaker.h,v 2.9 2001/09/28 22:22:05 ullrich Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="$Id: StEventMaker.h,v 2.10 2002/02/25 19:34:14 ullrich Exp $ built "__DATE__" "__TIME__ ;
 	return cvs;
     }
 
@@ -92,8 +95,7 @@ protected:
 private:
     StEventManager*       mEventManager;		//!
     StEvent*              mCurrentEvent;                //!
-    StRunInfo*            mCurrentRunInfo;              //!
     Bool_t                mCreateEmptyInstance;         //!
-    ClassDef(StEventMaker, 2)
+    ClassDef(StEventMaker, 3)
 };
 #endif

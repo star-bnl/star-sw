@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.45 2002/02/15 23:06:58 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.46 2002/02/25 19:34:14 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.46  2002/02/25 19:34:14  ullrich
+ * Fill parts of StRunInfo from StDetectorDbBeamInfo.
+ *
  * Revision 2.45  2002/02/15 23:06:58  ullrich
  * Fill detector state for RICH.
  *
@@ -178,6 +181,7 @@
 #include "StEvtHddr.h"
 #include "StTpcDb/StTpcDb.h"
 #include "StDetectorDbMaker/StDetectorDbRichScalers.h"
+#include "StDetectorDbMaker/StDetectorDbBeamInfo.h"
 
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
@@ -191,7 +195,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.45 2002/02/15 23:06:58 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.46 2002/02/25 19:34:14 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -201,7 +205,6 @@ StEventMaker::StEventMaker(const char *name, const char *title) : StMaker(name)
     mEventManager = new StRootEventManager();
     mEventManager->setMaker(this);
     mCurrentEvent = 0;
-    mCurrentRunInfo = 0;
     doLoadTpcHits     = kTRUE;
     doLoadFtpcHits    = kTRUE;
     doLoadSvtHits     = kTRUE;
@@ -216,7 +219,6 @@ StEventMaker::StEventMaker(const char *name, const char *title) : StMaker(name)
 StEventMaker::~StEventMaker()
 {
     delete mEventManager;
-    delete mCurrentRunInfo;
 }
 
 void
@@ -951,34 +953,32 @@ StEventMaker::makeEvent()
     //
     //  Fill StRunInfo
     //
-    if (!mCurrentRunInfo) mCurrentRunInfo = new StRunInfo;
-
-    //
-    //  This part of run info is only filled once a run/file
-    //
-    if (mCurrentEvent->runId() != mCurrentRunInfo->runId()) {
-	mCurrentRunInfo->setRunId(mCurrentEvent->runId());
-	mCurrentRunInfo->setProductionTime(time(0));                 
-	mCurrentRunInfo->setProductionVersion(getenv("STAR_VERSION"));
-	if (header) {
-	    mCurrentRunInfo->setCenterOfMassEnergy(header->GetCenterOfMassEnergy());             
-	    mCurrentRunInfo->setBeamMassNumber(east, header->GetAEast());  
-	    mCurrentRunInfo->setBeamMassNumber(east, header->GetAWest());  
-	    mCurrentRunInfo->setBeamCharge(east, header->GetZEast());
-	    mCurrentRunInfo->setBeamCharge(west, header->GetZWest());
-	}
-	if (mCurrentEvent->summary())
-	    mCurrentRunInfo->setMagneticField(mCurrentEvent->summary()->magneticField());
-	if (gStTpcDb) {
-	    mCurrentRunInfo->setTpcDriftVelocity(east, gStTpcDb->DriftVelocity());	
-	    mCurrentRunInfo->setTpcDriftVelocity(west, gStTpcDb->DriftVelocity());
-	}
-    }
-    
-    //
-    //  This part of run info is filled every event
-    //
+    StRunInfo* mCurrentRunInfo = new StRunInfo;
+    StDetectorDbBeamInfo *dbBeamInfo = StDetectorDbBeamInfo::instance();
     StDetectorDbRichScalers* richScalers = StDetectorDbRichScalers::instance();
+    
+    mCurrentRunInfo->setRunId(mCurrentEvent->runId());
+    mCurrentRunInfo->setProductionTime(time(0));                 
+    mCurrentRunInfo->setProductionVersion(getenv("STAR_VERSION"));
+    if (mCurrentEvent->summary())
+	mCurrentRunInfo->setMagneticField(mCurrentEvent->summary()->magneticField());
+    if (gStTpcDb) {
+	mCurrentRunInfo->setTpcDriftVelocity(east, gStTpcDb->DriftVelocity());	
+	mCurrentRunInfo->setTpcDriftVelocity(west, gStTpcDb->DriftVelocity());
+    }
+    if (dbBeamInfo) {
+	mCurrentRunInfo->setCenterOfMassEnergy(dbBeamInfo->getBlueEnergy() + dbBeamInfo->getYellowEnergy());
+	mCurrentRunInfo->setBeamMassNumber(blue, dbBeamInfo->getBlueMassNumber());  
+	mCurrentRunInfo->setBeamMassNumber(yellow, dbBeamInfo->getYellowMassNumber());  
+	mCurrentRunInfo->setBeamEnergy(blue, dbBeamInfo->getBlueEnergy());
+	mCurrentRunInfo->setBeamEnergy(yellow, dbBeamInfo->getYellowEnergy());
+	mCurrentRunInfo->setInitialBeamIntensity(blue, dbBeamInfo->getBlueIntensity());
+	mCurrentRunInfo->setInitialBeamIntensity(yellow, dbBeamInfo->getYellowIntensity());
+	mCurrentRunInfo->setBeamLifeTime(blue, dbBeamInfo->getBlueLifeTime());
+	mCurrentRunInfo->setBeamLifeTime(yellow, dbBeamInfo->getYellowLifeTime());
+	mCurrentRunInfo->setBeamFillNumber(blue, dbBeamInfo->getBlueFillNumber());
+	mCurrentRunInfo->setBeamFillNumber(yellow, dbBeamInfo->getYellowFillNumber());
+    }
     if (richScalers) {
 	mCurrentRunInfo->setZdcWestRate(richScalers->getZDCWest());
 	mCurrentRunInfo->setZdcEastRate(richScalers->getZDCEast());
@@ -987,9 +987,8 @@ StEventMaker::makeEvent()
 	mCurrentRunInfo->setL0RateToRich(richScalers->getL0());
 	mCurrentRunInfo->setBbcCoincidenceRate(richScalers->getBBCX());
     }
-    
     if (mCurrentRunInfo)
-	mCurrentEvent->setRunInfo(new StRunInfo(*mCurrentRunInfo));
+	mCurrentEvent->setRunInfo(mCurrentRunInfo);
 
     //
     //  Detector States
