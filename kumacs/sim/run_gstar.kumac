@@ -28,7 +28,8 @@ macro run__
    input_file=muons_central_2.txt _
    output_file=muons_central_2.xdf _
    phystype=muons _
-   geomtype=muons 
+   geomtype=muons _
+   outtype=muons 
   
   
 * *********SETUP SEARCH DIRECTORIES TO FIND KUMACS *********
@@ -97,22 +98,21 @@ def [DEFAULT]
   next; dcut cave z 225 10 10 .04 .04
  endif
  
+* ************** MOVE RUN TABLES TO CORRECT DIRECTORY *********
+* ********** WRITE RUN INFO TO OUTPUT FILE ***************
+* write Run information to output file - already in staf format 
+ if [outtype].eq.muons then
+   exec gstar#mv_tables_Run_muons
+   exec write_table_to_file#write outunit /dui/geant/Run
+ else
+   message ' SORRY! - ask Pavel to fix so you can write out Run!'
+ endif
+
 * ************ OPEN INPUT FILE *********************************
 * open input file - this in in GEANT format!
   user/input tx [input_file]
   
-  
-
-* ************** MOVE RUN TABLES TO CORRECT DIRECTORY *********
- exec gstar#mv_tables_Run
-  
-
-* ********** WRITE RUN INFO TO OUTPUT FILE ***************
-* write Run information to output file - already in staf format 
- exec write_table_to_file#write outunit /dui/geant/Run
-  
-
-  
+    
 *************** LOOP OVER EVENTS *****************************
   
    do iev = 1,[nev]
@@ -127,13 +127,17 @@ def [DEFAULT]
 *   using phase or gkin
      
 * run gstar/g2t - automatically reads next event from input file 
-   exec gstar#process_event
-   
-* ************** MOVE RUN TABLES TO CORRECT DIRECTORY *********
-   exec gstar#mv_tables_Event
-   
+     exec gstar#process_event
+     
+* ************** MOVE RUN TABLES TO CORRECT DIRECTORY *********   
 * write out Event information 
-   exec write_table_to_file#write outunit /dui/geant/Event
+     if [outtype].eq.muons then
+        exec gstar#mv_tables_Event_muons
+        exec write_table_to_file#write outunit /dui/geant/Event
+     else
+	message ' SORRY! - ask Pavel to fix so you can write out Event!'
+     endif
+     
      
    enddo
    

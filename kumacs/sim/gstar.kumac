@@ -37,13 +37,13 @@
  
  macro load_lib
    
-   cd /dui/geant
+
    make geometry
-   cd /dui/geant
+
    make sim/g2t
-   cd /dui/geant
+
    make sim/gstar
-   cd /dui
+
    
  return
  
@@ -51,18 +51,17 @@
   
  macro process_event
    
-* must go to directory geant!
-* cd /dui/geant
+
 * read in another event from input_file
      trig 1
+     
 * write out in staf table format
-* cd /dui/geant
    for/call g2t
      
  return
 * ****************************************
  
- macro mv_tables_Run
+ macro mv_tables_Run_muons
    
    dui/mv Run/cave_cave geant/Run
    dui/mv Run/tpce_tpcg geant/Run
@@ -79,7 +78,7 @@
  
 * ***************************************
  
- macro mv_tables_Event
+ macro mv_tables_Event_muons
    
    dui/mv Event/g2t_event    geant/Event
    dui/mv Event/g2t_vertex   geant/Event
