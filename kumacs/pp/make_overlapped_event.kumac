@@ -5,14 +5,10 @@ macro make_overlapped_event _
    background_file=pythia_pp_minbias.fzd _
    output_file=pythia_pp_jet_10gev_with_overlap_full_L.xdf
 * output_file=pythia_pp_jet_10gev_with_overlap_design_L.xdf
-
    
-   debug on; trace on
+   debug on
+* trace on
    
-   cd /dui; mkdir Run
-   dio/newfilestream outunit [dir][output_file] w
-   dio/stream/putevent outunit Run
-
    gfile PZ [dir][input_file]
    gfile BZ [dir][background_file]
    
@@ -28,6 +24,9 @@ macro make_overlapped_event _
 * gback 200 200 0.1 200 5
  
    make sim/g2t    
+   
+   dio/newfilestream outunit [dir][output_file] w
+   dio/stream/putevent outunit Run
 
    do i = 1, [N]
      message ' run_gstar: merging event  '  [i]  
@@ -40,9 +39,3 @@ macro make_overlapped_event _
    cd /dui/Event; ls
 
  return
-
-
-
-
-
-
