@@ -1,6 +1,6 @@
-      SUBROUTINE ev0_circle_param_r(trk,xc,r)
+      SUBROUTINE emc_circle_param_r(trk,xc,r)
 c:>------------------------------------------------------------------
-C:ROUTINE:      ev0_circle_param_r
+C:ROUTINE:      emc_circle_param_r
 C:DESCRIPTION:  returns x,y coordinates and radius of circle in bending plane
 C:ARGUMENTS:    see code
 C:ARGUMENTS:    see code
@@ -27,7 +27,7 @@ C--------find the radius and the (hit)x-y coordinates------------------
       y=trk(1)*sin( trk(2)/trk(1) )
 C--------get the momentum components-----------------------------------
       iflag=0
-      CALL ev0_track_mom_r(trk,iflag,p)
+      CALL emc_track_mom_r(trk,iflag,p)
 C--------find the two possible solutions------------------------------
       IF(p(1).eq.0.) p(1)=0.01
       a=p(2)/p(1)

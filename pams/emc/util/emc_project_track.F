@@ -1,13 +1,13 @@
-      SUBROUTINE ev0_project_track(xc,r,xp,x)
+      SUBROUTINE emc_project_track(xc,r,xp,x)
 c:>------------------------------------------------------------------
-C:FILE:         ems_ev0_routines.F
+C:FILE:         ems_routines.F
 C:DESCRIPTION:  Service routines for EMC Analysis Module, package ems, STAF compliant.
 c:AUTHOR:       Spiros Margetis?
 C:BUGS:         None known.
 C:HISTORY:      05dec95-v1.0-wjl- Creation.
 c:>------------------------------------------------------------------
 c:>------------------------------------------------------------------
-C:ROUTINE:      ev0_project_track
+C:ROUTINE:      emc_project_track
 C:DESCRIPTION:  extrapolate helix and calculate coord of point of closest approach to another point...
 C:ARGUMENTS:    see code
 C:ARGUMENTS:    see code
