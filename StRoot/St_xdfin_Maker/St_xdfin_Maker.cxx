@@ -18,7 +18,7 @@ ClassImp(St_xdfin_Maker)
     m_InitDone(0)
 {
   if (inputFile && inputFile[0]) SetFile(inputFile);
-  fEvtHddr = GetDataSet("EvtHddr");
+  fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
   if (!fEvtHddr) {
     fEvtHddr = new StEvtHddr(m_ConstSet);
     SetOutput(fEvtHddr);	//Declare this "EvtHddr" for output
@@ -114,9 +114,6 @@ Int_t St_xdfin_Maker::Make(){
   return kStEOF;
 }
 //_____________________________________________________________________________
-void St_xdfin_Maker::PrintInfo(){
-  if (GetDebug()) printf("St_xdfin_Maker\n"); //  %s %s \n",GetName(), GetTitle());
-}
 //_____________________________________________________________________________
 void St_xdfin_Maker::Skip(Int_t Nskip){
   St_DataSet *set;

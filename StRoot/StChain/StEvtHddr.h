@@ -1,6 +1,7 @@
 #ifndef StEvtHddr_h
 #define StEvtHddr_h
 
+#include "TDatime.h"
 #include "St_DataSet.h"
 class StEvtHddr : public St_DataSet
 {
@@ -35,6 +36,7 @@ public:
   void          SetRunNumber(int run)	{mRunNumber=run;};
   void		SetEventType(const Char_t *type){mEventType=type;};
   void 		SetTriggerMask(ULong_t tm)	{mTriggerMask=tm;};
+  void 		SetInputTriggerMask(ULong_t tm)	{mInputTriggerMask=tm;};
   void       	SetCenterOfMassEnergy(float e)	{mCenterOfMassEnergy=e;};
   void     	SetBImpact  (float b)  	{mBImpact=b;};
   void     	SetPhiImpact(float p)  	{mPhImpact=p;};
@@ -46,14 +48,17 @@ public:
   void     	SetLuminosity(float lu)	{mLuminosity=lu;};
   void     	SetDateTime(int iDate,int iTime){mEventTime.Set(iDate,iTime);};
   void          SetDateTime(TDatime dt)	{mEventTime=dt;};
+  void          SetGMTime(ULong_t ut);
   void          SetProdDateTime()	{mProdTime.Set();};
   void     	SetEventNumber(int ev)	{mEventNumber=ev;};
   void     	SetGenerType(int g)	{mGenerType=g;};
+  void     	Print();
 
 //		Data Members
 protected:
     Int_t	mRunNumber;
     Int_t       mId;
+    ULong_t 	mInputTriggerMask;
     ULong_t 	mTriggerMask;
     Float_t     mCenterOfMassEnergy;
     Int_t       mAEast;
@@ -76,13 +81,6 @@ protected:
 ClassDef(StEvtHddr,1)
 };
 
-inline StEvtHddr::StEvtHddr(St_DataSet *parent):St_DataSet("EvtHddr",parent)
-{ 
-  SetDateTime(19950101,0);
-  SetEventType("NONE");
-  memset(&mRunNumber,0,(char*)&mEventNumber-(char*)&mRunNumber); 
-  mEventNumber=0;
-}  
 #endif
 
 #if 0

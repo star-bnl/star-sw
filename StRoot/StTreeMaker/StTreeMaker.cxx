@@ -239,9 +239,6 @@ void StTreeMaker::Clear(Option_t *opt)
 
 
 //_____________________________________________________________________________
-void StTreeMaker::PrintInfo(){
-  if (GetDebug()) printf("StTreeMaker\n"); //  %s %s \n",GetName(), GetTitle());
-}
 //_____________________________________________________________________________
 void StTreeMaker::FillHistBranch(StBranch *histBr)
 {
