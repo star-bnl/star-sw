@@ -1,5 +1,8 @@
-# $Id: MakeEnv.mk,v 1.18 1999/08/20 22:59:15 fisyak Exp $
+# $Id: MakeEnv.mk,v 1.19 1999/08/24 13:27:28 fisyak Exp $
 # $Log: MakeEnv.mk,v $
+# Revision 1.19  1999/08/24 13:27:28  fisyak
+# Fix St_Tables name
+#
 # Revision 1.18  1999/08/20 22:59:15  fisyak
 # Fix problem with / in ROOT_DIR
 #
@@ -287,7 +290,9 @@ ifeq ($(LEVEL),$(FOUR)) #subpackage level
     DOM_DIR := $(subst / ,,$(INP_DIR)/../../) )
     PKG     := $(NAME)
 endif
-
+ifeq (tables,$(PKG))
+PKG :=Tables
+endif
 ifdef NT
 BIN_DIR := $(SYS_DIR)/bin
 endif

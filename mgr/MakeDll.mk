@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.105 1999/08/22 23:09:35 fisyak Exp $
+# $Id: MakeDll.mk,v 1.106 1999/08/24 13:27:28 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.106  1999/08/24 13:27:28  fisyak
+# Fix St_Tables name
+#
 # Revision 1.105  1999/08/22 23:09:35  fisyak
 # remove dir path from library linkage
 #
@@ -226,6 +229,9 @@ include $(STAR_MAKE_HOME)/MakeDirs.mk
 #
 ifdef PKGNAME
 PKG := $(PKGNAME)
+ifeq (tables,$(PKGNAME))
+PKG :=Tables
+endif
 endif
 ifndef SO_LIB
     SO_LIB := $(LIB_DIR)/$(PKG).$(SOEXT)
@@ -256,7 +262,7 @@ SRC_DIRS  += $(ALL_DIRS)
 endif
 
 # 	Define internal and external includes dirs
-INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities xdf2root StarClassLibrary StEvent) \
+INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities xdf2root StarClassLibrary StEvent StDbLib) \
               StRoot .share .share/tables .share/$(PKG) pams inc StDb/include
 #                            StarClassLibrary/include
 INC_DIRS  := $(wildcard $(GEN_DIR) $(SRC_DIRS) $(SRC_DIR)/include)
