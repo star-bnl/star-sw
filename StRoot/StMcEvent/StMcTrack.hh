@@ -1,7 +1,14 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.5 2000/04/04 22:25:24 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.6 2000/04/06 08:34:56 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.6  2000/04/06 08:34:56  calderon
+ * Version using the particle table:
+ * 1) Constructor for particle_st*
+ * 2) Pointer to parent track from particle table
+ * 3) PDG encoding when track is from particle table
+ * 4) Generator label, used to index entries in the table for debugging
+ *
  * Revision 2.5  2000/04/04 22:25:24  calderon
  * add inline function to return primary key from g2t table
  *
@@ -41,11 +48,15 @@
 //#include "StTrackTopologyMap.h"
 class StParticleDefinition;
 class g2t_track_st;
+class particle_st;
+class StMcTrack;
+
 class StMcTrack {
 public:
     StMcTrack();
     virtual ~StMcTrack();
     StMcTrack(g2t_track_st* trk);
+    StMcTrack(particle_st* trk);
     
     // StMcTrack(const StMcTrack&);                     use default
     // const StMcTrack & operator=(const StMcTrack&);   use default
@@ -65,6 +76,8 @@ public:
     const StMcVertex*            startVertex() const; //!
     StMcVertex*                  stopVertex(); //!
     const StMcVertex*            stopVertex() const; //!
+    StMcTrack*                   generatorParent(); //!
+    const StMcTrack*             generatorParent() const; //!
     StPtrVecMcVertex&            intermediateVertices(); //!
     const StPtrVecMcVertex&      intermediateVertices() const; //!
     StPtrVecMcTpcHit&            tpcHits(); //!
@@ -79,7 +92,9 @@ public:
     const StParticleDefinition*  particleDefinition() const; //!
     int                          isShower() const; //! 1 = yes, 0 = no
     long                         geantId() const;  //!
+    long                         pdgId()   const;  //!
     long                         key()     const;  //!
+    long                         eventGenLabel() const; //!
 
   // "Set" Methods
     void setFourMomentum(const StLorentzVectorF&); //!
@@ -93,7 +108,10 @@ public:
   
     void setShower(char); //!
     void setGeantId(long); //!
+    void setPdgId(long); //!
     void setKey(long);     //!
+    void setEventGenLabel(long);     //!
+    void setGeneratorParent(StMcTrack*);     //!
 
     void addTpcHit(StMcTpcHit*); //!
     void addSvtHit(StMcSvtHit*); //!
@@ -116,9 +134,12 @@ protected:
     StPtrVecMcFtpcHit      mFtpcHits; //!
     StPtrVecMcRichHit      mRichHits; //!
     StParticleDefinition*  mParticleDefinition; //!
+    StMcTrack*             mGeneratorParent;
     char                   mIsShower; //!
     long                   mGeantId; //!
+    long                   mPdgId; //!
     long                   mKey;     //!
+    long                   mEventGenLabel; //!
     //    StTrackTopologyMap     mTopologyMap; //!
 };
 
@@ -143,6 +164,10 @@ inline const StMcVertex* StMcTrack::startVertex() const { return mStartVertex; }
 inline StMcVertex* StMcTrack::stopVertex() { return mStopVertex; }
 
 inline const StMcVertex* StMcTrack::stopVertex() const { return mStopVertex; }
+
+inline StMcTrack* StMcTrack::generatorParent() { return mGeneratorParent; }
+
+inline const StMcTrack* StMcTrack::generatorParent() const { return mGeneratorParent; }
 
 inline StPtrVecMcVertex& StMcTrack::intermediateVertices() { return mIntermediateVertices; }
 
@@ -172,7 +197,12 @@ inline int StMcTrack::isShower() const { return mIsShower; }
 
 inline long StMcTrack::geantId() const { return mGeantId; }
 
+inline long StMcTrack::pdgId() const { return mPdgId; }
+
 inline long StMcTrack::key() const { return mKey; }
+
+inline long StMcTrack::eventGenLabel() const { return mEventGenLabel; }
+
 #endif
 
 
