@@ -56,7 +56,7 @@ public:
 	/// Set the attributes of this node as a copy of the given node.
 	void setAsCopyOf(const StiKalmanTrackNode * node);
 	/// Propagates a track encapsulated by the given node "p" to the given detector "tDet".
-	int  propagate(StiKalmanTrackNode *p, StiDetector * tDet);	//throw (Exception);
+	int  propagate(StiKalmanTrackNode *p, const StiDetector * tDet);	//throw (Exception);
 	/// Evaluates, stores and returns the dedx associated with this node.
 	/// Possible returned values are:
 	/// > 0 : value of dedx
@@ -67,14 +67,15 @@ public:
 
 	void propagate(double x, 
 								 double x0,   
-								 double rho); //throw (Exception); // mass hypothesis
-	double evaluateChi2(); //throw ( Exception);
+								 double rho); 
+	void propagateError();
+	double evaluateChi2(); 
 	void updateNode(); //throw (Exception);
 	void extendToVertex(); //throw (Exception);
 	void rotate(double alpha); //throw ( Exception);
   void add(StiKalmanTrackNode * newChild);
-	void setTargetDet(StiDetector * targetDet);
-	StiDetector * getTargetDet();
+	void setTargetDet(const StiDetector * targetDet);
+	const StiDetector * getTargetDet();
 
   double fAlpha;          // rotation angle
   double fX;              // X-coordinate of this track (reference plane)
@@ -113,15 +114,17 @@ public:
 
 	static bool  recurse;
 
+
  protected:   
   
+	const StiDetector * targetDet; // not persistent
+
   static double kField;
   static bool   elossCalculated;
   static bool   mcsCalculated;
   static double massHypothesis;
 
-	StiDetector * targetDet; // not persistent
-
+	static double x1,x2,y1,z1,dx,r1,r2,c1,c2,x0,rho;
 };
 
 #endif

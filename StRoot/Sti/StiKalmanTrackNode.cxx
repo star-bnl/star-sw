@@ -26,9 +26,22 @@ bool StiKalmanTrackNode::mcsCalculated   = false;
 double StiKalmanTrackNode::kField = 0.5;
 double StiKalmanTrackNode::massHypothesis = 0.13957018;
 
+
 int StiKalmanTrackNode::minContiguousHitCountForNullReset = 2;
 int StiKalmanTrackNode::maxNullCount = 40;  
 int StiKalmanTrackNode::maxContiguousNullCount = 25;
+
+double StiKalmanTrackNode::x1=0;
+double StiKalmanTrackNode::x2= 0; 
+double StiKalmanTrackNode::y1= 0; 
+double StiKalmanTrackNode::z1= 0; 
+double StiKalmanTrackNode::dx= 0; 
+double StiKalmanTrackNode::r1= 0; 
+double StiKalmanTrackNode::r2= 0; 
+double StiKalmanTrackNode::c1= 0; 
+double StiKalmanTrackNode::c2= 0; 
+double StiKalmanTrackNode::x0= 0; 
+double StiKalmanTrackNode::rho = 0;
 
 //_____________________________________________________________________________
 void StiKalmanTrackNode::reset()
@@ -419,7 +432,7 @@ double StiKalmanTrackNode::getPt() const
 
 
 int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode, 
-				  StiDetector * tDet)	//throw (Exception)
+				  const StiDetector * tDet)
 {
 
   int position = 0;
@@ -435,9 +448,9 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   double x, x0, rho, pathLength;
   position = StiMaterialInteraction::findIntersection(pNode,tDet,x,x0,rho,
                                                       pathLength);
-	*(Messenger::instance(MessageType::kNodeMessage)) 
-		<< "StiKalmanTrackNode::propagate(...)\tx/x0/rho:" 
-		<< x << "\t" << x0 << "\t" << rho << endl;
+	//*(Messenger::instance(MessageType::kNodeMessage)) 
+	//	<< "StiKalmanTrackNode::propagate(...)\tx/x0/rho:" 
+	//	<< x << "\t" << x0 << "\t" << rho << endl;
   propagate(x,x0,rho);
   return position;
 }
@@ -471,38 +484,50 @@ double  StiKalmanTrackNode::evaluateDedx()
 }
 
 
-void  StiKalmanTrackNode::propagate(double xk, 
-				  double x0,   // thickness of material
-				  double rho)  // density of material
-    //throw (Exception)
+void  StiKalmanTrackNode::propagate(double xk, double _x0,double _rho)
 {
-  double x1=fX, x2=x1+(xk-x1), dx=x2-x1, y1=fP0, z1=fP1;
-  double c1=fP3*x1 - fP2;
+  x1=fX;
+	x2=x1+(xk-x1);
+	x0 = _x0;
+	rho = _rho;
+	dx=x2-x1;
+	y1=fP0;
+	z1=fP1;
+  c1=fP3*x1 - fP2;
   double c1sq = c1*c1; 
   if (c1sq>=1.) 
       {
 				*(Messenger::instance(MessageType::kNodeMessage)) << "c1sq:" << c1sq << endl;
 				throw runtime_error("SKTN::propagate() - c1sq>=1");
       }
-  double r1=sqrt(1.- c1sq );
-  double c2=fP3*x2 - fP2; 
+  c2=fP3*x2 - fP2; 
   double c2sq = c2*c2; 
   if (c2sq>=1.) 
       {
 				*(Messenger::instance(MessageType::kNodeMessage)) << "c2sq>=1 value:" << c2sq << endl;
 				throw runtime_error("SKTN::propagate() - c2sq>=1");
       }
-  double r2=sqrt(1.- c2sq );
-  fP0 = fP0 + dx*(c1+c2)/(r1+r2);
+	double cSum = c1+c2;
+  r1=sqrt(1.- c1sq );
+  r2=sqrt(1.- c2sq );
+  fP0 += dx*cSum/(r1+r2);
 	double dddd = c1*r2 + c2*r1;
-	if (fabs(dddd)<1e-15)
+	if (fabs(dddd)==0)
 		{
 			*(Messenger::instance(MessageType::kNodeMessage)) 
 				<< "StiKalmanTrackNode::propagate() - dddd: " << dddd << endl;
-				throw runtime_error("SKTN::propagate() - fabs(dddd)<=1e-15");
+				throw runtime_error("SKTN::propagate() - fabs(dddd)==0.");
 		}
-  fP1 = fP1 + dx*(c1+c2)/(dddd)*fP4; 
-  
+  fP1 += dx*fP4*cSum/dddd;
+	fX=x2;
+}
+
+void  StiKalmanTrackNode::propagateError()
+{
+	///Completes the work of propagate(double xk,double x0, double rho) 
+	// x0  : thickness of material
+	// rho : density of material
+
   //f = F - 1
   double rr=r1+r2, cc=c1+c2, xx=x1+x2;
   double f02=-dx*(2*rr + cc*(c1/r1 + c2/r2))/(rr*rr);
@@ -539,7 +564,6 @@ void  StiKalmanTrackNode::propagate(double xk,
   fC21 += b21; 
   fC31 += b31; 
   fC41 += b41; 
-  fX=x2;
 
   // Multiple scattering
   if (mcsCalculated && x0>0 && rho>0) // only do this when the thickness & density are supplied
@@ -600,8 +624,10 @@ StiKalmanTrackNode::evaluateChi2() 	//throw ( Exception)
   double r11=hit->szz()+fC11;
   double det=r00*r11 - r01*r01;
   *(Messenger::instance(MessageType::kNodeMessage)) 
-		<< "r00;r01;r11;det:" << r00 << "\t" << r01 << "\t" << r11 << "\t" << det << endl;
-if (fabs(det)< 1.e-20)
+		<< "chi2()  fC00;fC10;fc11:" << fC00 << "\t" << fC10 << "\t" << fC11 << endl
+		<< "           syy;syz;szz:" << hit->syy() << "\t" << hit->syz() << "\t" << hit->szz() << "\t" << det << endl
+		<< "       r00;r01;r11;det:" << r00 << "\t" << r01 << "\t" << r11 << "\t" << det << endl;
+	if (fabs(det)==0.)
 		{
 			*(Messenger::instance(MessageType::kNodeMessage)) <<"StiKalmanTrackNode::evaluateChi2(). ERROR:\t";
       *(Messenger::instance(MessageType::kNodeMessage)) <<"det test failed line 535.  return 0."<<endl;
@@ -634,8 +660,8 @@ void StiKalmanTrackNode::updateNode() //throw (Exception)
 	double r01=hit->syz()+fC10;
 	double r11=hit->szz()+fC11;
 	double det=r00*r11 - r01*r01;
-	if (fabs(det)< 1.e-20)
-		throw runtime_error("SKTN::updateNode() - Singular matrix; fabs(det)<1e-20 !\n");
+	if (fabs(det)==0)
+		throw runtime_error("SKTN::updateNode() - Singular matrix; fabs(det)==0 !\n");
   // inverse matrix
   double tmp=r00; r00=r11/det; r11=tmp/det; r01=-r01/det;
   // update error matrix
@@ -650,7 +676,7 @@ void StiKalmanTrackNode::updateNode() //throw (Exception)
   double cur = fP3 + k30*dy + k31*dz;
   double eta = fP2 + k20*dy + k21*dz;
   double ddd = cur*fX-eta;
-  if (fabs(ddd) >= (1-1e-8))
+  if (fabs(ddd) >= 1.)
 		{
       *(Messenger::instance(MessageType::kNodeMessage)) << "StiKalmanTrackNode::updateNode(). ERROR:\t";
       *(Messenger::instance(MessageType::kNodeMessage)) <<" - extrapolation failed line 588. return"<< endl;
@@ -879,7 +905,7 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 		{
 			for (int i=0;i<nChildren;i++)
 				{
-					const StiKalmanTrackNode * child = dynamic_cast<const StiKalmanTrackNode *>(n.getChildAt(i));
+					const StiKalmanTrackNode * child = static_cast<const StiKalmanTrackNode *>(n.getChildAt(i));
 					os << *child;
 				}
 		}
@@ -888,13 +914,13 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 
 
 //_____________________________________________________________________________
-void StiKalmanTrackNode::setTargetDet(StiDetector * target)
+void StiKalmanTrackNode::setTargetDet(const StiDetector * target)
 {
 	targetDet = target;
 }
 
 //_____________________________________________________________________________
-StiDetector * StiKalmanTrackNode::getTargetDet()
+const StiDetector * StiKalmanTrackNode::getTargetDet()
 {
 	return targetDet;
 }

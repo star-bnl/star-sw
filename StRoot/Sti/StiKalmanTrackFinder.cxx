@@ -196,38 +196,32 @@ void StiKalmanTrackFinder::doTrackFit()
 
 void StiKalmanTrackFinder::doTrackFind()
 {
-    try
-	{
-	    trackDone = true;
-	    scanningDone = true;
-	    state = 0;
-	    track = 0;
-	    if (trackSeedFinder->hasMore())	
+	trackDone = true;
+	scanningDone = true;
+	state = 0;
+	track = 0;
+	if (trackSeedFinder->hasMore())	
 		{ //Redundant check, but it protectes against naive calls
-		    track = trackSeedFinder->next();
-		    if (!track) 
-			{
+			track = trackSeedFinder->next();
+			if (!track) 
+				{
 			    trackMes << "\tNO MORE TRACK SEEDS - EVENT COMPLETED" << endl;
 			    return;
-			}
-		    trackMes <<"StiKalmanTrackFinder::doTrackFind()\t Got Valid track"<<endl;
-		    findTrack(track);
-		    trackMes << " SKTFinder::doTrackFind() - Track Parameters" << endl << *track;
-		    trackContainer->push_back(track);
-		    
-		    track->update();  //This updates the track on the display
-		    trackDone = false;  // ready for a new track
+				}
+			trackMes <<"StiKalmanTrackFinder::doTrackFind()\t Got Valid track"<<endl;
+			findTrack(track);
+			trackMes << " SKTFinder::doTrackFind() - Track Parameters" << endl << *track;
+			reserveHits(track->getFirstNode());
+			trackContainer->push_back(track);
+			track->update();  //This updates the track on the display
+			trackDone = false;  // ready for a new track
 		}
-	    else 
+	else 
 		{
 		    trackMes << "\tNO MORE TRACK SEEDS - EVENT COMPLETED" << endl;
 		}
-	}
-    catch (exception & e)
-	{
-		cout << "Exception: " << e.what();
-	}
 }
+
 void StiKalmanTrackFinder::findTracks()
 {
     //-----------------------------------------------------------------
@@ -270,15 +264,22 @@ void StiKalmanTrackFinder::findTrack(StiTrack * t)
 	    throw logic_error("SKTF::findTrack()\t - ERROR - dynamic_cast<StiKalmanTrack *>  returned 0");
 	}
     StiKalmanTrackNode * lastNode = track->getLastNode();
-    lastNode = followTrackAt(lastNode);
+		try
+			{
+				lastNode = followTrackAt(lastNode);
+			}
+		catch (exception & e)
+			{
+				cout << "SKTF::findTrack() exception: " << e.what();
+			}
     pruneNodes(lastNode);
     reserveHits(track->getFirstNode());
     track->setLastNode(lastNode);
     track->setChi2(lastNode->fChi2);
     if (lastNode->fP3*StiKalmanTrackNode::getFieldConstant()>0)
-	track->setCharge(-1);
+			track->setCharge(-1);
     else
-	track->setCharge(1);
+			track->setCharge(1);
     //extendToMainVertex(lastNode);
 }
 
@@ -338,8 +339,7 @@ void StiKalmanTrackFinder::initSearch(StiKalmanTrackNode * node)
     sNode = node; // source node
     tNode  = 0;    // target node
     leadDet = 0;
-    trackDone = false;		    
-    
+    trackDone = false;
     scanningDone = true;
     sDet  = sNode->getHit()->detector();
     if (sDet==0) 
@@ -411,9 +411,17 @@ void StiKalmanTrackFinder::doNextDetector()
     if (tNode==0) 
 			throw logic_error("SKTF::doNextDetector()\t- ERROR - tNode==null");
     tNode->reset();
-    //trackMes << "New Detector: \n ParentNode:"<<*sNode<<endl;
-		trackMes << "doNextDet: fC00:" << tNode->fC00 << endl;
-    position = tNode->propagate(sNode, tDet); 
+    try
+			{
+				position = tNode->propagate(sNode, tDet); 
+			}
+		catch (runtime_error & rte)
+			{
+				trackMes << "SKTF::doNextDetector() - RunTimeError: " << rte.what();
+				scanningDone = true;
+				trackDone = true;
+				return;
+			}
     //trackMes << "TargetDet :"<<*tDet<<endl;
     //trackMes << "TargetNode:"<<*tNode<<endl;
     
@@ -436,7 +444,7 @@ void StiKalmanTrackFinder::doNextDetector()
 		    leadNode->setDetector(tDet);
 		    if (position==kHit)
 			scanningDone = true;
-		    
+		    tNode->propagateError();
 		    hitContainer->setDeltaD(10.); //yWindow);
 		    hitContainer->setDeltaZ(10.); //zWindow);
 		    //void setRefPoint(double position, double refAngle, double y, double z);
@@ -483,6 +491,7 @@ void StiKalmanTrackFinder::doNextDetector()
 					hasDet = true;
 					trackMes << " but was a hit" << endl;
 					scanningDone = true;	
+					tNode->propagateError();
 					leadNode = tNode;
 					leadNode->setDetector(tDet);
 				}
