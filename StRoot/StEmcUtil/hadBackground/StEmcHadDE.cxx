@@ -28,7 +28,7 @@
 #include "PhysicalConstants.h"
 #include "StPhysicalHelixD.hh"
 
-#include "StEmcPosition.h"
+#include "StEmcUtil/projection/StEmcPosition.h"
 
 ClassImp(StEmcHadDE)
 
