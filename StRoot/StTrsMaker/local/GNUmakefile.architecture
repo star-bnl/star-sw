@@ -1,6 +1,6 @@
 ############################################################################
 #
-# $Id: GNUmakefile.architecture,v 1.1 1998/11/12 22:48:08 lasiuk Exp $
+# $Id: GNUmakefile.architecture,v 1.2 1998/11/12 23:04:54 lasiuk Exp $
 #
 # Author: Thomas Ullrich, Mar 25 1998
 # --------------------------------------------------------------------------
@@ -11,6 +11,8 @@
 #   i386_linux2   Linux, egcs 1.0.2 or g++ 2.8.1 compiler (or higher)
 #
 #   i386_redhat50 Linux, egcs 1.0.2 or g++ 2.8.1 compiler (or higher)
+#
+#   i386_redhat51 Linux, egcs 1.0.2 compiler (or higher)
 # 
 #   sun4x_54      SunOS 5.4, CC 4.2 (or higher)
 #
@@ -40,29 +42,14 @@
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile.architecture,v $
-# Revision 1.1  1998/11/12 22:48:08  lasiuk
-# Standalone Makefiles
-#
 # Revision 1.2  1998/11/12 23:04:54  lasiuk
 # automate the makefiles
 #
-# Revision 1.6  1998/10/31 14:13:58  lasiuk
-# SCL_HOME (add underscore) to make consistent with SCL!
+# Revision 1.3  1998/11/16 14:45:17  lasiuk
+# Nov 16
 #
-# Revision 1.5  1998/09/14 10:30:30  lasiuk
-# directory structure of scl
-#
-# Revision 1.4  1998/08/07 19:51:44  lasiuk
-# use of STAR_SYS
-#
-# Revision 1.3  1998/06/30 22:57:32  lasiuk
-# added debug flags for HP
-#
-# Revision 1.2  1998/06/27 16:48:47  lasiuk
-# update to SCL standards (flags turn OFF ANSI features)
-#
-# Revision 1.1.1.1  1998/05/19 22:33:43  lasiuk
-# Initial Revision
+# Revision 1.2  1998/11/12 23:04:54  lasiuk
+# automate the makefiles
 #
 # Revision 1.1  1998/11/12 22:48:08  lasiuk
 # Standalone Makefiles
