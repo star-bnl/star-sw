@@ -1,13 +1,19 @@
+// Cons tries to include even if there is a  '#ifdef #endif' around
+// For that reson I had to change all '#include' statements into
+// '//(notTheY2KBuf)#include' 
+#undef McEventExists
+#ifdef McEventExists
+
 #ifndef StHbtMcEventReader_hh
 #define StHbtMcEventReader_hh
 
-#include <ctime>
-#include "StMaker.h"
-#include "StHbtMaker/Base/StHbtEventReader.hh"
-#include "StV0MiniDstMaker/StV0MiniDstMaker.h"
-#include "StHbtMaker/Base/StHbtEventCut.h"
-#include "StHbtMaker/Base/StHbtTrackCut.h"
-#include "StHbtMaker/Base/StHbtV0Cut.h"
+//(notTheY2KBug)#include <ctime>
+//(notTheY2KBug)#include "StMaker.h"
+//(notTheY2KBug)#include "StHbtMaker/Base/StHbtEventReader.hh"
+//(notTheY2KBug)#include "StV0MiniDstMaker/StV0MiniDstMaker.h"
+//(notTheY2KBug)#include "StHbtMaker/Base/StHbtEventCut.h"
+//(notTheY2KBug)#include "StHbtMaker/Base/StHbtTrackCut.h"
+//(notTheY2KBug)#include "StHbtMaker/Base/StHbtV0Cut.h"
 
 class TOrdCollection;
 class StHbtMcEventReader : public StHbtEventReader{
@@ -64,4 +70,10 @@ inline StHbtEventCut* StHbtMcEventReader::EventCut(){return mEventCut;}
 inline StHbtTrackCut* StHbtMcEventReader::TrackCut(){return mTrackCut;}
 inline StHbtV0Cut*    StHbtMcEventReader::V0Cut(){return mV0Cut;}
 
+#endif
+
+#else // McEventExists
+class StHbtMcEventReader {
+  int fake() { return 0;}
+};
 #endif

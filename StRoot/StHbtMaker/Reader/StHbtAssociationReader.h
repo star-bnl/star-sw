@@ -1,12 +1,18 @@
+// Cons tries to include even if there is a  '#ifdef #endif' around
+// For that reson I had to change all '#include' statements into
+// '//(notTheY2KBuf)#include' 
+#undef McEventExists
+#ifdef McEventExists
+
 #ifndef StHbtAssociationReader_hh
 #define StHbtAssociationReader_hh
 
-#include <ctime>
-#include "StMaker.h"
-#include "StHbtMaker/Base/StHbtEventReader.hh"
-#include "StV0MiniDstMaker/StV0MiniDstMaker.h"
-#include "StHbtMaker/Base/StHbtEventCut.h"
-#include "StHbtMaker/Base/StHbtTrackCut.h"
+//(notTheY2KBug)#include <ctime>
+//(notTheY2KBug)#include "StMaker.h"
+//(notTheY2KBug)#include "StHbtMaker/Base/StHbtEventReader.hh"
+//(notTheY2KBug)#include "StV0MiniDstMaker/StV0MiniDstMaker.h"
+//(notTheY2KBug)#include "StHbtMaker/Base/StHbtEventCut.h"
+//(notTheY2KBug)#include "StHbtMaker/Base/StHbtTrackCut.h"
 
 class StHbtAssociationReader : public StHbtEventReader{
   
@@ -72,3 +78,11 @@ inline void StHbtAssociationReader::SetEventCut(StHbtEventCut* ecut){mEventCut=e
 inline void StHbtAssociationReader::SetTrackCut(StHbtTrackCut* pcut){mTrackCut=pcut;}
  
 #endif
+
+#else // McEventExists
+class StHbtAssociationReader {
+  int fake() { return 0;}
+};
+#endif
+
+
