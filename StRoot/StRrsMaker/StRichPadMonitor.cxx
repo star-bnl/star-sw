@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPadMonitor.cxx,v 1.5 2000/05/17 22:20:40 lasiuk Exp $
+ * $Id: StRichPadMonitor.cxx,v 1.6 2000/06/16 01:53:30 lasiuk Exp $
  * Description:
  *  First aTtempt at a simple Pad Monitor.
  *  Runs only in ROOT
@@ -7,6 +7,11 @@
  *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
+ * Revision 1.6  2000/06/16 01:53:30  lasiuk
+ * added GEANT info and diagnostics
+ * added vector to keep track of info
+ * cosmetics for filenames, user info
+ *
  * Revision 1.5  2000/05/17 22:20:40  lasiuk
  * charge from the pixel
  *
@@ -42,7 +47,14 @@
 
 #include "StRchMaker/StRichSimpleHit.h"
 #include "StRchMaker/StRichDrawableTHit.h"
+
+#include "StRichPIDMaker/StRichTDrawableRings.h"
+#include "StRichPIDMaker/StRichTDrawableTrack.h"
+#include "StRichPIDMaker/StRichTrack.h"
+#include "StRichPIDMaker/StRichTDrawableTrack.h"
+
 #include "StRichPadMonitorText.h"
+#include "TText.h"
 
 StRichPadMonitor* StRichPadMonitor::mInstance = 0;
 
@@ -50,13 +62,22 @@ StRichPadMonitor* StRichPadMonitor::getInstance(StRichGeometryDb* geo)
 {
     if(!mInstance)
 	mInstance = new StRichPadMonitor(geo);
-
+    
     return mInstance;
 }
 
 StRichPadMonitor::StRichPadMonitor(StRichGeometryDb* geoDb)
     : mGeometryDb(geoDb)
 {
+
+    mLegendE = 0; // ---> initialize legend pointer to null
+    mLegendPi = 0;
+    mLegendK = 0;
+    mLegendP = 0;
+
+    mFileName = 0;
+    mFileEventNum = 0;
+    
     mTransform = StRichCoordinateTransform::getTransform(geoDb);
     // xtop, ytop, w h
     mRichCanvas = new TCanvas("richCanvas", "RICH Event Display",0,0,1200,900);
@@ -133,7 +154,9 @@ StRichPadMonitor::StRichPadMonitor(StRichGeometryDb* geoDb)
 
     // color scale
     drawColorBox();
-
+    drawLegend();
+    // make control panel
+    
     //
     // Make controls
     // mControls;
@@ -172,6 +195,14 @@ StRichPadMonitor::~StRichPadMonitor()
     // mColorBoxes
     // mTextLabels
     delete mRichCanvas;
+
+    delete mLegendE;     // legend pointers
+    delete mLegendPi;
+    delete mLegendK;
+    delete mLegendP;
+
+    delete mFileName;
+    delete mFileEventNum;
 }
 
 void StRichPadMonitor::clearAll()
@@ -179,6 +210,8 @@ void StRichPadMonitor::clearAll()
     this->clearPads();
     this->clearG2T();
     this->clearHits();
+    cerr << "\n Hits Cleared\n";
+    this->clearTracks();
 }
 void StRichPadMonitor::clearPads()
 {
@@ -312,7 +345,7 @@ void StRichPadMonitor::drawHit(StRichSimpleHit* hit)
     //
     //cout << "StRichPadMonitor::drawHit() " << *hit << endl;
     StRichDrawableTHit* thit = new StRichDrawableTHit(*hit);
-    thit->SetMarkerSize(3);
+    thit->SetMarkerSize(2.5);
     thit->SetMarkerColor(1);
     thit->Draw();
     mHits.Add(thit);
@@ -364,44 +397,96 @@ Color_t StRichPadMonitor::GetColorAttribute(double amp)
 //     return ret;
 }
 
-void StRichPadMonitor::addInnerRingPoint(double x, double y)
+void StRichPadMonitor::addTrack(StRichTrack* track)
 {
-    mXPoints.push_back(x);
-    mYPoints.push_back(y);
-}
-void StRichPadMonitor::addOuterRingPoint(double x, double y)
-{
-    mXOPoints.push_back(x);
-    mYOPoints.push_back(y);
+
+    mVectorTracks.push_back(new StRichTDrawableTrack(track)); 
+    
 }
 
-void StRichPadMonitor::drawRing()
+StRichTDrawableTrack* StRichPadMonitor::getTrack(StRichTrack* track)
 {
- //    PR(mXPoints.size());
-//     PR(mYPoints.size());
-    if(!mXPoints.size()) {
-	cout << "StRichPadMonitor::drawRing()\n";
-	cout << "\tERROR\n";
-	cout << "\tNo Points to Plot." << endl;
-    }
-    else {
-	    for(unsigned  ii=1; ii<mXPoints.size(); ii++) {
-// 		cout << "pts: "
-// 		     << (mXPoints[ii-1]) << " "
-// 		     << (mYPoints[ii-1]) << " "
-// 		     << (mXPoints[ii])   << " "
-// 		     << (mYPoints[ii]) << endl;
-		TLine* aLine = new TLine(mXPoints[ii-1], mYPoints[ii-1],
-					 mXPoints[ii],   mYPoints[ii]);
-		mRingPoints.Add(aLine);
-		aLine->Draw();
 
-		TLine* bLine = new TLine(mXOPoints[ii-1], mYOPoints[ii-1],
-					 mXOPoints[ii],   mYOPoints[ii]);
-		mORingPoints.Add(bLine);
-		//cout << "Try draw" << endl;
-		bLine->Draw();
-	    }
+    for(unsigned int i = 0; i < mVectorTracks.size() ; i++)
+	{
+	    if(mVectorTracks[i]->getTrack() == track)
+		return mVectorTracks[i];
+	}
+    return 0;
+}
+
+void StRichPadMonitor::drawRings()
+{
+    for(unsigned int j = 0; j < mVectorTracks.size();j++) {
+	for(int i = 0;i < mVectorTracks[j]->numberOfRings();i++) {
+	    mVectorTracks[j]->getRing(i)->draw();
+	}
+	mVectorTracks[j]->getProjectedMIP()->Draw();
     }
 }
+
+void StRichPadMonitor::clearTracks()
+{
+  cout << "in clearTracks()\n";
+    for(unsigned int j=0; j < mVectorTracks.size();j++) {
+	delete mVectorTracks[j];
+    }
+	
+    mVectorTracks.clear();
+    mVectorTracks.resize(0);
+}
+
+void StRichPadMonitor::drawLegend() {
+
+    /* mLegendE = new TText(-60.0,-50.0,"e");
+       mLegendE->SetTextColor(2);
+       mLegendE->SetTextFont(1);
+       mLegendE->Draw(); */
+    
+    mLegendPi = new TText(-60.0,-47.0,"p"); // Red p in greek
+    mLegendPi->SetTextColor(2);
+    mLegendPi->SetTextFont(122);
+    mLegendPi->Draw();
+
+    mLegendK = new TText(-55.0,-47.0,"K"); // black K
+    mLegendK->SetTextColor(1);
+    mLegendK->SetTextFont(1);
+    mLegendK->Draw();
+
+    mLegendP = new TText(-50.0,-47.0,"p"); // green P
+    mLegendP->SetTextColor(3);
+    mLegendP->SetTextFont(1);
+    mLegendP->Draw();
+    
+}
+
+void StRichPadMonitor::drawEventNum(Int_t eventNum) {
+    
+    if(mFileEventNum)            // delete the old info
+	delete mFileEventNum;
+    
+    if (sprintf(mFileTextEventNum,"Event: %i",eventNum))
+	{
+	    mFileEventNum = new TText(65.2,-46.5,mFileTextEventNum);
+	    mFileEventNum->SetTextColor(1);
+	    mFileEventNum->SetTextFont(1);
+	    mFileEventNum->SetTextSize(.05);
+	    mFileEventNum->SetTextAlign(31);
+	    mFileEventNum->Draw();
+	}
+}
+
+void StRichPadMonitor::drawFileName(char * fileName) {
+
+    if(mFileName)            
+	delete mFileName;
+    
+    mFileName = new TText(65.2,-48.7,fileName);
+    mFileName->SetTextColor(1);
+    mFileName->SetTextFont(1);
+    mFileName->SetTextSize(.019495); // Found this works
+    mFileName->SetTextAlign(31);
+    mFileName->Draw();
+}
+
 #endif
