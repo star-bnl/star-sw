@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.46 2000/04/13 21:46:34 kathy Exp $
+// $Id: doEvents.C,v 1.47 2000/04/13 22:14:03 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -35,6 +35,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.47  2000/04/13 22:14:03  perev
+// StFile -> StFileI
+//
 // Revision 1.46  2000/04/13 21:46:34  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -122,7 +125,7 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     // Handling depends on whether file is a ROOT file or XDF file
     //
     chain  = new StChain("StChain");
-    StFile *setFiles =0;
+    StFileI *setFiles =0;
     if (fileList) {	//Normal case
       setFiles= new StFile(fileList);
     } else        {	//Grand Chalenge
