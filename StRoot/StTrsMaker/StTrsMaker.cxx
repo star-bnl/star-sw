@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.17 1999/02/23 19:15:05 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.18 1999/02/24 16:57:02 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.18  1999/02/24 16:57:02  lasiuk
+// x --> -x for sectors>12
+//
 // Revision 1.17  1999/02/23 19:15:05  lasiuk
 // Change in the rotation angle for GEANT global coordinates
 //
@@ -38,8 +41,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StTrsMaker class for Makers                                        //
+// StTrsMaker class for Makers                                          //
 //                                                                      //
+#define HISTOGRAMS 1
 //////////////////////////////////////////////////////////////////////////
 
 #include "StTrsMaker.h"
@@ -60,6 +64,9 @@
 // SCL
 #include "StGlobals.hh"
 #include "Randomize.h"
+#ifdef HISTOGRAMS
+#include "StHbook.hh"
+#endif
 
 // General TRS
 #include "StCoordinates.hh"
@@ -100,7 +107,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.17 1999/02/23 19:15:05 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.18 1999/02/24 16:57:02 lasiuk Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -256,7 +263,27 @@ void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
     
 Int_t StTrsMaker::Make(){
     //  PrintInfo();
+#ifdef HISTOGRAMS
+    cout << "Histogram" << endl;
+    
+    //
+    //  Open histogram file and book tuple
+    //
+    string fname = "hbook";
+    StHbookFile *hbookFile =
+	new StHbookFile(fname.c_str());
 
+    const int tupleSize2 = 10;
+    float tuple2[tupleSize2];
+
+    StHbookTuple *secTuple  =
+	new StHbookTuple("coord", tupleSize2);
+
+    *secTuple << "sec"
+	      << "x" << "y" << "z"
+	      << "xp" << "yp" << "zp"
+	      << "xg" << "yg" << "zg" << book;
+#endif
     //
     // Set Range for Processing
     const int firstSectorToProcess = 1;
@@ -376,10 +403,26 @@ Int_t StTrsMaker::Make(){
 	    double sb   = sin(beta);
 	    double xp = hitPosition.x()*cb - hitPosition.y()*sb;
 	    double yp = hitPosition.x()*sb + hitPosition.y()*cb;
-	    
+
 	    StThreeVector<double>
 		sector12Coordinate(xp,yp,tpc_hit->x[2]);
-	    
+
+	    if(bsectorOfHit>12) {
+		sector12Coordinate.setX(-xp);
+	    }
+#ifdef HISTOGRAMS
+	    tuple2[0] = static_cast<float>(bsectorOfHit);
+	    tuple2[1] = static_cast<float>(hitPosition.x());
+	    tuple2[2] = static_cast<float>(hitPosition.y());
+	    tuple2[3] = static_cast<float>(hitPosition.z());
+	    tuple2[4] = static_cast<float>(sector12Coordinate.x());
+	    tuple2[5] = static_cast<float>(sector12Coordinate.y());
+	    tuple2[6] = static_cast<float>(sector12Coordinate.z());
+	    tuple2[7] = static_cast<float>(tpc_hit->x[0]);
+	    tuple2[8] = static_cast<float>(tpc_hit->x[1]);
+	    tuple2[9] = static_cast<float>(tpc_hit->x[2]);
+	    secTuple->fill(tuple2);
+#endif
 	    StThreeVector<double> hitMomentum(tpc_hit->p[0]*GeV,
 					      tpc_hit->p[1]*GeV,
 					      tpc_hit->p[2]*GeV);
@@ -573,7 +616,10 @@ Int_t StTrsMaker::Make(){
 #endif
   
     cout << "Got to the end of the maker" << endl;
-  
+#ifdef HISTOGRAMS
+    cout << "Save and close " << endl;
+    hbookFile->saveAndClose();
+#endif    
     // Pass the decoder and data
     if (m_DataSet) delete m_DataSet;
     m_DataSet =  new St_DataSet(GetName());
@@ -609,7 +655,7 @@ Int_t StTrsMaker::Make(){
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.17 1999/02/23 19:15:05 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.18 1999/02/24 16:57:02 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
