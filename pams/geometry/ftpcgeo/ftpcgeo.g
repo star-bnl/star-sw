@@ -8,14 +8,19 @@ Module   FTPCGEO  is the geometry of the Forward TPC in STAR
 * modification:
 * PN. 06/08/98: truncate variable in structures to 8 letters maximum
 *               otherwise they can not be converted into tables
+*  Modified 10-July-98
+*  Author   Holm Hummler, Janet Seyboth
+*           Position FSEN in correct order
 ******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
 *
 	Content FTPC, FIAL, FMPT, FOAL, FDUM, FGAS, FSEN, FSEC,
 		FIFR, FKWI, FFSL, FFCE, FROS, FROM, FROR, FROB, 
-		FROE, FROL, FROP, FROT, FREL, FRCC, FRCE, 
+		FROE, FROL, FROP, FROT, FREL, FRCC, FRCE, FROK,
 		FSER, FSRA, FSRB, FSPG, FSPI, FSSM, FSRI, FSBA,
-		FPAD, FFRA
+		FPAD, FFRA, FFRB, FFRC, FFRD, FFRE, FFRF, FFRG, 
+		FFRH, FFRI, FFRJ, FFRK, FFRL, FFRM, FFRN, FFRO, 
+		FFRP, FFRQ 
 *
 	structure FTPG { Version, RinnerMs, RouterMs,
                          RGasOut, RRoM, RElCard,  RCooPlm, RCooPle, 
@@ -43,12 +48,14 @@ Module   FTPCGEO  is the geometry of the Forward TPC in STAR
                         PolyOR, TrapX1, TrapX2, TrapDY, TrapDZ,
                         PGonPDZ, SBSDy}
 *
-	Integer  k,n,jj,ww,gg,hh,Iring
+	Integer  k,n,jj,ww,nn,gg,hh,Iring
+        Integer krueck
         Integer  iflaga(5),iflagb(5)
         Data     iflaga /0,1,1,2,2/
         Data     iflagb /0,0,1,1,2/
-	Real     position, temp1, temp2, temp3
-        Real     z1,z2,frob_x1
+	Real     position, temp1, temp2, temp3,temp4
+        Real     z1,z2,z3,z4,z5,z6
+	Real     frob_x1,deg,pxy,rsignx,rsigny
 	Integer  Agexist
 
 *
@@ -313,10 +320,13 @@ Block FGAS is the FTPC gas volume
 * 
     create FSEN
     Do k=1,nint(ftpg_Hitlay)/2
+       krueck=nint(ftpg_Hitlay)/2+1-k
+       position FSEN z = -((ftpg_DzSmPR/2.)+(ftpg_DzSmPR*iflagb(krueck))_
+                         +(ftpg_DzBiPR*iflaga(krueck)))
+    EndDO
+    Do k=1,nint(ftpg_Hitlay)/2
        position FSEN z = (ftpg_DzSmPR/2.)+(ftpg_DzSmPR*iflagb(k))_
-                         +(ftpg_DzBiPR*iflaga(k)) 
-       position FSEN z = -((ftpg_DzSmPR/2.)+(ftpg_DzSmPR*iflagb(k))_
-                         +(ftpg_DzBiPR*iflaga(k)))
+                         +(ftpg_DzBiPR*iflaga(k))
     EndDO
 
 *
