@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.23 2000/02/10 01:21:49 calderon Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.24 2000/02/24 16:19:07 long Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,6 +12,12 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.24  2000/02/24 16:19:07  long
+ * take away straight line model due to changes made by GEANT on de<0 case
+ * 
+ *Revision 1.24  2000/02/20 16:22:33  long
+ * take away straight line model due to changes made by GEANT on de<0 case
+ *
  * Revision 1.23  2000/02/10 01:21:49  calderon
  * Switch to use StTpcDb.
  * Coordinates checked for consistency.
@@ -515,7 +521,7 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 	//To decompose track use the helix parameterization.
 	//StPhysicalHelix(p,x,B,+/-)
 	// Need some track info from pid:
-       if(mDE>0.&&fabs((magDb->at(mSector12Position)).z())>0.01){    //HL,9/4/99,if mDe<0,helix model is not good
+     
 	 
 	StPhysicalHelix
 	    track(mMomentum,
@@ -545,27 +551,8 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 	    newPosition += deltaS;
 	} // loop over subsegments
 
-      }//if field on  
-    else{// if mDe<0 ,HL,9/4/99
-         double newS;
-         newS=-mDs/2. + deltaS/2.;
-         StThreeVector<double> miniHitPosition; 
-        
-	for(unsigned int j=0; j<ionizationSegments[(numberOfLevels-1)].size(); j++) {
-            
-	    miniHitPosition.setX(mSector12Position.x()+newS*mMomentum.x()/mMomentum.mag()); 
-            miniHitPosition.setY(mSector12Position.y()+newS*mMomentum.y()/mMomentum.mag()); 
-            miniHitPosition.setZ(mSector12Position.z()+newS*mMomentum.z()/mMomentum.mag());
-	    StTrsMiniChargeSegment aMiniSegment(miniHitPosition,
-						ionizationSegments[(numberOfLevels-1)][j],
-						deltaS);
-	 
-	    listOfMiniSegments->push_back(aMiniSegment); 
-	    
-	    newS += deltaS;
-	} // loop over subsegments
-       
-      }   //field off 
+  
+   
           
     } // charge !=0
     else {
