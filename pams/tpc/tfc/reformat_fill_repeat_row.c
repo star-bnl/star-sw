@@ -30,7 +30,7 @@ long  reformat_fill_repeat_row
     TABLE_HEAD_ST  *pixel_data_io_h, TYPE_SHORTDATA_ST    *pixel_data_io)
 {
   /* define local variables */
-    int    i, j,ij,ji,ik;
+    int    i, j,ij,ji,ik, ijrow;
     long   iptr;
     long   ipad;
     int    nseq, nseq0, nseq1, nbuck0, bucket;
@@ -49,7 +49,6 @@ long  reformat_fill_repeat_row
      first_pixel_row=raw_row_io[iRepeatRow].ipixel;
  
      /* loop over pad if pads in this row have hits */
-
       for(i=0;i<npad;i++){
                 
           ipad  = structtbl[sptr++].info;
@@ -57,14 +56,17 @@ long  reformat_fill_repeat_row
 	  nseq1 = structtbl[sptr++].info;
           first_pixel_pad=pixel_data_io_h->nok;
 
+	  /*          printf("ipad=%d, first_pixel_pad=%d\n",ipad, first_pixel_pad); */
+
           /* find whether this pad ID is less than the last one in this row */
            iRepeatPad=-100;
            for(ji=raw_row_io[iRepeatRow].ipad+raw_row_io[iRepeatRow].npad;
                  ji>=raw_row_io[iRepeatRow].ipad;ji--){
                          if(ipad<raw_pad_io[ji].PadId)iRepeatPad=ji;
             }   
+
            /* check whether this pad should be the first pad in the row*/
-             if(iRepeatPad< raw_row_io[iRepeatRow].PadFirst) {
+             if(iRepeatPad>=0&&iRepeatPad< raw_row_io[iRepeatRow].PadFirst) {
                  raw_row_io[iRepeatRow].PadFirst=ipad;
 	   } 
 
@@ -213,9 +215,13 @@ long  reformat_fill_repeat_row
             npixel_this_pad = pixel_data_io_h->nok-first_pixel_pad;
             raw_row_io[iRepeatRow].npixel += npixel_this_pad;
             raw_row_io[iRepeatRow].nseq +=nseq0+nseq1;
-            raw_row_io[iRepeatRow].npad++;
-	     /*    raw_row_io_h->nok++;   not increase it for repeated row*/ 
-           } /* end loop for pads in this row */
+            raw_row_io[iRepeatRow].npad++; 
+            /* when next row has hit pads in it, because we insert one pad in, the raw_pad_io_h->nok increases one, so we need push ipad in the follow rows back further */
+           for(ijrow=iRepeatRow+1;ijrow<raw_row_io_h->nok;ijrow++){
+                   if(raw_row_io[ijrow].npad!=0) raw_row_io[ijrow].ipad++;
+             }
+        /*    raw_row_io_h->nok++;   not increase it for repeated row*/ 
+       } /* end loop for pads in this row */
             return STAFCV_OK;
 }
 
