@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: NonId3DCorrFctn.cxx,v 1.3 2002/12/12 17:02:49 kisiel Exp $
+ * $Id: NonId3DCorrFctn.cxx,v 1.4 2003/02/02 21:52:49 magestro Exp $
  *
  * Author: Adam Kisiel, Warsaw University of Technology
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: NonId3DCorrFctn.cxx,v $
+ * Revision 1.4  2003/02/02 21:52:49  magestro
+ * small changes to remove compiler warnings
+ *
  * Revision 1.3  2002/12/12 17:02:49  kisiel
  * Use KStar instead of 2*KStar for non-identical particles
  *
@@ -197,8 +200,6 @@ void NonId3DCorrFctn::makeHistos(char* title, const int& nbins, const float& Qin
 
   float kstarlim = 0.5;
   float klim = 0.6 * kstarlim;
-  float klim2 = 0.3;
-  double exitlim = 400.0;
   
   char htitle[200];
   strcpy(htitle,"HOutKSame");
@@ -488,7 +489,7 @@ void NonId3DCorrFctn::AddRealPair(const StHbtPair* pair){
   double tKOut = pair->dKOut();
   double tKSide = pair->dKSide();
   double tKLong = pair->dKLong();
-  double exitsep = pair->NominalTpcExitSeparation();
+  //double exitsep = pair->NominalTpcExitSeparation();
 
    if (mKCompCut <= 0.0)
     {
@@ -567,7 +568,7 @@ void NonId3DCorrFctn::AddMixedPair(const StHbtPair* pair){
   double tKOut = pair->dKOut();
   double tKSide = pair->dKSide();
   double tKLong = pair->dKLong();
-  double exitsep = pair->NominalTpcExitSeparation();
+  //double exitsep = pair->NominalTpcExitSeparation();
 
   if (mKCompCut <= 0.0)
     {
