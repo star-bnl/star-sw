@@ -3,7 +3,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.23 2000/03/08 14:27:45 ullrich Exp $
+% $Id: StEvent.tex,v 2.24 2000/03/23 18:30:50 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -22,8 +22,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.23  2000/03/08 14:27:45  ullrich
-% Added description of new method of StVertex.
+% Revision 2.24  2000/03/23 18:30:50  ullrich
+% Added new EMC classes to reference section.
 %
 % Revision 2.33  2000/05/22 22:04:07  ullrich
 % Removed StRichPixelCollection ref section and added description
@@ -148,8 +148,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.23 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/08 14:27:45 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.24 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/23 18:30:50 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -173,8 +173,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.23 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/08 14:27:45 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.24 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/23 18:30:50 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -182,17 +182,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.23 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/08 14:27:45 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.24 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/23 18:30:50 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.23 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/08 14:27:45 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.24 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/23 18:30:50 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.23 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/08 14:27:45 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.24 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/23 18:30:50 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -207,8 +207,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.23 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/08 14:27:45 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.24 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/23 18:30:50 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -2389,6 +2389,7 @@ definition in the header file.
     \item[evt = 0] triggered event at t = 0
     \item[evt = 1] 1st pre event at t = -5
     \item[evt = 2] 2nd pre event at t = -4
+    \item[evt = 3] 3rd pre event at t = -3
     \item[evt = 4] 1st post event at t = -2
     \item[evt = 5] 2nd post event at t = -1
     \item[evt = 6] 2nd post event at t = +1
@@ -2407,12 +2408,15 @@ definition in the header file.
     possible future use.  For the second argument (\texttt{evt}) see
     \texttt{mips()} above.
 
-    \verb+Int_t nHits() const;+\\
+    \verb+void setMips(UInt_t, UInt_t, UInt_t, Float_t);+\\
     \verb+void setTime(UInt_t, UInt_t, UInt_t, Char_t);+\\
+    \verb+void setAux(UInt_t, UInt_t, Float_t);+\\
     \verb+void setNumberOfPreSamples(UInt_t);+\\
     \verb+void setNumberOfPostSamples(UInt_t);+\\
 \end{Entry}
 \clearpage
+
+
 
 \subsection{StDedxPidTraits}
 \index{StDedxPidTraits|textbf}
@@ -2420,6 +2424,7 @@ definition in the header file.
 \begin{Entry}
 \item[Summary]
 \item[Synopsis]
+    \verb+#include "StDedxPidTraits.h"+\\
     \verb+class StDedxPidTraits;+\\
 \item[Description]
 \item[Related Classes]
@@ -2467,6 +2472,12 @@ definition in the header file.
     \verb+Float_t phi() const;+\\
     \verb+Float_t sigmaEta() const;+\\
     \verb+Float_t sigmaPhi() const;+\\
+    \verb+Float_t energy() const;+\\
+    \verb+Int_t nHits() const; +\\
+    \verb+Int_t nNeighbors() const;+\\
+    \verb+Int_t nTracks() const;+\\
+    \verb+StPtrVecEmcRawHit& hit();+\\
+    \verb+const StPtrVecEmcRawHit& hit() const;+\\
     \verb+StPtrVecEmcCluster& neighbor();+\\
     \verb+const StPtrVecEmcCluster& neighbor() const;+\\
     \verb+StPtrVecTrack& track();+\\
@@ -2515,6 +2526,49 @@ definition in the header file.
 \index{StEmcCollection|textbf}
 \label{sec:StEmcCollection}
 \begin{Entry}
+\item[Summary]
+\item[Synopsis]
+    \verb+#include "StEmcCollection.h"+\\
+    \verb+class StEmcCollection;+\\
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
+    \verb+StEmcCollection();+\\
+\item[Public Member\\ Functions]
+    \verb+StEmcDetector* detector(StDetectorId);+\\
+    \verb+const StEmcDetector* detector(StDetectorId) const;+\\
+    \verb+StSPtrVecEmcPoint& barrelPoints();+\\
+    \verb+const StSPtrVecEmcPoint& barrelPoints() const;+\\
+    \verb+StSPtrVecEmcPoint& endcapPoints();+\\
+    \verb+const StSPtrVecEmcPoint& endcapPoints() const;+\\
+    \verb+void addBarrelPoint(const StEmcPoint*);+\\
+    \verb+void addEndcapPoint(const StEmcPoint*);+\\
+    \verb+void setDetector(StEmcDetector*);+\\
+\end{Entry}
+\clearpage
+
+
+\subsection{StEmcDetector}
+\index{StEmcDetector|textbf}
+\label{sec:StEmcDetector}
+\begin{Entry}
+\item[Summary]
+\item[Synopsis]
+    \verb+#include "StEmcDetector.h"+\\
+    \verb+class StEmcDetector;+\\
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
+    \verb+StEmcDetector();+\\
+    \verb+StEmcDetector(StDetectorId, UInt_t);+\\
+\item[Public Member\\ Functions]
+    \verb+StDetectorId detectorId() const;+\\
+    \verb+UInt_t numberOfModules() const;+\\
+    \verb+Bool_t addHit(StEmcRawHit*);+\\
+    \verb+UInt_t numberOfHits() const;+\\
+    \verb+StEmcModule* module(UInt_t);+\\
+    \verb+const StEmcModule* module(UInt_t) const;+\\
+    \verb+StEmcClusterCollection* cluster();+\\
     \verb+const StEmcClusterCollection* cluster() const;+\\
     \verb+void setCluster(StEmcClusterCollection*);+\\
 \end{Entry}
