@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.22 2002/02/22 18:43:39 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.23 2002/06/10 21:13:17 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.23  2002/06/10 21:13:17  caines
+ * Add SvtHits and a hit collection if StEvent already exists - prepartation for ittf
+ *
  * Revision 1.22  2002/02/22 18:43:39  caines
  * Add SetFileNames function
  *
@@ -101,6 +104,9 @@
 #include "StSvtClassLibrary/StSvtWaferGeometry.hh"
 #include "StSvtAnalysedHybridClusters.hh"
 #include "StSvtSimulationMaker/StSvtGeantHits.hh"
+
+#include "StEvent.h"
+#include "StSvtHitCollection.h"
 
 fstream cluInfo;
 
@@ -304,6 +310,11 @@ Int_t StSvtHitMaker::Make()
      gMessMgr->Warning() <<" Things are wrong with the SVT database!!!!!!!!!" << endm;
   }
 
+
+  mCurrentEvent = (StEvent*) GetInputDS("StEvent");
+  if( mCurrentEvent){
+    msvtHitColl = new StSvtHitCollection;
+  }
   TransformIntoSpacePoint();
   FillHistograms();
 
@@ -319,7 +330,8 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 
   int index, TotHits=0, GoodHit=0;
   
-  
+  StSvtHit* EventSvtHit;
+
   StSvtCoordinateTransform* SvtGeomTrans = new StSvtCoordinateTransform();
   //SvtGeomTrans->setParamPointers(&srs_par[0], &geom[0], &shape[0], mSvtData->getSvtConfig());
   if(m_geom)  SvtGeomTrans->setParamPointers(m_geom, mSvtData->getSvtConfig(), m_driftVeloc);
@@ -379,6 +391,10 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	    mSvtBigHit->svtHit()[clu].setPosition(mPos);
 	 
 	    if(mSvtBigHit->svtHit()[clu].flag() < 4) GoodHit++; 
+	    if( mCurrentEvent){
+	      EventSvtHit = new StSvtHit(mSvtBigHit->svtHit()[clu]);
+	      msvtHitColl->addHit(EventSvtHit);
+	    }
 	  }
 	  
 	  if( mSvtBigHit->numOfHits() > 0){
