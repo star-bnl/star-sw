@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.29 2001/04/25 18:08:16 perev Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.30 2001/05/15 15:30:18 rcwells Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.30  2001/05/15 15:30:18  rcwells
+ * Added magnetic field to StHbtEvent
+ *
  * Revision 1.29  2001/04/25 18:08:16  perev
  * HPcorrs
  *
@@ -268,7 +271,16 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   StHbtThreeVector vp = rEvent->primaryVertex()->position();
   hbtEvent->SetPrimVertPos(vp);
   cout << " StStandardHbtEventReader::ReturnHbtEvent() - primary vertex : " << vp << endl;
- 
+
+  if ( rEvent->summary() ) {
+    double magneticField = rEvent->summary()->magneticField();
+    hbtEvent->SetMagneticField(magneticField);
+    cout <<" StStandardHbtEventReader - magnetic field " << hbtEvent->MagneticField() << endl;
+  }
+  else {
+    cout << "StStandardHbtEventReader - no StEvent summary -> no magnetic field written to HbtEvent" << endl;
+  }
+
   // By now, all event-wise information has been extracted and stored in hbtEvent
   // see if it passes any front-loaded event cut
   if (mEventCut){
