@@ -1,7 +1,10 @@
 *
-* $Id: dzdent.F,v 1.3 1998/04/16 17:00:27 fisyak Exp $
+* $Id: dzdent.F,v 1.4 2000/01/06 01:01:09 nevski Exp $
 *
 * $Log: dzdent.F,v $
+* Revision 1.4  2000/01/06 01:01:09  nevski
+* dzdoc for agi
+*
 * Revision 1.3  1998/04/16 17:00:27  fisyak
 * 2nd pass with gstar
 *
@@ -40,10 +43,9 @@
 *.            21-Nov-95 PN:  Z option supress data description dump    *
 *.**********************************************************************
 C     SAVE
- 
+
 #include "dzdoc/bkwrp.inc"
 #include "dzdoc/tapes.inc"
-*         From DZEBRA
 #include "zebra/zbcdk.inc"
 #include "dzdoc/linout.inc"
       LOGICAL BTEST, LTHERE, RTHERE,BTHERE,DTHERE
@@ -56,15 +58,15 @@ C     SAVE
 #include "dzdoc/bkstparq.inc"
 #include "dzdoc/bktgparq.inc"
 #include "dzdoc/bktgdatq.inc"
- 
+
       LTHERE=.FALSE.
       RTHERE=.FALSE.
       BTHERE=.FALSE.
       DTHERE=.FALSE.
    10 CONTINUE
- 
+
 *--     Loop over the link, status bit and data information
- 
+
       II     = NBHEAQ
       IF (IFLOPT(MPOSBQ).NE.0) THEN
 *--         Link description bank option
@@ -75,9 +77,9 @@ C     SAVE
 *--           Get the number ow words required in the bank
           NLPUSH = NLLL + MOLK0Q - IQWND(KQSP+LBQBKD)
 *--           If number of link > 0 -- Push bank, otherwise noopt
- 
+
 *--- OTTO    allow return of non announced links
- 
+
 *--          CALL DZVERI('Before MZPUSH',0,'CFLSU')
          IF (NLLL.GE.0) CALL MZPUSH(0,LBQBKD,0,NLPUSH,'I')
 *--      PRINT '('' NLLINK NLPUSH '',2I5)',NLLINK,NLPUSH
@@ -86,9 +88,9 @@ C     SAVE
 *--            0th address and max. nb. entries in link description bank
 *          MBLK0  = KQSP + LBQBKD + MOLK0Q
           NBLMAX = IQWND(KQSP+LBQBKD) - MOLK0Q
- 
+
           IHLPUT = 0
- 
+
       ENDIF
       ITAG   = IOTAGQ
       IF (IFLOPT(MPOSIQ).NE.0) THEN
@@ -96,7 +98,7 @@ C     SAVE
       ELSE
          IREP   = 5
       ENDIF
- 
+
       DO 120 I=MBLINQ,MBDATQ
           IF (IFLOPT(MPOSBQ).NE.0.AND.I.NE.MBLINQ)         GO TO 120
           II     = II + IQ(KQSP+LQBKD+I-1)
@@ -117,7 +119,7 @@ C     SAVE
 C--              No link description
                                                            GO TO 120
              ENDIF
- 
+
           ELSEIF (I.EQ.MBRLIQ) THEN
               IF (IQ(KQSP+LQBKD+I).GT.0) THEN
                  IF (IFLOPT(MPOSIQ).NE.0) THEN
@@ -134,7 +136,7 @@ C--              No link description
 C--              No ref link description
                                                            GO TO 120
              ENDIF
- 
+
           ELSEIF (I.EQ.MBBITQ) THEN
             IF (IQ(KQSP+LQBKD+I).GT.0) THEN
                  IF (IFLOPT(MPOSIQ).NE.0) THEN
@@ -198,7 +200,7 @@ C--            No data description
                   COUT(INDENT+2:)='--REP level='//
      +                         CHAR(ICHAR('0')+IREPLV)
                ENDIF
- 
+
 *1810               IF    (IREPLO.EQ.0)THEN
 *1810                  COUT(INDENT+2:)='-- Do I = 1,'
 *1810               ELSE IF(IREPLO.EQ.1)THEN
@@ -258,7 +260,7 @@ C--            No data description
               ELSE
                   IF(IFLOPT(MPOSBQ).EQ.0)WRITE(LUNUSR,'(A)') COUT
               ENDIF
- 
+
 *------------------ End of loop over Hollerith text
               INDENT = IREPLV*INDENQ
           ELSEIF (IREPLO.GT.IREPLV) THEN
@@ -406,9 +408,9 @@ C--            No data description
                   ENDIF
               ENDIF
               INLINE = INDENT + ITAG
- 
+
 *--             Special case for the link descriptor bank
- 
+
               IF (IFLOPT(MPOSBQ).EQ.0)                     GO TO 90
 *--                Update pointer in input bank and test tag information
                   INSERT = INSERT + NWHOLL
@@ -535,19 +537,19 @@ C--            No data description
           ENDIF
 *---------- End of loop over link/status bits/data info (400)
   120 CONTINUE
- 
+
       GOTO 140
- 
+
   130 CONTINUE
- 
+
       WRITE(LUNOUT,'(A,A4)')' Previous error occured in: ',
      +                      IQ(KQSP+LQBKD+1)
- 
+
   140 CONTINUE
- 
+
 *--- OTTO tell highest link number
- 
+
       IQ(LBQBKD+KQSP+5) = IHLPUT
       IQUEST(MOQUEQ) = LBQBKD
- 
+
       END

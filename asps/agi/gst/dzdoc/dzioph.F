@@ -1,16 +1,22 @@
 *
-* $Id: dzioph.F,v 1.3 1998/04/16 17:00:29 fisyak Exp $
+* $Id: dzioph.F,v 1.4 2000/01/06 01:01:12 nevski Exp $
 *
 * $Log: dzioph.F,v $
+* Revision 1.4  2000/01/06 01:01:12  nevski
+* dzdoc for agi
+*
 * Revision 1.3  1998/04/16 17:00:29  fisyak
 * 2nd pass with gstar
 *
+* Revision 1.2  1996/04/24 17:26:11  mclareni
+* Extend the include file cleanup to dzebra, rz and tq, and also add
+* dependencies in some cases.
 *
-* -----------------------------------------------------------------
-#include "dzdoc/pilot.h"
-*CMZ :  1.30/00 11/02/96  22.08.12  by  Pavel Nevski
-*CMZU:  1.00/01 22/01/96  00.49.05  by  Sasha Vanyashin
-*-- Author :
+* Revision 1.1.1.1  1996/03/06 10:47:06  mclareni
+* Zebra
+*
+*-----------------------------------------------------------
+#include "zebra/pilot.h"
 #if (defined(CERNLIB_DEBUGON))&&(defined(CERNLIB_VFORT))
 #include "zebra/debugvf1.inc"
 #endif
@@ -23,7 +29,7 @@
 #include "zebra/zunit.inc"
 #include "zebra/dzc1.inc"
 #include "zebra/bkfoparq.inc"
- 
+
       CHARACTER CHROUT*(*),CHSTAK*6,KFOTYP(0:11)*1
 #if defined(CERNLIB_QMCRY)||defined(CERNLIB_QMCDC)
       CHARACTER CDWORD*36
@@ -37,35 +43,35 @@
       EQUIVALENCE     (DWORD,IWORD,RWORD)
       PARAMETER (CHROUT = 'DZIOPH')
       DATA KFOTYP /'U','B','I','F','D','H','*','S','*','N','*','L'/
- 
+
 #if (defined(CERNLIB_DEBUGON))&&(defined(CERNLIB_VFORT))
 #include "zebra/debugvf2.inc"
 #endif
 *SEQ, Q$JBIT.
- 
+
       CHSTAK          = CQSTAK(MCQSIQ:)
       CQSTAK(MCQSIQ:) = CHROUT
- 
+
       CALL ZPAGE(IQPRNT,MIN((ILAST-IFIRST)/10+2,5))
       CQLINE = ' --------  DATA part of bank  --------'
       IF (IFLOPT(MPOSQQ).EQ.0) CALL DZTEXT(0,CDUMMQ,1)
- 
+
       WRITE (CQLINE,'(1X,I7,'' /'',120X)') IFIRST
       INLINE =11
- 
+
       JDATA  = 0
       JFOCUR = 0
       NWPRNT = 0
- 
- 
+
+
    10 ITYPE  = MFO(JFOCUR+1)
       IF (ITYPE.EQ.7)                                      GO TO 40
       NWSEC = MFO(JFOCUR+2)
       IF   (NWSEC)           20, 30, 60
- 
+
    20 NWSEC = ILAST - JDATA
                                                            GO TO 60
- 
+
    30 JDATA = JDATA + 1
       IWORD = IQ(KQS+LS+JDATA)
       NWSEC = IWORD
@@ -81,7 +87,7 @@
           NWPRNT = NWPRNT + 1
       ENDIF
                                                            GO TO 50
- 
+
    40 JDATA = JDATA + 1
       IWORD = IQ(KQS+LS+JDATA)
       ITYPE = MOD (IWORD,16)
@@ -96,7 +102,7 @@
      +     KFOTYP(MIN(ITYPE,6)),NWSEC
           NWPRNT = NWPRNT + 1
       ENDIF
- 
+
    50 IF (JDATA.GE.IFIRST) THEN
 #if defined(CERNLIB_QMCRY)||defined(CERNLIB_QMCDC)
           IF (MOD(NWPRNT,6).EQ.0)  THEN
@@ -117,7 +123,7 @@
 #endif
           ENDIF
       ENDIF
- 
+
       IF (ITYPE.GE.8) THEN
           ITYPE      = 0
           NWSEC      = ILAST - JDATA
@@ -130,8 +136,8 @@
           NWSEC      = ILAST - JDATA
           IQUEST(11) = -ITYPE-32
       ENDIF
- 
- 
+
+
    60 IDBLE  = 0
       DO 100 I=MAX(JDATA+1,IFIRST),MIN(JDATA+NWSEC,ILAST)
           IWORD = IQ(KQS+LS+I)
@@ -193,7 +199,7 @@
 #endif
           ENDIF
           NWPRNT = NWPRNT + 1
- 
+
 #if defined(CERNLIB_QMCRY)||defined(CERNLIB_QMCDC)
           IF (MOD(NWPRNT,6).EQ.0)  THEN
 #endif
@@ -212,24 +218,24 @@
               INLINE = INLINE + 12
 #endif
           ENDIF
- 
+
   100 CONTINUE
- 
- 
+
+
       JDATA = JDATA + NWSEC
- 
+
       IF (JDATA.GE.ILAST)                                  GO TO 900
- 
+
       IF (JDATA.LT.ILAST)   THEN
           JFOCUR = JFOCUR + 2
           IF (JFOCUR.LT.JFOEND)                            GO TO 10
           JFOCUR = JFOREP
                                                            GO TO 10
       ENDIF
- 
- 
+
+
   900 IF (INLINE.NE.11.AND.IFLOPT(MPOSQQ).EQ.0) CALL DZTEXT(0,CDUMMQ,1)
- 
+
   999 CQSTAK(MCQSIQ:) = CHSTAK
       END
- 
+
