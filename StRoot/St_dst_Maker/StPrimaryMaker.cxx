@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.71 2002/01/24 17:47:45 balewski Exp $
+// $Id: StPrimaryMaker.cxx,v 1.72 2002/01/24 23:54:39 balewski Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.72  2002/01/24 23:54:39  balewski
+// one more bug in ppLMV
+//
 // Revision 1.71  2002/01/24 17:47:45  balewski
 // double ppLMV bug fix
 //
@@ -465,7 +468,6 @@ Int_t StPrimaryMaker::Init(){
     int   ppLMVparIdef[10]={2, 10, 0, 0, 0, 0, 0, 0, 0, 9999};
     float ppLMVparFdef[10]={1., 3.9, 0.20, .02, 1.,180., 0, 0, 0, 8888};
     ppLMVuse(ppLMVparIdef,ppLMVparFdef);
-    UnSetBeam4ppLMV(); // turn off adding beam line to ppLMV  as default (2)
   }
 
    // few histos for monitoring of ppLMV
