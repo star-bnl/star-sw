@@ -5,6 +5,7 @@
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
 #include "StHbtMaker/Infrastructure/StHbtParticle.hh"
+#include "TH1.h"
 
 class StHbtCoulomb {
 
@@ -23,6 +24,8 @@ public:
   double CoulombCorrect(const double& eta, const double& radius);
   double CoulombCorrect(const StHbtPair* pair);
   double CoulombCorrect(const StHbtPair* pair, const double& radius);
+  StHbt1DHisto* CorrectionHistogram(const double& mass1, const double& mass2, const int& nBins, 
+				    const double& low, const double& high);
 
 
 private:
