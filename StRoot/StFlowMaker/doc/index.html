@@ -18,35 +18,53 @@ STAR Software for Analysis of Anisotropic Flow</h3>
 Berkeley, CA 94720, USA</i></caption>
 
 <tr VALIGN=TOP>
-<td VALIGN=TOP WIDTH="50%"><!C- First column starts here>In the <a href="http://www.star.bnl.gov/STAR/html/star_computing.html">STAR</a>
-
-<a href="http://root.cern.ch/">ROOT</a> environment c++ programs have
-been written to analyze STAR data for anisotropic (directed and elliptic)
-flow. This document is a roadmap to the available documentation and is
-kept <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowMaker/doc/">updated</a>.
-The software consists of three modules which are called from the STAR software
-chain and described in the overview <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowMaker/doc/HTML_Presentation/index.htm">presentation</a>.
-<p><b>StFlowMaker</b> is the interface with the STAR DST. It creates the
-microDST StFlowEvent from StEvent after event and track cuts. This is describedc
-in the <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowMaker/README">README</a>
+<td VALIGN=TOP WIDTH="50%"><!C- First column starts here>In the <a href="http://root.cern.ch/">ROOT</a>
+for <a href="http://www.star.bnl.gov/STAR/html/star_computing.html">STAR</a>
+environment, c++ programs have been written to analyze STAR data for anisotropic
+(directed and elliptic) flow. This document is a roadmap to the available
+documentation and is kept <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowMaker/doc/">updated</a>.
+The software consists of 2.3k lines of code in 16 files in three directories.
+The three "maker" modules are called from the STAR software chain and described
+in the overview <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowMaker/doc/HTML_Presentation/index.htm">presentation</a>.
+The presentation is also available as a <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowMaker/doc/Presentation.ps">postscript</a>
+file.
+<p><b><a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/">StFlowMaker</a></b>
+is the interface with the STAR DST. It creates the microDST <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowEvent.cc">StFlowEvent</a>
+from <a href="http://www.star.bnl.gov/star/starlib/doc/www/html/comp_l/root/html/StEvent.html">StEvent</a>
+after <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowCutEvent.cxx">event</a>
+and <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowCutTrack.cxx">track</a>
+cuts. StFlowEvent consists of a vector <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowTrackCollection.hh">track
+collextion</a> of <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowTrack.hh">tracks</a>.
+This is described in the <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowMaker/README">README</a>
 document. One can also view the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowMaker.hh">header</a>,
 the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowMaker.cxx">implimentation,</a>
 and the <a href="http://www.star.bnl.gov/star/starlib/doc/www/html/comp_l/root/html/StFlowMaker.html">interface</a>.
-<p><b>StFlowTagMaker</b> fills the tag database from StFlowEvent. This
-is describedc in the <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowTagMaker/README">README</a>
+Constants which are needed in more than one file are kept in <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowConstants.hh">StFlowConstants</a>.
+<p><b><a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowTagMaker/">StFlowTagMaker</a></b>
+fills the tag database from StFlowEvent. This is described in the <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowTagMaker/README">README</a>
 document. One can also view the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowTagMaker/StFlowTagMaker.hh">header</a>,
 the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowTagMaker/StFlowTagMaker.cxx">implimentation,</a>
 and the <a href="http://www.star.bnl.gov/star/starlib/doc/www/html/comp_l/root/html/StFlowTagMaker.html">interface</a>.
-<p><b>StFlowAnalysisMaker</b> does the flow analysis and fills histograms.
-This is describedc in the <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowAnalysisMaker/README">README</a>
+<p><b><a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowAnalysisMaker/">StFlowAnalysisMaker</a></b>
+reads the event-by-event quantities from the tag database, if it exists,
+or if it does not, from StFlowEvent. It reads the particle quantities from
+StFlowEvent and does the flow analysis.&nbsp; The main results are 2D histograms
+of the flow variables, v_n, as a function of pseudorapidity and transverse
+momenta. This is described in the <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowAnalysisMaker/README">README</a>
 document. One can also view the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowAnalysisMaker/StFlowAnalysisMaker.hh">header</a>,
 the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowAnalysisMaker/StFlowAnalysisMaker.cxx">implimentation,</a>
 and the <a href="http://www.star.bnl.gov/star/starlib/doc/www/html/comp_l/root/html/StFlowAnalysisMaker.html">interface</a>.
+The macro <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowAnalysisMaker/plot.C">plot.C</a>
+is used to plot the resulting histograms.
+<p>There is also a STAR Note<sup>1</sup> which contains predictions for
+STAR.
 <p><!C- End of first column></td>
 
 <td VALIGN=TOP WIDTH="50%"><!C- Begin second column>
 <p><!C- References and footnotes here><i>Footnotes and References</i>
-<br><font size=-1>1. authors, reference</font></td>
+<br><font size=-1>1. R.J.M. Snellings, A.M. Poskanzer, and S.A. Voloshin,
+"Anisotropic Flow at STAR", STAR Note <a href="http://www.star.bnl.gov/STAR/sno/sno.html">SN0388
+(</a>1999).</font></td>
 </tr>
 </table>
 
