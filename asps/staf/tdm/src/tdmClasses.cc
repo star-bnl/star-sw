@@ -369,7 +369,11 @@ STAFCV_T tdmTable::dumpRows(long ifirst,long nrows,char *out,char *colList) {
   fclose(ff);
   for(pass=0;pass<2;pass++) { /* first pass compiles info (eg, col widths) */
     ff=fopen(tmp,"r"); if(!ff) EML_ERROR(CANT_READ_FILE);
-    if(pass==1) { gg=fopen(out,"w"); if(!gg) EML_ERROR(CANT_WRITE_FILE);  }
+    if(pass==1) {
+      if(strcmp(out,"screen")) {
+        gg=fopen(out,"w"); if(!gg) EML_ERROR(CANT_WRITE_FILE); 
+      } else gg=stdout;
+    }
     lineindex=0; if(pass==0) maxlineindex=0;
     if(pass==1) {
       sprintf(format,"%d",maxlineindex+ifirst);
@@ -377,7 +381,7 @@ STAFCV_T tdmTable::dumpRows(long ifirst,long nrows,char *out,char *colList) {
     }
     while(fgets(line,LINESIZE,ff)) {
       if(strlen(line)>LINESIZE-5) {
-        fclose(ff); if(pass==1) fclose(gg); 
+        fclose(ff); if(pass==1&&strcmp(out,"screen")) fclose(gg); 
         EML_ERROR(LINE_TOO_BIG); /* too many cols */
       }
       if(!haveSetMask) {
@@ -388,7 +392,8 @@ STAFCV_T tdmTable::dumpRows(long ifirst,long nrows,char *out,char *colList) {
         cc=strtok(NULL,TOKENS); cc=strtok(NULL,TOKENS); /* discard first 2 */
         while(cc) {
           if(nmask>=MCIF) {
-            fclose(ff); if(pass==1) fclose(gg); EML_ERROR(TOO_MANY_COLS);
+            fclose(ff); if(pass==1&&strcmp(out,"screen")) fclose(gg); 
+            EML_ERROR(TOO_MANY_COLS);
           }
           dd=strstr(cc,"["); if(dd) dd[0]=0;
           for(i=0;i<ncol;i++) {
@@ -421,7 +426,7 @@ STAFCV_T tdmTable::dumpRows(long ifirst,long nrows,char *out,char *colList) {
       lineindex++; if(pass==0) maxlineindex++;
     }
     fclose(ff); 
-    if(pass==1) fclose(gg);
+    if(pass==1) { if(strcmp(out,"screen")) fclose(gg); }
   }
   printf("Have written %s,  vi %s\n",out,out);
   EML_SUCCESS(STAFCV_OK);
