@@ -208,7 +208,7 @@ Int_t StKinkMaker::Make(){//called for each event
     mParentImpact = parentHelix.distance(mEventVertex);
     if (mParentImpact > tkfpar->impactCut ) continue;
     cutPImpact++;
-
+    Int_t foundDaughters = 0;
     for (j=i+1;j<=trackArray.GetLast();j++ ){//daughter
       mTrack2 = (StKinkLocalTrack*)trackArray.At(j);
       mDaughterTrackCandidate = mTrack2->trackBack();
@@ -414,16 +414,19 @@ Int_t StKinkMaker::Make(){//called for each event
   if (distanceKinkDaughter2D > tkfpar->distanceKinkDaughter2D ) continue; 
   if (distanceKinkParentZ > tkfpar->distanceKinkParentZ ) continue; 
   if (distanceKinkDaughterZ > tkfpar->distanceKinkDaughterZ ) continue; 
-
- kinkCandidate++;		  
-
-  FillEvent(myDaughterGeometry1,myParentGeometry11);
-  kinkVertices.push_back(kinkVertex);
-  
+  foundDaughters++;
+  mDaughterTrackUnic = myDaughterGeometry1;
    }//loop j.. daughters
+  if(foundDaughters!=1)continue;//if found more than 1 daugthers for one parent track,ignore it
+
+  kinkCandidate++;		  
+  FillEvent(mDaughterTrackUnic,myParentGeometry11);
+  kinkVertices.push_back(kinkVertex);
+  //  cout<<"foundDaugthers"  <<foundDaughters<<endl;
+
  }//loop i .. parents
   // trackArray.Delete(); 
-  gMessMgr->Info() << " Found " << kinkCandidate << " kink candidates " << endm;
+  gMessMgr->Info() << " StKinkMaker:: Found " << kinkCandidate << " kink candidates " << endm;
   return kStOK; 
 }
 	
