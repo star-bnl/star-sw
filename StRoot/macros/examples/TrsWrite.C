@@ -1,7 +1,12 @@
 //
-// $Id: TrsWrite.C,v 1.3 2000/01/10 21:49:07 kathy Exp $
+// $Id: TrsWrite.C,v 1.4 2000/01/20 18:18:16 calderon Exp $
 //
 // $Log: TrsWrite.C,v $
+// Revision 1.4  2000/01/20 18:18:16  calderon
+// fixed for current TRS in dev.  Current DB in dev is ROOT DB, because
+// Electronics DB from MySQL is not accessible.  When it is, just comment out
+// ROOT DB part and uncomment MySQL DB part.
+//
 // Revision 1.3  2000/01/10 21:49:07  kathy
 // put owner statement in macros
 //
@@ -50,7 +55,7 @@ void TrsWrite(const Int_t Nevents=1)
 
   //  Create the makers to be called by the current chain
 
-  // Db
+  // ROOT Db
   const char* mainDB = "$STAR/StDb";
   St_db_Maker *dbMk = new St_db_Maker("db",mainDB);
   dbMk->SetDebug();
@@ -60,6 +65,23 @@ void TrsWrite(const Int_t Nevents=1)
   St_db_Maker *calibMk = new St_db_Maker("calib",calibDB);
   chain->SetInput("calib","calib:calib");
   calibMk->SetDebug();
+
+  // MySQL DB
+//   const char *mainDB = "MySQL:Geometry";
+//   St_db_Maker *dbMk = new St_db_Maker("Geometry",mainDB);
+//   dbMk->SetDebug();
+//   dbMk->Init();
+//   dbMk->GetDataBase("Geometry/tpc");
+  
+//   const char *calibDB = "MySQL:Calib";
+//   St_db_Maker *calibMk = new St_db_Maker("Calib",calibDB);
+//   calibMk->SetDebug();
+//   calibMk->Init();
+//   calibMk->GetDataBase("Calibrations/tpc");
+//   StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
+//   tpcDbMk->Init();
+//   tpcDbMk->Make();
+//   cout << "The Db: " << gStTpcDb << endl;
 
   // Geant
   geant = new St_geant_Maker("geant");
