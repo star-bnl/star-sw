@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.15 2001/11/02 15:32:16 jeromel Exp $
+// $Id: StEpcMaker.cxx,v 1.16 2001/11/06 23:35:27 suaide Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.16  2001/11/06 23:35:27  suaide
+// fixed bug in the way we get magnetic field
+//
 // Revision 1.15  2001/11/02 15:32:16  jeromel
 // Added return kStOK; which makes Insure happy (function is Int_t and does not return
 // a value).
@@ -162,6 +165,7 @@ Int_t StEpcMaker::Init()
 //_________________________________________________________________________
 Int_t StEpcMaker::Make()
 {
+  cout <<"\n\n***************************************************************\n";
   cout<<" StEpcMaker Make() **"<<endl;
   // ptr initialization
   mTheEmcCollection=0;                                                            
@@ -231,6 +235,23 @@ Int_t StEpcMaker::Make()
         }
       }
     }
+    
+    BField=0.5;   // default magnetic field in Tesla
+    
+    StEventSummary*  summary=mEvent->summary();
+    if(summary) BField = summary->magneticField()/10.; // BField in Tesla
+    else 
+    {
+      // Get BField from gufld(,)
+      cout <<"Trying to Get the BField ..."<<endl;
+      float x[3] = {0,0,0};
+      float b[3];
+      gufld(x,b);
+      BField = 0.1*b[2]; // This is BField in Tesla.        
+    }
+    cout <<"BField (tesla) = "<<BField<<endl;
+  
+    //////////////////////////////////////
 
     //-------------------
     //Tracks from StEvent
@@ -265,11 +286,14 @@ Int_t StEpcMaker::Make()
     StTrackVec& TrackToFit=TrackVecForEmc;
     //******Creating StPointCollection and calling findPoints
     StPointCollection *point = new StPointCollection("point");
+    
+    point->SetBField(BField);  // set correct magnetic field
+    
     m_DataSet->Add(point);
 
     if(point->findEmcPoints(Bemccluster,Bprscluster,Bsmdecluster,Bsmdpcluster,TrackToFit)!=kStOK)
     {
-      return kStErr;
+      return kStWarn;
     } 
     else cout<<" findEmcPoint called"<<endl;
 
@@ -298,6 +322,8 @@ Int_t StEpcMaker::Make()
     Int_t fill = fillStEvent();
     if(fill != kStOK){cout<< "StEvent filling is not O.k"<<endl;}
   }
+  cout <<"***************************************************************\n\n";
+  
   return kStOK;
 }
 //_________________________________________________________________________
@@ -420,9 +446,4 @@ bool StEpcMaker::accept(StTrack* track)
     //  class only (StTrack).
     //
     return track && track->flag() >= 0;
-}
-//-------------------------------------------------------
-void StEpcMaker::Clear(Option_t *option)
-{// 14-oct-2001
-  if(option){};
 }
