@@ -1,5 +1,8 @@
-// $Id: StFtpcPrimaryMaker.cxx,v 1.7 2001/05/29 12:20:33 jcs Exp $
+// $Id: StFtpcPrimaryMaker.cxx,v 1.8 2001/12/12 16:35:22 jcs Exp $
 // $Log: StFtpcPrimaryMaker.cxx,v $
+// Revision 1.8  2001/12/12 16:35:22  jcs
+// increase max_Dca from 1. to 2. for refit to primary vertex
+//
 // Revision 1.7  2001/05/29 12:20:33  jcs
 // increase n_fit_point by 1 for FTPC primary tracks to include vertex point
 //
@@ -131,7 +134,7 @@ Int_t StFtpcPrimaryMaker::Make(){
 
     StFtpcVertex *refit_vertex = new StFtpcVertex(primvtx->x,primvtx->y,primvtx->z);
     Bool_t bench = (Bool_t)false;
-    StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, points, tracks, bench, 1.);
+    StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, points, tracks, bench, 2.);
     refitter->FitAndWrite(tracks,primvtx->id);
     delete refitter;
     delete refit_vertex;
