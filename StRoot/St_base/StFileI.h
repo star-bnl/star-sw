@@ -55,15 +55,15 @@ public:
                 {const char *Argv[1]; Argv[0]=argv; return Init(1,Argv);};
  
   virtual void  ls(Option_t *opt="") const {if(opt){};};
-  virtual Int_t AddFile(const Char_t *file,const Char_t *comp=0){return 0;};
-  virtual Int_t AddFile(const Char_t **fileList){return 0;};
-  virtual Int_t AddWild(const Char_t *file){return 0;};
+  virtual Int_t AddFile(const char *file,const char *opt=0){return 0;};
+  virtual Int_t AddFile(const char **fileList){return 0;};
+  virtual Int_t AddWild(const char *file,const char *opt=0){return 0;};
   virtual Int_t GetNFiles()=0;
   virtual Int_t GetNBundles()=0;
   virtual Int_t GetBundleSize()=0;
-  virtual const Char_t *GetFileName(Int_t idx=-1)=0;
-  virtual const Char_t *GetCompName(Int_t idx=0)=0;
-  virtual const Char_t *GetFormat(Int_t idx=0)=0;
+  virtual const char *GetFileName(Int_t idx=-1)=0;
+  virtual const char *GetCompName(Int_t idx=0)=0;
+  virtual const char *GetFormat(Int_t idx=0)=0;
   virtual Int_t GetNextBundle()=0;
   virtual Int_t GetNextEvent(UInt_t *NextEventNumber)
                 {*NextEventNumber=0;return 0;}

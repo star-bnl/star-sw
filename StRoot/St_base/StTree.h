@@ -20,7 +20,7 @@ class StIO
  public:
  
  static Int_t    Write    (TFile *file, const StUKey &ukey, TObject  *obj);
- static TObject *Read     (TFile *file, const Char_t *name);
+ static TObject *Read     (TFile *file, const char *name);
  static TObject *Read     (TFile *file, const StUKey &ukey);
  static Int_t   GetNextKey(TFile *file,       StUKey &ukey, ULong_t &handle);
  static TObject *ReadNext (TFile *file,       StUKey &ukey, ULong_t &handle);
@@ -36,7 +36,7 @@ class StBranch : public TDataSet {
 //friend class StBranch;
 friend class StTree;
 public:
-  StBranch(const Char_t *name="", StTree* parent=0,Option_t *opt=0);
+  StBranch(const char *name="", StTree* parent=0,Option_t *opt=0);
  ~StBranch();
 
   virtual void SetIOMode(Option_t *iomode="0");
@@ -45,9 +45,9 @@ public:
   virtual Option_t *GetOption() const {return fOption;};
   virtual Bool_t IsOption(Option_t *opt) const 
           {return fOption.Contains(opt,TString::kIgnoreCase);};
-  virtual Int_t UpdateFile(const Char_t *file);
-  virtual const Char_t *GetFile();
-  virtual Int_t SetFile(const Char_t *file,const Char_t *iomode=0,int insist=0);
+  virtual Int_t UpdateFile(const char *file);
+  virtual const char *GetFile();
+  virtual Int_t SetFile(const char *file,const char *iomode=0,int insist=0);
   virtual Int_t SetTFile(TFile *tfile);
   virtual TFile        *GetTFile(){return fTFile;};
   virtual void SetName(const char *name){fUKey=name;TDataSet::SetName(name);};
@@ -71,7 +71,7 @@ protected:
   void SetParAll(TList *savList);
   Int_t fNEvents; 		//  Number of written events in file
   StUKey  fUKey;          	//! Current RunEvent number 
-  Char_t fIOMode;		//! r=ReadOnly; w=WriteOnly; u=Update;0=do nothing
+  char fIOMode;		//! r=ReadOnly; w=WriteOnly; u=Update;0=do nothing
   TString fFile;		//  File name
   TString fOption;		//  Option string
   TFile   *fTFile;		//! Opened TFile
@@ -83,7 +83,7 @@ ClassDef(StBranch,1)
 
 class StTree : public StBranch {
 public:
-  StTree(const Char_t *name="");
+  StTree(const char *name="");
  ~StTree();
 
   virtual void  SetIOMode (Option_t *iomode="0");			//Set for all branches
@@ -96,12 +96,12 @@ public:
   virtual void  Close(const char *opt=0);
   virtual Int_t Open();
   virtual void Clear(Option_t *opt="");
-  virtual Int_t SetFile(const Char_t *file,const Char_t *iomode=0,int insist=0);
+  virtual Int_t SetFile(const char *file,const char *iomode=0,int insist=0);
   virtual void SetBaseName(const char* basename,const char* dirname=0);
   virtual const char *GetBaseName() 
           {return (fBaseName.IsNull()) ? 0:(const char*)fBaseName;};
   static StTree *GetTree(TFile *file, const char *treeName);
-  virtual Int_t UpdateFile(const Char_t *file);
+  virtual Int_t UpdateFile(const char *file);
 
 protected:
   TString fBaseName;		//base name to construct branch file name
@@ -130,9 +130,9 @@ public:
 
   virtual void  ls(Option_t *opt="") ;
   virtual void  ls(Option_t *opt="") const{ ((StFile*)this)->ls(opt);}
-  virtual Int_t AddFile(const Char_t *file,const Char_t *comp=0);
-  virtual Int_t AddFile(const Char_t **fileList);
-  virtual Int_t AddWild(const Char_t *file);
+  virtual Int_t AddFile(const char *file,const char *opt=0); //opt="remove" or "exclude" remove file from list
+  virtual Int_t AddFile(const char **fileList);
+  virtual Int_t AddWild(const char *file,const char *opt=0);
   virtual Int_t AddEvent(UInt_t r,UInt_t e=0);
   virtual Int_t GetNBundles();
   virtual Int_t GetNFiles();
@@ -140,15 +140,16 @@ public:
   virtual StUKey GetNextEvent();
   virtual Int_t GetNextEvent(UInt_t *NextEventNumber){return StFileI::GetNextEvent(NextEventNumber);}
 
-  virtual const Char_t *GetFileName(Int_t idx=-1);
-  virtual const Char_t *GetCompName(Int_t idx=0);
-  virtual const Char_t *GetFormat(Int_t idx=0);
+  virtual const char *GetFileName(Int_t idx=-1);
+  virtual const char *GetCompName(Int_t idx=0);
+  virtual const char *GetFormat(Int_t idx=0);
   virtual Int_t GetNextBundle();
   virtual void Rewind(){fIter = -1; delete fKeyIter; fKeyIter =0;}
   
 protected:
+  void  lsFull(Option_t *opt="") ;
   void SetInfo(TDataSet *ds);
-  const Char_t *GetAttr(TDataSet *ds,const char *att);
+  const char *GetAttr(TDataSet *ds,const char *att);
   TDataSet *GetFileDS(int idx);
   TDataSet *fDS;
   Int_t    fIter; 

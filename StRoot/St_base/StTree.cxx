@@ -85,7 +85,7 @@ Int_t StIO::Write(TFile *file, const StUKey &ukey, TObject  *obj)
   return 0;
 }
 //_______________________________________________________________________________
-TObject *StIO::Read(TFile *file, const Char_t *name)
+TObject *StIO::Read(TFile *file, const char *name)
 {
   TObject *toread=0;
   TKey *key = 0;
@@ -228,7 +228,7 @@ Int_t StIO::IfExi(const char *name)
 ClassImp(StBranch)
 
 //_______________________________________________________________________________
-StBranch::StBranch(const Char_t *name, StTree *parent,Option_t *opt):TDataSet(name,parent)
+StBranch::StBranch(const char *name, StTree *parent,Option_t *opt):TDataSet(name,parent)
 {
 
   SetTitle(".StBranch");
@@ -262,7 +262,7 @@ IOMODE[0]=0; if (fIOMode>0) IOMODE[0] = RWU[fIOMode]; return IOMODE;
 }
 
 //_______________________________________________________________________________
-Int_t StBranch::SetFile(const Char_t *file,const Char_t *mode,int insist)
+Int_t StBranch::SetFile(const char *file,const char *mode,int insist)
 {
   fHandle=0;
   fIOMode = abs(fIOMode);
@@ -272,7 +272,7 @@ Int_t StBranch::SetFile(const Char_t *file,const Char_t *mode,int insist)
   return 0;
 }
 //_______________________________________________________________________________
-Int_t StBranch::UpdateFile(const Char_t *file)
+Int_t StBranch::UpdateFile(const char *file)
 {
 fHandle=0;
 fIOMode = abs(fIOMode);
@@ -520,7 +520,7 @@ void StBranch::Clear(Option_t *)
 ClassImp(StTree)
 
 //_______________________________________________________________________________
-StTree::StTree(const Char_t *name):StBranch(name)
+StTree::StTree(const char *name):StBranch(name)
 {
   SetTitle(".StTree");
 }
@@ -537,7 +537,7 @@ void StTree::SetIOMode(Option_t *iomode)
  while ((br=(StBranch*)next())) { br->SetIOMode(iomode);}
 }
 //_______________________________________________________________________________
-Int_t StTree::SetFile(const Char_t *file,const Char_t *mode,int insist)
+Int_t StTree::SetFile(const char *file,const char *mode,int insist)
 {
   if (mode && *mode) StBranch::SetIOMode(mode); 
   if (!file || !*file) 	return 0;
@@ -572,7 +572,7 @@ Int_t StTree::Open()
   return 0;
 }
 //_______________________________________________________________________________
-Int_t StTree::UpdateFile(const Char_t *file)
+Int_t StTree::UpdateFile(const char *file)
 {
   TDataSetIter next(this);StBranch *br;
   while ((br=(StBranch*)next())) br->UpdateFile(file);
@@ -760,7 +760,7 @@ TDataSet *StFile::GetFileDS(Int_t idx)
   return df;
 }
 //_____________________________________________________________________________
-const Char_t *StFile::GetFileName(Int_t idx)
+const char *StFile::GetFileName(Int_t idx)
 {
   if (idx == -1) { idx=0; if (GetNextBundle()) return 0;}
   TDataSet *df = GetFileDS(idx);
@@ -768,43 +768,49 @@ const Char_t *StFile::GetFileName(Int_t idx)
   return strstr(df->GetTitle(),"file=")+5;
 }
 //_____________________________________________________________________________
-const Char_t *StFile::GetFormat(Int_t idx)
+const char *StFile::GetFormat(Int_t idx)
 {
   TDataSet *df = GetFileDS(idx);
   return GetAttr(df,"format=");
 }
 //_____________________________________________________________________________
-const Char_t *StFile::GetCompName(Int_t idx)
+const char *StFile::GetCompName(Int_t idx)
 {
   TDataSet *df = GetFileDS(idx);
   return GetAttr(df,"branch=");
 }
 //_____________________________________________________________________________
-Int_t StFile::AddFile(const Char_t **fileList)
+Int_t StFile::AddFile(const char **fileList)
 {
-  const Char_t *file;
+  const char *file;
   if (!fileList) return 0;
   for(int i=0; (file = fileList[i]);i++) AddFile(file);
   return 0;
 }
 //_____________________________________________________________________________
-Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
+Int_t StFile::AddFile(const char *file,const char *opt)
 {
   TString tfile,tit,base,famy;
-  if (strpbrk(file,"*\\[]#@")) return AddWild(file);
-
-
+  if (strpbrk(file,"*\\[]#@")) return AddWild(file,opt);
+  int remove = 0;
+  if (opt && *opt) {
+    TString ts(opt);
+    if (ts.Contains("REMOVE" ,TString::kIgnoreCase)) remove=1;   
+    if (ts.Contains("EXCLUDE",TString::kIgnoreCase)) remove=1;   
+  }	  
+	  
+	    
   tfile = file; gSystem->ExpandPathName(tfile);
 
   if (!StIO::IfExi(tfile)) {// file does not exist
     Warning("AddFile","*** IGNORED *** File %s does NOT exist \n",
-    (const Char_t*)tfile);
+    (const char*)tfile);
     return kStWarn;}
 
   const char* cc = strrchr(tfile,'.');
   if (!cc || !strstr(".xdf .root .daq",cc)){// No extention
     Warning("AddFile","*** IGNORED *** File %s has wrong extention \n",
-    (const Char_t *)tfile);
+    (const char *)tfile);
     return kStWarn;}
 
   base = gSystem->BaseName(tfile);
@@ -816,19 +822,20 @@ Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
   if (dot>0) famy.Replace(dot+1,999,"");
 
   TDataSet *dsfam = fDS->Find(famy);
+  if (!dsfam && remove) return 0;
   if (!dsfam) fDS->Add((dsfam = new TObjectSet(famy,0)));
 
-  if (dsfam->Find(base))
-    Warning("AddFile","File %s added twice \n",(const Char_t *)tfile);
-
+  TDataSet *twice = dsfam->Find(base);
+  if (twice) {
+    if (!remove) {Warning("AddFile","File %s added twice \n",(const char *)tfile);
+    } else       { delete twice; return 0;}
+  }
   //  TDataSet *dss = dsfam->First();
   //if (dss)
   //  Warning("AddFile","Files %s and %s are from the same family \n",
-  //  (const Char_t *)tfile,dss->GetName());
+  //  (const char *)tfile,dss->GetName());
 
   tit = tfile; tit.Replace(0,0," file=");
-
-  if (branch) {tit.Replace(0,0,branch); tit.Replace(0,0," br=");}
 
   TDataSet *ds = new TDataSet(base,dsfam);
   ds->SetTitle(tit);
@@ -840,11 +847,11 @@ Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
   return 0;
 }
 //_____________________________________________________________________________
-Int_t StFile::AddWild(const Char_t *file)
+Int_t StFile::AddWild(const char *file,const char *opt )
 {
   const char* fullname;
   TDirIter dirIter(file);
-  while((fullname=dirIter.NextFile())) { AddFile(fullname);}
+  while((fullname=dirIter.NextFile())) { AddFile(fullname,opt);}
   
   return 0;
 }
@@ -956,6 +963,25 @@ RETN:;
 //_____________________________________________________________________________
 void StFile::ls(Option_t *opt)
 {
+   if (!fDS) return;
+   if (opt && *opt ) {lsFull(opt); return;}
+   TDataSetIter famIter(fDS);
+   TDataSet *fam,*fil;
+   int num = 0;
+   while((fam=famIter.Next())) {
+     if (!fam->First()) continue;
+     TDataSetIter filIter(fam);
+     while((fil=filIter.Next())) {
+       const char *fname = strstr(fil->GetTitle(),"file=");
+       if (!fname) continue;
+       num++;
+       printf("%3d - %s\n",num,fname+5);
+     }
+   }
+}
+//_____________________________________________________________________________
+void StFile::lsFull(Option_t *opt)
+{
   TList blist;
   int ibr=0,i;
   Cat *cat;
@@ -1048,7 +1074,7 @@ void StFile::ls(Option_t *opt)
   fIter = savIter;
 }
 //_____________________________________________________________________________
-const Char_t *StFile::GetAttr(TDataSet *ds,const char *att)
+const char *StFile::GetAttr(TDataSet *ds,const char *att)
 {
   static TString brName;
   if (!ds) return 0;
