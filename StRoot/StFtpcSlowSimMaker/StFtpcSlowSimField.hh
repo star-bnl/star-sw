@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimField.hh,v 1.3 2001/03/06 23:36:05 jcs Exp $
+// $Id: StFtpcSlowSimField.hh,v 1.4 2002/09/13 13:45:23 fsimon Exp $
 // $Log: StFtpcSlowSimField.hh,v $
+// Revision 1.4  2002/09/13 13:45:23  fsimon
+// Commented out anglefactor
+//
 // Revision 1.3  2001/03/06 23:36:05  jcs
 // use database instead of params
 //
@@ -56,7 +59,7 @@ public:
       iLower+=padrowIndex;
       iUpper+=padrowIndex;
       *inverseVelocity = EFieldStepInverted*((inverseDriftVelocity[iUpper])*diffDown + (inverseDriftVelocity[iLower])*diffUp);
-      *angle = EFieldStepInvConverted*((preciseLorentzAngle[iUpper])*diffDown + (preciseLorentzAngle[iLower])*diffUp)*angleFactor;
+      *angle = EFieldStepInvConverted*((preciseLorentzAngle[iUpper])*diffDown + (preciseLorentzAngle[iLower])*diffUp);//*angleFactor;
     }    
 
   float GetVelAtReadout() const { return  finalVelocity; }
