@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.3 1999/12/03 00:55:21 calderon Exp $
+ * $Id: StMcEventMaker.h,v 1.4 2000/04/20 16:53:39 calderon Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.4  2000/04/20 16:53:39  calderon
+ * change maker name from "MCEvent" to "StMcEvent".
+ *
  * Revision 1.3  1999/12/03 00:55:21  calderon
  * Completely revised for StMcEvent 2.0
  * Using StDbUtilities for coordinate transformations.
@@ -28,7 +31,7 @@ class StMcTrack;
 class StMcEventMaker : public StMaker {
 public:
 
-    StMcEventMaker(const char* name = "MCEvent", const char* title = "");
+    StMcEventMaker(const char* name = "StMcEvent", const char* title = "");
     virtual ~StMcEventMaker();
 
     virtual void  Clear(const char* opt="");
@@ -39,7 +42,7 @@ public:
     StMcEvent* currentMcEvent() { return mCurrentMcEvent;}; 
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.3 1999/12/03 00:55:21 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.4 2000/04/20 16:53:39 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
