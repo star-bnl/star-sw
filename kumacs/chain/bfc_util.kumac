@@ -149,10 +149,14 @@
 * 10/13/98 K. Turner - change "dout" so that it writes out full run
 *                      directory during bfc_init, not just run/params
 * 10/14/98 K. Turner - remove "dwntp" - not needed
-* 10/14/98 K. Turner - fix dout so it writes out whole run dir during init
+*                    - fix dout so it writes out whole run dir during init
 *                    - fix dstin for backwards compatibility
 *                    - default params read with read_default_params 
-*                      instead of load_libraries  
+*                      instead of load_libraries 
+*                    - following changes to pams/ftpc/ code & kumacs now can:
+*                       - change fpt_s,fpt_f chains to both be fpt
+*                       - change fte_s,fte_f chains to both be fte
+* 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -335,16 +339,10 @@ macro bfc_init _
             exec create_tables_ftpc#fcl_tables
             exec init_fcl#read_cal
 	    exec init_fcl#init
-    (fpt_f)
-	    exec create_tables_ftpc#fpt_tables
-	    exec init_fpt#init
-    (fte_f)
-	    exec create_tables_ftpc#fte_tables
-            exec init_fte#init
-    (fpt_s)
+    (fpt)
             exec create_tables_ftpc#fpt_tables
             exec init_fpt#init
-    (fte_s)
+    (fte)
             exec create_tables_ftpc#fte_tables
             exec init_fte#init	    
       (svm) 
@@ -632,10 +630,8 @@ return
       (ffs)    exec run_ffs#run 
       (fss)    exec run_fss#run
       (fcl)    exec run_fcl#run
-    (fpt_f)    exec run_fpt#run_fast_sim
-    (fte_f)    exec run_fte#run_fast_sim
-    (fpt_s)    exec run_fpt#run_slow_sim
-    (fte_s)    exec run_fte#run_slow_sim
+      (fpt)    exec run_fpt#run
+      (fte)    exec run_fte#run
       (svm)    exec run_svm#run_svm
       (evr)    exec run_evr#run
       (egr)    exec run_egr#egr	
