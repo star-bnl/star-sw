@@ -1,5 +1,8 @@
-* $Id: istbgeo.g,v 1.1 2004/07/15 16:27:50 potekhin Exp $
+* $Id: istbgeo.g,v 1.2 2004/07/22 22:48:24 potekhin Exp $
 * $Log: istbgeo.g,v $
+* Revision 1.2  2004/07/22 22:48:24  potekhin
+* Corrected a typo in comment
+*
 * Revision 1.1  2004/07/15 16:27:50  potekhin
 * A properly configured version of the outer pixel
 * barrel detector with 3 layers, initial cut
@@ -84,7 +87,7 @@ Module ISTBGEO is the geometry of the outer barrel pixel detector
       Create   IBMO
       Position IBMO in CAVE
 * -----------------------------------------------------------------------------
-Block IBMO is the mother of the MIT detector volumes
+Block IBMO is the mother of the ISTB detector volumes
       Material  Air
       Attribute IBMO  Seen=1  colo=6
 
