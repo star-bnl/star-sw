@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.29 2000/02/10 03:19:26 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.30 2000/02/11 01:48:21 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.30  2000/02/11 01:48:21  lansdell
+// fixed phi histograms; added new histograms as per St_QA_Maker.cxx
+//
 // Revision 1.29  2000/02/10 03:19:26  lansdell
 // filled new histograms as per St_QA_Maker.cxx
 //
@@ -227,6 +230,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_yf0->Fill(dif.y());
 	m_glb_zf0->Fill(dif.z());
 	m_glb_impactT->Fill(logImpact);
+	m_glb_impactrT->Fill(globtrk->impactParameter());
 
 // these are TPC & FTPC
 	m_pointT->Fill(globtrk->detectorInfo()->numberOfPoints());
@@ -235,7 +239,10 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_chargeT->Fill(globtrk->geometry()->charge());
 
 	m_glb_r0T->Fill(globtrk->geometry()->origin().perp());
-	m_glb_phi0T->Fill(180+globtrk->geometry()->origin().phi()/degree);
+	if (globtrk->geometry()->origin().phi() < 0)
+	  m_glb_phi0T->Fill(360+globtrk->geometry()->origin().phi()/degree);
+	else
+	  m_glb_phi0T->Fill(globtrk->geometry()->origin().phi()/degree);
 	m_glb_z0T->Fill(globtrk->geometry()->origin().z());
 	m_glb_curvT->Fill(logCurvature);
 
@@ -281,7 +288,11 @@ void StEventQAMaker::MakeHistGlob() {
 	m_nfptonpt_etaT->Fill(eta,nfitntot);
 	// had to make psi_deg and phi_deg b/c ROOT won't compile otherwise
 	// for some strange reason... -CPL
-	Float_t phi_deg = 180+globtrk->geometry()->origin().phi()/degree;
+	Float_t phi_deg;
+	if (globtrk->geometry()->origin().phi() < 0)
+	  phi_deg = 360+globtrk->geometry()->origin().phi()/degree;
+	else
+	  phi_deg = globtrk->geometry()->origin().phi()/degree;
 	Float_t psi_deg = globtrk->geometry()->psi()/degree;
 	m_psi_phiT->Fill(phi_deg,psi_deg);
       }
@@ -294,6 +305,7 @@ void StEventQAMaker::MakeHistGlob() {
         m_glb_yf0TS->Fill(dif.y());
         m_glb_zf0TS->Fill(dif.z());
 	m_glb_impactTS->Fill(logImpact);
+	m_glb_impactrTS->Fill(globtrk->impactParameter());
 
 	m_pointTS->Fill(globtrk->detectorInfo()->numberOfPoints());
 	m_max_pointTS->Fill(globtrk->numberOfPossiblePoints());
@@ -301,7 +313,10 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_chargeTS->Fill(globtrk->geometry()->charge());
 
 	m_glb_r0TS->Fill(globtrk->geometry()->origin().perp());
-	m_glb_phi0TS->Fill(180+globtrk->geometry()->origin().phi()/degree);
+	if (globtrk->geometry()->origin().phi() < 0)
+	  m_glb_phi0TS->Fill(360+globtrk->geometry()->origin().phi()/degree);
+	else
+	  m_glb_phi0TS->Fill(globtrk->geometry()->origin().phi()/degree);
 	m_glb_z0TS->Fill(globtrk->geometry()->origin().z());
 	m_glb_curvTS->Fill(logCurvature);
 
@@ -345,7 +360,11 @@ void StEventQAMaker::MakeHistGlob() {
 	m_nfptonpt_etaTS->Fill(eta,nfitntot);
 	// had to make psi_deg and phi_deg b/c ROOT won't compile otherwise
 	// for some strange reason... -CPL
-	Float_t phi_deg = 180+globtrk->geometry()->origin().phi()/degree;
+	Float_t phi_deg;
+	if (globtrk->geometry()->origin().phi() < 0)
+	  phi_deg = 360+globtrk->geometry()->origin().phi()/degree;
+	else
+	  phi_deg = globtrk->geometry()->origin().phi()/degree;
 	Float_t psi_deg = globtrk->geometry()->psi()/degree;
 	m_psi_phiTS->Fill(phi_deg,psi_deg);
       }
@@ -538,6 +557,7 @@ void StEventQAMaker::MakeHistPrim() {
         m_pmom->Fill(gmom);
 	m_plength->Fill(primtrk->length());
         m_prim_impact->Fill(logImpact);
+	m_prim_impactr->Fill(primtrk->impactParameter());
        	m_pchisq0->Fill(chisq0);
 	m_pchisq1->Fill(chisq1);
 
@@ -878,28 +898,44 @@ void StEventQAMaker::MakeHistPoint() {
   ULong_t ftpcHitsE = 0;
   ULong_t ftpcHitsW = 0;
 
+  UInt_t i,j; // just some generic indices
+
   if (tpcHits) {
     m_pnt_tpc->Fill(tpcHits->numberOfHits());
     totalHits += tpcHits->numberOfHits();
+    for (i=0; i<tpcHits->numberOfHits(); i++)
+      m_pnt_id->Fill(kTpcId);
   }
   if (svtHits) {
     m_pnt_svt->Fill(svtHits->numberOfHits());
     totalHits += svtHits->numberOfHits();
+    for (i=0; i<svtHits->numberOfHits(); i++)
+      m_pnt_id->Fill(kSvtId);
   }
   if (ftpcHits) {
-    // it's better to do this with det_id, but need to code -CPL
-    for (UInt_t i=0; i<10; i++)
-      ftpcHitsW += ftpcHits->plane(i)->numberOfHits();
-    for (UInt_t j=10; j<20; j++)
-      ftpcHitsE += ftpcHits->plane(j)->numberOfHits();
-
+    // StFtpcHitCollection doesn't differentiate between W and E FTPCs
+    // so it is up to the user to check this via plane number -CPL
+    for (i=0; i<20; i++) {
+      if (i<10) {
+	ftpcHitsW += ftpcHits->plane(i)->numberOfHits();
+	for (j=0; j<ftpcHits->plane(i)->numberOfHits(); j++)
+	  m_pnt_id->Fill(kFtpcWestId);
+      }
+      else {
+	ftpcHitsE += ftpcHits->plane(i)->numberOfHits();
+	for (j=0; j<ftpcHits->plane(i)->numberOfHits(); j++)
+	  m_pnt_id->Fill(kFtpcEastId);
+      }
+    }
     m_pnt_ftpcW->Fill(ftpcHitsW);
     m_pnt_ftpcE->Fill(ftpcHitsE);
-    totalHits += ftpcHitsW + ftpcHitsE;
+    totalHits += ftpcHits->numberOfHits();
   }
   if (ssdHits) {
     m_pnt_ssd->Fill(ssdHits->numberOfHits());
     totalHits += ssdHits->numberOfHits();
+    for (i=0; i<ssdHits->numberOfHits(); i++)
+      m_pnt_id->Fill(kSsdId);
   }
   m_pnt_tot->Fill(totalHits);
   m_pnt_tot_med->Fill(totalHits);
