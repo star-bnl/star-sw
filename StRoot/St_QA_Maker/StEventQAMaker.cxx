@@ -1,7 +1,7 @@
-// $Id: StEventQAMaker.cxx,v 1.35 2000/05/25 03:52:10 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.36 2000/05/25 04:02:51 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
-// Revision 1.35  2000/05/25 03:52:10  lansdell
-// mirrored globtrk histograms for primtrk; removed ev0_eval, vertex: detector id histograms; added generator pT for TPC (|eta|<1), vertex: radial position histograms; merged vertex methods
+// Revision 1.36  2000/05/25 04:02:51  lansdell
+// fill primtrk TPC histograms for iflag>0
 //
 // Revision 1.34  2000/03/15 20:20:38  lansdell
 // added Craig's changes to pid histogram
@@ -578,7 +578,7 @@ void StEventQAMaker::MakeHistPrim() {
 	m_pdet_id->Fill(primtrk->pidTraits()[0]->detector());
 
 // now fill all TPC histograms ------------------------------------------------
-	if (primtrk->flag()>=100 && primtrk->flag()<200) {
+	if (primtrk->flag()>0) {
 
 // these are TPC only
 	  m_prim_xf0->Fill(dif.x());
@@ -654,7 +654,7 @@ void StEventQAMaker::MakeHistPrim() {
 
 // now fill all TPC+SVT histograms --------------------------------------------
 
-	if (primtrk->flag()>=500 && primtrk->flag()<600 ) {
+	if (primtrk->flag()>=500 && primtrk->flag()<600) {
 
 	  m_prim_xf0TS->Fill(dif.x());
 	  m_prim_yf0TS->Fill(dif.y());

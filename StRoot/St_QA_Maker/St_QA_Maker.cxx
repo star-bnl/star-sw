@@ -1,7 +1,7 @@
-// $Id: St_QA_Maker.cxx,v 1.96 2000/05/25 03:52:11 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 1.97 2000/05/25 04:02:51 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
-// Revision 1.96  2000/05/25 03:52:11  lansdell
-// mirrored globtrk histograms for primtrk; removed ev0_eval, vertex: detector id histograms; added generator pT for TPC (|eta|<1), vertex: radial position histograms; merged vertex methods
+// Revision 1.97  2000/05/25 04:02:51  lansdell
+// fill primtrk TPC histograms for iflag>0
 //
 // Revision 1.95  2000/04/20 17:26:30  kathy
 // fix to remove compilation warnings due to unused variables - see Victor's email to starsofi recently
@@ -969,7 +969,7 @@ void St_QA_Maker::MakeHistPrim(){
  	m_pdet_id->Fill(t->det_id);
 
 //  now fill all TPC histograms ------------------------------------------------
-        if (t->iflag>=100 && t->iflag<200 ) {
+        if (t->iflag>0) {
 
 // these are tpc only
         m_prim_xf0->Fill(xdif);
@@ -1028,7 +1028,7 @@ void St_QA_Maker::MakeHistPrim(){
 
 
 //  now fill all TPC+SVT histograms ------------------------------------------------
-        if (t->iflag>=500 && t->iflag<600 ) {
+        if (t->iflag>=500 && t->iflag<600) {
 
         m_prim_xf0TS->Fill(xdif);
         m_prim_yf0TS->Fill(ydif);
