@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.12 2004/06/29 07:13:02 subhasis Exp $
+ * $Id: StPmdClustering.cxx,v 1.13 2004/06/29 07:35:25 subhasis Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,6 +17,9 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.13  2004/06/29 07:35:25  subhasis
+ * const.h dropped
+ *
  * Revision 1.12  2004/06/29 07:13:02  subhasis
  * limit of clust_ fixed
  *
@@ -56,7 +59,7 @@
 #include<TPad.h>
 #include<StMessMgr.h>
 #include<TFile.h>
-#include "StConstants.hh"
+//#include "StConstants.hh"
 
 #include <TTableSorter.h>
 
@@ -79,6 +82,8 @@ Double_t crd_org[2][96][72];
 
 Int_t iord[2][6912], infocl[2][96][72], inford[3][6912], clno;
 
+const Double_t pi=3.141592653, sqrth=sqrt(3.)/2.;
+const Int_t nmx    = 6912;
 
 StPmdGeom *geom=new StPmdGeom(); //! utility class
 //-------------------------------------------------
