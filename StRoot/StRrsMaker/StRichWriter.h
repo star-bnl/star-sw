@@ -1,5 +1,5 @@
 /*********************************************************Writer.h**\
- * $Id: StRichWriter.h,v 1.3 2000/01/27 17:10:01 lasiuk Exp $
+ * $Id: StRichWriter.h,v 1.4 2000/02/14 01:10:40 lasiuk Exp $
  *
  * Description:
  *   Writer is the output module for  
@@ -10,9 +10,12 @@
  *
  ********************************************************************
  * $Log: StRichWriter.h,v $
- * Revision 1.3  2000/01/27 17:10:01  lasiuk
- * modify to work stand-alone from ROOT
+ * Revision 1.4  2000/02/14 01:10:40  lasiuk
+ * interface for StRichID is changed
  *
+ *
+ * Revision 1.4  2000/02/14 01:10:40  lasiuk
+ * interface for StRichID is changed
  *
  * Revision 1.3  2000/01/27 17:10:01  lasiuk
  * modify to work stand-alone from ROOT
@@ -34,6 +37,8 @@
 #include "St_DataSet.h"
 #endif
 #ifndef ST_NO_NAMESPACES
+//namespace StRichRawData {
+#include "StRichOtherAlgorithms.h"
 #include "StRichRrsMacros.h"
 #include "StRichPadPlane.h"
 #include "StRichPhysicsDb.h"
@@ -44,7 +49,7 @@ public:
     
     static StRichWriter* getInstance();
     static StRichWriter* getInstance(StRichPadPlane*);
-    void putSignal(int row, int col, double s, int id);
+    
     ~StRichWriter();
     
     //void initStorage(int rows, int cols) { mStorage->resize(rows,cols); }
@@ -62,7 +67,12 @@ public:
     
 protected:
     StRichWriter();
-    static StRichWriter * p2Instance;     // handle to only instance
+    StRichWriter(StRichPadPlane*);
+    
+    MyRound      mRound;
+private:
+    StRichPadPlane* mStorage;
+    StRichPhysicsDb* mPhysicsDb;
 
     double       mAdcConversion;
 
