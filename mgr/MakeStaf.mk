@@ -10,8 +10,6 @@ endif
 ###	Suppress all imlicit rules
 .SUFFIXES:
 
-include $(STAR_MAKE_HOME)/MakeEnv.mk
-include $(STAR_MAKE_HOME)/MakeArch.mk
 
 #
 #	INP_DIR & OUT_DIR could be declared in invoking
@@ -22,6 +20,8 @@ endif
 ifeq (,$(strip $(filter /%,$(INP_DIR))))
   override INP_DIR := $(CWD)/$(INP_DIR)
 endif
+include $(STAR_MAKE_HOME)/MakeEnv.mk
+#include $(STAR_MAKE_HOME)/MakeArch.mk
 
 
 
@@ -92,14 +92,14 @@ VPATH := $(ALL_INC_DIRS)
 
 ASPS  := $(notdir $(subst / , ,$(dir $(wildcard $(INP_DIR)/???/src)) ))
 #
-# 	if PKG=pkg  use unly this package(pam or asp)
-#	... example  PKG=sdd   only sdd will be maked
-#	... example  PKG=a% only started from a (like asu amu) will be maked
+# 	if ASPKG=pkg  use unly this package(pam or asp)
+#	... example  ASPKG=sdd   only sdd will be maked
+#	... example  ASPKG=a% only started from a (like asu amu) will be maked
 ifdef pkg
-  PKG := $(pkg)
+  ASPKG := $(pkg)
 endif  
-ifdef PKG
- ASPS := $(filter $(PKG),$(ASPS))
+ifdef ASPKG
+ ASPS := $(filter $(ASPKG),$(ASPS))
 endif
 #
 ##	Temporary remove of some ASPs
@@ -119,8 +119,8 @@ ifdef SYSTEM_DOMAIN
     ASPSEXE := $(subst / , ,$(dir $(ASPSEXE)) )
     ASPSEXE := $(notdir $(basename $(ASPSEXE)))
   endif
-ifdef PKG
- ASPSEXE := $(filter $(PKG),$(ASPSEXE))
+ifdef ASPKG
+ ASPSEXE := $(filter $(ASPKG),$(ASPSEXE))
 endif
 
 

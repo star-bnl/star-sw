@@ -1,5 +1,8 @@
-# $Id: MakeRexe.mk,v 1.12 1999/02/14 23:10:09 fisyak Exp $
+# $Id: MakeRexe.mk,v 1.13 1999/02/19 01:12:07 fisyak Exp $
 # $Log: MakeRexe.mk,v $
+# Revision 1.13  1999/02/19 01:12:07  fisyak
+# Add xt
+#
 # Revision 1.12  1999/02/14 23:10:09  fisyak
 # split tables for HP, remove duplicates for root4star
 #
@@ -68,7 +71,7 @@ FILES_O := $(sort $(addprefix $(OBJ_DIR)/,$(addsuffix .o,$(NAMES_O))))
 FILES_D := $(sort $(addprefix $(DEP_DIR)/,$(addsuffix .d,$(NAMES_D)))) 
 
 # ggsim.o agdummy.o dummy.o 
-INCL  := $(ROOTSYS)/src $(STAR)/StRoot/base $(INP_DIR) $(GST_DIR) $(STAF_SYS_INCS) $(STAR)/asps/agi $(STAR)/asps/agi/kuip  $(CERN_ROOT)/include $(CERN_ROOT)/src/pawlib/paw/ntuple 
+INCL  := $(ROOTSYS)/src $(STAR)/StRoot/St_base $(INP_DIR) $(GST_DIR) $(STAF_SYS_INCS) $(STAR)/asps/agi $(STAR)/asps/agi/kuip  $(CERN_ROOT)/include $(CERN_ROOT)/src/pawlib/paw/ntuple 
 INCL  := $(addprefix -I,$(INCL))
 CPPFLAGS += $(INCL)
 #STAF  = YES
@@ -124,7 +127,7 @@ ALL_EXE_LIBS += -lXpm $(FLIBS) $(CLIBS)
 
 
 
-Root4star: $(FILES_O) $(STEVENT_OBJS)
+root4star: $(FILES_O) $(STEVENT_OBJS)
 	$(DOEXE) $(STEVENT_OBJS) $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
 #
 #

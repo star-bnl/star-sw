@@ -1,0 +1,60 @@
+#!/usr/local/bin/perl
+
+# Program is written by Alex Lenderman
+# RHIC Computing Facility
+# Version 1.0
+# January 9, 1998
+
+$comp = shift;
+my $a;
+my $color;
+foreach $a (@ARGV){
+  $color .= " " . $a;
+}
+system ("echo \$DISPLAY > /tmp/$$");
+
+open (DISP, "/tmp/$$");
+$display = <DISP>;
+close (DISP);
+printf ("%s \n",$display);
+system ("rm -f /tmp/$$");
+@temp = split(/:/, $display);
+$display = $temp[0];
+
+if ($term eq "") {
+	$term = $display;
+#	$term = $term . ".rhic.bnl.gov";
+} else {
+	$term = $term. ".rhic.bnl.gov";
+}
+
+if (! $color) {
+	$color = " -bg black -fg white  -sb -sl 4000 -geometry 132x64";
+}
+
+if (($comp =~ /^rsgi/) || ($comp =~ /^ribm/) || ($comp =~ /^rnfs/) || 
+    ($comp =~ /^rmds0[12]/) || ($comp =~ /^rdev/) || ($comp =~ /^rls/)) {
+	$com = "ssh " . $comp . ".rhic.bnl.gov xterm" . $color . " -title " . $comp . " -n " . $comp . "&";
+} elsif (($comp =~ /^ru/) || ($comp =~ /^rsun/) || ($comp =~ /^rcf/) || 
+         ($comp =~ /^rmds00/) || ($comp =~ /^rmds03/)) {
+        $com = "ssh " . $comp . ".rhic.bnl.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
+} elsif (($comp =~ /^rcas/) || ($comp =~ /^rcrs/) || ($comp =~ /^rlnx/) ) {
+	$com = "ssh " . $comp . ".rcf.bnl.local xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
+} elsif (($comp =~ /^sol/) || ($comp =~ /^flynn/) || ($comp =~ /^elvis/) || 
+         ($comp =~ /^robinson/) || ($comp =~ /^pickford/))
+{        $com = "ssh " . $comp . ".star.bnl.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
+} elsif ($comp eq "-v") {
+	print ("\nXterminal utility program, version 1.0, by Alex Lenderman, RCF\n");
+} elsif (($comp eq "-h") || ($comp eq "")) {
+	print ("Usage: xt xhost \[Any xterm parameters\]\n");
+	print ("       xt \[-v\] \[-h\]\n");	
+}  else {
+	print ("\nWrong parameters! Try again!\n");
+}
+
+if ($com ne "") {
+        printf("%s \n", $com);
+	system ("$com");
+}
+
+
