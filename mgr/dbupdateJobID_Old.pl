@@ -13,7 +13,7 @@ use Class::Struct;
 use File::Basename;
 use File::Find;
 
-require "/afs/rhic/star/packages/DEV/mgr/dbProdSetup.pl";
+require "/afs/rhic/star/packages/DEV00/mgr/dbProdSetup.pl";
 
 my $debugOn=0;
 

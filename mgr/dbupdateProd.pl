@@ -13,7 +13,7 @@ use File::Basename;
 use File::Find;
 use Net::FTP;
 
-require "/afs/rhic/star/packages/DEV/mgr/dbCpProdSetup.pl";
+require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
 
 my $debugOn=0;
 
@@ -35,7 +35,9 @@ my @SetG = (
              "auau200/venus412/default/b6_9/year_1b/hadronic_on",
              "auau200/hijing135/Bjets/b0_3/year_2a/hadronic_on",
              "auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on", 
-#             "auau200/hijing135/Cjets/b0_3/year_2a/hadronic_on",
+             "auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on",
+             "auau200/hijing135/jetq_on/b9_12/year_1b/hadronic_on",
+             "auau200/hijing135/Cjets/b0_3/year_2a/hadronic_on",
 );
 
 my $SetD = "dst/prod5/1999/12";
@@ -629,8 +631,8 @@ foreach my $jobnm (@jobFSum_set){
       print "updating cpFileCatalogT table\n";
  
 #      &updateDbTable();
-      &fillDbTestTable();
-      &fillDbTable();   
+#      &fillDbTestTable();
+#      &fillDbTable();   
 
        last;
       }  else {

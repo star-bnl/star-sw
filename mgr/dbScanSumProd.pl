@@ -12,7 +12,7 @@
 # 
 ################################################################################################
 
-require "/afs/rhic/star/packages/DEV/mgr/dbCpProdSetup.pl";
+require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
 
 #require "dbCpProdSetup.pl";
 
@@ -25,6 +25,9 @@ my @SetS = (
              "auau200/venus412/default/b0_3/year_1b/hadronic_on",
              "auau200/venus412/default/b3_6/year_1b/hadronic_on",
              "auau200/venus412/default/b6_9/year_1b/hadronic_on",
+             "auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on",
+             "auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on", 
+             "auau200/hijing135/jetq_off/b9_12/year_1b/hadronic_on",
  );
 
 my $SetD = "daq/1999/12/";
