@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.7 2001/05/17 18:35:11 lasiuk Exp $
+ * $Id: StMagUtilities.h,v 1.8 2001/05/18 22:16:19 lasiuk Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.8  2001/05/18 22:16:19  lasiuk
+ * add ey component to the exb calculation (brian III)
+ *
  * Revision 1.7  2001/05/17 18:35:11  lasiuk
  * make changes to allow full transport (brian II)
  *
@@ -102,6 +105,7 @@ private:
     StThreeVectorD mBNominal;
     StThreeVectorD mEField;
     StThreeVectorD mDriftField;
+    StThreeVectorD mtmpField;
 
     double mFrischGrid;
 
