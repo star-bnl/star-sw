@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.19 2000/06/30 23:43:52 fisyak Exp $
+// $Id: St_mwc_Maker.cxx,v 1.20 2000/12/11 10:33:35 vlmrz Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.20  2000/12/11 10:33:35  vlmrz
+// *** empty log message ***
+//
 // Revision 1.19  2000/06/30 23:43:52  fisyak
 // Remove access to gStTpcDb
 //
@@ -96,25 +99,40 @@
 #include "mwc/St_mwu_Module.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TFile.h"
 #include <iostream.h>
 ClassImp(St_mwc_Maker)
-
+ 
 //_____________________________________________________________________________
 St_mwc_Maker::St_mwc_Maker(const char *name):StMaker(name){
+
 
 }
 //_____________________________________________________________________________
 St_mwc_Maker::~St_mwc_Maker(){
 }
+//______________________________________________________________________________
+St_mwc_Maker::Finish(){
+  /*
+m_outfile = new TFile("mwc_signal.root","recreate");
+m_outfile->cd();
+m_signal->Write();
+m_outfile->Close();
+  */
+}
 //_____________________________________________________________________________
 Int_t St_mwc_Maker::Init(){
 
 // Read Parameter tables
+   cout<<"Hello, this is St_mwc_Maker Init"<<endl;
 
    St_DataSetIter params(GetDataBase("mwc/mwcpars"));
    m_geom = (St_mwc_geo  *) params("geom");
    m_cal  = (St_mwc_cal  *) params("cal");
    m_mpar = (St_mwc_mpar *) params("mpar");
+
+
+
 
    mwc_mpar_st *partable = m_mpar->GetTable();
    partable->de_thresh_in      = 0;
@@ -123,7 +141,7 @@ Int_t St_mwc_Maker::Init(){
    partable->min_ion    = 0;
    m_mpar->AddAt(partable,0);
 
-#if 0
+   
    mwc_geo_st *geotable = m_geom->GetTable();
    if (gStTpcDb) {
      StTpcWirePlaneI *radius = gStTpcDb->WirePlaneGeometry();
@@ -137,8 +155,10 @@ Int_t St_mwc_Maker::Init(){
      geotable->r2max = rad4;
    }
    m_geom->AddAt(geotable,0);
-#endif   
+   
 
+
+  
 // Create Histograms
 
    m_px = new TH1F("MwcHitPx","MWC: px",100,-4.0,4.0);
@@ -147,6 +167,8 @@ Int_t St_mwc_Maker::Init(){
    m_nWiresHit = new TH1F("MwcNumberWiresHit","MWC: WiresHit",101,-0.5,100.5);
    m_nSectorsHit = new TH1F("MwcNumSecHit","MWC: SectorsHit",101,-0.5,100.5);
    m_EtaPhi = new TH2F("MwcEtaPhi","MWC: Eta vs Phi",24,0.5,24.5,4,0.5,4.5);
+   m_Hits = new TH1F("MwcHits","Time distribution of MWC hits",11,-0.5,10.5);
+
 
    return StMaker::Init();
 }
@@ -159,10 +181,24 @@ Int_t St_mwc_Maker::Make(){
 
    St_mwc_mevent *mevent = new St_mwc_mevent("mevent",96);
    St_mwc_sector *sector = new St_mwc_sector("sector",96);
-   St_mwc_raw    *raw    = new St_mwc_raw("raw",96);
+   St_mwc_raw    *raw    = new St_mwc_raw("raw",1056);
 //   the cor table is not implemented
 //     St_mwc_cor    *cor    = new St_mwc_cor("cor",384);
 
+   St_mwc_pars *pars = new St_mwc_pars("pars",1);
+   mwc_pars_st *parst = pars->GetTable();
+   parst->ogain = 1315; 
+   parst->igain = 2503;
+   parst->vgain = 2.75E-13;
+   parst->drift1 = 0.04969;
+   parst->drift2 = 0.025;
+   parst->tr = 140;       
+   parst->mip_deds = 1.7E-06;
+   parst->threshold = .1;
+   parst->delay = 109*6;   
+   pars->AddAt(parst,0);
+
+   m_DataSet->Add(pars);
    m_DataSet->Add(mevent);
    m_DataSet->Add(sector);
    m_DataSet->Add(raw);
@@ -179,6 +215,8 @@ Int_t St_mwc_Maker::Make(){
    if (!mevent)      {printf("mevent does not exist\n")     ;return kStWarn;}
    if (!sector)      {printf("sector does not exist\n")     ;return kStWarn;}
    if (!raw)         {printf("raw does not exist\n")        ;return kStWarn;}
+   printf("Hello This is the St_mwc_Maker\n");
+
 
    Int_t mwc_result = mws(
                           g2t_mwc_hit,
@@ -186,7 +224,8 @@ Int_t St_mwc_Maker::Make(){
                           m_mpar,
                           mevent,
                           sector,
-                          raw);
+                          raw,
+                          pars);
    if (mwc_result != kSTAFCV_OK)
    {
       printf("**** Problems with mwc ****\n");
@@ -194,15 +233,21 @@ Int_t St_mwc_Maker::Make(){
    }
 
    mwc_sector_st *sec = sector->GetTable();
-   //mwc_raw_st    *rw  = raw->GetTable();
-   /*   for (int ii=0;ii<=95;ii++)
-     {
-       if ( (rw+ii)->count )
+   mwc_raw_st    *rw  = raw->GetTable();
+   for (int jj = 0;jj<=10;jj++){
+     Int_t nhts = 0;
+     for (int ii=jj*96;ii<=95+jj*96;ii++){
+ 
+       if ( (rw+ii)->count ){
+         nhts = nhts + (rw+ii)->count;
 	 printf("raw sector: %2d count %3d phi %2d eta %d nhit %2d tot_hit "
 		"%3d de %f\n",(rw+ii)->sector,(rw+ii)->count,
-		(sec+ii)->iphi,(sec+ii)->ieta,(sec+ii)->nhit,
-		(sec+ii)->tot_hit,(sec+ii)->de);
-     }*/
+		(sec+ii-jj*96)->iphi,(sec+ii-jj*96)->ieta,(sec+ii-jj*96)->nhit,
+		(sec+ii-jj*96)->tot_hit,(sec+ii-jj*96)->de);
+       }	 
+     }
+   for (int zz = 0;zz<nhts;zz++) m_Hits->Fill(jj);
+   }
    g2t_mwc_hit_st *hitTable = g2t_mwc_hit->GetTable();
    float px,py,pz,x,y;
    int iNHit;

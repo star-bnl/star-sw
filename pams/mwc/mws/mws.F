@@ -4,7 +4,8 @@ CC: HISTORY:
 CC:               feb97-v000a-jpw- First version for STAF
 CC:               jan98-v001a-ppy- Call to geometry module eliminated
 CC:               jan99-v002a-der- ROOT ready/change params
-CC: 
+CC:
+CC                jun00-      Vladimir Morozov - slow simulation 
 CC:<--------------------------------------------------------------------
 
       INTEGER*4 FUNCTION MWS(
@@ -13,7 +14,8 @@ CC:<--------------------------------------------------------------------
      5              mpar_h,              mpar ,
      6            mevent_h,            mevent ,
      7            sector_h,            sector ,
-     8               raw_h,               raw ) 
+     8               raw_h,               raw , 
+     9              pars_h,              pars ) 
       IMPLICIT NONE
 #include "mws.inc"
 CC:>--------------------------------------------------------------------
@@ -25,6 +27,7 @@ CC:
 CC:             Please edit comments and code.
 CC: AUTHOR:     jpw - James Whitfield whitfield@cmchem.chem.cmu.edu
 CC:             der - Dan Russ dan.russ@cmu.edu
+CC:                   Vladimir Morozov vlmrz@sseos.lbl.gov
 CC: ARGUMENTS:
 CC:          IN:
 CC:       INOUT:
@@ -33,7 +36,8 @@ CC:             geom     - geometry definition table for MWC
 CC:            mpar     - input parameters for simulation
 CC:           mevent     - event table for simulation
 CC:           sector     - sector results
-CC:              raw     - count output output table for MWC sim.
+CC:              raw     - count output output table for MWC sim
+CC:             pars     - new parameters table.
 CC:         OUT:
 CC:>------------------------------------------------------------------
       INTEGER MWG
@@ -43,11 +47,11 @@ CC:>------------------------------------------------------------------
       INTEGER Ir, Iphi, Index, Num_hits
       INTEGER Nsignal, Nhit(Mwc_raw_len)
       INTEGER num_wires_sect, num_wires_count, num_counts_sect, num_counts_out
-      INTEGER icell, cell_num, cell_hit(7680)
-      INTEGER se_hit(384), overload_slat, num_below_thresh
-      INTEGER hit_index, tot_cell_hit(384), ee_correct
-      INTEGER isect, iosect, i, j, wire_hit(7680), ipie
-      REAL    Tolerance, Pi, se_de(384)
+      INTEGER icell, cell_num, cell_hit(0:10,7680)
+      INTEGER se_hit(0:10,96), overload_slat, num_below_thresh
+      INTEGER hit_index, tot_cell_hit(0:10,96), ee_correct
+      INTEGER isect, iosect, i, j, jj, wire_hit(0:10,7680), ipie
+      REAL    Tolerance, Pi, se_de(96)
       REAL    Rhit, Phihit, Phi_step
       REAL    Scale, RG32, Dummy, Ped
       REAL    Total_de(Mwc_raw_len), gain
@@ -56,7 +60,7 @@ CC:>------------------------------------------------------------------
       REAL    local_hit, local_step, cell_de(7680)
       REAL    thresh,elect_noise
       REAL    g2
-      LOGICAL First, wires_set
+      LOGICAL First
       SAVE    Tolerance
       SAVE    First      
       SAVE    Pi
@@ -64,23 +68,40 @@ CC:>------------------------------------------------------------------
       DATA    Tolerance / -0.1 /
       DATA    First     / .true. /
       DATA    Pi        / 3.141592654 /
+
+      INTEGER trg(0:10)
+      REAL    y_pos, fraction
+      REAL xlocal, plocal
+      REAL drift1, drift2, mip_deds, vgain, threshold
+      INTEGER igain, ogain, tr,delay
+      COMMON /deposition/ drift1,drift2,igain,ogain,
+     * vgain,tr
+      INTEGER rhic_delay
+      REAL r1min,r1max,r2min,r2max
+      COMMON /mwc_ss/ insect_ir, r1max,r2min
+
 *--
 *--    Default this works
 *--
       MWS = STAFCV_OK
-*--
+*--   
+     
+
+
+*--- Time is split into 11 buckets, each has a variable trg(1),2,3,4 etc
+*--- for starters, trg = 0, then they are incremented by 1 in the 
+*--- subroutine deposition, if voltage > thereshold in that time bucket
+*--- this is repeated for every hit in the event
+*--- trg - is a "local" variable for each of the many hits in event, trg = 0 or 1
 
       if ( First ) then
          First   = .false.
-*--
-*--	The parameter mpar.wires was removed.  We ALWAYS wire count!
-*--     
-        wires_set=.true.
+
 *-- 
 *--    Set the gain for output from MWC
 *--
          if (mpar(1).gain .eq. 0.0)  then
-            write (6,*) 'MWS:WARNING -- Gains not set.  Setting gain to 1.0!'
+            write (6,*) 'MWS:WARNING Gains not set.Setting gain to 1.0!'
             mpar(1).gain = 1.0
          endif
          gain = mpar(1).gain
@@ -95,19 +116,41 @@ CC:>------------------------------------------------------------------
 *--      num_wires_count: Number of wires used per count
 *--      num_counts_sect: Number of count values per sector (inner or outer)
 *--
-         outsect_ir       = Geom(1).r2min
-         insect_ir        = Geom(1).r1min
+CC:      let us define some constants here - in real life they must come from the database, 
+CC:      but in the absence thereof, we should provide these values in the code
+
+
+         ogain = pars(1).ogain
+         igain =  pars(1).igain
+         vgain =  pars(1).vgain
+         drift1 =  pars(1).drift1
+         drift2 =  pars(1).drift2
+         tr =  pars(1).tr
+         mip_deds =  pars(1).mip_deds
+         threshold =  pars(1).threshold
+         delay =  pars(1).delay
+         r1max = geom(1).r1max
+         r1min = geom(1).r1min
+         r2max = geom(1).r2max
+         r2min = geom(1).r2min
+         outsect_ir       = r2min
+         insect_ir        = r1min
          wire_step        = 0.4
          num_wires_sect   = 160
+         rhic_delay = delay/109 ! RHIC strobes 
+
+CC:      end database constants
+
          num_counts_out   = mpar(1).num_counts_out
          num_wires_count  = mpar(1).num_wires_count
          num_counts_sect  = num_wires_sect/num_wires_count
 *--
 *--    Check that the endcap wire segments have been set correctly
 *--
+
         ee_correct = abs(7680 - num_counts_out * num_wires_count)
         if (ee_correct .gt. 0) then
-           write (6,*) 'MWS: ERROR GSTAR geometry there must be 7680 wires'
+           write(6,*)'MWS: ERROR GSTAR geometry there must be 7680 wires'
            MWS = STAFCV_BAD
            return
         endif
@@ -141,11 +184,15 @@ CC:>------------------------------------------------------------------
       num_below_thresh = 0
 
       do j = 1,num_counts_out*num_wires_count
-         cell_hit(j) = 0
+CC: VM add all 11 timebuckets in here
+         do jj = 0,10            
+          cell_hit(jj,j) = 0 ! 1 cell ~ 1 wire
+          wire_hit(jj,j) = 0
+         enddo
          cell_de(j)  = 0
-         wire_hit(j) = 0
+
       enddo
-       
+
 *--
 *--    Check if any data
 *--
@@ -154,12 +201,20 @@ CC:>------------------------------------------------------------------
 *--    Loop over hits
 *--
 *--
-         do Ihit = 1, mhit_h.nok
+
+            do Ihit = 1, mhit_h.nok
+
+            do j=0,10
+             trg(jj) = 0
+            enddo
 *--
+
             Rhit   = sqrt(Mhit(Ihit).x(1)**2+Mhit(Ihit).x(2)**2)
-            if (   (Rhit .gt. Geom(1).r1min) 
-     +.and.        (Rhit .lt. Geom(1).r2max+10.0)  ) then
+            if (   (Rhit .gt. r1min) 
+     +.and.        (Rhit .lt. r2max+10.0))then
+
 *--
+  
                Mevent(1).no_hits = Mevent(1).no_hits + 1
                if (Ihit .eq. 1 .or. 
      &          Mhit(Ihit).track_p .ne. Mhit(Ihit-1).track_p) then
@@ -169,7 +224,9 @@ CC:>------------------------------------------------------------------
 *--    Get Phi index now
 *--
                Phihit = ATAN2(Mhit(Ihit).x(2),Mhit(Ihit).x(1))
-               if ( Phihit .lt. 0 ) Phihit = Phihit + 2*Pi
+               if ( Phihit .lt. 0 ) then 
+               Phihit = Phihit + 2*Pi
+               endif
 *--
 *--     Get necessary geometry information
 *--
@@ -195,6 +252,26 @@ CC:>------------------------------------------------------------------
                   iosect = 2
                endif
 
+C     VM: now let's do voltage simulation for this hit (hit is one occurence of
+C  energy deposition in one cell), there may be more than one hit in one cell, due to 
+C  a passage of several particles thru one cell, and there may be more than one 
+C  hit from one particle - i.e. a particale goes thru more than 1 cell
+C  We should be OK with this
+
+*-- VM: now we want to know how much more energy was deposited in this hit, compared to a MIP
+               
+               fraction = (mhit(ihit).de/mhit(ihit).ds)/(mip_deds)   
+               if (iosect.eq.1) then
+               y_pos = 10*(208.6 - abs(mhit(ihit).x(3))) + 5
+               endif
+               if (iosect.eq.2) then
+               y_pos = 10*(208.6 - abs(mhit(ihit).x(3))) + 7
+               endif
+               call xploc(xlocal,mhit(ihit).x(1),mhit(ihit).x(2),
+     * plocal,mhit(ihit).p(1),mhit(ihit).p(2))         
+               call deposit (10*xlocal,y_pos,
+     * plocal,-1*mhit(ihit).p(3),trg,threshold,
+     * fraction,delay)
                if (iosect.eq.1) then
                   sector_ir = insect_ir/phicos
                else
@@ -208,10 +285,11 @@ CC:>------------------------------------------------------------------
                local_step = wire_step/phicos
                icell      = int(local_hit/local_step) + 1
                cell_num = (((isect-1)*(2*num_wires_sect))
-     1                    +((iosect-1)*num_wires_sect)+icell)
+     *                    +((iosect-1)*num_wires_sect)+icell)
                if (mhit(ihit).x(3) .gt. 0.0) then 
                   cell_num = cell_num +(num_wires_sect*24)
                endif
+            
 *--
 *--    Determine electronic noise
 *--    if width=0 then do not include noise (noise=0)
@@ -227,51 +305,46 @@ CC:>------------------------------------------------------------------
 *--     Get the number of hits in a cell and the total energy
 *--     deposition in the cell
 *--
-               cell_hit(cell_num) = cell_hit(cell_num) + 1
+C   VM: this is the main change I'm intruducing - a cell is hit if voltage generated in this cell exceeds threshold voltage.
+C   cell_hit(cell_num) is incremented at most by 1 in one particle hit but in principle, we may have cell_hit > 1
+               do jj =0,10                  
+               cell_hit(jj,cell_num)=cell_hit(jj,cell_num)+trg(jj) ! + el.noise
+               enddo
                cell_de(cell_num)  = cell_de(cell_num) + mhit(ihit).de +
-     1         elect_noise
+     *         elect_noise
+
             else
                write (6,*) 'MWS : Wrong geometry '
-               write (6,*) mhit(ihit).x(1), mhit(ihit).x(2), mhit(ihit).x(3)
+               write(6,*)mhit(ihit).x(1),mhit(ihit).x(2),mhit(ihit).x(3)
+            
             endif
+
 *--    end loop over hits
          enddo
+
+
 *--
 *--    Get wire hit information
 *--
        do i = 1, (num_wires_sect * 24 * 2)
-*--
-*--    do we have an inner or outer sector?
-*--    if mpar.min_ion = 0 then use the value of de_thresh_in/out as the
-*--    de threshold.  Otherwise the threshold is mpar(1).min_ion * 
-*--    mpar.de_thresh.  Why?  This allows you to set the threshold to
-*--    0.03*min_ion or set the threshold to a value.  You pick
-*--                                                    d.e. russ 11/28/98
-         if ( mod(i-1,320) .lt. 160) then
-            iosect = 1
-            thresh = mpar(1).de_thresh_in
-          else
-            iosect = 2
-            thresh = mpar(1).de_thresh_out
-         endif
-         if (mpar(1).min_ion .ne. 0) thresh = thresh * mpar(1).min_ion
-         
-         if (cell_de(i) .ge. thresh) then
-            if (cell_hit(i) .ge. 1) then
-               wire_hit(i) = 1
-            endif
-         else
-            num_below_thresh = num_below_thresh + 1
-         endif
-      enddo 
+        do jj = 0,11
+        if (cell_hit(jj,i) .ge. 1) then
+         wire_hit(jj,i) = 1
+        elseif (jj.eq.0) then 
+         num_below_thresh = num_below_thresh + 1
+        endif
+        enddo
+       enddo 
 *--
 *--
 *--
        Mevent_h.nok = 1
-       do i = 1,384
-          se_hit(i) = 0
+       do i = 1,96  
+          do jj =0 , 10 
+          se_hit(jj,i) = 0
+          tot_cell_hit(jj,i) = 0
+          enddo
           se_de(i)  = 0
-          tot_cell_hit(i) = 0
        enddo
 *--
 *--    Loop over sectors now
@@ -280,9 +353,11 @@ CC:>------------------------------------------------------------------
          do Isec = 1, num_counts_out
            do j = 1, num_wires_count
              hit_index = (isec-1)*num_wires_count + j
-             
-             tot_cell_hit(isec) = tot_cell_hit(isec) + cell_hit(hit_index)
-             se_hit(isec)  = se_hit(isec) + wire_hit(hit_index)
+             do jj = 0,10
+             tot_cell_hit(jj,isec) = tot_cell_hit(jj,isec) + 
+     *       cell_hit(jj,hit_index)
+             se_hit(jj,isec)  = se_hit(jj,isec) + wire_hit(jj,hit_index)
+             enddo
              se_de(isec)   = se_de(isec)  + cell_de(hit_index)
            enddo
 *--
@@ -303,35 +378,25 @@ CC:>------------------------------------------------------------------
            ieta = isec - ((iphi - 1) * ( 2*num_counts_sect ) )
            if (iphi .gt. 12) iphi = iphi - 12
 
-           if (se_hit(Isec) .gt. 0.) then
+CC: we will write mwc_raw table with 96x11 pairs of values, even if some of hit counts will be zeroz
+CC: to this end, I delet the following condition:
+
+CC:           if (se_de(Isec) .gt. 0.) then
                nsignal = nsignal + 1
 *--
                sector(nsignal).iphi    = iphi
                sector(nsignal).ieta    = ieta
                sector(nsignal).sector  = isec
-               sector(nsignal).nhit    = se_hit(isec)
+               sector(nsignal).nhit    = se_hit(rhic_delay + 1,isec)
                sector(nsignal).de      = se_de(isec)
-               sector(nsignal).tot_hit = tot_cell_hit(isec)
+               sector(nsignal).tot_hit = tot_cell_hit(rhic_delay+1,isec)
 *--
-               raw(nsignal).sector = isec
-               if (wires_set) then
-                 raw(nsignal).count = se_hit(isec)
-*--  Legacy code from the old days when STAR did not wire count
-*--  This code will be deleted soon - d.e. russ 1/27/99
-               else
-                  write (6,*) 'Warning you are NOT wire counting'
-                  write (6,*) 'This code will be deleted soon...'
-                  write (6,*) '                 1/27/99 d.e russ'
-                  raw(nsignal).count = se_de(isec)*Scale
-                  if (raw(nsignal).count .gt. 32) then
-                     raw(nsignal).count = 32
-                     overload_slat = overload_slat + 1
-                     write (6,*) 'Slat Number ', nsignal,' Count Value Overflow'
-                     write (6,*) 'Total Overflow Slats = ', overload_slat
-                  endif
-*--  End of legacy code
-               endif
-           endif
+
+               do jj = 0,10   
+                raw(nsignal + 96*jj).sector = isec
+                raw(nsignal + 96*jj).count = se_hit(jj,isec)
+               enddo
+CC:           endif
          enddo
 *         write (6,*) 'Number below threshold: ',num_below_thresh
 *         write (6,*) '========================================='
@@ -343,6 +408,7 @@ CC:>------------------------------------------------------------------
 *--
 *--    end if any data
 *--
+  
       endif 
 *--
 *--    That's It
@@ -374,6 +440,391 @@ CC:>------------------------------------------------------------------
        g2=ret_val
        return
        end
+*---------------------------------------------------------------
+
+
+       subroutine deposit(x0,y0,v_x,v_y,trg,
+     * threshold,fraction,delay)
+       real q_x(-70:70), q_y(-70:70), delt, factor, 
+     * v_x,v_y, x0, y0,x_wall1, x_wall2,
+     * y_wall1, y_wall2, x,y,
+     * y_ground, y_anode,
+     * t(-70:70),drift1,drift2,vgain,
+     * q1(0:800),gain,threshold,deltat
+       integer n, helper, j, num,
+     * trg(0:10),jj, delay,igain,ogain,tr
+C  This program calculates the voltage output from the MWPC wires,
+C  we want to get 24mV per 6750 electrons - V. Morozov      
+      real maximum, m_time, sum1(1000),total
+      DIMENSION VOUT(1,1000)
+      real vshift(0:595) ! voltage output shifted by signal delay
+      real v_peak(0:10)
+      COMMON /deposition/ drift1,drift2,igain,
+     * ogain,vgain,tr
+
+      data maximum = 0
+      data m_time = 0
+
+
+C      put all the q_x & q_y equal to zero
+       data q_x/141*0.0/
+       data q_y/141*0.0/
+       data t/141*2000/
+       data q1/801*0/
+       factor = 0
+       do 564 j = 0,10
+        v_peak(j)=0
+ 564   continue
+ 
+     
+       do jj = 0,10
+        trg(jj) = 0
+       enddo
+       helper = iosect     
+       
+       if (helper.eq.1) then 
+       goto 200
+       else
+       goto 100
+       end if
+
+  100  continue
+       x_wall1 = 2.0
+       x_wall2 = -2.0
+       y_wall1 = 7.0
+       y_wall2 = -7.0
+       y_anode = -3.0
+       y_ground = 1.0
+       gain =ogain
+       goto 300
+  200  continue
+       x_wall1 = 2.0
+       x_wall2 = -2.0
+       y_wall1 = 5.0
+       y_wall2 = -5.0
+       y_anode = -3.0
+       y_ground = -1.0
+
+
+       gain = igain
+       goto 300
+
+ 300   continue
+
+       x = x0
+       y = y0
+       delt = .22/(sqrt(v_x*v_x +v_y*v_y))
+C      now we propagate the particle thru the cell
+       
+       do 298 nk = -70,70
+       q_x(nk) = 0
+       q_y(nk) = 0
+       t(nk) = 2000
+ 298   continue
+       
+       N = 0
+       
+       do 182 nk = -70,70
+       summa = summa+q_x(nk)+q_y(nk)
+       if (summa.ne.0) then
+       print*,'!!!!!!!!! MWC ERROR !!!!!!!'
+       endif
+ 182   continue
+
+       if(v_y.ge.0) then
+       v_y = -1*v_y
+       v_x = -1*v_x
+       endif
+
+       if (v_x.gt.0) then     
+ 11    if ((x.le.x_wall1).and.(y.ge.y_wall2)) then
+       q_x(N) = x
+       q_y(N) = y
+       x = x + delt*v_x
+       y = y + delt*v_y
+       N = N +1
+       if (v_x*v_y.eq.0)then
+       print*,' !!!!!!!! MWC ERROR !!!!!!!!'
+       endif
+       goto 11
+       else
+       endif
+      
+       n=0   
+       x = x0
+       y = y0
+
+ 21    if ((x.ge.x_wall2).and.(y.le.y_wall1)) then 
+       x = x - delt*v_x
+       y = y - delt*v_y
+       N = N-1
+       q_x(N) = x
+       q_y(N) = y
+       if (v_x*v_y.eq.0)then
+       print*,' !!!!!!!! MWC ERROR !!!!!!!!'
+       endif
+     
+       goto 21
+       else 
+
+       endif
+
+       else ! if v_x < 0
+
+ 14    if ((x.le.x_wall1).and.(y.le.y_wall1)) then
+       q_x(N) = x
+       q_y(N) = y
+       x = x - delt*v_x
+       y = y - delt*v_y
+       N = N +1
+       if (v_x*v_y.eq.0)then
+       print*,' !!!!!!!! MWC ERROR !!!!!!!!'
+       endif
+
+       goto 14
+       else
+       endif
+      
+       n=0
+       x = x0
+       y = y0
+
+ 24    if ((x.ge.x_wall2).and.(y.ge.y_wall2)) then 
+       x = x + delt*v_x
+       y = y + delt*v_y
+       N = N-1
+       q_x(N) = x
+       q_y(N) = y
+       if (v_x*v_y.eq.0)then
+       print*,' !!!!!!!! MWC ERROR !!!!!!!!'
+       endif
+
+       goto 24
+       else 
+
+       endif
+       
+       endif
+
+C      now we will calculate drift times for each electron
+C      from it's original position (q_x(n),q_y(n)) to anode
+C      we will assume velosity_drift1 = .04969 mm/ns from the gating gr. to ground
+C      and velocity drift2 = .025 mm/ns from the ground to anode 
+C      (neglect sharp increase of v close to anodes)
+C      for electron with x > 1mm use "factor" to account for curving track
+       
+       do 500 n = -70,70
+          if ((q_x(n).ne.0).or.(q_y(n).ne.0)) then
+             if (abs(q_x(n)).ge.1) then
+                factor = .2
+             endif
+             if (q_y(n).ge.y_ground) then
+                t(n) = ((q_y(n)-y_ground)/drift1) + (sqrt(q_x(n)*q_x(n) 
+     *               + (y_ground - y_anode)*(y_ground-y_anode))/drift2) 
+     *               + factor*(abs(q_x(n))/drift2)
+             else
+             t(n)=(sqrt(q_x(n)*q_x(n)+(q_y(n)-y_anode)*(q_y(n)-y_anode))
+     *               /drift2)+factor*(abs(q_x(n))/drift2)
+             endif
+             
+          endif
+ 500   continue
+       
+C      now we want to add all these arrival times t(n) into q1(j)
+C      q1(j)- how much charge arrives on anode within .5ns at time j
+
+       
+       do 174 nk=0,800
+       if (q1(nk).ne.0) then
+       print*,'!!!!!!!! MWC ERROR !!!!!!'
+       endif
+ 174   continue
+
+       do 600 n = -70,70
+       if (q_x(n).ne.0.or.q_y(n).ne.0) then
+       num = t(n)*2
+       q1(num) = q1(num) + 1
+       endif
+ 600   continue
+       
+       do 700 j = 0,800
+       q1(j) = gain*q1(j)*fraction
+
+    
+ 700   continue
+
+      NTIME=800
+        
+      data sum1/1000*0/ 
+      
+     
+      DO 20 J=2,NTIME
+         SUM1(j)=SUM1(j-1)+Q1(J)
+
+C this increases the electron count by one every time there is 
+C anything at all reaching the wire in that time bucket
+C if more than one e's reach the wire, we miss them.
+C it doesn't happen often, though
+         
+ 20   CONTINUE
+
+      hlpr = 0
+   
+      DO 30 J=1,NTIME
+
+         VOUT(1,J)=0.
+      
+ 30   CONTINUE
+    
+      DO 40 J=2,NTIME
+         DO 50 K=1,J
+            DT=FLOAT(J-K)
+            VOUT(1,J)=VOUT(1,J)+DELTAT(DT,vgain,tr)*Q1(K)
+ 50      CONTINUE
+      if (maximum.le.vout(1,j)) then
+      maximum = vout(1,j)
+      m_time = j/2
+      endif 
+ 40   CONTINUE
+
+   
+
+C      VM: now let's digitize this V(t) curve, one timebucket = 109 ns
+C      but first we have to shift time by the amount of signal delay
+
+       do jj = 1,594
+        vshift(jj) = 0
+       enddo
+
+       do 565 jj = 1,594  ! jj - time in 2ns, spans 11 time buckets
+        if (jj*2.lt.delay) then
+         vshift(jj) =0.0
+        elseif(jj*2.ge.delay) then
+         if (((jj-delay/2)*4 +1).lt.800) then 
+          vshift(jj) = vout(1,((jj-delay/2)*4 + 1))
+         else
+          vshift(jj) = 0.0
+         endif
+        endif
+ 565   continue     
+  
+       do jj= 0,10              ! jj - timebucket number
+          v_peak(jj) = vshift(1+54*jj)
+          do J=1+54*jj,54*(jj+1)
+             if (vshift(j+1).gt.vshift(j)) then
+                v_peak(jj) = vshift(j+1)
+             endif
+          enddo
+          if (jj.gt.0) then
+           if(v_peak(jj).ge.threshold.and.v_peak(jj-1).lt.threshold)then
+                trg(jj) = 1
+             endif
+          elseif(jj.eq.0) then
+             if (v_peak(0).gt.threshold) then
+                trg(0) = 1
+             endif
+          endif
+       enddo
+    
+
+
+
+C      VM: flip-flop mechanism is on - if the voltage EVER goes above threshold, 
+C      trigger will be in that time bin and that time bin only
+
+
+
+       maximum = 0
+       m_time = 0
+       do jj = 0,10
+       v_peak(jj)= 0
+       enddo
+
+       factor = 0
+       do 288 nk = -70,70
+       q_x(nk) = 0
+       q_y(nk) = 0
+       t(nk) = 2000
+ 288   continue
+       
+       do 299 nk = 0, 800
+       vout(1,nk)=0
+       q1(nk)=0
+ 299   continue
+      
+
+       return
+
+       stop
+       end
+
+       
+         FUNCTION DELTAT(DT,vgain,tr)
+         integer tr
+         TPZ=500.
+         DELTAT=((DT/2*TR)**2*EXP(-2*DT/TR))*vgain
+C VM:have put the factor 2.75e-13 to make V_out(1electron) = 24mv/6750
+         TO=TR
+         RAT=DT/TO
+         RETURN
+         END
+
+CC------------------------------------------------------------
+CC here we write a subroutine to calculate the position of the hit with respect to the cell,
+CC if we know the lab frame coordinates of the hit.
+      SUBROUTINE XPLOC (xlocal, x,y,plocal,px,py)
+      REAL xlocal,x,y,plocal, px,py
+      INTEGER i,imax
+      REAL max,angle,step	
+      COMMON /mwc_ss/ r1min, r1max,r2min
+      PARAMETER (angle =.523598775598)! pi/6 = 30 degrees
+      PARAMETER ( step =.400)! width of a cell in radial direction
+ 
+      imax = 1
+      max = -200
+    
+      do 10 i = 1, 12
+      if((x*sin(angle*i)+y*cos(angle*i)).ge.max) then
+      imax = i
+      max = x*sin(angle*i)+y*cos(angle*i)
+      endif
+ 10   continue
+CC now we need to convert max into the coordinate with respect to a cell
+
+      if (max.lt.r1max) then
+      xlocal = max - r1min
+      i = 1
+      else
+      xlocal = max - r2min
+      i = 161
+      endif
+CC    this part will check if xlocal is within (-2,+2)mm
+
+ 20   continue
+      if ((xlocal.gt.(-.2)).and.(xlocal.lt.(.2))) then
+      goto 30
+      else
+      i = i+1
+      xlocal = xlocal - step
+      goto 20
+      endif
+
+ 30   continue
+      plocal =  px*sin(angle*imax)+py*cos(angle*imax)
+      return
+
+
+      end
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.h,v 1.7 1999/07/15 13:58:17 perev Exp $
+// $Id: St_mwc_Maker.h,v 1.8 2000/12/11 10:33:35 vlmrz Exp $
 // $Log: St_mwc_Maker.h,v $
+// Revision 1.8  2000/12/11 10:33:35  vlmrz
+// *** empty log message ***
+//
 // Revision 1.7  1999/07/15 13:58:17  perev
 // cleanup
 //
@@ -50,6 +53,9 @@
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
+#include <fstream.h>
+//#include "TFile.h"
+#include "TNtuple.h"
 #endif
 
 class St_mwc_geo;
@@ -61,7 +67,7 @@ class TH2F;
 class St_mwc_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_mwc_Maker.h,v 1.7 1999/07/15 13:58:17 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_mwc_Maker.h,v 1.8 2000/12/11 10:33:35 vlmrz Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
    St_mwc_geo  *m_geom; //!
@@ -72,18 +78,21 @@ class St_mwc_Maker : public StMaker {
    TH1F   *m_px;  //!
    TH1F   *m_py;  //!
    TH1F   *m_pz;  //!
+   TH1F   *m_Hits; //!
    TH1F   *m_nWiresHit; //!
    TH1F   *m_nSectorsHit; //!
    TH2F   *m_EtaPhi; //!
+ 
   
  public: 
                   St_mwc_Maker(const char *name="mwc");
    virtual       ~St_mwc_Maker();
    virtual Int_t  Init();
    virtual Int_t  Make();
+   virtual Int_t  Finish();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_mwc_Maker.h,v 1.7 1999/07/15 13:58:17 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_mwc_Maker.h,v 1.8 2000/12/11 10:33:35 vlmrz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_mwc_Maker, 1)   //StAF chain virtual base class for Makers
 };
