@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.19 2003/02/27 22:56:58 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.20 2003/06/11 12:06:03 jcs Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.20  2003/06/11 12:06:03  jcs
+// get inner cathode and cluster geometry parameters from database
+//
 // Revision 1.19  2003/02/27 22:56:58  jcs
 // use the ftpc body temperature readings to make temperature/pressure corrections
 //
@@ -96,11 +99,13 @@ class St_ftpcTimeOffset;
 class St_ftpcDriftField;
 class St_ftpcGas;
 class St_ftpcElectronics;
+class St_ftpcInnerCathode;
+class St_ftpcClusterGeometry;
 
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.19 2003/02/27 22:56:58 jcs Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.20 2003/06/11 12:06:03 jcs Exp $";
    St_db_Maker *mDbMaker;                         //!
    St_ftpcClusterPars   *m_clusterpars;           //!
    St_ftpcFastSimGas    *m_fastsimgas;            //!
@@ -119,6 +124,8 @@ class StFtpcClusterMaker : public StMaker {
    St_ftpcDriftField    *m_driftfield;            //!
    St_ftpcGas           *m_gas;                   //!
    St_ftpcElectronics   *m_electronics;           //!
+   St_ftpcInnerCathode  *m_cathode;               //!
+   St_ftpcClusterGeometry *m_clustergeo;          //!
    void             MakeHistograms();// Histograms for FTPC cluster finder
  
  protected:
@@ -151,7 +158,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.19 2003/02/27 22:56:58 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.20 2003/06/11 12:06:03 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker, 1)   //StAF chain virtual base class for Makers
 };

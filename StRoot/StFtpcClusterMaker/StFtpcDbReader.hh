@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.15 2003/06/10 13:13:51 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.16 2003/06/11 12:06:03 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.16  2003/06/11 12:06:03  jcs
+// get inner cathode and cluster geometry parameters from database
+//
 // Revision 1.15  2003/06/10 13:13:51  jcs
 // get mix,max gas temperature and pressure limits from database
 //
@@ -73,6 +76,8 @@
 #include "tables/St_ftpcGas_Table.h"
 #include "tables/St_ftpcDriftField_Table.h"
 #include "tables/St_ftpcElectronics_Table.h"
+#include "tables/St_ftpcInnerCathode_Table.h"
+#include "tables/St_ftpcClusterGeometry_Table.h"
 
 
 class StFtpcDbReader : public TObject 
@@ -89,6 +94,17 @@ protected:
   Int_t mLastSectorToSearch;
   Int_t mNumberOfPads;
   Int_t mNumberOfTimebins;
+  Int_t mMinTimeBin;
+  Int_t mMinTimeBinMed;
+  Int_t mMinTimeBinOut;
+  Int_t mMaxTimeLength;
+  Int_t mMaxTimeLengthMed;
+  Int_t mMaxTimeLengthOut;
+  Int_t mMaxPadLength;
+  Int_t mMaxPadLengthMed;
+  Int_t mMaxPadLengthOut;
+  Int_t mDeltaTime;
+  Int_t mDeltaPad;
 
   Bool_t mEastIsInverted;
   Bool_t mAsic2EastNotInverted;
@@ -130,10 +146,18 @@ protected:
   Float_t mMaxGasTemperature;
 
   Float_t mTZero;
+
+  Float_t mOffsetCathodeWest;
+  Float_t mOffsetCathodeEast;
+  Float_t mAngleOffsetWest;
+  Float_t mAngleOffsetEast;
+
   Float_t mDriftCathodeVoltage;
   Float_t mMinimumDriftField;
   Float_t mStepSizeDriftField;
   Float_t mRadiusTimesField;
+
+  Float_t mMinChargeWindow;
 
   ftpcAmpSlope_st   *ampslopeTable;
   ftpcAmpOffset_st  *ampoffsetTable;
@@ -160,7 +184,9 @@ public:
                  St_ftpcTimeOffset    *timeoffset,
                  St_ftpcDriftField    *driftfield,
                  St_ftpcGas           *gas,
-                 St_ftpcElectronics   *electronics);
+                 St_ftpcElectronics   *electronics,
+		 St_ftpcInnerCathode  *cathode,
+		 St_ftpcClusterGeometry *clustergeo);
   // constructor used by StFtpcSlowSimMaker
   StFtpcDbReader(St_ftpcDimensions    *dimensions,
 		 St_ftpcAsicMap       *asicmap,
@@ -255,10 +281,30 @@ public:
   Float_t maxGasTemperature() {return mMaxGasTemperature;}
 
   Float_t tZero() {return mTZero;}
+
   Float_t driftCathodeVoltage() {return mDriftCathodeVoltage;}
   Float_t minimumDriftField() {return mMinimumDriftField;}
   Float_t stepSizeDriftField() {return mStepSizeDriftField;}
   Float_t radiusTimesField() {return mRadiusTimesField;}
+
+  Float_t offsetCathodeWest() {return mOffsetCathodeWest;}
+  Float_t offsetCathodeEast() {return mOffsetCathodeEast;}
+  Float_t angleOffsetWest() {return mAngleOffsetWest;}
+  Float_t angleOffsetEast() {return mAngleOffsetEast;}
+   
+  Int_t minTimeBin() {return mMinTimeBin;} 
+  Int_t minTimeBinMed() {return mMinTimeBinMed;}
+  Int_t minTimeBinOut() {return mMinTimeBinOut;}
+  Int_t maxTimeLength() {return mMaxTimeLength;}
+  Int_t maxPadLength() {return mMaxPadLength;}
+  Int_t maxTimeLengthMed() {return mMaxTimeLengthMed;}
+  Int_t maxPadLengthMed() {return mMaxPadLengthMed;}
+  Int_t maxTimeLengthOut() {return mMaxTimeLengthOut;}
+  Int_t maxPadLengthOut() {return mMaxPadLengthOut;}
+  Int_t deltaTime() {return mDeltaTime;}
+  Int_t deltaPad() {return mDeltaPad;}
+  Float_t minChargeWindow() {return mMinChargeWindow;}
+
 };
 
 #endif
