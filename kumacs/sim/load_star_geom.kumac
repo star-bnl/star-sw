@@ -1,34 +1,75 @@
-************************
+* ***********************
 * load_star_geom.kumac *
-************************
-*   load star geometry using agstar geometry interface
-*   pn/pmj   26/4/96
-*   WJL      31/10/96
-gdrop *
-* uncomment the folloing line if neither MWC nor pseudo padrows are needed
-* detp tpce tpcg(1).MWCread= 0  tprs(1).super= 1
-  mode btof grap 4   | otherwise too many details for graphics
-*
-gexec cavegeo
-gexec pipegeo
-gexec svttgeo
-gexec tpcegeo
-gexec ftpcgeo
-gexec vpddgeo
-gexec btofgeo
-gexec calbgeo
-gexec ecalgeo
-gexec magpgeo
-gexec mfldgeo
-gclos all
-message 'geometry done'
-*
-*   load xdf and other user controled input formats 
-gexec gstar_input
-gexec gstar_readxdf
-*
-*   set some common STAR defaults
-subevent       200  | split each event into subevents of 200 tracks
-mode tpce simu 2    | save secondaries, which produce TPC hits, in KINE
+* ***********************
+* 7Jul98 - created, Pavel Nevski
+* 9Jul98 - editted, Kathy Turner
+* ******************************************************************
+* ******************************************************************
+ 
+ macro all
+        
+ *                    simu=2 saves secondaries which produce a hits
+ gsflag geometry 0            | default status - off
+ mode  cave geom 1            | 
+ mode  pipe geom 1            |
+ mode  svtt geom 1 simu 2     | year 2
+ mode  tpce geom 1 simu 2
+ mode  ftpc geom 1 simu 2
+ mode  vpdd geom 1            | year 2
+ mode  btof geom 1
+ mode  calb geom 1            | year 2
+ mode  ecal geom 1            | year 2
+ mode  magp geom 1
+ mode  mfld geom 1
+ mode  g2tm geom 1         
+* 
+* uncomment one of the following lines if: 
+
+* - neither MWC nor pseudo padrows are needed
+* detp tpce tpcg(1).MWCread=0  tprs(1).super=1
+
+* - magnetic field should be off (default is 5):
+* detp mfld mflg.field=0
+
+* - secondaries AFTER all decays should be saved
+* detp TRAC DCAY 210 210 0.1 0.01
+
+* - svt layer 4 should be switched off
+* detp svtt  svtg.nlayer = 6 | switch off shell 4 
+
+* - tof system should be on (for year 2)
+* detp btof btog.choice=2
+
+* - each event should be splitted into subevents of 1000 tracks
+* subevent       1000  
+ 
+ return
+ 
 ***********************************************************************
 
+ macro tpc_field
+   
+      gsflag geom 0
+      mode cave geom 1
+      mode tpce geom 1
+      mode mfld geom 1
+      mode g2tm geom 1
+      
+ return
+ 
+ ***********************************************************************
+
+ macro tpc_nofield
+   
+      gsflag geom 0
+      mode cave geom 1
+      mode tpce geom 1
+      mode mfld geom 1
+      mode g2tm geom 1
+      
+* - turn magnetic field off (default is 5):
+ detp mfld mflg.field=0    
+      
+ return
+ 
+*********************************************************************
