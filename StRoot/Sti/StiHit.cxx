@@ -31,7 +31,7 @@ StiHit::StiHit(const StiHit& rhs)
     return;
 }
 
-StThreeVectorD StiHit::globalPosition() const
+const StThreeVectorF& StiHit::globalPosition() const
 {
     return msthit->position();
 }

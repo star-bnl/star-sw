@@ -66,6 +66,11 @@ void StiEvaluableTrackSeedFinder::setEvent(StMcEvent* mcevt)
     return;
 }
 
+void StiEvaluableTrackSeedFinder::build()
+{
+    cout <<"StiEvalaubleTrackSeedFinder::build()"<<endl;
+}
+
 bool StiEvaluableTrackSeedFinder::hasMore()
 {
     return (mCurrentMc!=mEndMc);
