@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.22 2005/01/17 01:31:25 perev Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.23 2005/03/24 17:58:33 perev Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,6 +12,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.23  2005/03/24 17:58:33  perev
+ * Do not allow to modify node anymore
+ *
  * Revision 2.22  2005/01/17 01:31:25  perev
  * New parameter model
  *
@@ -88,11 +91,13 @@
 #include "StiHitErrorCalculator.h"
 #include "tables/St_HitError_Table.h"
 
+//_____________________________________________________________________________
 StiDefaultHitErrorCalculator::StiDefaultHitErrorCalculator()
 {
   set(0.,0.,0.,0.,0.,0.); 
 }
 
+//_____________________________________________________________________________
 StiDefaultHitErrorCalculator::StiDefaultHitErrorCalculator(const StiDefaultHitErrorCalculator & e)
 {
   coeff[0]= e.coeff[0];
@@ -103,6 +108,7 @@ StiDefaultHitErrorCalculator::StiDefaultHitErrorCalculator(const StiDefaultHitEr
   coeff[5]= e.coeff[5];
 }
 
+//_____________________________________________________________________________
 const StiDefaultHitErrorCalculator & StiDefaultHitErrorCalculator::operator=(const StiDefaultHitErrorCalculator & calc)
 {
   coeff[0]= calc.coeff[0];
@@ -114,6 +120,7 @@ const StiDefaultHitErrorCalculator & StiDefaultHitErrorCalculator::operator=(con
 	return *this;
 }
 
+//_____________________________________________________________________________
 const StiDefaultHitErrorCalculator & StiDefaultHitErrorCalculator::operator=(const HitError_st & e)
 {
   coeff[0]= e.coeff[0];
@@ -125,9 +132,11 @@ const StiDefaultHitErrorCalculator & StiDefaultHitErrorCalculator::operator=(con
 	return *this;
 }
 
+//_____________________________________________________________________________
 StiDefaultHitErrorCalculator::~StiDefaultHitErrorCalculator()
 {}
 
+//_____________________________________________________________________________
 void StiDefaultHitErrorCalculator::set(double intrinsicZ, double driftZ,
 				    double crossZ, double intrinsicX,
 				    double driftX, double crossX)
@@ -141,6 +150,7 @@ void StiDefaultHitErrorCalculator::set(double intrinsicZ, double driftZ,
   cout << *this << endl;
 }
 
+//_____________________________________________________________________________
 //Load values from given input file stream
 void StiDefaultHitErrorCalculator::loadFS(ifstream& iFile)
 {
@@ -151,6 +161,7 @@ void StiDefaultHitErrorCalculator::loadFS(ifstream& iFile)
   cout << "StiDefaultHitErrorCalculator::loadFS(ifstream& iFile) -I- Done" <<endl;
 }
 
+//_____________________________________________________________________________
 //Load values from given dataset
 void StiDefaultHitErrorCalculator::loadDS(TDataSet & ds)
 {
@@ -170,6 +181,7 @@ void StiDefaultHitErrorCalculator::loadDS(TDataSet & ds)
   cout << "StiDefaultHitErrorCalculator::loadDS(TDataSet & ds) -I- Done" <<endl;
 }
 
+//_____________________________________________________________________________
 ostream& operator<<(ostream& os, const StiDefaultHitErrorCalculator& c)
 {
   cout <<"Hit Error Parameters: "
@@ -182,19 +194,20 @@ ostream& operator<<(ostream& os, const StiDefaultHitErrorCalculator& c)
   return os;	
 }
 
-void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node) const
+//_____________________________________________________________________________
+void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node
+		                       ,double &ecross, double &edip) const
 {  
   double dz = (200.-fabs(node->getZ()))/100.;
   double cosCA = node->getCos();
   double sinCA = node->getSin();
-  if (cosCA==0.) cosCA=1.e-10;
+  if (cosCA<0.01) cosCA=0.01;
   double tanCA = sinCA/cosCA;
-  double ecross=coeff[0]+coeff[1]*dz/(cosCA*cosCA) +coeff[2]*tanCA*tanCA;
+         ecross=coeff[0]+coeff[1]*dz/(cosCA*cosCA) +coeff[2]*tanCA*tanCA;
   double tanDip=node->getTanL();
   double cosDipInv2=1+tanDip*tanDip;
-  double edip=coeff[3]+coeff[4]*dz*cosDipInv2+coeff[5]*tanDip*tanDip;
+         edip=coeff[3]+coeff[4]*dz*cosDipInv2+coeff[5]*tanDip*tanDip;
   if (ecross>50) ecross = 50.; 
   if (edip  >50) edip   = 50.; 
-  node->setError(ecross,edip);
 }
 
