@@ -1,11 +1,17 @@
-// $Id: StFtpcConfMapPoint.cc,v 1.1 2000/05/11 15:14:38 oldi Exp $
+// $Id: StFtpcConfMapPoint.cc,v 1.2 2000/06/07 09:51:01 oldi Exp $
 // $Log: StFtpcConfMapPoint.cc,v $
+// Revision 1.2  2000/06/07 09:51:01  oldi
+// Wrong setting in SetAllCoord(const StFtpcConfMapPoint *preceding_hit) in case
+// of this == preceding_hit changed. Tracking with no vertex constraint works now
+// poperly.
+// Introduced a workaround for the exit(-1) in SetAngles().
+//
 // Revision 1.1  2000/05/11 15:14:38  oldi
 // Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 11.05.2000
+//----------Last Modified: 07.06.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcConfMapPoint.hh"
@@ -13,7 +19,7 @@
 /////////////////////////////////////////////////////////////////////////////////////
 //                                                                                 //
 // StFtpcConfMapPoint class - representation of one cluster for the conformal      //
-//                          mapping track algorithm.                               //
+//                            mapping track algorithm.                             //
 //                                                                                 //
 // This class inherits all data members from StFtpcPoint which are the output      //
 // of the FTPC cluster finder. Additionally it provides some data members and      //
@@ -79,7 +85,7 @@ void StFtpcConfMapPoint::Setup(StFtpcVertex *vertex)
 
 
 void StFtpcConfMapPoint::SetIntPoint(const Double_t in_x,     const Double_t in_y,     const Double_t in_z,
-				   const Double_t in_x_err, const Double_t in_y_err, const Double_t in_z_err)
+				     const Double_t in_x_err, const Double_t in_y_err, const Double_t in_z_err)
 {
   // Defines a new interaction point. This point is needed to calculate
   // the conformal coordinates. 
@@ -102,8 +108,8 @@ void StFtpcConfMapPoint::SetAllCoord(const StFtpcConfMapPoint *preceding_hit)
   // already found cluster on the same track.
   
   if (this == preceding_hit) {
-    SetIntPoint(preceding_hit->GetXv(),    preceding_hit->GetYv(),    preceding_hit->GetZv(),
-		preceding_hit->GetXverr(), preceding_hit->GetYverr(), preceding_hit->GetZverr());
+    SetIntPoint(preceding_hit->GetX(),    preceding_hit->GetY(),    preceding_hit->GetZ(),
+		preceding_hit->GetXerr(), preceding_hit->GetYerr(), preceding_hit->GetZerr());
   }
   
   else {  
@@ -113,7 +119,7 @@ void StFtpcConfMapPoint::SetAllCoord(const StFtpcConfMapPoint *preceding_hit)
   
   SetShiftedCoord();
   SetConfCoord();
-  
+
   return;
 }
 
@@ -165,27 +171,29 @@ void StFtpcConfMapPoint::SetAngles()
   // Calculates the angle phi and the pseudorapidity eta for each cluster.
   // So to say this is just a transformation of the coordinate system.
   
-  Double_t r2dim = TMath::Sqrt(mXv*mXv + mYv*mYv);
   Double_t r3dim = TMath::Sqrt(mXv*mXv + mYv*mYv + mZv*mZv);
-  
-  if (r2dim) {
-    
-    if (mXv == 0.) 
-      mPhi = (mYv > 0.) ? TMath::Pi() / 2. : - TMath::Pi() / 2.;
-    
-    else 
-      mPhi = (mXv > 0.) ? TMath::ASin(mYv/r2dim) : TMath::Pi() - TMath::ASin(mYv/r2dim);
-    
-    if (mPhi < 0.) 
-      mPhi += 2. * TMath::Pi();
-    
-    mEta = 0.5 * TMath::Log((r3dim + mZv)/(r3dim - mZv));
+  Double_t r2dim = TMath::Sqrt(mXv*mXv + mYv*mYv);
+
+  if (r2dim == 0.) {
+  // If r2dim == 0 the pseudorapidity eta cannot be calculated (division by zero)!
+  // This can only happen if the point is lying on the z-axis and this should never be possible.
+    cerr << "The pseudorapidity eta cannot be calculated (division by zero)! Set to 1.e-10." << endl;
+    r2dim = 1.e-10;
   }
   
+  if (mXv == 0.) {
+    mPhi = (mYv > 0.) ? TMath::Pi() / 2. : - TMath::Pi() / 2.;
+  }
+
   else {
-    cout << "The pseudorapidity eta cannot be calculated (division by zero)!" << endl;
-    exit(-1);
+    mPhi = (mXv > 0.) ? TMath::ASin(mYv/r2dim) : TMath::Pi() - TMath::ASin(mYv/r2dim);
   }
-  
+
+  if (mPhi < 0.) {
+    mPhi += 2. * TMath::Pi();
+  }
+
+  mEta = 0.5 * TMath::Log((r3dim + mZv)/(r3dim - mZv));
+
   return;
 }
