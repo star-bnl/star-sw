@@ -20,6 +20,7 @@ public:
   virtual void EventEnd(const StHbtEvent*) { /* no-op */ }
   void SetQuality(const float, const float );
   void SetKt(const float, const float );
+  void SetPt(const float, const float );
   void SetOpeningAngle(const float, const float );
   void SetEntranceSeparation(const float, const float );
   void SetRapidity(const float, const float );
@@ -43,6 +44,7 @@ public:
   int mIdenticalMother;
   float mQuality[2];
   float mKt[2];
+  float mPt[2];
   float mRapidity[2];
   float mEta[2];
   float mQinv[2];
@@ -65,6 +67,7 @@ public:
 
 inline void franksPairCut::SetQuality(const float x, const float y) { mQuality[0]=x; mQuality[1]=y; }
 inline void franksPairCut::SetKt(const float x, const float y) { mKt[0]=x; mKt[1]=y; }
+inline void franksPairCut::SetPt(const float x, const float y) { mPt[0]=x; mPt[1]=y; }
 inline void franksPairCut::SetOpeningAngle(const float x, const float y) { mOpeningAngle[0]=x; mOpeningAngle[1]=y; }
 inline void franksPairCut::SetRapidity(const float x, const float y) { mRapidity[0]=x; mRapidity[1]=y; }
 inline void franksPairCut::SetEta(const float x, const float y) { mEta[0]=x; mEta[1]=y; }

@@ -15,6 +15,7 @@ ClassImp(franksPairCut)
   franksPairCut::franksPairCut() /* : mResonanceInfoOn(false) */ {
   mQuality[0] = -1.; mQuality[1] = +1.;
   mKt[0] = -1e9; mKt[1]= +1e9;
+  mPt[0] = -1e9; mPt[1]= +1e9;
   mOpeningAngle[0] = -1e9; mOpeningAngle[1]= +1e9;
   mRapidity[0] = -1e9; mRapidity[1]= +1e9;
   mEta[0] = -1e9; mEta[1]= +1e9;
@@ -38,6 +39,8 @@ franksPairCut::franksPairCut(const franksPairCut& c) : StHbtPairCut(c) /* :  ,  
   mQuality[1] = c.mQuality[1];
   mKt[0] = c.mKt[0];
   mKt[1] = c.mKt[1];
+  mPt[0] = c.mPt[0];
+  mPt[1] = c.mPt[1];
   mOpeningAngle[0] = c.mOpeningAngle[0];
   mOpeningAngle[1] = c.mOpeningAngle[1];
   mQinv[0] = c.mQinv[0];
@@ -61,51 +64,53 @@ franksPairCut::franksPairCut(const franksPairCut& c) : StHbtPairCut(c) /* :  ,  
 //__________________
 //franksPairCut::~franksPairCut(){
 //  /* no-op */
-//}
+//}  
 //__________________
 bool franksPairCut::Pass(const StHbtPair* pair){
   if ( !(pair->quality() >= mQuality[0]  && pair->quality() <= mQuality[1] ) ) 
-    leave(false);
+    return leave(false);
   if ( !(pair->kT() >= mKt[0]  && pair->kT() <= mKt[1] ) ) 
-    leave(false);
+    return leave(false);
+  if ( !(pair->fourMomentumSum().perp() >= mPt[0]  && pair->fourMomentumSum().perp() <= mPt[1] ) ) 
+    return leave(false);
   if ( !(pair->OpeningAngle() >= mOpeningAngle[0]  && pair->OpeningAngle() <= mOpeningAngle[1] )  ) 
-    leave(false);
+    return leave(false);
   if ( !(pair->fourMomentumSum().rapidity() >= mRapidity[0]  && pair->fourMomentumSum().rapidity() <= mRapidity[1]) ) 
-    leave(false);
+    return leave(false);
   if ( !(pair->fourMomentumSum().pseudoRapidity() >= mEta[0]  && pair->fourMomentumSum().pseudoRapidity() <= mEta[1] )  ) 
-    leave(false);
+    return leave(false);
   if ( !(fabs(pair->qInv()) >= mQinv[0]  && fabs(pair->qInv()) <= mQinv[1])  ) 
-    leave(false);
+    return leave(false);
   if ( !(pair->NominalTpcEntranceSeparation() >= mEntranceSeparation[0]  && pair->NominalTpcEntranceSeparation() <= mEntranceSeparation[1] )
-       ) leave(false);
+       ) return leave(false);
   
-//   if (mResonanceInfoOn) {
-//     //    cout << " fix this " << endl; 
-//     pair->CalculateResonanceInfo(&mPrimaryVertex, 0.25*tesla);
-//     //    cout << " mDecayLength "  << pair->ResonanceInfo()->mDecayLength << endl;
-//     if ( !(pair->ResonanceInfo()->mDecayLength >= mDecayLength[0]  && 
-// 	   pair->ResonanceInfo()->mDecayLength <= mDecayLength[1]) ) 
-//       leave(false);
-//     //    cout << " mDcaOfDaughters "  << pair->ResonanceInfo()->mDcaOfDaughters << endl;
-//     if ( !(pair->ResonanceInfo()->mDcaOfDaughters >= mDcaOfDaughters[0]  && 
-// 	   pair->ResonanceInfo()->mDcaOfDaughters <= mDcaOfDaughters[1]) ) 
-//       leave(false);
+  /*if (mResonanceInfoOn) {
+    //cout << " fix this " << endl; 
+    pair->CalculateResonanceInfo(&mPrimaryVertex, 0.25*tesla);
+    //cout << " mDecayLength "  << pair->ResonanceInfo()->mDecayLength << endl;
+    if ( !(pair->ResonanceInfo()->mDecayLength >= mDecayLength[0]  && 
+	   pair->ResonanceInfo()->mDecayLength <= mDecayLength[1]) ) 
+      return leave(false);
+    //cout << " mDcaOfDaughters "  << pair->ResonanceInfo()->mDcaOfDaughters << endl;
+    if ( !(pair->ResonanceInfo()->mDcaOfDaughters >= mDcaOfDaughters[0]  && 
+	   pair->ResonanceInfo()->mDcaOfDaughters <= mDcaOfDaughters[1]) ) 
+      return leave(false);
     
-//     //    cout << "mAngleToPrimaryVertex " << pair->ResonanceInfo()->mAngleToPrimaryVertex << endl;
-//     if ( !(pair->ResonanceInfo()->mAngleToPrimaryVertex >= mAngleToPrimaryVertex[0]  && 
-// 	   pair->ResonanceInfo()->mAngleToPrimaryVertex <= mAngleToPrimaryVertex[1]) ) 
-//       leave(false);
+    //cout << "mAngleToPrimaryVertex " << pair->ResonanceInfo()->mAngleToPrimaryVertex << endl;
+    if ( !(pair->ResonanceInfo()->mAngleToPrimaryVertex >= mAngleToPrimaryVertex[0]  && 
+	   pair->ResonanceInfo()->mAngleToPrimaryVertex <= mAngleToPrimaryVertex[1]) ) 
+      return leave(false);
     
-//     //    cout << "mDcaToPrimaryVertex " << pair->ResonanceInfo()->mDcaToPrimaryVertex << endl;
-//     if ( !(pair->ResonanceInfo()->mDcaToPrimaryVertex >= mDcaToPrimaryVertex[0]  && 
-// 	   pair->ResonanceInfo()->mDcaToPrimaryVertex <= mDcaToPrimaryVertex[1]) ) 
-//       leave(false);
+    //cout << "mDcaToPrimaryVertex " << pair->ResonanceInfo()->mDcaToPrimaryVertex << endl;
+    if ( !(pair->ResonanceInfo()->mDcaToPrimaryVertex >= mDcaToPrimaryVertex[0]  && 
+	   pair->ResonanceInfo()->mDcaToPrimaryVertex <= mDcaToPrimaryVertex[1]) ) 
+      return leave(false);
     
-//   }
+	   }*/
 
   if (mIdenticalMother)
     if(  !((int)(pair->track1()->TrackId()/__2POWER16__) != (int)(pair->track2()->TrackId()/__2POWER16__) ) ) 
-      leave(false);
+      return leave(false);
   
   return leave(true);
 }
@@ -125,6 +130,8 @@ StHbtString franksPairCut::Report(){
   sprintf(Ctemp,"quality: %f  -- %f\n",mQuality[0],mQuality[1]);
   Stemp += Ctemp;
   sprintf(Ctemp,"kT: %f  -- %f\n",mKt[0],mKt[1]);
+  Stemp += Ctemp;
+  sprintf(Ctemp,"pT: %f  -- %f\n",mPt[0],mPt[1]);
   Stemp += Ctemp;
   sprintf(Ctemp,"opening angle: %f  -- %f\n",mOpeningAngle[0],mOpeningAngle[1]);
   Stemp += Ctemp;
