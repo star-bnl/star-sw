@@ -27,6 +27,7 @@ C
      +,			      tpmcpixh, tpmcpix 
      +,			      pad_planeh, pad_plane
      +,			      detectorh, detector,
+     +	                      tclpar_h, tclpar,
      +                        tpc_indexh, tpc_index,
      +                        tpc_index_typeh, tpc_index_type)
 
@@ -38,8 +39,23 @@ C     tphith:
 C     tphit:
 C
 C   Output arguments : 
-C     None: this module fills a hit data ntuple for subsequent
-C           analysis
+c
+c	Output is the tpc_index table, used for correlating MC and
+c	  reconstructed hits.
+c
+c	Also, the following ntuples used for diagnostics
+c	  300+event# "Compare Info": MC and Rec hit positions, uncertainties
+c	  400+event# "Track Info": Not really used
+c	  500+event# "Hit Pixel Info": x,z,adc,cluster#,row for pixels
+c	  600+event# "Local Hit Info": local x,z,hit#,cluster#,row for recon hits
+c	  650+event# "Local MC Hit Info": local x,z,MCtrack#,row for MC hits
+c
+c       And the following histograms
+c	  1100+event# "MC Neighbor Distance- Inner"
+c	  1200+event# "MC Neighbor Distance- Outer"
+c	  2100+event# "Rec Neighbor Distance- Inner"
+c	  2200+event# "Rec Neighbor Distance- Outer"
+c
 C
 C   Functional Description : 
 C
@@ -63,11 +79,16 @@ C   24mar95 malisa
 C       - now unpack data in the new way
 C	  datum = adc+'1000'X*tdc+'1000000'X*numseq
 c
-c   8mar95 malisa
+c   8mar96 malisa
 c       - code upgraded to interface with new geant scheme (gstar)
 c         as well as new geometry routines tgc.
 c       - old code (that works with mct and tpg) is at tpeam.F.pre_gstar
 C
+c   23may96 malisa
+c	- now fill pixel visualization ntuples even when we deal with
+c	  real data (requires reading tclpar to know if it is a MC event or
+c	  not) So need fill ntuples 300,500,600
+c
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
@@ -103,6 +124,9 @@ C-----------------------------------------------------------------------
 #include "tpg_detector_pars.inc"
 #include "tpg_detector_st.inc"
 
+#include "tcl_tclpar_pars.inc"
+#include "tcl_tclpar_st.inc"
+
 #include "tcl_tpc_index_pars.inc"
 #include "tcl_tpc_index_st.inc"
 
@@ -137,6 +161,9 @@ C-----------------------------------------------------------------------
       
       RECORD/ table_head_st/ detectorh
       RECORD/ detector_row_st/ detector(*)
+
+      RECORD/ table_head_st/ tclpar_h
+      RECORD/ tclpar_row_st/ tclpar(*)
 
       RECORD/ table_head_st/ tpc_indexh
       RECORD/ tpc_index_row_st/ tpc_index(*)
@@ -325,22 +352,120 @@ c ntuple 200 as defined has no more information than the hits table...
 *     +           chtags)
          call hbookn(300+ihisto,'Compare Info',nvar2,'NTUP',27000,
      +              chtags2)
-         call hbookn(400+ihisto,'Track Info',nvar3,'NTUP',4000,
-     +              chtags3)
+         if (tclpar(1).mc.eq.1)
+     +        call hbookn(400+ihisto,'Track Info',nvar3,'NTUP',4000,
+     +        chtags3)
          call hbookn(500+ihisto,'Hit Pixel Info',nvar4,'NTUP',5000,
      +              chtags4)
          call hbookn(600+ihisto,'LOCAL Hit Info',nvar5,'NTUP',5000,
      +              chtags5)
-         call hbookn(650+ihisto,'LOCAL MC Hit Info',nvar6,'NTUP',4000,
-     +              chtags6)
-         call hbook2(1100+ihisto,'MC Neighbor Distance -Inner',
-     +              40,0.0,5.0,40,0.0,5.0,-1.0)
-         call hbook2(1200+ihisto,'MC Neighbor Distance -Outer',
-     +              40,0.0,5.0,40,0.0,5.0,-1.0)
+         if (tclpar(1).mc.eq.1) 
+     +        call hbookn(650+ihisto,'LOCAL MC Hit Info',nvar6,'NTUP',4000,
+     +        chtags6)
+         if (tclpar(1).mc.eq.1)  then
+            call hbook2(1100+ihisto,'MC Neighbor Distance -Inner',
+     +           40,0.0,5.0,40,0.0,5.0,-1.0)
+            call hbook2(1200+ihisto,'MC Neighbor Distance -Outer',
+     +           40,0.0,5.0,40,0.0,5.0,-1.0)
+         endif
          call hbook2(2100+ihisto,'Rec Neighbor Distance -Inner',
      +              40,0.0,5.0,40,0.0,5.0,-1.0)
          call hbook2(2200+ihisto,'Rec Neighbor Distance -Outer',
      +              40,0.0,5.0,40,0.0,5.0,-1.0)
+
+c********** 23may96 * if this is real data, then things are simpler
+c******************** we only want visualization ntuples 500,300,600
+         icycle = 0
+         if (tclpar(1).mc.eq.0) then
+c fill ntuple 500 = pixel information
+            do kclus=1,tpclusterh.nok
+               vec(4)=kclus
+               nseq_hit=tpcluster(kclus).nseq
+               ktpc_row=tpcluster(kclus).tpc_row
+               ksector = ktpc_row/100
+               krow = ktpc_row - ksector*100
+               
+               vec(5) = ktpc_row
+               kseq = tpcluster(kclus).jseq
+*     
+               do kseq_count=1,nseq_hit
+                  kpad = tpseq(kseq).secpad
+                  kstatus=tgc_pad_to_x(float(kpad),float(krow),
+     +                 vec(1),pad_planeh,pad_plane)
+                  kpix = tpseq(kseq).jpix
+                  kdatum=tppixel(kpix).datum
+                  numpix_seq=kdatum/numpix_factor ! 24mar95 malisa
+                  do kpix_count=1,numpix_seq
+                     kdatum=tppixel(kpix).datum
+                     ktdc = (kdatum - numpix_factor*numpix_seq)/tdc_factor
+                     kadc = kdatum - numpix_factor*numpix_seq - 
+     +                    tdc_factor*ktdc
+                     ktdc = ktdc+1 ! first bucket is coded as tdc=0
+                     kmcid = tpmcpix(kpix).mcid
+                     vec(3)=kadc
+                     vec(2) = ktdc*time_bucket
+                     call hfn(500+ihisto,vec)
+                     kpix=kpix+1
+                  enddo
+                  kseq = tpseq(kseq).next
+               enddo
+            enddo
+            call hrout(500+ihisto,icycle,' ')
+c fill a much simpler version of ntuple 300, containing no correlation to MC data...
+            do ihit_recon=1,tphith.nok
+               vec(1) = tphit(ihit_recon).track ! may be useful some day even w/o MC
+               vec(2) = 0.0
+               vec(3) = 0.0
+               vec(4) = 0.0
+               vec(5) = tphit(ihit_recon).x
+               vec(6) = tphit(ihit_recon).y
+               vec(7) = tphit(ihit_recon).z
+               vec(8) = 0.0
+               vec(9) = 0.0
+               vec(10) = 0.0
+               vec(11) = tphit(ihit_recon).row
+               kclus = tphit(ihit_recon).cluster
+               vec(12) = kclus
+               vec(13) = tpcluster(kclus).nseq
+               vec(14) = tphit(ihit_recon).dx
+               vec(15) = tphit(ihit_recon).dy
+               vec(16) = tphit(ihit_recon).dz
+               vec(17) = 0      ! mc hit
+               vec(18) = 0      ! nmc hit
+               vec(19) = tphit(ihit_recon).phi
+               vec(20) = tphit(ihit_recon).lambda
+               vec(21) = 0.0    ! mc alpha
+               vec(22) = tphit(ihit_recon).alpha
+               vec(23) = tphit(ihit_recon).id
+               vec(24) = tphit(ihit_recon).flag
+               vec(25) = tphit(ihit_recon).q
+               vec(26) = tphit(ihit_recon).prf
+               vec(27) = 0.0    ! mc lambda
+               call hfn(300+ihisto,vec)
+            enddo
+            call hrout(300+ihisto,icycle,' ')
+c fill ntuple 600, local hit information
+            do khit=1,tphith.nok
+               vec(3) = tphit(khit).id
+               kclus = tphit(khit).cluster
+               vec(4) = kclus
+               invec(1) = tphit(khit).x
+               invec(2) = tphit(khit).y
+               invec(3) = tphit(khit).z
+               ktpc_row = tpcluster(kclus).tpc_row
+               vec(5) = tphit(khit).row
+               ksector = ktpc_row/100
+               krow = ktpc_row - ksector*100
+               kstatus=tgc_global_to_local(ksector,invec,outvec)
+               vec(1) = outvec(1)
+               vec(2) = outvec(3)
+               call hfn(600+ihisto,vec)
+            enddo
+            call hrout(600+ihisto,icycle,' ')
+            call hrend('NTUP')
+            close(23)
+            return
+         endif
 
 c clear overall pointer list numbers...
          do isect=1,24
