@@ -19,7 +19,7 @@
 // * purpose.  It is provided "as is" without express or implied warranty.
 // ************************************************************************
 
-// $Id: St_DataSet.h,v 1.41 2000/01/12 18:07:23 fine Exp $
+// $Id: St_DataSet.h,v 1.42 2000/01/23 20:57:50 fine Exp $
 #ifndef ROOT_St_DataSet
 #define ROOT_St_DataSet
  
@@ -150,6 +150,7 @@ class St_DataSet : public TNamed
     virtual Int_t        Streamer(StBufferAbc &R__b);
     virtual void         Update();                            // Update dataset
     virtual void         Update(St_DataSet *set,UInt_t opt=0);// Update this dataset with the new one
+    virtual void         Write(const Text_t *name=0, Int_t option=0, Int_t bufsize=0);
     ClassDef(St_DataSet,1)
 };
 
@@ -163,8 +164,11 @@ inline void        St_DataSet::UnMark()   { Mark(kMark,kReset); }
 inline void        St_DataSet::Mark(UInt_t flag,EBitOpt reset){ SetBit(flag,reset); }
 
 // $Log: St_DataSet.h,v $
+// Revision 1.42  2000/01/23 20:57:50  fine
+// methods St_DataSet:Remove have been fixed for the structural members
+//
 // Revision 1.41  2000/01/12 18:07:23  fine
-// cvs symbols have been added and copyright class introduced
+//  cvs symbols have been added and copyright class introduced
 //
 // Revision 1.40  1999/11/10 00:49:25  fine
 // comment was changed
