@@ -1,14 +1,14 @@
 /***************************************************************************
  *
- * $Id: StHbtTypes.hh,v 1.14 2001/06/21 19:15:48 laue Exp $
+ * $Id: StHbtEnumeration.hh,v 1.1 2001/06/21 19:15:45 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************
  *
  ***************************************************************************
  *
- * $Log: StHbtTypes.hh,v $
- * Revision 1.14  2001/06/21 19:15:48  laue
+ * $Log: StHbtEnumeration.hh,v $
+ * Revision 1.1  2001/06/21 19:15:45  laue
  * Modified fiels:
  *   CTH.hh : new constructor added
  *   StHbtEvent, StHbtKink, StHbtTrack : constructors from the persistent
@@ -24,16 +24,14 @@
  *
  *
  ***************************************************************************/
+#ifndef StHbtEnumeration_hh
+#define StHbtEnumeration_hh
 
-// 
-// I split this up into different files, so that I do not have to 
-// load/recompile everything all over again.
-//
+#ifdef __CINT__
+#pragma link C++ enum StHbtParticleType;
+#pragma link C++ enum StHbtIOMode;
+#endif
+enum StHbtParticleType {hbtUndefined, hbtTrack, hbtV0, hbtKink};
+enum StHbtIOMode {hbtRead, hbtWrite};
 
-#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
-#include "StHbtMaker/Infrastructure/StHbtString.hh"
-#include "StHbtMaker/Infrastructure/StHbtVector.hh"
-#include "StHbtMaker/Infrastructure/StHbtHelix.hh"
-#include "StHbtMaker/Infrastructure/StHbtEnumeration.hh"
-
-
+#endif

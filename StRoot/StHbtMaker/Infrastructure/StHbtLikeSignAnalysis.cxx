@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtLikeSignAnalysis.cxx,v 1.1 2000/09/01 17:47:36 laue Exp $
+ * $Id: StHbtLikeSignAnalysis.cxx,v 1.2 2001/06/21 19:15:46 laue Exp $
  *
  * Author: Frank Laue, Ohio State, Laue@mps.ohio-state.edu
  ***************************************************************************
@@ -16,6 +16,9 @@
 #include "StHbtMaker/Infrastructure/StHbtParticleCollection.hh"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 #include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "StHbtMaker/Infrastructure/StHbtPicoEventCollectionVector.hh"
+#include "StHbtMaker/Infrastructure/StHbtPicoEventCollectionVectorHideAway.hh"
+#include <iostream>
 
 #ifdef __ROOT__ 
 ClassImp(StHbtLikeSignAnalysis)
@@ -29,25 +32,46 @@ extern void FillHbtParticleCollection(StHbtParticleCut*         partCut,
 				     StHbtEvent*               hbtEvent,
 				     StHbtParticleCollection*  partCollection);
 
-
+ 
 //____________________________
-StHbtLikeSignAnalysis::StHbtLikeSignAnalysis() : StHbtAnalysis() {
+StHbtLikeSignAnalysis::StHbtLikeSignAnalysis(unsigned int bins, double min, double max) : StHbtAnalysis() {
+  mVertexBins = bins;
+  mVertexZ[0] = min;
+  mVertexZ[1] = max;
+  mUnderFlow = 0; 
+  mOverFlow = 0; 
+  if (mMixingBuffer) delete mMixingBuffer;
+  mPicoEventCollectionVectorHideAway = new StHbtPicoEventCollectionVectorHideAway(mVertexBins,mVertexZ[0],mVertexZ[1]);
     /* no-op */
 }
 //____________________________
-
 StHbtLikeSignAnalysis::StHbtLikeSignAnalysis(const StHbtLikeSignAnalysis& a) : StHbtAnalysis(a) {
-    /* no-op */
-}
-//____________________________
+  mVertexBins = a.mVertexBins; 
+  mVertexZ[0] = a.mVertexZ[0]; 
+  mVertexZ[1] = a.mVertexZ[1];
+  mUnderFlow = 0; 
+  mOverFlow = 0; 
+  if (mMixingBuffer) delete mMixingBuffer;
+  mPicoEventCollectionVectorHideAway = new StHbtPicoEventCollectionVectorHideAway(mVertexBins,mVertexZ[0],mVertexZ[1]);
+ }
+//____________________________ 
 StHbtLikeSignAnalysis::~StHbtLikeSignAnalysis(){
-    /* no-op */
+  delete mPicoEventCollectionVectorHideAway; mPicoEventCollectionVectorHideAway=0;
 }
 //____________________________
 StHbtString StHbtLikeSignAnalysis::Report()
-{
+{  
+  char Ctemp[200];
   cout << "StHbtLikeSignAnalysis - constructing Report..."<<endl;
-  string temp = "-----------\nHbt Analysis Report:\n";
+  StHbtString temp = "-----------\nHbt Analysis Report:\n";
+  sprintf(Ctemp,"Events are mixed in %d bins in the range %E cm to %E cm.\n",mVertexBins,mVertexZ[0],mVertexZ[1]);
+  temp += Ctemp;
+  sprintf(Ctemp,"Events underflowing: %d\n",mUnderFlow);
+  temp += Ctemp;
+  sprintf(Ctemp,"Events overflowing: %d\n",mOverFlow);
+  temp += Ctemp;
+  sprintf(Ctemp,"Now adding StHbtAnalysis(base) Report\n");
+  temp += Ctemp; 
   temp += "Adding StHbtAnalysis(base) Report now:\n";
   temp += StHbtAnalysis::Report();
   temp += "-------------\n";
@@ -56,20 +80,30 @@ StHbtString StHbtLikeSignAnalysis::Report()
 }
 //_________________________
 void StHbtLikeSignAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
+  // get right mixing buffer
+  double vertexZ = hbtEvent->PrimVertPos().z();
+  mMixingBuffer = mPicoEventCollectionVectorHideAway->PicoEventCollection(vertexZ); 
+  if (!mMixingBuffer) {
+    if ( vertexZ < mVertexZ[0] ) mUnderFlow++;
+    if ( vertexZ > mVertexZ[1] ) mOverFlow++;
+    return;
+  }
+
   // startup for EbyE 
   EventBegin(hbtEvent);  
   // event cut and event cut monitor
   bool tmpPassEvent = mEventCut->Pass(hbtEvent);
   mEventCut->FillCutMonitor(hbtEvent, tmpPassEvent);
   if (tmpPassEvent) {
-    cout << "StHbtLikeSignAnalysis::ProcessEvent() - Event has passed cut - build picoEvent from " <<
-      hbtEvent->TrackCollection()->size() << " tracks in TrackCollection" << endl;
+      mNeventsProcessed++;
+      cout << "StHbtLikeSignAnalysis::ProcessEvent() - " << hbtEvent->TrackCollection()->size();
+      cout << " #track=" << hbtEvent->TrackCollection()->size();
       // OK, analysis likes the event-- build a pico event from it, using tracks the analysis likes...
       StHbtPicoEvent* picoEvent = new StHbtPicoEvent;       // this is what we will make pairs from and put in Mixing Buffer
       FillHbtParticleCollection(mFirstParticleCut,(StHbtEvent*)hbtEvent,picoEvent->FirstParticleCollection());
       if ( !(AnalyzeIdenticalParticles()) )
 	FillHbtParticleCollection(mSecondParticleCut,(StHbtEvent*)hbtEvent,picoEvent->SecondParticleCollection());
-      cout <<"StHbtLikeSignAnalysis::ProcessEvent() - #particles in First, Second Collections: " <<
+      cout <<"   #particles in First, Second Collections: " <<
 	picoEvent->FirstParticleCollection()->size() << " " <<
 	picoEvent->SecondParticleCollection()->size() << endl;
       
@@ -119,7 +153,9 @@ void StHbtLikeSignAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 	  }  // if passed pair cut
 	}    // loop over second particle
       }      // loop over first particle
+#ifdef STHBTDEBUG
       cout << "StHbtLikeSignAnalysis::ProcessEvent() - reals done" << endl;
+#endif
 
       StHbtParticleIterator nextIter;
       StHbtParticleIterator prevIter;
@@ -147,8 +183,9 @@ void StHbtLikeSignAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 	  }  // if passed pair cut
 	}    // loop over second particle
       }      // loop over first particle
+#ifdef STHBTDEBUG
       cout << "StHbtLikeSignAnalysis::ProcessEvent() - like sign first collection done" << endl;
-
+#endif
       // like sign second partilce collection pairs
       prevIter = EndInnerLoop;
       prevIter--;
@@ -172,11 +209,14 @@ void StHbtLikeSignAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 	  }  // if passed pair cut
 	}    // loop over second particle
       }      // loop over first particle
+#ifdef STHBTDEBUG
       cout << "StHbtLikeSignAnalysis::ProcessEvent() - like sign second collection done" << endl;
-
+#endif
       
       if (MixingBufferFull()){
+#ifdef STHBTDEBUG
 	cout << "Mixing Buffer is full - lets rock and roll" << endl;
+#endif
       }
       else {
 	cout << "Mixing Buffer not full -gotta wait " << MixingBuffer()->size() << endl;
@@ -217,16 +257,14 @@ void StHbtLikeSignAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 	}        // loop over pico-events stored in Mixing buffer
 	// Now get rid of oldest stored pico-event in buffer.
 	// This means (1) delete the event from memory, (2) "pop" the pointer to it from the MixingBuffer
-	picoEventIter = MixingBuffer()->end();
-	picoEventIter--;   // bug fixed malisa 27jul99 - end() is one BEYOND the end! (besides crashing on linux, this was a memory leak)
-	delete *picoEventIter;
+	delete MixingBuffer()->back();
 	MixingBuffer()->pop_back();
       }  // if mixing buffer is full
       delete ThePair;
       MixingBuffer()->push_front(picoEvent);  // store the current pico-event in buffer
     }   // if currentEvent is accepted by currentAnalysis
     EventEnd(hbtEvent);  // cleanup for EbyE 
-    cout << "StHbtLikeSignAnalysis::ProcessEvent() - return to caller ... " << endl;
+    //    cout << "StHbtLikeSignAnalysis::ProcessEvent() - return to caller ... " << endl;
 }
 
 

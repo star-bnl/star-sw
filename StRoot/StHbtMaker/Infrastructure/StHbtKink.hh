@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StHbtKink.hh,v 1.1 2001/05/25 23:23:59 lisa Exp $
+ * $Id: StHbtKink.hh,v 1.2 2001/06/21 19:15:46 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, 23May2001
  *
@@ -12,6 +12,20 @@
  ***********************************************************************
  *
  * $Log: StHbtKink.hh,v $
+ * Revision 1.2  2001/06/21 19:15:46  laue
+ * Modified fiels:
+ *   CTH.hh : new constructor added
+ *   StHbtEvent, StHbtKink, StHbtTrack : constructors from the persistent
+ *                                   (TTree) classes added
+ *   StHbtLikeSignAnalysis : minor changes, for debugging
+ *   StHbtTypes: split into different files
+ * Added files: for the new TTree muDst's
+ *   StExceptions.cxx StExceptions.hh StHbtEnumeration.hh
+ *   StHbtHelix.hh StHbtHisto.hh StHbtString.hh StHbtTFile.hh
+ *   StHbtTTreeEvent.cxx StHbtTTreeEvent.h StHbtTTreeKink.cxx
+ *   StHbtTTreeKink.h StHbtTTreeTrack.cxx StHbtTTreeTrack.h
+ *   StHbtTTreeV0.cxx StHbtTTreeV0.h StHbtVector.hh
+ *
  * Revision 1.1  2001/05/25 23:23:59  lisa
  * Added in StHbtKink stuff
  *
@@ -22,6 +36,8 @@
 #define StHbtKink_hh
 
 class StKinkVertex;
+class StHbtTTreeEvent;
+class StHbtTTreeKink;
 //#include "StEvent/StKinkVertex.h"  // from StEvent
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 
@@ -34,6 +50,7 @@ public:
   StHbtKink( const StHbtKink&); // copy constructor
 #ifdef __ROOT__
   StHbtKink( const StKinkVertex&, StHbtThreeVector PrimaryVertex); // create a StHbtKink from a StKinkVertex
+  StHbtKink( const StHbtTTreeEvent*, const StHbtTTreeKink*); 
 #endif
   ~StHbtKink(){/* no-op */}
 
@@ -55,6 +72,7 @@ public:
   friend istream& operator>>(istream& in,  StHbtKink& kink);
 
   friend class StHbtIOBinary;
+  friend class StHbtTTreeKink;
 
 protected:
 

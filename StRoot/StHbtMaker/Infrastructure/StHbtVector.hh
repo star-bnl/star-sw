@@ -1,14 +1,14 @@
 /***************************************************************************
  *
- * $Id: StHbtTypes.hh,v 1.14 2001/06/21 19:15:48 laue Exp $
+ * $Id: StHbtVector.hh,v 1.1 2001/06/21 19:15:48 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************
  *
  ***************************************************************************
  *
- * $Log: StHbtTypes.hh,v $
- * Revision 1.14  2001/06/21 19:15:48  laue
+ * $Log: StHbtVector.hh,v $
+ * Revision 1.1  2001/06/21 19:15:48  laue
  * Modified fiels:
  *   CTH.hh : new constructor added
  *   StHbtEvent, StHbtKink, StHbtTrack : constructors from the persistent
@@ -24,16 +24,10 @@
  *
  *
  ***************************************************************************/
-
-// 
-// I split this up into different files, so that I do not have to 
-// load/recompile everything all over again.
-//
-
-#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
-#include "StHbtMaker/Infrastructure/StHbtString.hh"
-#include "StHbtMaker/Infrastructure/StHbtVector.hh"
-#include "StHbtMaker/Infrastructure/StHbtHelix.hh"
-#include "StHbtMaker/Infrastructure/StHbtEnumeration.hh"
-
-
+#ifndef StHbtVector_hh
+#define StHbtVector_hh
+#include "StThreeVectorD.hh"
+typedef StThreeVectorD StHbtThreeVector;//!
+#include "StLorentzVectorD.hh"
+typedef StLorentzVectorD StHbtLorentzVector;//!
+#endif

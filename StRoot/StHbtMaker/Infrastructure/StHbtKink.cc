@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StHbtKink.cc,v 1.1 2001/05/25 23:23:59 lisa Exp $
+ * $Id: StHbtKink.cc,v 1.2 2001/06/21 19:15:46 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, 23May2001
  *
@@ -12,6 +12,20 @@
  ***********************************************************************
  *
  * $Log: StHbtKink.cc,v $
+ * Revision 1.2  2001/06/21 19:15:46  laue
+ * Modified fiels:
+ *   CTH.hh : new constructor added
+ *   StHbtEvent, StHbtKink, StHbtTrack : constructors from the persistent
+ *                                   (TTree) classes added
+ *   StHbtLikeSignAnalysis : minor changes, for debugging
+ *   StHbtTypes: split into different files
+ * Added files: for the new TTree muDst's
+ *   StExceptions.cxx StExceptions.hh StHbtEnumeration.hh
+ *   StHbtHelix.hh StHbtHisto.hh StHbtString.hh StHbtTFile.hh
+ *   StHbtTTreeEvent.cxx StHbtTTreeEvent.h StHbtTTreeKink.cxx
+ *   StHbtTTreeKink.h StHbtTTreeTrack.cxx StHbtTTreeTrack.h
+ *   StHbtTTreeV0.cxx StHbtTTreeV0.h StHbtVector.hh
+ *
  * Revision 1.1  2001/05/25 23:23:59  lisa
  * Added in StHbtKink stuff
  *
@@ -78,5 +92,26 @@ StHbtKink::StHbtKink( const StKinkVertex& SKV, StHbtThreeVector PrimaryVertex )
   mPosition.setZ(SKV.position().z());
 
 }
+
+#include "StHbtMaker/Infrastructure/StHbtTTreeEvent.h"
+#include "StHbtMaker/Infrastructure/StHbtTTreeKink.h"
+#include "StHbtMaker/Infrastructure/StHbtTTreeTrack.h"
+StHbtKink::StHbtKink( const StHbtTTreeEvent* e, const StHbtTTreeKink* k) {
+  mDcaParentDaughter = k->mDcaParentDaughter;          
+  mDcaDaughterPrimaryVertex = k->mDcaDaughterPrimaryVertex;   
+  mDcaParentPrimaryVertex = k->mDcaParentPrimaryVertex;     
+  mHitDistanceParentDaughter = k->mHitDistanceParentDaughter;  
+  mHitDistanceParentVertex = k->mHitDistanceParentVertex;    
+  mDeltaEnergy[0] = k->mDeltaEnergy[0];             
+  mDeltaEnergy[1] = k->mDeltaEnergy[1];             
+  mDeltaEnergy[2] = k->mDeltaEnergy[2];             
+  mDecayAngle = k->mDecayAngle;                 
+  mDecayAngleCM = k->mDecayAngleCM;               
+  StHbtTrack mDaughter = StHbtTrack(e, &k->mDaughter);      
+  StHbtTrack mParent= StHbtTrack(e, &k->mParent);        
+  StHbtThreeVector mPosition = StHbtTreeVector(k->mPositionX,k->mPositionY,k->mPositionZ);  
+}
+
+
 #endif // __ROOT__
 
