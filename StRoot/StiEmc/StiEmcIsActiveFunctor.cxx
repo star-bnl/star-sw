@@ -8,7 +8,7 @@ StiEmcIsActiveFunctor::StiEmcIsActiveFunctor(int iSector, int iLayer)
 {
   //if(_rdoMasks==0)
   //  _rdoMasks = StDetectorDbEmcRDOMasks::instance();
-  int iRdo = rdo(iSector,iLayer);
+  //int iRdo = rdo(iSector,iLayer);
   _westActive = false;//_rdoMasks->isOn(iSector, iRdo);
   _eastActive = false;//_rdoMasks->isOn(24 - iSector%12, iRdo);
 
