@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: mDstWrite.C,v 3.1 2000/10/13 19:23:46 ullrich Exp $
+// $Id: mDstWrite.C,v 3.2 2001/09/21 02:21:57 jeromel Exp $
 // Author: Thomas Ullrich, Oct 2000
 //
 //////////////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////////////
 //
 // $Log: mDstWrite.C,v $
+// Revision 3.2  2001/09/21 02:21:57  jeromel
+// StTpcDb needed by StEventMaker.
+//
 // Revision 3.1  2000/10/13 19:23:46  ullrich
 // Initial Revision
 //
@@ -56,6 +59,7 @@ void mDstWrite(Int_t nevents, const Char_t **fileList, const Char_t *outfile)
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StEvent");
     gSystem->Load("StMagF");
+    gSystem->Load("StTpcDb");
     gSystem->Load("StEventMaker");
     gSystem->Load("StMiniDstMaker");
     

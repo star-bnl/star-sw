@@ -1,6 +1,9 @@
 //*-- Author :  Valeri Fine (fine@bnl.gov)
-// $Id: drawEvent.C,v 1.10 2000/04/13 21:46:34 kathy Exp $
+// $Id: drawEvent.C,v 1.11 2001/09/21 02:21:57 jeromel Exp $
 // $Log: drawEvent.C,v $
+// Revision 1.11  2001/09/21 02:21:57  jeromel
+// StTpcDb needed by StEventMaker.
+//
 // Revision 1.10  2000/04/13 21:46:34  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -118,6 +121,7 @@ void doEventsQQ(const Int_t nevents=999,
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StMagF");
   gSystem->Load("StEvent");
+  gSystem->Load("StTpcDb");
   gSystem->Load("StEventMaker");
   gSystem->Load("St_geom_Maker");
   gSystem->Load("StEventDisplayMaker");

@@ -1,5 +1,8 @@
-// $Id: makeStrangeMuDst.C,v 2.3 2001/05/04 20:18:46 genevb Exp $
+// $Id: makeStrangeMuDst.C,v 2.4 2001/09/21 02:21:57 jeromel Exp $
 // $Log: makeStrangeMuDst.C,v $
+// Revision 2.4  2001/09/21 02:21:57  jeromel
+// StTpcDb needed by StEventMaker.
+//
 // Revision 2.3  2001/05/04 20:18:46  genevb
 // Update for new EMC dependencies
 //
@@ -49,6 +52,7 @@ void load() {
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StEvent");
   gSystem->Load("StMagF");
+  gSystem->Load("StTpcDb");
   gSystem->Load("StEventMaker");
   gSystem->Load("StStrangeMuDstMaker");
 // The following are needed for using Monte Carlo info
