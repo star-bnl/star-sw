@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.5 1999/07/13 00:29:53 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.6 1999/07/13 00:42:32 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.6  1999/07/13 00:42:32  kathy
+// updated all default input files, removed unneccessary macros, renamed other to make more standard
+//
 // Revision 1.5  1999/07/13 00:29:53  kathy
 // updated macros to take out StRootEvent
 //
@@ -36,7 +39,7 @@ class St_DataSet;
 St_DataSet *Event;
 
 void QA_bfcread_dst_tables(const char 
-*MainFile="/afs/rhic/star/data/test/dev/tfs_Solaris/Thu/year_1b/psc0050_01_40evts.dst.root",
+*MainFile="/afs/rhic/star/data/test/dev/tfs_Solaris/Thu/year_2a/psc0208_01_40evts.dst.root",
 const char *fname="qa_tables.txt")
 
 {

@@ -1,5 +1,8 @@
-// $Id: read_bfc_hist_list.C,v 1.4 1999/07/13 00:29:54 kathy Exp $ 
-// $Log: read_bfc_hist_list.C,v $
+// $Id: bfcread_hist_list.C,v 1.1 1999/07/13 00:42:33 kathy Exp $ 
+// $Log: bfcread_hist_list.C,v $
+// Revision 1.1  1999/07/13 00:42:33  kathy
+// updated all default input files, removed unneccessary macros, renamed other to make more standard
+//
 // Revision 1.4  1999/07/13 00:29:54  kathy
 // updated macros to take out StRootEvent
 //
@@ -24,8 +27,8 @@ St_DataSet *Event;
 StChain *chain;
 TBrowser *brow=0;
 
-void read_bfc_hist_list(Int_t nevents=1, const char
-*MainFile="/disk00000/star/test/dev/tfs_Linux/Thu/year_2a/psc0208_01_40evts.hist.root")
+void bfcread_hist_list(Int_t nevents=1, const char
+*MainFile="/afs/rhic/star/data/test/dev/tfs_Solaris/Thu/year_2a/psc0208_01_40evts.hist.root")
 
 {
 //

@@ -1,5 +1,8 @@
-// $Id: DrawDstHist.C,v 1.27 1999/07/13 00:31:30 kathy Exp $
-// $Log: DrawDstHist.C,v $
+// $Id: bfcread_dst_QAhist.C,v 1.1 1999/07/13 00:42:32 kathy Exp $
+// $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.1  1999/07/13 00:42:32  kathy
+// updated all default input files, removed unneccessary macros, renamed other to make more standard
+//
 // Revision 1.27  1999/07/13 00:31:30  kathy
 // moved DrawDstHistNew.C to DrawDstHist.C
 //
@@ -48,9 +51,9 @@ St_DataSet *Event;
 StChain *chain;
 TBrowser *brow=0;
 
-void DrawDstHistNew(Int_t nevents=1, 
+void bfcread_dst_QAhist(Int_t nevents=1, 
              const char *MainFile="/afs/rhic/star/data/test/dev/tfs_Solaris/Thu/year_2a/psc0208_01_40evts.dst.root",
-             const Char_t *psFile="QA_hist_DrawDstHistNew.ps")
+             const Char_t *psFile="QA_hist.ps")
 {
 //
   cout << "DrawDstHistNew.C, input file name       " << MainFile << endl;
