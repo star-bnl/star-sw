@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.11 2005/01/04 19:31:12 subhasis Exp $
+ * $Id: StPmdGeom.cxx,v 1.12 2005/01/08 16:47:02 subhasis Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,8 +11,8 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
- * Revision 1.11  2005/01/04 19:31:12  subhasis
- * Mapping for year2005 Run, Code from Rashmi's area
+ * Revision 1.12  2005/01/08 16:47:02  subhasis
+ * status problem fixed for chain#7 (Rashmi)
  *
  * Revision 1.10  2004/11/15 23:27:23  subhasis
  * if() removed in ctor to stop valgrind error
@@ -1502,7 +1502,7 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
     }
 }  // end of year==5
 
-  //(Y2005, Rashmi's) Following are the configuration of FEE from 24th Nov'04
+  //(Y2005, Rashmi's) Following are the configuration of FEE from 26th Nov'04 for pmd and 24th Dec'04 for cpv.
   if( rn >=1 && year==6)    
     {
       //chain 1
@@ -1523,11 +1523,11 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
       //chain 7
       status[6][0]=0;status[6][5]=0;
       for(Int_t i=12;i<14;i++)status[6][i]=0;
-      for(Int_t i=25;i<27;i++)status[6][i]=0;// 29-12-04
+      for(Int_t i=21;i<23;i++)status[6][i]=0;
       //chain 8
-      status[7][3]=0;
-      for(Int_t i=11;i<14;i++)status[7][i]=0;
-      for(Int_t i=25;i<27;i++)status[7][i]=0;
+      status[7][3]=0;status[7][23]=0;
+      for(Int_t i=10;i<14;i++)status[7][i]=0;
+      for(Int_t i=25;i<26;i++)status[7][i]=0;
       //chain 9
       status[8][0]=0;status[8][7]=0;
       status[8][19]=0;status[8][25]=0;status[8][26]=0;
@@ -1589,7 +1589,7 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
       //chain 28
       status[27][18]=0;
       //chain 29
-      status[28][24]=0;
+      status[28][10]=0;status[28][24]=0;
       //chain 30
       for(Int_t i=0;i<3;i++)status[29][i]=0;
       for(Int_t i=15;i<21;i++)status[29][i]=0;
@@ -1614,6 +1614,7 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
       status[37][8]=0;
       for(Int_t i=20;i<22;i++)status[37][i]=0;
       //chain 39
+      status[38][14]=0;
       //chain 40
       status[39][2]=0; status[39][10]=0; status[39][20]=0;
       for(Int_t i=6;i<8;i++)status[39][i]=0;
