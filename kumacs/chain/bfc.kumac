@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.22 1998/07/28 21:37:54 kathy Exp $
+* $Id: bfc.kumac,v 1.23 1998/07/28 22:18:55 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.23  1998/07/28 22:18:55  kathy
+* oops!
+*
 * Revision 1.22  1998/07/28 21:37:54  kathy
 * moved bfc_defaults and bfc_load out of bfc_util and into kumacs/util setup_defaults and load_libraries; changed bfc kumacs to reflect this - also now allow input text file to run gstar off of; fixed up some comments
 *
@@ -227,7 +230,7 @@ MACRO bfc _
 * BEGINNING STUFF 
 * **********************************************************
    
- exec [TOP]/kumacs/util/setup_defaults domain=[domain]
+ exec $STAR/kumacs/util/setup_defaults domain=[domain]
    
  exec setup#setup
       
