@@ -1,5 +1,8 @@
-// $Id: makedoc.C,v 1.31 1999/05/21 15:33:59 kathy Exp $
+// $Id: makedoc.C,v 1.32 1999/05/23 21:36:40 fine Exp $
 // $Log: makedoc.C,v $
+// Revision 1.32  1999/05/23 21:36:40  fine
+// New class have been introduce for html
+//
 // Revision 1.31  1999/05/21 15:33:59  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
@@ -52,6 +55,7 @@
      gSystem->Load("St_io_Maker.so");
      gSystem->Load("St_xdfin_Maker");
      gSystem->Load("St_evg_Maker");
+     gSystem->Load("StRootEvent");
 
 //     gSystem->Load("St_ebye_Maker");
 //     gSystem->Load("St_laser_Maker");
@@ -76,6 +80,9 @@
     sourcedir += "/.share/tables:";
     sourcedir += STAR;
     sourcedir += "/inc";
+    sourcedir += ":";
+    sourcedir += STAR;
+    sourcedir += "/StRoot/StRootEvent";
   }
 
   TString lookup ;
@@ -95,7 +102,9 @@
     lookup += STAR;
     lookup += "/StRoot/St_base:";
     lookup += STAR;
-    lookup += "/StRoot/St_io_Maker";
+    lookup += "/StRoot/St_io_Maker:";
+    lookup += STAR;
+    lookup += "/StRoot/StRootEvent";
   }
 
     
@@ -114,12 +123,12 @@
                        ,"StParticleView","St_ObjectSet","St_Node","St_NodePosition"
                        ,"StMaker",     "StChain",       "St_NodeView"
                        ,"table_head_st","St_NodeViewIter", "St_PolyLineShape"
-                       ,"St_Points3DABC","St_Points3D","St_PolyLine3D","St_PointsArray3D"
-                       ,"St_AttributesABC"
-                       ,"St_io_Maker"
+                       , "St_Points3D","St_PolyLine3D","St_PointsArray3D"
+                       ,"St_AttributesABC", "St_Table3Points","St_TablePoints"
+                       ,"St_io_Maker","StHelix3DPoints","StHits3DPoints"
                        ,"St_srs_Maker","St_xdfin_Maker"
                       };
-  Int_t nclass = 24;
+  Int_t nclass = 27;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
