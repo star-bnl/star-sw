@@ -49,7 +49,7 @@ BfcItem BFC[] = {
   {"cy1e"        ,""  ,"","y1e,Cdefault"                                 ,"","","Turn on chain y1h",kFALSE},
   {"cy1h"        ,""  ,"","y1h,Cdefault"                                 ,"","","Turn on chain y1e",kFALSE},
   {"Cy2a"        ,""  ,"","y2a,tpc,ftpc,emc,l0,l3,Cdst,tags,Tree,svt"    ,"","","Turn on chain y2a",kFALSE},
-  {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,Cdst,Kalman,tags,Tree,evout","",""
+  {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Cdst,Kalman,tags,Tree,evout","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----","------------------------------------------------","","","",kFALSE},
@@ -124,6 +124,11 @@ BfcItem BFC[] = {
   {"calib"       ,""  ,"","xdf2root"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"magF"        ,"","","NoFieldSet,StDbT,db","StMagFMaker","StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
+  {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
+  {"trg"         ,"","l0","trg_T,db"                       ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
+  {"l0"          ,"l0","","trg_T,globT,ctf,mwc,trg"                    ,"StChainMaker","StChain","",kFALSE}, 
+  {"ctf"         ,"ctf","l0","ctf_T,db"                    ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE}, 
+  {"mwc"         ,"mwc","l0","mwc_T,db,tpcDB"              ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
   {"tpc"         ,"tpc","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StChainMaker","StChain","",kFALSE},
   {"tpcDB"       ,"tpcDB","tpc","tpc_T,dbutil,db"                      ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"Trs"         ,"","tpc","scl,tpcDB,tpc_daq,Simu"                   ,"StTrsMaker","StTrsMaker","",kFALSE},
@@ -147,10 +152,6 @@ BfcItem BFC[] = {
   {"Fcl"         ,"ftpc_hits","ftpc","SCL"
                           ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,St_ftpc,StFtpcClusterMaker","",kFALSE},
   {"fpt"         ,"ftpc_tracks","ftpc","SCL"              ,"StFtpcTrackMaker","St_ftpc,StFtpcTrackMaker","",kFALSE},
-  {"l0"          ,"l0","","trg_T,globT,ctf,mwc,trg"                    ,"StChainMaker","StChain","",kFALSE}, 
-  {"ctf"         ,"ctf","l0","ctf_T,db"                    ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE}, 
-  {"mwc"         ,"mwc","l0","mwc_T,db"                    ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
-  {"trg"         ,"trg","l0","trg_T,db"                    ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
   {"global"      ,"global","","globT,Match,primary,v0,xi,kink,dst,SCL"
                                                          ,"StChainMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","global","SCL,tpc_T,svt_T,globT,tls"
@@ -777,8 +778,14 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.104 2000/06/20 19:06:06 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.108 2000/06/27 18:49:08 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.108  2000/06/27 18:49:08  fisyak
+// Move trg up
+//
+// Revision 1.105  2000/06/22 17:21:12  fisyak
+// Add rich in default p00h
+//
 // Revision 1.104  2000/06/20 19:06:06  fisyak
 // Fix clash between geant and data in MagF
 //

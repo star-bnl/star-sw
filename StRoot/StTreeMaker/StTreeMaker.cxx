@@ -167,11 +167,11 @@ Int_t StTreeMaker::Make(){
   }
 }
 //_____________________________________________________________________________
-Int_t StTreeMaker::MakeRead(const StUKey &RunEvent){
+Int_t StTreeMaker::MakeRead(UInt_t *RunEvent){
 
   int iret;
-  if (!RunEvent.IsNull())	iret = fTree->ReadEvent(RunEvent);
-  else                  	iret = fTree->NextEvent(        );
+  if (RunEvent && *RunEvent)	iret = fTree->ReadEvent(*RunEvent);
+  else                       	iret = fTree->NextEvent();
 
   if (iret) return iret;
   St_DataSetIter nextBr(fTree);
@@ -199,8 +199,7 @@ Int_t StTreeMaker::MakeWrite()
   UpdateHddr();
 
 //		Write StTree
-  StUKey ukey(GetRunNumber(),GetEventNumber());
-//  ULong_t ukey = GetNumber();
+  ULong_t ukey = GetNumber();
   fTree->WriteEvent(ukey);	
   fTree->Clear(); 
   return 0;

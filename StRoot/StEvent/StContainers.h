@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.6 2000/06/19 01:32:15 perev Exp $
+ * $Id: StContainers.h,v 2.5 2000/05/22 21:42:44 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,11 +10,8 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
- * Revision 2.6  2000/06/19 01:32:15  perev
- * Thomas StEvent branches added
- *
- * Revision 2.7  2000/09/28 10:56:35  ullrich
- * Added Rich PID classes.
+ * Revision 2.5  2000/05/22 21:42:44  ullrich
+ * Add RICH related classes.
  *
  * Revision 2.6  2000/06/19 01:32:15  perev
  *  Thomas StEvent branches added
@@ -33,7 +30,6 @@
  *
  * Revision 2.1  1999/10/28 22:06:19  ullrich
  * Initial Revision
- *
  **************************************************************************/
 #ifndef StContainers_hh
 #define StContainers_hh
@@ -56,7 +52,6 @@ class StEmcCluster;
 class StEmcPoint;
 class StTrack;
 class StTrackNode;
-class StTrackPidTraits;
 class StTrackDetectorInfo;
 class StV0Vertex;
 class StXiVertex;

@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.11 2000/05/16 02:01:46 fisyak Exp $
+// $Id: St_trg_Maker.cxx,v 1.12 2000/06/25 23:51:03 fisyak Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.12  2000/06/25 23:51:03  fisyak
+// Replace assert by return of kStErr
+//
 // Revision 1.11  2000/05/16 02:01:46  fisyak
 // Correction for removed  trg_fillDst
 //
@@ -60,7 +63,7 @@
 // St_trg_Maker class for Makers                                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
+#include "iostream.h"
 #include "St_trg_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -87,6 +90,8 @@ MarilynMonroe_t *GraceSlick;
 
 ClassImp(St_trg_Maker)
 #define PP printf(
+#define SANITYCheck(name,value) \
+ if (name != value) {cout << "Value of "#name" = |" << name << "| instead of expected "#value << endl; return  kStErr;}
 
 //_____________________________________________________________________________
 St_trg_Maker::St_trg_Maker(const char *name):StMaker(name){
@@ -166,19 +171,20 @@ void St_trg_Maker::CtbMwcDaq(St_dst_TrgDet *dst1) { // For sim data, use output 
     for(i=0;i<32;i++) tt->mwcaux[i][pp]=GraceSlick->RAW[pp].MWC[auxmwcmap[i]];
   }
 }
-void St_trg_Maker::SanityCheck() {
+Int_t St_trg_Maker::SanityCheck() {
   int pp,lim;
   lim=1+GraceSlick->EvtDesc.npre+GraceSlick->EvtDesc.npost;
   for(pp=0;pp<lim;pp++) {
-    assert(GraceSlick->RAW[pp].RawDetHeader[0]=='R');   // If one of these fails,
-    assert(GraceSlick->RAW[pp].RawDetHeader[1]=='D');   // then the .daq file may
-    assert(GraceSlick->RAW[pp].CTBdataHeader[0]=='C');  // be corrupted, the trigger
-    assert(GraceSlick->RAW[pp].CTBdataHeader[1]=='T');  // data may be missing, or
-    assert(GraceSlick->RAW[pp].MWCdataHeader[0]=='M');  // there may be trouble with StDaqLib
-    assert(GraceSlick->RAW[pp].MWCdataHeader[1]=='W');  // or StDAQMaker.
-    assert(GraceSlick->RAW[pp].EMCdataHeader[0]=='E');  // 
-    assert(GraceSlick->RAW[pp].EMCdataHeader[1]=='M');  // 
+    SANITYCheck(GraceSlick->RAW[pp].RawDetHeader[0] ,'R')
+    SANITYCheck(GraceSlick->RAW[pp].RawDetHeader[1] ,'D')
+    SANITYCheck(GraceSlick->RAW[pp].CTBdataHeader[0],'C')
+    SANITYCheck(GraceSlick->RAW[pp].CTBdataHeader[1],'T')
+    SANITYCheck(GraceSlick->RAW[pp].MWCdataHeader[0],'M')
+    SANITYCheck(GraceSlick->RAW[pp].MWCdataHeader[1],'W')
+    SANITYCheck(GraceSlick->RAW[pp].EMCdataHeader[0],'E')
+    SANITYCheck(GraceSlick->RAW[pp].EMCdataHeader[1],'M')  
   }
+  return kStOK;
 }
 int St_trg_Maker::Daq(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2,
       St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
@@ -195,7 +201,8 @@ int St_trg_Maker::Daq(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *ds
   assert(ptr);
   ptr+=40; /* skip header */
   GraceSlick=(MarilynMonroe_t*)ptr;
-  SanityCheck();
+  Int_t Iret = SanityCheck();
+  if (Iret !=  kStOK) return Iret;
   // dumpDataToScreenAndExit();
   VpdDaq(dst1);       // The function
   ZdcDaq(dst1);       // St_trg_Maker::Sim
