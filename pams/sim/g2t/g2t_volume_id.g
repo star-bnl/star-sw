@@ -18,8 +18,17 @@
       Integer          Iprin,Nvb
       Character*4                   cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+      structure  TPCG  {version}
+      logical          first/.true./
 *c - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 *
+      if (First) then
+          first=.false.
+          call RBPUSHD
+          USE  /DETM/TPCE/TPCG
+          call RBPOPD
+          print *,' g2t_volume_id: TPC version =',tpcg_version
+      endif
       volume_id = 0
 *
       If    (Csys=='svt') then
@@ -47,14 +56,26 @@
 *2*                                        Peter M. Jacobs
         tpgv  = numbv(1)
         tpss  = numbv(2)
-        tpad  = numbv(3)
         sector= tpss+12*(tpgv-1) 
-
+        tpad  = numbv(3)
         isdet = 0
-        If (cd=='TPAI')  isdet=1
-        If (cd=='TPAO')  isdet=2
-*PN: outermost pseudopadrow:
-        If (cd=='TPAO' .and. tpad==14) tpad=45
+        If  (tpcg_version==1) then
+          If (cd=='TPAI')  isdet=1
+          If (cd=='TPAO')  isdet=2
+*PN:      outermost pseudopadrow:
+          If (cd=='TPAO' & tpad==14) tpad=45
+        else
+          If (tpad<41) then
+             isdet = mod(42-tpad,3)
+             tpad  = (tpad+2)/2
+          else If (tpad<73) then
+             tpad=tpad-41+14
+          else
+             isdet = 2
+             tpad  = 45
+          endif
+        endif
+
         volume_id=100000*isdet+100*sector+tpad
 
       else If (Csys=='mwc') then

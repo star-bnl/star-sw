@@ -48,6 +48,7 @@ C :>--------------------------------------------------------------------
       External        TDM_GET_SPEC, TDM_GET_COLUMN, TDM_GET_CCOUNT
       Integer         AgFHIT1, ISLFLAG, G2T_VOLUME_ID
       External        AgFHIT1, ISLFLAG, G2T_VOLUME_ID
+      real            FSHORT
 *   
       G2T_GET_HITS = STAFCV_BAD
       Iprin = ISLFLAG('G2TM','PRIN')
@@ -128,6 +129,22 @@ C :>--------------------------------------------------------------------
          iflg(j)  = k
       enddo         
  101  continue
+      xD2M=iflg(iX)+iflg(iX+1)+iflg(iX+2)
+      pD2M=iflg(iC)+iflg(iC+1)+iflg(iC+2)
+      if (Iprin.ge.3) then
+         print *,' iX,iC,jX,jP iflg=',iX,iC,jX,jP
+         print *,' D2M  flags  are = ',xD2M,pD2M
+         print *,' pointer/counter position =',ip,in
+      endif
+      do i=0,2
+         if (iflg(iC+i).gt.0.and.iflg(jP+i).eq.0) iflg(jP+i)=-iflg(iC+i)
+         if (iflg(iX+i).gt.0.and.iflg(jX+i).eq.0) iflg(jX+i)=-iflg(iX+i)
+      enddo
+      If (Iprin.gt.1) then
+         print *,'hits are filling the following standard elements'     
+         print *,Gname
+         print *,iflg
+      endif
 *
 *     4. prepare map to fold full hit into table description
 *
@@ -137,7 +154,7 @@ C :>--------------------------------------------------------------------
          if (Iprin.ge.3) print *,'    k,col=',
      >                   k,i,l,e,m,' ',col(1:i),' t=',typ(1:10)
          do j=1,Lnam
-            if (col(1:min(i-1,4)).eq.Tname(j).and.iflg(j).gt.0) then
+            if (col(1:min(i-1,4)).eq.Tname(j).and.iflg(j).ne.0) then
                Do f=1,e
                   jadr(n+f)=j+f-1
                   jflg(j)=n+f
@@ -153,14 +170,8 @@ C :>--------------------------------------------------------------------
          return
       endif
 
-      xD2M=iflg(iX)+iflg(iX+1)+iflg(iX+2)
-      pD2M=iflg(iC)+iflg(iC+1)+iflg(iC+2)
-      if (Iprin.ge.3) then
-         print *,' iX,iC,jX,jP iflg=',iX,iC,jX,jP
-         print *,' D2M  flags  are = ',xD2M,pD2M
-         print *,' pointer/counter position =',ip,in
-      endif
       call VZERO(numbv,Nmh)
+******      if (pD2M.gt.0) jadr
 *
 * - - -     
       DO WHILE (agfhit1(ih,jtra,numbv,hits).eq.0)
@@ -172,7 +183,7 @@ C :>--------------------------------------------------------------------
          if (csys(1:3).eq.'tpc' .and. numbv(1).le.1 .and. hits(3).le.0)
      >      print *,' tpc hit ',(numbv(i),i=1,3),(hits(i),i=1,3)
          do k=1,Nmh
-            if (iadr(k).gt.0) QQ(iadr(k))=hits(k)
+            if (iadr(k).gt.0) QQ(iadr(k))=fshort(hits(k))
          enddo
 
 C        overwrite global coordinates with local if they are not measured
@@ -180,9 +191,11 @@ C        overwrite global coordinates with local if they are not measured
          if ( xD2M .ne. 0)  call GDTOM(x,xxx,1)
          if ( pD2M .ne. 0)  call GDTOM(c,ccc,2)
          do i=1,3
-            if (iflg(jX+i-1).eq.0.and.xD2M.gt.0) xx(i)=xxx(i)
-            if (iflg(jP+i-1).eq.0.and.pD2M.gt.0) p(i)=ccc(i)*p(4)
+            if (iflg(jX+i-1).le.0.and.xD2M.gt.0) xx(i)=fshort(xxx(i))
+            if (iflg(jP+i-1).le.0.and.pD2M.gt.0) p(i)=fshort(ccc(i)*p(4))
          enddo
+*         print *,nh,' X, c =',x,c
+*         print *,nh,' XX,cc=',xxx,ccc
 *
 *                  add to track linked list 
 *        Track(p_hits.track_p).n_tpc_hit += 1
@@ -197,7 +210,7 @@ C        overwrite global coordinates with local if they are not measured
          endif
 
          do k=1,n
-            if (jadr(k).gt.0) phits(k)=IQQ(jadr(k))
+            if (jadr(k).gt.0)  phits(k)=IQQ(jadr(k))
          enddo
          call ucopy (phits,p_hits(LenH*(nh-1)+1),LenH)
          p_hits_h.nok = nh
@@ -206,6 +219,20 @@ C        overwrite global coordinates with local if they are not measured
       G2T_GET_HITS = STAFCV_OK
 
       RETURN
+      end
+
+      function fshort(r)
+      common /gcflag/ IDEBUG
+      fshort=r
+      return
+      if (r.eq.0) return
+      s=sign(1.,r)
+      a=abs(r)
+      l=alog10(a)+100
+      e=10.**(l-100)
+      i=a/e*1000+0.5
+      fshort=i*0.001*e*s
+      if (Idebug.ge.3) print *,'short:',r,s,a,l,e,i,fshort
       end
 
 
