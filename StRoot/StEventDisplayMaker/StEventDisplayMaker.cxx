@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-//  
-// 
+// $Id: StEventDisplayMaker.cxx,v 1.11 1999/08/02 02:21:51 fine Exp $
+// $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.11  1999/08/02 02:21:51  fine
+// new methpd ParseName has been introduced, nut not activated yet
+//
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -315,7 +318,7 @@ Int_t StEventDisplayMaker::MakeGlobalTracks()
         if (!filter || filter->IsOn() ) 
               trackCounter +=  MakeTracks(globTrack,filter);
 
-        // ------------------------   Hits   ------------------------- //
+        // -------------------------   Hits  --------------------------- //
         filter = (StVirtualEventFilter *)m_FilterArray->At(kTrackTpcHits);
         if (!filter || filter->IsOn() ) {
            const StVecPtrTpcHit &hits   = globTrack->tpcHits();
@@ -364,25 +367,31 @@ Int_t StEventDisplayMaker::Make()
       while ( (eventName = (TObjString *)nextNames()) ) {
         m_Event = 0;
         m_Table = 0;
-        const Char_t *foundName = eventName->String().Data();
+  
+        Char_t *nextObjectName = StrDup(eventName->String().Data());
+        const Char_t *positions[] = {0,0,0,0,0};
+        Int_t type = ParseName(nextObjectName, positions);
+        if (!type) { delete [] nextObjectName; continue; }
+        const Char_t *foundName = positions[0];
         St_DataSet *event = GetDataSet(foundName);
         if (!event) {
           if (Debug()) Warning("Make","No object \"%s\" found",foundName);
           continue;
         }
-        if (event->InheritsFrom("St_Table")) {
-             //  ---- Draw "table" events ----  //
-               m_Table = (St_Table *)event;     //
-               totalCounter += MakeTable();     //
-             //  -----------------------------  //
+        if (event->InheritsFrom("St_Table") && type == 5) {
+             //  ----- Draw "table" events ----- //
+               m_Table = (St_Table *)event;      //
+               totalCounter += MakeTable();      //
+             //  ------------------------------- //
         }
-        else if (event->InheritsFrom("StEvent")) {
+        else if (event->InheritsFrom("StEvent") && type == 1) {
              //  ---- Draw "StEvent" events ---- //
                m_Event = (StEvent *)event;       //
                totalCounter += MakeEvent();      //
              //  ------------------------------- //
         }
-        else if (Debug()) Warning("Make","Can not draw object \"%s\"",foundName); 
+        else if (Debug()) Warning("Make","Can not draw object \"%s\"",nextObjectName); 
+        delete [] nextObjectName;
      }
    }
    if (totalCounter) {
@@ -395,44 +404,54 @@ Int_t StEventDisplayMaker::Make()
  return kStOK;
 }
 
-#if 0
 //_____________________________________________________________________________
-const Char_t StEventDisplayMaker::ParseName(const Char_t *inName)
-{
+Int_t StEventDisplayMaker::ParseName(Char_t *inName, const Char_t *positions[])
+{ 
+  // returns  the number of the tokens found:
+  //
+  //              "1" - assuming StEvent name defined by position[0]
+  //              "5" - assuming St_Table columns definitions
+  //              "0" - syntax error
+  //  
   //  "name" - StEvent
-  //  "g2t_tpc_hit(track_id,x[0],x[1],x[2])"
-  // look for the first bracket:
+  //  "g2t_tpc_hit(track_id,x[0]:x[1]:x[2])"
+  //   Attention:     NO EXPRESSION, yet !!!
+  //
+
+  Int_t nParsed = 0;
   if (inName && inName[0]) {
     Char_t *parsedName = StrDup(inName);
-    const Char_t *pos = 0;
-    const Char_t *positions[] = {0,0,0,0,0};
-    const Char_t *errorMessages[] = {"the open bracket missed"
+    Char_t *pos = 0;
+//    const Char_t *positions[] = {0,0,0,0,0};
+    const Char_t *errorMessages[] = {  "the open bracket missed"
                                      , "first comma missed"
-                                     , "second comma missed"
-                                     , "third comma missed"
+                                     , "first collon missed"
+                                     , "second collon missed"
                                      , "the closed bracket missed"
-                                    }
- 
-    const Int_t lenExpr = sizeof(positions)/sizeof(Char_t *);
+                                    };
+    const Int_t lenExpr = sizeof(errorMessages)/sizeof(Char_t *);
     const Char_t openBracket  = '(';
     const Char_t closeBracket = ')';
     const Char_t comma        = ',';
-    const Char_t delimiters[] = {openBracket,comma,comma,comma,closeBracket };
-    Int_t i = 0;
-    pos = positions[0] = parsedName;
-    for (i=1;i<lenExpr;i++)  {
-       if( pos = strchr(pos+1,delimiters[i]) ) {
-                position[i] = pos;
-               *pos = 0;
+    const Char_t collon       = ':';
+    const Char_t delimiters[] = {openBracket,comma,collon,collon,closeBracket };
+    pos = positions[nParsed] = inName;
+    for (nParsed=1;nParsed <= lenExpr;nParsed++)  {
+       if( pos = strchr(pos+1,delimiters[nParsed]) ) {
+           positions[nParsed] = pos;
+          *pos = 0;
        } else break;
     }
-    if (i > 1) 
-      for (i=1;i<lenExpr;i++) {
-         if (!position[i]) Error("ParseName","%s",errorMessages[i]);
+    if (nParsed > 1) {
+      for (Int_t i=1;i<nParsed;nParsed++) 
+         if (!positions[i]) Error("ParseName","%s",errorMessages[i-1]);
+      if (nParsed < lenExpr) nParsed = 0;
+    }
 
   }
+  return nParsed;
 }
-#endif
+
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeEvent()
 {
@@ -583,12 +602,14 @@ Int_t StEventDisplayMaker::MakeTable()
   return tableCounter;
 }
 //_____________________________________________________________________________
-Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFilter *filter)
+Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFilter *filter
+   // ,const Char_t *keyColumn,const Char_t *keyPositions[]
+)
 {
 #if 0
   St_Table &ttt = *((St_Table *)points);
   TString tr;
-  tr = GetKeyColumn(); 
+  tr = keyColumn(); 
   ULong_t keyOffset = GetKeyOffset();
 //  g2t_tpc_hit_st *p = points->GetTable();
    const Char_t *p = points->GetArray();
@@ -610,7 +631,7 @@ Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFi
         long newId = hitPoint + keyOffset;
         St_Table3Points *hitsPoints =  new St_Table3Points(track2Line,
                                             (const void *)&newId,
-                                            GetXColumn(),GetYColumn,GetZColumn());
+                                            keyPositions[0],keyPositions[1],keyPositions[2]);
 
         m_HitCollector->Add(hitsPoints);    // Collect to remove  
          St_PolyLineShape *hitsShape   = new St_PolyLineShape(hitsPoints);
@@ -685,7 +706,7 @@ void StEventDisplayMaker::PrintFilterStatus()
   for (i =0;i<kEndOfEventList;i++) {
       StVirtualEventFilter *filter = (StVirtualEventFilter *)m_FilterArray->At(i);
       Int_t isOn = filter->IsOn();
-      printf(" Filter for %16s%",filterNames[i]);
+      printf(" Filter for %16s",filterNames[i]);
       if (filter) {
           if (filter->IsOn()) printf(" is ON\n");
           else printf(" is       OFF\n");
