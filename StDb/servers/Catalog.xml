@@ -39,7 +39,7 @@
 			</HOST>
 		</SERVER>
 		<SERVER SCOPE="User">
-			<HOST NAME="fc.star.bnl.gov" DBNAME="FileCatalog_BNL" PORT="3336">
+			<HOST NAME="duvall.star.bnl.gov" DBNAME="FileCatalog_BNL" PORT="3336">
 				<ACCESS USER="FC_user" PASS="FCatalog"/>
 			</HOST>
 		</SERVER>
