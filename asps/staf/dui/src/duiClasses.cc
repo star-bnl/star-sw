@@ -174,7 +174,7 @@ STAFCV_T duiFactory:: df (char *markerString) {
 STAFCV_T duiFactory:: duRecurse (char *path,int indent,DS_DATASET_T *pDS,
       long minsize,int control) {
   bool_t isDataset; DS_DATASET_T *pDS2; const char *dsName;
-  static callCnt=0;
+  static int callCnt=0;
   int newlen,ii; const char *dname; char path2[DUI_PATH_SIZE+1],buf[17];
   size_t iEntry,numEntries,rowsize,nrows;
   indent++; indent++; path2[0]=0;

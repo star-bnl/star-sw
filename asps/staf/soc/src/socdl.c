@@ -9,34 +9,33 @@
 int 
 soc_dl_load (char *pkgName)
 {
-  char *solibName;
+  char solibName[500];
   
-  solibName = (char *) MALLOC(strlen(pkgName) + 7);
-#if defined(__hpux)
-  sprintf(solibName, "lib%s.sl", pkgName);
-#else
-  sprintf(solibName, "lib%s.so", pkgName);
-#endif
-  if (cdl_load(solibName)) {
-    FREE(solibName); /*fix memory leak -akio*/
-    EML_ERROR(NO_FUNCTION_LOADED);
-  }
-  FREE(solibName); /*fix memory leak -akio*/
+ sprintf(solibName, "lib%s.so", pkgName);
+ if (! cdl_load(solibName)) goto OK;
+ sprintf(solibName, "lib%s.sl", pkgName);
+ if (! cdl_load(solibName)) goto OK;
+ sprintf(solibName, "%s.sl", pkgName);
+ if (! cdl_load(solibName)) goto OK;
+ sprintf(solibName, "%s.so", pkgName);
+ if (! cdl_load(solibName)) goto OK;
 
+ printf ("soc_dl_load can not load %s\n",pkgName);
+ EML_ERROR(NO_FUNCTION_LOADED);
+
+OK: printf("%s loaded\n",solibName);
   return STAFCV_OK;
 }
 
 static int
 soc_dl_call (char *pkgName, char *suffix)
 {
-  char *funcName;
+  char funcName[500];
   int (*theFunction)();
   
-  funcName = (char *) MALLOC(strlen(pkgName) + strlen(suffix) + 1);
   sprintf(funcName, "%s%s", pkgName, suffix);
 
   theFunction = (int(*)()) cdl_func_addr(funcName);
-  FREE(funcName);   
   if (!theFunction) 
     EML_ERROR(NO_FUNCTION_LOADED);
   
