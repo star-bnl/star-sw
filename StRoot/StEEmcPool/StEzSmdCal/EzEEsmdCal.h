@@ -4,7 +4,7 @@
 #ifndef EzEEsmdCal_h
 #define EzEEsmdCal_h
 /*********************************************************************
- * $Id: EzEEsmdCal.h,v 1.1 2004/06/12 04:09:24 balewski Exp $
+ * $Id: EzEEsmdCal.h,v 1.2 2004/09/11 04:57:34 balewski Exp $
  *********************************************************************
  * \class  
  * \author Balewski
@@ -21,7 +21,6 @@
 #include "EEsmdCal.h"
 
 class TObjArray  ;
-class EEstarTrig;
 class EEmcEventHeader;
 class EEfeeRawEvent;
 
@@ -33,13 +32,12 @@ class EzEEsmdCal :public TObject, public  EEsmdCal{
 
   EEmcEventHeader *eHead;
   EEfeeRawEvent  *eEve;
-  EEstarTrig *eTrig;
 
  public:  
   EzEEsmdCal(int sect);
   virtual ~EzEEsmdCal();
   void make();
-  void set( TObjArray * hL, EEDB *db, EEfeeRawEvent  *eE,EEmcEventHeader *eH, EEstarTrig *eT=0){ HList=hL; eeDb=db;eHead=eH; eEve=eE; eTrig=eT; }; 
+  void set( TObjArray * hL, EEDB *db, EEfeeRawEvent  *eE,EEmcEventHeader *eH){ HList=hL; eeDb=db;eHead=eH; eEve=eE; }; 
     void init();
   ClassDef(EzEEsmdCal,1) 
 };
@@ -48,6 +46,9 @@ class EzEEsmdCal :public TObject, public  EEsmdCal{
 
 /*****************************************************************
  * $Log: EzEEsmdCal.h,v $
+ * Revision 1.2  2004/09/11 04:57:34  balewski
+ * cleanup
+ *
  * Revision 1.1  2004/06/12 04:09:24  balewski
  * start
  *

@@ -2,12 +2,12 @@
 // \author Jan Balewski
 #ifndef EEsmdCal_h
 #define EEsmdCal_h
-/*********************************************************************
- * $Id: EEsmdCal.h,v 1.7 2004/07/27 21:59:46 balewski Exp $
- *********************************************************************
+/*******************************************************
+ * $Id: EEsmdCal.h,v 1.8 2004/09/11 04:57:34 balewski Exp $
+ *******************************************************
  * Descripion:
  *  Calibration of SMD/pre/post using MIPs from UxV
- *********************************************************************/
+ *******************************************************/
 
 class EEmcGeomSimple;
 class TVector3;
@@ -32,20 +32,24 @@ class EEmcSmdMap;
 
 class EEsmdCal {
  protected:
-  enum {mxTile=4,kT=0,kP=1, kQ=2,kR=3, kU=0, kV=1}; // 0=tower, 1=pres1, 2=pres2, 3=post
+  enum {mxTile=4,kT=0, kP=1, kQ=2, kR=3, kU=0, kV=1}; // 0=tower, 1=pres1, 2=pres2, 3=post
 
  private: 
   
   float thrMipSmdE; //(GeV)  threshold on MIP signal in SMD strip
   float twMipRelEneLow, twMipRelEneHigh; // relative maximal energy deviation for MIP in towers 
-  float presMipElow,presMipEhigh ; // relative maximal energy deviation for MIP in pres1,2,post 
 
   float offCenter;// cut on deviation of UxV from tower center in eta & phi
 
   int emptyStripCount; // minimal # of SMD strops below threshold
-  float towerMipE [MaxEtaBins]; // mean energy for MIP
+  float towerMipE [MaxEtaBins]; // mean EM equiv energy for MIP in towers
+  float presMipE  [MaxEtaBins]; // mean Elos energy for MIP in pre/post
+  float smdAvrMipE   ; // mean Elos energy for MIP in SMD strip
+  float twTghEta[MaxEtaBins]; // mean tgh(eta) for towers
+
   int dbMapped;// flag indicating local DB is mapped
   const EEmcDbItem *dbT[mxTile][MaxEtaBins][MaxPhiBins]; // local fast access to DB
+  const EEmcDbItem *dbS[MaxSmdPlains][MaxSmdStrips];// local fast access to DB
   
   // various utility classes
   EEmcSmdMap *mapSmd;  
@@ -53,30 +57,24 @@ class EEsmdCal {
   EEmcSmdGeom *geoSmd;
   
   // cuts: 0=inclusive, 1=tagged with PostShower,  2=Tagged & UxVinTower, etc.
-  enum {kCut=7}; 
+  enum {kCut='h'-'a'}; 
 
   TH1F *hA[32]; // some global (test) histograms
   // all histograms are created for only one sector
 
   TH1F *hT[kCut][mxTile][MaxEtaBins][MaxPhiBins]; // tower histograms 
   TH1F *hSs[kCut][MaxSmdPlains][MaxSmdStrips]; // individual SMD strips ,inclusive
-  TH1F *hSp[kCut][MaxSmdPlains][MaxSmdStrips]; // pair of SMD strips
- 
-  enum {stripGang=20, MaxAt=15}; // study of attenuation in SMD
-  //stripGang- how many strips are added together 
-  TH1F *hSc[MaxSmdPlains][MaxSubSec][MaxAt];// SMD attenuation study  
-  TH1F *hSeta[MaxSmdPlains][MaxSubSec][MaxAt];//    -//-
-  TH1F *hSdist[MaxSmdPlains][MaxSubSec][MaxAt];//   -//-
-
 
   void initTileHistoAdc(char cut, char * title, int col=1); 
   void initTileHistoEne(char cut, char * title, int col=1); 
   void initSmdHist(char cut, char * title, int col=1);
-  void initSmdAttenHist(); 
+  void initSmdEneHist(char cut, char * title, int col=1);
   void initAuxHisto();
   void mapTileDb();
+  void histoGains();
   void addTwMipEbarsToHisto (int col, char mxC);
   void addPresMipEbarsToHisto (int col, char cT);
+  void addSmdMipEbarsToHisto (int col, char cT);
   
   void fillSmdHisto_a();
   void fillOneTailHisto(char cut, int iEta, int iPhi);
@@ -119,8 +117,9 @@ class EEsmdCal {
   void init(); 
   void initRun(int runID);// must be called after DB timestamp is known
   void setSmdCuts(float xs, int n1){ thrMipSmdE=xs; emptyStripCount=n1;}
-  void setTwCuts( float e1, float e2 ){twMipRelEneLow=e1; twMipRelEneHigh=e2;}
-  void setPQRCuts(float a, float b ){ presMipElow=a; presMipEhigh=b;  }
+  void setTwCuts( float e1, float e2 ,float r){
+    twMipRelEneLow=e1; twMipRelEneHigh=e2; offCenter=r; 
+  }
   
   void saveHisto(TString fname="fixMe3");
  
@@ -132,6 +131,9 @@ class EEsmdCal {
 
 /*****************************************************************
  * $Log: EEsmdCal.h,v $
+ * Revision 1.8  2004/09/11 04:57:34  balewski
+ * cleanup
+ *
  * Revision 1.7  2004/07/27 21:59:46  balewski
  * now runs on muDst as well
  *
