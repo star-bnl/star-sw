@@ -292,8 +292,8 @@ if (strncmp(".none ",GetFile(),6)==0) {//FileName was corrupted by old bug
 //VP  SetIOMode("0");
   if (bas[0] == bas[1] || bas[0].Contains(nam)) SetIOMode("r");
   //VP?? else                                  	bas[0]=bas[1];
-  for (int d=1; d>=0; d--) {
-    for (int b=1; b>=0; b--) {
+  for (int d=0; d<2; d++) {
+    for (int b=0; b<2; b++) {
       char *newFile = gSystem->ConcatFileName(dir[d],bas[b]);
       if (StIO::IfExi(newFile)) {        
         fFile = newFile;
