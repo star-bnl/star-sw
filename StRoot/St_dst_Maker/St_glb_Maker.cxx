@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.7 1998/10/31 00:26:12 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.8 1998/11/01 16:42:27 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.8  1998/11/01 16:42:27  fisyak
+// dst analysis
+//
 // Revision 1.7  1998/10/31 00:26:12  fisyak
 // Makers take care about branches
 //
@@ -35,7 +38,11 @@
 
 #include <iostream.h>
 #include <stdlib.h>
+#include <TMath.h>
 #include "St_dst_Maker.h"
+#include "St_particle_Table.h"
+#include "St_hepe_gent_Table.h"
+
 #include "StChain.h"
 #include "St_DataSetIter.h"
 
@@ -54,6 +61,13 @@
 #include "global/St_particle_dst_filler_Module.h"
 #include "global/St_dst_point_filler_Module.h"
 #include "global/St_fill_dst_event_summary_Module.h"
+
+   const Int_t St_dst_Maker::nxpT = 50;
+   const Int_t St_dst_Maker::nyeta = 50;
+   const Float_t St_dst_Maker::xminpT = 0.0;
+   const Float_t St_dst_Maker::xmaxpT = 5.0;
+   const Float_t St_dst_Maker::ymineta = -2.0;
+   const Float_t St_dst_Maker::ymaxeta =  2.0;
 
 ClassImp(St_dst_Maker)
 
@@ -100,6 +114,16 @@ Int_t St_dst_Maker::Init(){
    m_ev0par = (St_ev0_ev0par *)  params("global/ev0pars/ev0par");
    m_magf   = (St_mft_control *) params("global/magnetic_field/magf");  
 // Create Histograms    
+   m_pT_eta_rec = new TH2F("pT_eta_rec","pT versus eta (reconstructed)",
+                           nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
+   m_pT_eta_rec->SetXTitle("eta");
+   m_pT_eta_rec->SetYTitle("pT (GeV)");
+   m_pT_eta_gen = new TH2F("pT_eta_gen","pT versus eta (generated)",
+                           nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
+   m_pT_eta_gen->SetXTitle("eta");
+   m_pT_eta_gen->SetYTitle("pT (GeV)");
+   m_pT   = new TH1F("pT","pT distribution",nxpT,xminpT,xmaxpT);
+   m_eta  = new TH1F("eta","eta distribution",nyeta,ymineta,ymaxeta);
    return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -264,12 +288,72 @@ Int_t St_dst_Maker::Make(){
     }
     cout << " run_dst: finished calling fill_dst_event_summary" << endl;
   }
+  // Fill histograms
+  St_DataSetIter dst(m_DataSet);         // data/global/dst
+  St_dst_track *globtrk = (St_dst_track *) dst("globtrk");
+  if (!globtrk) {
+    table_head_st *trk_h = globtrk->GetHeader();
+    dst_track_st  *trk   = globtrk->GetTable();
+    for (Int_t i = 0; i < globtrk->GetNRows(); i++){
+      dst_track_st *t = trk + i;
+      Float_t pT = 9999.;
+      if (t->invpt) pT = 1./TMath::Abs(t->invpt);
+      Float_t theta = TMath::Pi() - TMath::ATan(t->tanl);
+      Float_t eta   =-TMath::Log(TMath::Tan(theta/2.));
+      m_pT->Fill(pT);
+      m_eta->Fill(eta);
+      m_pT_eta_rec->Fill(eta,pT);
+    }
+  }
+  St_hepe_gent *hepev = (St_hepe_gent *) dst("hepe_gent");
+  St_particle  *particle=0;
+  if (hepev) {
+      table_head_st *t1_h = hepev->GetHeader();
+      hepe_gent_st *particle = hepev->GetTable();
+      for (Int_t l=0; l < hepev->GetNRows(); l++){
+        hepe_gent_st *p = particle+l;
+        if (p->isthep == 1) {
+          Float_t px = p->phep[0];
+          Float_t py = p->phep[1];
+          Float_t pz = p->phep[2];
+          Float_t pT    =  TMath::Sqrt(px*px+py*py);
+          Double_t theta =  TMath::Atan2 ( pT, pz );
+//        Double_t theta =  atan2 ( pT, pz );
+          Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
+          m_pT_eta_gen->Fill(eta,pT);
+	}
+      }
+  }
+  else {
+    St_DataSet *evgen = gStChain->DataSet("evgen");
+    if (evgen) {
+      St_DataSetIter local(evgen);
+      St_particle *pa = (St_particle *) local("particle");
+      if (pa){
+        table_head_st *t1_h = pa->GetHeader();
+        particle_st *particle = pa->GetTable();
+        for (Int_t l=0; l < pa->GetNRows(); l++){
+          particle_st *p = particle+l;
+          if (p->isthep == 1) {
+            Float_t px = p->phep[0];
+            Float_t py = p->phep[1];
+            Float_t pz = p->phep[2];
+            Float_t pT    =  TMath::Sqrt(px*px+py*py);
+            Double_t theta =  TMath::Atan2 ( pT, pz );
+//        Double_t theta =  atan2 ( pT, pz );
+            Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
+            m_pT_eta_gen->Fill(eta,pT);
+	  }
+	}
+      }
+    }
+  }
   return kStOK;
 }
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.7 1998/10/31 00:26:12 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.8 1998/11/01 16:42:27 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
