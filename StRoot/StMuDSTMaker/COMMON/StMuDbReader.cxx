@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDbReader.cxx,v 1.2 2002/05/04 23:56:29 laue Exp $
+ * $Id: StMuDbReader.cxx,v 1.3 2002/10/03 19:27:13 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -53,9 +53,9 @@ StMuDbReader::~StMuDbReader() {
 /// add entries in dbFile to internal data base ( mDb ), will call sortDb(), returns number of entries in mDb
 int StMuDbReader::addDb(const char* fileName) {
   DEBUGMESSAGE2("");
-  char name[128];
+  char name[256];
   int numberOfEvents;
-  char line[256];
+  char line[512];
 
   ifstream in(fileName);
   if (!in) {
@@ -64,11 +64,10 @@ int StMuDbReader::addDb(const char* fileName) {
     return mDb.size();
   }
   while ( in ) {
-    in.getline(line,255);
+    in.getline(line,511);
     DEBUGVALUE3(line);
     int iret = sscanf(line,"%s%i",name, &numberOfEvents);
     if (iret==2) {
-      DEBUGVALUE2(name);
       pair<string,int> aPair(name,numberOfEvents);
       mDb.push_back( aPair );
     }
@@ -191,6 +190,9 @@ int StMuDbReader::createDB(const char* dbName, const char* inputList) {
 /***************************************************************************
  *
  * $Log: StMuDbReader.cxx,v $
+ * Revision 1.3  2002/10/03 19:27:13  laue
+ * maximum filename length increased (256 characters)
+ *
  * Revision 1.2  2002/05/04 23:56:29  laue
  * some documentation added
  *
