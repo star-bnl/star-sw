@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSimpleMagneticField.hh,v 1.2 1999/01/20 16:38:56 lasiuk Exp $
+ * $Id: StSimpleMagneticField.hh,v 1.3 1999/03/15 13:45:59 lasiuk Exp $
  *
  * Author: Thomas Ullrich, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSimpleMagneticField.hh,v $
+ * Revision 1.3  1999/03/15 13:45:59  lasiuk
+ * include SystemOfUnits from SCL
+ *
  * Revision 1.2  1999/01/20 16:38:56  lasiuk
  * add threevector capability
  *
@@ -31,6 +34,7 @@
 #ifdef __sun
 #include <stdcomp.h>
 #endif
+#include "SystemOfUnits.h"
 
 #include "StMagneticField.hh"
 
@@ -74,8 +78,8 @@ StSimpleMagneticField::instance()
 }
 
 inline const StThreeVector<double>&
-StSimpleMagneticField::at(const StGlobalCoordinate& gc) const {return mB;}
+StSimpleMagneticField::at(const StGlobalCoordinate&) const {return mB;}
 
 inline const StThreeVector<double>&
-StSimpleMagneticField::at(const StThreeVector<double>& v) const {return mB;}
+StSimpleMagneticField::at(const StThreeVector<double>&) const {return mB;}
 #endif
