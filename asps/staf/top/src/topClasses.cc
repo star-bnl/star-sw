@@ -82,8 +82,8 @@ char * topProject::  listing () {
    char* c = socObject::listing();
    char* cc = NULL;
    char* s = selectionSpecification();
-   char* ss="                           ";
-   strncpy(ss,s,strlen(ss)-1);
+   char ss[33];
+   strncpy(ss,s,32);
    cc = (char*)MALLOC(79);
    memset(cc,0,79);
    sprintf(cc,"%s %s",c,ss);
@@ -499,16 +499,19 @@ void topJoin:: whereClause(const char* clause) {
 //----------------------------------
 // OVERRIDE socObject::listing()
 char * topJoin::  listing () {
-   char* c = topProject::listing();
+   char* c = socObject::listing();
+
    char* cc = NULL;
+   char* s = selectionSpecification();
+   char ss[16];
+   strncpy(ss,s,15);
    char* w = whereClause();
-   char* ww="                           ";
-   strncpy(ww,w,strlen(ww)-1);
+   char ww[16];
+   strncpy(ww,w,15);
    cc = (char*)MALLOC(79);
    memset(cc,0,79);
-   sprintf(cc,"%s (%s)",c,ww);
-   FREE(c);
-   FREE(w);
+   sprintf(cc,"%s %s#%s",c,ss,ww);
+   FREE(c); FREE(s); FREE(w);
    return cc;
 }
 
