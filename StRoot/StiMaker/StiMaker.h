@@ -9,6 +9,7 @@ using std::string;
 #include "StMaker.h"
 #include "StEvent/StEnumerations.h"
 #include "Sti/StiKalmanTrackFinder.h"
+#include "Sti/StiKalmanTrackFitter.h"
 
 class TH1D;
 class StEvent;
@@ -21,6 +22,7 @@ class StiEvaluableTrack;
 class StiTrackSeedFinder;
 class StiTrackFinder;
 class StiKalmanTrackFinder;
+class StiKalmanTrackFitter;
 class StiTrackSeedFinder;
 class StiKalmanTrackNode;
 class StiKalmanTrack;
@@ -53,7 +55,7 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.11 2003/09/10 19:47:54 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.12 2004/01/30 21:47:23 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
@@ -65,6 +67,7 @@ class StiMaker : public StMaker
     EventDisplay* getEventDisplay() 
       { return _eventDisplay; }
     StiToolkit * getToolkit();
+		void load(TDataSet *);
 
 private:
     StiMakerParameters * _pars;
@@ -73,7 +76,8 @@ private:
     StiToolkit  *        _toolkit;
     StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * _hitLoader;
     StiTrackSeedFinder *  _seedFinder;
-    StiTrackFinder *      _tracker;
+    StiKalmanTrackFinder * _tracker;
+    StiKalmanTrackFitter * _fitter;
     StiStEventFiller *    _eventFiller;
     StiTrackContainer *   _trackContainer;
     StiVertexFinder*      _vertexFinder;

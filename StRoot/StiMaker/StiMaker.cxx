@@ -3,6 +3,11 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.133  2004/01/30 21:47:23  pruneau
+// Changed organization so detector geometris are loaded and build in InitRun
+// rather than Make.
+// Added accesses to db
+//
 // Revision 1.132  2003/10/28 16:01:15  andrewar
 // Passing tracking parameter file to detector Builders.
 //
@@ -134,7 +139,6 @@
 #include "Sti/StiDefaultTrackFilter.h"
 #include "Sti/StiMasterDetectorBuilder.h"
 #include "Sti/Star/StiStarDetectorGroup.h"
-#include "Sti/StiKalmanTrackFinderParameters.h"
 #include "StiFtpc/StiFtpcDetectorGroup.h"
 #include "StiTpc/StiTpcDetectorGroup.h"
 #include "StiSvt/StiSvtDetectorGroup.h"
@@ -147,7 +151,6 @@
 #include "Sti/StiVertexFinder.h"
 #include "Sti/StiResidualCalculator.h"
 #include "Sti/StiDetectorContainer.h"
-#include "Sti/StiTrackSeedFinder.h"
 #include "StiMaker/StiMakerParameters.h"
 #include "StiMaker/StiStEventFiller.h"
 #include "StiGui/EventDisplay.h"
@@ -158,6 +161,18 @@
 #include "Sti/Html/HistoDocument.h"
 #include "Sti/StiTrackingPlots.h"
 #include "Sti/RadLengthPlots.h"
+#include "Sti/StiTrackingParameters.h"
+#include "Sti/StiKalmanTrackFinderParameters.h"
+#include "Sti/StiKalmanTrackFitterParameters.h"
+#include "StiTpc/StiTpcDetectorBuilder.h"
+#include "StiSvt/StiSvtDetectorBuilder.h"
+#include "Sti/StiHitErrorCalculator.h"
+#include "TDataSet.h"
+#include "tables/St_TrackingParameters_Table.h"
+#include "tables/St_KalmanTrackFinderParameters_Table.h"
+#include "tables/St_KalmanTrackFitterParameters_Table.h"
+#include "tables/St_HitError_Table.h"
+
 
 ClassImp(StiMaker)
   
@@ -169,6 +184,7 @@ ClassImp(StiMaker)
     _hitLoader(0),
     _seedFinder(0),
     _tracker(0),
+		_fitter(0),
     _eventFiller(0),
     _trackContainer(0),
     _vertexFinder(0),
@@ -264,13 +280,13 @@ Int_t StiMaker::InitDetectors()
   if (_pars->useTpc)
     {
       cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
-      _toolkit->add(group = new StiTpcDetectorGroup(_pars->activeTpc, _pars->baseName));
+      _toolkit->add(group = new StiTpcDetectorGroup(_pars->activeTpc));
       group->setGroupId(kTpcId);
     }
   if (_pars->useSvt)
     {
       cout<<"StiMaker::Init() -I- Adding detector group:SVT"<<endl;
-      _toolkit->add(group = new StiSvtDetectorGroup(_pars->activeSvt, _pars->baseName));
+      _toolkit->add(group = new StiSvtDetectorGroup(_pars->activeSvt));
       group->setGroupId(kSvtId);
     }
   if (_pars->usePixel)
@@ -296,25 +312,47 @@ Int_t StiMaker::InitDetectors()
 
 Int_t StiMaker::InitRun(int run)
 {
-  return StMaker::InitRun(run);
-}
-
-Int_t StiMaker::Make()
-{
-  cout <<"StiMaker::Make() -I- Starting on new event ======================================"<<endl;
   if (!_initialized)
     {
-      cout <<"StiMaker::Make() -I- Initialization Segment Started"<<endl;
-      _initialized=true;
-      //InitDetectors();
+      cout <<"StiMaker::InitRun() -I- Initialization Segment Started"<<endl;
+
+			// load db parameters
+			TDataSet * ds = GetDataBase("Calibrations/tracker");
+			if (ds)
+				{
+					try
+						{
+							cout << "StiMaker::InitRun() -I- Attempting to load the track finder and fitter parameter from the database"<< endl;
+							// Load Kalman Track Finder Parameters
+							StiKalmanTrackFinderParameters finderPars;
+							finderPars.setName("KalmanTrackFinderParameters");
+							finderPars.load(ds);
+							_tracker->setParameters(finderPars);
+							
+							// Load Kalman Track Fitter Parameters
+							StiKalmanTrackFitterParameters fitterPars;
+							fitterPars.setName("KalmanTrackFitterParameters");
+							fitterPars.load(ds);
+							_fitter->setParameters(fitterPars);
+						}
+					catch (runtime_error & err)
+						{
+							cout << "StiMaker::InitRun() - Run Time Error :" << err.what() << endl;
+						}
+				}
+			else
+				cout << "StiMaker::InitRun() -W- Using DEFAULT tracking and fitting control parameters"<<endl;
+			// Load Detector related parameters
+			StiMasterDetectorBuilder * masterBuilder = _toolkit->getDetectorBuilder();
+			masterBuilder->build(*this);
       StiDetectorContainer * detectorContainer = _toolkit->getDetectorContainer(); 
-      detectorContainer->build(_toolkit->getDetectorBuilder());
+      detectorContainer->build(masterBuilder);
       detectorContainer->reset();
-      if (_pars->useResidualCalculator)
-	{
-	  _residualCalculator = _toolkit->getResidualCalculator();
-	  _residualCalculator->initialize(_toolkit->getDetectorBuilder());
-	}
+			if (_pars->useResidualCalculator)
+				{
+					_residualCalculator = _toolkit->getResidualCalculator();
+					_residualCalculator->initialize(_toolkit->getDetectorBuilder());
+				}
       StiTrackSeedFinder * trackSeedFinder   = _toolkit->getTrackSeedFinder();
       trackSeedFinder->initialize();
       _hitLoader = _toolkit->getHitLoader();
@@ -322,26 +360,39 @@ Int_t StiMaker::Make()
       _seedFinder = _toolkit->getTrackSeedFinder();
       cout << "StiMaker::Make() -I- Instantiate Tracker" <<  endl;
       _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
+      _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
       _eventFiller =  new StiStEventFiller();
       _trackContainer = _toolkit->getTrackContainer();
       _vertexFinder   = _toolkit->getVertexFinder();
       if (!_tracker)
-	throw runtime_error("StiMaker::Make() -F- tracker is not a StiKalmanTrackFinder");
+				throw runtime_error("StiMaker::Make() -F- tracker is not a StiKalmanTrackFinder");
       _tracker->initialize();
       _tracker->clear();
       if (_toolkit->isGuiEnabled())
-	{
-	  _eventDisplay->initialize();
-	  _eventDisplay->draw();
-	}
-      if (_pars->doPlots)
-	{
-	  _recPlotter = new StiTrackingPlots("R","Reconstructed");
-	  if (_pars->doSimulation) _mcPlotter = new StiTrackingPlots("MC","MC");
-	  _radLength = new RadLengthPlots("R","Radiation Length Plots");
-	}
-      cout <<"StiMaker::Make() -I- Initialization Segment Completed"<<endl;
+				{
+					_eventDisplay->initialize();
+					_eventDisplay->draw();
+				}
+      /*if (_pars->doPlots)
+				{
+					_recPlotter = new StiTrackingPlots("R","Reconstructed");
+					if (_pars->doSimulation) _mcPlotter = new StiTrackingPlots("MC","MC");
+					_radLength = new RadLengthPlots("R","Radiation Length Plots");
+					}*/
+      _initialized=true;
+      cout <<"StiMaker::InitRun() -I- Initialization Segment Completed"<<endl;
     }
+	///
+
+
+
+  return StMaker::InitRun(run);
+}
+
+Int_t StiMaker::Make()
+{
+  cout <<"StiMaker::Make() -I- Starting on new event ======================================"<<endl;
+
   eventIsFinished = false;
   StMcEvent * mcEvent;
   StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
@@ -352,17 +403,23 @@ Int_t StiMaker::Make()
   // Retrieve bfield in Tesla
   double field = event->summary()->magneticField()/10.;
   if (fabs(field)<2.)
-    static_cast<StiKalmanTrackFinderParameters*>(_tracker->getParameters())->setField(field);
+    static_cast<StiKalmanTrackFinderParameters&>(_tracker->getParameters()).setField(field);
   else
     {
       cout <<"StiMaker::Make() -E- field:"<<field<<endl;
       return -1;
     }
-  if (_toolkit->isMcEnabled())
+  if (_toolkit->isMcEnabled() )
     {
-      mcEvent= mMcEventMaker->currentMcEvent();
-      if (!mcEvent)
-	throw runtime_error("StiMaker::Make() - ERROR - mcEvent == 0");
+			mMcEventMaker = dynamic_cast<StMcEventMaker*>(GetMaker("StMcEventMaker"));
+			if (mMcEventMaker)
+				{
+					mcEvent= mMcEventMaker->currentMcEvent();
+					if (!mcEvent) 
+						throw runtime_error("StiMaker::Make() -E- mcEvent == 0");
+				}
+      else
+				throw runtime_error("StiMaker::Make() -E- mMcEventMaker == 0");
     }
   else 
     mcEvent = 0;
