@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.hh,v 1.2 1999/01/15 22:53:47 wenaus Exp $
+ * $Id: StL0Trigger.hh,v 1.3 1999/02/09 22:38:22 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.hh,v $
- * Revision 1.2  1999/01/15 22:53:47  wenaus
- * version with constructors for table-based loading
+ * Revision 1.3  1999/02/09 22:38:22  wenaus
+ * add missing 'inline'
+ *
+ * Revision 1.3  1999/02/09 22:38:22  wenaus
+ * add missing 'inline'
  *
  * Revision 1.2  1999/01/15 22:53:47  wenaus
  * version with constructors for table-based loading
@@ -51,7 +54,7 @@ protected:
     long         mMwcCtbMultiplicity;
     long         mMwcCtbDipole;
     long         mMwcCtbTopology;
-VecLong& StL0Trigger::coarsePixelArray() { return mCoarsePixelArray;}
+    long         mMwcCtbMoment;           
 };
 
 inline VecLong& StL0Trigger::coarsePixelArray() { return mCoarsePixelArray;}
