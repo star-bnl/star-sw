@@ -5,12 +5,15 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.12 2003/04/25 15:53:54 zolnie Exp $
+ * $Id: EEmcGeomSimple.h,v 1.13 2003/05/23 22:13:04 zolnie Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
  *********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.13  2003/05/23 22:13:04  zolnie
+ * SUN does not like inlines (why??)
+ *
  * Revision 1.12  2003/04/25 15:53:54  zolnie
  * always initalize
  *
@@ -50,9 +53,8 @@ public:
   EEmcGeomSimple();
   virtual ~EEmcGeomSimple();
 
-  inline TVector3 getTowerCenter(const UInt_t sec, const UInt_t sub, const UInt_t etabin) const;
-
-  inline TVector3 getDirection(const Float_t xetaBin, const Float_t xphiBin) const;
+  TVector3 getTowerCenter(const UInt_t  sec, const UInt_t sub, const UInt_t etabin) const;
+  TVector3 getDirection  (const Float_t xetaBin, const Float_t xphiBin) const;
   
   inline Float_t getZ1()   const { return mZ1;  };
   inline Float_t getZ2()   const { return mZ2;  };

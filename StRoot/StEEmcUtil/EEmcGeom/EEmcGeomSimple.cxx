@@ -1,5 +1,8 @@
-// $Id: EEmcGeomSimple.cxx,v 1.11 2003/04/25 15:53:52 zolnie Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.12 2003/05/23 22:13:04 zolnie Exp $
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.12  2003/05/23 22:13:04  zolnie
+// SUN does not like inlines (why??)
+//
 // Revision 1.11  2003/04/25 15:53:52  zolnie
 // always initalize
 //
@@ -101,8 +104,7 @@ EEmcGeomSimple::useDefaultGeometry()
   mClock  =  CounterClockwise;  
 }
 
-
-inline TVector3 
+TVector3 
 EEmcGeomSimple::getTowerCenter(const UInt_t sec, const UInt_t sub, const UInt_t etabin) const 
 {
   Double_t  phi   = getPhiMean(sec,sub);
@@ -115,8 +117,7 @@ EEmcGeomSimple::getTowerCenter(const UInt_t sec, const UInt_t sub, const UInt_t 
   return TVector3(rho*cos(phi),rho*sin(phi),z);
 }
 
-
-inline TVector3 
+TVector3 
 EEmcGeomSimple::getDirection(const Float_t xetaBin, const Float_t xphiBin) const
 {
   int ietaBin=(int)(xetaBin+0.5);
