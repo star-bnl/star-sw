@@ -5,7 +5,7 @@
 #######################################################################
 .PHONY: all clean test help setup config install default
 #
-VERSION			:= "$Id: Makefile,v 1.10 1997/11/15 02:26:24 tull Exp $"
+VERSION			:= "$Id: Makefile,v 1.11 1997/12/12 02:03:18 tull Exp $"
 #
 default: all
 #

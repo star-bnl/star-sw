@@ -119,7 +119,8 @@ extern CC_P char * emlContext(char *fmt, ...);
 	}
 #define EML_PUSHSUCCESS(CODE) \
 	{ SETCV(STAFCV_OK); }
-#define EML_POPSTACK() {fprintf(stderr,"%s\n",eml_stack); \
+#define EML_POPSTACK() {fflush(0); \
+	fprintf(stderr,"%s\n",eml_stack); \
 	DSPERROR((dsl):); \
 	fflush(stderr); EML_CLEARSTACK();}
 
@@ -139,16 +140,15 @@ extern CC_P char * emlContext(char *fmt, ...);
 #define EML_MESSAGE emlMessage
 
 /*- EML_WARNING - print warning                                      -*/
-#define EML_WARNING(MESS) { emlMessage("WARNING: "#MESS"\n"); \
-	if(eml_context)fprintf(stdout,"%s\n",eml_context); \
-	EML_CLEARCONTEXT(); fflush(stdout); }
+#define EML_WARNING(MESS) { EML_TRACE(WARNING: MESS); }
 
 /*- EML_CONTEXT - define formated context for error                  -*/
 #define EML_CONTEXT emlContext
 
 /*- EML_TRACE - print trace                                          -*/
 #define EML_TRACE(CODE) \
-	{fprintf(stderr,"%s-%s.%d\n",#CODE,__FILE__,__LINE__); \
+	{fflush(0); \
+	fprintf(stderr,"%s-%s.%d\n",#CODE,__FILE__,__LINE__); \
 	if(eml_context)fprintf(stderr,"%s\n",eml_context); \
 	EML_CLEARCONTEXT(); fflush(stderr); }
 

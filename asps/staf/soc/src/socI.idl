@@ -111,6 +111,8 @@ interface socCatalogI : socFactoryI {
 // ** NONE **
 
 //:----------------------------------------------- FUNCTIONS          --
+STAFCV_T bind(in string pkgName);
+STAFCV_T release(in string pkgName);
 STAFCV_T deleteID(in IDREF_T id);
 		/* Delete object with idRef# == id. */
 STAFCV_T deleteObject(in string name, in string type);

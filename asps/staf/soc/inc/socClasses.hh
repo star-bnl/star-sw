@@ -125,6 +125,9 @@ public:
    virtual char * version (); // override virtual
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+   virtual STAFCV_T bind (const char * pname);
+   virtual STAFCV_T release (const char * pname);
+
 //- OVERRIDE VIRTUALS
    virtual char * list ();			// list all objects
    virtual unsigned char implementsInterface (const char * iface);
