@@ -125,6 +125,14 @@ if (/^i386_/) {
     $FEXTEND  = "-Mextend";
   }
   if (/^i386_linux2/) {$FLIBS   .= " -lI77 -lF77";}
+  if (defined($ARG{INSURE})){
+      print "Use INSURE++\n";
+      $CC       = "insure -g -Zoi \"compiler_c gcc\"";
+      $CPP      = "insure -g -Zoi \"compiler_c gcc\"";
+      $CXX      = "insure -g -Zoi \"compiler_cpp g++\"";
+      $LD       = $CXX;
+      $SO       = $CXX;
+  }
 }
 elsif (/^hp_ux102/) {
 #    case "hp":
@@ -202,6 +210,14 @@ elsif (/^sun4x_55$/ ||  /^sun4x_56$/) {
   $LINKCOM      .= "%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%> ";
   $LINKCOM      .= "%>:d/Templates.DB/*.o $ROOTSYS/obj/Templates.DB/*.o ||";  
   $LINKCOM      .= "%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
+  if (defined($ARG{INSURE})){
+      print "***Use INSURE++***\n";
+      $CC       = "insure -g -Zoi \"compiler_c cc\"";
+      $CPP      = "insure -g -Zoi \"compiler_c CC\"";
+      $CXX      = "insure -g -Zoi \"compiler_cpp CC\"";
+      $LD       = $CXX;
+      $SO       = $CXX;
+  }
 }
 elsif (/^intel_wnt/) {
 #  $DEBUG    = "-Zi";
