@@ -899,7 +899,7 @@ CCC   Assign final error (sigma) to extrapolated track position:
      2           (dabs(z0(k)).lt.zlimit2 .and. dabs(z0(k)).gt.
      3           zlimit1 .and. dsqrt(x0(k)*x0(k) + y0(k)*y0(k))
      4           .le. beampipecut2)) then
-                 izzz = int((z0(k)+zlimit2)/dz)+1;
+                 izzz = int((z0(k)+zlimit2)/dz)+1
                  zsum(izzz) = zsum(izzz) + 1   
               endif
               else if (k.gt.maxtr) then
