@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.hh,v 1.3 1999/11/30 18:52:55 snelling Exp $
+// $Id: StFlowTrack.hh,v 1.4 1999/12/04 00:10:35 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.hh,v $
+// Revision 1.4  1999/12/04 00:10:35  posk
+// Works with the new StEvent
+//
 // Revision 1.3  1999/11/30 18:52:55  snelling
 // First modification for the new StEvent
 //
@@ -39,7 +42,7 @@ public:
   Float_t Phi() const;
   Float_t Eta() const;
   Float_t Pt()  const;
-  Int_t   Select(Int_t harmonic, Int_t selection, Int_t subevent) const;
+  Int_t   Select(Int_t harmonic, Int_t selection, Int_t subevent=0) const;
 
   void SetPid(Char_t);
   void SetPhi(Float_t);
@@ -60,8 +63,8 @@ private:
   Float_t mPhi;
   Float_t mEta;
   Float_t mPt;
-  UInt_t  mSelection;
-  UInt_t  mSubevent[nHars][nSels];
+  Int_t  mSelection;
+  Int_t  mSubevent[nHars][nSels];
 
 };
 
@@ -86,7 +89,7 @@ inline Float_t StFlowTrack::Eta() const {return mEta;}
 inline Float_t StFlowTrack::Pt() const {return mPt;}                
 
 inline Int_t   StFlowTrack::Select(Int_t harmonic, Int_t selection,
- Int_t subevent=0) const {
+ Int_t subevent) const {
   if (!subevent || subevent == mSubevent[harmonic][selection]) {
     Int_t bitShift = harmonic + nHars * selection;
     return (mSelection & (1 << bitShift)) ? kTRUE : kFALSE;

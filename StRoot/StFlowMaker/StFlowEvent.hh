@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.hh,v 1.3 1999/11/30 18:52:52 snelling Exp $
+// $Id: StFlowEvent.hh,v 1.4 1999/12/04 00:10:33 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.hh,v $
+// Revision 1.4  1999/12/04 00:10:33  posk
+// Works with the new StEvent
+//
 // Revision 1.3  1999/11/30 18:52:52  snelling
 // First modification for the new StEvent
 //
@@ -32,8 +35,12 @@
 #include <stdlib.h>
 #include "StFlowTrackCollection.hh"
 #include "Rtypes.h"
+#include "SystemOfUnits.h"
 class TVector2;
 
+enum {nHars = 4, nSels=2, nSubs = 2};
+enum {nPhiBins = 60};
+//const Double_t bField = 0.5*tesla;
 
 class StFlowEvent{
 
@@ -57,6 +64,9 @@ public:
   Float_t  MeanPt(Int_t harN=1, Int_t selN=0, Int_t subN=0);
   Float_t  Psi(Int_t harN=1, Int_t selN=0, Int_t subN=0);
 
+//   enum {nHars = 4, nSels=2, nSubs = 2};
+//   enum {nPhiBins = 60};
+
   // For I/O of this object -- functions defined in StHbtIO.cc
   friend ostream& operator<<(ostream& out, StFlowEvent& ev);
   friend istream& operator>>(istream& in,  StFlowEvent& ev);
@@ -69,9 +79,6 @@ private:
   StFlowEvent* pFlowEvent;                 //!
   StFlowTrackCollection* pTrackCollection; //!
 
-  // C++ way to define constants in the header
-  enum {nHars = 4, nSels=2, nSubs = 2};
-  enum {nPhiBins = 60};
   /// typedef Double_t PhiWgt_t[nSel][nHars][nPhiBins];
   Double_t mPhiWgt[nSels][nHars][nPhiBins]; // To make event plane isotropic
 
