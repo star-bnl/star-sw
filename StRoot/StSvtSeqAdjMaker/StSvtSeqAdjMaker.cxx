@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.8 2000/08/24 04:23:50 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.9 2000/08/28 22:11:38 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.9  2000/08/28 22:11:38  caines
+ * Fixed check that data exists before using it
+ *
  * Revision 1.8  2000/08/24 04:23:50  caines
  * Improved histograms
  *
@@ -339,6 +342,8 @@ Int_t StSvtSeqAdjMaker::Make()
   if (Debug()) gMessMgr->Debug() << " In StSvtSeqAdjMaker::Make()"
                                << GetName() << endm; 
 
+
+  gMessMgr->Info() << "Working On Event: " << mSvtToBeAdjEvent->getEventNumber() << endm;
   
   for(int Barrel = 1;Barrel <= mSvtToBeAdjEvent->getNumberOfBarrels();Barrel++) {
     
@@ -349,8 +354,10 @@ Int_t StSvtSeqAdjMaker::Make()
 	for( int Hybrid = 1;Hybrid <=mSvtToBeAdjEvent->getNumberOfHybrids();Hybrid++){
 	  
           int index = mSvtToBeAdjEvent->getHybridIndex(Barrel,Ladder,Wafer,Hybrid);
+
+	  if( index < 0) continue;
 	  
-          mHybridToBeAdjData = (StSvtHybridData *)mSvtToBeAdjEvent->getObject(Barrel,Ladder,Wafer,Hybrid);
+          mHybridToBeAdjData = (StSvtHybridData *)mSvtToBeAdjEvent->at(index);
 	  if( !mHybridToBeAdjData) continue;
 
 
