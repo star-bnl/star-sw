@@ -184,6 +184,7 @@ class StiKalmanTrack : public StiTrack
      that were turned off or had no data for some reason.
     */
    int getMaxPointCount() const;
+   int getMaxPointCount(int detectorId) const;
 
    int getSeedHitCount() const;
    void setSeedHitCount(int c);
