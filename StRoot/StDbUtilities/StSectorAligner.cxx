@@ -81,9 +81,7 @@ StSectorAligner::moveHit(const float x[],float xprime[],int sector, int row)
   // set the vector with the input coordinates
   mVecHit->setX(x[0]); mVecHit->setY(x[1]); mVecHit->setZ(x[2]);
 
-  float angle(0),offset(0);
-
-  
+  float angle(0),offset(0),rotatePoint(0);
 
   // always rotate the hits
   if(row<=lastInnerSectorRow){ //inner
@@ -91,20 +89,23 @@ StSectorAligner::moveHit(const float x[],float xprime[],int sector, int row)
       thedb->SectorPosition(sector)->innerRotation()*deg_2_rad;
     offset = 
       thedb->SectorPosition(sector)->innerPositionOffsetX();
-    rotateHit(angle,sector,innerSectorRotatePoint);
+    rotatePoint = innerSectorRotatePoint;
   }
   else{ // outer
     angle  = 
       thedb->SectorPosition(sector)->outerRotation()*deg_2_rad;
     offset = 
       thedb->SectorPosition(sector)->outerPositionOffsetX();
-    rotateHit(angle,sector,outerSectorRotatePoint);
+    rotatePoint = outerSectorRotatePoint;
   }
   
   // translate
   if((row>lastInnerSectorRow && mTranslateOuterSector) ||
      (row<=lastInnerSectorRow && !mTranslateOuterSector)) 
     translateHit(offset,sector);
+
+  // rotate
+  rotateHit(angle,sector,rotatePoint);
 
   // set xprime (z coordinate should remain the same)
   xprime[0] = mVecHit->x(); xprime[1] = mVecHit->y(); xprime[2] = x[2];
