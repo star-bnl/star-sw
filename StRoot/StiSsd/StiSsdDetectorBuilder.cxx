@@ -89,7 +89,7 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
       all SSD materials (average).
     */
     //gMessMgr->Info() << "StiSsdDetectorBuilder::buildMaterials() - I - Started "<<endm;
-    _gasMat     = add(new StiMaterial("SsdAir", 0.49919,  1., 0.001205, 30420.*0.001205, 5.));
+    _gasMat     = add(new StiMaterial("SsdAir",7.3, 14.61, 0.001205, 30420.*0.001205, 7.3*12.e-9));
     _siMat      = add(new StiMaterial("SsdSi",14., 28.0855, 2.33, 21.82, 14.*12.*1e-9));
     _hybridMat  = add(new StiMaterial("SsdHyb",14., 28.0855, 2.33, 21.82, 14.*12.*1e-9));
 

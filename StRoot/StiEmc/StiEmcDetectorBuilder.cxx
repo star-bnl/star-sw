@@ -25,8 +25,8 @@ void StiEmcDetectorBuilder::buildDetectors(StMaker & source)
   for (unsigned int barrel = 0; barrel<3; barrel++)
     setNSectors(barrel,16);
 
-  _gas  = add(new StiMaterial("Pb",82., 208., 1., 1., 1.));
-  _lead = add(new StiMaterial("Pb",82., 208., 1., 1., 1.));
+  _gas  = add(new StiMaterial("Pb",82., 207.2, 21.45, 0.56, 82*12e-9));
+  _lead = add(new StiMaterial("Pb",82., 207.2, 21.45, 0.56, 82*12e-9));
   //    ideally get the following based on some db calls.
   float halfDepth=1; // half length along beam axis
   float thickness=1; // radial thickness

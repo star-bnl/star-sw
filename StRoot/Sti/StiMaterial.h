@@ -41,8 +41,8 @@ public:
     double getZOverA() { return _zOverA;}
 
     void set(const string& name,
-	     double a,
 	     double z,
+	     double a,
 	     double density,
 	     double radLength,
 	     double ionization);
