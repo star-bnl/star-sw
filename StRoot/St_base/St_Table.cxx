@@ -3,9 +3,9 @@
  
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// TStafTable                                                           //
+// St_Table                                                             //
 //                                                                      //
-// Array of the STAF structures longs (one STAF Table per element).     //
+// Wraps the array of the STAF C-structures (one STAF Table per element)//
 //                                                                      //
 // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/st2tab.gif"> </P> End_Html //
 //                                                                      //

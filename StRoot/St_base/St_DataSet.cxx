@@ -99,10 +99,10 @@ St_DataSet *St_DataSetIter::AddTable(St_Table *table, const Char_t *path)
 }
 
 //______________________________________________________________________________
-St_DataSet *St_DataSetIter::Cd(Char_t *dirname){
+St_DataSet *St_DataSetIter::Cd(const Char_t *dirname){
 /////////////////////////////////////////////////////////////////////
 //                                                                 //
-// St_DataSet *St_DataSetIter::Cd(Char_t *dirname)                 //
+// St_DataSet *St_DataSetIter::Cd(const Char_t *dirname)           //
 //                                                                 //
 // Change the current working directory to dirname                 //
 // return the pointer to the previous "working" St_DataSet object  //
@@ -139,7 +139,7 @@ St_DataSet *St_DataSetIter::Dir(Char_t *dirname)
   return set;
 }
 //______________________________________________________________________________
-St_DataSet *St_DataSetIter::Mkdir(Char_t *dirname){
+St_DataSet *St_DataSetIter::Mkdir(const Char_t *dirname){
  St_DataSet *set = 0;
  set = Next(dirname,0,kTRUE);
  if (!s_Next)  Reset();  // Create a new iterator 

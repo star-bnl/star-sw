@@ -45,7 +45,7 @@ class St_DataSet : public TNamed
     virtual void        ls(Option_t *option="");  // Option "*" means print all levels
     virtual void        ls(Int_t deep);           // Print the "deep" levels of this datatset
     virtual void        Update();                 // Update dataset
-            ClassDef(St_DataSet,1) 
+    ClassDef(St_DataSet,1) 
 };
 
 inline void St_DataSet::Add(St_Table *table){s_StafTable = table;}
@@ -94,13 +94,13 @@ public:
   virtual St_DataSet      *AddTable(St_Table *table, St_DataSet *dataset);
   virtual St_DataSet      *AddTable(St_Table *table, const Char_t *path);
 
-  virtual St_DataSet      *Cd(Char_t *dirname);
+  virtual St_DataSet      *Cd(const Char_t *dirname);
   virtual St_DataSet      *operator()() { return  (St_DataSet *)(s_Next?s_Next->Next():0);}
   virtual St_DataSet      *operator()(const Char_t *path) { return Next(path); }
   virtual void            *GetTable(const Char_t *path);
   virtual St_Table        *GetTableObj(const Char_t *path);
   virtual St_DataSet      *Dir(Char_t *dirname);
-  virtual St_DataSet      *Mkdir(Char_t *dirname);
+  virtual St_DataSet      *Mkdir(const Char_t *dirname);
   virtual St_DataSet      *Md(Char_t *dirname){return Mkdir(dirname);}
   virtual St_DataSet      *Pwd(){return s_WorkingDataSet;}
   virtual Int_t            Rmdir(St_DataSet *dataset,Option_t *option="");
