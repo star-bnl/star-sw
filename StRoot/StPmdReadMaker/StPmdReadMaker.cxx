@@ -42,6 +42,7 @@
 //
 ClassImp(StPmdReadMaker) // macro
    
+//FILE *fp = fopen("checking.dat","w");
 
 //-----------------------------------------------------------------
 
@@ -284,6 +285,7 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_det
 	    phit->setColumn(Int_t(col));         // filling col
 	    phit->setEnergy(edep);              // filling energy
 	    phit->setAdc(adc);              // filling ADC
+ //fprintf(fp,"%d %d %d %d %f %d\n", subdet,gsuper-1,row,col,edep,adc);	    
 	    if(mPmdEvent)mPmdEvent->addHit(phit);
 	  }
 	}
@@ -324,6 +326,7 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_det
 
 Int_t StPmdReadMaker::Finish() {
 
+//fclose(fp);
 
   return StMaker::Finish();
 }
@@ -353,7 +356,7 @@ Bool_t StPmdReadMaker::ReadCalibrationsConst()
   if(!pmdcalibst) return kFALSE;
   m_PmdCalibConst=pmdcalibst;		
   //loop over all boards and all channels //
-  //Int_t MAX_BRD= 1296;
+  Int_t MAX_BRD= 1296;
   /*
     for(Int_t id=1;id<=MAX_BRD;id++)
     {
