@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.3 2002/08/20 19:55:49 laue Exp $
+ * $Id: StMuEvent.h,v 1.4 2002/08/23 17:30:18 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -60,8 +60,10 @@ class StMuEvent : public TObject {
   unsigned short refMult();
   /// Currently not filled properly.
   double reactionPlane(unsigned short);
+  void   setReactionPlane(unsigned short, double v);
   /// Currently not filled properly.
   double reactionPlanePtWgt(unsigned short);
+  void   setReactionPlanePtWgt(unsigned short, double v);
   double magneticField();
   double zdcAdcAttentuatedSumWest();
   double zdcAdcAttentuatedSumEast();
@@ -111,7 +113,9 @@ inline unsigned short StMuEvent::refMultPos() {return mRefMultPos;}
 inline unsigned short StMuEvent::refMultNeg() {return mRefMultNeg;}
 inline unsigned short StMuEvent::refMult() {return refMultPos()+refMultNeg();}
 inline double StMuEvent::reactionPlane(unsigned short s) {return (s==0) ? mReactionPlane[0] : mReactionPlane[1];}
+inline void StMuEvent::setReactionPlane(unsigned short s, double v) {(s==0) ? mReactionPlane[0]=v : mReactionPlane[1]=v;}
 inline double StMuEvent::reactionPlanePtWgt(unsigned short s) {return (s==0) ? mReactionPlanePtWgt[0] : mReactionPlanePtWgt[1];}
+inline void StMuEvent::setReactionPlanePtWgt(unsigned short s, double v) {(s==0) ? mReactionPlanePtWgt[0]=v : mReactionPlanePtWgt[1]=v;}
 inline double StMuEvent::magneticField() { return mEventSummary.magneticField();}
 inline double StMuEvent::zdcAdcAttentuatedSumWest() { return mZdcTriggerDetector.adc(10);}
 inline double StMuEvent::zdcAdcAttentuatedSumEast() { return mZdcTriggerDetector.adc(13);}
@@ -130,6 +134,9 @@ inline StThreeVectorF StMuEvent::primaryVertexPosition() { return mEventSummary.
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.4  2002/08/23 17:30:18  laue
+ * additional member functions added (Helen Caines' request)
+ *
  * Revision 1.3  2002/08/20 19:55:49  laue
  * Doxygen comments added
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.7 2002/08/20 19:55:49 laue Exp $
+ * $Id: StMuDst.h,v 1.8 2002/08/23 17:30:18 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -138,6 +138,33 @@ public:
   /// returns pointer to the i-th stranneCut (of type TCut)
   static TCut* strangeCuts(int i) { return (TCut*)strangeArrays[smuCut]->UncheckedAt(i); }
 
+  static unsigned int numberOfPrimaryTracks()  { return arrays[muPrimary]->GetEntries(); }
+  static unsigned int numberOfGlobalTracks()   { return arrays[muGlobal]->GetEntries(); }
+  static unsigned int numberOfOtherTracks()    { return arrays[muOther]->GetEntries(); }
+  static unsigned int numberOfL3Tracks()       { return arrays[muL3]->GetEntries(); }
+  static unsigned int numberOfRichSpectras()   { return arrays[muRich]->GetEntries(); }
+  static unsigned int numberOfDetectorStates() { return arrays[muState]->GetEntries(); }
+  static unsigned int numberOfL3AlgoAccepts()  { return arrays[muAccept]->GetEntries(); }
+  static unsigned int numberOfL3AlgoRejects()  { return arrays[muReject]->GetEntries(); }
+  static unsigned int numberOfV0s()            { return strangeArrays[smuV0]->GetEntries(); }
+  static unsigned int numberOfXis()            { return strangeArrays[smuXi]->GetEntries(); }
+  static unsigned int numberOfKinks()          { return strangeArrays[smuKink]->GetEntries(); }
+  static unsigned int numberOfStrangeCuts()    { return strangeArrays[smuCut]->GetEntries(); }
+
+  static unsigned int GetNPrimaryTrack()    { return numberOfPrimaryTracks(); }  
+  static unsigned int GetNGlobalTrack()     { return numberOfGlobalTracks(); }   
+  static unsigned int GetNOtherTrack()      { return numberOfOtherTracks(); }    
+  static unsigned int GetNL3Track()         { return numberOfL3Tracks(); }       
+  static unsigned int GetNRichSpectra()     { return numberOfRichSpectras(); }   
+  static unsigned int GetNDetectorState()   { return numberOfDetectorStates(); } 
+  static unsigned int GetNL3AlgoAccept()    { return numberOfL3AlgoAccepts(); }  
+  static unsigned int GetNL3AlgoReject()    { return numberOfL3AlgoRejects(); }  
+  static unsigned int GetNV0()              { return numberOfV0s(); }            
+  static unsigned int GetNXi()              { return numberOfXis(); }            
+  static unsigned int GetNKink()            { return numberOfKinks(); }          
+  static unsigned int GetNStrangeCut()      { return numberOfStrangeCuts(); }    
+
+
     ClassDef(StMuDst,1)
 };
 
@@ -146,6 +173,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.8  2002/08/23 17:30:18  laue
+ * additional member functions added (Helen Caines' request)
+ *
  * Revision 1.7  2002/08/20 19:55:49  laue
  * Doxygen comments added
  *
