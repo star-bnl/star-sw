@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.2 2001/05/14 23:04:33 posk Exp $
+// $Id: StFlowEvent.h,v 1.3 2001/11/06 17:05:30 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.3  2001/11/06 17:05:30  posk
+// New 40 Gev centrality bins. Using only sin terms at 40 GeV.
+//
 // Revision 1.2  2001/05/14 23:04:33  posk
 // Can select PID for event plane particles. Protons not used for 1st har.
 // event plane.
@@ -47,10 +50,13 @@ public:
   StThreeVectorF VertexPos() const;
   UInt_t         Mult(StFlowSelection*);
   TVector2       Q(StFlowSelection*);
+  Float_t        SumPt(StFlowSelection*);
+  Float_t        SumPt2(StFlowSelection*);
   Float_t        q(StFlowSelection*);
   Float_t        Psi(StFlowSelection*);
   Bool_t         PtWgt() const;
   Bool_t         YWgt() const;
+  Bool_t         SinOnly() const;
   Int_t          Stripes() const;
   Char_t*        Pid();
   Bool_t         ProbPid() const;
@@ -79,6 +85,7 @@ public:
   static void SetMeanSinCosCut(Float_t lo, Float_t hi);
   static void SetPtWgt();
   static void SetYWgt();
+  static void SetSinOnly();
   static void SetStripes(Int_t);
   static void SetProbPid();
 
@@ -98,6 +105,7 @@ private:
   Flow::MeanSin_t mMeanSin;                             //!recentering
   static Bool_t   mPtWgt;                               // flag for pt weighting
   static Bool_t   mYWgt;                                // flag for y weighting
+  static Bool_t   mSinOnly;                             // flag for using sin terms only in the correlation term for v2
   static Int_t    mStripes;                             // flag for striped subevents
   static Char_t   mPid[10];                             // pi-, pi+, pi, pbar, proton, e+, e-
   static Bool_t   mProbPid;                             // flag for probability pid
@@ -127,6 +135,8 @@ inline StThreeVectorF StFlowEvent::VertexPos() const { return mVertexPos; }
 inline Bool_t   StFlowEvent::PtWgt() const { return mPtWgt; }
 
 inline Bool_t   StFlowEvent::YWgt() const { return mYWgt; }
+
+inline Bool_t   StFlowEvent::SinOnly() const { return mSinOnly; }
 
 inline Int_t    StFlowEvent::Stripes() const { return mStripes; }
 
@@ -173,6 +183,8 @@ inline void StFlowEvent::SetVertexPos(const StThreeVectorF& vertexPos) {
 inline void  StFlowEvent::SetPtWgt() { mPtWgt = kTRUE; }
 
 inline void  StFlowEvent::SetYWgt() { mYWgt = kTRUE; }
+
+inline void  StFlowEvent::SetSinOnly() { mYWgt = kTRUE; }
 
 inline void  StFlowEvent::SetStripes(const Int_t stripe) { mStripes = stripe; }
 

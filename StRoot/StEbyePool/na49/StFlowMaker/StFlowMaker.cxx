@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.3 2001/08/17 22:10:26 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.4 2001/11/06 17:05:30 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.4  2001/11/06 17:05:30  posk
+// New 40 Gev centrality bins. Using only sin terms at 40 GeV.
+//
 // Revision 1.3  2001/08/17 22:10:26  posk
 // Now also can do 40 GeV data.
 //
@@ -358,21 +361,9 @@ Bool_t StFlowMaker::FillFromMicroVer1(StEbyeEvent* pMicroEvent) {
 					  pMicroEvent->Vz()));
   pFlowEvent->SetEVeto(pMicroEvent->Eveto());
   pFlowEvent->SetRunID(pMicroEvent->RunID());
+  pFlowEvent->SetCent(pMicroEvent->Centrality());
 
-  // Set new centrality bins for 40 GeV
-  if (Flow::eBeam == 40) {
-    Float_t ZdcDividers[] = {6000.,12600.,17500.,21500.,24500.};
-    Float_t eVeto = pMicroEvent->Eveto();
-    Float_t cent = 0.;
-    if (eVeto < ZdcDividers[0])      { cent = 1.; }
-    else if (eVeto < ZdcDividers[1]) { cent = 2.; }
-    else if (eVeto < ZdcDividers[2]) { cent = 3.; }
-    else if (eVeto < ZdcDividers[3]) { cent = 4.; }
-    else if (eVeto < ZdcDividers[4]) { cent = 5.; }
-    else                             { cent = 6.; }
-    pFlowEvent->SetCent(cent);
-  } 
-  
+
   // Fill FlowTracks
   int    goodTracks    = 0;
   for (Int_t nt=0; nt < pMicroEvent->OrigMult(); nt++) {

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.4 2001/08/17 22:10:24 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.5 2001/11/06 17:05:28 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.5  2001/11/06 17:05:28  posk
+// New 40 Gev centrality bins. Using only sin terms at 40 GeV.
+//
 // Revision 1.4  2001/08/17 22:10:24  posk
 // Now also can do 40 GeV data.
 //
@@ -69,6 +72,7 @@ Float_t  StFlowEvent::mMeanSinCosCuts[2] = {-0.2,0.2};
 
 Bool_t  StFlowEvent::mPtWgt     = kFALSE;
 Bool_t  StFlowEvent::mYWgt      = kFALSE;
+Bool_t  StFlowEvent::mSinOnly   = kFALSE;
 Int_t   StFlowEvent::mStripes   = 0;
 Bool_t  StFlowEvent::mProbPid   = kFALSE;
 Char_t  StFlowEvent::mPid[10]   = {'\0'};
@@ -147,6 +151,42 @@ UInt_t StFlowEvent::Mult(StFlowSelection* pFlowSelect) {
 
 //-------------------------------------------------------------
 
+Float_t StFlowEvent::SumPt(StFlowSelection* pFlowSelect) {
+ Float_t sumPt = 0;
+
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    if (pFlowSelect->Select(pFlowTrack)) {
+      float pt = pFlowTrack->Pt();
+      sumPt += pt;
+    }
+  }
+
+  return sumPt;
+}
+
+//-------------------------------------------------------------
+
+Float_t StFlowEvent::SumPt2(StFlowSelection* pFlowSelect) {
+ Float_t sumPt2 = 0;
+
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    if (pFlowSelect->Select(pFlowTrack)) {
+      float pt = pFlowTrack->Pt();
+      sumPt2 += pt*pt;
+    }
+  }
+
+  return sumPt2;
+}
+
+//-------------------------------------------------------------
+
 TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) { 
   TVector2 mQ;
   Int_t  selN  = pFlowSelect->Sel();
@@ -196,13 +236,21 @@ Float_t StFlowEvent::Psi(StFlowSelection* pFlowSelect) {
 
 //-------------------------------------------------------------
 
-Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) { 
-  TVector2 mQ  = Q(pFlowSelect);
-  UInt_t mult  = Mult(pFlowSelect);
-  
-  if (mPtWgt || mYWgt) return 0.;
+Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) {
+  Float_t q = 0.;
 
-  return (mult) ? mQ.Mod() / sqrt((double)mult) : 0.;
+  if (mPtWgt || mYWgt) return q;
+  TVector2 mQ   = Q(pFlowSelect);
+  UInt_t mult   = Mult(pFlowSelect);
+  Float_t sumPt = SumPt(pFlowSelect);
+  
+  if (!mPtWgt && mult) {
+    q = mQ.Mod() / sqrt((double)mult);
+  } else if (mPtWgt && sumPt != 0.) { 
+    q = mQ.Mod() * (double)mult / (sqrt(sumPt) * sumPt);  // wrong
+  }
+
+  return q;
 }
 
 //-----------------------------------------------------------------------
@@ -240,11 +288,18 @@ void StFlowEvent::SetSelections() {
 	// MeanSinCos
 	Float_t meanSin = MeanSin(rapidity, pt, harN);
 	Float_t meanCos = MeanCos(rapidity, pt, harN);
-	if (mMeanSinCosCuts[1] > mMeanSinCosCuts[0] && 
-	    (meanSin < mMeanSinCosCuts[0]  ||
-	     meanSin >= mMeanSinCosCuts[1] ||
-	     meanCos < mMeanSinCosCuts[0]  ||
-	     meanCos >= mMeanSinCosCuts[1])) continue;
+	//for using sin terms only for correlation
+	if (harN == 1 && mSinOnly) {
+	  if (mMeanSinCosCuts[1] > mMeanSinCosCuts[0] && 
+	      (meanSin < mMeanSinCosCuts[0]  ||
+	       meanSin >= mMeanSinCosCuts[1])) continue;
+	} else {
+	  if (mMeanSinCosCuts[1] > mMeanSinCosCuts[0] && 
+	      (meanSin < mMeanSinCosCuts[0]  ||
+	       meanSin >= mMeanSinCosCuts[1] ||
+	       meanCos < mMeanSinCosCuts[0]  ||
+	       meanCos >= mMeanSinCosCuts[1])) continue;
+	}
 	
       	pFlowTrack->SetSelect(harN, selN);
 	
@@ -476,4 +531,3 @@ void StFlowEvent::PrintSelectionList() {
   cout << "#######################################################" << endl;
   
 }
-

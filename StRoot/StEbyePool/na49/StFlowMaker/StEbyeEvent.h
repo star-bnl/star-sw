@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeEvent.h,v 1.2 2001/05/14 23:04:02 posk Exp $
+ * $Id: StEbyeEvent.h,v 1.3 2001/11/06 17:05:28 posk Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  +         Art Poskanzer, LBNL Nov. 2000
@@ -14,6 +14,9 @@
  **********************************************************************
  *
  * $Log: StEbyeEvent.h,v $
+ * Revision 1.3  2001/11/06 17:05:28  posk
+ * New 40 Gev centrality bins. Using only sin terms at 40 GeV.
+ *
  * Revision 1.2  2001/05/14 23:04:02  posk
  * Can select PID for event plane particles. Protons not used for 1st har.
  * event plane.
@@ -114,8 +117,12 @@ class StEbyeEvent : public TObject {
   Int_t OrigMult() const { return mOrigMult; };
   Int_t CentMult() const { return mCentMult; };
 
-  Float_t Centrality() const { return mCentrality; };
+  /* calculating centrality online now
+   * Float_t Centrality() const { return mCentrality; };
+   */
 
+  Float_t Centrality();
+  
   Float_t Vx() const { return mVx; }
   Float_t Vy() const { return mVy; }
   Float_t Vz() const { return mVz; }
