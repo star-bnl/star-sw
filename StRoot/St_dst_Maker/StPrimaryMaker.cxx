@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.70 2002/01/24 06:10:25 balewski Exp $
+// $Id: StPrimaryMaker.cxx,v 1.71 2002/01/24 17:47:45 balewski Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.71  2002/01/24 17:47:45  balewski
+// double ppLMV bug fix
+//
 // Revision 1.70  2002/01/24 06:10:25  balewski
 // beamLine4ppLMV+DB correction and double call of ppLMV
 //
@@ -494,7 +497,8 @@ Int_t StPrimaryMaker::Init(){
      hPiFi[19] = new TH1F("Fin19","Vertex Y/cm found, no BeamLine",100,-5,5);
      hPiFi[20] = new TH1F("Fin20","Vertex Z/cm found, no BeamLine",100,-250,250);
      
-     hPiFi[21] = new TH1F("Fin21","Vertex Z/cm found-noBeamLine /cm ",200,-5,5);
+     hPiFi[21] = new TH1F("Fin21","Vertex Z/cm found-noBeamLine",200,-5,5);
+     hPiFi[22] =(TH1F *) new TH2F("Fin22","Vertex X/cm vs. Z/cm -noBeamLine",50,-250,250,30,-1.5,1.5); 
 //temp schizophrenia JB
   }
 
@@ -656,9 +660,12 @@ Int_t StPrimaryMaker::Make(){
 	MatchedTrk maTrk2= maTrk;
 	St_dst_vertex vertex2("vertexSchizo", 1);
 	int oldK=beam4ppLMV.isOn;
-	beam4ppLMV.isOn=0;
         int iRes2 =kStWarn;
-	if (beam4ppLMV.isOn) iRes2= ppLMV4(maTrk2,globtrk,&vertex2,-1);
+
+	beam4ppLMV.isOn=0;
+	if (oldK) iRes2= ppLMV4(maTrk2,globtrk,&vertex2,-1);
+	beam4ppLMV.isOn=oldK;
+
 	if(iRes2==kStOK) {
 	  dst_vertex_st *aa=(dst_vertex_st *)vertex2.GetTable();
 	  assert(aa);
@@ -666,8 +673,8 @@ Int_t StPrimaryMaker::Make(){
 	  hPiFi[18]->Fill( aa->x);
 	  hPiFi[19]->Fill( aa->y);
 	  hPiFi[20]->Fill( aa->z);
+	  ((TH2F*)hPiFi[22])->Fill( aa->z, aa->x);
 	}
-	beam4ppLMV.isOn=oldK;
 	//temp schizophrenia JB1 end
 	
 	if (beam4ppLMV.isOn) {// take beam line params from DB
@@ -686,8 +693,8 @@ Int_t StPrimaryMaker::Make(){
 	  assert(aa);
 	  dst_vertex_st *bb=(dst_vertex_st *)vertex->GetTable();
 	  assert(bb);
-	  printf("current # of vert=%d\n",vertex->GetNRows());
-	  bb+=vertex->GetNRows();
+	  bb+=vertex->GetNRows()-1;
+	  printf("current # of vert=%d, Z=%f delZ=%f \n",vertex->GetNRows(),bb->z,bb->z-aa->z);
 	  hPiFi[21]->Fill( bb->z-aa->z);
 	}
 	//temp schizophrenia JB2 end
