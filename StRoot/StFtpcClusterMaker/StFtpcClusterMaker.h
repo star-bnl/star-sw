@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.27 2004/09/27 12:54:27 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.28 2005/03/23 14:32:28 jcs Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.28  2005/03/23 14:32:28  jcs
+// additional changes for using body + extra temperatures starting with y2005
+//
 // Revision 1.27  2004/09/27 12:54:27  jcs
 // pad vs. time histograms moved to St_QA_Maker
 // set radial step histogram line color; red = FTPC East, blue=FTPC West
@@ -127,6 +130,7 @@ class St_ftpcGas;
 class St_ftpcElectronics;
 class St_ftpcInnerCathode;
 class St_ftpcClusterGeom;
+class St_ftpcTemps;
 class StEvent;
 class StFtpcHitCollection;
 class TObjArray;
@@ -134,7 +138,7 @@ class TObjArray;
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.27 2004/09/27 12:54:27 jcs Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.28 2005/03/23 14:32:28 jcs Exp $";
    St_db_Maker *mDbMaker;                         //!
    St_ftpcClusterPars   *m_clusterpars;           //!
    St_ftpcFastSimGas    *m_fastsimgas;            //!
@@ -154,7 +158,8 @@ class StFtpcClusterMaker : public StMaker {
    St_ftpcGas           *m_gas;                   //!
    St_ftpcElectronics   *m_electronics;           //!
    St_ftpcInnerCathode  *m_cathode;               //!
-   St_ftpcClusterGeom *m_clustergeo;          //!
+   St_ftpcClusterGeom   *m_clustergeo;            //!
+   St_ftpcTemps         *m_temps;                 //!
    void             MakeHistograms();// Histograms for FTPC cluster finder
  
  protected:
@@ -192,7 +197,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.27 2004/09/27 12:54:27 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.28 2005/03/23 14:32:28 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker,0)   //StAF chain virtual base class for Makers
 };
