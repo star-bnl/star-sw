@@ -1,7 +1,11 @@
 //////////////////////////////////////////////////////////////////////
+
 //
-// $Id: StPeCPair.cxx,v 1.2 2000/12/13 00:08:59 akio Exp $
+// $Id: StPeCPair.cxx,v 1.3 2001/02/12 21:02:56 yepes Exp $
 // $Log: StPeCPair.cxx,v $
+// Revision 1.3  2001/02/12 21:02:56  yepes
+// this is a test
+//
 // Revision 1.2  2000/12/13 00:08:59  akio
 // Added trigger sim and histograms
 //
