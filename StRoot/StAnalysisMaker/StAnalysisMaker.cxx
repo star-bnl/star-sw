@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.4 2003/02/18 22:19:09 jeromel Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.5 2003/02/27 15:25:36 jeromel Exp $
  *
  */
 
@@ -183,49 +183,53 @@ StAnalysisMaker::Make()
 
 
     // Y3 trigger Id dump
-    const StTriggerId *l1 = event->triggerIdCollection()->l1();
-    const StTriggerId *l2 = event->triggerIdCollection()->l2();
-    const StTriggerId *l3 = event->triggerIdCollection()->l3();
-    const StTriggerId *nominal = event->triggerIdCollection()->nominal();
+    StTriggerIdCollection *trgcol = event->triggerIdCollection();
+    if ( ! trgcol ){
+      cout << "No triggerIdCollection " << endl;
+    } else {
+      const StTriggerId *l1 = trgcol->l1();
+      const StTriggerId *l2 = trgcol->l2();
+      const StTriggerId *l3 = trgcol->l3();
+      const StTriggerId *nominal = trgcol->nominal();
 
-    if(l1) {
-      vector<unsigned int> l1Vec = l1->triggerIds();
-      cout << "L1: Mask " <<l1->mask() << " " ;
-      for (vector<unsigned int>::iterator viter = l1Vec.begin();
-	   viter != l1Vec.end(); ++viter) {
-	cout << (*viter) << "," ;
+      if(l1) {
+	vector<unsigned int> l1Vec = l1->triggerIds();
+	cout << "L1: Mask " <<l1->mask() << " " ;
+	for (vector<unsigned int>::iterator viter = l1Vec.begin();
+	     viter != l1Vec.end(); ++viter) {
+	  cout << (*viter) << "," ;
+	}
+	cout << endl;
       }
-      cout << endl;
-    }
-    if(l2) {
-      vector<unsigned int> l2Vec = l2->triggerIds();
-      cout << "L2: Mask " <<l2->mask() << " " ;
-      for (vector<unsigned int>::iterator viter = l2Vec.begin();
-	   viter != l2Vec.end(); ++viter) {
-	cout << (*viter) << "," ;
+      if(l2) {
+	vector<unsigned int> l2Vec = l2->triggerIds();
+	cout << "L2: Mask " <<l2->mask() << " " ;
+	for (vector<unsigned int>::iterator viter = l2Vec.begin();
+	     viter != l2Vec.end(); ++viter) {
+	  cout << (*viter) << "," ;
+	}
+	cout << endl;
       }
-      cout << endl;
-    }
-    if(l3) {
-      vector<unsigned int> l3Vec = l3->triggerIds();
-      cout << "L3: Mask " <<l3->mask() << " " ;
-      for (vector<unsigned int>::iterator viter = l3Vec.begin();
-	   viter != l3Vec.end(); ++viter) {
-	cout << (*viter) << "," ;
+      if(l3) {
+	vector<unsigned int> l3Vec = l3->triggerIds();
+	cout << "L3: Mask " <<l3->mask() << " " ;
+	for (vector<unsigned int>::iterator viter = l3Vec.begin();
+	     viter != l3Vec.end(); ++viter) {
+	  cout << (*viter) << "," ;
+	}
+	cout << endl;
       }
-      cout << endl;
-    }
-
-    if(nominal) {
-      vector<unsigned int> nominalVec = nominal->triggerIds();
-      cout << "NOMINAL: Mask " <<nominal->mask() << " " ;
-      for (vector<unsigned int>::iterator viter = nominalVec.begin();
-	   viter != nominalVec.end(); ++viter) {
-	cout << (*viter) << "," ;
+      
+      if(nominal) {
+	vector<unsigned int> nominalVec = nominal->triggerIds();
+	cout << "NOMINAL: Mask " <<nominal->mask() << " " ;
+	for (vector<unsigned int>::iterator viter = nominalVec.begin();
+	     viter != nominalVec.end(); ++viter) {
+	  cout << (*viter) << "," ;
+	}
+	cout << endl;
       }
-      cout << endl;
     }
-
 
 
     //
@@ -307,6 +311,9 @@ bool StAnalysisMaker::accept(StTrack* track)
 
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.5  2003/02/27 15:25:36  jeromel
+ * Missing check on triggerIdCollection() now added
+ *
  * Revision 2.4  2003/02/18 22:19:09  jeromel
  * Added dump of Y3 triggers
  *
