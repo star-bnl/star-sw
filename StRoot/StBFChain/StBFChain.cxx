@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.426 2004/07/23 21:36:58 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.427 2004/07/29 03:36:45 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -552,10 +552,11 @@ Bfc_st BFC1[] = {
   {"FlowAnalysis","","TagsChain","StEvent,Flow"     ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
   {"StrangeTags" ,"","TagsChain","StEvent"            ,"StStrangeTagsMaker","StStrangeTagsMaker","",kFALSE},
   {"SpectraTag"  ,"","TagsChain","StEvent"              ,"StSpectraTagMaker","StSpectraTagMaker","",kFALSE},
+  {"HeavyTags"   ,"","TagsChain","StEVent"                  ,"StHeavyTagMaker","StHeavyTagMaker","",kFALSE},
   //{"EbyeScaTags" ,"","TagsChain","StEvent"            ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
   {"PCollTag"    ,"","TagsChain","StEvent"                  ,"StPCollTagMaker","StPCollTagMaker","",kFALSE},
   {"tags"        ,"","TagsChain",
-                 "TagsChain,globT,Event,StrangeTags,SpectraTag,TpcTag,PCollTag"
+                 "TagsChain,globT,Event,StrangeTags,SpectraTag,HeavyTags,TpcTag,PCollTag"
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
 
 
@@ -743,7 +744,7 @@ Bfc_st BFC2[] = {
            ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
   {"Idst"        ,""  ,"",
-   "l0,dst,event,dEdxY2,genvtx,Kink2,xi2,svtdEdx,SvtIT,CMuDst,analysis,compend,EventQA"   ,"","","",kFALSE},
+         "l0,dst,event,dEdxY2,genvtx,Kink2,xi2,svtdEdx,CMuDst,analysis,compend,EventQA"   ,"","","",kFALSE},
   {"B2003I"      ,"","","ry2003,in,tpc_daq,tpcI,fcf,Physics,Idst,tags,Tree,evout"
                                                                   ,"","","Base chain for 2003 ITTF",kFALSE},
   {"dau2003i"    ,""  ,"",  "B2003I,CtbMatchVtx,Corr2,ppOpt,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd",
@@ -753,13 +754,32 @@ Bfc_st BFC2[] = {
                                    "","","Production chain for winter 2003 data dau2003a with ITTF",kFALSE},
 
   // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
-  {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
-                                                                       ,"Base chain for 2004 (tpc)",kFALSE},
-  {"P2004"       ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr3,ftpc,trgd,OSpaceZ2","",""
-                ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
-  {"pp2004"     ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr3,ppOpt,-PreVtx,ftpc,trgd,OSpaceZ2","",""
-                         ,"Production chain for 2004 pp data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
+  //{"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
+  //                                                                   ,"Base chain for 2004 (tpc)",kFALSE},
+  //{"P2004"       ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr3,ftpc,trgd,OSpaceZ2","",""
+  //            ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
+  //{"pp2004"     ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr3,ppOpt,-PreVtx,ftpc,trgd,OSpaceZ2","",""
+  //                     ,"Production chain for 2004 pp data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
+  // 
+  // *** ITTF chains *** Year4 drops standard chains and support ITTF chains only
+  //     Main change tpc -> tpcI and Cdst -> Idst
+  // 
+  {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,tags,Tree,evout","",""
+                                                             ,"Base chain for 2004 ITTF (tpc+svt)",kFALSE},
 
+  // Notes:
+  //  fcf was not added by default to allow switching if needed
+  //  there is no PreVtx in tpcI so no need to do -PreVtx for pp chain
+  //  SVT is added as base default, svtIT in chains 
+  {"P2004"       ,"" ,"",
+                          "B2004,fcf,VFMinuit,l3onl,tofDat,emcDY2,eemcD,fpd,ftpc,trgd,svtIT,Corr3,OSpaceZ2",
+              "","","Production chain for 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+  {"pp2004"      ,"" ,"",
+        "B2004,fcf,ppOpt,VFppLMV,CtbMatchVtx,l3onl,tofDat,emcDY2,eemcD,fpd,ftpc,trgd,svtIT,Corr3,OSpaceZ2",
+             "","","Production chain for 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},   
+   
+
+   
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","","",
                                                                     "Laser Calibration Chain (tcl)",kFALSE},
@@ -1139,10 +1159,11 @@ Bfc_st BFC2[] = {
   {"FlowAnalysis","","TagsChain","StEvent,Flow"     ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
   {"StrangeTags" ,"","TagsChain","StEvent"            ,"StStrangeTagsMaker","StStrangeTagsMaker","",kFALSE},
   {"SpectraTag"  ,"","TagsChain","StEvent"              ,"StSpectraTagMaker","StSpectraTagMaker","",kFALSE},
+  {"HeavyTags"   ,"","TagsChain","StEVent"                  ,"StHeavyTagMaker","StHeavyTagMaker","",kFALSE},
   //{"EbyeScaTags" ,"","TagsChain","StEvent"            ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
   {"PCollTag"    ,"","TagsChain","StEvent"                  ,"StPCollTagMaker","StPCollTagMaker","",kFALSE},
   {"tags"        ,"","TagsChain",
-                 "TagsChain,globT,Event,StrangeTags,SpectraTag,TpcTag,PCollTag"
+                 "TagsChain,globT,Event,StrangeTags,SpectraTag,HeavyTags,TpcTag,PCollTag"
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
 
 
