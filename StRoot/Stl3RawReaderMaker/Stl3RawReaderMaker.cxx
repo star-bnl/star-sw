@@ -8,9 +8,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
-//  $Id: Stl3RawReaderMaker.cxx,v 1.15 2004/01/23 23:14:06 kollegge Exp $
+//  $Id: Stl3RawReaderMaker.cxx,v 1.16 2004/03/26 00:31:59 dietel Exp $
 //
 //  $Log: Stl3RawReaderMaker.cxx,v $
+//  Revision 1.16  2004/03/26 00:31:59  dietel
+//  Check L3_SUMD, fixes http://www.star.bnl.gov/rt2/Ticket/Display.html?id=357
+//
 //  Revision 1.15  2004/01/23 23:14:06  kollegge
 //  Crashs of the l3 online analysis code so far stopped the chain. Changed this to a warning message.
 //
@@ -284,11 +287,20 @@ Int_t Stl3RawReaderMaker::fillStEvent()
   mStEvent->setL3Trigger(myStL3Trigger);
 
   // create StL3EventSummary
-  StL3EventSummary* myEventSummary = new StL3EventSummary(ml3reader->getL3_SUMD());
-  if (!myEventSummary) {
-        gMessMgr->Error("Stl3RawReaderMaker: No Stl3EventSummary.");
-	return 1;
+
+  if (!ml3reader->getL3_SUMD()) {
+    gMessMgr->Warning("Stl3RawReaderMaker: No L3_SUMD bank.");
+    myStL3Trigger->setL3EventSummary(NULL);
+    return 0;
   }
+
+  StL3EventSummary* myEventSummary = new StL3EventSummary(ml3reader->getL3_SUMD());
+
+  if (!myEventSummary) {
+    gMessMgr->Error("Stl3RawReaderMaker: No Stl3EventSummary.");
+    return 1;
+  } 
+
   // connect StL3EventSummary to StL3Trigger
   myStL3Trigger->setL3EventSummary(myEventSummary);
 
