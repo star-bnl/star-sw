@@ -9,6 +9,7 @@ enum StTrackFittingMethod {
   kKalmanFitId               = kKalmanFitIdentifier,
   kLine2StepId               = kLine2StepIdentifier,
   kLine3DId                  = kLine3DIdentifier,
-  kL3FitId                   = kL3FitIdentifier
+  kL3FitId                   = kL3FitIdentifier,
+  kITKalmanFitId             = kITKalmanFitIdentifier
 };
 #endif
