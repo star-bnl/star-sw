@@ -27,10 +27,10 @@ void GeomDrawUsage() {
           printf(" To get the OpenGL view one has to\n");
           printf("    1. Turn Qt ROOT Layer on (see: http://www.rhic.bnl.gov/~fine/EventDisplay \n");
           printf("    2. Select \"OpenGL view\" from the \"View\" menu of ROOT TCanvas \n");                
-          printf("\n$Id: GeomDraw.C,v 1.6 2004/08/06 22:11:37 fine Exp $\n");
+          printf("\n$Id: GeomDraw.C,v 1.7 2004/08/07 00:46:33 fine Exp $\n");
 }                 
 //_____________________________________________________________________________________________________________
-void GeomDraw(const char *fzFile="complete")
+void GeomDraw(const char *fzFile="complete",const char *out = "")
 {
    // Read the ZEBRA file with GEANT geometry
    // Convert it to TVolume format 
@@ -84,11 +84,18 @@ void GeomDraw(const char *fzFile="complete")
      if (hall) {
         hall->SetVisibility(2);
         new TBrowser("STAR Geometry", hall);
-        hall->Draw("4");
+        hall->Draw("5");
     }
     gPad->Modified();
     gPad->Update();
+    if (out && out[0]) {
+       TFile outFile(out,"RECREATE");
+       v->Write();
+       outFile.Write();
+       outFile.Close();      
+    }   
   } else {
      fprintf(stderr,"\n\n, ** Error **, No suitable STAR geonmetry has been found. Abort !!! \n");   
   }
+  deleet chain; chain = 0;
 }
