@@ -1,4 +1,4 @@
-// $Id: StarMCApplication.cxx,v 1.1 2004/07/12 20:36:39 potekhin Exp $
+// $Id: StarMCApplication.cxx,v 1.2 2004/07/13 19:10:25 potekhin Exp $
 //
 
 #include <iostream.h>
@@ -17,9 +17,6 @@
 #include <TPDGCode.h>
 
 
-#include "TPolyMarker3D.h"
-
-
 ClassImp(StarMCApplication)
 
 //_____________________________________________________________________________
@@ -30,7 +27,9 @@ ClassImp(StarMCApplication)
       _DetectorConstruction(),
       fFieldB(0),
       fRootManager("StarVMC", fileMode),
-      fileBased(0)
+      _fileBased(0),
+      _display(0),
+      _finishEventCB(0)
 {
   // Standard constructor
   cout<<"StarMCApplication ctor called"<<endl;
@@ -64,7 +63,9 @@ StarMCApplication::StarMCApplication()
     _DetectorConstruction(),
     fFieldB(0),
     fRootManager(),
-    fileBased(0)
+    _fileBased(0),
+    _display(0),
+    _finishEventCB(0)
 {    
 // Default constructor
 // ---
@@ -100,7 +101,7 @@ void StarMCApplication::ResetGenerator(StarGenerator *generator)
 //
 //_____________________________________________________________________________
 void StarMCApplication::setFileBased() {
-  fileBased=1;
+  _fileBased=1;
 }
 
 //_____________________________________________________________________________
@@ -142,7 +143,7 @@ void StarMCApplication::ConstructGeometry()
     exit(-1);
   }
 
-  if(fileBased) return; // no need to construct (?)
+  if(_fileBased) return; // no need to construct (?)
 
   // Do materials
   cout<<"StarMCApplication::ConstructGeometry DetectorConstruction.ConstructMaterials()"<<endl;
@@ -163,8 +164,7 @@ void StarMCApplication::ConstructGeometry()
 }
 
 //_____________________________________________________________________________
-void StarMCApplication::InitGeometry()
-{    
+void StarMCApplication::InitGeometry() {    
 // Initialize geometry
 // ---
   
@@ -214,8 +214,11 @@ void StarMCApplication::InitMC(void) {
 }
 
 //_____________________________________________________________________________
-void StarMCApplication::InspectGeometry(TGeoVolume* v)
-{
+void StarMCApplication::InitDisplay() {    
+  _display = new StarMCDisplay();
+}
+//_____________________________________________________________________________
+void StarMCApplication::InspectGeometry(TGeoVolume* v) {
 
   if(v==0) {
     cout<<"zero pointer supplied for top volume!"<<endl;
@@ -258,8 +261,7 @@ void StarMCApplication::GeneratePrimaries()
 }
 
 //_____________________________________________________________________________
-void StarMCApplication::BeginEvent()
-{    
+void StarMCApplication::BeginEvent() {    
   // User actions at beginning of event
   // ---
   
@@ -267,8 +269,7 @@ void StarMCApplication::BeginEvent()
 }
 
 //_____________________________________________________________________________
-void StarMCApplication::BeginPrimary()
-{    
+void StarMCApplication::BeginPrimary() {    
   // User actions at beginning of a primary track
   // ---
 
@@ -276,8 +277,7 @@ void StarMCApplication::BeginPrimary()
 }
 
 //_____________________________________________________________________________
-void StarMCApplication::PreTrack()
-{    
+void StarMCApplication::PreTrack() {    
   // User actions at beginning of each track
   // ---
 
@@ -285,13 +285,10 @@ void StarMCApplication::PreTrack()
 }
 
 //_____________________________________________________________________________
-void StarMCApplication::Stepping()
-{    
-  // User actions at each step
-  //  fTrackerSD.ProcessHits();
+void StarMCApplication::Stepping() { // User actions at each step
 
   Int_t copyNo;
-  Int_t id = gMC->CurrentVolID(copyNo);        //  cout<<"volume "<<id<<"   "<<gMC->VolName(id)<<endl;
+  Int_t id = gMC->CurrentVolID(copyNo);  //  cout<<"volume "<<id<<"   "<<gMC->VolName(id)<<endl;
 
   StarVolume* sv =  StarVolume::FindVolume(id);
   if(!sv) {
@@ -299,7 +296,7 @@ void StarMCApplication::Stepping()
     exit(-1);
   }
 
-  if (! sv->IsSensitive()) return;            //  cout<<"volume id: "<<id<<" name "<<sv->GetName()<<endl;
+  if (! sv->IsSensitive()) return;       //  cout<<"volume id: "<<id<<" name "<<sv->GetName()<<endl;
 
   Double_t edep = gMC->Edep();
 
@@ -356,34 +353,18 @@ void StarMCApplication::FinishEvent()
  
   fRootManager.Fill();
 
-  //  fTrackerSD.EndOfEvent();
-
 
   cout<<"End Event"<<endl;
   PrintHits();
-  TGeoVolume* v = gGeoManager->GetTopVolume();
-  v->Draw();
 
-
-
-  TPolyMarker3D* pm = new TPolyMarker3D(1000,20);
-  //  pm->SetMarkerSize(1);
-  pm->SetMarkerColor(2);
-
-  // Now do individual hits
-  TIterator*   it = Hits()->MakeIterator();
-  StarHit*      h = (StarHit*) it->Next();
-
-  while(h) {
-    TVector3 pos = h->GetPos();
-    pm->SetNextPoint(pos.X(),pos.Y(),pos.Z());
-    h=(StarHit*) it->Next();
+  if(_display) {
+    _display->DrawVolume();
+    _display->DrawHits(Hits());
   }
 
-  pm->Draw();
+  if(_finishEventCB) _finishEventCB();
 
-  // Clear hits: tbd
-
+  // Clear hits: tbd?
   Hits()->Delete();
 
   //  _stack->Print();  
