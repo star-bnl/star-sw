@@ -85,13 +85,19 @@ St_TableSorter::~St_TableSorter()
 int St_TableSorter::Search##valuetype  (const void *elem1, const void **elem2) { \
          valuetype *value1 = (valuetype *)(elem1);   \
          valuetype *value2 = (valuetype *)(*elem2);   \
-         Int_t res = *value1-*value2;                 \
+         valuetype diff = *value1-*value2;            \
+         Int_t res = 0;                               \
+         if (diff > 0)      res =  1;                 \
+         else if (diff < 0) res = -1;                 \
          return res;                                  \
 }                                                     \
 int St_TableSorter::Compare##valuetype  (const void **elem1, const void **elem2) { \
          valuetype *value1 = (valuetype *)(*elem1);   \
          valuetype *value2 = (valuetype *)(*elem2);   \
-         Int_t res = *value1-*value2;                 \
+         valuetype diff = *value1-*value2;            \
+         Int_t res = 0;                               \
+         if (diff > 0  )    res =  1;                 \
+         else if (diff < 0) res = -1;                 \
          if (res) return res;                         \
          return value1-value2;                        \
 }                                                     
@@ -185,11 +191,28 @@ Int_t St_TableSorter::BSearch(const void *value){
                    m_numberOfRows,  // Number of elements
                    sizeof(void *),  // Width of elements
                    CALLQSORT(m_searchMethod));
-      const Char_t *res = (const Char_t *)(*p);
-      // calculate index:
-      index = (res - (((const Char_t *)m_ParentTable[0]) + m_colOffset))/m_ParentTable.GetRowSize();
+      if (p) {
+         const Char_t *res = (const Char_t *)(*p);
+         // calculate index:
+         index =  m_firstRow + (res - (((const Char_t *)m_ParentTable[m_firstRow]) + m_colOffset))/m_ParentTable.GetRowSize();
+      }
     }
     return index;  
+}
+
+//_____________________________________________________________________________
+Int_t St_TableSorter::GetIndex(UInt_t index)
+{
+   Int_t indx = -1;
+   if (index < m_numberOfRows )  {
+     void *p = m_SortIndex[index];
+     if (p) {
+         const Char_t *res = (const Char_t *)p;
+         // calculate index:
+         indx = m_firstRow + (res - (((const Char_t *)m_ParentTable[m_firstRow]) + m_colOffset))/m_ParentTable.GetRowSize();
+     }
+  }
+  return indx;
 }
 
 #if 0
@@ -213,7 +236,7 @@ int St_TableSorter::CompareChar   (const void *elem1, const void *elem2)
 void St_TableSorter::FillIndexArray(){
   if (!m_SortIndex) return;
   for (Int_t i=m_firstRow; i < m_firstRow+m_numberOfRows;i++) 
-           m_SortIndex[i] = ((Char_t *)(m_ParentTable[i])) + m_colOffset;
+           m_SortIndex[i-m_firstRow] = ((Char_t *)(m_ParentTable[i])) + m_colOffset;
  
 }
 //_____________________________________________________________________________
@@ -254,7 +277,7 @@ void  St_TableSorter::SortArray(){
          break;
     };
  
-   if (compare) 
+   if (compare)  
            qsort(m_SortIndex,  //Start of target array
                 m_numberOfRows,       //Array size in elements
                 sizeof(void *),       //Element size in bytes

@@ -2,6 +2,9 @@
 // 
 // 
 
+//*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
+// 
+// 
 #ifndef STAR_St_TableSorter
 #define STAR_St_TableSorter
 
@@ -51,6 +54,7 @@ class St_TableSorter : public TObject {
     static int CompareUShort_t    (const void **, const void **);
     static int CompareUChar_t     (const void **, const void **);
     static int CompareChar_t      (const void **, const void **);
+           Int_t GetIndex(UInt_t index);
     void   FillIndexArray();
     static int SearchFloat_t     (const void *, const void **);
     static int SearchInt_t       (const void *, const void **);
