@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Module.cxx,v 1.7 1999/03/11 00:34:44 perev Exp $
+// $Id: St_Module.cxx,v 1.8 1999/06/14 09:45:41 fine Exp $
 // $Log: St_Module.cxx,v $
+// Revision 1.8  1999/06/14 09:45:41  fine
+// assert for St_Module (thanks Fisyak)
+//
 // Revision 1.7  1999/03/11 00:34:44  perev
 // St_base in new maker schema
 //
@@ -14,6 +17,7 @@
 // New base with Tree
 //
 
+#include <assert.h>
 #include <string.h>
 #include "St_Module.h"
 #include "table_header.h" 
@@ -322,6 +326,7 @@ Int_t St_Module::CheckParameters(const Char_t *names[])
            fprintf(stderr, "\t %i-%s %s of <%s> has not been defined yet\n"
                    ,odd+1,suffix[indx],title[i&1],name);
        }
+     assert (!errcode);
    }
    return errcode;
 }
@@ -366,6 +371,7 @@ Int_t St_Module::CheckResults(Int_t res, const Char_t *names[])
        }
        headfl = -headfl;
      }
+     assert (!errcode);
    }
    return res;
 }
@@ -396,6 +402,7 @@ Int_t St_Module::ExecuteModule()
         if (i < fN-1) printf(", ");
      }
      printf("; \n");
+     assert (!errcode);
    }
    else
     printf(" NO parameters \n");
