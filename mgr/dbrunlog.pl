@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbrunlog.pl,v 1.7 1999/09/21 12:26:39 wenaus Exp $
+# $Id: dbrunlog.pl,v 1.8 1999/10/30 15:12:29 wenaus Exp $
 #
 # $Log: dbrunlog.pl,v $
+# Revision 1.8  1999/10/30 15:12:29  wenaus
+# Updated data area paths
+#
 # Revision 1.7  1999/09/21 12:26:39  wenaus
 # Add calib/param databases to backup list
 #
@@ -42,7 +45,7 @@ require "dbsetup.pl";
 
 $debugOn = 0;
 
-$timestampFile = '/disk1/star/daq/last_update';
+$timestampFile = '/star/rcf/disk1/star/daq/last_update';
 $timestamp = (stat($timestampFile))[9];
 $timestamp = localtime($timestamp);
 
@@ -94,8 +97,8 @@ exit;
 ######################################################################
 sub displayLog {
     $hpssVolume = 0;
-    @daqfiles = </disk1/star/daq/*.daq /star/datapool/1/daq/*.daq>;
-    @dstfiles = </disk1/star/dst/*.dst.xdf /star/datapool/1/dst/*.dst.xdf>;
+    @daqfiles = </star/rcf/disk1/star/daq/*.daq /star/datapool/1/daq/*.daq>;
+    @dstfiles = </star/rcf/disk1/star/dst/*.dst.xdf /star/datapool/1/dst/*.dst.xdf>;
     # connect to the DB
     &StDbConnect();
 
@@ -363,9 +366,9 @@ END
                     } else {
                         if ( ! $gotHpssFile ) {
                             if ($hpssCheck) {
-                                print "<b><font color=\"red\">Data file not in /disk1/star/daq and not in HPSS</b></font>";
+                                print "<b><font color=\"red\">Data file not in on disk and not in HPSS</b></font>";
                             } else {
-                                print "<b>Data file not in /disk1/star/daq/</b>\n";
+                                print "<b>Data file not on disk</b>\n";
                             }
                         }
                     }
