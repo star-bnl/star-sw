@@ -107,8 +107,8 @@ C*- Load EMC energy to neutral energy
          rl=3
          do itwr = 1,ems_hits_bemc_h.nok
             if(ems_hits_bemc(itwr).tower_dep.eq.0)then  !tower sum in depth=0...
-               pbin=ems_hits_bemc(itwr).tower_phi_bin
-               ebin=ems_hits_bemc(itwr).tower_eta_bin
+               pbin=ems_hits_bemc(itwr).phi_bin
+               ebin=ems_hits_bemc(itwr).eta_bin
                nout=nout+1
                id(rl,pbin,ebin)=nout                  
                call find_pos_emc(ems_control,rl,pbin,ebin,phi,eta)
@@ -117,10 +117,10 @@ C*- Load EMC energy to neutral energy
                emc_energy(nout).iphi  =pbin
                emc_energy(nout).eta   =eta
                emc_energy(nout).phi   =phi
-               emc_energy(nout).energy=cal*ems_hits_bemc(itwr).eb_sum
+               emc_energy(nout).energy=cal*ems_hits_bemc(itwr).e_sum
                emc_energy(nout).error =0.0
                emc_energy(nout).n_track=1000
-               etot=etot+cal*ems_hits_bemc(itwr).eb_sum
+               etot=etot+cal*ems_hits_bemc(itwr).e_sum
             end if
          enddo
       endif
