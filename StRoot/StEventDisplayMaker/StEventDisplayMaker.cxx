@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.63 2000/08/04 21:03:43 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.64 2000/08/15 22:17:27 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -340,6 +340,7 @@ Int_t StEventDisplayMaker::Make()
       else 
 #endif
       {
+#if TPC
         TDataSet *dshits = GetDataSet("tphit");
         if (dshits)   {
            AddName("tphit(id_globtrk,x:y:z)");
@@ -352,6 +353,24 @@ Int_t StEventDisplayMaker::Make()
             printf(" tptrack found !!!\n"); 
            ((TTable *)dstracks)->Print(0,1);
          }
+#else
+        TDataSet *dshits = GetDataSet("dst/point");
+        if (dshits)   {
+           AddName("dst/point(id_track,position[0]:position[1]:charge)");
+           if (Debug()) {
+              printf(" tphit found !!!\n");  
+             ((TTable *)dshits)->Print(0,10);   
+           }
+        }
+         TDataSet *dstracks = GetDataSet("dst/globtrk");
+         if (dstracks) {
+            AddName("dst/globtrk");
+            if (Debug()) {
+              printf(" globtrk found !!!\n"); 
+             ((TTable *)dstracks)->Print(0,1);
+            }
+         }
+#endif
       }
     }
     TIter nextNames(m_ListDataSetNames);
@@ -717,7 +736,7 @@ Int_t StEventDisplayMaker::MakeTableTracks(const StTrackChair *points,StVirtualE
   if (points && (nRows = points->GetNRows()) ) {
     Color_t trackColor = kRed;
     Style_t trackStyle = 1;
-    Size_t trackSize  = 2;
+    Size_t trackSize  = 1;
     for (i = 0; i < nRows; i++ ){
       filter = (StVirtualEventFilter *)m_FilterArray->At(kTptTrack);
       if (!filter || filter->IsOn() ) {
@@ -768,8 +787,8 @@ Int_t StEventDisplayMaker::MakeTableHits(const TTable *points,StVirtualEventFilt
     TTableSorter *track2Line = new TTableSorter (ttt,tr);
     m_TableCollector->Add(track2Line);    // Collect to remove  
     Color_t hitColor = kGreen;
-    Style_t hitStyle = packed ?   5 : 8;
-    Size_t  hitSize  = packed ? 0.9 : 0.65;
+    Style_t hitStyle = packed ?   8 : 5;
+    Size_t  hitSize  = packed ? 0.6 : 0.9;
     i = 0;
     Int_t nextKeyIndx = 0;
     Int_t maxTrackCounter = track2Line->CountKeys();
@@ -919,6 +938,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.64  2000/08/15 22:17:27  fine
+// New defaults to draw globtrk and point
+//
 // Revision 1.63  2000/08/04 21:03:43  perev
 // Leaks + Clear() cleanup
 //
