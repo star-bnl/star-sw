@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.cxx,v 2.13 2004/10/17 03:35:10 perev Exp $
+ * $Id: StTrackDetectorInfo.cxx,v 2.14 2004/10/20 18:55:13 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.cxx,v $
+ * Revision 2.14  2004/10/20 18:55:13  ullrich
+ * Name of enum changed: StStarMaxR(Z) now StStarMaxTrackRangeR(Z).
+ *
  * Revision 2.13  2004/10/17 03:35:10  perev
  * Error check improved
  *
@@ -59,7 +62,7 @@
 
 ClassImp(StTrackDetectorInfo)
 
-static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.13 2004/10/17 03:35:10 perev Exp $";
+static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.14 2004/10/20 18:55:13 ullrich Exp $";
 
 StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0),
 					     mNumberOfPointsTpc(0),
@@ -253,10 +256,10 @@ int  StTrackDetectorInfo::bad() const
    if(ierr) return 1+100*ierr;
    ierr = mLastPoint.bad();
    if(ierr) return 2+100*ierr;
-   if (fabs(mFirstPoint.z())>kStarMaxZ) return 21;
-   if (fabs(mLastPoint.z ())>kStarMaxZ) return 22;
-   if (mFirstPoint.perp  () >kStarMaxR) return 31;
-   if (mLastPoint.perp   () >kStarMaxR) return 32;
+   if (fabs(mFirstPoint.z())>kStarMaxTrackRangeZ) return 21;
+   if (fabs(mLastPoint.z ())>kStarMaxTrackRangeZ) return 22;
+   if (mFirstPoint.perp  () >kStarMaxTrackRangeR) return 31;
+   if (mLastPoint.perp   () >kStarMaxTrackRangeR) return 32;
 
    return 0;
 }

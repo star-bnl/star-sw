@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.26 2004/10/17 03:35:10 perev Exp $
+ * $Id: StTrack.cxx,v 2.27 2004/10/20 18:55:13 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.27  2004/10/20 18:55:13  ullrich
+ * Name of enum changed: StStarMaxR(Z) now StStarMaxTrackRangeR(Z).
+ *
  * Revision 2.26  2004/10/17 03:35:10  perev
  * Error check improved
  *
@@ -107,7 +110,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.26 2004/10/17 03:35:10 perev Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.27 2004/10/20 18:55:13 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -478,7 +481,7 @@ int StTrack::bad() const
     if (ierr                             )	return    4+100*ierr;
     if (!mOuterGeometry                  )	return   25;
     ierr = mOuterGeometry->bad();
-    if (ierr                             )      return    5+100*ierr;
+    if (ierr                             )        return    5+100*ierr;
     
     const StTrackDetectorInfo *di = mDetectorInfo;
     if (!di                              )   	return   26;
@@ -487,13 +490,14 @@ int StTrack::bad() const
     StPhysicalHelixD hlx1 = mGeometry->helix();
     StThreeVectorD   ori2 = mOuterGeometry->origin();
     double len12 = hlx1.pathLength(ori2);
-    if (fabs(mLength-len12)>0.9)                return   43;
+    if (fabs(mLength-len12)>0.9)                  return   43;
      
-    if (fabs(hlx1.z(mLength))>kStarMaxZ  )      return   53;
+    if (fabs(hlx1.z(mLength))>kStarMaxTrackRangeZ) return   53;
     double qwe = pow(hlx1.x(mLength),2)+pow(hlx1.y(mLength),2);
-    if (sqrt(qwe)>kStarMaxR)			return   63;
+    if (sqrt(qwe)>kStarMaxTrackRangeR)		 return   63;
     return 0;
 }
+
 void StTrack::Streamer(TBuffer &R__b)
 {
     // Stream an object of class .
