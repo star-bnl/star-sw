@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.13 2003/03/13 18:59:13 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.14 2003/03/13 21:21:27 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.14  2003/03/13 21:21:27  pruneau
+ * getPhase() fixed. MUST inclde -helicity()*pi/2
+ *
  * Revision 2.13  2003/03/13 18:59:13  pruneau
  * various updates
  *
@@ -270,7 +273,7 @@ double StiKalmanTrackNode::getPhase() const
 {
   const StThreeVector<double> p=getGlobalMomentum();
   double h = getHelicity();
-  return (p.y()==0&&p.x()==0) ? (1-2.*h)*M_PI/4. : atan2(p.y(),p.x())-h*M_PI/2.;
+  return (p.y()==0&&p.x()==0) ? (1-2.*h)*M_PI/4. : atan2(p.y(),p.x())-h*M_PI/2;
 }
 
 /// returns momentum and its error matrix 
