@@ -51,22 +51,14 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
       //cout << " ||||||" << endl;
       for (source=first;source!=last;)
 	{
+	  if ((*source).getChildCount()<=0) break;
 	  targetNode= static_cast<StiKalmanTrackNode*>((*source).getFirstChild());
-	  if (!targetNode)
-	    {
-	      cout << " StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) -E- [1] targetNode==0" << endl;
-	      throw runtime_error("StiKalmanTrack::fit() -E- targetNode==0"); 
-	    }
 	  targetDet = targetNode->getDetector();
 	  targetHit = targetNode->getHit();
-
 	  //begin refit at first hit
 	  if (!targetHit && !started)
-	    {
-	      source++; continue;
-	    }
+	    { source++; continue;}
 	  started = true;
-
 	  // evolve state from that of source using dets source to target
 	  if (targetDet)
 	    status = targetNode->propagate(&(*source),targetDet);	// hit
@@ -83,7 +75,7 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 		  status = targetNode->updateNode();
 		}
 	    }
-	  if (status<0)
+	  /*	  if (status<0)
 	    {
 	      // truncate because the propagation to the targetNode was not successful
 	      //cout << " truncation 1 +++++++++++++++++++++++++++++" << endl;
@@ -91,8 +83,9 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	      //track->setLastNode(&(*source));
 	      //cout << " truncation 1 completed +++++++++++++++++++++++++++++" << endl;
 	      //break;
-	    }
-	  source++;//cout<<"=="<<endl;
+	      }*/
+	  source++;
+	  //cout<<"=="<<endl;
 	}
     }
   else
@@ -100,40 +93,16 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
       //cout << " set ++" << endl;
       last  = track->rend();
       first = track->rbegin();
-      //cout << " <<<<<<<<<<"<<endl;
-      /*
-      cout << " FIT != TRACKING --- Original Track" << endl;
-      StiKTNForwardIterator it2(track->getLastNode());
-      StiKTNForwardIterator end2 = it2.end();
-      while (it2!=end2) 
-	{
-	  const StiKalmanTrackNode& node2 = *it2;
-	  double x_g = node2.x_g();
-	  double y_g = node2.y_g();
-	  double rt_g2 = sqrt(x_g*x_g+y_g*y_g);
-	  cout << "rt=" << rt_g2 << " " << node2 << endl;
-	  ++it2;
-	}
-      cout << " FIT != TRACKING --- Begin Track Refit" << endl;
-      */
-
+      //cout << " <<<<<refit<<<<<"<<endl;
       for (source=first;source!=last;)
 	{
 	  targetNode= static_cast<StiKalmanTrackNode*>((*source).getParent());
-	  if (!targetNode)
-	    {
-	      cout << " StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) -E- [1] targetNode==0" << endl;
-	      throw runtime_error("StiKalmanTrack::fit() -E- targetNode==0"); 
-	    }
+	  if (!targetNode) break;
 	  targetDet = targetNode->getDetector();
 	  targetHit = targetNode->getHit();
-
-
 	  //begin refit at first hit
 	  if (!targetHit && !started)
-	    {
-	      source++; continue;
-	    }
+	    {  source++; continue;   }
 	  started = true;
 	  //cout << "  ==== " << *source << endl;
 	  // evolve state from that of source using dets source to target
@@ -154,8 +123,8 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 		  status = targetNode->updateNode();
 		}
 	    }
-	  if (status<0)
-	    {
+	  //if (status<0)
+	  //{
 	      //cout << "STATUS : " << status << endl;
 	      //cout << *targetNode << endl;
 	      // truncate because the propagation to the targetNode was not successful
@@ -165,7 +134,7 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	      // (*source).setParent(0);
 	      //cout << " truncation 2 completed +++++++++++++++++++++++++++++" << endl;
 	      //break;
-	    }
+	  //}
 	  source++;//cout<<"!="<<endl;
 	}
       //cout << "   <<<<<<<<<<<Done Refit" << endl;
@@ -204,3 +173,27 @@ void  StiKalmanTrackFitter::setDefaults()
   _pars.setDefaults();
   cout << "StiKalmanTrackFitter::setDefaults() -I- Done" << endl;
 }
+
+
+/*
+	useful diagnostic tool - do not delete.
+
+	if (!targetNode) continue;
+	    {
+	      cout << " StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) -E- [1] targetNode==0" << endl;
+	      cout << " FIT != TRACKING --- Original Track" << endl;
+	      StiKTNForwardIterator it2(track->getLastNode());
+	      StiKTNForwardIterator end2 = it2.end();
+	      while (it2!=end2) 
+		{
+		  const StiKalmanTrackNode& node2 = *it2;
+		  double x_g = node2.x_g();
+		  double y_g = node2.y_g();
+		  double rt_g2 = sqrt(x_g*x_g+y_g*y_g);
+		  cout << "rt=" << rt_g2 << " " << node2 << endl;
+		  ++it2;
+		}
+	      cout << " report done"<<endl;
+	      throw runtime_error("StiKalmanTrack::fit() -E- [1] targetNode==0"); 
+	    }
+*/
