@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerInclude.h,v 3.0 2000/07/14 12:56:49 genevb Exp $
+// $Id: StStrangeControllerInclude.h,v 3.1 2000/07/17 20:28:40 genevb Exp $
 // $Log: StStrangeControllerInclude.h,v $
+// Revision 3.1  2000/07/17 20:28:40  genevb
+// File size limitation workaround, some under the hood improvements
+//
 // Revision 3.0  2000/07/14 12:56:49  genevb
 // Revision 3 has event multiplicities and dedx information for vertex tracks
 //
@@ -32,7 +35,7 @@ inline void StStrangeControllerBase::PrintNumCand(const char* text, Int_t num) {
 }
 //_____________________________________________________________________________
 inline StStrangeControllerBase* StStrangeControllerBase::GetDstController() {
-  return dstMaker->Get(GetName());
+  return dstMaker->Get(dstType);
 }
 //_____________________________________________________________________________
 

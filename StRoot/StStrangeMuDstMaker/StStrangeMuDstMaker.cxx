@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.1 2000/07/14 21:28:34 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.2 2000/07/17 20:28:40 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.2  2000/07/17 20:28:40  genevb
+// File size limitation workaround, some under the hood improvements
+//
 // Revision 3.1  2000/07/14 21:28:34  genevb
 // Added V0Mc index for XiMc, fixed bug with entries for XiMc, cleaned up controllers
 //
@@ -56,20 +59,16 @@
 #include "StParticleDefinition.hh"
 #include "StMessMgr.h"
 
-#define EachController(proc) \
-  if (doV0) v0->proc; \
-  if (doXi) xi->proc; \
-  if (doKink) kink->proc;
+// Set maximum file size to 1.9 GB (Root has a 2GB limit)
+#define MAXFILESIZE 1900000000
+#define EachDoT(proc) \
+  for (Int_t i=1; i<strDstT; i++) { \
+    if (doT[i]) proc; }
+#define EachController(proc) EachDoT(cont[i]->proc);
 
 ClassImp(StStrangeMuDstMaker)
 //_____________________________________________________________________________
 StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
-
-  doV0 = kFALSE;
-  doXi = kFALSE;
-  doKink = kFALSE;
-  doMc = kFALSE;
-  rw = StrangeNoFile;
 
   muDst = 0;
   tree = 0;
@@ -77,15 +76,27 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
   dstMaker = 0;
   cuts = new StStrangeCuts();
   SetNumber(-2);
+  outFileNum = 1;
 
-  evFile = "evMuDst.root";
-  v0File = "v0MuDst.root";
-  xiFile = "xiMuDst.root";
-  kinkFile = "kinkMuDst.root";
-  evFiles = 0;
-  v0Files = 0;
-  xiFiles = 0;
-  kinkFiles = 0;
+  TString suffix = "MuDst.root";
+  for (Int_t i=0; i<strDstT; i++) {
+    doT[i] = kFALSE;
+    cont[i] = 0;
+    files[i]=0;
+    
+    // Defaults file names: evMuDst.root, v0MuDst.root, etc.
+    TString prefix = strTypeNames[i];
+    prefix.ToLower();
+    prefix.Append(suffix);
+    size_t len = prefix.Length();
+    file[i] = new char[len + 1];
+    strncpy(file[i],prefix.Data(),len);
+    (file[i])[len] = 0;
+  }
+
+  doMc = kFALSE;
+  rw = StrangeNoFile;
+
 }
 //_____________________________________________________________________________
 StStrangeMuDstMaker::~StStrangeMuDstMaker() {
@@ -107,9 +118,11 @@ Int_t StStrangeMuDstMaker::Init() {
     evClonesArray = new TClonesArray("StStrangeEvMuDst",1);
   }
   StStrangeControllerBase::currentMaker = this;
-  if (doV0) v0 = StStrangeControllerBase::Instantiate("V0");
-  if (doXi) xi = StStrangeControllerBase::Instantiate("Xi");
-  if (doKink) kink = StStrangeControllerBase::Instantiate("Kink");
+  EachDoT(cont[i] = StStrangeControllerBase::Instantiate(i));
+
+  v0 = cont[v0T];
+  xi = cont[xiT];
+  kink = cont[kinkT];
 
   if (rw == StrangeRead) {            // READING  the Micro Dst
     InitReadDst();
@@ -131,7 +144,7 @@ void StStrangeMuDstMaker::InitReadDst() {
   tree = (TTree*) muDst->Get("StrangeMuDst");
   if (!tree) {
     gMessMgr->Error() << "StStrangeMuDstMaker: no StrangeMuDst tree"
-                      << " in file " << evFile << endm;
+                      << " in file " << file[evT] << endm;
     return;
   }
   tree->SetBranchAddress("Event",&evClonesArray);
@@ -143,16 +156,13 @@ void StStrangeMuDstMaker::InitCreateDst() {
   
   tree = new TTree("StrangeMuDst","Strangeness Micro-DST");
   tree->SetDirectory(muDst);
-
-  if (doV0) v0->InitCreateDst(v0File);
-  if (doXi) xi->InitCreateDst(xiFile);
-  if (doKink) kink->InitCreateDst(kinkFile);
+  EachController(InitCreateDst());
 
   if (!dstMaker) {
     Int_t split=2;
     Int_t bsize=64000;
     TBranch* branch = tree->Branch("Event",&evClonesArray,bsize,split);
-    branch->SetFile(evFile);
+    branch->SetFile(file[evT]);
     cuts->Assure();
   }
 }
@@ -163,7 +173,7 @@ void StStrangeMuDstMaker::InitCreateSubDst() {
   Int_t split=2;
   Int_t bsize=64000;
   TBranch* branch = tree->Branch("Event",&evClonesArray,bsize,split);
-  branch->SetFile(evFile);
+  branch->SetFile(file[evT]);
   EachController(InitCreateSubDst());
   cuts->Append(dstMaker->Cuts().GetCollection());
 }
@@ -197,14 +207,14 @@ Int_t StStrangeMuDstMaker::MakeReadDst() {
     SetNumber(-1);                 // Use m_Number = -1 to indicate this.
   } else if (event_number == -1) {
     event_number = tree->GetReadEvent() + 1;
-  } else if (evFiles) {
+  } else if (files[evT]) {
     event_number -= evNumber;
   }
   Int_t tree_size = (Int_t) tree->GetEntries();
   if (event_number >= tree_size) {
-    if (evFiles) {                                     // If reading from
+    if (files[evT]) {                                     // If reading from
       SetStFiles();                                    // multiple files, then
-      if (!evFile) return kStErr;                      // get the next file
+      if (!file[evT]) return kStErr;                   // get the next file
       CloseFile();                                     // names, close the old
       if (OpenFile() == kStErr) return kStErr;         // files, open the new,
       InitReadDst();                                   // and subtract total
@@ -225,9 +235,9 @@ Int_t StStrangeMuDstMaker::MakeCreateDst() {
   // Get the cut parameters and fill StrangeCuts on the first event
   if (firstEvent) {
     Int_t iSize = cuts->GetCollection()->GetSize();
-    cuts->Fill("V0", GetDataSet("ev0par2"));
-    cuts->Fill("Xi", GetDataSet("exipar"));
-    cuts->Fill("Kink", GetDataSet("tkf_tkfpar"));
+    cuts->Fill(strTypeNames[v0T], GetDataSet("ev0par2"));
+    cuts->Fill(strTypeNames[xiT], GetDataSet("exipar"));
+    cuts->Fill(strTypeNames[kinkT], GetDataSet("tkf_tkfpar"));
     Int_t fSize = cuts->GetCollection()->GetSize();
     if (!(fSize-iSize))
       gMessMgr->Warning("StStrangeMuDstMaker: no cut parameters found.");
@@ -246,6 +256,8 @@ Int_t StStrangeMuDstMaker::MakeCreateDst() {
   new((*evClonesArray)[0]) StStrangeEvMuDst(*event);
   EachController(MakeCreateDst(*event));
   if (doMc) MakeCreateMcDst();
+
+  CheckFile();
   tree->Fill();
 
   return kStOK;
@@ -274,24 +286,24 @@ Int_t StStrangeMuDstMaker::MakeCreateMcDst() {
                           mcVertexIt != mcVertices.end(); mcVertexIt++) {
     const StMcTrack* parent = (*mcVertexIt)->parent();
     if (parent) {
-      if (doXi) { // looking for Xis
+      if (doT[xiT]) { // looking for Xis
         if ((parent->geantId()==23)||(parent->geantId()==24)||
             (parent->geantId()==31)||(parent->geantId()==32))
-	  xi->MakeCreateMcDst(*mcVertexIt);
-      } else if (doV0) { // looking for V0s
+	  cont[xiT]->MakeCreateMcDst(*mcVertexIt);
+      } else if (doT[v0T]) { // looking for V0s
         if ((parent->geantId()==16)||(parent->geantId()==18)||
             (parent->geantId()==26)) 
-	  v0->MakeCreateMcDst(*mcVertexIt);
+	  cont[v0T]->MakeCreateMcDst(*mcVertexIt);
       }
-      if (doKink) { // looking for Kinks
+      if (doT[kinkT]) { // looking for Kinks
 	if ((parent->geantId()==11)||(parent->geantId()==12))
-	  kink->MakeCreateMcDst(*mcVertexIt);
+	  cont[kinkT]->MakeCreateMcDst(*mcVertexIt);
       }
     }
   }//end of loop over MC  vertices
 
   // Do all non-Xi V0's at the end...
-  if (doXi && doV0) {
+  if (doT[xiT] && doT[v0T]) {
     for (StMcVertexIterator mcVertexIt = mcVertices.begin();
                           mcVertexIt != mcVertices.end(); mcVertexIt++) {
       const StMcTrack* parent = (*mcVertexIt)->parent();
@@ -301,7 +313,7 @@ Int_t StStrangeMuDstMaker::MakeCreateMcDst() {
         // Check for cascade parentage
         if (!((parent2) && ((parent2->geantId()==23)||(parent2->geantId()==24)||
             (parent2->geantId()==31)||(parent2->geantId()==32))))
-	  v0->MakeCreateMcDst(*mcVertexIt);
+	  cont[v0T]->MakeCreateMcDst(*mcVertexIt);
       }
     }
   }//end of loop over MC  vertices
@@ -360,10 +372,10 @@ void StStrangeMuDstMaker::SetRead (char* eFile, char* vFile,
 void StStrangeMuDstMaker::SetRead (StFile* eFiles, StFile* vFiles,
                                    StFile* xFiles, StFile* kFiles) {
   rw = StrangeRead;
-  evFiles = eFiles;
-  v0Files = vFiles;
-  xiFiles = xFiles;
-  kinkFiles = kFiles;
+  files[evT] = eFiles;
+  files[v0T] = vFiles;
+  files[xiT] = xFiles;
+  files[kinkT] = kFiles;
   evNumber = 0;
   SetStFiles();
 }
@@ -374,28 +386,18 @@ void StStrangeMuDstMaker::SetNoKeep() {
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::SetFiles (char* eFile, char* vFile,
                                     char* xFile, char* kFile) {
-  if (eFile) evFile = eFile;
-  if (vFile) v0File = vFile;
-  if (xFile) xiFile = xFile;
-  if (kFile) kinkFile = kFile;
+  if (eFile) file[evT] = eFile;
+  if (vFile) file[v0T] = vFile;
+  if (xFile) file[xiT] = xFile;
+  if (kFile) file[kinkT] = kFile;
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::SetStFiles () {
-  if (evFiles) {
-    evFiles->GetNextBundle();
-    evFile = const_cast<char*> (evFiles->GetFileName(0));
-  }
-  if (v0Files) {
-    v0Files->GetNextBundle();
-    v0File = const_cast<char*> (v0Files->GetFileName(0));
-  }
-  if (xiFiles) {
-    xiFiles->GetNextBundle();
-    xiFile = const_cast<char*> (xiFiles->GetFileName(0));
-  }
-  if (kinkFiles) {
-    kinkFiles->GetNextBundle();
-    kinkFile = const_cast<char*> (kinkFiles->GetFileName(0));
+  for (Int_t i=0; i<strDstT; i++) {
+    if (files[i]) {
+      files[i]->GetNextBundle();
+      file[i] = const_cast<char*> (files[i]->GetFileName(0));
+    }
   }
 }
 //_____________________________________________________________________________
@@ -408,13 +410,13 @@ Int_t StStrangeMuDstMaker::OpenFile() {
   else
     return kStOk;
     
-  if( ! (muDst = new TFile(evFile,option)) ) {
+  if( ! (muDst = new TFile(file[evT],option)) ) {
     gMessMgr->Error() << "StStrangeMuDstMaker: Error opening event file:\n  "
-                      << evFile << endm;
+                      << file[evT] << endm;
     return kStErr;
   }
   gMessMgr->Info() << "StStrangeMuDstMaker: Opened event file:\n  "
-                   << evFile << endm;     
+                   << file[evT] << endm;     
   return kStOk;
 }
 //_____________________________________________________________________________
@@ -429,6 +431,37 @@ Int_t StStrangeMuDstMaker::CloseFile() {
     tree = 0;
   }
   return kStOk;
+}
+//_____________________________________________________________________________
+void StStrangeMuDstMaker::CheckFile() {
+  if (muDst->GetBytesWritten() > MAXFILESIZE) {
+    gMessMgr->Warning() << "StStrangeMuDstMaker: File size limit "
+                        << MAXFILESIZE << " exceeded!\n"
+			<< "           Closing file " << file[evT] << endm;
+    CloseFile();
+    char buf_[10];
+    sprintf(buf_,"_%d",(++outFileNum));
+    for (Int_t i=0; i<strDstT; i++) {
+      TString fixer = file[i];
+      size_t len = fixer.Length();
+      if (outFileNum>2) {
+        TString suffix = strrchr(file[i],'.');
+        size_t last_ = fixer.Last('_');
+	size_t len_ = len - last_;
+	fixer.Remove(last_,len_).Append(buf_).Append(suffix);
+        len = fixer.Length();
+      } else {
+        size_t lastdot = fixer.Last('.');
+        fixer.Insert(lastdot,buf_);
+        len = fixer.Length();
+        file[i] = new char[len + 5];
+      }
+      strncpy(file[i],fixer.Data(),len);
+      (file[i])[len] = 0;
+    }
+    OpenFile();
+    InitCreateDst();
+  }
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::SelectEvent() {

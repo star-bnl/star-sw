@@ -1,5 +1,8 @@
-// $Id: StXiController.cxx,v 3.1 2000/07/14 21:28:34 genevb Exp $
+// $Id: StXiController.cxx,v 3.2 2000/07/17 20:28:40 genevb Exp $
 // $Log: StXiController.cxx,v $
+// Revision 3.2  2000/07/17 20:28:40  genevb
+// File size limitation workaround, some under the hood improvements
+//
 // Revision 3.1  2000/07/14 21:28:34  genevb
 // Added V0Mc index for XiMc, fixed bug with entries for XiMc, cleaned up controllers
 //
@@ -37,7 +40,7 @@
 class StStrangeEvMuDst;
 
 //_____________________________________________________________________________
-StXiController::StXiController() : StStrangeControllerBase("Xi") {
+StXiController::StXiController() : StStrangeControllerBase(xiT) {
 }
 //_____________________________________________________________________________
 StXiController::~StXiController() {
@@ -107,7 +110,7 @@ Int_t StXiController::MakeCreateMcDst(StMcVertex* mcVert) {
   if (Bach) {
     StXiMc* xiMc = new((*mcArray)[mcEntries++]) StXiMc(mcVert,Bach);
     if (V0daughter) {
-      StStrangeControllerBase* v0Cont = masterMaker->Get("V0");
+      StStrangeControllerBase* v0Cont = masterMaker->Get(v0T);
       if (v0Cont) {
         StMcVertex* v0Vertex = V0daughter->stopVertex();
         if (v0Vertex) {
