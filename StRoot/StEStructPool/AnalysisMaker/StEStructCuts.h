@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.h,v 1.1 2003/10/15 18:20:32 porter Exp $
+ * $Id: StEStructCuts.h,v 1.2 2004/08/23 19:12:13 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -69,11 +69,13 @@ public:
   virtual void fillHistograms(bool passed);
   virtual void writeCutHists(TFile* tf);
   virtual bool loadBaseCuts(const char* name,const char** vals,int nvals)=0;
-  virtual void loadUserCuts(const char* name,const char** vals,int nvals)=0;
+  virtual bool loadBaseCuts(const char* name,const char* val1,const char* val2);  // overloaded to accept strings
+  virtual void loadUserCuts(const char* name,const char** vals,int nvals)=0; 
+  virtual void loadUserCuts(const char* name,const char* val1,const char* val2);  // overloaded to accept strings
   virtual void printCuts(ostream& of) = 0;
   virtual void printCuts(const char* fileName);
-
-
+  virtual bool loadCutDB();   // Loads pre-compiled cuts from database
+    
   ClassDef(StEStructCuts,1)
 
 };
@@ -119,6 +121,9 @@ inline bool StEStructCuts::isLoaded(){ return (mcutFileName) ? true : false ; }
 /***********************************************************************
  *
  * $Log: StEStructCuts.h,v $
+ * Revision 1.2  2004/08/23 19:12:13  msd
+ * Added pre-compiled cut database, minor changes to cut base class
+ *
  * Revision 1.1  2003/10/15 18:20:32  porter
  * initial check in of Estruct Analysis maker codes.
  *
