@@ -7,14 +7,12 @@
      
   message ' --> bfc_cleanup - delete directories'     
 * delete directories/tables
-   cd /dui
    ls
    rmdir run
-   cd /dui
    rmdir event
-   cd /dui
-   rmdir calib
-   cd dui
+* 
+* rmdir calib
+   ls
    
   message ' --> bfc_cleanup - delete vectors'      
 * delete vectors
