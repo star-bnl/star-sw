@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.369 2003/12/13 22:49:54 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.370 2003/12/30 14:30:41 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -61,6 +61,7 @@ Bfc_st BFC1[] = {
   {"RY2003a","","","db,detDb"                         ,"","","Real data with Year3 study geometry ",kFALSE},
   {"RY2003b","","","db,detDb"                         ,"","","Real data with Year3 study geometry ",kFALSE},
   {"RY2003X","","","db,detDb"           ,"","","tempative 2003: Real data with Year4 trigger study",kFALSE},
+  {"RY2004" ,"","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
 
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
@@ -158,7 +159,7 @@ Bfc_st BFC1[] = {
                                                              ,"pp 2001 (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
 
-  // Year 3 chains *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
+  // Year 3 chains 
   // B2003 is a base-chain with tpc only for now
   {"B2003"       ,""  ,"","ry2003,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2003 (tpc)",kFALSE},
@@ -170,6 +171,12 @@ Bfc_st BFC1[] = {
   {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
            ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
+
+  // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
+  {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
+                                                                       ,"Base chain for 2004 (tpc)",kFALSE},
+  {"P2004"       ,""  ,"","B2004,l3onl,tofDat,emcDY2,fpd,Corr2,svt_daq,SvtD,ftpc,trgd,OSpaceZ","",""
+  ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
 
   // Other chains/Calibration
@@ -396,11 +403,15 @@ Bfc_st BFC1[] = {
   {"Fcl"    ,"ftpc_hits","ftpcChain","SCL"
                ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
 
-  {"pmd"    ,"pmd","","geant,pmdSim,pmdClust,pmdDis"      ,"StMaker","StChain",         "PMD chain",kFALSE},
-  {"pmdSim" ,"","","geant,PmdUtil","StPmdSimulatorMaker","StPmdSimulatorMaker", "simulator for PMD",kFALSE},
-  {"pmdClust"      ,"pmdClust","PmdSim","","StPmdClusterMaker",      "StPmdClusterMaker",        "",kFALSE},
-  {"pmdDis" ,"pmdDis","PmdClust",""   ,"StPmdDiscriminatorMaker",      "StPmdDiscriminatorMaker","",kFALSE},
 
+  {"pmdRaw"    ,"pmdRaw","","pmdRead,pmdClust,pmdDis"          ,"StMaker","StChain","PMD Raw chain",kFALSE},
+  {"pmd"       ,"pmd","","geant,pmdSim,pmdClust,pmdDis","StMaker","StChain", "PMD Simulation chain",kFALSE},
+  {"pmdRead"   ,"","","PmdUtil","StPmdReadMaker"            ,"StPmdReadMaker", "DAQ reader for PMD",kFALSE},
+  {"pmdSim"    ,"","","geant,PmdUtil","StPmdSimulatorMaker",
+                                                      "StPmdSimulatorMaker","Hit Simulator for PMD",kFALSE},
+  {"pmdClust"  ,"pmdClust","","","StPmdClusterMaker",    "StPmdClusterMaker","ClusterMaker for PMD",kFALSE},
+  {"pmdDis"    ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker",
+                                                  "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
 
 
   {"emcY2"             ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
@@ -574,6 +585,7 @@ Bfc_st BFC2[] = {
   {"RY2003a","","","db,detDb"                         ,"","","Real data with Year3 study geometry ",kFALSE},
   {"RY2003b","","","db,detDb"                         ,"","","Real data with Year3 study geometry ",kFALSE},
   {"RY2003X","","","db,detDb"           ,"","","tempative 2003: Real data with Year4 trigger study",kFALSE},
+  {"RY2004" ,"","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
 
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
@@ -671,7 +683,7 @@ Bfc_st BFC2[] = {
                                                              ,"pp 2001 (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
 
-  // Year 3 chains *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
+  // Year 3 chains 
   // B2003 is a base-chain with tpc only for now
   {"B2003"       ,""  ,"","ry2003,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2003 (tpc)",kFALSE},
@@ -682,6 +694,13 @@ Bfc_st BFC2[] = {
 
   {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
                  ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
+
+
+  // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
+  {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
+                                                                       ,"Base chain for 2004 (tpc)",kFALSE},
+  {"P2004"       ,""  ,"","B2004,l3onl,tofDat,emcDY2,fpd,Corr2,svt_daq,SvtD,ftpc,trgd,OSpaceZ","",""
+  ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
 
   // Other chains/Calibration
@@ -910,12 +929,14 @@ Bfc_st BFC2[] = {
   {"Fcl"    ,"ftpc_hits","ftpcChain","SCL"
                ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
 
-  {"pmd"    ,"pmd","","geant,pmdSim,pmdClust,pmdDis"      ,"StMaker","StChain",         "PMD chain",kFALSE},
-  {"pmdSim" ,"","","geant,PmdUtil","StPmdSimulatorMaker","StPmdSimulatorMaker", "simulator for PMD",kFALSE},
-  {"pmdClust"      ,"pmdClust","PmdSim","","StPmdClusterMaker",      "StPmdClusterMaker",        "",kFALSE},
-  {"pmdDis" ,"pmdDis","PmdClust",""   ,"StPmdDiscriminatorMaker",      "StPmdDiscriminatorMaker","",kFALSE},
-
-
+  {"pmdRaw"    ,"pmdRaw","","pmdRead,pmdClust,pmdDis"          ,"StMaker","StChain","PMD Raw chain",kFALSE},
+  {"pmd"       ,"pmd","","geant,pmdSim,pmdClust,pmdDis","StMaker","StChain", "PMD Simulation chain",kFALSE},
+  {"pmdRead"   ,"","","PmdUtil","StPmdReadMaker"            ,"StPmdReadMaker", "DAQ reader for PMD",kFALSE},
+  {"pmdSim"    ,"","","geant,PmdUtil","StPmdSimulatorMaker",
+                                                      "StPmdSimulatorMaker","Hit Simulator for PMD",kFALSE},
+  {"pmdClust"  ,"pmdClust","","","StPmdClusterMaker",    "StPmdClusterMaker","ClusterMaker for PMD",kFALSE},
+  {"pmdDis"    ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker",
+                                                  "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
 
   {"emcY2"             ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
