@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.70 2002/02/05 07:19:26 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.71 2002/03/12 02:33:22 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -92,6 +92,9 @@ Int_t StFlowMaker::Make() {
 
     if (mEventFileName != mEventFileNameOld) { 
       if (Debug()) gMessMgr->Info() << "FlowMaker: New file opened " << endm;
+//       gMessMgr->Info() << "##### FlowMaker: truncated filename " 
+// 		       <<  mEventFileName << endm;
+      gMessMgr->Info() << "##### FlowMaker: " <<  mEventFileName << endm;
       if (mPicoEventWrite && pPicoDST->IsOpen()) {
 	pPicoDST->Write(0, TObject::kOverwrite);
 	pPicoDST->Close();
@@ -152,8 +155,8 @@ Int_t StFlowMaker::Make() {
       double beamEnergy = pFlowEvent->CenterOfMassEnergy();
       short beamMassE   = pFlowEvent->BeamMassNumberEast();
       short beamMassW   = pFlowEvent->BeamMassNumberWest();
-      gMessMgr->Info() << "##### FlowMaker: " << runID << ", " << beamEnergy
-		       << " GeV/c " << beamMassE << " + " << beamMassW << endm;
+      gMessMgr->Info() << "##### FlowMaker: " << runID << " run, " <<
+	beamEnergy << " GeV/c " << beamMassE << " + " << beamMassW << endm;
       mRunID = runID;
     }
   }
@@ -174,32 +177,29 @@ Int_t StFlowMaker::Init() {
   Int_t kRETURN = kStOK;
 
   if (!mPicoEventRead) {
-    // get input file name
     pIOMaker = (StIOMaker*)GetMaker("IO");
     if (pIOMaker) {
-      mEventFileName = strrchr(pIOMaker->GetFile(),'/')+1;
-      mEventFileNameOld = mEventFileName; 
-    
-      gMessMgr->Info() << "##### FlowMaker: truncated filename " 
-		       <<  mEventFileName << endm;
-    }
-    StuProbabilityPidAlgorithm::readParametersFromFile("PIDTable.root");
+      mEventFileName = "";
+      mEventFileNameOld = mEventFileName;
+    } 
   }
+  StuProbabilityPidAlgorithm::readParametersFromFile("PIDTable.root");
 
   if (mPicoEventWrite) kRETURN += InitPicoEventWrite();
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.70 2002/02/05 07:19:26 snelling Exp $");
-  if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.71 2002/03/12 02:33:22 posk Exp $");
 
+  if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
 }
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowMaker::InitRun() {
+Int_t StFlowMaker::InitRun(int runID) {
   if (Debug()) gMessMgr->Info() << "FlowMaker: InitRun()" << endm;
+  PR(runID);
 
   return kStOK;
 }
@@ -1347,6 +1347,11 @@ Int_t StFlowMaker::InitPicoEventWrite() {
 
   TString* filestring = new TString(mPicoEventDir);
   filestring->Append(mEventFileName);
+  if (filestring->EndsWith(".event.root")) {
+    int nameLength = filestring->Length();
+    filestring->Remove(nameLength - 11);
+  }
+  //cout << filestring->Data() << endl;
   filestring->Append(".flowpicoevent.root");
   pPicoDST = new TFile(filestring->Data(),"RECREATE","Flow Pico DST file");
   if (!pPicoDST) {
@@ -1355,8 +1360,8 @@ Int_t StFlowMaker::InitPicoEventWrite() {
     return kStFatal;
   }
   pPicoDST->SetCompressionLevel(comp);
-  gMessMgr->Info() << "##### FlowMaker: PicoEvents file = " 
-		   << filestring->Data() << endm;
+//   gMessMgr->Info() << "##### FlowMaker: PicoEvents file = " 
+// 		   << filestring->Data() << endm;
   
   // Create a ROOT Tree and one superbranch
   pFlowTree = new TTree("FlowTree", "Flow Pico Tree");
@@ -1421,6 +1426,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.71  2002/03/12 02:33:22  posk
+// Now makes pico files in SL02c.
+//
 // Revision 1.70  2002/02/05 07:19:26  snelling
 // Quick fix for problems with backward compatibility (changed ClassDef back)
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.30 2002/02/13 22:29:12 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.31 2002/03/12 02:33:19 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -33,7 +33,7 @@ Int_t   StFlowCutTrack::mFitPtsFtpcCuts[2] = {5, 11};     // greater than ten!
 Float_t StFlowCutTrack::mFitOverMaxCuts[2] = {0.52, 1.1}; // greater than one!
 Float_t StFlowCutTrack::mChiSqTpcCuts[2]   = {0., 0.};
 Float_t StFlowCutTrack::mChiSqFtpcCuts[2]  = {0., 0.};
-Float_t StFlowCutTrack::mDcaFtpcCuts[2]    = {0., 1.};
+Float_t StFlowCutTrack::mDcaFtpcCuts[2]    = {0., 2.};
 Float_t StFlowCutTrack::mPtTpcCuts[2]      = {0.1, 8.};
 Float_t StFlowCutTrack::mPtFtpcCuts[2]     = {0.1, 8.};
 Float_t StFlowCutTrack::mEtaTpcCuts[2]     = {-1.3, 1.3};
@@ -445,6 +445,9 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.31  2002/03/12 02:33:19  posk
+// Now makes pico files in SL02c.
+//
 // Revision 1.30  2002/02/13 22:29:12  posk
 // Pt Weight now also weights Phi Weights. Added Eta Weight, default=FALSE.
 //
