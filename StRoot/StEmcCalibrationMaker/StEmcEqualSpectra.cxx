@@ -15,12 +15,13 @@
 #include "TF1.h"
 
 ClassImp(StEmcEqualSpectra);
+
 //_____________________________________________________________________________
 StEmcEqualSpectra::StEmcEqualSpectra(const char* cdet,Int_t nbis, Float_t bin0, Float_t bin1):StEmcSpectra(cdet,nbis,bin0,bin1)
 {  
 	mEqualMode = 3;
 	mEqualMin = 20;
-	mEqualMax = 140;			 	
+	mEqualMax = 140;			 
 }
 //_____________________________________________________________________________
 StEmcEqualSpectra::~StEmcEqualSpectra()
@@ -37,7 +38,7 @@ void StEmcEqualSpectra::DrawEqualConst()
   canvas6->Divide(1,2);
   
   TH1F* distr1=new TH1F("distr1","Relative gain distribution",200,0,4);
-  TH1F* distr2=new TH1F("distr2","Relative shift distribution",200,-4,4);
+  TH1F* distr2=new TH1F("distr2","Relative shift distribution",200,-50,50);
   distr1->SetFillColor(11);
   distr2->SetFillColor(11);
   
@@ -54,8 +55,8 @@ void StEmcEqualSpectra::DrawEqualConst()
     //cout <<"bin = "<<j<<"  a = "<<a<<"  b = "<<b<<"  s = "<<s<<endl;
     if (a>0 && s==1)
     { 
-      y[j]=a;
-      y1[j]=b;
+      if(fabs(a)<200) y[j]=a;
+      if(fabs(b)<200) y1[j]=b;
       distr1->Fill(y[j]);
       distr2->Fill(y1[j]);
     } 
@@ -105,6 +106,13 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
   Bool_t EqDone=kFALSE;
   Float_t a=0,b=0;
   
+  if(mode==-1)
+  {
+    a = 1;
+    b = 0;
+    EqDone=kTRUE;
+  }
+  
   if(mode>=0 && mode <=3)  
   {
     Float_t m1,r1,m2,r2;        
@@ -136,23 +144,27 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
   
 	if(mode==4)
 	{
-		TF1 *f=new TF1("f","[0]*exp(-[1]*x)");
-		f->SetRange(mEqualMin,mEqualMax);
+		TF1 *f=new TF1("ff","[0]*exp(-x/[1])",mEqualMin,mEqualMax);
 		TH1D *h=GetSpectra(position1);
-		h->Fit(f,"RQN");
-		Float_t m1,m2;
+    Float_t I1 = h->Integral(h->FindBin(mEqualMin),h->GetNbinsX());
+		f->SetParameter(1,10);
+		h->Fit(f,"RQNLW");
+		Float_t m1,m2,A1,A2;
 		m1 = f->GetParameter(1);
+		A1 = f->GetParameter(0);
 		h=GetSpectra(position2);
-		h->Fit(f,"RQN");
+    Float_t I2 = h->Integral(h->FindBin(mEqualMin),h->GetNbinsX());
+		h->Fit(f,"RQNLW");
 		m2 = f->GetParameter(1);
-		a=m2/m1;
-		b=0;
+		A2 = f->GetParameter(0);
+		a=m1/m2;
+		b=-log((A2*I1)/(A1*I2));
 		EqDone=kTRUE;
-    cout <<"  id = "<<position2<<"  ref = "<<position1<<"  slopes = "<<m1<<" , "<<m2
-         <<"  a = "<<a<<endl;
+    cout <<"  id = "<<position2<<"  ref = "<<position1<<"  slopes = "<<m2<<" , "<<m1
+         <<"  a = "<<a<<"  b = "<<b<<endl;
 		delete f;
-		
 	}
+  
   if (EqDone)
   {
 		TH2F* equal=GetEqual();
@@ -220,7 +232,7 @@ Bool_t StEmcEqualSpectra::Equalize()
           {
             numberReady++;
             Float_t mean,rms;
-            GetLogMeanAndRms(id1,mEqualMin,mEqualMax,&mean,&rms);
+            GetMeanAndRms(id1,mEqualMin,mEqualMax,&mean,&rms);
             sum+=mean;
           }
         }      
@@ -238,7 +250,7 @@ Bool_t StEmcEqualSpectra::Equalize()
             if(GetStatus(id1)>0 && GetSum(id1)>=GetMinHits())
             {
               Float_t mean,rms;
-              GetLogMeanAndRms(id1,mEqualMin,mEqualMax,&mean,&rms);
+              GetMeanAndRms(id1,mEqualMin,mEqualMax,&mean,&rms);
               Float_t dmean1=fabs(mean-LOCALMEAN);
               if(dmean1<dmean) {dmean=dmean1; refmean=mean; ref=id1;}
             }
