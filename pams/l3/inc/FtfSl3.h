@@ -20,6 +20,7 @@
 **:           apr 18  2000  ppy: modify readMezzannine to include rb and mz as arguments
 **:           apr 19  2000  ppy: dEdx from Christof
 **:           apr 19  2000  cs ppy: include FtfDedx added
+**:           oct 30  2000  ppy: ClassDef commented out
 **:<------------------------------------------------------------------*/
 #ifndef FTFSL3
 #define FTFSL3
@@ -35,7 +36,7 @@
 #ifdef SL3ROOT
 #include "Rtypes.h"
 #else
-#define ClassDef(a,b)
+//#define ClassDef(a,b)
 #endif
 
 class sectorGeometry {
@@ -124,7 +125,7 @@ public:
 private:
    void*     coordinateTransformer ;
 
-   ClassDef(FtfSl3,1)
+// ClassDef(FtfSl3,1)
 
 };
 #endif
