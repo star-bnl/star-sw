@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StRichAnalogSignalGenerator.cxx,v 1.8 2000/04/05 16:09:14 lasiuk Exp $
+ * $Id: StRichAnalogSignalGenerator.cxx,v 1.9 2000/05/17 22:17:43 lasiuk Exp $
  *
  * Description:
  *  StRichAnalogSignalGenerator generates signals on pads
@@ -32,6 +32,10 @@
  * 
  *************************************************************************
  * $Log: StRichAnalogSignalGenerator.cxx,v $
+ * Revision 1.9  2000/05/17 22:17:43  lasiuk
+ * make sure signal is never negative
+ * max()
+ *
  * Revision 1.8  2000/04/05 16:09:14  lasiuk
  * misc
  *
@@ -158,7 +162,11 @@ void StRichAnalogSignalGenerator::induceSignal(const StRichMiniHit* hit, double 
 	    q11 = induceTension (( (hit->position().y()-y) + mPadLength/2)/mAnodePadPlaneSpacing,    
 				 ( (hit->position().x()-x) + mPadWidth/2 )/mAnodePadPlaneSpacing);   
 
-	    s =  q * (q00-q10-q01+q11);
+	    //
+	    // Make sure the charge is never negative
+	    //
+	    s =  max(0.,q * (q00-q10-q01+q11));
+	    
 	    sum += s;
 	    if(RRS_DEBUG)
 		cout << "s/sum " << s << '/' << sum << endl;
