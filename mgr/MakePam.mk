@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.45 1998/08/19 21:41:41 fisyak Exp $
+# $Id: MakePam.mk,v 1.46 1998/08/25 02:10:09 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.46  1998/08/25 02:10:09  fisyak
+# Add nodebug
+#
 # Revision 1.45  1998/08/19 21:41:41  fisyak
 # Split base -> base + xdf2root
 #
@@ -99,11 +102,11 @@ VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_DIR) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS)
 #-------------------------------includes----------------------------
 STIC       := $(STAR_BIN)/stic
 GEANT3     := $(STAR_BIN)/geant3
-STICFLAGS =  $(addprefix -I,  $(STAR)/asps/staf/inc $(SRC_DIR) $(IDL_DIRS))
+STICFLAGS =  $(addprefix -I,  $(STAR)/inc $(SRC_DIR) $(IDL_DIRS))
 ifneq ($(STAR_SYS),hp_ux102)   
 CPPFLAGS += -D$(STAR_SYS) $(strip -D$(shell uname)) 
 endif                          
-CPPFLAGS += -I. -I../ -I/usr/include -I$(STAR)/asps/staf/inc \
+CPPFLAGS += -I. -I../ -I/usr/include -I$(STAR)/inc \
              $(addprefix -I, $(SRC_DIR) $(GEN_TAB) $(GEN_DIR) $(INC_DIRS)) \
             -I$(CERN_ROOT)/include
 ifneq ($(OUT_DIR),$(STAR))        
