@@ -473,15 +473,17 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 	    /* here we come after we examined one pad row */
 	    if(cl_found == 0) continue ;	/* nothing in this row goto next row */
 
-	    /* there was something in this padrow...*/
-	    rows++ ;
+	   
+	    // write this row out
+	    {
+	      // now we store TPCMZCLD DATA WORD 2 3 : rowid and number of clusters for this row
+	      UInt_t *rows_ok_p, *cl_ok_p ;
+	      // good cluster counter
+	      UInt_t cls_ok ;
+	      // reset good cluster counter
+	      cls_ok = 0 ;	
 
-	    // let's output the data in the 2.1 format
-	    // we'll do it stupidly for now and later use assembly or something...
-	    // now we are filling the TPCMZCLD DATA WORD 2 3
-	    *outres++ = rowAbs[i] ;
-	    *outres++ = cl_found ;
-
+	    
 #ifdef DO_STUFF
 	    // now fill the found clusters in the TPCMZCLD bank 
 	    for(j=0;j<cl_found;j++) 
@@ -499,15 +501,26 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 			UShort_t c ;
 		    } *f ;
 
-		    c = (struct fmt21_c *) outres++ ;
-		    f = (struct fmt21_f *) outres++ ;
-
-		    // reject one_pad clusters
+		     // reject one_pad clusters
 		    if(resx[j].flags & FLAG_ONEPAD)
 		    {
 		      //printf("one pad rejected\n") ;
 		      continue ;
 		    }
+
+		    // increase pointer of good ones
+		    cls_ok++ ;
+
+		    // set pointer to data word 2 and 3
+		    if(cls_ok == 1) 
+		      {
+			rows_ok_p = outres++ ;
+			cl_ok_p = outres++ ;
+		      }
+
+		    // set c and f to the right address in memory
+		    c = (struct fmt21_c *) outres++ ;
+		    f = (struct fmt21_f *) outres++ ;
 
 		    // if cluster is not empty
 		    if(resx[j].charge) 
@@ -539,6 +552,18 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 	    *outres++ = rowEnd[i] ;
 #endif
 	   
+	    if(cls_ok) 
+	      {	
+		// any acceptable clusters after the cut?
+		// fill data word number of clusters in this row
+		*cl_ok_p = cls_ok ;
+		// fill data word row_id
+		*rows_ok_p = rowAbs[i] ;
+		// increase number of rows done by this mezzanine
+		rows++ ;
+	      }
+	    
+	    } // write this row out
 
 	}	/* for MAX_LOGICAL_ROWS */
     
