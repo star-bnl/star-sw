@@ -1,5 +1,8 @@
-// $Id: rootlogon.C,v 1.5 1999/06/11 23:01:56 perev Exp $
+// $Id: rootlogon.C,v 1.6 1999/06/15 16:19:11 fine Exp $
 // $Log: rootlogon.C,v $
+// Revision 1.6  1999/06/15 16:19:11  fine
+// New logon script
+//
 // Revision 1.5  1999/06/11 23:01:56  perev
 // cleanup
 //
@@ -7,23 +10,66 @@
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
 //=======================================================================
-// owner:  Valery Fine
-// what it does: 
+// owner:  Yuri Fisyak
+// what it does: opens the ROOT session
 //=======================================================================
 
 {
 #include <iostream.h>
+    TString gPrompt =  gROOT->GetApplication()->Argv(0);
+    gPrompt += " [%d] ";
+
+   ((TRint*)gROOT->GetApplication())->SetPrompt( gPrompt.Data()); // Redefine prompt
+
    printf("\nWelcome to the ROOT tutorials\n\n");
    printf("\nType \".x STAR_Demos.C\" to get a toolbar from which to execute the STAR demos\n");
    printf("\nType \".x demos.C\" to get a toolbar from which to execute the demos\n");
    printf("\nType \".x demoshelp.C\" to see the help window\n\n");
 #pragma includepath "./StRoot"
 #pragma includepath "/afs/rhic/star/packages/dev/StRoot"
+   {
+ TDatime start;
+ 
+ int idate=start.GetDate();
+ int itime=start.GetTime();
+
+ int year=idate/10000;
+ int month=(idate%10000)/100;
+ int day=idate%100;
+ int hh=itime/10000;
+ int mm=(itime%10000)/100;
+ int ss=itime%100;
+
+ char* c[12]={"jan","feb","mar","apr","may","jun",
+              "jul","aug","sep","oct","nov","dec"};
+
+ cout << " *** Start at Date : " << day << "-" << c[month-1] << "-" << year
+      << " Time : " << hh << ":" << mm << ":" << ss << " ***" << endl;
+ cout << endl;
+
+   }
+
+
+//gROOT->SetStyle("Plain");// Default white background for all plots
+
+ // The modes below are provided by Nick van Eijndhoven <Nick@phys.uu.nl>
+ // from Alice.
+
+ gStyle->SetCanvasColor(10);
+ gStyle->SetStatColor(10);
+ gStyle->SetTitleColor(10);
+ gStyle->SetPadColor(10);
+
+ // Settings for statistics information
+ gStyle->SetOptFit(1);
+ gStyle->SetOptStat(1);
+
+ // Positioning of axes labels
+ gStyle->SetTitleOffset(1.2);
 
 // 	Assign bif size of hashtable for STAR I/O
 TBuffer::SetGlobalWriteParam(2003);
 printf("fgMapSize=%d\n",TBuffer::GetGlobalWriteParam());
-gROOT->SetStyle("Plain");
 
 }
  
