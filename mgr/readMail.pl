@@ -131,15 +131,15 @@ if ($SFLAG == 2 && $SSUBM){
     opendir(JDIR,"$SOURCE/jobfiles/");
 
     while ( defined($file = readdir(JDIR)) ){
-	if( $file =~ /$prodl/){
+	if( $file =~ /$prodl/ && $file !~ /\.lock/){
 	    $lock = "$SOURCE/jobfiles/$file.lock";
 	    if( ! -e "$lock" ){
 		if ( open(FO,">$lock") ){
 		    system("$SUBMIT $SOURCE/jobfiles/$file");
 		    rename("$SOURCE/jobfiles/$file","$SOURCE/archive/$file");
-		    unlink($lock);
 		    # Just for the heck of it, output submit debugging
 		    &ASLog("Job $SOURCE/jobfiles/$file submitted");
+		    unlink($lock);
 		    last;
 		} else {
 		    &ASLog("Lock $lock creation failed");
