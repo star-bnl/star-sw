@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////////
-// $Id: TwoSideDraw.C,v 1.10 2000/01/10 22:06:09 kathy Exp $
+// $Id: TwoSideDraw.C,v 1.11 2000/01/20 02:19:41 snelling Exp $
 //
 // $Log: TwoSideDraw.C,v $
+// Revision 1.11  2000/01/20 02:19:41  snelling
+// removed tss dependencies
+//
 // Revision 1.10  2000/01/10 22:06:09  kathy
 // add owner name and comments
 //
@@ -207,7 +210,7 @@ void TwoSideDraw() {
   } // Fill GEANT hits
   
   // -------- Fill pixels ----------
-  Bool_t isSimulator = chain->GetOption("tss") || chain->GetOption("trs");
+  Bool_t isSimulator = chain->GetOption("trs");
   
   if ((!noDAQ || isSimulator) && hits = GetPixels() && nHitsRows = hits->GetNRows() ) {
     
