@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.80 2000/01/31 22:15:26 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.81 2000/02/01 21:35:10 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.81  2000/02/01 21:35:10  kathy
+// fix code for xi mass in StEvent histograms; change curvature and impact param histograms so it's log of the value, plotted in linear scale
+//
 // Revision 1.80  2000/01/31 22:15:26  kathy
 // added Gene's code to make mass plot for Xi's in table and StEvent versions
 //
@@ -557,6 +560,10 @@ void St_QA_Maker::MakeHistGlob(){
                        TMath::Power((t->x_first[1]),2);
                 radf = TMath::Sqrt(radf); 
 
+        Float_t logImpact = TMath::Log10(t->impact); 
+        Float_t logCurvature = TMath::Log10(t->curvature); 
+
+
 // from Lanny on 2 Jul 1999 9:56:03
 //1. x0,y0,z0 are coordinates on the helix at the starting point, which
 //   should be close to the first TPC hit position assigned to the track.
@@ -574,7 +581,7 @@ void St_QA_Maker::MakeHistGlob(){
         m_glb_xf0->Fill(xdif);
         m_glb_yf0->Fill(ydif);
         m_glb_zf0->Fill(zdif);
-        m_glb_impactT->Fill(t->impact);
+        m_glb_impactT->Fill(logImpact);
 	
 // these are tpc & ftpc
 	m_pointT->Fill(trkpnt);
@@ -584,7 +591,7 @@ void St_QA_Maker::MakeHistGlob(){
         m_glb_r0T->Fill(t->r0);
         m_glb_phi0T->Fill(t->phi0);
         m_glb_z0T->Fill(t->z0);
-        m_glb_curvT->Fill(t->curvature);
+        m_glb_curvT->Fill(logCurvature);
         m_glb_xfT->Fill(t->x_first[0]);
         m_glb_yfT->Fill(t->x_first[1]);
         m_glb_zfT->Fill(t->x_first[2]);
@@ -631,7 +638,7 @@ void St_QA_Maker::MakeHistGlob(){
         m_glb_xf0TS->Fill(xdif);
         m_glb_yf0TS->Fill(ydif);
         m_glb_zf0TS->Fill(zdif);
-        m_glb_impactTS->Fill(t->impact);
+        m_glb_impactTS->Fill(logImpact);
 	
 	m_pointTS->Fill(trkpnt);
 	m_max_pointTS->Fill(trkmpnt);
@@ -640,7 +647,7 @@ void St_QA_Maker::MakeHistGlob(){
         m_glb_r0TS->Fill(t->r0);
         m_glb_phi0TS->Fill(t->phi0);
         m_glb_z0TS->Fill(t->z0);
-        m_glb_curvTS->Fill(t->curvature);
+        m_glb_curvTS->Fill(logCurvature);
         m_glb_xfTS->Fill(t->x_first[0]);
         m_glb_yfTS->Fill(t->x_first[1]);
         m_glb_zfTS->Fill(t->x_first[2]);
@@ -859,6 +866,10 @@ void St_QA_Maker::MakeHistPrim(){
 	Float_t chisq1 = t->chisq[1]; 
         Float_t nfitntot = (Float_t(trkfpnt))/(Float_t(trkpnt));
 
+        Float_t logImpact = TMath::Log10(t->impact); 
+        Float_t logCurvature = TMath::Log10(t->curvature); 
+
+
 // Spiros' modifications start - 10jan00
         target[0] = t->x_first[0];
         target[1] = t->x_first[1];
@@ -905,7 +916,7 @@ void St_QA_Maker::MakeHistPrim(){
 	m_ppT->Fill(pT);
         m_pmom->Fill(gmom);
 	m_plength->Fill(t->length);
-        m_prim_impact->Fill(t->impact);
+        m_prim_impact->Fill(logImpact);
        	m_pchisq0->Fill(chisq0);
 	m_pchisq1->Fill(chisq1);
 

@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.29 2000/01/31 22:15:25 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.30 2000/02/01 21:35:10 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.30  2000/02/01 21:35:10  kathy
+// fix code for xi mass in StEvent histograms; change curvature and impact param histograms so it's log of the value, plotted in linear scale
+//
 // Revision 1.29  2000/01/31 22:15:25  kathy
 // added Gene's code to make mass plot for Xi's in table and StEvent versions
 //
@@ -587,7 +590,7 @@ void StQABookHist::BookHistGlob(){
   m_glb_r0T     = QAH1F("QaGtrkR0T",     "globtrk: radius at start (cm), tpc ", 50,0.,200.);
   m_glb_phi0T   = QAH1F("QaGtrkPhi0T",   "globtrk: azimuth ang at start (deg), tpc ", 64,-360.,360.);
   m_glb_z0T     = QAH1F("QaGtrkZ0T",     "globtrk: z-coord at start (cm), tpc ", 50, -300.,300.);
-  m_glb_curvT   = QAH1F("QaGtrkCurvT",   "globtrk: curvature (1/cm), tpc ", 50,0.,.1);
+  m_glb_curvT   = QAH1F("QaGtrkCurvT",   "globtrk: log10 curvature (1/cm), tpc ", 50,-5.,0.);
   m_glb_xfT     = QAH1F("QaGtrkXfT",     "globtrk: x of first hit on trk, tpc", 50,-200.,200.);
   m_glb_xf0     = QAH1F("QaGtrkXf0",     "globtrk: x of first hit - on helix at start, tpc",60,-3.,3.);
   m_glb_yfT     = QAH1F("QaGtrkYfT",     "globtrk: y of first hit on trk, tpc", 50,-200.,200.);
@@ -604,7 +607,7 @@ void StQABookHist::BookHistGlob(){
   m_momT        = QAH1F("QaGtrkPT",      "globtrk: momentum, tpc",50,0.,5.);
   m_chisq0T     = QAH1F("QaGtrkChisq0T", "globtrk: chisq0 - xy, tpc", 50, 0.,5.);
   m_chisq1T     = QAH1F("QaGtrkChisq1T", "globtrk: chisq1 - z, tpc", 50, 0.,5.);
-  m_glb_impactT = QAH1F("QaGtrkImpactT", "globtrk: impact param from prim vtx, tpc", 100,0.,500.);
+  m_glb_impactT = QAH1F("QaGtrkImpactT", "globtrk: log10 impact param from prim vtx, tpc",120,-3.0,3.0);
 
 
 // 2D - tpc
@@ -699,7 +702,7 @@ void StQABookHist::BookHistGlob(){
   m_glb_r0TS     = QAH1F("QaGtrkR0TS",     "globtrk: radius at start (cm), tpc+svt", 50,0.,200.);
   m_glb_phi0TS   = QAH1F("QaGtrkPhi0TS",   "globtrk: azimuth ang at start (deg), tpc+svt", 64,-360.,360.);
   m_glb_z0TS     = QAH1F("QaGtrkZ0TS",     "globtrk: z-coord at start (cm), tpc+svt", 50, -300.,300.);
-  m_glb_curvTS   = QAH1F("QaGtrkCurvTS",   "globtrk: curvature (1/cm), tpc+svt", 50,0.,.1);
+  m_glb_curvTS   = QAH1F("QaGtrkCurvTS",   "globtrk: log10 curvature (1/cm), tpc+svt", 50,-5.,0.);
   m_glb_xfTS     = QAH1F("QaGtrkXfTS",     "globtrk: x of first hit on trk, tpc+svt", 50,-200.,200.);
   m_glb_xf0TS    = QAH1F("QaGtrkXf0TS",    "globtrk: x of first hit - on helix at start, tpc+svt",50,-5.,5.);
   m_glb_yfTS     = QAH1F("QaGtrkYfTS",     "globtrk: y of first hit on trk, tpc+svt", 50,-200.,200.);
@@ -716,7 +719,7 @@ void StQABookHist::BookHistGlob(){
   m_momTS        = QAH1F("QaGtrkPTS",      "globtrk: momentum, tpc+svt",50,0.,5.);
   m_chisq0TS     = QAH1F("QaGtrkChisq0TS", "globtrk: chisq0 - xy, tpc+svt", 50, 0.,5.);
   m_chisq1TS     = QAH1F("QaGtrkChisq1TS", "globtrk: chisq1 - z, tpc+svt", 50, 0.,5.);
-  m_glb_impactTS = QAH1F("QaGtrkImpactTS", "globtrk: impact param from prim vtx, tpc+svt", 100,0.,50.);
+  m_glb_impactTS = QAH1F("QaGtrkImpactTS", "globtrk: log10 impact param from prim vtx, tpc+svt", 120,-3.0,3.0);
 
 
 // 2D - tpc + silicon (svt + ssd)
@@ -911,7 +914,7 @@ void StQABookHist::BookHistPrim(){
   m_pchisq0     = QAH1F("QaPtrkChisq0",  "primtrk: chisq0 - xy", 50, 0.,5.);
   m_pchisq1     = QAH1F("QaPtrkChisq1",  "primtrk: chisq1 - z", 50, 0.,5.);
   m_plength     = QAH1F("QaPtrkLength",  "primtrk: track length", 50,0.,300.);
-  m_prim_impact = QAH1F("QaPtrkImpact",  "primtrk: impact param from prim vtx ", 100,0.,0.5);
+  m_prim_impact = QAH1F("QaPtrkImpact",  "primtrk: log10 impact param from prim vtx ", 120,-4.,2.0);
 
 
 // 2D
