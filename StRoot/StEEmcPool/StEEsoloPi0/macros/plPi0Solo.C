@@ -10,11 +10,10 @@ void plPi0Solo( int page=1,char *dd="C/") {
   int pr=0;
 
   TString fName="all" ;
-  // fName="ctbSum70-801sec1-12thr0.8";
+  fName="mc4";
   
-  TString outDir="outPi0/";
-  outDir="/auto/pdsfdv34/starspin/balewski/calib2004/outPi0";
-  outDir+=dd;
+  TString outDir="outPi0/"; 
+  //  outDir="/auto/pdsfdv34/starspin/balewski/calib2004/outPi0";  outDir+=dd;
  
   gROOT->Reset();
 
