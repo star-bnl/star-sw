@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcVertexMaker.h,v 1.3 2003/09/10 19:47:42 perev Exp $
+ * $Id: StZdcVertexMaker.h,v 1.4 2003/10/06 04:06:14 perev Exp $
  *
  * Author:  Johan E. Gonzalez, August 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StZdcVertexMaker.h,v $
+ * Revision 1.4  2003/10/06 04:06:14  perev
+ * cvs() overloaded
+ *
  * Revision 1.3  2003/09/10 19:47:42  perev
  * ansi corrs
  *
@@ -34,6 +37,8 @@ public:
     Int_t Init();
     Int_t Make();
     Int_t Finish();
+    virtual const char *GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StZdcVertexMaker.h,v 1.4 2003/10/06 04:06:14 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
 private:    
     float mEAP0;
