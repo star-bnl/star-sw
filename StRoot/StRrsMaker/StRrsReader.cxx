@@ -1,9 +1,12 @@
 //*************************************************************
-// $Id: StRrsReader.cxx,v 1.2 2000/01/25 22:02:23 lasiuk Exp $
+// $Id: StRrsReader.cxx,v 1.3 2000/02/14 01:06:49 lasiuk Exp $
 //
 // $Log: StRrsReader.cxx,v $
-// Revision 1.2  2000/01/25 22:02:23  lasiuk
-// Second Revision
+// Revision 1.3  2000/02/14 01:06:49  lasiuk
+// change structure StRichID
+//
+// Revision 1.3  2000/02/14 01:06:49  lasiuk
+// change structure StRichID
 //
 // Revision 1.2  2000/01/25 22:02:23  lasiuk
 // Second Revision
@@ -39,13 +42,13 @@ anIDList StRrsReader::GetMCDetectorInfo(int row, int col)
     anIDList myList;
     anIDList::iterator iter;
     for (iter  = (*mData)[row][col].IDs.begin();
-	double charge;
-	if ( (*mData)[row][col].signal )
-	    charge = (*iter).amount / (*mData)[row][col].signal;
-	else
-	    charge = 1;
+	 iter != (*mData)[row][col].IDs.end();
+	 ++iter ) {
+	//g_id.id  = (*k).G_ID;
+// 	double charge;
+// 	if ( (*mData)[row][col].signal )
 // 	    charge = (*iter).mAmount / (*mData)[row][col].signal;
-	  StRichID anID((*iter).G_ID, charge);
+// 	else
 // 	    charge = 1;
 
 	  StRichID anID((*iter).mG_ID, (*iter).mTrackp, (*iter).mAmount);
