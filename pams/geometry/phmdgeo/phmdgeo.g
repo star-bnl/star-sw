@@ -1,6 +1,12 @@
 *****************************************************************
  Module  PHMDGEO  is the geometry of photon multiplicity detector
 *****************************************************************
+* modified: 18th July 2003: Tapan, Dipak
+* Two modifications:
+* 1. CUTGAM and CUTELE values are introduced in the
+*    sensitive medium
+* 2. Proper mixture of Ar+CO2(70:30) has been introduced.
+*
 * modified: 14th June 2002: Viyogi,Tapan,Bedanga and Dipak
 *
 * 13th Aug. 2001 : Viyogi,Tapan,Bedanga and Dipak
@@ -348,8 +354,11 @@ Block ASTR  is the  strip
 endblock
 *---------------------------------------------------------
 Block PSTR is one pseudo-cell
-
+**      Material  Argon_gas
+**      Medium    sensitive  Isvol=1
       shape division Ndiv=NCellx Iaxis=1
+**        call GSTPAR (ag_imed, 'CUTGAM', .0001)
+**        call GSTPAR (ag_imed, 'CUTELE', .00001)
 *  Place outer hex inside PGCO
       create and position PDCU AlphaZ=90
 
@@ -423,14 +432,22 @@ Block PDCU is The outer cell in the PMD module
 endblock
 * -----------------------------------------------------------------------
 Block PDGS is The inner cell in the PMD module
-      Material  Argon_gas
+**      Material  Argon_CO2
       Medium    sensitive  Isvol=1
+      Component Ar    A=40  Z=18 W=.7
+      Component C     A=12  Z=6  W=.3*12/44.
+      Component O     A=16   Z=8  W=.3*32/44.
+**PMD uses gas mixture Ar+CO2  7:3 by weight
+      Mixture   Ar_CO2 Dens=0.0018405        "g/cm**3"
       Attribute PDGS   seen=0      colo=3
       Shape     PGON  Phi1=pmdg_hexd2(1) DPhi=pmdg_hexd2(2),
                       Nz=pmdg_hexd2(4)   NpDiv=pmdg_hexd2(3),
                       Zi={pmdg_hexd2(5),pmdg_hexd2(8)},
                       rmn={pmdg_hexd2(6),pmdg_hexd2(9)},
                       rmx={pmdg_hexd2(7),pmdg_hexd2(10)}
+
+        call GSTPAR (ag_imed, 'CUTGAM', .0001)
+        call GSTPAR (ag_imed, 'CUTELE', .00001)
 
       HITS      PDGS  Eloss:0:(0,1)
 *     HITS      PDGS  Eloss:0:Calo(0,1) - do not keep track id
