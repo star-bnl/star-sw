@@ -1,28 +1,13 @@
 /**
- * $Id: StTinyMcTrack.h,v 1.4 2003/09/02 17:58:43 perev Exp $
+ * $Id: StTinyMcTrack.h,v 1.5 2004/03/31 23:42:46 calderon Exp $
  * \file  StTinyMcTrack.h
  * \brief   Persistent MC track class.
  * 
  *
  * \author Bum Choi
  * \date   March 2001
- *
- * There will be a container of all MC tracks, and these will also be entered into the Matched and Contamination
- * collections as Pairs, with their corresponding RC track.
- * $Log: StTinyMcTrack.h,v $
- * Revision 1.4  2003/09/02 17:58:43  perev
- * gcc 3.2 updates + WarnOff
- *
- * Revision 1.3  2003/05/08 02:09:20  calderon
- * Added data members for svt and ftpc fit points for StTinyRcTrack.
- * Added data members for svt and ftpc hits for StTinyMcTrack.
- * Added methods to calculate px, py, and p from the available pt,  phi and pz, for
- * global and primary momenta and also for monte carlo momentum.
- * Cleaned up includes in StMiniMcEvent.
- *
- * Revision 1.2  2002/06/11 21:12:00  calderon
- * fix typo, pttMc() -> ptMc()
- *
+ * 
+ * CVS Log is at the bottom of file.
 */
 
 #ifndef StTinyMcTrack_H
@@ -48,7 +33,8 @@ class StTinyMcTrack : public TObject {
   void setNAssocGl(Short_t val) { mNAssocGl=val; }
   void setNAssocPr(Short_t val) { mNAssocPr=val; }
   void setStopR(Float_t val) { mStopR=val; }
-
+  void setKey(Short_t val) { mKey=val; }
+    
   float ptMc() const { return mPtMc; }
   float pxMc() const { return mPtMc*cos(mPhiMc); }
   float pyMc() const { return mPtMc*sin(mPhiMc); }
@@ -64,7 +50,8 @@ class StTinyMcTrack : public TObject {
   short nAssocGl() const { return mNAssocGl; }
   short nAssocPr() const { return mNAssocPr; }
   float stopR() const { return mStopR; }
-
+  short key() const { return mKey; }
+    
 private:
   // mc stuff
     
@@ -78,17 +65,23 @@ private:
   Short_t    mGeantId;
   Short_t    mChargeMc;
   Float_t    mStopR;
-
+  Short_t    mKey;
+    
   // assoc stuff
   Short_t      mNAssocGl;
   Short_t      mNAssocPr;
 
-  ClassDef(StTinyMcTrack,2)
+  ClassDef(StTinyMcTrack,3)
 };
 
 #endif
 //
 // $Log: StTinyMcTrack.h,v $
+// Revision 1.5  2004/03/31 23:42:46  calderon
+// Adding info to evaluate idTruth information.
+// -Add key to StTinyMcTrack.h
+// -Add dominatrack, common hits to dominatrack and average hit quality to StMiniMcPair.h
+//
 // Revision 1.4  2003/09/02 17:58:43  perev
 // gcc 3.2 updates + WarnOff
 //
