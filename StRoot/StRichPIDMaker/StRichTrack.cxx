@@ -1,15 +1,13 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.4 2000/10/19 01:13:23 horsley Exp $
+ * $Id: StRichTrack.cxx,v 2.5 2000/11/01 17:43:10 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
- *  Revision 2.4  2000/10/19 01:13:23  horsley
- *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
- *  added normal distance sigma cut on hits, quartz and radiator pathlengths
- *  for individual photons, modified minimization routine to correct boundary
- *  problems
+ *  Revision 2.5  2000/11/01 17:43:10  lasiuk
+ *  default arguments initialization in c'tor.  Addition of init() member
+ *  function to handle generic DB initialization and removal of virtual keyword
  *
  *  Revision 2.10  2000/11/28 19:18:54  lasiuk
  *  Include protection/error warning if no MIP
@@ -68,12 +66,6 @@
 
 #include <utility> //bool is defined here in SUN
 #ifndef ST_NO_NAMESPACES
-// used in track coordinate transformations
-#include "StRrsMaker/StRichMomentumTransform.h"
-#include "StRrsMaker/StGlobalCoordinate.h"
-#include "StRrsMaker/StRichRawCoordinate.h"
-#include "StRrsMaker/StRichLocalCoordinate.h"
-#include "StRrsMaker/StRichCoordinateTransform.h"
 using std::pair;
 using std::adjacent_difference;
 using std::max_element;
@@ -83,50 +75,35 @@ using std::sort;
 
 #include "StParticleTypes.hh"
 #include "StParticleDefinition.hh"
-StRichTrack::StRichTrack()  {}
 
-StRichTrack::StRichTrack(StThreeVectorF mom, StThreeVectorF imp)  {
- 
-  mStTrack  = 0;
-  mPidTrait = 0;
+#include "StRichTrack.h"
+#include "StEventTypes.h"
+#include "StRichMaterialsDb.h"
+#include "SystemOfUnits.h"
+#include "StRichRingPoint.h"
+
+#include "StRichPidTraits.h"
 
 #include "StRrsMaker/StRichGeometryDb.h"
 
-  mAssociatedMIP = 0;
-  
+
+#ifndef ST_NO_NAMESPACES
 using namespace units;
 // For sorting the possible MIP candiates
-  myGeometryDb  = StRichGeometryDb::getDb();  
-  myMaterialsDb = StRichMaterialsDb::getDb();  
-  coordinateTransformation = StRichCoordinateTransform::getTransform(myGeometryDb);
-  momentumTransformation   = StRichMomentumTransform::getTransform(myGeometryDb);  
-  
-  StThreeVectorF richNormal(myGeometryDb->normalVectorToPadPlane().x(),
-			    myGeometryDb->normalVectorToPadPlane().y(),
-			    myGeometryDb->normalVectorToPadPlane().z());
-  
-  setMomentum(mom);
-  setImpactPoint(imp);
+//
+typedef pair<StRichHit*, double> candidate;
 bool operator<(const candidate &a, const candidate &b) {return (a.second<b.second);};
 
 
-StRichTrack::StRichTrack(globalTrack *track, double magField)  {
+StRichTrack::StRichTrack()
+    : mStTrack(0),  mPidTrait(0),  mAssociatedMIP(0), mMagneticField(0)
+{/* nopt */}
+
 StRichTrack::StRichTrack(StThreeVectorF mom, StThreeVectorF imp)
-    mPidTrait      = 0;
-    mMagneticField = magField;
-    mStTrack       = 0;
-    mL3Track       = track; 
-    mAssociatedMIP = 0;
+    : mPidTrait(0),  mAssociatedMIP(0)
 {
     //
-    myGeometryDb = StRichGeometryDb::getDb();  
-    myMaterialsDb = StRichMaterialsDb::getDb();  
-    coordinateTransformation = StRichCoordinateTransform::getTransform(myGeometryDb);
-    momentumTransformation   = StRichMomentumTransform::getTransform(myGeometryDb);
-    
-    StThreeVectorF richNormal(myGeometryDb->normalVectorToPadPlane().x(),
-			      myGeometryDb->normalVectorToPadPlane().y(),
-			      myGeometryDb->normalVectorToPadPlane().z());
+#ifdef RICH_WITH_L3_TRACKS
   mL3Track  = 0; 
 #endif  
 
@@ -218,25 +195,14 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
     setUnCorrectedMomentum(richLocalMomentum);
     setImpactPoint(richTransformedImpactPoint.position());
     setProjectedMIP(localImpactPointAtAnodeWirePlane.position());
+    setPathLength(mPathLengthAtRadiator);
+				    localImpactPointAtAnodeWirePlane);
 
-
-
-StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)  {
- 
-    mStTrack       = tpcTrack;
-    mPidTrait      = 0;
-    mMagneticField = magField;
-    mAssociatedMIP = 0;
+	localImpactPointAtAnodeWirePlane.position()
 	    .setX(localImpactPointAtAnodeWirePlane.position().x()-xCorrection);
     : mStTrack(tpcTrack),  mPidTrait(0),  mAssociatedMIP(0),mMagneticField(magField)
-    myGeometryDb  = StRichGeometryDb::getDb();  
-    myMaterialsDb = StRichMaterialsDb::getDb();  
-    coordinateTransformation = StRichCoordinateTransform::getTransform(myGeometryDb);
-    momentumTransformation   = StRichMomentumTransform::getTransform(myGeometryDb);
-    
-    mRichNormal.setX(myGeometryDb->normalVectorToPadPlane().x());
-    mRichNormal.setY(myGeometryDb->normalVectorToPadPlane().y());
-    mRichNormal.setZ(myGeometryDb->normalVectorToPadPlane().z());
+
+    }
     
     // define system parameters
 
@@ -383,47 +349,61 @@ StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)  {
   setProjectedMIP(tempMip);
   setProjectedCTB(localCTBImpactPoint);
   setPathLength(mPathLengthAtRadiator);
-    this->setProjectedCTB(localCTBImpactPoint);
-vector<StRichRingHit*> StRichTrack::getRingHits( StParticleDefinition* part) {
-  if ( (part ==  StPionMinus::instance()) || (part == StPionPlus::instance())) {
-    return mPionList; 
-  }
-}
-  else if ( (part ==  StKaonMinus::instance()) || (part == StKaonPlus::instance())) {
-    return mKaonList; 
-  }
-  
-  else if ( (part ==  StProton::instance()) || (part == StAntiProton::instance())) {
-    return mProtonList; 
-  }
+  setLastHitDCA(lastHitDCA);
+  setLastHit(tpcTrack->detectorInfo()->lastPoint());
+    
+    this->setImpactPoint(tempHit);
 
-  vector<StRichRingHit*> tempvec(0);
-  tempvec[0]=0;
-  return tempvec;
+    //
+    // Likewise the MIP position must be corrected
+    // for the same effect
+    //
+    StThreeVectorF tempMip(localImpactPointAtAnodeWirePlane.position().x() -xCorrection,
+			   localImpactPointAtAnodeWirePlane.position().y(),
+			   localImpactPointAtAnodeWirePlane.position().z());
+
+    this->setProjectedMIP(tempMip);
+    this->setProjectedCTB(localCTBImpactPoint);
+    this->setPathLength(mPathLengthAtRadiator);
+vector<StRichRingHit*>
+    this->setLastHit(tpcTrack->detectorInfo()->lastPoint());
+}
+vector<StRichRingHit*>&
+void StRichTrack::init()
+{
+    myGeometryDb  = StRichGeometryDb::getDb();  
+    myMaterialsDb = StRichMaterialsDb::getDb();  
+    coordinateTransformation = StRichCoordinateTransform::getTransform(myGeometryDb);
+    momentumTransformation   = StRichMomentumTransform::getTransform(myGeometryDb);  
+
+    mRichNormal.setX(myGeometryDb->normalVectorToPadPlane().x());
+    mRichNormal.setY(myGeometryDb->normalVectorToPadPlane().y());
+    mRichNormal.setZ(myGeometryDb->normalVectorToPadPlane().z());
 }
 
 vector<StRichRingHit*>
 StRichTrack::getRingHits( StParticleDefinition* part) {
-  for (size_t l=0;l<mPionList.size();l++) {
-    delete mPionList[l];
-    mPionList[l] = 0;
-  }
-  mPionList.clear();
-  mPionList.resize(0);
+
+    if ( (part ==  StPionMinus::instance()) || (part == StPionPlus::instance())) {
+	return mPionList; 
     }
-  for (size_t l=0;l<mKaonList.size();l++) {
-    delete mKaonList[l];
-    mKaonList[l] =0;
-  }
-  mKaonList.clear();
-  mKaonList.resize(0);
+  
+    else if ( (part ==  StKaonMinus::instance()) || (part == StKaonPlus::instance())) {
+	return mKaonList; 
+    }
+    
+    else if ( (part ==  StProton::instance()) || (part == StAntiProton::instance())) {
+	return mProtonList; 
+    }
+  
+    vector<StRichRingHit*> tempvec(0);
     tempvec[0]=0;
-  for (size_t l=0;l<mProtonList.size();l++) {
-    delete mProtonList[l];
-    mProtonList[l] = 0;
-  }
-  mProtonList.clear();
-  mProtonList.resize(0); 
+    return tempvec;
+}
+
+
+void StRichTrack::clearHits() {
+
     for (size_t l=0;l<mPionList.size();l++) {
 	delete mPionList[l];
 	mPionList[l] = 0;
@@ -572,22 +552,40 @@ bool StRichTrack::correct() {
       
       // do the momentum vector rotation here
       StThreeVector<double> tempRichLocalMom(0,0,0);
-  // proximity matching between TPC track's predicted MIP and 
-  // RICH pad plane MIP 
+      StThreeVector<double> tempRichGlobalMom(correctedMomentum.x(),correctedMomentum.y(),correctedMomentum.z());
+      
+      momentumTransformation->localMomentum(tempRichGlobalMom,tempRichLocalMom);
+      StThreeVectorF tempRichLocalMomentum(tempRichLocalMom.x(),tempRichLocalMom.y(),tempRichLocalMom.z());  
       StThreeVectorF normalVector(0,0,-1);
-  if (hits) {
       
 
 
-     
-    for (StSPtrVecRichHitIterator hitIndex = hits->begin(); hitIndex != hits->end(); ++hitIndex) { 
-      testThisResidual = ((*hitIndex)->local() - mProjectedMIP).perp();      
-      if (testThisResidual<smallestResidual && (*hitIndex)->charge()>adcCut) {
-	smallestResidual = testThisResidual;   
-	mAssociatedMIP   = *hitIndex;
-      }
-// 	break;
+
+      setProjectedMIP(correctedProjectedMIP);
+      setImpactPoint(impact);
+
   }
+  
+    double adcCut=200;
+}
+    if (hits) {
+
+	StSPtrVecRichHitConstIterator hitIndex;
+	for (hitIndex = hits->begin(); hitIndex != hits->end(); hitIndex++) { 
+	    testThisResidual = ((*hitIndex)->local() - mProjectedMIP).perp();      
+
+	    //
+	    // should look at ePhotoElectron or eMip flag (StRichHitFlag)
+	    //
+	    if (testThisResidual<smallestResidual && (*hitIndex)->charge()>adcCut) {
+		smallestResidual = testThisResidual;   
+		mAssociatedMIP   = *hitIndex;
+	    }
+    // RICH pad plane MIP 
+    
+    for (hitIndex = hits->begin(); hitIndex != hits->end(); hitIndex++) { 
+// 	break;
+
 // 	}
 //     }
 
@@ -595,7 +593,6 @@ bool StRichTrack::correct() {
 	cout << highestAmplitude << endl;
 	    //cout << "StRichTrack::assignMIP()\n";
 	    //cout << "\tTake smallest Residual" << endl;
-StRichPidTraits* StRichTrack::getPidTrait()      { return mPidTrait;}
 	    highestAmplitude = candidateHits[0].first->charge();
 	}
 	    
@@ -638,18 +635,20 @@ int StRichTrack::getFirstRow() { return mFirstRow;}
 int StRichTrack::getLastRow()  { return mLastRow;}
 int StRichTrack::maxSeq(vector<int>& seqrows) {
     vector<int> diffs(seqrows.size());
-StThreeVectorF& StRichTrack::getUnCorrectedMomentum()     { return mUnCorrectedMomentum;}
+    adjacent_difference(seqrows.begin(), seqrows.end(), diffs.begin());
     vector<int>::iterator max = max_element(diffs.begin()+1, diffs.end());
-StThreeVectorF& StRichTrack::getUnCorrectedImpactPoint()  { return mUnCorrectedImpactPoint;}
-StThreeVectorF& StRichTrack::getLastHit()                 { return mLastHit;}
-StThreeVectorF& StRichTrack::getProjectedCTBPoint()       { return mProjectedCTB;} 
-StThreeVectorF& StRichTrack::getProjectedMIP()            { return mProjectedMIP;}
-StThreeVectorF& StRichTrack::getImpactPoint()             { return mImpactPoint;}
-StThreeVectorF& StRichTrack::getMomentum()                { return mMomentum;}
-StThreeVectorF& StRichTrack::getMomentumAtPadPlane()      { return mMomentumAtPadPlane;}
+    return max!=diffs.end() ? *max : -999;
+}
+
+int StRichTrack::fastEnough(StParticleDefinition* particle) {
+    double p = mMomentum.mag()*GeV;
+    double m = particle->mass()*GeV;
+    
     double indexOfRefraction1 = myMaterialsDb->indexOfRefractionOfC6F14At(219.999*nanometer);
+    double indexOfRefraction2 = myMaterialsDb->indexOfRefractionOfC6F14At(169.0*nanometer);
         
-void StRichTrack::setPathLength(double p)        { mPath = p;}
+    if ( p/sqrt(p*p + m*m) > (1./indexOfRefraction1) && 
+	 p/sqrt(p*p + m*m) > (1./indexOfRefraction2)) { 
 	return 1;
     }
     
