@@ -60,21 +60,26 @@ end
                        Bdipole,  RmaxDip, ZminDip, ZmaxDip,
                        int nrp, int nzp, rm, zm , BBZ(nzp,nrp),BBR(nzp,nrp) }
       real         x(3),F(3),dr/0/,dz/0/,Br,BZ,r,z,a
-      Integer      Ievent_old/-1/,ir,iz
+      Integer      Ievent_old/-1/,ir,iz,Istat/0/
       logical      first/.true./
 *
+      F = {0,0,0}
+*
       if (first) then
-         first = .false.
 *     get parameter bank locally
          Call RbPUSHD
-         USE  MFLDGEO/MFLG  
+         USE  MFLDGEO/MFLG stat=Istat  
+         if (Istat<0) then
+           print *,' AGUFLD: Magnetic Field Description is not available '
+           return
+         endif
          Call RbPOPD
          if (mflg_Nrp>0) dr=mflg_Rm/mflg_Nrp
          if (mflg_Nzp>0) dz=mflg_Zm/mflg_Nzp
          if (mflg_version>=3) dz=2*dz
+         first = .false.
       endif
 *
-      F = {0,0,0}
       r = sqrt(x(1)*x(1)+x(2)*x(2))
       z = x(3)
       a = abs(z)
