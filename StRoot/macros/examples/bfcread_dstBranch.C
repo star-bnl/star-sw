@@ -1,5 +1,8 @@
-// $Id: bfcread_dstBranch.C,v 1.10 2000/05/03 18:36:30 kathy Exp $
+// $Id: bfcread_dstBranch.C,v 1.11 2000/05/31 21:25:17 kathy Exp $
 // $Log: bfcread_dstBranch.C,v $
+// Revision 1.11  2000/05/31 21:25:17  kathy
+// updated so it now finds all tables/objects (e.g. BfcStatus) under dstBranch
+//
 // Revision 1.10  2000/05/03 18:36:30  kathy
 // ooopps - my mistake - autoQA is using bfcread_dstBranch now instead of QA_bfcread_dst_tables - so put it back in...
 //
@@ -59,120 +62,167 @@ void bfcread_dstBranch(
 // --- now execute chain member functions
   chain->Init();
 
-  TDataSet *ds=0;
   TTable   *tabl=0;
+
   TDataSet *obj=0;
-
-
-  Float_t tottabcntr=0;
-  Float_t totobjcntr=0;
-
+  TDataSet *ddb=0;
+  TDataSet *ddstBranch=0;
 
   int istat=0;
-  int i=0;
+  int iev=0;
+
   int countev=0;
-  int countevdds=0;
-  int countevobj=0;
-  int countevtab=0;
+
+  Float_t countevdstB=0.0;
+  Float_t countevdst=0.0;
+  Float_t countevobj=0.0;
+  Float_t countevtab=0.0;
 
 // Event loop
-EventLoop: if (i < nevents && !istat) {
+EventLoop: if (iev < nevents && !istat) {
+
+  Int_t Countevobj=0;
+  Int_t Countevtab=0;
 
     chain->Clear();
-    istat = chain->Make(i);
+    istat = chain->Make(iev);
     
 //  count # times Make is called
-    i++;
+    iev++;
 
-    cout << " Call Make # " << i << endl; 
+    cout << " Call Make # " << iev << endl; 
     cout << "     istat value returned from chain Make = " << istat << endl;
-
-// Now look at the data in the event:
-    int countObj=0;
-    int countTable=0;
 
     if (!istat) {
 
     countev++;
-
     cout << " start event # " << countev << endl;
 
-      ds=chain->GetDataSet("dst");
-      TDataSetIter tabiter(ds);
-      if (ds) {
-        countevdds++;
-//        ds->ls(2);  
+    ddstBranch=chain->GetDataSet("dstBranch");
+
+    TDataSetIter dstbranchIter(ddstBranch);
+
+    if (ddstBranch) {
+
+    countevdstB++;
+
+    cout << endl << " QAInfo: in dstBranch " << endl;
+    fout << endl << " QAInfo: in dstBranch " << endl;
+
+    while (ddb=dstbranchIter.Next()) {
+
+      cout << endl << " QAInfo:   found object: " << ddb->GetName() << endl;
+      fout << endl << " QAInfo:   found object: " << ddb->GetName() << endl;
+     
+      countevobj++;
+      Countevobj++;
+
+      if (ddb->InheritsFrom("TTable")) { 
+	 countevtab++;
+         Countevtab++;
+
+         tabl = (TTable *)ddb;
+         cout << " QAInfo:     it's a table with #rows = " 
+                        << tabl->GetNRows() << endl;
+      }
+
+      TString dsName =  ddb->GetName();
+
+// now look under dst branch
+      if (dsName == "dst") {
+
+        countevdst++;
+
+    cout << " QAInfo:    in dst object " << endl;
+    fout << " QAInfo:    in dst object " << endl;
+
+// look for dst objects/tables
+
+        TDataSetIter tabiter(ddb);
+
+//        ddb->ls(2);  
         while (obj = tabiter.Next()) {
 
-	  cout << " QAInfo: found object: " << obj->GetName() << endl;
-	  fout << " QAInfo: found object: " << obj->GetName() << endl;
+	  cout << " QAInfo:     found object: " << obj->GetName() << endl;
+	  fout << " QAInfo:     found object: " << obj->GetName() << endl;
 
-          countObj++;
-          totobjcntr++;
+          countevobj++;
+          Countevobj++;
 
 //.. count all tables that exist:
           if (obj->InheritsFrom("TTable")) {
             tabl = (TTable *)tabiter.Find(obj->GetName());
             if (tabl) {
-              countTable++;
-              tottabcntr++;
-              cout << " QAInfo:     it's a table with #rows = " 
-                        << tabl->GetNRows() << endl;
-              fout << " QAInfo:     it's a table with #rows = " 
-                        << tabl->GetNRows() << endl;
+	      countevtab++;
+              Countevtab++;
 
+             cout << " QAInfo:       it's a table with #rows = " 
+                        << tabl->GetNRows() << endl;
+             fout << " QAInfo:       it's a table with #rows = " 
+                        << tabl->GetNRows() << endl;
 
 	    } // tabl
           }  // obj
 //.. end of counting all tables that exist
-	}  // while
-           if (countObj) countevobj++;
-           if (countTable) countevtab++;
-      }   // ds
 
-    cout << " QAInfo: event # " << countev << ", # objects found = " 
-         << countObj << ", # tables found = " << countTable << endl << endl;
-    fout << " QAInfo: event # " << countev << ", # objects found = " 
-         << countObj << ", # tables found = " << countTable << endl << endl;
+	}  // while obj
+
+      } // dsName = dst
+
+    } // while dstBranch
+
+    cout << endl << " QAInfo: event # " << countev << 
+            ", # objects found = " << Countevobj << 
+            ", # tables found = " <<  Countevtab << 
+             endl << endl;
+
+    fout << endl << " QAInfo: event # " << countev << 
+            ", # objects found = " << Countevobj << 
+            ", # tables found = " <<  Countevtab << 
+             endl << endl;
+
+
+      } // if dstBranch
 
     }  // istat
 
     else   // if (istat)
       {
       cout << "Last event processed. Status = " << istat << endl;
-    }
+      }
 
     goto EventLoop;
 
 }  // EventLoop
      
-  tottabcntr /= countev;
-  totobjcntr /= countev;
- 
+    countevobj /= countev;
+    countevtab /= countev;
+
   cout << endl;
   cout << "QAInfo: End of Job " << endl; 
-  cout << "QAInfo: # times Make called = " << i << endl;
+  cout << "QAInfo: # times Make called = " << iev << endl;
   cout << "QAInfo:  # events read = " << countev << endl;
-  cout << "QAInfo:   # events with dst dataset = " << countevdds << endl;
-  cout << "QAInfo:     # with objects = " << countevobj << endl;
-  cout << "QAInfo:     # with tables  = " << countevtab << endl;
-  cout << "QAInfo: avg # tables per event  = " << tottabcntr << endl;
-  cout << "QAInfo: avg # objects per event = " << totobjcntr << endl << endl;
+  cout << "QAInfo:   # events with dstBranch dataset = " << 
+                      countevdstB << endl;
+  cout << "QAInfo:   # events with dst dataset = " << 
+                      countevdst << endl;
+  cout << "QAInfo: avg # tables per event  = " << countevtab << endl;
+  cout << "QAInfo: avg # objects per event = " << countevobj << endl << endl;
+
 
   fout << endl;
-  fout << "QAInfo: # times Make called = " << i << endl;
+  fout << "QAInfo: End of Job " << endl; 
+  fout << "QAInfo: # times Make called = " << iev << endl;
   fout << "QAInfo:  # events read = " << countev << endl;
-  fout << "QAInfo:   # events with dst dataset = " << countevdds << endl;
-  fout << "QAInfo:     # with objects = " << countevobj << endl;
-  fout << "QAInfo:     # with tables  = " << countevtab << endl;
-  fout << "QAInfo: avg # tables per event  = " << tottabcntr << endl;
-  fout << "QAInfo: avg # objects per event = " << totobjcntr << endl << endl;
+  fout << "QAInfo:   # events with dstBranch dataset = " << 
+                      countevdstB << endl;
+  fout << "QAInfo:   # events with dst dataset = " << 
+                      countevdst << endl;
+  fout << "QAInfo: avg # tables per event  = " << countevtab << endl;
+  fout << "QAInfo: avg # objects per event = " << countevobj << endl << endl;
 
  chain->Finish();   
 
 }
- 
-
- 
 
 
