@@ -82,9 +82,11 @@ class StEmcDecoder
     int       GetCrateAndSequenceFromTriggerPatch(int,int&,int&); // returns the crate number and start point for a given trigger patch
     
     int       GetSmdCoord(int,int,int&,int&,int&,int&,bool=false);///<Get SMD detector (3==SMDE, 4==SMDP), m, e, s from RDO and position for SMD
+    int       GetSmdCoord(int,int,int&,int&,int&,int&,int&,int&,bool=false);///<Get SMD detector (3==SMDE, 4==SMDP), m, e, s from RDO and position for SMD. Also returns smd-wire and A_value
     int       GetSmdRDO(int,int,int,int,int&,int&);///<Get SMD fiber and position from detector number (3==SMDE, 4==SMDP), m, e, s
 
     int       GetPsdId(int,int,int&,bool=false);///<Get PSD id
+    int       GetPsdId(int,int,int&,int&,int&,int&,bool=false);///<Get PSD id. Also returns PMTBox,  wire number and FEE value
     int       GetPsdRDO(int,int&,int&);///<Get PSD fiber and position from id
     
     void      PrintTowerMap(ofstream *);///<Print Tower MAP

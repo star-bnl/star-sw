@@ -252,10 +252,18 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
   }
   
   PSDTables:
-  int PsdOffset_tmp[40] = {20,21,22,23,0,1,2,3,24,25,26,27,4,5,6,7,28,29,30,31,
-                           8,9,10,11,32,33,34,35,12,13,14,15,36,37,38,39,16,17,18,19};
-  for(int i=0;i<40;i++) PsdOffset[i] = PsdOffset_tmp[i];
-  
+  if(date < 20040801 ) // this is the WRONG PSD MAP. I is kept while production is runnning but will be removed after it is done
+  {
+    int PsdOffset_tmp[40] = {20,21,22,23,0,1,2,3,24,25,26,27,4,5,6,7,28,29,30,31,
+                             8,9,10,11,32,33,34,35,12,13,14,15,36,37,38,39,16,17,18,19};
+    for(int i=0;i<40;i++) PsdOffset[i] = PsdOffset_tmp[i];
+  }
+  else
+  {
+    int PsdOffset_tmp[40] = {36,37,38,39,16,17,18,19,32,33,34,35,12,13,14,15,28,29,30,31,
+                             8,9,10,11,24,25,26,27,4,5,6,7,20,21,22,23,0,1,2,3};
+    for(int i=0;i<40;i++) PsdOffset[i] = PsdOffset_tmp[i];
+  }
   int PsdStart_tmp[60] = {2261,2181,2101,2021,1941,1861,1781,1701,1621,1541,1461,1381,1301,1221,1141,1061,
                           981,901,821,741,661,581,501,421,341,261,181,101,21,2341,
                           4661,4741,2421,2501,2581,2661,2741,2822,2901,2981,3061,3141,3221,3301,3381,3461,
@@ -570,8 +578,26 @@ int StEmcDecoder::GetSmdRDO(int detector,int module, int eta, int sub, int& RDO,
 \param module is the module number
 \param eta is the eta division for towers
 \param sub is the sub division for towers
+\param print enables/disables some printout information
 */
 int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int& eta,int& sub,bool print)
+{
+  int wire, A_value;
+  return GetSmdCoord(RDO,index,detector,module,eta,sub,wire,A_value,print);
+}
+//--------------------------------------------------------
+/*!
+\param RDO is the SMD fiber number
+\param index is the position in the fiber
+\param detector is detector number (3 = SMDE, 4 = SMDP)
+\param module is the module number
+\param eta is the eta division for towers
+\param sub is the sub division for towers
+\param wire is the SMD-wire number
+\param A_value is the A_value in the FEE card
+\param print enables/disables some printout information
+*/
+int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int& eta,int& sub,int& wire, int& A_value,bool print)
 {
     
   if(RDO<0 || RDO>7) return 0;
@@ -584,10 +610,10 @@ int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int&
   int daq_smd=index;
   
   int category=daq_smd/1600;
-  int wire=(daq_smd-category*1600)/20+1;
+  wire=(daq_smd-category*1600)/20+1;
   int A_step=daq_smd%4;
   int S_step=daq_smd%20;
-  int A_value=0;
+  A_value=0;
   int S_value=0;
   int SCA = S_step/5+1;
   
@@ -747,11 +773,30 @@ int StEmcDecoder::getSmdpStrip(int pin,int& eta,int& sub)
 \param RDO is the PSD fiber number
 \param index is the position in the fiber
 \param id is the software Id
+\param print enables/disables some printout information
 
 The Pre Shower and SMD crates are identical and they share almost
 the same decoder.
 */
 int StEmcDecoder::GetPsdId(int RDO,int index, int& id,bool print)
+{
+  int wire, A_value, PMT;
+  return GetPsdId(RDO,index,id,PMT,wire,A_value,print);
+}
+//--------------------------------------------------------
+/*!
+\param RDO is the PSD fiber number
+\param index is the position in the fiber
+\param id is the software Id
+\param PMT is the PMT box number
+\param wire is the equivalent mux-wire in the SMD/PSD crate
+\param A_value is the A_value in the FEE card
+\param print enables/disables some printout information
+
+The Pre Shower and SMD crates are identical and they share almost
+the same decoder.
+*/
+int StEmcDecoder::GetPsdId(int RDO,int index, int& id, int& PMTBox, int& wire, int& A_value,bool print)
 {
   id=0;  
   if(RDO<0 || RDO>3) return 0;
@@ -763,12 +808,13 @@ int StEmcDecoder::GetPsdId(int RDO,int index, int& id,bool print)
   int daq_smd=index;
   
   int category=daq_smd/1600;
-  int wire=(daq_smd-category*1600)/20+1;  
+  wire=(daq_smd-category*1600)/20+1;  
   int A_step=daq_smd%4;
   int S_step=daq_smd%20;
-  int A_value=0;
+  A_value=0;
   int S_value=0;
   int SCA = S_step/5+1;
+  PMTBox = 0;
   
   if(print) sprintf(line,"%s cat=%2d  wire=%3d  As=%4d  Ss=%3d  SCA=%1d",line,category,wire,A_step,S_step,SCA);
     
@@ -787,7 +833,7 @@ int StEmcDecoder::GetPsdId(int RDO,int index, int& id,bool print)
   if(A_value==1) half=40;
   if(A_value==2) half=0;
   
-  int PMTBox = PsdModules[RDO][S_value-1];
+  PMTBox = PsdModules[RDO][S_value-1];
   int start  = PsdStart[PMTBox-1];
   int offset = PsdOffset[wire-1];
   
