@@ -358,7 +358,7 @@ Int_t StV0FinderMaker::Prepare() {
         if (triGeom->charge()*triGeom->helicity() > 0) Bfield = -fabs(Bfield);
                else Bfield = fabs(Bfield);
         }
-        if (fabs(Bfield)<1.e-5) return kStWarn;
+        if (fabs(Bfield)<1.e-20) return kStWarn;
 	      
       if (triGeom->charge() > 0) ptrk.push_back(trks);
       else if (triGeom->charge() < 0) ntrk.push_back(trks);
@@ -845,8 +845,11 @@ void StV0FinderMaker::ExpandVectors(unsigned short size) {
   trkID.resize(newsize);
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.28 2005/02/05 01:10:16 perev Exp $
+// $Id: StV0FinderMaker.cxx,v 1.29 2005/02/09 21:10:01 perev Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.29  2005/02/09 21:10:01  perev
+// test for zero field fixed
+//
 // Revision 1.28  2005/02/05 01:10:16  perev
 // Zero field check
 //
