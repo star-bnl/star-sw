@@ -1,5 +1,14 @@
-* $Id: geometry.g,v 1.66 2003/10/10 23:59:18 potekhin Exp $
+* $Id: geometry.g,v 1.67 2003/10/15 23:19:35 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.67  2003/10/15 23:19:35  potekhin
+* Due to an apparent need to have the "most precise"
+* geometry describing the STAR configuration in the
+* spring'03 run, we introduce the tag Y2003C. It
+* includes all the corrections first introduced in
+* Y2003A, but also has the extra material in the
+* SVT that we recently added in the GEANT model
+* and which had been missing before.
+*
 * Revision 1.66  2003/10/10 23:59:18  potekhin
 * Per Jerome's suggestion, which I agree with, we should
 * semantically separate our current geometry tags from the
@@ -234,12 +243,13 @@ replace[;ON#{#;] with [
    If (JVOLUM>0) call AGDROP ('*')
 
 * -------------------- set GSTAR absolute default ------------------------
-
 * before parsing the request, set some default values:
    IPRIN    = IDEBUG
    NtrSubEv = 1000     " automatic !"
+
 * No correction by default
    CorrNum = 0
+
 * No PHMD by default, hence init the version:
    PhmdVersion = 0
 
@@ -247,15 +257,15 @@ replace[;ON#{#;] with [
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
 * If an empty or no DETP GEOM was issued, geometry is defined externally.
 
+   field=5               " default"
 
-   field=5                                             "defaults constants"
-* "canonical" detector are all ON by default
+* "Canonical" detectors are all ON by default,
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
 * whereas some stuff is considered optional:
    {bbcm,fpdm,phmd,pixl} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows"   
-   {ems,rich,alpipe}=off   "TimeOfFlight, EM calorimeter Sector"
+   {ems,rich,alpipe}=off " TimeOfFlight, EM calorimeter Sector"
    btofconfig = 1        " ctb only
    Nsi=7; Wfr=0;  Wdm=0; " SVT+SSD, wafer number and width as in code     "
    svtw=on               " water+water manifold in svt, off for Y2000 only"
@@ -270,8 +280,9 @@ replace[;ON#{#;] with [
    ArgonBug=0            " in the future tsettting bug to 1 should introduce "
    Fieldbug=0            " old bugs in these places "
    Commands=' ';
+
    do kgeom=1,8
-      Geom(kgeom:kgeom)='\0';
+      Geom(kgeom:kgeom)='\0'; ! Initialize the string with NULLs for strcpy safety
    enddo;
 
 * -------------------- select USERS configuration ------------------------
@@ -280,6 +291,7 @@ replace[;ON#{#;] with [
 * This flags are used in the next section to create subsystems and 
 * to communicate DETP commands with parameters to them.
 * 
+
 If LL>1   
 { Call AGSFLAG  ('GEOM',1)
 * convert input line into a string of upprecase characters
@@ -330,8 +342,8 @@ If LL>1
                   nmod={12,0}; shift={87,0}; Rp=1; Rv=2; Wdm=6;        Nsi=-3;
                   mwx=1;}
 
+* HELEN:       one ladder at R=10.16cm with 7 wafers at the 12 O'Clock...
   on YEAR_1E    { even better y1:  TPC+CTB+RICH+caloPatch+svtLadder;  
-*    HELEN:       one ladder at R=10.16cm with 7 wafers at the 12 O'Clock...
                   btofconfig=4;
                   {vpdd,ecal,ftpc}=off;  {rich,ems}=on;  Itof=1;
                   nmod={12,0}; shift={87,0}; Rp=1; Rv=2; Wfr=7; Wdm=6; Nsi=-3;
@@ -346,16 +358,18 @@ If LL>1
 
   on COMPLETE   { Complete STAR geometry; Itof=2; bbcm=on; ecal_fill=3; ecal_config=3;  }
 
+* corrected: MWC readout, RICH reconstructed position, no TOF 
   on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder; 
-*                 corrected: MWC readout, RICH reconstructed position, no TOF 
                   {vpdd,ecal,ftpc,svtw}=off; {rich,ems}=on; Field=2.5; 
                   nmod={12,0}; shift={87,0}; Rp=2; Rv=2; Wfr=7; Mf=3;  Nsi=-3;}
 
   on YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
                   btofconfig=4;
                   {rich,ems}=on;
-* a newer way to steer it:
+
+* a newer way to steer ecal:
                   ecal_config=1   " one ecal patch, west "
+
 * this was put here in recent versions (as of 1.50) and I believe this is wrong as
 * it destroys compatibility with earlier code:
 *    ecal=off;  
@@ -451,9 +465,10 @@ If LL>1
 * Corrections and enhancements in y2003b:
 *    extra material in SVT (see web page)
 *    added the Photon Multiplicity Detector (PHMD)
-*    added newly installed parts of ECAL (to be done)
+*    added newly installed parts of ECAL
+*    THIS IS THE MASTER GEOMETRY FOR THE FALL'03
 
-  on Y2003B    { correction 2 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
+  on Y2003B    { correction 2 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -483,7 +498,40 @@ If LL>1
                      PhmdVersion = 1;
                 }
 
-  on Y2003X    { same as year2003 but with full calorimeters
+***********************************************************************
+* y2003c is y2003a, but with the extra material in the SVT
+* This is actually an important case (i.e. the "most precise" geometry
+* approximation for the early 2003 run) which we were lacking so far.
+* This is achieved by setting CorrNum to 2.
+
+  on Y2003C    { correction 2 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     btofconfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,0}; shift={75,0}; " 60 sectors " 
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=1     " sectors 2-5 filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+                  "geometry correction "
+                     CorrNum = 2;
+                }
+
+  on Y2003X    { same as year2003 (with all its deficiencies) but with full calorimeters
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -620,11 +668,11 @@ If LL>1
 * - to save secondaries AFTER all decays:      DETP TRAC DCAY 210 210 0.1 0.01
    dcay={210,210,0.1,0.01}
    If LL>1 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
-*
-*  Advertise the geometry correction level that we'll be
-*  increasingly using to implement intra-year corrections:
-   write(*,*) 'Geometry Correction Level:', CorrNum
-*
+
+
+*  Advertise the geometry correction level used to implement intra-year corrections:
+   write(*,*) '************** ATTENTION: Geometry Correction Level:', CorrNum
+
    if (rich) ItCKOV = 1
    if (cave)        Call cavegeo
    If (LL>1)        call AgDETP new ('PIPE')
