@@ -86,12 +86,12 @@ C*-Calculate (phi,eta) bin for Track at vertex
                EMC_IDEAL_EGRID=STAFCV_BAD
                return
             endif
-            eta=float(ebin-0.5)
+            eta=(ebin-0.5)
      +           /float(ems_control(1).chrg_eta_nbin)
      +           *(ems_control(1).chrg_eta_max
      +           -ems_control(1).chrg_eta_min)
      +           +ems_control(1).chrg_eta_min
-            phi=float(pbin-0.5)*PI2
+            phi=(pbin-0.5)*PI2
      +           /float(ems_control(1).chrg_phi_nbin)
             id(pbin,ebin)=nout
             emc_energy(nout).rl    =0
