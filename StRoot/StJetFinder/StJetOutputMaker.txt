@@ -1,0 +1,141 @@
+/***************************************************************************
+ *
+ * $Id: StJetOutputMaker.txt,v 1.1 2004/03/02 00:42:30 thenry Exp $
+ * $Log: StJetOutputMaker.txt,v $
+ * Revision 1.1  2004/03/02 00:42:30  thenry
+ * Documentation for using the StJetOutputMaker and PJEvent objects
+ *
+ * Revision 1.0  2003/09/24 20:54:08  thenry
+ * created
+ *
+ * Author: Thomas Henry March 2004
+ ***************************************************************************
+ *
+ * Description:  Maker which creates a binary output file of the jets and
+ * some other basic information like trigger and event ids.  It contains
+ * the jetevent class.  If __ROOT__ is not defined, this file simplifies
+ * to only the jetevent class.  Saving to a file can be disabled.
+ *
+ ***************************************************************************/
+
+The class StJetOuptutMaker contains a PJetEvent object called oJetEvent:
+	StJetOutputMaker::oJetEvent
+
+When StJetOutputMaker is constructed in the chain using something like:
+	StJetOutputMaker *joMaker = new StJetOutputMaker("StJetOutputMaker", 
+  	  MuDstMaker, JetMaker, outputFileName, EmcFourPMaker);
+Where MuDstMaker is the MuDstMaker object, JetMaker is the StJetMaker object, outputFileName
+is a file name to save the oJetEvent to, and EmcFourPMaker is the StEmcTpcFourPMaker * or NULL if
+not used.  
+
+!!If you want to use the StJetOutputMaker but not save anything to file, make sure
+outputFileName = "/dev/null" or just pass "/dev/null" to the StJetOutputMaker constructor.!!!
+
+The StJetOutputMaker should come after the StEmcTpcFourPMaker in the chain.  If this is so,
+then after the StJetOutputMaker executes in the chain, the object oJetEvent will be initialized.
+
+This object is very useful.  Let
+PJetEvent &jetEvent = joMaker.oJetEvent;
+ 
+The jetEvent object then contains a rather comprehensive set of jet observables and variables after
+the StJetOutputMaker executes in the chain.  The PJetEvent class is also istream and ostream
+compatible using the overloaded operators >> and <<, so that if istr and ostr are istream and ostreams
+respectively, outEvent >> ostr, and inEvent << istr will put the jet information in a file, or 
+retreive the jet information from a file, respectively (outEvent and inEvent are objects of type 
+PJetEvent).  
+
+However, file io is not necessary for using the jetEvent object within the chain.  StJetOutputMaker
+copies all the information from the jet object into the jetEvent, and output will be suppresed if
+"/dev/null" is used as above.
+
+PJetEvent is a tree-like structure whose leaves are simple data types (That is, if you consider
+the stl vectors involved to be branches).
+
+the class PJetEvent contains the following public member variables of use for accessing variables: 
+jetEvent:
+public:
+    EventStruct event;  // Contains data relating to the whole event
+    vector<int> triggers;  // An stl vector of trigger numbers (like 2001 or 1000)
+
+    JetStructVec jets; // An stl vector of JetStruct
+
+The member variables JetStruct jet, TrackStructVec tracks, and TrackStruct track are used by the
+StJetOutputMaker to fill the PJetEvent structure with data, and are not useful for accessing the data.
+
+The triggers vector is straight forward, but will not contain any numbers for pythia simulated jet
+reconstruction, so the length should always be checked before use (triggers.size() > 0).
+
+The EventStruct contains two structures:
+jetEvent.event:
+public:
+  EventSubStruct subEvent;
+
+  vector<short> triggers;
+
+The triggers vector is the same vector of trigger numbers.  The subEvent structure contains the
+rest of the event values:
+jetEvent.event.subEvent:
+public:
+  unsigned short eventId;  // The Id of the event
+  unsigned short runNumber;  // The runNumber of the event
+  double xVertex;  // Vertex locations in cm
+  double yVertex;
+  double zVertex;
+  short npTracks;  // number primary tracks in event
+  // A char containing spin bits: code means 0 bit = yellow up true, ect. 
+  unsigned char spinUpY0B1DownY3B4;
+  unsigned short bunchCrossingId7bit;  // bunch crossing variables
+  unsigned short bunchCrossingId;
+  short numCoincidences; // Number of tracks that land on hits/clusters/points (h/c/ps)
+  double sumPtTracks; // Sum of all |pt| values of charged tracks in event (fairly useless)
+  double sumEMC; // Total sum of all h/c/ps Used mainly to halt jet finding for absurd values
+  double sumDoubleESub;  // Total double counted energy subtracted from h/c/ps based on coincidences
+  double sumDoubleECalc; // Total double counted energy that would have been subtracted from h/c/ps.
+sumDoubleESub may be lower if the h/c/ps had too little energy within subtraction region
+  long numPoints; // Total Number of hits/clusters/points in event
+  char isAborted; // A flag which is true if the jet finder aborted for some reason.  Reasons include
+sumEMC > 200 GeV, or if numPoints (with E > threshold) is too large.
+
+The number of the jets in the Event is simply:
+jetEvent.jets.size()
+since jets is an STL vector of JetStructs.  It is possible to either iterate through the vector
+using iterators, or simply to specify a JetStruct by:
+jetEvent.jets[i]:
+public:
+  string jetname; // String (name) used in addAnalyser call to StJetAnalyzer 
+  JetSubStruct jet; // JetSubStruct which contains values for the aggregate jet
+  TrackStructVec tracks;  // An Stl vector of TrackStruct
+
+The JetSubStruct contains values for the aggregate jet:
+jetEvent.jets[i].jet:
+public:
+  double energy; // Total Energy of jet (not Et)
+  double px; // x momenta of jet
+  double py; // y momenta of jet
+  double pz; // z momenta of jet
+  double eta; // eta of jet
+  double phi; // phi of jet
+  short numCharges;  // number charges in jet
+  short charge;  // total charge of jet
+
+The number of tracks in the jet (including emc hits) is:
+jetEvent.jets[i].tracks.size()
+The TrackStructs contain the following further information on the particles including EMC tracks 
+included in the jet:
+jetEvent.jets[i].tracks[j]
+public:
+  double trackE; // Energy of Track (not Et)
+  double trackPx; // x momenta of track
+  double trackPy;
+  double trackPz;
+  double trackPhi; // Phi of track
+  double trackEta; // Eta of track
+  long trackId;  // Primary Track index if a charged track, or TowerId or point index or cluster index
+  bool isTpcTrack;  // True if the track is a TPC track, false if a point/cluster/hit ect...
+
+
+
+
+
+
+
