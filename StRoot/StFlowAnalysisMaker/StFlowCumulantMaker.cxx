@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.11 2002/02/19 14:42:18 jeromel Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.12 2002/05/19 18:58:00 aihong Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -361,7 +361,7 @@ Int_t StFlowCumulantMaker::Init() {
       
       // ***  for integrated flow  ***
 
-      histFull[k].histFullHar[j].mHistCumulIntegG0 =
+      histFull[k].histFullHar[j].mHistCumulIntegG0Sum =
       new TH1D*[Flow::nCumulIntegOrders*Flow::nCumulInteg_qMax];
 
       for (int pq = 0; pq <  Flow::nCumulIntegOrders*Flow::nCumulInteg_qMax; pq++) {
@@ -383,7 +383,7 @@ Int_t StFlowCumulantMaker::Init() {
 	
 	histFull[k].histFullHar[j].mCumulIntegG0[pq] = 0.;
 
-  	histTitle = new TString("Flow_CumulIntegG0_Order");
+  	histTitle = new TString("Flow_CumulIntegG0Sum_Order");
 	histTitle->Append(*theCumulOrderChar);
 	histTitle->Append("_GenFunIdx");
 	histTitle->Append(*qIndexOrderChar);
@@ -391,7 +391,7 @@ Int_t StFlowCumulantMaker::Init() {
 	histTitle->Append(*countSels);
 	histTitle->Append("_Har");
 	histTitle->Append(*countHars);
-	histFull[k].histFullHar[j].mHistCumulIntegG0[pq] =
+	histFull[k].histFullHar[j].mHistCumulIntegG0Sum[pq] =
           new TH1D(histTitle->Data(),histTitle->Data(),1,0.,1.);
         delete histTitle;   
 
@@ -400,11 +400,12 @@ Int_t StFlowCumulantMaker::Init() {
       histFull[k].histFullHar[j].mMultSum       = 0.;
       histFull[k].histFullHar[j].mWgtMultSum_q4 = 0.;
       histFull[k].histFullHar[j].mWgtMultSum_q6 = 0.;
+      histFull[k].histFullHar[j].mNEvent        = 0;
     }
   }
   
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.11 2002/02/19 14:42:18 jeromel Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.12 2002/05/19 18:58:00 aihong Exp $");
 
   return StMaker::Init();
 }
@@ -732,11 +733,15 @@ Int_t StFlowCumulantMaker::Finish() {
 	// not begining with 0. That is "p" in (B3, PG5)
 	//int qIndex = pq%(Flow::nCumulInteg_qMax); // like 0,1,..qMax-1 
 	// begining with 0. "q" in (B3, PG5)
+
+	histFull[k].histFullHar[j].mHistCumulIntegG0Sum[pq]-> // don't move it.
+          SetBinContent(1,histFull[k].histFullHar[j].mCumulIntegG0[pq]);
+
+        //mCumulIntegG0 is the sum of IntegG0 until the code right below,
+        //where mCumulIntegG0 becomes <Gn(z)> :
 	histFull[k].histFullHar[j].mCumulIntegG0[pq] /= 
 	  float(histFull[k].histFullHar[j].mNEvent);        // <Gn(z)> (PG 4)
 
-	histFull[k].histFullHar[j].mHistCumulIntegG0[pq]->
-          SetBinContent(1,histFull[k].histFullHar[j].mCumulIntegG0[pq]);
 
 	if (mOldMethod) {
 	  CpInteg[theCumulOrder-1] +=
@@ -983,6 +988,9 @@ Int_t StFlowCumulantMaker::Finish() {
   (*cumulConstants)(8)=double(Flow::nCumulInteg_qMax);
   (*cumulConstants)(9)=double(Flow::nCumulDiffOrders);
   (*cumulConstants)(10)=double(Flow::nCumulDiff_qMax);
+  (*cumulConstants)(11)=r0;
+  (*cumulConstants)(12)=m_M;
+  (*cumulConstants)(13)=(strlen(pFlowSelect->PidPart()) != 0) ? 1 : 0;//1,pidflow
 
   cumulConstants->Write("CumulConstants",TObject::kOverwrite | TObject::kSingleKey);
 
@@ -1009,6 +1017,9 @@ Int_t StFlowCumulantMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.12  2002/05/19 18:58:00  aihong
+// speed up cumulant
+//
 // Revision 1.11  2002/02/19 14:42:18  jeromel
 // Added float.h for Linux 7.2
 //
