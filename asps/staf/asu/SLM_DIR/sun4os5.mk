@@ -60,13 +60,17 @@ export RANLIB := /bin/true
 export OS_LIBS := -lm -ldl
 #
 # Fortran Libraries
-SUNLIBDIR1 := /opt/SUNWspro/lib 
-SUNLIBDIR2 := /opt/SUNWspro/SC3.0.1/lib
-SUNLIBDIR1 := /vol/lic/SUNWspro-3.0/lib
-SUNLIBDIR2 := /vol/lic/SUNWspro-3.0/SC3.0/lib
-export FOR_LIBS += -L$(SUNLIBDIR1) -L$(SUNLIBDIR2) \
-	-lM77 -lF77 -lsunmath -lm -lc \
-	$(SUNLIBDIR2)/crtn.o
+ifndef SUNW_ROOT
+SUNW_LDIRS := /vol/lic/SUNWspro-3.0/libs /vol/lic/SUNWspro-3.0/SC3.0/lib
+SUNW_LDIRS := /opt/SUNWspro/libs /opt/SUNWspro/SC4.0/lib
+endif
+ifndef SUNW_CRTN
+SUNW_CRTN := /vol/lic/SUNWspro-3.0/SC3.0/lib/crtn.o
+SUNW_CRTN := /opt/SUNWspro/SC4.0/lib/crtn.o
+endif
+export FOR_LIBS += $(addprefix -L,$(SUNW_LDIRS)) \
+	-lM77 -lF77 -lsunmath -lm -lc -L/usr/ucblib -lucb \
+	$(SUNW_CRTN)
 #
 # X-Motif Libraries
 export XM_LIBS += -L/usr/openwin/lib -L/vol/pub/SunSDK/SUNWmotif/lib \
