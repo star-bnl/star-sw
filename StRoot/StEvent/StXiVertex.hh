@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.hh,v 1.4 1999/04/09 19:34:06 genevb Exp $
+ * $Id: StXiVertex.hh,v 1.5 1999/04/09 20:02:12 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.hh,v $
+ * Revision 1.5  1999/04/09 20:02:12  genevb
+ * Change constancy of new functions
+ *
  * Revision 1.4  1999/04/09 19:34:06  genevb
  * Added vertex daughter functionality
  *
@@ -50,8 +53,8 @@ public:
     const StThreeVector<float>& momentumOfBachelor() const;
     StThreeVector<float>& momentumOfV0() const;
     StV0Vertex* v0Vertex() const;
-    StGlobalTrack* bachelor() const;
-    double chargeOfBachelor(double B) const;
+    StGlobalTrack* bachelor();
+    double chargeOfBachelor(double B);
 
     void setDcaBachelorToPrimaryVertex(float);
     void setMomentumOfBachelor(const StThreeVector<float>&);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.cc,v 1.5 1999/04/09 19:34:05 genevb Exp $
+ * $Id: StXiVertex.cc,v 1.6 1999/04/09 20:02:11 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.cc,v $
+ * Revision 1.6  1999/04/09 20:02:11  genevb
+ * Change constancy of new functions
+ *
  * Revision 1.5  1999/04/09 19:34:05  genevb
  * Added vertex daughter functionality
  *
@@ -31,7 +34,7 @@
 #include <iostream.h>
 #include "StEvent/StXiVertex.hh"
 
-static const char rcsid[] = "$Id: StXiVertex.cc,v 1.5 1999/04/09 19:34:05 genevb Exp $";
+static const char rcsid[] = "$Id: StXiVertex.cc,v 1.6 1999/04/09 20:02:11 genevb Exp $";
 
 StXiVertex::StXiVertex() : 
  StVertex()
@@ -105,7 +108,7 @@ void StXiVertex::setV0Vertex(StV0Vertex* v0vtx)
     mV0Vertex = v0vtx;
 }
 
-StGlobalTrack* StXiVertex::bachelor() const
+StGlobalTrack* StXiVertex::bachelor()
 {
     if ((numberOfDaughters()))
       return daughters()[0]; 
@@ -113,7 +116,7 @@ StGlobalTrack* StXiVertex::bachelor() const
       return 0;
 }
 
-double StXiVertex::chargeOfBachelor(double B) const
+double StXiVertex::chargeOfBachelor(double B)
 {
     if ((numberOfDaughters()))
       return bachelor()->helix().charge(B);
