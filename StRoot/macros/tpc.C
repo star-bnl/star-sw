@@ -11,11 +11,12 @@
 //#define MINIDAQ
 #ifdef MINIDAQ
 #define CTEST
+#define StMagF
 #endif   
 //#define CTEST
 #define TPC
-//#define TRS
-#define TSS
+#define TRS
+//#define TSS
 //#define FTPC
 //#define FSS
 //#define SVT
@@ -222,8 +223,8 @@ void tpc (const Int_t Nevents=1,
 #endif
 
 #ifdef MINIDAQ
+  StMagF         *field   = new StMagFC("field","STAR no field",0.);
   StMinidaqMaker *tpc_raw = new StMinidaqMaker("tpc_raw");
-  geant->LoadGeometry("detp geometry field_only field_off");
   cout<<"initializing input for the tpc DB"<<endl;
   tpc_raw->SetInput("params","tpcdb:StDb/params"); 
 #endif
@@ -283,7 +284,11 @@ void tpc (const Int_t Nevents=1,
   tclMk->SetInput("params","tpcdb:StDb/params");  
   tclMk->SetDebug();
   tclMk->SetDebug();
-  tclMk->tclPixTransOn();  
+  tclMk->tclPixTransOn();
+#ifndef MINIDAQ
+  //Turn on the hit finder evaluation
+  tclMk->tclEvalOn();
+#endif  
 #endif
 
 #ifdef SVT
@@ -302,6 +307,13 @@ void tpc (const Int_t Nevents=1,
 #ifdef TPC
 //		tpt
   St_tpt_Maker *tptMk 	= new St_tpt_Maker("tpc_tracks");
+#ifdef MINIDAQ
+ // Turn on the final ntuple.
+  tptMk->Set_final(kTRUE);
+#else
+  //Turn on the tpc evaluation
+  tptMk->tteEvalOn();
+#endif
   tptMk->SetDebug();
 #endif
 
