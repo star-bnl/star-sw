@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.59 2001/07/27 01:26:19 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.60 2001/07/27 20:33:40 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -54,7 +54,7 @@ ClassImp(StFlowMaker)
 
 StFlowMaker::StFlowMaker(const Char_t* name): 
   StMaker(name), 
-  mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), pRun(NULL), pEvent(NULL) {
+  mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), pHeader(NULL), pEvent(NULL) {
   pFlowSelect = new StFlowSelection();
   SetPicoEventDir("./");
 }
@@ -62,7 +62,7 @@ StFlowMaker::StFlowMaker(const Char_t* name):
 StFlowMaker::StFlowMaker(const Char_t* name,
 			 const StFlowSelection& flowSelect) :
   StMaker(name), 
-  mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), pRun(NULL), pEvent(NULL) {
+  mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), pHeader(NULL), pEvent(NULL) {
   pFlowSelect = new StFlowSelection(flowSelect); //copy constructor
   SetPicoEventDir("./");
 }
@@ -112,16 +112,16 @@ Int_t StFlowMaker::Make() {
   // Get a pointer to StEvent
   if (!mPicoEventRead) {
 
-    // Get pointer to Run summary
-    pRun = (StRun*)GetDataSet("StRun");
-    if (!pRun) {
+    // Get pointer to Event header
+    pHeader = dynamic_cast<StEvtHddr*>(GetInputDS("EvtHddr"));
+    if (!pHeader) {
       if (Debug()) { 
-	gMessMgr->Info() << "FlowMaker: no StRun " << endm;
+	gMessMgr->Info() << "FlowMaker: no Event header " << endm;
       }
       //      return kStOK; // If no run info, we're done
     }
 
-    pEvent = (StEvent*)GetDataSet("StEvent");
+    pEvent = dynamic_cast<StEvent*>(GetInputDS("StEvent"));
     if (!pEvent) {
       if (Debug()) { 
 	gMessMgr->Info() << "FlowMaker: no StEvent " << endm;
@@ -188,7 +188,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.59 2001/07/27 01:26:19 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.60 2001/07/27 20:33:40 snelling Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -310,10 +310,10 @@ void StFlowMaker::FillFlowEvent() {
   pFlowEvent->SetEventID((Int_t)(pEvent->id()));
   pFlowEvent->SetRunID((Int_t)(pEvent->runId()));
 
-  if(pRun) {
-    pFlowEvent->SetCenterOfMassEnergy(pRun->centerOfMassEnergy());
-    pFlowEvent->SetBeamMassNumberEast(pRun->beamMassNumber(east));
-    pFlowEvent->SetBeamMassNumberWest(pRun->beamMassNumber(west));
+  if(pHeader) {
+    pFlowEvent->SetCenterOfMassEnergy(pHeader->GetCenterOfMassEnergy());
+    pFlowEvent->SetBeamMassNumberEast(pHeader->GetAEast());
+    pFlowEvent->SetBeamMassNumberWest(pHeader->GetAWest());
   }
   else {
     pFlowEvent->SetCenterOfMassEnergy(0.0);
@@ -1245,6 +1245,9 @@ Float_t StFlowMaker::calcDcaSigned(const StThreeVectorF pos,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.60  2001/07/27 20:33:40  snelling
+// switched from StRun to StEvtHddr.
+//
 // Revision 1.59  2001/07/27 01:26:19  snelling
 // Added and changed variables for picoEvent. Changed trackCut class to StTrack
 //
