@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.19 2000/02/04 16:26:41 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.20 2000/02/10 01:47:30 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.20  2000/02/10 01:47:30  snelling
+// Make changes for HP compiler
+//
 // Revision 1.19  2000/02/04 16:26:41  posk
 // Added correct calculation of event plane resolution for large flow.
 //
@@ -167,7 +170,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.19 2000/02/04 16:26:41 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.20 2000/02/10 01:47:30 snelling Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
@@ -698,13 +701,13 @@ void StFlowAnalysisMaker::fillEventHistograms() {
 	} else if (j==2) {
 	  j1 = 2, j2 = 4;	
 	}
-	psiSubCorrDiff = fmod(mPsiSub[2*k][j1-1], twopi/(float)j2) - 
-	  fmod(mPsiSub[2*k+1][j2-1], twopi/(float)j2);
+	psiSubCorrDiff = fmod((double)mPsiSub[2*k][j1-1], twopi/(float)j2) - 
+	  fmod((double)mPsiSub[2*k+1][j2-1], twopi/(float)j2);
 	if (psiSubCorrDiff < 0.) psiSubCorrDiff += twopi/(float)j2;
 	histFull[k].histFullHar[j].mHistPsiSubCorrDiff->
 	  Fill(psiSubCorrDiff);
-	psiSubCorrDiff = fmod(mPsiSub[2*k][j2-1], twopi/(float)j2) - 
-	  fmod(mPsiSub[2*k+1][j1-1], twopi/(float)j2);
+	psiSubCorrDiff = fmod((double)mPsiSub[2*k][j2-1], twopi/(float)j2) - 
+	  fmod((double)mPsiSub[2*k+1][j1-1], twopi/(float)j2);
 	if (psiSubCorrDiff < 0.) psiSubCorrDiff += twopi/(float)j2;
 	histFull[k].histFullHar[j].mHistPsiSubCorrDiff->
 	  Fill(psiSubCorrDiff);
@@ -809,7 +812,7 @@ void StFlowAnalysisMaker::fillParticleHistograms() {
 	float dPhi = phi_i - psi_i;
 	if (dPhi < 0.) dPhi += twopi;
 	histFull[k].histFullHar[j].mHistPhiCorr->
-	  Fill(fmod(dPhi, twopi / order));
+	  Fill(fmod((double)dPhi, twopi / order));
       }
     }  
   }
@@ -902,8 +905,8 @@ Int_t StFlowAnalysisMaker::Finish() {
 	double resSubErr = cosPairErr[k][j] / (2. * resSub);
 	double chiSub = chi(resSub);
 	double chiSubDelta = chi(resSub + deltaResSub);
-	mRes[k][j] = resEventPlane(sqrt(2) * chiSub); // full event plane res.
-	double mResDelta = resEventPlane(sqrt(2) * chiSubDelta);
+	mRes[k][j] = resEventPlane(sqrt(2.) * chiSub); // full event plane res.
+	double mResDelta = resEventPlane(sqrt(2.) * chiSubDelta);
 	mResErr[k][j] = resSubErr * fabs(mRes[k][j] - mResDelta) / deltaResSub;
       } else {
 	mRes[k][j]    = 0.;     // subevent correlation must be positive
