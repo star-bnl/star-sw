@@ -1,8 +1,8 @@
 //
-// $Id: StEpcMaker.cxx,v 1.4 2000/07/03 02:07:45 perev Exp $
+// $Id: StEpcMaker.cxx,v 1.5 2000/08/29 20:33:04 subhasis Exp $
 // $Log: StEpcMaker.cxx,v $
-// Revision 1.4  2000/07/03 02:07:45  perev
-// StEvent: vector<TObject*>
+// Revision 1.5  2000/08/29 20:33:04  subhasis
+// Modified to accept input from StEvent and writing output to StEvent for Emc
 //
 // Revision 1.3  2000/05/16 21:48:32  subhasis
 //  new checks for events with no clusters
@@ -45,8 +45,10 @@
 #include "StEpcMaker.h"
 
 // For StEvent
- 
+#include "StEventTypes.h"
 #include "St_ObjectSet.h"
+#include "StEvent.h" 
+#include "StContainers.h"
 #include "StEmcCollection.h"
 #include "StEmcDetector.h"
 #include "StEmcModule.h"
@@ -54,7 +56,11 @@
 #include "StEmcClusterCollection.h"
 #include "StEmcCluster.h"
 #include "StEmcPoint.h"
-#include "StEnumerations.h"                                                      
+#include "StEnumerations.h"
+
+StTrackVec TrackVecForEmc;
+
+                                                      
 #include "StarCallf77.h"
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
@@ -62,7 +68,7 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 // declaring cernlib routine (mathlib, H301) assndx to be used for matching.
 #include "StarCallf77.h"
 #define    assndx  F77_NAME(assndx,ASSNDX)
-extern "C" {void type_of_call assndx ( Int_t &, Float_t *, Int_t &, Int_t &, Int_t &,Int_t *, Float_t &,Int_t *,Int_t &); }
+extern "C" {void type_of_call assndx ( Int_t &, Float_t (*)[], Int_t &, Int_t &, Int_t &,Int_t *, Float_t &,Int_t (*)[],Int_t &); }
 
 
 ClassImp(StEpcMaker)
@@ -89,126 +95,136 @@ Int_t StEpcMaker::Init(){
   m_point_delphi= new TH1F(" Point DelPhi "," Point DelPhi ",100,-0.1,0.1);
   m_point_trmom= new TH1F(" Point TrMom "," Point TrMom ",100,0.,10.);
   m_point_flag= new TH1F(" Point Flag "," Point Flag ",5,0.5,5.5);
+  m_emc_points= new TH1F(" Points Multiplicity "," Points ",50,0.5,200.5);
 
   return StMaker::Init();
 }  
 //_________________________________________________________________________
 Int_t StEpcMaker::Make(){
+cout<<" StEpcMaker Make() **"<<endl;
+// ptr initialization
+mTheEmcCollection=0;                                                            
+
   if (!m_DataSet->GetList()){   //if DataSet is empty, create object and fill it
   //
-    StEmcHitCollection *hit = 0;    
-    StEmcHitCollection *hits = 0;    
-    StEmcHitCollection *hit_e = 0;    
-    StEmcHitCollection *hit_p = 0;    
-    StBemcPreClusterCollection *hit0 = 0;
-    StBsmdePreClusterCollection *hit1 = 0;
-    StBsmdpPreClusterCollection *hit2 = 0;
-    StEmcHitCollection dummy; TString tit = dummy.GetTitle();
-    // get pointer for StEmcHitCollection
-    St_DataSetIter itr(GetDataSet("emc_hits"));
-   Int_t nhitsw =0;
-   Int_t nhit =0;
-   Int_t cluster_tot=0;
-
-    while ( (hit = (StEmcHitCollection *)itr()) ) {
-      if(hit->GetTitle() == tit){
-        TString name = hit->GetName();
-        nhitsw = hit->NHit();
-        nhit +=nhitsw;
-        if(nhitsw > 0){
-          if(!strcmp(name.Data(),"bemc")){
-          // cout <<" Name "<< name.Data() <<"  Hits " << nhitsw << endl;
-          hits = (StEmcHitCollection *)hit;
-          }
-          else if(!strcmp(name.Data(),"bsmde")){ 
-          // cout <<" Name "<< name.Data() <<"  Hits " << nhitsw << endl;
-          hit_e = (StEmcHitCollection *)hit;
-          }
-          else if(!strcmp(name.Data(),"bsmdp")){
-          // cout <<" Name "<< name.Data() <<"  Hits " << nhitsw << endl;
-          hit_p = (StEmcHitCollection *)hit;
-          } 
-        }   // nhitsw if end
-    else{
-          cout <<" nhitsw<=0 Name "<< hit->GetName()<<"  Hits " << nhitsw << endl;
-//	return kStWarn;
-        }
-      } // tit if end
-   } // while loop end for StEmcHitCollection
-
-   cout<<" Total number of hits **"<<nhit<<endl;
-
-//If there is no Emc hit, return
-  if(nhit<=0){
-    cout<<" StEpcMaker:: No Emc Hits Found ***, Returning"<<endl;
-    return kStWarn;
-  }
-
-//  If there is EMC hit, then get the clusters
-
-  if(nhit > 0){
-    St_DataSetIter itr(GetDataSet("preecl"));
-    StBemcPreClusterCollection dummy; TString tit = dummy.GetTitle();
-    Char_t *cdet;
-    cdet="bemc";
-   hit0 = (StBemcPreClusterCollection *)itr(cdet);
-  if(hit0 != 0){
-      if(hit0->GetTitle() == tit){
-        Int_t nhit0 = hit0->Nclusters();
-        cluster_tot +=nhit0;
-         // cout <<"  Hit0  " << nhit0 << endl;
-      }
-   }
-
-    cdet="bsmde";
-   hit1 = (StBsmdePreClusterCollection *)itr(cdet);
-  if(hit1 != 0){
-      if(hit1->GetTitle() == tit){
-        Int_t nhit1 = hit0->Nclusters();
-        cluster_tot +=nhit1;
-         // cout <<"  Hit1  " << nhit1 << endl;
-      }
-   }
-
-    cdet="bsmdp";
-   hit2 = (StBsmdpPreClusterCollection *)itr(cdet);
-  if(hit2 != 0){
-      if(hit2->GetTitle() == tit){
-        Int_t nhit2 = hit2->Nclusters();
-        cluster_tot +=nhit2;
-         // cout <<"  Hit2  " << nhit2 << endl;
-      }
-   }
-}
-
-   cout<<" Total number of clusters **"<<cluster_tot<<endl;
-
-//If there is no Emc cluster, return
-  if(cluster_tot<=0){
-    cout<<" StEpcMaker::  No Emc Cluster Found ***, Returning"<<endl;
-    return kStWarn;
-  }
-
-
-  // Getting tracks from globals
-   
-  St_DataSet *match = GetDataSet("match");
-  St_DataSetIter matchI(match);
+  //Getting tracks from StEvent
+  // grab StEvent
+  cout << "about to Obtain Stevent" << endl;
+  mEvent = (StEvent *) GetInputDS("StEvent");
  
-  St_dst_track     *globtrk  = (St_dst_track *) matchI("globtrk");
-  long NGlbTrk = globtrk->GetNRows(); 
+  if (!mEvent) {
+    cout << "No StEvent! Can not continue. " << endl;
+    return kStOK; // If no event, we're done
+  }
+  cout<<" StEpcMaker** , StEvent found**"<<endl; 
+  //First Find if EmcCollection exists
 
-//******Creating StPointCollection and calling findPoints
+ if(mEvent){
+   cout<<"Epc::StEvent found **"<<endl;
+        mTheEmcCollection = mEvent->emcCollection();
+  }
+ if(!mTheEmcCollection){
+   cout<<" EPC:: No EmcCollection, Cannot continue**"<<endl;
+   return kStOK;
+ }
+
+   StDetectorId EmcId;
+   StEmcDetector* EmcDet;
+   StEmcClusterCollection* cluscoll;
+   StEmcClusterCollection* Bemccluster;
+   StEmcClusterCollection* Bprscluster;
+   StEmcClusterCollection* Bsmdecluster;
+   StEmcClusterCollection* Bsmdpcluster;
+
+   if(mTheEmcCollection){
+   cout<<" StEvent EmcCollection exists**"<<endl;
+
+   for(Int_t idet=0;idet<4;idet++){
+     EmcId = static_cast<StDetectorId>(idet+kBarrelEmcTowerId); 
+     EmcDet =mTheEmcCollection->detector(EmcId);
+     if(EmcDet){
+     cluscoll = EmcDet->cluster();
+     if(cluscoll){
+       //     Int_t Nclusters=cluscoll->numberOfClusters();
+     //     if(Nclusters>0){
+     //     const StSPtrVecEmcCluster& emcclusters= cluscoll->clusters();
+     //     cout<<" Clusters vector found, size **"<<emcclusters.size()<<endl;
+     if(idet==0) Bemccluster=(StEmcClusterCollection*)cluscoll;
+     if(idet==1) Bprscluster=(StEmcClusterCollection*)cluscoll;
+     if(idet==2) Bsmdecluster=(StEmcClusterCollection*)cluscoll;
+     if(idet==3) Bsmdpcluster=(StEmcClusterCollection*)cluscoll;
+
+     }
+     }
+     }
+   } 
+
+   //-------------------
+   //Tracks from StEvent
+   //------------------- 
+
+  StSPtrVecTrackNode& theTrackNodes = mEvent->trackNodes();
+  cout<<" StEpcMaker:: Node size **"<<theTrackNodes.size()<<endl;
+
+    int allGlobals = 0;
+    int goodGlobals = 0;                                                       
+
+  StTrack *track;
+  //Initialize container for track
+
+	 TrackVecForEmc.clear();
+	 //
+
+  for (size_t nodeIndex=0; nodeIndex<theTrackNodes.size(); nodeIndex++) {
+
+     size_t numberOfTracksInNode =  theTrackNodes[nodeIndex]->entries(global);
+
+       for (size_t trackIndex=0; trackIndex<numberOfTracksInNode; trackIndex++)        {
+            track =theTrackNodes[nodeIndex]->track(global,trackIndex);
+        if (track) allGlobals++;
+        if (accept(track)){
+         TrackVecForEmc.push_back(track);
+          goodGlobals++;
+	}                                      
+	  }
+  }
+
+  StTrackVec& TrackToFit=TrackVecForEmc;
+
+ 
+ //******Creating StPointCollection and calling findPoints
 	StPointCollection *point = new StPointCollection("point");
 	m_DataSet->Add(point);
 
-if(point->findPoints(hit0,hit1,hit2,hits,hit_e,hit_p,globtrk)!=kStOK)
+ if(point->findEmcPoints(Bemccluster,Bprscluster,Bsmdecluster,Bsmdpcluster,TrackToFit)!=kStOK)
  { return kStErr;}
 else
  {
-       cout<<" FindPoint called"<<endl;
+       cout<<" findEmcPoint called"<<endl;
  }
-  MakeHistograms(); // Fill QA histgrams
+
+    MakeHistograms(); // Fill QA histgrams
+   //------------------------------------------
+   // WRITING IN EMCCOLLECTION IN STEVENT
+   //------------------------------------------
+
+  //Search for StEvent pointer , where EmcCollection is to be added
+   //  mEvent=(StEvent *) GetInputDS("StEvent");
+   //  if(mEvent){
+   //      cout<<"Epc::StEvent found **"<<endl;
+   //   if(!mTheEmcCollection){
+   //        mTheEmcCollection = mEvent->emcCollection();
+   //   }
+   //  }
+   //else{
+   //    cout<<" *** Epc:: StEvent Structure does not exist***"<<endl;
+   //    cout<<" *** Epc:: Try make one yourself***"<<endl;
+   //    mEvent= new StEvent();
+   //  }
+   //   if(mTheEmcCollection){
+   //   cout<<" StEvent EmcCollection exists**"<<endl;
+   //   }
+   cout<<" Epc***  Filling StEvent **"<<endl;
   Int_t fill = fillStEvent();
   if(fill != kStOK){cout<< "StEvent filling is not O.k"<<endl;}
   }
@@ -227,6 +243,7 @@ void StEpcMaker::MakeHistograms()
           if(cluster !=0){
           if(cluster->GetTitle() == tit){
             Int_t n = cluster->NPoints();
+	    m_emc_points->Fill(Float_t(n));
             if(n>0){
               TIter next(cluster->Points());
               StPi0Candidate *cl;
@@ -262,12 +279,24 @@ void StEpcMaker::MakeHistograms()
 Int_t StEpcMaker::fillStEvent()
 {
   if(!m_DataSet)return kStOK;
+   StEmcCollection *emc;
+  if(!mTheEmcCollection){
+    cout<<"Epc:: Emc Collection does not exist, Create one***"<<endl;
+  //Create StEmcHitCollection
+   emc = new StEmcCollection();
+   cout<<" Epc:: EmcCollection created***"<<endl;
+     }
+     else{
+      cout<<" Epc:: EmcCollection exist***"<<endl;
+      emc=mTheEmcCollection;
+     }
+   cout<<" Epc:: Main fillevent***"<<endl;
 
   //create StEmcCollection
-  StEmcCollection* emc = new StEmcCollection();
+//  StEmcCollection* emc = new StEmcCollection();
 
   //Add it to Dataset as ObjectSet
-  AddData(new St_ObjectSet("EmcCollection", emc));
+     AddData(new St_ObjectSet("EmcCollection", emc));
 
 	  St_DataSetIter itr(m_DataSet);
 	  StPointCollection *cluster = 0;
@@ -277,6 +306,7 @@ Int_t StEpcMaker::fillStEvent()
 	  if(cluster != 0){
 	    if(cluster->GetTitle() == tit){
 	      Int_t nR = cluster->NPointsReal();
+
 	      if(nR>0){
 		TIter next(cluster->PointsReal());
 		StEmcPoint *cl;
@@ -284,15 +314,29 @@ Int_t StEpcMaker::fillStEvent()
 		  cl = (StEmcPoint*)next();
 		  emc->addBarrelPoint(cl);
 		} //for i=0
-	      }// for nR>0 check
+	      }// for nR
 	    }//tit check
 	  } //cluster!= 0 check
-
-	  return kStOK;
+  // add EmcSollection to StEvent
+//  mEvent->setEmcCollection(emc);
+	 
+       return kStOK;
 	  }
   //-------------------------------------------------------
 
 Int_t StEpcMaker::Finish() {
   return StMaker::Finish();
-} 
-
+}
+//
+bool StEpcMaker::accept(StTrack* track)
+{
+    //
+    //  This is a kind of very simple track filter.
+    //  We only check for positive flags.
+    //  Note that this method works for global and
+    //  primary tracks since we deal with the base
+    //  class only (StTrack).
+    //
+    return track && track->flag() >= 0;
+}
+   
