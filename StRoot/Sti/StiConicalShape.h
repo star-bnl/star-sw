@@ -33,7 +33,7 @@ protected:
     
     float outerRadiusEast;  // >= 0
     float outerRadiusWest;  // >= 0
-    float openingAngle; // azimuthal extent of cylinder in radians in [0, 2pi]
+    float openingAngle; // azimuthal extent of cylinder in [0, 2pi]
     
 };
 
