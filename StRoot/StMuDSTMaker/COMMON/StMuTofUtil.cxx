@@ -45,7 +45,10 @@ void StMuTofUtil::fillMuTofHit(StMuTofHitCollection* muTofHit, StTofCollection* 
       tofMuHit->setAssociatedTrackId(tofHits[i]->associatedTrack()->key());
       if(tofHits[i]->trayIndex()!=0&&tofHits[i]->moduleIndex()!=0) { // tofr
 	tofMuHit->setADC((int)tofCell[tofHits[i]->cellCollIndex()]->adc());
-	tofMuHit->setProjectedPoint((StThreeVectorF&)tofCell[tofHits[i]->cellCollIndex()]->position());
+	StThreeVectorD hitpos = tofCell[tofHits[i]->cellCollIndex()]->position();
+	StThreeVectorF hitpos1((Float_t)(hitpos.x()),(Float_t)(hitpos.y()),(Float_t)(hitpos.z()));
+	tofMuHit->setProjectedPoint(hitpos1);
+	//	tofMuHit->setProjectedPoint((StThreeVectorF&)tofCell[tofHits[i]->cellCollIndex()]->position());
       } else { // tofp
 	tofMuHit->setADC((int)tofSlat[tofHits[i]->cellCollIndex()]->adc());
 	tofMuHit->setProjectedPoint((StThreeVectorF&)tofSlat[tofHits[i]->cellCollIndex()]->position());
