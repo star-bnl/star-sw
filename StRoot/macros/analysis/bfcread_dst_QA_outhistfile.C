@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QA_outhistfile.C,v 1.6 2000/01/13 16:55:11 kathy Exp $
+// $Id: bfcread_dst_QA_outhistfile.C,v 1.7 2000/01/18 16:38:05 kathy Exp $
 // $Log: bfcread_dst_QA_outhistfile.C,v $
+// Revision 1.7  2000/01/18 16:38:05  kathy
+// add loading of StUtilities and StAnalysisUtilities so that StHistUtil class can now be picked up from StAnalysisUtilities library
+//
 // Revision 1.6  2000/01/13 16:55:11  kathy
 // updating bfcread_dst*.C macros to use the new methods in StHistUtil which allow printing from a list; also make sure all libraries needed are loaded in the ones running St_QA_Maker; also update documentation
 //
@@ -80,6 +83,7 @@ void bfcread_dst_QA_outhistfile(
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
   gSystem->Load("StUtilities");
+  gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("St_QA_Maker");

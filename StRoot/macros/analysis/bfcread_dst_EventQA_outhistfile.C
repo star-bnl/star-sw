@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.4 2000/01/18 15:09:58 kathy Exp $
+// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.5 2000/01/18 16:38:05 kathy Exp $
 // $Log: bfcread_dst_EventQA_outhistfile.C,v $
+// Revision 1.5  2000/01/18 16:38:05  kathy
+// add loading of StUtilities and StAnalysisUtilities so that StHistUtil class can now be picked up from StAnalysisUtilities library
+//
 // Revision 1.4  2000/01/18 15:09:58  kathy
 // setbranch runco so this branch of file will also be opened
 //
@@ -71,6 +74,7 @@ void bfcread_dst_EventQA_outhistfile(
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
   gSystem->Load("StUtilities");
+  gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("St_QA_Maker"); 
