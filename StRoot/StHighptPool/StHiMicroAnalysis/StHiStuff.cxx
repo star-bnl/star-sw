@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiStuff.cxx,v 1.4 2003/04/30 20:37:30 perev Exp $
+ * $Id: StHiStuff.cxx,v 1.5 2004/01/26 22:59:41 perev Exp $
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHiStuff.cxx,v $
+ * Revision 1.5  2004/01/26 22:59:41  perev
+ * Add init of statick member
+ *
  * Revision 1.4  2003/04/30 20:37:30  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -27,6 +30,7 @@
  *
  **************************************************************************/
 #include "StHiStuff.h"
+Float_t StHiStuff::mMinPt = 2.5;
 
 //__________________
 

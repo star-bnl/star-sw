@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiStuff.h,v 1.2 2002/05/31 21:58:30 jklay Exp $                                    
+ * $Id: StHiStuff.h,v 1.3 2004/01/26 23:00:11 perev Exp $                                    
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  * 
  * $Log: StHiStuff.h,v $
+ * Revision 1.3  2004/01/26 23:00:11  perev
+ * Add init of statick member
+ *
  * Revision 1.2  2002/05/31 21:58:30  jklay
  * Updated analysis code to use new cut class
  *
@@ -45,7 +48,7 @@ class StHiStuff : public StHiBaseAnalysis{
 
   Int_t findSector(Float_t phi, Int_t firstSector);
 
-  static const Float_t mMinPt = 2.5;
+  static Float_t mMinPt;
 
   //###### histograms
 
