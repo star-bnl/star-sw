@@ -16,8 +16,7 @@ struct tpcPadResponse {
    float  outerWirePadCoupling;   /*   cm  */
    float  innerRowNormalization;   /*   unitless  */
    float  outerRowNormalization;   /*   unitless  */
-   float  innerCouplingFunctionConstants[4];   /*   unitless  */
-   float  outerCouplingFunctionConstants[4];   /*   unitless  */
+   float  BoundaryOfStepFunctions[6];   /*   cm  */
    float  innerChargeFractionConstants[6];   /*   unitless  */
    float  outerChargeFractionConstants[6];   /*   unitless  */
    float  errorFunctionRange;   /*   unitless  */
