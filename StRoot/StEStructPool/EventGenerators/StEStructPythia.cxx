@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.cxx,v 1.2 2004/03/24 21:26:52 porter Exp $
+ * $Id: StEStructPythia.cxx,v 1.3 2004/06/09 22:37:51 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -91,9 +91,6 @@ void StEStructPythia::fillTracks(StEStructEvent* estructEvent){
     if(pt<0.15)continue;
 
 
-    float energy=pstr->P[3][i];
-    float num=energy+p[2];
-    float den=energy-p[2];
     float eta=-999.;
 
     float ptotal=sqrt(p[0]*p[0]+p[1]*p[1]+p[2]*p[2]);
@@ -107,6 +104,9 @@ void StEStructPythia::fillTracks(StEStructEvent* estructEvent){
     useTrack = (mTCuts->goodGlobalDCA(gdca[3]) && useTrack);
 
     /*
+    float energy=pstr->P[3][i];
+    float num=energy+p[2];
+    float den=energy-p[2];
     if(den!=0.) { 
        float arg=num/den;
        if(arg>0.) eta=0.5*log(arg);
@@ -176,6 +176,11 @@ void StEStructPythia::setTrackCuts(StEStructTrackCuts* cuts){
 /**********************************************************************
  *
  * $Log: StEStructPythia.cxx,v $
+ * Revision 1.3  2004/06/09 22:37:51  prindle
+ * Moved some variable declarations inside comment to get rid of
+ * unused variable warnings.
+ * ved
+ *
  * Revision 1.2  2004/03/24 21:26:52  porter
  * fixed error calculating eta as rapidity
  *
