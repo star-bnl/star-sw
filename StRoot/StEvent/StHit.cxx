@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.7 2000/12/08 20:21:07 genevb Exp $
+ * $Id: StHit.cxx,v 2.8 2001/03/06 21:04:30 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.8  2001/03/06 21:04:30  ullrich
+ * Modified detector() method. Replaced switch
+ * statement by simple static_cast.
+ *
  * Revision 2.7  2000/12/08 20:21:07  genevb
  * Changed kTofPatchId -> kTofId
  *
@@ -41,7 +45,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.7 2000/12/08 20:21:07 genevb Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.8 2001/03/06 21:04:30 ullrich Exp $";
 
 ClassImp(StHit)
 
@@ -113,60 +117,7 @@ StHit::trackReferenceCount() const { return static_cast<UInt_t>(mTrackRefCount);
 StDetectorId
 StHit::detector() const
 {
-    unsigned int id = bits(0, 4);
-    switch (id) {
-    case kTpcId:
-        return kTpcId;
-    case kSvtId:
-        return kSvtId;
-    case kRichId:
-        return kRichId;
-    case kFtpcWestId:
-        return kFtpcWestId;
-    case kFtpcEastId:
-        return kFtpcEastId;
-    case kTofId:
-        return kTofId;
-    case kCtbId:
-        return kCtbId;
-    case kSsdId:
-        return kSsdId;
-    case kBarrelEmcTowerId:
-        return kBarrelEmcTowerId;
-    case kBarrelEmcPreShowerId:
-        return kBarrelEmcPreShowerId;
-    case kBarrelSmdEtaStripId:
-        return kBarrelSmdEtaStripId;
-    case kBarrelSmdPhiStripId:
-        return kBarrelSmdPhiStripId;
-    case kEndcapEmcTowerId:
-        return kEndcapEmcTowerId;
-    case kEndcapEmcPreShowerId:
-        return kEndcapEmcPreShowerId;
-    case kEndcapSmdUStripId:
-        return kEndcapSmdUStripId;
-    case kEndcapSmdVStripId:
-        return kEndcapSmdVStripId;
-    case kZdcWestId:
-        return kZdcWestId;
-    case kZdcEastId:
-        return kZdcEastId;
-    case kMwpcWestId:
-        return kMwpcWestId;
-    case kMwpcEastId:
-        return kMwpcEastId;
-    case kTpcSsdId:
-        return kTpcSsdId;
-    case kTpcSvtId:
-        return kTpcSvtId;
-    case kTpcSsdSvtId:
-        return kTpcSsdSvtId;
-    case kSsdSvtId:
-        return kSsdSvtId;
-    case kUnknownId:
-    default:
-        return kUnknownId;
-    }
+    return static_cast<StDetectorId>(bits(0, 4));
 }
 
 StThreeVectorF
@@ -175,6 +126,7 @@ StHit::positionError() const { return mPositionError; }
 StMatrixF
 StHit::covariantMatrix() const
 {
+    // for now the diagonal elements is all we have
     StMatrixF m(3,3);
     m(1,1) = mPositionError.x()*mPositionError.x();
     m(2,2) = mPositionError.y()*mPositionError.y();
