@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.9 2002/06/07 10:32:55 fsimon Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.10 2002/09/13 13:41:11 fsimon Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.10  2002/09/13 13:41:11  fsimon
+// Comment out anglefactor
+//
 // Revision 1.9  2002/06/07 10:32:55  fsimon
 // Correct treatment of clusters on sector boundaries
 // Correct assignment of pad numbers in WhichPad
@@ -53,6 +56,8 @@
 #include "StFtpcSlowSimReadout.hh"
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
 #include "StFtpcClusterMaker/StFtpcDbReader.hh"
+#include "TF1.h"
+
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -304,6 +309,12 @@ void StFtpcSlowSimReadout::OutputADC() const
 {
   int num_pixels[11]={0}, num_pixels_occupied[11]={0};
   
+  // Gaussian distribution for Noise
+  TF1* noise = new TF1("noise","gaus",-5,5);
+  noise->SetParameters(1,0,1.5);
+  cout << "Using random noise with a sigma of 1.5\n";
+
+
   for (int row=0; row<mDb->numberOfPadrows(); row++) { 
     for (int sec=0; sec<mDb->numberOfSectors(); sec++) {
       for (int pad=0; pad<mDb->numberOfPads(); pad++) {
@@ -311,10 +322,13 @@ void StFtpcSlowSimReadout::OutputADC() const
 	  int i=bin+mDb->numberOfTimebins()*pad+mDb->numberOfTimebins()*mDb->numberOfPads()*sec+mDb->numberOfTimebins()*mDb->numberOfPads()*mDb->numberOfSectors()*row;
 	  
 	  mADCArray[i] =(mADCArray[i] / mParam->adcConversion());
-	  // mADCArray[i] =(mADCArray[i] / 2); // Scale ADC Values to match real data
+	  mADCArray[i] =(mADCArray[i] / 1.4); // Scale ADC Values to match real data
 	  if(DEBUG)
 	    num_pixels[(int) (bin/30)]++;
 	  
+	  // Add random noise
+	  mADCArray[i] += noise->GetRandom();
+	 
 	  if(mADCArray[i] >= mParam->zeroSuppressThreshold()) {
 	    
 	    // count up occupancy
@@ -336,7 +350,9 @@ void StFtpcSlowSimReadout::OutputADC() const
       cout << "bin " << lastloop << " has occupancy" << num_pixels_occupied[lastloop]/(float) num_pixels[lastloop] << endl;
     }
   }
-  return;
+ 
+ delete noise;
+ return;
 }
 
 float StFtpcSlowSimReadout::PhiOfPad(const int pad, const int deg_or_rad)
