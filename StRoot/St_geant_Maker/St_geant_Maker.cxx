@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.40 1999/04/30 15:17:03 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.41 1999/07/03 22:40:11 fine Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.41  1999/07/03 22:40:11  fine
+// St_geant_Maker::Work - workaround of LINUX compiler problem
+//
 // Revision 1.40  1999/04/30 15:17:03  perev
 // SetOutput added to announce Geometry exists
 //
@@ -471,7 +474,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.40 1999/04/30 15:17:03 perev Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.41 1999/07/03 22:40:11 fine Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -804,20 +807,33 @@ St_Node *St_geant_Maker::Work()
         case CONE: t=new TCONE(nick,"CONE","void",
                          p[0],p[1],p[2],p[3],p[4]);               break;
         case CONS: t=new TCONS(nick,"CONS","void",    // take care !
-                         p[1],p[2],p[3],p[4],p[0],p[5],p[6]);     break;
+                         p[0],p[1],p[2],p[3],p[4],p[5],p[6]);     break;
+//                         p[1],p[2],p[3],p[4],p[0],p[5],p[6]);     break;
         case SPHE: t=new TSPHE(nick,"SPHE","void",
                          p[0],p[1],p[2],p[3],p[4],p[5]);          break;
         case PARA: t=new TPARA(nick,"PARA","void",
                          p[0],p[1],p[2],p[3],p[4],p[5]);          break;
         case PGON: t=new TPGON(nick,"PGON","void",p[0],p[1],p[2],p[3]);  
                    { Float_t *pp = p+4;
-                     for (Int_t i=0; i<p[3]; i++) 
-                         (( TPGON*)t)->DefineSection(i,*pp++,*pp++,*pp++);
+                     for (Int_t i=0; i<p[3]; i++) {
+                          Float_t z    = *pp++;
+                          Float_t rmin = *pp++;
+                          Float_t rmax = *pp++;
+                         ((TPCON *)t)->DefineSection(i,z,rmin,rmax);
+// this is because of a compiler bug on Linux (VF 030699)
+//                         (( TPGON*)t)->DefineSection(i,*pp++,*pp++,*pp++);
+                     }
                    }                                              break;
         case PCON: t=new TPCON(nick,"PCON","void",p[0],p[1],p[2]);
                    { Float_t *pp = p+3;
-                     for (Int_t i=0; i<p[2]; i++)
-                         ((TPCON *)t)->DefineSection(i,*pp++,*pp++,*pp++);
+                     for (Int_t i=0; i<p[2]; i++) {
+                          Float_t z    = *pp++;
+                          Float_t rmin = *pp++;
+                          Float_t rmax = *pp++;
+                         ((TPCON *)t)->DefineSection(i,z,rmin,rmax);
+// this is because of a compiler bug on Linux (VF 030699)
+//                         ((TPCON *)t)->DefineSection(i,*pp++,*pp++,*pp++);
+                     }
                    }                                              break;
         case ELTU: t=new TELTU(nick,"ELTU","void",
                          p[0],p[1],p[2]);                         break;
@@ -836,7 +852,8 @@ St_Node *St_geant_Maker::Work()
  
       // to build a compressed tree, name should be checked for repetition
       newNode = new St_Node(name,nick,t);
-      newNode -> SetVisibility(att[1]);
+//      newNode -> SetVisibility(ENodeSEEN(MapGEANT2StNodeVis(att[1])));
+      newNode -> SetVisibility((St_Node::ENodeSEEN)St_Node::MapGEANT2StNodeVis(att[1]));
       H->SetPointer(newNode);
     }
 
