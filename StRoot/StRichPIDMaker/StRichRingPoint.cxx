@@ -1,10 +1,15 @@
 /**********************************************************
- * $Id: StRichRingPoint.cxx,v 2.6 2000/12/08 04:57:09 lasiuk Exp $
+ * $Id: StRichRingPoint.cxx,v 2.7 2001/02/07 16:01:06 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingPoint.cxx,v $
+ *  Revision 2.7  2001/02/07 16:01:06  lasiuk
+ *  no units with mass of particle in c'tor
+ *  momentum loss (uses local copy) taken into account
+ *  inline functions where possible
+ *
  *  Revision 2.6  2000/12/08 04:57:09  lasiuk
  *  small fix to units quantities
  *
@@ -132,37 +137,35 @@ StRichRingPoint::StRichRingPoint(StRichTrack* track,
   mRefractedAway.setZ(FLT_MAX);  
 }
 
-StParticleDefinition* StRichRingPoint::getParticleType() {
-  return mParticle;
-}
+StRichRingPoint::~StRichRingPoint() { /* nopt */ }
 
 void StRichRingPoint::setParticleType(StParticleDefinition* particle) {
   
-  mParticle   = particle;
-  mMass       = particle->mass()*GeV;
-  mBeta       = mMomentum/sqrt(mMomentum*mMomentum + mMass*mMass);
-  mCher       = acos(1.0/(mBeta*mIndexRad[mRingType]));
+    mParticle   = particle;
+    mMass       = particle->mass();
+
+    //
+    // Adjust for the energy loss
+    //
+    
+    mMomentum -= mTrack->getMomentumLoss(particle);
+    
+    mBeta       = mMomentum/sqrt(mMomentum*mMomentum + mMass*mMass);
+    mCher       = acos(1.0/(mBeta*mIndexRad[mRingType]));
+
+    
+    if (mCher>M_PI/2.0 || mCher<0) {
+	cout << "StRichRingPoint::setParticleType()\n";
+	cout << "\tERROR\n";
+	cout << "\tProblem with the Chernekov angle!\n";
+	cout << "\tmCher= " << mCher;
+	cout << "\tabort!! "<< endl;
+	abort();
+    } 
+
+    mFastEnough = mTrack->fastEnough(particle);
   
-  if (mCher>M_PI/2.0 || mCher<0) {
-    cout << "StRichRingPoint::setParticleType(): problem! abort!! "<< endl;
-    abort();
-  } 
-
-  mFastEnough = mTrack->fastEnough(particle);
-  
-  // define "fast" trig functions
-  mTanCher = tan(mCher);  
-}
-
-
-StRichRingPoint::~StRichRingPoint() { }
-
-StRichTrack* StRichRingPoint::getTrack() {
-  return mTrack;
-}
-
-void StRichRingPoint::setPoint(StThreeVectorF& sPoint) {
-  minPoint = sPoint;
+    mTanCher = tan(mCher);
 }
 
 bool StRichRingPoint::getPoint(double psi, StThreeVectorF& point) {
@@ -196,50 +199,47 @@ bool StRichRingPoint::getPoint(double psi, StThreeVectorF& point) {
 
   mPsiPrime = mRotatedLightRay.phi();
   
-  // define "fast" trig functions
   double cosPsiPrime = cos(mPsiPrime);
   double sinPsiPrime = sin(mPsiPrime);
 
+  //
   // angles cone makes with refractive boundaries
+  //
   mRadiatorAngle = acos(mRotatedLightRay.z()/mRotatedLightRay.mag());
   if (mRadiatorAngle >= 0.5*M_PI) {return false;}
 
   double tempQVal = (mIndexRad[mRingType]/mIndexQuartz[mRingType])*sin(mRadiatorAngle);
-  if (tempQVal >= 1.0)           {return false;}
+  if (tempQVal >= 1.0) {return false;}
   mQuartzAngle = asin(tempQVal);
 
   double tempMVal = (mIndexQuartz[mRingType]/mIndexMeth[mRingType])*sin(mQuartzAngle);
-  if (tempMVal >= 1.0)           {return false;}
+  if (tempMVal >= 1.0)  {return false;}
   mMethaneAngle = asin(tempMVal);
 
-
-  // define "fast" trig functions
   double mTanRAngle = tan(mRadiatorAngle);
   double mTanQAngle = tan(mQuartzAngle);
   double mTanMAngle = tan(mMethaneAngle);
 
- 
-
-  // propagation to pad plane
+  //
+  // propagation of inner, outer, and mean
+  // rings to the pad plane
+  //
+  
   StThreeVectorF mPropagatedLightRay;
 
-  // inner ring  
-  if (mRingType==eInnerRing) {
-    mPropagatedLightRay.setX(mDepthRad*mTrackTanTheta*mTrackCosPhi);
-    mPropagatedLightRay.setY(mDepthRad*mTrackTanTheta*mTrackSinPhi);
-    mPropagatedLightRay.setZ(0.0);
+  if(mRingType==eInnerRing) {
+      mPropagatedLightRay.setX(mDepthRad*mTrackTanTheta*mTrackCosPhi);
+      mPropagatedLightRay.setY(mDepthRad*mTrackTanTheta*mTrackSinPhi);
+      mPropagatedLightRay.setZ(0.0);
   }
   
-
-  // outer ring  
-  if (mRingType==eOuterRing) {
-    mPropagatedLightRay.setX(mDepthRad*mTanRAngle*cosPsiPrime);
-    mPropagatedLightRay.setY(mDepthRad*mTanRAngle*sinPsiPrime);
-    mPropagatedLightRay.setZ(0.0);
+  if(mRingType==eOuterRing) {
+      mPropagatedLightRay.setX(mDepthRad*mTanRAngle*cosPsiPrime);
+      mPropagatedLightRay.setY(mDepthRad*mTanRAngle*sinPsiPrime);
+      mPropagatedLightRay.setZ(0.0);
   } 
 
-  // mean ring  
-  if (mRingType==eMeanRing) {
+  if(mRingType==eMeanRing) {
     mPropagatedLightRay.setX((mDepthRad*mMeanDepthRad)*mTrackTanTheta*mTrackCosPhi 
 			   + (mDepthRad-mDepthRad*mMeanDepthRad)*mTanRAngle*cosPsiPrime);
 
@@ -253,90 +253,64 @@ bool StRichRingPoint::getPoint(double psi, StThreeVectorF& point) {
 
   } 
 
-
-
   double tempXVal = 
-    mImpactPoint.x() + 
-    mPropagatedLightRay.x() +       
-    mDepthQuar*mTanQAngle*cosPsiPrime + 
-    mDepthProx*mTanMAngle*cosPsiPrime;
+      mImpactPoint.x() + 
+      mPropagatedLightRay.x() +       
+      mDepthQuar*mTanQAngle*cosPsiPrime + 
+      mDepthProx*mTanMAngle*cosPsiPrime;
   
   double tempYVal = 
-    mImpactPoint.y() + 
-    mPropagatedLightRay.y() + 
-    mDepthQuar*mTanQAngle*sinPsiPrime + 
-    mDepthProx*mTanMAngle*sinPsiPrime;
+      mImpactPoint.y() + 
+      mPropagatedLightRay.y() + 
+      mDepthQuar*mTanQAngle*sinPsiPrime + 
+      mDepthProx*mTanMAngle*sinPsiPrime;
   
   if (isnan(tempXVal) || isnan(tempYVal)) {
-    
-    cout << "impactxy = " << mImpactPoint << endl;
-    cout << "psi = " << psi/degree << endl;
-    cout << "mtanCher = " << mTanCher << endl;
-    cout << " cosPsi  sinPsi = " << cosPsi << "   " << sinPsi << endl;
-    cout << "mLightRay = " << mLightRay << endl;
-    cout << "mRotatedLightRay = " << mRotatedLightRay << endl;
-    cout << "mTrackCosTheta     mTrackCosPhi        mTrackSinPhi        mTrackSinTheta   " 
-	 << mTrackCosTheta  << "  " <<    mTrackCosPhi    << "  " <<     mTrackSinPhi    
-	 << "  " <<     mTrackSinTheta << endl;
+      cout << "StRichRingPoint::getPoint()\n";
+      cout << "\tERROR:\n";
+      cout << "impactxy = " << mImpactPoint << endl;
+      cout << "psi = " << psi/degree << endl;
+      cout << "mtanCher = " << mTanCher << endl;
+      cout << " cosPsi  sinPsi = " << cosPsi << "   " << sinPsi << endl;
+      cout << "mLightRay = " << mLightRay << endl;
+      cout << "mRotatedLightRay = " << mRotatedLightRay << endl;
+      cout << "mTrackCosTheta     mTrackCosPhi        mTrackSinPhi        mTrackSinTheta   " 
+	   << mTrackCosTheta  << "  " <<    mTrackCosPhi    << "  " <<     mTrackSinPhi    
+	   << "  " <<     mTrackSinTheta << endl;
 
-    cout << "mPsiPrime = " << mPsiPrime << endl;
-    cout << "cosPsiPrime    sinPsiPrime  = " << cosPsiPrime << "   " <<    sinPsiPrime << endl;
-    cout << "mRingType = " << static_cast<int>(mRingType) << endl;
+      cout << "mPsiPrime = " << mPsiPrime << endl;
+      cout << "cosPsiPrime    sinPsiPrime  = " << cosPsiPrime << "   " <<    sinPsiPrime << endl;
+      cout << "mRingType = " << static_cast<int>(mRingType) << endl;
     
-    cout << " mDepthQuar*mTanQAngle*cosPsiPrime  = " <<  mDepthQuar << "   " 
-	 << mTanQAngle << "   " << cosPsiPrime << endl;
+      cout << " mDepthQuar*mTanQAngle*cosPsiPrime  = " <<  mDepthQuar << "   " 
+	   << mTanQAngle << "   " << cosPsiPrime << endl;
     
-    cout << " mPropagatedLightRay = " <<  mPropagatedLightRay << endl;
-    cout << "mDepthProx*mTanMAngle*sinPsiPrime = " << mDepthProx 
-	 << "   " << mTanMAngle << "   " << sinPsiPrime << endl;
-    abort();
+      cout << " mPropagatedLightRay = " <<  mPropagatedLightRay << endl;
+      cout << "mDepthProx*mTanMAngle*sinPsiPrime = " << mDepthProx 
+	   << "   " << mTanMAngle << "   " << sinPsiPrime << endl;
+      abort();
   }
-    point.setX(tempXVal);
-    point.setY(tempYVal);
-    point.setZ(0.0);
   
-    return true;
+  point.setX(tempXVal);
+  point.setY(tempYVal);
+  point.setZ(0.0);
+  
+  return true;
 }
 
 double StRichRingPoint::rotatedFunction(double psi) {
-  if (!getPoint(psi,tempPoint)) return HUGE_VAL;
-  tempPoint = tempPoint - mImpactPoint;
-  StThreeVectorF rotatedPoint(mTrackCosPhi*tempPoint.x() + 
-			      mTrackSinPhi*tempPoint.y(),
+
+    if (!getPoint(psi,tempPoint)) return HUGE_VAL;
+
+    tempPoint = tempPoint - mImpactPoint;
+
+    StThreeVectorF rotatedPoint(mTrackCosPhi*tempPoint.x() + 
+				mTrackSinPhi*tempPoint.y(),
 			      
-			     -mTrackSinPhi*tempPoint.x() + 
-			      mTrackCosPhi*tempPoint.y(),
-			      
-			      0.0);
+				-mTrackSinPhi*tempPoint.x() + 
+				mTrackCosPhi*tempPoint.y(),
+
+				0.0);
   
-  return (rotatedPoint - minPoint).perp(); 
+    return (rotatedPoint - minPoint).perp(); 
 }
-    
-double StRichRingPoint::getMeanPathInRadiator() {
-  return mMeanPathInRadiator;
-}
-
-double StRichRingPoint::getMeanPathInQuartz() {
-  return mMeanPathInQuartz;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

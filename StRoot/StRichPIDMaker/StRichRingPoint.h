@@ -1,10 +1,15 @@
 /**********************************************************
- * $Id: StRichRingPoint.h,v 2.1 2000/09/29 01:35:38 horsley Exp $
+ * $Id: StRichRingPoint.h,v 2.2 2001/02/07 16:01:06 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingPoint.h,v $
+ *  Revision 2.2  2001/02/07 16:01:06  lasiuk
+ *  no units with mass of particle in c'tor
+ *  momentum loss (uses local copy) taken into account
+ *  inline functions where possible
+ *
  *  Revision 2.1  2000/09/29 01:35:38  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
  *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
@@ -29,8 +34,9 @@
 class  StRichRingPoint {
 public:
   
-  StRichRingPoint(StRichTrack* track, StRichRingDefinition type);
-  ~StRichRingPoint();
+    StRichRingPoint(StRichTrack* track, StRichRingDefinition type);
+    ~StRichRingPoint();
+
   double rotatedFunction(double psi);
   bool   getPoint(double psi, StThreeVectorF& point);
   void   setPoint(StThreeVectorF& sPoint);
@@ -102,7 +108,11 @@ private:
 
 };
 
-
+inline StRichTrack* StRichRingPoint::getTrack() { return mTrack; }
+inline void StRichRingPoint::setPoint(StThreeVectorF& sPoint) { minPoint = sPoint; }
+inline StParticleDefinition* StRichRingPoint::getParticleType() { return mParticle;}
+inline double StRichRingPoint::getMeanPathInRadiator() { return mMeanPathInRadiator;}
+inline double StRichRingPoint::getMeanPathInQuartz() {  return mMeanPathInQuartz;}
 
 #endif
 
