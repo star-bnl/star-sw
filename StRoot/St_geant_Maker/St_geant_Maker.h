@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.32 2003/10/01 23:54:08 potekhin Exp $
+// $Id: St_geant_Maker.h,v 1.33 2004/02/10 23:16:34 potekhin Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.33  2004/02/10 23:16:34  potekhin
+// First version of Ag2Geom
+//
 // Revision 1.32  2003/10/01 23:54:08  potekhin
 // Added a declaration a a pointer to the structure geom_gdat,
 // needed for the propagation the GEANT run data --
@@ -50,15 +53,17 @@ class TGeant3;
 class TRotMatrix;
 class TH1F;
 class TShape;
-
+class TGeoVolume;
 class St_geom_gdat;
+class TGeoVolume;
 
 class St_geant_Maker : public StMaker {
 protected:
   Int_t  fNwGeant;     // No. of words in GCBANK common block
   Int_t  fNwPaw;       // No. of words in PAWC  common block
   Int_t  fIwType;      // HIGZ interface (=0 no HIGZ)
-  TVolume*   fVolume;   //!
+  TDataSet*   fVolume;   //!
+  TGeoVolume* fTopGeoVolume; //!
   TString fInputFile; // 
   StEvtHddr *fEvtHddr;//! pointer to Event Header
   virtual TShape  *MakeShape(TString *name, Int_t ivo);
@@ -73,7 +78,7 @@ protected:
 
 public: 
                   St_geant_Maker(const char *name="geant",
-				 Int_t nwgeant=20000000,Int_t nwpaw=0, Int_t iwtype=0);
+				 Int_t nwgeant=20,Int_t nwpaw=0, Int_t iwtype=0);
    virtual       ~St_geant_Maker(){};
    virtual Int_t  Finish(){SafeDelete(m_DataSet); return kStOK;}
    virtual Int_t  Init();
@@ -81,11 +86,11 @@ public:
    virtual void   Draw(const char*);
    virtual Int_t  Make();
    virtual void   LoadGeometry (Char_t *option = "detp geometry field_only");  // *MENU
-   virtual void   SetNwGEANT (Int_t n=2000000);
-   virtual void   SetNwPAW   (Int_t n=      0);
-   virtual void   SetIwtype  (Int_t n=      0);
+   virtual void   SetNwGEANT (Int_t n=2);
+   virtual void   SetNwPAW   (Int_t n=0);
+   virtual void   SetIwtype  (Int_t n=0);
    virtual Int_t  Skip(Int_t Nskip=1);                        // *MENU*
-   virtual TVolume *Work();
+   virtual TDataSet *Work();
    virtual void   Mark(TVolume *topvol);
    virtual void   Call(const Char_t *name); // *MENU 
    virtual TRotMatrix *GetMatrix(float theta1, float phi1,
@@ -96,14 +101,20 @@ public:
    virtual void  SetDebug(Int_t dbl=kDebug); 
            Int_t SetInputFile(const char* file);
 
-   TVolume* GetVolume() { return fVolume; }
+   TDataSet* GetVolume() { return fVolume; }
+   TGeoVolume* GetTopGeoVolume() {return fTopGeoVolume;}
    static void RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, 
 			    Int_t &k, Char_t *iq);
    virtual void     Geometry();
    virtual Int_t    Agstroot();
    virtual Int_t    G2t_volume_id(const Char_t *name, Int_t *numbv);
+#if 1
    virtual Int_t    Agvolume(TVolume *&node,Float_t *&par,Float_t *&pos,Float_t *&mot,
+   			     Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar);
+#else
+   virtual Int_t    Agvolume(void *&node,Float_t *&par,Float_t *&pos,Float_t *&mot,
 			     Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar);
+#endif
    virtual void     Agnzgete (Int_t &ILK, Int_t &IDE,
 			      Int_t &NPART, Int_t &IRUN,
 			      Int_t &IEVT, const Char_t *CGNAM,
@@ -119,6 +130,7 @@ public:
 			   const Char_t* path,const Char_t* opt,
 			   Int_t& one,Int_t &two,Int_t &three,Int_t& iw);
    
+  TGeoVolume* Ag2Geom();
  protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -134,7 +146,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.32 2003/10/01 23:54:08 potekhin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.33 2004/02/10 23:16:34 potekhin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 

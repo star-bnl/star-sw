@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.86 2003/11/12 22:44:26 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.87 2004/02/10 23:16:34 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.87  2004/02/10 23:16:34  potekhin
+// First version of Ag2Geom
+//
 // Revision 1.86  2003/11/12 22:44:26  potekhin
 // Kill a stray debug print statement
 //
@@ -305,6 +308,14 @@
 //     #include "THYPE.h"
 #include "TGTRA.h"
 #include "TCTUB.h"
+//  new Geometry
+#include "TGeoMaterial.h"
+#include "TGeoMatrix.h"
+#include "TGeoNode.h"
+#include "TGeoManager.h"
+#include "TGeoVolume.h"
+#include "TGeoPcon.h"
+#include "TGeoPgon.h"
 #ifdef __CC5__
 #include <TGeant3.h>
 #else
@@ -352,6 +363,7 @@
 #define    agstroot	 F77_NAME(agstroot,AGSTROOT)
 #define    rootmaptable  F77_NAME(rootmaptable,ROOTMAPTABLE)
 #define    agvolume      F77_NAME(agvolume,AGVOLUME)
+#define    agvoluma      F77_NAME(agvoluma,AGVOLUMA)
 #define    uhtoc         F77_NAME(uhtoc,UHTOC)
 #endif
 typedef long int (*addrfun)(); 
@@ -360,9 +372,9 @@ R__EXTERN "C" {
   Int_t type_of_call agstroot();
   void type_of_call *csaddr(char *name, int l77name=0);
   long int type_of_call csjcal(
-				addrfun *fun, /* addres of external routine */
-				int  *narg,   /* number   of arguments      */
-				...);         /* other narg arguments       */
+			       addrfun *fun, /* addres of external routine */
+			       int  *narg,   /* number   of arguments      */
+			       ...);         /* other narg arguments       */
   
   Int_t type_of_call g2t_volume_id (DEFCHARD, int* DEFCHARL);
   void type_of_call gfrotm   (Int_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&);
@@ -373,21 +385,26 @@ R__EXTERN "C" {
 			      Float_t *VERT,Int_t &IWTFL,Float_t &WEIGH DEFCHARL);
   void type_of_call dzddiv   (Int_t &,Int_t &,DEFCHARD,DEFCHARD,
 			      Int_t &,Int_t &,Int_t &,Int_t & DEFCHARL DEFCHARL);
-/*
-* Input : ILK   - Link number  : 1 = primary, 2 = secondary (obsolete)    *
-*         IDE   - ID of event in gate ( ZEBRA IDN)                        *
-* Output: NPART - Number of particles in event record                     *
-*         IRUN  - run number as recorded by generator                     *
-*         IEVT  - event number as recorded by generator                   *
-*         CGNAM - generator name                                          *
-*         VERT(4)- x,y,z,t of event (metres,seconds or mm,mm/c)           *
-*         IWTFL - weight flag                                             *
-*         WEIGH - event weight                                            *
-*/
+  /*
+   * Input : ILK   - Link number  : 1 = primary, 2 = secondary (obsolete)    *
+   *         IDE   - ID of event in gate ( ZEBRA IDN)                        *
+   * Output: NPART - Number of particles in event record                     *
+   *         IRUN  - run number as recorded by generator                     *
+   *         IEVT  - event number as recorded by generator                   *
+   *         CGNAM - generator name                                          *
+   *         VERT(4)- x,y,z,t of event (metres,seconds or mm,mm/c)           *
+   *         IWTFL - weight flag                                             *
+   *         WEIGH - event weight                                            *
+   */
   void type_of_call rootmaptable_(DEFCHARD,DEFCHARD,DEFCHARD, Int_t&,Char_t * 
 				  DEFCHARL DEFCHARL DEFCHARL);
   Int_t type_of_call agvolume(TVolume*&,Float_t*&,Float_t*&,Float_t*&,
+    			      Int_t&,Int_t&,Float_t*&,Int_t&);
+#if 0
+  Int_t type_of_call agvolume(void*&,Float_t*&,Float_t*&,Float_t*&,
 			      Int_t&,Int_t&,Float_t*&,Int_t&);
+#endif
+  Int_t type_of_call agvoluma(void*,void*,void*,void*,void*,void*,void*,void*,void*,void*);
   void type_of_call uhtoc(Int_t&,Int_t &,DEFCHARD,Int_t& DEFCHARL);
 }
 
@@ -411,24 +428,23 @@ typedef struct {
 } attributes;
 extern "C" 
 {
-  }
+}
 ClassImp(St_geant_Maker)
-
-TDataSet *St_geant_Maker::fgGeom = 0;
+  
+  TDataSet *St_geant_Maker::fgGeom = 0;
 TGeant3  *St_geant_Maker::geant3 = 0;
 //_____________________________________________________________________________
 St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int_t iwtype):
-StMaker(name),
-fInputFile(""), fEvtHddr(0)
+  StMaker(name), 
+  fNwGeant(nwgeant), fNwPaw(nwpaw), fIwType(iwtype),
+  fVolume(0), fTopGeoVolume(0), 
+  fInputFile(""), fEvtHddr(0)
 {
-  fVolume    = 0;
-  fNwGeant = nwgeant;
-  fNwPaw   = nwpaw;
-  fIwType  = iwtype;
-  fgGeom = new TDataSet("geom");  
+  fVolume = new TDataSet("geom");
+  fgGeom  = new TDataSet("geom");  
   m_ConstSet->Add(fgGeom);
   SetOutput(fgGeom);	//Declare this "geom" for output
-// Initialize GEANT
+  // Initialize GEANT
   
   if (! geant3) {
     PrintInfo();
@@ -450,18 +466,18 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
                                         const StMaker *dowMk) const 
 {
   TDataSet *ds = StMaker::FindDataSet(logInput,uppMk,dowMk);
-
+  
   if (ds || strcmp(logInput,"HALL")) return ds;
-
+  
   if (!fVolume) ((St_geant_Maker *)this)->Work();
-
+  
   if (fVolume) { 
     TList *listOfVolume = gGeometry->GetListOfNodes();
-
+    
     // Remove hall from the list of ROOT nodes to make it free of ROOT control
     listOfVolume->Remove(fVolume);
     listOfVolume->Remove(fVolume);
-
+    
     // Add "hall" into ".const" area of this maker
     ((St_geant_Maker *)this)->AddConst(fVolume);
     if (Debug()) fVolume->ls(3);
@@ -470,7 +486,7 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
-
+  
   if (m_Mode != 1) { // Mixer mode == 1 - do not modify EvtHddr
     fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
     if (!fEvtHddr) {                            // Standalone run
@@ -484,266 +500,266 @@ Int_t St_geant_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Make()
 {
-    Int_t    nhits,nhit1,nhit2,nhit3,nhit4,link=1,ide=1,npart,irun,ievt,iwtfl;
-    Float_t  vert[4],weigh;
-
-    int iRes = 0; if(iRes) {/*touch*/};
+  Int_t    nhits,nhit1,nhit2,nhit3,nhit4,link=1,ide=1,npart,irun,ievt,iwtfl;
+  Float_t  vert[4],weigh;
   
-    Do("trig");
-
-    // check EoF
-    if (cquest->iquest[0]) {return kStEOF;}
-    Int_t Nwhead,Ihead[100];
-    Int_t Nwbuf;
-    Float_t Ubuf[100];
-
-    // prepare an empty g2t_event
-    St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
-    m_DataSet->Add(g2t_event);
-
-    Char_t   cgnam[21] = "                   \0";                               
-    Agnzgete(link,ide,npart,irun,ievt,cgnam,vert,iwtfl,weigh);
-    geant3->Gfhead(Nwhead,Ihead,Nwbuf,Ubuf);
-
-    if (fEvtHddr) {
-      if (clink->jhead) {
-	if (fEvtHddr->GetRunNumber() != *(z_iq+clink->jhead+1)) 
-	  fEvtHddr->SetRunNumber(*(z_iq+clink->jhead+1));
-	fEvtHddr->SetEventNumber(*(z_iq+clink->jhead+2));
-      }
-      if (fInputFile != "") fEvtHddr->SetEventType(TString(gSystem->BaseName(fInputFile.Data()),7));
+  int iRes = 0; if(iRes) {/*touch*/};
+  
+  Do("trig");
+  
+  // check EoF
+  if (cquest->iquest[0]) {return kStEOF;}
+  Int_t Nwhead,Ihead[100];
+  Int_t Nwbuf;
+  Float_t Ubuf[100];
+  
+  // prepare an empty g2t_event
+  St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
+  m_DataSet->Add(g2t_event);
+  
+  Char_t   cgnam[21] = "                   \0";                               
+  Agnzgete(link,ide,npart,irun,ievt,cgnam,vert,iwtfl,weigh);
+  geant3->Gfhead(Nwhead,Ihead,Nwbuf,Ubuf);
+  
+  if (fEvtHddr) {
+    if (clink->jhead) {
+      if (fEvtHddr->GetRunNumber() != *(z_iq+clink->jhead+1)) 
+	fEvtHddr->SetRunNumber(*(z_iq+clink->jhead+1));
+      fEvtHddr->SetEventNumber(*(z_iq+clink->jhead+2));
     }
-    if (npart>0) {  
-      St_particle  *particle   = new St_particle("particle",npart);
-      m_DataSet->Add(particle);  iRes = g2t_particle(particle);
-//    =======================
-
-      particle_st *p = particle->GetTable();
-
-      // 20030508 --max-- found a bug: 9999999
-      // "istat==10" on the following line, changing to >=11
-      // This "if should now work with both "old" and "new" ntuple conventions
-
-      if ( (p->isthep == 10 && p->idhep  == 9999999 && fEvtHddr) ||
-           (p->isthep >= 11 && p->idhep  == 999998  && fEvtHddr)) {
-
-	fEvtHddr->SetBImpact  (p->phep[0]);
-	fEvtHddr->SetPhImpact (p->phep[1]);
-	fEvtHddr->SetCenterOfMassEnergy(p->phep[2]);
-
-	// Obsoleted: --max--
-	// 	fEvtHddr->SetGenerType((int)p->phep[2]);
-	// 	Int_t west = (int)p->phep[4];
-	// 	Int_t east = (int)(1000.*p->phep[4]-1000.*((float)west));
-	// 	fEvtHddr->SetAWest(west);
-	// 	fEvtHddr->SetAEast(east);
-
-	// Update the run number, if necessary
-	if (fEvtHddr->GetRunNumber()!=p->vhep[0]) fEvtHddr->SetRunNumber((int)p->vhep[0]);
-
-	fEvtHddr->SetEventNumber((int)p->vhep[1]);
-	fEvtHddr->SetProdDateTime();
-
-        Int_t id = p->jdahep[0];
-        Int_t it = p->jdahep[1];
-
-        if (id <=        0) id = 19991231;
-	if (id <= 19000000) id +=19000000;
-        if (id >= 20500000) id = 19991231;
-	if (it <         0) it = 235959;
-	if (it >    246060) it = 235959;
-	fEvtHddr->SetDateTime(id,it);
-      }
-    }
-
-    if (!cnum->nvertx || !cnum->ntrack) return kStErr;
-    St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",cnum->nvertx);
-    m_DataSet->Add(g2t_vertex);
-    St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",cnum->ntrack);
-    m_DataSet->Add(g2t_track);
+    if (fInputFile != "") fEvtHddr->SetEventType(TString(gSystem->BaseName(fInputFile.Data()),7));
+  }
+  if (npart>0) {  
+    St_particle  *particle   = new St_particle("particle",npart);
+    m_DataSet->Add(particle);  iRes = g2t_particle(particle);
+    //    =======================
+    if (Debug() > 1) particle->Print(0,10);
+    particle_st *p = particle->GetTable();
     
-    iRes = g2t_get_kine(g2t_vertex,g2t_track);
-    iRes = g2t_get_event(g2t_event);
-
-    // --max--
-    // Filling the event header, addition due to the new coding
-    if(fEvtHddr) {
-      fEvtHddr->SetAEast((*g2t_event)[0].n_wounded_east);
-      fEvtHddr->SetAWest((*g2t_event)[0].n_wounded_west);
-    }
-    //---------------------- inner part -------------------------//
-
-    geant3->Gfnhit("SVTH","SVTD", nhit1);
-    geant3->Gfnhit("SVTH","SFSD", nhit2);
-    nhits=nhit1+nhit2;
-    if (nhits>0) { 
-      St_g2t_svt_hit *g2t_svt_hit = new St_g2t_svt_hit("g2t_svt_hit",nhits);
-      m_DataSet->Add(g2t_svt_hit);
-
-      iRes = g2t_svt(g2t_track,g2t_svt_hit);
-//	     ===============================
-    }
-
-    geant3->Gfnhit("PIXH","PLAC", nhits);
-
-    if (nhits>0) { 
-      St_g2t_pix_hit *g2t_pix_hit = new St_g2t_pix_hit("g2t_pix_hit",nhits);
-      m_DataSet->Add(g2t_pix_hit);
-
-      iRes = g2t_pix(g2t_track,g2t_pix_hit);
-//
-    }
-
-    geant3->Gfnhit("TPCH","TPAD", nhits);
-    if (nhits>0){ 
-      St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",nhits);
-      m_DataSet->Add(g2t_tpc_hit);
-
-      iRes = g2t_tpc(g2t_track,g2t_tpc_hit);
-//	     ==============================
-    }
+    // 20030508 --max-- found a bug: 9999999
+    // "istat==10" on the following line, changing to >=11
+    // This "if should now work with both "old" and "new" ntuple conventions
     
-
-    geant3->Gfnhit("TPCH","TMSE", nhits);
-    if (nhits>0) { 
-      St_g2t_mwc_hit *g2t_mwc_hit = new St_g2t_mwc_hit("g2t_mwc_hit",nhits);
-      m_DataSet->Add(g2t_mwc_hit);
-      iRes = g2t_mwc(g2t_track,g2t_mwc_hit);
-//	     ==============================
+    if ( (p->isthep == 10 && p->idhep  == 9999999 && fEvtHddr) ||
+	 (p->isthep >= 11 && p->idhep  == 999998  && fEvtHddr)) {
+      
+      fEvtHddr->SetBImpact  (p->phep[0]);
+      fEvtHddr->SetPhImpact (p->phep[1]);
+      fEvtHddr->SetCenterOfMassEnergy(p->phep[2]);
+      
+      // Obsoleted: --max--
+      // 	fEvtHddr->SetGenerType((int)p->phep[2]);
+      // 	Int_t west = (int)p->phep[4];
+      // 	Int_t east = (int)(1000.*p->phep[4]-1000.*((float)west));
+      // 	fEvtHddr->SetAWest(west);
+      // 	fEvtHddr->SetAEast(east);
+      
+      // Update the run number, if necessary
+      if (fEvtHddr->GetRunNumber()!=p->vhep[0]) fEvtHddr->SetRunNumber((int)p->vhep[0]);
+      
+      fEvtHddr->SetEventNumber((int)p->vhep[1]);
+      fEvtHddr->SetProdDateTime();
+      
+      Int_t id = p->jdahep[0];
+      Int_t it = p->jdahep[1];
+      
+      if (id <=        0) id = 19991231;
+      if (id <= 19000000) id +=19000000;
+      if (id >= 20500000) id = 19991231;
+      if (it <         0) it = 235959;
+      if (it >    246060) it = 235959;
+      fEvtHddr->SetDateTime(id,it);
     }
-
-    geant3->Gfnhit("FTPH","FSEC", nhits);
-    if (nhits>0){
-      St_g2t_ftp_hit *g2t_ftp_hit = new St_g2t_ftp_hit("g2t_ftp_hit",nhits);
-      m_DataSet->Add(g2t_ftp_hit);
-      iRes = g2t_ftp(g2t_track,g2t_ftp_hit);
-//           ===============================
+  }
+  
+  if (!cnum->nvertx || !cnum->ntrack) return kStErr;
+  St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",cnum->nvertx);
+  m_DataSet->Add(g2t_vertex); 
+  St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",cnum->ntrack);
+  m_DataSet->Add(g2t_track);
+  
+  iRes = g2t_get_kine(g2t_vertex,g2t_track); if (Debug() > 1) {g2t_vertex->Print(0,10); g2t_track->Print(0,10);}
+  iRes = g2t_get_event(g2t_event); if (Debug() > 1) g2t_event->Print(0,10);
+  
+  // --max--
+  // Filling the event header, addition due to the new coding
+  if(fEvtHddr) {
+    fEvtHddr->SetAEast((*g2t_event)[0].n_wounded_east);
+    fEvtHddr->SetAWest((*g2t_event)[0].n_wounded_west);
+  }
+  //---------------------- inner part -------------------------//
+  
+  geant3->Gfnhit("SVTH","SVTD", nhit1);
+  geant3->Gfnhit("SVTH","SFSD", nhit2);
+  nhits=nhit1+nhit2;
+  if (nhits>0) { 
+    St_g2t_svt_hit *g2t_svt_hit = new St_g2t_svt_hit("g2t_svt_hit",nhits);
+    m_DataSet->Add(g2t_svt_hit); 
+    
+    iRes = g2t_svt(g2t_track,g2t_svt_hit); if (Debug() > 1) g2t_svt_hit->Print(0,10);
+    //	     ===============================
+  }
+  
+  geant3->Gfnhit("PIXH","PLAC", nhits);
+  
+  if (nhits>0) { 
+    St_g2t_pix_hit *g2t_pix_hit = new St_g2t_pix_hit("g2t_pix_hit",nhits);
+    m_DataSet->Add(g2t_pix_hit);
+    
+    iRes = g2t_pix(g2t_track,g2t_pix_hit);if (Debug() > 1) g2t_pix_hit->Print(0,10);
+    //
+  }
+  
+  geant3->Gfnhit("TPCH","TPAD", nhits);
+  if (nhits>0){ 
+    St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",nhits);
+    m_DataSet->Add(g2t_tpc_hit);
+    
+    iRes = g2t_tpc(g2t_track,g2t_tpc_hit); if (Debug() > 1) g2t_tpc_hit->Print(0,10);
+    //	     ==============================
+  }
+  
+  
+  geant3->Gfnhit("TPCH","TMSE", nhits);
+  if (nhits>0) { 
+    St_g2t_mwc_hit *g2t_mwc_hit = new St_g2t_mwc_hit("g2t_mwc_hit",nhits);
+    m_DataSet->Add(g2t_mwc_hit);
+    iRes = g2t_mwc(g2t_track,g2t_mwc_hit);if (Debug() > 1) g2t_mwc_hit->Print(0,10);
+    //	     ==============================
+  }
+  
+  geant3->Gfnhit("FTPH","FSEC", nhits);
+  if (nhits>0){
+    St_g2t_ftp_hit *g2t_ftp_hit = new St_g2t_ftp_hit("g2t_ftp_hit",nhits);
+    m_DataSet->Add(g2t_ftp_hit);
+    iRes = g2t_ftp(g2t_track,g2t_ftp_hit);
+    //           ===============================
+  }
+  
+  geant3->Gfnhit("BTOH","BXSA", nhits);
+  if (nhits>0) { 
+    St_g2t_ctf_hit *g2t_ctb_hit = new St_g2t_ctf_hit("g2t_ctb_hit",nhits);
+    m_DataSet->Add(g2t_ctb_hit);
+    iRes = g2t_ctb(g2t_track,g2t_ctb_hit); if (Debug() > 1) g2t_ctb_hit->Print(0,10);
+    //           ==============================
+  }
+  
+  geant3->Gfnhit("BTOH","BCSB", nhits);
+  if (nhits>0) {
+    St_g2t_ctf_hit *g2t_tof_hit = new St_g2t_ctf_hit("g2t_tof_hit",nhits);
+    m_DataSet->Add(g2t_tof_hit);
+    iRes = g2t_tof(g2t_track,g2t_tof_hit); if (Debug() > 1) g2t_tof_hit->Print(0,10);
+    //           ==============================
+  }
+  
+  geant3->Gfnhit("BTOH","BRSG", nhits);
+  if (nhits>0) {
+    St_g2t_ctf_hit *g2t_tfr_hit = new St_g2t_ctf_hit("g2t_tfr_hit",nhits);
+    m_DataSet->Add(g2t_tfr_hit);
+    iRes = g2t_tfr(g2t_track,g2t_tfr_hit); if (Debug() > 1) g2t_tfr_hit->Print(0,10);
+    //           ==============================
+  }
+  
+  
+  geant3->Gfnhit("RICH","RGAP", nhit1);
+  geant3->Gfnhit("RICH","RCSI", nhit2);
+  geant3->Gfnhit("RICH","FREO", nhit3);
+  geant3->Gfnhit("RICH","QUAR", nhit4);
+  //  cout << nhit1 << " " << nhit2 << " " << nhit3 << " " << nhit4 << endl;
+  nhits=nhit1+nhit2+nhit3+nhit4;
+  if (nhits>0) {
+    St_g2t_rch_hit *g2t_rch_hit = new St_g2t_rch_hit("g2t_rch_hit",nhits);
+    m_DataSet->Add(g2t_rch_hit);
+    iRes = g2t_rch(g2t_track,g2t_rch_hit); if (Debug() > 1) g2t_rch_hit->Print(0,10);
+    //           ==============================
+  }
+  
+  //---------------------- calorimeters -------------------------//
+  geant3->Gfnhit("CALH","CSUP", nhits);
+  if (nhits>0) {
+    St_g2t_emc_hit *g2t_emc_hit = new St_g2t_emc_hit("g2t_emc_hit",nhits);
+    m_DataSet->Add(g2t_emc_hit);
+    iRes = g2t_emc(g2t_track,g2t_emc_hit); if (Debug() > 1) g2t_emc_hit->Print(0,10);
+    //           ==============================
+  }
+  
+  geant3->Gfnhit("CALH","CSDA", nhits);
+  if (nhits>0) {
+    St_g2t_emc_hit *g2t_smd_hit = new St_g2t_emc_hit("g2t_smd_hit",nhits);
+    m_DataSet->Add(g2t_smd_hit);
+    iRes = g2t_smd(g2t_track,g2t_smd_hit); if (Debug() > 1) g2t_smd_hit->Print(0,10);
+    //           ==============================
+  }
+  
+  geant3->Gfnhit("ECAH","ESCI", nhit1);
+  geant3->Gfnhit("ECAH","ELGR", nhit2);
+  geant3->Gfnhit("ECAH","EPCT", nhit3);
+  nhits = nhit1+nhit2+nhit3; 
+  if (nhits>0) {
+    St_g2t_emc_hit *g2t_eem_hit = new St_g2t_emc_hit("g2t_eem_hit",nhits);
+    m_DataSet->Add(g2t_eem_hit);
+    iRes = g2t_eem(g2t_track,g2t_eem_hit); if (Debug() > 1) g2t_eem_hit->Print(0,10);
+    //           ==============================
+  }
+  
+  geant3->Gfnhit("ECAH","EXSE", nhit1);
+  geant3->Gfnhit("ECAH","EHMS", nhit2);
+  nhits = nhit1+nhit2;
+  if (nhits>0) {
+    St_g2t_emc_hit *g2t_esm_hit = new St_g2t_emc_hit("g2t_esm_hit",nhits);
+    m_DataSet->Add(g2t_esm_hit);
+    iRes = g2t_esm(g2t_track,g2t_esm_hit); if (Debug() > 1) g2t_esm_hit->Print(0,10);
+    //           ==============================
+  }
+  
+  geant3->Gfnhit("VPDH","VRAD", nhits);
+  if (nhits>0) {
+    St_g2t_vpd_hit *g2t_vpd_hit = new St_g2t_vpd_hit("g2t_vpd_hit",nhits);
+    m_DataSet->Add(g2t_vpd_hit);
+    iRes = g2t_vpd(g2t_track,g2t_vpd_hit); if (Debug() > 1) g2t_vpd_hit->Print(0,10);
+    //           ==============================
+  }
+  
+  geant3->Gfnhit("PHMH","PDGS", nhits);
+  if (nhits>0) {
+    St_g2t_pmd_hit *g2t_pmd_hit = new St_g2t_pmd_hit("g2t_pmd_hit",nhits);
+    m_DataSet->Add(g2t_pmd_hit);
+    iRes = g2t_pmd(g2t_track,g2t_pmd_hit); if (Debug() > 1) g2t_pmd_hit->Print(0,10);
+    //           ==============================
+  }
+  
+  geant3->Gfnhit("ZCAH","QSCI", nhits);
+  if (nhits>0) {
+    St_g2t_emc_hit *g2t_zdc_hit = new St_g2t_emc_hit("g2t_zdc_hit",nhits);
+    m_DataSet->Add(g2t_zdc_hit);
+    iRes = g2t_zdc(g2t_track,g2t_zdc_hit); if (Debug() > 1) g2t_zdc_hit->Print(0,10);
+    //           ==============================
+  }
+  
+  
+  geant3->Gfnhit("BBCH","BPOL", nhits);
+  if (nhits>0) 
+    {
+      St_g2t_ctf_hit *g2t_bbc_hit = new St_g2t_ctf_hit("g2t_bbc_hit",nhits);
+      m_DataSet->Add(g2t_bbc_hit);
+      iRes = g2t_bbc(g2t_track,g2t_bbc_hit); if (Debug() > 1) g2t_bbc_hit->Print(0,10);
+      //           ==============================
     }
-
-    geant3->Gfnhit("BTOH","BXSA", nhits);
-    if (nhits>0) { 
-      St_g2t_ctf_hit *g2t_ctb_hit = new St_g2t_ctf_hit("g2t_ctb_hit",nhits);
-      m_DataSet->Add(g2t_ctb_hit);
-      iRes = g2t_ctb(g2t_track,g2t_ctb_hit);
-//           ==============================
-    }
-
-    geant3->Gfnhit("BTOH","BCSB", nhits);
-    if (nhits>0) {
-      St_g2t_ctf_hit *g2t_tof_hit = new St_g2t_ctf_hit("g2t_tof_hit",nhits);
-      m_DataSet->Add(g2t_tof_hit);
-      iRes = g2t_tof(g2t_track,g2t_tof_hit);
-//           ==============================
-    }
-
-    geant3->Gfnhit("BTOH","BRSG", nhits);
-    if (nhits>0) {
-      St_g2t_ctf_hit *g2t_tfr_hit = new St_g2t_ctf_hit("g2t_tfr_hit",nhits);
-      m_DataSet->Add(g2t_tfr_hit);
-      iRes = g2t_tfr(g2t_track,g2t_tfr_hit); 
-//           ==============================
-    }
-
-
-    geant3->Gfnhit("RICH","RGAP", nhit1);
-    geant3->Gfnhit("RICH","RCSI", nhit2);
-    geant3->Gfnhit("RICH","FREO", nhit3);
-    geant3->Gfnhit("RICH","QUAR", nhit4);
-//  cout << nhit1 << " " << nhit2 << " " << nhit3 << " " << nhit4 << endl;
-    nhits=nhit1+nhit2+nhit3+nhit4;
-    if (nhits>0) {
-      St_g2t_rch_hit *g2t_rch_hit = new St_g2t_rch_hit("g2t_rch_hit",nhits);
-      m_DataSet->Add(g2t_rch_hit);
-      iRes = g2t_rch(g2t_track,g2t_rch_hit);
-//           ==============================
-    }
-
-    //---------------------- calorimeters -------------------------//
-    geant3->Gfnhit("CALH","CSUP", nhits);
-    if (nhits>0) {
-      St_g2t_emc_hit *g2t_emc_hit = new St_g2t_emc_hit("g2t_emc_hit",nhits);
-      m_DataSet->Add(g2t_emc_hit);
-      iRes = g2t_emc(g2t_track,g2t_emc_hit);
-//           ==============================
-    }
-
-    geant3->Gfnhit("CALH","CSDA", nhits);
-    if (nhits>0) {
-      St_g2t_emc_hit *g2t_smd_hit = new St_g2t_emc_hit("g2t_smd_hit",nhits);
-      m_DataSet->Add(g2t_smd_hit);
-      iRes = g2t_smd(g2t_track,g2t_smd_hit);
-//           ==============================
-    }
-
-    geant3->Gfnhit("ECAH","ESCI", nhit1);
-    geant3->Gfnhit("ECAH","ELGR", nhit2);
-    geant3->Gfnhit("ECAH","EPCT", nhit3);
-    nhits = nhit1+nhit2+nhit3; 
-    if (nhits>0) {
-      St_g2t_emc_hit *g2t_eem_hit = new St_g2t_emc_hit("g2t_eem_hit",nhits);
-      m_DataSet->Add(g2t_eem_hit);
-      iRes = g2t_eem(g2t_track,g2t_eem_hit);
-//           ==============================
-    }
-
-    geant3->Gfnhit("ECAH","EXSE", nhit1);
-    geant3->Gfnhit("ECAH","EHMS", nhit2);
-    nhits = nhit1+nhit2;
-    if (nhits>0) {
-      St_g2t_emc_hit *g2t_esm_hit = new St_g2t_emc_hit("g2t_esm_hit",nhits);
-      m_DataSet->Add(g2t_esm_hit);
-      iRes = g2t_esm(g2t_track,g2t_esm_hit);
-//           ==============================
-    }
-
-    geant3->Gfnhit("VPDH","VRAD", nhits);
-    if (nhits>0) {
-      St_g2t_vpd_hit *g2t_vpd_hit = new St_g2t_vpd_hit("g2t_vpd_hit",nhits);
-      m_DataSet->Add(g2t_vpd_hit);
-      iRes = g2t_vpd(g2t_track,g2t_vpd_hit);
-//           ==============================
-    }
-
-    geant3->Gfnhit("PHMH","PDGS", nhits);
-    if (nhits>0) {
-      St_g2t_pmd_hit *g2t_pmd_hit = new St_g2t_pmd_hit("g2t_pmd_hit",nhits);
-      m_DataSet->Add(g2t_pmd_hit);
-      iRes = g2t_pmd(g2t_track,g2t_pmd_hit);
-//           ==============================
-    }
-
-    geant3->Gfnhit("ZCAH","QSCI", nhits);
-    if (nhits>0) {
-      St_g2t_emc_hit *g2t_zdc_hit = new St_g2t_emc_hit("g2t_zdc_hit",nhits);
-      m_DataSet->Add(g2t_zdc_hit);
-      iRes = g2t_zdc(g2t_track,g2t_zdc_hit);
-//           ==============================
-    }
-
-
-    geant3->Gfnhit("BBCH","BPOL", nhits);
-    if (nhits>0) 
-      {
-	St_g2t_ctf_hit *g2t_bbc_hit = new St_g2t_ctf_hit("g2t_bbc_hit",nhits);
-	m_DataSet->Add(g2t_bbc_hit);
-	iRes = g2t_bbc(g2t_track,g2t_bbc_hit);
-//           ==============================
-      }
-
-//------------------------all bloody detectors done--------------------//
+  
+  //------------------------all bloody detectors done--------------------//
 #if 0
-    Char_t *g2t = "g2t_";
-    Int_t  narg = 0;
-    addrfun address  = (addrfun ) csaddr(g2t);
-    if (address) csjcal(&address,&narg);
+  Char_t *g2t = "g2t_";
+  Int_t  narg = 0;
+  addrfun address  = (addrfun ) csaddr(g2t);
+  if (address) csjcal(&address,&narg);
 #endif
-
-// Fill Histograms    
-   FillHist();
-
-   if (cflag->ieorun) return kStEOF; 
-   if (cflag->ieotri) return kStErr; 
-   return kStOK;
+  
+  // Fill Histograms    
+  FillHist();
+  
+  if (cflag->ieorun) return kStEOF; 
+  if (cflag->ieotri) return kStErr; 
+  return kStOK;
 }
 //_____________________________________________________________________________
 void St_geant_Maker::LoadGeometry(Char_t *option){
@@ -782,41 +798,41 @@ TVolume *St_geant_Maker::MakeVolume(TString *name, Int_t ivo, Int_t Nlevel, Int_
       if (!shape ) {shape = MakeShape(name,ivo);}
       node = new TVolume(name->Data(), name->Data(), shape);
     }
-
+    
     Int_t nin =(Int_t) z_q[jvo+3];
     if (nin > 0) 
-    {
-      Nlevel++;
-      for (Int_t in=1; in<= nin; in++) 
       {
-	Int_t jin   =        z_lq[jvo-in];
-	Int_t ivom  = (Int_t) z_q[jin+2];
-	Int_t nuser = (Int_t) z_q[jin+3];
-	TString  namem((const Char_t *) &(z_iq[jvolum+ivom]), 4);
-
-	Names[Nlevel] = z_iq[jvolum+ivom];
-	Numbers[Nlevel] = nuser;
-	Int_t   nlevv = Nlevel+1;
-	Int_t   Ierr;
-	Float_t xx[3], theta1,phi1, theta2,phi2, theta3,phi3, type;
-
-	Ierr = geant3->Glvolu(nlevv, Names, Numbers);
-
-	Gfxzrm(Nlevel, xx[0],xx[1],xx[2], 
-		       theta1,phi1, theta2,phi2, theta3,phi3, type);
-        TVolume *newnode = (TVolume *) topnode->FindObject(namem.Data());
-
-	if (!newnode) 
-        {  newnode = MakeVolume(&namem, ivom, nlevv, Names, Numbers);  }
-
-	irot++;
-	Char_t ss[12];
-	sprintf(ss,"rotm%i",irot);
-	TRotMatrix *rotm = new TRotMatrix(ss,ss, 
-                           theta1,phi1, theta2,phi2, theta3,phi3);
-	node->Add(newnode,xx[0],xx[1],xx[2],rotm);
+	Nlevel++;
+	for (Int_t in=1; in<= nin; in++) 
+	  {
+	    Int_t jin   =        z_lq[jvo-in];
+	    Int_t ivom  = (Int_t) z_q[jin+2];
+	    Int_t nuser = (Int_t) z_q[jin+3];
+	    TString  namem((const Char_t *) &(z_iq[jvolum+ivom]), 4);
+	    
+	    Names[Nlevel] = z_iq[jvolum+ivom];
+	    Numbers[Nlevel] = nuser;
+	    Int_t   nlevv = Nlevel+1;
+	    Int_t   Ierr;
+	    Float_t xx[3], theta1,phi1, theta2,phi2, theta3,phi3, type;
+	    
+	    Ierr = geant3->Glvolu(nlevv, Names, Numbers);
+	    
+	    Gfxzrm(Nlevel, xx[0],xx[1],xx[2], 
+		   theta1,phi1, theta2,phi2, theta3,phi3, type);
+	    TVolume *newnode = (TVolume *) topnode->FindObject(namem.Data());
+	    
+	    if (!newnode) 
+	      {  newnode = MakeVolume(&namem, ivom, nlevv, Names, Numbers);  }
+	    
+	    irot++;
+	    Char_t ss[12];
+	    sprintf(ss,"rotm%i",irot);
+	    TRotMatrix *rotm = new TRotMatrix(ss,ss, 
+					      theta1,phi1, theta2,phi2, theta3,phi3);
+	    node->Add(newnode,xx[0],xx[1],xx[2],rotm);
+	  }
       }
-    }
     if (nin < 0) {
       Nlevel++;
     }
@@ -844,11 +860,11 @@ TShape *St_geant_Maker::MakeShape(TString *name, Int_t ivo){
   Int_t    jma    =          z_lq[jmate-nmat];
   Int_t    nmixt  = (Int_t)  z_q[jma+11];
   Int_t    nm     = TMath::Abs(nmixt);
-
+  
   Char_t   astring[20];
   if (nm <= 1)  sprintf (astring,"mat%i",nmat); 
   else          sprintf (astring,"mix%i",nmat);   
-
+  
   TString Astring(astring);
   t = (TShape *) gGeometry->GetListOfShapes()->FindObject(name->Data());
   if (!t) {
@@ -913,9 +929,9 @@ TShape *St_geant_Maker::MakeShape(TString *name, Int_t ivo){
     //      default:   t = new TBRIK((Char_t *) name->Data(),"BRIK",(Char_t *) Astring.Data(),
     //			       p->par[0],p->par[1],p->par[2]);
     //      break;
-
+    
     default: assert(0);
-
+      
     } 
     if (att->lseen  != 1) t->SetVisibility((int)att->lseen);
     if (att->lstyle != 1) t->SetLineStyle ((int)att->lstyle);
@@ -933,127 +949,135 @@ void St_geant_Maker::Call(const Char_t *name)
   if (address) csjcal_(address, &narg);
 }
 //_____________________________________________________________________________
-TVolume *St_geant_Maker::Work()
+TDataSet *St_geant_Maker::Work()
 {  
   struct  Medium 
-    { Char_t name[20]; Int_t nmat, isvol, ifield; Float_t fieldm; };
+  { Char_t name[20]; Int_t nmat, isvol, ifield; Float_t fieldm; };
   struct  Volume
-    { Char_t name[4],nick[4]; Int_t npar; Float_t par[50]; };
-
+  { Char_t name[4],nick[4]; Int_t npar; Float_t par[50]; };
+  
+  //  Int_t node = 0;
+  //  TVolume   *volume=0;
   TVolume   *node=0;
+  
   Float_t   *volu=0, *position=0, *mother=0, *p=0;
   Int_t     who=0, copy=0, npar=0;
   Int_t     nvol=cnum->nvolum;
   Float_t   theta1,phi1, theta2,phi2, theta3,phi3, type;
   TObjArray nodes(nvol+1);
-
+  
   new TGeometry("STAR","nash STAR");
   GtHash *H = new GtHash;
- 
+  
   printf(" looping on agvolume \n");
   //   ===============================================================
-  while (Agvolume(node,volu,position,mother,who,copy,p,npar)) 
-  { // ===============================================================
+  //  while(agvolume(node,volu,position,mother,who,copy,p,npar)) {
+    //  while(agvolume(&node,&volu,&position,&mother,&who,&copy,&p,&npar)) {
+    while (Agvolume(node,volu,position,mother,who,copy,p,npar)) 
+    { // ===============================================================
+      
+      typedef enum {BOX=1,TRD1,TRD2,TRAP,TUBE,TUBS,CONE,CONS,SPHE,PARA,
+		    PGON,PCON,ELTU,HYPE,GTRA=28,CTUB} shapes;
+      TShape*  t;
+      shapes   shape   = (shapes) volu[1];
+      Int_t    nin     = 0;
+      //   Int_t    medium  = (Int_t)  volu[3]; 
+      Int_t    np      = (Int_t)  volu[4];
+      Float_t* p0      = volu+6;
+      Float_t* att     = p0+np;
+      Char_t   name[]  = {0,0,0,0,0};
+      Char_t   nick[]  = {0,0,0,0,0};
+      float    xx[3]   = {0.,0.,0.};
+      TVolume *newVolume = 0;
+      if (mother)  nin = (Int_t) mother[2];
+      TVolume *Hp      = 0;
+      
+      strncpy(nick,(const Char_t*)&cvolu->names[cvolu->nlevel-1],4);
+      strncpy(name,(const Char_t*)(volu-5),4);
+      
+      Hp = (TVolume *) H->GetPointer(p,npar+1);
+      if (Hp)  newVolume = Hp; 
+      else
+	{ // printf(" creating object %s  %f  %f  %f \n", name,p[0],p[1],p[2]);
+	  switch (shape) 
+	    { case BOX:  t=new TBRIK(nick,"BRIK","void",
+				     p[0],p[1],p[2]);                         break;
+	    case TRD1: t=new TTRD1(nick,"TRD1","void",
+				   p[0],p[1],p[2],p[3]);                    break;
+	    case TRD2: t=new TTRD2(nick,"TRD2","void",
+				   p[0],p[1],p[2],p[3],p[4]);               break;
+	    case TRAP: t=new TTRAP(nick,"TRAP","void",
+				   p[0],p[1],p[2],p[3],p[4],p[5],
+				   p[6],p[7],p[8],p[9],p[10]);              break;
+	    case TUBE: t=new TTUBE(nick,"TUBE","void",
+				   p[0],p[1],p[2]);                         break;
+	    case TUBS: t=new TTUBS(nick,"TUBS","void",
+				   p[0],p[1],p[2],p[3],p[4]);               break;
+	    case CONE: t=new TCONE(nick,"CONE","void",
+				   p[0],p[1],p[2],p[3],p[4]);               break;
+	    case CONS: t=new TCONS(nick,"CONS","void",    // take care !
+				   p[0],p[1],p[2],p[3],p[4],p[5],p[6]);     break;
+	    //                         p[1],p[2],p[3],p[4],p[0],p[5],p[6]);     break;
+	    case SPHE: t=new TSPHE(nick,"SPHE","void",
+				   p[0],p[1],p[2],p[3],p[4],p[5]);          break;
+	    case PARA: t=new TPARA(nick,"PARA","void",
+				   p[0],p[1],p[2],p[3],p[4],p[5]);          break;
+	    case PGON: t=new TPGON(nick,"PGON","void",p[0],p[1],(int)p[2],(int)p[3]);  
+	      { Float_t *pp = p+4;
+	      for (Int_t i=0; i<p[3]; i++) {
+		Float_t z    = *pp++;
+		Float_t rmin = *pp++;
+		Float_t rmax = *pp++;
+		((TPCON *)t)->DefineSection(i,z,rmin,rmax);
+		// this is because of a compiler bug on Linux (VF 030699)
+		//                         (( TPGON*)t)->DefineSection(i,*pp++,*pp++,*pp++);
+	      }
+	      }                                              break;
+	    case PCON: t=new TPCON(nick,"PCON","void",p[0],p[1],(int)p[2]);
+	      { Float_t *pp = p+3;
+	      for (Int_t i=0; i<p[2]; i++) {
+		Float_t z    = *pp++;
+		Float_t rmin = *pp++;
+		Float_t rmax = *pp++;
+		((TPCON *)t)->DefineSection(i,z,rmin,rmax);
+		// this is because of a compiler bug on Linux (VF 030699)
+		//                         ((TPCON *)t)->DefineSection(i,*pp++,*pp++,*pp++);
+	      }
+	      }                                              break;
+	    case ELTU: t=new TELTU(nick,"ELTU","void",
+				   p[0],p[1],p[2]);                         break;
+	    //      case HYPE: t=new THYPE(nick,"HYPE","void",
+	    //                       p[0],p[1],p[2],p[3]);                    break;
+	    case GTRA: t=new TGTRA(nick,"GTRA","void",
+				   p[0],p[1],p[2],p[3],p[4],p[5],
+				   p[6],p[7],p[8],p[9],p[10],p[11]);        break;
+	    case CTUB: t=new TCTUB(nick,"CTUB","void",
+				   p[0],p[1],p[2],p[3],p[4],p[5],
+				   p[6],p[7],p[8],p[9],p[10]);              break;
+	    default:   t=new TBRIK(nick,"BRIK","void",
+				   p[0],p[1],p[2]);                         break;
+	    };
+	  t->SetLineColor((int)att[4]);
+	  
+	  // to build a compressed tree, name should be checked for repetition
+	  newVolume = new TVolume(name,nick,t);
+	  //      newVolume -> SetVisibility(ENodeSEEN(MapGEANT2StNodeVis(att[1])));
+	  newVolume -> SetVisibility((TVolume::ENodeSEEN)TVolume::MapGEANT2StNodeVis((int)att[1]));
+	  H->SetPointer(newVolume);
+	}
+      
+      if (node)
+	{  Gfxzrm(nlev, xx[0],xx[1],xx[2], theta1,phi1, 
+		  theta2,phi2, theta3,phi3, type);
+	TRotMatrix *matrix=GetMatrix(theta1,phi1,theta2,phi2,theta3,phi3);
+	node->Add(newVolume,xx[0],xx[1],xx[2],matrix,UInt_t(copy));
+	}
+      //    volume = newVolume;
+      node = newVolume;
+    };
   
-    typedef enum {BOX=1,TRD1,TRD2,TRAP,TUBE,TUBS,CONE,CONS,SPHE,PARA,
-                        PGON,PCON,ELTU,HYPE,GTRA=28,CTUB} shapes;
-    TShape*  t;
-    shapes   shape   = (shapes) volu[1];
-    Int_t    nin     = 0;
-    //   Int_t    medium  = (Int_t)  volu[3]; 
-    Int_t    np      = (Int_t)  volu[4];
-    Float_t* p0      = volu+6;
-    Float_t* att     = p0+np;
-    Char_t   name[]  = {0,0,0,0,0};
-    Char_t   nick[]  = {0,0,0,0,0};
-    float    xx[3]   = {0.,0.,0.};
-    TVolume *newVolume = 0;
-    if (mother)  nin = (Int_t) mother[2];
-    TVolume *Hp      = 0;
-
-    strncpy(nick,(const Char_t*)&cvolu->names[cvolu->nlevel-1],4);
-    strncpy(name,(const Char_t*)(volu-5),4);
-
-    Hp = (TVolume *) H->GetPointer(p,npar+1);
-    if (Hp)  newVolume = Hp; 
-    else
-      { // printf(" creating object %s  %f  %f  %f \n", name,p[0],p[1],p[2]);
-      switch (shape) 
-      { case BOX:  t=new TBRIK(nick,"BRIK","void",
-                         p[0],p[1],p[2]);                         break;
-        case TRD1: t=new TTRD1(nick,"TRD1","void",
-                         p[0],p[1],p[2],p[3]);                    break;
-        case TRD2: t=new TTRD2(nick,"TRD2","void",
-                         p[0],p[1],p[2],p[3],p[4]);               break;
-        case TRAP: t=new TTRAP(nick,"TRAP","void",
-                         p[0],p[1],p[2],p[3],p[4],p[5],
-                         p[6],p[7],p[8],p[9],p[10]);              break;
-        case TUBE: t=new TTUBE(nick,"TUBE","void",
-                         p[0],p[1],p[2]);                         break;
-        case TUBS: t=new TTUBS(nick,"TUBS","void",
-                         p[0],p[1],p[2],p[3],p[4]);               break;
-        case CONE: t=new TCONE(nick,"CONE","void",
-                         p[0],p[1],p[2],p[3],p[4]);               break;
-        case CONS: t=new TCONS(nick,"CONS","void",    // take care !
-                         p[0],p[1],p[2],p[3],p[4],p[5],p[6]);     break;
-//                         p[1],p[2],p[3],p[4],p[0],p[5],p[6]);     break;
-        case SPHE: t=new TSPHE(nick,"SPHE","void",
-                         p[0],p[1],p[2],p[3],p[4],p[5]);          break;
-        case PARA: t=new TPARA(nick,"PARA","void",
-                         p[0],p[1],p[2],p[3],p[4],p[5]);          break;
-        case PGON: t=new TPGON(nick,"PGON","void",p[0],p[1],(int)p[2],(int)p[3]);  
-                   { Float_t *pp = p+4;
-                     for (Int_t i=0; i<p[3]; i++) {
-                          Float_t z    = *pp++;
-                          Float_t rmin = *pp++;
-                          Float_t rmax = *pp++;
-                         ((TPCON *)t)->DefineSection(i,z,rmin,rmax);
-// this is because of a compiler bug on Linux (VF 030699)
-//                         (( TPGON*)t)->DefineSection(i,*pp++,*pp++,*pp++);
-                     }
-                   }                                              break;
-        case PCON: t=new TPCON(nick,"PCON","void",p[0],p[1],(int)p[2]);
-                   { Float_t *pp = p+3;
-                     for (Int_t i=0; i<p[2]; i++) {
-                          Float_t z    = *pp++;
-                          Float_t rmin = *pp++;
-                          Float_t rmax = *pp++;
-                         ((TPCON *)t)->DefineSection(i,z,rmin,rmax);
-// this is because of a compiler bug on Linux (VF 030699)
-//                         ((TPCON *)t)->DefineSection(i,*pp++,*pp++,*pp++);
-                     }
-                   }                                              break;
-        case ELTU: t=new TELTU(nick,"ELTU","void",
-                         p[0],p[1],p[2]);                         break;
-//      case HYPE: t=new THYPE(nick,"HYPE","void",
-//                       p[0],p[1],p[2],p[3]);                    break;
-        case GTRA: t=new TGTRA(nick,"GTRA","void",
-                         p[0],p[1],p[2],p[3],p[4],p[5],
-                         p[6],p[7],p[8],p[9],p[10],p[11]);        break;
-        case CTUB: t=new TCTUB(nick,"CTUB","void",
-                         p[0],p[1],p[2],p[3],p[4],p[5],
-                         p[6],p[7],p[8],p[9],p[10]);              break;
-        default:   t=new TBRIK(nick,"BRIK","void",
-                         p[0],p[1],p[2]);                         break;
-      };
-      t->SetLineColor((int)att[4]);
- 
-      // to build a compressed tree, name should be checked for repetition
-      newVolume = new TVolume(name,nick,t);
-//      newVolume -> SetVisibility(ENodeSEEN(MapGEANT2StNodeVis(att[1])));
-      newVolume -> SetVisibility((TVolume::ENodeSEEN)TVolume::MapGEANT2StNodeVis((int)att[1]));
-      H->SetPointer(newVolume);
-    }
-
-    if (node)
-    {  Gfxzrm(nlev, xx[0],xx[1],xx[2], theta1,phi1, 
-                       theta2,phi2, theta3,phi3, type);
-       TRotMatrix *matrix=GetMatrix(theta1,phi1,theta2,phi2,theta3,phi3);
-       node->Add(newVolume,xx[0],xx[1],xx[2],matrix,UInt_t(copy));
-    }
-    node = newVolume;
-  };
-
+  //  fVolume=volume;
+  //  gGeometry->GetListOfNodes()->Add(volume);
   fVolume=node;
   gGeometry->GetListOfNodes()->Add(node);
   return GetVolume();
@@ -1128,26 +1152,26 @@ void St_geant_Maker::Mark(TVolume *topvol) {
 //_____________________________________________________________________________
 static Bool_t CompareMatrix(TRotMatrix &a,TRotMatrix &b)
 {  double *pa=a.GetMatrix(); double *pb=b.GetMatrix();
-   for (int i=0; i<9; i++)  if (pa[i]!=pb[i]) return kFALSE;
-   return kTRUE;
+ for (int i=0; i<9; i++)  if (pa[i]!=pb[i]) return kFALSE;
+ return kTRUE;
 }
 //_____________________________________________________________________________
 TRotMatrix *St_geant_Maker::GetMatrix(float thet1, float phii1,
                                       float thet2, float phii2,
                                       float thet3, float phii3)
 {  char mname[20];
-   THashList *list = gGeometry->GetListOfMatrices();
-   int n=list->GetSize(); sprintf(mname,"matrix%d",n+1);
-   TRotMatrix *pattern=new TRotMatrix(mname,mname,
-                                      thet1,phii1,thet2,phii2,thet3,phii3);
-   
-   TRotMatrix *matrix=0; TIter nextmatrix(list);
-   while ((matrix=(TRotMatrix *) nextmatrix())) 
+ THashList *list = gGeometry->GetListOfMatrices();
+ int n=list->GetSize(); sprintf(mname,"matrix%d",n+1);
+ TRotMatrix *pattern=new TRotMatrix(mname,mname,
+				    thet1,phii1,thet2,phii2,thet3,phii3);
+ 
+ TRotMatrix *matrix=0; TIter nextmatrix(list);
+ while ((matrix=(TRotMatrix *) nextmatrix())) 
    { if (matrix!=pattern) 
      { if (CompareMatrix(*matrix,*pattern)) 
        { list->Remove(pattern); delete pattern; return matrix; }
-   } }
-   return pattern;
+     } }
+ return pattern;
 }
 //_____________________________________________________________________________
 void  St_geant_Maker::SetDebug(Int_t dbl)
@@ -1164,14 +1188,14 @@ Int_t St_geant_Maker::SetInputFile(const char *file)
   if (cquest->iquest[0]) {return kStEOF;}
   Do("gclose all");
   Agstroot();
-
+  
   St_geom_gdat *gdat = (St_geom_gdat *) Find(".const/geom/geom_gdat");
-
+  
   if(gdat) {
     St_geom_gdat *gdat_copy = new St_geom_gdat(*gdat);
     AddRunco(gdat_copy);
   }
-
+  
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -1180,7 +1204,7 @@ Int_t St_geant_Maker::Skip(Int_t Nskip)
   if (Nskip >= 0) {
     Char_t kuip[20];
     sprintf (kuip,"skip %i",Nskip);
-     if (GetDebug()) printf("St_geant_Maker skip %i\n record(s)",Nskip); 
+    if (GetDebug()) printf("St_geant_Maker skip %i\n record(s)",Nskip); 
     Do((const char*)kuip);
     
     if (cquest->iquest[0]) {return kStEOF;}
@@ -1189,7 +1213,7 @@ Int_t St_geant_Maker::Skip(Int_t Nskip)
 }
 //_____________________________________________________________________________
 void type_of_call rootmaptable_(const Char_t* cdest,const Char_t* table , const Char_t* spec, 
-                                                      Int_t &k, Char_t *iq, 
+				Int_t &k, Char_t *iq, 
 				const int lCdest,const int lTable, const int lSpec)
 { 
   Char_t *Cdest = new char[(lCdest+1)]; strncpy(Cdest,cdest,lCdest); Cdest[lCdest] = 0;
@@ -1202,12 +1226,12 @@ void type_of_call rootmaptable_(const Char_t* cdest,const Char_t* table , const 
 }
 //_____________________________________________________________________________
 void St_geant_Maker::RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, 
-                                                      Int_t &k, Char_t *iq)
+				  Int_t &k, Char_t *iq)
 {
   TString TableName(Table); 
   TString t = TableName.Strip();
   t.ToLower();
-
+  
   // Use St_Table::New(...)  when it is available as follows:
   St_Table *table =  St_Table::New(t.Data(),t.Data(),iq,k);
 #ifndef __CINT__
@@ -1227,13 +1251,14 @@ Int_t St_geant_Maker::G2t_volume_id(const Char_t *name, Int_t *numbv){
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Agvolume(TVolume *&node,Float_t *&par,Float_t *&pos,Float_t *&mot,
-		       Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar){
+			       Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar){
   return agvolume(node,par,pos,mot,who,copy,par1,npar);
 }
+
 //_____________________________________________________________________________
 void St_geant_Maker::Agnzgete (Int_t &ILK,Int_t &IDE,
-			Int_t &NPART,Int_t &IRUN,Int_t &IEVT,const Char_t *CGNAM,
-			Float_t *VERT,Int_t &IWTFL,Float_t &WEIGH){
+			       Int_t &NPART,Int_t &IRUN,Int_t &IEVT,const Char_t *CGNAM,
+			       Float_t *VERT,Int_t &IWTFL,Float_t &WEIGH){
   agnzgete (ILK,IDE,NPART,IRUN,IEVT,PASSCHARD(CGNAM),VERT,IWTFL,WEIGH
 	    PASSCHARL(CGNAM));
 }
@@ -1243,19 +1268,19 @@ void St_geant_Maker::Geometry() {geometry();}
 Int_t St_geant_Maker::Agstroot() {return agstroot();}
 //_____________________________________________________________________________
 void St_geant_Maker::Gfxzrm(Int_t & Nlevel, 
-		     Float_t &x, Float_t &y, Float_t &z,
-		     Float_t &Theta1, Float_t & Phi1,
-		     Float_t &Theta2, Float_t & Phi2,
-		     Float_t &Theta3, Float_t & Phi3,
-		     Float_t &Type){
-	gfxzrm(Nlevel, x, y, z,
-	       Theta1, Phi1, 
-	       Theta2, Phi2, 
-	       Theta3, Phi3, Type);
+			    Float_t &x, Float_t &y, Float_t &z,
+			    Float_t &Theta1, Float_t & Phi1,
+			    Float_t &Theta2, Float_t & Phi2,
+			    Float_t &Theta3, Float_t & Phi3,
+			    Float_t &Type){
+  gfxzrm(Nlevel, x, y, z,
+	 Theta1, Phi1, 
+	 Theta2, Phi2, 
+	 Theta3, Phi3, Type);
 } 
 //_____________________________________________________________________________
 void St_geant_Maker::Dzddiv(Int_t& idiv ,Int_t &Ldummy,const Char_t* path,const Char_t* opt,
-		     Int_t& one,Int_t &two,Int_t &three,Int_t& iw){
+			    Int_t& one,Int_t &two,Int_t &three,Int_t& iw){
   dzddiv (idiv,Ldummy,PASSCHARD(path),PASSCHARD(opt),
 	  one,two,three,iw PASSCHARL(path) PASSCHARL(opt));
 }
@@ -1265,46 +1290,46 @@ void St_geant_Maker::Dzddiv(Int_t& idiv ,Int_t &Ldummy,const Char_t* path,const 
 void St_geant_Maker::BookHist(){
   
   cout << "***********  St_geant_Maker - bookhist!!!! *********" << endl;
-
+  
   m_histvx =0;
   m_histvy =0;
   m_histvz =0;
-
+  
   m_histvx = new TH1F("GeantPVtxX"," geant vertex: primary X (cm)",
-        50, -5.0,5.0);
+		      50, -5.0,5.0);
   m_histvy = new TH1F("GeantPVtxY"," geant vertex: primary Y (cm)",
-        50, -5.0,5.0);
+		      50, -5.0,5.0);
   m_histvz = new TH1F("GeantPVtxZ"," geant vertex: primary Z (cm)",
-        50, -50.0,50.0);
-
+		      50, -50.0,50.0);
+  
 }
 
 //_____________________________________________________________________________
 
 void St_geant_Maker::FillHist(){
   //  cout << " St_geant_Maker::FillHist - Will now fill histograms! " << endl;
-
-
+  
+  
   // get geant event vertex
   TDataSet *geant = GetDataSet("geant"); 
   if( !geant ){
     cout << " No pointer to GEANT DataSet \n" << endl; 
   }
- 
+  
   St_g2t_vertex *geantVertex=(St_g2t_vertex *) geant->Find("g2t_vertex"); 
   if( !geantVertex ){
     cout << " NULL pointer to St_g2t_vertex table\n"<< endl;
   }
- 
+  
   if( geantVertex->GetNRows()<=0) { 
-   cout << " empty St_g2t_vertex table\n" << endl; 
+    cout << " empty St_g2t_vertex table\n" << endl; 
   } 
-
+  
   g2t_vertex_st *gvt=geantVertex->GetTable();
-
+  
   cout << " geant event vertex: " << 
-     gvt->ge_x[0] << "\t" << gvt->ge_x[1] << "\t" << gvt->ge_x[2] << endl;
-
+    gvt->ge_x[0] << "\t" << gvt->ge_x[1] << "\t" << gvt->ge_x[2] << endl;
+  
   m_histvx->Fill(gvt->ge_x[0]);
   m_histvy->Fill(gvt->ge_x[1]);
   m_histvz->Fill(gvt->ge_x[2]);
@@ -1313,3 +1338,288 @@ void St_geant_Maker::FillHist(){
 void St_geant_Maker::SetNwGEANT(Int_t n){cout << "St_geant_Maker::SetNwGEANT is obsolete now\n";}
 void St_geant_Maker::SetNwPAW(Int_t n){cout << "St_geant_Maker::SetNwPAW is obsolete now\n";}
 void St_geant_Maker::SetIwtype(Int_t n){cout << "St_geant_Maker::SetIwtype is obsolete now\n";}
+//_____________________________________________________________________________
+TGeoVolume* St_geant_Maker::Ag2Geom() { 
+  typedef enum {BOX=1,TRD1,TRD2,TRAP,TUBE,TUBS,CONE,CONS,SPHE,PARA,
+		PGON,PCON,ELTU,HYPE,GTRA=28,CTUB} shapes;
+  TStopwatch      m_Timer;
+  m_Timer.Start();
+  GtHash     MatrixH, TranslationH,VolumeH,Material,*H = 0;
+  TList      droplist;
+
+  TGeoManager *gGeoManager = new TGeoManager("star","STAR Geometry");
+  TGeoVolume  *volume=0;
+
+  Double_t     z, rmin, rmax;
+  Float_t     *volu=0, *position=0, *mother=0;
+
+  Float_t     *params;
+
+  Int_t        who=0, copy=0, npar=0, ntot=0, nshape=0;
+  TGeoRotation *matrix = 0;
+  Int_t      jn=0;     //,nm;
+  Int_t      noMarked = 0;
+  Int_t node = 0;
+
+  cout << "Total no. of volumes = "      << cnum->nvolum 
+       << "\t no. of rot. matrices = "   << cnum->nrotm 
+       << "\t no. of materials = "       << cnum->nmate 
+       << "\t no. of tracking medias = " << cnum->ntmed
+       << endl;
+  Int_t   nmat;
+  Int_t   isvol;  
+  Int_t   ifield; 
+  Int_t   nbuf;
+
+  Float_t fieldm; 
+  Float_t tmaxfd; 
+  Float_t stemax; 
+  Float_t deemax; 
+  Float_t epsil; 
+  Float_t stmin; 
+
+  cout << "----------- Make List of Materials and Mixtures--------------" << endl;
+
+  TGeoMaterial *mat = 0;
+  TGeoMixture  *mix = 0;
+
+  for (int imat = 1; imat <= cnum->nmate; imat++) {
+    int jma=z_lq[clink->jmate-imat];
+    if(jma == 0) continue;
+    TString MatName((Char_t *) &z_iq[jma+1],20);
+    MatName.Strip(); 
+
+    int nmixt= (int) z_q[jma+11]; 
+    int nm = TMath::Abs(nmixt);
+
+    if (nm <= 1) {
+      if (z_q[jma+6] < 1 && z_q[jma+7] < 1) 
+	mat = new TGeoMaterial(MatName.Data(),0.,0.,0.);
+      else {
+	mat = new TGeoMaterial(MatName.Data(),
+			       (Double_t) z_q[jma+6], // A
+			       (Double_t) z_q[jma+7], // A
+			       (Double_t) z_q[jma+8]); // Density
+      }
+
+      mat->SetUniqueID(imat);
+      mat->GetIndex();
+      if (Debug()) mat->Print("");
+    }
+    else {
+      int jmixt=z_lq[jma-5];
+      mix = new TGeoMixture(MatName.Data(),nmixt,(Double_t) z_q[jma+8]);
+      for (int im=1; im<=nm; im++) 
+	mix->DefineElement(im-1,
+			   z_q[jmixt+im],        // A
+			   z_q[jmixt+nm+im],     // Z
+			   z_q[jmixt+2*nm+im]);  // W
+      mix->SetUniqueID(imat);
+      mix->GetIndex();
+      if (Debug()) mix->Print("");
+    }
+  }
+
+  for (int itmed = 1; itmed <= cnum->ntmed; itmed++) {
+    int jtm=z_lq[clink->jtmed-itmed];
+    if(jtm == 0) continue;
+    TString MedName((Char_t *) &z_iq[jtm+1], 20);
+    MedName.Strip(); 
+    Int_t imat = (Int_t) z_q[jtm+6];
+    TGeoMedium *med = 
+      new TGeoMedium(MedName.Data(),         // name
+		     itmed,                  // numed
+		     imat,                   // imat
+		     (Int_t) z_q[jtm+7],     // ISVOL
+		     (Int_t) z_q[jtm+8],     // IFIELD 
+		     (Double_t) z_q[jtm+9],  // FIELDM
+		     (Double_t) z_q[jtm+10], // TMAXFD
+		     (Double_t) z_q[jtm+11], // STEMAX
+		     (Double_t) z_q[jtm+12], // DEEMAX
+		     (Double_t) z_q[jtm+13], // EPSIL
+		     (Double_t) z_q[jtm+14]);// STMIN
+    if (Debug()) 
+      cout << "medium: " << med->GetId() << "\t" << med->GetName() << "\t" << med->GetTitle()
+	   << "\tisvol  " << med->GetParam(0)
+	   << "\tifield " << med->GetParam(1)
+	   << "\tfieldm " << med->GetParam(2)
+	   << "\ttmaxfd " << med->GetParam(3)
+	   << "\tstemax " << med->GetParam(4)
+	   << "\tdeemax " << med->GetParam(5)
+	   << "\tepsil  " << med->GetParam(6)
+	   << "\tstmin  " << med->GetParam(7)
+	   << endl;
+    TGeoMaterial  *mater = med->GetMaterial(); mater->Print("");
+  }
+  Int_t NLevel = 0;
+  Char_t name[5] = "    ";
+  Char_t nick[5] = "    ";
+  while(agvoluma(&volume,&volu,&position,&mother,&who,&copy,&params,&npar,nick,name)) {
+    TString Name(nick,4);
+    TString Nick(name,4);
+    if (npar < 3) {
+      cout << Name.Data() << "/" << Nick.Data() << " has npar = " << npar << endl;
+    }
+    ntot++;
+    node = ntot;
+
+    TGeoVolume *t;
+    TGeoVolume *newVolume = 0, *Hp = 0;
+    shapes      shape     = (shapes) volu[1];
+
+    // get materials
+    Int_t   numed     = (Int_t)  volu[3]; 
+    Char_t  medname[] = "                    ";
+    Float_t fbuf[400];
+
+    geant3->Gftmed(numed, medname, nmat, isvol, ifield, fieldm, tmaxfd, 
+		   stemax, deemax, epsil, stmin, fbuf, &nbuf);
+
+    TString MedName(medname);
+    MedName.Strip(); 
+
+    TGeoMedium *med = gGeoManager->GetMedium(MedName.Data());
+    assert (med);
+
+    Int_t    np      = (Int_t)  volu[4];
+    Double_t dp[250];
+    if (Debug())
+      cout<<"** nick: " <<Nick.Data() <<"    name: "<<Name.Data()<<endl;
+
+    if (Debug()) cout<<"******** number of params " << npar <<endl;
+    for (int i = 0; i < npar; i++) {
+      dp[i] = params[i];
+      if (Debug()) cout<< "\tparams[" << i << "] =" << params[i];
+    }
+    if (Debug()) cout <<endl;
+    Float_t *att     = volu+6+np;
+    Int_t    nin     = 0;
+
+    if (mother)  nin = (Int_t) mother[2];        //    Int_t konly = (int) p[npar];
+
+    H = (GtHash*) VolumeH.GetPointer((void *)Name.Data(),1);
+    if (!H) {	//new nick: 
+      H = new GtHash();
+      VolumeH.SetPointer(H);
+      droplist.Add(H);
+    }
+
+    Hp = (TGeoVolume *) H->GetPointer(dp,2*npar);
+
+    if (Hp)
+      newVolume = Hp;
+    else { 
+      nshape += 1;
+      switch (shape) {
+      case BOX:  t=gGeoManager->MakeBox   (Name.Data(),med,dp[0],dp[1],dp[2]);                    break;
+      case TRD1: t=gGeoManager->MakeTrd1  (Name.Data(),med,dp[0],dp[1],dp[2],dp[3]);              break;
+      case TRD2: t=gGeoManager->MakeTrd2  (Name.Data(),med,dp[0],dp[1],dp[2],dp[3],dp[4]);        break;
+      case TRAP: t=gGeoManager->MakeTrap  (Name.Data(),med,dp[0],dp[1],dp[2],dp[3],dp[4],dp[5],
+					   dp[6],dp[7],dp[8],dp[9],dp[10]);                break;
+      case TUBE: t=gGeoManager->MakeTube  (Name.Data(),med,dp[0],dp[1],dp[2]);                    break;
+      case TUBS: t=gGeoManager->MakeTubs  (Name.Data(),med,dp[0],dp[1],dp[2],dp[3],dp[4]);        break;
+      case CONE: t=gGeoManager->MakeCone  (Name.Data(),med,dp[0],dp[1],dp[2],dp[3],dp[4]);        break;
+      case CONS: t=gGeoManager->MakeCons  (Name.Data(),med,dp[0],dp[1],dp[2],dp[3],dp[4],
+					   dp[5],dp[6]);                                   break;
+      case SPHE: t=gGeoManager->MakeSphere(Name.Data(),med,dp[0],dp[1],dp[2],dp[3],dp[4],dp[5]);  break;
+      case PARA: t=gGeoManager->MakePara  (Name.Data(),med,dp[0],dp[1],dp[2],dp[3],dp[4],dp[5]);  break;
+
+      case PGON: t=gGeoManager->MakePgon  (Name.Data(),med,dp[0],dp[1],(int) dp[2], (int) dp[3]);
+	{
+	  Double_t *dpp = dp+4;
+	  for (Int_t i=0; i<dp[3]; i++) {
+	    z = *dpp++;
+	    rmin = *dpp++;
+	    rmax = *dpp++;
+	    ((TGeoPgon *) t->GetShape())->DefineSection(i,z,rmin,rmax);
+	  }
+	}                                                                                  break;
+
+      case PCON: t=gGeoManager->MakePcon  (Name.Data(),med,dp[0],dp[1], (int) dp[2]);
+	{
+	  Double_t *dpp = dp+3;
+	  for (Int_t i=0; i<dp[2]; i++) {
+	    z = *dpp++;
+	    rmin = *dpp++;
+	    rmax = *dpp++;
+	    ((TGeoPcon *) t->GetShape())->DefineSection(i,z,rmin,rmax);
+	  }
+	}                                                                                  break;
+      case ELTU: t=gGeoManager->MakeEltu  (Name.Data(),med,dp[0],dp[1],dp[2]);                    break;
+      case GTRA: t=gGeoManager->MakeGtra  (Name.Data(),med,dp[0],dp[1],dp[2],dp[3],dp[4],dp[5],
+					   dp[6],dp[7],dp[8],dp[9],dp[10],dp[11]);         break;
+      case CTUB: t=gGeoManager->MakeCtub  (Name.Data(),med,dp[0],dp[1],dp[2],dp[3],dp[4],dp[5],
+					   dp[6],dp[7],dp[8],dp[9],dp[10]);                break;
+      default:   t=gGeoManager->MakeBox   (Name.Data(),med,dp[0],dp[1],dp[2]);                    break;
+      };
+
+      //***************************************************************************************
+      if (Debug()) {
+	printf("GeoVolume: %s", t->GetName());
+	t->GetShape()->InspectShape();
+      }
+
+      if (ntot == 1) {gGeoManager->SetTopVolume(t); fTopGeoVolume = t;}
+      t->SetLineColor((int) att[4]);
+      newVolume = t;
+      newVolume->SetVisibility((int) att[1]); // SEEN
+      newVolume->SetLineColor((int) att[4]);  // COLO
+      H->SetPointer(newVolume);
+    } 
+
+    if (volume) { 
+      Float_t  xyz[3]   = {0.,0.,0.};
+      Float_t  RotAngles[6]; 
+      gfxzrm(NLevel,xyz[0],xyz[1],xyz[2],
+	     RotAngles[0],RotAngles[1],RotAngles[2],RotAngles[3],
+	     RotAngles[4],RotAngles[5],RotAngles[6]);
+      TGeoRotation Matrix("Test",
+			  RotAngles[0],RotAngles[1],RotAngles[2],RotAngles[3],
+			  RotAngles[4],RotAngles[5]); 
+      matrix = (TGeoRotation *) MatrixH.GetPointer((void *)Matrix.GetRotationMatrix(),18);
+      if (!matrix) {
+	jn++; 
+	matrix = new TGeoRotation(Form("r%d",jn),
+				  RotAngles[0],RotAngles[1],RotAngles[2],
+				  RotAngles[3],RotAngles[4],RotAngles[5]);
+	MatrixH.SetPointer(matrix);
+      }
+      TGeoTranslation *translation = 0;
+      if (TMath::Abs(xyz[0]) > 1.e-30 ||
+	  TMath::Abs(xyz[1]) > 1.e-30 || 
+	  TMath::Abs(xyz[0]) > 1.e-30)  {
+	translation = (TGeoTranslation *) TranslationH.GetPointer(xyz,3);
+	if (! translation ) {
+	  translation = new TGeoTranslation(xyz[0],xyz[1],xyz[2]);
+	  TranslationH.SetPointer(translation);
+	}
+      }
+      if (!matrix) {
+	if (! translation) volume->AddNode(newVolume, (Int_t) copy,gGeoIdentity);
+	else               volume->AddNode(newVolume, (Int_t) copy,translation);
+      } 
+      else {
+	if (! translation) volume->AddNode(newVolume, (Int_t) copy,new TGeoCombiTrans(0,0,0,matrix));
+	else               volume->AddNode(newVolume, (Int_t) copy,
+					   new TGeoCombiTrans(xyz[0],xyz[1],xyz[2],matrix));
+      }
+    }
+    volume=newVolume; 
+  }
+
+  gGeoManager->CloseGeometry();
+
+  cout << " found " 
+       << ntot     << " objects (" 
+       << nshape   << " different) " 
+       << noMarked << " are marked"
+       << endl;
+
+  m_Timer.Stop();
+  cout << "Conversion:  Real Time = " 
+       << m_Timer.RealTime() << "  seconds Cpu Time = " 
+       << m_Timer.CpuTime() << " seconds" << endl;
+  fTopGeoVolume = volume;
+  return GetTopGeoVolume();
+}
+  
