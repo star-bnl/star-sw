@@ -1,12 +1,23 @@
 /***************************************************************************
  *
- * Description: part of STAR HBT Framework: StHbtMaker package
- *    the Triplet object is passed to the TripletCuts for verification, and
+ * $Id: StHbtTriplet.cc,v 1.2 2000/04/12 01:55:59 willson Exp $
+ *
+ * Author: Robert Willson, Ohio State, willson@bnl.gov
+ ***************************************************************************
+ *
+ * Description: part of STAR HBT Framework: StHbtMaker package.
+ *    The triplet object is passed to the TripletCuts for verification, and
  *    then to the AddRealTriplet and AddMixedTriplet methods of the
- *    Three Particle Correlation Functions
+ *    three-particle correlation functions.
+ *
+ ***************************************************************************
+ *
+ * $Log: StHbtTriplet.cc,v $
+ * Revision 1.2  2000/04/12 01:55:59  willson
+ * Qinv Correlation Functions corrected
+ *
  *
  ***************************************************************************/
-
 
 #include "StHbtMaker/Infrastructure/StHbtTriplet.hh"
 
@@ -30,9 +41,27 @@ StHbtTriplet::~StHbtTriplet() {/* no-op */}
 //_________________
 double StHbtTriplet::qInv() const
 {
-    double dq = abs(mTrack1->FourMomentum() - mTrack2->FourMomentum()) +
-                abs(mTrack2->FourMomentum() - mTrack3->FourMomentum()) +
-                abs(mTrack3->FourMomentum() - mTrack1->FourMomentum());
+    double dq = sqrt(fabs((mTrack1->FourMomentum() - mTrack2->FourMomentum()).m2()) +
+                fabs((mTrack2->FourMomentum() - mTrack3->FourMomentum()).m2()) +
+                fabs((mTrack3->FourMomentum() - mTrack1->FourMomentum()).m2()));
+    return (dq);
+}
+//_________________
+double StHbtTriplet::qInv12() const
+{
+    double dq = abs(mTrack1->FourMomentum() - mTrack2->FourMomentum());
+    return (dq);
+}
+//_________________
+double StHbtTriplet::qInv23() const
+{
+    double dq = abs(mTrack2->FourMomentum() - mTrack3->FourMomentum());
+    return (dq);
+}
+//_________________
+double StHbtTriplet::qInv31() const
+{
+    double dq = abs(mTrack3->FourMomentum() - mTrack1->FourMomentum());
     return (dq);
 }
 //_________________
