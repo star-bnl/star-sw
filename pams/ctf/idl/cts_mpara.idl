@@ -32,4 +32,5 @@
        float     d_grid[20] ;         //  d points in slat response grid
        float     slat_response[100] ; //  Slat response vs z and d
        float     time_response[100] ; //  Integrated amplitude as a function of time
+       long      zero_suppression   ; //  
    } ;
