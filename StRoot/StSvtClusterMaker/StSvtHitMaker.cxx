@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.19 2002/01/31 23:53:25 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.20 2002/02/03 00:34:50 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.20  2002/02/03 00:34:50  caines
+ * Still fill scs_spt table even if database missing so global doesnt crash
+ *
  * Revision 1.19  2002/01/31 23:53:25  caines
  * Return kStOK even if init fails so chain doesnt crash
  *
@@ -271,8 +274,7 @@ Int_t StSvtHitMaker::Make()
   }
 
   if( !m_geom){
-     gMessMgr->Warning() <<" Things are wrong with the SVT database!!" << endm;
-    return kStWarn;
+     gMessMgr->Warning() <<" Things are wrong with the SVT database!!!!!!!!!" << endm;
   }
 
   TransformIntoSpacePoint();
@@ -290,13 +292,10 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 
   int index, TotHits=0, GoodHit=0;
   
-  // srs_srspar_st *srs_par = m_srs_srspar->GetTable();
-//   svg_geom_st* geom = m_geom->GetTable();
-//   svg_shape_st* shape = m_shape->GetTable();
   
   StSvtCoordinateTransform* SvtGeomTrans = new StSvtCoordinateTransform();
   //SvtGeomTrans->setParamPointers(&srs_par[0], &geom[0], &shape[0], mSvtData->getSvtConfig());
-  SvtGeomTrans->setParamPointers(m_geom, mSvtData->getSvtConfig());
+  if(m_geom)  SvtGeomTrans->setParamPointers(m_geom, mSvtData->getSvtConfig());
   StSvtLocalCoordinate localCoord(0,0,0);
   StSvtWaferCoordinate waferCoord(0,0,0,0,0,0);
   StGlobalCoordinate globalCoord(0,0,0); 
@@ -328,23 +327,24 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	    waferCoord.setWafer(wafer);
 	    waferCoord.setHybrid(hybrid);
 
-	    SvtGeomTrans->operator()(waferCoord,localCoord);
+	    if( m_geom) {
+	      SvtGeomTrans->operator()(waferCoord,localCoord);
 
 
 	    // Flag as bad those hits not in the drift region
-	    if( (localCoord.position().x() < -0.01 && localCoord.hybrid()==2)
-		|| (localCoord.position().x() > 0.01 && localCoord.hybrid()==1)
-		|| fabs(localCoord.position().x())> 3.01){
-	      mSvtBigHit->svtHit()[clu].setFlag( 
-				      	mSvtBigHit->svtHit()[clu].flag()+5);
+	      if( (localCoord.position().x() < -0.01 && localCoord.hybrid()==2)
+		  || (localCoord.position().x() > 0.01 && localCoord.hybrid()==1)
+		  || fabs(localCoord.position().x())> 3.01){
+		mSvtBigHit->svtHit()[clu].setFlag( 
+						  mSvtBigHit->svtHit()[clu].flag()+5);
+	      }
+	      
+	      SvtGeomTrans->operator()(localCoord,globalCoord);
 	    }
-	    
-	    SvtGeomTrans->operator()(localCoord,globalCoord);
-	    
-// 	    cout << " Timebucket=" << waferCoord.timebucket() << 
-// 	      " x=" << localCoord.position().x() <<
-// 	      " hybrid=" << localCoord.hybrid() <<
-// 	      " flag =" <<mSvtBigHit->svtHit()[clu].flag() << endl; 
+	    // 	    cout << " Timebucket=" << waferCoord.timebucket() << 
+	    // 	      " x=" << localCoord.position().x() <<
+	    // 	      " hybrid=" << localCoord.hybrid() <<
+	    // 	      " flag =" <<mSvtBigHit->svtHit()[clu].flag() << endl; 
 
 	    mPos.setX(globalCoord.position().x());
 	    mPos.setY(globalCoord.position().y());
