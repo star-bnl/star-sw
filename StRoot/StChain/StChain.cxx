@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.31 1999/02/28 19:18:44 fisyak Exp $
+// $Id: StChain.cxx,v 1.32 1999/03/02 03:20:52 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.32  1999/03/02 03:20:52  fine
+// Table counter has been  moved from StMaker to StChain
+//
 // Revision 1.31  1999/02/28 19:18:44  fisyak
 // Add tag information
 //
@@ -254,6 +257,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <stdlib.h>
+#include <malloc.h>
+#include <iostream.h>
+#include <iomanip.h>
+
 #include "TROOT.h"
 #include "TChain.h"
 #include "TTree.h"
@@ -262,6 +270,7 @@
 #include "TGeometry.h"
 #include "TSystem.h"
 #include "St_XDFFile.h"
+#include "St_Table.h"
 #include "St_DataSetIter.h"
 #include "St_FileSet.h"
 #include "StChain.h"
@@ -288,7 +297,7 @@ StChain::StChain()
 
 //_____________________________________________________________________________
 StChain::StChain(const char *name, const char *title):
-m_VersionCVS("$Id: StChain.cxx,v 1.31 1999/02/28 19:18:44 fisyak Exp $"),
+m_VersionCVS("$Id: StChain.cxx,v 1.32 1999/03/02 03:20:52 fine Exp $"),
 m_VersionTag("$Name:  $"),
 m_DateTime(),
 mProcessTime()
@@ -470,10 +479,10 @@ Int_t StChain::Init()
    }
    // Save Run to XDF Output file if any
    if (m_FileOut) {
-     St_DataSetIter next(m_DataSet);
-     next.Cd(GetName());
-     St_DataSet *set = next("run");
-     if (!set) set = next("Run");
+     St_DataSetIter nextRun(m_DataSet);
+     nextRun.Cd(GetName());
+     St_DataSet *set = nextRun("run");
+     if (!set) set = nextRun("Run");
      if (set) m_FileOut->NextEventPut(set);
    }
    return kStOK;
@@ -507,7 +516,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.31 1999/02/28 19:18:44 fisyak Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.32 1999/03/02 03:20:52 fine Exp $    \n");
    printf("* The chain was tagged with $Name:  $                \n");
    printf("**************************************************************\n");
 //     Print info for all defined Makers
@@ -623,15 +632,92 @@ void StChain::SetDefaultParameters()
 }
 
 //_____________________________________________________________________________
+static void countTables(StMaker *maker,Int_t *numTotalAlloc, Int_t *numTotalUsed)
+{
+  // Count the allocated and used space but ht e tables of the maler's dataset
+  // increament the input parameters:
+  //
+  //    Int_t *numTotalAlloc
+  //    Int_t *numTotalUsed
+  //
+   const Float_t percent = 15.0;
+   const Float_t Mega = 1024.0*1024.;
+   Int_t nTotalAlloc = 0;
+   Int_t nTotalUsed  = 0;
+   St_DataSet *ds = maker->DataSet();
+   St_DataSetIter nextSet(ds,0);
+   St_DataSet *set = 0;
+   Int_t isPrinted   = kFALSE;
+   while (set =  (St_DataSet *)nextSet()) {
+     if (!set->InheritsFrom("St_Table")) continue;
+     St_Table *tab = (St_Table *)set;
+     Int_t nAlloc  =  tab->GetTableSize();
+     Int_t nUsed   =  tab->GetNRows();
+     Int_t nSize   =  tab->GetRowSize();
+     nTotalAlloc  += nAlloc*nSize;
+     nTotalUsed   += nUsed*nSize;
+     Float_t wastePercent = 0;
+     if (nAlloc > 0) wastePercent = 100*(1.0-Float_t(nUsed)/Float_t(nAlloc));
+     if ( wastePercent > percent) {
+        if (!isPrinted) {
+            isPrinted = kTRUE;
+            cout << " --------  Statistics of tables \"wasted\" > " 
+                 <<  percent << "% of the allocated by maker < " << maker->GetName() << " > ------------"
+                 << endl;
+        }
+        cout << "Table: "<< setw(25) << tab->GetName()
+                                    << ": Allocated = "  << setw(6) << nAlloc 
+                                    << " rows : Used = " << setw(6) << nUsed << " rows : Wasted: " 
+                                    << wastePercent << "% space"
+                                    << endl;
+
+     }
+   }
+   if (nTotalAlloc > 0 && isPrinted) {
+      Float_t totalWastePercent = 100*(1-Float_t(nTotalUsed)/Float_t(nTotalAlloc));
+      if ( totalWastePercent  >  percent )
+        cout << "Maker: "      << setw(10) << maker->GetName() << " : " 
+            << "Allocated = " << setw(8)  << nTotalAlloc/Mega << " Mbytes : " 
+            << "Used = "      << setw(8)  << nTotalUsed/Mega  << " Mbytes : " 
+            << "Wasted: " << totalWastePercent << "% of the space"
+            << endl
+            << " -----------------------" << endl << endl;
+   }     
+   *numTotalAlloc += nTotalAlloc;
+   *numTotalUsed  += nTotalUsed;
+} 
+
+//_____________________________________________________________________________
+static void printAlloc(const Char_t *chain, Int_t nTotalAlloc, Int_t nTotalUsed)
+{
+  const Float_t Mega = 1024.0*1024.;
+  const Float_t percent = 15.0;
+  if (nTotalAlloc > 0) 
+  {
+     Float_t totalWastePercent = 100*(1-Float_t(nTotalUsed)/Float_t(nTotalAlloc));
+//     if ( totalWastePercent  >  percent )
+      cout << " ------------------------------------------------" << endl
+           << "Total chain: "<< setw(10) << chain  << " : " 
+           << "Allocated = " << setw(8)  << nTotalAlloc/Mega  << " Mbytes : " 
+           << "Used = "      << setw(8)  << nTotalUsed/Mega  << " Mbytes : " 
+           << "Wasted: "     << totalWastePercent << "% of the space"
+           << endl
+           << " ------------------------------------------------" << endl << endl;
+  }     
+}
+
+//_____________________________________________________________________________
 Int_t StChain::Make(Int_t i)
 {
 // Create event 
    //   St_DataSetIter nextDataSet(m_DataSet);
    //   nextDataSet.Cd(gStChain->GetName());
 //   Loop on all makers
-   Int_t ret;
+   Int_t ret = kStOK;
    TIter nextMaker(m_Makers);
    StMaker *maker;
+   Int_t numTotalAlloc=0;
+   Int_t numTotalUsed= 0;
    SetEvent(i);
    while ((maker = (StMaker*)nextMaker())) {
      // Create the new DataSet for each new type of the maker if any
@@ -646,13 +732,15 @@ Int_t StChain::Make(Int_t i)
   // Call Maker
      StartMaker(maker);
      ret = maker->Make();
+     countTables(maker,&numTotalAlloc, &numTotalUsed);
      EndMaker(maker,ret);
      
      if (gStChain->Debug()) printf("%s %i\n",maker->GetName(),ret);
-     if (ret) return ret;
+     if (ret) break; 
      if (gStChain->Debug()) m_DataSet->ls(2);
    }
-   return kStOK;
+   printAlloc(GetName(), numTotalAlloc, numTotalUsed);
+   return ret;
 }
 
 //_____________________________________________________________________________

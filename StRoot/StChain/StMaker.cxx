@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.19 1999/03/01 19:24:47 fine Exp $
+// $Id: StMaker.cxx,v 1.20 1999/03/02 03:20:52 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.20  1999/03/02 03:20:52  fine
+// Table counter has been  moved from StMaker to StChain
+//
 // Revision 1.19  1999/03/01 19:24:47  fine
 // StMaker::Clear() wasted statistic has been added
 //
@@ -141,6 +144,7 @@ void StMaker::Browse(TBrowser *b)
 void StMaker::Clear(Option_t *opt)
 {
  // print some statistics
+#if 0
  const Float_t percent = 15.0;
  if (m_DataSet) {
    St_DataSetIter nextSet(m_DataSet,0);
@@ -162,14 +166,10 @@ void StMaker::Clear(Option_t *opt)
         if (!isPrinted) {
             isPrinted = kTRUE;
             const Char_t *n = GetName();
-//            printf(" --------  Statistics of tables \"wasted\" more then %d %% of the allocated by maker < %s >------------\n"
-//            ,percent,n);
             cout << " --------  Statistics of tables \"wasted\" > " 
                  <<  percent << "% of the allocated by maker < " << n << " > ------------"
                  << endl;
         }
-//          printf("Table: %-10s: Allocated = %6d rows : Used = %6d rows : Wasted: %6.1 %% space\n"
-//                                                    ,tab->GetName(),nAlloc,nUsed,wastePercent);     
         cout << "Table: "<< setw(25) << tab->GetName()
                                     << ": Allocated = "  << setw(6) << nAlloc 
                                     << " rows : Used = " << setw(6) << nUsed << " rows : Wasted: " 
@@ -180,8 +180,6 @@ void StMaker::Clear(Option_t *opt)
    }
    if (nTotalAlloc > 0 && isPrinted) {
       Float_t totalWastePercent = 100*(1-Float_t(nTotalUsed)/Float_t(nTotalAlloc));
-//         printf("Maker: %-10s: Allocated = %8d bytes : Used = %8d bytes : Wasted: %5.1 %% space\n"
-//                ,GetName(),nTotalAlloc,nTotalUsed,totalWastePercent);
       if ( totalWastePercent  >  percent )
         cout << "Maker: "      << setw(10) << GetName()   << " : " 
             << "Allocated = " << setw(8)  << nTotalAlloc << " bytes : " 
@@ -191,6 +189,7 @@ void StMaker::Clear(Option_t *opt)
             << " -----------------------" << endl << endl;
    }     
  }
+#endif
  SafeDelete(m_DataSet);
 }
 
