@@ -1,9 +1,10 @@
 macro ctu_run 
+macro/global/import *
 *
 *   
 *    Call cts
 *
-ami/mod/call ctu /dui/constants/ctf/geometry/ctb _ 
-                 /dui/constants/ctf/calib/ctb_slat _
-                 /dui/data/ctf/ctb_raw _
-                 /dui/data/ctf/ctb_cor
+ami/mod/call ctu [geometry]/ctf/ctb _ 
+                 [calib]/ctf/ctb_slat _
+                 [data]/ctf/ctb_raw _
+                 [data]/ctf/ctb_cor

@@ -1,4 +1,5 @@
 macro init_jet _
+macro/global/import *
 [par]='/dui/constants/emc/params' _
 [jet]='/dui/data/emc/tracks'
 

@@ -5,6 +5,7 @@
 * 
 *
 * 
+macro/global/import *
     DEFAULT = _
 ./kumacs/util,_
 ./kumacs/ctf,_
