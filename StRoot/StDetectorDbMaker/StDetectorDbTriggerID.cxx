@@ -214,8 +214,9 @@ float StDetectorDbTriggerID::getPs(unsigned int entry){
     return value;
 };
 
+/// Will return kDbTriggerBadID if it fails finding it in the database
 unsigned int StDetectorDbTriggerID::getDefaultTriggerLevel(){
-    unsigned int value = 999;
+    unsigned int value = kDbTriggerBadID;
     if(mDefaultTriggerLevel)
 	value = mDefaultTriggerLevel->level;
     return value;
