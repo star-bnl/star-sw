@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulation.cc,v 1.3 2001/03/15 15:12:08 bekele Exp $
+ * $Id: StSvtSimulation.cc,v 1.4 2001/03/19 22:25:53 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulation.cc,v $
+ * Revision 1.4  2001/03/19 22:25:53  caines
+ * Catch wrong wafer ids more elegantly
+ *
  * Revision 1.3  2001/03/15 15:12:08  bekele
  * added a method to fill the whole SVT hybrid with background
  *
@@ -27,7 +30,6 @@
 #include "StDbUtilities/StGlobalCoordinate.hh"
 #include "StDbUtilities/StSvtCoordinateTransform.hh"
 #include "StDbUtilities/StSvtWaferCoordinate.hh"
-#include "StThreeVector.hh"
 
 #include "StSvtAngles.hh"
 #include "StSvtSignal.hh"
@@ -78,13 +80,11 @@ void StSvtSimulation::setParam(double timBinSize, double anodeSize)
  }
 
 
-StSvtWaferCoordinate StSvtSimulation::toLocalCoord(double x, double y, double z,StSvtCoordinateTransform  *coTransform)
+StSvtWaferCoordinate StSvtSimulation::toLocalCoord(StThreeVector<double>& pos,StSvtCoordinateTransform  *coTransform)
 {
-   StThreeVector<double> pos(0,0,0);
+ 
    StSvtWaferCoordinate waferCoord(0,0,0,0,0,0);
    StGlobalCoordinate globalCor;
-
-   pos.setX(x);  pos.setY(y);  pos.setZ(z);
      
    globalCor.setPosition(pos);
 

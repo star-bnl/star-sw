@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "StSvtElectronCloud.hh"
+#include "StThreeVector.hh"
 
 class StSvtSignal;
 class StSvtHybridPixels;
@@ -29,7 +30,7 @@ public:
   int writeFiles2(int c,int i, double width, double peak);
   void closeFiles();
 
-  StSvtWaferCoordinate toLocalCoord(double x, double y, double z,StSvtCoordinateTransform  *coTransform);
+  StSvtWaferCoordinate toLocalCoord(StThreeVector<double>& x,StSvtCoordinateTransform  *coTransform);
   void calcAngles(svg_geom_st *geom_st, double x, double y, double z, int mLayer, int mLadder, int mWafer );
   void doCloud(double time, double Energy,double mTheta,double mPhi);
   void reset();

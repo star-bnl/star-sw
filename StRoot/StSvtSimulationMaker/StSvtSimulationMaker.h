@@ -1,5 +1,8 @@
-// $Id: StSvtSimulationMaker.h,v 1.4 2001/03/15 15:12:09 bekele Exp $
+// $Id: StSvtSimulationMaker.h,v 1.5 2001/03/19 22:25:53 caines Exp $
 // $Log: StSvtSimulationMaker.h,v $
+// Revision 1.5  2001/03/19 22:25:53  caines
+// Catch wrong wafer ids more elegantly
+//
 // Revision 1.4  2001/03/15 15:12:09  bekele
 // added a method to fill the whole SVT hybrid with background
 //
@@ -23,6 +26,8 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+
+#include "StThreeVector.hh"
 
 class StChain;
 class TFile;
@@ -73,7 +78,7 @@ class StSvtSimulationMaker : public StMaker
   void  calcAngles(svg_geom_st *geom_st,int hardWarePosition);
   void  fillBuffer(double mAnHit, double mTimeHit, int hybIndex);
   Int_t doOneHit(StSvtHybridPixels* mSvtSimDataPixels);
-  Int_t fillEval(int barrel, int ladder, int wafer, int yybrid, StSvtWaferCoordinate& waferCoord);
+  Int_t fillEval(int barrel, int ladder, int wafer, int yybrid, StSvtWaferCoordinate& waferCoord, StThreeVector<double>& xVec);
 
   Int_t CreateHistograms();
   void  MakeHistograms1();
@@ -141,7 +146,7 @@ class StSvtSimulationMaker : public StMaker
   TH2D** geant_hit;            //!
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.4 2001/03/15 15:12:09 bekele Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.5 2001/03/19 22:25:53 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
 
   ClassDef(StSvtSimulationMaker,1)
 
