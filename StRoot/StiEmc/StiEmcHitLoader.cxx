@@ -12,7 +12,9 @@
 #include "Sti/StiDetector.h"
 #include "StEvent.h"
 #include "StMcEvent.hh"
+#ifndef ST_NO_NAMESPACES
 using namespace std;
+#endif
 
 StiEmcHitLoader::StiEmcHitLoader()
   : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("EmcHitLoader")
