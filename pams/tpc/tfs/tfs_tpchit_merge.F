@@ -1,5 +1,8 @@
-* $Id: tfs_tpchit_merge.F,v 1.11 1999/08/12 19:58:47 liq Exp $
+* $Id: tfs_tpchit_merge.F,v 1.12 1999/09/09 18:52:48 liq Exp $
 * $Log: tfs_tpchit_merge.F,v $
+* Revision 1.12  1999/09/09 18:52:48  liq
+* change the way to calculate the y for the merged hit
+*
 * Revision 1.11  1999/08/12 19:58:47  liq
 * check the distance along x instead of y when decided whether it should be merged
 *
@@ -374,6 +377,7 @@ C     add the amplitudes and quadrature the errors
                       tphit(l).dq = 0.
                      endif
                xoutl(1) = (rmax + rmin) / 2.
+               xoutl(2) = (xoutl(2) + xoutk(2))/2.
                xoutl(3) = (zmax + zmin) / 2.
                IsectorDummy=i
                iret  = tgc_local_to_global(IsectorDummy,xoutl,xglob) 
