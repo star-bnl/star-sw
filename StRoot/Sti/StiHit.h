@@ -52,6 +52,7 @@
 #ifndef StiHit_HH
 #define StiHit_HH
 
+class StMeasuredPoint;
 class StHit;
 class StThreeVectorD;
 class StThreeVectorF;
@@ -102,7 +103,8 @@ public:
 
     ///Return a const pointer to the StHit object corresponding to this StiHit
     ///instance
-    const StHit* stHit() const;
+    //const StHit* stHit() const;
+    const StMeasuredPoint * stHit() const;
 
     ///If we are running in simulated mode, return a const pointer to the
     /// StMcHit associated with this StiHit.
@@ -111,7 +113,7 @@ public:
     ///Return the number of times this hit was assigned to a track
     unsigned int timesUsed() const;
     
-    ///Return a boolean that marks whether or not this hit is assigne to a
+    ///Return a boolean that marks whether or not this hit is assigned to a
     ///track.
     //bool   isUsed() const;
 
@@ -155,7 +157,8 @@ public:
     ///Set the pointer to the StiDetector from which the hit arose.
     void setDetector(StiDetector*);
     ///Set the pointer to the corresponding StHit object.
-    void setStHit(StHit*);
+    //void setStHit(StHit*);
+    void setStHit(StMeasuredPoint*);
     
     ///Set a boolean that marks whether or not this hit is assigned to a track.
     //void setUsed(bool);
@@ -183,7 +186,8 @@ private:
     double msyz;
     unsigned int mTimesUsed;
     StiDetector* mdetector;
-    StHit* msthit;
+    //StHit* msthit;
+		StMeasuredPoint * msthit;
 };
 
 //Inlines-----------------------------------------------------------
@@ -259,7 +263,8 @@ inline double StiHit::refangle() const {return mrefangle;}
 
 inline double StiHit::position() const {return mposition;}
 
-inline const StHit* StiHit::stHit() const {return msthit;}
+//inline const StHit* StiHit::stHit() const {return msthit;}
+inline const StMeasuredPoint* StiHit::stHit() const {return msthit;}
 
 inline const StiDetector* StiHit::detector() const {return mdetector;}
 
@@ -307,7 +312,8 @@ inline void StiHit::setPosition(double val) {mposition=val;}
 
 inline void StiHit::setDetector(StiDetector* det) {mdetector=det;}
 
-inline void StiHit::setStHit(StHit* val) {msthit=val;}
+//inline void StiHit::setStHit(StHit* val) {msthit=val;}
+inline void StiHit::setStHit(StMeasuredPoint * val) {msthit=val;}
 
 inline void StiHit::setTimesUsed(unsigned int val)
 {

@@ -54,10 +54,13 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack) //throw (Exception)
 				}			
 			targetNode= static_cast<StiKalmanTrackNode*>((*source).getFirstChild());
 			targetDet = targetNode->getDetector();
-			targetHit  = targetNode->getHit();
+			targetHit = targetNode->getHit();
 			// evolve state from that of source using dets source to source
-			targetNode->propagate(&(*source),targetDet);	
-			// if target has hit, get chi2 and update track parameters accordingly
+			if (targetDet)
+				targetNode->propagate(&(*source),targetDet);	// hit
+			else
+				targetNode->propagate(&(*source),targetHit);  // vertex
+			// if targetNode has hit, get chi2 and update track parameters accordingly
 			if (targetHit)
 				{
 					targetNode->evaluateChi2();

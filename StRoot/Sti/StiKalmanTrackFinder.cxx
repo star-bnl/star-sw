@@ -289,27 +289,35 @@ void StiKalmanTrackFinder::fitTracks()
 */
 void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 {
-    try 
-	{
+	try 
+		{
 	    track = 0;
 	    for (KalmanTrackMap::const_iterator it=trackContainer->begin(); it!=trackContainer->end(); ++it) 
-		{
-		    track = (*it).second;
-		    extendTrackToVertex( track->getInnerMostNode(),vertex);
+				{
+					track = (*it).second;
+					try
+						{
+							extendTrackToVertex( track->getInnerMostNode(),vertex);
+						}
+					catch (runtime_error & rte) 
+						{
+							cout << "StiKalmanTrackFinder::extendTracksToVertex()"
+									 << " - Run Time Error while extending a track to main vertex.\n" << rte.what() << endl;
+						}
+				}
 		}
-	}
-    catch (runtime_error & rte) 
-	{
-	    cout << "StiKalmanTrackFinder::extendTracksToVertex() - Run Time Error :\n" << rte.what() << endl;
-	}
-    catch (logic_error & le) 
-	{
+	catch (runtime_error & rte) 
+		{
+			cout << "StiKalmanTrackFinder::extendTracksToVertex() - Run Time Error :\n" << rte.what() << endl;
+		}
+	catch (logic_error & le) 
+		{
 	    cout << "StiKalmanTrackFinder::extendTracksToVertex() - Logic Error :\n" << le.what() << endl;
-	}
-    catch (exception & e) 
-	{
+		}
+	catch (exception & e) 
+		{
 	    cout << "StiKalmanTrackFinder::extendTracksToVertex() - Internal Error :\n" << e.what() << endl;
-	}
+		}
 }
 
 
@@ -831,7 +839,7 @@ void StiKalmanTrackFinder::extendTrackToVertex(StiKalmanTrackNode * sNode, StiHi
 	    sNode->add(tNode);	
 	    track->setLastNode(tNode);
 	}
-    cout << *track << endl;
+    cout << "STKN::extendTrackToVertex()"<<*track << endl;
 }
 
 /*

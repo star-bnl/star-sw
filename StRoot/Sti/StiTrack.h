@@ -34,6 +34,7 @@ using namespace std;
 
 class StiHit;
 class StHit;
+class StMeasuredPoint;
 
 /*! 
    \class StiKalmanTrack
@@ -98,7 +99,8 @@ public:
 	
 	//StiHit * getVertex() const;  // return pointer to vertex associated with this track if any. 
 
-	virtual vector<StHit*> stHits() const=0;
+	//virtual vector<StHit*> stHits() const=0;
+	virtual vector<StMeasuredPoint*> stHits() const=0;
 	
   // accessor methods
   
