@@ -1,0 +1,113 @@
+//:Copyright 1995, Lawrence Berkeley National Laboratory
+//:>--------------------------------------------------------------------
+//:FILE:	tdmI.idl
+//:DESCRIPTION:	Table & Dataset Memory Orbix-Interface-objects
+//:AUTHOR:	cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:	-- STILL IN DEVELOPMENT --
+//:HISTORY:	02feb97-v003c-cet- rename file
+//:HISTORY:	01jan96-v003b-cet- add DSL structures **DOSN'T WORK**
+//:HISTORY:	29nov95-v003a-cet- adapt to working Moast
+//:HISTORY:	13sep95-v002c-cet- "hack" DS_MAX_DIMS problem
+//:HISTORY:	10jul95-v001a-cet- move gen_hier to DIO
+//:HISTORY:	06jul95-v000a-cet- creation
+//:<--------------------------------------------------------------------
+
+//:----------------------------------------------- INCLUDES           --
+#include "socI.idl"
+
+//:----------------------------------------------- TYPEDEFS           --
+#include "tdmItypes.idl"
+
+//:=============================================== INTERFACE          ==
+interface tdmObjectI : socObjectI {
+
+//:----------------------------------------------- ATTRIBUTES         --
+readonly attribute string dslName;
+readonly attribute boolean isDataset;
+readonly attribute boolean isTable;
+
+//:----------------------------------------------- FUNCTIONS          --
+// **NONE**
+};
+
+//:=============================================== INTERFACE          ==
+interface tdmTableI : tdmObjectI {
+
+//:----------------------------------------------- ATTRIBUTES         --
+readonly attribute long columnCount;
+attribute long maxRowCount;
+attribute long rowCount;
+readonly attribute long rowSize;
+readonly attribute string typeName;
+readonly attribute string typeSpecifier;
+
+//:----------------------------------------------- FUNCTIONS          --
+boolean isType(in string aType);
+STAFCV_T printRows(in long ifirst, in long nrows);
+STAFCV_T show();
+
+STAFCV_T findColumn(in string name, out TDM_COLUMN_T column);
+STAFCV_T getColumn(in long ncol, out TDM_COLUMN_T column);
+
+//- Column attributes
+long columnNumber(in string name);
+string columnName(in long ncol);
+DS_TYPE_CODE_T columnTypeCode(in long ncol);
+long columnSize(in long ncol);
+long columnRank(in long ncol);
+long columnShape(in long ncol,in long ndim);
+
+long columnElcount(in long ncol);
+string columnTypeName(in long ncol);
+
+//- Accessing data.
+STAFCV_T getData(out TDM_DATABLOCK_T data);
+STAFCV_T putData(in TDM_DATABLOCK_T data);
+
+STAFCV_T getCell(out TDM_CELLDATA_T data, in long nrow, in long ncol);
+STAFCV_T putCell(in TDM_CELLDATA_T data, in long nrow, in long ncol);
+
+};
+
+//:=============================================== INTERFACE          ==
+interface tdmDatasetI : tdmObjectI {
+
+//:----------------------------------------------- ATTRIBUTES         --
+readonly attribute long entryCount;
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T addDataset(in string name, in long setDim);
+STAFCV_T addTable(in string name, in string spec, in long rows);
+STAFCV_T getEntryType(out string type, in long num);
+STAFCV_T getDatasetEntry(out tdmDatasetI dataset, in long num);
+STAFCV_T getTableEntry(out tdmTableI table, in long num);
+STAFCV_T findDatasetEntry(out tdmDatasetI dataset, in string name);
+STAFCV_T findTableEntry(out tdmTableI table, in string name);
+
+STAFCV_T getDescriptor(out string descriptor);
+};
+
+//:=============================================== INTERFACE          ==
+interface tdmFactoryI : socFactoryI {
+
+//:----------------------------------------------- ATTRIBUTES         --
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T deleteDataset(in string name);
+tdmDatasetI findDataset(in string name);
+tdmDatasetI getDataset(in IDREF_T id);
+tdmDatasetI newDataset(in string name, in long setDim);
+tdmDatasetI createDataset(in string name, in DSL_PTR_T pDS);
+
+STAFCV_T deleteTable(in string name);
+tdmTableI findTable(in string name);
+tdmTableI getTable(in IDREF_T id);
+tdmTableI newTable(in string name, in string spec, in long rows);
+tdmTableI createTable(in string name, in DSL_PTR_T pDS);
+
+STAFCV_T getTypeName(in long tid, out string name);
+STAFCV_T getTypeSpecification(in long tid, out string spec);
+
+//STAFCV_T parsePath(in string spec, out PATH_T path);
+};
+
