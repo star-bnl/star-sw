@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.119 2001/12/19 20:48:28 jeromel Exp $
+# $Id: Construct,v 1.120 2002/01/03 20:46:37 jeromel Exp $
 use Env;
 use lib $STAR . "/mgr";    # Modify perl include path
 use ConsDefs;
@@ -69,8 +69,13 @@ else {
   print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
   
 }
-$CPPPATH = $INCLUDE . ":#StRoot:" . $ROOTSRC;
-$CPPPATH .= $main::PATH_SEPARATOR . $CERN_ROOT . "/include" . $EXTRA_CPPPATH;
+if( defined( $ARG{CPPPATH} ) ){
+    $CPPPATH = $ARG{CPPPATH};
+} else {
+    $CPPPATH = $INCLUDE . ":#StRoot:" . $ROOTSRC;
+    $CPPPATH .= $main::PATH_SEPARATOR . 
+	$CERN_ROOT . "/include" . $EXTRA_CPPPATH;
+}
 $FCPPPATH = "";
 ( my $DirPath = cwd() ) =~ s/\/$//g;
 print "DirPath    = $DirPath\n" unless ($param::quiet);
