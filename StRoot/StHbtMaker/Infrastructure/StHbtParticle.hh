@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.4 1999/09/17 22:38:02 lisa Exp $
+ * $Id: StHbtParticle.hh,v 1.5 1999/12/11 15:58:29 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
+ * Revision 1.5  1999/12/11 15:58:29  lisa
+ * Add vertex decay position datum and accessor to StHbtParticle to allow pairwise cuts on seperation of V0s
+ *
  * Revision 1.4  1999/09/17 22:38:02  lisa
  * first full integration of V0s into StHbt framework
  *
@@ -47,14 +50,16 @@ public:
 
   StPhysicalHelixD& Helix();
 
+  StHbtThreeVector DecayVertexPosition() const;
 
 private:
   StHbtLorentzVector mFourMomentum;
   StPhysicalHelixD mHelix;
+  StHbtThreeVector mDecayVertexV0;
 
 };
 
 inline StHbtLorentzVector StHbtParticle::FourMomentum() const {return mFourMomentum;}
 inline StPhysicalHelixD& StHbtParticle::Helix() {return mHelix;}
-
+inline StHbtThreeVector StHbtParticle::DecayVertexPosition() const {return mDecayVertexV0;}
 #endif
