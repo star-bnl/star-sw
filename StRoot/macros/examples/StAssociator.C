@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.26 2001/04/25 21:16:57 jeromel Exp $
+// $Id: StAssociator.C,v 1.27 2001/04/27 18:44:10 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.27  2001/04/27 18:44:10  calderon
+// added comment on usage of L3Trigger switch
+//
 // Revision 1.26  2001/04/25 21:16:57  jeromel
 // Added libgeometry_Tables missing for some StEmcUtil calls.
 //
@@ -165,6 +168,10 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
 //     mcEventReader->doUseFtpc = kTRUE;
 //     mcEventReader->doUseRich = kTRUE;
     StAssociationMaker* associator    = new StAssociationMaker;
+
+    // If you need to use L3 TRIGGER uncomment the line:
+    // associator->useL3Trigger();
+    //associator->SetDebug();
     //associator->doPrintMemoryInfo = kTRUE;
     StMcAnalysisMaker*  examples      = new StMcAnalysisMaker;
 
