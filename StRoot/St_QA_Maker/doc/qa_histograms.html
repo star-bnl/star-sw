@@ -101,7 +101,7 @@
          <UL>
              <LI> number of tracks (total, good, ratio pos. to neg., good primaries)
              <LI> number of vertices, mean pT, mean eta, rms eta
-             <LI> x,y,z of primary vertex
+             <LI> x,y,z,r of primary vertex
          </UL>
       <LI><FONT  size ="+1" color="green">  MakeHistGlob()  <FONT  size ="+1" color="black"> 
          <UL>
@@ -111,26 +111,30 @@
              <LI> <FONT color="blue">TPC, TPC+SVT, FTPC East & West histograms (1D) :</FONT>
              <BR> - number of points, max. points, fit points on track
              <BR> - ratio of fit/tot, fit/max, charge
-             <BR> - x,y,z,radial position of first hit on track
+             <BR> - x,y,z,r position of first hit on track
              <BR> - track length, psi, eta, pT, momentum
              <BR> - chi squared, chi squared probability
              <BR> <FONT  size ="+1" color="red"> Not used for FTPC : <FONT  size ="+1" color="black"> 
              <BR> - radius at start, azimuth at start (phi), z-coord. at start, log10 curvature
-             <BR> - x,y,z of first hit minus on helix at start, theta, tanl (dip angle)
+             <BR> - x,y,z of first hit minus x,y,z of helix at start, theta, tanl (dip angle)
+             <BR> - overlayed histogram of first point: x,y,z_hit - x,y,z_helix
+             <BR> - padrow # of first hit
              <BR> - impact param to primary vertex (log10 and not)
              <LI><FONT color="blue"> TPC, TPC+SVT, FTPC East and West histograms (2D) :</FONT>
              <BR> - log pT vs eta, Y vs X of first hit on track
              <BR> - trk length vs eta, N pnts vs length, N fit pnts vs length
              <BR> <FONT  size ="+1" color="red"> Not used for FTPC : <FONT  size ="+1" color="black">
-             <BR> - tanl vs zfirst, log mom vs trk length
-             <BR> - chisq vs log mom, vs eta, vs tanl, vs zfirst
+             <BR> - tanl vs zfirst-zvtx, log mom vs trk length
+             <BR> - chisq vs log mom, vs eta, vs phi, vs tanl, vs zfirst
              <BR> - chisq prob vs log mom, vs eta, vs tanl, vs zfirst
              <BR> - ratio Nfitpnt,Npnt vs log mom, vs Eta
              <BR> - psi vs phi
          </UL>
       <LI><FONT  size ="+1" color="green">  MakeHistPrim()  <FONT  size ="+1" color="black"> 
          <UL>
-             <LI> <FONT color="darkred">Note : Currently uses same histograms as in MakeHistGlob().  Currently, FTPC histograms are empty for primary tracks and so not drawn (soon to change). </FONT>
+             <LI> <FONT color="darkred">Note : uses essentially the same histograms as in MakeHistGlob().  Currently, FTPC histograms are empty for primary tracks and so not drawn (soon to change). </FONT>
+             <LI> inner and outer sector TPC dE/dx histograms (drawn before event summary histograms)
+
          </UL>
       <LI><FONT  size ="+1" color="green">  MakeHistDE()  <FONT  size ="+1" color="black"> 
          <UL>
