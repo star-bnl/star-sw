@@ -3,8 +3,22 @@ void FillHistos(
 	 const char *outName="Output.root",
 	 const char *outDir="")
 {
-  gSystem->Load("StMiniMcEvent");    
-  gSystem->Load("StiEvaluator");
+  char * list[]={"St_base","StChain","StUtilities", "St_Tables", "StarClassLibrary",
+		 "libsim_Tables","libglobal_Tables","geometry","St_g2t","St_geant_Maker","libGui",
+		 "StIOMaker","StTreeMaker", "St_db_Maker","StDbLib","StDbBroker",
+		 "StSvtDbMaker","StDbUtilities", "StTpcDb","StEvent","StEventMaker",
+		 "StMcEvent","StMcEventMaker","StMiniMcEvent","StAssociationMaker",
+		 "Sti", "StiEvaluator",
+		 "last"};
+
+  int i=0;  
+  cout <<"Run.C::loadLibrairies() - INFO - Started"<<endl;
+  while (list[i]!="last")
+    {
+      cout << "          Loading module:"<<list[i];
+      gSystem->Load(list[i++]);
+      cout << "\t\t- Done." << endl;
+    } 
   TChain* chain = new TChain("StMiniMcTree");
   chain->Add(MainFile);
 
