@@ -326,7 +326,7 @@ void TrackEntry::clear()
     stiTrackY = stiTrackTanL = stiTrackPx = stiTrackPy = stiTrackPz = stiTrackPt = stiTrackEta = 0.;
     stiTrackNHits = stiTrackNTpcHits = stiTrackNSvtHits = 0;
     stiTrackNAssocHits = stiTrackNAssocTpcHits = stiTrackNAssocSvtHits  = 0;
-    stiTrackFlag = 0;
+    stiTrackFlag = stiTrackNSeedHits = 0;
 
 }
 
@@ -337,156 +337,28 @@ void TrackEntry::setStiTrack(const StiTrack *newtrack)
     
     try {
 	stiTrackQ          = newtrack->getCharge();
-    }
-    catch (runtime_error & rte)	{
-	cout <<"StiTrack::getCharge() threw:";
-	cout << "RunTime Error Exception: " << rte.what()<<endl;
-    }
-    catch (exception & e) {	
-	cout <<"StiTrack::getCharge() threw:";
-	cout << "Exception: " << e.what()<<endl;
-    }
-
-    try {
 	stiTrackPsi        = newtrack->getPhi();
-    }
-    catch (runtime_error & rte)	{
-	cout <<"StiTrack::getPhi() threw:";
-	cout << "RunTime Error Exception: " << rte.what()<<endl;
-    }
-    catch (exception & e) {
-	cout <<"StiTrack::getPhi() threw:";
-	cout << "Exception: " << e.what()<<endl;
-    }
-    
-    try {
 	stiTrackM          = newtrack->getMass();
-    }
-    catch (runtime_error & rte)	{
-	cout <<"StiTrack::getMass() threw:";
-	cout << "RunTime Error Exception: " << rte.what()<<endl;
-    }
-    catch (exception & e) {
-	cout <<"StiTrack::getMass() threw:";
-	cout << "Exception: " << e.what()<<endl;
-    }
-    
-    try {
 	stiTrackChi2       = newtrack->getChi2();
-    }
-    catch (runtime_error & rte)	{
-	cout <<"StiTrack::getChi2() threw:";
-	cout << "RunTime Error Exception: " << rte.what()<<endl;
-    }
-    catch (exception & e) {
-	cout <<"StiTrack::getChi2() threw:";
-	cout << "Exception: " << e.what()<<endl;
-    }
-    
-    try {
-	stiTrackNHit       = newtrack->getFitPointCount();
-    }
-    catch (runtime_error & rte)	{
-	cout <<"StiTrack::getFitPointCount() threw:";
-	cout << "RunTime Error Exception: " << rte.what()<<endl;
-    }
-    catch (exception & e) {
-	cout <<"StiTrack::getFitPointCount() threw:";
-	cout << "Exception: " << e.what()<<endl;
-    }
-    
-    try {
+	stiTrackNHit       = newtrack->getPointCount();
+	stiTrackNSeedHits = newtrack->getSeedHitCount();
 	stiTrackY          = newtrack->getRapidity();
-    }
-    catch (runtime_error & rte)	{
-	cout <<"StiTrack::getRapidity() threw:";
-	cout << "RunTime Error Exception: " << rte.what()<<endl;
-    }
-    catch (exception & e) {
-	cout <<"StiTrack::getRapidity() threw:";
-	cout << "Exception: " << e.what()<<endl;
-    }
-    
-    try {
 	stiTrackTanL       = newtrack->getTanL();
-    }
-    catch (runtime_error & rte)	{
-	cout <<"StiTrack::getTanL() threw:";
-	cout << "RunTime Error Exception: " << rte.what()<<endl;
-    }
-    catch (exception & e) {
-	cout <<"StiTrack::getTanL() threw:";
-	cout << "Exception: " << e.what()<<endl;
-    }
-    
-    try {
 	mom = newtrack->getMomentumAtOrigin();
-    }
-    catch (runtime_error & rte)	{
-	cout <<"StiTrack::getMomentumAtOrigin() threw:";
-	cout << "RunTime Error Exception: " << rte.what()<<endl;
-    }
-    catch (exception & e) {
-	cout <<"StiTrack::getMomentumAtOrigin() threw:";
-	cout << "Exception: " << e.what()<<endl;
-    }
-    
-    try {
 	stiTrackPx = mom.x();
-    }
-    catch (runtime_error & rte)	{
-	cout <<"StThreeVector<double>::x() threw:";
-	cout << "RunTime Error Exception: " << rte.what()<<endl;
-    }
-    catch (exception & e) {
-	cout <<"StThreeVector<double>::x() threw:";
-	cout << "Exception: " << e.what()<<endl;
-    }
-    try {
 	stiTrackPy = mom.y();
-    }
-    catch (runtime_error & rte)	{
-	cout <<"StThreeVector<double>::y() threw:";
-	cout << "RunTime Error Exception: " << rte.what()<<endl;
-    }
-    catch (exception & e) {
-	cout <<"StThreeVector<double>::y() threw:";
-	cout << "Exception: " << e.what()<<endl;
-    }
-    try {
 	stiTrackPz = mom.z();
-    }
-    catch (runtime_error & rte)	{
-	cout <<"StThreeVector<double>::z() threw:";
-	cout << "RunTime Error Exception: " << rte.what()<<endl;
-    }
-    catch (exception & e) {
-	cout <<"StThreeVector<double>::z() threw:";
-	cout << "Exception: " << e.what()<<endl;
-    }
-    try {
 	stiTrackPt = mom.perp();
-    }
-    catch (runtime_error & rte)	{
-	cout <<"StThreeVector<double>::perp() threw:";
-	cout << "RunTime Error Exception: " << rte.what()<<endl;
-    }
-    catch (exception & e) {
-	cout <<"StThreeVector<double>::perp() threw:";
-	cout << "Exception: " << e.what()<<endl;
-    }
-    try {
 	stiTrackEta = mom.pseudoRapidity();
     }
+    
     catch (runtime_error & rte)	{
-	cout <<"StThreeVector<double>::pseudoRapidity() threw:";
-	cout << "RunTime Error Exception: " << rte.what()<<endl;
+	//cout << "RunTime Error Exception: " << rte.what()<<endl;
     }
     catch (exception & e) {
-	cout <<"StThreeVector<double>::pseudoRapidity() threw:";
-	cout << "Exception: " << e.what()<<endl;
+	//cout << "Exception: " << e.what()<<endl;
     }
-
+    
     //We made it all the way through, mark this track as legit
     stiTrackFlag=1;
 }

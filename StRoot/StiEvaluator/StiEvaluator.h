@@ -167,6 +167,7 @@ private:
 
     //raw counters of hits on track
     unsigned int stiTrackNHits;
+    unsigned int stiTrackNSeedHits;
     unsigned int stiTrackNTpcHits;
     unsigned int stiTrackNSvtHits;
 
