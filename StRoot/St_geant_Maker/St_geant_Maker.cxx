@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.13 1999/02/12 17:57:01 nevski Exp $
+// $Id: St_geant_Maker.cxx,v 1.14 1999/02/16 18:15:45 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.14  1999/02/16 18:15:45  fisyak
+// Check in the latest updates to fix them
+//
 // Revision 1.13  1999/02/12 17:57:01  nevski
 // particle table
 //
@@ -200,6 +203,9 @@ Int_t St_geant_Maker::Make()
   Char_t   cgnam[20];
 
   gtrig();
+  // empty g2t_event
+  St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
+  m_DataSet->Add(g2t_event);
   agnzgete_(&link,&ide,&npart,&irun,&ievt,cgnam,vert,&iwtfl,&weigh);
 
   if (npart>0)
@@ -316,7 +322,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.13 1999/02/12 17:57:01 nevski Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.14 1999/02/16 18:15:45 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }

@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.cxx,v 1.5 1998/12/15 22:38:45 akio Exp $
+// $Id: St_ems_Maker.cxx,v 1.6 1999/02/16 18:15:44 fisyak Exp $
 // $Log: St_ems_Maker.cxx,v $
+// Revision 1.6  1999/02/16 18:15:44  fisyak
+// Check in the latest updates to fix them
+//
 // Revision 1.5  1998/12/15 22:38:45  akio
 // Add some comments
 //
@@ -47,8 +50,8 @@ Int_t St_ems_Maker::Init(){
    m_org_ped_bemc    = (St_emc_pedestal *)     local("emc/cal/org_ped_bemc");
    m_org_slp_bemc_h  = (St_emc_calib_header *) local("emc/cal/org_slp_bemc_h");
    m_org_slp_bemc    = (St_emc_adcslope *)     local("emc/cal/org_slp_bemc");
-   St_DataSetIter       geom(gStChain->DataSet("geom"));
-   m_calb_calg   = (St_calb_calg   *) geom("calb_calg");
+   //   St_DataSetIter       geom(gStChain->DataSet("geom"));
+   m_calb_calg   = (St_calb_calg   *) local("geant/Run/calb_calg");
    //Just to chek the contents!
    //   emc_calib_header_st *b = m_org_ped_bemc_h->GetTable();
    //cout << b[0].nmodule    << "   "<< b[0].neta    << "   "<< b[0].nsub    <<endl;
@@ -136,7 +139,7 @@ Int_t St_ems_Maker::Make(){
 //_____________________________________________________________________________
 void St_ems_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ems_Maker.cxx,v 1.5 1998/12/15 22:38:45 akio Exp $\n");
+  printf("* $Id: St_ems_Maker.cxx,v 1.6 1999/02/16 18:15:44 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }

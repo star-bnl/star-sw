@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.8 1999/01/02 19:08:21 fisyak Exp $
+// $Id: St_stk_Maker.cxx,v 1.9 1999/02/16 18:15:46 fisyak Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.9  1999/02/16 18:15:46  fisyak
+// Check in the latest updates to fix them
+//
 // Revision 1.8  1999/01/02 19:08:21  fisyak
 // Add ctf
 //
@@ -152,6 +155,11 @@ Int_t St_stk_Maker::Make(){
       St_stk_kine   *stk_mckine  = new St_stk_kine("stk_mckine",maxNofTracks/5);
       m_DataSet->Add(stk_mckine);
       //
+      //
+      St_DataSetIter data(gStChain->DataSet("svt_hits"));
+      St_scs_spt    *scs_spt      = (St_scs_spt *) data("scs_spt");
+      // exec run_stk  
+#if 0
       St_DataSet    *geom = gStChain->DataSet("geom");
       St_DataSetIter run(geom);
       St_g2t_gepart *g2t_gepart  = (St_g2t_gepart *) run("g2t_gepart");
@@ -159,11 +167,6 @@ Int_t St_stk_Maker::Make(){
 	g2t_gepart   = new St_g2t_gepart("g2t_gepart",1);
 	run.Add(g2t_gepart);
       }
-      //
-      St_DataSetIter data(gStChain->DataSet("svt_hits"));
-      St_scs_spt    *scs_spt      = (St_scs_spt *) data("scs_spt");
-      // exec run_stk  
-#if 0
       if (m_ifstk){
 	Int_t Res_stk = stk_am(m_stk_stkpar,
 			       g2t_track,g2t_event,g2t_vertex,
@@ -232,7 +235,7 @@ Int_t St_stk_Maker::Make(){
 //_____________________________________________________________________________
 void St_stk_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_stk_Maker.cxx,v 1.8 1999/01/02 19:08:21 fisyak Exp $\n");
+  printf("* $Id: St_stk_Maker.cxx,v 1.9 1999/02/16 18:15:46 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

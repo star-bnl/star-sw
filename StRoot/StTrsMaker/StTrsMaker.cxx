@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.13 1999/02/15 03:32:09 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.14 1999/02/16 18:15:40 fisyak Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.14  1999/02/16 18:15:40  fisyak
+// Check in the latest updates to fix them
+//
 // Revision 1.13  1999/02/15 03:32:09  lasiuk
 // coordinate system for input data is global
 // deltapad(1)
@@ -86,7 +89,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.13 1999/02/15 03:32:09 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.14 1999/02/16 18:15:40 fisyak Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -489,7 +492,9 @@ Int_t StTrsMaker::Make(){
 	//
 	// Go to the next sector
 	currentSectorProcessed = bsectorOfHit;
-	break;  // Finish here
+	//
+	//break;  // Finish here
+	//
     } // loop over all segments: for(int i...
   } // mDataSet
   
@@ -586,7 +591,7 @@ Int_t StTrsMaker::Make(){
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.13 1999/02/15 03:32:09 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.14 1999/02/16 18:15:40 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: g2r.C,v 1.3 1999/01/28 00:11:55 fisyak Exp $
+// $Id: g2r.C,v 1.4 1999/02/16 18:15:49 fisyak Exp $
 // $Log: g2r.C,v $
+// Revision 1.4  1999/02/16 18:15:49  fisyak
+// Check in the latest updates to fix them
+//
 // Revision 1.3  1999/01/28 00:11:55  fisyak
 // add g2r
 //
@@ -23,7 +26,7 @@ void Load(){
     gSystem->Load("St_io_Maker");
     gSystem->Load("St_TLA_Maker");
 }
-g2r(const Int_t   Nevents=0,
+g2r(const Int_t   Nevents=10,
     const Char_t *fileinp = "/afs/rhic/star/data/samples/hijet-g2t.xdf",
     const Char_t *FileOut = "/afs/rhic/star/data/samples/hijet-g2t.root")
 {

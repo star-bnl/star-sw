@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.5 1999/02/12 01:26:36 lasiuk Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.6 1999/02/16 18:15:41 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,9 +16,12 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
- * Revision 1.5  1999/02/12 01:26:36  lasiuk
- * Limit debug output
+ * Revision 1.6  1999/02/16 18:15:41  fisyak
+ * Check in the latest updates to fix them
  *
+ *
+ * Revision 1.9  1999/02/24 19:31:25  lasiuk
+ * allow for tZero offset
  * positive pushes time bins into the chamber
  *
  * Revision 1.8  1999/02/18 21:17:27  lasiuk
@@ -309,7 +312,9 @@ int StTpcCoordinateTransform::rowFromLocal(const StThreeVector<double>& b) const
 
 int StTpcCoordinateTransform::padFromLocal(const StThreeVector<double>& b, const int row) const
 {
-    
+    int probablePad = mTPCdb->numberOfPadsAtRow(row)/2;
+    idb << "Probable Pad: " << probablePad << endl;
+    idb << "Row " << row << " has " << mTPCdb->numberOfPadsAtRow(row) << " pads." << endl;
 
     double thePitch = (row<=13) ?
     if(probablePad<1) probablePad = 1;

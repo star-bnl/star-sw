@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.cxx,v 1.3 1999/02/12 19:16:30 akio Exp $
+// $Id: St_emc_Maker.cxx,v 1.4 1999/02/16 18:15:44 fisyak Exp $
 // $Log: St_emc_Maker.cxx,v $
+// Revision 1.4  1999/02/16 18:15:44  fisyak
+// Check in the latest updates to fix them
+//
 // Revision 1.3  1999/02/12 19:16:30  akio
 // *** empty log message ***
 //
@@ -13,7 +16,7 @@
 //////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
 #include <math.h>
-#include "/afs/rhic/star/packages/SL98j/pams/global/inc/math_constants.h"
+#include "global/inc/math_constants.h"
 #include "St_emc_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -135,7 +138,7 @@ void St_emc_Maker::MakeHistograms(){
 //_____________________________________________________________________________
 void St_emc_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_emc_Maker.cxx,v 1.3 1999/02/12 19:16:30 akio Exp $\n");
+  printf("* $Id: St_emc_Maker.cxx,v 1.4 1999/02/16 18:15:44 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }

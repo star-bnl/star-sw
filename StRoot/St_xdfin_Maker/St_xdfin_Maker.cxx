@@ -182,9 +182,11 @@ void St_xdfin_Maker::Split(){
               maker->SetDataSet(Set); 
             }
             Set->Update(set);
+            St_DataSetIter ll(Set);
+            ll.Du();
           }
         }
-      }
+      } 
     }
     SafeDelete(m_DataSet);
   }
