@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.24 1999/07/09 13:14:19 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.25 1999/07/09 23:04:07 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.25  1999/07/09 23:04:07  kathy
+//! hopefully getting to final round of fixes to globtrk and primtrk histograms
+//!
 //! Revision 1.24  1999/07/09 13:14:19  kathy
 //! now have put in new primtrk histograms to match the globtrk ones
 //!
@@ -127,7 +130,7 @@ class TCanvas;
 class St_QA_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.24 1999/07/09 13:14:19 kathy Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.25 1999/07/09 23:04:07 kathy Exp $";
   //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -250,7 +253,8 @@ class St_QA_Maker : public StMaker {
   TH1F     *m_glb_ndf;       //! no. deg. of freedom for track fit.
 
   TH2F     *m_pT_eta_rec;    //! pT versus eta Spectra for reconstructed
-  TH2F     *m_tanl_z0;       //! tanl(dip angle) vs z coord at start of helix
+  TH2F     *m_globtrk_xf_yf; //! Y vs X of first hit on trk
+  TH2F     *m_tanl_z0;       //! tanl(dip angle) vs zfirst
   TH2F     *m_mom_trklength; //! mom vs. trk length
   TH2F     *m_eta_trklength; //! trk length vs. eta
   TH2F     *m_npoint_length; //! num points vs length
@@ -261,8 +265,8 @@ class St_QA_Maker : public StMaker {
   TH2F     *m_chisq1_eta;    //! chisq1 vs eta
   TH2F     *m_chisq0_dip;    //! chisq0 vs dip angle
   TH2F     *m_chisq1_dip;    //! chisq1 vs dip angle
-  TH2F     *m_chisq0_z0;    //! chisq0 vs z0 - helix start point
-  TH2F     *m_chisq1_z0;    //! chisq1 vs z0 - helix start point
+  TH2F     *m_chisq0_z0;     //! chisq0 vs zfirst - 
+  TH2F     *m_chisq1_z0;     //! chisq1 vs zfirst - 
   TH2F     *m_nfptonpt_mom;  //! mom vs ratio of n fit pnts over n pnts
   TH2F     *m_nfptonpt_eta;  //! eta vs ratio of n fit pnts over n pnts
 
@@ -273,7 +277,7 @@ class St_QA_Maker : public StMaker {
   TH1F     *m_dedx1;         //! dE/dx [1] 
   
 
-// for method MakeHistGlob - from table primtrk
+// for method MakeHistPrim - from table primtrk
   TH1F     *m_primtrk_tot;   //! # tracks in table
   TH1F     *m_primtrk_good;  //! # tracks in table with iflag>0 
   TH1F     *m_primtrk_iflag; //! iflag value
@@ -301,6 +305,7 @@ class St_QA_Maker : public StMaker {
   TH1F     *m_prim_ndf;       //! no. deg. of freedom for track fit.
 
   TH2F     *m_ppT_eta_rec;    //! pT versus eta Spectra for reconstructed
+  TH2F     *m_primtrk_xf_yf;  //! Y vs X of first hit on trk
   TH2F     *m_ptanl_z0;       //! tanl(dip angle) vs z coord at start of helix
   TH2F     *m_pmom_trklength; //! mom vs. trk length
   TH2F     *m_peta_trklength; //! trk length vs. eta
