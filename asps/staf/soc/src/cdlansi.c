@@ -468,9 +468,9 @@ cdl_load(char *lib_name)
    int flags;
 
 #if defined(__hpux)
-   flags = BIND_DEFERRED | DYNAMIC_PATH;
    long address = 0L;
    extern int errno;
+   flags = BIND_DEFERRED | DYNAMIC_PATH;
 
    file_handle = shl_load(lib_name, flags, address);
    if (file_handle==0){
@@ -484,8 +484,10 @@ cdl_load(char *lib_name)
 
 #if defined(__alpha)
     flags = RTLD_LAZY;
-#else
+#elif !defined(WIN32)
     flags = RTLD_LAZY | RTLD_GLOBAL;
+#else 
+    flags = 0;
 #endif
 
     file_handle = dlopen(lib_name, flags);
