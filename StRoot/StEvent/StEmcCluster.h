@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcCluster.h,v 2.1 2000/02/23 17:55:43 ullrich Exp $
+ * $Id: StEmcCluster.h,v 2.2 2000/03/23 22:24:06 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCluster.h,v $
+ * Revision 2.2  2000/03/23 22:24:06  akio
+ * Initial version of Emc Point, and Inclusion of track pointers
+ *
  * Revision 2.1  2000/02/23 17:55:43  ullrich
  * Initial Revision
  *
@@ -35,11 +38,14 @@ public:
     Float_t energy() const;
     Int_t   nHits() const; 
     Int_t   nNeighbors() const;
+    Int_t   nTracks() const;
     
     StPtrVecEmcRawHit& hit();
     const StPtrVecEmcRawHit& hit() const;
     StPtrVecEmcCluster& neighbor();
     const StPtrVecEmcCluster& neighbor() const;
+    StPtrVecTrack& track();
+    const StPtrVecTrack& track() const;
     
     void setEta(Float_t);
     void setPhi(Float_t);
@@ -49,6 +55,7 @@ public:
     
     void addHit(StEmcRawHit*);
     void addNeighbor(StEmcCluster*);
+    void addTrack(StTrack*);
     
     void print(ostream& os = cout) const;
     
@@ -60,6 +67,7 @@ private:
     Float_t mEnergy;
     StPtrVecEmcRawHit  mHits;
     StPtrVecEmcCluster mNeighbors;
+    StPtrVecTrack      mTracks;
     
     StObject* clone();
     ClassDef(StEmcCluster,1)
