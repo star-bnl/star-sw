@@ -369,6 +369,10 @@ sub parse_log($) {
           
           $jrun = "Done";      
 	}
+    if ( $Err_messg ne "none") {
+     $jrun = $Err_messg;
+   }
+   
     if ( $line =~ /Finished job execution/) {
       @word_tr = split(" ",$line);
        $node_name = $word_tr[11];    
