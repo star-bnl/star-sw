@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.49 2004/12/07 17:04:46 posk Exp $
+// $Id: StFlowEvent.h,v 1.50 2004/12/17 15:50:08 aihong Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -59,7 +59,10 @@ public:
   Float_t        ZDCSMD_PsiWst();
   Float_t 	 ZDCSMD_GetPosition(int eastwest,int verthori,int strip);
   Double_t       G_New(StFlowSelection* pFlowSelect, Double_t Zx, Double_t Zy);
+  Double_t       G_Mix(StFlowSelection* pFlowSelect, Double_t Z1x, Double_t Z1y, Double_t Z2x, Double_t Z2y);
   Double_t       SumWeightSquare(StFlowSelection* pFlowSelect);
+  Double_t       PtAbsWgtValue(Double_t pt) const;
+  Double_t       EtaAbsWgtValue(Double_t eta) const;
   TVector2       NormQ(StFlowSelection* pFlowSelect);
   Float_t        CTB() const;
   Float_t        ZDCe() const;
@@ -75,6 +78,16 @@ public:
   Char_t*        Pid();
   Bool_t         EtaSubs() const;
   Bool_t         RanSubs() const;
+
+  Float_t V1TPCDetctWgtG_Mix(Int_t selN) const;
+  Float_t V1FtpcEastDetctWgtG_Mix(Int_t selN) const;
+  Float_t V1FtpcWestDetctWgtG_Mix(Int_t selN) const;
+
+  Float_t V2TPCDetctWgtG_Mix(Int_t selN) const;
+  Float_t V2FtpcEastDetctWgtG_Mix(Int_t selN) const;
+  Float_t V2FtpcWestDetctWgtG_Mix(Int_t selN) const;
+
+
   StFlowTrackCollection* TrackCollection() const;
 
   void SetSelections();
@@ -141,6 +154,17 @@ public:
   static void SetFirstLastPoints();
   static void SetUseZDCSMD(Bool_t);
 
+  static void SetV1TPCDetctWgtG_Mix(Float_t val,  Int_t selN);
+  static void SetV1FtpcEastDetctWgtG_Mix(Float_t val, Int_t selN);
+  static void SetV1FtpcWestDetctWgtG_Mix(Float_t val,  Int_t selN);
+
+
+  static void SetV2TPCDetctWgtG_Mix(Float_t val,  Int_t selN);
+  static void SetV2FtpcEastDetctWgtG_Mix(Float_t val, Int_t selN);
+  static void SetV2FtpcWestDetctWgtG_Mix(Float_t val,  Int_t selN);
+
+
+
 private:
 
   Int_t               mEventID;                                  // ID of the event
@@ -165,6 +189,14 @@ private:
   static Float_t      mEtaFtpcCuts[4][2][Flow::nSels];           // range values
   static Float_t      mPtTpcCuts[2][2][Flow::nSels];             // range
   static Float_t      mPtFtpcCuts[2][2][Flow::nSels];            // range
+
+  static Float_t      mV1TPCDetctWgtG_Mix[Flow::nSels]; // detector wgt for G_Mix in v1{3} calc.
+  static Float_t      mV1FtpcEastDetctWgtG_Mix[Flow::nSels]; 
+  static Float_t      mV1FtpcWestDetctWgtG_Mix[Flow::nSels]; 
+  static Float_t      mV2TPCDetctWgtG_Mix[Flow::nSels]; 
+  static Float_t      mV2FtpcEastDetctWgtG_Mix[Flow::nSels]; 
+  static Float_t      mV2FtpcWestDetctWgtG_Mix[Flow::nSels]; 
+
   Flow::PhiWgt_t      mPhiWgtFarEast;                            //!flattening weights FarEast
   Flow::PhiWgt_t      mPhiWgtEast;                               //!flattening weights East
   Flow::PhiWgt_t      mPhiWgtWest;                               //!flattening weights West
@@ -263,6 +295,24 @@ inline Bool_t   StFlowEvent::EtaSubs() const { return mEtaSubs; }
 inline Bool_t   StFlowEvent::RanSubs() const { return mRanSubs; }
 
 inline Bool_t   StFlowEvent::UseZDCSMD() const { return mUseZDCSMD;}
+
+inline   Float_t StFlowEvent::V1TPCDetctWgtG_Mix(Int_t selN) const {
+  return mV1TPCDetctWgtG_Mix[selN]; }
+inline   Float_t StFlowEvent::V1FtpcEastDetctWgtG_Mix(Int_t selN) const {
+  return mV1FtpcEastDetctWgtG_Mix[selN]; }
+inline   Float_t StFlowEvent::V1FtpcWestDetctWgtG_Mix(Int_t selN) const {
+  return mV1FtpcWestDetctWgtG_Mix[selN]; }
+
+
+inline   Float_t StFlowEvent::V2TPCDetctWgtG_Mix(Int_t selN) const {
+  return mV2TPCDetctWgtG_Mix[selN]; }
+inline   Float_t StFlowEvent::V2FtpcEastDetctWgtG_Mix(Int_t selN) const {
+  return mV2FtpcEastDetctWgtG_Mix[selN]; }
+inline   Float_t StFlowEvent::V2FtpcWestDetctWgtG_Mix(Int_t selN) const {
+  return mV2FtpcWestDetctWgtG_Mix[selN]; }
+
+
+
 
 #ifndef __CINT__
 inline void StFlowEvent::SetPhiWeightFarEast(const Flow::PhiWgt_t& pPhiWgtFarEast) {
@@ -404,11 +454,30 @@ inline void StFlowEvent::SetPtWgt(Bool_t PtWgt) { mPtWgt = PtWgt; }
 
 inline void StFlowEvent::SetEtaWgt(Bool_t EtaWgt) { mEtaWgt = EtaWgt; }
 
+inline void StFlowEvent::SetV1TPCDetctWgtG_Mix(Float_t val,  Int_t selN){
+  mV1TPCDetctWgtG_Mix[selN]=val;}
+inline void StFlowEvent::SetV1FtpcEastDetctWgtG_Mix(Float_t val,  Int_t selN){
+  mV1FtpcEastDetctWgtG_Mix[selN]=val;}
+inline void StFlowEvent::SetV1FtpcWestDetctWgtG_Mix(Float_t val,  Int_t selN){
+  mV1FtpcWestDetctWgtG_Mix[selN]=val;}
+
+
+inline void StFlowEvent::SetV2TPCDetctWgtG_Mix(Float_t val,  Int_t selN){
+  mV2TPCDetctWgtG_Mix[selN]=val;}
+inline void StFlowEvent::SetV2FtpcEastDetctWgtG_Mix(Float_t val,  Int_t selN){
+  mV2FtpcEastDetctWgtG_Mix[selN]=val;}
+inline void StFlowEvent::SetV2FtpcWestDetctWgtG_Mix(Float_t val,  Int_t selN){
+  mV2FtpcWestDetctWgtG_Mix[selN]=val;}
+
+
 #endif
 
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.50  2004/12/17 15:50:08  aihong
+// check in v1{3} code
+//
 // Revision 1.49  2004/12/07 17:04:46  posk
 // Eliminated the very old mOnePhiWgt, which used one phiWgt histogram for flttening
 // instead of four.

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.h,v 1.6 2004/11/16 21:22:22 aihong Exp $
+// $Id: StFlowCumulantMaker.h,v 1.7 2004/12/17 15:50:09 aihong Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -11,6 +11,8 @@
 //                refer to Phy. Rev. C63 (2001) 054906 (old new method)
 //                and      Phy. Rev. C64 (2001) 054901 (new new method)
 //                and      nucl-ex/0110016             (Practical Guide)
+////
+//               Anything that has "Mix" in it is for v1{3} calculation PRC 66 014905 (2002)
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -19,6 +21,7 @@
 //    Diff  for Diffeential
 //    Integ for Integrated
 //    Denom for Denominator
+//    Mix   for mixed harmonics (for v1{3})
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -54,7 +57,7 @@ public:
   void     SetHistoRanges(Bool_t ftpc_included = kFALSE);
 
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowCumulantMaker.h,v 1.6 2004/11/16 21:22:22 aihong Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowCumulantMaker.h,v 1.7 2004/12/17 15:50:09 aihong Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -66,6 +69,8 @@ private:
 #ifndef __CINT__
   UInt_t   mMult[Flow::nSels][Flow::nHars];                  //! multiplicity
   UInt_t   mMultSub[Flow::nSels*Flow::nSubs][Flow::nHars];   //! multiplicity subs
+  Double_t mSqrtOfSumWgtSqr[Flow::nSels][Flow::nHars]; 
+
 #endif /*__CINT__*/
   TString          xLabel;      //! label axis with rapidity or pseudorapidity 
   StFlowEvent*     pFlowEvent;  //! pointer to StFlowEvent
@@ -74,6 +79,7 @@ private:
   Double_t  profScale;          //! profile scale
   Double_t  r0;                 //! r0 in the cumulant paper.
   Double_t  r0Sq;               //! square of r0.
+  Double_t  r0Mix;              //! r0 for v1{3} calculation   
   UInt_t    m_M;                //! m in the cumulant paper.
 
 
@@ -84,11 +90,22 @@ private:
     TProfile**     mHistCumulEta;
     TProfile**     mHistCumulPt;
 
+    TProfile2D*    mHistCumulMix2D;
+    TProfile*      mHistCumulMixEta;
+    TProfile*      mHistCumulMixPt;
+
+
     TH2D**         mHist_v2D;
     TH1D**         mHist_vEta;
     TH1D**         mHist_vPt;
 
+    TH2D*         mHistMix_v2D;
+    TH1D*         mHistMix_vEta;
+    TH1D*         mHistMix_vPt;
+
+
     TProfile**     mCumulG0Denom; //denominator in (82), <G>
+    TProfile**     mCumulG0MixDenom;
 
     Double_t       mIntegXz[Flow::nCumulIntegOrders*Flow::nCumulInteg_qMax];
     Double_t       mIntegYz[Flow::nCumulIntegOrders*Flow::nCumulInteg_qMax];
@@ -97,13 +114,26 @@ private:
     Double_t       mCumulIntegG0[Flow::nCumulIntegOrders*Flow::nCumulInteg_qMax];    
     Double_t       mCumulG0DenomRead[Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax];
 
+    Double_t       mMixX1z[Flow::nCumulMixHar_pMax];
+    Double_t       mMixY1z[Flow::nCumulMixHar_pMax];
+    Double_t       mMixX2z[Flow::nCumulMixHar_qMax];
+    Double_t       mMixY2z[Flow::nCumulMixHar_qMax];
+
+    Double_t       mCumulIntegG0Mix[Flow::nCumulMixHar_pMax*Flow::nCumulMixHar_qMax];  
+    Double_t       mCumulG0MixDenomRead[Flow::nCumulMixHar_pMax*Flow::nCumulMixHar_qMax];
+
+
+
     Double_t       mMultSum;
     Int_t          mNEvent; 
+    Double_t       mMeanWgtSqrSum;
 
     TH1D*          mHistMultSum;    //histo for holding mMultSum.
     TH1D*          mHistNEvent;
+    TH1D*          mHistMeanWgtSqrSum; // sum <w^2> over evts.
 
     TH1D**         mHistCumulIntegG0Sum; //summation of G value.
+    TH1D**         mHistCumulIntegG0MixSum; //summation of G value.
 
   };
 
@@ -113,7 +143,11 @@ private:
 
   struct histFulls {
    TProfile**  mHistCumul; //integrated cumulant from differential
+   TProfile*   mHistCumulMix; //cumulant for mix 1st and 2nd hars.
+ 
    TH1D**      mHist_v; //integrated flow from differential
+   TH1D*       mHistMix_v; //integrated flow from differential
+
 
     struct histFullHars histFullHar[Flow::nHars];
   };
@@ -124,6 +158,7 @@ private:
   Float_t mEtaMin;
   Float_t mEtaMax;
     Int_t mNEtaBins;
+    Int_t nPtBinsPart;
 
   ClassDef(StFlowCumulantMaker,0)              // macro for rootcint
     
@@ -135,6 +170,9 @@ private:
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.h,v $
+// Revision 1.7  2004/12/17 15:50:09  aihong
+// check in v1{3} code
+//
 // Revision 1.6  2004/11/16 21:22:22  aihong
 // removed old cumulant method
 //

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.52 2004/12/09 23:43:35 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.53 2004/12/17 15:50:00 aihong Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -27,6 +27,23 @@
 #define PR(x) cout << "##### FlowEvent: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowEvent)
+
+//Main TPC particles do not participate in G Mix  calc. for the 1st Har. sel2
+//for sel 1, C{3} is ( har1(all) + har1(all) + har2(all) )
+//           differential v1{3} is ( har1(all) + har1(all) + har2(all) ) 
+          
+//for sel 2, C{3} is ( har1(FTPC)+ har1(FTPC)+ har2(TPC) )
+//           differential v1{3} is ( har1(FTPC)+ har1(FTPC)+ har2(TPC) )
+
+//please note that for the mixed har analysis, only the 1st har. make sense anyway.
+
+Float_t  StFlowEvent::mV1TPCDetctWgtG_Mix[Flow::nSels] = {1., 0.};
+Float_t  StFlowEvent::mV1FtpcWestDetctWgtG_Mix[Flow::nSels] ={1., 1.};
+Float_t  StFlowEvent::mV1FtpcEastDetctWgtG_Mix[Flow::nSels] ={1., 1.};
+
+Float_t  StFlowEvent::mV2TPCDetctWgtG_Mix[Flow::nSels] = {1., 1.};
+Float_t  StFlowEvent::mV2FtpcWestDetctWgtG_Mix[Flow::nSels] ={1., 0.};
+Float_t  StFlowEvent::mV2FtpcEastDetctWgtG_Mix[Flow::nSels] ={1., 0.};
 
 Float_t  StFlowEvent::mEtaTpcCuts[2][2][Flow::nSels] = {{{0.,0.5},
                                                          {0.,0.} },
@@ -168,18 +185,13 @@ Double_t StFlowEvent::Weight(Int_t selN, Int_t harN, StFlowTrack*
   bool oddHar = (harN+1) % 2;
   Double_t phiWgt = 1.;
 
-  if (mPtWgt) {
-    float pt = pFlowTrack->Pt();
-    phiWgt *= (pt < mPtWgtSaturation) ? pt : mPtWgtSaturation;  // pt weighting going constant
-  }
+  phiWgt *= PtAbsWgtValue(pFlowTrack->Pt());
 
   float eta = pFlowTrack->Eta();
-  float etaAbs = fabs(eta);
-  if (mEtaWgt && oddHar && etaAbs > 1.) {
-    phiWgt *= etaAbs;
+
+  if (oddHar) {
+    phiWgt *= ( (eta>0) ? (EtaAbsWgtValue(eta)) :  (-1.*EtaAbsWgtValue(eta)) );
   }
-  
-  if (oddHar && eta < 0.) phiWgt *= -1.;
 
   return phiWgt;
 }
@@ -436,6 +448,81 @@ Double_t StFlowEvent::G_New(StFlowSelection* pFlowSelect, Double_t Zx, Double_t 
   return theG;
 }
 
+//-----------------------------------------------------------------------
+
+Double_t StFlowEvent::G_Mix(StFlowSelection* pFlowSelect, Double_t Z1x, Double_t Z1y, Double_t Z2x, Double_t Z2y) { 
+
+  //only make sense in v1{3} calculation.
+  //which means, one should call this function with StFlowSelection with harN==0 only !
+
+  int selN     = pFlowSelect->Sel();
+  int harN     = pFlowSelect->Har();
+  double order = (double)(harN + 1); //should be 1 always in this func.
+
+   bool oddHar = (harN+1) % 2;
+   double etaWgt=1.;
+   double ptWgt=1.;
+
+  double mult = (double)Mult(pFlowSelect);
+  Double_t theG = 1.;
+
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    if (pFlowSelect->Select(pFlowTrack)) {
+
+
+      double detectorV1Wgt = 1.;
+
+	  if (pFlowTrack->TopologyMap().hasHitInDetector(kTpcId) ||  
+	      (pFlowTrack->TopologyMap().data(0) == 0 && 
+	       pFlowTrack->TopologyMap().data(1) == 0)) {
+	    // hits in Tpc or TopologyMap not available
+            detectorV1Wgt =mV1TPCDetctWgtG_Mix[selN];
+	  } else if (pFlowTrack->TopologyMap().trackFtpcEast() ) {
+	    detectorV1Wgt =mV1FtpcEastDetctWgtG_Mix[selN];
+          } else if (pFlowTrack->TopologyMap().trackFtpcWest() ) { 
+	    detectorV1Wgt =mV1FtpcWestDetctWgtG_Mix[selN];
+       }
+
+      double detectorV2Wgt = 1.;
+
+	  if (pFlowTrack->TopologyMap().hasHitInDetector(kTpcId) ||  
+	      (pFlowTrack->TopologyMap().data(0) == 0 && 
+	       pFlowTrack->TopologyMap().data(1) == 0)) {
+	    // hits in Tpc or TopologyMap not available
+            detectorV2Wgt =mV2TPCDetctWgtG_Mix[selN];
+	  } else if (pFlowTrack->TopologyMap().trackFtpcEast() ) {
+	    detectorV2Wgt =mV2FtpcEastDetctWgtG_Mix[selN];
+          } else if (pFlowTrack->TopologyMap().trackFtpcWest() ) { 
+	    detectorV2Wgt =mV2FtpcWestDetctWgtG_Mix[selN];
+       }
+
+
+
+
+      double phiWgt = PhiWeightRaw(selN, harN, pFlowTrack);      
+      float phi = pFlowTrack->Phi();
+      double pt = pFlowTrack->Pt();
+      double eta = pFlowTrack->Eta();
+
+  if (oddHar) etaWgt =( (eta>0) ? (EtaAbsWgtValue(eta)) :  (-1.*EtaAbsWgtValue(eta)) );
+
+       ptWgt = PtAbsWgtValue(pt);
+
+     theG *= 
+   (1. + (phiWgt*etaWgt*detectorV1Wgt/mult) * (2.* Z1x * cos(phi * order) + 
+			       	            2.* Z1y * sin(phi * order) ) 
+                      + (phiWgt*ptWgt*detectorV2Wgt/mult) * (2.* Z2x * cos(phi * order*2.) + 
+			       	            2.* Z2y * sin(phi * order*2.) ) );
+          
+  
+    }
+  }
+
+  return theG;
+}
 
 //-------------------------------------------------------------
 
@@ -496,6 +583,24 @@ Double_t StFlowEvent::SumWeightSquare(StFlowSelection* pFlowSelect) {
 
   return SumOfWeightSqr;
 }
+
+
+
+//-------------------------------------------------------------
+Double_t StFlowEvent::PtAbsWgtValue(Double_t pt) const {
+
+  return  ((mPtWgt) ? ((pt < mPtWgtSaturation) ? pt : mPtWgtSaturation) : 1.);
+
+}
+
+//-------------------------------------------------------------
+
+Double_t StFlowEvent::EtaAbsWgtValue(Double_t eta) const {
+
+ return  ((mEtaWgt) ? ((fabs(eta)<0.005) ? 0.005 : fabs(eta)) : 1.); 
+
+}
+
 
 
 //-------------------------------------------------------------
@@ -973,6 +1078,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.53  2004/12/17 15:50:00  aihong
+// check in v1{3} code
+//
 // Revision 1.52  2004/12/09 23:43:35  posk
 // Minor changes in code formatting.
 //
