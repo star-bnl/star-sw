@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0_ZS_SR.cxx,v 1.3 2001/05/14 16:07:36 jschamba Exp $
+ * $Id: SVTV1P0_ZS_SR.cxx,v 1.4 2003/02/20 21:39:45 ward Exp $
  *      
  * Author: J. Schambach
  *      
@@ -11,6 +11,9 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0_ZS_SR.cxx,v $
+ * Revision 1.4  2003/02/20 21:39:45  ward
+ * Remove voluminous warning message.
+ *
  * Revision 1.3  2001/05/14 16:07:36  jschamba
  * corrected mezzanine and transition board evaluation in constructors
  *
@@ -253,7 +256,8 @@ int SVTV1P0_ZS_SR::initialize()
       for (i=0; i<numXEntries; i++)
 	if (adcx_p->entry[i].hybrid == hybridID) break;
       if (i == numXEntries) {
-	printf("HybridID 0x%x not found in ADCX bank\n", hybridID);
+	// Commented Feb 20 2003 by Herb Ward on request of
+        // Jerome Lauret printf("HybridID 0x%x not found in ADCX bank\n", hybridID);
 	continue;
       }
 
