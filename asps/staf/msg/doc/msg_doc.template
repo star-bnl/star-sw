@@ -1,4 +1,4 @@
-
+<pre>
 
 *	msg.template -- the msg message-calls template.
 
@@ -93,3 +93,4 @@
 	CALL MSG_Set_by_Command( 'ENABLE <Subroutine Name>-I1' )
 	CALL MSG_Set_by_Command( 'LIMIT  <Subroutine Name>-I1=<Count Limit>' )
 *****************************************************************************************
+</pre>

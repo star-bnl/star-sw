@@ -1,4 +1,4 @@
-
+<pre>
 
 *	msg_trace.template -- the msg trace-message-calls template.
 
@@ -81,3 +81,4 @@
 *	Or, disable this trace message with an ASCII command:
 	CALL MSG_Set_by_Command( 'DISABLE <Subroutine Name>-T1' )
 *****************************************************************************************
+</pre>
