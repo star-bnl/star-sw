@@ -213,7 +213,7 @@ for my $class (@classes) {
       if ($class_hfile{$class} =~ /_Module/) {
 	print Out "#pragma link C++ class $class-;\n"; print  "#pragma link C++ class $class-;\n";
 	(my $global = $class) =~ s/St_//g;
-	print Out "#pragma link C++ global $global;\n"; print  "#pragma link C++ global $global;\n";
+#  vf 	print Out "#pragma link C++ global $global;\n"; print  "#pragma link C++ global $global;\n";
       }
       else {
 	if ($class =~ /^St/ and $class =~ /Iterator$/) {
