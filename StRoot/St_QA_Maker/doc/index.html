@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>StRoot/St_QA_Maker classes</title>
-<!-- Changed by: Kathleen R. Turner, 10-Feb-2000 -->
+<!-- Changed by: Kathleen R. Turner, 14-Feb-2000 -->
 </head>
 <body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
 <basefont face="verdana,arial,helvetica,sans-serif">
@@ -74,7 +74,7 @@
   
 <p>
 <a name="doc1">
-<font  size ="+1" color="blue"> The 4 classes in the St_QA_Maker directory are: <font  size ="+1" color="black"> 
+<font  size ="+1" color="blue"> The classes in the St_QA_Maker directory are: <font  size ="+1" color="black"> 
     <ul>
       <li> <font  size ="+1" color="red"> St_QA_Maker <font  size ="+1" color="black"> 
              <ul>
@@ -226,29 +226,6 @@
           &nbsp  - St_QA_Maker class runs during production to book & fill QA_Maker histograms
             from dst tables
 
-    <li>  <font  size ="+1" color="red">bfcread_hist_list_all.C  <font  size ="+1" color="black"> <br>
-          &nbsp  - reads .hist.root file produced from bfc.C or other chain <br>
-          &nbsp  - lists all histograms (from all Makers) it
-                   finds under all subdirectories for given top level
-                   directory<br>
-          &nbsp  - shows how to do this in macro - not using utilities
-
-    <li>  <font  size ="+1" color="red">bfcread_hist_list.C  <font  size ="+1" color="black"> <br>
-           &nbsp  - reads .hist.root file produced from bfc.C or other chain<br>
-           &nbsp  - lists all histograms it
-                   finds under given Maker subdirectory for given top
-                   level directory  <br>
-           &nbsp - uses SetPntrToMaker, ListHists methods
-                  from StHistUtil
-
-    <li>  <font  size ="+1" color="red">bfcread_hist_to_ps.C <font  size ="+1" color="black">  <br>
-          &nbsp   - reads .hist.root file produced from bfc.C  or other chain<br>
-          &nbsp   -  lists,draws,prints to output ps file histograms for given: Maker
-                    subdirectory name, top level directory name, print list<br>
-          &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
-                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,DrawHists,
-                     SetDefaultPrintList,ExaminePrintList, DrawHists  methods
-                  from StHistUtil
 
     <li>  <font  size ="+1" color="red">bfcread_dst_QAhist.C <font  size ="+1" color="black"> <br>
           &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
@@ -297,6 +274,40 @@
 Reminder!  In order to get your histograms in "correct" place, you
    must book them in ::Init method of your macro  OR
    you must use the AddHist method to put them in the right place!!!
+
+
+<p>
+<font  size ="+1" color="blue">
+  Library macros that print,list histograms created from these classes:
+<font  size ="+1" color="black">
+<ul>
+
+    <li>  <font  size ="+1" color="red">bfcread_hist_list_all.C  <font  size ="+1" color="black"> <br>
+          &nbsp  - reads .hist.root file produced from bfc.C or other chain <br>
+          &nbsp  - lists all histograms (from all Makers) it
+                   finds under all subdirectories for given top level
+                   directory<br>
+          &nbsp  - shows how to do this in macro - not using utilities
+
+    <li>  <font  size ="+1" color="red">bfcread_hist_list.C  <font  size ="+1" color="black"> <br>
+           &nbsp  - reads .hist.root file produced from bfc.C or other chain<br>
+           &nbsp  - lists all histograms it
+                   finds under given Maker subdirectory for given top
+                   level directory  <br>
+           &nbsp - uses SetPntrToMaker, ListHists methods
+                  from StHistUtil
+
+    <li>  <font  size ="+1" color="red">bfcread_hist_to_ps.C <font  size ="+1" color="black">  <br>
+          &nbsp   - reads .hist.root file produced from bfc.C  or other chain<br>
+          &nbsp   -  lists,draws,prints to output ps file histograms for given: Maker
+                    subdirectory name, top level directory name, print list<br>
+          &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
+                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,DrawHists,
+                     SetDefaultPrintList,ExaminePrintList, DrawHists  methods
+                  from StHistUtil
+
+ </ul>
+
 
 <p>
  <font  size ="+1" color="red">
