@@ -39,17 +39,12 @@ StiTpcDetectorBuilder::~StiTpcDetectorBuilder()
 <p>
 The material currently used are P10, and NOMEX. The properties
 of these materials are extracted from the Particle Data Book.
-<table>
-<tr><td>Name</td><td>Z</td><td>A</td><td>Z</td><td>Density(g/cm3)</td><td>RadLength(g/cm2)</td><td>Ionization</td></tr>
-<tr><td>P10 </td><td></td><td>A</td><td>Z</td><td>Density(g/cm3)</td><td>RadLength(g/cm2)</td><td>Ionization</td></tr>
-<tr><td>Name</td><td>Z</td><td>A</td><td>Z</td><td>Density(g/cm3)</td><td>RadLength(g/cm2)</td><td>Ionization</td></tr>
-</table>
 */  
 void StiTpcDetectorBuilder::buildMaterials()
 {
   _messenger << "StiTpcDetectorBuilder::buildMaterials() - INFO - Started" << endl;
-  _gas = add(new StiMaterial("P10", 0.5, 1.,0.00156,20.04, 5.));
-  _fcMaterial = add(new StiMaterial("Nomex",6.,12.,0.064,40.,5.));
+  _gas        = add(new StiMaterial("P10",  16.4, 36.2741,0.00156,12820.*0.00156, 15.48) ); 
+  _fcMaterial = add(new StiMaterial("Nomex", 6.24,12.40,  0.064,     39.984,  1.)        );
   _messenger << "StiTpcDetectorBuilder::buildMaterials() - INFO - Done" << endl;
 }
 
@@ -156,7 +151,8 @@ void StiTpcDetectorBuilder::buildDetectors()
       ofcVolume->setPlacement(p);
       ofcVolume->setGas(_gas);
       ofcVolume->setMaterial(_fcMaterial);
-      add(ofcVolume);
+      // remove it for now...
+      //add(ofcVolume);
   } 
 
   //Active TPC padrows
