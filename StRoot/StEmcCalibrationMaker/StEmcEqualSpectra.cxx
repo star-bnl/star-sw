@@ -81,11 +81,13 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
   if(mode==0)
   {
     Float_t m1,r1,m2,r2;
-    GetMeanAndRms(position1,&m1,&r1);
-    GetMeanAndRms(position2,&m2,&r2);
+    GetMeanAndRms(position1,(Int_t)pwd1,nadcMax,&m1,&r1);
+    GetMeanAndRms(position2,(Int_t)pwd1,nadcMax,&m2,&r2);
     a=r1/r2;
     b=m1-a*m2;
     EqDone=kTRUE;
+    cout <<"  id = "<<position2<<"  ref = "<<position1
+         <<"  a = "<<a<<"  b = "<<b<<endl;
   }
 
   if(mode==1)
@@ -98,7 +100,7 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
     
     if(pwd2>max) max=pwd2;
     
-    for(Int_t i=nadcMax-2;i>=(Int_t)(max*2.);i--)
+    for(Int_t i=nadcMax-2;i>=(Int_t)(max);i--)
     {
       x1[i]=x1[i+1]+GetAdcValue(position1,i);
       if(x1[i]==0) ini1=i;
@@ -108,8 +110,9 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
     
     Float_t limit;
     
-    if(x1[0]<x2[0]) limit=0.9*x1[0];
-    else limit=0.9*x2[0];
+    if(x1[(int)max]<x2[(int)max]) limit=0.9*x1[(int)max];
+    else limit=0.9*x2[(int)max];
+    cout <<"id = "<<position2<<"  ref = "<<position1<<"  limit = "<<limit<<endl;
     
     if(limit>=10)
     {    

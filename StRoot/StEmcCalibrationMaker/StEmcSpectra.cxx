@@ -124,7 +124,6 @@ Float_t StEmcSpectra::GetSum(Int_t position)
   if(position<1 || position>nBins) return 0;
   return Sum[position-1];
 }
-
 //_____________________________________________________________________________
 Bool_t StEmcSpectra::GetMeanAndRms(Int_t position,Float_t* m,Float_t* r)
 {
@@ -136,6 +135,31 @@ Bool_t StEmcSpectra::GetMeanAndRms(Int_t position,Float_t* m,Float_t* r)
   
   Float_t mean=0,rms=0,sum=0;
   for(Int_t j=0;j<nAdcMax;j++)
+  {
+    Float_t temp=GetAdcValue(position,j);
+    mean+=temp*(Float_t)j;
+    sum+=temp;
+    rms+=(Float_t)j*(Float_t)j*temp;
+  }
+  mean/=sum;
+  rms=sqrt(rms/sum-mean*mean);
+  *m=mean;
+  *r=rms;
+  return kTRUE;
+}
+
+//_____________________________________________________________________________
+Bool_t StEmcSpectra::GetMeanAndRms(Int_t position,Int_t amin,Int_t amax,
+                                   Float_t* m,Float_t* r)
+{
+  if(GetStatus(position)==0)
+  {
+    cout <<"***** StEmcSpectra: This position is turned off. Can not get AVG and RMS\n"; 
+    return kFALSE;
+  }
+  
+  Float_t mean=0,rms=0,sum=0;
+  for(Int_t j=amin;j<amax;j++)
   {
     Float_t temp=GetAdcValue(position,j);
     mean+=temp*(Float_t)j;

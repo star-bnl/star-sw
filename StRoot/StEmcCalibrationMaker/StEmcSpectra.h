@@ -53,6 +53,7 @@ class StEmcSpectra : public St_DataSet
            Int_t   GetStatus(Int_t);
            Float_t GetSum(Int_t);
            Bool_t  GetMeanAndRms(Int_t,Float_t*,Float_t*);
+           Bool_t  GetMeanAndRms(Int_t,Int_t,Int_t,Float_t*,Float_t*);
            Bool_t  GetOccupancy(Int_t,Float_t*,Float_t*,Float_t*);
            Bool_t  GetOccupancyEtaBin(Int_t,Float_t*,Float_t*,Float_t*);
  
