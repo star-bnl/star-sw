@@ -128,10 +128,10 @@ macro set_dir
      mkdir  [dst]
    elseif [sys]=ebye then
      mkdir [data]/ebye/sca
-   elseif [sys]<>global then
-     mkdir  [data]/[sys]/hits
    elseif [sys]=strange then
      mkdir [data]/strange/smdst
+   elseif [sys]<>global then
+     mkdir  [data]/[sys]/hits
    endif
  endfor
  
