@@ -9,10 +9,11 @@
 #include "TRandom.h"
 #include <TOrdCollection.h>
 
-static const char rcsid[] = "$Id: analyseRealPairs.cc,v 1.1 1999/04/28 15:13:25 ogilvie Exp $";
+static const char rcsid[] = "$Id: analyseRealPairs.cc,v 1.2 1999/05/03 17:19:29 ogilvie Exp $";
 
 void StAngleCorrMaker::analyseRealPairs(StEvent& event,int eventNumber)
 {
+  cout << "in real pairs " << endl;
   long counter = 0;
   // First, we have to establish a primary vertex.
 
@@ -64,12 +65,27 @@ void StAngleCorrMaker::analyseRealPairs(StEvent& event,int eventNumber)
     vertex1 = track1->startVertex();
     if (vertex1 &&
         vertex1->type() == primary) {
+      // cut on quality of tracks
+      // 
+
+      if (track1->tpcHits().size() < 20) continue;
+        float degreesOfFreedom = track1->fitTraits().degreesOfFreedom();
+        if ((track1->fitTraits().chiSquaredInXY()/degreesOfFreedom > 1.5 ) ||
+              (track1->fitTraits().chiSquaredInPlaneZ()/degreesOfFreedom > 1.5)) 
+	       continue;
+
         StTrackForPool *trackforpool = new StTrackForPool; 
 	StThreeVector<double> mom1 = track1->helix().momentum(bField);      //
+	if (mom1.perp() > 1.5*GeV ) {
       // put track into pool
       //
          trackforpool->setTrackForPool(mom1,eventNumber) ;
-         mCollectionOfTracks->AddLast(trackforpool); 
+         if (mNumberTracksInPool > 0) { 
+	   mCollectionOfTracks->AddLast(trackforpool); }
+	 else {
+	   mCollectionOfTracks->AddFirst(trackforpool); }
+	 mNumberTracksInPool++;	   
+	  
 	 //
 	 // find pairs in this event
 	 //
@@ -79,8 +95,13 @@ void StAngleCorrMaker::analyseRealPairs(StEvent& event,int eventNumber)
 	     vertex2 = track2->startVertex();
 	     if (vertex2 &&
 		 vertex2->type() == primary) {
-
-		 StThreeVector<double> mom2 = track2->helix().momentum(bField);
+	       if (track2->tpcHits().size() < 20) continue;
+	       float degreesOfFreedom = track2->fitTraits().degreesOfFreedom();
+	       if ((track2->fitTraits().chiSquaredInXY()/degreesOfFreedom > 1.5 ) ||
+                (track2->fitTraits().chiSquaredInPlaneZ()/degreesOfFreedom > 1.5)) 
+	       continue;
+	       StThreeVector<double> mom2 = track2->helix().momentum(bField);
+	       if (mom2.perp() > 1.5*GeV ) {
 	         double diff = anglediff->phiDiff(mom1,mom2);
                  double weight = anglediff->weightPhiDiff(mom1,mom2);
 		 // convert radians to degrees
@@ -89,18 +110,20 @@ void StAngleCorrMaker::analyseRealPairs(StEvent& event,int eventNumber)
 	       // fill histrograms here
 		   mHistPhiNumerator->Fill(float(diff),weight);
 	       counter++;
-	     }	   
+	       }
+	     }	
+	 }   
       }
     }
   }
+  StTrackForPool *trackFromPool;
+  trackFromPool = (StTrackForPool* ) mCollectionOfTracks->Last();
+  Int_t poolCounter = mCollectionOfTracks->IndexOf(trackFromPool);
 
-  StTrackForPool *trackfrompool;
-  trackfrompool = (StTrackForPool* ) mCollectionOfTracks->Last();
-  Int_t poolCounter = mCollectionOfTracks->IndexOf(trackfrompool);
-
+  if ((poolCounter+1) > 1 ) {
   // quick test for information
-  cout << "event number test " <<  trackfrompool->mEventNumber << endl;
-  
+  cout << "event number test " <<  trackFromPool->mEventNumber << endl;
+  }
   cout << "tracks in pool " << poolCounter+1 << endl;
 
   Float_t r = gRandom->Rndm();
