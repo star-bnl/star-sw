@@ -9,6 +9,7 @@
 #include "mwc_mevent.idl"
 #include "mwc_sector.idl"
 #include "mwc_raw.idl"
+#include "mwc_pars.idl"
 
 interface mws: amiModule {
         STAFCV_T call
@@ -18,7 +19,8 @@ interface mws: amiModule {
                 , inout mwc_mevent   mevent
                 , inout mwc_sector   sector
                 , inout mwc_raw      raw   
+		, inout mwc_pars     pars
                 );
 };
-/* Last mod. for mws.idl: $Date: 1998/02/17 16:45:52 $ */
+/* Last mod. for mws.idl: $Date: 2000/12/11 10:35:29 $ */
 

@@ -4,9 +4,9 @@
  */
 
    struct mwc_raw {         
-       long       sector;     /* One of 384 MWC sectors */
+       long       sector;     /* One of 96*11 MWC sectors */
        long       count ;     /* Count of fired wires in sector */
    };
 
-/*  Last mod. for mwc_raw:   $Date: 1998/02/17 16:41:50 $ */
+/*  Last mod. for mwc_raw:   $Date: 2000/12/11 10:34:46 $ */
 
