@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.13 2000/02/17 19:44:59 jgreid Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.14 2000/02/17 19:46:52 jgreid Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.14  2000/02/17 19:46:52  jgreid
+ * bug fix
+ *
  * Revision 1.13  2000/02/17 19:44:59  jgreid
  * added separate global variable calculations for different charge species
  *
@@ -299,9 +302,9 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event) {
 
     //uncomment the next line to send the analysis results to cout
     //    for charge > 0 ...
-    cout << trackCountPlus << " " << meanPtPlus/GeV << " " << meanPtSquaredPlus/(GeV*GeV) << endl;
+    //cout << trackCountPlus << " " << meanPtPlus/GeV << " " << meanPtSquaredPlus/(GeV*GeV) << endl;
     //    for charge < 0 ...
-    cout << trackCountMinus << " " << meanPtMinus/GeV << " " << meanPtSquaredMinus/(GeV*GeV) << endl;
+    //cout << trackCountMinus << " " << meanPtMinus/GeV << " " << meanPtSquaredMinus/(GeV*GeV) << endl;
 
     //uncomment the next line (and declaration of outFile above) to append results to a file
     //     for charge > 0 ...
