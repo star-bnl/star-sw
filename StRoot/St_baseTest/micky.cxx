@@ -5,16 +5,19 @@
 // matrix / vector "derived" from  
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: tmxm.cxx,v 1.1 1999/09/23 18:33:11 fine Exp $
-// $Log: tmxm.cxx,v $
+// $Id: micky.cxx,v 1.1 1999/09/24 17:15:37 fine Exp $
+// $Log: micky.cxx,v $
+// Revision 1.1  1999/09/24 17:15:37  fine
+// type fixed
+//
 // Revision 1.1  1999/09/23 18:33:11  fine
 // test system for RMath class has been introduced
 //
 //
 
-#include <iostream.h>
-#include "test.h"
+#include "StMicky.h"
 #include "RMath.h"
+#include <iostream.h>
 
 
 //________________________________________________________
@@ -414,4 +417,4 @@ L300:
 } /* tmxm_ */
 
 extern void minit_();
-test::test(){minit_(); tmxm_();}
+StMicky::StMicky(){minit_(); tmxm_();}
