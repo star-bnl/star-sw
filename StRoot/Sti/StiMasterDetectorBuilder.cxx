@@ -1,5 +1,5 @@
 #include "StiMasterDetectorBuilder.h"
-#include "Sti/Messenger.h"
+#include "Sti/Base/Messenger.h"
 
 StiMasterDetectorBuilder::StiMasterDetectorBuilder()
   : StiDetectorBuilder("MasterDetectorBuilder")
