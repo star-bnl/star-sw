@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.32 2000/06/30 14:51:18 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.33 2000/07/12 17:49:37 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.33  2000/07/12 17:49:37  posk
+// Changed EtaSym plots.
+//
 // Revision 1.32  2000/06/30 14:51:18  posk
 // Using MessageMgr. Added graph for Eta Symmetry vs. Vertex Z.
 //
@@ -20,7 +23,6 @@
 // Revision 1.30  2000/05/26 21:25:20  posk
 // Use TProfile2D class and profile projection methods.
 // Correction needed for >2 subevents.
-//
 //
 // Revision 1.28  2000/05/03 16:38:33  posk
 // Compatable with ROOT 2.24/02.
@@ -132,7 +134,7 @@ const Float_t StFlowAnalysisMaker::etaMin = -2.;
 const Float_t StFlowAnalysisMaker::etaMax =  2.;
 const Float_t StFlowAnalysisMaker::ptMin  =  0.;
 const Float_t StFlowAnalysisMaker::ptMax  =  2.;
-const Float_t StFlowAnalysisMaker::qMax   =  5.;
+const Float_t StFlowAnalysisMaker::qMax   = 3.5;
 
 enum { nEtaBins = 20,
        nPtBins  = 10,
@@ -185,11 +187,11 @@ Int_t StFlowAnalysisMaker::Make() {
       FillFromTags();                        // get event quantities
       FillEventHistograms();                 // fill from Flow Tags
     } else if (pFlowEvent) {
-      gMessMgr->Info("##### FlowAnalysis: null FlowTag pointer");
+      gMessMgr->Info("##### FlowAnalysis: FlowTag pointer null");
       FillFromFlowEvent();                   // get event quantities
       FillEventHistograms();                 // fill from FlowEvent
     } else {
-      gMessMgr->Info("##### FlowAnalysis: null FlowEvent and FlowTag pointers");
+      gMessMgr->Info("##### FlowAnalysis: FlowEvent and FlowTag pointers null");
       return kStOK;
     }
     // Particle quantities
@@ -217,7 +219,7 @@ Int_t StFlowAnalysisMaker::Init() {
   const float maxPtsMin       =    0.;
   const float maxPtsMax       =   60.; 
   const float fitOverMaxMin   =    0.;
-  const float fitOverMaxMax   =    2.; 
+  const float fitOverMaxMax   =   1.2; 
   const float origMultMin     =    0.;
   const float origMultMax     = 4000.; 
   const float totalMultMin    =    0.;
@@ -226,12 +228,14 @@ Int_t StFlowAnalysisMaker::Init() {
   const float corrMultMax     = 4000.; 
   const float multOverOrigMin =    0.;
   const float multOverOrigMax =    1.; 
-  const float vertexZMin      = -100.;
-  const float vertexZMax      =  100.; 
+  const float vertexZMin      = -150.;
+  const float vertexZMax      =  150.; 
   const float vertexXYMin     =   -1.;
   const float vertexXYMax     =    1.; 
-  const float etaSymMin       =  -0.3; 
-  const float etaSymMax       =   0.3; 
+  const float etaSymZMin      =  -0.5; 
+  const float etaSymZMax      =   0.5; 
+  const float etaSymMin       =   -5.; 
+  const float etaSymMax       =    5.; 
   const float phiMin          =    0.;
   const float phiMax          = twopi; 
   const float psiMin          =    0.;
@@ -251,19 +255,19 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nChi2Bins         = 50,
 	 nFitPtsBins       = 60,
 	 nMaxPtsBins       = 60,
-	 nFitOverMaxBins   =100,
+	 nFitOverMaxBins   = 40,
 	 nOrigMultBins     = 40,
 	 nTotalMultBins    = 40,
 	 nMultOverOrigBins = 50,
 	 nCorrMultBins     = 40,
-	 nVertexZBins      = 50,
+	 nVertexZBins      = 30,
 	 nVertexXYBins     = 50,
-	 nEtaSymBins       = 40,
+	 nEtaSymBins       = 50,
 	 nPhi3DBins        = 18,
 	 nPsiBins          = 36,
 	 nMultBins         = 40,
 	 nMeanPtBins       = 50,
-	 nPidBins          = 40,
+	 nPidBins          = 50,
          nCentBins         =  7 };
   
   // Charge
@@ -339,23 +343,23 @@ Int_t StFlowAnalysisMaker::Init() {
   mHistVertexXY2D->SetXTitle("Vertex X (cm)");
   mHistVertexXY2D->SetYTitle("Vertex Y (cm)");
     
-  // EtaSym
-  mHistEtaSym = new TH1F("Flow_EtaSym", "Flow_EtaSym",
-      nEtaSymBins, etaSymMin, etaSymMax);
-  mHistEtaSym->SetXTitle("Eta Symmetry Ratio");
-  mHistEtaSym->SetYTitle("Counts");
-    
   // EtaSym vs. Vertex Z
   mHistEtaSymVerZ2D = new TH2F("Flow_EtaSymVerZ2D", "Flow_EtaSymVerZ2D",
-    nVertexZBins, vertexZMin, vertexZMax, nEtaSymBins, etaSymMin, etaSymMax);
+    nVertexZBins, vertexZMin, vertexZMax, nEtaSymBins, etaSymZMin, etaSymZMax);
   mHistEtaSymVerZ2D->SetXTitle("Vertex Z (cm)");
   mHistEtaSymVerZ2D->SetYTitle("Eta Symmetry");
 
   // EtaSymVertexZ
   mHistEtaSymVerZ = new TH1F("Flow_EtaSymVerZ", "Flow_EtaSymVerZ",
-      nEtaSymBins, etaSymMin, etaSymMax);
+      nEtaSymBins, etaSymZMin, etaSymZMax);
   mHistEtaSymVerZ->SetXTitle("Eta Symmetry Vertex Z");
   mHistEtaSymVerZ->SetYTitle("Counts");
+    
+  // EtaSym
+  mHistEtaSym = new TH1F("Flow_EtaSym", "Flow_EtaSym",
+      nEtaSymBins, etaSymMin, etaSymMax);
+  mHistEtaSym->SetXTitle("Eta Symmetry Ratio");
+  mHistEtaSym->SetYTitle("Counts");
     
   // EtaPtPhi
   mHistEtaPtPhi3D = new TH3F("Flow_EtaPtPhi3D", "Flow_EtaPtPhi3D",
@@ -648,7 +652,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.32 2000/06/30 14:51:18 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.33 2000/07/12 17:49:37 posk Exp $");
 
   return StMaker::Init();
 }
@@ -909,15 +913,17 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 
   // EtaSym
   float etaSym = (etaSymPosN - etaSymNegN) / (etaSymPosN + etaSymNegN);
-  mHistEtaSym->Fill(etaSym);
 
   StThreeVectorF vertex = pFlowEvent->VertexPos();
   Float_t vertexZ = vertex.z();
   mHistEtaSymVerZ2D->Fill(vertexZ , etaSym);
 
   float etaSymZSlope = 0.003;
-  etaSym += (etaSymZSlope * vertexZ);
+  etaSym += (etaSymZSlope * vertexZ); // corrected for acceptance
   mHistEtaSymVerZ->Fill(etaSym);
+
+  etaSym *= sqrt((double)(etaSymPosN + etaSymNegN)); // corrected for statistics
+  mHistEtaSym->Fill(etaSym);
 
   // PID multiplicities
   float totalMult = (float)pFlowEvent->TrackCollection()->size();
