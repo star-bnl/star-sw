@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsoloPi0Maker.cxx,v 1.2 2004/04/14 19:34:01 balewski Exp $
+// $Id: StEEsoloPi0Maker.cxx,v 1.3 2004/04/29 04:16:43 perev Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -160,7 +160,7 @@ Int_t StEEsoloPi0Maker::getEEmcAdc(){
     n0++;
     //printf("i=%d  Tower %2.2dT%c%2.2d   adc=%4d\n",i,sec,sub+'A'-1,eta,adc );
     
-    const EEmcDbItem *x=db->getTail(sec,'A'+sub-1,eta,'T');
+    const EEmcDbItem *x=db->getTile(sec,'A'+sub-1,eta,'T');
     if(x==0) continue; // it should never happened for muDst
     
     if(adc <x->thr) continue;// value must be >ped+ N*ped_sig
@@ -252,6 +252,9 @@ float StEEsoloPi0Maker::getCtbSum(){
 }
 
 // $Log: StEEsoloPi0Maker.cxx,v $
+// Revision 1.3  2004/04/29 04:16:43  perev
+// typo fixed. getTile not getTail
+//
 // Revision 1.2  2004/04/14 19:34:01  balewski
 // access to trigger data
 //
