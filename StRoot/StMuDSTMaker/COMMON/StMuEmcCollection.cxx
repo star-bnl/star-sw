@@ -5,7 +5,6 @@
 //
 // See README for details
 //########################################################### 
-#include <assert.h>
 #include <string.h>
 
 #include "StMuEmcCollection.h"
@@ -361,46 +360,45 @@ void StMuEmcCollection::addEndcapPoint()
 
 
 void StMuEmcCollection
-::getEndcapTowerADC(int ihit, int &adc, int &isec, int &isub, int & ieta)
+::getEndcapTowerADC(int ihit1, int &adc, int &sec, int &sub, int & eta)
 {
+  int ihit=ihit1+1;  // it was not my idea to abort on index=0, JB
   adc=getTowerADC(ihit,eemc);
-  if(adc<=0) {
-    isec=isub=ieta=-1;
-    return;
-  }
-  util.getEndcapBin(eemc,ihit,isec,ieta,isub);
-  return ;
+  if(! util.getEndcapBin(eemc,ihit,sec,eta,sub))  return ;
+  adc=sec=sub=eta=-1;
+  return;
 }
 
 
 StMuEmcHit * StMuEmcCollection
-::getEndcapPrsHit(int ihit, int &isec, int &isub, int & ieta, int &ipre)
+::getEndcapPrsHit(int ihit, int &sec, int &sub, int & eta, int &pre)
 {
   if (!mPrsHits) return 0;
   StMuEmcHit * h =  getPrsHit(ihit,eprs);
-  util.getEndcapBin(eprs,h->getId(),isec,ieta,isub);
-  ipre=isub/5;
-  isub%=5;
+  int ssub;
+  if( util.getEndcapBin(eprs,h->getId(),sec,eta,ssub)) return 0;
+  pre=1+(ssub-1)/5;
+  sub=1+(ssub-1)%5;
   return h;
 }
 
 
 int StMuEmcCollection::getNEndcapSmdHits(char uv)
 {
-  assert(uv=='U' || uv=='V');
+  if(uv!='U' &&  uv!='V') return 0;
   return getNSmdHits((int)esmdu+uv-'U');
 }
 
 
 StMuEmcHit * StMuEmcCollection
-::getEndcapSmdHit(char uv, int ihit,int &isec, int &istrip)
+::getEndcapSmdHit(char uv, int ihit,int &sec, int &strip)
 {
-  assert(uv=='U' || uv=='V');
+  if(uv!='U' &&  uv!='V') return 0;
   if (!mPrsHits) return 0;
   int det=(int)esmdu+uv-'U';
   StMuEmcHit * h =getSmdHit(ihit,det);  
   int idum;
-  util.getEndcapBin(det,h->getId(),isec,istrip,idum);
+  if( util.getEndcapBin(det,h->getId(),sec,strip,idum)) return 0;
   return h;
 }
 
