@@ -4,8 +4,8 @@
 *     INTEGER   IL,IDE,IP,ISTAT,IDPDG,MOTH(2),IDAU1,i
 *     REAL      P(4),AMASS,TIME,V(5)
 *
-#include "g2t_particle.inc"
 #include "geant321/gcbank.inc"
+#include "g2t_particle.inc"
 *
       G2T_PARTICLE=1
       call agfpartic(link,len)
