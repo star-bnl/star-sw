@@ -630,8 +630,15 @@ long tdmTable:: columnElcount (long ncol) {
 //----------------------------------
 STAFCV_T tdmTable:: getCell (TDM_CELLDATA_T& data
 		, long nrow, long ncol) {
-   if( !VALID_CELL(nrow,ncol) ) EML_ERROR(INVALID_TABLE_CELL);
+   if( !VALID_CELL(nrow,ncol) ) {
+     EML_CONTEXT("ERROR: Check that your row number %d is in range.\n",nrow);
+     EML_ERROR(INVALID_TABLE_CELL);
+   }
    data.data.v = cellAddress(nrow,ncol);
+   if(!data.data.v) {
+     EML_CONTEXT("ERROR: Check that your row number %d is in range.\n",nrow);
+     EML_ERROR(INVALID_ROW_OR_COLUMN);
+   }
    data._d = columnTypeCode(ncol);
    data._maximum = data._length = data._size = columnSize(ncol);
    EML_SUCCESS(STAFCV_OK);
@@ -642,6 +649,10 @@ STAFCV_T tdmTable:: putCell (const TDM_CELLDATA_T& data
 		, long nrow, long ncol) {
    if( !VALID_CELL(nrow,ncol) ) EML_ERROR(INVALID_TABLE_CELL);
    void *pData = cellAddress(nrow,ncol);
+   if(!pData) {
+      EML_CONTEXT("ERROR: Check that your row number %d is in range.\n",nrow);
+      EML_ERROR(INVALID_ROW_OR_COLUMN);
+   }
    memcpy(pData,data.data.v,columnSize(ncol));
    EML_SUCCESS(STAFCV_OK);
 }
@@ -715,27 +726,34 @@ void * tdmTable:: cellAddress(long nrow, long ncol) {
    ||  !dsTableRowCount(&rCount,pDSthis)
    ||  !dsTableColumnCount(&cCount,pDSthis)
    ||  !dsTableRowSize(&rSize,pDSthis)
-   ||  !(0 <= nrow && nrow <= (long) rMax)
-   ||  !(0 <= ncol && ncol <= (long) cCount)
+   ||  !(0 <= nrow && nrow < (long) rMax)
+   ||  !(0 <= ncol && ncol < (long) cCount)
    ){
       return NULL;
    }
 
-   if( nrow < (long) rCount ){
+   if( 0 <= nrow < (long) rCount ){
       if( !dsCellAddress(&pData, pDSthis, nrow, ncol) ){
 	 return NULL;
       }
    }
    else {
-      if( !dsTableDataAddress(&pData,pDSthis) ){
-	 return NULL;
-      }
-      for(int i=0;i<ncol;i++){
-	 if( !dsColumnSize(&cSize,pDSthis,i) ){
-	    return NULL;
-	 }
-	 pData += cSize;
-      }
+      return NULL;   // hjw Sun Jul  5 11:31:49 EDT 1998
+      /* hjw Sun Jul  5 11:31:49 EDT 1998, this returns a pointer
+      ** to a position within the first row, which seems incorrect
+      ** when the row number is out of range.
+      ** So, I am commenting it and substituting a return of NULL.
+      **
+      ** if( !dsTableDataAddress(&pData,pDSthis) ){
+      **   return NULL;
+      ** }
+      ** for(int i=0;i<ncol;i++){
+      **   if( !dsColumnSize(&cSize,pDSthis,i) ){
+      **     return NULL;
+      **   }
+      **   pData += cSize;
+      ** }
+      ** hjw Sun Jul  5 11:31:49 EDT 1998 */
    }
    return (void*)pData;
 }

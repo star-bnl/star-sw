@@ -30,9 +30,9 @@ dui_cd(char* path)
 }
 
 STAFCV_T 
-dui_df()
+dui_df(char *markerString)
 {
-   if( !dui->df() ){
+   if( !dui->df(markerString) ){
       EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);

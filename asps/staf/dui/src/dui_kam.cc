@@ -56,7 +56,8 @@ kam_dui_cd_()
 void 
 kam_dui_df_()
 {
-  dui_df();
+  char*  markerString = ku_gets();
+  dui_df(markerString);
 }
 
 /*

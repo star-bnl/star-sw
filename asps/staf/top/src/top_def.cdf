@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_OPerators commands.
 .
- #(@)$Id: top_def.cdf,v 1.12 1998/07/04 02:27:30 ward Exp $
+ #(@)$Id: top_def.cdf,v 1.13 1998/07/09 11:29:19 ward Exp $
 .
 TOP is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -1044,6 +1044,8 @@ ARGUMENTS:
    TABLE1 - tdmTable name of input table.
 .
    TABLE2 - tdmTable name of output table.
+            Slashes are not allowed in this name, as a workaround
+            for a certain Staf bug.
           - If TABLE2 does not exist, it will be created with the
 	    proper columns as defined by topProject object SOREF.
 .
@@ -1071,7 +1073,10 @@ EXCEPTIONS:
 .
 BUGS: 
 .
-   None known.
+   Staf mishandles the name of the output table if it contains
+   slashes.  The logic is complex, and the safest fix I can think
+   of is to make slashes in such names illegal.  I will do this
+   in July 98.  Herb.
 .
 SEE ALSO: 
 .

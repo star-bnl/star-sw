@@ -107,6 +107,7 @@ STAFCV_T topProject:: project(tdmTable * table1, tdmTable *& table2) {
    if( NULL == table2 ){
       table2 = pTarget(table1, NULL);
    }
+   if(!table2) EML_ERROR(OUTPUT_TABLE_NOT_READY);
    pTbl2=table2->dslPointer();
    if(!mySelectSpec) EML_ERROR(INVALID_SELECTION_SPEC);
    if( !dsProjectTable(pTbl2,pTbl1,mySelectSpec) ){
@@ -147,7 +148,7 @@ tdmTable* topProject:: pTarget(tdmTable * table1, const char * name) {
    if( NULL == (table2 = tdm->newTable(n2,s2,0)) ){
       EML_ERROR(CANT_CREATE_TABLE);
       FREE(pTbl2); /*fix memory leak -akio*/
-    }
+   }
    FREE(pTbl2); /*fix memory leak -akio*/
    return table2;
 }

@@ -69,7 +69,7 @@ extern CC_P STAFCV_T dui_rm_nonprecious();
 extern CC_P STAFCV_T dui_count_();
 extern CC_P STAFCV_T dui_list_();
 extern CC_P STAFCV_T dui_du();
-extern CC_P STAFCV_T dui_df();
+extern CC_P STAFCV_T dui_df(char *markerString);
 extern CC_P STAFCV_T dui_cd(char* path);
 extern CC_P STAFCV_T dui_ln(char* fromPath, char* toPath);
 extern CC_P STAFCV_T dui_cp(char* fromPath, char* toPath);

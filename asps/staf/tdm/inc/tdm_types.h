@@ -164,7 +164,7 @@ extern CC_P STAFCV_T tdmdataset_maxentrycount(char* name);
 #endif /*OLD_DSL*/
 extern CC_P STAFCV_T tdmdataset_name(char* name);
 extern CC_P STAFCV_T tdmdataset_show();
-extern CC_P STAFCV_T tdmtable_cell_getvalue(char* cellSpec);
+extern CC_P STAFCV_T tdmtable_cell_getvalue(char* cellSpec,char* screenSwitch);
 extern CC_P STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv
 		, char **values);
 extern CC_P STAFCV_T tdmtable_columncount(char* name);

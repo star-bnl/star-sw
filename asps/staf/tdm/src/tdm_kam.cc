@@ -293,8 +293,9 @@ void
 kam_tdmtable_cell_getvalue_()
 {
    char* cellSpec = ku_gets();	/* table.cell specification */
+   char* screenSwitch = ku_gets();	/* table.cell specification */
 
-   tdmtable_cell_getvalue(cellSpec);
+   tdmtable_cell_getvalue(cellSpec,screenSwitch);
 }
 
 /*
