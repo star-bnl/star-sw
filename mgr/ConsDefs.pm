@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.72 2004/06/08 20:33:33 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.73 2004/06/09 19:13:27 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -121,8 +121,8 @@
     if ( !$ROOT_LEVEL ) { print "ROOT_LEVEL has to be defined\n"; exit 1;}
     if ( !$ROOTSYS )    { print "ROOT_SYS   has to be defined\n"; exit 1;}
     $ROOTCINT      = $ROOTSYS . "/bin/rootcint";
-    my $RLIBMAP    = $ROOTSYS . "/bin/rlibmap";
- if (! -e $RLIBMAP ) {$RLIBMAP = "";}
+    my $RLIBMAP    = "";#$ROOTSYS . "/bin/rlibmap";
+ if ($RLIBMAP and ! -e $RLIBMAP ) {$RLIBMAP = "";}
     $CINTSYSDIR    = $ROOTSYS . "/cint";
     $LIBS          = "";
     $Libraries     = "";
