@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.10 2000/06/29 05:47:17 lansdell Exp $
+// $Id: bfcread_hist_files_add.C,v 2.11 2000/06/29 22:42:22 lansdell Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.11  2000/06/29 22:42:22  lansdell
+// now write to specified hist branch properly
+//
 // Revision 2.10  2000/06/29 05:47:17  lansdell
 // checked for null pointer
 //
@@ -186,7 +189,7 @@ void bfcread_hist_files_add(
   if (kathyArray) {
 
     // constructor 
-    StHistMaker *HM  = new StHistMaker;
+    StHistMaker *HM  = new StHistMaker(MakerHistDir);
     HM->SetHArray(kathyArray);
 
     // output hist.root file:
