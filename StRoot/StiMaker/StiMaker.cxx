@@ -7,6 +7,9 @@
 //
 //
 // $Log: StiMaker.cxx,v $
+// Revision 1.105  2002/09/27 19:19:01  mmiller
+// Changed program flow to once again allow for track by track gui.
+//
 // Revision 1.104  2002/09/10 18:42:40  pruneau
 // Fixed bug in the call sequence of the association maker
 // introduced in the previous release.
@@ -249,15 +252,18 @@ Int_t StiMaker::Make()
 	  return 0;
 	}
     }
-  else
-    mMcEvent = 0;
+  else {
+      mMcEvent = 0;
+  }
   tracker->setEvent(mevent,mMcEvent);
-  finishEvent();
-  if (ioBroker->useGui()) 
-    {
+  if (ioBroker->useGui()==false) {
+      finishEvent();
+  }
+  else {
+      //toolkit->getHitContainer()->update();
       toolkit->getDisplayManager()->draw();
       toolkit->getDisplayManager()->update();
-    }
+  }
   return kStOK;
 }
 
@@ -314,7 +320,7 @@ void StiMaker::finishEvent()
   if (ioBroker->simulated())
     {
       clockAssociator.start();
-      StiEventAssociator::instance()->associate(mMcEvent);
+      //StiEventAssociator::instance()->associate(mMcEvent);
       clockAssociator.stop();
 
       //clockEvaluator.start();
