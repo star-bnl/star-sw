@@ -70,6 +70,12 @@ c B-field obtained via gufld call
  
       call gufld(xlocal,bfield)
       write(6,*) 'Using a field of',bfield(3),' KGauss'
+
+C convert to Tesla
+      bfield(1) = bfield(1)/10.
+      bfield(2) = bfield(2)/10.
+      bfield(3) = bfield(3)/10.
+
  
         nok=0
         if((globtrk_h.nok).eq.0) return
@@ -84,10 +90,11 @@ c B-field obtained via gufld call
               trak(nok).z0   = globtrk(i).z0
               trak(nok).psi   = globtrk(i).psi*C_RAD_PER_DEG !degrees to radians
               trak(nok).tanl= globtrk(i).tanl
-              trak(nok).rc = 1./(C_D_CURVATURE*bfield(3)*globtrk(i).invpt)
+              trak(nok).rc = 1./(C_D_CURVATURE*bfield(3)*10.
+     +             *globtrk(i).invpt)
               trak(nok).q  = float(globtrk(i).icharge)
               call ev0_circle_param(trak(nok).r0,xc,
-     +             trak(nok).rc,bfield(3)/10.)
+     +             trak(nok).rc,bfield(3))
               trak(nok).xc(1) = xc(1)
               trak(nok).xc(2) = xc(2)
               trak(nok).pid = globtrk(i).id_global_pid
@@ -105,7 +112,7 @@ c
      +       ev0par_h,ev0par,
      +       vertex_h,vertex,
      +       ev0out_h,ev0out,
-     +       bfield(3)/10)
+     +       bfield)
 c
 c call analysis (clean up) module, ev0par(1).iflag=1
 c

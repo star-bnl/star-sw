@@ -316,9 +316,14 @@ CCC>>>>  L. Ray, 9/24/98
 c     Opening angles: wkw
                        dot=pst1(1)*pst2(1)+pst1(2)*pst2(2)
      +                      +pst1(3)*pst2(3)
-                       open=acosd(dot/(trak(i).p*trak(j).p))
-                       ev0out(ok).theta = open
-*     
+                       open=(dot/(trak(i).p*trak(j).p))
+                       if( open .gt. 1.0) then
+                          open = 1.0
+                       elseif( open .lt. -1.) then
+                          open = -1.0
+                       endif
+                       ev0out(ok).theta = acosd(open)
+*
 *---  if blind run test all mass hypothesis
 *     
                        
