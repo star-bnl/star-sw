@@ -6,7 +6,8 @@
 #include "TString.h"
 #include "StMkDeb.h"
 
-int StMkDeb::fgCurr = -2003;
+int StMkDeb::fgCurr  = -2003;
+int StMkDeb::fgStage = 0;
 TObjArray *StMkDeb::fgArr=0;
 
 //_____________________________________________________________________________
@@ -50,7 +51,7 @@ void StMkDeb::Cancel(StMaker *mk)
 int StMkDeb::SetCurrent(const TObject *mk, int kind)
 {
   if (fgCurr<-1) Ready();
-  fgCurr = (fgArr->IndexOf(mk))*100+kind;
+  fgCurr = kind+100*(fgArr->IndexOf(mk));
   return fgCurr;
 }
 
@@ -71,7 +72,11 @@ int StMkDeb::SetCurrent(int curr)
   if (curr>=0) fgCurr = curr;
   return fgCurr;
 }
-
+//_____________________________________________________________________________
+void StMkDeb::SetStage(int stage)
+{
+   fgStage = stage;
+}
 //_____________________________________________________________________________
 void StMkDeb::Ready()
 {
@@ -100,17 +105,19 @@ const char *StMkDeb::GetName(int id)
    static TString ts;
    int lst = fgArr->GetLast();
    if (id     < 0  ) return "";
-   if (id/100 > lst) return "";
-   ts = fgArr->At(id/100)->GetName();
-   ts +="kind=";
-   ts += (id%100);
+   int stage = id%100; id/=100;
+   int kind  = id%100; id/=100;
+   if (id > lst) return "";
+   ts = fgArr->At(id)->GetName();
+   ts += " kind=" ;ts += kind ;
+   ts += " stage=";ts += stage;
    return ts.Data();
 }
 //_____________________________________________________________________________
 int StMkDeb::SetUser(TObject *us) 
 {
   if (!fgArr) 	return 0;
-  us->TObject::SetUniqueID(fgCurr+1);
+  us->TObject::SetUniqueID(fgCurr*100+fgStage+1);
   return fgCurr;
 }
 //_____________________________________________________________________________
