@@ -10,8 +10,8 @@ Module     MFLDGEO  is the actual GUFLD routine for GSTAR
    FILL MFLG(1)      ! Magnetic Field Map 
       version  =  1        ! field version
       Bfield   =  5.0      !  field value
-      RmaxInn  = 264.265   !  Inner field volume radius
-      ZmaxInn  = 229.685   !  Inner field volume langth
+      RmaxInn  = 264.90    !  Inner field volume radius
+      ZmaxInn  = 310.00    !  Inner field volume length
    endfill
 *
       USE  MFLG  version = 1
