@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.28 2000/12/19 20:25:17 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.29 2001/02/04 00:45:34 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -232,7 +232,7 @@
    $CC        = "/opt/WS5.0/bin/cc";
    $CXX       = "/opt/WS5.0/bin/CC";
    $FC        = "/opt/WS5.0/bin/f77";
-   $CXXFLAGS  = "-KPIC -D__SunOS_5_6 -library=iostream,no%%Cstd";
+   $CXXFLAGS  = "-KPIC -D__SunOS_5_6";#xs -library=iostream,no%%Cstd";
    $R_CPPFLAGS  = "-DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
    $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
    $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
@@ -245,7 +245,7 @@
    $CFLAGS    = "-KPIC";
    $CINTCFLAGS= $CFLAGS . " " . $R_CPPFLAGS;
    $LD        = $CXX;
-   $LDFLAGS   = "-library=iostream -Bdynamic";
+   $LDFLAGS   = " -Bdynamic"; #-library=iostream
    $SO        = $CXX;
    $SOFLAGS   = "-G";#
    if (defined($ARG{INSURE})){
