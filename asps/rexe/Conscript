@@ -6,6 +6,7 @@ $build =~ s/\\/\//g;# print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
 (my $ObjDir = DirPath '.') =~ s/\\/\//g;# print "ObjDir = $ObjDir\n";
 (my $Dir = $ObjDir) =~ s/$build\///g; #print "Dir = $Dir\n";
 $ObjDir = "#" . $ObjDir; #print "ObjDir = $ObjDir\n";
+(my $obj_dir = $ObjDir) =~ s/^\#//g;# print "obj_dir = $obj_dir\n";
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my $pkg  = root4star;
 my @GDIRS = (".","../agi/gst/agsim","../agi/gst/geant","../agi/gst/zebra");
@@ -16,8 +17,11 @@ $CPPPATH = $env->{CPPPATH} . ":#asps/agi:" . $env->{ENV}->{CERN_ROOT} . "/includ
 $CPPFLAGS = $env->{CPPFLAGS} . " -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DSTAF ";
 print "build root4star with cons\n";
 print "CPPPATH = \t$CPPPATH \nCPPFLAGS = \t$CPPFLAGS\n";
+my $CXXFLAGS = $env->{CXXFLAGS};
+if ($STAR_SYS =~ /^sun4x_5/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
 $env2 = $env->clone('CPPPATH'      => $CPPPATH,
-		    'CPPFLAGS'     => $CPPFLAGS
+		    'CPPFLAGS'     => $CPPFLAGS,
+		    'CXXFLAGS'     => $CXXFLAGS
 		   );
 my @sources = ();
 foreach my $d (@GDIRS){
