@@ -202,6 +202,10 @@
 *                       - get error and table is deleted
 *                      solution: read in tss_pars.xdf file again when 
 *                       running tss - so now we always have 98l version
+* 01/25/99 J.Seyboth -  ==> chain name/module
+*                           - added new modules into chain:
+*                                     fde  - FTPC dedx module      
+*                                    dftpc - module to store FTPC dst data
 * 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -450,6 +454,9 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
     (fte)
             exec create_tables_ftpc#fte_tables
             exec init_fte#init	    
+    (fde)
+            exec create_tables_ftpc#fde_tables
+            exec init_fde#init	    
       (svm) 
             exec create_tables_global#svm
             exec init_svm#init
@@ -818,6 +825,7 @@ return
       (fcl)    exec run_fcl#run
       (fpt)    exec run_fpt#run
       (fte)    exec run_fte#run
+      (fde)    exec run_fde#run
       (svm)    exec run_svm#run_svm
       (evr)    exec run_evr#run
       (egr)    exec run_egr#egr	
@@ -841,6 +849,7 @@ return
      (dehd)    exec run_dst#dst_ehead
     (ddedx)    exec run_dst#dst_dedx_filler
      (dpnt)    exec run_dst#point_filler
+    (dftpc)    exec run_dst#fill_ftpc_dst
     (dmsft)    exec run_dst#dst_mon_soft
     (dmhrd)    nextl 1
     (desum)    exec run_dst#dst_event_summary
