@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpParticle.cc,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: StPidAmpParticle.cc,v 1.2 2000/04/09 16:52:17 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpParticle.cc,v $
+ * Revision 1.2  2000/04/09 16:52:17  aihong
+ * change the start of proton/antiptoton from 0.3 to 0.2
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -92,10 +95,10 @@ const StPidAmpParticle StPidAmpParticle::mKaonPlus("kaon+", 11,1, 0.49368,  0.75
 const StPidAmpParticle StPidAmpParticle::mKaonMinus("kaon-",12,-1,0.49368, 0.75,    3.4,   6.105260e-05*0.7*0.65,-0.15,  -5.0, StPidAmpWindow(-0.15,-0.460));//0.47
 
 //-------------------------------------------------name        id z  mass      peakPos mWidth   mRatio                start   end  window
-const StPidAmpParticle StPidAmpParticle::mProton("proton",     14,1, 0.93827,  1.15,   4.0,   3.552151e-05*0.7,     0.3,   5.0, StPidAmpWindow(0.3,0.9));//0.92
+const StPidAmpParticle StPidAmpParticle::mProton("proton",     14,1, 0.93827,  1.15,   4.0,   3.552151e-05*0.7,     0.2,   5.0, StPidAmpWindow(0.3,0.9));//0.92
 
 //-------------------------------------------------name                id z  mass      peakPos mWidth    mRatio              start   end  window
-const StPidAmpParticle StPidAmpParticle::mAntiProton("anti_proton",     15,-1,0.93827,  1.15,   4.0,  3.552151e-05*0.7,    -0.3,  -5.0, StPidAmpWindow(-0.3,-0.9));//0.92 //width was 2.5
+const StPidAmpParticle StPidAmpParticle::mAntiProton("anti_proton",     15,-1,0.93827,  1.15,   4.0,  3.552151e-05*0.7,    -0.2,  -5.0, StPidAmpWindow(-0.3,-0.9));//0.92 //width was 2.5
 
 //-------------------------------------------------name        id z  mass      peakPos mWidth mRatio     start   end  window
 const StPidAmpParticle StPidAmpParticle::mDeuteron("deuteron", 45,1, 1.8756,   2.0,   3.0,   2.775118e-06,1.0,   5.0, StPidAmpWindow(1.0,1.5));
