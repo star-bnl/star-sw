@@ -11,7 +11,7 @@ my @tgt_idlT = ();
 my %idl    = ();
 my @sources = ();
 my $src;
-my $obj = $OBJ . "/tables"; 
+my $obj = $OBJ . "/pams/tables"; 
 my $share  = "#.share/tables"; #print "share = $share\n";
 Link $obj =>  $share; print "Link $obj =>  $share\n";
 my $SO_PKG = "St_Tables.so";
