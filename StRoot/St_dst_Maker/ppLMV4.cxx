@@ -1,5 +1,8 @@
-// $Id: ppLMV4.cxx,v 1.7 2002/02/18 19:48:20 genevb Exp $
+// $Id: ppLMV4.cxx,v 1.8 2002/02/22 04:36:11 genevb Exp $
 // $Log: ppLMV4.cxx,v $
+// Revision 1.8  2002/02/22 04:36:11  genevb
+// Set vertex id to vertex table entry row
+//
 // Revision 1.7  2002/02/18 19:48:20  genevb
 // Separation of primary vertex and track finding, other minor changes
 //
@@ -43,7 +46,7 @@ using namespace units;
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 
-//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.7 2002/02/18 19:48:20 genevb Exp $";
+//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.8 2002/02/22 04:36:11 genevb Exp $";
 
 struct Jcyl {float eta,phi;};
 
@@ -239,7 +242,7 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
 
 
   Int_t nrows = vertex->GetNRows();
-  long IVertex = 55;  //By definition
+  long IVertex = nrows+1;  //By definition
 
   // printf(" Fill the dst_vertex table\n");
   dst_vertex_st primvtx;
@@ -290,7 +293,7 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
 
   for(uint j=0;j<maTrk.primCan.size(); j++) {
       printf("glob j=%d x,y,z %f %f %f  trID=%d verID=%d\n",j, maTrk.primCan[j].x0,maTrk.primCan[j].y0,maTrk.primCan[j].z0,maTrk.primCan[j].glb_track_pointer->id,maTrk.primCan[j].glb_track_pointer->id_start_vertex);
-      if(maTrk.primCan[j].glb_track_pointer->id_start_vertex>10) continue; // already marked
+      if(maTrk.primCan[j].glb_track_pointer->id_start_vertex>=10) continue; // already marked
       double dz=maTrk.primCan[j].z0 - XVertex.z();
       if(fabs(dz)>DVtxMax) continue; // too fare in Z
       double dx=maTrk.primCan[j].x0 - XVertex.x();
