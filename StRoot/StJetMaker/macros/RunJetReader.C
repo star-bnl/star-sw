@@ -5,12 +5,11 @@ class  StChain;
 StChain *chain;
 int total=0;
 
-void RunJetReader(int nevents=200,
+void RunJetReader(int nevents=300,
 		  const char* dir = "",
-		  const char* file = "/star/data16/reco/dAuCombined/FullField/P03ih/2003/065/st_physics_4065003_raw_0040054.MuDst.root",
-		  //const char* file = "/star/data35/reco/productionPP/ReversedFullField/DEV/2004/132/st_physics_5132053_raw_2020005.MuDst.root",
+		  const char* file = "/star/data16/reco/ppLong-1/FullField/P03ih/2003/150/st_physics_4150010_raw_0010005.MuDst.root",
 		  const char *filter = "",
-		  const char* jetInFile = "Jets_out_emc.root")
+		  const char* jetInFile = "./4150010_raw_0010005emc.root")
 {
     if (gClassTable->GetID("TTable") < 0) {
 	gSystem->Load("libStar");
