@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.11 1999/02/27 23:09:50 sakrejda Exp $
+* $Id: tph.F,v 1.12 1999/03/24 01:20:13 sakrejda Exp $
 * $Log: tph.F,v $
+* Revision 1.12  1999/03/24 01:20:13  sakrejda
+* hits that start on the first or end on the last pad removed
+*
 * Revision 1.11  1999/02/27 23:09:50  sakrejda
 * auxiliary hit table eliminated
 *
@@ -376,6 +379,19 @@ c ??? Check index?
                  write(6,*) itdc_lo,'itdc_lo'
                  itdc_lo=1
               endif
+
+C Rai: patch from Bill Love we might have to think of a better way
+C             skip clusters on the end pads.
+              if(ipad_lo.eq.1)then
+                write(6,1)irow
+                go to 999
+ 1              format(' TPH - dropping pad 1 cluster in row',i5)
+              elseif(ipad_hi.eq.npads)then
+                write(6,2)npads,irow
+ 2              format(' TPH - drop end pad cluster, pad',i5,' row',i5)
+                go to 999
+              endif
+
 
               nhits =0 
 	      call tph_fit_cluster(tclpar,nseq, nclspix, npix_seq,
