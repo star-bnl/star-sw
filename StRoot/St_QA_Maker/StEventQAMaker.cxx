@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.53 2000/08/17 21:13:55 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.54 2000/08/18 20:30:16 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.54  2000/08/18 20:30:16  lansdell
+// added global track probability of fit histogram; extra, empty page is currently printed for some reason, still checking
+//
 // Revision 1.53  2000/08/17 21:13:55  lansdell
 // loop over all TPC hits for the z-hit distribution histogram
 //
@@ -383,10 +386,10 @@ void StEventQAMaker::MakeHistGlob() {
       if (globtrk->topologyMap().numberOfHits(kTpcSsdSvtId)>0) m_det_id->Fill(kTpcSsdSvtId);
       if (globtrk->topologyMap().numberOfHits(kSsdSvtId)>0) m_det_id->Fill(kSsdSvtId);
 
-      // z-dist of hits
-      //for (UInt_t i=0; i<globtrk->detectorInfo()->hits().size(); i++) {
-      //m_z_hits->Fill(globtrk->detectorInfo()->hits()[i]->position().z());
-      //}
+      // calculate the probability of a fit being correct
+      // number of degrees of freedom = fitpoints-5 (5 params constrain track)
+      Double_t probability = TMath::Prob(chisq0,2*globtrk->fitTraits().numberOfFitPoints()-5);
+      m_globtrk_fit_prob->Fill(probability);
 
 // now fill all TPC histograms ------------------------------------------------
       if (globtrk->flag()>=100 && globtrk->flag()<200) {
