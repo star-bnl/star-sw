@@ -6,8 +6,10 @@
 %{
 #include <stdio.h>
 #include <sys/types.h>
+#ifndef WIN32
 #include <unistd.h>
-#ifndef sun
+#endif
+#if !defined(sun) && !defined(WIN32) 
 #include <strings.h>
 #else
 #include <string.h>
@@ -89,7 +91,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.17 1999/06/19 19:21:00 fisyak Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.18 1999/09/20 20:16:21 fisyak Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -301,7 +303,7 @@ void FirstFile(FILE *ff) {
   FF"#endif\n");
 }
 void SecondFile(FILE *ff) {
-  FF"#include \"St_%s_Table.h\"\n",gTable);
+  FF"#include \"tables/St_%s_Table.h\"\n",gTable);
   FF"#include \"Stypes.h\"\n");
   FF"TableImp(%s)\n",gTable);
   FF"void St_%s::Streamer(TBuffer &b){St_Table::Streamer(b);}\n",gTable);
@@ -378,7 +380,7 @@ void ChangeCommentFromCToFortran(char *out,char *in) {
   while(cc) { cc[0]='0'; cc[1]=' '; cc=strstr(out,"*/"); }
 }
 void DotIncFileTbl(void) {
-  char buf2[111],*cc,buf[111],fortran[77],uppercase[111],blank[BLANK];
+  char buf2[111],*cc,buf[111],fort_ran[77],uppercase[111],blank[BLANK];
   char fortranComment[FORTRANCOMMENTSIZE+1];
   int col,ii,nn,totLen,here;
   ToUpper(uppercase,gTable);
@@ -388,19 +390,19 @@ void DotIncFileTbl(void) {
   /* 960529b  FINC"#include \"table_header.inc\"\n"); */
   FINC"\tSTRUCTURE /%s_ST/\n",uppercase);
   for(col=0;col<gNColNames;col++) {
-    Idl2Fortran(fortran,gColType[col]);
+    Idl2Fortran(fort_ran,gColType[col]);
     if(strcmp(gColType[col],"char")) {
       BracksToParens(buf,gColName[col]);
     } else {
       strcpy(buf,gColName[col]); cc=strstr(buf,"[");
       if(cc) {
         if(!strstr(cc,"]")) { F"Crummy stuff: %s.\n",gColName[col]); exit(2); }
-        nn=atoi(cc+1); cc[0]=0; sprintf(buf2,"%s%d",fortran,nn);
-      } else sprintf(buf2,"%s1",fortran);
-      strcpy(fortran,buf2);
+        nn=atoi(cc+1); cc[0]=0; sprintf(buf2,"%s%d",fort_ran,nn);
+      } else sprintf(buf2,"%s1",fort_ran);
+      strcpy(fort_ran,buf2);
     }
     ChangeCommentFromCToFortran(fortranComment,gOlc[col]);
-    FINC"\t%9s %s %s\n",fortran,buf,fortranComment);
+    FINC"\t%9s %s %s\n",fort_ran,buf,fortranComment);
   }
   FINC"\tEND STRUCTURE\n");
 
@@ -760,7 +762,7 @@ void FirstRootPamFile(FILE *ff) {
     for(i=1;i<gNIncFile;i++) FF" class St_%s;\n",Xidl(Nq(gIncFile[i]))); 
   FF"#else\n");
   for(i=1;i<gNIncFile;i++) 
-      FF"#include \"St_%s_Table.h\"\n",Xidl(Nq(gIncFile[i])));
+      FF"#include \"tables/St_%s_Table.h\"\n",Xidl(Nq(gIncFile[i])));
   FF"#endif\n");
   FF"\n");
   FF"\n");
@@ -874,7 +876,7 @@ void SecondRootPamFile(FILE *ff) {
   FF"#include \"%s.h\"\n",StrippedInFileName(0));
   FF"#include \"St_%s_Module.h\"\n",StrippedInFileName(0));
   for(i=1;i<gNIncFile;i++) {
-    FF"#include \"St_%s_Table.h\"\n",Xidl(Nq(gIncFile[i])));
+    FF"#include \"tables/St_%s_Table.h\"\n",Xidl(Nq(gIncFile[i])));
 /*    if(i<gNIncFile-1) FF","); FF"\n"); */
   }
   FF"\n");
