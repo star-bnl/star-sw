@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.17 1999/03/20 20:57:35 perev Exp $
+// $Id: StMaker.h,v 1.18 1999/04/30 14:58:41 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.18  1999/04/30 14:58:41  perev
+// cd() added to StMaker class
+//
 // Revision 1.17  1999/03/20 20:57:35  perev
 // add StEvtHddr.h and fix Get/SetNumber in maker
 //
@@ -64,7 +67,8 @@ protected:
    St_DataSet     *m_DataSet;		//!  
    St_DataSet     *m_ConstSet;		//!  
    St_DataSet     *m_GarbSet;		//!  
-   TList          *m_Inputs;	 	//!list of logInput:ActualInput
+   St_DataSet     *m_Inputs;	 	//!list of logInput:ActualInput
+   St_DataSet     *m_Ouputs;	 	//!list of logOuput:ActualOuput
    TList          *m_Histograms;	//!list of Histograms
    static StMaker *fgStChain;     	//current pointer to StChain
    Int_t	   m_Mode;		// Integer mode of maker
@@ -82,6 +86,7 @@ public:
    virtual       	~StMaker();
 
 //		User defined functions
+   virtual void   	Clear(Option_t *option="");
    virtual Int_t  	Init();
    virtual void   	StartMaker();
    virtual Int_t  	Make();
@@ -92,14 +97,14 @@ public:
    virtual void   	PrintInfo() const;
 
 //		User methods
-   virtual void        	AddData (St_DataSet *data=0,const char *dir=".data");
-   virtual void	       	AddObj  (TObject *obj,const char *dir);
+   virtual St_DataSet   *AddData (St_DataSet *data=0,const char *dir=".data");
+   virtual St_ObjectSet *AddObj  (TObject *obj,const char *dir);
    virtual void        	AddConst(St_DataSet *data=0){AddData(data,".const");}
    virtual void        	AddHist(TH1 *h){AddObj(h,".hist");};
    virtual void        	AddGarb (St_DataSet *data=0){AddData(data,".garb");};
    virtual TList       *GetHistList() const {return (TList*)GetDirObj(".hist");};
-
-   virtual void   	Clear(Option_t *option="");
+   virtual StMaker     *cd(){StMaker *ret = fgStChain; fgStChain=this; return ret;};
+   virtual StMaker     *Cd(){return cd();};
 
 //		STAR methods
    virtual Int_t  	GetNumber() const ;
@@ -115,10 +120,13 @@ public:
 
 
 //		Get
-   virtual St_DataSet  *GetDataSet (const char* logInput) const ;
-   virtual St_DataSet  *   DataSet (const char* logInput) const 
+   virtual St_DataSet  *GetData(const char *name, const char* dir=".data") const;
+   virtual St_DataSet  *GetDataSet (const char* logInput,
+                                    const StMaker *uppMk=0,
+                                    const StMaker *dowMk=0) const ;
+   virtual St_DataSet  *   DataSet (const char* logInput)   const 
                            {return GetDataSet(logInput);};
-   virtual St_DataSet  *GetInputDS (const char* logInput) const 
+   virtual St_DataSet  *GetInputDS (const char* logInput)   const 
                            {return GetDataSet(logInput);};
 
    virtual St_DataSet  *GetDataBase(const char* logInput);
@@ -129,7 +137,9 @@ public:
    virtual EDebugLevel 	GetDebug() const {return m_DebugLevel;}
    virtual EDebugLevel 	   Debug() const {return GetDebug();};
    virtual TList       *Histograms()  const {return GetHistList();}
-   virtual TString      GetInput(const char* logInput) const ;
+   virtual TString      GetAlias (const char* log, const char* dir=".aliases") const ;
+   virtual TString      GetInput (const char* log) const {return GetAlias(log);};
+   virtual TString      GetOutput(const char* log) const {return GetAlias(log,".aliases");};
    virtual TList       *GetMakeList() const ;
    virtual StMaker     *GetParentMaker () const;
    virtual StMaker     *GetMaker (const char *mkname);
@@ -139,7 +149,13 @@ public:
 //    Setters for flags and switches
 
    virtual void        	SetDebug(EDebugLevel l=kDebug){m_DebugLevel=l;}
-   virtual void       	SetInput(const char* logInput,const char* actInput);
+   virtual void       	SetAlias(const char* log,const char* act,const char* dir=".aliases");
+   virtual void       	AddAlias(const char* log,const char* act,const char* dir=".aliases");
+   virtual void       	SetInput(const char* log,const char* act){SetAlias(log,act);};
+   virtual void       	SetOutput(const char* log,const char* act){SetAlias(log,act,".aliases");};
+   virtual void       	SetOutput(const char* log,St_DataSet *ds);
+   virtual void       	SetOutput(St_DataSet *ds){SetOutput(0,ds);};
+   virtual void       	SetOutputAll(St_DataSet *ds);
    virtual void   	SetMode(Int_t mode=0)   {m_Mode=mode;}
 
 
@@ -156,7 +172,7 @@ public:
 
 //		must be in here in .h
    static const char   *GetCVSIdH() 
-    {static const char cvs[]="$Id: StMaker.h,v 1.17 1999/03/20 20:57:35 perev Exp $";
+    {static const char cvs[]="$Id: StMaker.h,v 1.18 1999/04/30 14:58:41 perev Exp $";
      return cvs;};
    static const char   *GetCVSTag()
      {static const char cvs[]="$Name:  $"; return cvs;};
