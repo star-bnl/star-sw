@@ -34,6 +34,7 @@ macro run
 [TOP]/pams/l3/kumac,_
 [TOP]/pams/mwc/kumac,_
 [TOP]/pams/sim/kumac,_
+[TOP]/pams/strange/kumac,_
 [TOP]/pams/svt/kumac,_
 [TOP]/pams/tpc/kumac,_
 [TOP]/pams/trg/kumac,_
@@ -60,6 +61,7 @@ $STAR/pams/global/kumac,_
 $STAR/pams/l3/kumac,_
 $STAR/pams/mwc/kumac,_
 $STAR/pams/sim/kumac,_
+$STAR/pams/strange/kumac,_
 $STAR/pams/svt/kumac,_
 $STAR/pams/tpc/kumac,_
 $STAR/pams/trg/kumac,_
