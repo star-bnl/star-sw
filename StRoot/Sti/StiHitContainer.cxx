@@ -28,12 +28,16 @@ ostream& operator<<(ostream& os, const StiHit& hit);
 //Non member functions
 ostream& operator<<(ostream&, const HitMapKey&);
 
-StiHitContainer* StiHitContainer::instance()
+StiHitContainer* StiHitContainer::instance(bool drawable)
 {
     if (sinstance==0) {
 	//Switch on what type to create based on some variable
-	//sinstance = new StiHitContainer();
-	sinstance = new StiRootDrawableHitContainer();
+	if (drawable==true) {
+	    sinstance = new StiRootDrawableHitContainer();
+	}
+	else {
+	    sinstance = new StiHitContainer();
+	}
     }
     
     return sinstance;

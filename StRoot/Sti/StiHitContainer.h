@@ -34,7 +34,7 @@ public:
     friend class nobody;
     
     //Singleton access
-    static StiHitContainer* instance();
+    static StiHitContainer* instance(bool drawable=false); //first call to instance set's type!
     static void kill();
     
     void setDeltaD(double);
@@ -83,7 +83,7 @@ private:
     friend ostream& operator<<(ostream&, const StiHitContainer&);
     
     HitMapKey mkey; //store a map key member to avoid constructor call per hit
-    
+
     double mdeltad; //Search limit in local d-direction
     double mdeltaz; //Search limit in local z-direction
 

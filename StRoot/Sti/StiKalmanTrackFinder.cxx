@@ -73,6 +73,12 @@ bool StiKalmanTrackFinder::isValid(bool debug) const
 }
 
 //Temporary patch, to test seed finder (MLM, 8/20/01)
+
+bool StiKalmanTrackFinder::hasMore()
+{
+    return trackSeedFinder->hasMore();
+}
+
 void StiKalmanTrackFinder::doNextAction()
 {
     StiKalmanTrack* track = 0;
