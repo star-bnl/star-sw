@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.43 2001/08/07 20:07:26 dietel Exp $
+// $Id: St_l3t_Maker.cxx,v 1.44 2001/09/21 16:19:00 yepes Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -234,12 +234,16 @@ Int_t St_l3t_Maker::MakeOnLine(){
     
     char* trackDataPointer = buffer + sizeof(L3_P)  ;
     char* endTrackDataPointer = buffer + maxBytes ;
+
+    // get magnetic field
+    Float_t xval[3] = {0.,0.,0.};
+    Float_t bval[3];
+    gufld(xval,bval);
     //
     //    Set parameters
     //
     tracker.setup ( 30000, 3000 ) ;
     tracker.para.infoLevel = 10 ;
-    //   for ( int ie = 0 ; ie < gl3.nEvents ; ie++ ) gl3.event[ie].bField = 0.5 ;
     tracker.para.infoLevel = 10 ;
     tracker.para.hitChi2Cut   = 50 ;
     tracker.para.trackChi2Cut = 10 ;
@@ -250,8 +254,8 @@ Int_t St_l3t_Maker::MakeOnLine(){
     tracker.setXyError ( 0.12 ) ;
     tracker.setZError  ( 0.24 ) ;
     
-    tracker.para.bField = 0.5;
-    //tracker.para.bFieldPolarity = 1;
+    tracker.para.bField = bval[2];
+    tracker.para.bFieldPolarity = (int)(bval[2]/fabs(bval[2]));
 
     tracker.para.ptMinHelixFit = 0.0;
     tracker.para.maxChi2Primary = 0;
@@ -260,7 +264,7 @@ Int_t St_l3t_Maker::MakeOnLine(){
 
     tracker.reset();
     
-    gl3.setBField(0.5);
+    gl3.setBField(bval[2]);
     
     //   Print parameters for first event
     if ( firstEvent ) {
@@ -668,15 +672,11 @@ Int_t St_l3t_Maker::fillStEvent(St_dst_track* trackS, St_dst_dedx* dedxS, St_tcl
 				 Pt * sin(convert*dstTracks[trackindex].psi),
 				 Pt * dstTracks[trackindex].tanl ) ;
 
-	// CS HACK: l3 tracking assumes pos. Bz
-	// ==>> correct charge
-	short q = bval[2] > 0 ? dstTracks[trackindex].icharge : -1 * dstTracks[trackindex].icharge;
-
 	// calculate helicity:
-	short h = ((bval[2] * q) > 0 ? -1 : 1);
+	short h = ((bval[2] * dstTracks[trackindex].icharge) > 0 ? -1 : 1);
 
 	StHelixModel* helixModel = 
-	    new StHelixModel( q,
+	    new StHelixModel( dstTracks[trackindex].icharge,
 			      dstTracks[trackindex].psi,
 			      0.0,
 			      atan(dstTracks[trackindex].tanl), 
