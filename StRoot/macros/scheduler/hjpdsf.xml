@@ -39,8 +39,10 @@
     module load globus
     mkdir -p ${registerDirectory}
     mkdir -p ${packageDirectoryBin}
-    echo "The job   $PROCESSID.$REQUESTID has been started"  &gt;${localLogFile}
-
+# ---
+#   Start the local Web page
+# ---
+    echo "&lt;HTML&gt;&lt;TITLE&gt;The job   $PROCESSID.$REQUESTID has been started &lt;/TITLE&gt; &lt;BODY&gt; &lt;small&gt; &lt;code&gt; &lt;pre&gt;"  &gt;${localLogFile}
     cd ${packageDirectoryBin}
 
 #    -------------------------------
@@ -166,6 +168,11 @@ STAFKUMAC
      echo "  $ZEBRAOUTPUT has been transfered  to  ${finalPackageDirectory}/gstar.$PROCESSID.fz  with status=$status"
 
       time &gt;&gt;${localLogFile}
+ # ----
+ #   close local Web page
+ # ----
+    echo "&lt;/PRE&gt;&lt;/BODY&gt;&lt;HTML&gt;"  &gt;${localLogFile}
+
    </command>  
     <stdout URL="file:./$JOBID.out" />
     <output fromScratch="$ZEBRAOUTPUT" >
