@@ -26,7 +26,7 @@
 
 */
 
-
+#include <cmath>
 #include "StiHitError.h"
 
 #define DEG2RAD 57.2958
