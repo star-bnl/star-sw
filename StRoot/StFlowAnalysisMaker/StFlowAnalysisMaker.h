@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.34 2001/12/11 22:03:56 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.35 2002/10/28 19:45:55 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -45,13 +45,13 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.34 2001/12/11 22:03:56 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.35 2002/10/28 19:45:55 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
 
   void     FillFromTags();
-  void     FillFromFlowEvent();
+  Bool_t   FillFromFlowEvent();
   void     FillEventHistograms();
   void     FillParticleHistograms();
 #ifndef __CINT__
@@ -212,6 +212,9 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.35  2002/10/28 19:45:55  posk
+// Eliminate events with Psi=0.
+//
 // Revision 1.34  2001/12/11 22:03:56  posk
 // Four sets of phiWgt histograms.
 // StFlowMaker StFlowEvent::PhiWeight() changes.

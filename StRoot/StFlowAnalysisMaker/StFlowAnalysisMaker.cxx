@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.65 2002/06/15 23:03:56 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.66 2002/10/28 19:45:52 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -78,16 +78,19 @@ Int_t StFlowAnalysisMaker::Make() {
     if (pFlowTag) {
       FillFromTags();                        // get event quantities
       FillEventHistograms();                 // fill from Flow Tags
+      if (pFlowEvent) FillParticleHistograms(); // fill particle histograms
     } else if (pFlowEvent) {
       gMessMgr->Info("##### FlowAnalysis: FlowTag pointer null");
-      FillFromFlowEvent();                   // get event quantities
-      FillEventHistograms();                 // fill from FlowEvent
+      if (FillFromFlowEvent()) {               // get event quantities
+	FillEventHistograms();                 // fill from FlowEvent
+	FillParticleHistograms();              // fill particle histograms
+      } else {
+	gMessMgr->Info("##### FlowAnalysis: Event psi = 0");
+      }
     } else {
       gMessMgr->Info("##### FlowAnalysis: FlowEvent and FlowTag pointers null");
       return kStOK;
     }
-    // Particle quantities
-    if (pFlowEvent) FillParticleHistograms(); // fill particle histograms
     
     if (Debug()) StMaker::PrintInfo();
   }
@@ -1057,7 +1060,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.65 2002/06/15 23:03:56 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.66 2002/10/28 19:45:52 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1101,7 +1104,7 @@ void StFlowAnalysisMaker::FillFromTags() {
 
 //-----------------------------------------------------------------------
 
-void StFlowAnalysisMaker::FillFromFlowEvent() {
+Bool_t StFlowAnalysisMaker::FillFromFlowEvent() {
   // Get event quantities from StFlowEvent
   for (int k = 0; k < Flow::nSels; k++) {
     pFlowSelect->SetSelection(k);
@@ -1112,6 +1115,7 @@ void StFlowAnalysisMaker::FillFromFlowEvent() {
 	int i = Flow::nSels*k + n;
 	// sub-event quantities
 	mPsiSub[i][j] = pFlowEvent->Psi(pFlowSelect);
+	if (mPsiSub[k][j]==0.) return kFALSE; // to eliminate psi=0
      }
 
       pFlowSelect->SetSubevent(-1);
@@ -1120,9 +1124,11 @@ void StFlowAnalysisMaker::FillFromFlowEvent() {
       mPsi[k][j]  = pFlowEvent->Psi(pFlowSelect);
       m_q[k][j]   = pFlowEvent->q(pFlowSelect);
       mMult[k][j] = pFlowEvent->Mult(pFlowSelect);
+      if (mPsi[k][j]==0.) return kFALSE; // to eliminate psi=0
     }
   }
 
+  return kTRUE;
 }
 
 //-----------------------------------------------------------------------
@@ -1789,6 +1795,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.66  2002/10/28 19:45:52  posk
+// Eliminate events with Psi=0.
+//
 // Revision 1.65  2002/06/15 23:03:56  posk
 // Changed Fit/Max histogram to (Fit - 1)/Max.
 //
