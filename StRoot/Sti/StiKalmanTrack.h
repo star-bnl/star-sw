@@ -114,80 +114,35 @@ public:
     {
     };
 
-  /*! 
-     Set the factory used for the creation of kalman track nodes.
-     @see StiFactory
-   */
+  /// Set the factory used for the creation of kalman track nodes.
   static void setKalmanTrackNodeFactory(StiObjectFactoryInterface<StiKalmanTrackNode>*);
   
-  //Action method for polymorphic graphical behavior
+  ///Action method for polymorphic graphical behavior
   virtual void update();
   
-  /*! 
-   * Reset the class members to their default state.
-   * This method is called by the ctor of the class to initialize the
-   * members of the class to an "empty" or null track state. The
-   * method must also be called everytime an instance of this class is
-   * retrieved from its factory in order to set the first and last
-   * nodes to "null" thus guaranteeing that the track object is empty
-   * i.e. does not represent any track and is thus ready for a new
-   * search and reconstruction.  It is guaranteed that a call to
-   * reset() fully propogates up the inheritance tree.
-   */
+
   void    reset();
   
-  /*! 
-   * Calculates and returns the momentum and error of the track 
-   * This method calculates and returns in the two arrays provided as arguments the 
-   * 3-momentum and error of the track in Star global coordinates. The 3-momentum 
-   * is calculated at the inner most point associated with the track. The inner-most 
-   * point may or may not be the main vertex of the event. Care should thus be exercised 
-   * while using this method. 
-   *
-   * The error is calculated (and returned) only if a non null array is passed as a second
-   * argument. It is thus possible to get the momentum without a lengthy calculation 
-   * of the error matrix. The error error matrix corresponds to a full covariance matrix.
-   * The definition of the error matrix is described in the introduction of this class
-   * definition. Note that the actual calculation of the momentum and associated error 
-   * is delegated to the track node class and uses the inner most node of the track.
-   */
+	/// Calculates and returns the momentum and error of the track 
   void    getMomentum(double p[3], double e[6]) const ;
   
-  /*!
-   * Calculates and returns the transverse momentum of the track at the inner most node 
-   * held by this track which may or (or not) be the primary vertex. 
-   */
-  double  getPt()             const;
+  /// Calculates and returns the transverse momentum of the track at the inner most node 
+  double  getPt() const;
   
-  /// Convenience method used to return the curvature of the track at its inner most point. 
-  double  getCurvature()      const; 
+  /// Return the curvature of the track at its inner most point. 
+  double  getCurvature() const; 
   
-  /*!
-   * Returns the rapidity of the track if the mass is known, Throws a runtime_error
-   * exception otherwise.
-   * @return rapidity
-   */
-  double  getRapidity()       const;
+  /// Return the rapidity of the track if the mass is known.
+  double  getRapidity() const;
   
-  /*!
-   * Returns the pseudorapidity of the track.
-   * @return pseudorapidity
-   */
+  /// Return the pseudorapidity of the track.
   double  getPseudoRapidity() const;
   
-  /*! 
-   * Returns the azimuthal angle of the track determined at the inner most point of the track
-   * which may or may not be a vertex.
-   * @return phi in radian
-   */
+	/// Return azimuthal angle at inner most point of the track.
   double  getPhi()            const;
   
-  /*!
-   * Returns the tangent of the dip angle of the track determined at the inner most point of the track
-   * which may or may not be a vertex.
-   * @return tan(lambda)
-   */
-   double  getTanL()           const;
+  /// Returns the tangent of the dip angle of the track determined at the inner most point of the track.
+	double  getTanL()           const;
 
   /*!
    * Returns the distance of closest approach of this track to the given hit.
@@ -208,23 +163,13 @@ public:
    */
    double getPrimaryDca() const;
 
-  /*!
-   * Returns the number of hits associated with this track.
-   * @return number of hits associated with the track
-   */
+	 /// Return the number of hits associated with this track.
    int getPointCount() const;
 
-  /*!
-   * Returns the number of hits associated with this track.
-   * @return number of hits associated with the track
-   */
+	 /// Returns the number of hits associated and used in the fit of this track.
    int getFitPointCount() const;  
    
-  /*!
-   * Returns the number of gaps on this track. The gaps correspond to missing hits 
-   * in active layers along the track
-   * @return number of gaps along this track
-   */
+	 /// Return the number of gaps on this track. 
    int getGapCount() const;
 
 	 /*!
@@ -373,14 +318,6 @@ protected:
   StiKalmanTrackNode * firstNode;
   StiKalmanTrackNode * lastNode;
 };
-
-
-/*! Return the mass hypothesis used in the resconstruction of this track.
-*/
-inline double  StiKalmanTrack::getMass() const   
-{
-  return m;
-}
 
 
 #endif
