@@ -14,24 +14,48 @@
 *                             files on switches.
 *
 * 09/15/98 - LDC added analysis_switch options for xdf file output
+*  9/21/98 - K. Turner - broke up into more distinct macros
+*
 * ***************************************************************
-macro init _
+* ***************************************************************
+macro read_params 
+  
+  macro/global/import *
+
+  message ' init_sca#read_params '
+
+  exec read_table_from_file#init  SCAPARAM    [TOP]/params/ebye/sca_params.xdf
+  exec read_table_from_file#read  SCAPARAM    [params]/ebye
+  exec read_table_from_file#close SCAPARAM 
+
+
+  return
+********************************************************************
+macro init_params _
 	calib_dir=$STAR_CALIB/ebye _ 	    
 	output_file=sca_out.xdf _
 	prior_switch=0 _
 	ensemble_switch=0 _
 	analysis_switch=0
-  
+
   macro/global/import *
-  message 'initialize sca tables and switches '  
 
-message  'prior switch: ' [prior_switch]
-message  'ensemble switch: ' [ensemble_switch]
-message  'analysis switch: ' [analysis_switch]
+  message ' init_sca#init_params '
 
-  exec read_table_from_file#init  SCAPARAM    [TOP]/params/ebye/sca_params.xdf
-  exec read_table_from_file#read  SCAPARAM    [params]/ebye
-  exec read_table_from_file#close SCAPARAM 
+return
+*******************************************************************
+
+macro init_analysis _
+	calib_dir=$STAR_CALIB/ebye _ 	    
+	output_file=sca_out.xdf _
+	prior_switch=0 _
+	ensemble_switch=0 _
+	analysis_switch=0
+
+  macro/global/import *
+
+  message ' init_sca#init_prior '
+
   if [prior_switch].eq.1 then
    exec  init_sca#init_prior
    exec  init_sca#init_ensemble_ave
@@ -88,6 +112,8 @@ return
 
 macro init_prior
   macro/global/import *
+  message ' init_sca#init_prior '
+
   cd [calib]/ebye/sca_prior_dir
 
   tdm/table/rowcount   sca_prior         1
@@ -97,9 +123,10 @@ macro init_prior
   cd /dui
 return
 
-
+*************************************************************
 macro init_ensemble_ave
   macro/global/import *
+  message 'init_sca#init_ensemble_ave'
 
   cd [calib]/ebye/sca_ensemble_dir
   tdm/table/rowcount   sca_ensemble_ave  1
@@ -118,3 +145,6 @@ macro init_ensemble_ave
 
   cd /dui
 return
+
+***************************************************************
+
