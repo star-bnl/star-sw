@@ -1,0 +1,34 @@
+*	This file is:  stropen.template
+
+*	This is a calling-template for STROPEN, defined in file strlib.f(or) .
+
+*	Actual declaration needed:
+	LOGICAL STROPEN
+
+*  Input arguments:
+*	INTEGER LUN !Logical unit on which to open file.
+*	CHARACTER*(<user>) FILENAME !Name of file.
+*	CHARACTER*(<user>) COMMANDS !Command line, through which
+*	                            !OPEN options are selected.
+*  Return values:
+*	.TRUE. for a successful open on: Filename .
+*	.FALSE. for a failed open.
+*  Functional description:
+*	Attempts to open the specified file in a machine-independent fashion
+*	using the OPEN parameters specified in COMMANDS.  COMMANDS is a
+*	character string containing all the "usual" OPEN parameters, except
+*	for the UNIT=lun (FORTRAN Logical Unit) and FILE=filename, which are passed
+*	separately, and without the usual single-quotes (apostrophes) normally
+*	around literal arguments.
+
+	IF ( .NOT. STROPEN(
+     1	      <LUN>, <FILENAME>
+     1	   ,  'STATUS=OLD'
+     1	   // ',CARRIAGECONTROL=LIST'
+     1	   ) ) THEN
+*	  File did not open:
+
+	ELSE
+*	  File successfully openned:
+
+	END IF
