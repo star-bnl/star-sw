@@ -1,5 +1,6 @@
 #include <iostream>
 #include <math.h>
+#include "StiDebug.h"
 #include "StiHit.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
@@ -20,14 +21,16 @@
 bool StiKalmanTrackNode::recurse = false;
 bool StiKalmanTrackNode::elossCalculated = false;
 bool StiKalmanTrackNode::mcsCalculated   = false;
-double StiKalmanTrackNode::kField = 0.25;
+double StiKalmanTrackNode::kField = 0.5;
 double StiKalmanTrackNode::massHypothesis = 0.13957018;
 double StiKalmanTrackNode::unitCharge = 1;
 
 //_____________________________________________________________________________
 void StiKalmanTrackNode::reset()
 { 
-  // Base class reset
+	if (StiDebug::isReq(StiDebug::Flow)) cout <<"StiKalmanTrackNode:reset() - Beginning" << endl;
+	
+	// Base class reset
   StiTrackNode::reset();
   // Reference angle
   fAlpha= 0.;
@@ -72,6 +75,7 @@ void StiKalmanTrackNode::set(int   depth,
 			     const double dEdx,
 			     const double chi2)
 {
+	if (StiDebug::isReq(StiDebug::Flow)) cout <<"StiKalmanTrackNode:set(...) - Beginning" << endl;
   StiTrackNode::set(depth, hit);
   fAlpha  = alpha;
   fX      = xRef;
@@ -102,6 +106,8 @@ void StiKalmanTrackNode::set(int   depth,
 
 void StiKalmanTrackNode::setState(const StiKalmanTrackNode * node)
 {
+	if (StiDebug::isReq(StiDebug::Flow)) 
+		cout <<"StiKalmanTrackNode:setState(const StiKalmanTrackNode * node) - Beginning" << endl;
 	fAlpha = node->fAlpha;
   fX   = node->fX;
   // state matrix
@@ -132,6 +138,9 @@ void StiKalmanTrackNode::setState(const StiKalmanTrackNode * node)
 //_____________________________________________________________________________
 void StiKalmanTrackNode::setAsCopyOf(const StiKalmanTrackNode * node)
 {
+	if (StiDebug::isReq(StiDebug::Flow)) 
+		cout <<"StiKalmanTrackNode:: setAsCopyOf(const StiKalmanTrackNode * node)- Beginning" << endl;
+
   StiTrackNode::setAsCopyOf(node);
   fX    = node->fX;
   fAlpha= node->fAlpha;
@@ -406,7 +415,8 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 		}
   double x, x0, rho;
   position = StiMaterialInteraction::findIntersection(pNode,tDet,x,x0,rho);
-  cout << "propagate x/x0/rho:" << x << "\t" << x0 << "\t" << rho << endl;
+  if (StiDebug::isReq(StiDebug::Node))
+		cout << "StiKalmanTrackNode::propagate(...)\tx/x0/rho:" << x << "\t" << x0 << "\t" << rho << endl;
   propagate(x,x0,rho);
   return position;
 }
@@ -429,8 +439,8 @@ void  StiKalmanTrackNode::propagate(double xk,
   double c2sq = c2*c2; 
   if (c2sq>1.) 
       {
-	  cout << "c2sq:" << c2sq << endl;
-	  c2sq = 0.99999999;
+				cout << "c2sq:" << c2sq << endl;
+				c2sq = 0.99999999;
       }
   double r2=sqrt(1.- c2sq );
   fP0 = fP0 + dx*(c1+c2)/(r1+r2);
@@ -444,7 +454,7 @@ void  StiKalmanTrackNode::propagate(double xk,
   double f12=-dx*fP4*(2*cr + cc*(c2*c1/r1-r1 + c1*c2/r2-r2))/(cr*cr);
   double f13=dx*fP4*(cr*xx-cc*(r1*x2-c2*c1*x1/r1+r2*x1-c1*c2*x2/r2))/(cr*cr);
   double f14= dx*cc/cr; 
-
+	
   //b = C*ft
   double b00=f02*fC20 + f03*fC30;
   double b01=f12*fC20 + f13*fC30 + f14*fC40;
@@ -461,7 +471,7 @@ void  StiKalmanTrackNode::propagate(double xk,
   double a00=f02*b20+f03*b30;
   double a01=f02*b21+f03*b31;
   double a11=f12*b21+f13*b31+f14*b41;
-
+	
   //F*C*Ft = C + (a + b + bt)
   fC00 += a00 + 2*b00;
   fC10 += a01 + b01 + b10; 
@@ -480,11 +490,12 @@ void  StiKalmanTrackNode::propagate(double xk,
       double d=sqrt((x1-fX)*(x1-fX)
 		    +(y1-fP0)*(y1-fP0)  +(z1-fP1)*(z1-fP1));
       double tanl  = fP4;
-      if (fP3==0.) {
-	  cout <<"StiKalmanTrackNode::propogate(). ERROR:\t";
-	  cout <<"fp3==0, line 484. return"<<endl;
-	  //throw new Exception("StiKalmanTrackNode::propagate - Error - fP3 wass null");
-	  return;
+      if (fP3==0.) 
+				{
+					cout <<"StiKalmanTrackNode::propogate(). ERROR:\t";
+					cout <<"fp3==0, line 484. return"<<endl;
+					//throw new Exception("StiKalmanTrackNode::propagate - Error - fP3 wass null");
+					return;
       }
 			
       double pt = 0.003*kField/fP3;

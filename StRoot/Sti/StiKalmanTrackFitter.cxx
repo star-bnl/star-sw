@@ -1,6 +1,6 @@
+#include "StiDebug.h"
 #include "StiKalmanTrackFitter.h"
 #include "StiKalmanTrack.h"
-
 
 StiKalmanTrackFitter::StiKalmanTrackFitter()
 {
@@ -12,24 +12,24 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack) //throw (Exception)
     /*
       Fit this track using the currently selected fit method.
     */
-    cout << "StiKalmanTrackFitter::fit() - ";
+	if (StiDebug::isReq(StiDebug::Flow))
+		cout << "StiKalmanTrackFitter::fit() - ";
     
     StiKalmanTrack * track = dynamic_cast<StiKalmanTrack * >(stiTrack);
     if (track==0) {
-	cout <<"StiKalmanTrack::fit(). ERROR:\t";
-	cout <<"Cast to StiKalmanTrack line 20 failed.  Return."<<endl;
-	return;
+			cout <<"StiKalmanTrack::fit(). ERROR:\t"
+					 <<"Cast to StiKalmanTrack line 20 failed.  Return."<<endl;
+			return;
     }
     
     StiKalmanTrackNode * first = track->getFirstNode();
     StiKalmanTrackNode * last  = track->getLastNode();  
     if (first==0) {
-	cout <<"StiKalmanTrackFitter::fit(). ERROR:\t";
-	cout <<"track->getFirstChild()==0, line 28. return"<<endl;
-	//throw new Exception("StiKalmanTrackFitter::fit(): track->getFirstChild() returned null");
-	return;
+			cout <<"StiKalmanTrackFitter::fit(). ERROR:\t";
+			cout <<"track->getFirstChild()==0, line 28. return"<<endl;
+			//throw new Exception("StiKalmanTrackFitter::fit(): track->getFirstChild() returned null");
+			return;
     }
-    
     if (last==0) {
       cout <<"StiKalmanTrackFitter::fit(). ERROR:\t";
       cout <<"track->getLastChild()==0, line 28. return"<<endl;
@@ -37,23 +37,25 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack) //throw (Exception)
     }
     switch (fitMethod)	{
     case Inward:
-	cout << "Inward" << endl;
-	fitInward(first);
-	track->setChi2(last->fChi2);
-	if (last->fP3>0)
-	    track->setCharge(StiKalmanTrackNode::unitCharge);
-	else
-	    track->setCharge(-StiKalmanTrackNode::unitCharge);
-	break;
-    case Outward:
-	cout << "Outward" << endl;
-	fitOutward(last);
-	track->setChi2(first->fChi2);
-	if (last->fP3>0)
-	    track->setCharge(StiKalmanTrackNode::unitCharge);
-	else
-	    track->setCharge(-StiKalmanTrackNode::unitCharge);
-	break;
+			if (StiDebug::isReq(StiDebug::Flow))
+				cout << "Fit Inward" << endl;
+			fitInward(first);
+			track->setChi2(last->fChi2);
+			if (last->fP3>0)
+				track->setCharge(StiKalmanTrackNode::unitCharge);
+			else
+				track->setCharge(-StiKalmanTrackNode::unitCharge);
+			break;
+    case Outward:	
+			if (StiDebug::isReq(StiDebug::Flow))
+				cout << "Fit Outward" << endl;
+			fitOutward(last);
+			track->setChi2(first->fChi2);
+			if (last->fP3>0)
+				track->setCharge(StiKalmanTrackNode::unitCharge);
+			else
+				track->setCharge(-StiKalmanTrackNode::unitCharge);
+			break;
     }
 }
 
@@ -79,13 +81,15 @@ void StiKalmanTrackFitter::fitInward(StiKalmanTrackNode * node) //throw (Excepti
   
   pNode = node;
   pDet  = pNode->getDetector();
-  cout << "StiKalmanTrackFitter::fitInward()" << endl
-       << "FIRST NODE::" << endl
-       << *pNode << endl;
+	if (StiDebug::isReq(StiDebug::Flow))
+		cout << "StiKalmanTrackFitter::fitInward()" << endl
+				 << "FIRST NODE::" << endl
+				 << *pNode << endl;
   int pos;
   while (pNode->getChildCount()>0)      {
     cNode = dynamic_cast<StiKalmanTrackNode *>(pNode->getFirstChild());
-    cout << "CHILD: " <<  *cNode;
+		if (StiDebug::isReq(StiDebug::Node))
+			cout << "CHILD: " <<  *cNode;
     cDet  = cNode->getHit()->detector();
     
     pos = cNode->propagate(pNode,cDet);	  // evolve state from pDet to cDet
@@ -95,7 +99,8 @@ void StiKalmanTrackFitter::fitInward(StiKalmanTrackNode * node) //throw (Excepti
     }
     cNode->evaluateChi2();
     cNode->updateNode();
-    cout << "UPDATED: " <<  *cNode;
+		if (StiDebug::isReq(StiDebug::Node))
+			cout << "UPDATED: " <<  *cNode;
     pNode = cNode;
     pDet  = cDet;
   }

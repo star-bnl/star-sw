@@ -25,6 +25,7 @@ public:
 
     virtual void setFitMethod(StiFitMethod fitMethod);
     virtual StiFitMethod getFitMethod() const;
+
     
 protected:
 
