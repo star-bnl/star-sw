@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helensV0Cut.cxx,v 1.9 2000/10/09 21:56:16 laue Exp $
+ * $Id: helensV0Cut.cxx,v 1.10 2001/09/28 20:41:19 lisa Exp $
  *
  * Authors: Helen Caines, Tom Humanic, Ohio State, humanic@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: helensV0Cut.cxx,v $
+ * Revision 1.10  2001/09/28 20:41:19  lisa
+ * fixes to V0 object and cut
+ *
  * Revision 1.9  2000/10/09 21:56:16  laue
  * Helens new cuts
  *
@@ -92,8 +95,8 @@ helensV0Cut::helensV0Cut(){
   mChargedEdx=0;
   mdEdx[0]=0;
   mdEdx[1]=-10;
-  mdEdx[0]=0;
-  mdEdx[1]=-10;
+  mdEdx[2]=0;
+  mdEdx[3]=-10;
 
   mPt[0]=0; 
   mPt[1]=100000;
@@ -169,7 +172,7 @@ bool helensV0Cut::Pass(const StHbtV0* V0){
                   (V0->alphaV0()   > malphaV0[0]) &&
                   (V0->alphaV0()   < malphaV0[1]));
 
-  if(goodPID){
+  if(goodPID && mChargedEdx){
     if( mChargedEdx <0){
       goodPID = ( (V0->dedxNeg() > (mdEdx[0]*V0->ptNeg()+mdEdx[1])) &&
 		  (V0->dedxNeg() > (mdEdx[2]*V0->ptNeg()+mdEdx[3])));

@@ -17,7 +17,10 @@ StHbtV0::StHbtV0(const StHbtV0& v){ // copy constructor
   mTrackTopologyMapPos[1] = v.mTrackTopologyMapPos[1];
   mTrackTopologyMapNeg[0] = v.mTrackTopologyMapNeg[0];
   mTrackTopologyMapNeg[1] = v.mTrackTopologyMapNeg[1];
-        
+   
+  mKeyPos = v.mKeyPos;
+  mKeyNeg = v.mKeyNeg;
+     
   mTpcHitsPos = v.mTpcHitsPos;
   mTpcHitsNeg = v.mTpcHitsNeg;
 
