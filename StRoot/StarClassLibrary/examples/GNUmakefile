@@ -1,6 +1,6 @@
 ############################################################################
 #
-# $Id: GNUmakefile,v 1.6 2000/03/16 16:30:58 ullrich Exp $
+# $Id: GNUmakefile,v 1.7 2000/04/06 22:26:36 ullrich Exp $
 #
 # Author: Thomas Ullrich, May 1999
 # --------------------------------------------------------------------------
@@ -10,8 +10,8 @@
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile,v $
-# Revision 1.6  2000/03/16 16:30:58  ullrich
-# Added new example randomTest4.
+# Revision 1.7  2000/04/06 22:26:36  ullrich
+# Added new particle classes to particleTest.
 #
 # Revision 1.6  2000/03/16 16:30:58  ullrich
 # Added new example randomTest4.
@@ -188,7 +188,7 @@ particlesTest:	particlesTest.cc \
 		StSigmacPlus.o StSigmacPlusPlus.o StSigmacZero.o \
 		StTauMinus.o StTauPlus.o StTriton.o \
 		StXiMinus.o StXiZero.o StXicPlus.o \
-		StXicZero.o
+		StXicZero.o StPhi.o StOmegaMeson.o
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $< \
 	StAlpha.o StAntiBMesonZero.o StAntiBsMesonZero.o \
 	StAntiDMesonZero.o StAntiKaonZero.o StAntiLambda.o \
@@ -216,7 +216,7 @@ particlesTest:	particlesTest.cc \
 	StSigmacPlus.o StSigmacPlusPlus.o StSigmacZero.o \
 	StTauMinus.o StTauPlus.o StTriton.o \
 	StXiMinus.o StXiZero.o StXicPlus.o \
-	StXicZero.o \
+	StXicZero.o  StPhi.o StOmegaMeson.o \
 	-o particlesTest $(LDFLAGS)
 
 clean:
