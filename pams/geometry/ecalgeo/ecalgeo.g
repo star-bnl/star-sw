@@ -1,9 +1,11 @@
-* $Id: ecalgeo.g,v 1.7 2001/03/15 01:14:19 nevski Exp $
+* $Id: ecalgeo.g,v 1.8 2001/03/16 22:09:12 nevski Exp $
 * $Name:  $
 * $Log: ecalgeo.g,v $
+* Revision 1.8  2001/03/16 22:09:12  nevski
+* some clean-up
+*
 * Revision 1.7  2001/03/15 01:14:19  nevski
 * first approach to forward pion detector
-*
 *
 ******************************************************************************
 Module ECALGEO is the EM EndCap Calorimeter GEOmetry
@@ -38,13 +40,14 @@ Author    Rashid Mehdiyev
                  ESSP,ETAR,EGTN,ESCI,ELED,EMOD,EXGT,EXSG,EALP,EHMS,
 		 ELGD,ELGT,EWAL,ELGR,ESRB,EPCT,EUMT
 *
-      Structure  EMCG { Version,ZOrig(2),ZEnd(2),EtaMin(2),EtaMax(2),
-			PhiMin(2),PhiMax(2),Offset(2),
-			Nsupsec(2),Nsector(2),Nsection(2),Nslices(2),
-			Front,Gten,Plate(2),PlateS,PlateB,
+      Structure  EMCG { Version,OnOff(3)}
+      Structure  EMCS { Type,ZOrig,ZEnd,EtaMin,EtaMax,
+			PhiMin,PhiMax,Offset,
+			Nsupsec,Nsector,Nsection,Nslices,
+			Front,Gten,Plate,PlateS,PlateB,
                         Hub,Rmshift,SMShift,GapPlt,GapCel,GapSMD}
 *
-      Structure  EETR { Etagr,Phigr,Neta(2),EtaBin(13),EtaBin2(5)}
+      Structure  EETR { Type,Etagr,Phigr,Neta,EtaBin(13)}
 *
       Structure  ESEC { Isect, FPlmat, Cell, Scint(2), Nlayer }
 *
@@ -61,7 +64,7 @@ Author    Rashid Mehdiyev
 *			
       Real       Secwid,Section,center,current,Plate,Gap,Cell,G10,
                  tan_low,tan_upp,Tanf,RBot,Rtop,Deta,etax,
-                 dup,dd,d2,d3,rshift,dphi,
+                 dup,dd,d2,d3,rshift,dphi,orgkeep,endkeep,
                  maxcnt,msecwd,mxgten,curr,
 		 curcl,EtaTop,EtaBot,
 		 xleft,xright,yleft,yright,
@@ -97,20 +100,48 @@ Author    Rashid Mehdiyev
 *
 Fill  EMCG                          ! EM EndCAp Calorimeter basic data 
       Version  = 4                  ! Geometry version 
-      ZOrig    = {273.5,   800}     ! calorimeter origin in z
-      ZEnd     = {310.007, 836.507} ! Calorimeter end in z
-      EtaMin   = {1.078,   1.6317}  ! upper feducial eta cut 
-      EtaMax   = {2.0,     2.0}     ! lower feducial eta cut
-      PhiMin   = {-180,    -9}      ! Min phi 
-      PhiMax   = {180,     9}       ! Max phi
-      Offset   = {0.0,  50.0}	    ! offset in x
-      Nsupsec  = {12,      1}       ! Number of azimuthal supersectors        
-      Nsector  = {60,      3}       ! Number of azimutal sectors (Phi granularity)
-      Nslices  = {5,       3}       ! number of phi slices in supersector
-      Nsection = {3,       3}       ! Number of readout sections
+      OnOff    = {0,2,2}            ! =0 no, =1 west, =2 east, =3 both
+				    ! for endcap, fpd and PbG		
+Fill  EMCS                          ! EM Ebdcap Calorimeter geometry
+      Type     = 1                  ! =1 endcap, =2 fpd edcap prototype
+      ZOrig    = 273.5              ! calorimeter origin in z
+      ZEnd     = 310.007            ! Calorimeter end in z
+      EtaMin   = 1.078              ! upper feducial eta cut 
+      EtaMax   = 2.0,               ! lower feducial eta cut
+      PhiMin   = -180               ! Min phi 
+      PhiMax   = 180                ! Max phi
+      Offset   = 0.0                ! offset in x
+      Nsupsec  = 12                 ! Number of azimuthal supersectors        
+      Nsector  = 60                 ! Number of azimutal sectors (Phi granularity)
+      Nslices  = 5                  ! number of phi slices in supersector
+      Nsection = 3                  ! Number of readout sections
       Front    = 0.953              ! thickness of the front AL plates
       Gten     = 0.16               ! Fiber routing guides
-      Plate    = {0.468, 0.5}       ! Lead radiator thickness
+      Plate    =  0.468             ! Lead radiator thickness
+      PlateS   = 0.05               ! Laminated SS plate thickness
+      PlateB   = 3.175              ! Back plate thickness SS
+      Hub      = 2.5                ! thickness of EndCap hub
+      Rmshift  = 1.228              ! radial shift of module
+      smshift  = 0.12               ! radial shift of steel support walls
+      GapPlt   = 0.3/2              ! HALF of the inter-plate gap in phi
+      GapCel   = 0.03/2             ! HALF of the radial inter-cell gap
+      GapSMD   = 3.2                ! space for SMD detector
+Fill  EMCS                          ! EM Ebdcap Calorimeter geometry
+      Type     =  2                 ! =1 endcap, =2 fpd edcap prototype
+      ZOrig    =  800               ! calorimeter origin in z
+      ZEnd     =  836.507           ! Calorimeter end in z
+      EtaMin   =  1.6317            ! upper feducial eta cut 
+      EtaMax   =  2.0               ! lower feducial eta cut
+      PhiMin   =  -9                ! Min phi 
+      PhiMax   =   9                ! Max phi
+      Offset   = 50.0	            ! offset in x
+      Nsupsec  =    1               ! Number of azimuthal supersectors        
+      Nsector  =    3               ! Number of azimutal sectors (Phi granularity)
+      Nslices  =    3               ! number of phi slices in supersector
+      Nsection =    3               ! Number of readout sections
+      Front    = 0.953              ! thickness of the front AL plates
+      Gten     = 0.16               ! Fiber routing guides
+      Plate    = 0.5                ! Lead radiator thickness
       PlateS   = 0.05               ! Laminated SS plate thickness
       PlateB   = 3.175              ! Back plate thickness SS
       Hub      = 2.5                ! thickness of EndCap hub
@@ -121,11 +152,17 @@ Fill  EMCG                          ! EM EndCAp Calorimeter basic data
       GapSMD   = 3.2                ! space for SMD detector
 * --------------------------------------------------------------------------
 Fill EETR                      ! Eta and Phi grid values
+      Type     = 1             ! =1 endcap, =2 fpd
       EtaGr    = 1.0536        ! eta_top/eta_bot tower granularity
       PhiGr    = 0.0981747     ! Phi granularity (radians)
-      NEta     = {12,4}        ! Eta granularity
+      NEta     = 12            ! Eta granularity
       EtaBin   = {2.0,1.9008,1.8065,1.7168,1.6317,1.5507,1.4738,1.4007,1.3312,1.2651,1.2023,1.1427,1.086}! Eta rapidities
-      EtaBin2  = {2.0,1.9,1.8,1.7,1.6} ! Eta rapidities for FPD
+Fill EETR                      ! Eta and Phi grid values
+      Type     = 2             ! =1 endcap, =2 fpd
+      EtaGr    = 1.0536        ! eta_top/eta_bot tower granularity
+      PhiGr    = 0.0981747     ! Phi granularity (radians)
+      NEta     = 4             ! Eta granularity
+      EtaBin   = {2.0,1.9,1.8,1.7,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6} ! Eta rapidities
 *---------------------------------------------------------------------------
 Fill ESEC           ! First EM section
       ISect    = 1                           ! Section number	
@@ -187,67 +224,99 @@ Fill ELGM				     ! PbG detector materials
       Use    EMCG
       Use    ELGG
 *
-      prin0 emcg_version 
+      prin1 emcg_version 
 	('ECALGEO version ', F4.2)
-*
-      Type=1 			! Endcap 
-      if(emcg_Nsupsec(Type)>0) then
-        diff = 0.0
-        center  = (emcg_ZOrig(1)+emcg_ZEnd(1))/2
-        Tan_Upp = tanf(emcg_EtaMin(1))
-        Tan_Low = tanf(emcg_EtaMax(1))
-        rshift  = emcg_Hub * sqrt(1. + Tan_Low*Tan_Low)
-        dup=emcg_Rmshift*Tan_Upp
-        dd=emcg_Rmshift*Tan_Low
-        d2=rshift + dd
-*       d3=emcg_Rmshift-2*emcg_smshift
-        dphi = (emcg_PhiMax(Type)-emcg_PhiMin(Type))/emcg_Nsector(Type)
-        Create    ECAL
-        Position  ECAL in CAVE    z=+center 
-*       Position  ECAL in CAVE    z=-center ThetaZ=180  
 
-        If(section > emcg_Zend(1)) then
-           prin0 section,emcg_Zend(1)
+* Endcap
+      USE EMCS type=1
+      USE EETR type=1
+      orgkeep =  emcs_ZOrig
+      endkeep =  emcs_ZEnd
+      if(emcg_OnOff(1)>0) then
+        diff = 0.0
+        center  = (emcs_ZOrig+emcs_ZEnd)/2
+        Tan_Upp = tanf(emcs_EtaMin)
+        Tan_Low = tanf(emcs_EtaMax)
+        rshift  = emcs_Hub * sqrt(1. + Tan_Low*Tan_Low)
+        dup=emcs_Rmshift*Tan_Upp
+        dd=emcs_Rmshift*Tan_Low
+        d2=rshift + dd
+*       d3=emcs_Rmshift-2*emcs_smshift
+        dphi = (emcs_PhiMax-emcs_PhiMin)/emcs_Nsector
+        Create ECAL
+        if(emcg_OnOff(1)==1 | emcg_OnOff(1)==3) then
+		Position ECAL in CAVE z=+center
+	endif
+        if(emcg_OnOff(1)==2 | emcg_OnOff(1)==3) then
+		Position ECAL in CAVE z=-center ThetaZ=180
+	endif
+
+        If(section > emcs_Zend) then
+           prin0 section,emcs_Zend
            (' ECALGEO error: sum of sections exceeds maximum ',2F12.4)
         endif
 *       prin0 section
 *       (' EndCap calorimeter total depth ',F12.4)
       endif
  
-      Type=2			! Foward Pion detector
-      if(emcg_Nsupsec(Type)>0) then
-        diff = emcg_ZOrig(2) - emcg_ZOrig(1)
-        center = (emcg_ZOrig(2)+emcg_ZEnd(2))/2
-        Tan_Upp = tanf(emcg_EtaMin(2))  
-        Tan_Low = tanf(emcg_EtaMax(2))
-        rshift  = emcg_Hub * sqrt(1. + Tan_Low*Tan_Low)
-        dup=emcg_Rmshift*Tan_Upp
-        dd=emcg_Rmshift*Tan_Low
+* Foward Pion detector
+      if(emcg_OnOff(2)>0) then
+        USE EMCS type=2
+        USE EETR type=2
+        diff = emcs_ZOrig - orgkeep
+        center = (emcs_ZOrig+emcs_ZEnd)/2
+        Tan_Upp = tanf(emcs_EtaMin)  
+        Tan_Low = tanf(emcs_EtaMax)
+        rshift  = emcs_Hub * sqrt(1. + Tan_Low*Tan_Low)
+        dup=emcs_Rmshift*Tan_Upp
+        dd=emcs_Rmshift*Tan_Low
         d2=rshift + dd
-        dphi = (emcg_PhiMax(Type)-emcg_PhiMin(Type))/emcg_Nsector(Type)
+        dphi = (emcs_PhiMax-emcs_PhiMin)/emcs_Nsector
         Create    ECAL
-        Position  ECAL in CAVE  z=-center x=emcg_Offset(Type) ThetaZ=180
+        if(emcg_OnOff(2)==1 | emcg_OnOff(2)==3) then
+		Position ECAL in CAVE z=+center x=emcs_Offset
+	endif
+        if(emcg_OnOff(2)==2 | emcg_OnOff(2)==3) then
+		Position ECAL in CAVE z=-center x=emcs_Offset ThetaZ=180
+	endif
 
-        If(section > emcg_Zend(2)) then
-          prin0 section,emcg_Zend(2)
+        If(section > emcs_Zend) then
+          prin0 section,emcs_Zend
           (' ECALGEO error: sum of sections exceeds maximum ',2F12.4)
         endif
       endif
 
-      Type=3                     ! PbG detectors
-      if(ELGG_NEta*ELGG_NPhi>0) then
+* PbG detectors
+      if(EMCG_OnOff(3)>0) then
 	zz = (ELGG_Depth+ELGG_AlThick+ELGG_MuMetDz)/2.0
         yy = (ELGG_NEta*ELGG_Width + (ELGG_NEta+1)*ELGG_DGap)/2.0
 
-	Create and Position ELGD in CAVE z=-(ELGG_ZPos+zz) y=ELGG_Rdis+yy x=0,
+        if(emcg_OnOff(2)==1 | emcg_OnOff(2)==3) then
+		Create and Position ELGD in CAVE z=ELGG_ZPos+zz y=ELGG_Rdis+yy x=0, 
+			       phix=180  phiy=90   phiz=0,
+			       thetax=90 thetay=90 thetaz=0 
+		Create and Position ELGD in CAVE z=ELGG_ZPos+zz x=ELGG_Rdis+yy y=0,
+ 			       phix=90   phiy=0    phiz=0,
+			       thetax=90 thetay=90 thetaz=0 
+		Create and Position ELGD in CAVE z=ELGG_ZPos+zz y=-(ELGG_Rdis+yy) x=0,
+ 			       phix=0    phiy=-90  phiz=0,
+			       thetax=90 thetay=90 thetaz=0 
+		Create and Position ELGD in CAVE z=ELGG_ZPos+zz x=-(ELGG_Rdis+yy) y=0,
+ 			       phix=-90  phiy=-180 phiz=0,
+			       thetax=90 thetay=90 thetaz=0 
+	endif
+        if(emcg_OnOff(2)==2 | emcg_OnOff(2)==3) then
+		Create and Position ELGD in CAVE z=-(ELGG_ZPos+zz) y=ELGG_Rdis+yy x=0,
  			       phix=180  phiy=90   phiz=0,
 			       thetax=90 thetay=90 thetaz=180 
-	Create and Position ELGD in CAVE z=-(ELGG_ZPos+zz) x=ELGG_Rdis+yy y=0,
+		Create and Position ELGD in CAVE z=-(ELGG_ZPos+zz) x=ELGG_Rdis+yy y=0,
  			       phix=90   phiy=0    phiz=0,
 			       thetax=90 thetay=90 thetaz=180 
-	Create and Position ELGD in CAVE z=-(ELGG_ZPos+zz) y=-(ELGG_Rdis+yy) x=0,
+		Create and Position ELGD in CAVE z=-(ELGG_ZPos+zz) y=-(ELGG_Rdis+yy) x=0,
  			       phix=0    phiy=-90  phiz=0,
 			       thetax=90 thetay=90 thetaz=180 
+	endif
+
       endif
       prin1
 	('ECALGEO finished')
@@ -257,12 +326,12 @@ Block ECAL is one EMC EndCap wheel
       Material  Air
       Medium    standard
       Attribute ECAL   seen=1 colo=7				!  lightblue
-      shape     CONE   dz=(emcg_Zend(Type)-emcg_ZOrig(Type))/2,
-                Rmn1=emcg_ZOrig(1)*Tan_Low-d2 Rmn2=emcg_ZEnd(1)*Tan_Low-d2,
-                Rmx1=emcg_ZOrig(1)*Tan_Upp+dup Rmx2=emcg_ZEnd(1)*Tan_Upp+dup,
-	        phi1=emcg_PhiMin(Type) phi2=emcg_PhiMax(Type)
+      shape     CONE   dz=(emcs_Zend-emcs_ZOrig)/2,
+                Rmn1=orgkeep*Tan_Low-d2 Rmn2=endkeep*Tan_Low-d2,
+                Rmx1=orgkeep*Tan_Upp+dup Rmx2=endkeep*Tan_Upp+dup,
+	        phi1=emcs_PhiMin phi2=emcs_PhiMax
 
-      if (Type=1) then
+      if (emcs_Type==1) then
       Create  and Position ECVO thetax=90 thetay=90 thetaz=0,
                                 phix = 75 phiy =-15 phiz=0
       else
@@ -274,10 +343,10 @@ EndBlock
 Block ECVO is one EMC EndCap wheel volume
       Material  Air
       Attribute ECVO   seen=1 colo=3				! green
-      shape     CONE   dz=(emcg_Zend(Type)-emcg_ZOrig(Type))/2,
-                Rmn1=emcg_ZOrig(1)*Tan_Low-d2 Rmn2=emcg_ZEnd(1)*Tan_Low-d2,
-                Rmx1=emcg_ZOrig(1)*Tan_Upp+dup Rmx2=emcg_ZEnd(1)*Tan_Upp+dup,
-	        phi1=emcg_PhiMin(Type) phi2=emcg_PhiMax(Type)
+      shape     CONE   dz=(emcs_Zend-emcs_ZOrig)/2,
+                Rmn1=orgkeep*Tan_Low-d2 Rmn2=endkeep*Tan_Low-d2,
+                Rmx1=orgkeep*Tan_Upp+dup Rmx2=endkeep*Tan_Upp+dup,
+	        phi1=emcs_PhiMin phi2=emcs_PhiMax
 *
       Create    EMDI 
 EndBlock
@@ -285,11 +354,11 @@ EndBlock
 Block EMDI is one 1/12 phi-division of the EMC EndCap
       Attribute EMDI      seen=1    colo=2     !  red
 *     phi1, phi2 are not really used here but will be inherited by daughters
-      Shape     Division  Iaxis=2   Ndiv=nint(emcg_Nsupsec(Type)),
-                          phi1=emcg_PhiMin(Type)/emcg_Nsupsec(Type),
-			  phi2=emcg_PhiMax(Type)/emcg_Nsupsec(Type)
+      Shape     Division  Iaxis=2   Ndiv=nint(emcs_Nsupsec),
+                          phi1=emcs_PhiMin/emcs_Nsupsec,
+			  phi2=emcs_PhiMax/emcs_Nsupsec
  
-*     Create and Position EMSS x=+emcg_smshift   
+*     Create and Position EMSS x=+emcs_smshift   
       Create and Position EMSS
 
 Endblock
@@ -298,11 +367,11 @@ Block EMSS is steel support of the EndCap module
       Attribute EMSS      seen=1    colo=1		! black
 			
       Material  Iron
-      Shape     CONS   dz=(emcg_Zend(Type)-emcg_ZOrig(Type))/2,
-                Rmn1=emcg_ZOrig(1)*Tan_Low-d2  Rmn2=emcg_ZEnd(1)*Tan_Low-d2,
-                Rmx1=emcg_ZOrig(1)*Tan_Upp+dup Rmx2=emcg_ZEnd(1)*Tan_Upp+dup,
-                phi1=emcg_PhiMin(Type)/emcg_Nsupsec(Type),
-		phi2=+emcg_PhiMax(Type)/emcg_Nsupsec(Type)
+      Shape     CONS   dz=(emcs_Zend-emcs_ZOrig)/2,
+                Rmn1=orgkeep*Tan_Low-d2  Rmn2=endkeep*Tan_Low-d2,
+                Rmx1=orgkeep*Tan_Upp+dup Rmx2=endkeep*Tan_Upp+dup,
+                phi1=emcs_PhiMin/emcs_Nsupsec,
+		phi2=+emcs_PhiMax/emcs_Nsupsec
 *
       Create and Position EAGA
 
@@ -311,9 +380,9 @@ EndBlock
 Block EAGA is air gap in sector of the EM EndCap
       Attribute EAGA      seen=1  colo=7			!  lightblue
       Material  Air
-      Shape     CONS   dz=(emcg_Zend(Type)-emcg_ZOrig(Type))/2,
-                Rmn1=emcg_ZOrig(1)*Tan_Low-dd Rmn2=emcg_ZEnd(1)*Tan_Low-dd,
-                Rmx1=emcg_ZOrig(1)*Tan_Upp+dup Rmx2=emcg_ZEnd(1)*Tan_Upp+dup
+      Shape     CONS   dz=(emcs_Zend-emcs_ZOrig)/2,
+                Rmn1=orgkeep*Tan_Low-dd Rmn2=endkeep*Tan_Low-dd,
+                Rmx1=orgkeep*Tan_Upp+dup Rmx2=endkeep*Tan_Upp+dup
 
        Create and Position EMOD  
 
@@ -322,40 +391,40 @@ EndBlock
 Block EMOD is one module  of the EM EndCap
       Attribute EMOD      seen=1    colo=3			! green
       Material  Air
-      Shape     CONS   dz=(emcg_Zend(Type)-emcg_ZOrig(Type))/2,
-                Rmn1=emcg_ZOrig(1)*Tan_Low-dd  Rmn2=emcg_ZEnd(1)*Tan_Low-dd,
-                Rmx1=emcg_ZOrig(1)*Tan_Upp+dup Rmx2=emcg_ZEnd(1)*Tan_Upp+dup
+      Shape     CONS   dz=(emcs_Zend-emcs_ZOrig)/2,
+                Rmn1=orgkeep*Tan_Low-dd  Rmn2=endkeep*Tan_Low-dd,
+                Rmx1=orgkeep*Tan_Upp+dup Rmx2=endkeep*Tan_Upp+dup
 *
 *    Running parameter 'section' contains the position of the current section
 *     It should not be modified in daughters, use 'current' variable instead.
 *     SecWid is used in all 'CONS' daughters to define dimensions.
 *
-      section = emcg_ZOrig(Type)
-      secwid  = emcg_Front
+      section = emcs_ZOrig
+      secwid  = emcs_Front
       Create and Position EFLP     z=section-center+secwid/2
       section = section + secwid
 *
-        Do I_section =1,nint(Emcg_Nsection(Type))
+        Do I_section =1,nint(Emcs_Nsection)
 
          USE ESEC Isect=I_section  
 *
          Secwid  = esec_cell*esec_Nlayer
          if (I_section == 3) then      ! Last section
-          Secwid  = Secwid - emcg_plate(TYPE) - 2*emcg_plateS
-				 endif
+          Secwid  = Secwid - emcs_plate - 2*emcs_plateS
+	 endif	
          Create and position ESEC      z=section-center+secwid/2
          section = section + Secwid
 * 
          if (I_section == 2) then      ! Shower Max section
 *
-            secwid  = emcg_GapSMD
+            secwid  = emcs_GapSMD
             Create and Position ESHM   z=section-center+secwid/2
             section = section + secwid
 *
          endif
 *
       enddo
-         secwid  = emcg_PlateB
+         secwid  = emcs_PlateB
          Create and Position ESSP      z=section-center+secwid/2
          section = section + secwid
 endblock
@@ -378,30 +447,30 @@ Block ESEC is a sinle EM section
        Call GSTPAR (ag_imed,'BCUTE',0.0001)
       end if
 *
-      Do isec=1,nint(emcg_Nslices(type))
-        Create and Position ETOW AlphaZ=(isec-emcg_Nslices(TYPE)/2.0-0.5)*dphi
+      Do isec=1,nint(emcs_Nslices)
+        Create and Position ETOW AlphaZ=(isec-emcs_Nslices/2.0-0.5)*dphi
       End Do 
 Endblock
 *---------------------------------------------------------------------------
 Block ETOW is an individual 1/60 phi EM tower (section in fact)
       Attribute ETOW   seen=1  colo=1
       Shape     CONS  dz=secwid/2, 
-                phi1=emcg_PhiMin(Type)/emcg_Nsector(Type),
-		phi2=+emcg_PhiMax(Type)/emcg_Nsector(Type),
+                phi1=emcs_PhiMin/emcs_Nsector,
+		phi2=+emcs_PhiMax/emcs_Nsector,
                 rmn1=(section-diff)*Tan_Low-dd rmn2=(section+secwid-diff)*Tan_Low-dd,
                 rmx1=(section-diff)*Tan_Upp+dup rmx2=(section+secwid-diff)*Tan_Upp+dup
       current = section
       Do is = 1,esec_Nlayer
 
 *        define actual Plate and cell thickness:         
-         Plate  = emcg_Plate(Type) + 2*emcg_PlateS
-         Gap = esec_cell - Plate - esec_scint(Type)
+         Plate  = emcs_Plate + 2*emcs_PlateS
+         Gap = esec_cell - Plate - esec_scint(emcs_Type)
          Cell = esec_cell
 *
          if (is==nint(esec_Nlayer) & I_section == 3) then
           Cell = esec_cell - Plate  
-				  Plate=0
-				 endif
+	  Plate=0
+         endif
 *		 
          Create    EPER 
          Position  EPER  z=-secwid/2+(is-1)*esec_cell+Cell/2 
@@ -415,22 +484,17 @@ Block EPER  is a EM sesection period (super layer)
       Material  Air 
       Attribute EPER   seen=1  colo=1
       Shape     CONS   dz=Cell/2, 
-                phi1=emcg_PhiMin(Type)/emcg_Nsector(Type),
-		phi2=+emcg_PhiMax(Type)/emcg_Nsector(Type), 
+                phi1=emcs_PhiMin/emcs_Nsector,
+		phi2=+emcs_PhiMax/emcs_Nsector, 
                 rmn1=(current-diff)*Tan_Low-dd  rmn2=(current+Cell-diff)*Tan_Low-dd,
                 rmx1=(current-diff)*Tan_Upp+dup  rmx2=(current+Cell-diff)*Tan_Upp+dup
 *
 * --- Divide module (section) into radial blocks 
 * 
       curcl = current+Cell/2
-      Do ie = 1,nint(eetr_NEta(Type))
-	if(Type=1)then
-          EtaBot  = eetr_EtaBin(ie)
-          EtaTop  = eetr_EtaBin(ie+1)
-	else
-          EtaBot  = eetr_EtaBin2(ie)
-          EtaTop  = eetr_EtaBin2(ie+1)
-        endif
+      Do ie = 1,nint(eetr_NEta)
+        EtaBot  = eetr_EtaBin(ie)
+        EtaTop  = eetr_EtaBin(ie+1)
 
         if(ie == 1) then         ! Lower slice
           RBot=(current-diff)*Tan_Low
@@ -447,8 +511,8 @@ Block EPER  is a EM sesection period (super layer)
         endif
         check RBot<RTop
 *
-	xx=tan(pi*emcg_PhiMax(Type)/180.0/emcg_Nsector(Type))
-        yy=cos(pi*emcg_PhiMax(Type)/180.0/emcg_Nsector(Type))
+	xx=tan(pi*emcs_PhiMax/180.0/emcs_Nsector)
+        yy=cos(pi*emcs_PhiMax/180.0/emcs_Nsector)
 	Create and Position  ETAR    x=(RBot+RTop)/2  ORT=YZX 
 *         prin0 ie,EtaTop,EtaBot,rbot,rtop
 *         (' EPER : ie,EtaTop,EtaBot,rbot,rtop ',i3,4F12.4)
@@ -461,16 +525,16 @@ Block ETAR is one CELL of scintillator, fiber and laminated lead
       Attribute ETAR   seen=1  colo=2				! violet
 *     local z goes along the radius, y is the thickness
       Shape     TRD1   dy=Cell/2   dz=(RTop-RBot)/2,
-           dx1=RBot*xx-emcg_GapCel/yy,
-           dx2=RTop*xx-emcg_GapCel/yy
+           dx1=RBot*xx-emcs_GapCel/yy,
+           dx2=RTop*xx-emcs_GapCel/yy
 *
-      G10 = emcg_Gten
-      Create and Position    ESCI        y=(-cell + esec_scint(Type))/2
-      Create and Position    EGTN        y=(-cell+G10)/2+esec_scint(Type)
+      G10 = emcs_Gten
+      Create and Position    ESCI        y=(-cell + esec_scint(emcs_type))/2
+      Create and Position    EGTN        y=(-cell+G10)/2+esec_scint(emcs_type)
       if (Plate>0) then
-      Create and Position    EXFP        y=(cell + emcg_plateS)/2 - plate
+      Create and Position    EXFP        y=(cell + emcs_plateS)/2 - plate
       Create and Position    ELED        y=(cell - plate)/2
-      Create and Position    EXFP        y=(cell - emcg_plateS)/2
+      Create and Position    EXFP        y=(cell - emcs_plateS)/2
       end if
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -485,7 +549,7 @@ Block EGTN  is the G10 layer
       Mixture   g10   Dens=1.7
       Attribute EGTN   seen=1   colo=4			! blue       
 *     local z goes along the radius, y is the thickness
-      Shape     TRD1   dy=Emcg_GTen/2  dz=(RTop-RBot)/2
+      Shape     TRD1   dy=Emcs_GTen/2  dz=(RTop-RBot)/2
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block ESCI  is the active scintillator (polystyren) layer  
@@ -494,7 +558,7 @@ Block ESCI  is the active scintillator (polystyren) layer
       Material  Cpolystyren   Isvol=1
       Attribute ESCI   seen=1   colo=7   fill=0   	! lightblue
 *     local z goes along the radius, y is the thickness
-      Shape     TRD1   dy=esec_scint(Type)/2  dz=(RTop-RBot)/2-emcg_GapCel
+      Shape     TRD1   dy=esec_scint(emcs_type)/2  dz=(RTop-RBot)/2-emcs_GapCel
       Call GSTPAR (ag_imed,'CUTGAM',0.00008)
       Call GSTPAR (ag_imed,'CUTELE',0.001)
       Call GSTPAR (ag_imed,'BCUTE',0.0001)
@@ -518,7 +582,7 @@ Block ELED  is lead absorber Plate
       Material  Lead
       Material  CLead Isvol=0
       Attribute ELED   seen=1   colo=3  fill=1			! green
-      Shape     TRD1   dy=emcg_Plate(Type)/2  dz=(RTop-RBot)/2
+      Shape     TRD1   dy=emcs_Plate/2  dz=(RTop-RBot)/2
       Call GSTPAR (ag_imed,'CUTGAM',0.00008)
       Call GSTPAR (ag_imed,'CUTELE',0.001)
       Call GSTPAR (ag_imed,'BCUTE',0.0001)
@@ -535,8 +599,8 @@ Block EFLP  is First Aluminium plate
       Shape     TUBS   dz=SecWid/2,
                        rmin=(section-diff)*Tan_Low,
                        rmax=(section-diff)*Tan_Upp+dup,
-                       phi1=emcg_PhiMin(Type)/emcg_Nsupsec(Type),
-		       phi2=emcg_PhiMax(Type)/emcg_Nsupsec(Type)
+                       phi1=emcs_PhiMin/emcs_Nsupsec,
+		       phi2=emcs_PhiMax/emcs_Nsupsec
 *                rmn1=(section-diff)*Tan_Low-dd rmn2=(section+secwid-diff)*Tan_Low-dd,
 *                rmx1=(section-diff)*Tan_Upp-dd rmx2=(section+secwid-diff)*Tan_Upp-dd
 endblock
@@ -545,7 +609,7 @@ Block EXFP  is SS laminated plate
 *
       Material  Iron
       Attribute EXFP   seen=1  colo=6 fill=1		! violet
-      Shape     TRD1   dy=emcg_PlateS/2  dz=(RTop-RBot)/2
+      Shape     TRD1   dy=emcs_PlateS/2  dz=(RTop-RBot)/2
 endblock
 * ----------------------------------------------------------------------------
 Block ESHM  is the SHower Max  section
@@ -553,8 +617,8 @@ Block ESHM  is the SHower Max  section
       Material  Air Isvol=0
       Attribute ESHM   seen=1   colo=4			!  blue
       Shape     CONS   dz=SecWid/2,
-                phi1=emcg_PhiMin(Type)/emcg_Nsupsec(Type),
-		phi2=+emcg_PhiMax(Type)/emcg_Nsupsec(Type),
+                phi1=emcs_PhiMin/emcs_Nsupsec,
+		phi2=+emcs_PhiMax/emcs_Nsupsec,
                 rmn1=(section-diff)*Tan_Low-dd rmn2=(section+secwid-diff)*Tan_Low-dd,
                 rmx1=(section-diff)*Tan_Upp+dup rmx2=(section+secwid-diff)*Tan_Upp+dup
 *      Call GSTPAR (ag_imed,'CUTGAM',0.00001)
@@ -564,7 +628,7 @@ Block ESHM  is the SHower Max  section
 *
       USE EMXG Version=1
       curr =  section
-      maxcnt = curr+emcg_GapSMD/2 
+      maxcnt = curr+emcs_GapSMD/2 
 *
         Do J_section = 1,2
 *       
@@ -607,8 +671,8 @@ Block EXGT  is the G10 layer in the SMax
       Mixture   g10   Dens=1.7
       Attribute EXGT   seen=1   colo=7
       Shape     CONS   dz=msecwd/2,
-                phi1=emcg_PhiMin(Type)/emcg_Nsupsec(Type),
-		phi2=emcg_PhiMax(Type)/emcg_Nsupsec(Type),
+                phi1=emcs_PhiMin/emcs_Nsupsec,
+		phi2=emcs_PhiMax/emcs_Nsupsec,
                 rmn1=(curr-diff)*Tan_Low-dd rmn2=(curr+msecwd-diff)*Tan_Low-dd,
                 rmx1=(curr-diff)*Tan_Upp-dd rmx2=(curr+msecwd-diff)*Tan_Upp-dd    
       Call GSTPAR (ag_imed,'CUTGAM',0.00001)
@@ -620,8 +684,8 @@ Block EXSG  is the Shower max  Gap for scintillator strips
       Attribute EXSG   seen=1   colo=7			! black
       Material  Air   Isvol=0
       Shape     CONS   dz=msecwd/2,
-                phi1=emcg_PhiMin(Type)/emcg_Nsupsec(Type),
-		phi2=emcg_PhiMax(Type)/emcg_Nsupsec(Type),
+                phi1=emcs_PhiMin/emcs_Nsupsec,
+		phi2=emcs_PhiMax/emcs_Nsupsec,
                 rmn1=(curr-diff)*Tan_Low-dd  rmn2=(curr+msecwd-diff)*Tan_Low-dd,
                 rmx1=(curr-diff)*Tan_Upp+dup rmx2=(curr+msecwd-diff)*Tan_Upp+dup
 *
@@ -630,8 +694,8 @@ Block EXSG  is the Shower max  Gap for scintillator strips
       Rbot = (curr-diff+msecwd/2.)*Tan_Low-dd
       Rtop = (curr-diff+msecwd/2.)*Tan_Upp+dup
 *
-      if (Type=1) then
-        rth = Pi/emcg_Nsupsec(Type)
+      if (emcs_Type==1) then
+        rth = Pi/emcs_Nsupsec
         tng = tan(rth)
 	Nstr = nint((rtop*sq3 - rbot)/emxg_Sbase)
 	if(Nstr > 300) Nstr = 300
@@ -728,8 +792,8 @@ Block EALP  is ALuminium  Plate in shower max
       Material  CAluminium   Isvol=0
       Attribute EALP   seen=1  colo=1
       Shape     CONS   dz=msecwd/2,
-                phi1=emcg_PhiMin(Type)/emcg_Nsupsec(Type),
-		phi2=+emcg_PhiMax(Type)/emcg_Nsupsec(Type),
+                phi1=emcs_PhiMin/emcs_Nsupsec,
+		phi2=+emcs_PhiMax/emcs_Nsupsec,
                 rmn1=(curr-diff)*Tan_Low-dd rmn2=(curr+msecwd/2-diff)*Tan_Low-dd,
                 rmx1=(curr-diff)*Tan_Upp-dd rmx2=(curr+msecwd/2-diff)*Tan_Upp-dd
       Call GSTPAR (ag_imed,'CUTGAM',0.00001)
@@ -742,9 +806,9 @@ Block ESSP  is stainless steel  Plate
 *
       Material  Iron      
       Attribute ESSP   seen=1  colo=6 fill=1	
-      Shape     CONS   dz=Emcg_PlateB/2,
-                phi1=emcg_PhiMin(Type)/emcg_Nsupsec(Type),
-		phi2=+emcg_PhiMax(Type)/emcg_Nsupsec(Type),
+      Shape     CONS   dz=Emcs_PlateB/2,
+                phi1=emcs_PhiMin/emcs_Nsupsec,
+		phi2=+emcs_PhiMax/emcs_Nsupsec,
                 rmn1=(section-diff)*Tan_Low-dd rmn2=(section+secwid-diff)*Tan_Low-dd,
                 rmx1=(section-diff)*Tan_Upp+dup rmx2=(section+secwid-diff)*Tan_Upp+dup
 endblock
@@ -795,12 +859,11 @@ Endblock
 * ----------------------------------------------------------------------------
 Block ELGR is Lead Grass detector
 *     PbG is about 65% Pb 
-      Component Pb    A=207.19 Z=82   W=ELGM_PbContent*207.19/(207.19+16)
-      Component O     A=16     Z=8    W=ELGM_PbContent*16./(207.19+16)
-      Component Si    A=28.08  Z=14   W=(1.0-ELGM_PbContent)*1*28./202.
-      Component C     A=12     Z=6    W=(1.0-ELGM_PbContent)*8*12./202.
-      Component H     A=1      Z=1    W=(1.0-ELGM_PbContent)*14*1./202.
-      Component O     A=16     Z=8    W=(1.0-ELGM_PbContent)*4*16./202.
+      Component Pb    A=207.19 Z=82   W=.60712
+      Component K     A=39.102 Z=19   W=.02324
+      Component Si    A=28.088 Z=14   W=.14771
+      Component O     A=15.999 Z=8    W=.22041
+      Component As    A=74.922 Z=33   W=.00152
       Mixture   PbG   Dens=ELGM_Density Radl=ELGM_RadLen
       Attribute ELGR  seen=1    colo=4		! red
       Shape     box dz=ELGG_depth/2 dx=ELGG_Width/2 dy=ELGG_Width/2
