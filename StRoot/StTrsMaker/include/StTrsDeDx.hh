@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.hh,v 1.1 1998/11/10 17:12:09 fisyak Exp $
+ * $Id: StTrsDeDx.hh,v 1.2 1999/01/23 05:04:18 lasiuk Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,8 +13,11 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.hh,v $
- * Revision 1.1  1998/11/10 17:12:09  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/23 05:04:18  lasiuk
+ * provide a default constructor
+ *
+ * Revision 1.2  1999/01/23 05:04:18  lasiuk
+ * provide a default constructor
  *
  * Revision 1.1  1998/11/10 17:12:09  fisyak
  * Put Brian trs versin into StRoot
@@ -69,6 +72,7 @@ public:
 	primaries,
 	secondaries,
 	total,
+    StTrsDeDx(); // should be made private!! Do not use!!
 	numberOfElectrons};
     
 public:
@@ -95,6 +99,9 @@ public:
 #else
     void   electrons(vector<int, allocator<int> >&, double bg=3) const;
 #endif
+
+    // DIAGNOSTIC
+
 protected:
     StTrsDeDx(); // should be made private!! Do not use!!
     void doInitialization();

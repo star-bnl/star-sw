@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.2 1999/01/15 10:57:45 lasiuk Exp $
+ * $Id: StTrsDeDx.cc,v 1.3 1999/01/23 05:04:09 lasiuk Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,10 +13,13 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
- * Revision 1.2  1999/01/15 10:57:45  lasiuk
- * exponential dist
- * unit check
+ * Revision 1.3  1999/01/23 05:04:09  lasiuk
+ * provide a default constructor
  *
+ * Revision 1.3  1999/01/23 05:04:09  lasiuk
+ * provide a default constructor
+ *
+ * Revision 1.2  1999/01/15 10:57:45  lasiuk
  * exponential dist
  * unit check
  *
@@ -70,6 +73,13 @@ using namespace units;
 
 HepJamesRandom  StTrsDeDx::mEngine;
 RandFlat        StTrsDeDx::mFlatDistribution(mEngine);
+
+//static string trsDeDxDummy = "a";
+
+StTrsDeDx::StTrsDeDx()
+{
+  mGas = "Ar";
+  mPadLength = 1.95*centimeter;
   doInitialization();
     : mPadLength(pad),  mGas(gas)
 
@@ -86,10 +96,14 @@ RandFlat        StTrsDeDx::mFlatDistribution(mEngine);
 	cerr << gas.c_str() << " gas not currently Implemented." << endl;
 	cerr << "Must use either: \"Ne\", \"Ar\", or \"P10\"." << endl;
 	cerr << "Exitting..." << endl;
+	exit(1);
+#endif
     }
+    doInitialization();
+}
 
 void StTrsDeDx::doInitialization()
-    if(gas == "Ne") {
+{
     mKonstant = 0.1536*MeV*centimeter2/gram;
     
     if(mGas == "Ne") {
@@ -103,7 +117,7 @@ void StTrsDeDx::doInitialization()
 	mSigmaLongitudinal = 300*micrometer/sqrt(centimeter);
 	
 	mDensity  = 0.000839*gram/centimeter3;
-    if(gas == "Ar") {
+	mZa       =  .5;        // Z/A
     }
     
     if(mGas == "Ar") {
@@ -117,7 +131,7 @@ void StTrsDeDx::doInitialization()
 	mSigmaLongitudinal = 300*micrometer/sqrt(centimeter);
 	
 	mDensity  = 0.00166*gram/centimeter3;
-    if((gas == "P10") || (gas == "p10")) {
+    if((mGas == "P10") || (gas == "p10")) {
     }
 
     if((mGas == "P10") || (mGas == "p10")) {
