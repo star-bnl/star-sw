@@ -16,43 +16,35 @@
 #include "StBemcTrigger.h"
 #include "StEvent/StTriggerDetectorCollection.h"
 
+class StEvent;
+
 class StEmcTriggerMaker : public StMaker 
 {
   private:
+    StBemcTrigger*    mBemcTrigger;
+    bool              mSaveStEvent;
+    bool              mPrint;
     
-    TH1F*   EtHist;        //!
-    TH1F*   RatioHist;     //!
-    TH1F*   HighTowerHist; //!
-    TH1F*   PatchHist;     //!
-    TH1F*   JetHist;       //!
-    TH2F*   HTxPatch;      //!
-//Histos for Trigger/DAQ Comparison
-    TH2F*   DAQHTower;     //!High Tower Trigger ADC from data stored in DAQ 
-    TH2F*   DAQPatch;      //!Patch Trigger ADC from data stored in DAQ
-    TH2F*   TRGHTower;     //!High Tower Trigger ADC from TRG data
-    TH2F*   TRGPatch;      //!Patch Trigger ADC from TRG data
-    TH2F*   TRGHTxDAQHT;   //!TRG High Tower vs. DAQ High Tower
-    TH2F*   TRGPAxDAQPA;   //!TRG ADC Patch Sum vs. DAQ ADC Patch Sum
-
+    TH2F*             mHTBefore;
+    TH2F*             mPABefore;
+    TH2F*             mHTCorrel;
+    TH2F*             mPACorrel;
+    TH2F*             mHT;
+    TH2F*             mPA;
   protected:
   public: 
-
-    StBemcTrigger* BemcTrigger;
-    TString TitleHist;
-    TString HistFileName;
-    TArrayF EtTh;
-    TArrayF RatioTh;
-    TArrayF HighTowerTh;
-    TArrayF PatchTh;
-    TArrayF JetTh;
     
-    StEmcTriggerMaker(const char *name="bemctrigger");
-    virtual ~StEmcTriggerMaker();
-    virtual Int_t Init();
-    virtual Int_t Make();
-    virtual Int_t Finish();
-            void  FillHistograms(StTriggerDetectorCollection* theTriggers);
-	    void  SetHistFileName(char* name) { HistFileName = name; }
+                      StEmcTriggerMaker(const char *name="bemctrigger");
+    virtual           ~StEmcTriggerMaker();
+    virtual Int_t     Init();
+    virtual Int_t     Make();
+    virtual Int_t     Finish();    
+    void              fillStEvent(StEvent*);    
+    void              fillHistograms(StEvent*);
+    void              saveHistograms(char*);    
+    void              setSaveStEvent(bool a) { mSaveStEvent = a;}
+    void              setPrint(bool a)     { mPrint = a;}
+    StBemcTrigger*    getTrigger() { return mBemcTrigger;}
 
   ClassDef(StEmcTriggerMaker,0) 
 };

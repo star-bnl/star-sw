@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.12 2003/01/29 20:43:49 suaide Exp $
+// $Id: StBemcTrigger.cxx,v 1.13 2004/08/04 17:53:08 suaide Exp $
 //
 //    
 
@@ -7,290 +7,164 @@
 #include "StEvent/StEvent.h"
 #include "StEvent/StEventTypes.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
-  
+#include "StarRoot/TUnixTime.h"  
+#include "StDaqLib/EMC/StEmcDecoder.h"
+#include "Stiostream.h"
 ClassImp(StBemcTrigger);
 
 //-------------------------------------------------------------------
-StBemcTrigger::StBemcTrigger(Int_t date, Int_t time):StEmcTrigger(date,time)
+StBemcTrigger::StBemcTrigger():TObject()
 {   
-  EmcTrigger=new St_emcTrigger("BemcTrigger",1);
-  EmcTrigger->SetNRows(1);
-  
-  PatchTrigger=new St_emcPatchTrigger("BemcPatch",300);
-  PatchTrigger->SetNRows(300);
-  
-  JetTrigger=new St_emcJetTrigger("BemcJet",14);
-  JetTrigger->SetNRows(14);
-      
-  geo=StEmcGeom::getEmcGeom("bemc");
+  mGeo=StEmcGeom::getEmcGeom("bemc");
+  mEvent = NULL;
+  mDecoder = NULL;
+  mPrint = true;
+  resetConf();
 }
 //----------------------------------------------------    
 StBemcTrigger::~StBemcTrigger()
 { 
-  delete EmcTrigger;
-  delete PatchTrigger;
-  delete JetTrigger;
 }
 //----------------------------------------------------    
-void StBemcTrigger::MakeTrigger()
-{ 
-    
-  StDetectorId id=kBarrelEmcTowerId;
-  StEmcDetector* det=EMC()->detector(id);
-  if(!det) return;
-  if(det->numberOfHits()==0) return;
-  
-  Float_t e8bits[4800],adc8bits[4800];
-  Float_t e6bits[4800],adc6bits[4800];
-  Float_t e12bits[4800],adc12bits[4800];
-  for(Int_t i=0;i<4800;i++) 
+void StBemcTrigger::resetConf()
+{
+  for(int i = 0;i<kNTowers;i++)
   {
-    e12bits[i]=0; 
-    adc12bits[i]=0;
-    e8bits[i]=0; 
-    adc8bits[i]=0;
-    e6bits[i]=0; 
-    adc6bits[i]=0;
+    mTrigger.TowerPedestal[i] = 0;
+    mTrigger.TowerStatus[i] = 1;
   }
-    
-  for(Int_t i=1;i<121;i++)
+  mTrigger.HTBits = 3;
+  int ped = 15;
+  for(int i = 0;i<kNPatches;i++)
   {
-    StEmcModule* module=det->module(i);
-    if(module)
-    { 
-      StSPtrVecEmcRawHit& hits=module->hits();
-      for(Int_t j=0;j<(Int_t)hits.size();j++)
-      {
-        UInt_t module=hits[j]->module();
-        UInt_t eta=hits[j]->eta();
-        UInt_t sub=abs(hits[j]->sub());
-        Int_t id;
-        geo->getId(module,eta,sub,id);
-        Int_t adc12 = (Int_t)(hits[j]->adc());
-        
-        Int_t adc8= ((adc12 & 0x3fc) >> 2);
-        
-        Float_t scalefactor=0.032;
-        
-        e8bits[id-1]=(Float_t)adc8*scalefactor; //convert to energy
-        adc8bits[id-1]=(Float_t)adc8;
-        
-        adc12bits[id-1]=adc12;
-        e12bits[id-1]=hits[j]->energy();
-        //cout <<hits[j]->adc()<<"   "<<e8bits[id-1]<<"   "<<scalefactor<<endl;
-      }
-    }
-  }
-  
-// making high tower trigger, 0.2x0.2 patch trigger and jet trigger
-  
-  Float_t Patch[300],HT[300],Jet[14];
-  Int_t HTId[300];
-  
-  for(Int_t i=0;i<300;i++) {Patch[i]=0;HT[i]=0;HTId[i]=0;}
-  for(Int_t i=0;i<14;i++)  {Jet[i]=0;}
-  
-  Float_t totalEt=0;
-  
-  Int_t sizeHT= m_HighTowerTh.GetSize();
-  Int_t sizePatch=m_TrigPatchTh.GetSize();
-  Int_t sizeJet=m_JetPatchTh.GetSize();
-  Int_t sizeEt=m_EtTh.GetSize();
-  Int_t sizeRa=m_RatioTh.GetSize();
-    
-  emcTrigger_st* triggerRows=EmcTrigger->GetTable();
-  emcPatchTrigger_st* patchRows=PatchTrigger->GetTable();
-  emcJetTrigger_st* jetRows=JetTrigger->GetTable();
-
-/////////////////////////////////////////////////////////////////////
-// filling patch information and generatin et and jet trigger
-
-  for(Int_t patch=1;patch<301;patch++)
-  {   
-    Float_t etah=GetEtaPatch(patch);        
-    Float_t theta = atan(exp(-etah))*2.;
-    Int_t crate,subpatch;    
-    GetCrateEtaPatch(patch,&crate,&subpatch);
-    
-    Int_t ti=0;
-    patchRows[patch-1].PatchAdcSum6bits=0;
-    
-    Float_t eta=0,phi=0,eta1=0,phi1=0,patchtemp=0;
-    Int_t HTTemp=0;
-    for(Int_t k=0;k<16;k++)
+    mTrigger.PatchStatus[i] = 1;
+    for(int j=0;j<k12bits;j++)
     {
-       Int_t positionInCrate=k+subpatch;
-       Int_t id;
-       emcdec->GetTowerIdFromCrate(crate,positionInCrate,id); 
-       //cout <<"  crate = "<<crate<<"  position = "<<positionInCrate<<"  id = "<<id<<endl;       
-       patchRows[patch-1].TowerId[ti]=id;
-       ti++;
-       //if(e8bits[id-1]>=HT[patch-1])   
-       if((Int_t)adc8bits[id-1]>=HTTemp) 
-       {
-         HT[patch-1]=e8bits[id-1]; 
-         HTId[patch-1]=id;
-         HTTemp=(Int_t)adc8bits[id-1];
-       }
-       Patch[patch-1]+=e8bits[id-1];
-       patchtemp+=(Int_t)adc8bits[id-1];
-       geo->getEtaPhi(id,eta1,phi1);
-       eta+=eta1;
-       phi+=phi1;
+      if(j<ped)              mTrigger.PatchLUT[i][j] = 0;
+      if(j>=ped && j<ped+63) mTrigger.PatchLUT[i][j] = j-ped;
+      if(j>=ped+63)          mTrigger.PatchLUT[i][j] = 63;
     }
-    Int_t patchtemp1=(Int_t)patchtemp/64;  // linear transformation. should replace for lookup table
-    patchRows[patch-1].PatchAdcSum6bits+=patchtemp1;
-    patchRows[patch-1].Eta=eta/16;
-    patchRows[patch-1].Phi=phi/16;
-    
-    Int_t temp = (Int_t)(adc8bits[HTId[patch-1]-1]);
-    
-    patchRows[patch-1].HighTowerAdc6bits=((temp & 0xfc)>>2);
-    
-    HT[patch-1]*=sin(theta);   // et
-    Patch[patch-1]*=sin(theta);// et
-    
-//    cout <<" before conv "<<HT[patch-1]<<"  "<<Patch[patch-1]<<endl;
-    
-// convert 8 bits HT to 6 bits HT
-    if(HT[patch-1]>DigEnergyHT) HT[patch-1]=DigEnergyHT;
-    Int_t adc6bits=(Int_t)(HT[patch-1]*64./DigEnergyHT);
-    HT[patch-1]=(Float_t)adc6bits*DigEnergyHT/64.;
-  
-// convert 12 bits patch to 6 bits energy 
-    if(Patch[patch-1]>DigEnergyPatch) Patch[patch-1]=DigEnergyPatch;
-    adc6bits=(Int_t)(Patch[patch-1]*64./DigEnergyPatch);
-    Patch[patch-1]=(Float_t)adc6bits*DigEnergyPatch/64.;  
-
-//    cout <<" after  conv "<<HT[patch-1]<<"  "<<Patch[patch-1]<<endl<<endl;
-
-    Int_t jet=GetJetId(crate);
-    if(jet>0) Jet[jet-1]+=Patch[patch-1];
-    totalEt+=Patch[patch-1];
-    
-// filling HighTower trigger
-    for(Int_t i=0;i<sizeHT;i++) 
-      if(HT[patch-1]>= m_HighTowerTh[i])
-      {
-        patchRows[patch-1].HighTowerBits[i]=1;
-        triggerRows[0].HighTowerBits[i]=1;
-      }
-      else patchRows[patch-1].HighTowerBits[i]=0;
-      
-// filling Patch trigger
-    for(Int_t i=0;i<sizePatch;i++) 
-      if(Patch[patch-1]>= m_TrigPatchTh[i])
-      {
-        patchRows[patch-1].PatchBits[i]=1;
-        triggerRows[0].PatchBits[i]=1;
-      }
-      else patchRows[patch-1].PatchBits[i]=0;
-
-// filling Ratio trigger
-    Float_t ratio=0;
-    if(Patch[patch-1]>0) ratio=HT[patch-1]/Patch[patch-1];    
-
-    for(Int_t i=0;i<sizeRa;i++) 
-      if(ratio>=m_RatioTh[i])
-      {
-        patchRows[patch-1].RatioBits[i]=1;
-        triggerRows[0].RatioBits[i]=1;
-      }
-      else patchRows[patch-1].RatioBits[i]=0;
-            
-// filling Patch information   
-    patchRows[patch-1].PatchNumber=patch;
-    patchRows[patch-1].PatchEt6bits=Patch[patch-1];
-    patchRows[patch-1].HighTowerEt6bits=HT[patch-1];
-    patchRows[patch-1].HighTowerId=HTId[patch-1];
-    patchRows[patch-1].Ratio=ratio;
-      
   }
-  
-// filling Patch trigger
-  triggerRows[0].NPatchThresholds=sizePatch;
-  for(Int_t i=0;i<sizePatch;i++) 
-    triggerRows[0].PatchThresholds[i]=m_TrigPatchTh[i];
+}
 
-// filling HighTower trigger
-  triggerRows[0].NHighTowerThresholds=sizeHT;
-  for(Int_t i=0;i<sizeHT;i++) 
-    triggerRows[0].HighTowerThresholds[i]=m_HighTowerTh[i];
-
-// filling Ratio trigger
-  triggerRows[0].NRatioThresholds=sizeRa;
-  for(Int_t i=0;i<sizeRa;i++) 
-    triggerRows[0].RatioThresholds[i]=m_RatioTh[i];
-
-/////////////////////////////////////////////////////////////////////
-// filling Et trigger
-  triggerRows[0].NEtThresholds=sizeEt;
-  triggerRows[0].Et=totalEt;
-  for(Int_t i=0;i<sizeEt;i++)
+//----------------------------------------------------    
+void StBemcTrigger::zero()
+{
+  for(int i=0;i<kNPatches;i++)
   {
-    triggerRows[0].EtThresholds[i]=m_EtTh[i];
-    if(totalEt>=m_EtTh[i]) triggerRows[0].EtBits[i]=1;
-    else triggerRows[0].EtBits[i]=0;
+    mTrigger.HT[i] = 0;
+    mTrigger.Patch[i]= 0;
   }
-  
-/////////////////////////////////////////////////////////////////////
-// filling Jet trigger  
-  for(Int_t jet=1;jet<15;jet++)
+  for(int i=0;i<kNJet;i++)
   {
-    TArrayI Jetbits(sizeJet);
-    for(Int_t i=0;i<sizeJet;i++) 
-      if(Jet[jet-1]>=m_JetPatchTh[i])
+    mTrigger.Jet[i]= 0;
+  }
+  mTrigger.Et = 0;
+}
+//----------------------------------------------------    
+void StBemcTrigger::makeTrigger()
+{    
+  
+  zero();
+  if(!mEvent) return;
+  StEmcCollection *emc = mEvent->emcCollection();
+  if(!emc) return;
+  
+  int adc12[kNTowers];
+  int adc10[kNTowers];
+  int adc08[kNTowers];
+  for(int i=0;i<kNTowers;i++) adc12[i] = 0;
+  
+  StEmcDetector* detector=emc->detector(kBarrelEmcTowerId);
+  if(detector) 
+  {
+    for(Int_t m=1;m<=120;m++)
+    {
+      StEmcModule* module = detector->module(m);
+      if(module)
       {
-        jetRows[jet-1].JetBits[i]=1;
-        triggerRows[0].JetBits[i]=1;
+        StSPtrVecEmcRawHit& rawHit=module->hits();
+        for(UInt_t k=0;k<rawHit.size();k++) if(rawHit[k])
+        {
+          Int_t did;
+          Int_t mod=rawHit[k]->module();
+          Int_t e=rawHit[k]->eta(); 
+          Int_t s=abs(rawHit[k]->sub());
+          mGeo->getId(mod,e,s,did);
+          if(mTrigger.TowerStatus[did-1]==1) 
+            adc12[did-1]=rawHit[k]->adc()-mTrigger.TowerPedestal[did-1];
+        }
       }
-      else jetRows[jet-1].JetBits[i]=0;
-    
-    jetRows[jet-1].JetPatchNumber=jet;
-    jetRows[jet-1].JetEt6bits=Jet[jet-1];
+    }
+  } else return;
+  
+  // convert to 10 and 8 bits
+  for(int i=0;i<kNTowers;i++) 
+  {
+    adc10[i] = adc12[i]>>2;
+    adc08[i] = adc10[i]>>2;
   }
   
-  triggerRows[0].NJetThresholds=sizeJet;
-  for(Int_t i=0;i<sizeJet;i++) 
-    triggerRows[0].JetThresholds[i]=m_JetPatchTh[i];
-
- 
+  // making trigger patches and high towers
+  
+  TUnixTime unixTime(mEvent->time());
+  Int_t dat=0,tim=0;
+  unixTime.GetGTime(dat,tim);
+  mDecoder = new StEmcDecoder(dat,tim);
+  
+  for(int i = 0;i<kNPatches;i++) if(mTrigger.PatchStatus[i]==1)
+  {
+    int crate = 0;
+    int seq  = 0;    
+    mDecoder->GetCrateAndSequenceFromTriggerPatch(i,crate,seq);
+    int HT = 0;
+    int PA = 0;
+    int HTID = -1;
+    int id;
+    for(int j=seq;j<seq+16;j++)
+    {
+      int stat = mDecoder->GetTowerIdFromCrate(crate,j,id);
+      if(stat==1)
+      {
+        if(adc10[id-1]>=HT) {HT = adc10[id-1]; HTID = id;}
+        PA+=adc08[id-1];
+      }
+    }
+    // at this point we have the high tower with 10 bits and
+    // the patch with 12 bits
+    
+    // conversion to 6 bits ...
+    // patch sum is easy. Just need to look in a LUT
+    mTrigger.Patch[i] = mTrigger.PatchLUT[i][PA];
+    
+    // high tower is different. Need to shift bits and make an
+    // or of the top bits
+    int SHIFT = mTrigger.HTBits;
+    HT = HT >> SHIFT;
+    int HTL = HT & 0x1F;
+    int HTH = HT >> 5;
+    int B5  = 0;
+    if(HTH>0) B5 = 1;
+    mTrigger.HT[i] = HTL+(B5<<5);
+    if(mPrint) cout <<"Patch number "<<i
+                    <<" Tower id = "<<HTID
+                    <<" adc12 = "<<adc12[HTID-1]<<" adc10 = "<<adc10[HTID-1]
+                    <<" adc08 = "<<adc08[HTID-1] 
+                    <<" HT10 = "<<HT<<" PA12 = "<<PA
+                    <<" HT = "<<mTrigger.HT[i]<<" PA = "<<mTrigger.Patch[i]<<endl;
+  }   
+  
+  // making Jet trigger and Et
+  mTrigger.Et = 0;
+  for(int i = 0;i<kNJet; i++)
+  {
+    int p0 = i*30;
+    int p1 = (i+1)*30;
+    mTrigger.Jet[i]= 0;
+    for(int j = p0;j<p1;j++) mTrigger.Jet[i]+=mTrigger.Patch[j];
+    mTrigger.Et+=mTrigger.Jet[i];
+  }
+    
+  delete mDecoder;
   return;
-}
-//----------------------------------------------------    
-void StBemcTrigger::GetCrateEtaPatch(Int_t patch,Int_t* mi,Int_t* ei)
-{
-  Int_t subpatch=(patch-1)%10*16;
-  Int_t crate;
-  if(patch<=150) crate = 16+(patch-1)/10;
-  else crate = (patch-1)/10-14;
-  //cout <<"patch = "<<patch<<"  crate = "<<crate <<"  subpatch = "<<subpatch<<endl;    
-  *mi=crate;
-  *ei=subpatch;
-}
-//----------------------------------------------------    
-Float_t StBemcTrigger::GetEtaPatch(Int_t patch)
-{
-  Int_t crate,subpatch;
-  GetCrateEtaPatch(patch,&crate,&subpatch);
-  Float_t eta=0,x=0;
-  for(Int_t k=0;k<16;k++)
-  {
-     Int_t positionInCrate=k+subpatch;
-     Int_t id;
-     emcdec->GetTowerIdFromCrate(crate,positionInCrate,id);
-     Int_t m,e,s;
-     geo->getBin(id,m,e,s);
-     Float_t temp;
-     geo->getEta(m,e,temp);
-     eta+=temp;
-     x++;
-  }
-  return eta/x;
-}
-//----------------------------------------------------    
-Int_t StBemcTrigger::GetJetId(Int_t crate)
-{
-  if(crate!=15 && crate!=30) return (crate-1)/2+1;
-  return 0;
 }
