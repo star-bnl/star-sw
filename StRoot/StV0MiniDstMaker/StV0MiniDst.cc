@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MiniDst.cc,v 1.1 1999/07/13 12:42:24 jones Exp $
+ * $Id: StV0MiniDst.cc,v 1.2 1999/07/26 19:17:24 jones Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 04-Jun-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StV0MiniDst.cc,v $
+ * Revision 1.2  1999/07/26 19:17:24  jones
+ * Added primary vertex position and v0 daughter DCA to the primary vertex
+ *
  * Revision 1.1  1999/07/13 12:42:24  jones
  * *** empty log message ***
  *
@@ -28,16 +31,21 @@ StV0MiniDst::StV0MiniDst() {
 
 StV0MiniDst::StV0MiniDst(StV0Vertex* v0Vertex,
 			 StVertex*   primaryVertex) {
+  mPrimVertex[0] = primaryVertex->position().x();
+  mPrimVertex[1] = primaryVertex->position().y();
+  mPrimVertex[2] = primaryVertex->position().z();
   mPosition[0] = v0Vertex->position().x();
   mPosition[1] = v0Vertex->position().y();
   mPosition[2] = v0Vertex->position().z();
   mDecayDistance = 
-    sqrt(pow(mPosition[0] - primaryVertex->position().x(),2) +
-	 pow(mPosition[1] - primaryVertex->position().y(),2) +
-	 pow(mPosition[2] - primaryVertex->position().z(),2));
+    sqrt(pow(mPosition[0] - mPrimVertex[0],2) +
+	 pow(mPosition[1] - mPrimVertex[1],2) +
+	 pow(mPosition[2] - mPrimVertex[2],2));
 
   mDcaDaughters = v0Vertex->dcaDaughters();
   mDcaParentToPrimVertex = v0Vertex->dcaParentToPrimaryVertex();
+  mDcaPosToPrimVertex = v0Vertex->dcaDaughterToPrimaryVertex(positiveTrack);
+  mDcaNegToPrimVertex = v0Vertex->dcaDaughterToPrimaryVertex(negativeTrack);
   mMomNegDaughter[0] = v0Vertex->momentumOfDaughter(negativeTrack).x();
   mMomNegDaughter[1] = v0Vertex->momentumOfDaughter(negativeTrack).y();
   mMomNegDaughter[2] = v0Vertex->momentumOfDaughter(negativeTrack).z();
@@ -53,6 +61,10 @@ StV0MiniDst::~StV0MiniDst() {
 
 void StV0MiniDst::Update() { 
   // Calculate derived data members
+
+       mDecayDistance = sqrt(pow(mPosition[0]-mPrimVertex[0],2) +
+			     pow(mPosition[1]-mPrimVertex[1],2) +
+			     pow(mPosition[2]-mPrimVertex[2],2));
   
     mPtot2PosDaughter = mMomPosDaughter[0]*mMomPosDaughter[0] +
                         mMomPosDaughter[1]*mMomPosDaughter[1] +
@@ -82,7 +94,7 @@ float StV0MiniDst::alpha() {
 }
 
 float StV0MiniDst::ptArm() {
-  return sqrt(mPtot2 - mMomPosAlongV0*mMomPosAlongV0);
+  return sqrt(mPtot2PosDaughter - mMomPosAlongV0*mMomPosAlongV0);
 }
 
 float StV0MiniDst::eLambda() {
@@ -118,7 +130,7 @@ float StV0MiniDst::massAntiLambda() {
 }
 
 float StV0MiniDst::massK0Short() {
-  return sqrt(pow(ePosDaughterProton()+eNegDaughterPion(),2)-mPtot2);
+  return sqrt(pow(ePosDaughterPion()+eNegDaughterPion(),2)-mPtot2);
 }
 
 float StV0MiniDst::rapLambda() {
