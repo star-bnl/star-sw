@@ -7,10 +7,21 @@
 * create tables for output
     
     cd [data]/emc/hits
+    
     tdm/newtable ems_hits_bemc ems_hits       9600
     tdm/newtable ems_hits_bsmd ems_hits      18000
     tdm/newtable ems_hits_eemc ems_hits      10000
     tdm/newtable ems_hits_esmd ems_hits      20000
+    
+    tdm/newtable emc_hits_bemc      emc_hits      4800 
+    tdm/newtable emc_hits_bprs      emc_hits      4800 
+    tdm/newtable emc_hits_bsmde     emc_hits	  5000
+    tdm/newtable emc_hits_bsmdp     emc_hits	  5000
+    tdm/newtable emc_hits_eemc      emc_hits      1440 
+    tdm/newtable emc_hits_eprs      emc_hits      1440 
+    tdm/newtable emc_hits_esmde     emc_hits	  5000
+    tdm/newtable emc_hits_esmdp     emc_hits	  5000
+    
     cd /dui
     
  return
@@ -21,17 +32,6 @@
   macro/global/import *
              
 * create tables for output
-    
-    cd [data]/emc/hits
-    tdm/newtable emc_hits_bemc      emc_hits      4800 
-    tdm/newtable emc_hits_bprs      emc_hits      4800 
-    tdm/newtable emc_hits_bsmde     emc_hits	  5000
-    tdm/newtable emc_hits_bsmdp     emc_hits	  5000
-    tdm/newtable emc_hits_eemc      emc_hits      1440 
-    tdm/newtable emc_hits_eprs      emc_hits      1440 
-    tdm/newtable emc_hits_esmde     emc_hits	  5000
-    tdm/newtable emc_hits_esmdp     emc_hits	  5000
-    cd /dui
     
  return
 
