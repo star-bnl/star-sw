@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.23 2000/08/04 03:32:18 long Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.24 2000/08/07 22:44:39 perev Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.24  2000/08/07 22:44:39  perev
+ * srand48 added
+ *
  * Revision 1.23  2000/08/04 03:32:18  long
  * nQOnWire<12--->nQOnWire<6.5
  * add "bin.sigmaT()+d[0]/12"
@@ -157,7 +160,7 @@ StTrsWireHistogram::StTrsWireHistogram(StTpcGeometry* geoDb, StTpcSlowControl* s
     
       
 {
-    srand(0);
+    srand48(19460510);
     random=new TRandom(); 
     mNumberOfEntriesInTable=4000;
     mRangeOfTable=4.0;
