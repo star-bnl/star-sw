@@ -100,7 +100,11 @@ int *pSocket;
 #ifdef IRIX
 int tcpRead(void *fd, void *buf, u_int len)
 #else /*IRIX*/
+#ifdef sun4os5pc
+int tcpRead(void *fd, char *buf, int len)
+#else /*sun4os5pc*/
 int tcpRead(int *fd, char *buf, int len)
+#endif /*sun4os5pc*/
 #endif /*IRIX*/
 {
 	int *ffdd=fd;	/*- HACK for IRIX -*/
@@ -119,7 +123,11 @@ int tcpRead(int *fd, char *buf, int len)
 #ifdef IRIX
 int tcpWrite(void *fd, void *buf, u_int len)
 #else /*IRIX*/
+#ifdef sun4os5pc
+int tcpWrite(void *fd, char *buf, int len)
+#else /*sun4os5pc*/
 int tcpWrite(int *fd, char *buf, int len)
+#endif /*sun4os5pc*/
 #endif /*IRIX*/
 {
 	int i, cnt;

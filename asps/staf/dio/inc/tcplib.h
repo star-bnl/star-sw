@@ -41,8 +41,13 @@ int tcpServer(int serverPort, int (*serverFcn)(), int spawn);
 int tcpRead(void *pFd, void *buf, u_int nbytes);
 int tcpWrite(void *pFd, void *buf, u_int nbytes);
 #else /*IRIX*/
+#ifdef sun4os5pc
+int tcpRead(void *pFd, char *buf, int nbytes);
+int tcpWrite(void *pFd, char *buf, int nbytes);
+#else /*sun4os5pc*/
 int tcpRead(int *pFd, char *buf, int nbytes);
 int tcpWrite(int *pFd, char *buf, int nbytes);
+#endif /*sun4os5pc*/
 #endif /*IRIX*/
 
 int close(int fd);

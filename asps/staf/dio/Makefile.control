@@ -13,7 +13,10 @@ ASPS := dio dui tdm spx soc
 #
 # Choose flags controlling make.
 DEBUG := TRUE
-#SHARE := TRUE
+IRIX := IRIX
+ifneq ($(IRIX),$(shell uname))
+SHARE := FALSE
+endif
 #MOTIF := TRUE
 #
 # Specify which CERN libraries against which to link.

@@ -24,10 +24,20 @@ dioFactory *dio;
 //:<--------------------------------------------------------------------
 int dio_init()
 {
-   EML_MESSAGE(DIO: Initializing.);
+   EML_MESSAGE("DIO:Initializing. ");
 
+/*- Load other PKGs. -*/
+// soc->bind("tdm");
+
+//						ifdef KUIP
 /*- Define the DIO KUIP commands. -*/
    dio_def_();
+//						endif /* KUIP */
+
+#ifdef TCL
+/*- Define the DIO TCL commands. -*/
+   dio_def_();
+#endif /* TCL */
 
    return TRUE;
 }
@@ -40,7 +50,7 @@ int dio_init()
 //:<--------------------------------------------------------------------
 int dio_start()
 {
-   EML_MESSAGE(DIO: Starting.);
+   EML_MESSAGE("DIO:Starting. ");
 
 /*- Create the DIO Factory. -*/
    dio = new dioFactory("dio");
@@ -56,7 +66,7 @@ int dio_start()
 //:<--------------------------------------------------------------------
 int dio_stop()
 {
-   EML_MESSAGE(DIO: Stopping.);
+   EML_MESSAGE("DIO:Stopping. ");
 
 /*- Delete the DIO Factory.
    delete dio;

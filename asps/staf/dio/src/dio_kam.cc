@@ -16,6 +16,7 @@
 #include <stdio.h>
 
 #include "kuip.h"
+#define KUIP
 
 #include "asuLib.h"
 #include "emlLib.h"
@@ -103,7 +104,7 @@ STAFCV_T dio_newfilestream(char* name, char* file, char* mode)
 	    if( !dio_tcltk_browsefile(&name,&file,&iomode)
 	    ||  !(file != NULL)
 	    ){
-	       EML_ERROR(KAM_NO_FILE_SELECTED);
+	       EML_FAILURE(KAM_NO_FILE_SELECTED);
 	    }
       }
    }
@@ -111,11 +112,11 @@ STAFCV_T dio_newfilestream(char* name, char* file, char* mode)
 
    dioFileStream* stream;
    if( NULL == (stream = dio->newFileStream(name,file)) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    if( !(DIO_UNKNOWN_MODE == iomode) ){
       if( !stream->open(iomode) ){
-	 EML_ERROR(KAM_METHOD_FAILURE);
+	 EML_FAILURE(KAM_METHOD_FAILURE);
       }
    }
    EML_SUCCESS(STAFCV_OK);
@@ -148,11 +149,11 @@ STAFCV_T dio_newsockstream(char* name, char* host, long port
 
    dioSockStream* stream;
    if( NULL == (stream = dio->newSockStream(name,host,port)) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    if( !(DIO_UNKNOWN_MODE == iomode) ){
       if( !stream->open(iomode) ){
-	 EML_ERROR(KAM_METHOD_FAILURE);
+	 EML_FAILURE(KAM_METHOD_FAILURE);
       }
    }
    EML_SUCCESS(STAFCV_OK);
@@ -178,10 +179,10 @@ STAFCV_T diostream_open(char* name, char* mode)
 
    if( !(DIO_UNKNOWN_MODE == iomode) ){
       if( NULL == (stream = dio->findStream(name)) ){
-	 EML_ERROR(KAM_OBJECT_NOT_FOUND);
+	 EML_FAILURE(KAM_OBJECT_NOT_FOUND);
       }
       if( !stream->open(iomode) ){
-	 EML_ERROR(KAM_METHOD_FAILURE);
+	 EML_FAILURE(KAM_METHOD_FAILURE);
       }
    }
    EML_SUCCESS(STAFCV_OK);
@@ -201,10 +202,10 @@ STAFCV_T diostream_close(char* name)
    dioStream* stream;
 
    if( NULL == (stream = dio->findStream(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    if( !stream->close() ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -226,20 +227,20 @@ STAFCV_T diostream_getevent(char* name, char* dest)
 
 //-("Find stream (%s).\n",name);
    if( NULL == (stream = dio->findStream(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
 
 //-("Find destination dataset (%s)(%p).\n",dest,destination);
    if( NULL == (destination = tdm->findDataset(dest)) ){
       if( NULL == (destination = tdm->newDataset(dest, 100)) //HACK 100
       ){
-	 EML_ERROR(KAM_OBJECT_NOT_FOUND);
+	 EML_FAILURE(KAM_OBJECT_NOT_FOUND);
       }
    }
 
 //-("Get the event.\n");
    if( !stream->getEvent(destination) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -260,13 +261,13 @@ STAFCV_T diostream_putevent(char* name, char* sour)
    tdmDataset* source=NULL;
 
    if( NULL == (stream = dio->findStream(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    if( NULL == (source = tdm->findDataset(sour)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    if( !stream->putEvent(source) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -285,7 +286,7 @@ STAFCV_T diostream_mode(char* name)
    dioStream* stream;
 
    if( NULL == (stream = dio->findStream(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    printf("DIO:\tStream mode = (%s) \n"
 		, dio_mode2text(stream->mode()));
@@ -306,7 +307,7 @@ STAFCV_T diostream_state(char* name)
    dioStream* stream;
 
    if( NULL == (stream = dio->findStream(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    printf("DIO:\tStream state = (%s) \n"
 		, dio_state2text(stream->state()));
@@ -331,7 +332,7 @@ STAFCV_T diofilestream_filename(char* name)
    dioFileStream* stream;
 
    if( NULL == (stream = dio->findFileStream(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    printf("DIO:\tFile name = (%s) \n"
 		, stream->fileName());
@@ -355,7 +356,7 @@ STAFCV_T diosockstream_host(char* name)
    dioSockStream* stream;
 
    if( NULL == (stream = dio->findSockStream(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    printf("DIO:\tHost name = (%s) \n"
 		, stream->host());
@@ -376,7 +377,7 @@ STAFCV_T diosockstream_port(char* name)
    dioSockStream* stream;
 
    if( NULL == (stream = dio->findSockStream(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    printf("DIO:\tPort number = (%d) \n"
 		, stream->port());
@@ -398,7 +399,7 @@ STAFCV_T diosockstream_maxhandshakes(char* name, long count)
    dioSockStream* stream;
 
    if( NULL == (stream = dio->findSockStream(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    if( count >= 0 ){
       stream->maxHandshakes(count);
