@@ -3,7 +3,7 @@
  * \author
  */
 /***********************************************************
- * $Id: StPmdClusterMaker.h,v 1.4 2003/09/10 19:47:26 perev Exp $
+ * $Id: StPmdClusterMaker.h,v 1.5 2004/03/23 05:18:51 subhasis Exp $
  *
  * Author:
  *
@@ -14,6 +14,9 @@
  ************************************************************
  *
  * $Log: StPmdClusterMaker.h,v $
+ * Revision 1.5  2004/03/23 05:18:51  subhasis
+ * refclust changed to have correct sigma/ncell
+ *
  * Revision 1.4  2003/09/10 19:47:26  perev
  * ansi corrs
  *
@@ -30,7 +33,8 @@
 #include <TH2.h>
 #include <TH1.h>
 #include <TCanvas.h>
-
+#include <TNtuple.h>
+#include <TFile.h>
 
 class StPmdCollection;
 class StPmdDetector;
@@ -54,6 +58,8 @@ class StPmdClusterMaker: public StMaker{
   TH2F *mClusterEdepFracPmd;  //!  nclust vs. frac. edep in Pmd
   TH1F *mPmdCluster; //!number of Pmd clusters
 
+  TH2F *mXYPmdCluster;
+  
   TH1F *mSmCpvCluster;      //!  supermodule no for Cpv
   TH1F *mEdepCpvCluster;    //!  cluster edep in Cpv
   TH1F *mSigmaCpvCluster;    //!  cluster Sigma in Cpv
@@ -65,20 +71,22 @@ class StPmdClusterMaker: public StMaker{
   TH1F *mExtraclusterCpv;        //!  phi vs.mod  in Cpv  
   TH2F *mClusterEdepFracCpv;  //!  nclust vs. frac. edep in Cpv
   TH1F *mCpvCluster; //!number of Cpv clusters
+  
+  TH2F *mXYCpvCluster;
    public:
   //!constructor 
-  StPmdClusterMaker(const char *name="PmdClust"); 
+  StPmdClusterMaker(const char *name="pmdClust"); 
   ~StPmdClusterMaker();//!
 
   virtual Int_t Init();
   virtual Int_t Make();
+  virtual Int_t  Finish();
 
-  Int_t getChoice(Int_t num); 
+  //Int_t getChoice(Int_t num); 
   void  FillStEvent(StPmdDetector*, StPmdDetector*);
 
   void  bookHistograms(); //! booking histograms
   void  FillHistograms(StPmdDetector*, StPmdDetector*); //! filling histograms
-  Float_t  AddEdep(StPmdDetector*, StPmdDetector*);
   void  Browse(TBrowser* b); 
 
   

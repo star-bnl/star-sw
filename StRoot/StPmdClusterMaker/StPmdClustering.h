@@ -4,7 +4,7 @@
  */
 /******************************************************
  *
- * $Id: StPmdClustering.h,v 1.3 2003/05/14 10:49:12 subhasis Exp $
+ * $Id: StPmdClustering.h,v 1.4 2004/03/23 05:17:45 subhasis Exp $
  *
  * Author: Dr. S.C. Phatak
  *         Dipak Mishra
@@ -13,6 +13,9 @@
  * Description: Base class for PMD clusters
  *
  * $Log: StPmdClustering.h,v $
+ * Revision 1.4  2004/03/23 05:17:45  subhasis
+ * refclust changed to have correct sigma/ncell
+ *
  * Revision 1.3  2003/05/14 10:49:12  subhasis
  * CPV clustering added
  *
@@ -30,14 +33,14 @@ class StPmdHit;
 class StPmdCluster;
 class StPmdDetector;
 class StPmdClusterCollection;
+class StPmdGeom;
 class StPmdClustering:public StPmdAbsClustering
 {
 
   private:
+  StPmdGeom* m_geom;
 
   protected:
-//  StPmdDetector *m_pmd_det;
-//  StPmdDetector *m_cpv_det;
 
    public:
   // functions for clustering
