@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.7 2000/04/25 17:02:06 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.8 2000/05/17 16:05:32 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.8  2000/05/17 16:05:32  pavlinov
+ * Change method getVolIdBemc
+ *
  * Revision 1.7  2000/04/25 17:02:06  pavlinov
  * Added methods for gettinng x,y,z from volume ID
  *
@@ -374,13 +377,13 @@ void StEmcGeom::initBSMDP()
 }
 // _____________________________________________________________________
 Int_t StEmcGeom::getVolIdBemc(const Int_t ivid, Int_t &module,Int_t &eta,
-Int_t &sub, Int_t &dep)
+Int_t &sub, Int_t &detector)
 {
   // Transition from Geant Volume Id to usual for BEMC and BPRS
   // See  emc/util/volid_bemc.F
 
   static Int_t emcIvid[5]={10000000,100000,100,10,1};
-  Int_t emcChid[5], i, ividw, rl, phi;
+  Int_t emcChid[5], i, ividw, rl, phi, dep;
 
   ividw = ivid;
   for(i=0; i<5; i++){
@@ -392,7 +395,15 @@ Int_t &sub, Int_t &dep)
     eta    = emcChid[1];  // pseudorapidity bin number [1,20]
     phi    = emcChid[2];  // module phi [1,120]
     sub    = emcChid[3];  // d(eta)=0.1 tower number [1,2]
-    dep    = emcChid[4];  // depth section [1,2]
+    dep    = emcChid[4];  // depth section [1,2];
+    switch (dep) {// see ems_interface2.F
+    case 1: 
+      detector = BPRS; break;
+    case 2: 
+      detector = BEMC; break;
+    default:
+      printf("<W> StEmcGeom::getVolIdBemc => wrong value of dep %i \n",dep);
+    }
     if     (rl==1) {
       phi+=((Int_t)toDeg(mPhiOffset[0])-75)/6;
       if     (phi<=0)  phi+=60;
@@ -423,12 +434,12 @@ Int_t &sub, Int_t &dep)
 }
 // _____________________________________________________________________
 Int_t StEmcGeom::getVolIdBsmd(const Int_t ivid, Int_t &module,Int_t &eta,
-Int_t &sub, Int_t &type)
+Int_t &sub, Int_t &detector)
 {
   // Transition from Geant Volume Id to usual for BSMDE and BSMDP
   // See  emc/util/volid_bsmd.F
   static Int_t smdIvid[5]={100000000,1000000,1000,100,1}; //matched with AGI&G2T
-  Int_t smdChid[5], i, ividw, rl, phi, t, strip;
+  Int_t smdChid[5], i, ividw, rl, phi, t, strip, type;
 
   ividw = ivid;
   for(i=0; i<5; i++){
