@@ -26,6 +26,8 @@
 /* perform deconv. in the pad direction */
 #define DECONVOLUTE_PAD 
 
+/* minimum charge */
+#define MIN_CHARGE 80
 
 
 /* output flags */
