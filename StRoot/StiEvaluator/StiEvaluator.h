@@ -20,95 +20,45 @@ class StTrackPairInfo;
 #include "TObject.h"
 
 class TClonesArray;
-/*
-class ArrayEntry : public TObject
-{
-public:
-    ArrayEntry() {};
-    virtual ~ArrayEntry() {};
 
-    void setMcTrack(StMcTrack*);
-    void setTptTrack(StTrack*);
-    void setStiTrack(StiTrack*);
-    
-
-
-private:
-    double mval;
-    //add info for Monte Carlo
-    double McTrackP[4];
-    double McTrackV[3];
-    double McTrackID;
-    double McTrackPt;
-    double McTrackPhi;
-    //add info for StiTracks
-    double StiTrackP[4];
-    double StiTrackV[3];
-    double StiTrackM;
-    double StiTrackQ;
-    double StiTrackPt;
-    double StiTrackPsi;
-    double StiTrackNHit;
-    //add info for Tpt tracks
-    double TptTrackP[4];
-    double TptTrackV[3];
-    double TptTrackM;
-    double TptTrackQ;
-    double TptTrackPt;
-    double TptTrackPsi;
-    double TptTrackNHit;
-
-    ClassDef(ArrayEntry,1)
-};
-*/
 class TrackEntry
 {
 public:
     TrackEntry();
     virtual ~TrackEntry() {};
 
-    void setA(double val);
-    void setB(double val);
-
     void setMcTrack(StMcTrack*);
-    void setTptTrack(StTrack*);
+    void setGlobalTrack(StTrack*);
     void setStiTrack(StiTrack*);
 
-    double getMcTrackID();
+    double getMcTrackId();
     double getMcTrackPt();
 
-    double a() const;
-    double b() const;
-
     void clear();
-    //void addArrayEntry(const ArrayEntry&);
 
 private:
-    double ma;
-    double mb;
 
     //temp kinematic info : MC
-    double McTrackID;
-    double McTrackPsi;
-    double McTrackPt;
-    double McTrackChi2;
-    //temp kinematic info : Tpt
-    short  TptTrackQ;
-    double TptTrackM;
-    double TptTrackPt;
-    double TptTrackPsi;
-    double TptTrackChi2;
-    double TptTrackNHit;
-    //temp kinematic info : Sti
-    double StiTrackM;
-    double StiTrackPt;
-    double StiTrackPsi;
-    double StiTrackChi2;
-    double StiTrackNHit;
-
-    TClonesArray* mArray; //! Temporary fix to compile
-    int mCounter;
+    double mcTrackId;
+    double mcTrackPsi;
+    double mcTrackPt;
+    double mcTrackChi2;
     
+    //temp kinematic info : global
+    short  globalTrackQ;
+    double globalTrackM;
+    double globalTrackPt;
+    double globalTrackPsi;
+    double globalTrackChi2;
+    double globalTrackNHit;
+    
+    //temp kinematic info : Sti
+    double stiTrackM;
+    double stiTrackPt;
+    double stiTrackPsi;
+    double stiTrackChi2;
+    double stiTrackNHit;
+
     ClassDef(TrackEntry,1) 
 };
 
@@ -130,13 +80,10 @@ class StiEvaluator
 
  private:
     void build();
-    void fillTuple(StiTrack*, StTrackPairInfo*);
     
     TFile* mFile;
-    TNtuple* mNtuple;
     TTree* mTree;
     TrackEntry* mEntry;
-    
 };
 
 #endif
