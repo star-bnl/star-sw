@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.23 1999/09/14 15:42:03 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.24 1999/09/14 16:57:56 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.24  1999/09/14 16:57:56  genevb
+// Forgot to remove a debug print statement
+//
 // Revision 1.23  1999/09/14 15:42:03  genevb
 // Some bug fixes, workaround for nulls in strings
 //
@@ -226,7 +229,6 @@ void type_of_call StInfo_(char* mess, size_t len1) {
 #ifdef LINUX
   sMessLength = len1;
 #endif
-  cout << "GGGG:" << mess << endl;
   if (mess[0]==0) {
     gMessMgr->Message(nullMess,"E",eOpt);
     return;
@@ -604,7 +606,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.23 1999/09/14 15:42:03 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.24 1999/09/14 16:57:56 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
