@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.35 2003/10/03 21:13:15 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.36 2003/10/10 13:38:29 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.36  2003/10/10 13:38:29  suaide
+// change to allow RMS or Energy CUT. Default is now RMS.
+//
 // Revision 1.35  2003/10/03 21:13:15  suaide
 // some histograms are created only in debug mode to save memory
 //
@@ -156,10 +159,10 @@ class StEmcADCtoEMaker : public StMaker
   Bool_t            mHasPed[MAXDETBARREL];
   Bool_t            mHasCalib[MAXDETBARREL];
   Bool_t            mHasGain[MAXDETBARREL];
-  Float_t           mPed[MAXDETBARREL][18000][3];
-  Float_t           mPedRMS[MAXDETBARREL][18000][3];
-  Float_t           mGain[MAXDETBARREL][18000];
-  Float_t           mCalib[MAXDETBARREL][18000][5];
+  Float_t           mPed[MAXDETBARREL][18001][3];
+  Float_t           mPedRMS[MAXDETBARREL][18001][3];
+  Float_t           mGain[MAXDETBARREL][18001];
+  Float_t           mCalib[MAXDETBARREL][18001][5];
 					 
   TDataSet          *mDb;
   StEmcCollection   *mEmc;            
@@ -189,7 +192,7 @@ class StEmcADCtoEMaker : public StMaker
   Bool_t            getEmcFromDaq(TDataSet* daq);///< This method gets EMC collection from DAQ dataset.
   Bool_t            clearOldEmc(); ///< Clear old emc collection
   Bool_t            getEmcFromStEvent(StEmcCollection*); ///< This method creates a temporary ADC vector for each detector.
-  Bool_t            saveHit(Int_t,Int_t);///< Decide if a hit should be saved or not
+  Bool_t            saveHit(Int_t,Int_t,Int_t cap=0);///< Decide if a hit should be saved or not
  protected:    
     
  public: 
@@ -207,7 +210,7 @@ class StEmcADCtoEMaker : public StMaker
   void                      setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
   void                      setPrint(Bool_t a) {mPrint = a; } ///< Set it to kFALSE if you do not want to print messages
   void                      setFillHisto(Bool_t a) {mFillHisto = a;} ///< Turns on/off histogram filling
-  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.35 2003/10/03 21:13:15 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.36 2003/10/10 13:38:29 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcADCtoEMaker, 2)  
 };

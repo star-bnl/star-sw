@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.58 2003/10/03 21:12:59 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.59 2003/10/10 13:38:28 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.59  2003/10/10 13:38:28  suaide
+// change to allow RMS or Energy CUT. Default is now RMS.
+//
 // Revision 1.58  2003/10/03 21:12:59  suaide
 // some histograms are created only in debug mode to save memory
 //
@@ -164,14 +167,16 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
 
   Int_t   calib[]      = {1, 0, 1, 1, 0, 0, 0, 0};
   Int_t   pedSub[]     = {1, 0, 1, 1, 0, 0, 0, 0};
-  Float_t energyCut[]  = {-1, -1, 0.07, 0.07, -1, -1, -1, -1};
+  Float_t cut[]        = {-1, -1, 1.25, 1.25, -1, -1, -1, -1};
+  Int_t   cutType[]    = {0, 0, 1, 1, 0, 0, 0, 0};
   Int_t   onlyCal[]    = {0, 0, 0, 0, 0, 0, 0, 0};
   
   for(Int_t i=0; i<MAXDETBARREL; i++)
   {
     mControlADCtoE->DeductPedestal[i]=pedSub[i];  
     mControlADCtoE->Calibration[i]=calib[i];
-    mControlADCtoE->EnergyCutOff[i]=energyCut[i];
+    mControlADCtoE->CutOff[i]=cut[i];
+    mControlADCtoE->CutOffType[i]=cutType[i];
     mControlADCtoE->OnlyCalibrated[i]=onlyCal[i];
     mHits[i] = NULL;   //!
     mAdc[i] = NULL;    //!
@@ -221,7 +226,8 @@ Int_t StEmcADCtoEMaker::Init()
     cout <<"det = "<<detname[i].Data()
          <<"  DeductPedestal = "<<mControlADCtoE->DeductPedestal[i]
          <<"  Calibration = "<<mControlADCtoE->Calibration[i]
-         <<"  EnergyCutOff = "<<mControlADCtoE->EnergyCutOff[i]
+         <<"  CutOff = "<<mControlADCtoE->CutOff[i]
+         <<"  CutOffType = "<<mControlADCtoE->CutOffType[i]
          <<"  OnlyCalibrated = "<<mControlADCtoE->OnlyCalibrated[i]<<endl;
   }
   
@@ -528,6 +534,7 @@ Bool_t StEmcADCtoEMaker::getStatus(Int_t det)
   TString TableName=detname[det]+"Status";
 	
 	Int_t NGOOD = 0; 
+  Int_t date = GetDate();
   
   if(det==0)
 	{
@@ -555,7 +562,13 @@ Bool_t StEmcADCtoEMaker::getStatus(Int_t det)
       {
         if(det==2) mData->SmdeStatus[i-1]=runst[0].Status[i-1];
 				if(det==3) mData->SmdpStatus[i-1]=runst[0].Status[i-1];
-				if(runst[0].Status[i-1]==STATUS_OK) NGOOD++;
+        if(date<20030601) if(i>9000)
+        {
+          if(det==2) mData->SmdeStatus[i-1]=0;
+				  if(det==3) mData->SmdpStatus[i-1]=0;
+        }
+        if(det==2 &&mData->SmdeStatus[i-1]==STATUS_OK) NGOOD++;
+        if(det==3 &&mData->SmdpStatus[i-1]==STATUS_OK) NGOOD++;
       }
     }
   }
@@ -652,29 +665,31 @@ Bool_t StEmcADCtoEMaker::getEmcFromStEvent(StEmcCollection *emc)
         if(module)
         {
           StSPtrVecEmcRawHit& rawHit=module->hits();
-          for(UInt_t k=0;k<rawHit.size();k++)
+          for(UInt_t k=0;k<rawHit.size();k++) if(rawHit[k])
           {
             Int_t m=rawHit[k]->module();
             Int_t e=rawHit[k]->eta();
             Int_t s=abs(rawHit[k]->sub());
             Short_t adc=(Short_t) rawHit[k]->adc();
+            Int_t cal=rawHit[k]->calibrationType();
+            if(cal>127) cal-=128;
        
-            Int_t idh;
-            mGeo[det]->getId(m,e,s,idh);
-            if(det==0) 
+            Int_t idh=0;
+            Int_t stat = mGeo[det]->getId(m,e,s,idh);
+            if(det==0 && stat==0) 
 						{
 							mData->TowerADC[idh-1] = adc; 
 							mData->ValidTowerEvent=kTRUE; 
 							mData->TowerPresent = kTRUE;
 							mData->NTowerHits++;
 						}
-						if(det==2) {mData->SmdeADC[idh-1] = adc;mData->NSmdHits++;}
-						if(det==3) {mData->SmdpADC[idh-1] = adc;mData->NSmdHits++;}
-            if(det==2) 
+						if(det==2 && stat==0) {mData->SmdeADC[idh-1] = adc;mData->NSmdHits++;}
+						if(det==3 && stat==0) {mData->SmdpADC[idh-1] = adc;mData->NSmdHits++;}
+            if(det==2 && stat==0) 
             {
               Int_t RDO,index;
               mDecoder->GetSmdRDO(det+1,m,e,s,RDO,index);
-              mData->TimeBin[RDO]=rawHit[k]->calibrationType();
+              mData->TimeBin[RDO]=cal;
 							mData->ValidSMDEvent=kTRUE;
 							mData->SMDPresent=kTRUE;
             }
@@ -767,6 +782,7 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 	Int_t   NHITS=0;
 	Int_t cap = 0;
   Int_t date = mData->EventDate;
+  //if(date<20030501 && det>=2) MAX=9000; //just to save CPU time
 	for(Int_t id=1;id<=MAX;id++)
 	{
 		Float_t ADC = 0;
@@ -799,7 +815,7 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
           // by AAPSUAIDE 20030908
           //
           int shift = 1;
-          if(date>20021101 && date<20030501)
+          if(date>20021101 && date<20030601)
           {
             if(det==3) shift = 0;
           }
@@ -814,9 +830,13 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
           // remove the pedestal problem we are having with them
           //
           // by AAPSUAIDE 20030910
-          if(date>20021101 && date<20030501)
+          if(date>20021101 && date<20030601)
           {
-            if((cap==1 || cap==2) && (det==2 || det==3)) PED = 0;
+            if((cap==1 || cap==2) && (det==2 || det==3)) 
+            {
+              mPed[det][id-shift][cap] = 0;
+              PED = 0;
+            }
           }
           /////////////////////////////////////////////////////////////////////
           /////////////////////////////////////////////////////////////////////
@@ -845,7 +865,7 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 			if(det==0) mData->TowerEnergy[id-1] = EN;
 			if(det==2) mData->SmdeEnergy[id-1] = EN;     
 			if(det==3) mData->SmdpEnergy[id-1] = EN;     
-			if(saveHit(det,id)) 
+			if(saveHit(det,id,cap)) 
 			{
 				TOTALE+=EN;
 				NHITS++;
@@ -884,6 +904,8 @@ Bool_t StEmcADCtoEMaker::fillHistograms()
 		Float_t totalADC = 0;
 		Int_t MAXCHANNEL = 18000;
 		if(det<2) MAXCHANNEL = 4800;
+    Int_t date = mData->EventDate;
+    if(date<20030501 && det>=2) MAXCHANNEL=9000; //just to save CPU time
 		Bool_t valid = kTRUE;
 		if(det==0) valid = mData->ValidTowerEvent;
 		if(det==2) valid = mData->ValidSMDEvent;
@@ -961,6 +983,8 @@ Bool_t StEmcADCtoEMaker::fillStEvent()
 			{
 				Int_t Max = 18000;
         if(det<2) Max = 4800;    
+        Int_t date = mData->EventDate;
+        if(date<20030501 && det>=2) Max=9000; //just to save CPU time
     		// first check if there is at least one valid hit to save
     		if(mSave[det])
     		{
@@ -985,33 +1009,44 @@ Bool_t StEmcADCtoEMaker::fillStEvent()
     
       		for(Int_t idh=1;idh<=Max;idh++)
       		{      
-        		if(saveHit(det,idh))
-        		{
-          		Int_t ADC = 0;
-							Float_t E = 0;
-							if(det==0) { ADC = mData->TowerADC[idh-1]; E = mData->TowerEnergy[idh-1]; }
-							if(det==2) { ADC = mData->SmdeADC[idh-1]; E = mData->SmdeEnergy[idh-1]; }
-							if(det==3) { ADC = mData->SmdpADC[idh-1]; E = mData->SmdpEnergy[idh-1]; }
-          		Int_t m,e,s;
-          		mGeo[det]->getBin(idh,m,e,s);
-          
-          		StEmcRawHit* hit=new StEmcRawHit(id,m,e,s,(UInt_t)ADC);
-          		hit->setEnergy(E);
-          		if(det==2 || det==3) 
-          		{
-            		Int_t RDO,index;
-            		mDecoder->GetSmdRDO(det+1,m,e,s,RDO,index);
-            		Int_t timeBin=mData->TimeBin[RDO];
-            		hit->setCalibrationType(timeBin);
-          		}
-          		detector->addHit(hit);
-							NHITS++;
-            	if(E!=0) NGOOD++;
-          	} 
+            int cap =0;
+            int timebin=0;
+          	Int_t m,e,s;
+          	mGeo[det]->getBin(idh,m,e,s);
+            if(det==2 || det==3) 
+          	{
+            	Int_t RDO,index;
+            	mDecoder->GetSmdRDO(det+1,m,e,s,RDO,index);
+            	timebin=mData->TimeBin[RDO];
+              if(timebin==CAP1) cap=1;
+              if(timebin==CAP2) cap=2;
+          	}
+            int save = 0;
+            if(!saveHit(det,idh,cap)) save = 128;
+            int calib = timebin+save;
+          	Int_t ADC = 0;
+						Float_t E = 0;
+            bool goEvent = true;
+						if(det==0) { ADC = mData->TowerADC[idh-1]; E = mData->TowerEnergy[idh-1]; }
+						if(det==2) { ADC = mData->SmdeADC[idh-1]; E = mData->SmdeEnergy[idh-1]; }
+						if(det==3) { ADC = mData->SmdpADC[idh-1]; E = mData->SmdpEnergy[idh-1]; }
+            if(det>=2 && ADC<=0) goEvent = false;
+          	if(goEvent)
+            {
+              StEmcRawHit* hit=new StEmcRawHit(id,m,e,s,(UInt_t)ADC);
+          	  hit->setEnergy(E);
+          	  hit->setCalibrationType(calib);
+              detector->addHit(hit);
+						  NHITS++;
+          	  if(save==0)
+              {
+                NGOOD++;
+              }
+            }
       		}
     		}
 			}
-			if(mPrint) cout <<"NHITS Saved on StEvent for detector "<<detname[det].Data()<<" = "<<NHITS<<"  GOOD = "<<NGOOD<<endl;
+			if(mPrint) cout <<"NHITS Saved on StEvent for detector "<<detname[det].Data()<<" = "<<NHITS<<"  GOOD to muDST = "<<NGOOD<<endl;
   	} 
 	} 
   // finished clean up
@@ -1022,20 +1057,51 @@ Bool_t StEmcADCtoEMaker::fillStEvent()
 /*!
 Check if this hit is ok to be saved on StEvent
 */
-Bool_t StEmcADCtoEMaker::saveHit(Int_t det,Int_t idh)
+Bool_t StEmcADCtoEMaker::saveHit(Int_t det,Int_t idh, Int_t cap)
 {  
 	if(det==0) return kTRUE; // save all for towers
-  Int_t ADC = 0;
+  if(det==1) return kFALSE;
+  Float_t ADC = 0;
 	Float_t E = 0;
 	Char_t S = 0;
+  /////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////
+  // need to include a correction because the SMD-phi
+  // pedestals for Y2003 run were not saved in the right position
+  // in the database. Instead of doing id-1 for SMD-phi, we need
+  // do only id. This is valid only for Y2003 data
+  //
+  // by AAPSUAIDE 20030908
+  //
+  int shift = 1;
+  int date = mData->EventDate;
+  if(date>20021101 && date<20030601)
+  {
+    if(det==3) shift = 0;
+  }
+  Float_t PED= mPed[det][idh-shift][cap];
+  Float_t RMS= mPedRMS[det][idh-shift][cap];
 	//if(det==0) {ADC = mData->TowerADC[idh-1]; E = mData->TowerEnergy[idh-1]; S = STATUS_OK; } // save all for towers
-	if(det==2) {ADC = mData->SmdeADC[idh-1]; E = mData->SmdeEnergy[idh-1]; S = mData->SmdeStatus[idh-1]; }
-	if(det==3) {ADC = mData->SmdpADC[idh-1]; E = mData->SmdpEnergy[idh-1]; S = mData->SmdpStatus[idh-1]; }
+	if(det==2) {ADC = (Float_t)mData->SmdeADC[idh-1]; E = mData->SmdeEnergy[idh-1]; S = mData->SmdeStatus[idh-1]; }
+	if(det==3) {ADC = (Float_t)mData->SmdpADC[idh-1]; E = mData->SmdpEnergy[idh-1]; S = mData->SmdpStatus[idh-1]; }
   
   Bool_t save = kTRUE;  
 	if(S!=STATUS_OK) save = kFALSE;   
-  if(mControlADCtoE->EnergyCutOff[det]>0) if(E<mControlADCtoE->EnergyCutOff[det]) save = kFALSE;
-  
+  if(mControlADCtoE->CutOff[det]>0) 
+  {
+    if(mControlADCtoE->CutOff[det]==1)
+    {
+      if(RMS>0 && PED>0)
+      {
+        Float_t x = (ADC-PED)/RMS;
+        if(x<mControlADCtoE->CutOff[det]) save = kFALSE;
+      } else save = kFALSE;
+    } 
+    else
+    {
+      if(E<mControlADCtoE->CutOff[det]) save = kFALSE;
+    }
+  }
   return save;
 }
 //_____________________________________________________________________________
