@@ -246,7 +246,11 @@ ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sgi_52 sgi_53 sgi_62 sgi_63 sgi_64
 #        ls $(OBJ_DIR) > OBJ_LIST;\
 #        $(LD) $(LDFLAGS) -o $(ALL_TAGS) -objectlist OBJ_LIST $(LIBRARY)
 else
+ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),hp_ux102))
+	cd $(OBJ_DIR); $(SO) $(SOFLAGS) -o $(SO_LIB) $(notdir $(FILES_O))  $(LIBRARY)
+else
 	$(SO) $(SOFLAGS) -o $(SO_LIB) $(FILES_O)  $(LIBRARY)
+endif
 endif
 
 

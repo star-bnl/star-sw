@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.12  1998/09/02 14:51:25  didenko
+#  correction
+#
 #  Revision 1.11  1998/08/25 02:10:09  fisyak
 #  Add nodebug
 #
@@ -115,7 +118,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/08/25 02:10:09 $ 
+#           Last modification $Date: 1998/09/02 14:51:25 $ 
 #  default setings
 # Current Working Directory
 #
@@ -167,6 +170,9 @@ else
 	SUBDIRS := $(filter-out html,$(SUBDIRS))
 	SUBDIRS := $(strip    $(sort $(SUBDIRS)))
         SUBDIRS := $(filter-out util, $(SUBDIRS))
+ifneq (,$(findstring $(STAF_ARCH),hp_ux102))
+        SUBDIRS := $(filter-out trg, $(SUBDIRS))
+endif
 ifneq (,$(findstring sim, $(SUBDIRS)))
         SUBDIRS := $(filter-out sim, $(SUBDIRS))
         DIRS    := $(strip $(wildcard sim/*))
