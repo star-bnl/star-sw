@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackNode.cxx,v 2.5 1999/12/01 20:04:58 ullrich Exp $
+ * $Id: StTrackNode.cxx,v 2.6 2000/03/23 13:49:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackNode.cxx,v $
- * Revision 2.5  1999/12/01 20:04:58  ullrich
- * Fixed bug in track() method.
+ * Revision 2.6  2000/03/23 13:49:31  ullrich
+ * Not implemented track type 'secondary' now handled
+ * in a more clean way; entries(secondary) returns 0.
  *
  * Revision 2.6  2000/03/23 13:49:31  ullrich
  * Not implemented track type 'secondary' now handled
@@ -40,7 +41,7 @@
 
 ClassImp(StTrackNode)
 
-static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.5 1999/12/01 20:04:58 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.6 2000/03/23 13:49:31 ullrich Exp $";
 
 StTrackNode::StTrackNode() { /* noop */ }
 
@@ -50,7 +51,9 @@ void
 StTrackNode::addTrack(StTrack* track)
 {
     if (track) {
-        case secondary:		// for now handled as global
+        switch (track->type()) {
+        case primary:
+            mReferencedTracks.push_back(track);
             break;
         case secondary:		// not implemented yet
 	    cerr << "StTrackNode::addTrack(): track type 'secondary' not implemented yet." << endl;
@@ -74,7 +77,9 @@ StTrackNode::removeTrack(StTrack* track)
     StSPtrVecTrackIterator iterS;
     if (track) {
         switch (track->type()) {
-        case secondary:		// for now handled as global
+        case primary:
+            for (iter = mReferencedTracks.begin(); iter != mReferencedTracks.end(); iter++)
+                if (*iter == track) mReferencedTracks.erase(iter);
             break;
         case secondary:		// not implemented yet
 	    cerr << "StTrackNode::removeTrack(): track type 'secondary' not implemented yet." << endl;
@@ -128,7 +133,10 @@ StTrackNode::track(UInt_t i)
 UInt_t
 StTrackNode::entries(StTrackType type) const
 {
-    case secondary:		// for now handled as global
+    switch (type) {
+    case primary:
+        return mReferencedTracks.size();
+        break;
     case secondary:		// not implemented yet
 	cerr << "StTrackNode::entries(): track type 'secondary' not implemented yet." << endl;
 	return 0;
@@ -149,7 +157,10 @@ StTrackNode::track(StTrackType type, UInt_t i) const
     switch (type) {
     case primary:
         if (i < mReferencedTracks.size())
-    case secondary:		// for now handled as global
+            return mReferencedTracks[i];
+        else
+            return 0;
+        break;
     case secondary:		// not implemented yet
 	cerr << "StTrackNode::track(): track type 'secondary' not implemented yet." << endl;
 	return 0;
@@ -173,7 +184,10 @@ StTrackNode::track(StTrackType type, UInt_t i)
     switch (type) {
     case primary:
         if (i < mReferencedTracks.size())
-    case secondary:		// for now handled as global
+            return mReferencedTracks[i];
+        else
+            return 0;
+        break;
     case secondary:		// not implemented yet
 	cerr << "StTrackNode::track(): track type 'secondary' not implemented yet." << endl;
 	return 0;
