@@ -270,7 +270,24 @@ void StiKalmanTrackFinder::fitTracks()
 		}
 }
 
-void StiKalmanTrackFinder::extendTracksToVertex(StiHit * vertex)
+/*! Extend all known tracks to primary vertex
+	<p>
+	Attempt an extension of all known tracks to the given primary vertex. If the extension is successfull, 
+	the vertex is added to the track as a node. Node that in this implementation, it is assumed the
+	track has been pruned and thus consists of a single node sequence (as opposed to a tree).
+	<p>
+	<ol>
+	<li>Loop on all tracks currently stored in track container.</li>
+	<li>It is assumed that the track does not already have a main vertex associated with it.</li>
+	<li>Attempt extension to the given vertex by a call to "extendToMainVertex". 
+	<li>If extension is successfull, the given vertex is added as node to the track.
+	</ol>
+	<p>
+	<h3>Note</h3>
+	Any exception thrown by "getInnerMostNode()" or "extendTrackToVertex()" are
+	caught here and reported with "cout".
+*/
+void StiKalmanTrackFinder::extendTracksToVertex(const StiHit & vertex)
 {
 	try 
 		{
@@ -278,7 +295,7 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit * vertex)
 			for (KalmanTrackMap::const_iterator it=trackContainer->begin(); it!=trackContainer->end(); ++it) 
 				{
 					track = (*it).second;
-					extendToMainVertex(track->getInnerMostNode(),vertex);
+					extendTrackToVertex( track->getInnerMostNode(),vertex);
 				}
 		}
   catch (runtime_error & rte) 
@@ -294,6 +311,7 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit * vertex)
 			cout << "StiKalmanTrackFinder::extendTracksToVertex() - Internal Error :\n" << e.what() << endl;
 		}
 }
+
 
 void StiKalmanTrackFinder::findNextTrack()
 {
@@ -391,25 +409,10 @@ void StiKalmanTrackFinder::findTrack(StiTrack * t) // throws runtime_error, logi
 	lastNode = sNode;
   pruneNodes(lastNode);
   reserveHits(lastNode);
-  //track->setChi2(lastNode->fChi2);
   using namespace std;
-  //if (lastNode->fP3*StiKalmanTrackNode::getFieldConstant()>0)
-  //  track->setCharge(-1);
-  //else
-  //  track->setCharge(1);
-  //if (pars->xtrapolateToMainVertex) extendToMainVertex(lastNode);
-	//cout << "======================================================================"<<endl;
-	//cout << *track<<endl;
-	track->setFittingDirection(kInsideOut);
-	track->fit();
-	//cout << *track<<endl;
+	//track->setFittingDirection(kInsideOut);
+	//track->fit();
 	track->setFlag(1);
-	//cout << "Track Length:" << track->getTrackLength() << endl;
-	//cout << "           N:" << track->getPointCount() << endl;
-	//cout << "       Max N:" << track->getMaxPointCount() << endl;
-	//cout << "        Gaps:" << track->getGapCount() << endl;
-	//cout << " SKTFinder::findTrack() - Track Parameters" << endl << *track;
-	// insert track in track container for output.
 	if (pars->useTrackFilter && trackFilter->filter(track)) 
 		trackContainer->push_back(track);
 	else
@@ -751,52 +754,85 @@ void StiKalmanTrackFinder::doFinishLayer()
   //printState();
 }
 
-//_____________________________________________________________________________
+/*! Remove given node from given track. 
+  <p>
+	Not implemented
+ */
 void StiKalmanTrackFinder::removeNodeFromTrack(StiKalmanTrackNode * node, StiKalmanTrack* track)
 {
-  // Remove given node from given track. 
-  // not implemented
 }
 
+/*! Prune the track to select the best branch of the tree identified by given leaf node.
+	<p>
+	The best brach is assumed to be the one given by the leaf "node".
+  All siblings of the given node, are removed, and iteratively
+  all siblings of its parent are removed from the parent of the
+  parent, etc.
+*/
 void StiKalmanTrackFinder::pruneNodes(StiKalmanTrackNode * node)
 {
-  // Prune unnecessary nodes on the track starting at given node. 
-  // All siblings of the given node, are removed, and iteratively
-  // all siblings of its parent are removed from the parent of the
-  // parent, etc.
-  //trackMes <<"SKTF::pruneNodes(StiKalmanTrackNode * node) - Beginning"<<endl;
+  trackMes <<"SKTF::pruneNodes() - Beginning"<<endl;
   StiKalmanTrackNode * parent = static_cast<StiKalmanTrackNode *>(node->getParent());
   while (parent)
     {
-      //if (StiDebug::isReq(StiDebug::Finding)) 
-      //trackMes << "SKTF::pruneNodes(StiKalmanTrackNode * node) -"
-      //    << "node has childCount:" << parent->getChildCount() << endl;
       parent->removeAllChildrenBut(node);
       node = parent;
       parent = static_cast<StiKalmanTrackNode *>(node->getParent());
     }
 }
 
+/*! Declare hits associated with given track as used.
+	<p>
+  Declare hits on the track ending at "node" as used. 
+	This method starts with the last node and seeks the
+  parent of each node recursively. The hit associated with each
+  node (when there is a hit) is set to "used".
+*/	
 void StiKalmanTrackFinder::reserveHits(StiKalmanTrackNode * node)
 {
-  // Declare hits on the track ending at "node"
-  // as used. This method starts with the last node and seeks the
-  // parent of each node recursively. The hit associated with each
-  // (when there is a hit) is set to "used".
-    
   //trackMes <<"SKTF::reserveHits(StiKalmanTrackNode * node) - Beginning"<<endl;
   StiKTNForwardIterator it(node);
   for_each( it, it.end(), SetHitUsed() );
 }
 
-void StiKalmanTrackFinder::extendToMainVertex(StiKalmanTrackNode * node, StiHit * vertex)
+/*! Extend track encapsulated by "sNode" to the given vertex.
+	<p>
+	Attempt an extension of the track encapsulated by sNode the given vertex. 
+	<p>
+	<ol>
+	<li>Get node from node factory.</li>
+	<li>Reset node.</li>
+	<li>Propagate the node from given parent node "sNode", to the given vertex using a 
+	call to "propagate".</li>
+	<li>Evaluate the chi2 of the extrapolated if the vertex is added to the track. Done
+	using a call to "evaluateChi2".</li>
+	<li>If chi2 is less than max allowed "maxChi2ForSelection", update track parameters
+	using the vertex as a measurement and add the vertex to the track as the last node.</li>
+	</ol>
+	<h3>Notes</h3>
+	<ul>
+	<li>Throws logic_error if no node can be obtained from the node factory.</li>
+	<li>The methods "propagate", "evaluateChi2", and "updateNode" may throw 
+	runtime_error exceptions which are NOT caught here...</li>
+	</ul>
+*/
+void StiKalmanTrackFinder::extendTrackToVertex(StiKalmanTrackNode * sNode, const StiHit & vertex)
 {
-	// to be implemented...
-	//cout << " --------------------------------------\na track extended..."<<endl;
-	//cout << *node<<endl;
+	tNode = trackNodeFactory->getObject();
+  if (tNode==0) 
+    throw logic_error("SKTF::extendTrackToVertex()\t- ERROR - tNode==null");
+	tNode->reset();
+	position = tNode->propagate(sNode, &vertex); 
+	tNode->setHit(&vertex);
+	chi2 = tNode->evaluateChi2(); 
+	if (chi2<pars->maxChi2ForSelection)
+		{
+			tNode->updateNode();
+			sNode->add(tNode);	
+			track->setLastNode(tNode);
+		}
+	cout << *track << endl;
 }
-
-
 
 /*
   

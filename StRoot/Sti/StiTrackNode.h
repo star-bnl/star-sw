@@ -14,42 +14,59 @@ class StiTrackNode : public StiDefaultMutableTreeNode
 {
 public:
     
-    void reset();
-    void set(int depth, StiHit * h);
-    void setAsCopyOf(const StiTrackNode * node);
-    void     setHit(StiHit * h)  
-			{  
-				hit = h;  
-				//    if(hit!=NULL){ detector = NULL; }
-				if(hit!=0){ detector = 0; }
-			}
-    StiHit * getHit() const      {  return hit;}
-    friend ostream& operator<<(ostream& os, const StiTrackNode& n);
-    
-    const StiDetector *getDetector() const;
-    void setDetector(const StiDetector *pDetector);
-    
-    void setDedx(double e) {dedx=e;}
-    double getDedx() const {return dedx;}
+	void reset();
+	void set(StiHit * h);
+	void setAsCopyOf(const StiTrackNode * node);
+	void setHit(StiHit * h); 
+	StiHit * getHit() const;
+	
+	const StiDetector *getDetector() const;
+	void setDetector(const StiDetector *pDetector);
+	
+	virtual void addChild(StiTrackNode * newChild);
+	
+	//void setDedx(double e) {dedx=e;}
+	//double getDedx() const {return dedx;}
 
-    virtual void addChild(StiTrackNode * newChild);
+	friend ostream& operator<<(ostream& os, const StiTrackNode& n);
 
-protected:   
-    
-    //StiTrackNode(): hit(NULL), detector(NULL){}
-    StiTrackNode(): hit(0), detector(0){
-      if(s_pMessenger==NULL){ 
-        s_pMessenger = Messenger::instance(MessageType::kNodeMessage);
-      }
-    }
-    
-    double        dedx;
-    StiHit      * hit;  
-    const StiDetector * detector; // used if not hit for node
-
-    static Messenger *s_pMessenger;
+ protected:   
+	
+	StiTrackNode();    
+	double   dedx;
+	StiHit * hit;  
+	const StiDetector * detector;
 };
 
+inline StiTrackNode::StiTrackNode(): hit(0), detector(0)
+{
+}
+	
+inline StiHit * StiTrackNode::getHit() const 
+{
+  return hit;
+}
+
+inline void StiTrackNode::setHit(StiHit * h)  
+{  
+	hit = h;  
+	if(hit!=0)
+		detector = 0;
+}
+
+inline void StiTrackNode::set(StiHit * h)
+{
+	hit = h;
+	if(hit!=0)
+		detector = 0;
+}
+
+inline void StiTrackNode::setAsCopyOf(const StiTrackNode * node)
+{
+	StiDefaultMutableTreeNode::setAsCopyOf(node);
+	hit = node->hit;
+	detector = node->detector;
+}
 #endif
 
 

@@ -32,7 +32,7 @@ public:
     /// Resets the node to a "null" un-used state
     void reset();
     /// Sets the various attributes of this node based on the argument list.
-    void set(int   depth,
+    void set(
 	     StiHit * hit,
 	     const double alpha,
 	     const double xRef,
@@ -61,8 +61,13 @@ public:
     void getGlobalMomentum(double p[3], double e[6]=0) const;
     /// Set the attributes of this node as a copy of the given node.
     void setAsCopyOf(const StiKalmanTrackNode * node);
+
     /// Propagates a track encapsulated by the given node "p" to the given detector "tDet".
     int  propagate(StiKalmanTrackNode *p, const StiDetector * tDet);	//throw (Exception);
+
+    /// Propagates a track encapsulated by the given node "p" to the given vertex
+    int  propagate(const StiKalmanTrackNode *p, const StiHit * vertex);
+
     /// Evaluates, stores and returns the dedx associated with this node.
     /// Possible returned values are:
     /// > 0 : value of dedx
