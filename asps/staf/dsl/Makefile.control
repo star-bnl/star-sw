@@ -1,0 +1,9 @@
+# Makefile.control
+# Customize these variables to control SLM (STAR Library Make).
+#
+# MANDATORY PARAMETERS -------------------------------------------------
+# --NONE--
+#
+# OPTIONAL PARAMETERS --------------------------------------------------
+# --NONE--
+#
