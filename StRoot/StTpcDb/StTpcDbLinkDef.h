@@ -4,4 +4,5 @@
 #pragma link off all functions;
 #pragma link C++ class StTpcDb;
 #pragma link C++ global gStTpcDb;
+#pragma link C++ class dEdx_t;
 #endif
