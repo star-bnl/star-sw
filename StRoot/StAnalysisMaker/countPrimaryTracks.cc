@@ -1,90 +1,85 @@
-// $Id: countPrimaryTracks.cc,v 1.6 1999/06/25 19:20:40 fisyak Exp $
-// $Log: countPrimaryTracks.cc,v $
-// Revision 1.6  1999/06/25 19:20:40  fisyak
-// Merge StRootEvent and StEvent
-//
-// Revision 1.3  1999/06/24 21:56:47  wenaus
-// Version minimally changed from standard StAnalysisMaker
-//
-// Revision 1.5  1999/03/30 20:37:49  wenaus
-// Explicit StGlobalTrack include
-//
-// Revision 1.4  1999/03/30 15:33:43  wenaus
-// eliminate obsolete branch methods
-//
-// Revision 1.3  1999/02/22 20:49:22  wenaus
-// Protect against null primary vertex
-//
-// Revision 1.2  1999/02/11 15:39:15  wenaus
-// cleanup
-//
-//
-///////////////////////////////////////////////////////////////////////////////
-//
-// countPrimaryTracks.cc
-//
-// Description: 
-//  Simple StEvent usage example. Based on Thomas Ullrich's Example 1
-//
-// Environment:
-//  Software developed for the STAR Detector at Brookhaven National Laboratory
-//
-// Author List: 
-//  Torre Wenaus, BNL  2/99
-//
-// History:
-//
-///////////////////////////////////////////////////////////////////////////////
-#include "StEvent.h"
-#include "StGlobalTrack.h"
+/***************************************************************************
  *
-static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.6 1999/06/25 19:20:40 fisyak Exp $";
+ * $Id: countPrimaryTracks.cc,v 1.7 1999/11/04 21:02:27 ullrich Exp $
+ *
+ * Author: Torre Wenaus, BNL,
+ *         Thomas Ullrich, Nov 1999
+ ***************************************************************************
+ *
+ * Description:  This is an example of a function which performs
+ *               some simple analysis using StEvent.
+ *               Use this as a template and customize it for your
+ *               studies.
+ *
+ ***************************************************************************
+ *
+ * $Log: countPrimaryTracks.cc,v $
+ * Revision 1.7  1999/11/04 21:02:27  ullrich
+ * Revision for new StEvent
+ *
+ * Revision 1.7  1999/11/04 21:02:27  ullrich
+ * Revision for new StEvent
+ *
+ **************************************************************************/
 #include "StEventTypes.h"
 
-static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.6 1999/06/25 19:20:40 fisyak Exp $";
-  long counter = 0;
-  // First, we have to establish a primary vertex.
-    //  in many different ways. Here we demonstrate
-  // Count vertex daughters, and arbitrarily set the primary vertex
-  // to be the vertex with the most daughters
-  StVertexCollection* vertices = event.vertexCollection();
-  StVertexIterator itr;
-  StVertex *vtx = 0;
-  StVertex *vtxMax = 0;
-  long nMax = 0;
-  for (itr = vertices->begin(); itr != vertices->end(); itr++) {
-    vtx = *itr;
-    if (vtx->daughters().size() > nMax) {
-      nMax = vtx->daughters().size();
-      vtxMax = vtx;
-    long counter2 = 0;
-  }
-  event.setPrimaryVertex(vtxMax);
-    for (unsigned int i=0; i<theNodes.size(); i++) {
-  StVertex *primaryV = event.primaryVertex();
-  if ( primaryV ) {
-    cout << "Primary vertex: " <<
-      " index= " << primaryV->index() <<
-      " nDaughters= " << primaryV->daughters().size() <<
-      endl;
-  } else {
-    cout << "No primary vertex" << endl;
-  }
+static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.7 1999/11/04 21:02:27 ullrich Exp $";
 
-  // Thomas's Example 1
-  StTrackCollection *tracks = event.trackCollection();
-  StTrackIterator iter;
-  StGlobalTrack *track;
-  StVertex *vertex;
-  for (iter = tracks->begin();
-       iter != tracks->end(); iter++) {
-    track = *iter;
-    vertex = track->startVertex();
-    if (vertex &&
-        vertex->type() == primary)
-      counter++;
-  }
-  return counter;
+long countPrimaryTracks(StEvent& event)
+{
+    //
+    //  The number of primary tracks can be obtained
+    //  in many different ways. Here we demonstrate
+    //  two of them.
+    //
+
+    // ******************** Method I *********************
+    
+    //  All primary tracks are stored/referenced from the
+    //  primary vertex. Although not currently implemented
+    //  there might be more than one event vertex. 
+    //
+    long nvtx = event.numberOfPrimaryVertices();
+
+    //
+    //  Now we loop over all event vertices and add up the
+    //  number of 'primary' tracks.
+    //
+    long counter1 = 0;
+    for (int k=0; k<nvtx; k++) {
+	StPrimaryVertex *vtx = event.primaryVertex(k);
+	if (vtx) counter1 += vtx->numberOfDaughters();
+	// or shorter:
+	// counter1 += event.primaryVertex(k)->numberOfDaughters();
+    };
+
+    //
+    //  That's it. counter1 is the what we have to return and
+    //  we are done. There's however another method which
+    //  should give us the same result.
+    //
+    
+    // ******************** Method II *********************
+
+    //
+    //  We scan the track nodes and count the number of primary
+    //  tracks referenced therein. Not the fastest way but that's
+    //  not the point here.
+    //  Note that 'primary' is defined in StEnumerations.h
+    //  
+    StSPtrVecTrackNode& theNodes = event.trackNodes();
+
+    long counter2 = 0;
+    for (unsigned int i=0; i<theNodes.size(); i++) {
+	counter2 += theNodes[i]->entries(primary);   
+    }
+
+    //
+    //  At last, a check if both are equal (they better be)
+    //  and we are done.
+    //
+    if (counter1 != counter2)
+	cerr << "countPrimaryTracks(): strange, different # of primary "
 	     << "tracks from different methods." << endl;
 
     return counter2;
