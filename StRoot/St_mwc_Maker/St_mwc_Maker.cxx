@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.14 1999/07/15 13:58:17 perev Exp $
+// $Id: St_mwc_Maker.cxx,v 1.15 2000/01/26 22:05:13 ward Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.15  2000/01/26 22:05:13  ward
+// replaced for(int iii with int iii for(iii
+//
 // Revision 1.14  1999/07/15 13:58:17  perev
 // cleanup
 //
@@ -171,7 +174,8 @@ Int_t St_mwc_Maker::Make(){
    float px,py,pz,x,y;
    int iNHit;
    int nSectorsHit=0;
-   for (int iii=0;iii<96;iii++)
+   int iii;
+   for (iii=0;iii<96;iii++)
      {
        iNHit = (sec+iii)->nhit;
        if (iNHit) nSectorsHit++;
