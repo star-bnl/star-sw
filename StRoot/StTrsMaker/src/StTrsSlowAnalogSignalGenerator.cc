@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.15 1999/04/23 19:19:50 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.16 1999/04/27 15:05:04 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,11 +10,14 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
+ * Revision 1.16  1999/04/27 15:05:04  lasiuk
+ * time shift in ns
+ *
+ * Revision 1.16  1999/04/27 15:05:04  lasiuk
+ * time shift in ns
+ *
  * Revision 1.15  1999/04/23 19:19:50  lasiuk
  * add delay to centroid of signal:
- * Calculated in constructor (mTimeShiftOfSignalCentroid)
- * and applied in in signalsampler()
- *
  * Calculated in constructor (mTimeShiftOfSignalCentroid)
  * and applied in in signalsampler()
  *
@@ -777,7 +780,7 @@ void StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()
 // 		    PR(mTimeShiftOfSignalCentroid);
 		    double tmpTime =
 			mTimeSequenceIterator->time() +
-			mTimeShiftOfSignalCentroid*nanosecond;
+			mTimeShiftOfSignalCentroid;
 		    mTimeSequenceIterator->setTime(tmpTime);
 // 		PR(mTimeSequenceIterator->time());
 // 		PR(mTimeSequenceIterator->time()/nanosecond);
