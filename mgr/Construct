@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.138 2003/10/30 19:40:41 jeromel Exp $
+# $Id: Construct,v 1.139 2004/01/15 00:11:53 fisyak Exp $
 use Env;
 use lib $ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -16,21 +16,19 @@ if ( -e "mgr/Conscript-standard"){
     $param::defaultConscript =
 	$STAR . "/mgr/Conscript-standard"; # Default construction file.
 }   
+$param::defaultInclude   = $INCLUDE; $param::defaultInclude =~ s|^#||; print "param::defaultInclude = $param::defaultInclude\n";
 
-
-print "Path used is $STAR\n" unless ($param::quiet);
-print "Use$xx Conscript from $param::defaultConscript \n"
-  unless ($param::quiet);
+print "Repository used is $STAR\n" unless ($param::quiet);
+print "Use$xx Conscript from $param::defaultConscript \n"  unless ($param::quiet);
 print "Install includes\n" unless ($param::quiet);
 
-my $include = "." . $STAR_HOST_SYS . "/include";
-my $build   = "." . $STAR_HOST_SYS;
-print "build for $build\n" unless ($param::quiet);
+my $include = $param::defaultInclude; mkdir $include if ! -d $include;
 
 if ( defined( $ARG{LinksCheck} ) ) {
-    print "Clean up links. It takes a time.\n";
-    &File::Find::find( \&wanted_dead, $build )   if -d $build;
-    &File::Find::find( \&wanted_dead, $include ) if -d $include;
+  print "Clean up links. It takes a time.\n";
+  my $build   = $BUILD; $build =~ s|^#||;
+  &File::Find::find( \&wanted_dead, $build )   if -d $build;
+  &File::Find::find( \&wanted_dead, $include ) if -d $include;
 }
 my $def = {@param::defaults};
 {
@@ -39,12 +37,10 @@ my $def = {@param::defaults};
       print "Reset $key = $def->{$key} to $ARG{$key}\n" unless ($param::quiet);
       my @defs = ($key => $ARG{$key});
       push ( @param::defaults, @defs );
-      #       $def->{$key} = $ARG{$key};
     }
   }
 }
 
-$BUILD = "#" . $build; print "BUILD is $BUILD CXX = $def->{CXX} DEBUG = $def->{DEBUG}\n";
 if ($def->{CXX}  =~ m/-Zoi/ ){
     # Drtup for INSURE tree directory.
     $LIB = $BUILD . "/ILIB";
@@ -59,14 +55,8 @@ if ($def->{CXX}  =~ m/-Zoi/ ){
     $BIN = $BUILD . "/BIN";
     $OBJ = $BUILD . "/OBJ";
 }
-
-$INCLUDE = "#" . $include;
-
-#$EXPORT  = "#.share";
-$EXPORT  = $BUILD . "/share";
 $LIBPATH = $LIB;
-print "Set LIB = $LIB BIN = $BIN OBJ = $OBJ SHARE = $EXPORT\n";
-print "    INCLUDE = $INCLUDE LIBPATH = $LIBPATH\n";
+print "Set LIB = $LIB BIN = $BIN OBJ = $OBJ INCLUDE = $INCLUDE LIBPATH = $LIBPATH\n";
 my $ROOTLIBS = "";
 my $ROOTGLIBS = "";
 my $RINTLIBS  = "-lRint ";
@@ -89,27 +79,19 @@ if ( defined( $ARG{ROOTLIBS} ) ) {
   print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
   
 }
-
-if( defined( $ARG{CPPPATH} ) ){
-    $CPPPATH = $ARG{CPPPATH};
-} else {
-    $CPPPATH  = "#StRoot:" . $INCLUDE . ":" . $ROOTSRC;
-    $CPPPATH .= $main::PATH_SEPARATOR . 
-	$CERN_ROOT . "/include" . $EXTRA_CPPPATH;
-    #$CPPPATH .= ":$INCLUDE";
-}
-
-$FCPPPATH = "";
+if ( defined( $ARG{CPPPATH} ) ){$CPPPATH = $ARG{CPPPATH};}
+if ( defined( $ARG{FCPATH}  ) ){$FCPATH = $ARG{FCPATH};}
 ( my $DirPath = cwd() ) =~ s/\/$//g;
 print "DirPath    = $DirPath\n" unless ($param::quiet);
 
 $repository = `echo $STAR`;
 chop($repository);
 print "repository = $repository\n" unless ($param::quiet);
-Repository($repository);    # unless $param::noRepository;
+Repository($repository); 
 
 my @Repo = Repository_List;
 if ( defined( $ARG{Salt} ) ) { $Salt = $ARG{Salt}; }
+if ( defined( $ARG{NoKeep} ) ) { $NoKeep = $ARG{NoKeep}; }
 
 if ( $#Repo > -1 ) {
     print "Repositories:  \"@Repo\";" unless ($param::quiet);
@@ -119,47 +101,10 @@ if ( $#Repo > -1 ) {
         print "\tSet Salt to \"$param::salt\"\n" unless ($param::quiet);
     }
 }
-else { $param::keep = 1; }
+else { if (! $NoKeep) {$param::keep = 1; }}
 
 
-if ( $STAR_HOST_SYS !~ /^intel_wnt/ ) {
-    my($packl,$cernl,$kernl);
-
-    if ( -e "$CERN/$CERN_LEVEL/bin/cernlib_noshift"      &&
-	 -e "$CERN/$CERN_LEVEL/lib/libpacklib_noshift.a" &&
-	 -e "$CERN/$CERN_LEVEL/lib/libkernlib_noshift.a" ){
-	$cernl = "$CERN/$CERN_LEVEL/bin/cernlib_noshift";
-	$packl = "packlib_noshift";
-	$kernl = "kernlib_noshift";
-    } else {
-	if ( ! -e "$CERN/$CERN_LEVEL/bin/cernlib"){
-	    print 
-		"\n",
-		" ** WARNING  ** Could not find $CERN/$CERN_LEVEL/bin/cernlib\n",
-		"                Will attempt to proceed and assume it is in\n",
-		"                your path ...\n",
-		"\n";
-	    $cernl = "cernlib";
-	} else {
-	    $cernl = "$CERN/$CERN_LEVEL/bin/cernlib";
-	}
-	print "WARNING :: Using default packlib (with possibly shift)\n";
-	$packl = "packlib";
-	$kernl = "kernlib";
-    }
-
-    $CERNLIBS .= " "
-	. `$cernl geant321 pawlib packlib graflib/X11 packlib mathlib kernlib`;
-
-    $CERNLIBS =~ s/packlib\./$packl\./g;
-    $CERNLIBS =~ s/kernlib\./$kernl\./g;
-
-    chop($CERNLIBS);
-    $Libraries  = $CERNLIBS . " ";
-    $Libraries .= " " . $FLIBS . " " . $CLIBS . " ";
-    chop($Libraries);
-
-} else {
+if ( $STAR_HOST_SYS =~ /^intel_wnt/ ) {
     $CPPPATH  = "";
     $FCPPPATH = "";
 
@@ -170,18 +115,17 @@ if ( $STAR_HOST_SYS !~ /^intel_wnt/ ) {
         $INCLUDE_PATH .= $main::PATH_SEPARATOR . $dir . "/" . $include . "/tables";
     }
     my $ROOTSRC = $AFS_RHIC . "\\star\\ROOT\\" . $ROOT_LEVEL . "\\ROOT\\src";
-    $INCLUDE_PATH .= $main::PATH_SEPARATOR . $ROOTSRC;
+    $INCLUDE_PATH .= $main::PATH_SEPARATOR . $env->{ENV}->{ROOTSYS} . "/include";
     $INCLUDE_PATH .= $main::PATH_SEPARATOR . $CERN_ROOT . "/include";
 }
 Link $OBJ => $DirPath;
 print "Link $BUILD => $DirPath\n" unless ($param::quiet);
-print "CPPPATH = $CPPPATH\n";
 
 $env = new cons(
+  'FCPATH'         => $FCPATH,
   'CPPPATH'        => $CPPPATH,
   'EXTRA_CXXFLAGS' => $EXTRA_CXXFLAGS,
   'EXTRA_CFLAGS'   => $EXTRA_CFLAGS,
-  'Libraries'      => $Libraries,
   'LIBPATH'        => $LIBPATH,
   'ROOTLIBS'       => $ROOTLIBS,
   'ROOTGLIBS'      => $ROOTGLIBS,
@@ -203,32 +147,53 @@ Ignore qw(
 );
 
 if ( !$param::quiet ) {
-    print "STAR_SYS = \t$env->{ENV}->{STAR_SYS}\n";
-    print "ROOTSYS  = \t$env->{ENV}->{ROOTSYS}\n";
-    print "DEBUG    = \t$env->{DEBUG}\n";
-    print "CPPFLAGS = \t$env->{CPPFLAGS} \tEXTRA_CPPFLAGS = \t$env->{EXTRA_CPPFLAGS}\nCPPPATH  = \t$env->{CPPPATH}\n";
-    print
-"CC       = \t$env->{CC}    \tCFLAGS   = \t$env->{CFLAGS} \tEXTRA_CFLAGS  = \t$env->{EXTRA_CFLAGS}     \tCLIBS    =\t$env->{CLIBS}\n";
-    print
-"CXX      = \t$env->{CXX}    \tCXXFLAGS = \t$env->{CXXFLAGS} \tEXTRA_CXXFLAGS = \t$env->{EXTRA_CXXFLAGS}\n";
-    print
-"FC       = \t$env->{FC}     \tFFLAGS   = \t$env->{FFLAGS}     \tFLIBS    =\t$env->{FLIBS}\n";
-    print
-"LD       = \t$env->{LD}     \tLDFLAGS  = \t$env->{LDFLAGS} \tEXTRA_LDFLAGS  = \t$env->{EXTRA_LDFLAGS}\n";
-
-    #    \nEXEFLAGS =\t$env->{EXEFLAGS}\n";
-    print
-"LIBPATH  = \t$env->{LIBPATH}\tLIBS     = \t$env->{LIBS}       \tLibraries=\t$env->{Libraries}\n";
-    print "SO       = \t$env->{SO}     \tSOFLAGS  = \t$env->{SOFLAGS}\n";
-    if ($param::debug) {
-        foreach my $key( sort keys %$env ) {
-            print "\$env->{", $key, "}= \t|$env->{$key}|\n";
-        }
+  my @list = qw (STAR_SYS ROOTSYS br 
+		 CXX DEBUG CXXFLAGS EXTRA_CXXFLAGS 
+		 CPPFLAGS EXTRA_CPPFLAGS br 
+		 CPPPATH EXTRA_CPPPATH br
+		 CC DEBUG CFLAGS EXTRA_CFLAGS br
+		 FC FDEBUG FPPFLAGS FEXTEND FFLAGS br 
+		 FCPATH EXTRA_FCPATH br
+		 F77LD F77LDFLAGS br
+		 CERNLIBS  FLIBS br
+		 CLIBS SYSLIBS br
+		 LD LDFLAGS EXTRA_LDFLAGS LIBPATH LIBS Libraries br
+		 SO SOFLAGS br );
+  my $tab = "";
+  foreach my $p ( @list ) {
+    if ($p eq 'br') {print "\n"; $tab = "";}
+    else {
+      if ($env->{$p})           {print "$tab$p = ", $env->{$p}; $tab = "\t";}
+      elsif ($env->{ENV}->{$p}) {print "$tab$p = ", $env->{ENV}->{$p};  $tab = "\t";}
     }
+  }
 }
+PrintHash($env,"\$env->{") if ($param::debug);
 my @subdirs = ();
-
-# make Targets and install includes
+# install includes
+my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg";
+@DirsWithIncludes = map File::Basename::dirname($_), @DirsWithIncludes;
+my @DirsIdlInc = glob "pams/*/idl pams/*/inc";
+print "DirsWithIncludes = @DirsWithIncludes @DirsIdlInc\n" if ($param::debug);
+foreach my $dir (@DirsWithIncludes, @DirsIdlInc) {
+  print "---> looking for include in $dir\n" if ($param::debug);
+  next if ! -r $dir;
+  opendir( DIR, $dir ) or die "Can't open $sub_DIR\n";
+  my @incs = readdir DIR; print "incs = @incs\n" if ($param::debug);
+  closedir DIR;
+  my @incT = ();
+  foreach my $inc(@incs) {
+    if ( $inc =~ /\.h$/ || $inc =~ /\.hh$/
+	 || $inc =~ /\.hpp$/ || $inc =~ /\.inc$/
+	 || $inc =~ /\.idl$/ ) {
+      push @incT, $dir . "/" . $inc;
+      print "+++ add $inc from $sub_DIR\n" if ($param::debug);
+    }
+  }
+  if ( $#incT > -1 && !$param::rflag ) {
+    Install $env $INCLUDE, @incT;
+  }
+}
 my  @items;
 if ( defined($SKIP_DIRS) ){ @items = split(" ",$SKIP_DIRS);}
 
@@ -236,12 +201,12 @@ if ( defined($SKIP_DIRS) ){ @items = split(" ",$SKIP_DIRS);}
 # Search for directories (one level down) and make
 # list of targets
 #
-foreach my $dir( "pams", "StRoot" ,"StPiD" ) {
+
+foreach my $dir( "pams", "StRoot" ,"StPiD") {
     next if !-d $dir;
     opendir( DIR, $dir ) or die "Can't open $dir\n";
     my @subdirS = readdir DIR;
     closedir DIR;
-
     foreach my $sub_dir (@subdirS) {
         next if $sub_dir eq '.' || $sub_dir eq '..';
 	# The above pattern survived for some time but is 
@@ -272,26 +237,9 @@ foreach my $dir( "pams", "StRoot" ,"StPiD" ) {
         if ( $sub_dir =~ /CVS/     )	{next;}
         if ( $sub_dir =~ /^html/   )	{next;}
         if ( $sub_dir =~ /^doc/    )	{next;}
-
-        my $ExportInc = $sub_DIR . "/.includes_for_export.flg";
-        if ( -f $ExportInc)
-        {
-            opendir( DIR, $sub_DIR ) or die "Can't open $sub_DIR\n";
-            my @incs = readdir DIR;
-            closedir DIR;
-            my @incT = ();
-
-            foreach my $inc(@incs) {
-                if ( $inc =~ /\.h$/ || $inc =~ /\.hh$/ || $inc =~ /\.inc$/ )
-                {
-                    push @incT, $sub_DIR . "/" . $inc;
-                }
-            }
-
-            if ( $#incT > -1 && !$param::rflag ) {
-                Install $env $INCLUDE, @incT;
-            }
-        }
+        if ( $sub_dir =~ /^inc$/   )	{next;}
+        if ( $sub_dir =~ /^idl$/   )	{next;}
+	
         opendir( DIR, $sub_DIR ) or die "Can't open $sub_DIR\n";
         my @subsubdirS = readdir DIR;
         closedir DIR;
@@ -309,34 +257,20 @@ foreach my $dir( "pams", "StRoot" ,"StPiD" ) {
 		     $subsub_dir =~ m/^example/  ||
 		     $subsub_dir =~ m/^include/  ||
 		     $subsub_dir =~ m/^macros/   ||
+		     $subsub_dir =~ /^inc$/    ||
+		     $subsub_dir =~ /^idl$/    ||
 		     $subsub_dir =~ m/^kumac/ ){
 		    #print "=== Skipping $subsub_dir in $subsub_DIR\n";
                     next;
-                }
-
-		#print "---> looking for $sub_DIR $subsub_dir\n";
-                if ( $subsub_dir =~ /^inc$/ || $subsub_dir =~ /^idl$/ ) {
-                    opendir( DIR, $subsub_DIR )
-                      or die "Can't open $sub_DIR\n";
-                    my @incs = readdir DIR;
-                    closedir DIR;
-                    my @incT = ();
-
-                    foreach my $inc(@incs) {
-                        if ( $inc =~ /\.h$/ || $inc =~ /\.hh$/
-                          || $inc =~ /\.hpp$/ || $inc =~ /\.inc$/
-                          || $inc =~ /\.idl$/ )
-                        {
-                            push @incT, $subsub_DIR . "/"
-				. $inc;    
-			    print "+++ add $inc from $sub_DIR\n" if ($param::debug);
-                        }
-                    }
-
-                    if ( $#incT > -1 && !$param::rflag ) {
-                        Install $env $INCLUDE, @incT;
-		    }
-                    next;
+		  }
+		if ( $sub_dir =~ /Pool$/ && ( ! $param::include or  $subsub_dir !~ /$param::include/o )) {
+		  if (! $param::include ) {
+		    print  "skip ";
+		    printf("%40s","$sub_dir/$subsub_dir");
+		    printf("\tto build it you need to add %25s","+$subsub_dir");
+		    print  " in cons command line\n";
+		  }
+		  next;
                 }
 
                 if ( ( $sub_dir =~ /^sim$/    || 
@@ -359,27 +293,41 @@ foreach my $dir( "pams", "StRoot" ,"StPiD" ) {
         print "================== add $sub_DIR\n" if ($param::debug);
     }
 }
-
 print "subdirs = @subdirs\n" if $param::debug;
 my @Targets = ();
-
-foreach $dir( "asps/rexe", "asps/staf/sdd", "asps/Jprof", "StDb", @subdirs ) {
+my @sysdirlist = qw(asps/agi/agetof asps/staf/sdd asps/rexe StDb cern/geant321 asps/agi/gcalor asps/agi/AtlsimMain);
+if ( $STAR_HOST_SYS !~ /^alpha_dux/) {push @sysdirlist, "asps/Jprof";}
+foreach $dir(@sysdirlist , @subdirs ) {
     if ( -d $dir ) {
         print "Add dir : $dir\n" if $param::debug;
         push @Targets, $OBJ . "/" . $dir . "/Conscript";
     }
 }
-print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ\n" unless ($param::quiet);
+print "BUILD  = $BUILD OBJ = $OBJ\n" unless ($param::quiet);
 print "Targets = @Targets\n" if $param::debug;
-Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ);
+Export qw( env INCLUDE LIB BIN BUILD OBJ);
 Default qw (   .  );
-#print "Debug ".join(" ",@Targets)."\n";
+print "Debug ".join(" ",@Targets)."\n"if ($param::debug);
+Depends $env $STAR . "/mgr/RootCint.pl", $env->{ENV}->{ROOTSYS} . "/bin/rootcint";
 Build @Targets;
 
 #___________________________________________________________________________
 sub script::wanted_dead {
     -l and not -e and print "bogus link: $File::Find::name \t--- remove it\n"
       and `rm $_`;
+}
+#____________________________________________________________
+sub script::PrintHash($$) {
+  my $env = shift; # print "Call PrintHash\n";
+  my $prefix = shift;
+  foreach my $key ( sort keys %$env ) {
+    if (ref($env->{$key}) eq "HASH") {
+      script::PrintHash($env->{$key}, $prefix . $key . "}->{");
+    }
+    else {
+      if ($env->{$key}) {print $prefix, $key, "}= \t$env->{$key}\n";}
+    }
+  }
 }
 
 #___________________________________________________________________________
