@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.4 1999/11/17 16:13:17 ullrich Exp $
+% $Id: StEvent.tex,v 2.5 1999/11/18 19:40:49 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -143,8 +143,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.4 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/17 16:13:17 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.5 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/18 19:40:49 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -168,8 +168,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.4 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/17 16:13:17 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.5 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/18 19:40:49 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -177,8 +177,8 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.4 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/17 16:13:17 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.5 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/18 19:40:49 $ $}  % replaced by cvs with current revision
 \index{header files}
 \index{StEventTypes.h file}
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
@@ -202,7 +202,7 @@ To summarize: All you need when using StEvent is to include
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.4 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.5 $ $}  \\[5mm] % replaced by cvs with current revision
 \index{enumerations}
 \index{constants}
 \index{StDetectorId.h file}
@@ -751,7 +751,7 @@ more sophisticated but the basic idea shown in the example stays the same.
     
     \verb+Bool_t  doPrintMemoryInfo;+\\
     Switch on/off checks on memory usage of \StEvent\
-
+\index{documentation}
 All documentation specific to the various packages is under cvs
 control and stored in the same repository as the source code of the
 package. You will find it usually in a directory called \texttt{doc}.
@@ -779,11 +779,156 @@ the more you will appreciate this book. We already mentioned that
 the internal structure you will find things like virtual constructors,
 overloaded new/delete operators and much more.
 Then it is nice to have Bjarnes book around to look things up.
+\index{Stroustrup, Bjarne}
 \clearpage
 
 In order to get started it is always a good idea to study a simple
-\subsection{Run Header} 
+In the following we describe the basic concepts of \StEvent.
+This is not to describe every class and every method but to explain
+the idea behind it and illustrate a few things in examples.
+If you need more details have a look at the reference section and if
+you want to know \emph{everything} about \StEvent\ you have to visit
+the source code directly.
+    root4star
+\end{verbatim}
+\index{StRun}
+\index{StRunSummary}
+\index{run header}
+\index{run summary}
+The class \texttt{StRun} contains all information you would expect
+from a run header: run number, trigger settings, beam setup, and
+much more. Every living \texttt{StRun} object also contains a pointer to an
+instance of \texttt{StRunSummary} which contains - you guessed it - the run summary.
+The fact that the summary is contained by pointer already tells
+you that the pointer might be \texttt{NULL} if something went wrong.
+So better make sure it is non-zero before you de-reference it.\\
+The run summary contains information gathered during the DST reconstruction like
+average pt, average pseudo-rapitity, CPU time, and similar stuff.
+It does \emph{not} contain all data on the experimental run but only on the events
+of the run which were handled in a single batch job. This are usually around 50 events,an experimental run can contain thousands of events. 
+It runs the chain on either a single file or all files under a
+specified root directory (see doEvents.C for details). Example
+        \includegraphics[width=0.5\textwidth]{run.eps}
+
+Processes 10 events from the specified XDF file.\\
+\hspace{1cm}\verb+.x doEvents.C(10,"-","/some_directory/some_dst_file.xdf");+\\
+
+Processes 42 events from the specified ROOT file.\\
+\hspace{1cm}\verb+.x doEvents.C(42,"-","/some_directory/some_dst_file.root");+\\
+
+and \texttt{StEvent} are completely seperate entities. They don't know
+specified directory.\\
+i.e.~ many instances of \texttt{StEvent}.
+\texttt{StEventMakerfig:umlRun} (see Sec.~\ref{sec:StEventMaker} will
+give you the same one over and over again, unless there's a new run
+header on the DST.
+
+\index{example using StRun}
+\index{example using StRunSummary}
+Here is a small example of a function \texttt{printRunInfo} which takes
+a pointer to an instance of \texttt{StRun} and prints out some stuff.
+    mkdir StRoot/StMyAnalysisMaker
+    cp $STAR/StRoot/StAnalysisMaker/* StRoot/StMyAnalysisMaker/
+    [edit and modify]
+    cons +StMyAnalysisMaker
+    cp $STAR/StRoot/macros/analysis/doEvents.C ./
+    [edit to use your maker]
+    root4star
+\end{verbatim}
+At the ROOT prompt type
+\begin{verbatim}
+    .x doEvents.C(<your arguments>);
+\end{verbatim}
+By the time you gain more experience your ``maker'' will become more
+and more sophisticated but the basic idea shown in the example stays
+the same.
+
+\subsection{Further Documentation}
+\label{sec:furtherDoc}
+\index{documentation}
+
+In STAR all documentation specific to a packages is under cvs control
+and stored in the same repository as the source code of the package.
+You will find it usually in a directory called \texttt{doc}.  In
+addition to that every package should contain a \texttt{README} and a
+\texttt{index.html} file with further information. (Note the
+properly. This code actually could have been written differently using
+the \texttt{PR(x)} macro defined in \texttt{StGlobals.h} from the
+StarClassLibrary.
+\name{StarClassLibrary} (SCL).  Examples are \texttt{StThreeVector},
+\texttt{StHelix} and \texttt{StParticleDefinition}. You should have a
+one then could write\\
+the helix track model used in STAR and contains many
+examples.\index{SCL} \index{StarClassLibrary}
+
+Very important is also the documentation from the
+\texttt{\$STAR/pams/global/idl} area. Here you will find a detailed
+description of the DST tables content.  Since StEvent pretty much
+reflects this content (although in a different way and approach) this
 is the place to check if you don't understand the meaning of certain
+\index{event header}
+\index{event summary}
+\index{StEvent}
+\index{StBrowsableEvent}
+\index{StEventSummary}
+The event header carries the same name as the whole package: \texttt{StEvent}.
+Don't worry, when we talk about the package we write \StEvent, when
+we talk about the class we write \texttt{StEvent}.\\
+The class \texttt{StEvent} plays a special role since it is the entry point
+and upper most object of the whole \StEvent\ tree. From here you can reach
+every single bit and byte there is on the DST.\\
+One already sees that that \texttt{StEvent} is a bit more complex than
+\texttt{StRun}. However, one thing is very similar: the summary.
+This is depicted in Fig.~\ref{fig:umlEvent} which shows only a very small
+fraction of the class design around \texttt{StEvent}.
+not to describe every class and every method in detail but to explain
+the idea behind it and illustrate a few things in simple examples.  If
+        \includegraphics[width=0.8\textwidth]{event.eps}
+want to know \emph{everything} about \StEvent\ you have to visit the
+source code directly.
+
+\subsection{Run Header}
+\index{StRun} \index{StRunSummary} \index{run header} \index{run
+The class StEventSummary contains lots of information gathered during the
+reconstruction of the event like: the number of tracks, the number of positive
+or negative tracks, the number of vertices of certain types, and several
+\emph{quasi}-histograms to hold for example distributions of for transverse momenta
+and other essential physics quantities. The same warning as for StRun applies here.
+Check the pointer to the event summary before you use it. It could be \texttt{NULL}.
+went wrong. So better make sure it is non-zero before you dereference
+it.\\
+therefore acts the same way but it has some additional features which allow
+a better integration of \StEvent\ into the ROOT framework. Since this is of no
+big importance for the understanding of the data model as a whole we refer
+to section \ref{sec:StEventMaker} and \ref{sec:StBrowsableEvent} for more
+details.
+
+As already mentioned StEvent opens the door to all the info there is on the DST.
+In order to get there you have to navigate through the tree. Only few objects, mostly
+container and collections, can be accessed directly from the StEvent objects.
+Here's a list of some important objects which are directly stored in StEvent and
+let you climb further down the tree:
+\end{figure}
+\item collection of software monitors
+classes. Pretty simple.  What is not shown is the relation to the
+\texttt{StEvent} class, simply because there is none.  \texttt{StRun}
+and \texttt{StEvent} are completely separate entities. They don't know
+\item list of all track nodes
+\item list of the detector info for each track
+\item primary vertices (mostly only one)
+\item list of all V0 vertex candidates
+\item list of all Xi vertex candidates
+\item list of all kink vertex candidates
+\item level-0 trigger
+pointer to an instance of \texttt{StRun} as argument and prints out
+And remember, an object you get \emph{by pointer} is not guaranteed to exist,
+an object you get \emph{by reference} always exist.
+void printRunInfo(StRun* run)
+What else does \texttt{StEvent} contain? Well, all the usual stuff one would expect
+to see in an event header: event identifier, time whene the event was recorded, the
+trigger mask, the bunch crossing number and more. For a complete reference see
+section \ref{sec:StEvent}.
+    cout << "run type:              " << run->type() << endl;
     cout << "center of mass energy: " << run->centerOfMassEnergy() << endl;
 can be reached directly from the \texttt{StEvent} objects.  Here's a
            << tpcMon->n_clus_tpc_in[i] << " cluster" << endl;
