@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mikesParticleCut.cxx,v 1.2 1999/07/06 22:33:21 lisa Exp $
+ * $Id: mikesParticleCut.cxx,v 1.3 1999/07/19 14:24:04 hardtke Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: mikesParticleCut.cxx,v $
+ * Revision 1.3  1999/07/19 14:24:04  hardtke
+ * modifications to implement uDST
+ *
  * Revision 1.2  1999/07/06 22:33:21  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -47,13 +50,15 @@ bool mikesParticleCut::Pass(const StHbtTrack* track){
     float TRapidity = 0.5*log((TEnergy+track->P().z())/
 			    (TEnergy-track->P().z()));
 
+    float Pt = sqrt((track->P().x())*(track->P().x())+
+                    (track->P().y())*(track->P().y()));
     bool goodTrack=
-      ((track->DCA()  > mDCA[0]) &&
-       (track->DCA()  < mDCA[1]) &&
+      ((track->DCAxy()  > mDCA[0]) &&
+       (track->DCAxy()  < mDCA[1]) &&
        (track->NHits() > mNHits[0]) &&
        (track->NHits() < mNHits[1]) &&
-       (track->Pt()    > mPt[0]) &&
-       (track->Pt()    < mPt[1]) &&
+       (Pt             > mPt[0]) &&
+       (Pt             < mPt[1]) &&
        (TRapidity      > mRapidity[0]) &&
        (TRapidity      < mRapidity[1]));
 
