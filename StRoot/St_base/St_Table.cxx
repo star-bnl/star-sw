@@ -1,5 +1,5 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: St_Table.cxx,v 1.97 2000/02/29 01:54:47 fine Exp $ 
+// $Id: St_Table.cxx,v 1.98 2000/02/29 22:15:45 fine Exp $ 
 // 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
@@ -99,9 +99,25 @@ static void ArrayLayout(Int_t *layout,Int_t *size, Int_t dim)
   }
 }
 
+
+ClassImp(St_Table)
+ 
 //______________________________________________________________________________
-static void AsString(void *buf, const char *name, Int_t width=0)
+St_tableDescriptor *St_Table::GetTableDescriptors() const {
+    return new St_tableDescriptor(this);
+}
+
+//______________________________________________________________________________
+void St_Table::AsString(void *buf, const char *name, Int_t width) const
 {
+  //
+  // AsString represents the value provided via "void *b" with type defined 
+  //          by "name"
+  //
+  //   void *buf  - the pointer to the value to be printed out.
+  //        name  - the name of the type for the value above
+  //       width  - the number of psotion to be used to print the value out
+  //
    if (!strcmp("unsigned int", name))
       cout << setw(width) << *(unsigned int *)buf;
    else if (!strcmp("int", name))
@@ -115,22 +131,13 @@ static void AsString(void *buf, const char *name, Int_t width=0)
    else if (!strcmp("short", name))
       cout <<  setw(width) << *(short *)buf;
    else if (!strcmp("unsigned char", name))
-      cout <<  setw(width) <<  *(unsigned char *)buf;
+      cout <<  setw(width) <<  hex << *(unsigned char *)buf;
    else if (!strcmp("char", name))
       cout <<   setw(width) << *(char *)buf;
    else if (!strcmp("float", name))
       cout <<   setw(width) << setprecision(width-3) << *(float *)buf;
    else if (!strcmp("double", name))
       cout <<   setw(width) << setprecision(width-3) << *(double *)buf;
-}
-
-
-ClassImp(St_Table)
- 
-
-//______________________________________________________________________________
-St_tableDescriptor *St_Table::GetTableDescriptors() const {
-    return new St_tableDescriptor(this);
 }
 
 //______________________________________________________________________________
@@ -1618,7 +1625,7 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *, const 
                         }
                         else 
 //                           cout << membertype->AsString(p3pointer) << " :";
-                          ::AsString(p3pointer,membertype->GetTypeName(),width);
+                           AsString(p3pointer,membertype->GetTypeName(),width);
                            cout << " :";
                    }
                 } else if (!strcmp(member->GetFullTypeName(), "char*") ||
@@ -1643,7 +1650,7 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *, const 
                     breakLoop = kTRUE;
                  }
                  else{
-                    ::AsString((void *)pointer,membertype->GetTypeName(),width);
+                    AsString((void *)pointer,membertype->GetTypeName(),width);
                     cout << " :";
 //                    cout << membertype->AsString((void *)pointer) <<" :";
                  }
@@ -2708,6 +2715,9 @@ St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {
 
 
 // $Log: St_Table.cxx,v $
+// Revision 1.98  2000/02/29 22:15:45  fine
+// function AsString converted to the virtual method to let user to overload it
+//
 // Revision 1.97  2000/02/29 01:54:47  fine
 // St_Table -> turn automatic schema evolution for table version 2 and above
 //

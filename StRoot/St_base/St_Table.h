@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.45 2000/02/26 01:38:12 fine Exp $
+// $Id: St_Table.h,v 1.46 2000/02/29 22:15:45 fine Exp $
 #ifndef STAF_St_Table
 #define STAF_St_Table
   
@@ -101,6 +101,7 @@ public:
   
    virtual     void       Adopt(Int_t n, void *array);
    virtual     void       AddAt(const void *c, Int_t i);
+   virtual     void       AsString(void *buf, const char *name, Int_t width=0) const;
               const void *At(Int_t i) const;
    virtual     void       Browse(TBrowser *b);
    virtual     void       CopySet(St_Table &array);
@@ -214,6 +215,9 @@ inline void St_Table::Draw(Option_t *opt)
 { Draw(opt, "", "", 1000000000, 0); }
 
 // $Log: St_Table.h,v $
+// Revision 1.46  2000/02/29 22:15:45  fine
+// function AsString converted to the virtual method to let user to overload it
+//
 // Revision 1.45  2000/02/26 01:38:12  fine
 // public s_Table is replaced with inline GetArray()
 //
