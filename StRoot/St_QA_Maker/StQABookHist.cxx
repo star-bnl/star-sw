@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.34 2000/02/07 19:49:06 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.35 2000/02/10 19:49:40 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.35  2000/02/10 19:49:40  kathy
+// use kEventVtxId to select primary verteices instead of value 1
+//
 // Revision 1.34  2000/02/07 19:49:06  kathy
 // removed L3 trigger histograms and methods that created them - this table is no longer standard on the DST; created methods BookHistEval and MakeHistEval for geant vs reco evaluation histograms; filled geant vs reco evaluation histograms for table-based data
 //
@@ -112,6 +115,9 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "StQABookHist.h"
+
+// tables  from geant
+//#include "tables/St_g2t_vertex_Table.h"
 
 const Int_t   StQABookHist::nxpT = 50;
 const Int_t   StQABookHist::nyeta = 50;
@@ -1173,6 +1179,8 @@ void StQABookHist::BookHistRich(){
 //_____________________________________________________________________________
 
 void StQABookHist::BookHistEval(){
+
+// these only get filled if the geant dataset is available!
 
    m_geant_reco_pvtx_x  = QAH1F("QaGRpvtxDx"," diff geant - reco prim vtx X",
                               100, -0.5,0.5);
