@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.43 2000/01/04 20:45:04 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.44 2000/01/07 01:04:57 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.44  2000/01/07 01:04:57  fisyak
+// Add magF option to work with field map (WL) + take scale factor for the field from Db
+//
 // Revision 1.43  2000/01/04 20:45:04  fisyak
 // Add StMagFMaker
 //
@@ -220,18 +223,19 @@ BfcItem BFC[] = {
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
-  {"gstar"       ,"" ,"","tables,geant","","","gstar for 10 muon track with pT = 10 GeV in |eta|<1",kFALSE}, 
-  {"tdaq"        ,""  ,"","er99,xin,tpc_daq"                                              ,"","","",kFALSE},  
+  {"gstar"       ,"" ,"","tables,geant","","","gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE}, 
+  {"tdaq"        ,""  ,"","xin,tpc_daq"                                                   ,"","","",kFALSE},  
   {"miniDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
   {"fzin"        ,""  ,"","geant","" ,""                                      ,"read gstar fz-file",kFALSE},
   {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
   {"tables"      ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
   {"tls"         ,""  ,"","",""                                                           ,"tls","",kFALSE},
   {"SCL"         ,""  ,"","","","StarClassLibrary",                         "Load StarClassLibrary",kFALSE},
-  {"FieldOn"     ,""  ,"","-FieldOff,-HalfField,-ReverseField,-magF","StMagFMaker","StMagF"  ,"Nominal field",kFALSE},
-  {"FieldOff"    ,""  ,"","-FieldOn,-HalfField,-ReverseField,-magF","StMagFC","StMagF" ,"No Field option",kFALSE},
-  {"HalfField"   ,""  ,"","-FieldOn,-FieldOff,-ReverseField,-magF","StMagFC","StMagF","Half Field option",kFALSE},
-  {"ReverseField",""  ,"","-FieldOn,-FieldOff,-HalfField,-magF","StMagFC","StMagF","Reverse Field option",kFALSE},
+  {"NoFieldSet"  ,""  ,"","-FieldOn,-FieldOff,-HalfField,-ReverseField,-magF" ,"","","No Field Set",kFALSE},
+  {"FieldOn"     ,""  ,"","NoFieldSet"                ,"StMagFC","StMagF" ,"Constant nominal field",kFALSE},
+  {"FieldOff"    ,""  ,"","NoFieldSet"                       ,"StMagFC","StMagF" ,"No Field option",kFALSE},
+  {"HalfField"   ,""  ,"","NoFieldSet"                      ,"StMagFC","StMagF","Half Field option",kFALSE},
+  {"ReverseField",""  ,"","NoFieldSet"                   ,"StMagFC","StMagF","Reverse Field option",kFALSE},
   {"NoEvent"     ,""  ,"","-event,-analysis"      ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
   {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},
   {"Debug"       ,""  ,"",""                                                ,"","","Set debug flag",kFALSE},
@@ -240,15 +244,15 @@ BfcItem BFC[] = {
   {"MAKERS      ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
-  {"geant","geant","","tables","St_geant_Maker","geometry,St_g2r,St_geant_Maker","initailize geant",kFALSE}, 
+  {"geant","geant","","NoFieldSet,tables","St_geant_Maker","geometry,St_g2r,St_geant_Maker","GEANT",kFALSE}, 
   {"db"          ,""  ,"","tables"               ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
-  {"magF"        ,""  ,"","tables,db","StMagFMaker","StMagF","Take mag. field scale factor from Db",kFALSE},
+  {"magF"        ,"","","NoFieldSet,tables,db","StMagFMaker","StMagF"
+                                                         ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpc"         ,"tpc","","tables,tls,db,tcl,tpt"                     ,"StChainMaker","StChain","",kFALSE},
   {"tpcDB"       ,"tpcDB","tpc",""                                     ,"StTpcDbMaker","StTpcDb","",kFALSE},
-  {"tss"         ,"tpc_raw","tpc","tls"                    ,"St_tss_Maker","St_tpc,St_tss_Maker","",kFALSE},  
   {"Trs"         ,"","tpc","scl,tpc_daq"                              ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"tpc_daq"     ,"tpc_raw","tpc",""                        ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
-  {"tfs"         ,""  ,"tpc","","",""               ,"use tfs       (no St_[tss_ and no Trs]Maker)",kFALSE},
+  {"tfs"         ,""  ,"tpc","","",""                                    ,"use tfs (no StTrsMaker)",kFALSE},
   {"tcl"         ,"tpc_hits","tpc","tables,tls"            ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
   {"tpt"         ,"tpc_tracks","tpc","tables,tls"          ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
   {"laser"       ,"tpc_tracks","tpc","tdaq,tpc,-tpt"
@@ -516,14 +520,14 @@ Int_t StBFChain::kOpt (const TString *tag) const {
 void StBFChain::SetOption(const Int_t k) {// set all off
   if (k > 0 && !BFC[k].Flag) {
     //    printf ("SetOption: %s %i",BFC[k].Key,k);
-    BFC[k].Flag = kTRUE;
-    printf (" Switch On  %s\n", BFC[k].Key);
     if (strlen(BFC[k].Opts) > 0) {
       TString *Opt[80];
       Int_t NParsed = ParseString(BFC[k].Opts,Opt);
       Int_t i;
       for (i=0;i<=NParsed;i++) SetOption(Opt[i]);
     }
+    BFC[k].Flag = kTRUE;
+    printf (" Switch On  %s\n", BFC[k].Key);
   }
   else {
     if (k < 0 && BFC[-k].Flag) {
@@ -570,9 +574,8 @@ void StBFChain::SetFlags(const Char_t *Chain, Bool_t Force)
     SetOption("fzin");
     SetOption("geant");
   }
-  if (!GetOption("geant") && !GetOption("FieldOff") && 
-      !GetOption("HalfField") && !GetOption("FieldOn") &&
-      !GetOption("magF"))     SetOption("magF"); 
+  if (!GetOption("geant") && !GetOption("FieldOn") && !GetOption("FieldOff") && 
+      !GetOption("HalfField") && !GetOption("ReverseField"))     SetOption("magF"); 
   if (!GetOption("global") && 
       (GetOption("Match") || GetOption("Primary") || GetOption("V0") ||
        GetOption("Xi")    || GetOption("Kink"))) SetOption("global");
@@ -712,8 +715,8 @@ void StBFChain::SetDbOptions(){
   else {if (GetOption("Y1d"))  dbMk->SetDateTime("year_1d");
   else {if (GetOption("Y1e"))  dbMk->SetDateTime("year_1e");
   else {if (GetOption("Y2a"))  dbMk->SetDateTime("year_2a");
-  //  else                         dbMk->SetDateTime("year_2a");
-  }}}}}}}}}}
+  else {if (GetOption("gstar"))dbMk->SetDateTime("year_2a");
+  }}}}}}}}}}}
   gMessMgr->QAInfo() << "db Maker set time = " << dbMk->GetDateTime().GetDate() 
 		   << dbMk->GetDateTime().GetTime() << endm;
   gMessMgr->QAInfo() << "Geometry Maker set time = ";
@@ -745,8 +748,7 @@ void StBFChain::SetTreeOptions()
     }
     if (GetOption("fss"))    treeMk->IntoBranch("ftpc_rawBranch","ftpc_raw/.data");
     if (GetOption("ems"))    treeMk->IntoBranch("emc_rawBranch","emc_raw/.data");
-    if (GetOption("tss") || GetOption("Trs"))
-                             treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
+    if (GetOption("Trs"))    treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
     if (GetOption("tcl"))    treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
     if (GetOption("tpt"))    treeMk->IntoBranch("tpc_tracksBranch","tpc_tracks/.data");
     if (GetOption("trg"))    treeMk->IntoBranch("trgBranch","ctf mwc trg");
