@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.8 2004/06/25 10:38:00 subhasis Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.9 2004/07/09 09:01:13 subhasis Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.9  2004/07/09 09:01:13  subhasis
+ *numbering convention starts from 0 everywhere for filling StEvent
+ *
  *Revision 1.8  2004/06/25 10:38:00  subhasis
  *vmecond bug fixed for 200 geV
  *
@@ -277,12 +280,24 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 	    //Fill StPmdHit
 	    StPmdHit *pmdhit = new StPmdHit();
 	    if(supmod>PMD_CRAMS_MAX)supmod-=PMD_CRAMS_MAX;
+	    /*
 	    pmdhit->setGsuper(Int_t(supmod));      //! filling supermodule no (1-12)
 	    pmdhit->setSubDetector(Int_t(SubDet)); //! filling subdetector (pmd=1,cpv=2)
 	    pmdhit->setRow(Int_t(row));            //! filling row
 	    pmdhit->setColumn(Int_t(col));         //! filling col
 	    pmdhit->setAdc(Int_t(DaqADC));         //! filling ADC   
 	    pmdhit->setEdep(Float_t(edep));        //! filling energy   
+	    */
+
+	    //Changed to accommodatre numbering convention
+	    pmdhit->setGsuper(Int_t(supmod-1));      //! filling supermodule no (0-11)
+	    pmdhit->setSubDetector(Int_t(SubDet-1)); //! filling subdetector (pmd=0,cpv=1)
+	    pmdhit->setRow(Int_t(row-1));            //! filling row (starts from 0)
+	    pmdhit->setColumn(Int_t(col-1));         //! filling col (starts from 0)
+	    pmdhit->setAdc(Int_t(DaqADC));         //! filling ADC   
+	    pmdhit->setEdep(Float_t(edep));        //! filling energy   
+	    /////////////////////////////////////////
+
 	    if(SubDet==2)det0->addHit(pmdhit);
 	    if(SubDet==1)det1->addHit(pmdhit);
 	    if(mPmdPrint)cout<<"Applymap:Chain "<<Chain_No<<"channel "<<channel<<"supmod "<<supmod<<"col  "<<col<<" row "<<row<<"ADC "<<DaqADC<<"BLOCK "<<BLOCK<<endl;	
