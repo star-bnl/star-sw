@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.42 2000/09/16 22:23:04 snelling Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.43 2000/09/22 22:01:38 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.43  2000/09/22 22:01:38  posk
+// Doubly integrated v now contains resolution error.
+//
 // Revision 1.42  2000/09/16 22:23:04  snelling
 // Auto magically switch to rapidity when identified particles are used
 //
@@ -410,7 +413,7 @@ Int_t StFlowAnalysisMaker::Init() {
   mHistYieldAll2D = new TH2D("Flow_YieldAll2D", "Flow_YieldAll2D",
     nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMax);
   mHistYieldAll2D->Sumw2();
-  mHistYieldAll2D->SetXTitle((char*)xLabel.Data());
+  mHistYieldAll2D->SetXTitle("Pseudorapidty");
   mHistYieldAll2D->SetYTitle("Pt (GeV)");
 
   // Mean Eta in each bin
@@ -421,7 +424,7 @@ Int_t StFlowAnalysisMaker::Init() {
   
   // Mean Pt in each bin
   mHistBinPt = new TProfile("Flow_Bin_Pt", "Flow_Bin_Pt",
-    nPtBins, ptMin, ptMax, ptMin, ptMax, "");
+    nPtBins, ptMin, ptMaxPart, ptMin, ptMaxPart, "");
   mHistBinPt->SetXTitle("Pt (GeV)");
   mHistBinPt->SetYTitle("<Pt> (GeV)");
   
@@ -862,7 +865,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHistYield2D =	new TH2D(histTitle->Data(),
         histTitle->Data(), nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMax);
       histFull[k].histFullHar[j].mHistYield2D->Sumw2();
-      histFull[k].histFullHar[j].mHistYield2D->SetXTitle((char*)xLabel.Data());
+      histFull[k].histFullHar[j].mHistYield2D->SetXTitle("Pseudorapidty");
       histFull[k].histFullHar[j].mHistYield2D->SetYTitle("Pt (GeV)");
       delete histTitle;
 
@@ -903,7 +906,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.42 2000/09/16 22:23:04 snelling Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.43 2000/09/22 22:01:38 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1077,7 +1080,6 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     float phi    = pFlowTrack->Phi();
     if (phi < 0.) phi += twopi;
     float eta    = pFlowTrack->Eta();
-    if (strlen(pFlowSelect->PidPart()) != 0) { eta = pFlowTrack->Y(); }
     float pt     = pFlowTrack->Pt();
     int   charge = pFlowTrack->Charge();
     float dca    = pFlowTrack->Dca();
@@ -1177,8 +1179,15 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     // Yield3D, Yield2D, BinEta, BinPt
     mHistEtaPtPhi3D->Fill(eta, pt, phi);
     mHistYieldAll2D->Fill(eta, pt);
-    mHistBinEta->Fill(eta, eta);
-    mHistBinPt->Fill(pt, pt);
+    if (pFlowSelect->SelectPart(pFlowTrack)) {
+      if (strlen(pFlowSelect->PidPart()) != 0) { 
+	float rapidity = pFlowTrack->Y();
+	mHistBinEta->Fill(rapidity, rapidity);
+      } else {
+	mHistBinEta->Fill(eta, eta);
+      }
+      mHistBinPt->Fill(pt, pt);
+    }
 
     // cos(n*phiLab)
     for (int j = 0; j < Flow::nHars; j++) {
@@ -1233,8 +1242,14 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  float v = cos(order * (phi - psi_i))/perCent;
 	  float vFlip = v;
 	  if (eta < 0 && (j+1) % 2 == 1) vFlip *= -1;
-	  histFull[k].histFullHar[j].mHist_vObs2D-> Fill(eta, pt, v);
-	  histFull[k].histFullHar[j].mHist_vObsEta->Fill(eta, v);
+	  if (strlen(pFlowSelect->PidPart()) != 0) { 
+	    float rapidity = pFlowTrack->Y();
+	    histFull[k].histFullHar[j].mHist_vObs2D-> Fill(rapidity, pt, v);
+	    histFull[k].histFullHar[j].mHist_vObsEta->Fill(rapidity, v);
+	  } else {
+	    histFull[k].histFullHar[j].mHist_vObs2D-> Fill(eta, pt, v);
+	    histFull[k].histFullHar[j].mHist_vObsEta->Fill(eta, v);
+	  }
 	  histFull[k].histFullHar[j].mHist_vObsPt-> Fill(pt, vFlip);
 	  histFull[k].mHist_vObs->Fill(order, vFlip);
 	  
@@ -1342,6 +1357,7 @@ Int_t StFlowAnalysisMaker::Finish() {
   double cosPairErr[Flow::nSels][Flow::nHars];
   double content;
   double error;
+  double totalError;
   for (int k = 0; k < Flow::nSels; k++) {
     char countSels[2];
     sprintf(countSels,"%d",k+1);
@@ -1427,19 +1443,25 @@ Int_t StFlowAnalysisMaker::Finish() {
       AddHist(histFull[k].histFullHar[j].mHist_vPt);
 
       // Calulate v = vObs / Resolution
-      // The systematic error of the resolution is not folded in.
       if (mRes[k][j] != 0.) {
-	cout << "##### Resolution= " << mRes[k][j] << " +/- " << mResErr[k][j] 
+	cout << "##### Resolution of the " << j+1 << "th harmonic = " << 
+	  mRes[k][j] << " +/- " << mResErr[k][j] 
 	     << endl;
+	// The systematic error of the resolution is not folded in.
 	histFull[k].histFullHar[j].mHist_v2D-> Scale(1. / mRes[k][j]);
 	histFull[k].histFullHar[j].mHist_vEta->Scale(1. / mRes[k][j]);
 	histFull[k].histFullHar[j].mHist_vPt ->Scale(1. / mRes[k][j]);
 	content = histFull[k].mHist_v->GetBinContent(j+1);
-	histFull[k].mHist_v->SetBinContent(j+1, content / mRes[k][j]);
+	content /=  mRes[k][j];
+	histFull[k].mHist_v->SetBinContent(j+1, content);
+	// The systematic error of the resolution is folded in.
 	error = histFull[k].mHist_v->GetBinError(j+1);
-	histFull[k].mHist_v->SetBinError(j+1, error / mRes[k][j]);
-	cout << "##### v= (" << content/mRes[k][j] << " +/- " << error/mRes[k][j] 
-	     << ") %" << endl;
+	error /= mRes[k][j];
+	totalError = fabs(content) * sqrt((error/content)*(error/content) +
+	       (mResErr[k][j]/mRes[k][j])*(mResErr[k][j]/mRes[k][j]));
+	histFull[k].mHist_v->SetBinError(j+1, totalError);
+	cout << "##### v= (" << content << " +/- " << error << " +/- " 
+	     << totalError << ") %" << endl;
       } else {
 	cout << "##### Resolution of the " << j+1 << "th harmonic was zero."
 	     << endl;
@@ -1463,7 +1485,7 @@ Int_t StFlowAnalysisMaker::Finish() {
       func_q->SetParameters(vGuess, mult, area); // initial values
       func_q->SetParLimits(1, 1, 1);             // mult is fixed
       func_q->SetParLimits(2, 1, 1);             // area is fixed
-      histFull[k].histFullHar[j].mHist_q->Fit("qDist", "0");
+      histFull[k].histFullHar[j].mHist_q->Fit("qDist", "Q0");
       delete func_q;
 
       // Calculate PhiWgt
