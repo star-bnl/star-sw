@@ -22,7 +22,7 @@ macro run tpc_sector_first tpc_sector_last
   
   cd   [params]/tpc/tsspars
   tdm/table/cell/putvalue   'tsspar[0].min_sect' [k]
-   
+  cd /dui   
    
    ami/module/call tss_
         [params]/tpc/tsspars/tsspar_
