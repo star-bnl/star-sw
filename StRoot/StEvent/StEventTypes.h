@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.21 2002/02/19 04:24:03 lasiuk Exp $
+ * $Id: StEventTypes.h,v 2.22 2002/04/18 23:38:21 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.22  2002/04/18 23:38:21  jeromel
+ * Implementation of the SVT 2 tables scheme ...
+ *
  * Revision 2.21  2002/02/19 04:24:03  lasiuk
  * addition of StRichSpectra information for uDST purposes
  *
@@ -97,6 +100,8 @@
 #include "StEventClusteringHints.h"
 #include "StEventInfo.h"
 #include "StEventSummary.h"
+#include "StEstGlobalTrack.h"
+#include "StEstPrimaryTrack.h"
 #include "StFpdCollection.h"
 #include "StFtpcHit.h"
 #include "StFtpcHitCollection.h"
