@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.76  1999/06/08 11:30:14  fisyak
+#  take out NT stuff for the moment
+#
 #  Revision 1.75  1999/05/10 19:43:38  fisyak
 #  Add Victor test for last library
 #
@@ -304,7 +307,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/05/10 19:43:38 $ 
+#           Last modification $Date: 1999/06/08 11:30:14 $ 
 #  default setings
 # Current Working Directory
 #
@@ -397,7 +400,7 @@ StEvent_StEvent:
 	$(MAKE)  -f $(MakeDll)
 St_Tables: $(BASE)
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables \
-         SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St_Tables.$(So) NODEBUG=YES
+         SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St_Tables.$(So) NODEBUG=1999
 test:   $(addsuffix _test, $(SUBDIRS))
 %_test:
 	$(MAKE)  -f $(Makeloop) -C $(STEM) test 

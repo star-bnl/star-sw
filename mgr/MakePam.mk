@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.92 1999/04/24 13:15:24 fisyak Exp $
+# $Id: MakePam.mk,v 1.93 1999/06/08 11:30:14 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.93  1999/06/08 11:30:14  fisyak
+# take out NT stuff for the moment
+#
 # Revision 1.92  1999/04/24 13:15:24  fisyak
 # Add --sillent mode for set SILENT environmnet variable
 #
@@ -192,7 +195,6 @@ ifeq (,$(findstring $(LEVEL),0 1))
     GEN_DIR := $(DIR_GEN)/$(DOMAIN)
     DOM_DIRS:= $(filter-out CVS, $(notdir $(wildcard $(OUT_DIR)/pams/*)))
 #.
-ifndef NT
     check_out   := $(shell test -d $(OUT_DIR) || mkdir -p $(OUT_DIR)) 
     check_sys   := $(shell test -d $(SYS_DIR) || mkdir -p $(SYS_DIR)) 
     check_lib   := $(shell test -d $(LIB_DIR) || mkdir -p $(LIB_DIR))
@@ -202,20 +204,8 @@ ifndef NT
     check_neg   := $(shell test -d $(GEN_DIR) || mkdir -p $(GEN_DIR))
     check_tab   := $(shell test -d $(GEN_TAB) || mkdir -p $(GEN_TAB))
     check_tmp   := $(shell test -d $(GEN_TMP) || mkdir -p $(GEN_TMP))
-else # /* NT */
-    check_out   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(OUT_DIR))))
-    check_sys   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(SYS_DIR))))
-    check_lib   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(LIB_DIR))))
-    check_obj   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(OBJ_DIR))))
-#   check_dep   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(DEP_DIR))))
-    check_gen   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(DIR_GEN))))
-    check_neg   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(GEN_DIR))))
-    check_tab   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(GEN_TAB))))
-    check_tmp   := $(shell $(MKDIR) $(subst /,\,$(subst \,/,$(GEN_TMP))))
-endif #/* NT */
     IDLS    := $(wildcard $(SRC_DIR)/*.idl $(SRC_DIR)/*/*.idl)
     ifneq (,$(IDLS))       
-ifndef NT
       FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(IDLS))
       NAMES_IDM := $(basename $(notdir $(FILES_IDM)))
       SRC_DIRR  := $(addprefix $(STAR), $(subst $(OUT_DIR),,$(SRC_DIR)))
@@ -224,8 +214,7 @@ ifndef NT
         FILES_IDMS:= $(shell egrep -l 'interface.*:.*amiModule' $(IDLSS))
       endif
       NAMES_IDMS:= $(filter-out $(NAMES_IDM), $(basename $(notdir $(FILES_IDMS))))
-endif #/* NT */
-endif
+    endif
     FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g)
 #_________________________________________________________________________
 SUFFIXES := .c .cc .C .cxx .f .F .g .h .hh .hpp .inc .idl
@@ -254,13 +243,7 @@ INCLUDES += -I. -I../ -I/usr/include -I$(STAF_SYS_INCS) \
 ifneq ($(OUT_DIR),$(STAR))        
 INCLUDES := $(INCLUDES) -I$(STAR)/.share/$(DOMAIN) -I$(STAR)/.share/tables
 endif                          
-ifndef NT
 CPPFLAGS := $(CPPFLAGS) $(INCLUDES)
-else #/* NT */
-  INCLUDES := $(INCLUDES) -I$(SUNRPC)
-  INCLUDES := $(addsuffix I-,$(INCLUDES))
-  INCLUDE := $(subst ;;,;,$(INCLUDE);$(subst /,\,$(subst I-,,$(subst I- ;,;,$(subst -I,;,$(INCLUDES))))))
-endif #/* NT */
 FFLAGS   += -DCERNLIB_TYPE
 #                                   -I$(CERN_ROOT)/src/geant321 
 #                 I have idl- or g-files
@@ -307,7 +290,6 @@ endif
 FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O),   $(notdir $(basename $(FILES_ICC)))))
 NAMES_O   = $(notdir $(FILES_O))
 # *.cc moved to sl $(NAMES_CC)
-ifndef NT
 ifneq (,$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF))) 
   SL_PKG  := $(LIB_DIR)/$(PKG).sl
   QWE  := $(sort $(wildcard $(SL_PKG).*))
@@ -320,11 +302,8 @@ ifneq (,$(QWE))
   SL_NEW := $(SL_PKG).$(QWE)
 endif
 endif
-endif #/NT/                          
-ifndef NT
 ifneq (,$(NAMES_IDM))          
 FILES_init  := $(addprefix $(OBJ_DIR)/, $(PKG)_init.$(O))
-endif    
 endif                      
 ifneq (,$(NAMES_CDF))          
 FILES_O    += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CDF)))
@@ -352,10 +331,8 @@ ifneq ($(STAR_PATH),$(OUT_DIR))
     LIBRARIES += $(wildcard  $(STAR_LIB)/lib$(PKG).$(A))
   endif                           
 endif                           
-ifndef NT
 qwe     := $(shell test ! -f $(LIB_PKG) ||  $(AR) $(ARFLAGS) $(LIB_PKG))
 OBJS    := $(LIB_PKG)($(NAMES_O))
-endif #/* NT */
 ifeq (,$(strip $(LIB_PKG) $(SL_PKG)))
 all:
 	@echo Nothing to do for package $(PKG)
@@ -373,13 +350,8 @@ endif
 ifneq (,$(strip $(FILES_O) $(FILES_SL) $(FILES_OG) $(FILES_init))) 
 #                 I have NO idl- and NO g-files
 ifneq ($(FILES_O),)    
-ifndef NT
 $(LIB_PKG):$(OBJS) 
 #	$(AR) $(ARFLAGS) $(LIB_PKG) $(FILES_O); $(RM) $(FILES_O)
-else #/* NT */
-$(LIB_PKG): $(FILES_O)	
-	$(AR) $(ARFLAGS) $(subst /,\\,$(subst \,/,$(LOUT)$(LIB_PKG) $(OBJ_DIR)\*.$(O)))
-endif #/* NT */
 endif                          
 ifneq ($(strip $(FILES_SL) $(FILES_OG) $(FILES_init)),)   
 $(SL_PKG): $(FILES_SL) $(FILES_OG) $(FILES_init) $(LIB_PKG)
@@ -406,11 +378,7 @@ $(OBJ_DIR)/$(PKG)_init.$(O): $(FILES_IDM)
                                                         >> $(GEN_DIR)/$(PKG)_init.cc ; done
 	@echo '                       return 1; }'      >> $(GEN_DIR)/$(PKG)_init.cc
 	@echo 'int  $(PKG)_stop () { return 1; }'       >> $(GEN_DIR)/$(PKG)_init.cc
-ifndef NT
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(GEN_DIR)/$(PKG)_init.cc -o $(ALL_TAGS)
-else #/* NT */
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(CXXOPT) $(subst \,/,-c $(CXXINP)$(GEN_DIR)/$(PKG)_init.cc $(COUT)$(ALL_TAGS))
-endif #/* NT */
 endif                           
 endif                           # NO idl- or g-files
 #_________________dependencies_____________________________
@@ -479,7 +447,6 @@ endif #ALL_TAB
 $(GEN_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
 	@test -h $(GEN_DIR)/geant3.def || $(RM)  $(GEN_DIR)/geant3.def
 	@test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def 
-ifndef NT
 #$(LIB_PKG)($(notdir $(FILES_OG)): $(OBJ_DIR)/%.o:%.g $(GEN_DIR)/geant3.def
 $(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(GEN_DIR)/geant3.def
 	$(CP) $(1ST_DEPS) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(1ST_DEPS) -o  $(GEN_DIR)/$(STEM).F
@@ -504,38 +471,10 @@ $(LIB_PKG)(%.o): %.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o; $(RM) $(OBJ_DIR)/$(STEM).o
 $(LIB_PKG)(%.o): %.cdf
-else #/* NT */
-$(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(GEN_DIR)/geant3.def
-	$(CP)$(1ST_DEPS) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(1ST_DEPS) -o  $(GEN_DIR)/$(STEM).F
-	$(FOR72) $(subst /,\\,$(subst \,/,$(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  $(FOUT)$(ALL_TAGS)))
-$(FILES_OBJ) $(FILES_ORJ) $(FILES_OTJ): $(OBJ_DIR)/%.$(O): %.cxx
-	$(CXX) $(CXXFLAGS) $(CXXOPT) $(subst \,/, $(CPPFLAGS) -c $(CXXINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN)
-$(FILES_SL) : $(OBJ_DIR)/%.$(O): %.cc
-	echo $(FILES_SL) : $(OBJ_DIR)/%.$(O): %.cc
-	$(CXX) $(CXXFLAGS) $(CXXOPT) $(subst \,/, $(CPPFLAGS) -c $(CXXINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN))
-$(OBJ_DIR)/%.$(O): %.F
-	$(RM) $(subst /,\\,$(subst \,/,$(OBJ_DIR)/$(STEM).$(O)))
-	$(FC) $(subst /,\\,$(subst \,/,$(CPPFLAGS)  $(FFLAGS) -c $(1ST_DEPS) $(FOUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN) ))
-$(OBJ_DIR)/%.$(O): %.c
-	$(RM) $(subst /,\\,$(subst \,/,$(OBJ_DIR)/$(STEM).$(O)))
-	$(CC) $(subst \,/,$(CPPFLAGS) $(CFLAGS) $(COPT) -c $(CINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN))
-$(OBJ_DIR)/%.$(O): %.cc
-	$(RM) $(subst /,\\,$(subst \,/,$(OBJ_DIR)/$(STEM).$(O)))
-	$(CXX) $(subst \,/,$(CPPFLAGS) $(CXXFLAGS) $(CXXOPT) -c $(CXXINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN))
-$(OBJ_DIR)/%.$(O): %.cdf
-	$(RM) $(subst /,\\,$(subst \,/,$(OBJ_DIR)/$(STEM).$(O)))
-endif #/* NT */
 	$(KUIPC) $(KUIPC_FLAGS) $(1ST_DEPS) $(GEN_DIR)/$(STEM).c
-ifndef NT
 	$(CC)  $(CPPFLAGS) $(CFLAGS)   -c $(GEN_DIR)/$(STEM).c $(COUT) $(OBJ_DIR)/$(STEM).$(O); \
         $(RM)  $(GEN_DIR)/$(STEM).c
-else #/* NT */
-	$(CC)  $(subst \,/,$(CPPFLAGS) $(CFLAGS) $(COPT) -c $(CINP)$(GEN_DIR)/$(STEM).c $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN)) &&  \
-        $(RM)  $(subst /,\\,$(subst \,/,$(GEN_DIR)/$(STEM).c))
-endif #/* NT */
-ifndef NT
 	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).$(O); $(RM) $(OBJ_DIR)/$(STEM).$(O)
-endif #/* NT */
 #_______________________dependencies_________________________________
 ifneq (,$(FILES_IDM))
 $(FILES_ICC) : $(GEN_DIR)/%_i.cc : %.idl
@@ -584,7 +523,6 @@ endif
 #	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         
 	$(RM) *.h *.inc *.template *.cxx;
 $(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
-ifndef NT
 	$(RM)  $(GEN_DIR)/$(STEM)_i.cc
 	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ;
 	cd $(GEN_TMP); $(STIC) -q $(STICFLAGS) $(1ST_DEPS); 
@@ -595,9 +533,6 @@ ifndef NT
 	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
 #	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         
 	$(RM) *.h *.inc *.template;
-else
-	@echo PLEASE, Run this make with UNIX first !
-endif #/* NT */
 endif #IDM
 ifndef NODEPEND
 include $(STAR_MAKE_HOME)/MakeDep.mk
@@ -608,29 +543,13 @@ endif
 #-----cleaning------------------------------
 clean: clean_obj clean_lib clean_dep
 clean_share:
-ifndef NT
 	rm -rf $(GEN_DIR) $(FILES_ALL_TAB)
-else #/* NT */
-#	$(RMDIR) $(subst /,\\,$(subst \,/,$(GEN_DIR) $(FILES_ALL_TAB)))
-endif #/* NT */
 clean_obj:
-ifndef NT
 	rm -rf $(OBJ_DIR) 
-else #/* NT */
-	if exist $(subst /,\\,$(subst \,/,$(OBJ_DIR)/. )) $(RMDIR) $(subst /,\\,$(subst \,/,$(OBJ_DIR) ))
-endif #/* NT */
 clean_dep:
-ifndef NT
 	rm -rf $(DEP_DIR) 
-else #/* NT */
-#	$(RMDIR) $(subst /,\\,$(subst \,/,$(DEP_DIR) ))
-endif #/* NT */
 clean_lib:
-ifndef NT
 	rm -rf $(DEP_DIR) $(OBJ_DIR) $(wildcard $(LIB_PKG) $(SL_PKG))
-else #/* NT */
-	for %i in ($(subst /,\\,$(subst \,/,$(SL_PKG) $(LIB_PKG)))) if exist %i\\. $(RMDIR)  %i
-endif #/* NT */
 endif
 test: test_dir test_files test_mk
 test_files:
@@ -728,9 +647,6 @@ test_dir:
 	@echo STAR_MAKE_HOME= $(STAR_MAKE_HOME)
 	@echo CERNLIB       = $(MAKECERNLIB)
 	@echo FILES_O       = $(FILES_O) 
-ifdef NT
-        @echo INCLUDE       = $(INCLUDE) 
-endif
 	@echo SRC_DIRR      = $(SRC_DIRR)
 	@echo FILES_IDMS    = $(FILES_IDMS)
 	@echo NAMES_IDM     = $(NAMES_IDM)
