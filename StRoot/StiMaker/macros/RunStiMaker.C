@@ -134,8 +134,8 @@ const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.ro
 
     anaMk->setDoFit(doFit);
     //enum SeedFinderType {kUndefined=0, kComposite=1, kEvaluable=2};
-    //anaMk->setSeedFinderType(StiMaker::kEvaluable);
-    anaMk->setSeedFinderType(StiMaker::kComposite);
+    anaMk->setSeedFinderType(StiMaker::kEvaluable);
+    //anaMk->setSeedFinderType(StiMaker::kComposite);
 
     anaMk->setSimulation(simulated);
     anaMk->setGui(draw);
