@@ -1,6 +1,10 @@
-// $Id: StFtpcDbReader.hh,v 1.16 2003/06/11 12:06:03 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.17 2003/06/12 10:01:26 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.17  2003/06/12 10:01:26  jcs
+// renamed ftpcClusterGeometry database table to ftpcClusterGeom
+// (name was too long)
+//
 // Revision 1.16  2003/06/11 12:06:03  jcs
 // get inner cathode and cluster geometry parameters from database
 //
@@ -77,7 +81,7 @@
 #include "tables/St_ftpcDriftField_Table.h"
 #include "tables/St_ftpcElectronics_Table.h"
 #include "tables/St_ftpcInnerCathode_Table.h"
-#include "tables/St_ftpcClusterGeometry_Table.h"
+#include "tables/St_ftpcClusterGeom_Table.h"
 
 
 class StFtpcDbReader : public TObject 
@@ -186,7 +190,7 @@ public:
                  St_ftpcGas           *gas,
                  St_ftpcElectronics   *electronics,
 		 St_ftpcInnerCathode  *cathode,
-		 St_ftpcClusterGeometry *clustergeo);
+		 St_ftpcClusterGeom *clustergeo);
   // constructor used by StFtpcSlowSimMaker
   StFtpcDbReader(St_ftpcDimensions    *dimensions,
 		 St_ftpcAsicMap       *asicmap,

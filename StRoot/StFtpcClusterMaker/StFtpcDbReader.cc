@@ -1,6 +1,10 @@
-// $Id: StFtpcDbReader.cc,v 1.24 2003/06/11 12:06:03 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.25 2003/06/12 10:01:25 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.25  2003/06/12 10:01:25  jcs
+// renamed ftpcClusterGeometry database table to ftpcClusterGeom
+// (name was too long)
+//
 // Revision 1.24  2003/06/11 12:06:03  jcs
 // get inner cathode and cluster geometry parameters from database
 //
@@ -97,7 +101,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
                                St_ftpcGas           *gas,
                                St_ftpcElectronics   *electronics,
 			       St_ftpcInnerCathode  *cathode,
-			       St_ftpcClusterGeometry *clustergeo)
+			       St_ftpcClusterGeom *clustergeo)
 {
 
   //  just copy dimensions table start to pointer
@@ -256,7 +260,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   }    
 
   //  just copy cluster geometry table start to pointer
-  ftpcClusterGeometry_st* clustergeoTable = (ftpcClusterGeometry_st*)clustergeo->GetTable();
+  ftpcClusterGeom_st* clustergeoTable = (ftpcClusterGeom_st*)clustergeo->GetTable();
   if(clustergeoTable){
     mMinTimeBin = clustergeoTable->minTimebin;
     mMinTimeBinMed = clustergeoTable->minTimebinMed;
@@ -271,7 +275,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
     mDeltaPad  = clustergeoTable->deltaPad;
     mMinChargeWindow = clustergeoTable->minChargeWindow;
   } else {
-    gMessMgr->Message( " No data in table class St_ftpcClusterGeometry","E");
+    gMessMgr->Message( " No data in table class St_ftpcClusterGeom","E");
   }
 
 

@@ -1,5 +1,9 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.50 2003/06/11 12:06:03 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.51 2003/06/12 10:01:25 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.51  2003/06/12 10:01:25  jcs
+// renamed ftpcClusterGeometry database table to ftpcClusterGeom
+// (name was too long)
+//
 // Revision 1.50  2003/06/11 12:06:03  jcs
 // get inner cathode and cluster geometry parameters from database
 //
@@ -338,8 +342,9 @@ Int_t StFtpcClusterMaker::Make()
   m_dimensions = (St_ftpcDimensions *)dblocal_geometry("ftpcDimensions");
   m_padrow_z   = (St_ftpcPadrowZ *)dblocal_geometry("ftpcPadrowZ");
   m_asicmap    = (St_ftpcAsicMap *)dblocal_geometry("ftpcAsicMap");
-  m_clustergeo = (St_ftpcClusterGeometry *)dblocal_geometry("ftpcClusterGeometry");
+  m_clustergeo = (St_ftpcClusterGeom *)dblocal_geometry("ftpcClusterGeom");
   m_cathode      = (St_ftpcInnerCathode *)dblocal_geometry("ftpcInnerCathode");
+  cout<<"DEBUG: m_clustergeo =  "<<m_clustergeo<<" m_cathode      = "<<m_cathode<<endl;
 
   St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
   if ( !ftpc_calibrations_db ){
