@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.31 1999/08/06 13:01:38 fisyak Exp $
+// $Id: StMaker.h,v 1.32 1999/08/13 01:12:25 fine Exp $
 // $Log: StMaker.h,v $
+// Revision 1.32  1999/08/13 01:12:25  fine
+// StMaker::GetHist has been introduced
+//
 // Revision 1.31  1999/08/06 13:01:38  fisyak
 // Add Active flag
 //
@@ -147,6 +150,7 @@ public:
    virtual void        	AddHist(TH1 *h,const char *dir=0);
    virtual void        	AddGarb (St_DataSet *data=0){AddData(data,".garb");};
    virtual TList       *GetHistList() const {return (TList*)GetDirObj(".hist");};
+   virtual TH1         *GetHist(const Char_t *histName) const {TList *l=GetHistList(); return l?(TH1*)l->FindObject(histName):(TH1*)0;};
    virtual StMaker     *cd(){StMaker *ret = fgStChain; fgStChain=this; return ret;};
    virtual StMaker     *Cd(){return cd();};
    static  StMaker     *New(const Char_t *classname, const Char_t *name="", void *title=0);
@@ -219,7 +223,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.31 1999/08/06 13:01:38 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.32 1999/08/13 01:12:25 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };
