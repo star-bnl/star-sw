@@ -34,6 +34,9 @@ public:
 				bool useMcAsRec,
 				Filter<StiTrack> * trackFilter, 
 				Filter<StiHit> * hitFilter);
+	int getLayer(int svtLayer) const;
+	int getLadder(int svtLayer, int svtLadder) const;
+	
 };
 
 #endif
