@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.12 2000/01/14 02:09:43 snelling Exp $
+// $Id: StFlowTagMaker.cxx,v 1.13 2000/01/14 05:44:34 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.13  2000/01/14 05:44:34  snelling
+// Added St_FlowTag Table to .data
+//
 // Revision 1.12  2000/01/14 02:09:43  snelling
 // Fixed small typo (- ->)
 //
@@ -82,9 +85,15 @@ StFlowTagMaker::~StFlowTagMaker()
 Int_t StFlowTagMaker::Make() 
 {
   // Create a new tag
-  pFlowEvent = 0;
-  pFlowTag   = 0;
-  pFlowTag   = new FlowTag_st;
+  pFlowEvent  = 0;
+  pFlowTag    = 0;
+  pSt_FlowTag = 0;
+
+  pSt_FlowTag = new St_FlowTag; // table header
+  pFlowTag    = new FlowTag_st; // tabe structure
+
+  // add FlowTag table to the root .data directory
+  AddData(pSt_FlowTag);
 
   // print pointer to flowtag 
   //cout << "TagPointer: " << pFlowTag << endl;
@@ -111,7 +120,7 @@ Int_t StFlowTagMaker::Make()
 
 void StFlowTagMaker::PrintInfo() 
 {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.12 2000/01/14 02:09:43 snelling Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.13 2000/01/14 05:44:34 snelling Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
