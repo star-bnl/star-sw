@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.11 2001/08/10 15:34:40 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.12 2001/10/22 09:40:18 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.12  2001/10/22 09:40:18  jcs
+// remove obsolete include  StFtpcParamReader.hh
+//
 // Revision 1.11  2001/08/10 15:34:40  jcs
 // correct mistake - close ftpcDriftField
 //
@@ -45,7 +48,6 @@
 #include "StFtpcDriftMapMaker.h"
 #include "StFtpcMagboltz1.hh"
 #include "StFtpcMagboltz2.hh"
-#include "StFtpcClusterMaker/StFtpcParamReader.hh"
 #include "StFtpcClusterMaker/StFtpcDbReader.hh"
 
 #include "StMessMgr.h"
