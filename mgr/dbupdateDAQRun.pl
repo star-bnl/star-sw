@@ -83,6 +83,7 @@ my @DISKR = (
 #              "/star/rcf/data05/reco",
 #              "/star/rcf/data08/reco",
               "/star/rcf/data03/reco",
+              "/star/rcf/disk00001/star/reco",
 ); 
 
 my %monthHash = (
