@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.8 2001/07/22 20:31:29 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.9 2001/07/25 14:47:47 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.9  2001/07/25 14:47:47  caines
+// Fix filling histogram only when debug is on
+//
 // Revision 1.8  2001/07/22 20:31:29  caines
 // Better tuning for real data. Common mode noise calc and sub. Avoid overlapping seq. Fill histograms only in debug
 //
@@ -103,6 +106,7 @@ class StSvtSeqAdjMaker : public StMaker
   TH1F** mRawAdc;  //!
   TH1F** mAdcAfter;  //!
   TH1F* mCommonModePitch; //!
+  TH1F* mCommonModeCount; //!
   int mNumOfSeq;
   int m_n_seq_lo;
   int m_n_seq_hi;
