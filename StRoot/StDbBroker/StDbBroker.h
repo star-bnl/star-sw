@@ -1,13 +1,41 @@
+/***************************************************************************
+ *
+ * $Id: StDbBroker.h,v 1.7 2000/01/10 20:31:16 porter Exp $
+ *
+ * Author: S. Vanyashin, V. Perevoztchikov
+ * Updated by:  R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description: Offline Interface from the Offline Maker interface to the
+ *              Database interface. 
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbBroker.h,v $
+ * Revision 1.7  2000/01/10 20:31:16  porter
+ * modified StDbBroker to be an interface to the DB-interface, StDbLib.
+ *  - old functionality is retained for the short-term & modifications
+ *    are extensions
+ *
+ *
+ **************************************************************************/
 //  
 
 #ifndef STAR_StDbBroker
 #define STAR_StDbBroker
 
 #include "Rtypes.h"
+#include "dbNodeArray.h"
+#include "dbConfig.h"
+
+class StDbConfigNode;
+class StDbManager;
+
 
 /* needed for GetComments only   */
 class St_Table;
 /*this is a temporary quick-and-dirty class for db access*/
+
 class StDbBroker  {
   public:
       enum EColumnType {kNAN, kFloat, kInt, kLong, kShort, kDouble, kUInt
@@ -41,14 +69,21 @@ class StDbBroker  {
     char*        m_tableVersion; // name of the version of the table
     char*        m_database;     // name of the database for this table
 
-  public:
-    StDbBroker(): m_structName(0), m_tableName(0), m_tableVersion(0), m_database(0) {}
+    dbNodeArray *m_Nodes;
+    StDbConfigNode* m_Tree;
 
+    dbConfig_st*  buildConfig(int numRows);
+    int       buildNodes(StDbConfigNode* node, int pID);
+
+  public:
+
+    StDbBroker();
     virtual ~StDbBroker(){}
     
     //    int Init(const char *dbname);// return 0 if OK
 
     void * Use();
+    void * Use(int tabID, int parID);
 
     char  **GetComments(St_Table *parentTable);
     void   Fill(void * pArray, const char **ElementComment);
@@ -79,8 +114,7 @@ class StDbBroker  {
 	} 
     };
 
-    void   SetDateTime(UInt_t date,UInt_t time)
-                                   {m_DateTime[0] = date; m_DateTime[1]= time;}
+    void   SetDateTime(UInt_t date,UInt_t time);
 
     void   SetDictionary(UInt_t nElements, Descriptor *D)
                                      {m_nElements=nElements; m_descriptor = D;}
@@ -93,11 +127,11 @@ class StDbBroker  {
                                 {if(m_structName) delete [] m_structName;
                                  m_structName=new char[strlen(struct_name)+1];
                                  strcpy(m_structName,struct_name);};
-    void  SetVersionName(const char *version) 
+    void   SetVersionName(const char *version) 
                                  {if(m_tableVersion) delete [] m_tableVersion;
                                   m_tableVersion= new char[strlen(version)+1];
                                   strcpy(m_tableVersion,version);}
-    void  SetDataBaseName(const char *dbName) 
+    void   SetDataBaseName(const char *dbName) 
                                  {if(m_database) delete [] m_database;
                                   m_database= new char[strlen(dbName)+1]; 
                                   strcpy(m_database,dbName);}
@@ -109,8 +143,15 @@ class StDbBroker  {
     void   SetEndDate(UInt_t EndDate)     {m_EndDate = EndDate;    }
     void   SetEndTime(UInt_t EndTime)     {m_EndTime = EndTime;    }
     static int DbInit(const char *);  		//dbInit
+ 
+ //-> here's all the real stuff now
+   
+    dbConfig_st* InitConfig(const char* configName, int& numRows, char* versionName=0);
 
-    ClassDef(StDbBroker,0)
+    StDbManager* mgr;
+
+
+  //ClassDef(StDbBroker,0)
 };
 
 extern "C" void DbFill(unsigned int *,         //datetime[4]

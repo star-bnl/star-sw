@@ -1,3 +1,23 @@
+/***************************************************************************
+ *
+ * $Id: DbUse.cxx,v 1.6 2000/01/10 20:31:16 porter Exp $
+ *
+ * Author: S. Vanyashin
+ ***************************************************************************
+ *
+ * Description: low-level C-code to read from  "params" database
+ *              
+ *
+ ***************************************************************************
+ *
+ * $Log: DbUse.cxx,v $
+ * Revision 1.6  2000/01/10 20:31:16  porter
+ * modified StDbBroker to be an interface to the DB-interface, StDbLib.
+ *  - old functionality is retained for the short-term & modifications
+ *    are extensions
+ *
+ *
+ **************************************************************************/
 // idea: to get data from database
 // DbUse allocate memory for the DbData array of fetched structures
 // returning number of structures that was found

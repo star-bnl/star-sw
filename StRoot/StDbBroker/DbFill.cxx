@@ -1,3 +1,23 @@
+/***************************************************************************
+ *
+ * $Id: DbFill.cxx,v 1.2 2000/01/10 20:31:16 porter Exp $
+ *
+ * Author: S. Vanyashin
+ ***************************************************************************
+ *
+ * Description: low-level C-code to write to "params" database
+ *              
+ *
+ ***************************************************************************
+ *
+ * $Log: DbFill.cxx,v $
+ * Revision 1.2  2000/01/10 20:31:16  porter
+ * modified StDbBroker to be an interface to the DB-interface, StDbLib.
+ *  - old functionality is retained for the short-term & modifications
+ *    are extensions
+ *
+ *
+ **************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
