@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.10 1999/09/13 15:17:58 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.11 1999/09/13 23:28:33 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.11  1999/09/13 23:28:33  caines
+// Changed egrpars so doesn't use SVT only tracks by default
+//
 // Revision 1.10  1999/09/13 15:17:58  caines
 // Changed memset(&row,0,m_evr_evrpar->GetRowSize());  to memset(&row,0,m_egr_egrpar->GetRowSize()); for the egr2 allocation
 //
@@ -117,7 +120,7 @@ Int_t StPrimaryMaker::Init(){
     row.debug[0] =  1;
     row.svtchicut = 0;
     row.usetpc    = 2;
-    row.usesvt    = 2;
+    row.usesvt    = 0;
     row.usevert   = 1;
     row.useglobal = 2;
     m_egr2_egrpar->AddAt(&row,0);
