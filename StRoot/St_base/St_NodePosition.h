@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98   
-// $Id: St_NodePosition.h,v 1.12 1999/04/13 14:26:40 fine Exp $
+// $Id: St_NodePosition.h,v 1.13 1999/04/23 22:47:34 fine Exp $
 // $Log: St_NodePosition.h,v $
+// Revision 1.13  1999/04/23 22:47:34  fine
+// Node family has been adjusted for St_PolyLineShape class
+//
 // Revision 1.12  1999/04/13 14:26:40  fine
 // Geometry-based dataset implementation, next step
 //
@@ -98,6 +101,7 @@ class St_NodePosition  : public TObject /*, public St_DefineSet */ {
         virtual void        SetMatrix(TRotMatrix *matrix=0) {fMatrix = matrix;}
         virtual void        SetNode(St_Node *node){ fNode = node;}
         virtual void        SetPosition( Double_t x=0, Double_t y=0, Double_t z=0) {fX=x; fY=y; fZ=z;}
+        virtual void        SetVisibility(Int_t vis=1); // *MENU*
         virtual void        SetX(Double_t x){ fX  =  x;}
         virtual void        SetY(Double_t y){ fY  =  y;}
         virtual void        SetZ(Double_t z){ fZ  =  z;}

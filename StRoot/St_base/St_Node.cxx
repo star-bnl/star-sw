@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.21 1999/04/15 19:44:46 fine Exp $
+// $Id: St_Node.cxx,v 1.22 1999/04/23 22:47:33 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.22  1999/04/23 22:47:33  fine
+// Node family has been adjusted for St_PolyLineShape class
+//
 // Revision 1.21  1999/04/15 19:44:46  fine
-// St_DataSetIter::FindObject bug has been fixed. aliases FindByName and FindByPath  introduced
+//  St_DataSetIter::FindObject bug has been fixed. aliases FindByName and FindByPath  introduced
 //
 // Revision 1.20  1999/04/13 14:26:39  fine
 // Geometry-based dataset implementation, next step
@@ -811,43 +814,4 @@ void St_Node::Sizeof3D() const
       node->Sizeof3D();
    }
 }
- 
-#if 0
-//_______________________________________________________________________
-void St_Node::Streamer(TBuffer &b)
-{
-//*-*-*-*-*-*-*-*-*Stream a class object*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-//*-*              =========================================
-   if (b.IsReading()) {
-      Version_t v = b.ReadVersion();
-      TNamed::Streamer(b);
-      TAttLine::Streamer(b);
-      TAttFill::Streamer(b);
-      b >> fX;
-      b >> fY;
-      b >> fZ;
-      b >> fMatrix;
-      b >> fShape;
-      b >> fParent;
-      b >> fNodes;
-      fOption.Streamer(b);
-      if (v > 1) b >> fVisibility;
-      else  fVisibility = fShape->GetVisibility();
-   } else {
-      b.WriteVersion(St_Node::IsA());
-      TNamed::Streamer(b);
-      TAttLine::Streamer(b);
-      TAttFill::Streamer(b);
-      b << fX;
-      b << fY;
-      b << fZ;
-      b << fMatrix;
-      b << fShape;
-      b << fParent;
-      b << fNodes;
-      fOption.Streamer(b);
-      b << fVisibility;
-   }
-}
-#endif
 
