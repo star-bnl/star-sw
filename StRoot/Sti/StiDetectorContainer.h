@@ -16,13 +16,13 @@ using std::map;
 #include "StiMapUtilities.h"
 
 #include "Sti/StiCompositeTreeNode.h" //For factory
+#include "Sti/StiCompositeLeafIterator.h"
 #include "StiGui/StiRootDrawableDetector.h" //For factory
 
 using std::map;
 
 class StiDetector;
 class StiMaterial;
-
 class StiDetectorContainer
 {
 public:
@@ -64,11 +64,6 @@ public:
     //Set iterators to the position nearest this guy
     void setToDetector(double position, double angle);
 
-    //Starting points for outside-in tracking  
-    void nextStartPoint(); //++  
-    //void previousStartPoint(); //---   
-    bool hasMoreStartPoints() const; //Done yet?  
-    
     //Utilities
     void print() const;
     
@@ -77,16 +72,15 @@ private:
     //The Tree
     data_node* mroot;
     data_node* mregion; //current region (mid/forward/backward rapidity, etc)
+    StiCompositeLeafIterator<data_t>* mLeafIt; //Iterator over leaves, declared on heap for size concerns
     
     //iterators
     data_node_vec::const_iterator mradial_it;
     data_node_vec::const_iterator mphi_it;
 
 private:
-    void findStartPoints();
-    void setToStartPoint(data_node* node);
-    data_node_vec mstartvec;  //vector of starting points for outside in tracking
-    data_node_vec::const_iterator mstart_it;
+    void setToLeaf(data_node* node);
+    
 
 private:
     

@@ -14,6 +14,7 @@
 #include "StiHitContainer.h"
 #include "CombinationIterator.h"
 #include "StiTrackSeedFinder.h"
+#include "StiDetectorContainer.h"
 
 
 ostream& operator<<(ostream& os, const StiHit& hit);
@@ -116,19 +117,13 @@ StiKalmanTrack* StiTrackSeedFinder::makeTrack(const tvector& vec) const
 	return track;
     }
     mdrawablehits->clear();
-    //cout <<"StiTrackSeedFinder::makeTrack()\tConstruct seed from"<<endl;
 
     //This is an ugly loop ,but it is chosen for efficiency to avoid multiple loops over the points
     //and terminate the loop immediately if a hit combination doesn't pass the filter
     bool go=true;
     mdrawablehits->push_back( vec[0] ); //Temp, MLM
-    //cout <<"\t"<<*(vec[0])<<endl;
     for (unsigned int i=1; i<vec.size() && go; ++i) { //start at begin+1
-	//cout <<"\t"<<*(vec[i])<<endl;
 	go = mhitcombofilter->operator()( vec[i-1], vec[i] );
-	if (!go) {
-	    //cout <<"go==false, aborting"<<endl;
-	}
 	mdrawablehits->push_back( vec[i] ); //Temp, MLM
     }
     if (go) { //They're all good
@@ -136,6 +131,9 @@ StiKalmanTrack* StiTrackSeedFinder::makeTrack(const tvector& vec) const
 	//Fit points to helix, etc
 	track = mtrackfactory->getObject();
 	track->reset();
+	//Setup DetectorContainer to inner-most point
+	//This assumes outside in tracking, can be made to switch on direction
+	StiDetectorContainer::instance()->setToDetector( vec.front()->detector() );
     }
     return track;
 }

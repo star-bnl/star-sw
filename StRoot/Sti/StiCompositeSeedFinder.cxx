@@ -82,7 +82,6 @@ void StiCompositeSeedFinder::StiSeedFinderRep::build()
 void StiCompositeSeedFinder::StiSeedFinderRep::reset()
 {
     mCurrentStartPoint = mIntDetMap.begin();
-    //init();
     return;
 }
 
