@@ -41,7 +41,7 @@ StIOMaker::StIOMaker(const char *name,  const char *iomode,
                      const char *ioFile,const char *treeName)
 :StIOInterFace(name,iomode)
 {
-    Build(fFileSet,ioFile,treeName);
+    Build(0,ioFile,treeName);
 }
 //_____________________________________________________________________________
 StIOMaker::StIOMaker(const char *name,   const char *iomode, 
