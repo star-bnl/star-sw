@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.17 2001/10/25 23:00:24 hardtke Exp $
+ * $Id: StMagUtilities.h,v 1.18 2002/02/02 01:01:09 jeromel Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.18  2002/02/02 01:01:09  jeromel
+ * Jim's modif for FC & SpaceCharge corrections.
+ *
  * Revision 1.17  2001/10/25 23:00:24  hardtke
  * Use database to get a few parameters in StMagUtilities (including twist)
  *
@@ -55,64 +58,93 @@
 #include <fstream.h>
 #include <iomanip.h>
 #include "TSystem.h"
-#include "TROOT.h"
-#include "TFile.h"
+#include "TROOT.h"        // Stop at this point and put further includes in .cxx file
 
+#define  nZ               57            // Standard STAR B field Map. Number of Z points in table
+#define  nR               28            // Number of R points in table
+#define  nPhi             37            // Number of Phi points in table
+#define  neZ              69            // Standard STAR E field Map. Number of Z points in table
+#define  neR              33            // Number of R points in table
+#define  nePhi            13            // Number of Phi points in table ( add one for 360 == 0 )
 
-enum   EBField  { kUndefined=0, kConstant=1, kMapped=2, kChain=3 } ;
-// DO NOT change the numbering of those constants. StBFChain depends
-// on those values to build an option mask. In StBFChain, the options
-// are set as those values x2 since the mask is right shifted first.
-enum   DistortSelect { kElectricField2001 = 1, 
-		       kBMap = 0x08,
-		       kPadrow13 = 0x10,
-		       kTwist = 0x20,
-		       kClock = 0x40,
-		       kMembrane = 0x80,
-		       kEndcap = 0x100 
-};
+enum   EBField  { kUndefined = 0, kConstant = 1, kMapped = 2, kChain = 3 } ;
+// DO NOT change the numbering of these constants. StBFChain depends
+// on these values to build an option mask. In StBFChain, the options
+// are set to these values x2 since the mask is right shifted first.
+enum   DistortSelect 
+{ 
+  kElectricField2001 = 1,        // Bits 0-2 used to specify year from 2000
+  kBMap              = 0x08,     // Bit 3
+  kPadrow13          = 0x10,     // Bit 4
+  kTwist             = 0x20,     // Bit 5
+  kClock             = 0x40,     // Bit 6
+  kMembrane          = 0x80,     // Bit 7
+  kEndcap            = 0x100,    // Bit 8
+  kIFCShift          = 0x200,    // Bit 9
+  kSpaceCharge       = 0x400     // Bit 10
+} ;
 
-class StTpcDb;
-		       
+class StTpcDb ;
+class TDataSet ;
+class StDetectorDbSpaceCharge ;
+
 class StMagUtilities {
 
 
  private:
-    Int_t mDistortionMode;
+  
+  StTpcDb*  thedb ;  
+  TDataSet* thedb2 ;
+  StDetectorDbSpaceCharge* fSpaceCharge ;
 
-  virtual void    Init ( Int_t mode ) ;
+  virtual void    CommonStart ( Int_t mode, StTpcDb* dbin , TDataSet* dbin2 ) ;
   virtual void    ReadField ( ) ;
   virtual void    Search ( Int_t N, Float_t Xarray[], Float_t x, Int_t &low ) ;
   virtual Float_t Interpolate ( const Float_t Xarray[], const Float_t Yarray[], 
 				const Int_t ORDER, const Float_t x ) ;
-  virtual void    InterpolateBfield  ( const Float_t r, const Float_t z, 
-				       Float_t &Br_value, Float_t &Bz_value ) ;
-  virtual void    Interpolate3Dfield ( const Float_t r, const Float_t z, const Float_t phi, 
-				       Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
+  virtual void    Interpolate2DBfield ( const Float_t r, const Float_t z, 
+					Float_t &Br_value, Float_t &Bz_value ) ;
+  virtual void    Interpolate3DBfield ( const Float_t r, const Float_t z, const Float_t phi, 
+					Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
   virtual void    InterpolateEdistortion ( const Float_t r, const Float_t phi, const Float_t z, 
-                                           Float_t &Er_value, Float_t &Ephi_value ) ;
-  virtual void    InterpolateEEdistortion ( const Float_t r, const Float_t phi, const Float_t z, 
-					    Float_t &Er_value, Float_t &Ephi_value ) ;
-  StTpcDb* thedb;  
-  float  StarDriftV;               // STAR Drift Velocity (cm/microSec) Magnitude
-  float  StarMagE;                 // STAR Electric Field (V/cm) Magnitude
-  float  GG;                       // Gating Grid voltage (volts)
+                                           const Float_t Er[neZ][nePhi][neR], const Float_t Ephi[neZ][nePhi][neR], 
+					   Float_t &Er_value, Float_t &Ephi_value ) ;
 
-  float  TPC_Z0;                   // Z location of STAR TPC Ground Plane (cm)
-  float  XTWIST;                   // X Displacement of West end of TPC wrt magnet (mRad)
-  float  YTWIST;                   // Y Displacement of West end of TPC wrt magnet (mRad)
-  float  EASTCLOCKERROR;           // Phi rotation of East end of TPC in milli-radians
-  float  WESTCLOCKERROR;           // Phi rotation of West end of TPC in milli-radians
+  Int_t    mDistortionMode;             // Distortion mode - determines which corrections are run
+
+  Float_t  StarDriftV ;                 // Drift Velocity (cm/microSec) Magnitude
+  Float_t  TPC_Z0 ;                     // Z location of STAR TPC Ground Wire Plane (cm) Magnitude
+  Float_t  XTWIST ;                     // X Displacement of West end of TPC wrt magnet (mRad)
+  Float_t  YTWIST ;                     // Y Displacement of West end of TPC wrt magnet (mRad)
+  Float_t  CathodeV ;                   // Cathode Potential (volts)
+  Float_t  GG ;                         // Gating Grid voltage (volts)
+  Float_t  EASTCLOCKERROR ;             // Phi rotation of East end of TPC in milli-radians
+  Float_t  WESTCLOCKERROR ;             // Phi rotation of West end of TPC in milli-radians
+  Float_t  IFCRadius ;                  // Radius of the Inner Field Cage
+  Float_t  OFCRadius ;                  // Radius of the Outer Field Cage
+  Float_t  StarMagE ;                   // STAR Electric Field (V/cm) Magnitude
+  Float_t  IFCShift ;                   // Shift of the IFC towards the West Endcap (cm)
+  Float_t  Const_0, Const_1, Const_2 ;  // OmegaTau parameters
+  Double_t SpaceCharge ;                // Space Charge parameter (uniform in the TPC - arbitrary units)
+
+  Float_t  Bz[nZ][nR], Br[nZ][nR] ;         
+  Float_t  Radius[nR], ZList[nZ] ;         
+  Float_t  Bz3D[nPhi][nZ][nR], Br3D[nPhi][nZ][nR], Bphi3D[nPhi][nZ][nR] ;         
+  Float_t  R3D[nR], Z3D[nZ], Phi3D[nPhi] ;         
+  Float_t  cmEr[neZ][nePhi][neR],    cmEphi[neZ][nePhi][neR] ;
+  Float_t  endEr[neZ][nePhi][neR],   endEphi[neZ][nePhi][neR] ;
+  Float_t  shiftEr[neZ][nePhi][neR], shiftEphi[neZ][nePhi][neR] ;
+  Float_t  spaceEr[neZ][nePhi][neR], spaceEphi[neZ][nePhi][neR] ;
+  Float_t  eRadius[neR], ePhiList[nePhi], eZList[neZ]  ;         
   
  public:
 
   StMagUtilities () ;
-  StMagUtilities ( Int_t mode ) ;
-  StMagUtilities ( Int_t mode, StTpcDb* dbin ) ;
-  StMagUtilities ( const EBField map, const Float_t factor=1.0, Int_t mode = 0) ;
-  virtual ~StMagUtilities() {}
-  virtual void SetDb(StTpcDb* dbin);
+  StMagUtilities ( Int_t mode, StTpcDb* dbin,  TDataSet* dbin2 ) ;
+  StMagUtilities ( const EBField map, const Float_t factor, Int_t mode = 0 ) ;
+  virtual ~StMagUtilities () {}
 
+  virtual void    SetDb( StTpcDb* dbin , TDataSet* dbin2 ) ;
   virtual void    BField ( const Float_t x[], Float_t B[] ) ;
   virtual void    BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value ) ;
   virtual void    B3DField ( const Float_t x[], Float_t B[] ) ;
@@ -125,8 +157,10 @@ class StMagUtilities {
   virtual void    UndoPad13Distortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoTwistDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoClockDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoMembraneDistortion ( const Float_t x[3], Float_t Xprime[3] ) ;
-  virtual void    UndoEndcapDistortion ( const Float_t x[3], Float_t Xprime[3] ) ;
+  virtual void    UndoMembraneDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoEndcapDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoSpaceChargeDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoIFCShiftDistortion ( const Float_t x[], Float_t Xprime[] ) ;
 
   ClassDef(StMagUtilities,1)    // Base class for all STAR MagField
 
