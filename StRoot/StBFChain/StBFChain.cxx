@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.245 2001/11/08 00:47:43 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.246 2001/11/13 15:58:34 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -91,25 +91,31 @@ Bfc_st BFC[] = {
                                                            ,"Production chain for summer 2000 data",kFALSE},
   {"P2000"       ,""  ,"","ry2000,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
+
+  {"B2000"       ,""  ,"","ry2000a,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout","",""
+                                                                  ,"Base chain for 2001 (tpc+rhic)",kFALSE},
   {"P2000a"      ,""  ,"",
-   "ry2000a,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,AlignSectors,ExB,OBmap,OClock,OPr13",
-   "",""                                                   ,"Production chain for summer 2000 data",kFALSE},
+   "B2001,AlignSectors,ExB,OBmap,OClock,OPr13","",""       ,"Production chain for summer 2000 data",kFALSE},
 
 
   {"SvtD"        ,""  ,"","SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit,SvtVtx", "", "","SVT makers for Data",kFALSE},
 
 
-  // Physics,Cdst,... Physics was removed since trg reads the wrong format
+  // Year 2 chains. B2001 is a base-chain for 2001 (with tpc+rhic). SVT not in 2001 but can be added
+  // as an extra option. 2001a is currently used by FastOffline and is the "experimental" chain.
+  {"B2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout","",""
+                                                                  ,"Base chain for 2001 (tpc+rhic)",kFALSE},
   {"P2001"       ,""  ,"",
-   "ry2001,in,tpc_daq,tpc,rich,l3onl,tofDat,Physics,Cdst,Kalman,tags,Tree,evout,AlignSectors,ExB,OBmap,OClock,OPr13",
-   "",""                                       ,"Production chain for summer 2001 data (tpc, rich)",kFALSE},
+   "B2001,l3onl,tofDat,AlignSectors,ExB,OBmap,OClock,OPr13",
+   "",""                                       ,"Production chain for summer 2001 data (+ l3, tof)",kFALSE},
 
-  // all above P2001x are TEMPORARY chains. We will shift the numbering up
+  // all below P2001x are TEMPORARY chains. We will shift the numbering up
   // as soon as the code will be toroughly tested. NoHits will be turned on
-  // later as a final touch. emcY2 removed on Sept 27th 2001.
+  // later as a final touch. emcY2 removed on Sept 27th 2001. Replaced by
+  // emcDY2 in the first week of Nov 2001.
   {"P2001a"      ,""  ,"",
-   "ry2001,in,tpc_daq,tpc,rich,svt_daq,SvtD,ftpc,l3onl,tofDat,emcDY2,Physics,Cdst,Kalman,tags,Tree,evout,AlignSectors,ExB,OBmap,OClock,OPr13","",""
-                       ,"Production chain for summer 2001 data (tpc, rich, ftpc, svt, l3, tof emc)",kFALSE},
+   "B2001,svt_daq,SvtD,ftpc,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13","",""
+                                ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof emc)",kFALSE},
 
 
 
