@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPidTraits.cxx,v 2.3 2000/11/25 11:53:36 lasiuk Exp $
+ * $Id: StRichPidTraits.cxx,v 2.4 2001/02/22 21:05:00 lasiuk Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.cxx,v $
+ * Revision 2.4  2001/02/22 21:05:00  lasiuk
+ * add production version, associated MIP, dca residual 3Vectors
+ *
  * Revision 2.3  2000/11/25 11:53:36  lasiuk
  * initialize data members in c'tor
  *
@@ -23,9 +26,7 @@
  ***************************************************************************/
 #include "StRichPidTraits.h"
 
-#include "StRichPid.h"
-
-static const char rcsid[] = "$Id: StRichPidTraits.cxx,v 2.3 2000/11/25 11:53:36 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPidTraits.cxx,v 2.4 2001/02/22 21:05:00 lasiuk Exp $";
 
 ClassImp(StRichPidTraits)
 
@@ -62,4 +63,16 @@ const StRichPid* StRichPidTraits::getPid(StParticleDefinition* part) const {
 	
     }
     return 0;
+}
+
+ostream&
+operator<<(ostream& os, const StRichPidTraits& t)
+{
+    return (os << "StrichPidTraits::> #Pids= " << t.getAllPids().size()
+	    << "\n\tProduction Version: " << t.productionVersion()
+	    << "\n\tAssociated Mip:     " << t.associatedMip()
+	    << "\n\tMip Residual:       " << t.mipResidual()
+	    << "\n\tRefit Residual:     " << t.refitResidual()
+	    << "\n\tid                  " << t.id()
+	    << "\n\tprobability         " << t.probability());
 }
