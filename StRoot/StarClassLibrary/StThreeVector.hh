@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.6 1999/12/21 15:14:31 ullrich Exp $
+ * $Id: StThreeVector.hh,v 1.7 2000/01/04 19:56:05 ullrich Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
+ * Revision 1.7  2000/01/04 19:56:05  ullrich
+ * Added cpp macro for CINT.
+ *
  * Revision 1.6  1999/12/21 15:14:31  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
  *
@@ -42,23 +45,22 @@
 #ifndef ST_THREE_VECTOR_HH
 #define ST_THREE_VECTOR_HH
 
+#ifndef __CINT__
 #include <iostream.h>
 #include <math.h>
-
 #ifdef GNU_GCC
-#include <stddef.h>
+#    include <stddef.h>
 #endif
-
 #if defined (__SUNPRO_CC) && __SUNPRO_CC < 0x500
-#include <stdcomp.h>
+#    include <stdcomp.h>
 #endif
-
 #ifndef ST_NO_EXCEPTIONS
-#include <stdexcept>
-#if !defined(ST_NO_NAMESPACES)
+#    include <stdexcept>
+#    if !defined(ST_NO_NAMESPACES)
 using std::out_of_range;
+#    endif
 #endif
-#endif
+#endif // __CINT__
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 template<class T>
@@ -162,6 +164,7 @@ protected:
     T    mX1, mX2, mX3;
 };
 
+#ifndef __CINT__
 //
 //        Implementation of member functions
 //
@@ -747,5 +750,5 @@ istream&  operator>>(istream& is, StThreeVector<T>& v)
     v.setZ(z);
     return is;
 }
-
+#endif // CINT
 #endif
