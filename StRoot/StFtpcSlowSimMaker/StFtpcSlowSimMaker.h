@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimMaker.h,v 1.8 2003/01/14 12:58:25 jcs Exp $
+// $Id: StFtpcSlowSimMaker.h,v 1.9 2003/02/14 16:53:49 fsimon Exp $
 // $Log: StFtpcSlowSimMaker.h,v $
+// Revision 1.9  2003/02/14 16:53:49  fsimon
+// Add functionality that allows for different temperature corrections
+// in west and east, important for embedding.
+//
 // Revision 1.8  2003/01/14 12:58:25  jcs
 // use Geometry_ftpc/ftpcAsicMap to control corrections for error in Y2001-2002
 // FTPC asic mapping
@@ -39,6 +43,11 @@
 #include "StMaker.h"
 #endif
 
+#ifndef __CINT__
+#include "StDaqLib/GENERIC/EventReader.hh"
+#include "StDaqLib/RICH/RICH_Reader.hh"
+#endif /*__CINT__*/
+
 class St_ftpcClusterPars;
 class St_ftpcFastSimGas;
 class St_ftpcFastSimPars;
@@ -63,7 +72,7 @@ class TH2F;
 
 class StFtpcSlowSimMaker : public StMaker {
  private:
-  // static Char_t m_VersionCVS = "$Id: StFtpcSlowSimMaker.h,v 1.8 2003/01/14 12:58:25 jcs Exp $";
+  // static Char_t m_VersionCVS = "$Id: StFtpcSlowSimMaker.h,v 1.9 2003/02/14 16:53:49 fsimon Exp $";
   // Int_t         m_mode;        // mode 1 = primaries;
    St_ftpcClusterPars   *m_clusterpars;           //!
    //St_ftpcFastSimGas    *m_fastsimgas;            //!
@@ -98,7 +107,7 @@ class StFtpcSlowSimMaker : public StMaker {
   virtual Int_t  Make();
   // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcSlowSimMaker.h,v 1.8 2003/01/14 12:58:25 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcSlowSimMaker.h,v 1.9 2003/02/14 16:53:49 fsimon Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StFtpcSlowSimMaker, 1)   //StAF chain virtual base class for Makers
 };
