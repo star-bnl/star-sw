@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.20 2000/06/23 18:05:36 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.21 2000/07/07 03:52:32 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.21  2000/07/07 03:52:32  genevb
+// AddHist improvements
+//
 // Revision 1.20  2000/06/23 18:05:36  kathy
 // add new method PrintInfoHists which prints info about hist to screen & file -- name,entries,mean,rms
 //
@@ -477,8 +480,7 @@ TList* StHistUtil::FindHists(Char_t *dirName)
   St_DataSet *hist=0;
   hist = m_PntrToMaker->GetDataSet("hist");
   if (hist) {
-
-    hist->ls(9);
+//    hist->ls(9);
 
 // must look in dirNameHist 
 // use TString to append "Hist" to the dirName
@@ -685,10 +687,11 @@ Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
   Int_t histAddCount = 0;
 
   if (dirList){
+   if (numHistCopy < 0) numHistCopy = dirList->GetSize();
    TIter nextObj(dirList);
    TObject *obj = 0;
 
-    while ((obj = nextObj())) {    
+    while ((obj = nextObj())) {
      if (obj->InheritsFrom("TH1")) {
       
 // now want to add these histograms to the copied ones:
