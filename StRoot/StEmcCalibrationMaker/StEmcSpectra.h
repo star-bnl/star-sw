@@ -71,10 +71,13 @@ class StEmcSpectra : public St_DataSet
            TArrayF GetSpectra(Int_t);
            TArrayF GetSpectra(Int_t,Float_t,Float_t);
            TArrayF ReBin(Int_t,Float_t,Float_t);
-           void    CalcEtaBin(Int_t,Float_t,Int_t*,Int_t*,Int_t*,Int_t*);
+  virtual  void    CalcEtaBin(Int_t,Float_t,Int_t*,Int_t*,Int_t*,Int_t*);
            TArrayF GetEtaBinSpectra(Int_t);
            Float_t GetSumEtaBin(Int_t); 
            Int_t   GetEtaBinId(Int_t,Int_t);
+           
+           void    SaveAll(char*);
+           void    LoadAll(char*);
 
   ClassDef(StEmcSpectra,1)
 };

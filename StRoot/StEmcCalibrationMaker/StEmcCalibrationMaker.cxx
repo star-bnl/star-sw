@@ -16,6 +16,7 @@
 #include "StEmcUtil/emcDetectorName.h"
 #include "StarClassLibrary/SystemOfUnits.h"
 #include "tables/St_MagFactor_Table.h"
+#include "stdlib.h"
 
 #ifndef ST_NO_NAMESPACES
 using units::tesla;
@@ -103,7 +104,7 @@ Int_t StEmcCalibrationMaker::Init()
   emclog <<"===========================================================================\n";
   emclog <<"StEmcCalibrationMaker::Init()\n";
   #endif
-  
+
   emcCalSummary_st* Summary_st=SummaryTable->GetTable();
   emcCalSettings_st* Settings_st=SettingsTable->GetTable();
   
@@ -135,8 +136,8 @@ Int_t StEmcCalibrationMaker::Init()
   
   firstEventTime=0;
   firstEventRun=0;
-  firstEventDate=0;
-  lastEventTime=0;
+  firstEventTime=000000;
+  firstEventDate=20300101;    
   lastEventRun=0;
   lastEventDate=0;
   
@@ -372,13 +373,17 @@ Int_t StEmcCalibrationMaker::Make()
   }
 
   evnumber++;
-  if(evnumber==1) 
+  Int_t firstEventTimeNew=GetTime();
+  Int_t firstEventDateNew=GetDate();
+  
+  cout <<"StEmcCalibrationMaker::Make() - First   event date = "<<firstEventDate<<"  time = "<<firstEventTime<<endl;  
+  cout <<"StEmcCalibrationMaker::Make() - Current event date = "<<GetDate()<<"  time = "<<GetTime()<<endl;
+  
+  if(firstEventDateNew<firstEventDate || (firstEventDateNew==firstEventDate && firstEventTimeNew<firstEventTime))
   {
     firstEventTime=GetTime();
     firstEventDate=GetDate();
     firstEventRun=GetRunNumber();
-    gMessMgr->Info()<<"StEmcCalibrationMaker::Make() - First Event time = "<<firstEventTime<<endm;
-    gMessMgr->Info()<<"StEmcCalibrationMaker::Make() - First Event run = "<<firstEventRun<<endm;
     Summary_st[0].FirstRun=firstEventRun;
   }
    
@@ -435,6 +440,7 @@ Int_t StEmcCalibrationMaker::Make()
   #ifdef StEmcCalibrationMaker_DEBUG  
   emclog <<"Time to run StEmcCalibrationMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<" \n";
   #endif
+  cout   <<"Time to run StEmcCalibrationMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<" \n";
 
   return kStOK;
 }
@@ -599,20 +605,22 @@ Bool_t StEmcCalibrationMaker::CheckTracks()
     return kTRUE;
   }
 
-  Float_t eta,phi;
+  Float_t eta,phi,eta1,phi1;
   
   //TArrayI tmp1,tmp2;
   tmp1.Set(nbins);
   tmp1.Reset(); // number of tracks projected in the bin
   tmp2.Set(nTracks);
   tmp2.Reset(); // bin of projected track
-
+  
   StTrack* track;
   
   for(Int_t i=0;i<nTracks;i++)
   {
     Int_t mtr,etr,str,idtr=0,mtr1,etr1,str1,idtr1=0;
 
+    eta=10;eta1=10;phi=0;phi1=0;
+    
     if(Settings_st[0].UseL3Tracks==1) 
     {
       StSPtrVecTrackNode& tracks =event->l3Trigger()->trackNodes();
@@ -627,11 +635,21 @@ Bool_t StEmcCalibrationMaker::CheckTracks()
     if(ProjectTrack(track,(double)calibGeo->Radius(),&eta,&phi))
     {
       if(calibGeo->getBin(phi,eta,mtr,etr,str)==0) if(str!=-1) calibGeo->getId(mtr,etr,str,idtr);
-      if(ProjectTrack(track,(double)(calibGeo->Radius()+calibGeo->YWidth()),&eta,&phi))
-        if(calibGeo->getBin(phi,eta,mtr1,etr1,str1)==0) if(str1!=-1) calibGeo->getId(mtr1,etr1,str1,idtr1);
+
+      if(ProjectTrack(track,(double)(calibGeo->Radius()+calibGeo->YWidth()),&eta1,&phi1))
+        if(calibGeo->getBin(phi1,eta1,mtr1,etr1,str1)==0) if(str1!=-1) calibGeo->getId(mtr1,etr1,str1,idtr1);
       
-      if(idtr!=0 && idtr==idtr1) tmp2[i]=idtr; // good track candidate
+      if(idtr!=0 && idtr==idtr1) // good track candidate
+      {
+        /*Float_t etac,phic;
+        calibGeo->getEtaPhi(idtr,etac,phic);
+        Float_t radius=sqrt((eta-etac)*(eta-etac)+(phi-phic)*(phi-phic));
+        Float_t radius1=sqrt((eta1-etac)*(eta1-etac)+(phi1-phic)*(phi1-phic));
+        
+        if(radius<0.015) */tmp2[i]=idtr; 
+      }
       if(idtr!=0) tmp1[idtr-1]++;
+      if(idtr1!=0 && idtr!=idtr1) tmp1[idtr1-1]++;
     }
   }
 
@@ -701,7 +719,7 @@ Bool_t StEmcCalibrationMaker::CheckTracks()
       StTrackFitTraits&  fit=track->fitTraits();
       Int_t npoints=fit.numberOfFitPoints();
         
-      if(momentum.mag()>=Settings_st[0].MipMinimumMomentum && npoints>10)
+      if(momentum.mag()>=Settings_st[0].MipMinimumMomentum && npoints>0)
       {
         if(trackTower[tmp2[i]-1]==1) 
         {
@@ -751,7 +769,7 @@ Bool_t StEmcCalibrationMaker::ProjectTrack(StTrack* track,double radius, Float_t
   
   *ETA=eta;
   *PHI=phi;
-  if(fabs(eta)>calibGeo->EtaMax()) return kFALSE;
+  //if(fabs(eta)>calibGeo->EtaMax()) return kFALSE;
   
   return kTRUE;
   
@@ -759,28 +777,13 @@ Bool_t StEmcCalibrationMaker::ProjectTrack(StTrack* track,double radius, Float_t
 //_____________________________________________________________________________
 Bool_t StEmcCalibrationMaker::SubtractPedestal()
 {
-  TDataSet *emcDb=GetInputDB("Calibrations/emc");
+  cout <<"Subtracting pedestals for detector "<<detname[detnum]<<endl;
+  TString calibDb="Calibrations/emc/"+detname[detnum];
+  TDataSet *emcDb=GetInputDB(calibDb.Data());
   if(!emcDb) return kFALSE;
   
   if(detnum==0) // bemc
   {
-    /*if(!ped)
-    {
-      TDataSet *emcDb=GetInputDB("Calibrations/emc");
-      if(!emcDb) return kFALSE;
-      St_emcPedestal *ped1=(St_emcPedestal*)emcDb->Find("bemcPedestal");
-      if(!ped1) return kFALSE;
-      ped=new St_emcPedestal("bemcPed",4800);
-      ped->SetNRows(4800);
-      emcPedestal_st *pedst=ped->GetTable();
-      emcPedestal_st *ped1st=ped1->GetTable();
-      for(Int_t j=0;j<4800;j++)
-      {
-        pedst[j].AdcPedestal=ped1st[j].AdcPedestal;
-        pedst[j].AdcPedestalRMS=ped1st[j].AdcPedestalRMS;
-        pedst[j].Status=ped1st[j].Status;
-      }
-    }*/
     ped=(St_emcPedestal*)emcDb->Find("bemcPedestal");
     if(!ped) return kFALSE;
     
@@ -813,16 +816,12 @@ Bool_t StEmcCalibrationMaker::FillEqual()
       //FILL QA HISTOGRAM*********************
       m_EqualOccupancy->Fill(did);
       //**************************************
-      #ifdef StEmcCalibrationMaker_DEBUG
-      //emclog <<"EQUALIZATION: Fill Id = "<<did<<"  ADC = "<<rawHit[k]->adc()<<"\n";
-      //cout   <<"EQUALIZATION: Fill Id = "<<did<<"  ADC = "<<rawHit[k]->adc()<<"\n";
-      #endif
     }
   }
   m_equalCounter++;
   
   if(EqStatus!= 0) return kTRUE; // it reached the minimum number of events. I don't need to check it again
-  if(m_equalCounter<1.2*Settings_st[0].EqEventsPerBin) return kTRUE; // gives 20% more 
+  //if(m_equalCounter<1.2*Settings_st[0].EqEventsPerBin) return kTRUE; // gives 20% more 
   
 // checking the average event number per bin event numbers ...
   Float_t x,y,z;
@@ -974,7 +973,7 @@ Bool_t StEmcCalibrationMaker::FillMipCalib()
   
   if(MipStatus!=0) return kTRUE;
   
-  if(m_mipCounter<1.2*Settings_st[0].MipEventsPerBin) return ok; // gives 20% more 
+  //if(m_mipCounter<1.2*Settings_st[0].MipEventsPerBin) return ok; // gives 20% more 
 
   Float_t occ=0,x=0,y=0;
   
@@ -1285,26 +1284,21 @@ Bool_t StEmcCalibrationMaker::SaveTables()
   emcEqualization_st* Equal_st;
   if(EqualTable) Equal_st=EqualTable->GetTable(); 
 
-  char file1[80],file2[80],file3[80],file4[80],file5[80],histfile[80]; 
+  char file1[80],file2[80],file3[80],file4[80],file5[80],histfile[80],spec[80]; 
 
   // saving tables ...
   
-  sprintf(file1,"%sCalSummary.%08d.%06d.%08d.%06d.C",
-          detname[detnum].Data(),firstEventDate,firstEventTime,
-          lastEventDate,lastEventTime);
-  sprintf(file2,"%sCalSettings.%08d.%06d.%08d.%06d.C",
-          detname[detnum].Data(),firstEventDate,firstEventTime,
-          lastEventDate,lastEventTime);
-  sprintf(file3,"%sCalibration.%08d.%06d.%08d.%06d.C",
-          detname[detnum].Data(),firstEventDate,firstEventTime,
-          lastEventDate,lastEventTime);
-  sprintf(file4,"%sEqualization.%08d.%06d.%08d.%06d.C",
-          detname[detnum].Data(),firstEventDate,firstEventTime,
-          lastEventDate,lastEventTime);
-  sprintf(file5,"%sMipCalib.%08d.%06d.%08d.%06d.C",
-          detname[detnum].Data(),firstEventDate,firstEventTime,
-          lastEventDate,lastEventTime);
- 
+  sprintf(file1,"%sCalSummary.%08d.%06d.C",
+          detname[detnum].Data(),firstEventDate,firstEventTime);
+  sprintf(file2,"%sCalSettings.%08d.%06d.C",
+          detname[detnum].Data(),firstEventDate,firstEventTime);
+  sprintf(file3,"%sCalibration.%08d.%06d.C",
+          detname[detnum].Data(),firstEventDate,firstEventTime);
+  sprintf(file4,"%sEqualization.%08d.%06d.C",
+          detname[detnum].Data(),firstEventDate,firstEventTime);
+  sprintf(file5,"%sMipCalib.%08d.%06d.C",
+          detname[detnum].Data(),firstEventDate,firstEventTime);
+           
   ofstream *out1 = new ofstream(file1);
   SummaryTable->SavePrimitive(*out1,"");
   out1->close();
@@ -1338,9 +1332,8 @@ Bool_t StEmcCalibrationMaker::SaveTables()
   
   // creating histogram file ...
   
-  sprintf(histfile,"%sCalib.%08d.%06d.%08d.%06d.hist.root",
-          detname[detnum].Data(),firstEventDate,firstEventTime,
-          lastEventDate,lastEventTime);
+  sprintf(histfile,"%sCalib.%08d.%06d.hist.root",
+          detname[detnum].Data(),firstEventDate,firstEventTime);
           
   TFile f(histfile,"RECREATE");
   Int_t nb;
@@ -1395,7 +1388,13 @@ Bool_t StEmcCalibrationMaker::SaveTables()
       if(MipSpec->GetStatus(i)==1) mipocc.Fill(x,MipSpec->GetSum(i));
   }
 
-  if(EqualSpec) { equa0.Write(); equa1.Write(); equalocc.Write();}
+  if(EqualSpec) 
+  {     
+    sprintf(spec ,"%sEqualSpec.%08d.%06d.dat",
+    detname[detnum].Data(),firstEventDate,firstEventTime);
+    EqualSpec->SaveAll(spec);
+    equa0.Write(); equa1.Write(); equalocc.Write();
+  }
   
   if(MipSpec)
   {
@@ -1415,6 +1414,9 @@ Bool_t StEmcCalibrationMaker::SaveTables()
       for(Int_t j=0;j<MipSpec->GetNAdcMax();j++) mipspecetabin.Fill((Float_t)j,spectemp[j]);
       mipspecetabin.Write();
     }
+    sprintf(spec ,"%sMipSpec.%08d.%06d.dat",
+    detname[detnum].Data(),firstEventDate,firstEventTime);
+    MipSpec->SaveAll(spec);
     mip0.Write(); mipocc.Write();
   }
         
@@ -1455,6 +1457,12 @@ void StEmcCalibrationMaker::SetCalibStatus()
   } 
   
   Calib_st[2309-1].Status=0;
+  Calib_st[2254-1].Status=0;
+  Calib_st[2288-1].Status=0;
+  Calib_st[2325-1].Status=0;
+  Calib_st[2150-1].Status=0;
+  Calib_st[1986-1].Status=0;
+  Calib_st[1979-1].Status=0;
   //for(Int_t i=1;i<=nbins;i++) Calib_st[i-1].Status=1; // FULL EMC
 }
 //_____________________________________________________________________________
@@ -1591,4 +1599,31 @@ Bool_t StEmcCalibrationMaker::FillEmcVector()
   }
   if(tmp>0) return kTRUE;
   return kFALSE;
+}
+//_____________________________________________________________________________
+void StEmcCalibrationMaker::LoadSpectra(char *time)
+{
+  cout <<"Recovering spectra from file with timestamp: "<<time<<"\n";
+  char spec[120];
+  TString stamp=time;
+  if(EqualSpec) 
+  {     
+    sprintf(spec ,"%sEqualSpec.%s.dat",
+    detname[detnum].Data(),stamp.Data());
+    EqualSpec->LoadAll(spec);
+  }
+  if(MipSpec) 
+  {     
+    sprintf(spec ,"%sMipSpec.%s.dat",
+    detname[detnum].Data(),stamp.Data());
+    MipSpec->LoadAll(spec);
+  }
+  evnumber==1;
+  Int_t firstEventTimeNew=atoi(stamp(9,6).Data());
+  Int_t firstEventDateNew=atoi(stamp(0,8).Data());
+  if(firstEventDateNew<firstEventDate || (firstEventDateNew==firstEventDate && firstEventTimeNew<firstEventTime))
+  {
+    firstEventTime=firstEventTimeNew;
+    firstEventDate=firstEventDateNew;    
+  }
 }

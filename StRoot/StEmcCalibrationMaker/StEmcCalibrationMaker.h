@@ -80,7 +80,7 @@ class StEmcCalibrationMaker : public StMaker
            Float_t m_equalStep;
            Float_t m_calibStep;
            Int_t   nTracks;
-
+           
            Bool_t  ReadHitsOffline();
            Bool_t  CalcZVertex();
            Bool_t  FillEqual();
@@ -108,6 +108,7 @@ class StEmcCalibrationMaker : public StMaker
            Bool_t  MakeCalibration();
            Bool_t  MakeEffPed();
            Bool_t  SaveTables();
+           void    LoadSpectra(char*);
            void    CalcEtaBin(Int_t,Float_t,Int_t*,Int_t*,Int_t*,Int_t*);
 
            St_emcCalSummary*      SummaryTable;

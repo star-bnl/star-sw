@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide and Marcia Moura
 // 
-// $Id: StEmcFit.cxx,v 1.1 2001/10/17 13:51:31 suaide Exp $
+// $Id: StEmcFit.cxx,v 1.2 2001/10/26 21:00:33 suaide Exp $
 // $Log: StEmcFit.cxx,v $
+// Revision 1.2  2001/10/26 21:00:33  suaide
+// Many modifications to optimize for real data
+//
 // Revision 1.1  2001/10/17 13:51:31  suaide
 // new modifications to work with real data
 //
@@ -201,11 +204,14 @@ void StEmcFit::Fit()
 {
   alamda=-1;
   Int_t co=0;
+  Float_t old=1e30,deltao=0;
   loop:
     mrqmin();
+    deltao=fabs(chisq-old)/old;
+    old=chisq;
     //cout <<"chi = "<<chisq<<"  alamda = "<<alamda<<endl;
     co++;
-    if(co<1000 && alamda>1e-17 && alamda <1e37) goto loop;
+    if(co<1000 && alamda>1e-20 && alamda <1e37 && deltao > 0.00001 ) goto loop;
   cout <<"FIT: Niteractions = "<<co<<"  alamda = "<<alamda<<endl;
   alamda=0;  
   mrqmin();
@@ -215,11 +221,14 @@ void StEmcFit::Fit(Int_t max)
 {
   alamda=-1;
   Int_t co=0;
+  Float_t old=1e30,deltao=0;
   loop:
     mrqmin();
+    deltao=fabs(chisq-old)/old;
+    old=chisq;
     //cout <<"chi = "<<chisq<<"  alamda = "<<alamda<<endl;
     co++;
-    if(co<max && alamda>1e-17 && alamda <1e37) goto loop;
+    if(co<max && alamda>1e-20 && alamda <1e37 && deltao > 0.00001 ) goto loop;
   cout <<"FIT: Niteractions = "<<co<<"  alamda = "<<alamda<<endl;
   alamda=0;  
   mrqmin();
@@ -244,9 +253,10 @@ k = 1; :::; na/3. The dimensions of the arrays are a[1..na], dyda[1..na].*/
   *y=0.0;
   for (i=1;i<=ma-1;i+=3) 
   {
+    //if(atry[i+2]<=0) {atry[i+2]=fabs(atry[i+2]);}
     arg=(x-atry[i+1])/atry[i+2];
     ex=exp(-arg*arg);
-    fac=atry[i]*ex*2.0*arg;
+    fac=atry[i]*ex*2.0*arg*(atry[i+2]/fabs(atry[i+2]));
     *y += atry[i]*ex;
     dyda[i]=ex;
     dyda[i+1]=fac/atry[i+2];

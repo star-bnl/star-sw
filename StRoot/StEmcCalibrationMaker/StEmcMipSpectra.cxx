@@ -58,21 +58,18 @@ void StEmcMipSpectra::DrawEtaBin(Int_t etabin)
     Int_t fitmax=mip[etabin-1].MipFitAdcMax;
     Int_t df=fitmax-fitmin;
     
-    TH1F* fit=new TH1F("fit","",df,(Float_t)fitmin,(Float_t)fitmax-1);
-    TH1F* fitpeak=new TH1F("fitpeak","",df,(Float_t)fitmin,(Float_t)fitmax-1);
-    TH1F* fitback=new TH1F("fitback","",df,(Float_t)fitmin,(Float_t)fitmax-1);
+    TH1F* fit=new TH1F("fit","",nadcMax,0,(Float_t)nadcMax-1);
+    TH1F* fitpeak=new TH1F("fitpeak","",nadcMax,0,(Float_t)nadcMax-1);
+    TH1F* fitback=new TH1F("fitback","",nadcMax,0,(Float_t)nadcMax-1);
     
-    for(Int_t adc=mip[etabin].MipFitAdcMin;adc<mip[etabin].MipFitAdcMax;adc++)
+    for(Int_t adc=0;adc<nadcMax;adc++)
     {
       Double_t gauss1=Gaussian((Double_t)adc,(Double_t)mip[etabin-1].MipFitParam[0],
-                               (Double_t)mip[etabin-1].MipFitParam[1],
-                               (Double_t)mip[etabin-1].MipFitParam[2]);
+                                             (Double_t)mip[etabin-1].MipFitParam[1],
+                                             (Double_t)mip[etabin-1].MipFitParam[2]);
       Double_t gauss2=Gaussian((Double_t)adc,(Double_t)mip[etabin-1].MipFitParam[3],
-                               (Double_t)mip[etabin-1].MipFitParam[4],
-                              (Double_t)mip[etabin-1].MipFitParam[5]);
-//      Double_t gauss2=Pol((Double_t)adc,(Double_t)mip[etabin-1].MipFitParam[4],
-//                               (Double_t)mip[etabin-1].MipFitParam[5],
-//                               (Double_t)mip[etabin-1].MipFitParam[6]);
+                                             (Double_t)mip[etabin-1].MipFitParam[4],
+                                             (Double_t)mip[etabin-1].MipFitParam[5]);
       fit->Fill((Float_t)adc,gauss1+gauss2);
       fitpeak->Fill((Float_t)adc,gauss1);
       fitback->Fill((Float_t)adc,gauss2);
@@ -95,6 +92,7 @@ Bool_t StEmcMipSpectra::CalibrateEtaBin(Int_t etabin,Int_t mode)
   {
     TArrayF SpectraTemp=GetEtaBinSpectra(etabin);            
     Int_t nadcMax=GetNAdcMax();    
+    cout <<"********** Calibrating Eta bin "<<etabin<<endl;
     if(CalibrateByMip(etabin,SpectraTemp,0,nadcMax)) return kTRUE;
   }
   return kFALSE;
@@ -125,30 +123,24 @@ Bool_t StEmcMipSpectra::CalibrateByMip(Int_t bin,TArrayF SpectraTemp,
   Float_t a[7];
   Int_t   ia[7]={0,1,1,1,1,1,1};
   
-  Int_t adcmip=fitmin;
+  Int_t adcmip=20;
   Int_t firstadc=0;
-  for(Int_t i=fitmin;i<fitmax;i++)
+  for(Int_t i=20;i<fitmax;i++)
       if(SpectraTemp[i]>SpectraTemp[adcmip]) adcmip=i;
       
-  if(adcmip<20) 
-  {
-    firstadc=5;
-    a[3]=5;         // mip width
-  } 
-  else 
-  {
-    firstadc=10; 
-    a[3]=10;        // mip width
-  }
-  
-  a[2]=adcmip;      // mip position
+  firstadc=10; 
+  a[3]=15;        // mip width
   
   Int_t lastadc=(Int_t)(5.0*a[3]+(Float_t)adcmip);
   
   a[4]=0;
   for(Int_t i=0;i<3;i++) a[4]+=SpectraTemp[firstadc+i]/3;   // background amplitude
+  
+  //if(bin==5) {firstadc=20; adcmip=50; lastadc=100; a[4]=75;}
+  
   a[5]=(Float_t)firstadc+1.;                      // background center
   
+  a[2]=adcmip;      // mip position
   Float_t b=(Float_t) lastadc;
   Float_t yb=0;
   for(Int_t i=0;i<3;i++) yb+=SpectraTemp[lastadc+i-1]/3;
@@ -204,4 +196,44 @@ Bool_t StEmcMipSpectra::CalibrateByMip(Int_t bin,TArrayF SpectraTemp,
   delete fit;
 
   return kTRUE; 
+}
+//_____________________________________________________________________________
+TArrayF StEmcMipSpectra::GetEtaBinSpectra(Int_t etabin)
+{
+  if(etabin>nEtaBins || etabin<1) return 0;
+  
+  if(!EqualTable) return 0;
+
+  emcEqualization_st* rows=EqualTable->GetTable(); 
+  
+  TArrayF temp(GetNAdcMax());
+  for(Int_t i=0;i<GetNAdcMax();i++) temp[i]=0;
+
+  Int_t mi,mf,ei,ef,si,sf;
+  CalcEtaBin(etabin,etaBinWidth,&mi,&mf,&ei,&ef);
+  
+  
+  if(ei!=ef && ef==nEta) ef--;  // remove last channels in eta
+  
+  
+  si=1; sf=GetNSub();
+
+  for(Int_t m=mi;m<=mf;m++)
+    for(Int_t e=ei;e<=ef;e++)
+      for(Int_t s=si;s<=sf;s++)
+      {
+        Int_t id=GetID(m,e,s);
+        if(rows[id-1].EqStatus==1 && GetStatus(id)==1)
+        {
+          Float_t a=rows[id-1].EqSlope;
+          Float_t b=rows[id-1].EqShift;
+          if(a!=0) 
+          {
+            TArrayF temp1=GetSpectra(id,a,b); 
+            for(Int_t j=0;j<GetNAdcMax();j++) temp[j]+=temp1[j];
+          } 
+        }
+      }
+  
+  return temp;
 }
