@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: spr_svt.cc,v 1.4 1998/10/15 18:42:48 lasiuk Exp $
+ * $Id: spr_svt.cc,v 1.5 1998/12/03 21:05:31 fisyak Exp $
  *
  * Author: blasiuk and nyfeiman 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: spr_svt.cc,v $
+ * Revision 1.5  1998/12/03 21:05:31  fisyak
+ * Add type_of_call for NT
+ *
  * Revision 1.4  1998/10/15 18:42:48  lasiuk
  * Initial Revision
  *
@@ -31,7 +34,7 @@
 
 // PAM
 
-  long spr_svt_(
+  long type_of_call spr_svt_(
   TABLE_HEAD_ST *sprParameterH,       SPR_SPRPAR_ST    *sprParameter,
   TABLE_HEAD_ST *svtTrackKinematicsH, STK_KINE_ST      *svtTrackKinematics,
   TABLE_HEAD_ST *svtGeometryH,        SVG_GEOM_ST      *svtGeometry,
