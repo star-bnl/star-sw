@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.6 2005/03/18 13:35:40 lmartin Exp $
+// $Id: StSsdPointMaker.cxx,v 1.7 2005/03/22 10:38:51 lmartin Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.7  2005/03/22 10:38:51  lmartin
+// HighCut value taken from the db
+//
 // Revision 1.6  2005/03/18 13:35:40  lmartin
 // Partly missing cvs header added
 //
@@ -120,8 +123,7 @@ Int_t StSsdPointMaker::Init(){
       else 
 	{
 	  mClusterControl = new StSsdClusterControl();
-	  //	  mClusterControl -> setHighCut(clusterCtrl->highCut);  
-	  mClusterControl -> setHighCut(3);  
+	  mClusterControl -> setHighCut(clusterCtrl->highCut);  
 	  mClusterControl -> setTestTolerance(clusterCtrl->testTolerance);
 	  mClusterControl -> setClusterTreat(clusterCtrl->clusterTreat);
 	  mClusterControl -> setAdcTolerance(clusterCtrl->adcTolerance);
@@ -179,7 +181,7 @@ Int_t StSsdPointMaker::Init(){
       mDynamicControl->printParameters();
       // Replace tables for control parameters
       mClusterControl = new StSsdClusterControl(clusterCtrl);
-      mClusterControl->setHighCut(3);
+      mClusterControl->setHighCut(5);
       mClusterControl->printParameters();
       // End of Setting Cluster Control parameters
       if ((!mDynamicControl)||(!mClusterControl)) {
