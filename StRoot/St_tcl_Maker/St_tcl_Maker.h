@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.18 1999/11/22 23:18:46 snelling Exp $
+// $Id: St_tcl_Maker.h,v 1.19 1999/12/05 00:07:05 snelling Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.19  1999/12/05 00:07:05  snelling
+// Modifications made for eval option: added Histograms and NTuple support
+//
 // Revision 1.18  1999/11/22 23:18:46  snelling
 // added Li Qun's changes to tfs
 //
@@ -70,7 +73,7 @@ const float LINEARIZATION 		= 1.2;
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_tcl_Maker virtual base class for Maker                            //
+// St_tcl_Maker: Wrapper for fortran tph and tcl code                   //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include "StMaker.h"
@@ -92,17 +95,47 @@ class St_tcl_tp_seq;
 
 class St_tcc_morphology;
 
+class St_tcl_tp_seq;
+class St_tcl_tphit;
+class St_tcl_tpcluster;
+class St_tcc_morphology;
+class St_tcl_tpc_index;
 
 class TH1F;
+class TNtuple;
 
 class St_tcl_Maker : public StMaker {
 
+ public: 
+
+  St_tcl_Maker(const char *name="tpc_hits");
+  virtual       ~St_tcl_Maker(); 
+  virtual void   tclEvalOn() {tclEval(kTRUE);}
+  virtual void   tclEvalOff(){tclEval();} 
+  virtual void   tclMorphOn() {tclMorph(kTRUE);}
+  virtual void   tclMorphOff(){tclMorph();} 
+  virtual void   tclPixTransOn() {tclPixTrans(kTRUE);}
+  virtual void   tclPixTransOff(){tclPixTrans();} 
+  virtual void   WriteTNtupleOn() {WriteTNtuple(kTRUE);}
+  virtual void   WriteTNtupleOff(){WriteTNtuple();}
+  
+  virtual Int_t  Init();
+  virtual Int_t  Make();
+  virtual Int_t  Finish();
+  virtual void   PrintInfo();
+  virtual const char *GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.19 1999/12/05 00:07:05 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  
  private:
 
-  Bool_t                 m_tclPixTransOn;       // switch for pixel translation evaluation
   Bool_t                 m_tclEvalOn;           // switch for the cluster finder evaluation
+  Bool_t                 m_tclPixTransOn;       // switch for pixel translation evaluation
   Bool_t                 m_tclMorphOn;          // switch for the cluster morphology study
+  Bool_t                 bWriteTNtupleOn;       // switch for writing ntuple to disk
+
   Bool_t                 m_raw_data_tpc;        // bool used to check if there is pixel data
+
+  // define the tables used
   St_tpg_detector*       m_tpg_detector;  	//! TPC geometry parameters 
   St_tpg_pad*            m_tpg_pad;       	//! characteristics unique to a given pad
 	                                  	// (not used)
@@ -117,17 +150,27 @@ class St_tcl_Maker : public StMaker {
   St_tfs_fspar*          m_tfs_fspar;   	//! TFS parameter table 
   St_tfs_fsctrl*         m_tfs_fsctrl;  	//! TFS control switches
 
+  St_tcl_tp_seq*         tpseq;                 //! TPC sequence table
+  St_tcl_tphit*          tphit;                 //! TPC hit table
+  St_tcl_tpcluster*      tpcluster;             //! TPC cluster table
+  St_tcc_morphology*     morph;                 //! TPC cluster morphology table
+  St_tcl_tpc_index*      index;                 //! TPC evaluation table
+
+
+  void   tclEval(Bool_t flag=kFALSE){m_tclEvalOn=flag;}
+  void   tclPixTrans(Bool_t flag=kFALSE){m_tclPixTransOn=flag;}
+  void   tclMorph(Bool_t flag=kFALSE){m_tclMorphOn=flag;}
+  void   WriteTNtuple(Bool_t flag=kFALSE){bWriteTNtupleOn=flag;}
+  void   MakeHistograms(); 
+  void   InitHistograms(); 
+
   Int_t cluster_morphology( 
 			   Int_t sectorNumber,
 			   St_type_shortdata *pixel_data_in, 
-			   St_type_shortdata *pixel_data_out,
-			   St_tcl_tpcluster  *tpcluster, 
-			   St_tcl_tp_seq     *tpseq,
-			   St_tcc_morphology *morph);
+			   St_type_shortdata *pixel_data_out);
   
   Int_t FillOneRowOfMorphTable(
 			       int iClusterTbl,
-			       St_tcc_morphology *morph,
 			       int padrow,
 			       int sector,
 			       int nseq,
@@ -169,6 +212,7 @@ class St_tcl_Maker : public StMaker {
 				float &linEcc1Eq8,
 				float &linEcc2Eq9);
 
+
   // for tcl
   TH1F *m_nseq_cluster; //! number sequences in cluster
   TH1F *m_nhits;        //! estimated # of overlapping hits in cluster
@@ -186,32 +230,9 @@ class St_tcl_Maker : public StMaker {
 
  protected:
 
- public: 
-
-  St_tcl_Maker(const char *name="tpc_hits");
-  virtual       ~St_tcl_Maker(); 
-  virtual void   tclEval(Bool_t flag=kFALSE){m_tclEvalOn=flag;}
-  virtual void   tclEvalOn() {tclEval(kTRUE);}                       // *MENU*
-  virtual void   tclEvalOff(){tclEval();} 
-  virtual void   tclMorph(Bool_t flag=kFALSE){m_tclMorphOn=flag;}
-  virtual void   tclMorphOn() {tclMorph(kTRUE);}                       // *MENU*
-  virtual void   tclMorphOff(){tclMorph();} 
-  virtual void   tclPixTrans(Bool_t flag=kFALSE){m_tclPixTransOn=flag;}
-  virtual void   tclPixTransOn() {tclPixTrans(kTRUE);}                       // *MENU*
-  virtual void   tclPixTransOff(){tclPixTrans();} 
-
-  void MakeHistograms(); 
-  void InitHistograms(); 
+  TNtuple *mNtupleTcl; //!
   
-  virtual Int_t  Init();
-  virtual Int_t  Make();
-  virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.18 1999/11/22 23:18:46 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-  
-  ClassDef(St_tcl_Maker, 1)       //StAF chain virtual base class for Makers
+  ClassDef(St_tcl_Maker, 1)       //Cint definition
 };
 
 #endif
-
-
-
