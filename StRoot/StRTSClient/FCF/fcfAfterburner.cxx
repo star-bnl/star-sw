@@ -173,7 +173,7 @@ int fcfAfterburner::check_merge(struct fcfHit *hit_l, struct fcfHit *hit_r)
 }
 
 
-int fcfAfterburner::burn(u_int *ptr_res[3])
+int fcfAfterburner::burn(u_int *ptr_res[3], u_int *ptr_simu_res[3])
 {
 	u_int i ;
 

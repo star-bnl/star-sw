@@ -3,11 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: FCFMaker.h,v 1.8 2004/01/27 18:38:18 jeromel Exp $
+ * $Id: FCFMaker.h,v 1.9 2004/03/10 21:55:54 jml Exp $
  *
  *--------------------------------------------------------------------------
  *
  * $Log: FCFMaker.h,v $
+ * Revision 1.9  2004/03/10 21:55:54  jml
+ * support for simulations in FCFMaker
+ *
  * Revision 1.8  2004/01/27 18:38:18  jeromel
  * Change SetDAQFlag to overloaded SetMode
  *
@@ -123,6 +126,7 @@ class StRTSClientFCFMaker:public StMaker
 
   StDaqClfCppRow cpp[FCF_MAX_PADROWS];       // PADROW, PAD, SEQUENCE (0 based)
 
+  short croat_trk[FCF_MAX_PADS_EVER+1][FCF_MAX_TIMEBINS_EVER];
   unsigned short croat_adc[FCF_MAX_PADS_EVER+1][FCF_MAX_TIMEBINS_EVER];
   unsigned short croat_cpp[FCF_MAX_PADS_EVER+1][64];
   unsigned int croat_adcOff[FCF_MAX_PADS_EVER+1];
@@ -140,7 +144,7 @@ class StRTSClientFCFMaker:public StMaker
 
   StDaqClfCppRow *GetCPPRow(int r, int i, StDaqClfCppRow *storage);     // split the row along mezzanine banks
 
-  void saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int p1, int p2, int t1, int t2, int r, int sector);
+  void saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int p1, int p2, int t1, int t2, int r, int sector,int id_simtrk, int id_quality);
   void fillStEvent(tcl_tphit_st *hit);
   void filltphit(tcl_tphit_st *hit);
 
@@ -167,6 +171,7 @@ class StRTSClientFCFMaker:public StMaker
   int mFill_stevent;
   int mCreate_stevent;
   int clustercount;
+  int hasSim;
 
   double mDriftVelocity;
 
@@ -196,7 +201,10 @@ class StRTSClientFCFMaker:public StMaker
 		       int sector,
 		       int row,
 		       StDaqClfCppRow *cppRow,
-		       unsigned short *adc);
+		       unsigned short *adc,
+		       unsigned short *trk,
+		       u_int *simu_result_buff,
+		       j_uintptr *simu_mz_ptr);
 
   int build_croat_clusters();
   int build_daq_file_clusters();

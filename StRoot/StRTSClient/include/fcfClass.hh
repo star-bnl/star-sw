@@ -39,6 +39,11 @@
 	typedef unsigned char u_char;  
 #endif
 
+struct FcfSimOutput {   // this is just the payload definition.
+  short id_simtrk;
+  short id_quality;
+  int reserved;
+};
 
 class fcfClass {
 public:
@@ -76,6 +81,9 @@ public:
 	u_int *adcOff ;	// offsets for the current row only!
 	u_short *cppOff ;	
 	u_int maxClusters ;	// maximum allowed # clusters in this row
+
+        short *simIn;           // simulation track id
+        u_int *simOut;
 
 	// offset to the pad-to-pad t0 correction (multipled by gain and 64!), V4.10
 	int *t0Corr ;
