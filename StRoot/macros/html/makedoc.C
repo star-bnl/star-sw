@@ -146,6 +146,7 @@
   html.Convert("./../test/XDFcopy.C","How to read/write XDF file");
   html.Convert("./../test/XDFtest.C","How to read/write XDF and ROOT files");
   html.Convert("./par_anal.cxx","How to create several histrograms from XDF file");
+  html.Convert("./ana.C","Multiple DST files analysis");
   html.Convert("./../test/test10.C","How to use the dataset iterator class");
   html.Convert("./../test/test9.C","How to read the event from XDF file and build some histograms with ROOT");
   html.Convert("./makedoc.C","How to create the HTML documentation");

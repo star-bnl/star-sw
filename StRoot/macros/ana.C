@@ -1,19 +1,9 @@
-//void ana(const Char_t *Path="/disk1/star/auau200/hijing135/default/b0_3/year1a/hadronic_off/tfs_dst/",const Char_t *root_file="b0_3_y1a_off.root")
-void ana(const Char_t *Path="/disk1/star/tfs_dsts/",const Char_t *root_file="all.root")
+void ana(const Char_t *Path="/disk1/star/auau200/hijing135/default/",const Char_t *root_file="all2.root")
 {
-//Char_t *xdffilename="/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/tfs_dst/psc148_02_48evts_h_dst.xdf"
   gROOT->Reset();
-  Bool_t NT = kFALSE;
-  if (strcmp(gSystem.GetName(),"WinNT")==0){
-    NT = kTRUE;
-    if (gSystem.Load("St_base.dll")) printf(" Loading DLL \"St_base.dll\" failed \n");
-    if (gSystem.Load("St_Tables.dll")) printf(" Loading DLL \"St_Tables.dll\" failed \n");
-  }
-  else{
-    if (gSystem.Load("St_base.so"))      printf(" Loading DLL \"St_base.so\" failed \n");
-    if (gSystem.Load("xdf2root.so"))      printf(" Loading DLL \"xdf2root.so\" failed \n");
-    if (gSystem.Load("St_Tables.so"))    printf(" Loading DLL \"St_Tables.so\" failed \n");
-  }
+  if (gSystem.Load("St_base"))      printf(" Loading DLL \"St_base\" failed \n"); 
+  if (gSystem.Load("xdf2root"))      printf(" Loading DLL \"xdf2root\" failed \n");
+  if (gSystem.Load("St_Tables"))    printf(" Loading DLL \"St_Tables\" failed \n");
  // Create "histograms"
   TFile  *root_out = 0;
   root_out = new TFile(root_file,"RECREATE");
@@ -85,7 +75,6 @@ void ana(const Char_t *Path="/disk1/star/tfs_dsts/",const Char_t *root_file="all
   TString  path = Path;
   while (set = nextxdf()){
     if (strcmp(set->GetTitle(),"file") == 0){
-      printf ("Title = %s Name = %s\n",set->GetTitle(),set->GetName());
       if (strstr(set->GetName(),"dst.xdf")){
 	if (xdf) delete xdf;
 	 path = Path;
@@ -94,8 +83,9 @@ void ana(const Char_t *Path="/disk1/star/tfs_dsts/",const Char_t *root_file="all
          xdf =  new St_XDFFile(xdffilename,"r");
          printf ("Open %s\n", xdffilename);
          while (event = xdf.NextEventGet() ) {
-           St_DataSetIter dst(event);
-           St_dst_track *globtrk = (St_dst_track *) dst("globtrk");
+           St_DataSetIter *dst = 0;
+	   dst = new St_DataSetIter(event);
+           St_dst_track *globtrk = (St_dst_track *) dst->Next("globtrk");
 	   if (globtrk) { 
 	     table_head_st *trk_h = globtrk->GetHeader();
 	     dst_track_st  *trk   = globtrk->GetTable();
@@ -128,7 +118,7 @@ void ana(const Char_t *Path="/disk1/star/tfs_dsts/",const Char_t *root_file="all
 	       }
     
     // Update the view of these histograms (just for fun)
-	       if (l && (l%kUPDATE) == 0) {
+	       if (kUPDATE && l && (l%kUPDATE) == 0) {
 		 if ( l==kUPDATE && !drawinit) {
 		   drawinit = kTRUE;
 		   c1->cd();
@@ -159,7 +149,8 @@ void ana(const Char_t *Path="/disk1/star/tfs_dsts/",const Char_t *root_file="all
 	     c4->Modified();
 	     c4->Update();
 	   }
-	   St_hepe_gent *hepev = (St_hepe_gent *) dst("hepe_gent");
+	   St_hepe_gent *hepev = (St_hepe_gent *) dst->Next("hepe_gent");
+           delete dst; dst= 0;
 #if 0
 	   if (hepev) {
 	     Int_t kUPDATE = hepev->GetNRows()/5;
@@ -178,7 +169,7 @@ void ana(const Char_t *Path="/disk1/star/tfs_dsts/",const Char_t *root_file="all
 		 Double_t theta =  atan2 ( pT, pz );
 		 Float_t  eta  = -log(tan(theta/2.));
 		 m_pT_eta_gen->Fill(eta,pT);
-		 if (l && (l%kUPDATE) == 0) {
+		 if (kUPDATE && l && (l%kUPDATE) == 0) {
 		   if ( l==kUPDATE && !drawinit) {
 		     printf ("l =%d\n",l);
 		     drawinit = kTRUE;
