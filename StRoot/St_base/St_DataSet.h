@@ -18,12 +18,19 @@
 #include "TList.h"
 //*KEEP,TNamed.
 #include "TNamed.h"
-#include "TString.h"
 //*KEND.
  
 class St_DataSetIter;
 class TBrowser;
- 
+
+// The control codes to navigate the St_DataSet structure via St_DataSet::Pass method
+
+typedef enum {
+      kContinue,  // continue passing 
+      kPrune,     // stop passing of the current branch but continue with the next one if any
+      kStop       // break passing
+     } EDataSetPass;
+
 class St_DataSet : public TNamed
 {
  friend class St_DataSetIter;
@@ -37,23 +44,24 @@ class St_DataSet : public TNamed
  public:
  
     St_DataSet(const Char_t *name="", St_DataSet *parent=0);
-    St_DataSet(TString &dirname, const Char_t *filename="",Bool_t expand=kTRUE);
     virtual ~St_DataSet();
-            void        Add(St_DataSet *dataset);
-    virtual void        Browse(TBrowser *b);
-    virtual St_DataSet *Data() { return HasData() ? this : 0; }  // returns this pointer the derived classes if any
-            TObject    *GetMother() const { return fMother; }
-    virtual St_DataSet *GetParent() const { return (St_DataSet *)fMother;}
-            TList      *GetList() const {return fList;}
-            TList      *GetListOfDataset() const {return GetList();}
-            Int_t       GetListSize() const;
-    virtual Long_t      HasData() const {return 0;} // Check whether this dataset has extra "data-members"
-    virtual Bool_t      IsFolder(){return kTRUE;}
-    virtual Bool_t      IsThisDir(const Char_t *dirname) const ;
-    virtual void        ls(Option_t *option="");    // Option "*" means print all levels
-    virtual void        ls(Int_t deep);             // Print the "deep" levels of this datatset
-    virtual void        Update();                   // Update dataset
-           TString      Path();                     // return the "full" path of this dataset
+            void         Add(St_DataSet *dataset);
+    virtual void         Browse(TBrowser *b);
+    virtual St_DataSet  *Data() { return HasData() ? this : 0; }  // returns this pointer the derived classes if any
+            TObject     *GetMother() const { return fMother; }
+    virtual St_DataSet  *GetParent() const { return (St_DataSet *)fMother;}
+            TList       *GetList() const {return fList;}
+            TList       *GetListOfDataset() const {return GetList();}
+            Int_t        GetListSize() const;
+    virtual Long_t       HasData() const {return 0;} // Check whether this dataset has extra "data-members"
+    virtual Bool_t       IsFolder(){return kTRUE;}
+    virtual Bool_t       IsThisDir(const Char_t *dirname) const ;
+    virtual void         ls(Option_t *option="");    // Option "*" means print all levels
+    virtual void         ls(Int_t depth);            // Print the "depth" levels of this datatset
+    virtual void         Update();                   // Update dataset
+           TString       Path();                     // return the "full" path of this dataset
+    virtual EDataSetPass Pass(EDataSetPass ( *callback)(St_DataSet *),Int_t depth=0);
+
     virtual void        Remove(St_DataSet *set);
     ClassDef(St_DataSet,1)
 };
@@ -94,9 +102,9 @@ public:
   virtual St_DataSet    *operator()(const Char_t *path) { return Next(path); }
   virtual St_DataSet    *Dir(Char_t *dirname);
   virtual St_DataSet    *Ls(const Char_t *dirname="",Option_t *opt="");
-  virtual St_DataSet    *Ls(const Char_t *dirname,Int_t deep);
+  virtual St_DataSet    *Ls(const Char_t *dirname,Int_t depth);
   virtual St_DataSet    *ls(const Char_t *dirname="",Option_t *opt=""){return Ls(dirname,opt);}
-  virtual St_DataSet    *ls(const Char_t *dirname,Int_t deep){return Ls(dirname,deep);}
+  virtual St_DataSet    *ls(const Char_t *dirname,Int_t depth){return Ls(dirname,depth);}
   virtual St_DataSet    *Mkdir(const Char_t *dirname);
   virtual St_DataSet    *Md(Char_t *dirname){return Mkdir(dirname);}
   virtual St_DataSet    *Pwd(){return fWorkingDataSet;}
