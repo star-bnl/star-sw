@@ -29,7 +29,7 @@
 STAFCV_T
 tnt_count()
 {
-  printf("TNT:\tObject count = %d \n",tnt->count());
+  printf("TNT:\tObject count = %ld \n",tnt->count());
   EML_SUCCESS(STAFCV_OK);
 }
 
@@ -76,7 +76,7 @@ tntcwntuple_hid(long hid)
     EML_CONTEXT("ERROR: can't find CW ntuple with HID %d.\n",hid);
     EML_FAILURE(OBJECT_NOT_FOUND);
   }
-  printf("TNTCWNTUPLE:\tHID = %d \n",tuple->hid());
+  printf("TNTCWNTUPLE:\tHID = %ld \n",tuple->hid());
 
   EML_SUCCESS(STAFCV_OK);
 }
@@ -106,7 +106,7 @@ tntcwntuple_entrycount(long hid)
     EML_CONTEXT("ERROR: can't find CW ntuple with HID %d.\n",hid);
     EML_FAILURE(OBJECT_NOT_FOUND);
   }
-  printf("TNTCWNTUPLE:\tEntry Count = %d \n",tuple->entryCount());
+  printf("TNTCWNTUPLE:\tEntry Count = %ld \n",tuple->entryCount());
 
   EML_SUCCESS(STAFCV_OK);
 }
@@ -120,7 +120,7 @@ tntcwntuple_columncount(long hid)
     EML_CONTEXT("ERROR: can't find CW ntuple with HID %d.\n",hid);
     EML_FAILURE(OBJECT_NOT_FOUND);
   }
-  printf("TNTCWNTUPLE:\tColumn Count = %d \n",tuple->columnCount());
+  printf("TNTCWNTUPLE:\tColumn Count = %ld \n",tuple->columnCount());
 
   EML_SUCCESS(STAFCV_OK);
 }
