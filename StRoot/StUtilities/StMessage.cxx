@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.9 1999/07/01 01:24:46 genevb Exp $
+// $Id: StMessage.cxx,v 1.10 1999/07/08 22:58:18 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.10  1999/07/08 22:58:18  genevb
+// Created an abstract interface with StMessMgr.h hiding template implementation from others, a few other small fixes
+//
 // Revision 1.9  1999/07/01 01:24:46  genevb
 // Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
 //
@@ -41,8 +44,6 @@
 #include <string.h>
 #include "StMessage.h"
 #include "StMessageCounter.h"
-#include "StMessTypeList.h"
-#include "TDatime.h"
 #include <strstream.h>
 
 static StMessageCounter* messCounter = StMessageCounter::Instance();
@@ -69,7 +70,7 @@ messTime() {
   message = new char[(++len + 1)];
   strncpy(message,mess,len);
   strcpy(&(message[len]),"");
-  Print();
+  Print(0);
 }
 //_____________________________________________________________________________
 StMessage::~StMessage() {
@@ -127,7 +128,7 @@ int StMessage::Print(int nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.9 1999/07/01 01:24:46 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.10 1999/07/08 22:58:18 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

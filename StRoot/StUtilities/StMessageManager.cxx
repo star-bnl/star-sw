@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.14 1999/07/01 23:32:52 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.15 1999/07/08 22:58:18 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.15  1999/07/08 22:58:18  genevb
+// Created an abstract interface with StMessMgr.h hiding template implementation from others, a few other small fixes
+//
 // Revision 1.14  1999/07/01 23:32:52  genevb
 // Change default message typing
 //
@@ -47,6 +50,7 @@
 // StMessageManager                                                     //
 //                                                                      //
 // This class manages the messages in STAR software. It is a singleton. //
+// It inherits from StMessMgr, which provides the external interface.   //
 // Messages are stored in a vector, and come in several types           //
 // (i.e. info, error, debug ). The types "I" (info), "W" (warning),     //
 // "E" (error), and "D" (debug) are predefined. Message finding         //
@@ -57,7 +61,7 @@
 //
 //      ***************************************************************
 //      ***************************************************************
-//      ****   StMessageManager: The STAR offline message manager  ****
+//      ****      StMessMgr:  The STAR offline message manager     ****
 //      ***************************************************************
 //      ***************************************************************
 //
@@ -92,7 +96,7 @@
 //
 // *** I-1.   C++ and CINT usage
 //
-// In C++ programs, one must include StMessageManager.h.
+// In C++ programs, one must include StMessMgr.h.
 // A global pointer (gMessMgr) points to the single message managing class.
 // A generic message is created as follows:
 //
@@ -261,7 +265,7 @@
 // Message lists in the form of a vector of StMessage pointers are called
 // a messVec. A list of messages can be found which match up to four strings:
 //
-//   messVec& myList = gMessMgr->FindMessageList("sun","moon","planet")
+//   messVec* myList = gMessMgr->FindMessageList("sun","moon","planet")
 //
 //
 // *** II-8.  Finding messages within a list
@@ -274,12 +278,12 @@
 //
 // Call PrintList() with a pointer to the messVec list of messages:
 //
-//   gMessMgr->PrintList(&(myList));
+//   gMessMgr->PrintList(myList);
 //
 //
 // *** II-10. Formatting output
 //
-// StMessageManager is an ostream, like cout. It can therefore be used
+// StMessMgr is an ostream, like cout. It can therefore be used
 // to format, like cout:
 //
 //   gMessMgr->Info() << "Here, n=";
@@ -323,11 +327,12 @@
 #ifdef __ROOT__
 #include "TROOT.h"
 #endif
+
 #include "StMessageManager.h"
 #include <ctype.h>
 #include <string.h>
 
-StMessageManager* gMessMgr = 0;
+StMessMgr* gMessMgr = 0;
 StMessage* gMessage=0;
 StMessage* endm=0;
 ostream& operator<<(ostream& os, StMessage*) {
@@ -336,7 +341,7 @@ ostream& operator<<(ostream& os, StMessage*) {
 }
 static const char* defaultMessType = "I";
 static char* emptyString = "";
-StMessageManager* StMessageManager::mInstance = 0;
+StMessMgr* StMessageManager::mInstance = 0;
 //
 // C and Fortran routines:
 //________________________________________
@@ -429,13 +434,13 @@ void type_of_call StMessAddType_(const char* type, const char* text,
 ClassImp(StMessageManager)
 #endif
 //_____________________________________________________________________________
-StMessageManager::StMessageManager() : ostrstream(new char[1024],1024) {
+StMessageManager::StMessageManager() : StMessMgr() {
 //
 // Constructor - only called once when the library is loaded to
 // instantiate the global message manager.
 //
   curType = 0;
-  gMessMgr = this;
+  gMessMgr = (StMessMgr*) this;
   messTypeList = StMessTypeList::Instance();
   messCounter = StMessageCounter::Instance();
   messCounter->AddType();
@@ -461,18 +466,18 @@ StMessageManager::~StMessageManager() {
   gMessMgr = 0;
 }
 //_____________________________________________________________________________
-StMessageManager* StMessageManager::Instance() {
+StMessMgr* StMessageManager::Instance() {
 //
 // Allows anyone to get a pointer to the single message manager:
 //   StMessageManager::Instance()->(member function)
 //
   if (!mInstance) {
-    mInstance = new StMessageManager;
+    mInstance = (StMessMgr*) new StMessageManager;
   }
   return mInstance;
 }
 //_____________________________________________________________________________
-StMessageManager& StMessageManager::Message(char* mess, char* type, char* opt) {
+StMessMgr& StMessageManager::Message(char* mess, char* type, char* opt) {
 //
 // Message declarator - creates a new message if mess is not empty,
 // otherwise, prepares for << input.
@@ -484,7 +489,7 @@ StMessageManager& StMessageManager::Message(char* mess, char* type, char* opt) {
     curOpt = opt;
     seekp(0);
   }
-  return (*this);
+  return *((StMessMgr*) this);
 }
 //_____________________________________________________________________________
 void StMessageManager::BuildMessage(char* mess, char* type, char* opt) {
@@ -573,7 +578,7 @@ StMessage* StMessageManager::FindMessage(const char* s1, char* s2,
   return ( (current) ? (*current) : 0 );
 }
 //_____________________________________________________________________________
-messVec& StMessageManager::FindMessageList(const char* s1, char* s2,
+messVec* StMessageManager::FindMessageList(const char* s1, char* s2,
                char* s3, char* s4, messVec* list) {
 //
 // Obtain a list (messVec) of StMessage pointers for all messages
@@ -590,7 +595,7 @@ messVec& StMessageManager::FindMessageList(const char* s1, char* s2,
   }
   if (!list) list = &messList;
   if (!(strlen(s1a) || strlen(s2) || strlen(s3) || strlen(s4)))
-    return (*list);
+    return list;
   messVec* newList = new messVec();
   messVecIter current;
   const char* curMess;
@@ -600,7 +605,7 @@ messVec& StMessageManager::FindMessageList(const char* s1, char* s2,
         (strstr(curMess,s3)) && (strstr(curMess,s4)))
       newList->push_back(*current);
   }
-  return (*newList);
+  return newList;
 }
 //_____________________________________________________________________________
 int StMessageManager::RemoveMessage(StMessage* mess) {
@@ -722,7 +727,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.14 1999/07/01 23:32:52 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.15 1999/07/08 22:58:18 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -731,4 +736,4 @@ void StMessageManager::PrintInfo() {
 //
 // Instantiate the (singleton) class upon loading
 //
-StMessageManager* temp=StMessageManager::Instance();
+StMessMgr* temp=StMessageManager::Instance();
