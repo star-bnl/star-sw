@@ -1,5 +1,8 @@
-// $Id: Example_read_hist_file_list_draw_ps.C,v 1.1 1999/10/11 17:17:58 kathy Exp $
+// $Id: Example_read_hist_file_list_draw_ps.C,v 1.2 1999/11/02 22:54:36 kathy Exp $
 // $Log: Example_read_hist_file_list_draw_ps.C,v $
+// Revision 1.2  1999/11/02 22:54:36  kathy
+// fixing documentation in macro
+//
 // Revision 1.1  1999/10/11 17:17:58  kathy
 // changed names of some macros to make them more standard; changed default input file to MakeHists since previous no longer existed; combined some macros so that the one example will show all functionality
 //
@@ -11,7 +14,7 @@
 //
 //   This macro assumes you don't know what's in the file a priori.
 //
-//   You can first run  Example_read_xdffile_make_hist.C to create 
+//   You can first run  Example_read_xdf_makehist.C to create 
 //     an output Kathy_hist.root file (flat file).  
 //   This macro then reads in the histogram file and draws 
 //     histogram h1.
