@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.57 2004/05/07 15:02:18 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.58 2004/05/19 17:45:06 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.58  2004/05/19 17:45:06  oldi
+// *** empty log message ***
+//
 // Revision 1.57  2004/05/07 15:02:18  oldi
 // Tracks are written to StEvent directly, now.
 // Primary Vertex is read from StEvent.
@@ -512,7 +515,7 @@ Int_t StFtpcTrackMaker::Make()
   for (Int_t i = 0; i < clusters->GetEntriesFast(); i++) {
     point = (StFtpcPoint *)clusters->At(i);
     point->TransformFtpc2Global(); // errors are not transformed up to now (effect should be small) !!!
-    point->GetStFtpcHit()->update(*point);
+    if (event->ftpcHitCollection()) point->GetStFtpcHit()->update(*point);
   }
 
   // momentum fit, dE/dx calculation
@@ -785,7 +788,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.57 2004/05/07 15:02:18 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.58 2004/05/19 17:45:06 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
