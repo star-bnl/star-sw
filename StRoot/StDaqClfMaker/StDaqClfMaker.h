@@ -3,11 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: StDaqClfMaker.h,v 1.4 2002/08/22 21:31:33 jml Exp $
+ * $Id: StDaqClfMaker.h,v 1.5 2002/09/05 15:48:07 jml Exp $
  *
  *--------------------------------------------------------------------------
  *
  * $Log: StDaqClfMaker.h,v $
+ * Revision 1.5  2002/09/05 15:48:07  jml
+ * Now fill the deconvolution flag to help dedx
+ *
  * Revision 1.4  2002/08/22 21:31:33  jml
  * Installed new version of fcfClass
  * This version is frozen for the 2002-2003 run and will be running on the i960s
@@ -134,6 +137,7 @@ class StDaqClfMaker:public StMaker
   int doT0Corrections;    // apply t0 corrections
   int doGainCorrections;  // apply gains in clf (rather than daqmaker)
   int doZeroTruncation;   // throw away hist beyond central membrane
+  int fillDeconFlag;      // do we fill the deconvolution flag?
 
   int mFill_tphit;
   int mFill_stevent;
