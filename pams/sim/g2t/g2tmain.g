@@ -125,13 +125,14 @@ created   22 april 98
  endif
 *
       G2T_MAIN = 0
+      Call AGSTRUT(' ','Run')
+*
       Use GTTC
-      Call AGSTRUT(' ',' ')
 *
       o    = CHAR(0)
       Cdir = gttc_edir(1)//gttc_edir(2)//gttc_edir(3)
       ld   = Lenocc(cdir)
-      edir = '/dui/'//Cdir(1:Lenocc(cdir))//o
+      edir = '/dui/'//Cdir(1:ld)//o
  
       i = TDM_map_table(edir,'g2t_event'//o,g2t_event_spec//o,1,g2t_event)
       if (ld>0) i = DUI_CDIR (edir)
@@ -145,8 +146,8 @@ created   22 april 98
 
       do j=1,GTTC_Nsys
 
-        use dete(j)  Stat=Istat
-        if (Istat!=ok) break
+        use dete(j)   " Stat=Istat "
+*        if (Istat!=ok) break
 
         call  GFNHIT  (dete_Csys(1:3)//'H',dete_Cdet,Nhits)
         Check dete_onoff>0 & Nhits>0
