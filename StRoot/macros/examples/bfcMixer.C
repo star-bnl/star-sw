@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer.C,v 1.15 2003/05/16 19:52:45 hjort Exp $
+// $Id: bfcMixer.C,v 1.16 2003/09/19 20:45:44 hjort Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -22,6 +22,7 @@ class StIOMaker;
 class StEventDisplayMaker; StEventDisplayMaker *dsMk = 0;
 class StEventMaker; StEventMaker *evMk = 0;
 class StMixerMaker;
+class StFtpcMixerMaker;
 class StEvtHddr;
 //_____________________________________________________________________
 void Load(){
@@ -67,12 +68,17 @@ void bfcMixer(const Int_t Nevents=10,
   // Create chain2 object
   chain2 = new StBFChain("Two");
   saveMk = chain2->cd();
-  chain2->SetFlags("fzin DbV20030408 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
+  chain2->SetFlags("fzin DbV20030408 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq fss ftpcT");   // 
   chain2->Set_IO_Files(file2);
   chain2->Load();
   chain2->Instantiate();
   St_geant_Maker *geantMk = chain2->GetMaker("geant");
   if (geantMk) geantMk->SetMode(1);   // Mixer mode - do not modify EvtHddr
+  
+  if (chain2->GetOption("TRS")){
+    StTrsMaker *trsMk = (StTrsMaker *) chain2->GetMaker("Trs");
+    trsMk->setNormalFactor(1.23);
+  }
   
   // Add the acceptance filter maker before TRS  
   if (!strcmp(mode,"strange")){
@@ -112,10 +118,13 @@ void bfcMixer(const Int_t Nevents=10,
   chain2->SetInput("Input2","Event");
   mixer->writeFile("mixer.trs",Nevents);
 
+  gSystem->Load("StFtpcMixerMaker");
+  StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
+
   // Create chain3 object
   chain3 = new StBFChain("Three");
   saveMk = chain3->cd();
-  chain3->SetFlags("Simu ppOpt beamline NoDefault DbV20030408 NoInput db tpc_daq tpc global dst Kalman event evout QA Tree GeantOut ctf -Prevtx"); 
+  chain3->SetFlags("Simu ppOpt beamline NoDefault DbV20030408 NoInput db tpc_daq tpc ftpc emcDY2 global dst Kalman event evout QA Tree GeantOut ctf tofDat -Prevtx"); 
 
   TString OutputFileName(gSystem->BaseName(file1));
   OutputFileName.ReplaceAll("*","");
@@ -129,6 +138,9 @@ void bfcMixer(const Int_t Nevents=10,
   StMaker *tpcdaqMk = chain3->GetMaker("tpc_raw");
   tpcdaqMk->SetMode(1);   // Trs
   tpcdaqMk->SetInput("Event","MixerEvent");
+
+  StMaker *ftpccluMk = chain3->GetMaker("ftpc_hits");
+  ftpccluMk->SetInput("ftpc_raw","FtpcMixer");
 
   saveMk->cd();
   {
