@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstRefitBranch.cxx,v 1.1 2000/12/07 11:14:22 lmartin Exp $
+ * $Id: StEstRefitBranch.cxx,v 1.2 2001/01/25 18:02:18 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,14 +10,30 @@
  ***************************************************************************
  *
  * $Log: StEstRefitBranch.cxx,v $
+ * Revision 1.2  2001/01/25 18:02:18  lmartin
+ * Method renamed and declared as StEstTracker method.
+ * gtrk deleted at the end of the refit.
+ *
  * Revision 1.1  2000/12/07 11:14:22  lmartin
  * First CVS commit
  *
  **************************************************************************/
-#include "StEstMaker.h"
+// memory leak fixed for gtrk. gtrk is delete at the end of the method which 
+// still impose a creation at each call.
+// Final fix ? : gtrk as a data member of StEstMaker and initialized outside
+// RefitBranch. 
+
+#include "StEstTracker.h"
+#include "StEstParams.hh"
+#include "Infrastructure/StEstWafer.hh"
+#include "Infrastructure/StEstBranch.hh"
+#include "Infrastructure/StEstHit.hh"
+#include "Infrastructure/StEstTrack.hh"
+#include "Infrastructure/StEstTPCTrack.hh"
+
 #include "StarCallf77.h"
 #include "table_header.h"
-
+#include "tables/St_egr_egrpar_Table.h"
 
 // egr fortran routines
 #define egr_cross_fact F77_NAME(egr_cross_fact,EGR_CROSS_FACT)
@@ -28,7 +44,7 @@ extern "C" {int type_of_call egr_helix_fit_(int&,StEstGtrk*,float*,float*,float*
 extern "C" {int type_of_call egr_find_outlier_(int&,StEstGtrk*,float*,float*,float*,float*,float*,int&,int&, table_head_st*,egr_egrpar_st*);}
 
 
-int StEstMaker::RefitBranch2(StEstBranch *br, StEstHit *hittmp, int exclhit, int usevertex, int *fitstatus) {
+int StEstTracker::RefitBranch(StEstBranch *br, StEstHit *hittmp, int exclhit, int usevertex, int *fitstatus) {
 
   // details on the fit status (called flag in this method)
   // flag = -1 not enough hits for the fit
@@ -37,7 +53,6 @@ int StEstMaker::RefitBranch2(StEstBranch *br, StEstHit *hittmp, int exclhit, int
   // flag = -3 one outlier has been identified, the iteration continues
   // flag = -6 no outlier can be isolated to reduce the chisq
   // flag = -4 the helix fit failed.
-
   // details on the fit parameters gtrk[0].p[x]
   // p[0] = 1 
   // p[1] = sgn*rr : signed radius
@@ -86,9 +101,6 @@ int StEstMaker::RefitBranch2(StEstBranch *br, StEstHit *hittmp, int exclhit, int
   StEstTPCTrack *tpctr = track->mTPCTrack;  // TPCtrack object
 
   egr_egrpar_st*   egrpar      = m_egr_egrpar->GetTable();
-  table_head_st*  egrpar_h = new table_head_st[1];
-  egrpar_h[0].maxlen=1;
-  egrpar_h[0].nok=1;
 
   // load the tpc information 
   // In StEstInit the tpc hits are sorted from the smallest radius to the biggest radius
@@ -254,7 +266,7 @@ int StEstMaker::RefitBranch2(StEstBranch *br, StEstHit *hittmp, int exclhit, int
       }
       else {
 	// call the fitting routine
- 	iret = egr_helix_fit(row_in_gtrk,gtrk,xcir,ycir,zcir,wcir,wlin,ncir,egrpar_h,egrpar,covar);
+ 	iret = egr_helix_fit(row_in_gtrk,gtrk,xcir,ycir,zcir,wcir,wlin,ncir,m_egrpar_h,egrpar,covar);
 	if (iret==1) {
 	  if ((gtrk[0].p[7]/float(ncir-3)<egrpar[0].prob[0] || 
 	       egrpar[0].prob[0]<0) &&
@@ -265,10 +277,10 @@ int StEstMaker::RefitBranch2(StEstBranch *br, StEstHit *hittmp, int exclhit, int
 	  }
 	  else {
 	   if (egrpar[0].mxtry>1) {
-	     iret=egr_find_outlier(row_in_gtrk,gtrk,xcir,ycir,zcir,wcir,wlin,ncir,ibad,egrpar_h,egrpar);
+	     iret=egr_find_outlier(row_in_gtrk,gtrk,xcir,ycir,zcir,wcir,wlin,ncir,ibad,m_egrpar_h,egrpar);
 	     if (iret==1) {
 	       good_hit[pnt[ibad-1]]=0;
-	       gtrk[0].flag=-3.;
+	       gtrk[0].flag=-3;
 	       ntry=ntry+1;
 	     }
 	     else {
@@ -293,7 +305,9 @@ int StEstMaker::RefitBranch2(StEstBranch *br, StEstHit *hittmp, int exclhit, int
     if (exclhit==1) cout<<"hit failed ?? flag="<<gtrk[0].flag<<endl;
     *fitstatus=gtrk[0].flag;
     br->mLastFitStatus=0;
-    return(gtrk[0].flag);
+    delete[] gtrk;
+    // fit failed - return -1 (previously gtrk[0].flag)
+    return(-1);
   }
   else {
     if (ntry>1)
@@ -343,7 +357,7 @@ int StEstMaker::RefitBranch2(StEstBranch *br, StEstHit *hittmp, int exclhit, int
   br->SetNFit(gtrk[0].nfit);
   br->mLastFitStatus=gtrk[0].flag;
   if (exclhit==1) {
-    cout<<"Refit2 : x0= "<<x0<<endl
+    cout<<"Refit  : x0= "<<x0<<endl
 	<<"         y0= "<<y0<<endl
 	<<"       radi= "<<1./c<<endl
 	<<"       phi0= "<<gtrk[0].p[4]<<endl
@@ -358,6 +372,7 @@ int StEstMaker::RefitBranch2(StEstBranch *br, StEstHit *hittmp, int exclhit, int
 	<<"       flag= "<<tpctr->GetFlag()<<endl;
   }
   *fitstatus=gtrk[0].flag;
+  delete [] gtrk;
   return(1);
   
     
