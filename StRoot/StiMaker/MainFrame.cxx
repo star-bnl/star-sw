@@ -25,7 +25,7 @@ using std::find_if;
 #include "Sti/StlUtilities.h"
 #include "Sti/StiToolkit.h"
 #include "Sti/StiIOBroker.h"
-#include "Sti/Messenger.h"
+#include "Sti/Base/Messenger.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiPlacement.h"
 #include "Sti/StiDetectorContainer.h"

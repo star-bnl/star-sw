@@ -100,7 +100,7 @@ void StiOptionFrame::initialize()
 {
   //cout << "StiOptionFrame::initialize() - INFO - Starting" << endl;
   ParameterIterator it;
-  int num=0;
+  //int num=0;
   for (it=parameters->begin();it!=parameters->end();it++)
     {
       RootEditableParameter * par = static_cast<RootEditableParameter *>(*it);
