@@ -588,7 +588,9 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
 */
 bool  StiKalmanTrack::isPrimary() const
 {
-  return false;
+  //modified 2-14-2003; fX -> _x, correct???
+  StiKalmanTrackNode * node = getInnerMostHitNode();
+  return (node->_x<2.) ? true : false;
 }
 
 /*! Swap the track node sequence inside-out
@@ -772,25 +774,28 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() - ERROR - tNode==null");
   tNode->reset();
 	//  if (tNode->propagate(sNode, vertex))
-  if (tNode->propagate(localVertex.x(),0) )
-		{
-			chi2 = tNode->evaluateChi2(&localVertex); 
-			//cout<<"Chi2 at Vertex:"<<chi2<<endl;
-			if (chi2<20.)// pars->maxChi2ForSelection)
-				{
-					// storing a pointer to the vertex 
-					// should I use localVertex?
-					StiHit * myHit = StiToolkit::instance()->getHitFactory()->getInstance();
-					*myHit = localVertex;
-					tNode->setHit(myHit);
-					tNode->setChi2(chi2);
-					tNode->setDetector(0);
-					add(tNode);
-					trackExtended = true;
-				}
-			return trackExtended;
-		}
-	return false;
+  bool propagateResult=tNode->propagate(sNode,vertex);
+  cout <<"Propagate Result= "<<propagateResult<<endl;
+  if (propagateResult)
+  {
+     chi2 = tNode->evaluateChi2(&localVertex); 
+     //cout<<"Chi2 at Vertex:"<<chi2<<endl;
+     if (chi2<20.)// pars->maxChi2ForSelection)
+	{
+	   // storing a pointer to the vertex 
+	   // should I use localVertex?
+	   StiHit * myHit = StiToolkit::instance()->
+	                    getHitFactory()->getInstance();
+	   *myHit = localVertex;
+	    tNode->setHit(myHit);
+	    tNode->setChi2(chi2);
+	    tNode->setDetector(0);
+	    add(tNode);
+	    trackExtended = true;
+	 }
+	 return trackExtended;
+  }//end if (propogate returns true)
+  return false;
 }
 
 bool StiKalmanTrack::find(int direction)
