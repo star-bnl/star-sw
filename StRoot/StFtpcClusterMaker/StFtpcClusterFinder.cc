@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.50 2003/09/02 17:58:14 perev Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.51 2003/10/08 13:49:53 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.51  2003/10/08 13:49:53  jcs
+// initialize pointers and arrays
+//
 // Revision 1.50  2003/09/02 17:58:14  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -233,8 +236,8 @@ StFtpcClusterFinder::~StFtpcClusterFinder()
 int StFtpcClusterFinder::search()
 {
 
-  Double_t  *pradius;
-  Double_t  *pdeflection;
+  Double_t  *pradius = 0;
+  Double_t  *pdeflection = 0;
   int iRow, iSec, iPad, iPadBuf, iHardSec, iHardRow;
   int iRowBuf, iSecBuf;
   int firstPadrowToSearch;
@@ -276,8 +279,10 @@ int StFtpcClusterFinder::search()
   /* allocate memory for padtrans table */
   pradius = new Double_t[mParam->numberOfDriftSteps()
                            *mDb->numberOfPadrowsPerSide()];
+  memset(pradius, 0, (mParam->numberOfDriftSteps()*mDb->numberOfPadrowsPerSide())*sizeof(Double_t));
   pdeflection = new Double_t[mParam->numberOfDriftSteps()
                                *mDb->numberOfPadrowsPerSide()];
+  memset(pdeflection, 0, (mParam->numberOfDriftSteps()*mDb->numberOfPadrowsPerSide())*sizeof(Double_t));
 
   if(pradius == 0 || pdeflection == 0)
     {
@@ -922,7 +927,8 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
   printf("starting hitfinder\n");
 #endif
 
-  TPeak *Peaks = new TPeak[MAXPEAKS];
+  TPeak *Peaks = 0;
+  Peaks = new TPeak[MAXPEAKS];
   float TClSearch [162][258]; 
 
   for (int i=0;i<162;i++)
