@@ -1,3 +1,21 @@
+/***************************************************************************
+ *
+ * $Id: dbStruct.hh,v 1.5 1999/09/30 02:06:13 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description:  Simple dictionary for XML file tags
+ *
+ ***************************************************************************
+ *
+ * $Log: dbStruct.hh,v $
+ * Revision 1.5  1999/09/30 02:06:13  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #ifndef DBSTRUCT_HH
 #define DBSTRUCT_HH
 

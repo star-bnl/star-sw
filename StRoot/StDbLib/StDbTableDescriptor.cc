@@ -1,3 +1,22 @@
+/***************************************************************************
+ *
+ * $Id: StDbTableDescriptor.cc,v 1.4 1999/09/30 02:06:10 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description: Class implement table-descriptor (memory/name of data-elements)
+ *              this descriptor is loaded from database
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.4  1999/09/30 02:06:10  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #include "StDbTableDescriptor.h"
 #include <stdlib.h>
 #include <math.h>
@@ -44,7 +63,7 @@ return dScr;
 /////////////////////////////////////////////////////////////////////////
 
 StTableDescriptorI*
-StDbTableDescriptor::getCpy() const {
+StDbTableDescriptor::getCpy(){
 
 StTableDescriptorI* dScr = new StDbTableDescriptor(*this);
 return dScr;
@@ -156,7 +175,7 @@ int i = elementNum;
 
     mcols[i].offset = 0;
     offsetToNextEmptyByte = mcols[i].offset+mcols[i].size;
-    j = 4* ((int) floor ( (mcols[i].size-1)/4 ));
+    j = 4* ((int) floor ( (float) (mcols[i].size-1)/4 ));
     offsetToLast4Bytes = mcols[i].offset + j;// + 4;
  
 
@@ -164,13 +183,14 @@ int i = elementNum;
 
      mcols[i].offset=offsetToNextEmptyByte;
      offsetToNextEmptyByte = mcols[i].offset+mcols[i].size;
-     j = 4* ((int) floor ( (mcols[i].size-space-1)/4 ));
-     offsetToLast4Bytes = offsetToLast4Bytes+j;//+4;
+     //     j = 4* ((int) floor ( (mcols[i].size-space-1)/4 ));
+     j = 4* ((int) floor ((float) (mcols[i].size-1)/4 ));
+     offsetToLast4Bytes = offsetToLast4Bytes+j+4;
 
   } else if( (space>=2) && (type == Stshort || type == Stushort) ){
 
       mcols[i].offset=offsetToLast4Bytes+2;
-      j = 4* ((int) floor ( (mcols[i].size-2-1)/4 ));    // note the 2
+      j = 4* ((int) floor ((float) (mcols[i].size-2-1)/4 ));    // note the 2
       offsetToNextEmptyByte=mcols[i].offset+mcols[i].size;
       offsetToLast4Bytes = offsetToLast4Bytes+j;//+4;  // 4 is for the 1st "row"
 
@@ -182,7 +202,7 @@ int i = elementNum;
     }
      mcols[i].offset=offsetToLast4Bytes+4;
      offsetToNextEmptyByte = mcols[i].offset + mcols[i].size;
-     j = 4* ((int) floor ( (mcols[i].size-1)/4 ));
+     j = 4* ((int) floor ((float) (mcols[i].size-1)/4 ));
      offsetToLast4Bytes = mcols[i].offset + j;// + 4;
   }
 

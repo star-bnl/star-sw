@@ -1,7 +1,33 @@
-#ifndef StDBtestBuff
-#define  StDBtestBuff
+
+/***************************************************************************
+ *
+ * $Id: StDbBufferI.h,v 1.2 1999/09/30 02:06:01 porter Exp $
+ *
+ * Author: Laurent Conin & Jeff Porter
+ ***************************************************************************
+ *
+ * Description: Buffer Interface to negotiate data I/O between database
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbBufferI.h,v $
+ * Revision 1.2  1999/09/30 02:06:01  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
+#ifndef STDBBUFFERI_H
+#define STDBBUFFERI_H
 
 
+#ifdef SOLARIS
+# ifndef false
+typedef int bool;
+#define false 0
+#define true 1
+# endif
+#endif
 
 class StDbBufferI  { 
 

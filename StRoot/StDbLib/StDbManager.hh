@@ -1,9 +1,28 @@
+/***************************************************************************
+ *
+ * $Id: StDbManager.hh,v 1.6 1999/09/30 02:06:07 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description:  Manages access to Servers and passes Query-by-Table to db
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbManager.hh,v $
+ * Revision 1.6  1999/09/30 02:06:07  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #ifndef STDBMANAGER_HH
 #define STDBMANAGER_HH
 
 #include "StDbDefs.hh"
 #include "parseXmlString.hh"
 #include <fstream.h>
+#include "StDbTime.h"
 
 class dbType;
 class dbDomain;
@@ -11,6 +30,7 @@ class StDbServer;
 class StDbTable;
 class StDbTableI;
 class StDbConfigNode;
+//class StDbTime;
 
 #ifndef __CINT__
 #include <list>
@@ -46,7 +66,9 @@ private:
 
   bool mhasServerList;
   bool mhasDefaultServer;
-  
+  StDbTime mcheckTime;  
+  StDbTime mstoreTime;
+
 protected:
 
   virtual void initServers(const char* refFile = 0);
@@ -90,12 +112,24 @@ public:
   virtual StDbType getDbType(const char* typeName);
   virtual StDbDomain getDbDomain(const char* domainName);
 
-  virtual bool IsValid(StDbTableI* table, int time);
-  virtual void fetchDbTable(StDbTableI* table, int time);
+  virtual void setRequestTime(unsigned int time);
+  virtual void setRequestTime(const char* time);
+  virtual unsigned int getUnixCheckTime();
+  virtual char* getDateCheckTime();
+  virtual void setStoreTime(unsigned int time);
+  virtual void setStoreTime(const char* time);
+  virtual unsigned int getUnixStoreTime();
+  virtual char* getDateStoreTime();
+ 
+  //  virtual bool IsValid(StDbTableI* table, int time);
+  //  virtual void fetchDbTable(StDbTableI* table, int time);
+
+  virtual bool IsValid(StDbTableI* table);
+  virtual void fetchDbTable(StDbTableI* table);
   virtual void storeDbTable(StDbTableI* table);
+  virtual void storeAllTables(StDbConfigNode* node);
 
   // ClassDef(StDbManager,0)
-
 
 };
 

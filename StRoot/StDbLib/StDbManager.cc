@@ -1,8 +1,28 @@
+/***************************************************************************
+ *
+ * $Id: StDbManager.cc,v 1.8 1999/09/30 02:06:07 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description:  Manages access to Servers and passes Query-by-Table to db
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbManager.cc,v $
+ * Revision 1.8  1999/09/30 02:06:07  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #include "StDbManager.hh"
 #include "StDbLists.hh"
 #include "StDbConfigNode.hh"
 #include "StDbServer.hh"
 #include "StDbTable.h"
+#include "StDbTime.h"
+#include "TableIter.hh"
 #include <iostream.h>
 #include <strstream.h>
 #include <strings.h>
@@ -332,7 +352,7 @@ ostrstream os(line,10240);
    } else {
      is.getline(tmpline,255);
 
-     if(id=strstr(tmpline,"//"))continue;
+     if((id=strstr(tmpline,"//")))continue;
 
      if(!started){
 
@@ -439,8 +459,8 @@ StDbManager::findServer(StDbType type, StDbDomain domain){
 
  if(!server) {
    cerr << "No Such Server :: " << endl;
-   cerr << "Type = " << type << " name= " << getDbTypeName(type) << endl;
-   cerr << "Domain = "<< domain << " name = " << getDbDomainName(domain) << endl;
+   cerr << "Type Name= " << getDbTypeName(type) << endl;
+   cerr << "Domain Name = " << getDbDomainName(domain) << endl;
 }
 
 return server;
@@ -507,32 +527,100 @@ char* name;
 }
 
 ////////////////////////////////////////////////////////////////
+void
+StDbManager::setRequestTime(unsigned int time){
+
+mcheckTime.munixTime = time;
+StDbServer* server = findServer(StarDb,Star);
+if(server)mcheckTime.mdateTime = server->getDateTime(time);
+
+}
+
+////////////////////////////////////////////////////////////////
+
+void
+StDbManager::setRequestTime(const char* time){
+
+mcheckTime.setDateTime(time);
+StDbServer* server = findServer(StarDb,Star);
+if(server)mcheckTime.munixTime = server->getUnixTime(time);
+
+}
+
+
+////////////////////////////////////////////////////////////////
+void
+StDbManager::setStoreTime(unsigned int time){
+
+mstoreTime.munixTime = time;
+StDbServer* server = findServer(StarDb,Star);
+if(server)mstoreTime.mdateTime = server->getDateTime(time);
+
+}
+
+////////////////////////////////////////////////////////////////
+
+void
+StDbManager::setStoreTime(const char* time){
+
+mstoreTime.setDateTime(time);
+StDbServer* server = findServer(StarDb,Star);
+if(server)mstoreTime.munixTime = server->getUnixTime(time);
+
+}
+
+////////////////////////////////////////////////////////////////
+
+unsigned int
+StDbManager::getUnixCheckTime(){ return mcheckTime.munixTime; }
+
+////////////////////////////////////////////////////////////////
+
+char* 
+StDbManager::getDateCheckTime(){ return mcheckTime.mdateTime; }
+
+////////////////////////////////////////////////////////////////
+
+unsigned int
+StDbManager::getUnixStoreTime(){ return mstoreTime.munixTime; }
+
+////////////////////////////////////////////////////////////////
+
+char* 
+StDbManager::getDateStoreTime(){ return mstoreTime.mdateTime; }
+
 ////////////////////////////////////////////////////////////////
 
 bool
-StDbManager::IsValid(StDbTableI* table, int time){
+StDbManager::IsValid(StDbTableI* table){
+
+ unsigned int time = mcheckTime.munixTime;
 
  bool retVal = false;
  if(!table) return retVal;
  if(time >= table->getBeginTime() && time < table->getEndTime()) retVal = true;
+
 return retVal;
 
 }
 
 void
-StDbManager::fetchDbTable(StDbTableI* table, int time){
+StDbManager::fetchDbTable(StDbTableI* table){
 
   if(!table){
     cout << "Cannot Update StDbTable=0" << endl;
   } else {
 
-  table->setRequestTime(time);
+  if(!mcheckTime.munixTime && !mcheckTime.mdateTime)return;
 
   StDbServer* server = findServer(table->getDbType(),table->getDbDomain());
-  server->QueryDb((StDbTable*)table);  // table is filled 
+  server->QueryDb((StDbTable*)table,mcheckTime.munixTime);  // table is filled 
 
   }
 }
+
+////////////////////////////////////////////////////////////////
+
 
 void
 StDbManager::storeDbTable(StDbTableI* table){
@@ -542,12 +630,40 @@ StDbManager::storeDbTable(StDbTableI* table){
   } else {
 
     //  table->setRequestTime(time);
-
+  if(!mstoreTime.munixTime && !mstoreTime.mdateTime){
+    cerr<< "No storage time set"; return;
+  }
   StDbServer* server = findServer(table->getDbType(),table->getDbDomain());
-  server->WriteDb((StDbTable*)table);  // table is filled 
+  server->WriteDb((StDbTable*)table,mstoreTime.munixTime);  // table is filled 
 
   }
 }
+
+////////////////////////////////////////////////////////////////
+
+void
+StDbManager::storeAllTables(StDbConfigNode* node){
+
+  if(!mstoreTime.munixTime && !mstoreTime.mdateTime){
+    cerr<< "No storage time set"; return;
+  }
+
+  if(node->hasData()){
+    TableIter* itr = node->getTableIter();
+    StDbTableI* table = 0;
+    while(!itr->done()){
+      table = itr->next();
+      storeDbTable(table);
+    }
+  delete [] itr;
+  }
+
+  if(node->hasChildren())storeAllTables(node->getFirstChildNode());
+  StDbConfigNode* nextNode = 0;
+  if((nextNode=node->getNextNode()))storeAllTables(nextNode);
+
+}
+    
 
 ////////////////////////////////////////////////////////////////
 
@@ -590,8 +706,9 @@ mDomains.push_back(new dbDomain(L3,"l3"));
 char*
 StDbManager::mstringDup(const char* str){
 
-if(!str)return str;
-char* retString = new char[strlen(str)+1];
+char* retString=0;
+if(!str)return retString;
+retString = new char[strlen(str)+1];
 strcpy(retString,str);
 
 return retString;

@@ -1,4 +1,21 @@
-
+/***************************************************************************
+ *
+ * $Id: MysqlDb.cc,v 1.2 1999/09/30 02:05:59 porter Exp $
+ *
+ * Author: Laurent Conin
+ ***************************************************************************
+ *
+ * Description: Mysql - SQL Query handler
+ *
+ ***************************************************************************
+ *
+ * $Log: MysqlDb.cc,v $
+ * Revision 1.2  1999/09/30 02:05:59  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #include "MysqlDb.h"
 
 
@@ -63,14 +80,14 @@ if(mRes) delete mRes;
 
 //////////////////////////////////////////////////////////////////////// 
 bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd, 
-		      const char *aDb, unsigned aPort){
+		      const char *aDb, const int aPort){
   
   bool tRetVal = false;
   if (!mysql_init(&mData)) {
     cout << &mData <<endl;
     cout << "Init Error : " << mysql_error(&mData) << endl;
   } else {
-    if(mysql_real_connect(&mData,aHost,aUser,aPasswd,aDb,0,NULL,0)){ 
+    if(mysql_real_connect(&mData,aHost,aUser,aPasswd,aDb,aPort,NULL,0)){ 
       // cout << "connected on " << aDb <<mysql_error(&mData) << 
       //	mysql_ping(&mData) <<endl;
       tRetVal=true;
@@ -101,14 +118,17 @@ bool MysqlDb::ExecQuery(){
 
 bool tOk=false;
 
+//cout <<"Attempting Query:: "<<mQuery << endl;
   if(mysql_real_query(&mData,mQuery,mQueryLen)){
     cout << "Query Failed : " << mQueryMess << endl;
     cout << "Returned Error : " << mysql_error(&mData) << endl;
+    mqueryState=false;
   } else {
     //    cout << "Query : "<< mQueryMess <<endl;
     mRes->Release();
     mRes->mRes=mysql_store_result(&mData);
     tOk=true;
+    mqueryState=true;
   }
   //  RazQuery();
   return tOk;
@@ -213,13 +233,19 @@ bool MysqlDb::Input(const char *table,StDbBuffer *aBuff){
     unsigned i;
 
     for (i=0;i<NbFields();i++) {
-      if  (IS_BLOB(mRes->mRes->fields[i].flags)) {
+      if  ((IS_BLOB(mRes->mRes->fields[i].flags) ) || mRes->mRes->fields[i].type ==254) {
 	if (mRes->mRes->fields[i].flags&BINARY_FLAG) {
 	  if (aBuff->ReadArray(tVal,len,mRes->mRes->fields[i].name)){
 	    if (tFirst) {tFirst=false;} else {*this << ",";};
 	    *this << mRes->mRes->fields[i].name << "='" << Binary(len,(float*)tVal)<<"'";
 	  };
 	}else{
+      if(mRes->mRes->fields[i].type==254){
+ 	  if (aBuff->ReadScalar(tVal,mRes->mRes->fields[i].name)) {
+	    if (tFirst) {tFirst=false;} else {*this << ",";};
+	    *this << mRes->mRes->fields[i].name << "='" << tVal << "'";
+	  };
+          } else {
 	  char** tVal2=0;
 	  if (aBuff->ReadArray(tVal2,len,mRes->mRes->fields[i].name)){
 	    tVal=CodeStrArray(tVal2,len);
@@ -227,7 +253,8 @@ bool MysqlDb::Input(const char *table,StDbBuffer *aBuff){
 	    delete [] tVal2;
 	    if (tFirst) {tFirst=false;} else {*this << ",";};
 	    *this << mRes->mRes->fields[i].name << "='" << tVal<<"'";
-	  };
+	  }
+     };
 	};
       }else {
 	if (aBuff->ReadScalar(tVal,mRes->mRes->fields[i].name)) {
@@ -242,7 +269,7 @@ bool MysqlDb::Input(const char *table,StDbBuffer *aBuff){
       cout << " Mysql : no matching field in Buffer" << endl;
     } else {
       *this << endsql;
-      tRetVal=true;
+      if(mqueryState)tRetVal=true;
     };
   };
   if (!tRetVal) cout << "insert Failed"<< endl;
@@ -269,6 +296,7 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
 
 
   MYSQL_ROW tRow=mysql_fetch_row(mRes->mRes);
+  if(!tRow) return false;
   unsigned long * lengths=mysql_fetch_lengths(mRes->mRes);
   unsigned tNbFields=NbFields();
   int i;
@@ -323,7 +351,7 @@ column *MysqlDb::PrepareWrite(){
       
 */
 ////////////////////////////////////////////////////////////////////////
-char** MysqlDb::DecodeStrArray(const char* strinput , int &aLen){
+char** MysqlDb::DecodeStrArray(char* strinput , int &aLen){
   
   char* tPnt=strinput;
   aLen=0;
@@ -373,7 +401,7 @@ char** MysqlDb::DecodeStrArray(const char* strinput , int &aLen){
   return strarr;
 }
 ////////////////////////////////////////////////////////////////////////
-char* MysqlDb::CodeStrArray(const char** strarr , int aLen){
+char* MysqlDb::CodeStrArray(char** strarr , int aLen){
   int tMaxLen=0;
   int i;
   for (i=0;i<aLen;i++) {

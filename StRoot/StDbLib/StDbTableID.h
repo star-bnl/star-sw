@@ -1,3 +1,21 @@
+/***************************************************************************
+ *
+ * $Id: StDbTableID.h,v 1.3 1999/09/30 02:06:11 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description: Associates tablename with current SchemaID 
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbTableID.h,v $
+ * Revision 1.3  1999/09/30 02:06:11  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #ifndef STDBTABLEID_HH
 #define STDBTABLEID_HH
 

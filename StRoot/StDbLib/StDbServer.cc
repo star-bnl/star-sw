@@ -1,3 +1,21 @@
+/***************************************************************************
+ *
+ * $Id: StDbServer.cc,v 1.5 1999/09/30 02:06:08 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description: Server class for DB-access
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbServer.cc,v $
+ * Revision 1.5  1999/09/30 02:06:08  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #include "StDbServer.hh"
 #include "mysqlAccessor.hh"
 #include "StDbManager.hh"
@@ -7,7 +25,7 @@
 
 ////////////////////////////////////////////////////////////////
 
-StDbServer::StDbServer(StDbServer& server) : mserverName(0), mhostName(0), munixSocket(0), mdomainName(0), mtypeName(0), mdbName(0), mconnectState(false), misDefault(false) {
+StDbServer::StDbServer(StDbServer& server) :  mserverName(0), mhostName(0), munixSocket(0), mdbName(0),  mdomainName(0), mtypeName(0), mconnectState(false), misDefault(false), mdatabase(0) {
 
  char * name;
  name = server.getServerName(); setServerName(name);  if(name) delete [] name;
@@ -296,13 +314,21 @@ strcpy(name,mserverName);
 return name;
 }
 
+unsigned int StDbServer::getUnixTime(const char* time){ 
+  return mdatabase->getUnixTime(time);}
+
+char* 
+StDbServer::getDateTime(unsigned int time){
+  return mdatabase->getDateTime(time);}
+
+
 ////////////////////////////////////////////////////////////////
 
 void 
-StDbServer::QueryDb(StDbTable* table) { 
+StDbServer::QueryDb(StDbTable* table, unsigned int reqTime) { 
 
 char* name=0;
-  if(!mdatabase->QueryDb(table)){
+  if(!mdatabase->QueryDb(table,reqTime)){
     if(table){
       if((name = table->getTableName())){
         cout << "table ["<<name<<"] ";
@@ -317,9 +343,38 @@ char* name=0;
 ////////////////////////////////////////////////////////////////
 
 void 
-StDbServer::WriteDb(StDbTable* table) { 
+StDbServer::QueryDb(StDbTable* table, const char* reqTime) { 
 
-  if(!mdatabase->WriteDb(table)){
+char* name=0;
+  if(!mdatabase->QueryDb(table,reqTime)){
+    if(table){
+      if((name = table->getTableName())){
+        cout << "table ["<<name<<"] ";
+       delete [] name;
+      }
+    cout << "Table is not Updated" << endl;
+    }
+  }
+
+}
+
+////////////////////////////////////////////////////////////////
+
+void 
+StDbServer::WriteDb(StDbTable* table, unsigned int storeTime) { 
+
+  if(!mdatabase->WriteDb(table, storeTime)){
+    if(table) cout << "Wrote table ["<<table->getTableName()<<"] ";
+    cout << "Table is not Updated" << endl;
+  }
+}
+
+////////////////////////////////////////////////////////////////
+
+void 
+StDbServer::WriteDb(StDbTable* table,const char* storeTime) { 
+
+  if(!mdatabase->WriteDb(table, storeTime)){
     if(table) cout << "Wrote table ["<<table->getTableName()<<"] ";
     cout << "Table is not Updated" << endl;
   }
@@ -354,8 +409,9 @@ StDbServer::QueryDb(StDbConfigNode* node) {
 char*
 StDbServer::mstringDup(const char* str) const {
 
-if(!str)return str;
-char* retString = new char[strlen(str)+1];
+char* retString=0;
+if(!str)return retString;
+retString = new char[strlen(str)+1];
 strcpy(retString,str);
 
 return retString;

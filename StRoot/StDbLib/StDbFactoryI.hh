@@ -1,3 +1,21 @@
+/***************************************************************************
+ *
+ * $Id: StDbFactoryI.hh,v 1.3 1999/09/30 02:06:05 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description:  StDbTable ctor & list holder for generic tables
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbFactoryI.hh,v $
+ * Revision 1.3  1999/09/30 02:06:05  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #ifndef STDBFACTORYI_HH
 #define STDBFACTORYI_HH
 
@@ -27,7 +45,7 @@ protected:
 
 public:
 
-  StDbFactoryI() : isloaded(false), mdbType(0) {};
+  StDbFactoryI() : isloaded(false), mdbType(StarDb) {};
   virtual ~StDbFactoryI(){ deleteIDList();};
   virtual StDbType getDbType() { return mdbType; };
 

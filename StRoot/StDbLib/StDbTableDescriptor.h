@@ -1,3 +1,22 @@
+/***************************************************************************
+ *
+ * $Id: StDbTableDescriptor.h,v 1.3 1999/09/30 02:06:10 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description: Class implement table-descriptor (memory/name of data-elements)
+ *              this descriptor is loaded from database
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbTableDescriptor.h,v $
+ * Revision 1.3  1999/09/30 02:06:10  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #ifndef STDBTABLEDESCRIPTOR_HH
 #define STDBTABLEDESCRIPTOR_HH
 
@@ -43,7 +62,7 @@ public:
   virtual ~StDbTableDescriptor() {if(mcols) delete [] mcols; }
   virtual void fillElement(StDbBuffer* buff, int tableID);
 
-  virtual StTableDescriptorI* getCpy() const;
+  virtual StTableDescriptorI* getCpy();
   virtual tableDescriptor* getTableDescriptor() const;
   virtual unsigned int getNumElements() const;
   virtual unsigned int getTotalSizeInBytes() const;
@@ -66,7 +85,9 @@ StDbTableDescriptor::getTotalSizeInBytes() const {return mtableSize;}
 
 inline char*
 StDbTableDescriptor::getElementName(int elementNum) const { 
-return mcols[elementNum].name;
+char* retVal = new char[strlen(mcols[elementNum].name)+1];
+strcpy(retVal,mcols[elementNum].name);
+return retVal;
 }
 
 inline unsigned int

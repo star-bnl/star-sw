@@ -1,13 +1,27 @@
+/***************************************************************************
+ *
+ * $Id: StDbLists.hh,v 1.3 1999/09/30 02:06:07 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description:  mapping of Db-names & Db-enumerations
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbLists.hh,v $
+ * Revision 1.3  1999/09/30 02:06:07  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #ifndef STDBLISTS_HH
 #define STDBLISTS_HH
 
 #include "StDbDefs.hh"
 
 #include <string.h>
-
-// Shortcut mapping of Enumerations to names in database
-// These are classes but everything is public
-// ..... will put into database eventually
 
 class dbType{
 

@@ -1,9 +1,26 @@
-#ifndef testBuff
-#define  testBuff
+/***************************************************************************
+ *
+ * $Id: StDbBuffer.h,v 1.3 1999/09/30 02:06:01 porter Exp $
+ *
+ * Author: Laurent Conin
+ ***************************************************************************
+ *
+ * Description: Buffer that negotiates data I/O between mysql database
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbBuffer.h,v $
+ * Revision 1.3  1999/09/30 02:06:01  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
+#ifndef STDBBUFFER_H
+#define STDBBUFFER_H
 #ifndef __CINT__
 #include "mysql.h"
 #include "mysql_com.h"
-#include "enumType.hh"
 #endif
 
 #include "StDbBufferI.h"
@@ -15,9 +32,12 @@ const int mycsize[]={sizeof(char),sizeof(unsigned char),sizeof(short),sizeof(uns
 		 sizeof(float),sizeof(double),sizeof(char*),sizeof(char*)};
 #ifdef SOLARIS
 const int mycswapl[]={1,1,1,1,4,4,4,4,4,8,1,1};
-//const int mycswapl[]={1,1,1,1,1,1,1,1,1,1,1,1};
+#else
+#ifdef hpux
+const int mycswapl[]={1,1,1,1,4,4,4,4,4,8,1,1};  // same swapping than Solaris
 #else
 const int mycswapl[]={1,1,1,1,1,1,1,1,1,1,1,1};
+#endif
 #endif
 
 struct column {
@@ -126,31 +146,31 @@ protected:
   void AddField(const char *aName, const myctype aTpe,const void* aVal,const int aLen);
   void ChangeField(const myctype aTpe,const void* aVal,const int aLen);
 
-//bool StDbBuffer::WriteMem(char &s,void* aVal, myctype type);
+//bool WriteMem(char &s,void* aVal, myctype type);
 
-  bool StDbBuffer::WriteMem(char *s,void* aVal, myctype type);
-  bool StDbBuffer::WriteMem(unsigned char *s,void* aVal, myctype type);
-  bool StDbBuffer::WriteMem(short *s,void* aVal, myctype type);
-  bool StDbBuffer::WriteMem(unsigned short *s,void* aVal, myctype type);
-  bool StDbBuffer::WriteMem(int *s,void* aVal, myctype type);
-  bool StDbBuffer::WriteMem(unsigned int *s,void* aVal, myctype type);
-  bool StDbBuffer::WriteMem(long *s,void* aVal, myctype type);
-  bool StDbBuffer::WriteMem(unsigned long *s,void* aVal, myctype type);
-  bool StDbBuffer::WriteMem(float *s,void* aVal, myctype type);
-  bool StDbBuffer::WriteMem(double *s,void* aVal, myctype type);
-  bool StDbBuffer::WriteMem(char **s,void* aVal, myctype type);
+  bool WriteMem(char *s,void* aVal, myctype type);
+  bool WriteMem(unsigned char *s,void* aVal, myctype type);
+  bool WriteMem(short *s,void* aVal, myctype type);
+  bool WriteMem(unsigned short *s,void* aVal, myctype type);
+  bool WriteMem(int *s,void* aVal, myctype type);
+  bool WriteMem(unsigned int *s,void* aVal, myctype type);
+  bool WriteMem(long *s,void* aVal, myctype type);
+  bool WriteMem(unsigned long *s,void* aVal, myctype type);
+  bool WriteMem(float *s,void* aVal, myctype type);
+  bool WriteMem(double *s,void* aVal, myctype type);
+  bool WriteMem(char **s,void* aVal, myctype type);
 
-  void StDbBuffer::StrConv(char* aVal,char &s);
-  void StDbBuffer::StrConv(char* aVal,unsigned char &s);
-  void StDbBuffer::StrConv(char* aVal,short &s);
-  void StDbBuffer::StrConv(char* aVal,unsigned short &s);
-  void StDbBuffer::StrConv(char* aVal,int &s);
-  void StDbBuffer::StrConv(char* aVal,unsigned int &s);
-  void StDbBuffer::StrConv(char* aVal,long &s);
-  void StDbBuffer::StrConv(char* aVal,unsigned long &s);
-  void StDbBuffer::StrConv(char* aVal,float &s);
-  void StDbBuffer::StrConv(char* aVal,double &s); 
-  void StDbBuffer::StrConv(char* aVal,char* &s);
+  void StrConv(char* aVal,char &s);
+  void StrConv(char* aVal,unsigned char &s);
+  void StrConv(char* aVal,short &s);
+  void StrConv(char* aVal,unsigned short &s);
+  void StrConv(char* aVal,int &s);
+  void StrConv(char* aVal,unsigned int &s);
+  void StrConv(char* aVal,long &s);
+  void StrConv(char* aVal,unsigned long &s);
+  void StrConv(char* aVal,float &s);
+  void StrConv(char* aVal,double &s); 
+  void StrConv(char* aVal,char* &s);
 
   void MemSwapCpy(char* where,char* from,int len,int swaplen,BuffMode mode);
 

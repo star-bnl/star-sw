@@ -1,3 +1,21 @@
+/***************************************************************************
+ *
+ * $Id: StDbBuffer.cc,v 1.2 1999/09/30 02:06:01 porter Exp $
+ *
+ * Author: Laurent Conin
+ ***************************************************************************
+ *
+ * Description: Buffer for DB I/O
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbBuffer.cc,v $
+ * Revision 1.2  1999/09/30 02:06:01  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #include "StDbBuffer.h"
 #include <stdlib.h>
 #include <string.h>
@@ -274,8 +292,9 @@ Wscal(double,_double,1);
 
 
 bool StDbBuffer::WriteScalar(const char* s,const char *aName)
-{const char** tVal=new char*[1];
- tVal[0]=s;
+{ char** tVal=new char*[1];
+  tVal[0]=new char[strlen(s)+1];
+  strcpy(tVal[0],s);
  if (Find_Col(aName))
    //  { ChangeField(_string,(void*)&tVal,1);}
   { ChangeField(_string,(void*)tVal,1);}
