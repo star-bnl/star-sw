@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.10 1999/05/01 00:57:03 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.11 1999/05/01 01:49:15 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.11  1999/05/01 01:49:15  fisyak
+// Add StRootEvent fill
+//
 // Revision 1.10  1999/05/01 00:57:03  fisyak
 // Change Clear function to defualt
 //
@@ -78,8 +81,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: St_dst_Maker.cxx,v 1.10 1999/05/01 00:57:03 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.11 1999/05/01 01:49:15 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.11  1999/05/01 01:49:15  fisyak
+// Add StRootEvent fill
+//
 // Revision 1.10  1999/05/01 00:57:03  fisyak
 // Change Clear function to defualt
 //
@@ -149,7 +155,7 @@
 #include "StV0Vertex.h"
 #include "StXiVertex.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.10 1999/05/01 00:57:03 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.11 1999/05/01 01:49:15 fisyak Exp $";
 #include "StEventManager.h"
 StEventManager MakerEventManager;
 
@@ -220,7 +226,7 @@ Int_t St_dst_Maker::Make(){
     ds->Shunt(m_DataSet);
     if (Debug()) printf("\n*** <%s::Make> *** selected %s%s\n",ClassName(),mkname,name);
   }
-  Int_t Res = EventReader();
+  Int_t Res = EventReader(); if (Res){/*touch*/};
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -674,7 +680,7 @@ void St_dst_Maker::setEventManager(StEventManager* mgr)
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_dst_Maker.cxx,v 1.10 1999/05/01 00:57:03 fisyak Exp $\n");
+  printf("* $Id: St_dst_Maker.cxx,v 1.11 1999/05/01 01:49:15 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
