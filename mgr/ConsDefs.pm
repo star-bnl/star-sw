@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.11 2000/04/22 20:07:12 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.12 2000/04/24 16:48:04 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -90,10 +90,10 @@
    $OSFID   .= " CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX NEW_ARRAY_ON GNU_GCC";
    $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
    $R_CPPFLAGS  .= " -DGNU_CC -DR__GLIBC -DG__REGEXP -DG__UNIX -DG__SHAREDLIB -DG__OSFDLL -DG__ROOT -DG__REDIRECTIO";
-   $CXXFLAGS = "-fPIC -Wall";
+   $CXXFLAGS = "-fPIC -Wall";# -march=pentiumpro";
    $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
    #                                             -fpipe
-   $CFLAGS   = "-fPIC -Wall";
+   $CFLAGS   = "-fPIC -Wall";# -march=pentiumpro";
    $CINTCFLAGS = $CFLAGS . " " . $R_CPPFLAGS;
    $LDFLAGS  = $DEBUG . " " . $CXXFLAGS . " -Wl,-Bdynamic";
    $SOFLAGS  = "-shared -Wl,-Bdynamic";  
