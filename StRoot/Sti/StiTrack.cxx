@@ -29,6 +29,7 @@ void StiTrack::reset()
   vertex = 0;
   m      = -1.;
   chi2   = 0.;
+  mFlag = 0;
 }
 
 void StiTrack::fit() //throw (Exception)

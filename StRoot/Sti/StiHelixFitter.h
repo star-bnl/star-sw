@@ -23,6 +23,7 @@
 
 //std
 #include <iostream.h>
+#include <float.h>
 #include <vector>
 using std::vector;
 
