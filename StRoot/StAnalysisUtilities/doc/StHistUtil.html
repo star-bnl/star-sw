@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>StHistUtil Class</title>
-<!-- Changed by: Kathleen R. Turner, 27-Jan-2000 -->
+<!-- Changed by: Kathleen R. Turner, 31-Jan-2000 -->
 </head>
 <body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
 <basefont face="verdana,arial,helvetica,sans-serif">
@@ -116,10 +116,22 @@
      </ol>
      &nbsp - close postscript file
   <li> virtual Int_t  
-    <font  size ="+1" color="red">Overlay2Hists<font  size ="+1" color="black">(Char_t *dirName="QA"); <br>
+    <font  size ="+1" color="red">Overlay1D<font  size ="+1" color="black">
+          (Char_t *dirName,Char_t *inHist1,Char_t *inHist2); <br>
 
-     &nbsp -  input a histogram directory name and the NAMES of 2 histograms that you want overlaid
-              (can be 1D or 2D hists) <br>
+     &nbsp -  input a histogram directory name and the NAMES of 2 1dim 
+              histograms that you want overlaid <br>
+     &nbsp -  loops over directory, finds the histograms and makes copies of them
+     &nbsp -  creates histogram canvas<br>
+     &nbsp -  combines titles of histograms<br>
+     &nbsp -  draws the 2 histograms with different line style/color <br>
+     &nbsp -  draws the legend <br>
+  <li> virtual Int_t  
+    <font  size ="+1" color="red">Overlay2D<font  size ="+1" color="black">
+          (Char_t *dirName,Char_t *inHist1,Char_t *inHist2); <br>
+
+     &nbsp -  input a histogram directory name and the NAMES of 2 2dim 
+              histograms that you want overlaid <br>
      &nbsp -  loops over directory, finds the histograms and makes copies of them
      &nbsp -  creates histogram canvas<br>
      &nbsp -  combines titles of histograms<br>
@@ -188,6 +200,7 @@
         <ol>
           <li> "Cosmic" (goes with St_QA_Maker histograms)
           <li> "TestQATable" (goes with StQAMaker histograms)
+          <li> "Ftpc" (goes with StQAMaker histograms)
         </ol>
   <li> virtual Int_t   
     <font  size ="+1" color="red">AddToPrintList<font  size ="+1" color="black">(const Char_t *HistName="");<br>
