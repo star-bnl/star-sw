@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.cxx,v 2.4 2003/01/23 23:49:32 ullrich Exp $
+ * $Id: StTriggerDetectorCollection.cxx,v 2.5 2003/01/29 23:59:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.cxx,v $
+ * Revision 2.5  2003/01/29 23:59:12  ullrich
+ * Changed order of instantiation in constructor.
+ *
  * Revision 2.4  2003/01/23 23:49:32  ullrich
  * Feeding now tables to BBC instance as well.
  *
@@ -29,14 +32,14 @@
 #include "StTriggerDetectorCollection.h"
 #include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.4 2003/01/23 23:49:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.5 2003/01/29 23:59:12 ullrich Exp $";
 
 ClassImp(StTriggerDetectorCollection)
 
 StTriggerDetectorCollection::StTriggerDetectorCollection() {/* noop */}
 
 StTriggerDetectorCollection::StTriggerDetectorCollection(const dst_TrgDet_st& t) :
-    mCtb(t), mMwc(t), mVpd(t), mZdc(t), mEmc(t), mBbc(t) {/* noop */}
+    mCtb(t), mMwc(t), mVpd(t), mZdc(t), mBbc(t), mEmc(t) {/* noop */}
 
 StTriggerDetectorCollection::~StTriggerDetectorCollection() {/* noop */}
 
