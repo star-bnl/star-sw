@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.21 2001/07/12 10:42:05 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.22 2001/08/20 00:35:17 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.22  2001/08/20 00:35:17  jcs
+// check index (j) before using it
+//
 // Revision 1.21  2001/07/12 10:42:05  jcs
 // reject clusters outside FTPC sensitive volume
 // change to linear interpolation method in padtrans
@@ -1853,8 +1856,8 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
       pradius[padrow]=mDb->sensitiveVolumeOuterRadius();
       pdeflection[padrow]=0;
       e_now = mDb->radiusTimesField() / (0.5*r_last);
-      for(j=v_buf; mDb->magboltzEField(j) < e_now
-	    && j<mDb->numberOfMagboltzBins(); j++);
+      for(j=v_buf; j<mDb->numberOfMagboltzBins()
+	    && mDb->magboltzEField(j) < e_now; j++);
       if(j<1 || j>=mDb->numberOfMagboltzBins())
 	{
 	  gMessMgr->Message("", "E", "OST") << "Error 1: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
@@ -1886,8 +1889,8 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
 	  r_next = r_last - v_now * step_size * mDb->microsecondsPerTimebin();
 	  e_now = mDb->radiusTimesField() / (0.5*(r_last+r_next));
 	  
-	  for(j=v_buf; mDb->magboltzEField(j) < e_now 
-		       && j<mDb->numberOfMagboltzBins(); j++);
+	  for(j=v_buf; j<mDb->numberOfMagboltzBins()
+		       && mDb->magboltzEField(j) < e_now; j++);
 	  
 	  if(j<1 || j>=mDb->numberOfMagboltzBins())
 	    {

@@ -1,6 +1,9 @@
-// $Id: StFtpcChargeStep.cc,v 1.11 2001/07/12 10:30:47 jcs Exp $
+// $Id: StFtpcChargeStep.cc,v 1.12 2001/08/20 00:35:59 jcs Exp $
 //
 // $Log: StFtpcChargeStep.cc,v $
+// Revision 1.12  2001/08/20 00:35:59  jcs
+// check index (j) before using it
+//
 // Revision 1.11  2001/07/12 10:30:47  jcs
 // change computing of average to use bins 50-99 instead of bins 0-49
 //
@@ -356,8 +359,8 @@ int StFtpcChargeStep::calcpadtrans(double *pradius)
 	  r_next = r_last - v_now * step_size * mDb->microsecondsPerTimebin();
 	  e_now = mDb->radiusTimesField() / (0.5*(r_last+r_next));
 	  
-	  for(j=v_buf; mDb->magboltzEField(j) < e_now 
-		       && j<mDb->numberOfMagboltzBins(); j++);
+          for(j=v_buf; j<mDb->numberOfMagboltzBins()
+                       && mDb->magboltzEField(j) < e_now; j++);
 	  
 	  if(j<1 || j>=mDb->numberOfMagboltzBins())
 	    {
