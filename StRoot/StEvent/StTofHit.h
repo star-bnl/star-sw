@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofHit.h,v 2.6 2003/05/21 18:22:46 ullrich Exp $
+ * $Id: StTofHit.h,v 2.7 2003/07/09 20:14:20 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofHit.h,v $
+ * Revision 2.7  2003/07/09 20:14:20  ullrich
+ * New methods added.
+ *
  * Revision 2.6  2003/05/21 18:22:46  ullrich
  * Major Revision of ToF classes (F. Geurts)
  *
@@ -80,17 +83,18 @@ public:
     void setPathLength(float);
     void setBeta(float);
     void setAssociatedTrack(StTrack*);
-    void settofExpectedAsElectron(float);
-    void settofExpectedAsPion(float);
-    void settofExpectedAsKaon(float);
-    void settofExpectedAsProton(float);
-    void setsigmaElectron(float);
-    void setsigmaPion(float);
-    void setsigmaKaon(float);
-    void setsigmaProton(float);
-    void setparticleHypothesis(StParticleDefinition*);
+    void setTofExpectedAsElectron(float);
+    void setTofExpectedAsPion(float);
+    void setTofExpectedAsKaon(float);
+    void setTofExpectedAsProton(float);
+    void setSigmaElectron(float);
+    void setSigmaPion(float);
+    void setSigmaKaon(float);
+    void setSigmaProton(float);
+    void setParticleHypothesis(StParticleDefinition*);
 
  protected:
+    StObject* clone() const;
     Int_t   mTrayIndex;
     Int_t   mModuleIndex;
     Int_t   mCellIndex;

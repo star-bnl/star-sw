@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofHit.cxx,v 2.3 2003/05/21 18:22:46 ullrich Exp $
+ * $Id: StTofHit.cxx,v 2.4 2003/07/09 20:14:20 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofHit.cxx,v $
+ * Revision 2.4  2003/07/09 20:14:20  ullrich
+ * New methods added.
+ *
  * Revision 2.3  2003/05/21 18:22:46  ullrich
  * Major Revision of ToF classes (F. Geurts)
  *
@@ -48,6 +51,8 @@ StTofHit::StTofHit()
 }
 
 StTofHit::~StTofHit() {/* noop */}
+
+StObject* StTofHit::clone() const { return new StTofHit(*this); }
 
 int StTofHit::trayIndex() const { return mTrayIndex; }
 
@@ -106,23 +111,23 @@ void StTofHit::setAssociatedTrack(StTrack* val)
     mAssociatedTrack = val;
 }
 
-void StTofHit::settofExpectedAsElectron(float tofexp) { mTOFExpectedAsElectron = tofexp; }
+void StTofHit::setTofExpectedAsElectron(float tofexp) { mTOFExpectedAsElectron = tofexp; }
 
-void StTofHit::settofExpectedAsPion(float tofexp) { mTOFExpectedAsPion = tofexp; }
+void StTofHit::setTofExpectedAsPion(float tofexp) { mTOFExpectedAsPion = tofexp; }
 
-void StTofHit::settofExpectedAsKaon(float tofexp) { mTOFExpectedAsKaon = tofexp; }
+void StTofHit::setTofExpectedAsKaon(float tofexp) { mTOFExpectedAsKaon = tofexp; }
 
-void StTofHit::settofExpectedAsProton(float tofexp) { mTOFExpectedAsProton = tofexp; }
+void StTofHit::setTofExpectedAsProton(float tofexp) { mTOFExpectedAsProton = tofexp; }
 
-void StTofHit::setsigmaElectron(float sigma) { mSigmaElectron = sigma; }
+void StTofHit::setSigmaElectron(float sigma) { mSigmaElectron = sigma; }
 
-void StTofHit::setsigmaPion(float sigma) { mSigmaPion = sigma; }
+void StTofHit::setSigmaPion(float sigma) { mSigmaPion = sigma; }
 
-void StTofHit::setsigmaKaon(float sigma) { mSigmaKaon = sigma; }
+void StTofHit::setSigmaKaon(float sigma) { mSigmaKaon = sigma; }
 
-void StTofHit::setsigmaProton(float sigma) { mSigmaProton = sigma; }
+void StTofHit::setSigmaProton(float sigma) { mSigmaProton = sigma; }
 
-void StTofHit::setparticleHypothesis(StParticleDefinition* val)
+void StTofHit::setParticleHypothesis(StParticleDefinition* val)
 {
     mParticleHypothesis = val;
 }
