@@ -10,12 +10,15 @@ MYSQL mysql;
 mysql_init(&mysql);
 
 //set timout in seconds for bnl.local domain
+
+#ifndef __sun
 //on sun:
 //Program received signal SIGBUS, Bus error.
 //0xed737d68 in mysql_options ()
 
-//mysql_options(&mysql,MYSQL_OPT_CONNECT_TIMEOUT,"4");
+mysql_options(&mysql,MYSQL_OPT_CONNECT_TIMEOUT,"2");
 
+#endif
 // Try to establish a connection to the MySQL database engine 
 
 const char *database=dbName;
