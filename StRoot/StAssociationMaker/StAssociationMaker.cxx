@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.40 2004/01/24 03:31:09 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.41 2004/02/08 00:08:14 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.41  2004/02/08 00:08:14  calderon
+ * Added method useEstTracks() requested by Helen, for association of estGlobals.
+ *
  * Revision 1.40  2004/01/24 03:31:09  calderon
  * Changed the code to make it backward compatible.
  *
@@ -398,6 +401,7 @@ StAssociationMaker::StAssociationMaker(const char *name, const char *title):StMa
     doPrintMemoryInfo = kFALSE;
     mL3TriggerOn = false;
     mInTrackerOn = false;
+    mEstTracksOn = false;
 }
 
 //_________________________________________________
@@ -626,7 +630,10 @@ Int_t StAssociationMaker::Init()
     gMessMgr->Info() << "Cuts used in association for this run: " << endm;
     gMessMgr->Info() << "\n" << *(StMcParameterDB::instance()) << "\n" << endm;
     if (mInTrackerOn) {
-	gMessMgr->Info() << "Using IT Tracks " << endm;
+	gMessMgr->Info() << "Using IT Tracks in Association" << endm;
+    }
+    if (mEstTracksOn) {
+	gMessMgr->Info() << "Using EST Tracks in Association" << endm;
     }
     return StMaker::Init();
 }
@@ -643,6 +650,11 @@ Int_t StAssociationMaker::Make()
 	gMessMgr->Warning() << "AssociationMaker::Make(): L3 and IT Tracks are both on!" << endm;
 	return kStWarn;
     }
+    if (mEstTracksOn && mInTrackerOn) {
+	gMessMgr->Warning() << "AssociationMaker::Make(): EST and IT Tracks are both on!" << endm;
+	return kStWarn;
+    }
+    
     //
     // Get StEvent
     //
@@ -1153,8 +1165,11 @@ Int_t StAssociationMaker::Make()
 	vector<trackPing, allocator<trackPing> > candidates(20, initializedTrackPing);
 #endif
 	trkNode = rcTrackNodes[trkNodeI]; // For a by-pointer collection we need to dereference once
-	rcTrack = dynamic_cast<StGlobalTrack*>(trkNode->track(global));
-	
+	if (!mEstTracksOn)
+	    rcTrack = dynamic_cast<StGlobalTrack*>(trkNode->track(global));
+	else
+	    rcTrack = dynamic_cast<StGlobalTrack*>(trkNode->track(estGlobal));
+	    
 	if (!rcTrack || !(rcTrack->detectorInfo()->hits().size()))
 	    continue; // If there are no Tpc Hits, skip track.
 	if (mInTrackerOn  && rcTrack->encodedMethod()!=263) continue; //for IT Tracks, skip the old globals
