@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.17 1999/10/16 20:20:19 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.18 1999/10/28 01:57:16 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.18  1999/10/28 01:57:16  fisyak
+// Add ParseString
+//
 // Revision 1.17  1999/10/16 20:20:19  fisyak
 // Allow to have xdf file for gstar option
 //
@@ -224,28 +227,24 @@ void StBFChain::SetFlags(const Char_t *Chain )
   TString tChain(Chain);
   printf ("QAInfo:Requested chain is :\t%s\n",tChain.Data());
   tChain.ToLower(); //printf ("Chain %s\n",tChain.Data());
-  Ssiz_t begin, index, end, end2;
-  begin = index = end = end2 = 0;
-  TRegexp separator("[^ ;,\\t\\s]+");
+  TString *Opt[80];
+  Int_t NParsed = ParseString(tChain,Opt);
   TString Tag, opt, nopt;
-  while ( (begin < tChain.Length()) && (index != kNPOS) ) { // loop over given Chain options 
-    index = tChain.Index(separator,&end,begin);
-    if (index >= 0) Tag = tChain(index,end);
-    begin += end+1;
-    if (index >=0) {
-      Int_t kgo = 0;
-      for (k = kFIRST+1; k<NoChainOptions; k++) {
-	opt = TString(ChainOptions[k]);
-	opt.ToLower();
-	nopt = TString("-");
-	nopt += opt;
-	if       (Tag == "in") Tag = "xin";
-	if       (Tag ==  opt) kgo =  k;
-	else {if (Tag == nopt) kgo = -k;}
-	if (kgo) {SetOption(kgo); break;}
-      }
-      if (!kgo) printf ("Option %s has been not recognized\n", Tag.Data());
+  Int_t i;
+  for (i=0;i<=NParsed;i++){
+    Tag = *Opt[i];
+    Int_t kgo = 0;
+    for (k = kFIRST+1; k<NoChainOptions; k++) {
+      opt = TString(ChainOptions[k]);
+      opt.ToLower();
+      nopt = TString("-");
+      nopt += opt;
+      if       (Tag == "in") Tag = "xin";
+      if       (Tag ==  opt) kgo =  k;
+      else {if (Tag == nopt) kgo = -k;}
+      if (kgo) {SetOption(kgo); break;}
     }
+    if (!kgo) printf ("Option %s has been not recognized\n", Tag.Data());
   }
   // Check flags consistency   
   if (!GetOption(kFZIN) && !GetOption(kGEANT) &&
@@ -281,6 +280,7 @@ Int_t StBFChain::Load()
   if (kUTIL) gSystem->Load("StAnalysisUtilities");
   //gSystem->Load("libmsg");
   gSystem->Load("libtls");
+  gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
   if (GetOption(kFieldOff) || 
@@ -599,15 +599,20 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
     }
   }
   if (Infile) {
+    setFiles= new StFile();
     InFile = new TString(Infile);
-    if (!strstr(InFile->Data(),"*") &&
-	gSystem->AccessPathName(InFile->Data())) {// file does not exist
-      printf (" *** NO FILE: %s, exit!\n", InFile->Data());
-      gSystem->Exit(1); 
+    TString *Files[80];
+    Int_t NParsed = ParseString((const TString )*InFile,Files);
+    Int_t i;
+    for (i=0;i<=NParsed;i++) {
+      if (!strstr(Files[i]->Data(),"*") &&
+	gSystem->AccessPathName(Files[i]->Data())) {// file does not exist
+	printf (" *** NO FILE: %s, exit!\n", Files[i]->Data());
+	gSystem->Exit(1); 
+      }
     }
     if (!GetOption(kFZIN)) {
-      setFiles= new StFile();
-      setFiles->AddFile(InFile->Data());
+      setFiles->AddFile(Files[i]->Data());
     }
   }
   if (GetOption(kGSTAR)) {
@@ -642,7 +647,7 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
   //    gSystem->Exit(1);
 }
 //_____________________________________________________________________
-void StBFChain::SetOption(int k){// set all OFF
+void StBFChain::SetOption(Int_t k){// set all OFF
 
   if (k > 0 && !ChainFlags[k]) {
     //    printf ("SetOption: %s %i",ChainOptions[k],k);
@@ -802,4 +807,19 @@ Int_t StBFChain::AddAB (const Char_t *mkname,const StMaker *maker,const Int_t Op
   if (Opt > 0) list->AddAfter ((StMaker*)maker,mk);
   else         list->AddBefore((StMaker*)maker,mk);
   return kStOk;
+}
+//_____________________________________________________________________
+Int_t StBFChain::ParseString (const TString &tChain, TString *Opt[]) {
+  Int_t nParsed = -1;
+  Ssiz_t begin, index, end, end2;
+  begin = index = end = end2 = 0;
+  TRegexp separator("[^ ;,\\t\\s]+");
+  TString Tag, opt, nopt;
+  while ( (begin < tChain.Length()) && (index != kNPOS) ) { 
+    // loop over given Chain options 
+    index = tChain.Index(separator,&end,begin);
+    if (index >= 0) Opt[++nParsed] = new TString(tChain(index,end));
+    begin += end+1;
+  }
+  return nParsed;
 }
