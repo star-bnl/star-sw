@@ -12,15 +12,15 @@ struct LocalTrackSeedFinder {
 
   /*  type varnam;      Units : Comments */
 
-  double deltaY;     /* search window in the next layer when connecting two points*/
-  double deltaZ;     /* search window in the next layer when connecting two points*/
+  double deltaY;            /* search window in the next layer when connecting two points           */
+  double deltaZ;            /* search window in the next layer when connecting two points           */
   double mExtrapDeltaY;     /* search window in the next layer when extending a conection of points */
   double mExtrapDeltaZ;     /* search window in the next layer when extending a conection of points */
-  int seedLength;     /* minimum number of points to connect*/
-  int maxSkipped;     /* max number of layers one can skip*/
-  int extrapMaxLength;     /* define the Min/Max number of points to extrapolate */
-  int extrapMinLength;     /* define the Min/Max number of points to extrapolate */
-  bool useOrigin;     /* Use the origin to calculate helix*/
+  long   seedLength;        /* minimum number of points to connect                                  */
+  long   maxSkipped;        /* max number of layers one can skip                                    */
+  long   extrapMaxLength;   /* define the Max number of points to extrapolate                       */
+  long   extrapMinLength;   /* define the Min number of points to extrapolate                       */
+  short  useOrigin;         /* Use the origin to calculate helix                                    */
 
 
 };
