@@ -4,7 +4,7 @@
  */
 /********************************************************************
  *
- * $Id: StPhmdCluster.h,v 2.1 2002/12/20 22:33:00 ullrich Exp $
+ * $Id: StPhmdCluster.h,v 2.2 2003/04/22 00:08:13 ullrich Exp $
  *
  * Author: Subhasis Chattopadhyay, Dec 2002
  ********************************************************************
@@ -14,6 +14,9 @@
  ********************************************************************
  *
  * $Log: StPhmdCluster.h,v $
+ * Revision 2.2  2003/04/22 00:08:13  ullrich
+ * Removed //! comments
+ *
  * Revision 2.1  2002/12/20 22:33:00  ullrich
  * Initial Revision.
  *
@@ -58,15 +61,15 @@ public:
     const StPtrVecPhmdHit&  hit() const;    
 
 private:
-    Int_t             mModule;          //! supermodule no
-    Int_t             mNumberOfCells;   //! no. of cells in the cluster
-    Float_t           mEta;             //! cluster eta
-    Float_t           mPhi;             //! cluster phi
-    Float_t           mEnergy;          //! cluster edep
-    Float_t           mSigma;           //! sigma of the cluster
-    Int_t             mPID;             //! cluster PID based on matching
-    Int_t             mEnergyPID;       //! clusterPID based on edep
-    Int_t             mMcPID;           //! Mc Cluster PID
+    Int_t             mModule;          // supermodule no
+    Int_t             mNumberOfCells;   // no. of cells in the cluster
+    Float_t           mEta;             // cluster eta
+    Float_t           mPhi;             // cluster phi
+    Float_t           mEnergy;          // cluster edep
+    Float_t           mSigma;           // sigma of the cluster
+    Int_t             mPID;             // cluster PID based on matching
+    Int_t             mEnergyPID;       // clusterPID based on edep
+    Int_t             mMcPID;           // Mc Cluster PID
     StPtrVecPhmdHit   mHits;
 
     ClassDef(StPhmdCluster,1)

@@ -4,7 +4,7 @@
 */
 /********************************************************************
  *
- * $Id: StPhmdHit.h,v 2.2 2002/12/21 00:32:33 ullrich Exp $
+ * $Id: StPhmdHit.h,v 2.3 2003/04/22 00:08:14 ullrich Exp $
  *
  * Author: Subhasis Chattopadhyay, Dec 2002
  ********************************************************************
@@ -14,6 +14,9 @@
  ********************************************************************
  *
  * $Log: StPhmdHit.h,v $
+ * Revision 2.3  2003/04/22 00:08:14  ullrich
+ * Removed //! comments
+ *
  * Revision 2.2  2002/12/21 00:32:33  ullrich
  * Corrected typo in module().
  *
@@ -33,13 +36,13 @@ public:
     StPhmdHit();                     
     ~StPhmdHit();                     
 
-    int             superModule() const;  //! function for supermodule no.
-    int             module() ;            //! function for module
-    int             subDetector() const;  //! function for subdetector
-    int             row() const;          //! function for row
-    int             column() const;       //! function for col
-    float           energy() const;       //! function for edep
-    int             adc() const;          //! function for adc
+    int             superModule() const;  // function for supermodule no.
+    int             module() ;            // function for module
+    int             subDetector() const;  // function for subdetector
+    int             row() const;          // function for row
+    int             column() const;       // function for col
+    float           energy() const;       // function for edep
+    int             adc() const;          // function for adc
     
     void            setSuperModule(int);
     void            setSubDetector(int);
@@ -49,12 +52,12 @@ public:
     void            setAdc(int);
     
 private:
-    Int_t           mSuperModuleNumber;   //! global supermodule no.
-    Int_t           mSubDetector;         //! detector (PMD/CPV)
-    Int_t           mRow;                 //! row no. in the supermodule 
-    Int_t           mCol;                 //! col no. in the supermodule
-    Float_t         mEnergy;              //! energy deposition
-    Int_t           mAdc;                 //! adc
+    Int_t           mSuperModuleNumber;   // global supermodule no.
+    Int_t           mSubDetector;         // detector (PMD/CPV)
+    Int_t           mRow;                 // row no. in the supermodule 
+    Int_t           mCol;                 // col no. in the supermodule
+    Float_t         mEnergy;              // energy deposition
+    Int_t           mAdc;                 // adc
     ClassDef(StPhmdHit,1)
 };
 
