@@ -1,4 +1,9 @@
-//////////////////////////////////////////////////////////////////////////
+// $Id: StTpcFEEGainCalibMaker.cxx,v 1.4 1999/10/11 08:04:17 fretiere Exp $
+// $Log: StTpcFEEGainCalibMaker.cxx,v $
+// Revision 1.4  1999/10/11 08:04:17  fretiere
+// Fix bugg + add README, LOG and ID
+//
+///////////////////////////////////////////////////////////////////////////
 //                                                                      //
 //                   DEAD CHANNEL FINDER                                //
 // For the time being, the finder look for corrupted pads :
@@ -126,7 +131,7 @@ Int_t StTpcFEEGainCalibMaker::Make(){
 //_____________________________________________________________________________
 void StTpcFEEGainCalibMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTpcFEEGainCalibMaker.cxx,v 1.3 1999/09/24 01:23:27 fisyak Exp $\n");
+  printf("* $Id: StTpcFEEGainCalibMaker.cxx,v 1.4 1999/10/11 08:04:17 fretiere Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

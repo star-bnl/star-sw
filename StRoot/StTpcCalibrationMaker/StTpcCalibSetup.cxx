@@ -1,3 +1,9 @@
+// $Id: StTpcCalibSetup.cxx,v 1.3 1999/10/11 08:04:12 fretiere Exp $
+// $Log: StTpcCalibSetup.cxx,v $
+// Revision 1.3  1999/10/11 08:04:12  fretiere
+// Fix bugg + add README, LOG and ID
+//
+/////////////////////////////////////////////////////////////////////////////
 #include <string.h>
 #include "StTpcCalibSetup.h"
 

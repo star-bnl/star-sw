@@ -1,11 +1,12 @@
+// $Id: StTpcBadChanMaker.h,v 1.2 1999/10/11 08:04:09 fretiere Exp $
+// $Log: StTpcBadChanMaker.h,v $
+// Revision 1.2  1999/10/11 08:04:09  fretiere
+// Fix bugg + add README, LOG and ID
+//
+///////////////////////////////////////////////////////////////////////////////
 #ifndef STAR_StTpcBadChanMaker
 #define STAR_StTpcBadChanMaker
 
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// St_tpt_Maker virtual base class for Maker                            //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif

@@ -1,11 +1,12 @@
+// $Id: StTpcDeadChanMaker.h,v 1.2 1999/10/11 08:04:17 fretiere Exp $
+// $Log: StTpcDeadChanMaker.h,v $
+// Revision 1.2  1999/10/11 08:04:17  fretiere
+// Fix bugg + add README, LOG and ID
+//
+///////////////////////////////////////////////////////////////////////////
 #ifndef STAR_StTpcDeadChanMaker
 #define STAR_StTpcDeadChanMaker
 
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// St_tpt_Maker virtual base class for Maker                            //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif

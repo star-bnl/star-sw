@@ -1,3 +1,9 @@
+// $Id: StTpcCalibSetup.h,v 1.3 1999/10/11 08:04:14 fretiere Exp $
+// $Log: StTpcCalibSetup.h,v $
+// Revision 1.3  1999/10/11 08:04:14  fretiere
+// Fix bugg + add README, LOG and ID
+//
+/////////////////////////////////////////////////////////////////////////////
 // This class is only a container of all the parameters I need.
 // C/C++
 #ifndef STAR_StTpcCalibSetup
