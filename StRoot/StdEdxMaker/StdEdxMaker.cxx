@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.16 2001/07/30 19:40:26 fine Exp $
+// $Id: StdEdxMaker.cxx,v 1.17 2001/08/03 18:45:05 fine Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -438,9 +438,12 @@ Int_t StdEdxMaker::Finish() {
 //_____________________________________________________________________________
 Int_t StdEdxMaker::Make(){ 
 // Get the magnetic field direction to build the helix properly:
-  static St_dst_event_summary *summary = (St_dst_event_summary *)GetDataSet("dst/event_summary");
+  St_dst_event_summary *summary = (St_dst_event_summary *)GetDataSet("dst/event_summary");
   float bField = -1;
-  if (summary) bField = summary->GetTable()->field;
+  if (summary) { 
+      assert(summary->GetTable());
+      bField = summary->GetTable()->field;
+  }
 
   Double_t Scale2keV = 560./335.;
   Double_t Scale70   = 1.2684;//1.2876; //1.2315;
