@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.19 2000/12/08 17:03:38 oldi Exp $
+// $Id: StFlowCutTrack.cxx,v 1.20 2000/12/08 17:27:51 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.20  2000/12/08 17:27:51  oldi
+// New release due to cvs comments in last version.
+//
 // Revision 1.19  2000/12/08 17:03:38  oldi
 // Phi weights for both FTPCs included.
 //
@@ -87,7 +90,6 @@ ClassImp(StFlowCutTrack)
 
 //-----------------------------------------------------------------------
 
-<<<<<<< StFlowCutTrack.cxx
 Int_t   StFlowCutTrack::mFitPtsTpcCuts[2]  = {15, 200};
 Int_t   StFlowCutTrack::mFitPtsFtpcCuts[2] = {5, 11};      // has to be greater than ten!
 Float_t StFlowCutTrack::mFitOverMaxCuts[2] = {0.52, 1.1};  // has to be greater than one, otherwise ... :-[
@@ -99,16 +101,6 @@ Float_t StFlowCutTrack::mPtTpcCuts[2]      = {0.1, 2.};
 Float_t StFlowCutTrack::mPtFtpcCuts[2]     = {0.1, 2.};
 Float_t StFlowCutTrack::mEtaTpcCuts[2]     = {-1.3, 1.3};
 Float_t StFlowCutTrack::mEtaFtpcCuts[4]    = {-4.0, -2.7, 2.7, 4.0};
-=======
-Int_t   StFlowCutTrack::mFitPtsTpcCuts[2]  = {15, 200};
-Int_t   StFlowCutTrack::mFitPtsFtpcCuts[2] = {5, 11};      // has to be greater than ten!
-Float_t StFlowCutTrack::mFitOverMaxCuts[2] = {0.52, 1.1};  // has to be greater than one, otherwise ... :-[
-Float_t StFlowCutTrack::mChiSqCuts[2]      = {0., 0.};
-Float_t StFlowCutTrack::mDcaCuts[2]        = {0., 1.};
-Float_t StFlowCutTrack::mPtCuts[2]         = {0.1, 2.};
-Float_t StFlowCutTrack::mEtaTpcCuts[2]     = {-1.3, 1.3};
-Float_t StFlowCutTrack::mEtaFtpcCuts[2]    = {-4.5, 4.5};
->>>>>>> 1.18
 
 UInt_t  StFlowCutTrack::mTrackN            = 0;     
 UInt_t  StFlowCutTrack::mTpcTrackN         = 0;     
@@ -127,7 +119,6 @@ UInt_t  StFlowCutTrack::mEtaSymNegFtpcN    = 0;
 UInt_t  StFlowCutTrack::mFitPtsTpcCutN     = 0;
 UInt_t  StFlowCutTrack::mFitPtsFtpcCutN    = 0;
 UInt_t  StFlowCutTrack::mFitOverMaxCutN    = 0;
-<<<<<<< StFlowCutTrack.cxx
 UInt_t  StFlowCutTrack::mFitOverMaxTpcCutN = 0;
 UInt_t  StFlowCutTrack::mFitOverMaxFtpcCutN= 0;
 UInt_t  StFlowCutTrack::mChiSqTpcCutN      = 0;
@@ -138,13 +129,6 @@ UInt_t  StFlowCutTrack::mPtTpcCutN         = 0;
 UInt_t  StFlowCutTrack::mPtFtpcCutN        = 0;
 UInt_t  StFlowCutTrack::mEtaTpcCutN        = 0;
 UInt_t  StFlowCutTrack::mEtaFtpcCutN       = 0;
-=======
-UInt_t  StFlowCutTrack::mChiSqCutN         = 0;
-UInt_t  StFlowCutTrack::mPtCutN            = 0;
-UInt_t  StFlowCutTrack::mEtaTpcCutN        = 0;
-UInt_t  StFlowCutTrack::mEtaFtpcCutN       = 0;
-UInt_t  StFlowCutTrack::mDcaCutN           = 0;
->>>>>>> 1.18
 
 //-----------------------------------------------------------------------
 
@@ -178,7 +162,6 @@ Int_t StFlowCutTrack::DetId(Float_t eta) {
 Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
   // Returns kTRUE if the StEvent track survives all the cuts
 
-<<<<<<< StFlowCutTrack.cxx
   StThreeVectorD p = pTrack->geometry()->momentum();
 
   float eta = p.pseudoRapidity();
@@ -191,13 +174,6 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
 
   if (DetId(eta) == kTpcId) {
       mTpcTrackN++;
-=======
-  StThreeVectorD p = pTrack->geometry()->momentum();
-  float eta = p.pseudoRapidity();
-
-  if (DetId(eta) == kTpcId) {
-      mTpcTrackN++;
->>>>>>> 1.18
   }
 
   else if (DetId(eta) == kFtpcEastId) {
@@ -205,7 +181,6 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
       mFtpcEastTrackN++;
   }
 
-<<<<<<< StFlowCutTrack.cxx
   else if (DetId(eta) == kFtpcWestId) {
       mFtpcTrackN++;
       mFtpcWestTrackN++;
@@ -272,26 +247,10 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
     }
     
     mGoodFtpcTrackN++;
-=======
-  else if (DetId(eta) == kFtpcWestId) {
-      mFtpcTrackN++;
-      mFtpcWestTrackN++;
-  }
-
-  mTrackN++;
-  
-  // ChiSq
-  float chiSq = (float)(pTrack->fitTraits().chi2());
-  if (mChiSqCuts[1] > mChiSqCuts[0] && 
-      (chiSq < mChiSqCuts[0] || chiSq >= mChiSqCuts[1])) {
-    mChiSqCutN++;
-    return kFALSE;
->>>>>>> 1.18
   }
 
   else { // (DetId(eta) == kTpcId) Tpc track or otherwise!!!
 
-<<<<<<< StFlowCutTrack.cxx
     // dca
     if (mDcaTpcCuts[1] > mDcaTpcCuts[0] && 
 	(dca < mDcaTpcCuts[0] || dca >= mDcaTpcCuts[1])) {
@@ -347,102 +306,8 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
     }
     
     mGoodTpcTrackN++;
-=======
-  // pt
-  float pt = p.perp();
-  if (mPtCuts[1] > mPtCuts[0] && 
-      (pt < mPtCuts[0] || pt >= mPtCuts[1])) {
-    mPtCutN++;
-    return kFALSE;
   }
 
-  if (DetId(eta) == kTpcId) { // Tpc track
-
-      // Fit Points
-      Int_t nFitPoints = pTrack->fitTraits().numberOfFitPoints();
-      if (mFitPtsTpcCuts[1] > mFitPtsTpcCuts[0] && 
-	  (nFitPoints < mFitPtsTpcCuts[0] || nFitPoints >= mFitPtsTpcCuts[1])) {
-	  mFitPtsTpcCutN++;
-	  return kFALSE;
-      }
-
-      // Fit points / max points
-      Int_t nMaxPoints = pTrack->numberOfPossiblePoints();
-      float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
-      if (mFitOverMaxCuts[1] > mFitOverMaxCuts[0] && 
-	  (fitOverMax < mFitOverMaxCuts[0] || fitOverMax >= mFitOverMaxCuts[1])) {
-	  mFitOverMaxCutN++;
-	  return kFALSE;
-      }
-
-      // eta
-      if (mEtaTpcCuts[1] > mEtaTpcCuts[0] && 
-	  (eta < mEtaTpcCuts[0] || eta >= mEtaTpcCuts[1])) {
-	  mEtaTpcCutN++;
-	  return kFALSE;
-      }
-
-      // Increment counters for Eta symmetry cut
-      if (eta > 0.) { 
-	  mEtaSymPosTpcN++;
-	  mEtaSymPosN++;
-      } 
-      
-      else { 
-	  mEtaSymNegTpcN++; 
-	  mEtaSymNegN++; 
-      }
-      
-      mGoodTpcTrackN++;
-  }
-
-  else if (DetId(eta) == kFtpcEastId || DetId(eta) == kFtpcWestId) { // Ftpc track
-      
-      // Fit Points
-      Int_t nFitPoints = pTrack->fitTraits().numberOfFitPoints();
-      if (mFitPtsFtpcCuts[1] > mFitPtsFtpcCuts[0] && 
-	  (nFitPoints < mFitPtsFtpcCuts[0] || nFitPoints >= mFitPtsFtpcCuts[1])) {
-	  mFitPtsFtpcCutN++;
-	  return kFALSE;
-      }
-
-      // Fit points / max points
-      Int_t nMaxPoints = pTrack->numberOfPossiblePoints();
-      float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
-      if (mFitOverMaxCuts[1] > mFitOverMaxCuts[0] && 
-	  (fitOverMax < mFitOverMaxCuts[0] || fitOverMax >= mFitOverMaxCuts[1])) {
-	  mFitOverMaxCutN++;
-	  return kFALSE;
-      }
-
-      // eta
-      if (mEtaFtpcCuts[1] > mEtaFtpcCuts[0] && 
-	  (eta < mEtaFtpcCuts[0] || eta >= mEtaFtpcCuts[1])) {
-	  mEtaFtpcCutN++;
-	  return kFALSE;
-      }
-
-      // Increment counters for Eta symmetry cut
-      if (eta > 0.) {
-	  mEtaSymPosFtpcN++;
-	  mEtaSymPosN++;
-      } 
-
-      else {
-	  mEtaSymNegFtpcN++; 
-	  mEtaSymNegN++; 
-      }
-
-      mGoodFtpcTrackN++;
->>>>>>> 1.18
-  }
-<<<<<<< StFlowCutTrack.cxx
-  
-=======
-
-  else return kFALSE;
-
->>>>>>> 1.18
   mGoodTrackN++;
   return kTRUE;
 }
@@ -452,7 +317,6 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
 Int_t StFlowCutTrack::CheckTrack(StGlobalTrack* gTrack) {
   // Returns kTRUE if the StEvent track survives all the cuts
 
-<<<<<<< StFlowCutTrack.cxx
   StThreeVectorD g = gTrack->geometry()->momentum();
 
   float eta = g.pseudoRapidity();
@@ -465,13 +329,6 @@ Int_t StFlowCutTrack::CheckTrack(StGlobalTrack* gTrack) {
 
   if (DetId(eta) == kTpcId) {
       mTpcTrackN++;
-=======
-  StThreeVectorD g = gTrack->geometry()->momentum();
-  float eta = g.pseudoRapidity();
-
-  if (DetId(eta) == kTpcId) {
-      mTpcTrackN++;
->>>>>>> 1.18
   }
 
   else if (DetId(eta) == kFtpcEastId) {
@@ -479,7 +336,6 @@ Int_t StFlowCutTrack::CheckTrack(StGlobalTrack* gTrack) {
       mFtpcEastTrackN++;
   }
 
-<<<<<<< StFlowCutTrack.cxx
   else if (DetId(eta) == kFtpcWestId) {
       mFtpcTrackN++;
       mFtpcWestTrackN++;
@@ -509,22 +365,6 @@ Int_t StFlowCutTrack::CheckTrack(StGlobalTrack* gTrack) {
       mChiSqFtpcCutN++;
       return kFALSE;
     }
-=======
-  else if (DetId(eta) == kFtpcWestId) {
-      mFtpcTrackN++;
-      mFtpcWestTrackN++;
-  }
-
-  mTrackN++;
-    
-  // ChiSq
-  float chiSq = (float)(gTrack->fitTraits().chi2());
-  if (mChiSqCuts[1] > mChiSqCuts[0] && 
-      (chiSq < mChiSqCuts[0] || chiSq >= mChiSqCuts[1])) {
-    mChiSqCutN++;
-    return kFALSE;
-  }
->>>>>>> 1.18
 
     // Fit Points
     if (mFitPtsFtpcCuts[1] > mFitPtsFtpcCuts[0] && 
@@ -541,7 +381,6 @@ Int_t StFlowCutTrack::CheckTrack(StGlobalTrack* gTrack) {
       return kFALSE;
     }
 
-<<<<<<< StFlowCutTrack.cxx
     // eta
     if ((eta < 0 && mEtaFtpcCuts[1] > mEtaFtpcCuts[0] &&
 	 (eta < mEtaFtpcCuts[0] || eta >= mEtaFtpcCuts[1])) ||
@@ -623,97 +462,6 @@ Int_t StFlowCutTrack::CheckTrack(StGlobalTrack* gTrack) {
       
     mGoodTpcTrackN++;
   }
-=======
-  // pt
-  float pt = g.perp();
-  if (mPtCuts[1] > mPtCuts[0] && 
-      (pt < mPtCuts[0] || pt >= mPtCuts[1])) {
-    mPtCutN++;
-    return kFALSE;
-  }
-
-  if (DetId(eta) == kTpcId) { // Tpc tracks
-      
-      // Fit Points
-      Int_t nFitPoints = gTrack->fitTraits().numberOfFitPoints();
-      if (mFitPtsTpcCuts[1] > mFitPtsTpcCuts[0] && 
-	  (nFitPoints < mFitPtsTpcCuts[0] || nFitPoints >= mFitPtsTpcCuts[1])) {
-	  mFitPtsTpcCutN++;
-	  return kFALSE;
-      }
-      
-      // Fit points / max points
-      Int_t nMaxPoints = gTrack->numberOfPossiblePoints();
-      float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
-      if (mFitOverMaxCuts[1] > mFitOverMaxCuts[0] && 
-	  (fitOverMax < mFitOverMaxCuts[0] || fitOverMax >= mFitOverMaxCuts[1])) {
-	  mFitOverMaxCutN++;
-	  return kFALSE;
-      }
-      
-      // eta
-      if (mEtaTpcCuts[1] > mEtaTpcCuts[0] && 
-	  (eta < mEtaTpcCuts[0] || eta >= mEtaTpcCuts[1])) {
-	  mEtaTpcCutN++;
-	  return kFALSE;
-      }
-      
-      // Increment counters for Eta symmetry cut
-      if (eta > 0.) {
-	  mEtaSymPosTpcN++;
-	  mEtaSymPosN++;
-      } 
-
-      else {
-	  mEtaSymNegFtpcN++; 
-	  mEtaSymNegN++; 
-      }
-      
-      mGoodTpcTrackN++;
-  }
-
-  else if (DetId(eta) == kFtpcEastId || DetId(eta) == kFtpcWestId) { // Ftpc track
-
-      // Fit Points
-      Int_t nFitPoints = gTrack->fitTraits().numberOfFitPoints();
-      if (mFitPtsFtpcCuts[1] > mFitPtsFtpcCuts[0] && 
-	  (nFitPoints < mFitPtsFtpcCuts[0] || nFitPoints >= mFitPtsFtpcCuts[1])) {
-	  mFitPtsFtpcCutN++;
-	  return kFALSE;
-      }
-      
-      // Fit points / max points
-      Int_t nMaxPoints = gTrack->numberOfPossiblePoints();
-      float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
-      if (mFitOverMaxCuts[1] > mFitOverMaxCuts[0] && 
-	  (fitOverMax < mFitOverMaxCuts[0] || fitOverMax >= mFitOverMaxCuts[1])) {
-  	  mFitOverMaxCutN++;
-	  return kFALSE;
-      }
-
-      // eta
-      if (mEtaFtpcCuts[1] > mEtaFtpcCuts[0] && 
-	  (eta < mEtaFtpcCuts[0] || eta >= mEtaFtpcCuts[1])) {
-	  mEtaFtpcCutN++;
-	  return kFALSE;
-      }
-      
-      // Increment counters for Eta symmetry cut
-      if (eta > 0.) {
-	  mEtaSymPosFtpcN++;
-	  mEtaSymPosN++;
-      } 
-     
-      else {
-	  mEtaSymNegFtpcN++;
-	  mEtaSymNegN++;
-      }
-      
-      mGoodFtpcTrackN++;
-  }  
-
-  else return kFALSE;
->>>>>>> 1.18
 
   mGoodTrackN++;
   return kTRUE;
@@ -724,7 +472,6 @@ Int_t StFlowCutTrack::CheckTrack(StGlobalTrack* gTrack) {
 Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
   // Returns kTRUE if the picotrack survives all the cuts
 
-<<<<<<< StFlowCutTrack.cxx
   float eta = pPicoTrack->Eta();
   float dca = pPicoTrack->Dca();
   float pt = pPicoTrack->Pt();
@@ -735,12 +482,6 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
 
   if (DetId(eta) == kTpcId) {
       mTpcTrackN++;
-=======
-  float eta = pPicoTrack->Eta();
-
-  if (DetId(eta) == kTpcId) {
-      mTpcTrackN++;
->>>>>>> 1.18
   }
 
   else if (DetId(eta) == kFtpcEastId) {
@@ -753,7 +494,6 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
       mFtpcWestTrackN++;
   }
 
-<<<<<<< StFlowCutTrack.cxx
   mTrackN++;
       
   if (DetId(eta) == kFtpcEastId || DetId(eta) == kFtpcWestId) { // Ftpc track
@@ -815,16 +555,6 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
     }
       
     mGoodFtpcTrackN++;
-=======
-  mTrackN++;
-      
-  // ChiSq
-  float chiSq = pPicoTrack->Chi2();
-  if (mChiSqCuts[1] > mChiSqCuts[0] && 
-      (chiSq < mChiSqCuts[0] || chiSq >= mChiSqCuts[1])) {
-    mChiSqCutN++;
-    return kFALSE;
->>>>>>> 1.18
   }
   
   else { // (DetId(eta) == kTpcId)   Tpc track or otherwise!!!
@@ -850,7 +580,6 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
       return kFALSE;
     }
 
-<<<<<<< StFlowCutTrack.cxx
     // Fit Points
     if (mFitPtsTpcCuts[1] > mFitPtsTpcCuts[0] && 
 	(nFitPoints < mFitPtsTpcCuts[0] || nFitPoints >= mFitPtsTpcCuts[1])) {
@@ -885,101 +614,8 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
     }
       
     mGoodTpcTrackN++;
-=======
-  // pt
-  float pt = pPicoTrack->Pt();
-  if (mPtCuts[1] > mPtCuts[0] && 
-      (pt < mPtCuts[0] || pt >= mPtCuts[1])) {
-    mPtCutN++;
-    return kFALSE;
   }
 
-  if (DetId(eta) == kTpcId) { // Tpc track
-      
-      // Fit Points
-      Int_t nFitPoints = pPicoTrack->FitPts();
-      if (mFitPtsTpcCuts[1] > mFitPtsTpcCuts[0] && 
-	  (nFitPoints < mFitPtsTpcCuts[0] || nFitPoints >= mFitPtsTpcCuts[1])) {
-	  mFitPtsTpcCutN++;
-	  return kFALSE;
-      }
-      
-      // Fit points / max points
-      Int_t nMaxPoints = pPicoTrack->MaxPts();
-      float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
-      if (mFitOverMaxCuts[1] > mFitOverMaxCuts[0] && 
-	  (fitOverMax < mFitOverMaxCuts[0] || fitOverMax >= mFitOverMaxCuts[1])) {
-	  mFitOverMaxCutN++;
-	  return kFALSE;
-      }
-      
-      // eta
-      if (mEtaTpcCuts[1] > mEtaTpcCuts[0] && 
-	  (eta < mEtaTpcCuts[0] || eta >= mEtaTpcCuts[1])) {
-	  mEtaTpcCutN++;
-	  return kFALSE;
-      }
-      
-      // Increment counters for Eta symmetry cut
-      if (eta > 0.) { 
-	  mEtaSymPosTpcN++;
-	  mEtaSymPosN++;
-      } 
-      
-      else { 
-	  mEtaSymNegTpcN++;
-	  mEtaSymNegN++;
-      }
-      
-      mGoodTpcTrackN++;
-  }
-
-  else if (DetId(eta) == kFtpcEastId || DetId(eta) == kFtpcWestId) { // Ftpc track
-      
-      // Fit Points
-      Int_t nFitPoints = pPicoTrack->FitPts();
-      if (mFitPtsFtpcCuts[1] > mFitPtsFtpcCuts[0] && 
-	  (nFitPoints < mFitPtsFtpcCuts[0] || nFitPoints >= mFitPtsFtpcCuts[1])) {
-	  mFitPtsFtpcCutN++;
-	  return kFALSE;
-      }
-      
-      // Fit points / max points
-      Int_t nMaxPoints = pPicoTrack->MaxPts();
-      float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
-      if (mFitOverMaxCuts[1] > mFitOverMaxCuts[0] && 
-	  (fitOverMax < mFitOverMaxCuts[0] || fitOverMax >= mFitOverMaxCuts[1])) {
-	  mFitOverMaxCutN++;
-	  return kFALSE;
-      }
-      
-      // eta
-      if (mEtaFtpcCuts[1] > mEtaFtpcCuts[0] && 
-	  (eta < mEtaFtpcCuts[0] || eta >= mEtaFtpcCuts[1])) {
-	  mEtaFtpcCutN++;
-	  return kFALSE;
-      }
-      
-      // Increment counters for Eta symmetry cut
-      if (eta > 0.) { 
-	  mEtaSymPosFtpcN++;
-	  mEtaSymPosN++;
-      } 
-      
-      else { 
-	  mEtaSymNegFtpcN++;
-	  mEtaSymNegN++;
-      }
-      
-      mGoodFtpcTrackN++;
->>>>>>> 1.18
-  }
-
-<<<<<<< StFlowCutTrack.cxx
-=======
-  else return kFALSE;
-
->>>>>>> 1.18
   mGoodTrackN++;
   return kTRUE;
 }
@@ -992,7 +628,6 @@ void StFlowCutTrack::PrintCutList() {
 
   cout << "#######################################################" << endl;
   cout << "# Track Cut List:" << endl;
-<<<<<<< StFlowCutTrack.cxx
   cout << "#   FitPts (Tpc) cuts= " << mFitPtsTpcCuts[0] << ", " << mFitPtsTpcCuts[1] 
        << " :\t " << setprecision(3) << (float)mFitPtsTpcCutN/(float)mTrackN/perCent 
        << "%\t (" << setprecision(3) << (float)mFitPtsTpcCutN/(float)mTpcTrackN/perCent << "% Tpc) cut" << endl;
@@ -1033,39 +668,6 @@ void StFlowCutTrack::PrintCutList() {
   cout << "# Good Ftpc Tracks =\t " << (float)mGoodFtpcTrackN/(float)mFtpcTrackN/perCent
        << "%" << endl;
   cout << "# Good Tracks =\t\t " << (float)mGoodTrackN/(float)mTrackN/perCent
-=======
-  cout << "#   FitPts (Tpc) cuts= " << mFitPtsTpcCuts[0] << ", " << mFitPtsTpcCuts[1] 
-       << " : " << setprecision(3) << (float)mFitPtsTpcCutN/(float)mTrackN/perCent 
-       << "% (" << setprecision(3) << (float)mFitPtsTpcCutN/(float)mTpcTrackN/perCent << "% Tpc) cut" << endl;
-  cout << "#   FitPts (Ftpc) cuts= " << mFitPtsFtpcCuts[0] << ", " << mFitPtsFtpcCuts[1] 
-       << " :\t " << setprecision(3) << (float)mFitPtsFtpcCutN/(float)mTrackN/perCent 
-       << "% (" << setprecision(3) << (float)mFitPtsFtpcCutN/(float)mFtpcTrackN/perCent << "% Ftpc) cut" << endl;
-  cout << "#   FitOverMax cuts= " << mFitOverMaxCuts[0] << ", " 
-       << mFitOverMaxCuts[1] << " : " << setprecision(3)
-       << (float)mFitOverMaxCutN/(float)mTrackN/perCent << "% cut" << endl;
-  cout << "#   ChiSq cuts= " << mChiSqCuts[0] << ", " 
-       << mChiSqCuts[1] << " :\t\t " << setprecision(3)
-       << (float)mChiSqCutN/(float)mTrackN/perCent << "% cut" << endl;
-  cout << "#   Dca cuts= " << mDcaCuts[0] << ", " 
-       << mDcaCuts[1] << " :\t\t " << setprecision(3)
-       << (float)mDcaCutN/(float)mTrackN/perCent << "% cut" << endl;
-  cout << "#   Pt cuts= " << mPtCuts[0] << ", " 
-       << mPtCuts[1] << " :\t\t " << setprecision(3)
-       << (float)mPtCutN/(float)mTrackN/perCent << "% cut" << endl;
-  cout << "#   Eta (Tpc) cuts= " << mEtaTpcCuts[0] << ", " 
-       << mEtaTpcCuts[1] << " :\t " << setprecision(3)
-       << (float)mEtaTpcCutN/(float)mTrackN/perCent << "% (" 
-       << setprecision(3) << (float)mEtaTpcCutN/(float)mTpcTrackN/perCent << "% Tpc) cut" << endl;
-  cout << "#   Eta (Ftpc) cuts= " << mEtaFtpcCuts[0] << ", " 
-       << mEtaFtpcCuts[1] << " : " << setprecision(3)
-       << (float)mEtaFtpcCutN/(float)mTrackN/perCent << "% (" 
-       << setprecision(3) << (float)mEtaFtpcCutN/(float)mFtpcTrackN/perCent << "% Ftpc) cut" << endl;
-  cout << "# Good Tpc Tracks = " << (float)mGoodTpcTrackN/(float)mTpcTrackN/perCent
-       << "%" << endl;
-  cout << "# Good Ftpc Tracks = " << (float)mGoodFtpcTrackN/(float)mFtpcTrackN/perCent
-       << "%" << endl;
-  cout << "# Good Tracks = " << (float)mGoodTrackN/(float)mTrackN/perCent
->>>>>>> 1.18
        << "%" << endl;
   cout << "#######################################################" << endl;
 
