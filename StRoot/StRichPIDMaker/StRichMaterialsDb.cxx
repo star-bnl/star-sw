@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichMaterialsDb.cxx,v 2.4 2000/12/08 04:58:20 lasiuk Exp $
+ * $Id: StRichMaterialsDb.cxx,v 2.5 2001/01/30 16:38:43 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMaterialsDb.cxx,v $
+ *  Revision 2.5  2001/01/30 16:38:43  horsley
+ *  updated PID maker for next production run, included new class for TTree
+ *
  *  Revision 2.4  2000/12/08 04:58:20  lasiuk
  *  allow for index of refraction for liquid less than 170nm
  *
@@ -224,7 +227,7 @@ double StRichMaterialsDb::indexOfRefractionOfC6F14At(double wavelength) {
   // this is a patch until we get a parameterization
   // of the index of refraction to 165 nm
   //
-  if (wavelength < 170) return 1.295;
+  if (wavelength < 170) return 1.305;
   
   double index = (mLongestWavelength/nanometer - wavelength)/mConversion; 
   if(boundsCheck(index)) {

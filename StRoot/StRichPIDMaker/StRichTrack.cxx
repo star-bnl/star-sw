@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.16 2000/12/14 19:20:49 horsley Exp $
+ * $Id: StRichTrack.cxx,v 2.17 2001/01/30 16:38:44 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
+ *  Revision 2.17  2001/01/30 16:38:44  horsley
+ *  updated PID maker for next production run, included new class for TTree
+ *
  *  Revision 2.16  2000/12/14 19:20:49  horsley
  *  added event run id to dist ntuple,
  *
@@ -217,14 +220,8 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
     double mPathLengthAtRadiator  = mHelix.pathLength(rr,richNormal);
     double mPathLengthAtPadPlane  = mHelix.pathLength(rp,richNormal);
     
-    StThreeVectorD tpcMom;
-    //    if (mPathLengthAtRadiator<10e10 && mPathLengthAtRadiator>0) {
-	tpcMom = mHelix.momentumAt(mPathLengthAtRadiator,magField*kilogauss);	
-	//}
-
-    StThreeVector<double> tpcMomentum(tpcMom.x(),
-				      tpcMom.y(),
-				      tpcMom.z());    
+    StThreeVectorD tpcMom = mHelix.momentumAt(mPathLengthAtRadiator,magField*kilogauss);	
+    StThreeVector<double> tpcMomentum(tpcMom.x(),tpcMom.y(),tpcMom.z());    
     
     // do the momentum vector rotation here
     StThreeVector<double> richLocalMomentum;
@@ -254,28 +251,27 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
     cout << "\tMC flag set.  No xCorrection (px/pz) implemented" << endl;
     xCorrection = 0.;
 #endif
-    richTransformedImpactPoint.position().setX(richTransformedImpactPoint.position().x()-xCorrection);
+    richTransformedImpactPoint.position().setX(richTransformedImpactPoint.position().x()
+					       - xCorrection);
 
     StThreeVectorD ppMomentum;
     
     // pad plane intersection (projected MIP)
     StGlobalCoordinate    globalImpactPointAtAnodeWirePlane(-999,-999,-999);
     StRichLocalCoordinate localImpactPointAtAnodeWirePlane(-999,-999,-999);  
+    
+    globalImpactPointAtAnodeWirePlane.position().setX(mHelix.x(mPathLengthAtPadPlane));
+    globalImpactPointAtAnodeWirePlane.position().setY(mHelix.y(mPathLengthAtPadPlane));
+    globalImpactPointAtAnodeWirePlane.position().setZ(mHelix.z(mPathLengthAtPadPlane));	
+    
+    (*coordinateTransformation)(globalImpactPointAtAnodeWirePlane,
+				localImpactPointAtAnodeWirePlane);
+    
+    localImpactPointAtAnodeWirePlane.position()
+      .setX(localImpactPointAtAnodeWirePlane.position().x()-xCorrection);
+    
+    ppMomentum =  mHelix.momentumAt(mPathLengthAtPadPlane,magField*kilogauss);
 
-    //  if (mPathLengthAtRadiator < 10e10  && mPathLengthAtRadiator>0) {
-
-	globalImpactPointAtAnodeWirePlane.position().setX(mHelix.x(mPathLengthAtPadPlane));
-	globalImpactPointAtAnodeWirePlane.position().setY(mHelix.y(mPathLengthAtPadPlane));
-	globalImpactPointAtAnodeWirePlane.position().setZ(mHelix.z(mPathLengthAtPadPlane));	
-
-	(*coordinateTransformation)(globalImpactPointAtAnodeWirePlane,
-				    localImpactPointAtAnodeWirePlane);
-
-	localImpactPointAtAnodeWirePlane.position()
-	    .setX(localImpactPointAtAnodeWirePlane.position().x()-xCorrection);
-
-	ppMomentum =  mHelix.momentumAt(mPathLengthAtPadPlane,magField*kilogauss);
-	//}
 
     StThreeVector<double> padPlaneMomentum(ppMomentum.x(),ppMomentum.y(),ppMomentum.z());
     momentumTransformation->localMomentum(padPlaneMomentum,mMomentumAtPadPlane);
@@ -346,12 +342,10 @@ StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)
     float mPathLengthAtCTB       = mHelix.pathLength(mCTBGlobal,mRichNormal);
     
     StThreeVectorF tpcMom;
-    if (mPathLengthAtRadiator<10e10  && mPathLengthAtRadiator>0) {
-      tpcMom = mHelix.momentumAt(mPathLengthAtRadiator,mMagneticField*kilogauss); 
-    }
-    
+    tpcMom = mHelix.momentumAt(mPathLengthAtRadiator,mMagneticField*kilogauss); 
     StThreeVector<double> tpcMomentum(tpcMom.x(), tpcMom.y(), tpcMom.z());
     
+
     // do the momentum vector rotation here
     StThreeVector<double> tempRichLocalMomentum(0,0,0);
     momentumTransformation->localMomentum(tpcMomentum,tempRichLocalMomentum);
@@ -362,19 +356,18 @@ StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)
 
     // impact point in CTB
     StThreeVectorF localCTBImpactPoint(-999,-999,-999);
-    if (mPathLengthAtCTB>0 && mPathLengthAtCTB<10e10) {
-      StGlobalCoordinate CTBGlobal(mHelix.x(mPathLengthAtCTB),
-				   mHelix.y(mPathLengthAtCTB),
-				   mHelix.z(mPathLengthAtCTB));
-
-      StRichLocalCoordinate richTransformedImpactPoint(-999,-999,-999);
-      (*coordinateTransformation)(CTBGlobal,richTransformedImpactPoint);
-
-      localCTBImpactPoint.setX(richTransformedImpactPoint.position().x());
-      localCTBImpactPoint.setY(richTransformedImpactPoint.position().y());
-      localCTBImpactPoint.setZ(richTransformedImpactPoint.position().z());
-    }
-
+    StGlobalCoordinate CTBGlobal(mHelix.x(mPathLengthAtCTB),
+				 mHelix.y(mPathLengthAtCTB),
+				 mHelix.z(mPathLengthAtCTB));
+    
+    StRichLocalCoordinate richTransformedCTBPoint(-999,-999,-999);
+    (*coordinateTransformation)(CTBGlobal,richTransformedCTBPoint);
+    
+    localCTBImpactPoint.setX(richTransformedCTBPoint.position().x());
+    localCTBImpactPoint.setY(richTransformedCTBPoint.position().y());
+    localCTBImpactPoint.setZ(richTransformedCTBPoint.position().z());
+    
+    
     // impact point on radiator
     StGlobalCoordinate globalImpactPoint(mHelix.x(mPathLengthAtRadiator),
 					 mHelix.y(mPathLengthAtRadiator),
@@ -391,16 +384,15 @@ StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)
     StGlobalCoordinate    globalImpactPointAtAnodeWirePlane(-999,-999,-999);
     StRichLocalCoordinate localImpactPointAtAnodeWirePlane(-999,-999,-999);  
     
-    if (mPathLengthAtPadPlane < 10e10  && mPathLengthAtPadPlane>0) {
-      globalImpactPointAtAnodeWirePlane.position().setX(mHelix.x(mPathLengthAtPadPlane));
-      globalImpactPointAtAnodeWirePlane.position().setY(mHelix.y(mPathLengthAtPadPlane));
-      globalImpactPointAtAnodeWirePlane.position().setZ(mHelix.z(mPathLengthAtPadPlane));
-      
-      (*coordinateTransformation)(globalImpactPointAtAnodeWirePlane,
-				  localImpactPointAtAnodeWirePlane);
-      
-      ppMomentum =  mHelix.momentumAt(mPathLengthAtPadPlane,mMagneticField*kilogauss);
-    }
+    globalImpactPointAtAnodeWirePlane.position().setX(mHelix.x(mPathLengthAtPadPlane));
+    globalImpactPointAtAnodeWirePlane.position().setY(mHelix.y(mPathLengthAtPadPlane));
+    globalImpactPointAtAnodeWirePlane.position().setZ(mHelix.z(mPathLengthAtPadPlane));
+    
+    (*coordinateTransformation)(globalImpactPointAtAnodeWirePlane,
+				localImpactPointAtAnodeWirePlane);
+    
+    ppMomentum =  mHelix.momentumAt(mPathLengthAtPadPlane,mMagneticField*kilogauss);
+    
     
     StThreeVector<double> padPlaneMomentum(ppMomentum.x(),ppMomentum.y(),ppMomentum.z());
     StThreeVector<double> tempMomentum;
@@ -443,8 +435,6 @@ StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)
     cout << "\tMC flag set.  No xCorrection (px/pz) implemented" << endl;
     xCorrection = 0.;
 #endif
-
-    //double xCorrection = 0.;
     
     StThreeVectorF tempHit(richTransformedImpactPoint.position().x() - xCorrection,
 			   richTransformedImpactPoint.position().y(),
@@ -481,6 +471,8 @@ void StRichTrack::init()
     mPionMass = StPionMinus::instance()->mass();
     mKaonMass = StKaonMinus::instance()->mass();
     mProtonMass = StAntiProton::instance()->mass();
+
+    mRefit = 0;
 }
 
 bool StRichTrack::setEnergyLoss() {
@@ -493,7 +485,9 @@ bool StRichTrack::setEnergyLoss() {
     // at normal incidence  ~ 20 MeV
     //
 
-    double protonEnergyLoss = 20.0*MeV;
+  //double protonEnergyLoss = 20.0*MeV;
+
+  double protonEnergyLoss = 0.0*MeV;
 
     //
     // constant energy loss temporary, in future adjust for angle, mass, etc...
@@ -518,129 +512,7 @@ double StRichTrack::getEnergyLoss() const {
   return mEnergyLoss;
 }
 
-int StRichTrack::getOrigConstHits(int particleType) const {
 
-    switch(particleType) {
-    case -211:
-	return mOrigPiConstHits;
-    case -321:
-	return mOrigKConstHits;
-    case -2212:
-	return mOrigPConstHits;
-    default:
-	cout << "StRichTrack::getOrigConstHits()\n";
-	cout << "\tWARNING!!!!!\n";
-	cout << "\tparticle type is not recogized (" << particleType << ")" << endl;
-	return -990;
-    }
-}
-
-int StRichTrack::getNewConstHits(int particleType) const {
-
-    switch(particleType) {
-    case -211:
-	return mNewPiConstHits;
-    case -321:
-	return mNewKConstHits;
-    case -2212:
-	return mNewPConstHits;
-    default:
-	cout << "StRichTrack::getNewConstHits()\n";
-	cout << "\tWARNING!!!!!\n";
-	cout << "\tparticle type is not recogized (" << particleType << ")" << endl;
-	return -990;
-    }
-}
-
-int StRichTrack::getOrigTotHits(int particleType) const {
-
-    switch(particleType) {
-    case -211:
-	return mOrigPiTotHits;
-    case -321:
-	return mOrigKTotHits;
-    case -2212:
-	return mOrigPTotHits;
-    default:
-	cout << "StRichTrack::getOrigTotHits()\n";
-	cout << "\tWARNING!!!!!\n";
-	cout << "\tparticle type is not recogized (" << particleType << ")" << endl;
-	return -990;
-    }
-}
-
-int StRichTrack::getNewTotHits(int particleType) const {
-
-    switch(particleType) {
-    case -211:
-	return mNewPiTotHits;
-    case -321:
-	return mNewKTotHits;
-    case -2212:
-	return mNewPTotHits;
-    default:
-	cout << "StRichTrack::getNewTotHits()\n";
-	cout << "\tWARNING!!!!!\n";
-	cout << "\tparticle type is not recogized (" << particleType << ")" << endl;
-	return -990;
-    }
-}
-
-void StRichTrack::assignHits(int consthits, int tothits, int refit, int particleType) {
-
-    switch(particleType) {
-
-    case -211: // pion
-	if (refit==0) {	// no refit
-	    mOrigPiConstHits = consthits;
-	    mOrigPiTotHits = tothits;
-	}
-	else if (refit==1) { //  refit
-	    mNewPiConstHits = consthits;
-	    mNewPiTotHits = tothits;
-	}
-	else {
-	    cout << "StRichTrack::assignHits()\n";
-	    cout << "\tPion switch (" << refit  << ")" << endl;
-	}
-	break;
-	
-    case -321: // kaon
-	if (refit==0) {	// no refit
-	    mOrigKConstHits = consthits;
-	    mOrigKTotHits = tothits;
-	}
-	else if (refit==1) { //  refit
-	    mNewKConstHits = consthits;
-	    mNewKTotHits = tothits;
-	}
-	else {
-	    cout << "StRichTrack::assignHits()\n";
-	    cout << "\tKaon switch (" << refit  << ")" << endl;
-	}
-	break;
-
-    case -2212: // proton
-	if (refit==0) {	// no refit
-	    mOrigPConstHits = consthits;
-	    mOrigPTotHits = tothits;
-	}
-	else if (refit==1) { //  refit
-	    mNewPConstHits = consthits;
-	    mNewPTotHits = tothits;
-	}
-	else {
-	    cout << "StRichTrack::assignHits()\n";
-	    cout << "\tProton switch (" << refit  << ")" << endl;
-	}
-	break;
-
-    default:
-	cout << "StRichTrack::assignHits()\n";
-	cout << "\tWARNING\n";
-	cout << "\tParticle type is not recogized (" << particleType << ")" << endl;
-    }
-}
 
 vector<StRichRingHit*>
 StRichTrack::getRingHits( StParticleDefinition* part) {
@@ -713,6 +585,8 @@ StRichTrack::~StRichTrack() {
 
 bool StRichTrack::correctTrajectory() {
 
+  cout << "StRichTrack::correctTrajectory()\n";
+
   if (!mStTrack) return false;
   
   StThreeVectorF tempMip(-999,-999,-999);
@@ -743,6 +617,12 @@ bool StRichTrack::correctTrajectory() {
   this->setUnCorrectedMomentum( this->getMomentum() );
 
   double xCorrection = 0.4*(mMomentumAtPadPlane.x()/mMomentumAtPadPlane.z());
+
+  
+  //
+  // set refit check flag
+  //
+  mRefit = true;
 
 #ifdef myRICH_WITH_MC    
   xCorrection = 0.0;
@@ -863,7 +743,7 @@ bool StRichTrack::correctTrajectory() {
 					       tempRichLocalMom.z());  
 	  //StThreeVectorF normalVector(0,0,-1);
       
-	  this->setProjectedMIP(correctedProjectedMIP);
+	  //this->setProjectedMIP(correctedProjectedMIP);
 	  this->setImpactPoint(impact);
 	  //this->setMomentum(tempRichLocalMomentum);
       }
@@ -872,6 +752,10 @@ bool StRichTrack::correctTrajectory() {
   //this->setCorrectedMomentum(correctedMomentum);
   return true;
 }
+
+
+bool StRichTrack::getRefit() {return mRefit;}
+
 
 void StRichTrack::assignMIP(const StSPtrVecRichHit* hits) {
 

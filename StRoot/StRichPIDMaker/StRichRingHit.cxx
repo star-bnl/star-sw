@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichRingHit.cxx,v 2.2 2000/10/19 01:13:23 horsley Exp $
+ * $Id: StRichRingHit.cxx,v 2.3 2001/01/30 16:38:44 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingHit.cxx,v $
+ *  Revision 2.3  2001/01/30 16:38:44  horsley
+ *  updated PID maker for next production run, included new class for TTree
+ *
  *  Revision 2.2  2000/10/19 01:13:23  horsley
  *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
  *  added normal distance sigma cut on hits, quartz and radiator pathlengths
@@ -34,7 +37,7 @@
 
 
 StRichRingHit::StRichRingHit(StRichHit* hit, double angle, double dist, double sigma, 
-			     double radPath, double quaPath) {
+			              double radPath, double quaPath) {
   mHit = hit;
   mAngle = angle;
   mDist = dist;
