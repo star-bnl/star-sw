@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.49 2005/02/08 17:22:46 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.50 2005/02/22 19:38:39 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.50  2005/02/22 19:38:39  genevb
+// Do PMD hists only for year 4 and later (real data)
+//
 // Revision 2.49  2005/02/08 17:22:46  genevb
 // PMD histo changes, handle estGlobal/ITTF tracks
 //
@@ -748,7 +751,7 @@ void StQABookHist::BookHist(Int_t histsSet){
   BookHistDE();
   BookHistPID();
   BookHistVertex();
-  BookHistPMD();
+  if (histsSet==StQA_AuAu) BookHistPMD();
   if (histsSet==StQA_MC) BookHistEval();
   
 }

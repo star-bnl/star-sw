@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.29 2005/02/08 17:22:46 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.30 2005/02/22 19:38:39 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.30  2005/02/22 19:38:39  genevb
+// Do PMD hists only for year 4 and later (real data)
+//
 // Revision 2.29  2005/02/08 17:22:46  genevb
 // PMD histo changes, handle estGlobal/ITTF tracks
 //
@@ -209,7 +212,7 @@ Int_t StQAMakerBase::Make() {
   // histograms from FPD in StEvent
   if (histsSet==StQA_AuAuOld) MakeHistFPD();
   // histograms from PMD in StEvent
-  MakeHistPMD();
+  if (histsSet==StQA_AuAu) MakeHistPMD();
 
   eventCount++;
   return kStOk;
