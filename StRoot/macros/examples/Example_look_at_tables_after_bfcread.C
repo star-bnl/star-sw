@@ -1,5 +1,8 @@
-// $Id: Example_look_at_tables_after_bfcread.C,v 1.1 1999/06/07 17:31:22 kathy Exp $
+// $Id: Example_look_at_tables_after_bfcread.C,v 1.2 1999/06/07 21:10:35 kathy Exp $
 // $Log: Example_look_at_tables_after_bfcread.C,v $
+// Revision 1.2  1999/06/07 21:10:35  kathy
+// fixing up macros - removed or renamed some, fixed others so the default input file is there
+//
 // Revision 1.1  1999/06/07 17:31:22  kathy
 // clean up some macros
 //
@@ -11,7 +14,7 @@
 // what it does: see below
 //=======================================================================
 //
-//  Example_root_look_at_tables_after_bfcread.C
+//  Example_look_at_tables_after_bfcread.C
 //
 // Kathy (5/13/99):
 //  This is an example showing how to navigate through tables and
@@ -24,6 +27,11 @@
 //=======================================================================
 
 {
+  cout << " !!! ----------------------------------------------- !!! " << endl;
+  cout << " !!! This is Example_look_at_tables_after_bfcread.C !!! " << endl;
+  cout << "    --> You must have already run bfcread.C beforehand!" << endl;
+  cout << " !!! ----------------------------------------------- !!! " << endl;
+
 //  get dataset for globtrk
 St_DataSet *ds=chain->GetDataSet("dst/globtrk");
 
