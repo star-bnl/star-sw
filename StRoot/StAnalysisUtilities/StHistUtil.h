@@ -1,5 +1,8 @@
-//! $Id: StHistUtil.h,v 1.1 2000/01/18 16:42:40 kathy Exp $
+//! $Id: StHistUtil.h,v 1.2 2000/01/26 19:29:27 kathy Exp $
 //! $Log: StHistUtil.h,v $
+//! Revision 1.2  2000/01/26 19:29:27  kathy
+//! add methods SetDefaultLogXList,AddToLogXList,ExamineLogXList,RemoveFromLogXList - requested by T.Trainor - impact param hists are now draw with LogX scale
+//!
 //! Revision 1.1  2000/01/18 16:42:40  kathy
 //! move StHistUtil class from St_QA_Maker directory and put into StAnalysisUtilities
 //!
@@ -61,9 +64,11 @@ class StHistUtil {
   
   TString        m_PsFileName;     // Name of the PostScipt file to plot hist's out
   
-  TString        m_GlobalTitle;     // Title at top of each page of output
+  TString        m_GlobalTitle;    // Title at top of each page of output
   
-  TList         *m_ListOfLog;      //! list of histogram names that will be drawn with logy scale
+  TList         *m_ListOfLogY;     //! list of histogram names that will be drawn with logY scale
+
+  TList         *m_ListOfLogX;     //! list of histogram names that will be drawn with logX scale
 
   TList         *m_ListOfPrint;    //! list of histogram names that will be drawn,printed
 
@@ -85,6 +90,11 @@ class StHistUtil {
   virtual Int_t   RemoveFromLogYList(const Char_t *HistName="");
   virtual Int_t   ExamineLogYList();
 
+  virtual void    SetDefaultLogXList(Char_t *dirName="QA");
+  virtual Int_t   AddToLogXList(const Char_t *HistName="");
+  virtual Int_t   RemoveFromLogXList(const Char_t *HistName="");
+  virtual Int_t   ExamineLogXList();
+
   virtual void    SetDefaultPrintList(Char_t *dirName="QA",Char_t *analType="FullTable");
   virtual Int_t   AddToPrintList(const Char_t *HistName="");
   virtual Int_t   RemoveFromPrintList(const Char_t *HistName="");
@@ -103,7 +113,7 @@ class StHistUtil {
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.1 2000/01/18 16:42:40 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.2 2000/01/26 19:29:27 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
