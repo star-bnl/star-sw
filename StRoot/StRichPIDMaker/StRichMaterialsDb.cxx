@@ -1,12 +1,12 @@
 /**********************************************************
- * $Id: StRichMaterialsDb.cxx,v 2.2 2000/10/02 23:06:33 horsley Exp $
+ * $Id: StRichMaterialsDb.cxx,v 2.3 2000/11/30 23:31:32 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMaterialsDb.cxx,v $
- *  Revision 2.2  2000/10/02 23:06:33  horsley
- *  *** empty log message ***
+ *  Revision 2.3  2000/11/30 23:31:32  lasiuk
+ *  default setting of mInner and mOuter in c'tor
  *
  *  Revision 2.2  2000/10/02 23:06:33  horsley
  *  *** empty log message ***
@@ -33,127 +33,138 @@ using namespace units;
 StRichMaterialsDb* StRichMaterialsDb::p2Db = 0;
 
 StRichMaterialsDb::StRichMaterialsDb() {
-  my_fill();
+
+    this->my_fill();
+
 }
 
 void StRichMaterialsDb::my_fill() {
-  mVersion = 1.0;
+
+    mVersion = 1.0;
  
-  mLongestWavelength  = 220.0*nanometer;    // --> inner ring
-  mMeanWavelength     = 177.4*nanometer;    // --> mode frequency  
-  mShortestWavelength = 160.0*nanometer;    // --> outer ring
+    mLongestWavelength  = 220.0*nanometer;    // --> inner ring
+    mMeanWavelength     = 177.4*nanometer;    // --> mode frequency  
+    mShortestWavelength = 160.0*nanometer;    // --> outer ring
  
-  
-  double numberOfEntries = 13;
-  mConversion  
-    = ((mLongestWavelength/nanometer-mShortestWavelength/nanometer)/(numberOfEntries-1));
+    //
+    // default...can be reset by macro
+    //
+    mOuterWave = mShortestWavelength;
+    mInnerWave = mLongestWavelength;
 
-  mMeanRadiatorDepth = 0.5; // normalized to unit pathlength in radiator
-  
-  // goes from long to short wavelength
-  ////////// index of refraction  ////////////////////////////
-  int entries = static_cast<int>(numberOfEntries);
-  double index_freon[13] = { 1.269946, 
-				  1.271246, 
-				  1.272452, 
-				  1.273844,
-				  1.275236,
-				  1.276721, 
-				  1.278206, 
-				  1.279876,
-				  1.281546, 
-				  1.283402, 
-				  1.285444,
-                                  1.2869634,
-                                  1.2884828};
-  // the last two entries correspond to 164 and 159 nm
-  // gotten from a linear extrapolation of the CERN measurements
+    double numberOfEntries = 13;
+    mConversion  
+	= ((mLongestWavelength/nanometer-mShortestWavelength/nanometer)/(numberOfEntries-1));
 
+    mMeanRadiatorDepth = 0.5; // normalized to unit pathlength in radiator
   
-  double index_quartz[13] = { 1.528309, 
-				   1.533333, 
-				   1.538243, 
-				   1.544223,
-				   1.550568, 
-				   1.557770, 
-				   1.565463, 
-				   1.574765,
-				   1.584831, 
-				   1.597027, 
-				   1.611858,
-                                   1.620049,
-                                   1.628240};
-
-  // the last two entries correspond to 164 and 159 nm
-  // gotten from a linear extrapolation of the CERN measurements
-
-
-  
-  mMethaneIndexOfRefraction  = 1.000444;
-  
-  
-  /////////// absorption length  (cm) ////////////////////////////////// 
-  double absco_freon[13]  = { 179.0987   * centimeter, 
-				   179.0987   * centimeter,
-				   179.0987   * centimeter,
-				   179.0987   * centimeter,
-				   179.0987   * centimeter,
-				   121.9547   * centimeter, 
-				   43.40067  * centimeter, 
-				   15.7394   * centimeter,
-				   9.417928 * centimeter, 
-				   5.195241 * centimeter,  
-				   1.415808 * centimeter,
-                                   1.415808 * centimeter,
-                                   1.415808 * centimeter};
-  
-  double absco_quartz[13] = { 1000000.    * centimeter,  
-				   1000000.    * centimeter,  
-				   1000000.    * centimeter,  
-				   1000000.    * centimeter,  
-				   1000000.    * centimeter,  
-				   29.85  * centimeter,   
-				   7.34  * centimeter,   
-				   4.134 * centimeter,   
-				   1.273 * centimeter,  
-				   0.722 * centimeter,   
-				   0.365 * centimeter,
-				   0.365 * centimeter,
-                                   0.365 * centimeter };
-  
-  mMethaneAbsCoeff = 1000000.0 * centimeter;
-  
-  ////////// CsI quantum efficiency  //////////////
-  double effic_csi[13] = { 3.15e-4, 
-				4.50e-4, 
-				6.75e-3, 
-				1.125e-2, 
-				2.115e-2,
-				3.60e-2, 
-				8.46e-2,  
-				.15533,   
-				.20286,
-				.24745,
-				.27881,
-                                .27881, 
-                                .27881};
-  
-  // fill arrays
-  for (int i=0;i<entries;i++) {
+    // goes from long to short wavelength
+    ////////// index of refraction  ////////////////////////////
+    int entries = static_cast<int>(numberOfEntries);
+    double index_freon[13] = { 1.269946, 
+			       1.271246, 
+			       1.272452, 
+			       1.273844,
+			       1.275236,
+			       1.276721, 
+			       1.278206, 
+			       1.279876,
+			       1.281546, 
+			       1.283402, 
+			       1.285444,
+			       1.2869634,
+			       1.2884828};
+    // the last two entries correspond to 164 and 159 nm
+    // gotten from a linear extrapolation of the CERN measurements
     
-    mC6F14IndexOfRefraction[i]  = index_freon[i];
-    mQuartzIndexOfRefraction[i] = index_quartz[i];
     
-    mC6F14AbsCoeff[i]  = absco_freon[i];
-    mQuartzAbsCoeff[i] = absco_quartz[i];
+    double index_quartz[13] = { 1.528309, 
+				1.533333, 
+				1.538243, 
+				1.544223,
+				1.550568, 
+				1.557770, 
+				1.565463, 
+				1.574765,
+				1.584831, 
+				1.597027, 
+				1.611858,
+				1.620049,
+				1.628240};
     
-    mCsIQE[i] = effic_csi[i];
-  }
+    // the last two entries correspond to 164 and 159 nm
+    // gotten from a linear extrapolation of the CERN measurements
+    
+    
+    
+    mMethaneIndexOfRefraction  = 1.000444;
+    
+    
+    /////////// absorption length  (cm) ////////////////////////////////// 
+    double absco_freon[13]  = { 179.0987   * centimeter, 
+				179.0987   * centimeter,
+				179.0987   * centimeter,
+				179.0987   * centimeter,
+				179.0987   * centimeter,
+				121.9547   * centimeter, 
+				43.40067  * centimeter, 
+				15.7394   * centimeter,
+				9.417928 * centimeter, 
+				5.195241 * centimeter,  
+				1.415808 * centimeter,
+				1.415808 * centimeter,
+				1.415808 * centimeter};
+    
+    double absco_quartz[13] = { 1000000.    * centimeter,  
+				1000000.    * centimeter,  
+				1000000.    * centimeter,  
+				1000000.    * centimeter,  
+				1000000.    * centimeter,  
+				29.85  * centimeter,   
+				7.34  * centimeter,   
+				4.134 * centimeter,   
+				1.273 * centimeter,  
+				0.722 * centimeter,   
+				0.365 * centimeter,
+				0.365 * centimeter,
+				0.365 * centimeter };
+    
+    mMethaneAbsCoeff = 1000000.0 * centimeter;
+    
+    ////////// CsI quantum efficiency  //////////////
+    double effic_csi[13] = { 3.15e-4, 
+			     4.50e-4, 
+			     6.75e-3, 
+			     1.125e-2, 
+			     2.115e-2,
+			     3.60e-2, 
+			     8.46e-2,  
+			     .15533,   
+			     .20286,
+			     .24745,
+			     .27881,
+			     .27881, 
+			     .27881};
+    
+    // fill arrays
+    for (int i=0;i<entries;i++) {
+	
+	mC6F14IndexOfRefraction[i]  = index_freon[i];
+	mQuartzIndexOfRefraction[i] = index_quartz[i];
+	
+	mC6F14AbsCoeff[i]  = absco_freon[i];
+	mQuartzAbsCoeff[i] = absco_quartz[i];
+	
+	mCsIQE[i] = effic_csi[i];
+    }
 }
 
 StRichMaterialsDb* StRichMaterialsDb::getDb() {
-  if(!p2Db) p2Db = new StRichMaterialsDb();
-  return p2Db;
+
+    if(!p2Db)
+	p2Db = new StRichMaterialsDb();
+
+    return p2Db;
 }
 
 void StRichMaterialsDb::print(ostream& os) const {
