@@ -10,7 +10,11 @@
 */  
 
 #include "l3totphit.h"
+#ifndef __CC5__
 #include "sl3CoordinateTransform.h"
+#else
+#include <sl3CoordinateTransform.h>
+#endif
 #include <Rtypes.h> /* use ROOT variables: ..._t */
 
 long type_of_call l3totphit_(
