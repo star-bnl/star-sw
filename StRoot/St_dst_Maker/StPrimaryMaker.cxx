@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.43 2000/04/20 15:59:39 fine Exp $
+// $Id: StPrimaryMaker.cxx,v 1.44 2000/04/20 20:38:51 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.44  2000/04/20 20:38:51  caines
+// More fixing for the -1 problem
+//
 // Revision 1.43  2000/04/20 15:59:39  fine
 // assert introduced. It is a quick emergency fix to prevent chain crash elsewhere unless the proper solution found
 //
@@ -487,9 +490,6 @@ Int_t StPrimaryMaker::Make(){
 	    row = spc[spt_id].row/100;
 	    row = spc[spt_id].row - row*100;
 	    if( spc[spt_id].id_globtrk-1 < 0){
-	      cout << spc[spt_id].id_globtrk-1 << endl;
-              cout << "========== > Helen < =========  this will cuase the entire chain crash" << endl;
-              cout << "                                --------------------------------------" << endl;     
 	      cout << tgroup->ident << " " << tgroup->id1 << " " << tgroup->id2 << " " << spc[spt_id].id << " " << endl;
               assert(0);
 	    }

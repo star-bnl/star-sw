@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.20 2000/03/29 14:33:40 caines Exp $
+// $Id: StMatchMaker.cxx,v 1.21 2000/04/20 20:38:50 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.21  2000/04/20 20:38:50  caines
+// More fixing for the -1 problem
+//
 // Revision 1.20  2000/03/29 14:33:40  caines
 // Fixed topology map for TPC only
 //
@@ -380,6 +383,9 @@ Int_t StMatchMaker::Init(){
     else{
     row.useglobal = 2; // set if to usematching to be used ;
     row.usetpc	 =  1; // set if TPC used in refit ;
+    //row.useglobal = 2; // set if to usematching to be used ;
+    //row.usetpc	 =  1; // set if TPC used in refit ;  
+
     gMessMgr->Info() << "Kalman fitting turned OFF" << endm;
     }
     row.useemc	 =          0; // set if EMC used in refit ;
@@ -398,8 +404,8 @@ Int_t StMatchMaker::Init(){
   //  row.usevert   = m_usevert;
    m_egr_egrpar->AddAt(&row,0);
   //Use this as the GEANT pid to be used for the kalman filter for now 
-   row.useglobal = 8;
-   m_egr_egrpar->AddAt(&row,1);
+    //row.useglobal = 8;
+    //m_egr_egrpar->AddAt(&row,1);
   }
   
   AddRunCont(m_egr_egrpar);
@@ -556,13 +562,22 @@ Int_t StMatchMaker::Make(){
 
    tcl_tphit_st  *spc   = tphit->GetTable();
    sgr_groups_st *tgroup = tpc_groups->GetTable();
+   tpt_track_st  *ttrack = tptrack->GetTable();
    int count = 0;
 
    for( i=0; i<tphit->GetNRows(); i++, spc++){
      
        tgroup->id1 = spc->track;
        tgroup->id2 = i+1;
-       tgroup->ident = 0;
+       if( spc->flag !=0) {
+	 tgroup->ident = -1;
+       }
+       else if( ttrack[((int)tgroup->id1/1000)-1].flag < 0){
+	 tgroup->ident = -1;
+       }
+       else{
+	 tgroup->ident = 0;
+       }
        count++;
        tgroup++;
    }
