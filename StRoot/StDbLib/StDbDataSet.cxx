@@ -1,6 +1,11 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: StDbDataSet.cxx,v 1.2 1999/08/23 16:10:13 porter Exp $
+// $Id: StDbDataSet.cxx,v 1.3 1999/12/03 22:24:01 porter Exp $
 // $Log: StDbDataSet.cxx,v $
+// Revision 1.3  1999/12/03 22:24:01  porter
+// expanded functionality used by online, fixed bug in
+// mysqlAccessor::getElementID(char*), & update StDbDataSet to
+// conform to changes in Xml reader & writer
+//
 // Revision 1.2  1999/08/23 16:10:13  porter
 // modified XmlReader & XmlWriter to be in sinc with Xml format used by current
 // perl scripts.  Also added removeTable to StDbConfigNode so that others can
@@ -76,9 +81,9 @@ void StDbDataSet::Browse(TBrowser *b)
     name = fObj->getTableName();
     acc->streamTableName(name); delete [] name;
     acc->streamAccessor();
-    fObj->StreamAccessor((typeAcceptor*)acc);
+    fObj->StreamAccessor((typeAcceptor*)acc,false);
     acc->endAccessor();
-    fObj->dbStreamer((typeAcceptor*)acc);
+    fObj->dbStreamer((typeAcceptor*)acc,false);
     acc->streamEndTableName();
     //acc->streamTail();  // end DataBase
     delete acc;

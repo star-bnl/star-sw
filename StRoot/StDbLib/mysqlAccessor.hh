@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.hh,v 1.4 1999/10/19 14:30:41 porter Exp $
+ * $Id: mysqlAccessor.hh,v 1.5 1999/12/03 22:24:01 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.hh,v $
+ * Revision 1.5  1999/12/03 22:24:01  porter
+ * expanded functionality used by online, fixed bug in
+ * mysqlAccessor::getElementID(char*), & update StDbDataSet to
+ * conform to changes in Xml reader & writer
+ *
  * Revision 1.4  1999/10/19 14:30:41  porter
  * modifications relevant to use with StDbBroker and future merging with
  * "params" database structure + some docs + suppressing diagnostics messages
@@ -68,7 +73,7 @@ protected:
   virtual bool isConfig(const char* name);  // has "Keys"
   virtual char* getKeyName(const char* nodeName); // add "Keys"
   virtual char* getNodeName(const char* keyName); // strip "Keys"
-  virtual int*  getElementID(char* nodeName, int numRows);
+  virtual int*  getElementID(char* nodeName, int& numRows);
   virtual bool  isBaseLine(const char* baseline);
   virtual char* getBoolString(bool baseline);
   virtual char* getNextID(char*& currentElement);

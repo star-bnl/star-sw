@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.8 1999/09/30 02:06:03 porter Exp $
+ * $Id: StDbConfigNode.cc,v 1.9 1999/12/03 22:24:00 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.9  1999/12/03 22:24:00  porter
+ * expanded functionality used by online, fixed bug in
+ * mysqlAccessor::getElementID(char*), & update StDbDataSet to
+ * conform to changes in Xml reader & writer
+ *
  * Revision 1.8  1999/09/30 02:06:03  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -185,6 +190,21 @@ StDbConfigNode::addTable(const char* tableName, char* version, bool isBaseLine){
 return table;
 }
 
+////////////////////////////////////////////////////////////////
+StDbTable*
+StDbConfigNode::findLocalTable(const char* name){
+
+  TableList::iterator itr;
+  StDbTable* table=0;
+    for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
+      if((*itr)->checkTableName(name)){
+	table=*itr;
+        break;
+      }
+    }
+
+return table;
+}
 ////////////////////////////////////////////////////////////////
 
 void
