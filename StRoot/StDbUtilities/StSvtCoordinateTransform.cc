@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.4 2000/10/05 21:51:43 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.5 2000/11/30 21:34:57 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -17,7 +17,13 @@
  ***********************************************************************/
 #include "StSvtCoordinateTransform.hh"
 #include "StCoordinates.hh"        // coordinate definitions
+#include "StGlobals.hh"
+#include "StSvtClassLibrary/StSvtConfig.hh"
+#include "tables/St_svg_geom_Table.h"
+#include "tables/St_svg_shape_Table.h"
+#include "tables/St_srs_srspar_Table.h"
 #include <unistd.h>
+
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using namespace units;
 #endif
