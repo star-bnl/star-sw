@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.cc,v 1.6 1999/10/22 00:00:13 calderon Exp $
+ * $Id: StTrsDigitalSector.cc,v 1.7 1999/11/09 19:33:39 calderon Exp $
  *
  * Author: bl 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.cc,v $
+ * Revision 1.7  1999/11/09 19:33:39  calderon
+ * Message of "removed row" replaced with total number of rows removed.
+ *
  * Revision 1.6  1999/10/22 00:00:13  calderon
  * -added macro to use Erf instead of erf if we have HP and Root together.
  * -constructor with char* for StTrsDedx so solaris doesn't complain
@@ -103,11 +106,11 @@ int StTrsDigitalSector::cleanup()
 	    }
 	} // Pads are now clean
 	if (numberOfEmptyPads==mData[iRow].size()) {
-	    cout << "Removing Row " << iRow+1 << endl;  
 	    mData[iRow].clear();
 	    numberOfEmptyRows++;
 	}
     } // Rows are now clean
+    cout << "This sector had " << numberOfEmptyRows << " empty rows." << endl;
     if (numberOfEmptyRows==mData.size()) return 1;
     else return 0;
 }    
