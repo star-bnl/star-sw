@@ -12,6 +12,7 @@ public:
 //		Get methods
 
   Int_t 	GetRunNumber()    const {return mRunNumber;};
+  Int_t 	GetOldRunNumber() const {return mOldRunNumber;};
   const Char_t *GetEventType()    const {return (const Char_t*)mEventType;};
   ULong_t 	GetTriggerMask()  const {return mTriggerMask;};
   Float_t       GetCenterOfMassEnergy() const {return mCenterOfMassEnergy;};
@@ -30,10 +31,11 @@ public:
   TDatime       GetProdDateTime() const {return mProdTime;};
   Int_t     	GetEventNumber()  const {return mEventNumber;};
   Int_t     	GetGenerType()    const {return mGenerType;};
+  Int_t     	IsNewRun()    const {return (mRunNumber==mOldRunNumber);};
 
 //		Set methods
 
-  void          SetRunNumber(int run)	{mRunNumber=run;};
+  void          SetRunNumber(int run)	{mOldRunNumber=mRunNumber;mRunNumber=run;};
   void		SetEventType(const Char_t *type){mEventType=type;};
   void 		SetTriggerMask(ULong_t tm)	{mTriggerMask=tm;};
   void 		SetInputTriggerMask(ULong_t tm)	{mInputTriggerMask=tm;};
@@ -57,6 +59,7 @@ public:
 //		Data Members
 protected:
     Int_t	mRunNumber;
+    Int_t	mOldRunNumber;
     Int_t       mId;
     ULong_t 	mInputTriggerMask;
     ULong_t 	mTriggerMask;

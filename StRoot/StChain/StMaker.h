@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.35 1999/09/08 00:13:35 fisyak Exp $
+// $Id: StMaker.h,v 1.36 1999/09/21 15:05:18 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.36  1999/09/21 15:05:18  perev
+// InitRun & FinishRun added
+//
 // Revision 1.35  1999/09/08 00:13:35  fisyak
 // Add static *GetChain()
 //
@@ -142,12 +145,14 @@ public:
 
 //		User defined functions
    virtual void   	Clear(Option_t *option="");
+   virtual Int_t  	InitRun(int runumber);
    virtual Int_t  	Init();
    virtual void   	StartMaker();
    virtual Int_t  	Make();
    virtual Int_t  	Make(int number){SetNumber(number);return Make();};
    virtual void   	EndMaker  (int ierr);
    virtual Int_t  	Finish();
+   virtual Int_t  	FinishRun(int oldrunumber);
    virtual void	       	Fatal(int Ierr, const char *Com);  
    virtual void   	PrintInfo() const;
 
@@ -170,7 +175,8 @@ public:
    virtual Int_t  	GetNumber() const ;
    virtual void   	SetNumber(Int_t number) ;
    virtual St_DataSet*  UpdateDB(St_DataSet* ds){if (ds){};return 0;};
-   static  StMaker     *GetChain() {return fgStChain;}
+   static  StMaker     *GetChain(){return fgStChain;}
+   virtual StMaker     *GetParentChain() const;
    virtual Int_t        GetEventNumber() const ;
    virtual Int_t        GetRunNumber() const ;
    virtual TDatime      GetDateTime() const;
@@ -237,7 +243,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.35 1999/09/08 00:13:35 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.36 1999/09/21 15:05:18 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };
