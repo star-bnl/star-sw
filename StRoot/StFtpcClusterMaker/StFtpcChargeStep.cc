@@ -1,6 +1,13 @@
-// $Id: StFtpcChargeStep.cc,v 1.8 2001/04/19 12:18:57 jcs Exp $
+// $Id: StFtpcChargeStep.cc,v 1.9 2001/04/23 19:19:04 oldi Exp $
 //
 // $Log: StFtpcChargeStep.cc,v $
+// Revision 1.9  2001/04/23 19:19:04  oldi
+// This class had a problem if the decline of the edge of histogram was too steep!
+// Therefore dCharge[peak] was set to 0.000001. This is mathematically incorrect,
+// but solves the most cases with problems.
+// Also this class gave wrong results for low density events. As a result the
+// normalizedNowPressure is set only, if there are enough charge entries accumulated.
+//
 // Revision 1.8  2001/04/19 12:18:57  jcs
 // change pRadius to pradius to remove warning on Sun
 //
@@ -35,6 +42,7 @@
 
 #include <iostream.h>
 #include <stdlib.h>
+#include "StMessMgr.h"
 #include "StFtpcChargeStep.hh"
 
 StFtpcChargeStep::StFtpcChargeStep(TH2F *histo,
@@ -73,7 +81,6 @@ int StFtpcChargeStep::histogram(int setPressure)
   // if !setPressure only the evaluation histogram will be filled,
   // but the normalized pressure will not be changed
 {
-  printf("in histogram!\n");
   /* is magboltz database loaded, if not exit */
   if(mDb->numberOfMagboltzBins()<1)
     {
@@ -194,13 +201,19 @@ int StFtpcChargeStep::histogram(int setPressure)
   // gauss fit derivative of charge step dropoff
   float *dCharge = new float[imax];
   int maxdrop=0;
+
   dCharge[maxdrop]=0.0;
+  dCharge[peak] = 0.000001;  // This line had to be introduced to avoid problems if the decline of the 
+                             // charge step histogram was to steep and had less than 4 bins with entries at 
+                             // the right hand side of the maximum.
+    
   for(i=peak+1; i<imax; i++)
     {
       dCharge[i]=proHisto->GetBinContent(i-1)-proHisto->GetBinContent(i);
       if(dCharge[i]>dCharge[maxdrop])
 	maxdrop=i;
     }
+
   float chargestep2=(float) maxdrop;
   float lnChange=log(dCharge[maxdrop]*dCharge[maxdrop]/(dCharge[maxdrop-1]*dCharge[maxdrop+1]));
   if(lnChange<=0)
@@ -208,8 +221,8 @@ int StFtpcChargeStep::histogram(int setPressure)
   float sigmaSqrChange = 1/lnChange;
   if(dCharge[maxdrop+1]>0)
     chargestep2 = maxdrop-sigmaSqrChange*log(dCharge[maxdrop-1]/dCharge[maxdrop+1])-0.5;  
-
   float TimeCoordinate=chargestep2+0.5;// 0 is at beginning of 1st timebin
+
   // include tZero = time from collision to beginning of bin 0
   TimeCoordinate += mDb->tZero()/mDb->microsecondsPerTimebin();
   int PadtransPerTimebin = (int) mParam->numberOfDriftSteps() 
@@ -226,8 +239,8 @@ int StFtpcChargeStep::histogram(int setPressure)
     +((aimTime/TimeCoordinate-1)/
      (mDb->magboltzdVDriftdP(mDb->numberOfMagboltzBins()/2, 0)
       /mDb->magboltzVDrift(mDb->numberOfMagboltzBins()/2, 0)));
-  
-  if(setPressure)
+
+  if(setPressure && mHisto->GetEntries() > 10000)  // set pressure only if enough entries collected
     {
       mParam->setNormalizedNowPressure(newPressure);
       
@@ -259,10 +272,25 @@ int StFtpcChargeStep::histogram(int setPressure)
 	+((aimTime/TimeCoordinate-1)/
 	  (mDb->magboltzdVDriftdP(mDb->numberOfMagboltzBins()/2, 0)
 	   /mDb->magboltzVDrift(mDb->numberOfMagboltzBins()/2, 0)));
+
       mParam->setNormalizedNowPressure(newPressure);
-      cout << "StFtpcChargeStep set normalized pressure to " << newPressure << endl;
-    }      
       
+      gMessMgr->Message("", "I", "OST") << "StFtpcChargeStep set normalized pressure to " << newPressure << "." << endm;
+    }      
+   
+  else {
+    gMessMgr->Message("", "I", "OST") << "StFtpcChargeStep did not set normalized pressure to " << newPressure << " (still at " << mParam->normalizedNowPressure() << ")" << endm;
+
+    if (mHisto->GetEntries() > 10000) {
+      gMessMgr->Message("", "I", "OST") << "because the method of writing the value to the database has to be switched on." << endm;
+    }
+    
+    else {
+      gMessMgr->Message("", "I", "OST") << "because chargestep histo has " << mHisto->GetEntries() << " entries up to now (at least 10000 entries are necessary" << endm;
+      gMessMgr->Message("", "I", "OST") << "and the method of writing the value to the database has to be switched on." << endm;
+    }
+  }
+
   delete[] dCharge;
   free(pRadius);
   return 1;
