@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.2 1999/01/22 22:05:08 fisyak Exp $
+// $Id: StTrsMaker.cxx,v 1.3 1999/01/22 23:37:50 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.3  1999/01/22 23:37:50  lasiuk
+// root does not eat dynamic_cast<>
+//
 // Revision 1.2  1999/01/22 22:05:08  fisyak
 // Rename
 //
@@ -183,16 +186,16 @@ Int_t StTrsMaker::Init()
     //
     // Set the function for the induced charge on Pad
     //
-    dynamic_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
-	setChargeDistribution(StTrsSlowAnalogSignalGenerator::endo);
+    //dynamic_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
+        //setChargeDistribution(StTrsSlowAnalogSignalGenerator::endo);
 	//setChargeDistribution(StTrsSlowAnalogSignalGenerator::gatti);
 	//setChargeDistribution(StTrsSlowAnalogSignalGenerator::dipole);
     //
     // Set the function for the Analog Electronics signal shape
     //
-    dynamic_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
+    //dynamic_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
 	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::delta);
-	setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
+        //setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
 	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianExact);
 	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::asymmetricGaussianApproximation);
 	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::realShaper); 
@@ -306,7 +309,7 @@ Int_t StTrsMaker::Make(){
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.2 1999/01/22 22:05:08 fisyak Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.3 1999/01/22 23:37:50 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
