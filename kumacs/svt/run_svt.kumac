@@ -1,5 +1,9 @@
 **************************************************
-MACRO run_all no_events=1 file=/star/mds/users/caines/output.dsl svt_simul=srs svt_tracker=sgr  
+MACRO run_all no_events=1 _
+	INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
+	file=event_0000050.xdf _
+	svt_simul=srs _
+	svt_tracker=sgr  
  **************************************************
  * MACRO RUN_ALL
  *
@@ -10,10 +14,6 @@ MACRO run_all no_events=1 file=/star/mds/users/caines/output.dsl svt_simul=srs s
  *    analysis. The kumac includes user setable switches to let
  *    the user decide what packages are to be used for specific
  *    tasks.
- *    The user should set the LOCAL macro to his/her work area.
- *    ANA and SIM point to the reference code and kumacs. The
- *    use of LOCAL rather than ANA or SIM depend on the user's
- *    specific needs.
  *
 
  * Authors: H. Caines
@@ -21,26 +21,48 @@ MACRO run_all no_events=1 file=/star/mds/users/caines/output.dsl svt_simul=srs s
  * History:
  *          MARCH 18, 98 - created
  *************************************************
- no_events=[1]
- file = [2]
- LOCAL = /star/u2c/caines/test/SL98a
- PAMS   = [LOCAL]/pams
 
- UTIL_HOME = /afs/rhic/star/packages/SL98b/kumacs/util
- KUM_HOME = [LOCAL]/kumacs/chain
- SVT_HOME = [PAMS]/svt/kumac
 
+***********************************************************
+* PRINT OUT INPUT VALUES
+***********************************************************
  
- SVG_HOME = [SVT_HOME]
- SSS_HOME = [SVT_HOME]
- SSF_HOME = [SVT_HOME]
- SRS_HOME = [SVT_HOME]
- SGR_HOME = [SVT_HOME]
- STK_HOME = [SVT_HOME]
-
+message ' *** Data sample directory -->  ' [INPUT_DATA_DIR]
+message ' *** Input file -->             ' [file]
+message ' *** Num Events to process -->  ' [no_events]
+message ' *** SVT simulator         -->  ' [svt_simul]
+message ' *** SVT tracker           -->  ' [svt_tracker]
+ 
+***********************************
+* SETUP DIRECTORIES TO FIND KUMACS:
+***********************************
+ 
+ DEFAULT = _
+./kumacs/util,_
+./kumacs/chain,_
+./pams/emc/kumac,_
+./pams/global/kumac,_
+./pams/svt/kumac,_
+./pams/tpc/kumac,_
+$STAR/kumacs/util,_
+$STAR/kumacs/chain,_
+$STAR/kumacs/tpc,_
+$STAR/pams/ctf/kumac,_
+$STAR/pams/emc/kumac,_
+$STAR/pams/ftpc/kumac,_
+$STAR/pams/gen/kumac,_
+$STAR/pams/global/kumac,_
+$STAR/pams/mwc/kumac,_
+$STAR/pams/svt/kumac,_
+$STAR/pams/tpc/kumac,_
+$STAR/pams/trg/kumac
+ 
+ def [DEFAULT]
+ message 'Define default kumac search path as' def
 
  make util
  make svt
+
  *****************************************
  * variables
  *****************************************
@@ -52,7 +74,7 @@ MACRO run_all no_events=1 file=/star/mds/users/caines/output.dsl svt_simul=srs s
  *****************************************
  *****************************************
   
- exec [UTIL_HOME]/setup_dir
+ exec setup_dir
 
 
 Message 'Doing' [no_events] 'events'
@@ -60,22 +82,22 @@ Message 'Doing' [no_events] 'events'
  ***************************************** 
  * open input file and read header
  *****************************************
- exec [UTIL_HOME]/input_g2t_file#init [file]
+ exec input_g2t_file#init [INPUT_DATA_DIR][file]
 
  *****************************************
  * one time package initialization phase for geometry
  *****************************************
  cd /dui/data/svt
 
- exec  [SVG_HOME]/init_svg
+ exec  init_svg
  if [svt_simul] = sss then
   message 'run_all-I1 : will use svt simulator sss/ssf'
-  exec [SSS_HOME]/init_sss
-  exec [SSF_HOME]/init_ssf
+  exec init_sss
+  exec init_ssf
  endif
 
- cd /dui/geant
- stream/getevent G2Tfile
+
+  G2Tfile
  ls
 
  *****************************************
@@ -88,19 +110,23 @@ Message 'Doing' [no_events] 'events'
     message 'run_all-I3 : doing loop' [ievent]
 
    
+ exec input_g2t_file#read
+ 
+    if (staf_status(1).ne.STAFCV_OK) goto EOF
+
 
  *  SVT detector response simulation 
    cd /dui/data/svt
 $cptime
     if [svt_simul]= sss then
-      exec [SSS_HOME]/run_sss [ievent] [SSS_HOME]
+      exec run_sss [ievent]
 	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
-      exec [SSF_HOME]/run_ssf [ievent] [SSF_HOME]
+      exec run_ssf [ievent] 
 	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
- *    exec [SCL_HOME]/run_scl [ievent] [SCL_HOME]
+ *    exec run_scl [ievent]
 	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
     elseif [svt_simul]= srs then
-      exec [SRS_HOME]/run_srs  [ievent] [SRS_HOME]
+      exec run_srs  [ievent]
 	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
     endif
 
@@ -109,13 +135,13 @@ $cptime
 
  *  svt track finding and momentum reconstruction
     if [svt_tracker]= stk then
-      exec [STK_HOME]/run_stk  [ievent] [STK_HOME]
+      exec run_stk  [ievent]
 	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
     elseif [svt_tracker]=sgr then
-      exec [SGR_HOME]/run_sgr  [ievent] [SGR_HOME]
+      exec run_sgr  [ievent]
 	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
 
-     exec [STK_HOME]/run_stk  [ievent]+1 [STK_HOME]
+     exec run_stk  [ievent]+1 
 	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
     endif
 
@@ -124,8 +150,7 @@ $cptime
 
 NEXT_EVENT:
  
- cd /dui/geant   
- dio/stream/getevent G2Tfile 
+
 enddo
 
 *  task is completed
