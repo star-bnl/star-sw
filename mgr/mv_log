@@ -1,0 +1,136 @@
+#! /bin/csh -f
+#  set list = `grep -l *** Break *** Segmentation violation` 
+#  set list = `grep -l ASU_ALLOC: ***Error***: No Space `
+#  set list = `grep -l DS_E_XDR_IO_ERROR'
+#  set list = `grep -l CANT_READ_FROM_STREAM '
+#  set list = `grep -l DSL_NODE_NOT_FOUND '
+#  set list = `grep -l ERROR_WRITING_DATASET'
+# echo $tag "->" $list
+ foreach tag (NoSpace DslError DslEntry CantRead CantOpen DslNode NoSpaceOnDev SegViolation SegViolatSp SegViolatDsl SegViolatCR WritError EVR-AM tfs Problems done)
+   switch ($tag)
+    case "NoSpace":
+#=============================
+    set list = `grep -l 'ASU_ALLOC:\ \*\*\*Error\*\*\*\:\ No\ more\ memory\ available'  *evts`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw
+    case "DslError":
+#============================
+     set list = `grep -l 'DS_E_XDR_IO_ERROR' *evts`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw
+    case "DslEntry":
+#============================
+     set list = `grep -l 'DS_E_ENTRY_NOT_FOUND' *evts`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw
+    case "CantRead":
+#============================
+    set list = `grep -l 'CANT_READ_FROM_STREAM' *evts`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw
+    case "CantOpen":
+#============================
+    set list = `grep -l 'CANT_OPEN_FILE' *evts`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw
+    case "DslNode":
+#============================
+     set list = `grep -l 'DSL_NODE_NOT_FOUND' *evts`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw
+    case "NoSpaceOnDev":
+#============================
+     set list = `grep -l 'No space left on device' *evts`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw   
+    case "SegViolation":
+#===========================
+    set list = `grep -l '*\*\*\ Break \*\*\*\ Segmentation\ violation' *evts`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw 
+    case "SegViolatSp":
+#===========================
+    set list = `grep -l '*\*\*\ Break \*\*\*\ Segmentation\ violation' *job*NoSpace`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw
+    case "SegViolatDsl":
+#===========================
+    set list = `grep -l '*\*\*\ Break \*\*\*\ Segmentation\ violation' *job*DslError`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw 
+    case "SegViolatCR":
+#===========================
+    set list = `grep -l '*\*\*\ Break \*\*\*\ Segmentation\ violation' *job*CantRead`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw        
+    case "WritError":
+#===========================
+    set list = `grep -l 'ERROR_WRITING_DATASET' *evts`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw 
+    case "Problems":
+#===========================
+    set list = `grep -l '\[Pp\]roblem' *evts`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw 
+     case "done":
+#===========================
+    set list = `grep -l 'total\ CPU\/event' *evts`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw 
+       case "staging-fails":
+#===========================
+    set list = `grep -l E-o-D *evts`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw 
+       case "EVR-AM":
+#===========================
+    set list = `grep -l "Problem\ running\ tfs\_g2t" *evts`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw 
+       case "tfs":
+#===========================
+    set list = `grep -l "Problem\ on\ return\ from\ EVR\_AM" *evts`
+    foreach file ($list)
+      mv $file ${file}_${tag}
+    end
+    breaksw 
+        
+    default:
+#  ====================
+    breaksw
+  endsw
+end
+set list = `ls -1 *evts* | grep -v Aft`
