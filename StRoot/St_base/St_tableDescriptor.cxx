@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   09/08/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.cxx,v 1.8 2000/01/24 04:02:53 fine Exp $
+// $Id: St_tableDescriptor.cxx,v 1.9 2000/01/25 02:17:04 fine Exp $
 // $Log: St_tableDescriptor.cxx,v $
+// Revision 1.9  2000/01/25 02:17:04  fine
+// CreateLeafList and dtor have been fixed
+//
 // Revision 1.8  2000/01/24 04:02:53  fine
 // CreateLeafList(): some extra protection
 //
@@ -73,6 +76,7 @@ St_tableDescriptor::St_tableDescriptor(TClass *classPtr)
 //______________________________________________________________________________
 St_tableDescriptor::~St_tableDescriptor()
 {
+#ifdef NORESTRICTIONS
   if (!IsZombie()) {
     for (Int_t i=0;i<GetNRows();i++) {
       Char_t *name = (Char_t *)GetColumnName(i);
@@ -81,6 +85,7 @@ St_tableDescriptor::~St_tableDescriptor()
       if (indxArray) delete [] indxArray; 
     }
   }
+#endif
 }
 //____________________________________________________________________________
 TString St_tableDescriptor::CreateLeafList() const 
@@ -90,15 +95,32 @@ TString St_tableDescriptor::CreateLeafList() const
   Int_t maxRows = GetNumberOfColumns();
   TString string;
   for (Int_t i=0;i<maxRows;i++){
-    if (GetDimensions()) {
-       string = ""; 
-       Error("CreateLeafList()","Can not create leaflist for arrays");
-       break;
-    }
     if (i) string += ":";
-    string += GetColumnName(i);
-    string += "/";
-    string += TypeMapTBranch[GetColumnType(i)];
+    Int_t nDim = GetDimensions(i);
+    if (nDim) {
+       UInt_t *indx = GetIndexArray(i);
+       if (indx) {
+         const Char_t *colName = GetColumnName(i);
+         Char_t digBuffer[100];       
+         for (Int_t j=0;j<nDim;j++) {
+	   for (Int_t l=0;l<indx[j];l++){
+	     if (l) string += ":";
+	     sprintf(digBuffer,"%s_%d",colName, l);
+	     string += digBuffer;
+	     if (l==0) { string += "/"; string += TypeMapTBranch[GetColumnType(i)];}
+	   }
+         }
+       }
+       else {
+         string = ""; 
+         Error("CreateLeafList()","Can not create leaflist for arrays");
+         break;
+      }
+    } else {
+      string += GetColumnName(i);
+      string += "/";
+      string += TypeMapTBranch[GetColumnType(i)];
+    }
   }
   return string;
 }
