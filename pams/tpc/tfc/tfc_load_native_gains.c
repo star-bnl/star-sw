@@ -26,7 +26,7 @@ int           pads_in_row[nRows]={ 88,  96, 104, 112, 118,
 			           134, 136, 138, 138, 140,
 			           142, 144, 144, 144, 144};
                                 
-long tfc_load_native_gains_(
+long type_of_call tfc_load_native_gains_(
   TABLE_HEAD_ST *current_sector_h, TCL_SECTOR_INDEX_ST   *current_sector ,
   TABLE_HEAD_ST       *indextbl_h,       TYPE_INDEX_ST         *indextbl ,
   TABLE_HEAD_ST       *gain_bad_h,    TYPE_GAIN_BAD_ST         *gain_bad ,
