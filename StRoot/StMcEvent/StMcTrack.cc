@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.7 2000/04/06 23:29:10 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.8 2000/04/12 21:32:05 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.8  2000/04/12 21:32:05  calderon
+ * Chech particle definition pointer before writing name
+ *
  * Revision 2.7  2000/04/06 23:29:10  calderon
  * Store the parent track for all tracks.
  *
@@ -59,7 +62,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.7 2000/04/06 23:29:10 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.8 2000/04/12 21:32:05 calderon Exp $";
 
 StMcTrack::StMcTrack() 
 {
@@ -138,7 +141,8 @@ int StMcTrack::operator!=(const StMcTrack& t) const
 
 ostream&  operator<<(ostream& os, const StMcTrack& t)
 {
-    os << "Particle      : " << t.particleDefinition()->name().c_str() << endl;
+    if (t.particleDefinition())
+	os << "Particle      : " << t.particleDefinition()->name().c_str() << endl;
     os << "Four Momentum : " << t.fourMomentum() << endl; 
     os << "Pt            : " << t.pt() << endl;
     os << "Rapidity      : " << t.rapidity() << endl;
