@@ -94,7 +94,7 @@ c
 C      this will only work if Kalman fit was used
         if(iand(globtrk(i).method,kKalmanFitId).ne.0)then
          globtrk(i).chisq(2) = 0.0 ! preset in case of failure
-         rc = 1./(globtrk(i).curvature + 1.e-5)
+         rc = 1./(globtrk(i).curvature + 1.e-10)
          ndef = 2*globtrk(i).n_fit_point-5
 
 C -- use Kalman extrapolator to near primary vertex position

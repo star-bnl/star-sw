@@ -110,7 +110,7 @@ C --    this will only work if Kalman fit was used
 CCC --- restore this when substituting for egr_impactcl
 CCC         globtrk(i).chisq(2) = 0.0 ! preset in case of failure
          primtrk(index).chisq(2) = 0.0 ! preset in case of failure
-         rc = 1./(globtrk(i).curvature+1.e-5)
+         rc = 1./(globtrk(i).curvature+1.e-10)
          ndef = 2*globtrk(i).n_fit_point-5
 
 C -- use Kalman extrapolator to near primary vertex position
@@ -134,7 +134,7 @@ C --  put phi 0-2pi
 C -- Set up GEANT energy loss calculation for this track
           csign = bfield(3)*pvecis(5) ! b_z * charge
           psi = pvecis(4)+sign(1.0,csign)*C_PI_2 !mangled psi
-          r = 1.0/(abs(C_D_CURVATURE*csign)+1.e-5)
+          r = 1.0/(abs(C_D_CURVATURE*csign)+1.e-10)
 
           xb = globtrk(i).r0*cos(phi)
           yb = globtrk(i).r0*sin(phi)
@@ -150,7 +150,7 @@ C -- calculate track parameters near mainv
           trk1(5) = pvecis(3)
           trk1(6) = globtrk(i).icharge
           call ev0_update_track_param(xy0,abs(r),xyatv,trk1,trk2,bfield(3))
-          pt = 1./(globtrk(i).invpt+1.e-5)
+          pt = 1./(globtrk(i).invpt+1.e-10)
           px = pt*cos(trk2(4))
           py = pt*sin(trk2(4))
           pz = pt*trk2(5)
@@ -188,7 +188,7 @@ C --          put phi 0-2pi
               primtrk(index).z0 = mainv(3)
               primtrk(index).tanl = pveci(3)                 !tanl
               charge = sign(1.0,pveci(5))
-              r1 = 1./(pveci(5)*CONSB+1.e-5) ! signed radius of curvature
+              r1 = 1./(pveci(5)*CONSB+1.e-10) ! signed radius of curvature
 
               psi1 = pveci(4) + alen/r1
               if(psi1.gt. C_2PI)psi1 = psi1-C_2PI

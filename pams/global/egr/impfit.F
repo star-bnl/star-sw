@@ -54,7 +54,7 @@
 
       impfit = 0
 
-      if (abs(bfield) .le. 1.e-5) return
+      if (abs(bfield) .le. 1.e-10) return
       CONSB = C_D_CURVATURE*bfield
 
       Good = .01 ! convergence criterion
@@ -78,7 +78,7 @@
       enddo
 
       CALL UCOPY(pvect(1), Xb(1), 5)
-      r1 = 1./(Xb(5)*CONSB+1.e-5) ! signed radius of curvature
+      r1 = 1./(Xb(5)*CONSB+1.e-10) ! signed radius of curvature
 
 CCC      Xb(6) = r1*(pvecv(4)-pvect(4)) 
       Xb(6) = rxy ! approximate initial guess for arclength 

@@ -211,7 +211,7 @@ CCC        ENDIF
         Y0  = RIN * SIN( PH0 )
 *--
 CCC        HRH = - SIN( PIN(3) ) / ( CONSB * PIN(5) )
-        HRH = - 1.0 / ( CONSB * PIN(5) +1.e-5 )
+        HRH = - 1.0 / ( CONSB * PIN(5) +1.e-10 )
         RRH = HRH ** 2
 *--
         X1  = X0 - HRH * SIN( PIN(4) )
@@ -258,7 +258,7 @@ CCC        POU(2) = PIN(2) + DPH * HRH / TAN( PIN(3) )
         XYZ(1) = RE1*COS(PIN(1)/RE1)
         XYZ(2) = RE1*SIN(PIN(1)/RE1)
         XYZ(3) = PIN(2)
-        MOMENTUM = SQRT(1.+PIN(3)**2)/(ABS(PIN(5))+1.e-5)
+        MOMENTUM = SQRT(1.+PIN(3)**2)/(ABS(PIN(5))+1.e-10)
         ENERGY = SQRT(MOMENTUM**2+PMASS**2)
 
         TKIN(1) = ENERGY - PMASS ! KE 
