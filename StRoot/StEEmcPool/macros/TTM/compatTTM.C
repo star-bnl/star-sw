@@ -10,8 +10,8 @@ int
 compatTTM
 (
  char* inpDir  = "/star/fy2003/mudst/",
- char* inpFile = "", //"st_physics_4145010_raw_0010001.MuDst.root",
- Int_t nFiles  = 50
+ char* inpFile = "st_physics_4145010_raw_0010001.MuDst.root",
+ Int_t nFiles  = 1
  )
 { 
   
@@ -87,10 +87,14 @@ compatTTM
     if(curSize>maxSize) maxSize=curSize;
     if(curSize<minSize) minSize=curSize;
     counter++;
-    fprintf(stdout,"EVENT#%-6d   matched:%-6d  heap=%5.1f prog=%5.1f (%5.1f/%5.1f)\r",
-	    counter,m->GetNMatched(),curUsed,curSize,minSize,maxSize);
+    if(!(counter%100)) {
+      fprintf(stdout,"EVENT#%-6d   matched:%-6d  heap=%5.1f prog=%5.1f (%5.1f/%5.1f)\n",
+	      counter,m->GetNMatched(),curUsed,curSize,minSize,maxSize);
+      fflush(stdout);
+    }
     stat = chain->Make();
   }
+  timer.stop();
   //chain->Finish();
   cout << endl;
   cout << "tracks matched: " << m->GetNMatched() << endl;
