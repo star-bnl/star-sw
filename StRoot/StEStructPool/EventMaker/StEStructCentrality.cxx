@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCentrality.cxx,v 1.3 2004/06/09 22:39:06 prindle Exp $
+ * $Id: StEStructCentrality.cxx,v 1.4 2004/09/24 01:46:45 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -150,6 +150,12 @@ void StEStructCentrality::setPts( const double* pts,   const int numPt,
     }
     mnumptcents=numCent;
 }
+void StEStructCentrality::setPtLimit( const int index, double pt ) {
+    if ((index < 0) || (mnumpts <index)) {
+        return;
+    }
+    mpts[index] = pt;
+}
 int StEStructCentrality::numPts() {
     return mnumpts;
 }
@@ -172,6 +178,10 @@ double StEStructCentrality::ptCentralityLimit( const int index ) {
 /***********************************************************************
  *
  * $Log: StEStructCentrality.cxx,v $
+ * Revision 1.4  2004/09/24 01:46:45  prindle
+ * Added call for setPtLimit. I use this in fluctuations which prevented
+ * a fresh CVS checkout from compiling
+ *
  * Revision 1.3  2004/06/09 22:39:06  prindle
  * Expanded centrality class.
  * Call to set centrality from event reader.

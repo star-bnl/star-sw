@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCentrality.h,v 1.4 2004/06/25 03:13:41 porter Exp $
+ * $Id: StEStructCentrality.h,v 1.5 2004/09/24 01:46:45 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -39,6 +39,7 @@ class StEStructCentrality {
   int ptCentrality(const double cent);
 
   void setCentralities( const double* centralities, const int num );
+  void setPtLimit( const int index, double pt );
   int numCentralities();
   double centralityLimit( const int index );
 
@@ -69,6 +70,10 @@ inline double StEStructCentrality::maxCentrality(int id){
 /***********************************************************************
  *
  * $Log: StEStructCentrality.h,v $
+ * Revision 1.5  2004/09/24 01:46:45  prindle
+ * Added call for setPtLimit. I use this in fluctuations which prevented
+ * a fresh CVS checkout from compiling
+ *
  * Revision 1.4  2004/06/25 03:13:41  porter
  * updated centrality methods and put a test in StEStructEvent.cxx
  *
