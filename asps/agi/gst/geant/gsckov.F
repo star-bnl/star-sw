@@ -1,7 +1,10 @@
 *
-* $Id: gsckov.F,v 1.3 2000/04/12 19:48:56 nevski Exp $
+* $Id: gsckov.F,v 1.4 2000/04/12 23:20:21 nevski Exp $
 *
 * $Log: gsckov.F,v $
+* Revision 1.4  2000/04/12 23:20:21  nevski
+* NPCKOV defined
+*
 * Revision 1.3  2000/04/12 19:48:56  nevski
 * GCJLOC common (which contains links) restored
 *
@@ -47,7 +50,7 @@ C.
 #include "geant321/gcjloc.inc"
 C
       REAL     PPCKOV(*), ABSCO(*), EFFIC(*), RINDEX(*)
-      INTEGER  ITMED, J
+      INTEGER  ITMED, NPCKOV, J
 C.
 C.    ------------------------------------------------------------------
 C.
