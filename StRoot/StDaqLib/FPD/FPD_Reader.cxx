@@ -1,10 +1,13 @@
 /***************************************************************************
-* $Id: FPD_Reader.cxx,v 1.1 2002/01/17 17:19:58 akio Exp $
+* $Id: FPD_Reader.cxx,v 1.2 2003/05/22 20:48:17 perev Exp $
 * Author: Akio Ogawa
 ***************************************************************************
 * Description:  FPD Event Reader
 ***************************************************************************
 * $Log: FPD_Reader.cxx,v $
+* Revision 1.2  2003/05/22 20:48:17  perev
+* method added to remove unprintef chars
+*
 * Revision 1.1  2002/01/17 17:19:58  akio
 * First version of FPD daq reader
 *
@@ -28,8 +31,9 @@ void FPD_Reader::ProcessEvent(const Bank_FPDP * FpdPTR) {
   if (FpdPTR->AdcPTR.length>0) {
     FpdAdcD = (FPDDATA *) ((unsigned long *)FpdPTR + FpdPTR->AdcPTR.offset);
     //FpdAdcD->print();
+
     FpdAdcD->swap();
-    cout << "FPD_Reader(FPDADCD): Got a bank named " << FpdAdcD->header.BankType << endl;
+    cout << "FPD_Reader(FPDADCD): Got a bank named " << FpdAdcD->bankTypeString() << endl;
     if (FpdAdcD->header.Token!=Token){
       cout << "FPD_Reader: Token mismatch FPDP "<< Token<<" "
 	   << " FPDADCD " << FpdAdcD->header.Token << endl;
@@ -52,7 +56,7 @@ void FPD_Reader::ProcessEvent(const Bank_FPDP * FpdPTR) {
     FpdTdcD = (FPDDATA *) ((unsigned long *)FpdPTR + FpdPTR->TdcPTR.offset);
     //FpdTdcD->print();
     FpdTdcD->swap();
-    cout << "FPD_Reader(FPDTDCD): Got a bank named " << FpdTdcD->header.BankType << endl;;
+    cout << "FPD_Reader(FPDTDCD): Got a bank named " << FpdTdcD->bankTypeString() << endl;;
     if (FpdTdcD->header.Token!=Token){
       cout << "FPD_Reader: Token mismatch FPDP "<< Token 
 	   << " FPDTDCD " << FpdTdcD->header.Token << endl;
@@ -75,7 +79,7 @@ void FPD_Reader::ProcessEvent(const Bank_FPDP * FpdPTR) {
     FpdRegD = (FPDDATA *) ((unsigned long *)FpdPTR + FpdPTR->RegPTR.offset);
     //FpdRegD->print();
     FpdRegD->swap();
-    cout << "FPD_Reader(FPDREGD): Got a bank named " << FpdRegD->header.BankType << endl;
+    cout << "FPD_Reader(FPDREGD): Got a bank named " << FpdRegD->bankTypeString() << endl;
     if (FpdRegD->header.Token!=Token){
       cout << "FPD_Reader: Token mismatch FPDP "<< Token 
 	   << " FPDREGD " << FpdRegD->header.Token << endl;
@@ -98,7 +102,7 @@ void FPD_Reader::ProcessEvent(const Bank_FPDP * FpdPTR) {
     FpdPedD = (FPDDATA *) ((unsigned long *)FpdPTR + FpdPTR->PedPTR.offset);
     //FpdPedD->print();
     FpdPedD->swap();
-    cout << "FPD_Reader(FPDPEDD): Got a bank named " << FpdPedD->header.BankType << endl;
+    cout << "FPD_Reader(FPDPEDD): Got a bank named " << FpdPedD->bankTypeString() << endl;
     if (FpdPedD->header.Token!=Token){
       cout << "FPD_Reader: Token mismatch FPDP "<< Token 
 	   << " FPDPEDD " << FpdPedD->header.Token << endl;
@@ -121,7 +125,7 @@ void FPD_Reader::ProcessEvent(const Bank_FPDP * FpdPTR) {
     FpdSclD = (FPDSCLDATA *) ((unsigned long *)FpdPTR + FpdPTR->SclPTR.offset);
     //FpdSclD->print();
     FpdSclD->swap();
-    cout << "FPD_Reader(FPDSCL): Got a bank named " << FpdSclD->header.BankType << endl;
+    cout << "FPD_Reader(FPDSCL): Got a bank named " << FpdSclD->bankTypeString() << endl;
     if (FpdSclD->header.Token!=Token){
       cout << "FPD_Reader: Token mismatch FPDP "<< Token 
 	   << " FPDSCL " << FpdSclD->header.Token << endl;
@@ -144,7 +148,7 @@ void FPD_Reader::ProcessEvent(const Bank_FPDP * FpdPTR) {
     BbcAdcD = (FPDDATA *) ((unsigned long *)FpdPTR + FpdPTR->BbcAdcPTR.offset);
     //FpdPedD->print();
     BbcAdcD->swap();
-    cout << "FPD_Reader(BBCDAT): Got a bank named " << BbcAdcD->header.BankType << endl;
+    cout << "FPD_Reader(BBCDAT): Got a bank named " << BbcAdcD->bankTypeString() << endl;
     if (BbcAdcD->header.Token!=Token){
       cout << "FPD_Reader: Token mismatch FPDP "<< Token 
 	   << " BBCDAT " << BbcAdcD->header.Token << endl;
@@ -167,7 +171,7 @@ void FPD_Reader::ProcessEvent(const Bank_FPDP * FpdPTR) {
     BbcPedD = (FPDDATA *) ((unsigned long *)FpdPTR + FpdPTR->BbcPedPTR.offset);
     //FpdPedD->print();
     BbcPedD->swap();
-    cout << "FPD_Reader(BBCPED): Got a bank named " << BbcPedD->header.BankType << endl;
+    cout << "FPD_Reader(BBCPED): Got a bank named " << BbcPedD->bankTypeString() << endl;
     if (BbcPedD->header.Token!=Token){
       cout << "FPD_Reader: Token mismatch FPDP "<< Token 
 	   << " BBCPED " << BbcPedD->header.Token << endl;
@@ -189,7 +193,7 @@ void FPD_Reader::ProcessEvent(const Bank_FPDP * FpdPTR) {
     BbcSclD = (FPDSCLDATA *) ((unsigned long *)FpdPTR + FpdPTR->BbcSclPTR.offset);
     //FpdPedD->print();
     BbcSclD->swap();
-    cout << "FPD_Reader(BBCSCL): Got a bank named " << BbcSclD->header.BankType << endl;
+    cout << "FPD_Reader(BBCSCL): Got a bank named " << BbcSclD->bankTypeString() << endl;
     if (BbcSclD->header.Token!=Token){
       cout << "FPD_Reader: Token mismatch FPDP "<< Token 
 	   << " BBCSCLD " << BbcSclD->header.Token << endl;
