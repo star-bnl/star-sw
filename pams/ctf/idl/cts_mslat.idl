@@ -1,3 +1,6 @@
+/*
+ *	revised by wjl for mdc2
+ */
 struct cts_mslat { 
    long      i_eta;      // Eta index 
    long      i_phi;      // Phi index 
@@ -12,6 +15,7 @@ struct cts_mslat {
    float     s_length;   // Trajectory length 
    float     pm_length;  // Distance from impact to tube
    float     z_hit    ;  // Z hit position 
-   float     time;       // Measured time 
-   float     tof;        // Tof of first particle 
+   float     tof;        // Tof of first particle to strike the slat
+   float     time;       // Tof+prop delay of first particle to strike the slat 
+   float     mtime;      // now include the length-dependent time resolution
 } ;

@@ -4,6 +4,7 @@
 **:             03feb97-      ppy- STAF version
 **:             19mar98-      ppy- zero suppression introduced
 **:                           this may mess up physical and electronic noise
+**:             13jan99-      WJL - lots of changes/updates for TOFp
 **:
 **:<------------------------------------------------------------------*/
 #include <math.h>
@@ -117,10 +118,11 @@ extern "C" long type_of_call cts_(
 **: 
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
-   char  OutMessage[50] ;
+   char  OutMessage[100] ;
 //
 //   Check there are input hits
 //
+   printf(" cts: entering cts\n");  //WJL
    if ( mhit_h->nok < 1 ) {
      sprintf ( OutMessage, " No input hits " ) ;
      MessageOut ( OutMessage ) ;
@@ -187,6 +189,7 @@ extern "C" long type_of_call cts_(
 //
 //   Simulate counter response
 //
+//   printf(" cts: calling cts_detector_response\n");
    cts_detector_response ( mhit_h,   mhit, 
                            track_h,    track, 
                            geo_h,      geo,
@@ -198,21 +201,25 @@ extern "C" long type_of_call cts_(
 //
 //    Fill raw table
 //
+//   printf(" cts: calling cts_fill_raw\n");
    cts_fill_raw ( geo_h, geo, mpara_h, mpara,
                   mslat_h, mslat, slat_h, slat, raw_h, raw ) ;
 //
 //   Add electronic noise if requested
 //
    if ( mpara->elec_noise < 0 )
+//      printf(" cts: calling cts_electronic_noise\n");
       cts_electronic_noise ( geo_h, geo, mpara_h, mpara,
                              slat_h, slat, raw_h,   raw ) ;
 //
 //   Fill info about event
 //
+//   printf(" cts: calling cts_fill_event\n");
    cts_fill_event ( track_h, track, mslat_h, mslat, event_h, event ) ;
 //
 //  That's it
 //
+   printf(" cts: leaving cts\n");
    return STAFCV_OK;
 }
 //
@@ -253,7 +260,7 @@ long cts_detector_response (
 **:              mslat    - Monte Carlo slat information   
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
-   char  OutMessage[50] ;
+   char  OutMessage[100] ;
 //
 //    Total number of counters in phi and eta
 //
@@ -266,11 +273,21 @@ long cts_detector_response (
 //
 //   Loop over hits
 //
+   printf(" CTS: starting hit loop for detector=%d\n",geo->detector);
    for ( int i_hit = 0 ; i_hit < mhit_h->nok ; i_hit++ ) {
 //
 //   Get indexes
 //   If routines return 0 something went wrong
 //
+
+#ifdef TEST
+	if(geo->detector == 2){     //WJL
+		printf("%d %d    %f %f %f \n", 
+        mhit[i_hit].volume_id, mhit[i_hit].track_p,
+        mhit[i_hit].x[0], mhit[i_hit].x[1], mhit[i_hit].x[2] );
+	}                          //WJL
+#endif
+
       if ( mpara->geo_from_geant ){
          cts_get_ctf_indexes ( geo->detector, mhit[i_hit].volume_id, i_phi, i_eta ) ;
 #ifdef TEST
@@ -319,8 +336,9 @@ long cts_detector_response (
                            / slat_eta[i_eta].cosang ;
       if ( Length < -1 * mpara->position_tolerance || 
            Length - mpara->position_tolerance > max_distance  ) { 
-           sprintf ( OutMessage, " cts: Hit %d has wrong distance: %f  ",
-                                   i_hit, Length ) ;
+           sprintf ( OutMessage, 
+             " cts: Hit %d has local-Z exceeding len. of assigned slat: %f %f ",
+             i_hit, Length, max_distance ) ;
            MessageOut ( OutMessage ) ;
            continue ;
       }
@@ -330,15 +348,11 @@ long cts_detector_response (
 //
       long n_phe ;
       if ( !(mpara->slat_para) ) {
-//
-//         Exponential attenuation
-//
+//---- Exponential attenuation
          n_phe = mhit[i_hit].de * cts_slat_response_exp ( Length, mpara ) ;
       }
       else {
-//
-//     Get distance to closest edge
-//
+//---- Get distance to closest edges and use maps
          float phi    = atan2 ( mhit[i_hit].x[1], mhit[i_hit].x[0] ) ;
          if ( phi < 0 ) phi += 2. * Pi ;
          float d_phi_1 = fabs(slat_phi[i_phi].phi_min/Todeg-phi) ;
@@ -346,27 +360,22 @@ long cts_detector_response (
          float d_phi_2 = fabs(slat_phi[i_phi].phi_max/Todeg-phi) ;
          if ( d_phi_2 > Pi ) d_phi_2 = 2. * Pi - d_phi_2 ;
          float d_edge = geo->r * min(d_phi_1,d_phi_2) ;
-//
          n_phe = mhit[i_hit].de * 
                  cts_slat_response_table ( Length, d_edge, mhit[i_hit].tof, mpara ) ;
       }
 //
-//     Check the slat number
-//
+//---- Check the slat number
       long index = ctg_index ( i_phi+1, i_eta+1, n_eta ) ;
 //
-//    Verify indexes
-//
+//---- Verify indices
       if ( slat[index].i_phi != i_phi+1 ){
          MessageOut ( " cts_detector_response: i_phi mismatch " ) ;
          continue ;
       }
-//
       if ( slat[index].i_eta != i_eta+1 ){
          MessageOut ( " cts_detector_response: i_eta mismatch " ) ;
          continue ;
       }
-//
       long i_slat = local_index[index] ;
       if ( i_slat < 0 ) {   
          i_slat = n_slats_on ;
@@ -376,57 +385,74 @@ long cts_detector_response (
          n_slats_on++ ;
       }
 //
-//     Store # photoelectrons and deposited Energy
-//     and momentum of particles going through
-// 
-      mslat[i_slat].pm_length = Length ;
-      mslat[i_slat].z_hit     = mhit[i_hit].x[2] ;
-      mslat[i_slat].n_phe    += n_phe ;
+//---- Store # photoelectrons and deposited Energy
+//---- and momentum of particles going through
+//WJL-	 move pm_length assignment down...
+//WJL-	 move z_hit assignment down...
       mslat[i_slat].n_hits++ ;
+      mslat[i_slat].n_phe    += n_phe ;
       mslat[i_slat].de       += mhit[i_hit].de ;
+      mslat[i_slat].ds       += mhit[i_hit].ds ;    //WJL incremented instead of replaced...
 //
-//        Get measured time
+//---- Get measured time
+//      float time = mhit[i_hit].tof + mpara->delay * Length ;
+//      for ( float tt=0 ; tt <= 0 ; tt = time ) 
+//         tt = time + rg32_(1) * mpara->time_res * sqrt(Length) ;
 //
-      float time = mhit[i_hit].tof + mpara->delay * Length ;
-      for ( float tt=0 ; tt <= 0 ; tt = time ) 
-         tt = time + rg32_(1) * mpara->time_res * sqrt(Length) ;
+//WJL----  time = pure arrival time + propagation delay. perfect resolution
+//WJL----  tt   = same as time but w/ (now) Length-dependent slat assy resolution
+      float time = mhit[i_hit].tof + mpara->delay*Length ;
+      float resl = mpara->time_res*sqrt(fabs(Length));            //WJL
+      if (resl < 50.e-12) resl = 50.e-12;                         //WJL practical lower limit
+      float tt  = mhit[i_hit].tof + mpara->delay*Length + rg32_(1)*resl;
+
+#ifdef TEST
+	if(geo->detector == 2){     //WJL
+		printf("%d %d     %f %f %f      %f %f %f %f\n", i_hit, i_slat, 
+        mhit[i_hit].x[0], mhit[i_hit].x[1], mhit[i_hit].x[2],
+		Length, 1.e9*time, 1.e9*resl, 1.e9*tt );
+	}
+#endif
 //
-//        Keep real time of fastest particle
-//
+//---- Keep real time of fastest particle to slat.
       if ( mslat[i_slat].tof == 0 || mhit[i_hit].tof < mslat[i_slat].tof )    
              mslat[i_slat].tof = mhit[i_hit].tof ;
 //
-//        Keep measured time of fastest particle
+//---- Keep earliest measured time 
+//WJL *and* other information appropriate for this hit....
+      if ( mslat[i_slat].time < 0 || time < mslat[i_slat].time ) {  
+             mslat[i_slat].time      = time ;
+             mslat[i_slat].mtime     = tt;
+             mslat[i_slat].z_hit     = mhit[i_hit].x[2] ;    //WJL from above...
+             mslat[i_slat].pm_length = Length ;              //WJL from above...
+             mslat[i_slat].s_length  = mhit[i_hit].s_track ; //WJL from below...
+             float px                = mhit[i_hit].p[0] ;    //WJL from below...
+             float py                = mhit[i_hit].p[1] ;    //WJL from below...
+             float pz                = mhit[i_hit].p[2] ;    //WJL from below...
+             mslat[i_slat].ptot      = sqrt(px*px+py*py+pz*pz) ; //WJL from below...
+             mslat[i_slat].mc_trk_id = mhit[i_hit].track_p ;     //WJL from below...
+      }
 //
-      if ( mslat[i_slat].time < 0 || time < mslat[i_slat].time ) 
-             mslat[i_slat].time = time ;
+//---- Keep some information about the last particle 
 //
-//        Keep some information about the last particle
+//WJL why useful? should this be the info corresponding to the earliest hit?
+//WJL these lines moved up (just above)...
 //
-      float px                = mhit[i_hit].p[0] ;
-      float py                = mhit[i_hit].p[1] ;
-      float pz                = mhit[i_hit].p[2] ;
-      float ptot              = sqrt(px*px+py*py+pz*pz) ;
-      mslat[i_slat].ptot      = ptot ;
-      mslat[i_slat].mc_trk_id = mhit[i_hit].track_p ;
-      mslat[i_slat].s_length  = mhit[i_hit].s_track ;
-      mslat[i_slat].ds        = mhit[i_hit].ds ;
+//---- Generate noise only in phys_noise% of slats
+//WJL      if ( rndm_(1) < mpara->phys_noise ) 
+//WJL             cts_physical_noise ( i_phi, i_eta, n_slats_on,
+//WJL                                  n_phe, time,
+//WJL                                  mslat_h, mslat,   
+//WJL                                  geo_h,   geo   ) ;
 //
-//     Generate noise only in phys_noise% of slats
-//
-      if ( rndm_(1) < mpara->phys_noise ) 
-             cts_physical_noise ( i_phi, i_eta, n_slats_on,
-                                  n_phe, time,
-                                  mslat_h, mslat,   
-                                  geo_h,   geo   ) ;
    } // end loop over hits
 //
-//   Store number of slats with signal
-//
+//---- Store number of slats with signal
+   printf(" cts: n_slats_on = %d\n", n_slats_on); 
    mslat_h->nok  = n_slats_on ;
 //
-//  That's it
-//
+//---- That's it
+   printf(" cts: leaving cts_detector_response\n");  //WJL
    return STAFCV_OK;
 }
 //
@@ -482,6 +508,7 @@ void cts_fill_event (
       }
    }
 //
+   printf(" cts: n_event+1  = %d\n", n_event+1); 
    event_h->nok = n_event + 1 ;
 }
 void cts_fill_raw (
@@ -536,18 +563,35 @@ void cts_fill_raw (
 //
 //     Adc 
 //
-      offset = slat[index].offset_adc + rg32_(1)* slat[index].ods_adc ;
-      raw[i_raw].adc = (int)((float)mslat[i_slat].n_phe * mpara->nphe_to_adc) 
-                       + offset ;
-      if ( raw[i_raw].adc > mpara->adc_overflow ) 
-                   raw[i_raw].adc = mpara->adc_overflow ;
-      mslat[index].adc = raw[i_raw].adc ;
+//?WJL      offset = slat[index].offset_adc + rg32_(1)* slat[index].ods_adc ;
+//?WJL      raw[i_raw].adc = (int)((float)mslat[i_slat].n_phe * mpara->nphe_to_adc) 
+//?WJL                       + offset ;
+//?WJL      if ( raw[i_raw].adc > mpara->adc_overflow ) 
+//?WJL                   raw[i_raw].adc = mpara->adc_overflow ;
+//?WJL      mslat[index].adc = raw[i_raw].adc ;
+//
+      offset = slat[index].offset_adc + rg32_(1)*slat[index].ods_adc;
+      mslat[i_slat].adc = (int)((float)mslat[i_slat].n_phe*mpara->nphe_to_adc)
+                        + offset;
+      if ( mslat[i_slat].adc > mpara->adc_overflow )
+           mslat[i_slat].adc = mpara->adc_overflow ;
+      if ( mslat[i_slat].adc < 0 )
+           mslat[i_slat].adc = 0;
+      raw[i_raw].adc = mslat[i_slat].adc;
 //
 //     Tdc
 //
+//?WJL      offset = slat[index].offset_tdc + rg32_(1)* (float)slat[index].ods_tdc ;
+//?WJL      raw[i_raw].tdc = mslat[i_slat].time / slat[index].cc_tdc + offset ;
+//?WJL      mslat[i_slat].tdc = raw[i_raw].tdc ;
+//
       offset = slat[index].offset_tdc + rg32_(1)* (float)slat[index].ods_tdc ;
-      raw[i_raw].tdc = mslat[i_slat].time / slat[index].cc_tdc + offset ;
-      mslat[i_slat].tdc = raw[i_raw].tdc ;
+      mslat[i_slat].tdc = mslat[i_slat].mtime / slat[index].cc_tdc + offset ;
+      if ( mslat[i_slat].tdc > mpara->tdc_overflow )
+           mslat[i_slat].tdc = mpara->tdc_overflow ;
+      if ( mslat[i_slat].tdc < 0 )
+           mslat[i_slat].tdc = 0;
+      raw[i_raw].tdc = mslat[i_slat].tdc;
 //
       raw[i_raw].i_phi = mslat[i_slat].i_phi ; 
       raw[i_raw].i_eta = mslat[i_slat].i_eta ;
@@ -556,6 +600,7 @@ void cts_fill_raw (
 //   If zero suppression stop here
 //
    if ( mpara->zero_suppression ) {
+   printf(" cts: mslat nok  = %d\n", mslat_h->nok); 
       raw_h->nok = mslat_h->nok ;
       return ;
    }
@@ -574,6 +619,7 @@ void cts_fill_raw (
 //
 //   Set number of slats with raw data
 //
+   printf(" cts: nphi*neta  = %d\n", n_phi*n_eta); 
    raw_h->nok = n_phi * n_eta ;
 //
 //  That's it
@@ -647,6 +693,7 @@ void cts_electronic_noise (
 //
 //   Update # entries
 //
+   printf(" noi: n_slats_on = %d\n", n_slats_on); 
    raw_h->nok = n_slats_on ;
 //
 //  That's it
@@ -726,10 +773,21 @@ void cts_get_tof_indexes ( long volume, long &i_phi, long &i_eta ) {
     short i_tray_eta,    i_tray_phi ;
     short i_counter_eta, i_counter_phi ; 
 
+//WJL - tofp heierarchy is different, but pavel changed g2t_volume_id...
     i_tray_eta    = int(volume/100000) ;
     i_counter_eta = (short)fmod(volume,100000)/1000 ;
     i_tray_phi    = (short)fmod(volume,1000)/10 ;
     i_counter_phi = (short)fmod(volume,10) ;
+
+//    i_tray_eta    =  1;
+//    i_counter_phi = int(volume/100000);
+//    i_tray_phi    =  1;
+//    i_counter_eta = (short)fmod(volume,1000)/10;
+
+#ifdef TEST
+	printf(" %d %d %d %d %d \n", 
+	volume, i_tray_eta, i_counter_eta, i_tray_phi, i_counter_phi);
+#endif
 
     if ( i_tray_eta == 1 ) {
        i_phi = 14 - i_tray_phi ;
@@ -742,11 +800,11 @@ void cts_get_tof_indexes ( long volume, long &i_phi, long &i_eta ) {
        i_phi = i_phi * 5 + i_counter_phi - 5 ;
     }
     else
-       cout<<" ctg_get_tof_indexes: I_eta error "<<endl ;
+       cout<<" ctg_get_tof_indexes: I_eta error "<<i_tray_eta<<endl ;
 //
-    if ( i_tray_eta == 1 ) i_eta = i_counter_eta + 10 ;
+    if ( i_tray_eta == 1 ) i_eta = i_counter_eta + 9 ;   //WJL
        else
-    if ( i_tray_eta == 2 ) i_eta = 11 - i_counter_eta ;
+    if ( i_tray_eta == 2 ) i_eta = 10 - i_counter_eta ;  //WJL
 
 }
 //
