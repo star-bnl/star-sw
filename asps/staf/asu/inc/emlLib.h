@@ -136,7 +136,7 @@ extern CC_P char * emlContext(char *fmt, ...);
 	fprintf(stderr,"------------------------------------------------\n"); \
 	fprintf(stderr,"%s\n",eml_stack); \
 	if(eml_demand_ack_on) { fprintf(stderr,"Press return to continue: "); \
-				gets(eml_error_ack); } \
+				fgets(eml_error_ack,100,stdin); } \
 	DSPERROR((dsl):); \
 	fflush(stderr); EML_CLEARSTACK();}
 
