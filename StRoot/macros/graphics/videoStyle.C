@@ -1,15 +1,22 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: videoStyle.C,v 1.2 1999/12/22 21:43:58 posk Exp $
+// $Id: videoStyle.C,v 1.3 2000/02/04 16:42:46 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Oct. 1999
 // Description:  Style file for video presentation histograms.
-//               Just execute this macro before making your graph.
-//               You can return to defaultStyle with gROOT->SetStyle("Default").
+//               Just execute this macro before making your graphs.
+//               Begining with ROOT 2.23/11 you can do
+//                    gROOT->SetStyle("Video");
+//                    gROOT->ForceStyle();               
+//               You can return to defaultStyle with 
+//                    gROOT->SetStyle("Default");
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: videoStyle.C,v $
+// Revision 1.3  2000/02/04 16:42:46  posk
+// Documented the availability in ROOT.
+//
 // Revision 1.2  1999/12/22 21:43:58  posk
 // Reduced the line widths to compensate for the increase in postscript
 // line width which started in ROOT 2.23/08.
@@ -32,6 +39,7 @@ TStyle* myStyle = new  TStyle("videoStyle", "Video Style");
 myStyle->SetPalette(1,0);
 myStyle->SetCanvasColor(10);
 myStyle->SetCanvasBorderMode(0);
+myStyle->SetLineWidth(3);
 myStyle->SetFrameLineWidth(3);
 myStyle->SetFrameFillColor(10);
 myStyle->SetPadColor(10);
