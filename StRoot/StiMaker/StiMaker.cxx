@@ -7,6 +7,9 @@
 //
 //
 // $Log: StiMaker.cxx,v $
+// Revision 1.102  2002/09/05 05:47:30  pruneau
+// Adding Editable Parameters and dynamic StiOptionFrame
+//
 // Revision 1.101  2002/08/28 17:14:18  pruneau
 // Simplified the interface of StiKalmanTrackFinder and the calls
 // required in StiMaker.
@@ -101,6 +104,7 @@
 #include "StiStEventFiller.h"
 #include "StiMaker.h"
 #include "Sti/StiSimpleTrackFilter.h"
+#include "StiMaker/StiRootSimpleTrackFilter.h"
 
 StiMaker* StiMaker::sinstance = 0;
 
@@ -289,6 +293,7 @@ void StiMaker::finishEvent()
   mevent = mStEventFiller->fillEvent(mevent, toolkit->getTrackContainer());
   clockGlobalFiller.stop();
 
+  cout << " - 1 -  " <<endl;
   if (mevent->primaryVertex()) 
     {
       clockPrimaryFinder.start();
@@ -305,16 +310,25 @@ void StiMaker::finishEvent()
     }
   else 
     cout <<"StiMaker::finishEvent() - INFO - Event has no vertex" << endl;
+  cout << " - 2 -  " <<endl;
   if (ioBroker->simulated())
     {
       clockAssociator.start();
       StiEventAssociator::instance()->associate(mMcEvent);
+      cout << " - 2a -  " <<endl;
       clockAssociator.stop();
       clockEvaluator.start();
-      StiEvaluator::instance()->evaluate(toolkit->getTrackContainer());
+      //StiEvaluator::instance()->evaluate(toolkit->getTrackContainer());
+      cout << " - 2b -  " <<endl;
       clockEvaluator.stop();
     }
-  if (ioBroker->useGui()==true)    tracker->update();
+  cout << " - 3 -  " <<endl;
+  if (ioBroker->useGui()==true) 
+    {
+      cout << "ioBroker->useGui()==true" << endl;
+      tracker->update();
+    }
+  cout << " - 4 -  " <<endl;
 
   eventIsFinished = true;
   cout <<"StiMaker::finishEvent()"<<endl
@@ -326,32 +340,36 @@ void StiMaker::finishEvent()
        <<"         Filling :"<<clockPrimaryFiller.elapsedTime()<<endl
        <<"     Association :"<<clockAssociator.elapsedTime()<<endl
        <<"      Evaluation :"<<clockEvaluator.elapsedTime()<<endl;
-    
-  // filter our baby...
-  trackFilter->set(StiSimpleTrackFilter::kChi2,       0., 100.);
-  trackFilter->set(StiSimpleTrackFilter::kPt,         0., 10. );
-  //trackFilter->set(StiSimpleTrackFilter::kPseudoRap, -1.5, 1.5);
-  trackFilter->set(StiSimpleTrackFilter::kNPts,       5., 50.);
-  trackFilter->set(StiSimpleTrackFilter::kNGaps,      0., 50.);
-  cout << "      Total Found:" << tracker->getTrackFoundCount()<<endl;
-  trackFilter->set(StiSimpleTrackFilter::kPt,         0.1, 0.2 );
-  cout << "       0.1<pt<0.2:" << tracker->getTrackFoundCount(trackFilter) << endl;
-  trackFilter->set(StiSimpleTrackFilter::kPt,         0.2, 0.5 );
-  cout << "       0.2<pt<0.5:" << tracker->getTrackFoundCount(trackFilter) << endl;
-  trackFilter->set(StiSimpleTrackFilter::kPt,         0.5, 1.0 );
-  cout << "       0.5<pt<1.0:" << tracker->getTrackFoundCount(trackFilter) << endl;
-  trackFilter->set(StiSimpleTrackFilter::kPt,         1.0,10.0 );
-  cout << "       1.0<pt<10.:" << tracker->getTrackFoundCount(trackFilter) << endl;
-  trackFilter->set(StiSimpleTrackFilter::kPt,         0.1, 0.5 );
-  trackFilter->set(StiSimpleTrackFilter::kNPts,       5., 20.);
-  cout << "NPts<20 && 0.1<pt<0.5 :" << tracker->getTrackFoundCount(trackFilter) << endl;
-  trackFilter->set(StiSimpleTrackFilter::kNPts,       20., 100.);
-  cout << "NPts>20 && 0.1<pt<0.5 :" << tracker->getTrackFoundCount(trackFilter) << endl;
-  trackFilter->set(StiSimpleTrackFilter::kPt,         0.5, 10. );
-  trackFilter->set(StiSimpleTrackFilter::kNPts,       5., 20.);
-  cout << "NPts<20 && 0.5<pt<10. :" << tracker->getTrackFoundCount(trackFilter) << endl;
-  trackFilter->set(StiSimpleTrackFilter::kNPts,       20., 100.);
-  cout << "NPts>20 && 0.5<pt<10. :" << tracker->getTrackFoundCount(trackFilter) << endl;
+
+  if (ioBroker->useGui()==true) 
+    {
+      StiRootSimpleTrackFilter * f = static_cast<StiRootSimpleTrackFilter *>(tracker->getGuiTrackFilter());
+      if (f)
+	{
+	  f->getParameter("Chi2Used")->setValue(true);
+	  f->getParameter("Chi2Min")->setValue(0.);
+	  f->getParameter("Chi2Max")->setValue(20.);
+	  f->getParameter("PtUsed")->setValue(true);
+	  f->getParameter("PtMin")->setValue(0.1);
+	  f->getParameter("PtMax")->setValue(10.);
+	  f->getParameter("nPtsUsed")->setValue(true);
+	  f->getParameter("nPtsMin")->setValue(0);
+	  f->getParameter("nPtsMax")->setValue(60);
+	  f->getParameter("nGapsUsed")->setValue(true);
+	  f->getParameter("nGapsMin")->setValue(0);
+	  f->getParameter("nGapsMax")->setValue(60);
+	  cout << "      Total Found:" << tracker->getTrackFoundCount()<<endl;
+	  f->getParameter("PtMin")->setValue(0.1);
+	  f->getParameter("PtMax")->setValue(0.2);
+	  cout << "       0.1<pt<0.2:" << tracker->getTrackFoundCount(f) << endl;
+	  f->getParameter("PtMin")->setValue(0.2);
+	  f->getParameter("PtMax")->setValue(0.5);
+	  cout << "       0.2<pt<0.5:" << tracker->getTrackFoundCount(f) << endl;
+	  f->getParameter("PtMin")->setValue(0.5);
+	  f->getParameter("PtMax")->setValue(1.0);
+	  cout << "       0.5<pt<1.0:" << tracker->getTrackFoundCount(f) << endl;
+	}
+    }
   cout <<"StiMaker::finishEvent() - INFO - Done"<<endl;
 }
 
