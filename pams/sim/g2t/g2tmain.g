@@ -1,5 +1,8 @@
-* $Id: g2tmain.g,v 1.37 2000/01/28 00:47:13 nevsky Exp $
+* $Id: g2tmain.g,v 1.38 2000/12/01 22:48:01 nevski Exp $
 * $Log: g2tmain.g,v $
+* Revision 1.38  2000/12/01 22:48:01  nevski
+* phmd stuff added
+*
 * Revision 1.37  2000/01/28 00:47:13  nevsky
 * rich hits may contain up to 5 detectors: RCSI,RGAP,QUAR,FREO,OQUA
 *
@@ -159,10 +162,10 @@ created   22 april 98
      csys  = 'VPDD'       ! Geant Subsystem
      cdet  = 'VRAD'       ! Sensitive detector
    fill dete       ! star subsystem
-     ctab  = 'psc'        ! table name
+     ctab  = 'pmd'        ! table name
      spec  = '   '        ! specification type
-     csys  = 'PMDD'       ! Geant Subsystem
-     cdet  = 'VRAD'       ! Sensitive detector
+     csys  = 'PHMD'       ! Geant Subsystem
+     cdet  = 'PDGS'       ! Sensitive detector
    fill dete       ! star subsystem
      ctab  = 'pgc'        ! table name
    endfill
