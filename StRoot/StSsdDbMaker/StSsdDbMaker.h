@@ -9,8 +9,12 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#include "StDbLib/StDbDefs.hh"                         //
 
 class StChain;
+class StDbManager;
+class StDbConfigNode;
+
 
 class St_SsdDb_Reader;
 class StSsdDbReader; 
@@ -20,10 +24,14 @@ class StSsdDbWriter;
 
 class StSsdDbMaker : public StMaker {
  private:
-  Text_t *mTimeStamp;        //!
-  Int_t   mUnixTimeStamp;    //!
-  St_SsdDb_Reader *m_Reader; //!
-  StSsdDbWriter *mWriter;
+  Text_t *mTimeStamp;            //!
+  Int_t   mUnixTimeStamp;        //!
+  St_SsdDb_Reader *m_Reader;     //!
+  StSsdDbWriter *mWriter;        //!
+  
+  StDbManager* mDbMgr;           //!
+  StDbConfigNode* mConfigGeom;   //!
+  StDbConfigNode* mGeom;         //!
 
  protected:
 
@@ -31,6 +39,7 @@ class StSsdDbMaker : public StMaker {
   StSsdDbMaker(const char *name="SsdDb");
   virtual       ~StSsdDbMaker();
   virtual Int_t  Init();
+  virtual Int_t  InitTable();
   virtual Int_t  InitRun(int runumber);
   virtual Int_t  Make();
   virtual Int_t  Finish();
@@ -40,10 +49,15 @@ class StSsdDbMaker : public StMaker {
   void setUnixTimeStamp(Int_t timestamp) {mUnixTimeStamp = timestamp;}
   void setSsdDb_Reader();
 
+  void setSsdDirectDb_Reader();
+
   void setSsdConfig();
   void readSsdConfig();
+  void readSsdDirectConfig();
+
   void setSsdGeometry();
   void readSsdGeometry();
+  void readSsdDirectGeometry();
   void setSsdPedestals();
   void readSsdPedestals();
 
@@ -52,7 +66,7 @@ class StSsdDbMaker : public StMaker {
   St_SsdDb_Reader* get_SsdDb_Reader(){return m_Reader;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdDbMaker.h,v 1.2 2004/07/20 13:44:17 croy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdDbMaker.h,v 1.3 2004/08/13 06:56:43 croy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StSsdDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
