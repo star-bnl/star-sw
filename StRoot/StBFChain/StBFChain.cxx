@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.377 2004/01/28 02:49:11 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.378 2004/01/31 01:41:14 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -175,7 +175,7 @@ Bfc_st BFC1[] = {
   // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
   {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2004 (tpc)",kFALSE},
-  {"P2004"       ,""  ,"","B2004,l3onl,tofDat,emcDY2,fpd,Corr2,svt_daq,SvtD,ftpc,trgd,OSpaceZ","",""
+  {"P2004"       ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr2,svt_daq,SvtD,ftpc,trgd,OSpaceZ","",""
   ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
 
@@ -353,7 +353,8 @@ Bfc_st BFC1[] = {
   {"tpc_daq"     ,"tpc_raw","tpcChain","detDb,tpc_T"        ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"tfs"         ,"","tpcChain","Simu"                             ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"ZDCVtx"      ,"","tpcChain","db"                      ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
-  {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
+  {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls",                   "St_tcl_Maker","St_tpc,St_tcl_Maker",
+                                                                        "Cluster Finder (from raw)",kFALSE},
   {"fcf"         ,"","tpcChain","daq",           "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker",
                                                                        "Offline FCF Cluster finder",kFALSE},
   {"daqclf"      ,"","tpcChain","","StDaqClfMaker","StDaqClfMaker",    "Offline DAQ Cluster finder",kFALSE},
@@ -713,7 +714,7 @@ Bfc_st BFC2[] = {
   // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
   {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2004 (tpc)",kFALSE},
-  {"P2004"       ,""  ,"","B2004,l3onl,tofDat,emcDY2,fpd,Corr2,svt_daq,SvtD,ftpc,trgd,OSpaceZ","",""
+  {"P2004"       ,""      ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr2,svt_daq,SvtD,ftpc,trgd,OSpaceZ","",""
   ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
 
@@ -893,7 +894,8 @@ Bfc_st BFC2[] = {
   {"tpc_daq"     ,"tpc_raw","tpcChain","detDb,tpc_T"        ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"tfs"         ,"","tpcChain","Simu"                             ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"ZDCVtx"      ,"","tpcChain","db"                      ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
-  {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
+  {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"                   ,"St_tcl_Maker","St_tpc,St_tcl_Maker",
+                                                                        "Cluster Finder (from raw)",kFALSE},
   {"fcf"         ,"","tpcChain","daq",           "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker",
                                                                        "Offline FCF Cluster finder",kFALSE},
   {"daqclf"      ,"","tpcChain","","StDaqClfMaker","StDaqClfMaker",    "Offline DAQ Cluster finder",kFALSE},
@@ -2241,6 +2243,7 @@ void StBFChain::SetTreeOptions()
     if (GetOption("ems"))    treeMk->IntoBranch("emc_rawBranch","emc_raw/.data");
     if (GetOption("Trs"))    treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
     if (GetOption("tcl"))    treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
+    if (GetOption("fcf"))    treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
     if (GetOption("tpt"))    treeMk->IntoBranch("tpc_tracksBranch","tpc_tracks/.data");
     if (GetOption("srs"))    treeMk->IntoBranch("svt_hitsBranch","svt_hits/.data");
     if (GetOption("stk"))    treeMk->IntoBranch("svt_tracksBranch","svt_tracks/.data");
