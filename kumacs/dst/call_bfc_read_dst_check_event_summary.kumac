@@ -14,7 +14,7 @@
    ebye_analysis_switch=1 _
    gstar_settings=' field_only' _
    domain='  ' _
-   chain=' dstin dchkt ntup' _
+   chain=' dstin ntup' _
    skip=0 _
    no_events=70 _
    input_data_file=/disk1/star/kathy/rcf002_12_61evts_h_dst.xdf _
@@ -22,6 +22,6 @@
    log=rcf002_12_61evts_h_dst.log _
    nunit=21 _
    nfile=rcf002_12_61evts_h_dst.ntup _
-   nid=111 _
+   nid=112 _
    ntable=event/data/global/dst/event_summary
 
