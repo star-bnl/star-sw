@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.69 2002/02/01 23:06:34 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.70 2002/02/05 07:19:26 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -190,7 +190,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.69 2002/02/01 23:06:34 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.70 2002/02/05 07:19:26 snelling Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -394,7 +394,12 @@ void StFlowMaker::FillFlowEvent() {
     pFlowEvent->SetBeamMassNumberEast(pEvent->runInfo()->beamMassNumber(east));
     pFlowEvent->SetBeamMassNumberWest(pEvent->runInfo()->beamMassNumber(west));
   } else {
-    gMessMgr->Info() << "FlowMaker: no Run Info " << endm;
+    gMessMgr->Info() << "FlowMaker: no Run Info, reverting to year 1 settings "
+		     << endm;
+    pFlowEvent->SetCenterOfMassEnergy(130);
+    pFlowEvent->SetMagneticField(4.98);
+    pFlowEvent->SetBeamMassNumberEast(208);
+    pFlowEvent->SetBeamMassNumberWest(208);
   }
 
   // Get primary vertex position
@@ -791,6 +796,8 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   // Make StFlowEvent from StFlowPicoEvent
   
   if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoDST()" << endm;
+  if (Debug()) gMessMgr->Info() << "FlowMaker: Pico Version: " <<  
+		 pPicoEvent->Version() << endm;
 
   if (!pPicoEvent || !pPicoChain->GetEntry(mPicoEventCounter++)) {
     cout << "##### FlowMaker: no more events" << endl; 
@@ -809,12 +816,12 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   }
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
-
+  
   // Check event cuts
   if (!StFlowCutEvent::CheckEvent(pPicoEvent)) {  
     Int_t eventID = pPicoEvent->EventID();
     gMessMgr->Info() << "##### FlowMaker: picoevent " << eventID 
-		     << " cut" << endm;
+  		     << " cut" << endm;
     delete pFlowEvent;             // delete this event
     pFlowEvent = NULL;
     return kTRUE;
@@ -1203,7 +1210,7 @@ Bool_t StFlowMaker::FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent) {
 Bool_t StFlowMaker::FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent) {
   // Make StFlowEvent from StFlowPicoEvent
   
-  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion4DST()" << endm;
+  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion5DST()" << endm;
 
   pFlowEvent->SetEventID(pPicoEvent->EventID());
   UInt_t origMult = pPicoEvent->OrigMult();
@@ -1414,6 +1421,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.70  2002/02/05 07:19:26  snelling
+// Quick fix for problems with backward compatibility (changed ClassDef back)
+//
 // Revision 1.69  2002/02/01 23:06:34  snelling
 // Added entries for header information in flowPico (not everthing is available yet)
 //

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.h,v 1.12 2002/02/01 23:06:59 snelling Exp $
+// $Id: StFlowPicoEvent.h,v 1.13 2002/02/05 07:19:38 snelling Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -97,7 +97,7 @@ class StFlowPicoEvent : public TObject {
   TClonesArray*        fTracks;
   static TClonesArray* fgTracks;
   
-  ClassDef(StFlowPicoEvent,5)
+  ClassDef(StFlowPicoEvent,4)
 };
 
 #endif
@@ -105,6 +105,9 @@ class StFlowPicoEvent : public TObject {
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.h,v $
+// Revision 1.13  2002/02/05 07:19:38  snelling
+// Quick fix for problems with backward compatibility (changed ClassDef back)
+//
 // Revision 1.12  2002/02/01 23:06:59  snelling
 // Added entries for header information in flowPico (not everthing is available yet)
 //
