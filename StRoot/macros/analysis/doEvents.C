@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.72 2001/12/22 03:47:27 perev Exp $
+// $Id: doEvents.C,v 1.73 2002/01/15 18:28:53 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -51,6 +51,9 @@
 
 class     StChain;
 StChain  *chain=0;
+class     St_db_Maker;
+St_db_Maker *dbMk =0;
+
 Int_t iEvt=0,istat=0,nEvents=0;
 void doEvents()
 {
@@ -59,6 +62,7 @@ void doEvents()
     cout << "       doEvents.C(nEvents,\"path/*.event.root\")" << endl;
     cout << "       doEvents.C(nEvents,\"path/file.dst.root\",\"evout\") //Write out StEvent" << endl;	
     cout << "       doEvents.C(nEvents,\"path/file.dst.root\",\"display\") //EventDispay" << endl;	
+    cout << "       doEvents.C(nEvents,\"path/file.dst.root\",\"dbon\") //DB on" << endl;	
 }
 //		ProtoTypes
 
@@ -86,8 +90,8 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
 {
 
   nEvents = nEventsQQ;
-  TString tflag = qaflag;
-  int eventDisplay = tflag.Contains("disp",TString::kIgnoreCase);
+  TString tflag = qaflag; tflag.ToLower();
+  int eventDisplay = tflag.Contains("disp");
 
   cout <<  endl << endl <<" doEvents -  input # events = " << nEvents << endl;
   Int_t ilist=0;
@@ -117,6 +121,15 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     gSystem->Load("StMagF");
     gSystem->Load("StAnalysisMaker");
     
+//		DB ON
+    if (tflag.Contains("dbon")) {
+
+      gSystem->Load("StDbLib.so");
+      gSystem->Load("StDbBroker.so");
+      gSystem->Load("libStDb_Tables.so");
+      gSystem->Load("St_db_Maker.so");
+    }
+
 //   		Special libraries for EventDisplay
     if (eventDisplay) {//EventDisplay on
        gSystem->Load("St_g2t");
@@ -156,9 +169,16 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
 
 
     TString mainBranch;
-    if (fileList && fileList[0] && strstr(fileList[0],".root")) {
-      mainBranch = fileList[0];
-      printf("fileList[0] %s %s\n",fileList[0],mainBranch.Data());
+    if (fileList && fileList[0]) {
+      char line[999]; strcpy(line,fileList[0]);
+      if (*line=='@') {
+         TString command("grep '.root' "); command += line+1;
+         FILE *pipe = gSystem->OpenPipe(command.Data(),"r");
+         if (pipe) {fgets(line,999,pipe);line[strlen(line)-1] = 0;}
+	 fclose(pipe);
+      }
+      mainBranch = line;
+//    printf("fileList[0] %s %s\n",line,mainBranch.Data());
       mainBranch.ReplaceAll(".root","");
       int idot = strrchr((char*)mainBranch,'.') - mainBranch.Data();
       mainBranch.Replace(0,idot+1,"");
@@ -174,6 +194,11 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
 //     IOMk->SetBranch("runcoBranch",0,"r");
      IOMk->SetDebug();
 
+//		DB ON
+    if (tflag.Contains("dbon")) {
+      dbMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
+    }
+
     //
     // Maker to read events from file or database into StEvent
     //
@@ -188,7 +213,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     StAnalysisMaker *analysisMaker = new StAnalysisMaker("analysis");
 
     // WriteOut StEvent
-    Int_t wrStEOut = tflag.Contains("evout",TString::kIgnoreCase);
+    Int_t wrStEOut = tflag.Contains("evout");
     if (wrStEOut) {
       cout << "!!!! doEvents: will write out .event.root file !!" << endl << endl;
       StTreeMaker *outMk = new StTreeMaker("EvOut","","bfcTree");
@@ -294,6 +319,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.73  2002/01/15 18:28:53  perev
+// @file logic added
+//
 // Revision 1.72  2001/12/22 03:47:27  perev
 // StTpcDb.so is not loaded for event.root case
 //
