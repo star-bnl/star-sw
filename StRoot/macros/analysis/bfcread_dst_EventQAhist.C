@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.15 2000/01/27 18:53:52 kathy Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.16 2000/01/28 17:56:18 lansdell Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.16  2000/01/28 17:56:18  lansdell
+// changed overlay code at end to match new methods
+//
 // Revision 1.15  2000/01/27 18:53:52  kathy
 // add call to method Overlay2hists at end of macro
 //
@@ -193,8 +196,12 @@ void bfcread_dst_EventQAhist(
 //  Now draw the actual histograms to canvas and to ps file
   HU->DrawHists(MakerHistDir);
 
-//  overlay two histograms and print to screen -CPL
-  Int_t result = HU->Overlay2Hists(MakerHistDir,"StEQaGtrkRT","StEQaPtrkR");
+//  overlay two histograms and print to screen
+  Int_t result = HU->Overlay1D(MakerHistDir,"StEQaGtrkRT","StEQaPtrkR");
   if (result == kStErr)
-    cout << " !!! There was an error in Overlay2Hists !!!" << endl;  
+    cout << " !!! There was an error in Overlay1D !!!" << endl;  
+
+  result = HU->Overlay2D(MakerHistDir,"StEQaGtrkLengthVEtaT","StEQaPtrkLengthVEta");
+  if (result == kStErr)
+    cout << " !!! There was an error in Overlay2D !!!" << endl;  
 }
