@@ -138,7 +138,7 @@
 * count successfully processed events.
    nevebyetot=[nevebyetot]+1
 * write table to ntuple
-    *exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
+    exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
 * write event to file
     if [analysis_switch]=1 then
         exec write_table_to_file#write SCAANALYSIS [data]/ebye/
