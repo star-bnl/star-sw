@@ -216,12 +216,14 @@ C.......................CALCULATE CORRECTION TO THE ERROR, COMING FROM THE CROSS
                      if(ncir.eq.2) then
                         wcir(1) = wcir(1)/cf
                      endif
+                     xold = xcir(ncir)
+                     yold = ycir(ncir)
                      wcir(ncir) = wcir(ncir)/cf
                      wlin(ncir) = 1.0/dz**2
                      pnt(ncir)  = j ! pointer that identifies outliers
                   endif
                enddo            ! END OF LOOP OVER TPC HITS
-
+               
 C     Now fit provided there are at least MINFIT hits left
                if(ncir.le.egrpar(1).minfit) then
                   gtrk(i).flag=-1 ! track destroyed by the outliers removal
