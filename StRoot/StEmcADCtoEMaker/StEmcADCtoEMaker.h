@@ -1,7 +1,10 @@
-// $Id: StEmcADCtoEMaker.h,v 1.6 2001/10/24 14:41:45 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.7 2001/10/24 14:47:16 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.7  2001/10/24 14:47:16  suaide
+// type correction
+//
 // Revision 1.6  2001/10/24 14:41:45  suaide
-// ruge change on StEmcADCtoEMaker to a different software.
+// huge change on StEmcADCtoEMaker to a different software.
 // The other version is kept as *.old for future debug
 //
 //
