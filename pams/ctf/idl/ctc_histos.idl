@@ -1,7 +1,0 @@
-//
-//   ctc_histos: Controls ctc   
-//
-struct ctc_histos {
-    short      signal[256]     ; // Signal 
-    short      rel_signal[256] ; // Signal relative to number of TPC tracks 
-};
