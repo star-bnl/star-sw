@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.h,v 1.1 2002/12/13 00:47:40 fine Exp $
+// $Id: PadControlPanel.h,v 1.2 2002/12/19 01:21:45 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -19,14 +19,24 @@
 //  operation:
 //
 ///////////////////////////////////////////////////////////////////////
-
+#ifdef R__QT
 #include "Rtypes.h"
 #include "Gtypes.h"
+#if !defined(__CINT__) && defined(R__QT)
+# include <qobject.h>
+#endif
 
 class QButtonGroup;
 class TVirtualPad;
 
-class StPadControlPanel {
+class StPadControlPanel
+#if !defined(__CINT__) && defined(R__QT)
+  : public QObject 
+#endif
+{
+#if !defined(__CINT__) && defined(R__QT)
+Q_OBJECT
+#endif
   private:
      QButtonGroup *fBar;  
 //   TGLayoutHints *fL1;
@@ -38,7 +48,7 @@ public:
 
   StPadControlPanel();
   void  Build();
-  ~StPadControlPanel();
+  virtual ~StPadControlPanel();
   QButtonGroup *Bar() const;
 
   void Clicked(int id);
@@ -64,4 +74,4 @@ public:
 };
 
 // StPadControlPanel __StPadControlPanel__;
-
+#endif

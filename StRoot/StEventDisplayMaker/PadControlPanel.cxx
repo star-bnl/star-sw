@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.cxx,v 1.1 2002/12/13 00:47:40 fine Exp $
+// $Id: PadControlPanel.cxx,v 1.2 2002/12/19 01:21:32 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -53,6 +53,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 #include "PadControlPanel.h"
+#ifdef R__QT
 #include "TVirtualPad.h"
 #include "TROOT.h"
 #include "TSystem.h"
@@ -69,13 +70,14 @@
 
 QButtonGroup *mainBar=0;
 
+
+//_______________________________________________________________________________________
+StPadControlPanel::StPadControlPanel() { Build();}
 //_______________________________________________________________________________________
 void StPadControlPanel::AddButt(const Char_t *buttonName, const Char_t *command)
 {   
    new QPushButton(buttonName,fBar,command);
 }
-
-StPadControlPanel::StPadControlPanel() { Build();}
 //_______________________________________________________________________________________
 void  StPadControlPanel::Build()
 {
@@ -353,4 +355,4 @@ void StPadControlPanel::AddAxes(TVirtualPad *pad)
 }
 
 // StPadControlPanel __StPadControlPanel__;
-
+#endif
