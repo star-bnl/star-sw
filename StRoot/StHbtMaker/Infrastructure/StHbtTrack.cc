@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.cc,v 1.13 2002/03/21 18:49:31 laue Exp $
+ * $Id: StHbtTrack.cc,v 1.14 2003/01/21 17:26:33 magestro Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: StHbtTrack.cc,v $
+ * Revision 1.14  2003/01/21 17:26:33  magestro
+ * Added condition to globalTrack() call so GlobalTracks branch in MuDst can be disabled
+ *
  * Revision 1.13  2002/03/21 18:49:31  laue
  * updated for new MuDst reader
  *
@@ -405,7 +408,7 @@ StHbtTrack::StHbtTrack(const StMuDst* dst, const StMuTrack* t) { // copy constru
    mMap[0] = t->topologyMap().data(0);
    mMap[1] = t->topologyMap().data(1);
    mHelix = t->helix();
-   mHelixGlobal = t->globalTrack()->helix();
+   if(t->globalTrack()) mHelixGlobal = t->globalTrack()->helix();
    mCharge = t->charge();
 
    
@@ -416,12 +419,14 @@ StHbtTrack::StHbtTrack(const StMuDst* dst, const StMuTrack* t) { // copy constru
    mDCAxy = dca.perp();
    mDCAz =  dca.z();
 
-   double pathlengthGlobal = mHelixGlobal.pathLength(ev->primaryVertexPosition());
-   mPGlobal = mHelixGlobal.momentumAt(pathlengthGlobal,ev->magneticField()*kilogauss);
-   mPtGlobal = mPGlobal.perp();
-   StThreeVectorD dcaGlobal(mHelixGlobal.at(pathlengthGlobal) - ev->primaryVertexPosition());
-   mDCAxyGlobal = dcaGlobal.perp();
-   mDCAzGlobal =  dcaGlobal.z();
+   if(t->globalTrack()) {  
+     double pathlengthGlobal = mHelixGlobal.pathLength(ev->primaryVertexPosition());
+     mPGlobal = mHelixGlobal.momentumAt(pathlengthGlobal,ev->magneticField()*kilogauss);
+     mPtGlobal = mPGlobal.perp();
+     StThreeVectorD dcaGlobal(mHelixGlobal.at(pathlengthGlobal) - ev->primaryVertexPosition());
+     mDCAxyGlobal = dcaGlobal.perp();
+     mDCAzGlobal =  dcaGlobal.z();
+   }
 
 //    cout << "*******************" << endl;
 //    cout << " vertex " << ev->primaryVertexPosition() << endl;
