@@ -238,8 +238,9 @@ StIOInterFace *StIOMaker::Load()
   klass = gROOT->GetClass(className);
   
   if (! klass ) {//lib not loaded
-    if (fCase==kStXDF) gSystem->Load("xdf2root");
-    if (fCase==kStDAQ) gSystem->Load("StDaqLib");
+    if (fCase==kStXDF)   gSystem->Load("xdf2root");
+    if (fCase==kStDAQ)   gSystem->Load("StDaqLib");
+    if (fCase==kStMuDst) gSystem->Load("StMuDSTMaker");
     gSystem->Load(className);
     klass = gROOT->GetClass(className);
   }
