@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.46 2004/02/14 23:57:40 jeromel Exp $
+ * $Id: StMagUtilities.cxx,v 1.47 2004/03/01 17:22:39 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,10 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.47  2004/03/01 17:22:39  jhthomas
+ * Change Shorted Ring Algorithm over to Wieman's Bessel Function solution.  It is faster.
+ * Also Fix Jerome's famous non-ascii typo.
+ *
  * Revision 1.46  2004/02/14 23:57:40  jeromel
  * File still had binary characters in CVS. Corrected and adjusted doc
  *
@@ -224,6 +228,7 @@ To do:  <br>
 #include "StDetectorDbMaker/StDetectorDbSpaceCharge.h"
 #include "StDetectorDbMaker/StDetectorDbMagnet.h"
 #include "StDetectorDbMaker/StDetectorDbTpcVoltages.h"
+#include "tables/St_tpcFieldCageShort_Table.h"
 
 static EBField  gMap  =  kUndefined ;   // Global flag to indicate static arrays are full
 static Float_t  gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
@@ -252,6 +257,7 @@ StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
   GetTPCVoltages()      ;    // Get the TPC Voltages from the DB
   GetSpaceCharge()      ;    // Get the spacecharge variable from the DB
   GetSpaceChargeR2()    ;    // Get the spacecharge variable R2 from the DB
+  GetShortedRing()      ;    // Get the parameters that describe the shorted ring on the field cage
   CommonStart( mode )   ;    // Read the Magnetic and Electric Field Data Files, set constants
 }
 
@@ -279,7 +285,7 @@ void StMagUtilities::SetDb ( StTpcDb* dbin , TDataSet* dbin2 )
   thedb2 = dbin2 ;
 }
 
-void StMagUtilities::GetMagFactor ()  
+void StMagUtilities::GetMagFactor () 
 { 
   St_MagFactor *fMagFactor  =  (St_MagFactor *) thedb2->Find("MagFactor");  assert(fMagFactor) ;
   gFactor        =  (*fMagFactor)[0].ScaleFactor ;         // Set the magnetic field scale factor
@@ -316,6 +322,20 @@ void StMagUtilities::GetSpaceChargeR2 ()
   SpaceChargeR2  =  0.525 * fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ; 
 }
 
+void StMagUtilities::GetShortedRing ()
+{
+  tpcFieldCageShort_st* shortTable  = ((St_tpcFieldCageShort*)
+				      (thedb->FindTable("tpcFieldCageShort",1)))->GetTable();
+  Ring     = shortTable->ring ;       // Location of short (in units of rings)
+  Resistor = shortTable->resistor ;   // M-Ohm value of added external resistor to resistor chain 
+}
+/* Wish list for when the DB code is updated.
+  fShortedRing   =  StDetectorDbFieldCageShort::instance() ; //copy comments
+  Ring           =  fShortedRing->getRing();
+  Resistor       =  fShortedRing->getResistor();
+  cout << "Ring = " << Ring << "  Resistor = " << Resistor << endl ;
+}
+*/
 
 //________________________________________
 
@@ -325,7 +345,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
 {
 
   //  These items are not taken from the DB but they should be ... some day.
-      IFCRadius   =    47.45 ;     // Radius of the Inner Field Cage
+      IFCRadius   =    47.90 ;     // Radius of the Inner Field Cage
       OFCRadius   =    200.0 ;     // Radius of the Outer Field Cage
   //  End of list of items that might come from the DB
 
@@ -338,7 +358,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
       cout << "StMagUtilities::CommonSta  ***NO TPC DB, Using default TPC parameters. You sure it is OK??? ***" << endl ; 
       cout << "StMagUtilities::CommonSta  ***NO TPC DB, Using default TPC parameters. You sure it is OK??? ***" << endl ; 
       cout << "StMagUtilities::CommonSta  ***NO TPC DB, Using default TPC parameters. You sure it is OK??? ***" << endl ; 
-      StarDriftV  =     5.45 ;      // Drift Velocity (cm/microSec) Magnitude
+      StarDriftV  =     5.54 ;      // Drift Velocity (cm/microSec) Magnitude
       TPC_Z0      =    208.7 ;      // Z location of STAR TPC Gated Grid (cm)
       XTWIST      =   -0.165 ;      // X Displacement of West end of TPC wrt magnet (mRad)
       YTWIST      =    0.219 ;      // Y Displacement of West end of TPC wrt magnet (mRad)
@@ -395,22 +415,22 @@ void StMagUtilities::CommonStart ( Int_t mode )
 
   // Theoretically, OmegaTau is defined as shown in the next line.  
   // OmegaTau   =  -10. * B[2] * StarDriftV / StarMagE ;  // cm/microsec, Volts/cm
-  // Instead, we will use scaled values from Amendolia et al NIM A235 (1986) 296.
+  // Instead, we will use scaled values from Amendolia et al NIM A235 (1986) 296 and include their
+  // characterization of the electron drift velocity tensor with different omega-tau's in different directions.
+  Float_t TensorV1    =  1.34 ;  // Drift velocity tensor term: in the ExB direction
+  Float_t TensorV2    =  1.11 ;  // Drift velocity tensor term: direction perpendicular to Z and ExB
 
-  StarMagE   =  TMath::Abs((CathodeV-GG)/TPC_Z0) ;           // STAR Electric Field (V/cm) Magnitude
-  OmegaTau   =  -10.0 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note the sign of B is important 
+  StarMagE   =  TMath::Abs((CathodeV-GG)/TPC_Z0) ;         // STAR Electric Field (V/cm) Magnitude
+  OmegaTau   =  -10.0 * B[2] * StarDriftV / StarMagE ;     // B in kGauss, note the sign of B is important 
 
-  Float_t Fudge_0    =  1.11 ;  // Drift velocity correction factor: perpendicular to Z and the ExB direction
-  Float_t Fudge_1    =  1.34 ;  // Drift velocity correction factor: in the ExB direction
-  Float_t Fudge_2    =  1.11 ;  // Drift velocity correction factor: perpendicular to Z and the ExB direction
-
-  Const_0    =  1. / ( 1. +  Fudge_0*Fudge_0*OmegaTau*OmegaTau ) ;
-  Const_1    =  Fudge_1*OmegaTau / ( 1. + Fudge_1*Fudge_1*OmegaTau*OmegaTau ) ;
-  Const_2    =  Fudge_2*Fudge_2*OmegaTau*OmegaTau / ( 1. + Fudge_2*Fudge_2*OmegaTau*OmegaTau ) ;
+  Const_0    =  1. / ( 1. +  TensorV2*TensorV2*OmegaTau*OmegaTau ) ;
+  Const_1    =  TensorV1*OmegaTau / ( 1. + TensorV1*TensorV1*OmegaTau*OmegaTau ) ;
+  Const_2    =  TensorV2*TensorV2*OmegaTau*OmegaTau / ( 1. + TensorV2*TensorV2*OmegaTau*OmegaTau ) ;
 
   cout << "StMagUtilities::DriftVel     =  " << StarDriftV << " cm/microsec" <<  endl ; 
   cout << "StMagUtilities::TPC_Z0       =  " << TPC_Z0 << " cm" << endl ; 
-  cout << "StMagUtilities::OmegaTau     =  " << OmegaTau * Fudge_1 << endl ; 
+  cout << "StMagUtilities::OmegaTau1    =  " << OmegaTau * TensorV1 << endl ; 
+  cout << "StMagUtilities::OmegaTau2    =  " << OmegaTau * TensorV2 << endl ; 
   cout << "StMagUtilities::XTWIST       =  " << XTWIST << " mrad" << endl ;
   cout << "StMagUtilities::YTWIST       =  " << YTWIST << " mrad" << endl ;
   cout << "StMagUtilities::SpaceCharge  =  " << SpaceCharge << " Coulombs/epsilon-nought" << endl ;
@@ -420,6 +440,8 @@ void StMagUtilities::CommonStart ( Int_t mode )
   cout << "StMagUtilities::GG           =  " << GG << " volts" << endl ;
   cout << "StMagUtilities::EastClock    =  " << EASTCLOCKERROR << " mrad" << endl;
   cout << "StMagUtilities::WestClock    =  " << WESTCLOCKERROR << " mrad" << endl;
+  cout << "StMagUtilities::Ring         =  " << Ring << " Shorted Ring Location (rings)" << endl;
+  cout << "StMagUtilities::Resistor     =  " << Resistor << " Compensating Resistor Value (M-Ohm)" << endl;
 
 }
 
@@ -761,6 +783,7 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] )
 
 //________________________________________
 
+
 /// Twist distortion
 void StMagUtilities::UndoTwistDistortion( const Float_t x[], Float_t Xprime[] )
 {
@@ -783,6 +806,7 @@ void StMagUtilities::UndoTwistDistortion( const Float_t x[], Float_t Xprime[] )
 
 
 //________________________________________
+
 
 #define  GAP13_14      1.595            // Width of the gap between the grids at row 13 and row 14 (cm)
 #define  GAPRADIUS     121.8            // Radius of gap between rows 13 & 14 at phi = zero degrees (cm)
@@ -879,6 +903,7 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] )
 
 //________________________________________
 
+
 /// Clock distortion
 void StMagUtilities::UndoClockDistortion( const Float_t x[], Float_t Xprime[] )
 {
@@ -899,6 +924,7 @@ void StMagUtilities::UndoClockDistortion( const Float_t x[], Float_t Xprime[] )
 
 
 //________________________________________
+
 
 /// Membrane distortion
 void StMagUtilities::UndoMembraneDistortion( const Float_t x[], Float_t Xprime[] )
@@ -932,6 +958,7 @@ void StMagUtilities::UndoMembraneDistortion( const Float_t x[], Float_t Xprime[]
 
 //________________________________________
 
+
 /// Endcap distortion
 void StMagUtilities::UndoEndcapDistortion( const Float_t x[], Float_t Xprime[] )
 {
@@ -963,6 +990,7 @@ void StMagUtilities::UndoEndcapDistortion( const Float_t x[], Float_t Xprime[] )
 
 
 //________________________________________
+
 
 /*! 
   IFC distortion
@@ -1035,6 +1063,7 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
 
 
 //________________________________________
+
 
 /*!
   Space Charge distortion using a uniform distribution of charge per unit volume
@@ -1120,7 +1149,8 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
   
 //________________________________________
 
-/*
+
+/*!
   Space Charge distortion using space charge from a real event (~1/R**2 distribution)
   Electrostatic equations solved by relaxtion.  Original work by H. H. Wieman, N. Smirnov, and J. Thomas 
   Charge density has 1/R**2 distribution but also includes linear increase of charge from endcap to CM 
@@ -1289,142 +1319,74 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 
 /*!
   Shorted Ring Distortion 
-  Electrostatic equations solved by relaxtion.  Original work by Jim Thomas, 1/5/2004
-  This code contains *hardwired parameters* for the short on the EAST end of the TPC on 12/22/2003.
+  This codes assumes that the shorted ring is on the EAST end of the TPC.
+  Electrostatic Equations from SN0253 by Howard Wieman.
+  Note that we use Howards funny coordinate system where Z==0 at the GG.
 */
 void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprime[] )
 { 
 
-  const Float_t   Ring        =  169.5 ;                // Location of short (in units of rings)
-  const Float_t   Pitch       =  1.15  ;                // Ring to Ring pitch (cm)
-  const Float_t   RingRatio   =  Ring*Pitch/TPC_Z0 ;    // Percent of full length where short appears
-  const Float_t   GridRatio   =  (CathodeV-GG)/CathodeV ; // Ratio of TPC length to Resistor chain length.
-  
-  const Int_t     ROWS        =  150 ;        // Rmax - Rmin (cm) [high accuracy not required]
-  const Int_t     COLUMNS     =  183 ;        // Number of rings (note that ring zero is the CM so add one to ring numbers)  
-  const Int_t     ITERATIONS  =  3000 ;
-  const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
-  const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
-  const Double_t  Ratio       =  GRIDSIZER*GRIDSIZER / (GRIDSIZEZ*GRIDSIZEZ) ;
-  const Double_t  Four        =  2.0 + 2.0*Ratio ;
+  const Float_t R0        = 2.130 ;            // First resistor (R0) between CM and ring number one (Mohm)
+  const Float_t R182      = 0.310 ;            // Last resistor in the IFC chain
+  const Float_t RStep     = 2.000 ;            // Resistor chain value (except the first one) (Mohm)
+  const Float_t Pitch     = 1.150 ;            // Ring to Ring pitch (cm)
+  const Float_t Z01       = 1.225 ;            // Distance from CM to center of first ring (cm)
+  Float_t Rtot      = R0 + 181*RStep + R182 ;  // Total resistance of the resistor chain
+  Float_t ZShort    = TPC_Z0 - (Z01 + (Ring-1)*Pitch)  ;  // Distance from GG to the midpoint between the shorted rings
+  //Float_t deltaV    = GG*0.99 - CathodeV * (1.0-TPC_Z0*RStep/(Pitch*Rtot)) ;    // Error on GG voltage from nominal (99% effective)
 
-  Float_t   Er_integral, Ephi_integral ;
-  Double_t  r, phi, z ;
+  Float_t C1 = RStep*RStep/(Rtot*Rtot*Pitch) ;    // Slope across the full resistor chain
+  Float_t C0 = (Rtot*Pitch/RStep - TPC_Z0)*C1  ;  // C1*deltaZ ... where deltaZ is effective length of resistor chain - Zgg 
+  Float_t C2 = C0 - RStep/Rtot ;                  // Full voltage effect due to 1 ring minus C1*deltaZ
+
+  Float_t  Er_integral, Ephi_integral ;
+  Double_t r, phi, z ;
 
   static Int_t DoOnce = 0 ;
 
+  if ( Ring == 0 ) { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ; return ; }
+
   if ( DoOnce == 0 )
     {
-
-      TMatrixD  ArrayV(ROWS,COLUMNS), ArrayE(ROWS,COLUMNS), EroverEz(ROWS,COLUMNS) ;
-      Float_t   Rlist[ROWS], Zedlist[COLUMNS] ;
-      Int_t     TpcShortConfiguration ;     // This will come out of the conditions DB, someday.
-
-      //TpcShortConfiguration = 0 ;           // Shorted ring.  No compensating resistor.
-      TpcShortConfiguration = 1 ;           // Shorted ring with external compensating resistor.
-
-      //Fill boundary of arrays with error potentials and "volume" of array with approximate solutions to aid convergence. 
-      for ( Int_t i = 0 ; i < ROWS ; i++ )  
-	{
-	  Double_t Radius = IFCRadius + i*GRIDSIZER ;
-	  Double_t SHRINK = IFCRadius*IFCRadius / ( Radius*Radius ) ;  // Shrink candidate solution with 1/r**2 falloff
-	  if ( i == 0 ) SHRINK = 1.0 ;  // Force Boundary Condition on IFC without perturbation by Shrinkage
-	  Rlist[i] = Radius ;
-	  for ( Int_t j = 0 ; j < COLUMNS ; j++ )  // Fill Vmatrix with Boundary Conditions *and* candidate solution
-	    {
-  	      Double_t zed = j*GRIDSIZEZ ;
-	      Zedlist[j] = zed ;
-              if ( (float)j/(float)(COLUMNS-1) < RingRatio )
-		{
-		  if ( TpcShortConfiguration == 0 ) ArrayV(i,j) = SHRINK*StarMagE*Pitch*GridRatio*(double)j/(double)(COLUMNS-1) ;
-		  if ( TpcShortConfiguration == 1 ) ArrayV(i,j) = 0.0 ;  // with external resistor   
-		}
-	      else
-		{
-		  if ( TpcShortConfiguration == 0 ) ArrayV(i,j) = SHRINK*StarMagE*Pitch*GridRatio*((double)j/(double)(COLUMNS-1)-1) ;
-		  if ( TpcShortConfiguration == 1 ) ArrayV(i,j) = SHRINK*StarMagE*Pitch * -1 ; // with external resistor
-		  if ( TpcShortConfiguration == 1 && j >= 181 ) ArrayV(i,j) = 0.0 ; // Force rings 181 and 182 to zero error
-		}
-	      // Force zero error potential on endcap and CM
-	      if ( ( j == 0 || j == (COLUMNS-1) ) && ( i != 0 && i != (ROWS-1) ) ) ArrayV(i,j) = 0.0 ;  
-	      // Force zero error potential on OFC
-	      if ( i == (ROWS-1) ) ArrayV(i,j) = 0.0 ;
-            }
-	}      
-      
-      //Solve Laplace's equation in cylindrical coordinates by relaxation technique
-      //Allow for different size grid spacing in R and Z directions
-
-      for ( Int_t k = 1 ; k <= ITERATIONS; k++ )
-	{
-	  for ( Int_t j = 1 ; j < COLUMNS-1 ; j++ )  
-	    {
-	      for ( Int_t i = 1 ; i < ROWS-1 ; i++ )  
-		{
-		  Double_t Radius = IFCRadius + i*GRIDSIZER ;
-		  ArrayV(i,j) = ( ArrayV(i+1,j) + ArrayV(i-1,j) + Ratio*ArrayV(i,j+1) + Ratio*ArrayV(i,j-1) ) 
-		                + ArrayV(i+1,j)*GRIDSIZER/(2*Radius) - ArrayV(i-1,j)*GRIDSIZER/(2*Radius)  ;
-		  ArrayV(i,j) *=  1.0/Four ;
-		}
-	    } 
-	}
-
-      //Differentiate V(r) and solve for E(r) using special equations for the first and last row
-      //Integrate E(r)/E(z) from point of origin to pad plane
-
-      for ( Int_t j = COLUMNS-1 ; j >= 0 ; j-- )  // Count backwards to facilitate integration over Z
-	{	  
-	  // Differentiate in R
-	  for ( Int_t i = 1 ; i < ROWS-1 ; i++ )  ArrayE(i,j) = -1 * ( ArrayV(i+1,j) - ArrayV(i-1,j) ) / (2*GRIDSIZER) ;
-	  ArrayE(0,j)      =  -1 * ( -0.5*ArrayV(2,j) + 2.0*ArrayV(1,j) - 1.5*ArrayV(0,j) ) / GRIDSIZER ;  
-	  ArrayE(ROWS-1,j) =  -1 * ( 1.5*ArrayV(ROWS-1,j) - 2.0*ArrayV(ROWS-2,j) + 0.5*ArrayV(ROWS-3,j) ) / GRIDSIZER ; 
-	  // Integrate over Z
-	  for ( Int_t i = 0 ; i < ROWS ; i++ ) 
-	    {
-	      Int_t Index = 1 ;   // Simpsons rule if N=odd.  If N!=odd then add extra point by trapezoidal rule.  
-	      EroverEz(i,j) = 0.0 ;
-	      for ( Int_t k = j ; k < COLUMNS ; k++ ) 
-		{ 
-		  EroverEz(i,j)  +=  Index*(GRIDSIZEZ/3.0)*ArrayE(i,(COLUMNS-1)+j-k)/(-1*StarMagE) ;
-		  if ( Index != 4 )  Index = 4; else Index = 2 ;
-		}
-	      if ( Index == 4 ) EroverEz(i,j)  -=  (GRIDSIZEZ/3.0)*ArrayE(i,COLUMNS-1)/ (-1*StarMagE) ;
-	      if ( Index == 2 ) EroverEz(i,j)  +=  
-				  (GRIDSIZEZ/3.0)*(0.5*ArrayE(i,COLUMNS-2)-2.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
-	      if ( j == COLUMNS-2 ) EroverEz(i,j) =  
-				      (GRIDSIZEZ/3.0)*(1.5*ArrayE(i,COLUMNS-2)+1.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
-	      if ( j == COLUMNS-1 ) EroverEz(i,j) =  0.0 ;
-	    }
-	}
-
-      //Interpolate results onto standard grid for Electric Fields
-
-      Int_t ilow=0, jlow=0 ;
-      Float_t save_Er[2] ;	      
+      Int_t Nterms = 100 ;
       for ( Int_t i = 0 ; i < neZ ; ++i ) 
 	{
-	  // Apply correction to EAST end of TPC, only.  Return 0 if on the West end.
-	  z = TMath::Abs(eZList[i]) ;
+	  z = TMath::Abs( eZList[i] ) ;
 	  for ( Int_t j = 0 ; j < neR ; ++j ) 
-	    { // Linear interpolation
+	    {
 	      r = eRadius[j] ;
-	      Search( ROWS,   Rlist, r, ilow ) ;  // Note switch - R in rows and Z in columns
-	      Search( COLUMNS, Zedlist, z, jlow ) ;
-	      if ( ilow < 0 ) ilow = 0 ;  // artifact of Root's binsearch, returns -1 if out of range
-	      if ( jlow < 0 ) jlow = 0 ;   
-	      if ( ilow + 1  >=  ROWS - 1 ) ilow =  ROWS - 2 ;	      
-	      if ( jlow + 1  >=  COLUMNS - 1 ) jlow =  COLUMNS - 2 ; 
-	      save_Er[0] = EroverEz(ilow,jlow) + (EroverEz(ilow,jlow+1)-EroverEz(ilow,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
-	      save_Er[1] = EroverEz(ilow+1,jlow) + (EroverEz(ilow+1,jlow+1)-EroverEz(ilow+1,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
-	      shortEr[i][j] = save_Er[0] + (save_Er[1]-save_Er[0])*(r-Rlist[ilow])/GRIDSIZER ;
-	      if ( eZList[i] > 0 ) shortEr[i][j] = 0.0 ;  // Force West end to zero !!!!
-	    }
+	      shortEr[i][j] = 0.0 ; 	    
+              if (r < IFCRadius) continue; //VP defence against divergency. Not sure if correct.  JT - Yes, OK.
+	      Double_t IntegralOverZ = 0.0 ;
+	      for ( Int_t n = 1 ; n < Nterms ; ++n ) 
+		{
+		  Double_t k    =  n * TMath::Pi() / TPC_Z0 ;
+		  Double_t Eout =  0 ;                    // Error potential on the OFC is (usually) zero
+		  Double_t Ein  =  0 ;                    // Error potential on the IFC
+		  if ( Resistor > 0.0 ) 
+		    Ein =  2 * RStep * ( 1 - TMath::Cos(k*ZShort) ) / (k*Rtot*TPC_Z0) ;  // With Compensating resistor
+		  else
+		    Ein =  2 * ( C0 - (C2+C1*TPC_Z0)*TMath::Cos(k*TPC_Z0) - (C0-C2)*TMath::Cos(k*ZShort) )/(k*TPC_Z0) ; //Without
+		  //Ein   =  2 * RStep * -1*deltaV / ( k * Pitch * Rtot * CathodeV ) ;        // Gating Grid studies (note -1)
+		  //Eout  =  2 * RStep * -1*deltaV / ( k * Pitch * Rtot * CathodeV ) ;        // Gating Grid studies (note -1)
+		  Double_t An   =  Ein  * TMath::BesselK0( k*OFCRadius ) - Eout * TMath::BesselK0( k*IFCRadius ) ;
+		  Double_t Bn   =  Eout * TMath::BesselI0( k*IFCRadius ) - Ein  * TMath::BesselI0( k*OFCRadius ) ;
+		  Double_t Numerator =
+		    An * TMath::BesselI1( k*r ) - Bn * TMath::BesselK1( k*r ) ;
+		  Double_t Denominator =
+		    TMath::BesselK0( k*OFCRadius ) * TMath::BesselI0( k*IFCRadius ) -
+		    TMath::BesselK0( k*IFCRadius ) * TMath::BesselI0( k*OFCRadius ) ;
+		  Double_t zterm = TMath::Cos( k*(TPC_Z0-z) ) - 1 ;
+		  Double_t qwe = Numerator / Denominator ;
+		  IntegralOverZ += TPC_Z0 * zterm * qwe ;
+	          if ( n>10 && fabs(IntegralOverZ)*1.e-10 > fabs(qwe) ) break;   // Assume series converges, break if small terms
+		}
+	      if  ( eZList[i] > 0 )  IntegralOverZ = 0.0 ;  // Force short on East End only (Z < 0) (Remove this for GG studies)
+	      shortEr[i][j] = IntegralOverZ ; 	    }
 	}
-
-      DoOnce = 1 ;      
-
+      DoOnce = 1 ;
     }
-
+  
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   phi    =  TMath::ATan2(x[1],x[0]) ;
   if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
@@ -1433,7 +1395,7 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
   if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
 
   Interpolate2DEdistortion( r, z, shortEr, Er_integral ) ;
-  Ephi_integral = 0.0 ;  // E field is symmetric in phi
+  Ephi_integral = 0.0 ;  // Efield is symmetric in phi
 
   // Subtract to Undo the distortions
   if ( r > 0.0 ) 
@@ -1450,6 +1412,7 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 
   
 //________________________________________
+
 
 /// Read the electric and magnetic field maps stored on disk
 void StMagUtilities::ReadField( )
@@ -1982,7 +1945,6 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
 
   const Int_t   INNER = 13 ;               // Number of TPC rows in the inner sectors 
   const Int_t   ROWS  = 45 ;               // Total number of TPC rows per sector (Inner + Outer)
-  const Float_t IFCRadius  =  47.45 ;      // Radius of the Inner Field Cage
   const Float_t TestRadius =  77.00 ;      // A random test radius inside the TPC to compare which way the track is going
 
   Int_t    ChargeB ;
@@ -2113,6 +2075,8 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
 
 }
 
+
+//________________________________________
 
 
 
