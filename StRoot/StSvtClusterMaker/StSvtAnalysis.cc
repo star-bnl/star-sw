@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.7 2000/09/14 22:17:15 caines Exp $
+ * $Id: StSvtAnalysis.cc,v 1.8 2000/10/02 13:47:03 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -81,6 +81,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.8  2000/10/02 13:47:03  caines
+ * Fixed some array bound problems. Better flagging of hits
+ *
  * Revision 1.7  2000/09/14 22:17:15  caines
  * Fix memory problems
  *
@@ -1249,7 +1252,7 @@ void StSvtAnalysis::SetBadAnTb(int nClus)
       if (m_countBadAn[iHyb][iAn]>4) {mCluFlag[i] += 4;}// cout<<"Hot Anodes: "<<iAn<<" Hyb: "<<iHyb<<endl;}
     }
     if( iTb >=0 && iTb < 129){
-      if (m_countBadTb[iHyb][iTb]>4) {mCluFlag[i] += 4;}// cout<<"Hot Time: "<<iTb<<" Hyb: "<<iHyb<<endl;}
+      if (m_countBadTb[iHyb][iTb]>4) {mCluFlag[i] += 4;}//cout<<"Hot Time: "<<iTb<<" Hyb: "<<iHyb<<endl;}
       //if (iHyb==11) cout<<"Hot Stuff: "<<iAn<<" "<<m_countBadAn[iHyb][iAn]<<" "<<mCluFlag[i]<<endl;
     }
   }
