@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHitCollection.hh,v 2.1 1999/11/19 19:06:32 calderon Exp $
+ * $Id: StMcFtpcHitCollection.hh,v 2.2 2000/04/17 23:01:15 calderon Exp $
  * $Log: StMcFtpcHitCollection.hh,v $
+ * Revision 2.2  2000/04/17 23:01:15  calderon
+ * Added local momentum to hits as per Lee's request
+ *
  * Revision 2.1  1999/11/19 19:06:32  calderon
  * Recommit after redoing the files.
  *
@@ -18,7 +21,6 @@
 #define StMcFtpcHitCollection_hh
 
 #include "StMcFtpcPlaneHitCollection.hh"
-
 class StMcFtpcHit;
 
 class StMcFtpcHitCollection {

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.cc,v 2.2 1999/12/14 07:04:49 calderon Exp $
+ * $Id: StMcHit.cc,v 2.3 2000/04/17 23:01:15 calderon Exp $
  * $Log: StMcHit.cc,v $
+ * Revision 2.3  2000/04/17 23:01:15  calderon
+ * Added local momentum to hits as per Lee's request
+ *
  * Revision 2.2  1999/12/14 07:04:49  calderon
  * Numbering scheme as per SVT request.
  *
@@ -22,7 +25,7 @@
 
 #include "tables/St_g2t_hits_Table.h"
 
-static const char rcsid[] = "$Id: StMcHit.cc,v 2.2 1999/12/14 07:04:49 calderon Exp $";
+static const char rcsid[] = "$Id: StMcHit.cc,v 2.3 2000/04/17 23:01:15 calderon Exp $";
 
 StMcHit::StMcHit()
     : mPosition(0.,0.,0.), mdE(0),mdS(0),mParentTrack(0)
@@ -41,6 +44,9 @@ StMcHit::StMcHit(g2t_hits_st* pt)
   mPosition.setX(pt->x[0]); 
   mPosition.setY(pt->x[1]);
   mPosition.setZ(pt->x[2]);
+  mLocalMomentum.setX(pt->p[0]); 
+  mLocalMomentum.setY(pt->p[1]);
+  mLocalMomentum.setZ(pt->p[2]);
   mParentTrack = 0;
   // For parent track, the g2t_hits table only gives the id of 
   // the parent track :  pt->track_p  .  We need to decode this and assign
@@ -61,6 +67,8 @@ int StMcHit::operator!=(const StMcHit& h) const
 }
 
 void StMcHit::setPosition(const StThreeVectorF& val) { mPosition = val; }
+
+void StMcHit::setLocalMomentum(const StThreeVectorF& val) { mLocalMomentum = val; }
 
 void StMcHit::setdE(float val) { mdE = val; }
 

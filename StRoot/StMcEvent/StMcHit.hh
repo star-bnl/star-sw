@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.hh,v 2.2 1999/12/14 07:04:49 calderon Exp $
+ * $Id: StMcHit.hh,v 2.3 2000/04/17 23:01:15 calderon Exp $
  * $Log: StMcHit.hh,v $
+ * Revision 2.3  2000/04/17 23:01:15  calderon
+ * Added local momentum to hits as per Lee's request
+ *
  * Revision 2.2  1999/12/14 07:04:49  calderon
  * Numbering scheme as per SVT request.
  *
@@ -45,20 +48,23 @@ public:
     
 
   // "Get" Methods
-    virtual const StThreeVectorF& position() const;
-    virtual float                       dE() const;
-    virtual float                       dS() const;
-    virtual StMcTrack*         parentTrack() const;	
+    virtual const StThreeVectorF&      position() const;
+    virtual const StThreeVectorF& localMomentum() const;
+    virtual float                            dE() const;
+    virtual float                            dS() const;
+    virtual StMcTrack*              parentTrack() const;	
 
   // "Set" Methods
 
     virtual void setPosition(const StThreeVectorF&);
+    virtual void setLocalMomentum(const StThreeVectorF&);
     virtual void setdE(float);
     virtual void setdS(float);
     virtual void setParentTrack(StMcTrack*);
     
 protected:
-    StThreeVectorF mPosition;
+    StThreeVectorF       mPosition;
+    StThreeVectorF       mLocalMomentum;
     float                mdE;
     float                mdS;
     StMcTrack*           mParentTrack;
@@ -67,6 +73,8 @@ protected:
 ostream&  operator<<(ostream& os, const StMcHit&);
 
 inline const StThreeVectorF& StMcHit::position() const { return mPosition;}
+
+inline const StThreeVectorF& StMcHit::localMomentum() const { return mLocalMomentum;}
 
 inline float StMcHit::dE() const { return mdE; }
 

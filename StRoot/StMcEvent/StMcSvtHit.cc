@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.cc,v 2.2 1999/12/03 00:51:52 calderon Exp $
+ * $Id: StMcSvtHit.cc,v 2.3 2000/04/17 23:01:15 calderon Exp $
  * $Log: StMcSvtHit.cc,v $
+ * Revision 2.3  2000/04/17 23:01:15  calderon
+ * Added local momentum to hits as per Lee's request
+ *
  * Revision 2.2  1999/12/03 00:51:52  calderon
  * Tested with new StMcEventMaker.  Added messages for
  * diagnostics.
@@ -22,7 +25,7 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_svt_hit_Table.h"
 
-static const char rcsid[] = "$Id: StMcSvtHit.cc,v 2.2 1999/12/03 00:51:52 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSvtHit.cc,v 2.3 2000/04/17 23:01:15 calderon Exp $";
 
 StMemoryPool StMcSvtHit::mPool(sizeof(StMcSvtHit));
 
@@ -42,6 +45,9 @@ StMcSvtHit::StMcSvtHit(g2t_svt_hit_st* pt)
   mPosition.setX(pt->x[0]); 
   mPosition.setY(pt->x[1]);
   mPosition.setZ(pt->x[2]);
+  mLocalMomentum.setX(pt->p[0]); 
+  mLocalMomentum.setY(pt->p[1]);
+  mLocalMomentum.setZ(pt->p[2]);
   mVolumeId = pt->volume_id;
 }
 

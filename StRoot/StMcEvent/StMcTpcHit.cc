@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.cc,v 2.3 1999/12/14 07:04:49 calderon Exp $
+ * $Id: StMcTpcHit.cc,v 2.4 2000/04/17 23:01:15 calderon Exp $
  * $Log: StMcTpcHit.cc,v $
+ * Revision 2.4  2000/04/17 23:01:15  calderon
+ * Added local momentum to hits as per Lee's request
+ *
  * Revision 2.3  1999/12/14 07:04:49  calderon
  * Numbering scheme as per SVT request.
  *
@@ -25,7 +28,7 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_tpc_hit_Table.h"  
 
-static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.3 1999/12/14 07:04:49 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.4 2000/04/17 23:01:15 calderon Exp $";
 
 StMemoryPool StMcTpcHit::mPool(sizeof(StMcTpcHit));
 
@@ -44,6 +47,9 @@ StMcTpcHit::StMcTpcHit(g2t_tpc_hit_st* pt)
   mPosition.setX(pt->x[0]); 
   mPosition.setY(pt->x[1]);
   mPosition.setZ(pt->x[2]);
+  mLocalMomentum.setX(pt->p[0]); 
+  mLocalMomentum.setY(pt->p[1]);
+  mLocalMomentum.setZ(pt->p[2]);
   mVolumeId = pt->volume_id;
   // The Local and Pad coordinates will be filled in the maker,
   // since they use the coordinate transforms.

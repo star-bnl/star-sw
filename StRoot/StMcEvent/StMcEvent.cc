@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.5 2000/03/06 18:05:21 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.6 2000/04/17 23:01:14 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.6  2000/04/17 23:01:14  calderon
+ * Added local momentum to hits as per Lee's request
+ *
  * Revision 2.5  2000/03/06 18:05:21  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.
@@ -36,6 +39,11 @@
 #include "StThreeVectorF.hh"
 
 #include "StMcEvent.hh"
+#include "StMcTpcHitCollection.hh"
+#include "StMcFtpcHitCollection.hh"
+#include "StMcRichHitCollection.hh"
+#include "StMcSvtHitCollection.hh"
+#include "StMcContainers.hh" 
 #include "StMcVertex.hh"
 #include "StMcTrack.hh"
 #include "StMcTpcHit.hh"
@@ -46,8 +54,8 @@
 
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.5 2000/03/06 18:05:21 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.5 2000/03/06 18:05:21 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.6 2000/04/17 23:01:14 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.6 2000/04/17 23:01:14 calderon Exp $";
 
 void StMcEvent::initToZero()
 {
