@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.hh,v 1.7 2001/08/16 20:24:36 caines Exp $
+ * $Id: StSvtCoordinateTransform.hh,v 1.8 2002/01/30 14:29:10 caines Exp $
  *
  * Author: Helen Caines made this on  April 14 2000
  *
@@ -48,6 +48,8 @@ class StGlobalCoordinate;
 class StSvtLocalCoordinate;
 class StSvtWaferCoordinate;
 class StSvtConfig;
+class StSvtGeometry;
+class svg_geom_st;
 class svg_shape_st;
 class srs_srspar_st;
 class StTpcCoordinateTransform;
@@ -73,6 +75,7 @@ public:
   void  operator()(const StSvtLocalCoordinate&, StGlobalCoordinate&);
   void  operator()(const  StGlobalCoordinate& ,StSvtLocalCoordinate&);
   void  setParamPointers( srs_srspar_st* srspar, svg_geom_st* geom, svg_shape_st* shape, StSvtConfig* config);
+  void  setParamPointers( StSvtGeometry* geom, StSvtConfig* config);
   int  LocaltoGlobal(const StSvtLocalCoordinate&,   StThreeVector<double>& x, int Index);
   int  GlobaltoLocal(const StThreeVector<double>& x , StSvtLocalCoordinate&, int HardWarePos, int Index );
   double CalcDriftLength(double x);
@@ -84,10 +87,11 @@ public:
   StTpcCoordinateTransform* TpcTransform;
 private:
   
-  svg_geom_st *mgeom;
-  svg_shape_st *mshape;
-  srs_srspar_st *mparam;
+  //  svg_geom_st *mgeom;
+  //  svg_shape_st *mshape;
+  //  srs_srspar_st *mparam;
   StSvtConfig *mconfig;
+  StSvtGeometry* mgeom;
 
 };
 
