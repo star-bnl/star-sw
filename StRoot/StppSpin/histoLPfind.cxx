@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: histoLPfind.cxx,v 1.3 2001/04/12 15:19:09 balewski Exp $
+// $Id: histoLPfind.cxx,v 1.4 2001/04/13 20:15:14 balewski Exp $
 // $Log: histoLPfind.cxx,v $
+// Revision 1.4  2001/04/13 20:15:14  balewski
+// *** empty log message ***
+//
 // Revision 1.3  2001/04/12 15:19:09  balewski
 // *** empty log message ***
 //
@@ -39,7 +42,8 @@ void StppLPfindMaker::init_histo()
   hv[3]=new TH1F("R nPri","No. of primary tracks",100,0.,200.);
   hv[4]=new TH1F("R pt","Recon LP pT  gPt (GeV/c)",npt,pt0,pt1);
   hv[5]=new TH1F("R nTPT","No. of all TPT tracks",100,0.,1000.);
- 
+  hv[6]=new TH1F("R eff","Counts Input,rec events",10,-0.5,9.5);
+
   printf("init histo .. done\n");
 
 }
