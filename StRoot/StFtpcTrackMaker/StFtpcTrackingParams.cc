@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.23 2003/10/02 00:10:37 perev Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.24 2003/10/07 14:12:54 jcs Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.24  2003/10/07 14:12:54  jcs
+// use gufld to determine magnetic field factor (this is where we started from a long,long time ago)
+//
 // Revision 1.23  2003/10/02 00:10:37  perev
 // Zeroing of members added and bug in ResetMagField fixed
 //
@@ -95,10 +98,15 @@
 using namespace units;
 #endif
 
+#ifndef gufld
+#define gufld gufld_
+extern "C" void gufld(float *, float *);
+#endif
+
 #include "tables/St_MagFactor_Table.h"
 
 #include "TMath.h"
-#include "Stiostream.h"
+#include <Stiostream.h>
 
 ////////////////////////////////////////////////////////////////////////
 // StFtpcTrackingParams                                               //
@@ -212,14 +220,14 @@ StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug,
 }
 
 
-StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, St_ftpcCoordTrans *ftpcCoordTrans, TDataSet *RunLog, StBFChain *chain) {
+StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, St_ftpcCoordTrans *ftpcCoordTrans, TDataSet *RunLog) {
   // updates magnetic field, if necessary
 
   mInstance->InitCoordTransformation(ftpcCoordTrans->GetTable()); // Has to be invoked here, because it could change from run to run.
   mInstance->InitSpaceTransformation(); // Has to be invoked here, since gStTpcDb isn't set before.
   
   if (RunLog) {
-    mInstance->ResetMagField(RunLog, chain); // Has to be invoked here, because it could change from run to run.
+    mInstance->ResetMagField(RunLog); // Has to be invoked here, because it could change from run to run.
   }
   
   if (debug) {
@@ -1020,15 +1028,20 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
 }
 
 
-Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog, StBFChain *chain) {
+Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog) {
   // Resets magnetic field if field configuration has changed.
   
+  if (RunLog) { // I think RunLog is not needed anymore. (?)
+                // It was used before to figure out if the field was set already 
+                // (it wasn't for the first call of ResetMagField).
+                // I'm not sure how gufld behaves so I'll keep it (RunLog) for now.
 
-  if (RunLog) {
-    St_MagFactor *fMagFactor = (St_MagFactor *)RunLog->Find("MagFactor");     
-    Double_t newFactor = (*fMagFactor)[0].ScaleFactor;
-    if (chain->GetOption("ReverseField")) newFactor = -newFactor; // check if field was reversed by a chain option
-    
+    Float_t x[3] = {0., 0., 0.};
+    Float_t b[3];
+    gufld(x, b);
+    Double_t newFactor = b[2]/4.980;
+    if (TMath::Abs(newFactor) < 10e-3) newFactor = 0.; // set factor to zero if it is close (otherwise NoFieldTracking won't be switched on)
+
     if (newFactor != mMagFieldFactor) { // field has changed
       
       if (mMagFieldFactor == -9999.) { // field will be set the first time
