@@ -5,6 +5,7 @@
 TString StarConfiguration::_conFile="";
 TString StarConfiguration::_geoFile="";
 int     StarConfiguration::_triggers=0;
+int     StarConfiguration::_seed=1;
 int     StarConfiguration::_external=0;
 
 StarConfiguration::StarConfiguration(const TString& cf_) {
@@ -27,29 +28,23 @@ TString StarConfiguration::getGeoFile() {
   return _geoFile;
 }
 
-void StarConfiguration::setTriggers(int n_) {
-  _triggers=n_;
-}
-
-int StarConfiguration::getTriggers() {
-  return _triggers;
-}
-
-void StarConfiguration::setExternal(void) {
-  _external=1;
-}
-
-int StarConfiguration::isExternal(void) {
-  return _external;
-}
-
-
+//_________________________________________________________________
+void StarConfiguration::setTriggers(int n_) {  _triggers=n_;    }
+int  StarConfiguration::getTriggers()       {  return _triggers;}
+//_________________________________________________________________
+void StarConfiguration::setSeed(int s_)     {  _seed=s_;        }
+int  StarConfiguration::getSeed()           {  return _seed;    }
+//_________________________________________________________________
+void StarConfiguration::setExternal(void)   {  _external=1;     }
+int  StarConfiguration::isExternal(void)    {  return _external;}
+//_________________________________________________________________
 void StarConfiguration::print() {
-  cout<<"Geometry to be read from "<<getGeoFile()<<endl;
-  cout<<"Triggers "<<getTriggers()<<endl;
+  cout<<"Geometry to be read from "<< getGeoFile()  <<endl;
+  cout<<"Triggers "<<                 getTriggers() <<endl;
+  cout<<"Seed "    <<                 getSeed()     <<endl;
 }
 
-
+//_________________________________________________________________
 void StarConfiguration::parse() {
 
   ifstream configFile(_conFile);
@@ -64,6 +59,10 @@ void StarConfiguration::parse() {
 
     if(command=="geom") {
       setGeoFile(argument);
+    }
+
+    if(command=="seed") {
+      setSeed(atoi(argument));
     }
 
     if(command=="trig") {
