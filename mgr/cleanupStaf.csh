@@ -33,7 +33,6 @@ if ( -e $DEP ) then
 set SRG = srg
 if ( -e $SRG ) then
   cd $SRG
-  cd $DEP
   foreach dir (???)
   if ( $dir != "exe") then
     echo rm -rf $cwd/$dir
