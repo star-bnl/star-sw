@@ -61,7 +61,7 @@ void MiniChain::run(int first,
       setupInput(fileList);
       setupDatabase();
       StMcEventMaker * mcEventMaker;
-      StAssociationMaker * assocMaker=0;
+      StAssociationMaker * assocMaker=0;		if(assocMaker){}
       if (_pars->doSimulation)
     	{
 	  mcEventMaker = new StMcEventMaker();

@@ -10,8 +10,8 @@ HtmlDocument::HtmlDocument(const string & fileName,
 			   const string & titleText, 
 			   const string & mainHeading)
   : HtmlElement("HTML"),
-    _fileName(fileName+".html"),
-    _body(0)
+    _body(0),
+    _fileName(fileName+".html")
 {
   cout << "HtmlDocument::HtmlDocument(...) -I- Started"<<endl;
   HtmlHead*head=static_cast<HtmlHead *>(HtmlElement::add(new HtmlHead()));

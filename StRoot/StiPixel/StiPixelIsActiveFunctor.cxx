@@ -7,7 +7,7 @@ StiPixelIsActiveFunctor::StiPixelIsActiveFunctor(){
 StiPixelIsActiveFunctor::~StiPixelIsActiveFunctor(){
 } // ~StiPixelIsActiveFunctor
 
-bool StiPixelIsActiveFunctor::operator()(double dYlocal, double dZlocal)
+bool StiPixelIsActiveFunctor::operator()(double dYlocal, double dZlocal) const
 {
     return true;
     //return false;

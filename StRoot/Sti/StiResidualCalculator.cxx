@@ -1,7 +1,7 @@
 //StiResidualCalculator.cxx
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.cxx,v 2.6 2003/09/02 17:59:41 perev Exp $
+ * $Id: StiResidualCalculator.cxx,v 2.7 2003/09/07 03:49:08 perev Exp $
  *
  * \class  StiResidualCalculator provides a utility for determining the
  *         track residuals.
@@ -9,6 +9,9 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.cxx,v $
+ * Revision 2.7  2003/09/07 03:49:08  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 2.6  2003/09/02 17:59:41  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -115,7 +118,7 @@ void StiResidualCalculator::initDetector(StiDetectorBuilder *detBuilder)
 	  //Slashes in name make root unhappy
 	  detName=(det->getName()).c_str();
 	  int x=detName.find("/");
-	  while(x<detName.size())
+	  while(x<int(detName.size()))
 	    {
 	      detName.replace(x,1,"_");
 	      x=detName.find("/");
@@ -296,9 +299,9 @@ int StiResidualCalculator::trackResidue(const StiKalmanTrack *track)
   //! pertinant values (fillHist).
 
 
-  double nHits =0;
+  double nHits =0;	if(nHits){}
      
-  int count=0;
+  int count=0;		if(count){}
   StiKalmanTrackNode* leaf = track->getLastNode();
   StiKTNForwardIterator iT(leaf);
   StiKTNForwardIterator end = iT.end();
@@ -339,8 +342,8 @@ int StiResidualCalculator::trackResidue(const StiKalmanTrack *track)
 	  double cross = iNode.crossAngle();
 	  double dip   = iNode.pitchAngle();
 	  double nodeZ = iNode.getZ();
-	  double nodeY = iNode.getY();
-	  double dy,dz;
+	  double nodeY = iNode.getY();		if(nodeY){}
+//VP	  double dy,dz;
 
 	  fillTrackHist(cross,dip,pt, nodeZ);
 

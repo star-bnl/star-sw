@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetOutputMaker.h,v 1.5 2003/09/02 17:58:39 perev Exp $
+ * $Id: StJetOutputMaker.h,v 1.6 2003/09/07 03:49:03 perev Exp $
  * $Log: StJetOutputMaker.h,v $
+ * Revision 1.6  2003/09/07 03:49:03  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 1.5  2003/09/02 17:58:39  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -137,7 +140,7 @@ class EventStruct {
   void clear(void) { triggers.clear(); };
   void setTriggers(vector<int> trigs) {
     triggers.clear();
-    for(vector<int>::iterator it = trigs.begin(); it != trigs.end(); ++it)
+    for(std::vector<int>::iterator it = trigs.begin(); it != trigs.end(); ++it)
       triggers.push_back(*it);
   };
 
@@ -296,7 +299,7 @@ public:
     }; 
     void setTriggers(vector<short> newtriggers) {
       triggers.clear();
-      for(vector<short>::iterator it = newtriggers.begin(); 
+      for(std::vector<short>::iterator it = newtriggers.begin(); 
 	  it != newtriggers.end(); ++it)
 	triggers.push_back(static_cast<short>(*it));
     };
@@ -322,7 +325,7 @@ istream& read(istream &is, char *toRead, int size);
 template <class T>
 ostream& write(ostream &os, vector<T> &toWrite)
 {
-  typedef vector<T>::iterator vectorTiter;
+  typedef typename vector<T>::iterator vectorTiter;
   unsigned short size = toWrite.size();
   write(os, reinterpret_cast<char*>(&size), sizeof(size));
   for(vectorTiter it = toWrite.begin(); 
@@ -360,7 +363,7 @@ ostream& operator << (ostream &os, vector<T> &toWrite)
 {
   short size = toWrite.size();
   os << typeid(T).name() << " (Size: " << size << ")" << endl;
-  for(vector<T>::iterator it = toWrite.begin(); 
+  for(typename vector<T>::iterator it = toWrite.begin(); 
       it != toWrite.end(); ++it)
     {
       os << (*it) << " ";

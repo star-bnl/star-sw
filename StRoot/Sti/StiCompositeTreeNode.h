@@ -144,33 +144,33 @@ public:
     typedef vector<StiCompositeTreeNode *> StiCompositeTreeNodeVector;
 
     ///Provide the iterator into the parent that can be dereferenced to get this node
-    vec_type::iterator whereInParent() {
+    typename vec_type::iterator whereInParent() {
 	return (mparent) ? (mparent->begin()+mkey.index) : mVec.end();
     }
 
     ///Provide random access iterator to the beginning of the vector of children
-    vec_type::iterator begin() {return mVec.begin();}
+    typename vec_type::iterator begin() {return mVec.begin();}
         
     ///Provide random access iterator to the end of the vector of children.
-    vec_type::iterator end() {return mVec.end();}
+    typename vec_type::iterator end() {return mVec.end();}
 
     ///Provide const_iterator to the beginning of the vector of children
-    vec_type::const_iterator begin() const {return mVec.begin();}
+    typename vec_type::const_iterator begin() const {return mVec.begin();}
     
     ///Provied const_iterator to the end of the vector of children.
-    vec_type::const_iterator end() const {return mVec.end();}
+    typename vec_type::const_iterator end() const {return mVec.end();}
 
     ///Provide reverse iterator to the beginning of the vector of children.
-    vec_type::reverse_iterator rbegin() {return mVec.rbegin();}
+    typename vec_type::reverse_iterator rbegin() {return mVec.rbegin();}
     
     ///Provide reverse iterator to the end of the vector of children.
-    vec_type::reverse_iterator rend() {return mVec.rend();}
+    typename vec_type::reverse_iterator rend() {return mVec.rend();}
 
     ///Provide const_reverse_iterator tot he beginning of the vector of children.
-    vec_type::const_reverse_iterator rbegin() const {return mVec.rbegin();}
+    typename vec_type::const_reverse_iterator rbegin() const {return mVec.rbegin();}
     
     ///Provide const_reverse_iterator to the end of the vector of children.
-    vec_type::const_reverse_iterator rend() const {return mVec.rend();}
+    typename vec_type::const_reverse_iterator rend() const {return mVec.rend();}
     
 private:
 
@@ -278,7 +278,7 @@ template <class T>
 void StiCompositeTreeNode<T>::add(StiCompositeTreeNode* newChild) 
 {
     if (!newChild) return;
-    StiCompositeTreeNodeVector::iterator where = find(mVec.begin(), mVec.end(),
+    typename StiCompositeTreeNodeVector::iterator where = find(mVec.begin(), mVec.end(),
 						      newChild);
     //Remove if we see an efficiency penalty
     if (where!=end()) {

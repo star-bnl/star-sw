@@ -109,7 +109,7 @@ void EfficiencyPlots::fill(StMiniMcEvent* minimcevent)
 	// only look at pi-, k-, pbar = 9, 12, 15 and pi+, k+, prot = 8, 11, 14
 	if (id==8 || id==9)
 	  {
-	    double p      = tinymctrack->pMc();
+	    double p      = tinymctrack->pMc();	if(p){}
 	    double pt     = tinymctrack->ptMc();
 	    double eta    = tinymctrack->etaMc();
 	    double phi    = (180./3.1415927)*tinymctrack->phiMc();
@@ -127,7 +127,7 @@ void EfficiencyPlots::fill(StMiniMcEvent* minimcevent)
 	      }
 	  }
     }
-    int nMatchedPiKP=0;
+    int nMatchedPiKP=0;		if(nMatchedPiKP){}
     int nMatchedPairs = minimcevent->nMatchedPair();
     //cout << "# MatchedPairs  " << nMatchedPairs << ":" << minimcevent->tracks(MATCHED)->GetEntries() << endl;
     for (int k=0; k<nMatchedPairs; ++k) 
@@ -140,7 +140,7 @@ void EfficiencyPlots::fill(StMiniMcEvent* minimcevent)
 	if (id==8 || id==9)
 	  {
 	    double pt_mc    = minimcpair->ptMc();
-	    double p_mc     = minimcpair->pMc();
+	    double p_mc     = minimcpair->pMc();	if(p_mc){}
 	    double eta_mc   = minimcpair->etaMc();
 	    double phi_mc   = (180./3.1415927)*minimcpair->phiMc();
 	    int nHits       = minimcpair->nHitMc();

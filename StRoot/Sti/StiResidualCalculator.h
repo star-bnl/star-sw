@@ -1,11 +1,14 @@
 //StiResidualMaker.h
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.h,v 2.4 2003/06/10 16:23:30 andrewar Exp $
+ * $Id: StiResidualCalculator.h,v 2.5 2003/09/07 03:49:08 perev Exp $
  *
  * Author: Andrew Rose, Wayne State University, October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.h,v $
+ * Revision 2.5  2003/09/07 03:49:08  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 2.4  2003/06/10 16:23:30  andrewar
  * Added functions to residual calculator. Added parallel hist set for
  * different detector layers.
@@ -39,7 +42,7 @@
  */
 
 
-#define TRACKMESSENGER *(Messenger::instance(MessageType::kResidualMessage))
+//VP #define TRACKMESSENGER *(Messenger::instance(MessageType::kResidualMessage))
 
 #ifndef StiResidualMaker_HH
 #define StiResidualMaker_HH

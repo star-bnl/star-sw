@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StAddRunInfoMaker.h,v 1.1 2003/03/06 01:34:18 laue Exp $
+ * $Id: StAddRunInfoMaker.h,v 1.2 2003/09/07 03:49:03 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StAddRunInfoMaker_hh
@@ -22,12 +22,9 @@ class StAddRunInfoMaker : public StMaker {
     StAddRunInfoMaker(const char* name="addRunInfo");
     ~StAddRunInfoMaker();
     
-    int Init();   ///< do nothing
-    void Clear(); ///< do nothing 
     int Make();   ///< add StRunInfo to StEvent
-    int Finish(); ///< do nothing
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StAddRunInfoMaker.h,v 1.1 2003/03/06 01:34:18 laue Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StAddRunInfoMaker.h,v 1.2 2003/09/07 03:49:03 perev Exp $ built "__DATE__" "__TIME__ ; 
 	return cvs;
     }
   
@@ -41,6 +38,9 @@ class StAddRunInfoMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StAddRunInfoMaker.h,v $
+ * Revision 1.2  2003/09/07 03:49:03  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 1.1  2003/03/06 01:34:18  laue
  * StAddRunInfoMaker is a make helper maker to add the StRunInfo for the
  * only year1 Au+Au 130GeV data

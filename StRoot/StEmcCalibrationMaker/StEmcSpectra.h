@@ -84,7 +84,8 @@ class StEmcSpectra : public St_DataSet
            Bool_t   			GetOccupancyEtaBin(Float_t,Float_t*,Float_t*,Float_t*); ///< Get eta bin occupancy
            void           Fit(Int_t,TF1*);
            TH1D*    			Draw(Int_t); ///< Draw bin spectrum
-           void     			DrawOccupancy(); ///< Draw occupancy
+           void                         Draw(const Option_t* opt){TObject::Draw(opt);} //WarnOff
+	   void     			DrawOccupancy(); ///< Draw occupancy
   virtual  TH1D*    			DrawEtaBin(Int_t); ///< Draw eta bin spectrum  
   virtual  void     			DrawAllEtaBin(Int_t,Float_t=10); ///< Draw all spectra in the eta bin 
 	         TH1D*    			GetSpectra(Int_t); ///< Return spectrum for one bin

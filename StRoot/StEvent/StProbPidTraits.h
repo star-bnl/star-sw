@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StProbPidTraits.h,v 2.1 2002/10/31 22:47:11 fisyak Exp $
+ * $Id: StProbPidTraits.h,v 2.2 2003/09/07 03:49:02 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -42,7 +42,7 @@ class StProbPidTraits : public StTrackPidTraits {
   Double_t GetSum() { return mSum;}
   void     SetFractions(Double_t *Fractions) {mFractions = Fractions; mSum = 0;}
   void     SetNDF(Int_t ndf)                 {mNDF = ndf;}
-  void     Print(Option_t *opt = "");
+  void     Print(Option_t *opt = "") const;
   static   StParticleDefinition  *mPidParticleDefinitions[KPidParticles]; //!
  protected:
   Int_t     mNDF;

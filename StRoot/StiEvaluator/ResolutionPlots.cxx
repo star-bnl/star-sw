@@ -179,9 +179,9 @@ void ResolutionPlots::fill(StMiniMcEvent* minimcevent)
       if (!acceptEtaCut(tinymctrack->etaMc())) continue;
       double p      = tinymctrack->pMc();
       double pt     = tinymctrack->ptMc();
-      double px     = tinymctrack->pxMc();
-      double py     = tinymctrack->pyMc();
-      double pz     = tinymctrack->pzMc();
+      double px     = tinymctrack->pxMc();	if(px){}
+      double py     = tinymctrack->pyMc();	if(py){}
+      double pz     = tinymctrack->pzMc();	if(pz){}
       double eta    = tinymctrack->etaMc();
       double phi    = (180./3.1415927)*tinymctrack->phiMc();
       int   nHits  = tinymctrack->nHitMc();
@@ -196,7 +196,7 @@ void ResolutionPlots::fill(StMiniMcEvent* minimcevent)
   
   double B = 0.49795819;
   double c = 0.299792458;
-  int nMatchedPiKP=0;
+  int nMatchedPiKP=0;				if(nMatchedPiKP){}
   int nMatchedPairs = minimcevent->nMatchedPair();
   //cout << "# MatchedPairs  " << nMatchedPairs << ":" << minimcevent->tracks(MATCHED)->GetEntries() << endl;
   for (int k=0; k<nMatchedPairs; ++k) 
@@ -207,13 +207,13 @@ void ResolutionPlots::fill(StMiniMcEvent* minimcevent)
       if (!acceptGeantId(id)) continue;
       if (!acceptPair(minimcpair)) continue; 
       double pt_mc    = minimcpair->ptMc();
-      double px_mc    = minimcpair->pxMc();
-      double py_mc    = minimcpair->pyMc();
+      double px_mc    = minimcpair->pxMc();	if(px_mc){}
+      double py_mc    = minimcpair->pyMc();	if(py_mc){}
       double pz_mc    = minimcpair->pzMc();
       double p_mc     = minimcpair->pMc();
       double eta_mc   = minimcpair->etaMc();
       double phi_mc   = (180./3.1415927)*minimcpair->phiMc();
-      int    nHits    = minimcpair->nHitMc();
+      int    nHits    = minimcpair->nHitMc();	if(nHits){}
       double tan_mc   = pz_mc/pt_mc;
       double curv_mc  = B*c/100/pt_mc;
 

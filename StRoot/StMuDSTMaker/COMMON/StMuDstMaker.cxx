@@ -1,11 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.31 2003/09/02 17:58:44 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.32 2003/09/07 03:49:03 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
-#include <fstream>
-#include <strstream>
+#include "Stiostream.h"
+#include "Stsstream.h"
 #include "StChain.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StTrack.h"
@@ -889,6 +889,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.32  2003/09/07 03:49:03  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 1.31  2003/09/02 17:58:44  perev
  * gcc 3.2 updates + WarnOff
  *

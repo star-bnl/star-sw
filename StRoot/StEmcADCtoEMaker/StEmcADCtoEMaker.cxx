@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.46 2003/09/02 17:57:58 perev Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.47 2003/09/07 03:49:01 perev Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.47  2003/09/07 03:49:01  perev
+// gcc 3.2 + WarnOff
+//
 // Revision 1.46  2003/09/02 17:57:58  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -112,7 +115,7 @@
 #include "StBemcData.h"
 
 #define STATUS_OK 1
-#define MAXDET 4
+//VP #define MAXDET 4
 #define CAP1 124
 #define CAP2 125
 

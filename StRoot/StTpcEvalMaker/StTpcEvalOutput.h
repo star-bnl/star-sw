@@ -19,6 +19,7 @@ public:
     StTpcEvalOutput();
     void Open(); 
     void Write(); 
+    int  Write(const char* k, int i1, int i2){return TObject::Write(k, i1, i2);}//WarnOff
     void Close(); 
     TFile* mOutputFile; //!
 private:

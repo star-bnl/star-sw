@@ -14,7 +14,8 @@ using std::streamsize;
 class ostrstream : public std::ostringstream {
 public:
 const char *str()         {return std::ostringstream::str().c_str();}
-int        pcount() const {return std::ostringstream::str().size() ;}
+int        pcount()       {return int(tellp()) ;}
+void       seekp(int pos) {if (int(tellp())>=0) std::ostringstream::seekp(pos);}
 void freeze(bool) const{;};
 };
 class istrstream : public std::istringstream {

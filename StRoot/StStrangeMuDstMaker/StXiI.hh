@@ -194,11 +194,11 @@ public:
   /// @name DCAs
   //@{
   /// DCA of xi daughters at decay vertex
-  virtual Float_t dcaXiDaughters() {return 0;}
+  virtual Float_t dcaXiDaughters() const {return 0;}
   /// DCA of bachelor to primary vertex
-  virtual Float_t dcaBachelorToPrimVertex() {return -1;}
+  virtual Float_t dcaBachelorToPrimVertex() const {return -1;}
   /// DCA of xi to primary vertex
-  virtual Float_t dcaXiToPrimVertex() {return -1;}
+  virtual Float_t dcaXiToPrimVertex() const {return -1;}
   //@}
 
   /// @name Fit/Finding properties
@@ -460,8 +460,11 @@ inline TVector3 StXiI::momXiFrame(Float_t m1, Float_t m2, StXiDaughter type) {
 
 
 /***********************************************************************
- * $Id: StXiI.hh,v 3.10 2003/09/02 17:59:04 perev Exp $
+ * $Id: StXiI.hh,v 3.11 2003/09/07 03:49:05 perev Exp $
  * $Log: StXiI.hh,v $
+ * Revision 3.11  2003/09/07 03:49:05  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 3.10  2003/09/02 17:59:04  perev
  * gcc 3.2 updates + WarnOff
  *

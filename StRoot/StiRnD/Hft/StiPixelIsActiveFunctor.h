@@ -16,7 +16,7 @@ class StiPixelIsActiveFunctor : public StiIsActiveFunctor{
 public:
     StiPixelIsActiveFunctor();
     virtual ~StiPixelIsActiveFunctor();
-    virtual bool operator()(double dYlocal, double dZlocal);
+    virtual bool operator()(double dYlocal, double dZlocal) const;
     
 protected:
 };

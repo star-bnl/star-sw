@@ -22,6 +22,7 @@ public:
   virtual ~HtmlDocument();
 
   virtual HtmlElement * add(HtmlElement * e);
+          HtmlElement * add(const std::string& s){return HtmlElement::add(s);}
   virtual HtmlTitle   * addTitle(const string & text);
   virtual HtmlHeading * addHeading(const string & level, const string & text);
   virtual HtmlTable   * addTable();

@@ -90,6 +90,7 @@ class StPmdNeuNet : public TNamed
   void Forward(); // do a simple forward propagation
   Double_t Error();// compute the error between forward propagation and teaching
   Double_t ErrorO();// compute the error between forward propagation and teaching
+  void Error(const char*, const char*, ...) const{}//WarnOff
   void FreeVW();  
   void AllocateVW(Int_t nInput, Text_t *hidden, Int_t nOutput);  
   void SetHidden(Text_t *ttext); 

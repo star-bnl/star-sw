@@ -117,7 +117,7 @@ void ViewMenuGroup::setSelectedView(int option)
       cout << "ViewMenuGroup::setSelectedView() -E- groups==0"<<endl;
       return;
     }
-  if (group<0 || group>=(*groups).size())
+  if (group<0 || group>=int((*groups).size()))
     {
       cout << "ViewMenuGroup::setSelectedView() -E- group:"<<group<<endl;
       return;

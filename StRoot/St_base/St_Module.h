@@ -1,8 +1,11 @@
 //*-- Author : Valeri Fine (Faine); E-mail: fine@bnl.gov, fine@mail.cern.ch
 //*CMZ : 23/03/98
 // Copyright (C) FineSoft, Valery Fine at Brookhaven National Laboratory (fine@bnl.gov)
-// $Id: St_Module.h,v 1.10 2001/07/16 23:58:35 fine Exp $
+// $Id: St_Module.h,v 1.11 2003/09/07 03:49:07 perev Exp $
 // $Log: St_Module.h,v $
+// Revision 1.11  2003/09/07 03:49:07  perev
+// gcc 3.2 + WarnOff
+//
 // Revision 1.10  2001/07/16 23:58:35  fine
 // suppressing the compilation warning
 //
@@ -134,7 +137,7 @@ public:
   TTable *GetTable(Int_t i) const {return (TTable *)fParams->At(i);}
   void *GetStruct(Int_t i) const {return ((TTable *)fParams->At(i))->GetArray();}
 
-  virtual Int_t  operator()() { return ExecuteModule(); }
+//VP  virtual Int_t  operator()() { return ExecuteModule(); }
           Int_t  InvokeModule(TTable *f1,    TTable *f2=0,  TTable *f3=0,  TTable *f4=0
                               ,TTable *f5=0,  TTable *f6=0,  TTable *f7=0,  TTable *f8=0
                               ,TTable *f9=0,  TTable *f10=0, TTable *f11=0, TTable *f12=0

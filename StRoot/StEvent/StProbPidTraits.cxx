@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StProbPidTraits.cxx,v 2.2 2003/09/02 17:58:05 perev Exp $
+ * $Id: StProbPidTraits.cxx,v 2.3 2003/09/07 03:49:02 perev Exp $
  *
  * Author: Yuri Fisyak, Oct 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StProbPidTraits.cxx,v $
+ * Revision 2.3  2003/09/07 03:49:02  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 2.2  2003/09/02 17:58:05  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -23,7 +26,7 @@
 #include "TMath.h"
 ClassImp(StProbPidTraits)
 
-static const char rcsid[] = "$Id: StProbPidTraits.cxx,v 2.2 2003/09/02 17:58:05 perev Exp $";
+static const char rcsid[] = "$Id: StProbPidTraits.cxx,v 2.3 2003/09/07 03:49:02 perev Exp $";
 StParticleDefinition *StProbPidTraits::mPidParticleDefinitions[KPidParticles] = {
   StElectron::instance(),
   StProton::instance(),     
@@ -63,7 +66,8 @@ Double_t StProbPidTraits::GetProbability(Int_t PartId) {
   return mSum > 0 ? mProbability[PartId] : 0;
 }
 //________________________________________________________________________________
-void StProbPidTraits::Print(Option_t *opt) {
+void StProbPidTraits::Print(Option_t *opt) const {
+  StProbPidTraits *This = (StProbPidTraits *)this;
   Int_t N = mPidArray->GetSize();
   const Float_t *Array = mPidArray->GetArray();
   Int_t i;
@@ -71,7 +75,7 @@ void StProbPidTraits::Print(Option_t *opt) {
   for (i = 0; i < N; i++) {
     cout << "Particle : \t" << mPidParticleDefinitions[i]->name();
     if (mFractions) cout << "\tFraction : \t" << mFractions[i];
-    cout << "\tProbability :\t" << GetProbability(i) 
+    cout << "\tProbability :\t" << This->GetProbability(i) 
 	 << "\tChisq :\t" << Array[i];
       if (mNDF > 0) cout << "\t Chisq Prob:\t" << TMath::Prob(Array[i],mNDF);
     cout << endl;

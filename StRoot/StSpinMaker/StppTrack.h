@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppTrack.h,v 1.2 2002/12/04 20:28:09 thenry Exp $
+// $Id: StppTrack.h,v 1.3 2003/09/07 03:49:05 perev Exp $
 // $Log: StppTrack.h,v $
+// Revision 1.3  2003/09/07 03:49:05  perev
+// gcc 3.2 + WarnOff
+//
 // Revision 1.2  2002/12/04 20:28:09  thenry
 // StppuDstMaker was modified to allow multiple jet analysis modules to be
 // run simultaneosly with various parameters while the Maker loads the events
@@ -36,11 +39,12 @@
 
 #include "TObject.h"
 
-#define MAXANALYZERS 4
+//VP #define MAXANALYZERS 4 //enum instead
 
 class StTrack;
 
 class StppTrack:public TObject{
+enum {MAXANALYZERS=4};
 public:
     StppTrack();
     virtual ~StppTrack();

@@ -199,8 +199,8 @@ double gl3Histo::getWeightedMean(double sigmaWidthBins)
   int HistoMaxBin = GetMaximumBin();
   double HistoMaxCenter = GetBinCenter(HistoMaxBin);
   
-  double SigmaHalfL = Integral(HistoMaxBin-sigmaWidthBins,HistoMaxBin-1);
-  double SigmaHalfR = Integral(HistoMaxBin+1,HistoMaxBin+sigmaWidthBins);
+  double SigmaHalfL = Integral(int(HistoMaxBin-sigmaWidthBins),HistoMaxBin-1);
+  double SigmaHalfR = Integral(HistoMaxBin+1,int(HistoMaxBin+sigmaWidthBins));
   double SigmaHalfLCenter=0;
   
   for(int cnt=HistoMaxBin-1; cnt>=(HistoMaxBin-sigmaWidthBins); cnt--) {

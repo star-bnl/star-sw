@@ -8,8 +8,8 @@ NavigationMenuGroup::NavigationMenuGroup(const string& name,
 					 EventDisplay * display, 
 					 int offset)
   : MenuGroup(name,description,display,offset),
-    _colorSave(-1),
     _visibleSave(true),
+    _colorSave(-1),
     _launched(false)
 {}
 

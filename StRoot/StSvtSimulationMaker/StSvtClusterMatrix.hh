@@ -1,11 +1,10 @@
 #ifndef STSVTCLUSTERMATRIX_HH
 #define STSVTCLUSTERMATRIX_HH
 
-#include <Stiostream.h>
 #include "Stiostream.h"
 #include <stdlib.h>
 #include <math.h>
-#include <new.h>
+#include <new>
 
 class StSvtClusterMatrix {
 

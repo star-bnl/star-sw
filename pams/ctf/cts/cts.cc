@@ -509,8 +509,8 @@ void cts_fill_event (
    long n_event = event_h->nok ;
 //
    if ( n_event >= event_h->maxlen ) {
-     sprintf ( OutMessage, " cts_fill_event: n_event = %d > maxlen = %d  ",
-                             n_event, (int)event_h->maxlen ) ;
+     sprintf ( OutMessage, " cts_fill_event: n_event = %ld > maxlen = %d  ",
+                             n_event, event_h->maxlen ) ;
      MessageOut ( OutMessage ) ;
      return ;
    }

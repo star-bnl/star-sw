@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.cxx,v 1.1 2003/07/31 19:18:09 caines Exp $
+ * $Id: StSvtEmbeddingMaker.cxx,v 1.2 2003/09/07 03:49:06 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,12 +10,15 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.cxx,v $
+ * Revision 1.2  2003/09/07 03:49:06  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 1.1  2003/07/31 19:18:09  caines
  * Petrs improved simulation code
  *
  **************************************************************************/
 
-#include <iostream.h>
+#include "Stiostream.h"
 #include <math.h>
 
 #include "TH2.h"

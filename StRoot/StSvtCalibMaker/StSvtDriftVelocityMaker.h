@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDriftVelocityMaker.h,v 1.4 2002/03/04 17:06:48 willson Exp $
+ * $Id: StSvtDriftVelocityMaker.h,v 1.5 2003/09/07 03:49:05 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDriftVelocityMaker.h,v $
+ * Revision 1.5  2003/09/07 03:49:05  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 1.4  2002/03/04 17:06:48  willson
  * Laser spot positions recorded
  *
@@ -131,7 +134,7 @@ class StSvtDriftVelocityMaker : public StMaker {
   void SetNumTimeBins(const Int_t x) {mNumTimeBins = x;}; //!
   void SetMaximumTB(const Int_t x) {mMaximumTB = x;}; //!
   void SetMinimumTB(const Int_t x) {mMinimumTB = x;}; //!
-  void SetDebug(const bool x) {mDebug = x;}; //!
+  void SetDebug(int x) {mDebug = (x!=0);}; //!
   void SetMoveForward(const bool x) {mMoveForward = x;}; //!
   void SetFraction(const double x) {mFraction = x;}; //!
   void SetT0Guess(const double x) {mT0Guess = x;}; //!

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: PIDFitter.cxx,v 1.9 2003/09/02 17:58:46 perev Exp $
+// $Id: PIDFitter.cxx,v 1.10 2003/09/07 03:49:04 perev Exp $
 //
 // Authors: Aihong Tang
 //
@@ -11,7 +11,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "PIDFitter.h"
-#include <strstream>
+#include "Stsstream.h"
 #include "Stiostream.h"
 
 //#include "TH1.h"
@@ -1204,6 +1204,9 @@ Double_t sigmaNSampleFitFcn(Double_t* x, Double_t *par){
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: PIDFitter.cxx,v $
+// Revision 1.10  2003/09/07 03:49:04  perev
+// gcc 3.2 + WarnOff
+//
 // Revision 1.9  2003/09/02 17:58:46  perev
 // gcc 3.2 updates + WarnOff
 //

@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtHybridPixelsD.cc,v 1.1 2003/07/31 19:04:56 caines Exp $
+ * $Id: StSvtHybridPixelsD.cc,v 1.2 2003/09/07 03:49:05 perev Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -17,7 +17,7 @@
 //                                                                        //
 ////////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include "Stiostream.h"
 #include "StSvtHybridPixelsD.hh"
 
 

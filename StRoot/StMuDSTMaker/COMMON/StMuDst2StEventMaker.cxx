@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst2StEventMaker.cxx,v 1.6 2003/08/29 14:54:00 laue Exp $
+ * $Id: StMuDst2StEventMaker.cxx,v 1.7 2003/09/07 03:49:03 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDst2StEventMaker.h"
@@ -22,11 +22,8 @@ StMuDst2StEventMaker::~StMuDst2StEventMaker() {
   /* no=op */
 }
     
-int StMuDst2StEventMaker::Init(){
-  return 0;
-}
  
-void StMuDst2StEventMaker::Clear() {
+void StMuDst2StEventMaker::Clear(const char*) {
     if ( mStEvent ) delete mStEvent;
     mStEvent =0;
 }
@@ -37,7 +34,7 @@ int StMuDst2StEventMaker::Make(){  ///< create a StEvent from the muDst and put 
 
   if ( mMuDstMaker ) {
     mStEvent = mMuDstMaker->muDst()->createStEvent();
-    StMuDst* muDst = mMuDstMaker->muDst();
+//VP    StMuDst* muDst = mMuDstMaker->muDst();
         if(mStEvent) {
       // set chain date to be the same of event date
       StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
@@ -111,7 +108,7 @@ void StMuDst2StEventMaker::loopOverTracks(StEvent* ev) {
 	    StTrack* t = node->track(primary);
 	    if (t) {
 		// fill pid traits and print some values
-		const StParticleDefinition* pid  = t->pidTraits(pidAlgorithm);
+		const StParticleDefinition* pid  = t->pidTraits(pidAlgorithm);if(pid){/*nothing*/}
 		// if we have pid traits
 		if ( pidAlgorithm.traits() ) {
 		    //		    cout << "dE/dx = " <<  pidAlgorithm.traits()->mean() << "   ";
@@ -122,16 +119,15 @@ void StMuDst2StEventMaker::loopOverTracks(StEvent* ev) {
 }
 
 
-int StMuDst2StEventMaker::Finish() { 
-  return 0;
-}
-    
 
 ClassImp(StMuDst2StEventMaker)
 
 /***************************************************************************
  *
  * $Log: StMuDst2StEventMaker.cxx,v $
+ * Revision 1.7  2003/09/07 03:49:03  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 1.6  2003/08/29 14:54:00  laue
  * Commented out printing of the trigger ids and the (test)-loop over the tracks.
  *
