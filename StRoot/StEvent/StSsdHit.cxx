@@ -1,8 +1,9 @@
 /***************************************************************************
  *
- * $Id: StSsdHit.cxx,v 2.4 1999/11/09 19:35:15 ullrich Exp $
+ * $Id: StSsdHit.cxx,v 2.5 2000/01/05 16:05:37 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
+ *         Lilian Martin, Dec 1999
  ***************************************************************************
  *
  * Description:
@@ -10,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.cxx,v $
- * Revision 2.4  1999/11/09 19:35:15  ullrich
- * Memory now allocated using StMemoryPool via overloaded new/delete
+ * Revision 2.5  2000/01/05 16:05:37  ullrich
+ * Updated for actual use in StEvent. Unpacking changed.
  *
  * Revision 2.5  2000/01/05 16:05:37  ullrich
  * Updated for actual use in StEvent. Unpacking changed.
@@ -33,7 +34,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.4 1999/11/09 19:35:15 ullrich Exp $";
+static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.5 2000/01/05 16:05:37 ullrich Exp $";
 
 StMemoryPool StSsdHit::mPool(sizeof(StSsdHit));
 
@@ -59,8 +60,8 @@ StSsdHit::StSsdHit(const dst_point_st& pt)
     const ULong_t ssdq  = pt.charge - ssddq*(1L<<16);
     mCharge = Float_t(ssdq)/(1<<21);
 
-    const Float_t maxRange   = 22;
-    const Float_t mapFactor  = 23800;
+    //
+    // Unpack position in xyz
     //
     const Float_t maxRange   = 40;
     const Float_t mapFactor  = 16000;
@@ -94,35 +95,42 @@ StSsdHit::StSsdHit(const dst_point_st& pt)
 StSsdHit::~StSsdHit() {/* noop */}
 
 StObject*
+StSsdHit::clone() { return new StSsdHit(*this); }
+
+ULong_t
+StSsdHit::ladder() const
+{
+    unsigned long numwaf = (mHardwarePosition>>4) & ~(~0UL<<9);
+    return (numwaf/mWaferPerLadder+1);
 }
 
-    return bits(4, 10)-1;    // bits 4-13
+ULong_t
+StSsdHit::wafer() const
+{
+    unsigned long numwaf = (mHardwarePosition>>4) & ~(~0UL<<9);
+    return (numwaf-(numwaf/mWaferPerLadder)*mWaferPerLadder+1);
+}
+
+ULong_t 
 StSsdHit::centralStripNSide() const
 {
   return bits(13, 10);     // bits 13-22
 }
 
-    return bits(16, 10)-1;    // bits 16-25
+ULong_t
 StSsdHit::centralStripPSide() const
 {
   return bits(23, 5);      // bits 23-27
 }
 
-    return bits(14, 2);    // bits 14-15
+ULong_t
 StSsdHit::clusterSizeNSide() const
 {
     return bits(28, 2);    // bits 28-29
 }
 
-    return bits(26, 2);    // bits 26-27
-}
-
 ULong_t
-StSsdHit::matchingQualityFactor() const
-{
-    return bits(28, 4);    // bits 28-31
 StSsdHit::clusterSizePSide() const
-
 {
     return bits(30, 2);    // bits 30-31
 }
