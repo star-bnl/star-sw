@@ -127,49 +127,54 @@ macro bfc_init _
           dio/stream/getevent inev
      (rgst) 
      (rg2t) 
-     (svg) exec init_svg#read
+     (svg) 
+* exec init_svg#read
            exec init_svg#svg_am
-     (tpg) exec tpg_init#read
+      (tpg) 
+* exec tpg_init#read
            exec tpg_init#tpg_main
-      (sss) exec init_sss
-            exec init_ssf
+      (sss)
+* 	   exec init_sss
+* exec init_ssf
       (srs) 
             exec create_tables_svt#srs
-            exec init_srs		| SVT initialization - fast simulation
+* exec init_srs		| SVT initialization - fast simulation
       (tfs) 
             exec create_tables_tpc#tcl_fast
-            exec tcl_init#init
-            exec tfs_init#init
+* exec tcl_init#init
+* exec tfs_init#init
       (tss) 
 	    exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
             exec tss_init#init [tpc_sector_first] [tpc_sector_last]
       (tfc) exec create_tables_tpc#tfc
       (tcl)
             exec create_tables_tpc#tcl_slow
-            exec tcl_init#init
+* exec tcl_init#init
       (tpt)
 	    exec create_tables_tpc#tpt
-            exec tpt_init#init
+* exec tpt_init#init
     (tte_t) 
 	    exec create_tables_tpc#tpt
-            exec tpt_init#init            
+* exec tpt_init#init            
     (tte_e)
             exec create_tables_tpc#tte
-            exec tte_init#init
-      (tid) exec tid_init#init
+* exec tte_init#init
+      (tid) 
+* exec tid_init#init
       (stk)
 	    exec create_tables_svt#sgr
             exec create_tables_svt#stk
-            exec init_sgr
-            exec init_stk#init
+* exec init_sgr
+* exec init_stk#init
 	    exec init_stk#vtx
       (sgr) 
 	    exec create_tables_svt#sgr
             exec create_tables_svt#stk
-            exec init_sgr
-            exec init_stk#init
+* exec init_sgr
+* exec init_stk#init
 	    exec init_stk#vtx
-      (spr) exec init_spr
+      (spr) 
+* exec init_spr
       (ffs) 
 	    exec create_tables_ftpc#ffs_tables
 	    exec ffs_init#init
@@ -280,7 +285,7 @@ ABEND:
      (evin) exec read_table_from_file#read inev
             if (staf_status(1).ne.STAFCV_OK) goto EOF
 * 8/25/98 K.Turner - because of mismatch between old and new structure:
-            rmdir event/dst
+*            rmdir event/dst
      (esin) for dir in [evgen] [geantE] [raw_data] [data] [dst]
               cd [dir]; dio/stream/getevent inev 
               if (staf_status(1).ne.STAFCV_OK) goto EOF
