@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "dstype.h"
 #include "dsxdr.h"
 #include "dscuts.h"
 /***********************************************************  DEFINES  **/

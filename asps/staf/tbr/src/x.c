@@ -30,10 +30,11 @@
 #include <Xm/ScrollBar.h>
 #include <Xm/ScrolledW.h>
 #include <Xm/SelectioB.h>
-#include "dsxdr.h"
+#include "dstype.h"
 #include "dscuts.h"
 #include "asuAlloc.h"
 #include "dsuType.h" 
+#include "dsxdr.h"
 #define TXTOUT "table.dump"
 #define EXTERN extern
 #include "brow.h"

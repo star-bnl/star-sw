@@ -8,10 +8,11 @@
 #endif
 
 #include <stdlib.h>
-#include "dsxdr.h"
+#include "dstype.h"
 #include "dsuType.h"
 #include "emlLib.h"
 #include "tbr_types.h"
+#include "dsxdr.h"
 #include "ds.h"
 #ifdef EXTERN
 #undef EXTERN

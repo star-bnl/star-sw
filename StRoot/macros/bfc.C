@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.25 1998/11/25 21:58:36 fisyak Exp $
+// $Id: bfc.C,v 1.26 1998/12/10 01:43:46 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.26  1998/12/10 01:43:46  fisyak
+// Remove geant
+//
 // Revision 1.25  1998/11/25 21:58:36  fisyak
 // Cleanup
 //
@@ -71,11 +74,11 @@
 //
 void bfc(
          const Char_t *fileinp = 
-"/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/g2t/psc091_03_34evts.xdf",
+"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/g2t/psc340_04_90evts.xdf",
          const Char_t *fileout=
-"/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc091_03_34evts_dst.xdf",
+"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/root/psc340_04_90evts_dst.xdf",
          const Char_t *FileOut=
-"/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc091_03_34evts_dst.root",
+"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/root/psc340_04_90evts_dst.root",
          const Int_t  Nevents=1000)
 {
   gSystem->Load("St_base");
@@ -88,8 +91,8 @@ void bfc(
   gSystem->Load("St_xdfin_Maker");
   gSystem->Load("St_calib_Maker");
   gSystem->Load("St_evg_Maker");
-  gSystem->Load("St_geant_Maker");
-  gSystem->Load("St_geom_Maker");
+  //  gSystem->Load("St_geant_Maker");
+  //  gSystem->Load("St_geom_Maker");
   gSystem->Load("St_TLA_Maker");
   gSystem->Load("tpc");
   gSystem->Load("St_tpc");
@@ -122,14 +125,14 @@ void bfc(
 
 //  Create the makers to be called by the current chain
   St_params_Maker params("params","run/params");
-  St_geom_Maker     geom("geom","run/geant/Run");
+  St_TLA_Maker     geom("geom","run/geant/Run");
   if (xdf_in) {
     St_xdfin_Maker xdfin("xdfin");
     chain.SetInputXDFile(xdf_in);
   }
   St_calib_Maker    calib("calib","calib"); 
   St_evg_Maker      evgen("evgen","event/evgen");
-  St_geant_Maker    geant("geant","event/geant/Event");
+  St_TLA_Maker    geant("geant","event/geant/Event");
 //  St_fss_Maker   ftpc_raw("ftpc_raw","event/raw_data/ftpc");
 //  St_tss_Maker    tpc_raw("tpc_raw","event/raw_data/tpc");
 // Set parameters
@@ -145,7 +148,7 @@ void bfc(
   St_dst_Maker        dst_Maker("dst","event/data/global/dst");
   St_run_summary_Maker  summary("run_summary","run/dst");
   chain.PrintInfo();
-// Init the mai chain and all its makers
+// Init the chain and all its makers
   int iInit = chain.Init();
   if (iInit) chain.Fatal(iInit,"on init");
 //  chain.MakeTree("StChainTree","Title");
