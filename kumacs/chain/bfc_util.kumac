@@ -77,7 +77,7 @@ return
 **********************************************************************
  
 macro bfc_init _
-         chain=' g2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout' 
+         chain=' g2tin svg tpg srs tfs sgr spr tpt tte_e svm egr ev0 evout' 
   
   macro/global/import *
     
@@ -152,6 +152,7 @@ macro bfc_init _
             exec init_sgr
             exec init_stk#init
 	    exec init_stk#vtx
+      (spr) exec init_spr
       (ffs) 
 	    exec create_tables_ftpc#ffs_tables
 	    exec ffs_init#init
@@ -233,7 +234,7 @@ EOF:
 **********************************************************************
 
  macro bfc_process _
-      chain=' g2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
+      chain=' g2tin svg tpg srs tfs sgr spr tpt tte_e svm egr ev0 evout'_
    
   macro/global/import *
   test = [chain]
@@ -250,8 +251,10 @@ EOF:
             if (staf_status(1).ne.STAFCV_OK) goto EOF
      (gtxin) nextl 1
      (evin) exec read_table_from_file#read inev
+            if (staf_status(1).ne.STAFCV_OK) goto EOF
      (esin) for dir in [evgen] [geantE] [raw_data] [data] [dst]
               cd [dir]; dio/stream/getevent inev 
+              if (staf_status(1).ne.STAFCV_OK) goto EOF
             endfor
      (fzin) trig 1 
      (rgst) trig 1
@@ -294,6 +297,7 @@ EOF:
                if (staf_status(1) .ne. stafcv_ok) then
                  nextl 1;
                endif
+      (spr)    exec run_spr#run
       (tpt)    exec tpt_run#run
 	       if (staf_status(1) .ne. stafcv_ok) then 
                  message ' problem with tpc_tracker_tpt'
@@ -367,7 +371,7 @@ return
 **********************************************************************
 
 macro bfc_finish _
-   chain=' g2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'
+   chain=' g2tin svg tpg srs tfs sgr spr tpt tte_e svm egr ev0 evout'
   
   macro/global/import *
   test = [chain]
