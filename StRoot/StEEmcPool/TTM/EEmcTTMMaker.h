@@ -1,7 +1,7 @@
 // Hey Emacs this is -*-c++-*-
 #ifndef STAR_EEmcTTMMaker
 #define STAR_EEmcTTMMaker
-// $Id: EEmcTTMMaker.h,v 1.9 2004/04/14 16:20:25 zolnie Exp $
+// $Id: EEmcTTMMaker.h,v 1.10 2004/04/14 16:40:34 zolnie Exp $
 
 /*!
  *                                                                     
@@ -168,19 +168,25 @@ public:
   /// returns a map  of matches
   TMap  *GetMatch()  { return mMatchMap ; }; 
 
+  /// prints a summary of run
   ostream&   Summary    ( ostream &out ) const ;
 
-  /// a static method to be called from root4star 
-  /// also an example how to use TTM
+  //! a static method to be called from root4star (also an example how to use TTM)
+  /// \param chain     - a pointer to StChain instance
+  /// \param inpDir    - MuDST directory 
+  /// \param inpFile   - MuDST file or file list
+  /// \param outFile   - output ROOT tree
+  /// \param nFiles    - max number of MuDST to process  
+  /// \param nEvents   - max number of events to process (-1 == all)
+  /// \param timeStamp - database time stamp to be used (e.g. 20040331)
   static void Run(
 	    StChain* chain, 
-	    char* inpDir    ,
-	    char* inpFile   ,
-	    char* outFile   ,
-	    Int_t nFiles    ,
-	    Int_t nEvents   ,
-	    Int_t timeStamp );
-
+	    char*    inpDir    ,
+	    char*    inpFile   ,
+	    char*    outFile   ,
+	    Int_t    nFiles    ,
+	    Int_t    nEvents   ,
+	    Int_t    timeStamp );
 
  protected:
 
@@ -234,7 +240,7 @@ public:
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.9 2004/04/14 16:20:25 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.10 2004/04/14 16:40:34 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -251,6 +257,9 @@ ostream&  operator<<(ostream &out, const StMuTrack    &t  );
 
 
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.10  2004/04/14 16:40:34  zolnie
+// *** empty log message ***
+//
 // Revision 1.9  2004/04/14 16:20:25  zolnie
 // added static method Run for faster analysis under root4star
 //
