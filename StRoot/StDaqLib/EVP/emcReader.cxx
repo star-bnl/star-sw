@@ -52,9 +52,6 @@ int emcReader(char *m) {
   emc.bsmd_ch = 0 ;
   emc.bpre_ch = 0 ;
   
-  emc.etow_ch = 0 ;
-  emc.esmd_ch = 0 ;
-  
   emc.btow_in = emc.bsmd_in = emc.bpre_in = 0 ;
   emc.etow_in = emc.esmd_in = 0 ;
   
@@ -264,7 +261,6 @@ int emcReader(char *m) {
 	    for(m=0;m<ETOW_DATSIZE;m++) {
 	      for(l=0;l<ETOW_MAXFEE;l++) {
 		emc.etow[l][m] = l2h16(*data++) ;
-		if(emc.etow[l][m] > 0) emc.etow_ch++ ;
 	      }
 	    }
 	    
@@ -309,7 +305,6 @@ int emcReader(char *m) {
 	    for(m=0;m<ESMD_DATSIZE;m++) {
 	      for(l=0;l<mxESMDfiber;l++) {
 		emc.esmd[l][m] = l2h16(*data++) ;
-		if(emc.esmd[l][m] > 0) emc.esmd_ch++ ;
 	      }
 	    }
 	  }

@@ -32,7 +32,6 @@ struct emc {
 
 	// ENDCAP TOWERS
 	u_char etow_in ;	// in this event?
-	u_short etow_ch ;	// channels above zero
 	u_short etow[ETOW_MAXFEE][ETOW_DATSIZE] ;	// ADC data...
 	u_short etow_pre[ETOW_MAXFEE][ETOW_PRESIZE]; // ETOW preamble
 	u_short *etow_raw ;	// pointer to the beginning of rawdata; raw data is little endian
@@ -41,7 +40,6 @@ struct emc {
 
 	// ENDCAP Showermax & preshower(?)
 	u_char esmd_in ;	// in this event?
-	u_short esmd_ch ;	// channels above 0
 	u_short esmd[ESMD_MAXFEE][ESMD_DATSIZE] ;	// ADC data
 	u_short esmd_pre[ESMD_MAXFEE][ESMD_PRESIZE]; // ESMD preamble
 	u_short *esmd_raw ;	// pointer to the beginning of raw data; raw data is little endian
