@@ -1,19 +1,13 @@
-// $Id: Example_readdst_qa_tables.C,v 1.2 1999/07/13 01:13:01 kathy Exp $
-// $Log: Example_readdst_qa_tables.C,v $
-// Revision 1.2  1999/07/13 01:13:01  kathy
-// moved rch.C to obsolete, put in id,log,owner into HbtExample, removed loading of StRootEvent and changed default input file in bfcread.C and Example_readdst_qa_tables.C
-//
-// Revision 1.1  1999/06/22 21:25:29  kathy
-// example to read read dst.root file and print out info about tables
+// $Id: Example_read_dst_print_tables.C,v 1.1 1999/10/11 17:17:57 kathy Exp $
+// $Log: Example_read_dst_print_tables.C,v $
+// Revision 1.1  1999/10/11 17:17:57  kathy
+// changed names of some macros to make them more standard; changed default input file to MakeHists since previous no longer existed; combined some macros so that the one example will show all functionality
 //
 //
 //======================================================================
 // owner: Kathy Turner  
 // what it does: 
-//=======================================================================
-// Example_readdst_qa_tables.C
-//
-// Kathy's notes (6/22/99):
+// Kathy's notes (10/11/99):
 //     - read dstbranch from *.dst.root file
 //     - read 1 event and print out information from the tables
 //======================================================================
@@ -24,7 +18,7 @@ StChain *chain;
 class St_DataSet;
 St_DataSet *Event;
 
-void Example_readdst_qa_tables(Int_t nevents=1, const char
+void Example_read_dst_print_tables(Int_t nevents=1, const char
 *MainFile="/disk00000/star/test/new/tfs_Solaris/year_2a/psc0208_01_40evts.dst.root")
 
 {
@@ -35,7 +29,7 @@ void Example_readdst_qa_tables(Int_t nevents=1, const char
     gSystem->Load("StTreeMaker");
     gSystem->Load("StarClassLibrary");
 
-    cout << "  .. Example_readdst_qa_tables.C, have loaded libraries " << endl;
+    cout << "  .. Example_read_dst_print_tables.C, have loaded libraries " << endl;
 
 //  Setup top part of chain
     chain = new StChain("bfc");

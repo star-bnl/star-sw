@@ -1,5 +1,8 @@
-// $Id: MakeHists.cxx,v 1.10 1999/06/03 16:40:36 kathy Exp $
+// $Id: MakeHists.cxx,v 1.11 1999/10/11 17:18:00 kathy Exp $
 // $Log: MakeHists.cxx,v $
+// Revision 1.11  1999/10/11 17:18:00  kathy
+// changed names of some macros to make them more standard; changed default input file to MakeHists since previous no longer existed; combined some macros so that the one example will show all functionality
+//
 // Revision 1.10  1999/06/03 16:40:36  kathy
 // put back old dedx.C and restore original macros that use non-existent input file
 //
@@ -12,7 +15,7 @@
 //=======================================================================
 //*-- Author :    Valery Fine   21/07/98  (E-mail:fine@bnl.gov)
 // #include "St_mevsim_Module.h"
-void MakeHists(Char_t *xdffilename="/afs/rhic/star/packages/dev/StRoot/macros/data/test.xdf")
+void MakeHists(Char_t *xdffilename="/disk00000/star/test/new/tfs_Solaris/year_1b/set0352_01_35evts.dst.xdf")
 {
 
   gROOT->Reset();

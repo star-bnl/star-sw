@@ -1,5 +1,8 @@
-// $Id: Example_readdst_makehist.C,v 1.1 1999/09/28 21:59:08 kathy Exp $
-// $Log: Example_readdst_makehist.C,v $
+// $Id: Example_read_dst_makehist.C,v 1.1 1999/10/11 17:17:56 kathy Exp $
+// $Log: Example_read_dst_makehist.C,v $
+// Revision 1.1  1999/10/11 17:17:56  kathy
+// changed names of some macros to make them more standard; changed default input file to MakeHists since previous no longer existed; combined some macros so that the one example will show all functionality
+//
 // Revision 1.1  1999/09/28 21:59:08  kathy
 // add new macro to show how to read .dst.root file, find a value in a table and make a histogram of it and print out
 //
@@ -13,7 +16,7 @@
 //=======================================================================
 
 
-void Example_readdst_makehist(Int_t nevents=3, const char
+void Example_read_dst_makehist(Int_t nevents=3, const char
 *MainFile="/disk00000/star/test/new/tfs_Solaris/year_2a/psc0208_01_40evts.dst.root")
 {
  
