@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.19 1999/02/16 01:53:57 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.20 1999/02/19 16:30:25 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.20  1999/02/19 16:30:25  fisyak
+// sanitary check
+//
 // Revision 1.19  1999/02/16 01:53:57  fisyak
 // Make sure that tfs does not run if there tss
 //
@@ -252,7 +255,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.19 1999/02/16 01:53:57 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.20 1999/02/19 16:30:25 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
@@ -266,8 +269,8 @@ void St_tcl_Maker::MakeHistograms() {
   //Get the table:
   St_tcl_tphit *ptphh = 0;
   St_tcl_tpcluster *ptpcl =0;
-  ptphh  = (St_tcl_tphit *) tpc_hits.Find("tphit");
-  ptpcl  = (St_tcl_tpcluster *) tpc_hits.Find("tpcluster");
+  ptphh  = (St_tcl_tphit *) tpc_hits["tphit"];
+  ptpcl  = (St_tcl_tpcluster *) tpc_hits["tpcluster"];
 
   //  cout << " **** NOW MAKING HISTOGRAMS FOR TCL !!!!! " << endl;
   if (ptphh) {
