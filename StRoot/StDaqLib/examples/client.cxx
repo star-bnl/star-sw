@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: client.cxx,v 1.4 1999/07/21 21:33:10 levine Exp $
+ * $Id: client.cxx,v 1.5 1999/08/31 01:59:47 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: sample top-level code sould be used as a tutorial
@@ -11,10 +11,21 @@
  *  09-Jul-99 MJL add calls to various non_TPC detector readers
  *  12-Jul-99 MJL add calls to getSpacePts()
  *  20-Jul-99 MJL use new EventReader constructor with log file name
+ *  29-Aug-99 MJL change to include <iostream.h> for HP platform
  *
  ***************************************************************************
  * $Log: client.cxx,v $
+ * Revision 1.5  1999/08/31 01:59:47  levine
+ * changes to allow compilation on HP/UX
+ * in EventReader.cxx:
+ * if((MMAPP = (char *) mmap(0, datap.EventLength * 4, PROT_READ |PROT_WRITE,
+ *
+ * in various files in TPC directory:
+ * #include <iostream.h>
+ *
  * Revision 1.4  1999/07/21 21:33:10  levine
+ *
+ *
  * changes to include error logging to file.
  *
  * There are now 2 constructors for EventReader:
@@ -54,7 +65,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <iostream>
+#include <iostream.h>
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/EMC/EMC_Reader.hh"
