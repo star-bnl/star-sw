@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.h,v 1.1 2002/12/05 23:42:46 hardtke Exp $
+ * $Id: StMinuitVertexFinder.h,v 1.2 2003/05/09 22:19:51 lbarnby Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  * Modified for pp by David Hardtke, Summer 2002
@@ -87,26 +87,30 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.2  2003/05/09 22:19:51  lbarnby
+ * Now also calculates and reports error on vertex. Corrected filter to use ITTF tracks. Some temporary protections against inf/Nan. Skip delete of TMinuit class since causing seg. fault.
+ *
  * Revision 1.1  2002/12/05 23:42:46  hardtke
  * Initial Version for development and integration
  *
  **************************************************************************/
 #include <vector>
-//#include "/afs/rhic/star/packages/DEV/include/StThreeVectorD.hh"
-//#include "/afs/rhic/star/packages/DEV/include/StPhysicalHelixD.hh"
 #include "StThreeVectorD.hh"
 #include "StPhysicalHelixD.hh"
+#include "StGenericVertexFinder.h"
+
 class StEvent;
 class StTrack;
 class TMinuit;
 
-class StMinuitVertexFinder {
+class StMinuitVertexFinder: public StGenericVertexFinder {
 public:
     StMinuitVertexFinder();
     ~StMinuitVertexFinder();
 
     bool            fit(StEvent*);       // fit the vertex
     StThreeVectorD  result() const;      // result of fit
+    StThreeVectorD  error() const;       // error on fit result
     int             status() const;      // error and status flag
 
     void            setExternalSeed(const StThreeVectorD&);
@@ -117,9 +121,8 @@ public:
     void            CTBforSeed();
     void            NoCTBforSeed();
     int             NCtbMatches();
-    bool            use_ITTF;    //Use only tracks with ITTF encoded method
     void            SetFitPointsCut(int fitpoints);
-
+    inline void DoUseITTF(){use_ITTF=kTRUE;};
 private:
     bool accept(StTrack*) const;   // track filter
     static void fcn(int&, double*, double&, double*, int); // fit function
@@ -142,6 +145,7 @@ private:
     
     TMinuit*                 mMinuit;
     StThreeVectorD           mFitResult;
+    StThreeVectorD           mFitError;
     unsigned int             mMinNumberOfFitPointsOnTrack;
     bool                     mExternalSeedPresent;
     StThreeVectorD           mExternalSeed;
@@ -153,6 +157,7 @@ private:
     int                      mStatus;     // status flag 
     bool                     mVertexConstrain; // Use vertex constraint from db
     bool                     mRequireCTB; // require CTB for seed
+    bool            use_ITTF;    //Use only tracks with ITTF encoded method
     double                   mWeight ; // Weight in fit for vertex contraint
     StPhysicalHelixD*        mBeamHelix ; // Beam Line helix
 };
