@@ -118,6 +118,9 @@ private:
     double mcTrackPz;
     double mcTrackPt;
     double mcTrackEta;
+    unsigned int mcTrackNTpcHits;
+    unsigned int mcTrackNSvtHits;
+    unsigned int mcTrackNFtpcHits;
     
     //temp kinematic info : global
     short  globalTrackQ;

@@ -328,6 +328,10 @@ void TrackEntry::setMcTrack(StMcTrack *newtrack)
   const StThreeVectorF& momentum = newtrack->momentum();
   mcTrackPt = momentum.perp();
   mcTrackEta = momentum.pseudoRapidity();
+
+  mcTrackNTpcHits = newtrack->tpcHits().size();
+  mcTrackNSvtHits = newtrack->svtHits().size();
+  mcTrackNFtpcHits = newtrack->ftpcHits().size();
 }
 
 void TrackEntry::setGlobalTrack(StTrack *newtrack)
