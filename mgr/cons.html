@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <TITLE>Cons - Software Construction System</TITLE>
-<LINK REV="made" HREF="mailto:root@porky.devel.redhat.com">
+<LINK REV="made" HREF="mailto:lionel.cons@cern.ch">
 </HEAD>
 
 </TITLE> 
@@ -119,7 +119,6 @@
 		<LI><A HREF="#The_C_Install_method">The &lt;CODE&gt;Install&lt;/CODE&gt; method</A>
 		<LI><A HREF="#The_C_InstallAs_method">The &lt;CODE&gt;InstallAs&lt;/CODE&gt; method</A>
 		<LI><A HREF="#The_C_Precious_method">The &lt;CODE&gt;Precious&lt;/CODE&gt; method</A>
-		<LI><A HREF="#The_C_AfterBuild_method">The &lt;CODE&gt;AfterBuild&lt;/CODE&gt; method</A>
 		<LI><A HREF="#The_C_Command_method">The &lt;CODE&gt;Command&lt;/CODE&gt; method</A>
 		<LI><A HREF="#The_C_Objects_method">The &lt;CODE&gt;Objects&lt;/CODE&gt; method</A>
 		<LI><A HREF="#The_C_Program_method">The &lt;CODE&gt;Program&lt;/CODE&gt; method</A>
@@ -1659,12 +1658,7 @@ Would yield a compilation command of:
 </PRE>
 
 <P>
-In order to shorten the command lines as much as possible, Cons will remove <CODE>-I</CODE> flags for any directories, locally or in the repositories, which do not
-actually exist. (Note that the <CODE>-I</CODE> flags are not included in the MD5 signature calculation for the target
-file, so the target will not be recompiled if the compilation command
-changes due to a directory coming into existence.)
 
-<P>
 Because Cons relies on the compiler's <CODE>-I</CODE> flags to communicate the order in which repository directories must be
 searched, Cons' handling of repository directories is fundamentally
 incompatible with using double-quotes on the <CODE>#include</CODE> directives in your C source code:
@@ -2408,22 +2402,12 @@ Both the target and the sources lists should be of the same length.
 
 <DT><STRONG>The Precious method</STRONG><DD>
 <P>
-<HR>
-<H2><A NAME="The_C_AfterBuild_method">The &lt;CODE&gt;AfterBuild&lt;/CODE&gt; method</A></H2>
-<P>
-The <CODE>AfterBuild</CODE> method evaluates the specified perl string after building the given file or
-files (or finding that they are up to date). The eval will happen once per
-specified file.  <CODE>AfterBuild</CODE> is called as follows:
+The <CODE>Precious</CODE> method asks cons not to delete the given file or list of files before
+building them again. This is especially useful for allowing incremental
+updates to libraries or debug information files which are updated rather
+than rebuilt anew each time. Cons will still delete the files when the <CODE>-r</CODE> flag is specified.
 
-<P>
-<PRE>  AfterBuild $env 'foo.o', qq(print &quot;foo.o is up to date!\n&quot;);
-</PRE>
-<P>
-The perl string is evaluated in the <CODE>script</CODE> package, and has access to all variables and subroutines defined in the <EM>Conscript</EM> file in which the <CODE>AfterBuild</CODE> method is called.
-
-<P>
-<HR>
-<H2><A NAME="The_C_Command_method">The &lt;CODE&gt;Command&lt;/CODE&gt; method</A></H2>
+<DT><STRONG>The Command method</STRONG><DD>
 <P>
 The <CODE>Command</CODE> method is a catchall method which can be used to arrange for any external
 command to be called to update the target. For this command, a target file
