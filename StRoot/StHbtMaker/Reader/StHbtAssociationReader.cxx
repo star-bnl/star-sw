@@ -2,13 +2,15 @@
 #define DIFF_CUT_OFF 1.
 
 #include "StHbtMaker/Reader/StHbtAssociationReader.h"
+#include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
+#include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
+
 #include "StChain.h"
 #include "TOrdCollection.h"
 
 #include "StEvent.h"
 #include "StGlobalTrack.h"
 #include "StTrackNode.h"
-#include "StTrackDetectorInfo.h"
 #include "StContainers.h"
 #include "StPrimaryVertex.h"
 #include "StVertex.h"
@@ -16,24 +18,20 @@
 #include "StDedxPidTraits.h"
 #include "StTrackPidTraits.h"
 #include "StTrackGeometry.h"
+#include "StTrackDetectorInfo.h"
 
 #include "StParticleTypes.hh"
 #include "StTpcDedxPidAlgorithm.h"
 
-//#include <typeinfo>
 #include <math.h>
 
 #include "SystemOfUnits.h"   // has "tesla" in it
-#include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 #include "StEventMaker/StEventMaker.h"
-#include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
-#include "StV0MiniDstMaker/StV0MiniDstMaker.h"  
-#include "StV0MiniDstMaker/StV0MiniDst.hh"
 #include "StAssociationMaker/StAssociationMaker.h"
 
-//#include <iostream.h>
-//#include <stdlib.h>
-//#include <vector>
+#include "StStrangeMuDstMaker/StStrangeEvMuDst.hh"
+#include "StStrangeMuDstMaker/StV0MuDst.hh"
+
 #include "StMcEventMaker/StMcEventMaker.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -123,14 +121,6 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   cout << " StHbtAssociationReader::ReturnHbtEvent() :  Seconds elapsed since last call : " << difftime( time(0), timeStamp ) << endl;
   cout << " **************************************************************************************" << endl;
   timeStamp = time(0);
-
-  cout << "StHbtAssociationReader::ReturnHbtEvent" << endl;
-  cout << "StHbtAssociationReader::ReturnHbtEvent" << endl;
-  cout << "StHbtAssociationReader::ReturnHbtEvent" << endl;
-  cout << "StHbtAssociationReader::ReturnHbtEvent" << endl;
-  cout << "StHbtAssociationReader::ReturnHbtEvent" << endl;
-  cout << "StHbtAssociationReader::ReturnHbtEvent" << endl;
-  
   // ********************************
   // get pointer to eventMaker, event
   // ********************************
@@ -153,7 +143,6 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     cout << "StHbtAssociationReader - No StMcEvent!!! " << endl;
     return 0;
   }
-
   cout << " McEvent " << endl;
   // ****************************************
   // get pointer to associationMaker, mcEvent
@@ -168,6 +157,11 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   }
   rcTpcHitMapType* theHitMap = 0;
   theHitMap = assoc->rcTpcHitMap();
+  if (!theHitMap){
+    cout << "StHbtAssociationReader - No tpcHitMap!!! " << endl;
+    cout << "StHbtAssociationReader - theHitMap " << theHitMap <<endl;
+    return 0;
+  }
   rcTrackMapType* theTrackMap = 0;
   theTrackMap = assoc->rcTrackMap();
   if (!theTrackMap){
@@ -175,9 +169,11 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     cout << "StHbtAssociationReader - theTrackMap " << theTrackMap <<endl;
     return 0;
   }
-  if (!theHitMap){
-    cout << "StHbtAssociationReader - No tpcHitMap!!! " << endl;
-    cout << "StHbtAssociationReader - theHitMap " << theHitMap <<endl;
+  rcV0MapType* theV0Map = 0;
+  theV0Map = assoc->rcV0Map();
+  if (!theV0Map){
+    cout << "StHbtAssociationReader - No v0Map!!! " << endl;
+    cout << "StHbtAssociationReader - theV0Map " << theV0Map <<endl;
     return 0;
   }
 
@@ -211,14 +207,12 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   
   cout << "StHbtAssociationReader::ReturnHbtEvent - We have " << rMult << " tracks to store - we skip tracks with nhits==0" << endl;
     
-  
   double pathlength;
   StHbtThreeVector p;
   StHbtThreeVector mp;
   
   mDiffCurrent->Reset();
 
-  // what the hell is this?  StHbtTrackCollection dummyTrackCollection;
   float diff=0;
 
   StHbtEvent* hbtEvent = new StHbtEvent;
@@ -241,7 +235,6 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
       return 0;
     }
   }
-
 
   for (rcTrackMapIter tIter=theTrackMap->begin(); tIter!=theTrackMap->end(); ++tIter){
     //    cout << "Doing track number " << ++icount << endl;
@@ -467,17 +460,42 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   
   hbtEvent->SetNumberOfGoodTracks(hbtEvent->TrackCollection()->size());
   
-  cout << "StHbtAssociationReader::ReturnEvent() : mean of momenta diff (accepted tracks)= " << mDiffCurrent->GetMean() << endl;
-  cout << "StHbtAssociationReader::ReturnEvent() : rms  of momenta diff (accepted tracks)= " << mDiffCurrent->GetRMS() << endl;
+  cout << " StHbtAssociationReader::ReturnEvent() : mean of momenta diff (accepted tracks)= " << mDiffCurrent->GetMean() << endl;
+  cout << " StHbtAssociationReader::ReturnEvent() : rms  of momenta diff (accepted tracks)= " << mDiffCurrent->GetRMS() << endl;
   mDiffMean->Fill(mDiffCurrent->GetMean(),1.);
   mDiffRMS->Fill(mDiffCurrent->GetRMS(),1.);
-  cout << "DiffCurrent   (p_real - p_mc ) / p_real                " << mDiffCurrent << endl;
-  cout << "DiffEvents    (p_real - p_mc ) / p_real vs eventNumber " << mDiffEvents << endl;
-  cout << "Diff          (p_real - p_mc ) / p_real                " << mDiff << endl;
-  cout << "DiffMean       mean  of (p_real - p_mc ) / p_real      " << mDiffMean << endl;
-  cout << "DiffSigma      sigma of (p_real - p_mc ) / p_real      " << mDiffRMS << endl;
+  cout << " StHbtAssociationReader::ReturnEvent() : DiffCurrent (p_real - p_mc ) / p_real                " << mDiffCurrent << endl;
+  cout << " StHbtAssociationReader::ReturnEvent() : DiffEvents  (p_real - p_mc ) / p_real vs eventNumber " << mDiffEvents << endl;
+  cout << " StHbtAssociationReader::ReturnEvent() : Diff        (p_real - p_mc ) / p_real                " << mDiff << endl;
+  cout << " StHbtAssociationReader::ReturnEvent() : DiffMean    mean  of (p_real - p_mc ) / p_real      " << mDiffMean << endl;
+  cout << " StHbtAssociationReader::ReturnEvent() : DiffSigma   sigma of (p_real - p_mc ) / p_real      " << mDiffRMS << endl;
   
-  cout << "StHbtAssociationReader::Finish" << endl;
+
+  //the fastes way to fill the StHbtV0 is to create the StStrangeEvMuDst with the StV0MuDst and the copy into StHbtV0
+  StStrangeEvMuDst strangeEvMuDst(*rEvent);
+  // loop over all the StV0Vertices
+  for (rcV0MapIter tIter=theV0Map->begin(); tIter!=theV0Map->end(); ++tIter){
+    StV0Vertex* rV0Vertex = (StV0Vertex*) (*tIter).first; // got the V0 from reconstruction
+    StV0MuDst v0MuDst(rV0Vertex,&strangeEvMuDst);         // create the StV0MuDst
+    cout << " StHbtAssociationEventReader::ReturnHbtEvent() " << theV0Map->count(rV0Vertex) << " associated V0s " << endl;
+    // loop over associated tracks // maybe later you want to check particle ids
+    pair<rcV0MapIter, rcV0MapIter> boundsV0 = theV0Map->equal_range(rV0Vertex);
+    for (rcV0MapIter v0Iter = boundsV0.first; v0Iter!= boundsV0.second; v0Iter++){ // loop over all associated V0s
+      StMcVertex* mcV0 = (*v0Iter).second;
+    }
+    StHbtV0* hbtV0 = new StHbtV0(v0MuDst);       // copy into StHbtV0;
+    if (mV0Cut){                                 // check whether vo passes cuts
+      if (!(mV0Cut->Pass(hbtV0))) {              // track failed - delete it and skip the push_back
+	delete hbtV0;
+	continue;
+      }
+    }
+    hbtEvent->V0Collection()->push_back(hbtV0);  // good V0 fill in collection
+  }
+  
+  cout << " StHbtAssociationReader::ReturnHbtEvent() - " << hbtEvent->V0Collection()->size();
+  cout << " V0s pushed in collection " << endl;
+
   eventNumber++;
   return hbtEvent;
 }
