@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2004/01/19
-// $Id: EEmcTTDisplay.cxx,v 1.10 2004/05/06 16:02:48 zolnie Exp $
+// $Id: EEmcTTDisplay.cxx,v 1.11 2005/02/05 00:53:01 perev Exp $
 // doxygen info here
 /**
  * \class   EEmcTTDisplay
@@ -12,8 +12,8 @@
  *
  * \author  Piotr A. Zolnierczuk
  * 
- * $Date: 2004/05/06 16:02:48 $ 
- * $Revision: 1.10 $
+ * $Date: 2005/02/05 00:53:01 $ 
+ * $Revision: 1.11 $
  * 
  * \section displayexample  Short example how to use EEmcTTDisplay
  * for details consult  StRoot/StEEmcPool/macros/TTM/show.C
@@ -28,8 +28,8 @@
  *
  */
 
-#include <ostream>
-#include <sstream>
+#include <Stiostream.h>
+#include <Stsstream.h>
 
 #include "TList.h"
 #include "TGeoVolume.h"
@@ -334,6 +334,9 @@ EEmcTTDisplay::volumeName(const EEmcTower& tower)
 
 
 // $Log: EEmcTTDisplay.cxx,v $
+// Revision 1.11  2005/02/05 00:53:01  perev
+// Bacward compatibility to redhead7
+//
 // Revision 1.10  2004/05/06 16:02:48  zolnie
 // more docs
 //

@@ -1,10 +1,10 @@
 // Hey Emacs this is -*-c++-*-
 #ifndef STAR_EEmcTower_h
 #define STAR_EEmcTower_h
-// $Id: EEmcTower.h,v 1.4 2004/05/10 21:10:19 zolnie Exp $
+// $Id: EEmcTower.h,v 1.5 2005/02/05 00:53:28 perev Exp $
 
 
-#include <ostream>
+#include <Stiostream.h>
 
 #include "TObject.h"
 #include "TVector3.h"
