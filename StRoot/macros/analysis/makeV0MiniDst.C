@@ -1,7 +1,10 @@
 // Using StV0MiniDstMaker to make v0 mini-DST
 // Peter G. Jones, University of Birmingham, p.g.jones@bham.ac.uk
-// $Id: makeV0MiniDst.C,v 1.4 1999/08/31 20:49:08 genevb Exp $
+// $Id: makeV0MiniDst.C,v 1.5 1999/09/02 09:12:26 jones Exp $
 // $Log: makeV0MiniDst.C,v $
+// Revision 1.5  1999/09/02 09:12:26  jones
+// Changes reflect new I/O file handling
+//
 // Revision 1.4  1999/08/31 20:49:08  genevb
 // StV0MiniDst class now depends on StAnalysisUtilities library
 //
@@ -31,8 +34,7 @@ void load() {
 
 void run() {
   // Open input file
-  //  const Char_t *file = "/afs/rhic/star/strange/jones/xi_new.xdf";
-  const Char_t *file = "/afs/rhic/star/data3/test/dev/tfs_Solaris/Wed/year_1b/psc0050_01_40evts.dst.xdf";
+  const Char_t *file = "/afs/rhic/star/strange/xi_dst.xdf";
 
   StFile *files = new StFile();
   files->AddFile(file);
@@ -46,8 +48,9 @@ void run() {
   // Create Makers
   StIOMaker IOMaker("IO","r",files,"bfcTree");
   StEventMaker eventMaker("events","title");
-  StV0MiniDstMaker v0dst("v0dst","V0MicroDst.root"); // Sets output filename
+  StV0MiniDstMaker v0dst("v0dst");
 
+  v0dst.SetOutputFile("V0MicroDst.root"); // Set output filename
   v0dst.SetV0VertexType(); // Selects V0 vertices for micro-DST
 
   // Do init
