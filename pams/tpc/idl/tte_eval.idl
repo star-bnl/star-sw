@@ -11,6 +11,7 @@
        long       nfit;       /* Number of points included in fit */
        long       ngood;      /* Number of points from the dominant track */
        long       nrec;       /* Number of reconstructed points */
+       long       npos;       /* Number of possible points, allowed by geometry*/
        long       qg;         /* Generated charge */
        long       qr;         /* Reconstructed charge */
        long       rtrk;       /* Reconstructed track # */

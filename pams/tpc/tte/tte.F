@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.26 1999/03/01 08:03:24 sakrejda Exp $
+* $Id: tte.F,v 1.27 1999/04/21 23:41:51 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.27  1999/04/21 23:41:51  sakrejda
+* possible number of points on track added to the tpt_track table (Spirose's request
+*
 * Revision 1.26  1999/03/01 08:03:24  sakrejda
 * static memory allocation replaced with malloc
 *
@@ -404,6 +407,7 @@ c     let's count dropped mc hits
            evmc(evmc_h.nok).nfst=   0
            evmc(evmc_h.nok).nfstm=  0
            evmc(evmc_h.nok).ngnt=   0
+           evmc(evmc_h.nok).npos=   0
            evmc(evmc_h.nok).ptr =   0.0
            evmc(evmc_h.nok).ptvr=   0.0
            evmc(evmc_h.nok).pzr =   0.0
@@ -696,6 +700,7 @@ c          loop through all the points until this track is done
              eval(eval_h.nok).rtrk=track_num
 c            fill the evaluation table with the info about this track:
              eval(eval_h.nok).nfit=track(list_tracks(track_num)).nfit
+             eval(eval_h.nok).npos=track(list_tracks(track_num)).npos
              eval(eval_h.nok).nrec=track(list_tracks(track_num)).nrec
              eval(eval_h.nok).inhit=track(list_tracks(track_num)).hitid
 c            find a mc hit associated with this reconstructed hit
