@@ -1,9 +1,12 @@
 //
-// $Id: PCollTag.idl,v 1.3 1999/02/09 21:42:23 wenaus Exp $
+// $Id: PCollTag.idl,v 1.4 1999/02/09 22:21:42 wenaus Exp $
 //
 // Peripheral collections group tag
 //
 // $Log: PCollTag.idl,v $
+// Revision 1.4  1999/02/09 22:21:42  wenaus
+// PWG tag definition fixes
+//
 // Revision 1.3  1999/02/09 21:42:23  wenaus
 // Final (?) versions of MDC2 PWG tags
 //
@@ -15,10 +18,10 @@
 //
 
 struct PCollTag {
-    unsigned int chargedMultiplicity;
-    unsigned int numberOfPhotonClusters;
-    unsigned int numberOfElectronsInEmc;
-    unsigned int numberOfMwpcHits;
+    long chargedMultiplicity;
+    long numberOfPhotonClusters;
+    long numberOfElectronsInEmc;
+    long numberOfMwpcHits;
     float        vectorSumOfPt;
     float        primaryVertex[3];
     float        zdc1Energy;

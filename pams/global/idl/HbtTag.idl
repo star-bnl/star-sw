@@ -1,9 +1,12 @@
 //
-// $Id: HbtTag.idl,v 1.1 1999/02/09 21:42:22 wenaus Exp $
+// $Id: HbtTag.idl,v 1.2 1999/02/09 22:21:42 wenaus Exp $
 //
 // HBT Tag
 //
 // $Log: HbtTag.idl,v $
+// Revision 1.2  1999/02/09 22:21:42  wenaus
+// PWG tag definition fixes
+//
 // Revision 1.1  1999/02/09 21:42:22  wenaus
 // Final (?) versions of MDC2 PWG tags
 //
@@ -35,5 +38,5 @@ struct HbtTag {
     float protons_Sigmas[5];
     
     float antiProtons_Means[5];
-    float antiProtons_Sigmas[5]
+    float antiProtons_Sigmas[5];
 };
