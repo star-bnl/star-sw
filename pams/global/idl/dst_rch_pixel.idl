@@ -10,8 +10,8 @@
  */
 
  struct dst_rch_pixel  {
-  short pad;   /* Packed module and channel numbers (see above)  */
-  short adc;   /* ADC value for the hit                          */
+  long  pad;   /* Packed module and channel numbers (see above)  */
+  long  adc;   /* ADC value for the hit                          */
  } ;
-/*  Last mod. for dst_pixel::   $Date: 1999/09/27 16:54:09 $ */
+/*  Last mod. for dst_pixel::   $Date: 2000/01/05 20:19:26 $ */
 

@@ -213,22 +213,22 @@
                                /* primary vertex (cm)                    */
   unsigned long map[2];        /* Packed track/detector occupancy map and*/
                                /* extrap. info. (see preceeding comments)*/
-  short      id;               /* Primary key (see comments)             */
-  short      iflag;            /* bitmask quality info. (see comments)   */
-  short      det_id;           /* Detector id information                */
-  short      method;           /* Track finding/fitting method, packed   */
-  short      pid;              /* Geant particle ID for assumed mass     */
-  short      n_point;          /* number of points assigned to track,    */
+  long       id;               /* Primary key (see comments)             */
+  long       iflag;            /* bitmask quality info. (see comments)   */
+  long       det_id;           /* Detector id information                */
+  long       method;           /* Track finding/fitting method, packed   */
+  long       pid;              /* Geant particle ID for assumed mass     */
+  long       n_point;          /* number of points assigned to track,    */
                                /* SVT, TPC, FTPC component #s are packed */
-  short      n_max_point;      /* maximum number of points possible,     */
+  long       n_max_point;      /* maximum number of points possible,     */
                                /* SVT, TPC, FTPC component #s are packed */
-  short      n_fit_point;      /* number of points used in fit,          */
+  long       n_fit_point;      /* number of points used in fit,          */
                                /* SVT, TPC, FTPC component #s are packed */
-  short      icharge;          /* Particle charge in units of |e|        */
-  short      id_start_vertex;  /* Packed variable for primary vertex     */
+  long       icharge;          /* Particle charge in units of |e|        */
+  long       id_start_vertex;  /* Packed variable for primary vertex     */
                                /* final fit and primary track candidates */
  } ;
-/*  Last mod. for dst_track:   $Date: 1999/12/23 19:29:12 $ */
+/*  Last mod. for dst_track:   $Date: 2000/01/05 20:19:26 $ */
 
 
 

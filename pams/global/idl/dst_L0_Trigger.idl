@@ -7,7 +7,7 @@
   long            MWC_CTB_dipole;     /* MWC/CTB dipole analysis    */
   long            MWC_CTB_topology;   /* MWC/CTB spc. topology      */
   long            MWC_CTB_moment;     /* MWC/CTB moment analysis    */
-  unsigned short  TriggerActionWd;    /* Trigger Action Word        */
-  unsigned short  TriggerWd;          /* Trigger Word               */
+  unsigned long   TriggerActionWd;    /* Trigger Action Word        */
+  unsigned long   TriggerWd;          /* Trigger Word               */
  };
-/*  Last mod. for dst_L0_Trigger:   $Date: 1999/12/23 19:29:12 $ */
+/*  Last mod. for dst_L0_Trigger:   $Date: 2000/01/05 20:19:25 $ */
