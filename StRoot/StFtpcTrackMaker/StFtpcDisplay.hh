@@ -1,5 +1,9 @@
-// $Id: StFtpcDisplay.hh,v 1.6 2000/11/10 18:37:24 oldi Exp $
+// $Id: StFtpcDisplay.hh,v 1.7 2001/07/13 18:01:03 oldi Exp $
 // $Log: StFtpcDisplay.hh,v $
+// Revision 1.7  2001/07/13 18:01:03  oldi
+// New function WriteData() added. It writes TPolyMarkers and TPolyLine3Ds to
+// a file which can be used to display results (pictures) offline.
+//
 // Revision 1.6  2000/11/10 18:37:24  oldi
 // It is now possible to display tracks which should be longer (so called 'short tracks').
 //
@@ -110,6 +114,7 @@ public:
   virtual  ~StFtpcDisplay();                                    // destructor
 
   //void  Info();                                                                              // prints general information
+  void  WriteData(Char_t *filename);                                                           // writes clusters and tracks to file
   void  TrackInfo();                                                                           // plots single tracks
   void  ShowClusters();                                                                        // displays clusters
   void  ShowTracks(Int_t trackanz = 0, Int_t trackarray[] = NULL);                             // displays tracks
