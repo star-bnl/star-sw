@@ -102,12 +102,12 @@ STAFCV_T top_newcut(char* agent, char* func)
 }
  
 /*-------------------------------------------------------------------*/
-void kam_topsort_sort_() {
+void kam_topsort_agent_sort_() {
   char *agent = ku_gets(); /* name of sort agent */
   char *whichTable = ku_gets(); /* which table to sort */
-  STAFCV_T status = topsort_sort(agent,whichTable);
+  STAFCV_T status = topsort_agent_sort(agent,whichTable);
 }
-STAFCV_T topsort_sort(char *agent,char *whichTable) {
+STAFCV_T topsort_agent_sort(char *agent,char *whichTable) {
   topSort* sort=NULL;
   if(!top->findSort(agent,sort)) EML_ERROR(KAM_OBJECT_NOT_FOUND);
   tdmTable* tbl=NULL;
@@ -133,15 +133,15 @@ STAFCV_T top_newsort(char *agent,char *whichCol) {
 }
  
 /*-------------------------------------------------------------------*/
-void kam_topsort_column_()
+void kam_topsort_agent_column_()
 {
    // long npars = ku_npar();
    char *agent = ku_gets(); /* name of project agent */
    char *whichColumn = ku_gets(); /* which column to sort with */
 
-   STAFCV_T status = topsort_column(agent, whichColumn);
+   STAFCV_T status = topsort_agent_column(agent, whichColumn);
 }
-STAFCV_T topsort_column(char* agent, char* whichCol)
+STAFCV_T topsort_agent_column(char* agent, char* whichCol)
 {
    topSort* sort=NULL;
    if( !top->findSort(agent, sort) ){
@@ -159,15 +159,15 @@ STAFCV_T topsort_column(char* agent, char* whichCol)
    }
    EML_SUCCESS(STAFCV_OK);
 }
-void kam_topproject_selectspec_()
+void kam_topproject_agent_selectspec_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of project agent */
    char *select = ku_gets(); /* selection specification */
 
-        STAFCV_T status = topproject_selectspec(agent, select);
+        STAFCV_T status = topproject_agent_selectspec(agent, select);
 }
-STAFCV_T topproject_selectspec(char* agent, char* select)
+STAFCV_T topproject_agent_selectspec(char* agent, char* select)
 {
    topProject* proj=NULL;
    if( !top->findProject(agent, proj) ){
@@ -188,7 +188,7 @@ STAFCV_T topproject_selectspec(char* agent, char* select)
 }
  
 /*-------------------------------------------------------------------*/
-void kam_topproject_project_()
+void kam_topproject_agent_project_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of project agent */
@@ -196,10 +196,10 @@ void kam_topproject_project_()
    char *table2 = ku_gets(); /* output table */
    char *select = ku_gets(); /* selection specification */
 
-        STAFCV_T status = topproject_project(agent, table1, table2
+        STAFCV_T status = topproject_agent_project(agent, table1, table2
 		, select);
 }
-STAFCV_T topproject_project(char* agent, char* table1, char* table2
+STAFCV_T topproject_agent_project(char* agent, char* table1, char* table2
 	, char* select)
 {
 //- Find Mandatory Input Objects
@@ -232,14 +232,14 @@ STAFCV_T topproject_project(char* agent, char* table1, char* table2
 }
  
 /*-------------------------------------------------------------------*/
-void kam_topproject_reset_()
+void kam_topproject_agent_reset_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of project agent */
 
-        STAFCV_T status = topproject_reset(agent);
+        STAFCV_T status = topproject_agent_reset(agent);
 }
-STAFCV_T topproject_reset(char* agent)
+STAFCV_T topproject_agent_reset(char* agent)
 {
 //- Find Mandatory Input Objects
    topProject* proj=NULL;
@@ -253,15 +253,15 @@ STAFCV_T topproject_reset(char* agent)
 }
  
 /*-------------------------------------------------------------------*/
-void kam_topjoin_selectspec_()
+void kam_topjoin_agent_selectspec_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of join agent */
    char *select = ku_gets(); /* selection specification */
 
-        STAFCV_T status = topjoin_selectspec(agent, select);
+        STAFCV_T status = topjoin_agent_selectspec(agent, select);
 }
-STAFCV_T topjoin_selectspec(char* agent, char* select)
+STAFCV_T topjoin_agent_selectspec(char* agent, char* select)
 {
    topJoin* join=NULL;
    if( !top->findJoin(agent, join) ){
@@ -282,15 +282,15 @@ STAFCV_T topjoin_selectspec(char* agent, char* select)
 }
  
 /*-------------------------------------------------------------------*/
-void kam_topjoin_whereclause_()
+void kam_topjoin_agent_whereclause_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of join agent */
    char *where = ku_gets(); /* where clause */
 
-        STAFCV_T status = topjoin_whereclause(agent, where);
+        STAFCV_T status = topjoin_agent_whereclause(agent, where);
 }
-STAFCV_T topjoin_whereclause(char* agent, char* where)
+STAFCV_T topjoin_agent_whereclause(char* agent, char* where)
 {
    topJoin* join=NULL;
    if( !top->findJoin(agent, join) ){
@@ -311,7 +311,7 @@ STAFCV_T topjoin_whereclause(char* agent, char* where)
 }
  
 /*-------------------------------------------------------------------*/
-void kam_topjoin_fastjoin_()
+void kam_topjoin_agent_fastjoin_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of join agent */
@@ -321,10 +321,10 @@ void kam_topjoin_fastjoin_()
    char *select = ku_gets(); /* selection specification */
    char *where = ku_gets(); /* where clause */
 
-        STAFCV_T status = topjoin_fastjoin(agent, table1, table2, table3
+        STAFCV_T status = topjoin_agent_fastjoin(agent, table1, table2, table3
 		, select, where);
 }
-STAFCV_T topjoin_fastjoin(char* agent, char* table1, char* table2
+STAFCV_T topjoin_agent_fastjoin(char* agent, char* table1, char* table2
 	, char* table3, char* select, char* where)
 {
 //- Find Mandatory Input Objects
@@ -368,7 +368,7 @@ STAFCV_T topjoin_fastjoin(char* agent, char* table1, char* table2
    EML_SUCCESS(STAFCV_OK);
 }
 /*-------------------------------------------------------------------*/
-void kam_topjoin_join_()
+void kam_topjoin_agent_join_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of join agent */
@@ -378,10 +378,10 @@ void kam_topjoin_join_()
    char *select = ku_gets(); /* selection specification */
    char *where = ku_gets(); /* where clause */
 
-        STAFCV_T status = topjoin_join(agent, table1, table2, table3
+        STAFCV_T status = topjoin_agent_join(agent, table1, table2, table3
 		, select, where);
 }
-STAFCV_T topjoin_join(char* agent, char* table1, char* table2
+STAFCV_T topjoin_agent_join(char* agent, char* table1, char* table2
 	, char* table3, char* select, char* where)
 {
 //- Find Mandatory Input Objects
@@ -426,14 +426,14 @@ STAFCV_T topjoin_join(char* agent, char* table1, char* table2
 }
  
 /*-------------------------------------------------------------------*/
-void kam_topjoin_reset_()
+void kam_topjoin_agent_reset_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of join agent */
 
-        STAFCV_T status = topjoin_reset(agent);
+        STAFCV_T status = topjoin_agent_reset(agent);
 }
-STAFCV_T topjoin_reset(char* agent)
+STAFCV_T topjoin_agent_reset(char* agent)
 {
 //- Find Mandatory Input Objects
    topJoin* join=NULL;
@@ -447,12 +447,12 @@ STAFCV_T topjoin_reset(char* agent)
 }
 
 /*-------------------------------------------------------------------*/
-void kam_topcut_function_()
+void kam_topcut_agent_function_()
 {
   char *agent = ku_gets();
-  STAFCV_T status = topcut_function(agent);
+  STAFCV_T status = topcut_agent_function(agent);
 }
-STAFCV_T topcut_function(char* agent)
+STAFCV_T topcut_agent_function(char* agent)
 {
   topCut* cut=NULL;
   if( !top->findCut(agent, cut) ){
@@ -462,7 +462,7 @@ STAFCV_T topcut_function(char* agent)
   printf("%s\n",cut->cutFunction());
 }
 /*-------------------------------------------------------------------*/
-void kam_topcut_filter_()
+void kam_topcut_agent_filter_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of cut agent */
@@ -470,9 +470,9 @@ void kam_topcut_filter_()
    char *table2 = ku_gets(); /* output table */
    char *func = ku_gets(); /* cut function */
 
-        STAFCV_T status = topcut_filter(agent, table1, table2, func);
+        STAFCV_T status = topcut_agent_filter(agent, table1, table2, func);
 }
-STAFCV_T topcut_filter(char* agent, char* table1, char* table2
+STAFCV_T topcut_agent_filter(char* agent, char* table1, char* table2
 	, char* func)
 {
 //- Find or create Mandatory Objects
@@ -520,16 +520,16 @@ STAFCV_T topcut_filter(char* agent, char* table1, char* table2
 }
  
 /*-------------------------------------------------------------------*/
-void kam_topcut_cut_()
+void kam_topcut_agent_cut_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of cut agent */
    char *table1 = ku_gets(); /* first input table */
    char *func = ku_gets(); /* cut function */
   
-        STAFCV_T status = topcut_cut(agent, table1, func);
+        STAFCV_T status = topcut_agent_cut(agent, table1, func);
 }
-STAFCV_T topcut_cut(char* agent, char* table1,
+STAFCV_T topcut_agent_cut(char* agent, char* table1,
 	char* func)
 {
 //- Find or create Mandatory Objects

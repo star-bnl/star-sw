@@ -1,168 +1,499 @@
-**:Copyright 1995, Lawrence Berkeley National Laboratory
+**######################################################################
+**######################################################################
+**######################################################################
+**:Copyright 1997, Lawrence Berkeley National Laboratory
 **:>--------------------------------------------------------------------
 **:FILE:        dui_def.cdf
-**:DESCRIPTION: Dataset Unix-like Interface Command Definition File 
-**:HISTORY:	30apr96-v100a-cet- Beta Release Version
-**:HISTORY:     08dec95-v000a-cet- Creation
+**:DESCRIPTION: Command Definition File for DUI package.
 **:<--------------------------------------------------------------------
-
+**
 >NAME DUI_DEF
-
-************************************************************************
+**
 ************************************************************************
 ** DUI
 >MENU DUI
 >GUIDANCE
-Dataset Unix-like Interface commands.
+Dataset_Unix_like_Interface commands.
 .
-VERSION v1.00a (30apr96).
+ #(@)$Id: dui_def.cdf,v 1.5 1997/12/22 17:41:12 tull Exp $
 .
-Commands for the Dataset Unix-like Interface ASP.
+DUI is an Analysis Service Package (ASP) for the Standard Analysis
+Framework (StAF). An ASP is a package of object interfaces which plug
+into the software bus archictecture of StAF in a CORBA compliant
+interface layer.
 .
-************************************************************************
-************************************************************************
-
-** ---------------------------------------------------------------------
-** DUI/DU [ PATH ] [ MINSIZE ]
->COMMAND DU
->PARAMETERS
-+
-PATH 'Directory Path' C D='/dui'
-MINSIZE 'Minimum size of reported tables' I D=0
->GUIDANCE
-Shows size (bytes) in memory of all tables under the node
-defined by the PATH parameter.   PATH can be either
-a directory or a table.  The size of a table is 
-row size times number of rows.
+Each ASP is comprised of an object factory interface (eg. duiFactory)
+and zero or more worker object interfaces.
 .
-If you are only interested in large tables, use MINSIZE parameter.
-For example, if you set MINSIZE to 1000000, only tables using
-more than one megabyte of memory are reported.
+DUI worker objects include:
+   duiObject - See DUI/OBJECT
+	       - More guidance needed here.
 .
-See also DUI/DF, which reports both table and non-table memory.
+More guidance needed here.
 .
->ACTION KAM_DUI_DU
-** ---------------------------------------------------------------------
-** DUI/DF
->COMMAND DF
->PARAMETERS
->GUIDANCE
-See also DUI/DU, which gives a table-by-table report.
-.
-Shows total current memory allocated to the STAF process.
-This includes (1) non-table memory [eg, from malloc()],
-(2) table memory, (3) memory overhead.  
-.
-Because of item 3, the numbers reported by this command will 
-be a little larger than you might expect.  In particular,
-a given table's effect will be larger on this command than on DUI/DU.
-.
->ACTION KAM_DUI_DF
 ** ---------------------------------------------------------------------
 ** DUI/CD [ PATH ]
 >COMMAND CD
 >PARAMETERS
 +
-PATH 'Directory Path' C D='/dui'
+PATH    'Unix-like dataset path' C D='/dui'
 >GUIDANCE
-Change current working dataset.
+More guidance needed here.
+.
+DESCRIPTION: 
+.
+CD is a member function of the duiFactory interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   PATH - Unix-like dataset path
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   duiFactory::CD
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. More guidance needed here.
+.
+   StAF> DUI/CD
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
 .
 >ACTION KAM_DUI_CD
-
-** ---------------------------------------------------------------------
-** DUI/LN SOURCE TARGET
->COMMAND LN
->PARAMETERS
-SOURCE 'Link from source ...' C
-TARGET '... to target' C
->GUIDANCE
-Links tables and/or datasets, similar to a UNIX soft link.
-.
-You can use either a directory or a table for the target.
-You can use paths.  The paths can be absolute or relative.
-.
->ACTION KAM_DUI_LN
-
+**
 ** ---------------------------------------------------------------------
 ** DUI/CP SOURCE TARGET
 >COMMAND CP
 >PARAMETERS
-SOURCE 'Copy from source ...' C
-TARGET '... to target' C
+SOURCE  'Source table name' C
+TARGET  'Target table/dataset name' C
 >GUIDANCE
-Copy tables.
+More guidance needed here.
 .
-The target can be either a directory or a table, just like UNIX.
-Caution: not all of the STAF UNIX-like commands are like UNIX.
+DESCRIPTION: 
+.
+CP is a member function of the duiFactory interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   SOURCE - Source table name.
+   - More guidance needed here.
+.
+   TARGET - Target table/dataset name.
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   duiFactory::CP
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. More guidance needed here.
+.
+   StAF> DUI/CP
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
 .
 >ACTION KAM_DUI_CP
-
+**
+** ---------------------------------------------------------------------
+** DUI/DF
+>COMMAND DF
+>PARAMETERS
+>GUIDANCE
+More guidance needed here.
+.
+DESCRIPTION: 
+.
+DF is a member function of the duiFactory interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   None.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   duiFactory::DF
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. More guidance needed here.
+.
+   StAF> DUI/DF
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_DUI_DF
+**
+** ---------------------------------------------------------------------
+** DUI/DU [ PATH MINSIZE ]
+>COMMAND DU
+>PARAMETERS
++
+PATH    'Unix-like dataset path' C D='.'
+MINSIZE 'Minimum size of reported tables' I D=0
+>GUIDANCE
+More guidance needed here.
+.
+DESCRIPTION: 
+.
+DU is a member function of the duiFactory interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   PATH - Unix-like dataset path.
+   - More guidance needed here.
+.
+   MINSIZE - Minimum size of reported tables.
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   duiFactory::DU
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. More guidance needed here.
+.
+   StAF> DUI/DU
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_DUI_DU
+**
+** ---------------------------------------------------------------------
+** DUI/LN SOURCE TARGET
+>COMMAND LN
+>PARAMETERS
+SOURCE  'Source table name' C
+TARGET  'Target table/dataset name' C
+>GUIDANCE
+More guidance needed here.
+.
+DESCRIPTION: 
+.
+LN is a member function of the duiFactory interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   SOURCE - Source table name.
+   - More guidance needed here.
+.
+   TARGET - Target table/dataset name.
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   duiFactory::LN
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. More guidance needed here.
+.
+   StAF> DUI/LN
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_DUI_LN
+**
 ** ---------------------------------------------------------------------
 ** DUI/LS [ PATH ]
 >COMMAND LS
 >PARAMETERS
 +
-PATH 'Directory Path' C D='.'
+PATH    'Unix-like dataset path' C D='.'
 >GUIDANCE
-List tables and/or datasets.
+More guidance needed here.
+.
+DESCRIPTION: 
+.
+LS is a member function of the duiFactory interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   PATH - Unix-like dataset path.
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   duiFactory::LS
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. More guidance needed here.
+.
+   StAF> DUI/LS
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
 .
 >ACTION KAM_DUI_LS
-
+**
 ** ---------------------------------------------------------------------
 ** DUI/MKDIR PATH
 >COMMAND MKDIR
 >PARAMETERS
-PATH 'Directory Path' C
+PATH    'Unix-like dataset path' C
 >GUIDANCE
-Create a new, empty dataset.
+More guidance needed here.
+.
+DESCRIPTION: 
+.
+MKDIR is a member function of the duiFactory interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   PATH - Unix-like dataset path.
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   duiFactory::MKDIR
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. More guidance needed here.
+.
+   StAF> DUI/MKDIR
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
 .
 >ACTION KAM_DUI_MKDIR
-
+**
 ** ---------------------------------------------------------------------
 ** DUI/MV SOURCE TARGET
 >COMMAND MV
 >PARAMETERS
-SOURCE 'Move from SOURCE ...' C
-TARGET '... to TARGET' C
+SOURCE  'Source table name' C
+TARGET  'Target table/dataset name' C
 >GUIDANCE
-Move tables and/or datasets.
+More guidance needed here.
 .
-The target MUST BE A DIRECTORY.
+DESCRIPTION: 
+.
+MV is a member function of the duiFactory interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   SOURCE - Source table name.
+   - More guidance needed here.
+.
+   TARGET - Target table/dataset name.
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   duiFactory::MV
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. More guidance needed here.
+.
+   StAF> DUI/MV
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
 .
 >ACTION KAM_DUI_MV
-
+**
 ** ---------------------------------------------------------------------
 ** DUI/PWD
 >COMMAND PWD
 >PARAMETERS
 >GUIDANCE
-Show current working directory.
+More guidance needed here.
+.
+DESCRIPTION: 
+.
+PWD is a member function of the duiFactory interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   None.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   duiFactory::PWD
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. More guidance needed here.
+.
+   StAF> DUI/PWD
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
 .
 >ACTION KAM_DUI_PWD
-
+**
 ** ---------------------------------------------------------------------
 ** DUI/RM PATH
 >COMMAND RM
 >PARAMETERS
-PATH 'Table Path' C
+PATH    'Unix-like table path' C
 >GUIDANCE
-Remove a table.
+More guidance needed here.
 .
-You can use a path to the table, eg. rm a/b/c, where a and b are
-'directories' (datasets).
+DESCRIPTION: 
+.
+RM is a member function of the duiFactory interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   PATH - Unix-like table path.
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   duiFactory::RM
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. More guidance needed here.
+.
+   StAF> DUI/RM
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
 .
 >ACTION KAM_DUI_RM
-
+**
 ** ---------------------------------------------------------------------
 ** DUI/RMDIR PATH
 >COMMAND RMDIR
 >PARAMETERS
-PATH 'Directory Path' C
+PATH    'Unix-like dataset path' C
 >GUIDANCE
-Remove datasets.
+More guidance needed here.
 .
-Caution: this is like 'rm -rf' in UNIX,
-it removes the directory and all directories and tables thereunder.
+DESCRIPTION: 
+.
+RMDIR is a member function of the duiFactory interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   PATH - Unix-like dataset path.
+   - More guidance needed here.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   duiFactory::RMDIR
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. More guidance needed here.
+.
+   StAF> DUI/RMDIR
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
 .
 >ACTION KAM_DUI_RMDIR
-
+**

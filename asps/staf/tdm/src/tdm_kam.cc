@@ -117,11 +117,10 @@ void kam_tdm_newdataset_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();	/* dataset name */
-   long dim = ku_geti();	/* dataset dimension */
 
-        STAFCV_T status = tdm_newdataset(name,dim);
+        STAFCV_T status = tdm_newdataset(name);
 }
-STAFCV_T tdm_newdataset(char* name, long dim)
+STAFCV_T tdm_newdataset(char* name)
 {
    if( !tdm->newDataset(name,dim) ){
       EML_FAILURE(KAM_METHOD_FAILURE);
@@ -169,21 +168,21 @@ STAFCV_T tdm_newtable(char* name, char* spec, long rowcount)
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_tdm_type_list_
+*:ROUTINE:      void kam_tdmtypespecifiers_list_
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --
 *:RETURN VALUE: -- NONE --
 *:* TDM/TYPESPECIFIERS/LIST [ TID ]
 *:<---------------------------------------------------------------------
 */
-void kam_tdm_type_list_()
+void kam_tdmtypespecifiers_list_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    long tid = ku_geti();	/* table type id */
 
-        STAFCV_T status = tdm_type_list(tid);
+        STAFCV_T status = tdmtypespecifiers_list(tid);
 }
-STAFCV_T tdm_type_list(long tid)
+STAFCV_T tdmtypespecifiers_list(long tid)
 {
    char *name=NULL;
 
@@ -208,21 +207,21 @@ STAFCV_T tdm_type_list(long tid)
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_tdm_type_show_
+*:ROUTINE:      void kam_tdmtypespecifiers_show_
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --
 *:RETURN VALUE: -- NONE --
 *:* TDM/SPECIFICATION [ NAME ]
 *:<---------------------------------------------------------------------
 */
-void kam_tdm_type_show_()
+void kam_tdmtypespecifiers_show_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char *name = ku_gets();	/* table name */
 
-        STAFCV_T status = tdm_type_show(name);
+        STAFCV_T status = tdmtypespecifiers_show(name);
 }
-STAFCV_T tdm_type_show(char* name)
+STAFCV_T tdmtypespecifiers_show(char* name)
 {
    char *tspec=NULL;
    char *tname=NULL;
@@ -243,21 +242,21 @@ STAFCV_T tdm_type_show(char* name)
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_tdm_type_load_
+*:ROUTINE:      void kam_tdmtypespecifiers_load_
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --
 *:RETURN VALUE: -- NONE --
 *:* TDM/TYPESPECIFIERS/LIST [ TID ]
 *:<---------------------------------------------------------------------
 */
-void kam_tdm_type_load_()
+void kam_tdmtypespecifiers_load_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* fname = ku_gets();	/* idl file name */
 
-        STAFCV_T status = tdm_type_load(fname);
+        STAFCV_T status = tdmtypespecifiers_load(fname);
 }
-STAFCV_T tdm_type_load(char * fname)
+STAFCV_T tdmtypespecifiers_load(char * fname)
 {
    printf("file = %s\n",fname); fflush(0);
    FILE *f = NULL;
@@ -332,11 +331,10 @@ void kam_tdmdataset_adddataset_()
    long npars = ku_npar();      /* number of KUIP parameters */
    char* dsname = ku_gets();	/* dataset name */
    char* name = ku_gets();	/* new dataset name */
-   long dim = ku_geti();	/* new dataset dimension */
 
-        STAFCV_T status = tdmdataset_adddataset(dsname,name,dim);
+        STAFCV_T status = tdmdataset_adddataset(dsname,name);
 }
-STAFCV_T tdmdataset_adddataset(char* dsname,char* name,long dim)
+STAFCV_T tdmdataset_adddataset(char* dsname,char* name)
 {
    tdmDataset *dataset;
    if( NULL == (dataset = tdm->findDataset(dsname))
@@ -727,21 +725,21 @@ STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_tdmtable_colcount_
+*:ROUTINE:      void kam_tdmtable_columncount_
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --
 *:RETURN VALUE: -- NONE --
 *:* TDM/TABLE/COLCOUNT NAME
 *:<---------------------------------------------------------------------
 */
-void kam_tdmtable_colcount_()
+void kam_tdmtable_columncount_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();	/* table name */
 
-        STAFCV_T status = tdmtable_colcount(name);
+        STAFCV_T status = tdmtable_columncount(name);
 }
-STAFCV_T tdmtable_colcount(char* name)
+STAFCV_T tdmtable_columncount(char* name)
 {
    tdmTable* table;		/* tdmTable object */
    long result=0;
@@ -1031,11 +1029,10 @@ void kam_tdmtable_show_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();	/* table name */
-   char* option = ku_gets();	/* options */
 
-        STAFCV_T status = tdmtable_show(name, option);
+        STAFCV_T status = tdmtable_show(name);
 }
-STAFCV_T tdmtable_show(char* name, char* option)
+STAFCV_T tdmtable_show(char* name);
 {
    tdmTable* table;		/* tdmTable object */
 

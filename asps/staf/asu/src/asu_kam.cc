@@ -13,7 +13,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/types.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "kuip.h"
 #define KUIP
@@ -65,27 +67,84 @@ void kam_asu_time_()
 }
 STAFCV_T asu_time()
 {
-   time_t it,*pt=&it;
+   struct timeval t, *tp=&t;
+   static double t0=0.0;
+   double t1;
 
-   *pt = time(0);
-   printf("ASU:\tTime = %s \n",ctime(pt));
+   if( 1.0 > t0 ){
+      gettimeofday(tp,NULL);
+      t0=((double)t.tv_sec)+((double)(t.tv_usec)/1000000.);
+      t1=t0;
+   }
+   else {
+      gettimeofday(tp,NULL);
+      t1=((double)t.tv_sec)+((double)(t.tv_usec)/1000000.);
+   }
+
+   set_staf_result((float)(t1-t0));
+   printf("ASU:\tTime = %f \n",t1-t0);
    EML_SUCCESS(STAFCV_OK);
 }
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_asuallocstats_
+*:ROUTINE:      void kam_asu_date_
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --
 *:RETURN VALUE: -- NONE --
 *:* ASU/TIME
 *:<---------------------------------------------------------------------
 */
-void kam_asuallocstats_()
+void kam_asu_date_()
 {
-	STAFCV_T status = asuallocstats();
+   long npars = ku_npar();      /* number of KUIP parameters */
+
+        STAFCV_T status = asu_date();
 }
-STAFCV_T asuallocstats()
+STAFCV_T asu_date()
+{
+   time_t it,*pt=&it;
+
+   *pt = time(0);
+   printf("ASU:\tDate = %s \n",ctime(pt));
+   EML_SUCCESS(STAFCV_OK);
+}
+
+/*
+*:>---------------------------------------------------------------------
+*:ROUTINE:      void kam_asu_fflush_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* ASU/TIME
+*:<---------------------------------------------------------------------
+*/
+void kam_asu_fflush_()
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+
+        STAFCV_T status = asu_fflush();
+}
+STAFCV_T asu_fflush()
+{
+   fflush(0);
+   EML_SUCCESS(STAFCV_OK);
+}
+
+/*
+*:>---------------------------------------------------------------------
+*:ROUTINE:      void kam_asumalloc_stats_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* ASU/TIME
+*:<---------------------------------------------------------------------
+*/
+void kam_asumalloc_stats_()
+{
+	STAFCV_T status = asumalloc_stats();
+}
+STAFCV_T asumalloc_stats()
 {
    asuMallocStats();
    EML_SUCCESS(STAFCV_OK);
@@ -93,19 +152,19 @@ STAFCV_T asuallocstats()
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_asualloclevel_
+*:ROUTINE:      void kam_asumalloc_level_
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --
 *:RETURN VALUE: -- NONE --
 *:* ASU/TIME
 *:<---------------------------------------------------------------------
 */
-void kam_asualloclevel_()
+void kam_asumalloc_level_()
 {
    int level = ku_geti();
-	STAFCV_T status = asualloclevel(level);
+	STAFCV_T status = asumalloc_level(level);
 }
-STAFCV_T asualloclevel(int level)
+STAFCV_T asumalloc_level(int level)
 {
    ASU_MALLOCLEVEL_T mLevel=ASU_MALLOC_FAST;
 

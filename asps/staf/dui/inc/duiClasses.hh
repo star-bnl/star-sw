@@ -63,7 +63,7 @@ public:
           const char * toPath);  // The unLinkSrc arg allows mv() to be
                                  // simply lnmv(TRUE,xx,xx).
 				 // and ln to be lnmv(FALSE,xx,xx).
-//-cet-17nov97-from HJW's df,du version
+//-cet-17nov97-from HJWs df,du version
    virtual void duiSprinfWithCommas(char *out,long in);
    virtual STAFCV_T duRecurse (char *path,int indent,
 		DS_DATASET_T *pDS, long minsize);

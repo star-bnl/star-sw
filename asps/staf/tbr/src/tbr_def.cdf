@@ -1,64 +1,72 @@
-**:Copyright 1995, Lawrence Berkeley National Laboratory
+**######################################################################
+**######################################################################
+**######################################################################
+**:Copyright 1997, Lawrence Berkeley National Laboratory
 **:>--------------------------------------------------------------------
 **:FILE:        tbr_def.cdf
-**:DESCRIPTION: Command Definition File for TBR
-**:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
-**:HISTORY:     18jun96-v002a-cet- Remove COUNT & LIST
-**:HISTORY:     11mar96-v000a-cet,hjw- Creation
+**:DESCRIPTION: Command Definition File for TBR package.
 **:<--------------------------------------------------------------------
-
+**
 >NAME TBR_DEF
-
-************************************************************************
+**
 ************************************************************************
 ** TBR
 >MENU TBR
->Guidance
-Table BRowser commands.
-.
-VERSION v1.00a (30apr96).
-.
-Commands for the Table BRowser ASP.
-.
-************************************************************************
-************************************************************************
-
-** ---------------------------------------------------------------------
-** TBR/COUNT
-**>COMMAND COUNT
-**>PARAMETERS
-**>GUIDANCE
-**Show count of known TBR objects.
-**.
-**>ACTION KAM_TBR_COUNT
-
-** ---------------------------------------------------------------------
-** TBR/LIST
-**>COMMAND LIST
-**>PARAMETERS
-**>GUIDANCE
-**List known TBR objects.
-**.
-**>ACTION KAM_TBR_LIST
-
-************************************************************************
-************************************************************************
-** TBR/MOTIF
->MENU MOTIF
 >GUIDANCE
-Motif Table BRowser commands.
+Table_BRowser commands.
 .
-************************************************************************
-************************************************************************
-
+ #(@)$Id: tbr_def.cdf,v 1.4 1997/12/22 17:46:53 tull Exp $
+.
+TBR is an Analysis Service Package (ASP) for the Standard Analysis
+Framework (StAF). An ASP is a package of object interfaces which plug
+into the software bus archictecture of StAF in a CORBA compliant
+interface layer.
+.
+Each ASP is comprised of an object factory interface (eg. tbrFactory)
+and zero or more worker object interfaces.
+.
+TBR worker objects include:
+   tbrObject - See TBR/OBJECT
+	       - More guidance needed here.
+.
+More guidance needed here.
+.
 ** ---------------------------------------------------------------------
-** TBR/MOTIF/VIEW
+** TBR/VIEWDATASET
 >COMMAND VIEWDATASET
 >PARAMETERS
 >GUIDANCE
-Launch the Motif Table BRowser and view dataset.
+More guidance needed here.
 .
-The Motif Table BRowser always launches at the root directory.
+DESCRIPTION: 
 .
->ACTION KAM_TBR_MOTIF_VIEWDATASET
-
+VIEWDATASET is a member function of the tbrFactory interface.
+.
+More guidance needed here.
+.
+ARGUMENTS: 
+.
+   None.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   tbrFactory::VIEWDATASET
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. More guidance needed here.
+.
+   StAF> TBR/VIEWDATASET
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None known.
+.
+SEE ALSO: 
+.
+>ACTION KAM_TBR_VIEWDATASET
+**
