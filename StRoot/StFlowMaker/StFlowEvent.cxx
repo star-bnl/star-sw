@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.50 2004/12/07 17:04:44 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.51 2004/12/07 23:08:11 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -95,6 +95,9 @@ StFlowEvent::~StFlowEvent() {
 Double_t StFlowEvent::PhiWeightRaw(Int_t selN, Int_t harN, StFlowTrack*
 				pFlowTrack) const {
   // Weight for making the event plane isotropic in the lab.
+
+  bool oddHar = (harN+1) % 2;
+  harN = oddHar ? 0 : 1;
 
   StTrackTopologyMap map = pFlowTrack->TopologyMap();
   float phi = pFlowTrack->Phi();
@@ -952,6 +955,10 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.51  2004/12/07 23:08:11  posk
+// Only odd and even phiWgt hists. If the old phiWgt file contains more than
+// two harmonics, only the first two are read. Now writes only the first two.
+//
 // Revision 1.50  2004/12/07 17:04:44  posk
 // Eliminated the very old mOnePhiWgt, which used one phiWgt histogram for flttening
 // instead of four.

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.94 2004/12/07 17:04:46 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.95 2004/12/07 23:08:12 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -222,7 +222,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.94 2004/12/07 17:04:46 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.95 2004/12/07 23:08:12 posk Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -292,11 +292,11 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
     }
   }
 
-  // Fill mPhiWgt for each selection and each harmonic
+  // Fill mPhiWgt for each selection, and odd and even harmonics
   for (int k = 0; k < Flow::nSels; k++) {
     char countSels[2];
     sprintf(countSels,"%d",k+1);
-    for (int j = 0; j < Flow::nHars; j++) {
+    for (int j = 0; j < 2; j++) {
       char countHars[2];
       sprintf(countHars,"%d",j+1);
       // Tpc (FarEast)
@@ -2068,6 +2068,10 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.95  2004/12/07 23:08:12  posk
+// Only odd and even phiWgt hists. If the old phiWgt file contains more than
+// two harmonics, only the first two are read. Now writes only the first two.
+//
 // Revision 1.94  2004/12/07 17:04:46  posk
 // Eliminated the very old mOnePhiWgt, which used one phiWgt histogram for flttening
 // instead of four.
