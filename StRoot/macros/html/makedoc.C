@@ -105,7 +105,7 @@
 
   // Create the list of the classes defined with the loaded DLL's to be documented
 
-  Char_t *classes[] = { "St_TableSorter"
+  Char_t *classes[] = { "St_TableSorter","St_TableNtuple"
                        ,"St_XDFFile",  "St_Module",   "St_Table"
                        ,"St_DataSet", "St_DataSetIter","St_FileSet"
                        ,"StParticleView","St_ObjectSet","St_Node","St_NodePosition"
@@ -113,7 +113,7 @@
                        ,"table_head_st","St_NodeViewIter"
                        ,"St_srs_Maker","St_tpt_Maker","St_xdfin_Maker"
                       };
-  Int_t nclass = 16;
+  Int_t nclass = 17;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
