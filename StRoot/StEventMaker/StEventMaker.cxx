@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.37 2001/09/19 04:49:05 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.38 2001/09/28 22:22:05 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.38  2001/09/28 22:22:05  ullrich
+ * Load helix geometry at last point of each track.
+ *
  * Revision 2.37  2001/09/19 04:49:05  ullrich
  * Set event size in StEventInfo.
  *
@@ -166,7 +169,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.37 2001/09/19 04:49:05 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.38 2001/09/28 22:22:05 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -295,6 +298,41 @@ StEventMaker::getStEventInstance()
 	return new StEvent;
 }
 
+void
+StEventMaker::fillOuterTrackGeometry(StTrack* track, const dst_track_st& t)
+{
+    //
+    // Here we have to require that the 'original' geometry
+    // already exist. We cannot use the StTrackGeometry constructor
+    // which takes the table as argument since we have now two
+    // versions of track parameters stored in the tables.
+    //
+    if (!(track && track->geometry())) return;
+
+    // Things which don't change
+    short q = track->geometry()->charge();
+    short h = track->geometry()->helicity();
+
+    // New origin, psi and dip angle
+    StThreeVectorF o(t.r0out*cos(t.phi0out*degree),
+		     t.r0out*sin(t.phi0out*degree),
+		     t.z0out);
+    double psi = t.psiout*degree;
+    double dip = atan(t.tanlout);
+
+    // New momentum
+    double pt = 1./t.invptout;
+    double pz = pt*t.tanlout;
+    StThreeVectorF p(pt*cos(psi), pt*sin(psi), pz);
+    
+    // New curvature
+    double c = track->geometry()->curvature()*
+	track->geometry()->momentum().perp()*t.invptout;
+	
+    // Assign to track
+    track->setOuterGeometry(new StHelixModel(q, psi, c, dip, o, p, h));
+}
+
 Int_t
 StEventMaker::makeEvent()
 {
@@ -404,6 +442,7 @@ StEventMaker::makeEvent()
         gtrack->setGeometry(new StHelixModel(dstGlobalTracks[i]));
 	h =  gtrack->geometry()->charge()*signOfField > 0 ? -1 : 1;   //  h = -sign(q*B)
 	gtrack->geometry()->setHelicity(h);
+	fillOuterTrackGeometry(gtrack, dstGlobalTracks[i]);
         info = new StTrackDetectorInfo(dstGlobalTracks[i]);
         gtrack->setDetectorInfo(info);
         detectorInfo.push_back(info);
@@ -454,6 +493,7 @@ StEventMaker::makeEvent()
         ptrack->setGeometry(new StHelixModel(dstPrimaryTracks[i]));
 	h =  ptrack->geometry()->charge()*signOfField > 0 ? -1 : 1;   //  h = -sign(q*B)
 	ptrack->geometry()->setHelicity(h);
+	fillOuterTrackGeometry(ptrack, dstPrimaryTracks[i]);
         id = ptrack->key();
         if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
             info = vecGlobalTracks[id]->detectorInfo();
@@ -504,6 +544,7 @@ StEventMaker::makeEvent()
 	ttrack->setGeometry(new StHelixModel(dstTptTracks[i]));
 	h =  ttrack->geometry()->charge()*signOfField > 0 ? -1 : 1;   //  h = -sign(q*B)
 	ttrack->geometry()->setHelicity(h);
+	fillOuterTrackGeometry(ttrack, dstTptTracks[i]);
 	id = ttrack->key();
 	//
 	//   Tpt tracks come in late. Good chance that there is already
@@ -731,7 +772,7 @@ StEventMaker::makeEvent()
                 gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
                                     << " TPC hits, wrong hardware address." << endm;
         }
-        
+
         //
         //        SVT hits
         //
@@ -887,7 +928,6 @@ StEventMaker::makeEvent()
     }
     if (mCurrentRunInfo)
 	mCurrentEvent->setRunInfo(new StRunInfo(*mCurrentRunInfo));
-
    
     return kStOK;
 }
@@ -1271,6 +1311,10 @@ StEventMaker::printTrackInfo(StTrack* track)
         cout << "---> StTrack -> StGeometry ("<< track->geometry()->GetName()
              << ") at " << (void*) (track->geometry()) << endl;
         if (track->geometry()) track->geometry()->Dump();
+
+        cout << "---> StTrack -> StGeometry (outer) ("<< track->outerGeometry()->GetName()
+             << ") at " << (void*) (track->outerGeometry()) << endl;
+        if (track->outerGeometry()) track->outerGeometry()->Dump();
 
         cout << "---> StTrack -> StDetectorInfo at "
              << (void*) (track->detectorInfo()) << endl;
