@@ -1,5 +1,8 @@
-// $Id: makedoc.C,v 1.34 1999/06/02 16:32:46 fine Exp $
+// $Id: makedoc.C,v 1.35 1999/06/04 01:46:09 fine Exp $
 // $Log: makedoc.C,v $
+// Revision 1.35  1999/06/04 01:46:09  fine
+// New examples have been included
+//
 // Revision 1.34  1999/06/02 16:32:46  fine
 // PadControlPanel macro html has been introduced
 //
@@ -172,6 +175,8 @@
 
   // Make HTML docs for the "plain" text files those are not in the dictionaries
   cout << " Makeing HTML's for macros" << endl;
+  html.Convert("./DrawTpcHits.C","How to draw 3D view for hits and");
+  html.Convert("./DrawTrackTpcHits.C","How to draw 3D view for hits and tracks");
   html.Convert("./PadControlPanel.C","How to manipulate with 3D pad images");
   html.Convert("./HitsDraw.C","3D drawing of the STAR Geometry and the hits from the STAF table");
   html.Convert("./SubDetectorView.C","How to create sub-detector view");
