@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.24 2000/01/10 21:22:29 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.25 2000/01/11 15:28:32 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.25  2000/01/11 15:28:32  kathy
+// limits on residual histograms changed; St_QA_Maker changed to give proper inputs to routine prop_one_track which is from pams/global/egr - NOTE! Now St_QA_Maker class requires that you load the St_global librarycvs -n update!
+//
 // Revision 1.24  2000/01/10 21:22:29  kathy
 // now use Spiros' new code in pams/global/egr/prop_one_track to get primary track residuals - note must now load St_global library! - don't have magnetic field working from the dst yet...
 //
@@ -573,11 +576,11 @@ void StQABookHist::BookHistGlob(){
   m_glb_z0T     = QAH1F("QaGtrkZ0T",     "globtrk: z-coord at start (cm), tpc ", 50, -300.,300.);
   m_glb_curvT   = QAH1F("QaGtrkCurvT",   "globtrk: curvature (1/cm), tpc ", 50,0.,.1);
   m_glb_xfT     = QAH1F("QaGtrkXfT",     "globtrk: x of first hit on trk, tpc", 50,-200.,200.);
-  m_glb_xf0     = QAH1F("QaGtrkXf0",     "globtrk: x of first hit - on helix at start, tpc",50,-5.,5.);
+  m_glb_xf0     = QAH1F("QaGtrkXf0",     "globtrk: x of first hit - on helix at start, tpc",60,-3.,3.);
   m_glb_yfT     = QAH1F("QaGtrkYfT",     "globtrk: y of first hit on trk, tpc", 50,-200.,200.);
-  m_glb_yf0     = QAH1F("QaGtrkYf0",     "globtrk: y of first hit - on helix at start, tpc",50,-5.,5.);
+  m_glb_yf0     = QAH1F("QaGtrkYf0",     "globtrk: y of first hit - on helix at start, tpc",60,-3.,3.);
   m_glb_zfT     = QAH1F("QaGtrkZfT",     "globtrk: z of first hit on trk, tpc", 50,-300.,300.);
-  m_glb_zf0     = QAH1F("QaGtrkZf0",     "globtrk: z of first hit - on helix at start, tpc",50,-5.,5.);
+  m_glb_zf0     = QAH1F("QaGtrkZf0",     "globtrk: z of first hit - on helix at start, tpc",60,-3.,3.);
   m_glb_radfT   = QAH1F("QaGtrkRT",      "globtrk: radial position of first hit, tpc", 50,0.,200.);
   m_lengthT     = QAH1F("QaGtrkLengthT", "globtrk: track length, tpc", 50,0.,300.);
   m_psiT        = QAH1F("QaGtrkPsiT",    "globtrk: psi, tpc", 64, 0.,360.);
@@ -878,11 +881,11 @@ void StQABookHist::BookHistPrim(){
   m_pfit_point  = QAH1F("QaPtrkNPntFit", "primtrk: N fit points on track", 60, 0.,60.);
   m_prim_charge = QAH1F("QaPtrkChrg",    "primtrk: charge ", 20,-2.,2.);
   m_prim_xf     = QAH1F("QaPtrkXf",      "primtrk: x of first hit on trk ", 50,-200.,200.);
-  m_prim_xf0    = QAH1F("QaPtrkXf0",     "primtrk: x of first hit - on helix at start",50,-5.,5.);
+  m_prim_xf0    = QAH1F("QaPtrkXf0",     "primtrk: x of first hit - on helix at start",60,-3.,3.);
   m_prim_yf     = QAH1F("QaPtrkYf",      "primtrk: y of first hit on trk", 50,-200.,200.);
-  m_prim_yf0    = QAH1F("QaPtrkYf0",     "primtrk: y of first hit - on helix at start",50,-5.,5.);
+  m_prim_yf0    = QAH1F("QaPtrkYf0",     "primtrk: y of first hit - on helix at start",60,-3.,3.);
   m_prim_zf     = QAH1F("QaPtrkZf",      "primtrk: z of first hit on trk", 50,-200.,200.);
-  m_prim_zf0    = QAH1F("QaPtrkZf0",     "primtrk: z of first hit - on helix at start",50,-5.,5.);
+  m_prim_zf0    = QAH1F("QaPtrkZf0",     "primtrk: z of first hit - on helix at start",60,-3.,3.);
   m_prim_radf   = QAH1F("QaPtrkR",       "primtrk: radial position of first hit",50,0.,200.);
   m_prim_ratio  = QAH1F("QaPtrkRnf",     "primtrk: ratio Nfitpnt over Npnt", 50, 0., 1.2005);
   m_ppsi        = QAH1F("QaPtrkPsi",     "primtrk: psi ", 36, 0.,360.);
