@@ -1,9 +1,9 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.1 2001/02/12 21:16:17 yepes Exp $
+// $Id: StPeCTrigger.cxx,v 1.2 2001/02/12 21:39:45 yepes Exp $
 // $Log: StPeCTrigger.cxx,v $
-// Revision 1.1  2001/02/12 21:16:17  yepes
-// New version of StPeCMaker, lots of changes
+// Revision 1.2  2001/02/12 21:39:45  yepes
+// get rid of old trigger simulation
 //
 // Revision 1.0  2000/12/11 
 //
@@ -16,8 +16,6 @@
 #include "Stypes.h"
 #include "StMessMgr.h"
 
-
-int l0sim(StEvent*, Bool_t*);
 
 
 ClassImp(StPeCTrigger)
@@ -163,28 +161,6 @@ Int_t StPeCTrigger::process(StEvent *event){
   p4c = l0_2000Corrected->process ( event ) ;
   p5  = l0Offline2001->process ( event ) ;
 //
-//   Take quadrants from 2001 wiring
-//
-  // L0 simulator
-  Bool_t trgOut[40];
-  for ( int i = 0 ; i < 40 ; i++ ) trgOut[i] = 0 ;
-  int res =  l0sim(event, trgOut );
-
-  if ( infoLevel > 2 ) {
-     printf ( "trgBits : " ) ;
-     for ( int i = 0 ; i < 24 ; i++ ) {
-        printf ( "%d ", trgOut[i] ) ;
-     }
-     printf ( "\n" ) ;
-  }
-
-  FalkAkio    = trgOut[18] ;
-  FalkAkioEW  = trgOut[19] ;
-  EastAndWest = trgOut[20] ;
-  EastOrWest  = trgOut[21] ;
-  p4_0       = trgOut[22] ;
-  p4_1       = trgOut[23] ;
-//
 //   Get Ftpc info
 //
   StFtpcHitCollection*        ftpHitC = 0 ;
@@ -220,7 +196,6 @@ Int_t StPeCTrigger::process(StEvent *event){
 
   }
 
-
-  return res;
+  return 0;
 }
 
