@@ -16,6 +16,7 @@
       integer itmbk,ntmbk,min_tmbk, max_tmbk
       integer isect, irow,jsect
       integer ret
+      integer longrow
 
       integer tgc_global_to_local,tgc_x_to_pad,tgc_z_to_time
       real xglobal(3),xlocal(3)
@@ -35,7 +36,8 @@ c calculate the pads used by this hit
           xglobal(2)=tphit(ihit).y
           xglobal(3)=tphit(ihit).z          
           isect=tphit(ihit).row/100
-          irow=mod(tphit(ihit).row,100)
+          longrow=tphit(ihit).row
+          irow=mod(longrow,100)
 
           ret=tgc_global_to_local(jsect,xglobal,xlocal)
 

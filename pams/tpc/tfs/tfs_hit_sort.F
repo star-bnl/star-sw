@@ -1,5 +1,8 @@
-* $Id: tfs_hit_sort.F,v 1.1 1998/01/27 01:47:23 fisyak Exp $
+* $Id: tfs_hit_sort.F,v 1.2 1999/12/17 16:34:10 sakrejda Exp $
 * $Log: tfs_hit_sort.F,v $
+* Revision 1.2  1999/12/17 16:34:10  sakrejda
+* Introduced additional variable to avoid mod(short,int)
+*
 * Revision 1.1  1998/01/27 01:47:23  fisyak
 * Split sources
 *
@@ -46,6 +49,7 @@ C     IROW  - 2 number of hits
 C Local variables
       integer ih, jrow, jsect, iret
       integer tls_Quick_Sort_i
+      integer longrow
 
 C=========================== Begin Executable Code =======================
 
@@ -56,13 +60,15 @@ C     is to be used later to sort each sector-row according to drift.
       iret = tls_Quick_Sort_i(tphit_h.nok,tphit(1).row,
      >     tphit(2).row,tphit)
       call vzero(irow,2*mxrow*mxsector)
-      jrow = mod( tphit(1).row, 100 )
+      longrow=tphit(1).row
+      jrow = mod( longrow, 100 )
       jsect = (tphit(1).row - jrow)/100
       irow(1,jrow,jsect) = 1
       irow(2,jrow,jsect) = irow(2,jrow,jsect) + 1
       do ih = 2, tphit_h.nok
          if (tphit(ih).row .ne. tphit(ih-1).row) then
-            jrow = mod( tphit(ih).row, 100 )
+            longrow=tphit(ih).row
+            jrow = mod( longrow, 100 )
             jsect = (tphit(ih).row - jrow)/100
             irow(1,jrow,jsect) = ih
          endif
