@@ -241,6 +241,14 @@ void StJetReader::exampleEventAna()
 			 <<"\tPhi_track:\t"<<mom.phi()
 			 <<"\tdR:\t"<<dR<<endl;
 		    
+		    //dylan, now get it from the double-check method (stored directly at jet finding, _with_ energy subtraction)
+		    const TLorentzVector* check = stjets->trackToJetIndex(muDst, i, muTrack); //see StJets::addProtoJet(), where 4-p is stored
+		    assert(check);
+		    double dphi_check = gDeltaPhi(j->Phi(), check->Phi());
+		    double deta_check = j->Eta()-check->Eta();
+		    double dR_check = sqrt(dphi_check*dphi_check + deta_check*deta_check);
+		    cout <<"\tPt_check:\t"<<check->Pt()<<"\tEta_check:\t"<<check->Eta()<<"\tPhi_check:\t"<<check->Phi()<<"\tdR:\t"<<dR_check<<endl;
+		    
 		    ++itrack;
 		}
 		//now get the bemc info:
@@ -260,6 +268,17 @@ void StJetReader::exampleEventAna()
 		    double deta = j->Eta()-eta;
 		    double dR = sqrt( dphi*dphi  +  deta*deta );
 		    cout <<"\tE_tower:\t"<<e<<"\tEta_tower:\t"<<eta<<"\tPhi_tower:\t"<<phi<<"\tdR:\t"<<dR<<endl;
+
+		    //dylan, now get it from the double-check method (stored directly at jet finding, _with_ energy subtraction)
+		    const TLorentzVector* check = stjets->trackToJetIndex(i, (*bit));
+		    if (!check) {
+			cout <<"you're going to segfualt on jet:\t"<<i<<"\ttower:\t"<<(*bit)<<endl;
+		    }
+		    assert(check);
+		    double dphi_check = gDeltaPhi(j->Phi(), check->Phi());
+		    double deta_check = j->Eta()-check->Eta();
+		    double dR_check = sqrt(dphi_check*dphi_check + deta_check*deta_check);
+		    cout <<"\tE_check:\t"<<check->E()<<"\tEta_check:\t"<<check->Eta()<<"\tPhi_check:\t"<<check->Phi()<<"\tdR:\t"<<dR_check<<endl;
 		}
 	    }
 	}

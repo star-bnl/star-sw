@@ -1,7 +1,12 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.3 2004/09/14 17:27:15 mmiller Exp $
+// $Id: StJets.cxx,v 1.4 2004/09/20 23:15:51 mmiller Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.4  2004/09/20 23:15:51  mmiller
+// Fixed bug in retreiving emc towers for jet, introduced
+// TrackToJetIndex inherits from TLorentzVector now.  See StJetReader::exampleAna
+// for example of how to retreive the corrected 4-momenta used for barrel towers.
+//
 // Revision 1.3  2004/09/14 17:27:15  mmiller
 // Fixed bug (lack of StFourPMaker::Clear()).
 //
@@ -144,8 +149,9 @@ void StJets::addProtoJet(StProtoJet& pj)
 	    //add to trackToJetIndices
 	    int addAt = mTrackToJetIndices->GetLast()+1;
 	    TrackToJetIndex t2j( jetIndex, muTrackIndex, track->detectorId() );
+	    t2j.SetPxPyPzE(track->px(), track->py(), track->pz(), track->e() );
 	    //cout <<"here's the t2j:\t"<<t2j<<endl;
-	    
+
 	    new ( (*mTrackToJetIndices)[addAt]) TrackToJetIndex( t2j );
 
 	    //((TrackToJetIndex*)(*mTrackToJetIndices)[addAt])->setTrackIndex(muTrackIndex);
@@ -171,26 +177,38 @@ void StJets::print()
     */
 }
 
-/*
-vector<int> StJets::jetTrackIndices(int jetIndex)
+
+const TLorentzVector* StJets::trackToJetIndex(int jetIndex, int trackIndex)
 {
-  vector<int> vec;
-  int size = mTrackToJetIndices->GetLast()+1;
-  
-  for (int i=0; i<size; ++i) {
-      TrackToJetIndex* id = dynamic_cast<TrackToJetIndex*>( mTrackToJetIndices->UncheckedAt(i) );
-      if(id) {
-	  int trackIndex = id->trackIndex();
-	  //cout <<"jetIndex:\t"<<id->jetIndex()<<"\ttrackIndex:\t"<<trackIndex<<endl;
-	  if(id->jetIndex() == jetIndex) {
-	      //cout <<"\tadd track"<<endl;
-	      vec.push_back( trackIndex );
-	  }
-      }
-  }
-  return vec;
+    int size = mTrackToJetIndices->GetLast()+1;
+    TrackToJetIndex* t2j=0;
+
+    //cout <<"\n search for jetIndex:\t"<<jetIndex<<"\ttrackIndex:\t"<<trackIndex<<endl;
+    for (int i=0; i<size; ++i) {
+	TrackToJetIndex* id = static_cast<TrackToJetIndex*>( (*mTrackToJetIndices)[i] );
+	//cout <<"\tjet:\t"<<id->jetIndex()<<"\ttrack:\t"<<id->trackIndex()<<endl;
+	if (id->jetIndex()==jetIndex && id->trackIndex()==trackIndex) {
+	    t2j = id;
+	    break;
+	}
+    }
+    return t2j;
 }
-*/
+
+const TLorentzVector* StJets::trackToJetIndex(StMuDst* event, int jetIndex, const StMuTrack* track)
+{
+    int trackIndex = -1;
+    TClonesArray& tracks = *(event->primaryTracks());
+    int ntracks = tracks.GetLast()+1;
+    for (int i=0; i<ntracks; ++i) {
+	const StMuTrack* temp = static_cast<const StMuTrack*>( tracks[i] );
+	if (temp == track) {
+	    trackIndex = i;
+	    break;
+	}
+    }
+    return trackToJetIndex(jetIndex, trackIndex);
+}
 
 vector<int> StJets::jetBemcTowerIndices(int jetIndex)
 {
@@ -201,7 +219,7 @@ vector<int> StJets::jetBemcTowerIndices(int jetIndex)
 	TrackToJetIndex* id = static_cast<TrackToJetIndex*>( (*mTrackToJetIndices)[i] );
 	StDetectorId detId = id->detectorId();
 	
-	if (detId != kBarrelEmcTowerId) continue;
+	if (detId!=kBarrelEmcTowerId || id->jetIndex()!=jetIndex) continue;
 	vec.push_back(id->trackIndex());
     }
     return vec;
@@ -231,6 +249,8 @@ StJets::TrackVec StJets::jetParticles(StMuDst* event, int jetIndex)
 	if (id->jetIndex() == jetIndex ) {
 	    StMuTrack* track = static_cast<StMuTrack*>( tracks[trackIndex] );
 	    vec.push_back( track );
+	    //cout <<"mom_track:\t"<<track->momentum()<<endl;
+	    //cout <<"mom_check:\t"<<id->Px()<<"\t"<<id->Py()<<"\t"<<id->Pz()<<endl;
 	}
     }
     
