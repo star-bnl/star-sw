@@ -1,47 +1,75 @@
-macro run_tte i=1 TPC_HOME=$STAR/pams/tpc/kumac
-i=[1]
-TPC_HOME = [2]
+*********************************************************************
 
- if ( [i] .eq. 1) then
-  exec [TPC_HOME]/tpt_init.kumac
-  
-  
- endif
+macro run_tte_track
 
- message ' Running tte_track...'
- ami/mod/call tte_track _
-   /dui/data/tpc/tracks/tptrack _
-   /dui/data/tpc/hits/tphit _
-   /dui/geant/Event/g2t_tpc_hit _
-   /dui/geant/Event/g2t_track _
-   /dui/data/tpc/hits/index _
-   /dui/constants/tpc/params/type
+ message 'start run_tte_track'
+
+ alias/create STAFCV_OK  1
+ alias/create STAFCV_BAD 0
+
+ ami/module/call tte_track _
+                        /dui/data/tpc/tracks/tptrack _
+                        /dui/data/tpc/hits/tphit _
+                        /dui/geant/Event/g2t_tpc_hit _
+                        /dui/geant/Event/g2t_track _
+                        /dui/data/tpc/hits/index _
+                        /dui/constants/tpc/params/tclpars/type
  
- if ( staf_status(1) .ne. STAFCV_OK) then
-   message 'Problem running tte_track...'
-   goto END
- endif
 
- message ' Running tte...'
- ami/mod/call tte _
-   /dui/data/tpc/tracks/tptrack _
-   /dui/data/tpc/hits/tphit _
-   /dui/geant/Event/g2t_tpc_hit _
-   /dui/geant/Event/g2t_track _
-   /dui/data/tpc/hits/index _
-   /dui/constants/tpc/params/type _
-   /dui/data/tpc/tracks/tpt_eval _
-   /dui/data/tpc/tracks/mctrk _
-   /dui/data/tpc/tracks/res _
-   /dui/constants/params/tte_control
+  if ( staf_status(1) .ne. STAFCV_OK) then
+    message 'Problem running tte_track...'
+    goto RTRN
+  endif
+
+  RTRN:
  
+  message 'finish run_tte_track'
+
+return
+
+*************************************************************
+
+macro run_tte
+
+message 'start run_tte'
+
+ alias/create STAFCV_OK  1
+ alias/create STAFCV_BAD 0
+
+  cd /dui
+  tdm/table/rowcount /dui/data/tpc/tracks/mctrk   0
+  tdm/table/rowcount /dui/data/tpc/tracks/evaltrk 0
+
+
+ ami/module/call tte _
+               /dui/data/tpc/tracks/tptrack _
+               /dui/data/tpc/hits/tphit _
+               /dui/geant/Event/g2t_tpc_hit _
+               /dui/geant/Event/g2t_track _
+               /dui/data/tpc/hits/index _
+               /dui/constants/tpc/params/tclpars/type _
+               /dui/data/tpc/tracks/evaltrk _
+               /dui/data/tpc/tracks/mctrk _
+               /dui/data/tpc/tracks/res _
+               /dui/constants/tpc/params/ttepars/tte_control
+ 
+
  if ( staf_status(1) .ne. STAFCV_OK) then
    message 'Problem with tte..'
-   
- endif
+   goto RTRN
+   endif
  
-END:
+ RTRN:
+
+ message 'finish run_tte'
+
+return
+
+************************************************************ 
  
- return
- 
- 
+
+
+
+
+
+

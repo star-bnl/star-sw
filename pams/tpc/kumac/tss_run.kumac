@@ -4,13 +4,18 @@
 *******************************************************************
 *********************************************************************
 
-macro run
+macro run  
+
+message 'start tss_run'
 
 *
   cd /dui
   tdm/table/rowcount /dui/raw_data/tpc/pixels/tppixel 0
   tdm/table/rowcount /dui/raw_data/tpc/pixels/tpmcpix 0
   tdm/table/rowcount /dui/raw_data/tpc/pixels/tppad   0
+
+  alias/create STAFCV_OK 1
+  alias/create STAFCV_BAD 0
 *
   ami/module/call tssam_
         /dui/constants/tpc/params/tsspars/tsspar_
@@ -24,6 +29,16 @@ macro run
         /dui/constants/tpc/calib/bad_channels_
         /dui/constants/tpc/calib/readout_map_
         /dui/constants/tpc/calib/tpc_pedestal
+
+  if ( staf_status(1) .ne. STAFCV_OK) then
+	message 'Problem running tss...'
+	goto RTRN
+  endif
+
+
+  RTRN:
+
+  message 'finish tss_run' 
 
 return 
 
