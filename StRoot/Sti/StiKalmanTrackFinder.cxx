@@ -1,36 +1,30 @@
-/**************************************************************************
- * Copyright(c) 2001, STAR  Experiment at BNL, All rights reserved.       *
- *                                                                        *
- * Author: STAR Integrated Track Task Force                               *
- * Contributors are mentioned in the code where appropriate.              *
- *                                                                        *
- * Permission to use, copy, modify and distribute this software and its   *
- * documentation strictly for non-commercial purposes is hereby granted   *
- * without fee, provided that the above copyright notice appears in all   *
- * copies and that both the copyright notice and this permission notice   *
- * appear in the supporting documentation. The authors make no claims     *
- * about the suitability of this software for any purpose. It is          *
- * provided "as is" without express or implied warranty.                  *
- *                                                                        *
- **************************************************************************/
+/*
+  Copyright(c) 2001, STAR  Experiment at BNL, All rights reserved.      
+  
+  Author: STAR Integrated Track Task Force                              
+  Contributors are mentioned in the code where appropriate.
+  
+  Permission to use, copy, modify and distribute this software and its
+  documentation strictly for non-commercial purposes is hereby granted 
+  without fee, provided that the above copyright notice appears in all
+  copies and that both the copyright notice and this permission notice
+  appear in the supporting documentation. The authors make no claims 
+  about the suitability of this software for any purpose. It is     
+  provided "as is" without express or implied warranty.             
 
-/**************************************************************************
- *                                                                        *
- * StiKalmanTrackFinder  	                                          *				   
- *                                                                        *
- * Author:  Claude Pruneau, Wayne State University                        *
- * Created: March 2001                                                    *
- *                                                                        *
- * Important Note: The Kalman Filter Code imbedded in this class was given*
- *                 to us gracioulsy by Jouri Belikov from the ALICE       *
- *                 collaboration. i.e. code reproduced with autorization. *
- *                                                                        *
- *                                                                        *
- *                                                                        *
- *                                                                        *
- *                                                                        *
- *                                                                        *
- **************************************************************************/
+ */
+
+/*
+  StiKalmanTrackFinder  
+  
+  Author:  Claude Pruneau, Wayne State University                        
+  Created: March 2001                                                    
+  
+  Important Note: The Kalman Filter Code imbedded in this class was given
+  to us gracioulsy by Jouri Belikov from the ALICE       
+  collaboration. i.e. code reproduced with autorization. 
+*/
+
 //Sti
 #include "StiHit.h"
 #include "StiDetector.h"
@@ -83,13 +77,6 @@ bool StiKalmanTrackFinder::isValid(bool debug) const
 //Temporary patch, to test seed finder (MLM, 8/20/01)
 void StiKalmanTrackFinder::doNextAction()
 {
-    //Test composite seed finder
-    //StiCompositeSeedFinder* sf = dynamic_cast<StiCompositeSeedFinder*>(trackSeedFinder);
-    //if (!sf) {
-    //	cout <<"StiKalmanTrackFinder::doNextAction()\tcast to CompositeSF failed"<<endl;
-    //	return;
-    //}
-	
     StiKalmanTrack* track = 0;
     if (trackSeedFinder->hasMore()) {
 	track = trackSeedFinder->next();
