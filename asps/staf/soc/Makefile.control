@@ -1,0 +1,11 @@
+# soc/Makefile.control
+#
+ASPS += soc
+#PAMS +=
+#
+USER_LIBS += -lasu
+#
+DEBUG := TRUE
+#SHARE := TRUE
+MOTIF := FALSE
+#
