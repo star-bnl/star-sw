@@ -23,7 +23,9 @@ my $prodSr = "prod6";
 my @Sets = (
              "auau200/hijing/beamgas/hydrogen/year_1h/hadronic_on",
              "auau200/hijing/beamgas/nitrogen/year_1h/hadronic_on", 
-             "pp200/pythia/default/minibias/year_2a/hadronic_on",
+#             "pp200/pythia/default/minibias/year_2a/hadronic_on",
+             "auau130/mevsim/vanilla_flow/central/year_1h/hadronic_on",
+             "auau200/single/default/central/year_1e/hadronic_on",
              "auau128/hijing/b0_12/halffield/year_1e/hadronic_on",
              "auau128/hijing/b0_3/halffield/year_1e/hadronic_on",
              "auau200/hijing135/default/b0_3/year_1h/hadronic_on", 
