@@ -1,6 +1,8 @@
 //*-- Author :    Valery Fine   21/07/98  (E-mail:fine@bnl.gov)
 // #include "St_mevsim_Module.h"
-void MakeHists(Char_t *xdffilename="$(temp)/test.xdf") 
+void MakeHists(Char_t *xdffilename="/star/sol/users/fisyak/auau_ce_b0-2_4801_5000.xdf")
+//"$AFS_RHIC/star/data/samples/auau_central_hijing.xdf")
+// /star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2_4801_5000.xdf"
 {
 
   gROOT->Reset();
@@ -9,34 +11,37 @@ void MakeHists(Char_t *xdffilename="$(temp)/test.xdf")
     NT = kTRUE;
     if (gSystem.Load("St_base.dll")) printf(" Loading DLL \"St_base.dll\" failed \n");
     if (gSystem.Load("St_Tables.dll")) printf(" Loading DLL \"St_Tables.dll\" failed \n");
-    if (gSystem.Load("libSt_mevsim.dll")) printf(" Loading DLL \"libSt_mevsim.dll\" failed \n");
   }
-
+  else{
+    if (gSystem.Load("libasu.so"))      printf(" Loading DLL \"libasu.so\" failed \n");
+    if (gSystem.Load("libdsl.so"))      printf(" Loading DLL \"libdsl.so\" failed \n");
+    if (gSystem.Load("St_base.so"))      printf(" Loading DLL \"St_base.so\" failed \n");
+    if (gSystem.Load("St_Tables.so"))    printf(" Loading DLL \"St_Tables.so\" failed \n");
+  }
 
 //   Read XDF file
   // St_XDFFile  xdf("auau_ce_b0-2_4801_5000.xdf");
    St_XDFFile  xdf(xdffilename);
+   //   St_DataSet *event = xdf.NextEventGet();
    St_DataSet *event = xdf.NextEventGet();
    if (!event) { printf(" NO events \n"); return;}
    event->ls("*");
    St_DataSet *set=0;
    St_DataSetIter root(event);
    set = root.Cd("/evgen/particle");
-   if (set) { 
-     set->ls("*");
-     printf(" Getting the tables \n");
-
-     St_particle *pa=set->GetTableObj();
-
-
+   //   set = root.Cd("/Event/hepe_gent");
+   if (set && set->HasData()) { 
+     St_particle *pa = (St_particle *)set;
+     pa->ls("*");
+     
      printf(" Checking the results \n");
-
+     
      table_head_st *t1_h = pa->GetHeader();
 
      printf(" Name=%s type=%s t1_h.nok = %i \n", t1_h->name, t1_h->type, t1_h->nok);
      printf(" t1_h.rbytes = %i \n", t1_h.rbytes);
 
-     particle_st *particle = pa.GetTable();
+     particle_st *particle = pa->GetTable();
 
      // Create "histograms"
 

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   26/06/98  (E-mail:fine@bnl.gov)
-// $Id: CallMevSaveXDF.cxx,v 1.2 1998/07/22 01:14:29 fisyak Exp $
+// $Id: CallMevSaveXDF.cxx,v 1.3 1998/07/23 11:32:41 fisyak Exp $
 // $Log: CallMevSaveXDF.cxx,v $
+// Revision 1.3  1998/07/23 11:32:41  fisyak
+// Small fixes
+//
 // Revision 1.2  1998/07/22 01:14:29  fisyak
 // Release SL98e
 //
@@ -43,7 +46,7 @@
       if (NT)  strcpy( cmd, "copy " );
       else     strcpy( cmd, "/bin/cp " );
 
-      strcat(cmd, infile); delete [] infile;
+      strcat(cmd, infile);// delete [] infile;
       strcat(cmd, " .");
       if (NT)  {   // change the path separators from "slash" to "backslash" for Windows NT
         Char_t *bptr = 0;
@@ -57,15 +60,15 @@
 
 //   Read XDF file
    const Char_t *filename;
-   if (NT) filename = "$(temp)/test.xdf";
-   else  filename = "/tmp/test.xdf";
-   St_XDFFile  xdf;                       // Create xdf object of St_XDFFile class
-   if (xdf.OpenXDF(filename,"w")) return; // Try to open the inout XDF file
+   //   if (NT) filename = "$(temp)/test.xdf";
+   //   else  filename = "test.xdf";
+   //   St_XDFFile  xdf;                       // Create xdf object of St_XDFFile class
+   //   if (xdf.OpenXDF(filename,"w")) return; // Try to open the inout XDF file
 
 // File has been opened
 
    Int_t nevent = 10;
-   printf(" Writting %d events to XDF file %s \n", nevent);
+   //   printf(" Writting %d events to XDF file %s \n", nevent);
    Int_t i;
 
  // Entering the event loop
@@ -77,19 +80,19 @@
       printf(" Calling the 'mevsim' module for %d event \n",i+1);
       if( mevsim(pa) ) {
         pa->ls("*");
-        xdf.NextEventPut(&event);               // Write the current event into XDF file
+	//        xdf.NextEventPut(&event);               // Write the current event into XDF file
       }
       else
         printf(" Module failed \n");
    }
-   xdf.CloseXDF();                             // Close the XDF file
+   //   xdf.CloseXDF();                             // Close the XDF file
    gBenchmark->Stop("mevsim");                 // Stop timer
 
   // Print timing
-   printf("    Real Time Cpu Time  Os    CPU     RAM   output     size\n");
-   printf("      sec       sec                    Mb    file \n");
-   printf(" 1.  17.75     15.45    NT  Intel 266   128    local     7'116'900\n");
-   printf("\n ======== Your system for %d events is: \n",nevent);
-   gBenchmark->Show("mevsim");
-   printf(" File %s in XDF format has been created\n",gSystem->ExpandPathName(filename));
+   //   printf("    Real Time Cpu Time  Os    CPU     RAM   output     size\n");
+   //   printf("      sec       sec                    Mb    file \n");
+   //   printf(" 1.  17.75     15.45    NT  Intel 266   128    local     7'116'900\n");
+   //   printf("\n ======== Your system for %d events is: \n",nevent);
+    gBenchmark->Show("mevsim");
+   //   printf(" File %s in XDF format has been created\n",gSystem->ExpandPathName(filename));
 }

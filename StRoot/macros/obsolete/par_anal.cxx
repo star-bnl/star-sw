@@ -1,7 +1,22 @@
 // void par_anal(Char_t *xdffilename) 
 {
   //  gROOT->Reset();
-  Char_t *xdffilename="/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2_1_200.xdf";
+
+  gROOT->Reset();
+  Bool_t NT = kFALSE;
+  if (strcmp(gSystem.GetName(),"WinNT")==0){
+    NT = kTRUE;
+    if (gSystem.Load("St_base.dll")) printf(" Loading DLL \"St_base.dll\" failed \n");
+    if (gSystem.Load("St_Tables.dll")) printf(" Loading DLL \"St_Tables.dll\" failed \n");
+  }
+  else{
+    if (gSystem.Load("libasu.so"))      printf(" Loading DLL \"libasu.so\" failed \n");
+    if (gSystem.Load("libdsl.so"))      printf(" Loading DLL \"libdsl.so\" failed \n");
+    if (gSystem.Load("St_base.so"))      printf(" Loading DLL \"St_base.so\" failed \n");
+    if (gSystem.Load("St_Tables.so"))    printf(" Loading DLL \"St_Tables.so\" failed \n");
+  }
+  //  Char_t *xdffilename="/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2_1_200.xdf";
+   Char_t *xdffilename="/star/sol/users/fisyak/auau_ce_b0-2_4801_5000.xdf";
 //   Read XDF file
    printf(" File: \"%s\" \n", xdffilename);
    St_XDFFile  xdf;
@@ -49,8 +64,8 @@
        set->ls("*");
        printf(" Getting the tables \n");
 
-       St_particle *pa=set->GetTableObj();
-       particle_st *particle = pa.GetTable();
+       St_particle *pa= (St_particle *)set;
+       particle_st *particle = pa->GetTable();
 
      
        Int_t kUPDATE = pa->GetNRows()/5;

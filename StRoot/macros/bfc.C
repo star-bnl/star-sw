@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.5 1998/07/21 13:35:14 fine Exp $
+// $Id: bfc.C,v 1.6 1998/07/23 11:32:42 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.6  1998/07/23 11:32:42  fisyak
+// Small fixes
+//
 // Revision 1.5  1998/07/21 13:35:14  fine
 // The new version of the macros: MakeHtmlTables and makedoc have been introduced
 //
@@ -56,11 +59,11 @@
   chain.Init();
 // Prepare TCanvas to show some histograms created by makers
   gBenchmark->Start("bfc");
-for (Int_t i=0;i<2;i++){
+for (Int_t i=0;i<1;i++){
   chain.Make(i);
   //  histCanvas->Modified();
   //  histCanvas->Update();
-  chain.Clear();
+  //  chain.Clear();
 }
   gBenchmark->Stop("bfc");
   gBenchmark->Print("bfc");
