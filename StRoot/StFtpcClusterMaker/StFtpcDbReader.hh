@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.17 2003/06/12 10:01:26 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.18 2003/06/13 12:11:12 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.18  2003/06/13 12:11:12  jcs
+// change constructor comment to specify that it is also used for StFtpcMixerMaker
+//
 // Revision 1.17  2003/06/12 10:01:26  jcs
 // renamed ftpcClusterGeometry database table to ftpcClusterGeom
 // (name was too long)
@@ -215,7 +218,7 @@ public:
                  St_ftpcdDeflectiondP *ddeflectiondp,
                  St_ftpcGas           *gas,
                  St_ftpcDriftField    *driftfield);
-  // constructor used by Sti/StFtpcDetectorBuilder:
+  // constructor used by Sti/StFtpcDetectorBuilder and StFtpcMixerMaker:
   StFtpcDbReader(St_ftpcDimensions    *dimensions,
                  St_ftpcPadrowZ       *zrow        );
 
