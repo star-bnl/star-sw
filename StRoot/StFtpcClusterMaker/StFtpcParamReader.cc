@@ -1,8 +1,8 @@
-// $Id: StFtpcParamReader.cc,v 1.19 2002/02/26 13:16:40 jcs Exp $
+// $Id: StFtpcParamReader.cc,v 1.20 2002/03/01 14:22:20 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
-// Revision 1.19  2002/02/26 13:16:40  jcs
-// get cluster unfolding paramteres from ftpcClusterPars
+// Revision 1.20  2002/03/01 14:22:20  jcs
+// add additional histograms to monitor cluster finding
 //
 // Revision 1.18  2002/01/21 22:14:56  jcs
 // added values for temperature/pressure calculations to ftpcClusterPars
@@ -114,7 +114,11 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     mMaxLoops = detTable->maxLoops;         
     mMaxFastLoops = detTable->maxFastLoops;    
     mUnfoldLimit = detTable->unfoldLimit;      
-    mUnfoldFailedLimit = detTable->unfoldFailedLimit; 
+    mUnfoldFailedLimit = detTable->unfoldFailedLimit;
+    mMaxTimeLength = detTable->maxTimelength;
+    mMaxPadLength = detTable->maxPadlength;
+    mMinTimeBin = detTable->minTimebin;
+
   } else {
     gMessMgr->Message( " No data in table class St_ftpcClusterPars","E");
   }
@@ -239,6 +243,18 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     mNormalizedNowPressure = detTable->normalizedNowPressure;
     mAdjustedAirPressureWest = detTable->adjustedAirPressureWest;
     mAdjustedAirPressureEast = detTable->adjustedAirPressureEast;
+    mMaxNumSequences = detTable->maxNumSequences ; 
+    mMaxNumSeqPeaks = detTable->maxNumSeqPeaks;
+    mMaxNumPeaks = detTable->maxNumPeaks;          
+    mMaxNumCUC = detTable->maxNumCUC;           
+    mMaxLoops = detTable->maxLoops;         
+    mMaxFastLoops = detTable->maxFastLoops;    
+    mUnfoldLimit = detTable->unfoldLimit;      
+    mUnfoldFailedLimit = detTable->unfoldFailedLimit;
+    mMaxTimeLength = detTable->maxTimelength;
+    mMaxPadLength = detTable->maxPadlength;
+    mMinTimeBin = detTable->minTimebin;
+
   } else {
     gMessMgr->Message( " No data in table class St_ftpcClusterPars","E");
   }

@@ -1,8 +1,8 @@
-// $Id: StFtpcClusterFinder.cc,v 1.27 2002/02/26 13:17:56 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.28 2002/03/01 14:22:20 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
-// Revision 1.27  2002/02/26 13:17:56  jcs
-// get cluster unfolding parameters from ftpcClusterPars
+// Revision 1.28  2002/03/01 14:22:20  jcs
+// add additional histograms to monitor cluster finding
 //
 // Revision 1.26  2002/02/10 21:10:44  jcs
 // allow for individual west/east Ftpc temperature/pressure corrections
@@ -99,7 +99,9 @@
 StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,  
 					 StFtpcParamReader *paramReader,
                                          StFtpcDbReader *dbReader,
-					 TObjArray *pointarray)
+					 TObjArray *pointarray,
+					 TH2F *hpad,
+					 TH2F *htime)
 {
 //   cout << "StFtpcClusterFinder constructed" << endl;  
   mReader = reader;
@@ -113,6 +115,12 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
   MAXFASTLOOPS = mParam->maxFastLoops();
   UNFOLDLIMIT = mParam->unfoldLimit();
   UNFOLDFAILEDLIMIT = mParam->unfoldFailedLimit();
+  MAXPADLENGTH = mParam->maxPadLength();
+  MAXTIMELENGTH = mParam->maxTimeLength();
+  MINTIMEBIN = mParam->minTimeBin();
+
+  mhpad = hpad;
+  mhtime = htime;
 
 //clfradius=new TH1F("clfradius","radius",140,0,35);
 }
@@ -966,7 +974,7 @@ int StFtpcClusterFinder::getSeqPeaksAndCalibAmp(TPCSequence *Sequence,
   iWidth=0;
   iPadIndex=iSeqTimesPads+iPad;
   
-  for(iIndex=0; iIndex< Sequence->Length; iIndex++)
+  for(iIndex=0; (iIndex< Sequence->Length) && (Sequence->startTimeBin+iIndex>=MINTIMEBIN) ; iIndex++)
     {
       cTemp=(unsigned char)((float)(unsigned int)(Sequence->FirstAdc[iIndex])
 			    * mDb->amplitudeSlope(iPadIndex,iRow) 
@@ -1232,10 +1240,17 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 !isnan(Peak->TimeSigma) // && Peak->PeakHeight>=mParam->minimumClusterMaxADC())
 	 && Peak->Rad <= mDb->sensitiveVolumeOuterRadius() && Peak->Rad >= mDb->sensitiveVolumeInnerRadius() )
 */
-      if(!isnan(Peak->x) && !isnan(Peak->y) && !isnan(Peak->PadSigma) && !isnan(Peak->TimeSigma))
+      if(!isnan(Peak->x) && !isnan(Peak->y) && !isnan(Peak->PadSigma) && !isnan(Peak->TimeSigma)
+	 && (Cluster->EndPad +1 - Cluster->StartPad)<=MAXPADLENGTH 
+	 && Peak->Sequence.Length<=MAXTIMELENGTH )
 
 	{
 	  // create new point
+
+	  // fill QA histograms
+	  mhpad->Fill(Cluster->EndPad +1 - Cluster->StartPad,1);
+	  mhtime->Fill(Peak->Sequence.Length,1);
+
 	  Int_t numPoint = mPoint->GetEntriesFast();
 	  if (numPoint >= mPoint->GetSize()) mPoint->Expand(mPoint->GetSize()+5000);
 
@@ -1675,9 +1690,16 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	     && Peak[iPeakIndex].Rad <= mDb->sensitiveVolumeOuterRadius() 
              && Peak[iPeakIndex].Rad >= mDb->sensitiveVolumeInnerRadius() )
 */
-          if(!isnan(Peak[iPeakIndex].x) && !isnan(Peak[iPeakIndex].y) &&
-                  !isnan(Peak[iPeakIndex].PadSigma) && !isnan(Peak[iPeakIndex].TimeSigma))
+          if(!isnan(Peak[iPeakIndex].x) && !isnan(Peak[iPeakIndex].y) 
+	     &&	!isnan(Peak[iPeakIndex].PadSigma) && !isnan(Peak[iPeakIndex].TimeSigma)
+	     && (Cluster->EndPad +1 - Cluster->StartPad)<=MAXPADLENGTH 
+	     && Peak[iPeakIndex].Sequence.Length<=MAXTIMELENGTH)
 	    {
+
+	      // fill QA histograms
+	      mhpad->Fill(Cluster->EndPad +1 - Cluster->StartPad,iNumPeaks);
+	      mhtime->Fill(Peak[iPeakIndex].Sequence.Length,iNumPeaks);
+
 	      // create new point
 	      Int_t numPoint = mPoint->GetEntriesFast();
 	      if (numPoint >= mPoint->GetSize()) mPoint->Expand(mPoint->GetSize()+5000);

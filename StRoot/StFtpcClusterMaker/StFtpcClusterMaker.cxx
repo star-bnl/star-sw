@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.34 2002/02/10 21:15:38 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.35 2002/03/01 14:22:20 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.35  2002/03/01 14:22:20  jcs
+// add additional histograms to monitor cluster finding
+//
 // Revision 1.34  2002/02/10 21:15:38  jcs
 // create separate radial chargestep histograms for Ftpc west and east
 //
@@ -240,19 +243,29 @@ Int_t StFtpcClusterMaker::Init(){
   m_fastsimgas   = (St_ftpcFastSimGas  *)local("ftpcFastSimGas");
   m_fastsimpars  = (St_ftpcFastSimPars *)local("ftpcFastSimPars");
 
-// 		Create Histograms
-m_csteps      = new TH2F("fcl_csteps"	,"FTPC charge steps by sector"	,60,-0.5,59.5, 260, -0.5, 259.5);
-m_chargestep_West = new TH1F("fcl_chargestepW","FTPC West chargestep",260, -0.5, 259.5);
-m_chargestep_East = new TH1F("fcl_chargestepE","FTPC East chargestep",260, -0.5, 259.5);
-//m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,7,0.,8.);
-//m_row        = new TH1F("fcl_row"	,"FTPC rows"			,20,1.,21.);
-//m_sector     = new TH1F("fcl_sector"	,"FTPC sectors"			,6,1.,7.);
-//m_pads       = new TH1F("fcl_pads"	,"FTPC pads"			,80,1.,161.);
-//m_timebins   = new TH1F("fcl_timebins","FTPC timebins"		,100,1.,257.);
-//m_row_sector = new TH2F("fcl_row_sector","FTPC(fcl) row vs. sector"	,20,1.,21.,6,1.,7.);
-//m_npad_nbin  = new TH2F("fcl_pad_bin"	,"FTPC(fcl) pad vs. timebin"	,80,1.,161.,100,1.,257.);
-m_cluster_radial_West = new TH1F("fcl_radialW","FTPCW cluster radial position",700,0.,35.);
-m_cluster_radial_East = new TH1F("fcl_radialE","FTPCE cluster radial position",700,0.,35.);
+  // 		Create Histograms
+  m_csteps      = new TH2F("fcl_csteps"	,"FTPC charge steps by sector"	,60,-0.5,59.5, 260, -0.5, 259.5);
+  m_chargestep_West = new TH1F("fcl_chargestepW","FTPC West chargestep",260, -0.5, 259.5);
+  m_chargestep_East = new TH1F("fcl_chargestepE","FTPC East chargestep",260, -0.5, 259.5);
+  m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,7,0.,8.);
+  m_row        = new TH1F("fcl_row"	,"FTPC rows"			,20,1.,21.);
+  m_sector     = new TH1F("fcl_sector"	,"FTPC sectors"			,6,1.,7.);
+  //m_pads       = new TH1F("fcl_pads"	,"FTPC pads"			,80,1.,161.);
+  //m_timebins   = new TH1F("fcl_timebins","FTPC timebins"		,100,1.,257.);
+  m_row_sector = new TH2F("fcl_row_sector","FTPC(fcl) row vs. sector"	,20,1.,21.,6,1.,7.);
+  //m_npad_nbin  = new TH2F("fcl_pad_bin"	,"FTPC(fcl) pad vs. timebin"	,80,1.,161.,100,1.,257.);
+  m_cluster_radial_West = new TH1F("fcl_radialW","FTPCW cluster radial position",700,0.,35.);
+  m_cluster_radial_East = new TH1F("fcl_radialE","FTPCE cluster radial position",700,0.,35.);
+
+  m_hitsvspad = new TH2F("fcl_hitsvspad","#hits vs. padlength",10,0.5,10.5,11,0.5,11.5);
+  m_hitsvstime = new TH2F("fcl_hitsvstime","#hits vs. timelength",12,0.5,12.5,11,0.5,11.5);
+
+  m_padvstime_West = new TH2F("fcl_padvstimeW","FTPCW padlength vs. timelength",12,0.5,12.5,10,0.5,10.5);
+  m_padvstime_East = new TH2F("fcl_padvstimeE","FTPCE padlength vs. timelength",12,0.5,12.5,10,0.5,10.5);
+  m_maxadc_West = new TH1F("fcl_maxadcW","FTPCW MaxAdc",50,0.5,50.5);
+  m_maxadc_East = new TH1F("fcl_maxadcE","FTPCE MaxAdc",50,0.5,50.5);
+  m_charge_West = new TH1F("fcl_chargeW","FTPCW charge",50,0.5,500.5);
+  m_charge_East = new TH1F("fcl_chargeE","FTPCE charge",50,0.5,500.5);
 
   return StMaker::Init();
 }
@@ -288,9 +301,9 @@ Int_t StFtpcClusterMaker::Make()
   m_ampslope = (St_ftpcAmpSlope *)dblocal_calibrations("ftpcAmpSlope" );
   m_ampoffset = (St_ftpcAmpOffset *)dblocal_calibrations("ftpcAmpOffset");
   m_timeoffset = (St_ftpcTimeOffset *)dblocal_calibrations("ftpcTimeOffset");
-   m_driftfield = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
-   m_gas        = (St_ftpcGas *)dblocal_calibrations("ftpcGas");
-   m_electronics = (St_ftpcElectronics *)dblocal_calibrations("ftpcElectronics");
+  m_driftfield = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
+  m_gas        = (St_ftpcGas *)dblocal_calibrations("ftpcGas");
+  m_electronics = (St_ftpcElectronics *)dblocal_calibrations("ftpcElectronics");
 
   // create parameter reader
   StFtpcParamReader *paramReader = new StFtpcParamReader(m_clusterpars,
@@ -409,6 +422,8 @@ Int_t StFtpcClusterMaker::Make()
   }
 
   if(ftpcReader) {
+
+    /*
     StFtpcChargeStep *step = new StFtpcChargeStep(m_csteps,
                                                   m_chargestep_West,
                                                   m_chargestep_East,
@@ -419,13 +434,16 @@ Int_t StFtpcClusterMaker::Make()
     //step->histogram(1); // This can give wrong values if the decline of the charge step is too steep!
     // uncomment to fill charge step histogram only:
     step->histogram(0);
-    
+    */
+
     if(Debug()) gMessMgr->Message("", "I", "OST") << "start running StFtpcClusterFinder" << endm;
     
     StFtpcClusterFinder *fcl = new StFtpcClusterFinder(ftpcReader, 
 						       paramReader, 
                                                        dbReader,
-						       hitarray);
+						       hitarray,
+						       m_hitsvspad,
+						       m_hitsvstime);
     
     int searchresult=fcl->search();
     
@@ -435,7 +453,7 @@ Int_t StFtpcClusterMaker::Make()
       }
 	
     delete fcl;
-    delete step;
+    //delete step;
     if (using_FTPC_slow_simulator) delete ftpcReader;
   }
   else {     
@@ -508,14 +526,14 @@ Int_t StFtpcClusterMaker::Make()
   delete paramReader;
   delete dbReader;
 // Deactivate histograms for MDC3
-MakeHistograms(); // FTPC cluster finder histograms
+  MakeHistograms(); // FTPC cluster finder histograms
   return iMake;
 }
 //_____________________________________________________________________________
 void StFtpcClusterMaker::MakeHistograms() 
 {
 
- // cout<<"*** NOW MAKING HISTOGRAMS FOR fcl ***"<<endl;
+  //cout<<"*** NOW MAKING HISTOGRAMS FOR fcl ***"<<endl;
 
 
   // Create an iterator
@@ -527,34 +545,46 @@ void StFtpcClusterMaker::MakeHistograms()
   if (! ppointh) 	return;
   fcl_fppoint_st *r = ppointh->GetTable();
   for (Int_t i=0; i<ppointh->GetNRows();i++,r++) {
-//    Int_t flag = r->flags;
-//    if (flag > 0) {
-//      Int_t bin = 6;
-//      for (Int_t twofac=32; twofac>0; twofac=twofac/2,bin--) {
-//        Int_t nbit = flag/twofac;
-//        if (nbit != 1) 	continue;
-//        m_flags->Fill((float)bin);
-//        flag = flag - nbit*twofac;        
-//      }//end loop twofac
-//    }//endif flag
+    Int_t flag = r->flags;
+    if (flag > 0) {
+      Int_t bin = 6;
+      for (Int_t twofac=32; twofac>0; twofac=twofac/2,bin--) {
+	Int_t nbit = flag/twofac;
+        if (nbit != 1) 	continue;
+        m_flags->Fill((float)bin);
+	flag = flag - nbit*twofac;        
+      }//end loop twofac
+    }//endif flag
 
-//    Float_t nrow = r->row;
-//    m_row->Fill(nrow);
-//    Float_t nsec = r->sector;
-//    m_sector->Fill(nsec);
-//    m_row_sector->Fill(nrow,nsec);
-//    Float_t npad = r->n_pads;
-//    m_pads->Fill(npad);
+   Float_t nrow = r->row;
+   m_row->Fill(nrow);
+   Float_t nsec = r->sector;
+   m_sector->Fill(nsec);
+   m_row_sector->Fill(nrow,nsec);
+
+//  Float_t npad = r->n_pads;
+//  m_pads->Fill(npad);
 //  Float_t nbin = r->n_bins;
 //  m_timebins->Fill(nbin);
-//    m_npad_nbin->Fill(npad,nbin);
+//  m_npad_nbin->Fill(npad,nbin);
   
-  // Fill cluster radius histograms
-    Float_t rpos = sqrt(r->x*r->x + r->y*r->y);
-    if (r->row <=10 ) 
+   // Fill cluster radius histograms
+   Float_t rpos = sqrt(r->x*r->x + r->y*r->y);
+   if (r->row <=10 ) 
+     {
        m_cluster_radial_West->Fill(rpos);
-    else if (r->row >=11 ) 
+       m_maxadc_West->Fill(r->max_adc);
+       m_charge_West->Fill(r->charge);	 
+       m_padvstime_West->Fill(r->n_bins,r->n_pads);
+     }
+   else if (r->row >=11 ) 
+     {
        m_cluster_radial_East->Fill(rpos);
+       m_maxadc_East->Fill(r->max_adc);
+       m_charge_East->Fill(r->charge);
+       m_padvstime_East->Fill(r->n_bins,r->n_pads);
+     }
+   
   }//end rows loop 
 }
                                    

@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.16 2002/02/10 21:14:44 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.17 2002/03/01 14:22:20 jcs Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.17  2002/03/01 14:22:20  jcs
+// add additional histograms to monitor cluster finding
+//
 // Revision 1.16  2002/02/10 21:14:44  jcs
 // create separate radial chargestep histograms for Ftpc west and east
 //
@@ -88,7 +91,7 @@ class St_ftpcElectronics;
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.16 2002/02/10 21:14:44 jcs Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.17 2002/03/01 14:22:20 jcs Exp $";
    St_ftpcClusterPars   *m_clusterpars;           //!
    St_ftpcFastSimGas    *m_fastsimgas;            //!
    St_ftpcFastSimPars   *m_fastsimpars;           //!
@@ -115,11 +118,20 @@ class StFtpcClusterMaker : public StMaker {
    TH1F            *m_flags;       //! quality control flags
    TH1F            *m_row;         //! rows
    TH1F            *m_sector;      //! sectors
-   TH1F            *m_pads;        //! pads
-   TH1F            *m_timebins;    //! timebins 
+   //TH1F            *m_pads;        //! pads
+   //TH1F            *m_timebins;    //! timebins 
    TH2F            *m_row_sector;  //! row vs. sector 
-   TH2F            *m_npad_nbin;   //! number of pads vs. number of timebins
+   //TH2F            *m_npad_nbin;   //! number of pads vs. number of timebins
    TH2F            *m_csteps;      //! charge step by (6*row)+sector
+   TH2F            *m_hitsvspad;   //! number of found hits over cluster padlength 
+   TH2F            *m_hitsvstime;  //! number of found hits over cluster timelength 
+   TH2F            *m_padvstime_West; //! padlength vs. timelength
+   TH2F            *m_padvstime_East; //! padlength vs. timelength
+   TH1F            *m_maxadc_West;
+   TH1F            *m_maxadc_East;
+   TH1F            *m_charge_West;
+   TH1F            *m_charge_East;
+
  public: 
                   StFtpcClusterMaker(const char *name="ftpc_hits");
    virtual       ~StFtpcClusterMaker();
@@ -128,7 +140,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.16 2002/02/10 21:14:44 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.17 2002/03/01 14:22:20 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker, 1)   //StAF chain virtual base class for Makers
 };
