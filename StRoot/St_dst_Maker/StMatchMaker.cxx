@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + egr )                                     //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.38 2001/07/25 16:34:32 caines Exp $
+// $Id: StMatchMaker.cxx,v 1.39 2002/02/19 16:00:27 wdeng Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.39  2002/02/19 16:00:27  wdeng
+// Number of maximum point calculation from Ian.
+//
 // Revision 1.38  2001/07/25 16:34:32  caines
 // Fix some flipped field problems
 //
@@ -144,6 +147,7 @@ using namespace units;
 #define gufld   gufld_
 extern "C" {void gufld(Float_t *, Float_t *);}
 
+#include "RdoFinder.h"
 
 class St_tcl_tpcluster;
 class St_ctu_cor;
@@ -262,7 +266,6 @@ Int_t StMatchMaker::Make(){
   Float_t x[3] = {0,0,0};
   Float_t b[3];
   gufld(x,b);
-
   
   St_dst_track     *globtrk     = new St_dst_track("globtrk",20000);  
   AddData(globtrk);
@@ -425,11 +428,17 @@ Int_t StMatchMaker::Make(){
     gMessMgr->Warning() << "Problem on return from EGR_FITTER" << endm;}
   if(Debug()) gMessMgr->Debug() << " finished calling egr_fitter" << endm;
 
+  RdoFinder* rdoFinder = RdoFinder::Instance();
+  rdoFinder->setMagneticField( b[2] );
+  
   // globtrk length calculation  
   dst_track_st *globtrkPtr1  = globtrk->GetTable();
   for( Int_t no_rows=0; no_rows<globtrk->GetNRows(); no_rows++, globtrkPtr1++)
     {
-      //Convenient place to also zero globtrk bitmap
+      int possiblePoints = rdoFinder->PossiblePoints(globtrkPtr1);
+      globtrkPtr1->n_max_point = possiblePoints;
+  
+    //Convenient place to also zero globtrk bitmap
       globtrkPtr1->map[0]= 0UL; globtrkPtr1->map[1]= 0UL;
       if( globtrkPtr1->iflag<0 ) { globtrkPtr1->length = 0; continue; }
       Float_t dip   = atan(globtrkPtr1->tanl);
