@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helixTest1.cc,v 1.3 2000/02/02 19:05:15 ullrich Exp $
+ * $Id: helixTest1.cc,v 1.4 2000/03/17 13:57:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, April 1998 
  ***************************************************************************
@@ -11,8 +11,9 @@
  ***************************************************************************
  *
  * $Log: helixTest1.cc,v $
- * Revision 1.3  2000/02/02 19:05:15  ullrich
- * Changed macros for CC5/CC4.2 compatibility
+ * Revision 1.4  2000/03/17 13:57:32  ullrich
+ * Updated. Include now also test of method which returns
+ * intersection with plane. Also made input more flexible.
  *
  * Revision 1.3  2000/02/02 19:05:15  ullrich
  * Changed macros for CC5/CC4.2 compatibility
@@ -36,9 +37,9 @@ using namespace units;
 #endif
 int main(int, char* argc[])
 {
-    double radius    = 2;
-    double dipAngle  = 10;
-    double phase     = 10;
+    double curvature = 0;
+    double dipAngle  = 0;
+    double phase     = 0;
     double x0 = 0;
     double y0 = 0;
     double z0 = 0;
@@ -48,27 +49,35 @@ int main(int, char* argc[])
     StHelix  *helix = 0;
     bool     moreHelices = true;
     bool     moreTests   = true;
+    bool     radunits    = true;
     double   r = 0.1;
     char     selection = 'v';
     double   slow = 0, sup = 0, ds = 0, ss = 0;
-    StThreeVector<double> origin, point, mmpoint;
+    StThreeVector<double> origin, point, mmpoint, rv, nv;
 
     cout << "This is test program " << argc[0] << endl << endl;
     
     while(moreHelices) {
 	moreTests = true;
 	cout << "Enter helix parameter:" << endl;
-	StPrompt("radius in meter", radius);
-	StPrompt("dipAngle in deg", dipAngle);
-	StPrompt("phase in deg", phase);
+	StPrompt("Angles in radians (else degrees)", radunits);
+	StPrompt("Enter curvature", curvature);
+	if (radunits) {
+	    StPrompt("dipAngle in rad", dipAngle);
+	    StPrompt("phase in rad", phase);
+	}
+	else {
+	    StPrompt("dipAngle in degree", dipAngle);
+	    StPrompt("phase in degree", phase);
+	}
 	StPrompt("-sign(q*B)", H);
-	StPrompt("xyz of origin in millimeter", origin);
+	StPrompt("xyz of origin", origin);
 
 	delete helix;
-	helix = new StHelix(1/(radius*meter),
-			    dipAngle*degree,
-			    phase*degree,
-			    origin*millimeter,
+	helix = new StHelix(curvature,
+			    (radunits ? dipAngle : dipAngle*degree),
+			    (radunits ? phase : phase*degree),
+			    origin,
 			    H);
 	if (!helix->valid()) {
 	    cerr << "Error: parametrization is not valid" << endl;
@@ -91,20 +100,27 @@ int main(int, char* argc[])
 		cout << "Print helix points along its path ..... v" << endl;
 		cout << "Test pathLength(r) method ............. r" << endl;
 		cout << "Test pathLength(point) method ......... p" << endl;
+		cout << "Test pathLength(plane) method ......... e" << endl;
 		cout << "Test distance(point) method ........... d" << endl;
 		StPrompt("Enter your selection", selection);
 
 		switch (selection) {
+		case 'e':
+		    StPrompt("vector r to a point in the plane", rv);
+		    StPrompt("normal vector n for plane", nv);
+		    ss = helix->pathLength(rv, nv);
+		    cout << "s = " << ss << " -> " << helix->at(ss) << endl;		    
+		    break;
 		case 'v':
-		    StPrompt("lower s in meter", slow);
-		    StPrompt("upper s in meter", sup);
-		    StPrompt("step size in meter", ds);
-		    for (ss = slow*meter; ss < sup*meter; ss+= ds*meter)
+		    StPrompt("lower s", slow);
+		    StPrompt("upper s", sup);
+		    StPrompt("step size", ds);
+		    for (ss = slow; ss < sup; ss+= ds)
 			cout << "s = " << ss << " -> " << helix->at(ss) << endl;
 		    break;
 		case 'r':
-		    StPrompt("Enter a radius in meter", r);
-		    s = helix->pathLength(r*meter);
+		    StPrompt("Enter a radius", r);
+		    s = helix->pathLength(r);
 		    cout << "The helix reaches r at s1 = " << s.first
 			 << " and s2 = " << s.second << endl;
 		    cout << "Crosscheck radius1 = " << helix->at(s.first).perp()
@@ -113,16 +129,16 @@ int main(int, char* argc[])
 			 << ", delta_r = " << r*meter-helix->at(s.second).perp() << endl;
 		    break;
 		case 'p':
-		    StPrompt("xyz of point in millimeter", point);
-		    mmpoint = point*millimeter;
+		    StPrompt("xyz of point", point);
+		    mmpoint = point;
 		    ss = helix->pathLength(mmpoint);
 		    cout << "The helix reaches r at s = " << ss << endl;
 		    cout << "Crosscheck point = " << helix->at(ss)
 			 << ", delta = " << abs(mmpoint-helix->at(ss)) << endl;
 		    break;
 		case 'd':
-		    StPrompt("xyz of point in millimeter", point);
-		    mmpoint = point*millimeter;
+		    StPrompt("xyz of point", point);
+		    mmpoint = point;
 		    cout << "The closest distance from the helix to the point is: "
 			 << helix->distance(mmpoint) << endl;
 		    break;
