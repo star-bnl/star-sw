@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.23 2004/02/11 23:25:17 caines Exp $
+ * $Id: StEstMaker.cxx,v 1.24 2004/03/18 02:05:08 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.24  2004/03/18 02:05:08  caines
+ * Maker sure tracker gest deleted before every return from make - wasnt happening if errors were found so created memory leak on the odd occasion this happend
+ *
  * Revision 1.23  2004/02/11 23:25:17  caines
  * Avoid crash for missing SVT events by quiting earlier
  *
@@ -594,8 +597,10 @@ Int_t StEstMaker::Make() {
 		   Stsvgshape,
 		   Stsvgconf,
 		   Stscsspt);
+
   if( status ==1 ) {
     Tracker->CleanUp();
+    delete Tracker;
     return kStOK;
   }
 
@@ -603,6 +608,7 @@ Int_t StEstMaker::Make() {
   status = Tracker->VertexSetup(preVertex);
   if( status ==1 ) {
     Tracker->CleanUp();
+    delete Tracker;
     return kStOk;
   }
 
@@ -610,6 +616,7 @@ Int_t StEstMaker::Make() {
   status = Tracker->TPCInit(Sttptrack,Sttphit);
   if( status ==1 ) {
     Tracker->CleanUp();
+    delete Tracker;
     return kStOk;
   }
   Tracker->BranchInit();
