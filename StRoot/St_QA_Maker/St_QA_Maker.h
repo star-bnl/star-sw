@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.34 1999/11/18 22:34:14 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.35 1999/11/18 22:48:44 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.35  1999/11/18 22:48:44  kathy
+//! remove commented out lines
+//!
 //! Revision 1.34  1999/11/18 22:34:14  kathy
 //! removed some histograms of variables that no longer exist and change some limits
 //!
@@ -150,16 +153,11 @@
 #include "TList.h"
 #include "TString.h"
 
-// tell it that we're going to use method from StHistUtil class (but
-// not using them in header file, so don't need to include StHistUtil.h
-//class StHistUtil;
-
 class St_QA_Maker : public StMaker {
  private:
   Bool_t drawinit;
-//  StHistUtil *m_PntrToHistUtil;    //! pointer to an StHistUtil
 
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.34 1999/11/18 22:34:14 kathy Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.35 1999/11/18 22:48:44 kathy Exp $";
 //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -438,7 +436,7 @@ class St_QA_Maker : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.34 1999/11/18 22:34:14 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.35 1999/11/18 22:48:44 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
     };
@@ -447,8 +445,6 @@ class St_QA_Maker : public StMaker {
     
 inline void St_QA_Maker::SetDraw(Bool_t drawFlag) 
                          { drawinit = drawFlag;}
-//inline void St_QA_Maker::SetPntrToHistUtil(StHistUtil *m1) 
-//                          {m_PntrToHistUtil = m1;}
 
 
 
