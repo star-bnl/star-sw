@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.39 1999/02/05 16:31:41 fine Exp $
+// $Id: bfc.C,v 1.40 1999/02/08 20:13:05 didenko Exp $
 // $Log: bfc.C,v $
+// Revision 1.40  1999/02/08 20:13:05  didenko
+// added St_QA_Maker
+//
 // Revision 1.39  1999/02/05 16:31:41  fine
 // StarGeom.C macro has been improved
 //
@@ -82,37 +85,30 @@ void Load(){
     gSystem->Load("libEG");
     gSystem->Load("St_evg_Maker");
     gSystem->Load("geometry");
-    gSystem->Load("g2r");
     gSystem->Load("St_g2r");
     gSystem->Load("St_geant_Maker");
     gSystem->Load("St_TLA_Maker");
-    gSystem->Load("tpc");
     gSystem->Load("St_tpc");
     gSystem->Load("St_tss_Maker");
     gSystem->Load("St_tcl_Maker");
     gSystem->Load("St_tpt_Maker");
-    gSystem->Load("ftpc");
     gSystem->Load("St_ftpc");
     gSystem->Load("St_fss_Maker");
     gSystem->Load("St_fcl_Maker");
     gSystem->Load("St_fpt_Maker");
-    gSystem->Load("emc");
     gSystem->Load("St_emc");
     gSystem->Load("St_ems_Maker");
     gSystem->Load("St_emc_Maker");
-    gSystem->Load("ctf");
     gSystem->Load("St_ctf");
     gSystem->Load("St_ctf_Maker");
-    gSystem->Load("svt");
     gSystem->Load("St_svt");
     gSystem->Load("St_srs_Maker");
     gSystem->Load("St_stk_Maker");
-    gSystem->Load("strange");
     gSystem->Load("St_strange");
-    gSystem->Load("global");
     gSystem->Load("St_global");
     gSystem->Load("St_dst_Maker");
     gSystem->Load("St_run_summary_Maker");
+     gSystem->Load("St_QA_Maker");
 }
 
 /*------------------------------------- Begin_Html <font color="#800000" size="-1">
@@ -196,8 +192,8 @@ files require a maker to read in the data file.
   St_dst_Maker        *dst_Maker = new St_dst_Maker("dst","dst");
   //  St_dst_Maker        *dst_Maker = new St_dst_Maker("dst","event/data/global/dst");
   //  dst_Maker->Save();
-  //  St_run_summary_Maker  *summary = new St_run_summary_Maker("run_summary","run/dst");
-  
+  St_run_summary_Maker  *summary = new St_run_summary_Maker("run_summary","run/dst");
+  St_QA_Maker        *qa         = new St_QA_Maker;  
   // Create HTML docs of all Maker's involved
   //   chain->MakeDoc();
 
