@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.38 2002/01/14 23:42:57 posk Exp $
+// $Id: plot.C,v 1.39 2002/02/13 22:31:50 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -19,15 +19,16 @@
 
 #include <math.h> 
 //const Int_t nHars    = 6;
-const  Int_t nHars    = 3;
-const  Int_t nSels    = 2;
-const  Int_t nSubs    = 2;
-Int_t  runNumber      = 0;
-char   runName[6];
-char   fileNumber[4]  = "x";
-char   fileName[30];
-TFile* histFile;
-char   tmp[10];
+const    Int_t nHars    = 3;
+const    Int_t nSels    = 2;
+const    Int_t nSubs    = 2;
+Int_t    runNumber      = 0;
+char     runName[6];
+char     fileNumber[4]  = "x";
+char     fileName[30];
+TFile*   histFile;
+char     tmp[10];
+TCanvas* can;
 
 TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
@@ -178,11 +179,11 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   while (pageNumber <= 1 || pageNumber > nNames) {
     if (pageNumber < 0) {                                 // plot all
       plotAll(nNames, selN, harN, -pageNumber);
-      return c;
+      return can;
     }
     if (pageNumber == 1) {                                // plot resolution
-      TCanvas* c = plotResolution();
-      return c;
+      can = plotResolution();
+      return can;
     }
     cout << "-1: \t All" << endl;                         // print menu
     for (int i = 0; i < nNames; i++) {
@@ -219,9 +220,9 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   } else {
     int canvasWidth = 780, canvasHeight = 600;             // landscape
   }
-  TCanvas* c = new TCanvas(shortName[pageNumber], shortName[pageNumber],
+  can = new TCanvas(shortName[pageNumber], shortName[pageNumber],
 			   canvasWidth, canvasHeight);
-  c->ToggleEventStatus();
+  can->ToggleEventStatus();
   if (multiGraph) {
     TPaveLabel* title = new TPaveLabel(0.1,0.96,0.9,0.99,shortName[pageNumber]);
     title->Draw();
@@ -298,13 +299,13 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  TH3* hist3D = dynamic_cast<TH3*>(histFile->Get(histName->Data()));
 	  if (!hist3D) {
 	    cout << "### Can't find histogram " << histName->Data() << endl;
-	    return c;
+	    return can;
 	  }
 	} else {                                      // 1D projection
 	  TH2* hist2D = dynamic_cast<TH2*>(histFile->Get(histName->Data()));
 	  if (!hist2D) {
 	    cout << "### Can't find histogram " << histName->Data() << endl;
-	    return c;
+	    return can;
 	  }
 	}
       } else {
@@ -313,20 +314,20 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  TH3* hist3D = dynamic_cast<TH3*>(histFile->Get(histName->Data()));
 	  if (!hist3D) {
 	    cout << "### Can't find histogram " << histName->Data() << endl;
-	    return c;
+	    return can;
 	  }
 	} else if (strstr(shortName[pageNumber],"2D")!=0) { // 2D
 	  twoD = kTRUE;
 	  TH2* hist2D = dynamic_cast<TH2*>(histFile->Get(histName->Data()));
 	  if (!hist2D) {
 	    cout << "### Can't find histogram " << histName->Data() << endl;
-	    return c;
+	    return can;
 	  }
 	} else {                                            // 1D
 	  TH1* hist = dynamic_cast<TH1*>(histFile->Get(histName->Data()));
 	  if (!hist) {
 	    cout << "### Can't find histogram " << histName->Data() << endl;
-	    return c;
+	    return can;
 	  }
 	  float max = hist->GetXaxis()->GetXmax();
 	}
@@ -451,7 +452,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	TH1* histMult = dynamic_cast<TH1*>(histFile->Get(histName->Data()));
 	if (!histMult) {
 	  cout << "### Can't find histogram " << histName->Data() << endl;
-	  return c;
+	  return can;
 	}
 	delete histName;
 	float mult = histMult->GetMean();
@@ -540,7 +541,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   }
   delete [] shortName;
 
-  return c;
+  return can;
 }
 
 // macro for the resolution plot
@@ -551,8 +552,8 @@ TCanvas* plotResolution(){
   int pads = rows*columns;
 
   // make the graph page
-  TCanvas* c = new TCanvas(resName[1], resName[1], 600, 780);
-  c->ToggleEventStatus();
+  can = new TCanvas(resName[1], resName[1], 600, 780);
+  can->ToggleEventStatus();
   TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runName);  
   run->Draw();
   TDatime now;
@@ -579,7 +580,7 @@ TCanvas* plotResolution(){
       TH1* hist = dynamic_cast<TH1*>(histFile->Get(histName->Data()));
       if (!hist) {
 	cout << "### Can't find histogram " << histName->Data() << endl;
-	return c;
+	return can;
       }
       graphPad->cd(padN);
       gStyle->SetOptStat(0);
@@ -597,18 +598,18 @@ TCanvas* plotResolution(){
     }
   }
 
-  return c;
+  return can;
 } 
 
 void plotAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
   for (int i =  first; i < nNames + 1; i++) {
-    TCanvas* c = plot(i, selN, harN);
-    c->Update();
+    can = plot(i, selN, harN);
+    can->Update();
     cout << "save? y/[n], quit? q" << endl;
     fgets(tmp, sizeof(tmp), stdin);
-    if (strstr(tmp,"y")!=0) c->Print(".ps");
+    if (strstr(tmp,"y")!=0) can->Print(".ps");
     else if (strstr(tmp,"q")!=0) return;
-    c->Delete();
+    //can->Delete();
   }
   cout << "  plotAll Done" << endl;
 }
@@ -630,6 +631,9 @@ static Double_t qDist(double* q, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.39  2002/02/13 22:31:50  posk
+// Pt Weight now also weights Phi Weight. Added Eta Weught, default=FALSE.
+//
 // Revision 1.38  2002/01/14 23:42:57  posk
 // Renamed ScalerProd histograms. Moved print commands to FlowMaker::Finish().
 //

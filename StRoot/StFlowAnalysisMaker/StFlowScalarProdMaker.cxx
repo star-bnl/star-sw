@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowScalarProdMaker.cxx,v 1.4 2002/01/31 01:09:30 posk Exp $
+// $Id: StFlowScalarProdMaker.cxx,v 1.5 2002/02/13 22:31:46 posk Exp $
 //
 // Authors: Method proposed by Art and Sergei, code written by Aihong
 //          Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -19,7 +19,6 @@
 #include "StFlowMaker/StFlowEvent.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "StFlowMaker/StFlowSelection.h"
-//#include "StFlowMaker/StFlowCutTrack.h"
 #include "StEnumerations.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -28,11 +27,8 @@
 #include "TString.h"
 #include "TH1.h"
 #include "TH2.h"
-//#include "TH3.h"
 #include "TProfile.h"
 #include "TProfile2D.h"
-//#include "TF1.h"
-//#include "TOrdCollection.h"
 #include "StMessMgr.h"
 #include "TMath.h"
 #define PR(x) cout << "##### FlowScalarProdAnalysis: " << (#x) << " = " << (x) << endl;
@@ -163,7 +159,7 @@ Int_t StFlowScalarProdMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowScalerProdAnalysis", 2);
-  gMessMgr->Info("##### FlowScalerProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.4 2002/01/31 01:09:30 posk Exp $");
+  gMessMgr->Info("##### FlowScalerProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.5 2002/02/13 22:31:46 posk Exp $");
 
   return StMaker::Init();
 }
@@ -389,6 +385,9 @@ Int_t StFlowScalarProdMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowScalarProdMaker.cxx,v $
+// Revision 1.5  2002/02/13 22:31:46  posk
+// Pt Weight now also weights Phi Weight. Added Eta Weught, default=FALSE.
+//
 // Revision 1.4  2002/01/31 01:09:30  posk
 // *** empty log message ***
 //
