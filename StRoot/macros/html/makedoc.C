@@ -40,8 +40,8 @@
      gSystem->Load("St_tpc");
      gSystem->Load("svt.sl");
      gSystem->Load("St_svt");
-     gSystem->Load("global.sl");
-     gSystem->Load("St_global");
+//     gSystem->Load("global.sl");
+//     gSystem->Load("St_global");
      gSystem->Load("ftpc.sl");
      gSystem->Load("St_ftpc");
      gSystem->Load("StChain");
@@ -68,7 +68,7 @@
   STAR += "/star/packages/dev";
   TString sourcedir;
   sourcedir = STAR;
-  sourcedir += "/StRoot/base";
+  sourcedir += "/StRoot/St_base";
   if (!NT) { 
     sourcedir += ":";
     sourcedir += STAR;
@@ -92,7 +92,7 @@
     lookup += STAR;
     lookup += "/.share/tables:";
     lookup += STAR;
-    lookup += "/StRoot/base";
+    lookup += "/StRoot/St_base";
   }
 
     
@@ -151,6 +151,8 @@
 
   // Make HTML docs for the "plain" text files those are not in the dictionaries
   cout << " Makeing HTML's for macros" << endl;
+  html.Convert("./GetEvent.C","An example of the reading MDC2 dst events");
+  html.Convert("./QA_Hist_Draw.C","An example of the plotting postscript file of the MDC2 histograms");
   html.Convert("./StarGeom.C","An example of the ROOT/STAR/GEANT interface");
   html.Convert("./TestSorter.C","An example of the STAF table sort utility");
   html.Convert("./XDFBrowser.C","XDF file interactive ROOT browser");
@@ -184,6 +186,6 @@
   html.Convert("./tst.kumac","An example of  Iwona's old tst.kumac of the analysis of laser events");
   html.Convert("./tpctest.C","ROOT based TPC test analysis");
 
- // html.MakeClass("EModuleTypes");
- // html.MakeIndex();
+ html.MakeClass("EModuleTypes");
+ html.MakeIndex();
 }
