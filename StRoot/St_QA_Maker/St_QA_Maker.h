@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.30 1999/09/20 20:12:19 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.31 1999/09/21 15:05:38 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.31  1999/09/21 15:05:38  kathy
+//! comment out unneccessary method: SetPntrToHistUtil because now I'm making it totally independent of the histograms printing at the end - also put in doc directory and html file - basically empty now
+//!
 //! Revision 1.30  1999/09/20 20:12:19  kathy
 //! moved the histogram utility methods out of St_QA_Maker and into StHistUtil because they can really be used by any Maker and associated histograms
 //!
@@ -140,14 +143,14 @@
 
 // tell it that we're going to use method from StHistUtil class (but
 // not using them in header file, so don't need to include StHistUtil.h
-class StHistUtil;
+//class StHistUtil;
 
 class St_QA_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  StHistUtil *m_PntrToHistUtil;    //! pointer to an StHistUtil
+//  StHistUtil *m_PntrToHistUtil;    //! pointer to an StHistUtil
 
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.30 1999/09/20 20:12:19 kathy Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.31 1999/09/21 15:05:38 kathy Exp $";
 //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -393,11 +396,11 @@ class St_QA_Maker : public StMaker {
   virtual void   BookHistVertex();
   virtual void   BookHistXi();
   virtual void   SetDraw(Bool_t drawFlag=kTRUE);
-  virtual void   SetPntrToHistUtil(StHistUtil *m1);
+//  virtual void   SetPntrToHistUtil(StHistUtil *m1);
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.30 1999/09/20 20:12:19 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.31 1999/09/21 15:05:38 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
     };
@@ -406,8 +409,8 @@ class St_QA_Maker : public StMaker {
     
 inline void St_QA_Maker::SetDraw(Bool_t drawFlag) 
                          { drawinit = drawFlag;}
-inline void St_QA_Maker::SetPntrToHistUtil(StHistUtil *m1) 
-                          {m_PntrToHistUtil = m1;}
+//inline void St_QA_Maker::SetPntrToHistUtil(StHistUtil *m1) 
+//                          {m_PntrToHistUtil = m1;}
 
 
 

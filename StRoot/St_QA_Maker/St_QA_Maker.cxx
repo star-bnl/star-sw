@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.50 1999/09/20 20:22:19 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.51 1999/09/21 15:05:36 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.51  1999/09/21 15:05:36  kathy
+// comment out unneccessary method: SetPntrToHistUtil because now I'm making it totally independent of the histograms printing at the end - also put in doc directory and html file - basically empty now
+//
 // Revision 1.50  1999/09/20 20:22:19  kathy
 // oops - one more fix to make sure that QA_Maker doesn't depend on StHistUtil
 //
@@ -417,23 +420,26 @@ ClassImp(St_QA_Maker)
 //_____________________________________________________________________________
 
 St_QA_Maker::~St_QA_Maker(){
+
 // St_QA_Maker - destructor
 //  SafeDelete(m_QACanvas);
 //  if (m_ListOfLog) {
 //  m_ListOfLog->Delete();
 //  SafeDelete(m_ListOfLog);
-  //}
+//}
+
 }
 
 
 //_____________________________________________________________________________
 
 Int_t St_QA_Maker::Finish() {
+
 // St_QA_Maker - Finish, Draw histograms if SetDraw true
 //  Use DrawHists method from StHistUtil
 //    - must have pointer to StHistUtil from using SetHistUtil member function
-  //  if (drawinit)  
-  //  m_PntrToHistUtil->DrawHists();
+//  if (drawinit)  
+//  m_PntrToHistUtil->DrawHists();
 
   return StMaker::Finish();
 }
@@ -453,9 +459,8 @@ Int_t St_QA_Maker::Init(){
   BookHistVertex();
   BookHistXi();
 
-
 //  Set default values for all methods:
-  SetDraw(kFALSE);
+//  SetDraw(kFALSE);
 
   //  m_PntrToHistUtil->SetHistsNamesDraw();
   //m_PntrToHistUtil->SetZones();
