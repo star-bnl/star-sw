@@ -114,7 +114,10 @@ STAFCV_T dioStream:: close () {
    myState = DIO_UNKNOWN_STATE;
 
 /*- Destroy xdr. -*/
-   /* hjw 03oct97 always true: if( &myXDR != NULL ) */  XDR_DESTROY(&myXDR);
+   if( saveState != DIO_UNKNOWN_STATE ) { // hjw June 17 1998.  I did this
+     XDR_DESTROY(&myXDR);     // to prevent crash due to un-initialized
+                              // myXDR when client socketStream is refused
+   }                          // by server.
 
    if( DIO_OPEN_STATE == saveState ){
       saveState = DIO_CLOSE_STATE;

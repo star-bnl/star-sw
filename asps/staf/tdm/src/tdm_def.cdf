@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_and_Dataset_Memory commands.
 .
- #(@)$Id: tdm_def.cdf,v 1.12 1998/06/09 22:54:21 ward Exp $
+ #(@)$Id: tdm_def.cdf,v 1.13 1998/06/18 19:32:50 ward Exp $
  Edited by Bill Love on 23-24 Feb 1998
 .
 TDM is an Analysis Service Package (ASP) for the Standard Analysis
@@ -1003,6 +1003,7 @@ for IFIRST.
 The COLUMNLIST parameter is used
 to select a subset of the columns.  In the COLUMNLIST parameter, separate the 
 column names with carets (^).  See the example below.
+Instead of a list of columns, you can type allColumns.
 .
 EXAMPLE: 
 This example writes columns id, offset, and pedestal of

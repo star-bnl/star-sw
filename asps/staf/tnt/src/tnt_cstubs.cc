@@ -67,9 +67,8 @@ tnt_newcwntuple(long hid, char* tname)
 {
   tdmTable* table = tdm->findTable(tname);
 
-  if (table == NULL || !tnt->createCWNtuple(hid,table)) {
-    EML_FAILURE(FAILURE);
-  }
+  if (table == NULL ) EML_FAILURE(FAILURE);
+  if( !tnt->createCWNtuple(hid,table)) EML_FAILURE(FAILURE);
   EML_SUCCESS(STAFCV_OK);
 }
  
