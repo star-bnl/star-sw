@@ -16,44 +16,24 @@ using namespace std;
 #include "Sti/Base/Parameter.h"
 #include "Sti/Base/EditableParameter.h"
 #include "Sti/Base/EditableFilter.h"
-#include "StiHitLoader.h"
 #include "StiToolkit.h"
-#include "StiKTNIterator.h"
 #include "StiHit.h"
 #include "StiDetector.h"
-#include "StiPlacement.h"
-#include "StiShape.h"
-#include "StiPlanarShape.h"
 #include "StiDetectorContainer.h"
 #include "StiTrackContainer.h"
 #include "StiTrack.h"
 #include "StiTrackFinder.h"
-#include "StiKalmanTrack.h"
 #include "StiTrackSeedFinder.h"
-#include "StiEvaluableTrackSeedFinder.h"
-#include "StiCompositeSeedFinder.h"
 #include "StiTrack.h"
-#include "StiMcTrack.h"
-#include "StiGui/StiRootDrawableMcTrack.h"
 #include "StiKalmanTrackFinder.h"
 #include "StiTrackContainer.h"
-#include "StiDrawableTrack.h"
-#include "StEvent.h"
-#include "StPrimaryVertex.h"
-#include "StMcEvent.hh"
-#include "StMcTrack.hh"
-#include "StMcContainers.hh"
-#include "StiMaker/StiStEventFiller.h"
 #include "StiKalmanTrack.h"
 #include "StiKalmanTrackNode.h"
-#include "StThreeVector.hh"
-#include "StThreeVectorF.hh"
-#include "StThreeVectorD.hh"
 #include "StiVertexFinder.h"
 #include "StiDefaultTrackFilter.h"
-#include "StiMasterDetectorBuilder.h"
 
 ostream& operator<<(ostream&, const StiTrack&);
+
 void StiKalmanTrackFinder::initialize()
 {
   cout << "StiKalmanTrackFinder::initialize() -I- Started"<<endl;
@@ -65,7 +45,6 @@ void StiKalmanTrackFinder::initialize()
   _detectorContainer = _toolkit->getDetectorContainer(); 
   _detectorContainer->reset();
   _trackSeedFinder   = _toolkit->getTrackSeedFinder();
-  _hitLoader         = _toolkit->getHitLoader();
   _hitContainer      = _toolkit->getHitContainer();
   _trackContainer    = _toolkit->getTrackContainer();
   _mcTrackContainer  = _toolkit->getMcTrackContainer();
@@ -78,6 +57,7 @@ void StiKalmanTrackFinder::initialize()
   trackFilter->add( new EditableParameter("nPtsMax", "Maximum nPts", 60., 60., 0., 100.,1., 
 					  Parameter::Integer,StiTrack::kPointCount) );
   _trackFilter = trackFilter;
+
   _toolkit->setFinderTrackFilter(trackFilter);
   cout << "StiKalmanTrackFinder::initialize() -I- Done"<<endl;
 }
@@ -85,15 +65,12 @@ void StiKalmanTrackFinder::initialize()
 StiKalmanTrackFinder::StiKalmanTrackFinder(StiToolkit*toolkit)
   : _toolkit(toolkit),
     _trackFilter(0), 
-    _guiTrackFilter(0), 
-    _guiMcTrackFilter(0), 
     _trackSeedFinder(0),
     _trackNodeFactory(0),
     _trackFactory(0),
     _mcTrackFactory(0),
     _hitFactory(0),
     _detectorContainer(0),
-    _hitLoader(0),
     _hitContainer(0),
     _trackContainer(0),
     _mcTrackContainer(0),
@@ -105,6 +82,7 @@ StiKalmanTrackFinder::StiKalmanTrackFinder(StiToolkit*toolkit)
   cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Started"<<endl;
   StiKalmanTrack::setParameters(&_pars);
   StiKalmanTrackNode::setParameters(&_pars);
+  _pars.setName("KalmanTrackFinderParameters");
   if (!_toolkit)
     throw runtime_error("StiKalmanTrackFinder::StiKalmanTrackFinder(...) - FATAL - toolkit==0");
   cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
@@ -344,42 +322,42 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
       scanningDone = false;
       // loop over possible volumes
       while (!scanningDone)
-				{
-					testNode.reset();
-					testNode.setChi2(1e50);
-					position = testNode.propagate(sNode,tDet);
-					if (position<0)
-						{ // not reaching this detector layer - stop track
-							if(debug)cout << "TRACK DOES NOT REACH CURRENT LAYER"<<endl;
-							trackDone = true; break;
-						}
-					else if (position<=kEdgeZplus) 
-						{ 
-							testNode.setDetector(tDet);
-							bool active = tDet->isActive();
-							if (active&&(testNode.nullCount<_pars.maxNullCount&&testNode.contiguousNullCount<_pars.maxContiguousNullCount)) 
-								{ // active detector may have a hit
-									_hitContainer->setRefPoint(testNode);
-									while (_hitContainer->hasMore()) 
-										{  
-											stiHit = _hitContainer->getHit();if (!stiHit) throw logic_error("StiKalmanTrackFinder::doNextDetector() - FATAL - StiHit*hit==0");
-											chi2 = testNode.evaluateChi2(stiHit);
-											//if (chi2<_pars.maxChi2ForSelection && chi2<testNode.getChi2())
-											if (chi2<maxChi2 && chi2<testNode.getChi2())
-												{
-													testNode.setHit(stiHit); testNode.setChi2(chi2);
-												}
-										} 
-								}
-							StiKalmanTrackNode * node = _trackNodeFactory->getInstance();if (node==0) throw logic_error("SKTF::find() - ERROR - node==null");
-							node->reset();
-							*node = testNode;
-							sNode = track->add(node);
-							if (node->getHit())
-								{
-									nAdded++;
-									node->hitCount = sNode->hitCount+1;
-									node->contiguousHitCount = sNode->contiguousHitCount+1; 
+	{
+	  testNode.reset();
+	  testNode.setChi2(1e50);
+	  position = testNode.propagate(sNode,tDet);
+	  if (position<0)
+	    { // not reaching this detector layer - stop track
+	      if(debug)cout << "TRACK DOES NOT REACH CURRENT LAYER"<<endl;
+	      trackDone = true; break;
+	    }
+	  else if (position<=kEdgeZplus) 
+	    { 
+	      testNode.setDetector(tDet);
+	      bool active = tDet->isActive();
+	      if (active&&(testNode.nullCount<_pars.maxNullCount&&testNode.contiguousNullCount<_pars.maxContiguousNullCount)) 
+		{ // active detector may have a hit
+		  _hitContainer->setRefPoint(testNode);
+		  while (_hitContainer->hasMore()) 
+		    {  
+		      stiHit = _hitContainer->getHit();if (!stiHit) throw logic_error("StiKalmanTrackFinder::doNextDetector() - FATAL - StiHit*hit==0");
+		      chi2 = testNode.evaluateChi2(stiHit);
+		      //if (chi2<_pars.maxChi2ForSelection && chi2<testNode.getChi2())
+		      if (chi2<maxChi2 && chi2<testNode.getChi2())
+			{
+			  testNode.setHit(stiHit); testNode.setChi2(chi2);
+			}
+		    } 
+		}
+	      StiKalmanTrackNode * node = _trackNodeFactory->getInstance();if (node==0) throw logic_error("SKTF::find() - ERROR - node==null");
+	      node->reset();
+	      *node = testNode;
+	      sNode = track->add(node);
+	      if (node->getHit())
+		{
+		  nAdded++;
+		  node->hitCount = sNode->hitCount+1;
+		  node->contiguousHitCount = sNode->contiguousHitCount+1; 
 		  if (node->contiguousHitCount>_pars.minContiguousHitCountForNullReset)
 		    node->contiguousNullCount = 0;
 		  else
@@ -425,54 +403,13 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
   return nAdded>0;
 }
 
-/*! Get the number of tracks found by this finder for the current event.
-  <p>
-  This convenience method returns the number of tracks found by this finder
-  for the current. The number of tracks is simply determined based on the size
-  of the track container used by this finder. All tracks inserted in the container
-  are counted, no quality cut is used. 
-*/
-int StiKalmanTrackFinder::getTrackFoundCount() const
-{
-  return _trackContainer->size();
-}
-
-/*! Get the number of tracks satisfying the given track filter.
-  <p>
-  This convenience method returns the number of tracks found by this finder
-  for the current that satisfy the give track filter. 
-*/
-int StiKalmanTrackFinder::getTrackFoundCount(Filter<StiTrack> * filter) const
-{
-  // reset filter counter to zero.
-  filter->reset();
-  // loop over all tracks and filter
-  TrackToTrackMap::const_iterator it;
-  for (it=_trackContainer->begin(); 
-       it!=_trackContainer->end(); 
-       ++it) 
-    filter->filter((*it).second);
-  return filter->getAcceptedCount();
-}
-
-/*! Get the number of track seeds found by the seed finder used by this finder for the current event.
-  <p>
-  This convenience method returns the number of track seeds found by the 
-  seed finder used by this finder for the current. 
-  Note:needs to be fixed.
-*/
-int StiKalmanTrackFinder::getTrackSeedFoundCount() const
-{
-  return _trackContainer->size();
-}
 
 void StiKalmanTrackFinder::findNextTrack()
 {
   try 
     {
       track = 0;
-      if (!_trackSeedFinder)
-				throw runtime_error("No Track seed finder instance available");
+      if (!_trackSeedFinder) throw runtime_error("No Track seed finder instance available");
       if (_trackSeedFinder->hasMore()) 
 	{ 
 	  track = 0;
@@ -480,13 +417,7 @@ void StiKalmanTrackFinder::findNextTrack()
 	  //Redundant check, but it protectes against naive calls
 	  if (!track) throw runtime_error("TrackSeedFinder->next() returned 0");
 	  track->find();
-	  StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track); if(t){}
-	  if (_trackFilter)
-	    {
-	      if (_trackFilter->filter(track)) 
-		_trackContainer->push_back(track);
-	    }
-	  else 
+	  if (!_trackFilter || _trackFilter->filter(track) ) 
 	    _trackContainer->push_back(track);
 	} 
       else 
@@ -495,8 +426,6 @@ void StiKalmanTrackFinder::findNextTrack()
   catch (runtime_error & rte) 
     {
       cout << "StiKalmanTrackFinder::findNextTrack() - Run Time Error :\n" << rte.what() << endl;
-      //StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
-      //if (t) t->update();
     }
 }
 
@@ -518,9 +447,6 @@ void StiKalmanTrackFinder::fitNextTrack()
 	    }
 	  else
 	    _trackContainer->push_back(track);
-	  StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
-	  t->update();
-	  //cout << "track parameters:" << cout << *track<<endl;
 	}
       else 
 	cout <<"\ttrackSeedFinder->hasMore()==false"<<endl;
@@ -531,10 +457,6 @@ void StiKalmanTrackFinder::fitNextTrack()
     }
 }
 
-void StiKalmanTrackFinder::findNextTrackSegment()
-{
-  // depracated
-}
 
 void StiKalmanTrackFinder::setParameters(const StiKalmanTrackFinderParameters & par)
 {
@@ -556,5 +478,28 @@ StiVertexFinder * StiKalmanTrackFinder::getVertexFinder()
 void StiKalmanTrackFinder::setVertexFinder(StiVertexFinder *vertexFinder)
 {
   _vertexFinder = vertexFinder;
+}
+
+
+void StiKalmanTrackFinder::loadDS(TDataSet&ds)
+{
+  cout << "StiKalmanTrackFinder::loadDS(TDataSet*ds) -I- Starting" << endl;
+  _pars.loadDS(ds); 
+  cout << "StiKalmanTrackFinder::loadDS(TDataSet*ds) -I- Done" << endl;
+}
+
+void StiKalmanTrackFinder::loadFS(ifstream & iFile)
+{
+  cout << "StiKalmanTrackFinder::loadFS(ifstream&) -I- Starting" << endl;
+  _pars.loadFS(iFile); 
+  cout << "StiKalmanTrackFinder::loadFS(ifstream&) -I- Done" << endl;
+}
+
+
+void StiKalmanTrackFinder::setDefaults()
+{
+  cout << "StiKalmanTrackFinder::setDefaults() -I- Starting" << endl;
+  _pars.setDefaults(); 
+  cout << "StiKalmanTrackFinder::setDefaults() -I- Done" << endl;
 }
 
