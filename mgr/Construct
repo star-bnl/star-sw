@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.135 2003/09/17 17:50:27 jeromel Exp $
+# $Id: Construct,v 1.136 2003/09/27 18:58:47 jeromel Exp $
 use Env;
 use lib $ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -125,15 +125,26 @@ if ( $STAR_HOST_SYS !~ /^intel_wnt/ ) {
     if ( -e "$CERN/$CERN_LEVEL/bin/cernlib_noshift"      &&
 	 -e "$CERN/$CERN_LEVEL/lib/libpacklib_noshift.a" &&
 	 -e "$CERN/$CERN_LEVEL/lib/libkernlib_noshift.a" ){
-	$cernl = "cernlib_noshift";
+	$cernl = "$CERN/$CERN_LEVEL/bin/cernlib_noshift";
 	$packl = "packlib_noshift";
 	$kernl = "kernlib_noshift";
     } else {
+	if ( ! -e "$CERN/$CERN_LEVEL/bin/cernlib"){
+	    print 
+		"\n",
+		" ** WARNING  ** Could not find $CERN/$CERN_LEVEL/bin/cernlib\n",
+		"                Will attempt to proceed and assume it is in\n",
+		"                your path ...\n",
+		"\n";
+	    $cernl = "cernlib";
+	} else {
+	    $cernl = "$CERN/$CERN_LEVEL/bin/cernlib";
+	}
 	print "WARNING :: Using default packlib (with possibly shift)\n";
-	$cernl = "cernlib";
 	$packl = "packlib";
 	$kernl = "kernlib";
     }
+
     $CERNLIBS .= " "
 	. `$cernl geant321 pawlib packlib graflib/X11 packlib mathlib kernlib`;
 
@@ -141,7 +152,7 @@ if ( $STAR_HOST_SYS !~ /^intel_wnt/ ) {
     $CERNLIBS =~ s/kernlib\./$kernl\./g;
 
     chop($CERNLIBS);
-    $Libraries = $CERNLIBS . " ";
+    $Libraries  = $CERNLIBS . " ";
     $Libraries .= " " . $FLIBS . " " . $CLIBS . " ";
     chop($Libraries);
 }
