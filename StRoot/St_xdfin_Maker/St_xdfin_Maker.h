@@ -16,8 +16,9 @@
 class St_xdfin_Maker : public StIOInterFace {
  private:
   St_XDFFile fXdfin;
-  int m_InitDone;
+  Int_t m_InitDone;
   StEvtHddr *fEvtHddr;//! pointer to Event Header
+
  public:
   St_xdfin_Maker(const char *name="xdfin",const char *inputFile=0);
   virtual       ~St_xdfin_Maker();
