@@ -197,20 +197,16 @@ void MiniChain::setupOutput(const char * filePrefix,
   TString outFilePrefix = "MiniChain_";
   TString stEventFileSuffix = "event.root";
   TString MuDstSuffix = "MuDst.root";
-  TString miniMcSuffix = "stiminimc.root";
 
   //Now clip prefix and 'event.root' from filename
   TString templateFile = fileTemplate;
   int fileBeginIndex = templateFile.Index(filePrefix,0);
   templateFile.Remove(0,fileBeginIndex);
-  int fileEndIndex = templateFile.Index(stEventFileSuffix,0);
-  templateFile.Remove(fileEndIndex, templateFile.Length());
 
   if (_pars->doStEventOutput) 
     {
       TString stEventFileName = outFilePrefix;
       stEventFileName.Append(templateFile);
-      stEventFileName.Append(stEventFileSuffix);
       
       cout << "    Events written out to " <<stEventFileName << endl;
       StTreeMaker * outMaker = new StTreeMaker("EvOut","","bfcTree");
@@ -223,12 +219,6 @@ void MiniChain::setupOutput(const char * filePrefix,
 
   if (_pars->doMiniMcEvent)
     {
-      TString miniMcFileName = outFilePrefix;
-      miniMcFileName.Append(templateFile);
-      miniMcFileName.Append(miniMcSuffix);
-      cout << "    MiniMcEvent will be called."<<endl
-	   << "    MiniMcEvent output to file : " << miniMcFileName << endl;
-
       StAssociationMaker  * assocMakerIt = new StAssociationMaker();
       assocMakerIt->useInTracker();
       assocMakerIt->SetDebug();
@@ -236,7 +226,8 @@ void MiniChain::setupOutput(const char * filePrefix,
       StMiniMcMaker * minimcMaker = new StMiniMcMaker;
       minimcMaker->setDebug();
       minimcMaker->setOutDir("./");
-      minimcMaker->setFileName(miniMcFileName);
+      TString miniMcFile = templateFile;
+      minimcMaker->setFileName(miniMcFile);
     }
   else
     {
