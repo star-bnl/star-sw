@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.6 1999/07/13 00:42:32 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.7 1999/07/17 00:48:46 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.7  1999/07/17 00:48:46  kathy
+// change check on dst_TrgDet to test on TrgDet table
+//
 // Revision 1.6  1999/07/13 00:42:32  kathy
 // updated all default input files, removed unneccessary macros, renamed other to make more standard
 //
@@ -39,7 +42,7 @@ class St_DataSet;
 St_DataSet *Event;
 
 void QA_bfcread_dst_tables(const char 
-*MainFile="/afs/rhic/star/data/test/dev/tfs_Solaris/Thu/year_2a/psc0208_01_40evts.dst.root",
+*MainFile="/afs/rhic/star/data/test/dev/tfs_Solaris/Fri/year_2a/psc0208_01_40evts.dst.root",
 const char *fname="qa_tables.txt")
 
 {
@@ -116,7 +119,7 @@ const char *fname="qa_tables.txt")
    Int_t cnt_dst_xi_vertex=0;
    Int_t cnt_dst_dedx=0;
    Int_t cnt_particle=0;
-   Int_t cnt_dst_TrgDet=0;
+   Int_t cnt_TrgDet=0;
    Int_t cnt_monitor_soft=0;
    Int_t cnt_g2t_rch_hit=0;
 
@@ -185,8 +188,8 @@ const char *fname="qa_tables.txt")
                cnt_dst_dedx++;
             if (strcmp(obj->GetName(),"particle")==0) 
                cnt_particle++;
-            if (strcmp(obj->GetName(),"dst_TrgDet")==0) 
-               cnt_dst_TrgDet++;
+            if (strcmp(obj->GetName(),"TrgDet")==0) 
+               cnt_TrgDet++;
             if (strcmp(obj->GetName(),"monitor_soft")==0) 
                cnt_monitor_soft++;
             if (strcmp(obj->GetName(),"g2t_rch_hit")==0) 
@@ -268,9 +271,9 @@ const char *fname="qa_tables.txt")
         fout << endl << "QA-> Missing Table: " << "particle" << endl;
         tabmiss++;
       } 
-      if (cnt_dst_TrgDet == 0){
-        cout << endl << "QA-> Missing Table: " << "dst_TrgDet" << endl;
-        fout << endl << "QA-> Missing Table: " << "dst_TrgDet" << endl;
+      if (cnt_TrgDet == 0){
+        cout << endl << "QA-> Missing Table: " << "TrgDet" << endl;
+        fout << endl << "QA-> Missing Table: " << "TrgDet" << endl;
         tabmiss++;
       } 
       if (cnt_monitor_soft == 0){
