@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.6 2005/03/18 14:04:06 lmartin Exp $
+// $Id: StSsdBarrel.cc,v 1.7 2005/03/18 14:57:49 lmartin Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.7  2005/03/18 14:57:49  lmartin
+// readNoiseFromTable methods modified to transmit the pedestal
+//
 // Revision 1.6  2005/03/18 14:04:06  lmartin
 // missing CVS header added
 //
@@ -204,7 +207,7 @@ int  StSsdBarrel::readNoiseFromTable(St_sdm_calib_db *spa_noise, StSsdDynamicCon
       iWaf    = (int)((idWaf - mSsdLayer*1000)/100 - 1);
       iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
       iSide   = (noise[i].id_strip - nStrip*100000 - idWaf)/10000;
-      mLadders[iLad]->mWafers[iWaf]->setSigmaStrip(nStrip, iSide, noise[i].n_sigma, dynamicControl);
+      mLadders[iLad]->mWafers[iWaf]->setPedestalSigmaStrip(nStrip, iSide,0, noise[i].n_sigma, dynamicControl);
     }
 
   NumberOfNoise = spa_noise->GetNRows();
@@ -231,7 +234,7 @@ int  StSsdBarrel::readNoiseFromTable(St_ssdStripCalib *strip_calib, StSsdDynamic
       iWaf    = (int)((idWaf - mSsdLayer*1000)/100 - 1);
       iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
       iSide   = (noise[i].id - nStrip*100000 - idWaf)/10000;
-      mLadders[iLad]->mWafers[iWaf]->setSigmaStrip(nStrip, iSide, noise[i].rms, dynamicControl);
+      mLadders[iLad]->mWafers[iWaf]->setPedestalSigmaStrip(nStrip, iSide, noise[i].pedestals, noise[i].rms, dynamicControl);
       //       if (iLad==11 && iWaf==8 && nStrip <10) 
       //	cout<<"iLad,idWaf,nStrip,iSide,rms = "<<iLad
       //	    <<" "<<idWaf
