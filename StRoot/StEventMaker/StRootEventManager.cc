@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.cc,v 2.3 2000/01/05 16:08:25 ullrich Exp $
+ * $Id: StRootEventManager.cc,v 2.4 2000/05/25 14:44:47 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,8 +12,8 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.cc,v $
- * Revision 2.3  2000/01/05 16:08:25  ullrich
- * Removed some unnecessary checks.
+ * Revision 2.4  2000/05/25 14:44:47  ullrich
+ * Removed remaining pieces of the RICH pixel table.
  *
  * Revision 2.4  2000/05/25 14:44:47  ullrich
  * Removed remaining pieces of the RICH pixel table.
@@ -102,7 +102,6 @@ RETURN_TABLE(dst_mon_soft_ftpc,mon_soft_ftpc)
 RETURN_TABLE(dst_mon_soft_glob,mon_soft_glob)  
 RETURN_TABLE(dst_mon_soft_l3,mon_soft_l3)    
 RETURN_TABLE(dst_mon_soft_rich,mon_soft_rich) 
-RETURN_TABLE(dst_rch_pixel,rch_pixel)     
 RETURN_TABLE(dst_mon_soft_svt,mon_soft_svt)   
 RETURN_TABLE(dst_mon_soft_tpc,mon_soft_tpc)   
 RETURN_TABLE(dst_point,point)          
