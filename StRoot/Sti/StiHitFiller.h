@@ -27,7 +27,7 @@
 #include <iostream.h>
 #include <vector>
 #include <map>
-#include "../pams/global/inc/StDetectorId.h" //for detector enumerations
+#include "StDetectorId.h" //for detector enumerations
 
 #include "StiHit.h"
 #include "Factory.h"
