@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.23 1999/02/22 23:55:57 fine Exp $
+// $Id: St_geant_Maker.cxx,v 1.24 1999/02/23 18:59:50 nevski Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.24  1999/02/23 18:59:50  nevski
+// SVT 4th layer added to svt hit table
+//
 // Revision 1.23  1999/02/22 23:55:57  fine
 // St_geant_Maker::rootmaptable is prepaed to use St_TableNew(), not activated yet
 //
@@ -272,8 +275,10 @@ Int_t St_geant_Maker::Make(){
     
     
     //---------------------- inner part -------------------------//
-    gfnhit_ ("SVTH","SVTD", &nhits, 4,4);
-    if (nhits>0) 
+    gfnhit_ ("SVTH","SVTD", &nhit1, 4,4);
+    gfnhit_ ("SVTH","SFSD", &nhit2, 4,4);
+    nhits=nhit1+nhit2;
+     if (nhits>0) 
       { St_g2t_svt_hit *g2t_svt_hit = new St_g2t_svt_hit("g2t_svt_hit",nhits);
       m_DataSet->Add(g2t_svt_hit);
       Int_t Res_svt = g2t_svt(g2t_track,g2t_svt_hit);
@@ -375,7 +380,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.23 1999/02/22 23:55:57 fine Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.24 1999/02/23 18:59:50 nevski Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }

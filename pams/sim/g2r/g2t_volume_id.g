@@ -10,7 +10,7 @@
 * 
       Character*3      Csys
       Integer          NUMBV(15)
-      Integer          innout,sector,sub_sector,volume_id
+      Integer          innout,sector,sub_sector,volume_id,i,n/0/
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          endcap,zslice,innour,lnumber,wafer,phi_30d
       Integer          section,tpgv,tpss,tpad,sector,isdet,ladder
@@ -196,6 +196,8 @@ c* else  to be filled.
         endif          
 	eta=idigi(2)+1
         strip=idigi(3)+1
+        n=n+1
+        print *,'in g2t idigi=',n,(idigi(i),i=1,5)
         If (forw_back==4) forw_back=3
         If (rileft==1) then
           phi=60-phi+1
