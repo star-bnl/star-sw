@@ -220,9 +220,13 @@ C**
          do imatch=1,evt_match_h.nok ! Loop over evt_match table
             itpct = evt_match(imatch).idtpc
             isvtt = evt_match(imatch).idsvt
+            igtrk = itpct
+            if( svt_track_h.nok .eq. 0) then
+               svt(isvtt) = 0
+            endif
+
             if( egrpar(1).useglobal .eq. 2) then ! Standard refit
                
-               igtrk = itpct  
                
                iret = egr_refit_track(igtrk,itpct,svt(isvtt),ipriv,gtrk,
      +              tphit_h,tphit,privert_h,privert,svt_spt_h,svt_spt,
@@ -276,16 +280,26 @@ c     mark spts as used if not using primary vertex
                   endif
                enddo
             elseif( egrpar(1).useglobal.eq.4) then ! Kalman refit
-               igtrk = itpct
-               
-               param(1) = svt_track(svt(isvtt)).phi0*C_RAD_PER_DEG
-               param(2) = svt_track(svt(isvtt)).z0
-               param(3) = svt_track(svt(isvtt)).psi*C_RAD_PER_DEG 
-               param(4) = svt_track(svt(isvtt)).tanl
-               param(5) = svt_track(svt(isvtt)).invpt
-               param(6) = svt_track(svt(isvtt)).r0
-               
-               
+              
+
+               if( svt_track_h.nok .gt. 0) then
+                  
+                  param(1) = svt_track(svt(isvtt)).phi0*C_RAD_PER_DEG
+                  param(2) = svt_track(svt(isvtt)).z0
+                  param(3) = svt_track(svt(isvtt)).psi*C_RAD_PER_DEG 
+                  param(4) = svt_track(svt(isvtt)).tanl
+                  param(5) = svt_track(svt(isvtt)).invpt
+                  param(6) = svt_track(svt(isvtt)).r0
+               else 
+                  param(1) = tptrack(tpc(itpct)).phi0*C_RAD_PER_DEG
+                  param(2) = tptrack(tpc(itpct)).z0
+                  param(3) = tptrack(tpc(itpct)).psi*C_RAD_PER_DEG 
+                  param(4) = tptrack(tpc(itpct)).tanl
+                  param(5) = tptrack(tpc(itpct)).invp*tptrack(tpc(itpct)).q
+                  param(6) = tptrack(tpc(itpct)).r0
+                    
+               endif
+
                iret = egr_refit_track_kal(param, igtrk,itpct,svt(isvtt),
      +              ipriv,gtrk,
      +              tphit_h,tphit,privert_h,privert,svt_spt_h,svt_spt,
@@ -294,7 +308,7 @@ c     mark spts as used if not using primary vertex
                
                iret = egr_load_globtrk_kal(globtrk_h,globtrk
      +              ,igtrk,gtrk,tphit_h,
-     +              tphit,svt_spt_h,svt_spt,covar,itpct,isvtt,
+     +              tphit,svt_spt_h,svt_spt,covar,itpct,svt(isvtt),
      +              ipriv,bfield(3))
                
 c     mark spts as used if not using primary vertex
@@ -343,7 +357,9 @@ c     mark spts as used if not using primary vertex
          
          if( ipriv .eq. 0) then
             tptrack(tpc(itpct)).id_globtrk = globtrk_h.nok
-            svt_track(svt(isvtt)).id_globtrk = globtrk_h.nok
+            if( svt_track_h.nok .gt. 0) then
+               svt_track(svt(isvtt)).id_globtrk = globtrk_h.nok
+            endif
          else
             tptrack(tpc(itpct)).id_globtrk =
      +           -1*tptrack(tpc(itpct)).id_globtrk
