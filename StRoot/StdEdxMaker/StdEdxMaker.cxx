@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.13 2001/05/12 21:05:09 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.14 2001/05/21 00:49:21 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -434,6 +434,7 @@ Int_t StdEdxMaker::Finish() {
 }
 //_____________________________________________________________________________
 Int_t StdEdxMaker::Make(){ 
+  Double_t Scale2keV = 560./335.;
   Double_t Scale70   = 1.2684;//1.2876; //1.2315;
   Double_t Scale60   = 1.3506;//1.3712; //1.3146;
   StTpcCoordinateTransform transform(gStTpcDb);
@@ -713,7 +714,7 @@ Int_t StdEdxMaker::Make(){
       Double_t dY = 
 	normal.x()*(helix->y(s_in) - helix->y(s_out))  - 
 	normal.y()*(helix->x(s_in) - helix->x(s_out));
-      dE = dEdxP[ipoint].dE;
+      dE = dEdxP[ipoint].dE*Scale2keV;
       // Corrections
       dE *= TimeScale;
       Int_t pad = dEdxP[ipoint].pad;
