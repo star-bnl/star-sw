@@ -1,5 +1,11 @@
-// $Id: StFtpcSlowSimField.hh,v 1.5 2003/02/14 16:58:03 fsimon Exp $
+// $Id: StFtpcSlowSimField.hh,v 1.6 2003/07/03 13:30:56 fsimon Exp $
 // $Log: StFtpcSlowSimField.hh,v $
+// Revision 1.6  2003/07/03 13:30:56  fsimon
+// Implementation of cathode offset simulation:
+// 	The inner radius (and thus the E-field) is changed according to
+// 	phi of the cluster and the size of the offset.
+// 	GetVelocityZ not inline anymore, since it got quite big
+//
 // Revision 1.5  2003/02/14 16:58:03  fsimon
 // Add functionality that allows for different temperature corrections
 // in west and east, important for embedding. Drift tables are created
@@ -53,27 +59,7 @@ public:
 
   // GetVelocityZ is inline although too long because it is called in the
   // main drift loop
-  inline void GetVelocityZ(const float inverseRadius, const int padrow, float *inverseVelocity, float *angle)
-    {
-      int fieldPadrow = padrow;
-      if (padrow >= 10) fieldPadrow = padrow - 10; // bField symmetric, no diff east/west !
-      float e_now=radTimesField * inverseRadius;
-      int iLower= (int)((e_now-EFieldMin)*EFieldStepInverted);
-      int iUpper= iLower + 1;
-      int padrowIndex= nMagboltzBins*fieldPadrow;
-      float diffUp=preciseEField[iUpper]-e_now;
-      float diffDown=e_now-preciseEField[iLower];
-      iLower+=padrowIndex;
-      iUpper+=padrowIndex;
-      if (padrow < 10) {//west
-      	*inverseVelocity = EFieldStepInverted*((inverseDriftVelocityWest[iUpper])*diffDown + (inverseDriftVelocityWest[iLower])*diffUp);
-      	*angle = EFieldStepInvConverted*((preciseLorentzAngleWest[iUpper])*diffDown + (preciseLorentzAngleWest[iLower])*diffUp);//*angleFactor;
-      }
-      else {
-        *inverseVelocity = EFieldStepInverted*((inverseDriftVelocityEast[iUpper])*diffDown + (inverseDriftVelocityEast[iLower])*diffUp);
-      	*angle = EFieldStepInvConverted*((preciseLorentzAngleEast[iUpper])*diffDown + (preciseLorentzAngleEast[iLower])*diffUp);//*angleFactor;
-      }
-    }
+  void GetVelocityZ(const float inverseRadius, const int padrow, const float phi, float *inverseVelocity, float *angle);
 
   float GetVelAtReadout() const { return  finalVelocity; }
 
@@ -114,6 +100,12 @@ private:
   float *inverseDriftVelocityEast;
   float *preciseLorentzAngleEast;
   float angleFactor;
+
+  // variables for cathode offset simulation
+  float mOffsetCathodeWest;
+  float mOffsetCathodeEast;
+  float mAngleOffsetWest;
+  float mAngleOffsetEast;
 
   struct grid_data {
     float rhit;    // hit radius in cm

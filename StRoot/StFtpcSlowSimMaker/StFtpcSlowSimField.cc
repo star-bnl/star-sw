@@ -1,5 +1,11 @@
-// $Id: StFtpcSlowSimField.cc,v 1.12 2003/02/14 16:58:03 fsimon Exp $
+// $Id: StFtpcSlowSimField.cc,v 1.13 2003/07/03 13:30:54 fsimon Exp $
 // $Log: StFtpcSlowSimField.cc,v $
+// Revision 1.13  2003/07/03 13:30:54  fsimon
+// Implementation of cathode offset simulation:
+// 	The inner radius (and thus the E-field) is changed according to
+// 	phi of the cluster and the size of the offset.
+// 	GetVelocityZ not inline anymore, since it got quite big
+//
 // Revision 1.12  2003/02/14 16:58:03  fsimon
 // Add functionality that allows for different temperature corrections
 // in west and east, important for embedding. Drift tables are created
@@ -188,6 +194,13 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader,
   EFieldStepInvConverted= EFieldStepInverted * degree;
   finalVelocity = grid_point[mParam->numSlowSimGridPoints()-1].vel_z*10.;
 
+  // fill variables for cathode offset
+  mOffsetCathodeWest = mDb->offsetCathodeWest();
+  mOffsetCathodeEast = mDb->offsetCathodeEast();
+  mAngleOffsetWest = mDb->angleOffsetWest();
+  mAngleOffsetEast = mDb->angleOffsetEast();
+
+
 }
 
 StFtpcSlowSimField::~StFtpcSlowSimField() {
@@ -252,6 +265,73 @@ float StFtpcSlowSimField::InterpValue(const int npt, const float* x,
     }
     return sum;
 }
+
+
+
+void StFtpcSlowSimField::GetVelocityZ(const float inverseRadius, const int padrow, const float phi, float *inverseVelocity, float *angle)
+{
+     
+  // move cathode (standard: along x in pos direction
+  float xOff = 0;
+  float angleOff;
+  float newR;
+  float phis = phi - TMath::Pi()/2; // to get phi to run from 0 to 2 Pi
+
+  if (padrow < 10) { 
+    xOff = mOffsetCathodeWest;
+    angleOff = -mAngleOffsetWest;  // this sign is not tested! Up to now, the Offset is 0!
+    phis -= TMath::Pi()/2;
+  }
+  else {
+    xOff = mOffsetCathodeEast;
+    angleOff = -mAngleOffsetEast;
+  }
+      
+  
+  if (xOff != 0) {
+    // rotate offset
+    phis -= angleOff;
+    if (phis < 0) phis += 2*TMath::Pi();
+    if (phis > 2*TMath::Pi()) phis -= 2*TMath::Pi();
+    
+    if (phis > TMath::Pi()) phis = 2 * TMath::Pi() - phis;
+    
+    if (phis == 0) 
+      newR = innerRadius + xOff;
+    else if (phis == TMath::Pi())
+      newR = innerRadius - xOff;
+    else {
+      float asinSum = TMath::ASin(xOff/innerRadius * TMath::Sin(phis));
+      if (asinSum < 0 ) asinSum = asinSum* (-1);
+      newR = innerRadius/TMath::Sin(phis) * TMath::Sin(TMath::Pi() - phis - asinSum);
+    }
+  }
+  else
+    newR = innerRadius;
+  
+  int fieldPadrow = padrow;
+  if (padrow >= 10) fieldPadrow = padrow - 10; // bField symmetric, no diff east/west !
+  //float e_now=radTimesField * inverseRadius;
+  // e - Field corrected for changed cathode:
+  float e_now=radTimesField * inverseRadius * (log(outerRadius / (innerRadius))/log(outerRadius / newR));
+  int iLower= (int)((e_now-EFieldMin)*EFieldStepInverted);
+  int iUpper= iLower + 1;
+  int padrowIndex= nMagboltzBins*fieldPadrow;
+  float diffUp=preciseEField[iUpper]-e_now;
+  float diffDown=e_now-preciseEField[iLower];
+  iLower+=padrowIndex;
+  iUpper+=padrowIndex;
+  if (padrow < 10) {//west
+    *inverseVelocity = EFieldStepInverted*((inverseDriftVelocityWest[iUpper])*diffDown + (inverseDriftVelocityWest[iLower])*diffUp);
+    *angle = EFieldStepInvConverted*((preciseLorentzAngleWest[iUpper])*diffDown + (preciseLorentzAngleWest[iLower])*diffUp);//*angleFactor;
+  }
+  else {
+    *inverseVelocity = EFieldStepInverted*((inverseDriftVelocityEast[iUpper])*diffDown + (inverseDriftVelocityEast[iLower])*diffUp);
+    *angle = EFieldStepInvConverted*((preciseLorentzAngleEast[iUpper])*diffDown + (preciseLorentzAngleEast[iLower])*diffUp);//*angleFactor;
+  }
+}
+
+
 
 void StFtpcSlowSimField::Output() const
 {
