@@ -1,12 +1,6 @@
 /***************************************************************************
- *
- * $Id: St_SsdDb_Reader.cc,v 1.1 2004/03/12 04:56:55 jeromel Exp $
- *
- * Author: cr
- ***************************************************************************
- *
+ * Author: christelle roy
  * Description: SSD DB access Maker
- *
  **************************************************************************/
 
 #include "St_SsdDb_Reader.hh"
@@ -16,12 +10,9 @@
 #include "StSsdUtil/StSsdHybridCollection.hh"
 #include "StSsdUtil/StSsdGeometry.hh"
 #include "StSsdUtil/StSsdWaferGeometry.hh"
-// #include "tables/St_ssdConfiguration_Table.h"
-// #include "tables/St_ssdWafersPosition_Table.h"
-// #include "tables/St_ssdDimensions_Table.h"
-
-// #include "tables/St_ssdPedestals_Table.h"
-#include "tables/St_svg_geom_Table.h"
+#include "tables/St_ssdWafersPosition_Table.h"
+#include "tables/St_ssdConfiguration_Table.h"
+#include "tables/St_ssdDimensions_Table.h"
 
 
 #ifdef __ROOT__
@@ -33,7 +24,6 @@ St_SsdDb_Reader::St_SsdDb_Reader()
 {
   mSsdConfig = NULL;
   mSsdGeom   = NULL;
-  mSvgGeom   = NULL;
   memset(ssdDb,0,sizeof(ssdDb));
 }
 
@@ -44,14 +34,34 @@ St_SsdDb_Reader::~St_SsdDb_Reader()
 }
 
 //_____________________________________________________________________________
-void St_SsdDb_Reader::setSvgGeom(St_svg_geom* aSvgGeom)
+void St_SsdDb_Reader::setWafersPosition(St_ssdWafersPosition* aWafersPosition)
 {
-  mSvgGeom=aSvgGeom;
+  mWafersPosition=aWafersPosition;
 }
 //_____________________________________________________________________________
-St_svg_geom* St_SsdDb_Reader::getSvgGeom()
+St_ssdWafersPosition* St_SsdDb_Reader::getWafersPosition()
 {
-  return mSvgGeom;
+  return mWafersPosition;
+}
+//_____________________________________________________________________________
+void St_SsdDb_Reader::setSsdConfiguration(St_ssdConfiguration* aSsdConfiguration)
+{
+  mSsdConfiguration=aSsdConfiguration;
+}
+//_____________________________________________________________________________
+St_ssdConfiguration* St_SsdDb_Reader::getSsdConfiguration()
+{
+  return mSsdConfiguration;
+}
+//_____________________________________________________________________________
+void St_SsdDb_Reader::setSsdDimensions(St_ssdDimensions* aSsdDimensions)
+{
+  mSsdDimensions=aSsdDimensions;
+}
+//_____________________________________________________________________________
+St_ssdDimensions* St_SsdDb_Reader::getSsdDimensions()
+{
+  return mSsdDimensions;
 }
 //_____________________________________________________________________________
 void St_SsdDb_Reader::setDataBase(St_DataSet* input, dbSsdType type)
@@ -62,124 +72,132 @@ void St_SsdDb_Reader::setDataBase(St_DataSet* input, dbSsdType type)
     gMessMgr->Message("Error setting St_SsdDb_Reader: Need to specify input DataSet","E");  
 }
 
-//_____________________________________________________________________________
-StSsdConfig* St_SsdDb_Reader::getConfiguration()
+//___________________________________________________________________________________________
+StSsdGeometry* St_SsdDb_Reader::getDimensions(St_ssdDimensions *ssdDimensions)
 {
-  gMessMgr->Message("St_SsdDb_Reader::getConfiguration");
 
-  //  St_ssdConfiguration *configuration;
-  //  const int dbIndex = kGeometry;
+  if (ssdDimensions)
+    { 
+      gMessMgr->Info() <<"St_SsdDb_Reader::getDimensions "<<endm; 
+      gMessMgr->Info() <<"ssdDimensions :: nRows = "<<ssdDimensions->GetNRows()<<endm;
+    }
+  else
+    {
+      gMessMgr->Error() << "St_SsdDb_Reader::getDimensions : No  access to dimensions table " << endm;
+      return 0; 
+    }
 
-  //  if (ssdDb[dbIndex]){
-  //     {    
-  //       configuration = (St_ssdConfiguration*)ssdDb[dbIndex]->Find("ssdConfiguration");
-  //     }
-  //     if (!(configuration && configuration->HasData()) ){
-  //      gMessMgr->Message("Error Finding SSD Configuration","E");
-  //      return 0;
-  //     }
-  //   }
-  //   else {
-  gMessMgr->Message("Error Finding SSD Configuration Db","E");
+  ssdDimensions_st *dimensions = ssdDimensions->GetTable();  
+  gMessMgr->Info() <<" Half Length of a wafer = " <<dimensions->waferHalfLength<<endm;
+  mSsdGeom = new StSsdGeometry();
 
+  mSsdGeom->setWaferLength(2*dimensions->waferHalfLength);
+  mSsdGeom->setWaferThickness(2*dimensions->waferHalfThickness);
+  mSsdGeom->setWaferWidth(2*dimensions->waferHalfWidth);
+    
+  gMessMgr->Info() << "____________________________________" << endm;
+  gMessMgr->Info() << "St_SsdDb_Reader.................    " << endm;
+  gMessMgr->Info() << "SSD : ................waferLength = " << mSsdGeom->getWaferLength()<< endm;
+  gMessMgr->Info() << "SSD : .................waferWidth = " << mSsdGeom->getWaferWidth()<< endm;
+  gMessMgr->Info() << "SSD : .............waferThickness = " << mSsdGeom->getWaferThickness()<< endm;
+  gMessMgr->Info() << "____________________________________" << endm;
+
+  return mSsdGeom;
+}
+
+//___________________________________________________________________________________________
+StSsdConfig* St_SsdDb_Reader::getConfiguration(St_ssdConfiguration *ssdConfiguration)
+{
+
+  if (ssdConfiguration)
+    { 
+      gMessMgr->Info() <<"St_SsdDb_Reader::getConfiguration "<<endm; 
+      gMessMgr->Info() <<"ssdConfiguration :: nRows = "<<ssdConfiguration->GetNRows()<<endm;
+    }
+  else
+    {
+      gMessMgr->Error() << "St_SsdDb_Reader::getConfiguration : No  access to configuration table " << endm;
+      return 0; 
+    }
+
+  int totLadderPresent = 0;
+  ssdConfiguration_st *config = ssdConfiguration->GetTable();  
+  gMessMgr->Info() <<" Maximum number of ladders = " <<config->nMaxLadders<<endm;
   mSsdConfig = new StSsdConfig();
-  mSsdConfig->setNumberOfBarrels(1);
-  mSsdConfig->setNumberOfLadders(1,20);
-  mSsdConfig->setNumberOfWafers(1,16);
+
+  for (int ladder = 1; ladder<=config[0].nMaxLadders;ladder++) 
+    {
+      if (config[0].ladderIsPresent[ladder-1] != 0)
+	{
+	  gMessMgr->Info()<< "........Ladders "<<ladder<<" on sector "<<config[0].ladderIsPresent[ladder-1]<<endm;
+	  totLadderPresent++;
+	}
+      mSsdConfig->setLadderIsActive(ladder,config[0].ladderIsPresent[ladder-1]);
+    }   
+  gMessMgr->Info() << " Number of ladders in 2004 : "<<totLadderPresent<<endm;  
+  mSsdConfig->setNumberOfLadders(totLadderPresent);
+  
+  
+  mSsdConfig->setNumberOfWafers(16);
   mSsdConfig->setNumberOfHybrids(2);
-  mSsdConfig->setTotalNumberOfHybrids(640);
+  mSsdConfig->setTotalNumberOfHybrids(2*16*totLadderPresent);
+  mSsdConfig->setTotalNumberOfLadders(config->nMaxLadders);
   mSsdConfig->setNumberOfStrips(768);
-  mSsdConfig->setNumberOfTimeBins(128);
   mSsdConfig->setConfiguration();
     
   gMessMgr->Info() << "____________________________________" << endm;
-  gMessMgr->Info() << "St_SsdDb_Reader...Hard coding...    " << endm;
-  gMessMgr->Info() << "SSD :........ numberOfBarrels = " << mSsdConfig->getNumberOfBarrels() << endm;
-  gMessMgr->Info() << "SSD : ........numberOfLadders = " << 
-    mSsdConfig->getNumberOfLadders(mSsdConfig->getNumberOfBarrels()) << endm;
-  gMessMgr->Info() << "SSD : .........numberOfWafers = " << 
-    mSsdConfig->getNumberOfWafers(mSsdConfig->getNumberOfBarrels()) << endm;
-  gMessMgr->Info() << "SSD : ........numberOfHybrids = " << mSsdConfig->getNumberOfHybrids() << endm;
-  gMessMgr->Info() << "SSD : numberOfStripsPerHybrid = " << mSsdConfig->getNumberOfStrips()  << endm;
+  gMessMgr->Info() << "St_SsdDb_Reader...Via  Tables...    " << endm;
+  gMessMgr->Info() << "SSD : ........numberOfLadders = " << mSsdConfig->getNumberOfLadders()     << endm;
+  gMessMgr->Info() << "SSD : ...totalNumberOfLadders = " << mSsdConfig->getTotalNumberOfLadders()<< endm;
+  gMessMgr->Info() << "SSD : .........numberOfWafers = " << mSsdConfig->getNumberOfWafers()      << endm;
+  gMessMgr->Info() << "SSD : ........numberOfHybrids = " << mSsdConfig->getNumberOfHybrids()     << endm;
+  gMessMgr->Info() << "SSD : ...totalNumberOfHybrids = " << mSsdConfig->getTotalNumberOfHybrids()<< endm;
+  gMessMgr->Info() << "SSD : numberOfStripsPerHybrid = " << mSsdConfig->getNumberOfStrips()      << endm;
   gMessMgr->Info() << "____________________________________" << endm;
 
   return mSsdConfig;
 }
 
-StSsdGeometry* St_SsdDb_Reader::getGeometry(St_svg_geom *SsdGeom)
+//______________________________________________________________________________________________________________
+StSsdGeometry* St_SsdDb_Reader::getGeometry(St_ssdWafersPosition *wafersPosition)
 {
-  if (SsdGeom != 0) 
+  gMessMgr->Info()<<"_____________GetGeometry______________"<<endm;
+ 
+
+  if (wafersPosition != 0) 
     {
-      //      cout<<"St_SsdDb_Reader..GeomTable NRows = "<<SsdGeom->GetNRows()<<endl;
-      svg_geom_st *geom = SsdGeom->GetTable();
+      gMessMgr->Info()<<wafersPosition->GetNRows()<< " rows in wafersPosition table" <<endl;
+      ssdWafersPosition_st *position = wafersPosition->GetTable();
       
       mSsdGeom = new StSsdGeometry(mSsdConfig);
-      mSsdGeom->setBarrelRadius(22.8);
-      mSsdGeom->setWaferLength(7.5);
-      mSsdGeom->setWaferThickness(0.015);
-      mSsdGeom->setWaferWidth(4.2);
-      mSsdGeom->setStripPitch(0.095);
-      
-      cout<<"St_SsdDb_Reader::getGeometry....NumberOfBarrel = "<<mSsdConfig->getNumberOfBarrels()<< endl;
-      cout<<"St_SsdDb_Reader::getGeometry......BarrelRadius = "<<mSsdGeom->getBarrelRadius(1)<<endl;
 
-      int i, index;    //index sur detecteurs (320) et non pas sur hybrides comme le SVT
-      
-      StSsdWaferGeometry* waferGeom;
-//       St_ssdWafersPosition *positions;
-//       ssdWafersPosition_st *position;
+      int index  = -1;    
+      int barrel = 1;
 
-      cout<<"St_SsdDb_Reader::getGeometry......LoadOfWaferPosition........"<<endl;  
-      cout<<"_______________________________________________________________________________"<<endl;
-      printf("St_SsdDb_Reader:getGeometry --> %d barrel, %d ladders, %d wafers per ladder\n",mSsdGeom->getNumberOfBarrels(),mSsdGeom->getNumberOfLadders(mSsdGeom->getNumberOfBarrels()),mSsdGeom->getNumberOfWafers(mSsdGeom->getNumberOfBarrels()));
-      index = -1;
-
-      int barrel =1;
-      for (int ladder = 1;ladder <= mSsdGeom->getNumberOfLadders(barrel);ladder++) {
-	for (int wafer = 1;wafer <= mSsdGeom->getNumberOfWafers(barrel);wafer++) {
-	    
-// 	    index++;
-// 	    if (index < 0) continue;	  
-// 	    int idCurrentWaf = 7000 + (wafer)*100 + (ladder); /*7000 = mSsdLayer*1000*/
-
-	  //  printf("Barrel %d / Ladder %d / Wafer %d \n",barrel,ladder,wafer);
-	    
-	    /* Old SvtAdaptedMethod
-	       index = mSsdGeom->getWaferIndex(barrel,ladder,wafer);
-	       obsolete now; indexation has been used for the time being 
-	       + switch (barrel)
-	       obsolete since SSD = 1 barrel
-	    */
-	    
-	    // get wafers position table
-	    
-	    // 	  position = positions->GetTable();
-	    
-	   // fill StSsdGeometry object
+      for (int ladder = 1;ladder <= mSsdGeom->getNumberOfLadders();ladder++) {
+ 	for (int wafer = 1;wafer <= mSsdGeom->getNumberOfWafers();wafer++) {
 	  index++;
-	  i = 216 + index;
-	  waferGeom = new StSsdWaferGeometry(barrel,ladder,wafer);	    
-	  waferGeom->setDriftDirection(geom[i].d[0],geom[i].d[1],geom[i].d[2]);
-	  waferGeom->setNormalDirection(geom[i].n[0],geom[i].n[1],geom[i].n[2]);
-	  waferGeom->setTransverseDirection(geom[i].t[0],geom[i].t[1],geom[i].t[2]);
-	  waferGeom->setCenterPosition(geom[i].x[0],geom[i].x[1],geom[i].x[2]);	    
+	  if (index < 0) continue;	  
+
+	  // fill StSsdGeometry object
+	  StSsdWaferGeometry* waferGeom;
+	  waferGeom = (StSsdWaferGeometry*)mSsdGeom->at(index);
+	  if (!waferGeom)
+	    waferGeom = new StSsdWaferGeometry(barrel,ladder,wafer);	    
+
+ 	  waferGeom->setDriftDirection(position[index].driftDirection[0],position[index].driftDirection[1],position[index].driftDirection[2]);
+	  waferGeom->setNormalDirection(position[index].normalDirection[0],position[index].normalDirection[1],position[index].normalDirection[2]);
+	  waferGeom->setTransverseDirection(position[index].transverseDirection[0],position[index].transverseDirection[1],position[index].transverseDirection[2]);
+	  waferGeom->setCenterPosition(position[index].centerPosition[0],position[index].centerPosition[1],position[index].centerPosition[2]);	    
+	  waferGeom->setID(position[index].id);	    
 	  mSsdGeom->put_at(waferGeom,index);
-	  //	  cout << "index = "  << index << " i = "<<i<< " idwaf = "<<geom[i].id<<" , x = " << geom[i].x[0] 
-	  //      << " radius = "<< sqrt(geom[i].x[0]*geom[i].x[0] + geom[i].x[1]*geom[i].x[1])<<endl;  
-	  if (wafer == 1)
-	    cout << " idwaf = "<< geom[i].id
-		 << "              "
-		 << "     x = " << geom[i].x[0] 
-		 << "              "
-		 << "     y = " << geom[i].x[1]
-		 << "              "
-		 << "     z = " << geom[i].x[2]
-		 << "              "
-		 <<endl;  
-	} // end of loop over wafers
-      } // end of loop over ladders
-      
+ 	} 
+      }   
     } 
+  else {
+    gMessMgr->Info() <<"St_SsdDb_Maker::getGeometry  :: can not find wafersPosition table "<<endm;
+    return 0;
+  }
   return mSsdGeom;
 }
 
