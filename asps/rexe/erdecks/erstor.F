@@ -1,7 +1,10 @@
 *
-* $Id: erstor.F,v 1.1 1999/12/07 15:44:30 fisyak Exp $
+* $Id: erstor.F,v 1.2 2000/01/10 16:22:14 fisyak Exp $
 *
 * $Log: erstor.F,v $
+* Revision 1.2  2000/01/10 16:22:14  fisyak
+* Modify for multiple volume entries
+*
 * Revision 1.1  1999/12/07 15:44:30  fisyak
 * Add geane, new TGeant3 from Alice
 *
@@ -34,7 +37,8 @@ C.    ******************************************************************
 * *** Write out results at intermediate points
 *
       ILPRED = ILPRED + 1
-      IF (ILPRED.GE.NEPRED) ISTOP = 1
+*yf   IF (ILPRED.GE.NEPRED) ISTOP = 1
+      ISTOP = 1
       IEPRED(ILPRED) = INLIST
 *
 * *** Leave B-matrix intact for eventual further tracking
