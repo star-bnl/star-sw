@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StuCutTrack.cxx,v 1.1 1999/12/17 00:07:08 posk Exp $
+// $Id: StuCutTrack.cxx,v 1.2 1999/12/21 16:12:26 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Dec 1999
 //
@@ -9,13 +9,14 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StuCutTrack.cxx,v $
+// Revision 1.2  1999/12/21 16:12:26  posk
+// Updates.
+//
 // Revision 1.1  1999/12/17 00:07:08  posk
 // Classes for StEvent cuts.
 //
-//
 // Revision 1.0  posk
 // First versions of StEvent cut classes.
-//
 //
 ////////////////////////////////////////////////////////////////////////////
 
@@ -83,7 +84,7 @@ Int_t StuCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
 
   // Increment counters for Eta symmetry cut
   double bField = 0.5*tesla;
-  // When I learn how to get this from StRun bField will be done correctly.
+  // When I learn how to get this from StRun, bField will be done correctly.
   StThreeVectorD p = pTrack->geometry()->helix().momentum(bField); 
   if (p.pseudoRapidity() > 0.) {
     mEtaSymPosN++;

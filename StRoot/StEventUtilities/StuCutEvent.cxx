@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StuCutEvent.cxx,v 1.1 1999/12/17 00:07:03 posk Exp $
+// $Id: StuCutEvent.cxx,v 1.2 1999/12/21 16:12:24 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Dec 1999
 //
@@ -9,13 +9,14 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StuCutEvent.cxx,v $
+// Revision 1.2  1999/12/21 16:12:24  posk
+// Updates.
+//
 // Revision 1.1  1999/12/17 00:07:03  posk
 // Classes for StEvent cuts.
 //
-//
 // Revision 1.0   posk
-// First versions of StEvent cut classes.
-//
+// First version of StEvent cut classes.
 //
 ////////////////////////////////////////////////////////////////////////////
 
