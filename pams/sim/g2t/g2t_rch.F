@@ -58,7 +58,7 @@
          g2t_rch_hit(i).de            = Elos
          g2t_rch_hit(i).ds            = Step
          g2t_rch_hit(i).track_p       = trac
-         g2t_rch_hit(i).volume_id     = volume+Isys*1000
+         g2t_rch_hit(i).volume_id     = volume
 
 *         write(21,*) x(1),x(2),x(3),xx(1),xx(2),xx(3),
 *     >   p(1),p(2),p(3),tof,Elos,Step,

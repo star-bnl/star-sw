@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.25 2000/05/23 20:02:09 fisyak Exp $
+* $Id: g2t_volume_id.g,v 1.26 2000/05/24 15:02:50 nevski Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.26  2000/05/24 15:02:50  nevski
+* rich volume numbering done in g2t_volume ONLY
+*
 * Revision 1.25  2000/05/23 20:02:09  fisyak
 * Attempt to merge all correction together (PN)
 *
@@ -28,10 +31,10 @@
       Character*4                   cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
       Structure  TPCG  {version}
-      Structure  BTOG  {version, Rmin, Rmax, dz, choice, posit1, posit2 }
-      Structure  CALG  {version, int Nmodule(2), int NetaT, int MaxModule, int Nsub,
-     + 	                int NetaSMDp, int NPhistr, int Netfirst, int Netsecon}
-
+      Structure  BTOG  {version, Rmin, Rmax, dz, choice, posit1, }
+      Structure  CALG  {version, int Nmodule(2), int NetaT, int MaxModule, 
+                                 int Nsub, int NetaSMDp, int NPhistr,
+     + 	                         int Netfirst, int Netsecon}
       logical          first/.true./
 c - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 *
@@ -65,7 +68,6 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                 wafer = lnumber
                 ladder = 12
                 lnumber = 4
-
                                                                                * Set First barrel ids            
            else If (lnumber.le.2) then
 *             wafer    = 5-wafer 
@@ -121,7 +123,6 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                else If(ladder .eq.6) then 
                   ladder= 5
                endif
-
 
              endif
 
@@ -182,6 +183,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         sector= tpss+12*(tpgv-1) 
         tpad  = numbv(3)
         isdet = 0
+
         If  (tpcg_version==1) then
           If (cd=='TPAI')  isdet=1
           If (cd=='TPAO')  isdet=2
@@ -250,6 +252,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
              print *,' g2t_volume_id: unknown TOF choice.'
              print *,' g2t_volume_id: btog_choice=',btog_choice
            endif
+
 *  -------- sanity check ---------
            if ((rileft.lt.1).OR.(rileft.gt. 2).or.
      +        (sector.lt.1).OR.(sector.gt.60).or.
@@ -261,10 +264,12 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      +         ((innout.eq.2).AND.(section.ne.1)))
      +    print *,' g2t_volume_id: TOF sanity check failed.',
      +              rileft,sector,innout,sub_sector,section
+
 *  -------- combine 4wide and 5wide sections ---------
           if (innout==1) then
              section = section+1  !  phi-tray (4wide-sections)
           endif
+
 *  -------- encode volume_id ---------
           volume_id = 100000*rileft+1000*sector+100*sub_sector+section
         else
@@ -408,12 +413,13 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *13*
       else If (Csys=='rch') then
         is=0
-        if      cd=='RCSI' { is=1 }
-        elseif  cd=='RGAP' { is=2 }
+        if      cd=='RGAP' { is=1 }
+        elseif  cd=='RCSI' { is=2 }
         elseif  cd=='QUAR' { is=3 }
         elseif  cd=='FREO' { is=4 }
         elseif  cd=='OQUA' { is=5 }
-        volume_id = numbv(1)+10*is
+
+        volume_id = numbv(1) + Is*1000
 
       else If (Csys=='zdc') then
         volume_id = numbv(1)*1000+numbv(2)
