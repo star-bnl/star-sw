@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.7 1998/03/23 18:25:51 sakrejda Exp $
+* $Id: tpt.F,v 1.8 1998/03/27 20:50:29 sakrejda Exp $
 * $Log: tpt.F,v $
+* Revision 1.8  1998/03/27 20:50:29  sakrejda
+* bug in sector verification removed. (old:isec2=isect, new:isec3=isec2)
+*
 * Revision 1.7  1998/03/23 18:25:51  sakrejda
 * tpg_pad-plane removed from the tpt module, it was not used there anyway
 *
@@ -110,11 +113,14 @@ c     if not, truncate number of hits to track...
         hit_h.nok=tpt_mxhit
       endif
 
-C     Sort the TPC hits according to row/sector field
-C     Check whether the right sector was assigned to a hit
-c     This check could go away at some point
+C     Sort the TPC hits according to row/sector field.
+C     Check whether the right sector was assigned to a hit (geant messes it up
+c     sometimes). This check will go away at some point.
 C     Hits are divided into 12 volumes so that crossing through the central
-C     membrane is less painful
+C     membrane is smooth.
+c     Also since this is a loop over all the hits, reset the track assignement
+c     to 0.
+c
       call timed(time_now)
       time_all = time_all + time_now
       do i=1,hit_h.nok
@@ -124,18 +130,21 @@ C        clean up sector assignement.
          xglobal(1)=hit(i).x
          xglobal(2)=hit(i).y
          xglobal(3)=hit(i).z
+c        check what xy and z says about the sector.
          iret=tgc_global_to_sector(isec2,xglobal)
          isec3=int(hit(i).row/100)
          if(isec3.ne.isec2) then
            write(m132,*) 'TPT-I1 sector missmatch',isec3,isec2,xglobal
            call message(m132,1,idI1)
-           isec2=isect
+           isec3=isec2
          endif
          iret=tgc_sec24_to_sec12(isec3,isect)
          hit(i).row=isect*100+mod(hit(i).row,100)
       end do
 c
       if(hit_h.nok.eq.1)then
+c       if there is just one hit, sorting routine has problems,
+c       so deal with it separately
         loc_hit(1)=1
       else
         iret=tls_Index_Sort_i(hit_h.nok,hit(1).row,hit(2).row,loc_hit,
@@ -145,7 +154,7 @@ c
       time_all = time_all + time_now
       time_sort = time_now
 c
-c     Set up tables so that hit could be found within rows and sectors
+c     Set up tables so that hit could be found within rows and sectors.
       iret=tpt_row_sect_pnt(hit_h,hit,loc_hit,tpstart,tpcount,
      >                                  tpar_h,tpar,
      >                                  next_hit,slice_loc,slice_pnt,
