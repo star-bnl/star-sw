@@ -10,7 +10,7 @@
       Integer          innout,sector,sub_sector,volume_id
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          endcap,zslice,innour,lnumber,wafer,phi_30d
-      Integer          section,tpgv,tpss,tpad,sector,isdet
+      Integer          section,tpgv,tpss,tpad,sector,isdet,ladder
 *
 *    this is an internal agfhit/digi information - need a better access.
       integer          idigi
@@ -24,21 +24,24 @@
 *
       If    (Csys.eq.'svt') then
 *1*                                          Ken Wilson
-        lnumber    = numbv(1)
-        phi        = numbv(2)
-        wafer      = numbv(3)
-        If (lnumber.le.2) then
-          wafer    = 5-wafer
-        else If (lnumber.le.4) then
-          wafer    = 7-wafer     
-        else If (lnumber.le.6) then
-          wafer    = 8-wafer     
-        else
-          print *,' G2T warning: layer number ',lnumber,
-     *            '     in svt hits not found' 
+        If  (Cd=='SVTD') then
+           lnumber    = numbv(1)
+           ladder     = numbv(2)
+           wafer      = numbv(3)
+           If (lnumber.le.2) then
+             wafer    = 5-wafer
+           else If (lnumber.le.4) then
+             wafer    = 7-wafer     
+           else If (lnumber.le.6) then
+             wafer    = 8-wafer     
+           else
+             print *,' G2T warning: layer number ',lnumber,
+     *               '     in svt hits not found' 
+           endif
+           volume_id  = 1000*lnumber+100*wafer+ladder
+        else If (Cd=='SFSD') then
+           volume_id =  7000+100*numbv(2)+numbv(1)
         endif
-
-        volume_id  = 100*lnumber+10*phi+wafer
 
       else If (Csys.eq.'tpc') then
 *2*                                        Peter M. Jacobs

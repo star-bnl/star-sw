@@ -32,7 +32,7 @@ created   22 april 98
    first = .false.
    fill GTTC(1)           ! g2t control
      version = 1                  ! version number
-     nsys    = 15                 ! number of subsystems
+     nsys    = 16                 ! number of subsystems
      edir    = {'Even','t',' '}   ! event output directory name 
      rdir    = {'Run ',' ',' '}   ! run output directory name 
    fill dete       ! star subsystem
@@ -43,78 +43,84 @@ created   22 april 98
      cdet  = 'SVTD'       ! Sensitive detector
    fill dete       ! star subsystem
      onoff = 2            ! system number
+     ctab  = 'svt'        ! table name
+     spec  = 'svt'        ! specification type
+     csys  = 'SVTT'       ! Geant Subsystem
+     cdet  = 'SFSD'       ! Sensitive detector
+   fill dete       ! star subsystem
+     onoff = 3            ! system number
      ctab  = 'tpc'        ! table name
      spec  = 'tpc'        ! specification type
      csys  = 'TPCE'       ! Geant Subsystem
      cdet  = 'TPAD'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 3            ! system number
+     onoff = 4            ! system number
      cdet  = 'TPAI'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 4            ! system number
+     onoff = 5            ! system number
      cdet  = 'TPAO'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 5            ! system number
+     onoff = 6            ! system number
      ctab  = 'mwc'        ! table name
      spec  = 'mwc'        ! specification type
      csys  = 'TPCE'       ! Geant Subsystem
      cdet  = 'TMSE'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 6            ! system number
+     onoff = 7            ! system number
      ctab  = 'ctb'        ! table name
      spec  = 'ctf'        ! specification type
      csys  = 'BTOF'       ! Geant Subsystem
      cdet  = 'BCSA'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 7            ! system number
+     onoff = 8            ! system number
      ctab  = 'tof'        ! table name
      spec  = 'ctf'        ! specification type
      csys  = 'BTOF'       ! Geant Subsystem
      cdet  = 'BCSB'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 8            ! system number
+     onoff = 9            ! system number
      ctab  = 'emc'        ! table name
      spec  = 'emc'        ! specification type
      csys  = 'CALB'       ! Geant Subsystem
      cdet  = 'CSUP'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 9            ! system number
+     onoff = 10            ! system number
      ctab  = 'smd'        ! table name
      spec  = 'emc'        ! specification type
      csys  = 'CALB'       ! Geant Subsystem
      cdet  = 'CSDA'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 10           ! system number
+     onoff = 11           ! system number
      ctab  = 'eem'        ! table name
      spec  = 'emc'        ! specification type
      csys  = 'ECAL'       ! Geant Subsystem
      cdet  = 'ESCI'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 11           ! system number
+     onoff = 12           ! system number
      ctab  = 'esm'        ! table name
      spec  = 'emc'        ! specification type
      csys  = 'ECAL'       ! Geant Subsystem
      cdet  = 'MSEC'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 12           ! system number
+     onoff = 13           ! system number
      ctab  = 'ftp'        ! table name
      spec  = 'ftp'        ! specification type
      csys  = 'FTPC'       ! Geant Subsystem
      cdet  = 'FSEN'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 13           ! system number
+     onoff = 14           ! system number
      ctab  = 'vpd'        ! table name
      spec  = 'vpd'        ! specification type
      csys  = 'VPDD'       ! Geant Subsystem
      cdet  = 'VRAD'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 14           ! system number
+     onoff = 15           ! system number
      ctab  = 'psc'        ! table name
      spec  = '   '        ! specification type
      csys  = 'PMDD'       ! Geant Subsystem
      cdet  = 'VRAD'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 15           ! system number
+     onoff = 16           ! system number
      ctab  = 'pgc'        ! table name
    endfill
 *
@@ -136,8 +142,8 @@ created   22 april 98
  
       i = TDM_map_table(edir,'g2t_event'//o,g2t_event_spec//o,1,g2t_event)
       if (ld>0) i = DUI_CDIR (edir)
-      i = TDM_NEW_TABLE ('g2t_vertex'//o,G2T_VERTEX_SPEC//o,NVERTX)
-      i = TDM_NEW_TABLE ('g2t_track'//o, G2T_TRACK_SPEC//o, NTRACK)
+      i = TDM_NEW_TABLE('g2t_vertex'//o,G2T_VERTEX_SPEC//o,NVERTX)
+      i = TDM_NEW_TABLE('g2t_track'//o, G2T_TRACK_SPEC//o, NTRACK)
 
       names(1)='g2t_vertex'//o
       names(2)='g2t_track'//o
