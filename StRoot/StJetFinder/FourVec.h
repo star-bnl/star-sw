@@ -89,7 +89,7 @@ public:
 		mPx = pt*cos(phi);
 		mPy = pt*sin(phi);
 		mPz = pt*sinh(eta);
-		mE = sqrt(fabs(mPx*mPx + mPy*mPy *mPz*mPz + m*m) );
+		mE = sqrt(fabs(mPx*mPx + mPy*mPy +mPz*mPz + m*m) );
 		mCharge = charge;
     }
 	
