@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.1 2002/03/08 17:04:17 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.2 2002/03/08 20:04:31 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -70,9 +70,7 @@ class StMuDstMaker : public StMaker{
 
   StMuDst* muDst();
   TChain* chain();
-  TChain* strangeChain();
   TTree* tree();
-  TTree* strangeTree();
 
 private:
   StMuDst* mStMuDst;
@@ -102,10 +100,7 @@ private:
   string mCurrentFileName;
 
   TChain* mChain;
-  TChain* mStrangeChain;
-
   TTree* mTTree;
-  TTree* mStrangeTTree;
 
   int mEventCounter;
   int mSplit;
@@ -167,22 +162,12 @@ private:
   void setReadKinks(bool);
 
   string basename(string);
-
+ 
   friend class StMuDst;
 
-  //! protected:
-  
-//! /*   static char* arrayNames[__NARRAYS__]; */
-//! /*   static char* arrayTypes[__NARRAYS__]; */
-//! /*   static int arraySizes[__NARRAYS__]; */
-//! /*   static int arrayCounters[__NARRAYS__]; */
   TClonesArray* arrays[__NARRAYS__];
   TClonesArray* mArrays[__NARRAYS__];
-  
-//! /*   static char* strangeArrayNames[__NSTRANGEARRAYS__]; */
-//! /*   static char* strangeArrayTypes[__NSTRANGEARRAYS__]; */
-//! /*   static int strangeArrayCounters[__NSTRANGEARRAYS__]; */
-//! /*   static int strangeArraySizes[__NSTRANGEARRAYS__]; */
+
   TClonesArray* strangeArrays[__NSTRANGEARRAYS__];
   TClonesArray* mStrangeArrays[__NSTRANGEARRAYS__];
 
@@ -191,9 +176,7 @@ private:
 
 inline StMuDst* StMuDstMaker::muDst() { return mStMuDst;}
 inline TChain* StMuDstMaker::chain() { return mChain; }
-inline TChain* StMuDstMaker::strangeChain() { return mStrangeChain;}
 inline TTree* StMuDstMaker::tree() { return mTTree; }
-inline TTree* StMuDstMaker::strangeTree() { return mStrangeTTree;}
 inline void StMuDstMaker::setTrackFilter(StMuCut* c) { mTrackFilter=c;}
 inline void StMuDstMaker::setL3TrackFilter(StMuCut* c) { mL3TrackFilter=c;}
 inline void StMuDstMaker::setStStrangeMuDstMaker(StStrangeMuDstMaker* s) {mStStrangeMuDstMaker=s;}
@@ -215,8 +198,8 @@ inline void StMuDstMaker::setReadKinks(bool b) { mReadKinks=b;}
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
- * Revision 1.1  2002/03/08 17:04:17  laue
- * initial revision
+ * Revision 1.2  2002/03/08 20:04:31  laue
+ * change from two trees to 1 tree per file
  *
  *
  **************************************************************************/

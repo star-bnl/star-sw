@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.1 2002/03/08 17:04:17 laue Exp $
+ * $Id: StMuDst.h,v 1.2 2002/03/08 20:04:31 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -31,6 +31,11 @@ class StEvent;
 class StGlobalTrack;
 class StPrimaryTrack;
 class StStrangeEvMuDst;
+
+
+class StV0MuDst;
+class StXiMuDst;
+class StKinkMuDst;
 
 #include "TObject.h"
 #include "StMuDstMaker.h"
@@ -81,6 +86,8 @@ public:
   static StL3AlgorithmInfo* l3AlgoAccept(int i) { return (StL3AlgorithmInfo*)arrays[muAccept]->UncheckedAt(i); }
   static StL3AlgorithmInfo* l3AlgoReject(int i) { return (StL3AlgorithmInfo*)arrays[muReject]->UncheckedAt(i); }
 
+  static TClonesArray* v0s() { return strangeArrays[smuV0]; }
+  static StV0MuDst* v0s(int i) { return (StV0MuDst*)strangeArrays[smuV0]->UncheckedAt(i); }
 
     ClassDef(StMuDst,1)
 };
@@ -90,6 +97,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.2  2002/03/08 20:04:31  laue
+ * change from two trees to 1 tree per file
+ *
  * Revision 1.1  2002/03/08 17:04:17  laue
  * initial revision
  *
