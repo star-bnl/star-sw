@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.6 1999/08/10 00:28:50 fisyak Exp $
+ * $Id: StDAQReader.cxx,v 1.7 1999/08/19 22:28:40 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.7  1999/08/19 22:28:40  perev
+ * fix Skip & EventNumber
+ *
  * Revision 1.6  1999/08/10 00:28:50  fisyak
  * Herb/Victor corrects for errors
  *
@@ -115,6 +118,7 @@ int StDAQReader::skipEvent(int nskip)
     fEventReader = new EventReader();
     fEventReader->InitEventReader(fFd, fOffset, 0);
     if(fEventReader->errorNo()) return kStErr;  
+    fOffset = fEventReader->NextEventOffset();
   }
   return 0;
 }
