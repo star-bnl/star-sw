@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.5 1999/07/02 04:37:41 levine Exp $
+ * $Id: EventReader.cxx,v 1.6 1999/07/04 01:47:58 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -15,6 +15,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.6  1999/07/04 01:47:58  levine
+ * minor changes to make solaris CC compiler happy
+ *
  * Revision 1.5  1999/07/02 04:37:41  levine
  * Many changes - see change logs in individual programs
  *
@@ -31,7 +34,7 @@
 #include "EventReader.hh"
 
 
-EventReader *getEventReader(int fd, long offset, int MMap=1)
+EventReader *getEventReader(int fd, long offset, int MMap)
 {
   EventReader *er = new EventReader();
   er->InitEventReader(fd, offset, MMap);
@@ -73,7 +76,7 @@ EventReader::EventReader()
 }
 
 // Here lies the event reader code
-void EventReader::InitEventReader(int fdes, long offset, int MMap=1)
+void EventReader::InitEventReader(int fdes, long offset, int MMap)
 {//InitER
   long c_offset = offset;
   if (verbose) cout << "Initializing EventReader with a file" << endl;

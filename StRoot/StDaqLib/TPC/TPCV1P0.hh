@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV1P0.hh,v 1.2 1999/07/02 04:43:23 levine Exp $
+ * $Id: TPCV1P0.hh,v 1.3 1999/07/04 01:43:24 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description:  Declarations For TPC version 1.0
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: TPCV1P0.hh,v $
+ * Revision 1.3  1999/07/04 01:43:24  levine
+ * minor changes to make solaris CC compiler happy
+ *
  * Revision 1.2  1999/07/02 04:43:23  levine
  * Many changes -
  *  navigates to head of TPCP bank independent of position.
@@ -158,7 +161,7 @@ public:
   int getClusters(int PadRow, int Pad, int *nClusters, 
 			  struct ASIC_Cluster **clusters);
 
-  int getAsicParams(ASIC_params *){};
+  int getAsicParams(ASIC_params *){return FALSE;};
   int MemUsed();
   
   TPCV1P0_CPP_SR(int sector, TPCV1P0_Reader *);

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_Reader.hh,v 1.2 1999/07/02 04:43:24 levine Exp $
+ * $Id: TPCV2P0_Reader.hh,v 1.3 1999/07/04 01:43:25 levine Exp $
  * Author: Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: common definitions for TPC
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_Reader.hh,v $
+ * Revision 1.3  1999/07/04 01:43:25  levine
+ * minor changes to make solaris CC compiler happy
+ *
  * Revision 1.2  1999/07/02 04:43:24  levine
  * Many changes -
  *  navigates to head of TPCP bank independent of position.
@@ -32,6 +35,9 @@ static const unsigned char tpcRowLen[TPC_ROWS_PER_SECTOR] = {
 
 
 //embed version number in bank name
+#ifdef classname
+#undef classname
+#endif
 #define classname(x) x ## V2P0 
 
 // Detector Reader Virtual Class

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RecHeaderFormats.cxx,v 1.3 1999/07/02 04:37:41 levine Exp $
+ * $Id: RecHeaderFormats.cxx,v 1.4 1999/07/04 01:47:59 levine Exp $
  * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
  ***************************************************************************
  * Description: Bank header formats common to all detectors in STAR:
@@ -13,6 +13,9 @@
  *
  ***************************************************************************
  * $Log: RecHeaderFormats.cxx,v $
+ * Revision 1.4  1999/07/04 01:47:59  levine
+ * minor changes to make solaris CC compiler happy
+ *
  * Revision 1.3  1999/07/02 04:37:41  levine
  * Many changes - see change logs in individual programs
  *
@@ -28,6 +31,7 @@
 #include "RecHeaderFormats.hh"
 #include "CRC.hh"
 #include "swaps.hh"
+#include <string.h>
 
 #define NOCRCCHECKING
 
@@ -42,7 +46,7 @@ char* name2str(char* type) /* for everyone !!!! */
 };
 
 // first some trash can functions 
-void dump_data(char* buffer,int size,int width = 8 )
+void dump_data(char* buffer,int size,int width )
 {
   uint* data_base = (uint*)buffer ;
   uint* data ;
@@ -180,7 +184,7 @@ int Logical_Record::test_CRC()
   return(-1) ;
 }; 
 
-void Logical_Record::print(int level=0)
+void Logical_Record::print(int level)
 {
   header.print();
   
@@ -269,7 +273,7 @@ int Bank::test_CRC()
   return(-1) ;
 }; 
 
-void Bank::print(int level=0)
+void Bank::print(int level)
 {
   header.print();
   

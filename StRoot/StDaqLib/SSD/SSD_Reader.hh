@@ -31,7 +31,7 @@ class SSD_Reader : public DetectorReader
   friend class EventReader;
 
 public:
-  SSD_Reader *getSSDReader(int sector){cout <<"DUMMY implementation"<<endl;};
+  SSD_Reader *getSSDReader(int sector){cout <<"DUMMY implementation"<<endl; return FALSE;};
   ZeroSuppressedReader *getZeroSuppressedReader(int sector){cout<<sector<<endl; return FALSE;};
   ADCRawReader *getADCRawReader(int sector){cout<<sector<<endl; return FALSE;};
   PedestalReader *getPedestalReader(int sector){cout<<sector<<endl; return FALSE;};
