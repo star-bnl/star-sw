@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.4 2000/01/20 14:43:39 ullrich Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.5 2000/02/22 23:24:08 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
- * Revision 2.4  2000/01/20 14:43:39  ullrich
- * Fixed bug in numberOfFitPoints(). Sum was wrong.
+ * Revision 2.5  2000/02/22 23:24:08  ullrich
+ * Fixed bug in covariantMatrix().
  *
  * Revision 2.4  2000/01/20 14:43:39  ullrich
  * Fixed bug in numberOfFitPoints(). Sum was wrong.
@@ -41,7 +41,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.4 2000/01/20 14:43:39 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.5 2000/02/22 23:24:08 ullrich Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
@@ -117,7 +117,7 @@ StTrackFitTraits::chi2(UInt_t i) const
 StMatrixF
 StTrackFitTraits::covariantMatrix() const
 {
-    StMatrixF m;
+    StMatrixF m(5,5);
     m(1,1) = mCovariantMatrix[0];
     m(1,2) = m(2,1) = mCovariantMatrix[1];
     m(1,3) = m(3,1) = mCovariantMatrix[2];
