@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.390 2004/03/10 06:01:07 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.391 2004/03/10 06:02:52 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -74,7 +74,7 @@ Bfc_st BFC1[] = {
                   "y2003X: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL - Full B/E EMC",kFALSE},
   {"Y2003a" ,"","","db,detDb","","",
                                   "Year2003 geometry with corrected barrel EMC and SVT layer radii",kFALSE},
-  {"Y2003b" ,"","","db,detDb","","",      
+  {"Y2003b" ,"","","db,detDb","","",
     "Year2003 geometry with corrected barrel EMC and SVT layer radii and extra material in the SVT",kFALSE},
   {"Y2004"  ,"","","db,detDb","","",                                 "Who knows what that is (\? )",kFALSE},
 
@@ -613,7 +613,7 @@ Bfc_st BFC2[] = {
                   "y2003X: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL - Full B/E EMC",kFALSE},
   {"Y2003a" ,"","","db,detDb","","",
                                   "Year2003 geometry with corrected barrel EMC and SVT layer radii",kFALSE},
-  {"Y2003b" ,"","","db,detDb","","",      
+  {"Y2003b" ,"","","db,detDb","","",
     "Year2003 geometry with corrected barrel EMC and SVT layer radii and extra material in the SVT",kFALSE},
   {"Y2004"  ,"","","db,detDb","","",                                 "Who knows what that is (\? )",kFALSE},
 
@@ -1387,7 +1387,7 @@ Int_t StBFChain::Instantiate()
 	    //pars->tpcInputFile     = "StRoot/StiMaker/macros/tpcInputFile.dat";
 	    //pars->ftpcInputFile    = "none";
 	    //pars->pixelInputFile   = "none";
-           
+
 	    pars->useSvt=kTRUE;         // SVT used in IT but not active. ??
 	                                // Pre-2001 data, will build only 1 ladder?
 	    if (GetOption("SvtIT")) pars->activeSvt=kTRUE;
@@ -1395,7 +1395,7 @@ Int_t StBFChain::Instantiate()
 	      pars->useFtpc=kTRUE;
 	      pars->activeFtpc=kTRUE;
 	    }
-	    cout << "Sti Parameters (seen in bfc):" << endl 
+	    cout << "Sti Parameters (seen in bfc):" << endl
 		 << *pars << endl;
 
 	    if (GetOption("Simu")) tk->setMcEnabled(kTRUE);
@@ -1439,7 +1439,7 @@ Int_t StBFChain::Instantiate()
 	      else                             mk->SetMode(2);
 	    }
 	  }
-	  
+
 	  if (GetOption("CMuDST") && GetOption("StrngMuDST")) {
 	    if (maker == "StStrangeMuDstMaker"){
 	      StStrangeMuDstMaker *pMk = (StStrangeMuDstMaker*) mk;
@@ -1529,7 +1529,7 @@ Int_t StBFChain::Instantiate()
 	    // bit 1  =   do NOISE_ELIM
 	    // bit 2  =   do ASIC_THRESHOLDS
 	    // WARNING Option FCF is checked in StDAQMaker
-	    if ( GetOption("fcf")   ){   
+	    if ( GetOption("fcf")   ){
 	      tcpdaqMk->SetSequenceMerging(0);
 	      if ( GetOption("Trs")   )  tcpdaqMk->SetCorrection(0x5); // ASIC + GAIN
 	      else                       tcpdaqMk->SetCorrection(0x0); // fcf && ! trs => no corrections
@@ -1635,7 +1635,7 @@ Int_t StBFChain::Instantiate()
         else status = kStErr;
 	if (status != kStOk && i != iFail) {
 	  gMessMgr->QAInfo()
-	    << " ======================================\n" 
+	    << " ======================================\n"
 	    << " problem with Instantiation of "         << fBFC[i].Maker << "\n"
 	    << " ======================================" << endm;
 	  iFail = i;
@@ -1743,7 +1743,7 @@ Int_t StBFChain::kOpt (const TString *tag) const {
     else {if (Tag == nopt) {return -i;}}
   }
 #if 0
-  // Check that option can be library name or / and Maker 
+  // Check that option can be library name or / and Maker
   static Char_t *path = ".:.$STAR_HOST_SYS/lib::.$STAR_HOST_SYS/LIB:$STAR/.$STAR_HOST_SYS/lib:$STAR/.$STAR_HOST_SYS/LIB";
   TString File = *tag; File += ".so";
   Char_t *file = gSystem->Which(path,File.Data(),kReadPermission);
@@ -1761,7 +1761,7 @@ Int_t StBFChain::kOpt (const TString *tag) const {
     memcpy (&fBFC[NoChainOptions].Libs, tag->Data(), strlen(tag->Data()));
     fBFC[NoChainOptions].Comment = "";
     fBFC[NoChainOptions].Flag = 0;
-    NoChainOptions++; 
+    NoChainOptions++;
     return NoChainOptions-1;
   }
 #endif
@@ -2287,7 +2287,7 @@ void StBFChain::SetTreeOptions()
       treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
     }
     if (GetOption("fss"))    treeMk->IntoBranch("ftpc_rawBranch","ftpc_raw/.data");
-    if (GetOption("tpc_daq") || GetOption("TrsMini"))  
+    if (GetOption("tpc_daq") || GetOption("TrsMini"))
                              treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
     if (GetOption("ems"))    treeMk->IntoBranch("emc_rawBranch","emc_raw/.data");
     if (GetOption("tcl"))    treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
