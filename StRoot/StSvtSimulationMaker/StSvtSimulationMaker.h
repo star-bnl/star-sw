@@ -1,5 +1,8 @@
-// $Id: StSvtSimulationMaker.h,v 1.1 2000/11/30 20:47:49 caines Exp $
+// $Id: StSvtSimulationMaker.h,v 1.2 2001/02/07 19:13:51 caines Exp $
 // $Log: StSvtSimulationMaker.h,v $
+// Revision 1.2  2001/02/07 19:13:51  caines
+// Small fixes to allow to run without setup from command line
+//
 // Revision 1.1  2000/11/30 20:47:49  caines
 // First version of Slow Simulator - S. Bekele
 //
@@ -23,9 +26,8 @@ class TH2D;
 class TString;
 
 class St_g2t_svt_hit;
-class St_svg_shape;
-class St_svg_geom;
-class St_srs_srspar;
+class svg_shape_st;
+class srs_srspar_st;
 class svg_geom_st;
 
 class StSvtHybridCollection;
@@ -53,7 +55,7 @@ class StSvtSimulationMaker : public StMaker
 
   Int_t setOneHit(int oneHit = 0, double anode = 0, double time = 0,double energy = 0,double theta = 0,double phi = 0);
   Int_t setOptions(char* option1, int option2, int option3, int option4);
-  Int_t setConst(char* backgr,double backgSigma, double driftVel, double timBinSize, double anodeSize );
+  Int_t setConst(char* backgr,double backgSigma, double timBinSize, double anodeSize );
   Int_t setConfig(const char* config);
   Int_t setConfig(StSvtConfig* config);
   Int_t setEval();
@@ -96,9 +98,9 @@ class StSvtSimulationMaker : public StMaker
   St_ObjectSet                 *mSimDataSet;         //!
 
   St_g2t_svt_hit               *mG2tSvtHit;       //!
-  St_svg_shape                 *mSvtShape;        //!
-  St_svg_geom                  *mSvtGeom;         //!
-  St_srs_srspar                *mSvtSrsPar;       //!
+  svg_shape_st                 *mSvtShape;        //!
+  svg_geom_st                  *mSvtGeom;         //!
+  srs_srspar_st                *mSvtSrsPar;       //!
 
   TFile                        *mNtFile;          //! 
   TNtuple                      *mNTuple;          //!
@@ -116,7 +118,7 @@ class StSvtSimulationMaker : public StMaker
 
   double mTimeBinSize;
   double mAnodeSize;    
-  double mDriftVel;
+  double mDriftVelocity;
   double mEnergy;
   double mTheta;
   double mPhi;
@@ -129,7 +131,7 @@ class StSvtSimulationMaker : public StMaker
   TH2D** geant_hit;            //!
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.1 2000/11/30 20:47:49 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.2 2001/02/07 19:13:51 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
 
   ClassDef(StSvtSimulationMaker,1)
 
