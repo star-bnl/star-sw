@@ -360,7 +360,7 @@ void TrackEntry::setStiTrack(const StiTrack *newtrack)
     }
     
     //We made it all the way through, mark this track as legit
-    stiTrackFlag=1;
+    stiTrackFlag = 100 + newtrack->getFlag();
 }
 
 void TrackEntry::setAssociation(const StiTrackPairInfo& info)
