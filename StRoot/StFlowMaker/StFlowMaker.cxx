@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.11 2000/01/13 22:19:19 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.12 2000/01/24 23:01:00 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.12  2000/01/24 23:01:00  posk
+// Merged updates
+//
 // Revision 1.11  2000/01/13 22:19:19  posk
 // Updates and corrections.
 //
@@ -96,7 +99,7 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.11 2000/01/13 22:19:19 posk Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.12 2000/01/24 23:01:00 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 
 }
@@ -112,6 +115,10 @@ Int_t StFlowMaker::Init() {
 //   StFlowCutEvent::SetVertexX(0., 0.);
 //   StFlowCutEvent::SetVertexY(0., 0.);
 //   StFlowCutEvent::SetVertexZ(-50., 50.);
+
+  // Set the track cuts
+  StFlowCutTrack::SetFitPts(0, 0);
+  //StFlowCutTrack::SetFitOverMaxPts(0, 0);
 
   return StMaker::Init();
 }
@@ -205,7 +212,7 @@ void StFlowMaker::fillFlowEvent() {
 
   for (itr = tracks.begin(); itr != tracks.end(); itr++) {
     StPrimaryTrack* pTrack = *itr;
-    if (StFlowCutTrack::CheckTrack(pTrack)) {
+    if (pTrack->flag() > 0 && StFlowCutTrack::CheckTrack(pTrack)) {
       // Instantiate new StFlowTrack
       StFlowTrack* pFlowTrack = new StFlowTrack;
       StThreeVectorD p = pTrack->geometry()->momentum();
@@ -213,8 +220,6 @@ void StFlowMaker::fillFlowEvent() {
       pFlowTrack->SetEta(p.pseudoRapidity());
       pFlowTrack->SetPt(p.perp());
       pFlowTrack->SetCharge(pTrack->geometry()->charge());
-//       float b = pTrack->impactParameter();
-//       PR(b);
       pFlowTrack->SetImpactPar(pTrack->impactParameter());
       pFlowTrack->SetChi2(pTrack->fitTraits().chi2());
       pFlowTrack->SetFitPts(pTrack->fitTraits().numberOfFitPoints());

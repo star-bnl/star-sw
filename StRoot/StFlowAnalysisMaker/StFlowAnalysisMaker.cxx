@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.16 2000/01/14 02:09:24 snelling Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.17 2000/01/24 23:02:11 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.17  2000/01/24 23:02:11  posk
+// Merged updates
+//
 // Revision 1.16  2000/01/14 02:09:24  snelling
 // Fixed small typo (,)
 //
@@ -93,7 +96,7 @@ const Float_t StFlowAnalysisMaker::etaMin    =   -2.;
 const Float_t StFlowAnalysisMaker::etaMax    =    2.;
 const Float_t StFlowAnalysisMaker::ptMin     =    0.;
 const Float_t StFlowAnalysisMaker::ptMax     =    2.;
-const Float_t StFlowAnalysisMaker::qMax      =    2.;
+const Float_t StFlowAnalysisMaker::qMax      =    5.;
 
 enum { nEtaBins    = 20,
        nPtBins     = 10,
@@ -157,7 +160,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.16 2000/01/14 02:09:24 snelling Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.17 2000/01/24 23:02:11 posk Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
@@ -186,9 +189,9 @@ Int_t StFlowAnalysisMaker::Init() {
   const float fitOverMaxMin   =    0.;
   const float fitOverMaxMax   =    3.; 
   const float origMultMin     =    0.;
-  const float origMultMax     = 2500.; 
+  const float origMultMax     = 4000.; 
   const float totalMultMin    =    0.;
-  const float totalMultMax    = 1500.; 
+  const float totalMultMax    = 2000.; 
   const float multOverOrigMin =    0.;
   const float multOverOrigMax =    1.; 
   const float vertexZMin      = -100.;
@@ -537,6 +540,27 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHist_vObs2D->SetYTitle("Pt (GeV)");
       delete histTitle;
 
+      // Flow observed projections
+      histTitle = new TString("Flow_vObsEta_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHist_vObsEta = new TProfile(histTitle->Data(),
+        histTitle->Data(), 2*nEtaBins, etaMin, etaMax, -100., 100., "");
+      histFull[k].histFullHar[j].mHist_vObsEta->SetXTitle("Pseudorapidity");
+      histFull[k].histFullHar[j].mHist_vObsEta->SetYTitle("Flow (%)");
+      delete histTitle;
+
+      histTitle = new TString("Flow_vObsPt_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHist_vObsPt = new TProfile(histTitle->Data(),
+        histTitle->Data(), 2*nPtBins, ptMin, ptMax, -100., 100., "");
+      histFull[k].histFullHar[j].mHist_vObsPt->SetXTitle("Pt (GeV)");
+      histFull[k].histFullHar[j].mHist_vObsPt->SetYTitle("Flow (%)");
+      delete histTitle;
+
       // Flow
       histTitle = new TString("Flow_v2D_Sel");
       histTitle->Append(*countSels);
@@ -547,6 +571,27 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHist_v2D->Sumw2();
       histFull[k].histFullHar[j].mHist_v2D->SetXTitle("Pseudorapidity");
       histFull[k].histFullHar[j].mHist_v2D->SetYTitle("Pt (GeV)");
+      delete histTitle;
+
+      // Flow projections
+      histTitle = new TString("Flow_vEta_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHist_vEta = new TProfile(histTitle->Data(),
+        histTitle->Data(), 2*nEtaBins, etaMin, etaMax, -100., 100., "");
+      histFull[k].histFullHar[j].mHist_vEta->SetXTitle("Pseudorapidity");
+      histFull[k].histFullHar[j].mHist_vEta->SetYTitle("Flow (%)");
+      delete histTitle;
+
+      histTitle = new TString("Flow_vPt_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHist_vPt = new TProfile(histTitle->Data(),
+        histTitle->Data(), 2*nPtBins, ptMin, ptMax, -100., 100., "");
+      histFull[k].histFullHar[j].mHist_vPt->SetXTitle("Pt (GeV)");
+      histFull[k].histFullHar[j].mHist_vPt->SetYTitle("Flow (%)");
       delete histTitle;
 
     }
@@ -653,7 +698,7 @@ void StFlowAnalysisMaker::fillEventHistograms() {
     }
   }
 
-  // full event Psi, PsiSubCorr, PsiSubCorrDiff, cos, N, q, <Pt>
+  // full event Psi, PsiSubCorr, PsiSubCorrDiff, cos, mult, q, <Pt>
   for (int k = 0; k < nSels; k++) {
     for (int j = 0; j < nHars; j++) {
       float order  = (float)(j+1);
@@ -763,6 +808,10 @@ void StFlowAnalysisMaker::fillParticleHistograms() {
        	// Caculate v for all particles
 	float v = cos(order * (phi - psi_i))/perCent;
 	histFull[k].histFullHar[j].mHistSum_v2D->Fill(eta, pt, v);
+	histFull[k].histFullHar[j].mHist_vObsEta->Fill(eta, v);
+	histFull[k].histFullHar[j].mHist_vObsPt->Fill(pt, v);
+	histFull[k].histFullHar[j].mHist_vEta->Fill(eta, v);
+	histFull[k].histFullHar[j].mHist_vPt->Fill(pt, v);
 
 	// Correlation of Phi of all particles with Psi
 	float phi_i = phi;
@@ -843,8 +892,11 @@ Int_t StFlowAnalysisMaker::Finish() {
       cout << "# Resolution= " << mRes[k][j] << " +/- " << mResErr[k][j] << endl;
       histFull[k].histFullHar[j].mHist_v2D->
    	Divide(histFull[k].histFullHar[j].mHistSum_v2D, histYield2DZero,1.,1.);
+
       if (mRes[k][j] != 0.) {
-	histFull[k].histFullHar[j].mHist_v2D->Scale(1. / mRes[k][j]);
+	histFull[k].histFullHar[j].mHist_v2D-> Scale(1. / mRes[k][j]);
+	histFull[k].histFullHar[j].mHist_vEta->Scale(1. / mRes[k][j]);
+	histFull[k].histFullHar[j].mHist_vPt-> Scale(1. / mRes[k][j]);
       } else {
 	cout << "##### Resolution of the " << j+1 << "th harmonic was zero."
 	     << endl;
@@ -856,7 +908,8 @@ Int_t StFlowAnalysisMaker::Finish() {
       float mult = histFull[k].histFullHar[j].mHistMult->GetMean();
       TF1* func_q = new TF1("qDist", qDist, 0., qMax, 3); // fit q dist
       func_q->SetParNames("v", "mult", "area");
-      func_q->SetParameters(1., mult, area); // initial values
+      //func_q->SetParameters(1., mult, area); // initial values
+      func_q->SetParameters(10., mult, area); // initial values
       func_q->SetParLimits(1, 1, 1); // mult is fixed
       func_q->SetParLimits(2, 1, 1); // area is fixed
       histFull[k].histFullHar[j].mHist_q->Fit("qDist", "0");

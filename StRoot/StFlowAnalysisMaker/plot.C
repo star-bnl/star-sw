@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.8 2000/01/13 21:50:24 posk Exp $
+// $Id: plot.C,v 1.9 2000/01/24 23:02:13 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker
@@ -9,6 +9,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.9  2000/01/24 23:02:13  posk
+// Merged updates
+//
 // Revision 1.8  2000/01/13 21:50:24  posk
 // Updates and corrections.
 //
@@ -36,12 +39,15 @@
 
 TFile histFile("flow.hist.root");
 
-const Int_t nHars    = 6;
+//const Int_t nHars    = 6;
+const Int_t nHars    = 3;
 const Int_t nSels    = 2;
 const Int_t nSubs    = 2;
 const Float_t twopi  = 2. * 3.1416;
 const Float_t etaMax = 2.;
 const Float_t ptMax  = 2.;
+Int_t runNo = 0;
+char  runNumber[6];
 
 // gSystem->Load("boldStyle");
 // boldStyle();
@@ -85,17 +91,21 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_Psi_Sub_Corr_Sel",
 			     "Flow_Psi_Sub_Corr_Diff_Sel",
 			     "Flow_Phi_Corr_Sel",
-			     "Flow_Sum_v2D_Sel",
 			     "Flow_Yield2D_Sel",
 			     "Flow_Yield.Eta_Sel",
 			     "Flow_Yield.Pt_Sel",
+			     "Flow_Sum_v2D_Sel",
 			     "Flow_vObs2D_Sel",
+			     "Flow_vObsEta_Sel",
+			     "Flow_vObsPt_Sel",
 			     "Flow_v2D_Sel",
+			     "Flow_vEta_Sel",
+			     "Flow_vPt_Sel",
 			     "Flow_v.Eta_Sel",
 			     "Flow_v.Pt_Sel" };
   //const int nNames = sizeof(baseName) / sizeof(baseName[0]);
   const int nNames = sizeof(baseName) / 4;
-  const int nSingles = 19 + 1;
+  const int nSingles = 20 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -104,6 +114,14 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     strcpy(shortName[n], baseName[n]);
     char* cp = strstr(shortName[n],"_Sel");
     if (cp) *cp = '\0';
+  }
+
+  // input the run number
+  if (runNo == 0) {
+    cout << "     run number? ";
+    cin >> runNo;
+    sprintf(runNumber,"ana%2d",runNo);
+    cout << " run number = " << runNumber << endl;
   }
 
   // input the page number
@@ -131,7 +149,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   cout << "  name= " << shortName[pageNumber] << endl;
 
   // set the constants
-  float qMax    =     2.;
+  //float qMax    =     2.;
+  float qMax    =     5.;
   float phiMax  = twopi; 
   int   n_qBins =    50;
 
@@ -154,6 +173,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     TPaveLabel* title = new TPaveLabel(0.1,0.96,0.9,0.99,shortName[pageNumber]);
     title->Draw();
   }
+  TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runNumber);  
+  run->Draw();
   TDatime now;
   TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
   date->Draw();
@@ -207,8 +228,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       if (strstr(shortName[pageNumber],"2D")!=0) {             // 2D
  	if (strcmp(shortName[pageNumber],"Flow_v2D")==0 ||
 	    strcmp(shortName[pageNumber],"Flow_vObs2D")==0) {
-	  hist->SetMaximum(50.);
-	  hist->SetMinimum(-50.);
+	  hist->SetMaximum(20.);
+	  hist->SetMinimum(-5.);
 	  gStyle->SetOptStat(0);
 	} else {
 	  gStyle->SetOptStat(10);
@@ -291,7 +312,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       } else if (strstr(shortName[pageNumber],"Psi")!=0) { // Psi distibutions
 	gStyle->SetOptStat(10);
 	hist->Draw("E1"); 
-      } else {
+      } else {                                             // all others
 	gStyle->SetOptStat(100110);
 	hist->Draw(); 
       }
@@ -317,6 +338,8 @@ TCanvas* plotResolution(){
 
   TCanvas* c = new TCanvas(profName[1],profName[1],600,780);
   c->ToggleEventStatus();
+  TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runNumber);  
+  run->Draw();
   TDatime now;
   TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
   date->Draw();
@@ -359,6 +382,8 @@ TCanvas* plotSingles(char* shortName){
   cout << "  name= " << shortName << endl;
   TCanvas* c = new TCanvas(shortName,shortName,780,600);
   c->ToggleEventStatus();
+  TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runNumber);  
+  run->Draw();
   TDatime now;
   TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
   date->Draw();
