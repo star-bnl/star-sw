@@ -1,66 +1,72 @@
+* editted 7/9/98 Kathy Turner - don't create subdirectores for GSTAR
+* 
 **************************************************
 macro setup 
 
-macro/global/import *
+ macro/global/import *
  if $vexist(setup_done)=0 then
    exec setup#dir
 *  exec setup#tables
    vec/cre setup_done
  endif
+ 
 return
+ 
 **************************************************
 macro dir
-macro/global/import *
-* editted 6/5/98 Kathy Turner
-* 
-* ***************************************************************
-* Sets up STAR STAF directroy tree .
+  
+  macro/global/import *
+   
 
-MESSAGE ********************************
-MESSAGE *** Setting up directory tree **
-MESSAGE ********************************
-macro/global/create run       /dui/run
-macro/global/create event     /dui/event
-macro/global/create constants [run]
-macro/global/create calib     /dui/calib
-macro/global/create params    [constants]/params
-macro/global/create geometry  [constants]/params
-macro/global/create evgen     [event]/evgen    
-macro/global/create geant     [event]/geant    
-macro/global/create raw_data  [event]/raw_data 
-macro/global/create data      [event]/data
-macro/global/create dst       [event]/dst
-*  constants tables
-mkdir  [run]
-mkdir  [calib]
-mkdir  [event]
-mkdir  [params]
+ MESSAGE ********************************
+ MESSAGE *** Setting up directory tree **
+ MESSAGE ********************************
+ 
+ macro/global/create run       /dui/run
+ macro/global/create event     /dui/event
+ macro/global/create constants [run]
+ macro/global/create calib     /dui/calib
+ macro/global/create params    [constants]/params
+ macro/global/create geometry  [constants]/params
+ macro/global/create evgen     [event]/evgen    
+ macro/global/create geant     [event]/geant    
+ macro/global/create raw_data  [event]/raw_data 
+ macro/global/create data      [event]/data
+ macro/global/create dst       [event]/dst
+   
+* top level directories--------------------------
+ mkdir  [run]
+ mkdir  [calib]
+ mkdir  [event]
+ 
+* constants tables ----------------------------------
+ mkdir  [params]
   for sys in ctf emc ftpc global mwc svt tpc
     mkdir [params]/[sys]
     mkdir [calib]/[sys]
   endfor
-mkdir  [params]/global/magnetic_field
+ mkdir  [params]/global/magnetic_field
+  
 
-*  event generator tables
-mkdir  [evgen]
+*  event generator tables ----------------------------
+ mkdir  [evgen]
  
-*  geant tables
-mkdir  [geant]
-mkdir  [geant]/Event
-mkdir  [geant]/Run
+*  geant tables ---------------------------------------
+ mkdir  [geant]
 
-*  raw data tables
-mkdir  [raw_data] 
-for sys in emc ftpc svt tpc
-  mkdir  [raw_data]/[sys]
-  mkdir  [raw_data]/[sys]/pixels
-endfor 
-*  data tables
-mkdir  [data] 
-mkdir  [data]/ctf
-mkdir  [data]/trg       
-mkdir  [data]/mwc
-for sys in emc ftpc global svt tpc
+*  raw data tables ------------------------------------
+ mkdir  [raw_data] 
+  for sys in emc ftpc svt tpc
+   mkdir  [raw_data]/[sys]
+   mkdir  [raw_data]/[sys]/pixels
+ endfor
+ 
+*  data tables ----------------------------------------
+ mkdir  [data] 
+ mkdir  [data]/ctf
+ mkdir  [data]/trg       
+ mkdir  [data]/mwc
+ for sys in emc ftpc global svt tpc
   mkdir  [data]/[sys]
   mkdir  [data]/[sys]/tracks
   if [sys]=global then
@@ -68,30 +74,39 @@ for sys in emc ftpc global svt tpc
   else
     mkdir  [data]/[sys]/hits
   endif
-endfor
-*  for dst information
-mkdir  [dst]
-return
-macro tables
-macro/global/import *
-**************************************************
-* Tables declaration
-**************************************************
+ endfor
+ 
+*  dst information ---------------------------------------
+ mkdir  [dst]
+ 
+ return
+ 
+******************************************************
+ 
+ macro tables
+   
+   macro/global/import *
+
 *____ geant/Run
-for table in  cave_cave  pipe_pipg  svtt_svtg  svtt_swca  svtt_ssup _
+ for table in  cave_cave  pipe_pipg  svtt_svtg  svtt_swca  svtt_ssup _
               svtt_serg  svtt_swam  svtt_selc  svtt_svtl  tpce_tpcg _
               tpce_tprs  tpce_tecw  ftpc_ftpg  ftpc_ffcc  ftpc_frbd _
               ftpc_fssd  vpdd_vpdg  btof_btog  btof_tray  btof_ctbb _
               btof_toff  calb_calg  ecal_emcg  ecal_eetr  ecal_esec _
               ecal_emxg  ecal_exse  magp_magg  magp_mbar  magp_mend _
               mfld_mflg  g2tm_gttc  g2tm_dete  mick_miky 
-  macro/global/create [table] [geant]/Run/[table]
-endfor
+   
+* macro/global/create [table] [geant]/Run/[table]
+ endfor
+ 
 *____ geant/Event
-for table in event vertex track svt_hit tpc_hit ctb_hit emc_hit smd_hit
-  macro/global/create g2t_[table] [geant]/Event/g2t_[table]
-endfor
-*____ constants/ctf
+ for table in event vertex track svt_hit tpc_hit ctb_hit emc_hit smd_hit
+*  macro/global/create g2t_[table] [geant]/Event/g2t_[table]
+ endfor
+ 
+* ____ constants/ctf
 
 
 return
+
+* *********************************************************************
