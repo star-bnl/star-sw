@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.116 2001/08/01 14:17:20 jeromel Exp $
+# $Id: Construct,v 1.117 2001/08/02 21:03:27 jeromel Exp $
 use Env;
 use lib $STAR . "/mgr";    # Modify perl include path
 use ConsDefs;
@@ -173,6 +173,8 @@ if ( !$param::quiet ) {
 my @subdirs = ();
 
 # make Targets and install includes
+my  @items = split(" ",$SKIP_DIRS);
+
 foreach my $dir( "pams", "StRoot" ) {
     next if !-d $dir;
     opendir( DIR, $dir ) or die "Can't open $dir\n";
@@ -181,9 +183,23 @@ foreach my $dir( "pams", "StRoot" ) {
 
     foreach my $sub_dir (@subdirS) {
         next if $sub_dir eq '.' || $sub_dir eq '..';
-        if ( $SKIP_DIRS && $SKIP_DIRS =~ $sub_dir ) {
-            print "skip dir: $sub_dir \t=> $SKIP_DIRS\n";
-            next;
+	# The above pattern survived for some time but is 
+	# COMPLETELY wrong.
+	#
+        #if ( $SKIP_DIRS && $SKIP_DIRS =~ $sub_dir ) {
+	# Although longer to search, this is the only secure way I
+	# could come up with. J.lauret August 2001
+        if ( $SKIP_DIRS ) {
+	    my $el;
+	    my $sts=1;
+	    foreach $el (@items){
+		if( $sub_dir =~ m/$el/){
+		    print "skip dir: $sub_dir \t=> $SKIP_DIRS\n";
+		    $sts = 0;
+		    last;
+		}
+	    }
+	    next if (! $sts);
         }
 
         my $sub_DIR = $dir . "/" . $sub_dir;
@@ -228,6 +244,7 @@ foreach my $dir( "pams", "StRoot" ) {
                   || $subsub_dir =~ /^wrk$/ || $subsub_dir  =~ /^example/
                   || $subsub_dir =~ /^kumac/ )
                 {
+		    #print "=== Skipping $subsub_dir in $subsub_DIR\n";
                     next;
                 }
 
@@ -244,13 +261,14 @@ foreach my $dir( "pams", "StRoot" ) {
                           || $inc =~ /\.idl$/ )
                         {
                             push @incT, $subsub_DIR . "/"
-                              . $inc;    #print "+++ add $inc\n";
+				. $inc;    
+			    print "+++ add $inc from $sub_DIR\n" if ($param::debug);
                         }
                     }
 
                     if ( $#incT > -1 && !$param::rflag ) {
                         Install $env $INCLUDE, @incT;
-                    }
+		    }
                     next;
                 }
 
