@@ -1,7 +1,7 @@
 // Hey Emacs this is -*-c++-*-
 #ifndef STAR_EEmcTower_h
 #define STAR_EEmcTower_h
-// $Id: EEmcTower.h,v 1.3 2004/05/07 22:02:57 zolnie Exp $
+// $Id: EEmcTower.h,v 1.4 2004/05/10 21:10:19 zolnie Exp $
 
 
 #include <ostream>
@@ -21,15 +21,24 @@ public:
   
   /// the explicit constructor
   EEmcTower(int s, int ss, int e, float adc=0.0, float ene=0.0) { 
-    mSec  = (unsigned char)s;
-    mSub  = (unsigned char)ss;
-    mEta  = (unsigned char)e;
+    mSec  = (char)s;
+    mSub  = (char)ss;
+    mEta  = (char)e;
     mADC  = adc;
     mEdep = ene;
   };
 
   /// an explicit constructor that uses labels rather intigers
   EEmcTower(const char *label, float adc=0.0, float ene=0.0);
+  
+  /// a copy constructor
+  EEmcTower(const EEmcTower& t) {
+    mSec  = (char) t.Sec();
+    mSub  = (char) t.SubSec();
+    mEta  = (char) t.Eta();
+    mADC  = t.ADC();
+    mEdep = t.dE();
+  }
 
   /// the destructor
   ~EEmcTower() { };
@@ -80,7 +89,26 @@ public:
 
   /// print tower hit info in xml-like style
   ostream& Out ( ostream &out ) const ;  
+
+  /// compare two towers
+  bool operator==(const EEmcTower &t) {
+    if(mSec!=t.Sec())    return false;
+    if(mSub!=t.SubSec()) return false;
+    if(mEta!=t.Eta())    return false;
+    return true;
+  }
   
+  /// compare two towers
+  bool operator!=(const EEmcTower &t) {
+    if(mSec==t.Sec())    return false;
+    if(mSub==t.SubSec()) return false;
+    if(mEta==t.Eta())    return false;
+    return true;
+  }
+  
+  /// copy one tower to another
+  ///EEmcTower& operator=(const EEmcTower &t);
+
 private:
   bool  ParseLabel(const char* label);
   //
@@ -94,7 +122,9 @@ public:
   ClassDef(EEmcTower, 3)   // 
 };
 
-
+/// print EEmcTower to a ostream 
+/// \param out a reference to an ostream 
+/// \param t   a reference to a EEmcTower
 ostream&  operator<<(ostream &out, const EEmcTower    &t  );
 
 #endif

@@ -1,5 +1,5 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTower.cxx,v 1.5 2004/05/07 22:02:57 zolnie Exp $
+// $Id: EEmcTower.cxx,v 1.6 2004/05/10 21:10:19 zolnie Exp $
 
 /**
  * \class  EEmcTower
@@ -11,8 +11,8 @@
  *
  * \author Piotr A. Zolnierczuk
  *
- * $Date: 2004/05/07 22:02:57 $ 
- * $Revision: 1.5 $
+ * $Date: 2004/05/10 21:10:19 $ 
+ * $Revision: 1.6 $
  *
  * \section towerremarks Remarks
  * \bug  implicitly assumed that labels are no longer than 16 characters
@@ -58,15 +58,16 @@ EEmcTower::ParseLabel(const char *label)
   char const *p = label;
   int  s=0;
   char ss=0;
+  char t=0;
   int  e=0;
   while( *p != 0x00 && !islower(*p) && !isupper(*p) && !isdigit(*p) ) p++;
-  int  r=sscanf(p,"%02dT%1c%02d",&s,&ss,&e);
-  if(r!=3) return false;
+  int  r=sscanf(p,"%02d%1c%1c%02d",&s,&t,&ss,&e);
+  if(toupper(t)!='T') return false;
+  if(r!=4) return false;
   // adjust indices
-  mSec = s - 1;
-  mSub = ss -1;
-  mEta = e-1;  
-  // format label 
+  mSec = s  - 1;
+  mSub = ss - 'A';
+  mEta = e  - 1;  
   return true; 
   
 }
