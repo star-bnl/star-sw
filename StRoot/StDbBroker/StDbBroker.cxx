@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.19 2000/04/14 14:46:41 fine Exp $
+ * $Id: StDbBroker.cxx,v 1.20 2000/04/25 18:27:48 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.20  2000/04/25 18:27:48  porter
+ * Added flavor and production time as query fields to pass to db-api
+ *
  * Revision 1.19  2000/04/14 14:46:41  fine
  * new method for Victor has been introduced
  *
@@ -128,7 +131,7 @@ char **StDbBroker::GetComments(St_Table *parentTable)
 }
 
 //_____________________________________________________________________________
-StDbBroker::StDbBroker(): m_structName(0), m_tableName(0), m_requestTimeStamp(0), m_tableVersion(0), m_database(0), m_ParentType(0), m_isVerbose(0), m_Nodes(0), m_Tree(0) {
+StDbBroker::StDbBroker(): m_structName(0), m_tableName(0), m_requestTimeStamp(0), m_tableVersion(0), m_database(0), m_ParentType(0), m_isVerbose(0), m_Nodes(0), m_Tree(0), m_flavor(0), m_prodTime(0) {
 
   mgr=StDbManager::Instance();
 
@@ -137,6 +140,11 @@ StDbBroker::StDbBroker(): m_structName(0), m_tableName(0), m_requestTimeStamp(0)
 //_____________________________________________________________________________
 StDbBroker::~StDbBroker(){
 
+  if(m_tableName) delete [] m_tableName;
+  if(m_structName) delete [] m_structName;
+  if(m_tableVersion) delete [] m_tableVersion;
+  if(m_database) delete [] m_database;
+  if(m_flavor) delete [] m_flavor;
   if(m_Nodes) delete m_Nodes;
   if(m_Tree) delete m_Tree;
   if(mgr) delete mgr;
@@ -302,6 +310,22 @@ StDbBroker::SetDateTime(UInt_t date, UInt_t time)
 
    //   cout << "ReQuested Time = " << mgr->getDateCheckTime() << endl;
 
+
+}
+
+//____________________________________________________________________________
+void StDbBroker::SetProdTime(UInt_t ptime){
+  if(m_Tree)m_Tree->setProdTime(ptime);
+  m_prodTime = ptime;
+}
+
+//____________________________________________________________________________
+void StDbBroker::SetFlavor(const char* flavor){
+
+  if(!flavor)return;
+  m_flavor = new char[strlen(flavor)+1];
+  strcpy(m_flavor,flavor);
+  if(m_Tree)m_Tree->setFlavor(m_flavor);
 
 }
 
@@ -484,7 +508,10 @@ if(!versionName){
 
  dbConfig_st* configTable = 0;
  if(!m_Tree) return configTable;
- 
+
+ if(m_prodTime!=0)m_Tree->setProdTime(m_prodTime); 
+ if(m_flavor)m_Tree->setFlavor(m_flavor);
+
  if(m_isVerbose){
  cout << "****************************************************************"<<endl;
  cout << "***    Will Print the Tree "<<endl;
