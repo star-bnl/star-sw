@@ -62,9 +62,15 @@ C     =====================
       
 C     Local Declarations:
 C     ===================
+
       real       x(3,0:7), v(3,6,0:7), vm(7,0:7), cth, cthij(7,0:7)
-      integer    extra(7), ispts(0:7), ispt, jspt(0:7), iwafer(0:7)
+
+%L
+%T2       
+      integer    extra(7), ispts(0:7), i_spt, j_spt(0:7), iwafer(0:7)
       integer    jwafer(0:7),n_groups
+%N
+%T0
       integer    iwafer1, iwafer2, n, kwafer
       integer    iladder, iladder1, iladder2
       integer    layer, layerp, layerpp, k
@@ -81,7 +87,7 @@ C     ===================
       integer    ilist
       save       first
       character*132 myString
-
+      real       cosd
  
 
 
@@ -290,8 +296,8 @@ c     sort the space points by wafer and count them
       end do
 
 
-      do ispt = 1, spt_h.nok   ! count
-         kwafer       = spt(ispt).id_wafer
+      do i_spt = 1, spt_h.nok   ! count
+         kwafer       = spt(i_spt).id_wafer
          ilayer       = kwafer/1000
          if (ilayer.eq.8) ilayer=7
          iwafer1      = (kwafer-ilayer*1000)/100
@@ -312,7 +318,7 @@ c     sort the space points by wafer and count them
             endif
          else
             sptkeyn(iwafer2) = sptkeyn(iwafer2) + 1
-            sptkey(sptkeyn(iwafer2),iwafer2) = ispt
+            sptkey(sptkeyn(iwafer2),iwafer2) = i_spt
          endif
 
       end do ! spt = 1, spt_h.nok
@@ -331,7 +337,7 @@ c     main vertex
 c     -------------------------------------------------
 c     layer 1
 c     -------------------------------------------------
-      jspt(1)   = 0
+      j_spt(1)   = 0
       jwafer(1) = 1
       iwafer(1) = waferkey(jwafer(1),1,0)
       done(1)   = .false.
@@ -342,14 +348,14 @@ c     -------------------------------------------------
 
          if (extra(1).lt.1) then
 
-            jspt(1) = jspt(1) + 1
+            j_spt(1) = j_spt(1) + 1
 
-            if (jspt(1).gt.sptkeyn(iwafer(1))) then
+            if (j_spt(1).gt.sptkeyn(iwafer(1))) then
 
                if (jwafer(1).lt.waferkeyn(1,0)) then
                   jwafer(1) = jwafer(1) + 1
                   iwafer(1) = waferkey(jwafer(1),1,0)
-                  jspt(1)   = 0
+                  j_spt(1)   = 0
                   goto 1
                else
                   extra(1) = extra(1) + 1
@@ -357,7 +363,7 @@ c     -------------------------------------------------
                end if
                
             else 
-               ispts(1) = sptkey(jspt(1),iwafer(1))
+               ispts(1) = sptkey(j_spt(1),iwafer(1))
                if (spt(ispts(1)).flag.eq.0) then
                   layer   = 1
                   layerp  = 0
@@ -401,7 +407,7 @@ c     -------------------------------------------------
 c     ------------------------------------------------ 
 c     layer 2 
 c     -------------------------------------------------
-      jspt(2)   = 0
+      j_spt(2)   = 0
       jwafer(2) = 1
       done(2)   = .false.
       extra(2)  = 0
@@ -421,15 +427,15 @@ c     -------------------------------------------------
          
          if (extra(2).lt.1) then
             
-            jspt(2) = jspt(2) + 1
+            j_spt(2) = j_spt(2) + 1
             iwafer(2) = waferkey(jwafer(2),2,iwafer(layerp))
 
-            if (jspt(2).gt.sptkeyn(iwafer(2))) then
+            if (j_spt(2).gt.sptkeyn(iwafer(2))) then
                
                if (jwafer(2).lt.waferkeyn(2,iwafer(layerp))) then
                   jwafer(2) = jwafer(2) + 1
                   iwafer(2) = waferkey(jwafer(2),2,iwafer(layerp))
-                  jspt(2)   = 0
+                  j_spt(2)   = 0
                   goto 2
                else
                   extra(2) = extra(2) + 1
@@ -437,7 +443,7 @@ c     -------------------------------------------------
                end if
                
             else 
-               ispts(2) = sptkey(jspt(2),iwafer(2))
+               ispts(2) = sptkey(j_spt(2),iwafer(2))
                if (spt(ispts(2)).flag.eq.0) then
                   layer   =  2
                   if (layers(1)) then
@@ -497,7 +503,7 @@ c     -------------------------------------------------
 c     -------------------------------------------------
 c     layer 3
 c     -------------------------------------------------
-      jspt(3)   = 0
+      j_spt(3)   = 0
       jwafer(3) = 1
       done(3)   = .false.
       extra(3)  = 0
@@ -524,15 +530,15 @@ c     -------------------------------------------------
          
         if (extra(3).lt.1) then
             
-            jspt(3)   = jspt(3) + 1
+            j_spt(3)   = j_spt(3) + 1
             iwafer(3) = waferkey(jwafer(3),3,iwafer(layerp))
 
-            if (jspt(3).gt.sptkeyn(iwafer(3))) then
+            if (j_spt(3).gt.sptkeyn(iwafer(3))) then
                
                if (jwafer(3).lt.waferkeyn(3,iwafer(layerp))) then
                   jwafer(3) = jwafer(3) + 1
                   iwafer(3) = waferkey(jwafer(3),3,iwafer(layerp))
-                  jspt(3)   = 0
+                  j_spt(3)   = 0
                   goto 3
                else
                   extra(3) = extra(3) + 1
@@ -540,7 +546,7 @@ c     -------------------------------------------------
                end if
                
             else 
-               ispts(3) = sptkey(jspt(3),iwafer(3))
+               ispts(3) = sptkey(j_spt(3),iwafer(3))
                if (spt(ispts(3)).flag.eq.0) then
                   layer   =  3
                   if (layers(2)) then
@@ -607,7 +613,7 @@ c     -------------------------------------------------
 c     -------------------------------------------------
 c     layer 4
 c     -------------------------------------------------
-      jspt(4)   = 0
+      j_spt(4)   = 0
       jwafer(4) = 1
       done(4)   = .false.
       extra(4)  = 0
@@ -643,15 +649,15 @@ c     -------------------------------------------------
          
          if (extra(4).lt.1) then
             
-            jspt(4) = jspt(4) + 1
+            j_spt(4) = j_spt(4) + 1
             iwafer(4) = waferkey(jwafer(4),4,iwafer(layerp))
 
-            if (jspt(4).gt.sptkeyn(iwafer(4))) then
+            if (j_spt(4).gt.sptkeyn(iwafer(4))) then
                
                if (jwafer(4).lt.waferkeyn(4,iwafer(layerp))) then
                   jwafer(4) = jwafer(4) + 1
                   iwafer(4) = waferkey(jwafer(4),4,iwafer(layerp))
-                  jspt(4)   = 0
+                  j_spt(4)   = 0
                   goto 4
                else
                   extra(4) = extra(4) + 1
@@ -659,7 +665,7 @@ c     -------------------------------------------------
                end if
                
             else 
-               ispts(4) = sptkey(jspt(4),iwafer(4))
+               ispts(4) = sptkey(j_spt(4),iwafer(4))
                if (spt(ispts(4)).flag.eq.0) then
                   layer   =  4
                   if (layers(3)) then
@@ -736,7 +742,7 @@ c     -------------------------------------------------
 c     -------------------------------------------------
 c     layer 5
 c     -------------------------------------------------
-      jspt(5)   = 0
+      j_spt(5)   = 0
       jwafer(5) = 1
       done(5)   = .false.
       extra(5)  = 0
@@ -783,15 +789,15 @@ c     -------------------------------------------------
          
          if (extra(5).lt.1) then
             
-            jspt(5) = jspt(5) + 1
+            j_spt(5) = j_spt(5) + 1
             iwafer(5) = waferkey(jwafer(5),5,iwafer(layerp))
 
-            if (jspt(5).gt.sptkeyn(iwafer(5))) then
+            if (j_spt(5).gt.sptkeyn(iwafer(5))) then
                
                if (jwafer(5).lt.waferkeyn(5,iwafer(layerp))) then
                   jwafer(5) = jwafer(5) + 1
                   iwafer(5) = waferkey(jwafer(5),5,iwafer(layerp))
-                  jspt(5)   = 0
+                  j_spt(5)   = 0
                   goto 5
                else
                   extra(5) = extra(5) + 1
@@ -799,7 +805,7 @@ c     -------------------------------------------------
                end if
                
             else 
-               ispts(5) = sptkey(jspt(5),iwafer(5))
+               ispts(5) = sptkey(j_spt(5),iwafer(5))
                if (spt(ispts(5)).flag.eq.0) then
 c                  ilayer = 5
 	          layer = 5 ! this was wrong (lm and wkw) 
@@ -888,7 +894,7 @@ c                  ilayer = 5
 c     -------------------------------------------------
 c     layer 6
 c     -------------------------------------------------
-      jspt(6)   = 0
+      j_spt(6)   = 0
       jwafer(6) = 1
       done(6)   = .false.
       extra(6)  = 0
@@ -948,15 +954,15 @@ c     -------------------------------------------------
       
          if (extra(6).lt.1) then
 
-            jspt(6) = jspt(6) + 1
+            j_spt(6) = j_spt(6) + 1
             iwafer(6) = waferkey(jwafer(6),6,iwafer(layerp))
 
-            if (jspt(6).gt.sptkeyn(iwafer(6))) then
+            if (j_spt(6).gt.sptkeyn(iwafer(6))) then
                
                if (jwafer(6).lt.waferkeyn(6,iwafer(layerp))) then
                   jwafer(6) = jwafer(6) + 1
                   iwafer(6) = waferkey(jwafer(6),6,iwafer(layerp))
-                  jspt(6)   = 0
+                  j_spt(6)   = 0
                   ispts(6)  = 0
                   goto 6
                else
@@ -966,7 +972,7 @@ c     -------------------------------------------------
                end if
                
             else 
-               ispts(6) = sptkey(jspt(6),iwafer(6))
+               ispts(6) = sptkey(j_spt(6),iwafer(6))
                if (spt(ispts(6)).flag.eq.0) then
                   layer   =  6
                   if (layers(5)) then
@@ -1080,23 +1086,23 @@ c     consider track candidate for storage
             stk_am_fill3 = stafcv_bad
             itrack   = track_h.maxlen
          else                   ! (itrack.le.track_h.maxlen)
-            ispt = 0
+            i_spt = 0
             do k = 1, 6
-               if (ispts(k).gt.0) ispt = ispt + 1
+               if (ispts(k).gt.0) i_spt = i_spt + 1
             end do
-            if ((ispt.ge.3).and.                        ! at least 3 hits
+            if ((i_spt.ge.3).and.                        ! at least 3 hits
      &          (ispts(5).gt.0.or.ispts(6).gt.0).and.   ! one in slayer 3
      &          (ispts(3).gt.0.or.ispts(4).gt.0).and.   ! one in slayer 2 (wkw)
      &          (ispts(1).gt.0.or.ispts(2).gt.0)) then  ! one in slayer 1 (wkw)
                itrack = itrack + 1
-               track(itrack).nspt       = ispt
+               track(itrack).nspt       = i_spt
                track(itrack).id         = itrack
                track(itrack).sec        = 0
                track(itrack).pid        = 0
-               ispt = 0
+               i_spt = 0
                do k = 1,6
                   if (ispts(k).gt.0) then
-                     ispt = ispt + 1
+                     i_spt = i_spt + 1
                      groups(n_groups).ident = 2
                      groups(n_groups).id1 = itrack
                      groups(n_groups).id2 = ispts(k)

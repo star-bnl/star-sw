@@ -74,7 +74,7 @@ c     error on positions
       real pha
 c     wkw: add in residues:
       real    cir_res(max_spt),  lin_res(max_spt)
-      integer nspt, kspt(max_spt), the_spt, layer(3)
+      integer nspt, k_spt(max_spt), the_spt, layer(3)
       
       real      tanl,  psi,  invpt      ! momentum info
       real     dtanl, dpsi, dinvpt      ! error on momentum info
@@ -116,6 +116,7 @@ c     =============
       logical   first
       data      first/.true./
       save      first
+      real      atan2d,cosd,sind
       
 C     RETURN:
 C     =======
@@ -189,7 +190,6 @@ c                             = 0  unknown - will be taken as primaries
 c     wkw: (I changed the order of the sec/nspt tests)
 
          if (track(itrack).nspt .gt. 2) then ! enough hits
-
             if (track(itrack).nspt .gt. 3 .or.
      +          stkpar(1).method .le. 1 ) then         ! fit circle properly
 
@@ -210,7 +210,7 @@ c     the vertex is therefore not in the fitted points.
 
                if( stkpar(1).method .le. 1) then ! Add in prim vtx as point
                ispt = ispt+1
-               kspt(ispt)  = -1  ! -1 indicates this is a vertex
+               k_spt(ispt)  = -1  ! -1 indicates this is a vertex
                x(ispt)    = vtx(1).x(1)
                y(ispt)    = vtx(1).x(2)
                z(ispt)    = vtx(1).x(3)
@@ -267,7 +267,7 @@ c               write(6,*) ' nspt=',nspt
 
                   ispt        = ispt + 1
                   the_spt     = groups(table_off(i)).id2
-                  kspt(ispt)   = the_spt
+                  k_spt(ispt)   = the_spt
                   
 c     This is a new section to calculate the largest difference between
 c     any of the space points de/dx and the average of the other space
@@ -504,7 +504,6 @@ c               dz0   = dz(2) ! new dz0 calc follows wkw
                dz0r0       = 0.
                dz0tanl     = 0.
 
-               
 c              wkw: renormalize chi
 c               track(itrack).chisq(1) = cchi2 ! circle fit chi-square
 c               track(itrack).chisq(1) = cchi2/(3.47+280*exp(-13.7/abs(invpt)))
@@ -582,7 +581,7 @@ C               layer(3) = 0
 #endif               
                do i = 1, nrows
                   the_spt     = groups(table_off(i)).id2
-                  kspt(ispt)   = the_spt
+                  k_spt(ispt)   = the_spt
 c     In order to make code similar to case where vertex
 c     is used in fit, transform to remove vertex offset 
 c     here too (wkw)
@@ -886,7 +885,7 @@ C                  track(itrack).dedx(2)  = infinity ! error on above
                   track(itrack).phi0     = infinity ! 1st point coordinate
                   track(itrack).r0       = infinity
                   track(itrack).z0       = infinity
-                  track(itrack).flag     = 0 ! flag=0 ! wkw: bad fit
+                  track(itrack).flag     = 0 ! flag=0 -  wkw: bad fit
                   track(itrack).cov(1)   = infinity
                   track(itrack).cov(2)   = infinity
                   track(itrack).cov(3)   = infinity
@@ -929,7 +928,7 @@ c      first point
             track(itrack).phi0     = infinity ! 1st point coordinate
             track(itrack).r0       = infinity
             track(itrack).z0       = infinity
-            track(itrack).flag     = 0 ! flag=0 ! wkw: not enough hits
+            track(itrack).flag     = 0 ! flag=0 - wkw: not enough hits
             track(itrack).cov(1)   = infinity
             track(itrack).cov(2)   = infinity
             track(itrack).cov(3)   = infinity
