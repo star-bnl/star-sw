@@ -44,6 +44,11 @@ void StiRootDrawableLine::setMarkerSize(double val)
     //    mpoly->SetMarkerSize(10.);
 }
 
+void StiRootDrawableLine::setLineStyle(unsigned int val)
+{
+    mline->SetLineStyle(val);
+}
+
 void StiRootDrawableLine::fillHitsForDrawing()
 {
     mline->SetPolyLine(0, marray);
