@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.hh,v 1.6 1999/09/16 18:47:59 lisa Exp $
+ * $Id: StHbtEvent.hh,v 1.7 2000/02/18 21:32:23 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,15 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.hh,v $
+ * Revision 1.7  2000/02/18 21:32:23  laue
+ * franksTrackCut changed. If mCharge is set to '0' there will be no cut
+ * on charge. This is important for front-loaded cuts.
+ *
+ * copy constructor implemented for StHbtEvent, StHbtTrack and StHbtV0.
+ *
+ * franks1HistoD.cxx franks1HistoD.h franks2HistoD.cxx franks2HistoD.h
+ * removed. We can now (CC5 on Solaris) use the versions (no D)
+ *
  * Revision 1.6  1999/09/16 18:47:59  lisa
  * replace placeholder HbtV0Track stuff with Helens StHbtV0 classes
  *
@@ -40,9 +49,13 @@
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
 
+class StHbtTrackCut;
+class StHbtV0Cut;
+
 class StHbtEvent{
 public:
   StHbtEvent();
+  StHbtEvent(const StHbtEvent&, StHbtTrackCut* =0, StHbtV0Cut* =0); // copy constructor with track and v0 cuts
   ~StHbtEvent();
 
   unsigned short EventNumber() const;

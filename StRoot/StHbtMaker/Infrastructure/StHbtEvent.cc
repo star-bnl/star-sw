@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.4 1999/09/16 18:47:59 lisa Exp $
+ * $Id: StHbtEvent.cc,v 1.5 2000/02/18 21:32:23 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,15 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.5  2000/02/18 21:32:23  laue
+ * franksTrackCut changed. If mCharge is set to '0' there will be no cut
+ * on charge. This is important for front-loaded cuts.
+ *
+ * copy constructor implemented for StHbtEvent, StHbtTrack and StHbtV0.
+ *
+ * franks1HistoD.cxx franks1HistoD.h franks2HistoD.cxx franks2HistoD.h
+ * removed. We can now (CC5 on Solaris) use the versions (no D)
+ *
  * Revision 1.4  1999/09/16 18:47:59  lisa
  * replace placeholder HbtV0Track stuff with Helens StHbtV0 classes
  *
@@ -28,6 +37,9 @@
  **************************************************************************/
 
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
+#include "StHbtMaker/Base/StHbtTrackCut.h"
+#include "StHbtMaker/Base/StHbtV0Cut.h"
+
 //___________________
 StHbtEvent::StHbtEvent(){
   mPrimVertPos[0]=-999.0;
@@ -35,6 +47,39 @@ StHbtEvent::StHbtEvent(){
   mPrimVertPos[2]=-999.0;
   mTrackCollection = new StHbtTrackCollection;
   mV0Collection = new StHbtV0Collection;
+}
+//___________________
+StHbtEvent::StHbtEvent(const StHbtEvent& ev, StHbtTrackCut* tCut, StHbtV0Cut* vCut){ // copy constructor with track and v0 cuts
+  //cout << "StHbtEvent::StHbtEvent(const StHbtEvent& ev, StHbtTrackCut* tCut, StHbtV0Cut* vCut)" << endl;
+  mEventNumber = ev.mEventNumber;
+  mCtbMultiplicity = ev.mCtbMultiplicity;
+  mZdcAdc[0] = ev.mZdcAdc[0];
+  mZdcAdc[1] = ev.mZdcAdc[1];
+  mTpcNhits = ev.mTpcNhits;
+  mNumberOfTracks = ev.mNumberOfTracks;
+  mNumberOfGoodTracks = ev.mNumberOfGoodTracks;
+  mReactionPlane[0] = ev.mReactionPlane[0];
+  mReactionPlane[1] = ev.mReactionPlane[1];
+  mPrimVertPos = ev.mPrimVertPos;
+
+  // create collections
+  mTrackCollection = new StHbtTrackCollection;
+  mV0Collection = new StHbtV0Collection;
+  // copy track collection
+  for ( StHbtTrackIterator tIter=ev.mTrackCollection->begin(); tIter!=ev.mTrackCollection->end(); tIter++) {
+    if ( !tCut || tCut->Pass(*tIter) ) {
+      //cout << " trackCut passed " << endl;
+      StHbtTrack* trackCopy = new StHbtTrack(**tIter);
+      mTrackCollection->push_back(trackCopy);
+    }
+  }
+  // copy v0 collection
+  for ( StHbtV0Iterator vIter=ev.mV0Collection->begin(); vIter!=ev.mV0Collection->end(); vIter++) {
+    if ( !vCut || vCut->Pass(*vIter) ) {
+      StHbtV0* v0Copy = new StHbtV0(**vIter);
+      mV0Collection->push_back(v0Copy);
+    }
+  }
 }
 //___________________
 StHbtEvent::~StHbtEvent(){

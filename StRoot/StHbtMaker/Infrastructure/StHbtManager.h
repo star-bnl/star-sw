@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.h,v 1.8 2000/01/25 17:35:17 laue Exp $
+ * $Id: StHbtManager.h,v 1.9 2000/02/18 21:32:24 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,15 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.h,v $
+ * Revision 1.9  2000/02/18 21:32:24  laue
+ * franksTrackCut changed. If mCharge is set to '0' there will be no cut
+ * on charge. This is important for front-loaded cuts.
+ *
+ * copy constructor implemented for StHbtEvent, StHbtTrack and StHbtV0.
+ *
+ * franks1HistoD.cxx franks1HistoD.h franks2HistoD.cxx franks2HistoD.h
+ * removed. We can now (CC5 on Solaris) use the versions (no D)
+ *
  * Revision 1.8  2000/01/25 17:35:17  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -54,16 +63,18 @@
 
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtAnalysisCollection.hh"
+#include "StHbtMaker/Infrastructure/StHbtEventWriterCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtAnalysis.h"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Base/StHbtEventReader.hh"
+#include "StHbtMaker/Base/StHbtEventWriter.hh"
 
 class StHbtManager{
 
 private:
   StHbtAnalysisCollection* mAnalysisCollection;
   StHbtEventReader*        mEventReader;
-  StHbtEventReader*        mEventWriter;
+  StHbtEventWriterCollection* mEventWriterCollection;
 
 public:
   StHbtManager();
@@ -72,12 +83,16 @@ public:
   // Gets and Sets...
   StHbtAnalysisCollection* AnalysisCollection();
   StHbtAnalysis* Analysis(int n);  // Access to Analysis within Collection
+  void AddAnalysis(StHbtAnalysis*);
+
+  StHbtEventWriterCollection* EventWriterCollection();
+  StHbtEventWriter* EventWriter(int n);// Access to EventWriter within Collection
+  void SetEventWriter(StHbtEventWriter*);  // just for historic reasons
+  void AddEventWriter(StHbtEventWriter*);
 
   StHbtEventReader* EventReader();
   void SetEventReader(StHbtEventReader*);
-  void SetEventWriter(StHbtEventReader*);
 
-  void AddAnalysis(StHbtAnalysis*);
 
   int Init();
   int ProcessEvent();   // a "0" return value means success - otherwise quit
@@ -90,11 +105,15 @@ public:
 };
 
 inline StHbtAnalysisCollection* StHbtManager::AnalysisCollection(){return mAnalysisCollection;}
+inline void StHbtManager::AddAnalysis(StHbtAnalysis* anal){mAnalysisCollection->push_back(anal);}
+
+inline StHbtEventWriterCollection* StHbtManager::EventWriterCollection(){return mEventWriterCollection;}
+inline void StHbtManager::AddEventWriter(StHbtEventWriter* writer){mEventWriterCollection->push_back(writer);}
+inline void StHbtManager::SetEventWriter(StHbtEventWriter* writer){mEventWriterCollection->push_back(writer);}
+
 inline StHbtEventReader* StHbtManager::EventReader(){return mEventReader;}
 inline void StHbtManager::SetEventReader(StHbtEventReader* reader){mEventReader = reader;}
-inline void StHbtManager::SetEventWriter(StHbtEventReader* writer){mEventWriter = writer;}
 
-inline void StHbtManager::AddAnalysis(StHbtAnalysis* anal){mAnalysisCollection->push_back(anal);}
 
 #endif
 

@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.10 2000/01/25 17:35:17 laue Exp $
+ * $Id: StHbtTrack.hh,v 1.11 2000/02/18 21:32:24 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,15 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.11  2000/02/18 21:32:24  laue
+ * franksTrackCut changed. If mCharge is set to '0' there will be no cut
+ * on charge. This is important for front-loaded cuts.
+ *
+ * copy constructor implemented for StHbtEvent, StHbtTrack and StHbtV0.
+ *
+ * franks1HistoD.cxx franks1HistoD.h franks2HistoD.cxx franks2HistoD.h
+ * removed. We can now (CC5 on Solaris) use the versions (no D)
+ *
  * Revision 1.10  2000/01/25 17:35:17  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -65,6 +74,7 @@
 class StHbtTrack{
 public:
   StHbtTrack(){/* no-op*/};
+  StHbtTrack(const StHbtTrack&);// copy constructor
   ~StHbtTrack(){/* no-op*/};
 
   char Charge() const;

@@ -11,6 +11,15 @@
  ***********************************************************************
  *
  * $Log: StHbtV0.hh,v $
+ * Revision 1.4  2000/02/18 21:32:24  laue
+ * franksTrackCut changed. If mCharge is set to '0' there will be no cut
+ * on charge. This is important for front-loaded cuts.
+ *
+ * copy constructor implemented for StHbtEvent, StHbtTrack and StHbtV0.
+ *
+ * franks1HistoD.cxx franks1HistoD.h franks2HistoD.cxx franks2HistoD.h
+ * removed. We can now (CC5 on Solaris) use the versions (no D)
+ *
  * Revision 1.3  2000/02/01 00:33:32  laue
  * namespaces changed to run on the new Solaris Compiler CC5
  * since we can use member templates in franks1Histo.hh we are doing it
@@ -34,6 +43,7 @@
 class StHbtV0 {
 public:
   StHbtV0(){/* no-op */}
+  StHbtV0(const StHbtV0&); // copy constructor
   ~StHbtV0(){/* no-op */}
 
 
