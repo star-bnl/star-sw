@@ -1,5 +1,5 @@
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.8 2003/05/09 22:07:54 pruneau Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.9 2003/06/26 20:22:18 andrewar Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.9  2003/06/26 20:22:18  andrewar
+ * Fixed error in drift calc.
+ *
  * Revision 2.8  2003/05/09 22:07:54  pruneau
  * Added protection to avoid 90deg tracks and ill defined eloss
  *
@@ -72,7 +75,7 @@ void StiDefaultHitErrorCalculator::set(double intrinsicZ, double driftZ,
 
 void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node) const
 {  
-  double dz = (fabs(node->getZ())-200.)/100.;
+  double dz = (200.-fabs(node->getZ()))/100.;
   double cosCA = node->_cosCA;
   double sinCA = node->_sinCA;
   if (cosCA==0.)
