@@ -221,14 +221,17 @@ Int_t St_trg_Maker::Make(){
 
 
       case 2004:
-        (void) printf("St_trg_Maker:: Make()  : analyzing year 2004 trigger data (using 2003)\n");
+      case 2005:
+        (void) printf("St_trg_Maker:: Make()  : analyzing year 2004/2005 trigger data (using 2003)\n");
         if(!initializationDone) { 
-	  InitCtbArrays2001();                        /* use 2001 for 2004       */ 
+	  InitCtbArrays2001();                        /* use 2001 for 2004-2005  */ 
 	  initializationDone=7; 
 	}
         return Daq2003(DAQdset,dst1,dst2,dst3,dst4);  /* use same scheme as 2003 */
         break;
-      case 0: return kStWarn;
+
+      case 0: 
+	return kStWarn;
 
       default: assert(0);
     }
@@ -1055,8 +1058,11 @@ void St_trg_Maker::InitMwcArrays(void) {
 
 
 
-// $Id: St_trg_Maker.cxx,v 1.51 2004/08/07 03:02:20 perev Exp $
+// $Id: St_trg_Maker.cxx,v 1.52 2005/01/07 15:26:54 jeromel Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.52  2005/01/07 15:26:54  jeromel
+// Assume same decoding 2005=2004 .
+//
 // Revision 1.51  2004/08/07 03:02:20  perev
 // corruption test added
 //
