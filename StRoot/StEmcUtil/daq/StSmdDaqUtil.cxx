@@ -6,7 +6,7 @@ StSmdDaqUtil::StSmdDaqUtil()  { };
 
 StSmdDaqUtil::~StSmdDaqUtil() { };
 
-inline Bool_t
+Bool_t
 StSmdDaqUtil::getBsmdeCell(const Int_t connector, const Int_t pin, Int_t& e)
 {
   // connector - input connector of FEE card (change from 1 to 3)
@@ -25,7 +25,7 @@ StSmdDaqUtil::getBsmdeCell(const Int_t connector, const Int_t pin, Int_t& e)
   }
 }
 
-inline Bool_t
+Bool_t
 StSmdDaqUtil::getBsmdpCell(const Int_t connector, const Int_t pin, Int_t& e, Int_t& s)
 {
   static Int_t connectorShift[3]={15, 10, 5};
@@ -42,7 +42,7 @@ StSmdDaqUtil::getBsmdpCell(const Int_t connector, const Int_t pin, Int_t& e, Int
   }
 }
 
-inline Bool_t
+Bool_t
 StSmdDaqUtil::checkBound(const Int_t i, const Int_t min, const Int_t max)
 {
   if(i>=min && i<=max) return kTRUE;
