@@ -238,7 +238,7 @@ sub parse_log($) {
 
     # check if job crashed due to segmentation violation
     if ($line =~ /segmentation violation/) {
-             $segmentation_violation = $previous_line;
+             $segmentation_violation = "segmentation violation";
     }
 
     $previous_line = $line;
@@ -252,6 +252,8 @@ sub parse_log($) {
 
   #--------------------------------------------------------------------------
    $num_event = $no_event;   
+
+
   # output header info
   
   print '=' x 80, "\n";
@@ -302,7 +304,8 @@ sub parse_log($) {
    print '=' x 80, "\n";
    print(">>> Average number of tracks, vertices and hits found <<<\n");
    print '=' x 80, "\n";
- 
+
+  if( $num_event ne 0 )  {
    $avr_tracks    = $tot_tracks/$num_event;
    $avr_vertices  = $tot_vertices/$num_event;
    $avr_tpc_hits  = $tot_tpc_hits/$num_event;
@@ -314,6 +317,7 @@ sub parse_log($) {
     printf ("QAinfo: number of SVT hits:  %10i \n",  $avr_svt_hits ); 
     printf ("QAinfo: number of FTPC hits: %10i \n",  $avr_ftpc_hits ); 
 
+ }
    print '=' x 80, "\n";
    print(">>> Average memory usage for each package at the time of execution <<<\n");
    print '=' x 80, "\n";
@@ -363,7 +367,7 @@ sub parse_log($) {
  @cpu_output = `tail -90 $job_log`;
   foreach $end_line (@cpu_output){
           chop $end_line;
-   if ($end_line =~ /Cpu Time/) {
+   if ($end_line =~ /seconds Cpu Time/) {
      @part = split (" ", $end_line); 
     if($part[0] ne "QAInfo:" and $part[2] =~ /Real/) {        
      @myword = split /:/, $end_line; 
