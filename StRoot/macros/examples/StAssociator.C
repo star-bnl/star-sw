@@ -1,5 +1,12 @@
-// $Id: StAssociator.C,v 1.30 2001/10/23 18:58:50 hardtke Exp $
+// $Id: StAssociator.C,v 1.31 2002/04/05 02:34:22 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.31  2002/04/05 02:34:22  calderon
+// Added
+//   gSystem->Load("StDetectorDbMaker");
+// The hijing files produced now have the event.root branch, in this case,
+// the StEventMaker should NOT be used.  So this is now the default, StEventMaker
+// is neither loaded nor instantiated.
+//
 // Revision 1.30  2001/10/23 18:58:50  hardtke
 // Load StTpcDb library
 //
@@ -131,10 +138,12 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
   gSystem->Load("StUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
-    
+  gSystem->Load("StDetectorDbMaker");
+
+
   gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
-  gSystem->Load("StEventMaker"); 
+//   gSystem->Load("StEventMaker"); //not needed if event.root branch present
   gSystem->Load("StEmcUtil"); 
 
   gSystem->Load("StMcEvent");
@@ -152,12 +161,13 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
   ioMaker->SetIOMode("r");
   ioMaker->SetBranch("*",0,"0");                 //deactivate all branches
   ioMaker->SetBranch("geantBranch",0,"r"); //activate geant Branch
-  ioMaker->SetBranch("dstBranch",0,"r"); //activate Event Branch
-  ioMaker->SetBranch("runcoBranch",0,"r"); //activate runco Branch
+//   ioMaker->SetBranch("dstBranch",0,"r"); //activate Event Branch
+//   ioMaker->SetBranch("runcoBranch",0,"r"); //activate runco Branch
 
   // Note, the title "events" is used in the Association Maker, so don't change it.
-  StEventMaker*       eventReader   = new StEventMaker("events","title");
-  eventReader->doPrintMemoryInfo = kFALSE;
+  // StEventMaker is not needed for event.root files
+//   StEventMaker*       eventReader   = new StEventMaker("events","title");
+//   eventReader->doPrintMemoryInfo = kFALSE;
   StMcEventMaker*     mcEventReader = new StMcEventMaker; // Make an instance...
   StAssociationMaker* associator    = new StAssociationMaker;
 
