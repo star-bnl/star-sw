@@ -1,6 +1,19 @@
-// $Id: StTrsMaker.cxx,v 1.46 1999/10/21 23:50:32 calderon Exp $
+// $Id: StTrsMaker.cxx,v 1.47 1999/11/05 22:10:13 calderon Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.47  1999/11/05 22:10:13  calderon
+// Added Clear() method in StTrsMaker.
+// Removed StTrsUnpacker from maker.
+// Added StTrsDetectorReader and StTrsZeroSuppressedReader
+// for DAQ type interface to event data.
+// Made private copy constructor and operator= in classes that needed it.
+// Renamed the DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast,
+// and the default to use is the new "Fast" which has the 10-8 bit conversion.
+// Removed vestigial loop in AnalogSignalGenerator.
+// Added Time diagnostics.
+// Added trsinterface.pdf in doc/ directory.
+// Write version of data format in .trs data file.
+//
 // Revision 1.46  1999/10/21 23:50:32  calderon
 // Changes are
 // -string for gasDb
@@ -168,7 +181,7 @@
 #include <list>
 #include <utility>    // pair
 #include <algorithm>  // min() max()
-
+#include <ctime>      // time functions
 // SCL
 #include "StGlobals.hh"
 #include "Randomize.h"
@@ -221,8 +234,8 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //***************************** SEE the default options for Analog Signal generator
 #include "StTrsParameterizedAnalogSignalGenerator.hh"
 //*****************************
-#include "StTrsParameterizedDigitalSignalGenerator.hh"
 #include "StTrsFastDigitalSignalGenerator.hh"
+// #include "StTrsOldDigitalSignalGenerator.hh"
 
 // containers
 #include "StTrsChargeSegment.hh"
@@ -236,7 +249,9 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 
 // outPut Data--decoder
 #include "StTrsRawDataEvent.hh"
-#include "StTrsUnpacker.hh"
+#include "StTrsDetectorReader.hh"
+#include "StTrsZeroSuppressedReader.hh"
+#include "StDaqLib/GENERIC/EventReader.hh"
 #include "StSequence.hh"
 #include "StTrsIstream.hh"
 #include "StTrsOstream.hh"
@@ -248,7 +263,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.46 1999/10/21 23:50:32 calderon Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.47 1999/11/05 22:10:13 calderon Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -259,14 +274,14 @@ ClassImp(StTrsMaker)
 
 
 StTrsMaker::StTrsMaker(const char *name):
-  //  mMiniSegmentLength(400.*millimeter),  // used to be 4mm
+StMaker(name),
+    //  mMiniSegmentLength(400.*millimeter),  // used to be 4mm
 mMiniSegmentLength(4.*millimeter),  // test trial,Hui Long
 mFirstSectorToProcess(1),
 mLastSectorToProcess(24), 
-mUseParameterizedSignalGenerator(1), // test trial,Hui Long
-mReadFromFile(0),
 mWriteToFile(0),
-StMaker(name)
+mReadFromFile(0),
+mUseParameterizedSignalGenerator(1) // test trial,Hui Long
 {/* nopt */ }
 
 StTrsMaker::~StTrsMaker() { /* nopt */ }
@@ -309,7 +324,7 @@ Int_t StTrsMaker::Init()
   //mSlowControlDb->print();
 
 //   mMagneticFieldDb =
-//       StROOTMagneticField::instance();  // default is .5T field in z direction
+//       StTpcDbMagneticField::instance();  // default is .5T field in z direction
   
   
 
@@ -341,6 +356,15 @@ Int_t StTrsMaker::Init()
 
 //   mMagneticFieldDb =
 //       StROOTMagneticField::instance();  // default is .5T field in z direction
+   /////////// Magnetic Field
+   float x[3] = {0,0,0};
+   float B[3];
+   gufld(x,B);
+   StThreeVector<double> Bfield(B[0],B[1],B[2]);
+   Bfield*=kilogauss;
+   PR(Bfield/tesla);
+   mMagneticFieldDb =
+      StSimpleMagneticField::instance(Bfield);  // default is .5T field in z direction
   
   mElectronicsDb =
       StTpcROOTElectronics::instance(Electronics);
@@ -390,8 +414,8 @@ Int_t StTrsMaker::Init()
        StTpcSimpleSlowControl::instance(scFile.c_str());
    //mSlowControlDb->print();
 
-//    mMagneticFieldDb =
-//        StSimpleMagneticField::instance(magFile.c_str());
+   mMagneticFieldDb =
+       StSimpleMagneticField::instance(magFile.c_str());
 
    mElectronicsDb =
        StTpcSimpleElectronics::instance(electronicsFile.c_str());
@@ -404,15 +428,6 @@ Int_t StTrsMaker::Init()
    mGasDb = new StTrsDeDx(gas);
    //mGasDb->print();
    
-   /////////// Magnetic Field
-   float x[3] = {0,0,0};
-   float B[3];
-   gufld(x,B);
-   StThreeVector<double> Bfield(B[0],B[1],B[2]);
-   Bfield*=kilogauss;
-   PR(Bfield/tesla);
-   mMagneticFieldDb =
-      StSimpleMagneticField::instance(Bfield);  // default is .5T field in z direction
 
    // Stream Instantiation
    if (mWriteToFile) mOutputStream = new StTrsOstream(mOutputFileName,mNumberOfEvents,mGeometryDb);
@@ -491,12 +506,8 @@ Int_t StTrsMaker::Init()
    mAnalogSignalGenerator->generateNoiseUnderSignalOnly(false);
    mAnalogSignalGenerator->setNoiseRMS(900);  // set in  #e
    }
-   if(mUseParameterizedSignalGenerator) {
 
    mDigitalSignalGenerator =
-       StTrsParameterizedDigitalSignalGenerator::instance(mElectronicsDb, mSector);
-   }
-   else mDigitalSignalGenerator =
 	    StTrsFastDigitalSignalGenerator::instance(mElectronicsDb, mSector);
    
    } // 'else' from condition to read from file or process normally 
@@ -505,7 +516,6 @@ Int_t StTrsMaker::Init()
    //
    // Output is into an StTpcRawDataEvent* vector<StTrsDigitalSector*>
    // which is accessible via the StTrsUnpacker.  Initialize the pointers!
-   mUnPacker=0;
    mAllTheData=0;
 
    //
@@ -519,11 +529,8 @@ Int_t StTrsMaker::Init()
 
    //
    // Construct constant data sets.  This is what is passed downstream
-   mUnPacker = new StTrsUnpacker();
    mAllTheData = new StTrsRawDataEvent(mGeometryDb->numberOfSectors());
    AddConst(new St_ObjectSet("Event"  , mAllTheData));
-   AddConst(new St_ObjectSet("Decoder", mUnPacker));
-
 
    
    return StMaker::Init();
@@ -552,7 +559,9 @@ Int_t StTrsMaker::Make(){
     // doing...This is a histogram diagnostic to compare
     // the GEANT hits to those produced by TRS!
 
-    
+    cout << "\n -- Begin TRS Processing -- \n";
+    time_t trsMakeBegin = time(0);
+    cout << "Started at: " << ctime(&trsMakeBegin);    
     int currentSectorProcessed = mFirstSectorToProcess;
 
     cout << "Processing sectors "
@@ -813,12 +822,19 @@ Int_t StTrsMaker::Make(){
 	//
 	// Generate the ANALOG Signals on pads
 	//
+	time_t inducedChargeBegin = time(0);
 	cout << "--->inducedChargeOnPad()..." << endl;
 	mAnalogSignalGenerator->inducedChargeOnPad(mWireHistogram);
+	time_t inducedChargeEnd= time(0);
+	double inducedChargeTime = difftime(inducedChargeEnd,inducedChargeBegin);
+	cout << "Time to process induced Charge: " << inducedChargeTime << " sec\n\n";
 
-
+	time_t sampleAnalogSignalBegin = time(0);
 	cout << "--->sampleAnalogSignal()..." << endl;
 	mAnalogSignalGenerator->sampleAnalogSignal();
+	time_t sampleAnalogSignalEnd= time(0);
+	double sampleAnalogSignalTime = difftime(sampleAnalogSignalEnd,sampleAnalogSignalBegin);
+	cout << "Time to sample Analog Signal: " << sampleAnalogSignalTime << " sec\n\n";
 
 
 	//
@@ -834,10 +850,14 @@ Int_t StTrsMaker::Make(){
 
 	//
 	// ...and digitize it
+	time_t digitizeSignalBegin = time(0);
 	cout << "--->digitizeSignal()..." << endl;
 	mDigitalSignalGenerator->digitizeSignal();
 
 	cout<<"--->digitizeSignal() Finished..." << endl;
+	time_t digitizeSignalEnd= time(0);
+	double digitizeSignalTime = difftime(digitizeSignalEnd,digitizeSignalBegin);
+	cout << "Time to digitize Signal: " << digitizeSignalTime << " sec\n\n";
 
 	//
 	// Fill it into the event structure...
@@ -867,60 +887,57 @@ Int_t StTrsMaker::Make(){
 #ifdef UNPACK_ALL
   //
   // Access the data with
-  //   *mUnPacker  
+  //   *mDetectorReader 
 
+   string version = "TrsDRv1.0";
+   StTrsDetectorReader mDetectorReader(mAllTheData, version);
     //
     // Loop around the sectors: (should be from db, or size of the structure!)
     //
-    for(int isector=1; isector<=24; isector++) {
-	int getSectorStatus =
-	    mUnPacker->getSector(isector,
-				 static_cast<StTpcRawDataEvent*>(mAllTheData));
-	//PR(getSectorStatus);
-	
-	// if getSectorStatus is bad move on to the next sector
-	if(getSectorStatus) continue;
-
+    for(int isector=1; isector<=mGeometryDb->numberOfSectors(); isector++) {
+	ZeroSuppressedReader* zsr = mDetectorReader.getZeroSuppressedReader(isector);
+	if(!zsr) continue; 
+// 	PR(isector);
 	// otherwise, let's decode it
 	unsigned char* padList;
-	for(int irow=1; irow<=45; irow++) {
-//  	  PR(irow);
-	    int numberOfPads = mUnPacker->getPadList(irow, &padList);
-// 	  PR(numberOfPads);
+	for(int irow=1; irow<=mGeometryDb->numberOfRows(); irow++) {
+//   	  PR(irow);
+	    int numberOfPads = zsr->getPadList(irow, &padList);
+// 	    PR(numberOfPads);
 
 	    // If there are no pads, go to the next row...
 	    if(!numberOfPads) continue;
-	      
 	    for(int ipad = 0; ipad<numberOfPads; ipad++) {
 		//PR(static_cast<int>(padList[ipad]));
 		int nseq;
 		  
-		StSequence* listOfSequences;
-		int getSequencesStatus =
-		    mUnPacker->getSequences(irow,
-					    padList[ipad],
-					    &nseq,
-					    &listOfSequences);
+		//StSequence* listOfSequences;
+		Sequence* listOfSequences;
+		zsr->getSequences(irow,
+				  static_cast<int>(padList[ipad]),
+				  &nseq,
+				  &listOfSequences);
 	      //PR(getSequencesStatus);
-		      
-		for(int kk=0; kk<nseq; kk++) {
-		    //PR(listOfSequences[kk].length);
-		    for(int zz=0; zz<listOfSequences[kk].length; zz++) {
 #ifdef VERBOSITY
+		for(int kk=0; kk<nseq; kk++) {
+		    PR(listOfSequences[kk].Length);
+		    for(int zz=0; zz<listOfSequences[kk].Length; zz++) {
+
 			cout << " " << kk
 			     << " " << zz << '\t'
-			     << static_cast<int>(*(listOfSequences[kk].firstAdc)) << endl;
-#endif
-			listOfSequences[kk].firstAdc++;
+			     << static_cast<int>(*(listOfSequences[kk].FirstAdc)) << endl;
+
+			listOfSequences[kk].FirstAdc++;
 		    } // zz
 
 		} // Loop kk
-
+#endif
 	    } // loop over pads
 	    //
 	    // One would do the data manipulation here!
 	    // Then deallocate the memory
-	    mUnPacker->clear();
+// 	    dynamic_cast<StTrsZeroSuppressedReader*>(zsr);
+//  	    zsr->clear();
 	} // Loop over rows!
     } // Loop over sectors
 #endif
@@ -932,6 +949,10 @@ Int_t StTrsMaker::Make(){
 #endif    
     // CAUTION: ROOT is resposible for the memory at this point
     // ROOT deletes m_DataSet in the chain after every event.
+    time_t trsMakeEnd = time(0);
+    cout << "\nFinished at: " << ctime(&trsMakeEnd);
+    double trsMakeTotal = difftime(trsMakeEnd,trsMakeBegin);
+    cout << "Total StTrsMaker::Make() Processing Time: " << trsMakeTotal << " sec\n\n"; 
 
     return kStOK;
 }
@@ -939,6 +960,11 @@ Int_t StTrsMaker::Make(){
 // *****************************************************************
 // Make sure the memory is deallocated!
 //
+Int_t StTrsMaker::Clear()
+{
+    mAllTheData->clear(); //This deletes all the StTrsDigitalSectors in the StTrsRawDataEvent
+    return kStOk;
+}
 Int_t StTrsMaker::Finish()
 {
     //Clean up all the pointers that were initialized in StTrsMaker::Init()
@@ -950,7 +976,6 @@ Int_t StTrsMaker::Finish()
     
     delete mWireHistogram;
     delete mSector;
-    delete mUnPacker;
     delete mAllTheData;
     
     delete mChargeTransporter;
