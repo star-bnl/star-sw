@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.26 2003/04/03 13:18:07 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.27 2003/09/08 20:56:52 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.27  2003/09/08 20:56:52  suaide
+// Patch to fix problem with SMD-phi pedestals saved on database
+//
 // Revision 1.26  2003/04/03 13:18:07  suaide
 // option to turn off message log was included
 //
@@ -109,6 +112,7 @@ class StEmcADCtoEMaker : public StMaker
            TH2F              *mHits[MAXDET];   //!
            TH2F              *mAdc[MAXDET];    //!
            TH2F              *mEnergyHist[MAXDET]; //!
+           TH2F              *mEnergySpec[MAXDET]; //!
            TH1F              *mAdc1d[MAXDET];  //!           
            TH1F              *mEn1d[MAXDET];  //!           
            TH2F              *mTower;          //!           
@@ -155,7 +159,7 @@ class StEmcADCtoEMaker : public StMaker
            void              setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
            void              setPrint(Bool_t a) {mPrint = a; } /// Set it to kFALSE if you do not want to print messages
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.26 2003/04/03 13:18:07 suaide Exp $ built "__DATE__" "__TIME__ ; 
+     static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.27 2003/09/08 20:56:52 suaide Exp $ built "__DATE__" "__TIME__ ; 
      return cvs;
    }
 
