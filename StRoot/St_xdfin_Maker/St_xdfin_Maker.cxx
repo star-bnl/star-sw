@@ -24,7 +24,7 @@ Int_t St_xdfin_Maker::Init(){
   
   printf("*** St_xdfin_Maker::Init:  Open Input file %s ***\n",(const char*)fFileName);
   fXdfin.OpenXDF(fFileName,"r");
-  Int_t res;
+  Int_t res = kStOK;
   while (! m_InitDone) res = St_xdfin_Maker::Make();
   return res;
 }
@@ -57,8 +57,8 @@ Int_t St_xdfin_Maker::Make(){
     mkdir = 0;
     CONST = kFALSE;
     if (!strcmp("dst",dsname)) {
-      if (m_InitDone) {mkdir = "run";  CONST = kTRUE;}
-      else             mkdir = "event/data/global";
+      if (!m_InitDone) {mkdir = "run";  CONST = kTRUE;}
+      else              mkdir = "event/data/global";
     }
     if (!strcmp("Run",dsname)) 		{mkdir = "run/geant"; CONST = kTRUE;}
     if (!strcmp("params",dsname)) 	{mkdir = "run";       CONST = kTRUE;}
