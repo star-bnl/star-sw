@@ -1,12 +1,12 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.10 2000/11/28 19:18:54 lasiuk Exp $
+ * $Id: StRichTrack.cxx,v 2.11 2000/11/30 23:30:16 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
- *  Revision 2.10  2000/11/28 19:18:54  lasiuk
- *  Include protection/error warning if no MIP
+ *  Revision 2.11  2000/11/30 23:30:16  lasiuk
+ *  Warning in isGood() added
  *
  *  Revision 2.10  2000/11/28 19:18:54  lasiuk
  *  Include protection/error warning if no MIP
@@ -799,15 +799,23 @@ void StRichTrack::setMomentum(StThreeVectorF& momentum) {
 
 
 bool StRichTrack::isGood(StParticleDefinition* particle) {   
+
     StRichRingPoint OuterRing(this,eOuterRing); // Get Ring
     OuterRing.setParticleType(particle);
     StThreeVectorF otemp;
     
     // See If valid point at back of ring
-    // cut:   changed from pi          ---->                 pi/2 
-    //            very back                                 at least half ring is ok
+    // cut:   changed from pi ----> pi/2 
+    //            very back         at least half ring is ok
 
     bool goodTrack = OuterRing.getPoint(M_PI/2.0,otemp);
+
+    if(!goodTrack) {
+	cout << "StRichTrack::isGood()\n";
+	cout << "\tWARNING:\n";
+	cout << "\ttrack has ring refracted away at 90 degrees" << endl;
+    }
+    
     return goodTrack;
 }
 
