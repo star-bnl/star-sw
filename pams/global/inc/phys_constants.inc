@@ -1,5 +1,8 @@
-* $Id: phys_constants.inc,v 1.2 1998/03/05 00:16:08 fisyak Exp $
+* $Id: phys_constants.inc,v 1.3 1998/05/25 23:54:06 fisyak Exp $
 * $Log: phys_constants.inc,v $
+* Revision 1.3  1998/05/25 23:54:06  fisyak
+* replace +/- to PLUS/MINUS
+*
 * Revision 1.2  1998/03/05 00:16:08  fisyak
 * Missing C_D_CURVATURE
 *
@@ -101,10 +104,10 @@
 #define  L_D_0              4.280000D-13     /* lifetime in sec */
 #define  M_ANTI_D_0         1.8646           /* mass     in GeV */
 #define  L_ANTI_D_0         4.280000D-13     /* lifetime in sec */
-#define  M_DS+              1.9685           /* mass     in GeV */
-#define  L_DS+              4.360000D-13     /* lifetime in sec */
-#define  M_DS-              1.9685           /* mass     in GeV */
-#define  L_DS-              4.360000D-13     /* lifetime in sec */
+#define  M_DSPLUS           1.9685           /* mass     in GeV */
+#define  L_DSPLUS           4.360000D-13     /* lifetime in sec */
+#define  M_DSMINUS          1.9685           /* mass     in GeV */
+#define  L_DSMINUS          4.360000D-13     /* lifetime in sec */
 #define  M_LAMBDA_C_PLUS    2.2851           /* mass     in GeV */
 #define  L_LAMBDA_C_PLUS    1.790000D-13     /* lifetime in sec */
 #define  M_W_PLUS           80.220           /* mass     in GeV */
