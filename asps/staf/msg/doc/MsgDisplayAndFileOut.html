@@ -1,0 +1,18 @@
+<pre><h3>	void	MsgDisplayAndFileOut</h3></pre>
+<pre>
+(
+
+/*   Inputs:                                                                               */
+	  const char *msg /* Character-string message, with prefix, submitted for display. */
+	, FILE  *fid )    /* File Descriptor for msg to be echoed to;                      */
+{
+/* Description:  Display a message on standard out and echo on fid.
+	Display (always) the message msg on standard output and echo it to fid.
+	The message may not be disabled.
+	The message is not counted.
+
+	Note that unlike the FORTRAN message call, there is no "Lines" argument;
+	lines are defined with "\n" (newline) characters.
+	However, the caller should NOT include a "\n" at the very end, since msg puts
+	a "\n" at the very end.  msg may have as many newlines as desired.                 */
+</pre>
