@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.2 1999/06/23 20:31:04 perev Exp $
+// $Id: StObject.cxx,v 1.3 1999/11/15 23:09:10 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.3  1999/11/15 23:09:10  perev
+// Streamer for StrArray and auto remove
+//
 // Revision 1.2  1999/06/23 20:31:04  perev
 // StArray I/O + browser
 //
@@ -12,7 +15,21 @@
 #include "TClass.h"
 #include "TDataMember.h"
 #include "TRealData.h"
+#include "StArray.h"
 
+//_____________________________________________________________________________
+StObject::~StObject()
+{
+  UInt_t colIdx,objIdx,u;
+  u = GetUniqueID();
+  if (!u) return;
+  StRegistry::Ident(u,colIdx,objIdx);
+  if (!colIdx) return;
+  StStrArray *ar = StRegistry::GetColl(colIdx);
+  if (!ar) return;
+  if (ar->At(objIdx-1) != (TObject*)this) return;
+  ar->RemoveAt(objIdx-1);
+}
 //_____________________________________________________________________________
 void StObject::Browse(TBrowser *tb)
 {

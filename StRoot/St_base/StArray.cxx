@@ -1,5 +1,8 @@
-// $Id: StArray.cxx,v 1.16 1999/11/06 18:01:47 perev Exp $
+// $Id: StArray.cxx,v 1.17 1999/11/15 23:09:10 perev Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.17  1999/11/15 23:09:10  perev
+// Streamer for StrArray and auto remove
+//
 // Revision 1.16  1999/11/06 18:01:47  perev
 // StArray cleanup
 //
@@ -37,23 +40,35 @@
 // assert
 //
 #include <assert.h>
+#include <stdlib.h>
 #include "StArray.h"
 #include "TDatime.h"
 #include "TBrowser.h"
 
-TObjArray *StRegistry::fReg = 0;
-TList     *StRegistry::fNon = 0;
+TObjArray *StRegistry::fReg  = 0;
+TList     *StRegistry::fNon  = 0;
+Int_t      StRegistry::fFree = 0;
 //______________________________________________________________________________
 ClassImp(StTObjArray)
 //______________________________________________________________________________
 ClassImp(StRegistry)
 //______________________________________________________________________________
-void StRegistry::Clear(){if (fReg) fReg->Clear();}
+void StRegistry::Clear()
+{
+  if (fReg) fReg->Clear();
+  fFree = 0;
+}
 //______________________________________________________________________________
-ULong_t StRegistry::Ident(ULong_t colidx,ULong_t objidx){return colidx<<24 |objidx;}
+UInt_t StRegistry::Ident(UInt_t colidx,UInt_t objidx)
+{
+ assert(colidx<=0xffff && objidx <= 0xffff);
+ return (colidx<<16)|objidx;
+}
 //______________________________________________________________________________
-void    StRegistry::Ident(ULong_t ident,ULong_t &colidx,ULong_t &objidx)
-  {colidx = ident>>24;  objidx = ident & 0x00ffffff;}
+void    StRegistry::Ident(UInt_t ident,UInt_t &colidx,UInt_t &objidx)
+{
+  colidx = ident>>16;  objidx = ident & 0x0000ffff;
+}  
 //______________________________________________________________________________
 Int_t StRegistry::GetNColl(){return (fReg) ? fReg->GetLast()+1:0;}				// Number of collections
 //______________________________________________________________________________
@@ -63,16 +78,37 @@ void StRegistry::Streamer(TBuffer &){assert(0);}
 Int_t StRegistry::SetColl(StStrArray *coll) 		
 // Register new container
 {
+  Int_t n;
   assert(coll);
   if (!fReg) fReg = new TObjArray(10);
   
-  fReg->AddLast(coll);
-  return fReg->GetLast()+1;
+  if (!fFree) {	//No free places
+    fReg->AddLast(coll);
+    n = fReg->GetLast()+1;
+  } else {
+    n = fFree;
+    fFree = -(int)fReg->At(n-1);
+    fReg->AddAt(coll,n-1);
+  }
+  coll->SetUniqueID(StRegistry::Ident(0,n));
+  
+  return n;
 }
 //______________________________________________________________________________
 void StRegistry::RemColl(StStrArray *coll)  
 {
-  assert(fReg); fReg->Remove(coll);
+  UInt_t colIdx,objIdx;
+  assert(fReg); 
+  StRegistry::Ident(coll->GetUniqueID(), colIdx, objIdx);
+  assert(objIdx);  assert(!colIdx);
+  assert( fReg->At(objIdx-1)==coll);
+  fReg->RemoveAt(objIdx-1);
+  if (objIdx-1 < (UInt_t)fReg->GetLast()) {
+    fReg->AddAt((TObject*)(-fFree),objIdx-1);
+    fFree = objIdx;
+  }
+
+  coll->SetUniqueID(0);
   
 }
 //______________________________________________________________________________
@@ -330,7 +366,7 @@ void StRefArray::Streamer(TBuffer &R__b)
    // Stream all objects in the array to or from the I/O buffer.  
 
    Int_t nobjects,newcol,i;
-   ULong_t ulong,objidx,colidx,kolidx,nkoll=0; 
+   UInt_t ulong,objidx,colidx,kolidx,nkoll=0; 
    TObject *obj; TString *colname;
 
    if (R__b.IsReading()) {
@@ -357,8 +393,7 @@ void StRefArray::Streamer(TBuffer &R__b)
 
       R__b.WriteVersion(StRefArray::IsA());
       Int_t ncoll = StRegistry::GetNColl();
-      Int_t icolls[100]; 
-      assert(ncoll < 100);
+      Int_t *icolls = (Int_t*)calloc(ncoll+1,sizeof(Int_t)); 
       memset(icolls,0,sizeof(Int_t)*(ncoll+1));
       nobjects = GetLast()+1;
       R__b << nobjects;
@@ -378,21 +413,23 @@ void StRefArray::Streamer(TBuffer &R__b)
         if (newcol) //Write Name of collection
           R__b << StRegistry::GetCollName(colidx);
       }
+      free(icolls);
    }
 }
 //______________________________________________________________________________
 void StRefArray::Decode()
 {
   int i,j,colidx;
-  ULong_t ulong,kolidx,objidx,nkoll=0;
+  UInt_t ulong,kolidx,objidx,nkoll=0;
   int nobjects = GetLast() + 1 ;
   TString *colname;
-  int icolls[100];
+  int mcolls =  StRegistry::GetNColl(); 
+  int *icolls = (int *)calloc(mcolls,sizeof(int));
   TObject *obj;
   StStrArray *coll;
   
   for (i = 0,j=0; i < nobjects; i++) {
-    ulong = (ULong_t)At(i); AddAt(0,i);
+    ulong = (UInt_t)At(i); AddAt(0,i);
     if (! ulong) continue; 
     StRegistry::Ident(ulong,kolidx,objidx);
     if (kolidx > nkoll) {
@@ -400,6 +437,7 @@ void StRefArray::Decode()
       colidx = StRegistry::GetColl((const char*)*colname);
       if(!colidx) Warning("Decode","Collection %s Not Loaded.",(const char*)colname);
       delete colname; colname=0;
+      assert(colidx<mcolls);      
       icolls[kolidx]=colidx; nkoll = kolidx;
     }
     colidx = icolls[kolidx];  assert(colidx);
@@ -408,6 +446,7 @@ void StRefArray::Decode()
     obj = coll->At(objidx);
     AddAt(obj, j++);
   }
+  free(icolls);
 }
 //______________________________________________________________________________
 ClassImp(StStrArray)
