@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.43 1998/08/18 18:53:16 fisyak Exp $
+# $Id: MakePam.mk,v 1.44 1998/08/19 00:03:59 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.44  1998/08/19 00:03:59  fisyak
+# Add NOROOT option
+#
 # Revision 1.43  1998/08/18 18:53:16  fisyak
 # Add root I/O
 #
@@ -222,7 +225,9 @@ else
 # phony - not a file
 .PHONY               : MakeInc lib sl_lib depend clean test
 all                  : MakeInc $(LIB_PKG) $(SL_PKG) 
+ifndef NOROOT
 MakeInc  : $(FILES_ALL_TAB) $(FILES_ALL_MOD) 
+endif
 # all files:
 ifneq (,$(strip $(FILES_O) $(FILES_SL) $(FILES_OG) $(FILES_init))) 
 #                 I have NO idl- and NO g-files
