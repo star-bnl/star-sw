@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.31 1999/03/11 01:29:53 perev Exp $ 
+// $Id: St_XDFFile.cxx,v 1.32 1999/03/15 00:10:14 perev Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.32  1999/03/15 00:10:14  perev
+// For new Maker schema
+//
 // Revision 1.31  1999/03/11 01:29:53  perev
 // New schema xdf2root
 //
@@ -110,6 +113,7 @@ St_XDFFile::St_XDFFile(){
   fErrorCode=0;
   fRecordCount =0;
   fBrowsable = 0;
+  fDebug=0;
 }
 
 //______________________________________________________________________________
@@ -132,6 +136,7 @@ St_XDFFile::St_XDFFile(const Char_t *filename,const Char_t *mode)
   fErrorCode=0;
   fRecordCount =0;
   fBrowsable = 0;
+  fDebug=0;
   if (filename && strlen(filename)) {
      fStream = (XDR*) malloc(sizeof(XDR));
      OpenXDF(filename,mode);
@@ -295,12 +300,12 @@ Int_t St_XDFFile::CreateXDFStream(){
   return 0;
 } 
 //______________________________________________________________________________
-Int_t St_XDFFile::NextEventPut(St_DataSet *dataset)
+Int_t St_XDFFile::WriteEvent(St_DataSet *dataset)
 {
  // 
- //  NextEventPut(St_DataSet *dataset)
+ //  WriteEvent(St_DataSet *dataset)
  // 
- // The NextEventPut writes the St_DataSet objected defined with the dataset
+ // The WriteEvent writes the St_DataSet objected defined with the dataset
  // pointer as XDR dataset
  //
  //  dataset - the pointer to the St_DataSet object to be saved with XDF file
@@ -312,7 +317,7 @@ Int_t St_XDFFile::NextEventPut(St_DataSet *dataset)
  //
 
  fMethodName = "WriteEvent";
- printf("%s \n",fMethodName);
+ if (fDebug) printf("%s \n",fMethodName);
  if (!( dataset && fFile) ) return 0;
  if (strchr(fType,'w')) {
    DS_DATASET_T *ds = MakeDataSet(dataset);
@@ -330,13 +335,14 @@ Int_t St_XDFFile::NextEventPut(St_DataSet *dataset)
  } else 
    return kFALSE;
 }
+
 //______________________________________________________________________________
-St_DataSet *St_XDFFile::NextEventGet()
+St_DataSet *St_XDFFile::ReadEvent()
 {
  // 
- //  NextEventGet()
+ //  ReadEvent()
  // 
- //  The NextEventGet reads the next XDR events and creats St_DataSet object
+ //  The ReadEvent reads the next XDR events and creats St_DataSet object
  //  and returns its pointer.
  //
  //  It returns ZERO if failed.
@@ -359,7 +365,7 @@ St_DataSet *St_XDFFile::NextEventGet()
        return 0;
    };
    fRecordCount++;
-    printf("%s from %s record %d \n",fMethodName,fName,fRecordCount);
+    if (fDebug) printf("%s from %s record %d \n",fMethodName,fName,fRecordCount);
    St_DataSet *set = MakeDataSet(fDataSet);
    Delete(fDataSet);
    return set;
@@ -407,7 +413,7 @@ St_DataSet *St_XDFFile::NextEventList()
    return set;
  } else 
    return 0;
-#endif
+#endif // 0
 }
 //______________________________________________________________________________
 St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
@@ -574,10 +580,10 @@ Int_t St_XDFFile::CloseXDF()
 void St_XDFFile::GetXdFile(const Char_t *filename, St_DataSet *dataset)
 {
   if (!(dataset && filename && strlen(filename))) return;
-  printf(" GetXdfFile: read from %s to DataSet %s \n",filename,dataset->GetName());
   St_XDFFile xdf;
+  if(xdf.GetDebug()) printf(" GetXdfFile: read from %s to DataSet %s \n",filename,dataset->GetName());
   if (xdf.OpenXDF(filename) == 0){
-    St_DataSet *set = xdf.NextEventGet();
+    St_DataSet *set = xdf.ReadEvent();
     if (set) dataset->Add(set);
   }
 }
@@ -625,11 +631,10 @@ St_DataSet *St_XDFFile::GetXdFile(const Char_t *filename)
 {
   St_DataSet *set = 0;
   if (filename && strlen(filename)) {
-    printf("GetXdfFile: read from %s\n",filename);
     St_XDFFile xdf;
+    if(xdf.GetDebug()) printf("GetXdfFile: read from %s\n",filename);
     if (xdf.OpenXDF(filename) == 0)
-      set = xdf.NextEventGet();
+      set = xdf.ReadEvent();
   }
   return set;
 }
-
