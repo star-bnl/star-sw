@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.375 2004/01/23 16:05:41 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.376 2004/01/28 00:06:35 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -9,7 +9,6 @@
 #include "StBFChain.h"
 #include "StEvtHddr.h"
 #include "StChain.h"
-//VP #include "St_XDFFile.h"
 #include "St_geant_Maker/St_geant_Maker.h"
 #include "StEventMaker/StEventMaker.h"
 #include "StDbBroker/StDbBroker.h"
@@ -18,7 +17,6 @@
 #include "StIOMaker/StIOMaker.h"
 #include "StChallenger/StChallenger.h"
 #include "St_tcl_Maker/St_tcl_Maker.h"
-#include "St_tpt_Maker/St_tpt_Maker.h"
 #include "St_dst_Maker/StPrimaryMaker.h"
 #include "St_dst_Maker/StVertexMaker.h"
 #include "St_tpcdaq_Maker/St_tpcdaq_Maker.h"
@@ -32,6 +30,7 @@
 #include "StSecondaryVertexMaker/StV0FinderMaker.h"
 #include "StSecondaryVertexMaker/StXiFinderMaker.h"
 #include "StHitFilterMaker/StHitFilterMaker.h"
+#include "StTpcHitMoverMaker/StTpcHitMoverMaker.h"
 
 //_____________________________________________________________________
 Bfc_st BFC1[] = {
@@ -236,7 +235,7 @@ Bfc_st BFC1[] = {
                                                       "... AlignSectors,ExB,OBmap,OClock,OPr13 ...",kFALSE},
   {"Corr2"       ,""  ,"","AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC","","",
                                           "... AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC ...",kFALSE},
-  {"ExB"         ,""  ,"","",""                       ,"","Activate ExB correction in St_tpt_Maker",kFALSE},
+  {"ExB"         ,""  ,"","",""                                       ,"","Activate ExB correction",kFALSE},
   {"EB1"         ,""  ,"","",""                                     ,"","Force ExB configuration 1",kFALSE},
   {"EB2"         ,""  ,"","",""                                     ,"","Force ExB configuration 2",kFALSE},
   {"OBmap"       ,""  ,"","",""                                          ,"","ExB shape correction",kFALSE},
@@ -249,7 +248,7 @@ Bfc_st BFC1[] = {
   {"OSpaceZ"     ,""  ,"","",""                                      ,"","Space Charge corrections",kFALSE},
   {"OSpaceZ2"    ,""  ,"","",""                                   ,"","Space Charge corrections R2",kFALSE},
   {"OShortR"     ,""  ,"","",""                                       ,"","Shorted Ring correction",kFALSE},
-  {"AlignSectors",""  ,"","",""          ,"","Activate Sector Alignment correction in St_tpt_Maker",kFALSE},
+  {"AlignSectors",""  ,"","",""                          ,"","Activate Sector Alignment correction",kFALSE},
 
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
@@ -350,18 +349,22 @@ Bfc_st BFC1[] = {
   {"Trs"         ,"","tpcChain","scl,tpcDB,tpc_daq,Simu"              ,"StTrsMaker","StTrsMaker","",kFALSE},
 
   {"Mixer"       ,"tpc_raw","","","StMixerMaker"  ,"StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
-  {"tpc_daq"     ,"tpc_raw","tpcChain","detDb,tpc_T,onlraw" ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
+  {"tpc_daq"     ,"tpc_raw","tpcChain","detDb,tpc_T"        ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"tfs"         ,"","tpcChain","Simu"                             ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"ZDCVtx"      ,"","tpcChain","db"                      ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
-  {"fcf"         ,"","tpcChain","",   "StRTSClientFCFMaker","StDAQMaker,StRTSClientFCF,StRTSClientFCFMaker",
+  {"fcf"         ,"","tpcChain","daq",           "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker",
                                                                        "Offline FCF Cluster finder",kFALSE},
   {"daqclf"      ,"","tpcChain","","StDaqClfMaker","StDaqClfMaker",    "Offline DAQ Cluster finder",kFALSE},
 
 
   {"Velo"        ,"","tpcChain","tpc_T,tls"                         ,"StVeloMaker","StVeloMaker","",kFALSE},
   {"TpcHitFilter","tpc_hit_filter","tpcChain",""    ,"StTpcHitFilterMaker","StTpcHitFilterMaker","",kFALSE},
-  {"tpt"         ,"tpc_tracks","tpcChain","tpc_T,tls,"     ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
+  {"TpcHitMover" ,"tpc_hit_mover","tpcChain","",        
+                      "StTpcHitMover","StTpcHitMoverMaker","TPC hits coord transform + corrections",kFALSE},
+  {"tpt"         ,"tpc_tracks","tpcChain","tpc_T,tls,TpcHitMover",
+                                                            "St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
+  {"tpt_old"     ,"tpc_tracks","tpcChain","tpc_T,tls",      "St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
   {"TpcT0"       ,"TpcT0","","tpc_T,svt_T,ctf_T,ftpcT,globT,tls,db,tpcDB,tpc_daq,kalman","StTpcT0Maker",
               "St_tpc,St_tcl_Maker,St_tpt_Maker,St_svt,St_global,St_dst_Maker,StPass0CalibMaker","",kFALSE},
   {"ChargeStep","","","tpc_T,globT,tls,db,tpcDB,tpc_daq","StChargeStepMaker","StChargeStepMaker","",kFALSE},
@@ -771,7 +774,7 @@ Bfc_st BFC2[] = {
                                                       "... AlignSectors,ExB,OBmap,OClock,OPr13 ...",kFALSE},
   {"Corr2"       ,""  ,"","AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC","","",
                                           "... AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC ...",kFALSE},
-  {"ExB"         ,""  ,"","",""                       ,"","Activate ExB correction in St_tpt_Maker",kFALSE},
+  {"ExB"         ,""  ,"","",""                                       ,"","Activate ExB correction",kFALSE},
   {"EB1"         ,""  ,"","",""                                     ,"","Force ExB configuration 1",kFALSE},
   {"EB2"         ,""  ,"","",""                                     ,"","Force ExB configuration 2",kFALSE},
   {"OBmap"       ,""  ,"","",""                                          ,"","ExB shape correction",kFALSE},
@@ -784,7 +787,7 @@ Bfc_st BFC2[] = {
   {"OSpaceZ"     ,""  ,"","",""                                      ,"","Space Charge corrections",kFALSE},
   {"OSpaceZ2"    ,""  ,"","",""                                   ,"","Space Charge corrections R2",kFALSE},
   {"OShortR"     ,""  ,"","",""                                       ,"","Shorted Ring correction",kFALSE},
-  {"AlignSectors",""  ,"","",""          ,"","Activate Sector Alignment correction in St_tpt_Maker",kFALSE},
+  {"AlignSectors",""  ,"","",""                          ,"","Activate Sector Alignment correction",kFALSE},
 
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
@@ -886,18 +889,22 @@ Bfc_st BFC2[] = {
   {"Trs"         ,"","tpcChain","scl,tpcDB,tpc_daq,Simu"              ,"StTrsMaker","StTrsMaker","",kFALSE},
 
   {"Mixer"       ,"tpc_raw","","","StMixerMaker"  ,"StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
-  {"tpc_daq"     ,"tpc_raw","tpcChain","detDb,tpc_T,onlraw" ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
+  {"tpc_daq"     ,"tpc_raw","tpcChain","detDb,tpc_T"        ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"tfs"         ,"","tpcChain","Simu"                             ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"ZDCVtx"      ,"","tpcChain","db"                      ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
-  {"fcf"         ,"","tpcChain","",   "StRTSClientFCFMaker","StDAQMaker,StRTSClientFCF,StRTSClientFCFMaker",
+  {"fcf"         ,"","tpcChain","daq",           "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker",
                                                                        "Offline FCF Cluster finder",kFALSE},
   {"daqclf"      ,"","tpcChain","","StDaqClfMaker","StDaqClfMaker",    "Offline DAQ Cluster finder",kFALSE},
 
 
   {"Velo"        ,"","tpcChain","tpc_T,tls"                         ,"StVeloMaker","StVeloMaker","",kFALSE},
   {"TpcHitFilter","tpc_hit_filter","tpcChain",""    ,"StTpcHitFilterMaker","StTpcHitFilterMaker","",kFALSE},
-  {"tpt"         ,"tpc_tracks","tpcChain","tpc_T,tls,"     ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
+  {"TpcHitMover" ,"tpc_hit_mover","tpcChain","",        
+                      "StTpcHitMover","StTpcHitMoverMaker","TPC hits coord transform + corrections",kFALSE},
+  {"tpt"         ,"tpc_tracks","tpcChain","tpc_T,tls,TpcHitMover",     
+                                                            "St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
+  {"tpt_old"     ,"tpc_tracks","tpcChain","tpc_T,tls",      "St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
   {"TpcT0"       ,"TpcT0","","tpc_T,svt_T,ctf_T,ftpcT,globT,tls,db,tpcDB,tpc_daq,kalman","StTpcT0Maker",
               "St_tpc,St_tcl_Maker,St_tpt_Maker,St_svt,St_global,St_dst_Maker,StPass0CalibMaker","",kFALSE},
   {"ChargeStep","","","tpc_T,globT,tls,db,tpcDB,tpc_daq","StChargeStepMaker","StChargeStepMaker","",kFALSE},
@@ -1425,7 +1432,8 @@ Int_t StBFChain::Instantiate()
 	  if (maker == "StLaserEventMaker"){
 	    // Bill stuff - Empty place-holder
 	  }
-	  if (maker == "St_tpt_Maker" && GetOption("ExB")){
+	  //if (maker == "St_tpt_Maker" && GetOption("ExB")){
+	  if (maker == "StTpcHitMover" && GetOption("ExB")){
 	    // bit 0 is ExB ON or OFF
 	    // The next 3 bits are reserved for yearly changes.
 	    // Backward compatibility preserved.
@@ -1463,9 +1471,13 @@ Int_t StBFChain::Instantiate()
 	    (void) printf("StBFChain:: ExB The option passed will be %d 0x%X\n",mask,mask);
 	    mk->SetMode(mask);
 	  }
-	  if (maker == "St_tpt_Maker" && GetOption("AlignSectors")){
-	    St_tpt_Maker *tptMk = (St_tpt_Maker*)mk;
-            tptMk->AlignHits(kTRUE);
+	  //if (maker == "St_tpt_Maker" && GetOption("AlignSectors")){
+	  //St_tpt_Maker *tptMk = (St_tpt_Maker*)mk;
+	  //tptMk->AlignHits(kTRUE);
+	  //}
+	  if (maker == "StTpcHitMover" && GetOption("AlignSectors")){
+	    StTpcHitMover *hitMk = (StTpcHitMover *) mk;
+            hitMk->AlignHits(kTRUE);
 	  }
 	  if (maker == "St_tcl_Maker") {
 	    St_tcl_Maker *tclMk = (St_tcl_Maker *) mk;
@@ -1482,10 +1494,10 @@ Int_t StBFChain::Instantiate()
 	    else if (GetOption("Simu"))  tcpdaqMk->SetMode(2); // daq, no gain
 	    else                         tcpdaqMk->SetMode(0); // daq
 
-	    // DAQ100 or Raw switch options
+	    // DAQ100 or Raw switch options -- Please, adjust StRTSClientFCFMaker block as well
 	    if ( GetOption("onlcl") )   DMode = DMode | 0x2;  // use the online TPC clusters (DAQ100) info if any
 	    if ( GetOption("onlraw") )  DMode = DMode | 0x1;  // use the TPC raw hit information
-	    tcpdaqMk->SetDAQFlag(DMode);                      // set flag
+	    if (DMode != 0) tcpdaqMk->SetDAQFlag(DMode);      // set flag, leave default = 1
 
 	    // Correction depending on DAQ100 or not
 	    // bit 0  =   do GAIN_CORRECTION
@@ -1501,6 +1513,14 @@ Int_t StBFChain::Instantiate()
 
 	    (void) printf("StBFChain:: maker==St_tpcdaq_Maker SetDAQFlag(%d) SetMode(%d) SetCorrection(%d)\n",
 			  DMode,tcpdaqMk->GetMode(),tcpdaqMk->GetCorrection());
+	  }
+	  if (maker == "StRTSClientFCFMaker"){
+	    Int_t DMode=0;
+	    // use the online TPC clusters (DAQ100) info if any
+	    if ( GetOption("onlcl") && ! GetOption("onlraw") )  DMode = DMode | 0x2;  
+	    // use the TPC raw hit information
+	    if ( GetOption("onlraw")&& ! GetOption("onlcl")  )  DMode = DMode | 0x1;
+	    mk->SetMode(DMode);                               // set flag (matches tcpdaqMk->SetDAQFlag())
 	  }
 
 	  if (maker == "StRchMaker") {
