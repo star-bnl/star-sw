@@ -36,8 +36,8 @@ class StTclHitChair : public TChair {
     Long_t   TrackId(Int_t i)         const;
     Long_t   Position(Int_t i)        const;
     Bool_t   IsValid(Int_t i)         const;
-    tcl_tphit_st *Table(Int_t i=0) const;
-    tcl_tphit_st &operator[](Int_t i){return *Table(i);}
+    tcl_tphit_st *GetTable(Int_t i=0) const;
+    tcl_tphit_st &operator[](Int_t i){return *GetTable(i);}
 
     UShort_t SectorRow(Int_t i,UShort_t sector,UShort_t row);
     Long_t IdPosition(Int_t i, Long_t track_Id, Long_t position);
@@ -69,21 +69,21 @@ inline Long_t   StTclHitChair::PckTrack(Long_t trackId, Long_t position)
 inline UShort_t StTclHitChair::PckRow(UShort_t sector,UShort_t row)
                 { return sector*GetSectorFactor() + row;}
 
-inline tcl_tphit_st *StTclHitChair::Table(Int_t i) const { return ((St_tcl_tphit *)GetTable())->GetTable(i);}
+inline tcl_tphit_st *StTclHitChair::GetTable(Int_t i) const { return ((St_tcl_tphit *)GetThisTable())->GetTable(i);}
 
-inline UShort_t StTclHitChair::Sector(Int_t i)   const { return UpckSec(Table(i)->row);}
-inline UShort_t StTclHitChair::PadRow(Int_t i)   const { return UpckRow(Table(i)->row);}
-inline Long_t   StTclHitChair::TrackId(Int_t i)  const { return UpckTrackId(Table(i)->track);}
-inline Long_t   StTclHitChair::Position(Int_t i) const { return UpckPosition(Table(i)->track);}
+inline UShort_t StTclHitChair::Sector(Int_t i)   const { return UpckSec(GetTable(i)->row);}
+inline UShort_t StTclHitChair::PadRow(Int_t i)   const { return UpckRow(GetTable(i)->row);}
+inline Long_t   StTclHitChair::TrackId(Int_t i)  const { return UpckTrackId(GetTable(i)->track);}
+inline Long_t   StTclHitChair::Position(Int_t i) const { return UpckPosition(GetTable(i)->track);}
 
 
-inline Bool_t StTclHitChair::IsValid(Int_t i)  const {return (Table(i)->z)*(Sector(i)-12.5) <= 0 ? kTRUE : kFALSE; }
+inline Bool_t StTclHitChair::IsValid(Int_t i)  const {return (GetTable(i)->z)*(Sector(i)-12.5) <= 0 ? kTRUE : kFALSE; }
 
 inline UShort_t StTclHitChair::SectorRow(Int_t i, UShort_t sector,UShort_t row)
-{ return Table(i)->row = PckRow(sector,row); }
+{ return GetTable(i)->row = PckRow(sector,row); }
 
 inline Long_t StTclHitChair::IdPosition(Int_t i, Long_t trackId, Long_t position)
-{return Table(i)->track = PckTrack(trackId,position);}
+{return GetTable(i)->track = PckTrack(trackId,position);}
 
 #endif
 
