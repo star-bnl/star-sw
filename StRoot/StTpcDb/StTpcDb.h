@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.21 2001/08/14 18:18:03 hardtke Exp $
+ * $Id: StTpcDb.h,v 1.22 2002/02/06 18:39:13 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.22  2002/02/06 18:39:13  hardtke
+ * Add tpc Field Cage structure
+ *
  * Revision 1.21  2001/08/14 18:18:03  hardtke
  * Add sector position structures
  *
@@ -91,6 +94,7 @@
 #include "StRTpcSlowControlSim.h"
 #include "StRTpcGlobalPosition.h"
 #include "StRTpcSectorPosition.h"
+#include "StRTpcFieldCage.h"
 #include "St_DataSet.h"
 class StMaker;
 class St_tpcDriftVelocity;
@@ -111,6 +115,7 @@ class StTpcDb {
  StTpcT0I*             t0[24];        //!
  StTpcSectorPositionI* sect[24];    //! 
  StTpcGlobalPositionI* GlobPos; //!
+ StTpcFieldCageI*      FC;
  St_DataSet*           tpc[3];        //!
  St_DataSet*           trg[3];        //!
  St_tpcDriftVelocity*  dvel;          //!
@@ -132,6 +137,7 @@ class StTpcDb {
    StTpcSlowControlSimI* SlowControlSim();
    StTpcElectronicsI* Electronics();
    StTpcGlobalPositionI* GlobalPosition();
+   StTpcFieldCageI* FieldCage();
    StTpcGainI* Gain(int sector);
    StTpcT0I* T0(int sector);
    StTpcSectorPositionI* SectorPosition(int sector);
