@@ -1,5 +1,8 @@
-* $Id: tpt_project.F,v 1.9 1999/10/15 00:54:08 nevski Exp $
+* $Id: tpt_project.F,v 1.10 1999/11/01 07:09:05 sakrejda Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.10  1999/11/01 07:09:05  sakrejda
+* Information about the first point on a track updated.
+*
 * Revision 1.9  1999/10/15 00:54:08  nevski
 * pgf->g77 cleanup
 *
@@ -195,6 +198,7 @@ C              a hit found
       if(iret.eq.STAFCV_OK) then
          ixpnt = trk(itrk).nhit
          l = trk(itrk).ipnt(ixpnt)
+         track(itrk).hitid = hit(l).id
          xold = hit(l).x
          yold = hit(l).y
          do i=trk(itrk).nhit-1,1,-1
