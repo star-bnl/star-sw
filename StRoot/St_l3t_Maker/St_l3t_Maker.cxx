@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.33 2000/07/24 20:17:10 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.34 2000/07/31 14:35:05 yepes Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -208,6 +208,7 @@ Int_t St_l3t_Maker::MakeOnLine(){
    char* buffer = new char[maxBytes] ;
    char* endTrackBuffer = buffer + maxBytes;     
    L3_P *gl3Header = (L3_P *) buffer;
+   memset (buffer, 0, sizeof (L3_P));
    memcpy (gl3Header->bh.bank_type, CHAR_L3_P, 8);
    gl3Header->bh.bank_id = 1;
    gl3Header->bh.format_ver = DAQ_RAW_FORMAT_VERSION;
@@ -217,7 +218,6 @@ Int_t St_l3t_Maker::MakeOnLine(){
    gl3Header->bh.w9 = DAQ_RAW_FORMAT_WORD9;
    gl3Header->bh.crc = 0;		//don't know yet....    
 
-   memset (buffer, 0, sizeof (L3_P));
    char* trackDataPointer = buffer + sizeof(L3_P)  ;
    char* endTrackDataPointer = buffer + maxBytes ;
 //
@@ -445,6 +445,10 @@ Int_t St_l3t_Maker::MakeOnLine(){
 
    // Fill StEvent
    fillStEvent(trackS,dedxS,hitS) ;
+   //
+   //  delete buffer
+   //
+   delete []buffer ;
 
    return kStOk ;
 }
