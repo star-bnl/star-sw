@@ -265,10 +265,14 @@ macro bfc_init _
             user/input u [evgen]/particle.staf
     (gtxin) user/input dummy [input_file]
     (fzin)  
-            gfile p [input_file]      | PN: p is a generic format
-            tables ' ' [geant_Run]
-            detp g2tm dete(cdet=SFSD).onoff=0 gttc.rdir=0
-	    make gstar
+           gfile p [input_file]      | PN: p is a generic format
+           if ($iquest(1) <>0) then
+             message ' CANNOT OPEN INPUT FILE - EXIT! '
+	     goto EOF
+	   endif
+	   tables ' ' [geant_Run]
+           detp g2tm dete(cdet=SFSD).onoff=0 gttc.rdir=0
+	   make gstar
     (g2tin) 
 	    exec input_g2t_file#init [input_file]
             if (STAF_STATUS(1).ne. STAFCV_OK) then
