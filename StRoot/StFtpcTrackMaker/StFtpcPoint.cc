@@ -1,5 +1,8 @@
-// $Id: StFtpcPoint.cc,v 1.20 2004/05/07 14:18:46 oldi Exp $
+// $Id: StFtpcPoint.cc,v 1.21 2004/09/10 13:39:39 jcs Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.21  2004/09/10 13:39:39  jcs
+// correct bit allocation error for FTPC HardwarePosition
+//
 // Revision 1.20  2004/05/07 14:18:46  oldi
 // const added to GedtDetectorId() and GetHardwarePosition().
 // Creation of StEvent/StFtpcHit removed. This is done in a new constructor of StFtpcit itself, now.
@@ -462,14 +465,14 @@ Long_t StFtpcPoint::GetHardwarePosition() const
 {
   // Returns the hardware position of this hit.
   //    hw_position  (32 bits)
-  //            bits  0-3   det_id
-  //            bits 4-10   FTPC pad plane (1-20)
-  //            bits 11-20  Sector number within pad-plane (1-6)
-  //            bits 21-24  number of pads in cluster
-  //            bits 25-31  number of consecutive timebins in cluster
-  return (mNumberBins<<25) 
-    + (mNumberPads<<21)
-    + (mSector<<11)
+  //            bits 0-3    det_id
+  //            bits 4-8    FTPC pad plane (1-20)
+  //            bits 9-11   Sector number within pad-plane (1-6)
+  //            bits 12-19  number of pads in cluster (1-160)
+  //            bits 20-28  number of consecutive timebins in cluster (1-256)
+  return (mNumberBins<<20) 
+    + (mNumberPads<<12)
+    + (mSector<<9)
     + (mPadRow<<4)
     + this->GetDetectorId(); 
 }
