@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.11 2002/01/30 15:40:47 porter Exp $
+ * $Id: StDbManagerImpl.cc,v 1.12 2002/10/29 21:40:39 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.12  2002/10/29 21:40:39  porter
+ * Added dbScalers as a dbType; dbScaler is a dbDomain from before but now
+ * use as a dbType is more in line with how it will be handled
+ *
  * Revision 1.11  2002/01/30 15:40:47  porter
  * changed limits on flavor tag & made defaults retrieving more readable
  *
@@ -225,6 +229,7 @@ addDbType(dbGeometry,"Geometry");
 addDbType(dbRunCatalog,"RunCatalog"); 
 addDbType(dbConfigurations,"Configurations"); 
 addDbType(dbRunParams,"RunParams"); 
+addDbType(dbScalers,"Scalers"); 
 addDbType(dbTestScheme,"TestScheme"); 
 
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbDefs.hh,v 1.16 2001/10/24 04:05:20 porter Exp $
+ * $Id: StDbDefs.hh,v 1.17 2002/10/29 21:40:39 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -13,6 +13,10 @@
  ***************************************************************************
  *
  * $Log: StDbDefs.hh,v $
+ * Revision 1.17  2002/10/29 21:40:39  porter
+ * Added dbScalers as a dbType; dbScaler is a dbDomain from before but now
+ * use as a dbType is more in line with how it will be handled
+ *
  * Revision 1.16  2001/10/24 04:05:20  porter
  * added long long type to I/O and got rid of obsolete dataIndex table
  *
@@ -95,7 +99,7 @@
 #define STDBDEFS_HH
 
 // enumerated standard set of database types
-enum StDbType { dbStDb=0, dbServer, dbRunLog, dbConfigurations, dbConditions, dbCalibrations, dbGeometry, dbRunCatalog, dbRunParams, dbTestScheme, dbTUser1, dbTUser2, dbTUser3, dbTEnd};
+enum StDbType { dbStDb=0, dbServer, dbRunLog, dbConfigurations, dbConditions, dbCalibrations, dbGeometry, dbRunCatalog, dbRunParams, dbScalers, dbTestScheme, dbTUser1, dbTUser2, dbTUser3, dbTEnd};
 
 // enumerated standard set of database domains
 enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3, dbOnl, dbRich, dbMwc, dbRhic, dbSsd, dbRts, dbTof, dbFpd, dbDUser1, dbDUser2, dbDUser3, dbDEnd };
