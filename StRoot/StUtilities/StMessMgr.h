@@ -34,10 +34,13 @@ class StMessMgr : public ostrstream {
    friend ostream& operator-(StMessMgr&);
    friend ostream& operator--(StMessMgr&);
    friend ostream& operator~(StMessMgr&);
+   friend class StBFChain;
 
  private:
 
  protected:
+   virtual void IgnoreRepeats() =0;
+   virtual void AllowRepeats() =0;
  
  public:
    StMessMgr();
@@ -46,7 +49,7 @@ class StMessMgr : public ostrstream {
 
 // Generic Messages:
    virtual StMessMgr& Message(const char* mess="", const char* type="",
-         const char* opt=0)= 0;
+         const char* opt=0) =0;
    virtual       void Print() =0;
    virtual        int PrintList(messVec* list) =0;
    virtual        int PrintAll() =0;
@@ -136,8 +139,11 @@ R__EXTERN StMessMgr& gMess;
 
 #endif
 
-// $Id: StMessMgr.h,v 1.17 2004/01/28 00:09:14 genevb Exp $
+// $Id: StMessMgr.h,v 1.18 2004/04/02 22:17:14 genevb Exp $
 // $Log: StMessMgr.h,v $
+// Revision 1.18  2004/04/02 22:17:14  genevb
+// Added protected Ignore/AllowRepeats() for friend StBFChain class
+//
 // Revision 1.17  2004/01/28 00:09:14  genevb
 // Messages (except Debug) default to no time-date stamp
 //

@@ -25,6 +25,9 @@ static ostrstream messBuffer;
 static char space = ' ';
 static char tab = '\t';
 
+int StMessage::repeats=1;
+static ostrstream lastMessBuffer;
+
 #ifdef __ROOT__
 ClassImp(StMessage)
 #endif
@@ -116,6 +119,14 @@ int StMessage::Print(int nChars) {
       nChars = 0;
   }
   messBuffer << ends;
+  if (!repeats) {
+    if (!strcmp(messBuffer.str(),lastMessBuffer.str())) {
+      return messBuffer.tellp();
+    } else {
+      lastMessBuffer.seekp(0);
+      lastMessBuffer << messBuffer.str() << ends;
+    }
+  }
   if ((option & kMessOptO) || (nChars != 0)) {
     myout << messBuffer.str();
     if (addedMessage) myout << addedMessage;
@@ -167,7 +178,7 @@ size_t StMessage::GetMemoryUsage() {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.26 2004/03/01 17:52:13 fisyak Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.27 2004/04/02 22:17:14 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -182,8 +193,11 @@ int StMessage::InitBuffer() {
 int tmpp = StMessage::InitBuffer();
 
 //_____________________________________________________________________________
-// $Id: StMessage.cxx,v 1.26 2004/03/01 17:52:13 fisyak Exp $
+// $Id: StMessage.cxx,v 1.27 2004/04/02 22:17:14 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.27  2004/04/02 22:17:14  genevb
+// Added protected Ignore/AllowRepeats() for friend StBFChain class
+//
 // Revision 1.26  2004/03/01 17:52:13  fisyak
 // Add include for assert (osf required)
 //

@@ -27,8 +27,12 @@ enum StMessOpt {
   };
 
 class StMessage {
+   friend class StMessageManager;
 
  private:
+   static int repeats;
+   static void IgnoreRepeats() { repeats=0; }
+   static void AllowRepeats() { repeats=1; }
 
  protected:
    char type[2];
@@ -61,8 +65,11 @@ class StMessage {
 
 #endif
 
-// $Id: StMessage.h,v 1.15 2003/10/01 20:06:50 genevb Exp $
+// $Id: StMessage.h,v 1.16 2004/04/02 22:17:14 genevb Exp $
 // $Log: StMessage.h,v $
+// Revision 1.16  2004/04/02 22:17:14  genevb
+// Added protected Ignore/AllowRepeats() for friend StBFChain class
+//
 // Revision 1.15  2003/10/01 20:06:50  genevb
 // Initialize and test ostrstream buffer sizes (support for gcc before 3.2)
 //
