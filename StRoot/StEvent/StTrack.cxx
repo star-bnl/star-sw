@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.14 2001/05/30 17:45:54 perev Exp $
+ * $Id: StTrack.cxx,v 2.15 2001/09/28 22:20:49 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.15  2001/09/28 22:20:49  ullrich
+ * Added helix geometry at last point.
+ *
  * Revision 2.14  2001/05/30 17:45:54  perev
  * StEvent branching
  *
@@ -68,7 +71,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.14 2001/05/30 17:45:54 perev Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.15 2001/09/28 22:20:49 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -79,6 +82,7 @@ StTrack::StTrack()
     mLength = 0;
     mNumberOfPossiblePoints = 0;
     mGeometry = 0;
+    mOuterGeometry = 0;
     mDetectorInfo = 0;
     mNode = 0;
 }
@@ -93,6 +97,7 @@ StTrack::StTrack(const dst_track_st& track) :
     mLength = track.length;
     mNumberOfPossiblePoints = track.n_max_point;
     mGeometry = 0;                                // has to come from outside
+    mOuterGeometry = 0;                           // has to come from outside
     mDetectorInfo = 0;                            // has to come from outside
     mNode = 0;                                    // has to come from outside
 }
@@ -111,6 +116,10 @@ StTrack::StTrack(const StTrack& track)
         mGeometry = track.mGeometry->copy();
     else
         mGeometry = 0;
+    if (track.mOuterGeometry)
+        mOuterGeometry = track.mOuterGeometry->copy();
+    else
+        mOuterGeometry = 0;
     mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
     mPidTraitsVec = track.mPidTraitsVec;
     mNode = 0;                                 // do not assume any context here
@@ -133,6 +142,11 @@ StTrack::operator=(const StTrack& track)
             mGeometry = track.mGeometry->copy();
         else
             mGeometry = 0;
+        if (mOuterGeometry) delete mOuterGeometry;
+        if (track.mOuterGeometry)
+            mOuterGeometry = track.mOuterGeometry->copy();
+        else
+            mOuterGeometry = 0;
         mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
         mPidTraitsVec = track.mPidTraitsVec;
         mNode = 0;                                 // do not assume any context here
@@ -143,6 +157,7 @@ StTrack::operator=(const StTrack& track)
 StTrack::~StTrack()
 {
     delete mGeometry;
+    delete mOuterGeometry;
 }
 
 short
@@ -231,6 +246,12 @@ StTrack::geometry() const { return mGeometry; }
 StTrackGeometry*
 StTrack::geometry() { return mGeometry; }
 
+const StTrackGeometry*
+StTrack::outerGeometry() const { return mOuterGeometry; }
+
+StTrackGeometry*
+StTrack::outerGeometry() { return mOuterGeometry; }
+
 StTrackFitTraits&
 StTrack::fitTraits() { return mFitTraits; }
 
@@ -291,6 +312,13 @@ StTrack::setGeometry(StTrackGeometry* val)
 {
     if (mGeometry) delete mGeometry;
     mGeometry = val;
+}
+
+void
+StTrack::setOuterGeometry(StTrackGeometry* val)
+{
+    if (mOuterGeometry) delete mOuterGeometry;
+    mOuterGeometry = val;
 }
 
 void
