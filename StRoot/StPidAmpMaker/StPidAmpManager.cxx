@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpManager.cxx,v 1.2 2000/04/09 16:36:43 aihong Exp $
+ * $Id: StPidAmpManager.cxx,v 1.3 2000/04/11 15:45:25 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpManager.cxx,v $
+ * Revision 1.3  2000/04/11 15:45:25  aihong
+ * change to adapt dividing trks by channel for faster filling
+ *
  * Revision 1.2  2000/04/09 16:36:43  aihong
  * change for adapting NHitDcaNet added
  *
@@ -61,7 +64,7 @@ void StPidAmpManager::bookADefaultChannelCollection(TString fitOpt, TString draw
   dcaArray[1]=FLT_MAX;
 
 
-   StPidAmpChannelCollection* defaultChannelCollection=new StPidAmpChannelCollection(2, nhitsArray, 2, ptArray,2, dcaArray, noDependent,fitOpt,drawOpt);
+   StPidAmpChannelCollection* defaultChannelCollection=new StPidAmpChannelCollection(2, nhitsArray, 2, ptArray,2, dcaArray, noDependent,mTrks,fitOpt,drawOpt);
    mChannelCollections->push_back(defaultChannelCollection);
 }
 
@@ -81,7 +84,7 @@ void StPidAmpManager::bookAPtChannelCollection(Double_t x1, Double_t x2, Double_
   dcaArray[0]=0.0;
   dcaArray[1]=FLT_MAX;
 
-   StPidAmpChannelCollection* ptChannelCollection=new StPidAmpChannelCollection(2, nhitsArray, 3, ptArray,2, dcaArray, ptDependent,fitOpt,drawOpt);
+   StPidAmpChannelCollection* ptChannelCollection=new StPidAmpChannelCollection(2, nhitsArray, 3, ptArray,2, dcaArray, ptDependent,mTrks,fitOpt,drawOpt);
    mChannelCollections->push_back(ptChannelCollection);
 
 }
@@ -105,7 +108,7 @@ void StPidAmpManager::bookAPtChannelCollection(Double_t x1, Double_t x2, Double_
   dcaArray[0]=0.0;
   dcaArray[1]=FLT_MAX;
 
-   StPidAmpChannelCollection* ptChannelCollection=new StPidAmpChannelCollection(2, nhitsArray, 4, ptArray,2,dcaArray, ptDependent,fitOpt,drawOpt);
+   StPidAmpChannelCollection* ptChannelCollection=new StPidAmpChannelCollection(2, nhitsArray, 4, ptArray,2,dcaArray, ptDependent,mTrks,fitOpt,drawOpt);
    mChannelCollections->push_back(ptChannelCollection);
 
 }
@@ -133,7 +136,7 @@ void StPidAmpManager::bookAPtChannelCollection(Double_t x1, Double_t x2, Double_
   dcaArray[1]=FLT_MAX;
 
 
-   StPidAmpChannelCollection* ptChannelCollection=new StPidAmpChannelCollection(2, nhitsArray, 5, ptArray, 2, dcaArray, ptDependent,fitOpt,drawOpt);
+   StPidAmpChannelCollection* ptChannelCollection=new StPidAmpChannelCollection(2, nhitsArray, 5, ptArray, 2, dcaArray, ptDependent,mTrks,fitOpt,drawOpt);
    mChannelCollections->push_back(ptChannelCollection);
 
 }
@@ -162,7 +165,7 @@ void StPidAmpManager::bookANHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3,T
   dcaArray[0]=0.0;
   dcaArray[1]=FLT_MAX;
 
-   StPidAmpChannelCollection* nhitsChannelCollection=new StPidAmpChannelCollection(3, nhitsArray, 2, ptArray,2,dcaArray,nhitsDependent,fitOpt,drawOpt);
+   StPidAmpChannelCollection* nhitsChannelCollection=new StPidAmpChannelCollection(3, nhitsArray, 2, ptArray,2,dcaArray,nhitsDependent,mTrks,fitOpt,drawOpt);
    mChannelCollections->push_back(nhitsChannelCollection);
 
 }
@@ -192,7 +195,7 @@ void StPidAmpManager::bookANHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3, 
   dcaArray[0]=0.0;
   dcaArray[1]=FLT_MAX;
 
-   StPidAmpChannelCollection* nhitsChannelCollection=new StPidAmpChannelCollection(4, nhitsArray, 2, ptArray, 2, dcaArray, nhitsDependent,fitOpt,drawOpt);
+   StPidAmpChannelCollection* nhitsChannelCollection=new StPidAmpChannelCollection(4, nhitsArray, 2, ptArray, 2, dcaArray, nhitsDependent,mTrks,fitOpt,drawOpt);
    mChannelCollections->push_back(nhitsChannelCollection);
 
 }
@@ -223,7 +226,7 @@ void StPidAmpManager::bookANHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3, 
   dcaArray[0]=0.0;
   dcaArray[1]=FLT_MAX;
 
-   StPidAmpChannelCollection* nhitsChannelCollection=new StPidAmpChannelCollection(5, nhitsArray, 2, ptArray, 2, dcaArray, nhitsDependent,fitOpt,drawOpt);
+   StPidAmpChannelCollection* nhitsChannelCollection=new StPidAmpChannelCollection(5, nhitsArray, 2, ptArray, 2, dcaArray, nhitsDependent,mTrks,fitOpt,drawOpt);
    mChannelCollections->push_back(nhitsChannelCollection);
 
 }
@@ -256,7 +259,7 @@ void StPidAmpManager::bookANHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x
   dcaArray[1]=d2;
   dcaArray[2]=d3;
 
-   StPidAmpChannelCollection* nhitsChannelCollection=new StPidAmpChannelCollection(3, nhitsArray, 2, ptArray,3,dcaArray,nhitsDcaDependent,fitOpt,drawOpt);
+   StPidAmpChannelCollection* nhitsChannelCollection=new StPidAmpChannelCollection(3, nhitsArray, 2, ptArray,3,dcaArray,nhitsDcaDependent,mTrks,fitOpt,drawOpt);
    mChannelCollections->push_back(nhitsChannelCollection);
 
 }
@@ -289,7 +292,7 @@ void StPidAmpManager::bookANHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x
   dcaArray[1]=d2;
   dcaArray[2]=d3;
 
-   StPidAmpChannelCollection* nhitsChannelCollection=new StPidAmpChannelCollection(4, nhitsArray, 2, ptArray, 3, dcaArray, nhitsDcaDependent,fitOpt,drawOpt);
+   StPidAmpChannelCollection* nhitsChannelCollection=new StPidAmpChannelCollection(4, nhitsArray, 2, ptArray, 3, dcaArray, nhitsDcaDependent,mTrks,fitOpt,drawOpt);
    mChannelCollections->push_back(nhitsChannelCollection);
 
 }
@@ -321,7 +324,7 @@ void StPidAmpManager::bookANHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x
   dcaArray[1]=d2;
   dcaArray[2]=d3;
  
-   StPidAmpChannelCollection* nhitsChannelCollection=new StPidAmpChannelCollection(5, nhitsArray, 2, ptArray, 3, dcaArray, nhitsDcaDependent,fitOpt,drawOpt);
+   StPidAmpChannelCollection* nhitsChannelCollection=new StPidAmpChannelCollection(5, nhitsArray, 2, ptArray, 3, dcaArray, nhitsDcaDependent,mTrks,fitOpt,drawOpt);
    mChannelCollections->push_back(nhitsChannelCollection);
 
 }
@@ -346,7 +349,7 @@ void StPidAmpManager::bookAPtNHitsChannelCollection(Int_t n, Int_t* nhitsAry,Int
      dcaArray[0]=0.0;
      dcaArray[1]=FLT_MAX;
 
-   StPidAmpChannelCollection* PtNHitsChannelCollection=new StPidAmpChannelCollection(n, nhitsAry, p, ptAry,2,dcaArray, ptNhitsDependent,fitOpt,drawOpt);
+   StPidAmpChannelCollection* PtNHitsChannelCollection=new StPidAmpChannelCollection(n, nhitsAry, p, ptAry,2,dcaArray, ptNhitsDependent,mTrks,fitOpt,drawOpt);
    mChannelCollections->push_back(PtNHitsChannelCollection);
 
   }
@@ -366,6 +369,14 @@ void StPidAmpManager::printAllSetsNames(){
 
 }
 //--------------------------------
+void StPidAmpManager::passTrksAddress(StPidAmpTrkVector* trks){
+
+    mTrks=trks;
+}
+
+
+
+//--------------------------------
 StPidAmpChannelCollectionVector* StPidAmpManager::netSets(){
      return mChannelCollections;
 }
@@ -375,7 +386,7 @@ void StPidAmpManager::printNSets(){
 }
    
 //--------------------------------
-void StPidAmpManager::process(StPidAmpTrkVector* trks,TH3D* histo){
+void StPidAmpManager::process(TH3D* histo){
 
    if (mChannelCollections->size()==0) bookADefaultChannelCollection("BAR","BAR");
 
@@ -386,7 +397,7 @@ void StPidAmpManager::process(StPidAmpTrkVector* trks,TH3D* histo){
            theSet=*iter;
 
 
-           theSet->process(trks,histo);
+           theSet->process(histo);
  
    }
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpMaker.h,v 1.2 2000/04/09 16:36:43 aihong Exp $
+ * $Id: StPidAmpMaker.h,v 1.3 2000/04/11 15:45:25 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpMaker.h,v $
+ * Revision 1.3  2000/04/11 15:45:25  aihong
+ * change to adapt dividing trks by channel for faster filling
+ *
  * Revision 1.2  2000/04/09 16:36:43  aihong
  * change for adapting NHitDcaNet added
  *
@@ -68,15 +71,19 @@ public:
     void AddPtNHitsChannelCollection(Int_t n, Int_t* nhitsAry,Int_t p, Double_t* ptAry,TString fitOpt="BAR", TString drawOpt="B");
   
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.2 2000/04/09 16:36:43 aihong Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.3 2000/04/11 15:45:25 aihong Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
 private:
 
+    void   bookCollection();
+
+    Int_t mNHits4BG;
     TString drawOpt;
     TH3D*   dependHisto;//!
     //       ^^^^^^^^^^  3D histogram of nhits,pt,X (X reserve for future).
 
     Char_t collectionName[256];
+
     
     StPidAmpTrkVector*  ampTrks; //!
     StPidAmpManager* theManager; //!
