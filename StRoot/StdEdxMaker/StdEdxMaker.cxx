@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.30 2003/09/02 17:59:39 perev Exp $
+// $Id: StdEdxMaker.cxx,v 1.31 2004/09/19 00:09:42 perev Exp $
 #include <Stiostream.h>
 #include <time.h>
 #include "StdEdxMaker.h"
@@ -190,7 +190,10 @@ StdEdxMaker::StdEdxMaker(const char *name):StMaker(name),
 m_TpcSecRow(0),m_fee_vs_pad_row(0), m_tpcTime(0), m_drift(0), 
 m_Simulation(kFALSE), m_InitDone (kFALSE) {}
 //_____________________________________________________________________________
-StdEdxMaker::~StdEdxMaker(){}
+StdEdxMaker::~StdEdxMaker()
+{
+  delete gMinuit; gMinuit=0;	
+}
 //_____________________________________________________________________________
 Int_t StdEdxMaker::Init(){
   if (m_Mode < 0) {

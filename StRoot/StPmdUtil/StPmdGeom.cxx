@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.8 2004/04/13 20:12:55 subhasis Exp $
+ * $Id: StPmdGeom.cxx,v 1.9 2004/09/19 00:08:21 perev Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.9  2004/09/19 00:08:21  perev
+ * Small Walgrind leak fixed
+ *
  * Revision 1.8  2004/04/13 20:12:55  subhasis
  * Rashmi's fix of chain46 mapping
  *
@@ -1241,7 +1244,7 @@ void StPmdGeom::readBoardDetail()
 
 void StPmdGeom::readBoardDetail(Int_t runno1)
 {
-  char *runfile = new char[20];
+  char runfile[20];
   sprintf(runfile,"%d",runno1);
   
   //Initialise satus array as 1 (good board)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.33 2004/04/09 15:46:16 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.34 2004/09/19 00:07:28 perev Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.34  2004/09/19 00:07:28  perev
+ * Small Walgrind leak fixed
+ *
  * Revision 1.33  2004/04/09 15:46:16  aihong
  * add isPIDTableRead()
  *
@@ -523,6 +526,31 @@ void StuProbabilityPidAlgorithm::readParametersFromFile(TString fileName){
       TFile f(fileName,"READ");
 
       if (f.IsOpen()){
+
+        delete StuProbabilityPidAlgorithm::mEAmp     ;
+        delete StuProbabilityPidAlgorithm::mECenter  ;
+        delete StuProbabilityPidAlgorithm::mESigma   ;
+        delete StuProbabilityPidAlgorithm::mPiAmp    ;
+        delete StuProbabilityPidAlgorithm::mPiCenter ;
+        delete StuProbabilityPidAlgorithm::mPiSigma  ;
+        delete StuProbabilityPidAlgorithm::mKAmp     ;
+        delete StuProbabilityPidAlgorithm::mKCenter  ;
+        delete StuProbabilityPidAlgorithm::mKSigma   ;
+        delete StuProbabilityPidAlgorithm::mPAmp     ;
+        delete StuProbabilityPidAlgorithm::mPCenter  ;
+        delete StuProbabilityPidAlgorithm::mPSigma   ;
+        delete StuProbabilityPidAlgorithm::mEqualyDividableRangeStartSet;
+        delete StuProbabilityPidAlgorithm::mEqualyDividableRangeEndSet;
+        delete StuProbabilityPidAlgorithm::mEqualyDividableRangeNBinsSet;
+        delete StuProbabilityPidAlgorithm::mNoEqualyDividableRangeNBinsSet;
+        delete StuProbabilityPidAlgorithm::mMultiBinEdgeSet ;
+        delete StuProbabilityPidAlgorithm::mDcaBinEdgeSet   ;
+        delete StuProbabilityPidAlgorithm::mBBPrePar;
+        delete StuProbabilityPidAlgorithm::mBBTurnOver;
+        delete StuProbabilityPidAlgorithm::mBBOffSet;
+        delete StuProbabilityPidAlgorithm::mBBScale;
+        delete StuProbabilityPidAlgorithm::mBBSaturate;
+        delete StuProbabilityPidAlgorithm::mProductionTag;
 
 	StuProbabilityPidAlgorithm::mEAmp     =(TVectorD* )f.Get("eAmp");
 	StuProbabilityPidAlgorithm::mECenter  =(TVectorD* )f.Get("eCenter");
