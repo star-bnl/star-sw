@@ -23,8 +23,8 @@ class EEmcDbItem {
   int crate, chan; ///< hardware channel
   float gain; 
   float ped,thr; // in ADC channals
-  unsigned short stat; // bits, see eemcConstDB.hh for definitions
-  unsigned short fail; // bits, see eemcConstDB.hh for definitions
+  unsigned  stat; // bits, see eemcConstDB.hh for definitions
+  unsigned  fail; // bits, see eemcConstDB.hh for definitions
 
   EEmcDbItem();
   void clear();
@@ -35,6 +35,7 @@ class EEmcDbItem {
   int isEmpty() const;
   int isSMD() const { return (plane=='U' || plane=='V');}
   void exportAscii(FILE *fd) const;
+  int  importAscii(FILE *fd);
 };
 
 #endif 

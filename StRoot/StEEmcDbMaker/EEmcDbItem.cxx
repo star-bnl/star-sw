@@ -1,4 +1,4 @@
-// $Id: EEmcDbItem.cxx,v 1.5 2003/12/10 04:43:10 balewski Exp $
+// $Id: EEmcDbItem.cxx,v 1.6 2004/02/26 04:21:17 balewski Exp $
 
 #include <stdio.h>
 #include <string.h>
@@ -46,10 +46,51 @@ void EEmcDbItem::exportAscii(FILE *fd) const{
   if(name[0]==0) return; // item not defined
 
   if(strchr(name,'U') || strchr(name,'V') )
-    fprintf(fd,"itemSMD %s %3d %3d %2d %c %4d %.3f %.2f %.2f 0x%4.4x 0x%4.4x %s %d\n",name,crate,chan,sec,plane,strip,gain,ped,thr,stat,fail,tube,key);
+    fprintf(fd,"%s %3d %3d %2d %c %4d %.3f %.2f %.2f 0x%4.4x 0x%4.4x %s %d\n",name,crate,chan,sec,plane,strip,gain,ped,thr,stat,fail,tube,key);
   else
-    fprintf(fd,"itemTWR %s %d %3d %2d %c %2d %.3f  %.2f %.2f 0x%4.4x 0x%4.4x %s %d\n",name,crate,chan,sec,sub,eta,gain,ped,thr,stat,fail,tube,key);
+    fprintf(fd,"%s %d %3d %2d %c %2d %.3f  %.2f %.2f 0x%4.4x 0x%4.4x %s %d\n",name,crate,chan,sec,sub,eta,gain,ped,thr,stat,fail,tube,key);
 }
+
+
+
+//--------------------------------------------------
+//--------------------------------------------------
+int EEmcDbItem::importAscii(FILE *fd){
+  /* return:
+    <0 : error in input
+     0 : EOF
+     1 : line ignored
+     2 : valid input
+  */
+
+  const int mx=1000;
+  char buf[mx];
+  
+  char * ret=fgets(buf,mx,fd);
+  if(ret==0) return 0;
+
+  if(buf[0]=='#') return 1;
+  char name0[mx];
+  int ret1=sscanf(buf,"%s",name0);
+  if(ret1==0) return -1;
+
+  int n=0; 
+  //  printf("aaa name='%s' n=%d\n",name,name[0]);
+  if(name0[2]=='U' || name0[2]=='V') { 
+    n=sscanf(buf,"%s %d %d %d %c %d %f %f %f %x %x %s %d",name,&crate,&chan,&sec,&plane,&strip,&gain,&ped,&thr,&stat,&fail,tube,&key);
+  }
+  else if (name0[2]=='T' || name0[2]=='P' || name0[2]=='Q' || name0[2]=='R' ) {
+    n=sscanf(buf,"%s %d %d %d %c %d %f  %f %f %x %x %s %d",name,&crate,&chan,&sec,&sub,&eta,&gain,&ped,&thr,&stat,&fail,tube,&key);
+  }
+  else 
+    return -3;
+
+
+  if(n!=13) return -1000-n;
+  //  print();
+  return 2;
+}
+
 
 //--------------------------------------------------
 //--------------------------------------------------
@@ -135,6 +176,9 @@ void EEmcDbItem::setName(char *text) {
 }
 
 // $Log: EEmcDbItem.cxx,v $
+// Revision 1.6  2004/02/26 04:21:17  balewski
+// read ASCII dump
+//
 // Revision 1.5  2003/12/10 04:43:10  balewski
 // fisrt QA
 //
