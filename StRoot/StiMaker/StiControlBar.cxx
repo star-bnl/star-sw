@@ -13,7 +13,7 @@
 #include "Sti/StiDetectorContainer.h"
 
 //StiGui
-#include "StiGui/StiDrawableDetector.h"
+#include "StiGui/StiRootDrawableDetector.h"
 #include "StiGui/StiDisplayManager.h"
 
 //StiMaker
@@ -37,15 +37,19 @@ StiControlBar::~StiControlBar()
 
 void StiControlBar::resetStiGuiForEvent()
 {
+    //cout <<"StiControlBar::resetStiGuiForEvent()"<<endl;
     StiControlBar::setCurrentDetectorToDefault();
     StiMaker::instance()->reset();
     StiDisplayManager::instance()->draw();
     StiDisplayManager::instance()->update();
+    //cout <<"\t Leaving StiControlBar::resetStiGuiForEvent()"<<endl;
 }
 
 void StiControlBar::doNextStiGuiAction()
 {
+    //cout <<"StiControlBar::doNextStGuiAction()"<<endl;
     StiMaker::instance()->doNextAction();
+    //cout <<"\t Leaving StiControlBar::doNextStGuiAction()"<<endl;
 }
 
 void StiControlBar::stepToNextEvent()
@@ -161,19 +165,23 @@ void StiControlBar::setLayerAndAngle()
 void StiControlBar::moveOut()
 {
     //cout <<"Function Not Currently Implemented"<<endl;
+    //cout <<"StiControlBar::moveOut()"<<endl;
     StiControlBar::setCurrentDetectorToDefault();
     StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
     rdet.moveOut();
     StiControlBar::showCurrentDetector();
+    //cout <<"\t Leaving StiControlBar::moveOut()"<<endl;
 }
 
 void StiControlBar::moveIn()
 {
     //cout <<"Function Not Currently Implemented"<<endl;
+    //cout <<"StiControlBar::moveIn()"<<endl;
     StiControlBar::setCurrentDetectorToDefault();
     StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
     rdet.moveIn();
     StiControlBar::showCurrentDetector();
+    //cout <<"\t Leaving StiControlBar::moveIn()"<<endl;
 }
             
 void StiControlBar::movePlusPhi()
@@ -198,7 +206,7 @@ void StiControlBar::showCurrentDetector()
 {
     //cout <<"Function Not Currently Implemented"<<endl;
     StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-    StiDrawableDetector* layer = dynamic_cast<StiDrawableDetector*>(*rdet);
+    StiRootDrawableDetector* layer = dynamic_cast<StiRootDrawableDetector*>(*rdet);
     
     if (!layer) {
 	cout <<"Error! StiControlBar::showCurrentDetector(): Failed to get drawable detector"<<endl;
@@ -217,14 +225,15 @@ void StiControlBar::showCurrentDetector()
 void StiControlBar::setCurrentDetectorToDefault()
 {
     //cout <<"Function Not Currently Implemented"<<endl;
-    //cout <<"setCurrentDetectorToDefault()"<<endl;
+    //cout <<"StiControlBar::setCurrentDetectorToDefault()"<<endl;
     StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-    StiDrawableDetector* layer = dynamic_cast<StiDrawableDetector*>(*rdet);
+    StiRootDrawableDetector* layer = dynamic_cast<StiRootDrawableDetector*>(*rdet);
     if (!layer) {
 	cout <<"Error! StiControlBar::setCurrentDetectorToDefault(): Failed to get drawable detector"<<endl;
 	return;
     }
     layer->setColor(1);
+    //cout <<"\t Leaving StiControlBar::setCurrentDetectorToDefault()"<<endl;
 }
 
 TControlBar* StiControlBar::makeControlBar()
