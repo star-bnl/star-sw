@@ -105,8 +105,7 @@ mysqlTypeR::pass(char* name, int* i,  unsigned int size){
   int iend = (int)(size/len);
 
   if(mfields[mcolumn].type == 250 ||
-     mfields[mcolumn].type == 251 ||
-     mfields[mcolumn].type == 252){
+     mfields[mcolumn].type == 251){
 
 #ifdef _ByteSwap_
    int* itmp = new int[iend];
@@ -175,8 +174,7 @@ mysqlTypeR::pass(char* name, long* i,  unsigned int size){
   int iend = (int)(size/len);
 
   if(mfields[mcolumn].type == 250 ||
-     mfields[mcolumn].type == 251 ||
-     mfields[mcolumn].type == 252){
+     mfields[mcolumn].type == 251){
 
 #ifdef _ByteSwap_
    long* itmp = new long[iend];
@@ -243,9 +241,7 @@ mysqlTypeR::pass(char* name, float* i,  unsigned int size){
   int iend = (int)(size/len);
 
   if(mfields[mcolumn].type == 250 ||
-     mfields[mcolumn].type == 251 ||
-     mfields[mcolumn].type == 252){
-
+     mfields[mcolumn].type == 251){
 
 #ifdef _ByteSwap_
    float* itmp = new float[iend];
@@ -312,8 +308,7 @@ mysqlTypeR::pass(char* name, double* i,  unsigned int size){
   int iend = (int)(size/len);
 
   if(mfields[mcolumn].type == 250 ||
-     mfields[mcolumn].type == 251 ||
-     mfields[mcolumn].type == 252){
+     mfields[mcolumn].type == 251){
 
 
 #ifdef _ByteSwap_

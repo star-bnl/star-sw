@@ -112,8 +112,7 @@ mysqlTypeW::pass(char* name, int* i,  unsigned int size){
 
 
   if(mfields[mcolumn].type == 250 ||
-     mfields[mcolumn].type == 251 ||
-     mfields[mcolumn].type == 252){
+     mfields[mcolumn].type == 251 ){
 
    char * dataString = new char[2*size+1];
 
@@ -160,8 +159,7 @@ mysqlTypeW::pass(char* name, long* i,  unsigned int size){
 
 
   if(mfields[mcolumn].type == 250 ||
-     mfields[mcolumn].type == 251 ||
-     mfields[mcolumn].type == 252){
+     mfields[mcolumn].type == 251){
 
    char * dataString = new char[2*size+1];
 
@@ -210,8 +208,7 @@ mysqlTypeW::pass(char* name, float* i,  unsigned int size){
 
 
   if(mfields[mcolumn].type == 250 ||
-     mfields[mcolumn].type == 251 ||
-     mfields[mcolumn].type == 252){
+     mfields[mcolumn].type == 251 ){
 
    char * dataString = new char[2*size+1];
 
@@ -260,8 +257,7 @@ mysqlTypeW::pass(char* name, double* i,  unsigned int size){
 
 
   if(mfields[mcolumn].type == 250 ||
-     mfields[mcolumn].type == 251 ||
-     mfields[mcolumn].type == 252){
+     mfields[mcolumn].type == 251 ){
 
    char * dataString = new char[2*size+1];
 
