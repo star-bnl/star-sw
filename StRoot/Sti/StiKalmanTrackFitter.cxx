@@ -66,7 +66,7 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
             if (status) 		continue;
 	  // if targetNode has hit, get chi2 and update track parameters accordingly
 	  if (!targetHit) 		continue;
-	  targetNode->nudge();
+	  if (targetNode->nudge())	continue;
 	  chi2 = targetNode->evaluateChi2(targetHit);
 	  targetNode->setChi2(1e52);
 	  if (!(chi2<_pars.getMaxChi2()))continue;

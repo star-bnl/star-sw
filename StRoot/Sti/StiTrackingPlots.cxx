@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.20 2004/12/23 15:07:18 pruneau Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.21 2005/01/17 01:31:26 perev Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.21  2005/01/17 01:31:26  perev
+ * New parameter model
+ *
  * Revision 2.20  2004/12/23 15:07:18  pruneau
  * added point of closest approach to vertex (pca) histos
  *
@@ -351,8 +354,8 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 	  double pcay = pcaNode->y_g();
 	  double pcaz = pcaNode->z_g();
 
-	  double x1 = kTrack->getInnerMostNode()->_x;
-	  double x2 = kTrack->getInnerMostHitNode()->_x;
+	  double x1 = kTrack->getInnerMostNode()->getX();
+	  double x2 = kTrack->getInnerMostHitNode()->getX();
 	  _xLastHitVsXLastNode[i]->Fill(x1,x2);
 
 	  _pcaxy[i]->Fill(pcax,pcay);
@@ -414,13 +417,13 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 		  if (theHit && (id==1 || id==2) )
 		    {
 		      cout << "=";
-		      double dx = theHit->x() - node._x;
-		      double dy = theHit->y() - node._p0;
-		      double dz = theHit->z() - node._p1;
+		      double dx = theHit->x() - node.getX();
+		      double dy = theHit->y() - node.getY();
+		      double dz = theHit->z() - node.getZ();
 		      double theDca = sqrt(dy*dy+dz*dz);
 		      double theChi2 = node.evaluateChi2(theHit);
-		      double tanCA = node._sinCA/node._cosCA;
-		      double tanL  = node._p4;
+		      double tanCA = node.getSin()/node.getCos();
+		      double tanL  = node.getTanL();
 		      if (key>50 || key<0) continue;
 		      cout << "OK";
 		      if (id==2) 
@@ -432,19 +435,19 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 			{
 			  _chi2Inc[i][key]->Fill(theChi2);
 			  _chi2IncVsDca[i][key]->Fill(theChi2,theDca);
-			  if (node._c00>0) _yPull[i][key]->Fill( dy/sqrt(node.eyy) );
-			  if (node._c11>0) _zPull[i][key]->Fill( dz/sqrt(node.ezz) );
+			  if (node.getCyy()>0) _yPull[i][key]->Fill( dy/sqrt(node.getEyy()) );
+			  if (node.getCzz()>0) _zPull[i][key]->Fill( dz/sqrt(node.getEzz()) );
 			  if (theChi2<30) //svt only
 			    {
 			      _dx[i][key]->Fill(dx);
 			      _dy[i][key]->Fill(dy);
 			      _dyVsTanCA[i][key][key2]->Fill(tanCA,dy);
-			      _dyVsY[i][key][key2]->Fill(node._p0,dy);
-			      _dyVsZ[i][key][key2]->Fill(node._p1,dy);
+			      _dyVsY[i][key][key2]->Fill(node.getY(),dy);
+			      _dyVsZ[i][key][key2]->Fill(node.getZ(),dy);
 			      _dz[i][key]->Fill(dz);
 			      _dzVsTanL[i][key][key2]->Fill(tanL,dz);
-			      _dzVsY[i][key][key2]->Fill(node._p0,dz);
-			      _dzVsZ[i][key][key2]->Fill(node._p1,dz);
+			      _dzVsY[i][key][key2]->Fill(node.getY(),dz);
+			      _dzVsZ[i][key][key2]->Fill(node.getZ(),dz);
 			    }
 			}
 		    } //theHit
@@ -521,8 +524,8 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 	  _chi2VsNpts[i]->Fill(nPts,chi2);
 	  _chi2VsDca[i]->Fill(gdca,chi2);
 	  _chi2[i]->Fill(chi2);
-	  double x1 = kTrack->getInnerMostNode()->_x;
-	  double x2 = kTrack->getInnerMostHitNode()->_x;
+	  double x1 = kTrack->getInnerMostNode()->getX();
+	  double x2 = kTrack->getInnerMostHitNode()->getX();
 	  _xLastHitVsXLastNode[i]->Fill(x1,x2);
 
 	  // loop through nodes
@@ -536,13 +539,13 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 	      const StiDetector * theDetector = node.getDetector();
 	      if (theHit && theDetector)
 		{
-		  double dx = theHit->x() - node._x;
-		  double dy = theHit->y() - node._p0;
-		  double dz = theHit->z() - node._p1;
+		  double dx = theHit->x() - node.getX();
+		  double dy = theHit->y() - node.getY();
+		  double dz = theHit->z() - node.getZ();
 		  double theDca = sqrt(dy*dy+dz*dz);
 		  double theChi2 = node.evaluateChi2(theHit);
-		  double tanCA = node._sinCA/node._cosCA;
-		  double tanL  = node._p4;
+		  double tanCA = node.getSin()/node.getCos();
+		  double tanL  = node.getTanL();
 		  int id   = theDetector->getGroupId();
 		  int key1 = theDetector->getKey(1);
 		  int key2 = theDetector->getKey(2);
@@ -556,8 +559,8 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 		  if (key>50 || key<0 || id<1 || id>2) {++it;continue;}
 		  _chi2Inc[i][key]->Fill(theChi2);
 		  _chi2IncVsDca[i][key]->Fill(theChi2,theDca);
-		  if (node._c00>0) _yPull[i][key]->Fill( dy/sqrt(node.eyy) );
-		  if (node._c11>0) _zPull[i][key]->Fill( dz/sqrt(node.ezz) );
+		  if (node.getCyy()>0) _yPull[i][key]->Fill( dy/sqrt(node.getEyy()) );
+		  if (node.getCzz()>0) _zPull[i][key]->Fill( dz/sqrt(node.getEzz()) );
 		  if (theChi2<30) //svt only
 		    {
 		      _dx[i][key]->Fill(dx);

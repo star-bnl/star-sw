@@ -265,7 +265,7 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 	  if (!track) continue;
 	  bool extended = false;
 	  StiKalmanTrackNode * inner = track->getInnerMostNode();
-	  double r = inner->_refX;
+	  double r = inner->getRefPosition();
 	  if (r>4.1 && r<50) find(track,kOutsideIn);
 	  extended = track->extendToVertex(vertex);
 	  // simple diagnostics
@@ -385,7 +385,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 	      position = testNode.propagate(leadNode,tDet,direction);
 
 	      // CP Nov 2 Try doubling the chi2 in the SVT
-	      //if (testNode._x<40.) maxChi2 = 2* maxChi2;
+	      //if (testNode.getX()<40.) maxChi2 = 2* maxChi2;
 	      if(debug)  cout << "propagate returned:"<<position<<endl<< "testNode:"<<testNode;
 	      if (position<0 || position>kEdgeZplus)
 		{ 
@@ -397,11 +397,11 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		{
 		  if (debug) cout << "position<=kEdgeZplus";
 		  testNode.setDetector(tDet);
-		  bool active = tDet->isActive(testNode._p0,testNode._p1);
+		  bool active = tDet->isActive(testNode.getY(),testNode.getZ());
 		  if (debug) cout << " vol active:" << active<<endl;
 		  // temporary elimination of the SVT
-		  //if (testNode._x<40.) active = false;
-		  if (active&&(testNode.nullCount<(_pars.maxNullCount+3)&&testNode.contiguousNullCount<(_pars.maxContiguousNullCount+3) ) )
+		  //if (testNode.getX()<40.) active = false;
+		  if (active&&(testNode.getNullCount()<(_pars.maxNullCount+3)&&testNode.getContigNullCount()<(_pars.maxContiguousNullCount+3) ) )
 		    {
 		      double maxChi2 = tDet->getTrackingParameters()->getMaxChi2ForSelection();
 		      if (debug)cout<<" search hits";
@@ -437,8 +437,8 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		  if (node->getHit())
 		    {
 		      if (debug)cout << " got Hit! "<<endl ;
-		      nAdded++; node->hitCount++; node->contiguousHitCount++;
-		      if (node->contiguousHitCount>_pars.minContiguousHitCountForNullReset) node->contiguousNullCount = 0;
+		      nAdded++; node->getHitCount()++; node->getContigHitCount()++;
+		      if (node->getContigHitCount()>_pars.minContiguousHitCountForNullReset) node->getContigNullCount() = 0;
 		    }
 		  else if (position>0 || !active) // detectors edge - don't really expect a hit here
 		    {
@@ -447,7 +447,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		  else // there should have been a hit but we found none
 		    {
 		      if (debug) cout << " no hit but expected one"<<endl;
-		      node->nullCount++; node->contiguousNullCount++; node->contiguousHitCount  = 0;
+		      node->getNullCount()++; node->getContigNullCount()++; node->getContigHitCount()  = 0;
 		    }//node->getHit()
 		  leadNode = sNode;
 		  leadDet  = leadNode->getDetector();
@@ -568,7 +568,7 @@ bool CloserAngle::operator()(const StiDetector*lhs, const StiDetector* rhs)
 }
 
 
-/*if (inner->_x < 4.5) 
+/*if (inner->getX() < 4.5) 
   else
   {
   //xxxxxxxxxxxxxxxxx

@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.21 2004/12/11 04:31:36 perev Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.22 2005/01/17 01:31:25 perev Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,6 +12,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.22  2005/01/17 01:31:25  perev
+ * New parameter model
+ *
  * Revision 2.21  2004/12/11 04:31:36  perev
  * set of bus fixed
  *
@@ -182,18 +185,16 @@ ostream& operator<<(ostream& os, const StiDefaultHitErrorCalculator& c)
 void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node) const
 {  
   double dz = (200.-fabs(node->getZ()))/100.;
-  double cosCA = node->_cosCA;
-  double sinCA = node->_sinCA;
-  if (cosCA==0.)
-    cosCA=1.e-10;
+  double cosCA = node->getCos();
+  double sinCA = node->getSin();
+  if (cosCA==0.) cosCA=1.e-10;
   double tanCA = sinCA/cosCA;
   double ecross=coeff[0]+coeff[1]*dz/(cosCA*cosCA) +coeff[2]*tanCA*tanCA;
   double tanDip=node->getTanL();
   double cosDipInv2=1+tanDip*tanDip;
   double edip=coeff[3]+coeff[4]*dz*cosDipInv2+coeff[5]*tanDip*tanDip;
   if (ecross>50) ecross = 50.; 
-  if (edip>50) edip = 50.; 
-  node->eyy = ecross;
-  node->ezz = edip;
+  if (edip  >50) edip   = 50.; 
+  node->setError(ecross,edip);
 }
 
