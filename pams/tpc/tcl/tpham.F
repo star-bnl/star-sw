@@ -1,5 +1,8 @@
-* $Id: tpham.F,v 1.50 1998/02/20 22:18:43 sakrejda Exp $
+* $Id: tpham.F,v 1.51 1998/03/20 06:05:22 sakrejda Exp $
 * $Log: tpham.F,v $
+* Revision 1.51  1998/03/20 06:05:22  sakrejda
+* 10.0e-6 changed to 1.0e-6 in tpeam and tpham, maching changes in tss
+*
 * Revision 1.50  1998/02/20 22:18:43  sakrejda
 * tsspar.v_drift replaced with a call to tgc_drift_velocity
 *
@@ -382,7 +385,7 @@ c                  the following line was commented out and replaced by
 c                  one line after that
 c                  iwona sakrejda
 c     +             3.0*tsspar(1).tau*tsspar(1).v_drift
-     +             3.0*tsspar(1).tau*dvel* 10.0e-6
+     +             3.0*tsspar(1).tau*dvel* 1.0e-6
               
               
               istatus = tgc_row_to_y(float(irow),
