@@ -31,7 +31,8 @@ my $eachJob;
 my $kl = 0;
 while (<>) {
   $mail_line = $_;
-  chop $line ; print "$mail_line \n";
+  chomp($mail_line) ; 
+  print "$mail_line \n";
   if ($mail_line =~ /Message-Id/) {
     $messg_count++;
   };
