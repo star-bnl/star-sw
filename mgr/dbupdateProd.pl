@@ -3,60 +3,134 @@
 #  
 #
 # dbupdateProd.pl - script to update Production FileCatalog and JobStatus
-#
+# Requires two arguments: production series, disk data location like '/star/data19/test2001'
 # L.Didenko
 ############################################################################
 
 use Mysql;
 use Class::Struct;
 use File::Basename;
-use File::Find;
 use Net::FTP;
 
 require "/afs/rhic/star/packages/dev/mgr/dbCpProdSetup.pl";
-#require "/afs/rhic/star/packages/dev/mgr/dbOnLineSetup.pl";
 
 my $debugOn=0;
 
 
 my $DISK1 = "/star/rcf/prodlog";
-my $DISK = "/star/data18/reco"; 
-my $prodSr = "P01he";
+#my $DISK = "/star/data19/test2001"; 
+my $prodSr = $ARGV[0]; 
+my $DISK = $ARGV[1];
 my $jobFDir = "/star/u/starreco/" . $prodSr ."/requests/";
+my $logDir = $DISK1 . "/" .$prodSr . "/log_old/daq";
 
 my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetD;
 my @SetS;
-my @diskRecoDirs;
+my @DirD;
+my $nSetS = 0;
+my $trgDir = "physics";
+my $mySet;
+my @prtk;
+my $lastTime;
+my $lastDTime;
 
-my @trgDir = ("minbias","central");
-my @DirD = (
-#            "2000/06",
-#            "2000/07",
-            "2000/08",
-            "2000/09",
-);
+  &StDbProdConnect();
+
+   $sql="SELECT DISTINCT path FROM $FileCatalogT WHERE path like '%/daq/2001/%' AND insertTime > 0107180000 ";
+
+     $cursor =$dbh->prepare($sql)
+      || die "Cannot prepare statement: $DBI::errstr\n";
+     $cursor->execute;
+ 
+      while(@fields = $cursor->fetchrow) {
+        my $cols=$cursor->{NUM_OF_FIELDS};
+
+          for($i=0;$i<$cols;$i++) {
+             my $fvalue=$fields[$i];
+             my $fname=$cursor->{NAME}->[$i];
+#          print "$fname = $fvalue\n" ;
+         
+         $mySet = $fvalue  if ( $fname eq 'path'); 
+         }
+       next if ($mySet eq "/home/starsink/raw/daq/2001/04");
+       next if ($mySet eq "/home/starsink/raw/daq/2001/192");
+       next if ($mySet eq "/home/starsink/raw/daq/2001/193");
+       next if ($mySet eq "/home/starsink/raw/daq/2001/198");
+       next if ($mySet eq "/home/starsink/raw/daq/2001/199");     
+        $SetS[$nSetS] = $mySet;
+        $nSetS++; 
+      }
 
 my $kk = 0;
 
- for( $k = 0; $k<scalar(@DirD); $k++) {
-  $SetS[$k] = "daq" . "/" . $DirD[$k];
- for ( $i = 0; $i<scalar(@trgDir); $i++) {
-  $SetD[$kk] =  $trgDir[$i] ."/" . $prodSr . "/" . $DirD[$k]; 
-print "Production DIR :", $SetD[$kk], "\n";
-  $kk++;
-}
-print "DAQ files DIR :", $SetS[$k], "\n";
+
+my $nHpssFiles = 0;
+my @hpssDstDirs;
+my @hpssDstFiles;
+my $nDiskFiles = 0;
+my @diskRecoDirs;
+
+ for( $k = 0; $k<scalar(@SetS); $k++) {
+  @prtk = split("daq", $SetS[$k]);
+  $DirD[$k] = $prtk[1];   
+  $SetD[$k] = $prodSr .  $DirD[$k];
+  $diskRecoDirs[$k] = $DISK . "/" . $SetD[$k];
+  $hpssDstDirs[$k] = $topHpssReco . "/" . $SetD[$k];
+print "Production DIR :", $SetD[$k], "\n";
+print "diskRecoDir: ", $diskRecoDirs[$k], "\n";
+print "hpssDstDir:", $hpssDstDirs[$k], "\n";
 }
 
-for( $ll = 0; $ll<scalar(@SetD); $ll++) { 
-  $diskRecoDirs[$ll] = $DISK . "/" . $SetD[$ll];
-  print "diskRecoDir: $diskRecoDirs[$ll]\n";
-}
+my $nHpssDirs = scalar(@SetD);
+
+
+    $sql="SELECT max(createTime) FROM $FileCatalogT WHERE jobID like '%$prodSr%' AND fName like '%.root' AND hpss = 'Y' ";
+
+     $cursor =$dbh->prepare($sql)
+      || die "Cannot prepare statement: $DBI::errstr\n";
+     $cursor->execute;
+ 
+     my $crHTime = $cursor->fetchrow ;
+      $cursor->finish;   
+
+
+     $sql="SELECT max(createTime) FROM $FileCatalogT WHERE jobID like '%$prodSr%' AND fName like '%.root' AND site = 'disk_rcf' ";
+
+     $cursor =$dbh->prepare($sql)
+      || die "Cannot prepare statement: $DBI::errstr\n";
+     $cursor->execute;
+ 
+        my $crTime = $cursor->fetchrow;
+          $cursor->finish;
+
+
+ &StDbProdDisconnect();
+
+my $temTime;
+my $temDate;
+my $temHour;
+   $temTime  = $crHTime;
+   @prtk = split(" ",$temTime);
+   $temDate = $prtk[0];
+   $temDate =~ s/-//g;
+   $temHour = $prtk[1];
+ my @wrd = split(":",$temHour);   
+   $lastTime = $temDate . $wrd[0] . $wrd[1];
+   $temTime  = $crTime;
+   @prtk = split(" ",$temTime);
+   $temDate = $prtk[0];
+   $temDate =~ s/-//g;
+   $temHour = $prtk[1];
+ my @wrdk = split(":",$temHour);   
+   $lastDTime = $temDate . $wrdk[0] . $wrdk[1];
+
+#    $lastTime = "200107251515";
+ print "Last Date: ",  $lastTime, "  %  ",$lastDTime ;
+
 
 my $recoDir = ("daq");
-
 
 struct JFileAttr => {
           prSer  => '$',
@@ -78,72 +152,46 @@ struct JFileAttr => {
     timeS     => '$',
     faccess   => '$',
     fowner    => '$',
-    iflag     => '$',
                   };
 
- struct DbAttr =>  {
-    gname       => '$', 
-    gpath       => '$',
-    gsize       => '$',
-    gtimeS      => '$',
-    gdone       => '$',
-                    };
-      
  struct RunAttr => {
         drun   => '$',
         dtSet  => '$',
-        dtrg   => '$',
-};
+                  };
 
-  my %monthHash = (
-                   "Jan" => 1,
-                   "Feb" => 2, 
-                   "Mar" => 3, 
-                   "Apr" => 4, 
-                   "May" => 5, 
-                   "Jun" => 6, 
-                   "Jul" => 7, 
-                   "Aug" => 8, 
-                   "Sep" => 9, 
-                   "Oct" => 10, 
-                   "Nov" => 11, 
-                   "Dec" => 12
-                   );
+ my %monthHash = (
+                  "Jan" => 1,
+                  "Feb" => 2, 
+                  "Mar" => 3, 
+                  "Apr" => 4, 
+                  "May" => 5, 
+                  "Jun" => 6, 
+                  "Jul" => 7, 
+                  "Aug" => 8, 
+                  "Sep" => 9, 
+                  "Oct" => 10, 
+                  "Nov" => 11, 
+                  "Dec" => 12
+                  );
 
-  my %daqHash = ();
-  my %flagHash = ();
-  my @runSet;
-  my $nrunSet = 0;
-  my @jobSum_set;
-  my $jobSum_no = 0;
-  my @jobFSum_set;
-  my $jobFSum_no = 0;
-  my $jbSt = "n/a";
-  my @runDescr;
-  my $nrunDescr = 0;
+my @runSet;
+my $nrunSet = 0;
+my @jobSum_set;
+my $jobSum_no = 0;
+my $jbSt = "n/a";
+my @runDescr;
+my $nrunDescr = 0;
 
 ########## Find reco for daq files on HPSS
 
-  my $nHpssFiles = 0;
-  my $nHpssDirs = 4;
-  my @hpssDstDirs;
-  my @hpssDstFiles;
-  my $nDiskFiles = 0;
+  $nHpssFiles = 0;
 
-   $nHpssFiles = 0;
-
-
-   for( $ll = 0; $ll<scalar(@SetD); $ll++) {
-     $hpssDstDirs[$ll] = $topHpssReco . "/" . $SetD[$ll];
-     print "hpssDstDir:", $hpssDstDirs[$ll], "\n";
-   }
- 
-   print "\nFinding daq DST files in HPSS\n";
+   print "\nFinding DST files in HPSS\n";
    my $ftpRDaq = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>600)
      or die "HPSS access failed";
    $ftpRDaq->login("starreco","MockData") or die "HPSS access failed";
 
-   &walkDHpss( $ftpRDaq, \@hpssDstDirs, \@hpssDstFiles );
+   &walkDHpss( $ftpRDaq, \@hpssDstDirs, \@hpssDstFiles, $lastTime );
    print "Total files: ".@hpssDstFiles."\n";
     $ftpRDaq->quit();
 
@@ -165,26 +213,29 @@ struct JFileAttr => {
 
        $fullname = $diskDir."/".$flname;
        my @dirF = split(/\//, $diskDir); 
-       my $set = sprintf("%s\/%s\/%s\/%s",$dirF[4],$dirF[5],$dirF[6],$dirF[7]);
+       my $set = sprintf("%s\/%s\/%s\/%s",$dirF[4],$dirF[5],$dirF[6]);
                                                 
 #      print "Dst Set = ", $set, "\n"; 
       ($size, $mTime) = (stat($fullname))[7, 9];
       ($sec,$min,$hr,$dy,$mo,$yr) = (localtime($mTime))[0,1,2,3,4,5];
-      $mo = sprintf("%2.2d", $mo+1);
-      $dy = sprintf("%2.2d", $dy);
-  
+
       if( $yr > 97 ) {
         $fullyear = 1900 + $yr;
       } else {
         $fullyear = 2000 + $yr;
       }
-      $fflag = 1;
-
+       
+      $mo = sprintf("%2.2d", $mo+1);
+      $dy = sprintf("%2.2d", $dy);
 #      $timeS = sprintf ("%4.4d%2.2d%2.2d",
 #                        $fullyear,$mo,$dy);
       $timeS = sprintf ("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:00",
                          $fullyear,$mo,$dy,$hr,$min);
-    
+ my $dkTime = sprintf ("%4.4d%2.2d%2.2d%2.2d%2.2d",
+                      $fullyear,$mo,$dy,$hr,$min); 
+
+       if($dkTime > $lastDTime ) {     
+#      print "File to be processed from disk: ", $flname, "  %  ",$timeS ,"  %  ", $dkTime,"\n";    
       $fObjAdr = \(FileAttr->new());
       ($$fObjAdr)->filename($flname);
       ($$fObjAdr)->fpath($diskDir);
@@ -192,11 +243,11 @@ struct JFileAttr => {
       ($$fObjAdr)->timeS($timeS);
       ($$fObjAdr)->faccess($maccess);
       ($$fObjAdr)->fowner($mdowner);
-      ($$fObjAdr)->iflag($fflag); 
       $hpssDstFiles[$nHpssFiles] = $fObjAdr;
      $nHpssFiles++;
      $nDiskFiles++;
     }
+  }
   closedir DIR;
   }
   } 
@@ -206,15 +257,12 @@ struct JFileAttr => {
 
    &StDbProdConnect();
 
- my $mNevts = 0;
- my $mNevtLo = 0;
- my $mNevtHi = 0;
  my $mFile;
  my $mEvType = 0;
 
   for ($ll = 0; $ll<scalar(@SetS); $ll++) {
 
-   $sql="SELECT DISTINCT runID, dataset, trigger FROM $FileCatalogT WHERE path like '%$SetS[$ll]%' AND dataset like 'AuAu%' AND fName like '%daq' ";
+   $sql="SELECT DISTINCT runID, dataset FROM $FileCatalogT WHERE path = '$SetS[$ll]' AND dataset like 'AuAu%' AND fName like '%daq' ";
 
      $cursor =$dbh->prepare($sql)
       || die "Cannot prepare statement: $DBI::errstr\n";
@@ -231,9 +279,7 @@ struct JFileAttr => {
 
       ($$fObjAdr)->drun($fvalue)      if( $fname eq 'runID');
       ($$fObjAdr)->dtSet($fvalue)     if( $fname eq 'dataset');   
-      ($$fObjAdr)->dtrg($fvalue)      if( $fname eq 'trigger');
-
-     }
+    }
        $runDescr[$nrunDescr] = $fObjAdr;
        $nrunDescr++;
    } 
@@ -241,10 +287,9 @@ struct JFileAttr => {
 
 #####  select from JobStatus table files which should be updated
 
-   $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobStatus = 'n/a' ";
+ $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName, jobStatus FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobStatus = 'n/a' ";
 
-
-     $cursor =$dbh->prepare($sql)
+    $cursor =$dbh->prepare($sql)
       || die "Cannot prepare statement: $DBI::errstr\n";
      $cursor->execute;
  
@@ -262,12 +307,12 @@ struct JFileAttr => {
           ($$fObjAdr)->smFile($fvalue)   if( $fname eq 'sumFileName'); 
           ($$fObjAdr)->smDir($fvalue)    if( $fname eq 'sumFileDir'); 
           ($$fObjAdr)->jbFile($fvalue)   if( $fname eq 'jobfileName');
-  
+          ($$fObjAdr)->jobSt($fvalue)    if( $fname eq 'jobStatus');
      }
 
          $jobSum_set[$jobSum_no] = $fObjAdr;
          $jobSum_no++; 
-  }
+ }
  
  my $mchainOp;
  my $pr_chain;
@@ -280,12 +325,10 @@ struct JFileAttr => {
  my $JOB_DIR;
  my @parts;
  my $mjobDg = "none";
- my $first_evts = 0;
- my $last_evts = 0;
+ my $old_logFile;
 
 #########  declare variables needed to fill the JobStatus table
 
- my $msJobId = "n/a";
  my $mjobSt = "n/a";
  my $mNev  = 0;
  my $mEvtSk = 0;
@@ -295,83 +338,14 @@ struct JFileAttr => {
  my $mNoTrk = 0;
  my $mNoVert = 0;
  my $mnodeId = "n/a";
- my $jb_sumFile;
- my $msumFile;
- my $msumDir;
+ my $jb_logFile;
+ my $mlogFile;
+ my $mlogDir;
  my $mproSr;
  my $mjbDir = "new_jobs";
  my $jfile;
-
- $jobFSum_no = 0;
-
-   foreach my $jobnm (@jobSum_set){
-        $mproSr   = ($$jobnm)->prSer;
-        $msJobId   = ($$jobnm)->job_id;
-        $msumFile = ($$jobnm)->smFile;
-        $msumDir  = ($$jobnm)->smDir;
-        $mjobFname = ($$jobnm)->jbFile;
-        $jfile = $msumFile;
-        $jfile =~ s/.sum//g;
-        $first_evts = 0;
-        $last_evts = 0;
-        $mEvtSk = 0;
-        $mjobSt = "n/a";
-        $mNev  = 0;
-        $mCPU = 0;
-        $mRealT = 0; 
-        $mmemSz = 0;
-        $mNoTrk = 0;
-        $mNoVert = 0;
-        $mnodeId = "n/a";
-
-       $JOB_DIR = $jobFDir . $recoDir ;
-#      print "Job Dir = ", $JOB_DIR, "\n";
- 
-      $jb_news = $JOB_DIR . "/new_jobs/" . $mjobFname;
-      $jb_archive = $JOB_DIR . "/archive/" . $mjobFname;
-      $jb_jobfile = $JOB_DIR . "/jobfiles/" . $mjobFname;
-      $jb_hold = $JOB_DIR . "/jobs_hold/" . $mjobFname;
-      if (-f $jb_news)     {$mjbDir = "new_jobs"};
-      if (-f $jb_archive)  {$mjbDir = "archive"};
-      if (-f $jb_jobfile)  {$mjbDir = "jobfiles"};
-      if (-f $jb_hold)     {$mjbDir = "jobs_hold"};  
-
-        $jb_sumFile = $msumDir . "/" . $msumFile;
-        if (-f $jb_sumFile)  {
-
-         $mjobDg = "none";
-         $mjobSt = "n/a"; 
-
-             &sumInfo("$jb_sumFile",1);
-
-        print "JobFile=", $mjobFname," % ",$jb_sumFile," % ", "Job Status: ", $mjobSt,"\n";
-#       print "Event first, last, Done, Skip :", $first_evts," % ",$last_evts," % ",$mNev," % ", $mEvtSk, "\n";
-
-#####  update JobStatus table with info for jobs completed
-
-       print "updating JobStatus table\n";
- 
-      &updateJSTable(); 
-
-        $fObjAdr = \(JFileAttr->new());
-       
-        ($$fObjAdr)->prSer($mproSr);    
-        ($$fObjAdr)->job_id($msJobId);  
-        ($$fObjAdr)->smFile($msumFile);
-        ($$fObjAdr)->jbFile($mjobFname);   
-        ($$fObjAdr)->NoEvt($mNev);
-        ($$fObjAdr)->NoEvSk($mEvtSk); 
-        ($$fObjAdr)->FstEvt($first_evts);
-        ($$fObjAdr)->LstEvt($last_evts);               
-        ($$fObjAdr)->jobSt($mjobSt);
-
-       $jobFSum_set[$jobFSum_no] = $fObjAdr;
-       $jobFSum_no++; 
-        
-       } else {
-          next;
-        }
- }
+ my $mfile;
+ my $lgsize;
 
 ########  declare variables needed to fill the database table
 
@@ -384,6 +358,9 @@ struct JFileAttr => {
  my $mdataSet = "n/a";
  my $msize = 0;
  my $mcTime = 00-00-00;
+ my $mNevts = 0;
+ my $mNevtLo = 0;
+ my $mNevtHi = 0;
  my $mowner = "n/a";
  my $mprotc = "-rw-r-----";
  my $mtype = "n/a";
@@ -395,8 +372,17 @@ struct JFileAttr => {
  my $mdtStat = "OK";
  my $mcomnt = " ";
  my $mcalib = "n/a";
- my $mtrigger = "n/a";
+ my $mtrigger = "physics";
  my $compont;
+ my $jLog_err;
+ my $efile;
+ my $Erfile;
+ my $old_erfile;
+ my $lgfile;
+ my $dbfile = "none";
+ my $dbpath = "none";
+ my $dbStat = "n/a";
+ my $mdone = 0;
 
 #####=======================================================
 #####  hpss reco daq file check
@@ -407,13 +393,88 @@ struct JFileAttr => {
  my $mrun;
  my $Numrun;
  my $mdtSet;
- my $mtrig;
- my $dfile;
 
-        foreach my $eachDstFile (@hpssDstFiles) {
+   foreach my $jobnm (@jobSum_set){
+        $mproSr   = ($$jobnm)->prSer;
+        $mJobId   = ($$jobnm)->job_id;
+        $mlogFile = ($$jobnm)->smFile;
+        $mlogDir  = ($$jobnm)->smDir;
+        $mjobFname = ($$jobnm)->jbFile;
+        $dbStat    = ($$jobnm)->jobSt;
+        $jfile = $mlogFile;
+        $jfile =~ s/.log//g;
+      $mfile = $mlogDir ."/". $mlogFile;  
+        if (-f $mfile)  {
+     my $ltime = `mod_time $mfile`;
+           if( $ltime > 7200) {
+          $lgsize = (stat($mfile))[7];          
+          if($lgsize > 12000) {
+
+       $JOB_DIR = $jobFDir . $recoDir ;
+#      print "Job Dir = ", $JOB_DIR, "\n";
+
+      $jb_news = $JOB_DIR . "/new_jobs/" . $mjobFname;
+      $jb_archive = $JOB_DIR . "/archive/" . $mjobFname;
+      $jb_jobfile = $JOB_DIR . "/jobfiles/" . $mjobFname;
+      $jb_hold = $JOB_DIR . "/jobs_hold/" . $mjobFname;
+      if (-f $jb_news)     {$mjbDir = "new_jobs"};
+      if (-f $jb_archive)  {$mjbDir = "archive"};
+      if (-f $jb_jobfile)  {$mjbDir = "jobfiles"};
+      if (-f $jb_hold)     {$mjbDir = "jobs_hold"};  
+
+        $first_evts = 0;
+        $last_evts = 0;
+        $mEvtSk = 0;
+        $mjobSt = "n/a";
+        $mNev  = 0;
+        $mCPU = 0;
+        $mRealT = 0; 
+        $mmemSz = 0;
+        $mNoTrk = 0;
+        $mNoVert = 0;
+        $mnodeId = "n/a";
+
+        $jb_logFile = $mfile;
+         $mjobDg = "none";
+         $mjobSt = "n/a"; 
+
+       parse_log($jb_logFile);
+       
+       $old_logFile = $logDir . "/" .$mlogFile; 
+       $efile = $jfile .".err";
+       $Erfile = $mlogDir . "/" .$efile;
+       $old_erfile = $logDir . "/" .$efile;
+       if($mjobSt eq "Done")  {
+       rename($jb_logFile,$old_logFile); 
+       rename($Erfile,$old_erfile);
+#        print $old_logFile, "\n";
+#        print $Erfile, " % ", $old_erfile, "\n";
+}
+       if ($mjobSt ne  $dbStat)  {
+        print "JobFile=", $mjobFname," % ",$jb_logFile," % ", "Job Status: ", $mjobSt,"\n";
+#        print "Event first, last, Done, Skip, Memory, CPU:", $first_evts," % ",$last_evts," % ",$mNev," % ", $mEvtSk," % ",$mmemSz," % ", $mCPU, " % ", $mNoTrk, " % ",$mNoVert, "\n";
+
+#####  update JobStatus table with info for jobs completed
+   print "updating JobStatus table\n";
+ 
+      &updateJSTable(); 
+      }else{
+       next;
+     }
+     } else {
+       next;
+     }
+     }else {
+      next; 
+     } 
+     }else {
+       next;
+     }
+   }
+
+      foreach my $eachDstFile (@hpssDstFiles) {
 
 #####   reinitialize variables
-
  $mJobId = "n/a"; 
  $mrunId = 0;
  $mfileSeq = 0;
@@ -421,11 +482,11 @@ struct JFileAttr => {
  $mfName = "n/a";
  $mpath  = "n/a";
  $mdataSet = "n/a";
- $msize = 0;
- $mcTime = 00-00-00;
  $mNevts = 0;
  $mNevtLo = 0;
  $mNevtHi = 0;
+ $msize = 0;
+ $mcTime = 00-00-00;
  $mowner = "n/a";
  $mprotc = "-rw-r-----";
  $mtype = "n/a";
@@ -437,7 +498,7 @@ struct JFileAttr => {
  $mdtStat = "OK";
  $mcomnt = " ";   
  $mcalib = "on-fly";
- $mtrigger = "n/a";
+ $mtrigger = "physics";
  
 #####   end of reinitialization
 
@@ -455,113 +516,39 @@ struct JFileAttr => {
       if ($compont =~ m/\.([a-z0-9_]{3,})$/) {
       $mcomp = $1;
     }else{
-    }
-     @flsplit = split ("_",$basename);  
+     $mcomp = "unknown";
+    } 
+    @flsplit = split ("_",$basename);  
     $mfileS = $flsplit[4];
     $mrun =  $flsplit[2];
     $mrunId = $mrun;
     $extn = "." . $mcomp;
     $mfileSeq = basename("$mfileS","$extn"); 
-
+    $jfile = basename("$compont", "$extn"); 
     if ($mpath =~ /starreco/) {  
     $msite = "hpss_rcf";
     $mhpss = "Y";
      }else {
     $msite = "disk_rcf";
     $mhpss = "N";
-   }
+     }
     $mtype = "daq_reco";
 
     $mevtType = 3;
 
-     foreach my $runDsc (@runDescr) {
+    foreach my $runDsc (@runDescr) {
 
          $Numrun     = ($$runDsc)->drun;
          $mdtSet     = ($$runDsc)->dtSet;
-         $mtrig      = ($$runDsc)->dtrg;
-
           if ($mrunId == $Numrun) {
            $mdataSet = $mdtSet;
-           $mtrigger = $mtrig;
            last;
         }else {
          next;
         }
-    }      
+    }    
 
-   foreach my $jobm (@jobFSum_set){
-         $mproSr   = ($$jobm)->prSer;
-         $msumFile = ($$jobm)->smFile;
-         $mJobId   = ($$jobm)->job_id;
-         $mNevts = ($$jobm)->NoEvt;
-         $mNevtLo =($$jobm)->FstEvt;
-         $mNevtHi =($$jobm)->LstEvt;
-         $mjobSt  =($$jobm)->jobSt;
-         $dfile = $msumFile;
-         $dfile =~ s/.sum//g;
- 
-     chop $mjobSt;        
-       if ( $mfName =~ /$dfile/) {
-       if ( $mjobSt eq "Done") {
-         $mdtStat = "OK";
-         $mcomnt = " ";
-  } else{
-        $mdtStat = "notOK";
-        $mcomnt = $mjobSt;
-  }
-
-   print "File Name :", $mpath, " % ", $mfName, " % ", $mdataSet, " % ", $mtrigger," % ",$mdtStat ," % ",$mcomnt," % ",$mNevts, " % ", $mcTime, "\n";     
-      print "updating FileCatalog with new files\n";
- 
-     &fillDbTable();   
-
-        last;
-       } else {
-          next;
-       }
-     }   
-   }else{
-    next;
-   }
-  }
-
-#################### update jobs and files which have been redone  #######################
-
- my @jobSum = ();
- my $njobSum = 0;
- my @jobFSum = ();
- my $njobFSum = 0;
- my @rootFiles = ();
- my $nrootFile = 0;
-
-  $sql="SELECT fName, path, size, createTime, redone FROM $FileCatalogT  WHERE fName LIKE '%root' AND jobID LIKE '%$prodSr%' ";
-
-    $cursor =$dbh->prepare($sql)
-     || die "Cannot prepare statement: $DBI::errstr\n";
-           $cursor->execute;
- 
-   while(@fields = $cursor->fetchrow) {
-     my $cols=$cursor->{NUM_OF_FIELDS};
-        $fObjAdr = \(DbAttr->new());
-  
-   for($i=0;$i<$cols;$i++) {
-     my $fvalue=$fields[$i];
-       my $fname=$cursor->{NAME}->[$i];
-      print "$fname = $fvalue\n" if $debugOn;
-         ($$fObjAdr)->gname($fvalue)     if( $fname eq 'fName');
-         ($$fObjAdr)->gpath($fvalue)     if( $fname eq 'path'); 
-         ($$fObjAdr)->gsize($fvalue)     if( $fname eq 'size'); 
-         ($$fObjAdr)->gtimeS($fvalue)    if( $fname eq 'createTime');
-         ($$fObjAdr)->gdone($fvalue)     if( $fname eq 'redone');
-  }
-
-    $rootFiles[$nrootFile] = $fObjAdr;
-    $nrootFile++;
-
-  }
-
-
-   $sql="SELECT JobID, prodSeries, jobfileName, sumFileName, sumFileDir, jobStatus, NoEvents FROM $JobStatusT WHERE JobID like '%$prodSr%' AND jobStatus <> 'n/a'";
+  $sql="SELECT JobID, prodSeries, jobfileName, sumFileName, jobStatus, NoEvents FROM $JobStatusT WHERE prodSeries= '$prodSr' AND sumFileName like '$jfile%' AND jobStatus <> 'n/a'";
 
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
@@ -569,304 +556,72 @@ struct JFileAttr => {
  
     while(@fields = $cursor->fetchrow) {
      my $cols=$cursor->{NUM_OF_FIELDS};
-         $fObjAdr = \(JFileAttr->new());
  
    for($i=0;$i<$cols;$i++) {
      my $fvalue=$fields[$i];
        my $fname=$cursor->{NAME}->[$i];
 #        print "$fname = $fvalue\n" ;
 
-        ($$fObjAdr)->prSer($fvalue)    if( $fname eq 'prodSeries');
-        ($$fObjAdr)->job_id($fvalue)   if( $fname eq 'JobID'); 
-        ($$fObjAdr)->jbFile($fvalue)   if( $fname eq 'jobfileName');
-        ($$fObjAdr)->smFile($fvalue)   if( $fname eq 'sumFileName'); 
-        ($$fObjAdr)->smDir($fvalue)    if( $fname eq 'sumFileDir');  
-        ($$fObjAdr)->NoEvt($fvalue)    if( $fname eq 'NoEvents');       
-        ($$fObjAdr)->jobSt($fvalue)     if( $fname eq 'jobStatus'); 
-   }
+        $mproSr   = $fvalue  if( $fname eq 'prodSeries');
+        $mJobId   = $fvalue  if( $fname eq 'JobID');
+        $mlogFile = $fvalue  if( $fname eq 'sumFileName');
+        $mNevts   = $fvalue  if( $fname eq 'NoEvents');
+        $mjobSt   = $fvalue  if( $fname eq 'jobStatus');
 
-       $jobSum[$njobSum] = $fObjAdr;
-       $njobSum++; 
-}
-
-  foreach my $jobn (@jobSum){
-       $mproSr    = ($$jobn)->prSer;
-       $msJobId   = ($$jobn)->job_id;
-       $mjbStat   = ($$jobn)->jobSt;
-       $msumFile  = ($$jobn)->smFile;
-       $msumDir   = ($$jobn)->smDir;
-       $mjobFname = ($$jobn)->jbFile;
-       $mNoEvt    = ($$jobn)->NoEvt;
- 
-      $jfile = $msumFile;
-      $jfile =~ s/.sum//g;
-      $first_evts = 0;
-      $last_evts = 0;
-      $mNev  = 0;
-      $mEvtSk = 0;
-      $mCPU = 0;
-      $mRealT = 0; 
-      $mmemSz = 0;
-      $mNoTrk = 0;
-      $mNoVert = 0;
-      $mnodeId = "n/a";
-
-      $jb_sumFile = $msumDir . "/" . $msumFile;
-
-      if (-f $jb_sumFile)  {
-       $mjbDir = "archive";
-       $mjobDg = "none";
-       $mjobSt = "n/a"; 
-
-           &sumInfo("$jb_sumFile",1);
-
-        $fObjAdr = \(JFileAttr->new());
-       
-        ($$fObjAdr)->prSer($mproSr);    
-        ($$fObjAdr)->job_id($msJobId);  
-        ($$fObjAdr)->smFile($msumFile);
-        ($$fObjAdr)->jbFile($mjobFname);   
-        ($$fObjAdr)->NoEvt($mNev);
-        ($$fObjAdr)->FstEvt($first_evts);
-        ($$fObjAdr)->LstEvt($last_evts);               
-        ($$fObjAdr)->jobSt($mjobSt);
-
-       $jobFSum[$njobFSum] = $fObjAdr;
-       $njobFSum++; 
-       chop $mjobSt;
-       if ( ($mjobSt ne $mjbStat) or ($mNev != $mNoEvt) ) {
-      print  "JobFile=", $mjobFname," % ", $mjobSt, " % ", "Job Status Old: ", $mjbStat, "\n";
-
-##### update JobStatus table with info for jobs completed
-
-       print "updating JobStatus table with jobs redone \n";
- 
-     &updateJSTable(); 
-        
-       }else {
-        next;
-        }
-     }else {
-     next;
-   }
-   }
-
- my $dbfname;
- my $dbfpath;
- my $dbfsize;
- my $dbgtime;
- my $gtime;
- my $dbctime;
- my $fullName;
-
-   foreach my $eachFile (@hpssDstFiles) {
-
-    $mfName = ($$eachFile)->filename;
-    $mcTime  = ($$eachFile)->timeS;
-    $msize = ($$eachFile)->dsize;
-    $mpath = ($$eachFile)->fpath;
-    $fullName = $mpath . "/" . $mfName; 
-    $flagHash{$fullName} = ($$eachFile)->iflag;
-#    $mcTime = substr ($mgTime,-8) ;
-#    print "Time = ",  $mcTime, "\n";
-     foreach my $gtfile (@rootFiles){
-        $dbfname = ($$gtfile)->gname;
-        $dbfpath = ($$gtfile)->gpath;
-        $dbfsize = ($$gtfile)->gsize;
-        $dbgtime = ($$gtfile)->gtimeS;
-        @parts = split (" ",$dbgtime);
-        $gtime =  $parts[0];
-#        $gtime =~ s/-//g;
-        $dbctime = $gtime;
-
-      if ( ($mfName eq $dbfname) and ($mpath eq $dbfpath)) { 
-
-            if ( ($msize eq $dbfsize) and ($mcTime =~ /$dbctime/) ) {
-#           if ( $msize eq $dbfsize) {  
-            $flagHash{$fullName} = 0;
-           } else {
-             $flagHash{$fullName} = 2;  
-           }
-         last;
-         }else {
-          next;
-         } 
       }
    }
+        $lgfile = $mlogFile;
+        $lgfile =~ s/.log//g;
+       if ( $mfName =~ /$lgfile/) {
 
- my $NumMisFile = 0;
- my $NumUpFile = 0;
- my $newset;
- my @trk;
- my $jbFile;
- my $topHpss = "home/starreco";
- my $topDisk = "star/rcf";
- my $mdone = 0;
- my $mName;
- my $gflag; 
-
-    foreach my $eachFile (@hpssDstFiles) {
-
-#####  reinitialize variables
-
- $mJobId = "n/a"; 
- $mrunId = 0;
- $mfileSeq = 0;
- $mevtType = 0;
- $mfName = "n/a";
- $mpath  = "n/a";
- $mdataSet = "n/a";
- $msize = 0;
- $mcTime = 0;
- $mNevts = 0;
- $mNevtLo = 0;
- $mNevtHi = 0;
- $mowner = "n/a";
- $mprotc = 0;
- $mtype = "n/a";
- $mcomp = "n/a";
- $mformat = "n/a";
- $msite = "n/a";
- $mhpss = "Y";
- $mstatus = 0;
- $mdtStat = "OK";
- $mcomnt = " ";   
- $mcalib = "on-fly";
- $mtrigger = "n/a";
- $mdone = 0;  
- $gflag = 0;
-#####  end of reinitialization
-
-  $mfName = ($$eachFile)->filename;
-  $mpath  = ($$eachFile)->fpath;
-  $mcTime  = ($$eachFile)->timeS;
-  $mprotc = ($$eachFile)->faccess;
-  $mowner = ($$eachFile)->fowner;
-  $msize = ($$eachFile)->dsize;
-
-  if($mfName =~ /root/) {
-      $mformat = "root";
-      $basename = basename("$mfName",".root");   
-      my $compont = $basename;
-      if ($compont =~ m/\.([a-z0-9_]{3,})$/) {
-      $mcomp = $1;
-    }else {
-    }
-     
-    @flsplit = split ("_",$basename);  
-    $mfileS = $flsplit[4];
-    $mrun =  $flsplit[2];
-    $mrunId = $mrun;
-    $extn = "." . $mcomp;
-    $mfileSeq = basename("$mfileS","$extn"); 
-    $mevtType = 3;
-
-   if($mpath =~ /starreco/)  {
-    $msite = "hpss_rcf";
-    $mhpss = "Y";
-  } else {
-    $msite = "disk_rcf";
-    $mhpss = "N";
-  } 
-    $mtype = "daq_reco"; 
-
-    $fullName = $mpath ."/" . $mfName;
-    $gflag = $flagHash{$fullName}; 
-#  print "File Name :", $fullName," % ", $gflag, "\n";     
-       $newset = $fullName;
-       @trk = split ("/", $newset);
-     $jbFile = $trk[5] ."_" . $trk[4] ."_" .$trk[6] ."_" . $trk[7];    
- 
-   if( $gflag != 0 ) {
-#  print "File name to be inserted :",$fullName, "\n"; 
-     foreach my $dbjob (@jobFSum){
-       $mproSr   = ($$dbjob)->prSer;
-       $mJobId   = ($$dbjob)->job_id;
-        $msumFile = ($$dbjob)->smFile;
-        $mNevts   = ($$dbjob)->NoEvt;
-        $mNevtLo  = ($$dbjob)->FstEvt;
-        $mNevtHi  = ($$dbjob)->LstEvt;
-        $mjobFname = ($$dbjob)->jbFile;
-        $mjobSt   = ($$dbjob)->jobSt;
-       $jfile = $msumFile;
-       $jfile =~ s/.sum//g;
-       chop $mjobSt; 
-       if ($mfName =~ /$jfile/ and $mjobFname =~ /$jbFile/) {
-#    print "JobFileName :", $jbFile, "\n";
-      if ( $mjobSt ne "Done") {
-
+        if ( $mjobSt eq "Done") {
+         $mdtStat = "OK";
+         $mcomnt = " ";
+      } else{
         $mdtStat = "notOK";
         $mcomnt = $mjobSt;
- } else{
-   $mdtStat = "OK";
-   $mcomnt = " ";
- }
-          
-      foreach my $runDsc (@runDescr) {
-
-        $Numrun     = ($$runDsc)->drun;
-        $mdtSet     = ($$runDsc)->dtSet;
-        $mtrig      = ($$runDsc)->dtrg;
-       
-         if ($mrunId == $Numrun) {
-          $mdataSet = $mdtSet;
-          $mtrigger = $mtrig;
-          last;
-       }else {
-        next;
-       }
-   }      
-
-  if ( $gflag == 1) {
-
-    print "Files to be inserted :", "\n"; 
-    print "Files: ", $mJobId," % ", $mpath," % ",$mfName, " % ",$mcTime," % ",$mdone, " % ",$mdataSet," % ",$mtrigger," % ",$mdtStat," % ",$mcomnt, "\n"; 
-#   print "Number of Events: EvtDone, EvtLo, EvtHi :", $mNevts," % ",$mNevtLo," % ",$mNevtHi, "\n",
-      $NumMisFile++;
-      $mdone = 0;
-
-#####  fill Files Catalog with missing files
-#     print "Filling Files Catalog with missing files\n";
-     &fillDbTable();
-  }
-
- elsif ( $gflag == 2) {
-   
-  print "Files to be updated :", "\n";    
-
-     $NumUpFile++; 
-
-     foreach my $rdfile (@rootFiles){
-      $mdone = ($$rdfile)->gdone;
-      $mName = ($$rdfile)->gname;
-      if($mfName eq $mName) {
-          $mdone++;
-       
-   print "Files: ", $mJobId, " % ",$mpath," % ",$mfName, " % ",$mcTime," % ",$mdone," % ",$mdataSet," % ",$mtrigger," % ",$mdtStat," % ",$mcomnt, "\n";
-
-#####  update RECO DAQ files in Files Catalog if rerun 
-#     print "Updating Files Catalog with missing files\n";
-    &updateDbTable();  
-       last;
-       }else{
-      next;
       }
-     }
-    }else{
-    } 
-   last;
-   }else{
-     next;
-    }
-   }
-  }else{
-  next;
-  }
- }
- }
 
-    print "Number of missing files : ", $NumMisFile, "\n";
-    print "Number of updated files : ", $NumUpFile, "\n";
+      $dbfile = "none";
+
+ $sql="SELECT fName, path, redone FROM $FileCatalogT  WHERE fName = '$mfName' AND path = '$mpath' AND jobID LIKE '%$prodSr%' ";
+
+    $cursor =$dbh->prepare($sql)
+     || die "Cannot prepare statement: $DBI::errstr\n";
+           $cursor->execute;
+ 
+   while(@fields = $cursor->fetchrow) {
+     my $cols=$cursor->{NUM_OF_FIELDS};
+  
+   for($i=0;$i<$cols;$i++) {
+     my $fvalue=$fields[$i];
+       my $fname=$cursor->{NAME}->[$i];
+      print "$fname = $fvalue\n" if $debugOn;
+         $dbfile = $fvalue     if( $fname eq 'fName');
+         $dbpath = $fvalue     if( $fname eq 'path'); 
+         $mdone  = $fvalue     if( $fname eq 'redone');
+         }
+      }
+
+      if ($dbfile eq "none") {
+    print "updating FileCatalog with new files\n";
+    print "File to be inserted :", $mJobId, " % ", $mpath, " % ",$mfName, " % ", $mdataSet, " % ", $mtrigger," % ",$mdtStat ," % ",$mcomnt," % ",$mNevts, " % ", $mcTime, "\n"; 
+ 
+     &fillDbTable();   
+  }else{
+      $mdone++;  
+    print "updating files rerun in FileCatalog\n";   
+    print "File to be updated :", $mJobId, " % ", $mpath, " % ",$mfName, " % ", $mdataSet, " % ", $mtrigger," % ",$mdtStat ," % ",$mcomnt," % ",$mNevts, " % ", $mcTime, "\n"; 
+#     &updateFC();
+     }
+       } else {
+         next;
+       }
+
+   }else{
+    next;
+   }
+  }
 
 
 #####  finished with data base
@@ -874,7 +629,7 @@ struct JFileAttr => {
 
     exit;
 
-#################################################################################
+################################################################################
    sub updateJSTable {
 
    $sql="update $JobStatusT set ";
@@ -888,7 +643,7 @@ struct JFileAttr => {
    $sql.="RealTime_per_evt='$mRealT',";
    $sql.="NoEventSkip='$mEvtSk',";
    $sql.="nodeID='$mnodeId'";
-   $sql.=" WHERE sumFileName = '$msumFile' AND jobfileName = '$mjobFname' AND prodSeries = '$mproSr'";
+   $sql.=" WHERE sumFileName = '$mlogFile' AND jobfileName = '$mjobFname' AND prodSeries = '$mproSr'";
    print "$sql\n" if $debugOn;
 #   print "$sql\n";
    $rv = $dbh->do($sql) || die $dbh->errstr;
@@ -928,14 +683,12 @@ struct JFileAttr => {
    }
 
 ##### ======================================================================
-  sub updateDbTable {
+  sub updateFC {
 
       $sql="update $FileCatalogT set ";
       $sql.="size='$msize',";
       $sql.="createTime='$mcTime',";
       $sql.="Nevents='$mNevts',";
-      $sql.="NevLo='$mNevtLo',";
-      $sql.="NevHi='$mNevtHi',";
       $sql.="owner='$mowner',";
       $sql.="redone='$mdone',"; 
       $sql.="dataStatus='$mdtStat',";     
@@ -946,10 +699,11 @@ struct JFileAttr => {
 
     }
 
+
 ##############################################################################
   sub walkDHpss {
 
-    my ( $ftp, $dirs, $files ) = @_;
+    my ( $ftp, $dirs, $files, $lstTime ) = @_;
  
  my @fields;
  my $access;
@@ -963,53 +717,53 @@ struct JFileAttr => {
  my $fullDir;
  my $set; 
  
-  for ($ii=0; $ii<$nHpssDirs; $ii++) {
-    my @dird = $ftp->dir($dirs->[$ii]);
+    for ($ii=0; $ii<$nHpssDirs; $ii++) {
+      my @dird = $ftp->dir($dirs->[$ii]);
 
-     for ($jj=0; $jj<@dird; $jj++) {
-         @fields = split(/\s+/, $dird[$jj]);
-         $access = $fields[0]; 
-         $downer = $fields[2];
-         $size   = $fields[4];
-         $month  = $fields[5];
-         $day    = $fields[6];
-         $year   = $fields[7];
-         $name   = $fields[8];
-         $fullDir = $dirs->[$ii];
+       for ($jj=0; $jj<@dird; $jj++) {
+           @fields = split(/\s+/, $dird[$jj]);
+           $access = $fields[0]; 
+           $downer = $fields[2];
+           $size   = $fields[4];
+           $month  = $fields[5];
+           $day    = $fields[6];
+           $year   = $fields[7];
+           $name   = $fields[8];
+           $fullDir = $dirs->[$ii];
           
-         next if ( $name =~ /^delete_me/);
-         next if ( $name =~ /^file/);
-         next if ( $name =~ /^Star.Test/);
-     
-#        @dirF = split(/\//, $dirs->[$ii]); 
-#       $set = sprintf("%s\/%s\/%s\/%s",$dirF[4],$dirF[5],$dirF[6],
-#                                                $dirF[7]);
+#          @dirF = split(/\//, $dirs->[$ii]); 
 
-    my $monthD = $monthHash{$month};
-    my $sec = 0;
-    my $min = 0;
-    my $hr = 0;
+#         $set = sprintf("%s\/%s\/%s\/%s",$dirF[4],$dirF[5],$dirF[6],
+#                                                  $dirF[7]);
+
+      my $monthD = $monthHash{$month};
+      my $sec = 0;
+      my $min = 0;
+      my $hr = 0;
       
-    if ( $year =~ m/:/ ) {
-      ( $hr, $min ) = split(/:/,$year);
-      $year = (localtime())[5];
-    } else {
-      $year = $year - 1900;
-    }
+      if ( $year =~ m/:/ ) {
+        ( $hr, $min ) = split(/:/,$year);
+        $year = (localtime())[5];
+      } else {
+        $year = $year - 1900;
+      }
       
-    if( $year > 97 ) {
-      $year = 1900 + $year;
-    } else {
-      $year = 2000 + $year;
-    }
-  $fflag = 1;
+      if( $year > 97 ) {
+        $year = 1900 + $year;
+      } else {
+        $year = 2000 + $year;
+      }
    
-    $timeS = sprintf ("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:00",
-                      $year,$monthD,$day,$hr,$min);
-   
-#    $timeS = sprintf ("%4.4d%2.2d%2.2d",
-#                     $year,$monthD,$day);
-      
+  my $hpTime = sprintf ("%4.4d%2.2d%2.2d%2.2d%2.2d",
+                        $year,$monthD,$day,$hr,$min);
+      $timeS = sprintf ("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:00",
+                        $year,$monthD,$day,$hr,$min);
+#      $timeS = sprintf ("%4.4d%2.2d%2.2d",
+#                      $year,$monthD,$day);
+	   if ($hpTime >  $lstTime ) {
+
+#   print "Files to be processed: ", $name,"  %  ", $timeS,"  %  ", $hpTime,"\n";
+
       $fObjAdr = \(FileAttr->new());
       ($$fObjAdr)->filename($name);
       ($$fObjAdr)->fpath($fullDir);
@@ -1017,104 +771,244 @@ struct JFileAttr => {
       ($$fObjAdr)->timeS($timeS);
       ($$fObjAdr)->faccess($access);
       ($$fObjAdr)->fowner($downer);
-      ($$fObjAdr)->iflag($fflag); 
 
       $files->[$nHpssFiles] = $fObjAdr;
       $nHpssFiles++;
       print "File ".$name."\n" if $debugOn;
+	 }
       }
     } 
   }
 
-##############################################################################
+#######################################################################################
+ sub mod_time($) { 
+my $atime;   # Last access time since the epoch
+my $mtime;   # Last modify time since the epoch
+my $ctime;   # Inode change time (NOT creation time!) since the epoch
+my $now;     # current time 
+my $dev;
+my $ino;
+my $mode;
+my $nlink;
+my $uid;
+my $gid;
+my $rdev;
+my $blksize;
+my $blocks;
+my $dtime;
+my $file_name =  $ARGV[0];
 
-  sub sumInfo {
+$now = time;
+($dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime, $mtime, $ctime, $blksize, $blocks ) = stat $file_name;
+printf ($mtime);
+$dtime = $now - $mtime;
+printf  ($dtime) ;
+}
 
-  my ($jb_sum,$useless) = @_;   
-  my $sum_line ;
-  my @word_sum;
-   my @output = `more $jb_sum`; 
-     foreach my $sum_line (@output) {
-              chop $sum_line;
+############################################################################################
 
-#####  get node name
-             if ($sum_line =~ /Starting job execution/) {
-              @word_sum = split (" ", $sum_line);
-              $mnodeId = $word_sum[11];
-	    }
-#####  get job status
+sub parse_log($) {
 
-       if ($sum_line =~ /Job status:/) {
-          @word_sum = split (":", $sum_line);
-           $mjobSt = $word_sum[1];
-       } 
-        if ($sum_line =~ /Segmentation violation/) {
-                $mjobDg = "Segmentation violation";
-            }
-       elsif ($sum_line =~ /Bus error/) {
-               $mjobDg = "bus_error";
-          } 
-      if($sum_line =~ /Error message/)  {
-          @word_sum = split (":", $sum_line); 
-             $mjobDg = $word_sum[1];
-        }
+  my $logName = $_[0];
+  my $line; 
+  $mjobSt = "Run not completed";
+  my $Err_messg = "none";
+  my $exmessg = "none";
 
-#####  get number of events done
-   
-     if ($sum_line =~ /Number of Events Done/ ) {
-       @word_sum = split (":", $sum_line);          
-         $mNev = $word_sum[1];
-     } 
-   	     if ( $sum_line =~ /Number of Events Skiped/ ) {
-                   @word_sum = split (":", $sum_line);          
-         $mEvtSk = $word_sum[1];
- 	        }
-  	    if ( $sum_line =~ /First event/ ) {
-                   @word_sum = split (":", $sum_line);          
-         $first_evts = $word_sum[1];
- 	        }
-              if ( $sum_line =~ /Last event/ ) {
-                     @word_sum = split (":", $sum_line);          
-         $last_evts = $word_sum[1];
+#  print $logName, "\n";
+ open (LOGFILE, $logName ) or die "cannot open $logName: $!\n";
 
- 	 	 }
-#####  get chain
-           if( $sum_line =~ /QAInfo:Requested chain is/ ) {
-             @word_sum = split (":", $sum_line); 
-               $pr_chain = $word_sum[2];
-               $pr_chain =~ s/ /_/g;
-              if ( $pr_chain =~ /^\s*_/ ) {
-                my $mIndex = index $pr_chain, "_";
-                  $pr_chain = substr( $pr_chain, $mIndex+1);
-                 } 
-                            }
-#####  get max memory size during execution
-              if ($sum_line =~ /Package   outputStream/ ) {
-                @word_sum = split (" ", $sum_line);
-                  $mmemSz = $word_sum[5];
-              }
-#####  get CPU and REAL Time per event
-               next if ($sum_line =~ /Command string/);
-              if($sum_line =~ /Total: bfc/ ) {             
-             @word_sum = split (" ", $sum_line);
-#            print "CPU = ", $sum_line, "\n";   
-              if($word_sum[8] =~ /Cpu/) { 
-                $mCPU  = $word_sum[11];  
-                $mRealT = $word_sum[6];  
-             }
-            }
-#####  get everage number of tracks in the event
+# dump contents of log file to array for parsing
+  my @logfile = <LOGFILE>;
+  my $no_event = 0;
+  my $num_event = 0;
+  my $num_line = 0;  
+  $mmemSz = 0; 
+  my $maker_size = 0;
+  my $mymaker; 
+  my $no_tracks; 
+  my $no_vertices;
+  my $no_prtracks; 
+  my $tot_tracks = 0;
+  my $tot_vertices = 0;
+  my $tot_prtracks = 0;
+  my $avr_prtracks;
+  my @word_tr;
+  $mEvtSk = 0;
+  $first_evts = 0;
+  $last_evts = 0; 
+  my @nparts;
+  my @size_line;
+   my @myword; 
+   my @words;
+  $mnodeId = "n/a";
+   my $Anflag = 0;
+#---------------------------------------------------------
 
-        if($sum_line =~ /QAinfo: Average number of tracks/) {
-         @word_sum = split (" ", $sum_line) ;  
-                $mNoTrk = $word_sum[5];
-       }   
-#####  get everage number of vertex in the event
+  
+# parse beginning of file
+ $Anflag = 0;   
 
-       if($sum_line =~ /QAinfo: Average number of vertices/) {     
-           @word_sum = split (" ", $sum_line) ;
-            $mNoVert = $word_sum[5]; 
-       }
+  foreach my $line (@logfile) {
+     chop $line ;
+    
+# get memory size at the outputStream
+     if ($num_line > 1000){
+     if( $line =~ /EndMaker/ and $line =~ /outputStream/){
+       @size_line = split(" ",$line); 
+       $size_line[6] =~ s/=//g;      
+        $maker_size += $size_line[6];
+         $mymaker = $size_line[3];
      }
-  }
+   }
+# get  number of events
+    if ( $line =~ /QAInfo: Done with Event/ ) {
+      @nparts = split ( "/",$line);
+      $noEvts = $nparts[2];
+      $last_evts = substr($noEvts,4) + 0; 
+      if ($no_event == 0) {
+      $first_evts = $last_evts;
+    }
+      $no_event++;
+  } 
 
+# get number of tracks, vertices and hits
+
+     if ($line =~ /StMessageManager message summary/) {
+      $Anflag = 1;
+    }
+
+     if ($line =~ /track nodes:/ && $Anflag == 0 ) {
+           my  $string = $line;
+             @word_tr = split /:/,$string;            
+              $no_tracks = $word_tr[2];
+              $tot_tracks += $no_tracks; 
+#              print $word_tr[2], $no_tracks, "\n";
+    }
+        elsif($line =~ /primary tracks:/ && $Anflag == 0 ) {
+              $string = $line;
+             @word_tr = split /:/,$string;
+             $no_prtracks = $word_tr[2]; 
+             $tot_prtracks += $no_prtracks;
+     }
+        elsif($line =~ /V0 vertices:/ && $Anflag == 0 ) {
+            $string = $line;
+             @word_tr = split /:/,$string;
+             $no_vertices = $word_tr[2]; 
+             $tot_vertices += $no_vertices;
+     }   
+
+# check if job crashed 
+
+      if($line =~ /bus error/) {
+         $Err_messg = "bus error";
+       }
+
+    elsif ($line =~ /segmentation violation/) {
+             $Err_messg = "segmentation violation";
+    }
+    elsif ($line =~ /eventIsCorrupted/)  {
+            $exmessg = "Corrupted event";
+    } 
+    elsif ($line =~ /Interpreter error recovered/)  {
+             $Err_messg = "Interpreter error recovered";
+           }
+
+# check how many events have been skiped
+
+      if ( $line =~ /Total events processed/) {
+
+        @word_tr = split /:/,$line;
+        $mEvtSk = $word_tr[3];
+   }      
+        
+#check if job is completed
+    if ( $line =~ /Run completed/) {          
+          $mjobSt = "Done";      
+        }
+ 
+   if ($no_event != 0) {
+   if ($line =~ /Total: bfc/ and $line =~ /seconds Cpu Time/) {
+     @myword = split /:/, $line;    
+     @words = split(" ",$myword[3]);
+   }  
+ }
+    if ( $line =~ /Finished job execution/) {
+      @word_tr = split(" ",$line);
+       $mnodeId = $word_tr[11];          
+        } 
+  $num_line++;
+     }
+
+  $mNev = $no_event;
+  $num_event = $no_event - $mEvtSk;
+
+  if( $num_event > 0 )  {
+
+   $mRealT = $words[3] /$num_event;
+   $mCPU = $words[8] /$num_event;   
+   $mNoTrk  = $tot_tracks/$num_event;
+   $mNoVert  = $tot_vertices/$num_event;
+   $avr_prtracks  = $tot_prtracks/$num_event;
+   $mmemSz = $maker_size/$num_event;
+ } 
+  close(LOGFILE);
+
+##----------------------------------------------------------------------------
+# parse error log file
+
+   my @err_out;
+   my $mline;
+   my $jLog_err;
+   my $err_file;
+   my @prt;
+   my $jLog = $logName;
+   my $basename = basename("$jLog",".log");
+  $err_file = $basename .".err";
+  $jLog_err = $DISK1 . "/" . $prodSr ."/" ."log/daq" ."/" .$err_file;  
+  
+# print "Err file ",  $jLog_err, "\n"; 
+
+     @err_out = `tail -100 $jLog_err`;
+  foreach $mline (@err_out){
+          chop $mline;
+       if ( $mline =~ /No space left on device/)  {
+        $exmessg = "No space left on device";
+     } 
+        elsif ($mline =~ /Error calling module/) {
+       chop $mline;  
+      $exmessg = $mline;
+      }
+     elsif ($mline =~ /Stale NFS file handle/) {
+  
+      $exmessg = "Stale NFS file handle";
+     }       
+     elsif ( $mline =~ /Assertion/ & $mline =~ /failed/)  {
+        $Err_messg = "Assertion failed";
+     } 
+      elsif ($mline =~ /Error calling module/) {
+       chop $mline;  
+      $exmessg = $mline;
+   }
+      elsif ($mline =~ /Fatal in <operator delete>/) {
+  
+       $Err_messg = "Fatal in <operator delete>";   
+  }
+       elsif ($mline =~ /Fatal in <operator new>/) {
+  
+       $Err_messg = "Fatal in <operator new>";   
+  }
+      elsif ($mline =~ /Error: Unexpected EOF/) {
+      $Err_messg = "Unexpected EOF";
+  } 
+
+  } 
+      if ( $Err_messg ne "none") {
+     $mjobSt = $Err_messg;
+   } 
+      if ($mNev == 0 &&  $mjobSt eq "Done" && $exmessg eq "Corrupted event") {
+      $mjobSt = $exmessg;
+  } 
+ }
+#==============================================================================
+	    
