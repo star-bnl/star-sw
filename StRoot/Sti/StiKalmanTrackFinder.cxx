@@ -277,7 +277,6 @@ void StiKalmanTrackFinder::doTrackFind()
 
 void StiKalmanTrackFinder::findTracks()
 {
-<<<<<<< StiKalmanTrackFinder.cxx
   //-----------------------------------------------------------------
   // Find all possible tracks in the given set of hits/points.
   // 
@@ -287,7 +286,7 @@ void StiKalmanTrackFinder::findTracks()
   //                    before they are added to the track store.
   // trackContainer   : track container
   //-----------------------------------------------------------------
-  StiTrack * t;
+  StiKalmanTrack * t;
   while (trackSeedFinder->hasMore())
     { 
       t = trackSeedFinder->next(); // obtain a pointer to the next track candidate/seed
