@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   25/05/99  (E-mail: fine@bnl.gov)
-// $Id: DrawTrackTpcHits.C,v 1.1 1999/05/29 20:56:17 fine Exp $
+// $Id: DrawTrackTpcHits.C,v 1.2 1999/06/24 16:49:00 fine Exp $
 // $Log: DrawTrackTpcHits.C,v $
+// Revision 1.2  1999/06/24 16:49:00  fine
+// StTrack.length method replaced the 120.0 cm constant
+//
 // Revision 1.1  1999/05/29 20:56:17  fine
-// An example of 3D representation of StEventStGlobalTrack and StHits objects
+//  An example of 3D representation of StEventStGlobalTrack and StHits objects
 //
 {
 //_______________________________________
@@ -40,7 +43,7 @@
          next();
          StVecPtrTpcHit *hits = globTrack->tpcHits();
          StHits3DPoints *hitPoints     = new StHits3DPoints(hits);
-         StHelix3DPoints *helixPoints  = new StHelix3DPoints(globTrack,120.0,30);
+         StHelix3DPoints *helixPoints  = new StHelix3DPoints(globTrack,globTrack->length(),30);
          if (hitPoints->Size()>1) {
            St_PolyLineShape *trackShape  = new St_PolyLineShape(hitPoints);
            trackShape->SetVisibility(1); trackShape->SetColorAttribute(kYellow);
