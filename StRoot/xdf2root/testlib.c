@@ -59,24 +59,14 @@ struct table_tag {
 	struct {float x; long n;}v;
 };
 
-int dsPrintType(DS_TYPE_T *type);
 void dumpMem(char *ptr, int count);
 void dumpType(DS_TYPE_T *type);
 static void dumpTypeR(DS_TYPE_T *type, char *prefix);
 static void setTable(struct table_tag *table);
-int testStats(void);
 int xdr_read(XDR *xdrs, int fast);
 int xdr_write(XDR *xdrs);
 
 
-/******************************************************************************
-*
-*/
-int dsBug()
-{
-	/* put code here */
-	return TRUE;
-}
 /******************************************************************************
 *
 * dsTestAdt - simple test of abstract data type routines
@@ -133,7 +123,6 @@ int dsTestAdt()
 		}
 	}
 	dumpType(type);
-	testStats();
 	return TRUE;
 
 }
@@ -161,7 +150,7 @@ char *prefix;
 	size_t i, j;
 	DS_FIELD_T *field;
 
-	for (field = type->field, i = 0; i < type->nField; i++, field++) {
+	for (field = DS_FIELD_PTR(type), i = 0; i < type->nField; i++, field++) {
 		printf("%7d%7d",field->offset,  field->count);
 		printf("  %c  ", DS_REP_IS_STD(field->type) ? 'T' : 'F');
 		printf("%10s |", field->type->name);
@@ -207,18 +196,25 @@ int dsTestErr()
 int dsTestMisc()
 {
 	char *ptr;
-	size_t size;
+	size_t len, size, tid;
 	DS_TYPE_T *type = NULL;
 
 	if (!dsCreateType(&type, &size, def, &ptr)) {
 		dsPerror("dsCreateType failed");
 		return FALSE;
 	}
-	printf("typeSize %d\n", size);
-	dsPrintType(type);
-	dsDumpTypes();
 	free((char *)type);
-	testStats();
+	printf("typeSize %d\n", size);
+	if (!dsTypeId(&tid, def, &ptr)) {
+		dsPerror("dsTypeId failed");
+		return FALSE;
+	}
+	if (!dsTypeDef(&ptr, &len, tid)) {
+		dsPerror("dsTypeDef failed");
+        return FALSE;
+       }
+	printf("%s", ptr);
+	dsDumpTypes();
 	return TRUE;
 }
 /******************************************************************************
@@ -275,7 +271,6 @@ int dsTestTree()
 		dsPerror("dsPrintDataset failed for table");
 		return FALSE;
 	}
-	testStats();
 	return TRUE;
 }
 /******************************************************************************
@@ -285,13 +280,13 @@ int dsTestTree()
 */
 int dsTestDset()
 {
-	char buf[10];
+	char buf[10], *ptr;
 	char *tblDecl[] = {"struct type1 {int a;}", "struct type2 {long l;}",
 		"struct type3 {float f;}", "struct type4 {int x;}"};
 	int i, a[21];
 	long l[5];
 	char *pData[] = {NULL, NULL, NULL, NULL};
-	size_t dim[] = {10, 5, 12, 31};
+	size_t dim[] = {10, 5, 12, 31, 8, 4, 12, 2};
 	DS_DATASET_T dataset[21], *pDataset = dataset;
 
 	pData[0] = (char *)a;
@@ -303,8 +298,9 @@ int dsTestDset()
 	}
 	for (i = 0; i < 20; i++) {
 		sprintf(buf, "tbl%d", i);
+		ptr =pData[i%4];
 		if (!dsAddTable(pDataset,
-			buf, tblDecl[i%4], dim[i%4], &pData[i%4], NULL)) {
+			buf, tblDecl[i%4], dim[i%8], &ptr)) {
 			dsPerror("dsAddTable failed");
 			return FALSE;
 		}
@@ -313,7 +309,7 @@ int dsTestDset()
 		dsPerror("dsPrintDataSet failed");
 		return FALSE;
 	}
-	testStats();
+	dsFreeDataset(pDataset);
 	return TRUE;
 }
 /******************************************************************************
@@ -445,22 +441,6 @@ static void setTable(struct table_tag *table)
 }
 /******************************************************************************
 *
-* dsPrintType - print type declaration in standard form
-*
-*/
-int dsPrintType(DS_TYPE_T *type)
-{
-	char buf[500];
-
-	if (!dsFmtTypeDef(buf, sizeof(buf), type)) {
-		dsPerror("dsFmtTypeDef failed");
-		return FALSE;
-	}
-	printf("%s", buf);
-	return TRUE;
-}
-/******************************************************************************
-*
 * xdrMemTest - test xdr_dataset in memory region
 *
 */
@@ -489,13 +469,11 @@ int xdrMemTest(void)
 		goto fail;
 	}
 	free(addr);
-	testStats();
 	return TRUE;
 fail:
 	if (addr != NULL) {
 		free(addr);
 	}
-	testStats();
 	return FALSE;
 }
 /******************************************************************************
@@ -528,6 +506,7 @@ int xdr_read(XDR *xdrs, int fast)
 	for(l = 0; l < NLOOP; l++) {
 		dataset = NULL;
 		if (!xdr_dataset(xdrs, &dataset)) {
+			printf("loop count %d\n", l);
 			dsPerror("xdr_dataset failed for DECODE");
 			return FALSE;
 		}
@@ -537,14 +516,12 @@ int xdr_read(XDR *xdrs, int fast)
 				return FALSE;
 			}
 		}
-		xdr_free(xdr_dataset, (char *)&dataset);
-		if (dataset != NULL) {
-			printf("xdr_free failed\n");
+		if (!dsFreeDataset(dataset)) {
+			dsPerror("dsFreeDataset failed");
 			return FALSE;
 		}
 	}
 	printf("DECODE success\n");
-	testStats();
 	return TRUE;
 }
 /******************************************************************************
@@ -604,16 +581,15 @@ int xdr_write(XDR *xdrs)
 	}
 	free(table);
 	printf("ENCODE success\n");
-	testStats();
 	return TRUE;
 }
 /******************************************************************************
 *
 */
-int testStats(void)
+void testStats(void)
 {
+	printf("\n");
 	dsDatasetAllocStats();
 	dsTidHashStats();
 	dsTypeLockStats();
-	return TRUE;
 }

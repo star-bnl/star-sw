@@ -7,7 +7,7 @@ modification history
 --------------------
 01a,24apr93,whg  written.
 */
-
+				
 /*
 DESCRIPTION
 TBS ...
@@ -54,7 +54,7 @@ typedef enum ds_code_t {
 #define DS_STD_REAL(type) ((type)->code < DS_TYPE_FLOAT ||\
 		DS_IS_IEEE_FLOAT || (type)->code > DS_TYPE_DOUBLE)
 
-
+#define DS_FIELD_PTR(type) ((DS_FIELD_T *)&(type)[1])
 /******************************************************************************
 *
 * ds_type_t - node in type tree
@@ -68,22 +68,26 @@ typedef struct ds_type_t {
 	size_t modulus;		/* alignment modulus */
 	size_t stdsize;		/* size in standard encoding */
 	size_t stdmodulus;	/* modulus in standard encoding */
-	size_t nField;		/* number of fields */
-	struct	ds_field_t {		/* if code is DS_TYPE_STRUCT */
-		char name[DS_NAME_DIM];	/* field name */
-		struct ds_type_t *type;	/* field element type */
-		size_t count;	/* number of elements in field */
-		size_t offset;	/* field offset from start of struct */
-		size_t stdoffset;	/* field offset in standard encoding */
-					/* array dimension or zero */
-		size_t dim[DS_MAX_DIMS];
-	}*field;
+	size_t nField;		/* number of fields that follow */
 }DS_TYPE_T;
-typedef struct ds_field_t	DS_FIELD_T;
 
 /* type flags */
 #define DS_STD_REP 0X1		/* type has standard encoding */
 #define DS_REP_IS_STD(type) (((type)->flags & DS_STD_REP) != 0)
+/******************************************************************************
+*
+* field in structure
+*
+*/
+typedef  struct	ds_field_t {		/* if code is DS_TYPE_STRUCT */
+	char name[DS_NAME_DIM];	/* field name */
+	struct ds_type_t *type;	/* field element type */
+	size_t count;	/* number of elements in field */
+	size_t offset;	/* field offset from start of struct */
+	size_t stdoffset;	/* field offset in standard encoding */
+				/* array dimension or zero */
+	size_t dim[DS_MAX_DIMS];
+}DS_FIELD_T;
 /******************************************************************************
 *
 * node in hiearchical data structure
@@ -100,7 +104,6 @@ typedef struct ds_dataset_t {
 		struct ds_dataset_t *child;	/* children if tid == zero */
 		void *data;			/* table if tid != zero */
 	}p;
-	void *pUser;		/* pointer to user area */
 }DS_DATASET_T;
 
 /* DATASET flags */
@@ -120,18 +123,18 @@ typedef struct ds_dataset_t {
 *
 */
 int dsAddTable(DS_DATASET_T *pDataset, char *name,
-	char *decl, size_t nRow, void *ppData, void *hook);
+	char *decl, size_t nRow, void *ppData);
 int dsAllocTables(DS_DATASET_T *pDataset);
 int dsFindDataset(DS_DATASET_T **ppChild, DS_DATASET_T *pDataset, char *name);
 int dsFreeDataset(DS_DATASET_T *pDataset);
 int dsMapTable(DS_DATASET_T *pDataset, char *name,
-	char *decl, size_t *pCount, void *ppData, void *hook);
+	char *decl, size_t *pCount, void *ppData);
 int dsNewDataset(DS_DATASET_T **ppDataset, char *name, size_t setDim);
 int dsPerror(char *msg);
-int dsProjectDataset(DS_DATASET_T *pDst, DS_DATASET_T *pSrc,
-	int (*missing)(DS_DATASET_T *pMiss, size_t index));
-int dsProjectTable(DS_DATASET_T *pDst, DS_DATASET_T *pSrc,
-	int (*missing)(DS_DATASET_T *pMiss, size_t index));
+int dsProjectTable(DS_DATASET_T *pDst, DS_DATASET_T *pSrc);
+int dsTasProject(DS_DATASET_T *pDataset, char *name,
+	char *decl, size_t *pCount, void *ppData);
+
 /******************************************************************************
 *
 * Not recommended for applications
@@ -242,6 +245,7 @@ int dsStrToMem(DS_MEM_T *bp, char *str);
 char *dsTypeCalloc(size_t size);
 void dsTidFree(void *ptr, size_t size);
 int dsTidHashStats(void);
+char *dsTypeLimit(DS_TYPE_T *type);
 int dsTypeLock(void);
 int dsTypeLockInit(void);
 int dsTypeLockStats(void);
@@ -249,9 +253,7 @@ int dsTypeUnlock(void);
 int dsTypeListCreate(size_t **pList, size_t listDim);
 int dsTypeListFree(size_t *list);
 int dsTypeListEnter(size_t *list, char *str, char **ptr);
-int dsTypeListFindName(size_t *pH, size_t *list, char *str, char **ptr);
-int dsTypeListFindTid(size_t *pH, size_t *list, size_t tid);
-
+int dsTypeListFind(size_t *pH, size_t *list, char *str, char **ptr);
 /******************************************************************************
 *
 *

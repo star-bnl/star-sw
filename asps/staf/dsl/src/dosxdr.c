@@ -5,13 +5,15 @@
 /*
 modification history
 --------------------
-01a,24apr93,whg  written.
+24apr93,whg	written.
+11feb95,whg	don't compile non INTEL
 */
 
 /*
 DESCRIPTION
 TBS ...
 */
+#ifdef _MSC_VER /* only if Microsoft compiler */
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -93,9 +95,7 @@ bool_t xdr_bytes(XDR *xdrs, char **cpp, unsigned *sizep, unsigned maxsize)
 * xdr_double - translate IEEE little Endian double to XDR
 *
 */
-bool_t xdr_double(xdrs, dp)
-XDR *xdrs;
-double *dp;
+bool_t xdr_double(XDR *xdrs, double *dp)
 {
 	char c[8], *cp = (char *)dp;
 
@@ -134,9 +134,7 @@ double *dp;
 * xdr_float - little Endian IEEE float to XDR
 *
 */
-bool_t xdr_float(xdrs, fp)
-XDR *xdrs;
-float *fp;
+bool_t xdr_float(XDR *xdrs, float *fp)
 {
 	return xdr_long(xdrs, (long *)fp);
 }
@@ -157,9 +155,7 @@ void xdr_free(xdrproc_t proc, char *objp)
 * xdr_int - int to XDR
 *
 */
-bool_t xdr_int(xdrs, ip)
-XDR *xdrs;
-int *ip;
+bool_t xdr_int(XDR *xdrs, int *ip)
 {
 	long l;
 
@@ -187,9 +183,7 @@ int *ip;
 * xdr_u_int - unsigned to XDR
 *
 */
-bool_t xdr_u_int(xdrs, uip)
-XDR *xdrs;
-unsigned *uip;
+bool_t xdr_u_int(XDR *xdrs, unsigned *uip)
 {
 	unsigned long ul;
 
@@ -217,9 +211,7 @@ unsigned *uip;
 * xdr_long - long to XDR
 *
 */
-bool_t xdr_long(xdrs, lp)
-XDR *xdrs;
-long *lp;
+bool_t xdr_long(XDR *xdrs, long *lp)
 {
 	if (xdrs->x_op == XDR_DECODE) {
 		return XDR_GETLONG(xdrs, lp);
@@ -237,9 +229,7 @@ long *lp;
 * xdr_u_long - same as xdr_long
 *
 */
-bool_t xdr_u_long(xdrs, ulp)
-XDR *xdrs;
-unsigned long *ulp;
+bool_t xdr_u_long(XDR *xdrs, unsigned long *ulp)
 {
 	return xdr_long(xdrs, (long *)ulp);
 }
@@ -363,10 +353,7 @@ static void xdrstdio_destroy(XDR *xdrs)
 * xdrstdio_getbytes - read bytest from stream
 *
 */
-static bool_t xdrstdio_getbytes(xdrs, cp, len)
-XDR *xdrs;
-char *cp;
-unsigned len;
+static bool_t xdrstdio_getbytes(XDR *xdrs, char *cp, unsigned len)
 {
 	if ((len != 0) &&
 		(fread(cp, len, 1, (FILE *)xdrs->x_private) != 1)) {
@@ -379,10 +366,7 @@ unsigned len;
 * xdrstdio_putbytes - write bytes to stream
 *
 */
-static bool_t xdrstdio_putbytes(xdrs, cp, len)
-XDR *xdrs;
-char *cp;
-unsigned len;
+static bool_t xdrstdio_putbytes(XDR *xdrs, char *cp, unsigned len)
 {
 	if ((len != 0) &&
 		(fwrite(cp, (int)len, 1, (FILE *)xdrs->x_private) != 1)) {
@@ -395,9 +379,7 @@ unsigned len;
 * xdrstdio_getlong - read long and translate to intel
 *
 */
-static bool_t xdrstdio_getlong(xdrs, lp)
-XDR *xdrs;
-long *lp;
+static bool_t xdrstdio_getlong(XDR *xdrs, long *lp)
 {
 	char c[4], *cp = (char *)lp;
 
@@ -415,9 +397,7 @@ long *lp;
 * xdrstdio_putlong - translate from intel and write long
 *
 */
-static bool_t xdrstdio_putlong(xdrs, lp)
-XDR *xdrs;
-long *lp;
+static bool_t xdrstdio_putlong(XDR *xdrs, long *lp)
 {
 	char c[4], *cp = (char *)lp;
 
@@ -461,3 +441,4 @@ static long *xdrstdio_inline(XDR *xdrs, unsigned pos)
 	}
 	return NULL;
 }
+#endif /* _MSC_VER only if NT or DOS */

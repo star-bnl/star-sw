@@ -1,5 +1,5 @@
 /* Copyright 1993, Lawrence Berkeley Laboratory */
-
+ 
 /* dserror.c - error handler routines */
 
 /*

@@ -22,6 +22,7 @@ TBS ...
 #include "dsxdr.h"
 #include "sample.h"
 
+void dbgTest(void);
 int xdrCreate(XDR *xdrs, char *fileName, int op);
 int readDynamic(XDR *xdrs);
 int readVars(XDR *xdrs);
@@ -48,6 +49,10 @@ void main(int argc, char **argv)
 		fcn = readVars;
 		op = XDR_DECODE;
 		break;
+
+	case 't':
+		dbgTest();
+		exit(0);
 
 	case 'v':
 		fcn = writeDynamic;
@@ -82,6 +87,23 @@ void main(int argc, char **argv)
 }
 /******************************************************************************
 *
+* dbgTest - spot for development unit test
+*/
+void dbgTest(void)
+{
+	char *limit;
+	DS_TYPE_T *type = NULL;
+
+	if (!dsCreateType(&type, NULL, TYPE_D_S, NULL)) {
+		dsPerror("dbgTest - dsCreateType failed \n");
+		exit(0);
+	}
+	limit = dsTypeLimit(type);
+	printf("TYPE size %d, FIELD size %d\n", sizeof(DS_TYPE_T), sizeof(DS_FIELD_T));
+	printf("size: %d\n", limit - (char *)type);
+}
+/******************************************************************************
+*
 * xdrCreate - open file and create XDR structure
 *
 */
@@ -108,11 +130,11 @@ int checkTable5(DS_DATASET_T *pDataset)
 	void *table5 = NULL;
 	size_t nRow5;
 
-	if (dsMapTable(pDataset, "table5", TYPE_A_S, &nRow5, &table5, NULL)) {
+	if (dsMapTable(pDataset, "table5", TYPE_A_S, &nRow5, &table5)) {
 		typeStr = TYPE_A_S;
 		printf("table5 is TYPE_A\n");
 	}
-	else if (dsMapTable(pDataset, "table5", TYPE_B_S, &nRow5, &table5, NULL)) {
+	else if (dsMapTable(pDataset, "table5", TYPE_B_S, &nRow5, &table5)) {
 		typeStr = TYPE_B_S;
 		printf("table5 is TYPE_B\n");
 	}
@@ -143,10 +165,10 @@ int readDynamic(XDR *xdrs)
 	/* read dataset and set table row counts and pointers */
 	if (
 		!xdr_dataset(xdrs, &pDataset) ||
-		!dsMapTable(pDataset, "table1", TYPE_A_S, &nRow1, &table1, NULL) ||
-		!dsMapTable(pDataset, "table2", TYPE_B_S, &nRow2, &table2, NULL) ||
-		!dsMapTable(pDataset, "table3", TYPE_C_S, &nRow3, &table3, NULL) ||
-		!dsMapTable(pDataset, "table4", TYPE_D_S, &nRow4, &table4, NULL)
+		!dsMapTable(pDataset, "table1", TYPE_A_S, &nRow1, &table1) ||
+		!dsMapTable(pDataset, "table2", TYPE_B_S, &nRow2, &table2) ||
+		!dsMapTable(pDataset, "table3", TYPE_C_S, &nRow3, &table3) ||
+		!dsMapTable(pDataset, "table4", TYPE_D_S, &nRow4, &table4)
 	) {
 		dsPerror("readDynamic failed");
 		goto fail;
@@ -162,12 +184,12 @@ int readDynamic(XDR *xdrs)
 		goto fail;
 	}
 
-	xdr_free(xdr_dataset, (char *)&pDataset);
+	dsFreeDataset(pDataset);
 	return TRUE;
 
 fail:
 	if (pDataset != NULL) {
-		xdr_free(xdr_dataset, (char *)&pDataset);
+		dsFreeDataset(pDataset);
 	}
 	return FALSE;
 }
@@ -189,10 +211,10 @@ int readVars(XDR *xdrs)
 	/* read dataset into program vars */
 	if (
 		!xdr_dataset_type(xdrs, &pDataset, DSET_DIM) ||
-		!dsMapTable(pDataset, "table1", TYPE_A_S, &nRow1, &pTable1, NULL) ||
-		!dsMapTable(pDataset, "table2", TYPE_B_S, &nRow2, &pTable2, NULL) ||
-		!dsMapTable(pDataset, "table3", TYPE_C_S, &nRow3, &pTable3, NULL) ||
-		!dsMapTable(pDataset, "table4", TYPE_D_S, &nRow4, &pTable4, NULL) ||
+		!dsMapTable(pDataset, "table1", TYPE_A_S, &nRow1, &pTable1) ||
+		!dsMapTable(pDataset, "table2", TYPE_B_S, &nRow2, &pTable2) ||
+		!dsMapTable(pDataset, "table3", TYPE_C_S, &nRow3, &pTable3) ||
+		!dsMapTable(pDataset, "table4", TYPE_D_S, &nRow4, &pTable4) ||
 		!dsAllocTables(pDataset) ||
 		!xdr_dataset_data(xdrs, pDataset)
 	) {
@@ -209,11 +231,11 @@ int readVars(XDR *xdrs)
 	) {
 		goto fail;
 	}
-	xdr_free(xdr_dataset, (char *)&pDataset);
+	dsFreeDataset(pDataset);
 	return TRUE;
 
 fail:
-	xdr_free(xdr_dataset, (char *)&pDataset);
+	dsFreeDataset(pDataset);
 	return FALSE;
 }
 /******************************************************************************
@@ -227,11 +249,11 @@ int writeDynamic(XDR *xdrs)
 
 	if (
 		!dsNewDataset(&pDataset, "example", DSET_DIM) ||
-		!dsAddTable(pDataset, "table1", TYPE_A_S, NROW_TABLE1, NULL, NULL) ||
-		!dsAddTable(pDataset, "table2", TYPE_B_S, NROW_TABLE2, NULL, NULL) ||
-		!dsAddTable(pDataset, "table3", TYPE_C_S, NROW_TABLE3, NULL, NULL) ||
-		!dsAddTable(pDataset, "table4", TYPE_D_S, NROW_TABLE4, NULL, NULL) ||
-		!dsAddTable(pDataset, "table5", TYPE_B_S, NROW_TABLE5, NULL, NULL) ||
+		!dsAddTable(pDataset, "table1", TYPE_A_S, NROW_TABLE1, NULL) ||
+		!dsAddTable(pDataset, "table2", TYPE_B_S, NROW_TABLE2, NULL) ||
+		!dsAddTable(pDataset, "table3", TYPE_C_S, NROW_TABLE3, NULL) ||
+		!dsAddTable(pDataset, "table4", TYPE_D_S, NROW_TABLE4, NULL) ||
+		!dsAddTable(pDataset, "table5", TYPE_B_S, NROW_TABLE5, NULL) ||
 		!setDataset(pDataset)
 	) {
 		dsPerror("writeDynamic setup failed");
@@ -242,12 +264,12 @@ int writeDynamic(XDR *xdrs)
 		dsPerror("writeDynamic xdr_dataset failed");
 		goto fail;
 	}
-	xdr_free(xdr_dataset, (char *)&pDataset);
+	dsFreeDataset(pDataset);
 	return TRUE;
 
 fail:
 	if (pDataset != NULL) {
-		xdr_free(xdr_dataset, (char *)&pDataset);
+		dsFreeDataset(pDataset);
 	}
 	return FALSE;
 }
@@ -281,11 +303,11 @@ int writeProg(XDR *xdrs)
 	/* build and write dataset */
 	if (
 		!dsNewDataset(&pDataset, "example", DSET_DIM) ||
-		!dsAddTable(pDataset, "table1", TYPE_A_S, nRow1, &pTable1, NULL) ||
-		!dsAddTable(pDataset, "table2", TYPE_B_S, nRow2, &pTable2, NULL) ||
-		!dsAddTable(pDataset, "table3", TYPE_C_S, nRow3, &pTable3, NULL) ||
-		!dsAddTable(pDataset, "table4", TYPE_D_S, nRow4, &pTable4, NULL) ||
-		!dsAddTable(pDataset, "table5", TYPE_A_S, nRow5, &pTable5, NULL) ||
+		!dsAddTable(pDataset, "table1", TYPE_A_S, nRow1, &pTable1) ||
+		!dsAddTable(pDataset, "table2", TYPE_B_S, nRow2, &pTable2) ||
+		!dsAddTable(pDataset, "table3", TYPE_C_S, nRow3, &pTable3) ||
+		!dsAddTable(pDataset, "table4", TYPE_D_S, nRow4, &pTable4) ||
+		!dsAddTable(pDataset, "table5", TYPE_A_S, nRow5, &pTable5) ||
 		!xdr_dataset(xdrs, &pDataset)
 	) {
 		dsPerror("writeProg failed");

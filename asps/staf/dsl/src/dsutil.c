@@ -1,7 +1,7 @@
 /* Copyright 1993, Lawrence Berkeley Laboratory */
 
 /* dsutil.c - data structure utility routines */
-
+   
 /*
 modification history
 --------------------
@@ -51,12 +51,13 @@ int dsCheckDuplicate(char *name, size_t count, size_t stride)
 */
 char *dsDsetAlloc(size_t size)
 {
-	char *ptr;
-
-	if ((ptr = malloc(size)) != NULL) {
+	char *ptr = NULL;
+    
+	if (size && (ptr = malloc(size)) != NULL) {
 		dsAllocCalls++;
 	}
 	else {
+		ptr = NULL;
 		DS_LOG_ERROR(DS_E_MALLOC_FAILURE);
 	}
 	return ptr;
@@ -80,8 +81,9 @@ void dsDsetFree(void *ptr)
 */
 int dsDatasetAllocStats(void)
 {
-	printf("datasetAllocStats: allocCalls %d, freeCalls %d, diff %d\n",
-		dsAllocCalls, dsFreeCalls, dsAllocCalls - dsFreeCalls);
+
+	printf("AllocStats:tidSize: %d, allocCalls %d, freeCalls %d, diff %d\n",
+		dsTidSize, dsAllocCalls, dsFreeCalls, dsAllocCalls - dsFreeCalls);
 	return TRUE;
 }
 /******************************************************************************
@@ -137,12 +139,8 @@ int dsIndent(DS_MEM_T *mem, int n)
 * dsMapDef - first pass for parse of dataset and type declarations
 *
 */
-int dsMapDef(pSepCount, map, pMapCount, maxMapCount, str)
-int *pSepCount;
-int *map;
-int *pMapCount;
-int maxMapCount;
-char *str;
+int dsMapDef(int *pSepCount, int *map,
+	int *pMapCount, int maxMapCount, char *str)
 {
 	int mapCount = 0, nest = -1, sepCount = 0, stack[DS_MAX_NEST];
 
@@ -277,23 +275,6 @@ int dsNumToMem(DS_MEM_T *mem, size_t num)
 
 	sprintf(buf, "%d", num);
 	return dsStrToMem(mem, buf);
-}
-/******************************************************************************
-*
-* dsStrSearch - find string in an array of structs
-*
-*/
-int dsStrSearch(size_t *pIndex, char *str, char *base, size_t stride, size_t count)
-{
-	size_t i;
-	
-	for (i = 0; i < count; i++, base += stride) {
-		if (strcmp(base, str) == 0) {
-			*pIndex = i;
-			return TRUE;
-		}
-	}
-	return FALSE;
 }
 /******************************************************************************
 *
