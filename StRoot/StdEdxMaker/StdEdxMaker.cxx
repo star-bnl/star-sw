@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.23 2001/12/11 13:31:43 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.24 2001/12/13 12:56:52 fisyak Exp $
 #include <iostream.h>
 #include <time.h>
 #include "StdEdxMaker.h"
@@ -480,6 +480,10 @@ Int_t StdEdxMaker::Make(){
   Double_t Scale2keV = 560./335.;
   Double_t Scale70   = 1.2684;//1.2876; //1.2315;
   Double_t Scale60   = 1.3506;//1.3712; //1.3146;
+  if (GetDate() > 20010000) {// new scales for Y2001
+    Scale70 *= TMath::Exp(1.77944248749191236e-01);
+    Scale60 *= TMath::Exp(1.78199266545715274e-01);
+  }
   StTpcCoordinateTransform transform(gStTpcDb);
   St_DataSet *Dst = GetDataSet("dst"); assert(Dst);
   St_DataSet *dst = Dst->Find(".data/dst");
