@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.6 2002/11/11 17:08:59 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.7 2002/11/11 17:24:28 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -185,11 +185,15 @@ StdEdxY2Maker::StdEdxY2Maker(const char *name):
 StdEdxY2Maker::~StdEdxY2Maker(){}
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Init(){
-  m_OldCLusterFinder = m_Mode/10 != 0;
-  m_Calibration      = m_Mode%10;
-  if (m_Calibration < 0) {
+  if (m_Mode == -10) {
     m_Simulation = kTRUE;
     gMessMgr->Warning() << "StdEdxY2Maker:: use Simulation mode (no calibration) " << endm;
+  }
+  else {
+    m_OldCLusterFinder = m_Mode/10 != 0;
+    if (m_OldCLusterFinder) gMessMgr->Warning() << "StdEdxY2Maker:: use old Cluster Finder parameterization" << endm;
+    m_Calibration      = m_Mode%10;
+    if (! m_Calibration) gMessMgr->Warning() << "StdEdxY2Maker:: Calibration Mode" << m_Calibration << endm;
   }
   m_Bichsel = new Bichsel();
   if (m_Calibration != 0) {// calibration mode
