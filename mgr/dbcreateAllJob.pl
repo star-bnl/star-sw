@@ -21,21 +21,18 @@ require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
 my $debugOn=0;
 
 my @Sets = (
-#             "auau200/venus412/default/b0_3/year_1b/hadronic_on",
-#             "auau200/venus412/default/b3_6/year_1b/hadronic_on",
-#             "auau200/venus412/default/b6_9/year_1b/hadronic_on",
-#             "auau200/hijing135/Bjets/b0_3/year_2a/hadronic_on",
-#             "auau200/hijing135/Cjets/b0_3/year_2a/hadronic_on",
-#             "auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on", 
-             "auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on", 
-             "auau200/hijing135/jetq_on/b9_12/year_1b/hadronic_on",
+             "auau200/vni/default/b0_3/year_1h/hadronic_on/",
+             "auau200/nexus/default/b0_3/year_1h/hadronic_on",
+             "auau200/mevsim/vanilla_central/year_1h/hadronic_on",
+             "auau200/hijing/b8_15_jetq_off/jet05/year_1h/hadronic_on",
+             "auau200/hijing/b8_15_jetq_on/jet05/year_1h/hadronic_on", 
 );
 
-my $SetD = "daq/1999/12/";
+my $SetD = "daq/2000/02/";
 
-my $prodPeriod = "prod5"; 
-my @chName = ("tfs6b", "tdaq4");
-my $prodDir = "tfs_5";              
+my $prodPeriod = "mdc3"; 
+my @chName = ("tfs1h", "tdaq4");
+my $prodDir = "tfs_6";              
 my @chainDir = ("tfs","daq","trs");
 
 ###Set directories to be created for jobfiles
@@ -100,8 +97,8 @@ my $jb_fstat;
  my $mNoVert = 0;
  my $mchName = "n\/a";
  my $mnodeId = "n\/a";
- my $startId = "Job_prod5";
- my $startSer = "prod5";
+ my $startId = "Job_mdc3";
+ my $startSer = "mdc3";
  my $new_id = 0;
 
 ### start loop over input files
@@ -135,11 +132,12 @@ my $filename;
    $rv = $dbh->do($sql) || die $dbh->errstr;
    $new_id = $dbh->{'mysql_insertid'};
 
-	      for ($ii=0; $ii<2; $ii++)  {
+#	      for ($ii=0; $ii<2; $ii++)  {
+  $ii = 0;
   $JOB_LOG[$ii] =  $DISK1 . $prodPeriod . "/log/" . $chainDir[$ii];
   $JOB_DIR[$ii] =  "/star/u2e/starreco/" . $prodPeriod ."/requests/". $chainDir[$ii]; 
   $SUM_DIR[$ii] =  $DISK1 . $prodPeriod . "/sum/" . $chainDir[$ii];
- }
+# }
 
 
  $jobIn_no = 0;
@@ -223,10 +221,10 @@ my $filename;
         my $mlibVer  = ($$optchain)->libVer; 
         my $mNikName = ($$optchain)->chaName;
 
-      if($jset =~ /jets/) {
-          $mNikName = "tfs6a";
-          $mchain = "tfs_cy2a_eval_big_fzin";
-     }    
+#      if($jset =~ /jets/) {
+#          $mNikName = "tfs6a";
+#          $mchain = "tfs_cy2a_eval_big_fzin";
+#     }    
 
           $mprodSr = $prodPeriod; 
           $myID = 100000000 + $new_id;
