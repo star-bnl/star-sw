@@ -64,7 +64,7 @@ public:
   void     	SetEventSize(int is)	{mEventSize=is;};
   void     	SetEventNumber(int ev)	{mEventNumber=ev;};
   void     	SetGenerType(int g)	{mGenerType=g;};
-  void     	Print(Option_t* option="");
+  void     	Print(Option_t* option="") const;
 
 //		Data Members
 protected:
