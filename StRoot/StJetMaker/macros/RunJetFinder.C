@@ -1,5 +1,5 @@
 
-// NOTE - chain needs to be declared global so for StHbtEventReader
+// NOTE - This macro is good for reading simulated data (i.e. pythia6.x through bfc.C).  For real data, use RunJetFinder2.C (uses the data-base)
 //=========================================================================================
 class  StChain;
 StChain *chain;
@@ -75,6 +75,15 @@ void RunJetFinder(
     cpars->setDoSplitMerge(true);
     cpars->setDebug(false);
     emcJetMaker->addAnalyzer(anapars, cpars, "MkConeJetsPt02R07");
+
+    //Setup the charged cell cone finder (See StJetFinder/StCdfChargedConeJetFinder.h -> class StCdfChargedConePars)
+    StCdfChargedConePars* ccdfpars = new StCdfChargedConePars();
+    ccdfpars->setGridSpacing(56, -1.6, 1.6, 120, -pi, pi);
+    ccdfpars->setConeRadius(0.7);
+    ccdfpars->setSeedEtMin(1.0);
+    ccdfpars->setAssocEtMin(0.1);
+    ccdfpars->setDebug(false);
+    emcJetMaker->addAnalyzer(anapars, ccdfpars, "MkCdfChargedJetsPt02R07");
 
     //Setup the cone finder (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
     StKtCluPars* ktpars = new StKtCluPars();
