@@ -1,5 +1,9 @@
-// $Id: StFtpcClusterMaker.h,v 1.26 2004/09/03 20:35:04 perev Exp $
+// $Id: StFtpcClusterMaker.h,v 1.27 2004/09/27 12:54:27 jcs Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.27  2004/09/27 12:54:27  jcs
+// pad vs. time histograms moved to St_QA_Maker
+// set radial step histogram line color; red = FTPC East, blue=FTPC West
+//
 // Revision 1.26  2004/09/03 20:35:04  perev
 // Big LeakOff + mem optimisation
 //
@@ -130,7 +134,7 @@ class TObjArray;
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.26 2004/09/03 20:35:04 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.27 2004/09/27 12:54:27 jcs Exp $";
    St_db_Maker *mDbMaker;                         //!
    St_ftpcClusterPars   *m_clusterpars;           //!
    St_ftpcFastSimGas    *m_fastsimgas;            //!
@@ -174,8 +178,6 @@ class StFtpcClusterMaker : public StMaker {
    TH2F            *m_csteps;      //! charge step by (6*row)+sector
    TH2F            *m_hitsvspad;   //! number of found hits over cluster padlength 
    TH2F            *m_hitsvstime;  //! number of found hits over cluster timelength 
-   TH2F            *m_padvstime_West; //! padlength vs. timelength
-   TH2F            *m_padvstime_East; //! padlength vs. timelength
    TH1F            *m_maxadc_West;
    TH1F            *m_maxadc_East;
    TH1F            *m_charge_West;
@@ -190,7 +192,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.26 2004/09/03 20:35:04 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.27 2004/09/27 12:54:27 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker,0)   //StAF chain virtual base class for Makers
 };
