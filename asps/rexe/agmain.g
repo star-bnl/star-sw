@@ -34,7 +34,7 @@
       CALL AGZINI                  "  specific ZEBRA initialization      "
       CALL GPART                   "  Define standard particles          "
       CALL GMATE                   "  Initialize standard materials      "
-*yf      Call AGXINIT                 "  aguser menu - called here          "
+      Call AGXINIT                 "  aguser menu - called here          "
       CALL GINTRI                  "  Geant MENUs and COMMANDs           "
 *
       Idebug      =  p             "  restore Idebug after GINIT         "

@@ -38,9 +38,12 @@ FSL := $(FOR72) $(FFLAGS)   $(CPPFLAGS)   $(SOFLAGS)
 
 
 #	OUT dirs
-OBJ_DIR := $(OUT_DIR)/.$(STAF_ARCH)/obj/rex
-DEP_DIR := $(OUT_DIR)/.$(STAF_ARCH)/dep/rex
+OBJ_DIR := $(OUT_DIR)/.$(STAF_ARCH)/obj/rexe
+DEP_DIR := $(OUT_DIR)/.$(STAF_ARCH)/dep/rexe
 EXE_DIR := $(OUT_DIR)/.$(STAF_ARCH)/bin
+check   := $(shell test -d $(OBJ_DIR) || mkdir -p $(OBJ_DIR)) 
+check   := $(shell test -d $(DEP_DIR) || mkdir -p $(DEP_DIR)) 
+check   := $(shell test -d $(EXE_DIR) || mkdir -p $(EXE_DIR)) 
 ####EXE_DIR := $(ROOTSYS)/bin
 
 ifAFS_OUT := $(strip $(filter /afs/%, $(OUT_DIR)))
@@ -49,7 +52,7 @@ ifdef ifAFS_OUT
   AFS_EXE_DIR := $(OUT_DIR)/bin
 endif
 
-SRC_DIRS := $(INP_DIR) 
+SRC_DIRS := $(INP_DIR)  $(addprefix $(STAR)/asps/agi/gst/, geant zebra)
 #                         $(addprefix $(STAR)/asps/agi/gst/, agsim  main geant comis)
 VPATH := $(SRC_DIRS) $(OUT_DIR) $(OBJ_DIR)  $(EXE_DIR) 
 
@@ -58,14 +61,14 @@ NAMES_O := $(wildcard $(addsuffix /*.[fFgc]*,$(SRC_DIRS)))
 #NAMES_O := $(filter %.g %.f %.F %.c %.cc %.cxx %.cdf,$(NAMES_O))
 NAMES_O := $(filter-out %.bck,$(NAMES_O))
 NAMES_O := $(basename $(notdir $(NAMES_O)))
-NAMES_O := $(filter-out gyintf,$(NAMES_O))
+#NAMES_O := $(filter-out gyintf,$(NAMES_O))
 # from asps/rexe
 #NAMES_0 := $(filter-out agmain  fdummy ggsim, $(NAMES_O))
 #NAMES_O := $(filter-out kgsim, $(NAMES_O))
-NAMES_O := $(filter-out traceqc pawfca pawbrk pawcs pgexi gkfort, $(NAMES_O))
-NAMES_O := $(filter-out csrmsl csjcal csaddr csfile  csext  csexec, $(NAMES_O))
-NAMES_O := $(filter-out tdm_clear_all tdm_map_table ami_module_register agpawq hplopt, $(NAMES_O))
-NAMES_O := $(filter-out UTILS_h2root afmain acmain,$(NAMES_O))
+#NAMES_O := $(filter-out traceqc pawfca pawbrk pawcs pgexi gkfort, $(NAMES_O))
+#NAMES_O := $(filter-out csrmsl csjcal csaddr csfile  csext  csexec, $(NAMES_O))
+#NAMES_O := $(filter-out tdm_clear_all tdm_map_table ami_module_register agpawq hplopt, $(NAMES_O))
+#NAMES_O := $(filter-out UTILS_h2root afmain acmain ,$(NAMES_O))
 NAMES_D := $(filter-out MAIN_rmain kgsim, $(NAMES_O))
 FILES_O := $(sort $(addprefix $(OBJ_DIR)/,$(addsuffix .o,$(NAMES_O))))
 FILES_D := $(sort $(addprefix $(DEP_DIR)/,$(addsuffix .d,$(NAMES_D)))) 
@@ -97,14 +100,7 @@ ifdef STAF
 # ALL_EXE_LIBS +=    -L$(STAF_SYS_LIB) -lmsg -ltdm -lspx -lsoc -lasu -ltop -ltnt -lami -ldio -ldui -ldsl -ldsu -ltls 
 endif
 
-ALL_EXE_LIBS +=	`cernlib geant321 pawlib 
-
-ifdef  MOTIF
-  ALL_EXE_LIBS += graflib/Motif
-else
-  ALL_EXE_LIBS += graflib/X11
-endif
-ALL_EXE_LIBS += packlib mathlib kernlib`
+ALL_EXE_LIBS +=	`cernlib geant321 pawlib graflib/X11 packlib mathlib kernlib`
  
 ROOTLIBS      = -L$(ROOTSYS)/lib -lRint -lNew -lBase -lCint -lClib -lCont -lFunc \
                 -lGraf -lGraf3d -lHist -lHtml -lMatrix -lMeta -lMinuit -lNet \
@@ -134,8 +130,8 @@ $(OBJ_DIR)/%.o : %.g
 	test -h geant3.def || $(RM)  geant3.def; \
 	test -h geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  geant3.def; \
 	$(EXE_DIR)/geant3    $(1ST_DEPS) -o $(STEM).F; \
-	$(FOR) -c $(INCL) $(STEM).F -o  $(OBJ_DIR)/$(STEM).o;\
-        $(RM)  $(STEM).F;
+	$(FOR) -c $(INCL) $(STEM).F -o  $(OBJ_DIR)/$(STEM).o;
+#        $(RM)  $(STEM).F;
 $(OBJ_DIR)/%.o : %.f
 	$(FOR) -c $(INCL) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.o : %.F
@@ -149,8 +145,8 @@ $(OBJ_DIR)/%.o : %.cxx
 $(OBJ_DIR)/%.o :%.cdf
 	cd $(OBJ_DIR);\
 	kuipc     $(1ST_DEPS) $(STEM).f;\
-	$(FOR) -c $(STEM).f -o  $(OBJ_DIR)/$(STEM).o;\
-	$(RM)     $(STEM).f
+	$(FOR) -c $(STEM).f -o  $(OBJ_DIR)/$(STEM).o;
+#	$(RM)     $(STEM).f
 #
 #
 #ifDEP_DIR := $(wildcard $(DEP_DIR))
