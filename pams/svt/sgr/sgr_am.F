@@ -183,37 +183,39 @@ C pretty close together so i hope this won't matter.
              write(6,*)' in sgr_am:',mess
           endif
           do i = 1,svt_hits_h.nok-1
-             j = i+1
-             dist2 = (zs(ind(i))- zs(ind(j)))**2
-             do while( dist2 .lt. MergeSize2)
-                if( Layer(ind(i)) .eq. Layer(ind(j))) then
-                   delphi = phi(ind(i))-phi(ind(j))
-                   if (delphi .lt.-180.0) then
-                      delphi = delphi + 360.0
-                   elseif( delphi .gt. 180.0) then
-                      delphi = delphi - 180.0
-                   endif
-                   dist2 = dist2 + SCALEPHI2*delphi**2
-                   if( dist2 .lt. MergeSize2) then
-                        Merge(ind(j)) = ind(i)
-                        zs(ind(i))    = (zs(ind(i))  + zs(ind(j)))/2.0
-                        phi(ind(i))   = (phi(ind(i)) + phi(ind(j)))/2.0
-                        Layer(ind(j)) = 10
-                        used(ind(j))  = .TRUE.
-                        endif
-                    endif
-                j = j + 1
-                if( j .gt. svt_hits_h.nok) goto 10
+             if( .not. used(ind(i)) ) then
+                j = i+1
                 dist2 = (zs(ind(i))- zs(ind(j)))**2
+                do while( dist2 .lt. MergeSize2)
+                   if( Layer(ind(i)) .eq. Layer(ind(j)) ) then
+                      delphi = phi(ind(i))-phi(ind(j))
+                      if (delphi .lt.-180.0) then
+                         delphi = delphi + 360.0
+                      elseif( delphi .gt. 180.0) then
+                         delphi = delphi - 180.0
+                      endif
+                      dist2 = dist2 + SCALEPHI2*delphi**2
+                      if( dist2 .lt. MergeSize2) then
+                         Merge(ind(j)) = ind(i)
+                         zs(ind(i))    = (zs(ind(i))  + zs(ind(j)))/2.0
+                         phi(ind(i))   = (phi(ind(i)) + phi(ind(j)))/2.0
+                         Layer(ind(j)) = 10
+                         used(ind(j))  = .TRUE.
+                      endif
+                   endif
+                   j = j + 1
+                   if( j .gt. svt_hits_h.nok) goto 10
+                   dist2 = (zs(ind(i))- zs(ind(j)))**2
                 enddo
  10             continue
-             enddo
+             endif
+          enddo
 C Now we have Merge set up with backward indices.
 C  We can have many Merge(j) = i for one i (with Merg(i) = 0).
 C  Since i is the hit we will be using, it will be more convenient to be
 C  able to follow a list starting at Merge(i) and going to the end.
           do i = 1,svt_hits_h.nok
-             if( Merge(i) .ne. 0) then
+             if( Merge(i) .ne. 0) then 
                 j = Merge(i)
                 do while (Merge(j) .ne.0)
                    j = Merge(j)
@@ -228,7 +230,16 @@ C ipass = 2 Tuned to 200 MeV/c
 C ipass = 3 Tuned to 100 MeV/c
 C ipass = 4 Tuned to 50 MeV/c
 
-          g_last = groups(groups_h.nok).id1
+C   Set g_last to highest track id found last pass
+C   on low multiplicity events may not have found any tracks
+C   yet, in this case set g_last back to zero
+
+           if( groups_h.nok .gt. 0 ) then
+              g_last = groups(groups_h.nok).id1
+           else
+              g_last = 0
+           endif
+          
         endif
 C
 C Reset pix_Map.
