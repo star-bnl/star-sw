@@ -77,7 +77,7 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
      xm=0,ym=0,xxm=0,yym=0,xym=0,rrm=0,rrxm=0,rrym=0;
      for (lv =0,ip=0; ip < npnts; ip++,lv+=rowsize) 
      {
-       if (ign[ip]) 	break;
+       if (ign[ip]) 	continue;
        np++;
        x = pnts[lv+0];  
        y = pnts[lv+1];  
@@ -144,7 +144,7 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
      if (fabs(Rho)>1./fullen) fullen = 2.*M_PI/fabs(Rho);
      for (lv =0,ip=0; ip < npnts; ip++,lv+=rowsize) 
      {
-       if (ign[ip]) 	break;
+       if (ign[ip]) 	continue;
        z = pnts[lv+2];  
        s = temp.Step(pnts+lv); 
        if (fabs(s*fCosL) > fabs(s*fCosL-fullen)) s = s-fullen/fCosL;
@@ -162,7 +162,7 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
      maxres = 0;resmax = 0; res=0;
      for (lv =0,ip=0; ip < npnts; ip++,lv+=rowsize) 
      {
-       if (ign[ip]) 	break;
+       if (ign[ip]) 	continue;
        Step(stp[ip]/fCosL,xyz);
        double rs = 0;
        for(int i=0;i<3;i++) {rs += pow(pnts[lv+i]-xyz[i],2);}
