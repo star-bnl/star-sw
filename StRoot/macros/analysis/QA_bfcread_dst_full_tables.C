@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_full_tables.C,v 1.7 1999/11/03 17:12:58 kathy Exp $
+// $Id: QA_bfcread_dst_full_tables.C,v 1.8 1999/11/03 19:02:53 kathy Exp $
 // $Log: QA_bfcread_dst_full_tables.C,v $
+// Revision 1.8  1999/11/03 19:02:53  kathy
+// changes to default input files and output file names - needed by perl script for testing
+//
 // Revision 1.7  1999/11/03 17:12:58  kathy
 // fixed macros so they use StIOMaker instead of StTreeMaker
 //
@@ -45,7 +48,7 @@ St_DataSet *Event;
 
 void QA_bfcread_dst_full_tables(Int_t nevents=15, 
  const char *MainFile=
- "/disk00000/star/test/dev/tfs_Linux/Wed/year_2a/psc0208_01_40evts.dst.root",
+ "/disk00000/star/test/new/tfs_Linux/year_2a/psc0208_01_40evts.dst.root",
  const char *fname="qa_full_tables.txt")
 
 {

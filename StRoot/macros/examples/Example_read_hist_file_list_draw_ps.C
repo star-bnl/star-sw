@@ -1,5 +1,8 @@
-// $Id: Example_read_hist_file_list_draw_ps.C,v 1.2 1999/11/02 22:54:36 kathy Exp $
+// $Id: Example_read_hist_file_list_draw_ps.C,v 1.3 1999/11/03 19:03:05 kathy Exp $
 // $Log: Example_read_hist_file_list_draw_ps.C,v $
+// Revision 1.3  1999/11/03 19:03:05  kathy
+// changes to default input files and output file names - needed by perl script for testing
+//
 // Revision 1.2  1999/11/02 22:54:36  kathy
 // fixing documentation in macro
 //
@@ -32,7 +35,7 @@
 //  *-*
 //
 
-void Example_read_hist_file_list_draw_ps(const char* filein="Kathy_hist.root")
+void Example_read_hist_file_list_draw_ps(const char* filein="Example_read_xdf_makehist.root")
 {
 
 // open file
@@ -58,7 +61,7 @@ Int_t height = 27;
 gStyle->SetPaperSize(width, height);
 
 // define output ps file 
-TPostScript ps("kathy_hist.ps",111);
+TPostScript ps("Example_read_hist_file_list_draw_ps.ps",111);
 
 //range of figures on ps page
 ps.Range(20,26);

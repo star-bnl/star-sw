@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_makehist.C,v 1.2 1999/11/03 16:56:59 kathy Exp $
+// $Id: Example_read_dst_makehist.C,v 1.3 1999/11/03 19:03:05 kathy Exp $
 // $Log: Example_read_dst_makehist.C,v $
+// Revision 1.3  1999/11/03 19:03:05  kathy
+// changes to default input files and output file names - needed by perl script for testing
+//
 // Revision 1.2  1999/11/03 16:56:59  kathy
 // fix macros to use StIOMaker instead of StTreeMaker
 //
@@ -49,7 +52,7 @@ void Example_read_dst_makehist(Int_t nevents=3, const char
  
 // open output hist file 
  TFile *hist_outfile = 0;
- const Char_t *root_file = "Kathy_hist.root";
+ const Char_t *root_file = "Example_read_dst_makehist.root";
  hist_outfile = new TFile(root_file,"RECREATE");
 
 // book histogram
@@ -89,7 +92,7 @@ void Example_read_dst_makehist(Int_t nevents=3, const char
  cout << " ==> finished loop" << endl;
 
  TCanvas *c1 = new TCanvas("c1"," from table dst/vertex",200,10,600,880);
- TPostScript ps("MyHist.ps",111);
+ TPostScript ps("Example_read_dst_makehist.ps",111);
 
  h1->Draw();
  c1->Update();
