@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.cxx,v 1.15 2002/05/21 22:52:56 lasiuk Exp $
+ * $Id: StRichSpectraMaker.cxx,v 1.16 2002/05/23 02:00:52 dunlop Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -15,6 +15,10 @@
  ***************************************************************************
  *
  * $Log: StRichSpectraMaker.cxx,v $
+ * Revision 1.16  2002/05/23 02:00:52  dunlop
+ * Put mVertexWindow, etc. back to what was used for SL02[cde], so
+ * we don't have a mishmash of versions in the MuDst's.
+ *
  * Revision 1.15  2002/05/21 22:52:56  lasiuk
  * attempt 2
  *
@@ -335,19 +339,19 @@ void StRichSpectraMaker::initCutParameters() {
     //
     // Event Level
     //
-    mVertexWindow = 30.*centimeter;
+    mVertexWindow = 200.*centimeter;
     
     //
     // Track Level
     //
     mPtCut = 0.*GeV; // GeV/c
     mEtaCut = 0.5; 
-    mLastHitCut = 160.0*centimeter;
+    mLastHitCut = 100.0*centimeter;
     mDcaCut = 3.0*centimeter;
     mFitPointsCut = 20;
     mPathCut = 500*centimeter;
-    mPadPlaneCut = 2.0*centimeter;
-    mRadiatorCut = 2.0*centimeter;
+    mPadPlaneCut = 1.0*centimeter;
+    mRadiatorCut = 1.0*centimeter;
 
     mMomentumThreshold = .5*GeV;
     mMomentumLimit = 7.*GeV;
@@ -771,7 +775,7 @@ Int_t StRichSpectraMaker::Make() {
 void StRichSpectraMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRichSpectraMaker.cxx,v 1.15 2002/05/21 22:52:56 lasiuk Exp $\n");
+    printf("* $Id: StRichSpectraMaker.cxx,v 1.16 2002/05/23 02:00:52 dunlop Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
