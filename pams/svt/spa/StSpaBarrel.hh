@@ -22,17 +22,18 @@ class StSpaBarrel
 				 table_head_st *sls_strip_h, sls_strip_st *sls_strip);
   void  addNoiseToStrip(sls_ctrl_st *ctrl);
   void  doDaqSimulation(sls_ctrl_st *ctrl);
+
   StSpaWafer** mWafers;
   
  private:
-  int    mSsdLayer;
-  int    mNLadder;
-  int    mNWaferPerLadder;
-  int    mNStripPerSide;
+  int       mSsdLayer;
+  int       mNLadder;
+  int       mNWaferPerLadder;
+  int       mNStripPerSide;
   RanGauss *mGaussDistribution;
 
-  int idWaferToWaferNumb(int idWafer);
-  int waferNumbToIdWafer(int waferNumb);
+  int       idWaferToWaferNumb(int idWafer);
+  int       waferNumbToIdWafer(int waferNumb);
   
 };
 #endif

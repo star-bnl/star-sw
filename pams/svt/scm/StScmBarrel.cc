@@ -181,7 +181,7 @@ int StScmBarrel::doClusterMatching(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_c
                   mWafers[iWaf]->doStatPerfect(nPerfect, scm_ctrl);
       nSolved  += mWafers[iWaf]->doSolvePackage(geom_par, scm_ctrl);
     }
-  cout<<"****     nombre de packages resolus   "<<nSolved<<"   ****\n";
+  cout<<"****       Remark: "<<nSolved<<"  solved packages     ****\n";
   return NumberOfPackage;
 }
 

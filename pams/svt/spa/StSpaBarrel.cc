@@ -24,24 +24,20 @@ StSpaBarrel::~StSpaBarrel()
 {
   int i = 0;
   for (i = 0 ; i < mNLadder*mNWaferPerLadder ; i++)
-    {
-      delete mWafers[i];
-    }
+    { delete mWafers[i]; }
 }
-
 
 void StSpaBarrel::setSpaParameters(sdm_geom_par_st  *geom_par)
 {
   mSsdLayer        = geom_par[0].N_layer; // all layers : 1->7
   mNLadder         = geom_par[0].N_ladder;
   mNWaferPerLadder = geom_par[0].N_waf_per_ladder;
-  mNStripPerSide   = geom_par[0].N_strip_per_side;//;
+  mNStripPerSide   = geom_par[0].N_strip_per_side;
 }
 
 int StSpaBarrel::idWaferToWaferNumb(int idWafer)
 {
   // idwafer = layer*1000+waf*100+ladder
-  
   int iW = (int)((idWafer - mSsdLayer*1000)/100);
   int iL = idWafer - mSsdLayer*1000 - iW*100;
   return ((iL-1)*mNWaferPerLadder + iW -1);
@@ -56,10 +52,9 @@ int StSpaBarrel::waferNumbToIdWafer(int waferNumb)
 
 int StSpaBarrel::readStripFromTable(table_head_st *sls_strip_h, sls_strip_st *sls_strip)
 {
-  
-  int idWaf = 0;
+  int idWaf  = 0;
   int nStrip = 0;
-  int iSide = 0;
+  int iSide  = 0;
   int i = 0;
   int *idMcHit = new int[5];
   int e = 0;
@@ -123,7 +118,7 @@ int  StSpaBarrel::readConditionDbFromTable(table_head_st *condition_h, sdm_condi
 int  StSpaBarrel::writeStripToTable(table_head_st *out_strip_h, spa_strip_st *out_strip,
 					  table_head_st *sls_strip_h, sls_strip_st *sls_strip)
 {
-  int currRecord  = 0;
+  int currRecord   = 0;
   out_strip_h->nok = 0;
   int iWaf = 0;
   for (iWaf = 0; iWaf < mNLadder*mNWaferPerLadder ; iWaf++)
@@ -168,7 +163,6 @@ int  StSpaBarrel::writeStripToTable(table_head_st *out_strip_h, spa_strip_st *ou
     }      
   return currRecord;
 }
-
 
 void  StSpaBarrel::addNoiseToStrip(sls_ctrl_st *ctrl)
 {

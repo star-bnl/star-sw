@@ -1,9 +1,3 @@
-/*:>--------------------------------------------------------------------
-**: FILE:       scf_am.c.template
-**: HISTORY:
-**:             00jan93-v000a-hpl- Created by stic Version
-**:  Id: idl.y,v 1.15 1998/10/11 17:41:14 fisyak Exp  
-**:<------------------------------------------------------------------*/
 #include "scf_am.h"
 #include "StScfBarrel.hh"
 
@@ -16,8 +10,7 @@ long scf_am_(
   TABLE_HEAD_ST        *cluster_h,    SCF_CLUSTER_ST          *cluster )
 {
   cout<<"#################################################"<<endl;
-  cout<<"##################### IN SCF ####################"<<endl;
-  cout<<"#################################################"<<endl;
+  cout<<"####       START OF SSD CLUSTER FINDER       ####"<<endl;
   cout<<"####        SSD BARREL INITIALIZATION        ####"<<endl;
   StScfBarrel *barrel = new StScfBarrel(geom_par);
   barrel->setScfParameters(geom_par);
@@ -32,12 +25,10 @@ long scf_am_(
   barrel->doSideClusterisation(nClusterPerSide, sls_ctrl,scf_ctrl);
   cout<<"####      NUMBER OF CLUSTER P SIDE "<<nClusterPerSide[0]<<"      ####"<<endl;
   cout<<"####      NUMBER OF CLUSTER N SIDE "<<nClusterPerSide[1]<<"      ####"<<endl;
-  
   barrel->sortListCluster();
   int nClusterWritten = barrel->writeClusterToTable(cluster_h,cluster);
   cout<<"####      NUMBER OF CLUSTER SAVED  "<<nClusterWritten<<"      ####"<<endl;
   delete barrel;
   cout<<"#################################################"<<endl;
-  
-   return STAFCV_OK;
+  return STAFCV_OK;
 }

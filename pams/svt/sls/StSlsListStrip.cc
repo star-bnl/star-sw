@@ -69,7 +69,6 @@ int StSlsListStrip::removeStrip(StSlsStrip *ptr)
     {
       if (ptAfter == 0)
 	{
-	  // taille = 1
 	  this->mFirstS =     0;
 	  this->mLastS  =     0;
 	  this->mListLength = 0;

@@ -7,8 +7,8 @@ StSpaStrip::StSpaStrip(int rNStrip, int rMcStrip, int rDigitSig, float rAnalogSi
   mAnalogSig     = rAnalogSig;
   mIdMcHit       = new int[5];
   for(int e=0;e<5;e++)  mIdMcHit[e] = rIdMcHit[e];
-  mPrevStrip = 0;
-  mNextStrip = 0;
+  mPrevStrip     = 0;
+  mNextStrip     = 0;
 }
 StSpaStrip::StSpaStrip(int rNStrip, int rMcStrip, float rAnalogSig)
 {
@@ -18,8 +18,8 @@ StSpaStrip::StSpaStrip(int rNStrip, int rMcStrip, float rAnalogSig)
   mAnalogSig     = rAnalogSig;
   mIdMcHit       = new int[5];
   for(int e=0;e<5;e++)  mIdMcHit[e] = 0;
-  mPrevStrip = 0;
-  mNextStrip = 0;
+  mPrevStrip     = 0;
+  mNextStrip     = 0;
 }
 
 StSpaStrip::StSpaStrip(int rNStrip, int rDigitSig)
@@ -30,8 +30,8 @@ StSpaStrip::StSpaStrip(int rNStrip, int rDigitSig)
   mAnalogSig     = 0.;
   mIdMcHit       = new int[5];
   for(int e=0;e<5;e++)  mIdMcHit[e] = 0;
-  mPrevStrip = 0;
-  mNextStrip = 0;
+  mPrevStrip     = 0;
+  mNextStrip     = 0;
 }
 
 StSpaStrip::~StSpaStrip()
