@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.31 1999/11/10 02:24:36 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.32 1999/11/11 17:29:10 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -377,7 +377,7 @@ Int_t StEventDisplayMaker::Make()
  
   TIter nextFilter(m_FilterArray);
   StVirtualEventFilter *f = 0;
-  while ( (f = (StVirtualEventFilter *)nextFiler()) ) f->Reset(); 
+  while ( (f = (StVirtualEventFilter *)nextFilter()) ) f->Reset(); 
 
  //---  Temporary ---
  //   ClearCanvas();
@@ -950,6 +950,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 // --  end of filter list --
 
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.32  1999/11/11 17:29:10  fine
+// typo Filer replaced with Filter
+//
 // Revision 1.31  1999/11/10 02:24:36  fine
 // StVirtualFilter::Reset method has been introduced
 //
