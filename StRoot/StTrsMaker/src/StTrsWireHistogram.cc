@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.5 1999/01/18 20:59:39 lasiuk Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.6 1999/02/10 04:28:29 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,9 +11,12 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
- * Revision 1.5  1999/01/18 20:59:39  lasiuk
- * change gas gain 10^4
+ * Revision 1.6  1999/02/10 04:28:29  lasiuk
+ * comment debug
  *
+ *
+ * Revision 1.8  1999/02/12 01:26:38  lasiuk
+ * Limit debug output
  *
  * Revision 1.7  1999/02/10 18:03:42  lasiuk
  * gas gain manual setting
@@ -223,6 +226,7 @@ double StTrsWireHistogram::wireCoordinate(int index) const
 }
 
 //vector<StTrsWireBinEntry>&
+aTpcWire& StTrsWireHistogram::getWire(int num)
 {
     if(num>=0 && num<mTotalNumberOfAnodeWires) {
 	return mSectorWires[num];
