@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.8 2000/02/04 18:57:17 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.9 2000/02/25 17:58:41 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.9  2000/02/25 17:58:41  ward
+// Changed array sizes for ctb and mwc.  Thx to Joakim Nystrand.
+//
 // Revision 1.8  2000/02/04 18:57:17  ward
 // Added dst_L1_Trigger and dst_L2_Trigger to output.
 //
@@ -131,10 +134,10 @@ Int_t St_trg_Maker::Make(){
 void St_trg_Maker::CtbMwcDaq(St_dst_TrgDet *dst1) { // For real data, this takes the place of the trg_fillDst module.
   int i;
   dst_TrgDet_st *tt = dst1->GetTable();
-  for(i=0;i<240;i++) tt->nCtb[i]=GraceSlick->RAW.CTB[i];
-  for(i=0;i<240;i++) tt->timeCtb[i]=0; // bbb This may be settable in some event from the LS bit 
+  for(i=0;i<256;i++) tt->nCtb[i]=GraceSlick->RAW.CTB[i];
+  for(i=0;i<256;i++) tt->timeCtb[i]=0; // bbb This may be settable in some event from the LS bit 
                                        //     of RAW.CTB. Hank is sending email to startrg-l.
-  for(i=0;i< 96;i++) tt->nMwc[i]=GraceSlick->RAW.MWC[i];
+  for(i=0;i<128;i++) tt->nMwc[i]=GraceSlick->RAW.MWC[i];
 }
 int St_trg_Maker::Daq(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2,
       St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
