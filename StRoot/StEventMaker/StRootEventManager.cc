@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.cc,v 2.5 2000/08/17 00:38:05 ullrich Exp $
+ * $Id: StRootEventManager.cc,v 2.6 2001/04/20 16:23:22 perev Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.cc,v $
+ * Revision 2.6  2001/04/20 16:23:22  perev
+ * Remove annoing warning
+ *
  * Revision 2.5  2000/08/17 00:38:05  ullrich
  * Added CpyTrk table.
  *
@@ -79,8 +82,8 @@ TABLE_TYPE ##_st* StRootEventManager::returnTable_ ## TABLE_TYPE(long& nentries)
     nentries = tableWrap->GetNRows();\
   } \
   else {\
-    cerr << "StRootEventManager: Table type  " << nt << \
-	  " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endl;\
+//VP    cerr << "StRootEventManager: Table type  " << nt << \
+//VP	  " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endl;\
     nentries = 0;\
   }\
   return table;\
