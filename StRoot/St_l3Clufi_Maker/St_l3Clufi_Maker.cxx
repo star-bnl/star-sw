@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.17 2000/06/26 22:14:18 fisyak Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.18 2000/07/08 18:19:43 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.18  2000/07/08 18:19:43  flierl
+// rm ClassImp of transformation classes
+//
 // Revision 1.17  2000/06/26 22:14:18  fisyak
 // remove params
 //
@@ -100,10 +103,8 @@
 extern TStopwatch i960[18];
 
 ClassImp(St_l3Clufi_Maker)
-ClassImp(St_l3_xyz_Coordinate)
-ClassImp(St_l3_ptrs_Coordinate)
-  //_____________________________________________________________________________
-  St_l3Clufi_Maker::St_l3Clufi_Maker(const char *name):StMaker(name){
+//_____________________________________________________________________________
+St_l3Clufi_Maker::St_l3Clufi_Maker(const char *name):StMaker(name){
   //  l3Clufi constructor
   //
   //  const char *name -  the name of this constructor
