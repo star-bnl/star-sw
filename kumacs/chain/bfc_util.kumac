@@ -1,6 +1,7 @@
 * 2Jul98 K. Turner - tpc code now requires geometry so make it default
 *                    in domain
 * 3Jul98 K. Turner - changed tpc kumacs so that pam kumacs are called directly
+* 7Jul98 K. Turner - changed to use gstar stuff
 * 
 *************************************************************
 *                     BFC_UTIL.KUMAC
