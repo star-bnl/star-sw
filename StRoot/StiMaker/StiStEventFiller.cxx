@@ -1,11 +1,15 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.24 2003/09/07 03:49:10 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.25 2003/11/26 04:02:53 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.25  2003/11/26 04:02:53  calderon
+ * track->getChi2() returns the sum of chi2 for all sti nodes.  In StEvent,
+ * chi2(0) should be chi2/dof, so we need to divide by dof=track->getPointCount()-5;
+ *
  * Revision 2.24  2003/09/07 03:49:10  perev
  * gcc 3.2 + WarnOff
  *
@@ -605,7 +609,7 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   double alpha, xRef, x[5], covM[15], chi2node;
   node->get(alpha,xRef,x,covM,chi2node);
   float chi2[2];
-  chi2[0] = track->getChi2(); // changed 12/May/03: using track->getChi2() instead of chi2node, want sum of chi2 for all nodes
+  chi2[0] = track->getChi2()/(track->getPointCount()-5.); // changed again!  chi2() was not divided by N.D. of F. changed 12/May/03: using track->getChi2() instead of chi2node, want sum of chi2 for all nodes
   chi2[1] = -9999; // change: here goes an actual probability, need to calculate?
     
 
