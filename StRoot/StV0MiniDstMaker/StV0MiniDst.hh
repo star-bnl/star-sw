@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MiniDst.hh,v 1.5 1999/08/13 12:38:16 jones Exp $
+ * $Id: StV0MiniDst.hh,v 1.6 1999/09/02 09:04:56 jones Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 04-Jun-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StV0MiniDst.hh,v $
+ * Revision 1.6  1999/09/02 09:04:56  jones
+ * Added StEvMiniDst class, New file handling, Partially implemented TTrees
+ *
  * Revision 1.5  1999/08/13 12:38:16  jones
  * Major revision to merge StV0MiniDstMaker and StXiMiniDstMaker
  *
@@ -30,7 +33,9 @@
  ***********************************************************************/
 #ifndef StV0MiniDst_hh
 #define StV0MiniDst_hh
-#include "StHFillObject.h"
+#include "StAnalysisUtilities/StHFillObject.h"
+#include "StEvMiniDst.hh"
+#include "TClonesArray.h"
 
 class StVertex;
 class StV0Vertex;
@@ -39,12 +44,10 @@ class StV0MiniDst : public StHFillObject {
 public:
   StV0MiniDst();
   ~StV0MiniDst();
-  StV0MiniDst(StV0Vertex*,StVertex*);
+  StV0MiniDst(StV0Vertex*,StEvMiniDst*);
   void UpdateV0();
 
-  int run() const;              // Run number
-  int event() const;            // Event number
-  float *primaryVertex();       // Primary Vertex Position
+  StEvMiniDst *event();         // Pointer to event information
 
   float decayLengthV0() const;       // 3-d decay distance
   float *decayVertexV0();            // Coordinates of decay vertex
@@ -82,9 +85,7 @@ public:
   float ptotNeg();              // Total momentum of neg. daughter  
 
 protected:
-  int   mRun;                   // These are written out
-  int   mEvent;
-  float mPrimaryVertex[3];
+  StEvMiniDst *mEvent;          // These are written out
 
   float mDecayVertexV0[3];
   float mDcaV0Daughters;
@@ -109,12 +110,15 @@ protected:
   ClassDef(StV0MiniDst, 1)
 };
 
-inline int   StV0MiniDst::run() const
-             { return mRun; }
-inline int   StV0MiniDst::event() const
+class StV0MiniMiniDst: public TObject {
+public:
+protected:
+  TClonesArray *array;
+  ClassDef(StV0MiniMiniDst, 1)
+};
+
+inline StEvMiniDst *StV0MiniDst::event()
              { return mEvent; }
-inline float *StV0MiniDst::primaryVertex()
-             { return mPrimaryVertex; }
 
 inline float StV0MiniDst::decayLengthV0() const 
              { return mDecayLengthV0; }

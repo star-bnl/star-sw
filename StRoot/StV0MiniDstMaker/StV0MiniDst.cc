@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MiniDst.cc,v 1.5 1999/08/13 12:38:16 jones Exp $
+ * $Id: StV0MiniDst.cc,v 1.6 1999/09/02 09:04:56 jones Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 04-Jun-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StV0MiniDst.cc,v $
+ * Revision 1.6  1999/09/02 09:04:56  jones
+ * Added StEvMiniDst class, New file handling, Partially implemented TTrees
+ *
  * Revision 1.5  1999/08/13 12:38:16  jones
  * Major revision to merge StV0MiniDstMaker and StXiMiniDstMaker
  *
@@ -39,13 +42,12 @@ StV0MiniDst::StV0MiniDst() {
 }
 
 StV0MiniDst::StV0MiniDst(StV0Vertex* v0Vertex,
-			 StVertex*   primaryVertex) {
+			 StEvMiniDst* event) {
 
   double B=0.5*tesla; // Hardwired - fix later
 
-  mPrimaryVertex[0] = primaryVertex->position().x();
-  mPrimaryVertex[1] = primaryVertex->position().y();
-  mPrimaryVertex[2] = primaryVertex->position().z();
+  mEvent = event;
+
   mDecayVertexV0[0] = v0Vertex->position().x();
   mDecayVertexV0[1] = v0Vertex->position().y();
   mDecayVertexV0[2] = v0Vertex->position().z();
@@ -74,30 +76,33 @@ StV0MiniDst::~StV0MiniDst() {
 void StV0MiniDst::UpdateV0() { 
   // Calculate derived data members
 
-       mDecayLengthV0 = sqrt(pow(mDecayVertexV0[0]-mPrimaryVertex[0],2) +
-			     pow(mDecayVertexV0[1]-mPrimaryVertex[1],2) +
-			     pow(mDecayVertexV0[2]-mPrimaryVertex[2],2));
+     mDecayLengthV0 = sqrt(pow(mDecayVertexV0[0] -
+			       mEvent->primaryVertex()[0],2) +
+			   pow(mDecayVertexV0[1] -
+			       mEvent->primaryVertex()[1],2) +
+			   pow(mDecayVertexV0[2] - 
+			       mEvent->primaryVertex()[2],2));
   
-            mPtot2Pos = mMomPos[0]*mMomPos[0] +
-                        mMomPos[1]*mMomPos[1] +
-                        mMomPos[2]*mMomPos[2];
+          mPtot2Pos = mMomPos[0]*mMomPos[0] +
+	              mMomPos[1]*mMomPos[1] +
+	              mMomPos[2]*mMomPos[2];
 
-            mPtot2Neg = mMomNeg[0]*mMomNeg[0] +
-                        mMomNeg[1]*mMomNeg[1] +
-                        mMomNeg[2]*mMomNeg[2];
+          mPtot2Neg = mMomNeg[0]*mMomNeg[0] +
+                      mMomNeg[1]*mMomNeg[1] +
+                      mMomNeg[2]*mMomNeg[2];
 
-                mMomV0[0] = mMomPos[0] + mMomNeg[0];
-                mMomV0[1] = mMomPos[1] + mMomNeg[1];
-                mMomV0[2] = mMomPos[2] + mMomNeg[2];
-               mPt2V0 = mMomV0[0]*mMomV0[0] + mMomV0[1]*mMomV0[1];
-             mPtot2V0 = mPt2V0 + mMomV0[2]*mMomV0[2];
+          mMomV0[0] = mMomPos[0] + mMomNeg[0];
+          mMomV0[1] = mMomPos[1] + mMomNeg[1];
+          mMomV0[2] = mMomPos[2] + mMomNeg[2];
+             mPt2V0 = mMomV0[0]*mMomV0[0] + mMomV0[1]*mMomV0[1];
+           mPtot2V0 = mPt2V0 + mMomV0[2]*mMomV0[2];
 
-       mMomPosAlongV0 = ( mMomPos[0]*mMomV0[0] + 
-			  mMomPos[1]*mMomV0[1] +
-			  mMomPos[2]*mMomV0[2] ) / sqrt(mPtot2V0); 
-       mMomNegAlongV0 = ( mMomNeg[0]*mMomV0[0] + 
-			  mMomNeg[1]*mMomV0[1] + 
-			  mMomNeg[2]*mMomV0[2] ) / sqrt(mPtot2V0);
+     mMomPosAlongV0 = ( mMomPos[0]*mMomV0[0] + 
+			mMomPos[1]*mMomV0[1] +
+			mMomPos[2]*mMomV0[2] ) / sqrt(mPtot2V0); 
+     mMomNegAlongV0 = ( mMomNeg[0]*mMomV0[0] + 
+			mMomNeg[1]*mMomV0[1] + 
+			mMomNeg[2]*mMomV0[2] ) / sqrt(mPtot2V0);
 }
 
 float StV0MiniDst::alphaV0() {
