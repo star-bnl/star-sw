@@ -10,13 +10,14 @@
 * 7/3/98 - K. Turner - make to use bfc_util kumacs and include pam kumacs
 * 7/8/98 - I. Sakrejda - put in cluster matching evaluator & track evaluator
 * 7/9/98 - K. Turner - put in tfc_run#run_newtab - can now set adcxyzon=1
+* 7/11/98 - K. Turner - change default data file to new version
 * ***********************************************************************
 ************************************************************************
  macro run__
           TOP=$STAR _
           domain='geometry tpc' _ 
           INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
-          input_g2t_file=event_0000050.xdf_
+          input_g2t_file=auau_central_hijing.xdf _
           num_events=1_
           tpc_sector_first=1_
           tpc_sector_last=1_
