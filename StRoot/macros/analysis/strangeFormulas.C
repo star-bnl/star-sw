@@ -1,5 +1,8 @@
-// $Id: strangeFormulas.C,v 1.4 2000/04/12 21:13:27 genevb Exp $
+// $Id: strangeFormulas.C,v 1.5 2000/04/13 18:30:26 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 1.5  2000/04/13 18:30:26  genevb
+// Better handling of backward compatibility
+//
 // Revision 1.4  2000/04/12 21:13:27  genevb
 // Added track topology map functions
 //
@@ -276,7 +279,7 @@ Int_t strangeFormulas(TTree* tree) {
     
     // Track topology maps, with function names like
     // "V0.topologyMapNeg.*()" and "V0.topologyMapPos.*()"
-    if (!(tree->GetBranch("V0.mTopologyMapPos.mMap0"))) continue;
+    if (tree->GetBranch("V0.mTopologyMapPos.mMap0")) {
     for (int k=0; k<2; k++) {
       if (k) sprintf(track,"Neg\0");
       else sprintf(track,"Pos\0");
@@ -400,7 +403,7 @@ Int_t strangeFormulas(TTree* tree) {
       sprintf(expr,"V0.topologyMap%s.bit(58)",track);
       f1 = new TTreeFormula(name,expr,tree);
       gROOT->GetListOfFunctions()->Add(f1);
-    }
+    } } // End topology maps
 
   }  // End of V0
   
@@ -702,7 +705,7 @@ Int_t strangeFormulas(TTree* tree) {
     // Track topology maps, with function names like
     // "Xi.topologyMapNeg.*()", Xi.topologyMapPos.*(),
     // and "Xi.topologyMapBachelor.*()"
-    if (!(tree->GetBranch("Xi.mTopologyMapBachelor.mMap0"))) continue;
+    if (tree->GetBranch("Xi.mTopologyMapBachelor.mMap0")) {
     for (int k=0; k<3; k++) {
       if (k==2) sprintf(track,"Bachelor\0");
       else if (k==1) sprintf(track,"Neg\0");
@@ -827,7 +830,7 @@ Int_t strangeFormulas(TTree* tree) {
       sprintf(expr,"Xi.topologyMap%s.bit(58)",track);
       f1 = new TTreeFormula(name,expr,tree);
       gROOT->GetListOfFunctions()->Add(f1);
-    }
+    } } // End topology maps
 
   }  // End of Xi
 
