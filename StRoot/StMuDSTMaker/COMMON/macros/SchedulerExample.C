@@ -8,7 +8,7 @@ class StMiniEventMaker;
 class StMuDbReader;
 
 void SchedulerExample(const char* fileList, const char* outFile="SchedulerExample.root") {
-    gROOT->LoadMacro("StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+    gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
     loadSharedLibraries();
 
   // create the chain"
