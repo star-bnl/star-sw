@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.141 2004/01/15 20:44:17 fisyak Exp $
+# $Id: Construct,v 1.142 2004/01/15 21:19:59 jeromel Exp $
 use Env;
 use lib $ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -262,15 +262,16 @@ foreach my $dir( "pams", "StRoot" ,"StPiD") {
 		     $subsub_dir =~ m/^kumac/ ){
 		    #print "=== Skipping $subsub_dir in $subsub_DIR\n";
                     next;
-		  }
-		if ( $sub_dir =~ /Pool$/ && ( ! $param::include or  $subsub_dir !~ /$param::include/o )) {
-		  if (! $param::include ) {
-		    print  "skip ";
-		    printf("%40s","$sub_dir/$subsub_dir");
-		    printf("\tto build it you need to add %25s","+$subsub_dir");
-		    print  " in cons command line\n";
-		  }
-		  next;
+		}
+		if (   $sub_dir =~ /Pool$/                                       && 
+		     ( ! $param::include or  $subsub_dir !~ /$param::include/o )    ) {
+		    #if (! $param::include ) {
+		    #	print  "skip ";
+		    #	printf("%40s","$sub_dir/$subsub_dir");
+		    #	printf("\tto build it you need to add %25s","+$subsub_dir");
+		    #	print  " in cons command line\n";
+		    #}
+		    #next;
                 }
 
                 if ( ( $sub_dir =~ /^sim$/    || 
@@ -293,13 +294,36 @@ foreach my $dir( "pams", "StRoot" ,"StPiD") {
         print "================== add $sub_DIR\n" if ($param::debug);
     }
 }
+
+
+
+
 print "subdirs = @subdirs\n" if $param::debug;
 my @Targets = ();
+
+# List of targets
 my @sysdirlist = qw(asps/Simulation/agetof 
-		    asps/staf/sdd asps/rexe 
+		    asps/staf/sdd 
+		    asps/rexe 
 		    StDb 
-		    asps/Simulation/geant321 asps/Simulation/gcalor asps/Simulation/starsim );
-if ( $STAR_HOST_SYS !~ /^alpha_dux/) {push @sysdirlist, "asps/Jprof";}
+		    cern/geant321 
+		    asps/Simulation/gcalor 
+		    asps/Simulation/AtlsimMain);
+
+# Platform specific target inclusion/exclusion
+if ( $STAR_HOST_SYS !~ /^alpha_dux/) {
+    push @sysdirlist, "asps/Jprof";
+}
+
+
+
+
+# Platform dependent targets
+if ( $STAR_HOST_SYS !~ /^alpha_dux/) {
+    push @sysdirlist, "asps/Jprof";
+}
+
+
 foreach $dir(@sysdirlist , @subdirs ) {
     if ( -d $dir ) {
         print "Add dir : $dir\n" if $param::debug;
@@ -313,6 +337,8 @@ Default qw (   .  );
 print "Debug ".join(" ",@Targets)."\n"if ($param::debug);
 Depends $env $STAR . "/mgr/RootCint.pl", $env->{ENV}->{ROOTSYS} . "/bin/rootcint";
 Build @Targets;
+
+
 
 #___________________________________________________________________________
 sub script::wanted_dead {
