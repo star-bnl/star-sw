@@ -15,12 +15,14 @@
    mkdir jet
    cd /dui
    
-   exec init_ems.kumac#write
-   exec init_cal.kumac#write
-   exec init_jet.kumac#write
-   exec fake_pedestal
-   exec fake_adcslope
-   
+   wd=./pams/emc/kumac/
+   exec [wd]init_ems.kumac#write
+   exec [wd]init_cal.kumac#write
+   exec [wd]init_jet.kumac#write
+
+**   
+** Save parameters 
+**
    dio/newfilestream out1 ./params/emc/ems_param.xdf w
    dio/stream/putevent out1 [params]/emc/ems
    dio/stream/close out1
@@ -31,6 +33,9 @@
    dio/stream/putevent out3 [params]/emc/cal
    dio/stream/close out3
       
+   exec fake_pedestal
+   exec fake_adcslope
+
 return   
 
 *** Make fake pedestal calibration constants   
@@ -39,13 +44,37 @@ macro fake_pedestal
   cd [params]/emc/cal
  
   tdm/table/cell/putvalue 'ems_cal_control[0].det'                1
-  tdm/table/cell/putvalue 'ems_cal_control[0].ped_channel'        0
-  tdm/table/cell/putvalue 'ems_cal_control[0].ped_var'            0
+  tdm/table/cell/putvalue 'ems_cal_control[0].ped_channel'        10
+  tdm/table/cell/putvalue 'ems_cal_control[0].ped_var'            6
   tdm/newtable org_ped_bemc_h emc_calib_header 1
   tdm/newtable org_ped_bemc   emc_pedestal     4800
   ami/module/call fake_pedestal [params]/emc/ems/ems_control ems_cal_control _
     org_ped_bemc_h org_ped_bemc 
 
+  tdm/table/cell/putvalue 'ems_cal_control[0].det'                2
+  tdm/table/cell/putvalue 'ems_cal_control[0].ped_channel'        11
+  tdm/table/cell/putvalue 'ems_cal_control[0].ped_var'            6
+  tdm/newtable org_ped_bprs_h emc_calib_header 1
+  tdm/newtable org_ped_bprs   emc_pedestal     4800
+  ami/module/call fake_pedestal [params]/emc/ems/ems_control ems_cal_control _
+    org_ped_bprs_h org_ped_bprs
+ 
+  tdm/table/cell/putvalue 'ems_cal_control[0].det'                3
+  tdm/table/cell/putvalue 'ems_cal_control[0].ped_channel'        12
+  tdm/table/cell/putvalue 'ems_cal_control[0].ped_var'            6
+  tdm/newtable org_ped_bsmde_h emc_calib_header 1
+  tdm/newtable org_ped_bsmde   emc_pedestal     18000              | 120*150
+  ami/module/call fake_pedestal [params]/emc/ems/ems_control ems_cal_control _
+    org_ped_bsmde_h org_ped_bsmde
+ 
+  tdm/table/cell/putvalue 'ems_cal_control[0].det'                4
+  tdm/table/cell/putvalue 'ems_cal_control[0].ped_channel'        12
+  tdm/table/cell/putvalue 'ems_cal_control[0].ped_var'            6
+  tdm/newtable org_ped_bsmdp_h emc_calib_header 1
+  tdm/newtable org_ped_bsmdp   emc_pedestal     18000              | 120*10*15
+  ami/module/call fake_pedestal [params]/emc/ems/ems_control ems_cal_control _
+    org_ped_bsmdp_h org_ped_bsmdp
+ 
   tdm/table/cell/putvalue 'ems_cal_control[0].det'                5
   tdm/table/cell/putvalue 'ems_cal_control[0].ped_channel'        30
   tdm/table/cell/putvalue 'ems_cal_control[0].ped_var'            20
@@ -54,14 +83,6 @@ macro fake_pedestal
   ami/module/call fake_pedestal [params]/emc/ems/ems_control ems_cal_control _
     org_ped_eemc_h org_ped_eemc
 
-  tdm/table/cell/putvalue 'ems_cal_control[0].det'                2
-  tdm/table/cell/putvalue 'ems_cal_control[0].ped_channel'        20
-  tdm/table/cell/putvalue 'ems_cal_control[0].ped_var'            10
-  tdm/newtable org_ped_bprs_h emc_calib_header 1
-  tdm/newtable org_ped_bprs   emc_pedestal     4800
-  ami/module/call fake_pedestal [params]/emc/ems/ems_control ems_cal_control _
-    org_ped_bprs_h org_ped_bprs
- 
   cd /dui
 return
 
