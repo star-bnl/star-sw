@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.64 2001/02/15 21:34:45 perev Exp $
+// $Id: StTrsMaker.cxx,v 1.65 2001/03/13 22:09:19 long Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.65  2001/03/13 22:09:19  long
+// *** empty log message ***
+//
 // Revision 1.64  2001/02/15 21:34:45  perev
 // clear improved
 //
@@ -352,7 +355,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.64 2001/02/15 21:34:45 perev Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.65 2001/03/13 22:09:19 long Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -692,6 +695,9 @@ Int_t StTrsMaker::Make(){
     mAllTheData->clear();
     //
     //
+    //update the gain for very events  
+   mWireHistogram->setGasGainInnerSector(mSlowControlDb->innerSectorGasGain());
+   mWireHistogram->setGasGainOuterSector(mSlowControlDb->outerSectorGasGain());
     
     if (mReadFromFile) { // Read mAllTheData from file
 	mInputStream->fillTrsEvent(mAllTheData);
