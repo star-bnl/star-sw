@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.71 1999/06/27 22:45:32 fisyak Exp $
+// $Id: bfc.C,v 1.72 1999/06/28 15:31:13 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.72  1999/06/28 15:31:13  fisyak
+// Add ev0EvalOn, Setting of time stamp
+//
 // Revision 1.71  1999/06/27 22:45:32  fisyak
 // Merge StRootEvent and StEvent
 //
@@ -412,8 +415,8 @@ void Load(const Char_t *Chain="gstar tfs"){
   gSystem->Load("StChain");
   gSystem->Load("xdf2root");
   gSystem->Load("St_Tables");
-  //  gSystem->Load("StUtilities");
-  gSystem->Load("libmsg");
+  gSystem->Load("StUtilities");
+  //  gSystem->Load("libmsg");
   gSystem->Load("libtls");
   gSystem->Load("St_db_Maker");
   if (ChainFlags[kXINDF]) gSystem->Load("St_xdfin_Maker");
@@ -550,12 +553,22 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar tfs",Char_t *infile=
   Set_IO_Files(infile,outfile);
   if (!chain) delete chain;
   chain = new StChain("bfc");
+  printf ("Run chain version %s on %s in %s\n",chain->GetCVSTag(),gSystem->HostName(),gSystem->WorkingDirectory());
   chain->SetDebug();
 
 //  Create the makers to be called by the current chain
   const char *mainDB = "$STAR/StDb/params";
   dbMk = new St_db_Maker("db",mainDB);
   dbMk->SetDebug();
+//if (ChainFlags[ksd97]) { dbMk->SetDateTime("sd97");}
+//if (ChainFlags[ksd98]) { dbMk->SetDateTime("sd98");}
+  if (ChainFlags[kY1a]) { dbMk->SetDateTime("year_1a");}
+  if (ChainFlags[kY1b]) { dbMk->SetDateTime("year_1b");}
+  if (ChainFlags[kY1c]) { dbMk->SetDateTime("year_1c");}
+//if (ChainFlags[kY1d]) { dbMk->SetDateTime("year_1d");}
+//if (ChainFlags[kY1e]) { dbMk->SetDateTime("year_1e");}
+  if (ChainFlags[kY2a]) { dbMk->SetDateTime("year_2a");}
+  printf ("db Maker set time = %d %d \n",dbMk->GetDateTime().GetDate(),dbMk->GetDateTime().GetTime());
   const char *calibDB = "$STAR_ROOT/calib";
   St_db_Maker *calibMk = new St_db_Maker("calib",calibDB);
   calibMk->SetDebug();  
@@ -705,6 +718,9 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar tfs",Char_t *infile=
     glbMk = new St_glb_Maker("global");
     chain->SetInput("dst",".make/global/.data/dst");
     glbMk->SetDebug();
+    if (ChainFlags[kEval]) {//Additional switches 
+      glbMk->ev0EvalOn();   //Turn on the ev0 evaluation  
+    }
   }
   if (ChainFlags[kL3]) {//		l3t
     l3tMk  = new St_l3t_Maker("l3Tracks");
