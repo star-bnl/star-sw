@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.13 2002/06/21 17:49:25 genevb Exp $
+ * $Id: StHelix.cc,v 1.14 2003/06/26 17:15:56 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
+ * Revision 1.14  2003/06/26 17:15:56  ullrich
+ * Changed local variable name in pathLenght.
+ *
  * Revision 1.13  2002/06/21 17:49:25  genevb
  * Some minor speed improvements
  *
@@ -454,11 +457,11 @@ StHelix::pathLengths(const StHelix& h) const
 	StThreeVector<double> b(-h.mCosDipAngle*h.mSinPhase,
 				h.mCosDipAngle*h.mCosPhase,
 				h.mSinDipAngle);	
-	double h = a*b;
-	double g = dv*a;
-	double k = dv*b;
-	s2 = (k-h*g)/(h*h-1.);
-	s1 = g+s2*h;
+	double ab = a*b;
+	double g  = dv*a;
+	double k  = dv*b;
+	s2 = (k-ab*g)/(ab*ab-1.);
+	s1 = g+s2*ab;
 	return pair<double, double>(s1, s2);
     }
     else {	

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.cc,v 1.10 2002/06/21 17:49:25 genevb Exp $
+ * $Id: StHelixD.cc,v 1.11 2003/06/26 17:15:56 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHelixD.cc,v $
+ * Revision 1.11  2003/06/26 17:15:56  ullrich
+ * Changed local variable name in pathLenght.
+ *
  * Revision 1.10  2002/06/21 17:49:25  genevb
  * Some minor speed improvements
  *
@@ -438,11 +441,11 @@ StHelixD::pathLengths(const StHelixD& h) const
 	StThreeVectorD b(-h.mCosDipAngle*h.mSinPhase,
 			 h.mCosDipAngle*h.mCosPhase,
 			 h.mSinDipAngle);	
-	double h = a*b;
-	double g = dv*a;
-	double k = dv*b;
-	s2 = (k-h*g)/(h*h-1.);
-	s1 = g+s2*h;
+	double ab = a*b;
+	double g  = dv*a;
+	double k  = dv*b;
+	s2 = (k-ab*g)/(ab*ab-1.);
+	s1 = g+s2*ab;
 	return pairD(s1, s2);
     }
     else {	
