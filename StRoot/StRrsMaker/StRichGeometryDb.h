@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StRichGeometryDb.h,v 1.4 2000/02/12 21:55:45 lasiuk Exp $
+ * $Id: StRichGeometryDb.h,v 1.5 2000/03/12 22:18:45 lasiuk Exp $
  *
  * Description:
  *  Both have common_fill,star_fill and my_fill private
@@ -15,9 +15,13 @@
  *
  *****************************************************************
  * $Log: StRichGeometryDb.h,v $
- * Revision 1.4  2000/02/12 21:55:45  lasiuk
- * Wire position adjustment
+ * Revision 1.5  2000/03/12 22:18:45  lasiuk
+ * add from materials Db
+ * add normal vector value
  *
+ * Revision 1.5  2000/03/12 22:18:45  lasiuk
+ * add from materials Db
+ * add normal vector value
  *
  * Revision 1.4  2000/02/12 21:55:45  lasiuk
  * Wire position adjustment
@@ -44,6 +48,8 @@
 
 #include <vector>
 
+#ifndef ST_NO_NAMESPACES
+using std::vector;
 #endif
 
 #include "StThreeVector.hh"
@@ -60,7 +66,7 @@ public:
     static StRichGeometryDb* getDb();
 	
     double mVersion;
-	double z0;                // same thing but verticaly
+    struct Quadrant {
 	Quadrant() { }
 	
 	double x0;                // center of first pad in each quadrant
@@ -72,21 +78,27 @@ public:
     vector<Quadrant> quadsOrigin; // the quadrants of the pad plane    
 #else
     vector<Quadrant, allocator<Quadrant> > quads;
-    double quad_gap_z;          // gap between quadrants in z
-    double quad_gap_x;          // gap between quadrants in x
+    vector<Quadrant, allocator<Quadrant> > quadsOrigin;
+#endif   
 	
 	
-    double wire_x0[2];             // first wire offset
+    double quad_gap_x;          // gap between quadrants in z
     double quad_gap_y;          // gap between quadrants in x
+    
+    double wire_spacing;        // distance between wires
+    double wire_y0[2];             // first wire offset
+    int    number_of_wires;     // total number of wires
+
+    StThreeVector<double> mRadiatorDimension;
     StThreeVector<double> mQuartzDimension;
     StThreeVector<double> mPadPlaneDimension;
     double mProximityGap; 
-    double pad_side_x;          // length of pads
+    StThreeVector<double> mNormalVectorToPadPlane;
     
-    double pad_side_z;          // width of pads
+    double pad_spacing;         // gap between pads
     double row_spacing;
     double pad_side_x;          // width of pads
-    int n_pad_x, n_pad_z;       // number of pads in both directions (quadrant)
+    double pad_pitch;
     double pad_side_y;          // length of pads
     double row_pitch;
     
@@ -102,15 +114,20 @@ public:
     //
     // survey geometry
     double mInclinationAngle;
-    double quadrantZ0(int)        const;
     double mRadialDistanceToRich;
-    double quadrantZOrigin(int)   const;
+    
     // Interface
+    double version()              const;
     double quadrantX0(int)        const;
-    double quadrantGapInZ()       const;
     double quadrantY0(int)        const;
+    double quadrantXOrigin(int)   const;
     double quadrantYOrigin(int)   const;
-    double firstWirePositionInX(int) const;
+
+    double quadrantGapInX()       const;
+    double quadrantGapInY()       const;
+
+    const StThreeVector<double>& radiatorDimension() const;
+    const StThreeVector<double>& quartzDimension()   const;
     const StThreeVector<double>& padPlaneDimension() const;
     double proximityGap()                            const; 
     
@@ -135,6 +152,7 @@ public:
     double detectorWidth()     const;
     double anodeToPadSpacing() const;
 	
+    //
     // Survey Geometry
     double radialDistanceToRich()   const;
     double inclinationAngle()       const;
@@ -148,29 +166,34 @@ private:
     //void star_fill();           // fill from STAR DB
     void my_fill();             // fill with my own stuff
     
-inline double StRichGeometryDb::quadrantZ0(int n) const {return quads[n].z0;}
     static StRichGeometryDb* p2Db;   // handle to only instance
-inline double StRichGeometryDb::quadrantZOrigin(int n) const {return quadsOrigin[n].z0;}
+};
 
-inline double StRichGeometryDb::quadrantGapInZ() const {return quad_gap_z;}
-inline double StRichGeometryDb::quadrantGapInX() const { return quad_gap_x;}
+inline double StRichGeometryDb::version() const {return mVersion;}
+inline double StRichGeometryDb::quadrantX0(int n) const {return quads[n].x0;}
+inline double StRichGeometryDb::quadrantY0(int n) const {return quads[n].y0;}
+inline double StRichGeometryDb::quadrantXOrigin(int n) const {return quadsOrigin[n].x0;}
+inline double StRichGeometryDb::quadrantYOrigin(int n) const {return quadsOrigin[n].y0;}
+inline double StRichGeometryDb::quadrantGapInX() const {return quad_gap_x;}
+inline double StRichGeometryDb::quadrantGapInY() const { return quad_gap_y;}
+
+inline const StThreeVector<double>& StRichGeometryDb::radiatorDimension() const { return mRadiatorDimension;}
 inline const StThreeVector<double>& StRichGeometryDb::quartzDimension() const { return mQuartzDimension;}
 inline const StThreeVector<double>& StRichGeometryDb::padPlaneDimension() const { return mPadPlaneDimension;}
-inline double StRichGeometryDb::firstWirePositionInX(int q) const { return (q>0) ? wire_x0[0] : wire_x0[1]; }
+inline double StRichGeometryDb::proximityGap() const { return mProximityGap;} 
 inline const StThreeVector<double>& StRichGeometryDb::normalVectorToPadPlane() const { return mNormalVectorToPadPlane;}
 
-	
 inline double StRichGeometryDb::wirePitch() const { return wire_spacing;}
 inline double StRichGeometryDb::firstWirePositionInY(int q) const { return (q>0) ? wire_y0[0] : wire_y0[1]; }
 inline int    StRichGeometryDb::numberOfWires() const { return number_of_wires;}
     
-inline double StRichGeometryDb::padLength() const { return pad_side_x;}
-inline double StRichGeometryDb::padWidth() const { return pad_side_z;}
+inline double StRichGeometryDb::padPitch() const { return pad_pitch;}
+inline double StRichGeometryDb::rowPitch() const { return row_pitch;}
 inline double StRichGeometryDb::padSpacing() const { return pad_spacing;}
 inline double StRichGeometryDb::rowSpacing() const { return row_spacing;}
-inline int    StRichGeometryDb::numberOfPadsInAQuadrantRow() const { return n_pad_z;} // X
-inline int    StRichGeometryDb::numberOfRowsInAColumn() const { return mNumberOfPadsInaColumn;} // Z
-inline int    StRichGeometryDb::numberOfRowsInAQuadrantColumn() const { return n_pad_x;} // Z
+inline double StRichGeometryDb::padLength() const { return pad_side_y;}
+inline double StRichGeometryDb::padWidth() const { return pad_side_x;}
+
 inline int    StRichGeometryDb::numberOfPadsInARow() const { return mNumberOfPadsInaRow;} // X
 inline int    StRichGeometryDb::numberOfPadsInAQuadrantRow() const { return n_pad_x;} // X
 inline int    StRichGeometryDb::numberOfRowsInAColumn() const { return mNumberOfPadsInaColumn;} // Y
