@@ -28,7 +28,7 @@ my @dirs = ();
 if ($#ARGV > -1) {
     push(@dirs, $ARGV[0]);
 } else {
-    push(@dirs,$SYSNM."obj"); 
+    push(@dirs,$SYSNM."obj");
     push(@dirs,$SYSNM."OBJ");
     push(@dirs,$SYSNM."IOBJ");
 }
@@ -53,8 +53,8 @@ foreach my $dir (@dirs) {
     ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
     my $name = $File::Find::name;# print "name = $name\n";
     if (-e _ && /\.\d+$/) {#    print "Version $name\n";
-      my $so = $_; $so =~ s/\.\d*$//; 
-      my $link = $so; 
+      my $so = $_; $so =~ s/\.\d*$//;
+      my $link = $so;
       if (-l $link) {
 	my $file = readlink $link;#      print "Found Link = $link -> $file\n";
 	my $vers = $file; $vers =~ s/$so\.//;# print "so = $so vers = $vers\n";
@@ -71,7 +71,7 @@ foreach my $dir (@dirs) {
 	  }
 	  my $diff = $vers - $v - $KEEP;
 	  if ($diff lt 0) {
-	      #print "keep \t$file => \t$link / $s : $vers - $v - $KEEP = $diff < 0\n"; 
+	      #print "keep \t$file => \t$link / $s : $vers - $v - $KEEP = $diff < 0\n";
 	      next;
 	  }
 	  print "Delete $s \n";
