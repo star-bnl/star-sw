@@ -2,6 +2,7 @@
 *                    - this is now kumac that drives tpc fast simulator
 *                      and then does tracking
 *  editted June 4, 1998 Kathy Turner
+*  editted 6/9/98 Kathy Turner
 * ***********************************************************************
 ************************************************************************
 macro run__
@@ -90,7 +91,7 @@ $STAR/pams/trg/kumac
   exec tpg_init#init
 
 * ****************** TPC FAST SIM INIT ***************************
-   exec tpc_slow_sim#initialize [adcxyzon]
+   exec tpc_slow_sim#initialize [adcxyzon] [tpc_sector_first] [tpc_sector_last]
    
    
 * now overwrite which sector you want to run (in case you don't want default)
@@ -132,9 +133,11 @@ $STAR/pams/trg/kumac
     exec input_g2t_file#read
     if STAF_STATUS(1).eq.0 goto ENDOFDATA
 *  slow simulator
-    exec tpc_slow_sim#process_event [i] [adcxyzon]
+    exec tpc_slow_sim#process_event _
+        [i] [adcxyzon] [tpc_sector_first] [tpc_sector_last]
 * clustering
-     exec tpc_clustering#process_event [i] 
+    exec tpc_clustering#process_event _
+        [i] [tpc_sector_first] [tpc_sector_last]  
 *  tracking
     if [tracker]=tpt then
       exec tpc_tracker#process_event_tpt [i] 
