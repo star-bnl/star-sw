@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowPhiWgtMaker.cxx,v 1.1 2003/05/16 20:44:49 posk Exp $
+// $Id: StFlowPhiWgtMaker.cxx,v 1.2 2003/07/30 22:01:55 oldi Exp $
 //
 // Authors: Art Poskanzer and Jamie Dunlop, May 2003
 //
@@ -305,7 +305,7 @@ Int_t StFlowPhiWgtMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowPhiWgt", 2);
-  gMessMgr->Info("##### FlowPhiWgt: $Id: StFlowPhiWgtMaker.cxx,v 1.1 2003/05/16 20:44:49 posk Exp $");
+  gMessMgr->Info("##### FlowPhiWgt: $Id: StFlowPhiWgtMaker.cxx,v 1.2 2003/07/30 22:01:55 oldi Exp $");
 
   return StMaker::Init();
 }
@@ -401,7 +401,7 @@ void StFlowPhiWgtMaker::FillParticleHistograms() {
 	  // Calculate weights for filling histograms
 	  float wt = 1.;
 	  if (pFlowEvent->PtWgt()) {
-	    wt *= (pt < 2.) ? pt : 2.;  // pt weighting going constant above 2 GeV
+	    wt *= (pt < pFlowEvent->PtWgtSaturation()) ? pt : pFlowEvent->PtWgtSaturation();  // pt weighting going constant
 	  }
 	  float etaAbs = fabs(eta);
  	  if (pFlowEvent->EtaWgt() && oddHar && etaAbs > 1.) {
@@ -570,6 +570,9 @@ Int_t StFlowPhiWgtMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPhiWgtMaker.cxx,v $
+// Revision 1.2  2003/07/30 22:01:55  oldi
+// PtWgtSaturation parameter introduced.
+//
 // Revision 1.1  2003/05/16 20:44:49  posk
 // First commit of StFlowPhiWgtMaker
 //
