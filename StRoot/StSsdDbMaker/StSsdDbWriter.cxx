@@ -69,8 +69,7 @@ void StSsdDbWriter::setDbManager()
   //->get the singleton manager
   //
   mDbMgr = StDbManager::Instance();
-
-  mDbMgr -> setVerbose(true);             // set Verbose mode for debug
+  mDbMgr -> setVerbose(false);             // set Verbose mode for debug
 
   //-> connect to the db & get an empty container
   //
