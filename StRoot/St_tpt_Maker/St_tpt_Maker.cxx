@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.18 1999/02/26 17:25:38 kathy Exp $
+e// $Id: St_tpt_Maker.cxx,v 1.19 1999/02/26 19:24:15 didenko Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.19  1999/02/26 19:24:15  didenko
+// fixed histogram maker
+//
 // Revision 1.18  1999/02/26 17:25:38  kathy
 // fix histograms
 //
@@ -220,12 +223,14 @@ Int_t St_tpt_Maker::Make(){
 void St_tpt_Maker::MakeHistograms() {
    // go get event number from the event data
   Int_t evno = 0;
+   if (m_mkfinal) {
   St_DataSet *raw = gStChain->DataSet("tpc_raw");
   if (raw) {
     St_DataSetIter nex(raw);
     St_type_index *I1 = (St_type_index *) nex("TPC_DATA/IT1");
     type_index_st *ii = I1->GetTable();
     evno = ii->data_row;
+     }
   }
   // Create an iterator
   St_DataSetIter tpc_tracks(m_DataSet);
@@ -301,7 +306,7 @@ void St_tpt_Maker::MakeHistograms() {
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.18 1999/02/26 17:25:38 kathy Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.19 1999/02/26 19:24:15 didenko Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
