@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.163 2004/09/16 02:28:43 perev Exp $
+// $Id: bfc.C,v 1.164 2005/02/22 00:01:09 fine Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -41,12 +41,29 @@ St_geant_Maker *geant = 0;
 StEventDisplayMaker *dsMk = 0;
 StTpcT0Maker *t0mk = 0;
 //_____________________________________________________________________
-void Load(){
+void Load(const Char_t *options=""){
   if (gClassTable->GetID("TTable") < 0) gSystem->Load("libTable");
   gSystem->Load("StarRoot");
   TMemStat::PrintMem("load StarRoot");
+  // Look up for the logger option
+  Bool_t needLogger  = kFALSE;
+  if (TString(options).Contains("logger")) {
+      needLogger = gSystem->Load("liblog4cxx.so"); 
+      if (!needLogger) {
+         needLogger = kTRUE;
+         TMemStat::PrintMem("load log4cxx");
+      }
+      else {
+         fprintf(stderr," Could not load log4cxx shared library\n");         
+      }
+  }
   gSystem->Load("St_base");
   TMemStat::PrintMem("load St_base");
+  if (needLogger) {
+    gSystem->Load("StStarLogger.so");
+    StLoggerManager::StarLoggerInit();   
+    TMemStat::PrintMem("load StStarLogger");
+ }
   gSystem->Load("StChain");
   TMemStat::PrintMem("load StChain");
   gSystem->Load("StUtilities");
@@ -68,7 +85,7 @@ void bfc(const Int_t First,
   // "-" sign before requiest means that this option is disallowed
   // Chain = "gstar" run GEANT on flight with 10 muons in range |eta| < 1 amd pT = 1GeV/c (default)
   // Dynamically link some shared libs
-  if (gClassTable->GetID("StBFChain") < 0) Load();
+  if (gClassTable->GetID("StBFChain") < 0) Load(Chain);
   if (chain) delete chain;
 
   // This was added on March 19th 2002 for ITTF //-chain setup
@@ -264,5 +281,7 @@ void Usage() {
   printf (" \t//Laser (10) events with half magnetic field \n");
   printf (" root4star 'bfc.C(1,\"tdaq FieldOff\",\"/star/rcf/disk1/star/daq/990701.614.daq\")' \n");
   printf (" \t//Laser (12) events with no magnetic field \n");
+  printf (" root4star 'bfc.C(1,\"tdaq FieldOff logger\",\"/star/rcf/disk1/star/daq/990701.614.daq\")' \n");
+  printf (" \t//As above but all program messages are controled by the log4cxx package \n");
   gSystem->Exit(1);
 }
