@@ -40,6 +40,7 @@ class StiGeometryTransform;
 class StTpcCoordinateTransform;
 class StEvent;
 class StPrimaryVertex;
+class Messenger;
 
 class StiHitFiller
 {
@@ -73,6 +74,7 @@ private:
 			     StiObjectFactoryInterface<StiHit>*);
     
 private:
+    Messenger& mMessenger;
     StiGeometryTransform* mtranslator;
     //StTpcCoordinateTransform* mtpctransformer;
     

@@ -75,7 +75,7 @@ void StiCodedDetectorBuilder::buildMaterials(){
 // adds them to map by name
 void StiCodedDetectorBuilder::buildShapes()
 {
-    cout <<"StiCodedDetectorBuilder::buildShapes()"<<endl;
+    m_messenger <<"StiCodedDetectorBuilder::buildShapes()"<<endl;
   char szName[100];
 
   //---------------------------------------------------------------------------
@@ -107,7 +107,7 @@ void StiCodedDetectorBuilder::buildShapes()
     //stemp << iPadrow + 1;
     //theName += stemp.str();
     //NameMapKey key(theName);    
-    //cout <<"szName: "<<szName<<"\ttheName: "<<theName<<endl;
+    //m_messenger <<"szName: "<<szName<<"\ttheName: "<<theName<<endl;
     
     NameMapKey key(szName);
     mShapeMap.insert( shapeMapValType(key, pShape) );

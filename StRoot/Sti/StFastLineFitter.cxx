@@ -4,6 +4,7 @@
 
 #include <math.h>
 #include <iostream>
+#include "Messenger.h"
 #include "StFastLineFitter.h"
 
 using std::cout;
@@ -11,12 +12,12 @@ using std::endl;
 
 StFastLineFitter::StFastLineFitter()
 {
-    cout <<"StFastLineFitter::StFastLineFitter()"<<endl;
+    *(Messenger::instance(kSeedFinderMessage)) <<"StFastLineFitter::StFastLineFitter()"<<endl;
 }
 
 StFastLineFitter::~StFastLineFitter()
 {
-    cout <<"StFastLineFitter::~StFastLineFitter()"<<endl;
+    *(Messenger::instance(kSeedFinderMessage)) <<"StFastLineFitter::~StFastLineFitter()"<<endl;
 }
 
 void StFastLineFitter::clear()
@@ -31,14 +32,14 @@ void StFastLineFitter::clear()
 
 void StFastLineFitter::print() const
 {
-    cout <<"\nStFastLineFitter::print()-------------------"<<endl;
-    cout <<"slope\tintercept\tchi2\tsigmaA\tsigmaB\tsize"<<endl;
-    cout <<slope()<<"\t"<<intercept()<<"\t"<<chiSquared()<<"\t";
-    cout <<sigmaA()<<"\t";
-    cout <<sigmaB()<<"\t"<<numberOfPoints()<<endl;
-    cout <<"Point Collection------------------"<<endl;
+    *(Messenger::instance(kSeedFinderMessage)) <<"\nStFastLineFitter::print()-------------------"<<endl;
+    *(Messenger::instance(kSeedFinderMessage)) <<"slope\tintercept\tchi2\tsigmaA\tsigmaB\tsize"<<endl;
+    *(Messenger::instance(kSeedFinderMessage)) <<slope()<<"\t"<<intercept()<<"\t"<<chiSquared()<<"\t";
+    *(Messenger::instance(kSeedFinderMessage)) <<sigmaA()<<"\t";
+    *(Messenger::instance(kSeedFinderMessage)) <<sigmaB()<<"\t"<<numberOfPoints()<<endl;
+    *(Messenger::instance(kSeedFinderMessage)) <<"Point Collection------------------"<<endl;
     for (int i=0; i<numberOfPoints(); ++i) {
-	cout <<mx[i]<<"\t"<<my[i]<<"\t"<<mw[i]<<endl;
+	*(Messenger::instance(kSeedFinderMessage)) <<mx[i]<<"\t"<<my[i]<<"\t"<<mw[i]<<endl;
     }
     return;
 }

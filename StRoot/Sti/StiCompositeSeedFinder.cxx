@@ -25,12 +25,12 @@ StiTrackSeedFinder* gTrackSeedFinderBuilder(const string& buildPath);
 
 StiCompositeSeedFinder::StiCompositeSeedFinder()
 {
-    cout <<"StiCompositeSeedFinder::StiCompositeSeedFinder()"<<endl;
+    mMessenger <<"StiCompositeSeedFinder::StiCompositeSeedFinder()"<<endl;
 }
 
 StiCompositeSeedFinder::~StiCompositeSeedFinder()
 {
-    cout <<"StiCompositeSeedFinder::~StiCompositeSeedFinder()"<<endl;
+    mMessenger <<"StiCompositeSeedFinder::~StiCompositeSeedFinder()"<<endl;
 
     //Destroy seed finders
     for (SeedFinderVec::iterator it=mSeedVec.begin(); it!=mSeedVec.end(); ++it) {
@@ -40,16 +40,16 @@ StiCompositeSeedFinder::~StiCompositeSeedFinder()
 
 bool StiCompositeSeedFinder::hasMore()
 {
-    cout <<"StiCompositeSeedFinder::hasMore()"<<endl;
+    mMessenger <<"StiCompositeSeedFinder::hasMore()"<<endl;
     bool val =  mCurrent>=mSeedVec.begin() && mCurrent<mSeedVec.end()
 	&& (*mCurrent)->hasMore();
-    cout <<"\t  returning "<<val<<endl;
+    mMessenger <<"\t  returning "<<val<<endl;
     return val;
 }
 
 StiKalmanTrack* StiCompositeSeedFinder::next()
 {
-    cout <<"StiCompositeSeedFinder::next()"<<endl;
+    mMessenger <<"StiCompositeSeedFinder::next()"<<endl;
     StiKalmanTrack* track=0;
     //while ((*mCurrent)->hasMore() && track==0) {
     track = (*mCurrent)->next();
@@ -60,49 +60,49 @@ StiKalmanTrack* StiCompositeSeedFinder::next()
 	++mCurrent;
     }
      
-    cout <<"\t leaving StiCompositeSeedFinder::next()"<<endl;
+    mMessenger <<"\t leaving StiCompositeSeedFinder::next()"<<endl;
     return track;
 }
 
 void StiCompositeSeedFinder::reset()
 {
-    cout <<"StiCompositeSeedFinder::reset()"<<endl;
+    mMessenger <<"StiCompositeSeedFinder::reset()"<<endl;
     //reset all!
     for (SeedFinderVec::iterator it=mSeedVec.begin(); it!=mSeedVec.end(); ++it) {
 	(*it)->reset();
     }
     mCurrent=mSeedVec.begin();
-    cout <<"\t leaving StiCompositeSeedFinder::reset()"<<endl;
+    mMessenger <<"\t leaving StiCompositeSeedFinder::reset()"<<endl;
     
     return;
 }
 
 void StiCompositeSeedFinder::build()
 {
-    cout <<"\nStiCompositeSeedFinder::build()"<<endl;
-    cout <<"BuildFrom:\t"<<mBuildPath<<endl;
+    mMessenger <<"\nStiCompositeSeedFinder::build()"<<endl;
+    mMessenger <<"BuildFrom:\t"<<mBuildPath<<endl;
 
-    cout <<"Get vector size"<<endl;
+    mMessenger <<"Get vector size"<<endl;
     unsigned int theSize = 0;
     StGetConfigValue(mBuildPath.c_str(), "theStringVecSize", theSize);
-    cout <<"Read Size, decide"<<endl;
+    mMessenger <<"Read Size, decide"<<endl;
 
     if (theSize==0) {
-	cout <<"StiCompositeSeedFinder::build(). ERROR:\t";
-	cout <<"theStringVecSize==0  Abort"<<endl;
+	mMessenger <<"StiCompositeSeedFinder::build(). ERROR:\t";
+	mMessenger <<"theStringVecSize==0  Abort"<<endl;
 	return;
     }
-    cout <<"vector size:\t"<<theSize<<endl;
+    mMessenger <<"vector size:\t"<<theSize<<endl;
 
-    cout <<"Get the vector"<<endl;
+    mMessenger <<"Get the vector"<<endl;
     vector<string> theStringVec(theSize);
     StGetConfigValue(mBuildPath.c_str(), "theStringVec", theStringVec, theSize);
     if (theStringVec.empty()) {
-	cout <<"StiCompositeSeedFinder::build(). ERROR:\t";
-	cout <<"theStringVec.empty()==true.  Abort"<<endl;
+	mMessenger <<"StiCompositeSeedFinder::build(). ERROR:\t";
+	mMessenger <<"theStringVec.empty()==true.  Abort"<<endl;
 	return;
     }
-    cout <<"Got vector"<<endl;
+    mMessenger <<"Got vector"<<endl;
     
     //Build each SeedFinder
     for (vector<string>::iterator it=theStringVec.begin(); it!=theStringVec.end(); ++it) {
@@ -121,7 +121,9 @@ StiTrackSeedFinder* gTrackSeedFinderBuilder(const string& buildPath)
 {
     StiTrackSeedFinder* sf=0;
 
-    cout <<" gTrackSeedFinderBuilder().  Build from:\t"<<buildPath<<endl;
+    Messenger& mMessenger = *(Messenger::instance(kSeedFinderMessage));
+    
+    mMessenger <<" gTrackSeedFinderBuilder().  Build from:\t"<<buildPath<<endl;
 
     //Get hit filter type
     string filterType="empty";
@@ -130,8 +132,8 @@ StiTrackSeedFinder* gTrackSeedFinderBuilder(const string& buildPath)
     Sti2HitComboFilter* filt=0;
 
     if (filterType=="empty") {
-	cout <<"gTrackSeedFinderBuilder() ERROR:\t";
-	cout <<"filterType==empty.  Abort"<<endl;
+	mMessenger <<"gTrackSeedFinderBuilder() ERROR:\t";
+	mMessenger <<"filterType==empty.  Abort"<<endl;
 	return 0;
     }
     else if (filterType=="StiRectangular2HitComboFilter") {
@@ -139,8 +141,8 @@ StiTrackSeedFinder* gTrackSeedFinderBuilder(const string& buildPath)
 	filt->build( buildPath );
     }
     else {
-	cout <<"gTrackSeedFinderBuilder() ERROR:\t";
-	cout <<"Unknown filter type.  Abort"<<endl;
+	mMessenger <<"gTrackSeedFinderBuilder() ERROR:\t";
+	mMessenger <<"Unknown filter type.  Abort"<<endl;
     }
 
     //Get Seed-finder type
@@ -148,8 +150,8 @@ StiTrackSeedFinder* gTrackSeedFinderBuilder(const string& buildPath)
     StGetConfigValue(buildPath.c_str(), "seedFinderType", seedFinderType);
     
     if (seedFinderType=="empty") {
-	cout <<"gTrackSeedFinderBuilder() ERROR:\t";
-	cout <<"seedFinderType==empty.  Abort"<<endl;
+	mMessenger <<"gTrackSeedFinderBuilder() ERROR:\t";
+	mMessenger <<"seedFinderType==empty.  Abort"<<endl;
 	return 0;
     }
     else if (seedFinderType=="StiLocalTrackSeedFinder") {
@@ -157,8 +159,8 @@ StiTrackSeedFinder* gTrackSeedFinderBuilder(const string& buildPath)
 					 StiHitContainer::instance(), filt);
     }
     else {
-	cout <<"gTrackSeedFinderBuilder() ERROR:\t";
-	cout <<"Unkown seed finder type.  Abort"<<endl;
+	mMessenger <<"gTrackSeedFinderBuilder() ERROR:\t";
+	mMessenger <<"Unkown seed finder type.  Abort"<<endl;
 	return 0;
     }
 
@@ -167,28 +169,28 @@ StiTrackSeedFinder* gTrackSeedFinderBuilder(const string& buildPath)
     StGetConfigValue(buildPath.c_str(), "nPadrows", nPadrows);
 
     if (nPadrows==0) {
-	cout <<"gTrackSeedFinderBuilder(). ERROR:\t";
-	cout <<"nPadrows=0.  Abort"<<endl;
+	mMessenger <<"gTrackSeedFinderBuilder(). ERROR:\t";
+	mMessenger <<"nPadrows=0.  Abort"<<endl;
 	return 0;
     }
     vector<unsigned int> thePadrows(nPadrows);
     StGetConfigValue(buildPath.c_str(), "thePadrows", thePadrows, nPadrows);
-    cout <<"Using Padrows: ";
-    copy(thePadrows.begin(), thePadrows.end(), ostream_iterator<unsigned int>(cout, " "));
-    cout <<endl;
+    mMessenger <<"Using Padrows: ";
+    copy(thePadrows.begin(), thePadrows.end(), ostream_iterator<unsigned int>(mMessenger, " "));
+    mMessenger <<endl;
     
     int nSectors=0;
     StGetConfigValue(buildPath.c_str(), "nSectors",nSectors);
     if (nSectors==0) {
-	cout <<"gTrackSeedFinderBuilder(). ERROR:\t";
-	cout <<"nSectors=0.  Abort"<<endl;
+	mMessenger <<"gTrackSeedFinderBuilder(). ERROR:\t";
+	mMessenger <<"nSectors=0.  Abort"<<endl;
 	return 0;
     }
     vector<unsigned int> theSectors(nSectors);
     StGetConfigValue(buildPath.c_str(), "theSectors", theSectors, nSectors);
-    cout <<"Using Sectors: ";
-    copy(theSectors.begin(), theSectors.end(), ostream_iterator<unsigned int>(cout, " "));
-    cout <<endl;
+    mMessenger <<"Using Sectors: ";
+    copy(theSectors.begin(), theSectors.end(), ostream_iterator<unsigned int>(mMessenger, " "));
+    mMessenger <<endl;
 
     sf->setBuildPath(buildPath);
     sf->build();
@@ -201,8 +203,8 @@ StiTrackSeedFinder* gTrackSeedFinderBuilder(const string& buildPath)
 	    sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d", *padrow, *sector);
 	    StiDetector* layer = StiDetectorFinder::instance()->findDetector(szBuf);
 	    if (!layer) {
-		cout <<"gTrackSeedFinderBuilder(). ERROR:\t";
-		cout <<"No layer: "<<szBuf<<endl;
+		mMessenger <<"gTrackSeedFinderBuilder(). ERROR:\t";
+		mMessenger <<"No layer: "<<szBuf<<endl;
 	    }
 	    else {
 		sf->addLayer(layer);

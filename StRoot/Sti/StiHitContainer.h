@@ -127,6 +127,7 @@ using std::vector;
 
 class StiHit;
 class StiDetector;
+class Messenger;
 
 ///We define this globally for convenience of users.
 typedef vector<StiHit*> hitvector;
@@ -228,6 +229,8 @@ protected:
     StiHitContainer();
     ///Implementation of the singleton design pattern.
     virtual ~StiHitContainer();
+
+    Messenger& mMessenger;
 
 private:
     //Vertex implementation
