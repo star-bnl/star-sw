@@ -1,11 +1,15 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.12 2000/03/13 21:58:01 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 1.13 2000/03/13 22:17:37 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
- * Revision 1.12  2000/03/13 21:58:01  lasiuk
- * singleton classes
+ * Revision 1.13  2000/03/13 22:17:37  lasiuk
+ * unbelievable!  I can't stand it.
+ * Comment the Ring drawing routines
+ *
+ * Revision 1.15  2000/03/21 17:04:21  lasiuk
+ * remove forced delete of singleton classes
  *
  * Revision 1.14  2000/03/17 14:55:12  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -74,18 +78,21 @@
 #include "StRichPadPlane.h"
 #include "StRichPadPlane.h"
 #include "StRichWriter.h"
+#include "StRichWriter.h"
+#include "StRichAnalogSignalGenerator.h"
 
 #include "StRichGHit.h"
-#ifdef RICH_WITH_RINGS
-#include "StRichRingDefinition.h"
-#include "StRichTrack.h"
-#include "StRichRingPoint.h"
-#include "StRichRingCalculator.h"
-#include "StParticleDefinition.hh"
-#include "StParticleTypes.hh"
+#include "StRichMiniHit.h"
+
+
+#ifdef RICH_WITH_PADMONITOR
+#include "StRichSinglePixel.h"
+#include "StRichPadMonitor.h"
 #endif
+
 //////
-#endif
+//////MATT's stuff
+// #ifdef RICH_WITH_RINGS
 // #include "StRichRingDefinition.h"
 // #include "StRichTrack.h"
 // #include "StRichRingPoint.h"
@@ -570,31 +577,31 @@ int StRrsMaker::whichVolume(int val, string* vName)
 // 			<< iter->mAmount << endl;
 // #endif
 //	    }
-#ifdef RICH_WITH_RINGS
-    //try draw a ring:
-    StGlobalCoordinate gIP;
-    StRichLocalCoordinate localIP(10.4*centimeter,23.4*centimeter,0.);
-    (*mCoordinateTransform)(localIP,gIP);
-    StRichTrack theTrack(lTrackMomentum, gIP.position());
-    PR(lTrackMomentum);
-    PR(gIP);
-    StRichRingCalculator myCalculator(&theTrack);
-    StPionMinus* pion = StPionMinus::instance();
-    StKaonMinus* kaon = StKaonMinus::instance();
-    StProton* proton = StProton::instance();
-    myCalculator.getRing(eInnerRing)->setParticleType(proton);
-    myCalculator.getRing(eOuterRing)->setParticleType(proton);
-
-    StThreeVector<double> aPoint;
-    StThreeVector<double> bPoint;
-    for(int kk=90; kk<270;kk+=5) {
-	bool status = myCalculator.getRing(eInnerRing)->getPoint(kk*degree, aPoint);
-	thePadMonitor->addInnerRingPoint(aPoint.x(), aPoint.y());
-	status = myCalculator.getRing(eOuterRing)->getPoint(kk*degree, bPoint);
-	thePadMonitor->addOuterRingPoint(bPoint.x(), bPoint.y());
-    }
-    thePadMonitor->drawRing();
+// #endif
+	    
+	    }
+#ifdef RICH_WITH_PADMONITOR
+	    //thePadMonitor->drawPads();
 #endif
+	}
+    }
+#endif
+#ifdef RICH_WITH_PADMONITOR
+// #ifdef RICH_WITH_RINGS
+//     //try draw a ring:
+//     StGlobalCoordinate gIP;
+//     StRichLocalCoordinate localIP(10.4*centimeter,23.4*centimeter,0.);
+//     (*mCoordinateTransform)(localIP,gIP);
+//     StRichTrack theTrack(lTrackMomentum, gIP.position());
+//     PR(lTrackMomentum);
+//     PR(gIP);
+//     StRichRingCalculator myCalculator(&theTrack);
+//     StPionMinus* pion = StPionMinus::instance();
+//     StKaonMinus* kaon = StKaonMinus::instance();
+//     StProton* proton = StProton::instance();
+//     myCalculator.getRing(eInnerRing)->setParticleType(proton);
+//     myCalculator.getRing(eOuterRing)->setParticleType(proton);
+
 //     StThreeVector<double> aPoint;
 //     StThreeVector<double> bPoint;
 //     for(int kk=90; kk<270;kk+=5) {
