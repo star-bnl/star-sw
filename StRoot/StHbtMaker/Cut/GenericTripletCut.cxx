@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: GenericTripletCut.cxx,v 1.3 2000/04/12 01:53:35 willson Exp $
+ * $Id: GenericTripletCut.cxx,v 1.4 2000/08/08 23:39:31 laue Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: GenericTripletCut.cxx,v $
+ * Revision 1.4  2000/08/08 23:39:31  laue
+ * Updated for standalone version
+ *
  * Revision 1.3  2000/04/12 01:53:35  willson
  * Initial Installation - Comments Added
  *
@@ -20,7 +23,9 @@
 #include "StHbtMaker/Cut/GenericTripletCut.h"
 //#include <cstdio>
 
+#ifdef _ROOT__
 ClassImp(GenericTripletCut)
+#endif
 
 //__________________
 GenericTripletCut::GenericTripletCut(){

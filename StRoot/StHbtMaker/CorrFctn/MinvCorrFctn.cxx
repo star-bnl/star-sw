@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctn.cxx,v 1.8 2000/06/15 18:52:42 willson Exp $
+ * $Id: MinvCorrFctn.cxx,v 1.9 2000/08/08 23:39:21 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctn.cxx,v $
+ * Revision 1.9  2000/08/08 23:39:21  laue
+ * Updated for standalone version
+ *
  * Revision 1.8  2000/06/15 18:52:42  willson
  * HbtAnalysis() method must be cast to specific analysis
  * rotateEventCut installed
@@ -105,8 +108,6 @@ void MinvCorrFctn::Finish(){
   if (   dynamic_cast<StHbtAnalysis*>( HbtAnalysis() )   ) {
     if (   dynamic_cast<mikesEventCut*>( ((StHbtAnalysis*)HbtAnalysis())->EventCut() )   )
       NEvents = ((mikesEventCut*)((StHbtAnalysis*)HbtAnalysis())->EventCut())->NEventsPassed();
-    if (   dynamic_cast<rotationEventCut*>( ((StHbtAnalysis*)HbtAnalysis())->EventCut() )   )
-      NEvents = ((rotationEventCut*)((StHbtAnalysis*)HbtAnalysis())->EventCut())->NEventsPassed();
   }
 
   mNumerator->Scale(1./NEvents);
