@@ -111,8 +111,6 @@ ostream& operator << (ostream& s, error_t& e)
   if(!init) {
     blank = new ofstream("/dev/null");
     init=7;
-  } else {
-    printf("got the other new of ooo ooo ooo ooo ooo ooo ooo \n");
   }
 
   if( e.print )
