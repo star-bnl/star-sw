@@ -1,5 +1,8 @@
-// $Id: StFtpcGlobalMaker.cxx,v 1.10 2002/11/06 13:48:25 oldi Exp $
+// $Id: StFtpcGlobalMaker.cxx,v 1.11 2002/11/25 12:06:29 jcs Exp $
 // $Log: StFtpcGlobalMaker.cxx,v $
+// Revision 1.11  2002/11/25 12:06:29  jcs
+// set bit 0 of map[0]=0 for all ftpc global tracks (unconstrained fit)
+//
 // Revision 1.10  2002/11/06 13:48:25  oldi
 // Vertex handling simplifed.
 // Global/primary fit handling simplified.
@@ -172,7 +175,7 @@ Int_t StFtpcGlobalMaker::Make(){
   m_fdepar = (St_fde_fdepar *) gime("fdepars/fdepar");
   fde_fdepar_st *fdepar = m_fdepar->GetTable();
 
-  gMessMgr->Message("", "I", "OST") << "Global fit for FTPC tracks not redone, because used vertex for tracking was the primary vertex." << endm;
+  gMessMgr->Message("", "I", "OST") << "Global fit for FTPC tracks not redone, because vertex used for tracking was the primary vertex." << endm;
 
 #ifdef REFIT_FTPC_TRACKS
   // Redo unconstrained fit with primary vertex instead of preVertex
@@ -196,14 +199,13 @@ Int_t StFtpcGlobalMaker::Make(){
     globtrk[iglobtrk].id      = iglobtrk + 1;
     fptrack[itrk].id_globtrk = globtrk[iglobtrk].id; 
 
-    //  initialize map and det_id 
-    //  =0 if unconstrained, =1 if vertex constraint used in track fit
-    if (fptrack[itrk].id_start_vertex > 0) {
-      globtrk[iglobtrk].map[0]   = 1;
-    }
-    else {globtrk[iglobtrk].map[0] = 0;}
-    //       Format interpreter -  set bit 31 for FTPC
+    //  initialize map (=0 for global tracks = unconstrained fit)
+    globtrk[iglobtrk].map[0] = 0;
+    
+    //  initialize map[1] = Format interpreter -  set bit 31 for FTPC
     globtrk[iglobtrk].map[1]   =  (1<<31);
+
+    //  initialize det_id 
     globtrk[iglobtrk].det_id   = 0;
 
     //  Loop over all hits on track 
