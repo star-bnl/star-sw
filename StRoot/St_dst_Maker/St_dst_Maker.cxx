@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.6 1999/02/20 18:49:16 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.7 1999/02/23 02:09:02 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.7  1999/02/23 02:09:02  fisyak
+// Add emc hits to dst
+//
 // Revision 1.6  1999/02/20 18:49:16  fisyak
 // Add event/run information
 //
@@ -61,7 +64,8 @@
 #include "St_tpt_track_Table.h"
 #include "St_g2t_rch_hit_Table.h"
 #include "St_dst_rch_Table.h"
-
+#include "St_dst_tof_trk_Table.h"
+#include "St_dst_tof_evt_Table.h"
 
 ClassImp(St_dst_Maker)
 
@@ -125,6 +129,14 @@ Int_t St_dst_Maker::Make(){
       if (monitor_soft) m_DataSet->Shunt(monitor_soft);
 #endif
     }
+    St_DataSet *ctf = gStChain->DataSet("ctf");
+    if (ctf) {
+      St_DataSetIter ctfI(ctf);
+      St_dst_tof_trk *dst_tof_trk = (St_dst_tof_trk *) ctfI["dst_tof_trk"];
+      St_dst_tof_evt *dst_tof_evt = (St_dst_tof_evt *) ctfI["dst_tof_evt"];
+      if (dst_tof_trk) m_DataSet->Shunt(dst_tof_trk);
+      if (dst_tof_evt) m_DataSet->Shunt(dst_tof_evt);
+    }
     St_DataSet *trg = gStChain->DataSet("trg");
     if (trg) {
       St_DataSetIter trgI(trg);
@@ -134,16 +146,19 @@ Int_t St_dst_Maker::Make(){
     St_DataSet *l3t = gStChain->DataSet("l3Tracks");
     if (l3t) {
       St_DataSetIter l3tI(l3t);
-      St_tpt_track   *track = (St_tpt_track *) l3tI("tptrack");
+      St_tpt_track   *track = (St_tpt_track *) l3tI("l3Track");
       if (track)         m_DataSet->Shunt(track);
     }
+    St_DataSet *emc = gStChain->DataSet("emc_hits");
+    if (emc) {m_DataSet->Shunt(emc);}
   }
+  
   return kStOK;
 }
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_dst_Maker.cxx,v 1.6 1999/02/20 18:49:16 fisyak Exp $\n");
+  printf("* $Id: St_dst_Maker.cxx,v 1.7 1999/02/23 02:09:02 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

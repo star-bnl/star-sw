@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.35 1999/02/22 21:27:20 kathy Exp $
+// $Id: St_glb_Maker.cxx,v 1.36 1999/02/23 02:09:03 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.36  1999/02/23 02:09:03  fisyak
+// Add emc hits to dst
+//
 // Revision 1.35  1999/02/22 21:27:20  kathy
 // moved hist from St_glb_Maker to St_QA_Maker and had to rename some etc
 //
@@ -198,7 +201,7 @@ Int_t St_glb_Maker::Init(){
   egr_egrpar->minfit =     2;
   egr_egrpar->prob[0] =    2;
   egr_egrpar->prob[1] =    2;
-  memset(egr_egrpar->debug, 0, 10*sizeof(Int_t));  
+  memset(egr_egrpar->debug, 0, 9*sizeof(Int_t));  
   egr_egrpar->debug[0] =   1; 
   egr_egrpar->svtchicut =  0;
   egr_egrpar->usetpc =     1;
@@ -216,6 +219,7 @@ Int_t St_glb_Maker::Init(){
   // prop
   m_tp_param = new St_egr_propagate("tp_param",1); 
   params("global/evrpars")->Add(m_tp_param);
+  m_tp_param->SetNRows(1);
   egr_propagate_st *tp_param = m_tp_param->GetTable();
   tp_param->iflag =   m_flag;
   if (m_flag == 1 || m_flag == 2) {
@@ -239,7 +243,7 @@ Int_t St_glb_Maker::Init(){
   egr2_egrpar->minfit =    5;
   egr2_egrpar->prob[0] =   2;
   egr2_egrpar->prob[1] =   2;
-  memset (egr2_egrpar->debug,0,10*sizeof(Int_t));
+  memset (egr2_egrpar->debug,0,9*sizeof(Int_t));
   egr2_egrpar->debug[0] =  1;
   egr2_egrpar->svtchicut = 0;
   egr2_egrpar->usetpc    = 1;
@@ -355,13 +359,15 @@ Int_t St_glb_Maker::Make(){
     event_header  = new St_dst_event_header("event_header",1);
     dst.Add(event_header);
   }
+  event_header->SetNRows(1);
   dst_event_header_st  event =   {"Collision", //event_type
 				  {0,0},       // n_event[2]
 				  0, 0, 0, 0}; // n_run,time,trig_mask,bunch_cross
   strcpy (&event.event_type[0],gStChain->EvenType()->Data());
   event.n_event[0] = gStChain->Event();
+  event.n_event[1] = gStChain->Date();
   event.n_run      = gStChain->Run();
-  event.time       = 1000000*gStChain->Date() + gStChain->Time();
+  event.time       = gStChain->Time();
   event_header->AddAt(&event,0);
   if (! event_summary) {
     event_summary = new St_dst_event_summary("event_summary",1);
@@ -660,13 +666,15 @@ Int_t St_glb_Maker::Make(){
     }
     if (!run_header) {
       run_header = new St_dst_run_header("run_header",1);
-      m_DataSet->Add(run_header);
+      dst.Add(run_header);
+      run_header->SetNRows(1);
       dst_run_header_st *run = run_header->GetTable();
       run->run_id = gStChain->Run();
       strcpy (run->event_type,gStChain->EvenType()->Data());
       run->sqrt_s = gStChain->CenterOfMassEnergy();
       run->east_a = gStChain->Aeast();
       run->west_a = gStChain->Awest();
+      run_header->SetNRows(1);
    }
     if (summary_param && run_header) {
       cout << " run_dst: Calling fill_dst_event_summary" << endl;
@@ -694,7 +702,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.35 1999/02/22 21:27:20 kathy Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.36 1999/02/23 02:09:03 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
