@@ -96,14 +96,20 @@ int EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken, HeadVer 
   int listB[]={1,2,3,4,5,6,84,85,86};
   int listC[]={1,2,3,4,5,6,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,
  18,17,16,30,29,28,27,26,25,24,23,22,21,20,19,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}; // etow+esmd+btow
-
+  // summer 2004 shut down
+  int listD[]={1,2,3,4,5,6,100,101,102,103,1,2,3,4,1,2,3,4,1,2,3,4}; // Renee, put here 4 carte ID's
+  
+  
   int *list, dim;
   if (timeStamp< 1068761131)  //Thu Nov 13 17:05:31 2003
     { list=listA; dim=sizeof(listA)/sizeof(int); }
   else  if (timeStamp< 1070474417 ) //  Wed Dec  3 13:00:17 2003
     { list=listB; dim=sizeof(listB)/sizeof(int); }
-  else 
+  else if (timeStamp< 1093360000  )// about  Aug 24 14:56:04 2004
     { list=listC; dim=sizeof(listC)/sizeof(int); }
+  else 
+    { list=listD; dim=sizeof(listD)/sizeof(int); }
+
 
   // printf("\n Header check:\n");
   int ic;
@@ -192,6 +198,9 @@ UShort_t  EEfeeRawEvent::getValue(int crateID, int channel) const {
 
 /*
  * $Log: EEfeeRawEvent.cxx,v $
+ * Revision 1.19  2004/08/24 20:30:08  balewski
+ * for Renne LED test with mini
+ *
  * Revision 1.18  2004/07/10 20:12:13  balewski
  * match miniDaq
  *
