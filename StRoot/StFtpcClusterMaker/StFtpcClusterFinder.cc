@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.45 2003/04/15 11:35:39 putschke Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.46 2003/04/23 15:13:13 putschke Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.46  2003/04/23 15:13:13  putschke
+// minor change in padtrans
+//
 // Revision 1.45  2003/04/15 11:35:39  putschke
 // Include corrections for inner cathode offset and move some parameter to database
 //
@@ -1878,7 +1881,7 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
   
   // shift time => radius if there is an offset of the inner cathode :
 
-  if (mOffsetCathodeWest>0 || mOffsetCathodeEast>0)
+  if (fabs(mOffsetCathodeWest)>0 || fabs(mOffsetCathodeEast)>0)
     {
 
       if (iRow<10) // correct for west chamber
