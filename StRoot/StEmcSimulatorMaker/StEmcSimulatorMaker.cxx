@@ -96,6 +96,7 @@ Int_t StEmcSimulatorMaker::Init()
       SetDebug(controlTable->debug);
       gMessMgr->SetLimit("StEmcSimulator",Int_t(controlTable->messLimit));
       // Db for calibration
+      mDbMaker     = (St_db_Maker*)GetMaker("db");
       Int_t dbDate = mDbMaker->GetDateTime().GetDate();
       Int_t detInDb=0;
       for(Int_t i=0; i<4; i++) {
@@ -109,7 +110,6 @@ Int_t StEmcSimulatorMaker::Init()
       }
       if(mDB) {
         gMessMgr->Info()<<"Calibration db in action for " << detInDb << " detector(s)"<<endm; 
-        mDbMaker = (St_db_Maker*)GetMaker("db");
         if(mDbMaker) {
 	  // 10-sep-2002 - I can not do that because it changes the global time stamp 
 	  //           printf("Time stamp from control table : date %i time %i \n",
@@ -891,8 +891,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.12 2002/09/16 22:14:50 pavlinov Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.13 2002/09/17 18:37:01 pavlinov Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.13  2002/09/17 18:37:01  pavlinov
+// mDbMaker was zero
+//
 // Revision 1.12  2002/09/16 22:14:50  pavlinov
 // No DB for EMC before 24-09-2001
 //
