@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDriftVelocityMaker.cxx,v 1.2 2002/01/18 20:53:47 willson Exp $
+ * $Id: StSvtDriftVelocityMaker.cxx,v 1.3 2002/02/06 00:10:45 willson Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDriftVelocityMaker.cxx,v $
+ * Revision 1.3  2002/02/06 00:10:45  willson
+ * File entries, variable names.
+ *
  * Revision 1.2  2002/01/18 20:53:47  willson
  * Some bug fixes by Helen
  *
@@ -52,9 +55,9 @@ ClassImp(StSvtDriftVelocityMaker)
   mSvtDriftVeloc = NULL;
   mSvtRawData = NULL;
   mEventCounter = mHitCounter = 0;
-  mNumBinsDV = 128;
-  mMaximumDV = 127;
-  mMinimumDV = 0;
+  mNumTimeBins = 128;
+  mMaximumTB = 127;
+  mMinimumTB = 0;
   mDebug = false;
   mFraction = 0.5;
   mMoveForward = true;
@@ -105,7 +108,7 @@ Int_t StSvtDriftVelocityMaker::Init()
 	  sprintf(CharString1, "Histo%d", indexHybrid);
 	  sprintf(CharString2, "2DHisto%d", indexHybrid);
 
-	  hybridHisto = new TH1D(CharString1, CharString1, mNumBinsDV, mMinimumDV, mMaximumDV);
+	  hybridHisto = new TH1D(CharString1, CharString1, mNumTimeBins, mMinimumTB, mMaximumTB);
 	  mHybridDriftVelocityHisto[indexHybrid] = hybridHisto;
 
 	  if (mDebug) {
@@ -306,17 +309,18 @@ Int_t StSvtDriftVelocityMaker::CalcDriftVelocity()
 {
 
   double Aver=0, Num=0;
-  Int_t Offset= (mMaximumDV - mMinimumDV)/10;
-  Int_t Start = Offset + mMinimumDV;
-  Int_t End   = mMaximumDV - Offset;
+  char filename[100];
+  Int_t Offset= (mMaximumTB - mMinimumTB)/10;
+  Int_t Start = Offset + mMinimumTB;
+  Int_t End   = mMaximumTB - Offset;
   Int_t i, j;
   double DriftVelocity, TotalDriftTime;
   ofstream file;
 
-  if (!mDebug)       
-    file.open("test.txt");
+  sprintf(filename, "Run%d_DV.out", mSvtRawData->getRunNumber());
 
-  cout << "Current Run Number is " << mSvtRawData->getRunNumber() << endl;
+  if (!mDebug)       
+    file.open(filename);
 
   for (i=0; i<mSvtDriftVeloc->getTotalNumberOfHybrids(); i++) {
     
@@ -329,17 +333,15 @@ Int_t StSvtDriftVelocityMaker::CalcDriftVelocity()
 
     Aver *= mFraction;
     
-    j=mMaximumDV/2;
-
     if (mMoveForward) {
-      for (j=mMaximumDV/2; j<mMaximumDV+1; j++) {
+      for (j=mMaximumTB/2; j<mMaximumTB+1; j++) {
 	if (mHybridDriftVelocityHisto[i]->GetBinContent(j) < Aver) 
 	  break;
       }
     }
 
     else {
-      for (j=mMaximumDV-2; j>mMaximumDV/2; j--) {
+      for (j=mMaximumTB-2; j>mMaximumTB/2; j--) {
 	if (mHybridDriftVelocityHisto[i]->GetBinContent(j) > Aver) 
 	  break;
       }
@@ -350,14 +352,14 @@ Int_t StSvtDriftVelocityMaker::CalcDriftVelocity()
     if (mDebug)
       cout << j << endl;
 
-    TotalDriftTime = (j-mMinimumDV-mT0Guess)*(128.0/mNumBinsDV)*0.00000004;
+    TotalDriftTime = (j-mMinimumTB-mT0Guess)*(128.0/mNumTimeBins)*0.00000004;
 
     DriftVelocity = 3.0/TotalDriftTime;
 
     if (mDebug)
       mCalculatedDriftVelocity->Fill(i, DriftVelocity);
     else 
-      file << DriftVelocity << "\n";
+      file << i << "\t" << DriftVelocity << "\t\t" << j*128.0/mNumTimeBins << "\n";
     
     Aver=Num=0;
 

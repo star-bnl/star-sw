@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDriftVelocityMaker.h,v 1.2 2002/01/18 20:53:47 willson Exp $
+ * $Id: StSvtDriftVelocityMaker.h,v 1.3 2002/02/06 00:10:45 willson Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDriftVelocityMaker.h,v $
+ * Revision 1.3  2002/02/06 00:10:45  willson
+ * File entries, variable names.
+ *
  * Revision 1.2  2002/01/18 20:53:47  willson
  * Some bug fixes by Helen
  *
@@ -48,25 +51,25 @@ class StSvtDriftVelocityMaker : public StMaker {
   TH1D* mCalculatedDriftVelocity; //!
   Int_t mEventCounter;
   Int_t mHitCounter;
-  Int_t mNumBinsDV;    // Number of time bins to use in drift velocity calculation.  Default=128
-  Int_t mMaximumDV;    // Max Time Bin to look at. Default=127
-  Int_t mMinimumDV;    // Min Time Bin to look at. Default=0
-  bool  mRaw;          // Raw data?  false=StEvent data
-  bool mDebug;         // If true, make 2D histos, and keep everything.  Also, save to TH1D instead of ascii file
+  Int_t mNumTimeBins;    // Number of time bins to use in drift velocity calculation.  Default=128
+  Int_t mMaximumTB;      // Max Time Bin to look at. Default=127
+  Int_t mMinimumTB;      // Min Time Bin to look at. Default=0
+  bool  mRaw;            // Raw data?  false=StEvent data
+  bool mDebug;           // If true, make 2D histos, and keep everything.  Also, save to TH1D instead of ascii file
   
   /* To calculate drift velocity, take the 1D histo of hits vs. time.  Find the average number of hits
      in some number of time bins in the middle of the histogram.  
        For mMoveFoward=true:
        Start in the middle of the 1D histo, and move up the time bins until the number of hits per time bin 
-       are LESS THAN  [average*mFraction].  Record this time bin, j, and calculate drift velocity with this formula:
+       is LESS THAN  [average*mFraction].  Record this time bin, j, and calculate drift velocity with this formula:
           Drift Velocity = 3.0 cm/Drift Time  (cm/sec)
-	  Drift Time = (j-mMinimumDV-mT0Guess)*(128.0/mNumBinsDV)*(0.00000004 sec/time bin)
+	  Drift Time = (j-mMinimumTB-mT0Guess)*(128.0/mNumTimeBins)*(0.00000004 sec/time bucket)
 
        For mMoveForward=false:
-       Start at the end of the 1D histo, and move up the time bins until the number of hits per time bin are
+       Start at the end of the 1D histo, and move down the time bins until the number of hits per time bin are
        GREATER THAN  [average*mFraction].  Record this time bin, j, and calculate drift velocity the same way.
 
-       mT0Guess = T0 guess (units: time bucket bins)   */
+       mT0Guess = T0 guess (units: time bucket bins **NOT Time Buckets!**)   */
   
   double mFraction;  // Default: 0.5
   double mT0Guess;   // Default: 0.5
@@ -109,16 +112,16 @@ class StSvtDriftVelocityMaker : public StMaker {
   TH1D* GetFinalHisto() {return mCalculatedDriftVelocity;}; //!
   Int_t GetNumEvents() {return mEventCounter;}; //!
   Int_t GetNumHits() {return mHitCounter;}; //!
-  Int_t GetNumBinsDV() {return mNumBinsDV;}; //!
-  Int_t GetMaximumDV() {return mMaximumDV;}; //!
-  Int_t GetMinimumDV() {return mMinimumDV;}; //!
+  Int_t GetNumTimeBins() {return mNumTimeBins;}; //!
+  Int_t GetMaximumTB() {return mMaximumTB;}; //!
+  Int_t GetMinimumTB() {return mMinimumTB;}; //!
   bool DebugIsOn() {return mDebug;}; //!
   bool DVCalcDoesMoveForward() {return mMoveForward;}; //!
   double GetDVFraction() {return mFraction;}; //!
   double GetDVT0Guess() {return mT0Guess;}; //!
-  void SetNumBinsDV(const Int_t x) {mNumBinsDV = x;}; //!
-  void SetMaximumDV(const Int_t x) {mMaximumDV = x;}; //!
-  void SetMinimumDV(const Int_t x) {mMinimumDV = x;}; //!
+  void SetNumTimeBins(const Int_t x) {mNumTimeBins = x;}; //!
+  void SetMaximumTB(const Int_t x) {mMaximumTB = x;}; //!
+  void SetMinimumTB(const Int_t x) {mMinimumTB = x;}; //!
   void SetDebug(const bool x) {mDebug = x;}; //!
   void SetMoveForward(const bool x) {mMoveForward = x;}; //!
   void SetFraction(const double x) {mFraction = x;}; //!
