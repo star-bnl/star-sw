@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.16 2004/11/10 21:45:11 pruneau Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.17 2004/11/22 19:21:45 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.17  2004/11/22 19:21:45  pruneau
+ * revamped the plotting package
+ *
  * Revision 2.16  2004/11/10 21:45:11  pruneau
  * added diagnostic plots
  *
@@ -90,159 +93,154 @@ StiTrackingPlots::StiTrackingPlots(const string & name, const string & descripti
 
 void StiTrackingPlots::initialize()
 {
+  int i,k;
+  char label[64];
+
   cout <<"StiTrackingPlots::StiTrackingPlots() -I- Started"<<endl;
-  numTracks=book("numTracks","Number of tracks in Container", 128,0.,10000.);
+
+  for (i=0;i<4;++i)
+    {
+      sprintf(label,"t%d",i);
+      _track[i] = book(label,label,600,0.,600.);
+      for (k=i+1;k<4;++k)
+	{
+	  sprintf(label,"t%dVs%d",k,i);
+	  _track2D[i][k]   = book(label,label,100,0.,600.,100,0.,600.);
+	}
+    }
+
+  /*
   radLengthZ   =book("radLengthZ","Absorption Length (%) vs. Z",400,-200,200,  100,0,100);
   radLengthPhi =book("radLengthPhi","Absorption Length (%) vs. Phi",128,0,360, 256,0,1);
   radLengthEta =book("radLengthEta","Absorption Length (%) vs. Eta",128,-2,2, 256,0,1);
-  _eta        = book("eta",     "Track Eta",  200, -2.,2.);
-  _etaPlus    = book("etaPlus", "Track Eta +",200, -2.,2.);
-  _etaMinus   = book("etaMinus","Track Eta -",200, -2.,2.);
-  _phi        = book("phi",     "Track Phi",  100,-3.1415927,3.1415927);
-  _phiPlus    = book("phiPlus", "Track Phi+", 100,-3.1415927,3.1415927);
-  _phiMinus   = book("phiMinus","Track Phi-", 100,-3.1415927,3.1415927);
-  _pt         = book("pt",     "pt",      250,0., 5.);
-  _ptPlus     = book("ptPlus", "ptPlus",  250,0., 5.);
-  _ptMinus    = book("ptMinus","ptMinus", 250,0., 5.);
-  // mCurv  = new TH3D("mCurv","Curvature v. Eta and Pt", 256,-100,100,128,-2,2,128,0,30));
-  // mHeli  = new TH3D("mHeli","Helicity v. Eta and Pt", 3,-1,1,128,-2,2,128,0,30));
-  // mMomX  = new TH3D("mMomX","Momentum (X) v. Eta and Phi",  256,0,30,128,-2,2,128,0,360));
-  // mMomY  = new TH3D("mMomY","Momentum (Y) v. Eta and Phi",  256,0,30,128,-2,2,128,0,360));
-  // mMomZ  = new TH3D("mMomZ","Momentum (Z) v. Eta and Phi",  256,0,30,128,-2,2,128,0,360));
-  // mPhase = new TH3D("mPhase","Phase v. Eta and Pt",  256,0,30,128,-2,2,128,0,360));
-  _globalDca = book("globalDca","Global DCA", 160, 0,20);	  
-  _globalDcaPlus = book("globalDcaPlus","Global DCAPlus", 160, 0,20);	 
-  _globalDcaMinus = book("globalDcaMinus","Global DCA Minus", 160, 0,20);	 
-  _dca40 = book("dca40","DCA N>=40", 160, 0,20);	 
-  _dca40Plus  = book("dca40Plus","DCA N>=40 Plus", 160, 0,20);	 
-  _dca40Minus = book("dca40Minus","DCA N>=40 Minus", 160, 0,20);
-  
-  _nptsVsPt      = book("nptsVsPt",     "nptsVsPt",     40, 0., 4., 50, 0., 50.);
-  _nptsVsPtPlus  = book("nptsVsPtPlus", "nptsVsPtPlus", 40, 0., 4., 50, 0., 50.);
-  _nptsVsPtMinus = book("nptsVsPtMinus","nptsVsPtMinus",40, 0., 4., 50, 0., 50.);
-  
-  _nptsVsEta      = book("nptsVsEta",     "nptsVsEta",     40, -2., 2., 50, 0., 50.);
-  _nptsVsEtaPlus  = book("nptsVsEtaPlus", "nptsVsEtaPlus", 40, -2., 2., 50, 0., 50.);
-  _nptsVsEtaMinus = book("nptsVsEtaMinus","nptsVsEtaMinus",40, -2., 2., 50, 0., 50.);
-  _nptsVsEtaPtGt200 = book("nptsVsEtaPtGt200",     "nptsVsEtaPtGt200",     40, -2., 2., 50, 0., 50.);
-  _nptsVsEtaPtLt200 = book("nptsVsEtaPtLt200",     "nptsVsEtaPtLt200",     40, -2., 2., 50, 0., 50.);
+  */
 
-  _nptsVsPhi = book("nptsVsPhi","nptsVsPhi",100,-3.1415927,3.1415927, 50, 0., 50.);
-  _nptsVsPhiPlus = book("nptsVsPhiPlus","nptsVsPhiPlus",100,-3.1415927,3.1415927, 50, 0., 50.);
-  _nptsVsPhiMinus = book("nptsVsPhiMinus","nptsVsPhiMinus",100,-3.1415927,3.1415927, 50, 0., 50.);
-  
-  _xLastHitVsXLastNode = book("xLastHitVsXLastNode","xLastHitVsXLastNode",200,0.,200.,200,0.,200.);
-  _xLastHitVsXLastNode1 = book("xLastHitVsXLastNode1","xLastHitVsXLastNode1",200,0.,200.,200,0.,200.);
-  _xLastHitVsXLastNode2 = book("xLastHitVsXLastNode2","xLastHitVsXLastNode2",200,0.,200.,200,0.,200.);
+  // index = 0 : all good tracks
+  // index = 1 : all good primary tracks
+  //         2 : accepted global 
+  //         3 : accepted primaries
+  for (i=0;i<5;++i)
+    {
+      sprintf(label,"eta_%d",i);        _eta[i]        = book(label,label,200, -2.,2.);
+      sprintf(label,"phi_%d",i);        _phi[i]        = book(label,label, 100,-3.1415927,3.1415927);
+      sprintf(label,"dca_%d",i);        _dca[i]        = book(label,label,  100,0., 10.);
+      sprintf(label,"gdca_%d",i);       _gdca[i]       = book(label,label,  100,0., 10.);
+      sprintf(label,"pt_%d",i);         _pt[i]         = book(label,label,  250,0., 5.);
+      sprintf(label,"nptsVsPt_%d",i);   _nptsVsPt[i]   = book(label,label,  40, 0., 4., 50, 0., 50.);
+      sprintf(label,"nptsVsEta_%d",i);  _nptsVsEta[i]  = book(label,label,  40, -2., 2., 50, 0., 50.);
+      sprintf(label,"ntpsVsPhi_%d",i);  _nptsVsPhi[i]  = book(label,label,  90, -3.1415927,3.1415927, 50, 0., 50.);
+      sprintf(label,"nFitVsPt_%d",i);   _nFitVsPt[i]   = book(label,label,  40, 0., 4., 50, 0., 50.);
+      sprintf(label,"nFitVsEta_%d",i);  _nFitVsEta[i]  = book(label,label,  40, -2., 2., 50, 0., 50.);
+      sprintf(label,"nFitVsPhi_%d",i);  _nFitVsPhi[i]  = book(label,label,  90, -3.1415927,3.1415927, 50, 0., 50.);
+      sprintf(label,"nFitVsN_%d",i);    _nFitVsN[i]    = book(label,label,  50,  0.,50.,50,0.,50);
+      //sprintf(label,"nFitVsNSvt_%d",i); _nFitVsNSvt    = book(label,label,   5,0.,5.,5,0.,5);
+      sprintf(label,"chi2_%d",i);       _chi2[i]       = book(label,label,120,-2.,10.);
+      sprintf(label,"chi2VsNpts_%d",i); _chi2VsNpts[i] = book(label,label,50,0.,50.,120,-2.,10.);
+      sprintf(label,"chi2VsDca_%d",i);  _chi2VsDca[i]  = book(label,label,50,0.,10.,120,-2.,10.);
+      sprintf(label,"lastHitVsNode_%d",i); _xLastHitVsXLastNode[i] = book(label,label,200,0.,200.,200,0.,200.);
 
-  _chi2 = book("chi2","chi2",120,-2.,10.);
-  _chi2VsNpts = book("chi2VsNpts","chi2VsNpts",50,0.,50.,120,-2.,10.);
-  _chi2VsDca  = book("chi2VsDca","chi2VsDca",60,-2.,10., 100, 0., 10.);
-  _chi2VsDcaSvt[0]  = book("chi2VsDcaSvt1","chi2VsDca Svt1",60,-2.,10., 100, 0., 10.);
-  _chi2VsDcaSvt[1]  = book("chi2VsDcaSvt2","chi2VsDca Svt2",60,-2.,10., 100, 0., 10.);
-  _chi2VsDcaSvt[2]  = book("chi2VsDcaSvt3","chi2VsDca Svt3",60,-2.,10., 100, 0., 10.);
+      for (int layer=0;layer<51;++layer)
+	{
+	  sprintf(label,"chi2_%d_L%d",i,layer);	      _chi2Inc[i][layer] = book(label,label,400,0.,100.);
+	  sprintf(label,"dcaVschi2_%d_L%d",i,layer);  _chi2IncVsDca[i][layer] = book(label,label,400,0.,100.,30,0.,1.5);
+	  sprintf(label,"dx_%d_L%d",i,layer);         _dx[i][layer] = book(label,label,100,-5.,5.);
+	  sprintf(label,"dy_%d_L%d",i,layer);         _dy[i][layer] = book(label,label,100,-5.,5.);
+	  sprintf(label,"dz_%d_L%d",i,layer);         _dz[i][layer] = book(label,label,100,-5.,5.);
+	  sprintf(label,"yPull_%d_L%d",i,layer);      _yPull[i][layer] = book(label,label,100,-5.,5.);
+	  sprintf(label,"zPull_%d_L%d",i,layer);      _zPull[i][layer] = book(label,label,100,-5.,5.);
 
-  // with one, two, three svt points...
-  _etaSvt[0]        = book("etaSvt1",     "Track Eta Svt1",  100,-3.1415927,3.1415927);
-  _phiSvt[0]        = book("phiSvt1",     "Track Phi Svt1",  100,-3.1415927,3.1415927);
-  _ptSvt[0]         = book("ptSvt1",     "pt Svt1",      250,0., 5.);
-  _globalDcaSvt[0]  = book("globalDcaSvt1","Global DCA Svt1", 160, 0,20);	  
-  _nptsVsPtSvt[0]   = book("nptsVsPtSvt1",     "nptsVsPt Svt1",     40, 0., 4., 50, 0., 50.);
-  _nptsVsEtaSvt[0]  = book("nptsVsEtaSvt1",     "nptsVsEta Svt1",     40, -2., 2., 50, 0., 50.);
-  _nptsVsPhiSvt[0]  = book("nptsVsPhiSvt1","nptsVsPhi Svt1",100,-3.1415927,3.1415927, 50, 0., 50.);
-  _chi2Svt[0]       = book("chi2Svt1","chi2 Svt1",120,-2.,10.);
-  _chi2VsNptsSvt[0] = book("chi2VsNptsSvt1","chi2VsNpts Svt1",50,0.,50.,100,0.,10.);
-
-  _etaSvt[1]        = book("etaSvt2",     "Track Eta Svt2",  100,-3.1415927,3.1415927);
-  _phiSvt[1]        = book("phiSvt2",     "Track Phi Svt2",  100,-3.1415927,3.1415927);
-  _ptSvt[1]         = book("ptSvt2",     "pt Svt2",      250,0., 5.);
-  _globalDcaSvt[1]  = book("globalDcaSvt2","Global DCA Svt2", 160, 0,20);	  
-  _nptsVsPtSvt[1]   = book("nptsVsPtSvt2",     "nptsVsPt Svt2",     40, 0., 4., 50, 0., 50.);
-  _nptsVsEtaSvt[1]  = book("nptsVsEtaSvt2",     "nptsVsEta Svt2",     40, -2., 2., 50, 0., 50.);
-  _nptsVsPhiSvt[1]  = book("nptsVsPhiSvt2","nptsVsPhi Svt2",100,-3.1415927,3.1415927, 50, 0., 50.);
-  _chi2Svt[1]       = book("chi2Svt2","chi2 Svt2",120,-2.,10.);
-  _chi2VsNptsSvt[1] = book("chi2VsNptsSvt2","chi2VsNpts Svt2",50,0.,50.,100,0.,10.);
-
-  _etaSvt[2]        = book("etaSvt3",     "Track Eta Svt3",  100,-3.1415927,3.1415927);
-  _phiSvt[2]        = book("phiSvt3",     "Track Phi Svt3",  100,-3.1415927,3.1415927);
-  _ptSvt[2]         = book("ptSvt3",     "pt Svt3",      250,0., 5.);
-  _globalDcaSvt[2]  = book("globalDcaSvt3","Global DCA Svt3", 160, 0,20);	  
-  _nptsVsPtSvt[2]   = book("nptsVsPtSvt3",     "nptsVsPt Svt3",     40, 0., 4., 50, 0., 50.);
-  _nptsVsEtaSvt[2]  = book("nptsVsEtaSvt3",     "nptsVsEta Svt3",     40, -2., 2., 50, 0., 50.);
-  _nptsVsPhiSvt[2]  = book("nptsVsPhiSvt3","nptsVsPhi Svt3",100,-3.1415927,3.1415927, 50, 0., 50.);
-  _chi2Svt[2]       = book("chi2Svt3","chi2 Svt3",120,-2.,10.);
-  _chi2VsNptsSvt[2] = book("chi2VsNptsSvt3","chi2VsNpts Svt3",50,0.,50.,100,0.,10.);
-
-  //3d...
-  mGDcavNptsvEtaA = book("mGDcavNptsvEtaA",
-				"Global DCA vs. Npts vs. Eta, All charges",
-				100,0.,20.,6,0.,645.,30,-2.,2.);
-  //mPDcavNptsvEtaA = book("mPDcavNptsvEtaA",
-  //			"Primary DCA vs. Npts vs. Eta, All charges",
-  //			100,0.,20.,645,0.,645.,30,-2.0,2.);
-  mGDcavNptsvPtA = book("mGDcavNptsvPtA",
-				"Global DCA vs. Npts vs. Pt, All charges",
-				100,0.,20.,6,0.,645.,10,0.,5.);
-  //mPDcavNptsvPtA = book("mPDcavNptsvPtA",
-  //			"Global DCA vs. Npts vs. Pt, All charges",
-  //			100,0.,20.,645,0.,645.,50,0.,5.);
-  
-  mNptsvPtvEtaA = book("mNptsvPtvEtaA",
-				"Npts vs. Pt. vs. Eta, All charges",
-				6,0.,645.,30,-2.,2., 50,0.,5.);
-  mGDcavEtavPtA = book("mGDcavEtavPtA",
-		       "Global DCA vs. Eta vs. Pt",
-       		      100,0.,20.,10,-2.,2.,10,0.,5.);
-  //mPDcavEtavPtA= book("mPDcavEtavPtA",
-  //		      "Primary DCA vs. Eta vs. Pt"
-  //		      100,0,20.,20,-2.,2.,50,0.,5.);
-
-  mGDcavNptsvEtaP = book("mGDcavNptsvEtaP",
-				"Global DCA vs. Npts vs. Eta, P All charges",
-				20,0.,20.,6,0.,645.,15,-2.,2.);
-  //mPDcavNptsvEtaP = book("mPDcavNptsvEtaP",
-  //			"Primary DCA vs. Npts vs. Eta, All charges",
-  //			100,0.,20.,645,0.,645.,30,-2.0,2.);
-  mGDcavNptsvPtP = book("mGDcavNptsvPtP",
-				"Global DCA vs. Npts vs. Pt, All charges",
-				20,0.,20.,6,0.,645.,10,0.,5.);
-  //mPDcavNptsvPtP = book("mPDcavNptsvPtP",
-  //			"Global DCA vs. Npts vs. Pt, All charges",
-  //			100,0.,20.,645,0.,645.,50,0.,5.);
-  
-  mNptsvPtvEtaP = book("mNptsvPtvEtaP",
-				"Npts vs. Pt. vs. Eta, All charges",
-				645,0.,645.,4,-2.,2., 10,0.,5.);
-  mGDcavEtavPtP = book("mGDcavEtavPtP",
-		       "Global DCA vs. Eta vs. Pt",
-		       10,0,20.,4,-2.,2.,10,0.,5.);
-  //mPDcavEtavPtP= book("mPDcavEtavPtP",
-  //		      "Primary DCA vs. Eta vs. Pt"
-  //		      100,0,20.,20,-2.,2.,50,0.,5.);
-
-  mGDcavNptsvEtaM = book("mGDcavNptsvEtaM",
-				"Global DCA vs. Npts vs. Eta, P All charges",
-				10,0.,20.,6,0.,645.,4,-2.,2.);
-  //mPDcavNptsvEtaM = book("mPDcavNptsvEtaM",
-  //			"Primary DCA vs. Npts vs. Eta, All charges",
-  //			100,0.,20.,645,0.,645.,30,-2.0,2.);
-  mGDcavNptsvPtM = book("mGDcavNptsvPtM",
-				"Global DCA vs. Npts vs. Pt, All charges",
-				10,0.,20.,6,0.,645.,10,0.,5.);
-  //mPDcavNptsvPtM = book("mPDcavNptsvPtM",
-  //			"Global DCA vs. Npts vs. Pt, All charges",
-  //			100,0.,20.,645,0.,645.,50,0.,5.);
-  
-  mNptsvPtvEtaM = book("mNptsvPtvEtaM",
-  			"Npts vs. Pt. vs. Eta, All charges",
-  			6,0.,645.,4,-2.,2., 10,0.,5.);
-  mGDcavEtavPtM = book("mGDcavEtavPtM",
-		       "Global DCA vs. Eta vs. Pt",
-       		      100,0,20.,20,-2.,2.,50,0.,5.);
-  //mPDcavEtavPtM= book("mPDcavEtavPtM",
-  //			      "Primary DCA vs. Eta vs. Pt"
-  //			      100,0,20.,20,-2.,2.,50,0.,5.);
-
+	  int nSectors;
+	  switch (layer)
+	    {
+	    case 0:
+	    case 1: nSectors = 4; break;
+	    case 2:
+	    case 3: nSectors = 6; break;
+	    case 4:
+	    case 5: nSectors = 8; break;
+	    default: nSectors = 12;
+	    }
+	  for (int  sector=0;sector<nSectors;++sector)
+	    {
+	      //sprintf(label,"dx_%d_L%d_S%d",i,layer,sector);        _dx[i][layer][sector]=book(label,label,100,-1.,1.);
+	      //sprintf(label,"dy_%d_L%d_S%d",i,layer,sector);        _dy[i][layer][sector]=book(label,label,100,-1.,1.);
+	      sprintf(label,"dyVsTanCA_%d_L%d_S%d",i,layer,sector); _dyVsTanCA[i][layer][sector]=book(label,label,10,-1.,1.,100,-1.,1.);
+	      //sprintf(label,"dz_%d_L%d_S%d",i,layer,sector);	  _dz[i][layer][sector]=book(label,label,100,-1.,1.);
+	      sprintf(label,"dzVsTanL_%d_L%d_S%d",i,layer,sector);  _dzVsTanL[i][layer][sector]=book(label,label,10,-1.,1.,100,-1.,1.);	  
+	    }//sector
+	}//layer
+    }//plot type
+      /*
+	//3d...
+	mGDcavNptsvEtaA = book("mGDcavNptsvEtaA",
+	"Global DCA vs. Npts vs. Eta, All charges",
+	100,0.,20.,6,0.,645.,30,-2.,2.);
+	//mPDcavNptsvEtaA = book("mPDcavNptsvEtaA",
+	//			"Primary DCA vs. Npts vs. Eta, All charges",
+	//			100,0.,20.,645,0.,645.,30,-2.0,2.);
+	mGDcavNptsvPtA = book("mGDcavNptsvPtA",
+	"Global DCA vs. Npts vs. Pt, All charges",
+	100,0.,20.,6,0.,645.,10,0.,5.);
+	//mPDcavNptsvPtA = book("mPDcavNptsvPtA",
+	//			"Global DCA vs. Npts vs. Pt, All charges",
+	//			100,0.,20.,645,0.,645.,50,0.,5.);
+	
+	mNptsvPtvEtaA = book("mNptsvPtvEtaA",
+	"Npts vs. Pt. vs. Eta, All charges",
+	6,0.,645.,30,-2.,2., 50,0.,5.);
+	mGDcavEtavPtA = book("mGDcavEtavPtA",
+	"Global DCA vs. Eta vs. Pt",
+	100,0.,20.,10,-2.,2.,10,0.,5.);
+	//mPDcavEtavPtA= book("mPDcavEtavPtA",
+	//		      "Primary DCA vs. Eta vs. Pt"
+	//		      100,0,20.,20,-2.,2.,50,0.,5.);
+	
+	mGDcavNptsvEtaP = book("mGDcavNptsvEtaP",
+	"Global DCA vs. Npts vs. Eta, P All charges",
+	20,0.,20.,6,0.,645.,15,-2.,2.);
+	//mPDcavNptsvEtaP = book("mPDcavNptsvEtaP",
+	//			"Primary DCA vs. Npts vs. Eta, All charges",
+	//			100,0.,20.,645,0.,645.,30,-2.0,2.);
+	mGDcavNptsvPtP = book("mGDcavNptsvPtP",
+	"Global DCA vs. Npts vs. Pt, All charges",
+	20,0.,20.,6,0.,645.,10,0.,5.);
+	//mPDcavNptsvPtP = book("mPDcavNptsvPtP",
+	//			"Global DCA vs. Npts vs. Pt, All charges",
+	//			100,0.,20.,645,0.,645.,50,0.,5.);
+	
+	mNptsvPtvEtaP = book("mNptsvPtvEtaP",
+	"Npts vs. Pt. vs. Eta, All charges",
+	645,0.,645.,4,-2.,2., 10,0.,5.);
+	mGDcavEtavPtP = book("mGDcavEtavPtP",
+	"Global DCA vs. Eta vs. Pt",
+	10,0,20.,4,-2.,2.,10,0.,5.);
+	//mPDcavEtavPtP= book("mPDcavEtavPtP",
+	//		      "Primary DCA vs. Eta vs. Pt"
+	//		      100,0,20.,20,-2.,2.,50,0.,5.);
+	
+	mGDcavNptsvEtaM = book("mGDcavNptsvEtaM",
+	"Global DCA vs. Npts vs. Eta, P All charges",
+	10,0.,20.,6,0.,645.,4,-2.,2.);
+	//mPDcavNptsvEtaM = book("mPDcavNptsvEtaM",
+	//			"Primary DCA vs. Npts vs. Eta, All charges",
+	//			100,0.,20.,645,0.,645.,30,-2.0,2.);
+	mGDcavNptsvPtM = book("mGDcavNptsvPtM",
+	"Global DCA vs. Npts vs. Pt, All charges",
+	10,0.,20.,6,0.,645.,10,0.,5.);
+	//mPDcavNptsvPtM = book("mPDcavNptsvPtM",
+	//			"Global DCA vs. Npts vs. Pt, All charges",
+	//			100,0.,20.,645,0.,645.,50,0.,5.);
+	
+	mNptsvPtvEtaM = book("mNptsvPtvEtaM",
+	"Npts vs. Pt. vs. Eta, All charges",
+	6,0.,645.,4,-2.,2., 10,0.,5.);
+	mGDcavEtavPtM = book("mGDcavEtavPtM",
+	"Global DCA vs. Eta vs. Pt",
+	100,0,20.,20,-2.,2.,50,0.,5.);
+	//mPDcavEtavPtM= book("mPDcavEtavPtM",
+	//			      "Primary DCA vs. Eta vs. Pt"
+	//			      100,0,20.,20,-2.,2.,50,0.,5.);
+      */
   
   //cout <<"StiTrackingPlots::StiTrackingPlots() -I- Done"<<endl;
 }
@@ -258,129 +256,260 @@ StiTrackingPlots::~StiTrackingPlots()
 void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 {
   //cout <<"StiTrackingPlots::fill() -I- Filling histos" <<endl;
+  const StiTrack* track;
+  const StiKalmanTrack * kTrack;
 
-  //numTracks->Fill(mTrackStore->getTrackCount(mFilter));
-
+  int trackCount[6];
+  for (int k=0;k<4;++k) trackCount[k] = 0;
   //loop over tracks
   for (TrackToTrackMap::const_iterator trackIt = mTrackStore->begin(); 
        trackIt!=mTrackStore->end();
        ++trackIt)
     {
-      const StiTrack* track = (*trackIt).second;
-      const StiKalmanTrack * kTrack = dynamic_cast<const StiKalmanTrack *>(track);
+      track = (*trackIt).second;
+      kTrack = dynamic_cast<const StiKalmanTrack *>(track);
       if( !track || !kTrack ) continue;
-      if(!kTrack->isPrimary()) continue;
-      double nPts = track->getPointCount();
+      bool good    = (1==kTrack->getFlag());
+      bool primary = kTrack->isPrimary();
+
+      int nPts = kTrack->getPointCount();
       if(nPts<5) continue;
-      double phi = track->getPhi();
-      double eta = track->getPseudoRapidity();
-      double thePt  = track->getPt();
-      double dca = track->getDca();
-      //double p[3], e[3];
-      //track->getMomentum(p,e);
-      
-      _eta->Fill(eta);
-      _phi->Fill(phi);
-      _pt->Fill(thePt);
-      _globalDca->Fill(dca);
 
-      int tpcPoints = (kTrack->getNodes(1)).size();
-      int svtPoints = (kTrack->getNodes(2)).size();
-      int mPts=100*svtPoints+tpcPoints;
+      int nFitPts    = kTrack->getFitPointCount();
+      int nFitPtsSvt = kTrack->getFitPointCount(2);
+      int tpcPoints  = (kTrack->getNodes(1)).size();
+      int svtPoints  = (kTrack->getNodes(2)).size();
+      //int mPts=100*svtPoints+tpcPoints;
       
-      mGDcavNptsvEtaA->Fill(dca,mPts,eta);
-      mGDcavNptsvPtA->Fill(dca,mPts, thePt);
-      mNptsvPtvEtaA->Fill(mPts,thePt,eta);
-      mGDcavEtavPtA->Fill(dca,eta,thePt);
+      double phi    = track->getPhi();
+      double eta    = track->getPseudoRapidity();
+      double pt     = track->getPt();
+      double gdca   = track->getGlobalDca();
+      double dca    = track->getDca();
+      double charge = track->getCharge();
+      double chi2   = kTrack->getChi2();
 
-      // svt points driven histos
-   
-      if(track->getCharge())
-	{//charge > 0
-	  mGDcavNptsvEtaP->Fill(dca,mPts,eta);
-	  mGDcavNptsvPtP->Fill(dca,mPts, thePt);
-	  mNptsvPtvEtaP->Fill(mPts,thePt,eta);
-	  mGDcavEtavPtP->Fill(dca,eta,thePt);
-	}
-      else
-	{//charge < 0
-	  mGDcavNptsvEtaM->Fill(dca,mPts,eta);
-	  mGDcavNptsvPtM->Fill(dca,mPts, thePt);
-	  mNptsvPtvEtaM->Fill(mPts,thePt,eta);
-	  mGDcavEtavPtM->Fill(dca,eta,thePt);
-	}
-      
-
-      if (nPts>=40) _dca40->Fill(dca); 
-      _nptsVsPt->Fill(thePt,nPts);
-      _nptsVsEta->Fill(eta,nPts);
-      _nptsVsPhi->Fill(phi,nPts);
-      if (thePt>0.2)
-	_nptsVsEtaPtGt200->Fill(eta,nPts);
-      else
-	_nptsVsEtaPtLt200->Fill(eta,nPts);
-      if (kTrack)
+      bool globalAccepted = false;
+      bool primaryAccepted= false;
+      if (pt>0.15 && fabs(eta)<0.5 && nFitPts>15 && gdca<3.) 
 	{
-	  double chi2 = kTrack->getChi2();
-	  _chi2->Fill(chi2);
-	  _chi2VsNpts->Fill(nPts,chi2);
-	  //cout << "StiTrackPlots::fill() -I- kTrack OK";
+	  globalAccepted = true;
+	  if (primary) primaryAccepted = true;
+	}
+      for (int i=0;i<4;++i)
+	{
+	  if (i==0 && !good)     continue;
+	  if (i==1 && !primary)  continue;
+	  if (i==2 && !globalAccepted)  continue;
+	  if (i==3 && !primaryAccepted) continue;
+	  trackCount[i]++;
+	  _eta[i]->Fill(eta);
+	  _phi[i]->Fill(phi);
+	  _pt[i]->Fill(pt);
+	  _gdca[i]->Fill(gdca);
+	  _dca[i]->Fill(dca); 
+	  _nptsVsPt[i]->Fill(pt,nPts);
+	  _nptsVsEta[i]->Fill(eta,nPts);
+	  _nptsVsPhi[i]->Fill(phi,nPts);
+	  _nFitVsPt[i]->Fill(pt,nFitPts);
+	  _nFitVsEta[i]->Fill(eta,nFitPts);
+	  _nFitVsPhi[i]->Fill(phi,nFitPts);
+	  _nFitVsN[i]->Fill(nPts,nFitPts);
+	  _chi2VsNpts[i]->Fill(nPts,chi2);
+	  _chi2VsDca[i]->Fill(gdca,chi2);
+	  _chi2[i]->Fill(chi2);
 	  double x1 = kTrack->getInnerMostNode()->_x;
-	  //cout << " x1:"<<x1;
 	  double x2 = kTrack->getInnerMostHitNode()->_x;
-	  //cout << " x2:"<<x2;
-	  _xLastHitVsXLastNode->Fill(x1,x2);
-	  if (fabs(eta)<0.4)
-	    _xLastHitVsXLastNode1->Fill(x1,x2);
-	  else if (fabs(eta)<0.8 && fabs(eta)>0.5 )
-	    _xLastHitVsXLastNode2->Fill(x1,x2);
-	  //cout << " - Filled OK";
+	  _xLastHitVsXLastNode[i]->Fill(x1,x2);
 
-	  _chi2VsDca->Fill(kTrack->_vChi2, kTrack->_vDca);
-	  if (svtPoints>0 && svtPoints<4)
+	  /* 3D temporarily disabled...
+	     mGDcavNptsvEtaA->Fill(dca,mPts,eta);
+	     mGDcavNptsvPtA->Fill(dca,mPts, pt);
+	     mNptsvPtvEtaA->Fill(mPts,pt,eta);0
+	     mGDcavEtavPtA->Fill(dca,eta,pt);
+	     
+	     if (svtPoints>0 && svtPoints<4)
+	     {
+	     int iii = svtPoints-1;
+	     _chi2VsDcaSvt[iii]->Fill(kTrack->_vChi2, kTrack->_vDca);
+	     _etaSvt[iii]->Fill(eta);
+	     _phiSvt[iii]->Fill(phi);
+	     _ptSvt[iii]->Fill(pt);
+	     _globalDcaSvt[iii]->Fill(dca);
+	     _nptsVsPtSvt[iii]->Fill(pt,nPts);
+	     _nptsVsEtaSvt[iii]->Fill(eta,nPts);
+	     _nptsVsPhiSvt[iii]->Fill(phi,nPts);
+	     _chi2Svt[iii]->Fill(chi2);
+	     _chi2VsNptsSvt[iii]->Fill(nPts,chi2);
+	     }
+	  */
+	    
+	  // loop through nodes
+	  StiKalmanTrackNode* leaf = kTrack->getLastNode();
+	  StiKTNForwardIterator it(leaf);
+	  StiKTNForwardIterator end = it.end();
+	  while (it!=end) 
 	    {
-	      int iii = svtPoints-1;
-	      _chi2VsDcaSvt[iii]->Fill(kTrack->_vChi2, kTrack->_vDca);
-	      _etaSvt[iii]->Fill(eta);
-	      _phiSvt[iii]->Fill(phi);
-	      _ptSvt[iii]->Fill(thePt);
-	      _globalDcaSvt[iii]->Fill(dca);
-	      _nptsVsPtSvt[iii]->Fill(thePt,nPts);
-	      _nptsVsEtaSvt[iii]->Fill(eta,nPts);
-	      _nptsVsPhiSvt[iii]->Fill(phi,nPts);
-	      _chi2Svt[iii]->Fill(chi2);
-	      _chi2VsNptsSvt[iii]->Fill(nPts,chi2);
+	      StiKalmanTrackNode& node = *it;
+	      const StiHit * theHit = node.getHit();
+	      const StiDetector * theDetector = node.getDetector();
+	      if (theHit && theDetector)
+		{
+		  double dx = theHit->x() - node._x;
+		  double dy = theHit->y() - node._p0;
+		  double dz = theHit->z() - node._p1;
+		  double theDca = sqrt(dy*dy+dz*dz);
+		  double theChi2 = node.evaluateChi2(theHit);
+		  double tanCA = node._sinCA/node._cosCA;
+		  double tanL  = node._p4;
+		  int id   = theDetector->getGroupId();
+		  int key1 = theDetector->getKey(1);
+		  int key2 = theDetector->getKey(2);
+		  int key;
+		  if (id==1) 
+		    key=5+key1;
+		  else if (id==2) 
+		    key=key1;
+		  else 
+		    continue;
+		  if (key>50 || key<0) continue;
+		  _chi2Inc[i][key]->Fill(theChi2);
+		  _chi2IncVsDca[i][key]->Fill(theChi2,theDca);
+		  if (node._c00>0) _yPull[i][key]->Fill( dy/sqrt(node.eyy) );
+		  if (node._c11>0) _zPull[i][key]->Fill( dz/sqrt(node.ezz) );
+		  if (theChi2<30) //svt only
+		    {
+		      _dx[i][key]->Fill(dx);
+		      _dy[i][key]->Fill(dy);
+		      _dyVsTanCA[i][key][key2]->Fill(tanCA,dy);
+		      _dz[i][key]->Fill(dz);
+		      _dzVsTanL[i][key][key2]->Fill(tanL,dz);
+		    }
+		}
+	      ++it;
 	    }
-	  
-	}
-      //else
-	//cout << "StiTrackPlots::fill() -W- kTrack==0"<<endl;
-
-      if (track->getCharge()>0) 
-	{
-	  _etaPlus->Fill(eta);
-	  _phiPlus->Fill(phi);
-	  _ptPlus->Fill(thePt);
-	  _globalDcaPlus->Fill(dca);
-	  if (nPts>=40) _dca40Plus->Fill(dca);
-	  _nptsVsPtPlus->Fill(thePt,nPts);
-	  _nptsVsEtaPlus->Fill(eta,nPts);
-	  _nptsVsPhiPlus->Fill(phi,nPts);
-	}
-      else
-	{
-	  _etaMinus->Fill(eta);
-	  _phiMinus->Fill(phi);
-	  _ptMinus->Fill(thePt);
-	  _globalDcaMinus->Fill(dca);
-	  if (nPts>=40) _dca40Minus->Fill(dca);
-	  _nptsVsPtMinus->Fill(thePt,nPts);
-	  _nptsVsEtaMinus->Fill(eta,nPts);
-	  _nptsVsPhiMinus->Fill(phi,nPts);
-	}
-
+	  // end of loop hrough nodes
+	} // end of loop plot types
     }//end loop over tracks
-  //cout <<"StiTrackingPlots::fill() -I- Done Filling histos" <<endl;
+      
+  trackCount[0] = trackCount[0]/10.;
+  trackCount[1] = trackCount[1]/10.;
+  // some global histograms
+  for (int j1=0;j1<4;++j1)
+    {
+      _track[j1]->Fill(trackCount[j1]);
+      for (int j2=j1+1;j2<4;++j2)
+	{
+	  _track2D[j1][j2]->Fill(trackCount[j1],trackCount[j2]);
+	}
+    }
 
+  //xxxxx
+  if (trackCount[3]>0.9*trackCount[2]) return;
+
+
+  cout << " anomalous event" << endl;
+  for (TrackToTrackMap::const_iterator trackIt = mTrackStore->begin(); 
+       trackIt!=mTrackStore->end();
+       ++trackIt)
+    {
+      track = (*trackIt).second;      const StiTrack* track = (*trackIt).second;
+      kTrack = dynamic_cast<const StiKalmanTrack *>(track);
+      if( !track || !kTrack ) continue;
+      bool good    = (1==kTrack->getFlag());
+      bool primary = kTrack->isPrimary();
+
+      int nPts = kTrack->getPointCount();
+      if(nPts<5) continue;
+
+      int nFitPts    = kTrack->getFitPointCount();
+      int nFitPtsSvt = kTrack->getFitPointCount(2);
+      int tpcPoints  = (kTrack->getNodes(1)).size();
+      int svtPoints  = (kTrack->getNodes(2)).size();
+      //int mPts=100*svtPoints+tpcPoints;
+      
+      double phi    = track->getPhi();
+      double eta    = track->getPseudoRapidity();
+      double pt     = track->getPt();
+      double gdca   = track->getGlobalDca();
+      double dca    = track->getDca();
+      double charge = track->getCharge();
+      double chi2   = kTrack->getChi2();
+
+      bool globalAccepted = false;
+      bool primaryAccepted= false;
+      if (pt>0.15 && fabs(eta)<0.5 && nFitPts>15 && gdca<3.) 
+	{
+	  globalAccepted = true;
+	  if (primary) primaryAccepted = true;
+	}
+      int i = 4;
+	  _eta[i]->Fill(eta);
+	  _phi[i]->Fill(phi);
+	  _pt[i]->Fill(pt);
+	  _gdca[i]->Fill(gdca);
+	  _dca[i]->Fill(dca); 
+	  _nptsVsPt[i]->Fill(pt,nPts);
+	  _nptsVsEta[i]->Fill(eta,nPts);
+	  _nptsVsPhi[i]->Fill(phi,nPts);
+	  _nFitVsPt[i]->Fill(pt,nFitPts);
+	  _nFitVsEta[i]->Fill(eta,nFitPts);
+	  _nFitVsPhi[i]->Fill(phi,nFitPts);
+	  _nFitVsN[i]->Fill(nPts,nFitPts);
+	  _chi2VsNpts[i]->Fill(nPts,chi2);
+	  _chi2VsDca[i]->Fill(gdca,chi2);
+	  _chi2[i]->Fill(chi2);
+	  double x1 = kTrack->getInnerMostNode()->_x;
+	  double x2 = kTrack->getInnerMostHitNode()->_x;
+	  _xLastHitVsXLastNode[i]->Fill(x1,x2);
+
+	  // loop through nodes
+	  StiKalmanTrackNode* leaf = kTrack->getLastNode();
+	  StiKTNForwardIterator it(leaf);
+	  StiKTNForwardIterator end = it.end();
+	  while (it!=end) 
+	    {
+	      StiKalmanTrackNode& node = *it;
+	      const StiHit * theHit = node.getHit();
+	      const StiDetector * theDetector = node.getDetector();
+	      if (theHit && theDetector)
+		{
+		  double dx = theHit->x() - node._x;
+		  double dy = theHit->y() - node._p0;
+		  double dz = theHit->z() - node._p1;
+		  double theDca = sqrt(dy*dy+dz*dz);
+		  double theChi2 = node.evaluateChi2(theHit);
+		  double tanCA = node._sinCA/node._cosCA;
+		  double tanL  = node._p4;
+		  int id   = theDetector->getGroupId();
+		  int key1 = theDetector->getKey(1);
+		  int key2 = theDetector->getKey(2);
+		  int key;
+		  if (id==1) 
+		    key=5+key1;
+		  else if (id==2) 
+		    key=key1;
+		  else 
+		    continue;
+		  if (key>50 || key<0) continue;
+		  _chi2Inc[i][key]->Fill(theChi2);
+		  _chi2IncVsDca[i][key]->Fill(theChi2,theDca);
+		  if (node._c00>0) _yPull[i][key]->Fill( dy/sqrt(node.eyy) );
+		  if (node._c11>0) _zPull[i][key]->Fill( dz/sqrt(node.ezz) );
+		  if (theChi2<30) //svt only
+		    {
+		      _dx[i][key]->Fill(dx);
+		      _dy[i][key]->Fill(dy);
+		      _dyVsTanCA[i][key][key2]->Fill(tanCA,dy);
+		      _dz[i][key]->Fill(dz);
+		      _dzVsTanL[i][key][key2]->Fill(tanL,dz);
+		    }
+		}
+	      ++it;
+	    }
+	  // end of loop hrough nodes
+    }//end loop over tracks
+      
+  //cout <<"StiTrackingPlots::fill() -I- Done Filling histos" <<endl;
 }
 
