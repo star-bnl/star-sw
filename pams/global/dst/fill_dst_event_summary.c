@@ -4,7 +4,7 @@
 #include <math.h>
 /* ------- STAF/ROOT generated includes ------- */
 #include "fill_dst_event_summary.h"
-
+#include "StVertexDefinitions.h"
 #define  NRANGE     10
 
 
