@@ -142,7 +142,8 @@ tdm/table/cell/putvalue 'stk_filler[0].wth87' 120.0
 
 cd /dui
 
- message ' *** Warning vertex not found just filled fron MC ***'
+ message ' !!! init_stk: vertex not found,  filled from MC ***'
+ 
   cd [data]/global/vertices
   tdm/newtable stk_vtx stk_vtx 1
   tdm/table/rowcount stk_vtx 1
@@ -153,7 +154,9 @@ cd /dui
   tdm/table/cell/putvalue 'stk_vtx[0].cov' 0.0 0.0 0.0 0.0 0.0 0.0 
 cd /dui
 
-
+ 
+ table/print /dui/event/data/global/vertices/stk_vtx
+ wait
 
 
 
