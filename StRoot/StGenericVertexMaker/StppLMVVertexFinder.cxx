@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.3 2004/07/24 02:57:40 balewski Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.4 2004/07/29 00:44:30 balewski Exp $
  *
  * Author: Jan Balewski
  ***************************************************************************
@@ -34,7 +34,6 @@ StppLMVVertexFinder::StppLMVVertexFinder() {
   gMessMgr->Info() << "StppLMVVertexFinder::StppLMVVertexFinder is in use." << endm;
 
     mBeamHelix=0;
-    mStatus = 0;
     mExternalSeedPresent = false;
     mVertexConstrain = false;
     mRequireCTB = false;
@@ -65,11 +64,13 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
   //
   //  Reset vertex
   //
-  mFitError = mFitResult = StThreeVectorD(0,0,0);
+  mFitError = mFitResult = StThreeVectorD(777,888,999);
   mCtbHits.clear();
   mPrimCand.clear();
 
   n1=0,n2=0,n3=0, n4=0,n5=0,n6=0;
+  mStatus = -888;
+
   mTotEve++;
   eveID=event->id();
 
@@ -100,7 +101,6 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
   
   if(!mRequireCTB){
     gMessMgr->Warning() << "StppLMVVertexFinder::fit() does not work w/o RequireCTB=true, sorry , quit" << endm;
-    mStatus = -1;
     return false;
   }   
 
@@ -116,7 +116,6 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
 
   if(mCtbHits.size()<=0){
     gMessMgr->Warning() << "StppLMVVertexFinder::fit() no valid CTB hits found, quit" << endm;
-    mStatus = -1;
     return false;
   }   
   
@@ -143,13 +142,11 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
   gMessMgr->Debug() << ", now n1=" << n1 << " n2=" << n2 << " n3=" << n3 << " n4=" << n4 << "n6=" << n6 << endm;
 
 
-
   //
   //  In case there are no tracks left we better quit
   //
   if (mPrimCand.empty()) {
     gMessMgr->Warning() << "StppLMVVertexFinder::fit: no tracks to fit." << endm;
-    mStatus = -1;
     return false;
   }
   gMessMgr->Info() << "StppLMVVertexFinder::fit() size of helix vector: " << mPrimCand.size() << endm;
@@ -183,10 +180,14 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
   }
 
   //  ----------  D O   F I N D    V E R T E X
-  ppLMV4();
-
+  int ret=ppLMV4();
+  if(ret==false) {
+    gMessMgr->Debug() << "ppLMV did not found vertex"<< endm;
+    return false;
+  }
+  
   //printf("Prim tr used by ppLMV for nTotEve=%d, tracks at vertex\n",mTotEve);
-  gMessMgr->Debug() << "Prim tr used by ppLMV for nTotEve=" << mTotEve 
+  gMessMgr->Info() << "Prim tr used by ppLMV for eveID=" << eveID 
 		    << ", tracks at vertex" << endm;
 
   for( uint j=0;j<mPrimCand.size();j++) {
@@ -466,7 +467,7 @@ bool  StppLMVVertexFinder::ppLMV4() {  //  ----------  D O   F I N D    V E R T 
     }
 
     if( dmax > mDVtxMax ){
-      gMessMgr->Debug() << "Removing a track! dmax=" << dmax << endm;
+      gMessMgr->Info() << "Removing a track! dmax=" << dmax << endm;
       mPrimCand.erase(ikeep);
       done=0;
     }
@@ -513,6 +514,9 @@ int  StppLMVVertexFinder::NCtbMatches() {
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.4  2004/07/29 00:44:30  balewski
+ * ppLMV() returns false on error
+ *
  * Revision 1.3  2004/07/24 02:57:40  balewski
  * clean up of ppLMV, CTB-util separated
  *
