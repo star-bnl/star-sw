@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.23 2000/08/01 21:51:20 posk Exp $
+// $Id: plot.C,v 1.24 2000/08/12 20:20:15 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -17,6 +17,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.24  2000/08/12 20:20:15  posk
+// More centrality bins.
+//
 // Revision 1.23  2000/08/01 21:51:20  posk
 // Added doubly integrated v.
 //
@@ -71,7 +74,7 @@ const Int_t nHars    = 3;
 const Int_t nSels    = 2;
 const Int_t nSubs    = 2;
 const Float_t twopi  = 2. * 3.1416;
-const Float_t etaMax = 2.;
+const Float_t etaMax = 1.5;
 const Float_t ptMax  = 2.;
 Int_t runNumber      = 0;
 char  runName[6];
@@ -547,6 +550,7 @@ TCanvas* plotSingles(char* shortName){
     hist->Draw();
     lineZeroHar->Draw();
   } else if (strstr(shortName,"PidMult")!=0) {      // PID Mult
+    gPad->SetLogy();
     gStyle->SetOptStat(0);
     hist->Draw();
   } else if (strstr(shortName,"Pid")!=0) {          // PID
