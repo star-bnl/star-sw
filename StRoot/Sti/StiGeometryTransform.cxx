@@ -313,7 +313,9 @@ pair<int,int> StiGeometryTransform::layerAndLadderForSvtCoords(const StThreeVect
       iLadder++;
     }
 
-    if(fabs(vecLocal.x() - dRadius1)<0.1){
+    // this 0.44 is a threshhold based on the minimum difference in radii
+    // between 2 layers in the same barrel is 0.89 (layers 3 & 4).
+    if(fabs(vecLocal.x() - dRadius1)<0.44){
       iLayer = 2*iBarrel - 1;
       if((iLadder + iLayer)%2==0){
         // case when ladder overlap puts the point in another svt "sector"
@@ -322,7 +324,7 @@ pair<int,int> StiGeometryTransform::layerAndLadderForSvtCoords(const StThreeVect
       if(iLadder<1){        iLadder += nLadders; }
       if(iLadder>nLadders){ iLadder -= nLadders; }
       break;
-    }else if(fabs(vecLocal.x() - dRadius2)<0.1){
+    }else if(fabs(vecLocal.x() - dRadius2)<0.44){
       iLayer = 2*iBarrel;
       if((iLadder + iLayer)%2==0){
         // case when ladder overlap puts the point in another svt "sector"
@@ -458,6 +460,12 @@ void StiGeometryTransform::operator() (const StSvtHit* svthit, StiHit* stihit){
   int iLayer = layerAndLadder.first;
   int iLadder = layerAndLadder.second;
   int iBarrel = (iLayer + 1)/2;
+
+//  if(iLayer!=svthit->layer() || iLadder!=svthit->ladder()){
+//    cout << "SvtHit [perp, phi]=[" << position.perp() << ", "
+//         << position.phi() << "], layer=" << svthit->layer()
+//         << ", ladder=" << svthit->ladder() << endl;
+//  }
 
   // first the position & ref angle
   int nLadders = m_pSvtConfig->getNumberOfLadders(iBarrel);
