@@ -1,5 +1,8 @@
-// $Id: StMultiH1F.h,v 1.2 2000/08/25 15:46:42 genevb Exp $
+// $Id: StMultiH1F.h,v 1.3 2000/08/28 19:21:05 genevb Exp $
 // $Log: StMultiH1F.h,v $
+// Revision 1.3  2000/08/28 19:21:05  genevb
+// Improved projection code
+//
 // Revision 1.2  2000/08/25 15:46:42  genevb
 // Added stats box, legend names
 //
@@ -35,6 +38,7 @@ class StMultiH1F : public TH2F {
                               { SetNames(ngroup, newname); return 0; }
  protected:
   TString names[10];
+  virtual       TH1F* XProjection(const char* name, Int_t ybin=-1);
   ClassDef(StMultiH1F,1)
 };
 
