@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.2 2000/09/18 14:26:51 hummler Exp $
+// $Id: StFtpcParamReader.hh,v 1.3 2000/10/31 09:52:19 hummler Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.3  2000/10/31 09:52:19  hummler
+// add parameters for slow simulator
+//
 // Revision 1.2  2000/09/18 14:26:51  hummler
 // expand StFtpcParamReader to supply data for slow simulator as well
 // introduce StFtpcGeantReader to separate g2t tables from simulator code
@@ -105,6 +108,11 @@ protected:
   Float_t *mFssGasLorentzAngle;
   Int_t mRandomNumberGenerator;
   Int_t mZeroSuppressThreshold;
+  Int_t mNumSlowSimGridPoints;
+  Int_t mMaxAdc;
+  Int_t mGaussIntegrationSteps;
+  Int_t mDiffusionCoarseness;
+  Float_t mAdcConversion;
   Float_t mSimulationPhiStart;
   Float_t mSimulationPhiEnd;
   Float_t mChamberCathodeVoltage;
@@ -198,6 +206,11 @@ public:
   Int_t numberOfFssGasValues() {return mNumberOfFssGasValues;}
   Int_t randomNumberGenerator() {return mRandomNumberGenerator;}
   Int_t zeroSuppressThreshold() {return mZeroSuppressThreshold;}
+  Int_t numSlowSimGridPoints() {return mNumSlowSimGridPoints;}
+  Int_t maxAdc() {return mMaxAdc;}
+  Int_t gaussIntegrationSteps() {return mGaussIntegrationSteps;}
+  Int_t diffusionCoarseness() {return mDiffusionCoarseness;}
+  Float_t adcConversion() {return mAdcConversion;}
   Float_t simulationPhiStart() {return mSimulationPhiStart;}
   Float_t simulationPhiEnd() {return mSimulationPhiEnd;}
   Float_t chamberCathodeVoltage() {return mChamberCathodeVoltage;}

@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.2 2000/09/18 14:26:50 hummler Exp $
+// $Id: StFtpcParamReader.cc,v 1.3 2000/10/31 09:52:13 hummler Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.3  2000/10/31 09:52:13  hummler
+// add parameters for slow simulator
+//
 // Revision 1.2  2000/09/18 14:26:50  hummler
 // expand StFtpcParamReader to supply data for slow simulator as well
 // introduce StFtpcGeantReader to separate g2t tables from simulator code
@@ -160,6 +163,11 @@ StFtpcParamReader::StFtpcParamReader(St_fss_gas *gas,
   fss_param_st *paramTable = param->GetTable();
   mRandomNumberGenerator = paramTable->random_number_gen;
   mZeroSuppressThreshold = paramTable->adc_threshold;
+  mNumSlowSimGridPoints = paramTable->n_grid_points;
+  mMaxAdc = paramTable->max_adc;
+  mGaussIntegrationSteps = paramTable->n_int_steps;
+  mDiffusionCoarseness = paramTable->diff_coarse;
+  mAdcConversion = paramTable->adc_conversion;
   mSimulationPhiStart = paramTable->chamber_phi_min;
   mSimulationPhiEnd = paramTable->chamber_phi_max;
   mChamberCathodeVoltage = paramTable->chamber_cath_voltage;
