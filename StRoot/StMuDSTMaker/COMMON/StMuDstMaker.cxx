@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.50 2004/04/02 03:24:54 jeromel Exp $
+ * $Id: StMuDstMaker.cxx,v 1.51 2004/04/06 01:48:09 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -750,10 +750,10 @@ void StMuDstMaker::fillTof(StEvent* ev) {
   timer.start();
 
   // fill tofHit
-  StMuTofHitCollection *muTofHitColl = new StMuTofHitCollection();
-  mTofUtil->fillMuTofHit(muTofHitColl, tofcol);
-  for(size_t i=0; i < muTofHitColl->size(); i++) {
-    StMuTofHit* tofMuHit = (StMuTofHit *)muTofHitColl->getHit(i);
+  StMuTofHitCollection muTofHitColl;
+  mTofUtil->fillMuTofHit(&muTofHitColl, tofcol);
+  for(size_t i=0; i < muTofHitColl.size(); i++) {
+    StMuTofHit* tofMuHit = (StMuTofHit *)muTofHitColl.getHit(i);
     addType( mTofArrays[muTofHit], *tofMuHit );
   }
 
@@ -1058,6 +1058,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.51  2004/04/06 01:48:09  perev
+ * Small leak + incorrect filing StMuTofHitCollection
+ *
  * Revision 1.50  2004/04/02 03:24:54  jeromel
  * Changes implements PMD and TOF.  TOF is clearly incomplete.
  *

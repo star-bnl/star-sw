@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StMuTofHitCollection.cxx,v 1.1 2004/04/02 03:39:12 jeromel Exp $
+ * $Id: StMuTofHitCollection.cxx,v 1.2 2004/04/06 01:48:09 perev Exp $
  *
  * Author: Xin Dong, April 2004
  *
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StMuTofHitCollection.cxx,v $
+ * Revision 1.2  2004/04/06 01:48:09  perev
+ * Small leak + incorrect filing StMuTofHitCollection
+ *
  * Revision 1.1  2004/04/02 03:39:12  jeromel
  * New files for TTOF
  *
@@ -25,11 +28,15 @@ StMuTofHitCollection::StMuTofHitCollection()
 { }
 
 StMuTofHitCollection::~StMuTofHitCollection()
-{ }
+{
+  clear();
+}
 
 void
 StMuTofHitCollection::clear()
 {
+    int n = mHitVector.size();
+    for (int i=0;i<n;i++) { delete mHitVector[i];}
     mHitVector.clear();
 }
 
