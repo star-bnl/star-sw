@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.19 2003/07/03 13:21:54 fsimon Exp $
+// $Id: StFtpcDbReader.hh,v 1.20 2004/07/18 14:10:04 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.20  2004/07/18 14:10:04  jcs
+// get adjustAverageWest/East from Calibrations_ftpc/ftpcGas
+//
 // Revision 1.19  2003/07/03 13:21:54  fsimon
 // Added cathode offset information to constructor for SlowSimulator
 //
@@ -154,6 +157,8 @@ protected:
   Float_t mMaxPressure;
   Float_t mMinGasTemperature;
   Float_t mMaxGasTemperature;
+  Float_t mAdjustAverageWest;
+  Float_t mAdjustAverageEast;
 
   Float_t mTZero;
 
@@ -290,6 +295,8 @@ public:
   Float_t maxPressure() {return mMaxPressure;}
   Float_t minGasTemperature() {return mMinGasTemperature;}
   Float_t maxGasTemperature() {return mMaxGasTemperature;}
+  Float_t adjustAverageWest() {return mAdjustAverageWest;}
+  Float_t adjustAverageEast() {return mAdjustAverageEast;}
 
   Float_t tZero() {return mTZero;}
 

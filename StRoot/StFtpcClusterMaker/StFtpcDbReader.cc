@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.27 2004/01/28 01:41:15 jeromel Exp $
+// $Id: StFtpcDbReader.cc,v 1.28 2004/07/18 14:10:09 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.28  2004/07/18 14:10:09  jcs
+// get adjustAverageWest/East from Calibrations_ftpc/ftpcGas
+//
 // Revision 1.27  2004/01/28 01:41:15  jeromel
 // Change OST to OS everywhere since defaultoption is now not to print
 // the date.
@@ -243,6 +246,8 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
    mMaxPressure            = gasTable->maxPressure; 
    mMinGasTemperature      = gasTable->minGasTemperature;
    mMaxGasTemperature      = gasTable->maxGasTemperature; 
+   mAdjustAverageWest      = gasTable->adjustAverageWest;
+   mAdjustAverageEast      = gasTable->adjustAverageEast;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcGas","E");
   }
@@ -401,6 +406,8 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
    mMaxPressure            = gasTable->maxPressure; 
    mMinGasTemperature      = gasTable->minGasTemperature;
    mMaxGasTemperature      = gasTable->maxGasTemperature; 
+   mAdjustAverageWest      = gasTable->adjustAverageWest;
+   mAdjustAverageEast      = gasTable->adjustAverageEast;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcGas","E");
   }
