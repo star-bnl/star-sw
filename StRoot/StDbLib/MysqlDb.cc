@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.17 2001/04/25 17:13:19 perev Exp $
+ * $Id: MysqlDb.cc,v 1.18 2001/12/21 04:54:33 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.18  2001/12/21 04:54:33  porter
+ * sped up table definition for emc and changed some ostrstream usage for
+ * insure tests
+ *
  * Revision 1.17  2001/04/25 17:13:19  perev
  * HPcorrs
  *
@@ -209,24 +213,26 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
   if (!mysql_init(&mData))
     return (bool) StDbManager::Instance()->printInfo("Mysql Init Error=",mysql_error(&mData),dbMErr,__LINE__,__CLASS__,__METHOD__);
 
-  char *connString; ostrstream cs;
+  // char *connString; 
+  ostrstream cs;
   if(mysql_real_connect(&mData,aHost,aUser,aPasswd,bDb,aPort,NULL,0)){ 
        t0=mqueryLog.wallTime()-t0;
        cs<< "Server Connecting:"; if(bDb)cs<<" DB=" << bDb ;
        cs<< "  Host=" << aHost <<":"<<aPort<<endl;
        cs<< " --> Connection Time="<<t0<<" sec"<<ends;
-       connString = cs.str();
-        StDbManager::Instance()->printInfo(connString,dbMConnect,__LINE__,__CLASS__,__METHOD__);
-	delete [] connString;
+       //       connString = cs.str();
+        StDbManager::Instance()->printInfo(cs.str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
+	//	delete [] connString;
       tRetVal=true;
   } else {
       cs << "Making Connection to DataBase = " << aDb;
       cs << " On Host = " << aHost <<":"<<aPort;
       cs << " MySQL returned error " << mysql_error(&mData) << ends;
-      connString=cs.str();
-      StDbManager::Instance()->printInfo(connString,dbMConnect,__LINE__,__CLASS__,__METHOD__);
-      delete [] connString;
+      //      connString=cs.str();
+      StDbManager::Instance()->printInfo(cs.str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
+      //      delete [] connString;
   }
+  cs.freeze(0);
 
   if(mlogTime)mconnectLog.end();
   mhasConnected = tRetVal;
@@ -323,12 +329,14 @@ MysqlDb &MysqlDb::operator<<( const char *aQuery){
     RazQuery();
   } else {
 
-    char *tQuery = new char[mQueryLen+strlen(aQuery)+1];
-    memcpy(tQuery,mQuery,mQueryLen);
-    strcpy(&tQuery[mQueryLen],aQuery);
-    
-    if(mQuery)delete [] mQuery;
-    mQuery=tQuery;
+    char* tQuery = new char[strlen(mQuery)+1];
+    strcpy(tQuery,mQuery);    
+    delete [] mQuery;
+  
+    mQuery = new char[mQueryLen+strlen(aQuery)+1];
+    memcpy(mQuery,tQuery,mQueryLen);
+    strcpy(&mQuery[mQueryLen],aQuery);    
+    delete [] tQuery;
     mQueryLen=mQueryLen+strlen(aQuery);
 
   };
@@ -470,7 +478,8 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
            ostrstream cn;
            cn<<mRes->mRes->fields[i].name<<".text"<<ends;
 	       aBuff->WriteScalar((char*)tRow[i],cn.str());
-               delete [] cn.str();
+               cn.freeze(0);
+	       //       delete [] cn.str();
 	    };
       } else {
 	       aBuff->WriteScalar((char*)tRow[i],mRes->mRes->fields[i].name);

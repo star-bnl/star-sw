@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.14 2001/12/19 20:44:52 porter Exp $
+ * $Id: StDbSql.cc,v 1.15 2001/12/21 04:54:46 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.15  2001/12/21 04:54:46  porter
+ * sped up table definition for emc and changed some ostrstream usage for
+ * insure tests
+ *
  * Revision 1.14  2001/12/19 20:44:52  porter
  * fixed endTime for run-level queries
  *
@@ -341,6 +345,7 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
        }
      }
      elementString = getElementList(elementsLeft,rowsLeft);
+     delete [] elementsLeft;
    } else {
      done=true;
    }
@@ -357,6 +362,8 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
      tp<<" Returned="<<numRows-rowsLeft<<" for Table="<<ends;
      mgr->printInfo(tp.str(),tName,dbMWarn,__LINE__,__CLASS__,__METHOD__);
      tp.freeze(0);
+     //     numRows-=rowsLeft;
+     //     table->resizeNumRows(numRows);
    }
 
   if(retVal){
@@ -868,9 +875,7 @@ StDbSql::selectElements(const char* elementName, StDbElementIndex* inval, int& n
   }
   Db<<endsql;
   numElements=Db.NbRows();
-
-  if(numElements==0) return retElements;
-  
+  if(numElements<=0) return retElements;
   retElements = new int[numElements];
   int j=0;
   while(Db.Output(&buff)){
@@ -878,7 +883,6 @@ StDbSql::selectElements(const char* elementName, StDbElementIndex* inval, int& n
     j++;
     buff.Raz();
   }
-
   clear();
   return retElements;
 }
@@ -1085,9 +1089,35 @@ char* tmpString;
     if(!buff.ReadScalar(tmpString,"structName"))return false;
     table->setCstructName(tmpString); delete [] tmpString;
     
-    if(!buff.ReadScalar(tmpString,"indexName")) return false;
-    table->setElementName(tmpString);
-    delete [] tmpString;
+    tmpString=0;
+    char* hy=0;
+    if(buff.ReadScalar(tmpString,"elementID")){
+      hy=strstr(tmpString,"-");
+      if(hy){
+	*hy='\0';
+	hy++;
+        int first=atoi(tmpString);
+        int last = atoi(hy);
+        hy--;
+        *hy='-';
+        int len = last-first+1;
+        int * tmpElements = new int[len];
+        int j=0;
+        int k;
+        for(k=first; k<=last;k++){
+	  tmpElements[j]=k;
+          j++;
+	} 
+        table->setElementID(tmpElements,len);
+        delete [] tmpElements;
+      } else {
+       delete [] tmpString;
+       if(!buff.ReadScalar(tmpString,"indexName")) return false;
+       table->setElementName(tmpString);
+      }
+      delete [] tmpString;
+    }
+
 
     table->setBaseLine(checkValue("baseLine","Y"));
     table->setBinary(checkValue("isBinary","Y"));

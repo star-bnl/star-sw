@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.15 2001/10/24 04:05:19 porter Exp $
+ * $Id: StDbBuffer.cc,v 1.16 2001/12/21 04:54:45 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.16  2001/12/21 04:54:45  porter
+ * sped up table definition for emc and changed some ostrstream usage for
+ * insure tests
+ *
  * Revision 1.15  2001/10/24 04:05:19  porter
  * added long long type to I/O and got rid of obsolete dataIndex table
  *
@@ -328,8 +332,8 @@ bool StDbBuffer::WriteMem( char **s,void* aVal, myctype type) {
     castcasest(_float,float);
     castcasest(_double,double);
   case _string: {char** tVal=(char**)aVal;
-                 s[0]=new char[strlen(*(char**)aVal)+1];
-                 strcpy(s[0],*tVal);
+                 *s=new char[strlen(*(char**)aVal)+1];
+                 strcpy(*s,*tVal);
                  }
                  break;
   default: cout <<"wrong type" << endl;tRetVal=false;\
@@ -391,16 +395,24 @@ bool StDbBuffer::WriteScalar(const char* s,const char *aName)
 {
   if(!s) return false;
 //  cout<< "Createin pointerstring "<<endl;
-  char** tVal=new char*[1];
+  //**  char** tVal=new char*[1];
+  char* aVal=new char[strlen(s)+1];
+  strcpy(aVal,s);
+  char** tVal=&aVal;
 //  cout<< "Creatin storag string "<<endl;
-  tVal[0]=new char[strlen(s)+1];
+  //**  tVal[0]=new char[strlen(s)+1];
 //  cout<< "Copy storag string "<<endl;
-  strcpy(tVal[0],s);
- if (Find_Col(aName))
+  //**  strcpy(tVal[0],s);
+  /* if (Find_Col(aName))
    //  { ChangeField(_string,(void*)&tVal,1);}
   { ChangeField(_string,(void*)tVal,1); delete [] tVal[0]; delete [] tVal;}
  else
-   { AddField(aName,_string,(void*)tVal,1); delete [] tVal[0]; delete [] tVal;};
+   { AddField(aName,_string,(void*)tVal,1); delete [] tVal[0]; delete [] tVal;}
+   */
+ if (Find_Col(aName))
+  { ChangeField(_string,(void*)tVal,1); delete [] aVal;}
+ else
+   { AddField(aName,_string,(void*)tVal,1); delete [] aVal;};
 return true;
 }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.29 2001/10/26 20:59:46 porter Exp $
+ * $Id: StDbTable.cc,v 1.30 2001/12/21 04:54:46 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.30  2001/12/21 04:54:46  porter
+ * sped up table definition for emc and changed some ostrstream usage for
+ * insure tests
+ *
  * Revision 1.29  2001/10/26 20:59:46  porter
  * fixed new endtime flag from previous checkin. made StDataBaseI available
  * at root-cli.
@@ -130,6 +134,10 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.30  2001/12/21 04:54:46  porter
+ * sped up table definition for emc and changed some ostrstream usage for
+ * insure tests
+ *
  * Revision 1.29  2001/10/26 20:59:46  porter
  * fixed new endtime flag from previous checkin. made StDataBaseI available
  * at root-cli.
@@ -549,9 +557,40 @@ StDbTable::setElementID(int* elements, int nrows) {
    createMemory(nrows);
    // set up & fill char* will element list
    if(melementID) delete [] melementID;
+   if(nrows==0){
+     melementID=0;
+     return;
+   }
    melementID = new int[nrows];
    memcpy(melementID, elements, nrows*sizeof(int));
 }
+
+//////////////////////////////////////////////////////////////////////
+void StDbTable::resizeNumRows(int nrows){
+  // if only some rows aer returned, this is called to
+  // compress memory
+
+  unsigned int rowsize=mdescriptor->getTotalSizeInBytes();
+  unsigned int len = mrows*rowsize;
+  unsigned int newlen = nrows*rowsize;
+
+  if(mdata){
+    char* oldData=new char[len];
+    memcpy(oldData,mdata,len);
+    delete [] mdata;
+    mdata = new char[newlen];
+    if(newlen<=len){
+      memcpy(mdata,oldData,newlen);
+    } else {
+      memcpy(mdata,oldData,len);
+    }
+    delete [] oldData;
+  }
+
+  mrows=nrows;
+  return;
+}
+
 
 //////////////////////////////////////////////////////////////////////
 void
@@ -570,6 +609,13 @@ StDbTable::addNRows(int numRows){
   memset(p1,0,numRows*rowsize);
   if(mdata)delete [] mdata;
   mdata=newData;
+
+  int * newElements=new int[newRows];
+  if(melementID) {
+    memcpy(newElements,melementID,mrows*sizeof(int));
+    delete [] melementID;
+  }
+  melementID=newElements;
   mrows = newRows;
 
 };
@@ -578,17 +624,17 @@ StDbTable::addNRows(int numRows){
 void
 StDbTable::addNElements(int* elements, int numRows){
 
-  if(!melementID) {
-    setElementID(elements,numRows);
-    return;
-  }
 
-  int* newData = new int[mrows+numRows];
-  memcpy(newData,melementID,(mrows)*sizeof(int));
-  memcpy(&newData[mrows],elements,(numRows)*sizeof(int));
-  delete [] melementID;
-  melementID = newData;
-  //  mrows+=numRows;
+  if(!melementID) return;
+
+  int i,j,k;
+  k=mrows-numRows;
+  if(k<0)return;
+  j=0;
+  for(i=k;i<mrows;i++){
+    melementID[i]=elements[j]; 
+    j++;
+  }
 
 }  
   
