@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcSimpleElectronics.hh,v 1.3 1999/02/24 19:33:17 lasiuk Exp $
+ * $Id: StTpcSimpleElectronics.hh,v 1.4 1999/02/28 20:17:53 lasiuk Exp $
  *
  * Author: brian Nov 3, 1998
  *
@@ -11,8 +11,8 @@
  **********************************************************************
  *
  * $Log: StTpcSimpleElectronics.hh,v $
- * Revision 1.3  1999/02/24 19:33:17  lasiuk
- * add tzero offset parameter
+ * Revision 1.4  1999/02/28 20:17:53  lasiuk
+ * add numberOfTimeBins
  *
  * Revision 1.3  1999/02/24 19:33:17  lasiuk
  * add tzero offset parameter
@@ -53,6 +53,7 @@ public:
     // Digital Electronics
     double    adcConversion()                  const;
     double    adcConversionCharge()            const;
+    int       numberOfTimeBins()               const;
     int       averagePedestal()                const;
     int       pedestal(int,int,int,int)        const;
     int       pedestal(StTpcPadCoordinate&)    const;
@@ -75,7 +76,8 @@ private:
     
     double mAdcConversion;
     double mAdcConversionCharge;
-    int mAveragePedestal;
+    int    mNumberOfTimeBins;
+    int    mAveragePedestal;
 };
 inline double StTpcSimpleElectronics::nominalGain() const {return mNominalGain;}
 inline double StTpcSimpleElectronics::samplingFrequency() const {return mSamplingFrequency;}
@@ -84,5 +86,6 @@ inline double StTpcSimpleElectronics::tZero() const {return mTZero;}
 inline double StTpcSimpleElectronics::tau() const {return mTau;}
 inline double StTpcSimpleElectronics::adcConversion() const {return mAdcConversion;}
 inline double StTpcSimpleElectronics::adcConversionCharge() const {return mAdcConversionCharge;}
+inline int StTpcSimpleElectronics::numberOfTimeBins() const {return mNumberOfTimeBins;}
 inline int StTpcSimpleElectronics::averagePedestal() const {return mAveragePedestal;}
 #endif
