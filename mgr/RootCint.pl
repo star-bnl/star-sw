@@ -1,8 +1,8 @@
 #!/usr/bin/env perl
 #
-# Script to run rootcint : 
+# Script to run rootcint :
 #              Input     : list of h-files
-#              Output    : 
+#              Output    :
 #
 use Env;
 use File::Basename;
@@ -20,34 +20,34 @@ my $CPPFLAGS = shift; 				#print "CPPFLAGS = ", $CPPFLAGS, "\n";
 my @cpps = split / /,$CPPFLAGS;			#print "cpps: @cpps \n";
 
 my %class_hfile = (); 		# class h-file map
-my %class_hfile_depens_on = (); # 
-my %class_written = (); 
+my %class_hfile_depens_on = (); #
+my %class_written = ();
 my @classes = 0; 		# list of classes
 my $h_files = "";
 my $coll = 0;
 my $col  = 0;
 # count no. of classes in LinkDef's
-my $ListOfWrittenClasses = ":"; 
+my $ListOfWrittenClasses = ":";
 my $ListOfDefinedClasses = "";
 my $off = 0;
 
 open (Out, ">$LinkDef") or die "Can't open $LinkDef";
 
-print Out "#pragma link off all globals;\n";  
+print Out "#pragma link off all globals;\n";
 print Out "#pragma link off all classes;\n";
 print Out "#pragma link off all functions;\n";;
 my $off = 1;
 for my $def  (split /\s/,$sources) {		#print "SRC:", $def, "\n";
   if (!($def =~ /LinkDef/  ))		{next;}
   if ( ($def =~/^$LinkDef$/))   	{next;}
-  
+
   open (In, $def) or die "Can't open $def";
   $LinkDefDirName = dirname($def);
   while ($line = <In>) {
     if (!($line  =~ /^\#pragma/))	{next;}
     if ($line =~ /link off all/) 	{next;}
 
-##VP      print Out $line;# print $line; 
+##VP      print Out $line;# print $line;
     if (!($line =~ / class / ))		{goto PRINT;}
 
     my @words = split /([ \(,\)\;\-\!+])/, $line;
@@ -71,8 +71,8 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
   my $hh = $h;
 
   if (!-f $hh) {($hh = $h) =~ s/.*.share/StRoot/;}
-  if (!-f $hh) {($hh = $h) =~ s/.*.share/asps/;} 
-  if (!-f $hh) {($hh = $h) =~ s/.*.share//;} 
+  if (!-f $hh) {($hh = $h) =~ s/.*.share/asps/;}
+  if (!-f $hh) {($hh = $h) =~ s/.*.share//;}
 
   if ($h != $hh ){
       print "=== RootCint-Info :: massaging h = hh = $h --> hh = $hh\n";
@@ -89,11 +89,11 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
     next if $line =~ /^\s*\/\//;
     if ($line =~ /\/\//) {$line =~ s/\/\/.*$//;}
     if ($com && $line =~ /\*\//) {$com = 0; $line =~ s/^*\*\///;}
-    next if ($com); 
+    next if ($com);
     if ($line =~ /\/\*/) {
-      $com = 1; 
+      $com = 1;
       if ($line =~ /\*\//) {
-	$line =~ s/\/\*.*\*\///; 
+	$line =~ s/\/\*.*\*\///;
 	$com = 0;
       }
       else {$line =~ s/\/\*.*$//;}
@@ -112,7 +112,7 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
       my $class = $words[2];      	#print "=================class = ",$class,"\n";
       if ($class) {
 	push @classes, $class;
-	$class_hfile{$class} = $h; 	#print "class: $class, written: $class_written{$class}, h: $class_hfile{$class}\n"; 
+	$class_hfile{$class} = $h; 	#print "class: $class, written: $class_written{$class}, h: $class_hfile{$class}\n";
 	$class_hfile_depens_on{$class} = $includes;
       }
     }
@@ -122,7 +122,7 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
     }
   }
   close (In);
-  if ($coll) {			# Collection Definition 
+  if ($coll) {			# Collection Definition
     my $macro = "./StRoot/St_base/StArray.h";
     if (-f $macro) {}
     else {$macro = `echo \$STAR/StRoot/St_base/StArray.h`;}
@@ -140,7 +140,7 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
 	  foreach my $stem ("Iterator","PtrVec","SPtrVec") {
 	    if ($stem eq "Iterator") {$cl = "St" . $core . $stem      ;}
 	    else                     {$cl = "St" . $stem . $core . "-";}
-	    push @classes, $cl; 
+	    push @classes, $cl;
 	    $class_hfile{$cl} = $new_h; $class_hfile_depens_on{$cl} = $includes;
 	    				#print "class: $stem $core $cl includes  $includes\n";
 	  }
@@ -165,7 +165,7 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
     }
     close (OUTPUT);
     my $flag = rename $tmp, $new_h;  #print "rename $tmp $new_h;\n";
-  }#end Collection Definition 
+  }#end Collection Definition
 }
 my $opened = "";
 for my $class (@classes) {
@@ -190,7 +190,7 @@ for my $class (@classes) {
       }
       else {
 	if ($class =~ /^St/ and $class =~ /Iterator$/) {
-	  print Out "#pragma link C++ typedef $class;\n"; print  "#pragma link C++ typedef $class;\n"; 
+	  print Out "#pragma link C++ typedef $class;\n"; print  "#pragma link C++ typedef $class;\n";
 	}
 	else {
 	  if ($class =~ /-$/) {print Out "#pragma link C++ class $class;\n"; print  "#pragma link C++ class $class;\n";}
@@ -206,7 +206,7 @@ if ($opened) {
   close (Out);
   $opened = "";
 }
-if ($coll) { # order h-files with Collections 
+if ($coll) { # order h-files with Collections
   my $done = 0;
   while (!$done) {
     my $add = 0;
@@ -214,8 +214,8 @@ if ($coll) { # order h-files with Collections
       next if ! $class;
       my $h = $class_hfile{$class};
       next if ! $h;
-      my $hh = " " . basename($h) . " "; 
-      next if $h_files =~ /$hh/; 
+      my $hh = " " . basename($h) . " ";
+      next if $h_files =~ /$hh/;
       my $hd =  $class_hfile_depens_on{$class};
       if ($hd) { my @hds = split /:/, $hd; 	       	#print "h: $h => $hd => @hds\n";
 		 my $incsd = "";
@@ -237,13 +237,18 @@ if ($coll) { # order h-files with Collections
 for my $class (@classes) {	#loop over classes
   next if ! $class;
   my $h = $class_hfile{$class};  			#print "Class: $class h: $h written: $class_written{$class} \n";
-  if (!$h) {	#No .h for class
-     my $hfile = $DirName . "/" . $class . ".h"; 	#print "1 hfile = $hfile\n";
-     if (! -f $hfile) {$hfile =$LinkDefDirName . "/" . $class . ".h";}	#print "2 hfile = $hfile\n";} 
-     if (  -f $hfile) {$h = $hfile;} 
+  foreach my $ext ((".h",".hh")){                       #search for a few
+      if (!$h) {	#No .h for class
+	  my $hfile = $DirName . "/" . $class . $ext; 	#print "1 hfile = $hfile\n";
+	  if (! -f $hfile) {   $hfile =$LinkDefDirName . "/" . $class . $ext;
+			       #print "2 hfile = $hfile\n";}
+			   }
+	  if (  -f $hfile) {   $h = $hfile;}
+      }
+      if ($h) { last;}
   }
   if (!$h) {
-      print STDERR "RootCint.pl :: Warning : $class.h NOT FOUND\n"; 
+      print STDERR "RootCint.pl :: Warning : $class.h(h) NOT FOUND\n";
       next;
   }
 
@@ -255,13 +260,13 @@ for my $class (@classes) {	#loop over classes
 my $hfile = $DirName . "/Stypes.h";
 if (-f $hfile) {$h_files .= " Stypes.h";}
 if ($h_files) {
-  $h_files .= " " . "LinkDef.h"; 
+  $h_files .= " " . "LinkDef.h";
   my $local_cint = basename($Cint_cxx);  		#print "files = $#files\n";
   $CPPFLAGS = " -I" . $DirName . " " . $CPPFLAGS;
   my $cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ -I. $CPPFLAGS $h_files";
   print "cmd = ",$cmd,"\n";
   my $flag = `$cmd`; if ($?) {exit 2;}
-  
+
 }
 exit(0);
 # last line
