@@ -34,6 +34,7 @@ my @SetG = (
              "auau200/hijing/beamgas/nitrogen/year_1h/hadronic_on", 
              "pp200/pythia/default/minibias/year_2a/hadronic_on",
              "auau128/hijing/b0_3/halffield/year_1e/hadronic_on",
+             "auau128/hijing/b0_12/halffield/year_1e/hadronic_on",
 );
 
 my @recoDir = ("tfs_7", "trs_7");
