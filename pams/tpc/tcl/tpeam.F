@@ -16,6 +16,7 @@ C----------------------------------------------------------------------
 C
       INTEGER FUNCTION TPEAM( 
      +                        tphith, tphit 
+     +,                       mctrlh, mctrl
      +,                       mkineh, mkine
      +,                       mhits_tpch, mhits_tpc )
 
@@ -49,6 +50,8 @@ C-----------------------------------------------------------------------
 #include "tcl_tphit_pars.inc"
 #include "tcl_tphit_st.inc"
 
+#include "mct_mctrl_pars.inc"
+#include "mct_mctrl_st.inc"
 #include "mct_mkine_pars.inc"
 #include "mct_mkine_st.inc"
 #include "mct_mhits_tpc_pars.inc"
@@ -58,6 +61,8 @@ C-----------------------------------------------------------------------
       RECORD/ table_head_st/ tphith
       RECORD/ tphit_row_st/ tphit(*)
 
+      RECORD/ table_head_st/ mctrlh
+      RECORD/ mctrl_row_st/ mctrl(*)
       RECORD/ table_head_st/ mkineh
       RECORD/ mkine_row_st/ mkine(*)
       RECORD/ table_head_st/ mhits_tpch
@@ -66,6 +71,8 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 c
 c        functions
+c
+         integer lenocc,lochar
 c
 C-----------------------------------------------------------------------
 c
@@ -90,13 +97,15 @@ C-----------------------------------------------------------------------
          integer mcptr(4*mxhits),dtptr(mxhits)
          
          integer nmctrk,nhitrk,itrk
+         character*80 outfile
+         integer iper,ihisto
 
 C-----------------------------------------------------------------------
          data nvar/9/,nvar2/11/
          data chtags/'itrk','itcl','nrow','x','y','z','prf','zrf','q'/
          data chtags2/'itrk','mcx ','mcy ','mcz ','tpx ','tpy ','tpz '
      +,              'delx','dely','delz','nrow'/
-         data first/.true./
+         data first/.true./,ihisto/0/
 C-----------------------------------------------------------------------
 c
 c        set status
@@ -107,7 +116,19 @@ c
 c
 c           open rz file for ntuple...
 c
-            open(unit=23,file='tpe.rzd',form='unformatted',
+            if(mctrl(1).infile .eq. '""')then
+               outfile = 'tpe.rzd'
+            else
+               outfile = mctrl(1).infile
+               iper = lochar(1H.,1,mctrl(1).infile,80)
+               if(iper.gt.0)then
+                  outfile(iper+1:iper+7) = 'tpe_rzd'
+               else
+                  outfile = 'tpe.rzd'
+               endif
+            endif
+
+            open(unit=23,file=outfile,form='unformatted',
      +        recl=1024,access='direct',
      +        status='new',iostat=istat)
             nquota=10000
@@ -115,11 +136,13 @@ c
                iquest(10)=nquota
                call hrfile(23,'ntup','NQ')
             endif
-            call hbookn(102,'Hit Info',nvar,'ntup',8000,
-     +              chtags)
-            call hbookn(103,'Compare Info',nvar2,'ntup',11000,
-     +              chtags2)
          endif
+
+         ihisto = ihisto+1
+         call hbookn(200+ihisto,'Hit Info',nvar,'ntup',8000,
+     +           chtags)
+         call hbookn(300+ihisto,'Compare Info',nvar2,'ntup',11000,
+     +              chtags2)
 c        
 c        proceed with evaluation...
 c
@@ -135,12 +158,12 @@ c
             vec(8)=tphit(indx).zrf
             vec(9)=tphit(indx).q
 
-            call hfn(102,vec)
+            call hfn(200+ihisto,vec)
          enddo
 c     
 c->      close ntuple file...
 c
-         call hrout(102,icycle,' ')
+         call hrout(200+ihisto,icycle,' ')
 c        call hrend('ntup')
 c        close(23)
 c
@@ -204,12 +227,12 @@ c
                  vec(9) = 0.
                  vec(10) = 0.
               endif
-              call hfn(103,vec)
+              call hfn(300+ihisto,vec)
            enddo
          enddo
-         call hrout(103,icycle,' ')
-         call hrend('ntup')
-         close(23)
+         call hrout(300+ihisto,icycle,' ')
+c        call hrend('ntup')
+c        close(23)
 
 c
          return
