@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.hh,v 2.4 2000/01/18 20:52:31 calderon Exp $
+ * $Id: StMcVertex.hh,v 2.5 2000/03/29 16:15:55 calderon Exp $
  * $Log: StMcVertex.hh,v $
+ * Revision 2.5  2000/03/29 16:15:55  calderon
+ * Added more information from g2t_vertex table
+ *
  * Revision 2.4  2000/01/18 20:52:31  calderon
  * Works with CC5
  *
@@ -59,7 +62,10 @@ public:
     string                      geantVolume() const;
     float                       tof() const;
     long                        geantProcess() const;
-
+    long                        generatorProcess() const;
+    long                        key() const;
+    long                        geantMedium() const; 
+    
   // "Set" Methods
   
     void setPosition(const StThreeVectorF&);
@@ -78,6 +84,9 @@ protected:
     string               mGeantVolume;
     float                mTof;
     long                 mGeantProcess;
+    long                 mGeneratorProcess;
+    long                 mKey;
+    long                 mGeantMedium;
 };
 
 ostream&  operator<<(ostream& os, const StMcVertex&);
@@ -100,5 +109,11 @@ inline string StMcVertex::geantVolume() const { return mGeantVolume; }
 inline float StMcVertex::tof() const { return mTof; }  
 
 inline long StMcVertex::geantProcess() const { return mGeantProcess; }      
+
+inline long StMcVertex::geantMedium() const { return mGeantMedium; }      
+
+inline long StMcVertex::generatorProcess() const { return mGeneratorProcess; }      
+
+inline long StMcVertex::key() const { return mKey; }      
 
 #endif
