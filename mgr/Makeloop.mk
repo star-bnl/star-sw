@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.29  1998/11/15 21:12:58  fisyak
+#  fix shared libraries versioning for St_Root
+#
 #  Revision 1.28  1998/11/14 01:16:59  fisyak
 #  Post NT updates
 #
@@ -163,7 +166,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/11/14 01:16:59 $ 
+#           Last modification $Date: 1998/11/15 21:12:58 $ 
 #  default setings
 # Current Working Directory
 #
@@ -314,7 +317,6 @@ Makers  :=  $(notdir $(wildcard $(ROOT_DIR)/StRoot/St_*_Maker))
 Makers  :=  $(filter-out St_ebye_Maker, $(Makers))
 Makers  :=  $(filter-out St_laser_Maker, $(Makers))
 Makers  :=  $(filter-out St_mev_Maker, $(Makers))
-Makers  :=  $(filter-out St_tpctest_Maker, $(Makers))
 ifneq ($(EMPTY),$(findstring i386_linux2, $(STAR_SYS)) )
 Makers  :=  $(filter-out St_trs_Maker, $(Makers))
 endif

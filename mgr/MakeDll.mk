@@ -1,3 +1,8 @@
+# $Id: MakeDll.mk,v 1.33 1998/11/15 21:12:57 fisyak Exp $
+# $Log: MakeDll.mk,v $
+# Revision 1.33  1998/11/15 21:12:57  fisyak
+# fix shared libraries versioning for St_Root
+#
 #
 ifdef SO_LIB
    OUT_UP  := $(subst / ,,$(dir $(SO_LIB))  )
@@ -125,18 +130,19 @@ ifneq (,$(DOIT))
 
 DEP_DIR := $(SYS_DIR)/dep/$(PKGNAME)
 
-OUPUT_DIRS := $(LIB_DIR) $(OBJ_DIR) $(DEP_DIR) $(BIN_DIR) $(TMP_DIR) $(GEN_DIR) $(SRC_DIR) 
+OUTPUT_DIRS := $(LIB_DIR) $(OBJ_DIR) $(DEP_DIR) $(BIN_DIR) $(TMP_DIR) $(GEN_DIR)
+#                                                                                $(SRC_DIR) 
 INPUT_DIRS += $(SRC_DIR) $(SRC_DIR)/src
 
 # 	Make dirs before make real work. Othervice VPATH does not see
 #    	non existing directories
 ifndef NT
-MAKEDIRS := $(shell mkdir -p $(OUPUT_DIRS))
+MAKEDIRS := $(shell mkdir -p $(OUTPUT_DIRS))
 else #/* NT */
-MAKEDIRS := $(shell $(MKDIR) $(subst /,\,$(OUPUT_DIRS))) 
+MAKEDIRS := $(shell $(MKDIR) $(subst /,\,$(OUTPUT_DIRS))) 
 endif# /* NT */
 
-VPATH =  $(INPUT_DIRS) $(OUPUT_DIRS)
+VPATH =  $(INPUT_DIRS) $(OUTPUT_DIRS)
 
 FILES_SYM  := $(wildcard $(SRC_DIR)/St_Module.cxx)
 FILES_SYT  := $(wildcard $(SRC_DIR)/St_Table.cxx)
@@ -242,15 +248,15 @@ else
 
 MY_SO  := $(SO_LIB)
 ifndef NT
-  QWE  := $(wildcard $(MY_SO).*)
+  QWE    := $(strip $(wildcard $(MY_SO).*))
   SL_NEW := $(MY_SO).1000
 ifdef QWE
   NQWE := $(words $(QWE))
   QWE  := $(word $(NQWE),$(QWE))
   QWE  := $(subst $(MY_SO).,,$(QWE))
   QWE  := $(shell expr $(QWE) + 1)
-endif
   SL_NEW := $(MY_SO).$(QWE)
+endif
 else #/* NT */
   SL_NEW := $(MY_SO)
 endif
@@ -448,9 +454,9 @@ endif #/* NT */
 
 clean :
 ifndef NT
-	-$(RMDIR)  $(OUPUT_DIRS)
+	-$(RMDIR)  $(OUTPUT_DIRS)
 else #/* NT */
-	-$(RMDIR)  $(subst \,/,$(OUPUT_DIRS))
+	-$(RMDIR)  $(subst \,/,$(OUTPUT_DIRS))
 endif #/* NT */
 
 
@@ -477,7 +483,7 @@ test:
 	@echo SRC_DIR := $(SRC_DIR) 
 	@echo BIN_DIR     := $(BIN_DIR) 
 	@echo DOIT        := $(DOIT)
-	@echo OUPUT_DIRS  := $(OUPUT_DIRS)
+	@echo OUTPUT_DIRS := $(OUTPUT_DIRS)
 	@echo INPUT_DIRS  := $(INPUT_DIRS)
 	@echo FILES_SRC   := $(FILES_SRC)
 	@echo FILES_D     := $(FILES_D)
@@ -521,3 +527,7 @@ ifdef NT
 	@echo ROOT_DIR    := $(ROOT_DIR)
 
 endif #/* NT */
+	@echo MY_SO       := $(MY_SO)
+	@echo SL_NEW      := $(SL_NEW)
+	@echo QWE         := "|"$(QWE)"|"
+	@echo NQWE        := $(NQWE)
