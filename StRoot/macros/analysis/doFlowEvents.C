@@ -1,10 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.29 2000/12/08 17:04:36 oldi Exp $
+// $Id: doFlowEvents.C,v 1.30 2000/12/12 18:49:18 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
-// what it does: reads .dst.root, .xdf, flowevent.root, pico files 
+// what it does: reads .dst.root, .xdf, or pico files 
 //          to fill StFlowEvent
 //
 // Environment:
@@ -17,7 +17,6 @@
 // If 'file' ends in '.xdf', XDF DSTs are searched for.
 // If 'file' ends in '.dst.root', ROOT DSTs are searched for.
 // If 'file' ends in 'event.root' a StEvent file is used.
-// If 'file' ends in 'flowevent.root' a StFlowEvent file is used.
 // If 'file' ends in 'flowpicoevent.root' a StFlowPicoEvent file is used.
 //
 //  inputs:
@@ -41,91 +40,6 @@
 //              Victor Perevoztchikov
 //              Art Poskanzer
 //  
-///////////////////////////////////////////////////////////////////////////////
-//
-// $Log: doFlowEvents.C,v $
-// Revision 1.29  2000/12/08 17:04:36  oldi
-// Phi weights for both FTPCs included.
-//
-// Revision 1.27  2000/11/15 14:41:51  posk
-// Protected against running Finish() twice.
-//
-// Revision 1.26  2000/11/13 01:32:35  snelling
-// load StEventUtilities
-//
-// Revision 1.25  2000/11/09 17:39:14  snelling
-// Added switch for probability pid
-//
-// Revision 1.24  2000/09/16 22:21:15  snelling
-// Added lines to set selection on P and global DCA
-//
-// Revision 1.23  2000/09/15 22:54:44  posk
-// Added Pt weighting for event plane calculation.
-//
-// Revision 1.22  2000/09/15 01:22:27  snelling
-// Added the new selection options to the macro
-//
-// Revision 1.21  2000/09/05 16:29:43  snelling
-// Added cuts for new particles
-//
-// Revision 1.20  2000/09/01 12:16:19  posk
-// Consistency with Maker changes.
-//
-// Revision 1.19  2000/08/28 16:48:01  snelling
-// Right defaults for QA
-//
-// Revision 1.18  2000/08/28 16:15:50  snelling
-// Added Pt and Eta cuts to macro
-//
-// Revision 1.17  2000/08/26 21:39:51  snelling
-// Modified IO for multiple pico events
-//
-// Revision 1.16  2000/07/12 18:04:27  posk
-// Fixed bug in use of selection objects.
-//
-// Revision 1.15  2000/06/30 14:57:34  posk
-// Updated to latest doEvents.C .
-//
-// Revision 1.14  2000/06/05 15:22:19  posk
-// Fixed typo in EOF recognition.
-//
-// Revision 1.12  2000/05/18 18:12:06  posk
-// Updated to doEvents.C
-//
-// Revision 1.11  2000/05/17 16:20:59  kathy
-// add some print stmts and also run some IOMaker methods in order to get default input files that are softlinks to other files working correctly
-//
-// Revision 1.10  2000/05/16 20:57:31  posk
-// Voloshin's flownanoevent.root added.
-//
-// Revision 1.9  2000/05/11 00:22:28  posk
-// Can read StEvent files which have extention .event.root .
-//
-// Revision 1.8  2000/05/09 19:38:22  kathy
-// update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
-//
-// Revision 1.7  2000/04/24 20:25:45  posk
-// Added doEvents.C updates.
-//
-// Revision 1.6  2000/04/13 21:46:34  kathy
-// remove loading of libtpc_Tables since l3Track table is now dst_track type from global
-//
-// Revision 1.5  2000/04/12 15:06:53  kathy
-// changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
-//
-// Revision 1.4  2000/03/28 23:26:46  posk
-// Allow multiple instances of the AnalysisMaker.
-//
-// Revision 1.3  2000/03/15 23:33:54  posk
-// Added StFlowSelection.
-//
-// Revision 1.2  2000/03/07 17:51:23  snelling
-// Added switch for Nano DST
-//
-// Revision 1.1  2000/03/02 23:49:11  posk
-// Version of doEvents.C for flow analysis which can set cut parameters.
-//
-//
 ///////////////////////////////////////////////////////////////////////////////
 
 Int_t    usePath = 0;
@@ -254,7 +168,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
     }
     
   } else if (strstr(fileList[0], "pico")==0) {
-    // Read StEvent (or StFlowEvent) files
+    // Read StEvent files
     StIOMaker *IOMk = new StIOMaker("IO", "r", setFiles, "bfcTree");
     IOMk->SetIOMode("r");
     IOMk->SetBranch("*", 0, "0");                 //deactivate all branches
@@ -356,7 +270,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //StFlowEvent::SetEtaCut(0.05, 1., 2, 0); // harmonic 3, selection 1
 
   // Use a Pt weight in the event plane calcualtion
-  //  StFlowEvent::SetPtWgt();
+  //StFlowEvent::SetPtWgt();
 
   // Use Aihong's probability PID method
   //  StFlowEvent::SetProbPid();
@@ -437,9 +351,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   if (nevents > 1) {
     chain->Clear();
     chain->Finish();
-    if (chain) {
-      delete chain;
-    }
+    delete chain;
   }
   else {
     if (!b) {
@@ -494,8 +406,79 @@ void doFlowEvents(const Int_t nevents)
   // LBNL
   //Char_t* filePath="/auto/pdsfdv14/rhstar/snelling/P00hg/Global/";
   //Char_t* filePath="/auto/pdsfdv15/rhstar/flow/pDST/P00hg/Version3/";
-  //Char_t* fileExt="flowpicoevent.root";
+  //Char_t* fileExt="*.flowpicoevent.root";
   //Char_t* fileExt="st_physics_1229055_raw_0013.dst.root.flowpicoevent.root"; // one file
 
   doFlowEvents(nevents, filePath, fileExt);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Log: doFlowEvents.C,v $
+// Revision 1.30  2000/12/12 18:49:18  posk
+// Moved log comments to the end of the file.
+//
+// Revision 1.29  2000/12/08 17:04:36  oldi
+// Phi weights for both FTPCs included.
+//
+// Revision 1.27  2000/11/15 14:41:51  posk
+// Protected against running Finish() twice.
+//
+// Revision 1.26  2000/11/13 01:32:35  snelling
+// load StEventUtilities
+//
+// Revision 1.25  2000/11/09 17:39:14  snelling
+// Added switch for probability pid
+//
+// Revision 1.24  2000/09/16 22:21:15  snelling
+// Added lines to set selection on P and global DCA
+//
+// Revision 1.23  2000/09/15 22:54:44  posk
+// Added Pt weighting for event plane calculation.
+//
+// Revision 1.22  2000/09/15 01:22:27  snelling
+// Added the new selection options to the macro
+//
+// Revision 1.21  2000/09/05 16:29:43  snelling
+// Added cuts for new particles
+//
+// Revision 1.18  2000/08/28 16:15:50  snelling
+// Added Pt and Eta cuts to macro
+//
+// Revision 1.17  2000/08/26 21:39:51  snelling
+// Modified IO for multiple pico events
+//
+// Revision 1.15  2000/06/30 14:57:34  posk
+// Updated to latest doEvents.C .
+//
+// Revision 1.11  2000/05/17 16:20:59  kathy
+// add some print stmts and also run some IOMaker methods in order to get default input files that are softlinks to other files working correctly
+//
+// Revision 1.10  2000/05/16 20:57:31  posk
+// Voloshin's flownanoevent.root added.
+//
+// Revision 1.9  2000/05/11 00:22:28  posk
+// Can read StEvent files which have extention .event.root .
+//
+// Revision 1.8  2000/05/09 19:38:22  kathy
+// update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
+//
+// Revision 1.6  2000/04/13 21:46:34  kathy
+// remove loading of libtpc_Tables since l3Track table is now dst_track type from global
+//
+// Revision 1.5  2000/04/12 15:06:53  kathy
+// changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
+//
+// Revision 1.4  2000/03/28 23:26:46  posk
+// Allow multiple instances of the AnalysisMaker.
+//
+// Revision 1.3  2000/03/15 23:33:54  posk
+// Added StFlowSelection.
+//
+// Revision 1.2  2000/03/07 17:51:23  snelling
+// Added switch for Nano DST
+//
+// Revision 1.1  2000/03/02 23:49:11  posk
+// Version of doEvents.C for flow analysis which can set cut parameters.
+//
+///////////////////////////////////////////////////////////////////////////////
