@@ -12,8 +12,12 @@ void RunJetFinder2(int nevents=100,
 		   const char* dir = "",
 		   const char *filter = "")
 {
+    TString histfile(outfile);
+    histfile.ReplaceAll(".root",".jethist.root");
+
     cout <<"Read file:\t"<<file<<endl;
     cout <<"Write file:\t"<<outfile<<endl;
+    cout <<"jet hists:\t"<<histfile<<endl;
     
     if (gClassTable->GetID("TTable") < 0) {
 	gSystem->Load("libStar");
@@ -24,17 +28,21 @@ void RunJetFinder2(int nevents=100,
     gSystem->Load("StMagF");
     gSystem->Load("StTpcDb");
     gSystem->Load("StDbUtilities");
-    
+    gSystem->Load("StMcEvent");
+    gSystem->Load("StMcEventMaker");
     gSystem->Load("StDaqLib");
     gSystem->Load("StEmcRawMaker");
     gSystem->Load("StEmcADCtoEMaker");
+    gSystem->Load("StPreEclMaker");
     gSystem->Load("StEpcMaker");
+    gSystem->Load("StEmcSimulatorMaker");
+    gSystem->Load("StEmcUtil");
     gSystem->Load("StDbLib");
-    gSystem->Load("StDbBroker");  
+    gSystem->Load("StDbBroker");
+    gSystem->Load("StDetectorDbMaker");
     gSystem->Load("St_db_Maker");
-    gSystem->Load("St_db_Maker");
-    gSystem->Load("StEEmcUtil");
-    assert(gSystem->Load("StEEmcDbMaker")==0);
+    gSystem->Load("StEEmcDbMaker");
+    gSystem->Load("StEEmcUtil");// needed by EEMC-Db
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetMaker");
 
@@ -63,16 +71,8 @@ void RunJetFinder2(int nevents=100,
     //EmcAdc2EMaker
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
 
-    /*
-    //Instantiate the StEmcTpcFourPMaker (this will hopefully disappear from CVS soon!)
-    StEmcTpcFourPMaker* emcFourPMaker = new StEmcTpcFourPMaker("EmcTpcFourPMaker", muDstMaker, 30, 30, .3, .3, .003, adc);
-    emcFourPMaker->setUseType(StEmcTpcFourPMaker::Hits);//if don't have this line then default is 0 (which is hits)
-    emcFourPMaker->setMaxPoints(150);
-    emcFourPMaker->setMinPointThreshold(.3);
-    */
-
     //test Mike's new 4p maker:
-    StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker,adc);
+    StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker);
 
     /*
     //test Mike's new 4p maker with Endcap (defualts to noEndcap)
@@ -83,53 +83,25 @@ void RunJetFinder2(int nevents=100,
     //Instantiate the JetMaker
     StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker", muDstMaker, outfile);
 
-    //Now setup two jet analyses that use the same track/jet cuts
-    
+    //Instantiate Jet Histogram Maker
+    StJetHistMaker* jetHistMaker = new StJetHistMaker(muDstMaker, histfile.Data() );
+
     //set the analysis cuts: (see StJetMaker/StppJetAnalyzer.h -> class StppAnaPars )
     StppAnaPars* anapars = new StppAnaPars();
     anapars->setFlagMin(0); //track->flag() > 0
-    anapars->setNhits(15); //track->nHitsFit()>15
+    anapars->setNhits(20); //track->nHitsFit()>20
     anapars->setCutPtMin(0.2); //track->pt() > 0.2
     anapars->setAbsEtaMax(1.6); //abs(track->eta())<1.6
-    anapars->setJetPtMin(5.0); //MLM, remember to change this back to 5!
+    anapars->setJetPtMin(5.0);
     anapars->setJetEtaMax(100.0);
     anapars->setJetEtaMin(0);
     anapars->setJetNmin(0);
-    
-
-    /*
-    //Setup the cone finder (See StJetFinder/StConeJetFinder.h -> class StConePars)
-    StConePars* cpars = new StConePars();
-    cpars->setGridSpacing(56, -1.6, 1.6, 120, -pi, pi);
-    cpars->setConeRadius(0.7);
-    cpars->setSeedEtMin(0.5);
-    cpars->setAssocEtMin(0.1);
-    cpars->setSplitFraction(0.5);
-    cpars->setPerformMinimization(true);
-    cpars->setAddMidpoints(true);
-    cpars->setRequireStableMidpoints(true);
-    cpars->setDoSplitMerge(true);
-    cpars->setDebug(false);
-    emcJetMaker->addAnalyzer(anapars, cpars, emcFourPMaker, "MkConeJetsPt02R07");
-
-    //Setup the cone finder (See StJetFinder/StCdfChargedConeJetFinder.h -> class StCdfChargedConePars)
-    StCdfChargedConePars* ccdfpars = new StCdfChargedConePars();
-    ccdfpars->setGridSpacing(56, -1.6, 1.6, 120, -pi, pi);
-    ccdfpars->setConeRadius(0.7);
-    ccdfpars->setSeedEtMin(1.0);
-    ccdfpars->setAssocEtMin(0.1);
-    ccdfpars->setDebug(false);
-    emcJetMaker->addAnalyzer(anapars, ccdfpars, emcFourPMaker, "MkCdfChargedJetsPt02R07");
-    */
-
-    //Setup the kt=finder (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
+  
+    //Setup the kt finder for measured particles (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
     StKtCluPars* ktpars = new StKtCluPars();
-    ktpars->setR(1.0);
+    ktpars->setR(0.7);
     ktpars->setDebug(false);
-    
-    //emcJetMaker->addAnalyzer(anapars, ktpars, emcFourPMaker, "MkKtJet");
-    emcJetMaker->addAnalyzer(anapars, ktpars, bet4pMaker, "4pKtJet");
-    //emcJetMaker->addAnalyzer(anapars, ktpars, bet4pMaker2, "EndcapKtJet");
+    emcJetMaker->addAnalyzer(anapars, ktpars, bet4pMaker, "KtJet");
     
     chain->PrintInfo();
     chain->Init();
@@ -198,3 +170,48 @@ void RunJetFinder2(int nevents=100,
 
 
 
+    /*
+    //set the analysis cuts: (see StJetMaker/StppJetAnalyzer.h -> class StppAnaPars )
+    StppAnaPars* anapars = new StppAnaPars();
+    anapars->setFlagMin(0); //track->flag() > 0
+    anapars->setNhits(15); //track->nHitsFit()>15
+    anapars->setCutPtMin(0.2); //track->pt() > 0.2
+    anapars->setAbsEtaMax(1.6); //abs(track->eta())<1.6
+    anapars->setJetPtMin(5.0); //MLM, remember to change this back to 5!
+    anapars->setJetEtaMax(100.0);
+    anapars->setJetEtaMin(0);
+    anapars->setJetNmin(0);
+  
+    //Setup the cone finder (See StJetFinder/StConeJetFinder.h -> class StConePars)
+    StConePars* cpars = new StConePars();
+    cpars->setGridSpacing(56, -1.6, 1.6, 120, -pi, pi);
+    cpars->setConeRadius(0.7);
+    cpars->setSeedEtMin(0.5);
+    cpars->setAssocEtMin(0.1);
+    cpars->setSplitFraction(0.5);
+    cpars->setPerformMinimization(true);
+    cpars->setAddMidpoints(true);
+    cpars->setRequireStableMidpoints(true);
+    cpars->setDoSplitMerge(true);
+    cpars->setDebug(false);
+    emcJetMaker->addAnalyzer(anapars, cpars, emcFourPMaker, "MkConeJetsPt02R07");
+
+    //Setup the cone finder (See StJetFinder/StCdfChargedConeJetFinder.h -> class StCdfChargedConePars)
+    StCdfChargedConePars* ccdfpars = new StCdfChargedConePars();
+    ccdfpars->setGridSpacing(56, -1.6, 1.6, 120, -pi, pi);
+    ccdfpars->setConeRadius(0.7);
+    ccdfpars->setSeedEtMin(1.0);
+    ccdfpars->setAssocEtMin(0.1);
+    ccdfpars->setDebug(false);
+    emcJetMaker->addAnalyzer(anapars, ccdfpars, emcFourPMaker, "MkCdfChargedJetsPt02R07");
+    
+
+    //Setup the kt=finder (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
+    StKtCluPars* ktpars = new StKtCluPars();
+    ktpars->setR(0.7);
+    ktpars->setDebug(false);
+    
+    //emcJetMaker->addAnalyzer(anapars, ktpars, emcFourPMaker, "MkKtJet");
+    emcJetMaker->addAnalyzer(anapars, ktpars, bet4pMaker, "4pKtJet");
+    //emcJetMaker->addAnalyzer(anapars, ktpars, bet4pMaker2, "EndcapKtJet");
+    */

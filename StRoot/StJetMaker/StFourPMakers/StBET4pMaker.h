@@ -19,6 +19,7 @@ class StEmcADCtoEMaker;
 class StEmcRawHit;
 class StMuEmcPosition;
 class EEmcGeomSimple;
+class StBemcTables;
 class StEEmcDbMaker;
 
 #include "StJetMaker/StFourPMakers/StFourPMaker.h"
@@ -28,7 +29,8 @@ class StBET4pMaker : public StFourPMaker
 public:
     
     ///Require StMuDstMaker pointer at instantiation
-    StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, StEmcADCtoEMaker* adc2e);
+    //StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, StEmcADCtoEMaker* adc2e);
+    StBET4pMaker(const char* name, StMuDstMaker* uDstMaker);
     
     ///Default destructor
     virtual ~StBET4pMaker() {};
@@ -40,7 +42,9 @@ public:
     virtual void Clear(Option_t* opt);
 
     ///Initialize
-    virtual Int_t Init();
+    virtual Int_t Init();    
+    Int_t InitRun(Int_t runId);
+
 
     void setUseEndcap(bool v) {mUseEndcap=v;}
     
@@ -61,7 +65,9 @@ protected:
     StMuEmcPosition*  mMuPosition; //!
 
     StMuDstMaker* mMuDstMaker; //!
-    StEmcADCtoEMaker* mAdc2E; //!
+    //StEmcADCtoEMaker* mAdc2E; //!
+    StBemcTables* mTables;//!
+
 
         
     EEmcGeomSimple* mEeGeom;

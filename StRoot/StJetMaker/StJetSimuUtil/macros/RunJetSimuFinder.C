@@ -1,4 +1,3 @@
-
 // NOTE - This macro is ONLY for running MC simulation data!!
 // If using StJetSimuWeightMaker class on simulation data before 2004 you will
 // need to comment out all references to St_g2t_pythia class. These tables 
@@ -7,16 +6,37 @@
 class  StChain;
 StChain *chain;
 int total=0;
+#include <string>
 
 void RunJetSimuFinder(int nevents = 100,
-		      const char *dir = "",
-		      const char* file = "/star/data19/reco/pp200/pythia6_203/default/pt15/y2004x/gheisha_on/trs_ii/pds1214_02_5000evts.MuDst.root",
-		      const char *fname="/star/data19/reco/pp200/pythia6_203/default/pt15/y2004x/gheisha_on/trs_ii/pds1214_02_5000evts.geant.root",
-		      const char *filter = "",
-		      const char *outfile="Jets_out.root",
-		      const char *soutfile="Simu_out.root"
+		      const char* fname = "./firstPass/reco/pythia_a_D96D83CC9A4C45CD72DAA45AFF8D6021_11.MuDst.root",
+		      const char* fbname = "pythia_a_D96D83CC9A4C45CD72DAA45AFF8D6021_11",
+		      //const char* fname = "/star/data18/reco/pp200/pythia6_203/default/pt15/y2004x/gheisha_on/trs_ij/pds1214_69_5000evts.MuDst.root",
+		      //const char* fbname = "pds1214_69_5000evts",
+		      const char* outdir = "./processed/"
 		      )
 {
+    /*
+    string basename = firstHalf(fname,"/",".MuDst.root");
+    TString mudstfile = TString("/") + TString(basename) + TString(".MuDst.root");
+    TString geantfile = TString("/") + TString(basename) + TString(".geant.root");
+    */
+    
+    TString mudstfile(fname);
+    TString geantfile = mudstfile;
+    geantfile.ReplaceAll("MuDst","geant");
+    
+    cout <<"read mudst file:\t"<<mudstfile<<endl;
+    cout <<"read geant file:\t"<<geantfile<<endl;
+
+    TString jetfile = TString(outdir) + TString(fbname) + TString(".jet.root");
+    TString simufile = TString(outdir) + TString(fbname) + TString(".simu.root");
+    TString histfile = TString(outdir) + TString(fbname) + TString(".jethist.root");
+    
+    cout <<"write jet file:\t"<<jetfile<<endl;
+    cout <<"write simu file:\t"<<simufile<<endl;
+    cout <<"write hist file:\t"<<histfile<<endl;
+    
     if (gClassTable->GetID("TTable") < 0) {
 	gSystem->Load("libStar");
 	gSystem->Load("libPhysics");
@@ -31,13 +51,17 @@ void RunJetSimuFinder(int nevents = 100,
     gSystem->Load("StDaqLib");
     gSystem->Load("StEmcRawMaker");
     gSystem->Load("StEmcADCtoEMaker");
+    gSystem->Load("StPreEclMaker");
+    gSystem->Load("StEpcMaker");
+    gSystem->Load("StEmcSimulatorMaker");
     gSystem->Load("StEmcUtil");
     gSystem->Load("StDbLib");
-    gSystem->Load("StDbBroker");  
+    gSystem->Load("StDbBroker");
+    gSystem->Load("StDetectorDbMaker");
     gSystem->Load("St_db_Maker");
     gSystem->Load("StEEmcDbMaker");
     gSystem->Load("StEEmcUtil");// needed by EEMC-Db
-    gSystem->Load("StJetFinder");
+    gSystem->Load("StJetFinder");    
     gSystem->Load("StJetMaker");
   
     double pi = atan(1.0)*4.0;
@@ -50,14 +74,13 @@ void RunJetSimuFinder(int nevents = 100,
 
     //StIOMaker - to read geant files
     StIOMaker* ioMaker = new StIOMaker();
-    ioMaker->SetFile(fname);
+    ioMaker->SetFile(geantfile.Data());
     ioMaker->SetIOMode("r");
     ioMaker->SetBranch("*",0,"0");             //deactivate all branches
     ioMaker->SetBranch("geantBranch",0,"r");   //activate geant Branch
-    ioMaker->SetBranch("eventBranch",0,"r");   //activate event Branch
+    //ioMaker->SetBranch("eventBranch",0,"r");   //don't read event branch!
     //ioMaker->SetDebug();
     
-
     // Instantiate StMcEventMaker - to get pythia pid from McEvent 
     class StMcEventMaker *mcEventMaker = new StMcEventMaker();
     mcEventMaker->doPrintEventInfo = false;
@@ -65,50 +88,52 @@ void RunJetSimuFinder(int nevents = 100,
 
     //Instantiate the MuDstReader
     StMuDebug::setLevel(1); 
-    StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,dir,file,filter,10,"MuDst");    
+    StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,"",mudstfile.Data(),"",1e6,"MuDst");
 
     //Instantiate Trigger maker for simulation -- only need ADC from MuDst -- no calibration
     StJetSimuTrigMaker *trig=new StJetSimuTrigMaker("SimuTrig");
-    trig->setPrintOption(1);
+    trig->setPrintOption(0);
   
-    //Database -- must set flavor correctly for ideal gains (this is ok, MLM)
+    //Database -- get a real calibration (this is ok, MLM)
     St_db_Maker *dbMk =new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
-    dbMk->SetDateTime(20031120,0);
-    dbMk->SetFlavor("sim","bemcPed");
-    dbMk->SetFlavor("sim","bemcStatus");
-    dbMk->SetFlavor("sim","bemcCalib");
-    dbMk->SetFlavor("sim","bemcGain");
-    dbMk->SetFlavor("sim","eemcPMTcal");
-    dbMk->SetFlavor("sim","eemcPIXcal");
+    dbMk->SetDateTime(20040427,101529); //run 5118011 status in DB
 
+    //Database interface
+    StDetectorDbMaker* detDbMk = new StDetectorDbMaker();
+
+    //Endcap DB
     StEEmcDbMaker* eemcb = new StEEmcDbMaker("eemcDb");
 
     //get BEMC calibration (this is ok, MLM)
-    StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
+    //StEmcADCtoEMaker *adc = new StEmcADCtoEMaker(); // this will just convert what's in MuDst to ADC, use for data only!
+    StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
+    StPreEclMaker* preEcl = new StPreEclMaker(); //need this to fill new StEvent information
 
     //Instantiate Maker with Pythia event record etc for simulation (this guy doesn't break chain, MLM)
     StJetSimuWeightMaker *weight= new StJetSimuWeightMaker("SimuWeight");
     weight->setPrintOption(0);
   
     //Instantiate Tree Maker for simulation (this guy doesn't break chain, MLM)
-    StJetSimuTreeMaker *stree= new StJetSimuTreeMaker("SimuTree",soutfile);
+    StJetSimuTreeMaker *stree= new StJetSimuTreeMaker("SimuTree",simufile.Data());
     stree->setPrintOption(0);
   
-    //Instantiate the StEmcTpcFourPMaker (and this is ok, MLM)
-    StEmcTpcFourPMaker* emcFourPMaker = new StEmcTpcFourPMaker("EmcTpcFourPMaker", muDstMaker, 30, 30, .3, .3, .003, adc);
-    emcFourPMaker->setUseType(StEmcTpcFourPMaker::Hits);//if don't have this line then default is 0 (which is hits)
+    //test Mike's new 4p maker:
+    StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker);
 
     //Pythia4pMaker
     StPythiaFourPMaker* pythiaFourPMaker = new StPythiaFourPMaker("StPythiaFourPMaker",weight, mcEventMaker);
 
     //Instantiate the JetMaker
-    StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker", muDstMaker, outfile);
+    StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker", muDstMaker, jetfile.Data());
+
+    //Instantiate Jet Histogram Maker
+    StJetHistMaker* jetHistMaker = new StJetHistMaker(muDstMaker, histfile.Data() );
   
     //Now setup two jet analyses that use the same track/jet cuts  
     //set the analysis cuts: (see StJetMaker/StppJetAnalyzer.h -> class StppAnaPars )
     StppAnaPars* anapars = new StppAnaPars();
     anapars->setFlagMin(0); //track->flag() > 0
-    anapars->setNhits(15); //track->nHitsFit()>15
+    anapars->setNhits(20); //track->nHitsFit()>20
     anapars->setCutPtMin(0.2); //track->pt() > 0.2
     anapars->setAbsEtaMax(1.6); //abs(track->eta())<1.6
     anapars->setJetPtMin(5.0);
@@ -116,66 +141,51 @@ void RunJetSimuFinder(int nevents = 100,
     anapars->setJetEtaMin(0);
     anapars->setJetNmin(0);
   
-    //Setup the cone finder (See StJetFinder/StConeJetFinder.h -> class StConePars)
-    StConePars* cpars = new StConePars();
-    cpars->setGridSpacing(56, -1.6, 1.6, 120, -pi, pi);
-    cpars->setConeRadius(0.7);
-    cpars->setSeedEtMin(0.5);
-    cpars->setAssocEtMin(0.1);
-    cpars->setSplitFraction(0.0);
-    cpars->setPerformMinimization(true);
-    cpars->setAddMidpoints(true);
-    cpars->setRequireStableMidpoints(true);
-    cpars->setDoSplitMerge(true);
-    cpars->setDebug(false);
-    emcJetMaker->addAnalyzer(anapars, cpars, emcFourPMaker, "MkConeJetsPt02R07");
-    
-    //Setup the cone finder (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
+    //Setup the kt finder for measured particles (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
     StKtCluPars* ktpars = new StKtCluPars();
-    ktpars->setR(1.0);
+    ktpars->setR(0.7);
     ktpars->setDebug(false);
-    emcJetMaker->addAnalyzer(anapars, ktpars, emcFourPMaker, "MkKtJet");
+    emcJetMaker->addAnalyzer(anapars, ktpars, bet4pMaker, "KtJet");
 
     //set the analysis cuts for pythia clustering: (see StJetMaker/StppJetAnalyzer.h -> class StppAnaPars )
     StppAnaPars* pythiapars = new StppAnaPars();
     pythiapars->setFlagMin(0);
-    pythiapars->setNhits(0); 
-    pythiapars->setCutPtMin(0.0001); 
+    pythiapars->setNhits(0);
+    pythiapars->setCutPtMin(0.0001);
     pythiapars->setAbsEtaMax(5.0);
     pythiapars->setJetPtMin(5.0);
     pythiapars->setJetEtaMax(5.0);
     pythiapars->setJetEtaMin(0);
     pythiapars->setJetNmin(0);
     
-
-    //Setup the cone finder (See StJetFinder/StConeJetFinder.h -> class StConePars)
-    StConePars* pythia_cpars = new StConePars();
-    pythia_cpars->setGridSpacing(200, -5.0, 5.0, 120, -pi, pi); //take everyting in 10 units of rapidity!
-    pythia_cpars->setConeRadius(0.7);
-    pythia_cpars->setSeedEtMin(0.5);
-    pythia_cpars->setAssocEtMin(0.01);
-    pythia_cpars->setSplitFraction(0.5);
-    pythia_cpars->setPerformMinimization(true);
-    pythia_cpars->setAddMidpoints(true);
-    pythia_cpars->setRequireStableMidpoints(true);
-    pythia_cpars->setDoSplitMerge(true);
-    pythia_cpars->setDebug(false);
-    emcJetMaker->addAnalyzer(pythiapars, pythia_cpars, pythiaFourPMaker, "MkPythiaConeJetsPt02R07");
- 
-    //Setup the kt=finder (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
-    StKtCluPars* pythia_ktpars = new StKtCluPars();
-    pythia_ktpars->setR(1.0);
-    pythia_ktpars->setDebug(false);
-    emcJetMaker->addAnalyzer(pythiapars, pythia_ktpars, pythiaFourPMaker, "MkPythiaKtJet");
+    emcJetMaker->addAnalyzer(pythiapars, ktpars, pythiaFourPMaker, "PythiaKtJet");
     
     chain->Init();
     chain->PrintInfo();
+
+    //Note: ------------ Must do this stuff after Init()
+    int controlVal = 2;
+    controlEmcSimulatorMaker_st* simControl = emcSim->getControlSimulator()->GetTable();
+    simControl->keyDB[0] = controlVal;
+    simControl->keyDB[1] = 0;
+    simControl->keyDB[2] = controlVal;
+    simControl->keyDB[3] = controlVal;
+    //keyDB[det] = 0 -> NO database (default value)
+    //           = 1 - only gains are applied
+    //           = 2 - gains and pedestals are applied
+    // In other words, for pure MC should be 2, and
+    // for embedding should be 1.
+
     chain->ls(3);
+
+    TChain* fileChain = muDstMaker->chain();
+    assert(fileChain);
+    int ntotal = fileChain->GetEntries();
 
     //int nevents =1000000;
     for (Int_t iev=0;iev<nevents; iev++) {
 	cout << "****************************************** " << endl;
-	cout << "Working on eventNumber " << iev << endl;
+	cout << "Working on eventNumber:\t" << iev <<"\tof:\t"<<ntotal<<endl;
 	cout << "*************************1***************** " << endl;
 	chain->Clear();
 	int iret = chain->Make(iev); 
@@ -192,8 +202,26 @@ void RunJetSimuFinder(int nevents = 100,
 }
 
 
-
-
-
-
+string firstHalf(string infile, string begin, string end, int offset=0)
+{
+    unsigned int where1 = infile.find(begin);
+    unsigned int where2 = infile.find(end);
+    if (where2==infile.npos) {
+	return 0;
+    }
+    
+    int start=where1+begin.size()+offset;
+    int stop=where2;
+    if (stop<=start) {
+	cout <<"error, mismatch.abort()"<<endl;
+	abort();
+    }
+    //cout <<"numbers of events is between indices: ["<<start<<","<<stop<<")"<<endl;
+    string number;
+    for (int i=start; i<stop; ++i) {
+	//cout <<"\ti:\t"<<i<<"\t"<<infile[i]<<endl;
+	number += infile[i];
+    }
+    return number;
+}
 

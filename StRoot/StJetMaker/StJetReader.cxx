@@ -258,6 +258,32 @@ bool verifyJet(StJets* stjets, int ijet)
     }
 }
 
+void StJetReader::doJetAssoc()
+{
+    cout <<"StJetReader::doJetAssoc()"<<endl;
+
+    //get pointer to pythia StJets object:
+    JetBranchesMap::iterator where1 = mStJetsMap.find("PythiaKtJet");
+    assert(where1!=mStJetsMap.end());
+    StJets* pythiaJets = (*where1).second;
+    assert(pythiaJets);
+    
+    //get pointer to reco StJets object:
+    JetBranchesMap::iterator where2 = mStJetsMap.find("KtJet");
+    assert(where2!=mStJetsMap.end());
+    StJets* recoJets = (*where2).second;
+    assert(recoJets);
+
+    //int nJets = stjets->nJets();
+    //cout <<"Found\t"<<nJets<<"\tjets from:\t"<<(*it).first<<endl;
+    
+    //TClonesArray* jets = stjets->jets();
+
+    //for(int ijet=0; ijet<nJets; ++ijet){
+	    
+    //loop on jets
+    //StJet* j = static_cast<StJet*>( (*jets)[ijet] );
+}
 
 void StJetReader::exampleEventAna()
 {
