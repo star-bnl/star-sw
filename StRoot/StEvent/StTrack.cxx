@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.17 2002/03/14 17:42:31 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.18 2003/04/25 23:48:18 calderon Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.18  2003/04/25 23:48:18  calderon
+ * fittingMethod member function was missing case for kITKalmanFitId.
+ *
  * Revision 2.17  2002/03/14 17:42:31  ullrich
  * Added method to set mNumberOfPossiblePoints.
  *
@@ -77,7 +80,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.17 2002/03/14 17:42:31 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.18 2003/04/25 23:48:18 calderon Exp $";
 
 StTrack::StTrack()
 {
@@ -203,6 +206,9 @@ StTrack::fittingMethod() const
         break;
     case kL3FitId:
         return kL3FitId;
+        break;
+    case kITKalmanFitId:
+        return kITKalmanFitId;
         break;
     default:
     case kUndefinedFitterId:
