@@ -1,12 +1,22 @@
+///\file Run.C
+///\author The ITTF Group
+///\date   Changing all the times...
+///Macros used to run the ITTF tracker.
+///<p>
+///See documentation of the Run function for an explanation of the 
+///parameters.
+
 //const char * path= "/star/data13/reco/ppMinBias/FullField/P02gf/2002/019/",
 //const char * path ="/star/data22/ITTF/EvalData/Event/ppMinBias/",
 //const char * file="st_physics_3019045_raw_0031.event.root",
 //const char * path= "/star/data06/ITTF/EvalData/MCFiles/auau200",
 //const char * path= "/data/r20b/ittf/auau200/hijing/b0_20/standard/year2001/",
 
+
 void help();
 void loadLibrairies();
 
+///Prints a short help message on the command line.
 void help()
 {
   cout << "Usage: Run.C(firstEvtIndex,nevents,\"-\",\"some_directory/some_dst_file.xdf\")" << endl;
@@ -14,6 +24,8 @@ void help()
   cout << "       Run.C(firstEvtIndex,nevents,\"some_directory\",\"*.dst.root\")" << endl;	
 }
 
+///Loads all the shared librairies required to execute the tracker. 
+///\param doProfile boolean flag indicating whether code profiling should be performed while running the tracker.
 void loadLibrairies(bool doProfile)
 {	
   char * list[]={"St_base","StChain","StUtilities", "St_Tables", "StarClassLibrary",
@@ -61,10 +73,15 @@ void RunMany(int firstEvent = 0,
 	     bool doStEventOutput=false,
 	     bool doStEventInput=true,
 	     bool useTpc=true,
-	     bool useSvt=false,
+	     bool activeTpc=true,
+	     bool useSvt=true,
+	     bool activeSvt=false,
 	     bool useEmc=false,
+	     bool activeEmc=false,
 	     bool useFtpc=false,
+	     bool activeFtpc=false,
 	     bool usePixel=false,
+	     bool activePixel=false,
 	     bool useResidualCalculator=false,
 	     bool doProfile=false	 )
 {
@@ -82,11 +99,11 @@ void RunMany(int firstEvent = 0,
       doDst,
       doStEventOutput,
       doStEventInput,
-      useTpc,
-      useSvt,
-      useEmc,
-      useFtpc,
-      usePixel,
+      useTpc,activeTpc,
+      useSvt,activeSvt,
+      useEmc,activeEmc,
+      useFtpc,activeFtpc,
+      usePixel,activePixel,
       useResidualCalculator,
       doProfile);
 }
@@ -106,10 +123,15 @@ void RunResiduals(int firstEvent = 0,
 		  bool doStEventOutput=false,
 		  bool doStEventInput=true,
 		  bool useTpc=true,
-		  bool useSvt=false,
+		  bool activeTpc=true,
+		  bool useSvt=true,
+		  bool activeSvt=false,
 		  bool useEmc=false,
+		  bool activeEmc=false,
 		  bool useFtpc=false,
+		  bool activeFtpc=false,
 		  bool usePixel=false,
+		  bool activePixel=false,
 		  bool useResidualCalculator=true,
 		  bool doProfile=false	 )
 {
@@ -127,11 +149,11 @@ void RunResiduals(int firstEvent = 0,
       doDst,
       doStEventOutput,
       doStEventInput,
-      useTpc,
-      useSvt,
-      useEmc,
-      useFtpc,
-      usePixel,
+      useTpc,activeTpc,
+      useSvt,activeSvt,
+      useEmc,activeEmc,
+      useFtpc,activeFtpc,
+      usePixel,activePixel,
       useResidualCalculator,
       doProfile);
 }
@@ -153,37 +175,41 @@ void RunGui(int firstEvent = 0,
 	    bool doStEventOutput=false,
 	    bool doStEventInput=true,
 	    bool useTpc=true,
-	    bool useSvt=false,
+	    bool activeTpc=true,
+	    bool useSvt=true,
+	    bool activeSvt=false,
 	    bool useEmc=false,
+	    bool activeEmc=false,
 	    bool useFtpc=false,
+	    bool activeFtpc=false,
 	    bool usePixel=false,
+	    bool activePixel=false,
 	    bool useResidualCalculator=false,
 	    bool doProfile=false
 	    )
 {
     Run(firstEvent,
-      nEvents,
-      filePrefix,
-      path,
-      file,
-      useGui, 
-      useMcAsRec,
-      doPlots,
-      doSimulation,
-      doAssociation,
-      doMiniMcEvent,
-      doDst,
-      doStEventOutput,
-      doStEventInput,
-      useTpc,
-      useSvt,
-      useEmc,
-      useFtpc,
-      usePixel,
-      useResidualCalculator,
-      doProfile);
+	nEvents,
+	filePrefix,
+	path,
+	file,
+	useGui, 
+	useMcAsRec,
+	doPlots,
+	doSimulation,
+	doAssociation,
+	doMiniMcEvent,
+	doDst,
+	doStEventOutput,
+	doStEventInput,
+	useTpc,activeTpc,
+	useSvt,activeSvt,
+	useEmc,activeEmc,
+	useFtpc,activeFtpc,
+	usePixel,activePixel,
+	useResidualCalculator,
+	doProfile);
 } 
-
 
 void Run(int firstEvent,
 	 int nEvents,
@@ -196,14 +222,19 @@ void Run(int firstEvent,
 	 bool doSimulation,
 	 bool doAssociation,
 	 bool doMiniMcEvent,
-	 bool doDst=false,
+	 bool doDst,
 	 bool doStEventOutput,
 	 bool doStEventInput,
 	 bool useTpc,
+	 bool activeTpc,
 	 bool useSvt,
+	 bool activeSvt,
 	 bool useEmc,
+	 bool activeEmc,
 	 bool useFtpc,
+	 bool activeFtpc,
 	 bool usePixel,
+	 bool activePixel,
 	 bool useResidualCalculator,
 	 bool doProfile	 )
 {
@@ -229,15 +260,39 @@ void Run(int firstEvent,
       doDst,
       doStEventOutput,
       doStEventInput,
-      useTpc,
-      useSvt,
-      useEmc,
-      useFtpc,
-      usePixel,
+      useTpc,activeTpc,
+      useSvt,activeSvt,
+      useEmc,activeEmc,
+      useFtpc,activeFtpc,
+      usePixel,activePixel,
       useResidualCalculator,
       doProfile);
 }
 
+///Run the tracker with the given set of parameter values.
+///\param firstEvent index of the first event to process. Must be greater or equal to zero.
+///\param nEvents number of events to process. Must be greater than one.
+///\param filePrefix prefix used to save output files.
+///\param fileList list of data files to process.
+///\param useGui boolean flag indicating whether the tracker should be used with the graphical user interface.
+///\param useMcAsRec boolean flag indicating whether monte carlo hits should be used as reconstructed hits
+///\param doPlots  boolean flag indicating whether StiMaker specific histograms should be created.
+///\param doSimulation boolean flag indicating whether simulation MC loader should be used.
+///\param doAssociation boolean flag indicating whether the association maker should be called.
+///\param doMiniMcEvent boolean flag indicating whether MiniMcEvent output should be created.
+///\param doDst boolean flag indicating whether DST  output should be created.
+///\param doStEventOutput boolean flag indicating whether StEvent  output should be created.
+///\param doStEventInput boolean flag indicating whether input proceeds from StEvent.
+///\param useTpc boolean flag indicating whether the TPC geometry will be built and used for ELOSS/MCS calculations.
+///\param activeTpc boolean flag indicating whether the TPC hits will be used in track reconstruction.
+///\param useSvt boolean flag indicating whether the SVT geometry will be built and used for ELOSS/MCS calculations.
+///\param activeSvt boolean flag indicating whether the SVT hits will be used in track reconstruction.
+///\param useEmc boolean flag indicating whether the EMC geometry will be built and used for ELOSS/MCS calculations.
+///\param activeEmc boolean flag indicating whether the EMC hits will be used in track reconstruction.
+///\param useFtpc boolean flag indicating whether the FTPC geometry will be built and used for ELOSS/MCS calculations.
+///\param activeFtpc boolean flag indicating whether the FTPC hits will be used in track reconstruction.
+///\param useResidualCalculator boolean flag indicating whether to perform residual calculations
+///\param doProfile boolean flag indicating whether to perform code profiling 
 void Run(Int_t firstEvent,
 	 Int_t nEvents, 
 	 const char *  filePrefix,
@@ -252,17 +307,22 @@ void Run(Int_t firstEvent,
 	 bool doStEventOutput,
 	 bool doStEventInput,
 	 bool useTpc,
+	 bool activeTpc,
 	 bool useSvt,
+	 bool activeSvt,
 	 bool useEmc,
+	 bool activeEmc,
 	 bool useFtpc,
+	 bool activeFtpc,
 	 bool usePixel,
+	 bool activePixel,
 	 bool useResidualCalculator,
 	 bool doProfile)
 {
   loadLibrairies(doProfile);
   MiniChain * miniChain = new MiniChain();
   StiMakerParameters* pars = miniChain->getParameters();
-  pars->useGui          =useGui;
+  pars->useGui          = useGui;
   pars->useMcAsRec      = useMcAsRec;
   pars->doSimulation    = doSimulation;
   pars->doAssociation   = doAssociation;
@@ -272,10 +332,15 @@ void Run(Int_t firstEvent,
   pars->doStEventInput  = doStEventInput;  
   pars->doPlots         = doPlots; 
   pars->useTpc          = useTpc;
+  pars->activeTpc       = activeTpc;
   pars->useSvt          = useSvt;
+  pars->activeSvt       = activeSvt;
   pars->useEmc          = useEmc;
-  pars->useFtpc         = useFtpc;
-  pars->usePixel          = usePixel;
+  pars->activeEmc       = activeEmc;
+  pars->useFtpc         = useFtpc;  
+  pars->activeFtpc      = activeFtpc;  
+  pars->usePixel        = usePixel;
+  pars->activePixel     = activePixel;
   pars->useResidualCalculator = useResidualCalculator;
   miniChain->run(firstEvent,nEvents,filePrefix,fileList);
 }

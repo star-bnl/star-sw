@@ -10,7 +10,7 @@
 StiSsdDetectorGroup::StiSsdDetectorGroup(bool active)
   : StiDetectorGroup<StEvent,StMcEvent>("SSD",
 			      active?new StiSsdHitLoader():0,
-			      new StiSsdDetectorBuilder(),0,0)
+			      new StiSsdDetectorBuilder(active),0,0)
 {}
 
 StiSsdDetectorGroup::~StiSsdDetectorGroup()

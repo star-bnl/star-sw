@@ -4,7 +4,8 @@
 
 StDetectorDbTpcRDOMasks *StiTpcIsActiveFunctor::s_pRdoMasks = 0;
 
-StiTpcIsActiveFunctor::StiTpcIsActiveFunctor(int iSector, int iPadrow){
+StiTpcIsActiveFunctor::StiTpcIsActiveFunctor(int iSector, int iPadrow)
+{
   if(s_pRdoMasks==0){
     s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
   }
@@ -21,7 +22,9 @@ StiTpcIsActiveFunctor::~StiTpcIsActiveFunctor(){
 
 bool StiTpcIsActiveFunctor::operator()(double dYlocal, double dZlocal)
 {
-  return (m_bWestActive && dZlocal>-2.0 ||
-          m_bEastActive && dZlocal< 2.0);
+  if (dZlocal<0.)
+    return m_bWestActive && dZlocal>=-200.0;
+  else
+    return m_bEastActive && dZlocal<= 200.0;
 } // operator()
 

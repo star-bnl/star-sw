@@ -37,7 +37,7 @@ class StiDetectorBuilder : public Named
 public:
 
 
-  StiDetectorBuilder(const string & name);
+  StiDetectorBuilder(const string & name,bool active);
   virtual ~StiDetectorBuilder(); 
   
   detectorMap getDetectors(){ return mDetectorMap; }
@@ -77,6 +77,8 @@ public:
   
  protected:
   
+  int                 _groupId;
+  bool                _active;
   materialMap         mMaterialMap;
   shapeMap            mShapeMap;
   detectorMap         mDetectorMap;
@@ -86,7 +88,6 @@ public:
   vector< vector<StiDetector*> > _detectors;
   Factory<StiDetector>*_detectorFactory;
   Messenger&           _messenger;
-  int                  _groupId;
 
 };
 

@@ -8,7 +8,7 @@ class StiEmcDetectorBuilder : public StiDetectorBuilder
 
 public:
     // constructors
-    StiEmcDetectorBuilder();
+    StiEmcDetectorBuilder(bool active);
     virtual ~StiEmcDetectorBuilder(); 
     virtual void loadDb();
     virtual void buildMaterials();

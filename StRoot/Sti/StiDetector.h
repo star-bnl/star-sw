@@ -7,10 +7,10 @@
 using std::string;
 #include "Sti/Base/Named.h"
 #include "Sti/StiPlacement.h"
+#include "StiIsActiveFunctor.h"
 
 class StiMaterial;
 class StiShape;
-class StiIsActiveFunctor;
 template<class T> class StiCompositeTreeNode;
 class StiHitErrorCalculator;
 
@@ -139,5 +139,17 @@ inline int  StiDetector::getGroupId() const
 {
   return _groupId;
 }
+
+inline bool StiDetector::isActive(double dYlocal, double dZlocal) const
+{
+  return (*isActiveFunctor)(dYlocal, dZlocal);
+} // isActive
+
+inline bool StiDetector::isActive() const 
+{
+  return isActive(placement->getNormalYoffset(), placement->getZcenter());
+} // isActive
+
+
 
 #endif

@@ -8,7 +8,7 @@
 StiStarDetectorGroup::StiStarDetectorGroup(bool active)
   : StiDetectorGroup<StEvent,StMcEvent>("STAR",
 			      0,
-			      new StiStarDetectorBuilder(),
+			      new StiStarDetectorBuilder(active),
 			      0,
 			      0)
 {}

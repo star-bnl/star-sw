@@ -3,7 +3,6 @@
 
 #include <stdexcept>
 #include <vector>
-#include "Sti/Base/Vectorized.h"
 #include "StiHitLoader.h"
 
 /*! \class StiMasterHitLoader
@@ -26,7 +25,7 @@
  */
 template<class Source1, class Source2,class Detector>
 class StiMasterHitLoader : public StiHitLoader<Source1, Source2,Detector>,
-                           public Vectorized< StiHitLoader<Source1, Source2,Detector> >
+                           public vector< StiHitLoader<Source1, Source2,Detector> *>
 {
 public:
 
@@ -77,7 +76,7 @@ template<class Source1, class Source2,class Detector>
 
 void StiMasterHitLoader<Source1, Source2,Detector>::addLoader(StiHitLoader<Source1, Source2,Detector>*loader)
 {
-   add(loader); 
+  push_back(loader); 
 }
 
 template<class Source1, class Source2,class Detector>

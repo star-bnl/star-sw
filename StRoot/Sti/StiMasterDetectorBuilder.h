@@ -1,13 +1,13 @@
 #ifndef StiMasterDetectorBuilder_H
 #define StiMasterDetectorBuilder_H
 
-#include "Sti/Base/Vectorized.h"
+#include <vector>
 #include "StiDetectorBuilder.h"
 
-class StiMasterDetectorBuilder : public StiDetectorBuilder, public Vectorized<StiDetectorBuilder>
+class StiMasterDetectorBuilder : public StiDetectorBuilder, public vector<StiDetectorBuilder*>
 {
 public:
-    StiMasterDetectorBuilder();
+    StiMasterDetectorBuilder(bool active);
     virtual ~StiMasterDetectorBuilder(); 
     virtual bool hasMore() const;
     virtual StiDetector * next();

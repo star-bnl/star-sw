@@ -10,7 +10,7 @@ class StiMakerParameters : public TObject
   StiMakerParameters();
   virtual ~StiMakerParameters();
 
-  // Detectors
+  // Detector loading
   bool useEmc;
   bool useEemc;
   bool useSvt;
@@ -18,6 +18,15 @@ class StiMakerParameters : public TObject
   bool useTpc;
   bool useFtpc;
   bool usePixel;
+
+  // Hit loading 
+  bool activeEmc;
+  bool activeEemc;
+  bool activeSvt;
+  bool activeSsd;
+  bool activeTpc;
+  bool activeFtpc;
+  bool activePixel;
   bool useResidualCalculator;
 
   bool useMcAsRec;

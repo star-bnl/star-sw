@@ -19,8 +19,8 @@
 #include "StiTpcDetectorBuilder.h" 
 #include "StiTpcIsActiveFunctor.h"
 
-StiTpcDetectorBuilder::StiTpcDetectorBuilder()
-  : StiDetectorBuilder("TpcBuilder")
+StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active)
+  : StiDetectorBuilder("TpcBuilder",active)
 {
   _innerCalc = new StiDefaultHitErrorCalculator();
   _innerCalc->set(3.12735e-03, 0., 2.43806e-02,
@@ -67,7 +67,7 @@ the inner and outer field cage of the TPC. The padrows  are polygonal with 12  s
 whereas  the field cage are cylindrical. However to match the 12 fold symmetry of the 
 TPC, the field cage are artificially segmented into 12 sectors each.
 */
-void StiTpcDetectorBuilder::buildDetectors()
+  void StiTpcDetectorBuilder::buildDetectors()
 {
   char name[50];
   _messenger << "StiTpcDetectorBuilder::buildDetectors() - INFO - Started" << endl;
@@ -171,7 +171,10 @@ void StiTpcDetectorBuilder::buildDetectors()
 	  StiDetector *pDetector = _detectorFactory->getInstance();
 	  pDetector->setName(name);
 	  pDetector->setIsOn(true);
-	  pDetector->setIsActive(new StiTpcIsActiveFunctor(sector, row));
+	  if (_active)
+	    pDetector->setIsActive(new StiTpcIsActiveFunctor(sector, row));
+	  else
+	    pDetector->setIsActive(new StiNeverActiveFunctor());
 	  pDetector->setIsContinuousMedium(true);
 	  pDetector->setIsDiscreteScatterer(false);
 	  pDetector->setMaterial(_gas);

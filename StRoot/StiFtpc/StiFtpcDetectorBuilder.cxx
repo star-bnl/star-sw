@@ -1,7 +1,7 @@
 #include "StiFtpc/StiFtpcDetectorBuilder.h" 
 
-StiFtpcDetectorBuilder::StiFtpcDetectorBuilder()
-  : StiDetectorBuilder("FtpcBuilder")
+StiFtpcDetectorBuilder::StiFtpcDetectorBuilder(bool active)
+  : StiDetectorBuilder("FtpcBuilder",active)
 {}
 
 StiFtpcDetectorBuilder::~StiFtpcDetectorBuilder()

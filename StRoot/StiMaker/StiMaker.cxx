@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.127  2003/05/07 03:06:34  pruneau
+// *** empty log message ***
+//
 // Revision 1.126  2003/05/06 16:48:10  mmiller
 // Incorporated StiPixel.  usePixel==false by default.
 //
@@ -209,6 +212,7 @@ Int_t StiMaker::Init()
   _loaderTrackFilter->add(new EditableParameter("chargeMax", "Max Charge",  1.,  1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge));
   _toolkit->setLoaderHitFilter(_loaderHitFilter);
   _toolkit->setLoaderTrackFilter(_loaderTrackFilter);
+  InitDetectors();
   return kStOk;
 }
 
@@ -220,32 +224,31 @@ Int_t StiMaker::InitDetectors()
   if (_pars->useTpc)
     {
       cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
-      _toolkit->add(group = new StiTpcDetectorGroup(true));
+      _toolkit->add(group = new StiTpcDetectorGroup(_pars->activeTpc));
       group->setGroupId(kTpcId);
     }
   if (_pars->useSvt)
     {
       cout<<"StiMaker::Init() -I- Adding detector group:SVT"<<endl;
-      _toolkit->add(group = new StiSvtDetectorGroup(true));
+      _toolkit->add(group = new StiSvtDetectorGroup(_pars->activeSvt));
       group->setGroupId(kSvtId);
     }
   if (_pars->usePixel)
       {
 	  cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
-	  _toolkit->add(group = new StiPixelDetectorGroup(true));
+	  _toolkit->add(group = new StiPixelDetectorGroup(_pars->activePixel));
 	  group->setGroupId(9999);
       }
-  
   if (_pars->useFtpc)
-      {
-	  cout<<"StiMaker::Init() -I- Adding detector group:FTPC"<<endl;
-	  _toolkit->add(group = new StiFtpcDetectorGroup(true));
-	  group->setGroupId(kFtpcWestId);
-      }
+    {
+      cout<<"StiMaker::Init() -I- Adding detector group:FTPC"<<endl;
+      _toolkit->add(group = new StiFtpcDetectorGroup(_pars->activeFtpc));
+      group->setGroupId(kFtpcWestId);
+    }
   if (_pars->useEmc)
     {
       cout<<"StiMaker::Init() -I- Adding detector group:BEMC"<<endl;
-      _toolkit->add(group = new StiEmcDetectorGroup(true));
+      _toolkit->add(group = new StiEmcDetectorGroup(_pars->activeEmc));
       group->setGroupId(kBarrelEmcTowerId);
     }
   return kStOk;
@@ -263,7 +266,7 @@ Int_t StiMaker::Make()
     {
       cout <<"StiMaker::Make() -I- Initialization Segment Started"<<endl;
       _initialized=true;
-      InitDetectors();
+      //InitDetectors();
       StiDetectorContainer * detectorContainer = _toolkit->getDetectorContainer(); 
       detectorContainer->build(_toolkit->getDetectorBuilder());
       detectorContainer->reset();
@@ -288,6 +291,7 @@ Int_t StiMaker::Make()
       _tracker->clear();
       if (_toolkit->isGuiEnabled())
 	{
+	  _eventDisplay->initialize();
 	  _eventDisplay->draw();
 	}
       if (_pars->doPlots)

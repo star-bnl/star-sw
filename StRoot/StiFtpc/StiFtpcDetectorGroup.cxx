@@ -11,7 +11,7 @@
 StiFtpcDetectorGroup::StiFtpcDetectorGroup(bool active)
   : StiDetectorGroup<StEvent,StMcEvent>("FTPC",
 			      active?new StiFtpcHitLoader():0,
-			      new StiFtpcDetectorBuilder(),0,0)
+			      new StiFtpcDetectorBuilder(active),0,0)
 {}
 
 

@@ -8,7 +8,7 @@ class StiFtpcDetectorBuilder : public StiDetectorBuilder
 
 public:
     // constructors
-    StiFtpcDetectorBuilder();
+    StiFtpcDetectorBuilder(bool active);
     virtual ~StiFtpcDetectorBuilder(); 
     virtual void loadDb();
     virtual void buildMaterials();

@@ -13,7 +13,7 @@ class StiTpcDetectorBuilder : public StiDetectorBuilder
 
 public:
     // constructors
-    StiTpcDetectorBuilder();
+    StiTpcDetectorBuilder(bool active);
     virtual ~StiTpcDetectorBuilder(); 	
     virtual void loadDb();
     virtual void buildMaterials();

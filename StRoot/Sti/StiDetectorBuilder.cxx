@@ -8,8 +8,10 @@
 #include "Sti/StiToolkit.h"
 #include "StThreeVector.hh"
 
-StiDetectorBuilder::StiDetectorBuilder(const string & name)
+StiDetectorBuilder::StiDetectorBuilder(const string & name,bool active)
   : Named(name),
+    _groupId(-1),
+    _active(active),
     _detectorFactory( StiToolkit::instance()->getDetectorFactory() ),
     _messenger(*Messenger::instance(MessageType::kDetectorMessage) )
 {
@@ -98,7 +100,6 @@ StiDetector * StiDetectorBuilder::add(StiDetector *detector)
   //complete the building of this detector element
   // in the base class nothing is actually done
   // but ROOT stuff is built in the drawable version of this class.
-  //detector->build();
   detector->setGroupId(_groupId);
   return detector;
 }

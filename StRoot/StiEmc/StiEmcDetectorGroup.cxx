@@ -9,7 +9,7 @@
 StiEmcDetectorGroup::StiEmcDetectorGroup(bool active)
   : StiDetectorGroup<StEvent,StMcEvent>("EMC",
 			      active?new StiEmcHitLoader():0,
-			      new StiEmcDetectorBuilder(),
+			      new StiEmcDetectorBuilder(active),
 			      0,
 			      0)
 {}

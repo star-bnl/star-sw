@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.19 2003/05/03 14:37:22 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.20 2003/05/07 03:01:39 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.20  2003/05/07 03:01:39  pruneau
+ * *** empty log message ***
+ *
  * Revision 2.19  2003/05/03 14:37:22  pruneau
  * *** empty log message ***
  *
@@ -660,18 +663,20 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   double dE=0;
   double sign;
   if (dx>0)
-    sign = -1.;
-  else
     sign = 1.;
+  else
+    sign = -1.;
   double eloss = _elossCalculator->calculate(1.,0.5,m, beta2,5.);
-  dE = sign*dxEloss*eloss;
-  /*if (getP()<0.2)
-   cout << "MCS: _x:"<<_x<<" dx:"<<dx<<" dxEloss:"<<dxEloss
-       <<" pt:"<<pt<<" p:"<<sqrt(p2)<<" E="<<sqrt(e2)<<" b="
-	<< sqrt(beta2)<<endl
-       << " eloss:"<<eloss<<" dE:"<<dE<<" dE/E="<<dE/sqrt(e2)
-       << " correction:"<<(1.- sqrt(e2)*dE/p2)<<endl;*/
-   if (fabs(dE)>0)
+  double fudge = 0.7;
+  dE = fudge*sign*dxEloss*eloss;
+  /*if (fabs(getP())<0.2)
+    cout << "MCS: _x:"<<_x<<" dx:"<<dx<<" dxEloss:"<<dxEloss
+	 <<" pt:"<<pt<<" p:"<<sqrt(p2)<<" E="<<sqrt(e2)<<" b="
+	 << sqrt(beta2)<<endl
+	 << " eloss:"<<eloss<<" dE:"<<dE<<" dE/E="<<dE/sqrt(e2)
+	 << " correction:"<<(1.- sqrt(e2)*dE/p2)
+	 << " pcorr:"<< _p3*(1.- sqrt(e2)*dE/p2) << endl;*/
+  if (fabs(dE)>0)
     {
       double cc=_p3;
       _p3 = _p3 *(1.- sqrt(e2)*dE/p2);
