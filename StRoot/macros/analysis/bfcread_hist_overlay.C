@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_overlay.C,v 1.4 2000/04/12 15:06:53 kathy Exp $
+// $Id: bfcread_hist_overlay.C,v 1.5 2000/07/26 19:53:45 lansdell Exp $
 // $Log: bfcread_hist_overlay.C,v $
+// Revision 1.5  2000/07/26 19:53:45  lansdell
+// made changes for creating new QA histograms
+//
 // Revision 1.4  2000/04/12 15:06:53  kathy
 // changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
 //
@@ -103,13 +106,13 @@ void bfcread_hist_overlay(
 
 // 1Dim. overlay
   Int_t result = HU->Overlay1D(MakerHistDir,
-                   "TabQaGtrkRT","TabQaPtrkR");
+                   "TabQaGtrkRT","TabQaPtrkRT");
   if (result == kStErr)
     cout << " !!! There was an error in Overlay1D !!!" << endl;  
 
 // 2Dim. overlay
   result = HU->Overlay2D(MakerHistDir,
-                   "TabQaGtrkLengthVEtaT","TabQaPtrkLengthVEta");
+                   "TabQaGtrkLengthVEtaT","TabQaPtrkLengthVEtaT");
   if (result == kStErr)
     cout << " !!! There was an error in Overlay2D !!!" << endl;  
    

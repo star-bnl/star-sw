@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.13 2000/06/02 20:25:11 lansdell Exp $
+// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.14 2000/07/26 19:53:44 lansdell Exp $
 // $Log: bfcread_dst_EventQA_outhistfile.C,v $
+// Revision 1.14  2000/07/26 19:53:44  lansdell
+// made changes for creating new QA histograms
+//
 // Revision 1.13  2000/06/02 20:25:11  lansdell
 // added check on Make() return codes
 //
@@ -102,22 +105,21 @@ void bfcread_dst_EventQA_outhistfile(
 
   gSystem->Load("St_base");
   gSystem->Load("StChain");
-
-  gSystem->Load("libgen_Tables");
-  gSystem->Load("libsim_Tables");
-  gSystem->Load("libglobal_Tables");
-
+  gSystem->Load("St_Tables");
 
   gSystem->Load("StUtilities");
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
-  gSystem->Load("St_QA_Maker"); 
-  gSystem->Load("StTreeMaker");
-
+  gSystem->Load("StDbUtilities");
+  gSystem->Load("StDbLib");
+  gSystem->Load("StDbBroker");
+  gSystem->Load("St_db_Maker");
+  gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
   gSystem->Load("StEventMaker");
-
+  gSystem->Load("StTreeMaker");
+  gSystem->Load("St_QA_Maker"); 
 
 //  Setup top part of chain
   chain = new StChain("MyChain");
@@ -129,6 +131,13 @@ void bfcread_dst_EventQA_outhistfile(
     IOMk->SetBranch("*",0,"0");                 //deactivate all branches
     IOMk->SetBranch("dstBranch",0,"r");
     IOMk->SetBranch("runcoBranch",0,"r");
+
+// database stuff
+  const char* calibDB = "MySQL:StarDb";
+  St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB);
+  calibMk->SetDateTime("year_1h");
+  calibMk->SetDebug();  
+  StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
 
 // constructor for other maker (not used in chain)
    StHistUtil   *HU  = new StHistUtil;
@@ -174,7 +183,7 @@ void bfcread_dst_EventQA_outhistfile(
      default: { gMessMgr->Warning() << "Event " << evnum << " returned status "
 	        << iret << ". Continuing."; gMessMgr->Print(); }
    }
-   iev++;                                // goto loop code
+   iev++;
    goto EventLoop;                       // goto loop code
  }
 
@@ -184,18 +193,4 @@ void bfcread_dst_EventQA_outhistfile(
   cout <<  "bfcread_dst_EventQA_outhistfile.C, passed chain->Finish" << endl ; 
    
 }
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
 

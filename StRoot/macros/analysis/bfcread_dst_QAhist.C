@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.35 2000/06/05 17:42:44 lansdell Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.36 2000/07/26 19:53:44 lansdell Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.36  2000/07/26 19:53:44  lansdell
+// made changes for creating new QA histograms
+//
 // Revision 1.35  2000/06/05 17:42:44  lansdell
 // restored StTpcDb and added libtpc_Tables (necessary to run on Linux as well as Solaris!)
 //
@@ -196,9 +199,9 @@ void bfcread_dst_QAhist(
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
-  gSystem->Load("StDbUtilities");
-  gSystem->Load("libtpc_Tables");
   gSystem->Load("StTpcDb");
+  gSystem->Load("libtpc_Tables");
+  gSystem->Load("StEvent");
   gSystem->Load("St_QA_Maker");
   gSystem->Load("tls");
   gSystem->Load("St_tpc");

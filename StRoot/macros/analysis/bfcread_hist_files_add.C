@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.12 2000/07/07 04:18:55 lansdell Exp $
+// $Id: bfcread_hist_files_add.C,v 2.13 2000/07/26 19:53:45 lansdell Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.13  2000/07/26 19:53:45  lansdell
+// made changes for creating new QA histograms
+//
 // Revision 2.12  2000/07/07 04:18:55  lansdell
 // loops over all branches of multiple hist.root files and saves the summed histograms to a new hist.root file (thanks Gene!)
 //
@@ -74,11 +77,13 @@ void bfcread_hist_files_add(
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("StIOMaker");
-  gSystem->Load("St_QA_Maker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StUtilities");
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("libglobal_Tables");
+  gSystem->Load("StTpcDb");
+  gSystem->Load("StEvent");
+  gSystem->Load("St_QA_Maker");
   gSystem->Load("StTreeMaker");
 
 // read file list from text file
