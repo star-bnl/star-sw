@@ -1,5 +1,9 @@
-* $Id: pixlgeo.g,v 1.8 2004/01/19 22:52:09 potekhin Exp $
+* $Id: pixlgeo.g,v 1.9 2004/01/29 19:58:12 potekhin Exp $
 * $Log: pixlgeo.g,v $
+* Revision 1.9  2004/01/29 19:58:12  potekhin
+* Corrected a typo in the ladder mother volume
+* material -- it's not silicon but air
+*
 * Revision 1.8  2004/01/19 22:52:09  potekhin
 * Some new dimensions
 *
@@ -128,7 +132,7 @@ Block PXMO is the mother of the pixel detector volumes
 endblock
 * -----------------------------------------------------------------------------
 Block PSEC is a group of ladders
-      Material  Silicon
+      Material  Air
       Attribute PSEC   Seen=1  colo=5
       Shape TUBS  Rmin=PIXG_Rin Rmax=PIXG_Rout Dz=PIXG_TotalLength/2.0 Phi1=-11.0 Phi2=118.0
 
