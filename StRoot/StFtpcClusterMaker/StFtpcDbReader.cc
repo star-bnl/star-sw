@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.13 2002/01/31 19:35:38 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.14 2002/10/11 15:37:36 oldi Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.14  2002/10/11 15:37:36  oldi
+// Minor cosmetics.
+//
 // Revision 1.13  2002/01/31 19:35:38  jcs
 // get temperatureDifference from data base
 //
@@ -59,7 +62,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
                                St_ftpcTimeOffset    *timeoffset,
                                St_ftpcDriftField    *driftfield,
                                St_ftpcGas           *gas,
-                               St_ftpcElectronics  *electronics)
+                               St_ftpcElectronics   *electronics)
 {
 
   //  just copy dimensions table start to pointer
