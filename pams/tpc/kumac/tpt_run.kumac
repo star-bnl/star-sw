@@ -9,7 +9,6 @@ endif
 
 MESSAGE 'Calling TPT...'
 ami/mod/call tpt /dui/constants/tpc/params/tptpars/tpt_pars _
-	     /dui/constants/tpc/geometry/tpgpar/tpg_pad_plane _
 	     /dui/data/tpc/hits/tphit _
 	     /dui/data/tpc/tracks/tptrack
 if ( staf_status(1) .ne. STAFCV_OK) then
