@@ -17,7 +17,7 @@
   StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
   dbMk->SetDebug();
   tpcDbMk->SetDebug();
-  dbMk->SetDateTime(19970101,10000);
+  dbMk->SetDateTime(20000801,10000);
   chain->SetDebug();
   chain->Init();
   chain->Make();
