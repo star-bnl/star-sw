@@ -196,13 +196,20 @@ int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger
     printf("St_trg_Maker:: Daq2003 : failed L1/L2 summary sanity check.\n"); 
     return Iret;
   }
+
   // printf("St_trg_Maker:: Daq2003 : passed L1/L2 summary sanity check.\n"); 
-  if(  
-       (((gActionWord)&0xf000)==0x9000 ) &&
-       (((gActionWord)&0x0001)==0x0001 ) &&
-       ( gs2003->EvtDesc.TriggerWord          ==0xf200 )
-  ) isLaser=7; // See comment 77y above.
-  if(gActionWord>>12==4) isPhysics=7;
+  printf("St_trg_Maker:: Daq2003 : ActionWrdCommand is 0x%0x TriggerWord 0x%0x\n",
+	 gs2003->EvtDesc.actionWdTrgCommand,
+	 gs2003->EvtDesc.TriggerWord);
+
+
+  if(  (((gActionWord)&0xf000)==0x9000 ) &&
+       (((gActionWord)&0x0001)==0x0001 ) //&&
+       //( gs2003->EvtDesc.TriggerWord          ==0xf200 )
+  ) isLaser=7; 
+
+  // See comment 77y above.
+  if(gActionWord>>12==4)                  isPhysics=7;
   if(gs2003->EvtDesc.TriggerWord==0xf101) isPulser=7;
 
   if((m_Mode  )==0)         thisEventOk=7;
