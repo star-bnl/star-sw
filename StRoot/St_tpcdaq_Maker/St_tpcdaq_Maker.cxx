@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.79  2004/01/02 17:05:46  ward
+// Bug fixes from Jeff Landgraf after testing.
+//
 // Revision 1.78  2003/12/24 13:44:55  fisyak
 // Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
 //
@@ -889,6 +892,7 @@ char St_tpcdaq_Maker::WhetherToSwap(unsigned int x) {
 #define MAXPADROWSPERBANK 50
 void St_tpcdaq_Maker::DAQ100clTableOut(unsigned int sectorCntsFrom1,char swap,
       const unsigned int *data) {
+  int nAlloc,nUsed;
   unsigned int wordNumber[MAXPADROWSPERBANK],npadrow,ipadrow;
   unsigned int padrow,numClusters,icluster;
   unsigned int numberOfClustersInPreviousChunk,numberOfWordsInPreviousChunk;
@@ -912,7 +916,7 @@ void St_tpcdaq_Maker::DAQ100clTableOut(unsigned int sectorCntsFrom1,char swap,
   // See the discussion of TPCMZCLD in the DAQ format doc, at about page 17.
   wordNumber[0]=1;
   assert(npadrow<=MAXPADROWSPERBANK); // Protect against overfilling the array.
-  for(ipadrow=1;ipadrow<npadrow;ipadrow++) {
+  for(ipadrow=0;ipadrow<npadrow;ipadrow++) {
     numberOfClustersInPreviousChunk = Swap4(swap,*(data+wordNumber[ipadrow-1]+1));
     numberOfWordsInPreviousChunk = 2 * numberOfClustersInPreviousChunk + 2;
     wordNumber[ipadrow] = wordNumber[ipadrow-1] + numberOfWordsInPreviousChunk;
@@ -935,6 +939,8 @@ void St_tpcdaq_Maker::DAQ100clTableOut(unsigned int sectorCntsFrom1,char swap,
       singlerow.timebucket=Swap2(swap,*time);
       singlerow.charge=Swap2(swap,*charge);
       singlerow.flag=Swap2(swap,*flag);
+      nAlloc=daq100cl->GetTableSize(); nUsed=daq100cl->GetNRows();
+      if(nUsed>nAlloc-10) { daq100cl->ReAllocate(Int_t(nAlloc*ALLOC+10)); }
       daq100cl->AddAt(&singlerow,totalRowCount++);
     }
   }
@@ -1001,7 +1007,7 @@ void St_tpcdaq_Maker::DAQ100clOutput(const unsigned int *pTPCP) {
         offset=Swap4(swapTPCRBCLP,*(pTPCRBCLP+10+2*imz  ));
         length=Swap4(swapTPCRBCLP,*(pTPCSECLP+10+2*imz+1));
         if(length==0) continue;
-        pTPCMZCLD=pTPCSECLP+offset; assert(!strncmp((char*)pTPCMZCLD,"TPCMZCLD",8));
+        pTPCMZCLD=pTPCRBCLP+offset; assert(!strncmp((char*)pTPCMZCLD,"TPCMZCLD",8));
         swapTPCMZCLD=WhetherToSwap(*(pTPCMZCLD+5));
         DAQ100clTableOut(sector+map,swapTPCMZCLD,pTPCMZCLD+10); // Decodes data words of TPCMZCLD.
       }
@@ -1010,8 +1016,9 @@ void St_tpcdaq_Maker::DAQ100clOutput(const unsigned int *pTPCP) {
     numberOfPresentSectors++;
 
   }
-  assert(numberOfPresentSectors==12||numberOfPresentSectors==0); // We expect 12 sectors
-    // as described in the section on TPCSECLP on page 17 of the DAQ Format doc.
+  // Not always 12 sectors assert(numberOfPresentSectors==12||numberOfPresentSectors==0); 
+  // We expect 12 sectors
+  // as described in the section on TPCSECLP on page 17 of the DAQ Format doc.
 }
 //________________________________________________________________________________
 Int_t St_tpcdaq_Maker::Make() {
