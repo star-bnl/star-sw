@@ -1,5 +1,8 @@
-// $Id: strange.C,v 1.5 1999/06/25 19:34:39 genevb Exp $
+// $Id: strange.C,v 1.6 1999/06/28 00:08:45 fisyak Exp $
 // $Log: strange.C,v $
+// Revision 1.6  1999/06/28 00:08:45  fisyak
+// Merge StRootEvent and StEvent
+//
 // Revision 1.5  1999/06/25 19:34:39  genevb
 // Update strange.C
 //
@@ -137,13 +140,7 @@ void strange(const Int_t nevents=999,
   strangeQQ(nevents,fileListQQ);
 }
 
-
-void strangeQQ(const Int_t nevents,
-              const Char_t **fileList)
-{
-
-
-
+void Load(){
   // Dynamically link needed shared libs
   gSystem->Load("St_base");
   gSystem->Load("StChain");
@@ -151,9 +148,15 @@ void strangeQQ(const Int_t nevents,
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StEvent");
-  gSystem->Load("StEventReaderMaker");
+  gSystem->Load("StEventMaker");
   gSystem->Load("StMagF");
   gSystem->Load("StSmdstMaker");
+}
+void strangeQQ(const Int_t nevents,
+              const Char_t **fileList)
+{
+
+  if (gClassTable->GetID("StChain") < 0) Load();
 
   // Handling depends on whether file is a ROOT file or XDF file
 
@@ -168,7 +171,7 @@ void strangeQQ(const Int_t nevents,
   IOMk->SetDebug();
 
 // 		Maker to read events from file or database into StEvent
-  StEventReaderMaker readerMaker("events","title");
+  StEventMaker readerMaker("events","title");
 // 		Sample analysis maker
  		StSmdstMaker *analysis=new StSmdstMaker("analysis");
 		analysis->DoHistograms();
