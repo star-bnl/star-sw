@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtReactionPlaneAnalysis.cxx,v 1.2 2001/07/20 20:03:53 rcwells Exp $
+ * $Id: StHbtReactionPlaneAnalysis.cxx,v 1.3 2002/03/27 19:00:44 rcwells Exp $
  *
  * Author: Randall Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtReactionPlaneAnalysis.cxx,v $
+ * Revision 1.3  2002/03/27 19:00:44  rcwells
+ * Corrected a test on the event plane angle
+ *
  * Revision 1.2  2001/07/20 20:03:53  rcwells
  * Added pT weighting and moved event angle cal. to event cut
  *
@@ -148,7 +151,7 @@ void StHbtReactionPlaneAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
   if (mPtWgt) mReactionPlaneAngle = hbtEvent->ReactionPlane(1);
   else mReactionPlaneAngle = hbtEvent->ReactionPlane(0);
   cout << "Reaction Plane " << mReactionPlaneAngle << endl; 
-  if (mReactionPlaneAngle==-999) {
+  if (mReactionPlaneAngle<-990) { // Test for a "good" event plane angle
     cout << "No event plane!" << endl;
     return;
   }
