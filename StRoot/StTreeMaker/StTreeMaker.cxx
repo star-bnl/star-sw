@@ -256,14 +256,17 @@ void StTreeMaker::FillHistBranch(StBranch *histBr)
     par = ds->GetParent();
     if (!par)				continue;
     if (strcmp(".make",par->GetName()))	continue;
+
+    TString ts(ds->GetName()); ts +="Hist";
+    St_ObjectSet *os = new St_ObjectSet(ts);
+    os->SetTitle(ds->GetTitle());
+    histBr->Add(os);
+
     dothist = ds->Find(".hist");
     if (!dothist)			continue;
     TList *tl = (TList*)((St_ObjectSet*)dothist)->GetObject();
     if (!tl || !tl->First())		continue;
-    TString ts(ds->GetName()); ts +="Hist";
-    St_ObjectSet *os = new St_ObjectSet(ts);
     os->SetObject(tl);
-    histBr->Add(os);
   }
   UpdateTree(2);
 }

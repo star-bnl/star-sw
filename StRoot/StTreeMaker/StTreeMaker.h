@@ -35,6 +35,10 @@ public:
    StTree *GetTree(){return fTree;};
    StBranch *GetBranch(const Char_t *brName)
      {if(!fTree)return 0;return (StBranch*)fTree->Find(brName);};   
+
+  virtual const char *GetCVS()
+  {static const char cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.6 1999/07/09 22:02:51 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
    ClassDef(StTreeMaker, 1)   //StAR chain virtual base class for Makers
 };
 
