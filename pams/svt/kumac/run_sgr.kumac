@@ -22,7 +22,7 @@ MACRO run
 	[params]/svt/svgpars/geom _
         [data]/svt/hits/scs_spt _
         [data]/svt/tracks/groups _ 
-        [params]/svt/pix_info _
+        [params]/svt/sgrpars/pix_info _
         [data]/svt/tracks/candidate_groups _
         [data]/svt/tracks/stk_track
   
