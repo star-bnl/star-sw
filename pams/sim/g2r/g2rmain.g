@@ -1,3 +1,9 @@
+* $Id: g2rmain.g,v 1.3 2000/01/11 17:29:57 nevski Exp $
+* $Log: g2rmain.g,v $
+* Revision 1.3  2000/01/11 17:29:57  nevski
+* a separate g2t_field function provided to extract nominal field
+*
+*
 **:>-----------------------------------------------------------------------
 module    G2Rmain  is g2r converter
 author    Pavel Nevski
@@ -275,17 +281,3 @@ created   22 april 98
   end
 
 ****************************************************************************
-
-  Function   G2T_FIELD(x)
-  Implicit   NONE
-  Real       G2T_field,x
-  Structure  MFLG  {version, BField }
-  Integer    imag/0/
-
-  Call RbPUSHD
-  USE /DETM/MFLD/MFLG  stat=imag
-  G2T_field = mflg_Bfield
-  Call RbPOPD
-
-  end
-

@@ -260,17 +260,3 @@ created   22 april 98
   end
 
 ****************************************************************************
-
-  Function   G2T_FIELD(x)
-  Implicit   NONE
-  Real       G2T_field,x
-  Structure  MFLG  {version, BField }
-  Integer    imag/0/
-
-  Call RbPUSHD
-  USE /DETM/MFLD/MFLG  stat=imag
-  G2T_field = mflg_Bfield
-  Call RbPOPD
-
-  end
-
