@@ -1,5 +1,5 @@
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.5 2003/04/22 21:20:05 pruneau Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.6 2003/05/01 20:46:41 pruneau Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.6  2003/05/01 20:46:41  pruneau
+ * changed error parametrization
+ *
  * Revision 2.5  2003/04/22 21:20:05  pruneau
  * Added hit filter
  * Tuning og finder pars
@@ -73,8 +76,8 @@ void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node) con
   double tanDip=node->getTanL();
   double cosDipInv2=1+tanDip*tanDip;
   double edip=coeff[3]+coeff[4]*dz*cosDipInv2+coeff[5]*tanDip*tanDip;
-  if (ecross>100) ecross = 100.; 
-  if (edip>100) edip = 100.; 
+  if (ecross>400) ecross = 100.; 
+  if (edip>400) edip = 100.; 
   double scaling;
   if (node->_x>120)
     scaling = StiKalmanTrackNode::pars->getOuterScaling();

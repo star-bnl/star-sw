@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.17 2003/04/22 21:20:17 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.18 2003/05/01 20:46:47 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.18  2003/05/01 20:46:47  pruneau
+ * changed error parametrization
+ *
  * Revision 2.17  2003/04/22 21:20:17  pruneau
  * Added hit filter
  * Tuning og finder pars
@@ -729,14 +732,12 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   //If required, recalculate the errors of the detector hits.
   //Do not attempt this calculation for the main vertex.
   if (!hit)throw runtime_error("SKTN::evaluateChi2(const StiHit &) - hit==0");
-
-  
   const StiDetector * detector = hit->detector();
   if (useCalculatedHitError && detector)
     {
-      const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
-      if (!calc)throw runtime_error("SKTN::evaluateChi2(const StiHit &) - calc==0");
-      calc->calculateError(this);
+      //const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
+      //if (!calc)throw runtime_error("SKTN::evaluateChi2(const StiHit &) - calc==0");
+      //calc->calculateError(this);
       //cout << " _c00:"<<_c00<<" _c10:"<<_c10<<" _c11:"<<_c11<<" ey:"<<sqrt(eyy)<<" ez:"<<sqrt(ezz)<<endl;
       r00=_c00+eyy;
       r01=_c10; r11=_c11+ezz;
@@ -968,30 +969,46 @@ double StiKalmanTrackNode::getWindowY()
 {	  
   const StiHitErrorCalculator * calc = getDetector()->getHitErrorCalculator();
   if (!calc)
-    throw runtime_error("SKTN::getWindowY() - calc==0");
+    {
+      cout << "SKTN::getWindowY() -E- Detector:"<<getDetector()->getName()<<" has no calculator"<<endl;
+      throw runtime_error("SKTN::getWindowY() -E- calc==0");
+    }
   calc->calculateError(this);
-  double sqrtC00 = sqrt(_c00);
-  double sqrtEyy = sqrt(eyy);
-  //cout << "getWindowY() _refX: "<< _refX<< " sqrt(_c00):"<<sqrtC00<<" ey:"<<sqrtEyy;
   double window = pars->searchWindowScale*sqrt(_c00+eyy);
-  //cout << " window:"<<window;
+  /*  double sqrtC00 = sqrt(_c00);
+  double sqrtEyy = sqrt(eyy);
+  double eta = 180*getDipAngle()/3.1415;
+  if (fabs(eta)<10.) cout << "getWindowY() _refX: "<< _refX
+			  <<" eta:"<< eta
+			  << " sqrt(_c00):"<<sqrtC00
+			  <<" ey:"<<sqrtEyy
+			  << " window:"<<window;*/
   if (window<pars->minSearchWindow)
     window = pars->minSearchWindow;
   else if (window>pars->maxSearchWindow)
     window = pars->maxSearchWindow;
-  //cout <<" win corr:"<<window<<endl;
+  //if (fabs(eta)<10.)cout <<" win corr:"<<window<<endl;
   return window;
 }
 
 //_____________________________________________________________________________
 double StiKalmanTrackNode::getWindowZ() const
 {	 
-  double window = pars->searchWindowScale*sqrt(_c11+ezz);
+  double window = pars->searchWindowScale*sqrt(_c11+ezz);  
+  /*
+  double sqrtC11 = sqrt(_c11);
+  double sqrtEzz = sqrt(ezz);
+  double eta = 180*getDipAngle()/3.1415;
+  if (fabs(eta)<10.) cout << "getWindowZ() _refX: "<< _refX
+			  <<" eta:"<< eta
+			  << " sqrt(_c11):"<<sqrtC11
+			  <<" ez:"<<sqrtEzz
+			  <<" window:"<<window;*/
   if (window<pars->minSearchWindow)
     window = pars->minSearchWindow;
   else if (window>pars->maxSearchWindow)
     window = pars->maxSearchWindow;
-  *(Messenger::instance(MessageType::kNodeMessage)) <<"winZ:"<<window<<endl;
+  //if (fabs(eta)<10.)cout <<" win corr:"<<window<<endl;
   return window;
 }
 
