@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.40 2003/01/22 18:13:29 ward Exp $
+ * $Id: EventReader.cxx,v 1.41 2003/01/29 21:09:31 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.41  2003/01/29 21:09:31  ward
+ * Accomodate nominally zero data words in TOFP.
+ *
  * Revision 1.40  2003/01/22 18:13:29  ward
  * Bug in TOF online code, disable corruption check for this bank.
  *
@@ -890,7 +893,7 @@ char EventReader::BankOrItsDescendentsIsBad(int herbFd,long currentOffset) { // 
   else if(!strcmp(bankname,"EMCP")) { beg=0; end=0; }
   else if(!strcmp(bankname,"PMDP")) { beg=0; end=0; }
   else WhereAreThePointers(&beg,&end,bankname); 
-  if(end>=numberOfDataWords) {
+  if(end>=numberOfDataWords&&numberOfDataWords>0) {//29jan03 numberOfDataWords>0 because of bank errs
     PP"end=%d, numberOfDataWords=%d, bankname=%s.\n",end,numberOfDataWords,bankname);
     assert(end<numberOfDataWords);
   }
