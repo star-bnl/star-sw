@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.24 2003/12/24 21:30:45 perev Exp $
+ * $Id: StDAQReader.h,v 1.25 2004/02/03 03:25:06 jeromel Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.25  2004/02/03 03:25:06  jeromel
+ * Added counter for ZeroToken events
+ *
  * Revision 1.24  2003/12/24 21:30:45  perev
  * Cleanup of DAQ
  *
@@ -177,7 +180,8 @@ public:
   virtual EventReader *getEventReader() const {return fEventReader;}  
 
 protected:
-  int fFd;	//File descriptor
+  int m_ZeroTokens;   //! number of events with token==0
+  int fFd;	      //  File descriptor
   int fVerbose;
   EventReader  *fEventReader;  
   StTPCReader  *fTPCReader;  

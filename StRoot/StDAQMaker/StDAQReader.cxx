@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.39 2004/02/02 20:21:42 ward Exp $
+ * $Id: StDAQReader.cxx,v 1.40 2004/02/03 03:25:06 jeromel Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.40  2004/02/03 03:25:06  jeromel
+ * Added counter for ZeroToken events
+ *
  * Revision 1.39  2004/02/02 20:21:42  ward
  * Passing Token 0 events, on request of J. Lauret.
  *
@@ -167,6 +170,7 @@ StDAQReader::StDAQReader(const char *file)
   fL3Reader 	= 0;
   fTOFReader    = 0;
   fFPDReader    = 0;
+  m_ZeroTokens  = 0;
   fOffset = 0;
   fFile = 0;
   fEventInfo = new DAQEventInfo;
@@ -218,6 +222,10 @@ int StDAQReader::close()
 //_____________________________________________________________________________
 StDAQReader::~StDAQReader()
 {
+  if (m_ZeroTokens > 1){
+    (void) printf("<Warning: StDAQReader::~StDAQReader()> %d events with token==0",
+		  m_ZeroTokens);
+  }
   close();
 }
 //_____________________________________________________________________________
@@ -238,7 +246,10 @@ int StDAQReader::readEvent()
   if(fEventReader->eventIsCorrupted(fFd,oldOffset)) return kStErr; // Herb, Aug 28 2000
   if(fEventReader->errorNo()) return kStErr;  
   *fEventInfo = fEventReader->getEventInfo();
-  // if(fEventInfo->Token==0) return kStErr;  // Herb, July 5 2000
+  if(fEventInfo->Token==0){
+    m_ZeroTokens++;
+    // return kStErr;  // Herb, July 5 2000
+  }
 
   if (fTPCReader&&TPCPresent  ())       fTPCReader ->Update();
   if (fFTPCReader&&FTPCPresent())	fFTPCReader->Update();  
