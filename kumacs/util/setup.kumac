@@ -27,7 +27,6 @@ macro dir
  
 *************** create global macros *********************************
  
- message ' new version'
  macro/global/create run       /dui/run
  macro/global/create event     /dui/event
  macro/global/create calib     /dui/calib
@@ -56,7 +55,7 @@ macro dir
  mkdir  [geantR]
  mkdir  [geant_Run]
  mkdir  [params]
-  for sys in ctf emc ftpc global mwc svt tpc
+  for sys in ctf emc ftpc global mwc svt tpc trg
     mkdir [params]/[sys]
     mkdir [calib]/[sys]
   endfor
@@ -72,17 +71,14 @@ macro dir
 
 *  raw data tables ------------------------------------
  mkdir  [raw_data] 
-  for sys in emc ftpc svt tpc
+  for sys in  ctf emc ftpc global mwc svt tpc trg
    mkdir  [raw_data]/[sys]
    mkdir  [raw_data]/[sys]/pixels
  endfor
  
 *  data tables ----------------------------------------
- mkdir  [data] 
- mkdir  [data]/ctf
- mkdir  [data]/trg       
- mkdir  [data]/mwc
- for sys in emc ftpc global svt tpc
+ mkdir  [data]  
+ for sys in ctf emc ftpc global mwc svt tpc trg
   mkdir  [data]/[sys]
   mkdir  [data]/[sys]/tracks
   if [sys]=global then
