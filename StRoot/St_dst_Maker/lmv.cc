@@ -1,5 +1,14 @@
-// $Id: lmv.cc,v 1.12 2000/03/04 02:41:37 nystrand Exp $
+// $Id: lmv.cc,v 1.13 2000/07/21 23:55:47 balewski Exp $
 // $Log: lmv.cc,v $
+// Revision 1.13  2000/07/21 23:55:47  balewski
+// NaN bug#600 fix
+//
+// JB: cleanup of NaN error
+//     - remove clvec : not used
+//     - set MinTrackLen=1. (cm) as static double
+//     - add check for -//- in calc of "matrix A and vect b"
+//     - remove  item from TrkLength list when track is discarded
+//
 // Revision 1.12  2000/03/04 02:41:37  nystrand
 // bugfix and update
 //
@@ -84,7 +93,9 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 //#include "StMagF/StMagF.h"
 
 
-//static const char rcsid[] = "$Id: lmv.cc,v 1.12 2000/03/04 02:41:37 nystrand Exp $";
+//static const char rcsid[] = "$Id: lmv.cc,v 1.13 2000/07/21 23:55:47 balewski Exp $";
+
+static double  MinTrackLen= 1.;
 
 long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 {
@@ -127,11 +138,11 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
   vector<long,allocator<long> > index;
-  vector<StPhysicalHelixD,allocator<StPhysicalHelixD> > clvec,helices;
+  vector<StPhysicalHelixD,allocator<StPhysicalHelixD> > helices;
   vector<double,allocator<double> > TrkLength,sigma;
 #else
   vector<long > index;
-  vector<StPhysicalHelixD > clvec,helices;
+  vector<StPhysicalHelixD > helices;
   vector<double > TrkLength,sigma;
 #endif
   index.clear();
@@ -388,7 +399,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     double D_fst_point = 0.030; // Estimated track resolution
 
     double dr_ext = 0.0;
-    if( TrkLength[kk] > 1.0 ){
+    if( TrkLength[kk] > MinTrackLen ){
       dr_ext = D_fst_point + D_fst_point*fabs(spath/TrkLength[kk]);
       sigma[kk] = sqrt( sigma[kk]*sigma[kk] + dr_ext*dr_ext );
     }
@@ -418,6 +429,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     // Compute matrix A and vector b
     for(unsigned int itr=0; itr < helices.size(); itr++){ 
       //      sigma[itr]=1.0;
+      if( TrkLength[itr] <= MinTrackLen ) continue;
       double xo=0.0,yo=0.0;
       spath = helices[itr].pathLength(xo,yo);
       StThreeVectorD XClosest = helices[itr].at(spath);
@@ -466,10 +478,12 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     vector<StPhysicalHelixD,allocator<StPhysicalHelixD> >::iterator itehlx=helices.begin(), i1keep;
     vector<double,allocator<double> >::iterator itesig=sigma.begin(),i2keep;
     vector<long,allocator<long> >::iterator iteind=index.begin(),i3keep;
+    vector<double,allocator<double> >::iterator itTrL=TrkLength.begin(),i4keep;
 #else
     vector<StPhysicalHelixD >::iterator itehlx=helices.begin(), i1keep;
     vector<double >::iterator itesig=sigma.begin(),i2keep;
     vector<long >::iterator iteind=index.begin(),i3keep;
+    vector<double >::iterator itTrL= TrkLength.begin(),i4keep;
 #endif
     while( itehlx != helices.end()){
       //      sigma[itr]=1.0;
@@ -489,9 +503,10 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
         i1keep = itehlx;
         i2keep = itesig;
         i3keep = iteind;
+	i4keep = itTrL;
       }
       //
-      itehlx++; itesig++; iteind++;
+      itehlx++; itesig++; iteind++; itTrL++;
     }
 
     if( dmax > DVtxMax ){
@@ -499,6 +514,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
       helices.erase(i1keep);
       sigma.erase(i2keep);
       index.erase(i3keep);
+      TrkLength.erase(i4keep);
       done=0;
     }
     else{
