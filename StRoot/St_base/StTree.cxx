@@ -2,6 +2,7 @@
 #include "Stypes.h"
 #include "StTree.h"
 #include "TRegexp.h"
+#include "TDirIter.h"
 #include "TKey.h"
 #include "TRFIOFile.h"
 
@@ -814,7 +815,7 @@ Int_t StFile::AddFile(const Char_t **fileList)
 Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
 {
   TString tfile,tit,base,famy;
-  if (strstr(file,"*")) return AddWild(file);
+  if (strpbrk(file,"*\\[]#@")) return AddWild(file);
 
 
   tfile = file; gSystem->ExpandPathName(tfile);
@@ -865,40 +866,10 @@ Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
 //_____________________________________________________________________________
 Int_t StFile::AddWild(const Char_t *file)
 {
-  TString tfile,tdir,tname,tbase,fullname;
-  const char *name; char *cc;
-  tfile = file;
-  tdir  = gSystem->DirName(tfile);
-  tbase = gSystem->BaseName(tfile);
-  gSystem->ExpandPathName(tdir);
-
-
-  void *dir = gSystem->OpenDirectory(tdir);
-  if (!dir) {
-    Warning("AddWild","*** IGNORED Directory %s does NOT exist ***\n",
-    (const Char_t *)tdir);
-    return kStWarn;}
-
-  while ((name = gSystem->GetDirEntry(dir))) {
-//              skip some "special" names
-    if (strcmp(name,"..")==0 || strcmp(name,".")==0) continue;
-    tname = name;
-
-    cc = gSystem->ConcatFileName(tdir,name);
-    fullname = cc; delete [] cc;
-
-    Long_t idqwe,sizeqwe,flags,modtimeqwe;
-    gSystem->GetPathInfo(fullname,&idqwe,&sizeqwe,&flags,&modtimeqwe);
-    if (flags&2 || !flags&4) continue;
-
-//              prepare simple regular expression
-    TRegexp rexp(tbase,kTRUE);
-    int len=0;
-    if (rexp.Index(tname,&len)!=0)      continue;
-    if (len!=tname.Length())            continue;
-    AddFile(fullname);
-  }
-  gSystem->FreeDirectory(dir);
+  const char* fullname;
+  TDirIter dirIter(file);
+  while((fullname=dirIter.NextFile())) { AddFile(fullname);}
+  
   return 0;
 }
 //_____________________________________________________________________________
