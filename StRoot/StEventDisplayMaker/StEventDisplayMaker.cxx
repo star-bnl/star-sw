@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.105 2004/11/08 20:12:11 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.106 2004/11/09 19:40:00 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -847,11 +847,7 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
   {
     pnt = (StPoints3DABC*)points->At(i);
     if (!pnt->Size()) continue;
-    //		Filtration
-    nextFilter.Reset();
-    while ((filt=(StFilterABC*)nextFilter())) {if (!filt->AcceptCB(pnt,col,siz,sty)) break;}
-    if (filt) {ncut++; continue;}
-
+ 
     int kind = pnt->Kind();
     L = "P";
     if (kind==3 && (kase&kUSE || pnt->Size()>1)) kind=9;
@@ -867,8 +863,12 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
     col = pnt->GetUniqueID();
     if (!col) col = defCol;
     siz = defSiz;sty=defSty;
-//  Draw it
+    //		Filtration
+    nextFilter.Reset();
+    while ((filt=(StFilterABC*)nextFilter())) {if (!filt->AcceptCB(pnt,col,siz,sty)) break;}
+    if (filt) {ncut++; continue;}
 
+//  Draw it
     DrawIt(pnt,L,col,sty,siz);
     trackCounter++;
   }
@@ -1189,6 +1189,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.106  2004/11/09 19:40:00  fine
+// Set the filter invokation after the default parameters set
+//
 // Revision 1.105  2004/11/08 20:12:11  fine
 // Remove the Victor workaround for Global tracks
 //
