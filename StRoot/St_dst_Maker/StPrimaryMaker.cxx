@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.21 1999/11/27 18:21:42 fisyak Exp $
+// $Id: StPrimaryMaker.cxx,v 1.22 1999/12/02 03:22:25 perev Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.22  1999/12/02 03:22:25  perev
+// remove redundant m_egr_egrpar
+//
 // Revision 1.21  1999/11/27 18:21:42  fisyak
 // Add test that primary vertex exists
 //
@@ -108,16 +111,13 @@ StPrimaryMaker::~StPrimaryMaker(){
 //_____________________________________________________________________________
 Int_t StPrimaryMaker::Init(){
   // Create tables
-  //egr 
-  m_egr_egrpar = (St_egr_egrpar *) GetDataSet("match/.runcontrol/egr_egrpar");  
-  assert (m_egr_egrpar);
   //evr
   //  m_evr_evrpar  = (St_evr_evrpar *) params("evrpars/evr_evrpar");
   m_evr_evrpar = new St_evr_evrpar("evr_evrpar",1);
   {
     evr_evrpar_st row;
     //
-    memset(&row,0,m_evr_evrpar->GetRowSize());
+    memset(&row,0,sizeof(row));
     row.vcut	 =          3; // distance below where track is marked as default primary ;
     row.cut2	 =          2; // select tracks for 2nd vertex fit ;
     row.cut3	 =        0.5; // select tracks for 3rd vertex fit ;
@@ -148,7 +148,7 @@ Int_t StPrimaryMaker::Init(){
   m_egr2_egrpar = new St_egr_egrpar("egr2_egrpar",1);
   {  
     egr_egrpar_st row;
-    memset(&row,0,m_egr_egrpar->GetRowSize());
+    memset(&row,0,sizeof(row));
     row.mxtry =    10;
     row.minfit =    5;
     row.prob[0] =   2;
