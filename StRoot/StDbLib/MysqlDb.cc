@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.21 2002/04/16 19:44:49 porter Exp $
+ * $Id: MysqlDb.cc,v 1.22 2003/02/11 03:22:07 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.22  2003/02/11 03:22:07  porter
+ * added warning message individual columns return null data
+ *
  * Revision 1.21  2002/04/16 19:44:49  porter
  * changed non-dbname in arguement of mysql_real_connect from 0 to NULL.  mysql
  * perfers this.  Updated rules.make for local mysql installation on linux
@@ -506,7 +509,14 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
       } else {
 	       aBuff->WriteScalar((char*)tRow[i],mRes->mRes->fields[i].name);
       };
-    };
+    } else {
+
+      ostrstream nd;
+      nd<<"null data returned from table = ";
+      nd<<mRes->mRes->fields[i].table<<" column="<<mRes->mRes->fields[i].name<<ends;
+      StDbManager::Instance()->printInfo(nd.str(),dbMWarn,__LINE__,"MysqlDb","Output(StDbBuffer* b)");
+      nd.freeze(0);
+    }
     tRetVal=true;
   };
   if (change) aBuff->SetClientMode();
