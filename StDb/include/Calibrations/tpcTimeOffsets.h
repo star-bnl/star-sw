@@ -1,0 +1,17 @@
+//:Description: 
+//:Synonyms::::
+//:Source:
+//:Update:
+//:Update frequncy:
+//:Reminder:
+//:Recall frequency:
+//:Size of Data:
+//:Pointer to data:  timeOffsets.time:
+struct tpcTimeOffsets {
+
+  //  type varnam;    //Units : Comments
+  int  sectorID;
+  long innerSectorTimeOffsets[1750];
+  long outerSectorTimeOffsets[3942];
+
+};
