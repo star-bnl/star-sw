@@ -406,7 +406,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		  bool active = tDet->isActive(testNode._p0,testNode._p1);
 		  if (debug) cout << " vol active:" << active<<endl;
 		  // temporary elimination of the SVT
-		  if (testNode._x<40.) active = false;
+		  // if (testNode._x<40.) active = false;
 		  if (active&&(testNode.nullCount<(_pars.maxNullCount+3)&&testNode.contiguousNullCount<(_pars.maxContiguousNullCount+3) ) )
 		    {
 		      if (debug)cout<<" search hits";
