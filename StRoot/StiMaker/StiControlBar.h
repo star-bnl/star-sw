@@ -39,8 +39,8 @@ public:
     static void setCurrentDetectorToDefault();
     static void showCurrentDetector(); //Show the current
     
-    static void setSector(); //call StiDetectorLayerContainer::setSector(int)
-    static void setSectorAndPadrow(); //call StiDetectorLayerContainer::setSector(int sector, int padrow)
+    static void setLayer(); //call StiDetectorLayerContainer::setSector(int)
+    static void setLayerAndAngle(); //call StiDetectorLayerContainer::setSector(int sector, int padrow)
     
     static void moveIn();
     static void moveOut();

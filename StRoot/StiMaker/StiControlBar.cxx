@@ -113,50 +113,47 @@ void StiControlBar::printDetector()
 }
 
 
-void StiControlBar::setSector()
+void StiControlBar::setLayer()
 {
-    cout <<"Function Not Currently Implemented"<<endl;
-    /*
-      StiControlBar::setCurrentDetectorToDefault();
-      cout <<"\nEnter Sector: (double)"<<endl;
-      double sector;
-      cin >>sector;
-      cout <<"Setting to  sector:\t"<<sector<<endl;
-      StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-      rdet.setRefDetector(sector);
-      const StiDetector* layer = *rdet;
-      if (!layer) {
-      cout <<"Error in setSectorAndPadrow"<<endl;
-      return;
-      }
-      cout <<"Detector Set To: "<<layer->getName()<<endl;
-      StiControlBar::showCurrentDetector();
-    */
+    //cout <<"Function Not Currently Implemented"<<endl;
+    StiControlBar::setCurrentDetectorToDefault();
+    cout <<"\nEnter position: (double)"<<endl;
+    double position;
+    cin >>position;
+    cout <<"Setting to  position:\t"<<position<<endl;
+    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+    rdet.setToDetector(position);
+    StiDetector* layer = *rdet;
+    if (!layer) {
+	cout <<"Error in setSectorAndPadrow"<<endl;
+	return;
+    }
+    cout <<"Detector Set To: "<<layer->getName()<<endl;
+    StiControlBar::showCurrentDetector();
 }
 
-void StiControlBar::setSectorAndPadrow()
+void StiControlBar::setLayerAndAngle()
 {
-    cout <<"Function Not Currently Implemented"<<endl;
-    /*
-      StiControlBar::setCurrentDetectorToDefault();
-      cout <<"\nEnter Sector: (int)"<<endl;
-      int sector;
-      cin >>sector;
-      cout <<"\nEnter Padrow: (int) "<<endl;
-      int padrow;
-      cin >>padrow;
-      
-      cout <<"Setting to  sector:\t"<<sector<<"\tpadrow:\t"<<padrow<<endl;
-      StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-      rdet.setRefDetector(sector, padrow);
-      const StiDetector* layer = *rdet;
-      if (!layer) {
-      cout <<"Error in setSectorAndPadrow"<<endl;
-      return;
-      }
-      cout <<"Detector Set To: "<<layer->getName()<<endl;
-      StiControlBar::showCurrentDetector();
-    */
+    //cout <<"Function Not Currently Implemented"<<endl;
+    StiControlBar::setCurrentDetectorToDefault();
+    cout <<"\nEnter position: (double)"<<endl;
+    double position;
+    cin >>position;
+
+    cout <<"\nEnter angle: (double)"<<endl;
+    double angle;
+    cin >> angle;
+    cout <<"Setting to  position:\t"<<position<<"\tangle:\t"<<angle<<endl;
+
+    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+    rdet.setToDetector(position, angle);
+    StiDetector* layer = *rdet;
+    if (!layer) {
+	cout <<"Error in setSectorAndPadrow"<<endl;
+	return;
+    }
+    cout <<"Detector Set To: "<<layer->getName()<<endl;
+    StiControlBar::showCurrentDetector();
 }
 
 void StiControlBar::moveOut()
@@ -260,9 +257,9 @@ TControlBar* StiControlBar::makeControlBar()
     bar->AddButton("Move Around (Plus)","StiControlBar::movePlusPhi()","Step positive in global phi");
     bar->AddButton("Move Around (Minus)","StiControlBar::moveMinusPhi()","Step negative in global phi");
 
-    bar->AddButton("Set Sector","StiControlBar::setSector()","Set to top of sector");
-    bar->AddButton("Set Sector and Padrow","StiControlBar::setSectorAndPadrow()",
-		   "Set to sector, padrow");
+    bar->AddButton("Set Layer","StiControlBar::setLayer()","Set to given layer");
+    bar->AddButton("Set Layer and Angle","StiControlBar::setLayerAndAngle()",
+		   "Set to given layer, angle");
 
     //Chain management
     bar->AddSeparator();
