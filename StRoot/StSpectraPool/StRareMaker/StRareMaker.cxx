@@ -1,5 +1,8 @@
-// $Id: StRareMaker.cxx,v 1.4 2001/10/15 20:20:27 struck Exp $
+// $Id: StRareMaker.cxx,v 1.5 2001/10/16 01:26:14 struck Exp $
 // $Log: StRareMaker.cxx,v $
+// Revision 1.5  2001/10/16 01:26:14  struck
+// added filename parameter for tree file to constructors
+//
 // Revision 1.4  2001/10/15 20:20:27  struck
 // first version with L3 included
 //
@@ -41,48 +44,50 @@ ClassImp(StRareEventCut)
 ClassImp(StRareTrackCut)
 ClassImp(StL3RareTrackCut)
 
-static const char rcsid[] = "$Id: StRareMaker.cxx,v 1.4 2001/10/15 20:20:27 struck Exp $";
+static const char rcsid[] = "$Id: StRareMaker.cxx,v 1.5 2001/10/16 01:26:14 struck Exp $";
 
 double dEdx_formula(double momentum, double mass);
 
 ClassImp(StRareMaker)
 
-StRareMaker::StRareMaker(const Char_t *name) : StMaker(name) {
+StRareMaker::StRareMaker(const Char_t *name, Char_t* fileName) : StMaker(name) {
   mRareEvent = new StRareEvent();
-  out = new TFile("RareEvent.root","RECREATE");
+  out = new TFile(fileName, "RECREATE");
   out->SetCompressionLevel(2);
-  m_Tree = new TTree("RareTree","RareTree");
+  m_Tree = new TTree("RareTree", "RareTree");
   //  m_Tree->SetBranchStyle(0); 
   m_Tree->AutoSave();
   m_Tree->SetAutoSave(10000000);
-  m_Tree->Branch("StRareEvent","StRareEvent",&mRareEvent,64000,1);
+  m_Tree->Branch("StRareEvent", "StRareEvent", &mRareEvent, 64000, 1);
   mEventCut = new StAcceptAllEvents(); 
   mTrackCut = new StAcceptAllTracks();
   mL3TrackCut = new StAcceptAllL3Tracks();
 }
 
-StRareMaker::StRareMaker(const Char_t *name,StRareEventCut* cut, StRareTrackCut* track) : StMaker(name) {
-  out = new TFile("RareEvent.root","RECREATE");
-  m_Tree = new TTree("RareTree","RareTree",1000000);
+StRareMaker::StRareMaker(const Char_t *name, Char_t* fileName,
+			 StRareEventCut* cut, StRareTrackCut* track) : StMaker(name) {
+  out = new TFile(fileName, "RECREATE");
+  m_Tree = new TTree("RareTree", "RareTree", 1000000);
   m_Tree->AutoSave();
   m_Tree->SetAutoSave(10000000);
   mRareEvent = new StRareEvent();  
-  m_Tree->Branch("StRareEvent","StRareEvent",&mRareEvent,64000,1);
+  m_Tree->Branch("StRareEvent", "StRareEvent", &mRareEvent, 64000, 1);
   mEventCut = cut; 
   mTrackCut = track;
   mL3TrackCut = 0;
 }
 
-StRareMaker::StRareMaker(const Char_t *name, StRareEventCut* cut,
+StRareMaker::StRareMaker(const Char_t *name, Char_t* fileName,
+			 StRareEventCut* cut,
 			 StRareTrackCut* trackCut,
 			 StL3RareTrackCut* l3trackCut) : StMaker(name) {
   //out = new TFile("/direct/star+data01/pwg/spectra/struck/2001/RareEvent.root","RECREATE");
-  out = new TFile("RareEvent.root","RECREATE");
-  m_Tree = new TTree("RareTree","RareTree",1000000);
+  out = new TFile(fileName, "RECREATE");
+  m_Tree = new TTree("RareTree", "RareTree", 1000000);
   m_Tree->AutoSave();
   m_Tree->SetAutoSave(10000000);
   mRareEvent = new StRareEvent();
-  m_Tree->Branch("StRareEvent","StRareEvent",&mRareEvent,64000,1);
+  m_Tree->Branch("StRareEvent", "StRareEvent", &mRareEvent, 64000, 1);
   mEventCut = cut; 
   mTrackCut = trackCut;
   mL3TrackCut = l3trackCut;
@@ -151,7 +156,7 @@ void StRareMaker::Report(){
 
 void StRareMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StRareMaker.cxx,v 1.4 2001/10/15 20:20:27 struck Exp $\n");
+  printf("* $Id: StRareMaker.cxx,v 1.5 2001/10/16 01:26:14 struck Exp $\n");
   printf("**************************************************************\n");
 }
 
