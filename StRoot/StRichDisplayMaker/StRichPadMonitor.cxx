@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPadMonitor.cxx,v 2.5 2000/11/01 16:59:18 lasiuk Exp $
+ * $Id: StRichPadMonitor.cxx,v 2.6 2000/12/08 04:59:12 lasiuk Exp $
  * Description:
  *  A Pad Monitor for the STAR-RICH.
  *  Runs only in ROOT
@@ -7,6 +7,10 @@
  *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
+ * Revision 2.6  2000/12/08 04:59:12  lasiuk
+ * unambiguate hiliteHits(flag) by requiring user
+ * to specify which ring is of interest
+ *
  * Revision 2.5  2000/11/01 16:59:18  lasiuk
  * MAJOR.  add ringInfo().  Clear() of TObjArray containers is simplified
  * (Valery suggestion)  Utilities added to draw lines and markers.
@@ -52,6 +56,8 @@
 #include "TText.h"
 #include "TPaveText.h"
 #include "StTrackDetectorInfo.h"
+
+#include "StParticleDefinition.hh"
 
 #include "StRrsMaker/StRichGeometryDb.h"
 #include "StRrsMaker/StRichCoordinateTransform.h"
@@ -886,27 +892,25 @@ void StRichPadMonitor::hiLiteHits() {
     
 }
 
-void StRichPadMonitor::hiLiteHits(const StRichHitFlag& flag) {
+void StRichPadMonitor::hiLiteHits(const StRichHitFlag& flag, StParticleDefinition* particle) {
 
     cout << "StRichPadMonitor::hiLiteHits(flag)" << endl;
+    if (!particle) {
+	cout << "StRichPadMonitor::hiLiteHits()\n";
+	cout << "\tparticleType pointer lost" << endl;
+	return;
+    }
 
     //
     // loop over all tracks
     //
     for(size_t ii=0; ii<mVectorTracks.size(); ii++) {
-	
-	for (size_t particleIndex=0;
-	     particleIndex<mListOfParticles.size();
-	     particleIndex++) {
-	    StParticleDefinition* particle = mListOfParticles[particleIndex];
-	    
-	    if (!particle) continue;
-	    StRichDrawableTRings* currentTRing = mVectorTracks[ii]->getRing(particle);
 		
-	    if (!currentTRing) continue;
-	    currentTRing->hilite(flag);
+	StRichDrawableTRings* currentTRing = mVectorTracks[ii]->getRing(particle);
+		
+	if (!currentTRing) continue;
+	currentTRing->hilite(flag);
 
-	} // loop over particle type
     }     // loop over tracks
 }
 
