@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichEnumeratedTypes.h,v 1.2 2000/03/17 14:54:26 lasiuk Exp $
+ * $Id: StRichEnumeratedTypes.h,v 1.3 2000/04/05 15:58:35 lasiuk Exp $
  *
  * Description:
  *   Enumerated type definitions
@@ -7,8 +7,8 @@
  ****************************************************************
  *
  * $Log: StRichEnumeratedTypes.h,v $
- * Revision 1.2  2000/03/17 14:54:26  lasiuk
- * Large scale revisions after ROOT dependent memory leak
+ * Revision 1.3  2000/04/05 15:58:35  lasiuk
+ * set bits instead of incremental numbers
  *
  * Revision 1.2  2000/03/17 14:54:26  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -28,5 +28,5 @@ enum StRichSinglePixelFlag {eUsed=1, eBorder=2, eGood=4, eIsolated=8, eLocalMaxi
 //
 // MC flags for repsonsible particle
 //
-enum StRichSignalType {eCharged,ePhoton,eFeedback};
+enum StRichSignalType {eUnknown=0, eCharged=1, ePhoton=2, eFeedback=4};
 #endif
