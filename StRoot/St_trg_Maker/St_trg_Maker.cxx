@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.6 2000/01/24 20:35:39 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.7 2000/01/26 18:55:37 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.7  2000/01/26 18:55:37  ward
+// Changed name of L0 table from TrgDet2 to L0_Trigger.
+//
 // Revision 1.6  2000/01/24 20:35:39  ward
 // Access trigger data.
 //
@@ -108,7 +111,7 @@ void St_trg_Maker::SecondDstSim(St_dst_L0_Trigger *dst2) {
 Int_t St_trg_Maker::Make(){
 
   St_dst_TrgDet     *dst1 = new St_dst_TrgDet("TrgDet",1);      if(!dst1) return kStWarn; dst1->SetNRows(1);
-  St_dst_L0_Trigger *dst2 = new St_dst_L0_Trigger("TrgDet2",1); if(!dst2) return kStWarn; dst2->SetNRows(1);
+  St_dst_L0_Trigger *dst2 = new St_dst_L0_Trigger("L0_Trigger",1); if(!dst2) return kStWarn; dst2->SetNRows(1);
   m_DataSet->Add(dst1);
   m_DataSet->Add(dst2);
 
