@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment.F,v 1.6 1999/07/19 19:15:55 genevb Exp $
+* $Id: tpt_make_segment.F,v 1.7 1999/08/12 12:43:28 sakrejda Exp $
 * $Log: tpt_make_segment.F,v $
+* Revision 1.7  1999/08/12 12:43:28  sakrejda
+* typo in a variable identifying sector was fixed, the variable name was changed so they differ by more than 1 letter
+*
 * Revision 1.6  1999/07/19 19:15:55  genevb
 * Use StMessMgr
 *
@@ -66,7 +69,7 @@ C_____________________________________________________________________
 C
 C     Local variables
       INTEGER ntrk,ir1,ir2,npnt,ip2,ip3,ip4,nfound,iret
-      INTEGER isect, isect_trunc, isec1
+      INTEGER isect_first, isect_trunc, isec1
       INTEGER irow_last,irow_start,irow_step,ngap
       INTEGER tgc_row_par, tpt_ptcrs
       INTEGER next_hit(*),slice_loc(mxsector,mxrow,mxslic)
@@ -74,20 +77,20 @@ C     Local variables
       INTEGER nf,drow,i,nh1,ilc
       INTEGER tpt_fit_track
       INTEGER is_pnt,islic,ipass,tte_skip
-      INTEGER tpt_find_slic, irets
+      INTEGER tpt_find_slic, iret
 
       INTEGER tgc_global_to_sector
       INTEGER tgc_sec24_to_sec12
 
       REAL    ax,ay,az,ar,bx,by,bz,br,dydx,oxy,dzdr,as,bs,xp1,yp1
-      REAL    zp1,rp1,drp,dis0,dy,dx,dz,dfir,tolr2,disr2,r2
+      REAL    zp1,rp1,drp,dis0,dy,dx,dz,dfir,tolr2,disr2,r2,denom
       REAL    xglobal(3), dummy
 
 C     Find what was the innermost row number and continue the search 
 C     towards the inside of the chamber
       irow_start = mod(hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row,100)-1
-      isect      = hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row/100
-      iret       = tgc_sec24_to_sec12(isect,isect_trunc)
+      isect_first= hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row/100
+      iret       = tgc_sec24_to_sec12(isect_first,isect_trunc)
       irow_last  = tpar(ipass).irow_seg_end
       irow_step = -1
 C
@@ -116,10 +119,9 @@ C           if there was a gap parametrisation for a row won't change
             bz = hit(ip4).z-hit(ip3).z
             br = sqrt(hit(ip4).x**2+hit(ip4).y**2)-
      >           sqrt(hit(ip3).x**2+hit(ip3).y**2)
-            dydx = -(hit(ip3).y-hit(ip2).y)/
-     >            (hit(ip2).y*hit(ip3).x-hit(ip3).y*hit(ip2).x)
-            oxy =  (hit(ip3).x-hit(ip2).x)/
-     >            (hit(ip2).y*hit(ip3).x-hit(ip3).y*hit(ip2).x)
+            denom = hit(ip2).y*hit(ip3).x-hit(ip3).y*hit(ip2).x
+            dydx = -(hit(ip3).y-hit(ip2).y)/denom
+            oxy =  (hit(ip3).x-hit(ip2).x)/denom
 
             dzdr = az/ar
          endif
@@ -138,10 +140,10 @@ C        and check whether it lies in the same sector
            drp = r2 - rp1
            zp1 = hit(ip2).z - dzdr*drp
            if(abs(zp1).lt.210.0)then
-           irets=tpt_find_slic(zp1,tpar(ipass).nzslic,islic)
+           iret=tpt_find_slic(zp1,tpar(ipass).nzslic,islic)
 
 C          check there are hits here
-           is_pnt = slice_loc(isect,ir1,islic)
+           is_pnt = slice_loc(isec1,ir1,islic)
            nh1 = slice_pnt(2,is_pnt)
            if(nh1.ne.0)then
              dis0 = 10000000.0
