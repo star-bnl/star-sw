@@ -26,7 +26,7 @@ public:
   virtual  const char *GetName() const {return fName;} 
   virtual  TString GetKey() const; 
   virtual  Int_t   GetNInt() const{ return fNUrr;} 
-  virtual  const UInt_t *GetUInt() const{ return fUrr;} 
+  virtual  const UInt_t *GetUrr() const{ return fUrr;} 
   virtual  void    SetKey(const char *key);
   virtual  void    SetUrr(const UInt_t *key,int nk);
   virtual  UInt_t  GetSum() const;
@@ -34,7 +34,7 @@ public:
   virtual  Int_t   IsNull() const { return !fUrr[0];}
   virtual  Int_t   Compare(StUKey &uk2) const 
                   { return strcmp(GetKey().Data(),uk2.GetKey().Data());}
-  virtual  Int_t GetRunId() const { return fUrr[0]; }
+  virtual  Int_t GetRunId()   const { return fUrr[0]; }
   virtual  Int_t GetEventId() const { return fUrr[1]; }
 private:
   TString fName;

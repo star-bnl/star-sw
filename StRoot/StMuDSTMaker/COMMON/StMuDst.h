@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.11 2003/04/15 18:48:34 laue Exp $
+ * $Id: StMuDst.h,v 1.12 2003/09/10 22:33:41 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -85,11 +85,11 @@ public:
 
 public:
   /// returns pointer to the n-th TClonesArray 
-  static TClonesArray* StMuDst::array(int type) { return arrays[type]; }
+  static TClonesArray* array(int type) { return arrays[type]; }
   /// returns pointer to the n-th TClonesArray from the strangeness arrays
-  static TClonesArray* StMuDst::strangeArray(int type) { return strangeArrays[type]; }
+  static TClonesArray* strangeArray(int type) { return strangeArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the emc arrays
-  static TClonesArray* StMuDst::emcArray(int type) { return emcArrays[type]; }
+  static TClonesArray* emcArray(int type) { return emcArrays[type]; }
 
   /// returns pointer to the primary tracks list
   static TClonesArray* primaryTracks() { return arrays[muPrimary]; }
@@ -185,6 +185,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.12  2003/09/10 22:33:41  perev
+ * Grid for MuDst corrections
+ *
  * Revision 1.11  2003/04/15 18:48:34  laue
  * Minor changes to be able to filter MuDst.root files and an example
  * how to do this. The StMuDstFilterMaker is just an example, it has to be
