@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_fv0_Maker                                                         //
+// StFtpcV0Maker                                                         //
 //                                                                      //
 //  This Module does the inital search for V0's in the FTPC.            //
 //  Written by Mike Heffner 8 Apr 99                                    //
@@ -23,23 +23,22 @@
 #include "ftpc/St_fpt_Module.h"
 #include "ftpc/St_fte_Module.h"
 #include "ftpc/St_fde_Module.h"
-#include "St_dst_v0_vertex_Table.h"
 #include "St_fv0_vertex_Table.h"
 
 #include "StFtpcV0Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
-ClassImp(St_fv0_Maker)
+ClassImp(StFtpcV0Maker)
 
 //_____________________________________________________________________________
-St_fv0_Maker::St_fv0_Maker(const char *name, const char *title):StMaker(name,title){
+StFtpcV0Maker::StFtpcV0Maker(const char *name, const char *title):StMaker(name,title){
    drawinit=kFALSE;
 }
 //_____________________________________________________________________________
-St_fv0_Maker::~St_fv0_Maker(){
+StFtpcV0Maker::~StFtpcV0Maker(){
 }
 //_____________________________________________________________________________
-Int_t St_fv0_Maker::Init(){
+Int_t StFtpcV0Maker::Init(){
 // Create tables
    St_DataSetIter       local(gStChain->DataSet("params"));
 	
@@ -54,7 +53,7 @@ Int_t St_fv0_Maker::Init(){
    return StMaker::Init();
 }
 //_____________________________________________________________________________
-Int_t St_fv0_Maker::Make(){
+Int_t StFtpcV0Maker::Make(){
   //  PrintInfo();
   if (!m_DataSet->GetList())  {//if DataSet is empty fill it
 
@@ -194,9 +193,9 @@ Int_t St_fv0_Maker::Make(){
   return kStOK;
 }
 //_____________________________________________________________________________
-void St_fv0_Maker::PrintInfo(){
+void StFtpcV0Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StFtpcV0Maker.cxx,v 1.1 1999/04/12 22:24:53 mheffner Exp $\n");
+  printf("* $Id: StFtpcV0Maker.cxx,v 1.2 1999/04/13 12:43:02 mheffner Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
