@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.79 1999/04/28 00:49:17 fisyak Exp $
+# $Id: MakeDll.mk,v 1.80 1999/04/30 13:23:25 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.80  1999/04/30 13:23:25  fisyak
+# add precint for Collection, use in compilation generated with precint h-files
+#
 # Revision 1.79  1999/04/28 00:49:17  fisyak
 # Once  more QWERTY
 #
@@ -295,24 +298,26 @@ ifdef FILES_MOD
 endif
 #    NAMES_ORD      := $(basename $(notdir $(FILES_H)))
 define AWK
-grep ClassDef $(FILES_H) | awk -F\( '{print $$2}' | awk -F\, '{print $$1}'
+ grep ClassDef $(FILES_H) | awk -F\( '{print $$2}' | awk -F\) '{print $$1}' | awk -F\, '{print $$1}' | grep -v \#
 endef
 define AWK2
-grep StCollectionDef $(FILES_H) | awk -F\( '{print $$2}' | awk -F\) '{print $$1}' | awk -F\, '{print $$1}'
-endef
+ grep StCollectionDef $(FILES_H) | \
+ awk -F\( '{print $$2}' | awk -F\) '{print $$1}' | \
+ awk -F\, '{print $$1}'  | grep -v define | grep -v QWERTY
+endef 
 
 ifdef FILES_ORD
   ifneq (,$(strip $(FILES_H)))
-    NAMES_ORD  := $(filter-out \#\# QWERTY, $(shell $(AWK)))
+    NAMES_ORD  := $(shell $(AWK))
     NAMES_DD   := $(shell $(AWK2))
-    NAMES_DD   := $(strip $(filter-out %StArray.h, $(NAMES_DD)))
+#    NAMES_DD   := $(strip $(filter-out %StArray.h, $(NAMES_DD)))
     ifneq (,$(NAMES_DD))
       NAMES_ORDD := $(addprefix St, $(addsuffix Collection, $(NAMES_DD))\
                                      $(addsuffix Iterator,   $(NAMES_DD))\
                                      $(addprefix  VecPtr,    $(NAMES_DD)))
       NAMES_ORD := $(filter-out $(NAMES_ORDD), $(NAMES_ORD))
       FILES_COL := $(shell grep -l StCollectionDef  $(FILES_H))
-      FILES_GCO := $(notdir $(FILES_COL))
+      FILES_COG := $(addprefix $(GEN_DIR)/, $(notdir $(FILES_COL)))
     endif
   endif
   LinkDef        :=$(wildcard $(SRC_DIR)/$(PKG)LinkDef.h $(SRC_DIR)/$(PKG)LinkDef.hh)
@@ -340,6 +345,10 @@ ifdef FILES_ORD
     FILES_CINT_ORD :=$(GEN_DIR)/$(PKG)_Cint.cxx 
     FILES_ORD_H    := $(wildcard $(addprefix $(SRC_DIR)/,$(addsuffix .h,$(NAMES_ORD)) \
                                                          $(addsuffix .hh,$(NAMES_ORD))))
+    ifneq (,$(FILES_COL))
+      FILES_ORD_H  := $(filter-out $(FILES_COL) \
+                      $(addprefix ($SRC_DIR)/, $(notdir $(FILES_COL))), $(FILES_ORD_H)) $(FILES_COG)
+    endif 
     ifneq (,$(NAMES_ORDD))
       NAMES_ORD      += $(addsuffix -, $(NAMES_ORDD))
     endif
@@ -426,6 +435,10 @@ else
 	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(1ST_DEPS)) $(LINKDEF)
 endif
+
+$(FILES_COG): $(GEN_DIR)/%.h:$(SRC_DIR)/%.h
+	$(RM) $(ALL_TAGS)
+	precint.pl $(1ST_DEPS) > $(ALL_TAGS);
 $(FILES_CINT_ORD) : $(FILES_ORD_H)   
 	$(COMMON_LINKDEF)
 	@for p in $(NAMES_ORD); do \
@@ -433,21 +446,11 @@ $(FILES_CINT_ORD) : $(FILES_ORD_H)
                                              done
 	@echo "#endif"                                  >> $(LINKDEF);
 	@$(CAT) $(LINKDEF)
+
 ifndef NT
-ifneq (,$(FILES_GCO))
-	@for p in $(FILES_GCO); do $(RM) $(GEN_DIR)/$$p; \
-                                precint.pl $(SRC_DIR)/$$p > $(GEN_DIR)/$$p; \
-                                done
-
-endif
 	cd $(GEN_DIR); \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -I./ $(DINCINT) $(notdir $(FILES_ORD_H)) \
+        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(FILES_ORD_H)) \
         $(notdir $(LINKDEF))
-ifneq (,$(FILES_GCO))
-	@for p in $(FILES_GCO); do $(RM) $(GEN_DIR)/$$p; \
-                                done
-
-endif
 else
 	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
         $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(1ST_DEPS)) \
@@ -678,6 +681,8 @@ test:
 	@echo FILES_MOD_H := $(FILES_MOD_H)
 	@echo FILES_DCINT := $(FILES_DCINT)
 	@echo FILES_COL   := $(FILES_COL)
+	@echo FILES_GCO   := $(FILES_GCO)
+	@echo FILES_COG   := $(FILES_COG)
 ifdef NT
 	@echo NT          := $(NT)
 	@echo MY_DLLNAME  := $(MY_DLLNAME)
