@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.11 1999/03/12 15:44:01 perev Exp $
+// $Id: St_mwc_Maker.cxx,v 1.12 1999/03/12 21:47:36 perev Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.12  1999/03/12 21:47:36  perev
+// New maker schema
+//
 // Revision 1.11  1999/03/12 15:44:01  perev
 // New maker schema
 //
@@ -70,9 +73,8 @@
 ClassImp(St_mwc_Maker)
 
 //_____________________________________________________________________________
-St_mwc_Maker::St_mwc_Maker(const char *name, const char *title):StMaker(name,title){
+St_mwc_Maker::St_mwc_Maker(const char *name):StMaker(name){
 
-   drawinit=kFALSE;
 }
 //_____________________________________________________________________________
 St_mwc_Maker::~St_mwc_Maker(){
@@ -82,10 +84,10 @@ Int_t St_mwc_Maker::Init(){
 
 // Read Parameter tables
 
-   St_DataSetIter params(GetDataBase("params"));
-   m_geom = (St_mwc_geo  *) params("mwc/mwcpars/geom");
-   m_cal  = (St_mwc_cal  *) params("mwc/mwcpars/cal");
-   m_mpar = (St_mwc_mpar *) params("mwc/mwcpars/mpar");
+   St_DataSetIter params(GetDataBase("params/mwc/mwcpars"));
+   m_geom = (St_mwc_geo  *) params("geom");
+   m_cal  = (St_mwc_cal  *) params("cal");
+   m_mpar = (St_mwc_mpar *) params("mpar");
 
 // Create Histograms 
 
@@ -100,66 +102,63 @@ Int_t St_mwc_Maker::Make(){
 
 //  PrintInfo();
 
-  if (!m_DataSet->GetList())  {//if DataSet is empty fill it
-
 // Create Empty tables for us
 
-     St_mwc_mevent *mevent = new St_mwc_mevent("mevent",96);
-     St_mwc_sector *sector = new St_mwc_sector("sector",96);
-     St_mwc_raw    *raw    = new St_mwc_raw("raw",96);
+   St_mwc_mevent *mevent = new St_mwc_mevent("mevent",96);
+   St_mwc_sector *sector = new St_mwc_sector("sector",96);
+   St_mwc_raw    *raw    = new St_mwc_raw("raw",96);
 //   the cor table is not implemented
 //     St_mwc_cor    *cor    = new St_mwc_cor("cor",384);
 
-     m_DataSet->Add(mevent);
-     m_DataSet->Add(sector);
-     m_DataSet->Add(raw);
+   m_DataSet->Add(mevent);
+   m_DataSet->Add(sector);
+   m_DataSet->Add(raw);
 //     m_DataSet->Add(cor);
 
 // Read in Geant Tables
 
-     St_DataSetIter geant(GetDataSet("geant"));
-     St_g2t_mwc_hit *g2t_mwc_hit = (St_g2t_mwc_hit *) geant("g2t_mwc_hit");
+   St_DataSetIter geant(GetDataSet("geant"));
+   St_g2t_mwc_hit *g2t_mwc_hit = (St_g2t_mwc_hit *) geant("g2t_mwc_hit");
 
-     if (!g2t_mwc_hit) {return kStOK;}
-     if (!m_geom)      {printf("m_geom does not exist\n")     ;return kStWarn;}
-     if (!m_mpar)      {printf("m_mpar does not exist\n")     ;return kStWarn;}
-     if (!mevent)      {printf("mevent does not exist\n")     ;return kStWarn;}
-     if (!sector)      {printf("sector does not exist\n")     ;return kStWarn;}
-     if (!raw)         {printf("raw does not exist\n")        ;return kStWarn;}
+   if (!g2t_mwc_hit) {return kStOK;}
+   if (!m_geom)      {printf("m_geom does not exist\n")     ;return kStWarn;}
+   if (!m_mpar)      {printf("m_mpar does not exist\n")     ;return kStWarn;}
+   if (!mevent)      {printf("mevent does not exist\n")     ;return kStWarn;}
+   if (!sector)      {printf("sector does not exist\n")     ;return kStWarn;}
+   if (!raw)         {printf("raw does not exist\n")        ;return kStWarn;}
 
-     Int_t mwc_result = mws(
-                            g2t_mwc_hit,
-                            m_geom,
-                            m_mpar,
-                            mevent,
-                            sector,
-                            raw);
-     if (mwc_result != kSTAFCV_OK)
+   Int_t mwc_result = mws(
+                          g2t_mwc_hit,
+                          m_geom,
+                          m_mpar,
+                          mevent,
+                          sector,
+                          raw);
+   if (mwc_result != kSTAFCV_OK)
+   {
+      printf("**** Problems with mwc ****\n");
+      return kStWarn;
+   }
+   g2t_mwc_hit_st *hitTable = g2t_mwc_hit->GetTable();
+   table_head_st *hitHead  = g2t_mwc_hit->GetHeader();
+   float px,py,pz,x,y;
+   for (int iii=0;iii<hitHead->nok;iii++)
      {
-        printf("**** Problems with mwc ****\n");
-        return kStWarn;
+       x  = (hitTable+iii)->x[0];
+       y  = (hitTable+iii)->x[1];
+       px = (hitTable+iii)->p[0]; 
+       py = (hitTable+iii)->p[1]; 
+       pz = (hitTable+iii)->p[2];
+       m_px ->Fill(px);
+       m_py ->Fill(py);
+       m_pz ->Fill(pz);
      }
-     g2t_mwc_hit_st *hitTable = g2t_mwc_hit->GetTable();
-     table_head_st *hitHead  = g2t_mwc_hit->GetHeader();
-     float px,py,pz,x,y;
-     for (int iii=0;iii<hitHead->nok;iii++)
-       {
-	 x  = (hitTable+iii)->x[0];
-	 y  = (hitTable+iii)->x[1];
-	 px = (hitTable+iii)->p[0]; 
-	 py = (hitTable+iii)->p[1]; 
-	 pz = (hitTable+iii)->p[2];
-	 m_px ->Fill(px);
-	 m_py ->Fill(py);
-	 m_pz ->Fill(pz);
-       }
-}
- return kStOK;
+   return kStOK;
 }
 //_____________________________________________________________________________
 void St_mwc_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_mwc_Maker.cxx,v 1.11 1999/03/12 15:44:01 perev Exp $\n");
+  printf("* $Id: St_mwc_Maker.cxx,v 1.12 1999/03/12 21:47:36 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();

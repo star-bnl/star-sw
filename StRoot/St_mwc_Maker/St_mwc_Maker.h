@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.h,v 1.4 1999/02/24 13:57:43 druss Exp $
+// $Id: St_mwc_Maker.h,v 1.5 1999/03/12 21:47:36 perev Exp $
 // $Log: St_mwc_Maker.h,v $
+// Revision 1.5  1999/03/12 21:47:36  perev
+// New maker schema
+//
 // Revision 1.4  1999/02/24 13:57:43  druss
 // removed 2d histograms and replaced them with 1d histograms
 //
@@ -52,7 +55,7 @@ class TH2F;
 class St_mwc_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_mwc_Maker.h,v 1.4 1999/02/24 13:57:43 druss Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_mwc_Maker.h,v 1.5 1999/03/12 21:47:36 perev Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
    St_mwc_geo  *m_geom; //!
@@ -65,7 +68,7 @@ class St_mwc_Maker : public StMaker {
    TH1F   *m_pz;  //!
   
  public: 
-                  St_mwc_Maker(const char *name="mwc", const char *title="mwc");
+                  St_mwc_Maker(const char *name="mwc");
    virtual       ~St_mwc_Maker();
    virtual Int_t  Init();
    virtual Int_t  Make();
