@@ -37,9 +37,7 @@ macro svm
     
   cd [dst]
   tdm/newtable globtrk dst_track 100000
-    maxrowcount [dst]/globtrk 100000
   tdm/newtable globtrk_aux dst_track_aux 100000
-    maxrowcount [dst]/globtrk_aux 100000
    
   cd /dui
 
@@ -51,20 +49,21 @@ macro svm
    
   macro/global/import *
       
-  rowcount [dst]/ev0out
-  if (staf_result(1).eq.0) then
+    
+  ls [run_dst]/run_summary
+    if (staf_status(2).ne.STAFCV_OK) then
       cd [dst]
       tdm/newtable ev0out ev0_aux 100000
   endif
     
-  rowcount [dst]/vertex
-  if ( staf_result(1) .eq. 0 ) then
+  ls [dst]/vertex
+  if ( staf_status(2) .ne. STAFCV_OK ) then
     cd [dst]
     tdm/newtable vertex dst_vertex 100000
   endif
   
-  rowcount [dst]/globtrk
-  if ( staf_result(1) .eq. 0 ) then
+  ls [dst]/globtrk
+  if (staf_status(2) .ne. STAFCV_OK ) then
     cd [dst]
     tdm/newtable globtrk dst_track 100000
   endif
@@ -84,7 +83,7 @@ macro svm
    macro/global/import *
      
      newtable [data]/global/tracks/ev0track2 ev0_track2 10000
-     maxrow   [data]/global/tracks/ev0track2 10000
+
 	
  return
  
@@ -96,8 +95,7 @@ macro svm
     
    cd [data]/global/vertices
    tdm/newtable ev0_eval ev0_eval 100000
-          
-   tdm/table/maxrowcount [data]/global/vertices/ev0_eval 100000
+   
 
   tdm/table/maxrowcount [data]/svt/tracks/stk_track
   if ( staf_result(1) .eq. 0) then
