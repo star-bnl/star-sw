@@ -1,9 +1,7 @@
 <pre><h3>INTEGER*4 FUNCTION EVR_AM(
             evrpar_h,            evrpar ,
-           tptrack_h,           tptrack ,
-         svt_track_h,         svt_track ,
+            egrpar_h,            egrpar ,
            globtrk_h,           globtrk ,
-         evt_match_h,         evt_match ,
            privert_h,           privert ) </h3>
 #include "evr_am.inc"
 CC:>----------------------------------------------------------------------
@@ -13,10 +11,8 @@ CC: AUTHOR:     S. Margetis  Created  MARCH-1992
 CC: ARGUMENTS:
 CC:          IN:
 CC:	       	evrpar   = Parameters controlling vertex finding
-CC:     	tptrack    = Track information from tpt package
-CC:       	svt_track    = Track information from stk package
+CC:	       	egrpar   = Parameters controlling egr - relevant here
 CC:       	globtrk  = Track information from egr package
-CC:       	evt_match    = Matching information from svm package
 CC:         OUT:
 CC:	       	privert  = Primary Vertex Information
 CC: RETURNS:    STAF Condition Value
