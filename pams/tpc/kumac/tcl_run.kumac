@@ -1,0 +1,48 @@
+******* tcl_run.kumac *******************************************************
+**************************************************************************
+**************************************************************************
+
+macro run_tcl_make_clusters 
+
+  cd /dui
+  tdm/table/rowcount /dui/data/tpc/hits/tpseq     0
+  tdm/table/rowcount /dui/data/tpc/hits/tpcluster 0
+
+  ami/module/call tcl_make_clusters_
+        /dui/constants/tpc/geometry/tpgpar/tpg_pad_plane_
+        /dui/raw_data/tpc/pixels/tppad_
+        /dui/raw_data/tpc/pixels/tppixel_
+        /dui/raw_data/tpc/pixels/tpmcpix_
+        /dui/data/tpc/hits/tpcluster_
+        /dui/data/tpc/hits/tpseq
+
+return
+
+************************************************************************
+
+macro run_tpham 
+
+
+  cd /dui
+  tdm/table/rowcount /dui/data/tpc/hits/tphit 0
+  tdm/table/rowcount /dui/data/tpc/hits/tphitau 0
+
+  ami/module/call tpham_
+        /dui/constants/tpc/params/tclpars/tclpar_
+        /dui/constants/tpc/params/tsspars/tsspar_
+        /dui/constants/tpc/geometry/tpgpar/tpg_detector_
+        /dui/constants/tpc/geometry/tpgpar/tpg_pad_plane_
+        /dui/raw_data/tpc/pixels/tppixel_
+        /dui/raw_data/tpc/pixels/tpmcpix_
+        /dui/data/tpc/hits/tpseq_
+        /dui/data/tpc/hits/tpcluster_
+        /dui/data/tpc/hits/tphit_
+        /dui/data/tpc/hits/tphitau
+
+return
+
+***********************************************************************
+
+
+
+

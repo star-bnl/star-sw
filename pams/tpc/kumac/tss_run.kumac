@@ -1,0 +1,41 @@
+ ********************* tss_run.kumac  ************************************
+**************************************************************************
+**************************************************************************
+*******************************************************************
+*********************************************************************
+
+macro run
+
+*
+  cd /dui
+  tdm/table/rowcount /dui/raw_data/tpc/pixels/tppixel 0
+  tdm/table/rowcount /dui/raw_data/tpc/pixels/tpmcpix 0
+  tdm/table/rowcount /dui/raw_data/tpc/pixels/tppad   0
+*
+  ami/module/call tssam_
+        /dui/constants/tpc/params/tsspars/tsspar_
+        /dui/constants/tpc/geometry/tpgpar/tpg_detector_
+        /dui/constants/tpc/geometry/tpgpar/tpg_pad_plane_
+        /dui/geant/Event/g2t_tpc_hit_
+        /dui/geant/Event/g2t_track_
+        /dui/raw_data/tpc/pixels/tppixel_
+        /dui/raw_data/tpc/pixels/tpmcpix_
+        /dui/raw_data/tpc/pixels/tppad_
+        /dui/constants/tpc/calib/bad_channels_
+        /dui/constants/tpc/calib/readout_map_
+        /dui/constants/tpc/calib/tpc_pedestal
+
+return 
+
+***********************************************************************
+
+
+
+
+
+
+
+
+
+
+
