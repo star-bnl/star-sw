@@ -175,7 +175,12 @@ FILES_OG    := $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(NAMES_G)))
 FILES_D     += $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_OG)))))
 endif
 ifneq (,$(NAMES_CC))            
-FILES_SL  += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(NAMES_CC))))
+FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(NAMES_CC))))
+FILES_D     += $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_CC)))))
+endif                          
+ifneq (,$(NAMES_CXX))            
+FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(NAMES_CXX))))
+FILES_D     += $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_CXX)))))
 endif                          
 ifeq (,$(findstring $(STAR_HOST_SYS),hp_ux102 hp_ux102_aCC))
 ifndef CERN_LIBS               
