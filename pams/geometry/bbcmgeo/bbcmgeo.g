@@ -14,7 +14,7 @@ Author    Yiqun Wang
 *
 	Structure	BBCG {version,onoff(3),zdis(2)}
 *
-	Structure	HEXG {type,irad,clad,thick,zoffset(2),xoffset(2),yoffset(2)}
+	Structure	HEXG {type,irad,clad,thick,zoffset,xoffset,yoffset}
 *
 	Real		actr,srad,lrad,ztotal,x0,y0,theta0,phi0,
 			xtrip,ytrip,rtrip,thetrip,rsing,thesing
@@ -36,9 +36,9 @@ Fill	HEXG					! hexagon tile geometry
 	irad	= 4.174				! inscribing circle radius =9.64/2*sin(60)=4.174
 	clad	= 0.1				! cladding thickness
 	thick	= 1.0				! thickness of tile
-	zoffset	= {1.5,1.5}			! z-offset from center of BBCW (1), or BBCE (2)
-	xoffset	= {0.0,0.0}			! x-offset center from beam for BBCW (1), or BBCE (2)
-	yoffset	= {0.0,0.0}			! y-offset center from beam for BBCW (1), or BBCE (2)
+	zoffset	= 1.5			! z-offset from center of BBCW (1), or BBCE (2)
+	xoffset	= 0.0			! x-offset center from beam for BBCW (1), or BBCE (2)
+	yoffset	= 0.0			! y-offset center from beam for BBCW (1), or BBCE (2)
 *
 *
 Fill	HEXG					! hexagon tile geometry
@@ -46,9 +46,9 @@ Fill	HEXG					! hexagon tile geometry
 	irad	= 16.697			! inscribing circle radius (4x that of small one)
 	clad	= 0.1				! cladding of tile
 	thick	= 1.0				! thickness of tile
-	zoffset	= {-1.5,-1.5}			! z-offset from center of BBCW (1), or BBCE (2)
-	xoffset	= {0.0,0.0}			! x-offset center from beam for BBCW (1), or BBCE (2)
-	yoffset	= {0.0,0.0}			! y-offset center from beam for BBCW (1), or BBCE (2)
+	zoffset	= -1.5			! z-offset from center of BBCW (1), or BBCE (2)
+	xoffset	= 0.0			! x-offset center from beam for BBCW (1), or BBCE (2)
+	yoffset	= 0.0			! y-offset center from beam for BBCW (1), or BBCE (2)
 *
 *----------------------------------------------------------------------------
 *
@@ -66,29 +66,32 @@ Fill	HEXG					! hexagon tile geometry
 
 	Use HEXG type=1
 	srad = hexg_irad*6.0
-	ztotal = hexg_thick+hexg_zoffset(1)+hexg_zoffset(2)
+	ztotal = hexg_thick+2*abs(hexg_zoffset)
 
 	Use HEXG type=2
 	lrad = hexg_irad*6.0
-	ztotal = ztotal+hexg_thick-hexg_zoffset(1)-hexg_zoffset(2)	! hexg_zoffset is negative for Large (type=2)
+	ztotal = ztotal+hexg_thick+2*abs(hexg_zoffset)	! hexg_zoffset is negative for Large (type=2)
 *
 * Beam Beam Counter Module
 *
 
+Create BBCM
 * West BBC Module
 	if(bbcg_OnOff(1)==1 | bbcg_OnOff(1)==3) then
-		Create and Position BBCM in CAVE z=bbcg_zdis(1) x=0 y=0
+		Position BBCM in CAVE z=bbcg_zdis(1) x=0 y=0 
+
 	endif
 * East BBC Module
 	if(bbcg_OnOff(1)==2 | bbcg_OnOff(1)==3) then
-		Create and Position BBCM in CAVE z=bbcg_zdis(2) x=0 y=0 ThetaZ=180
+		Position BBCM in CAVE z=bbcg_zdis(2) x=0 y=0 AlphaY=180
+
 	endif
 
 	prin1
 	 	('BBCMGEO finished')
 *
 * ----------------------------------------------------------------------------
-Block BBCM is one BBC Module 
+Block BBCM is one BBC East or West module 
 	Material  Air
 	Medium    standard
 	Attribute BBCM   seen=0 colo=7				!  lightblue
@@ -96,15 +99,17 @@ Block BBCM is one BBC Module
 
 * Small BBC hex tiles
 	Use HEXG type=1
-
-	Create and Position BBCA in BBCM z=hexg_zoffset(1) x=hexg_xoffset(1) y=hexg_yoffset(1)
-
+* West
+	if(bbcg_OnOff(2)==1 | bbcg_OnOff(2)==3) then
+Create and Position BBCA in BBCM z=hexg_zoffset x=hexg_xoffset y=hexg_yoffset
+	endif
 *
 * Large BBC hex tiles
 	Use HEXG type=2
-
-	Create and Position BBCA in BBCM z=hexg_zoffset(1) x=hexg_xoffset(1) y=hexg_yoffset(1)
-
+* West
+	if(bbcg_OnOff(3)==1 | bbcg_OnOff(3)==3) then
+Create and Position BBCA in BBCM z=hexg_zoffset x=hexg_xoffset y=hexg_yoffset
+	endif
 EndBlock
 *
 * ----------------------------------------------------------------------------
@@ -184,7 +189,7 @@ EndBlock
 *
 * ----------------------------------------------------------------------------
 Block BPOL is one Bbc POLystyren active scintillator layer 
-*	Material  POLYSTYREN
+	Material  POLYSTYREN
 	Material  Cpolystyren   Isvol=1
 	Attribute BPOL  seen=1 colo=4				!  blue
 	shape	  PGON	Phi1=0   Dphi=360  Nz=2,
@@ -204,7 +209,7 @@ Block BPOL is one Bbc POLystyren active scintillator layer
 	Call GSTPAR (ag_imed,'BIRK2',0.013)
 	Call GSTPAR (ag_imed,'BIRK3',9.6E-6)
 *     
-	HITS BPOL  Birk:0:C(0,10)
+	HITS BPOL  Birk:0:C(0,10) Tof:16:C(0,1.e-6) 
 *                  xx:16:H(-250,250)   yy:16:(-250,250)   zz:16:(-350,350),
 *                  px:16:(-100,100)    py:16:(-100,100)   pz:16:(-100,100),
 *                  Slen:16:(0,1.e4)    Tof:16:(0,1.e-6)   Step:16:(0,100),
