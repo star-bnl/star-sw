@@ -1,5 +1,10 @@
-// $Id: St_tcl_Maker.cxx,v 1.42 1999/08/26 01:27:17 snelling Exp $
+// $Id: St_tcl_Maker.cxx,v 1.43 1999/09/05 05:13:44 sakrejda Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.43  1999/09/05 05:13:44  sakrejda
+// Calls to Limit Error Messages added to Init()
+//    gMessMgr->SetLimit("TPSEQ",10);
+//    gMessMgr->SetLimit("TPHAM",10);
+//
 // Revision 1.42  1999/08/26 01:27:17  snelling
 // Li Qun: Table fixed
 //
@@ -141,6 +146,7 @@
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "St_XDFFile.h"
+#include "StUtilities/StMessMgr.h"
 #include "tpc/St_tpg_main_Module.h"
 #include "tpc/St_tcl_Module.h"
 #include "tpc/St_tph_Module.h"
@@ -174,6 +180,10 @@ St_tcl_Maker::~St_tcl_Maker(){
 //_____________________________________________________________________________
 Int_t St_tcl_Maker::Init()
 {
+  // Limit Error Messages
+   gMessMgr->SetLimit("TPSEQ",10);
+   gMessMgr->SetLimit("TPHAM",10);
+
 
 // 		Create tables
   St_DataSet *tpc = GetDataBase("params/tpc");
