@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrompt.hh,v 1.3 1999/12/21 20:20:35 ullrich Exp $
+ * $Id: StPrompt.hh,v 1.4 2000/06/22 01:57:29 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 15 1997
  ***************************************************************************
@@ -32,6 +32,9 @@
  ***************************************************************************
  *
  * $Log: StPrompt.hh,v $
+ * Revision 1.4  2000/06/22 01:57:29  ullrich
+ * Removed unused variable.
+ *
  * Revision 1.3  1999/12/21 20:20:35  ullrich
  * Fixed bug in macro for Sun.
  *
@@ -59,7 +62,7 @@ using std::string;
 inline void StPrompt()
 {
     cout << "-- Press return to continue -- ";
-    char c = cin.get();
+    cin.get();
 }
 
 template<class T>
@@ -120,7 +123,7 @@ inline void StPrompt(const char *text, bool& var)
 inline void StPrompt(const char *text, char* var, int maxlength)
 {
     string line;
-    char   c;
+    unsigned char   c;
     
     cout << text << " [" << var << "]: ";
     while ((c = cin.get()) && c != '\n' && line.length() < maxlength)
