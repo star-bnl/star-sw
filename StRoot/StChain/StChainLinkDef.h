@@ -6,4 +6,5 @@
 #pragma link C++ class StMakerIter-;
 #pragma link C++ class StChain-;
 #pragma link C++ class EvtHddr_st-!;
+#pragma link C++ enum  EChainBits;
 #endif
