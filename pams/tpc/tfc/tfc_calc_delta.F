@@ -1,5 +1,8 @@
-* $Id: tfc_calc_delta.F,v 1.2 1998/01/27 01:14:50 fisyak Exp $
+* $Id: tfc_calc_delta.F,v 1.3 1999/10/15 00:53:57 nevski Exp $
 * $Log: tfc_calc_delta.F,v $
+* Revision 1.3  1999/10/15 00:53:57  nevski
+* pgf->g77 cleanup
+*
 * Revision 1.2  1998/01/27 01:14:50  fisyak
 * Split sources
 *
@@ -91,11 +94,11 @@ c	  write (6,*) 'CALC_DELTA: Row ', i, ', Nhits = ', Nhits
 
 	  if (Nhits.gt.Nhits_max) then
 	    write (6,*) 'CALC_DELTA: !!! Nhits > Nhits_max: row=', i,
-	2	', Nhits=', Nhits, ', event=', ievent
+     2            ', Nhits=', Nhits, ', event=', ievent
 	  else
 	    if (delta_h.nok+int(0.5*Nhits*(Nhits+1)).gt.delta_h.maxlen) then
 	      write (6,*) 'CALC_DELTA: !!! Not enough room in DELTA '//
-	2	'for this row !!! Nhits = ', Nhits
+     2              'for this row !!! Nhits = ', Nhits
 	    else
 	      do j = 1, Nhits-1
 	        do k = j+1, Nhits
@@ -124,9 +127,9 @@ c	Simple cartesian separations
 
 c	Radial (cylindrical and 3D) separations
 	          delta(inok).dr = 
-	2		sqrt( delta(inok).dx**2 + delta(inok).dy**2 )
+     2                sqrt( delta(inok).dx**2 + delta(inok).dy**2 )
 	          delta(inok).d3 = 
-	2		sqrt( delta(inok).dr**2 + delta(inok).dz**2 )
+     2                sqrt( delta(inok).dr**2 + delta(inok).dz**2 )
 
 	        enddo
 	      enddo

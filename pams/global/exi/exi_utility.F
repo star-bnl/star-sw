@@ -588,7 +588,7 @@ C---------------------------------------------------------------------
 *---------calculate the impact parameter of the track from vertex-----
 *
       call make_track(x,p,track,q,beta)
-      call circle_param(track,xc,r)
+      call circle_param(track,xc,r,beta)
       call exi_project_track(xc,r,vertex,xn)
       call update_track_param(xc,r,xn,track,trk)
       r_min=sqrt( (xn(1)-vertex(1))**2+(xn(2)-vertex(2))**2+

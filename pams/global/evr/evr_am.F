@@ -283,6 +283,7 @@ CC  Declare new variables used in track cov() matrix contribution to sigma:
       REAL h(5,5),xsave(3),p(5),pnew(5),del(5),pcall(8)
       REAL deriv(3,5),derrorsq,derror,r0save,phi0save
       REAL sigdef,sigmin,sigmax,sigbig
+      REAL COSD,SIND
       INTEGER  ii,jj,ialpha,ibeta
 
 CC  Declare called CERNLIB Function:
@@ -296,7 +297,7 @@ CC                          ! fraction from GSTAR data (1999).
       DATA LSVT1 /0.017/    ! Effective SVT first layer radiation thickness
 CC                          ! to roughly approximate MCS effects on track
 CC                          ! DCA position uncertainty with SVT and/or SSD hits.
-      DATA beampipecut /4.0/  ! Beam pipe radius (cm); used for track DCA
+      DATA beampipecut /4.0/  ! Beam pipe radius (cm), used for track DCA
 CC                            ! transverse position cut on initial pass.
       DATA ntrkcut  /50/    ! Min. track number for event abort decision
       DATA ptdefault /0.4/  ! Default pT value in GeV/c for use in B_field = 0
@@ -613,8 +614,9 @@ CCC   Assign final error (sigma) to extrapolated track position:
 
               if(abs(z0(k)).lt.200. .and. sqrt(x0(k)*x0(k) +
      1           y0(k)*y0(k)) .le. beampipecut) then
-                 zsum(int(2.0*(z0(k)+200.0))+1) =      ! Modified to correct
-     1           zsum(int(2.0*(z0(k)+200.0))+1) + 1.   ! fat bin at 0.0
+CCC              Modified to correct fat bin at 0.0
+                 zsum(int(2.0*(z0(k)+200.0))+1) =      
+     1           zsum(int(2.0*(z0(k)+200.0))+1) + 1.   
               endif
               else if (k.gt.maxtr) then
                  k = maxtr
@@ -1148,7 +1150,7 @@ CC  Local Variable Type Declarations:
       REAL  psi,pt,tanl,x0,y0,z0,bfld,ka,trans_pathL,LIFC
       REAL  xp(2),x(4),epsq,R,RMAX,xc(2),xi
       REAL  sigma, sigma_estimate 
- 
+      REAL COSD,SIND 
       INTEGER  q
 
 C      DATA ka  /0.000299792458/
@@ -1243,7 +1245,7 @@ CC  Local Variable Type Declarations:
       REAL  xp(2),x(4),xc(2)
       REAL  R,a,b,c,invc,signa,signb,cut
       REAL  phi0,phiDCA,xi,epsq
-    
+      REAL COSD,SIND    
       INTEGER  q
 
       DATA cut /1.0E-03/
@@ -1359,7 +1361,7 @@ CC  Local Variable Type Declarations:
 
       REAL  psi,tanl,x0,y0,z0,xp(2),x(4)
       REAL  px,py,cut,d,m1,m2,pdu
-   
+      REAL COSD,SIND   
       DATA cut /1.0E-7/
 
 CC  Determine if special cases apply:
@@ -1474,7 +1476,7 @@ CC  Local Variable Type Declarations:
       REAL pt,x0,y0,psi,tanl,trans_pathL
       REAL fac,ptot,phi0,cospr,Leff,LIFC
       REAL theta_mcs,sqrt2
-
+      REAL COSD,SIND
 C      DATA sqrt2  /1.4142135/
 
       sqrt2 = C_SQRT2
@@ -1619,6 +1621,7 @@ c  Local variables:
         real E(3,3),Exx,Exy,Exz,Eyy,Eyz,Ezz,E_inv(3,3),detE
         real Sigxv,Sigyv,Sigzv
         real ex,ey,ez
+        REAL COSD,SIND
 
 c  Convention: L=angle lambda, V=angle phi
 

@@ -1,5 +1,8 @@
-* $Id: tstam.F,v 1.2 1998/01/27 01:14:51 fisyak Exp $
+* $Id: tstam.F,v 1.3 1999/10/15 00:53:59 nevski Exp $
 * $Log: tstam.F,v $
+* Revision 1.3  1999/10/15 00:53:59  nevski
+* pgf->g77 cleanup
+*
 * Revision 1.2  1998/01/27 01:14:51  fisyak
 * Split sources
 *
@@ -136,11 +139,11 @@ c -----	20-card setup (using sockets 1-5, 10-14)
 	integer nbad_channel_ranges
 	parameter(nbad_channel_ranges= 8)
 	integer ignore_range_lo(nbad_channel_ranges)
-	2	/   81,    225,    369,    513,
-	3	    657,    801,    945,     1089/
+     >		/   81,    225,    369,    513,
+     >	    	    657,    801,    945,     1089/
 	integer ignore_range_hi(nbad_channel_ranges)
-	2	/   144,    288,    432,    576,
-	3	    720,    864,    1008,     1152/
+     >		/   144,    288,    432,    576,
+     >		    720,    864,    1008,     1152/
 
         save first,itdc,iseq,ignore_range_lo,ignore_range_hi
 c-----------------------------------------------------------
@@ -353,7 +356,7 @@ c------ end of fix -- anyone who makes it here should be good...
 c bail on wierd fee numbers...
                  if ((ifee.lt.0).or.(ifee.gt.feeMax)) then
                     write(6,*)'Unknown FEE card number: IFEE = ',ifee,
-	2		', ICHAN = ', ichan
+     >			', ICHAN = ', ichan
 cNTBS                    write(6,*)' Quitting ...'
 cNTBS                    return
                     write(6,*)'Adding it to the bad_channels table...'

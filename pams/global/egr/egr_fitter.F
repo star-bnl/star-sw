@@ -1018,7 +1018,7 @@ CCC  L.Ray - 9/16/98
                continue 
             else 
 *              write(6,998) i
-998   Format(5XFx,'BAD Value of globtrk(i=',I7,').invpt detected - set to -999999')
+998   Format(5X,'BAD Value of globtrk(i=',I7,').invpt detected - set to -999999')
                globtrk(i).invpt = -999999.
                globtrk(i).iflag = -999
             end if  

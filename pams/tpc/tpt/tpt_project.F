@@ -1,5 +1,8 @@
-* $Id: tpt_project.F,v 1.8 1999/09/14 00:55:51 liq Exp $
+* $Id: tpt_project.F,v 1.9 1999/10/15 00:54:08 nevski Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.9  1999/10/15 00:54:08  nevski
+* pgf->g77 cleanup
+*
 * Revision 1.8  1999/09/14 00:55:51  liq
 * use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
 *
@@ -89,6 +92,7 @@ C     Local variables
       LOGICAL more
       REAL    xp(2),yp(2),devsum0,dist,dc,alpha,devsum
       REAL    xold,yold,cf,zp
+      real    atand
 C_____________________________________________________________________
 C
 

@@ -1,5 +1,8 @@
-* $Id: xyz.F,v 1.6 1999/03/06 21:08:13 perev Exp $
+* $Id: xyz.F,v 1.7 1999/10/15 00:54:01 nevski Exp $
 * $Log: xyz.F,v $
+* Revision 1.7  1999/10/15 00:54:01  nevski
+* pgf->g77 cleanup
+*
 * Revision 1.6  1999/03/06 21:08:13  perev
 * some small fixes
 *
@@ -77,10 +80,10 @@ c -----	TPG function calls
 	  time_bin = 1.0/detector(1).clock_frequency
 	  write (6,*) 'XYZ: drift_length = ', detector(1).drift_length
 	  write (6,'(1x,a,f5.2,a)') 'XYZ: '//
-     2       'SCA clock frequency: ', detector(1).clock_frequency,
-     3       '(x2) MHz'
+     >       'SCA clock frequency: ', detector(1).clock_frequency,
+     >       '(x2) MHz'
 	  write (6,*) '           '//
-	2	'(as of 11/96, SysTest uses a ~9(x2) MHz clock)'
+     >		'(as of 11/96, SysTest uses a ~9(x2) MHz clock)'
 
 	  seq_fact = 2**20
 	  buck_fact = 2**10
@@ -88,25 +91,25 @@ c -----	TPG function calls
 
 
 	if ((pad_plane_h.maxlen.le.0) .or. 
-	2	(pad_plane_h.nok.gt.pad_plane_h.maxlen)) then
+     >		(pad_plane_h.nok.gt.pad_plane_h.maxlen)) then
 	  write (6,*) 'XYZ: !!! Poorly defined table: PAD_PLANE !!!'
 	  goto 999
 	endif
 
 	if ((tppixel_h.maxlen.le.0) .or. 
-	2	(tppixel_h.nok.gt.tppixel_h.maxlen)) then
+     >		(tppixel_h.nok.gt.tppixel_h.maxlen)) then
 	  write (6,*) 'XYZ: !!! Poorly defined table: TPPIXEL !!!'
 	  goto 999
 	endif
 
 	if ((tppad_h.maxlen.le.0) .or. 
-	2	(tppad_h.nok.gt.tppad_h.maxlen)) then
+     >		(tppad_h.nok.gt.tppad_h.maxlen)) then
 	  write (6,*) 'XYZ: !!! Poorly defined table: TPPAD !!!'
 	  goto 999
 	endif
 
 	if ((adcxyz_h.maxlen.le.0) .or. 
-	2	(adcxyz_h.nok.gt.adcxyz_h.maxlen)) then
+     >		(adcxyz_h.nok.gt.adcxyz_h.maxlen)) then
 	  write (6,*) 'XYZ: !!! Poorly defined table: ADCXYZ !!!'
 	  goto 999
 	endif
@@ -145,15 +148,15 @@ c mal 31aug97
 
 c -----	Translate to cartesian coordinates
 	      istatus = tgc_pad_to_x (float(adcxyz(inok).pad), 
-	2	float(adcxyz(inok).row), Xlocal(1), pad_plane_h, pad_plane)
+     >		float(adcxyz(inok).row), Xlocal(1), pad_plane_h, pad_plane)
 
 	      istatus = tgc_row_to_y (float(adcxyz(inok).row), 
-	2	Xlocal(2), pad_plane_h, pad_plane)
+     >		Xlocal(2), pad_plane_h, pad_plane)
 
 *	      Xlocal(3) = adcxyz(inok).bucket * time_bucket
               istatus = tgc_time_to_z(adcxyz(inok).bucket,1,1,1,Xlocal(3))
 	      istatus = tgc_local_to_global (adcxyz(inok).sector,
-	2	Xlocal, Xglobal)
+     >		Xlocal, Xglobal)
 
 	      adcxyz(inok).x = Xglobal(1)
 	      adcxyz(inok).y = Xglobal(2)
