@@ -7,14 +7,6 @@ StiSsdDetectorBuilder::StiSsdDetectorBuilder(bool active)
 StiSsdDetectorBuilder::~StiSsdDetectorBuilder()
 {}
 
-void StiSsdDetectorBuilder::buildMaterials()
+void StiSsdDetectorBuilder::buildDetectors(StMaker&source)
 {}
 
-void StiSsdDetectorBuilder::buildShapes()
-{}
-
-void StiSsdDetectorBuilder::buildDetectors()
-{}
-
-void StiSsdDetectorBuilder::loadDb()
-{}
