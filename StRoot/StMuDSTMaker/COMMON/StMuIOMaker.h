@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.h,v 1.5 2004/04/02 03:24:54 jeromel Exp $
+ * $Id: StMuIOMaker.h,v 1.6 2004/04/09 03:36:15 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuIOMaker_hh
@@ -52,7 +52,7 @@ class StMuEmcUtil;
 /// pmd stuff
 //#include "StMuPmdCollection.h"
 class StMuPmdUtil;
-class StMuTofUtil;
+//class StMuTofUtil;
 
 class TFile;
 class TTree;
@@ -94,13 +94,13 @@ class StMuIOMaker : public StIOInterFace {
   StMuDst* muDst();                             ///< return pointer the  current (last read) StMuDst
   StMuEmcUtil* muEmcUtil() { return mEmcUtil; } ///< return pointer to StMuEmcUtil;
   StMuPmdUtil* muPmdUtil() { return mPmdUtil; } ///< return pointer to StMuPmdUtil;
-  StMuTofUtil* muTofUtil() { return mTofUtil; } ///< return pointer to StMuPmdUtil;
+  //StMuTofUtil* muTofUtil() { return mTofUtil; } ///< return pointer to StMuPmdUtil;
   int currentIndex() { return mCurrentIndex; }
   int eventCounter() { return mEventCounter; }
   int numberOfEvents() { return mNumberOfEvents; }
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuIOMaker.h,v 1.5 2004/04/02 03:24:54 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuIOMaker.h,v 1.6 2004/04/09 03:36:15 jeromel Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -109,7 +109,7 @@ private:
   StMuDst* mStMuDst;
   StMuEmcUtil* mEmcUtil;
   StMuPmdUtil* mPmdUtil;
-  StMuTofUtil* mTofUtil;
+  //StMuTofUtil* mTofUtil;
 
   TChain* mChain;
   int mNumberOfEvents; ///< holds the number of events in the current chain (file)
@@ -151,8 +151,8 @@ private:
   TClonesArray* pmdArrays[__NPMDARRAYS__];//->
   TClonesArray* mPmdArrays[__NPMDARRAYS__];//->
 
-  TClonesArray* tofArrays[__NTOFARRAYS__];//->
-  TClonesArray* mTofArrays[__NTOFARRAYS__];//->
+  //TClonesArray* tofArrays[__NTOFARRAYS__];//->
+  //TClonesArray* mTofArrays[__NTOFARRAYS__];//->
 
 
   ClassDef(StMuIOMaker, 2)
@@ -165,6 +165,10 @@ inline StMuDst* StMuIOMaker::muDst() { return mStMuDst;}
 /***************************************************************************
  *
  * $Log: StMuIOMaker.h,v $
+ * Revision 1.6  2004/04/09 03:36:15  jeromel
+ * Removed TOF support entirely for now as we need a working version ... Will
+ * revisit later.
+ *
  * Revision 1.5  2004/04/02 03:24:54  jeromel
  * Changes implements PMD and TOF.  TOF is clearly incomplete.
  *

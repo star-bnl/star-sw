@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.51 2004/04/06 01:48:09 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.52 2004/04/09 03:36:14 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -48,9 +48,9 @@
 #include "StMuEmcUtil.h"
 #include "StMuPmdCollection.h"
 #include "StMuPmdUtil.h"
-#include "StMuTofHit.h"
-#include "StMuTofHitCollection.h"
-#include "StMuTofUtil.h"
+//#include "StMuTofHit.h"
+//#include "StMuTofHitCollection.h"
+//#include "StMuTofUtil.h"
 
 #include "StMuDstMaker.h"
 #include "StMuDst.h"
@@ -75,25 +75,25 @@ ClassImp(StMuDstMaker)
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 /**
-   The default constructor as it is right now was written in order to run 
+   The default constructor as it is right now was written in order to run
    the StMuDstMaker during reconstruction in the bfc.
-   Since the PID table that is needed for muDst production is not passed as 
+   Since the PID table that is needed for muDst production is not passed as
    an argument to the bfc, this default constructor
-   sets a specific PID table. This table has to be updated when changing to 
+   sets a specific PID table. This table has to be updated when changing to
    a new production version.
    Also, the standard track and l3 track filters are set.
  */
 StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
-  mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0), 
+  mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0),
   mIOMaker(0), mTreeMaker(0),
   mIoMode(1), mIoNameMode((int)ioTreeMaker),
-  mTrackType(256), mReadTracks(1), 
+  mTrackType(256), mReadTracks(1),
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
-  mTrackFilter(0), mL3TrackFilter(0), 
-  mCurrentFile(0), 
+  mTrackFilter(0), mL3TrackFilter(0),
+  mCurrentFile(0),
   mChain (0), mTTree(0),
-  mSplit(99), mCompression(9), mBufferSize(65536*4), 
-  mProbabilityPidAlgorithm(0)  
+  mSplit(99), mCompression(9), mBufferSize(65536*4),
+  mProbabilityPidAlgorithm(0)
 {
   mDirName="./";
   mFileName="";
@@ -106,8 +106,8 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   mStMuDst = new StMuDst();
   mEmcUtil = new StMuEmcUtil();
   mPmdUtil = new StMuPmdUtil();
-  mTofUtil = new StMuTofUtil();
-  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil || ! mTofUtil )
+  //mTofUtil = new StMuTofUtil();
+  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil ) //|| ! mTofUtil )
     throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",__PRETTYF__);
 
 
@@ -127,44 +127,44 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
 void StMuDstMaker::zeroArrays()
 {
   int i;
-  for (  i=0; i < __NARRAYS__; i++) {        arrays[i] = 0;         mArrays[i] = 0;        } 
+  for (  i=0; i < __NARRAYS__; i++) {        arrays[i] = 0;         mArrays[i] = 0;        }
   for (  i=0; i < __NSTRANGEARRAYS__; i++) { strangeArrays[i] = 0;  mStrangeArrays[i] = 0; }
   for (  i=0; i < __NEMCARRAYS__; i++){      emcArrays[i] = 0;      mEmcArrays[i] = 0;     }
   for (  i=0; i < __NPMDARRAYS__; i++){      pmdArrays[i] = 0;      mPmdArrays[i] = 0;     }
-  for (  i=0; i < __NTOFARRAYS__; i++){      tofArrays[i] = 0;      mTofArrays[i] = 0;     }
+  //for (  i=0; i < __NTOFARRAYS__; i++){      tofArrays[i] = 0;      mTofArrays[i] = 0;     }
 }
 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles, const char* name) : StMaker(name), 
+StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles, const char* name) : StMaker(name),
   mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0),
   mIOMaker(0), mTreeMaker(0),
   mIoMode(mode), mIoNameMode(nameMode),
   mDirName(dirName), mFileName(fileName), mFilter(filter), mMaxFiles(maxFiles),
-  mTrackType(256), mReadTracks(1), 
+  mTrackType(256), mReadTracks(1),
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
   mTrackFilter(0), mL3TrackFilter(0),
-  mSplit(99), mCompression(9), mBufferSize(65536*4), 
-  mProbabilityPidAlgorithm(0)  
+  mSplit(99), mCompression(9), mBufferSize(65536*4),
+  mProbabilityPidAlgorithm(0)
 {
   streamerOff();
   zeroArrays();
   if (mIoMode==ioRead) openRead();
   if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
-  
+
   setProbabilityPidFile();
 
   mEventCounter=0;
   mStMuDst = new StMuDst();
   mEmcUtil = new StMuEmcUtil();
   mPmdUtil = new StMuPmdUtil();
-  mTofUtil = new StMuTofUtil();
-  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil || ! mTofUtil )
+  //mTofUtil = new StMuTofUtil();
+  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil ) //|| ! mTofUtil )
     throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",__PRETTYF__);
 
   createArrays();
-  
+
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -173,7 +173,7 @@ StMuDstMaker::~StMuDstMaker() {
   DEBUGMESSAGE1("");
   clear(999);
   delete mStMuDst;
-  delete mTofUtil;
+  //delete mTofUtil;
   DEBUGMESSAGE3("after arrays");
   saveDelete(mProbabilityPidAlgorithm);
   saveDelete(mTrackFilter);
@@ -189,10 +189,10 @@ StMuDstMaker::~StMuDstMaker() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-/** Switch of the TObject part of some streamers, so that only the 
-    datTClonesamenbers of the derived classes are written to disk, but not 
+/** Switch of the TObject part of some streamers, so that only the
+    datTClonesamenbers of the derived classes are written to disk, but not
     the data members of the base class TObject
-*/ 
+*/
 void  StMuDstMaker::streamerOff() {
   StStrangeMuDst::Class()->IgnoreTObjectStreamer();
   StV0MuDst::Class()->IgnoreTObjectStreamer();
@@ -213,7 +213,7 @@ void StMuDstMaker::createArrays() {
     DEBUGVALUE2(arrays[i]);
     mArrays[i]= clonesArray(arrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],StMuArrays::arrayCounters[i]);
     DEBUGVALUE2(arrays[i]);
-  } 
+  }
   /// from strangeness group
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     mStrangeArrays[i]= clonesArray(strangeArrays[i],StMuArrays::strangeArrayTypes[i],StMuArrays::strangeArraySizes[i],StMuArrays::strangeArrayCounters[i]);
@@ -227,10 +227,11 @@ void StMuDstMaker::createArrays() {
     mPmdArrays[i]= clonesArray(pmdArrays[i],StMuArrays::pmdArrayTypes[i],StMuArrays::pmdArraySizes[i],StMuArrays::pmdArrayCounters[i]);
   }
   // from Tof group
-  for ( int i=0; i<__NTOFARRAYS__; i++) {
-    mTofArrays[i]= clonesArray(tofArrays[i],StMuArrays::tofArrayTypes[i],StMuArrays::tofArraySizes[i],StMuArrays::tofArrayCounters[i]);
-  }
-  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);
+  //for ( int i=0; i<__NTOFARRAYS__; i++) {
+  //  mTofArrays[i]= clonesArray(tofArrays[i],StMuArrays::tofArrayTypes[i],StMuArrays::tofArraySizes[i],StMuArrays::tofArrayCounters[i]);
+  //}
+  //mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);
+  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -252,9 +253,9 @@ void StMuDstMaker::clear(int del){
   for ( int i=0; i<__NPMDARRAYS__; i++) {
     clear(mPmdArrays[i],StMuArrays::pmdArrayCounters[i]		,dell);
   }
-  for ( int i=0; i<__NTOFARRAYS__; i++) {
-    clear(mTofArrays[i],StMuArrays::tofArrayCounters[i],         dell);
-  }
+  //for ( int i=0; i<__NTOFARRAYS__; i++) {
+  //  clear(mTofArrays[i],StMuArrays::tofArrayCounters[i],         dell);
+  //}
   DEBUGMESSAGE2("out");
 }
 //-----------------------------------------------------------------------
@@ -279,10 +280,10 @@ void StMuDstMaker::clear(TClonesArray* &t, int& counter,int del)
 
   switch (kase) {
 
-  case 0: 
+  case 0:
        t->Clear();    break;
 
-  case kWrt: 
+  case kWrt:
   case kWrt|kDel:
        t->Delete();   break;
 
@@ -292,7 +293,7 @@ void StMuDstMaker::clear(TClonesArray* &t, int& counter,int del)
   case kRea|kDel:
        THack::ClearClonesArray(t);
        break;
-  
+
   case kRea|kDtr:
        THack::DeleteClonesArray(t);
        t = 0;
@@ -319,11 +320,11 @@ TClonesArray* StMuDstMaker::clonesArray(TClonesArray*& p, const char* type, int 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 /**
-   The Init() routine is used to establish contact to other makers. As it is STAR 
-   habit (but really really bad coding) we identify the 
-   other makers by names (instead of passing pointers). Here, the names are 
-   hard-wired because they have to be identical to the names 
-   the bfc is assining to the makers. Do not alter these names unless you know 
+   The Init() routine is used to establish contact to other makers. As it is STAR
+   habit (but really really bad coding) we identify the
+   other makers by names (instead of passing pointers). Here, the names are
+   hard-wired because they have to be identical to the names
+   the bfc is assining to the makers. Do not alter these names unless you know
    what you are doing.
 */
 int StMuDstMaker::Init(){
@@ -331,8 +332,8 @@ int StMuDstMaker::Init(){
   mIOMaker = (StIOMaker*)GetMaker("IOMaker");
   mTreeMaker = (StTreeMaker*)GetMaker("outputStream");
   mStStrangeMuDstMaker = (StStrangeMuDstMaker*)GetMaker("strangeMuDst");
-  TObjectSet *muDstSet =  AddObj(mStMuDst,".const");   ///< added for Valeri to be able to pick it up in other makers 
-  if (muDstSet ) muDstSet ->SetName("muDst");          ///< added for Valeri to be able to pick it up in other makers 
+  TObjectSet *muDstSet =  AddObj(mStMuDst,".const");   ///< added for Valeri to be able to pick it up in other makers
+  if (muDstSet ) muDstSet ->SetName("muDst");          ///< added for Valeri to be able to pick it up in other makers
 
   return 0;
 }
@@ -349,9 +350,9 @@ void StMuDstMaker::Clear(const char *){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 /**
-   Depending on ioMode, calling Make() will initiate the StMuDstMaker to read or 
+   Depending on ioMode, calling Make() will initiate the StMuDstMaker to read or
    write the next event. After the Make() function has finished,
-   a call to muDst() will return a pointer to an object od type StMuDst. This object 
+   a call to muDst() will return a pointer to an object od type StMuDst. This object
    will hold the current event if the io was successful, or return a null pointer.
 */
 int StMuDstMaker::Make(){
@@ -413,25 +414,25 @@ void StMuDstMaker::write(){
   string theFileName("/dev/null");
   DEBUGVALUE2(mIoNameMode);
   switch (mIoNameMode) {
-  case ioFix:  
+  case ioFix:
     DEBUGMESSAGE2("===> ioFix\n");
     theFileName = buildFileName( mDirName+"/", basename(mFileName),".MuDst.root");
     break;
   case ioIOMaker:
     DEBUGMESSAGE2("===> ioIOMaker\n");
-    ioMakerFileName = string(mIOMaker->GetFile()); 
+    ioMakerFileName = string(mIOMaker->GetFile());
     DEBUGVALUE2(ioMakerFileName);
-    theFileName = buildFileName( mDirName+"/", basename(ioMakerFileName),".MuDst.root"); 
+    theFileName = buildFileName( mDirName+"/", basename(ioMakerFileName),".MuDst.root");
     break;
   case ioTreeMaker:
     //    ioMakerFileName = mTreeMaker->GetTree()->GetBaseName();
     ioMakerFileName = mTreeMaker->GetTree()->GetBaseName();
-    theFileName = buildFileName(dirname(ioMakerFileName),basename(ioMakerFileName),".MuDst.root"); 
+    theFileName = buildFileName(dirname(ioMakerFileName),basename(ioMakerFileName),".MuDst.root");
     break;
   default:
     DEBUGMESSAGE("do not know where to get the filename from");
   }
-  
+
   DEBUGVALUE2(theFileName.c_str());
 
   if (theFileName != mCurrentFileName) {
@@ -477,36 +478,36 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
       chain->SetBranchAddress(StMuArrays::arrayNames[i],&mArrays[i]);
       ts = StMuArrays::arrayNames[i]; ts +="*";
       chain->SetBranchStatus (ts,1);
-    } 
-  
+    }
+
     // strange stuff
     for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
       chain->SetBranchAddress(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i]);
       ts = StMuArrays::strangeArrayNames[i]; ts +="*";
       chain->SetBranchStatus (ts,1);
-    } 
-  
+    }
+
     // emc stuff
     for ( int i=0; i<__NEMCARRAYS__; i++) {
       chain->SetBranchAddress(StMuArrays::emcArrayNames[i],&mEmcArrays[i]);
       ts = StMuArrays::emcArrayNames[i]; ts +="*";
       chain->SetBranchStatus (ts,1);
-    } 
+    }
 
     // pmd stuff
     for ( int i=0; i<__NPMDARRAYS__; i++) {
       chain->SetBranchAddress(StMuArrays::pmdArrayNames[i],&mPmdArrays[i]);
       ts = StMuArrays::pmdArrayNames[i]; ts +="*";
       chain->SetBranchStatus (ts,1);
-    } 
+    }
 
     // tof stuff
-    for ( int i=0; i<__NTOFARRAYS__; i++) {
-      chain->SetBranchAddress(StMuArrays::tofArrayNames[i],&mTofArrays[i]);   
-      ts = StMuArrays::tofArrayNames[i]; ts +="*";
-      chain->SetBranchStatus (ts,1);
-    } 
- 
+    //for ( int i=0; i<__NTOFARRAYS__; i++) {
+    //  chain->SetBranchAddress(StMuArrays::tofArrayNames[i],&mTofArrays[i]);
+    //  ts = StMuArrays::tofArrayNames[i]; ts +="*";
+    //  chain->SetBranchStatus (ts,1);
+    //}
+
     mTTree = mChain->GetTree();
   }
 }
@@ -517,7 +518,7 @@ void StMuDstMaker::openRead() {
   DEBUGVALUE2(mDirName.c_str());
   DEBUGVALUE2(mFileName.c_str());
   DEBUGVALUE2(mFilter.c_str());
- 
+
   StMuChainMaker* chainMaker = new StMuChainMaker("MuDst");
   mChain = chainMaker->make(mDirName, mFileName, mFilter, mMaxFiles);
 
@@ -527,7 +528,8 @@ void StMuDstMaker::openRead() {
     DEBUGVALUE3(mChain);
     setBranchAddresses(mChain);
 
-    mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);  
+    //mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);
+    mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays);
   }
 
 }
@@ -541,7 +543,7 @@ void StMuDstMaker::read(){
     DEBUGMESSAGE2("");
     if (mChain->GetCurrentFile()) {
       DEBUGVALUE2(mChain->GetCurrentFile()->GetName());
-    } 
+    }
     int bytes = 0;
     while (bytes==0 ) {
       DEBUGVALUE3(mEventCounter);
@@ -570,14 +572,14 @@ void StMuDstMaker::openWrite(string fileName) {
   // creat a Picoevent and and output file
   DEBUGMESSAGE2("now create file");
   mCurrentFile = new TFile(fileName.c_str(),"RECREATE","StMuDst");
-  
+
   if (!mCurrentFile) throw StMuExceptionNullPointer("no file openend",__PRETTYF__);
-  
+
   mCurrentFile->SetCompressionLevel(mCompression);
-  
+
   // Create a ROOT Tree and one superbranch
   DEBUGMESSAGE2("now create trees and branches");
-  
+
   TBranch* branch;
   int bufsize = mBufferSize;
   if (mSplit) bufsize /= 4;
@@ -591,21 +593,21 @@ void StMuDstMaker::openWrite(string fileName) {
     DEBUGVALUE2(i);
     branch = mTTree->Branch(StMuArrays::arrayNames[i],&mArrays[i], bufsize, mSplit);
   }
-  
+
   // strange stuff
   DEBUGMESSAGE2("strange arrays");
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     DEBUGVALUE2(i);
     branch = mTTree->Branch(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i], bufsize, mSplit);
   }
-  
+
   // emc stuff
   DEBUGMESSAGE2("emc arrays");
   for ( int i=0; i<__NEMCARRAYS__; i++) {
     DEBUGVALUE2(i);
     branch = mTTree->Branch(StMuArrays::emcArrayNames[i],&mEmcArrays[i], bufsize, mSplit);
   }
-  
+
   // pmd stuff
   DEBUGMESSAGE2("pmd arrays");
   for ( int i=0; i<__NPMDARRAYS__; i++) {
@@ -614,12 +616,12 @@ void StMuDstMaker::openWrite(string fileName) {
   }
 
   // tof stuff
-  DEBUGMESSAGE2("tof arrays");
-  for ( int i=0; i<__NTOFARRAYS__; i++) {
-    DEBUGVALUE2(i);
-    branch = mTTree->Branch(StMuArrays::tofArrayNames[i],&mTofArrays[i], bufsize, mSplit);
-  }
-  
+  //DEBUGMESSAGE2("tof arrays");
+  //for ( int i=0; i<__NTOFARRAYS__; i++) {
+  //  DEBUGVALUE2(i);
+  //  branch = mTTree->Branch(StMuArrays::tofArrayNames[i],&mTofArrays[i], bufsize, mSplit);
+  //}
+
   mCurrentFileName = fileName;
 }
 //-----------------------------------------------------------------------
@@ -633,7 +635,7 @@ void StMuDstMaker::closeWrite(){
     cout << " NumberOfEvents= " << mTTree->GetEntries() << " ";
     cout << " ##### " << endl;
   }
-  if (mTTree) mTTree->AutoSave(); 
+  if (mTTree) mTTree->AutoSave();
   mTTree = 0;
   if (mCurrentFile) mCurrentFile->Close();
   mCurrentFile = 0;
@@ -643,20 +645,20 @@ void StMuDstMaker::closeWrite(){
 //-----------------------------------------------------------------------
 void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
   DEBUGMESSAGE2("");
-  
+
  try {
     fillEvent(ev);
     fillL3AlgorithmInfo(ev);
     fillDetectorStates(ev);
     fillEmc(ev);
     fillPmd(ev);
-    fillTof(ev);
+    //fillTof(ev);
   }
   catch(StMuException e) {
     e.print();
     throw e;
   }
-  
+
   try {
     fillTracks(ev,mTrackFilter);
   }
@@ -704,18 +706,18 @@ void StMuDstMaker::fillEvent(StEvent* ev, StMuCut* cut) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::fillEmc(StEvent* ev) {
-  DEBUGMESSAGE2("");   
+  DEBUGMESSAGE2("");
   StEmcCollection* emccol=(StEmcCollection*)ev->emcCollection();
   if (!emccol)  return; //throw StMuExceptionNullPointer("no StEmcCollection",__PRETTYF__);
   StTimer timer;
   timer.start();
-  
+
   TClonesArray *tca = mEmcArrays[muEmc];
   new((*tca)[0]) StMuEmcCollection();
   StMuEmcCollection* muEmcColl = (StMuEmcCollection*)tca->At(0);
   if (!muEmcColl) throw StMuExceptionNullPointer("no StMuEmcCollection",__PRETTYF__);
   mEmcUtil->fillMuEmc(muEmcColl,emccol);
-  
+
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
 }
@@ -723,49 +725,51 @@ void StMuDstMaker::fillEmc(StEvent* ev) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::fillPmd(StEvent* ev) {
-  DEBUGMESSAGE2("");   
+  DEBUGMESSAGE2("");
   StPhmdCollection* phmdColl=(StPhmdCollection*)ev->phmdCollection();
   if (!phmdColl)  return; //throw StMuExceptionNullPointer("no StPhmdCollection",__PRETTYF__);
   StTimer timer;
   timer.start();
-  
+
   TClonesArray *tca = mPmdArrays[muPmd];
   new((*tca)[0]) StMuPmdCollection();
   StMuPmdCollection* muPmdColl = (StMuPmdCollection*)tca->At(0);
   if (!muPmdColl) throw StMuExceptionNullPointer("no StMuPmdCollection",__PRETTYF__);
   mPmdUtil->fillMuPmd(phmdColl,muPmdColl);
-  
+
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
 }
 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDstMaker::fillTof(StEvent* ev) {
-  DEBUGMESSAGE2("");
-  StTofCollection *tofcol = ev->tofCollection();
-  if( !ev || !tofcol || !tofcol->dataPresent() )
-    return;  //throw StMuExceptionNullPointer("no StTofDataCollection",__PRETTYF__);
-  StTimer timer;
-  timer.start();
 
-  // fill tofHit
-  StMuTofHitCollection muTofHitColl;
-  mTofUtil->fillMuTofHit(&muTofHitColl, tofcol);
-  for(size_t i=0; i < muTofHitColl.size(); i++) {
-    StMuTofHit* tofMuHit = (StMuTofHit *)muTofHitColl.getHit(i);
-    addType( mTofArrays[muTofHit], *tofMuHit );
-  }
+//void StMuDstMaker::fillTof(StEvent* ev) {
+//  DEBUGMESSAGE2("");
+//  StTofCollection *tofcol = ev->tofCollection();
+//  if( !ev || !tofcol || !tofcol->dataPresent() )
+//    return;  //throw StMuExceptionNullPointer("no StTofDataCollection",__PRETTYF__);
+//  StTimer timer;
+//  timer.start();
+//
+//  // fill tofHit
+//  StMuTofHitCollection muTofHitColl;
+//  mTofUtil->fillMuTofHit(&muTofHitColl, tofcol);
+//  for(size_t i=0; i < muTofHitColl.size(); i++) {
+//    StMuTofHit* tofMuHit = (StMuTofHit *)muTofHitColl.getHit(i);
+//    addType( mTofArrays[muTofHit], *tofMuHit );
+//  }
+//
+//  // fill tofData
+//  StSPtrVecTofData &tofData = tofcol->tofData();
+//  for(size_t i=0; i < tofData.size(); i++) {
+//    addType( mTofArrays[muTofData], *tofData[i] );
+//  }
+//
+//  timer.stop();
+//  DEBUGVALUE2(timer.elapsedTime());
+//}
 
-  // fill tofData
-  StSPtrVecTofData &tofData = tofcol->tofData();
-  for(size_t i=0; i < tofData.size(); i++) {
-    addType( mTofArrays[muTofData], *tofData[i] );
-  }
-
-  timer.stop();
-  DEBUGVALUE2(timer.elapsedTime());
-}
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -779,7 +783,7 @@ void StMuDstMaker::fillL3AlgorithmInfo(StEvent* ev) {
   StL3EventSummary* l3 = ev->l3Trigger()->l3EventSummary();
   int n = l3->numberOfAlgorithms();
   for (int i=0; i<n; i++) {
-    if (l3->algorithms()[i]->accept()) 
+    if (l3->algorithms()[i]->accept())
       addType( mArrays[muAccept], *l3->algorithms()[i] );
     else
       addType( mArrays[muReject], *l3->algorithms()[i] );
@@ -839,7 +843,7 @@ void StMuDstMaker::fillDetectorStates(StEvent* ev) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMuCut* cut, 
+void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMuCut* cut,
 				  TClonesArray* gTCA, TClonesArray* pTCA, TClonesArray* oTCA, bool l3) {
   DEBUGMESSAGE3("");
   const StTrack* tr=0;
@@ -879,7 +883,7 @@ int StMuDstMaker::addTrack(TClonesArray* tca, const StEvent*event, const StTrack
   int counter = tca->GetEntries();
   try{
     if (cut && !cut->pass(track)) throw StMuExceptionBadValue("failed track cut",__PRETTYF__);
-    // add StRichSpectra if StRichPidTraits are found 
+    // add StRichSpectra if StRichPidTraits are found
     // we have to do this more elegant
     StRichSpectra* rich = richSpectra(track);
     if (rich) {
@@ -909,15 +913,15 @@ void StMuDstMaker::fillStrange(StStrangeMuDstMaker* maker) {
   DEBUGMESSAGE2("");
   /// now fill the strangeness stuff
   if (!maker) throw StMuExceptionNullPointer("no StrangeMuDstMaker",__PRETTYF__);
- 
+
   StStrangeEvMuDst *ev=0;
-  StV0MuDst *v0=0;     
+  StV0MuDst *v0=0;
   StStrangeAssoc *assoc=0;
-  StXiMuDst *xi=0;     
-  StKinkMuDst *kink=0; 
-  StV0Mc *v0Mc=0;      
-  StXiMc *xiMc=0;      
-  StKinkMc *kinkMc=0;  
+  StXiMuDst *xi=0;
+  StKinkMuDst *kink=0;
+  StV0Mc *v0Mc=0;
+  StXiMc *xiMc=0;
+  StKinkMc *kinkMc=0;
   TCut *strangeCut=0;
 
   addType(maker->GetEvClonesArray(),  mStrangeArrays[0],ev);
@@ -936,7 +940,7 @@ void StMuDstMaker::fillStrange(StStrangeMuDstMaker* maker) {
   addType(maker->GetKinkAssocArray(), mStrangeArrays[10],assoc);
 
   addType(maker->GetCutsArray(), mStrangeArrays[11],strangeCut);
-  
+
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -960,7 +964,7 @@ int StMuDstMaker::addType(TClonesArray* tcaFrom, TClonesArray* &tcaTo ,T *t) {
 //   int counter =-1;
 //   if (tcaTo) {
 //     counter = tcaTo->GetEntries();
-    
+
 //     new((*tcaTo)[counter]) StMuEmcCollection();
 //   }
 //   return counter;
@@ -1019,7 +1023,7 @@ string StMuDstMaker::basename(string s){
   if (pos!=string::npos ) name.erase(pos,name.length()-pos );
   DEBUGVALUE3(name.c_str());
   return name;
-} 
+}
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1035,7 +1039,7 @@ string StMuDstMaker::dirname(string s){
   name=name+"/";
   DEBUGVALUE3(name);
   return name;
-} 
+}
 
 void StMuDstMaker::setProbabilityPidFile(const char* file) {
   ostrstream flnm;
@@ -1058,6 +1062,10 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.52  2004/04/09 03:36:14  jeromel
+ * Removed TOF support entirely for now as we need a working version ... Will
+ * revisit later.
+ *
  * Revision 1.51  2004/04/06 01:48:09  perev
  * Small leak + incorrect filing StMuTofHitCollection
  *
