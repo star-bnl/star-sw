@@ -29,7 +29,7 @@ checkDbTableList(char* listFile, char* outName, bool doPrintOut=true)
   loadSharedLibraries();
   
   // loading functions macros
-  gROOT->LoadMacro("checkDbTable.C");
+  gROOT->LoadMacro("StRoot/StEmcUtil/macros/checkDbTable.C");
 
   // Getting file list to be checked
   ifstream inputFile(listFile); 
