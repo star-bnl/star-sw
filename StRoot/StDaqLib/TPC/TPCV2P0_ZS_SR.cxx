@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.24 2004/03/04 21:51:29 ward Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.25 2004/03/10 05:53:08 jeromel Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -35,6 +35,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.25  2004/03/10 05:53:08  jeromel
+ * Left a debug line in (to remove later)
+ *
  * Revision 1.24  2004/03/04 21:51:29  ward
  * Replaced MERGE_SEQUENCES with a StDAQMaker chain parameter, as suggested by Landgraf and Lauret.
  *
@@ -121,10 +124,15 @@
 
 TPCV2P0_ZS_SR::TPCV2P0_ZS_SR(int s, TPCV2P0_Reader *det, char mergeSequences)
 {
-  assert(mergeSequences==0||mergeSequences==1); mMergeSequences=mergeSequences;
-  sector = s-1; // convert the sector into internal representation
+  assert(mergeSequences==0||mergeSequences==1); 
+  mMergeSequences=mergeSequences;
+
+  sector   = s-1;               // convert the sector into internal representation
   detector = det;
-  if (detector->ercpy->verbose) cout << "Constructing TPCV2P0_ZS_SR" << endl;
+  if (detector->ercpy->verbose){
+    cout << "Constructing TPCV2P0_ZS_SR" << endl
+	 << "  MergeSequence is " << (mMergeSequences?"ON":"OFF") << endl;
+  }
 
   // NULLS in banks array
   memset((char *)adcd_p, 0, sizeof(adcd_p));
@@ -143,6 +151,10 @@ int TPCV2P0_ZS_SR::initialize()
       Pad_array[row][pad].seq= (Sequence *)0;
     }
   }
+
+  // *** DEBUG LINE *** COMMENT LATER ***
+  cout << "TPCV2P0_ZS_SR::initialize : mMergeSequences=" << (mMergeSequences?"ON":"OFF") << endl;
+
   int rcb; // define for following for loops
   // store pointers to the ADCD, ADCX, SEQD banks
   for(rcb = 0; rcb < 6; rcb++)
@@ -433,39 +445,39 @@ int TPCV2P0_ZS_SR::initialize()
 	      //is this sequence adjacent to previous one?
 
               if(mMergeSequences) {  // Replaces an ifdef MERGE_SEQUENCES, Herb Ward, Mar 4 2004
-	      if (start>lastbin+1)  {   // Not adjoining previous sequence, no merge!
+		if (start>lastbin+1)  {   // Not adjoining previous sequence, no merge!
+		  if (pad_seq>=Pad_array[padrow-1][pad-1].nseq) {
+		    printf("sequence overrun %s %d row %d pad %d seq %d\n",
+			   __FILE__,__LINE__,padrow,pad,pad_seq);
+		  }
+
+		  Pad_array[padrow-1][pad-1].seq[pad_seq].startTimeBin = start;
+		  Pad_array[padrow-1][pad-1].seq[pad_seq].Length = len;
+		  Pad_array[padrow-1][pad-1].seq[pad_seq].FirstAdc = adc_locn;
+		  adc_locn +=len;
+		  pad_seq++;
+		}
+		else { // Merge sequence!
+		  assert ( pad_seq>=1 && pad_seq<=Pad_array[padrow-1][pad-1].nseq);
+		  
+		  if (pad_seq>Pad_array[padrow-1][pad-1].nseq)
+		    printf("sequence overrun %s %d row %d pad %d seq %d\n",
+			   __FILE__,__LINE__,padrow,pad,pad_seq);
+		  Pad_array[padrow-1][pad-1].seq[pad_seq-1].Length += len;
+		  adc_locn +=len;
+		}
+              } else { // if(mMergeSequences   Herb replaces an #else, Mar 4 2004.
+
 		if (pad_seq>=Pad_array[padrow-1][pad-1].nseq) {
 		  printf("sequence overrun %s %d row %d pad %d seq %d\n",
 			 __FILE__,__LINE__,padrow,pad,pad_seq);
 		}
-
+		
 		Pad_array[padrow-1][pad-1].seq[pad_seq].startTimeBin = start;
 		Pad_array[padrow-1][pad-1].seq[pad_seq].Length = len;
 		Pad_array[padrow-1][pad-1].seq[pad_seq].FirstAdc = adc_locn;
 		adc_locn +=len;
 		pad_seq++;
-	      }
- 	      else { // Merge sequence!
-		assert ( pad_seq>=1 && pad_seq<=Pad_array[padrow-1][pad-1].nseq);
-
- 		if (pad_seq>Pad_array[padrow-1][pad-1].nseq)
- 		  printf("sequence overrun %s %d row %d pad %d seq %d\n",
- 			 __FILE__,__LINE__,padrow,pad,pad_seq);
- 		Pad_array[padrow-1][pad-1].seq[pad_seq-1].Length += len;
- 		adc_locn +=len;
- 	      }
-              } else { // if(mMergeSequences   Herb replaces an #else, Mar 4 2004.
-
-	      if (pad_seq>=Pad_array[padrow-1][pad-1].nseq) {
-		printf("sequence overrun %s %d row %d pad %d seq %d\n",
-		       __FILE__,__LINE__,padrow,pad,pad_seq);
-	      }
-
-	      Pad_array[padrow-1][pad-1].seq[pad_seq].startTimeBin = start;
-	      Pad_array[padrow-1][pad-1].seq[pad_seq].Length = len;
-	      Pad_array[padrow-1][pad-1].seq[pad_seq].FirstAdc = adc_locn;
-	      adc_locn +=len;
-	      pad_seq++;
               } // if(mMergeSequences)  Herb Ward, Mar 4 2004.
  
 	      lastbin = start+len-1;
