@@ -42,7 +42,6 @@ my $lib_ver = "n\/a";
 my $mchain = "n\/a";
 my $mfield1 = "n\/a";
 my $mfield2 = "n\/a";
-my $makers  = "n\/a";
 
 my $ii = 0;
 my $ik = 0;
@@ -83,7 +82,6 @@ sub fillTable {
       $sql.="chainOpt='$mchain',"; 
       $sql.="field1='$mfield1',";
       $sql.="field2='$mfield2',";
-      $sql.="list_Makers='$makers'"; 
 
       print "$sql\n" if $debugOn;
       $rv = $dbh->do($sql) || die $dbh->errstr;
