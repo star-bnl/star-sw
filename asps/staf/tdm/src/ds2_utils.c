@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "emlLib.h"
 #include "dstype.h"
 #include "table_header.h"
 
@@ -60,18 +61,19 @@ int ds2ReallocTable(TABLE_HEAD_ST** ppHead,char** ppData
 	||  !dsTableDataAddress(&pDat, pTable)
 			|| !(pDat == pData)
 	){
-	   dsPerror("ds2ReallocTable: corrupt table structs");
+	   EML_ERROR(dsError("ds2ReallocTable: corrupt table structs"));
 	   return FALSE;
 	}
 
 	if( !dsReallocTable(pTable,newCount)
 	||  !dsTableDataAddress(&pDat, pTable)
 	){
-	   dsPerror("ds2ReallocTable: can't reallocate");
+	   EML_ERROR(dsError("ds2ReallocTable: can't reallocate"));
 	   return FALSE;
 	}
 	*ppData = pDat;
 	pHead->maxlen = newCount;
+	pHead->data_pointer=pDat;
 	return TRUE;
 }
 
