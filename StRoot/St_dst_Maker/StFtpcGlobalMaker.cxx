@@ -1,5 +1,8 @@
-// $Id: StFtpcGlobalMaker.cxx,v 1.19 2004/03/02 17:13:06 jcs Exp $
+// $Id: StFtpcGlobalMaker.cxx,v 1.20 2004/04/06 19:01:35 oldi Exp $
 // $Log: StFtpcGlobalMaker.cxx,v $
+// Revision 1.20  2004/04/06 19:01:35  oldi
+// Code cleanup.
+//
 // Revision 1.19  2004/03/02 17:13:06  jcs
 // Add description of ftpc cluster finding flags
 // (currently in fcl_fppoint.idl which will soon disappear)
@@ -286,9 +289,9 @@ Int_t StFtpcGlobalMaker::Make(){
       // end of processing current hit
     }  // end of processing all hits on track
     
-      if (globtrk[iglobtrk].det_id == 5 ) iftpc = 0;
-      if (globtrk[iglobtrk].det_id == 4 ) iftpc = 1;
-      mon_soft_ftpc[0].n_trk_ftpc[iftpc]++;
+    if (globtrk[iglobtrk].det_id == 5 ) iftpc = 0;
+    if (globtrk[iglobtrk].det_id == 4 ) iftpc = 1;
+    mon_soft_ftpc[0].n_trk_ftpc[iftpc]++;
 
     
     //  Track finding and track fitting method 
@@ -408,7 +411,7 @@ Int_t StFtpcGlobalMaker::Make(){
       globtrk[iglobtrk].psiout * C_DEG_PER_RAD; 
 
     //  1/pt at end 
-    globtrk[iglobtrk].invptout =  
+    globtrk[iglobtrk].invptout = 
       1./::sqrt(track->GetPx()*track->GetPx()
 	      +track->GetPy()*track->GetPy());
 
@@ -433,7 +436,7 @@ Int_t StFtpcGlobalMaker::Make(){
     globtrk[iglobtrk].iflag = 
       700 + flag;
     if (fabs((float) globtrk[iglobtrk].icharge) != 1. ) {
-      globtrk[iglobtrk].iflag   =  
+      globtrk[iglobtrk].iflag =  
 	-globtrk[iglobtrk].iflag + 20;
     }
     if (fabs((float) globtrk[iglobtrk].invpt) >= 999999.)  {
