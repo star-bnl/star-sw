@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.70 2001/09/21 01:23:25 jeromel Exp $
+// $Id: doEvents.C,v 1.71 2001/09/27 00:51:34 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -89,7 +89,6 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
   TString tflag = qaflag;
   int eventDisplay = tflag.Contains("disp",TString::kIgnoreCase);
 
-  cout << "Hello world" << endl;
   cout <<  endl << endl <<" doEvents -  input # events = " << nEvents << endl;
   Int_t ilist=0;
   while(fileList[ilist]){ 
@@ -116,16 +115,14 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     gSystem->Load("StEvent");
     gSystem->Load("StEventUtilities");
     gSystem->Load("StMagF");
-    gSystem->Load("StTpcDb");
-    gSystem->Load("StEventMaker");
     gSystem->Load("StAnalysisMaker");
-
+    gSystem->Load("StTpcDb");
+    
 //   		Special libraries for EventDisplay
     if (eventDisplay) {//EventDisplay on
        gSystem->Load("St_g2t");
        gSystem->Load("geometry");
        gSystem->Load("St_geant_Maker");
-       gSystem->Load("StEventHelper");
        gSystem->Load("StTableUtilities");
        gSystem->Load("StEventDisplayMaker");
     }
@@ -181,6 +178,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     // Maker to read events from file or database into StEvent
     //
     if (!mainBranch.Contains("eventBranch")) {
+      gSystem->Load("StEventMaker");
       StEventMaker *readerMaker =  new StEventMaker("events","title");
     }
     //
@@ -295,8 +293,8 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
-// Revision 1.70  2001/09/21 01:23:25  jeromel
-// gStTpcDb vs StEventMaker.
+// Revision 1.71  2001/09/27 00:51:34  perev
+// call StEventMaker conditionally
 //
 // Revision 1.69  2001/09/17 00:13:14  perev
 // Load StEventUtilities
