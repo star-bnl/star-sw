@@ -9,15 +9,12 @@
   cd [data]/ebye/sca
     tdm/newtable  sca_in      		sca_in     10000
     tdm/newtable  sca_out     		sca_out    10000
+    
+  cd [params]/ebye
     tdm/newtable  sca_prior       	sca_prior  300000
     tdm/newtable  sca_ensemble_ave    	sca_out        1
-
-    tdm/table/rowcount       sca_in    		0
-    tdm/table/rowcount       sca_out   		0
-    tdm/table/rowcount       sca_prior     	0
-    tdm/table/rowcount       sca_ensemble_ave  	0
     
-    cd /dui
+  cd /dui
 
 return
 

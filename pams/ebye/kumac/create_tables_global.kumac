@@ -8,7 +8,7 @@
 
     cd [dst]
     
-    tdm/newtable dstrack         dst_track 10000
+    tdm/newtable dstrack  dst_track 10000
     
     cd /dui
 

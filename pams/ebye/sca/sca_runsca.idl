@@ -20,4 +20,4 @@ interface sca_runsca : amiModule{
                  inout  sca_out		sca_out
                 );
 };
-/* last mod. for sca_runSca.idl : $Date: 1998/08/04 20:07:45 $ */
+/* last mod. for sca_runSca.idl : $Date: 1998/08/05 22:04:15 $ */

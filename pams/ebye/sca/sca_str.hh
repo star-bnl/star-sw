@@ -20,12 +20,19 @@ const int HIGH   = 3;
 
 #ifndef TRUE 
 #define   TRUE   1;
-#endif  TRUE
+#endif
+
 #ifndef FALSE
 #define   FALSE  0;
-#endif  FALSE
+#endif
+
+#ifndef OK
 #define OK     1;
+#endif
+
+#ifndef FAIL
 #define FAIL   0;
+#endif
 
 //Misc 
 const int MaxLineLength = 256;

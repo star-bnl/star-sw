@@ -3,8 +3,7 @@
 
 
 long type_of_call sca_filter_(
-  TABLE_HEAD_ST   *dst_track_h,         DST_TRACK_ST         *dstTrack,
-  TABLE_HEAD_ST   *particle_h,          PARTICLE_ST          *particle,
+  TABLE_HEAD_ST   *dst_track_h,     DST_TRACK_ST     *dstTrack,
   TABLE_HEAD_ST   *sca_filter_const_h,  SCA_FILTER_CONST_ST  *filter_const,
   TABLE_HEAD_ST   *sca_switch_h,         SCA_SWITCH_ST         *sca_switch,
   TABLE_HEAD_ST   *sca_const_h,         SCA_CONST_ST         *sca_const,
@@ -105,7 +104,7 @@ long type_of_call sca_filter_(
     sca_in[iGoodTrack].z     = dstTrack[idstTrack].psi;
     //sca_in[iGoodTrack].z = dstTrack[idstTrack].psi;
     // zero these out temporarily
-    sca_in[iGoodTrack].evn =0;
+    sca_in[iGoodTrack].evn =0; //eventSum->n_event[0];
     sca_in[iGoodTrack].run =0;
     sca_in[iGoodTrack].iflag =0;
     iGoodTrack++;
