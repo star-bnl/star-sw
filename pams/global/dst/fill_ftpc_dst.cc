@@ -1,8 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: fill_ftpc_dst.cc,v 1.5 2000/06/06 13:09:12 jcs Exp $
+// $Id: fill_ftpc_dst.cc,v 1.6 2000/06/14 08:20:19 jcs Exp $
 //
 // $Log: fill_ftpc_dst.cc,v $
+// Revision 1.6  2000/06/14 08:20:19  jcs
+// Combine the 2 loops over the track hits into 1
+//
 // Revision 1.5  2000/06/06 13:09:12  jcs
 // save fcl_fppoint.flags in dst_point.charge
 //
@@ -139,6 +142,84 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
               }
            }
             dst_track[dst_track_h->nok].map[0] |= (1<<fppoint[iPoint].row);
+//          Fill dst point table for current hit
+//          Check if still room for point
+            if (dst_point_h->nok>dst_point_h->maxlen-1) {
+              fprintf(stderr,"FILL_FTPC_DST: Too many dst points...exiting.\n");
+              return STAFCV_BAD;
+            }
+            //    hw_position  (32 bits)
+            //            bits  0-3   det_id
+            //            bits 4-10   FTPC pad plane (1-20)
+            //            bits 11-20  Sector number within pad-plane (1-6)
+            //            bits 21-24  number of pads in cluster
+            //            bits 25-31  number of consecutive timebins in cluster
+            dst_point[dst_point_h->nok].hw_position =
+                      (fppoint[iPoint].n_bins<<25)
+                    + (fppoint[iPoint].n_pads<<21)
+                    + (fppoint[iPoint].sector<<11)
+                    + (fppoint[iPoint].row<<4)
+                    + dst_track[dst_track_h->nok].det_id;
+
+            //         Fill space point position coordinates
+            if (fppoint[iPoint].x > FTPC_MIN && fppoint[iPoint].x < FTPC_MAX){
+              ftpcx = (int) (FTPC_FAC*(fppoint[iPoint].x + FTPC_MAX));
+            }
+            else {
+              ftpcx = 0;
+            }
+            if (fppoint[iPoint].y > FTPC_MIN && fppoint[iPoint].y < FTPC_MAX){
+              ftpcy = (int) (FTPC_FAC*(fppoint[iPoint].y + FTPC_MAX));
+            }
+            else {
+              ftpcy = 0;
+            }
+            if (fppoint[iPoint].z > FTPC_MIN && fppoint[iPoint].z < FTPC_MAX){
+              ftpcz = (int) (FTPC_FAC*(fppoint[iPoint].z + FTPC_MAX));
+            }
+            else {
+              ftpcz = 0;
+            }
+            ftpcy10 = ftpcy/two10;
+            ftpcy11 = ftpcy - two10*ftpcy10;
+            dst_point[dst_point_h->nok].position[0] = ftpcx + (two20*ftpcy11);
+            dst_point[dst_point_h->nok].position[1] = ftpcy10 + (two10*ftpcz);
+
+
+            //         Fill space point position errors (0.0<= error < 8.0)
+            if (fppoint[iPoint].x_err >= 0.0 && fppoint[iPoint].x_err < 8.0){
+              ftpcx =  (long) (two17*fppoint[iPoint].x_err);
+            }
+            else {
+              ftpcx = 0;
+            }
+            if (fppoint[iPoint].y_err >= 0.0 && fppoint[iPoint].y_err < 8.0){
+              ftpcy = (long) (two17*fppoint[iPoint].y_err);
+            }
+            else {
+              ftpcy = 0;
+            }
+            if (fppoint[iPoint].z_err >= 0.0 && fppoint[iPoint].z_err < 8.0){
+              ftpcz =  (long) (two17*fppoint[iPoint].z_err);
+            }
+            else {
+              ftpcz = 0;
+            }
+            ftpcy10 = ftpcy/two10;
+            ftpcy11 = ftpcy - (two10*ftpcy10);
+            dst_point[dst_point_h->nok].pos_err[0] = ftpcx + (two20*ftpcy11);
+            dst_point[dst_point_h->nok].pos_err[1] = ftpcy10 + (two10*ftpcz);
+
+            //        Fill charge and flags for cluster
+            //                     bits 0-15    charge (sum of adc channels)
+            //                     bits 16-31   flags  (see fcl_fppoint.idl)
+            dst_point[dst_point_h->nok].charge  =
+                         (fppoint[iPoint].flags<<16)
+                       + fppoint[iPoint].charge;
+
+            //        Fill Foreign Key to dst_track table
+            dst_point[dst_point_h->nok].id_track    =  dst_track_h->nok + 1;
+            dst_point_h->nok++;
         }
       }
 
@@ -261,93 +342,6 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
     if (fabs((float) dst_track[dst_track_h->nok].invpt) >= 999999.)  {
         dst_track[dst_track_h->nok].iflag   = -799;
     }
-
-
-
-//  Fill dst point table for current track 
-
-    for (ihit=0; ihit<MAXHITS; ihit++) {
-       if (dst_point_h->nok>dst_point_h->maxlen-1) {
-          fprintf(stderr,"FILL_FTPC_DST: Too many dst points...exiting.\n");
-          return STAFCV_BAD;
-       }
-       else if (fptrack[itrk].hitid[ihit] > -1) {
-//          hitid array filled by FORTRAN routine, must -1 for C routine
-         iPoint =  fptrack[itrk].hitid[ihit] - 1;
-//       hw_position  (32 bits)             
-//                    bits  0-3   det_id     
-//                    bits 4-10   FTPC pad plane (1-20)                  
-//                    bits 11-20  Sector number within pad-plane (1-6)    
-//                    bits 21-24  number of pads in cluster                
-//                    bits 25-31  number of consecutive timebins in cluster 
-         dst_point[dst_point_h->nok].hw_position = 
-                      (fppoint[iPoint].n_bins<<25)
-                    + (fppoint[iPoint].n_pads<<21)
-                    + (fppoint[iPoint].sector<<11)
-                    + (fppoint[iPoint].row<<4)
-                    + dst_track[dst_track_h->nok].det_id;
-
-//         Fill space point position coordinates 
-         if (fppoint[iPoint].x > FTPC_MIN && fppoint[iPoint].x < FTPC_MAX){
-           ftpcx = (int) (FTPC_FAC*(fppoint[iPoint].x + FTPC_MAX));
-         }
-         else {
-           ftpcx = 0;
-         }
-         if (fppoint[iPoint].y > FTPC_MIN && fppoint[iPoint].y < FTPC_MAX){
-           ftpcy = (int) (FTPC_FAC*(fppoint[iPoint].y + FTPC_MAX));
-         }
-         else {
-           ftpcy = 0;
-         }
-         if (fppoint[iPoint].z > FTPC_MIN && fppoint[iPoint].z < FTPC_MAX){
-           ftpcz = (int) (FTPC_FAC*(fppoint[iPoint].z + FTPC_MAX));
-         }
-         else {
-           ftpcz = 0;
-         } 
-         ftpcy10 = ftpcy/two10;
-         ftpcy11 = ftpcy - two10*ftpcy10;
-         dst_point[dst_point_h->nok].position[0] = ftpcx + (two20*ftpcy11);
-         dst_point[dst_point_h->nok].position[1] = ftpcy10 + (two10*ftpcz);
-
-
-//         Fill space point position errors (0.0<= error < 8.0)
-         if (fppoint[iPoint].x_err >= 0.0 && fppoint[iPoint].x_err < 8.0){
-           ftpcx =  (long) (two17*fppoint[iPoint].x_err);
-         }
-         else {
-           ftpcx = 0;
-         }
-         if (fppoint[iPoint].y_err >= 0.0 && fppoint[iPoint].y_err < 8.0){
-           ftpcy = (long) (two17*fppoint[iPoint].y_err);
-         }
-         else {
-           ftpcy = 0;
-         }
-         if (fppoint[iPoint].z_err >= 0.0 && fppoint[iPoint].z_err < 8.0){
-           ftpcz =  (long) (two17*fppoint[iPoint].z_err);
-         }
-         else {
-           ftpcz = 0;
-         }
-         ftpcy10 = ftpcy/two10;
-         ftpcy11 = ftpcy - (two10*ftpcy10);
-         dst_point[dst_point_h->nok].pos_err[0] = ftpcx + (two20*ftpcy11);
-         dst_point[dst_point_h->nok].pos_err[1] = ftpcy10 + (two10*ftpcz);
-
-//        Fill charge and flags for cluster   
-//                     bits 0-15    charge (sum of adc channels) 
-//                     bits 16-31   flags  (see fcl_fppoint.idl)
-         dst_point[dst_point_h->nok].charge  =  
-                         (fppoint[iPoint].flags<<16)
-                       + fppoint[iPoint].charge;
-
-//        Fill Foreign Key to dst_track table 
-         dst_point[dst_point_h->nok].id_track    =  dst_track_h->nok + 1;
-         dst_point_h->nok++;
-       }
-    }   // End of filling dst point bank for current track
 
 
 //  Fill dst_dedx table  
