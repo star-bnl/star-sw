@@ -1,5 +1,8 @@
-// $Id: makedoc.C,v 1.33 1999/06/01 01:46:41 fine Exp $
+// $Id: makedoc.C,v 1.34 1999/06/02 16:32:46 fine Exp $
 // $Log: makedoc.C,v $
+// Revision 1.34  1999/06/02 16:32:46  fine
+// PadControlPanel macro html has been introduced
+//
 // Revision 1.33  1999/06/01 01:46:41  fine
 // New classes have been added StTrack, StHit, StHelixD StObjArray
 //
@@ -169,6 +172,7 @@
 
   // Make HTML docs for the "plain" text files those are not in the dictionaries
   cout << " Makeing HTML's for macros" << endl;
+  html.Convert("./PadControlPanel.C","How to manipulate with 3D pad images");
   html.Convert("./HitsDraw.C","3D drawing of the STAR Geometry and the hits from the STAF table");
   html.Convert("./SubDetectorView.C","How to create sub-detector view");
   html.Convert("./StarFromWeb.C","Access to ROOT/GEANT geometry database");
