@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.cxx,v 2.3 2003/01/23 23:23:28 ullrich Exp $
+ * $Id: StBbcTriggerDetector.cxx,v 2.4 2003/02/05 23:17:34 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.cxx,v $
+ * Revision 2.4  2003/02/05 23:17:34  ullrich
+ * Corrected bug in adcSumWest(). Index needed offset.
+ *
  * Revision 2.3  2003/01/23 23:23:28  ullrich
  * Modified to cope with changes in how BBC data is loaded for Run3.
  *
@@ -23,7 +26,7 @@
 #include "StBbcTriggerDetector.h"
 #include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.3 2003/01/23 23:23:28 ullrich Exp $";
+static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.4 2003/02/05 23:17:34 ullrich Exp $";
 
 ClassImp(StBbcTriggerDetector)
 
@@ -201,7 +204,7 @@ int
 StBbcTriggerDetector::adcSumWest()
 {
     int sum=0;
-    if(mYear==2002)      { for(int i=0; i<8;  i++){sum+=adc(i);} }
+    if(mYear==2002)      { for(int i=0; i<8;  i++){sum+=adc(i+16);} }
     else if(mYear==2003) { for(int i=0; i<16; i++){sum+=adc(i+24);} }
     return sum;
 }
