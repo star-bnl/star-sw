@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.43 2004/03/26 23:26:34 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.44 2004/06/01 18:06:02 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.44  2004/06/01 18:06:02  calderon
+ * Check for chiSquared values for the V0's when using/not using Est tracks.
+ *
  * Revision 1.43  2004/03/26 23:26:34  calderon
  * -Adding switch to control Association based on IdTruth or on Distance.
  * -Adding debug2 output to print out all hits in a padrow, both reco and MC,
@@ -1589,6 +1592,8 @@ Int_t StAssociationMaker::Make()
     for (StV0VertexIterator v0vi = v0s.begin(); v0vi!=v0s.end(); v0vi++) {
 	StV0Vertex* rcV0 = *v0vi; // Got V0 ...
 	StTrack* v0Daughter1  = rcV0->daughter(0);
+	if (mEstTracksOn && rcV0->chiSquared()==-16) continue; //when Est runs, the X^2 is always -24 or less
+	if (!mEstTracksOn && rcV0->chiSquared()<-16) continue; //when Est didn't run it's ALWAYS -16.
 	StGlobalTrack* gV0Daughter1 = dynamic_cast<StGlobalTrack*>(v0Daughter1);
 	if (!gV0Daughter1) continue;
 	// Got Daughter1
@@ -1630,6 +1635,8 @@ Int_t StAssociationMaker::Make()
     // Loop over Xis
     for (StXiVertexIterator xvi = xis.begin(); xvi!=xis.end(); xvi++) {
 	StXiVertex* rcXi = *xvi;
+	if (mEstTracksOn && rcXi->chiSquared()==-16) continue; //when Est runs, the X^2 is always -24 or less
+	if (!mEstTracksOn && rcXi->chiSquared()<-16) continue; //when Est didn't run it's ALWAYS -16.
 	StV0Vertex* rcV0ofXi = rcXi->v0Vertex();
 	StTrack* rcBachelor = rcXi->bachelor();
 	StGlobalTrack* gRcBachelor = dynamic_cast<StGlobalTrack*>(rcBachelor);
