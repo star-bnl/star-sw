@@ -1,6 +1,11 @@
-// $Id: StTrsMaker.cxx,v 1.49 1999/11/11 19:42:24 calderon Exp $
+// $Id: StTrsMaker.cxx,v 1.50 1999/11/12 01:34:06 long Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.50  1999/11/12 01:34:06  long
+// 1)fix a bug for track with z<0
+// 2) turn on the switch on pseudo pad row and set the signal threshold to
+//    0 for the time being
+//
 // Revision 1.49  1999/11/11 19:42:24  calderon
 // Add #ifdef HISTOGRAM for Ntuple Diagnostics.
 // Use ROOT_DATABASE_PARAMETERS.  As soon as Jeff and Dave give Ok,
@@ -278,7 +283,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.49 1999/11/11 19:42:24 calderon Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.50 1999/11/12 01:34:06 long Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -524,7 +529,7 @@ Int_t StTrsMaker::Init()
        setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
    //mAnalogSignalGenerator->setDeltaRow(0);
    mAnalogSignalGenerator->setDeltaPad(2);
-   mAnalogSignalGenerator->setSignalThreshold(.1*millivolt);
+   mAnalogSignalGenerator->setSignalThreshold(.0*millivolt);
    mAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
    mAnalogSignalGenerator->addNoise(false);
    mAnalogSignalGenerator->generateNoiseUnderSignalOnly(false);
@@ -549,7 +554,7 @@ Int_t StTrsMaker::Init()
 
 
    // This should really be a boolean...when ROOT can handle it, change it!
-   mProcessPseudoPadRows = 0;  // 0 is no, 1 is yes!
+   mProcessPseudoPadRows = 1;  // 0 is no, 1 is yes!
 
    //
    // Construct constant data sets.  This is what is passed downstream
@@ -736,11 +741,7 @@ Int_t StTrsMaker::Make(){
 	    StThreeVector<double>
 		sector12Coordinate(xp,yp,(tpc_hit->x[2]));
 
-	    if(bsectorOfHit>12) {   
-	       
-                sector12Coordinate.setZ(-(tpc_hit->x[2]));
-	    }   
-
+	   
 	    // Must rotate the momentum as well,  BUT you should
 	    // only incur this calculational penalty if you split
 	    // the segment into more than 1 mini segement
@@ -752,11 +753,18 @@ Int_t StTrsMaker::Make(){
 					      tpc_hit->p[2]*GeV);
 
 	    //added by Hui Long ,8/24/99
-           if(bsectorOfHit>12) {
-	     
-               hitMomentum.setZ(-(tpc_hit->p[2]*GeV));
-	    }
-	   //
+             if(bsectorOfHit>12) 
+                   {
+                    sector12Coordinate.setZ(-(tpc_hit->x[2]));
+	            hitMomentum.setZ(-(tpc_hit->p[2]*GeV));
+		 
+                   } 
+             else
+		  { 
+		    sector12Coordinate.setX(-xp);
+                    hitMomentum.setX(-pxPrime*GeV);
+                  }
+                    //
 
 // 	    PR(tpc_hit->p[0]*GeV);
 // 	    PR(pxPrime*GeV);
