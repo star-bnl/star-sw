@@ -9,7 +9,7 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.14 1999/09/27 17:03:55 fisyak Exp $
+# $Id: cons,v 1.15 1999/10/08 12:55:43 fisyak Exp $
 $cons_history =
   q(
     Modification History:
@@ -44,7 +44,7 @@ $cons_history =
 $ver_num = 1.6;
 $ver_rev = "b1";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.14 1999/09/27 17:03:55 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.15 1999/10/08 12:55:43 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -131,6 +131,8 @@ Arguments can be any of the following, in any order:
 
   -d            Enable dependency debugging.
 
+  -g            Enable Construct/Conscript debug print out
+
   -f <file>	Use the specified file instead of "Construct" (but first
 		change to containing directory of <file>).
 
@@ -185,6 +187,7 @@ $param::depfile = '';		# Write all deps out to this file
 $param::salt = undef;		# Salt derived file signatures with this.
 $param::rep_sig_times_ok = 1;	# Repository .consign times are in sync w/files.
 $param::quiet = 0;		# should we show the command being executed.
+$param::debug = 0;		# should we print out debug information
 
 # Display a command while executing or otherwise. This
 # should be called by command builder action methods.
@@ -276,6 +279,8 @@ sub option {
 	$param::build = 0;
     } elsif ($_ eq 'h') {
 	$param::localhelp =1;
+    } elsif ($_ eq 'g') {
+	$param::debug =1;
     } elsif ($_ eq 'x') {
 	print($usage);
 	exit 0;
