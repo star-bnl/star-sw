@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.h,v 1.1 2000/04/05 16:39:30 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.h,v 1.2 2000/05/18 11:42:28 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.h,v $
- * Revision 1.1  2000/04/05 16:39:30  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/05/18 11:42:28  lasiuk
+ * mods for pre StEvent writing
  *
  * - remove matrix interface
  * - add necessary members
@@ -33,8 +33,8 @@
  * Revision 1.2  2000/05/18 11:42:28  lasiuk
  * mods for pre StEvent writing
  *
-#include "StRichCluster.h"
-#include "StRichHit.h"
+ * Revision 1.1  2000/04/05 16:39:30  lasiuk
+ * Initial Revision
 
 #ifndef ST_RICH_CLUSTER_AND_HOT_FINDER
 #define ST_RICH_CLUSTER_AND_HOT_FINDER

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.15 2000/04/05 21:25:18 lasiuk Exp $
+ * $Id: StRchMaker.cxx,v 1.16 2000/05/18 11:42:20 lasiuk Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 1.15  2000/04/05 21:25:18  lasiuk
- * with CF
+ * Revision 1.16  2000/05/18 11:42:20  lasiuk
+ * mods for pre StEvent writing
  *
  * Revision 1.17  2000/05/18 21:57:19  lasiuk
  * dev patch
@@ -61,7 +61,7 @@
 #include "StRrsMaker/StRichSingleMCPixel.h"
 // Database
 #ifdef RCH_WITH_PAD_MONITOR
-#include "StRichHit.h"
+#include "StRrsMaker/StRichPadMonitor.h"
 
 #include "StRichSingleHitCollection.h"
 #endif
@@ -460,13 +460,13 @@ Int_t StRchMaker::Make() {
 
 	}
     AddData(new St_ObjectSet("StRichEvent", richCollection));
-  printf("* $Id: StRchMaker.cxx,v 1.15 2000/04/05 21:25:18 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.16 2000/05/18 11:42:20 lasiuk Exp $\n");
 }
 //-----------------------------------------------------------------
-  printf("* $Id: StRchMaker.cxx,v 1.15 2000/04/05 21:25:18 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.16 2000/05/18 11:42:20 lasiuk Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
-    printf("* $Id: StRchMaker.cxx,v 1.15 2000/04/05 21:25:18 lasiuk Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 1.16 2000/05/18 11:42:20 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
