@@ -131,7 +131,7 @@ void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
 	n_crate=StMuEmcTowerData::nESmdCrates;
 	break;
       }
-      for (Int_t i_crate=0; i_crate<n_crate; i_crate++) {
+      for (Int_t i_crate=1; i_crate<=n_crate; i_crate++) {
 	muEmc->setCrateStatus(detector->crateStatus(i_crate),i_crate,EmcDet);
       }
     }
@@ -241,7 +241,7 @@ void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
       n_crate=StMuEmcTowerData::nESmdCrates;
       break;
     }
-    for (Int_t i_crate=0; i_crate<n_crate; i_crate++) {
+    for (Int_t i_crate=1; i_crate<=n_crate; i_crate++) {
       detector->setCrateStatus(i_crate,muEmc->getCrateStatus(i_crate,det));
     }
   }
