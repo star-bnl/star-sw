@@ -302,24 +302,6 @@ void StiKalmanTrack::removeAllHits()
     lastNode  = 0;
 }
 
-int  StiKalmanTrack::getHitCount()
-{
-    if (lastNode!=0)
-	{
-	    return lastNode->getDepth();
-	}
-    else
-	{
-	    return 0;
-	}
-}
-
-StiHit * StiKalmanTrack::getHit(int index)
-{
-    // not implemented...
-    return 0;
-}
-
 void StiKalmanTrack::initialize(double curvature,
 				double tanl,
 				const StThreeVectorD& origin,
@@ -604,18 +586,6 @@ void  StiKalmanTrack::setChi2(double v)
 {
     // set value of chi2 of track
     chi2 = v;
-}
-
-void  StiKalmanTrack::setFitPointCount(int v)   
-{
-    // set number of points used in fit
-    nFitPts = v;
-}
-
-void  StiKalmanTrack::setPointCount(int v)      
-{
-    // set value of number of points associated with track
-    nPts = v;
 }
 
 void  StiKalmanTrack::setStatus(int v)        
