@@ -1,6 +1,10 @@
-* $Id: svttgeo3.g,v 1.1 2003/11/20 03:06:32 potekhin Exp $
+* $Id: svttgeo3.g,v 1.2 2004/01/22 00:22:59 potekhin Exp $
 *
 * $Log: svttgeo3.g,v $
+* Revision 1.2  2004/01/22 00:22:59  potekhin
+* Optionally, position the SVT with MANY option,
+* in case there is an overlap of the PIXL and the beampipe
+*
 * Revision 1.1  2003/11/20 03:06:32  potekhin
 * Big change in this newly modified source:
 * the Silicon Strip Detector has been completely
@@ -98,7 +102,7 @@ Module  SVTTGEO3  is the SVT geometry for STAR: corrected and without SSD
                        SCBM,SCBL,SFED,SPLS,SOUM,SOUR
 *
       structure SVTG { Version,   Nlayer,    RsizeMin,  RsizeMax,
-		       ZsizeMax,  Angoff, SupportVer}
+		       ZsizeMax,  Angoff, SupportVer,   ifMany}
 *     
       structure SWCA { Version,   Length,
                        WaferWid,  WaferLen,  WaferThk,  RohaThk,
@@ -178,6 +182,7 @@ Module  SVTTGEO3  is the SVT geometry for STAR: corrected and without SSD
       ZsizeMax  = 270        ! SVT+FTPC length
       Angoff    = 0          ! angular offset x1 for slayer 2 x2 for slayer 3
       SupportVer= 1          ! versioning of the shield
+      ifMany    = 0          ! whether we use the geant MANY option
 *
    Fill SWCA ! Wafer Carrier
       Version   = 1          ! geometry version
@@ -490,8 +495,13 @@ Module  SVTTGEO3  is the SVT geometry for STAR: corrected and without SSD
 *        i don't care about the composition as soon as this is as light as air
          Mixture   Water  Dens=0.0009
       endif
-*
-      Create and Position SVTT in Cave
+
+      if(SVTG_ifMany>0) then ! custom positioning depending on pipe
+           Create and Position SVTT in Cave Konly='MANY'
+           write(*,*) '************** ATTENTION: SVT Positioned with MANY'
+      else
+           Create and Position SVTT in Cave
+      endif
 *
 *******************************************************************************
 *
