@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.73 2003/11/13 00:54:50 potekhin Exp $
+* $Id: geometry.g,v 1.74 2003/11/14 22:56:19 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.74  2003/11/14 22:56:19  potekhin
+* We are about to redo a sim run with y2003x,
+* and it seems that me might put in some of the
+* prior corrections as well. Therefore, I'm changing
+* the correctin level to 2.
+*
 * Revision 1.73  2003/11/13 00:54:50  potekhin
 * Create a facility to modify the TPC
 * gas density programmatically
@@ -595,7 +601,7 @@ If LL>1
                 }
 
 ****************************************************************************************
-  on Y2003X    { same as year2003 (with all its deficiencies) but with full calorimeters and phmd
+  on Y2003X    { same as y2003b but with full calorimeters and phmd
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -619,7 +625,7 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
                   "geometry correction "
-                     CorrNum = 1;
+                     CorrNum = 2;
                   "Photon Multiplicity Detector Version "
                      phmd=on;
                      PhmdVersion = 1;
