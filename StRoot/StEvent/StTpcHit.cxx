@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.11 2004/07/15 16:36:25 ullrich Exp $
+ * $Id: StTpcHit.cxx,v 2.12 2004/08/06 15:37:09 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
+ * Revision 2.12  2004/08/06 15:37:09  fisyak
+ * Add clster id
+ *
  * Revision 2.11  2004/07/15 16:36:25  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -52,7 +55,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.11 2004/07/15 16:36:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.12 2004/08/06 15:37:09 fisyak Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
@@ -62,8 +65,9 @@ StTpcHit::StTpcHit() { /* noop */ }
 
 StTpcHit::StTpcHit(const StThreeVectorF& p,
                    const StThreeVectorF& e,
-                   unsigned int hw, float q, unsigned char c)
-    : StHit(p, e, hw, q, c)
+                   unsigned int hw, float q, unsigned char c,
+		   UShort_t idTruth, UShort_t quality, UShort_t id)
+    : StHit(p, e, hw, q, c, idTruth, quality, id)
 { /* noop */ }
 
 StTpcHit::StTpcHit(const dst_point_st& pt)
@@ -101,13 +105,14 @@ StTpcHit::StTpcHit(const dst_point_st& pt)
     mPositionError.setX(float(tpcx)/(1L<<17));
     mPositionError.setY(float(tpcy)/(1L<<17));
     mPositionError.setZ(float(tpcz)/(1L<<17));
-
+    
     //
     // The hardware position stays at it is
     //
     mHardwarePosition = pt.hw_position;
     mIdTruth          = pt.id_simtrk;
     mQuality          = pt.id_quality;
+    mId               = pt.cluster;
 }
 
 StTpcHit::~StTpcHit() {/* noop */}

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcPixel.cxx,v 2.4 2004/04/26 16:33:35 fisyak Exp $
+ * $Id: StTpcPixel.cxx,v 2.5 2004/08/06 15:37:43 fisyak Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcPixel.cxx,v $
+ * Revision 2.5  2004/08/06 15:37:43  fisyak
+ * Add clster id
+ *
  * Revision 2.4  2004/04/26 16:33:35  fisyak
  * Make use of StTpcPixel
  *
@@ -29,7 +32,7 @@ void StTpcPixel::Print(Option_t *option) const {
       cout << option << "\t" << *this << endl;
     }
 
-static const char rcsid[] = "$Id: StTpcPixel.cxx,v 2.4 2004/04/26 16:33:35 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcPixel.cxx,v 2.5 2004/08/06 15:37:43 fisyak Exp $";
 ostream& operator<< (ostream& os, const StTpcPixel& m)
 {
   os << "d:" << (int) m.detector() 
@@ -39,6 +42,7 @@ ostream& operator<< (ostream& os, const StTpcPixel& m)
      << "/t:" << (int) m.timebin() 
      << "/a:" << m.adc() 
      << "/i:" << m.idTruth() 
+     << "/ClId:" << m.id() 
      << endl;
     return os;
 }
