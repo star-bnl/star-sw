@@ -117,7 +117,7 @@ C-----------------------------------------------------------------------
 
 C-----------------------------------------------------------------------
         integer nclpix_max
-        parameter (nclpix_max = 100)
+        parameter (nclpix_max = 1000)
         real ipad(nclpix_max),itdc(nclpix_max),iadc(nclpix_max)
 
         integer isec,irow,itrk,krow
