@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.hh,v 3.3 2000/08/24 20:29:00 genevb Exp $
+ * $Id: StV0MuDst.hh,v 3.4 2001/05/04 20:15:15 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.hh,v $
+ * Revision 3.4  2001/05/04 20:15:15  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
  * Revision 3.3  2000/08/24 20:29:00  genevb
  * Fixed a typo
  *
@@ -43,28 +46,19 @@
  ***********************************************************************/
 #ifndef StV0MuDst_hh
 #define StV0MuDst_hh
+#include "StV0I.hh"
 #include "StStrangeMuDst.hh"
-
-#ifndef StTrackTopologyMap_hh
-#include "StEvent/StTrackTopologyMap.h"
-#endif
 
 class StVertex;
 class StV0Vertex;
-class StStrangeEvMuDst;
 
-class StV0MuDst : public StStrangeMuDst {
+class StV0MuDst : public virtual StV0I, public StStrangeMuDst {
 public:
   StV0MuDst();
   ~StV0MuDst();
   StV0MuDst(StV0Vertex*,StStrangeEvMuDst*);
-  void    Clear();
   void    Fill(StV0Vertex*,StStrangeEvMuDst*);
-  void    SetEvent(StStrangeEvMuDst*);
 
-  StStrangeEvMuDst *event();           // Pointer to event information
-
-  Float_t decayLengthV0() const;       // 3-d decay distance
   Float_t decayVertexV0X() const;      // Coordinates of decay vertex
   Float_t decayVertexV0Y() const;
   Float_t decayVertexV0Z() const;
@@ -86,27 +80,7 @@ public:
   Float_t momV0X() const;         // Momentum components of V0
   Float_t momV0Y() const;
   Float_t momV0Z() const;
-  Float_t alphaV0();              // Armenteros-Podolanski variable
-  Float_t ptArmV0();              // Armenteros-Podolanski variable
-  Float_t eLambda();              // Energy assuming lambda hypothesis
-  Float_t eK0Short();             // Energy assuming k-short hypothesis
-  Float_t ePosProton();           // Energy of pos. daughter assuming proton
-  Float_t ePosPion();             // Energy of pos. daughter assuming pion
-  Float_t eNegProton();           // Energy of neg. daughter assuming antiproton
-  Float_t eNegPion();             // Energy of neg. daughter assuming pion
-  Float_t massLambda();           // Mass assuming lambda hypothesis
-  Float_t massAntiLambda();       // Mass assuming antilambda hypothesis
-  Float_t massK0Short();          // Mass assuming k-short hypothesis
-  Float_t rapLambda();            // Rapidity assuming (anti)lambda
-  Float_t rapK0Short();           // Rapidity assuming k-short
-  Float_t cTauLambda();           // Lifetime (ctau) assuming (anti)lambda
-  Float_t cTauK0Short();          // Lifetime (ctau) assuming k-short
-  Float_t ptV0();                 // Transverse momentum
-  Float_t ptotV0();               // Total momentum
-  Float_t ptPos();                // Transverse momentum of pos. daughter
-  Float_t ptotPos();              // Total momentum of pos. daughter
-  Float_t ptNeg();                // Transverse momentum of neg. daughter
-  Float_t ptotNeg();              // Total momentum of neg. daughter  
+
   Float_t chi2V0()  const;        // Chi square of V0
   Float_t clV0()    const;        // Confidence level of V0
   Float_t chi2Pos() const;        // Chi square of pos. daughter
@@ -121,7 +95,6 @@ public:
   UShort_t numDedxNeg() const;    // Number of dE/dX points for neg. daughter
 
 protected:
-  StStrangeEvMuDst *mEvent;       //!
 
   Float_t mDecayVertexV0X;        // These are written out
   Float_t mDecayVertexV0Y;
@@ -150,13 +123,6 @@ protected:
   Float_t mChi2Neg;
   Float_t mClNeg;
 
-  Float_t Ptot2Pos();          
-  Float_t Ptot2Neg();             
-  Float_t Ptot2V0();            
-  Float_t Pt2V0();  
-  Float_t MomPosAlongV0();
-  Float_t MomNegAlongV0();
-
   Long_t detectorIdTrack(StTrackTopologyMap&);
 
   Float_t mDedxPos;
@@ -164,15 +130,11 @@ protected:
   UShort_t mNumDedxPos;
   UShort_t mNumDedxNeg;
 
-  ClassDef(StV0MuDst,3)
+  ClassDef(StV0MuDst,4)
 };
 
-inline StV0MuDst::StV0MuDst(StV0Vertex* v1,StStrangeEvMuDst* e1)
+inline StV0MuDst::StV0MuDst(StV0Vertex* v1,StStrangeEvMuDst* e1) : StV0I()
              { Fill(v1,e1); }
-inline void StV0MuDst::SetEvent(StStrangeEvMuDst* ev)
-             { mEvent = ev; }
-inline StStrangeEvMuDst *StV0MuDst::event()
-             { return mEvent; }
 inline Float_t StV0MuDst::decayVertexV0X() const { return mDecayVertexV0X; }
 inline Float_t StV0MuDst::decayVertexV0Y() const { return mDecayVertexV0Y; }
 inline Float_t StV0MuDst::decayVertexV0Z() const { return mDecayVertexV0Z; }

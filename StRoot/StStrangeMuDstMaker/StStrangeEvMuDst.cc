@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeEvMuDst.cc,v 3.1 2000/09/07 02:22:56 genevb Exp $
+ * $Id: StStrangeEvMuDst.cc,v 3.2 2001/05/04 20:15:14 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 19-Aug-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeEvMuDst.cc,v $
+ * Revision 3.2  2001/05/04 20:15:14  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
  * Revision 3.1  2000/09/07 02:22:56  genevb
  * Now using STAR standard uncorrected primary track multiplicity
  *
@@ -34,6 +37,7 @@
  ***********************************************************************/
 #include "StStrangeEvMuDst.hh"
 #include "StEventTypes.h"
+#include "StMcEventTypes.hh"
 #include "StuRefMult.hh"
 
 ClassImp(StStrangeEvMuDst)
@@ -65,6 +69,27 @@ void StStrangeEvMuDst::Fill(StEvent& event) {
     mPrimaryVertexX = 0.;
     mPrimaryVertexY = 0.;
     mPrimaryVertexZ = 0.;
+  }
+}
+
+void StStrangeEvMuDst::Fill(StMcEvent& event) {
+
+  mRun = event.runNumber();
+  mEvent = event.eventNumber();
+  
+  mGlobalTracks = event.tracks().size();
+
+  StMcVertex* primaryVertex = event.primaryVertex();
+  if( primaryVertex ) {
+    mPrimaryVertexX = primaryVertex->position().x();
+    mPrimaryVertexY = primaryVertex->position().y();
+    mPrimaryVertexZ = primaryVertex->position().z();
+    mPrimaryTracks  = primaryVertex->numberOfDaughters();
+  } else {
+    mPrimaryVertexX = 0.;
+    mPrimaryVertexY = 0.;
+    mPrimaryVertexZ = 0.;
+    mPrimaryTracks  = 0;
   }
 }
 

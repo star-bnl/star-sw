@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMuDst.hh,v 3.2 2000/08/10 01:16:25 genevb Exp $
+ * $Id: StXiMuDst.hh,v 3.3 2001/05/04 20:15:15 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 30-Mar-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiMuDst.hh,v $
+ * Revision 3.3  2001/05/04 20:15:15  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
  * Revision 3.2  2000/08/10 01:16:25  genevb
  * Added number of dedx points
  *
@@ -38,22 +41,18 @@
 #ifndef StXiMuDst_hh
 #define StXiMuDst_hh
 #include "StV0MuDst.hh"
+#include "StXiI.hh"
 
-class StVertex;
-class StV0Vertex;
 class StXiVertex;
 
-class StXiMuDst : public StV0MuDst {
+class StXiMuDst : public virtual StXiI, public StV0MuDst {
 public:
   StXiMuDst();
   ~StXiMuDst();
   StXiMuDst(StXiVertex* x1,StV0Vertex* v1,StStrangeEvMuDst* e1);
-  void    Clear();
   void    Fill(StXiVertex*,StV0Vertex*,StStrangeEvMuDst*);
 
   Int_t   charge() const;              // Particle charge
-  Float_t decayLengthV0() const;       // 3-d decay distance
-  Float_t decayLengthXi() const;       // 3-d decay distance
   Float_t decayVertexXiX() const;      // Coordinate of decay vertex
   Float_t decayVertexXiY() const;
   Float_t decayVertexXiZ() const;
@@ -69,22 +68,7 @@ public:
   Float_t momXiX() const;              // Momentum components of Xi/Omega
   Float_t momXiY() const;
   Float_t momXiZ() const;
-  Float_t alphaXi();                   // Armenteros-Podolanski variable
-  Float_t ptArmXi();                   // Armenteros-Podolanski variable
-  Float_t eOmega();                    // Energy assuming Omega hypothesis
-  Float_t eXi();                       // Energy assuming Xi hypothesis
-  Float_t eBachelorPion();             // Energy of bachelor assuming pion
-  Float_t eBachelorKaon();             // Energy of bachelor assuming kaon
-  Float_t massOmega();                 // Mass assuming Omega hypothesis
-  Float_t massXi();                    // Mass assuming Xi hypothesis
-  Float_t rapOmega();                  // Rapidity assuming (anti)Omega
-  Float_t rapXi();                     // Rapidity assuming (anti)Xi
-  Float_t cTauOmega();                 // Lifetime (ctau) assuming (anti)Omega
-  Float_t cTauXi();                    // Lifetime (ctau) assuming (anti)Xi
-  Float_t ptBachelor();                // Transverse momentum of bachelor
-  Float_t ptotBachelor();              // Total momentum of bachelor
-  Float_t ptXi();                      // Transverse momentum of Xi/Omega
-  Float_t ptotXi();                    // Total momentum of Xi/Omega
+
   Float_t chi2Xi() const;              // Chi square of Xi
   Float_t clXi()   const;              // Confidence level of Xi
   Float_t chi2Bachelor() const;        // Chi square of bachelor
@@ -117,20 +101,15 @@ protected:
   Float_t mClBachelor;
 
   void    FillXi(StXiVertex*);
-  Float_t Ptot2Bachelor();
-  Float_t Ptot2Xi();
-  Float_t Pt2Xi();
-  Float_t MomBachelorAlongXi();
-  Float_t MomV0AlongXi();
 
   Float_t mDedxBachelor;
   UShort_t mNumDedxBachelor;
 
-  ClassDef(StXiMuDst,3)
+  ClassDef(StXiMuDst,4)
 };
 
 inline StXiMuDst::StXiMuDst(StXiVertex* x1,StV0Vertex* v1,StStrangeEvMuDst* e1):
-StV0MuDst(v1,e1)
+             StXiI(), StV0MuDst(v1,e1)
              { FillXi(x1); }
 
 inline Int_t   StXiMuDst::charge() const
@@ -159,4 +138,5 @@ inline Float_t StXiMuDst::chi2Bachelor() const { return mChi2Bachelor; }
 inline Float_t StXiMuDst::clBachelor()   const { return mClBachelor; }
 inline Float_t StXiMuDst::dedxBachelor() const { return mDedxBachelor; }
 inline UShort_t StXiMuDst::numDedxBachelor() const { return mNumDedxBachelor; }
+
 #endif

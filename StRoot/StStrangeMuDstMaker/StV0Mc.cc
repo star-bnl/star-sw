@@ -1,7 +1,10 @@
 /***********************************************************************
  *
- * $Id: StV0Mc.cc,v 3.0 2000/07/14 12:56:50 genevb Exp $
+ * $Id: StV0Mc.cc,v 3.1 2001/05/04 20:15:14 genevb Exp $
  * $Log: StV0Mc.cc,v $
+ * Revision 3.1  2001/05/04 20:15:14  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
  * Revision 3.0  2000/07/14 12:56:50  genevb
  * Revision 3 has event multiplicities and dedx information for vertex tracks
  *
@@ -21,12 +24,13 @@
 
 ClassImp(StV0Mc)
 
-StV0Mc::StV0Mc() {
-}
+StV0Mc::StV0Mc() : StV0I() {}
   
 StV0Mc::StV0Mc(StMcVertex* mcVertex, StMcTrack* mcPositiveTrack, 
-	       StMcTrack* mcNegativeTrack) {
+	     StMcTrack* mcNegativeTrack, StStrangeEvMuDst* mcEvent) : StV0I() {
   
+  mEvent = mcEvent;
+
   mDecayMode = StDecayMode::Instance()->Process(mcVertex);
   
   mParentGeantId = mcVertex->parent()->geantId(); 
