@@ -6,8 +6,11 @@
 
 #include <map>
 #include "StThreeVector.hh"
+#include "StThreeVectorD.hh"
 #include "tables/St_svg_config_Table.h"
 
+class StiTrack;
+class StTrack;
 class StTpcHit;
 class StSvtHit;
 class StSsdHit;
@@ -68,6 +71,16 @@ public:
     void operator() (const StiHit*, StSsdHit*);  //From Sti -> Ssd
     
     void operator() (const StPrimaryVertex*, StiHit*); //From StPrimaryVertex -> StiHit
+
+    //Point Transform Functors
+    
+    //refAngle is always defined [0,2pi] by each sector of the detector.
+    
+    //Go from global->Sti, expect refAngle positive
+    StThreeVector<double> operator() (const StThreeVector<double>& position, double refAngle);
+    StThreeVectorD operator() (const StThreeVectorD& position, double refAngle);
+
+    void StiGeometryTransform::operator() (const StTrack* st, StiTrack* sti);
     
 protected: 
 

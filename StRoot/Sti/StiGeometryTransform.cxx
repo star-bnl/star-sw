@@ -7,6 +7,9 @@
 //SCL
 #include "StThreeVector.hh"
 
+//StEvent
+#include "StEventTypes.h"
+
 //StDb
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StDbUtilities/StSvtCoordinateTransform.hh"
@@ -33,6 +36,18 @@
 StiGeometryTransform* StiGeometryTransform::sinstance = 0;
 
 double gRefAnleForSector(unsigned int sector);
+
+template <class T>
+T g2dEulerRotation(const T& x, double beta)
+{
+    //xprime = cos(beta)*x.x() + sin(beta)*x.y()
+    //yprime = -1.*sin(beta)*x.x() + cos(beta)*x.y()
+    return T( cos(beta)*x.x() + sin(beta)*x.y(),
+	      -1.*sin(beta)*x.x() + cos(beta)*x.y(),
+	      x.z()
+	      );
+}
+
 
 StiGeometryTransform::StiGeometryTransform()
 {
@@ -308,10 +323,12 @@ void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
     while (phi<0.) {
 	if (phi<0.) phi+=(2.*M_PI);
     }
-    
-    cout <<"TpcHit:\t"<<tpchit->sector()<<" "<<tpchit->padrow()<<"\t"<<tpchit->position().perp()<<" "<<phi<<endl;
-    double r=sqrt(stihit->x()*stihit->x() + stihit->y()*stihit->y());
-    cout <<"StiHit:\t \t "<<r<<" "<<stihit->refangle()<<endl;
+
+    /*
+      cout <<"TpcHit:\t"<<tpchit->sector()<<" "<<tpchit->padrow()<<"\t"<<tpchit->position().perp()<<" "<<phi<<endl;
+      double r=sqrt(stihit->x()*stihit->x() + stihit->y()*stihit->y());
+      cout <<"StiHit:\t \t "<<r<<" "<<stihit->refangle()<<endl;
+    */
     return;
 }
 void StiGeometryTransform::operator() (const StiHit* stihit, StTpcHit* tpchit)
@@ -366,6 +383,39 @@ void StiGeometryTransform::operator() (const StSsdHit* ssdhit, StiHit* stihit){
   stihit->setY(-ssdhit->position().x() * sin(dRefAngle) +
                 ssdhit->position().y() * cos(dRefAngle) );
 }
+
 void StiGeometryTransform::operator() (const StiHit* stihit, StSsdHit* ssdhit){
 }
 
+//Go from global->Sti, expect refAngle positive
+StThreeVector<double> StiGeometryTransform::operator() (const StThreeVector<double>& globalPosition, double refAngle)
+{
+    return g2dEulerRotation(globalPosition, refAngle);
+}
+
+StThreeVectorD StiGeometryTransform::operator() (const StThreeVectorD& globalPosition, double refAngle)
+{
+    return g2dEulerRotation(globalPosition, refAngle);
+}
+
+void StiGeometryTransform::operator() (const StTrack* st, StiTrack* sti)
+{
+    //First, establish the ref-Angle for the Track using the last point on StTrack
+    const StThreeVectorF& lastPointF = st->detectorInfo()->lastPoint();
+    StThreeVector<double> lastPoint(lastPointF.x(), lastPointF.y(), lastPointF.z());
+    
+    //Get the refAngle from the last point on the track (find the real last point!)
+    int sector = sectorForTpcCoords(lastPoint);
+    double refAngle = phiForSector( sector, 12);
+
+    //Now get the helix
+    StPhysicalHelixD sthelix = st->geometry()->helix();
+
+    //Establish the origin in TpcCoordinates
+    const StThreeVectorD& originD = sthelix.origin();
+
+    //Transform to StiCoordinates
+    StThreeVectorD stioriginD = this->operator()(originD, refAngle);
+    
+    //cout <<sector<<" "<<refAngle<<"\t\t"<<originD<<"\t\t"<<stioriginD<<endl;    
+}

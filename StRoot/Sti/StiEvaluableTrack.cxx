@@ -33,6 +33,13 @@ void StiEvaluableTrack::setStMcTrack(StMcTrack* val)
     mstmctrack = val;
 }
 
+void StiEvaluableTrack::reset()
+{
+    msttrack = 0;
+    mstmctrack = 0;
+    this->StiKalmanTrack::reset();
+}
+
 StTrack* StiEvaluableTrack::stTrack() const
 {
     return msttrack;

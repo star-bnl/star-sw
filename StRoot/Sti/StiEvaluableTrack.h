@@ -21,6 +21,8 @@ public:
     
     StTrack* stTrack() const;
     StMcTrack* stMcTrack() const;
+
+    virtual void reset();
     
 protected:
     StTrack* msttrack;

@@ -15,6 +15,7 @@
 //Sti
 #include "StiEvaluableTrack.h"
 #include "StiStTrackFilter.h"
+#include "StiGeometryTransform.h"
 #include "StiEvaluableTrackSeedFinder.h"
 
 StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder() : mevent(0), mmcevent(0)
@@ -86,8 +87,9 @@ StiKalmanTrack* StiEvaluableTrackSeedFinder::next()
 StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StTrack* sttrack)
 {
     StiEvaluableTrack* track = mfactory->getObject();
+    track->reset();
     track->setStTrack(sttrack);
-    //StMcTrack* dummy=0;
-    //track->setMcTrack(dummy);
+    StiGeometryTransform::instance()->operator()(sttrack, track);
+    
     return track;
 }

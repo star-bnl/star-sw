@@ -22,6 +22,7 @@ using std::find_if;
 #include "StiFactoryTypedefs.h"
 #include "StiDetectorTreeBuilder.h"
 #include "StlUtilities.h"
+#include "StiPlacement.h"
 #include "StiDetectorContainer.h"
 
 StiDetectorContainer* StiDetectorContainer::sinstance = 0;
@@ -56,16 +57,31 @@ StiDetectorContainer::~StiDetectorContainer()
 
 void StiDetectorContainer::setToDetector(double radius)
 {
-    reset();
+    mradial_it = gFindClosestOrderKey(mregion->begin(), mregion->end(), radius);
+    if (mphi_it == mregion->end()) {
+	cout <<"StiDetectorContainer::setToDetector(double)\tError:\tFind radius failed"<<endl;
+	mradial_it = mregion->begin();
+    }
+    mphi_it = (*mradial_it)->begin();
     return;
 }
 
 void StiDetectorContainer::setToDetector(double radius, double angle)
 {
+    //First, set the radius
+    setToDetector(radius);
+    
+    //Now set the phi
+    mphi_it = gFindClosestOrderKey((*mradial_it)->begin(), (*mradial_it)->end(), angle);
+    if (mphi_it == (*mradial_it)->end()) {
+	cout <<"StiDetectorContainer::setToDetector(double, double)\tError:\tFind Phi failed"<<endl;
+	mphi_it = (*mradial_it)->begin();
+    }
 }
 
 void StiDetectorContainer::setToDetector(StiDetector*layer)
 {
+    setToDetector( layer->getPlacement()->getCenterRadius(), layer->getPlacement()->getCenterRefAngle());
 }
 
 void StiDetectorContainer::reset()
