@@ -23,6 +23,7 @@ using std::ostream;
 using std::vector;
 
 #include "StiHelixCalculator.h"
+#include "StiHelixFitter.h"
 #include "StiTrackSeedFinder.h"
 
 class StiHitContainer;
@@ -48,13 +49,24 @@ public:
     virtual void addLayer(StiDetector*);
     virtual void print() const;
 
-protected:
+private:
     void increment();
     void initHitVec();
+
+    ///Extend hit looking for closest neighbor in z
     bool extendHit(StiHit* hit);
+
+    ///Extrapolate to next layer using straight line, add hit closest in z
+    bool extrapolate();
+
     void initializeTrack(StiKalmanTrack*);
     void calculate(StiKalmanTrack*);
     void calculateWithOrigin(StiKalmanTrack*);
+    
+    //Perform helix fit, Perform helix calculation (doesn't assume any vertex)
+    void fit(StiKalmanTrack*);
+    
+    //This is just for testing
     void triggerPartition();
 
 
@@ -66,26 +78,41 @@ protected:
     
     DetVec mDetVec;
     DetVec::iterator mCurrentDet;
+
     //Trigger hit-container partition on change in start radius
     double mCurrentRadius;
 
     //Store iterators to the hits for a given starting detector
     HitVec::iterator mHitsBegin;
     HitVec::iterator mHitsEnd;
-    
     HitVec::iterator mCurrentHit;
 
     //Subject
     Subject* mSubject;
     
-    //define search window in the next layer
+    //define search window in the next layer when connecting two points
     double mDeltaY;
     double mDeltaZ;
+    //define the number of points to connect
     unsigned int mSeedLength;
+
+    //define search window in the next layer when extending a coonection of points
+    double mExtrapDeltaY;
+    double mExtrapDeltaZ;
+    //Count how many hits we've skipped in extrapolation
+    unsigned int mSkipped;
+    //Define the max number we can skip
+    unsigned int mMaxSkipped;
+    //define the number of points to extrapolate
+    unsigned int mExtrapLength;
+
+    //Use the origin to calculate helix?
     bool mUseOrigin;
 
     HitVec mSeedHitVec;
+    bool mDoHelixFit; //true-> fit, false-> calculate
     StiHelixCalculator mHelixCalculator;
+    StiHelixFitter mHelixFitter;
     
 private:
     //The following are not implemented, as they are non-trivial
@@ -100,21 +127,21 @@ private:
 //inlines
 inline void StiLocalTrackSeedFinder::update(Subject* changedSubject)
 {
-    cout <<"StiLocalTrackSeedFinder::update(Subject*)"<<endl;
+    //cout <<"StiLocalTrackSeedFinder::update(Subject*)"<<endl;
     if (changedSubject!=mSubject) {
 	cout <<"StiLocalTrackSeedFinder::update(Subject*). ERROR:\t"
 	     <<"changedSubject!=mSubject"<<endl;
     }
     else {
-	cout <<"getting new values"<<endl;
+	//cout <<"getting new values"<<endl;
 	getNewState();
-	cout <<"\tdone getting new values"<<endl;
+	//cout <<"\tdone getting new values"<<endl;
     }   
 }
 
 inline void StiLocalTrackSeedFinder::forgetSubject(Subject* obsolete)
 {
-    cout <<"StiLocalTrackSeedFinder::forgetSubject(Subject*)"<<endl;
+    //cout <<"StiLocalTrackSeedFinder::forgetSubject(Subject*)"<<endl;
     if (obsolete==mSubject) {
 	mSubject=0;
     }

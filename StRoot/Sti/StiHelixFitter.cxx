@@ -23,9 +23,8 @@ ostream& operator<<(ostream& os, const StiHit&);
 double g2dPathlength(double radius, double xcenter, double ycenter,
 		     const StThreeVectorF& hit1, const StThreeVectorF& hit2);
 
-StiHelixFitter::StiHelixFitter() : mCircleFitter(), mLineFitter()
-    //mCircleInserter(mCircleFitter),
-    //mLineInserter(mCircleFitter, mLineFitter)
+StiHelixFitter::StiHelixFitter() : mCircleFitter(), mLineFitter(),
+				   mOrigin(0.,0.,0.), mCenter(0.,0.,0.)
 {
     cout <<"StiHelixFitter::StiHelixFitter()"<<endl;
 }
@@ -49,7 +48,26 @@ bool StiHelixFitter::fit(const StiHitVector& hits)
     reset();
     
     //for_each(hits.rbegin(), hits.rend(), PtrStreamer<StiHit>());
+
+    //First, we need circle fit in local coordinates to get H right.
+    /*
+      for (StiHitVector::const_iterator it=hits.begin(); it!=hits.end(); ++it) {
+      mCircleFitter.addPoint( (*it)->x(), (*it)->y() );
+      }
+      bool local_circle_rc = mCircleFitter.fit();
+      if (!local_circle_rc) {
+      cout <<"StiHelixFitter::fit(). ERROR:\t"
+      <<"Local fit failed.  Abort"<<endl;
+      mValid=false;
+      return false;
+      }
+    */
+ 
+    //Now calculate h, or the sign of the curvature:
+    //assumes a strict less-than ordering in radius
+    //calculateH(hits);
     
+    //Now do global circle fit to get origin
     //Do circle fit in x-yOrder doesn't matter for circle fit
     //for_each(hits.begin(), hits.end(), mCircleInserter);
     
@@ -58,18 +76,19 @@ bool StiHelixFitter::fit(const StiHitVector& hits)
 				(*it)->globalPosition().y() );
     }
     bool circle_rc = mCircleFitter.fit();
-    
+
+    mH=1.;
     if (!circle_rc) {
 	cout <<"StiHelixFitter::refit(). ERROR:\t";
 	cout <<"Circle Fit Failed.  abort"<<endl;
 	mValid=false;
 	return false;
     }
-    
+
     //Do line fit in s-z, where s is the 2-d pathlength along circle
     //Order matters, must start from innermost and go out, and 
-    
-    const StThreeVectorF& firsthit = hits.back()->position();
+
+    const StThreeVectorF& firsthit = hits.back()->globalPosition();
     
     for (StiHitVector::const_reverse_iterator it=hits.rbegin();
 	 it!=hits.rend(); ++it) {
@@ -104,6 +123,22 @@ bool StiHelixFitter::fit(const StiHitVector& hits)
     return mValid;
 }
 
+void StiHelixFitter::calculateH(const StiHitVector& hits)
+{
+    // We are in local coordinates, so this is easy.
+
+    //first find the point with localX closest to xCenter
+    //We do a linear search since hits.size()~10 at worst, and we usually
+    //only have to go half way
+    /*
+      double dx=0;
+      double dxMin=DBL_MAX;
+      for (StiHitVector::const_iterator it=hits.begin(); it!=hits.end(); ++it) {
+      dx = fabs( mCircleFitter.xcenter()
+      mH = (beta>0) ? -1. : 1.;
+    */
+    mH = 1.;
+}
 
 double g2dPathlength(double radius, double xcenter, double ycenter,
 		     const StThreeVectorF& hit1, const StThreeVectorF& hit2)

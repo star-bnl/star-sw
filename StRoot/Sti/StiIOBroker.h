@@ -73,6 +73,18 @@ public:
     
     virtual void setLTSFSeedLength(unsigned int) = 0;
     virtual unsigned int ltsfSeedLength() const = 0;
+
+    virtual void setLTSFExtrapZWindow(double) = 0;
+    virtual double ltsfExtrapZWindow() const = 0;
+    
+    virtual void setLTSFExtrapYWindow(double) = 0;
+    virtual double ltsfExtrapYWindow() const = 0;
+    
+    virtual void setLTSFExtrapMaxSkipped(unsigned int) = 0;
+    virtual unsigned int ltsfExtrapMaxSkipped() const = 0;
+    
+    virtual void setLTSFExtrapLength(unsigned int) = 0;
+    virtual unsigned int ltsfExtrapLength() const = 0;
     
     virtual void setLTSFUseVertex(bool) = 0;
     virtual bool ltsfUseVertex() const = 0;
@@ -156,6 +168,12 @@ inline ostream& operator<<(ostream& os, const StiIOBroker& b)
        <<"ltsfZWindow():\t"<<b.ltsfZWindow()<<endl
        <<"ltsfYWindow():\t"<<b.ltsfYWindow()<<endl
        <<"ltsfSeedLength():\t"<<b.ltsfSeedLength()<<endl
+	
+       <<"ltsfExtrapZWindow():\t"<<b.ltsfExtrapZWindow()<<endl
+       <<"ltsfExtrapYWindow():\t"<<b.ltsfExtrapYWindow()<<endl
+       <<"ltsfExtrapLength():\t"<<b.ltsfExtrapLength()<<endl	
+       <<"ltsfExtrapMaxSkipped():\t"<<b.ltsfExtrapMaxSkipped()<<endl
+	
        <<"ltsfUseVertex():\t"<<b.ltsfUseVertex()<<endl
        <<"ltsfDoHelixFit():\t"<<b.ltsfDoHelixFit()<<endl
 	
