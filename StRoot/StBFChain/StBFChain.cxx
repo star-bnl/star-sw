@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.449 2004/10/28 17:30:51 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.450 2004/10/28 19:02:40 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -144,7 +144,6 @@ Bfc_st BFC1[] = { // standard chains
   // Detector combined-chains
   {"SvtD"        ,""  ,"","SvtDb,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit,SvtVtx", "", "",
                                                                                "SVT chain for Data",kFALSE},
-  {"SsdD"        ,""  ,"","SsdDb", "", "",                                     "SSD chain for Data",kFALSE},
 
   // Year 1 chains
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
@@ -219,8 +218,8 @@ Bfc_st BFC1[] = { // standard chains
   {"Ev03"        ,""  ,"","","",""                                 ,"Turn on alternative V0 method",kFALSE},
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
   {"gstar"       ,""  ,"","geant,Simu","","" ,"gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE},
-  {"tdaq"        ,""  ,"","in,tpc_daq"                                                    ,"","","",kFALSE},
-  {"miniDAQ"     ,"tpc_raw","tpc","in,FieldOff,SD97,Eval"     ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
+  {"tdaq"        ,""  ,"","in,tpc_daq"                                                   ,"","","",kFALSE},
+  {"miniDAQ"     ,"tpc_raw","tpc","in,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
   {"fzin"        ,""  ,"","geant,Simu","" ,""                                 ,"read gstar fz-file",kFALSE},
   {"clearDAQCTB" ,""  ,"","","" ,""                             ,"clear DAQ CTB Hits for embedding",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
@@ -724,7 +723,6 @@ Bfc_st BFC2[] = { // ITTF Chains
   // Detector combined-chains
   {"SvtD"        ,""  ,"","SvtDb,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit,SvtVtx", "", "",
                                                                                "SVT chain for Data",kFALSE},
-  {"SsdD"        ,""  ,"","SsdDb", "", "",                                     "SSD chain for Data",kFALSE},
 
   // Year 1 chains
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
@@ -787,7 +785,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   // *** ITTF chains *** Year4 drops standard chains and support ITTF chains only
   //     Main change tpc -> tpcI and Cdst -> Idst
   //
-  {"B2004"       ,""    ,"","ry2004,in,tpc_daq,tpcI,svt_daq,SvtD,SsdDb,Physics,Idst,l0,tags,Tree,evout","",""
+  {"B2004"       ,""        ,"","ry2004,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
                                                              ,"Base chain for 2004 ITTF (tpc+svt)",kFALSE},
 
   // Notes:
@@ -819,7 +817,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"ITTF"        ,""  ,"","Sti,svtDb,ssdDb",                             "","","Turn on ITTF chain",kFALSE},
+  {"ITTF"        ,""  ,"","Sti",                                          "","","Turn on ITTF chain",kFALSE},
   {"SvtHitFilt"  ,"", "","",                                           "","","SVT Hit filter Maker",kFALSE},
   {"NoHits"      ,""  ,"",""                            ,"","","Don't write hits into Event.Branch",kFALSE},
   {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
@@ -827,8 +825,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Ev03"        ,""  ,"","","",""                                 ,"Turn on alternative V0 method",kFALSE},
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
   {"gstar"       ,""  ,"","geant,Simu","","" ,"gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE},
-  {"tdaq"        ,""  ,"","in,tpc_daq"                                                    ,"","","",kFALSE},
-  {"miniDAQ"     ,"tpc_raw","tpc","in,FieldOff,SD97,Eval"     ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
+  {"tdaq"        ,""  ,"","in,tpc_daq"                                                   ,"","","",kFALSE},
+  {"miniDAQ"     ,"tpc_raw","tpc","in,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
   {"fzin"        ,""  ,"","geant,Simu","" ,""                                 ,"read gstar fz-file",kFALSE},
   {"clearDAQCTB" ,""  ,"","","" ,""                             ,"clear DAQ CTB Hits for embedding",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
@@ -1531,8 +1529,8 @@ Int_t StBFChain::Instantiate()
 	    //pars->tpcInputFile     = "StRoot/StiMaker/macros/tpcInputFile.dat";
 	    //pars->ftpcInputFile    = "none";
 	    //pars->pixelInputFile   = "none";
-	    if (GetOption("SsdDB")) pars->useSsd=kTRUE; 
-	    pars->useSvt=kTRUE;         // SVT used in IT but not active. ??
+
+	    pars->useSvt=kTRUE;         // SVT used in Sti but not active. ??
 	                                // Pre-2001 data, will build only 1 ladder?
 	    pars->useSsd=kTRUE;         // use SSD in Sti
 
@@ -1860,13 +1858,13 @@ Int_t StBFChain::Skip(int nskip)
    if (geant && !geant->InheritsFrom("St_geant_Maker")) geant = 0;
    if (geant && !geant->IsActive()) 			geant = 0;
    if (geant) {
-      printf ("St_Geant_Make::Skip(%d) Events\n",nskip);
-      geant->Skip(nskip);return 0;}
+     (void) printf ("St_Geant_Make::Skip(%d) Events\n",nskip);
+     geant->Skip(nskip);return 0;}
 
    inpMk = (StIOMaker *) GetMaker("inputStream");
    if (inpMk && !inpMk->InheritsFrom("StIOMaker")) 	inpMk = 0;
    if (inpMk) {
-     printf ("StIOMaker::Skip(%d)  Events\n",nskip);
+     (void) printf ("StIOMaker::Skip(%d)  Events\n",nskip);
      inpMk->Skip(nskip); return 0;}
      
    Error("Skip","No maker to Skip"); 
@@ -1976,8 +1974,13 @@ Int_t StBFChain::kOpt (const TString *tag) const {
     return NoChainOptions-1;
   }
 #endif
-  (void) printf (" Option %s has not been recognized\n", Tag.Data());
-  abort(); //assert(1);
+  if ( (strncmp( Tag.Data() ,"dbv",3) || 
+	strncmp( Tag.Data() ,"sdt",3)   ) &&
+       strlen(Tag.Data()) == 11 ){
+  } else {
+    (void) printf (" Option %s has not been recognized\n", Tag.Data());
+    abort(); //assert(1);
+  }
   return 0;
 }
 
@@ -2096,7 +2099,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	// with a 8 digit long time stamp. We can do all of that in the
 	// SetDbOptions() only (removing the fBFC[i].Flag check) but the
 	// goal here is to avoid user's histeria by displaying extra
-	// messages NOW !!!
+	// messages NOW !!! Debug: dbv20040917
 	if( ! strncmp( string.Data() ,"dbv",3) && strlen(string.Data()) == 11){
 	  (void) sscanf(string.Data(),"dbv%d",&FDate);
 	  cout << " ... but still will be considered as a dynamic timestamp (MaxEntryTime) "
