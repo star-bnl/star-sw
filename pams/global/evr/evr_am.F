@@ -532,7 +532,8 @@ CC
       Parameter(Beamlinetanl = -1319.)
       Parameter(Beamline_xzslope = -0.00046)
       Parameter(Beamline_yzslope = -0.00060)
-      Parameter(Beamline_sigma   = 0.10)
+CCC      Parameter(Beamline_sigma   = 0.10)
+      Parameter(Beamline_sigma   = 100.0)  !  Take this constraint out temp.
 
 CC  Vertex_pass(i,j) contains the vertex position from the initial
 CC  estimate and the first and second passes, where i = pass#, j=x,y,z.
