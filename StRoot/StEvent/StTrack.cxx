@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.21 2003/12/04 03:53:14 perev Exp $
+ * $Id: StTrack.cxx,v 2.22 2004/01/26 22:56:28 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.22  2004/01/26 22:56:28  perev
+ * Add Finite for float
+ *
  * Revision 2.21  2003/12/04 03:53:14  perev
  * Set empty, instead of crazy outer geometry
  *
@@ -78,6 +81,7 @@
  *
  **************************************************************************/
 #include "TClass.h"
+#include "StMath.hh"
 #include "StTrack.h"
 #include "tables/St_dst_track_Table.h"
 #include "StParticleDefinition.hh"
@@ -89,7 +93,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.21 2003/12/04 03:53:14 perev Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.22 2004/01/26 22:56:28 perev Exp $";
 
 StTrack::StTrack()
 {
@@ -368,9 +372,9 @@ int StTrack::bad() const
 {
 static const double world = 1.e+5;
  if (mFlag <=0                     )            return 01;
- if (!::finite(mImpactParameter)   ) 		return 10;
+ if (!StMath::Finite(mImpactParameter)   ) 	return 10;
  if (::fabs(mImpactParameter)>world) 		return 11;
- if (!::finite(mLength)            )    	return 20;
+ if (!StMath::Finite(mLength)            )    	return 20;
  if (::fabs(mLength)         >world) 		return 21;
  if (mLength <1./world	           )    	return 22;
  if (mGeometry      && mGeometry->bad()     )	return 30;
