@@ -33,7 +33,9 @@ class geometryDataSet : public St_DataSet {
     double ioSectorSeparation;
     double frischGrid;
     double maximumDriftDistance;
-
+    double innerSectorzOffSet;
+    double outerSectorzOffSet;
+    
     double anodeWirePitch;
     double frischGridWirePitch;
     double gateWirePitch;
