@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 1.2 1999/07/28 20:27:32 calderon Exp $
+ * $Id: StMcEvent.cc,v 1.3 1999/09/23 21:25:50 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 1.3  1999/09/23 21:25:50  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
  * Revision 1.2  1999/07/28 20:27:32  calderon
  * Version with SL99f libraries
  *
@@ -9,17 +13,22 @@
  **************************************************************************/
 #include "StThreeVectorF.hh"
 
-#include "StMcEvent/StMcEvent.hh"
-#include "StMcEvent/StMcVertex.hh"
-#include "StMcEvent/StMcTrack.hh"
-#include "StMcEvent/StMcTpcHit.hh"
-#include "StMcEvent/StMcFtpcHit.hh"
-#include "StMcEvent/StMcSvtHit.hh"
+#include "StMcEvent.hh"
+#include "StMcVertex.hh"
+#include "StMcTrack.hh"
+#include "StMcTpcHit.hh"
+#include "StMcFtpcHit.hh"
+#include "StMcSvtHit.hh"
+#include "StMcTrackCollection.hh"
+#include "StMcFtpcHitCollection.hh"
+#include "StMcVertexCollection.hh"
+#include "StMcSvtHitCollection.hh"
+#include "StMcTpcHitCollection.hh"
 
 #include <string>
 #include <utility>
 
-// static const char rcsid[] = "$Id: StMcEvent.cc,v 1.2 1999/07/28 20:27:32 calderon Exp $";
+// static const char rcsid[] = "$Id: StMcEvent.cc,v 1.3 1999/09/23 21:25:50 calderon Exp $";
 
 StMcEvent::StMcEvent()
 {   cout << "Inside StMcEvent Constructor" << endl;

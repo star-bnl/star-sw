@@ -1,3 +1,13 @@
+/***************************************************************************
+ *
+ * $Id: StDevRow.cc,v 1.3 1999/09/23 21:25:19 calderon Exp $
+ * $Log: StDevRow.cc,v $
+ * Revision 1.3  1999/09/23 21:25:19  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
+ *
+ **************************************************************************/
 
 #include "StDevRow.hh"
 

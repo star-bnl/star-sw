@@ -1,8 +1,15 @@
-/*
- * StLocalHit: base class for localHits on rows of subdetector (TPC, SVT, FTPC)
+/***************************************************************************
+ *
+ *   StLocalHit.hh
+ *  base class for localHits on rows of subdetector (TPC, SVT, FTPC)
  *             devices.
  * MALisa 9jun99
- */
+ * $Log: StLocalHit.hh,v $
+ * Revision 1.3  1999/09/23 21:25:21  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
+ ******************************************************************/
 #ifndef StLocalHit_HH
 #define StLocalHit_HH
 

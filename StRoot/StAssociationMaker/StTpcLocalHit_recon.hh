@@ -1,5 +1,13 @@
-/* Reconstructed local hits in the TPC - MALisa 9jun99 */
-
+/***************************************************************************
+ *
+ * $Id: StTpcLocalHit_recon.hh,v 1.3 1999/09/23 21:25:23 calderon Exp $
+ * Reconstructed local hits in the TPC - MALisa 9jun99 
+ * $Log: StTpcLocalHit_recon.hh,v $
+ * Revision 1.3  1999/09/23 21:25:23  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
+ **************************************************************************/ 
 #ifndef StTpcLocalHit_recon_HH
 #define StTpcLocalHit_recon_HH
 

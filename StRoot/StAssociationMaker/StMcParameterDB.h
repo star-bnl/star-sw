@@ -1,11 +1,15 @@
 /*****************************************
  *
- * StMcParameterDB.h
+ * $Id: StMcParameterDB.h,v 1.2 1999/09/23 21:25:22 calderon Exp $
+ * $Log: StMcParameterDB.h,v $
+ * Revision 1.2  1999/09/23 21:25:22  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
  *
  * Changed extension to .h so it would
  * be accessible from the Root macro
  *
- * 
+ *  
  *****************************************/
 #ifndef ParameterDB_hh
 #define ParameterDB_hh

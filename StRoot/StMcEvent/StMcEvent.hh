@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 1.2 1999/07/28 20:27:32 calderon Exp $
+ * $Id: StMcEvent.hh,v 1.3 1999/09/23 21:25:50 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 1.3  1999/09/23 21:25:50  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
  * Revision 1.2  1999/07/28 20:27:32  calderon
  * Version with SL99f libraries
  *
@@ -11,11 +15,6 @@
 #define StMcEvent_hh
 
 #include <iostream.h>
-#include "StMcEvent/StMcTrackCollection.hh"
-#include "StMcEvent/StMcFtpcHitCollection.hh"
-#include "StMcEvent/StMcVertexCollection.hh"
-#include "StMcEvent/StMcSvtHitCollection.hh"
-#include "StMcEvent/StMcTpcHitCollection.hh"
 
 
 #include "tables/g2t_event.h"
@@ -24,6 +23,12 @@
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif
+
+#include "StMcTrackCollection.hh"
+#include "StMcFtpcHitCollection.hh"
+#include "StMcVertexCollection.hh"
+#include "StMcSvtHitCollection.hh"
+#include "StMcTpcHitCollection.hh"
 
 class StMcVertex;
 

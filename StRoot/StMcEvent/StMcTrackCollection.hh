@@ -1,6 +1,11 @@
 /***************************************************************************
  *
- * StMcTrackCollection.hh
+ * $Id: StMcTrackCollection.hh,v 1.2 1999/09/23 21:25:54 calderon Exp $
+ * $Log: StMcTrackCollection.hh,v $
+ * Revision 1.2  1999/09/23 21:25:54  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
  *
  **************************************************************************/
 #ifndef StMcTrackCollection_hh

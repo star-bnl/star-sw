@@ -1,7 +1,17 @@
-/*
-  Generic device row.  For TPC, this would be one padrow.
-  It just holds hits.
-*/
+/***************************************************************************
+ *
+ * $Id: StDevRow.hh,v 1.3 1999/09/23 21:25:20 calderon Exp $
+ * Generic device row.  For TPC, this would be one padrow.
+ * It just holds hits.
+ *
+ * $Log: StDevRow.hh,v $
+ * Revision 1.3  1999/09/23 21:25:20  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
+ *
+ *
+ **************************************************************************/
 
 #ifndef StDevRow_HH
 #define StDevRow_HH

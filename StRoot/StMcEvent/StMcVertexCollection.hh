@@ -1,6 +1,11 @@
 /***************************************************************************
  *
- * StMcVertexCollection.hh
+ * $Id: StMcVertexCollection.hh,v 1.2 1999/09/23 21:25:55 calderon Exp $
+ * $Log: StMcVertexCollection.hh,v $
+ * Revision 1.2  1999/09/23 21:25:55  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
  *
  **************************************************************************/
 #ifndef StMcVertexCollection_hh

@@ -1,16 +1,21 @@
 /***************************************************************************
  *
- * StMcVertex.hh
+ * $Id: StMcVertex.hh,v 1.3 1999/09/23 21:25:55 calderon Exp $
+ * $Log: StMcVertex.hh,v $
+ * Revision 1.3  1999/09/23 21:25:55  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
  *
  **************************************************************************/
 #ifndef StMcVertex_hh
 #define StMcVertex_hh
 #include <string>
-#include "StMcEvent/StMcTrackCollection.hh"
 #include "tables/g2t_vertex.h"  // Need to include a header file for the table!!
 
 class StThreeVectorF;
 class StMcTrack;
+#include "StMcTrackCollection.hh"
 
 class StMcVertex {
 public:

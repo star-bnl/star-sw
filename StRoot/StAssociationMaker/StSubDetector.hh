@@ -1,11 +1,21 @@
-/*
+/***************************************************************************
+ *
+ * $Id: StSubDetector.hh,v 1.4 1999/09/23 21:25:22 calderon Exp $
+ 
   Generic temporary class for STAR subdetectors (e.g. TPC, SVT, FTPC)
   Each Subdetector has some devices (TPC has 24 devices, which means sectors)
   Each device has some rows (TPC sector has 45 rows, which means padrows)
   Each row has some hits on it.  Here, we talk of *local* hit positions
 
   MALisa 9jun99
-*/
+ * $Log: StSubDetector.hh,v $
+ * Revision 1.4  1999/09/23 21:25:22  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
+ *
+ *
+ **************************************************************************/
 
 
 #ifndef StSubDetector_HH

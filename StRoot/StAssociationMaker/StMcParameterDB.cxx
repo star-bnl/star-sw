@@ -1,11 +1,15 @@
 /*****************************************
  *
- * StMcParameterDB.cxx
+ * $Id: StMcParameterDB.cxx,v 1.2 1999/09/23 21:25:21 calderon Exp $
  *
  * Changed extension to .cxx so that it
  * would be accessible from Root macro
  *
- * 
+ * $Log: StMcParameterDB.cxx,v $
+ * Revision 1.2  1999/09/23 21:25:21  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
  *****************************************/
 #include "StMcParameterDB.h"
 #include "PhysicalConstants.h"

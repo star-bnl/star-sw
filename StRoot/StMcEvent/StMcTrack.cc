@@ -1,20 +1,29 @@
 /***************************************************************************
  *
- * StMcTrack.cc
+ * $Id: StMcTrack.cc,v 1.3 1999/09/23 21:25:54 calderon Exp $
+ * $Log: StMcTrack.cc,v $
+ * Revision 1.3  1999/09/23 21:25:54  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
  *
  **************************************************************************/
 
-#include "StMcEvent/StMcTrack.hh"
-#include "StMcEvent/StMcVertex.hh"
-#include "StMcEvent/StMcVertex.hh"
-#include "StMcEvent/StMcTpcHit.hh"
-#include "StMcEvent/StMcSvtHit.hh"
-#include "StMcEvent/StMcFtpcHit.hh"
+#include "StMcTrack.hh"
+#include "StMcVertex.hh"
+#include "StMcVertex.hh"
+#include "StMcTpcHit.hh"
+#include "StMcSvtHit.hh"
+#include "StMcFtpcHit.hh"
+#include "StMcFtpcHitCollection.hh"
+#include "StMcTpcHitCollection.hh"
+#include "StMcSvtHitCollection.hh"
+#include "StMcVertexCollection.hh"
 
-#include "StarClassLibrary/StParticleTable.hh"
-#include "StarClassLibrary/StParticleDefinition.hh"
+#include "StParticleTable.hh"
+#include "StParticleDefinition.hh"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 1.2 1999/07/28 20:27:36 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 1.3 1999/09/23 21:25:54 calderon Exp $";
 
 StMcTrack::StMcTrack() 
 {

@@ -1,12 +1,17 @@
 /***************************************************************************
  *
- * StTrackPairInfo.cc
+ * $Id: StTrackPairInfo.cc,v 1.3 1999/09/23 21:25:24 calderon Exp $
+ * $Log: StTrackPairInfo.cc,v $
+ * Revision 1.3  1999/09/23 21:25:24  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
  *
  **************************************************************************/
 #include "StTrackPairInfo.hh"
-#include "StMcEvent/StMcTrack.hh"
+#include "StMcTrack.hh"
 
-static const char rcsid[] = "$Id: StTrackPairInfo.cc,v 1.2 1999/07/13 21:44:44 calderon Exp $";
+static const char rcsid[] = "$Id: StTrackPairInfo.cc,v 1.3 1999/09/23 21:25:24 calderon Exp $";
 
 StTrackPairInfo::StTrackPairInfo(StMcTrack* t, unsigned int pings) 
 {

@@ -1,6 +1,11 @@
 /*****************************************
  *
- * StTrackPairInfo.hh
+ * $Id: StTrackPairInfo.hh,v 1.2 1999/09/23 21:25:24 calderon Exp $
+ *
+ * $Log: StTrackPairInfo.hh,v $
+ * Revision 1.2  1999/09/23 21:25:24  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
  *
  *****************************************/
 

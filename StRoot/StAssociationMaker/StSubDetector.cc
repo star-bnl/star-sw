@@ -1,12 +1,22 @@
+/***************************************************************************
+ *
+ * $Id: StSubDetector.cc,v 1.5 1999/09/23 21:25:22 calderon Exp $
+ * $Log: StSubDetector.cc,v $
+ * Revision 1.5  1999/09/23 21:25:22  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
+ *
+ **************************************************************************/
 
 // #include "StThreeVector.hh"
 // #include "StEvent/StTpcHit.hh"
 #include "StThreeVectorF.hh"
-#include "StEvent/StTpcHit.h"
+#include "StTpcHit.h"
 
 #include "StSubDetector.hh"
 #include "StDevice.hh"
-#include "StMcEvent/StMcTpcHit.hh"
+#include "StMcTpcHit.hh"
 
 
 

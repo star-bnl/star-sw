@@ -1,15 +1,20 @@
 /***************************************************************************
  *
- * StMcHit.cc
+ * $Id: StMcHit.cc,v 1.3 1999/09/23 21:25:51 calderon Exp $
+ * $Log: StMcHit.cc,v $
+ * Revision 1.3  1999/09/23 21:25:51  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
  *
  **************************************************************************/
 #include "StThreeVectorF.hh"
 
-#include "StMcEvent/StMcHit.hh"
-#include "StMcEvent/StMcTrack.hh"
+#include "StMcHit.hh"
+#include "StMcTrack.hh"
 
 
-static const char rcsid[] = "$Id: StMcHit.cc,v 1.2 1999/07/28 20:27:33 calderon Exp $";
+static const char rcsid[] = "$Id: StMcHit.cc,v 1.3 1999/09/23 21:25:51 calderon Exp $";
 
 StMcHit::StMcHit()
 {
