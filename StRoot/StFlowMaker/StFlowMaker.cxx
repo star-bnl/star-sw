@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.45 2000/11/07 02:36:41 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.46 2000/11/30 16:40:21 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,129 +11,13 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.46  2000/11/30 16:40:21  snelling
+// Protection agains loading probability pid caused it not to work anymore
+// therefore protection removed again
+//
 // Revision 1.45  2000/11/07 02:36:41  snelling
 // Do not init prob pid when not used
 //
-// Revision 1.44  2000/11/02 18:19:09  fine
-// protection against of the crash with traits.size() == 0 and pid == 0. May be one has to change the logic of this code
-//
-// Revision 1.43  2000/10/12 22:46:37  snelling
-// Added support for the new pDST's and the probability pid method
-//
-// Revision 1.42  2000/09/15 22:51:30  posk
-// Added pt weighting for event plane calcualtion.
-//
-// Revision 1.41  2000/09/11 17:24:07  snelling
-// Put picoreader for different versions in seperate methods
-//
-// Revision 1.40  2000/09/05 16:11:33  snelling
-// Added global DCA, electron and positron
-//
-// Revision 1.39  2000/08/31 18:58:23  posk
-// For picoDST, added version number, runID, and multEta for centrality.
-// Added centrality cut when reading picoDST.
-// Added pt and eta selections for particles corr. wrt event plane.
-//
-// Revision 1.38  2000/08/26 21:37:02  snelling
-// Removed flownanoevent, Added multiple input for pico, fixed IO bug
-//
-// Revision 1.37  2000/08/25 19:55:16  snelling
-// Changed naming pico files (1 pico per dst)
-//
-// Revision 1.36  2000/08/12 20:22:20  posk
-// Recalculate centrality in read from pico.
-//
-// Revision 1.35  2000/08/10 23:00:22  posk
-// New centralities. pt and eta cuts.
-//
-// Revision 1.34  2000/08/09 21:38:23  snelling
-// PID added
-//
-// Revision 1.33  2000/07/20 17:25:51  posk
-// Fixed bug in readPico checkEvent.
-//
-// Revision 1.32  2000/07/14 23:49:03  snelling
-// Changed to ConstIterator for new StEvent and removed comparison int uint
-//
-// Revision 1.31  2000/07/12 17:54:37  posk
-// Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
-// Apply cuts when reading picoevent file.
-//
-// Revision 1.30  2000/06/30 14:48:33  posk
-// Using MessageMgr, changed Eta Symmetry cut.
-//
-// Revision 1.29  2000/06/01 18:26:36  posk
-// Increased precision of Track integer data members.
-//
-// Revision 1.28  2000/05/26 21:29:28  posk
-// Protected Track data members from overflow.
-//
-// Revision 1.27  2000/05/23 20:09:44  voloshin
-// added StFlowPicoEvent, persistent FlowEvent as plain root TTree
-//
-// Revision 1.26  2000/05/20 00:55:15  posk
-// Condensed flownanoevent.root somewhat.
-//
-// Revision 1.25  2000/05/16 20:59:31  posk
-// Voloshin's flownanoevent.root added.
-//
-// Revision 1.24  2000/05/12 22:42:04  snelling
-// Additions for persistency and minor fix
-//
-// Revision 1.22  2000/03/28 23:21:02  posk
-// Allow multiple instances of the AnalysisMaker.
-//
-// Revision 1.21  2000/03/21 00:22:01  posk
-// Added GetCVS and some print commands.
-//
-// Revision 1.20  2000/03/15 23:28:52  posk
-// Added StFlowSelection.
-//
-// Revision 1.19  2000/03/07 17:50:57  snelling
-// Added Nano DST
-//
-// Revision 1.18  2000/03/02 23:02:53  posk
-// Changed extensions from .hh and .cc to .h and .cxx .
-//
-// Revision 1.17  2000/02/29 22:00:54  posk
-// Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
-//
-// Revision 1.16  2000/02/29 01:26:11  snelling
-// removed static const int& nxxx = Flow::nxxx;
-//
-// Revision 1.14  2000/02/18 22:49:56  posk
-// Added PID and centrality.
-//
-// Revision 1.13  2000/02/11 20:53:10  posk
-// Commented out random_shuffle and cout formatting so as to work under CC5.
-//
-// Revision 1.9  1999/12/21 01:11:00  posk
-// Added more quantities to StFlowEvent.
-//
-// Revision 1.8  1999/12/16 18:05:23  posk
-// Fixed Linux compatability again.
-//
-// Revision 1.7  1999/12/15 22:01:27  posk
-// Added StFlowConstants.hh
-//
-// Revision 1.6  1999/12/07 23:30:53  snelling
-// Fixed Linux warnings
-//
-// Revision 1.5  1999/12/04 00:10:34  posk
-// Works with the new StEvent
-//
-// Revision 1.4  1999/11/30 18:52:52  snelling
-// First modification for the new StEvent
-//
-// Revision 1.3  1999/11/24 18:17:15  posk
-// Put the methods which act on the data in with the data in StFlowEvent.
-//
-// Revision 1.2  1999/11/11 23:08:57  posk
-// Rearrangement of files.
-//
-// Revision 1.1  1999/11/04 19:02:12  snelling
-// First check in of StFlowMaker. It contains the common code from
-// StFlowTagMaker and StFlowAnalysisMaker.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -236,8 +120,13 @@ Int_t StFlowMaker::Make() {
   // Get a pointer to StEvent
   if (!mFlowEventRead && !mPicoEventRead) {
     pEvent = (StEvent*)GetDataSet("StEvent");
-    if (!pEvent) return kStOK; // If no event, we're done
-    
+    if (!pEvent) {
+      if (Debug()) { 
+	gMessMgr->Info() << "FlowMaker: no StEvent " << endm;
+      }
+      return kStOK; // If no event, we're done
+    }
+
     // Check the event cuts and fill StFlowEvent
     if (StFlowCutEvent::CheckEvent(pEvent)) {
       // Instantiate a new StFlowEvent
@@ -296,10 +185,10 @@ Int_t StFlowMaker::Init() {
 		       <<  mEventFileName << endm;
     }
     // Init pid probability algorithm
-    if (pFlowEvent->ProbPid()) {
+    //    if (pFlowEvent->ProbPid()) {
       TString parameterfile = "nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_Amp.root";
       StuProbabilityPidAlgorithm::readParametersFromFile(parameterfile.Data());
-    }
+      //    }
   }
 
   if (mPicoEventWrite) kRETURN += InitPicoEventWrite();
@@ -308,7 +197,7 @@ Int_t StFlowMaker::Init() {
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.45 2000/11/07 02:36:41 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.46 2000/11/30 16:40:21 snelling Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -524,14 +413,14 @@ void StFlowMaker::FillFlowEvent() {
 	  assert(pid); pFlowTrack->SetDedx(pid->mean());
         }
 
-	if (pFlowEvent->ProbPid()) {
+	//	if (pFlowEvent->ProbPid()) {
 	  // Probability pid
 	  const StParticleDefinition* def = pTrack->pidTraits(uPid);
 	  pFlowTrack->SetMostLikelihoodPID(uPid.mostLikelihoodParticleGeantID());
 	  pFlowTrack->SetMostLikelihoodProb(uPid.mostLikelihoodProbability());
 	  if (uPid.isExtrap()) pFlowTrack->SetExtrapTag(1); //mergin area. 
 	  else pFlowTrack->SetExtrapTag(0); 
-	}
+	  //	}
 
 	pFlowEvent->TrackCollection()->push_back(pFlowTrack);
 	goodTracks++;
