@@ -13,13 +13,18 @@
      >                Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
       Equivalence     (QQ(1),IQQ(1),id)
 *    - - - - - - - - -
-      INTEGER   G2T_TPC,G2R_GET_HIT,Iprin/0/,i
+      INTEGER   G2T_TPC,G2R_GET_HIT,ISLFLAG,Iprin/0/,Idigi,i
       logical   Local/.true./
 *
       G2T_TPC=STAFCV_OK
-      call G2R_GET_SYS ('TPCE','TPAD')
+      if (g2t_tpc_hit_h.maxlen.le.0) return
 *
-      If (Iprin.ge.0) then
+      call G2R_GET_SYS ('TPCE','TPAD',Iprin,Idigi)
+      if (Iprin.lt.0) return
+      Local  = Idigi.ge.2
+*
+      If (Iprin.ge.3) then
+         print *,'   G2T_TPC: Iprin, Idigi =',Iprin, Idigi
          print *,'   name  = ',g2t_tpc_hit_h.name
          print *,'   type  = ',g2t_tpc_hit_h.type
          print *,'   nok   = ',g2t_tpc_hit_h.nok
