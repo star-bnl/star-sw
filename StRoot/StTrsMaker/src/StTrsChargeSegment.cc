@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.38 2004/04/07 18:58:57 perev Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.39 2004/04/08 20:51:39 perev Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -13,6 +13,9 @@
  *
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.39  2004/04/08 20:51:39  perev
+ * bug fix low limit must be -10, not 10.
+ *
  * Revision 1.38  2004/04/07 18:58:57  perev
  * Cleanup
  *
@@ -167,7 +170,7 @@ using std::random_shuffle;
 
 // Need a CERNLIB routine for tssSplit
 extern "C"  float dislan_(float &x);
-float dislan(float x) { return (x<10.)? 0.:dislan_(x);}
+float dislan(float x) { return (x<-10.)? 0.:dislan_(x);}
  
 HepJamesRandom  StTrsChargeSegment::mEngine;
 RandFlat        StTrsChargeSegment::mFlatDistribution(mEngine);
