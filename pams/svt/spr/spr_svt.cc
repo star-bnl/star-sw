@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: spr_svt.cc,v 1.6 1999/02/14 21:44:14 caines Exp $
+ * $Id: spr_svt.cc,v 1.7 1999/02/15 03:32:34 caines Exp $
  *
  * Author: blasiuk and nyfeiman 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: spr_svt.cc,v $
+ * Revision 1.7  1999/02/15 03:32:34  caines
+ * Fixed bug so now looks at correct hits
+ *
  * Revision 1.6  1999/02/14 21:44:14  caines
  * Code altered to include SSD
  *
@@ -31,7 +34,7 @@
 #include <math.h>
 //#include <vector>
 
-#define MYDEBUG 1
+#define MYDEBUG 0
 #define idb if(MYDEBUG) cout
 // SCL
 
@@ -67,7 +70,7 @@
     idb << "*  dE/dx - pid            : spr module              *" << endl;
     idb << "*  Hypothetical Pid is set to zero                  *" << endl; 
     idb << "*****************************************************" << endl;
-    cout << "Helens version" << endl;
+   
     
     // used to check global tracks here!
     
@@ -151,7 +154,7 @@
 	for (jj=0; jj<(svtGroupsH->nok); jj++) {
 	  
 	  if (trackId == svtGroups[jj].id1) {
-	    spacePoints[index] = svtGroups[jj].id2;
+	    spacePoints[index] = svtGroups[jj].id2-1;
 	    index++;    // can incorporate this into the spacePoints[index]?
 	  }
 	  if (index == numberOfPointsOnTrack)
@@ -198,7 +201,7 @@
 	  spacePointsCharge[index] = (ionization[index]/pathLength[index]);
 	  
 	  idb << "PathLength= " << pathLength[index] << endl;
-	  idb << "Real PathLength= " << svtCluster[spacePoints[jj]].de[1] <<  endl;
+	  
 	  index++;
 	  
 	  // unit vector for next point
@@ -225,7 +228,7 @@
 	float dEdxError=0;
 	for (jj=0; jj<numberOfPointsOnTrack; jj++) {
 	  idb << "spacePointsCharge " << (spacePointsCharge[jj]) << endl;
-	  //dEdx      += log(spacePointsCharge[jj]);
+	  dEdx      += log(spacePointsCharge[jj]);
 	  dEdx  += spacePointsCharge[jj];
 	  dEdxError += log(spacePointsCharge[jj]);
 	}
@@ -236,7 +239,7 @@
 	dEdx      /= numberOfPointsOnTrack;
 	dEdxError /= numberOfPointsOnTrack;      
 	
-	//dEdx = exp(dEdx);
+	dEdx = exp(dEdx);
 	dEdxError = sqrt(exp(dEdxError));
 	//dEdxError = exp(dEdxError) - dEdx*dEdx;
 	//cout << "dEdx " << dEdx << " +/- " << dEdxError << endl;
