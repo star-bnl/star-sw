@@ -9,9 +9,12 @@
 * -- EXAMPLES OF BFC  --
 * Use the kumacs listed below as examples - they are in $STAR/kumacs/dst
 * 
-* 1. call_bfc_read_dst.kumac 
+* 1. call_bfc_read_dst_ntup.kumac 
 *    - read in dst 
-
+*    - write out ntuple of a table
+*   Can write out globtrk & hepe_gent tables to ntuples and then use
+*      analyse_trk_reco_eff.kumac to make plots
+*
 * 2. call_bfc_read_dst_check_event_summary.kumac
 *    - read in dst 
 *    - execute dchkt package which writes out log file with summary info
