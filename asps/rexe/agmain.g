@@ -2,12 +2,13 @@
 *-- Author :    Pavel Nevski
 *****************************************************************************
 *                                                                           *
-      subroutine        A G M A I N
+      subroutine        A G M A I N (nwg,nwp)
 *                                                                           *
 *****************************************************************************
 +CDE,TYPING,AGECOM,AGCKINE.
 +CDE,GCFLAG,GCTIME,GCPHYS,GCTRAK.
 *
+      integer nwg, nwp
       INTEGER           NWGEA/4000000/,NWPA/500000/,p
       CHARACTER*6       PROG/'agroot'/
 *
@@ -19,6 +20,8 @@
 *                                        initialise packages
       CALL TIMEL   (TIMINT)
       CALL MZEBRA  (-3)
+      if (nwg .gt. 0) NWGEA = nwg
+      if (nwp .gt. 0) NWPA  = nwp
       CALL GZEBRA  (NWGEA)         ! store 0 - geant
       CALL MZPAW   (NWPA,' ')      ! store 1 - pawc
       CALL KUINIT  (5000)
