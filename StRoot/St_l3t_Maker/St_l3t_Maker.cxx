@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.cxx,v 1.6 1999/05/05 18:30:16 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.7 1999/05/05 18:37:21 yepes Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.7  1999/05/05 18:37:21  yepes
+// *** empty log message ***
+//
 // Revision 1.6  1999/05/05 18:30:16  yepes
 // define maximum number of tracks as NHits/20
 //
@@ -170,7 +173,7 @@ Int_t St_l3t_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_l3t_Maker::Make(){
   int iMake = kStOK;
-  const Int_t maxNofTracks = 20000; 
+  Int_t maxNofTracks = 20000; 
 
   St_DataSet *tpc_data =  GetDataSet("tpc_hits");
   if (tpc_data) {// Clusters exist -> do tracking
@@ -219,7 +222,7 @@ void St_l3t_Maker::MakeHistograms() {
 //_____________________________________________________________________________
 void St_l3t_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_l3t_Maker.cxx,v 1.6 1999/05/05 18:30:16 yepes Exp $\n");
+  printf("* $Id: St_l3t_Maker.cxx,v 1.7 1999/05/05 18:37:21 yepes Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
