@@ -1,7 +1,10 @@
-// $Id: StMessageManager.cxx,v 1.34 2003/09/22 01:30:41 perev Exp $
+// $Id: StMessageManager.cxx,v 1.35 2003/09/24 22:02:48 perev Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.35  2003/09/24 22:02:48  perev
+// Back to Gene solution of operator<<
+//
 // Revision 1.34  2003/09/22 01:30:41  perev
-// some cleanup
+//  some cleanup
 //
 // Revision 1.33  2003/09/02 17:59:20  perev
 // gcc 3.2 updates + WarnOff
@@ -128,8 +131,12 @@
 StMessMgr* gMessMgr = 0;
 StMessage* gMessage=0;
 StMessage* endm=0;
-StMessMgr& operator<<(StMessMgr& os, StMessage*) {
-  os.Print();
+ostream& operator<<(ostream& os, StMessage* stm) {
+  StMessMgr *mm = dynamic_cast<StMessMgr*>(&os);
+  if (mm) {mm->Print();return os;}
+  // something strange happened
+  if (!stm) return os;
+  os << stm->GetMessage();
   return os;
 }
 static const char defaultMessType = 'I';
@@ -449,7 +456,7 @@ StMessMgr& StMessageManager::Message(const char* mess, const char* type,
     strcpy(curOpt,opt);
     seekp(0);
   }
-  return *((StMessMgr*) this);
+  return *this;
 }
 //_____________________________________________________________________________
 void StMessageManager::BuildMessage(const char* mess, const char* type,
@@ -716,7 +723,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.34 2003/09/22 01:30:41 perev Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.35 2003/09/24 22:02:48 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

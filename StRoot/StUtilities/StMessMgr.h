@@ -1,7 +1,10 @@
-// $Id: StMessMgr.h,v 1.14 2003/09/22 01:30:41 perev Exp $
+// $Id: StMessMgr.h,v 1.15 2003/09/24 22:02:48 perev Exp $
 // $Log: StMessMgr.h,v $
+// Revision 1.15  2003/09/24 22:02:48  perev
+// Back to Gene solution of operator<<
+//
 // Revision 1.14  2003/09/22 01:30:41  perev
-// some cleanup
+//  some cleanup
 //
 // Revision 1.13  2003/09/02 17:59:20  perev
 // gcc 3.2 updates + WarnOff
@@ -73,7 +76,7 @@ class messVec;
 #include <Stiostream.h>
 
 class StMessMgr : public ostrstream {
-   friend StMessMgr& operator<<(StMessMgr& ,StMessage*);
+   friend ostream& operator<<(ostream& ,StMessage*);
 
  private:
 
