@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.47 1999/11/06 23:05:01 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.48 1999/11/11 05:16:30 fine Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.48  1999/11/11 05:16:30  fine
+// GetDataSet method has been introduced to build GEANT geometry on fly
+//
 // Revision 1.47  1999/11/06 23:05:01  fisyak
 // fix chars
 //
@@ -281,6 +284,7 @@ St_DataSet *St_geant_Maker::fgGeom = 0;
 //_____________________________________________________________________________
 St_geant_Maker::St_geant_Maker(const Char_t *name):
 StMaker(name){
+  fNode   = 0;
   nwgeant = 2000000;
   nwpaw   =       0;
   iwtype  =       0;
@@ -296,6 +300,31 @@ StMaker(name){
 
 //_____________________________________________________________________________
 St_geant_Maker::~St_geant_Maker(){
+}
+//_____________________________________________________________________________
+St_DataSet  *St_geant_Maker::GetDataSet (const char* logInput,const StMaker *uppMk,
+                                        const StMaker *dowMk) const 
+{
+  St_DataSet *ds = StMaker::GetDataSet(logInput,uppMk,dowMk);
+
+  if (ds || strcmp(logInput,"HALL")) return ds;
+
+  if (!fNode) ((St_geant_Maker *)this)->Work();
+
+  if (fNode) { 
+    //--
+    // Remove hall from the list of ROOT nodes
+    // to make it free of ROOT control
+    //--
+    TList *listOfNode = gGeometry->GetListOfNodes();
+    // Remove hall from the list of ROOT nodes to make it free of ROOT control
+    listOfNode->Remove(fNode);
+    listOfNode->Remove(fNode);
+    // Add "hall" into ".const" area of this maker
+    ((St_geant_Maker *)this)->AddConst(fNode);
+    if (Debug()) fNode->ls(3);
+  }
+  return fNode;
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
