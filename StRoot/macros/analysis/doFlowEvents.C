@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.14 2000/06/05 15:22:19 posk Exp $
+// $Id: doFlowEvents.C,v 1.15 2000/06/30 14:57:34 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -45,6 +45,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.15  2000/06/30 14:57:34  posk
+// Updated to latest doEvents.C .
+//
 // Revision 1.14  2000/06/05 15:22:19  posk
 // Fixed typo in EOF recognition.
 //
@@ -110,7 +113,7 @@ void doFlowEvents(Int_t, const Char_t *, const Char_t *,
 void doFlowEvents(Int_t nevents = 2);
 
 
-// ------------------ Here is the actual method -----------------------------------------
+// ------------------ Here is the actual method ----------------------------------
 void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
 		  const Int_t wrStEOut)
 {
@@ -156,11 +159,12 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
     gSystem->Load("StChallenger");
     setFiles = StChallenger::Challenge();
     setFiles->SetDebug();
-    Int_t Argc=4;
-    const char *Argv[4]= {
-      "-s","dst;hist;runco",
-      "-q","-5<=qxa_3<0.3 && 22>qxc_1>18"
+    const char *Argv[]= {
+      "-s","dst runco",                           // list of components needed
+      "-q","n_trk_tpc[0]>1000 && n_trk_tpc[1]>1000",   // example of user query
+      "-c","/afs/rhic/star/incoming/GCA/daq/stacs.rc"  // GC servers for daq
     };
+    Int_t Argc=sizeof(Argv)/4;
     setFiles->Init(Argc,Argv);
   }
   
@@ -243,7 +247,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //flowMaker->NanoEventWrite(kTRUE);
   //flowMaker->SetNanoEventFileName("testnanoevent.root"); 
   //flowMaker->PicoEventWrite(kTRUE);
-  //flowMaker->SetPicoEventFileName("/data06/posk/flow1picoevent.root"); 
+  //flowMaker->SetPicoEventFileName("/afs/rhic/star/ebye/flow/flow2picoevent.root"); 
+  //flowMaker->SetPicoEventFileName("/data06/posk/flow3picoevent.root"); 
   //flowMaker->FlowEventWrite(kTRUE);
 
   //flowMaker->FlowEventRead(kTRUE);
@@ -259,6 +264,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   Int_t iInit = chain->Init();
   if (iInit) chain->Fatal(iInit, "on init");
   chain->PrintInfo();
+  if (iInit) goto END;
   
   //
   // Set the parameters
@@ -267,43 +273,82 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //StFlowCutEvent::SetMult(100, 10000);
   //StFlowCutEvent::SetVertexX(0., 0.);
   //StFlowCutEvent::SetVertexY(0., 0.);
-  //StFlowCutEvent::SetVertexZ(-10., 10.);
-  //StFlowCutEvent::SetEtaSym(-0.05, 0.05);
+  //StFlowCutEvent::SetVertexZ(-100., 100.);
+  StFlowCutEvent::SetEtaSym(0.1, 0.05);  // off
   
   // Set the track cuts
   //StFlowCutTrack::SetFitPts(15, 200);
-  //StFlowCutTrack::SetFitOverMaxPts(0, 0);
+  //StFlowCutTrack::SetFitOverMaxPts(0.55, 2.0);
   
   // Set the event plane selections
-  //StFlowEvent::SetEtaCut(0.5, 1., 0, 0); // selection 1, harmonic 1
-  //StFlowEvent::SetPtCut(0.2, 1., 0, 0);
+  //StFlowEvent::SetEtaCut(0.5, 1., 0, 0); // harmonic 1, selection 1
   
   // Set the PID windows
   //StFlowEvent::SetPiPlusCut(-2., 2.);
   //StFlowEvent::SetPiMinusCut(-2., 2.);
   //StFlowEvent::SetProtonCut(-2., 2.);
   
+  TTable   *tabl=0;
+  TDataSet *obj=0;
+  TDataSet *ddb=0;
+  TDataSet *ddstBranch=0;
+  
   //
   // Event loop
   //
   int istat=0, i=1;
  EventLoop: if (i <= nevents && istat!=2) {
-   cout << "============================ Event " << i
+   
+   cout << endl << "============================ Event " << i
 	<< " start ============================" << endl;
+   
    chain->Clear();
    istat = chain->Make(i);
-   if (istat==2) {cout << "Last  event processed. Status = " << istat << endl;}
-   if (istat==3) {cout << "Error event processed. Status = " << istat << endl;}
+   if (istat==2) 
+     {cout << "Last  event processed. Status = " << istat << endl;}
+   if (istat==3) 
+     {cout << "Error event processed. Status = " << istat << endl;}
+
+   if (!istat) {
+     ddstBranch=chain->GetDataSet("dstBranch");
+     TDataSetIter dstbranchIter(ddstBranch);
+     if (ddstBranch) {
+       cout << endl << " QAInfo: in dstBranch " << endl;
+       while (ddb=dstbranchIter.Next()) {
+         cout << " QAInfo:   found object: " << ddb->GetName() << endl;      
+         TString dsName =  ddb->GetName();
+	 if (ddb->InheritsFrom("TTable")) { 
+	   tabl = (TTable *)ddb;
+	   cout << " QAInfo:     it's a table with #rows = " 
+		<< tabl->GetNRows() << endl;
+	   if (dsName == "BfcStatus") {	
+	     // Now print out contents of BfcStatus for QA purposes
+	     TDataSetIter bfcstatiter(ddb);
+	     St_dst_bfc_status *bfcstat = 
+	       (St_dst_bfc_status *) bfcstatiter.Find("BfcStatus");
+	     dst_bfc_status_st *bth = bfcstat->GetTable();
+	     //  loop over all rows in table BfcStatus:
+	     Int_t ij = 0;
+	     for (ij=0; ij< bfcstat->GetNRows(); ij++)
+               {
+	         cout << " QAInfo:       BfcStatus table -- row " << ij <<
+		   ", Maker: "     <<  bth[ij]->maker_name <<
+                   " has istat = "  <<  bth[ij]->status << endl;	
+	       }   // for bfcstat
+	   }  // if dsName
+	 } // if ddb
+       }  // while obj Next
+     } // if dstBranch
+   } //  if !istat
+   
    i++;
-
-   //chain->Finish();
-
    goto EventLoop;
  }
   
   i--;
-  cout << "============================ Event " << i
+  cout << endl << "============================ Event " << i
        << " finish ============================" << endl;
+
   if (nevents > 1) {
     chain->Clear();
     chain->Finish();
@@ -313,8 +358,11 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
       b = new TBrowser;
     }
   }
+
+END:
 }
 
+// ----------- This concatenates the path and the file name ---------------------
 void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file, const char *qaflag, const Int_t wrStEOut)
 {
   const char *fileListQQ[] = {0,0};
@@ -329,6 +377,7 @@ void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file, c
   doFlowEvents(nevents, fileListQQ, qaflag, wrStEOut);
 }
 
+// ----------- This sets default path and file names ---------------------------
 void doFlowEvents(const Int_t nevents)
 {
   // Commit to cvs with these defaults:
@@ -338,11 +387,14 @@ void doFlowEvents(const Int_t nevents)
   // BNL
   //Char_t* filePath="/star/rcf/data03/reco/auau200/mevsim/vanilla/flow/year_1h/hadronic_on/tfs_6/";
   //Char_t* fileExt="*.dst.root";
+
+  //Char_t* filePath="/star/rcf/data03/reco/auau200/hbt/default/midcentral/year_1h/hadronic_on/tfs_6";
+  //Char_t* fileExt="*.dst.root";
   
-  // Both
-  //Char_t* filePath="/afs/rhic/star/ebye/flow/";
-  //Char_t* fileExt="test.event.root";
+  //Char_t* filePath="/star/rcf/reco/P00hd/2000/06/"; // data
+  //Char_t* fileExt="*.dst.root";
   
+  // Both  
   //Char_t* filePath="/afs/rhic/star/ebye/flow/fixed10/";
   //Char_t* filePath="/afs/rhic/star/ebye/flow/random10/";
   //Char_t* fileExt="*.xdf";
@@ -353,11 +405,14 @@ void doFlowEvents(const Int_t nevents)
   //Char_t* filePath="./";
   //Char_t* fileExt="flownanoevent.root";
   
-  //Char_t* filePath="/data06/posk/";
-  //Char_t* fileExt="flowpicoevent.root";
-  
   // LBNL
+  //Char_t* filePath="/data06/posk/";
+  //Char_t* fileExt="flow7picoevent.root";
+  
   //Char_t* filePath="/data06/snelling/flow/";
+  //Char_t* fileExt="*.dst.root";
+
+  //Char_t* filePath="/auto/pdsfdv09/star/dst/halffield/nokalman";  // data
   //Char_t* fileExt="*.dst.root";
 
   doFlowEvents(nevents, filePath, fileExt);
