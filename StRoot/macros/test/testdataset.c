@@ -1,7 +1,10 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@bnl.gov)   07/04/99
-//  &
+// $Id: testdataset.c,v 1.10 1999/12/28 22:25:03 fine Exp $
 // $Log: testdataset.c,v $
+// Revision 1.10  1999/12/28 22:25:03  fine
+// new test for operators ++ and * implemented
+//
 // Revision 1.9  1999/04/15 19:45:26  fine
 // testdataset.c has been improved
 //
@@ -9,7 +12,7 @@
 // Extra test for St_DataSetIter::Du() was introduced
 //
 {
- gROOT->Reset();
+  gROOT->Reset();
   // Determinate the brand of the OS
   gSystem.Load("St_base");
 
@@ -57,7 +60,7 @@
   Int_t total = d.Du();                               
   cout << "---------------------" << endl;  
   cout << "Total: " << total << " datasets were listed" << endl;
- cout << "-----------------" << " End of Testing St_DataSetIter::Du() method: " <<
+  cout << "-----------------" << " End of Testing St_DataSetIter::Du() method: " <<
           "----------------" << endl;  
                                   cout << endl;
   cout << "We'll try some \"wrong\" path now" << endl;
@@ -127,8 +130,26 @@
    else
      cout << " Ok! the path to d[\"" <<  d("v1/v1_1/v1_1_1")->Path() << "\"]=" << d["v1/v1_1/v1_1_1"] << ";" << endl; 
   cout  << endl << "------------ 7 ------------ " << endl;
-  d.Rmdir("v1/v21");
+  cout  << "  Check loop with \"St_DataSet *operator++()\" and \"St_DataSet *operator *() const\"" << endl;
+  St_DataSet *ds = 0;
+  do { 
+    ds = d++;
+    if (ds) {
+        cout << "\tCurrent ds <" << ds->GetName() << ">;";
+        if (*d) { 
+          cout << "\tnext ds will be <" << (*d)->GetName();
+          cout << ">" << endl; 
+        } else 
+          cout << "\tthere will be no new ds" << endl; 
+
+    }
+  } while (ds);
+  cout << "   end of loop " << endl << endl ;
+
   cout  << endl << "------------ 8 ------------ " << endl;
+  d.Pwd();
+  d.Rmdir("v1/v21");
+  cout  << endl << "------------ 9 ------------ " << endl;
   d.ls("","*");
   d.Rmdir("v1");
   d.Rmdir("v1");
@@ -137,6 +158,7 @@
      cout << "Error the directory should be undefined nowadays " << endl;
   }
   else cout << "Ok! The last dataset has NO active directory anymore" << endl;
+  d.Pwd();
 
   cout  << endl << "------------ 9 ------------ " << endl;
   
