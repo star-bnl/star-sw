@@ -1,5 +1,8 @@
-* $Id: tgc_time_to_z.F,v 1.2 1998/01/27 01:56:43 fisyak Exp $
+* $Id: tgc_time_to_z.F,v 1.3 1998/07/08 02:44:44 sakrejda Exp $
 * $Log: tgc_time_to_z.F,v $
+* Revision 1.3  1998/07/08 02:44:44  sakrejda
+* z positioned in the middle of a bucket
+*
 * Revision 1.2  1998/01/27 01:56:43  fisyak
 * Split sources
 *
@@ -45,7 +48,7 @@ C     z - z coodinate in the local coordinate system
 
       zoff=0
       if(padrow.lt.14)zoff=z_offset
-      z = dvel_local*(time/clock_local - t0_offset)-zoff
+      z = dvel_local*((float(time)-0.5)/clock_local - t0_offset)-zoff
 
       tgc_time_to_z = STAFCV_OK      
 
