@@ -244,7 +244,11 @@ StIOInterFace *StIOMaker::Load()
     gSystem->Load(className);
     klass = gROOT->GetClass(className);
   }
-  assert (klass);
+  if ( ! klass ){
+    (void) printf("<StIOMaker::Load() className %s was not loaded\n",
+		  className);
+    assert (klass);
+  }
   
   StMaker *saveMK = cd();
   Mk = (StIOInterFace*)klass->New();    
