@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPhysicalHelixD.hh,v 1.1 1999/01/30 03:59:05 fisyak Exp $
+ * $Id: StPhysicalHelixD.hh,v 1.2 2002/02/20 00:56:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StPhysicalHelixD.hh,v $
+ * Revision 1.2  2002/02/20 00:56:31  ullrich
+ * Added methods to calculate signed DCA.
+ *
  * Revision 1.1  1999/01/30 03:59:05  fisyak
  * Root Version of StarClassLibrary
  *
@@ -41,15 +44,23 @@ public:
 		     const StThreeVectorD&, int h=-1);
     
     StPhysicalHelixD();
-    virtual ~StPhysicalHelixD();
+    ~StPhysicalHelixD();
 
     // Requires:  signed Magnetic Field
     StThreeVectorD momentum(double) const;     // returns the momentum at origin
     StThreeVectorD momentumAt(double, double); // returns momemtum at S
     int            charge(double)   const;     // returns charge of particle
+    // 2d DCA to x,y point signed relative to curvature
+    double curvatureSignedDistance(double x, double y) ;
+    // 2d DCA to x,y point signed relative to rotation 
+    double geometricSignedDistance(double x, double y) ;
+    // 3d DCA to 3d point signed relative to curvature
+    double curvatureSignedDistance(const StThreeVectorD&) ;
+    // 3d DCA to 3d point signed relative to rotation
+    double geometricSignedDistance(const StThreeVectorD&) ;
 
 #ifdef __ROOT__
-    ClassDef(StPhysicalHelixD,1)
+    ClassDef(StPhysicalHelixD,2)
 #endif
 };
 #endif
