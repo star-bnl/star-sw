@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbModifier.cxx,v 1.1 2000/08/15 22:51:52 porter Exp $
+ * $Id: StDbModifier.cxx,v 1.2 2002/03/13 22:14:53 porter Exp $
  *
  * Author: Masashi Kaneta, updated by R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbModifier.cxx,v $
+ * Revision 1.2  2002/03/13 22:14:53  porter
+ * added variable length table defautls for simplifying writes of l3 counters to db
+ *
  * Revision 1.1  2000/08/15 22:51:52  porter
  * Added Root2DB class from Masashi Kaneta
  * + made code more robust against requesting data from non-existent databases
@@ -224,8 +227,19 @@ Int_t StDbModifier::WriteDataToDB()
     dbtable -> setFlavor("ofl");
   }
 
-
-  dbtable -> SetTable((char*)cstruct,nrows);      // Put data in local table on memory
+  int dbnrows=dbtable->GetNRows();
+  int* eidList=0;
+  int tmp;
+  int* dbeidList=dbtable->getElementID(tmp);
+  if(nrows>dbnrows){
+    eidList=new int[nrows];
+    int i;
+    for(i=0;i<dbnrows;i++)eidList[i]=dbeidList[i];
+    for(i=dbnrows;i<nrows;i++)eidList[i]=eidList[dbnrows-1]+i;
+  }
+      
+ 
+  dbtable -> SetTable((char*)cstruct,nrows,eidList);      // Put data in local table on memory
   //  dbtable -> SetNRows(nrows);                     // Set number of rows on table in database
 
   //  mgr -> setStoreTime(fTimestamp);          // Set the time stamp 
@@ -236,6 +250,7 @@ Int_t StDbModifier::WriteDataToDB()
   }
 
   mgr -> storeDbTable(dbtable);             // Fetch the data 
+  if(eidList) delete [] eidList;
 
   return 1;
 }
