@@ -1,6 +1,11 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: StDbDataSet.cxx,v 1.1 1999/08/17 18:51:31 porter Exp $
+// $Id: StDbDataSet.cxx,v 1.2 1999/08/23 16:10:13 porter Exp $
 // $Log: StDbDataSet.cxx,v $
+// Revision 1.2  1999/08/23 16:10:13  porter
+// modified XmlReader & XmlWriter to be in sinc with Xml format used by current
+// perl scripts.  Also added removeTable to StDbConfigNode so that others can
+// become owner of a table
+//
 // Revision 1.1  1999/08/17 18:51:31  porter
 // Add DataSet files which should eventually go into St_base area but as
 // it is currently needed by codes other than StDbMaker
@@ -61,22 +66,23 @@ void StDbDataSet::Browse(TBrowser *b)
   // Browse this dataset (called by TBrowser).
   //   if (b && fObj) b->Add(fObj);
   St_DataSet::Browse(b);
-  cout << "Test This Browser " << endl;
+  //  cout << "Test This Browser " << endl;
+
   if(fObj){
 
- StDbXmlWriter* acc = new StDbXmlWriter(cout);
-
-//acc->streamHeader("dummy");
-acc->streamAccessor();
-fObj->StreamAccessor((typeAcceptor*)acc);
-acc->endAccessor();
-acc->streamTableName(fObj->getTableName());
-fObj->dbStreamer((typeAcceptor*)acc);
-acc->streamEndTableName();
-acc->streamTail();
-delete acc;
+    StDbXmlWriter* acc = new StDbXmlWriter(cout);
+    char* name;
+    //acc->streamHeader("dummy"); // this is for DataBase Name
+    name = fObj->getTableName();
+    acc->streamTableName(name); delete [] name;
+    acc->streamAccessor();
+    fObj->StreamAccessor((typeAcceptor*)acc);
+    acc->endAccessor();
+    fObj->dbStreamer((typeAcceptor*)acc);
+    acc->streamEndTableName();
+    //acc->streamTail();  // end DataBase
+    delete acc;
   }
-  if(fObj) cout << "My Name is " << fObj->getTableName() << endl;
 
 }
 

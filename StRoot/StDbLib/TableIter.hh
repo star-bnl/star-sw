@@ -21,6 +21,9 @@ public:
   StDbTableI* operator++();
   bool done();
 
+  // will also want a method nextAndRelease() which does the
+  // same as next() but removes the table from the StDbConfigNode
+
 };
 
 

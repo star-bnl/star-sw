@@ -26,7 +26,7 @@ int k;
  }
  if(!retVal){
  for(k=0;k<tab->nelems;k++){
-   cout <<k<<" elements = " << tab->nelems << endl;
+   //   cout <<k<<" elements = " << tab->nelems << endl;
     e=tab->e[k];
     if(strcmp(name,e->name)==0)retVal=e;
  }
@@ -263,15 +263,15 @@ if(p1){
 
 void
 StDbXmlReader::pass(char* name, char* i,  int len){
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"String")==0)i=strdup((e->val).data);
 }
 
 
 void
 StDbXmlReader::pass(char* name, unsigned char* i,  int len){
- elem* e = findElement(name);
- if(strcmp(e->type,"UString")==0)cout << "don't pass uchar yet " << endl;
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ if(strcmp(e->type,"UString")==0); // i=atoi((e->val).data);
 }
 
 
@@ -282,7 +282,7 @@ StDbXmlReader::pass(char* name, unsigned char* i,  int len){
 
 void
 StDbXmlReader::pass(char* name, short& i,  int len){
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"Short")==0)i=atoi((e->val).data);
 }
 
@@ -292,7 +292,7 @@ StDbXmlReader::pass(char* name, short& i,  int len){
 void
 StDbXmlReader::pass(char* name, short* i,  int len){
 
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"ShortArray")==0){
 
    char* p1;
@@ -333,7 +333,7 @@ StDbXmlReader::pass(char* name, short* i,  int len){
 
 void
 StDbXmlReader::pass(char* name, unsigned short& i,  int len){
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"UShort")==0)i=atoi((e->val).data);
 }
 
@@ -343,7 +343,7 @@ StDbXmlReader::pass(char* name, unsigned short& i,  int len){
 void
 StDbXmlReader::pass(char* name, unsigned short* i,  int len){
 
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"UShortArray")==0){
 
    char* p1;
@@ -384,7 +384,7 @@ StDbXmlReader::pass(char* name, unsigned short* i,  int len){
 
 void
 StDbXmlReader::pass(char* name, int& i,  int len){
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"Int")==0)i=atoi((e->val).data);
 }
 
@@ -393,7 +393,7 @@ StDbXmlReader::pass(char* name, int& i,  int len){
 void
 StDbXmlReader::pass(char* name, int* i,  int len){
 
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"IntArray")==0){
 
    char* p1;
@@ -430,7 +430,7 @@ StDbXmlReader::pass(char* name, int* i,  int len){
 }
 void
 StDbXmlReader::pass(char* name,unsigned int& i,  int len){
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"UInt")==0)i=atoi((e->val).data);
 }
 
@@ -439,7 +439,7 @@ StDbXmlReader::pass(char* name,unsigned int& i,  int len){
 void
 StDbXmlReader::pass(char* name,unsigned int* i,  int len){
 
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"UIntArray")==0){
 
    char* p1;
@@ -479,7 +479,7 @@ StDbXmlReader::pass(char* name,unsigned int* i,  int len){
 
 void
 StDbXmlReader::pass(char* name, long& i,  int len){
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"Long")==0)i=atol((e->val).data);
 }
 
@@ -489,7 +489,7 @@ StDbXmlReader::pass(char* name, long& i,  int len){
 void
 StDbXmlReader::pass(char* name, long* i,  int len){
 
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"LongArray")==0){
 
    char* p1;
@@ -530,7 +530,7 @@ StDbXmlReader::pass(char* name, long* i,  int len){
 
 void
 StDbXmlReader::pass(char* name, unsigned long& i,  int len){
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"ULong")==0)i=atol((e->val).data);
 }
 
@@ -540,7 +540,7 @@ StDbXmlReader::pass(char* name, unsigned long& i,  int len){
 void
 StDbXmlReader::pass(char* name, unsigned long* i,  int len){
 
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"ULongArray")==0){
 
    char* p1;
@@ -583,7 +583,7 @@ StDbXmlReader::pass(char* name, unsigned long* i,  int len){
 void
 StDbXmlReader::pass(char* name, float* i,  int len){
 
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"FloatArray")==0){
 
 
@@ -626,7 +626,7 @@ StDbXmlReader::pass(char* name, float* i,  int len){
 void
 StDbXmlReader::pass(char* name, double* i,  int len){
 
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"DoubleArray")==0){
 
 
@@ -668,7 +668,7 @@ StDbXmlReader::pass(char* name, double* i,  int len){
 
 void
 StDbXmlReader::pass(char* name, float& i,  int len){
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"Float")==0)i=(float)atof((e->val).data);
 
 }
@@ -676,7 +676,7 @@ StDbXmlReader::pass(char* name, float& i,  int len){
 
 void
 StDbXmlReader::pass(char* name, double& i,  int len){
- elem* e = findElement(name);
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"Double")==0)i=atof((e->val).data);
 
 }

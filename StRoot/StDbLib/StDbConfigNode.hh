@@ -5,6 +5,7 @@
 #include "StDbDefs.hh"
 
 class StDbTable;
+class StDbTableI;
 class StDbFactoryI;
 class TableIter;
 
@@ -91,6 +92,8 @@ public:
   virtual void printTree();
 
   virtual StDbTable* addTable(const char* tableName, char* version, int elementID);
+  virtual StDbTable* findTable(const char* tableName, const char* version, int elementID);
+  virtual void removeTable(StDbTable* table);
   virtual TableIter* getTableIter();
   virtual StDbConfigNode* findConfigNode(StDbType type, StDbDomain domain);
 
