@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.27 2001/07/25 19:10:53 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.28 2001/08/15 17:12:18 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.28  2001/08/15 17:12:18  ward
+// m_Mode third bit means pass pulser events.
+//
 // Revision 1.27  2001/07/25 19:10:53  ward
 // New function InitCtbArrays2001 for ctb_dsm_2001.map.
 //
@@ -239,7 +242,7 @@ Int_t St_trg_Maker::SanityCheck() {
 int St_trg_Maker::Daq(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2,
       St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
 
-  char *oo,*ptr,isLaser=0,isPhysics=0;
+  char *oo,*ptr,isLaser=0,isPhysics=0,isPulser=0,thisEventOk=0;
   fVictorPrelim=(StDAQReader*)(herb->GetObject()); assert(fVictorPrelim);
   fVictor=fVictorPrelim->getTRGReader(); assert(fVictor);
   assert(fVictor->thereIsTriggerData()); // We had bfc.C(" l0 "), but we have no TRG bank in
@@ -255,14 +258,17 @@ int St_trg_Maker::Daq(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *ds
   if (Iret !=  kStOK) return Iret;
   if(GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd==0x9001) isLaser=7;
   if(GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd>>12==4) isPhysics=7;
-  if (m_Mode) {
-    if((m_Mode & 1 && !isPhysics) || (m_Mode & 2 && !isLaser)) {
-      oo="";
-      if(isPhysics) oo="Physics"; if(isLaser) oo="Laser";
-      printf("St_trg_Maker.  %s event.  TrgActionWd=0x%x.  Returning kStErr.\n",
-          oo,GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd);
-      return kStErr; // Skip this event.
-    }
+  if(GraceSlick->EvtDesc.TCU3.FIFO3.TriggerWd==0xf101) isPulser=7;
+  if((m_Mode&1)&&isPhysics) thisEventOk=7;
+  if((m_Mode&2)&&isLaser)   thisEventOk=7;
+  if((m_Mode&4)&&isPulser)  thisEventOk=7;
+  if (!thisEventOk) {
+    oo="";
+    if(isPhysics) oo="Physics"; if(isLaser) oo="Laser"; if(isPulser) oo="Pulser";
+    printf("St_trg_Maker.  %s event.  TrgActionWd=0x%x.  TriggerWd=0x%0x. Returning kStErr.\n",
+        oo,GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd,
+        GraceSlick->EvtDesc.TCU3.FIFO3.TriggerWd);
+    return kStErr; // Skip this event.
   }
   // dumpDataToScreenAndExit();
   VpdDaq(dst1);       // The function
