@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.25 2000/05/02 21:15:52 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.26 2000/05/03 18:17:04 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.26  2000/05/03 18:17:04  kathy
+// change print stmt slightly
+//
 // Revision 1.25  2000/05/02 21:15:52  kathy
 // updated print statements in macro to be explicit
 //
@@ -186,9 +189,9 @@ EventLoop: if (i < nevents && !istat) {
             if (tabl) {
               countTable++;
               tottabcntr++;
-              cout << " QAInfo: it's a table with #rows = " 
+              cout << " QAInfo:     it's a table with #rows = " 
                         << tabl->GetNRows() << endl;
-              fout << " QAInfo: it's a table with #rows = " 
+              fout << " QAInfo:     it's a table with #rows = " 
                         << tabl->GetNRows() << endl;
 
 
