@@ -75,12 +75,13 @@ Int_t StTreeMaker::MakeWrite(){
   St_DataSetIter next(fMakers);
   StMaker *mk;
 
-  StBranch *br;St_DataSet *dat;
+  StBranch *br;St_DataSet *dat,*ds;
   while ((mk=(StMaker*)next())) {//loop over makers
     br = BranchOfMaker(mk,1999);
     if (!br) 	continue;
     dat = mk->Find(".data"); assert(dat);
-    br->Add(dat);
+    St_DataSetIter nextDs(dat);
+    while((ds = nextDs())) br->Add(ds);
   }
 //		Write StTree
   ULong_t ukey = fTopMaker->GetNumber();
