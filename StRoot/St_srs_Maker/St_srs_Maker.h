@@ -28,13 +28,20 @@ class St_srs_Maker : public StMaker {
                St_srs_direct  *m_srs_direct; //!
  protected:
 	       TH2F     *m_x_vs_y;  //! x vs y of Si points
+               TH2F     *m_waf_no1;  //! ladder no vs z of Si hit
+               TH2F     *m_waf_no2;  //! ladder no vs z of Si hit
+               TH2F     *m_waf_no3;  //! ladder no vs z of Si hit
+               TH2F     *m_waf_no4;  //! ladder no vs z of Si hit
+               TH2F     *m_waf_no5;  //! ladder no vs z of Si hit
+               TH2F     *m_waf_no6;  //! ladder no vs z of Si hit
+               TH2F     *m_waf_no7;  //! ladder no vs z of Si hit
  public: 
                   St_srs_Maker(const char *name="svt_hits");
    virtual       ~St_srs_Maker();
    virtual Int_t  Init();
    virtual Int_t  Make();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_srs_Maker.h,v 1.6 1999/07/15 13:58:20 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_srs_Maker.h,v 1.7 1999/08/08 19:47:42 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_srs_Maker, 1)   //StAF chain virtual base class for Makers
 };
