@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.cxx,v 1.11 1999/08/12 15:42:42 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.12 1999/08/13 17:15:59 yepes Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.12  1999/08/13 17:15:59  yepes
+// *** empty log message ***
+//
 // Revision 1.11  1999/08/12 15:42:42  yepes
 // Change printing
 //
@@ -206,6 +209,7 @@ Int_t St_l3t_Maker::Make(){
     *l3hit = *tphit ;
 //
     maxNofTracks = nHits / 10 ;
+    maxNofTracks = nHits  ;
     if ( maxNofTracks < 1 ) maxNofTracks = 1 ;
     St_tpt_track   *track = new St_tpt_track("l3Track",maxNofTracks); 
     m_DataSet->Add(track);
