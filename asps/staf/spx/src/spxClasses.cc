@@ -41,13 +41,19 @@ long spxDummy::  nCalls () {
    return myNCalls;
 }
 
-//:----------------------------------------------- PUB FUNCTIONS      --
-STAFCV_T spxDummy:: hello (const char * message) {
+//----------------------------------
+char * spxDummy::  listing () {
    myNCalls++;
-   printf(" %s \n",message);
-   EML_SUCCESS(STAFCV_OK);
+   char* c = socObject::listing();
+   char* cc = NULL;
+   cc = (char*)ASUALLOC(79);
+   memset(cc,0,79);
+   sprintf(cc,"%s Calls = %d",c,nCalls());
+   ASUFREE(c);
+   return cc;
 }
 
+//:----------------------------------------------- PUB FUNCTIONS      --
 //----------------------------------
 STAFCV_T spxDummy:: null () {
    myNCalls++;
@@ -99,6 +105,17 @@ short spxGrid::  height () {
 //----------------------------------
 short spxGrid::  width () {
    return myWidth;
+}
+
+//----------------------------------
+char * spxGrid::  listing () {
+   char* c = socObject::listing();
+   char* cc = NULL;
+   cc = (char*)ASUALLOC(79);
+   memset(cc,0,79);
+   sprintf(cc,"%s Size = (%d, %d)",c,height(),width());
+   ASUFREE(c);
+   return cc;
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
@@ -166,7 +183,7 @@ STAFCV_T spxManager:: deleteGrid (const char * name) {
 STAFCV_T spxManager:: findDummy (const char * name
 		, spxDummy*& dummy) {
    socObject* obj;
-   if( !soc->findObject(name,"spxDummy",obj) ){
+   if( NULL == (obj = soc->findObject(name,"spxDummy")) ){
       dummy = NULL;
       EML_ERROR(OBJECT_NOT_FOUND);
    }
@@ -178,7 +195,7 @@ STAFCV_T spxManager:: findDummy (const char * name
 STAFCV_T spxManager:: findGrid (const char * name
 		, spxGrid*& grid) {
    socObject* obj;
-   if( !soc->findObject(name,"spxGrid",obj) ){
+   if( NULL == (obj = soc->findObject(name,"spxGrid")) ){
       grid = NULL;
       EML_ERROR(OBJECT_NOT_FOUND);
    }
@@ -189,7 +206,7 @@ STAFCV_T spxManager:: findGrid (const char * name
 //----------------------------------
 STAFCV_T spxManager:: getDummy (IDREF_T id, spxDummy*& dummy) {
    socObject* obj;
-   if( !soc->getObject(id,obj) ){
+   if( NULL == (obj = soc->getObject(id)) ){
       dummy = NULL;
       EML_ERROR(OBJECT_NOT_FOUND);
    }
@@ -204,7 +221,7 @@ STAFCV_T spxManager:: getDummy (IDREF_T id, spxDummy*& dummy) {
 //----------------------------------
 STAFCV_T spxManager:: getGrid (IDREF_T id, spxGrid*& grid) {
    socObject* obj;
-   if( !soc->getObject(id,obj) ){
+   if( NULL == (obj = soc->getObject(id)) ){
       grid = NULL;
       EML_ERROR(OBJECT_NOT_FOUND);
    }
@@ -217,43 +234,22 @@ STAFCV_T spxManager:: getGrid (IDREF_T id, spxGrid*& grid) {
 }
 
 //----------------------------------
+//- OVER-RIDE socFactory:: list()
 char * spxManager:: list () {
+   char *c = socFactory::list();
 
-   socObject* obj;
+   char *cc = (char*)ASUALLOC(strlen(c) +1 +162);
 
-   printf("\n"
-"+---------------------------------------------------------------------"
-   "\n"
-"|*************** SPX - Service Package eXample listing ***************"
-   "\n"
-"+-------+-----------------+-----------------+-------------------------"
-   "\n"
-"| IDREF | NAME            | TYPE            |                         "
-    "\n"
-"+-------+-----------------+-----------------+-------------------------"
-    "\n");
-   for( int i=0;i<myCount;i++ ){
-      if( soc->getObject(entry(i),obj) ){
-	 if( 0 == strcmp("spxGrid",obj->type()) ){
-	    printf("| %5d | %-15s | %-15s | Size = (%d,%d) \n"
-	    		,obj->idRef(),obj->name(),obj->type()
-            		,SPXGRID(obj)->height()
-            		,SPXGRID(obj)->width());
-	 } else {
-	    printf("| %5d | %-15s | %-15s | Calls = %d \n"
-	    		,obj->idRef(),obj->name(),obj->type()
-            		,SPXDUMMY(obj)->nCalls());
-	 }
-      } else {
-         printf("| %5d | %-15s | %-15s | \n"
-                        ,entry(i),"**DELETED**","**DELETED**");
-      }
-   }
-   printf(
-"+-------+-----------------+-----------------+-------------------------"
-   "\n\n");
-
-   return ""; // TEMPORARY HACK
+   sprintf(cc, 
+		"\n"
+                "+-------------------------------------------"
+                "-----------------------------------\n"
+                "|******************* "
+                "SPX - Service Package eXample listing"
+                " ********************\n"
+                "%s\n",c);
+   ASUFREE(c);
+   return cc;
 }
 
 //----------------------------------
