@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
+
+#include "cstructs/eemcConstDB.hh"
 
 #include "StEEmcDbIndexItem1.h"
 
@@ -45,6 +48,16 @@ void StEEmcDbIndexItem1::setName(char *text) {
     eta=atoi(text+4);
     sub=text[3];
   }
+  // cleanup termintaing character
+  int i;
+  for(i=0;i<StEEmcNameLen;i++) {
+    if(name[i]==EEMCDbStringDelim) {
+      name[i]=0;
+      return;
+    }
+  }
+  printf("Error in  StEEmcDbIndexItem1::setName(%s)\n",text);
+  assert(1==2);
 }
 
 
