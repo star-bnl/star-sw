@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.67 2002/01/11 19:08:43 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.68 2002/01/14 23:39:34 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -199,7 +199,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.67 2002/01/11 19:08:43 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.68 2002/01/14 23:39:34 posk Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -217,6 +217,14 @@ Int_t StFlowMaker::InitRun() {
 
 Int_t StFlowMaker::Finish() {
   if (Debug()) gMessMgr->Info() << "FlowMaker: Finish()" << endm;
+
+  // Print message summary
+  cout << endl;
+  gMessMgr->Summary(3);
+  cout << endl;
+
+  // Print the selection object details
+  pFlowSelect->PrintList();
 
   // Print the cut lists
   cout << "#######################################################" << endl;
@@ -1319,6 +1327,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.68  2002/01/14 23:39:34  posk
+// Moved print commands to Finish().
+//
 // Revision 1.67  2002/01/11 19:08:43  posk
 // Restored SetDca for backwards compatability.
 //
