@@ -1,8 +1,13 @@
+
+*****September 30, 1999
+
+- n_event[2] --> n_event in event_header and dst_event_summary idls 
+
 *****September 28, 1999
 
 - In dst_track.idl x0,y0 has been replaced with r0,phi0
 - created new table proposed by Thomas: dst_monitor_soft_l3.idl
-
+- cleaned up obsolete structures
 
 *****August 20, 1999
 
