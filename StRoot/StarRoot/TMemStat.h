@@ -9,7 +9,7 @@
  */
 /***************************************************************************
  *
- * $Id: TMemStat.h,v 1.3 2004/09/03 20:53:06 perev Exp $
+ * $Id: TMemStat.h,v 1.4 2004/09/16 02:08:03 perev Exp $
  *
  * Author: Victor Perev, Jul 2000
  **************************************************************************/
@@ -33,6 +33,7 @@ public:
    static  Double_t Free();			/*!< Free heap memory in MB    */
    static  Double_t ProgSize();			/*!< Program size     in MB    */
    static  void     PrintMem(const char *tit);	/*!< Prints current memory     */
+   static  void     PM();	                /*!< Prints fast current heap  */
    static  void     Summary();			/*!< Prints usage summary      */
 
  private:

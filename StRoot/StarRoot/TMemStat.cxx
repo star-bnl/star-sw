@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TMemStat.cxx,v 1.12 2004/09/03 20:53:06 perev Exp $
+ * $Id: TMemStat.cxx,v 1.13 2004/09/16 02:07:18 perev Exp $
  *
  ***************************************************************************
  *
@@ -178,6 +178,14 @@ void TMemStat::PrintMem(const char *tit)
 
   if (tit) printf("\nTMemStat::%s",tit);
   printf("\t total =%10.6f heap =%10.6f and %10.6f(%+10.6f)\n",exec,used,free,used-fgUsed);
+  fgUsed = used;
+}
+//______________________________________________________________________________
+void TMemStat::PM()
+{
+  Double_t used = Used();
+  printf("\nTMemStat: ");
+  printf("TMemStat::heap =%10.6f(%+10.6f)\n",used,used-fgUsed);
   fgUsed = used;
 }
 //______________________________________________________________________________
