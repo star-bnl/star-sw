@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.48 1999/11/11 05:16:30 fine Exp $
+// $Id: St_geant_Maker.cxx,v 1.49 1999/11/13 02:40:55 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.49  1999/11/13 02:40:55  fisyak
+// Add gclose
+//
 // Revision 1.48  1999/11/11 05:16:30  fine
 // GetDataSet method has been introduced to build GEANT geometry on fly
 //
@@ -346,7 +349,6 @@ Int_t St_geant_Maker::Make()
     Char_t   cgnam[20];
     int iRes = 0; if(iRes) {/*touch*/};
   
-    agstroot_();
     Do("trig");
 
     // check EoF
@@ -526,6 +528,8 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
   Init(); 
   if (strlen(option)) Do (option); 
   geometry_();
+  Do("gclose all");
+  agstroot_();
 }
 //_____________________________________________________________________________
 //_____________________________________________________________________________
@@ -986,6 +990,8 @@ Int_t St_geant_Maker::SetInputFile(const char *file)
   TString kuip("gfile p "); kuip += fInputFile;
   Do((const char*)kuip); 
   if (cquest->iquest[0]) {return kStEOF;}
+  Do("gclose all");
+  agstroot_();
   return kStOK;
 }
 //------------------------------------------------------------------------
