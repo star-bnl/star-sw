@@ -35,6 +35,7 @@
   float  avg_trkL_svt;       /* Avg. track length (cm) SVT           */
                              /* -OR- Avg. # pts assigned             */ 
   float  avg_trkL_ftpc[2];   /* Avg. track length (cm) FTPC,east/west*/
+                             /* -OR- Avg. # pts assigned             */ 
   float  res_pad_tpc[2];     /* Avg. resid, pad direct, TPC <0,.ge.0 */
                              /* -OR- Avg. chisq(1) of fit,  <0,.ge.0 */
   float  res_drf_tpc[2];     /* Avg. resid, drift dir,  TPC <0,.ge.0 */
@@ -49,4 +50,4 @@
   long   prim_vrtx_ntrk;     /* # tracks used in primary vertex fit  */
   float  cpu_time[20];       /* cpu time for various modules (sec)   */
  } ;
-/*  Last mod. for dst_monitor_soft:   $Date: 1998/08/12 16:34:59 $ */
+/*  Last mod. for dst_monitor_soft:   $Date: 1999/01/26 14:40:43 $ */
