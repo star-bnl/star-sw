@@ -382,7 +382,7 @@ int kam_tdmtable_cell_getvalue()
    ||  !ahs_zeroAHS(a)
    ||  !ahs_parseSpec(cellSpec,&a)		// HACK - MEM LEAK **
    ){
-      EML_MESSAGE("\t Invalid cell specification. \n");
+      EML_MESSAGE(INVALID_CELL_SPECIFICATION);
    }
    AHSNODE_T *t=&(a.nodes[a.pathDepth-1]);
    int nrow = t->shape.indexes[0];

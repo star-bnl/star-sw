@@ -225,7 +225,8 @@ STAFCV_T socCatalog:: idObject (const char * name
       }
    }
    id = -1;
-   EML_ERROR(INVALID_IDREF);
+// EML_ERROR(INVALID_IDREF);
+   return FALSE;	//- HACK: This error is too sensitive
 }
 
 //----------------------------------

@@ -14,7 +14,7 @@ all: setup
 	cd srcm; $(MAKE)
 	cd bin; $(MAKE)
 	cd wrk; $(MAKE)
-	cd doc; $(MAKE)
+#	cd doc; $(MAKE)
 #
 ########################################################################
 include $(SLM_DIR)/base_t.mk

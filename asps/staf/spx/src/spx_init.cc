@@ -21,7 +21,7 @@ spxManager *spx;
 //:<--------------------------------------------------------------------
 int spx_init()
 {
-   EML_MESSAGE("Initializing SPX.");
+   EML_MESSAGE(Initializing SPX.);
 
 /*- Define the SPX KUIP commands. -*/
    spx_def_();
@@ -37,7 +37,7 @@ int spx_init()
 //:<--------------------------------------------------------------------
 int spx_start()
 {
-   EML_MESSAGE("Starting SPX.");
+   EML_MESSAGE(Starting SPX.);
 
 /*- Create the SPX Manager. -*/
    spx = new spxManager("spx");
@@ -53,7 +53,7 @@ int spx_start()
 //:<--------------------------------------------------------------------
 int spx_stop()
 {
-   EML_MESSAGE("Stopping SPX.");
+   EML_MESSAGE(Stopping SPX.);
 
 /*- Delete the SPX Manager.
    delete spx;

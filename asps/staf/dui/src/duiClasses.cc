@@ -128,40 +128,6 @@ STAFCV_T duiDispatcher:: cp (const char * fromPath
 }
 
 //----------------------------------
-STAFCV_T duiDispatcher:: findDatasetPath (const char * dirPath
-		, tdmDataset*& dataset) {
-
-   DS_DATASET_T* pDS=NULL;
-
-   if( !findDataset(dirPath,dataset) ){
-      if( !findNode_ds(dirPath,pDS)
-      ||  !createDataset(dirPath,pDS,dataset)
-      ){
-	 dataset = NULL;
-	 EML_ERROR(OBJECT_NOT_FOUND);
-      }
-   }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
-}
-
-//----------------------------------
-STAFCV_T duiDispatcher:: findTablePath (const char * filePath
-		, tdmTable*& table) {
-
-   DS_DATASET_T* pDS=NULL;
-
-   if( !findTable(filePath,table) ){
-      if( !findNode_ds(filePath,pDS)
-      ||  !createTable(filePath,pDS,table)
-      ){
-	 table = NULL;
-	 EML_ERROR(OBJECT_NOT_FOUND);
-      }
-   }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
-}
-
-//----------------------------------
 STAFCV_T duiDispatcher:: ls (const char * path, char *& result) {
 
    DS_DATASET_T *pDS;
@@ -243,20 +209,31 @@ char * duiDispatcher:: cvtRelAbs (const char * relPath) {
    return absPath;
 }
 
+//**********************************************************************
+// Over-ride tdmFactory methods
+//----------------------------------
+// Over-ride tdmFactory methods
+
 //----------------------------------
 STAFCV_T duiDispatcher:: findDataset (const char * dirPath
 		, tdmDataset*& dataset) {
 
    DS_DATASET_T* pDS=NULL;
+   char *fullPath=NULL;
 
-   if( !tdmFactory::findDataset(dirPath,dataset) ){
-      if( !findNode_ds(dirPath,pDS)
-      ||  !createDataset(dirPath,pDS,dataset)
+   if( !(fullPath = cvtRelAbs(dirPath)) ){
+	 EML_ERROR(INVALID_AHS_SPEC);
+   }
+
+   if( !tdmFactory::findDataset(fullPath,dataset) ){
+      if( !findNode_ds(fullPath,pDS)
+      ||  !createDataset(fullPath,pDS,dataset)
       ){
 	 dataset = NULL;
 	 EML_ERROR(OBJECT_NOT_FOUND);
       }
    }
+   ASUFREE(fullPath);
    EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
 }
 
@@ -282,6 +259,44 @@ STAFCV_T duiDispatcher:: findTable (const char * filePath
    }
    ASUFREE(fullPath);
    EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+STAFCV_T duiDispatcher:: newDataset (const char * name, long setDim){
+   IDREF_T id;
+   if( soc->idObject(name,"tdmDataset",id) ){
+      EML_ERROR(DUPLICATE_OBJECT_NAME);
+   }
+   tdmDataset* p;
+   if( !mkdir(name)
+   ||  !findDataset(name,p) ){
+      EML_ERROR(CANT_CREATE_OBJECT);
+   }
+   if( !soc->idObject(name,"tdmDataset",id) ){
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   addEntry(id);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+STAFCV_T duiDispatcher:: newTable (const char * name, const char * spec
+		, long rows){
+   IDREF_T id;
+   if( soc->idObject(name,"tdmTable",id) ){
+      EML_ERROR(DUPLICATE_OBJECT_NAME);
+   }
+   tdmTable* p;
+   if( !mkTable(name,spec,rows)
+   ||  !findTable(name,p) ){
+      EML_ERROR(CANT_CREATE_OBJECT);
+   }
+   if( !soc->idObject(name,"tdmTable",id) ){
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   addEntry(id);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+
 }
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
