@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableElementDescriptor.cxx,v 1.6 1999/08/06 15:25:03 fine Exp $
+// $Id: St_TableElementDescriptor.cxx,v 1.7 1999/12/07 22:26:27 fine Exp $
 // $Log: St_TableElementDescriptor.cxx,v $
+// Revision 1.7  1999/12/07 22:26:27  fine
+// Clean up to remove the compilation warnings
+//
 // Revision 1.6  1999/08/06 15:25:03  fine
 // St_TableElementDescriptor.cxx has been restored
 //
@@ -57,7 +60,7 @@ void St_TableElementDescriptor::LearnTable(St_Table *parentTable, const Char_t *
      // Define the index
      const char *openBracket  = columnName-1;
      const char *closeBracket = columnName-1;
-     for (Int_t i=0; i< m_Dimensions; i++) 
+     for (Int_t i=0; i< Int_t(m_Dimensions); i++) 
      {
           openBracket  = strchr(openBracket+1, '[');
           closeBracket = strchr(closeBracket+1,']');
@@ -118,7 +121,7 @@ void St_TableElementDescriptor::LearnTable(St_Table *parentTable, const Char_t *
       Int_t globalIndex = 0;
       if ( (dim = member->GetArrayDim()) ) {
       // Check dimensions
-        if (m_Dimensions && dim != m_Dimensions) {
+        if (m_Dimensions && dim != Int_t(m_Dimensions)) {
            Error("LearnTable","Wrong dimension");
            parentTable->Print();
            return;
@@ -128,7 +131,7 @@ void St_TableElementDescriptor::LearnTable(St_Table *parentTable, const Char_t *
             m_Dimensions = dim;
             globalIndex = 1;
         }
-        for( Int_t indx=0; indx < m_Dimensions; indx++ ){
+        for( Int_t indx=0; indx < Int_t(m_Dimensions); indx++ ){
            globalIndex *= member->GetMaxIndex(indx);
            if (indexArray) globalIndex += indexArray[indx];
         } 

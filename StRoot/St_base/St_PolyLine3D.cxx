@@ -299,7 +299,7 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
    //  -  the center of the view port  
    //       Axis / Cube
    
-   const Float_t arrowLegthFactor = 0.25;
+//   const Float_t arrowLegthFactor = 0.25;
    const Float_t arrowWidthFactor = 0.25;
 
    TView *view = pad->GetView();

@@ -168,6 +168,7 @@ Int_t St_PolyLineShape::SetConnection(EShapeTypes connection)
   return 0;
 }
 
+#if 0
 //______________________________________________________________________________
 static Int_t DistancetoLine(Int_t px, Int_t py, Float_t x1, Float_t y1, Float_t x2, Float_t y2, Int_t lineWidth )
 {
@@ -232,6 +233,7 @@ static Int_t DistancetoLine(Int_t px, Int_t py, Float_t x1, Float_t y1, Float_t 
  
    return Int_t(TMath::Sqrt(D) - 0.5*float(lineWidth));
 }
+#endif
  
 //______________________________________________________________________________
 Int_t St_PolyLineShape::DistancetoPrimitive(Int_t px, Int_t py)

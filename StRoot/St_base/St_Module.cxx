@@ -1,21 +1,5 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Module.cxx,v 1.8 1999/06/14 09:45:41 fine Exp $
-// $Log: St_Module.cxx,v $
-// Revision 1.8  1999/06/14 09:45:41  fine
-// assert for St_Module (thanks Fisyak)
-//
-// Revision 1.7  1999/03/11 00:34:44  perev
-// St_base in new maker schema
-//
-// Revision 1.6  1999/02/24 17:10:57  fine
-//  St_Table  New and Purge method have been introdiced, some clean up for St_module as well
-//
-// Revision 1.5  1998/11/25 21:58:33  fisyak
-// Cleanup
-//
-// Revision 1.4  1998/08/25 23:07:24  didenko
-// New base with Tree
-//
+// $Id: St_Module.cxx,v 1.9 1999/12/07 22:26:26 fine Exp $
 
 #include <assert.h>
 #include <string.h>
@@ -49,7 +33,7 @@ ClassImp(St_Module)
 
 //______________________________________________________________________________
 St_Module::St_Module() 
-: fN(0), st_Params(0),st_Name(0),st_Type(kUnknown), fIndex(0)
+: st_Type(kUnknown),st_Name(0), fN(0), fIndex(0), st_Params(0)
 {  // Default ctor;
 }
 //______________________________________________________________________________
@@ -77,7 +61,7 @@ St_Module::St_Module(char *, void *,void *,void *,void *
                             ,void *f77,void *f78,void *f79,void *f80
 #endif
                             ) 
-: fN(0), st_Params(0), st_Name(0), st_Type(kFortran), fIndex(38)
+: st_Type(kFortran), st_Name(0), fN(0), fIndex(38),  st_Params(0)
 // : TNamed(name)
 {}
 //______________________________________________________________________________
@@ -105,7 +89,7 @@ St_Module::St_Module(        void  *f1,void  *f2,void  *f3,void  *f4
                             ,void *f77,void *f78,void *f79,void *f80
 #endif
                             ) 
-: fN(0), st_Params(0), st_Name(0), st_Type(kFortran), fIndex(38)
+: st_Type(kFortran), st_Name(0), fN(0), fIndex(38), st_Params(0)
 {
   SetAllParameters( f1, f2, f3, f4, f5, f6, f7, f8, f9,f10,f11,f12
                   ,f13,f14,f15,f16,f17,f18,f19,f20,f21,f22,f23,f24
@@ -389,7 +373,7 @@ Int_t St_Module::ExecuteModule()
      printf("\n");
      for (Int_t i=0;i<fN;i++)
      {
-        if (st_Params[i]) printf(" %u ",*((ULong_t *)st_Params[i]));
+        if (st_Params[i]) printf(" %lu ",*((ULong_t *)st_Params[i]));
         else { 
             errcode++; 
 	    //yf            Char_t *suffix[4]={"st","nd","d","th"};
@@ -478,3 +462,25 @@ Int_t  St_Module::ExecuteModule(void  *f1,void  *f2,void  *f3,void  *f4,
 void St_Module::Streamer(TBuffer &b)
 {
 };
+
+//________________________________________________________________________
+// $Log: St_Module.cxx,v $
+// Revision 1.9  1999/12/07 22:26:26  fine
+// Clean up to remove the compilation warnings
+//
+// Revision 1.8  1999/06/14 09:45:41  fine
+// assert for St_Module (thanks Fisyak)
+//
+// Revision 1.7  1999/03/11 00:34:44  perev
+// St_base in new maker schema
+//
+// Revision 1.6  1999/02/24 17:10:57  fine
+//  St_Table  New and Purge method have been introdiced, some clean up for St_module as well
+//
+// Revision 1.5  1998/11/25 21:58:33  fisyak
+// Cleanup
+//
+// Revision 1.4  1998/08/25 23:07:24  didenko
+// New base with Tree
+//
+//________________________________________________________________________

@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableSorter.cxx,v 1.23 1999/12/06 03:44:15 fine Exp $
+// $Id: St_TableSorter.cxx,v 1.24 1999/12/07 22:26:27 fine Exp $
 
 #include <stdlib.h> 
 #include "St_TableSorter.h"
@@ -351,25 +351,25 @@ Int_t St_TableSorter::BSearch(valuetype value) const{ \
                                                       \
    switch (m_colType) {                               \
          case  kFloat:                                \
-           Value.Float = value; break;                \
+           Value.Float = Float_t(value); break;       \
          case  kInt :                                 \
-           Value.Int   = value; break;                \
+           Value.Int   = Int_t(value); break;         \
          case  kLong :                                \
-           Value.Long  = value; break;                \
+           Value.Long  = Long_t(value); break;        \
          case  kShort :                               \
-           Value.Short = value; break;                \
+           Value.Short = Short_t(value); break;       \
          case  kDouble :                              \
-           Value.Double= value; break;                \
+           Value.Double=  Double_t(value); break;     \
          case  kUInt:                                 \
-           Value.UInt  = value; break;                \
+           Value.UInt  = UInt_t(value); break;        \
          case  kULong :                               \
-           Value.ULong = value; break;                \
+           Value.ULong = ULong_t(value); break;       \
          case  kUShort:                               \
-           Value.UShort= value; break;                \
+           Value.UShort= UShort_t(value); break;      \
          case  kUChar:                                \
-           Value.UChar = value; break;                \
+           Value.UChar = UChar_t(value); break;       \
          case  kChar:                                 \
-           Value.Char  = value; break;                \
+           Value.Char  = Char_t(value); break;        \
          default:                                     \
            return -1;                                 \
            break;                                     \
@@ -794,6 +794,9 @@ void St_TableSorter::ShowMembers(TMemberInspector &R__insp, char *R__parent)
 //______________________________________________________________________________
 //______________________________________________________________________________
 // $Log: St_TableSorter.cxx,v $
+// Revision 1.24  1999/12/07 22:26:27  fine
+// Clean up to remove the compilation warnings
+//
 // Revision 1.23  1999/12/06 03:44:15  fine
 // Bug in Compare method fixed
 //
