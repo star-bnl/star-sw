@@ -15,7 +15,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#if defined (AIX) || defined(linux) || defined(HPUX)
+#if defined (AIX) || defined(__linux__) || defined(HPUX)
 #include <fnmatch.h>
 #elif defined(IRIX) || defined(sun)
 #include <libgen.h>
@@ -47,7 +47,7 @@
 int 
 sutMatchWild(char *pattern,char* string)
 {
-#if defined(AIX) || defined(HPUX) || defined(linux)
+#if defined(AIX) || defined(HPUX) || defined(__linux__)
    int flags = 0;	
    return !fnmatch(pattern,string,flags);
 #elif defined(sun) || defined(IRIX)

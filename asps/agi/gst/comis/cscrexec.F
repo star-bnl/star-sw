@@ -1,7 +1,10 @@
 *
-* $Id: cscrexec.F,v 1.2 1998/04/16 17:02:17 fisyak Exp $
+* $Id: cscrexec.F,v 1.3 2003/10/28 20:58:33 perev Exp $
 *
 * $Log: cscrexec.F,v $
+* Revision 1.3  2003/10/28 20:58:33  perev
+* Linux ==> __linux__
+*
 * Revision 1.2  1998/04/16 17:02:17  fisyak
 * 2nd pass with gstar
 *
@@ -17,7 +20,7 @@
 *                                                                       *
 * Description: comis exec processor                                     *
 * Modifications:                                                        *
-* PN, 29.10.97 - LINUX version added according to VB mail of 20.09.97   *
+* PN, 29.10.97 - __linux__ version added according to VB mail of 20.09.97   *
 *              - system branches cleaned up, USERLIB is a common option *
 *************************************************************************
       CHARACTER *(*)      NAME,CPID,FEXT,FEXEC

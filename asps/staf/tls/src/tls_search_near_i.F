@@ -1,5 +1,8 @@
-* $Id: tls_search_near_i.F,v 1.1 1998/03/24 00:42:12 fisyak Exp $
+* $Id: tls_search_near_i.F,v 1.2 2003/10/28 20:58:41 perev Exp $
 * $Log: tls_search_near_i.F,v $
+* Revision 1.2  2003/10/28 20:58:41  perev
+* Linux ==> __linux__
+*
 * Revision 1.1  1998/03/24 00:42:12  fisyak
 * Clean
 *
@@ -70,7 +73,7 @@ C
 C
 C Now find JLow and JHigh that bracket rkey.
       inc = 1
-#ifdef Linux 
+#ifdef __linux__ 
       IF ((key.GT.el1(1+len*(JLow-1))) .EQV. Ascend) THEN
 #else
       IF ((key.GT.el1(1+len*(JLow-1))) .EQ. Ascend) THEN
@@ -78,7 +81,7 @@ C Now find JLow and JHigh that bracket rkey.
  1        JHigh = JLow + inc
           IF (JHigh.GT.nrows) THEN
               JHigh = nrows+1
-#ifdef Linux
+#ifdef __linux__
             ELSE IF ((key.GT.el1(1+len*(JHigh-1))) .EQV. Ascend) THEN
 #else
             ELSE IF ((key.GT.el1(1+len*(JHigh-1))) .EQ. Ascend) THEN
@@ -92,7 +95,7 @@ C Now find JLow and JHigh that bracket rkey.
  2        JLow  = JHigh - inc
           IF (JLow.LT.1) THEN
               JLow = 0
-#ifdef Linux
+#ifdef __linux__
             ELSE IF ((key.LE.el1(1+len*(JLow-1))) .EQV. Ascend) THEN
 #else
             ELSE IF ((key.LE.el1(1+len*(JLow-1))) .EQ. Ascend) THEN
@@ -108,7 +111,7 @@ C Rest is the same as Search.
  10   CONTINUE
       IF (JHigh.GT.JLow+1) THEN
           JM = (JHigh+JLow)/2
-#ifdef Linux
+#ifdef __linux__
           IF ((key.GT.el1(1+len*(JM-1))) .EQV. Ascend) THEN
 #else
           IF ((key.GT.el1(1+len*(JM-1))) .EQ. Ascend) THEN

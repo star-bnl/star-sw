@@ -1,7 +1,10 @@
 /*
- * $Id: traceqc.c,v 1.9 1998/12/11 21:16:38 perev Exp $
+ * $Id: traceqc.c,v 1.10 2003/10/28 20:58:33 perev Exp $
  *
  * $Log: traceqc.c,v $
+ * Revision 1.10  2003/10/28 20:58:33  perev
+ * Linux ==> __linux__
+ *
  * Revision 1.9  1998/12/11 21:16:38  perev
  * Back to oldDsl
  *
@@ -55,7 +58,7 @@ printf (" interrupt trace routine (traceqc) not awailable yet \n");
 #define   pCharFunc  int
 #include  "kuip/kmenu.h"
  
-#if !defined(HPUX) && !defined(Linux)
+#if !defined(HPUX) && !defined(__linux__)
 void reset_arg_list( KmCommand *cmd )
 {
   extern KmCommand *cmd_current_;

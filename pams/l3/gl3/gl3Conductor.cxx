@@ -375,7 +375,7 @@ double gl3Conductor::cpuTime (void) {
   return (double) (clock ()) / CLOCKS_PER_SEC;
 }
 //
-#ifdef I386
+#ifdef __i386__
 double gl3Conductor::realTime (void) {
   const long nClicks = 400000000;
   unsigned long eax, edx;

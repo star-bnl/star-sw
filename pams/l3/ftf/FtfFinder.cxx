@@ -551,7 +551,7 @@ double FtfFinder::CpuTime( void )
 }
 
 //
-#ifdef I386 
+#ifdef __i386__ 
 double FtfFinder::RealTime (void) {
   const long nClicks = 400000000 ;
   unsigned long eax, edx;

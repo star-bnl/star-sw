@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0.Banks.hh,v 1.3 2001/04/18 19:47:25 ward Exp $
+ * $Id: SVTV1P0.Banks.hh,v 1.4 2003/10/28 20:58:30 perev Exp $
  *      
  * Author: Marcelo Munhoz, J. Schambach
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0.Banks.hh,v $
+ * Revision 1.4  2003/10/28 20:58:30  perev
+ * Linux ==> __linux__
+ *
  * Revision 1.3  2001/04/18 19:47:25  ward
  * StDaqLib/SVT stuff from Jo Schambach.
  *
@@ -110,7 +113,7 @@ struct SVTCoordinates
   u_char ladder;
   u_char waferID;  // 4:hybrid, 4:wafer
   u_char hybridID;  // 1:not used, 2:transition board, 3:wafer, 2:hybrid
-#elif i386
+#elif __i386__
   u_char hybridID;  // 1:not used, 2:transition board, 3:wafer, 2:hybrid
   u_char waferID;  // 4:hybrid, 4:wafer
   u_char ladder;

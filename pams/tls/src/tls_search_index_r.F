@@ -1,5 +1,8 @@
-* $Id: tls_search_index_r.F,v 1.2 1998/04/09 15:18:34 fisyak Exp $
+* $Id: tls_search_index_r.F,v 1.3 2003/10/28 20:58:36 perev Exp $
 * $Log: tls_search_index_r.F,v $
+* Revision 1.3  2003/10/28 20:58:36  perev
+* Linux ==> __linux__
+*
 * Revision 1.2  1998/04/09 15:18:34  fisyak
 * tls bug fixes from Duncan J. Prindle
 *
@@ -93,7 +96,7 @@ C
    10 CONTINUE
       IF (JHigh.GT.JLow+1) THEN
           JM = (JHigh+JLow)/2
-#ifdef Linux
+#ifdef __linux__
           IF ((rkey.GT.el1(1+len*(index(JM)-1))) .EQV. Ascend) THEN
 #else
           IF ((rkey.GT.el1(1+len*(index(JM)-1))) .EQ. Ascend) THEN
