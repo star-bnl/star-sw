@@ -1,0 +1,108 @@
+<HTML>
+<PRE>
+<H2>file: pam/src/pam3_show_tbls_i.cc</H2>
+
+
+/*------------------------------------------------------------------
+FILE:         pam3_show_tbls_i.cc
+DESCRIPTION:  Interface functions for pam3_show_tbls
+AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+BUGS:         Should be automatically generated
+HISTORY:      putDateHere-v000a-hpl- Creation.
+*/
+/*------------------------------------------- INCLUDES            */
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include "<A HREF="pam3_show_tbls.h.html">pam3_show_tbls.h</A>"
+/*------------------------------------------ TYPEDEFS             */
+/*------------------------------------------ GLOBALS              */
+/*------------------------------------------ PROTOTYPES           */
+/*
+*:&gt;----------------------------------------------------------------
+*:ROUTINE:      STAFCV_T <A HREF="#pam3_show_tbls_load_ami">pam3_show_tbls_load_ami(</A>)
+*:DESCRIPTION:  Initialize pam3_show_tbls
+*:ARGUMENTS:    amiBroker *broker       - broker for AMI object
+*:RETURN VALUE: TRUE or FALSE
+*:&lt;----------------------------------------------------------------
+*/
+<B>STAFCV_T <A NAME="pam3_show_tbls_load_ami">pam3_show_tbls_load_ami(</A>amiBroker *broker)</B>
+{
+<A HREF="pam3_show_tbls.h.html#PAM3_SHOW_TBLS_FT">PAM3_SHOW_TBLS_FT</A> pam3_show_tbls_call = pam3_show_tbls_;
+  printf("pam3_show_tbls_load_ami: Starting ####");
+  printf("####################\n");
+  STRING_SEQ_T specs;
+  specs._length = specs._maximum = <A HREF="pam3_show_tbls.h.html#PAM3_SHOW_TBLS_RANK">PAM3_SHOW_TBLS_RANK</A>;
+  specs._buffer = new char*[<A HREF="pam3_show_tbls.h.html#PAM3_SHOW_TBLS_RANK">PAM3_SHOW_TBLS_RANK</A>];
+
+  specs._buffer[0] = new char[strlen(<A HREF="tb1.h.html#TB1_SPEC">TB1_SPEC</A>)+1];
+  strcpy(specs._buffer[0],<A HREF="tb1.h.html#TB1_SPEC">TB1_SPEC</A>);
+  specs._buffer[1] = new char[strlen(<A HREF="tb2.h.html#TB2_SPEC">TB2_SPEC</A>)+1];
+  strcpy(specs._buffer[1],<A HREF="tb2.h.html#TB2_SPEC">TB2_SPEC</A>);
+
+  broker-&gt;newInvoker("pam3_show_tbls",<A HREF="pam3_show_tbls.h.html#PAM3_SHOW_TBLS_RANK">PAM3_SHOW_TBLS_RANK</A>
+               ,(FNC_PTR_T)pam3_show_tbls_call ,specs);
+  for( int i=0;i&lt;specs._maximum;i++ ){
+     delete specs._buffer[i];
+  }
+  delete[] specs._buffer;
+  printf("pam3_show_tbls_load_ami: Normal sucessful conclusion ######");
+  printf("\n");
+  return TRUE;
+}
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

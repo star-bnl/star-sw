@@ -1,0 +1,108 @@
+<HTML>
+<PRE>
+<H2>file: pam/src/pam0_i.cc</H2>
+
+
+/*------------------------------------------------------------------
+FILE:         pam0_i.cc
+DESCRIPTION:  Interface functions for pam0
+AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+BUGS:         Should be automatically generated
+HISTORY:      putDateHere-v000a-hpl- Creation.
+*/
+/*------------------------------------------- INCLUDES            */
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include "<A HREF="pam0.h.html">pam0.h</A>"
+/*------------------------------------------ TYPEDEFS             */
+/*------------------------------------------ GLOBALS              */
+/*------------------------------------------ PROTOTYPES           */
+/*
+*:&gt;----------------------------------------------------------------
+*:ROUTINE:      STAFCV_T <A HREF="#pam0_load_ami">pam0_load_ami(</A>)
+*:DESCRIPTION:  Initialize pam0
+*:ARGUMENTS:    amiBroker *broker       - broker for AMI object
+*:RETURN VALUE: TRUE or FALSE
+*:&lt;----------------------------------------------------------------
+*/
+<B>STAFCV_T <A NAME="pam0_load_ami">pam0_load_ami(</A>amiBroker *broker)</B>
+{
+<A HREF="pam0.h.html#PAM0_FT">PAM0_FT</A> pam0_call = pam0_;
+  printf("pam0_load_ami: Starting ####");
+  printf("####################\n");
+  STRING_SEQ_T specs;
+  specs._length = specs._maximum = <A HREF="pam0.h.html#PAM0_RANK">PAM0_RANK</A>;
+  specs._buffer = new char*[<A HREF="pam0.h.html#PAM0_RANK">PAM0_RANK</A>];
+
+  specs._buffer[0] = new char[strlen(<A HREF="tb1.h.html#TB1_SPEC">TB1_SPEC</A>)+1];
+  strcpy(specs._buffer[0],<A HREF="tb1.h.html#TB1_SPEC">TB1_SPEC</A>);
+  specs._buffer[1] = new char[strlen(<A HREF="tb2.h.html#TB2_SPEC">TB2_SPEC</A>)+1];
+  strcpy(specs._buffer[1],<A HREF="tb2.h.html#TB2_SPEC">TB2_SPEC</A>);
+
+  broker-&gt;newInvoker("pam0",<A HREF="pam0.h.html#PAM0_RANK">PAM0_RANK</A>
+               ,(FNC_PTR_T)pam0_call ,specs);
+  for( int i=0;i&lt;specs._maximum;i++ ){
+     delete specs._buffer[i];
+  }
+  delete[] specs._buffer;
+  printf("pam0_load_ami: Normal sucessful conclusion ######");
+  printf("\n");
+  return TRUE;
+}
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

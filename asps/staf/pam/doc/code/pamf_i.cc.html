@@ -1,0 +1,108 @@
+<HTML>
+<PRE>
+<H2>file: pam/src/pamf_i.cc</H2>
+
+
+/*------------------------------------------------------------------
+FILE:         pamf_i.cc
+DESCRIPTION:  Interface functions for pamf
+AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+BUGS:         Should be automatically generated
+HISTORY:      putDateHere-v000a-hpl- Creation.
+*/
+/*------------------------------------------- INCLUDES            */
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include "<A HREF="pamf.h.html">pamf.h</A>"
+/*------------------------------------------ TYPEDEFS             */
+/*------------------------------------------ GLOBALS              */
+/*------------------------------------------ PROTOTYPES           */
+/*
+*:&gt;----------------------------------------------------------------
+*:ROUTINE:      STAFCV_T <A HREF="#pamf_load_ami">pamf_load_ami(</A>)
+*:DESCRIPTION:  Initialize pamf
+*:ARGUMENTS:    amiBroker *broker       - broker for AMI object
+*:RETURN VALUE: TRUE or FALSE
+*:&lt;----------------------------------------------------------------
+*/
+<B>STAFCV_T <A NAME="pamf_load_ami">pamf_load_ami(</A>amiBroker *broker)</B>
+{
+<A HREF="pamf.h.html#PAMF_FT">PAMF_FT</A> pamf_call = pamf_;
+  printf("pamf_load_ami: Starting ####");
+  printf("####################\n");
+  STRING_SEQ_T specs;
+  specs._length = specs._maximum = <A HREF="pamf.h.html#PAMF_RANK">PAMF_RANK</A>;
+  specs._buffer = new char*[<A HREF="pamf.h.html#PAMF_RANK">PAMF_RANK</A>];
+
+  specs._buffer[0] = new char[strlen(<A HREF="scalars.h.html#SCALARS_SPEC">SCALARS_SPEC</A>)+1];
+  strcpy(specs._buffer[0],<A HREF="scalars.h.html#SCALARS_SPEC">SCALARS_SPEC</A>);
+  specs._buffer[1] = new char[strlen(<A HREF="vectors.h.html#VECTORS_SPEC">VECTORS_SPEC</A>)+1];
+  strcpy(specs._buffer[1],<A HREF="vectors.h.html#VECTORS_SPEC">VECTORS_SPEC</A>);
+
+  broker-&gt;newInvoker("pamf",<A HREF="pamf.h.html#PAMF_RANK">PAMF_RANK</A>
+               ,(FNC_PTR_T)pamf_call ,specs);
+  for( int i=0;i&lt;specs._maximum;i++ ){
+     delete specs._buffer[i];
+  }
+  delete[] specs._buffer;
+  printf("pamf_load_ami: Normal sucessful conclusion ######");
+  printf("\n");
+  return TRUE;
+}
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>
