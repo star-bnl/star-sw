@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.h,v 1.9 2001/01/02 18:10:44 ward Exp $
+// $Id: St_trg_Maker.h,v 1.10 2001/04/26 22:37:56 perev Exp $
 // $Log: St_trg_Maker.h,v $
+// Revision 1.10  2001/04/26 22:37:56  perev
+// HPcorrs
+//
 // Revision 1.9  2001/01/02 18:10:44  ward
 // Pablo Yepes' modifications in support of CTU simulations.
 //
@@ -67,7 +70,7 @@ class St_trg_Maker : public StMaker {
    Bool_t drawinit;
    StDAQReader *fVictorPrelim; //!
    StTRGReader *fVictor;       //!
-// static Char_t  m_VersionCVS = "$Id: St_trg_Maker.h,v 1.9 2001/01/02 18:10:44 ward Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_trg_Maker.h,v 1.10 2001/04/26 22:37:56 perev Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
    void dumpDataToScreenAndExit();
@@ -79,7 +82,7 @@ class St_trg_Maker : public StMaker {
  
  protected:
  public: 
-   int St_trg_Maker::getTrayCtb ( float phi, float z ) ;
+   int getTrayCtb ( float phi, float z ) ;
    int HandleCtu(St_ctu_raw *ctu_raw,St_dst_TrgDet *dst1);
    int HandleMwc(St_mwc_raw *mwc_raw,St_dst_TrgDet *dst1);
    void Vladimir2Herbert(int,int*,int*);
@@ -100,7 +103,7 @@ class St_trg_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.9 2001/01/02 18:10:44 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.10 2001/04/26 22:37:56 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_trg_Maker, 1)   //StAF chain virtual base class for Makers
 };
