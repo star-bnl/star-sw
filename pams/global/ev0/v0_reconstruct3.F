@@ -26,6 +26,7 @@ C----------------------------------------------------------------------
 #include "dst_v0_vertex.inc"
 #include "ev0_ev0par2.inc"
 #include "ev0_track3.inc"
+#include "StVertexId.inc"
 
 C---------------
 #include "phys_constants.inc"
@@ -98,7 +99,8 @@ CC:  Load Primary vertex position coordinates:
       mainv(2) = 0.0
       mainv(3) = 0.0
          do i = 1,vertex_h.nok
-            if(vertex(i).vtx_id .eq. 1) then
+            if(vertex(i).vtx_id .eq. kEventVtxId
+     +           .and. vertex(i).iflag .eq. 1) then
                mainv(1) = vertex(i).x
                mainv(2) = vertex(i).y
                mainv(3) = vertex(i).z
