@@ -1,5 +1,8 @@
-// $Id: Root2XDF.C,v 1.7 2000/05/17 21:12:07 fine Exp $
+// $Id: Root2XDF.C,v 1.8 2000/08/01 19:20:36 fine Exp $
 // $Log: Root2XDF.C,v $
+// Revision 1.8  2000/08/01 19:20:36  fine
+// Parameter to skip the input events has been introduced
+//
 // Revision 1.7  2000/05/17 21:12:07  fine
 // It was confused by the brand-mew Cint. Adjusted to make it happy
 //
@@ -30,12 +33,17 @@ StChain *chain;
 // what it does: Converts files from the ROOT format into the XDF format
 //=======================================================================
 
-void Root2XDF(
-  const char *MainFile=
-  "/afs/rhic/star/data/samples/gstar.dst.root",
-  Int_t nevents=5) 
+//__________________________________________________________________________
+void Root2XDF(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
+
 {
-  cout << "Usage: root.exe -b -q Root2XDF.C(\"rootfile name.dst.root\")" << endl
+  cout << endl
+       << "Usage: root.exe -b -q Root2XDF.C(\"rootfile name.dst.root\",numberOfEvents)" << endl
+       << "-----" << endl
+       << "  or   root.exe -b -q Root2XDF.C(firstEvent, numberOfEvents,\"rootfile name.dst.root\")" << endl
+       << "  or   root.exe -b -q Root2XDF.C(firstEvent, \"rootfile name.dst.root\")" << endl
+       << "  or   root.exe -b -q Root2XDF.C(\"rootfile name.dst.root\",numberOfEvents)" << endl
+       << endl
        << "       Converts the input ROOT file into the XDF format."     << endl
        << "       The output XDF file bears the same name as the input root file" << endl
        << "       and it is created under the current working directory" << endl
@@ -43,6 +51,9 @@ void Root2XDF(
        << "                    \"root.exe XDFBrowser.C\""                << endl
        << "       ROOT command"                                          << endl; 
 
+  if (numberOfEvents < 0) return;
+
+  gSystem->Load("libStar");
   gSystem->Load("St_base");
   gSystem->Load("StChain");
     
@@ -62,27 +73,29 @@ void Root2XDF(
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
   IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch  
+  if (firstEvent > 1) IOMk->Skip(firstEvent-1);
 // --- now execute chain member functions
   chain->Init();
 
-  St_DataSet *ds=0;
+  TDataSet *ds=0;
 
   // Create output file 
   TString xdfOut = gSystem->BaseName(MainFile);
   xdfOut.ReplaceAll(".root",".xdf");
   St_XDFFile *xdf = new St_XDFFile;
+  int iret=0,iev=0;
   if (xdf && !xdf->OpenXDF(xdfOut.Data(),"w")) {
     // Loop over events
-    int iret=0,iev=0;
-    EventLoop: if (iev<nevents && !iret) {         // goto loop code
+    if (!numberOfEvents) numberOfEvents = 9999;
+    int counter = numberOfEvents+firstEvent-1;
+    for (iev = 0; iev < counter; iev++) {         // goto loop code
        chain->Clear();
        iret = chain->Make();
+       if (iret) break;
        iev++;                                      // goto loop code
-       if (!iret) {
-         ds=chain->GetDataSet("dst");
-         if (ds) xdf->NextEventPut(ds);
-       }
-    goto EventLoop; }
+       ds=chain->GetDataSet("dst");
+       if (ds) xdf->NextEventPut(ds);
+    }
   }
   else {  
     cerr << " Can not open: <" << xdfOut.Data() << ">" << endl;
@@ -93,7 +106,7 @@ void Root2XDF(
   if (iev) { 
     cout << endl << 
    " *** Root2XDF.C -- Total: " << iev << 
-   " events have been written out" << endl << endl; 
+   " events starting from " << firstEvent << " have been written out" << endl << endl; 
     TString lsOut = "ls -l ";
     lsOut += xdfOut;
     gSystem->Exec(lsOut.Data());
@@ -106,3 +119,26 @@ void Root2XDF(
   }
   chain->Finish();   
 }
+
+//__________________________________________________________________________
+void Root2XDF()
+{   cout << endl << "*** Error *** " 
+         << "           Please, provide the input file name at least" << endl;
+     Root2XDF(0,-1,0);
+}
+//__________________________________________________________________________
+void Root2XDF(Int_t numbertOfEvents)
+{   Root2XDF(); }
+
+//__________________________________________________________________________
+void Root2XDF(const char *MainFile, Int_t numbertOfEvents)
+{   Root2XDF(firstEvent,numbertOfEvents,MainFile);  }
+
+//__________________________________________________________________________
+void Root2XDF(Int_t firstEvent, const char *MainFile)
+{   Root2XDF(firstEvent,99999,MainFile);  }
+
+//__________________________________________________________________________
+void Root2XDF(const char *MainFile="/afs/rhic/star/data/samples/gstar.dst.root")
+{   Root2XDF(1,99999,MainFile); }
+
