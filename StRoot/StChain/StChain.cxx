@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.43 2000/03/23 00:15:21 fine Exp $
+// $Id: StChain.cxx,v 1.44 2000/11/27 13:31:23 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.44  2000/11/27 13:31:23  fisyak
+// Add Production time set
+//
 // Revision 1.43  2000/03/23 00:15:21  fine
 // Adjusted to libSTAR for ROOT 2.24
 //
@@ -168,6 +171,7 @@ Int_t StChain::Init()
 //_____________________________________________________________________________
 Int_t StChain::Make() {
  // StartTimer();
+  if (m_EvtHddr) m_EvtHddr->SetProdDateTime();
  Int_t res = StMaker::Make();
  // StopTimer();
  return res;

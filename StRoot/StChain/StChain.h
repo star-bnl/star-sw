@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.34 2000/09/27 19:34:59 fisyak Exp $
+// $Id: StChain.h,v 1.35 2000/11/27 13:31:23 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.35  2000/11/27 13:31:23  fisyak
+// Add Production time set
+//
 // Revision 1.34  2000/09/27 19:34:59  fisyak
 // Temporal fix to get Run/EventNo from dst
 //
@@ -92,14 +95,14 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-
+class StEvtHddr;
 
 class StChain : public StMaker {
 private:
    Int_t               m_Version;    	//StChain version number
    Int_t               m_VersionDate;   //StChain version date
  protected:
-   TDataSet         *m_EvtHddr;     	//Header of event
+   StEvtHddr         *m_EvtHddr;     	//Header of event
 public:
                       StChain(const char *name="bfcChain");
    virtual           ~StChain();
@@ -115,7 +118,7 @@ public:
    Int_t              GetVersionDate() {return m_VersionDate;}
 
  virtual const char *GetCVS() const 
- {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.34 2000/09/27 19:34:59 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+ {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.35 2000/11/27 13:31:23 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StChain, 0)   //StChain control class
 };
 
