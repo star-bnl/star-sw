@@ -1,5 +1,5 @@
 /**********************************************************
- * $Id: StRrsMaker.h,v 1.5 2000/02/08 16:36:51 lasiuk Exp $
+ * $Id: StRrsMaker.h,v 1.6 2000/02/08 23:46:46 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
@@ -15,8 +15,11 @@
  *  memory.
  ***********************************************************
  *  $Log: StRrsMaker.h,v $
- *  Revision 1.5  2000/02/08 16:36:51  lasiuk
- *  Bring into line with HP
+ *  Revision 1.6  2000/02/08 23:46:46  lasiuk
+ *  comment to prevent streamer for ionize and inducesignal. Remove filter
+ *
+ *  Revision 1.6  2000/02/08 23:46:46  lasiuk
+ *  comment to prevent streamer for ionize and inducesignal. Remove filter
  *
  *  Revision 1.5  2000/02/08 16:36:51  lasiuk
  *  Bring into line with HP
@@ -76,7 +79,7 @@ class StRichPhysicsDb;
 class StRichCoordinateTransform;
 class StRichMomentumTransform;
 class StRichPadPlane;
-#include "StRichIonize.h"
+class StRichWriter;
 
 //#include "StRichFilter.h"
 #include "StRichIonization.h"
@@ -123,9 +126,8 @@ private:
 
 
     StRichCoordinateTransform      *mCoordinateTransform;//!
-    /*StRichFilter                    mFilter;*/
-    StRichIonization                mIonize;
-    StRichInduceSignal              mInduceSignal;
+    StRichMomentumTransform        *mMomentumTransform;//!
+    
     // Processing
     StRichIonization                mIonize;//!
     StRichInduceSignal              mInduceSignal;//!
@@ -146,10 +148,10 @@ private:
     
     //   Flags settable at macro level!
     int       mAddPedestal;
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.5 2000/02/08 16:36:51 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.6 2000/02/08 23:46:46 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
     
     virtual const char *GetCVS() const
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.5 2000/02/08 16:36:51 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.6 2000/02/08 23:46:46 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StRrsMaker, 1)            // StAF chain
 };
