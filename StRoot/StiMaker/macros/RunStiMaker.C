@@ -5,12 +5,12 @@
 class StChain;
 StChain *chain=0;
 
-void RunStiMaker(Int_t nevents=1,
+void RunStiMaker(Int_t nevents=10,
 		 
 		 bool simulated=true, /*sim or data?*/
 		 
-		 bool draw=true, /* use gui, click your way around */
-		 //bool draw=false, /*consol version, run through nevents */
+		 //bool draw=true, /* use gui, click your way around */
+		 bool draw=false, /*consol version, run through nevents */
 		 
 		 bool doFit=true, /* true->fit track only */
 		 //bool doFit=false, /* false->find track only */
@@ -102,7 +102,8 @@ void RunStiMaker(Int_t nevents=1,
     const char* calibDB = "MySQL:StarDb";
     const char* paramsDB = "$STAR/StarDb";
     St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB,paramsDB);
-    calibMk->SetDateTime("year_1h");
+    calibMk->SetDateTime("year_2b");
+    //calibMk->SetDateTime("year_1h");
     calibMk->SetDebug();
 
     //Read Tpc Database access
@@ -162,16 +163,65 @@ void RunStiMaker(Int_t nevents=1,
 	 cout << "Last Event Processed. Status = " << istat << endl;
      }
      iev++; goto EventLoop;
-    }
-
+ }
+    
     //Now we can do diagnostics
     if (draw==false) {
 	cout <<"\n\n***** Processed "<<iev-1<<" events with ";
 	cout <<TestTree->GetEntries()<<" tracks ******\n"<<endl;
 	
-	TestTree->Draw("mcTrackPt");
-	cout <<"\tMean MC pt:\t"<<htemp->GetMean()<<"\tRMS:\t"<<htemp->GetRMS()<<endl;
-	  
+	//This needs to be done by hand (ugly!):
+	TH1D* gids = new TH1D("gids","Geant Id",101, -.5, 100.5);
+	TestTree->Draw("mcTrackId>>gids");
+	cout <<"\tGeant Id:\tNumber of Tracks"<<endl;
+	cout <<"\t---------\t----------------"<<endl;
+	for (int i=0; i<gids->GetNbinsX(); ++i) {
+	    if (gids->GetBinContent(i)>0.) {
+		cout <<"\t"<<gids->GetBinCenter(i)<<"\t\t"<<gids->GetBinContent(i)<<endl;
+	    }
+	}
+	cout <<endl;
+	
+	cout <<"\t\tVariable\tMean\t\tRMS"<<endl;
+	cout <<"\t\t--------\t----\t\t---\n"<<endl;
+	
+	cout <<"ITTF Tracks"<<endl;
+	
+	canvas1 = new TCanvas("canvas1","ITTF Track Benchmarks",100,50,800,700);
+	canvas1->Divide(2,2);
+	
+	canvas1->cd(1);
+	TestTree->Draw("sqrt(stiTrackPx*stiTrackPx+stiTrackPy*stiTrackPy)");
+	htemp->SetXTitle("Pt (GeV)");
+	cout <<"\t\tPt\t\t"<<htemp->GetMean()<<"\t\t"<<htemp->GetRMS()<<endl;
+	
+	canvas1->cd(2);
+	//TestTree->Draw("stiTrackEta");
+	//htemp->SetXTitle("Eta");
+	
+	canvas1->cd(3);
+	TestTree->Draw("stiTrackChi2");
+	htemp->SetXTitle("Chi2");
+	cout <<"\t\tChi2\t\t"<<htemp->GetMean()<<"\t\t"<<htemp->GetRMS()<<endl;
+	
+	cout <<"Global Tracks"<<endl;
+	
+	canvas2 = new TCanvas("canvas2","Global Track Benchmarks",150,50,850,700);
+	canvas2->Divide(2,2);
+	
+	canvas2->cd(1);
+	TestTree->Draw("sqrt(globalTrackPx*globalTrackPx+globalTrackPy*globalTrackPy)");
+	htemp->SetXTitle("Pt (GeV)");
+	cout <<"\t\tPt\t\t"<<htemp->GetMean()<<"\t\t"<<htemp->GetRMS()<<endl;
+	
+	canvas2->cd(2);
+	TestTree->Draw("globalTrackEta");
+	htemp->SetXTitle("Eta");
+	
+	canvas2->cd(3);
+	TestTree->Draw("globalTrackChi2");
+	htemp->SetXTitle("Chi2");
+	cout <<"\t\tChi2\t\t"<<htemp->GetMean()<<"\t\t"<<htemp->GetRMS()<<endl;
 	
     }
     
