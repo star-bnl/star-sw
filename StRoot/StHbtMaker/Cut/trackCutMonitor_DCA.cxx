@@ -2,7 +2,6 @@
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Cut/trackCutMonitor_DCA.h"
 #include <cstdio>
-#include <typeinfo>
 
 #ifdef __ROOT__ 
 ClassImp(trackCutMonitor_DCA)

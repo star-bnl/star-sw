@@ -2,7 +2,7 @@
 #define trackCutMonitor_DCA_hh
 
 //#include<string>
-#include <typeinfo>
+//#include <typeinfo>
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #include "StHbtMaker/Base/StHbtCutMonitor.hh"

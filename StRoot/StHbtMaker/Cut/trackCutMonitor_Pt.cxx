@@ -1,8 +1,6 @@
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Cut/trackCutMonitor_Pt.h"
-#include <cstdio>
-#include <typeinfo>
 
 #ifdef __ROOT__ 
 ClassImp(trackCutMonitor_Pt)

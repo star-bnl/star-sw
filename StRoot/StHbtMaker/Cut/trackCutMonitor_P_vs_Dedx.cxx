@@ -2,7 +2,6 @@
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Cut/trackCutMonitor_P_vs_Dedx.h"
 #include <cstdio>
-#include <typeinfo>
 #include "StLorentzVector.hh"
 
 #ifdef __ROOT__ 

@@ -2,7 +2,6 @@
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Cut/eventCutMonitor_Mult.h"
 #include <cstdio>
-#include <typeinfo>
 
 #ifdef __ROOT__ 
 ClassImp(eventCutMonitor_Mult)
