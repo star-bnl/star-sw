@@ -6,7 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.16 1997/12/12 02:04:37 tull Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.17 1998/01/03 02:34:17 tull Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <stream.h>
@@ -212,7 +212,7 @@ unsigned char socFactory :: implementsInterface (const char * iface) {
 //----------------------------------
 char * socFactory :: list () {
    char *c=NULL;
-   c = (char*)MALLOC(80*(4+maxCount()));
+   c = (char*)MALLOC(80*(4+(unsigned int)maxCount()));
    char *l=NULL;	// individual line
    socObject *o;	// object
    char *cc;
@@ -321,14 +321,14 @@ char * socCatalog:: version() {
 //:----------------------------------------------- PUB FUNCTIONS      --
 STAFCV_T socCatalog :: bind (const char * pname){
    int status;
-   status = soc_dl_init(pname);
-   status = soc_dl_start(pname);
+   status = soc_dl_init((char*)pname);
+   status = soc_dl_start((char*)pname);
    return status;
 }
 
 //----------------------------------
 STAFCV_T socCatalog :: release (const char * pname){
-   return soc_dl_stop(pname);
+   return soc_dl_stop((char*)pname);
 }
 
 

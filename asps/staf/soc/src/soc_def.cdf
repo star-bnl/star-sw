@@ -15,7 +15,7 @@
 >GUIDANCE
 Service_and_Object_Catalog commands.
 .
- #(@)$Id: soc_def.cdf,v 1.3 1997/12/22 17:35:19 tull Exp $
+ #(@)$Id: soc_def.cdf,v 1.4 1998/01/03 02:34:20 tull Exp $
 .
 SOC is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
