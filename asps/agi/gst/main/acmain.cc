@@ -1,7 +1,10 @@
 /*
- * $Id: acmain.cc,v 1.7 1998/07/20 20:17:31 perev Exp $
+ * $Id: acmain.cc,v 1.8 1998/08/03 17:19:48 didenko Exp $
  *
  * $Log: acmain.cc,v $
+ * Revision 1.8  1998/08/03 17:19:48  didenko
+ * correction for NT version by Faine
+ *
  * Revision 1.7  1998/07/20 20:17:31  perev
  * Mods for exe SGI64 and HP rubber Zebra
  *
@@ -37,6 +40,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "PAM.h"
+
+#define agmain_ F77_NAME(agmain,AGMAIN)
+
 int        __argc_save=0;	// Pgf77
 char **    __argv_save=NULL;	//
 char       __ftn_32in64_[4];	// Pgf77
@@ -48,13 +55,15 @@ int f77argc = 0;      		// For mips Fortran
 char **f77argv=NULL; 		//
 
 
-extern "C"  int   agmain_ ();
+extern "C"  int type_of_call agmain_ ();
 extern "C"  int   MAIN__();
 #if defined(CERNLIB_HPUX)
 extern "C"  void  FTN_INITRAP();
 #endif
-extern "C"  int   getarg_ (int*, char*, int);
-extern "C"  int   iargc_ ();
+#define getarg_ F77_NAME(getarg,GETARG)
+extern "C"  int  type_of_call  getarg_ (int*, char*, int);
+#define iargc_ F77_NAME(iargc,IARGC)
+extern "C"  int   type_of_call iargc_ ();
 extern "C"  void  k_setar (int , char** );
 extern "C"  void  asuMallocInit();
 extern "C"  void  asuStack(void *);
@@ -75,6 +84,7 @@ int main    (int argc, char *argv[])
 
 // Request Staf size
 
+#ifndef WIN32
 for (int i=1; i<=argc; i++) { // Search -S <number>
   if (argv[i] && (!(strncmp(argv[i],"-S",2)) || !(strncmp(argv[i],"-s",2))) ) { 
      int n = atoi(argv[i+1]); 
@@ -88,20 +98,21 @@ for (int i=1; i<=argc; i++) { // Search -S <number>
      free(s);
      break;
 } }
-
+#endif
 
   agmain_();
+  return 0;
 }
 
 #ifndef Linux 
-int getarg_ (int *k, char *args, int n)
+int  type_of_call getarg_ (int *k, char *args, int n)
 { int i=0;  memset (args,' ',n); 
   if (*k>=__argc_save) return 1;
   if (! __argv_save[*k]) return 1;
   i=strlen(__argv_save[*k]);  if (i>n) i=n;
   strncpy(args,__argv_save[*k],i); return 0;  
 }
-int iargc_() { return __argc_save;}
+int  type_of_call iargc_() { return __argc_save;}
 
 
 #endif /*not Linux*/

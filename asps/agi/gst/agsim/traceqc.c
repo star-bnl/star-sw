@@ -1,7 +1,10 @@
 /*
- * $Id: traceqc.c,v 1.3 1998/07/10 01:09:37 fisyak Exp $
+ * $Id: traceqc.c,v 1.4 1998/08/03 17:23:57 didenko Exp $
  *
  * $Log: traceqc.c,v $
+ * Revision 1.4  1998/08/03 17:23:57  didenko
+ * correction for NT version by Faine
+ *
  * Revision 1.3  1998/07/10 01:09:37  fisyak
  * remove comment
  *
@@ -16,7 +19,9 @@
 /*CMZ :  1.30/00 22/04/97  14.49.55  by  Pavel Nevski*/
 /*-- Author :    FR & JZ*/
 #include <stdio.h>
-void traceqc_()
+#include "PAM.h"
+#define traceqc_  F77_NAME(traceqc,TRACEQC)
+void type_of_call traceqc_()
 {  
 #ifdef CERNLIB_HPUX 
 void    U_STACK_TRACE();

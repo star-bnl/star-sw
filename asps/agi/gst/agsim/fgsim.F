@@ -198,7 +198,8 @@ c***  Get command and number of parameters passed
                 endif
 *               Comis pass whole words only (both start and length !)
                 L1    = 4*((Length1+3)/4)
-                call CSJCAL(Iadr,2,string1(1:L1))
+                call CSJCAL(Iadr,2,string1(1:L1)
+     *,0,0,0,0,0, 0,0,0                )
                 IKINE = -4
             endif
 *
