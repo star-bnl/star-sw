@@ -37,7 +37,7 @@ Author    Rashid Mehdiyev
 		 ESHM,ESEC,ESCI,ESGH,ESPL,ESSP,EMSS,
 		 ETAR,EXGT,EXSG
 *
-      Structure  EMCG { Version,int Onoff}
+      Structure  EMCG { Version, int Onoff, int fillMode}
 
       Structure  EMCS { Type,ZOrig,ZEnd,EtaMin,EtaMax,
                         PhiMin,PhiMax,Offset,
@@ -181,7 +181,6 @@ Fill EXSE           ! Third SMD section
 *----------------------------------------------------------------------------
 *
       Use    EMCG
-      Use    EMCN
 *
       sq3 = sqrt(3.)
       sq2 = sqrt(2.)
