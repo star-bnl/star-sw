@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StDefaultFilter.h,v 1.5 2000/09/26 17:04:48 fine Exp $ 
+// $Id: StDefaultFilter.h,v 1.6 2003/08/02 02:51:28 perev Exp $ 
 #ifndef STAR_StDefaultFilter
 #define STAR_StDefaultFilter
 
@@ -54,11 +54,18 @@ class StDefaultFilter : public StVirtualEventFilter  {
     virtual ~StDefaultFilter() {Reset();}
     virtual Int_t Channel(const TTableSorter *tableObject,Int_t index,Size_t &size,Style_t &style);
     virtual Int_t Channel(const TTable *tableObject,Int_t rowNumber,Size_t &size,Style_t &style);
+    virtual Int_t Channel(const StVertex *vertexObject,Size_t &size,Style_t &style)
+		  {return StVirtualEventFilter::Channel(vertexObject,size,style);}
+            Int_t Channel(const StObjArray *hitCollection,Size_t &size,Style_t &style)
+                  {return StVirtualEventFilter::Channel(hitCollection,size,style);}
+            Int_t Channel(StGlobalTrack *globTrack,Size_t &size,Style_t &style)
+                  {return StVirtualEventFilter::Channel(globTrack,size,style);}
     TColoredAxis *GetColorAxis();
 
     virtual Int_t Reset(Int_t reset=0);
     Int_t SetTrack_Stylez(Int_t lowcolor,float lowenergy,Int_t highcolor,float highenergy,Size_t size,Style_t style,
                           Int_t CutTracksOutOfRange, Int_t KindOfColoring);
+
     ClassDef(StDefaultFilter,0)
 };
 
@@ -67,6 +74,9 @@ inline  TColoredAxis *StDefaultFilter::GetColorAxis(){ return mColorAxis;}
 
 //_____________________________________________________________________________
 // $Log: StDefaultFilter.h,v $
+// Revision 1.6  2003/08/02 02:51:28  perev
+// warnOff
+//
 // Revision 1.5  2000/09/26 17:04:48  fine
 // Two separate Distribution methods introduced
 //
