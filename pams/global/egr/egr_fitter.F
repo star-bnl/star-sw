@@ -305,6 +305,16 @@ C     Now find first point on track
                         ient = svt_group(ishit).id2
                         if( svt_spt(ient).id_wafer .gt. 6000 ) then
                            globtrk(igtrk).det_id = kTpcSsdSvtIdentifier
+C Adjusting from svt hit to ssd hit
+                           globtrk(igtrk).n_point = globtrk(igtrk).n_point
+     +                          -1000+10000
+                           globtrk(igtrk).n_fit_point = 
+     +                          globtrk(igtrk).n_fit_point
+     +                          -1000+10000
+                           if( svt_track(isvtt).nspt .eq.1) then
+                              globtrk(igtrk).det_id = kTpcSsdIdentifier
+                           endif
+
                         endif
                      r =  (svt_spt(ient).x(1)**2+svt_spt(ient).x(2)**2+
      +                       svt_spt(ient).x(3)**2)
@@ -409,6 +419,14 @@ c     mark spts as used
                   elseif( gtrk(itpct).det(ient) .eq. 2)  then   
                      svt_spt(gtrk(itpct).ipnt(ient)).id_globtrk =  
      +                    globtrk_h.nok
+                     if(svt_spt(gtrk(itpct).ipnt(ient)).id_wafer 
+     +                    .gt.6000) then
+                        globtrk(globtrk_h.nok).n_point = 
+     +                       globtrk(globtrk_h.nok).n_point-1000+10000
+                       globtrk(globtrk_h.nok).n_fit_point = 
+     +                       globtrk(globtrk_h.nok).n_fit_point-1000+10000
+                     endif
+                  
                   endif
                enddo
             elseif( egrpar(1).useglobal.eq.4) then
@@ -440,6 +458,13 @@ c     mark spts as used
                   elseif( gtrk(itpct).det(ient) .eq. 2)  then   
                      svt_spt(gtrk(itpct).ipnt(ient)).id_globtrk =  
      +                    globtrk_h.nok
+                     if(svt_spt(gtrk(itpct).ipnt(ient)).id_wafer 
+     +                    .gt.6000) then
+                        globtrk(globtrk_h.nok).n_point = 
+     +                       globtrk(globtrk_h.nok).n_point-1000+10000
+                       globtrk(globtrk_h.nok).n_fit_point = 
+     +                       globtrk(globtrk_h.nok).n_fit_point-1000+10000
+                     endif
                   endif
                enddo
                
@@ -456,6 +481,7 @@ c     mark spts as used
      +              +(sign(1.0,float(tptrack(tpc(itpct)).flag)))*500
      +              +tptrack(tpc(itpct)).flag             
                globtrk(igtrk).det_id = kTpcSvtIdentifier
+C Adjust for ssd later
                globtrk(igtrk).n_point = 1000*svt_track(svt(isvtt)).nspt +
      +              tptrack(tpc(itpct)).nrec
                 globtrk(igtrk).n_max_point = tptrack(tpc(itpct)).npos  
@@ -494,6 +520,15 @@ C     Now find first point on track
                      ient = svt_group(ishit).id2
                      if( svt_spt(ient).id_wafer .gt. 6000) then
                         globtrk(igtrk).det_id = kTpcSsdSvtIdentifier
+C Adjusting from svt hit to ssd hit
+                        globtrk(igtrk).n_point = globtrk(igtrk).n_fit_point
+     +                       -1000+10000
+                        globtrk(igtrk).n_fit_point = 
+     +                       globtrk(igtrk).n_fit_point
+     +                       -1000+10000
+                        if( svt_track(isvtt).nspt .eq. 1) then
+                           globtrk(igtrk).det_id = kTpcSsdIdentifier
+                        endif
                      endif
                      r = (svt_spt(ient).x(1)**2+svt_spt(ient).x(2)**2+
      +                    svt_spt(ient).x(3)**2)
@@ -748,11 +783,25 @@ C     Now loop over unmatched SVT tracks.  Straight svt_track copy.
 		     ifull = 2
                      iglob = globtrk_h.nok
                      rlast = 0.
+                     globtrk(iglob).det_id = kSvtIdentifier
+C     Adjust for ssd later
+                     globtrk(iglob).n_point = 1000*svt_track(itrk).nspt
+                     globtrk(iglob).n_max_point = 0
+                     globtrk(iglob).n_fit_point =  1000*svt_track(itrk).nspt
                      rfirst= 10000.
+
                      do ishit = 1,svt_group_h.nok
                         if( svt_group(ishit).id1 .eq.
      +                       svt_track(itrk).id) then
                            ient = svt_group(ishit).id2
+
+                           if( svt_spt(ient).id_wafer .gt. 6000 ) then
+                              globtrk(iglob).det_id = kSsdSvtIdentifier
+                              globtrk(iglob).n_point =
+     +                         globtrk(iglob).n_point-1000+10000
+                              globtrk(iglob).n_fit_point = 
+     +                         globtrk(iglob).n_fit_point-1000+10000
+                           endif
                            svt_spt(ient).id_globtrk = iglob
                            r = (svt_spt(ient).x(1)**2+svt_spt(ient).x(2)**2+
      +                      svt_spt(ient).x(3)**2)
@@ -771,10 +820,6 @@ C     Now loop over unmatched SVT tracks.  Straight svt_track copy.
                      globtrk(iglob).iflag = (sign(1.0,float(
      +                    svt_track(itrk).flag)))*200.
      +                    +svt_track(itrk).flag
-                     globtrk(iglob).det_id = kSsdSvtIdentifier
-                     globtrk(iglob).n_point = 1000*svt_track(itrk).nspt
-                     globtrk(iglob).n_max_point = 0
-                     globtrk(iglob).n_fit_point =  1000*svt_track(itrk).nspt
                      globtrk(iglob).icharge = 
      +                    sign(1.0,svt_track(itrk).invpt)
                      globtrk(iglob).r0 = svt_track(itrk).r0
@@ -888,6 +933,12 @@ C---<<<<<<<
                        if( gtrk(igtrk).det(ishit) .eq. 2) then
                           ient = gtrk(igtrk).ipnt(ishit)
                           svt_spt(ient).id_globtrk = globtrk_h.nok
+                          if( svt_spt(ient).id_wafer .gt. 6000) then
+                       globtrk(globtrk_h.nok).n_point = 
+     +                       globtrk(globtrk_h.nok).n_point-1000+10000
+                       globtrk(globtrk_h.nok).n_fit_point = 
+     +                       globtrk(globtrk_h.nok).n_fit_point-1000+10000
+                       endif
                        endif
                     enddo
                     

@@ -58,6 +58,7 @@ c---<<<<<<<<<<<<<<<<<<<<<<<<
       globtrk_h.nok = globtrk_h.nok + 1
       iglob = globtrk_h.nok
       globtrk(iglob).id = iglob
+C Adjust for ssd later
       globtrk(iglob).n_point = gtrk(igtrk).ntpc+
      +     1000*(gtrk(igtrk).nhit-gtrk(igtrk).ntpc)
       globtrk(iglob).n_max_point = 0
