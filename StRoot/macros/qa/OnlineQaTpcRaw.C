@@ -1,5 +1,8 @@
-// $Id: OnlineQaTpcRaw.C,v 1.1 2000/06/09 16:27:30 kathy Exp $
+// $Id: OnlineQaTpcRaw.C,v 1.2 2000/06/09 18:53:28 kathy Exp $
 // $Log: OnlineQaTpcRaw.C,v $
+// Revision 1.2  2000/06/09 18:53:28  kathy
+// update comments
+//
 // Revision 1.1  2000/06/09 16:27:30  kathy
 // put new online QA tpc  macro in
 //
@@ -47,14 +50,17 @@ void OnlineQaTpcRaw(
    cout << " OnlineQaTpcRaw.C: maker name set to " << 
            makerName << endl;
 
-// load libraries
+// load libraries - basic ones needed
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("StIOMaker");
     gSystem->Load("StTreeMaker");
+
+// these 2 are for using the StHistUtil class
     gSystem->Load("StUtilities");
     gSystem->Load("StAnalysisUtilities");
 
+// for raw tpc qa maker
     gSystem->Load("StRawTpcQaMaker");
 
 
