@@ -7,6 +7,7 @@ Modification history
 ====================
 
 02/10/1999 T. Wenaus
+  - fix setPrimaryVertex in StEvent to set the vertex type to primary
   - print the required 'lousy compiler' line only for the lousy (Sun)
     compiler (StEvent.cc)
   - plug lotsa leaks
