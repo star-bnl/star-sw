@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.8 1999/03/05 21:19:38 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.9 1999/03/07 16:53:33 fine Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.9  1999/03/07 16:53:33  fine
+//! New method DrawHists
+//!
 //! Revision 1.8  1999/03/05 21:19:38  kathy
 //! added new histograms
 //!
@@ -69,10 +72,12 @@
 #include "TH2.h"
 #endif
 
+class TCanvas;
+
 class St_QA_Maker : public StMaker {
  private:
    Bool_t drawinit;
-//! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.8 1999/03/05 21:19:38 kathy Exp $";
+//! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.9 1999/03/07 16:53:33 fine Exp $";
    //! Histograms booking constants
    static const Int_t nxpT;
    static const Int_t nyeta;
@@ -132,6 +137,17 @@ class St_QA_Maker : public StMaker {
      static const Float_t cmaxp; 
      static const Float_t cmindedx; 
      static const Float_t cmaxdedx; 
+
+// Data-members to make up the output Canvases and Postscript files
+    TCanvas       *m_QACanvas;       //!
+    Int_t          m_PadColumns;     // Number of the columns (TPad's) on the single Canvas
+    Int_t          m_PadRows;        // Number of the columns (TPad's) on the single Canvas
+
+    Int_t          m_PaperWidth;     // Paper size in inch.
+    Int_t          m_PaperHeight;    // Paper size in inch.
+
+    TString        m_FirstHistName;
+    TString        m_LastHistName;
 
 
  protected:
@@ -267,7 +283,9 @@ class St_QA_Maker : public StMaker {
  public: 
                   St_QA_Maker(const char *name="QA", const char *title="evet/QA");
    virtual       ~St_QA_Maker();
-   virtual Int_t Init();
+   virtual Int_t  DrawHists();
+   virtual Int_t  Init();
+   virtual Int_t  Finish();
    virtual Int_t  Make();
    virtual void   MakeHistEvSum();
    virtual void   MakeHistGlob();
@@ -296,7 +314,19 @@ class St_QA_Maker : public StMaker {
    virtual void   MakeHistEmsHitsBsmd();
    virtual void   MakeHistXi();
    virtual void   PrintInfo();
+   virtual void   SetDraw(Bool_t drawFlag=kTRUE);
+   virtual void   SetHistsNames(const Char_t *firstName="*", const Char_t *lastName="*");
+   virtual void   SetZones(Int_t columns=2, Int_t rows=3);
+   virtual void   SetPaperSize(Int_t width=20, Int_t height=27);
+
    ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
 #endif
+
+inline void St_QA_Maker::SetDraw(Bool_t drawFlag) { drawinit = drawFlag;}
+inline void St_QA_Maker::SetHistsNames(const Char_t *firstName, const Char_t *lastName)
+                         { m_FirstHistName = firstName;  m_LastHistName  = lastName; }
+inline void St_QA_Maker::SetZones(Int_t columns, Int_t rows){ m_PadColumns =columns; m_PadRows = rows;}
+inline void St_QA_Maker::SetPaperSize(Int_t width, Int_t height){ m_PaperWidth = width; m_PaperHeight = height;}
+
