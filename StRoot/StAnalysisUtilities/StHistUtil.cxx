@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.20 2004/05/24 15:13:10 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.21 2004/06/09 22:01:31 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.21  2004/06/09 22:01:31  genevb
+// Modify line parameter for FTPC hist
+//
 // Revision 2.20  2004/05/24 15:13:10  genevb
 // Range limit on FTPC radial step hists
 //
@@ -407,7 +410,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
               gPad->Modified();	      
               ruler.SetLineColor(46);
               ruler.SetLineWidth(2);
-              ruler.DrawLine(7.73,0.,7.73,hobj->GetMaximum());
+              ruler.DrawLine(7.8,0.,7.8,hobj->GetMaximum());
             }
 	  }
 	  if (gPad) gPad->Update();
