@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.46 1999/12/20 20:28:52 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.47 1999/12/21 18:58:15 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -304,7 +304,7 @@ Int_t StEventDisplayMaker::MakeGlobalTracks()
   Int_t hitCounter    = 0;
 #ifdef STEVENT
   const Int_t maxTrackCounter = 9999999;
-  Width_t size;
+  Size_t size;
   Style_t style;
   StTrackCollection *tracks = m_Event->trackCollection();
   if (tracks) {
@@ -586,7 +586,7 @@ Int_t StEventDisplayMaker::MakeHits(const StObjArray *eventCollection,StVirtualE
   if (eventCollection && eventCollection->GetLast() ) {
     Color_t hitColor = kYellow;
     Style_t hitStyle = 1;
-    Width_t hitSize  = 2;
+    Size_t hitSize  = 2;
 
     // ---------------------------- hits filter ----------------------------- //
     if (filter) hitColor =  filter->Channel(eventCollection,hitSize,hitStyle);//
@@ -623,7 +623,7 @@ Int_t StEventDisplayMaker::MakeVertex(const StVertex *vertex,StVirtualEventFilte
     Int_t   vertexCounter = 0;
     Color_t vertexColor = kBlue;
     Style_t vertexStyle = 3;
-    Width_t vertexSize  = 1;
+    Size_t vertexSize  = 1;
     // ---------------------------- hits filter ----------------------------- //
     if (filter) vertexColor =  filter->Channel(vertex,vertexSize,vertexStyle);//
     // ---------------------------------------------------------------------- //
@@ -660,7 +660,7 @@ Int_t StEventDisplayMaker::MakeVertices(const StObjArray *eventCollection,StVirt
     Int_t   hitCounter = 0;
     Color_t hitColor = kYellow;
     Style_t hitStyle = 1;
-    Width_t hitSize  = 2;
+    Size_t hitSize  = 2;
     // ---------------------------- hits filter ----------------------------- //
     if (filter) hitColor =  filter->Channel(eventCollection,hitSize,hitStyle); //
     // ---------------------------------------------------------------------- //
@@ -692,7 +692,7 @@ Int_t StEventDisplayMaker::MakeTracks( StGlobalTrack *globTrack,StVirtualEventFi
     Int_t   trackCounter = 0;
     Color_t trackColor = kRed;
     Style_t trackStyle = 1;
-    Width_t trackSize  = 2;
+    Size_t trackSize  = 2;
     // --------------------- tracks filter ---------------------------------- //
     if (filter) trackColor =  filter->Channel(globTrack,trackSize,trackStyle); //
     // ---------------------------------------------------------------------- //
@@ -750,7 +750,7 @@ Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEvent
     tpt_track_st *track = tptTrack->GetTable();
     Color_t trackColor = kRed;
     Style_t trackStyle = 1;
-    Width_t trackSize  = 2;
+    Size_t trackSize  = 2;
     for (i = 0; i < points->GetNRows();i++ ){
       filter = (StVirtualEventFilter *)m_FilterArray->At(kTptTrack);
       if (!filter || filter->IsOn() ) {
@@ -766,7 +766,7 @@ Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEvent
            StThreeVectorD vector(t.r0*cos(angle),t.r0*sin(angle),t.z0);
            StHelixD *helix  = new  StHelixD(t.curvature, atan(t.tanl), t.psi*rad-h*pi2, vector, h);           
 //	   Int_t nSteps = Int_t(12*t.length*t.curvature + 1); 
-	   Int_t nSteps = Int_t(36*t.length*t.curvature + 1); 
+	   Int_t nSteps = Int_t(28*t.length*t.curvature + 1); 
 	   Float_t step = t.length / nSteps;
            StHelix3DPoints *tracksPoints  = new StHelix3DPoints(helix,step,nSteps);
            m_TrackCollector->Add(tracksPoints);    // Collect to remove  
@@ -808,8 +808,8 @@ Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFi
     St_TableSorter *track2Line = new St_TableSorter (ttt,tr);
     m_TableCollector->Add(track2Line);    // Collect to remove  
     Color_t hitColor = kGreen;
-    Style_t hitStyle = packed ? 5 : 20;
-    Width_t hitSize  = 1;
+    Style_t hitStyle = packed ?   5 : 8;
+    Size_t  hitSize  = packed ? 0.9 : 0.65;
     i = 0;
     Int_t nextKeyIndx = 0;
     Int_t maxTrackCounter = track2Line->CountKeys();
@@ -890,7 +890,7 @@ StVirtualEventFilter *StEventDisplayMaker::SetFilter(StVirtualEventFilter *filte
 void StEventDisplayMaker::PrintFilterStatus()
 {
   const Char_t *filterNames[] = {
-                                  "Primary Vertex"
+                                   "Primary Vertex"
                                  , "Tpc Hit"
                                  , "Svt Hit"
                                  , "Ftpc Hit"
@@ -900,12 +900,12 @@ void StEventDisplayMaker::PrintFilterStatus()
                                  , "SmdEta Hit"
                                  , "Vertices"
                                  , "Global Tracks"
-                                 ,  "Track"
-                                 ,  "Track Tpc Hits"
-                                 ,  "Track Svt Hits"
-                                 ,  "Track Ftpc Hits" 
-                                 ,  "St_Table generic object" 
-                                 ,  "tpt_track table object" 
+                                 , "Track"
+                                 , "Track Tpc Hits"
+                                 , "Track Svt Hits"
+                                 , "Track Ftpc Hits" 
+                                 , "St_Table generic object" 
+                                 , "tpt_track table object" 
                                 } ;
    
   Int_t i;
@@ -959,6 +959,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.47  1999/12/21 18:58:15  fine
+// new default for SizeAttributes
+//
 // Revision 1.46  1999/12/20 20:28:52  fine
 // adjust some parameteres
 //
