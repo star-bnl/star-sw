@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.24 2000/06/02 13:37:36 porter Exp $
+ * $Id: StDbManager.cc,v 1.25 2000/06/30 01:57:02 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.25  2000/06/30 01:57:02  porter
+ * fixed a delete bug & small memory leak found by Akio via Insure++ ,
+ * updated SetTable() method for containing idList, corrected enumeration
+ * map to rhic domain for Conditions_rhic database
+ *
  * Revision 1.24  2000/06/02 13:37:36  porter
  * built up list of minor changes:
  *  - made buffer more robust for certain null inputs
@@ -180,6 +185,7 @@ mDomains.push_back(new dbDomain(dbL3,"l3"));
 mDomains.push_back(new dbDomain(dbOnl,"onl")); 
 mDomains.push_back(new dbDomain(dbRich,"rich")); 
 mDomains.push_back(new dbDomain(dbMwc,"mwc")); 
+mDomains.push_back(new dbDomain(dbRhic,"rhic")); 
 
 }
 
@@ -278,6 +284,7 @@ if(xmlfile1){
    if(misVerbose)cout<<"  "<<it<<". "<< xmlfile1 <<endl;
    findServersXml(is1);
    it++;
+   is1.close();
  }
  delete [] xmlfile1;
 }
@@ -288,6 +295,7 @@ if(xmlfile2){
    if(misVerbose)cout<<"  "<<it<<". "<<xmlfile2 <<endl;
    findServersXml(is2);
    it++;
+   is2.close();
  }
  delete [] xmlfile2;
 }
@@ -297,6 +305,7 @@ if(xmlfile3){
  if(is3){
    if(misVerbose)cout<<"  "<<it<<". "<<xmlfile3 <<endl;
    findServersXml(is3);
+   is3.close();
  }
  delete [] xmlfile3;
 }
@@ -1390,3 +1399,5 @@ StDbManager::setUser(const char* userName, const char* pWord){
   }
 
 }
+
+

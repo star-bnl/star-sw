@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.10 2000/06/02 15:58:26 porter Exp $
+ * $Id: StDbBuffer.cc,v 1.11 2000/06/30 01:57:00 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.11  2000/06/30 01:57:00  porter
+ * fixed a delete bug & small memory leak found by Akio via Insure++ ,
+ * updated SetTable() method for containing idList, corrected enumeration
+ * map to rhic domain for Conditions_rhic database
+ *
  * Revision 1.10  2000/06/02 15:58:26  porter
  * removed "\" character in a "//" comment - it gives a warning on linux
  *
@@ -367,21 +372,27 @@ return true;
 #define Rarray(tpe,tpelist) \
 bool  StDbBuffer::ReadArray(tpe* &s, int &len,const char *aName)\
 { bool tRetVal=false; \
+  bool newCheck=false;\
  if (Find_Col(aName)) \
   {int  i;\
   if (mCol[mCur].type==_char ) {\
     len=mCol[mCur].length/sizeof(tpe);\
     s=new tpe[len];\
+    newCheck=true;\
     MemSwapCpy((char*)s,(char*)mCol[mCur].val,len*sizeof(tpe),mycswapl[tpelist],Auto);\
+    tRetVal=true;\
   } else {\
     len=mCol[mCur].length;\
     s=new tpe[len];\
+    newCheck=true;\
     for (i=0;i<len;i++)\
       { if (!(WriteMem(&s[i],(void*)(((char*)mCol[mCur].val)+i*mycsize[mCol[mCur].type]),mCol[mCur].type))) break;}\
-      if (i==(int)mCol[mCur].length) tRetVal=true;};}\
+      if (i==(int)mCol[mCur].length) tRetVal=true;}}\
  return tRetVal;\
 }
 
+//tRetVal=true;} else {cout<<i<<" & "<<(int)mCol[mCur].length<<endl;};}}
+// if(!tRetVal && newCheck) cout<<"WARNING::field "<<aName<<" is has memory"<<endl;
 //else {cerr<<"WARNING::field "<<aName<<" is not in this Buffer"<<endl;}
 
 //Rarray(char,_char);

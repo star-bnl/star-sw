@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.25 2000/06/02 13:37:37 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.26 2000/06/30 01:57:02 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.26  2000/06/30 01:57:02  porter
+ * fixed a delete bug & small memory leak found by Akio via Insure++ ,
+ * updated SetTable() method for containing idList, corrected enumeration
+ * map to rhic domain for Conditions_rhic database
+ *
  * Revision 1.25  2000/06/02 13:37:37  porter
  * built up list of minor changes:
  *  - made buffer more robust for certain null inputs
@@ -232,7 +237,7 @@ int NodeID;
 
      buff.SetClientMode();
      if(currentNode.name) delete [] currentNode.name;
-     if(currentNode.versionKey) delete currentNode.versionKey;
+     if(currentNode.versionKey) delete [] currentNode.versionKey;
      if(!buff.ReadScalar(currentNode.name,"name"))return 0;
      if(!buff.ReadScalar(currentNode.versionKey,"versionKey"))return 0;
 

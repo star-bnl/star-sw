@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.18 2000/06/02 13:37:37 porter Exp $
+ * $Id: StDbTable.cc,v 1.19 2000/06/30 01:57:02 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.19  2000/06/30 01:57:02  porter
+ * fixed a delete bug & small memory leak found by Akio via Insure++ ,
+ * updated SetTable() method for containing idList, corrected enumeration
+ * map to rhic domain for Conditions_rhic database
+ *
  * Revision 1.18  2000/06/02 13:37:37  porter
  * built up list of minor changes:
  *  - made buffer more robust for certain null inputs
@@ -77,6 +82,11 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.19  2000/06/30 01:57:02  porter
+ * fixed a delete bug & small memory leak found by Akio via Insure++ ,
+ * updated SetTable() method for containing idList, corrected enumeration
+ * map to rhic domain for Conditions_rhic database
+ *
  * Revision 1.18  2000/06/02 13:37:37  porter
  * built up list of minor changes:
  *  - made buffer more robust for certain null inputs
@@ -309,13 +319,17 @@ return (void*)c;
 /////////////////////////////////////////////////////////////////////
 
 void 
-StDbTable::SetTable(char* c, int nrows) { 
+StDbTable::SetTable(char* c, int nrows, int* idList) { 
 
 if(mdata){
   delete [] mdata; 
   mdata = 0;
 }
-createMemory(nrows);
+ if(!idList){
+   createMemory(nrows);
+ } else {
+   setElementID(idList,nrows); // createMemory is called here
+ }
 int len = nrows*getTableSize();
 memcpy(mdata,c,len);
 mhasData=true;
@@ -416,7 +430,7 @@ StDbTable::createMemory() {
 void
 StDbTable::setElementID(int* elements, int nrows) { 
 
-   createMemory(mrows);
+   createMemory(nrows);
    // set up & fill char* will element list
    if(mnode.elementID) delete [] mnode.elementID;
    mnode.elementID = new char[4*nrows];
