@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.cxx,v 1.5 2004/04/02 03:24:54 jeromel Exp $
+ * $Id: StMuIOMaker.cxx,v 1.6 2004/04/08 19:20:13 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -215,7 +215,7 @@ void StMuIOMaker::setBranchAddresses(TChain* chain) {
   } 
 
   // added for Xin since it did not 
-  for ( int i=0; i<__NPMDARRAYS__; i++) {
+  for ( int i=0; i<__NTOFARRAYS__; i++) {
       chain->SetBranchAddress(StMuArrays::tofArrayNames[i],&mTofArrays[i]);
   } 
  
@@ -365,6 +365,9 @@ void  StMuIOMaker::SetFile(const char *fileName)    {
 /***************************************************************************
  *
  * $Log: StMuIOMaker.cxx,v $
+ * Revision 1.6  2004/04/08 19:20:13  jeromel
+ * Wrong indexing corrected (Xin)
+ *
  * Revision 1.5  2004/04/02 03:24:54  jeromel
  * Changes implements PMD and TOF.  TOF is clearly incomplete.
  *
