@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.31 2000/05/23 19:03:38 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.32 2001/05/14 20:53:20 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.32  2001/05/14 20:53:20  genevb
+// Add features to examine memory use, switch from TDatime to time_t
+//
 // Revision 1.31  2000/05/23 19:03:38  genevb
 // Correct interface for MessageOut(), update docs
 //
@@ -370,6 +373,7 @@ building(0) {
   AddType("D","Debug");
   AddType("Q","QAInfo");
   SwitchOff("D");
+  MemoryOn();
 #ifdef LINUX
   memset(listOfMessPtrs,0,(maxLOMP * sizeof(char*)));
 #endif
@@ -466,7 +470,7 @@ void StMessageManager::BuildMessage(const char* mess, const char* type,
     typeN = 1;                                // type number for Info is 1
   }
   gMessage = new StMessage(mess, curType, curOpt);
-  if (strchr(curOpt,'-')) {
+  if ((!remember) || (strchr(curOpt,'-'))) {
     if (gMessage) delete gMessage;
     gMessage = endm;
   } else {
@@ -661,6 +665,22 @@ void StMessageManager::Summary(size_t nTerms) {
     memset(messBlocks[i],0,mmax);
     delete [] messBlocks[i];
   }
+  MemorySummary();
+  return;
+}
+//_____________________________________________________________________________
+void StMessageManager::MemorySummary() {
+//
+// Output a summary of the memory usage of the message manager so far.
+// Loops over all stored messages to calculate message sizes and overhead.
+//
+  unsigned int gsize=0;
+  size_t nMess = messList.size();
+  for (size_t i=0; i<nMess; i++) {
+    gsize += (messList[i]->GetMemoryUsage() + 2*sizeof(messList[i]));
+  }
+  printf("  ***** StMessageManager memory usage = %u bytes (%u kb) *****\n",
+                      gsize,(gsize/1024));
   return;
 }
 //_____________________________________________________________________________
@@ -685,13 +705,12 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.31 2000/05/23 19:03:38 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.32 2001/05/14 20:53:20 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
 
 
-//
 // Instantiate the (singleton) class upon loading
 //
 StMessMgr* temp=StMessageManager::Instance();

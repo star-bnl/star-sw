@@ -1,5 +1,8 @@
-// $Id: StMessage.h,v 1.8 2000/06/10 21:19:02 genevb Exp $
+// $Id: StMessage.h,v 1.9 2001/05/14 20:53:20 genevb Exp $
 // $Log: StMessage.h,v $
+// Revision 1.9  2001/05/14 20:53:20  genevb
+// Add features to examine memory use, switch from TDatime to time_t
+//
 // Revision 1.8  2000/06/10 21:19:02  genevb
 // Remove use of virtual functions
 //
@@ -40,7 +43,7 @@
 #ifndef ClassStMessage
 #define ClassStMessage
 
-#include "TDatime.h"
+#include <time.h>
 
 class StMessage {
 
@@ -52,7 +55,7 @@ class StMessage {
 //   unsigned long runNumber;
 //   pair<long, long> eventId;
    char* option;                      //!
-   TDatime messTime;
+   time_t messTime;
    char* message;                     //!
 
  public:
@@ -61,11 +64,12 @@ class StMessage {
    virtual ~StMessage();
           void PrintInfo();
            int Print(int nChars=-1);
-      TDatime& GetTime() {return messTime;}
+       time_t& GetTime() {return messTime;}
    const char* GetType() const {return type;}
          char* GetMessage() {return message;}
          char* GetOptions() {return option;}
           void SetOption(char* opt) {option = opt;}
+        size_t GetMemoryUsage();
 #ifdef __ROOT__
    ClassDef(StMessage,1)
 #endif

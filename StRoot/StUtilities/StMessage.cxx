@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.19 2000/01/05 19:53:46 genevb Exp $
+// $Id: StMessage.cxx,v 1.20 2001/05/14 20:53:20 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.20  2001/05/14 20:53:20  genevb
+// Add features to examine memory use, switch from TDatime to time_t
+//
 // Revision 1.19  2000/01/05 19:53:46  genevb
 // Fixed CC5 warnings, and several other small improvements under the hood
 //
@@ -89,8 +92,8 @@ ClassImp(StMessage)
 #endif
 
 //_____________________________________________________________________________
-StMessage::StMessage(const char *mess, const char *ty, const char* opt) :
-messTime() {
+StMessage::StMessage(const char *mess, const char *ty, const char* opt) {
+  time(&messTime);
   *type = *ty;
   type[1] = 0;
   size_t len = strlen(opt);
@@ -145,8 +148,9 @@ int StMessage::Print(int nChars) {
     }
     if (nChars<=0) {
       if (!strchr(option,'T')) {                         // "No time" option
-        char* temp2 = strchr((char*)messTime.AsString(),' ');
-        messBuffer << insert2 << (++temp2) << insert3 ;  // " (",time,")"
+        char* temp2 = (ctime(&messTime) + 4);            // First 4 are day
+        *(temp2 + 20) = 0;                               // 24th is end-line
+        messBuffer << insert2 << temp2 << insert3 ;  // " (",time,")"
       }
       messBuffer << endofline;                           // "\n" end-line
     }
@@ -177,9 +181,15 @@ int StMessage::Print(int nChars) {
   return messBuffer.tellp();
 }
 //_____________________________________________________________________________
+size_t StMessage::GetMemoryUsage() {
+  size_t msize = strlen(message) + strlen(option) + 2;
+  msize += sizeof(*this);                   // Determine overhead
+  return msize;
+}
+//_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.19 2000/01/05 19:53:46 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.20 2001/05/14 20:53:20 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

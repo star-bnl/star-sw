@@ -1,5 +1,8 @@
-// $Id: StMessageManager.h,v 1.19 2000/06/07 00:05:36 genevb Exp $
+// $Id: StMessageManager.h,v 1.20 2001/05/14 20:53:20 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.20  2001/05/14 20:53:20  genevb
+// Add features to examine memory use, switch from TDatime to time_t
+//
 // Revision 1.19  2000/06/07 00:05:36  genevb
 // Added FixOn(), enforcing no limits on a specific message type/string
 //
@@ -141,6 +144,7 @@ class StMessageManager : public StMessMgr {
    char* curType;                     //!
    char* curOpt;                      //!
    int building;
+   int remember;
 
  protected:
    StMessageManager();
@@ -182,6 +186,9 @@ class StMessageManager : public StMessMgr {
    virtual       void FixOn(const char* str) {SetLimit(str,-5);}
    virtual       void NoLimits() {messCounter->NoLimits();}
    virtual       void Summary(size_t nTerms=1);
+   virtual       void MemorySummary();
+   virtual       void MemoryOn() {remember=1;}
+   virtual       void MemoryOff() {remember=0;}
    virtual        int AddType(const char* type, const char* text);
    virtual        int ListTypes() {return messTypeList->ListTypes();}
 
