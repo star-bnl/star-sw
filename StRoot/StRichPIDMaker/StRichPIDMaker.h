@@ -1,11 +1,14 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 2.0 2000/08/09 16:26:19 gans Exp $
+ * $Id: StRichPIDMaker.h,v 2.1 2000/08/13 01:25:58 gans Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
+ *  Revision 2.1  2000/08/13 01:25:58  gans
+ *  Added directory changing when using pidMaker->printCanvas("directory/")
+ *
  *  Revision 2.0  2000/08/09 16:26:19  gans
  *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
  *
@@ -80,6 +83,7 @@ class StRichPadMonitor;
 
     unsigned short mUseL3Tracking;
     unsigned short mUsePrintCanvas;
+    char mUsePrintCanvasDir[200];
     unsigned short mUseResidNTup;
   // analysis 
   TNtuple* mPidNtuple;
@@ -112,7 +116,7 @@ class StRichPadMonitor;
   
     void setFileName(char *);
     void useL3Tracking();
-    void usePrintCanvas();
+    void usePrintCanvas(const char * directory = "");
     void useResidNTup();
     long numStPrimaryTracks(StEvent*);
     void fillRichSoftwareMonitor(StEvent*);
