@@ -1,5 +1,8 @@
-// $Id: StAnalysisMaker.cxx,v 1.2 1999/02/10 23:59:52 wenaus Exp $
+// $Id: StAnalysisMaker.cxx,v 1.3 1999/02/11 15:39:15 wenaus Exp $
 // $Log: StAnalysisMaker.cxx,v $
+// Revision 1.3  1999/02/11 15:39:15  wenaus
+// cleanup
+//
 // Revision 1.2  1999/02/10 23:59:52  wenaus
 // cleanup
 //
@@ -28,11 +31,26 @@
 #include "StEvent/StRun.hh"
 #include "StEvent/StEvent.hh"
 
-static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.2 1999/02/10 23:59:52 wenaus Exp $";
+static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.3 1999/02/11 15:39:15 wenaus Exp $";
 #include "StMessMgr.h"
 void summarizeEvent(StEvent& event);
 //  specific analysis tasks.
 void summarizeEvent(StEvent& event, Int_t &nevents);
+Int_t StAnalysisMaker::Make() {
+  StEventReaderMaker* evMaker = (StEventReaderMaker*) gStChain->Maker("events");
+  if (! evMaker->event()) return kStOK; // If no event, we're done
+  StEvent& ev = *(evMaker->event());
+  StRun& run = *(evMaker->run());
+
+  // OK, we've got the event. Pass it and process it.
+  summarizeEvent(ev);
+  long ntk = countPrimaryTracks(ev);
+  cout << "Primary tracks: " << ntk << endl;
+
+  return kStOK;
+    drawinit = kFALSE;
+    theTag = 0;
+
 StAnalysisMaker::StAnalysisMaker(const Char_t *name, const Char_t *title) : StMaker(name, title) {
   drawinit = kFALSE;
 }
@@ -41,32 +59,16 @@ StAnalysisMaker::~StAnalysisMaker() {
 }
 
 Int_t StAnalysisMaker::Init() {
-  return StMaker::Init();
-}
-
-Int_t StAnalysisMaker::Make() {
-  StEventReaderMaker* evMaker = (StEventReaderMaker*) gStChain->Maker("events");
-  if (! evMaker->event()) {
-    // No event. We're done.
-    return kStOK;
-  }
-  StEvent& ev = *(evMaker->event());
-  StRun& run = *(evMaker->run());
-
-  summarizeEvent(ev);
-  long ntk = countPrimaryTracks(ev);
-  cout << "Primary tracks: " << ntk << endl;
-
-  return kStOK;
-    drawinit = kFALSE;
-    theTag = 0;
+Int_t
+StAnalysisMaker::Init()
+{
 void StAnalysisMaker::MakeBranch() {
   StMaker::MakeBranch();
 }
 
 void StAnalysisMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StAnalysisMaker.cxx,v 1.2 1999/02/10 23:59:52 wenaus Exp $\n");
+  printf("* $Id: StAnalysisMaker.cxx,v 1.3 1999/02/11 15:39:15 wenaus Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }

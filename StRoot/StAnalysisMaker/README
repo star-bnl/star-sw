@@ -9,6 +9,9 @@ Author: Torre Wenaus, BNL
 Mod history
 ===========
 
+02/11/1999 T. Wenaus
+- cleanup
+
 02/10/1999 T. Wenaus
 - protection against null event
 - separate out event analysis into separate functions

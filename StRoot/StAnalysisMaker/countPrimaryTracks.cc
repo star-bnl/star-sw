@@ -1,7 +1,31 @@
+// $Id: countPrimaryTracks.cc,v 1.2 1999/02/11 15:39:15 wenaus Exp $
+// $Log: countPrimaryTracks.cc,v $
+// Revision 1.2  1999/02/11 15:39:15  wenaus
+// cleanup
+//
+//
+///////////////////////////////////////////////////////////////////////////////
+//
+// countPrimaryTracks.cc
+//
+// Description: 
+//  Simple StEvent usage example. Based on Thomas Ullrich's Example 1
+//
+// Environment:
+//  Software developed for the STAR Detector at Brookhaven National Laboratory
+//
+// Author List: 
+//  Torre Wenaus, BNL  2/99
+//
+// History:
+//
+///////////////////////////////////////////////////////////////////////////////
 #include "StEvent/StEvent.hh"
+ *
+static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.2 1999/02/11 15:39:15 wenaus Exp $";
 #include "StEventTypes.h"
 
-static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.1 1999/02/10 23:59:53 wenaus Exp $";
+static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.2 1999/02/11 15:39:15 wenaus Exp $";
   // First, we have to establish a primary vertex.
     //  in many different ways. Here we demonstrate
   // Count vertex daughters, and arbitrarily set the primary vertex
