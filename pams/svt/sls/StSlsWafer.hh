@@ -1,6 +1,6 @@
 #ifndef STSLSWAFER_HH
 #define STSLSWAFER_HH
-#include <stdiostream.h>
+#include <iostream.h>
 #include <math.h>
 #include "StSlsListStrip.hh"
 #include "StSlsListPoint.hh"
