@@ -22,6 +22,8 @@ protected:
   TH2F     *myH1;    //! max #pads in each row
   TH1F     *myH2;    //! sector #
 
+  Int_t    ntmc;
+
 public: 
   StRawTpcQaMaker(const char *name="RawTpcQa");
   virtual       ~StRawTpcQaMaker();
@@ -30,7 +32,7 @@ public:
   virtual Int_t  Finish();
   virtual Int_t  Clear();
   virtual void   PrintInfo();
-
+  
 
  ClassDef(StRawTpcQaMaker, 1)   //StAF chain virtual base class for Makers
 };
