@@ -1,5 +1,8 @@
-// $Id: trs.C,v 1.7 1999/03/07 22:34:04 fisyak Exp $
+// $Id: trs.C,v 1.8 1999/03/15 19:52:11 fisyak Exp $
 // $Log: trs.C,v $
+// Revision 1.8  1999/03/15 19:52:11  fisyak
+// New Makers scheme
+//
 // Revision 1.7  1999/03/07 22:34:04  fisyak
 // replace StSclRoot by StarClassLibrary
 //
@@ -20,31 +23,44 @@ void Load(){
   gSystem->Load("StChain");
   gSystem->Load("xdf2root");
   gSystem->Load("St_Tables");
+  gSystem->Load("St_db_Maker");
   gSystem->Load("StarClassLibrary");
-  gSystem->Load("St_params_Maker");
   gSystem->Load("geometry");
   gSystem->Load("St_g2r");
   gSystem->Load("St_geant_Maker");
-  gSystem->Load("St_TLA_Maker");
-  gSystem->Load("St_xdfin_Maker");
   gSystem->Load("StTrsMaker");
 }
 void trs(const Int_t Nevents=1)
 {
   if (gClassTable->GetID("StChain") < 0) Load();
   chain = new StChain("trs");
-  St_params_Maker  *params = new St_params_Maker("params","params");
-  //  St_TLA_Maker       *geom = new St_TLA_Maker("geom","run/geant/Run");
-  geant = new St_geant_Maker("geant","event/geant/Event");
-  geant->SetNwGEANT(20 000 000);
+  chain->SetDebug();
+  chain->SetInput("EvtHddr",".make/geant/.const/EvtHddr");    
+ //  Create the makers to be called by the current chain
+  const char *mainDB = "$STAR/StDb";
+  St_db_Maker *dbMk = new St_db_Maker("db",mainDB);
+  chain->SetInput("params","db:StDb/params");
+  dbMk->SetDebug();  
+  const char *calibDB = "$STAR_ROOT/calib";
+  St_db_Maker *calibMk = new St_db_Maker("calib",calibDB);
+  chain->SetInput("calib","calib:calib");
+  calibMk->SetDebug();  
+
+  geant = new St_geant_Maker("geant");
+  geant->SetNwGEANT(10 000 000);
+  geant->SetNwGEANT(10 000 000);
+  geant->SetDebug();
   //  geant->SetNwPAW(1000000);
   geant->SetIwtype(1);
-  geant->Do("gfile p /disk1/star/test/psc0049_08_40evts.fzd");
+  TString InFile("/disk1/star/test/psc0049_08_40evts.fzd");
+  geant->SetInputFile(InFile.Data());
+  chain->SetInput("geom","geant:geom");
+  //  geant->Do("gfile p /disk1/star/test/psc0049_08_40evts.fzd");
   //geant->Do("gfile p /star/u2b/lasiuk/onemuon.fz");
   //geant->Do("gfile p /star/u2b/lasiuk/msector.fz");
   //geant->Do("mode tpce prin 1 digi 2");   // make tpc_hit in local coordinates
   //  geant->LoadGeometry("detp geometry field_only");
-  StTrsMaker    *tpc_raw = new StTrsMaker("tpc_raw","event/raw_data/tpc");
+  StTrsMaker    *tpc_raw = new StTrsMaker("Trs");
   //  chain->PrintInfo();
 // Init the mai chain and all its makers
   int iInit = chain->Init();
