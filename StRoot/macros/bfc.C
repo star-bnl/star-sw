@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.34 1999/01/11 18:29:33 fisyak Exp $
+// $Id: bfc.C,v 1.35 1999/01/26 16:04:13 fine Exp $
 // $Log: bfc.C,v $
+// Revision 1.35  1999/01/26 16:04:13  fine
+// GetEvent.C print out of the current input file name
+//
 // Revision 1.34  1999/01/11 18:29:33  fisyak
 // More HTML correction from Gene
 //
@@ -194,6 +197,7 @@ value (failure), then Init() returns a non-zero value as well.
 
   chain->PrintInfo();
   // Init the chain and all its makers
+  chain->SetDebug(1);
   int iInit = chain->Init();
   if (iInit) chain->Fatal(iInit,"on init");
 

@@ -1,5 +1,8 @@
-// $Id: g2r.C,v 1.1 1999/01/21 00:54:27 fisyak Exp $
+// $Id: g2r.C,v 1.2 1999/01/26 16:04:15 fine Exp $
 // $Log: g2r.C,v $
+// Revision 1.2  1999/01/26 16:04:15  fine
+// GetEvent.C print out of the current input file name
+//
 // Revision 1.1  1999/01/21 00:54:27  fisyak
 // Cleanup
 //
@@ -43,7 +46,7 @@ g2r(const Int_t   Nevents=0,
   if (iInit) chain->Fatal(iInit,"on init");
 //  chain->MakeTree("StChainTree","Transform g2t tables into Root file");
   gBenchmark->Start("bfc");
-  out->Add(geant->GetName());
+  out->Add(geant->GetName(),"geant_branch_name.root");
   if (root_out) {chain->Write();}
   Int_t i=0;
   for (Int_t i =1; i <= Nevents; i++){
