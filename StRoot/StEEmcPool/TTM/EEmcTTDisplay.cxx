@@ -1,7 +1,10 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2004/01/19
-// $Id: EEmcTTDisplay.cxx,v 1.5 2004/01/27 16:26:14 zolnie Exp $
+// $Id: EEmcTTDisplay.cxx,v 1.6 2004/01/27 20:38:41 zolnie Exp $
 // doxygen info here
+
+#include <ostream>
+#include <sstream>
 
 #include "TList.h"
 #include "TGeoVolume.h"
@@ -67,8 +70,16 @@ EEmcTTDisplay::initGeometry(const char *topName)
     sprintf(rotName,"RotSec%02d",s+1);
     TGeoRotation *rots = new TGeoRotation(rotName,phi/M_PI*180.0,0.0,0.0);
     TGeoVolume *sector = new TGeoVolume(volumeName(s),geosector,medVac);
-    //sector->SetVisibility(kTRUE);
-    sector->SetVisibility(kFALSE);
+    sector->SetVisibility(kTRUE);
+    // color coded sectors
+    switch(s) {
+    case 11: sector->SetLineColor(kRed    );break;
+    case  2: sector->SetLineColor(kGreen  );break;
+    case  5: sector->SetLineColor(kBlue   );break;
+    case  8: sector->SetLineColor(kYellow );break;
+    default: break;
+    }
+    //sector->SetVisibility(kFALSE);
     mEEmc->AddNode(sector,1,rots);
     
     //
@@ -190,14 +201,6 @@ EEmcTTDisplay::trackHit(const StMuTrack& track)
   StThreeVectorD o   = h.origin(); 
   StThreeVectorD p   = h.momentum(Bfield);
   double         q   = h.charge(Bfield);
-#define DEBUG_PRINTS 0
-#if     DEBUG_PRINTS
-  cerr << "<TrackHit>"<< endl;
-  cerr << o << endl;
-  cerr << p << endl;
-  cerr << q << endl;
-  cerr << "</TrackHit>"<< endl;
-#endif
   return trackHit(o.x(),o.y(),o.z(),p.x(),p.y(),p.z(),q*Bfield);
 }
 
@@ -207,6 +210,15 @@ EEmcTTDisplay::Out(ostream &out, const StMuTrack& track, const EEmcTower &tower)
 {
   ::Out(out,tower);
   ::Out(out,track);
+}
+
+void         
+EEmcTTDisplay::Out(TString &out, const StMuTrack& track, const EEmcTower &tower)
+{
+  const  int  bufLen=1024;
+  static char buff[bufLen];
+  sprintf(buff,"ADC(%s)=%.0f pT=%.2f GeV/c",volumeName(tower),tower.edep,track.pt());
+  out = buff;
 }
 
 
@@ -236,8 +248,17 @@ EEmcTTDisplay::volumeName (int sec, int sub, int eta)
   return vname;
 }
 
+char *
+EEmcTTDisplay::volumeName(const EEmcTower& tower)
+{  
+  return volumeName(tower.sec,tower.sub,tower.eta); 
+}; 
+
 
 // $Log: EEmcTTDisplay.cxx,v $
+// Revision 1.6  2004/01/27 20:38:41  zolnie
+// more docs
+//
 // Revision 1.5  2004/01/27 16:26:14  zolnie
 // polished doxygen documentation
 //

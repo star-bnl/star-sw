@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.9 2004/01/27 16:26:15 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.10 2004/01/27 20:38:42 zolnie Exp $
 // doxygen info here
 /** 
     \mainpage TTM - an endcap Tower to Track Match maker
@@ -52,10 +52,14 @@
       - macros/TTM/ttm.C   an example how to analyze MuDST data
       - macros/TTM/show.C  an example how to display MuDST data (track/towers)
 
-      root -q -b \
-      './StRoot/StEEmcPool/macros/TTM/ttm.C("/star/2003/mudst/","","R4145010.root",50)'
+      root -q -b './StRoot/StEEmcPool/macros/TTM/ttm.C("/star/2003/mudst/","","R4145010.root")'
      
       this will produce a simple tree file called R4145010.root
+
+       \image html  snapshot.jpg "Screen Shot"
+       \image html  eemc.gif     "Two track event"
+       \image latex eemc.eps     "Two track event" width=10cm
+
 
      \section final Final Analysis 
      Final analysis is done with macros e.g. mipcalib.C 
@@ -67,8 +71,7 @@
      ./mipcalib -h will print all the options
      
 
-     \todo To Do List 
-     
+     \todo    nothing on the todo list right now
      
 
      \bug     No known bugs at this moment
@@ -76,6 +79,7 @@
  */
 
 #include <iostream>
+#include <sstream>
 
 #include "TList.h"
 #include "TMap.h"
@@ -115,6 +119,7 @@
 #if !defined(ST_NO_NAMESPACES)
 using std::map;
 using std::ostream;
+using std::ostringstream;
 #endif
 
 
@@ -577,7 +582,7 @@ EEmcTTMMaker::Summary(ostream &out ) const
   return out;
 }
 
-// ======================================================================================================
+// ================================================================================================
 ostream& 
 EEmcTower::Out(ostream &out ) const
 {
@@ -590,7 +595,7 @@ EEmcTower::Out(ostream &out ) const
   return out;
 }
 
-// ======================================================================================================
+// ================================================================================================
 ostream& 
 Out(ostream &out , const StMuTrack &t)
 {
@@ -600,6 +605,7 @@ Out(ostream &out , const StMuTrack &t)
   out << "/>\n";
   return out;
 }
+
 ostream& 
 Out(ostream &out , const EEmcTower &t)
 {
@@ -608,9 +614,7 @@ Out(ostream &out , const EEmcTower &t)
 
 
 
-
-// ======================================================================================================
-
+// ================================================================================================
 ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm)  { 
   return ttm.Summary(out); 
 };
@@ -625,6 +629,9 @@ ostream&  operator<<(ostream &out, const StMuTrack    &t  )  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.10  2004/01/27 20:38:42  zolnie
+// more docs
+//
 // Revision 1.9  2004/01/27 16:26:15  zolnie
 // polished doxygen documentation
 //
