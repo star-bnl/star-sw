@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.49 1999/05/11 12:40:38 fisyak Exp $
+// $Id: bfc.C,v 1.50 1999/05/11 12:43:51 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.50  1999/05/11 12:43:51  fisyak
+// gtrack -> gstar
+//
 // Revision 1.49  1999/05/11 12:40:38  fisyak
 // Add tree for SL99c
 //
@@ -359,11 +362,11 @@ void Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0 ){
   }
 }
 //_____________________________________________________________________
-void bfc (const Int_t Nevents=1, const Char_t *Chain="gtrack",Char_t *infile=0, Char_t *outfile=0)
+void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar",Char_t *infile=0, Char_t *outfile=0)
 { // Chain variable define the chain configuration 
   // Only the first 3 symbols are significant
   // "-" sign before requiest means that this option is disallowed
-  // Chain = "gtrack" run GEANT on flight with 10 muons in range |eta| < 1 amd pT = 1GeV/c (default)
+  // Chain = "gstar" run GEANT on flight with 10 muons in range |eta| < 1 amd pT = 1GeV/c (default)
   // Chain = "" || "xdf" run STANDARD chain using xd-files as an input
   // Chain = "minidaq" read miniDAQ xdf file and process 
   NoEvents = Nevents;
