@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.153 2004/09/03 00:05:48 jeromel Exp $
+// $Id: StMaker.cxx,v 1.154 2004/09/03 20:33:31 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -1211,7 +1211,6 @@ int StMaker::SetAttr(const char *key, const char *val, const char *to)
      if (tv == ".remove") {
        TObject *t = m_Attr.FindObject(tk.Data());
        if(t){
-       Info("RemAttr","(\"%s\",\"%s\")",tk.Data(),fullName.Data());
        m_Attr.Remove(t); delete t;}}
      else if (tk == ".call") {
          TString command("(("); command += ClassName(); command+="*)";
@@ -1219,8 +1218,8 @@ int StMaker::SetAttr(const char *key, const char *val, const char *to)
 	 command +=buf; command +=")->"; command+=tv;command+=";";
 	 gROOT->ProcessLineFast(command.Data(),0);}
      else {
-       m_Attr.AddFirst(new TNamed(tk.Data(),tv.Data()));
-       Info("SetAttr","(\"%s\",\"%s\",\"%s\")",tk.Data(),tv.Data(),fullName.Data());}
+       m_Attr.AddFirst(new TNamed(tk.Data(),tv.Data()));}
+     Info("SetAttr","(\"%s\",\"%s\",\"%s\")",tk.Data(),tv.Data(),fullName.Data());
    }
    if (!(act&4)) return count;
 
@@ -1443,6 +1442,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.154  2004/09/03 20:33:31  perev
+// Attributes, cleanup
+//
 // Revision 1.153  2004/09/03 00:05:48  jeromel
 // Comment block oxygenized, removed unused var
 //
