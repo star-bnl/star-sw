@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.4 1999/01/18 10:17:07 lasiuk Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.5 1999/01/18 20:59:39 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
- * Revision 1.4  1999/01/18 10:17:07  lasiuk
- * distanceToWire
+ * Revision 1.5  1999/01/18 20:59:39  lasiuk
+ * change gas gain 10^4
  *
  *
  * Revision 1.7  1999/02/10 18:03:42  lasiuk
@@ -100,23 +100,23 @@ StTrsWireHistogram* StTrsWireHistogram::instance(StTpcGeometry* geoDb, StTpcSlow
     }
     else { // do nothing
 	cerr << "Cannot make a second instance of StTrsWireHistogram() " << endl;
-//     PR(yCoordinateOfHit);
+	cerr << "Continuing..." << endl;
     }
     return mInstance;
 }
 
 void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
-    PR(innerSectorBoundary);
+{
     // also needs db information to create coordinate->wire map
     // Find closes wire to: bin.position().y()
-// 	PR(mGeomDb->firstInnerSectorAnodeWire());
+
     double yCoordinateOfHit = bin.position().y();
     //PR(yCoordinateOfHit);
     double tmpWire;
     int    offSet;
     int    wireLimit;
     double innerSectorBoundary =
-// 	PR(mGeomDb->firstOuterSectorAnodeWire());
+	mGeomDb->outerSectorEdge() - mGeomDb->ioSectorSpacing();
     //PR(innerSectorBoundary);
     
     if(yCoordinateOfHit < innerSectorBoundary) { // in inner part of sector
@@ -133,8 +133,8 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 	offSet = mGeomDb->numberOfInnerSectorAnodeWires();
 	wireLimit = mGeomDb->numberOfInnerSectorAnodeWires() +
 	    mGeomDb->numberOfOuterSectorAnodeWires() - 1;
-    PR(offSet);
-    PR(wireLimit);
+    }
+
     PR(wireIndex);
     PR(wireCoordinate(wireIndex));
     //if (tmpWire<0) tmpWire -=.5;
@@ -143,7 +143,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 	wireIndex = offSet;
     if(wireIndex > wireLimit)
 	wireIndex = wireLimit;
-    
+
     //PR(offSet);
     //PR(wireLimit);
 //     PR(wireIndex);
@@ -167,7 +167,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 	// Time Delay
 	    // Increase DriftLength Proportional to the Distance from the Wire
 	    // Keeping in mind a 2mm shift is approximately .1 timebins
-		PR(increase);
+	    // This means 500 um is 2 mm!
 	    // Currently a linear function is used, but a better profile
 	    // can probably be found with some study.
 
@@ -176,12 +176,12 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 	    {
 #ifndef ST_NO_NAMESPACES
 		using namespace units;
-	PR(bin.position());
+#endif
 		double increase = 250*micrometer/millimeter*distanceToWire;
-	PR(bin.position());
+		//PR(increase);
         cout << "Try add # " << wireIndex <<endl;
 		bin.position().setZ((oldDriftLength+increase));
-	PR(bin);
+	    }
 //         cout << "add at wire # " << wireIndex <<endl;
 
 	//
@@ -286,8 +286,12 @@ double StTrsWireHistogram::exponentialFluctuations(int wireIndex) const
 	mExponentialDistribution.shoot(mInnerSectorGasGain) :
 	mExponentialDistribution.shoot(mOuterSectorGasGain);
 }
-    mInnerSectorGasGain = 1315.;
-    mOuterSectorGasGain = 615.;
+
+double StTrsWireHistogram::noFluctuations(int wireIndex) const
+{
+    return (wireIndex<mNumberOfInnerSectorAnodeWires) ?
+	mInnerSectorGasGain : mOuterSectorGasGain;
+
     // Take gain 10^4
     mInnerSectorGasGain = 10000.;
     mOuterSectorGasGain = 10000.;
