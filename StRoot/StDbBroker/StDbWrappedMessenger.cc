@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbWrappedMessenger.cc,v 1.1 2001/01/22 18:40:25 porter Exp $
+ * $Id: StDbWrappedMessenger.cc,v 1.2 2001/01/26 14:48:41 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbWrappedMessenger.cc,v $
+ * Revision 1.2  2001/01/26 14:48:41  porter
+ * fixed tag so verbose output works correctly
+ *
  * Revision 1.1  2001/01/22 18:40:25  porter
  * Added a wrapper for StMessage so one can use it in StDbLib
  *
@@ -38,7 +41,7 @@ if(dbLevel<mdbLevel)return;
  switch(dbLevel){
  case dbMDebug:
    {
-      strcpy(lString,"D");
+      strcpy(lString,"I");
       break;
    }
  case dbMWarn:
