@@ -17,7 +17,11 @@ static ASU_MALLOCTRACE_T *asu_mallocTrace=&asu_mallocTrace0;
 /*--------------------------------------------------------------------*/
 void asuMallocInit()
 {
-   if( !(ASU_MALLOC_INIT == asu_mallocLevel) ){
+  
+/* 	Init of asuStack	*/
+   asuStack(NULL);
+  
+     if( !(ASU_MALLOC_INIT == asu_mallocLevel) ){
       fprintf(stderr,"ASU_MALLOC: use Reset \n");fflush(0);
       return;
    }
@@ -306,9 +310,14 @@ void asuFree(void *p, char* file, int line)
 int asuStack(void *p) 
 {
   static unsigned long MinStack=(unsigned long)(-1),MaxStack=0,MinHeap=0;
+  static long init=0,ncall=0;
   unsigned long NowStack,pp;
 
-  if (!MinHeap) {MinHeap = (unsigned long)malloc(8); free ((void*)MinHeap);}
+  ncall++;
+  if (!MinHeap) {
+    MinHeap = (unsigned long)malloc(8); 
+    init = (! p);
+    }
 
   NowStack = (unsigned long)&NowStack ;
 
@@ -319,6 +328,8 @@ int asuStack(void *p)
 
   if (MaxStack >= pp && pp > NowStack) 	return  1;
   if (NowStack >= pp && pp > MinStack) 	return -1;
+  if (! init) return 0;
+  if (ncall < 100) MinHeap = (pp < MinHeap) ? pp : MinHeap;
   if (pp < MinHeap)  			return -2;
   return 0;    
 }
