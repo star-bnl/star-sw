@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.50 2004/12/12 01:34:24 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.51 2004/12/13 20:01:38 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.51  2004/12/13 20:01:38  perev
+ * old version of testError temporary activated
+ *
  * Revision 2.50  2004/12/12 01:34:24  perev
  * More smart testError, partial error reset
  *
@@ -805,6 +808,7 @@ void StiKalmanTrackNode::propagateError()
     f13 = (Dsin-cosCA2*dang)/(cosCA2*Dcos+sinCA2*Dsin);
   }
   f13 = _p4*f03*f13;
+  f13 = _p4*((x2-x1)-cosCA2*dl)/(cosCA2*_p3);
 
 //  double f14= dx*sumSin/sinCA1plusCA2; 
   double f14= dl; 
@@ -1616,6 +1620,54 @@ static const double MyChi2 = 1.18179;
 //______________________________________________________________________________
 int StiKalmanTrackNode::testError(double *emx)
 {
+  static int nCalls=0; nCalls++;
+  static const double big=1.e+6;
+  enum {kC00, kC10, kC11, kC20, kC21
+       ,kC22, kC30, kC31, kC32, kC33
+       ,kC40, kC41, kC42, kC43, kC44};
+
+  int ians;
+  ians=1; if (emx[kC00]<0) goto RETN;
+  ians=2; if (emx[kC11]<0) goto RETN;
+  ians=3; if (emx[kC22]<0) goto RETN;
+  ians=4; if (emx[kC33]<0) goto RETN;
+  ians=5; if (emx[kC44]<0) goto RETN;
+
+  ians=11; if (emx[kC00]>big) goto RETN;
+  ians=22; if (emx[kC11]>big) goto RETN;
+  ians=33; if (emx[kC22]>big) goto RETN;
+  ians=44; if (emx[kC33]>big) goto RETN;
+  ians=55; if (emx[kC44]>big) goto RETN;
+
+  ians=10; if (emx[kC10]*emx[kC10]>emx[kC11]*emx[kC00]) goto RETN;
+  ians=20; if (emx[kC20]*emx[kC20]>emx[kC22]*emx[kC00]) goto RETN;
+  ians=21; if (emx[kC21]*emx[kC21]>emx[kC22]*emx[kC11]) goto RETN;
+  ians=30; if (emx[kC30]*emx[kC30]>emx[kC33]*emx[kC00]) goto RETN;
+  ians=31; if (emx[kC31]*emx[kC31]>emx[kC33]*emx[kC11]) goto RETN;
+  ians=32; if (emx[kC32]*emx[kC32]>emx[kC33]*emx[kC22]) goto RETN;
+  ians=40; if (emx[kC40]*emx[kC40]>emx[kC44]*emx[kC00]) goto RETN;
+  ians=41; if (emx[kC41]*emx[kC41]>emx[kC44]*emx[kC11]) goto RETN;
+  ians=42; if (emx[kC42]*emx[kC42]>emx[kC44]*emx[kC22]) goto RETN;
+  ians=43; if (emx[kC43]*emx[kC43]>emx[kC44]*emx[kC33]) goto RETN;
+  return 0;
+RETN:
+#ifdef STI_NODE_TEST
+  printf("***StiKalmanTrackNode::testError =%d ***\n",ians);
+#endif
+  memset (emx,0,sizeof(double)*15);
+  emx[kC00]= 100*100;
+  emx[kC11]= 100*100;
+  emx[kC22]=  10*10;
+  emx[kC33]=   1*1;
+  emx[kC44]= 100*100;;
+
+
+  return ians;
+}
+#if 0
+//______________________________________________________________________________
+int StiKalmanTrackNode::testError(double *emx)
+{
 // Test and correct error matrix. Output : number of fixes
 // DO NOT IMPROVE weird if() here. This accounts NaN
 
@@ -1624,22 +1676,25 @@ int StiKalmanTrackNode::testError(double *emx)
   static const double dia[5] = { 10000., 10000.,100.,3.,10000.};
   static const int    idx[5][5] = 
   {{0,1,3,6,10},{1,2,4,7,11},{3,4,5,8,12},{6,7,8,9,13},{10,11,12,13,14}};
-  
   int ians=0,j1,j2,jj;
   for (j1=0; j1<5;j1++){
     jj = idx[j1][j1];
-    if (emx[jj]<=dia[j1] && (emx[jj]>0)) continue;
+    if (emx[jj]<=10*dia[j1] && (emx[jj]>0)) continue;
+//    assert(finite(emx[jj]));
     ians++; emx[jj]=dia[j1];
-    for (j2=0; j2<j1;j2++){emx[idx[j1][j2]]=0;}
+    for (j2=0; j2<5;j2++){if (j1!=j2) emx[idx[j1][j2]]=0;}
   }
   for (j1=0; j1< 5;j1++){
-  for (j2=0; j2<j1;j2++){
+  for (j2=0; j2< 5;j2++){
+    if (j1==j2) continue;
     jj = idx[j1][j2];
+//    assert(finite(emx[jj]));
     if (emx[jj]*emx[jj]<0.9*emx[idx[j1][j1]]*emx[idx[j2][j2]]) continue;
     ians++;emx[jj]=0;
   }}
   return ians;
 }
+#endif //0
 //______________________________________________________________________________
 void StiKalmanTrackNode::numeDeriv(double val,int kind,int shape,int dir)
 {
