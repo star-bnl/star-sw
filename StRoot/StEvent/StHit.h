@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.9 2002/02/22 22:56:48 jeromel Exp $
+ * $Id: StHit.h,v 2.10 2004/01/13 21:01:32 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.10  2004/01/13 21:01:32  fisyak
+ * Add Truth and Quality information from simulation
+ *
  * Revision 2.9  2002/02/22 22:56:48  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -63,7 +66,8 @@ public:
     StHit();
     StHit(const StThreeVectorF&,
           const StThreeVectorF&,
-          unsigned int, float, unsigned char = 0);
+          unsigned int, float, unsigned char = 0,
+	  UShort_t id=0, UShort_t quality=0);
     // StHit(const StHit&);            use default
     // StHit& operator=(const StHit&); use default
     ~StHit();
@@ -78,13 +82,15 @@ public:
     StThreeVectorF  positionError() const;     // overwrite inherited
     StMatrixF       covariantMatrix() const;   // overwrite inherited
     int             usedInFit() const;
-    
+    UShort_t        idTruth() const {return mIdTruth;}
+    UShort_t        quality() const {return mQuality;}
     void setCharge(float);
     void setFlag(unsigned char);
     void setTrackReferenceCount(unsigned char);
     void setHardwarePosition(unsigned int);
     void setPositionError(const StThreeVectorF&);
-    
+    void setIdTruth(UShort_t id=0) {mIdTruth=id;}
+    void setQuality(UShort_t quality=0) {mQuality = quality;}
     virtual StPtrVecTrack relatedTracks(const StSPtrVecTrackNode&, StTrackType);
     
 protected:
@@ -96,9 +102,10 @@ protected:
     StThreeVectorF mPositionError;
     UChar_t        mFlag;
     UChar_t        mFitFlag;
-    
+    UShort_t       mIdTruth; // simulation track id 
+    UShort_t       mQuality; // quality of this information (percentage of charge produced by mIdTruth)
     StObject* clone() const;
-    ClassDef(StHit,1)
+    ClassDef(StHit,2)
 };
 
 inline unsigned int StHit::bits(unsigned int bit, unsigned int nbits) const
