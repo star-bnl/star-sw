@@ -143,21 +143,33 @@ void Bank_TRGD::PrintAllTheData(FILE *ff) {
   FF Funsigned_short  ,"EvtDesc.npre",GS->EvtDesc.npre,GS->EvtDesc.npre);
   FF Funsigned_short  ,"EvtDesc.npost",GS->EvtDesc.npost,GS->EvtDesc.npost);
   FF Funsigned_short  ,"TrgSum.TrgSumBytes",GS->TrgSum.TrgSumBytes,GS->TrgSum.TrgSumBytes);
-  for(i=0;i<  2;i++) FF Fchar            ,PrintHelp("TrgSum.TrgSumHeader",i),GS->TrgSum.TrgSumHeader[i],GS->TrgSum.TrgSumHeader[i]);
+  char *TrgSumHeader=(char*)&(GS->TrgSum.TrgSumHeader);
+  for(i=0;i<  2;i++) FF Fchar            ,PrintHelp("TrgSum.TrgSumHeader",i),
+      TrgSumHeader[i],
+      TrgSumHeader[i]);
   for(i=0;i<  2;i++) FF Funsigned_int    ,PrintHelp("TrgSum.L1Sum",i),GS->TrgSum.L1Sum[i],GS->TrgSum.L1Sum[i]);
   for(i=0;i<  2;i++) FF Funsigned_int    ,PrintHelp("TrgSum.L2Sum",i),GS->TrgSum.L2Sum[i],GS->TrgSum.L2Sum[i]);
   FF Funsigned_short  ,"TrgSum.L0SumBytes",GS->TrgSum.L0SumBytes,GS->TrgSum.L0SumBytes);
-  for(i=0;i<  2;i++) FF Fchar            ,PrintHelp("TrgSum.L0SumHeader",i),GS->TrgSum.L0SumHeader[i],GS->TrgSum.L0SumHeader[i]);
+  char *L0SumHeader=(char*)&(GS->TrgSum.L0SumHeader);
+  for(i=0;i<  2;i++) FF Fchar            ,PrintHelp("TrgSum.L0SumHeader",i),
+      L0SumHeader[i],
+      L0SumHeader[i]);
   for(i=0;i< 32;i++) FF Funsigned_short  ,PrintHelp("TrgSum.DSM.CPA",i),GS->TrgSum.DSM.CPA[i],GS->TrgSum.DSM.CPA[i]);
   for(i=0;i<  8;i++) FF Funsigned_short  ,PrintHelp("TrgSum.DSM.quadDSM",i),GS->TrgSum.DSM.quadDSM[i],GS->TrgSum.DSM.quadDSM[i]);
   for(i=0;i<  8;i++) FF Funsigned_short  ,PrintHelp("TrgSum.DSM.lastDSM",i),GS->TrgSum.DSM.lastDSM[i],GS->TrgSum.DSM.lastDSM[i]);
   for(i=0;i< 16;i++) FF Funsigned_char  ,PrintHelp("TrgSum.DSM.ZDC",i),GS->TrgSum.DSM.ZDC[i],GS->TrgSum.DSM.ZDC[i]);
   for(i=0;i< 16;i++) FF Funsigned_short  ,PrintHelp("TrgSum.DSM.BCdata",i),GS->TrgSum.DSM.BCdata[i],GS->TrgSum.DSM.BCdata[i]);
   FF Funsigned_short  ,"TrgSum.L1SumBytes",GS->TrgSum.L1SumBytes,GS->TrgSum.L1SumBytes);
-  for(i=0;i<  2;i++) FF Fchar            ,PrintHelp("TrgSum.L1SumHeader",i),GS->TrgSum.L1SumHeader[i],GS->TrgSum.L1SumHeader[i]);
+  char *L1SumHeader=(char*)&(GS->TrgSum.L1SumHeader);
+  for(i=0;i<  2;i++) FF Fchar            ,PrintHelp("TrgSum.L1SumHeader",i),
+      L1SumHeader[i],
+      L1SumHeader[i]);
   for(i=0;i< 32;i++) FF Funsigned_int    ,PrintHelp("TrgSum.L1Result",i),GS->TrgSum.L1Result[i],GS->TrgSum.L1Result[i]);
   FF Funsigned_short  ,"TrgSum.L2SumBytes",GS->TrgSum.L2SumBytes,GS->TrgSum.L2SumBytes);
-  for(i=0;i<  2;i++) FF Fchar            ,PrintHelp("TrgSum.L2SumHeader",i),GS->TrgSum.L2SumHeader[i],GS->TrgSum.L2SumHeader[i]);
+  char *L2SumHeader=(char*)&(GS->TrgSum.L2SumHeader);
+  for(i=0;i<  2;i++) FF Fchar            ,PrintHelp("TrgSum.L2SumHeader",i),
+      L2SumHeader[i],
+      L2SumHeader[i]);
   for(i=0;i< 32;i++) FF Funsigned_int    ,PrintHelp("TrgSum.L2Result",i),GS->TrgSum.L2Result[i],GS->TrgSum.L2Result[i]);
   FF Funsigned_short  ,"RAW.RawDetBytes",GS->RAW[0].RawDetBytes,GS->RAW[0].RawDetBytes);
   for(i=0;i<  2;i++) FF Fchar            ,PrintHelp("RAW.RawDetHeader",i),GS->RAW[0].RawDetHeader[i],GS->RAW[0].RawDetHeader[i]);
@@ -185,6 +197,9 @@ void Bank_TRGD::PrintAllTheData(FILE *ff) {
 #define PLINE fprintf(ff,"%s",line);
 void Bank_TRGD::PrintDataCompact(FILE *ff) {
   int i;
+  char *L0SumHeader,*TrgSumHeader;
+  TrgSumHeader=(char*)&(GS->TrgSum.TrgSumHeader);
+  L0SumHeader=(char*)&(GS->TrgSum.L0SumHeader);
   char line[] = "-------------------------------------------------------------";
   assert(ff);
   FF Munsigned_short  ,"EvtDesc.TCUdataBytes",GS->EvtDesc.TCUdataBytes,GS->EvtDesc.TCUdataBytes);
@@ -205,11 +220,11 @@ void Bank_TRGD::PrintDataCompact(FILE *ff) {
   FF Munsigned_short  ,"EvtDesc.npre",GS->EvtDesc.npre,GS->EvtDesc.npre);
   FF Munsigned_short  ,"EvtDesc.npost",GS->EvtDesc.npost,GS->EvtDesc.npost);
   FF Munsigned_short  ,"TrgSum.TrgSumBytes",GS->TrgSum.TrgSumBytes,GS->TrgSum.TrgSumBytes);
-  FF "%-32s    '%c%c'\n","TrgSum.TrgSumHeader", GS->TrgSum.TrgSumHeader[0],GS->TrgSum.TrgSumHeader[1]);
+  FF "%-32s    '%c%c'\n","TrgSum.TrgSumHeader", TrgSumHeader[0],TrgSumHeader[1]);
   FF "%-32s    0x%08x   0x%08x\n", "TrgSum.L1Sum",GS->TrgSum.L1Sum[0],GS->TrgSum.L1Sum[1]);
   FF "%-32s    0x%08x   0x%08x\n", "TrgSum.L2Sum",GS->TrgSum.L2Sum[0],GS->TrgSum.L2Sum[1]);
   FF Munsigned_short  ,"TrgSum.L0SumBytes",GS->TrgSum.L0SumBytes,GS->TrgSum.L0SumBytes);
-  FF "%-32s    '%c%c'\n", "TrgSum.L0SumHeader",GS->TrgSum.L0SumHeader[0],GS->TrgSum.L0SumHeader[1]);
+  FF "%-32s    '%c%c'\n", "TrgSum.L0SumHeader",L0SumHeader[0],L0SumHeader[1]);
 
 
   FF "\n%s   ","TrgSum.DSM.CPA:");
@@ -250,7 +265,10 @@ void Bank_TRGD::PrintDataCompact(FILE *ff) {
   FF "\n\n");
 
   PLINE
-  FF "\n%-20s0x%x (%d) bytes\tHeader:  '%c%c'\n","TrgSum.L1Result:",GS->TrgSum.L1SumBytes,GS->TrgSum.L1SumBytes,GS->TrgSum.L1SumHeader[0],GS->TrgSum.L1SumHeader[1]);
+  char *L1SumHeader=(char*)&(GS->TrgSum.L1SumHeader);
+  FF "\n%-20s0x%x (%d) bytes\tHeader:  '%c%c'\n","TrgSum.L1Result:",GS->TrgSum.L1SumBytes,GS->TrgSum.L1SumBytes,
+      L1SumHeader[0],
+      L1SumHeader[1]);
   PLINE
   for(i=0;i< 32;i++) {
     if (i%8) FF "%8x ",GS->TrgSum.L1Result[i]);
@@ -260,7 +278,10 @@ void Bank_TRGD::PrintDataCompact(FILE *ff) {
 
 
   PLINE
-  FF "\n%-20s0x%x (%d) bytes\tHeader:  '%c%c'\n","TrgSum.L2Result:",GS->TrgSum.L2SumBytes,GS->TrgSum.L2SumBytes,GS->TrgSum.L2SumHeader[0],GS->TrgSum.L2SumHeader[1]);
+  char *L2SumHeader=(char*)&(GS->TrgSum.L2SumHeader);
+  FF "\n%-20s0x%x (%d) bytes\tHeader:  '%c%c'\n","TrgSum.L2Result:",GS->TrgSum.L2SumBytes,GS->TrgSum.L2SumBytes,
+      L2SumHeader[0],
+      L2SumHeader[1]);
   PLINE
   for(i=0;i< 32;i++) {
     if (i%8) FF "%8x ",GS->TrgSum.L2Result[i]);
