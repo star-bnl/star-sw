@@ -1,5 +1,8 @@
-// $Id: StMessage.h,v 1.7 2000/01/05 19:53:46 genevb Exp $
+// $Id: StMessage.h,v 1.8 2000/06/10 21:19:02 genevb Exp $
 // $Log: StMessage.h,v $
+// Revision 1.8  2000/06/10 21:19:02  genevb
+// Remove use of virtual functions
+//
 // Revision 1.7  2000/01/05 19:53:46  genevb
 // Fixed CC5 warnings, and several other small improvements under the hood
 //
@@ -56,13 +59,13 @@ class StMessage {
    StMessage(const char* mess="", const char* ty="I", const char* opt="O");
    StMessage(const StMessage&){;}
    virtual ~StMessage();
-   virtual           void PrintInfo();
-   virtual          int Print(int nChars=-1);
-   virtual     TDatime& GetTime() {return messTime;}
-   virtual  const char* GetType() const {return type;}
-   virtual        char* GetMessage() {return message;}
-   virtual        char* GetOptions() {return option;}
-   virtual         void SetOption(char* opt) {option = opt;}
+          void PrintInfo();
+           int Print(int nChars=-1);
+      TDatime& GetTime() {return messTime;}
+   const char* GetType() const {return type;}
+         char* GetMessage() {return message;}
+         char* GetOptions() {return option;}
+          void SetOption(char* opt) {option = opt;}
 #ifdef __ROOT__
    ClassDef(StMessage,1)
 #endif
