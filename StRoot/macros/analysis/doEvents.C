@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.83 2003/05/02 23:12:53 jeromel Exp $
+// $Id: doEvents.C,v 1.84 2003/07/17 15:34:12 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -275,7 +275,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     //
     istat=0,iEvt=1;
     istat = chain->EventLoop(1,nEvents);    
-
+    delete setFiles; setFiles=0;
 
 }
 
@@ -322,6 +322,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.84  2003/07/17 15:34:12  perev
+// delete setFiles added
+//
 // Revision 1.83  2003/05/02 23:12:53  jeromel
 // StBichsel
 //
