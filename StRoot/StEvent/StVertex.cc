@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cc,v 1.2 1999/01/15 22:54:22 wenaus Exp $
+ * $Id: StVertex.cc,v 1.3 1999/04/19 15:54:10 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,13 +13,17 @@
  ***************************************************************************
  *
  * $Log: StVertex.cc,v $
+ * Revision 1.3  1999/04/19 15:54:10  genevb
+ * Added momentum() to vertex classes
+ *
  * Revision 1.2  1999/01/15 22:54:22  wenaus
  * version with constructors for table-based loading
  *
  **************************************************************************/
 #include "StEvent/StVertex.hh"
+#include "StEvent/StGlobalTrack.hh"
 
-static const char rcsid[] = "$Id: StVertex.cc,v 1.2 1999/01/15 22:54:22 wenaus Exp $";
+static const char rcsid[] = "$Id: StVertex.cc,v 1.3 1999/04/19 15:54:10 genevb Exp $";
 
 StVertex::StVertex()
 {
@@ -65,3 +69,16 @@ void StVertex::setPositionError(const StThreeVector<float>& val) { mPositionErro
 void StVertex::setQualityBitmask(unsigned long val) { mQualityBitmask = val; } 
 
 void StVertex::setChiSquared(float val) { mChiSquared = val; }     
+
+StThreeVector<float> StVertex::momentum(double B)
+{
+    if (mParent) {
+      return mParent->helix().momentum(B);
+    } else {
+      StThreeVector<float> mMomentum;
+      for (int i=0; i<numberOfDaughters(); i++) {
+        mMomentum += daughter(i)->helix().momentum(B);
+      }
+      return mMomentum;
+    }
+}
