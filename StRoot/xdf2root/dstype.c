@@ -606,7 +606,7 @@ static int dsSearchScope(DS_TYPE_T **ppType, char *name,
 	DS_FIELD_T *field;
 	DS_TYPE_T *type;
 
-        // treat all  "int" as "long"
+        /* treat all  "int" as "long" */
         if (!dsCmpName(name,intName)) name = (char *)longName;
 	for (; level-- > 0;) {
 		type = scope[level];
