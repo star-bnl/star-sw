@@ -1,7 +1,8 @@
 * editted May 27, 1998 - Kathy Turner
 *                      - now just have macros in this kumac
 *                      - use run_tpc_slow_sim.kumac to run it!
-
+* editted June 4, 1998 - Kathy Turner
+*                      - now does only simulation (now clustering!)
 ***********************************************************************
 ************************************************************************
 ************************************************************************
@@ -18,16 +19,15 @@ macro initialize adcxyzon
 
 *
 *  create tables
-    exec create_tables_tpc_slow_sim#tss
+    exec create_tables_tpc#tss
     if [adcxyzon].eq.1 then
-      exec create_tables_tpc_slow_sim#tfc
+      exec create_tables_tpc#tfc
     endif
-    exec create_tables_tpc_slow_sim#tcl
 
 
 *   initialization for tpc slow simulator
     exec tss_init#init 
-    exec tcl_init#init
+ 
 
  return
 
@@ -46,12 +46,6 @@ macro process_event  nev adcxyzon
   if [adcxyzon].eq.1 then
     exec tfc_run#run 
   endif
-
-* call tcl_make_clusters - tpc cluster finder
-  exec tcl_run#run_tcl_make_clusters
-
-* call tpham - tpc hit finder
-  exec tcl_run#run_tpham 
 
 
 return

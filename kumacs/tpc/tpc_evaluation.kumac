@@ -7,9 +7,9 @@
 *                      - use run_tpc_tracker to run!
 * editted June 2, 1998 - Kathy Turner
 *                      - removed tcl_init#init 
-*                          and put it in run_tpc_tracker.kumac
+*                        and put it in run_tpc_tracker.kumac
 * editted June 4, 1998 - Kathy Turner
-*                      - now does tracking only!
+*                      - now does evaluation only!
 ************************************************************************
 ************************************************************************
 ************************************************************************
@@ -21,60 +21,34 @@
 
 macro initialize
 
-    message ' Initializing for tpc tracker '
-
 *
 *  create tables
-    exec create_tables_tpc#tpt
+
+    exec create_tables_tpc#tte
 
 
-* initialization for tpc tracker
-    exec tpt_init#init
-    exec tid_init#init
-
+    exec tte_init#init
 
  return
 
 
 *------------------------------------------------------------------------
 
-macro process_event_tpt   nev
+macro process_event   nev
 
 
-   message ' TPC tpt tracker: Processing Event # ' [nev]
+   message ' TPC evaluation: Processing Event # ' [nev]
 
 
-* call tpt
-  message ' calling tpt_run'
-  exec tpt_run#run
-  mess ' finished tpt run'
-* call tde_new
-  message ' calling tid_run'
-  exec tid_run#run_tde_new
 
+* call tte
+
+  exec tte_run#run_tte
 
 
 return
 
-*------------------------------------------------------------------------
 
-macro process_event_tte   nev
-
-   message ' TPC tte tracker: Processing Event # ' [nev]
-
-
-* call tte_track - MC tracking!
-  exec tte_run#run_tte_track
-
-* call tde_new
-  exec tid_run#run_tde_new
-
-
-return
-
-*********************************************************************
-*********************************************************************
-*********************************************************************
 *********************************************************************
 
 

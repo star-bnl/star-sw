@@ -4,6 +4,7 @@
 *                            /dui/data, /dui/geant !!
 * editted June 2, 1998 - Kathy Turner
 *                   - put in tcl_init#init and took it out of tpc_tracker.kumac
+*  editted June 3, 1998 - Kathy Turner
 * ***********************************************************************
 ************************************************************************
 
@@ -84,13 +85,18 @@ $STAR/pams/trg/kumac
    
 
 ********************** TPC CLUSTER INIT ***************************
-*  have to have this or it won't work!
-   exec tcl_init#init
+ 
+   exec tpc_clustering#initialize_fast
     
   
 ******************* TPC TRACKING INIT **************************
   exec tpc_tracker#initialize
-   
+  
+  
+******************* TPC TRACKING INIT **************************
+  exec tpc_evaluation#initialize
+  
+  
   
 ******************* TPC TRACKER PROCESSING *********************
 
@@ -106,6 +112,7 @@ $STAR/pams/trg/kumac
  elseif [tracker]=tte then
    exec tpc_tracker#process_event_tte [i] 
  endif
+ exec tpc_evaluation#process_event [i]
 * write table from tpc fast sim to ntuple
  if [i].eq.1 then
    exec write_table_to_ntuple#init_disk _

@@ -1,6 +1,7 @@
 * created May 27, 1998 - Kathy Turner
 *                      - this is now kumac that drives tpc fast simulator 
 *                        and then does tracking
+*  editted June 4, 1998 Kathy Turner
 * ***********************************************************************
 ************************************************************************
 
@@ -81,6 +82,10 @@ $STAR/pams/trg/kumac
 * tpc geometry init
   exec tpg_init#init
   
+* ****************** TPC CLUSTER INIT ***************************
+* tpc cluster init for fast sim tracking!
+  exec tpc_clustering#initialize_fast
+  
 * ****************** TPC FAST SIM INIT ***************************
 * tpc fast sim init
   exec tpc_fast_sim#initialize 
@@ -89,10 +94,16 @@ $STAR/pams/trg/kumac
 * tpc tracker init
   exec tpc_tracker#initialize
   
-     
+* ****************** TPC EVALUATION INIT **************************
+* tpc eval init
+  exec tpc_evaluation#initialize
+  
+  
+  
 * ****************** TPC FAST SIM PROCESSING ********************
 * ****************** TPC TRACKER PROCESSING *********************
-   
+* ****************** TPC TRACK EVALUATION ***********************
+  
 * read event and then process thru tpc fast sim & then tracker
   do i=1,[num_events]
     message ' run_tpc_fast_sim_tracker: processing event ' [i]
@@ -110,6 +121,8 @@ $STAR/pams/trg/kumac
     elseif [tracker]=tte then
       exec tpc_tracker#process_event_tte [i] 
     endif
+* tpc track evaluation
+    exec tpc_evaluation#process_event [i]
 * write table to ntuple
     if [i]=1 then
       exec write_table_to_ntuple#init_disk _

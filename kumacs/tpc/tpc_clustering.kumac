@@ -1,14 +1,7 @@
-* editted May 22, 1998 - Kathy Turner
-*                        changed it so it does simulation only
-*                        (no tracking)
-*
-* editted May 27, 1998 - Kathy Turner
-*                      - now just have macros in this kumac
-*                      - use run_tpc_fast_sim.kumac to run it!
-* editted June 4, 1998 Kathy Turner
-*                       - now does fast sim only
-*                       - must initialize clustering elsewhere
-* ***********************************************************************
+
+* created June 4, 1998 - Kathy Turner
+*                      -  does only  clustering!
+***********************************************************************
 ************************************************************************
 ************************************************************************
 ************************************************************************
@@ -17,37 +10,49 @@
 ************************************************************************
 *--------------------------------------------------------------------
 
-macro initialize
+macro initialize 
 
-    message ' Initializing for tpc fast simulator '
+  message ' Initializing for tpc clustering '
 
-    exec tfs_init#init
+    exec create_tables_tpc#tcl_slow
+
+    exec tcl_init#init
+
+ return
+ 
+* -------------------------------------------------
+ 
+macro initialize_fast 
+
+* exec before tpc_fast_sim initialize!
+  
+    exec create_tables_tpc#tcl_fast
+
+    exec tcl_init#init 
+
 
  return
 
 *------------------------------------------------------------------------
 
-macro process_event   nev
+macro process_event nev 
+  
+    message ' TPC clustering: processing event # ' [nev]
 
-   message ' TPC fast sim, Processing Event # ' [nev]
+* call tcl_make_clusters - tpc cluster finder
+  exec tcl_run#run_tcl_make_clusters
 
+* call tpham - tpc hit finder
+  exec tcl_run#run_tpham 
 
-* call tfs_g2t and tfs_filt
-  message ' calling tfs_run'
-  exec tfs_run#run
 
 return
 
-*------------------------------------------------------------------------
+
 *********************************************************************
 *********************************************************************
 *********************************************************************
 *********************************************************************
-
-
-
-
-
 
 
 
