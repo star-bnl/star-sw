@@ -1,7 +1,10 @@
-// $Id: St_Table.cxx,v 1.51 1999/04/01 20:17:20 fine Exp $ 
+// $Id: St_Table.cxx,v 1.52 1999/04/02 15:48:19 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.52  1999/04/02 15:48:19  fine
+// Minor casting problem for VC++ has been solved
+//
 // Revision 1.51  1999/04/01 20:17:20  fine
-// St_Table::Browse uses GetNRows rows at most now
+//  St_Table::Browse uses GetNRows rows at most now
 //
 // Revision 1.50  1999/03/30 23:24:50  fine
 //  Some comments fixed
@@ -399,7 +402,7 @@ Char_t *St_Table::Create()
 //______________________________________________________________________________
 void St_Table::Browse(TBrowser *b){
   St_DataSet::Browse(b);
-  Int_t nrows = TMath::Min(GetNRows(),6);
+  Int_t nrows = TMath::Min(Int_t(GetNRows()),6);
   Print(0,nrows);
 }
 //______________________________________________________________________________
