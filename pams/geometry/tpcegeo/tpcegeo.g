@@ -15,6 +15,7 @@ module   TPCEGEO  is the TPC system in GSTAR
 *  PN  08/21/97: anything denser than TPC gas absorbs laserino              *
 *  PN  10/28/98: two more pseudo-padrows in the outer sector for Iwona      *
 *  PN  11/10/99: full gap between gating grid and the padplane is sensitive *
+*  PN  03/10/01: TMSE hit x-size determined automatically with MWCread>=2   *
 *****************************************************************************
 +cde,AGECOM,GCUNIT,GCONST.     " - standart geant commons "
 Content   TPCE,TOFC,TOFS,TOST,TOKA,TONX,TOAD,TOHA,TPGV,TPSS,
@@ -36,7 +37,7 @@ Real      tocsIR,tocsOR,tokaIR,tokaOR,tonxIR,tonxOR,toadIR,toadOR,toigIR,toigOR,
           toalIR,toalOR,tohaIR,tohaOR,tofsIR,tofsOR,tofcIR,tofcOR,
           tiadIR,tiadOR,tinxIR,tinxOR,tikaIR,tikaOR,tialIR,tialOR,
           tifcIR,tifcOR,tpgvIR,tpgvLeng,tofcLeng,
-          tpcwz,tpgvz,tpeaZ,dx_dz,dxb,del
+          tpcwz,tpgvz,tpeaZ,dx_dz,dxb,del,a,b
 Integer   i_row,i_sec,i
 External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
 *******************************************************************************
@@ -63,7 +64,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
       tinxDR     = 1.270    ! inner nomex structure thickness
       tikaDR     = 0.015    ! inner Kapton layer thickness
       tialDR     = 0.004    ! inner aluminum layer thickness
-      MWCread    = 1        ! MWC readout flag
+      MWCread    = 2        ! MWC readout flag
 *
    Fill TPRS              ! sector of padrows
       sec    = 1            ! sector number: 1 for inner, 2 for outer
@@ -520,13 +521,20 @@ endblock
 Block TMSE  is a single sensitive volume
 
       SHAPE   division  Iaxis=3 Ndiv=tecw_MwcNwir
-*     until now AGI does not get proper dimensions here (!), force to max:
+      if (TPCG_MWCread==1) then
+*     until 10-03-01 AGI was not seting proper dimensions here, force to max:
       HITS    TMSE   Z:.01:S  Y:.01:   X:.01:(-tecw_MWCout/2,tecw_MWCout/2),
                      cx:10:   cy:10:   cz:10:,
                      Sleng:0.1:(0,800) Step:.01:,  
                      ToF:16:(0,1.e-6)  Ptot:16:(0,100), 
                      LGAM:16:(-2,2)    Elos:16:(0,0.01) 
-
+      else
+      HITS    TMSE   Z:.01:S  Y:.01:   X:.01:,
+                     cx:10:   cy:10:   cz:10:,
+                     Sleng:0.1:(0,800) Step:.01:,  
+                     ToF:16:(0,1.e-6)  Ptot:16:(0,100), 
+                     LGAM:16:(-2,2)    Elos:16:(0,0.01) 
+      endif
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Block TIAG is an air gap in inner sector aluminum structure
