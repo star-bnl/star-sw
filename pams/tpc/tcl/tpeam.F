@@ -19,7 +19,13 @@ C
      +,                       mctrlh, mctrl
      +,                       mkineh, mkine
      +,                       mhits_tpch, mhits_tpc 
-     +,                       tssparh, tsspar )
+     +,                       tssparh, tsspar 
+     +,			      tpclusterh, tpcluster
+     +,			      tpseqh, tpseq
+     +,			      tppixelh, tppixel 
+     +,			      tpmcpixh, tpmcpix 
+     +,			      pad_planeh, pad_plane
+     +,			      detectorh, detector )
 
       IMPLICIT NONE
 
@@ -51,6 +57,18 @@ C-----------------------------------------------------------------------
 #include "tcl_tphit_pars.inc"
 #include "tcl_tphit_st.inc"
 
+#include "tcl_tppixel_pars.inc"
+#include "tcl_tppixel_st.inc"
+
+#include "tcl_tpmcpix_pars.inc"
+#include "tcl_tpmcpix_st.inc"
+
+#include "tcl_tpcluster_pars.inc"
+#include "tcl_tpcluster_st.inc"
+
+#include "tcl_tpseq_pars.inc"
+#include "tcl_tpseq_st.inc"
+
 #include "mct_mctrl_pars.inc"
 #include "mct_mctrl_st.inc"
 #include "mct_mkine_pars.inc"
@@ -60,6 +78,12 @@ C-----------------------------------------------------------------------
 
 #include "tss_tsspar_pars.inc"
 #include "tss_tsspar_st.inc"
+
+#include "tpg_pad_plane_pars.inc"
+#include "tpg_pad_plane_st.inc"
+
+#include "tpg_detector_pars.inc"
+#include "tpg_detector_st.inc"
 
 C-----------------------------------------------------------------------
       RECORD/ table_head_st/ tphith
@@ -74,6 +98,24 @@ C-----------------------------------------------------------------------
 
       RECORD/ table_head_st/ tssparh
       RECORD/ tsspar_row_st/ tsspar(*)
+
+	RECORD/ table_head_st/ tpclusterh
+	RECORD/ tpcluster_row_st/ tpcluster(*)
+
+	RECORD/ table_head_st/ tpseqh
+	RECORD/ tpseq_row_st/ tpseq(*)
+
+	RECORD/ table_head_st/ tppixelh
+	RECORD/ tppixel_row_st/ tppixel(*)
+
+	RECORD/ table_head_st/ tpmcpixh
+	RECORD/ tpmcpix_row_st/ tpmcpix(*)
+
+	RECORD/ table_head_st/ pad_planeh
+	RECORD/ pad_plane_row_st/ pad_plane(*)
+
+	RECORD/ table_head_st/ detectorh
+	RECORD/ detector_row_st/ detector(*)
 
 C-----------------------------------------------------------------------
 c
@@ -113,12 +155,29 @@ C-----------------------------------------------------------------------
          integer nhitrow(mxhits),wire_hits,kwir
          real tphit_q(mxhits),mchit_q(mxhits)
 
+	integer nvar4
+	character*4 chtags4(11)
+	integer khit,kclus,nseq_hit,ktpc_row,kseq_count
+	integer ksector,krow,kseq,kpix,kdatum,kpad
+	integer numpix_seq,kadc,ktdc,kpix_count
+	integer kmcid,krowtemp
+	logical kstatus,tpg_local_to_global
+	double precision tpg_pad_to_x,tpg_row_to_y
+	double precision invec(3),outvec(3)
+	real xtemp,time_bucket
+	integer mxrow
+	parameter(mxrow=45)
+	integer id_pad(mxrow)
+	integer imal
+	
 C-----------------------------------------------------------------------
-         data nvar/9/,nvar2/11/,nvar3/5/
+         data nvar/9/,nvar2/11/,nvar3/5/,nvar4/11/
          data chtags/'itrk','itcl','nrow','x','y','z','prf','zrf','q'/
          data chtags2/'itrk','mcx ','mcy ','mcz ','tpx ','tpy ','tpz '
      +,              'delx','dely','delz','nrow'/
          data chtags3/'prec','mce','tpe','rde','pre2'/
+	 data chtags4/'hit ','clus','sect','row ','pad ',
+     +		      'tdc ','adc ','mcid','xpix','ypix','zpix'/
          data first/.true./,ihisto/0/
 C-----------------------------------------------------------------------
 c
@@ -152,6 +211,16 @@ c              iper = lochar(1H.,1,mctrl(1).infile,80)
                iquest(10)=nquota
                call hrfile(23,'ntup','NQ')
             endif
+
+c things needed for the ntuple 500+ihisto...
+ 	    time_bucket = detector(1).drift_length/tsspar(1).ntime
+            id_pad(1) = 0
+            do irow = 2, mxrow
+               id_pad(irow) = id_pad(irow-1)
+     +                        + pad_plane(1).npads(irow-1)
+            enddo
+
+
          endif
 
          call hcdir('//ntup',' ')
@@ -163,6 +232,8 @@ c              iper = lochar(1H.,1,mctrl(1).infile,80)
      +              chtags2)
          call hbookn(400+ihisto,'Track Info',nvar3,'ntup',4000,
      +              chtags3)
+         call hbookn(500+ihisto,'Hit Pixel Info',nvar4,'ntup',11000,
+     +              chtags4)
 c        
 c        proceed with evaluation...
 c
@@ -348,6 +419,74 @@ c
 
          call hrout(400+ihisto,icycle,' ')
          call hrout(300+ihisto,icycle,' ')
+
+c now fill pixel data for each hit - added 28nov94 mal
+*	goto 119
+
+	do khit=1,tphith.nok
+*	  WRITE(17,*)' AT TOP OF LOOP 1'
+	  kclus = tphit(khit).cluster
+	  nseq_hit = tpcluster(kclus).nseq
+	  kseq = tpcluster(kclus).jseq
+	  ktpc_row = tpcluster(kclus).secpad
+	  ksector = ktpc_row/100
+	  krow = ktpc_row - ksector*100
+	  if (mod(ksector,2).eq.0) then
+	    krowtemp = krow+pad_plane(1).nrow_in
+	  else
+	    krowtemp = krow
+	  endif
+	  vec(1)=khit
+	  vec(2)=kclus
+	  vec(3)=ksector
+	  vec(4)=krow
+	  invec(2)=tpg_row_to_y(krow,ksector)
+*	  WRITE(17,*)' ENTERING LOOP 2'
+	  do kseq_count=1,nseq_hit
+*	    WRITE(17,*)' AT TOP OF LOOP 2'
+*	    WRITE(17,*)'KSEQ,KROWTEMP,KROW = ',KSEQ,KROWTEMP,KROW
+	    kpad = tpseq(kseq).secpad - id_pad(krowtemp)
+*	    WRITE(17,*)'KPAD=',KPAD
+	    kpix = tpseq(kseq).jpix
+*	    WRITE(17,*)'KPIX=',KPIX
+	    kdatum=tppixel(kpix).datum
+	    numpix_seq=ibits(kdatum,8,6)
+*	    WRITE(17,*)'NUMPIX=',NUMPIX_SEQ
+	    vec(5)=kpad
+	    xtemp = kpad
+*	    WRITE(17,*)'XTEMP=',XTEMP
+	    invec(1)=tpg_pad_to_x(xtemp,krow,ksector)
+*	    WRITE(17,*)' ENTERING LOOP 3'
+	    do kpix_count=1,numpix_seq
+*	      WRITE(17,*)' AT TOP OF LOOP 3'
+	      kdatum=tppixel(kpix).datum
+	      kadc = ibits(kdatum,16,16)
+	      ktdc = ibits(kdatum,0,8) + 256*ibits(kdatum,14,2)
+	      kmcid = tpmcpix(kpix).mcid
+	      vec(6)=ktdc
+	      vec(7)=kadc
+	      vec(8)=kmcid
+	      invec(3) = dble(ktdc*time_bucket)
+	      kstatus=tpg_local_to_global(ksector,invec,outvec)
+	      vec(9)=real(outvec(1))
+	      vec(10)=real(outvec(2))
+	      vec(11)=real(outvec(3))
+*	      write(49,'(11(f6.2,1x))')(vec(imal),imal=1,11)
+*	      write(49,*)(vec(imal),imal=1,11)
+	      call hfn(500+ihisto,vec)
+	      kpix=kpix+1
+	    enddo
+*	    WRITE(17,*)' OUT OF LOOP 3'
+	    kseq = tpseq(kseq).next
+	  enddo
+*	  WRITE(17,*)' OUTOF LOOP 2'
+	enddo
+*	WRITE(17,*)' OUTOF LOOP 1'
+
+ 119	continue
+
+         call hrout(500+ihisto,icycle,' ')
+
 
 c        if( mctrl(1).nevt .eq. mctrl(1).mxevt)then
 c           call hrend('ntup')
