@@ -89,6 +89,8 @@ char * topProject::  listing () {
    char* c = socObject::listing();
    char* cc = NULL;
    char* s = selectionSpecification();
+   if(strlen(c)>77) c[78]=0;   // Herb, Dec 12 1998.  Fix crash.  No Insure++.
+   if(strlen(s)>95) s[96]=0;   // Herb, Dec 12 1998.  Fix crash.  No Insure++.
    cc = (char*)MALLOC(79+100);
    sprintf(cc,"%s %-32s",c,s);
    FREE(c);
