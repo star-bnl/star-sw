@@ -21,7 +21,25 @@
 #include "TVolume.hpp"					// include TVolume
 #include "Common.h"
 #include "types.h"
+//
+//  Constructor
+//
+TVolume::TVolume()
+{
+// reset padrow-array
+   memset(FPadRows, 0, (HIGH_PADROW-LOW_PADROW+2)*sizeof(void*));
+// set members
+// default padrow
+   FPadRow = 0;
+// initialize looping variables
+   FLastHitItem = NULL;
+// get hitlists for the FPadRowHits array
+   for(int count = 0; count < HIGH_PADROW-LOW_PADROW+2; count++)
+      FPadRowHits[count] = new THitList;
+}
+//
 // - destructor
+//
 // releases all allocated memory
 TVolume::~TVolume()
 {

@@ -108,10 +108,13 @@ public:
    void Reset();
 // initialize before each event
    void ResetEvent();
+//
 // pablo's setpointers is substituted by AddHitToVolume.
 // conformal-coordinates and cylinder coordinates are calculated in TTrackFrame,
 // filling the volume with hits is done at this point.
-   void AddHitToVolume(THit* NewValue);
+//   
+   inline void AddHitToVolume(THit* NewValue) { FVolume->AddHit(NewValue); };
+
 // get all tracks (primaries or secondaries)
 // Parameters:
 //	tracklist       - list of tracks (filled by this method)
@@ -278,16 +281,7 @@ public:
       FSEtaMax = etamax;
    };
 };
-
-
-// pablo's setpointers is substituted by AddHitToVolume.
-// conformal-coordinates and cylinder coordinates are calculated in TTrackFrame,
-// filling the volume with hits is done at this point.
-inline void TTrackerFFT::AddHitToVolume(THit* NewValue)
-{
-	FVolume->AddHit(NewValue);
-}
-
+//
 // merge close tracks
 // Parameters:
 //	tracklist	- list of tracks

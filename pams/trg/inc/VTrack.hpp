@@ -59,11 +59,27 @@ public:
       FPt = pt; FEta = eta; FCharge = charge; FdEdX = dedx; FChi2[0] = chi21; FChi2[1] = chi22;
       FPsi = psi; FTanL = tanl; FR0 = r0; FPhi0 = phi0; FZ0 = z0;
    };
+//
+// delete candidate (remove all hits and mark them as not used)
+//
+   inline void RemoveTrack() {
+//
+// loop over all hits, set their 'used' flag to false and clear chi-squares of hits
+//
+      THit* temp;
+      forall(temp, FHits) {temp->SetChi2Xy(0.0); temp->SetChi2Sz(0.0); temp->SetTrack(0);}
+//
+// remove all hits from hit-list
+//
+      FHits.clear();
+   };
+//
 // virtual destructor (you want to destroy it's siblings without knowing their classnames)
+//
    virtual ~VTrack() {RemoveTrack();};	// does nothing
-// remove track (delete candidate) (remove all hits and mark them as not used)
-   void RemoveTrack();
+//
 // calculate dE/dX information from track-hits
+//
    float dEdX();
 
 // getters
@@ -91,19 +107,5 @@ public:
    void SetZ0 (float NewValue)  {FZ0 = NewValue;};		// sets Z0
    void SetSecondary(int NewValue ) {FSecondary = NewValue; };
 };
-//**********************************************************************************
-// delete candidate (remove all hits and mark them as not used)
-//**********************************************************************************
-inline void VTrack::RemoveTrack() {
-//
-// loop over all hits, set their 'used' flag to false and clear chi-squares of hits
-//
-   THit* temp;
-   forall(temp, FHits) {temp->SetChi2Xy(0.0); temp->SetChi2Sz(0.0); temp->SetTrack(0);}
-//
-// remove all hits from hit-list
-//
-   FHits.clear();
-}
 
 #endif

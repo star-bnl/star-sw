@@ -49,8 +49,18 @@ public:
    slist() {h = 0; t = 0; count = 0;};
    ~slist() 
    {
-	clear();
-   };					// !!!!!!!!!!!!!!!!!! definieren!!!!!!!!!
+     if (h!=0) {
+        register slink* p, *old;
+        for(p = h; p; ) {
+// get next element before deleting this one
+           old = p;
+           p = p->succ;
+           delete old;
+         }
+         h=t=0;
+         count=0;
+      }
+   };
    slink* first() {return h;};
    const T& inf(slink* item) const { return ((T&) (item->e));};
    T inf(slink* item)  {return (T) (item->e);};
@@ -85,33 +95,32 @@ public:
        }
    };
 
-//      const T tail() const {return (T) t->e;};
-//      const T head() const {return (T) h->e;};
    const T head() const {return (T)h->e;};
    const T tail() const {return (T)t->e;};
    const T itsObject  ( slink* &s ) { if ( s == 0 ) return 0 ;
                                      else return (T)s->e;} ;
    const T nextObject ( slink* &s ) { if ( s == 0 ) return 0 ; 
+                                     else {
                                      s = s->succ ;
                                      if ( s != 0 )  return (T)s->e;
-                                     else     return 0 ; } ;
-      
+                                     else     return 0 ; } 
+                                     } ;
    int size() {return count;};
+
    void clear() {
-      if (h==0) return;
-
-      register slink* p, *old;
-
-      for(p = h; p; ) {
+      if (h!=0) {
+         register slink* p, *old;
+         for(p = h; p; ) {
 // get next element before deleting this one
-         old = p;
-         p = p->succ;
-         delete old;
-       }
-
-       h=t=0;
-       count=0;
+            old = p;
+            p = p->succ;
+            delete old;
+         }
+         h=t=0;
+         count=0;
+      }
    }
+
    void conc(slist<T>& l)
    { 
       if (count > 0) 

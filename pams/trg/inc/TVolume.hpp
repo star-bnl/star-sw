@@ -9,18 +9,18 @@
 //	around in one particular padrow (this is the case in TTrackFFT::Follow)
 //
 //	Parameters:
-//		FPadRows					- An array sorted by padrow; contains eta-slices (which contain phi-slices)
+//		FPadRows      - An array sorted by padrow; contains eta-slices 
 //	Public methods:
-//		TVolume						- constructor
-//		~TVolume					- destructor
-//		SetPadRow					- sets default padrow
-//		AddHit						- adds a hit to the volume
-//		operator[]					- some overloaded [] operators
+//		TVolume	      - constructor
+//		~TVolume      - destructor
+//		SetPadRow     - sets default padrow
+//		AddHit        - adds a hit to the volume
+//		operator[]    - some overloaded [] operators
 
 // some defines
 
 // some includes
-#include "THit.hpp"					// include THit
+#include "THit.hpp"	
 #include "Common.h"
 #include "types.h"
 #include <string.h>
@@ -55,30 +55,17 @@ private:
 	float FPhiSliceMultiplier;
 	float FEtaSliceMultiplier;
 public:
-	// public methods
-	// - constructor
-	
-	// sets the number of slices in eta and phi and initializes some values and arrays
-	TVolume() 
-	{
-		// reset padrow-array
-		memset(FPadRows, 0, (HIGH_PADROW-LOW_PADROW+2)*sizeof(void*));
-		// set members
-		// default padrow
-		FPadRow = 0;
-		// initialize looping variables
-		FLastHitItem = NULL;
-		// get hitlists for the FPadRowHits array
-		for(int count = 0; count < HIGH_PADROW-LOW_PADROW+2; count++)
-		{
-			FPadRowHits[count] = new THitList;
-		}
-	};
-	// - destructor
-	// releases all allocated memory
-	~TVolume();
-	// set statics
-	void SetStatics(WORD NumberOfEtaSlices, WORD NumberOfPhiSlices, double phimin, double phimax, double etamin, double etamax)
+// public methods
+// - constructor
+
+// sets the number of slices in eta and phi and initializes some values and arrays
+   TVolume();
+// - destructor
+// releases all allocated memory
+   ~TVolume();
+// set statics
+   void SetStatics(WORD NumberOfEtaSlices, WORD NumberOfPhiSlices, 
+                   double phimin, double phimax, double etamin, double etamax)
 	{
 		int index;
 		THitList** tempptr;
@@ -152,19 +139,19 @@ private:
 // padrow, eta and phi; return hit-list for this eta/phi-slice
 inline THitList* TVolume::operator()(int padrow, int eta, int phi)
 {
-	// check bounds
-	if ((padrow < LOW_PADROW) || (padrow >= HIGH_PADROW) || (FPadRows[padrow] == NULL))
-		return NULL;	// padrow out of bounds or not present, exit
-	// get entry
-	// return this hitlist
-	return FPadRows[padrow][CalcMapIndex(eta, phi)];
+// check bounds
+   if ((padrow < LOW_PADROW) || (padrow >= HIGH_PADROW) || (FPadRows[padrow] == NULL))
+      return NULL;
+// get entry
+// return this hitlist
+   else return FPadRows[padrow][CalcMapIndex(eta, phi)];
 }
-
-
+//
 // eta and phi (default padrow)
+//
 inline THitList* TVolume::operator()(int eta, int phi)
 {
-	return operator()(FPadRow, eta, phi);
+   return operator()(FPadRow, eta, phi);
 }
 
 
