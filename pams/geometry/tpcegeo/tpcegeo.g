@@ -12,6 +12,8 @@ module   TPCEGEO  is the TPC system in GSTAR
 *                Laser hits generated in a special subroutine TPCELASER     *
 *  PN  06/28/97: gas in pseudo-padrows and MWC volumes corrected            *
 *  PN  08/15/97: CSADDR,vect_inp/out not used anymore                       *
+*  PN  08/21/97: anything denser than TPC gas absorbs laserino              *
+*  PN  10/28/98: two more pseudo-padrows in the outer sector for Iwona      *
 *****************************************************************************
 +cde,AGECOM,GCUNIT,GCONST.     " - standart geant commons "
 Content   TPCE,TOFC,TOFS,TOST,TOKA,TONX,TOAD,TOHA,TPGV,TPSS,
@@ -272,8 +274,10 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
                create and position TPAD  x=tprs_Rpads(i_row) dx=tprs_width/2,
                                          dy=tprs_npads(i_row)*tprs_pitch/2
             endif
-            If (nint(tprs_super)==3)  then
+            If (nint(tprs_super)==3 | i_row==1)  then
                Create and Position TPAI  x=tprs_Rpads(i_row)-tprs_width  
+            endif
+            If (nint(tprs_super)==3 | i_row==nint(tprs_nRow))  then
                Create and Position TPAO  x=tprs_Rpads(i_row)+tprs_width  
             endif
          enddo
@@ -289,6 +293,7 @@ block TPAD is a real padrow with dimensions defined at positioning time
 * According to AGI rules for this we need A parameter. Lets use ISVOL=1 (!)
 * - this eliminates a need for a separate medium definition.
 *
+      attribute TPAD seen=0 colo=2
       material p10
       material sensitive_gas  ISVOL=1    stemax=5
       SHAPE    BOX   dx=0   dy=0   dz=0    
@@ -297,28 +302,30 @@ block TPAD is a real padrow with dimensions defined at positioning time
       HITS     TPAD  xx:16:SHX(-250,250)   yy:16:(-250,250)   zz:32:(-250,250),
                      px:20:(-100,100)      py:20:(-100,100)   pz:20:(-100,100),
                      Slen:16:(0,1.e4)      Tof:16:(0,1.e-6)   Step:16:(0,10),
-                     SHTN:16:              USER:32:(-0.1,0.1) 
+                     LGAM:16:(-2,2)        USER:32:(-0.1,0.1) 
 endblock
 *
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 block TPAI is an additional pseudo-padrow below the real one
+      attribute TPAI seen=0 colo=3
       material sensitive_gas
       medium   sensitive_gas
       SHAPE    BOX   dx=0   dy=0   dz=0
       HITS     TPAI  xx:16:SHX(-250,250)   yy:16:(-250,250)   zz:32:(-250,250),
                      px:20:(-100,100)      py:20:(-100,100)   pz:20:(-100,100),
                      Slen:16:(0,1.e4)      Tof:16:(0,1.e-6)   Step:16:(0,10),
-                     SHTN:16:              USER:32:(-0.1,0.1) 
+                     LGAM:16:(-2,2)        USER:32:(-0.1,0.1) 
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 block TPAO is an additional pseudo-padrow on top of the real one
+      attribute TPAO seen=0 colo=4
       material sensitive_gas
       medium   sensitive_gas
       SHAPE    BOX   dx=0   dy=0   dz=0
       HITS     TPAO  xx:16:SHX(-250,250)   yy:16:(-250,250)   zz:32:(-250,250),
                      px:20:(-100,100)      py:20:(-100,100)   pz:20:(-100,100),
                      Slen:16:(0,1.e4)      Tof:16:(0,1.e-6)   Step:16:(0,10),
-                     SHTN:16:              USER:32:(-0.1,0.1) 
+                     LGAM:16:(-2,2)        USER:32:(-0.1,0.1) 
 endblock
 *
 ********************************************************************************
@@ -525,7 +532,7 @@ Block TMSE  is a single sensitive volume
       HITS      TMSE  xx:16:SHX(-250,250) yy:16:(-250,250)   zz:16:(-250,250),
                       px:16:(-100,100)    py:16:(-100,100)   pz:16:(-100,100),
                       Slen:16:(0,1.e4)    Tof:16:(0,1.e-6)   Step:16:(0,100),
-                      SHTN:16:            Elos:32:(0,1)   
+                      LGAM:16:(-2,2)      Elos:32:(0,1)   
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Block TIAG is an air gap in inner sector aluminum structure
@@ -576,19 +583,21 @@ end
 *   Regarding the beam intensity and ionization, A. Lebedev wrote in his      *
 *   note that the ionization density decreases along the beam according to    *
 *   I(l) = I(0)*exp(-l/300.),  l in cm I(0) = 200e-/cm., dE of 1 e- is 26 eV  *
+*   PN  21.08.97: anything denser than TPC gas absorbs laserino               *
 *                                                                             *
 *******************************************************************************
       implicit none
-+CDE,GCTMED,GCKINE,GCTRAK,AGCSTEP..
++CDE,GCMATE,GCTMED,GCKINE,GCTRAK,AGCSTEP.
       character*8  cpart,laserino/'LASERINO'/
       equivalence (cpart,NaPart)
       Real Average
       Integer Npair,ier
 *                                    this happens only with primary laserino   
-      Check Isvol > 0 & Istak==0
       Check cpart==laserino
+      if (Dens>0.005) Istop=1  
+      Check Isvol > 0 & Istak==0
 *                                    number of produced pairs follows Poisson
-      Average = 200*Step*exp(Sleng/300.)
+      Average = 200*aStep*exp(Sleng/300.)
       Call POISSN(Average,Npair,ier)
       AdEstep  = 26.e-9*Npair
 *
