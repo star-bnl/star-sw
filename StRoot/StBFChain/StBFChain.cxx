@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.296 2002/05/22 21:14:21 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.297 2002/06/14 04:47:51 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1706,7 +1706,8 @@ void StBFChain::SetDbOptions(){
   }
 
   if( ! Idate && FDate){
-    (void) printf("QAInfo: Switching to user chosen dynamic time-stamp (MaxEntry) %d %d\n",FDate,FTime);
+    (void) printf("QAInfo: Switching to user chosen dynamic time-stamp (MaxEntry) %d %d\n",
+		  FDate,FTime);
     (void) printf("QAInfo: Chain may crash if time-stamp is not validated by db interface\n");
     Idate = FDate;
     Itime = FTime;
@@ -1717,46 +1718,50 @@ void StBFChain::SetDbOptions(){
   while ((maker = nextMaker.NextMaker())) {
     if (!strcmp(maker->ClassName(),"St_db_Maker")) {
       St_db_Maker *db = (St_db_Maker *) maker;
-        if (GetOption("SD97"))  db->SetDateTime("sd97");
-  else {if (GetOption("SD98"))  db->SetDateTime("sd98");
-  else {if (GetOption("Y1a"))   db->SetDateTime("year_1a");
-  else {if (GetOption("Y1b"))   db->SetDateTime("year_1b");
-  else {if (GetOption("Y1s"))   db->SetDateTime("year_1s");
-  else {if (GetOption("ES99"))  db->SetDateTime("es99");
-  else {if (GetOption("ER99"))  db->SetDateTime("er99");
-  else {if (GetOption("DC99"))  db->SetDateTime("dc99");
-  else {if (GetOption("Y1d"))   db->SetDateTime("year_1d");
-  else {if (GetOption("Y1e"))   db->SetDateTime("year_1e");
-  else {if (GetOption("Y1h"))   db->SetDateTime("year_1h");
-  else {if (GetOption("Y2000")) db->SetDateTime("year_1h");
-  else {if (GetOption("Y2a"))   db->SetDateTime("year_2a");
-  else {if (GetOption("Y2b"))   db->SetDateTime("year_2b");
-  else {if (GetOption("Y2001")) db->SetDateTime("year_2b");
-  else {if (GetOption("Y2001n"))db->SetDateTime("year2001"); // Year_2b ** db ** timestamp does not reflect
-                                                             // svt shift. Small hack to make it work.
-  }}}}}}}}}}}}}}}
 
-	// Startup date over-write
-	if (FDateS){
-	  (void) printf("QAInfo: Switching to user chosen dynamic time-stamp (Start) %d %d\n",FDateS,FTimeS);
-	  (void) printf("QAInfo: Chain may crash if time-stamp is not validated by db interface\n");
-	  db->SetDateTime(FDateS,FTimeS);
-	}
+      // Startup date over-write
+      if (FDateS){
+	(void) printf("QAInfo: Switching to user chosen dynamic time-stamp (Start) %d %d\n",
+		      FDateS,FTimeS);
+	(void) printf("QAInfo: Chain may crash if time-stamp is not validated by db interface\n");
+	db->SetDateTime(FDateS,FTimeS);
+      } else {
+	if (GetOption("SD97"))  db->SetDateTime("sd97");
+	else {if (GetOption("SD98"))  db->SetDateTime("sd98");
+	else {if (GetOption("Y1a"))   db->SetDateTime("year_1a");
+	else {if (GetOption("Y1b"))   db->SetDateTime("year_1b");
+	else {if (GetOption("Y1s"))   db->SetDateTime("year_1s");
+	else {if (GetOption("ES99"))  db->SetDateTime("es99");
+	else {if (GetOption("ER99"))  db->SetDateTime("er99");
+	else {if (GetOption("DC99"))  db->SetDateTime("dc99");
+	else {if (GetOption("Y1d"))   db->SetDateTime("year_1d");
+	else {if (GetOption("Y1e"))   db->SetDateTime("year_1e");
+	else {if (GetOption("Y1h"))   db->SetDateTime("year_1h");
+	else {if (GetOption("Y2000")) db->SetDateTime("year_1h");
+	else {if (GetOption("Y2a"))   db->SetDateTime("year_2a");
+	else {if (GetOption("Y2b"))   db->SetDateTime("year_2b");
+	else {if (GetOption("Y2001")) db->SetDateTime("year_2b");
+	else {if (GetOption("Y2001n"))db->SetDateTime("year2001"); 
+	// Year_2b ** db ** timestamp does not reflect
+	// svt shift. Small hack to make it work.
+	}}}}}}}}}}}}}}}
+      }
+    
 
-	// Show date settings
-	gMessMgr->QAInfo() << db->GetName()
-			   << " Maker set time = "
-			   << db->GetDateTime().GetDate() << "."
-			   << db->GetDateTime().GetTime() << endm;
+      // Show date settings
+      gMessMgr->QAInfo() << db->GetName()
+			 << " Maker set time = "
+			 << db->GetDateTime().GetDate() << "."
+			 << db->GetDateTime().GetTime() << endm;
 
-	// MaxEntry over-write
-	if (Idate) {
-	  db->SetMaxEntryTime(Idate,Itime);
-	  cout << "\tSet DataBase max entry time " << Idate << "/" << Itime
-	       << " for St_db_Maker(\"" << db->GetName() <<"\")" << endl;
-	}
-    }
-  }
+      // MaxEntry over-write
+      if (Idate) {
+	db->SetMaxEntryTime(Idate,Itime);
+	cout << "\tSet DataBase max entry time " << Idate << "/" << Itime
+	     << " for St_db_Maker(\"" << db->GetName() <<"\")" << endl;
+      }
+    } // check if maker is St_db_Maker
+  }   // loop over makers
 }
 //_____________________________________________________________________
 /// Creates output-tree branches
