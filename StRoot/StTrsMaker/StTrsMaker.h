@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.h,v 1.4 1999/02/19 16:28:24 fisyak Exp $
+// $Id: StTrsMaker.h,v 1.5 1999/03/15 02:52:26 perev Exp $
 //
 // $Log: StTrsMaker.h,v $
+// Revision 1.5  1999/03/15 02:52:26  perev
+// new Maker schema
+//
 // Revision 1.4  1999/02/19 16:28:24  fisyak
 // Change given name of Maker
 //
@@ -55,8 +58,7 @@ class StTrsUnpacker;
 
 class StTrsMaker : public StMaker {
  private:
-   Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.4 1999/02/19 16:28:24 fisyak Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.5 1999/03/15 02:52:26 perev Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
@@ -90,12 +92,11 @@ class StTrsMaker : public StMaker {
 protected:
 
 public: 
-    StTrsMaker(const char *name="Trs", const char *title="Trs");
+    StTrsMaker(const char *name="Trs");
     virtual       ~StTrsMaker();
     virtual Int_t Init();
     virtual Int_t  Make();
     virtual void   PrintInfo();
-    // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
     ClassDef(StTrsMaker, 1)   //StAF chain virtual base class for Makers
 
 private:

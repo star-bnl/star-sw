@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.20 1999/03/02 17:50:39 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.21 1999/03/15 02:52:26 perev Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.21  1999/03/15 02:52:26  perev
+// new Maker schema
+//
 // Revision 1.20  1999/03/02 17:50:39  lasiuk
 // for testing/defaults/geantPID
 //
@@ -115,13 +118,12 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.20 1999/03/02 17:50:39 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.21 1999/03/15 02:52:26 perev Exp $";
 
 ClassImp(StTrsMaker)
 
-StTrsMaker::StTrsMaker(const char *name, const char *title):StMaker(name,title)
+StTrsMaker::StTrsMaker(const char *name):StMaker(name)
 {
-   drawinit=kFALSE;
 }
 
 StTrsMaker::~StTrsMaker() { /* nopt */ }
@@ -129,7 +131,7 @@ StTrsMaker::~StTrsMaker() { /* nopt */ }
 Int_t StTrsMaker::Init()
 {
 //     // Create tables
-//     St_DataSetIter       local(gStChain->DataSet("params"));
+//     St_DataSetIter       local(GetDataBase("params"));
 
     //
     // Set up the DataBase access
@@ -337,7 +339,7 @@ Int_t StTrsMaker::Make(){
     //
     // Read the Ionization
     //
-    St_DataSetIter geant(gStChain->DataSet("geant"));
+    St_DataSetIter geant(GetDataSet("geant"));
     // $STAR/pams/sim/idl/g2t_tpc_hit.idl 
     
     St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
@@ -708,8 +710,8 @@ Int_t StTrsMaker::Make(){
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.20 1999/03/02 17:50:39 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.21 1999/03/15 02:52:26 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
