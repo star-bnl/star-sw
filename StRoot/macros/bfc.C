@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.109 1999/09/09 01:34:12 fisyak Exp $
+// $Id: bfc.C,v 1.110 1999/09/12 23:16:40 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -35,9 +35,6 @@ void bfc(const Int_t First,
   if (!chain) delete chain;
   chain = new StBFChain;
   chain->SetFlags(Chain);
-  if (!Chain || !strlen(Chain)) {
-    Usage();
-  }
   printf ("QAInfo:Process [First=%6i/Last=%6i/Total=%6i] Events\n",First,Last,Last-First+1);
   chain->Set_IO_Files(infile,outfile);
 
@@ -93,26 +90,19 @@ void bfc(const Int_t First,
    //    gSystem->Exec("ps ux");
    evnt->Stop("QAInfo:");
    evnt->Show("QAInfo:");
-   printf ("QAInfo: Done with Event no. %d (%d) Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n",
-	   i,iMake,evnt->GetRealTime("QAInfo:"),evnt->GetCpuTime("QAInfo:"));
+   printf ("QAInfo: Done with Event [no. %d/run %d/evt. %d/sta %d] Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n",
+	   i,chain->GetRunNumber(),chain->GetEventNumber(),
+	   iMake,evnt->GetRealTime("QAInfo:"),evnt->GetCpuTime("QAInfo:"));
    i++; goto EventLoop;
  }
-  if (Last > First || gROOT->IsBatch()) {
-    chain->Finish();
-    if (xdf_out) delete xdf_out;
-    fflush(stdout);
-    printf ("QAInfo:Run completed ");
-    gSystem->Exec("date");
-  }
-  else {
-    if (evMk) Event = (StEvent *) chain->GetInputDS("StEvent");
-  }
-
+  fflush(stdout);
+  printf ("QAInfo:Run completed ");
+  gSystem->Exec("date");
+  if (evMk) Event = (StEvent *) chain->GetInputDS("StEvent");
   {
     TDatime t;
     printf ("\nQAInfo:Run is finished at Date/Time %i/%i\n",t.GetDate(),t.GetTime());
   }
-
 }
 //_____________________________________________________________________
 void bfc (const Int_t Last, 
@@ -123,6 +113,9 @@ void bfc (const Int_t Last,
 //_____________________________________________________________________
 void bfc (const Char_t *Chain="",Char_t *infile=0, Char_t *outfile=0)
 {
+  if (!Chain || !strlen(Chain)) {
+    Usage();
+  }
   bfc(1,1,Chain,infile,outfile);
 }
 //____________________________________________________________
