@@ -1,5 +1,8 @@
-// $Id: bfcread_eventBranch.C,v 1.7 2000/06/20 14:03:05 kathy Exp $
+// $Id: bfcread_eventBranch.C,v 1.8 2001/09/20 20:13:57 genevb Exp $
 // $Log: bfcread_eventBranch.C,v $
+// Revision 1.8  2001/09/20 20:13:57  genevb
+// Remove StEventMaker
+//
 // Revision 1.7  2000/06/20 14:03:05  kathy
 // now unpack and print out BfcStatus table, if it exists, from .event.root file
 //
@@ -65,7 +68,6 @@ void bfcread_eventBranch(
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StEvent");
     //    gSystem->Load("StMagF");
-    gSystem->Load("StEventMaker");
     gSystem->Load("StAnalysisMaker");
 
 
