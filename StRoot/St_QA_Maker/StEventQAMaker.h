@@ -21,8 +21,9 @@ class StEventQAMaker : public StQAMakerBase {
  
   StEvent *event;          //! pointer to current event
   HitHistograms *mHitHist; //!
-  Int_t n_prim_good;       //!
-  Int_t n_glob_good;       //!
+  Int_t n_prim_good;
+  Int_t n_glob_good;
+  Bool_t allTrigs;
  
 //------------------------------------------------------------------------
   
@@ -48,19 +49,24 @@ class StEventQAMaker : public StQAMakerBase {
   virtual void   MakeHistBBC();
   virtual void   MakeHistFPD();
   
+  virtual void   AllTriggers() { allTrigs = kTRUE; }
+
   //  virtual void   SetPntrToHistUtil(StHistUtil *m1);
 
   /// the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.7 2002/04/23 01:59:56 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.8 2003/01/17 15:15:47 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
     };
     
 #endif
 
-// $Id: StEventQAMaker.h,v 2.7 2002/04/23 01:59:56 genevb Exp $
+// $Id: StEventQAMaker.h,v 2.8 2003/01/17 15:15:47 genevb Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.8  2003/01/17 15:15:47  genevb
+// Add AllTriggers() function to ignore trigger words
+//
 // Revision 2.7  2002/04/23 01:59:56  genevb
 // Addition of BBC/FPD histos
 //

@@ -45,7 +45,7 @@ ClassImp(StEventQAMaker)
 //_____________________________________________________________________________
 StEventQAMaker::StEventQAMaker(const char *name, const char *title) :
  StQAMakerBase(name,title,"StE") {
-  
+  allTrigs = kFALSE;
 }
 
 
@@ -100,8 +100,9 @@ Int_t StEventQAMaker::Make() {
     Bool_t doEvent = kTRUE;
     StTrigger* l0Trig = event->l0Trigger();
     Int_t run_num = event->runId();
-    Int_t run_year = run_num/1000000;       // Determine run year from run #
-    if ((l0Trig) && (run_year != 1)) {      // Don't use year 1 trigger word
+    Int_t run_year = run_num/1000000;         // Determine run year from run #
+    allTrigs = (allTrigs || (run_year == 1)); // Don't use year 1 trigger word
+    if ((l0Trig) && (!allTrigs)) {
       if (realData) doEvent = kFALSE;
       tword = l0Trig->triggerWord();
       if (tword) {
@@ -132,7 +133,7 @@ Int_t StEventQAMaker::Make() {
           gMessMgr->Warning("StEventQAMaker::Make(): trigger word=0 !!!!!");
       }
     } else { // No trigger info or year 1 data!
-      if (run_year != 1)
+      if (!allTrigs)
         gMessMgr->Warning("StEventQAMaker::Make(): No trigger info...processing anyhow");
     }
     if (!doEvent) {
@@ -1906,8 +1907,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.38 2002/05/29 13:54:30 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.39 2003/01/17 15:15:47 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.39  2003/01/17 15:15:47  genevb
+// Add AllTriggers() function to ignore trigger words
+//
 // Revision 2.38  2002/05/29 13:54:30  genevb
 // Some changes to FTPC chisq histos
 //
