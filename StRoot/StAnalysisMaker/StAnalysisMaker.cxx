@@ -1,5 +1,8 @@
-// $Id: StAnalysisMaker.cxx,v 1.11 1999/08/06 20:21:51 kathy Exp $
+// $Id: StAnalysisMaker.cxx,v 1.12 1999/08/06 21:25:33 fisyak Exp $
 // $Log: StAnalysisMaker.cxx,v $
+// Revision 1.12  1999/08/06 21:25:33  fisyak
+// Switch to StMessager
+//
 // Revision 1.11  1999/08/06 20:21:51  kathy
 // back to old version that didn't write out QA info file, but now added QAInfo tag in front of information that QA team wants in summarizeEvent.cc - will also add a few more lines of output to summarizeEvent.cc soon
 //
@@ -57,8 +60,8 @@
 #include "StChain/StChain.h"
 #include "StRun.h"
 #include "StEvent.h"
-
-static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.11 1999/08/06 20:21:51 kathy Exp $";
+#include "StAnalysisMaker.h"
+static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.12 1999/08/06 21:25:33 fisyak Exp $";
 #include "StMessMgr.h"
 void summarizeEvent(StEvent& event);
 //  specific analysis tasks.
@@ -73,7 +76,7 @@ Int_t StAnalysisMaker::Make() {
   // OK, we've got the event. Pass it and process it.
   summarizeEvent(ev); 
   long ntk = countPrimaryTracks(ev);
-  cout << " StAnalysisMaker.cxx -- Primary tracks: " << ntk << endl;
+  gMessMgr->Info() << " StAnalysisMaker.cxx -- Primary tracks: " << ntk << endl;
 
   // Create and fill a tag
   if (theTag) delete theTag;

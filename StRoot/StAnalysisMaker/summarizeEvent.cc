@@ -1,5 +1,8 @@
-// $Id: summarizeEvent.cc,v 1.5 1999/08/06 20:21:53 kathy Exp $
+// $Id: summarizeEvent.cc,v 1.6 1999/08/06 21:25:33 fisyak Exp $
 // $Log: summarizeEvent.cc,v $
+// Revision 1.6  1999/08/06 21:25:33  fisyak
+// Switch to StMessager
+//
 // Revision 1.5  1999/08/06 20:21:53  kathy
 // back to old version that didn't write out QA info file, but now added QAInfo tag in front of information that QA team wants in summarizeEvent.cc - will also add a few more lines of output to summarizeEvent.cc soon
 //
@@ -33,31 +36,31 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "StEvent.h"
-
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 1.5 1999/08/06 20:21:53 kathy Exp $";
+ *
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 1.6 1999/08/06 21:25:33 fisyak Exp $";
  *
 void summarizeEvent(StEvent& event)
 {
-  cout << "QAInfo: StAnalysisMaker,  Reading Event "  << 
+  gMessMgr->Info() << "QAInfo: StAnalysisMaker,  Reading Event "  << 
     " Type " << event.type() << " Run " << event.runNumber() << endl;
     gMessMgr->QAInfo() << "StAnalysisMaker,  Reading Event: " << nevents
-  cout << " N vertex " << event.vertexCollection()->size() << endl;
-  cout << " N track " << event.trackCollection()->size() << endl;
-  cout << " N TPC hit " << event.tpcHitCollection()->size() << endl;
-  cout << " N FTPC hit " << event.ftpcHitCollection()->size() << endl;
-  cout << " N SVT hit " << event.svtHitCollection()->size() << endl;
+  gMessMgr->Info() << " N vertex " << event.vertexCollection()->size() << endl;
+  gMessMgr->Info() << " N track " << event.trackCollection()->size() << endl;
+  gMessMgr->Info() << " N TPC hit " << event.tpcHitCollection()->size() << endl;
+  gMessMgr->Info() << " N FTPC hit " << event.ftpcHitCollection()->size() << endl;
+  gMessMgr->Info() << " N SVT hit " << event.svtHitCollection()->size() << endl;
 
-  cout << "QAInfo: # tracks:         " << 
+  gMessMgr->Info() << "QAInfo: # tracks:         " << 
               event.trackCollection()->size() << endl;
-  cout << "QAInfo:  # vertices:       " << 
+  gMessMgr->Info() << "QAInfo:  # vertices:       " << 
               event.vertexCollection()->size() << endl;
-  cout << "QAInfo:  # TPC hits:       " << 
+  gMessMgr->Info() << "QAInfo:  # TPC hits:       " << 
              event.tpcHitCollection()->size() << endl;
-  cout << "QAInfo:  # SVT hits:       " << 
+  gMessMgr->Info() << "QAInfo:  # SVT hits:       " << 
              event.svtHitCollection()->size() << endl;
-  cout << "QAInfo:  # FTPC hits:      " << 
+  gMessMgr->Info() << "QAInfo:  # FTPC hits:      " << 
              event.ftpcHitCollection()->size() << endl;
-  cout << "QAInfo:  primary vertex:   " << 
+  gMessMgr->Info() << "QAInfo:  primary vertex:   " << 
              event.primaryVertex()->position() << endl;
 
 		       << (event.svtHitCollection() ? event.svtHitCollection()->numberOfHits() : 0) << endm;
