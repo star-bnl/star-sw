@@ -53,7 +53,7 @@ void StEvtHddr::FillTag(EvtHddr_st *tag)
     return unixTime.GetUTime();
 }
 //_____________________________________________________________________________
-  void StEvtHddr::Print(Option_t*) const
+  void StEvtHddr::Print(Option_t *option) const
 {
   printf("\n *********** Event Info **********************\n");
   printf("\tRun: \t%5d  Event %5d  TimeStamp %8d.%6d  Bunch %u\n"

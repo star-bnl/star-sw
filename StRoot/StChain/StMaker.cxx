@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.136 2003/11/17 22:19:20 perev Exp $
+// $Id: StMaker.cxx,v 1.137 2004/01/14 22:33:12 fisyak Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -680,7 +680,9 @@ EDataSetPass StMaker::ClearDS (TDataSet* ds,void * )
 void StMaker::PrintInfo() 
 {
    const char *cvs = GetCVS();
-   printf("QAInfo:%-20s %s \n",ClassName(),cvs);
+   const char *built = strstr(cvs,"built");
+   if (built > cvs) printf("QAInfo:%-20s %s from %.*s\n",ClassName(),built,built-cvs,cvs);
+   else             printf("QAInfo:%-20s    from %s\n",ClassName(),cvs);
 //     Print info for all defined Makers
    TIter next(GetMakeList());
    StMaker *maker;
@@ -1200,6 +1202,9 @@ AGAIN: switch (fState) {
 }
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.137  2004/01/14 22:33:12  fisyak
+// restore built time
+//
 // Revision 1.136  2003/11/17 22:19:20  perev
 // count memory only after 3 events, to avoid non event memory
 //
