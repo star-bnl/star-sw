@@ -1,0 +1,11 @@
+# tdm/Makefile.control
+#
+ASPS += tdm soc
+#PAMS += 
+#
+USER_LIBS += -ldsl -lasu
+#
+DEBUG := TRUE
+#SHARE := TRUE
+MOTIF := FALSE
+#
