@@ -5,25 +5,47 @@
 
   St_DataSetIter d;
   d.Mkdir("v1/v1_1/v1_1_1");
-  d.Ls();
-  d.Mkdir("v1/v1_2/v1_2_1");
-  d.Pwd()->ls("*");
-  d.Mkdir("v1/v1_2/v1_2_2");
-  d.Pwd()->ls("*");
+  cout << "Short list:" << endl;
+  d.Pwd();  
+  cout << "Wide list:" << endl;
+  d.Pwd("*");
+                                  cout << endl;
+  d.Mkdir("/v1/v1_2/v1_2_1");
+  d.Pwd("*");
+                                  cout << endl;
+  d.Mkdir("v1/v1_3/v1_2_2");
+
+  St_DataSet *last = d.Mkdir("v1/v1/v1_v1_2_2");
+  St_DataSet *just = d("v1/v1/v1_v1_2_2");
+
+  if (last != just) 
+        cout << "Error: Mkdir return a wrong addrees";
+   else    
+        cout << "Ok! return value of St_DataSetIter::Mkdir method has been tested";
+        
+   cout << endl << endl;     
+
+  d.Pwd("*");
+                                  cout << endl;
   d.Mkdir("v1/v21/v3211");
-  d.Pwd()->ls("*");
+  d.Pwd("*");
   cout  << endl << "------------ 1 ------------ " << endl;
+                                  cout << endl;
   d.Mkdir("v1/v21/v3212/v4");
   cout << "the current path: " << d("v1/v21/v3212/v4")->Path() << endl;
-  d.Pwd()->ls("/");
+  d.Pwd("/");
   d("/")->ls();
   d.ls("/");
   cout << "list \"v3212\" the relative path " << endl;
-  d.Pwd()->ls("v1/v21/v3212");
+  d.Pwd("v1/v21/v3212");
   d("v1/v21/v3212")->ls();
   d.ls("v1/v21/v3212");
+                                  cout << endl;
+  d.Du();
+                                  cout << endl;
   cout << "We'll try some \"wrong\" path now" << endl;
-  d.Pwd()->ls("unknown");
+  d.Ls("unknown");
+//  d.Pwd()->ls("unknown");
 //  cout  << endl << "------------ 2 ------------ " << endl;
   cout  << endl << "-------- 2 test \"FindObject\" ------------ " << endl;
 
@@ -77,7 +99,11 @@
   cout  << endl << "------------ 7 ------------ " << endl;
   d.ls("","*");
   d.Rmdir("v1");
-  if (d.Pwd()) cout << "Error the directory should be undefined nowadays " << endl;
+  d.Rmdir("v1");
+  if (d.Cwd()) { 
+     d.ls("","*");
+     cout << "Error the directory should be undefined nowadays " << endl;
+  }
   else cout << "Ok! The last dataset has NO active directory anymore" << endl;
 
   cout  << endl << "------------ 8 ------------ " << endl;
