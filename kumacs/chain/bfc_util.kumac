@@ -194,6 +194,7 @@
 *                    - new chain "egout" to write out event generator files
 *                      with proper directory structure - so that gstar can
 *                      be run subsequently
+* 12/23/98 T. Wenaus - add content to obin, obout
 * 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -337,6 +338,16 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
 	    rm [run_dst]/run_summary
 	  endif
     (obin)	  
+      exec read_dst_from_db#init [input_file]
+      if ( staf_status(1) .ne. STAFCV_OK) then
+        message ' BFC_UTIL,init: ERROR - cannot open dst DB input - quit '
+        goto EOF
+      endif
+      exec read_dst_from_db#read ind [run]
+        if ( staf_status(1) .ne. STAFCV_OK) then
+          message ' BFC_UTIL,init: ERROR - cannot read dst DB - quit '
+          goto EOF
+      endif  
     (esin)
           dio/newfilestream inev [input_file] r
           cd [run]
@@ -537,6 +548,11 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
               dio/stream/puteven outfile
             endif
     (obout)
+            exec write_dst_to_db#init [input_file]
+            if ( staf_status(1) .ne. STAFCV_OK) then
+              message <<< ERROR >>> Cannot open DST DB for write
+              goto EOF
+            endif
       (*)   message " !!! bfc_util: No initialization for package " [mod]
     ENDCASE
     if (STAF_STATUS(1).ne. STAFCV_OK) goto EOF
@@ -675,7 +691,13 @@ return
 	     nev_total = [nev_total] - 1
 	     goto EOF
 	   endif
-     (obin)
+     (obin) exec read_dst_from_db#read
+           if ( staf_status(1) .ne. STAFCV_OK) then
+             message ' BFC_UTIL,process: ERROR - cannot read dst DB - quit '
+             nev_proc = [nev_proc] - 1
+             nev_total = [nev_total] - 1
+             goto EOF
+           endif
     (calin) call cal2mem(946702800) 
      (rgst) trig 1
             if ($iquest(1) <>0) then
@@ -852,7 +874,11 @@ return
                    cd [dir];  dio/stream/putevent outfile
                  endfor
 	       endif
-     (obout)
+     (obout)  exec write_dst_to_db#write
+           if ( staf_status(1) .ne. STAFCV_OK) then
+             message <<< ERROR >>> Cannot write DST DB in event [i]
+             goto NEXT_EVENT
+           endif
       (*)      message " !!! bfc_util: No process stage for package " [mod]
    ENDCASE
 
@@ -908,7 +934,7 @@ macro bfc_finish _
      (g2tin)  exec input_g2t_file#close
      (evin)  exec read_table_from_file#close inev 
      (dstin) exec read_table_from_file#close ind
-     (obin)
+     (obin) exec read_dst_from_db#close
      (rgst)  ge/rz/cd //PAWC; hi/list; | show histograms
      (drsum) exec  finish_dst#dst_run_summary
              exec  run_dst#dst_run_summary
@@ -958,7 +984,7 @@ macro bfc_finish _
               endif
               exec write_table_to_file#close dstout;
             endif
-     (obout)
+     (obout) exec write_dst_to_db#close
       (*) message " !!! bfc_util#bfc_finish No final stage for package " [mod]
     ENDCASE
 
