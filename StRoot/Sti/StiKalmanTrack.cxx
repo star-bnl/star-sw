@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.54 2005/02/18 19:02:31 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.54 2005/02/18 19:02:31 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.55 2005/02/25 16:36:14 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.55 2005/02/25 16:36:14 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.55  2005/02/25 16:36:14  perev
+ * Iteration in refit added
+ *
  * Revision 2.54  2005/02/18 19:02:31  fisyak
  * Add debug print out for extendToVertex
  *
@@ -1201,15 +1204,24 @@ bool StiKalmanTrack::find(int direction)
       if (debug()) cout << "StiKalmanTrack::find seed " << *((StiTrack *) this);
       if (trackFinder->find(this,kOutsideIn))
 	{
+          StiKalmanTrackNode *inn = getInnerMostNode();
+          double pars[5]; memcpy(pars,inn->getPars(),sizeof(pars));
 	  if (debug()) cout << "StiKalmanTrack::find find" << *((StiTrack *) this);
 	  //cout<<"/////////////////fit(InOut)";
-	  fit(kInsideOut);  
-	  if (debug()) cout << "StiKalmanTrack::find fit(kInsideOut)" << *((StiTrack *) this);
+            for (int iter=0;iter<10;iter++) {
+	    fit(kInsideOut);  
+	    if (debug()) cout << "StiKalmanTrack::find fit(kInsideOut)" << *((StiTrack *) this);
 	  //------
-	  fit(kOutsideIn);
-	  if (debug()) cout << "StiKalmanTrack::find fit(kOutsideIn)" << *((StiTrack *) this);
+	    fit(kOutsideIn);
+	    if (debug()) cout << "StiKalmanTrack::find fit(kOutsideIn)" << *((StiTrack *) this);
+            double est=0;
+	    for (int i=0;i<5;i++) {
+	      est += pow(pars[i]-inn->getPars()[i],2)/inn->getDiag(i);
+	    } 
+            memcpy(pars,inn->getPars(),sizeof(pars));
+            if (est<0.01) break;
+          }
 	  trackExtended = true;
-	  //cout<<"/////////////////fit(InOut) Done";
 	}	
     }
   catch (runtime_error & error)
