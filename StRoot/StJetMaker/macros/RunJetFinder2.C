@@ -5,9 +5,11 @@ class  StChain;
 StChain *chain;
 int total=0;
 
-void RunJetFinder(
-		  const char *dir = "/star/data29/reco/pp200/pythia6_203/default/pt15/year2003/gheisha_on/trs_if/",
-		  const char *file = "rcf1205_2012_1000evts.MuDst.root",
+void RunJetFinder2(
+		   //const char* dir = "/star/data42/reco/ppLong-1/FullField/P04if/2003/145/",
+		   //const char* file = "st_physics_4145041_raw_0040025.MuDst.root"
+		   const char* dir = "",
+		   const char* file = "/star/data16/reco/dAuCombined/FullField/P03ih/2003/065/st_physics_4065003_raw_0040054.MuDst.root",
 		  const char *filter = "",
 		  const char *outfile="Jets_out_")
 {
@@ -38,8 +40,26 @@ void RunJetFinder(
     //Instantiate the MuDstReader
     StMuDebug::setLevel(1); 
     StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,dir,file,filter,10,"MuDst");
-    StEmcADCtoEMaker *adc = NULL;
 
+    //StMuDbReader...
+    StMuDbReader* db = StMuDbReader::instance();
+
+    //StMuDst2StEventMaker
+    StMuDst2StEventMaker* eventMaker = new StMuDst2StEventMaker("MuDst2StEvent");
+
+    //Database
+    St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
+    dbMk->SetDateTime(20030101,10000); 
+
+    //EmcAdc2EMaker
+    StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
+
+    //PrecEclMaker
+    StPreEclMaker *pecl = new StPreEclMaker();
+
+    //EpcMaker
+    StEpcMaker *epc = new StEpcMaker();
+  
     //Instantiate the StEmcTpcFourPMaker
     StEmcTpcFourPMaker* emcFourPMaker = new StEmcTpcFourPMaker("EmcTpcFourPMaker", muDstMaker, 30, 30, .3, .3, .003, adc);
     emcFourPMaker->setUseType(StEmcTpcFourPMaker::Hits);//if don't have this line then default is 0 (which is hits)
