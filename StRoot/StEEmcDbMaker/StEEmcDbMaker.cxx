@@ -1,7 +1,10 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.5 2003/03/26 15:26:23 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.6 2003/03/26 21:28:02 balewski Exp $
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.6  2003/03/26 21:28:02  balewski
+// fix
+//
 // Revision 1.5  2003/03/26 15:26:23  balewski
 // add print()
 //
@@ -147,7 +150,7 @@ void StEEmcDbMaker::setThreshold(float x){
 //________________________________________________________
 Int_t StEEmcDbMaker::Init(){
   if( mNSector==0) setSectors(5,8);//default
-  setThreshold(-100.);  // defines threshold for ADCs
+  setThreshold(2.0);  // defines threshold for ADCs
   // should be +2 or +3 sigma in the future
   return StMaker::Init();
 }
@@ -396,7 +399,7 @@ void  StEEmcDbMaker::mOptimizeDb(){
       mLookup[t->slot[j]][t->channel[j]]=&mDbItem1[index];
       
       //      if(j>300) break;
-      printf("Mapped %s -->index=%d -->slot/chan=%d/%d \n",mDbItem1[index].name,index,t->slot[j],t->channel[j]);
+      // printf("Mapped %s -->index=%d -->slot/chan=%d/%d \n",mDbItem1[index].name,index,t->slot[j],t->channel[j]);
     }
 
   } 
