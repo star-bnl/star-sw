@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.19 2001/07/12 13:08:49 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.20 2001/07/13 17:58:18 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.20  2001/07/13 17:58:18  oldi
+// Small change related to new StFtpcDisplay (commented).
+//
 // Revision 1.19  2001/07/12 13:08:49  oldi
 // Remove display !@#$%^&*(.
 //
@@ -341,7 +344,8 @@ Int_t StFtpcTrackMaker::Make()
   //display->TrackInfo();
   //display->Info();
   //display->ShowClusters();
-  display->ShowTracks();
+  //display->ShowTracks();
+  display->WriteData("ftpc_display.root");
   delete display;
   */
 
@@ -404,7 +408,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.19 2001/07/12 13:08:49 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.20 2001/07/13 17:58:18 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
