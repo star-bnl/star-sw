@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.28 2004/08/07 02:44:06 mvl Exp $
+ * $Id: StMuDst.cxx,v 1.29 2004/08/14 00:48:41 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -308,34 +308,26 @@ StTrack* StMuDst::createStTrack(StMuTrack* track) {
   t->addPidTraits(new StDedxPidTraits(kTpcId, kTruncatedMeanId, track->nHitsDedx(), track->dEdx(),0));
   Float_t a[2],b[15];
   a[0]=track->chi2();
-  // This is cheating: fill in the old way to circumvent distinction
-  // between Tpc and Ftpc East, West
-  StTrackFitTraits *traits;
-  if (track->mNHitsPossTpc==255) {
-    // backward compatibility mode for old files 
-    // (also gives different result omn StEvent: no distinction between Tpcs)
-    traits=new StTrackFitTraits(0,track->nHitsFit(),a,b);
-  }
-  else {
-    traits->setNumberOfFitPoints(track->nHitsFit(kTpcId),kTpcId);
-    traits->setNumberOfFitPoints(track->nHitsFit(kFtpcEastId),kFtpcEastId);
-    traits->setNumberOfFitPoints(track->nHitsFit(kFtpcWestId),kFtpcWestId);
-    traits->setNumberOfFitPoints(track->nHitsFit(kSvtId),kSvtId);
-    traits->setNumberOfFitPoints(track->nHitsFit(kSsdId),kSsdId);
-  }
-  t->setFitTraits(*traits);
-  delete traits;  
-  if (track->mNHitsPossTpc==255) {
-    // backward compatibility mode, doesn't work for Ftpc tracks
-    t->setNumberOfPossiblePoints(track->nHitsPoss(),kTpcId);
-  }
-  else {
-    t->setNumberOfPossiblePoints(track->nHitsPoss(kTpcId),kTpcId);
-    t->setNumberOfPossiblePoints(track->nHitsPoss(kFtpcEastId),kFtpcEastId);
-    t->setNumberOfPossiblePoints(track->nHitsPoss(kFtpcWestId),kFtpcWestId);
-    t->setNumberOfPossiblePoints(track->nHitsPoss(kSvtId),kSvtId);
-    t->setNumberOfPossiblePoints(track->nHitsPoss(kSsdId),kSsdId);
-  }
+  a[1]=0;
+  memset(b,0,15*sizeof(Float_t));
+
+  StTrackFitTraits traits(0,0,a,b);
+  traits.setNumberOfFitPoints(track->nHitsFit(kTpcId),kTpcId);
+  traits.setNumberOfFitPoints(track->nHitsFit(kFtpcEastId),kFtpcEastId);
+  traits.setNumberOfFitPoints(track->nHitsFit(kFtpcWestId),kFtpcWestId);
+  traits.setNumberOfFitPoints(track->nHitsFit(kSvtId),kSvtId);
+  traits.setNumberOfFitPoints(track->nHitsFit(kSsdId),kSsdId);
+  // Set flag for primary tracks, but not if data is old-style
+  // Old style data has +1 for vertex built-in for Ftpc (not sure about Tpc)
+  if (track->type() == primary && track->mNHitsFitTpc != 255)
+    traits.setPrimaryVertexUsedInFit(kTRUE);
+  t->setFitTraits(traits);
+
+  t->setNumberOfPossiblePoints(track->nHitsPoss(kTpcId),kTpcId);
+  t->setNumberOfPossiblePoints(track->nHitsPoss(kFtpcEastId),kFtpcEastId);
+  t->setNumberOfPossiblePoints(track->nHitsPoss(kFtpcWestId),kFtpcWestId);
+  t->setNumberOfPossiblePoints(track->nHitsPoss(kSvtId),kSvtId);
+  t->setNumberOfPossiblePoints(track->nHitsPoss(kSsdId),kSsdId);
 
   // set the topology map
   t->setTopologyMap( track->topologyMap() );
@@ -349,6 +341,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.29  2004/08/14 00:48:41  mvl
+ * Bug fix in createStTrack & mods for vertex flag in fitTraits
+ *
  * Revision 1.28  2004/08/07 02:44:06  mvl
  * Added support for fitted and possible points in different detectors, for ITTF
  *
