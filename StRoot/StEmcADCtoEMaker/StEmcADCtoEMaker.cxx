@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.60 2003/10/10 14:26:12 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.61 2003/10/14 13:27:30 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.61  2003/10/14 13:27:30  suaide
+// new methods added in order to select either energy of pedestal cut for the SMD
+//
 // Revision 1.60  2003/10/10 14:26:12  suaide
 // small fix
 //
@@ -167,7 +170,7 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
 {
   mDecoder       = 0;
   mControlADCtoE = new controlADCtoE_st();
-
+  mSMDEidMinus1Bug = kFALSE;
   Int_t   calib[]      = {1, 0, 1, 1, 0, 0, 0, 0};
   Int_t   pedSub[]     = {1, 0, 1, 1, 0, 0, 0, 0};
   Float_t cut[]        = {-1, -1, 1.25, 1.25, -1, -1, -1, -1};
@@ -410,6 +413,7 @@ Bool_t StEmcADCtoEMaker::getTables()
 	smdGain_st        *smdgainst = NULL;
 	emcPed_st         *emcpedst = NULL;
   smdPed_st         *smdpedst = NULL;
+  int date = GetDate();
   for(int det=0;det<MAXDETBARREL;det++)
   {
     getStatus(det);
@@ -504,10 +508,34 @@ Bool_t StEmcADCtoEMaker::getTables()
             if(smdpedst)
             {
               mHasPed[det] = kTRUE;
-              for(int i=0;i<18000;i++) for(int j=0;j<3;j++) 
+              /////////////////////////////////////////////////////////////////////
+              /////////////////////////////////////////////////////////////////////
+              // need to include a correction because the SMD-phi
+              // pedestals for Y2003 run were not saved in the right position
+              // in the database. Instead of doing id-1 for SMD-phi, we need
+              // do only id. This is valid only for Y2003 data
+              //
+              // by AAPSUAIDE 20030908
+              //
+              int shift = 0;
+              if(date>20021101 && date<20030601) if(det==3 && mSMDEidMinus1Bug) shift = 1;
+              /////////////////////////////////////////////////////////////////////
+              /////////////////////////////////////////////////////////////////////
+             
+              for(int i=0;i<18000-shift;i++) for(int j=0;j<3;j++) 
               {
-                mPed[det][i][j] = ((Float_t)smdpedst[0].AdcPedestal[i][j])/100.;
-                mPedRMS[det][i][j] = ((Float_t)smdpedst[0].AdcPedestalRMS[i][j])/100.;
+                mPed[det][i][j] = ((Float_t)smdpedst[0].AdcPedestal[i+shift][j])/100.;
+                mPedRMS[det][i][j] = ((Float_t)smdpedst[0].AdcPedestalRMS[i+shift][j])/100.;
+                // This lines ZERO the PEDESTAL values for capacitors 124 and 125 for Y2003
+                // run. Once the pedestal is zero the energy of the corresponding hit
+                // will be set also as zero.
+                // This will remove the SMD hits with these capacitor values and
+                // remove the pedestal problem we are having with them
+                //
+                // by AAPSUAIDE 20030910
+                if(date>20021101 && date<20030601) if(j>0) mPed[det][i][j] = 0;
+                /////////////////////////////////////////////////////////////////////
+                /////////////////////////////////////////////////////////////////////
               }
             }
           }
@@ -808,41 +836,7 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 				  cap = 0;
 				  if(capacitor == CAP1) cap = 1;
 				  if(capacitor == CAP2) cap = 2;
-          /////////////////////////////////////////////////////////////////////
-          /////////////////////////////////////////////////////////////////////
-          // need to include a correction because the SMD-phi
-          // pedestals for Y2003 run were not saved in the right position
-          // in the database. Instead of doing id-1 for SMD-phi, we need
-          // do only id. This is valid only for Y2003 data
-          //
-          // by AAPSUAIDE 20030908
-          //
-          int shift = 1;
-          if(date>20021101 && date<20030601)
-          {
-            if(det==3) shift = 0;
-          }
-				  if((id-shift)>=0 && (id-shift)<18000) 
-            PED = mPed[det][id-shift][cap];
-          else PED = 0;
-        
-          // This lines ZERO the PEDESTAL values for capacitors 124 and 125 for Y2003
-          // run. Once the pedestal is zero the energy of the corresponding hit
-          // will be set also as zero.
-          // This will remove the SMD hits with these capacitor values and
-          // remove the pedestal problem we are having with them
-          //
-          // by AAPSUAIDE 20030910
-          if(date>20021101 && date<20030601)
-          {
-            if((cap==1 || cap==2) && (det==2 || det==3)) 
-            {
-              mPed[det][id-shift][cap] = 0;
-              PED = 0;
-            }
-          }
-          /////////////////////////////////////////////////////////////////////
-          /////////////////////////////////////////////////////////////////////
+          PED = mPed[det][id-1][cap];
 		    }
 		  }
 			PED =(Float_t)((Int_t)(PED)); // calibration is done this way because of histograms
@@ -1067,23 +1061,8 @@ Bool_t StEmcADCtoEMaker::saveHit(Int_t det,Int_t idh, Int_t cap)
   Float_t ADC = 0;
 	Float_t E = 0;
 	Char_t S = 0;
-  /////////////////////////////////////////////////////////////////////
-  /////////////////////////////////////////////////////////////////////
-  // need to include a correction because the SMD-phi
-  // pedestals for Y2003 run were not saved in the right position
-  // in the database. Instead of doing id-1 for SMD-phi, we need
-  // do only id. This is valid only for Y2003 data
-  //
-  // by AAPSUAIDE 20030908
-  //
-  int shift = 1;
-  int date = mData->EventDate;
-  if(date>20021101 && date<20030601)
-  {
-    if(det==3) shift = 0;
-  }
-  Float_t PED= mPed[det][idh-shift][cap];
-  Float_t RMS= mPedRMS[det][idh-shift][cap];
+  Float_t PED= mPed[det][idh-1][cap];
+  Float_t RMS= mPedRMS[det][idh-1][cap];
 	//if(det==0) {ADC = mData->TowerADC[idh-1]; E = mData->TowerEnergy[idh-1]; S = STATUS_OK; } // save all for towers
 	if(det==2) {ADC = (Float_t)mData->SmdeADC[idh-1]; E = mData->SmdeEnergy[idh-1]; S = mData->SmdeStatus[idh-1]; }
 	if(det==3) {ADC = (Float_t)mData->SmdpADC[idh-1]; E = mData->SmdpEnergy[idh-1]; S = mData->SmdpStatus[idh-1]; }
@@ -1143,5 +1122,18 @@ Bool_t StEmcADCtoEMaker::clearOldEmc()
   }
 	return kTRUE;
 }
-
+void StEmcADCtoEMaker::setSMDEnergyCut(Float_t a, Float_t b)
+{
+    mControlADCtoE->CutOff[2]=a;
+    mControlADCtoE->CutOffType[2]=0;
+    mControlADCtoE->CutOff[3]=b;
+    mControlADCtoE->CutOffType[3]=0;
+}
+void StEmcADCtoEMaker::setSMDRmsCut(Float_t a, Float_t b)
+{
+    mControlADCtoE->CutOff[2]=a;
+    mControlADCtoE->CutOffType[2]=1;
+    mControlADCtoE->CutOff[3]=b;
+    mControlADCtoE->CutOffType[3]=1;
+}
 
