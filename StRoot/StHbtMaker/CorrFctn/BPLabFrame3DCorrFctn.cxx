@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLabFrame3DCorrFctn.cxx,v 1.1 2000/07/31 01:19:23 lisa Exp $
+ * $Id: BPLabFrame3DCorrFctn.cxx,v 1.2 2000/08/02 01:25:10 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: BPLabFrame3DCorrFctn.cxx,v $
+ * Revision 1.2  2000/08/02 01:25:10  lisa
+ * Add Coulomb correction capability to 3D Bertsch-Pratt CorrFctn
+ *
  * Revision 1.1  2000/07/31 01:19:23  lisa
  * add PairCut which contains collection of PairCuts - also 3D bertsch-pratt CorrFctn
  *
@@ -33,7 +36,7 @@ BPLabFrame3DCorrFctn::BPLabFrame3DCorrFctn(char* title, const int& nbins, const 
   mQinvNormHi = 0.18;
   mNumRealsNorm = 0;
   mNumMixedNorm = 0;
-  //  mCorrection = 0;  // pointer to Coulomb Correction object
+  mCorrection = 0;  // pointer to Coulomb Correction object
 
   // set up numerator
   char TitNum[100] = "Num";
@@ -67,7 +70,7 @@ void BPLabFrame3DCorrFctn::Finish(){
   double NumFact = double(mNumRealsNorm);
   double DenFact = double(mNumMixedNorm);
 
-  mRatio->Divide(mNumerator,mDenominator,NumFact,DenFact);
+  mRatio->Divide(mNumerator,mDenominator,DenFact,NumFact);
 }
 
 //____________________________
@@ -86,16 +89,16 @@ StHbtString BPLabFrame3DCorrFctn::Report(){
   stemp += ctemp;
   sprintf(ctemp,"In numerator:\t%u\t In denominator:\t%u\n",mNumRealsNorm,mNumMixedNorm);
   stemp += ctemp;
-//   if (mCorrection)
-//     {
-//       float radius = mCorrection->GetRadius();
-//       sprintf(ctemp,"Coulomb correction used radius of\t%E\n",radius);
-//     }
-//   else
-//     {
-//       sprintf(ctemp,"No Coulomb Correction applied to this CorrFctn\n");
-//       stemp += ctemp;
-//     }
+  if (mCorrection)
+    {
+      float radius = mCorrection->GetRadius();
+      sprintf(ctemp,"Coulomb correction used radius of\t%E\n",radius);
+    }
+  else
+    {
+      sprintf(ctemp,"No Coulomb Correction applied to this CorrFctn\n");
+    }
+  stemp += ctemp;
   //  
   StHbtString returnThis = stemp;
   return returnThis;
@@ -113,14 +116,10 @@ void BPLabFrame3DCorrFctn::AddRealPair(const StHbtPair* pair){
 //____________________________
 void BPLabFrame3DCorrFctn::AddMixedPair(const StHbtPair* pair){
   double weight=1.0;
-//   if (mCorrection)
-//     {
-//       weight = mCorrection->CoulombCorrect(pair);
-//     }
-//   else
-//     {
-//       weight = 1.0;
-//     }
+  if (mCorrection)
+    {
+      weight = mCorrection->CoulombCorrect(pair);
+    }
   double Qinv = fabs(pair->qInv());   // note - qInv() will be negative for identical pairs...
   if ((Qinv < mQinvNormHi) && (Qinv > mQinvNormLo)) mNumMixedNorm++;
   double qOut = fabs(pair->qOutBf());
