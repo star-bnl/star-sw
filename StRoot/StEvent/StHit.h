@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.h,v 1.1 1999/01/30 03:58:06 fisyak Exp $
+ * $Id: StHit.h,v 1.2 1999/02/09 21:01:24 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
- * Revision 1.1  1999/01/30 03:58:06  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 21:01:24  fisyak
+ * import new Torres staff
+ *
+ * Revision 1.4  1999/03/23 21:51:47  ullrich
+ * Removed table-based constructor.
  *
  * Revision 1.3  1999/01/30 23:03:13  wenaus
  * table load intfc change; include ref change
@@ -28,7 +31,7 @@
 #endif
 #include <iostream.h>
  * Revision 2.1  1999/10/28 22:25:50  ullrich
-#include "dst_point.h"
+#include "tables/dst_point.h"
 #include "StObject.h"
 class StHit : public TObject {
 #include "StThreeVectorF.hh"
