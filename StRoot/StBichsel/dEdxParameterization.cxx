@@ -62,11 +62,12 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag,
   // set normalization factor to 2.3976 keV/cm at beta*gamma = 4;
   static const Double_t dEdxMIP = 2.39761562607903311; // [keV/cm]
   static const Double_t MIPBetaGamma10 = TMath::Log10(4.);
-  fMostProbableZShift = TMath::Log(dEdxMIP) - Interpolation(fP,MIPBetaGamma10,1,0);
-  fAverageZShift      = TMath::Log(dEdxMIP) - Interpolation(fA,MIPBetaGamma10,1,0);
+  //  fMostProbableZShift = TMath::Log(dEdxMIP) - Interpolation(fP,MIPBetaGamma10,1,0);
+  //  fAverageZShift      = TMath::Log(dEdxMIP) - Interpolation(fA,MIPBetaGamma10,1,0);
   fI70Shift           = dEdxMIP/Interpolation(fI70,MIPBetaGamma10,1,0);
   fI60Shift           = dEdxMIP/Interpolation(fI60,MIPBetaGamma10,1,0);
-  
+  fMostProbableZShift = TMath::Log(fI70Shift);
+  fAverageZShift      = fMostProbableZShift;
 };
 //________________________________________________________________________________
 dEdxParameterization::~dEdxParameterization() { 
