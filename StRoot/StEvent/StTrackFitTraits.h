@@ -1,6 +1,10 @@
+/*!
+ * \class StTrackFitTraits 
+ * \author Thomas Ullrich, Sep 1999
+ */
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.7 2001/05/04 19:50:52 perev Exp $
+ * $Id: StTrackFitTraits.h,v 2.8 2002/02/22 22:56:52 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
+ * Revision 2.8  2002/02/22 22:56:52  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.7  2001/05/04 19:50:52  perev
  * Streamer to account old ROOT2
  *

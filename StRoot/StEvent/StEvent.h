@@ -1,6 +1,10 @@
+/*!
+ * \class StEvent 
+ * \author Thomas Ullrich, Sep 1999
+ */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.26 2002/01/03 20:59:33 ullrich Exp $
+ * $Id: StEvent.h,v 2.27 2002/02/22 22:56:47 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.27  2002/02/22 22:56:47  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.26  2002/01/03 20:59:33  ullrich
  * Added BBC and FPD.
  *

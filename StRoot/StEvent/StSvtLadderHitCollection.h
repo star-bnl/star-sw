@@ -1,6 +1,10 @@
+/*!
+ * \class StSvtLadderHitCollection 
+ * \author Thomas Ullrich, Sep 1999
+ */
 /***************************************************************************
  *
- * $Id: StSvtLadderHitCollection.h,v 2.3 2001/04/05 04:00:43 ullrich Exp $
+ * $Id: StSvtLadderHitCollection.h,v 2.4 2002/02/22 22:56:51 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StSvtLadderHitCollection.h,v $
+ * Revision 2.4  2002/02/22 22:56:51  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.3  2001/04/05 04:00:43  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *

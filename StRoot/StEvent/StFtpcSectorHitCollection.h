@@ -1,6 +1,10 @@
+/*!
+ * \class StFtpcSectorHitCollection 
+ * \author Thomas Ullrich, July 1999
+ */
 /***************************************************************************
  *
- * $Id: StFtpcSectorHitCollection.h,v 2.2 1999/10/28 22:25:24 ullrich Exp $
+ * $Id: StFtpcSectorHitCollection.h,v 2.3 2002/02/22 22:56:48 jeromel Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StFtpcSectorHitCollection.h,v $
+ * Revision 2.3  2002/02/22 22:56:48  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.2  1999/10/28 22:25:24  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *

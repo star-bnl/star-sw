@@ -1,6 +1,10 @@
+/*!
+ * \class StL3Trigger 
+ * \author Thomas Ullrich, Apr 2000
+ */
 /***************************************************************************
  *
- * $Id: StL3Trigger.h,v 2.3 2001/08/02 01:27:45 ullrich Exp $
+ * $Id: StL3Trigger.h,v 2.4 2002/02/22 22:56:49 jeromel Exp $
  *
  * Author: Thomas Ullrich, Apr 2000
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StL3Trigger.h,v $
+ * Revision 2.4  2002/02/22 22:56:49  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.3  2001/08/02 01:27:45  ullrich
  * Added event summary and algorithms.
  *

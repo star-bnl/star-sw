@@ -1,6 +1,10 @@
+/*!
+ * \class StEventScavenger
+ * \author Thomas Ullrich, Sep 2000
+ */
 /***************************************************************************
  *
- * $Id: StEventScavenger.h,v 2.6 2002/01/19 00:14:17 ullrich Exp $
+ * $Id: StEventScavenger.h,v 2.7 2002/02/22 22:56:47 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StEventScavenger.h,v $
+ * Revision 2.7  2002/02/22 22:56:47  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.6  2002/01/19 00:14:17  ullrich
  * Corrected typo.
  *

@@ -1,6 +1,10 @@
+/*!
+ * \class StL0Trigger 
+ * \author Thomas Ullrich, Sep 1999
+ */
 /***************************************************************************
  *
- * $Id: StL0Trigger.h,v 2.5 2002/02/15 00:18:13 ullrich Exp $
+ * $Id: StL0Trigger.h,v 2.6 2002/02/22 22:56:48 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.h,v $
+ * Revision 2.6  2002/02/22 22:56:48  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.5  2002/02/15 00:18:13  ullrich
  * Changed signature of bunchCrossingId7bit().
  *

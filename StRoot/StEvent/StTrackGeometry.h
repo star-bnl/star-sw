@@ -1,6 +1,10 @@
+/*!
+ * \class StTrackGeometry 
+ * \author Thomas Ullrich, Sep 1999
+ */
 /***************************************************************************
  *
- * $Id: StTrackGeometry.h,v 2.5 2001/07/17 22:23:30 ullrich Exp $
+ * $Id: StTrackGeometry.h,v 2.6 2002/02/22 22:56:52 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StTrackGeometry.h,v $
+ * Revision 2.6  2002/02/22 22:56:52  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.5  2001/07/17 22:23:30  ullrich
  * Added helicity to track geometry.
  *

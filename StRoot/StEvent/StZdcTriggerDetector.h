@@ -1,6 +1,10 @@
+/*!
+ * \class StZdcTriggerDetector 
+ * \author Thomas Ullrich, Sep 1999
+ */
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.h,v 2.6 2001/07/13 16:25:20 perev Exp $
+ * $Id: StZdcTriggerDetector.h,v 2.7 2002/02/22 22:56:53 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.h,v $
+ * Revision 2.7  2002/02/22 22:56:53  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.6  2001/07/13 16:25:20  perev
  * last static array fixed
  *

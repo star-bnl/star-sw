@@ -1,6 +1,10 @@
+/*!
+ * \class StGlobalTrack 
+ * \author Thomas Ullrich, Sep 1999
+ */
 /***************************************************************************
  *
- * $Id: StGlobalTrack.h,v 2.2 2001/03/24 03:34:48 perev Exp $
+ * $Id: StGlobalTrack.h,v 2.3 2002/02/22 22:56:48 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.h,v $
+ * Revision 2.3  2002/02/22 22:56:48  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.2  2001/03/24 03:34:48  perev
  * clone() -> clone() const
  *

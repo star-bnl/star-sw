@@ -1,6 +1,10 @@
+/*!
+ * \class StPrimaryVertex 
+ * \author Thomas Ullrich, Sep 1999
+ */
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.h,v 2.6 2001/04/05 04:00:39 ullrich Exp $
+ * $Id: StPrimaryVertex.h,v 2.7 2002/02/22 22:56:49 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.h,v $
+ * Revision 2.7  2002/02/22 22:56:49  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.6  2001/04/05 04:00:39  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *

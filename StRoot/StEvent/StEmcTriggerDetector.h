@@ -1,6 +1,10 @@
+/*!
+ * \class StEmcTriggerDetector 
+ * \author Alex Suaide, Feb 2002
+ */
 /***************************************************************************
  *
- * $Id: StEmcTriggerDetector.h,v 2.1 2002/02/20 03:11:46 ullrich Exp $
+ * $Id: StEmcTriggerDetector.h,v 2.2 2002/02/22 22:56:47 jeromel Exp $
  *
  * Author: Alex Suaide, Feb 2002
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StEmcTriggerDetector.h,v $
+ * Revision 2.2  2002/02/22 22:56:47  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.1  2002/02/20 03:11:46  ullrich
  * Initial Revision.
  *

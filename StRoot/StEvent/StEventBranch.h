@@ -1,6 +1,10 @@
+/*!
+ * \class StEventBranch 
+ * \author Victor Perev, May 2001
+ */
 /***************************************************************************
  *
- * $Id: StEventBranch.h,v 2.1 2001/05/30 17:45:54 perev Exp $
+ * $Id: StEventBranch.h,v 2.2 2002/02/22 22:56:47 jeromel Exp $
  *
  * Author: Victor Perev, May 2001
  ***************************************************************************

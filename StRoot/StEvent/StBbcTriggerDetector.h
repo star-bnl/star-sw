@@ -1,6 +1,10 @@
+/*!
+ * \class StBbcTriggerDetector 
+ * \author Akio Ogawa, Jan 2002
+ */
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.h,v 2.2 2002/01/28 19:28:10 jeromel Exp $
+ * $Id: StBbcTriggerDetector.h,v 2.3 2002/02/22 22:56:46 jeromel Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.h,v $
+ * Revision 2.3  2002/02/22 22:56:46  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.2  2002/01/28 19:28:10  jeromel
  * Wrong format of an enum list corrected. Solaris picked this up.
  *

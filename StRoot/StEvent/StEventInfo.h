@@ -1,6 +1,10 @@
+/*!
+ * \class StEventInfo 
+ * \author Thomas Ullrich, Jun 2000
+ */
 /***************************************************************************
  *
- * $Id: StEventInfo.h,v 2.4 2001/09/19 04:48:08 ullrich Exp $
+ * $Id: StEventInfo.h,v 2.5 2002/02/22 22:56:47 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jun 2000
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StEventInfo.h,v $
+ * Revision 2.5  2002/02/22 22:56:47  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.4  2001/09/19 04:48:08  ullrich
  * Added event size.
  *

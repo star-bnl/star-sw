@@ -1,6 +1,10 @@
+/*!
+ * \class StEmcSoftwareMonitor 
+ * \author Thomas Ullrich, July 1999
+ */
 /***************************************************************************
  *
- * $Id: StEmcSoftwareMonitor.h,v 2.1 1999/10/13 19:43:00 ullrich Exp $
+ * $Id: StEmcSoftwareMonitor.h,v 2.2 2002/02/22 22:56:47 jeromel Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StEmcSoftwareMonitor.h,v $
+ * Revision 2.2  2002/02/22 22:56:47  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.1  1999/10/13 19:43:00  ullrich
  * Initial Revision
  *

@@ -1,6 +1,10 @@
+/*!
+ * \class StTofCollection 
+ * \author Thomas Ullrich, Dec 2000
+ */
 /***************************************************************************
  *
- * $Id: StTofCollection.h,v 2.3 2001/10/01 19:40:58 ullrich Exp $
+ * $Id: StTofCollection.h,v 2.4 2002/02/22 22:56:51 jeromel Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -14,6 +18,10 @@
  ***************************************************************************
  *
  * $Log: StTofCollection.h,v $
+ * Revision 2.4  2002/02/22 22:56:51  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.3  2001/10/01 19:40:58  ullrich
  * Added methods and members for StTofData.
  *

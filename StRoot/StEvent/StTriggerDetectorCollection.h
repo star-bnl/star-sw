@@ -1,6 +1,10 @@
+/*!
+ * \class StTriggerDetectorCollection 
+ * \author Thomas Ullrich, Sep 1999
+ */
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.h,v 2.2 2002/02/20 03:12:15 ullrich Exp $
+ * $Id: StTriggerDetectorCollection.h,v 2.3 2002/02/22 22:56:53 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.h,v $
+ * Revision 2.3  2002/02/22 22:56:53  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.2  2002/02/20 03:12:15  ullrich
  * Added EMC trigger.
  *

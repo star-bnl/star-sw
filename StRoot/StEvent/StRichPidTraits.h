@@ -1,6 +1,10 @@
+/*!
+ * \class StRichPidTraits 
+ * \author Matt Horsley, Sep 2000
+ */
 /***************************************************************************
  *
- * $Id: StRichPidTraits.h,v 2.11 2002/02/19 23:21:30 ullrich Exp $
+ * $Id: StRichPidTraits.h,v 2.12 2002/02/22 22:56:50 jeromel Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.h,v $
+ * Revision 2.12  2002/02/22 22:56:50  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.11  2002/02/19 23:21:30  ullrich
  * Added copy constructor and assignment operator. New destructor.
  *

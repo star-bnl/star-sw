@@ -1,6 +1,19 @@
+/*!
+ * \class StEventClusteringHints 
+ * \author Thomas Ullrich, Apr 2001
+ *
+ *               The class can distinguish between two modes
+ *               miniDST and DST mode in which clustering hints
+ *               are different.
+ *               With clustering hints we mean the association
+ *               of a class stored *directly* in the StEvent class
+ *               (StEvent::mContent) and the name of the branch it
+ *               will be written to.
+ *
+ */
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.h,v 2.6 2001/05/30 17:45:54 perev Exp $
+ * $Id: StEventClusteringHints.h,v 2.7 2002/02/22 22:56:47 jeromel Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -17,6 +30,10 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.h,v $
+ * Revision 2.7  2002/02/22 22:56:47  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.6  2001/05/30 17:45:54  perev
  * StEvent branching
  *

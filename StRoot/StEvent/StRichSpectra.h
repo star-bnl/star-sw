@@ -1,6 +1,10 @@
+/*!
+ * \class StRichSpectra 
+ * \author Brian Lasiuk, Dec 14, 2002
+ */
 /***************************************************************************
  *
- * $Id: StRichSpectra.h,v 2.3 2002/02/19 23:22:30 ullrich Exp $
+ * $Id: StRichSpectra.h,v 2.4 2002/02/22 22:56:50 jeromel Exp $
  *
  * Author: Brian Lasiuk, Dec 14, 2002
  ***************************************************************************
@@ -9,6 +13,10 @@
  *
  ***************************************************************************
  * $Log: StRichSpectra.h,v $
+ * Revision 2.4  2002/02/22 22:56:50  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.3  2002/02/19 23:22:30  ullrich
  * Minor modifications.
  *

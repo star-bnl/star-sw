@@ -1,6 +1,14 @@
+/*!
+ * \class StCalibrationVertex 
+ * \author Thomas Ullrich, Nov 2001
+ *
+ *               various types of vertices useful for calibration
+ *               and diagnostics. No daughters, no parent.
+ *
+ */
 /***************************************************************************
  *
- * $Id: StCalibrationVertex.h,v 2.1 2001/11/10 23:52:14 ullrich Exp $
+ * $Id: StCalibrationVertex.h,v 2.2 2002/02/22 22:56:46 jeromel Exp $
  *
  * Author: Thomas Ullrich, Nov 2001
  ***************************************************************************
@@ -12,6 +20,10 @@
  ***************************************************************************
  *
  * $Log: StCalibrationVertex.h,v $
+ * Revision 2.2  2002/02/22 22:56:46  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.1  2001/11/10 23:52:14  ullrich
  * Initial Revision.
  *

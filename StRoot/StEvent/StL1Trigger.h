@@ -1,6 +1,10 @@
+/*!
+ * \class StL1Trigger 
+ * \author Thomas Ullrich, Nov 2001
+ */
 /***************************************************************************
  *
- * $Id: StL1Trigger.h,v 2.1 2001/11/07 21:18:17 ullrich Exp $
+ * $Id: StL1Trigger.h,v 2.2 2002/02/22 22:56:48 jeromel Exp $
  *
  * Author: Thomas Ullrich, Nov 2001
  ***************************************************************************
@@ -10,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StL1Trigger.h,v $
+ * Revision 2.2  2002/02/22 22:56:48  jeromel
+ * Doxygen basic documentation in all header files. None of this is required
+ * for QM production.
+ *
  * Revision 2.1  2001/11/07 21:18:17  ullrich
  * Initial Revision.
  *
