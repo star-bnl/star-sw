@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: boldStyle.C,v 1.1 1999/10/28 21:24:07 posk Exp $
+// $Id: boldStyle.C,v 1.2 1999/12/22 21:43:56 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Sep. 1999
 // Description:  Style file for presentation histograms.
@@ -10,9 +10,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: boldStyle.C,v $
+// Revision 1.2  1999/12/22 21:43:56  posk
+// Reduced the line widths to compensate for the increase in postscript
+// line width which started in ROOT 2.23/08.
+//
 // Revision 1.1  1999/10/28 21:24:07  posk
 // Style file for making presentation histograms.
-//
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,14 +32,14 @@ TStyle* myStyle = new  TStyle("boldStyle", "Bold Style");
 myStyle->SetPalette(1,0);
 myStyle->SetCanvasColor(10);
 myStyle->SetCanvasBorderMode(0);
-myStyle->SetFrameLineWidth(4);
+myStyle->SetFrameLineWidth(2);
 myStyle->SetFrameFillColor(10);
 myStyle->SetPadColor(10);
 myStyle->SetPadTickX(1);
 myStyle->SetPadTickY(1);
 myStyle->SetPadBottomMargin(0.15);
 myStyle->SetPadLeftMargin(0.17);
-myStyle->SetHistLineWidth(6);
+myStyle->SetHistLineWidth(3);
 myStyle->SetHistLineColor(kRed);
 myStyle->SetLabelSize(0.04,"X");
 myStyle->SetLabelSize(0.04,"Y");
@@ -49,9 +52,10 @@ myStyle->SetTitleSize(0.06,"Y");
 //myStyle->SetTitleOffset(0.08,"X");
 //myStyle->SetTitleOffset(0.08,"Y");
 myStyle->SetTitleColor(10);
+myStyle->SetTitleTextColor(kBlue);
 //myStyle->SetOptStat(1110111);
 myStyle->SetStatColor(10);
-myStyle->SetFuncWidth(6);
+myStyle->SetFuncWidth(3);
 myStyle->SetFuncColor(kGreen);
 
 gROOT->ForceStyle();
