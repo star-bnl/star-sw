@@ -1,11 +1,15 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.13 2003/04/25 21:42:47 andrewar Exp $
+ * $Id: StiStEventFiller.cxx,v 2.14 2003/04/29 15:28:10 andrewar Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.14  2003/04/29 15:28:10  andrewar
+ * Removed hacks to get helicity right; switch now done at source
+ * (StiKalmanTrackNode).
+ *
  * Revision 2.13  2003/04/25 21:42:47  andrewar
  * corrected DCA bug and added temp fix for helicity problem. This will
  * have to be modified when the helicity convention in StiStKalmanTrack
@@ -479,7 +483,7 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
 					      node->getDipAngle(),
 					      origin, 
 					      node->getGlobalMomentumF(), 
-					      -1*node->getHelicity());
+					      node->getHelicity());
 
   //cout <<"Helix: "<<geometry->helix()<<endl;
   if (outer)
@@ -674,10 +678,10 @@ float StiStEventFiller::impactParameter(StiKalmanTrack* track)
   originD->rotateZ(node->getRefAngle());
   physicalHelix->setParameters(fabs(node->getCurvature()),
 			       node->getDipAngle(),
-			       node->getPhase()+node->getHelicity()*M_PI/2.,
+			       node->getPhase()-node->getHelicity()*M_PI/2.,
 			       *originD,
-			       -1*node->getHelicity());
-  cout <<"PHelix: "<<*physicalHelix<<endl;
+			       node->getHelicity());
+  //cout <<"PHelix: "<<*physicalHelix<<endl;
   float dca = static_cast<float>(physicalHelix->distance(vxDD));
 
   track->setDca(dca);
