@@ -22,7 +22,7 @@ ClassImp(StXiFinderMaker)
 
 //_____________________________________________________________________________
 StXiFinderMaker::StXiFinderMaker(const char *name):StV0FinderMaker(name),
-exipar(0),parsXi(0),xiVertex(0)
+exipar(0),parsXi(0),xiVertex(0),det_id_xi(0)
 {
 }
 
@@ -736,8 +736,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.12 2003/09/02 17:58:59 perev Exp $
+// $Id: StXiFinderMaker.cxx,v 1.13 2003/09/17 12:00:23 faivre Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.13  2003/09/17 12:00:23  faivre
+// RH8 : initialize everything in constructor.
+//
 // Revision 1.12  2003/09/02 17:58:59  perev
 // gcc 3.2 updates + WarnOff
 //
