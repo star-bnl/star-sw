@@ -1,8 +1,11 @@
 #!/usr/local/bin/perl
 Import qw ( env INCLUDE LIB BIN EXPORT BUILD OBJ);
-my $DIR = DirPath;                           print "Build in $DIR\n";
-(my $Dir = SourcePath($DIR)) =~ s/\/$DIR//;# print "new Dir = $Dir\n";
-my @idl = find_idl($Dir); #print "@idl\n"; 
+$my_env = $env->clone(
+		    'DEBUG'      => ' '
+		    );
+
+my $Dir = "pams";                           print "Build Tables for $Dir\n";
+my @idl = find_idl($Dir); # print "@idl\n"; 
 my @idlT = ();
 my @tgt_idlT = ();
 my %idl    = ();
@@ -14,16 +17,16 @@ Link $obj =>  $share; print "Link $obj =>  $share\n";
 my $SO_PKG = "St_Tables.so";
 for my $idl (@idl) {#  print "$idl \n";
   if (! grep (/\/idl\//,$idl)) {next;} #  if (! grep (/vpd\//,$idl)) {next;}
-  push @idlT, $idl; #print "i=",$i++," idl = ",$idl,"\n";
+  push @idlT, '#' . $Dir . "/" . $idl; #print "i=",$i++," idl = ",$idl,"\n";
   my $export_idl = $share . "/" . basename ($idl); #print "export_idl = $export_idl\n";
   push @tgt_idlT, $export_idl;
   my $stem = basename ($export_idl, ".idl"); #print "stem = $stem\n";
   $idl{$stem} = $export_idl;
-}
-Install $env $share, @idlT;
+} #print "idlT = @idlT\n";
+Install $my_env $share, @idlT;
 #___________________________________
 (my $build = $obj) =~ s/\#//g;  #print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
-my $CPPFLAGS = cppflags($env);
+my $CPPFLAGS = cppflags($my_env);
 foreach my $stem (sort keys %idl) { 
   my $idll = ($idl{$stem}); #print "@idll\n";
   my $dir  = dirname ($idll); #print "dir = $dir\n"; 
@@ -33,11 +36,11 @@ foreach my $stem (sort keys %idl) {
   (my $Dir = $dir) =~ s/\#//g; #print "Dir = $Dir \n";
   my @Deps = ();
   push  @Deps, $idll;
-  Command $env [$idlH, $idlI], @Deps, qq (cd $Dir; stic -H -q $idl );
+  Command $my_env [$idlH, $idlI], @Deps, qq (cd $Dir; stic -H -q $idl );
   my $idlHH = $obj . "/St_" . $stem . "_Table.h"; 
   push @Deps, $idlH;
   push @Deps, $idlI;
-  Command $env [$idlHH], @Deps, 
+  Command $my_env [$idlHH], @Deps, 
   qq (
       echo "#ifndef STAF_St_"$stem"_Table">%>
       echo "#define STAF_St_"$stem"_Table">>%>
@@ -60,9 +63,9 @@ foreach my $stem (sort keys %idl) {
       echo "};">>%>
       echo "#endif">>%>
      );
-  Install $env  $share, $idlHH;
+  Install $my_env  $share, $idlHH;
   my $idlCXX = $obj . "/St_" . $stem . "_Table.cxx"; 
-  Command $env [$idlCXX], @Deps, 
+  Command $my_env [$idlCXX], @Deps, 
   qq (
       echo "#include \\"St_"$stem"_Table.h\\"">%>
       echo "/////////////////////////////////////////////////////////////////////////">>%>
@@ -93,11 +96,11 @@ foreach my $stem (sort keys %idl) {
      $cmdCint.= "echo \"#pragma link C++ class \"$stem\"_st-!;\" >> LinkDef.h;";
      $cmdCint.= "echo \"#endif\" >> LinkDef.h;";
      $cmdCint.= " rootcint -f $idlcintC -c $CPPFLAGS  $idlhh LinkDef.h;"; #print "$cmdCint\n";
-  Command $env [$idlCintC, $idlCintH], @Deps,  qq ($cmdCint);
+  Command $my_env [$idlCintC, $idlCintH], @Deps,  qq ($cmdCint);
   push @sources, $idlCintC; 
 }
-LinkedModule $env $SO_PKG, @sources;
-Install $env $LIB, $SO_PKG;
+LinkedModule $my_env $SO_PKG, @sources;
+Install $my_env $LIB, $SO_PKG;
 #________________________________________
 sub script::find_idl {
   if (defined($AFS)) {$File::Find::dont_use_nlink;}

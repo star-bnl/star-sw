@@ -18,11 +18,11 @@ my $SoOUT    = "-o";
 my $CPP      = "gcc";
 my $CPPFLAGS = "";
 my $CXX      = "g++";
-my $CXXFLAGS = $DEBUG . "  -fpic -w";
+my $CXXFLAGS = "-fpic -w";
 my $CC       = "gcc";
-my $CFLAGS   = $DEBUG . "  -fpic -w";
+my $CFLAGS   = "  -fpic -w";
 my $FC       = "f77";
-my $FFLAGS   = $DEBUG . "  -KPIC -w -DCERNLIB_TYPE";
+my $FFLAGS   = "  -KPIC -w -DCERNLIB_TYPE";
 my $AR       = "ar";
 my $ARFLAGS  = "rvu";
 my $LD       = $CXX;
@@ -46,19 +46,19 @@ if (/^i386_linux2/ || /^i386_redhat50/ || /^i386_redhat51/ ||  /^i386_redhat52/)
 #  ====================
   $OSFID    = "lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
   $FC       = "pgf77";
-  $CXXFLAGS = $DEBUG . " -fPIC -Wall";
+  $CXXFLAGS = " -fPIC -Wall";
 #  $CPPPATH .= "/usr/local/include/g++:";
 #                                             -fpipe
-  $CFLAGS   = $DEBUG . " -fPIC -Wall";
+  $CFLAGS   = " -fPIC -Wall";
   $CPPFLAGS .= " f2cFortran";
-  $LDFLAGS  = $DEBUG . " -Wl,-Bstatic";
-  $EXEFLAGS = $DEBUG . " -Wl,-Bdynamic";  
-  $SOFLAGS  = $DEBUG . " -shared";  
+  $LDFLAGS  = " -Wl,-Bstatic";
+  $EXEFLAGS = " -Wl,-Bdynamic";  
+  $SOFLAGS  = " -shared";  
   $CLIBS    = "-L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
   $FLIBS    = "-L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
   if (/^i386_linux2/) {$FLIBS   .= " -lI77 -lF77";}
   $FLIBS   .= " -lcrypt";
-  $FFLAGS   = $DEBUG . " -DPGI";  
+  $FFLAGS   = " -DPGI";  
   $FEXTEND  = "-Mextend";
 }
 elsif (/^hp_ux102/) {
@@ -71,20 +71,20 @@ elsif (/^hp_ux102/) {
   $CC       = "cc";
   $LD       = $CXX;
   $SO       = $CXX;
-  $CXXFLAGS = $DEBUG . " -z +Z  -Dextname";
-  $CFLAGS   = $DEBUG . " -Ae -z +Z -Dextname";  
+  $CXXFLAGS = " -z +Z  -Dextname";
+  $CFLAGS   = " -Ae -z +Z -Dextname";  
   if (defined($SCL_OPTIMISE)){ # from Brian
     $CXXFLAGS .= " +Olibcalls +Onolimit";
   }
   else {
   $CXXFLAGS .= " +d";}
-  $LDFLAGS   = $DEBUG . " -z -Wl,+s -Wl,-E,+vnocompatwarnings";
+  $LDFLAGS   = " -z -Wl,+s -Wl,-E,+vnocompatwarnings";
   $EXEFLAGS  = $LDFLAGS . " -Wl,-N"; 
-  $SOFLAGS   = $DEBUG . "  -b -z";  
+  $SOFLAGS   = "  -b -z";  
   $CLIBS     = "-lXm -lXt -lX11 -lm -lPW -ldld";
   $FC        = "fort77";
   $FLIBS     = "/opt/fortran/lib/libU77.a";
-  $FFLAGS    = $DEBUG . " +DA1.0 +ppu +Z  +U77 -K";
+  $FFLAGS    = " +DA1.0 +ppu +Z  +U77 -K";
   $FEXTEND   = "+es";
 }
 elsif (/^sun4x_55/ ||  /^sun4x_56/) {
@@ -92,18 +92,18 @@ elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $CPPFLAGS  =~ s/SunOS//g;
   $OSFID     =  "sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SOLARIS CERNLIB_SUN ST_NO_MEMBER_TEMPLATES ST_NO_NUMERIC_LIMITS";
   $CC        = "/opt/SUNWspro/bin/cc";
-  $CXX       = "/opt/SUNWspro/bin/CC";
+  $CXX       = "/opt/SUNWspro/bin/CC -features=no%castop -features=no%anachronisms";
   $FC        = "/opt/SUNWspro/bin/f77";
-  $CXXFLAGS  =  $DEBUG . "  -KPIC -features=no%castop -features=no%anachronisms +w";
+  $CXXFLAGS  =  "-KPIC +w";
   $CLIBS     = "-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc";
   $FLIBS     = "-lM77 -lF77 -lsunmath";
-  $FFLAGS    =  $DEBUG . "  -KPIC -w";
+  $FFLAGS    =  "  -KPIC -w";
   $FEXTEND   = "-e";
-  $CFLAGS    =  $DEBUG . " -KPIC";
+  $CFLAGS    =  " -KPIC";
   $LD        =  $CXX;
-  $LDFLAGS   =  $DEBUG . " -Bstatic"; 
+  $LDFLAGS   =  " -Bstatic"; 
   $SO        =  $CXX;
-  $SOFLAGS   =  $DEBUG . " -G";
+  $SOFLAGS   =  " -G";
 }
 $MAIN    = cwd();
 $INCLUDE = "#inc";
@@ -133,8 +133,7 @@ print " in DirPath=",$DirPath," FilePath=",$FilePath,"\n";
 print " STAR = ",$STAR,"\n";
 push @Reps, $STAR;
 Repository ($STAR);
-my @Repo = Repository_List;
-  print "Repositories = @Repo\n";
+my @Repo = Repository_List; print "Repositories = @Repo\n";
 my $STICFLAGS = "-H -q";
 $env = new cons(
 		'STIC'         => $STIC,
@@ -142,33 +141,34 @@ $env = new cons(
 		'STICCOM'      => 'cd %<:d;  %STIC %STICFLAGS %_IFLAGS %<', 
 		'CPPPATH'      => $CPPPATH,
 		'CPPFLAGS'     => $CPPFLAGS,
+		'DEBUG'        => $DEBUG,
 		'FC'	       => $FC,
 		'FFLAGS'       => $FFLAGS,
 		'FEXTEND'      => $FEXTEND,
 		'FCPPPATH'     => $FCPPPATH,
-		'FCCOM'        => 'cd %<:d; %FC %FFLAGS %FEXTEND %_IFLAGS %FCPPPATH -c %<:f -o %>:f',
+		'FCCOM'        => 'cd %<:d; %FC %FFLAGS %DEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %<:f -o %>:f',
 		'GEANT3'       => $GEANT3,
-		'GEANT3COM'    => 'cd %<:d; %GEANT3 %<:f -o %<:f.F; %FC %FFLAGS  %_IFLAGS %FCPPPATH -c %<:f.F -o %>:f',
+		'GEANT3COM'    => 'cd %<:d; %GEANT3 %<:f -o %<:f.F; %FC %FFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %<:f.F -o %>:f',
 		'CC'	       => $CC,
 		'CFLAGS'       => $CFLAGS,
-		'CCCOM'        => 'cd %<:d; %CC %CFLAGS %CPPFLAGS %_IFLAGS -c %<:f -o %>:f',
+		'CCCOM'        => 'cd %<:d; %CC %CFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %<:f -o %>:f',
 		'CXX'          => $CXX,
 		'CXXFLAGS'     => $CXXFLAGS,
-		'CXXCOM'       => 'cd %<:d; %CXX %CXXFLAGS %CPPFLAGS %_IFLAGS -c %<:f -o %>:f',
+		'CXXCOM'       => 'cd %<:d; %CXX %CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %<:f -o %>:f',
 		'LINK'	       => $LD,
 		'LDFLAGS'      => $LDFLAGS,
-		'LINKCOM'      => '%LINK %LDFLAGS -o %> %<:f %_LDIRS %LIBS',
+		'LINKCOM'      => '%LINK %DEBUG %LDFLAGS -o %> %<:f %_LDIRS %LIBS',
 		'SO'           => $SO,
 		'SOFLAGS'      => $SOFLAGS, 
 		'SoOUT'        => $SoOUT,
-		'LINKMODULECOM'=> '%SO %SOFLAGS %SoOUT %> %<',
+		'LINKMODULECOM'=> '%SO %DEBUG %SOFLAGS %SoOUT %> %<',
 		'AR'	       => $AR,
 		'ARFLAGS'      => $ARFLAGS,
 		'ARCOM'        => "%AR %ARFLAGS %> %<;%RANLIB %>",
 		'RANLIB'       => 'ranlib',
 		'AS'	       => 'as',
 		'ASFLAGS'      => '',
-		'ASCOM'        => '%AS %ASFLAGS %< -o %>',
+		'ASCOM'        => '%AS %%DEBUG ASFLAGS %< -o %>',
 		'LD'	       => 'ld',
 		'LDFLAGS'      => '',
 		'PREFLIB'      => 'lib',
@@ -207,7 +207,9 @@ my $obj = $build . "/obj";
 Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n";
 if (! -d "$obj")   {mkdir $obj, 0664;}
 my @Targets = ();
-my @conscripts = ("tables/Conscript","pams/Conscript", "StRoot/Conscript");
+my @conscripts = ("StRoot/Conscript", "pams/Conscript","tables/Conscript");
+#my @conscripts = ("pams/Conscript","tables/Conscript");
+#my @conscripts = ("pams/Conscript");
 for my $conscript (@conscripts) {
   if (-f $conscript) {
     my $target = $OBJ . "/" . $conscript;
@@ -522,6 +524,7 @@ sub script::wanted_inc {
 	/^wrk$/)
      ) {$prune = 1; return;}
   if ( /^.*\.h$/|| /^.*\.hh$/ || /^.*\.inc$/  || /^.*\.hpp$/) { 
+#    if ($name =~ '/inc/' || $name =~ '/\w*cdes/') { print "$name\n"; 
     if ($name =~ '/inc/' ) {# print "$name\n"; 
       push @search_files, $name; }
   }
