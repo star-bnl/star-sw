@@ -1,9 +1,16 @@
-//*-- Author :    Valery Fine(fine@bnl.gov)   23/04/99  
+//*-- Author :    Valery Fine(fine@bnl.gov)   05/05/99  
+//
+// Test for the new St_Points3D class family
+// Derived from HitsDraw.C macro
+//
 // begin_html
 // Full text of this macro can be downloaded from the repository: <a href = "http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/macros/HitsDraw.C">HitsDraw.C</a> 
 // end_html
-// $Id: HitsDraw.C,v 1.4 1999/04/27 21:42:07 fine Exp $
+// $Id: HitsDraw.C,v 1.5 1999/06/03 00:48:59 fine Exp $
 // $Log: HitsDraw.C,v $
+// Revision 1.5  1999/06/03 00:48:59  fine
+// New version of HitsDraw
+//
 // Revision 1.4  1999/04/27 21:42:07  fine
 // Web ref. have been added
 //
@@ -19,13 +26,42 @@
 // Forward declarations
 class St_Node;
 class St_NodeView;
+class St_g2t_tpc_hit;
 
 // Global variables to access from an interactive session
 St_Node     *hall      = 0;
 St_NodeView *fullView  = 0;
 St_NodeView *shortView = 0;
 St_NodeView *sensible  = 0;
+St_g2t_tpc_hit *points = 0;
+//________________________________________________________________________________
+// Subroutine to define t=the track color
+Color_t trackColor(Long_t geantId)
+{
+  Color_t color = kYellow;
+  switch (geantId) {
+   case 1:
+   case 2:
+   case 3:
+     color = kRed;
+     break;
+   case 4:
+   case 5:
+   case 6:
+     color = kGreen;
+     break;
+   case 7:
+   case 8:
+   case 9:
+     color = kYellow;
+     break;
+  default:
+     color = kBlue;
+  };
+  return color;
+}
 
+//________________________________________________________________________________
 // Subroutine to draw a separate "HELP" TCanvas object
 void x3dHelpDraw(){
  TCanvas *paveCanvas =  new TCanvas("x3d","X3D Help",500,20,540,220);
@@ -48,18 +84,21 @@ void x3dHelpDraw(){
  paveCanvas->Update();
 }
 
+//________________________________________________________________________________
 // Loading the share libraries
 void Load() {
   gSystem->Load("St_base");
   gSystem->Load("xdf2root");
   gSystem->Load("St_Tables");
 }
+//________________________________________________________________________________
 // Drawing subroutine
 void HitsDraw(){
   TCanvas *m_TreeD = new TCanvas("STAF","Events",10,600,200,200);
   Load();
 //  Draw STAR detector first
-  TWebFile f("http://www.star.bnl.gov/~fine/star.root");
+//  TWebFile f("http://www.star.bnl.gov/~fine/star.root");
+  TFile f("/star/u2a/fine/WWW/star.root");
   // read STAR geometry database remotely
   TGeometry *star = f.Get("STAR");
   if (!star) {
@@ -85,7 +124,9 @@ void HitsDraw(){
   muons->ls(2);
   St_DataSetIter next(muons);
   const Char_t *table = "event/geant/Event/g2t_tpc_hit";
+  const Char_t *trackTable = "event/geant/Event/g2t_track";
   next.ls(table);
+  next.ls(trackTable );
 // struct g2t_tpc_hit_st {
 //        long    id;             // primary key
 //        long    next_tr_hit_p;  // Id of next hit on same track
@@ -97,7 +138,8 @@ void HitsDraw(){
 //        float   tof;            // time of flight
 //        float   x[3];           // coordinate (Cartesian)
 // }
-  St_g2t_tpc_hit *points = (St_g2t_tpc_hit *)next(table);
+  points = (St_g2t_tpc_hit *)next(table);
+  points->Print(0,10);
   g2t_tpc_hit_st *p = 0;
   if (points) 
      g2t_tpc_hit_st *p = points->GetTable();
@@ -106,16 +148,24 @@ void HitsDraw(){
      return;
   }
 
-//  Float_t  minrange[3] = {0,0,0};
-//  Float_t  maxrange[3] = {0,0,0};
+//  struct g2t_track_st {
+//        . . . .
+//	long ge_pid; /* GEANT particle id */
+//        . . . .
+//} G2T_TRACK_ST;
 
-//  TPolyLine3D *track = 0;
-  TPolyMarker3D *track = 0;
+  St_g2t_track *trackT = (St_g2t_track *)next(trackTable);
+  trackT->Print(0,10);
+  g2t_track_st *geTrack = trackT->GetTable(); 
+
+  St_Table3Points *track = 0;
   TString tr;
   tr = "track_p";
   St_Table &ttt = *((St_Table *)points);
   ttt.ls();
-  St_TableSorter Track2Line(ttt,tr);
+  // Track2Line MUST be on heap othwesie 3D view will crash just code leaves this
+  // subroutine
+  St_TableSorter *Track2Line = new St_TableSorter (ttt,tr);
 
   Int_t i = 0;
   Char_t buffer[10];
@@ -129,69 +179,57 @@ void HitsDraw(){
   long newId =  0;
   g2t_tpc_hit_st *hitPoint = 0;
   printf(" new track found:");
-  for (i=0;i<Track2Line.GetNRows() && i < 5000;i++) 
+  St_Node *thisTrack[7] = {0,0,0,0,0,0,0}; // seven noded for 7 different colors
+  Int_t  MaxRowtoCount = 5000; // 5000;
+  Int_t  MaxTracks = Track2Line->CountKeys();
+  printf(" Total tracks here %d \n",MaxTracks);
+  MaxTracks = 100;
+  for (i=0;i<Track2Line->GetNRows() && ntracks <  MaxTracks ;i++) 
   {
-   hitPoint = p + Track2Line.GetIndex(i);
+   hitPoint = p + Track2Line->GetIndex(i);
    newId =  hitPoint->track_p;
 
    if (newId != currentId)  {
      printf(".");
-//     track =  new TPolyLine3D;   
-     track =  new TPolyMarker3D;   
-//     track->SetLineColor(kYellow);
-     track->SetMarkerColor(kYellow);
-//     track->SetLineWidth(5);
-//     track->SetLineWidth(2);
-     track->SetMarkerSize(1);
-     track->SetMarkerStyle(7);
+//==1     track =  new St_PointsArray3D;   
+     const Char_t *xName = "x[0]";
+     const Char_t *yName = "x[1]";
+     const Char_t *zName = "x[2]";
+     track =  new St_Table3Points(Track2Line,(const void *)&newId,xName,yName,zName);
+
      // Create a shape for this node
      St_PolyLineShape *trackShape  =  new St_PolyLineShape(track);
      trackShape->SetVisibility(1);
+     Int_t colorIndx = ntracks%7;
+//     trackShape->SetLineColor(trackColor(geTrack[newId]->ge_pid));
+//     trackShape->SetLineColor(kYellow);
+     trackShape->SetColorAttribute(colorIndx+kGreen);
+     trackShape->SetLineStyle(1);
+     trackShape->SetSizeAttribute(2);
      // Create a node to hold it
-     St_Node *thisTrack = new St_Node("hits","hits",trackShape);
-     thisTrack->Mark();
-     thisTrack->SetVisibility();
+     if (!thisTrack[colorIndx])  {
+         thisTrack[colorIndx] = new St_Node("hits","hits",trackShape);
+         thisTrack[colorIndx]->Mark();
+         thisTrack[colorIndx]->SetVisibility();
+         St_NodePosition *pp = hall->Add(thisTrack[colorIndx]);
+         if (!pp) printf(" no position %d\n",ntrack);
+     }
+     else 
+       thisTrack[colorIndx]->Add(trackShape);
      currentId = newId;
-     St_NodePosition *pp = hall->Add(thisTrack);
      ntracks++;
-     if (!pp) printf(" no position %d\n",ntrack);
-   }
-
-   if (track) {
-      track->SetNextPoint(hitPoint->x[0],hitPoint->x[1],hitPoint->x[2]);
-     // calculate ranges
-     //   for (int jj=0;jj<3;jj++) {
-     //     minrange[jj] = TMath::Min(minrange[jj],hitPoint->x[jj]);
-     //     maxrange[jj] = TMath::Max(maxrange[jj],hitPoint->x[jj]);
-     //   }
-   }
-   else if (ntracks < maxtracks)
-     printf("\nerror. There is no place for the track\n");
+   }  
  }
   printf("\n");
+  printf("%d tracks have been read\n",ntracks);
   gBenchmark->Stop("Fill time");
 
    printf(" Now we will try to draw something \n");
-//---------------------------- Draw tracks -------------------
-//   TCanvas *m_TreeD = new TCanvas("STAF","Events",200,200,600,600);
-//   m_TreeD->SetTheta(90.0);
-//   m_TreeD->SetPhi(90.0);
-
-   // creating a view
-//   minrange[1]  = -5.0;
-//   if (!view)   view = new TView(minrange,maxrange,1);
-////   else         view->SetRange(minrange,maxrange);
    Int_t irep;
-// view->SetView(0,0,90,&irep);
-// view->SetView(0.0,90.0,90.0,irep);
-
-//       if (trackview) {
-//         trackview->SetShape(0);
-//         trackview->SetSmooth(kTRUE);
-//         trackview->Draw();
-//       }
   gBenchmark->Stop("Draw time");
 // Select sensors
+   ((St_Node *)volume.FindByName("ZCAL"))->SetVisibility(0);
+   ((St_Node *)volume.FindByName("QDIV"))->SetVisibility(0);
    fullView = new St_NodeView(*hall); 
    // Create the "open" sub-structure from the full one
    sensible = new St_NodeView(fullView);
@@ -203,11 +241,11 @@ void HitsDraw(){
    gPad->Update();
    // Draw a help for x3d picture
    printf(" drawing the HELP windows\n");
-   x3dHelpDraw();
+//   x3dHelpDraw();
    // make simple view
 
    // Select node to be left
-   printf(" Marking the current strucutre to create another simplified one\n");
+   printf(" Marking the current structure to create another simplified one\n");
    sensible->Mark();                                                      //  Select HALL
    shortView = (St_NodeView *)sensible->FindByName("TPGV");  // Select TPGV
    if (shortView) shortView->Mark();     
@@ -223,7 +261,7 @@ void HitsDraw(){
    printf(" Creating a new structure simplified structure\n");
    shortView = new St_NodeView(sensible);
    TCanvas *m_simpleD = new TCanvas("Detector","Simple view and hits",500,500,400,400);
-   shortView->Draw();
+   shortView->Draw("L");
 
  //  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/HitsDrawSimpleView.gif"> </P> End_Html // 
 
@@ -231,7 +269,7 @@ void HitsDraw(){
    gPad->Update();
    gBenchmark->Summary();
    printf(" Drawing 3d solid view of the last structure\n");
-   m_simpleD->x3d();
+//==   m_simpleD->x3d();
 
  //  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/HitsDrawX3D.gif"> </P> End_Html // 
 
