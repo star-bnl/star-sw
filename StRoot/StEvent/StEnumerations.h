@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.19 2004/10/14 19:59:42 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.20 2004/10/20 18:51:56 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.20  2004/10/20 18:51:56  ullrich
+ * Add enumerations from StDedxMethod.h StDetectorId.h StTrackMethod.h StVertexId.h.
+ *
  * Revision 2.19  2004/10/14 19:59:42  ullrich
  * Added enum for EMC crate status.
  *
@@ -75,69 +78,131 @@
 #ifndef StEnumerations_hh
 #define StEnumerations_hh
 
-#include "StDetectorId.h"
-#include "StVertexId.h"
-#include "StDedxMethod.h"
-#include "StTrackMethod.h"
+// These include files contain definitions that are also used in
+// Fortran code. The orginal definitions are implemented via pre-
+// processor #define statements. For compatibility reasons we have
+// to leave it as is for now.
+#include "StDetectorDefinitions.h"
+#include "StDedxDefinitions.h"
+#include "StVertexDefinitions.h"
+#include "StTrackDefinitions.h"
 
 /*!
- * \enum StBeamDirection 
+ * \enum StBeamDirection
  */
-enum StBeamDirection {east = 0,
-		  yellow = 0,  // yellow beam is going west -> east
-		  west = 1,
-		  blue = 1};   // blue beam is going east -> west
+enum StBeamDirection {east   = 0,
+                      yellow = 0,    // yellow beam is going west -> east
+                      west   = 1,
+                      blue   = 1};   // blue beam is going east -> west
 
 /*!
- * \enum StBeamPolarizationAxis 
+ * \enum StBeamPolarizationAxis
  */
 enum StBeamPolarizationAxis {transverse, longitudinal};
 
 /*!
- * \enum StChargeSign 
+ * \enum StChargeSign
  */
 enum StChargeSign {negative, positive};
 
 /*!
- * \enum StTrackType 
+ * \enum StDetectorId
+ */
+enum StDetectorId {kUnknownId   = kUnknownIdentifier,
+                   kTpcId       = kTpcIdentifier,
+                   kSvtId       = kSvtIdentifier,
+                   kRichId      = kRichIdentifier,
+                   kFtpcWestId  = kFtpcWestIdentifier,
+                   kFtpcEastId  = kFtpcEastIdentifier,
+                   kTofId       = kTofIdentifier,
+                   kCtbId       = kCtbIdentifier,
+                   kSsdId       = kSsdIdentifier,
+                   kBarrelEmcTowerId     = kBarrelEmcTowerIdentifier,
+                   kBarrelEmcPreShowerId = kBarrelEmcPreShowerIdentifier,
+                   kBarrelSmdEtaStripId  = kBarrelSmdEtaStripIdentifier,
+                   kBarrelSmdPhiStripId  = kBarrelSmdPhiStripIdentifier,
+                   kEndcapEmcTowerId     = kEndcapEmcTowerIdentifier,
+                   kEndcapEmcPreShowerId = kEndcapEmcPreShowerIdentifier,
+                   kEndcapSmdUStripId    = kEndcapSmdUStripIdentifier,
+                   kEndcapSmdVStripId    = kEndcapSmdVStripIdentifier,
+                   kZdcWestId   = kZdcWestIdentifier,
+                   kZdcEastId   = kZdcEastIdentifier,
+                   kMwpcWestId  = kMwpcWestIdentifier,
+                   kMwpcEastId  = kMwpcEastIdentifier,
+                   kTpcSsdId    = kTpcSsdIdentifier,
+                   kTpcSvtId    = kTpcSvtIdentifier,
+                   kTpcSsdSvtId = kTpcSsdSvtIdentifier,
+                   kSsdSvtId    = kSsdSvtIdentifier,
+                   kPhmdCpvId   = kPhmdCpvIdentifier,
+                   kPhmdId      = kPhmdIdentifier};
+
+/*!
+ * \enum StTrackType
  */
 enum StTrackType {global, primary, tpt, secondary, estGlobal, estPrimary};
 
 /*!
- * \enum StTrackModel 
+ * \enum StTrackModel
  */
 enum StTrackModel {helixModel, kalmanModel};
 
 /*!
- * \enum StTrackFinderMethod 
+ * \enum StTrackFinderMethod
  */
-enum StTrackFinderMethod { svtGrouper    = ksvtGrouperIdentifier,    
-                           svtStk        = ksvtStkIdentifier,       
-                           svtOther      = ksvtOtherIdentifier,     
-                           tpcStandard   = ktpcStandardIdentifier,  
-                           tpcOther      = ktpcOtherIdentifier,     
-                           ftpcConformal = kftpcConformalIdentifier,
-                           ftpcCurrent   = kftpcCurrentIdentifier,  
-                           svtTpcSvm     = ksvtTpcSvmIdentifier,    
-                           svtTpcEst     = ksvtTpcEstIdentifier,    
-                           svtTpcPattern = ksvtTpcPatternIdentifier,
-                           l3Standard    = kl3StandardIdentifier   
+enum StTrackFinderMethod {svtGrouper    = ksvtGrouperIdentifier,
+                          svtStk        = ksvtStkIdentifier,
+                          svtOther      = ksvtOtherIdentifier,
+                          tpcStandard   = ktpcStandardIdentifier,
+                          tpcOther      = ktpcOtherIdentifier,
+                          ftpcConformal = kftpcConformalIdentifier,
+                          ftpcCurrent   = kftpcCurrentIdentifier,
+                          svtTpcSvm     = ksvtTpcSvmIdentifier,
+                          svtTpcEst     = ksvtTpcEstIdentifier,
+                          svtTpcPattern = ksvtTpcPatternIdentifier,
+                          l3Standard    = kl3StandardIdentifier
 };
 
-//
-// The fitter methods are defined in
-// StTrackMethod.h & StTrackDefinitions.h
-//
+/*!
+ * \enum StDedxMethod
+ */
+enum StDedxMethod {kUndefinedMethodId        = kUndefinedMethodIdentifier,
+                  kTruncatedMeanId           = kTruncatedMeanIdentifier,
+                  kEnsembleTruncatedMeanId   = kEnsembleTruncatedMeanIdentifier,
+                  kLikelihoodFitId           = kLikelihoodFitIdentifier,
+                  kWeightedTruncatedMeanId   = kWeightedTruncatedMeanIdentifier,
+                  kOtherMethodId             = kOtherMethodIdentifier};
 
 /*!
- * \enum StRichPidFlag 
+ * \enum StTrackFittingMethod
+ */
+enum StTrackFittingMethod {kUndefinedFitterId         = kUndefinedFitterIdentifier,
+                           kHelix2StepId              = kHelix2StepIdentifier,
+                           kHelix3DId                 = kHelix3DIdentifier,
+                           kKalmanFitId               = kKalmanFitIdentifier,
+                           kLine2StepId               = kLine2StepIdentifier,
+                           kLine3DId                  = kLine3DIdentifier,
+                           kL3FitId                   = kL3FitIdentifier,
+                           kITKalmanFitId             = kITKalmanFitIdentifier};
+
+/*!
+ * \enum StVertexId
+ */
+enum StVertexId {kUndefinedVtxId = kUndefinedVertexIdentifier,
+                 kEventVtxId     = kEventVertexIdentifier,
+                 kV0VtxId        = kV0DecayIdentifier,
+                 kXiVtxId        = kXiDecayIdentifier,
+                 kKinkVtxId      = kKinkDecayIdentifier,
+                 kOtherVtxId     = kOtherTypeIdentifier};
+
+/*!
+ * \enum StRichPidFlag
  */
 enum StRichPidFlag {eNoMip = 1,                                        /**< enum value eNoMip  */
                     eFastEnough = 2,                                   /**< enum value eFastEnough  */
                     eLightOnPadPlane = 4};
 
 /*!
- * \enum StRichHitFlag 
+ * \enum StRichHitFlag
  */
 enum StRichHitFlag {eDeconvoluted=1,                                   /**< enum value eDeconvoluted */
                     eMip=2,                                            /**< enum value eMip */
@@ -171,7 +236,7 @@ enum StRichHitFlag {eDeconvoluted=1,                                   /**< enum
                     e2Sigmap=536870912};
 
 /*!
- * \enum StPwg         
+ * \enum StPwg
  */
 enum StPwg         {generic,                                           /**< enum value generic */
                     ebye,                                              /**< enum value ebye */
@@ -182,9 +247,19 @@ enum StPwg         {generic,                                           /**< enum
                     spin,                                              /**< enum value spin */
                     strangeness};
 
-enum StEmcCrateStatus { crateUnknown = 0,
-		    crateNotPresent = 1,
-		    crateOK = 2,
-		    crateHeaderCorrupt = 3 };
-		    
+/*!
+ * \enum StEmcCrateStatus
+ */
+enum StEmcCrateStatus {crateUnknown       = 0,
+                       crateNotPresent    = 1,
+                       crateOK            = 2,
+                       crateHeaderCorrupt = 3};
+
+/*!
+ * \enum StarMaxSize
+ */
+// maximal sizes of tracking part of STAR in cm (Victor)
+enum StarMaxTrackRangeSize {kStarMaxTrackRangeR = 200,
+                            kStarMaxTrackRangeZ = 269};
+
 #endif
