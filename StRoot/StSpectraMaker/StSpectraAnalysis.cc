@@ -1,14 +1,9 @@
 #include "StSpectraAnalysis.h"
 
-
 StSpectraAnalysis::StSpectraAnalysis() {
-
-  // mTitle    = new char[20]; 
-
 }
 
 StSpectraAnalysis::~StSpectraAnalysis() {
-  //delete mTitle;
 }
 
 void StSpectraAnalysis::setParticle(string particle) {
@@ -27,14 +22,13 @@ StParticleDefinition* StSpectraAnalysis::getParticle() {
 }
 
 void StSpectraAnalysis::setTitle(string title) {
-  // strcpy(mTitle,title)
   mTitle = title;
 }
 
-void StSpectraAnalysis::setEfficiencyParam(StEfficiency effic) {
+void StSpectraAnalysis::setEfficiency(StEfficiency effic) {
   mEffic = effic;
 }
-StEfficiency* StSpectraAnalysis::getEfficiencyParam() {
+StEfficiency* StSpectraAnalysis::getEfficiency() {
   return &(mEffic);
 }
 

@@ -7,65 +7,59 @@ StTpcDeviantSpectraAnalysis::StTpcDeviantSpectraAnalysis() {
 StTpcDeviantSpectraAnalysis::~StTpcDeviantSpectraAnalysis() {
 }
 
-void StTpcDeviantSpectraAnalysis::setYBinSize(double ybin) {
-  mYBinSize = ybin;
+void StTpcDeviantSpectraAnalysis::setYAxis(float lYbin, float uYbin, int nYbin) {
+  mlYbin = lYbin;
+  muYbin = uYbin;
+  mnYbin = nYbin;
 }
-double StTpcDeviantSpectraAnalysis::getYBinSize() {
-  return mYBinSize;
-}
-void StTpcDeviantSpectraAnalysis::setMtBinSize(double mtbin) {
-  mMtBinSize = mtbin;
-}
-double StTpcDeviantSpectraAnalysis::getMtBinSize() {
-  return mMtBinSize;
+
+void StTpcDeviantSpectraAnalysis::setMtAxis(float lMtbin, float uMtbin, int nMtbin) {
+  mlMtbin = lMtbin;
+  muMtbin = uMtbin;
+  mnMtbin = nMtbin;
 }
 
 void StTpcDeviantSpectraAnalysis::bookHistograms() {
- 
+
+  cout << mlYbin << " " << muYbin << " " << mnYbin << endl;
+  cout << mlMtbin << " " << muMtbin << " " << mnMtbin << endl;
   mNumEvent = 0;
-
-  float massParticle = mParticle->mass();
  
-  float ldevbin = -10.;
-  float udevbin = 10. ;
+  float ldevbin = -5.;
+  float udevbin = 5. ;
   int Ndevbins = 50;
-  float lybin =-2. ;
-  float uybin = 2.;
-  int NYbins = int(0.5+(uybin - lybin)/(mYBinSize));
-  float lmtbin = massParticle ;
-  float umtbin = massParticle + 1.;
-  int NMtbins = int(0.5+(umtbin - lmtbin)/(mMtBinSize));
-
- 
-  string hlabYMtDev = "YMtDeviant";
-  hlabYMtDev = hlabYMtDev + mTitle;
-  const char* hYMtDev = hlabYMtDev.data(); 
-  mYMtDeviant = new TH3D(hYMtDev,"number sigma from PID band, y,mt",
-			 NYbins, lybin,uybin,
-			 NMtbins,lmtbin,umtbin,
-			 Ndevbins,ldevbin,udevbin);
-  mYMtDeviant->Sumw2();  
 
   string hlabYMt = "YMt";
   hlabYMt = hlabYMt + mTitle;
-  const char* hYMt = hlabYMt.data(); 
+  const char* hYMt = hlabYMt.c_str(); 
   mYMt = new TH2D(hYMt,"y,mt",
-			 NYbins, lybin,uybin,
-			 NMtbins,lmtbin,umtbin);
+			 mnYbin, mlYbin,muYbin,
+			 mnMtbin,mlMtbin,muMtbin);
   mYMt->Sumw2();
+
+  string hlabDedx = "dedxvsP";
+  hlabDedx = hlabDedx + mTitle;
+  const char* hDedx = hlabDedx.c_str(); 
+  mDedxvsP = new TH2D(hDedx,"dedx vs p",50,0.,1.,50, 0., 1.e-05);
+  mDedxvsP->Sumw2();
+
+  string hlabYMtDev = "YMtDeviant";
+  hlabYMtDev = hlabYMtDev + mTitle;
+  const char* hYMtDev = hlabYMtDev.c_str(); 
+  mYMtDeviant = new TH3D(hYMtDev,"number sigma from PID band, y,mt",
+			 mnYbin, mlYbin,muYbin,
+			 mnMtbin,mlMtbin,muMtbin,
+			 Ndevbins,ldevbin,udevbin);
+  mYMtDeviant->Sumw2();  
+
 
   string hlabPID = "PIDDeviant";
   hlabPID = hlabPID + mTitle;
-  const char* hPID = hlabPID.data(); 
+  const char* hPID = hlabPID.c_str(); 
   mPIDDeviant = new TH1D(hPID,"number sigma from pid band",
 		Ndevbins,ldevbin,udevbin);
   mPIDDeviant->Sumw2();
 
-  string hlabDedx = "dedxvsP";
-  hlabDedx = hlabDedx + mTitle;
-  const char* hDedx = hlabDedx.data(); 
-  mDedxvsP = new TH2D(hDedx,"dedx vs p",50,0.,1.,50, 0., 1.e-05);
-  mDedxvsP->Sumw2();
 
 }
 
@@ -91,25 +85,34 @@ void StTpcDeviantSpectraAnalysis::fillHistograms(StEvent& event) {
     if (pidStatus) {
 	  const StDedx *tpc = track->tpcDedx();
           if (tpc==0) continue;
-	  int nhit = tpc->numberOfPointsUsed();
-	  float dca = track->helix().distance(primvtx->position());
-         
-	  const double  bField = 0.5*tesla;
-	  StThreeVectorD mom = track->helix().momentum(bField);
-	  double p = abs(mom);
+
 	  // 
 	  // check to see if track satisfies the quality cuts set up
 	  // for this analysis
 	  //
-	  if (nhit > mEffic.nhitCut() && 
-	      dca < mEffic.dcaCut() && 
-	      fabs(mParticle->charge() - track->helix().charge(bField)) < 0.01) {
+	  vector<StSpectraCut*>::const_iterator cutIter;
+          bool satisfiesAllCuts = true ;
+          for (cutIter = mEffic.mSpectraCutContainer.begin();
+	       cutIter != mEffic.mSpectraCutContainer.end();
+	       cutIter++) {
+	    if (!((*cutIter)->satisfiesCut(track,&event)) && satisfiesAllCuts){
+	       satisfiesAllCuts = false;
+	    }
+	  }
 
+	  const double  bField = 0.5*tesla;
+	  // remove this hardwired and get from new StEvent
+
+	  if (satisfiesAllCuts && 
+	      fabs(mParticle->charge() - track->helix().charge(bField))<0.01) {
+	    StThreeVectorD mom = track->helix().momentum(bField);
+	    double p = abs(mom);
             double dedx = tpc->mean();
 	    double deviant = 
 	      track->pidTraits().tpcDedxPid()->numberOfSigma(mMassPid);
 
 	    double effic = mEffic.efficiency(track);
+	    //  cout << effic << endl;
             if (effic > 0. && effic < 1.) {
 	      float weight = 1./effic;
               double pperp = mom.perp();

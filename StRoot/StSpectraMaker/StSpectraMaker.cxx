@@ -1,5 +1,8 @@
-// $Id: StSpectraMaker.cxx,v 1.2 1999/11/05 18:58:49 ogilvie Exp $
+// $Id: StSpectraMaker.cxx,v 1.3 1999/11/08 17:07:32 ogilvie Exp $
 // $Log: StSpectraMaker.cxx,v $
+// Revision 1.3  1999/11/08 17:07:32  ogilvie
+// *** empty log message ***
+//
 // Revision 1.2  1999/11/05 18:58:49  ogilvie
 // general tidy up following Mike Lisa's review. List of analyses conntrolled via
 // analysis.dat, rather than hardcoded into StSpectraMaker.cxx
@@ -16,9 +19,10 @@
 #include "StRun.h"
 #include "StEvent.h"
 #include "StMessMgr.h"
+#include "StEfficiency.h"
 #include <vector>
 
-static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.2 1999/11/05 18:58:49 ogilvie Exp $";
+static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.3 1999/11/08 17:07:32 ogilvie Exp $";
 
 StSpectraMaker::StSpectraMaker(const Char_t *name) : StMaker(name) {
 }
@@ -31,25 +35,51 @@ Int_t StSpectraMaker::Init() {
   mOutput = new TFile("deviant.root","RECREATE");
   //
   // create the analyses that are stored in the file analysis.dat, 
-  //
- 
+  // 
   ifstream from("StRoot/StSpectraMaker/analysis.dat");
   while (!from.eof()) {
     string particleName;
     from >> particleName;
-    cout << "particle name :" << particleName << endl;
     string analysisTitle;
     from >> analysisTitle; 
-    cout << "title for analysis :" << analysisTitle << endl;
+    efficiencyType efficType;
+    from >> efficType; 
+    char* efficiencyFile = new char[100];
+    from >> efficiencyFile; 
+    StEfficiency effic(efficType,efficiencyFile);
+    //
+    // to do, add in particle Definition to efficiency constructor
+    //
+    StParticleDefinition* particle = 
+   	StParticleTable::instance()->findParticle(particleName);
+    effic.setParticle(particleName);
+
+    string comment;
+    float lYbin, uYbin;
+    from >> lYbin >> uYbin >> comment;
+    int nYbin ;
+    from >> nYbin >> comment;
+    float lMtbin = particle->mass();
+    float mtRange, uMtbin;
+    from >> mtRange >> comment;
+    uMtbin = lMtbin + mtRange;
+    int nMtbin;
+    from >> nMtbin >> comment;
+
     StTpcDeviantSpectraAnalysis* anal = new StTpcDeviantSpectraAnalysis;
     anal->setParticle(particleName);
     anal->setTitle(analysisTitle);
+    anal->setEfficiency(effic);
+   
+    anal->setYAxis(lYbin,uYbin,nYbin); 
+    anal->setMtAxis(lMtbin,uMtbin,nMtbin); 
+
     mSpectraAnalysisContainer.push_back(anal);
   }
+  from.close();
  
   //
-  // set common characteristics of spectra, e.g. size of bins, efficiencies
-  // dca cuts etc., do this via a file?
+  // set common characteristics of spectra, e.g. size of bins, do this via a file?
   // loop through the analyses and load into the private data members the
   // spectra characteristics
   // 
@@ -61,17 +91,6 @@ Int_t StSpectraMaker::Init() {
 	 analysisIter != mSpectraAnalysisContainer.end();
 	 analysisIter++) {
     analysis = *analysisIter;
-    double ybin = 0.1;
-    double mtbin = 0.1;
-    analysis->setYBinSize(ybin); 
-    analysis->setMtBinSize(mtbin);
-
-    StEfficiency effic;
-    effic.setNhitCut(10);
-    effic.setDcaCut(2.*centimeter);
-    effic.init(analysis->getParticle());
-    analysis->setEfficiencyParam(effic);
-
     analysis->bookHistograms();
   }
  return StMaker::Init();
@@ -124,5 +143,6 @@ Int_t StSpectraMaker::Finish() {
 }
 
 ClassImp(StSpectraMaker)
+
 
 
