@@ -8,7 +8,10 @@
 * 8/7/98 LDC
 *	1.  modified to accomodate new switches
 *	2.  added a macro to initialize calibration xdf file
-
+* 8/10/98 LDC
+*	1.  changed to write out 2 calibration xdf files
+*	    so that prior and ensemble_ave can be worked on
+*	    independently
 *------------------------------------------------------
 macro params
 
@@ -56,7 +59,7 @@ return
 *------------------------------------------------------
 
 *------------------------------------------------------
-macro calib
+macro prior
 
  DEFAULT = _
 ./pams/ebye/kumac
@@ -66,21 +69,51 @@ message 'Define default kumac search path as' def
 
 * load idl tables
   tdm/types/load ./pams/ebye/idl/sca_prior.idl
+
+* make directory structure
+  cd /dui
+  mkdir /dui/calib
+  mkdir /dui/calib/ebye
+  mkdir /dui/calib/ebye/sca_prior_dir
+
+* make tables
+  cd /dui/calib/ebye/sca_prior_dir
+  tdm/newtable	sca_prior		sca_prior		300000
+
+* set nok for the SCA calibration tables.
+  tdm/table/rowcount	sca_prior           300000
+
+* write from staf tables to xdf
+  cd /dui
+  dio/newfilestream SCAPRIOR ./calib/ebye/sca_prior.xdf w
+  dio/stream/putevent    SCAPRIOR   calib/ebye/sca_prior_dir
+  dio/stream/close       SCAPRIOR
+
+return
+*------------------------------------------------------
+
+macro ensemble
+
+ DEFAULT = _
+./pams/ebye/kumac
+
+def [DEFAULT] C
+message 'Define default kumac search path as' def
+
+* load idl tables
   tdm/types/load ./pams/ebye/idl/sca_out.idl
 
 * make directory structure
   cd /dui
   mkdir /dui/calib
   mkdir /dui/calib/ebye
-  mkdir /dui/calib/ebye/sca
+  mkdir /dui/calib/ebye/sca_ensemble_dir
 
 * make tables
-  cd /dui/calib/ebye/sca
-  tdm/newtable	sca_prior		sca_prior		300000
+  cd /dui/calib/ebye/sca_ensemble_dir
   tdm/newtable	sca_ensemble_ave	sca_out			1
 
 * set nok for the SCA calibration tables.
-  tdm/table/rowcount	sca_prior           300000
   tdm/table/rowcount	sca_ensemble_ave    1
 
 * zero out sca_ensemble_ave table
@@ -88,9 +121,9 @@ message 'Define default kumac search path as' def
 
 * write from staf tables to xdf
   cd /dui
-  dio/newfilestream SCACALIB ./calib/ebye/sca_calib.xdf w
-  dio/stream/putevent    SCACALIB   calib/ebye/sca
-  dio/stream/close       SCACALIB load sca_filter_const & sca_const
+  dio/newfilestream SCAENSEMBLE ./calib/ebye/sca_ensemble.xdf w
+  dio/stream/putevent    SCAENSEMBLE   calib/ebye/sca_ensemble_dir
+  dio/stream/close       SCAENSEMBLE 
 
 return
 *------------------------------------------------------

@@ -3,12 +3,16 @@
 * ----------------------------------------------------------------
 * this is the initialization kumac for the sca event by event package
 * ----------------------------------------------------------------
+* History:
+*
 * 8/4/98 - K. Turner - edited to make standard
 * 8/7/98 - LDC
 *	1.  added switches
 *	2.  added calib/ebye/sca_calib.xdf filestream readin
+* 8/10/98 - LDC -- changed filestreams to read in 2 calib tables
+*
 * ***************************************************************
-macro init prior_switch=0 ensemble_switch=0 analysis_switch=1
+macro init calib_dir=$STAR_CALIB prior_switch=0 ensemble_switch=0 analysis_switch=1
   
   macro/global/import *
   message 'initialize sca tables and switches '  
@@ -18,9 +22,16 @@ macro init prior_switch=0 ensemble_switch=0 analysis_switch=1
   dio/stream/close       SCAPARAM
   
   cd [calib]/ebye
-  dio/newfilestream      SCACALIB  $STAR_CALIB/ebye/sca_calib.xdf r 
-  dio/stream/getevent    SCACALIB
-  dio/stream/close       SCACALIB
+*  dio/newfilestream      SCAPRIOR  [calib_dir]/ebye/sca_prior.xdf r 
+  dio/newfilestream      SCAPRIOR  $STAR_CALIB/ebye/sca_prior.xdf r 
+  dio/stream/getevent    SCAPRIOR
+  dio/stream/close       SCAPRIOR
+  
+  cd [calib]/ebye
+*  dio/newfilestream      SCAENSEMBLE  [calib_dir]/ebye/sca_ensemble.xdf r 
+  dio/newfilestream      SCAENSEMBLE  $STAR_CALIB/ebye/sca_ensemble.xdf r 
+  dio/stream/getevent    SCAENSEMBLE
+  dio/stream/close       SCAENSEMBLE
   
 * set switches
   cd [params]/ebye/sca
