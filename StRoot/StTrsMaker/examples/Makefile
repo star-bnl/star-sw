@@ -1,6 +1,6 @@
 ############################################################################
 #
-# $Id: Makefile,v 1.3 1998/11/13 00:24:35 lasiuk Exp $
+# $Id: Makefile,v 1.4 1998/11/13 21:33:42 lasiuk Exp $
 #
 # Author: Brian, October 1998
 # --------------------------------------------------------------------------
@@ -8,6 +8,9 @@
 # --------------------------------------------------------------------------
 #
 # $Log: Makefile,v $
+# Revision 1.4  1998/11/13 21:33:42  lasiuk
+# update
+#
 # Revision 1.3  1998/11/13 00:24:35  lasiuk
 # TRUE/FALSE, pntrs in Db
 #
@@ -87,8 +90,8 @@ MAKEFILE      = Makefile
 #PROGRAM       = trsLandau
 #PROGRAM       = trsTransparency
 #PROGRAM       = trsDiffusion
-PROGRAM       = trsIonization
-#PROGRAM       = trsSector
+#PROGRAM       = trsIonization
+PROGRAM       = trsSector
 
 OBJS	      = $(PROGRAM).o
 

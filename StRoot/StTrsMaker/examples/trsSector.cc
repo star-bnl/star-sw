@@ -1,20 +1,19 @@
 //*******************************************************/
-// Program: prf.cc
+// $Id: trsSector.cc,v 1.2 1998/11/13 21:33:06 lasiuk Exp $
 //
-// Purpose: Prototypes the operation of StTrsSector
-//          in filling and data manipulation
+// Author: brian, October, 1998
 //
-// Modifications
-// 10-24-98
-// :: Handle signals instead of floats
-// :: Signal generating mechanism
+// Purpose: Prototypes the operation of TRS and provides diagnostic
+//          at several levels
+//
+// $Log: trsSector.cc,v $
+// Revision 1.2  1998/11/13 21:33:06  lasiuk
+// update
+//
 /********************************************************/
 #include <iostream.h>
 #include <unistd.h>    // needed for access()
-//#include <fstream.h> // streams
-//#include <stdlib.h>
 // #include <math.h>
-// #include <stdio.h>
 
 #include <string>
 #include <vector>
@@ -40,6 +39,7 @@
 // processes
 #include "StTrsFastChargeTransporter.hh"
 #include "StTrsSlowAnalogSignalGenerator.hh"
+#include "StTrsFastDigitalSignalGenerator.hh"
 
 // containers
 #include "StTrsAnalogSignal.hh"
@@ -61,11 +61,11 @@
 // #endif
 
 
-void printPad(tpcSector& a)
+void printPad(StTrsSector *a)
 {
     ostream_iterator<StTrsAnalogSignal> out(cout,",");
     
-    for(int irow=0; irow<a.size(); irow++)
+    for(int irow=0; irow<a->size(); irow++)
 	cout << irow << " " <<  "<" << a[irow].size() << "> ";
 
 // 	for(int ipad=0; ipad<a[irow].size(); ipad++) {
@@ -96,9 +96,6 @@ int main (int argc,char* argv[])
     float tuple[tupleSize];
     theTuple << "row" << "pad" << "time" << "sig" << book;
 
-    vector<StTrsAnalogSignal>          timeBins;
-    vector<vector<StTrsAnalogSignal> > pad;
-    tpcSector                          sector;  // 3 dimensional vector<>
 
     int irow, ipad, itbin;   // ctrs
 
@@ -116,7 +113,7 @@ int main (int argc,char* argv[])
 	exit(1);
     }
 
-    string scFile("../run/example.conf");         // contains B field
+    string scFile("../run/sc.conf");         // contains B field
     if (access(scFile.c_str(),R_OK)) {
 	cerr << "ERROR:\n" << scFile << " cannot be opened" << endl;
 	cerr << "Exitting..." << endl;
@@ -138,6 +135,7 @@ int main (int argc,char* argv[])
 
     StTpcSlowControl *scDb =
 	StTpcSimpleSlowControl::instance(scFile.c_str());
+    scDb->print();
 
     StMagneticField *magDb =
 	StSimpleMagneticField::instance(scFile.c_str());
@@ -153,7 +151,7 @@ int main (int argc,char* argv[])
     //
     // create a Sector:
     //
-    tpcSector sector;
+    StTrsSector *sector = new StTrsSector(geomDb);
     
     //
     // Processes
@@ -161,28 +159,28 @@ int main (int argc,char* argv[])
     StTrsChargeTransporter *trsTransporter =
 	StTrsFastChargeTransporter::instance(geomDb, scDb, &myEloss, magDb);
     // set status:
-//     trsTransporter->setChargeAttachment(TRUE);
-//     trsTransporter->setGatingGridTransparency(TRUE);
-//     trsTransporter->setTransverseDiffusion(TRUE);
-//     trsTransporter->setLongitudinalDiffusion(TRUE);
-//     trsTransporter->setExB(TRUE);
+//     trsTransporter->setChargeAttachment(true);
+//     trsTransporter->setGatingGridTransparency(true);
+//     trsTransporter->setTransverseDiffusion(true);
+//     trsTransporter->setLongitudinalDiffusion(true);
+//     trsTransporter->setExB(true);
 
     StTrsWireHistogram *myWireHistogram =
 	StTrsWireHistogram::instance(geomDb, scDb);
-//     myWireHistogram->setDoGasGain(TRUE);  // True by default
-//     myWireHistogram->setDoGasGainFluctuations(FALSE);
-//     myWireHistogram->setDoTimeDelay(FALSE);
+//     myWireHistogram->setDoGasGain(true);  // True by default
+//     myWireHistogram->setDoGasGainFluctuations(false);
+//     myWireHistogram->setDoTimeDelay(false);
 
-    StTrsAnalogSignalGenerator *trsSignalGenerator =
+    StTrsAnalogSignalGenerator *trsAnalogSignalGenerator =
 	StTrsSlowAnalogSignalGenerator::instance(geomDb, scDb, electronicsDb, sector);
-//     trsSignalGenerator->setDeltaRow(0);
-//     trsSignalGenerator->setDeltaPad(0);
-//     trsSignalGenerator->setSignalThreshold(.0001);
-//     trsSignalGenerator->setSuppressEmptyTimeBins(TRUE);
-    //     ??select the type of function?
+//     trsAnalogSignalGenerator->setDeltaRow(0);
+//     trsAnalogSignalGenerator->setDeltaPad(0);
+//     trsAnalogSignalGenerator->setSignalThreshold(.0001);
+//     trsAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
+    //     ??should the type of function be an option ???
 	
-    StTrsDigitalSignalGenerator *trsDigitalGenerator =
-	StTrsFastSignalGenerator::instance(electronicsDb, sector);
+    StTrsDigitalSignalGenerator *trsDigitalSignalGenerator =
+	StTrsFastDigitalSignalGenerator::instance(electronicsDb, sector);
 
     //
     // Generate the Ionization
@@ -224,27 +222,38 @@ int main (int argc,char* argv[])
  	PR(anEntry);
 	myWireHistogram->addEntry(anEntry);
 	
-    }while(TRUE);
+    }while(true);
 
     cout << "\a***************************\a\n" << endl;
 
     //
     // Generate the ANALOG Signals on pads
     //
-    trsSignalGenerator->inducedChargeOnPads(myWireHistogram);
+    trsAnalogSignalGenerator->inducedChargeOnPad(myWireHistogram);
 
-    trsSignalGenerator->sampleAnalogSignal();
+    trsAnalogSignalGenerator->sampleAnalogSignal();
 
 
     //
     // Digitize the Signals
     //
-    trsDigitizer->digitize(sector);
-
+    trsDigitalSignalGenerator->digitizeSignal();
 
     //
     // Write it out!
     //
+
+    cout << "Write out the Sector " << endl;
+    for(irow=0; irow<sector->numberOfRows(); irow++) {
+      PR(irow);
+      for(ipad=0; ipad<sector->numberOfPadsInRow(irow); ipad++) {
+	tpcTimeBins currentTimeBins = sector->timeBinsOfRowAndPad(irow, ipad);
+	for(itbin=0; itbin<currentTimeBins.size(); itbin++) {
+	  if(currentTimeBins[itbin].amplitude() > 1.)
+	    PR(currentTimeBins[itbin]);
+	}
+      }
+    }
     
     return 0;
 }
