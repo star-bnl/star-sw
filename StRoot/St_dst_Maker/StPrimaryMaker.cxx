@@ -132,10 +132,6 @@ Int_t StPrimaryMaker::Make(){
   St_sgr_groups  *svt_groups  = 0;
   St_svm_evt_match *evt_match = 0;
   St_scs_spt     *scs_spt     = 0;
-  //JB tmp
-  svtracks=0;
-  svthits=0;
-  //JB tmp end
 
   // Case svt tracking performed
   if (svtracks) {
@@ -295,7 +291,7 @@ Int_t StPrimaryMaker::Make(){
 	if( sgroup->id1 != 0 && sgroup->ident >= 0){
 	  spt_id = sgroup->id2-1;
 	  row = s_spc[spt_id].id_wafer/1000;
-	  if(  s_spc[spt_id].id_globtrk-1 < 0){
+	   if(  s_spc[spt_id].id_globtrk-1 < 0){
 	    cout << spt_id << " " << s_spc[spt_id].id_globtrk<< " " << endl;
 	    return kStErr;
 	  }
@@ -374,8 +370,11 @@ Int_t StPrimaryMaker::Make(){
   return iMake;
 }
 //_____________________________________________________________________________
-// $Id: StPrimaryMaker.cxx,v 1.73 2002/02/18 19:48:20 genevb Exp $
+// $Id: StPrimaryMaker.cxx,v 1.74 2002/02/22 01:42:54 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.74  2002/02/22 01:42:54  caines
+// Correct track-hit correlations for SVT
+//
 // Revision 1.73  2002/02/18 19:48:20  genevb
 // Separation of primary vertex and track finding, other minor changes
 //

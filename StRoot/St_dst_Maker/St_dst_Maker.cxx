@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.68 2002/02/03 00:35:14 caines Exp $
+// $Id: St_dst_Maker.cxx,v 1.69 2002/02/22 01:43:08 caines Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.69  2002/02/22 01:43:08  caines
+// Correct track-hit correlations for SVT
+//
 // Revision 1.68  2002/02/03 00:35:14  caines
 // Remove annoying printout
 //
@@ -211,7 +214,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.68 2002/02/03 00:35:14 caines Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.69 2002/02/22 01:43:08 caines Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -432,9 +435,20 @@ Int_t  St_dst_Maker::Filler(){
    
   St_sgr_groups     *tpc_groups = (St_sgr_groups *) matchI("tpc_groups");
   if (! tpc_groups)    {tpc_groups = new St_sgr_groups("tpc_groups",1); AddGarb(tpc_groups);} 
+
+  St_sgr_groups    *svt_groups     = 0;
+  St_DataSet     *estI  = GetInputDS("est");
+  if( estI) {    svt_groups = (St_sgr_groups *) estI->Find("EstGroups");}
+  if (! svt_groups)    {svt_groups = new St_sgr_groups("EstGroups",1); AddGarb(svt_groups);} 
  
   if(Debug()) gMessMgr->Debug() << " run_dst: Calling dst_point_filler" << endm;
 
+  scs_spt_st* sgroups = scs_spt->GetTable();
+  int svtindex[10000];
+  for(int i=0; i<scs_spt->GetNRows(); i++,sgroups++){
+    if(sgroups->id < 10000)
+      svtindex[sgroups->id] = sgroups->id_globtrk;
+      }
  // Get pointer to svt cluster analysis 
 
     StSvtAnalysedHybridClusters *mSvtBigHit;
@@ -509,8 +523,9 @@ Int_t  St_dst_Maker::Filler(){
 	      
 	      for( int clu=0; clu<mSvtBigHit->numOfHits(); clu++){
 
-		if( mSvtBigHit->svtHit()[clu].flag() > 3 ||
-		   mSvtBigHit->svtHitData()[clu].peakAdc < 15 ) continue;
+		//		if( mSvtBigHit->svtHit()[clu].flag() > 3 ||
+		//   mSvtBigHit->svtHitData()[clu].peakAdc < 15 ) continue;
+
 		mypoint[HitIndex].hw_position = 2;
   		mypoint[HitIndex].hw_position += (1L<<4)*(index2);
 		svtx = int(mSvtBigHit-> WaferPosition()[clu].x()*4);
@@ -592,6 +607,9 @@ Int_t  St_dst_Maker::Filler(){
 		mypoint[HitIndex].pos_err[0] = svtx + (1L<<20)*svty11;
 		mypoint[HitIndex].pos_err[1] = svty10 + (1L<<10)*svtz;
 		mypoint[HitIndex].id_track = 0;
+		if( mSvtBigHit->svtHitData()[clu].id < 10000)
+		mypoint[HitIndex].id_track = 
+		  svtindex[mSvtBigHit->svtHitData()[clu].id];
 
 		HitIndex++;
 	      }
@@ -634,6 +652,8 @@ Int_t  St_dst_Maker::Filler(){
 	}
       }
   
+      
+      
   } //if #points>0
 
 // dst_dedx_filler
