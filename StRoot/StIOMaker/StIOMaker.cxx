@@ -10,7 +10,7 @@
 #include "StIOMaker.h"
 #include "StTreeMaker/StTreeMaker.h"
 //#include "St_io_Maker/St_io_Maker.h"
-#include "St_xdfin_Maker/St_xdfin_Maker.h"
+//#include "St_xdfin_Maker/St_xdfin_Maker.h"
 
 enum { kStTREE=1,
        kStXDF=2,
@@ -275,16 +275,16 @@ StIOInterFace *StIOMaker::Load()
     assert (klass);
   }
   
-  StMaker *saveMK = cd();
-  Mk = (StIOInterFace*)klass->New();    
-  assert(Mk);
-  saveMK->cd();
-  
   ts = GetName();
   ts +="_";
   ts += IONAME[fCase]; 
-
-  Mk->SetName(ts);
+  Mk = (StIOInterFace*)GetMaker(ts.Data());
+  assert(Mk->InheritsFrom(StIOInterFace::Class()));
+  if (!Mk) {
+    Mk = (StIOInterFace*)New(className,ts.Data());    
+    assert(Mk);
+  }  
+  AddMaker(Mk);
   Mk->SetIOMode(fIOMode);
   Mk->SetTreeName(fTreeName);
   Mk->SetFile(fNextFile);
