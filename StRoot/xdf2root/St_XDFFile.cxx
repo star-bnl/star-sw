@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.25 1999/01/21 02:46:36 fine Exp $ 
+// $Id: St_XDFFile.cxx,v 1.26 1999/01/21 18:12:47 fine Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.26  1999/01/21 18:12:47  fine
+// Browse and dir methods have been introduced
+//
 // Revision 1.25  1999/01/21 02:46:36  fine
 // New method dir and Browse to navigate XDF files
 //
@@ -145,8 +148,13 @@ void St_XDFFile::Browse(TBrowser *b)
   // the pointer to fBrowsable and will not
   // read the next record
   //
+  //   Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/XDFBrowser.gif"> </P> End_Html 
+  //
   // It is GetSelected() method that return the fBrowsable only
   //
+  //  Macro begin_html <a href="../examples/XDFBrowser.C.html"><i>XDFBrowser.C</i></a> end_html shows how this method can be used.
+  //
+ 
   if (!fFile) TObject::Browse(b);
   if (fBrowsable) {delete fBrowsable; fBrowsable = 0;}
   fBrowsable = NextEventGet();
