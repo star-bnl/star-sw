@@ -279,7 +279,7 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
                           dx=tprs_width/2 dy=tprs_npads(i_row)*tprs_pitch/2
             endif
             If (nint(tprs_super)==3 | i_row==nint(tprs_nRow))  then
-               Create and Position TPAD  x=tprs_Rpads(i_row)+tprs_width  
+               Create and Position TPAD  x=tprs_Rpads(i_row)+tprs_width,
                           dx=tprs_width/2 dy=tprs_npads(i_row)*tprs_pitch/2
             endif
          enddo
