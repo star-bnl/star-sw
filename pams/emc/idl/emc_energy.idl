@@ -4,12 +4,17 @@
 *        auther:      OGAWA, Akio
 */
    struct emc_energy { 
-       long      det;         /* 1=barrel, 2=endcap, 3=charged track */
-       long      ieta;        /* Pseudorapidity bin number */
-       long      iphi;        /* Phi bin number */
+       short     det;         /* >0 BEMC/EEMC, =0 gap between B&E, -1=outside*/
+       short     module;      /* module# */
+       short     ebin;        /* eta tower# */
+       short     sub;         /* sub divison# */
        float     eta;         /* Pseudorapidity */
        float     phi;         /* Phi */
-       float     energy;      /* Energy */
-       float     error;       /* Estimated error on energy */
-       long      n_track;     /* Number of charged trks which hit tower */
+       float     energy;      /* total energy = twr + trk - chg */
+       float     energy_twr;  /* energy from EMC tower */
+       float     energy_trk;  /* energy from tracking */
+       float     energy_chg;  /* estimated energy in EMC tower from charged particle */
+       float     error;       /* estimated error on energy */
+       long      n_track;     /* number of charged trks assign into this bin */
+       long      n_charge;    /* number of charged trks which hit tower */
    };
