@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.124  2003/04/30 15:39:33  pruneau
+// Integrating StiResidual in main stream Sti
+//
 // Revision 1.123  2003/04/29 18:48:50  pruneau
 // *** empty log message ***
 //
@@ -117,6 +120,8 @@
 #include "Sti/StiTrackSeedFinder.h"
 #include "Sti/StiVertexFinder.h"
 #include "Sti/StiResidualCalculator.h"
+#include "Sti/StiDetectorContainer.h"
+#include "Sti/StiTrackSeedFinder.h"
 #include "StiMaker/StiMakerParameters.h"
 #include "StiMaker/StiStEventFiller.h"
 #include "StiGui/EventDisplay.h"
@@ -236,15 +241,22 @@ Int_t StiMaker::InitRun(int run)
 
 Int_t StiMaker::Make()
 {
-  cout <<"StiMaker::Make() -I- Starting"<<endl;
-
-  // a  kludge because some guys don't initialize their detectors
-  // in Init but in Make - this is BAD!
+  //cout <<"StiMaker::Make() -I- Starting"<<endl;
   if (!_initialized)
     {
       cout <<"StiMaker::Make() -I- Initialization Segment Started"<<endl;
       _initialized=true;
       InitDetectors();
+      StiDetectorContainer * detectorContainer = _toolkit->getDetectorContainer(); 
+      detectorContainer->build(_toolkit->getDetectorBuilder());
+      detectorContainer->reset();
+      if (_pars->useResidualCalculator)
+	{
+	  _residualCalculator = _toolkit->getResidualCalculator();
+	  _residualCalculator->initialize(_toolkit->getDetectorBuilder());
+	}
+      StiTrackSeedFinder * trackSeedFinder   = _toolkit->getTrackSeedFinder();
+      trackSeedFinder->initialize();
       _hitLoader = _toolkit->getHitLoader();
       _hitLoader->setUseMcAsRec(_pars->useMcAsRec);
       _seedFinder = _toolkit->getTrackSeedFinder();
@@ -256,7 +268,6 @@ Int_t StiMaker::Make()
       if (!_tracker)
 	throw runtime_error("StiMaker::Make() -F- tracker is not a StiKalmanTrackFinder");
       _tracker->initialize();
-      _residualCalculator = new StiResidualCalculator(_toolkit->getHitContainer(), _toolkit->getDetectorBuilder() );
       _tracker->clear();
       if (_toolkit->isGuiEnabled())
 	{
@@ -268,8 +279,6 @@ Int_t StiMaker::Make()
 	  if (_pars->doSimulation) _mcPlotter = new StiTrackingPlots("MC","MC");
 	}
       cout <<"StiMaker::Make() -I- Initialization Segment Completed"<<endl;
-
-      
     }
   eventIsFinished = false;
   StMcEvent * mcEvent;
@@ -297,7 +306,7 @@ Int_t StiMaker::Make()
     mcEvent = 0;
   if (_toolkit->isGuiEnabled())
     {
-      cout << "StiMaker::Make() -I- Loading EVENT"<<endl;
+      //cout << "StiMaker::Make() -I- Loading EVENT"<<endl;
       _tracker->clear();
       _hitLoader->loadEvent(event,mcEvent,_loaderTrackFilter,_loaderHitFilter);
       _seedFinder->reset();
@@ -313,7 +322,7 @@ Int_t StiMaker::Make()
 	{
 	  if (_eventFiller && !_pars->useMcAsRec)
 	    _eventFiller->fillEvent(event, _trackContainer);
-	  cout << "SKTF::findTracks() -I- Global Track StEvent Fill Completed"<<endl;
+	  //cout << "SKTF::findTracks() -I- Global Track StEvent Fill Completed"<<endl;
 	}
       catch (runtime_error & rte)
 	{
@@ -322,13 +331,13 @@ Int_t StiMaker::Make()
       if (_vertexFinder)
 	{
 	  StiHit *vertex=0;
-	  cout << "StiMaker::Maker() -I- Will Find Vertex"<<endl;
+	  //cout << "StiMaker::Maker() -I- Will Find Vertex"<<endl;
 	  vertex = _vertexFinder->findVertex(event);
 	  if (vertex)
 	    {
-	      cout << "StiMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
+	      //cout << "StiMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
 	      _tracker->extendTracksToVertex(vertex);
-	      cout << "StiMaker::Make() -I- Primary Filling"<<endl; 
+	      //cout << "StiMaker::Make() -I- Primary Filling"<<endl; 
 	      try
 		{
 		  if (_eventFiller && !_pars->useMcAsRec)
@@ -340,12 +349,11 @@ Int_t StiMaker::Make()
 		}						
 	    }
 	}
-      cout<< "StiMaker::Make() -I- Will Fill Plots As Needed"<<endl;
       if (_recPlotter) _recPlotter->fill(_toolkit->getTrackContainer());
       if (_mcPlotter ) _mcPlotter->fill(_toolkit->getMcTrackContainer());  
-      _residualCalculator->calcResiduals(_toolkit->getTrackContainer() );
+      if (_residualCalculator) _residualCalculator->calcResiduals(_toolkit->getTrackContainer() );
     }
-  cout<< "StiMaker::Make() -I- Done"<<endl;
+  //cout<< "StiMaker::Make() -I- Done"<<endl;
   return kStOK;
 }
 
