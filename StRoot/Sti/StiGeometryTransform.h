@@ -15,7 +15,7 @@ class StSvtHit;
 class StSsdHit;
 class StiHit;
 class StPrimaryVertex;
-class StPhysicalHelix;
+class StHelix;
 class StTpcHitFilter;
 class StiCoordinateTransform;
 
@@ -49,8 +49,8 @@ public:
     /// StPrimaryVertex -> StiHit
     void operator() (const StPrimaryVertex*, StiHit*);
 
-    /// StiKalmanTrackNode -> StPhysicalHelix
-    void operator() (const StiKalmanTrackNode*, StPhysicalHelix*);
+    /// StiKalmanTrackNode -> StHelix
+    void operator() (const StiKalmanTrackNode*, StHelix*);
 
     /// StGlobalTrack -> StiKalmanTrack
     void operator() (StiHitContainer*, const StGlobalTrack*, StiKalmanTrack*,
