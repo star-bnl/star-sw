@@ -39,6 +39,7 @@
 
 using namespace log4cxx;
 using namespace log4cxx::helpers;
+using namespace log4cxx::varia;
 // using namespace log4cxx::xml;
 
 class  StMessage  {
@@ -55,8 +56,8 @@ std::ostream& StLoggerManager::OperatorShift(std::ostream& os, StMessage* stm) {
     *this << ends;
     StMessMgr::Instance()->Print();                
   } else {
-     fprintf(stderr,"StLoggerManager::OperatorShift os  %p StMessMgr = %p, stm = %p endm = %p\n",
-           &os, (std::ostream*) StMessMgr::Instance(), stm, endm);
+    // fprintf(stderr,"StLoggerManager::OperatorShift os  %p StMessMgr = %Lp, stm = %Lp endm = %Lp\n",
+    //       &os, (std::ostream*) StMessMgr::Instance(), stm, endm);
      assert(0);
     // if (stm) os << stm->GetMessage();  // Output this message to the ostream
   }
@@ -79,7 +80,7 @@ ClassImp(StLoggerManager)
 #endif
 //_____________________________________________________________________________
 StLoggerManager::StLoggerManager(const char *loggerName) 
-                : StMessMgr(), fAllowRepeat(-1),fLastRepeatCounter(0)
+                : StMessMgr(), fAllowRepeat(-1),fLastRepeatCounter(0),fStarOptionFilter(0)
 {
 //
 // Constructor - only called once when the library is loaded to
@@ -150,6 +151,7 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
   if (!mInstance) {
     // BasicConfigurator::configure();
     String propertyFile = "log4j.xml";
+    StarOptionFilterPtr filter;
     const char *proEnv = gSystem->Getenv("STAR_LOGGER_PROPERTY");
     if (proEnv && proEnv[0] ) propertyFile=proEnv;
     if (!gSystem->AccessPathName(propertyFile.c_str())) {
@@ -157,16 +159,21 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
     } else {       
      	// BasicConfigurator::configure();
        LoggerPtr root = Logger::getRootLogger();
-      	root->addAppender(new ConsoleAppender(
-		      new PatternLayout("%-3c{2}:%-5p - %m%n")));
+       // Add the STAR default appender
+       ConsoleAppenderPtr appender = new ConsoleAppender(
+		      new PatternLayout("%-3c{2}:%-5p - %m%n"));
 //		      new PatternLayout(PatternLayout::TTCC_CONVERSION_PATTERN)));
-
+       appender ->setName(_T("defaultAppender"));       
+       filter = new StarOptionFilter();
+       appender->addFilter(filter);
+       root->addAppender(appender);
     }
     Logger::getRootLogger();
     fgQALogger = Logger::getLogger("QA");
     NDC::push(_T(":"));
 
     mInstance = (StMessMgr*) new StLoggerManager;
+   ((StLoggerManager *)mInstance)->SetStarOptionFilter(filter);
     // if (gMessMgr) delete gMessMgr; gMessMgr = 0;
     gMessMgr  = mInstance;
   }
@@ -374,7 +381,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.9 2004/11/05 20:24:43 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.10 2004/11/13 00:28:16 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -547,6 +554,10 @@ void StLoggerManager::AllowRepeats(int nRepeats)
    //               == -1 there is no limit;
    fAllowRepeat       = nRepeats;
    fLastRepeatCounter = 0;
+   StarOptionFilterPtr& filter = ((StLoggerManager *)mInstance)->GetStarOptionFilter();
+   if (filter != 0 ) 
+       filter->setRepeatCounterOption(nRepeats);
+
 }
 
 
@@ -622,7 +633,18 @@ int StLoggerManager::RemoveMessage(const char* s1, const char* s2,
 //_____________________________________________________________________________
 void StLoggerManager::SetLimit(const char* str, int n)
 {  
-_NO_IMPLEMENTATION_;
+     if (str && str[0] && str[1]) {
+        LoggerPtr root = Logger::getRootLogger();
+        StarOptionFilterPtr filter = new StarOptionFilter();
+        filter->setRepeatCounterOption(n);
+        filter->setOption(_T("StringToCount"),str);
+        AppenderPtr defaultAppender = root->getAppender(_T("defaultAppender"));
+        if (defaultAppender){
+            cout << "------------ Appedner " << defaultAppender->getName() << " ------------------- " << str << "n = " << n << endl;               
+           defaultAppender->addFilter(filter);
+        }
+    }
+  
 //   messCounter->SetLimit(str,n);                               
 }
 //_____________________________________________________________________________
@@ -680,8 +702,11 @@ _NO_IMPLEMENTATION_;   return 5;
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.9 2004/11/05 20:24:43 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.10 2004/11/13 00:28:16 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.10  2004/11/13 00:28:16  fine
+// teach StarOption filter to count the messages
+//
 // Revision 1.9  2004/11/05 20:24:43  fine
 // Remove some redundant lines, clean up
 //
