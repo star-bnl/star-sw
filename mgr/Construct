@@ -138,7 +138,7 @@ elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $CC        = "/opt/SUNWspro/bin/cc";
   $CXX       = "/opt/SUNWspro/bin/CC";
   $FC        = "/opt/SUNWspro/bin/f77";
-  $CXXFLAGS  = "-KPIC +w -features=no_castop -features=no_anachronisms";
+  $CXXFLAGS  = "-KPIC +w -features=no_anachronisms -features=rtti";
 #  $CLIBS     = "-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc";
 #  $CLIBS     = "-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc";
   $CLIBS     = "-lw -lgen -lsocket -lnsl -lintl";
@@ -207,6 +207,8 @@ $MAIN    = cwd();
 $INCLUDE = "#include";
 $EXPORT = "#.share";
 $FFLAGS .= " -DCERNLIB_TYPE";
+$OSFID .= " " . $STAR_SYS;
+if ($STAR_SYS ne $STAR_HOST_SYS) {$OSFID .= " " . $STAR_HOST_SYS;}
 my $FLAGS = $CPPFLAGS . " " . $OSFID . " CERNLIB_TYPE" . " __ROOT__";
 $CPPFLAGS = "-D" . join (" -D", split (" ",$FLAGS));
 if (! $param::quiet) {
