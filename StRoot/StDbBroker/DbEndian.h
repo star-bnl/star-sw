@@ -34,7 +34,7 @@
 #   define BIG_ENDIAN
 #endif
 
-#if defined(__linux) && !defined(__powerpc)
+#if defined(__linux) && !defined(__powerpc) && !defined(LITTLE_ENDIAN)
 #   define LITTLE_ENDIAN
 #endif
 
