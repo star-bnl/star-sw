@@ -1,5 +1,8 @@
-// $Id: ppLMV4.cxx,v 1.2 2001/12/04 01:48:34 balewski Exp $
+// $Id: ppLMV4.cxx,v 1.3 2001/12/05 23:21:44 balewski Exp $
 // $Log: ppLMV4.cxx,v $
+// Revision 1.3  2001/12/05 23:21:44  balewski
+// *** empty log message ***
+//
 // Revision 1.2  2001/12/04 01:48:34  balewski
 // *** empty log message ***
 //
@@ -50,7 +53,7 @@ using namespace units;
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 
-//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.2 2001/12/04 01:48:34 balewski Exp $";
+//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.3 2001/12/05 23:21:44 balewski Exp $";
 
 struct Jcyl {float eta,phi;};
 
@@ -302,8 +305,8 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
 //_____________________________________________________________________________
 
 void StPrimaryMaker::ppLMVuse(int *parI, float *parF) {
-  char *nameI[10]={"CtbThres/ch","MinTrkPonits","i2","i3","i4","i5","i6","i7","i8","i9"};
-  char *nameF[10]={"CtbThres/MeV","MaxTrkDcaRxy","MinTrkPt/GeV","CtbEtaErr","CtbPhiErr/deg","MaxTrkDcaZ","f6","f7","f8","f9"};
+const  char *nameI[]={"CtbThres/ch","MinTrkPonits","i2","i3","i4","i5","i6","i7","i8","i9"};
+const  char *nameF[]={"CtbThres/MeV","MaxTrkDcaRxy","MinTrkPt/GeV","CtbEtaErr","CtbPhiErr/deg","MaxTrkDcaZ","f6","f7","f8","f9"};
   printf("\nppLMV use new set of params\n    INT:  "); 
   int i;
   for( i=0;i<10;i++) { 
