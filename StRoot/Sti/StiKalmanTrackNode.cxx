@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.72 2005/03/28 05:52:40 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.73 2005/03/30 21:01:43 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.73  2005/03/30 21:01:43  perev
+ * asserts replaced to prints
+ *
  * Revision 2.72  2005/03/28 05:52:40  perev
  * Reorganization of node container
  *
@@ -1298,7 +1301,11 @@ static int nCall=0; nCall++;
 #endif
   double det=r00*r11 - r01*r01;
   assert(finite(det));
-  assert(det>1.e-20);
+//  assert(det>1.e-10);
+  if (det<1.e-10) {
+    printf("StiKalmanTrackNode::updateNode *** zero determinant %g\n",det);
+    return -11;
+  }
   // inverse matrix
   double tmp=r00; r00=r11/det; r11=tmp/det; r01=-r01/det;
   // update error matrix
@@ -1385,7 +1392,6 @@ static int nCall=0; nCall++;
   _sinCA = sinCA;
   _cosCA = ::sqrt((1.-_sinCA)*(1.+_sinCA)); 
   // update error matrix
-#ifndef new
   double c00=_cYY;                       
   double c10=_cZY, c11=_cZZ;                 
   double c20=_cEY, c21=_cEZ;//, c22=_cEE;           
@@ -1396,33 +1402,14 @@ static int nCall=0; nCall++;
   _cEY-=k20*c00+k21*c10;_cEZ-=k20*c10+k21*c11;_cEE-=k20*c20+k21*c21;
   _cCY-=k30*c00+k31*c10;_cCZ-=k30*c10+k31*c11;_cCE-=k30*c20+k31*c21;_cCC-=k30*c30+k31*c31;
   _cTY-=k40*c00+k41*c10;_cTZ-=k40*c10+k41*c11;_cTE-=k40*c20+k41*c21;_cTC-=k40*c30+k41*c31;_cTT-=k40*c40+k41*c41;
-#else
-  double c00=_cYY;                       
-  double c10=_cZY, c11=_cZZ;                 
-  double c20=_cEY, c21=_cEZ, c22=_cEE;           
-  double c30=_cCY, c31=_cCZ, c32=_cCE, c33=_cCC;     
-  double c40=_cTY, c41=_cTZ, c42=_cTE, c43=_cTC, c44=_cTT;
 
-  _cYY=(1-k00)*c00*(1-k00)-(1-k00)*c10*k01-k01*c10*(1-k00)+k01*c11*k01+k00*v00*k00+k00*v10*k01+k01*v10*k00+k01*v11*k01;
+//  assert (_cYY>0 && _cZZ >0 && _cEE>0 && _cCC>0 && _cTT>0);
+  if (!(_cYY>0 && _cZZ >0 && _cEE>0 && _cCC>0 && _cTT>0)) {
+    printf("StiKalmanTrackNode::updateNode *** negative errors  %g %g %g %g %g\n"
+          ,_cYY,_cZZ,_cEE,_cCC,_cTT);
+    return -14;
+  }
 
-  _cZY=k10*c00*(1-k00)+k10*c10*k01+(1-k11)*c10*(1-k00)-(1-k11)*c11*k01+k10*v00*k00+k10*v10*k01+k11*v10*k00+k11*v11*k01;
-  _cZZ=k10*c00*k10-k10*c10*(1-k11)-(1-k11)*c10*k10+(1-k11)*c11*(1-k11)+k10*v00*k10+k10*v10*k11+k11*v10*k10+k11*v11*k11;
-
-  _cEY=k20*c00*(1-k00)+k20*c10*k01-k21*c10*(1-k00)+k21*c11*k01+c20*(1-k00)-c21*k01+k20*v00*k00+k20*v10*k01+k21*v10*k00+k21*v11*k01;
-  _cEZ=k20*c00*k10-k20*c10*(1-k11)+k21*c10*k10-k21*c11*(1-k11)-c20*k10+c21*(1-k11)+k20*v00*k10+k20*v10*k11+k21*v10*k10+k21*v11*k11;
-  _cEE=k20*c00*k20+k20*c10*k21-k20*c20+k21*c10*k20+k21*c11*k21-k21*c21-c20*k20-c21*k21+c22+k20*v00*k20+k20*v10*k21+k21*v10*k20+k21*v11*k21;
-
-  _cCY=k30*c00*(1-k00)+k30*c10*k01-k31*c10*(1-k00)+k31*c11*k01+c30*(1-k00)-c31*k01+k30*v00*k00+k30*v10*k01+k31*v10*k00+k31*v11*k01;
-  _cCZ=k30*c00*k10-k30*c10*(1-k11)+k31*c10*k10-k31*c11*(1-k11)-c30*k10+c31*(1-k11)+k30*v00*k10+k30*v10*k11+k31*v10*k10+k31*v11*k11;
-  _cCE=k30*c00*k20+k30*c10*k21-k30*c20+k31*c10*k20+k31*c11*k21-k31*c21-c30*k20-c31*k21+c32+k30*v00*k20+k30*v10*k21+k31*v10*k20+k31*v11*k21;
-  _cCC=k30*c00*k30+k30*c10*k31-k30*c30+k31*c10*k30+k31*c11*k31-k31*c31-c30*k30-c31*k31+c33+k30*v00*k30+k30*v10*k31+k31*v10*k30+k31*v11*k31;
-
-  _cTY=k40*c00*(1-k00)+k40*c10*k01-k41*c10*(1-k00)+k41*c11*k01+c40*(1-k00)-c41*k01+k40*v00*k00+k40*v10*k01+k41*v10*k00+k41*v11*k01;
-  _cTZ=k40*c00*k10-k40*c10*(1-k11)+k41*c10*k10-k41*c11*(1-k11)-c40*k10+c41*(1-k11)+k40*v00*k10+k40*v10*k11+k41*v10*k10+k41*v11*k11;
-  _cTE=k40*c00*k20+k40*c10*k21-k40*c20+k41*c10*k20+k41*c11*k21-k41*c21-c40*k20-c41*k21+c42+k40*v00*k20+k40*v10*k21+k41*v10*k20+k41*v11*k21;
-  _cTC=k40*c00*k30+k40*c10*k31-k40*c30+k41*c10*k30+k41*c11*k31-k41*c31-c40*k30-c41*k31+c43+k40*v00*k30+k40*v10*k31+k41*v10*k30+k41*v11*k31;
-  _cTT=k40*c00*k40+k40*c10*k41-k40*c40+k41*c10*k40+k41*c11*k41-k41*c41-c40*k40-c41*k41+c44+k40*v00*k40+k40*v10*k41+k41*v10*k40+k41*v11*k41;
-#endif
 
 #ifdef STI_ERROR_TEST
   testError(&_cXX,1);
