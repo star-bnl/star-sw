@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.13 1999/11/30 03:00:00 fine Exp $
+// $Id: PadControlPanel.C,v 1.14 1999/11/30 20:09:52 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -100,7 +100,7 @@ static TControlBar *PadControlPanel(TControlBar *bar=0){
    bar->AddButton("4 views","StPadControlPanel::MakeFourView();","4 view");
    bar->AddSeparator();
    bar->AddButton("Add Axes","StPadControlPanel::AddAxes();","Add 3D axes to the current TPad view");
-   bar->AddButton("Add Rulers","StPadControlPanel::AddRulers();","Add 3D axis / ruler to the current TPad view");
+   bar->AddButton("Rulers","StPadControlPanel::ToggleRulers();","Turn 3D ruler ON / OFF (a new ruler popes up with new attributes)");
    bar->AddSeparator();
 
    bar->AddButton("Next event","chain->MakeEvent();","Make next event and draw it");
@@ -177,11 +177,9 @@ static void TopView(TVirtualPad *pad=0){
   RotateView(270.0,0.0,pad);
 }
 //_______________________________________________________________________________________
-static void AddRulers()
+static void ToggleRulers(TVirtualPad *pad=0)
 {
-  TAxis3D *axis = new TAxis3D;
-  axis->SetBit(kCanDelete);
-  axis->Draw();
+  TAxis3D::ToggleRulers(pad);
 }
 
 //_______________________________________________________________________________________
@@ -361,6 +359,9 @@ StPadControlPanel __aa__;
 void PadControlPanel(){}
 
 // $Log: PadControlPanel.C,v $
+// Revision 1.14  1999/11/30 20:09:52  fine
+// new static method to present rulers
+//
 // Revision 1.13  1999/11/30 03:00:00  fine
 // Ruler button has been introduced
 //
