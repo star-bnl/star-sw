@@ -106,6 +106,8 @@ public:
   void doFinishTrackSearch();
   void doNextTrackStep();
 
+  friend class StiMaker;
+
 protected:
 
     void printState();
