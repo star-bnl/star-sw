@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.h,v 1.6 2001/07/17 17:18:45 love Exp $
+// $Id: StLaserEventMaker.h,v 1.7 2001/11/28 17:54:21 love Exp $
 // $Log: StLaserEventMaker.h,v $
+// Revision 1.7  2001/11/28 17:54:21  love
+// Default ExB flags to FALSE
+//
 // Revision 1.6  2001/07/17 17:18:45  love
 // phi variable added to lasertrack def
 //
@@ -91,12 +94,12 @@ public:
   virtual void   SetRows(Int_t min, Int_t max) {m_rowmin=min; m_rowmax=max;}
   virtual void   Set_laser(Bool_t m=kTRUE){m_mklaser = m;}
   virtual void   Set_lasers(Bool_t m=kTRUE){m_lasers = m;}
-  virtual void   Set_UndoExB(Bool_t m=kTRUE){m_undoExB = m;}
-  virtual void   Set_UndoDistort(Bool_t m=kTRUE){m_undoDistort = m;}
+  virtual void   Set_UndoExB(Bool_t m=kFALSE){m_undoExB = m;}
+  virtual void   Set_UndoDistort(Bool_t m=kFALSE){m_undoDistort = m;}
   virtual void   UndoExB(Float_t *x,Float_t *y,Float_t *z);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.6 2001/07/17 17:18:45 love Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.7 2001/11/28 17:54:21 love Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker, 1)   //StAF chain virtual base class for Makers
 };
