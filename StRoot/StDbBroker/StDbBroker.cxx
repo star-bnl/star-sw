@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.22 2000/06/14 13:39:05 didenko Exp $
+ * $Id: StDbBroker.cxx,v 1.23 2000/06/30 02:00:42 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.23  2000/06/30 02:00:42  porter
+ * fixed memory leak introduced when making sure top level returned to
+ * offline is always a database type name
+ *
  * Revision 1.22  2000/06/14 13:39:05  didenko
  * Add ClassDef/ClassImp
  *
@@ -488,10 +492,11 @@ StDbBroker::InitConfig(const char* configName, int& numRows, char* versionName)
     m_Nodes = 0;
   }
 
+
 if(m_Tree) delete m_Tree;
 
-char* dbTypeName=new char[20];
-char* dbDomainName=new char[20];
+ char* dbTypeName=0;
+ char* dbDomainName=0;
 if(m_ParentType) delete [] m_ParentType;
 m_ParentType = 0;
 
@@ -503,8 +508,9 @@ m_ParentType = 0;
    }
  }
 
- delete [] dbTypeName;
- delete [] dbDomainName;
+  delete [] dbTypeName;
+  delete [] dbDomainName;
+
  if(m_isVerbose)mgr->setVerbose(true);
 if(!versionName){
   m_Tree=mgr->initConfig(configName,"reconV0",1); // 1=don't get db-descriptors
