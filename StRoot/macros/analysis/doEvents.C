@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.57 2000/07/03 02:08:00 perev Exp $
+// $Id: doEvents.C,v 1.58 2000/07/16 23:04:27 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -245,15 +245,6 @@ void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, cons
     cout << endl << "============================ Event " << i
 	 << " finish ============================" << endl;
 
-    if (nevents > 1) {
-	chain->Clear();
-	chain->Finish();
-    }
-    else {
-	if (!b) {
-	    b = new TBrowser;
-	}
-    }
 }
 
 //--------------------------------------------------------------------------
@@ -278,8 +269,11 @@ void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
-// Revision 1.57  2000/07/03 02:08:00  perev
-// StEvent: vector<TObject*>
+// Revision 1.58  2000/07/16 23:04:27  perev
+// Remove redundunt Finish() call
+//
+// Revision 1.58  2000/07/16 23:04:27  perev
+// Remove redundunt Finish() call
 //
 // Revision 1.57  2000/07/03 02:08:00  perev
 // StEvent: vector<TObject*>
