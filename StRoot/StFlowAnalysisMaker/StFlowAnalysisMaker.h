@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.46 2004/12/09 23:47:07 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.47 2004/12/17 22:33:33 aihong Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -58,7 +58,7 @@ public:
   void     SetEtaRange_for_vPt(Float_t lo, Float_t hi);
   void     SetV1Ep1Ep2(Bool_t v1Ep1Ep2 = kTRUE);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.46 2004/12/09 23:47:07 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.47 2004/12/17 22:33:33 aihong Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -76,7 +76,7 @@ private:
   UInt_t   mMultSub[Flow::nSels*Flow::nSubs][Flow::nHars];   //! multiplicity subs
   Float_t  mRes[Flow::nSels][Flow::nHars];      //! event plane resolution
   Float_t  mResErr[Flow::nSels][Flow::nHars];   //! event plane resolution error
-  Float_t  mZDCSMD_e_PsiWgt,mZDCSMD_w_PsiWgt;   //! ZDCSMD Psi Weight
+  Float_t  mZDCSMD_e_PsiWgt,mZDCSMD_w_PsiWgt,mZDCSMD_f_PsiWgt;   //! ZDCSMD Psi Weight
   Float_t  mFlowWeight;				//! Weight for flow
 #endif /*__CINT__*/
   TString          xLabel;      //! label axis with rapidity or pseudorapidity 
@@ -154,8 +154,12 @@ private:
   TH1F*     mZDC_SMD_west_hori;	       //!
   TH1F*     mZDC_SMD_east_vert;        //!
   TH1F*     mZDC_SMD_east_hori;        //!
-  TH1F*	    mHistZDCSMDPsiWgtEast;     //!
-  TH1F*     mHistZDCSMDPsiWgtWest;     //!
+  TH1D*     mHistZDCSMDPsiWgtEast;     //!
+  TH1D*     mHistZDCSMDPsiWgtWest;     //!
+  TH1D*     mHistZDCSMDPsiWgtTest;     //!
+  TH1D*     mHistZDCSMDPsiWgtFull;     //!
+  TH1D*     mHistZDCSMDPsiCorTest;     //!
+  TH1D*     mHistZDCSMDPsiCorFull;     //!
   
   // for each harmonic, each selection, and each sub-event
   struct histSubHars {
@@ -252,6 +256,9 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.47  2004/12/17 22:33:33  aihong
+// add in full Psi weight for ZDC SMD and fix a few bugs, done by Gang
+//
 // Revision 1.46  2004/12/09 23:47:07  posk
 // Minor changes in code formatting.
 // Added hist for TPC primary dca to AnalysisMaker.

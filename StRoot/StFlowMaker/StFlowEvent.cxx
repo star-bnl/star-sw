@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.53 2004/12/17 15:50:00 aihong Exp $
+// $Id: StFlowEvent.cxx,v 1.54 2004/12/17 22:33:10 aihong Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -27,6 +27,10 @@
 #define PR(x) cout << "##### FlowEvent: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowEvent)
+Double_t  StFlowEvent::mZDCSMDCenterex = Flow::zdcsmd_ex0;
+Double_t  StFlowEvent::mZDCSMDCenterey = Flow::zdcsmd_ey0;
+Double_t  StFlowEvent::mZDCSMDCenterwx = Flow::zdcsmd_wx0;
+Double_t  StFlowEvent::mZDCSMDCenterwy = Flow::zdcsmd_wy0;
 
 //Main TPC particles do not participate in G Mix  calc. for the 1st Har. sel2
 //for sel 1, C{3} is ( har1(all) + har1(all) + har2(all) )
@@ -236,6 +240,15 @@ Double_t StFlowEvent::ZDCSMD_PsiWgtWest() {
 }
 
 //-------------------------------------------------------------
+Double_t StFlowEvent::ZDCSMD_PsiWgtFull() {
+  TH1F *mZDCSMD_PsiWgt=new TH1F("ZDCSMD_PsiWgt","ZDCSMD_PsiWgt",Flow::zdcsmd_nPsiBins,0.,twopi);
+  StFlowSelection* mFlowSelect;
+  Int_t n =mZDCSMD_PsiWgt->FindBin(Q(mFlowSelect).Phi());
+  mZDCSMD_PsiWgt->Delete();
+  return mZDCSMD_PsiWgtFull[n-1];
+}
+
+//-------------------------------------------------------------
 
 UInt_t StFlowEvent::Mult(StFlowSelection* pFlowSelect) {
   // Multiplicity of tracks selected for the event plane
@@ -412,10 +425,10 @@ Float_t StFlowEvent::ZDCSMD_GetPosition(int eastwest,int verthori,int strip) {
   Float_t zdcsmd_x[7] = {0.5,2,3.5,5,6.5,8,9.5};
   Float_t zdcsmd_y[8] = {1.25,3.25,5.25,7.25,9.25,11.25,13.25,15.25};
 
-  if(eastwest==0 && verthori==0) return zdcsmd_x[strip-1]-Flow::zdcsmd_ex0;
-  if(eastwest==1 && verthori==0) return Flow::zdcsmd_wx0-zdcsmd_x[strip-1];
-  if(eastwest==0 && verthori==1) return zdcsmd_y[strip-1]/sqrt(2.)-Flow::zdcsmd_ey0;
-  if(eastwest==1 && verthori==1) return zdcsmd_y[strip-1]/sqrt(2.)-Flow::zdcsmd_wy0;
+  if(eastwest==0 && verthori==0) return zdcsmd_x[strip-1]-mZDCSMDCenterex;
+  if(eastwest==1 && verthori==0) return mZDCSMDCenterwx-zdcsmd_x[strip-1];
+  if(eastwest==0 && verthori==1) return zdcsmd_y[strip-1]/sqrt(2.)-mZDCSMDCenterey;
+  if(eastwest==1 && verthori==1) return zdcsmd_y[strip-1]/sqrt(2.)-mZDCSMDCenterwy;
 
   return 0;
   }
@@ -1078,6 +1091,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.54  2004/12/17 22:33:10  aihong
+// add in full Psi weight for ZDC SMD and fix a few bugs, done by Gang
+//
 // Revision 1.53  2004/12/17 15:50:00  aihong
 // check in v1{3} code
 //

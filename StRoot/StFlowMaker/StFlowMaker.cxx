@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.97 2004/12/09 23:43:36 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.98 2004/12/17 22:33:16 aihong Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -222,7 +222,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.97 2004/12/09 23:43:36 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.98 2004/12/17 22:33:16 aihong Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -373,32 +373,6 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 	    phiWgtHistFtpcFarWest->GetBinContent(n+1) : 1.;
 	}
 
-	//ZDCSMD psi Wgt
-	TH1F* mZDCSMDPsiWest = (TH1F *)pPhiWgtFile->Get("Flow_ZDCSMDPsiWgtWest");
-	TH1F* mZDCSMDPsiEast = (TH1F *)pPhiWgtFile->Get("Flow_ZDCSMDPsiWgtEast");
-	
-	if (mZDCSMDPsiWest && mZDCSMDPsiEast) { //Weight histograms exist
-	  Float_t mZDCSMDPsiWest_mean = (mZDCSMDPsiWest->Integral())/
-	    (mZDCSMDPsiWest->GetNbinsX());
-	  Float_t mZDCSMDPsiEast_mean = (mZDCSMDPsiEast->Integral())/
-	    (mZDCSMDPsiEast->GetNbinsX());
-	  
-	  for (int n = 0; n < Flow::zdcsmd_nPsiBins; n++) {
-	    mZDCSMD_PsiWgtWest[n] = ((mZDCSMDPsiWest->GetBinContent(n+1))>0.) ?
-	      mZDCSMDPsiWest_mean/(mZDCSMDPsiWest->GetBinContent(n+1)):1.;
-	    mZDCSMD_PsiWgtEast[n] = ((mZDCSMDPsiEast->GetBinContent(n+1))>0.) ? 
-	      mZDCSMDPsiEast_mean/(mZDCSMDPsiEast->GetBinContent(n+1)):1.;
-	  }//zdcsmd_nPsiBins
-	  
-	} else { //Weight histograms don't exist
-	  
-	  for (int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
-	    mZDCSMD_PsiWgtWest[n] = 1.;
-	    mZDCSMD_PsiWgtEast[n] = 1.;
-	  }//zdcsmd_nPsiBins
-	  
-	}//else
-	
       } else {
 	for (int n = 0; n < Flow::nPhiBins; n++) {
 	  mPhiWgt[k][j][n]        = 1.;
@@ -415,10 +389,6 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 	  mPhiWgtFtpcFarWest[k][j][n] = 1.;
 	}
 
-	for(int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
-	  mZDCSMD_PsiWgtWest[n] = 1.;
-	  mZDCSMD_PsiWgtEast[n] = 1.;
-	}//zdcsmd_nPsiBins	
       }
 
       delete histTitleFarEast;
@@ -431,10 +401,57 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
       delete histTitleFtpcFarWest;
     }
   }
-  
+  //ZDCSMD psi Wgt
+  if (pPhiWgtFile->IsOpen()) {
+    TH1* mZDCSMDPsiWest = (TH1 *)pPhiWgtFile->Get("Flow_ZDCSMDPsiWgtWest");
+    TH1* mZDCSMDPsiEast = (TH1 *)pPhiWgtFile->Get("Flow_ZDCSMDPsiWgtEast");
+    TH1* mZDCSMDPsiFull = (TH1 *)pPhiWgtFile->Get("Flow_ZDCSMDPsiWgtFull");
+    if(mZDCSMDPsiWest && mZDCSMDPsiEast) { //Weight histograms exist
+      Float_t mZDCSMDPsiWest_mean = (mZDCSMDPsiWest->Integral())/(mZDCSMDPsiWest->GetNbinsX());
+      Float_t mZDCSMDPsiEast_mean = (mZDCSMDPsiEast->Integral())/(mZDCSMDPsiEast->GetNbinsX());
+      for(int n = 0; n < Flow::zdcsmd_nPsiBins; n++) {
+            mZDCSMD_PsiWgtWest[n] = ((mZDCSMDPsiWest->GetBinContent(n+1))>0.) ?
+              mZDCSMDPsiWest_mean/(mZDCSMDPsiWest->GetBinContent(n+1)):1.;
+            mZDCSMD_PsiWgtEast[n] = ((mZDCSMDPsiEast->GetBinContent(n+1))>0.) ?
+              mZDCSMDPsiEast_mean/(mZDCSMDPsiEast->GetBinContent(n+1)):1.;
+      }//zdcsmd_nPsiBins
+      if(mZDCSMDPsiFull) {
+        Float_t mZDCSMDPsiFull_mean = (mZDCSMDPsiFull->Integral())/(mZDCSMDPsiFull->GetNbinsX());
+        for(int n = 0; n < Flow::zdcsmd_nPsiBins; n++) {
+              mZDCSMD_PsiWgtFull[n] = ((mZDCSMDPsiFull->GetBinContent(n+1))>0.) ?
+                mZDCSMDPsiFull_mean/(mZDCSMDPsiFull->GetBinContent(n+1)):1.;
+        }
+      } else{//mZDCSMDPsiFull doesn't exist
+          for(int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
+              mZDCSMD_PsiWgtFull[n] = 1.;
+          }
+        }
+    } else { //Weight histograms don't exist
+          for(int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
+            mZDCSMD_PsiWgtWest[n] = 1.;
+            mZDCSMD_PsiWgtEast[n] = 1.;
+            mZDCSMD_PsiWgtFull[n] = 1.;
+          }//zdcsmd_nPsiBins
+      }//else
+  } else { // no pPhiWgtFile
+        for(int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
+          mZDCSMD_PsiWgtWest[n] = 1.;
+          mZDCSMD_PsiWgtEast[n] = 1.;
+          mZDCSMD_PsiWgtFull[n] = 1.;
+        }//zdcsmd_nPsiBins
+    } 
   // Close PhiWgt file
   if (pPhiWgtFile->IsOpen()) pPhiWgtFile->Close();
-  
+  //Read the ZDCSMD constants file
+        mZDCSMDCenterEx = Flow::zdcsmd_ex0;
+        mZDCSMDCenterEy = Flow::zdcsmd_ey0;
+        mZDCSMDCenterWx = Flow::zdcsmd_wx0;
+        mZDCSMDCenterWy = Flow::zdcsmd_wy0;
+
+     for(int i=0;i<2;i++) {for(int j=0;j<2;j++){for(int k=0;k<8;k++){
+       mZDCSMDPed[i][j][k] = Flow::zdcsmdPedstal[i][j][k];
+     }}}//for
+ 
   return kStOK;
 }
 
@@ -458,7 +475,8 @@ void StFlowMaker::FillFlowEvent() {
   pFlowEvent->SetFirstLastPoints();
   pFlowEvent->SetZDCSMD_PsiWeightWest(mZDCSMD_PsiWgtWest);
   pFlowEvent->SetZDCSMD_PsiWeightEast(mZDCSMD_PsiWgtEast);
-
+  pFlowEvent->SetZDCSMD_PsiWeightFull(mZDCSMD_PsiWgtFull);
+  pFlowEvent->SetZDCSMD_BeamCenter(mZDCSMDCenterEx,mZDCSMDCenterEy,mZDCSMDCenterWx,mZDCSMDCenterWy);
   // Get event id 
   pFlowEvent->SetEventID((Int_t)(pEvent->id()));
   pFlowEvent->SetRunID((Int_t)(pEvent->runId()));
@@ -517,18 +535,26 @@ void StFlowMaker::FillFlowEvent() {
     zdcw = ZDC.adcSum(west);
     // get ZDCSMD pedstal-subtracted and gain-corrected
     for (int strip=1;strip<9;strip++) {
-      zdcsmdEastHorizontal = (ZDC.zdcSmd(east,1,strip)
-	   -Flow::zdcsmdPedstal[0][1][strip-1])/Flow::zdcsmdGainFac[0][1][strip-1];
-      pFlowEvent->SetZDCSMD(0,1,strip,zdcsmdEastHorizontal);
-      zdcsmdEastVertical = (ZDC.zdcSmd(east,0,strip)
-	   -Flow::zdcsmdPedstal[0][0][strip-1])/Flow::zdcsmdGainFac[0][0][strip-1];
-      pFlowEvent->SetZDCSMD(0,0,strip,zdcsmdEastVertical);
-      zdcsmdWestHorizontal = (ZDC.zdcSmd(west,1,strip)
-	   -Flow::zdcsmdPedstal[1][1][strip-1])/Flow::zdcsmdGainFac[1][1][strip-1];
-      pFlowEvent->SetZDCSMD(1,1,strip,zdcsmdWestHorizontal);
-      zdcsmdWestVertical = (ZDC.zdcSmd(west,0,strip)
-	   -Flow::zdcsmdPedstal[1][0][strip-1])/Flow::zdcsmdGainFac[1][0][strip-1];
-      pFlowEvent->SetZDCSMD(1,0,strip,zdcsmdWestVertical);
+        if(ZDC.zdcSmd(east,1,strip)) {
+          zdcsmdEastHorizontal = (ZDC.zdcSmd(east,1,strip)
+                -mZDCSMDPed[0][1][strip-1])/Flow::zdcsmdGainFac[0][1][strip-1];
+          pFlowEvent->SetZDCSMD(0,1,strip,zdcsmdEastHorizontal);
+        }
+        if(ZDC.zdcSmd(east,0,strip)) {
+          zdcsmdEastVertical = (ZDC.zdcSmd(east,0,strip)
+                -mZDCSMDPed[0][0][strip-1])/Flow::zdcsmdGainFac[0][0][strip-1];
+          pFlowEvent->SetZDCSMD(0,0,strip,zdcsmdEastVertical);
+        }
+        if(ZDC.zdcSmd(west,1,strip)) {
+          zdcsmdWestHorizontal = (ZDC.zdcSmd(west,1,strip)
+                -mZDCSMDPed[1][1][strip-1])/Flow::zdcsmdGainFac[1][1][strip-1];
+          pFlowEvent->SetZDCSMD(1,1,strip,zdcsmdWestHorizontal);
+        }
+        if(ZDC.zdcSmd(west,0,strip)) {
+          zdcsmdWestVertical = (ZDC.zdcSmd(west,0,strip)
+                -mZDCSMDPed[1][0][strip-1])/Flow::zdcsmdGainFac[1][0][strip-1];
+          pFlowEvent->SetZDCSMD(1,0,strip,zdcsmdWestVertical);
+        }
     }
   } 
   pFlowEvent->SetCTB(ctb);
@@ -1602,6 +1628,8 @@ Bool_t StFlowMaker::FillFromMuDST() {
   pFlowEvent->SetFirstLastPoints();  
   pFlowEvent->SetZDCSMD_PsiWeightWest(mZDCSMD_PsiWgtWest);
   pFlowEvent->SetZDCSMD_PsiWeightEast(mZDCSMD_PsiWgtEast);
+  pFlowEvent->SetZDCSMD_PsiWeightFull(mZDCSMD_PsiWgtFull);
+  pFlowEvent->SetZDCSMD_BeamCenter(mZDCSMDCenterEx,mZDCSMDCenterEy,mZDCSMDCenterWx,mZDCSMDCenterWy);
   // Check event cuts
   if (!StFlowCutEvent::CheckEvent(pMuEvent)) {  
     Int_t eventID = pMuEvent->eventId();
@@ -1672,18 +1700,26 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
   Float_t zdcsmdWestVertical = -1.;
   StZdcTriggerDetector &ZDC = pMuEvent->zdcTriggerDetector();
   for (int strip=1;strip<9;strip++) {
-    zdcsmdEastHorizontal = (ZDC.zdcSmd(east,1,strip)
-	 -Flow::zdcsmdPedstal[0][1][strip-1])/Flow::zdcsmdGainFac[0][1][strip-1];
-    pFlowEvent->SetZDCSMD(0,1,strip,zdcsmdEastHorizontal);
-    zdcsmdEastVertical = (ZDC.zdcSmd(east,0,strip)
-	 -Flow::zdcsmdPedstal[0][0][strip-1])/Flow::zdcsmdGainFac[0][0][strip-1];
-    pFlowEvent->SetZDCSMD(0,0,strip,zdcsmdEastVertical);
-    zdcsmdWestHorizontal = (ZDC.zdcSmd(west,1,strip)
-	 -Flow::zdcsmdPedstal[1][1][strip-1])/Flow::zdcsmdGainFac[1][1][strip-1];
-    pFlowEvent->SetZDCSMD(1,1,strip,zdcsmdWestHorizontal);
-    zdcsmdWestVertical = (ZDC.zdcSmd(west,0,strip)
-	 -Flow::zdcsmdPedstal[1][0][strip-1])/Flow::zdcsmdGainFac[1][0][strip-1];
-    pFlowEvent->SetZDCSMD(1,0,strip,zdcsmdWestVertical);
+        if(ZDC.zdcSmd(east,1,strip)) {
+          zdcsmdEastHorizontal = (ZDC.zdcSmd(east,1,strip)
+                -mZDCSMDPed[0][1][strip-1])/Flow::zdcsmdGainFac[0][1][strip-1];
+          pFlowEvent->SetZDCSMD(0,1,strip,zdcsmdEastHorizontal);
+        }
+        if(ZDC.zdcSmd(east,0,strip)) {
+          zdcsmdEastVertical = (ZDC.zdcSmd(east,0,strip)
+                -mZDCSMDPed[0][0][strip-1])/Flow::zdcsmdGainFac[0][0][strip-1];
+          pFlowEvent->SetZDCSMD(0,0,strip,zdcsmdEastVertical);
+        }
+        if(ZDC.zdcSmd(west,1,strip)) {
+          zdcsmdWestHorizontal = (ZDC.zdcSmd(west,1,strip)
+                -mZDCSMDPed[1][1][strip-1])/Flow::zdcsmdGainFac[1][1][strip-1];
+          pFlowEvent->SetZDCSMD(1,1,strip,zdcsmdWestHorizontal);
+        }
+        if(ZDC.zdcSmd(west,0,strip)) {
+          zdcsmdWestVertical = (ZDC.zdcSmd(west,0,strip)
+                -mZDCSMDPed[1][0][strip-1])/Flow::zdcsmdGainFac[1][0][strip-1];
+          pFlowEvent->SetZDCSMD(1,0,strip,zdcsmdWestVertical);
+        }
   }
   UInt_t origMult = pMuEvent->eventSummary().numberOfGoodPrimaryTracks(); //???
   pFlowEvent->SetOrigMult(origMult);
@@ -2074,6 +2110,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.98  2004/12/17 22:33:16  aihong
+// add in full Psi weight for ZDC SMD and fix a few bugs, done by Gang
+//
 // Revision 1.97  2004/12/09 23:43:36  posk
 // Minor changes in code formatting.
 //

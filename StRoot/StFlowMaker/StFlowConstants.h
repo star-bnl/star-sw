@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.20 2004/12/17 15:50:08 aihong Exp $
+// $Id: StFlowConstants.h,v 1.21 2004/12/17 22:33:05 aihong Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -58,9 +58,9 @@ class Flow{
   static Int_t   cent62[nCents];
   static Int_t   cent22[nCents];
 
-  static Float_t zdcsmd_wx0,zdcsmd_ex0,zdcsmd_wy0,zdcsmd_ey0;
-  static Float_t zdcsmdPedstal[2][2][8];
-  static Float_t zdcsmdGainFac[2][2][8];
+  static Double_t zdcsmd_wx0,zdcsmd_ex0,zdcsmd_wy0,zdcsmd_ey0;
+  static Double_t zdcsmdPedstal[2][2][8];
+  static Double_t zdcsmdGainFac[2][2][8];
 
   ClassDef(Flow,1)               // macro for rootcint
 };
@@ -70,6 +70,9 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.21  2004/12/17 22:33:05  aihong
+// add in full Psi weight for ZDC SMD and fix a few bugs, done by Gang
+//
 // Revision 1.20  2004/12/17 15:50:08  aihong
 // check in v1{3} code
 //
