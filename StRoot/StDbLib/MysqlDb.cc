@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.12 2001/01/22 18:37:49 porter Exp $
+ * $Id: MysqlDb.cc,v 1.13 2001/02/09 23:06:24 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.13  2001/02/09 23:06:24  porter
+ * replaced ostrstream into a buffer with ostrstream creating the
+ * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
+ *
  * Revision 1.12  2001/01/22 18:37:49  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -84,7 +88,7 @@
  **************************************************************************/
 #include "MysqlDb.h"
 #include "StDbManager.hh" // for now & only for getting the message service
-#include "strstream.h"
+#include <strstream.h>
 
 //#include "errmsg.h"
 
@@ -180,19 +184,23 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
   if (!mysql_init(&mData))
     return (bool) StDbManager::Instance()->printInfo("Mysql Init Error=",mysql_error(&mData),dbMErr,__LINE__,__CLASS__,__METHOD__);
 
-  char connString[256]; ostrstream cs(connString,256);
+  char *connString; ostrstream cs;
   if(mysql_real_connect(&mData,aHost,aUser,aPasswd,aDb,aPort,NULL,0)){ 
        t0=mqueryLog.wallTime()-t0;
        cs<< "Server Connecting: DB=" << aDb ;
        cs<< " , Host=" << aHost <<":"<<aPort<<endl;
        cs<< " --> Connection Time="<<t0<<" sec"<<ends;
+       connString = cs.str();
         StDbManager::Instance()->printInfo(connString,dbMConnect,__LINE__,__CLASS__,__METHOD__);
+	delete [] connString;
       tRetVal=true;
   } else {
       cs << "Making Connection to DataBase = " << aDb;
       cs << " On Host = " << aHost <<":"<<aPort;
       cs << " MySQL returned error " << mysql_error(&mData) << ends;
+      connString=cs.str();
       StDbManager::Instance()->printInfo(connString,dbMConnect,__LINE__,__CLASS__,__METHOD__);
+      delete [] connString;
   }
 
   if(mlogTime)mconnectLog.end();

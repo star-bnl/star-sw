@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlReader.h,v 1.4 2000/01/10 20:37:55 porter Exp $
+ * $Id: StDbXmlReader.h,v 1.5 2001/02/09 23:06:25 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbXmlReader.h,v $
+ * Revision 1.5  2001/02/09 23:06:25  porter
+ * replaced ostrstream into a buffer with ostrstream creating the
+ * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
+ *
  * Revision 1.4  2000/01/10 20:37:55  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -32,7 +36,7 @@
 #define STDBXmlReader_HH
 
 #include "typeAcceptor.hh"
-#include <iostream.h>
+//#include <iostream.h>
 #include <fstream.h>
 #include <stdlib.h>
 #include <strstream.h>

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNode.cc,v 1.5 2001/01/22 18:37:57 porter Exp $
+ * $Id: StDbNode.cc,v 1.6 2001/02/09 23:06:25 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbNode.cc,v $
+ * Revision 1.6  2001/02/09 23:06:25  porter
+ * replaced ostrstream into a buffer with ostrstream creating the
+ * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
+ *
  * Revision 1.5  2001/01/22 18:37:57  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -148,8 +152,7 @@ char* id1;
 char* id2;
 
 id2 = strstr(tmpName,"-");
-char islist[2048];
-ostrstream sl(islist,2048);
+ostrstream sl;
 
 if(id2 && ( (id && id2<id) || !id)){
   id=id2;
@@ -177,6 +180,7 @@ while(id){
    if(id)id++;
 }
  sl << ends;
+ char* islist = sl.str();
 
  // cout << "My string list = " << islist << endl;
 
@@ -208,7 +212,8 @@ while(id){
  retVal = new int[numElements];
  for(k=0;k<numElements;k++)retVal[k]=tmpElements[k];
  numRows = numElements;
-
+ 
+ delete [] islist;
  delete [] tmpElements;
  delete [] tmpName; 
 

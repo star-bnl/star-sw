@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.15 2001/01/22 18:38:00 porter Exp $
+ * $Id: StDbTable.h,v 1.16 2001/02/09 23:06:25 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.16  2001/02/09 23:06:25  porter
+ * replaced ostrstream into a buffer with ostrstream creating the
+ * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
+ *
  * Revision 1.15  2001/01/22 18:38:00  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -95,7 +99,7 @@
 #include "StDbBufferI.h"
 #include "StDbStoreInfo.hh"
 #include <string.h>
-#include <iostream.h>
+//#include <iostream.h>
 
 class StDbBuffer;
 
@@ -164,7 +168,9 @@ public:
                                 if(mdata) delete [] mdata; 
                                 if(mdataTable) delete [] mdataTable;
                                 if(mstructName) delete []  mstructName;
-                                if(melementName) delete [] melementName;};
+                                if(melementName) delete [] melementName;
+                                if(mtimeVals) delete [] mtimeVals;
+                       };
 
   virtual bool         IsTable() const;
   virtual void         setNodeInfo(StDbNode* node);

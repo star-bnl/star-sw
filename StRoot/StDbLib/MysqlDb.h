@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.10 2001/01/22 18:37:50 porter Exp $
+ * $Id: MysqlDb.h,v 1.11 2001/02/09 23:06:24 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.11  2001/02/09 23:06:24  porter
+ * replaced ostrstream into a buffer with ostrstream creating the
+ * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
+ *
  * Revision 1.10  2001/01/22 18:37:50  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -78,8 +82,6 @@ typedef  char MYSQL_ROW;
 typedef  char MYSQL;
 typedef  int MYSQL_FIELD;
 #endif
-#include <iostream.h>
-#include <strstream.h>
 #include <string.h>
 #include "StDbBuffer.h"
 #include "StDbLogger.hh"
