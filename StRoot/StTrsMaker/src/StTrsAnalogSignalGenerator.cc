@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.cc,v 1.3 1999/02/28 20:13:29 lasiuk Exp $
+ * $Id: StTrsAnalogSignalGenerator.cc,v 1.4 1999/04/23 19:19:49 lasiuk Exp $
  *
  * Author: brian Nov 3, 1998 
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.cc,v $
+ * Revision 1.4  1999/04/23 19:19:49  lasiuk
+ * add delay to centroid of signal:
+ * Calculated in constructor (mTimeShiftOfSignalCentroid)
+ * and applied in in signalsampler()
+ *
  * Revision 1.3  1999/02/28 20:13:29  lasiuk
  * noise additions
  *
@@ -39,27 +44,30 @@ HepJamesRandom  StTrsAnalogSignalGenerator::mEngine;
 RandGauss       StTrsAnalogSignalGenerator::mGaussDistribution(mEngine);
 
 StTrsAnalogSignalGenerator::StTrsAnalogSignalGenerator(StTpcGeometry* geo, StTpcSlowControl* sc, StTpcElectronics* el, StTrsSector* sec)
-    : mGeomDb(geo), mSCDb(sc), mElectronicsDb(el), mSector(sec)
+    : mGeomDb(geo), mSCDb(sc), mElectronicsDb(el), mSector(sec),
+      mDeltaRow(0),
+      mDeltaPad(0),
+      mSignalThreshold(0.*volt),
+      mSuppressEmptyTimeBins(true)
 {
-    mDeltaRow = 0;
-    mDeltaPad = 0;
-
-    mSignalThreshold = .0*volt;
-    mSuppressEmptyTimeBins = true;
-
     //
-    // Initialization
     // signal generation
     mSigma1 = mElectronicsDb->shapingTime();
     mSigma2 = 2.*mSigma1;
     mTau    = mElectronicsDb->tau();
+    mGain   = mElectronicsDb->nominalGain();
+
     mSamplingFrequency = mElectronicsDb->samplingFrequency();
-    mGain              = mElectronicsDb->nominalGain();
     fractionSampled();
+    //
     // noise
     mAddNoise = false;
     mAddNoiseUnderSignalOnly = false;
-    mNoiseRMS = 0.; 
+    mNoiseRMS = 0.;
+    //
+    // Time  Shift
+    mTimeShiftOfSignalCentroid = 3.*mSCDb->driftVelocity()*mTau;
+    PR(mTimeShiftOfSignalCentroid);
 }
 
 void StTrsAnalogSignalGenerator::fractionSampled()

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.14 1999/02/28 20:12:50 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.15 1999/04/23 19:19:50 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
- * Revision 1.14  1999/02/28 20:12:50  lasiuk
- * threshold/noise additions
+ * Revision 1.15  1999/04/23 19:19:50  lasiuk
+ * add delay to centroid of signal:
+ * Calculated in constructor (mTimeShiftOfSignalCentroid)
+ * and applied in in signalsampler()
+ *
+ * Calculated in constructor (mTimeShiftOfSignalCentroid)
+ * and applied in in signalsampler()
  *
  * Revision 1.14  1999/02/28 20:12:50  lasiuk
  * threshold/noise additions
@@ -767,8 +772,15 @@ void StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()
 		    // charge from any signal that is within
 		    // 10 time bins.  This should be a settable
 		    // parameter.
-//  		    cout << " tb " << itbin << " " << (*mTimeSequenceIterator) << endl;
-
+		    //
+// 		    PR(mTimeSequenceIterator->time());
+// 		    PR(mTimeShiftOfSignalCentroid);
+		    double tmpTime =
+			mTimeSequenceIterator->time() +
+			mTimeShiftOfSignalCentroid*nanosecond;
+		    mTimeSequenceIterator->setTime(tmpTime);
+// 		PR(mTimeSequenceIterator->time());
+// 		PR(mTimeSequenceIterator->time()/nanosecond);
 		    if( fabs(timeBinT-mTimeSequenceIterator->time()) > 10.*mTimeBinWidth)
 			continue;
 //   		    cout << " tb " << itbin << " " << (*mTimeSequenceIterator) << endl;
