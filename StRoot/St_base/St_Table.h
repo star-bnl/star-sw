@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.20 1998/12/30 00:52:42 fisyak Exp $
+// $Id: St_Table.h,v 1.21 1998/12/30 01:08:02 fisyak Exp $
 // $Log: St_Table.h,v $
+// Revision 1.21  1998/12/30 01:08:02  fisyak
+// Add Public SetNRows for used No. of rows
+//
 // Revision 1.20  1998/12/30 00:52:42  fisyak
 // Remove SetfN from public
 //
@@ -130,6 +133,7 @@ public:
    virtual     void       StafStreamer(Char_t *structname=0, FILE *fl=0);
    virtual     void       Set(Int_t n);
    virtual     void       Set(Int_t n, Char_t *array);
+   virtual     void       SetNRows(Int_t n){SetUsedRows(n);} 
    virtual     void       Reset(Int_t c=0);
    virtual     void       Update();
    virtual     void       Update(St_DataSet *set,UInt_t opt=0);
