@@ -1,5 +1,8 @@
-// $Id: bfcread_runcoBranch.C,v 1.9 2000/04/18 20:37:26 kathy Exp $
+// $Id: bfcread_runcoBranch.C,v 1.10 2000/05/03 19:04:34 kathy Exp $
 // $Log: bfcread_runcoBranch.C,v $
+// Revision 1.10  2000/05/03 19:04:34  kathy
+// update to make consistent with other macros of same type
+//
 // Revision 1.9  2000/04/18 20:37:26  kathy
 // St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
 //
@@ -89,15 +92,20 @@ void bfcread_runcoBranch(
   TTable   *tabl=0;
   TDataSet *obj=0;
 
-// Event loop
-  int istat=0,i=0;
 
+  int istat=0;
+  int i=0;
+  int countev=0;
+  int countevrds=0;
+
+// Event loop
 EventLoop: if (i < nevents && !istat) {
 
     chain->Clear();
     istat = chain->Make(i);
-    cout << "     istat value returned from chain Make = " << istat << endl;
 
+//  count # times Make is called
+    i++;
 
 // Now look at the data in the event:
     int countObj=0;
@@ -106,16 +114,19 @@ EventLoop: if (i < nevents && !istat) {
 
     if (!istat) {
 
-    i++;
-    cout << " start event # " << i << endl;
+    countev++;
+
+    cout << " start event # " << countev << endl;
 
       ds=chain->GetDataSet("runco");
       TDataSetIter tabiter(ds);
       if (ds) {
-//        ds->ls(2);  
-        while (obj = tabiter.Next()) {
-//	  cout << " I have found an object! " <<endl;
-          cout << "  found object = " << obj->GetName() << endl;
+        countevrds++;
+
+       while (obj = tabiter.Next()) {
+	  cout << " QAInfo: found object: " << obj->GetName() << endl;
+	  fout << " QAInfo: found object: " << obj->GetName() << endl;
+
           countObj++;
 
 //.. now loop over each subdirectory and look at objects in it
@@ -123,7 +134,8 @@ EventLoop: if (i < nevents && !istat) {
   TDataSet *objindir=0;
   TDataSetIter objindiriter(obj);
         while(objindir = objindiriter.Next()) {
-         cout << "     has sub-object = " << objindir->GetName() << endl;
+         cout << " QAInfo:   has sub-object = " << objindir->GetName() << endl;
+         fout << " QAInfo:   has sub-object = " << objindir->GetName() << endl;
          countObjInDir++;
 
 	 // if it's a table, print more info:
@@ -131,37 +143,53 @@ EventLoop: if (i < nevents && !istat) {
             tabl = (TTable *)objindiriter.Find(objindir->GetName());
             if (tabl) {
               countTable++;
-              cout << "  QAInfo: found table, #rows = " << 
-                 objindir->GetName() << ",  " << tabl->GetNRows() << endl;
-              fout << "  QAInfo: found table, #rows = " << 
-                 objindir->GetName() << ",  " << tabl->GetNRows() << endl;
-            }
-          }
-         
-        }
+              cout << " QAInfo:     it's a table with #rows = " 
+		   << objindir->GetName() << ",  " << tabl->GetNRows() << endl;
+              fout << " QAInfo:     it's a table with #rows = " 
+		   << objindir->GetName() << ",  " << tabl->GetNRows() << endl;
 
-	}      
-      }
-    }
+            } //tabl
+	 }  //objindir
+        } //while objindir
+       } //while obj
+      } //ds
 
-    cout << endl << endl <<" QAInfo: finished event " << i << endl;
-    cout << " QAInfo: # objects (directories) found = " << countObj << endl;
-    cout << " QAInfo: # sub-objects, tables found = "
-	 << countObjInDir << ", " << countTable << endl << endl;
+    cout << " QAInfo: event # " << countev
+            << ", # directories found = " << countObj 
+            << ", # sub-objects found = " << countObjInDir 
+	    << ", # tables found = " << countTable 
+            << endl << endl;
 
-    fout << endl << endl <<" QAInfo: finished event " << i << endl;
-    fout << " QAInfo: # objects (directories) found = " << countObj << endl;
-    fout << " QAInfo: # sub-objects, tables found = "
-	 << countObjInDir << ", " << countTable << endl << endl;
+    fout << " QAInfo: event # " << countev
+            << ", # directories found = " << countObj 
+            << ", # sub-objects found = " << countObjInDir 
+	    << ", # tables found = " << countTable 
+            << endl << endl;
 
-    if (istat) {
+    } //istat
+
+    else   // if (istat)
+      {
       cout << "Last event processed. Status = " << istat << endl;
     }
-    
-    goto EventLoop;
-   }
 
-  cout << " bfcread RUNCO Branch: passed event loop " << endl;
+
+    goto EventLoop;
+} //EventLoop
+
+
+
+  cout << endl;
+  cout << "QAInfo: End of Job " << endl; 
+  cout << "QAInfo: # times Make called = " << i << endl;
+  cout << "QAInfo:  # events read = " << countev << endl;
+  cout << "QAInfo:   # events with runco dataset = " << countevrds << endl;
+
+  fout << endl;
+  fout << "QAInfo: End of Job " << endl;
+  fout << "QAInfo: # times Make called = " << i << endl;
+  fout << "QAInfo:  # events read = " << countev << endl;
+  fout << "QAInfo:   # events with runco dataset = " << countevrds << endl;
 
  chain->Finish();   
 }
