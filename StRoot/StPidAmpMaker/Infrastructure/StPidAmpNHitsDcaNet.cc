@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNHitsDcaNet.cc,v 1.4 2000/04/14 16:07:30 aihong Exp $
+ * $Id: StPidAmpNHitsDcaNet.cc,v 1.5 2000/05/01 16:59:26 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNHitsDcaNet.cc,v $
+ * Revision 1.5  2000/05/01 16:59:26  aihong
+ * clean up
+ *
  * Revision 1.4  2000/04/14 16:07:30  aihong
  * change BetheBlock to BetheBloch :-)
  *
@@ -51,11 +54,10 @@ StPidAmpNHitsDcaNet::StPidAmpNHitsDcaNet(StPidAmpParticle def, StPidAmpChannelIn
 }
 
 //------------------------------
-void StPidAmpNHitsDcaNet::fitBand(TH3D* histo){
+void StPidAmpNHitsDcaNet::fitBand(){
 
-  double varyRange=0.1;
+   double varyRange=0.1;
 
-  if (histo) histo->SetDirectory(0);
 
    TF1 *mBetheBlochFcn = new TF1 ("mBetheBlochFcn",funcBandPt, BandsBegin,BandsEnd,NBandParam);
   
@@ -89,65 +91,63 @@ void StPidAmpNHitsDcaNet::fitBand(TH3D* histo){
 
 
 //------------------------------
-void StPidAmpNHitsDcaNet::fitAPath(StPidAmpPath& path, StPidAmpTrkVector* trks,TH3D* histo){
+void StPidAmpNHitsDcaNet::fitAPath(StPidAmpPath& path, StPidAmpTrkVector* trks){
 
      double varyRange4Height=0.35;  
      double varyRange4Center=0.2;
      double varyRange4Width =0.3;
-
-    if (histo) histo->SetDirectory(0);
-
-    //  double totalTrks=double(trks->size());
-    double totalTrksInChannel;
-
-    double range=double(NMaxHits);
-
-    int startBin=int(((mChannelInfo.cutVector())[0].lowEdge()/range)*(histo->GetNbinsX()));
-    int endBin  =int(((mChannelInfo.cutVector())[0].highEdge()/range)*(histo->GetNbinsX()));
-
- totalTrksInChannel=double(histo->Integral(startBin,endBin,0,NBinPt,0,NBinX));
-
-    double totalTrks=totalTrksInChannel;
-
-    /*    int  idex=getSliceIndex(fabs(mParticleType.maxllPeakPos()));
-    double gausCenter=(sliceVector()->at(idex))->midBound();
-
-    //use a gauss at peakPos to get the fitting limits for the right path.
-    
-    TF1 *mGaussFcn = new TF1("mGaussFcn", "gaus",(sliceVector()->at(idex))->lowBound(),(sliceVector()->at(idex))->highBound());
-
-        mGaussFcn->SetParameter(0,totalTrks*(mParticleType.maxllRatio()));
-        mGaussFcn->SetParameter(1,gausCenter);
-        mGaussFcn->SetParameter(2,0.15*gausCenter);
-
-   double pathDedx=((gausCenter-(NPaths/2.0)*PathHeight+double(path.index())*PathHeight)>0.0)? (gausCenter-(NPaths/2.0)*PathHeight+double(path.index())*PathHeight) : 0.0;
-
-   double heightExpected=mGaussFcn->Eval(pathDedx, 0,0);
-    */
-
-     double heightExpected;
-
-     if (mParticleType.id()==2||mParticleType.id()==3) 
-     heightExpected=(maxPoint(path.pathGraph(),true))*1.0;
-
-     if (mParticleType.id()==8||mParticleType.id()==9) 
-     heightExpected=(maxPoint(path.pathGraph(),true));//*0.9364285;
-
-     if (mParticleType.id()==14||mParticleType.id()==15) 
-     heightExpected=(maxPoint(path.pathGraph(),true))*1.1;//1.2606;
-
-     if (mParticleType.id()==11||mParticleType.id()==12) 
-     heightExpected=(maxPoint(path.pathGraph(),true))*1.0;//2.0//2.475;
-
-     if (mParticleType.id()==45) 
-     heightExpected=totalTrks*(mParticleType.maxllRatio());
-
-     
+     double heightExpected=(maxPoint(ampGraph(),true));
      double centerExpected=fabs(mParticleType.maxllPeakPos());
-     double widthExpected =mParticleType.maxllWidth();
+     double widthExpected;
+     double midNhits=(mChannelInfo.cutVector())[0].midPoint();
 
-//now fit the path.
-   TF1 *mMaxllBoltzFcn = new TF1 ("mMaxllBoltzFcn",funcAmpPt, BandsBegin,BandsEnd,NAmpParam);
+     if ((mChannelInfo.cutVector())[2].lowEdge()>0.1)
+            widthExpected =0.186*midNhits+6.77; //higher dca, wider the width.
+     else   widthExpected =0.23*midNhits+5.99; 
+    //the less nhits, the wider. here I use a linear func
+     //to describe the width change with nhits.
+
+     if (mParticleType.id()==2||mParticleType.id()==3) {
+        //electron's amp center has strong dependence of NHits.
+        centerExpected=maxPoint(ampGraph(),false);
+       if   (maxPoint(ampGraph(),false)<0.1) {
+	 heightExpected=heightExpected*0.25;
+	 widthExpected =mParticleType.maxllWidth()*10.0;
+       }  else widthExpected =mParticleType.maxllWidth()*2.25;
+       
+     }
+
+     if (mParticleType.id()==8||mParticleType.id()==9)
+	 heightExpected=heightExpected*1.4;
+
+     if (mParticleType.id() == 14 || mParticleType.id()==15){
+     //for far off primary vertex proton tracks,
+     //the center shift to left when has for less nhits. (why ?) 
+     //so the centerExpected could not be a fixed number.
+       if ((mChannelInfo.cutVector())[2].lowEdge()>0.1){
+         centerExpected=maxPoint(ampGraph(),false);
+           if (mParticleType.id()==15)
+           heightExpected=heightExpected*0.2;
+       }
+     }
+
+     if (mParticleType.id()==11||mParticleType.id()==12) {
+       //do not expect much off-prvx pions
+       if ((mChannelInfo.cutVector())[2].lowEdge()>0.1)
+     heightExpected=heightExpected*0.2;
+     }
+
+ 
+      if (mParticleType.id()==45) {
+       if ((mChannelInfo.cutVector())[2].lowEdge()>0.1)
+          heightExpected=heightExpected*1.0;
+       else //do not expect deuteron comes from primary vertex.
+	  heightExpected=heightExpected*1e-06;
+     }    
+
+   //now fit the path.
+   TF1 *mMaxllBoltzFcn = 
+   new TF1 ("mMaxllBoltzFcn",funcAmpPt, BandsBegin,BandsEnd,NAmpParam);
     
    mMaxllBoltzFcn->SetParLimits(0,heightExpected*(1.0-varyRange4Height),heightExpected*(1.0+varyRange4Height));
    mMaxllBoltzFcn->SetParLimits(1,centerExpected*(1.0-varyRange4Center),centerExpected*(1.0+varyRange4Center));
@@ -164,93 +164,83 @@ void StPidAmpNHitsDcaNet::fitAPath(StPidAmpPath& path, StPidAmpTrkVector* trks,T
    (path.pathParams())->push_back(mMaxllBoltzFcn->GetParameter(i));
    }
 
-
-   //  delete mGaussFcn, mMaxllBoltzFcn;
-
      delete mMaxllBoltzFcn;
 }
 
 //------------------------------
-void StPidAmpNHitsDcaNet::fitAmp(StPidAmpTrkVector* trks,TH3D* histo){
-
-  //  double totalTrks=double(trks->size());
-
-    double totalTrksInChannel;
-
-    double range=double(NMaxHits);
-
-    int startBin=int(((mChannelInfo.cutVector())[0].lowEdge()/range)*(histo->GetNbinsX()));
-    int endBin  =int(((mChannelInfo.cutVector())[0].highEdge()/range)*(histo->GetNbinsX()));
-
-
- totalTrksInChannel=double(histo->Integral(startBin,endBin,0,NBinPt,0,NBinX));
-
-
-     double totalTrks=totalTrksInChannel;
-
+void StPidAmpNHitsDcaNet::fitAmp(StPidAmpTrkVector* trks){
      double varyRange4Height=0.25;  
      double varyRange4Center=0.3;
      double varyRange4Width =0.3;
-
-
-     //     double heightExpected=totalTrks*(mParticleType.maxllRatio());
-     double heightExpected;
-
-     if (mParticleType.id()==2||mParticleType.id()==3) {
-   if   (maxPoint(ampGraph(),false)<0.1) 
-        heightExpected=(maxPoint(ampGraph(),true))*0.25;
-   else heightExpected=maxPoint(ampGraph(),true);
-     }
-
-
-     if (mParticleType.id()==8||mParticleType.id()==9) 
-     heightExpected=(maxPoint(ampGraph(),true))*1.4;
-
-     if (mParticleType.id()==14||mParticleType.id()==15) 
-     heightExpected=(maxPoint(ampGraph(),true))*1.0;//1.2606;
-
-     if (mParticleType.id()==11||mParticleType.id()==12) 
-     heightExpected=(maxPoint(ampGraph(),true))*1.0;//2.0//2.475;
-
-     if (mParticleType.id()==45) 
-     heightExpected=(maxPoint(ampGraph(),true))*1.0;
-
-     
+     double heightExpected=(maxPoint(ampGraph(),true));
      double centerExpected=fabs(mParticleType.maxllPeakPos());
-
-
+     double widthExpected;
      double midNhits=(mChannelInfo.cutVector())[0].midPoint();
 
-     double widthExpected;
      if ((mChannelInfo.cutVector())[2].lowEdge()>0.1)
-       widthExpected =0.186*midNhits+6.77; //higher dca, wider the width.
+            widthExpected =0.186*midNhits+6.77; //higher dca, wider the width.
      else   widthExpected =0.23*midNhits+5.99; 
     //the less nhits, the wider. here I use a linear func
      //to describe the width change with nhits.
 
+     if (mParticleType.id()==2||mParticleType.id()==3) {
+        //electron's amp center has strong dependence of NHits.
+        centerExpected=maxPoint(ampGraph(),false);
+       if   (maxPoint(ampGraph(),false)<0.1) {
+	 widthExpected =mParticleType.maxllWidth()*20.0;
+       }  else widthExpected =mParticleType.maxllWidth()*2.25;
+       
+     }
 
-     if (mParticleType.id()==2||mParticleType.id()==3)
-     widthExpected =mParticleType.maxllWidth();
+     if (mParticleType.id()==8||mParticleType.id()==9){
+	 heightExpected=heightExpected*1.4;
+	 if ((mChannelInfo.cutVector())[2].lowEdge()>0.1){
+	   heightExpected=heightExpected*0.6;//reduce muon's contamination
+	  widthExpected=widthExpected*0.6;
+	 }
+     }       
 
 
 
-     if ((mChannelInfo.cutVector())[2].lowEdge()>0.1 && (mParticleType.id() == 14 || mParticleType.id()==15) ) 
-       centerExpected=maxPoint(ampGraph(),false);
-     //for off primary vertex proton tracks,
+     if (mParticleType.id() == 14 || mParticleType.id()==15){
+     //for far off primary vertex proton tracks,
      //the center shift to left when has for less nhits. (why ?) 
      //so the centerExpected could not be a fixed number.
+       if ((mChannelInfo.cutVector())[2].lowEdge()>0.1){
+         centerExpected=maxPoint(ampGraph(),false);
+	 if (mParticleType.id()==15) {
+	   heightExpected=heightExpected*0.5;//reduce noise contam.
+           widthExpected=widthExpected*2.0;
+	 }
+       }
+     }
+
+     if (mParticleType.id()==11||mParticleType.id()==12) {
+       //do not expect much off-prvx pions
+       if ((mChannelInfo.cutVector())[2].lowEdge()>0.1){
+           heightExpected=heightExpected*0.5;//reduce noise contam.
+           widthExpected=widthExpected*2.0;
+       }
+     }
+
+ 
+      if (mParticleType.id()==45) {
+       if ((mChannelInfo.cutVector())[2].lowEdge()>0.1)
+          heightExpected=heightExpected*1.0;
+       else //do not expect deuteron comes from primary vertex.
+	  heightExpected=heightExpected*1e-06;
+     }    
 
 
-     if (mParticleType.id()==2||mParticleType.id()==3) 
-     centerExpected=maxPoint(ampGraph(),false);//electron's amp center has strong dependence of NHits.
 
 
 
 
 
-   if (histo) histo->SetDirectory(0);
 
-   TF1 *mMaxllBoltzFcn = new TF1 ("mMaxllBoltzFcn",funcAmpPt, BandsBegin,BandsEnd,NAmpParam);
+
+   TF1 *mMaxllBoltzFcn = 
+   new TF1 ("mMaxllBoltzFcn",funcAmpPt, BandsBegin,BandsEnd,NAmpParam);
     
    mMaxllBoltzFcn->SetParLimits(0,heightExpected*(1.0-varyRange4Height),heightExpected*(1.0+varyRange4Height));
    mMaxllBoltzFcn->SetParLimits(1,centerExpected*(1.0-varyRange4Center),centerExpected*(1.0+varyRange4Center));
@@ -272,12 +262,14 @@ void StPidAmpNHitsDcaNet::fitAmp(StPidAmpTrkVector* trks,TH3D* histo){
 }
 //----------------------------------
 void StPidAmpNHitsDcaNet::fitReso(){
-    double adj=0.2;
+
 
   TF1 *mResoFcn = new TF1 ("mResoFcn",funcResoPt, BandsBegin,BandsEnd,NResoParam);
 
-  /*     switch(mParticleType.id()){
-
+  /*   
+         double adj=0.2;     
+ 
+        switch(mParticleType.id()){
 
         case 2  :  mResoFcn->SetParLimits(0,0.16*(1.0-adj),0.16*(1.0+adj));
 	              break;// ePlus
@@ -323,11 +315,11 @@ ostream& StPidAmpNHitsDcaNet::put(ostream& s) const{// for calling the right put
   s<<endl;
   s<<name().c_str()<<endl;
  
-  for (int i=0; i<mBandParams.size(); i++) s<<mBandParams[i]<<" ";
+  for (unsigned i=0; i<mBandParams.size(); i++) s<<mBandParams[i]<<" ";
   s<<endl;
-  for (int j=0; j<mAmpParams.size(); j++) s<<mAmpParams[j]<<" ";
+  for (unsigned j=0; j<mAmpParams.size(); j++) s<<mAmpParams[j]<<" ";
   s<<endl;
-  for (int k=0; k<mResoParams.size(); k++) s<<mResoParams[k]<<" ";
+  for (unsigned k=0; k<mResoParams.size(); k++) s<<mResoParams[k]<<" ";
   s<<endl;
     
   return s;

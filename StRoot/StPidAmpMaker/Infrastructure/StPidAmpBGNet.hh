@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpBGNet.hh,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: StPidAmpBGNet.hh,v 1.2 2000/05/01 16:59:25 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpBGNet.hh,v $
+ * Revision 1.2  2000/05/01 16:59:25  aihong
+ * clean up
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -33,9 +36,9 @@ public:
 
   double dedxAtBandCenter(double rig);
   void   setUp(); //set up slices and paths. shoulb be public.
-  void   processNet(StPidAmpTrkVector* trks=0,TH3D* histo=0);
+  void   processNet(StPidAmpTrkVector* trks=0);
   void   fillBand(); //fill band graph.
-  void   fitBand(TH3D* histo);//fit band. put result in mBandParams.
+  void   fitBand();//fit band. put result in mBandParams.
   void   drawNetFittings();
   void   fillNetOut();//fill mNetOut. 
   int    getSliceIndex(double x); 

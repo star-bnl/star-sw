@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNet.cc,v 1.6 2000/04/14 16:07:30 aihong Exp $
+ * $Id: StPidAmpNet.cc,v 1.7 2000/05/01 16:59:25 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNet.cc,v $
+ * Revision 1.7  2000/05/01 16:59:25  aihong
+ * clean up
+ *
  * Revision 1.6  2000/04/14 16:07:30  aihong
  * change BetheBlock to BetheBloch :-)
  *
@@ -60,7 +63,7 @@ StPidAmpNet::StPidAmpNet(StPidAmpParticle def, StPidAmpChannelInfo channelInfo){
 
       gMessMgr->Info()<<" constructing "<<def.name().c_str()<<" net "<<endm;
 
-      mParticleType=def; //do not move this.
+      mParticleType=def; //do not move this around.
 
       setBandParams(StPidAmpNet::mDefaultBandParams);
 
@@ -97,36 +100,37 @@ StPidAmpNet::StPidAmpNet(StPidAmpParticle def, StPidAmpChannelInfo channelInfo){
 //----------------------------------
 StPidAmpNet::StPidAmpNet(const StPidAmpNet& net){
   //have not update this method for a while. not garranteed to work.
-      mAmpParams=net.mAmpParams;
-      mBandParams=net.mBandParams;
-      mResoParams=net.mResoParams;
-      mSliceCollect=new StPidAmpSliceVector();
-      *mSliceCollect=*(net.mSliceCollect);
-      mPathCollect=new StPidAmpPathVector();
-      *mPathCollect=*(net.mPathCollect);
+      mAmpParams  = net.mAmpParams;
+      mBandParams = net.mBandParams;
+      mResoParams = net.mResoParams;
 
-      mBandGraph=new TGraph();
-      *mBandGraph=*(net.mBandGraph);
-      mAmpGraph=new TGraph();
-      *mAmpGraph=*(net.mAmpGraph);
-      mResoGraph=new TGraph();
-      *mResoGraph=*(net.mResoGraph);
-      mParticleType=net.mParticleType;
-      mChannelInfo=net.mChannelInfo;
-      mNetWindow=net.mNetWindow;
+      mSliceCollect  = new StPidAmpSliceVector();
+      *mSliceCollect = *(net.mSliceCollect);
+      mPathCollect   = new StPidAmpPathVector();
+      *mPathCollect  = *(net.mPathCollect);
+
+      mBandGraph     = new TGraph();
+      *mBandGraph    = *(net.mBandGraph);
+      mAmpGraph      = new TGraph();
+      *mAmpGraph     = *(net.mAmpGraph);
+      mResoGraph     = new TGraph();
+      *mResoGraph    = *(net.mResoGraph);
+      mParticleType  = net.mParticleType;
+      mChannelInfo   = net.mChannelInfo;
+      mNetWindow     = net.mNetWindow;
 
       mName=net.mName;
 
-      mDrawSlicesFit=net.mDrawSlicesFit;
-      mDrawPathsFit =net.mDrawPathsFit;
-      mDrawAmpFit   =net.mDrawAmpFit;
-      mDrawBandFit  =net.mDrawBandFit;
-      mDrawResoFit  =net.mDrawResoFit;
+      mDrawSlicesFit = net.mDrawSlicesFit;
+      mDrawPathsFit  = net.mDrawPathsFit;
+      mDrawAmpFit    = net.mDrawAmpFit;
+      mDrawBandFit   = net.mDrawBandFit;
+      mDrawResoFit   = net.mDrawResoFit;
 
-      mFitBand=net.mFitBand;
-      mFitPath=net.mFitPath;
-      mFitAmp =net.mFitAmp;
-      mFitReso=net.mFitReso;
+      mFitBand = net.mFitBand;
+      mFitPath = net.mFitPath;
+      mFitAmp  = net.mFitAmp;
+      mFitReso = net.mFitReso;
 
       funcBandPt=net.funcBandPt;
 
@@ -279,9 +283,9 @@ void StPidAmpNet::fillAmp(){//fill amp graph
   ofstream electronAmp;
 
   if (outputPoints4Tunning){
-  protonAmp.open("protonAmpGraph.txt",ios::app);
-  kaonAmp.open("kaonAmpGraph.txt",ios::app);
-  pionAmp.open("pionAmpGraph.txt",ios::app);
+    protonAmp.open("protonAmpGraph.txt",ios::app);
+      kaonAmp.open("kaonAmpGraph.txt",ios::app);
+      pionAmp.open("pionAmpGraph.txt",ios::app);
   deuteronAmp.open("deuteronGraph.txt",ios::app);
   electronAmp.open("electronGraph.txt",ios::app);
   }
@@ -293,11 +297,11 @@ void StPidAmpNet::fillAmp(){//fill amp graph
 mAmpGraph->SetPoint(mAmpGraph->GetN(),float(fabs(theSlice->meanRig())),float((theSlice->sliceInfo())->amp()));
 
   if (outputPoints4Tunning){
- if (mParticleType.id()==14) protonAmp<<"gr->SetPoint("<<(mAmpGraph->GetN()-1)<<","<<float(fabs(theSlice->meanRig()))<<","<<float((theSlice->sliceInfo())->amp())<<");"<<endl;
- if (mParticleType.id()==11) kaonAmp<<"gr->SetPoint("<<(mAmpGraph->GetN()-1)<<","<<float(fabs(theSlice->meanRig()))<<","<<float((theSlice->sliceInfo())->amp())<<");"<<endl;
- if (mParticleType.id()==8) pionAmp<<"gr->SetPoint("<<(mAmpGraph->GetN()-1)<<","<<float(fabs(theSlice->meanRig()))<<","<<float((theSlice->sliceInfo())->amp())<<");"<<endl;
+ if (mParticleType.id()==14)   protonAmp<<"gr->SetPoint("<<(mAmpGraph->GetN()-1)<<","<<float(fabs(theSlice->meanRig()))<<","<<float((theSlice->sliceInfo())->amp())<<");"<<endl;
+ if (mParticleType.id()==11)     kaonAmp<<"gr->SetPoint("<<(mAmpGraph->GetN()-1)<<","<<float(fabs(theSlice->meanRig()))<<","<<float((theSlice->sliceInfo())->amp())<<");"<<endl;
+ if (mParticleType.id()==8 )     pionAmp<<"gr->SetPoint("<<(mAmpGraph->GetN()-1)<<","<<float(fabs(theSlice->meanRig()))<<","<<float((theSlice->sliceInfo())->amp())<<");"<<endl;
  if (mParticleType.id()==45) deuteronAmp<<"gr->SetPoint("<<(mAmpGraph->GetN()-1)<<","<<float(fabs(theSlice->meanRig()))<<","<<float((theSlice->sliceInfo())->amp())<<");"<<endl;
- if (mParticleType.id()==3) electronAmp<<"gr->SetPoint("<<(mAmpGraph->GetN()-1)<<","<<float(fabs(theSlice->meanRig()))<<","<<float((theSlice->sliceInfo())->amp())<<");"<<endl;
+ if (mParticleType.id()==3 ) electronAmp<<"gr->SetPoint("<<(mAmpGraph->GetN()-1)<<","<<float(fabs(theSlice->meanRig()))<<","<<float((theSlice->sliceInfo())->amp())<<");"<<endl;
 
 
   }
@@ -417,7 +421,7 @@ void StPidAmpNet::setBandParams(StPidParamVector& pars){
 //----------------------------------
 void StPidAmpNet::fillBetaGammaNet(StPidAmpTrkVector* trks,StPidAmpChannelCollection* set){
    
- //fill histo. of betaGamma from ChannelCollectionStore.
+ //fill histo. of betaGamma from ChannelCollection.
 
 
   fillNet(trks,set);
@@ -425,14 +429,14 @@ void StPidAmpNet::fillBetaGammaNet(StPidAmpTrkVector* trks,StPidAmpChannelCollec
 }  
    
 //----------------------------------
-void StPidAmpNet::fitPaths(StPidAmpTrkVector* trks,TH3D* histo){
+void StPidAmpNet::fitPaths(StPidAmpTrkVector* trks){
   
   StPidAmpPathIter pathIter;
   StPidAmpPath*    thePath;
 
   for(pathIter=mPathCollect->begin(); pathIter!=mPathCollect->end(); pathIter++){
   thePath=*pathIter;
-  fitAPath(*thePath,trks,histo);
+  fitAPath(*thePath,trks);
   }  
 
 
@@ -441,7 +445,7 @@ void StPidAmpNet::fitPaths(StPidAmpTrkVector* trks,TH3D* histo){
 //----------------------------------
 void StPidAmpNet::drawNetFittings(){
 
-  int NPads=12;
+  unsigned NPads=12;
   strstream stPath,stBand,stAmp,stReso;
 
   strstream stSlice[NWindows4BG];
@@ -478,7 +482,7 @@ void StPidAmpNet::drawNetFittings(){
    thePathCanvas->Divide(3,4);//3X4=NPads.//this is an error prone.
   //should be robust.
    
-   for (int j=0; j<=mPathCollect->size(); j++){
+   for (unsigned j=0; j<=mPathCollect->size(); j++){
     if ((j+1)>NPads) break;
     thePathCanvas->cd(j+1);
     ((*mPathCollect)[j])->pathGraph()->Draw("A*");
@@ -501,7 +505,7 @@ void StPidAmpNet::drawNetFittings(){
  }
 
 //----------------------------------
-void StPidAmpNet::fitBand(TH3D* histo){
+void StPidAmpNet::fitBand(){
 
   //this method should be clear up.
    double varyRange=0.3;
@@ -534,30 +538,24 @@ void StPidAmpNet::fitBand(TH3D* histo){
    mBandParams.push_back(mBetheBlochFcn->GetParameter(i));
  }
 
-
-   if (histo) histo->SetDirectory(0);
-
    delete mBetheBlochFcn;
 
 }
 
 //----------------------------------
-void StPidAmpNet::fitAPath(StPidAmpPath& path, StPidAmpTrkVector* trks,TH3D* histo){
+void StPidAmpNet::fitAPath(StPidAmpPath& path, StPidAmpTrkVector* trks){
   /* to be overriden by its derivatives.  no-op */
  
   //the second input "trks" just for "trks.size()"
   //then use this size() info. to controll the range of the height of a path 
   //in the path fitting.
-  if (histo) histo->SetDirectory(0);//avoid compiler complain.
-
  
 }
 
 
 //----------------------------------
-void StPidAmpNet::fitAmp(StPidAmpTrkVector* trks,TH3D* histo){
+void StPidAmpNet::fitAmp(StPidAmpTrkVector* trks){
   /* to be overriden. no-op */
-  if (histo) histo->SetDirectory(0);
 
 }
 //----------------------------------
@@ -579,7 +577,7 @@ ostream& StPidAmpNet::put(ostream& s) const {
   return s<<"StPidAmpNet Base Class "<<endl;
 }
 //----------------------------------
-void StPidAmpNet::processNet(StPidAmpTrkVector* trks, TH3D* histo ){
+void StPidAmpNet::processNet(StPidAmpTrkVector* trks){
 //call funs needed to process in order.
 
     fillNet(trks);
@@ -588,7 +586,7 @@ void StPidAmpNet::processNet(StPidAmpTrkVector* trks, TH3D* histo ){
      fitSlices();
 
      fillBand();
-     fitBand(histo);    
+     fitBand();    
 
        setUp();
        fillNet(trks);
@@ -601,19 +599,17 @@ void StPidAmpNet::processNet(StPidAmpTrkVector* trks, TH3D* histo ){
 
 
 
-  if (trks && mFitPath) {
-      fitPaths(trks,histo);
+  if (trks){
+
+  if (mFitPath) {
+      fitPaths(trks);
       fillPathFittedSlices(); //StPidAmpSlice::mUsePathFitted is turn on here
       fitSlices();
-  
-  }
+    }
 
-  if ( trks ){
                  fillAmp();
-    if (mFitAmp) fitAmp(trks,histo);
-  }
+    if (mFitAmp) fitAmp(trks);
 
-  if ( trks ){
                    fillReso();
      if (mFitReso) fitReso();
   }
@@ -697,7 +693,7 @@ int StPidAmpNet::getSliceIndex(StPidAmpTrk* trk){
 
  double rg = fabs(trk->rig());
  
- int idx=int((rg-fabs(mParticleType.start()))/SliceWidth); // get the idex for slice
+ unsigned idx=int((rg-fabs(mParticleType.start()))/SliceWidth); // get the idex for slice
   
  if (idx>=mSliceCollect->size()) idx=mSliceCollect->size()-1;
  if (idx<0) idx=0;
@@ -710,7 +706,7 @@ int StPidAmpNet::getSliceIndex(double x){
 
  double rg = fabs(x);
  
- int idx=int((rg-fabs(mParticleType.start()))/SliceWidth); // get the idex for slice
+ unsigned idx=int((rg-fabs(mParticleType.start()))/SliceWidth); // get the idex for slice
  if (idx>=mSliceCollect->size()) idx=mSliceCollect->size()-1;
  if (idx<0) idx=0;
   
@@ -779,10 +775,8 @@ void StPidAmpNet::push2BGNet(StPidAmpNet& net, StPidAmpTrk* trk){
 
    double betaGamma =fabs((trk->rig())*(double(trk->charge()))/(mParticleType.mass()));
    double dedx=fabs(trk->dedx());
-   double dca=fabs(trk->dca());
- 
 
-  int idx=net.getSliceIndex(betaGamma);
+   int idx=net.getSliceIndex(betaGamma);
 
 
 
@@ -836,7 +830,7 @@ void StPidAmpNet::push2BGNet(StPidAmpNet& net, StPidAmpTrk* trk){
 }
 //---------------------------------
 void StPidAmpNet::fillNetOut(){
-  int i;
+  unsigned i;
 
   TArrayD bandArray;
   TArrayD ampArray;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannel.hh,v 1.3 2000/04/11 15:34:23 aihong Exp $
+ * $Id: StPidAmpChannel.hh,v 1.4 2000/05/01 16:59:25 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannel.hh,v $
+ * Revision 1.4  2000/05/01 16:59:25  aihong
+ * clean up
+ *
  * Revision 1.3  2000/04/11 15:34:23  aihong
  * change to adapt dividing trks by channel for faster filling
  *
@@ -30,8 +33,6 @@
 
 #include <iostream.h>
 #include "TH1.h"
-#include "TH3.h"
-
 
 #include "StPidAmpMaker/Infrastructure/StPidParamVector.hh"
 #include "StPidAmpMaker/Infrastructure/StPidAmpNetVector.hh"
@@ -54,32 +55,31 @@ public:
       StPidAmpChannel();
       StPidAmpChannel(StPidAmpChannelInfo& channelInfo,StPidAmpNetType netType=noDependent);
 
-      ~StPidAmpChannel();
+      virtual ~StPidAmpChannel();
 
 
 
   void drawFittings(); //draw bandFits and ampFits.
   void filterAndFillTrks(StPidAmpTrkVector* trks); //pick up trks in this channel
   void fillBGNet(StPidAmpChannelCollection* set);
-  void setBandParams4Nets(StPidParamVector& pars);
+  void setBandParams4Nets(StPidParamVector pars);
 
   void setBandFitsDraw(bool br);
   void setAmpFitsDraw(bool br);
   void setResoFitsDraw(bool br);
-  void processChannel(TH3D* histo,bool fitBd, bool fitPth, bool fitAp, bool fitLr);
+  void processChannel(bool fitBd, bool fitPth, bool fitAp, bool fitLr);
 
-  StPidAmpNetVector* netVector();
+  StPidAmpNetVector*     netVector();
   StPidAmpChannelInfoOut channelInfoOut() const;
       
-      static void setDefaultBandParams(StPidParamVector& bandPars);
-      //set StPidAmpNet::mDefaultBandParams.
+  static void setDefaultBandParams(StPidParamVector& bandPars);
+  //set StPidAmpNet::mDefaultBandParams.
 
 private:
 
       void setUp(StPidAmpNetType netType); //set nets. called by constructor
       void fillChannelInfoOut(); //fill mChannelInfoOut for out put to disk.
 
-  // void fillChannel();//fill  mTrks into mNetCollect.
 
       StPidAmpNetVector* mNetCollect;
       StPidAmpTrkVector* mTrks;

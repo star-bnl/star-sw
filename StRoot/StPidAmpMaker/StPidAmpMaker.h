@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpMaker.h,v 1.3 2000/04/11 15:45:25 aihong Exp $
+ * $Id: StPidAmpMaker.h,v 1.4 2000/05/01 16:59:49 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpMaker.h,v $
+ * Revision 1.4  2000/05/01 16:59:49  aihong
+ * clean up
+ *
  * Revision 1.3  2000/04/11 15:45:25  aihong
  * change to adapt dividing trks by channel for faster filling
  *
@@ -34,7 +37,6 @@
 
 #include "TString.h"
 #include "TH1.h"
-#include "TH3.h"
 
 #include "StPidAmpManager.h"
 #include "StPidAmpTrkVector.h"
@@ -51,42 +53,39 @@ public:
     virtual Int_t  Finish();
 
     void SetNHitsFilter2LastCollection(Int_t nhits);
-    void AddDefaultChannelCollection(TString fitOpt="BAR", TString drawOpt="B");
-    void AddNHitsChannelCollection(Int_t x1, Int_t x2,TString fitOpt="BAR", TString drawOpt="B");
-    void AddNHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt="BAR", TString drawOpt="B");
-    void AddNHitsChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x4,TString fitOpt="BAR", TString drawOpt="B");
-    void AddNHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt="BAR", TString drawOpt="B");
+    void AddDefaultChannelCollection(TString fitOpt="BAR", TString drawOpt=" ");
+    void AddNHitsChannelCollection(Int_t x1, Int_t x2,TString fitOpt="BAR", TString drawOpt=" ");
+    void AddNHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt="BAR", TString drawOpt=" ");
+    void AddNHitsChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x4,TString fitOpt="BAR", TString drawOpt=" ");
+    void AddNHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt="BAR", TString drawOpt=" ");
 
-    void AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,TString fitOpt, TString drawOpt,Double_t d1, Double_t d2, Double_t d3);
-    void AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt, TString drawOpt,Double_t d1, Double_t d2, Double_t d3);
-    void AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x4,TString fitOpt, TString drawOpt,Double_t d1, Double_t d2, Double_t d3);
-    void AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt, TString drawOpt,Double_t d1, Double_t d2, Double_t d3);
+    void AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,TString fitOpt, Double_t d1, Double_t d2, Double_t d3, TString drawOpt=" ");
+    void AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt,Double_t d1, Double_t d2, Double_t d3, TString drawOpt=" ");
+    void AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x4,TString fitOpt, Double_t d1, Double_t d2, Double_t d3, TString drawOpt=" ");
+    void AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt,Double_t d1, Double_t d2, Double_t d3, TString drawOpt=" ");
 
-    void AddPtChannelCollection(Double_t x1, Double_t x2,TString fitOpt="BAR", TString drawOpt="B");
-    void AddPtChannelCollection(Double_t x1, Double_t x2, Double_t x3,TString fitOpt="BAR", TString drawOpt="B");
-    void AddPtChannelCollection(Double_t x1, Double_t x2,Double_t x3, Double_t x4,TString fitOpt="BAR", TString drawOpt="B");
-    void AddPtChannelCollection(Double_t x1, Double_t x2, Double_t x3, Double_t x4, Double_t x5,TString fitOpt="BAR", TString drawOpt="B");
+    void AddPtChannelCollection(Double_t x1, Double_t x2,TString fitOpt="BAR", TString drawOpt=" ");
+    void AddPtChannelCollection(Double_t x1, Double_t x2, Double_t x3,TString fitOpt="BAR", TString drawOpt=" ");
+    void AddPtChannelCollection(Double_t x1, Double_t x2,Double_t x3, Double_t x4,TString fitOpt="BAR", TString drawOpt=" ");
+    void AddPtChannelCollection(Double_t x1, Double_t x2, Double_t x3, Double_t x4, Double_t x5,TString fitOpt="BAR", TString drawOpt=" ");
     
 
-    void AddPtNHitsChannelCollection(Int_t n, Int_t* nhitsAry,Int_t p, Double_t* ptAry,TString fitOpt="BAR", TString drawOpt="B");
+    void AddPtNHitsChannelCollection(Int_t n, Int_t* nhitsAry,Int_t p, Double_t* ptAry,TString fitOpt="BAR", TString drawOpt=" ");
   
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.3 2000/04/11 15:45:25 aihong Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.4 2000/05/01 16:59:49 aihong Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
 private:
 
     void   bookCollection();
 
-    Int_t mNHits4BG;
+    Int_t   mNHits4BG;
     TString drawOpt;
-    TH3D*   dependHisto;//!
-    //       ^^^^^^^^^^  3D histogram of nhits,pt,X (X reserve for future).
-
-    Char_t collectionName[256];
+    Char_t  collectionName[256];
 
     
     StPidAmpTrkVector*  ampTrks; //!
-    StPidAmpManager* theManager; //!
+    StPidAmpManager*    theManager; //!
 
     ClassDef(StPidAmpMaker,1)
 };

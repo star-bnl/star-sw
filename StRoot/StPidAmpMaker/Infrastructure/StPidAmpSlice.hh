@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpSlice.hh,v 1.1.1.1 2000/03/09 17:48:35 aihong Exp $
+ * $Id: StPidAmpSlice.hh,v 1.2 2000/05/01 16:59:26 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpSlice.hh,v $
+ * Revision 1.2  2000/05/01 16:59:26  aihong
+ * clean up
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:35  aihong
  * Installation of package
  *
@@ -48,7 +51,7 @@ public:
   //if slice is in the merging area, particleType=0
 
   StPidAmpSlice(const StPidAmpSlice& );
-  ~StPidAmpSlice();
+  virtual ~StPidAmpSlice();
 
   void fill(StPidAmpTrk *trk, double x); //fill histogram
 

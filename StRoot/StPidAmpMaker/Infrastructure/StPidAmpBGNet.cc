@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpBGNet.cc,v 1.4 2000/04/14 16:07:30 aihong Exp $
+ * $Id: StPidAmpBGNet.cc,v 1.5 2000/05/01 16:59:25 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpBGNet.cc,v $
+ * Revision 1.5  2000/05/01 16:59:25  aihong
+ * clean up
+ *
  * Revision 1.4  2000/04/14 16:07:30  aihong
  * change BetheBlock to BetheBloch :-)
  *
@@ -95,7 +98,7 @@ mBandGraphMiddleBetaGamma->SetPoint(mBandGraphMiddleBetaGamma->GetN(), float(fab
 
  }
 //----------------------------------
-void StPidAmpBGNet::processNet(StPidAmpTrkVector* trks, TH3D* histo ){
+void StPidAmpBGNet::processNet(StPidAmpTrkVector* trks){
 
 //call functions needed to be processed in order.
 
@@ -105,7 +108,7 @@ void StPidAmpBGNet::processNet(StPidAmpTrkVector* trks, TH3D* histo ){
 
      fillBand();
 
-     fitBand(histo);    
+     fitBand();    
 
 
   } else {
@@ -122,7 +125,7 @@ void StPidAmpBGNet::processNet(StPidAmpTrkVector* trks, TH3D* histo ){
 }
 
 //----------------------------------
-void StPidAmpBGNet::fitBand(TH3D* histo){
+void StPidAmpBGNet::fitBand(){
 
 
    double varyRange=0.3;
@@ -146,9 +149,6 @@ void StPidAmpBGNet::fitBand(TH3D* histo){
    mBetheBlochFcn->SetParLimits(6, 1,1);
 
       mBetheBlochFcn->SetParLimits(2,1.2775e-10,0.025e-5);
-   // mBetheBlochFcn->SetParLimits(2,0.0310e-5,0.06e-5);
-
-
 
 
  if ((bandGraph()->GetN())>0) {
@@ -163,7 +163,6 @@ void StPidAmpBGNet::fitBand(TH3D* histo){
  }
 
 
-   if (histo) histo->SetDirectory(0);
 
    mBandFitFcn = new TF1 ("mBandsFcn",funcBandPt, BandsBegin,mParticleType.end(),NBandParam);
     for (int i=0; i<NBandParam; i++) 
@@ -256,9 +255,6 @@ double StPidAmpBGNet::dedxAtBandCenter(double rig){
      if (mParticleType.id()==-2 || mParticleType.id()==-3 ||mParticleType.id()==-999) localBandsEnd=mParticleType.end();
 
 
-
-
-
           TF1 mBandBetheBlochFcn("mBandBetheBlochFcn",funcBandPt, localBandsBegin,localBandsEnd, NBandParam);
 
        mBandBetheBlochFcn.SetParameter(0,mBandParams[0]);
@@ -282,7 +278,7 @@ int StPidAmpBGNet::getSliceIndex(double x){
        double fx=fabs(x);
 
 
-       int i=0;
+       unsigned i=0;
 
      if (idx>0) i=int((fx-mNetWindow.windowBegin(idx))/sliceWidth4Window[idx-1]) + NSliceAccum[idx-1];
 
@@ -300,7 +296,6 @@ int StPidAmpBGNet::getSliceIndex(double x){
 //----------------------------------
 void StPidAmpBGNet::drawNetFittings(){
 
-  int NPads=12;
   strstream stPath,stBand,stAmp,stReso,stLowBand,stMiddleBand;
   strstream stSlice[NWindows4BG];
 
@@ -341,8 +336,6 @@ if (mBandFitFcn) mBandFitFcn->Draw("SAME");
   }
 
 
-
-
   if (mDrawSlicesFit){ //select ~12 slices from clean windows and draw histo.
 
  for (int NN=0; NN<mNetWindow.NWindows(); NN++)
@@ -364,9 +357,6 @@ void StPidAmpBGNet::bookSlicesInASegment(double theSliceWidth, double theSegBegi
  int i=0;
 
  segSliceLoop: if ( ((i+1.0)*theSliceWidth+fabs(theSegBegin))<fabs(theSegEnd ) ) {
-
-  
-
 
  double midRig=theSliceWidth*(double(i)+0.5)+fabs(theSegBegin);
  double lowBd=dedxAtBandCenter(midRig)- PathHeight*double(NPaths)/2.0;
@@ -396,7 +386,7 @@ StPidAmpSlice* backSlice=sliceVector()->back();
 
 //----------------------------------
 void StPidAmpBGNet::fillNetOut(){
-  int    i;
+  unsigned    i;
   double bgForMinimumPions=2.87;
 
   TArrayD bandArray;
@@ -436,9 +426,6 @@ void StPidAmpBGNet::fillNetOut(){
 void StPidAmpBGNet::redefineWindow(){
 
     int i,j; double tempWindowEnd;
-
-
-
 
     StPidAmpWindow tempWindow;
  

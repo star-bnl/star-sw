@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannelCollection.cc,v 1.4 2000/04/11 15:34:23 aihong Exp $
+ * $Id: StPidAmpChannelCollection.cc,v 1.5 2000/05/01 16:59:25 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannelCollection.cc,v $
+ * Revision 1.5  2000/05/01 16:59:25  aihong
+ * clean up
+ *
  * Revision 1.4  2000/04/11 15:34:23  aihong
  * change to adapt dividing trks by channel for faster filling
  *
@@ -114,7 +117,7 @@ StPidAmpChannelCollection::~StPidAmpChannelCollection(){
 }
 
 //----------------------------
-void StPidAmpChannelCollection::process(TH3D* histo){
+void StPidAmpChannelCollection::process(){
 
     bool BGBandOutPut4Debug=false;
 
@@ -164,9 +167,9 @@ void StPidAmpChannelCollection::process(TH3D* histo){
  processBGNet(false,false,false,false,false,  false, false,false,false, *mBGKaonMinusNet);
     //         fBd   fPth  fAmp  fReso drSlic  drPth  drAmp  drBd  drReso
  processBGNet(false,false,false,false,false,  false, false,false,false, *mBGProtonNet);
-  processBGNet(false,false,false,false,false,  false, false,false,false, *mBGAntiProtonNet);
+ processBGNet(false,false,false,false,false,  false, false,false,false, *mBGAntiProtonNet);
     //         fBd   fPth  fAmp  fReso drSlic  drPth  drAmp  drBd  drReso
-   drawMultiBGNets2Gether();
+ drawMultiBGNets2Gether();
    }
 
 
@@ -174,8 +177,7 @@ void StPidAmpChannelCollection::process(TH3D* histo){
       for (iter=mChannelCollect->begin(); iter!=mChannelCollect->end(); iter++){
        theChannel=*iter;
        theChannel->setBandParams4Nets(mBGNet->bandParams());
-       //   theChannel->processChannel(trks,histo,false,   false,   true,   true );
-    }//                                      fitband, fitpath, fitamp, fitReso
+      }
 
   }
 
@@ -187,23 +189,23 @@ void StPidAmpChannelCollection::process(TH3D* histo){
 
     for (iter=mChannelCollect->begin(); iter!=mChannelCollect->end(); iter++){
     theChannel=*iter;
-    theChannel->processChannel(histo,(mFitOpt.Contains("I")) ,  false, (mFitOpt.Contains("A")),(mFitOpt.Contains("R")) );
-//                            trks,hitso,  fitband,                  fitpath, fitamp,                  fitReso
+    theChannel->processChannel((mFitOpt.Contains("I")) ,  false, (mFitOpt.Contains("A")),(mFitOpt.Contains("R")) );
+//                            trks, fitband,                  fitpath, fitamp,                  fitReso
 
     }
   }
 
 
 
-   if (mWritePars2Disk) writePars2Disk();
-   if (BGBandOutPut4Debug) outputBGBand4Debug();
+   if (mWritePars2Disk)       writePars2Disk();
+   if (BGBandOutPut4Debug)    outputBGBand4Debug();
 
 }
    
 //----------------------------
 ostream& operator<<(ostream& s, StPidAmpChannelCollection& set){
     StPidAmpChannelIter iter;
-    StPidAmpChannel* theChannel;
+    StPidAmpChannel*    theChannel;
   for (iter=(set.channelVector())->begin(); iter!=(set.channelVector())->end(); iter++){
       theChannel=*iter;
       s<<*theChannel<<endl;
@@ -272,26 +274,21 @@ void StPidAmpChannelCollection::setUpChannels(int n, int* nhitsAry,int p, double
 	      StPidAmpCut     dcaCut;
               dcaCut=StPidAmpCut("D", dcaAry[k], dcaAry[k+1]);
 
-
             StPidAmpChannelInfo   channelInfo;
             StPidAmpCutVector cutCollect;
-
-
        
             cutCollect.push_back(nhitsCut); //nhits first always! do not change
             cutCollect.push_back(ptCut);
             cutCollect.push_back(dcaCut);
-      
-
 
             channelInfo=StPidAmpChannelInfo(cutCollect);
 
-	  StPidAmpChannel* channel=new StPidAmpChannel(channelInfo,theNetType);
+            StPidAmpChannel* channel = 
+            new StPidAmpChannel(channelInfo,theNetType);
 
-	      mChannelCollect->push_back(channel);
+	    mChannelCollect->push_back(channel);
 
      
-
 	    }
      
       }
@@ -304,23 +301,13 @@ void StPidAmpChannelCollection::setUpChannels(int n, int* nhitsAry,int p, double
 //----------------------------
 void StPidAmpChannelCollection::setDefaultBandParameters(){
      
-     StPidParamVector pars;
-
-
+    StPidParamVector pars;
 
     pars.push_back(1.10177);
     pars.push_back(0.169534);
     pars.push_back(1.97245e-07);
 
-     // following for mFactor/m
-     //  pars.push_back(1.116);//1.146);//1.141);
-     //  pars.push_back(0.3897);//1.225);//1.75);
-     //  pars.push_back(1.279e-10);
-
-
-     StPidAmpNet::setDefaultBandParams(pars);
-
-
+    StPidAmpNet::setDefaultBandParams(pars);
 
 }
 //----------------------------
@@ -360,8 +347,7 @@ void StPidAmpChannelCollection::processBGNet(bool fitBand, bool fitPath, bool fi
     net.setBandFitDraw(drawBandFit);
     net.setResoFitDraw(drawResoFit);
 
-
-       net.processNet();
+    net.processNet();
 }
 
 //----------------------------
@@ -486,7 +472,7 @@ void StPidAmpChannelCollection::writeAmp2Disk(){
     TString          fileName;
     int              bufSize=32000;
     int              splitLevel=0;   
-    int              i,j;
+    unsigned         i,j;
 
    fileName.Append(mName.c_str());
    fileName.Append("Amp.root");
@@ -516,6 +502,7 @@ void StPidAmpChannelCollection::writeAmp2Disk(){
 
 
     theFile->Write();
+    br=0;
 }
 
 //--------------------------------
@@ -528,7 +515,7 @@ void StPidAmpChannelCollection::writeReso2Disk(){
     StPidAmpChannel* theChannel;
     StPidAmpNet*     theNet;
     TString          fileName;
-    int              j;
+    unsigned         j;
 
    fileName.Append(mName.c_str());
    fileName.Append("Reso.root");
@@ -554,7 +541,7 @@ void StPidAmpChannelCollection::writeBands2Disk(){
     StPidAmpChannel* theChannel;
     StPidAmpNet*     theNet;
     TString          fileName;
-    int              j;
+    unsigned         j;
 
    fileName.Append(mName.c_str());
    fileName.Append("Bands.root");
@@ -581,7 +568,7 @@ void StPidAmpChannelCollection::writeBGBands2Disk(){
     StPidAmpChannel* theChannel;
     StPidAmpNet*     theNet;
     TString          fileName;
-    int              j;
+    unsigned         j;
 
    fileName.Append(mName.c_str());
    fileName.Append("BGBands.root");

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannel.cc,v 1.3 2000/04/11 15:34:23 aihong Exp $
+ * $Id: StPidAmpChannel.cc,v 1.4 2000/05/01 16:59:25 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannel.cc,v $
+ * Revision 1.4  2000/05/01 16:59:25  aihong
+ * clean up
+ *
  * Revision 1.3  2000/04/11 15:34:23  aihong
  * change to adapt dividing trks by channel for faster filling
  *
@@ -66,35 +69,16 @@ StPidAmpChannel::StPidAmpChannel(StPidAmpChannelInfo& channelInfo,StPidAmpNetTyp
     mChannelInfo =channelInfo;
 
     setUp(netType); //setup nets.
-     mTrks= new StPidAmpTrkVector();
+    mTrks= new StPidAmpTrkVector();
 
 
 }
-
-
-
-/*
-//----------------------------------
-void StPidAmpChannel::fillChannel(){
-
-
-     StPidAmpNetIter iter;
-     StPidAmpNet*    theNet;
-
-     for (iter=mNetCollect->begin(); iter!=mNetCollect->end(); iter++){
-          theNet=*iter;
-          theNet->fillNet(mTrks);
-     }
-  
-
-}
-*/
 
 //----------------------------------
 void StPidAmpChannel::drawFittings(){
        bool saveCanvas=false;
 
-       int NPads=9;
+       unsigned NPads=9;
        strstream stBandFit, stAmpFit,stResoFit;
        stBandFit<<"bandFits_"<<mChannelInfo.name().c_str();
        stAmpFit <<"ampFits_" <<mChannelInfo.name().c_str();   
@@ -102,25 +86,29 @@ void StPidAmpChannel::drawFittings(){
 
        if (mDrawBandFits){
           
-  TCanvas* theBandFitCanvas=new TCanvas(stBandFit.str(), stBandFit.str(),20,10,800,600);
+  TCanvas* theBandFitCanvas = 
+  new TCanvas(stBandFit.str(), stBandFit.str(),20,10,800,600);
+
   theBandFitCanvas->Divide(3,3);
   
-  for(int j=0; j<mNetCollect->size();j++){
+  for(unsigned j=0; j<mNetCollect->size();j++){
      if ((j+1)>NPads) break;
      theBandFitCanvas->cd(j+1);
      ((*mNetCollect)[j])->bandGraph()->Draw("A*");
   }//note that idex of pads of canvas begin with 1.
    //but our mNetCollect begin with 0.
-  theBandFitCanvas->cd();
+     theBandFitCanvas->cd();
   if (saveCanvas) theBandFitCanvas->SaveAs("");
 
        }
 
        if (mDrawAmpFits){
-  TCanvas* theAmpFitCanvas=new TCanvas(stAmpFit.str(), stAmpFit.str(),20,10,800,600);
+  TCanvas* theAmpFitCanvas = 
+  new TCanvas(stAmpFit.str(), stAmpFit.str(),20,10,800,600);
+
   theAmpFitCanvas->Divide(3,3);
   
-  for(int jj=0; jj<mNetCollect->size();jj++){
+  for(unsigned jj=0; jj<mNetCollect->size();jj++){
      if ((jj+1)>NPads) break;
      theAmpFitCanvas->cd(jj+1);
      ((*mNetCollect)[jj])->ampGraph()->Draw("A*");
@@ -133,10 +121,12 @@ void StPidAmpChannel::drawFittings(){
 
 
        if (mDrawResoFits){
-  TCanvas* theResoFitCanvas=new TCanvas(stResoFit.str(), stResoFit.str(),20,10,800,600);
+  TCanvas* theResoFitCanvas = 
+  new TCanvas(stResoFit.str(), stResoFit.str(),20,10,800,600);
+
   theResoFitCanvas->Divide(3,3);
 
-  for ( int k=0; k<mNetCollect->size(); k++){
+  for (unsigned k=0; k<mNetCollect->size(); k++){
 
        if ((k+1)>NPads) break;
        theResoFitCanvas->cd(k+1);
@@ -166,10 +156,10 @@ void StPidAmpChannel::fillBGNet(StPidAmpChannelCollection* set){
 }
 
 //----------------------------------
-void StPidAmpChannel::setBandParams4Nets(StPidParamVector& pars){
+void StPidAmpChannel::setBandParams4Nets(StPidParamVector pars){
 //put the fitted result of dedx~betagamma into nets.
      StPidAmpNetIter iter;
-     StPidAmpNet* theNet;
+     StPidAmpNet*    theNet;
      for (iter=mNetCollect->begin(); iter!=mNetCollect->end(); iter++){
           theNet=*iter;
           theNet->setBandParams(pars);
@@ -185,7 +175,7 @@ void StPidAmpChannel::setBandParams4Nets(StPidParamVector& pars){
 
 }
 //----------------------------------
-void StPidAmpChannel::processChannel(TH3D* histo,bool fitBd, bool fitPth, bool fitAp, bool fitLr){
+void StPidAmpChannel::processChannel(bool fitBd, bool fitPth, bool fitAp, bool fitLr){
   //assume getagamma fittings has finished.
 
      StPidAmpNetIter iter;
@@ -197,7 +187,7 @@ void StPidAmpChannel::processChannel(TH3D* histo,bool fitBd, bool fitPth, bool f
           theNet->setFitAmp(fitAp);
           theNet->setFitReso(fitLr);
 
-          theNet->processNet(mTrks,histo);
+          theNet->processNet(mTrks);
      }
 
       drawFittings();
@@ -321,10 +311,10 @@ void StPidAmpChannel::fillChannelInfoOut(){
 //---------------------------------
 void StPidAmpChannel::filterAndFillTrks(StPidAmpTrkVector* trks){
     StPidAmpTrkIter iter;
-    StPidAmpTrk* thisTrack;
+    StPidAmpTrk*    thisTrack;
 
  for (iter=trks->begin(); iter!=trks->end(); iter++){
-   thisTrack=*iter;
+        thisTrack=*iter;
    if  (mChannelInfo.isInChannel(thisTrack))
        mTrks->push_back(thisTrack);
  }
@@ -336,7 +326,7 @@ void StPidAmpChannel::filterAndFillTrks(StPidAmpTrkVector* trks){
 ostream& operator<<(ostream& s, StPidAmpChannel& channel){
   
      StPidAmpNetIter iter;
-     StPidAmpNet* theNet;
+     StPidAmpNet*    theNet;
      for (iter=(channel.netVector())->begin(); iter!=(channel.netVector())->end(); iter++){
      theNet=*iter;
      s<<*theNet<<endl;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpWindow.hh,v 1.2 2000/04/09 16:18:23 aihong Exp $
+ * $Id: StPidAmpWindow.hh,v 1.3 2000/05/01 16:59:26 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpWindow.hh,v $
+ * Revision 1.3  2000/05/01 16:59:26  aihong
+ * clean up
+ *
  * Revision 1.2  2000/04/09 16:18:23  aihong
  * add screen stuff
  *
@@ -38,7 +41,7 @@ public:
       StPidAmpWindow(double s1, double e1, double s2, double e2);
       StPidAmpWindow(double s1, double e1, double s2, double e2, double s3, double e3);
       StPidAmpWindow(double s1, double e1, double s2, double e2, double s3, double e3, double s4, double e4);
-      ~StPidAmpWindow();
+      virtual ~StPidAmpWindow();
 
       void addWindow(double s1, double e1); 
       void addScreen(double s1, double e1);

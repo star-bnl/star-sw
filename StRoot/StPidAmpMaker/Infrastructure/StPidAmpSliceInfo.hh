@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpSliceInfo.hh,v 1.1.1.1 2000/03/09 17:48:35 aihong Exp $
+ * $Id: StPidAmpSliceInfo.hh,v 1.2 2000/05/01 16:59:26 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpSliceInfo.hh,v $
+ * Revision 1.2  2000/05/01 16:59:26  aihong
+ * clean up
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:35  aihong
  * Installation of package
  *
@@ -30,7 +33,7 @@ public:
 
       StPidAmpSliceInfo();
       StPidAmpSliceInfo(double meanDedx, double sigma, double amp);
-      ~StPidAmpSliceInfo();
+      virtual ~StPidAmpSliceInfo();
       
       double  meanDedx() const;
       double     sigma() const;
