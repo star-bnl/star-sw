@@ -1,7 +1,10 @@
 /*
- * $Id: acmain.cc,v 1.5 1998/06/29 17:47:07 didenko Exp $
+ * $Id: acmain.cc,v 1.6 1998/07/09 23:01:43 perev Exp $
  *
  * $Log: acmain.cc,v $
+ * Revision 1.6  1998/07/09 23:01:43  perev
+ * replace fgsim.f -> fgsim.F
+ *
  * Revision 1.5  1998/06/29 17:47:07  didenko
  * fixed error
  *
@@ -76,7 +79,7 @@ for (int i=1; i<=argc; i++) { // Search -S <number>
        printf (" STAF. No space for %d Mega words\n",n);
        exit (1);
      }
-
+     memset(s,0,n*4000000);
      printf ("STAF got space %d Mega words\n",n);
      free(s);
      break;
@@ -89,11 +92,13 @@ for (int i=1; i<=argc; i++) { // Search -S <number>
 #ifndef Linux 
 int getarg_ (int *k, char *args, int n)
 { int i=0;  memset (args,' ',n); 
-if (*k<__argc_save) i=strlen(__argv_save[*k]);  if (i>n) i=n;
-  strncpy(args,__argv_save[*k],i); return 0;   
+  if (*k>=__argc_save) return 1;
+  if (! __argv_save[*k]) return 1;
+  i=strlen(__argv_save[*k]);  if (i>n) i=n;
+  strncpy(args,__argv_save[*k],i); return 0;  
 }
 int iargc_() { return __argc_save;}
 
 
-#endif
+#endif /*not Linux*/
 
