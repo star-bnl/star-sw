@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.31 1999/02/18 18:40:57 caines Exp $
+// $Id: St_glb_Maker.cxx,v 1.32 1999/02/19 15:29:25 caines Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.32  1999/02/19 15:29:25  caines
+// Corrected so egr now runs for year1
+//
 // Revision 1.31  1999/02/18 18:40:57  caines
 // Altered the creation of svm tables
 //
@@ -407,8 +410,10 @@ Int_t St_glb_Maker::Make(){
 
   St_DataSet     *svtracks = gStChain->DataSet("svt_tracks");
   St_DataSet     *svthits = gStChain->DataSet("svt_hits");
-  St_DataSet  *sitracks = global.Mkdir("sitracks");
-
+  
+  St_DataSet  *sitracks = gStChain->DataSet("global/sitracks");
+  if( !sitracks){   sitracks =  global.Mkdir("sitracks");}
+  
   St_stk_track   *stk_track   = 0;
   St_sgr_groups  *groups      = 0;
   St_scs_spt     *scs_spt     = 0;
@@ -439,7 +444,7 @@ Int_t St_glb_Maker::Make(){
     groups = new St_sgr_groups("groups",1); temp->Add(groups);
     scs_spt = new St_scs_spt("scs_spt",1); temp->Add(scs_spt);
   }
-  // CAse running est tpc -> Si space point tracking
+  // Case running est tpc -> Si space point tracking
   else if ( !svtracks && svthits){
     
       St_DataSetIter params(gStChain->DataSet("params"));
@@ -449,10 +454,18 @@ Int_t St_glb_Maker::Make(){
       m_svt_geom       = (St_svg_geom    *) params("svt/svgpars/geom");
       m_srs_activea    = (St_srs_activea *) params("svt/srspars/srs_activea");
       m_srspar     = (St_srs_srspar  *) params("svt/srspars/srs_srspar");
-      //      m_est_ctrl   = (St_est_ctrl  *) params("svt/estpars/est_ctrl");
-      groups       = new St_sgr_groups("groups",10000); sitracks->Add(groups);
-      stk_track    = new St_stk_track("stk_tracks",5000); sitracks->Add(stk_track);
-      est_match    = new St_est_match("est_match",10000); sitracks->Add(est_match); 
+      
+      St_DataSetIter si_tracks(sitracks);
+
+      groups = (St_sgr_groups *) si_tracks("groups");
+      if ( !groups){ groups = new St_sgr_groups("groups",10000); sitracks->Add(groups);}
+      
+      
+      stk_track    = (St_stk_track *) si_tracks.Find("stk_tracks");
+      if( !stk_track){ stk_track = new St_stk_track("stk_tracks",5000); sitracks->Add(stk_track);}
+
+      est_match    = (St_est_match *) si_tracks.Find("est_match");
+      if ( !est_match){ est_match = new St_est_match("est_match",10000); sitracks->Add(est_match); }
   } 
   
   // What is [data]/svt/hits/scs_cluster ?
@@ -469,26 +482,17 @@ Int_t St_glb_Maker::Make(){
     St_svm_evt_match *evt_match = 0;
     evt_match = (St_svm_evt_match *) global("tracks/evt_match");
     if (!evt_match) {evt_match  = new St_svm_evt_match("evt_match",3000); temp->Add(evt_match);}
-
+    if (! globtrk)    {globtrk = new St_dst_track("globtrk",20000);             dst.Add(globtrk);}
+    if (! globtrk_aux){globtrk_aux = new St_dst_track_aux("globtrk_aux",20000); dst.Add(globtrk_aux);}
+    
+    
     if (tptrack && svtracks) {
-       //svm
+      //svm
       Int_t res_svm =  svm_am (stk_track, tptrack,
 			       m_svm_ctrl, evt_match);
-      if (! globtrk)    {globtrk = new St_dst_track("globtrk",20000);             dst.Add(globtrk);}
-      if (! globtrk_aux){globtrk_aux = new St_dst_track_aux("globtrk_aux",20000); dst.Add(globtrk_aux);}
-      if (! vertex) {vertex = new St_dst_vertex("vertex",20000); dst.Add(vertex);}
-      // egr
-      Int_t Res_egr =  egr_fitter (tphit,vertex,tptrack,evaltrk,
-				   scs_spt,m_egr_egrpar,stk_track,groups,
-				   evt_match,globtrk,globtrk_aux);
-    
-      if (Res_egr != kSTAFCV_OK) {cout << "Problem on return from EGR_FITTER" << endl;}
-      cout << " finished calling egr_fitter" << endl;
     }
     else if (tptrack && svthits){
-      if (! globtrk)    {globtrk = new St_dst_track("globtrk",20000);             dst.Add(globtrk);}
-      if (! globtrk_aux){globtrk_aux = new St_dst_track_aux("globtrk_aux",20000); dst.Add(globtrk_aux);}
-      
+
       //est
 
       egr_egrpar_st *egr_egrpar = m_egr_egrpar->GetTable();
@@ -511,14 +515,19 @@ Int_t St_glb_Maker::Make(){
      // Int_t Res_est_eval = est_eval(g2t_track, tptrack, mctrk, 
      //m_est_ctrl,est_match,est_ev,scs_spt); 
      
-     if (! vertex) {vertex = new St_dst_vertex("vertex",20000); dst.Add(vertex);}
-     // egr
-     Int_t Res_egr =  egr_fitter (tphit,vertex,tptrack,evaltrk,
-				  scs_spt,m_egr_egrpar,stk_track,groups,
-				  evt_match,globtrk,globtrk_aux);
-    }
 
+    }
+    if (! vertex) {vertex = new St_dst_vertex("vertex",20000); dst.Add(vertex);}
+
+    // egr
+    Int_t Res_egr =  egr_fitter (tphit,vertex,tptrack,evaltrk,
+				 scs_spt,m_egr_egrpar,stk_track,groups,
+				 evt_match,globtrk,globtrk_aux);
+    
+    if (Res_egr != kSTAFCV_OK) {cout << "Problem on return from EGR_FITTER" << endl;}
+    cout << " finished calling egr_fitter" << endl;
 #if 1
+
     // evr
     cout << "run_evr: calling evr_am" << endl;
     Int_t Res_evr = evr_am(m_evr_evrpar,m_egr_egrpar,globtrk,vertex);
@@ -812,7 +821,7 @@ void St_glb_Maker::Histograms(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.31 1999/02/18 18:40:57 caines Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.32 1999/02/19 15:29:25 caines Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
