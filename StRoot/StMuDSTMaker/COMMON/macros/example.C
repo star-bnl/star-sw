@@ -54,10 +54,10 @@ void example() {
     StMuTrack* global = primaryTrack->globalTrack();
     cout << endl;
     StMuTrack*  tt = primaryTrack;
-    printf("momentum primary=%8f first-helix=%8f  last-outerHelix=%8f length=%8f lengthMeasured=%8f \n",
+    printf("primary momentum=%8f first-helix=%8f  last-outerHelix=%8f length=%8f lengthMeasured=%8f \n",
 	   tt->p().mag(), (tt->firstPoint() - tt->helix().origin()).mag(), (tt->lastPoint() - tt->outerHelix().origin()).mag(), tt->length(), tt->lengthMeasured() );
     StMuTrack*  tt = global;
-    printf("primary momentum=%8f first-helix=%8f  last-outerHelix=%8f length=%8f lengthMeasured=%8f \n",
+    printf("global  momentum=%8f first-helix=%8f  last-outerHelix=%8f length=%8f lengthMeasured=%8f \n",
 	   tt->p().mag(), (tt->firstPoint() - tt->helix().origin()).mag(), (tt->lastPoint() - tt->outerHelix().origin()).mag(), tt->length(), tt->lengthMeasured() );
   }
   printf("EVENT id=%d, runId=%d  unix time=%d trigWord=0x%0x bXing=%d spinBits=%d nPrim=%d\n", info.id(), info.runId(), info.time(), t.triggerWord(),t.bunchCrossingId(), t.spinBits(),n);
