@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.8 2001/08/07 07:51:28 lansdell Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.9 2001/08/29 20:45:15 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.9  2001/08/29 20:45:15  genevb
+// Trigger word histos
+//
 // Revision 2.8  2001/08/07 07:51:28  lansdell
 // primvtx check for different multiplicities crashed for MC data, now fixed
 //
@@ -194,6 +197,10 @@ void StQAMakerBase::BookHistGeneral(){
     mMultClass->SetXTitle("mult class (0=?/MC, 1=LM, 2=MM, 3=HM)");
     mMultClass->SetYTitle("# of events");
   }
+
+  mTrigWord = QAH::H1F("QaTrigWord","trigger word",8,0.5,8.5);
+  mTrigWord->SetXTitle("1=MinBias, 2=Central, 7=Laser, 8=Other");
+  mTrigBits = QAH::H1F("QaTrigBits","trigger bits",32,-0.5,31.5);
 }
 //_____________________________________________________________________________
 void StQAMakerBase::BookHistEvSum(){  

@@ -1,5 +1,8 @@
-// $Id: QAhlist_logy.h,v 2.4 2001/05/23 00:14:52 lansdell Exp $
+// $Id: QAhlist_logy.h,v 2.5 2001/08/29 20:45:15 genevb Exp $
 // $Log: QAhlist_logy.h,v $
+// Revision 2.5  2001/08/29 20:45:15  genevb
+// Trigger word histos
+//
 // Revision 2.4  2001/05/23 00:14:52  lansdell
 // more changes for qa_shift histograms
 //
@@ -22,6 +25,8 @@
  "QaInnerSectorDeDx",
  "QaOuterSectorDeDx",
  "QaDedxAllSectors",
+ "QaTrigWord",
+ "QaTrigBits",
  "QaGtrkFitProb",
  "QaGtrkDetId",
  "QaGtrkFlag",

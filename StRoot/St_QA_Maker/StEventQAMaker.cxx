@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.19 2001/08/23 17:57:36 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.20 2001/08/29 20:45:15 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.20  2001/08/29 20:45:15  genevb
+// Trigger word histos
+//
 // Revision 2.19  2001/08/23 17:57:36  genevb
 // Added SVT hit flag
 //
@@ -144,6 +147,33 @@ Int_t StEventQAMaker::Make() {
         histsSet = 0;
       }
       BookHist();
+    }
+    UInt_t tword = event->l0Trigger()->triggerWord();
+    Bool_t doEvent = kFALSE;
+    if (tword) {
+      if ((tword >= 0x1000) && (tword < 0x1100)) {
+        mTrigWord->Fill(1.); // "MinBias"
+	doEvent = kTRUE;
+      } else if ((tword >= 0x1100) && (tword < 0x1200)) {
+        mTrigWord->Fill(2.); // "Central"
+	doEvent = kTRUE;
+      } else if (tword == 0xF200) {
+        mTrigWord->Fill(7.); // "Laser"
+      } else {
+        mTrigWord->Fill(8.); // "Other"
+      }
+      mTrigWord->Fill(TMath::Log2((Double_t) tword));
+      for (int bitn=0; bitn<32; bitn++) {
+        if (tword>>(bitn) & 1U)
+          mTrigBits->Fill((Float_t) bitn);
+      }
+    } else {
+      gMessMgr->Warning("StEventQAMaker::Make(): trigger word=0 !!!!!");
+    }
+    if (!doEvent) {
+      gMessMgr->Message() << "StEventQAMaker::Make(): "
+        << "skipping because trigger word=" << tword << endm;
+      return kStOk;
     }
     // only process if a primary vertex exists !!!
     if (event->primaryVertex()) {
