@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+
+<html>
+
+<head>
+<title>error information</title>
+<meta name="GENERATOR" content="Microsoft FrontPage 1.1">
+</head>
+
+<body>
+<h2>Function that return error information</h2>
+<p><a href="#dsErrorCode">dsErrorCode</a> - returns error codes from dataset library functions </p>
+<p><a href="#dsPerror">dsPerror</a> - prints error information to stderr </p>
+<hr>
+<h2><a name="dsErrorCode">dsErrorCode</a></h2>
+<p>The <b>dsErrorCode</b> function returns the error code describing the last error encountered during a call to a dataset library 
+function.. </p>
+<p><b>DS_ERROR_CODE_T dsErrorCode(void</b>); </p>
+<h3>Parameters </h3>
+<p>None </p>
+<h3>Return Value</h3>
+<p>The return value is the callers last-error code value. </p>
+<h3>See Also</h3>
+<p><a href="#dsPerror">dsPerror</a> </p>
+<hr>
+<h2><a name="dsPerror">dsPerror</a></h2>
+<p>The <b>dsPerror</b> function prints a short error message on standard error describing the last error encountered during a call to a 
+dataset library function. </p>
+<p><b>void dsPerror(char *</b><b><i>message</i></b>); </p>
+<h3>Parameters</h3>
+<dl>
+<dt><i>message</i> </dt>
+<dd>A message to be printed before the error information. </dd>
+</dl>
+<h3>Return Value</h3>
+<p>None </p>
+<h3>See Also</h3>
+<p><a href="#dsErrorCode">dsErrorCode</a> </p>
+</body>
+
+</html>
