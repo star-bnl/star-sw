@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.cxx,v 1.5 1999/06/22 15:16:50 genevb Exp $
+// $Id: StSmdstMaker.cxx,v 1.6 1999/06/22 19:06:15 genevb Exp $
 // $Log: StSmdstMaker.cxx,v $
+// Revision 1.6  1999/06/22 19:06:15  genevb
+// Fixed no vertex collection error for cascades too
+//
 // Revision 1.5  1999/06/22 15:16:50  genevb
 // Typo fix
 //
@@ -203,7 +206,11 @@ Int_t StSmdstMaker::FillV0Table() {
    StEvent *ev = evMaker->event();
    if (!ev) return kStOK;
    StVertexIterator vertices = ev->vertexCollection()->begin();
-   if (!(vertices) || !(*vertices)) {
+   if (!(vertices)) {
+     printf("StSmdstMaker: Warning - no vertex collection in event.\n");
+     return kStOK;
+   }
+   if (!(*vertices)) {
      printf("StSmdstMaker: Warning - no vertices in event.\n");
      return kStOK;
    }
@@ -426,7 +433,11 @@ void StSmdstMaker::FillXiHistograms() {
   StEvent *ev = evMaker->event();
   if (!ev) return;
   StVertexIterator vertices = ev->vertexCollection()->begin();
-  if ((*vertices)==0) {
+  if (!(vertices)) {
+    printf("StSmdstMaker: Warning - no vertex collection in event.\n");
+    return;
+  }
+  if (!(*vertices)) {
     printf("StSmdstMaker: Warning - no vertices in event.\n");
     return;
   }
@@ -487,7 +498,7 @@ void StSmdstMaker::PrintInfo() {
 // PrintInfo() prints information about the class to standard output.
 //
   printf("**************************************************************\n");
-  printf("* $Id: StSmdstMaker.cxx,v 1.5 1999/06/22 15:16:50 genevb Exp $\n");
+  printf("* $Id: StSmdstMaker.cxx,v 1.6 1999/06/22 19:06:15 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   if (draw_histos) printf("* Strangeness Histograms are active\n");
   printf("**************************************************************\n");
