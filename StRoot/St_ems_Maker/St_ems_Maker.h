@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.h,v 1.12 2001/03/13 00:04:51 akio Exp $ 
+// $Id: St_ems_Maker.h,v 1.13 2003/01/23 03:50:08 jeromel Exp $ 
 // $Log: St_ems_Maker.h,v $
+// Revision 1.13  2003/01/23 03:50:08  jeromel
+// Include changed
+//
 // Revision 1.12  2001/03/13 00:04:51  akio
 // change due to StEmcGeom
 //
@@ -67,7 +70,7 @@
 #include "TH2.h"
 #include "TH1.h"
 #include "emc_def.h"
-#include "StEmcGeom.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 #include "tables/St_emc_hits_Table.h"
 
 class St_ems_control;
@@ -99,7 +102,7 @@ public:
   void   setEEMC(Short_t key){mEEMC = key; if (Debug()) printmEEMC();}
   void   setHistControl(Short_t key) {mHistControl = key;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_ems_Maker.h,v 1.12 2001/03/13 00:04:51 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_ems_Maker.h,v 1.13 2003/01/23 03:50:08 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   StEmcCollection*      getEmcCollection() {return  mEmcCollection;} //! 02-feb-2001 for backward capability
 
 protected:

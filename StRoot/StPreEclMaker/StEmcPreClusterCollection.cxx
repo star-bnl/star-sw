@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.cxx,v $
+// Revision 1.15  2003/01/23 03:49:59  jeromel
+// Include changed
+//
 // Revision 1.14  2001/10/01 15:36:19  pavlinov
 // cleanup
 //
@@ -100,7 +103,7 @@
 //#include "emc_def.h"
 #include "StEvent/StEvent.h" 
 #include "StEvent/StEventTypes.h"
-#include "StEmcUtil/StEmcGeom.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 ClassImp(StEmcPreClusterCollection)
 
 TArrayF energyw;

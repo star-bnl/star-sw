@@ -1,6 +1,9 @@
-// $Id: StEmcPreCluster.cxx,v 1.11 2001/10/01 15:36:19 pavlinov Exp $
+// $Id: StEmcPreCluster.cxx,v 1.12 2003/01/23 03:49:59 jeromel Exp $
 //
 // $Log: StEmcPreCluster.cxx,v $
+// Revision 1.12  2003/01/23 03:49:59  jeromel
+// Include changed
+//
 // Revision 1.11  2001/10/01 15:36:19  pavlinov
 // cleanup
 //
@@ -83,8 +86,8 @@
 #include "StEmcPreCluster.h"
 #include "StEvent/StEvent.h" 
 #include "StEvent/StEventTypes.h"
-#include "StEmcUtil/StEmcGeom.h"
-#include "StEmcUtil/StEmcMath.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEmcUtil/others/StEmcMath.h"
 
 ClassImp(StEmcPreCluster)
 
