@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEbye2ptMaker.cxx,v 1.4 2000/08/14 22:05:19 jseger Exp $
+ * $Id: StEbye2ptMaker.cxx,v 1.5 2000/09/19 19:45:51 jgreid Exp $
  *
  * StEbye2ptMaker.cxx
  *
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StEbye2ptMaker.cxx,v $
+ * Revision 1.5  2000/09/19 19:45:51  jgreid
+ * added functionality for urgent analysis
+ *
  * Revision 1.4  2000/08/14 22:05:19  jseger
  * Added eta-spectra.  Now reads Ebye mini-DST as input.  Bins events in
  * multiplicity and z-vertex position.  Name of output file is no longer hard-wired.
@@ -49,7 +52,7 @@
 using namespace units;
 #endif
 
-static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.4 2000/08/14 22:05:19 jseger Exp $";
+static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.5 2000/09/19 19:45:51 jgreid Exp $";
 
 ClassImp(StEbye2ptMaker)
 
@@ -557,10 +560,11 @@ void StEbye2ptMaker::SortEvents() {
   Int_t Nentries = pEbyeTree->GetEntries();
 
   // set binning constants
-  Int_t NMultBins = 20;  //  set number of bins for multiplicity
-  Int_t NZBins = 20;  //set number of bins for z vertex position
-  Int_t MultMax = 1600;  // set the maximum multiplicity for the dataset
-  Int_t ZMax = 450;  // set the maximum value for z vertex position
+  Int_t mNMultBins = 40;  //  set number of bins for multiplicity
+  Int_t mNZBins = 40;  //set number of bins for z vertex position
+  Int_t mMultMax = 1600;  // set the maximum multiplicity for the dataset
+  Int_t mMultMin = 700;
+  Int_t mZMax = 75;  // set the maximum value for z vertex position
 
   // place events into bins
   gMessMgr->Info() << " StEbye2ptMaker::SortEvents() Binning events... " << endm;
@@ -569,10 +573,10 @@ void StEbye2ptMaker::SortEvents() {
     pEbyeTree->GetEntry(i);
     Int_t mult = mEbyeEvent->OrigMult();
     Int_t zvertex = mEbyeEvent->Vz();
-    Int_t multbin = 1+(mult*NMultBins/MultMax);
-    Int_t zbin = 1+((zvertex+ZMax)*NZBins/(2*ZMax));
-    Int_t BinNumber = (multbin-1)*NZBins+zbin;
-   if(zbin > NZBins || zbin < 0 || multbin >NMultBins || multbin <0){
+    Int_t multbin = 1+((mult-mMultMin)*mNMultBins/(mMultMax-mMultMin));
+    Int_t zbin = 1+((zvertex+mZMax)*mNZBins/(2*mZMax));
+    Int_t BinNumber = (multbin-1)*mNZBins+zbin;
+   if(zbin > mNZBins || zbin < 0 || multbin >mNMultBins || multbin <0){
    gMessMgr->Info() << " StEbye2ptMaker::SortEvents() Bin Number Outside Allowed Range " << endm;
    }
     mSortArray[i] = BinNumber;
