@@ -1,7 +1,7 @@
 //StiResidualCalculator.cxx
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.cxx,v 2.4 2003/04/30 16:38:16 pruneau Exp $
+ * $Id: StiResidualCalculator.cxx,v 2.5 2003/06/10 16:23:29 andrewar Exp $
  *
  * \class  StiResidualCalculator provides a utility for determining the
  *         track residuals.
@@ -9,6 +9,10 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.cxx,v $
+ * Revision 2.5  2003/06/10 16:23:29  andrewar
+ * Added functions to residual calculator. Added parallel hist set for
+ * different detector layers.
+ *
  * Revision 2.4  2003/04/30 16:38:16  pruneau
  * active detector hit filtering
  *
@@ -54,6 +58,7 @@ using std::less;
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiDetectorBuilder.h"
+#include "Sti/StiHitErrorCalculator.h"
 
 #include "Sti/StiResiduals.h"
 #include "Sti/StiResidualCalculator.h"
@@ -79,6 +84,9 @@ void StiResidualCalculator::initialize(StiDetectorBuilder*detBuilder)
 
 void StiResidualCalculator::initDetector(StiDetectorBuilder *detBuilder)
 {
+  string baseName;
+  string detName;
+
   cout <<"StiResidualCalculator::initDetector"<<endl;
   if (detBuilder)
     {
@@ -91,7 +99,8 @@ void StiResidualCalculator::initDetector(StiDetectorBuilder *detBuilder)
       isNotActiveFunc = new StiNeverActiveFunctor();
       
 
-      for(int i=4, j=0; j<sectors;j++)
+
+      for(int i=15, j=0; j<sectors;j++,i=i+2)
 	{
 	  StiDetector* det = detBuilder->getDetector(i,j);
 	  //mark detector as unused
@@ -99,8 +108,80 @@ void StiResidualCalculator::initDetector(StiDetectorBuilder *detBuilder)
 	  det->setIsActive(isNotActiveFunc);
 	  //store detector pointer in vector
 	  candidates.push_back(det);
-	  cout <<"Residuals for "<<det->getName()
+	  
+	  //Slashes in name make root unhappy
+	  detName=(det->getName()).c_str();
+	  int x=detName.find("/");
+	  while(x<detName.size())
+	    {
+	      detName.replace(x,1,"_");
+	      x=detName.find("/");
+	    }
+
+	  cout <<"Residuals for "<<detName
 	       <<" set"<<endl;
+
+
+	  //init hists for detectors
+	  baseName = "y_cross_z_";
+	  baseName = baseName + detName;
+	  mYResidualCrossZ.push_back(book(baseName,
+					   "Residual in Y vs. Cross, Z", 
+					   20, -1, 1, 40, -200, 200, 
+					   75, -1.5,1.5));
+	  baseName= "y_dip_z_";
+	  baseName=baseName+ detName;
+	  mYResidualDipZ.push_back(book(baseName,"Residual in Y vs. Dip, Z",
+				      20,-1,1,40,-200,200.,
+				      75,-1.5,1.5));
+	  baseName= "yd_cross_z_";
+	  baseName=baseName+ detName;
+	  mYDResidualCrossZ.push_back(book(baseName,
+					   "Residual in Y vs. Cross, Z", 
+					   20, -1, 1, 40, -200, 200, 
+					   75, -1.5,1.5));
+	  baseName= "yd_dip_z_";
+	  baseName=baseName+ detName;
+	  mYDResidualDipZ.push_back(book(baseName,"Residual in Y vs. Dip, Z",
+				      20,-1,1,40,-200,200.,
+				      75,-1.5,1.5));
+
+	  baseName="z_cross_z";
+	  baseName=baseName+ detName;
+	  mZResidualCrossZ.push_back(book(baseName,
+					   "Residual in Z vs. Cross, Z", 
+					   20, -1, 1, 40, -200,200, 
+					   75, -1.5,1.5));
+	  baseName= "z_dip_z_";
+	  baseName=baseName+ detName;
+	  mZResidualDipZ.push_back(book(baseName,"Residual in Z vs. Dip, Z",
+				      20,-1,1,40,-200,200.,
+				      75,-1.5,1.5));
+
+	  baseName="zd_cross_z";
+	  baseName=baseName+ detName;
+	  mZDResidualCrossZ.push_back(book(baseName,
+					   "Residual in Z vs. Cross, Z", 
+					   20, -1, 1, 40, -200,200, 
+					   75, -1.5,1.5));
+	  baseName= "zd_dip_z_";
+	  baseName=baseName+ detName;
+	  mZDResidualDipZ.push_back(book(baseName,"Residual in Z vs. Dip, Z",
+				      20,-1,1,40,-200,200.,
+				      75,-1.5,1.5));
+
+	  baseName = "t_cross_dip_";
+	  baseName=baseName+detName;
+	  mResidualCrossDip.push_back(book(  baseName,
+					   "Residual in Y vs. Cross, Dip", 
+					   60, -1, 1, 60, -1, 1, 
+					   75, -1.5,1.5));
+	  baseName= "t_y_z_";
+	  baseName=baseName+detName;
+	  mResidualZY.push_back(book( baseName,"",100,0,200.,20,-2.,2.,
+				    20,-2.,2.));
+
+
 	  mDetectorHist->Fill(i,j);
 	}
     }
@@ -123,60 +204,29 @@ int StiResidualCalculator::Init()
   //!
 
 
-  string angleYBaseName = "yResidualCrossDip";
-  string coordYBaseName = "yResidualZYRow";
-  string angleZBaseName = "zResidualCrossDip";
-  string coordZBaseName = "zResidualZYRow";
-  string angleBaseName = "ResidualCrossDip";
-  string coordBaseName = "ResidualZYRow";
-  string detectorBaseName;
-  string incrimentName;
-
-  //determine detector
-//    switch(mDetector)
-//    {
-//      case kTpcId:
-//         //TPC
-//         detectorBaseName="Tpc";
-//         incrimentName="Row %dd";
-//         numLayers=45;
-//         break;
-//      case kSvtId:
-//        //SVT
-//         detectorBaseName="Svt";
-//         incrimentName="Layer %dd";
-//         numLayers=3;
-//         break;
-//      default:
-//        //NOT a tracking detector???!?!? (at least, one I want to deal with)
-//         break;
-//    }
-//      //make hist name strings from base names. This makes the pointer
-    //name unique.
-       detectorBaseName="Tpc";
-       incrimentName="Row %dd";
-    angleYBaseName+=detectorBaseName;
-    coordYBaseName+=detectorBaseName;
-    angleZBaseName+=detectorBaseName;
-    coordZBaseName+=detectorBaseName;
 
 
-  //setup hists
-  mYResidualCrossDip = new TH3D(angleYBaseName.c_str(),"Residual in Y vs. Cross, Dip", 128, -1.6, 1.6, 128, -1.6, 1.6, 128, -2.,2.);
-  mYResidualZY=new TH3D(coordYBaseName.c_str(),"",128,-2.,2.,128,-2.,2.,128,-2.,2.);
-  mZResidualCrossDip = new TH3D(angleZBaseName.c_str(),"Residual in Z vs. Cross, Dip", 128, -1.6, 1.6, 128, -1.6, 1.6, 128, -2.,2.);
-  mZResidualZY=new TH3D(coordZBaseName.c_str(),"",128,-2.,2.,128,-2.,2.,128,-2.,2.);
-  mResidualCrossDip = new TH3D(angleBaseName.c_str(),"Residual in Z vs. Cross, Dip", 128, -1.6, 1.6, 128, -1.6, 1.6, 128, -2.,2.);
-  mResidualZY=new TH3D(coordBaseName.c_str(),"",128,-2.,2.,128,-2.,2.,128,-2.,2.);
+  mCross = book("mCross","",30,-1.7,1.7);
+  mDip = book("mDip","",30,-1.7,1.7);
+  mPt = book("mPt","",30,0.,6.);
+  mDrift = book("mDrift","",100,-200.,200.);
 
-
-  mCross = new TH1D("mCross","",30,-1.7,1.7);
-  mDip = new TH1D("mDip","",30,-1.7,1.7);
-  mPt = new TH1D("mPt","",30,0.,6.);
-  mDrift = new TH1D("mDrift","",100,-200.,200.);
-
-  mDetectorHist = new TH2D("mDetectorHist","Detectors in Study", 
+  mDetectorHist = book("mDetectorHist","Detectors in Study", 
 		       50,0.,50.,12,0.,12.);
+
+
+
+      _BackgroundZ = book("_BackgroundZ","Background dZ",
+				  100,-2.,2.);
+      _BackgroundY = book("_BackgroundY","Background dY",
+				  100,-2.,2.);
+      _BackgroundClosestZ = book("_BackgroundClosestZ",
+				 "Background Closest dZ",
+				 100,-2.,2.);
+      _BackgroundClosestY = book("_BackgroundClosestY",
+				 "Background Closest dY",
+				 100,-2.,2.);
+
 
   return 1;
 }
@@ -185,8 +235,9 @@ void StiResidualCalculator::calcResiduals(StiTrackContainer *tracks)
 {
 
   //Do some checking to make sure the next call isn't pointless
-  if(candidates.size()==0)
+  if(candidates.size()<=1)
     {
+      //only background hists
       cout<<"StiResidualCalculator::trackResiduals"
 	  <<" no detectors initialized for residuals."<<endl;
       return;
@@ -200,6 +251,8 @@ void StiResidualCalculator::calcResiduals(StiTrackContainer *tracks)
   int check=0;
   while(trackIt!=tracks->end())
     {
+
+      //this is where track cuts could be used
       check= trackResidue((*trackIt).second);
       trackIt++;
     }
@@ -215,6 +268,7 @@ int StiResidualCalculator::trackResidue(const StiTrack *track)
   //If fails, exit. If success, call trackResidue(StiKalmanTrack).
 
 
+  int check;
 
   //cast to Kalman Track; if fail, end
 
@@ -226,7 +280,8 @@ int StiResidualCalculator::trackResidue(const StiTrack *track)
 	  return -10;
 	}  
 
-     int check = trackResidue(kTrack);
+      //if(kTrack->getCurvature()<0) 
+      check = trackResidue(kTrack);
      return check;
 }
 
@@ -239,8 +294,8 @@ int StiResidualCalculator::trackResidue(const StiKalmanTrack *track)
 
 
   double nHits =0;
-  double otherHits=0;
      
+  int count=0;
   StiKalmanTrackNode* leaf = track->getLastNode();
   StiKTNForwardIterator iT(leaf);
   StiKTNForwardIterator end = iT.end();
@@ -252,7 +307,7 @@ int StiResidualCalculator::trackResidue(const StiKalmanTrack *track)
       
       StiKalmanTrackNode iNode = (*iT);
       
-      //if the node has no vail detector pointer, go on to next node
+      //if the node has no valid detector pointer, go on to next node
       if(!iNode.getDetector()) {iT++;continue;}
 
 
@@ -276,6 +331,7 @@ int StiResidualCalculator::trackResidue(const StiKalmanTrack *track)
 	      ++iT;
 	      continue;
 	    }
+
 	  //get node values
 	  double cross = iNode.crossAngle();
 	  double dip   = iNode.pitchAngle();
@@ -285,82 +341,185 @@ int StiResidualCalculator::trackResidue(const StiKalmanTrack *track)
 
 	  fillTrackHist(cross,dip,pt, nodeZ);
 
-	  //Examine a 20cm x 20cm window around track projection.
-  	  candidateHits->setDeltaD(20.);
-  	  candidateHits->setDeltaZ(20.);
- 	  candidateHits->setRefPoint(iNode);
-	  //HitVectorType hits = candidateHits->hits(iNode.getDetector());
 
-	  StiHit* hit;
-	  //cout <<"Hit container size: "<<candidateHits.size()<<endl;
+	  //The offset of the detector in the candidate vec should
+	  //be the same as the offset for the histograms...
+	  int histVecOffset = find(candidates.begin(), 
+				   candidates.end(),
+				   iNode.getDetector())-candidates.begin();
+	  HitVectorType hitVec = candidateHits->hits(iNode.getDetector());
+	  NodeResidue(iNode, hitVec, histVecOffset);
 
-	  while(candidateHits->hasMore())
-	    {
-	      hit = candidateHits->getHit();
-	
-	      //Fill local Y residuals
-	      dy = hit->y() - nodeY;
-	      //Fill local Z residuals
-	      dz = hit->z() - nodeZ;
 	  
-	      FillHist(nodeZ,nodeY,cross,dip,dz,dy);
-	      nHits++;
-	    }//end loop over hits in detector
-	}//end if iT valid
+	  //if(histVecOffset == candidates.size()) histVecOffset=1;
+	  //vector<StiDetector*>::iterator iD = candidates.begin()+histVecOffset;
+	  //hitVec=candidateHits->hits((*iD));	        
+	  //NodeResidue(iNode, hitVec, 0);
+	  
+	  //(iD==candidates.end()) ? iD++ : iD=candidates.begin();
+	  //hitVec=candidateHits->hits((*iD));
+	  //fill background hist
+	  //ResidualBackground(iNode, hitVec);
 
-      
+	}
       iT++;
     }//end while over nodes
 
 
   return 1;
+   
 }
 
+void StiResidualCalculator::NodeResidue(StiKalmanTrackNode iNode,
+					HitVectorType hitVec,
+					int histVecOffset)
+{
+  //get node values
+  double cross = iNode.crossAngle();
+  double dip   = iNode.pitchAngle();
+  double nodeZ = iNode.getZ();
+  double nodeY = iNode.getY();
+  double dy,dz;
 
-void StiResidualCalculator::Write(char* outfile)
+  iNode.getDetector()->getHitErrorCalculator()->calculateError(&iNode);
+  double nodeZE = iNode.ezz;
+  double nodeYE = iNode.eyy;
+  //cout <<" D: "<<nodeZE<<endl;
+
+  if(nodeYE>0) nodeYE=sqrt(nodeYE);
+  else nodeYE=1.;
+  if(nodeZE>0) nodeYE=sqrt(nodeZE);
+  else nodeZE=1.;
+
+  HitVectorType::iterator iH = hitVec.begin();
+  StiHit* hit;
+
+  while(iH!=hitVec.end())
+  {
+    hit=*iH;
+     //Fill local Y residuals
+    if(fabs(hit->y() - nodeY)<10 && fabs(hit->z()-nodeZ)<10)
+      {
+	dy = hit->y() - nodeY;
+
+    //Fill local Z residuals
+	dz = hit->z() - nodeZ;
+
+
+	FillHist(histVecOffset,nodeZ,nodeY,cross,dip,dz,dy, 
+		 dz/nodeZE, dy/nodeYE);
+      }//end check on hit pos
+     ++iH;
+   }//end loop over hits in detector
+
+  return;
+}
+
+void StiResidualCalculator::ResidualBackground(StiKalmanTrackNode iNode,
+					       HitVectorType hitVec)
 {
 
-  //! Writes the residual hists to a file.
+  StiHit* nearest=0;
+  StiHit* hit;
+  HitVectorType::iterator iH = hitVec.begin();
 
-  cout <<"StiResidualCalculator::Write to file "<<outfile<<endl;
+  double z = iNode.getZ();
+  double y = iNode.getY();
 
-  //open output file
-  TFile *f = new TFile(outfile,"RECREATE");
+  double dz=0;
+  double dy=0;
+  double r=0;
+  double closestR=0;
 
-  //dump hists to file
-  mYResidualCrossDip->Write();
-  mYResidualZY->Write();
-  mZResidualCrossDip->Write();
-  mZResidualZY->Write();
+  //loop over hits
+  while(iH!=hitVec.end())
+    {
+      hit = *iH;
 
-  mResidualCrossDip->Write();
-  mResidualZY->Write();
+      dz=hit->z()-z;
+      dy=hit->y()-y;
 
-  mCross->Write();
-  mDip->Write();
-  mPt->Write();
-  mDrift->Write();
+      _BackgroundZ->Fill(dz);
+      _BackgroundY->Fill(dy);
 
-  mDetectorHist->Write();
+      //find closest hit
+      r=dz*dz+dy*dy;
+      if(r<=closestR) 
+	{
+	  closestR=r;
+	  nearest = hit;
+	}
+      ++iH;
+    }
 
-  //close file
-  f->Close();
+  _BackgroundClosestZ->Fill(nearest->z()-z);
+  _BackgroundClosestY->Fill(nearest->y()-y);
+  
+
 }
 
-void StiResidualCalculator::FillHist(double z, double y,
+void StiResidualCalculator::FillHist(int offset, double z, double y,
 				     double cross, double dip,
-				     double dz, double dy)
+				     double dz, double dy,
+				     double dze, double dye)
 {
-  mYResidualCrossDip->Fill(cross, dip, dy);
-  mYResidualZY->Fill(z, y, dy);
+  TH3D* hist;
+  int check;
 
-  mZResidualCrossDip->Fill(cross, dip, dz);
-  mZResidualZY->Fill(z, y, dz);
+  vector<TH3D*>::iterator iH = mYResidualCrossZ.begin();
+  hist = *(iH+offset);
+  if(hist) hist->Fill(cross, z, dy);
+  else check=-1;
 
+
+  iH =mYResidualDipZ.begin();
+  hist=*(iH+offset);
+  if(hist) hist->Fill(dip,z, dy);
+  else check=-1;
+
+  iH = mYDResidualCrossZ.begin();
+  hist = *(iH+offset);
+  if(hist) hist->Fill(cross, z, dye);
+  else check=-1;
+
+
+  iH =mYDResidualDipZ.begin();
+  hist=*(iH+offset);
+  if(hist) hist->Fill(dip,z, dye);
+  else check=-1;
+
+  iH= mZResidualCrossZ.begin();
+  hist = *(iH+offset);
+  if(hist) hist->Fill(cross, z, dz);
+  else check=-1;
+
+  iH = mZResidualDipZ.begin();
+  hist = *(iH+offset);
+  if(hist) hist->Fill(dip,z, dz);
+  else check=-1;
+
+  iH= mZDResidualCrossZ.begin();
+  hist = *(iH+offset);
+  if(hist) hist->Fill(cross, z, dze);
+  else check=-1;
+
+  iH = mZDResidualDipZ.begin();
+  hist = *(iH+offset);
+  if(hist) hist->Fill(dip,z, dze);
+  else check=-1;
 
   double diff = sqrt(dy*dy+dz*dz);
-  mResidualCrossDip->Fill(cross, dip, diff);
-  mResidualZY->Fill(z, y, diff);
+  iH = mResidualCrossDip.begin();
+  hist = *(iH+offset);
+  if(hist) hist->Fill(cross, dip, diff);
+  else check=-1;  
+
+  iH = mResidualZY.begin();
+  hist = *(iH+offset);
+  if(hist) hist->Fill(z, y, diff); 
+  else check=-1;
+
+  if (check==-1) cout <<"Error in hist finding..."<<endl;
 }
 
 void StiResidualCalculator::fillTrackHist(double cross, double dip,

@@ -1,11 +1,15 @@
 //StiResidualMaker.h
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.h,v 2.3 2003/04/30 15:38:57 pruneau Exp $
+ * $Id: StiResidualCalculator.h,v 2.4 2003/06/10 16:23:30 andrewar Exp $
  *
  * Author: Andrew Rose, Wayne State University, October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.h,v $
+ * Revision 2.4  2003/06/10 16:23:30  andrewar
+ * Added functions to residual calculator. Added parallel hist set for
+ * different detector layers.
+ *
  * Revision 2.3  2003/04/30 15:38:57  pruneau
  * Integrating StiResidualCalculator into the main stream.
  *
@@ -47,48 +51,68 @@ class StiHit;
 class StiTrack;
 class StiKalmanTrack;
 class StiNeverActiveFunctor;
+class HistogramGroup;
 
 #include "StDetectorId.h"
 #include "Sti/StiResiduals.h"
+#include "Sti/Base/HistogramGroup.h"
+#include "Sti/StiHitContainer.h"
 
-class StiResidualCalculator: public StiResiduals
+class StiResidualCalculator: public StiResiduals, public HistogramGroup
 {
    public:
      StiResidualCalculator(StiHitContainer*);
      ~StiResidualCalculator(){/*noop*/};
      void initialize(StiDetectorBuilder*);
      void calcResiduals(StiTrackContainer*);
-     void Write(char* outfile);
+
    private:
      int  Init();
      void initDetector(StiDetectorBuilder*);
      int  trackResidue(const StiTrack *track);
      int  trackResidue(const StiKalmanTrack *track);
-     void FillHist(double z, double y,
+     void NodeResidue(StiKalmanTrackNode iNode, HitVectorType hits, 
+		       int histVecOffset);
+     void ResidualBackground(StiKalmanTrackNode iNode, HitVectorType hitVec);
+     void FillHist(int offset, double z, double y,
 		   double cross, double dip,
-		   double dz, double dy);
+		   double dz, double dy,
+		   double dze, double dye);
      void fillTrackHist(double cross, double dip, double pt, double drift);
 
 
-     StDetectorId mDetector;
-     vector<StiDetector*> candidates;
-     StiHitContainer * candidateHits;
-     StiNeverActiveFunctor * isNotActiveFunc;
+     StDetectorId           mDetector;
+     vector<StiDetector*>   candidates;
+     StiHitContainer *      candidateHits;
+     StiNeverActiveFunctor *isNotActiveFunc;
 
      //Residual Hists  
-     TH3D *mYResidualCrossDip;
-     TH3D *mYResidualZY;
-     TH3D *mZResidualCrossDip;
-     TH3D *mZResidualZY;
-     TH3D *mResidualCrossDip;
-     TH3D *mResidualZY;
+     vector<TH3D*> mYResidualCrossZ;
+     vector<TH3D*> mYResidualDipZ;
+     vector<TH3D*> mYDResidualCrossZ;
+     vector<TH3D*> mYDResidualDipZ;
+     vector<TH3D*> mZResidualCrossZ;
+     vector<TH3D*> mZResidualDipZ;
+     vector<TH3D*> mZDResidualCrossZ;
+     vector<TH3D*> mZDResidualDipZ;
+     vector<TH3D*> mResidualCrossDip;
+     vector<TH3D*> mResidualZY;
 
+     //Track Hists
      TH1D *mCross;
      TH1D *mDip;
      TH1D *mPt;
      TH1D *mDrift;
 
+     TH1D* _BackgroundZ;
+     TH1D* _BackgroundY;
+     TH1D* _BackgroundClosestZ;
+     TH1D* _BackgroundClosestY;
+
+
+
      TH2D *mDetectorHist;
+
 
 };
   
