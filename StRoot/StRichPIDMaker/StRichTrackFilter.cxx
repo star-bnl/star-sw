@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichTrackFilter.cxx,v 1.1 2000/04/03 19:36:09 horsley Exp $
+ * $Id: StRichTrackFilter.cxx,v 1.2 2000/04/04 14:14:48 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrackFilter.cxx,v $
+ *  Revision 1.2  2000/04/04 14:14:48  horsley
+ *  modified StRichTrackFilter to use StRichGeometryDb.
+ *
  *  Revision 1.1  2000/04/03 19:36:09  horsley
  *  initial revision
  *
@@ -37,16 +40,43 @@ StRichTrackFilter::StRichTrackFilter(StTrack* tpcTrack, double magField)  {
   StRichMomentumTransform* momentumTransformation 
     = StRichMomentumTransform::getTransform(myGeometryDb);
 
-  // hardwired !!!!!!!!!!!!!!!!!!!!!
-  StThreeVectorD richNormal(-0.49723,0.86762,-0.56325);
-  StThreeVectorD richRadiator(113.88025,-197.09225,-0.56325); // should be point on radiator!
-  StThreeVectorD richPadPlane(113.88025,-197.09225,-0.56325); // should be point on padplane
+  StThreeVectorD richNormal(myGeometryDb->normalVectorToPadPlane().x(),
+			    myGeometryDb->normalVectorToPadPlane().y(),
+			    myGeometryDb->normalVectorToPadPlane().z());
+
+
+  StRichLocalCoordinate entryPointOfRichRadiator_Local(0.0,
+						       0.0,
+						       myGeometryDb->proximityGap() +
+						       myGeometryDb->quartzDimension().z() +
+						       myGeometryDb->radiatorDimension().z() );
+  
+  StRichLocalCoordinate entryPointOfRichPadPlane_Local(0.0,
+						       0.0,
+						       0.0);
+						       
+						       
+  StGlobalCoordinate entryPointOfRichRadiator_Global;
+  (*coordinateTransformation)(entryPointOfRichRadiator_Local,entryPointOfRichRadiator_Global);
+  
+  StGlobalCoordinate entryPointOfRichPadPlane_Global;
+  (*coordinateTransformation)(entryPointOfRichPadPlane_Local,entryPointOfRichPadPlane_Global);
+  
+
+  StThreeVectorD entryPointOfRichRadiator(entryPointOfRichRadiator_Global.position().x(),
+					  entryPointOfRichRadiator_Global.position().y(),
+					  entryPointOfRichRadiator_Global.position().z());
+
+  StThreeVectorD entryPointOfRichPadPlane(entryPointOfRichPadPlane_Global.position().x(),
+					  entryPointOfRichPadPlane_Global.position().y(),
+					  entryPointOfRichPadPlane_Global.position().z());
+  
  
   // create helix from StTrack, 
   // do momentum transformation, extrapolation 
   StPhysicalHelixD  mHelix = tpcTrack->geometry()->helix();
-  double mPathLengthAtRadiator  = mHelix.pathLength(richRadiator,richNormal);
-  double mPathLengthAtPadPlane  = mHelix.pathLength(richPadPlane,richNormal);
+  double mPathLengthAtRadiator  = mHelix.pathLength(entryPointOfRichRadiator,richNormal);
+  double mPathLengthAtPadPlane  = mHelix.pathLength(entryPointOfRichPadPlane,richNormal);
 
   StThreeVectorD tpcMom = mHelix.momentumAt(mPathLengthAtRadiator,magField*tesla);
   StThreeVector<double> globalMomentumAtRadiator(tpcMom.x(), tpcMom.y(), tpcMom.z());
@@ -115,7 +145,7 @@ StRichTrackFilter::StRichTrackFilter(StTrack* tpcTrack, double magField)  {
   StThreeVector<double> normalVector(0,0,-1);
   mIncidentAngleCheck = false;
   double trackTheta = acos(normalVector.dot(localMomentumAtRadiator)/localMomentumAtRadiator.mag());
-  if (trackTheta < M_PI/10.0) mIncidentAngleCheck=true;
+  if (trackTheta < M_PI/2.0) mIncidentAngleCheck=true;
 
 }
 
@@ -125,30 +155,53 @@ bool StRichTrackFilter::incidentAngleCheck() {
 }
 
 StRichTrackFilter::StRichTrackFilter(StPhysicalHelixD& tpcHelix, double magField)  {
-  
-
-  // define transformations 
+ // define transformations 
   StRichGeometryDb* myGeometryDb = StRichGeometryDb::getDb();
 
   StRichCoordinateTransform* coordinateTransformation =
         StRichCoordinateTransform::getTransform(myGeometryDb);
 
   StRichMomentumTransform* momentumTransformation 
-    = StRichMomentumTransform::getTransform();
+    = StRichMomentumTransform::getTransform(myGeometryDb);
 
-  // hardwired !!!!!!!!!!!!!!!!!!!!!
-  StThreeVectorD richNormal(-0.49723,0.86762,-0.56325);
-  StThreeVectorD richRadiator(113.88025,-197.09225,-0.56325); // should be point on radiator!
-  StThreeVectorD richPadPlane(113.88025,-197.09225,-0.56325); // should be point on padplane
- 
+  StThreeVectorD richNormal(myGeometryDb->normalVectorToPadPlane().x(),
+			    myGeometryDb->normalVectorToPadPlane().y(),
+			    myGeometryDb->normalVectorToPadPlane().z());
+
+
+  StRichLocalCoordinate entryPointOfRichRadiator_Local(0.0,
+						       0.0,
+						       myGeometryDb->proximityGap() +
+						       myGeometryDb->quartzDimension().z() +
+						       myGeometryDb->radiatorDimension().z() );
+  
+  StRichLocalCoordinate entryPointOfRichPadPlane_Local(0.0,
+						       0.0,
+						       0.0);
+						       
+						       
+  StGlobalCoordinate entryPointOfRichRadiator_Global;
+  (*coordinateTransformation)(entryPointOfRichRadiator_Local,entryPointOfRichRadiator_Global);
+  
+  StGlobalCoordinate entryPointOfRichPadPlane_Global;
+  (*coordinateTransformation)(entryPointOfRichPadPlane_Local,entryPointOfRichPadPlane_Global);
+  
+
+  StThreeVectorD entryPointOfRichRadiator(entryPointOfRichRadiator_Global.position().x(),
+					  entryPointOfRichRadiator_Global.position().y(),
+					  entryPointOfRichRadiator_Global.position().z());
+
+  StThreeVectorD entryPointOfRichPadPlane(entryPointOfRichPadPlane_Global.position().x(),
+					  entryPointOfRichPadPlane_Global.position().y(),
+					  entryPointOfRichPadPlane_Global.position().z());
+  
 
   // do momentum transformation, extrapolation 
-  double mPathLengthAtRadiator  = tpcHelix.pathLength(richRadiator,richNormal);
-  double mPathLengthAtPadPlane  = tpcHelix.pathLength(richPadPlane,richNormal);
+  double mPathLengthAtRadiator  = tpcHelix.pathLength(entryPointOfRichRadiator,richNormal);
+  double mPathLengthAtPadPlane  = tpcHelix.pathLength(entryPointOfRichPadPlane,richNormal);
 
-  StThreeVectorD tpcMom = tpcHelix.momentumAt(mPathLengthAtRadiator,magField);
+  StThreeVectorD tpcMom = tpcHelix.momentumAt(mPathLengthAtRadiator,magField*tesla);
   StThreeVector<double> globalMomentumAtRadiator(tpcMom.x(), tpcMom.y(), tpcMom.z());
-
 
   StThreeVector<double> localMomentumAtRadiator;
   momentumTransformation->localMomentum(globalMomentumAtRadiator,
@@ -165,8 +218,8 @@ StRichTrackFilter::StRichTrackFilter(StPhysicalHelixD& tpcHelix, double magField
   (*coordinateTransformation)(globalImpactPointAtRadiator,
 			      localImpactPointAtRadiator_temp);
   StThreeVector<double> localImpactPointAtRadiator(localImpactPointAtRadiator_temp.position().x(),
-						     localImpactPointAtRadiator_temp.position().y(),
-						     localImpactPointAtRadiator_temp.position().z());
+						   localImpactPointAtRadiator_temp.position().y(),
+						   localImpactPointAtRadiator_temp.position().z());
 
   // pad plane
  StGlobalCoordinate globalImpactPointAtPadPlane(tpcHelix.x(mPathLengthAtPadPlane),
@@ -177,12 +230,14 @@ StRichTrackFilter::StRichTrackFilter(StPhysicalHelixD& tpcHelix, double magField
   (*coordinateTransformation)(globalImpactPointAtPadPlane,
 			      localImpactPointAtPadPlane_temp);
   StThreeVector<double> localImpactPointAtPadPlane(localImpactPointAtPadPlane_temp.position().x(),
-						     localImpactPointAtPadPlane_temp.position().y(),
-						     localImpactPointAtPadPlane_temp.position().z());
+						   localImpactPointAtPadPlane_temp.position().y(),
+						   localImpactPointAtPadPlane_temp.position().z());
+
   // set data members
   setLocalMomentumAtRadiator(localMomentumAtRadiator);
   setLocalImpactPointAtRadiator(localImpactPointAtRadiator);
   setLocalImpactPointAtPadPlane(localImpactPointAtPadPlane);
+
 
 
   // determine if on pad plane, radiator
@@ -212,7 +267,8 @@ StRichTrackFilter::StRichTrackFilter(StPhysicalHelixD& tpcHelix, double magField
   StThreeVector<double> normalVector(0,0,-1);
   mIncidentAngleCheck = false;
   double trackTheta = acos(normalVector.dot(localMomentumAtRadiator)/localMomentumAtRadiator.mag());
-  if (trackTheta < M_PI/10.0) mIncidentAngleCheck=true;
+  if (trackTheta < M_PI/2.0) mIncidentAngleCheck=true;
+  
 }
 
 
