@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: StppLPfindMaker.h,v 1.2 2001/02/28 19:06:12 balewski Exp $
+// $Id: StppLPfindMaker.h,v 1.3 2001/04/10 16:28:52 perev Exp $
 // $Log: StppLPfindMaker.h,v $
+// Revision 1.3  2001/04/10 16:28:52  perev
+// ClassDef(,1) -> "ClassDef ( ,0 )
+//
 // Revision 1.2  2001/02/28 19:06:12  balewski
 // some reorganizations
 //
@@ -38,7 +41,7 @@ class St_tpt_track;
 class StppLPfindMaker : public StMaker 
 {
  private: 
-  // static Char_t  m_VersionCVS = "$Id: StppLPfindMaker.h,v 1.2 2001/02/28 19:06:12 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StppLPfindMaker.h,v 1.3 2001/04/10 16:28:52 perev Exp $";
 
   // setup
   float EtaCut;
@@ -81,9 +84,9 @@ class StppLPfindMaker : public StMaker
   // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
   
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StppLPfindMaker.h,v 1.2 2001/02/28 19:06:12 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StppLPfindMaker.h,v 1.3 2001/04/10 16:28:52 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
-  ClassDef(StppLPfindMaker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StppLPfindMaker,0)   //StAF chain virtual base class for Makers
 };
     
 #endif
