@@ -26,7 +26,7 @@ StMuTrackFourVec::StMuTrackFourVec(StMuTrack* t) : mTrack(t)
 
 StMuTrackFourVec::StMuTrackFourVec(StMuTrack* t, Int_t i) : mTrack(t), index(i)
 {
-    //index = i;
+    index = i;
     StThreeVectorF mom = t->momentum();
     //everything is a pion for now!!!!
     mVec = StLorentzVectorF( mom.massHypothesis(StPionPlus::instance()->mass() ) , mom);
@@ -39,7 +39,7 @@ StMuTrackFourVec::StMuTrackFourVec() : mTrack(NULL), index(0)
 
 void StMuTrackFourVec::Init(StMuTrack *track, StLorentzVectorF P, Int_t i)
 {
-  //index = i;
+  index = i;
   mVec = P;
   mTrack = track;
 }
