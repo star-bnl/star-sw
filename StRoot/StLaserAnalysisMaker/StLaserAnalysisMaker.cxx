@@ -1,5 +1,8 @@
-// $Id: StLaserAnalysisMaker.cxx,v 1.6 2000/06/23 16:42:08 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.7 2004/01/14 22:46:01 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.7  2004/01/14 22:46:01  fisyak
+// clean up
+//
 // Revision 1.6  2000/06/23 16:42:08  fisyak
 // remove params
 //
@@ -481,8 +484,9 @@ Int_t StLaserAnalysisMaker::Make(){
 	}
 	if (Debug()) {
 	  printf ("===================================\n");
-	  printf ("Total ADC %f ADC3x3 %f ratio: %f Sector %i padRow %i pad %i Time %i Y/Z tY/tZ %f %f %f %f\n",
-		  ADC,ADC3x3,ratio,sectorNumber,padRowNumber,padNumber,timeBin,Y,Z,tY,tZ);
+	  printf ("Total ADC %f ADC3x3 %f ratio: %f Sector %i padRow %i pad %i Time %i",
+		  ADC,ADC3x3,ratio,sectorNumber,padRowNumber,padNumber,timeBin);	  
+	  printf ("Y/Z tY/tZ %f %f %f %f\n",Y,Z,tY,tZ);
 	  printf ("Y/ dY \t:%f  \tZ/ dZ \t:%f\n",Y,Yav-Y,Z,Zav-Z);
 	  printf ("|\tidx");
 	  for (j=0;j<NZT;j++) printf("|\t%5i",j-NZ);  printf ("\n");
