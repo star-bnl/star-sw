@@ -1,10 +1,12 @@
 include $(STAR)/asps/staf/MakeArch.mk
 CMDS  = atlsim starsim gstar staf staf+ staf++ Staf
 SIZE  = 1 2 4 6 8 10 12 14 16 18 20 22 24 28 32 34 36
-INCL  = -Iinc  -I$(STAR)/asps/staf/inc
+INCL  = -Iinc  -I$(STAR)/asps/staf/inc -DSTAF
 STAF  = YES
+ifeq (,$(findstring $(STAF_ARCH),i386_linux2))
 CCload = YES
 Motif = YES
+endif
 ifneq (,$(findstring $(STAF_ARCH),sunx86_55))
 SHELL = /usr/bin/ksh
 GEA   = f77  -g
@@ -22,12 +24,12 @@ endif
 ifneq (,$(findstring $(STAF_ARCH),i386_linux2))
 SHELL = /bin/sh
 RMF   = /bin/rm  -f
-FOR   = g77  -w -O2 -fno-second-underscore
-GEA   = g77  -w -g
-# Fedunov: GST   = g77 -fPIC ? -fno-underscoring
-GST   = g77  -w -O2 -export-dynamic -fno-second-underscore
-LIB   = -ldl -L/usr/X11R6/lib/ -lX11 -lXm -lXt
-FSL   = g77  -w -O2
+FOR   = pgf77  -w -O2 -fno-second-underscore
+GEA   = pgf77  -w -g
+# Fedunov: GST   = pgf77 -fPIC ? -fno-underscoring
+GST   = pgf77  -w -O2 -export-dynamic -fno-second-underscore
+LIB   = -ldl -L/usr/X11R6/lib/ -lX11 -lXt # -lXm 
+FSL   = pgf77  -w -O2
 LDS   = ld   -ldl -shared
 CC    = cc
 CPP   = g++
@@ -124,9 +126,9 @@ LIBSL =
 RMF   = /bin/rm     -f
 LIB   = -L/usr/dt/lib -L/usr/SUNWspro/lib -ldl  -lM77 -lF77 -lsunmath -lmalloc
 endif
-load  = $(GST) -o /tmp/$@  fgsim.f  ccsim.o
+load  = $(GST) -g  fgsim.f  ccsim.o
 ifdef CCload
-load  = $(GSC) -o /tmp/$@  ccsim.cc fgsim.o
+load  = $(GSC) -g  ccsim.cc fgsim.o
 endif
 ifdef STAF
 load  += -DSTAF $(INCL)
@@ -194,18 +196,21 @@ endif
 .c.o:;  $(CC)  -c $*.c -o  $*.o
 .cc.o:; $(CPP) -c $(INCL)  $*.cc -o $*.o
 #
+qp_name.o: qp_name.c
+	 cc -c -g -I/cern/pro/include -I /cern/pro/src/pawlib/paw/ntuple qp_name.c
 #
 geant3: geant3.f; $(GEA) -o geant3 geant3.f `cernlib kernlib`
 #
-$(CMDS):ccsim.o fgsim.o agsim.o kgsim.o ggsim.o comisf.o comisc.o agdummy.o
-	$(load) agsim.o kgsim.o ggsim.o comisf.o comisc.o agdummy.o $(loadlibs)   $(LIB)
+$(CMDS):ccsim.o fgsim.o agsim.o kgsim.o ggsim.o comisf.o comisc.o qp_name.o agdummy.o
+	$(load) agsim.o kgsim.o ggsim.o comisf.o comisc.o agdummy.o qp_name.o\
+        $(loadlibs)   $(LIB)  -o $@
 #
 	echo '#!'$(PWD)'/$@'  > import.map
 ifneq (,$(findstring $(STAF_ARCH),rs_aix31 rs_aix32 rs_aix41))
 	nm $@|egrep ' [BAD] '|cut -f1 -d' '|sed -e 's/^#/ #/'|sort|uniq>>import.map
 	xlf $@ -o $@  -bE:import.map -lX11 -lXm -lXt
 endif
-	mv  /tmp/$@  ./$@
+#	mv  /tmp/$@  ./$@
  
 $(SIZE):
 	sed -e '5,15s/8 000/$@ 000/; 5,15s/2 000/500/' fgsim.f > simsize.f
