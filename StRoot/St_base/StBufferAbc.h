@@ -36,6 +36,13 @@ public:
  
    StBufferAbc(EMode mode);
    virtual ~StBufferAbc(){}
+//  From Pasha
+
+    virtual Int_t    GetDescriptor(const Char_t *tableName,Int_t timeStart, Int_t timeEnd) = 0;  // return the number of the rows for the object "tableName" with valididty (t1,t2)
+    virtual void     ReadFastArray(Char_t   *c, Int_t n1, Int_t n2, const Char_t *)        = 0;
+    virtual void     ReadFastArray(Char_t   *c, Int_t n1, Int_t n2, Int_t n3, const Char_t *) = 0;
+    virtual void     SetRecordNumber(Int_t recNum) = 0;
+//
  
    void     SetReadMode(){fMode = !kWrite;}
    void     SetWriteMode(){fMode = kWrite;}

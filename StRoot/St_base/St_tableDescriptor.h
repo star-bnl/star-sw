@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.h,v 1.3 1999/08/12 02:23:30 fine Exp $
+// $Id: St_tableDescriptor.h,v 1.4 1999/08/12 18:53:49 fine Exp $
 // $Log: St_tableDescriptor.h,v $
+// Revision 1.4  1999/08/12 18:53:49  fine
+// clash between St_tableDescriptor::GetSize and St_Table::GetSize resolved
+//
 // Revision 1.3  1999/08/12 02:23:30  fine
-// GetRowDescriptor must be const
+//  GetRowDescriptor must be const
 //
 // Revision 1.2  1999/08/11 14:44:39  fine
 // name clash with ROOT over enum resolved
@@ -38,8 +41,8 @@ class St_tableDescriptor : public St_Table {
              UInt_t     *GetIndexArray(Int_t columnIndex)          const;
              UInt_t      GetOffset(Int_t columnIndex)              const;
              Int_t       GetOffset(const Char_t *columnName=0)     const;
-             UInt_t      GetSize(Int_t columnIndex)                const;
-             Int_t       GetSize(const Char_t *columnName=0)       const;
+             UInt_t      GetColumnSize(Int_t columnIndex)          const;
+             Int_t       GetColumnSize(const Char_t *columnName=0) const;
              UInt_t      GetTypeSize(Int_t columnIndex)            const;
              Int_t       GetTypeSize(const Char_t *columnName=0)   const;
              UInt_t      GetDimensions(Int_t columnIndex)          const;
@@ -66,7 +69,7 @@ inline  const Char_t *St_tableDescriptor::GetColumnName(Int_t column)const{retur
 inline  UInt_t St_tableDescriptor::GetOffset(Int_t column)          const {return ((tableDescriptor_st *)At(column))->m_Offset;    }
 inline  UInt_t *St_tableDescriptor::GetIndexArray(Int_t column)     const {return ((tableDescriptor_st *)At(column))->m_IndexArray;}
 inline  UInt_t St_tableDescriptor::GetNumberOfColumns()             const {return GetNRows();                                      }
-inline  UInt_t St_tableDescriptor::GetSize(Int_t column)            const {return ((tableDescriptor_st *)At(column))->m_Size;      }
+inline  UInt_t St_tableDescriptor::GetColumnSize(Int_t column)      const {return ((tableDescriptor_st *)At(column))->m_Size;      }
 inline  UInt_t St_tableDescriptor::GetTypeSize(Int_t column)        const {return ((tableDescriptor_st *)At(column))->m_TypeSize;  }
 inline  UInt_t St_tableDescriptor::GetDimensions(Int_t column)      const {return ((tableDescriptor_st *)At(column))->m_Dimensions;}
 inline  St_Table::EColumnType St_tableDescriptor::GetColumnType(Int_t column) const {return EColumnType(((tableDescriptor_st *)At(column))->m_Type);}

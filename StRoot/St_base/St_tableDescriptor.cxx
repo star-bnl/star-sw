@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   09/08/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.cxx,v 1.2 1999/08/11 14:44:39 fine Exp $
+// $Id: St_tableDescriptor.cxx,v 1.3 1999/08/12 18:53:49 fine Exp $
 // $Log: St_tableDescriptor.cxx,v $
+// Revision 1.3  1999/08/12 18:53:49  fine
+// clash between St_tableDescriptor::GetSize and St_Table::GetSize resolved
+//
 // Revision 1.2  1999/08/11 14:44:39  fine
 // name clash with ROOT over enum resolved
 //
@@ -135,10 +138,10 @@ Int_t St_tableDescriptor::GetOffset(const Char_t *columnName) const
   return indx;
 }
 //____________________________________________________________________________
-Int_t St_tableDescriptor::GetSize(const Char_t *columnName) const 
+Int_t St_tableDescriptor::GetColumnSize(const Char_t *columnName) const 
 { 
   Int_t indx = GetColumnByName(columnName);
-  if (indx >= 0 ) indx = GetSize(indx);
+  if (indx >= 0 ) indx = GetColumnSize(indx);
   return indx;
 }
 //____________________________________________________________________________
