@@ -79,6 +79,7 @@ void RunStiMaker(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, c
     gSystem->Load("St_db_Maker");
     gSystem->Load("StDbLib");
     gSystem->Load("StDbBroker");
+    gSystem->Load("StSvtDbMaker");
     gSystem->Load("StDbUtilities");
     gSystem->Load("StTpcDb");
     gSystem->Load("StEvent");
@@ -91,19 +92,18 @@ void RunStiMaker(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, c
     gSystem->Load("StDAQMaker");
 
     gSystem->Load("StSvtClassLibrary");
-    gSystem->Load("StSvtDbMaker");
     gSystem->Load("StSvtDaqMaker");
     gSystem->Load("StSvtSimulationMaker");
     gSystem->Load("StSvtCalibMaker");
     gSystem->Load("StSvtSeqAdjMaker");
-    gSystem->Load("StSvtEvalMaker");
+    //gSystem->Load("StSvtEvalMaker");
     gSystem->Load("StSvtClusterMaker");
 
-    cout <<"Loading StMcEventMaker"<<endl;
-    gSystem->Load("StMcEventMaker");
+    //cout <<"Loading StMcEventMaker"<<endl;
+    //gSystem->Load("StMcEventMaker");
 
-    cout <<"Loading AssociationMaker"<<endl;
-    gSystem->Load("StAssociationMaker");
+    //cout <<"Loading AssociationMaker"<<endl;
+    //gSystem->Load("StAssociationMaker");
 
     cout <<"Loading Sti"<<endl;
     gSystem->Load("Sti");
