@@ -7,6 +7,7 @@
 #include "tte_hit_match.h"
 #include <math.h>
 
+int ds2ReallocTable (TABLE_HEAD_ST **h, char** ppData, int newsize);
 
 long type_of_call tte_hit_match_(
   TABLE_HEAD_ST        *g2t_hit_h,    G2T_TPC_HIT_ST          *g2t_hit ,
@@ -34,7 +35,7 @@ long type_of_call tte_hit_match_(
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
 #define tls_qsort_herb_i_ F77_NAME(tls_qsort_herb_i,TLS_QSORT_HERB_I)
-extern void type_of_call tls_qsort_herb_i_(long *, long *,long *,long *);
+extern void type_of_call tls_qsort_herb_i_(long *, void *,void *,long *);
 
 #define tls_quick_sort_r_ F77_NAME(tls_quick_sort_r,TLS_QUICK_SORT_R)
 extern void type_of_call tls_quick_sort_r_(long *, float *,float *,long *);
@@ -180,7 +181,7 @@ a match for id_current, now we fill the index table*/
 
     	  if (g2t_ent >= tpc_index_h->maxlen) { /* Increase table */
              newmaxlen = tpc_index_h->maxlen*1.3;
-             ds2ReallocTable(&tpc_index_h,&tpc_index,newmaxlen);}
+             ds2ReallocTable(&tpc_index_h,(char **)(&tpc_index),newmaxlen);}
 	  
 	  tpc_index[g2t_ent].type=tpc_index_type[0].tphit_mhitstpc;
           tpc_index[g2t_ent].key1=g2t_hit[start_p_g2t+i].id;
