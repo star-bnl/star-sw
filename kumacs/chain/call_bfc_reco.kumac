@@ -11,7 +11,7 @@
  exec $STAR/kumacs/chain/bfc _
    TOP=$STAR _
    tpc_sector_first=1 _
-   tpc_sector_last=1 _
+   tpc_sector_last=24 _
    gstar_settings=' field_only' _
    domain=' geometry tpc svt global ' _
    chain=' evin tpg svg tcl tpt tte_e tid sgr svm egr ev0 evout' _
