@@ -1,0 +1,34 @@
+/*   svm_match.idl
+ *   Table: svm_match
+ *
+ *   SVT-TPC matching table:
+ *   
+ *   This matching table complies with the offline software
+ *   design specs.  It is valid for both track-to-track
+ *   and track-to-space point(s) matching.  The type of match
+ *   is indicated by the match_type variable.  This table 
+ *   also permits different approaches for the same kind of
+ *   matching to be included, as indicated by the 'method'
+ *   variable.  For track-to-points matching several rows may
+ *   be filled that apply to the same particle trajectory.  The
+ *   variable 'next_match' refers to the primary key ('id')
+ *   in this same table for the next match item, thus building
+ *   a linked list.  It is a closed list, i.e. the last item
+ *   refers to the first.  All rows in the linked list can be
+ *   collected by following the foreign keys until the list
+ *   starts to repeat, any starting point in the list is valid.
+ */
+
+ struct svm_match  {
+  long id;           /* Primary key                             */
+  long svt_id;       /* Foreign key to either SVT point or track*/
+  long tpc_id;       /* Foreign key to either TPC point or track*/
+  short match_type;   /* Matching type index: 1=vec-vec, 2=vec-pt*/
+  long next_match;   /* Next svm_match id in linked list, last   */   
+                     /* to first, etc.                           */
+  short method;      /* Matching method index: PID/vertex on/off etc. */
+  short iflag;       /* Summary of matching quality information     */
+  float quality[5];  /* Detailed matching quality info for type/method*/
+ } ;
+/*  Last mod. for svm_match:   $Date: 1998/07/15 22:05:58 $ */
+
