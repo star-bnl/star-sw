@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.cxx,v 1.1 2003/10/15 18:20:32 porter Exp $
+ * $Id: StEStructEventCuts.cxx,v 1.2 2004/04/15 18:45:35 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -79,8 +79,7 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
   if(!strcmp(name,mnumTracksName.name)){
     mnumTracks[0]=atoi(vals[0]); 
     mnumTracks[1]=atoi(vals[1]);
-    float histRange[2]={0.,100}; 
-    mnumTracksName.idx=createCutHists(name,histRange);// mnumTracks);
+    mnumTracksName.idx=createCutHists(name,mnumTracks);
     return true;
   }    
     
@@ -108,6 +107,9 @@ void StEStructEventCuts::printCuts(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.cxx,v $
+ * Revision 1.2  2004/04/15 18:45:35  msd
+ * Removed hard-wired range of numTrack cut histograms
+ *
  * Revision 1.1  2003/10/15 18:20:32  porter
  * initial check in of Estruct Analysis maker codes.
  *
