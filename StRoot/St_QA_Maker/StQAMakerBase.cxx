@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.18 2002/04/23 01:59:56 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.19 2003/02/15 22:00:52 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.19  2003/02/15 22:00:52  genevb
+// Add tpcSectors, fix ftpc east/west charge
+//
 // Revision 2.18  2002/04/23 01:59:56  genevb
 // Addition of BBC/FPD histos
 //
@@ -90,6 +93,7 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
   mMultClass = 0;   // histogram for number of events in mult classes
   mTrigWord = 0;    // histogram for event trigger words
   mTrigBits = 0;    // histogram for event trigger bits
+  for (Int_t i=0; i<24; i++) mTpcSectorPlot[i] = 0;
 
 // for method MakeEvSum - from table software monitor
   m_glb_trk_chg=0;          //! all charge east/west, tpc
@@ -241,6 +245,18 @@ void StQAMakerBase::BookHistGeneral(){
     mMultClass = QAH::H1F("QaMultClass","event multiplicity class",5,-0.5,4.5);
     mMultClass->SetXTitle("mult class (0=?/MC, 1=LM, 2=MM, 3=HM)");
     mMultClass->SetYTitle("# of events");
+  }
+
+  char namebuf[32];
+  char titlebuf[64];
+  for (Int_t i=0; i<24; i++) {
+    sprintf(namebuf ,"QaTpcSector%d",i+1);
+    sprintf(titlebuf,"Hits in TPC Sector %d",i+1);
+    //mTpcSectorPlot[i] = QAH::H2F(namebuf,titlebuf,104,-52.,52.,150,50.,200.);
+    mTpcSectorPlot[i] = QAH::H2F(namebuf,titlebuf,104,-52.,52.,47,-0.5,46.5);
+    mTpcSectorPlot[i]->SetXTitle("along padrows [cm]");
+    //mTpcSectorPlot[i]->SetYTitle("across padrows [cm]");
+    mTpcSectorPlot[i]->SetYTitle("padrow");
   }
 }
 //_____________________________________________________________________________
