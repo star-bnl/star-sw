@@ -18,6 +18,7 @@
 #include "StDbLib/StDbManager.hh"
 #include "StDbLib/StDbConfigNode.hh"
 #include "StDbLib/StDataBaseI.hh"
+#include "StDetectorDbMaker/StDetectorDbTriggerID.h"
 #include "St_tcl_Maker/St_tcl_Maker.h"
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_L0_Trigger_Table.h"
@@ -161,6 +162,42 @@ Int_t StVertexSeedMaker::Make(){
     if (status != kStOk) return status;
   }
 
+
+  // Check trigger word
+  StDetectorDbTriggerID* dbTriggerId = StDetectorDbTriggerID::instance();
+  St_DataSet *daqReaderSet = GetDataSet("StDAQReader");
+  if (!daqReaderSet) {
+    gMessMgr->Error("StVertexSeedMaker: No StDAQReader!");
+    return kStErr;
+  }
+  StTrigSummary* trigSummary =
+    ((StDAQReader*) (daqReaderSet->GetObject()))->getTrigSummary();
+  UInt_t summary = 0;
+  switch (dbTriggerId->getDefaultTriggerLevel()) {
+    case (1) : { summary=trigSummary->L1summary[0]; break; }
+    case (2) : { summary=trigSummary->L2summary[0]; break; }
+    case (3) : { summary=trigSummary->L3summary[0]; break; }
+    default  : {}
+  }
+  Bool_t notTrig = kTRUE;
+  for (unsigned int iTrg = 0;
+       (notTrig) && (iTrg < dbTriggerId->getIDNumRows()) ; iTrg++) {
+    if (summary & (1 << (dbTriggerId->getDaqTrgId(iTrg)))) {
+      switch (dbTriggerId->getOfflineTrgId(iTrg)) {
+        case (2001) :
+        case (2003) :
+                      { notTrig = kFALSE; }
+        default     : {}
+      }
+    }
+  }
+  if (notTrig) {
+    gMessMgr->Info("StVertexSeedMaker: event does not satisfy triggers");
+    return kStOk;
+  }
+  
+
+
   // Get primary vertex from evr
   TDataSet *ds=GetDataSet("dst/vertex");
   if (!ds) {
@@ -258,7 +295,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.13 2003/02/12 04:19:39 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.14 2003/02/25 03:49:16 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -540,8 +577,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.13 2003/02/12 04:19:39 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.14 2003/02/25 03:49:16 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.14  2003/02/25 03:49:16  genevb
+// Choose only dAu minbias triggers
+//
 // Revision 1.13  2003/02/12 04:19:39  genevb
 // Small improvements
 //
