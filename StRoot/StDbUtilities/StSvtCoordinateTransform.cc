@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.5 2000/11/30 21:34:57 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.6 2001/02/07 19:14:25 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -291,8 +291,7 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
   
   Found = 0;
   ibarrel = (barrel*2)-1;
-  while(ibarrel<=barrel*2 && Found == 0){
-    ibarrel++;
+  do{
     for( iladder=ladderRangeLo; iladder<=ladderRangeHi; iladder++){
       HardWarePos = 1000*ibarrel+100*b.wafer()+iladder;
       if( IsOnWaferR(a.position(),HardWarePos)) {
@@ -300,7 +299,9 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
 	break;
       }
     }
-  }
+    if( Found) break;
+    ibarrel++;
+  }while (ibarrel<barrel*2);
   
   if( !Found && ladderMax !=0){
     
