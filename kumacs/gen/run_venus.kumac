@@ -1,4 +1,4 @@
-* RUN_VENUS.KUMAC
+* run_venus.kumac
 * 
 * generates venus events and writes out to xdf file
 * 
@@ -8,55 +8,83 @@
 * exec $STAR/kumacs/gen/run_venus
 * 
 * 6/22/98 Kathy Turner
-* 
+* 7/30/98 K. Turner - change to use utility kumacs 
 * ************************************************************************
 
  MACRO run__
-    [Nevents]=10 file=venus_output.xdf
+   TOP=$STAR _
+   domain='gen/ven' _
+   Nevents=10 _
+   file=venus_output.xdf
    
-       
-  DEFAULT = _
-./kumacs/util,_
-./kumacs/gen,_
-./pams/gen/kumac,_
-$STAR/kumacs/util,_
-$STAR/kumacs/gen,_
-$STAR/pams/gen/kumac
-
- def [DEFAULT]
- message 'Define default kumac search path as' def
+ ***********************************************************
+* PRINT OUT INPUT VALUES
+***********************************************************       
+ message ' *** TOP level directory      -->  ' [TOP]
+ message ' *** domains to load          -->  ' [domain]
+ message ' *** output file              -->  ' [file]        
+ message ' *** Num Events to process    -->  ' [Nevents]
  
- make gen/ven
- 
- exec setup_dir
- macro/global/import * 
-
-* initialize
+***********************************************************
+* GLOBAL VARIABLES 
+***********************************************************
+    
+ macro/global/create TOP              [TOP]
    
-RNDM  5289287  6745221
+***********************************************************
+* BEGINNING STUFF 
+***********************************************************
+   
+ exec $STAR/kumacs/util/setup_defaults 
+   
+ exec setup#setup 
+ 
+ macro/global/import *
+   
+ exec load_libraries#run  [domain]  
+ 
+**************************************************************
+* OPEN FILES
+* ***************************************************************
+ 
+ exec write_table_to_file#init ofile [file]
+ 
+* **************************************************************
+*  Setup for running venus
+* ****************************************************************
  
 message ' !!! Venus expects file optns.ven to be in top directory !!!!! '
  
-exec write_table_to_file#init ofile [file]
- 
-exec init_ven#init
+RNDM  5289287  6745221
   
-* loop over event
+exec init_ven#init
+ 
+ 
+* **************************************************************
+*  Run venus
+* ****************************************************************
  
 DO i=1,[Nevents]
-  message 'processing event ' [i]
+  message ' run_venus: processing event ' [i]
+* zero all tables
+  tabclear [event]
+* process event
   exec run_ven#run
+* print out table
   if [i].eq.1 then
     table/print  /dui/event/evgen/particle
   endif
-  exec write_table_to_file#write ofile /dui/event/evgen
+* write table to file  
+  exec write_table_to_file#write ofile [event]/evgen
 ENDDO
  
- 
-* end processing
+* **************************************************************
+*  End of Job
+* ****************************************************************
  
  exec write_table_to_file#close ofile
-
+ 
+ 
  return
  
 * ***********************************************************

@@ -8,56 +8,84 @@
 * exec $STAR/kumacs/gen/run_hijing
 * 
 * 6/22/98 Kathy Turner
-* 
+* 7/30/98 K. Turner - change to use utility kumacs 
 * ************************************************************************
 
  MACRO run__
-    [Nevents]=5 file=hijing_output.xdf
+   TOP=$STAR _
+   domain='gen/hij' _
+   Nevents=5 _
+   file=hijing_output.xdf
    
-       
-  DEFAULT = _
-./kumacs/util,_
-./kumacs/gen,_
-./pams/gen/kumac,_
-$STAR/kumacs/util,_
-$STAR/kumacs/gen,_
-$STAR/pams/gen/kumac
-
- def [DEFAULT]
- message 'Define default kumac search path as' def
+ ***********************************************************
+* PRINT OUT INPUT VALUES
+***********************************************************       
+ message ' *** TOP level directory      -->  ' [TOP]
+ message ' *** domains to load          -->  ' [domain]
+ message ' *** output file              -->  ' [file]        
+ message ' *** Num Events to process    -->  ' [Nevents]
  
- make gen/hij
+***********************************************************
+* GLOBAL VARIABLES 
+***********************************************************
+    
+ macro/global/create TOP              [TOP]
+   
+***********************************************************
+* BEGINNING STUFF 
+***********************************************************
+   
+ exec $STAR/kumacs/util/setup_defaults 
+   
+ exec setup#setup 
  
- exec setup_dir
  macro/global/import *
    
+ exec load_libraries#run  [domain]  
+ 
+**************************************************************
+* OPEN FILES
+* ***************************************************************
+ 
+ exec write_table_to_file#init ofile [file]
+ 
+* **************************************************************
+*  Setup for running hijing
+* ****************************************************************
+ 
  message ' !!! HIJING expects input file hijev.inp in top directory !!! '
  
 * initialize
    
 RNDM   114399  54720141
- 
-exec write_table_to_file#init ofile [file]
- 
+  
 exec init_hij#init
  
- 
-* loop over event
+* **************************************************************
+*  Run hijing
+* ****************************************************************
  
 DO i=1,[Nevents]
-  message ' processing event ' [i]
+  message ' run_hijing: processing event ' [i]
+* zero all tables
+  tabclear [event]
+* process event
   exec run_hij#run
+* print out table
   if [i].eq.1 then
     table/print  /dui/event/evgen/particle
   endif
-  exec write_table_to_file#write ofile /dui/event/evgen
+* write table to file  
+  exec write_table_to_file#write ofile [event]/evgen
 ENDDO
  
- 
-* end processing
+* **************************************************************
+*  End of Job
+* ****************************************************************
  
  exec write_table_to_file#close ofile
-
+ 
+ 
  return
  
 * ***********************************************************
