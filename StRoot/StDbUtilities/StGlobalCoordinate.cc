@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * $Id: StGlobalCoordinate.cc,v 1.2 2000/02/02 23:01:38 calderon Exp $
+ * $Id: StGlobalCoordinate.cc,v 1.3 2000/04/28 16:40:34 calderon Exp $
  *
  * Author:  brian May 20, 1998
  *
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: StGlobalCoordinate.cc,v $
+ * Revision 1.3  2000/04/28 16:40:34  calderon
+ * added constructor taking StThreeVectorF, because that's what
+ * StHits and StMcHits have.
+ *
  * Revision 1.2  2000/02/02 23:01:38  calderon
  * Changes for CC5
  * Tests withs StTpcDb still going.
@@ -43,8 +47,8 @@
  *
  *************************************************************************/
 #include "StGlobalCoordinate.hh"
-
-static const char rcsid[] = "$Id: StGlobalCoordinate.cc,v 1.2 2000/02/02 23:01:38 calderon Exp $";
+#include "StThreeVectorF.hh"
+static const char rcsid[] = "$Id: StGlobalCoordinate.cc,v 1.3 2000/04/28 16:40:34 calderon Exp $";
 
     
 StGlobalCoordinate::StGlobalCoordinate() {/**/}
@@ -54,6 +58,9 @@ StGlobalCoordinate::StGlobalCoordinate(const double x, const double y, const dou
 
 StGlobalCoordinate::StGlobalCoordinate(const StThreeVector<double>& x)
     : mPosition(x) {/**/}
+
+StGlobalCoordinate::StGlobalCoordinate(const StThreeVectorF& x)
+    : mPosition(x.x(), x.y(), x.z()) {/**/}
 
 StGlobalCoordinate::~StGlobalCoordinate() {/**/}
 

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StGlobalCoordinate.hh,v 1.2 2000/02/02 23:01:38 calderon Exp $
+ * $Id: StGlobalCoordinate.hh,v 1.3 2000/04/28 16:40:35 calderon Exp $
  *
  * Author:  brian Feb 6, 1998
  *
@@ -11,6 +11,10 @@
  *************************************************************************
  *
  * $Log: StGlobalCoordinate.hh,v $
+ * Revision 1.3  2000/04/28 16:40:35  calderon
+ * added constructor taking StThreeVectorF, because that's what
+ * StHits and StMcHits have.
+ *
  * Revision 1.2  2000/02/02 23:01:38  calderon
  * Changes for CC5
  * Tests withs StTpcDb still going.
@@ -48,6 +52,7 @@
 #include <iostream.h>
 
 #include "StThreeVector.hh"
+class StThreeVectorF;
 
 class StGlobalCoordinate
 {         
@@ -55,6 +60,7 @@ public:
     StGlobalCoordinate();
     StGlobalCoordinate(const double, const double, const double);
     StGlobalCoordinate(const StThreeVector<double>&);
+    StGlobalCoordinate(const StThreeVectorF&);
 
     virtual ~StGlobalCoordinate();
     //StGlobalCoordinate(const StGlobalCoordinate&);
