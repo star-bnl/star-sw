@@ -1,14 +1,18 @@
-/* $Id: acsjcal.c,v 1.2 2004/04/01 18:56:19 jeromel Exp $ */
-/* $Log: acsjcal.c,v $
- * Revision 1.2  2004/04/01 18:56:19  jeromel
- * Missing include header
- *
-/* Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
-/*
-/*
-/* Revision 1.2  2003/10/03 17:18:09  nevski
-/* better dynamic call
-/* */
+/* 
+   $Id: acsjcal.c,v 1.3 2004/04/01 21:51:59 jeromel Exp $
+   $Log: acsjcal.c,v $
+   Revision 1.3  2004/04/01 21:51:59  jeromel
+   Fixed comments. Return -1.
+
+   Revision 1.2  2004/04/01 18:56:19  jeromel
+   Missing include header
+   
+   Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
+   
+   
+   Revision 1.2  2003/10/03 17:18:09  nevski
+   better dynamic call
+*/
 #include <stdio.h>
 
 #define MDPOOL mdpool_;
@@ -88,6 +92,6 @@ int acsjcal_(iadr,np,p01,p02,p03,p04,p05,p06,p07,p08,p09,p10,
                              p21,p22,p23,p24,p25,p26,p27,p28,p29,p30);
     default:
      printf(" acsjcal ERROR: This case not yet implemented, npar=%i \n",*np);
-     return;
+     return -1;
   }
 }
