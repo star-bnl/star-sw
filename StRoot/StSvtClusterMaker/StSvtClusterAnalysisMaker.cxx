@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.13 2001/07/19 20:42:20 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.14 2001/08/07 20:52:15 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.14  2001/08/07 20:52:15  caines
+ * Implement better packing of svt hardware and charge values
+ *
  * Revision 1.13  2001/07/19 20:42:20  caines
- * Add Reset functions
+ *  Add Reset functions
  *
  * Revision 1.12  2001/05/04 14:20:05  caines
  * Improved historgramming
@@ -187,7 +190,7 @@ Int_t StSvtClusterAnalysisMaker::GetSvtPixels()
 Int_t StSvtClusterAnalysisMaker::SetSvtAnalysis()
 {
   mSvtAnalSet = new St_ObjectSet("StSvtAnalResults");
-  AddData(mSvtAnalSet);  
+  AddConst(mSvtAnalSet);  
   SetOutput(mSvtAnalSet); //Declare for output
 
   mSvtAnalColl = new StSvtHybridCollection(mSvtAdjEvent->getConfiguration());
@@ -317,7 +320,7 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
 	  }
 	  mSvtAnalClusters = new StSvtAnalysedHybridClusters(barrel, ladder, wafer, hybrid);
           if(mSvtAnalClusters) {
-	    mSvtAnalClusters->setMembers(mSvtAnalysis->GetnSvtClu(),wafer ,ladder);
+	    mSvtAnalClusters->setMembers(mSvtAnalysis->GetnSvtClu(),index);
 	    mSvtAnalClusters->setSvtHit(mSvtAnalysis);
 	    mSvtAnalColl->at(index) = mSvtAnalClusters;
 	   
@@ -511,10 +514,12 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
                seq =  tempMemberInfo[clu][mem].seq;
                actualAn =  tempMemberInfo[clu][mem].actualAnode; //actual anode
                mHybridAdjData->getListSequences(listAn,mSequence,svtSequence);
+	       
 
                stTimeBin =svtSequence[seq].startTimeBin; 
                len = svtSequence[seq].length; 
                adc = svtSequence[seq].firstAdc;
+	       
 	       int count=0;
 	       for(int k = 0; k < len ; k++)
                  {

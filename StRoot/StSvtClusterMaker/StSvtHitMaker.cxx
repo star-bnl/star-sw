@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.14 2001/07/24 23:43:08 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.15 2001/08/07 20:52:15 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.15  2001/08/07 20:52:15  caines
+ * Implement better packing of svt hardware and charge values
+ *
  * Revision 1.14  2001/07/24 23:43:08  caines
  * Better flagging of hits out of drift range
  *
@@ -237,7 +240,7 @@ Int_t StSvtHitMaker::Make()
 
 void StSvtHitMaker::TransformIntoSpacePoint(){
 
-  int index, TotHits=0;
+  int index, TotHits=0, GoodHit=0;
   
   srs_srspar_st *srs_par = m_srs_srspar->GetTable();
   svg_geom_st* geom = m_geom->GetTable();
@@ -299,7 +302,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	    mPos.setZ(globalCoord.position().z());
 	    mSvtBigHit->svtHit()[clu].setPosition(mPos);
 	 
-	  
+	    if(mSvtBigHit->svtHit()[clu].flag() < 4) GoodHit++; 
 	  }
 	  
 	  if( mSvtBigHit->numOfHits() > 0){
@@ -314,6 +317,8 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
     }
     
   }
+
+  gMessMgr->Info() << "Found " << GoodHit << " good hits " << endm;
 }
 
 //____________________________________________________________________________

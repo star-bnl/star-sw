@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.12 2001/04/25 18:34:44 perev Exp $
+ * $Id: StSvtAnalysis.cc,v 1.13 2001/08/07 20:52:15 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -51,6 +51,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.13  2001/08/07 20:52:15  caines
+ * Implement better packing of svt hardware and charge values
+ *
  * Revision 1.12  2001/04/25 18:34:44  perev
  * HPcorrs
  *
@@ -96,6 +99,7 @@
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
+#include "StMessMgr.h"
 #include "StSequence.hh"
 #include "StDAQMaker/StSVTReader.h"
 #include "StSvtClassLibrary/StSvtHybridData.hh"
@@ -634,7 +638,6 @@ void StSvtAnalysis::newCluster(int clu, int numAnodes, int igt3)
    mCluNumPixels[clu]            = mNumPixels;      //number of pixels
    mCluNumAnodes[clu]            = numAnodes;      //number of anodes including loop backs.
    mHybridNum[clu]               = m_hybIndex;     //hybrid index.
-
 
 
    for (int i1=0;i1<iRows;i1++)        //be more clever in the futre but for now....
@@ -1397,19 +1400,19 @@ int StSvtAnalysis::GetCluNumAnodes(int clu)
 void StSvtAnalysis::Report(int index)
 {
  
- cout<<"##############################################################"<<endl;
- cout<<"##                                                          ##"<<endl;
- cout<<"## Cluster Analysis Report For hybrid index = "<<index<<"   ##"<<endl;
- cout<<"##                                                          ##"<<endl;
- cout<<"##############################################################"<<endl;
- cout<<"\n";
+ gMessMgr->Debug()<<"##############################################################"<<endm;
+ gMessMgr->Debug()<<"##                                                          ##"<<endm;
+ gMessMgr->Debug()<<"## Cluster Analysis Report For hybrid index = "<<index<<"   ##"<<endm;
+ gMessMgr->Debug()<<"##                                                          ##"<<endm;
+ gMessMgr->Debug()<<"##############################################################"<<endm;
+ gMessMgr->Debug()<<"\n";
  
  mNumOfClusters = mHybridCluster->getNumberOfClusters();
 
  if(mNumOfClusters == 0)                     
    {
-    cout <<"+++++++++ Clusters found:  None "<<"\n";
-    cout<<"\n";
+    gMessMgr->Debug() <<"+++++++++ Clusters found:  None "<<"\n";
+    gMessMgr->Debug()<<"\n";
    }
 
  else {
@@ -1418,28 +1421,28 @@ void StSvtAnalysis::Report(int index)
    { 
     mNumOfMembers = mHybridCluster->getNumberOfMembers(clu);
 
-    cout << "cluster index = "<<' '<< clu <<"\n";
-    cout << "Number of Members = " <<' '<<  mNumOfMembers <<"\n";
-    cout << "First anode number =" <<' '<<mCluFirstAnode[clu]<<"\n";
-    cout << "Last anode number ="<<' '<<mCluLastAnode[clu]<<"\n";
-    cout << "minimum time bucket =" <<' '<<mCluFirstTimeBin[clu]<<"\n";
-    cout << "maximum timebucket ="<<' '<<mCluLastTimeBin[clu]<<"\n";
-    cout<< endl;
+    gMessMgr->Debug() << "cluster index = "<<' '<< clu <<"\n";
+    gMessMgr->Debug() << "Number of Members = " <<' '<<  mNumOfMembers <<"\n";
+    gMessMgr->Debug() << "First anode number =" <<' '<<mCluFirstAnode[clu]<<"\n";
+    gMessMgr->Debug() << "Last anode number ="<<' '<<mCluLastAnode[clu]<<"\n";
+    gMessMgr->Debug() << "minimum time bucket =" <<' '<<mCluFirstTimeBin[clu]<<"\n";
+    gMessMgr->Debug() << "maximum timebucket ="<<' '<<mCluLastTimeBin[clu]<<"\n";
+    gMessMgr->Debug()<< endm;
     
-    cout<<"****************************************************"<<"\n";
-    cout<<"\n";
+    gMessMgr->Debug()<<"****************************************************"<<"\n";
+    gMessMgr->Debug()<<"\n";
    }}
- cout<<"****************************************************"<<endl;
- cout<<"------- Moment Analysis Results for hybrid "<<index<<" ------"<<endl;
- cout<<"****************************************************"<<endl;
+ gMessMgr->Debug()<<"****************************************************"<<endm;
+ gMessMgr->Debug()<<"------- Moment Analysis Results for hybrid "<<index<<" ------"<<endm;
+ gMessMgr->Debug()<<"****************************************************"<<endm;
  
  {for( int clu = 0; clu <  mNumOfClusters; clu++)
    {
-    cout<<"mAverageHybAn"<<"["<<clu<<"] ="<<mMeanClusterAnode[clu]<<endl;
-    cout<<"mAverageTimeBin"<<"["<<clu<<"] ="<<mMeanClusterTimeBin[clu]<<endl;
+    gMessMgr->Debug()<<"mAverageHybAn"<<"["<<clu<<"] ="<<mMeanClusterAnode[clu]<<endm;
+    gMessMgr->Debug()<<"mAverageTimeBin"<<"["<<clu<<"] ="<<mMeanClusterTimeBin[clu]<<endm;
    }}
 
-  cout<<"--------------------------------------------------------"<<endl;
+  gMessMgr->Debug()<<"--------------------------------------------------------"<<endm;
  }
 
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.cc,v 1.2 2000/08/24 04:27:56 caines Exp $
+ * $Id: StSvtAnalysedHybridClusters.cc,v 1.3 2001/08/07 20:52:15 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.cc,v $
+ * Revision 1.3  2001/08/07 20:52:15  caines
+ * Implement better packing of svt hardware and charge values
+ *
  * Revision 1.2  2000/08/24 04:27:56  caines
  * Fixed casting warnings so compiles without errors on linux
  *
@@ -41,11 +44,11 @@ StSvtAnalysedHybridClusters::~StSvtAnalysedHybridClusters()
  delete [] mPos;
 }
 
-void StSvtAnalysedHybridClusters::setMembers(int numOfClu, int wafer, int ladder)
+void StSvtAnalysedHybridClusters::setMembers(int numOfClu, int index)
 {
 
  mNumOfHits = numOfClu;
- mHardWarePosition = getLayerID()*1000 + 100*wafer + ladder;
+ mHardWarePosition = index;
  mSvtHitData = new StSvtHitData[mNumOfHits];
  mSvtHit = new StSvtHit[mNumOfHits];
  mPos = new StThreeVector<double>[mNumOfHits];
@@ -78,6 +81,10 @@ int StSvtAnalysedHybridClusters::setSvtHit(StSvtAnalysis* mSvtAnalysis)
     mGlobalPos.setX(sqrt(mSvtAnalysis->GetCluXCov(hit)));
     mGlobalPos.setY(sqrt(mSvtAnalysis->GetCluYCov(hit)));
     mGlobalPos.setZ(0.0042);
+
+    mGlobalPos.setX(0.1);
+    mGlobalPos.setY(0.1);
+    mGlobalPos.setZ(0.1);
     
     mSvtHit[hit].setPositionError(mGlobalPos); 
 
@@ -91,7 +98,6 @@ int StSvtAnalysedHybridClusters::setSvtHit(StSvtAnalysis* mSvtAnalysis)
     mSvtHitData[hit].peakAdc = mSvtAnalysis->GetCluPeakAdc(hit);
     mSvtHitData[hit].numOfAnodesInClu = mSvtAnalysis->GetCluNumAnodes(hit);
     mSvtHitData[hit].numOfPixelsInClu = mSvtAnalysis->GetCluNumPixels(hit);
-    
     mSvtHitData[hit].mom2[0] = mSvtAnalysis->GetSecondMomClusterTimeBin(hit);
     mSvtHitData[hit].mom2[1] = mSvtAnalysis->GetSecondMomClusterAnode(hit);
 
