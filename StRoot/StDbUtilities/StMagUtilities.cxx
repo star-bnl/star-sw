@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.56 2004/10/20 17:52:36 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.57 2004/12/08 01:25:29 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,14 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.57  2004/12/08 01:25:29  jhthomas
+ * Add new method - kGridLeak.  It can be invoked with a chain flag.
+ * Fix Jeromes Insure bug with power of 2 check.  New function to do this cleanly.
+ * PredictSpaceCharge will now automatically select SpaceCharge with or without
+ * the GridLeak ... so you don't have to do it manually.
+ * In the future, InnerOuter ratio and charge shape need to be drawn from the DB.
+ * PredictSpaceCharge and ApplySpaceCharge (both) need to follow these changes.
+ *
  * Revision 1.56  2004/10/20 17:52:36  jhthomas
  * Add GetSpaceChargeMode() function
  *
@@ -225,8 +233,9 @@ enum   DistortSelect                                                  <br>
   kIFCShift          = 0x200,    // Bit 10                            <br>
   kSpaceCharge       = 0x400,    // Bit 11                            <br>
   kSpaceChargeR2     = 0x800,    // Bit 12                            <br>
-  kShortedRing       = 0x1000    // Bit 13                            <br>
-  kFast2DBMap        = 0x2000    // bit 14                            <br>
+  kShortedRing       = 0x1000,   // Bit 13                            <br>
+  kFast2DBMap        = 0x2000,   // bit 14                            <br>
+  kGridLeak          = 0x4000    // bit 15                            <br>
 } ;                                                                   <br>
 
 Note that the option flag used in the chain is 2x larger 
@@ -289,6 +298,7 @@ StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
   GetTPCVoltages()      ;    // Get the TPC Voltages from the DB
   GetSpaceCharge()      ;    // Get the spacecharge variable from the DB
   GetSpaceChargeR2()    ;    // Get the spacecharge variable R2 from the DB
+  // ManualSpaceChargeR2(0.01); //JT Test  // Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
   GetShortedRing()      ;    // Get the parameters that describe the shorted ring on the field cage
   CommonStart( mode )   ;    // Read the Magnetic and Electric Field Data Files, set constants
 }
@@ -304,6 +314,7 @@ StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t 
   fTpcVolts      =  0 ;      // Do not get TpcVoltages out of the DB   - use defaults in CommonStart
   ManualSpaceCharge(0);      // Do not get SpaceCharge out of the DB   - use defaults inserted here.
   ManualSpaceChargeR2(0);    // Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
+  // ManualSpaceChargeR2(0.01); //JT Test  // Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
   CommonStart( mode ) ;      // Read the Magnetic and Electric Field Data Files, set constants
 }
 
@@ -447,7 +458,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
 
   mDistortionMode = mode;
   if ( !( mode & ( kBMap | kPadrow13 | kTwist | kClock | kMembrane | kEndcap | kIFCShift | kSpaceCharge | kSpaceChargeR2 
-                         | kShortedRing | kFast2DBMap ))) 
+                         | kShortedRing | kFast2DBMap | kGridLeak ))) 
     {
        mDistortionMode |= kFast2DBMap ;
        mDistortionMode |= kPadrow13 ;
@@ -697,6 +708,13 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
 
   if (mDistortionMode & kShortedRing) { 
       UndoShortedRingDistortion ( Xprime1, Xprime2 ) ;
+      for (unsigned int i=0; i<3; ++i) {
+	  Xprime1[i] = Xprime2[i];
+      }
+  }
+
+  if (mDistortionMode & kGridLeak) { 
+      UndoGridLeakDistortion ( Xprime1, Xprime2 ) ;
       for (unsigned int i=0; i<3; ++i) {
 	  Xprime1[i] = Xprime2[i];
       }
@@ -1417,7 +1435,7 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
   
   const Int_t     ROWS        =  129 ;  // (2**n + 1)    
   const Int_t     COLUMNS     =  257 ;  // (2**m + 1) 
-  const Int_t     ITERATIONS  =  100 ;  // About 0.1 seconds per iteration
+  const Int_t     ITERATIONS  =  750 ;  // About 1 seconds per iteration
   const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
   const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
 
@@ -1466,9 +1484,13 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 	      // Next line is Wiemans fit to the HiJet Charge distribution; then integrated in Z due to drifting ions
 	      Charge(i,j) = zterm * ( 3191/(Radius*Radius) + 122.5/Radius - 0.395 ) / 15823 ;
 	      // Next line is for 1/R**2 charge deposition in the TPC; then integrated in Z due to drifting iones
-	      //Charge(i,j) = zterm / ( TMath::Log(OFCRadius/IFCRadius) * ( Radius*Radius ) ) ; 
+	      // Charge(i,j) = zterm / ( TMath::Log(OFCRadius/IFCRadius) * ( Radius*Radius ) ) ; 
 	      // Next line is for 1/R**3 charge deposition in the TPC; then integrated in Z due to drifting iones
 	      // Charge(i,j) = zterm / ( ( 1/IFCRadius - 1/OFCRadius) * ( Radius*Radius*Radius ) ) ; 
+	      // Next few lines are for a 1/R**N distribution where N may be any real number but not equal to 2.0
+	      // Float_t N = 1.65 ;  // 1.65 is a fit to real charge distribution by GVB on 11/4/2004
+	      // Charge(i,j) = zterm * (2-N) /
+	      //            ( ( TMath::Power(OFCRadius,2-N) - TMath::Power(IFCRadius,2-N) ) * TMath::Power(Radius,N) ) ;
 	    } // All cases normalized to have same total charge as the Uniform Charge case == 1.0
 	}
 
@@ -1659,6 +1681,13 @@ void StMagUtilities::UndoTiltDistortion( const Float_t x[], Float_t Xprime[] )
   Float_t  Rlist[ROWS], Zedlist[COLUMNS] , Philist[PHISLICES] ;
 
   static Int_t DoOnce = 0 ;
+
+  // This is a work in progress and is not yet complete.  Do not use.
+  Xprime[0] = x[0] ;  // JT test.
+  Xprime[1] = x[1] ;  // JT test.
+  Xprime[2] = x[2] ;  // JT test.
+  if ( DoOnce == 0 ) return ;
+  // end
 
   if ( DoOnce == 0 )
     {
@@ -1893,6 +1922,7 @@ void StMagUtilities::ReadField( )
   if ( mDistortionMode & kMembrane )      printf (" + Central Membrane") ;
   if ( mDistortionMode & kEndcap )        printf (" + Endcap") ;
   if ( mDistortionMode & kShortedRing )   printf (" + ShortedRing") ;
+  if ( mDistortionMode & kGridLeak )      printf (" + GridLeak") ;
 
   printf("\n");
   
@@ -2350,9 +2380,9 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayV, const TMatrix &Charge, 
 
   //Check that number of ROWS and COLUMNS is suitable for a binary expansion
 
-  if ( TMath::Log(ROWS-1) / TMath::Log(2) != (int)( 1.0e-6 + TMath::Log(ROWS-1) / TMath::Log(2) ) )
+  if ( !IsPowerOfTwo(ROWS-1) )
     { cout << "StMagUtilities::PoissonRelaxation - Error in the number of ROWS.  Must be 2**M - 1" << endl ; exit(1) ; }
-  if ( TMath::Log(COLUMNS-1) / TMath::Log(2) != (int)( 1.0e-6 + TMath::Log(COLUMNS-1) / TMath::Log(2) ) )
+  if ( !IsPowerOfTwo(COLUMNS-1) )
     { cout << "StMagUtilities::PoissonRelaxation - Error in the number of COLUMNS.  Must be 2**N - 1" << endl ; exit(1) ; }
   
   //Solve Poisson's equation in cylindrical coordinates by relaxation technique
@@ -2441,11 +2471,11 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
   TMatrix ArrayE(ROWS,COLUMNS) ;
 
   //Check that the number of ROWS and COLUMNS is suitable for a binary expansion
-  if ( TMath::Log((ROWS-1)/3) / TMath::Log(2) != (int)( 1.0e-6 + TMath::Log((ROWS-1)/3) / TMath::Log(2) ) )
+  if ( !IsPowerOfTwo((ROWS-1)/3)    )
     { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of ROWS.  Must be 3 * 2**M - 1" << endl ; exit(1) ; }
-  if ( TMath::Log((COLUMNS-1)/3) / TMath::Log(2) != (int)( 1.0e-6 + TMath::Log((COLUMNS-1)/3) / TMath::Log(2) ) )
+  if ( !IsPowerOfTwo((COLUMNS-1)/3) )
     { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of COLUMNS.  Must be 3 * 2**N - 1" << endl ; exit(1) ; }
-  if ( TMath::Log(PHISLICES/3) / TMath::Log(2) != (int)( 1.0e-6 + TMath::Log(PHISLICES/3) / TMath::Log(2) ) )
+  if ( !IsPowerOfTwo(PHISLICES/3)   )
     { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of PHISLICES.  Must be 3 * 2**N" << endl ; exit(1) ; }
   
   //Solve Poisson's equation in cylindrical coordinates by relaxation technique
@@ -2999,7 +3029,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    if ( (Charge != 1) && (Charge != -1) )                    return(0) ; // Fail
    if ( (DCA < -4.0) || (DCA > 4.0) )                        return(0) ; // Fail
 
-   const Float_t InnerOuterRatio = 1.3 ; // Ratio of size of the inner pads to the outer pads (real world == 1.0)
+   const Float_t InnerOuterRatio = 1.3 ; // Ratio of size of the inner pads to the outer pads (real world == 1.0 or 1.3)
    const Int_t   INNER    = 13  ;        // Number of TPC rows in the inner sector
    const Int_t   ROWS     = 45  ;        // Total number of TPC rows per sector (Inner + Outer)
    const Int_t   RefIndex =  7  ;        // Refindex 7 (TPCRow 8) is about where 1/R**2 has no effect on points (~97 cm radius).
@@ -3048,8 +3078,24 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
        while ( DeltaTheta >=   TMath::Pi() ) DeltaTheta -= TMath::TwoPi() ;
        Ztrack[i]  =   VertexZ + ChargeB*DeltaTheta*R0*Pz / Pt ;
        xx[0] = Xtrack[i] ; xx[1] = Ytrack[i] ; xx[2] = Ztrack[i] ;
-       UndoSpaceChargeR2Distortion(xx,xxprime) ;     
-       Xtrack[i] = 2*xx[0] - xxprime[0] ; Ytrack[i] = 2*xx[1] - xxprime[1] ;  Ztrack[i] = 2*xx[2] - xxprime[2] ; 
+
+       if (mDistortionMode & kSpaceChargeR2) {    // Daisy Chain all possible distortions and sort on flags
+	 UndoSpaceChargeR2Distortion ( xx, xxprime ) ;
+	 for (unsigned int i=0; i<3; ++i) {
+	   xx[i] = xxprime[i];
+	 }
+       }
+       if (mDistortionMode & kGridLeak) { 
+	 UndoGridLeakDistortion ( xx, xxprime ) ;
+	 for (unsigned int i=0; i<3; ++i) {
+	   xx[i] = xxprime[i];
+	 }
+       }
+
+       Xtrack[i] = 2*Xtrack[i] - xx[0] ; 
+       Ytrack[i] = 2*Ytrack[i] - xx[1] ;  
+       Ztrack[i] = 2*Ztrack[i] - xx[2] ; 
+
        if ( i == RefIndex )
 	 {
 	   Xreference = Xtrack[i] ;  // This point on the circle is the reference for the rest of the fit
@@ -3129,4 +3175,137 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
 }
 
 
+//________________________________________
 
+/// Check if integer is a power of 2
+
+Int_t StMagUtilities::IsPowerOfTwo(Int_t i)
+{
+  Int_t j = 0;
+  while( i > 0 ) { j += (i&1) ; i = (i>>1) ; }
+  if ( j == 1 ) return(1) ;
+  return(0) ;
+}
+
+
+//________________________________________
+
+/// Grid Leakage Calculation
+/*!
+  Calculate the distortions due to charge leaking out of the gap between the inner and outer sectors
+  as well as the gap between the IFC and the innersector, as well as outersector and OFC.
+  Original work by Gene VanBuren, and J. Thomas 
+*/
+void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[] )
+{ 
+  
+  const Int_t     ROWS        =  257 ;  // (2**n + 1)    
+  const Int_t     COLUMNS     =  257 ;  // (2**m + 1) 
+  const Int_t     ITERATIONS  =  750 ;  // About 1 seconds per iteration
+  const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
+  const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
+
+  Float_t   Er_integral, Ephi_integral ;
+  Double_t  r, phi, z ;
+
+  static Int_t DoOnce = 0 ;
+
+  if ( DoOnce == 0 )
+    {
+      TMatrix  ArrayV(ROWS,COLUMNS), Charge(ROWS,COLUMNS) ;
+      TMatrix  ArrayE(ROWS,COLUMNS), EroverEz(ROWS,COLUMNS) ;
+      Float_t   Rlist[ROWS], Zedlist[COLUMNS] ;
+      //Fill arrays with initial conditions.  V on the boundary and Charge in the volume.      
+
+      for ( Int_t j = 0 ; j < COLUMNS ; j++ )  
+	{
+	  Double_t zed = j*GRIDSIZEZ ;
+	  Zedlist[j] = zed ;
+	  for ( Int_t i = 0 ; i < ROWS ; i++ )  
+	    {
+	      Double_t Radius = IFCRadius + i*GRIDSIZER ;
+	      ArrayV(i,j) = 0 ;
+	      Charge(i,j) = 0 ;
+	      Rlist[i] = Radius ;
+	    }
+	}      
+
+      Float_t GridLeakageStrength = 15   ;      // Somewhere between zero and 20 (?) 
+      Float_t deltaR              = 3.0  ;      // About 3 cm.  Sheet of charge will be double this thickness.
+      // Simulation of charge coming out the gaps int the grids.  Note it is *not* integrated in Z.
+      // Grid leakage strength must be set manually.  Once set, the correction will automatically go 
+      // up and down with the Luminosity of the beam. This is an assumption that may or may not be true.
+      for ( Int_t j = 1 ; j < COLUMNS-1 ; j++ )  
+	{
+	  // Double_t zed = j*GRIDSIZEZ ;
+	  for ( Int_t i = 1 ; i < ROWS-1 ; i++ ) 
+	    { 
+	      Double_t Radius = IFCRadius + i*GRIDSIZER ;
+	      // Charge leak between the IFC and the Inner Sector 
+	      if ( (Radius >= 55.0  - deltaR) && (Radius <= 55.0 + deltaR ) ) Charge(i,j) = 0.0 * GridLeakageStrength ;
+	      // Charge leak at the gap between the inner and outer sectors
+	      if ( (Radius >= GAPRADIUS - deltaR) && (Radius <= GAPRADIUS + deltaR) ) Charge(i,j) = 1.0 * GridLeakageStrength ;
+	      // Charge leak between the OFC and the Outer Sector 
+	      if ( (Radius >= 195.0 - deltaR) && (Radius <= 195.0 + deltaR ) ) Charge(i,j) = 0.0 * GridLeakageStrength ;
+	    } 
+	}
+
+      PoissonRelaxation( ArrayV, Charge, EroverEz, ROWS, COLUMNS, ITERATIONS ) ;
+
+      //Interpolate results onto standard grid for Electric Fields
+      Int_t ilow=0, jlow=0 ;
+      Float_t save_Er[2] ;	      
+      for ( Int_t i = 0 ; i < neZ ; ++i ) 
+	{
+	  z = TMath::Abs( eZList[i] ) ;
+	  for ( Int_t j = 0 ; j < neR ; ++j ) 
+	    { // Linear interpolation
+	      r = eRadius[j] ;
+	      Search( ROWS,   Rlist, r, ilow ) ;  // Note switch - R in rows and Z in columns
+	      Search( COLUMNS, Zedlist, z, jlow ) ;
+	      if ( ilow < 0 ) ilow = 0 ;  // artifact of Root's binsearch, returns -1 if out of range
+	      if ( jlow < 0 ) jlow = 0 ;   
+	      if ( ilow + 1  >=  ROWS - 1 ) ilow =  ROWS - 2 ;	      
+	      if ( jlow + 1  >=  COLUMNS - 1 ) jlow =  COLUMNS - 2 ; 
+	      save_Er[0] = EroverEz(ilow,jlow) + (EroverEz(ilow,jlow+1)-EroverEz(ilow,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
+	      save_Er[1] = EroverEz(ilow+1,jlow) + (EroverEz(ilow+1,jlow+1)-EroverEz(ilow+1,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
+	      gridleakEr[i][j] = save_Er[0] + (save_Er[1]-save_Er[0])*(r-Rlist[ilow])/GRIDSIZER ;
+	    }
+	}
+
+      DoOnce = 1 ;      
+
+    }
+  
+  r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
+  phi    =  TMath::ATan2(x[1],x[0]) ;
+  if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
+  z      =  x[2] ;
+  if ( z > 0 && z <  0.2 ) z =  0.2 ;               // Protect against discontinuity at CM
+  if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
+  
+  Float_t phi0     =  TMath::Pi() * ((Int_t)(0.5 + phi*6/TMath::Pi())) / 6.0 ;
+  Float_t local_y  =  r * TMath::Cos( phi - phi0 ) ; // Cheat! Cheat! Use local y because charge is a flat sheet.
+
+  Interpolate2DEdistortion( local_y, z, gridleakEr, Er_integral ) ;
+  Ephi_integral = 0.0 ;  // E field is symmetric in phi
+
+  // Get Space Charge **** Every Event (JCD This is actually per hit)***
+  // Need to reset the instance every hit.  May be slow, but there's no per-event hook.
+  if (fSpaceChargeR2) GetSpaceChargeR2(); // need to reset it. 
+
+  // Subtract to Undo the distortions
+  if ( r > 0.0 ) 
+    {
+      phi =  phi - SpaceChargeR2 * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      r   =  r   - SpaceChargeR2 * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+    }
+
+  Xprime[0] = r * TMath::Cos(phi) ;
+  Xprime[1] = r * TMath::Sin(phi) ;
+  Xprime[2] = x[2] ;
+
+}
+
+  
+//________________________________________
