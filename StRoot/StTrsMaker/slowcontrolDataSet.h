@@ -16,7 +16,6 @@ class slowcontrolDataSet : public St_DataSet {
     double innerSectorGasGain;
     double innerSectorGasGainVzero;
     double innerSectorGasGainb;
-
     double outerSectorGasGain;
     double outerSectorGasGainVzero;
     double outerSectorGasGainb; 
