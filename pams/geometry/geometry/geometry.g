@@ -71,7 +71,7 @@ If LL>1
                   <W>;('Default: complete STAR with hadr_on  ');
                   <W>;('--------------------------------------------- ');
                 }  
-  on COMPLETE   { Complete STAR geometry;                                     }
+  on COMPLETE   { Complete STAR geometry;      tof=on;                        }
   on YEAR_1A    { poor approximation to year1: TPC+CTB+FTPC;      
                                               {vpdd,calb,ecal}=off;    Nsi=0; }
   on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch, no svt; 
