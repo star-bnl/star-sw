@@ -5,6 +5,7 @@
 //////////////////////////////////////////////// 
  
 #include "TNamed.h" 
+#include "St_Node.h"
   
 class TGeant3 : public TNamed { 
 
@@ -13,8 +14,7 @@ private:
   
 public: 
    TGeant3(); 
-   TGeant3(const char *name, const char *title, Int_t *gcbank, Int_t nwgeant=3000000, Int_t nwpaw=100000); 
-   TGeant3(Int_t *gcbank, const char *name, const char *title); 
+   TGeant3(const char *name, const char *title, Int_t nwgeant=2000000, Int_t nwpaw=0, Int_t iwtype=0); 
    virtual ~TGeant3(); 
    virtual void LoadAddress(); 
  
@@ -40,13 +40,12 @@ public:
   Bool_t TrackExiting();
   Bool_t TrackOut();
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                                               //
-//                                                                                                               //
-//     Here are the interface functions with GEANT3.21                                                           //
-//                                                                                                               //
-//                                                                                                               //
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+//                                                      //
+//     Here are the interface functions with GEANT3.21  //
+//                                                      //
+//                                                      //
+//////////////////////////////////////////////////////////
 
  
       // functions from GBASE 
@@ -136,7 +135,15 @@ EXTERN TGeant3 *geant;
 //--------------Declarations for ZEBRA--------------------- 
 EXTERN Int_t *z_iq, *z_lq; 
 EXTERN Float_t *z_q; 
- 
+//----------GCBANK
+//      PARAMETER (KWBANK=69000,KWWORK=5200)
+//      COMMON/GCBANK/NZEBRA,GVERSN,ZVERSN,IXSTOR,IXDIV,IXCONS,FENDQ(16)
+//     +             ,LMAIN,LR1,WS(KWBANK)
+//      DIMENSION IQ(2),Q(2),LQ(8000),IWS(2)
+//      EQUIVALENCE (Q(1),IQ(1),LQ(9)),(LQ(1),LMAIN),(IWS(1),WS(1))  
+typedef struct {
+  Int_t nzebra,gversion,zversn,ixstor,ixdiv,ixcons,fendq[16],lq[8],iq[1],lr1,ws[1];
+} common_gcbank;
 //----------QUEST 
 //      COMMON/QUEST/IQUEST(100) 
 typedef struct { 
@@ -390,7 +397,7 @@ typedef struct {
   Int_t   namec1[MAXME1]; 
 } common_gctpol; 
  
- 
+EXTERN common_gcbank *cbank;
 EXTERN common_quest  *cquest; 
 EXTERN common_gclink *clink; 
 EXTERN common_gccuts *ccuts; 
@@ -404,5 +411,314 @@ EXTERN common_gctpol *ctpol;
 EXTERN common_gcvolu *cvolu; 
 EXTERN common_gcnum  *cnum; 
 EXTERN common_gcsets *csets; 
+#ifndef __CINT__
+#ifndef WIN32 
+# define hlimit  hlimit_ 
+# define gzebra  gzebra_ 
+# define grfile  grfile_ 
+# define gpcxyz  gpcxyz_ 
+# define ggclos  ggclos_ 
+# define glast   glast_ 
+# define ginit   ginit_ 
+# define grun    grun_ 
+# define gtrig   gtrig_ 
+# define gtrigc  gtrigc_ 
+# define gtrigi  gtrigi_ 
+# define gwork   gwork_ 
+# define gzinit  gzinit_ 
+# define gfmate  gfmate_ 
+# define gfpart  gfpart_ 
+# define gftmed  gftmed_ 
+# define gmate   gmate_ 
+# define gpart   gpart_ 
+# define gsdk    gsdk_ 
+# define gsmate  gsmate_ 
+# define gsmixt  gsmixt_ 
+# define gspart  gspart_ 
+# define gstmed  gstmed_ 
+# define gstpar  gstpar_ 
+# define gfkine  gfkine_ 
+# define gfvert  gfvert_ 
+# define gskine  gskine_ 
+# define gsvert  gsvert_ 
+# define gphysi  gphysi_ 
+# define gdebug  gdebug_ 
+# define gekbin  gekbin_ 
+# define gfinds  gfinds_ 
+# define gsking  gsking_ 
+# define gsstak  gsstak_ 
+# define gsxyz   gsxyz_ 
+# define gtrack  gtrack_ 
+# define gtreve  gtreve_ 
+# define gdtom   gdtom_ 
+# define glmoth  glmoth_ 
+# define gmedia  gmedia_ 
+# define gmtod   gmtod_ 
+# define gsdvn   gsdvn_ 
+# define gsdvn2  gsdvn2_ 
+# define gsdvs   gsdvs_ 
+# define gsdvs2  gsdvs2_ 
+# define gsdvt   gsdvt_ 
+# define gsord   gsord_ 
+# define gspos   gspos_ 
+# define gsposp  gsposp_ 
+# define gsrotm  gsrotm_ 
+# define gprotm  gprotm_ 
+# define gsvolu  gsvolu_ 
+# define gprint  gprint_ 
+# define dzshow  dzshow_ 
+# define agmain  agmain_ 
+# define agxuser agxuser_
+# define agxinit agxinit_
+# define geometry geometry_
+# define agvolume agvolume_
+# define kuexel  kuexel_
+# define set_kupatl set_kupatl_
+# define dzddiv  dzddiv_
+# define gfrotm  gfrotm_
+# define gfxzrm  gfxzrm_
+
+#ifndef Geant3Dummy
+# define type_of_call 
+# define DEFCHARD     const char* 
+# define DEFCHARL   , const int 
+# define PASSCHARD(string) string 
+# define PASSCHARL(string) , strlen(string) 
+#endif /* not Geant3Dummy */
+#else 
+# define hlimit  HLIMIT 
+# define gzebra  GZEBRA 
+# define grfile  GRFILE 
+# define gpcxyz  GPCXYZ 
+# define ggclos  GGCLOS 
+# define glast   GLAST 
+# define ginit   GINIT 
+# define grun    GRUN 
+# define gtrig   GTRIG 
+# define gtrigc  GTRIGC 
+# define gtrigi  GTRIGI 
+# define gwork   GWORK 
+# define gzinit  GZINIT 
+# define gfmate  GFMATE 
+# define gfpart  GFPART 
+# define gftmed  GFTMED 
+# define gmate   GMATE 
+# define gpart   GPART 
+# define gsdk    GSDK 
+# define gsmate  GSMATE 
+# define gsmixt  GSMIXT 
+# define gspart  GSPART 
+# define gstmed  GSTMED 
+# define gstpar  GSTPAR 
+# define gfkine  GFKINE 
+# define gfvert  GFVERT 
+# define gskine  GSKINE 
+# define gsvert  GSVERT 
+# define gphysi  GPHYSI 
+# define gdebug  GDEBUG 
+# define gekbin  GEKBIN 
+# define gfinds  GFINDS 
+# define gsking  GSKING 
+# define gsstak  GSSTAK 
+# define gsxyz   GSXYZ 
+# define gtrack  GTRACK 
+# define gtreve  GTREVE 
+# define gdtom   GDTOM 
+# define glmoth  GLMOTH 
+# define gmedia  GMEDIA 
+# define gmtod   GMTOD 
+# define gsdvn   GSDVN 
+# define gsdvn2  GSDVN2 
+# define gsdvs   GSDVS 
+# define gsdvs2  GSDVS2 
+# define gsdvt   GSDVT 
+# define gsord   GSORD 
+# define gspos   GSPOS 
+# define gsposp  GSPOSP 
+#ifndef Geant3Dummy
+# define gsrotm  GSROTM 
+#endif /* not Geant3Dummy */
+# define gprotm  GPROTM 
+# define gsvolu  GSVOLU 
+# define gprint  GPRINT 
+# define dzshow  DZSHOW 
+# define agmain  AGMAIN
+# define agxuser AGXUSER
+# define agxinit AGXINIT
+# define geometry GEOMETRY
+# define agvolume AGVOLUME
+# define kuexel  KUEXEL
+# define set_kupatl SET_KUPATL
+# define dzddiv  DZDDIV
+# define gfrotm  GFROTM
+# define gfxzrm  GFXZRM
+
+
+#ifndef Geant3Dummy
  
+# define type_of_call  _stdcall 
+# define DEFCHARD   const char* , const int        
+# define DEFCHARL          
+# define PASSCHARD(string) string, strlen(string) 
+# define PASSCHARL(string) 
+#endif /* not Geant3Dummy */
+#endif 
+ 
+#ifndef Geant3Dummy
+extern "C" void type_of_call hlimit(const int&); 
+extern "C" void type_of_call gzebra(const int&); 
+extern "C" void type_of_call gpcxyz(); 
+extern "C" void type_of_call ggclos(); 
+extern "C" void type_of_call glast(); 
+extern "C" void type_of_call ginit(); 
+extern "C" void type_of_call grun(); 
+extern "C" void type_of_call gtrig(); 
+extern "C" void type_of_call gtrigc(); 
+extern "C" void type_of_call gtrigi(); 
+extern "C" void type_of_call gwork(const int&); 
+extern "C" void type_of_call gzinit(); 
+extern "C" void type_of_call gmate(); 
+extern "C" void type_of_call gpart(); 
+extern "C" void type_of_call gsdk(Int_t &, Float_t *, Int_t *); 
+extern "C" void type_of_call gfkine(Int_t &, Float_t *, Float_t *, Int_t &, Int_t &, Float_t *, Int_t &); 
+extern "C" void type_of_call gfvert(Int_t &, Float_t *, Int_t &, Int_t &, Float_t &, Float_t *, Int_t &); 
+extern "C" void type_of_call gskine(Float_t *,Int_t &, Int_t &, Float_t *, Int_t &, Int_t &); 
+extern "C" void type_of_call gsvert(Float_t *,Int_t &, Int_t &, Float_t *, Int_t &, Int_t &); 
+extern "C" void type_of_call gphysi(); 
+extern "C" void type_of_call gdebug(); 
+extern "C" void type_of_call gekbin(); 
+extern "C" void type_of_call gfinds(); 
+extern "C" void type_of_call gsking(Int_t &); 
+extern "C" void type_of_call gsstak(Int_t &); 
+extern "C" void type_of_call gsxyz(); 
+extern "C" void type_of_call gtrack(); 
+extern "C" void type_of_call gtreve(); 
+extern "C" void type_of_call gdtom(Float_t *, Float_t *, Int_t &); 
+extern "C" void type_of_call glmoth(Int_t &, Int_t &, Int_t &, Int_t *, Int_t *, Int_t *); 
+extern "C" void type_of_call gmedia(Float_t *, Int_t &); 
+extern "C" void type_of_call gmtod(Float_t *, Float_t *, Int_t &); 
+extern "C" void type_of_call gsrotm(const Int_t &, const Float_t &, const Float_t &, const Float_t &, const Float_t &, const Float_t &, const Float_t &); 
+extern "C" void type_of_call gprotm(const Int_t &); 
+extern "C" void type_of_call grfile(const Int_t&, DEFCHARD, DEFCHARD DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gfmate(const Int_t&, DEFCHARD, Float_t &, Float_t &, Float_t &, Float_t &, Float_t &, Float_t *, Int_t & DEFCHARL); 
+extern "C" void type_of_call gfpart(const Int_t&, DEFCHARD, Int_t &, Float_t &, Float_t &, Float_t &, Float_t *, Int_t & DEFCHARL); 
+extern "C" void type_of_call gftmed(const Int_t&, DEFCHARD, Int_t &, Int_t &, Int_t &, Float_t &, Float_t &, Float_t &, Float_t &, Float_t &, Float_t &, Float_t *, Int_t & DEFCHARL); 
+extern "C" void type_of_call gsmate(const Int_t&, DEFCHARD, Float_t &, Float_t &, Float_t &, Float_t &, Float_t &, Float_t *, Int_t & DEFCHARL); 
+extern "C" void type_of_call gsmixt(const Int_t&, DEFCHARD, Float_t &, Float_t &, Float_t &, Int_t &, Float_t * DEFCHARL); 
+extern "C" void type_of_call gspart(const Int_t&, DEFCHARD, Int_t &, Float_t &, Float_t &, Float_t &, Float_t *, Int_t & DEFCHARL); 
+extern "C" void type_of_call gstmed(const Int_t&, DEFCHARD, Int_t &, Int_t &, Int_t &, Float_t &, Float_t &, Float_t &, Float_t &, Float_t &, Float_t &, Float_t *, Int_t & DEFCHARL); 
+extern "C" void type_of_call gstpar(const Int_t&, DEFCHARD, Float_t & DEFCHARL); 
+extern "C" void type_of_call gsdvn(DEFCHARD,DEFCHARD, Int_t &, Int_t & DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gsdvn2(DEFCHARD,DEFCHARD, Int_t &, Int_t &, Float_t &, Int_t & DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gsdvs(DEFCHARD,DEFCHARD, Float_t &, Int_t &, Int_t & DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gsdvs2(DEFCHARD,DEFCHARD, Float_t &, Int_t &, Float_t &, Int_t & DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gsdvt(DEFCHARD,DEFCHARD, Float_t &, Int_t &, Int_t &, Int_t & DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gsord(DEFCHARD, Int_t & DEFCHARL); 
+extern "C" void type_of_call gspos(DEFCHARD, Int_t &, DEFCHARD, Float_t &, Float_t &, Float_t &, Int_t &, DEFCHARD DEFCHARL DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gsposp(DEFCHARD, Int_t &, DEFCHARD, Float_t &, Float_t &, Float_t &, Int_t &, DEFCHARD,  
+				    Float_t *, Int_t & DEFCHARL DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gsvolu(DEFCHARD, DEFCHARD, Int_t &, Float_t *, Int_t &, Int_t & DEFCHARL DEFCHARL); 
+extern "C" void type_of_call gprint(DEFCHARD,const int& DEFCHARL); 
+extern "C" void type_of_call dzshow(DEFCHARD,const int&,const int&,DEFCHARD,const int&, const int&, const int&, const int& DEFCHARL DEFCHARL); 
+extern "C" void type_of_call agmain(Int_t*,Int_t*,Int_t*);
+extern "C" void type_of_call agxuser();
+extern "C" void type_of_call agxinit();
+extern "C" void type_of_call geometry();
+extern "C" Int_t  type_of_call agvolume(St_Node**,Float_t**,Float_t**,Float_t**,Int_t*);
+extern "C" void type_of_call kuexel   (const Char_t*,Int_t);
+extern "C" void type_of_call set_kupatl(const Char_t*,Int_t*,Int_t);
+extern "C" void type_of_call dzddiv   (Int_t*,Int_t*,Char_t*,Char_t*,Int_t*,Int_t*,Int_t*,Int_t*,Int_t,Int_t);
+extern "C" void type_of_call gfrotm   (Int_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*);
+extern "C" void type_of_call gfxzrm   (Int_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*);
+ 
+#endif /* not Geant3Dummy */
+ common_gcbank *cbank;
+ common_quest  *cquest; 
+ common_gclink *clink; 
+ common_gccuts *ccuts; 
+ common_gcflag *cflag; 
+ common_gckine *ckine; 
+ common_gcking *cking; 
+ common_gcmate *cmate; 
+ common_gctmed *ctmed; 
+ common_gctrak *ctrak; 
+ common_gctpol *ctpol; 
+ common_gcvolu *cvolu; 
+ common_gcnum  *cnum; 
+ common_gcsets *csets; 
+ 
+ // Geant3 common blocks mapped to C structures 
+#ifndef WIN32 
+//#  define pawc   pawc_
+#  define gcbank gcbank_
+#  define quest  quest_ 
+#  define gclink gclink_ 
+#  define gccuts gccuts_ 
+#  define gcflag gcflag_ 
+#  define gckine gckine_ 
+#  define gcking gcking_ 
+#  define gcmate gcmate_ 
+#  define gctmed gctmed_ 
+#  define gctrak gctrak_ 
+#  define gctpol gctpol_ 
+#  define gcvolu gcvolu_ 
+#  define gcstak gcstak_ 
+#  define gcnum  gcnum_ 
+#  define gcsets gcsets_ 
+#else 
+//#  define pawc   PAWC
+#  define gcbank GCBANK
+#  define quest  QUEST 
+#  define gclink GCLINK 
+#  define gccuts GCCUTS 
+#  define gcflag GCFLAG 
+#  define gckine GCKINE 
+#  define gcking GCKING 
+#  define gcmate GCMATE 
+#  define gctmed GCTMED 
+#  define gctrak GCTRAK 
+#  define gctpol GCTPOL 
+#  define gcvolu GCVOLU 
+#  define gcstak GCSTAK 
+#  define gcnum  GCNUM 
+#  define gcsets GCSETS 
+#endif 
+ 
+#ifndef Geant3Dummy
+extern "C" common_gcbank gcbank;
+extern "C" common_quest  quest; 
+extern "C" common_gclink gclink; 
+extern "C" common_gccuts gccuts; 
+extern "C" common_gcflag gcflag; 
+extern "C" common_gckine gckine; 
+extern "C" common_gcking gcking; 
+extern "C" common_gcmate gcmate; 
+extern "C" common_gctmed gctmed; 
+extern "C" common_gctrak gctrak; 
+extern "C" common_gctpol gctpol; 
+extern "C" common_gcvolu gcvolu; 
+extern "C" common_gcnum  gcnum; 
+extern "C" common_gcsets gcsets; 
+#else /* Geant3Dummy */
+Int_t  gcbank;
+Int_t  quest;
+Int_t  gclink;
+Int_t  gccuts;
+Int_t  gcflag;
+Int_t  gckine;
+Int_t  gcking;
+Int_t  gcmate;
+Int_t  gctmed;
+Int_t  gctrak;
+Int_t  gctpol;
+Int_t  gcvolu;
+Int_t  gcnum ;
+Int_t  gcsets;
+#endif /* Geant3Dummy */
+ 
+//--------------Declarations for ZEBRA--------------------- 
+   Int_t *z_iq, *z_lq; 
+   Float_t *z_q; 
+ 
+#endif /* __CINT__ */ 
 #endif 
