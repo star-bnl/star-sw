@@ -46,7 +46,7 @@ int kam_tdm_allocstats()
    long npars = ku_npar();      /* number of KUIP parameters */
 
    dsDatasetAllocStats();
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -64,7 +64,7 @@ int kam_tdm_count()
    long npars = ku_npar();      /* number of KUIP parameters */
 
    printf("TDM:\tObject count = %d \n",tdm->count());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -81,10 +81,8 @@ int kam_tdm_list()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
 
-   if( !tdm->list() ){
-      EML_ERROR(KAM_METHOD_FAILURE);
-   }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   printf("%s",tdm->list() );
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -106,7 +104,7 @@ int kam_tdm_newdataset()
    if( !tdm->newDataset(name,dim) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -129,7 +127,7 @@ int kam_tdm_newtable()
    if( !tdm->newTable(name,spec,rowcount) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -163,7 +161,7 @@ int kam_tdm_type_list()
       }
       printf("TDM:\tType name = (%s) \n",name);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -191,10 +189,10 @@ int kam_tdm_type_show()
 	 break;
       }
       if( sutMatchWild(name,tname) ){
-	 printf("TDM:\tType spec = \n***\n%s\n***\n",tspec);
+	 printf("TDM:\tType spec = ...\n%s\n.\n",tspec);
       }
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -221,7 +219,7 @@ int kam_tdmdataset_adddataset()
    ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -249,7 +247,7 @@ int kam_tdmdataset_addtable()
    ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -273,7 +271,7 @@ int kam_tdmdataset_entrycount()
       EML_ERROR(KAM_METHOD_FAILURE);
    }
    printf("TDMDATASET:\tEntry Count = %d \n",dataset->entryCount());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -318,7 +316,7 @@ int kam_tdmdataset_maxentrycount()
    }
    printf("TDMDATASET:\tMax Entry Count = %d \n"
 		,dataset->maxEntryCount());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 
@@ -343,7 +341,7 @@ int kam_tdmdataset_name()
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    printf("TDMDATASET:\tDSL name = (%s) \n",dataset->dslName());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -455,7 +453,7 @@ int kam_tdmtable_cell_getvalue()
    set_staf_result(result);
 
    ASUFREE(cs);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -536,7 +534,7 @@ int kam_tdmtable_cell_putvalue()
    ASUFREE(cellData.data.v);
 
    ASUFREE(cs);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -560,7 +558,7 @@ int kam_tdmtable_colcount()
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    printf("TDMTABLE:\tColumn Count = %d \n",table->columnCount());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -668,7 +666,7 @@ int kam_tdmtable_maxrowcount()
       table->maxRowCount(maxrowcount);
    }
    printf("TDMTABLE:\tMax Row Count = %d \n",table->maxRowCount());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -692,7 +690,7 @@ int kam_tdmtable_name()
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    printf("TDMTABLE:\tDSL Name = (%s) \n",table->dslName());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -718,7 +716,7 @@ int kam_tdmtable_print()
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    table->printRows(ifirst,nrows);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -746,7 +744,7 @@ int kam_tdmtable_rowcount()
       table->rowCount(rowcount);
    }
    printf("TDMTABLE:\tRow Count = %d \n",table->rowCount());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -770,7 +768,7 @@ int kam_tdmtable_rowsize()
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    printf("TDMTABLE:\tRow Size = %d bytes \n",table->rowSize());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -794,10 +792,8 @@ int kam_tdmtable_show()
    if( !tdm->findTable(name,table) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
-   printf("TDMTABLE:\tTable = \n***\n");
-   table->show();
-   printf("\n***\n");
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   printf("TDMTABLE:\tTable = ...\n"); table->show(); printf("\n.\n");
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -820,9 +816,9 @@ int kam_tdmtable_specifier()
    if( !tdm->findTable(name, table) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
-   printf("TDMTABLE:\tType Specifier = \n***\n%s\n***\n"
+   printf("TDMTABLE:\tType Specifier = ...\n%s\n.\n"
 		,table->typeSpecifier());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -846,6 +842,6 @@ int kam_tdmtable_typename()
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    printf("TDMTABLE:\tType Name = (%s) \n",table->typeName());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 

@@ -45,13 +45,13 @@ long spxDummy::  nCalls () {
 STAFCV_T spxDummy:: hello (const char * message) {
    myNCalls++;
    printf(" %s \n",message);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
 STAFCV_T spxDummy:: null () {
    myNCalls++;
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -62,7 +62,7 @@ STAFCV_T spxDummy:: getTime (char *& tim) {
    c = (char*)ASUALLOC(strlen(ctime(&it)) +1);
    strcpy(c,ctime(&it));
    tim = (char *)c;
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
@@ -105,14 +105,14 @@ short spxGrid::  width () {
 STAFCV_T spxGrid:: get (short n, short m, long& value) {
    if(n<0||n>myHeight||m<0||m>myHeight)EML_ERROR(INVALID_GRIDCELL);
    value = myGrid[n][m];
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
 STAFCV_T spxGrid:: set (short n, short m, long value) {
    if(n<0||n>myHeight||m<0||m>myHeight)EML_ERROR(INVALID_GRIDCELL);
    myGrid[n][m] = value;
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
@@ -146,7 +146,7 @@ STAFCV_T spxManager:: deleteDummy (const char * name) {
    ){
       EML_ERROR(CANT_DELETE_OBJECT);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -159,7 +159,7 @@ STAFCV_T spxManager:: deleteGrid (const char * name) {
    ){
       EML_ERROR(CANT_DELETE_OBJECT);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -171,7 +171,7 @@ STAFCV_T spxManager:: findDummy (const char * name
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    dummy = (spxDummy*)(obj->ptr());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -183,7 +183,7 @@ STAFCV_T spxManager:: findGrid (const char * name
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    grid = (spxGrid*)(obj->ptr());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -198,7 +198,7 @@ STAFCV_T spxManager:: getDummy (IDREF_T id, spxDummy*& dummy) {
       EML_ERROR(WRONG_OBJECT_TYPE);
    }
    dummy = (spxDummy*)(obj->ptr());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -213,47 +213,47 @@ STAFCV_T spxManager:: getGrid (IDREF_T id, spxGrid*& grid) {
       EML_ERROR(WRONG_OBJECT_TYPE);
    }
    grid = (spxGrid*)(obj->ptr());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
-STAFCV_T spxManager:: list () {
+char * spxManager:: list () {
 
    socObject* obj;
 
    printf("\n"
-"**********************************************************************"
+"+---------------------------------------------------------------------"
    "\n"
-"**************** SPX - Service Package eXample listing ***************"
+"|*************** SPX - Service Package eXample listing ***************"
    "\n"
-"**********************************************************************"
+"+-------+-----------------+-----------------+-------------------------"
    "\n"
-"* IDREF * NAME            * TYPE            *                         "
+"| IDREF | NAME            | TYPE            |                         "
     "\n"
-"**********************************************************************"
+"+-------+-----------------+-----------------+-------------------------"
     "\n");
    for( int i=0;i<myCount;i++ ){
       if( soc->getObject(entry(i),obj) ){
 	 if( 0 == strcmp("spxGrid",obj->type()) ){
-	    printf("* %5d * %-15s * %-15s * Size = (%d,%d) \n"
+	    printf("| %5d | %-15s | %-15s | Size = (%d,%d) \n"
 	    		,obj->idRef(),obj->name(),obj->type()
             		,SPXGRID(obj)->height()
             		,SPXGRID(obj)->width());
 	 } else {
-	    printf("* %5d * %-15s * %-15s * Calls = %d \n"
+	    printf("| %5d | %-15s | %-15s | Calls = %d \n"
 	    		,obj->idRef(),obj->name(),obj->type()
             		,SPXDUMMY(obj)->nCalls());
 	 }
       } else {
-         printf("* %5d * %-15s * %-15s * \n"
+         printf("| %5d | %-15s | %-15s | \n"
                         ,entry(i),"**DELETED**","**DELETED**");
       }
    }
    printf(
-"**********************************************************************"
+"+-------+-----------------+-----------------+-------------------------"
    "\n\n");
 
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   return ""; // TEMPORARY HACK
 }
 
 //----------------------------------
@@ -268,7 +268,7 @@ STAFCV_T spxManager:: newDummy (const char * name) {
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    addEntry(id);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -284,7 +284,7 @@ STAFCV_T spxManager:: newGrid (const char * name
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    addEntry(id);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //:----------------------------------------------- PRIV FUNCTIONS     --

@@ -41,7 +41,7 @@ int kam_asu_hello()
    char*  msg = ku_gets();	/* message */
 
    printf("ASU:\tHello, %s \n",msg);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -61,7 +61,7 @@ int kam_asu_time()
 
    *pt = time(0);
    printf("ASU:\tTime = %s \n",ctime(pt));
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -77,6 +77,6 @@ void kam_asuallocstats_(){kam_asuallocstats();}
 int kam_asuallocstats()
 {
    asuAllocStats();
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 

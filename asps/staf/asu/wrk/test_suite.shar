@@ -3,57 +3,102 @@
 # 1. Remove everything above the #! /bin/sh line.
 # 2. Save the resulting text in a file.
 # 3. Execute the file with /bin/sh (not csh) to create the files:
-#	staf100asu.kumac
-#	staf110soc.kumac
-#	staf111soc.kumac
-#	staf112soc.kumac
-#	staf120spx.kumac
-#	staf121spx.kumac
-#	staf122spx.kumac
-#	staf123spx.kumac
-#	staf130tdm.kumac
-#	staf131tdm.kumac
-#	staf132tdm.kumac
-#	staf133tdm.kumac
-#	staf140dui.kumac
-#	staf141dui.kumac
-#	staf143dui.kumac
-#	staf144dui.kumac
-#	staf150dio.kumac
-#	staf151dio.kumac
-#	staf152dio.kumac
-#	staf153dio.kumac
-#	staf160ami.kumac
-#	staf170tbr.kumac
-#	staf171tbr.kumac
-#	staf172tbr.kumac
-#	staf301pam.kumac
-#	staf302pam.kumac
-#	staf303pam.kumac
-#	staf304pam.kumac
-#	staf305pam.kumac
-#	staf310tcl.kumac
-#	staf500tst.kumac
-#	staf501tst.kumac
-#	staf701getvalue.kumac
-# This archive created: Mon Jun  3 16:21:16 1996
+#	test000commands.kumac
+#	test001vectors.kumac
+#	test100soc.kumac
+#	test101many.kumac
+#	test102bind.kumac
+#	test110spx.kumac
+#	test120tdm.kumac
+#	test121getput.kumac
+#	test130dui.kumac
+#	test_suite.README
+#	test_suite.SETUP
+# This archive created: Thu Jun  6 18:07:30 1996
 export PATH; PATH=/bin:$PATH
-if test -f 'staf100asu.kumac'
+if test -f 'test000commands.kumac'
 then
-	echo shar: will not over-write existing file "'staf100asu.kumac'"
+	echo shar: will not over-write existing file "'test000commands.kumac'"
 else
-cat << \SHAR_EOF > 'staf100asu.kumac'
+cat << \SHAR_EOF > 'test000commands.kumac'
+MACRO TEST000COMMANDS
 
-MACRO STAF100ASU
-************************************************************************
-**** STAF100ASU - Exercise STAF vectors
-**** _       1 Show STAF Vectors
+MESS
+MESS ************************************************************
+MESS ************************************************************
+MESS ****  COMMANDS - Show some STAF commands available      ****
+MESS ****  from the KUIP command line interface.             ****
+MESS ************************************************************
+MESS ************************************************************
+MESS
+WAIT 'Hit <CR> to continue:' 0
 
-MESS _         STAF Test #100 - ASU
+MESS
+MESS ************************************************************
+MESS ****  HELP - Show all menus.                            ****
+MESS ************************************************************
+HELP
 
-MESS _       0 Handle Macro Arguments & Initialize
+MESS
+MESS ************************************************************
+MESS ****  SOC - Service and Object Catalog                  ****
+MESS ************************************************************
+USAGE SOC
+WAIT 'Hit <CR> to continue:' 0
 
-MESS _       1 Show STAF Vectors
+MESS
+MESS ************************************************************
+MESS ****  TDM - Table and Dataset Memory                    ****
+MESS ************************************************************
+USAGE TDM
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  DUI - Dataset Unix-like Interface                 ****
+MESS ************************************************************
+USAGE DUI
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  DIO - Dataset Input and Output                    ****
+MESS ************************************************************
+USAGE DIO
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  AMI - Analysis Module Interface                   ****
+MESS ************************************************************
+USAGE AMI
+WAIT 'Hit <CR> to continue:' 0
+
+
+RETURN
+SHAR_EOF
+fi # end of overwriting check
+if test -f 'test001vectors.kumac'
+then
+	echo shar: will not over-write existing file "'test001vectors.kumac'"
+else
+cat << \SHAR_EOF > 'test001vectors.kumac'
+MACRO TEST001VECTORS
+
+MESS
+MESS ************************************************************
+MESS ************************************************************
+MESS ****  ASUVECTORS - Show the two KUIP vectors used by    ****
+MESS ****  STAF.                                             ****
+MESS ************************************************************
+MESS ************************************************************
+MESS
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Show STAF Vectors                                 ****
+MESS ************************************************************
 VECTOR/LIST
 VECTOR/PRINT STAF_STATUS
 VECTOR/PRINT STAF_RESULT
@@ -61,598 +106,444 @@ VECTOR/PRINT STAF_RESULT
 RETURN
 SHAR_EOF
 fi # end of overwriting check
-if test -f 'staf110soc.kumac'
+if test -f 'test100soc.kumac'
 then
-	echo shar: will not over-write existing file "'staf110soc.kumac'"
+	echo shar: will not over-write existing file "'test100soc.kumac'"
 else
-cat << \SHAR_EOF > 'staf110soc.kumac'
+cat << \SHAR_EOF > 'test100soc.kumac'
+MACRO TEST100SOC [1]=4
 
-MACRO STAF110SOC
-************************************************************************
-**** STAF110SOC - Show all commands
-**** _       1 Show ASU Vectors
-**** _       2 Show ASU Usage
-**** _       3 Show SOC Usage
+MESS
+MESS ************************************************************
+MESS ************************************************************
+MESS ****  SOC - Test some SOC commands.                     ****
+MESS ************************************************************
+MESS ************************************************************
+MESS
+WAIT 'Hit <CR> to continue:' 0
 
-MESS _         SOC Test #100
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS _       1 Show ASU Vectors
-V/LIST
-V/PRINT STAF_STATUS
-V/PRINT STAF_RESULT
-
-MESS _       2 Show ASU Usage
-USAGE ASU
-
-MESS _       3 Show SOC Usage
-USAGE SOC
-
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf111soc.kumac'
-then
-	echo shar: will not over-write existing file "'staf111soc.kumac'"
-else
-cat << \SHAR_EOF > 'staf111soc.kumac'
-
-MACRO staf111soc
-************************************************************************
-**** staf111soc - Create and show 8 objects.
-**** _       1 Create 8 objects.
-**** _       2 Show 8 objects.
-**** _       3 Show 9th object.
-
-MESS _         STAF Test #111 - SOC
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS _       1 Create 8 objects.
-NEWOBJECT obj1
-NEWOBJECT obj2
-NEWOBJECT obj3
-NEWOBJECT obj4
-NEWOBJECT obj5
-NEWOBJECT obj6
-NEWOBJECT obj7
-NEWOBJECT obj8
-
-SOC/LIST
-
-MESS _       2 Show 8 object names.
-NAME 0
-NAME 1
-NAME 2
-NAME 3
-NAME 4
-NAME 5
-NAME 6
-NAME 7
-NAME 8
-
-MESS _       3 Show 9th object name.
-NAME 9
-
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf112soc.kumac'
-then
-	echo shar: will not over-write existing file "'staf112soc.kumac'"
-else
-cat << \SHAR_EOF > 'staf112soc.kumac'
-
-MACRO staf112soc
-************************************************************************
-**** staf112soc - Test SOC commands
-****         1 Setup some objects to manipulate
-****         2 SOC/BIND [ SERVER MARKER HOST ]
-****         3 SOC/RELEASE [ SERVER MARKER HOST ]
-****         4 SOC/OBJECT/NAME IDREF
-****         5 SOC/OBJECT/TYPE IDREF
-****         6 SOC/COUNT
-****         7 SOC/DELETEID IDREF
-****         8 SOC/DELETEOBJECT NAME [ TYPE ]
-****         9 SOC/IDOBJECT NAME [ TYPE ]
-****        10 SOC/LIST
-****        11 SOC/NEWOBJECT NAME [ TYPE ]
-
-MESS _         Test #102
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS         1 Setup some objects to manipulate
-USAGE SOC
-NEWOBJECT fee
-NEWOBJECT fii
-NEWOBJECT fo
-NEWOBJECT fum
-SOC/LIST
-
-MESS         2 SOC/BIND [ SERVER MARKER HOST ]
-**SOC/BIND
-
-MESS         3 SOC/RELEASE [ SERVER MARKER HOST ]
-**SOC/RELEASE
-
-MESS         4 SOC/OBJECT/NAME IDREF
-SOC/LIST
-SOC/OBJECT/NAME 0
-SOC/OBJECT/NAME 1
-SOC/OBJECT/NAME 2
-SOC/OBJECT/NAME 3
-SOC/OBJECT/NAME 4
-
-MESS         5 SOC/OBJECT/TYPE IDREF
-SOC/LIST
-SOC/OBJECT/TYPE 0
-SOC/OBJECT/TYPE 1
-SOC/OBJECT/TYPE 2
-SOC/OBJECT/TYPE 3
-SOC/OBJECT/TYPE 4
-
-MESS         6 SOC/COUNT
-SOC/LIST
+MESS
+MESS ************************************************************
+MESS ****  Count and list all know objects.                  ****
+MESS ************************************************************
 SOC/COUNT
+SOC/LIST
+WAIT 'Hit <CR> to continue:' 0
 
-MESS         7 SOC/DELETEID IDREF
+MESS
+MESS ************************************************************
+MESS ****  Create four generic objects, count and list again.****
+MESS ************************************************************
+NEWOBJECT apple
+NEWOBJECT pear
+NEWOBJECT fish
+NEWOBJECT banana
+SOC/COUNT
+SOC/LIST
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Get the IDREF numbers of the objects.             ****
+MESS ************************************************************
+SOC/IDOBJECT apple
+SOC/IDOBJECT pear
+SOC/IDOBJECT fish
+SOC/IDOBJECT banana
+**VECT/PRINT STAF_RESULT
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Get the names of some objects.                    ****
+MESS ************************************************************
+DO I=0,[1]
+	SOC/OBJECT/NAME [I]
+ENDDO
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Get the types of some objects.                    ****
+MESS ************************************************************
+DO I=0,[1]
+	SOC/OBJECT/TYPE [I]
+ENDDO
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Delete some objects by IDREF number and list      ****
+MESS ****  again. - N.B. This may not work!                  ****
+MESS ************************************************************
 SOC/DELETEID 2
-SOC/DELETEID 4
+SOC/DELETEID 3
 SOC/LIST
+WAIT 'Hit <CR> to continue:' 0
 
-MESS         8 SOC/DELETEOBJECT NAME [ TYPE ]
-SOC/DELETEOBJECT fee
+MESS
+MESS ************************************************************
+MESS ****  Delete the fish and list again.                   ****
+MESS ************************************************************
+SOC/DELETEOBJECT fish
 SOC/LIST
-
-MESS         9 SOC/IDOBJECT NAME [ TYPE ]
-SOC/LIST
-SOC/IDOBJECT fo
-
-MESS        10 SOC/LIST
-SOC/LIST
-
-MESS        11 SOC/NEWOBJECT NAME [ TYPE ]
-SOC/NEWOBJECT I_smell_the_blood
-SOC/NEWOBJECT of_an_englishman
-SOC/LIST
+WAIT 'Hit <CR> to continue:' 0
 
 RETURN
-
 SHAR_EOF
 fi # end of overwriting check
-if test -f 'staf120spx.kumac'
+if test -f 'test101many.kumac'
 then
-	echo shar: will not over-write existing file "'staf120spx.kumac'"
+	echo shar: will not over-write existing file "'test101many.kumac'"
 else
-cat << \SHAR_EOF > 'staf120spx.kumac'
+cat << \SHAR_EOF > 'test101many.kumac'
+MACRO TEST101SOC [1]=20
 
-MACRO STAF120SPX
-************************************************************************
-**** STAF120SPX - Show all commands
-**** _       1 Show ASU Vectors
-**** _       2 Show ASU Usage
-**** _       3 Show SOC Usage
-**** _       4 Show SPX Usage
+MESS
+MESS ************************************************************
+MESS ************************************************************
+MESS ****  SOC - Create many objects.                        ****
+MESS ************************************************************
+MESS ************************************************************
+MESS
+WAIT 'Hit <CR> to continue:' 0
 
-MESS _         STAF Test #110 - SPX
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS _       1 Show ASU Vectors
-V/LIST
-V/PRINT STAF_STATUS
-V/PRINT STAF_RESULT
-
-MESS _       2 Show ASU Usage
-USAGE ASU
-
-MESS _       3 Show SOC Usage
-USAGE SOC
-
-MESS _       4 Show SPX Usage
-USAGE SPX
-
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf121spx.kumac'
-then
-	echo shar: will not over-write existing file "'staf121spx.kumac'"
-else
-cat << \SHAR_EOF > 'staf121spx.kumac'
-
-MACRO staf121spx
-************************************************************************
-**** staf121spx - Test SOC commands
-
-MESS _         STAF Test #121 - SOC
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS         1 Create some SPX objects
-USAGE SPX
-NEWDUMMY aaa
-NEWDUMMY bbb
-NEWDUMMY cca
-NEWDUMMY ddd
-NEWGRID abc 10 50
-NEWGRID abcd 5 5
-NEWGRID abcde 100 100
+MESS
+MESS ************************************************************
+MESS ****  Count and list all know objects.                  ****
+MESS ************************************************************
+SOC/COUNT
 SOC/LIST
+WAIT 'Hit <CR> to continue:' 0
 
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf122spx.kumac'
-then
-	echo shar: will not over-write existing file "'staf122spx.kumac'"
-else
-cat << \SHAR_EOF > 'staf122spx.kumac'
-
-MACRO staf122spx
-************************************************************************
-**** staf122spx - Test SPX commands
-****         1 Create some SPX objects
-****         2 Exercise spxDummy object
-****         3 Exercise spxGrid object
-
-MESS _         STAF Test #122 - SPX
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS         1 Create some SPX objects
-USAGE SPX
-NEWDUMMY aaa
-NEWDUMMY bbb
-NEWDUMMY cca
-NEWDUMMY ddd
-NEWGRID abc 10 50
-NEWGRID abcd 5 5
-NEWGRID abcde 100 100
-SOC/LIST
-
-MESS         2 Exercise spxDummy object
-SPX/DUMMY/NULL aaa
-SPX/DUMMY/HELLO aaa 'Hello world!'
-SPX/DUMMY/TIME aaa
-SPX/DUMMY/CALLS aaa
-
-MESS         3 Exercise spxGrid object
-SPX/GRID/HEIGHT abc
-SPX/GRID/WIDTH abc
-SPX/GRID/GET abc 5 5
-SPX/GRID/SET abc 5 5 102
-SPX/GRID/GET abc 5 5
-
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf123spx.kumac'
-then
-	echo shar: will not over-write existing file "'staf123spx.kumac'"
-else
-cat << \SHAR_EOF > 'staf123spx.kumac'
-
-MACRO staf123spx [1]=10
-************************************************************************
-**** staf123spx - Test SPX commands
-****         1 Create lots SPX objects
-****         2 Exercise spxDummy object
-****         3 Exercise spxGrid object
-
-MESS _         STAF Test #123 - SPX
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS         1 Create some SPX objects
-DO I=1,[1]
-   SPX/NEWDUMMY spx_dummy[I]
-   SPX/NEWGRID spx_grid[I] [i]+1 3*[i]
+MESS
+MESS ************************************************************
+MESS ****  Create many objects, count and list again.        ****
+MESS ************************************************************
+DO I=0,[1]
+	SOC/NEWOBJECT soc[I]
 ENDDO
+SOC/COUNT
+SOC/LIST
+WAIT 'Hit <CR> to continue:' 0
 
+RETURN
+SHAR_EOF
+fi # end of overwriting check
+if test -f 'test102bind.kumac'
+then
+	echo shar: will not over-write existing file "'test102bind.kumac'"
+else
+cat << \SHAR_EOF > 'test102bind.kumac'
+MACRO TEST102BIND
+
+MESS
+MESS ************************************************************
+MESS ************************************************************
+MESS ****  BIND DEMO - Demonstrate run-time binding to ASP   ****
+MESS ****  DLL.                                              ****
+MESS ************************************************************
+MESS ************************************************************
+MESS
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Show help menu lacking the SPX menu.              ****
+MESS ****  SPX was not statically linked to executable.      ****
+MESS ************************************************************
+HELP
+
+MESS
+MESS ************************************************************
+MESS ****  Now dynamically link to SPX with SOC/BIND.        ****
+MESS ************************************************************
+TRACE ON
+SOC/BIND spx
+TRACE OFF
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Show help menu including the SPX menu.            ****
+MESS ****  SPX is now dynamically linked and all its com-    ****
+MESS ****  mands and functionallity is availalbe as though   ****
+MESS ****  it had been statically linked at compile time.    ****
+MESS ************************************************************
+USAGE SPX
+HELP
+
+MESS
+MESS ************************************************************
+MESS ****  Try some SPX commands.                            ****
+MESS ************************************************************
+WAIT 'Hit <CR> to continue:' 0
+TRACE ON
+SPX/COUNT
 SPX/LIST
+SPX/NEWDUMMY mats
+SPX/NEWGRID jerry 100 20
+SPX/LIST
+SPX/GRID/HEIGHT jerry
+SPX/GRID/WIDTH jerry
+SPX/GRID/SET jerry 21 17 1234
+SPX/GRID/GET jerry 21 17
+TRACE OFF
+WAIT 'Hit <CR> to continue:' 0
 
 RETURN
-
 SHAR_EOF
 fi # end of overwriting check
-if test -f 'staf130tdm.kumac'
+if test -f 'test110spx.kumac'
 then
-	echo shar: will not over-write existing file "'staf130tdm.kumac'"
+	echo shar: will not over-write existing file "'test110spx.kumac'"
 else
-cat << \SHAR_EOF > 'staf130tdm.kumac'
+cat << \SHAR_EOF > 'test110spx.kumac'
+MACRO TEST110SPX
 
-MACRO staf130tdm
-************************************************************************
-**** staf130tdm  - Show all Moast commands
-**** _       1 Show Vectors
-**** _       2 Show Usage
-**** _       3 Show Manuals
+MESS
+MESS ************************************************************
+MESS ************************************************************
+MESS ****  SPX - Test some SPX commands.                     ****
+MESS ************************************************************
+MESS ************************************************************
+MESS
+WAIT 'Hit <CR> to continue:' 0
 
-MESS _         STAF Test #130
+MESS
+MESS ************************************************************
+MESS ****  Count and list all know SPX objects.              ****
+MESS ************************************************************
+SPX/COUNT
+SPX/LIST
+WAIT 'Hit <CR> to continue:' 0
 
-MESS _       0 Handle Macro Arguments & Initialize
+MESS
+MESS ************************************************************
+MESS ****  Create some GRID objects, count and list.         ****
+MESS ************************************************************
+SPX/NEWGRID tictactoe 3 3
+SPX/NEWGRID chess 16 16
+SPX/NEWGRID tron 64 32
+SPX/COUNT
+SPX/LIST
+WAIT 'Hit <CR> to continue:' 0
 
-MESS _       1 Show ASU Vectors
-V/LIST
-V/PRINT STAF_STATUS
-V/PRINT STAF_RESULT
-
-MESS _       2 Show Usage
-USAGE ASU
-USAGE SOC
-USAGE SPX
-USAGE TDM
-
-MESS _       3 Show Manuals
-MANUAL ASU
-MANUAL SOC
-MANUAL SPX
-MANUAL TDM
+MESS
+MESS ************************************************************
+MESS ****  Exercise the GRID objects.                        ****
+MESS ************************************************************
+SPX/GRID/HEIGHT tron
+SPX/GRID/WIDTH tron
+SPX/GRID/GET chess 7 8
+SPX/GRID/SET chess 7 8 123
+SPX/GRID/GET chess 7 8
+WAIT 'Hit <CR> to continue:' 0
 
 RETURN
-
 SHAR_EOF
 fi # end of overwriting check
-if test -f 'staf131tdm.kumac'
+if test -f 'test120tdm.kumac'
 then
-	echo shar: will not over-write existing file "'staf131tdm.kumac'"
+	echo shar: will not over-write existing file "'test120tdm.kumac'"
 else
-cat << \SHAR_EOF > 'staf131tdm.kumac'
+cat << \SHAR_EOF > 'test120tdm.kumac'
+MACRO TEST120TDM
 
-MACRO staf131tdm
-************************************************************************
-**** staf131tdm - Test creating, accessing, & mutating TDM objects
-**** _       1 Show Usage
-**** _       2 Create some TDM objects
-**** _       3 Access some TDMDATASET attributes
-**** _       4 Access some TDMTABLE attributes
-**** _       5 Mutate some TDMTABLE attributes
+MESS
+MESS ************************************************************
+MESS ************************************************************
+MESS ****  TDM - Test some TDM commands.                     ****
+MESS ************************************************************
+MESS ************************************************************
+MESS
+WAIT 'Hit <CR> to continue:' 0
 
-MESS _         STAF Test #131
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS _       1 Show Usage
-USAGE TDM
-
-MESS _       2 Create some TDM objects
-
-TDM/NEWDATASET tdm_dataset1 100 PATH
-
-TDM/NEWTABLE tdm_table1 'struct fee{long x,y,z;};' 10 PATH
-
-TDM/NEWDATASET tdm_dataset2 100 PATH
-
-TDM/NEWTABLE tdm_table2 'struct fii{float p[3];};' 1000 PATH
-
-TDM/NEWDATASET tdm_dataset3 100 PATH
-
-TDM/NEWTABLE tdm_table3 'struct foo{char name[20];};' 101 PATH
-
-TDM/NEWDATASET tdm_dataset4 100 PATH
-
-TDM/NEWTABLE tdm_table4 'struct fum{short x; long y; float z;};' 4 PATH
-
+MESS
+MESS ************************************************************
+MESS ****  Count and list all know TDM objects.              ****
+MESS ************************************************************
+TDM/COUNT
 TDM/LIST
+WAIT 'Hit <CR> to continue:' 0
 
-SOC/LIST
+MESS
+MESS ************************************************************
+MESS ****  Create some TDM objects, count and list.          ****
+MESS ************************************************************
+TDM/NEWTABLE fee 'struct type120a{long x,y,z;};' 10
+TDM/NEWTABLE fii 'struct type120b{float p[3];};' 1000
+TDM/NEWTABLE foo 'struct type120c{char name[20];};' 101
+TDM/NEWTABLE fum 'struct type120d{short x; long y; float z;};' 4
+TDM/NEWDATASET eenee 100
+TDM/NEWDATASET menee 100
+TDM/NEWDATASET minee 100
+TDM/NEWDATASET moe 100
+TDM/COUNT
+TDM/LIST
+WAIT 'Hit <CR> to continue:' 0
 
-MESS _       3 Access some TDMDATASET attributes
-TDM/DATASET/NAME tdm_dataset1
-TDM/DATASET/ENTRYCOUNT tdm_dataset1
-TDM/DATASET/MAXENTRYCOUNT tdm_dataset1
+MESS
+MESS ************************************************************
+MESS ****  Exercise table objects.                           ****
+MESS ************************************************************
+TDM/TABLE/NAME fum
+TDM/TABLE/NAME /dui/fum
+TDM/TABLE/NAME ./fum
+TDM/TABLE/ROWCOUNT fum
+TDM/TABLE/ROWCOUNT fum 2
+TDM/TABLE/ROWCOUNT fum
+TDM/TABLE/MAXROWCOUNT fum
+TDM/TABLE/MAXROWCOUNT fum 40
+TDM/TABLE/MAXROWCOUNT fum
+TDM/TABLE/COLUMNCOUNT fum
+TDM/TABLE/TYPENAME fum
+TDM/TABLE/SPECIFIER fum
+TDM/TABLE/ROWSIZE fum
+TDM/TABLE/PRINT fum
+TDM/TABLE/SHOW fum
+TDM/TABLE/CELL/GETVALUE 'fum[0].x'
+TDM/TABLE/CELL/PUTVALUE 'fum[0].x' 11
+TDM/TABLE/CELL/GETVALUE 'fum[0].x'
+TDM/TABLE/CELL/PUTVALUE 'fum[1].y' 999
+TDM/TABLE/CELL/PUTVALUE 'fum[0].z' 3.1415
+TDM/TABLE/PRINT fum
+** TDM/TABLE/COLUMN/FIND COLUMNAME
+** TDM/TABLE/COLUMN/NAME NCOL
+** TDM/TABLE/COLUMN/TYPE NCOL
+** TDM/TABLE/COLUMN/CODE NCOL
+** TDM/TABLE/COLUMN/RANK NCOL
+** TDM/TABLE/COLUMN/SHAPE NCOL
+** TDM/TABLE/COLUMN/ELCOUNT NCOL
+** TDM/TABLE/COLUMN/SIZE NCOL
+WAIT 'Hit <CR> to continue:' 0
 
-MESS _       4 Access some TDMTABLE attributes
-TDM/TABLE/NAME tdm_table1
-TDM/TABLE/ROWCOUNT tdm_table1
-TDM/TABLE/MAXROWCOUNT tdm_table1
-TDM/TABLE/COLUMNCOUNT tdm_table1
-TDM/TABLE/TYPE tdm_table1
-TDM/TABLE/SHOW tdm_table1
-TDM/TABLE/ROWSIZE tdm_table1
-
-MESS _       5 Mutate some TDMTABLE attributes
-TDM/TABLE/ROWCOUNT tdm_table2
-TDM/TABLE/MAXROWCOUNT tdm_table2
-TDM/TABLE/ROWCOUNT tdm_table2 71
-TDM/TABLE/ROWCOUNT tdm_table2
-TDM/TABLE/MAXROWCOUNT tdm_table2
-TDM/TABLE/MAXROWCOUNT tdm_table2 100
-TDM/TABLE/ROWCOUNT tdm_table2
-TDM/TABLE/MAXROWCOUNT tdm_table2
+MESS
+MESS ************************************************************
+MESS ****  Exercise dataset objects.                         ****
+MESS ************************************************************
+TDM/DATASET/NAME moe
+TDM/DATASET/NAME /dui/moe
+TDM/DATASET/NAME ./moe
+TDM/DATASET/ENTRYCOUNT moe
+TDM/DATASET/MAXENTRYCOUNT moe
+** TDM/DATASET/ADDDATASET TDMDATASET NAME [ DIM ]
+** TDM/DATASET/ADDTABLE TDMDATASET NAME SPEC ROWCOUNT
+** TDM/DATASET/SHOW TDMDATASET [ OPTION ]
+** TDM/DATASET/ENTRYNAME NENTRY
+** TDM/DATASET/FINDENTRY ENTRYNAME
+WAIT 'Hit <CR> to continue:' 0
 
 RETURN
-
 SHAR_EOF
 fi # end of overwriting check
-if test -f 'staf132tdm.kumac'
+if test -f 'test121getput.kumac'
 then
-	echo shar: will not over-write existing file "'staf132tdm.kumac'"
+	echo shar: will not over-write existing file "'test121getput.kumac'"
 else
-cat << \SHAR_EOF > 'staf132tdm.kumac'
+cat << \SHAR_EOF > 'test121getput.kumac'
 
-MACRO staf132tdm [1]=10
-************************************************************************
-**** staf132tdm - Test many TDM objects
-**** _       1 Create lots of tdmTable objects
+MACRO TEST121GETPUT [NROWS]=101
 
-MESS _         STAF Test #132
+MESS
+MESS ************************************************************
+MESS ************************************************************
+MESS ****  GETPUT - Test the GETVALUE and PUTVALUE commands. ****
+MESS ************************************************************
+MESS ************************************************************
+MESS
+WAIT 'Hit <CR> to continue:' 0
 
-MESS _       0 Handle Macro Arguments & Initialize
+MESS
+MESS ************************************************************
+MESS ****  Create a Table.                                   ****
+MESS ************************************************************
+TDM/NEWTABLE 'tdm_table121' 'struct type121 { _
+        long i,j,k; _
+        float x,y,z; _
+        float p[3]; _
+        }' 1001
+TDM/TABLE/ROWCOUNT tdm_table121 [NROWS]
+TDM/TABLE/SHOW tdm_table121
+TDM/TABLE/PRINT tdm_table121
+WAIT 'Hit <CR> to continue:' 0
 
-MESS _       1 Create lots of tdmTable objects
-
-DO I=1,[1]
-TDM/NEWTABLE tdm_table[I] 'struct fee{long x,y,z;};' 1000 PATH
+MESS
+MESS ************************************************************
+MESS ****  Set cell values.                                  ****
+MESS ************************************************************
+DO I=0,[NROWS]-1
+        CELL = 'tdm_table121['//[I]//'].i'
+        MESS $QUOTE([CELL])
+        TDM/TABLE/CELL/PUTVALUE $QUOTE([CELL]) [I]
+        CELL = 'tdm_table121['//[I]//'].x'
+        MESS $QUOTE([CELL])
+	VALUE = 1+[I]
+        TDM/TABLE/CELL/PUTVALUE $QUOTE([CELL]) [VALUE]
+        CELL = 'tdm_table121['//[I]//'].y'
+        MESS $QUOTE([CELL])
+	VALUE = 2.2*[I]
+        TDM/TABLE/CELL/PUTVALUE $QUOTE([CELL]) [VALUE]
 ENDDO
-SOC/LIST
+TDM/TABLE/PRINT tdm_table121 [NROWS]
+WAIT 'Hit <CR> to continue:' 0
 
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf133tdm.kumac'
-then
-	echo shar: will not over-write existing file "'staf133tdm.kumac'"
-else
-cat << \SHAR_EOF > 'staf133tdm.kumac'
-
-MACRO staf133tdm [1]=101
-************************************************************************
-**** staf133tdm - Test access to TDMTABLE columns
-**** _       1 Create a tdmTable object
-**** _       2 Print datadmTable object
-**** _       3 Get cell values
-
-MESS _         STAF Test #133
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS _       1 Create a tdmTable object
-
-TDM/NEWTABLE 'tdm_table133' 'struct type133 { _
-	long i,j,k; _
-	float x,y,z; _
-	float p[3]; _
-	}' 1001
-TDM/TABLE/ROWCOUNT tdm_table133 
-TDM/TABLE/ROWCOUNT tdm_table133 [1]
-TDM/TABLE/ROWCOUNT tdm_table133 
-
-MESS _       2 Print datadmTable object
-TDM/TABLE/SHOW tdm_table133
-TDM/TABLE/PRINT tdm_table133
-
-MESS _       3 Get cell values
-DO I=1,[1]
-	CELL = 'tdm_table133['//[I]//'].i'
-	MESS $QUOTE([CELL])
-	TDM/TABLE/CELL/GETVALUE $QUOTE([CELL])
-	CELL = 'tdm_table133['//[I]//'].x'
-	MESS $QUOTE([CELL])
-	TDM/TABLE/CELL/GETVALUE $QUOTE([CELL])
-	CELL = 'tdm_table133['//[I]//'].y'
-	MESS $QUOTE([CELL])
-	TDM/TABLE/CELL/GETVALUE $QUOTE([CELL])
+MESS
+MESS ************************************************************
+MESS ****  Get cell values.                                  ****
+MESS ************************************************************
+DO I=0,[NROWS]-1
+        CELL = 'tdm_table121['//[I]//'].i'
+        MESS $QUOTE([CELL])
+        TDM/TABLE/CELL/GETVALUE $QUOTE([CELL])
+        CELL = 'tdm_table121['//[I]//'].x'
+        MESS $QUOTE([CELL])
+        TDM/TABLE/CELL/GETVALUE $QUOTE([CELL])
+        CELL = 'tdm_table121['//[I]//'].y'
+        MESS $QUOTE([CELL])
+        TDM/TABLE/CELL/GETVALUE $QUOTE([CELL])
 ENDDO
+WAIT 'Hit <CR> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Show STAF_RESULT vector.                          ****
+MESS ************************************************************
+VECT/PRINT STAF_RESULT
+WAIT 'Hit <CR> to continue:' 0
 
 RETURN
-
 SHAR_EOF
 fi # end of overwriting check
-if test -f 'staf140dui.kumac'
+if test -f 'test130dui.kumac'
 then
-	echo shar: will not over-write existing file "'staf140dui.kumac'"
+	echo shar: will not over-write existing file "'test130dui.kumac'"
 else
-cat << \SHAR_EOF > 'staf140dui.kumac'
+cat << \SHAR_EOF > 'test130dui.kumac'
+MACRO TEST130DUI [NSECT]=24 [NI960]=18
 
-MACRO staf140dui [1]=100
-************************************************************************
-**** staf140dui  - Show all commands
-**** _       1 Show ASU Vectors
-**** _       2 Show ASU Usage
-**** _       3 Show SOC Usage
-**** _       4 Show SPX Usage
-**** _       5 Show TDM Usage
-**** _       6 Show DUI Usage
+MESS
+MESS ************************************************************
+MESS ************************************************************
+MESS ****  DUITREE TEST - Demonstrate creating a Unix-like   ****
+MESS ****  dataset hierarchy with the DUI commands.          ****
+MESS ************************************************************
+MESS ************************************************************
+MESS
+WAIT 'Hit <CR> to continue:' 0
 
-MESS _         STAF Test #140
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS _       1 Show ASU Vectors
-V/LIST
-V/PRINT STAF_STATUS
-V/PRINT STAF_RESULT
-
-MESS _       2 Show ASU Usage
-USAGE ASU
-
-MESS _       3 Show SOC Usage
-USAGE SOC
-
-MESS _       4 Show SPX Usage
-USAGE SPX
-
-MESS _       5 Show TDM Usage
-USAGE TDM
-
-MESS _       6 Show DUI Usage
-USAGE DUI
-
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf141dui.kumac'
-then
-	echo shar: will not over-write existing file "'staf141dui.kumac'"
-else
-cat << \SHAR_EOF > 'staf141dui.kumac'
-
-MACRO staf141dui
-************************************************************************
-**** staf141dui  - 
-
-MESS _         STAF Test #141
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-** DUI/CD [ PATH ]
-DUI/CD
-
-** DUI/CP SOURCE TARGET
-
-** DUI/LS [ PATH ]
-DUI/LS
-
-** DUI/MKDIR PATH
-DUI/MKDIR PATH
-
-** DUI/MKTABLE NAME SPEC ROWCOUNT
-DUI/MKTABLE dui141a 'struct t141a { long i,j,k; }' 141
-
-** DUI/MV SOURCE TARGET
-
-** DUI/PWD
-DUI/PWD
-
-** DUI/RM PATH
-
-** DUI/RMDIR PATH
-
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf143dui.kumac'
-then
-	echo shar: will not over-write existing file "'staf143dui.kumac'"
-else
-cat << \SHAR_EOF > 'staf143dui.kumac'
-
-MACRO staf143dui
-************************************************************************
-**** staf143dui  - Create a DUI heirarcy.
-
-MESS _         STAF Test #143
-
-MESS _       0 Handle Macro Arguments & Initialize
-
+MESS
+MESS ************************************************************
+MESS ****  Create the heirarchy with MKDIR in a KUIP loop.   ****
+MESS ************************************************************
+WAIT 'Hit <CR> to continue:' 0
+TRACE ON
 MKDIR config
 MKDIR config/calib
 MKDIR raw
 MKDIR raw/tpc
-DO i=1,6
-	MKDIR raw/tpc/sect[i]
+DO i=1,[NSECT]
+        MKDIR raw/tpc/sect[i]
 ENDDO
 MKDIR trig
 MKDIR trig/level1
@@ -660,705 +551,114 @@ MKDIR trig/level1/nothing_here
 MKDIR trig/level2
 MKDIR trig/level2/nothing_here
 MKDIR trig/level3
-DO i=1,6
-	MKDIR trig/level3/sect[i]
-	DO j=1,3
-		MKDIR trig/level3/sect[i]/i960_[j]
-	ENDDO
-	MKDIR trig/level3/sect[i]/track
+DO i=1,[NSECT]
+        MKDIR trig/level3/sect[i]
+        DO j=1,[NI960]
+                MKDIR trig/level3/sect[i]/i960_[j]
+        ENDDO
+        MKDIR trig/level3/sect[i]/track
 ENDDO
 MKDIR scratch
+TRACE OFF
+WAIT 'Hit <CR> to continue:' 0
 
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf144dui.kumac'
-then
-	echo shar: will not over-write existing file "'staf144dui.kumac'"
-else
-cat << \SHAR_EOF > 'staf144dui.kumac'
-
-MACRO staf144dui [1]=202
-************************************************************************
-**** staf144dui  - Add some tables to the staf143dui hierarchy.
-**** _       1 staf143dui must be run first
-
-MESS _         STAF Test #144
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS _       1 staf143dui must be run first
-
+MESS
+MESS ************************************************************
+MESS ****  Add some tables with MKTABLE in nested KUIP loops.****
+MESS ************************************************************
+WAIT 'Hit <CR> to continue:' 0
+TRACE ON
+PWD
 CD config
-DUI/MKTABLE run_config 'struct run_configuration {long beam_z,  beam_a;float beam_e;char start_time[20],  stop_time[20],  comment[80];};' 1
+DUI/MKTABLE run_config 'struct run_configuration {long beam_z, _
+	beam_a;float beam_e;char start_time[20],  stop_time[20], _
+	comment[80];};' 1
 CD ../raw/tpc
-DO i=1,6
-	CD sect[i]
-	DUI/MKTABLE tpc_data 'struct tpc_data {char adc;};' 1000
-	CD ..
+DO i=1,[NSECT]
+        CD sect[i]
+        DUI/MKTABLE tpc_data 'struct tpc_data {char adc;};' 1000
+        CD ..
 ENDDO
 CD ../../trig/level3
-DO i=1,6
-	CD sect[i]
-	DO j=1,3
-		CD i960_[j]
-		DUI/MKTABLE cluster 'struct i960_cluster {short i960ID, nClusters;};' 100
-		DUI/MKTABLE data 'struct i960_data {long moment[7];};' 100
-		CD ..
-	ENDDO
-	CD track
-**BUG	DUI/MKTABLE fit 'struct track_fit {float q[3], p[3], chiSquare, errorMatrix[4,4]; short particleID;};' 50
-	DUI/MKTABLE fit 'struct track_fit {float q[3], p[3], chiSquare, errorMatrix[16]; short particleID;};' 50
-	CD ../..
+DO i=1,[NSECT]
+        CD sect[i]
+        DO j=1,[NI960]
+                CD i960_[j]
+                DUI/MKTABLE cluster 'struct i960_cluster _
+			{short i960ID, nClusters;};' 100
+                DUI/MKTABLE data 'struct i960_data {long moment[7];};' _
+			100
+                CD ..
+        ENDDO
+        CD track
+        DUI/MKTABLE fit 'struct track_fit {float q[3], p[3], _
+			chiSquare, errorMatrix[16]; _
+			short particleID;};' 50
+        CD ../..
 ENDDO
 MKDIR scratch
-
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf150dio.kumac'
-then
-	echo shar: will not over-write existing file "'staf150dio.kumac'"
-else
-cat << \SHAR_EOF > 'staf150dio.kumac'
-
-MACRO staf150dio
-************************************************************************
-**** staf150dio - Test DIO read commands
-**** _       1 Show Usage
-**** _       2 Read in existing file.
-**** _       3 Show file parameters.
-**** _       4 Read event from file.
-
-MESS _         STAF Test #150
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS _       1 Show Usage
-USAGE DIO
-
-MESS _       2 Open existing file.
-NEWFILE hier data/hier.xdf R
-
-MESS _       3 Show file parameters.
-MODE hier
-STATE hier
-
-MESS _       4 Read event from file.
-GETEVENT hier
-
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf151dio.kumac'
-then
-	echo shar: will not over-write existing file "'staf151dio.kumac'"
-else
-cat << \SHAR_EOF > 'staf151dio.kumac'
-
-MACRO staf151dio [1]=101
-************************************************************************
-**** staf151dio - Test DIO write command
-**** _       1 Show Usage
-**** _       2 Create hierarchy.
-**** _       3 Create new writable file.
-**** _       4 Put event.
-
-MESS _         STAF Test #151
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS _       1 Show Usage
-USAGE DIO
-
-MESS _       2 Create hierarchy.
-EXEC staf143dui
-EXEC staf144dui
-CD ../../
 PWD
-
-MESS _       3 Create new writable file.
-DIO/NEWFILE foo data/foo.xdf W
-MODE foo
-STATE foo
-
-MESS _       4 Put event.
-PUTEVENT foo
-
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf152dio.kumac'
-then
-	echo shar: will not over-write existing file "'staf152dio.kumac'"
-else
-cat << \SHAR_EOF > 'staf152dio.kumac'
-
-MACRO staf152dio
-************************************************************************
-**** staf152dio - Test DIO multiple reads
-**** _       1 Read in one event from hier.xdf file.
-**** _       2 Read one event into new directory from AFS file.
-**** _       3 List open DIO objects.
-**** _       4 Navigate and show entire hierarchy.
-
-MESS _         STAF Test #152
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS _       1 Read in one event from hier.xdf
-NEWFILE hier data/hier.xdf R
-GETEVENT hier
-
-MESS _       2 Read one event into new directory from AFS file.
-MKDIR tcl
-CD tcl
-NEWFILE tcl data/afs_l/ana/tcl/wrk/tss_12pi12p_noise100.xdf R
-GETEVENT tcl
-
-MESS _       3 List open DIO objects.
-DIO/LIST
-
-MESS _       4 Navigate and show entire hierarchy.
-CD /dui				; LS
-CD /dui/event			; LS
-CD /dui/event/config		; LS
-CD /dui/event/config/calib	; LS
-CD /dui/event/data		; LS
-CD /dui/event/data/tpc		; LS
-CD /dui/event/data/tpc/sect1	; LS
-CD /dui/tcl			; LS
-CD /dui/tcl/dslTASdata		; LS
-PWD
-
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf153dio.kumac'
-then
-	echo shar: will not over-write existing file "'staf153dio.kumac'"
-else
-cat << \SHAR_EOF > 'staf153dio.kumac'
-
-MACRO staf153dio
-************************************************************************
-**** staf153dio - Test multiple DIO read commands from single stream.
-**** _       1 Open existing file.
-**** _       2 Read several event from file.
-
-MESS _         DIO Test #103
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS _       1 Show Usage
-USAGE DIO
-
-**** _       1 Open existing file.
-NEWFILE hier data/hier5.xdf R
-MODE hier
-STATE hier
-
-**** _       2 Read several event from file.
-GETEVENT hier
-
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf160ami.kumac'
-then
-	echo shar: will not over-write existing file "'staf160ami.kumac'"
-else
-cat << \SHAR_EOF > 'staf160ami.kumac'
-
-MACRO AMI100 [1]=100
-************************************************************************
-**** AMI100  - Show all amiMoast commands
-**** _       1 Show ASU Vectors
-**** _       2 Show ASU Usage
-**** _       3 Show SOC Usage
-**** _       4 Show SPX Usage
-**** _       5 Show TDM Usage
-**** _       6 Show DUI Usage
-**** _       7 Show DIO Usage
-**** _       8 Show AMI Usage
-
-MESS _         AMI Test #100
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS _       1 Show ASU Vectors
-V/LIST
-V/PRINT STAF_STATUS
-V/PRINT STAF_RESULT
-
-MESS _       2 Show ASU Usage
-USAGE ASU
-
-MESS _       3 Show SOC Usage
-USAGE SOC
-
-MESS _       4 Show SPX Usage
-USAGE SPX
-
-MESS _       5 Show TDM Usage
-USAGE TDM
-
-MESS _       6 Show DUI Usage
-USAGE DUI
-
-MESS _       7 Show DIO Usage
-USAGE DIO
-
-MESS _       8 Show AMI Usage
-USAGE AMI
-
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf170tbr.kumac'
-then
-	echo shar: will not over-write existing file "'staf170tbr.kumac'"
-else
-cat << \SHAR_EOF > 'staf170tbr.kumac'
-
-MACRO TBR200 [1]=200
-************************************************************************
-**** TBR200  - Test Table BRowser
-**** _       1 Create DUI dataset hierarchy.
-**** _       2 Fill it with some tables.
-**** _       3 Launch Motif Table BRowser.
-
-MESS _       1 Create DUI dataset hierarchy.
-EXEC ../../dui/wrk/dui201
-
-MESS _       2 Fill it with some tables.
-EXEC ../../dui/wrk/dui202
-
-MESS _       3 Launch Motif Table BRowser.
-TBR/MOTIF/VIEWDATASET
-
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf171tbr.kumac'
-then
-	echo shar: will not over-write existing file "'staf171tbr.kumac'"
-else
-cat << \SHAR_EOF > 'staf171tbr.kumac'
-
-MACRO TBR201 [1]=201
-************************************************************************
-**** TBR201  - Test Table Print
-**** _       1 Print table
-
-MESS _       1 Print table
-CD sect6/track
-TBR/ASCII/PRINT fit
-
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf172tbr.kumac'
-then
-	echo shar: will not over-write existing file "'staf172tbr.kumac'"
-else
-cat << \SHAR_EOF > 'staf172tbr.kumac'
-
-MACRO TBR202 [1]=202
-************************************************************************
-**** TBR202  - Test Table Print
-**** _       1 Read file
-**** _       2 Print table
-
-MESS _       1 Read file
-NEWFILE idata /afs/rhic/star/users/tull/star_dev/ana/tcl/wrk/tss_12pi12p_noise100.xdf r
-MKDIR test
-CD test
-GETEVENT idata
-CD dslTASdata
-
-MESS _       2 Print table
-SPEC tsspar
-TBR/ASCII/PRINT tsspar
-SPEC sector
-TBR/ASCII/PRINT sector
-
-RETURN
-
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf301pam.kumac'
-then
-	echo shar: will not over-write existing file "'staf301pam.kumac'"
-else
-cat << \SHAR_EOF > 'staf301pam.kumac'
-
-MACRO PAM101 [1]=101
-************************************************************************
-**** PAM101  - Test calling an PAM 
-**** _       1 Create two empty tables.
-**** _       2 Call pam1_gen_tbl1 several times (1 tables)
-**** _       3 Write to file.
-
-MESS _         PAM Test #101
-
-MESS _       0 Handle Macro Arguments & Initialize
-TRACE ON
-
-MESS _       1 Create two empty tables.
-DUI/LS
-TDM/LIST
-MKTABLE abc 'struct tb1_data_st {long id; float x, y, z;}' 100
-MKTABLE def 'struct tb2_data_st {long id; float radius, phi, theta;}' _
-		100
-DUI/LS
-TDM/LIST
-
-MESS _       2 Call pam1_gen_tbl1 several times (1 tables)
-DO I=1,8
-   AMI/CALL pam1_gen_tbl1 abc
-   DUI/LS abc
-ENDDO
-
-MESS _       3 Write to file.
-NEWFILE foo $STAF_DIR/data/foo.xdf w
-PUTEVENT foo
-
 TRACE OFF
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf302pam.kumac'
-then
-	echo shar: will not over-write existing file "'staf302pam.kumac'"
-else
-cat << \SHAR_EOF > 'staf302pam.kumac'
-
-MACRO PAM102 [1]=102
-************************************************************************
-**** PAM102  - Test calling an PAM 
-**** _       1 Create two empty tables.
-**** _       2 Call pam0 several times (2 tables)
-
-MESS _         PAM Test #102
-
-MESS _       0 Handle Macro Arguments & Initialize
-TRACE ON
-
-MESS _       1 Create two empty tables.
-DUI/LS
-TDM/LIST
-MKTABLE abc 'struct tb1_data_st {long id; float x, y, z;}' 100
-MKTABLE def 'struct tb2_data_st {long id; float radius, phi, theta;}' _
-		100
-DUI/LS
-TDM/LIST
-
-MESS _       2 Call pam0 several times (2 tables)
-DO I=1,8
-   AMI/CALL pam0 abc def
-ENDDO
-
-TRACE OFF
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf303pam.kumac'
-then
-	echo shar: will not over-write existing file "'staf303pam.kumac'"
-else
-cat << \SHAR_EOF > 'staf303pam.kumac'
-
-MACRO PAM200 [1]=200
-************************************************************************
-**** PAM200  - Test calling an PAM 
-**** _       1 Create two empty tables.
-**** _       3 Call pam0 correctly (2 tables)
-**** _       4 Call pam1_gen_tbl1 correctly (1 tables)
-**** _       5 Call pam2_fill_tbl2 correctly (2 tables)
-**** _       6 Call pam3_show_tbls correctly (2 tables)
-**** _       7 Call pam1_gen_tbl1 incorrectly (1 tables)
-**** _       8 Call 3 pams in loop
-
-MESS _         PAM Test #200
-
-MESS _       0 Handle Macro Arguments & Initialize
-TRACE ON
-
-MESS _       1 Create two empty tables.
-DUI/LS
-TDM/LIST
-MKTABLE abc 'struct tb1_data_st {long id; float x, y, z;}' 100
-MKTABLE def 'struct tb2_data_st {long id; float radius, phi, theta;}' _
-		100
-DUI/LS
-TDM/LIST
-
-MESS _       3 Call pam0 correctly (2 tables)
-AMI/CALL pam0 abc def
-
-MESS _       4 Call pam1_gen_tbl1 correctly (1 tables)
-AMI/CALL pam1_gen_tbl1 abc
-
-MESS _       5 Call pam2_fill_tbl2 correctly (2 tables)
-AMI/CALL pam2_fill_tbl2 abc def
-
-MESS _       6 Call pam3_show_tbls correctly (2 tables)
-AMI/CALL pam3_show_tbls abc def
-
-MESS _       7 Call pam1_gen_tbl1 incorrectly (1 tables)
-AMI/CALL pam1_gen_tbl1 def
-
-MESS _       8 Call 3 pams in loop
-DO I=1,4
-   AMI/CALL pam1_gen_tbl1 abc
-   AMI/CALL pam2_fill_tbl2 abc def
-   AMI/CALL pam3_show_tbls abc def
-ENDDO
-
-TRACE OFF
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf304pam.kumac'
-then
-	echo shar: will not over-write existing file "'staf304pam.kumac'"
-else
-cat << \SHAR_EOF > 'staf304pam.kumac'
-MACRO PAM300 [1]=300
-************************************************************************
-**** PAM300  - Test calling pamc & pamf 
-
-MESS _         PAM Test #300
-
-MESS _       0 Handle Macro Arguments & Initialize
-TRACE OFF
-
-MKDIR test
-CD test
-MKTABLE aaa 'struct scalars {short aShort; unsigned short aUshort; long aLong; unsigned long aUlong; char aChar; octet aOctet; float aFloat; double aDouble;}' 1001
-MKTABLE bbb 'struct vectors {short bShorts[3]; unsigned short bUshorts[3]; long bLongs[3]; unsigned long bUlongs[3]; char bChars[3]; octet bOctets[3]; float bFloats[3]; double bDoubles[3];}' 1002
-
-AMI/CALL pamc aaa bbb
+WAIT 'Hit <CR> to continue:' 0
 
 RETURN
+SHAR_EOF
+fi # end of overwriting check
+if test -f 'test_suite.README'
+then
+	echo shar: will not over-write existing file "'test_suite.README'"
+else
+cat << \SHAR_EOF > 'test_suite.README'
+
+This test suite contains KUMAC files for testing various functions in
+STAF.
+
+test000commands.kumac
+	Show commands.
+
+test001vectors.kumac
+	Show STAF KUIP vectors.
+
+test100soc.kumac
+	Test some SOC commands.
+
+test101many.kumac
+	Create many objects.
+	Argument #1 == number of objects to create
+
+test102bind.kumac
+	Test binding to an ASP DLL.
+
+test110spx.kumac
+	Test some SPX commands.
+
+test120tdm.kumac
+	Test some TDM commands.
+
+test121getput.kumac
+	Test the GETVALUE and PUTVALUE commands.
+	Argument #1 == number of rows to process
+
+test130dui.kumac
+	Test some DUI commands.
 
 SHAR_EOF
 fi # end of overwriting check
-if test -f 'staf305pam.kumac'
+if test -f 'test_suite.SETUP'
 then
-	echo shar: will not over-write existing file "'staf305pam.kumac'"
+	echo shar: will not over-write existing file "'test_suite.SETUP'"
 else
-cat << \SHAR_EOF > 'staf305pam.kumac'
-MACRO staf305pam [1]=10 [2]=10
-************************************************************************
-**** staf305pam - Test PAM analysis module
-
-MESS _         STAF Test #305 - PAM
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-AMI/CALL pamc tab1 tab2
-MAXROWCOUNT tab1 [1]
-MAXROWCOUNT tab2 [2]
-ROWCOUNT tab1 [1]
-ROWCOUNT tab2 [2]
-CALL pamc tab1 tab2
-CALL pamf tab1 tab2
-TABLE/PRINT tab1 10
-TABLE/PRINT tab2 10
-
-RETURN
-
+cat << \SHAR_EOF > 'test_suite.SETUP'
+#!/bin/csh
+#
+echo "Setting up environment for STAF Test Suite."
+#
+mkdir data
+cd data
+ln -s /afs/rhic/star/users/tull/public/data/*.* .
+#
 SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf310tcl.kumac'
-then
-	echo shar: will not over-write existing file "'staf310tcl.kumac'"
-else
-cat << \SHAR_EOF > 'staf310tcl.kumac'
-*** Begin of history file: Wed Dec 31 16:00:00 1969
-AMI/LIST
-NEWFILE idata /afs/rhic/star/users/tull/star_dev/ana/tcl/wrk/tss_12pi12p_noise100.xdf r
-LS
-GETEVENT idata
-CD dslTASdata
-LS
-MKTABLE tpcluster _
-	'struct tpcluster{long flag,jseq,nhits,nseq,tpc_row;};' 5000
-MKTABLE tpseq _
-	'struct tpseq{long jpix,next,secpad,tpc_row;};' 15000
-AMI/CALL tcl_make_clusters pad_plane tppad tppixel tpmcpix tpcluster tpseq
-LS
-*** End   of history file: Wed Feb 28 10:06:02 1996
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf500tst.kumac'
-then
-	echo shar: will not over-write existing file "'staf500tst.kumac'"
-else
-cat << \SHAR_EOF > 'staf500tst.kumac'
-
-MACRO TST100 [1]=100
-************************************************************************
-**** TST100  - Show all tstMoast commands
-**** _       1 Show ASU Vectors
-**** _       2 Show ASU Usage
-**** _       3 Show SOC Usage
-**** _       4 Show SPX Usage
-**** _       5 Show TDM Usage
-**** _       6 Show DUI Usage
-**** _       7 Show DIO Usage
-**** _       8 Show AMI Usage
-**** _       9 Show TBR Usage
-
-MESS _         AMI Test #100
-
-MESS _       0 Handle Macro Arguments & Initialize
-
-MESS _       1 Show ASU Vectors
-VEC/LIST
-**V/PRINT STAF_STATUS
-**V/PRINT STAF_RESULT
-
-MESS _       2 Show ASU Usage
-USAGE ASU
-
-MESS _       3 Show SOC Usage
-USAGE SOC
-
-MESS _       4 Show SPX Usage
-USAGE SPX
-
-MESS _       5 Show TDM Usage
-USAGE TDM
-
-MESS _       6 Show DUI Usage
-USAGE DUI
-
-MESS _       7 Show DIO Usage
-USAGE DIO
-
-MESS _       8 Show AMI Usage
-USAGE AMI
-
-MESS _       9 Show TBR Usage
-USAGE TBR
-
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf501tst.kumac'
-then
-	echo shar: will not over-write existing file "'staf501tst.kumac'"
-else
-cat << \SHAR_EOF > 'staf501tst.kumac'
-
-MACRO TST200 [1]=200
-************************************************************************
-**** TST200  - Test calling PAM 
-**** _       1 Create two empty tables.
-**** _       2 Call pam on empty tables (correctly & incorrectly)
-**** _       3 Call pam on non-existant tables
-**** _       4 Allocate memory for created tables
-**** _       5 Call pam on allocated tables
-**** _       6 Set rowcount (nok) for created tables
-**** _       7 Call pam on tables
-**** _       8 Call pam in KUIP loop
-**** _       9 Write out tables to XDF file
-
-MESS _         AMI Test #200
-
-MESS _       0 Handle Macro Arguments & Initialize
-TRACE ON
-
-MESS _       1 Create two empty tables.
-DUI/LS
-MKTABLE xxx 'struct TB1_DATA_ST {long id; float x, y, z;}' 100
-MKTABLE yyy 'struct TB2_DATA_ST {long id; float radius, phi, theta;}' _
-                100
-DUI/LS
-
-MESS _       2 Call pam on empty tables (correctly & incorrectly)
-AMI/LIST
-AMI/CALL pam xxx yyy
-AMI/CALL pam yyy xxx
-
-MESS _       3 Call pam on non-existant tables
-DUI/LS
-AMI/CALL pam abc def
-DUI/LS
-
-MESS _       4 Allocate memory for created tables
-TDM/TABLE/MAXROWCOUNT abc 100
-TDM/TABLE/MAXROWCOUNT def 100
-
-MESS _       5 Call pam on allocated tables
-AMI/CALL pam abc def
-
-MESS _       6 Set rowcount (nok) for created tables
-TDM/TABLE/ROWCOUNT def 10
-TDM/TABLE/ROWCOUNT abc 92
-
-MESS _       7 Call pam on tables
-AMI/CALL pam abc def
-
-MESS _       8 Call pam in KUIP loop
-DO I=1,4
-   AMI/CALL pam xxx yyy
-   AMI/CALL pam abc def
-ENDDO
-
-MESS _       9 Write out tables to XDF file
-** THIS WILL WRITE OUT TABLES WITH JUNK AS DATA!
-DIO/NEWFILE junk $STAF_DIR/data/junk.xdf w
-DIO/FILE/PUTEVENT junk
-
-TRACE OFF
-RETURN
-
-SHAR_EOF
-fi # end of overwriting check
-if test -f 'staf701getvalue.kumac'
-then
-	echo shar: will not over-write existing file "'staf701getvalue.kumac'"
-else
-cat << \SHAR_EOF > 'staf701getvalue.kumac'
-
-exec staf305pam 10000 10000
-ls
-table/show tab1
-getvalue 'tab1[0].aLong'
-getvalue 'tab1[88].aLong'
-pwd
-ls
-putvalue 'tab1[86].aShort' 123
-putvalue 'tab1[87].aUshort' 321
-putvalue 'tab1[88].aLong' 123
-putvalue 'tab1[89].aUlong' 321
-putvalue 'tab1[90].aChar' %
-putvalue 'tab1[91].aOctet' 123
-putvalue 'tab1[92].aFloat' 321.123
-putvalue 'tab1[93].aDouble' 123.321
-
-getvalue 'tab1[88].aLong'
-table/print tab1 20 80
-
-SHAR_EOF
+chmod +x 'test_suite.SETUP'
 fi # end of overwriting check
 #	End of shell archive
 exit 0

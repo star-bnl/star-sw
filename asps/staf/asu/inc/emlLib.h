@@ -34,6 +34,7 @@ extern CC_P int eml_stop();
 #define EML_LOG_SUCCESS(code) {set_staf_status(STAFCV_OK);}
 #define EML_TRACE(msg) {printf("%s.%d-%s\n",__FILE__,__LINE__,msg);fflush(0);}
 #define EML_PRINTF printf("%s.%d-",__FILE__,__LINE__);fflush(0);printf
+#define EML_DSPERROR(msg) EML_TRACE(#msg);dsPerror("(dsl):")
 
 #endif /*EMLLIB_H*/
 

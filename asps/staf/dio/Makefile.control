@@ -1,7 +1,10 @@
 # dio/Makefile.control
 #
-ASPS := dio dui tdm soc
+#ASPS := dio dui tdm soc
 #PAMS := 
+### TEST
+ASPS := ami dio dui tdm soc
+PAMS := pam
 #
 USER_LIBS := -ldsl -lasu
 #

@@ -23,12 +23,11 @@
 #include "dio_types.h"
 
 //:=============================================== CLASS              ==
-class dioFileStream: public virtual socObject {
-
+class dioStream: public virtual socObject {
 public:
 //:----------------------------------------------- CTORS & DTOR       --
-   dioFileStream(const char * name);
-   virtual ~dioFileStream();
+   dioStream();
+   virtual ~dioStream();
 
 //:----------------------------------------------- ATTRIBUTES         --
    virtual DIO_MODE_T mode ();
@@ -36,20 +35,94 @@ public:
 
 //:----------------------------------------------- PUB FUNCTIONS      --
    virtual STAFCV_T close ();
-   virtual STAFCV_T getEvent (const char * path);
-   virtual STAFCV_T open (const char * fileName, DIO_MODE_T mode);
-   virtual STAFCV_T putEvent (const char * path);
+   virtual STAFCV_T getEvent (tdmDataset* destination);
+   virtual STAFCV_T open (DIO_MODE_T mode);
+   virtual STAFCV_T putEvent (tdmDataset* source);
 
 protected:
 //:----------------------------------------------- PRIV VARIABLES     --
    DIO_MODE_T myMode;
    DIO_STATE_T myState;
 
-   FILE* myFile;
    XDR myXDR;
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
+};
 
+//:=============================================== CLASS              ==
+class dioFileStream: public virtual dioStream {
+
+public:
+//:----------------------------------------------- CTORS & DTOR       --
+   dioFileStream(const char * name, const char * fileName);
+   virtual ~dioFileStream();
+
+//:----------------------------------------------- ATTRIBUTES         --
+   virtual char * fileName ();
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+//:- override virtuals
+   virtual STAFCV_T close ();
+   virtual STAFCV_T getEvent (tdmDataset* destination);
+   virtual STAFCV_T open (DIO_MODE_T mode);
+   virtual STAFCV_T putEvent (tdmDataset* source);
+
+protected:
+//:----------------------------------------------- PRIV VARIABLES     --
+   FILE* myFile;
+   char *myFileName;
+
+//:----------------------------------------------- PRIV FUNCTIONS     --
+
+};
+
+//:=============================================== CLASS              ==
+class dioTapeStream: public virtual dioStream {
+
+public:
+//:----------------------------------------------- CTORS & DTOR       --
+   dioTapeStream(const char * name, const char * tapeName);
+   virtual ~dioTapeStream();
+
+//:----------------------------------------------- ATTRIBUTES         --
+   virtual char * tapeName ();
+   virtual void bufferSize (long bufferSize);
+   virtual long bufferSize ();
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+//:**NONE**
+
+protected:
+//:----------------------------------------------- PRIV VARIABLES     --
+   FILE* myTape;
+   char *myTapeName;
+   long myBufferSize;
+
+//:----------------------------------------------- PRIV FUNCTIONS     --
+};
+
+//:=============================================== CLASS              ==
+class dioSockStream: public virtual dioStream {
+
+public:
+//:----------------------------------------------- CTORS & DTOR       --
+   dioSockStream(const char * name, long socket);
+   virtual ~dioSockStream();
+
+//:----------------------------------------------- ATTRIBUTES         --
+   virtual long socket ();
+   virtual void bufferSize (long bufferSize);
+   virtual long bufferSize ();
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+//:**NONE**
+
+protected:
+//:----------------------------------------------- PRIV VARIABLES     --
+   long mySocket;
+   long myBufferSize;
+
+//:----------------------------------------------- PRIV FUNCTIONS     --
 };
 
 //:=============================================== CLASS              ==
@@ -64,14 +137,15 @@ public:
 //:**NONE**
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+   virtual char * list ();
+
    virtual STAFCV_T deleteFileStream (const char * name);
    virtual STAFCV_T findFileStream (const char * name
                 , dioFileStream*& fileStream);
    virtual STAFCV_T getFileStream (IDREF_T id
                 , dioFileStream*& fileStream);
-   virtual STAFCV_T list ();
    virtual STAFCV_T newFileStream (const char * name
-                , const char * fileName, DIO_MODE_T mode);
+                , const char * fileName);
 
 protected:
 //:----------------------------------------------- PRIV VARIABLES     --

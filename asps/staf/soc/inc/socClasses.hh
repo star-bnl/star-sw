@@ -59,52 +59,6 @@ unsigned char myLock;
 };
 
 //:=============================================== CLASS              ==
-class socCatalog:  public virtual socObject {
-
-public:
-
-//:----------------------------------------------- CTORS & DTOR       --
-   socCatalog();
-// socCatalog(const char* name, const char* type);
-   virtual ~socCatalog();
-
-//:----------------------------------------------- ATTRIBUTES         --
-   virtual long count ();
-
-//:----------------------------------------------- PUB FUNCTIONS      --
-   virtual STAFCV_T deleteID (IDREF_T id);
-
-   virtual STAFCV_T deleteObject (const char * name, const char * type);
-
-   virtual STAFCV_T findObject (const char * name, const char * type
-		, socObject*& obj);
-
-   virtual STAFCV_T getObject (IDREF_T id, socObject*& obj);
-
-   virtual STAFCV_T idObject (const char * name
-		, const char * type, IDREF_T& id);
-
-   virtual STAFCV_T list ();
-
-   virtual STAFCV_T newObject (const char * name);
-
-   virtual STAFCV_T signIn (socObject* obj, IDREF_T& id);
-
-   virtual STAFCV_T signOut (IDREF_T id);
-
-protected:
-//:----------------------------------------------- PRIV VARIABLES     --
-long myCount;
-
-long maxCount;
-socObject**  myObjs;
-
-//:----------------------------------------------- PRIV FUNCTIONS     --
-// **NONE**
-
-};
-
-//:=============================================== CLASS              ==
 class socFactory: public virtual socObject { 
 
 public:
@@ -117,6 +71,8 @@ public:
    virtual long maxCount ();
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+   virtual char * list ();
+
    virtual STAFCV_T addEntry (IDREF_T idRef);
    virtual STAFCV_T deleteEntry (IDREF_T idRef);
    virtual IDREF_T entry(long n);
@@ -135,6 +91,47 @@ private:
 //:**NONE**
 //:----------------------------------------------- PRIV FUNCTIONS     --
 //:**NONE**
+};
+
+//:=============================================== CLASS              ==
+class socCatalog:  public virtual socFactory {
+
+public:
+
+//:----------------------------------------------- CTORS & DTOR       --
+   socCatalog();
+// socCatalog(const char* name, const char* type);
+   virtual ~socCatalog();
+
+//:----------------------------------------------- ATTRIBUTES         --
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+   virtual char * list (); // override virtual
+   virtual STAFCV_T deleteID (IDREF_T id);
+
+   virtual STAFCV_T deleteObject (const char * name, const char * type);
+
+   virtual STAFCV_T findObject (const char * name, const char * type
+		, socObject*& obj);
+
+   virtual STAFCV_T getObject (IDREF_T id, socObject*& obj);
+
+   virtual STAFCV_T idObject (const char * name
+		, const char * type, IDREF_T& id);
+
+   virtual STAFCV_T newObject (const char * name);
+
+   virtual STAFCV_T signIn (socObject* obj, IDREF_T& id);
+
+   virtual STAFCV_T signOut (IDREF_T id);
+
+protected:
+//:----------------------------------------------- PRIV VARIABLES     --
+socObject**  myObjs;
+
+//:----------------------------------------------- PRIV FUNCTIONS     --
+// **NONE**
+
 };
 
 //:---------------------------------------------------------------------

@@ -57,6 +57,7 @@ show:
 #
 install:
 	$(MAKE) -f $(SLM_DIR)/install.mk install_all
+	cp $(BASE_DIR)/SLM_DIR/* $(SLM_DIR)
 #
 $(notdir $(shell pwd)).config: Makefile.control
 	$(MAKE) -f $(SLM_DIR)/config.mk config

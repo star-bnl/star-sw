@@ -39,7 +39,7 @@ int kam_ami_count()
    long npars = ku_npar();      /* number of KUIP parameters */
 
    printf("AMI:\tObject count = %d \n",ami->count());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -56,10 +56,8 @@ int kam_ami_list()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
 
-   if( !ami->list() ){
-      EML_ERROR(KAM_METHOD_FAILURE);
-   }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   printf("%s",ami->list());
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -92,7 +90,7 @@ int kam_ami_call()
    if( !ami->callInvoker(name, tables) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 
 }
 
@@ -117,7 +115,7 @@ int kam_amiinvoker_rank()
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    printf("AMI:\tAnalysis module rank = %d \n",pam->rank());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -144,7 +142,7 @@ int kam_amiinvoker_show()
    }
    char *c = pam->tableSpec(-1);
    printf("AMI:\tTable Specification = \n%s \n",c);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /***********************************************************************

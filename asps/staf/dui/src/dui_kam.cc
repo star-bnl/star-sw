@@ -44,7 +44,7 @@ int kam_dui_cd()
    if( !dui->cd(path) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -66,7 +66,7 @@ int kam_dui_cp()
    if( !dui->cp(fromPath,toPath) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -90,8 +90,8 @@ int kam_dui_ls()
    if( !dui->ls(path, result) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   printf("DUI:\tListing = \n***\n%s\n***\n",result);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   printf("DUI:\tListing = ...\n%s\n.\n",result);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -112,7 +112,7 @@ int kam_dui_mkdir()
    if( !dui->mkdir(path) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -134,7 +134,7 @@ int kam_dui_mv()
    if( !dui->mv(fromPath,toPath) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -157,7 +157,7 @@ int kam_dui_pwd()
       EML_ERROR(KAM_METHOD_FAILURE);
    }
    printf("DUI:\tCurrent Working Directory = (%s) \n",result);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -178,7 +178,7 @@ int kam_dui_rm()
    if( !dui->rm(path) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -199,7 +199,7 @@ int kam_dui_rmdir()
    if( !dui->rmdir(path) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -222,6 +222,6 @@ int kam_dui_mktable()
    if( !dui->mkTable(name,spec,rowcount) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 

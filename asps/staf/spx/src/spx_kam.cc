@@ -45,7 +45,7 @@ int kam_spxdummy_ncalls()
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    printf("SPXDUMMY:\tNumber of calls = %d \n",dummy->nCalls());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -72,7 +72,7 @@ int kam_spxdummy_hello()
    if( !dummy->hello(message) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -96,7 +96,7 @@ int kam_spxdummy_null()
    ||  !dummy->null() ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -125,7 +125,7 @@ int kam_spxdummy_time()
    }
    printf("SPXDUMMY:\tTime = %s \n",tim);
    ASUFREE(tim);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -149,7 +149,7 @@ int kam_spxgrid_height()
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    printf("SPXGRID:\tHeight = %d \n",grid->height());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -173,7 +173,7 @@ int kam_spxgrid_width()
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    printf("SPXGRID:\tWidth = %d \n",grid->width());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -203,7 +203,7 @@ int kam_spxgrid_get()
       EML_ERROR(KAM_METHOD_FAILURE);
    }
    printf("SPXGRID:\tCell value = %d \n",value);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -232,7 +232,7 @@ int kam_spxgrid_set()
    if( !grid->set(m,n,value) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -250,7 +250,7 @@ int kam_spx_count()
    long npars = ku_npar();	/* number of KUIP parameters */
 
    printf("SPX:\tObject count = %d \n",spx->count());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -267,10 +267,8 @@ int kam_spx_list()
 {
    long npars = ku_npar();	/* number of KUIP parameters */
 
-   if( !spx->list() ){
-      EML_ERROR(KAM_METHOD_FAILURE);
-   }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   printf("%s",spx->list() );
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -291,7 +289,7 @@ int kam_spx_newdummy()
    if( !spx->newDummy(name) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -314,6 +312,6 @@ int kam_spx_newgrid()
    if( !spx->newGrid(name,height,width) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
