@@ -1,5 +1,9 @@
-// $Id: St_dst_Maker.cxx,v 1.78 2004/05/03 23:32:11 perev Exp $
+// $Id: St_dst_Maker.cxx,v 1.79 2004/05/11 15:44:05 jcs Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.79  2004/05/11 15:44:05  jcs
+// remove filling of dst_mon_soft_ftpc table, information now stored directly into StEvent
+// in StFtpcTrackMaker
+//
 // Revision 1.78  2004/05/03 23:32:11  perev
 // Possible non init WarnOff
 //
@@ -232,7 +236,6 @@
 #include "global/St_fill_dst_event_summary_Module.h"
 #include "tables/St_dst_summary_param_Table.h"
 #include "tables/St_dst_run_summary_Table.h"
-#include "tables/St_dst_mon_soft_ftpc_Table.h"
 #include "tables/St_dst_mon_soft_ctb_Table.h"
 #include "tables/St_dst_mon_soft_emc_Table.h"
 #include "tables/St_dst_mon_soft_l3_Table.h"
@@ -243,7 +246,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.78 2004/05/03 23:32:11 perev Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.79 2004/05/11 15:44:05 jcs Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -410,25 +413,6 @@ Int_t  St_dst_Maker::Filler(){
      if(!globtrk) {globtrk = new St_dst_track("globtrk",1);AddGarb(globtrk);}
   }
 
-  //  Get FTPC monitor soft table if it exists
-  // otherwise create an empty ftpc monitor soft table
-     St_dst_mon_soft_ftpc *mon_soft_ftpc =  NULL;
-     St_DataSet *ds=0, *mk=0;
-     mk = GetInputDS("fglobal");
-     if (mk) { 
-        ds = mk->Find("mon_soft_ftpc");
-        if (ds) {
-           ds->Shunt(dst);
-           mon_soft_ftpc =  (St_dst_mon_soft_ftpc *) dstI("mon_soft_ftpc");
-        }
-      } 
-      if (!mon_soft_ftpc) {
-           //Make (empty) ftpc monitor soft table
-           // fcl_fppoint and fpt_fptrack no longer exist
-           St_dst_mon_soft_ftpc *mon_soft_ftpc = new St_dst_mon_soft_ftpc("mon_soft_ftpc",1);
-           dstI.Add(mon_soft_ftpc);
-           mon_soft_ftpc->SetNRows(1);
-       }	   
 
   St_dst_vertex    *vertex      = (St_dst_vertex *)    dstI("vertex");    
   //Make empty vertex table if none exists
