@@ -1,9 +1,9 @@
-/*  ev0_track
+/*  ev0_track2
 *  Local track table for ev0
 */
 
 
-      struct ev0_track{
+      struct ev0_track2{
         long id;
 	long det_id;
         long pid;
