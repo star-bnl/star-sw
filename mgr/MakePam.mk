@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.59 1998/10/19 01:03:12 fisyak Exp $
+# $Id: MakePam.mk,v 1.60 1998/10/20 01:42:00 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.60  1998/10/20 01:42:00  fisyak
+# debug only for db
+#
 # Revision 1.59  1998/10/19 01:03:12  fisyak
 # Add also separate OBJ directory for NODEBUG version
 #
@@ -64,7 +67,6 @@ endif
 include $(STAF_MAKE_HOME)/MakeEnv.mk
 include $(STAF_MAKE_HOME)/MakeArch.mk
 
-
 ifdef SILENT
   .SILENT:
 endif
@@ -97,6 +99,11 @@ ifeq (,$(findstring $(LEVEL),0 1))
   ifeq ($(DOMAIN),sim)
     DOMAIN  := $(word 3, $(D))
   endif
+  ifeq ($(DOMAIN),db)
+    CFLAGS   := $(filter-out $(DEBUG),   $(CFLAGS)) -g
+    CXXFLAGS := $(filter-out $(DEBUG), $(CXXFLAGS)) -g
+    FFLAGS   := $(filter-out $(DEBUG),   $(FFLAGS)) -g
+  endif # temporal fix, db does not work with NODEBUG FLAG
   ifneq (,$(DOMAIN)$(PKG)) 
     SRC_DIR := $(INP_DIR)
     SYS_DIR := $(OUT_DIR)/.$(STAR_HOST_SYS)
