@@ -13,6 +13,7 @@
 *--------------------------------------------------------------------
 
 macro initialize adcxyzon tpc_sector_first tpc_sector_last
+macro/global/import *
 
   message ' Initializing for tpc slow simulator '
 *  message ' adc xyz on = ', [adcxyzon]
@@ -34,6 +35,7 @@ macro initialize adcxyzon tpc_sector_first tpc_sector_last
 *------------------------------------------------------------------------
 
 macro process_event  nev adcxyzon tpc_sector_first tpc_sector_last
+macro/global/import *
 
 
    message ' TPC slow sim: Processing Event # ' [nev]

@@ -1,7 +1,7 @@
 * created May 27, 1998 - Kathy Turner
 *                      - this is now kumac that drives tpc tracker
 *                      - input files must be in this order:
-*                            /dui/data, /dui/geant !!
+*                            [data], [geant] !!
 * editted June 2, 1998 - Kathy Turner
 *                   - put in tcl_init#init and took it out of tpc_tracker.kumac
 *  editted June 3, 1998 - Kathy Turner
@@ -26,6 +26,7 @@
 *    -   exec run_tpc_tracker
 *         
 *
+macro/global/import *
 
 message ' *** Input file data  -->             ' [input_filed]
 message ' *** Input file geant -->             ' [input_fileg]

@@ -23,6 +23,7 @@ macro run__
 *         
 *
 *
+macro/global/import *
 
 message ' *** Data Sample directory -->        ' [INPUT_DATA_DIR]
 message ' *** Input G2T file -->               ' [input_g2t_file]

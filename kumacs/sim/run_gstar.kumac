@@ -30,6 +30,7 @@ macro run__
    geomtype=muons 
 
   
+macro/global/import *
   
 * *********SETUP SEARCH DIRECTORIES TO FIND KUMACS *********
     
@@ -100,7 +101,7 @@ def [DEFAULT]
 
 * ********** WRITE RUN INFO TO OUTPUT FILE ***************
 * write Run information to output file - already in staf format 
-   exec write_table_to_file#write outunit /dui/geant/Run
+   exec write_table_to_file#write outunit [geant]/Run
 
 
 
@@ -136,7 +137,7 @@ def [DEFAULT]
      
 
 * WRITE OUT EVENT INFORMATION
-     exec write_table_to_file#write outunit /dui/geant/Event
+     exec write_table_to_file#write outunit [geant]/Event
 
      
    enddo

@@ -31,6 +31,7 @@ macro run__
 *    -   exec run_tpc_slow_sim_tracker_old
 *
 *
+macro/global/import *
 
 message ' *** Data sample directory -->  ' [INPUT_DATA_DIR]
 message ' *** Input G2T file -->         ' [input_g2t_file]
@@ -98,7 +99,7 @@ $STAR/pams/trg/kumac
    
    
 * now overwrite which sector you want to run (in case you don't want default)
-   cd /dui/constants/tpc/params/tsspars
+   cd [params]/tpc/tsspars
    tdm/table/cell/putvalue 'tsspar[0].min_sect' [tpc_sector_first]
    tdm/table/cell/putvalue 'tsspar[0].max_sect' [tpc_sector_last]
    message 'Minimum and Maximum Sector numbers for tpc slow simulation: '

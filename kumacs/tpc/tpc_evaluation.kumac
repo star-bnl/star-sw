@@ -20,6 +20,7 @@
 *--------------------------------------------------------------------
 
 macro initialize
+macro/global/import *
 
 *
 *  create tables
@@ -35,6 +36,7 @@ macro initialize
 *------------------------------------------------------------------------
 
 macro process_event   nev
+macro/global/import *
 
 
    message ' TPC evaluation: Processing Event # ' [nev]
