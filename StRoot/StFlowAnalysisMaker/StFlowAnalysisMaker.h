@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.10 2000/03/15 23:32:04 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.11 2000/03/21 00:24:45 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,8 +11,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.11  2000/03/21 00:24:45  posk
+// Added GetCVS and changed some plot names.
+//
 // Revision 1.10  2000/03/15 23:32:04  posk
-// *** empty log message ***
+// Added StFlowSelection.
 //
 // Revision 1.9  2000/03/02 22:55:34  posk
 // Changed header file extensions from .hh to .h .
@@ -91,6 +94,9 @@ public:
   Int_t    Finish();
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
+  virtual const char *GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.11 2000/03/21 00:24:45 posk Exp $ built "__DATE__" "__TIME__ ;
+    return cvs;}
 
 private:
 
