@@ -24,6 +24,7 @@ $cpFileCatalogT = "cpFileCatalog";
 $FilesCatalogTestT = "FilesCatalogTest";
 $ProdOptionsT = "ProdOptions";
 $cpJobStatusT = "cpJobStatus";
+$JobStatusT = "JobStatus";
 $cpjobRelationsT = "cpjobRelations";
 
 ######################
