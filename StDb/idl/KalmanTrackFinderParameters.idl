@@ -1,0 +1,26 @@
+/*    KalmanTrackFinderParameters.idl
+*
+*  Table: KalmanTrackFinderParameters
+*
+*       description:
+*/ 
+	
+
+struct KalmanTrackFinderParameters { 
+  long   useMcAsRec;
+  long   useTrackFilter;
+  long   elossCalculated;
+  long   mcsCalculated; 
+  double field; 
+  long    maxNullCount;
+  long    maxContiguousNullCount; 
+  long    minContiguousHitCountForNullReset;
+  //double minSearchWindow;
+  //double maxSearchWindow;
+  //double searchWindowScale;
+  //double maxChi2ForSelection;
+  double maxChi2Vertex;
+  double massHypothesis;
+  //double outerScaling;
+  //double innerScaling;
+ };  

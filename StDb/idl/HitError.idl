@@ -1,0 +1,16 @@
+/*    HitError.idl
+*
+*  Table: HitError
+*
+*       description:
+*/ 
+	
+
+struct HitError { 
+  double driftCross;
+  double tanCross;
+  double intrinsicCross;
+  double driftDip;
+  double tanDip;
+  double intrinsicDip;
+ };  

@@ -1,0 +1,11 @@
+/*    KalmanTrackFitterParameters.idl
+*
+*  Table: KalmanTrackFitterParameters
+*
+*       description:
+*/ 
+	
+
+struct KalmanTrackFitterParameters { 
+	double maxChi2; /* Maximum Chi2 */
+ };  
