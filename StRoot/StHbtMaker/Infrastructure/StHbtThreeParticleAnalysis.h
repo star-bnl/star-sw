@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtThreeParticleAnalysis.h,v 1.7 2001/06/03 20:56:10 willson Exp $
+ * $Id: StHbtThreeParticleAnalysis.h,v 1.8 2002/11/01 20:52:39 magestro Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtThreeParticleAnalysis.h,v $
+ * Revision 1.8  2002/11/01 20:52:39  magestro
+ * removed unused class declaration
+ *
  * Revision 1.7  2001/06/03 20:56:10  willson
  * Sectoring, Cos(phi) calculation added
  *
@@ -49,7 +52,6 @@
 #include "StHbtMaker/Infrastructure/StHbtCorrFctnCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtPicoEventCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtSectoredPicoEventCollection.hh"
-class StHbtPicoEventCollectionVectorHideAway;
 
 class StHbtThreeParticleAnalysis : public StHbtBaseAnalysis {
 
