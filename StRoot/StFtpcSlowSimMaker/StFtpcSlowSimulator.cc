@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.15 2003/09/02 17:58:16 perev Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.16 2003/10/07 12:43:07 jcs Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.16  2003/10/07 12:43:07  jcs
+// use StFtpcGeantReader member function to extract FTPC plane number from GEANT volumeID
+//
 // Revision 1.15  2003/09/02 17:58:16  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -174,14 +177,7 @@ int StFtpcSlowSimulator::simulate()
 	//if (kickout->GetRandom() < 0.2) continue;
 
        // Convert geant volume number into FTPC row number
-	int irow= mGeant->geantVolume(i);
-	if ( irow > 200){
-	  irow = irow - 201 + 10;
-	}
-	else  {
-	  irow = irow - 101;
-	}
-
+	int irow = mGeant->geantPlane(mGeant->geantVolume(i)) -1 ; // Geant goes from 1-20 and C++ counter uses  0-19
 
 	
 	// Rotate the hit into FTPC - internal coordinate system (GEANT hits are always in global coords)
