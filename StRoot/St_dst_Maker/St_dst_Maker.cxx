@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.52 2000/08/31 03:44:45 lbarnby Exp $
+// $Id: St_dst_Maker.cxx,v 1.53 2000/08/31 23:04:39 lbarnby Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.53  2000/08/31 23:04:39  lbarnby
+// get event_header table from trigger instead of creating it
+//
 // Revision 1.52  2000/08/31 03:44:45  lbarnby
 // A more useful time stored in the event header now
 //
@@ -161,7 +164,7 @@
 #include "tables/St_dst_mon_soft_rich_Table.h"
 #include "tables/St_sgr_groups_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.52 2000/08/31 03:44:45 lbarnby Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.53 2000/08/31 23:04:39 lbarnby Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -316,15 +319,25 @@ Int_t  St_dst_Maker::Filler(){
   St_svm_evt_match *evt_match   = (St_svm_evt_match *) dstI("evt_match");
   //St_dst_run_summary *dst_run_summary = (St_dst_run_summary   *) m_ConstSet->Find("dst_run_summary");
   
-  St_event_header  *event_header  = new St_event_header("event_header",1);
+  St_DataSet *trg = GetDataSet("trg");
+  St_DataSetIter trgI(trg);
+  St_event_header  *event_header = (St_event_header *) trgI("event_header");
+  if (!event_header){
+    St_event_header  *event_header  = new St_event_header("event_header",1);
+  }
   dstI.Add(event_header);
   event_header->SetNRows(1);
   event_header_st  event =   {"Collision", //event_type
                               0,           // n_event
-                              0, 0, 0, 0}; // exp_run_id,time,trig_mask,bunch_cross
+                              0, 0, 0, 0, // exp_run_id,time,trig_mask,bunch_cross
+			      0,0}; // bunchXing
   if (GetEventType()) strcpy (&event.event_type[0],GetEventType());
   event.n_event    = GetEventNumber();
   event.exp_run_id = GetRunNumber();
+  if(event_header){
+    event.bunchXing[0] = event_header->bunchXing[0];
+    event.bunchXing[1] = event_header->bunchXing[1];
+  }
   time_t tt  =  GetDateTime().Convert()-timezone; // UTC -> local uncorrected for daylight saving time
   event.time = localtime(&tt)->tm_isdst ? tt+3600 : tt; // assign and correct for summer time
   event_header->AddAt(&event,0);
