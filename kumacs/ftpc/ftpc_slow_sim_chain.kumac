@@ -12,7 +12,7 @@
 ****************************************************************************
 
 macro ftpc_slow_sim_chain_
-       input_g2t_file=/afs/rhic/star/users/jcs/public/g2t_pipealu_1.dsl_
+       input_g2t_file=/afs/rhic/star/users/jcs/public/auau_gstar_g2t.tab_
        output_file=ftpc_slow_sim_pipealu_1.tab_
        gas_file=/afs/rhic/star/users/jcs/public/gas.dat_
        nskip=0_
