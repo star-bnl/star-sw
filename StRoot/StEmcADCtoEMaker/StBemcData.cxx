@@ -7,6 +7,9 @@ ClassImp(StBemcData)
 StBemcData::StBemcData(char* name):TDataSet(name)
 {
   mDecoder = NULL;
+  TDCErrorFlag = 0;
+  SMDErrorFlag = 0;
+  PSDErrorFlag = 0;
   zeroAll();
   for(int i=0;i<TOWERCHANNELS;i++) 
   {
@@ -80,6 +83,9 @@ void StBemcData::zeroAll()
   ValidTowerEvent = kFALSE;
   ValidSMDEvent = kFALSE;
   ValidPSDEvent = kFALSE;
+  TDCErrorFlag = 0;
+  SMDErrorFlag = 0;
+  PSDErrorFlag = 0;
 }
 StBemcData::~StBemcData()
 {
