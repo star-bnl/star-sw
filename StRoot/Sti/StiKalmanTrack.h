@@ -127,7 +127,7 @@ public:
     /*!	Calculates and returns the pitch angle of the track momemtum vector based on the 
       inner most node associated with the track. 
     */		
-    virtual double  getTanL()           const;                   ;   // tan(lambda)
+    virtual double  getTanL()           const;                      // tan(lambda)
 
     /// Implementation returns 0
     virtual double  getDca(StiHit *h=0)    const;

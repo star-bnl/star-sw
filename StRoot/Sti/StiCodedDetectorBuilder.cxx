@@ -53,8 +53,8 @@ void StiCodedDetectorBuilder::init(){
 void StiCodedDetectorBuilder::buildMaterials(){
   
   int nMaterials = 8;
-  char* aNames[] = {"Air", "Al", "Hybrid", "IfcAdhesive", 
-                    "Nomex", "P10", "Si", "Vacuum"};
+  const char* aNames[] = {"Air", "Al", "Hybrid", "IfcAdhesive", 
+                          "Nomex", "P10", "Si", "Vacuum"};
   float aRadLengths[] = {30420., 8.9, 8.3, 33.3, 625., 12850., 9.36, DBL_MAX};
   float aDensities[] = {.00119, 2.7, 2.5, 1.2, .064, .00156, 2.33, 0.};
 

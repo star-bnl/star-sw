@@ -119,7 +119,7 @@ StiIntersection StiMaterialInteraction::findPlanarIntersection(
   double dZoffset = intersection.z() - pPlacement->getZcenter();
 
   // find limits of various regions
-  StiPlanarShape *pShape = dynamic_cast<StiPlanarShape *>(
+  StiPlanarShape *pShape = static_cast<StiPlanarShape *>(
       pDetector->getShape());
   double dEdgeHalfWidth = (strstr(pDetector->getName().c_str(), "Tpc")==NULL) ?
       SVG_EDGE_HALF_WIDTH : TPC_EDGE_HALF_WIDTH;
@@ -211,7 +211,7 @@ StiIntersection StiMaterialInteraction::findCylindricalIntersection(
   double dZoffset = intersection.z() - pPlacement->getZcenter();
 
   // find limits of various regions
-  StiCylindricalShape *pShape = dynamic_cast<StiCylindricalShape *>(
+  StiCylindricalShape *pShape = static_cast<StiCylindricalShape *>(
       pDetector->getShape());
   double radius = pPlacement->getNormalRadius();
   double dEdgeHalfWidth = (strstr(pDetector->getName().c_str(), "Tpc")==NULL) ?
@@ -345,7 +345,7 @@ bool StiMaterialInteraction::extrapolateHelixToCylinder(
       pPlacement->getNormalRadius());
   dGapThickness = (fabs(pathLengths.first) > fabs(pathLengths.second)) ? 
       pathLengths.second : pathLengths.first;
-  StThreeVector<double> intersection = helix.at(dGapThickness);
+  *pIntersection = helix.at(dGapThickness);
   
   // For the node & detector pathlengths, we still use a line approximation.
   StThreeVector<double> momentum = helix.momentumAt(
@@ -474,7 +474,7 @@ bool StiMaterialInteraction::extrapolateLineToCylinder(
   // momentum direction.
   //if(momentumCoefficient>0.){ return kFailed; }
   StThreeVector<double> nodeToIntersection = momentumCoefficient*momentum;
-  StThreeVector<double> intersection = node + nodeToIntersection;
+  *pIntersection = node + nodeToIntersection;
 
   //--------------------------------
   // determine thicknesses travsersed
