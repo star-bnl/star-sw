@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.42 1999/05/23 03:25:07 perev Exp $
+// $Id: StMaker.cxx,v 1.43 1999/05/23 04:05:02 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.43  1999/05/23 04:05:02  fine
+// The lost since 1.35 Wed Mar 10 20:23:58 timer functions have been re-introduced
+//
 // Revision 1.42  1999/05/23 03:25:07  perev
 // Start & Stop Timer instead of benchmark
 //
@@ -115,7 +118,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.42 1999/05/23 03:25:07 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.43 1999/05/23 04:05:02 fine Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -424,7 +427,7 @@ Int_t StMaker::Init()
       maker->StartTimer();
       if (GetDebug()) printf("\n*** Call %s::Init() ***\n\n",maker->ClassName());
       if ( maker->Init()) return kStErr;
-      maker->StartTimer();
+      maker->StopTimer();
 //VP      gBenchmark->Stop((const char *) maker->GetName());
 
 // 		Add the Maker histograms in the Maker histograms list
@@ -494,13 +497,36 @@ Int_t StMaker::Finish()
 
    TIter next(GetMakeList());
    StMaker *maker;
-   while ((maker = (StMaker*)next())) {
+   Double_t totalCpuTime = 0;
+   Double_t totalRealTime = 0;   
+   while ((maker = (StMaker*)next())) 
+   {
       if ( maker->Finish() ) nerr++;
       maker->PrintTimer();
+      totalCpuTime  += maker->CpuTime();
+      totalRealTime += maker->RealTime();
+   
 //VP      gBenchmark->Print((char *) maker->GetName());
    }
-  Clear();
- return nerr;
+
+   // Print relative time
+   if (totalCpuTime && totalRealTime) {
+     Printf("------------------------------------------------------------------");
+     Printf("%-10s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds"
+                               ,GetName(),totalRealTime,totalCpuTime);
+     Printf("------------------------------------------------------------------");
+     next.Reset();
+     while ((maker = (StMaker*)next())) {
+        Printf("%-10s: Real Time = %5.1f %%        Cpu Time = %5.1f %% "
+               ,maker->GetName()
+               ,100*maker->RealTime()/totalRealTime
+               ,100*maker->CpuTime()/totalCpuTime);
+     }
+     Printf("------------------------------------------------------------------");
+   }
+   
+   Clear();
+   return nerr;
 }
 
 //_____________________________________________________________________________
