@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.2 2001/08/17 22:03:32 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.3 2001/11/06 17:55:29 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.3  2001/11/06 17:55:29  posk
+// Only sin terms at 40 GeV.
+//
 // Revision 1.2  2001/08/17 22:03:32  posk
 // Now can also do 40 GeV data.
 //
@@ -63,6 +66,7 @@ private:
   TVector2 mQ[Flow::nSels][Flow::nHars];                     //! flow vector
   Float_t  mPsi[Flow::nSels][Flow::nHars];                   //! event plane angle
   UInt_t   mMult[Flow::nSels][Flow::nHars];                  //! multiplicity
+  Float_t  mSumPt2[Flow::nSels][Flow::nHars];                //! sum pt^2
   Float_t  m_q[Flow::nSels][Flow::nHars];                    //! Q/sqrt(Mult)
   TVector2 mQSub[Flow::nSels*Flow::nSubs][Flow::nHars];      //! flow vector subs
   Float_t  mPsiSub[Flow::nSels*Flow::nSubs][Flow::nHars];    //! plane angle subs
@@ -132,6 +136,8 @@ private:
     TH1F*       mHistPsiSubCorrDiff;
     TH1F*       mHistPsi;
     TH1F*       mHistMult;
+    TH1F*       mHistSumPt2;
+    TH1F*       mHistPtY;
     TH1F*       mHist_q;
     TH2D*       mHistYield2D;
     TProfile2D* mHist_vObs2D;

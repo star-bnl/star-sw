@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.4 2001/08/17 22:03:23 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.5 2001/11/06 17:55:23 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.5  2001/11/06 17:55:23  posk
+// Only sin terms at 40 GeV.
+//
 // Revision 1.4  2001/08/17 22:03:23  posk
 // Now can also do 40 GeV data.
 //
@@ -152,6 +155,10 @@ Int_t StFlowAnalysisMaker::Init() {
   const float psiMax          = twopi; 
   const float multMin         =    0.;
   const float multMax         = 1500.;
+  const float sumPt2Min       =    0.;
+  const float sumPt2Max       =  200.;
+  const float ptYMin          =    0.;
+  const float ptYMax          =   10.;
   const float qMin            =    0.;
   const float eVetoMin        =    0.;
   const float eVetoMax        = 40000.;
@@ -182,6 +189,8 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nPhi3DBins        = 18,
 	 nPsiBins          = 36,
 	 nMultBins         = 60,
+	 nSumPt2Bins      = 100,
+	 nPtYBins         = 100,
 	 nPidBins          = 50,
          nEVetoBins        = 50,
          nCentBins         =  6,
@@ -544,6 +553,28 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHistPsiSubCorrDiff->SetYTitle("Counts");
       delete histTitle;
       
+      // sum pt squared
+      histTitle = new TString("Flow_SumPt2_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistSumPt2 = new TH1F(histTitle->Data(),
+        histTitle->Data(), nSumPt2Bins, sumPt2Min, sumPt2Max);
+      histFull[k].histFullHar[j].mHistSumPt2->SetXTitle("Sum Pt^2 ((GeV/c)^2");
+      histFull[k].histFullHar[j].mHistSumPt2->SetYTitle("Counts");
+      delete histTitle;
+      
+      // pt weighted with y
+      histTitle = new TString("Flow_PtY_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistPtY = new TH1F(histTitle->Data(),
+        histTitle->Data(), nPtYBins, ptYMin, ptYMax);
+      histFull[k].histFullHar[j].mHistPtY->SetXTitle("Pt*Y (GeV/c)");
+      histFull[k].histFullHar[j].mHistPtY->SetYTitle("Counts");
+      delete histTitle;
+      
       // q
       histTitle = new TString("Flow_q_Sel");
       histTitle->Append(*countSels);
@@ -697,6 +728,7 @@ bool StFlowAnalysisMaker::FillFromFlowEvent() {
       mPsi[k][j]    = pFlowEvent->Psi(pFlowSelect);
       m_q[k][j]     = pFlowEvent->q(pFlowSelect);
       mMult[k][j]   = pFlowEvent->Mult(pFlowSelect);
+      mSumPt2[k][j] = pFlowEvent->SumPt2(pFlowSelect);
       if ( mPsi[k][j] == 0 ) return kFALSE; //to elliminate psi0
     }
   }
@@ -728,7 +760,7 @@ void StFlowAnalysisMaker::FillEventHistograms() {
     }
   }
 
-  // full event Psi, PsiSubCorr, PsiSubCorrDiff, cos, mult, q
+  // full event Psi, PsiSubCorr, PsiSubCorrDiff, cos, mult, pt2, q
   for (int k = 0; k < Flow::nSels; k++) {
     for (int j = 0; j < Flow::nHars; j++) {
       float order  = (float)(j+1);
@@ -764,6 +796,7 @@ void StFlowAnalysisMaker::FillEventHistograms() {
 	  Fill(psiSubCorrDiff);
       }
       histFull[k].histFullHar[j].mHistMult->Fill((float)mMult[k][j]);
+      histFull[k].histFullHar[j].mHistSumPt2->Fill(mSumPt2[k][j]);
       histFull[k].histFullHar[j].mHist_q->Fill(m_q[k][j]);
     }
   }
@@ -929,6 +962,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	if (pFlowSelect->Select(pFlowTrack)) {
 	  histFull[k].histFullHar[j].mHistPhi->Fill(phi);
 	  histFull[k].histFullHar[j].mHistYield2D->Fill(rapidity, pt);
+	  histFull[k].histFullHar[j].mHistPtY->Fill(pt*rapidity);
 	  double phiWgt = pFlowEvent->PhiWeight(phi, k, j);
 	  histFull[k].histFullHar[j].mHistPhiFlat->Fill(phi, phiWgt);
 	  if (!pFlowEvent->Stripes()) {
@@ -972,7 +1006,11 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
        	// Caculate v for all particles selected for correlation analysis
 	if (pFlowSelect->SelectPart(pFlowTrack)) {
 	  corrMultN++;
-	  float v = cos(order * (phi - psi_i))/perCent;
+	  float v = 0.;
+	  if(order == 2 && pFlowEvent->SinOnly())
+	    v = (sin(order*phi) * sin(order*psi_i))/perCent;
+	  else	  
+	    v = cos(order * (phi - psi_i))/perCent;
 	  //float vFlip = v;
 	  //if (rapidity < Flow::yCM && oddHar) vFlip *= -1;
 	  histFull[k].histFullHar[j].mHist_vObs2D->Fill(rapidity, pt, v);
@@ -1243,9 +1281,15 @@ Int_t StFlowAnalysisMaker::Finish() {
 	cout << "##### Resolution of the " << j+1 << "th harmonic = " << 
 	  mRes[k][j] << " +/- " << mResErr[k][j] << endl;
 	// The systematic error of the resolution is not folded in.
-
-	histFull[k].histFullHar[j].mHist_vY ->Scale(1. / mRes[k][j]);
+	histFull[k].histFullHar[j].mHist_v2D->Scale(1. / mRes[k][j]);
+	histFull[k].histFullHar[j].mHist_vY->Scale(1. / mRes[k][j]);
 	histFull[k].histFullHar[j].mHist_vPt->Scale(1. / mRes[k][j]);
+	// correction for using sin correlation terms only
+	if (j == 1 && pFlowEvent->SinOnly()) {
+	  histFull[k].histFullHar[j].mHist_v2D->Scale(1.41);
+	  histFull[k].histFullHar[j].mHist_vY->Scale(1.41);
+	  histFull[k].histFullHar[j].mHist_vPt->Scale(1.41);
+	}	  
 	content = histFull[k].mHist_v->GetBinContent(j+1);
 	content /=  mRes[k][j];
 	histFull[k].mHist_v->SetBinContent(j+1, content);
