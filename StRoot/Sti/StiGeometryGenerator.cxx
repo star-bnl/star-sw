@@ -35,8 +35,8 @@ StiGeometryGenerator::StiGeometryGenerator(const Char_t *name) : StMaker(name)
 {
 //  m_szGeomDirectory = "/star/u/bnorman/Detectors";
     //m_szGeomDirectory = "/scr20/ittf/StiGeometryParameters/Detectors";
-  m_szGeomDirectory = "/scr20/TempIttf/StiGeometryParameters/Detectors";
-  m_polydirectory = "/scr20/TempIttf/StiGeometryParameters/Polygons";
+    m_szGeomDirectory = "/scr20/TempIttf/StiGeometryParameters/Detectors";
+    m_polydirectory = "/scr20/TempIttf/StiGeometryParameters/Polygons";
 }
 
 StiGeometryGenerator::~StiGeometryGenerator() 
@@ -50,7 +50,8 @@ void StiGeometryGenerator::Clear(const char*)
 
 Int_t StiGeometryGenerator::Finish()
 {
-  return StMaker::Finish();
+    StiGeometryTransform::kill();
+    return StMaker::Finish();
 }
 
 Int_t StiGeometryGenerator::Init()
@@ -65,7 +66,7 @@ Int_t StiGeometryGenerator::Make()
   mpoly_vec.clear();
   
   // load Sti geometry routines
-  mGeometryTransform = new StiGeometryTransform();
+  mGeometryTransform = StiGeometryTransform::instance();
 
 
   // load svt & ssd geometry

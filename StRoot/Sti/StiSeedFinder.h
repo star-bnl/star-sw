@@ -9,13 +9,11 @@
 
 #include <utility>
 
-class StiDummyTrack;
+class StiTrack;
 class StTrack;
 
 class StiSeedFinder
 {
-    typedef pair<StiDummyTrack*, StTrack*> sti_track_pair;
-    
 public:
     StiSeedFinder();
     StiSeedFinder(const StiSeedFinder&);
@@ -23,7 +21,7 @@ public:
 
     //User interface
     virtual bool hasMore() = 0;
-    virtual sti_track_pair* next() = 0;
+    virtual StiTrack* next() = 0;
     
 protected:
 private:

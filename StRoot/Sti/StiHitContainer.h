@@ -47,7 +47,7 @@ public:
 
     //Gets
     const hitvector& hits(double refangle, double position);
-
+    
     //Debugging Utilities
     void print() const;
     void print(double refangle, double position);

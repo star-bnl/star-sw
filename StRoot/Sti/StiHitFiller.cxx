@@ -11,21 +11,18 @@
 #include "StiHit.h"
 #include "StiHitContainer.h"
 #include "StiObjectFactory.h"
-#include "StiHitTranslator.h"
+#include "StiGeometryTransform.h"
 
 #include "StiHitFiller.h"
 
-StiHitFiller::StiHitFiller()
+StiHitFiller::StiHitFiller() : mtranslator(StiGeometryTransform::instance())
 {
     cout <<"\nStiHitFiller::StiHitFiller()\n"<<endl;
-    mtranslator = new StiHitTranslator();
 }
 
 StiHitFiller::~StiHitFiller()
 {
     cout <<"\nStiHitFiller::~StiHitFiller()\n"<<endl;
-    delete mtranslator;
-    mtranslator=0;
 }
 
 void StiHitFiller::addDetector(StDetectorId det)
