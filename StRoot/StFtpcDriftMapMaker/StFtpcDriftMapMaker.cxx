@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.3 2001/03/07 15:12:32 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.4 2001/03/09 13:54:27 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.4  2001/03/09 13:54:27  jcs
+// write out cstructs with new values so that they can be added to database
+//
 // Revision 1.3  2001/03/07 15:12:32  jcs
 // use MySQL database instead of params
 //
@@ -172,6 +175,64 @@ Int_t StFtpcDriftMapMaker::Make(){
  	} 
      } 
  
+// Write out new ftpcDeflection
+
+  void* cstruct = m_deflection -> GetTable();   // Get pointer of table and copy to c-structure
+  Int_t   nrows = m_deflection -> GetNRows();      // Get number of rows in the table
+
+  fTableName = new char[20];
+  strcpy(fTableName,"ftpcDeflection");
+// Create new TTable object for c-structure
+  TTable* table = TTable::New(fTableName,fTableName,cstruct,nrows);
+
+  fOutputFileName = new char[100];
+  strcpy(fOutputFileName,"./ftpcDeflection.C");
+  ofstream ofs_Deflection(fOutputFileName);  // Open a file
+  table -> SavePrimitive(ofs_Deflection,0);  // Write information of c-structure from object of TTable to the file
+  ofs_Deflection.close();                    // Close the file
+ 
+// Write out new ftpcVDrift
+
+  cstruct = m_vdrift -> GetTable();   // Get pointer of table and copy to c-structure
+  nrows = m_vdrift -> GetNRows();      // Get number of rows in the table
+
+  strcpy(fTableName,"ftpcVDrift");
+// Create new TTable object for c-structure
+  table = TTable::New(fTableName,fTableName,cstruct,nrows);
+
+  strcpy(fOutputFileName,"./ftpcVDrift.C");
+  ofstream ofs_VDrift(fOutputFileName);  // Open a file
+  table -> SavePrimitive(ofs_VDrift,0);  // Write information of c-structure from object of TTable to the file
+  ofs_VDrift.close();                    // Close the file
+ 
+// Write out new ftpcdDeflectiondP
+
+  cstruct = m_ddeflectiondp -> GetTable();   // Get pointer of table and copy to c-structure
+  nrows = m_ddeflectiondp -> GetNRows();      // Get number of rows in the table
+
+  strcpy(fTableName,"ftpcdDeflectiondP");
+// Create new TTable object for c-structure
+  table = TTable::New(fTableName,fTableName,cstruct,nrows);
+
+  strcpy(fOutputFileName,"./ftpcdDeflectiondP.C");
+  ofstream ofs_dDeflectiondP(fOutputFileName);  // Open a file
+  table -> SavePrimitive(ofs_dDeflectiondP,0);  // Write information of c-structure from object of TTable to the file
+  ofs_dDeflectiondP.close();                    // Close the file
+ 
+// Write out new ftpcdVDriftdP
+
+  cstruct = m_dvdriftdp -> GetTable();   // Get pointer of table and copy to c-structure
+  nrows = m_dvdriftdp -> GetNRows();      // Get number of rows in the table
+
+  strcpy(fTableName,"ftpcdVDriftdP");
+// Create new TTable object for c-structure
+  table = TTable::New(fTableName,fTableName,cstruct,nrows);
+
+  strcpy(fOutputFileName,"./ftpcdVDriftdP.C");
+  ofstream ofs_dVDriftdP(fOutputFileName);  // Open a file
+  table -> SavePrimitive(ofs_dVDriftdP,0);  // Write information of c-structure from object of TTable to the file
+  ofs_dVDriftdP.close();                    // Close the file
+
   delete paramReader;
   delete dbReader;
   delete magboltz;
