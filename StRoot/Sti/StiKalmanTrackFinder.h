@@ -12,7 +12,6 @@ class StiDetector;
 class StiDetectorBuilder;
 class StiDetectorContainer;
 class StiToolkit;
-class StiTrackSeedFinder;
 class StiKalmanTrackFactory;
 class StiHitContainer;
 class StiTrackContainer;
@@ -50,11 +49,7 @@ public:
   /// Find/extend the given track, in the given direction
   virtual bool find(StiTrack *track, int direction);
   /// Find the next track 
-  virtual void findNextTrack(); 
-  /// Fit all tracks crruently loaded 
-  virtual void fitTracks(); 
-  /// Fit the next track available
-  virtual void fitNextTrack();
+  virtual StiTrack * findTrack(); 
   /// Extent all tracks to the given vertex
   virtual void extendTracksToVertex(StiHit* vertex);
   /// Reset the tracker
@@ -62,7 +57,7 @@ public:
   /// Clear the tracker
   virtual void clear();
   /// Get the track filter currently used by the tracker
-  virtual Filter<StiTrack> * getTrackFilter() const;
+  virtual Filter<StiTrack> * getTrackFilter();
   /// Get the vertex finder used by this track finder
   virtual StiVertexFinder * getVertexFinder();
   /// Set the vertex finder used by this tracker
@@ -89,7 +84,7 @@ public:
     void printState();
     StiToolkit                  * _toolkit;
     Filter<StiTrack>            * _trackFilter;
-    StiTrackSeedFinder          * _trackSeedFinder;
+    StiTrackFinder              * _trackSeedFinder;
     Factory<StiKalmanTrackNode> * _trackNodeFactory;
     Factory<StiKalmanTrack>     * _trackFactory;
     Factory<StiMcTrack>         * _mcTrackFactory;
@@ -131,22 +126,11 @@ private:
 
 };
 
-inline Filter<StiTrack> * StiKalmanTrackFinder::getTrackFilter() const
+inline Filter<StiTrack> * StiKalmanTrackFinder::getTrackFilter() 
 {
   return _trackFilter;
 }
 
-/*
-inline void StiKalmanTrackFinder::setTrackingMode(StiFindStep m)
-{
-  mode = m;
-}
-
-inline StiFindStep StiKalmanTrackFinder::getTrackingMode() const 
-{
-  return mode;
-}
-*/
 
 #endif
 

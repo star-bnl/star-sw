@@ -25,12 +25,12 @@ public:
   void setMaxContiguousNullCount(int count);
   double getMassHypothesis() const;
   void   initialize();
-	friend class StiKalmanTrackFinder;
+  friend class StiKalmanTrackFinder;
   friend class StiKalmanTrack;
   friend class StiKalmanTrackNode;
-	virtual void loadDS(TDataSet&);
-	virtual void loadFS(ifstream& inFile);
-	friend ostream& operator<<(ostream& os, const StiKalmanTrackFinderParameters& par);
+  virtual void loadDS(TDataSet&);
+  virtual void loadFS(ifstream& inFile);
+  friend ostream& operator<<(ostream& os, const StiKalmanTrackFinderParameters& par);
 
  protected:
   bool   useMcAsRec;

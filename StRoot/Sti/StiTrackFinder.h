@@ -17,11 +17,7 @@ public:
   /// Find/extend the given track, in the given direction
   virtual bool find(StiTrack *track, int direction) = 0;
   /// Find the next track 
-  virtual void findNextTrack()=0;
-  /// Fit all tracks crruently loaded 
-  virtual void fitTracks()=0; 
-  /// Fit the next track available
-  virtual void fitNextTrack()=0;
+  virtual StiTrack * findTrack()=0;
   /// Extent all tracks to the given vertex
   virtual void extendTracksToVertex(StiHit* vertex)=0;
   /// Reset the tracker
@@ -29,7 +25,7 @@ public:
   /// Reset the tracker
   virtual void clear()=0;
   /// Get the track filter currently used by the tracker
-  virtual Filter<StiTrack> * getTrackFilter() const = 0;
+  virtual Filter<StiTrack> * getTrackFilter()= 0;
   /// Get the vertex finder used by this track finder
   virtual StiVertexFinder * getVertexFinder()=0;
   /// Set the vertex finder used by this tracker
