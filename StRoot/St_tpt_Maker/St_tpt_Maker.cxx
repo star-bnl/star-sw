@@ -1,5 +1,11 @@
-// $Id: St_tpt_Maker.cxx,v 1.65 2001/09/06 18:27:37 jeromel Exp $
+// $Id: St_tpt_Maker.cxx,v 1.67 2001/10/06 05:20:02 jeromel Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.67  2001/10/06 05:20:02  jeromel
+// 0x-ing printf()
+//
+// Revision 1.66  2001/10/04 22:33:34  jeromel
+// Option mask changed to 0xFE to accomodate for soon-to-come changes (more options).
+//
 // Revision 1.65  2001/09/06 18:27:37  jeromel
 // Modifications for larger number of ExB options, forcing different configuration 9EB1 EB2 ...). Added loading of StTableUtilities when 'display' option is required.
 //
@@ -320,7 +326,7 @@ Int_t St_tpt_Maker::Make(){
   
   if (!tpc_data) return 0;
   
-// 		Clusters exist -> do tracking
+  // 		Clusters exist -> do tracking
   St_DataSetIter gime(tpc_data);
   St_tcl_tphit     *tphit = (St_tcl_tphit     *) gime(m_InputHitName);
   if (! tphit) return kStWarn;
@@ -391,19 +397,20 @@ Int_t St_tpt_Maker::Make(){
   St_tpt_track  *tptrack = new St_tpt_track("tptrack",maxNofTracks); m_DataSet->Add(tptrack);
 
 
-//			TPT
+  //			TPT
   if (!m_iftteTrack) {
-    
-    //undo ExB distortions - only if exb switch is set
-    
-    if(m_Mode & 1)
+    //
+    //undo ExB distortions - only if ExB switch is set
+    //
+    //printf("DEBUG :: %d 0x%X -> %d\n",m_Mode,m_Mode,m_Mode & 0x01);
+    if(m_Mode & 0x01)
       {
 	Float_t x[3], xprime[3] ;
-	Int_t   option = (m_Mode & 0x0E) >> 1;
+	Int_t   option = (m_Mode & 0xFE) >> 1;
 	// request from Jim Thomas to have 2 (or more)
 	// method in StMagUtilities. We then use the
 	// option as a mask. J.Lauret July 2001. 
-	(void) printf("St_tpt_Maker: ExB StMagUtilities(%d)\n\n",option);
+	(void) printf("St_tpt_Maker: ExB StMagUtilities(0x%X)\n\n",option);
 	if ( m_ExB == 0 ) m_ExB = new StMagUtilities( option ) ;
 	tcl_tphit_st *spc = tphit -> GetTable() ;
 	for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ )

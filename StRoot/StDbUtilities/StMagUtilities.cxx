@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.18 2001/09/06 18:27:39 jeromel Exp $
+ * $Id: StMagUtilities.cxx,v 1.22 2001/10/06 06:14:06 jeromel Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,16 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.22  2001/10/06 06:14:06  jeromel
+ * Sorry for multiple commits but ... added one more comment line.
+ *
+ * Revision 1.21  2001/10/05 20:19:38  dunlop
+ * Made default BMap + Padrow13 + Twist + Clock.
+ * Made selection logic symmetric
+ *
+ * Revision 1.20  2001/10/05 03:44:25  jeromel
+ * Modifications by Jamie so we can turn on/off every corrections.
+ *
  * Revision 1.18  2001/09/06 18:27:39  jeromel
  * Modifications for larger number of ExB options, forcing different configuration 9EB1 EB2 ...). Added loading of StTableUtilities when 'display' option is required.
  *
@@ -131,22 +141,21 @@ StMagUtilities::StMagUtilities( Int_t mode )
       gFactor = B[2] / 4.980 ;              // Select factor based on Chain values (kGauss) 
       gMap = kMapped ;                      // Do once & Select the B field map (mapped field or constant)
       Init(mode) ;                          // Read the Magnetic and Electric Field Data Files, set constants
-      (void) printf("StMagUtilities: ExB init(%d)\n",mode);
+      (void) printf("StMagUtilities: ExB init(0x%X)\n",mode);
 
     }
 
 }
 
 
-StMagUtilities::StMagUtilities( const EBField map = kMapped, const Float_t factor = 1.0 )
-
+StMagUtilities::StMagUtilities( const EBField map=kMapped, const Float_t factor, Int_t mode)       
 {                                           // StMagUtilities constructor
 
   if ( gMap == kUndefined ) 
     {
       gFactor = factor ;
       gMap = map ;                          // Do once & select the requested map (mapped or constant)
-      Init( 0 ) ;                           // Read the Magnetic and Electric Field Data Files, set constants
+      Init( mode ) ;                           // Read the Magnetic and Electric Field Data Files, set constants
     }
    
   if ( gMap != map || factor != gFactor ) 
@@ -165,21 +174,40 @@ void StMagUtilities::Init ( Int_t mode )
   Float_t  B[3], X[3] = { 0, 0, 0 } ;
   Float_t  OmegaTau ;                       // OmegaTau carries the sign opposite of B for an electron
 
+  // Default behavior: no bits set gives you this default
+  // To turn on and off individual distortions, set these higher bits
+  mDistortionMode = mode;
+  
+  if (!(mode & (kBMap | kPadrow13 | kTwist | kClock | kMembrane | kEndcap))) {
+      printf("StMagUtilities::Init : Default configuration\n");
+      mDistortionMode |= kBMap;
+      mDistortionMode |= kPadrow13;
+      mDistortionMode |= kClock;
+      mDistortionMode |= kTwist;
+  } else {
+    printf("StMagUtilities::Init : Using option 0x%X\n",mode);
+  }
+ 
   ReadField() ;                             // Read the Magnetic and Electric Field Data Files
   BField(X,B) ;                             // Work in kGauss, cm and assume Bz dominates
 
   // Mode = 0 is for Year 1 running, Mode = 1 is for year 2 running (different cathode potentials)
+  // Old comment
   // We reserved 3 bits for the option so we can extend up to 111=7 => 8 options (0 to 7)
+  // 
+  // End of old comment
 
   // Theoretically, OmegaTau is defined as shown in the next line.  
   // OmegaTau   =  -10. * B[2] * StarDriftV / StarMagE ;  // cm/microsec, Volts/cm
   // Instead, we will use scaled values from the Aleph collaboration
 
-  if ( mode == 0 ){
+  if ( !(mode & kElectricField2001) ){
     OmegaTau   =  -11.0 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note that the sign of B is important 
   } else {
     OmegaTau   =  -12.4 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note that the sign of B is important 
   }
+  
+
 
   Const_0    =  1. / ( 1. + pow( OmegaTau, 2 ) ) ;
   Const_1    =  OmegaTau / ( 1. + pow( OmegaTau, 2 ) ) ;
@@ -286,16 +314,60 @@ void StMagUtilities::BrBz3DField( const Float_t r, const Float_t z, const Float_
 void StMagUtilities::UndoDistortion( const Float_t x[3], Float_t Xprime[3] )
 
 {
-
+    // Control by flags JCD Oct 4, 2001
   Float_t Xprime1[3], Xprime2[3] ;
+// Set it up
+  for (unsigned int i=0; i<3; ++i) {
+      Xprime1[i] = x[i];
+  }
+
+  if (mDistortionMode & kBMap) {
+      FastUndoBDistortion    ( Xprime1, Xprime2 ) ;
+      for (unsigned int i=0; i<3; ++i) {
+	  Xprime1[i] = Xprime2[i];
+      }
+  }
+  if (mDistortionMode & kPadrow13) {
+      UndoPad13Distortion    ( Xprime1, Xprime2 ) ;
+      for (unsigned int i=0; i<3; ++i) {
+	  Xprime1[i] = Xprime2[i];
+      }
+  }
   
-  FastUndoBDistortion    ( x, Xprime1 ) ;
-  UndoPad13Distortion    ( Xprime1, Xprime2 ) ;
-  UndoTwistDistortion    ( Xprime2, Xprime1 ) ;
-  UndoClockDistortion    ( Xprime1, Xprime2 ) ;
-  UndoMembraneDistortion ( Xprime2, Xprime ) ; 
-  //UndoMembraneDistortion ( Xprime2, Xprime1 ) ;  // Replace the previous line with these two 
-  //UndoEndcapDistortion   ( Xprime1, Xprime ) ;   // to enable the Endcap distortion corrections
+  if (mDistortionMode & kTwist) {
+
+      UndoTwistDistortion    ( Xprime1, Xprime2 ) ;
+      for (unsigned int i=0; i<3; ++i) {
+	  Xprime1[i] = Xprime2[i];
+      }
+  }
+  if (mDistortionMode & kClock) {
+      
+      UndoClockDistortion    ( Xprime1, Xprime2 ) ; 
+      for (unsigned int i=0; i<3; ++i) {
+	  Xprime1[i] = Xprime2[i];
+      }
+ }
+  if (mDistortionMode & kMembrane) {
+      
+      UndoMembraneDistortion ( Xprime1, Xprime2 ) ;
+      for (unsigned int i=0; i<3; ++i) {
+	  Xprime1[i] = Xprime2[i];
+      }
+
+  }
+  if (mDistortionMode & kEndcap) { 
+      UndoEndcapDistortion ( Xprime1, Xprime2 ) ;
+      for (unsigned int i=0; i<3; ++i) {
+	  Xprime1[i] = Xprime2[i];
+      }
+  }
+
+  // Return it
+
+  for (unsigned int i=0; i<3; ++i) {
+      Xprime[i] = Xprime2[i];
+  }
   
 }
 
@@ -715,7 +787,26 @@ void StMagUtilities::ReadField( )
       
   printf("Reading Magnetic Field:  %s,  Scale factor = %f \n",comment.Data(),gFactor);
   printf("Filename is %s, Adjusted Scale factor = %f \n",filename.Data(),gFactor*gRescale);
-  printf("Version: 3D Mag Field Distortions + Twist + PadRow13 + Clock + Membrane\n" ) ;
+
+  
+  printf("Version: ") ;
+  
+  if (mDistortionMode & kBMap) printf("3D Mag Field Distortions");
+  if (mDistortionMode & kPadrow13) printf (" + Padrow 13");
+  if (mDistortionMode & kTwist) printf (" + Twist");
+  if (mDistortionMode & kClock) printf (" + Clock");
+  if (mDistortionMode & kMembrane) printf (" + Central Membrane");
+  if (mDistortionMode & kEndcap) printf (" + Endcap");
+  printf("\n");
+  if (mDistortionMode & kElectricField2001){
+      printf("2001 Electric Field\n");
+  }
+  
+  else {
+      printf("2000 Electric Field\n");
+  }
+  
+  
   MapLocation = BaseLocation + filename ;
   gSystem->ExpandPathName(MapLocation) ;
   magfile = fopen(MapLocation.Data(),"r") ;

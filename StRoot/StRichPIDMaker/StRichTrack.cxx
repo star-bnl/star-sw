@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.21 2001/02/22 21:06:30 lasiuk Exp $
+ * $Id: StRichTrack.cxx,v 2.22 2001/10/04 19:45:18 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
+ *  Revision 2.22  2001/10/04 19:45:18  lasiuk
+ *  Remove the px/pz correction for track extrapolation
+ *
  *  Revision 2.21  2001/02/22 21:06:30  lasiuk
  *  momentumLoss calcuation called when momentum of track is set
  *
@@ -492,7 +495,9 @@ double StRichTrack::xCorrection() const {
 
     return (0.0);
 #else
-    return  ( 0.4*(mMomentumAtPadPlane.x()/mMomentumAtPadPlane.z()) );
+    //return  ( 0.4*(mMomentumAtPadPlane.x()/mMomentumAtPadPlane.z()) );
+    // 2000data reproduction
+    return(0.0);
 #endif
 }
 

@@ -1,0 +1,22 @@
+* 9/23/98 K. Turner (for 98i)
+* Run BFC in following manner:
+* - read in fz file
+* - run g2t
+* - run the ftpc fast simulation chain
+* - write out xdf file
+*  
+* 
+ exec $STAR/kumacs/chain/bfc _
+   TOP=$STAR _
+   calib_dir=$STAR_CALIB/ebye _
+   tpc_sector_first=1 _
+   tpc_sector_last=24 _
+   gstar_settings=' field_only' _
+   domain=' geometry g2t ftpc ' _
+   chain=' fzin rg2t ffs fpt fte evout ' _
+   skip=0 _
+   no_events=1 _
+ input_data_file=/disk1/star/jcs/psc373_04_120evts.fzd _
+   output_file=$SCRATCH/psc373_04_1_ftpc_fast _
+   log=bfc_readfz_to_ftpc_fast.log
+

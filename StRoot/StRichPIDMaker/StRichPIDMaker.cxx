@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.46 2001/10/02 19:20:58 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.47 2001/10/27 19:43:42 dunlop Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.47  2001/10/27 19:43:42  dunlop
+ * Fix segfault when richCollection not present
+ *
  * Revision 2.46  2001/10/02 19:20:58  horsley
  * modified TFile::SetFile(), ifdef'd for older versions of ROOT
  *
@@ -312,7 +315,7 @@ using std::less;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.46 2001/10/02 19:20:58 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.47 2001/10/27 19:43:42 dunlop Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -534,8 +537,20 @@ Int_t StRichPIDMaker::Make() {
     //
     // LOAD TRACKS intersecting RICH
     // 
-	    mNumberOfPrimaries  = this->fillTrackList(rEvent,pRichHits);
-	    mRichTracks = mListOfStRichTracks.size();
+	    if (pRichHits) {
+		
+		mNumberOfPrimaries  = this->fillTrackList(rEvent,pRichHits);
+		mRichTracks = mListOfStRichTracks.size();
+	    }
+	    else {
+		cout << "\trichCollection but no Hits: clearing richtracklist" << endl;
+		this->clearTrackList();
+	    }
+	    
+	}
+	else { //need to clear the list: persistent across events
+	    cout << "\tNo richCollection: clearing richtracklist" << endl;
+	    this->clearTrackList();
 	}
     }
     else { // need to clear the list: persistent across events
@@ -686,7 +701,7 @@ Int_t StRichPIDMaker::Make() {
     if (!goodRichEvent) return kStWarn;
     if (!richCollection) {
 	cout << "StRichPIDMaker::Make()\n";
-	cout << "\tERROR: Cannot get richCollection from StEvent\n";
+	cout << "\WARNING: Cannot get richCollection from StEvent\n";
 	cout << "\tSkip Event" << endl;
 	return kStWarn;
     }
