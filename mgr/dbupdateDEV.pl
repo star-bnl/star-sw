@@ -76,6 +76,9 @@ if($thisday eq "Mon") {
  $beforeDay = $Nday[$iday - 3];
 }
 }
+if($thisday eq "Sat" or $thisday eq "Sun" ){
+ exit();
+} 
   print "Day Name: ",$thisday, " % ", "Index", $iday, "\n";
 
 ##### setup output directories for DEV with thisDay
@@ -92,15 +95,15 @@ for ($i = 0; $i < 2; $i++) {
 
 ##### setup output directories for DEV with beforeDay
 
-#for ($i = 0; $i < 2; $i++) {
-#     for ($j = 0; $j < 2; $j++) {
-#      for ($ll = 0; $ll < scalar(@hc_dir); $ll++) {
-#   $OUT_DIR[$ii] = $TOP_DIRD . $node_dir[$i] . "/" . $beforeDay . "/". $dir_year[$j] . "/" . $hc_dir[$ll];
-#    print "Output Dir for DEV :", $OUT_DIR[$ii], "\n";
-#        $ii++;
-#      }
-#  }
-#}
+for ($i = 0; $i < 2; $i++) {
+     for ($j = 0; $j < 2; $j++) {
+      for ($ll = 0; $ll < scalar(@hc_dir); $ll++) {
+   $OUT_DIR[$ii] = $TOP_DIRD . $node_dir[$i] . "/" . $beforeDay . "/". $dir_year[$j] . "/" . $hc_dir[$ll];
+    print "Output Dir for DEV :", $OUT_DIR[$ii], "\n";
+        $ii++;
+      }
+  }
+}
 
 struct FileAttr => {
       fjbID     => '$',
@@ -125,17 +128,18 @@ struct JFileAttr => {
        oldjbId   => '$',
        oldpath   => '$',
        oldfile   => '$',
+       oldTime   => '$',
        oldvail   => '$',
 };
 
- struct LFileAttr => {
-        jbId     => '$',
-        pth      => '$',
-        lbT      => '$', 
-        lgName   => '$',
-        evDn     => '$',
-        evSkp    => '$',
-};        
+# struct LFileAttr => {
+#        jbId     => '$',
+#        pth      => '$',
+#        lbT      => '$', 
+#        lgName   => '$',
+#        evDn     => '$',
+#        evSkp    => '$',
+#};        
 
  my $fullyear;
  my $mo;
@@ -221,7 +225,7 @@ struct JFileAttr => {
 
 #####  select all files from JobStatusT from testDay direcroties
 
- $sql="SELECT jobID, path, logFile, avail FROM $JobStatusT WHERE path LIKE '%$testDay%' AND avail = 'Y'";
+ $sql="SELECT jobID, path, logFile, createTime, avail FROM $JobStatusT WHERE path LIKE '%$testDay%' AND avail = 'Y'";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
    $cursor->execute;
@@ -239,6 +243,7 @@ struct JFileAttr => {
         ($$fObjAdr)->oldjbId($fvalue)   if( $fname eq 'jobID');
         ($$fObjAdr)->oldpath($fvalue)   if( $fname eq 'path');
         ($$fObjAdr)->oldfile($fvalue)   if( $fname eq 'logFile');  
+        ($$fObjAdr)->oldTime($fvalue)   if( $fname eq 'createTime'); 
         ($$fObjAdr)->oldvail($fvalue)   if( $fname eq 'avail'); 
    }
 
@@ -249,7 +254,7 @@ struct JFileAttr => {
 
 #####  select all files from JobStatusT from beforeDay direcroties
 
- $sql="SELECT jobID, path, logFile, avail FROM $JobStatusT WHERE path LIKE '%$beforeDay%' AND avail = 'Y'";
+ $sql="SELECT jobID, path, logFile,createTime avail FROM $JobStatusT WHERE path LIKE '%$beforeDay%' AND avail = 'Y'";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
    $cursor->execute;
@@ -267,6 +272,7 @@ struct JFileAttr => {
         ($$fObjAdr)->oldjbId($fvalue)   if( $fname eq 'jobID');
         ($$fObjAdr)->oldpath($fvalue)   if( $fname eq 'path');
         ($$fObjAdr)->oldfile($fvalue)   if( $fname eq 'logFile');  
+        ($$fObjAdr)->oldTime($fvalue)   if( $fname eq 'createTime'); 
         ($$fObjAdr)->oldvail($fvalue)   if( $fname eq 'avail'); 
    }
 
@@ -287,6 +293,13 @@ struct JFileAttr => {
 
 
 ####### read log files and fill in JobStatus
+
+my $pvfile;
+my $pvpath;
+my $pvTime;
+my $pvjbId;
+my $pvavail;
+my $pfullName;
 
  foreach  my $eachOutLDir (@OUT_DIR) {
           if (-d $eachOutLDir) {
@@ -354,11 +367,14 @@ struct JFileAttr => {
           $pvjbId = ($$eachOldJob)->oldjbId;
           $pvpath = ($$eachOldJob)->oldpath;
           $pvfile = ($$eachOldJob)->oldfile;
+          $pvTime = ($$eachOldJob)->oldTime
           $pvavail = ($$eachOldJob)->oldvail;
           $pfullName = $pvpath . "/" . $pvfile;
         
        if( ($fullname eq $pfullName) and ($pvavail eq "Y") ) {
 
+	 if( $timeS ne $pvTime) {
+ 
           $newAvail = "N";
   print  "Changing availability for test files", "\n";
   print  "files to be updated:", $pvjbId, " % ", $mpath, " % ", $newAvail, "\n"; 
@@ -386,7 +402,9 @@ struct JFileAttr => {
       ($$fObjAdr)->evSkp($EvSkip);
       $testJobStFiles[$nJobStFiles] = $fObjAdr;
       $nJobStFiles++;
-    }else{
+   }else{
+   } 
+   }else{
      next;
    }
     last;
@@ -526,17 +544,12 @@ foreach  $eachOutNDir (@OUT_DIR) {
  my @old_set;
  my $nold_set = 0;
  my $eachOldFile;
- my $pvpath;
- my $pvfile;
- my $pvavail;
- my $pfullName;
- my $pvjbId;
 
 ##### make files from previous test in $thisday directories in DB unavailable 
 
 #####  select all files from FilesCatalog from testDay directories
 
- $sql="SELECT jobID, path, fName, avail FROM $FilesCatalogT WHERE path LIKE '%$testDay%' AND avail = 'Y'";
+ $sql="SELECT jobID, path, fName, createTime, avail FROM $FilesCatalogT WHERE path LIKE '%$testDay%' AND avail = 'Y'";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
    $cursor->execute;
@@ -554,6 +567,7 @@ foreach  $eachOutNDir (@OUT_DIR) {
         ($$fObjAdr)->oldjbId($fvalue)   if( $fname eq 'jobID');
         ($$fObjAdr)->oldpath($fvalue)   if( $fname eq 'path');
         ($$fObjAdr)->oldfile($fvalue)   if( $fname eq 'fName'); 
+        ($$fObjAdr)->oldTime($fvalue)   if( $fname eq 'createTime')
         ($$fObjAdr)->oldvail($fvalue)   if( $fname eq 'avail'); 
    }
 
@@ -564,7 +578,7 @@ foreach  $eachOutNDir (@OUT_DIR) {
 
 #####  select all files from FilesCatalog from beforeDay direcroties
 
-  $sql="SELECT path, fName, avail FROM $FilesCatalogT WHERE path LIKE '%$beforeDay%' AND avail = 'Y'";
+  $sql="SELECT path, fName, createTime, avail FROM $FilesCatalogT WHERE path LIKE '%$beforeDay%' AND avail = 'Y'";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
    $cursor->execute;
@@ -582,6 +596,7 @@ foreach  $eachOutNDir (@OUT_DIR) {
         ($$fObjAdr)->oldjbId($fvalue)   if( $fname eq 'jobID');
         ($$fObjAdr)->oldpath($fvalue)   if( $fname eq 'path');
         ($$fObjAdr)->oldfile($fvalue)   if( $fname eq 'fName'); 
+        ($$fObjAdr)->oldTime($fvalue)   if( $fname eq 'createTime');  
         ($$fObjAdr)->oldvail($fvalue)   if( $fname eq 'avail'); 
    }
 
@@ -658,10 +673,12 @@ foreach  $eachOutNDir (@OUT_DIR) {
           $pvjbId = ($$eachOldFile)->oldjbId;
           $pvpath = ($$eachOldFile)->oldpath;
           $pvfile = ($$eachOldFile)->oldfile;
+          $pvTime = ($$eachOldFile)->oldTime;
           $pvavail = ($$eachOldFile)->oldvail;
           $pfullName = $pvpath . "/" . $pvfile;
 
 	   if ($pfullName eq $thfullName) {
+	     if ( $mcTime ne $pvTime ) {
 
               $newAvail = "N";
    print "Changing availability for test files", "\n";
@@ -671,6 +688,8 @@ foreach  $eachOutNDir (@OUT_DIR) {
     print "Filling Files Catalog with DEV output files for testDay\n";
     print "file to be inserted:", $mjID, " % ",$thfullName, " % ", $mavail, "\n";
    &fillDbTable();
+	    }else{
+	    }
 	}else{          
          next; 
        }
