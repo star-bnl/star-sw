@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.47 2004/05/31 20:09:35 oldi Exp $
+// $Id: StFlowEvent.cxx,v 1.48 2004/08/24 20:24:33 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -102,8 +102,8 @@ Double_t StFlowEvent::PhiWeightRaw(Int_t selN, Int_t harN, StFlowTrack*
   if (phi < 0.) phi += twopi;
   float eta = pFlowTrack->Eta();
 
-  Double_t phiWgt;
-  int n;
+  Double_t phiWgt = 0.;
+  int n = 0;
 
   float vertexZ = mVertexPos.z();
   if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) { 
@@ -933,7 +933,7 @@ void StFlowEvent::SetPidsProb() {
 void StFlowEvent::SetCentrality() {
   // Centrality=0 is not retieveable
 
-  Int_t* cent;
+  Int_t* cent = 0;
   Int_t  tracks = mMultEta; // converts UInt_t to Int_t
 
   if (mCenterOfMassEnergy == 0.) { // year=1
@@ -1042,6 +1042,10 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.48  2004/08/24 20:24:33  oldi
+// Minor modifications to avoid compiler warnings.
+// Small bug fix (didn't affect anyone yet).
+//
 // Revision 1.47  2004/05/31 20:09:35  oldi
 // PicoDst format changed (Version 7) to hold ZDC SMD information.
 // Trigger cut modified to comply with TriggerCollections.
