@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.54 2000/01/19 23:43:09 didenko Exp $
+// $Id: StBFChain.cxx,v 1.55 2000/01/22 00:34:57 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.55  2000/01/22 00:34:57  fisyak
+// Add dependence emc on db & calib
+//
 // Revision 1.54  2000/01/19 23:43:09  didenko
 // take out l3 from chains
 //
@@ -301,7 +304,7 @@ BfcItem BFC[] = {
   {"fss"         ,"ftpc_raw","ftpc","SCL"                 ,"St_fss_Maker","St_ftpc,St_fss_Maker","",kFALSE},
   {"Fcl"         ,"ftpc_hits","ftpc","SCL"    ,"StFtpcClusterMaker","St_ftpc,StFtpcClusterMaker","",kFALSE},
   {"fpt"         ,"ftpc_tracks","ftpc","SCL"              ,"St_fpt_Maker","St_ftpc,St_fpt_Maker","",kFALSE},
-  {"emc"         ,"emc","","geant,tables,ems,emh"                      ,"StChainMaker","StChain","",kFALSE},
+  {"emc"         ,"emc","","geant,tables,db,calib,ems,emh"             ,"StChainMaker","StChain","",kFALSE},
   {"ems"         ,"emc_raw","emc","geant,tables"           ,"St_ems_Maker","St_emc,St_ems_Maker","",kFALSE},
   {"emh"         ,"emc_hits","emc","geant,tables"          ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
   {"l0"          ,"l0","","tables,ctf,mwc,trg"                         ,"StChainMaker","StChain","",kFALSE}, 
