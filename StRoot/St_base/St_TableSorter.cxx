@@ -32,7 +32,6 @@
 // "To do" list
 //
 //  1. A separate method to provide lexicographical sort if the "sorted" column is a kind of array
-//  2. "home made" search to provide "nearest" value.
 //
 //  Usage: 
 //    1. Create an instanse of the sorter for the selected column of your table
@@ -54,6 +53,8 @@
 //          Int_t index =  sorter[id]; // Look for the row index with id = 5
 //                                     // using the standard "C"  "bsearch" binary search 
 //                                     // subroutine
+//          Int_t index =  sorter(id); // Look for the row index with id "nearest" to 5
+//                                     // using the internal "BinarySearch" method
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -62,6 +63,7 @@ ClassImp(St_TableSorter)
 //_____________________________________________________________________________
 St_TableSorter::St_TableSorter() : m_ParentTable(0)
 {
+  // default ctor for RootCint dictionary
   m_SortIndex  = 0;
   m_searchMethod = 0;
   m_numberOfRows = 0;
@@ -81,7 +83,12 @@ St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t fir
   //    - numberRows - the number of the table rows to sort (=0 by default)
   //                   = 0 means sort all rows from the "firstRow" by the end of table
   //
-  SetName(colName);
+
+  TString n = table.GetName();
+  n += ".";
+  n += colName;
+  SetName(n);
+
   m_SortIndex  = 0;
   m_searchMethod = 0;
   m_colType      = kNAN;
@@ -118,8 +125,8 @@ St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t fir
      m_IndexArray = new Int_t[m_colDimensions];
      memset(m_IndexArray,0,m_colDimensions*sizeof(Int_t));
      // Define the index
-     char *openBracket  = colName.Data()-1;
-     char *closeBracket = colName.Data()-1;
+     const char *openBracket  = colName.Data()-1;
+     const char *closeBracket = colName.Data()-1;
      for (Int_t i=0; i< m_colDimensions; i++) 
      {
           openBracket  = strchr(openBracket+1, '[');
@@ -135,15 +142,69 @@ St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t fir
   LearnTable();
   FillIndexArray();
   SortArray();
+  SetSearchMethod();
 }
 //_____________________________________________________________________________
 St_TableSorter::~St_TableSorter() 
 { if (m_SortIndex) delete [] m_SortIndex; m_SortIndex = 0; m_numberOfRows=0; }
+
 //_____________________________________________________________________________
-//_____________________________________________________________________________
-#define COMPAREVALUES(valuetype)  \
+//______________________________________________________________________________
+//*-*-*-*-*-*-*Binary search in an array of n values to locate value*-*-*-*-*-*-* 
+//*-*          ==================================================   
+//*-*  If match is found, function returns position of element.     
+//*-*  If no match found, function gives nearest element smaller than value. 
+//*-*                                                               
+//*-* This method is based on TMath::BinarySearch                   
+//*-*                                                               
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*  
+
+#define BINARYSEARCH(valuetype) Int_t St_TableSorter::BinarySearch(valuetype value) {\
+   switch (m_colType) {                               \
+         case  kFloat:                                \
+           return SelectSearch(Float_t(value));       \
+         case  kInt :                                 \
+           return SelectSearch(Int_t(value));         \
+         case  kLong :                                \
+           return SelectSearch(Long_t(value));        \
+         case  kShort :                               \
+           return SelectSearch(Short_t(value));       \
+         case  kDouble :                              \
+           return SelectSearch(Double_t(value));      \
+         case  kUInt:                                 \
+           return SelectSearch(UInt_t(value));        \
+         case  kULong :                               \
+           return SelectSearch(ULong_t(value));       \
+         case  kUShort:                               \
+           return SelectSearch(UShort_t(value));      \
+         case  kUChar:                                \
+           return SelectSearch(UChar_t(value));       \
+         case  kChar:                                 \
+           return SelectSearch(Char_t(value));        \
+         default:                                     \
+           return -1;                                 \
+           break;                                     \
+      };                                              \
+}                                                     \
+Int_t St_TableSorter::SelectSearch(valuetype value) {\
+   valuetype **array = (valuetype **)m_SortIndex;                   \
+   Int_t nabove, nbelow, middle;                                    \
+   nabove = m_numberOfRows+1;                                       \
+   nbelow = 0;                                                      \
+   while(nabove-nbelow > 1) {                                       \
+      middle = (nabove+nbelow)/2;                                   \
+      if (value == *array[middle-1]) return middle-1;               \
+      if (value  < *array[middle-1]) nabove = middle;               \
+      else                           nbelow = middle;               \
+   }                                                                \
+   nbelow--;                                                        \
+   if (nbelow < 0) return nbelow;                                   \
+   return GetIndex(nbelow);                                         \
+}
+
+#define COMPAREFLOATVALUES(valuetype)  \
 int St_TableSorter::Search##valuetype  (const void *elem1, const void **elem2) { \
-         valuetype *value1 = (valuetype *)(elem1);   \
+         valuetype *value1 = (valuetype *)(elem1);    \
          valuetype *value2 = (valuetype *)(*elem2);   \
          valuetype diff = *value1-*value2;            \
          Int_t res = 0;                               \
@@ -160,15 +221,33 @@ int St_TableSorter::Compare##valuetype  (const void **elem1, const void **elem2)
          else if (diff < 0) res = -1;                 \
          if (res) return res;                         \
          return value1-value2;                        \
-}                                                     
+}                                                     \
+BINARYSEARCH(valuetype)
 
-  COMPAREVALUES(Float_t)
+//_____________________________________________________________________________
+#define COMPAREVALUES(valuetype)  \
+int St_TableSorter::Search##valuetype  (const void *elem1, const void **elem2) { \
+         valuetype *value1 = (valuetype *)(elem1);    \
+         valuetype *value2 = (valuetype *)(*elem2);   \
+         return    *value1-*value2;                   \
+         Int_t res = 0;                               \
+}                                                     \
+int St_TableSorter::Compare##valuetype  (const void **elem1, const void **elem2) { \
+         valuetype *value1 = (valuetype *)(*elem1);   \
+         valuetype *value2 = (valuetype *)(*elem2);   \
+         valuetype diff = *value1-*value2;            \
+         if (diff ) return diff;                      \
+         return value1-value2;                        \
+}                                                     \
+BINARYSEARCH(valuetype)
+
+  COMPAREFLOATVALUES(Float_t)
   COMPAREVALUES(Int_t) 
   COMPAREVALUES(Long_t)
   COMPAREVALUES(ULong_t)
   COMPAREVALUES(UInt_t)
   COMPAREVALUES(Short_t)
-  COMPAREVALUES(Double_t)
+  COMPAREFLOATVALUES(Double_t)
   COMPAREVALUES(UShort_t)
   COMPAREVALUES(UChar_t)
   COMPAREVALUES(Char_t)
@@ -207,43 +286,6 @@ Int_t St_TableSorter::BSearch(TString &value)
 }
 //_____________________________________________________________________________
 Int_t St_TableSorter::BSearch(const void *value){
-  if (!m_searchMethod) {
-     switch (m_colType) {
-         case  kFloat:
-           m_searchMethod = SEARCHORDER(Float_t);
-           break;
-         case  kInt :
-           m_searchMethod = SEARCHORDER(Int_t);
-           break;
-         case  kLong :
-           m_searchMethod = SEARCHORDER(Long_t);
-           break;
-         case  kShort :
-           m_searchMethod = SEARCHORDER(Short_t);
-           break;
-         case  kDouble :  
-           m_searchMethod = SEARCHORDER(Double_t);
-           break;
-         case  kUInt: 
-           m_searchMethod = SEARCHORDER(UInt_t);
-           break;
-         case  kULong : 
-           m_searchMethod= SEARCHORDER(ULong_t);
-           break;
-         case  kUShort: 
-           m_searchMethod = SEARCHORDER(UShort_t);
-           break;
-         case  kUChar:
-           m_searchMethod = SEARCHORDER(UChar_t);
-           break;
-         case  kChar:
-           m_searchMethod = SEARCHORDER(Char_t);
-           break;
-         default:
-            break;
-
-      };
-  }
   Int_t index = -1;
   if (m_searchMethod) {
     void **p = (void **)bsearch( value,  // Object to search for
@@ -251,13 +293,13 @@ Int_t St_TableSorter::BSearch(const void *value){
                    m_numberOfRows,  // Number of elements
                    sizeof(void *),  // Width of elements
                    CALLQSORT(m_searchMethod));
-      if (p) {
-         const Char_t *res = (const Char_t *)(*p);
-         // calculate index:
-         index =  m_firstRow + (res - (((const Char_t *)m_ParentTable.At(m_firstRow)) + m_colOffset))/m_ParentTable.GetRowSize();
-      }
+    if (p) {
+       const Char_t *res = (const Char_t *)(*p);
+       // calculate index:
+       index =  m_firstRow + (res - (((const Char_t *)m_ParentTable.At(m_firstRow)) + m_colOffset))/m_ParentTable.GetRowSize();
     }
-    return index;  
+  }
+  return index;  
 }
 
 //_____________________________________________________________________________
@@ -306,6 +348,48 @@ const Text_t * St_TableSorter::GetTableTitle() const { return m_ParentTable.GetT
 //_____________________________________________________________________________
 const Text_t * St_TableSorter::GetTableType() const { return m_ParentTable.GetType();}
 
+//_____________________________________________________________________________
+void  St_TableSorter::SetSearchMethod()
+{
+  // Select search function at once 
+  if (!m_searchMethod) {  
+     switch (m_colType) {
+         case  kFloat:
+           m_searchMethod = SEARCHORDER(Float_t);
+           break;
+         case  kInt :
+           m_searchMethod = SEARCHORDER(Int_t);
+           break;
+         case  kLong :
+           m_searchMethod = SEARCHORDER(Long_t);
+           break;
+         case  kShort :
+           m_searchMethod = SEARCHORDER(Short_t);
+           break;
+         case  kDouble :  
+           m_searchMethod = SEARCHORDER(Double_t);
+           break;
+         case  kUInt: 
+           m_searchMethod = SEARCHORDER(UInt_t);
+           break;
+         case  kULong : 
+           m_searchMethod= SEARCHORDER(ULong_t);
+           break;
+         case  kUShort: 
+           m_searchMethod = SEARCHORDER(UShort_t);
+           break;
+         case  kUChar:
+           m_searchMethod = SEARCHORDER(UChar_t);
+           break;
+         case  kChar:
+           m_searchMethod = SEARCHORDER(Char_t);
+           break;
+         default:
+            break;
+
+      };
+  }
+}
 //_____________________________________________________________________________
 void  St_TableSorter::SortArray(){
    COMPAREMETHOD compare=0;
@@ -411,7 +495,7 @@ void St_TableSorter::LearnTable()
       // Check dimensions
         if (dim != m_colDimensions) {
            Error("LearnTable","Wrong dimension");
-           St_Table *t = &m_ParentTable;
+           St_Table *t = (St_Table *)&m_ParentTable;
            t->Print();
            return;
         }
@@ -430,4 +514,5 @@ void St_TableSorter::LearnTable()
 
 #undef COMPAREVALUES
 #undef COMPAREORDER
-
+#undef COMPAREFLOATVALUES
+#undef BINARYSEARCH

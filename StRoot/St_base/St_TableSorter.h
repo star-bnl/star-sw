@@ -36,6 +36,14 @@
 
 class St_Table;
 class St_TableSorter : public TNamed {
+ private:
+   union {  Char_t   m_Char; 
+            Int_t    m_Int;  
+            Long_t   m_Long;
+            Float_t  m_Float; 
+            Double_t m_Double;
+         } m_Value;
+
  protected:
     typedef Int_t (*COMPAREMETHOD)(const void **, const void **);
     typedef Int_t (*SEARCHMETHOD)(const void *, const void **);
@@ -51,8 +59,8 @@ class St_TableSorter : public TNamed {
     Int_t    *m_IndexArray;   // "parsed" indecis
     Int_t     m_colDimensions;// The number of the dimensions for array
     const St_Table &m_ParentTable;  // the back pointer to the sorted table
-    SEARCHMETHOD m_searchMethod; // Function selected to serach values
-    EColumnType m_colType;   // data type of the selected column
+    SEARCHMETHOD m_searchMethod;    // Function selected to serach values
+    EColumnType  m_colType;         // data type of the selected column
 
     Int_t  BSearch(const void *value);
     void   FillIndexArray();
@@ -60,11 +68,35 @@ class St_TableSorter : public TNamed {
     void   LearnTable();
     Int_t  LFind(const void *){ return -1;}
 
+    Int_t SelectSearch(Float_t  value );
+    Int_t SelectSearch(Int_t    value );
+    Int_t SelectSearch(ULong_t  value );
+    Int_t SelectSearch(Long_t   value );
+    Int_t SelectSearch(UInt_t   value );
+    Int_t SelectSearch(Short_t  value );
+    Int_t SelectSearch(Double_t value );
+    Int_t SelectSearch(UShort_t value );
+    Int_t SelectSearch(UChar_t  value );
+    Int_t SelectSearch(Char_t   value );
+
+    void  SetSearchMethod();
+
  public:
     St_TableSorter();
     St_TableSorter(const St_Table &table, TString &colName, Int_t firstRow=0,Int_t numbeRows=0);
     virtual ~St_TableSorter();
     
+    Int_t BinarySearch(Float_t  value );
+    Int_t BinarySearch(Int_t    value );
+    Int_t BinarySearch(ULong_t  value );
+    Int_t BinarySearch(Long_t   value );
+    Int_t BinarySearch(UInt_t   value );
+    Int_t BinarySearch(Short_t  value );
+    Int_t BinarySearch(Double_t value );
+    Int_t BinarySearch(UShort_t value );
+    Int_t BinarySearch(UChar_t  value );
+    Int_t BinarySearch(Char_t   value );
+
     Int_t BSearch(Float_t value);
     Int_t BSearch(Int_t value);
     Int_t BSearch(Double_t value);
@@ -101,23 +133,22 @@ class St_TableSorter : public TNamed {
     static int SearchUChar_t     (const void *, const void **);
     static int SearchChar_t      (const void *, const void **);
 
-    Int_t  LFind(Float_t value){ return LFind(&value);}
-    Int_t  LFind(Int_t value){ return LFind(&value);}
+    Int_t  LFind(Float_t value) { return LFind(&value);}
+    Int_t  LFind(Int_t value)   { return LFind(&value);}
     Int_t  LFind(Double_t value){ return LFind(&value);}
     Int_t  LFind(const Char_t *value){ return LFind(&value);}
     Int_t  LFind(TString &value){ return LFind(&value);}
 
-    Int_t operator[](Float_t value) { return BSearch(value); }
     Int_t operator[](Int_t value)   { return BSearch(value); }
     Int_t operator[](Double_t value){ return BSearch(value); } 
     Int_t operator[](const Char_t *value) { return BSearch(value); }
     Int_t operator[](TString &value) { return BSearch(value); }
 
-    Int_t operator()(Float_t value)  { return LFind(value); }
-    Int_t operator()(Int_t value)    { return LFind(value); }
-    Int_t operator()(Double_t value) { return LFind(value); }
-    Int_t operator()(const Char_t *value) { return LFind(value); }
-    Int_t operator()(TString &value) { return LFind(value); }
+    Int_t operator()(Float_t value)  { return BinarySearch(value); }
+    Int_t operator()(Int_t value)    { return BinarySearch(value); }
+    Int_t operator()(Double_t value) { return BinarySearch(value); }
+    Int_t operator()(const Char_t *value) { return BinarySearch(*value); }
+//    Int_t operator()(TString &value) { return *this(value.Data()); }
 
     ClassDef(St_TableSorter,0)
 };
