@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.25 1999/02/27 22:43:03 sakrejda Exp $
+* $Id: tte.F,v 1.26 1999/03/01 08:03:24 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.26  1999/03/01 08:03:24  sakrejda
+* static memory allocation replaced with malloc
+*
 * Revision 1.25  1999/02/27 22:43:03  sakrejda
 * some more checks for rec hit without a mc partner
 *
@@ -124,6 +127,7 @@ C      it was affecting sence of rotation in the momentum extrapolation
 C      and reconstructed charge entered into the evaluation tables
 C_____________________________________________________________________________
 
+      integer   malloc
       INTEGER   tls_Index_Sort_i              !integer sort (tls pkg)
       integer   tls_qsort_herb_i              !integer indexed sort
 
@@ -132,8 +136,14 @@ c                                              to address hits by id
 c                                              in the index table, mc g2t_hit
       parameter (list_size=1100000)
       integer   list_index_mc(list_size)      !address mc hit in tindex
+      pointer   (p_list_index_mc, list_index_mc)
+
       integer   list_index_rec(list_size)     !address rec hits in tindex
+      pointer   (p_list_index_rec, list_index_rec)
+
       integer   list_g2t_hits(list_size)      !mc hit address in g2t_tpc_hit
+      pointer   (p_list_g2t_hits, list_g2t_hits)
+      integer   big_id_of_g2t_hits
       integer   ng2t                          !count of cross-indexed hits
 
       integer   hit_size                      !size of array used to index 
@@ -143,8 +153,12 @@ c                                              reconstructed hits so it saves
 c                                              some space
       parameter (hit_size=600000)
       integer   list_hits(hit_size)           !rec. hits address in hit
+      pointer   (p_list_hits,list_hits)
+      integer   big_id_of_rec_hits
+
       integer   loc_hit(hit_size)             !list of hits ordered by track
 c                                              number
+      pointer   (p_loc_hit,loc_hit)
       integer   max_track_length
       parameter (max_track_length=2000)
       integer   rec_hit_on_mc_track_nok       !number of rec hits on a mc track
@@ -156,7 +170,12 @@ c     the second counts how many mc hits went into this reconstructed hit.
       integer   track_size
       parameter (track_size=100000)
       integer   list_tracks(track_size)      !address 
+      pointer   (p_list_tracks,list_tracks)
+      integer   big_id_of_rec_tracks
+
       integer   list_g2t_tracks(track_size)  !address by id for mc tracks
+      pointer   (p_list_g2t_tracks,list_g2t_tracks)
+      integer   big_id_of_mc_tracks
 
       integer   maxtrack                  !max # of mixed up tracks
       parameter (maxtrack=500)
@@ -242,65 +261,96 @@ c     set number of entries in the tables to 0
 c     set up an index table to address an mc hit by its hit id
 c     but first clean up the list
 c
-      call vzero(list_g2t_hits,list_size)
-C
+c     Find the biggest mc hit ID.
+      big_id_of_g2t_hits = 1
       do i=1,g2t_hit_h.nok
-         if(g2t_hit(i).id.gt.list_size.or.g2t_hit(i).id.lt.1) then
+         if(g2t_hit(i).id.gt.big_id_of_g2t_hits) then
+             big_id_of_g2t_hits=g2t_hit(i).id
+         else if(g2t_hit(i).id.lt.1) then
              tte=STAFCV_BAD
-             write(m132(1),*) 'TTE-I1 list_size not big enough ','i= ',i
-             write(m132(2),*) 'list_size = ',list_size,'g2t_hit(i).id = '
-     >                         ,g2t_hit(i).id, ' nok = ',g2t_hit_h.nok
+             write(m132(1),*) 'Hit id smaller than 1 ','i= ',i
+             write(m132(2),*) 'g2t_hit(i).id = ',g2t_hit(i).id
              call Message (m132, 2, idI1 )
              return
-         else
-             list_g2t_hits(g2t_hit(i).id)=i
-         endif   
+         endif
+      end do
+c     
+c     allocate memory for list_g2t_hits
+      p_list_g2t_hits = malloc(big_id_of_g2t_hits*4)
+      
+      call vzero(list_g2t_hits,big_id_of_g2t_hits)
+C
+      do i=1,g2t_hit_h.nok
+         list_g2t_hits(g2t_hit(i).id)=i
       end do
 c
+c     check how big table do we need for the reconstructed hits
+      big_id_of_rec_hits=1
+      do i=1,hit_h.nok
+         if(hit(i).id.gt.big_id_of_rec_hits) then
+            big_id_of_rec_hits = hit(i).id
+         else if(hit(i).id.lt.1) then
+             tte=STAFCV_BAD
+             write(m132(1),*) 'Reconstructed hit id less than 1 ','i= ',i
+             write(m132(2),*) 'hit(i).id = ', hit(i).id
+             call Message (m132, 2, idI2 )
+             go to 999
+         endif
+      end do
+c
+c     allocate memory for list_hits
+      p_list_hits = malloc(big_id_of_rec_hits*4)
+
 c     set up an index table to address a reconstructed hit by its hit id
 c     but first clean up the list
-      call vzero(list_hits,hit_size)
+      call vzero(list_hits,big_id_of_rec_hits)
       do i=1,hit_h.nok
-         if(hit(i).id.gt.list_size.or.hit(i).id.lt.1) then
-             tte=STAFCV_BAD
-             write(m132(1),*) 'TTE-I2 list_size not big enough ','i= ',i
-             write(m132(2),*) 'list_size = ', list_size, 'hit(i).id = ',
-     >                         hit(i).id
-             call Message (m132, 2, idI2 )
-             return
-         else
-             list_hits(hit(i).id)=i
-         endif
+         list_hits(hit(i).id)=i
       end do 
 
 c
 c     set up an index table to address mc tracks in g2t_track table by the 
 c     track id
-      call vzero(list_g2t_tracks,track_size)
+      big_id_of_mc_tracks=1
       do i=1,g2t_track_h.nok
-         if(g2t_track(i).id.gt.track_size.or.g2t_track(i).id.lt.1) then
-             tte=STAFCV_BAD
-             write(m132(1),*) 'TTE-I3 track_size not big enough, i = ',i
-             write(m132(2),*) 'track_size = ',track_size,
-     >                        ' g2t_track(i).id = ',g2t_track(i).id
-             call Message (m132, 2, idI3 )
-             return
+         if(g2t_track(i).id.gt.big_id_of_mc_tracks) then
+            big_id_of_mc_tracks = g2t_track(i).id
+         else if(g2t_track(i).id.lt.1) then
+            tte=STAFCV_BAD
+            write(m132(1),*) 'TTE-I3 track id less than 1, i = ',i
+            write(m132(2),*) 'track_id = ',g2t_track(i).id
+            call Message (m132, 2, idI3 )
+            go to 999
          endif
+      end do
+
+c     allocate memory for thetracks
+      p_list_g2t_tracks = malloc(big_id_of_mc_tracks*4)
+      call vzero(list_g2t_tracks,big_id_of_mc_tracks)
+
+      do i=1,g2t_track_h.nok
          list_g2t_tracks(g2t_track(i).id)=i
       end do
 c
 c     set up an index table to address rec tracks by the rec track id
-c     
-      call vzero(list_tracks,track_size)
+c 
+      big_id_of_rec_tracks = 1
       do i=1,track_h.nok
-         if(track(i).id.gt.track_size.or.track(i).id.lt.1) then
-             tte=STAFCV_BAD
-             write(m132(1),*) 'TPT-I4 track_size not big enough, i = ',i
-             write(m132(2),*) 'list_size = ',list_size,' track(i).id= ',
-     >                        track(i).id
-             call Message (m132, 2, idI4 )
-             return
+         if(track(i).id.gt.big_id_of_rec_tracks) then
+            big_id_of_rec_tracks = track(i).id
+         elseif(track(i).id.lt.1) then
+            tte=STAFCV_BAD
+            write(m132(1),*) 'TPT-I4  rec track id less than 1, i = ',i
+            write(m132(2),*) ' track(i).id= ',track(i).id
+            call Message (m132, 2, idI4 )
+            go to 998
          endif
+      end do    
+
+      p_list_tracks = malloc(big_id_of_rec_tracks*4)
+      call vzero(list_tracks,big_id_of_rec_tracks)
+
+      do i=1,track_h.nok
          if(track(i).flag.gt.0) list_tracks(track(i).id)=i 
       end do  
     
@@ -328,7 +378,9 @@ c
 c
 c     set up a list so the monte carlo hit can be found in the
 C     translation table, clean up and zero the list_index_mc first
-      call vzero(list_index_mc,list_size)
+
+      p_list_index_mc = malloc(big_id_of_g2t_hits*4)
+      call vzero(list_index_mc,big_id_of_g2t_hits)
       do i=istart,istart+ng2t-1
         list_index_mc(tindex(i).key1)=i
       end do 
@@ -343,7 +395,7 @@ c     let's count dropped mc hits
       do i=1,g2t_track_h.nok
 *     skip  if there is no hits on this track
 *     at this time we can also calculate a dedx for the track
-      if(g2t_track(i).n_tpc_hit.ne.0) then
+      if(g2t_track(i).n_tpc_hit.gt.0) then
           call vzero(dedx_list,max_track_length)
            evmc_h.nok=evmc_h.nok+1
            ntrack=0
@@ -358,14 +410,6 @@ c     let's count dropped mc hits
            evmc(evmc_h.nok).pzvr =  0.0
            evmc(evmc_h.nok).dedxr = 0.0
            evmc(evmc_h.nok).qfact = 0.0
-           if(hit_h.nok.gt.hit_size) then
-		write(m132(1),*) 'TTE-I5 hit_size not big enough'
-                write(m132(2),*) hit_h.nok,hit_size
-                call Message (m132, 2, idI5 )
-                tte = STAFCV_BAD
-                return
-           endif
-c
 *          find a pointer to the first mc hit for this track
            ip = list_g2t_hits(g2t_track(i).hit_tpc_p)
            rec_hit_on_mc_track_nok=0
@@ -383,21 +427,13 @@ c            find it's location in the index table
              if(index_mc.ne.0) then
 c            this point was used to create a hit
 c            it could be that hit simulation was not ran for that sector
-             if(tindex(index_mc).key2.gt.0) then
+             if(tindex(index_mc).key2.gt.0.and.
+     >          tindex(index_mc).key2.le.big_id_of_rec_hits) then
 c              but it could have been deleted later on in the process of
 c              merging and filtering.....
 c              so check whether we have this id on a list of reconstructed
 c              hits
                if(list_hits(tindex(index_mc).key2).gt.0) then
-                 if(tindex(index_mc).key2.gt.hit_size) then
-                   tte=STAFCV_BAD
-                   write(m132(1),*) 'TTE-I6 long_list not long enough,'
-     >                              //'hit_size ='
-                   write(m132(2),*) hit_size, 'tindex(index_mc).key2 =',
-     >             tindex(index_mc).key2
-                   call Message (m132, 2, idI6 )
-                   return
-                 endif
 c                find whether this hit is on our short list
                  iloc=0
                  do ii=1,rec_hit_on_mc_track_nok
@@ -422,6 +458,8 @@ c                  memorize the id of a reconstructed hit
 *                 call Message (m132, 1, idI10 )
                   ndrop = ndrop+1
                endif
+             else
+                ndrop = ndrop+1
              endif
              endif
            endif
@@ -458,14 +496,6 @@ c          so now it's time to calculate dedx for this track
            endif
 
 c          go through all the points on the long_list list
-           if(track_h.nok.gt.track_size) then
-               write(m132(1),*) 'TTE-I7 track_size not big enough', 
-     >         track_size, track_h.nok 
-               call Message (m132, 1, idI7 )
-               tte=STAFCV_BAD
-               return
-           endif
-*
 c
            rec_track_on_mc_track_nok = 0
            do j=1,rec_hit_on_mc_track_nok
@@ -478,17 +508,17 @@ c             add a reconstructed hit
 
 c             check whether this point was assigned to a track
               id_track=hit(ip_real).track/1000
-              if(id_track.gt.track_size) then
-                 write(m132(1),*) 'TTE-I8 track_size not big enough', 
+              if(id_track.gt.big_id_of_rec_tracks) then
+                 write(m132(1),*) 'TTE-I8 Strange track ID', 
      >           hit(ip_real).track, ip_real
                  call Message (m132, 1, idI8 )
                  tte=STAFCV_BAD
-                 return
+                 go to 997
               endif
 c
 c             make sure id is non zero - possible problem with bad 
 c             track numbering 
-              if(id_track.gt.0) then
+              if(id_track.gt.0.and.id_track.le.big_id_of_rec_tracks) then
 c             check whether it's flag is ok
               if(list_tracks(id_track).eq.0) then
 c                bad track
@@ -518,6 +548,8 @@ c                check whether we have it on our rec_track_on_mc_track list
                  rec_track_on_mc_track(2,iloc)=
      >           rec_track_on_mc_track(2,iloc)+1
               endif
+              else
+                 bad_track = bad_track+1
               endif
            end do
 c          went through all the reconstructed hits, now it's time to deal
@@ -615,24 +647,31 @@ c
 c
 c     set up a list so the reconstructed hit can be found in the
 c     translation table, clean up and zero the list_index_rec first
-      call vzero(list_index_rec,list_size)
+      p_list_index_rec = malloc(big_id_of_rec_hits*4)
+      call vzero(list_index_rec,big_id_of_rec_hits)
       do i=istart,istart+ng2t-1
-        if(tindex(i).key2.gt.0.and.tindex(i).key2.lt.list_size) then
+        if(tindex(i).key2.gt.0.and.tindex(i).key2.le.big_id_of_rec_hits) then
           list_index_rec(tindex(i).key2)=i
         else if(tindex(i).key2.eq.0) then
           write(m132,*)'TTEI12-E1 no reconstructed partner'
           call Message(m132, 1, idI12)
         else
-          write(m132,*)'TTEI12-E1 list size not big enough', list_size,
+          write(m132,*)'TTEI12-E1 Strange reconstructed hit in the index table',
      >    tindex(i).key2                     
           call Message(m132, 1, idI12)
+          tte=STAFCV_BAD
+          go to 996
         endif
       end do 
 
 C     Sort the hit array according to the track number
-      
-      iret = tls_Index_Sort_i(hit_h.nok,hit(1).track,
-     >       hit(2).track,loc_hit,hit_size)
+      if(hit_h.nok.gt.0)then
+         p_loc_hit = malloc(hit_h.nok*4)
+         iret = tls_Index_Sort_i(hit_h.nok,hit(1).track,
+     >       hit(2).track,loc_hit,hit_h.nok)
+      else
+         p_loc_hit = malloc(4)
+      endif
 
         
 c     go through all the hits sorted by the track number and relate them
@@ -833,5 +872,15 @@ c        let's find the biggest contribution
          call message (m132, 1 ,idI14)
       endif
       tte=STAFCV_OK
+      call free(p_loc_hit)
+996   continue
+      call free(p_list_index_rec)
+997   continue
+      call free(p_list_index_mc)
+      call free(p_list_tracks)
+998   continue
+      call free(p_list_g2t_tracks)
 999   continue
+      call free(p_list_g2t_hits)
+      call free(p_list_hits)
       end
