@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtConfig.cc,v 1.7 2001/10/02 22:57:49 caines Exp $
+ * $Id: StSvtConfig.cc,v 1.8 2001/10/04 02:56:26 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtConfig.cc,v $
+ * Revision 1.8  2001/10/04 02:56:26  caines
+ * Fix some of the hybrid swapping indexing
+ *
  * Revision 1.7  2001/10/02 22:57:49  caines
  * Wafer 3 is also swapped on getHybrid()B2L8
  *
@@ -341,6 +344,36 @@ int StSvtConfig::getHybridIndex(int barrelID, int ladderID, int waferID, int hyb
   return index;
 }
 
+int StSvtConfig::getProperHybridIndex(int barrelID, int ladderID, int waferID, int hybridID)
+{
+  
+  //Returns the index that the barrel,ladder,wafer and hybrid should be if
+  // things werent swapped around
+  int index = getHybridIndex( barrelID, ladderID, waferID,  hybridID);
+  
+  if ( !strncmp(mConfig, "FULL", strlen("FULL")) ) {
+    
+    if( (barrelID == 2) && (ladderID == 1) && (waferID > 3)){
+      if( hybridID ==1) index--;
+      if( hybridID ==2) index++;
+    }
+  
+    else if( (barrelID == 2) && (ladderID == 8) && (waferID < 4)){
+      if( hybridID ==1) index--;
+      if( hybridID ==2) index ++;
+    }
+    
+    else if( (barrelID == 3) && (ladderID == 16) && (waferID > 4)){
+      index += 14;
+  }
+    else if( (barrelID == 3) && (ladderID == 15) && (waferID > 4)){
+      index -= 14;
+    }
+  }
+  
+  
+  return index;
+}
 
 int StSvtConfig::getBarrel(int index){
   

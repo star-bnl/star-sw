@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridCollection.cc,v 1.7 2001/08/16 21:02:03 munhoz Exp $
+ * $Id: StSvtHybridCollection.cc,v 1.8 2001/10/04 02:56:26 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridCollection.cc,v $
+ * Revision 1.8  2001/10/04 02:56:26  caines
+ * Fix some of the hybrid swapping indexing
+ *
  * Revision 1.7  2001/08/16 21:02:03  munhoz
  * changing StObjArray to StStrArray. StSvtConfig reestructured. New classes for geometry DB
  *
@@ -105,6 +108,15 @@ int StSvtHybridCollection::getHybridIndex(int barrelID, int ladderID, int waferI
 
   if (mSvtConfig)
     return mSvtConfig->getHybridIndex(barrelID, ladderID, waferID, hybridID);
+
+  return -1;
+}
+int StSvtHybridCollection::getProperHybridIndex(int barrelID, int ladderID, int waferID, int hybridID)
+{
+ // returns an proper index for the specified hybrid if there was no swapping
+
+  if (mSvtConfig)
+    return mSvtConfig->getProperHybridIndex(barrelID, ladderID, waferID, hybridID);
 
   return -1;
 }
