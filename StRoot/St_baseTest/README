@@ -1,13 +1,9 @@
- $Id: README,v 1.1 1999/09/23 18:35:13 fine Exp $
- $Log: README,v $
- Revision 1.1  1999/09/23 18:35:13  fine
- Readme
-
   This directory contains some classes and
   subroutines to test other STAR classes.
   Those can not be tested with CINT macros only
 
-To run this test one needs the ROOT seesion as follows:
+To run this test one needs to launch a ROOT session
+as follows:
 
 root.exe -b 
 
@@ -28,4 +24,12 @@ root.exe [0] gSystem->Load("St_base"); gSystem->Load("St_baseTest"); test a;
 
 
      Valery Fine September, 23, 1999
+
+ $Id: README,v 1.2 1999/09/23 18:36:37 fine Exp $
+ $Log: README,v $
+ Revision 1.2  1999/09/23 18:36:37  fine
+ CVS ID was moved by the end of file
+
+ Revision 1.1  1999/09/23 18:35:13  fine
+ Readme
 
