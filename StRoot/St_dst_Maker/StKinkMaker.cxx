@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.23 1999/10/25 21:46:52 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.24 1999/11/10 20:29:38 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.24  1999/11/10 20:29:38  wdeng
+// Fixed problems with unit usage. Comment out the cut of point number for the moment.
+//
 // Revision 1.23  1999/10/25 21:46:52  wdeng
 // More iflag options
 //
@@ -97,9 +100,6 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define kaonToMuonQ  0.236
 #define kaonToPionQ  0.205
 #define pionToMuonQ  0.030
-
-#define radToDeg     C_DEG_PER_RAD
-#define degToRad     C_RAD_PER_DEG               
   
 #define MAXNUMOFTRACKS 10000
 #define SIZETRKIDCHECK 1000
@@ -127,7 +127,7 @@ Int_t StKinkMaker::Init(){
     parRow.vertexRMax2D              =  179.;  
     parRow.vertexRMin2D              =  133.;  
     parRow.thetaMin                  =  1.; 
-    parRow.numOfPadRows              =  40;  	
+    parRow.numOfPadRows              =  40;  	// This value is for year1 only
     parRow.parentDipAngleMax         =  0.79;	
     parRow.impactCut                 =  2.;
     parRow.parentLastDaughterStart2D =  14.;
@@ -210,25 +210,25 @@ Int_t StKinkMaker::Make(){
   double B     = b[2]*kilogauss;
   
   Int_t i, j;
-  
+ 
   for (i=0; i<numOfGlbtrk ; i++) {
     
     dst_track_st *dstTrackPtr = dstTrackStart + i;;
-    if( dstTrackPtr->n_point > tkfpar->numOfPadRows ) continue;
+    //    if( dstTrackPtr->n_point > tkfpar->numOfPadRows ) continue; 
+
     if( dstTrackPtr->iflag > 0 ) 
       {
 	Float_t dip   = atan(dstTrackPtr->tanl);
 	Int_t    h     = (B*dstTrackPtr->icharge > 0 ? -1 : 1);
 	Float_t phase = dstTrackPtr->psi*degree-h*pi/2;
-	Float_t pt    = (1./dstTrackPtr->invpt)*GeV;
 	Float_t curvature = dstTrackPtr->curvature;
-	Float_t x0 = dstTrackPtr->r0 * cos(dstTrackPtr->phi0 * degToRad);
-	Float_t y0 = dstTrackPtr->r0 * sin(dstTrackPtr->phi0 * degToRad);
+	Float_t x0 = dstTrackPtr->r0 * cos(dstTrackPtr->phi0 * degree);
+	Float_t y0 = dstTrackPtr->r0 * sin(dstTrackPtr->phi0 * degree);
 	Float_t z0 = dstTrackPtr->z0;
 	StThreeVectorD origin(x0, y0, z0);  
-	
+
 	tempTrack = new StKinkLocalTrack(dstTrackPtr,
-					 curvature/meter,
+					 curvature*centimeter,					 
 					 dip*radian, 
 					 phase*radian,
 					 origin*centimeter,
@@ -245,7 +245,7 @@ Int_t StKinkMaker::Make(){
 	  }
       }
   }
-  
+
   trackArray->Sort();
   
   dstVtxIndex  = vertex->GetNRows();
@@ -339,7 +339,7 @@ Int_t StKinkMaker::Make(){
 	  parentMoment   = myTrack1->helix().momentumAt(t1PathLength, B);
 	  daughterMoment = myTrack2->helix().momentumAt(t2PathLength, B);
 	  
-	  decayAngle = radToDeg*parentMoment.angle(daughterMoment);
+	  decayAngle = (1./degree) * parentMoment.angle(daughterMoment);
 	  if(decayAngle<tkfpar->thetaMin) continue;
 	  
 	  if( (parentMoment.z()==0.) || (daughterMoment.z()==0.) ) continue;
@@ -479,7 +479,7 @@ void StKinkMaker::FillTableRow()
   
   if( (deltaKaonPion < deltaKaonMuon) && (deltaKaonPion < deltaPionMuon) )
     {
-      kinkVtxRow.theta_cm = radToDeg*asin((daughterMoment.mag()/kaonToPionQ)*sin(decayAngle*degToRad));
+      kinkVtxRow.theta_cm = (1./degree) * asin((daughterMoment.mag()/kaonToPionQ)*sin(decayAngle*degree));
       if( myTrack1->charge() > 0 )	  
 	{
 	  kinkVtxRow.pidd = 8;
@@ -490,7 +490,7 @@ void StKinkMaker::FillTableRow()
 	}
     } else if( (deltaKaonMuon < deltaKaonPion) && (deltaKaonMuon < deltaPionMuon) )
       {
-	kinkVtxRow.theta_cm = radToDeg*asin((daughterMoment.mag()/kaonToMuonQ)*sin(decayAngle*degToRad));
+	kinkVtxRow.theta_cm = (1./degree) * asin((daughterMoment.mag()/kaonToMuonQ)*sin(decayAngle*degree));
 	if( myTrack1->charge() > 0 )	  
 	  {
 	    kinkVtxRow.pidd = 5;
@@ -500,7 +500,7 @@ void StKinkMaker::FillTableRow()
 	    kinkVtxRow.pidp = 12;
 	  }   
       } else {
-	kinkVtxRow.theta_cm = radToDeg*asin((daughterMoment.mag()/pionToMuonQ)*sin(decayAngle*degToRad));
+	kinkVtxRow.theta_cm = (1./degree) * asin((daughterMoment.mag()/pionToMuonQ)*sin(decayAngle*degree));
 	if( myTrack1->charge() > 0 )	  
 	  {
 	    kinkVtxRow.pidd = 5;
@@ -669,11 +669,11 @@ void StKinkMaker::FillIflag()
 	if( stopIdParent != startIdDaughter ) {
 	  dstVtxRow.iflag = 0;
 	} else {
-	  if( vertexGeProc == 12 ) {
+	  if( vertexGeProc == 20 ) {
 	    dstVtxRow.iflag = -3;
 	  }
 
-	  if( vertexGeProc != 12 && vertexGeProc != 5 ) {
+	  if( vertexGeProc != 20 && vertexGeProc != 5 ) {
 	    dstVtxRow.iflag = -4;
 	  }
 	  
