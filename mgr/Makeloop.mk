@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.25  1998/11/05 20:09:24  fisyak
+#  add OBJY CPPFLAGS
+#
 #  Revision 1.24  1998/10/29 23:34:26  fisyak
 #  set ASU_MALLOC_OFF for PAMS
 #
@@ -151,7 +154,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/10/29 23:34:26 $ 
+#           Last modification $Date: 1998/11/05 20:09:24 $ 
 #  default setings
 # Current Working Directory
 #
@@ -299,6 +302,9 @@ endif
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/xdf2root))
 XDF2ROOT := xdf2root
 endif
+ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/farm))
+FARM := farm
+endif
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/.share/tables))
 StRoot += St_Tables
 endif
@@ -318,15 +324,17 @@ Makers  :=  $(filter-out St_mev_Maker, $(Makers))
 Makers  :=  $(filter-out St_tpctest_Maker, $(Makers))
 endif
 #          I have subdrs
-.PHONY               :  all $(BASE) $(XDF2ROOT) $(TARGET) $(StRoot) test clean clean_lib clean_share clean_obj
+.PHONY               :  all $(BASE) $(XDF2ROOT) $(FARM) $(TARGET) $(StRoot) test clean clean_lib clean_share clean_obj
 #      I_have_subdirs
-all:  $(BASE) $(XDF2ROOT)  $(TARGETS) $(StRoot)
+all:  $(BASE) $(XDF2ROOT) $(FARM)  $(TARGETS) $(StRoot)
 ifndef NOROOT
-ROOT:      St_base xdf2root St_Makers StChain St_Tables
+ROOT:      St_base xdf2root $(FARM) St_Makers StChain St_Tables
 St_base:
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so
 xdf2root:
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root    SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.so 
+farm:
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/farm    SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/libfarm.so 
 St_Makers: $(Makers)
 StChain:   
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain    SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.so
