@@ -1,9 +1,13 @@
 /*************************************************************************
- * $Id: StRichGeometryDbInterface.h,v 1.3 2000/02/12 21:55:45 lasiuk Exp $
+ * $Id: StRichGeometryDbInterface.h,v 1.4 2000/03/12 22:18:45 lasiuk Exp $
  *
  * Description:
  *
  * $Log: StRichGeometryDbInterface.h,v $
+ * Revision 1.4  2000/03/12 22:18:45  lasiuk
+ * add from materials Db
+ * add normal vector value
+ *
  * Revision 1.3  2000/02/12 21:55:45  lasiuk
  * Wire position adjustment
  *
@@ -31,14 +35,19 @@ public:
     virtual double detectorLength() const = 0;
     virtual double detectorWidth() const = 0;
 
-    virtual double quadrantZ0(int) const = 0;
     virtual double quadrantX0(int) const = 0;
-    virtual double quadrantZOrigin(int) const = 0;
+    virtual double quadrantY0(int) const = 0;
     virtual double quadrantXOrigin(int) const = 0;
+    virtual double quadrantYOrigin(int) const = 0;
 
-    virtual double quadrantGapInZ() const = 0;
-    virtual double quadrantGapInX() const = 0;    
+    virtual double quadrantGapInX() const = 0;
+    virtual double quadrantGapInY() const = 0;    
 
+    virtual const StThreeVector<double>& radiatorDimension() const = 0;
+    virtual const StThreeVector<double>& quartzDimension() const = 0;
+    virtual const StThreeVector<double>& padPlaneDimension() const = 0;
+    virtual double proximityGap() const = 0; 
+ 
     virtual int    numberOfPadsInARow()            const = 0; // X
     virtual int    numberOfPadsInAQuadrantRow()    const = 0; // X
     virtual int    numberOfRowsInAColumn()         const = 0; // Z
@@ -53,7 +62,7 @@ public:
     virtual double padSpacing() const = 0;
     
     virtual double wirePitch() const = 0;
-    virtual double firstWirePositionInX(int) const = 0;
+    virtual double firstWirePositionInY(int) const = 0;
     virtual int    numberOfWires() const = 0;
 
     virtual double anodeToPadSpacing() const = 0;
@@ -62,6 +71,7 @@ public:
     // Survey Geometry
     virtual double radialDistanceToRich()    const = 0;
     virtual double inclinationAngle()        const = 0;
+    virtual const StThreeVector<double>& normalVectorToPadPlane() const = 0;
     
     virtual void   print(ostream& os = cout) const = 0;
 };
