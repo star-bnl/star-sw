@@ -34,6 +34,7 @@ using namespace std;
 #include "StiEvaluableTrackSeedFinder.h"
 #include "StiCompositeSeedFinder.h"
 #include "StiTrack.h"
+#include "StiTrackingParameters.h"
 #include "StiMcTrack.h"
 #include "StiGui/StiRootDrawableMcTrack.h"
 #include "StiKalmanTrackFinder.h"
@@ -76,7 +77,7 @@ void StiKalmanTrackFinder::initialize()
   StiDefaultTrackFilter * trackFilter = new StiDefaultTrackFilter("FinderTrackFilter","Reconstructed Track Filter");
   trackFilter->add( new EditableParameter("nPtsUsed","Use nPts", 1., 1., 0., 1., 1.,
 					  Parameter::Boolean, StiTrack::kPointCount) );
-  trackFilter->add( new EditableParameter("nPtsMin", "Minimum nPts", 10., 10., 0., 100.,1., 
+  trackFilter->add( new EditableParameter("nPtsMin", "Minimum nPts", 8., 10., 0., 100.,1., 
 					  Parameter::Integer,StiTrack::kPointCount) );
   trackFilter->add( new EditableParameter("nPtsMax", "Maximum nPts", 60., 60., 0., 100.,1., 
 					  Parameter::Integer,StiTrack::kPointCount) );
@@ -385,7 +386,8 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 	  else if (position<=kEdgeZplus) 
 	    { 
 	      testNode.setDetector(tDet);
-	      if (tDet->isActive()) 
+	      if (tDet->isActive() && (testNode.nullCount  <  _pars->maxNullCount &&
+		   testNode.contiguousNullCount  <  _pars->maxContiguousNullCount)) 
 		{ // active detector may have a hit
 		  _hitContainer->setRefPoint(testNode);
 		  while (_hitContainer->hasMore()) 
@@ -393,7 +395,8 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		      stiHit = _hitContainer->getHit();
 		      if (!stiHit) throw logic_error("StiKalmanTrackFinder::doNextDetector() - FATAL - StiHit*hit==0");
 		      chi2 = testNode.evaluateChi2(stiHit);
-		      if (chi2<_pars->maxChi2ForSelection && chi2<testNode.getChi2())
+		      if (chi2<tDet->getTrackingParameters()->getMaxChi2ForSelection() && 
+			  chi2<testNode.getChi2())
 			{
 			  testNode.setHit(stiHit);
 			  testNode.setChi2(chi2);
@@ -403,10 +406,10 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		}
 	      // add best node to track if it has a hit or
 	      // if the maximum of node with null hit has NOT been exceeded
-	      if (testNode.getHit() ||
+	      /*	      if (testNode.getHit() ||
 		  (testNode.nullCount  <  _pars->maxNullCount &&
 		   testNode.contiguousNullCount  <  _pars->maxContiguousNullCount) )
-		{
+		   {*/
 		  StiKalmanTrackNode * node = _trackNodeFactory->getInstance();
 		  if (node==0) throw logic_error("SKTF::find() - ERROR - node==null");
 		  node->reset();
@@ -445,12 +448,12 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		  leadDet = sNode->getDetector();
 		  if(debug)cout << " hit added"<<endl;
 		  break;
-		}
+		  /*	}
 	      else
 		{
 		  //cout <<"TRACK IS DONE"<<endl;
 		  trackDone = true;  break;
-		}
+		  }*/
 	    }
 	  else if ( (position==kEdgePhiPlus || position==kMissPhiPlus)  && lastMove>=0 )
 	    {
