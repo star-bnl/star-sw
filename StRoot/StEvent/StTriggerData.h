@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.3 2003/07/16 19:58:31 perev Exp $
+ * $Id: StTriggerData.h,v 2.4 2003/12/23 21:58:28 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.4  2003/12/23 21:58:28  ullrich
+ * Modifications to handle StTruggerData2004.
+ *
  * Revision 2.3  2003/07/16 19:58:31  perev
  * Cleanup of StTriggerData2003 at all
  *
@@ -78,6 +81,9 @@ virtual ~StTriggerData();
     virtual unsigned short zdcADC(int eastwest, int pmt, int prepost=0) const;
     virtual unsigned short zdcTDC(int eastwest, int prepost=0) const;
 
+    //ZDCSMD
+    virtual unsigned short zdcSMD(int eastwest, int verthori, int strip, int prepost=0) const;
+  
     // EMC
     virtual unsigned short bemcHighTower(int eta, int phi, int prepost=0) const;
     virtual unsigned short bemcJetPatch (int eta, int phi, int prepost=0) const;
@@ -137,6 +143,7 @@ inline unsigned short StTriggerData::zdcUnAttenuated(int eastwest, int prepost) 
 inline unsigned short StTriggerData::zdcAttenuated(int eastwest, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcADC(int eastwest, int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcTDC(int eastwest, int prepost) const {return 0;}
+inline unsigned short StTriggerData::zdcSMD(int eastwest, int verthori, int strip, int prepost) const {return 0;}
 inline unsigned short StTriggerData::bemcHighTower(int eta, int phi, int prepost) const {return 0;}
 inline unsigned short StTriggerData::bemcJetPatch (int eta, int phi, int prepost) const {return 0;}
 inline unsigned short StTriggerData::eemcHighTower(int eta, int phi, int prepost) const {return 0;}

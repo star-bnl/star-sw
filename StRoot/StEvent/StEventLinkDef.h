@@ -18,6 +18,7 @@
 #pragma link C++ enum StPidParticle;
 #pragma link C++ class StTriggerData+;
 #pragma link C++ class StTriggerData2003+;
+#pragma link C++ class StTriggerData2004+;
 
 //IncFile=StDaqLib/TRG/trgStructures.h
 #pragma link C++ class TrgDataType+;
@@ -29,6 +30,7 @@
 #pragma link C++ class Info1+;
 #pragma link C++ class Info2+;
 #pragma link C++ class Info3+;
+
 //IncFile=StDaqLib/TRG/trgStructures2000.h
 #pragma link C++ class TrgDataType2000+;
 #pragma link C++ class TrgEvtHeader2000+;   
@@ -57,5 +59,12 @@
 #pragma link C++ class TrgSumData2003+;  
 #pragma link C++ class RawTrgDet2003+; 
 #pragma link C++ class L0_DSM_Data2003+;
+
+//IncFile=StDaqLib/TRG/trgStructures2004.h
+#pragma link C++ class TrgDataType2004+;
+#pragma link C++ class EvtDescData2004+;   
+#pragma link C++ class TrgSumData2004+;  
+#pragma link C++ class RawTrgDet2004+; 
+#pragma link C++ class L0_DSM_Data2004+;
 #endif
 
