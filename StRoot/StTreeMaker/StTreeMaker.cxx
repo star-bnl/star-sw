@@ -101,9 +101,9 @@ Int_t StTreeMaker::Open(const char*)
 
 //    		Several default branches
       if ( fTreeName=="bfcTree") { 
-        SetBranch("dstBranch"  ,0,"w");
-        SetBranch("histBranch" ,0,"w","const");
-        SetBranch("runcoBranch",0,"w","const");
+        if (!Find(".branches/dstBranch"  )) SetBranch("dstBranch"  ,0,"w");
+        if (!Find(".branches/histBranch" )) SetBranch("histBranch" ,0,"w","const");
+        if (!Find(".branches/runcoBranch")) SetBranch("runcoBranch",0,"w","const");
       }
 
 //   	Set filename for runcoBranch
@@ -201,7 +201,7 @@ void StTreeMaker::UpdateTree(Int_t flag)
     updTitl = upd->GetTitle();
     updName = upd->GetName();
     updFile = ""; updMode = ""; updOpt = "";
-    isSetBr = (updTitl.Index("SetBranch:",10)==0);
+    isSetBr = (updTitl.Index("SetBranch:")==0);
     if (isSetBr && flag!=0)	continue;
 
     if (isSetBr) {//SetBranch block
@@ -220,7 +220,7 @@ void StTreeMaker::UpdateTree(Int_t flag)
         continue;}
         
     br = (StBranch*)fTree->Find(updName);
-    if (!br && fIOMode!="r") { br = new StBranch(updName,fTree); updMode = "w";}
+    if (!br && fIOMode!="r" && fIOMode!="0") br = new StBranch(updName,fTree);
       
     if (!br) 				continue;
     if (!updMode.IsNull() || !updFile.IsNull()) br->SetFile(updFile,updMode);  
