@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.h,v 1.10 2000/03/30 16:12:55 genevb Exp $
+// $Id: StMessageCounter.h,v 1.11 2000/06/07 00:05:36 genevb Exp $
 // $Log: StMessageCounter.h,v $
+// Revision 1.11  2000/06/07 00:05:36  genevb
+// Added FixOn(), enforcing no limits on a specific message type/string
+//
 // Revision 1.10  2000/03/30 16:12:55  genevb
 // Add NoLimits() capability to turn off message limiting.
 //
@@ -30,8 +33,6 @@
 // Revision 1.1  1999/06/23 15:17:50  genevb
 // Introduction of StMessageManager
 //
-//
-// Revision 1.1 1999/01/27 10:28:29 genevb
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -66,13 +67,13 @@ class StMessageCounter : public ostrstream {
  protected:
    StMessageCounter();
    StMessageCounter(const StMessageCounter&);
-   intVector limitTList;
-   intVector limitTCountList;
-   messCharVec limitList;
-   intVector limitNList;
-   intVector limitNCountList;
-   messCharVec limitWList;
-   intVector limitWCountList;
+   intVector limitTList;                         // List of type limits
+   intVector limitTCountList;                    // List of type counts
+   messCharVec limitList;                        // List of strings to limit
+   intVector limitNList;                         // List of string limits
+   intVector limitNCountList;                    // List of string counts
+   messCharVec limitWList;                       // List of waiting types
+   intVector limitWNList;                        // List of waiting type limits
  
  public:
    ~StMessageCounter();

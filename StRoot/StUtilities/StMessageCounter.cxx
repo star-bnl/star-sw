@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.cxx,v 1.15 2000/03/30 16:12:55 genevb Exp $
+// $Id: StMessageCounter.cxx,v 1.16 2000/06/07 00:05:36 genevb Exp $
 // $Log: StMessageCounter.cxx,v $
+// Revision 1.16  2000/06/07 00:05:36  genevb
+// Added FixOn(), enforcing no limits on a specific message type/string
+//
 // Revision 1.15  2000/03/30 16:12:55  genevb
 // Add NoLimits() capability to turn off message limiting.
 //
@@ -43,8 +46,6 @@
 // Introduction of StMessageManager
 //
 //
-// Revision 1.1 1999/01/27 10:28:29 genevb
-//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StMessageCounter                                                     //
@@ -85,13 +86,16 @@ void StMessageCounter::SetLimit(const char* str, int n) {
   if (len==1) {                         // Limits by type
     int typeN = messTypeList->FindTypeNum(str);
     if (typeN) {
-      limitTList[typeN] = n;
+      if (limitTList[typeN] != -5)      // -5 means fixed with no limit
+        limitTList[typeN] = n;
     } else {                            // Waiting list for type limits
       if (limitWList.size()) {
         index = 0;
-        for (curString=limitWList.begin(); curString!=limitWList.end(); curString++) {
+        for (curString=limitWList.begin(); curString!=limitWList.end();
+	                                   curString++) {
           if (*str == *(*curString)) {  // Already in the waiting list
-            limitWCountList[index] = n;
+            if (limitWNList[index] != -5)  // -5 means fixed with no limit
+              limitWNList[index] = n;
             return;
           }
           index++;
@@ -100,13 +104,15 @@ void StMessageCounter::SetLimit(const char* str, int n) {
       temp = new char[len+1];
       temp[len] = 0;
       limitWList.push_back(strncpy(temp,str,len));
-      limitWCountList.push_back(n);
+      limitWNList.push_back(n);
     }
   } else {                              // Limits by string
     index=0;
-    for (curString=limitList.begin(); curString!=limitList.end(); curString++) {
+    for (curString=limitList.begin(); curString!=limitList.end();
+                                      curString++) {
       if (!strcmp(str,(*curString))) {
-        if (n < 0) {
+        if (limitNList[index] == -5) return;  // -5 means fixed with no limit
+        if ((n < 0) && (n != -5)) {
           limitList.erase(curString);
           limitNList.erase(&(limitNList[index]));
           limitNCountList.erase(&(limitNCountList[index]));
@@ -117,7 +123,7 @@ void StMessageCounter::SetLimit(const char* str, int n) {
       }
       index++;
     }
-    if (n < 0) return;
+    if ((n < 0) && (n != -5)) return;
     temp = new char[len+1];
     temp[len] = 0;
     limitList.push_back(strncpy(temp,str,len));
@@ -128,22 +134,37 @@ void StMessageCounter::SetLimit(const char* str, int n) {
 }
 //_____________________________________________________________________________
 int StMessageCounter::GetLimit(const char* str) {
-  if (yesLimits) {
-    index=0;
-    for (curString=limitList.begin(); curString!=limitList.end(); curString++) {
-      if (!strcmp(str,(*curString))) {
-        return limitNList[index];
+  const size_t len = strlen(str);
+  if (len==1) {                         // Limits by type
+    int typeN = messTypeList->FindTypeNum(str);
+    if (typeN) {
+      return limitTList[typeN];
+    } else {                            // Waiting list for type limits
+      if (limitWList.size()) {
+        index = 0;
+        for (curString=limitWList.begin(); curString!=limitWList.end();
+	                                   curString++) {
+          if (*str == *(*curString)) return limitWNList[index];
+          index++;
+        }
       }
+    }
+  } else {                              // Limits by string
+    index=0;
+    for (curString=limitList.begin(); curString!=limitList.end();
+                                      curString++) {
+      if (!strcmp(str,(*curString))) return limitNList[index];
       index++;
     }
   }
-  return -1;
+  return -1;                            // Not found, no limit
 }
 //_____________________________________________________________________________
 void StMessageCounter::ListLimits() {
   if (yesLimits) {
-    cout << "  Limits :   counts : on message types";
-    cout << " (a negative limit means no limit)" << endl;
+    cout << "StMessage Limits: negative limit means no limit, ";
+    cout << "-5 means fixed with no limit\n";
+    cout << "  Limits :   counts : on message types" << endl;
     for (index = 1; index < limitTList.size(); index++) {
       cout.width(8);
       cout << limitTList[index] << " : ";
@@ -154,7 +175,7 @@ void StMessageCounter::ListLimits() {
     }
     for (index = 0; index < limitWList.size(); index++) {
       cout.width(8);
-      cout << limitWCountList[index] << " : ";
+      cout << limitWNList[index] << " : ";
       cout.width(8);
       cout << 0 << " : ";
       cout << limitWList[index] << " - ";
@@ -162,7 +183,8 @@ void StMessageCounter::ListLimits() {
     }
     cout << "  Limits :   counts : on message strings" << endl;
     index=0;
-    for (curString=limitList.begin(); curString!=limitList.end(); curString++) {
+    for (curString=limitList.begin(); curString!=limitList.end();
+                                      curString++) {
       cout.width(8);
       cout << limitNList[index] << " : ";
       cout.width(8);
@@ -196,7 +218,8 @@ int StMessageCounter::CheckLimit(char* mess, const char* type) {
     }
 
     index=0;
-    for (curString=limitList.begin(); curString!=limitList.end(); curString++) {
+    for (curString=limitList.begin(); curString!=limitList.end();
+                                      curString++) {
       if (strstr(mess,(*curString))) {
         int counts = limitNCountList[index] + 1;
         limitNCountList[index] = counts;
@@ -219,11 +242,12 @@ void StMessageCounter::AddType(const char* type) {
   limitTCountList.push_back(0);
   if (limitWList.size()) {
     index=0;                                // Now check the waiting list
-    for (curString=limitWList.begin(); curString!=limitWList.end(); curString++) {
+    for (curString=limitWList.begin(); curString!=limitWList.end();
+                                       curString++) {
       if (*type == *(*curString)) {
-        SetLimit((*curString),limitWCountList[index]);
+        SetLimit((*curString),limitWNList[index]);
         limitWList.erase(curString);
-        limitWCountList.erase(&(limitWCountList[index]));
+        limitWNList.erase(&(limitWNList[index]));
         return;
       }
       index++;

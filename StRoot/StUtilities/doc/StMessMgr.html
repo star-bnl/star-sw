@@ -326,16 +326,18 @@ the string. A "limit reached" message is output with the last printed
 message.
 
 Limits can be changed again after being set once. The exact same string
-or type must be specified. ListLimits() will list all the limits on
-message strings.
+or type must be specified. GetLimit(string/type) will return a current
+limit. ListLimits() will print out all the limits.
 
-A negative limit removes limiting. There are also a couple shortcuts
-to limiting message counts:
+A negative limit removes limiting, and a limit of -5 fixes this type to
+never be limited (despite any subsequent calls to SetLimit()).
+There are also a few shortcuts to limiting message counts:
 - RemoveLimit(string/type) sets the limit on a string/type to -1, thereby
   effectively removing the limit.
 - SwitchOff(string/type) sets the limit to zero. This is the default case
   for type "D", debug messages - on can use SwitchOn("D") to enable them.
 - SwitchOn(string/type) sets the limit to -1, removing any limit.
+- FixOn(string/type) sets the limit to -5, removing any limit (ever).
 - NoLimits() turns off ALL message limiting. This is useful for debugging,
   but can result in a large amount of messages that had been previously
   hidden.
