@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.29 1999/05/05 18:45:40 liq Exp $
+// $Id: St_tpt_Maker.cxx,v 1.30 1999/05/06 19:01:35 liq Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.30  1999/05/06 19:01:35  liq
+// set m_tteEvalOn=kFALSE;
+//
 // Revision 1.29  1999/05/05 18:45:40  liq
 // include valuation plots of reconstraction
 //
@@ -118,7 +121,7 @@ ClassImp(St_tpt_Maker)
     m_tpipar(0)
 {
   m_iftteTrack =kFALSE;
-  m_tteEvalOn=kTRUE;
+  m_tteEvalOn=kFALSE;
   m_tptResOn=kFALSE;
   m_mkfinal=kFALSE;
 }
@@ -683,7 +686,7 @@ delete m_eff1;
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.29 1999/05/05 18:45:40 liq Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.30 1999/05/06 19:01:35 liq Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -708,6 +711,9 @@ cout<<"For all events:Fit eff="<<efficiency<<endl;
 
 //divide to get efficiency
 m_ptg_rapidity->Divide(m_ptg_rapidity_2,m_ptg_rapidity_1,1.0,1.0); 
+
+//fit the slices of m_dpt_ptg, m_dp_pg,m_dp_pg_pion, m_dp_pg_kaon,m_dp_pg_proton
+
 
 //WriteOutHistogram();
 }
