@@ -1,5 +1,8 @@
-// $Id: Example_plotTable.C,v 1.5 1999/10/07 05:00:29 genevb Exp $
+// $Id: Example_plotTable.C,v 1.6 2000/01/06 19:35:48 kathy Exp $
 // $Log: Example_plotTable.C,v $
+// Revision 1.6  2000/01/06 19:35:48  kathy
+// change to use available xdf file as input
+//
 // Revision 1.5  1999/10/07 05:00:29  genevb
 // Update to work properly with library changes and file changes
 //
@@ -24,6 +27,7 @@ gSystem->Load("xdf2root");
 gSystem->Load("StUtilities");
 gSystem->Load("StAnalysisUtilities");
 St_TableNtuple myNtuple(St_dst_v0_vertex());
-myNtuple.AddXDFFile("/disk00000/star/test/SL99/tfs_Solaris/year_1b/set0352_01_35evts.dst.xdf","dst","dst_v0_vertex");
+myNtuple.AddXDFFile("/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.xdf",
+"dst","dst_v0_vertex");
 myNtuple.Draw("pos_py:pos_px");
 }

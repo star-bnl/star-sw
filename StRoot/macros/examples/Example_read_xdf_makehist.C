@@ -1,5 +1,8 @@
-// $Id: Example_read_xdf_makehist.C,v 1.2 1999/11/03 19:03:06 kathy Exp $
+// $Id: Example_read_xdf_makehist.C,v 1.3 2000/01/06 19:35:48 kathy Exp $
 // $Log: Example_read_xdf_makehist.C,v $
+// Revision 1.3  2000/01/06 19:35:48  kathy
+// change to use available xdf file as input
+//
 // Revision 1.2  1999/11/03 19:03:06  kathy
 // changes to default input files and output file names - needed by perl script for testing
 //
@@ -18,7 +21,7 @@
 
 
 void Example_read_xdf_makehist(const Char_t *InputXdfFile=
-"/disk00000/star/test/new/tfs_Solaris/year_2a/psc0208_01_40evts.dst.xdf")
+"/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.xdf")
 {
  // load libraries 
  gSystem.Load("St_base");
