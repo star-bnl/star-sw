@@ -14,6 +14,8 @@
 class StKinkVertex;
 
 class StKinkMuDst : public StKinkBase {  // StKinkBase inherits StKinkI methods
+  friend class StMuMomentumShiftMaker;
+
 public:
   StKinkMuDst();
   StKinkMuDst(StKinkVertex*);
@@ -155,8 +157,11 @@ inline UShort_t StKinkMuDst::keyDaughter() const { return mKeyDaughter; }
 
 
 /***********************************************************************
- * $Id: StKinkMuDst.hh,v 3.9 2004/02/03 20:09:07 genevb Exp $
+ * $Id: StKinkMuDst.hh,v 3.10 2005/03/17 05:02:20 genevb Exp $
  * $Log: StKinkMuDst.hh,v $
+ * Revision 3.10  2005/03/17 05:02:20  genevb
+ * Add StMuMomentumShiftMaker friend
+ *
  * Revision 3.9  2004/02/03 20:09:07  genevb
  * Update ClassDef version for added data members
  *

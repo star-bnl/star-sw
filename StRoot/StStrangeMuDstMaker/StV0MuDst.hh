@@ -16,6 +16,8 @@ class StVertex;
 class StV0Vertex;
 
 class StV0MuDst : public StStrangeMuDst, public virtual StV0I {
+  friend class StMuMomentumShiftMaker;
+
 public:
   StV0MuDst();
   ~StV0MuDst();
@@ -148,8 +150,11 @@ inline Float_t StV0MuDst::lenDedxNeg() const { return (mNumDedxNeg/100); }
 
 
 /***********************************************************************
- * $Id: StV0MuDst.hh,v 3.7 2003/10/20 17:20:18 perev Exp $
+ * $Id: StV0MuDst.hh,v 3.8 2005/03/17 05:02:20 genevb Exp $
  * $Log: StV0MuDst.hh,v $
+ * Revision 3.8  2005/03/17 05:02:20  genevb
+ * Add StMuMomentumShiftMaker friend
+ *
  * Revision 3.7  2003/10/20 17:20:18  perev
  * Change the order of inheritance and increased version numbers
  *

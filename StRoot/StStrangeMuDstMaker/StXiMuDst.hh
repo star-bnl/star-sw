@@ -16,6 +16,8 @@ class StXiVertex;
 class StPhysicalHelixD;
 
 class StXiMuDst : public StV0MuDst, public virtual StXiI {
+  friend class StMuMomentumShiftMaker;
+
 public:
   StXiMuDst();
   ~StXiMuDst();
@@ -136,8 +138,11 @@ inline Float_t StXiMuDst::lenDedxBachelor() const
 
 
 /***********************************************************************
- * $Id: StXiMuDst.hh,v 3.7 2003/10/20 17:20:19 perev Exp $
+ * $Id: StXiMuDst.hh,v 3.8 2005/03/17 05:02:20 genevb Exp $
  * $Log: StXiMuDst.hh,v $
+ * Revision 3.8  2005/03/17 05:02:20  genevb
+ * Add StMuMomentumShiftMaker friend
+ *
  * Revision 3.7  2003/10/20 17:20:19  perev
  * Change the order of inheritance and increased version numbers
  *

@@ -18,6 +18,8 @@ class StEvent;
 class StMcEvent;
 
 class StStrangeEvMuDst : public StStrangeMuDst {
+  friend class StMuMomentumShiftMaker;
+
 public:
   StStrangeEvMuDst();
   ~StStrangeEvMuDst();
@@ -173,8 +175,11 @@ inline void    StStrangeEvMuDst::setPrimaryTracks(Int_t newPrim)
 
 
 /***********************************************************************
- * $Id: StStrangeEvMuDst.hh,v 3.8 2003/05/30 21:20:19 genevb Exp $
+ * $Id: StStrangeEvMuDst.hh,v 3.9 2005/03/17 05:06:51 genevb Exp $
  * $Log: StStrangeEvMuDst.hh,v $
+ * Revision 3.9  2005/03/17 05:06:51  genevb
+ * Add StMuMomentumShiftMaker friend
+ *
  * Revision 3.8  2003/05/30 21:20:19  genevb
  * doxygen savvy, encoding of FTPC mults, change virtual funcs
  *
