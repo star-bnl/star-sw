@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.5 2000/01/18 17:56:08 levine Exp $
+ * $Id: DetectorReader.cxx,v 1.6 2000/06/06 21:46:59 jml Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,6 +12,9 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.6  2000/06/06 21:46:59  jml
+ * Added code for SVTV1P0
+ *
  * Revision 1.5  2000/01/18 17:56:08  levine
  * Added FTPC call to TPC-like detectors
  *
@@ -41,7 +44,7 @@
 #include "TPC/TPCV1P0_Reader.hh"
 #include "TPC/TPCV2P0_Reader.hh"
 #include "TRG/TRG_Reader.hh"
-#include "SVT/SVT_Reader.hh"
+#include "SVT/SVTV1P0_Reader.hh"
 #include "SSD/SSD_Reader.hh"
 #include "EMC/EMC_Reader.hh"
 #include "RICH/RICH_Reader.hh"
@@ -83,10 +86,10 @@ DetectorReader *getDetectorReader(EventReader *er, string det)
      }
   else if  (det == "SVT")
      {
-      Bank_SVTP *pSVTP;
-      pSVTP = (Bank_SVTP *)er->findBank("SVTP");
+      Bank_SVTPV1P0 *pSVTP;
+      pSVTP = (Bank_SVTPV1P0 *)er->findBank("SVTP");
       if (!pSVTP) dr = FALSE;
-      else dr =  new SVT_Reader(er,pSVTP);
+      else dr =  new SVTV1P0_Reader(er,pSVTP);
      }
   else if  (det == "FTPC")
      {
