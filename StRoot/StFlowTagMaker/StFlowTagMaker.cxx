@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.25 2000/06/30 14:43:37 posk Exp $
+// $Id: StFlowTagMaker.cxx,v 1.26 2001/05/22 19:51:54 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -8,65 +8,6 @@
 //
 // Description:  Maker to Fill the Flow EbyE Tag database
 //
-//////////////////////////////////////////////////////////////////////
-//
-// $Log: StFlowTagMaker.cxx,v $
-// Revision 1.25  2000/06/30 14:43:37  posk
-// Using MessageMgr.
-//
-// Revision 1.24  2000/05/26 21:26:51  posk
-// Number of subevents fixed at 2.
-//
-//
-// Revision 1.21  2000/03/28 23:23:25  posk
-// Allow multiple instances of the AnalysisMaker.
-//
-// Revision 1.20  2000/03/15 23:30:55  posk
-// Added StFlowSelection.
-//
-// Revision 1.19  2000/03/08 02:28:28  posk
-// Increased the range of the multiplicity histograms to prevent overflow.
-//
-// Revision 1.18  2000/03/02 23:00:08  posk
-// Changed header file extensions from .hh to .h .
-//
-// Revision 1.17  2000/02/29 21:53:29  posk
-// Removed static const int& statements.
-//
-// Revision 1.16  2000/02/23 22:14:08  posk
-// Renamed histograms to contain "Flow".
-//
-// Revision 1.14  2000/01/20 02:00:05  snelling
-// Fixed StFlowTag table size SetNRows=1 (Thanks Iwona)
-//
-// Revision 1.13  2000/01/14 05:44:34  snelling
-// Added St_FlowTag Table to .data
-//
-// Revision 1.11  2000/01/14 01:36:02  snelling
-// changed include path ../FlowMaker/ to FlowMaker/
-//
-// Revision 1.10  2000/01/13 23:22:05  snelling
-// modified sum pt (spt) to mean pt (mpt)
-//
-// Revision 1.7  1999/12/15 21:56:21  posk
-// Increased number of harmonics from 4 to 6.
-//
-// Revision 1.6  1999/12/07 23:39:15  snelling
-// Fixed Linux warnings
-//
-// Revision 1.5  1999/12/04 00:13:35  posk
-// Works with StFlowEvent which works with the new StEvent
-//
-// Revision 1.4  1999/11/11 23:12:59  posk
-// Rearrangement of files.
-//
-// Revision 1.3  1999/08/09 21:43:05  snelling
-// removed parameters from cxx file
-//
-// Revision 1.2  1999/07/26 23:39:34  snelling
-// added histograms for FlowTag QA
-//
-//  
 //////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
@@ -146,9 +87,9 @@ Int_t StFlowTagMaker::Make() {
 
 void StFlowTagMaker::PrintTag(ostream& os) {
   os << "##### Event-by-Event Flow Tag Table ---" << endl; 
-  if (!pFlowTag) 
+  if (!pFlowTag) {
     os << "(empty FlowTag)" << endl;
-  else {
+  } else {
     int i;
     os <<  "qxa";
     for(i=0; i<4; i++) os << "[" << i << "] =" << pFlowTag->qxa[i] << ' ';
@@ -174,10 +115,12 @@ Int_t StFlowTagMaker::Finish() {
 Int_t StFlowTagMaker::Init() {
   // Book histograms
 
-  enum { nPsiBins    = 100,
-	 nMeanPtBins = 100,
-	 nMultBins   = 100,
-	 n_qBins     = 100 }; 
+  enum { 
+    nPsiBins    = 100,
+    nMeanPtBins = 100,
+    nMultBins   = 100,
+    n_qBins     = 100 
+  }; 
 
   const Float_t PsiMin    =  0.;
   const Float_t PsiMax    =  twopi; 
@@ -246,7 +189,7 @@ Int_t StFlowTagMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowTag", 5);
-  gMessMgr->Info("##### FlowTag: $Id: StFlowTagMaker.cxx,v 1.25 2000/06/30 14:43:37 posk Exp $");
+  gMessMgr->Info("##### FlowTag: $Id: StFlowTagMaker.cxx,v 1.26 2001/05/22 19:51:54 posk Exp $");
   if (Debug()) StMaker::PrintInfo();
 
   return StMaker::Init();
@@ -351,3 +294,65 @@ Int_t StFlowTagMaker::FillHistograms() {
 
   return kStOK;
 }
+
+//////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowTagMaker.cxx,v $
+// Revision 1.26  2001/05/22 19:51:54  posk
+// Put log comments at end of file.
+//
+// Revision 1.25  2000/06/30 14:43:37  posk
+// Using MessageMgr.
+//
+// Revision 1.24  2000/05/26 21:26:51  posk
+// Number of subevents fixed at 2.
+//
+// Revision 1.21  2000/03/28 23:23:25  posk
+// Allow multiple instances of the AnalysisMaker.
+//
+// Revision 1.20  2000/03/15 23:30:55  posk
+// Added StFlowSelection.
+//
+// Revision 1.19  2000/03/08 02:28:28  posk
+// Increased the range of the multiplicity histograms to prevent overflow.
+//
+// Revision 1.18  2000/03/02 23:00:08  posk
+// Changed header file extensions from .hh to .h .
+//
+// Revision 1.17  2000/02/29 21:53:29  posk
+// Removed static const int& statements.
+//
+// Revision 1.16  2000/02/23 22:14:08  posk
+// Renamed histograms to contain "Flow".
+//
+// Revision 1.14  2000/01/20 02:00:05  snelling
+// Fixed StFlowTag table size SetNRows=1 (Thanks Iwona)
+//
+// Revision 1.13  2000/01/14 05:44:34  snelling
+// Added St_FlowTag Table to .data
+//
+// Revision 1.11  2000/01/14 01:36:02  snelling
+// changed include path ../FlowMaker/ to FlowMaker/
+//
+// Revision 1.10  2000/01/13 23:22:05  snelling
+// modified sum pt (spt) to mean pt (mpt)
+//
+// Revision 1.7  1999/12/15 21:56:21  posk
+// Increased number of harmonics from 4 to 6.
+//
+// Revision 1.6  1999/12/07 23:39:15  snelling
+// Fixed Linux warnings
+//
+// Revision 1.5  1999/12/04 00:13:35  posk
+// Works with StFlowEvent which works with the new StEvent
+//
+// Revision 1.4  1999/11/11 23:12:59  posk
+// Rearrangement of files.
+//
+// Revision 1.3  1999/08/09 21:43:05  snelling
+// removed parameters from cxx file
+//
+// Revision 1.2  1999/07/26 23:39:34  snelling
+// added histograms for FlowTag QA
+//
+//////////////////////////////////////////////////////////////////////
