@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcVertexMaker.cxx,v 1.4 2003/09/02 17:59:21 perev Exp $
+ * $Id: StZdcVertexMaker.cxx,v 1.5 2004/01/14 22:57:29 fisyak Exp $
  *
  * Author:  Johan E. Gonzalez, August 2001
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StZdcVertexMaker.cxx,v $
+ * Revision 1.5  2004/01/14 22:57:29  fisyak
+ * Add declaration of InitRun
+ *
  * Revision 1.4  2003/09/02 17:59:21  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -42,7 +45,7 @@
 
 //#include "StEventMaker/StEventMaker.h"
 
-static const char rcsid[] = "$Id: StZdcVertexMaker.cxx,v 1.4 2003/09/02 17:59:21 perev Exp $";
+static const char rcsid[] = "$Id: StZdcVertexMaker.cxx,v 1.5 2004/01/14 22:57:29 fisyak Exp $";
 
 ClassImp(StZdcVertexMaker)
 
@@ -85,7 +88,9 @@ Int_t StZdcVertexMaker::Finish()
 }
 
 //_________________________________________________
-Int_t StZdcVertexMaker::Init()
+Int_t StZdcVertexMaker::Init() {return StMaker::Init(); }
+//_________________________________________________
+Int_t StZdcVertexMaker::InitRun(int runumber) 
 { 
 
     // Getting Database info
@@ -99,6 +104,11 @@ Int_t StZdcVertexMaker::Init()
     
     St_DataSetIter       dblocal_calibrations(p);
     St_ZdcCalPars * t  = (St_ZdcCalPars *)dblocal_calibrations("ZdcCalPars");
+    if (! t) {
+      gMessMgr->Error() << "StZdcVertexMaker::Init():  in ZdcVertexMaker did not find ZdcCalPars." << endm;
+      return kStErr;
+    }
+   
     ZdcCalPars_st* s = (ZdcCalPars_st*)t->GetArray();
     
     mEAP0 = s[0].EAP0;
@@ -112,7 +122,7 @@ Int_t StZdcVertexMaker::Init()
     mVPAR = s[0].VPAR;
     mOFF = s[0].OFF;
     
-    return StMaker::Init();
+    return kStOK;
 }
 
 //_________________________________________________
