@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.21 2000/12/12 20:22:05 posk Exp $
+// $Id: StFlowEvent.h,v 1.22 2001/04/03 17:47:23 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -16,6 +16,7 @@
 //#include "St_DataSet.h"
 #include "StObject.h"
 #include "StFlowTrackCollection.h"
+#include "StTrackTopologyMap.h"
 #include "StThreeVectorF.hh"
 #include "StEnumerations.h"
 #include "Rtypes.h"
@@ -30,7 +31,7 @@ public:
   StFlowEvent();
   virtual        ~StFlowEvent();
 
-  Double_t       PhiWeight(Float_t mPhi, Int_t selN, Int_t harN, Int_t detId = kTpcId) const;
+  Double_t       PhiWeight(Float_t mPhi, Int_t selN, Int_t harN, StTrackTopologyMap map) const;
   Int_t          EventID() const;
   Int_t          RunID() const;
   UInt_t         OrigMult() const;
@@ -229,6 +230,9 @@ inline void  StFlowEvent::SetProbPid() { mProbPid = kTRUE; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.22  2001/04/03 17:47:23  oldi
+// Bug fix that excluded FTPC tracks from the determination of the reaction plane.
+//
 // Revision 1.21  2000/12/12 20:22:05  posk
 // Put log comments at end of files.
 // Deleted persistent StFlowEvent (old micro DST).

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.49 2000/12/12 15:01:10 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.50 2001/04/03 17:46:06 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -931,7 +931,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.49 2000/12/12 15:01:10 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.50 2001/04/03 17:46:06 oldi Exp $");
 
   return StMaker::Init();
 }
@@ -977,7 +977,6 @@ void StFlowAnalysisMaker::FillFromTags() {
 
 void StFlowAnalysisMaker::FillFromFlowEvent() {
   // Get event quantities from StFlowEvent
-  
   for (int k = 0; k < Flow::nSels; k++) {
     pFlowSelect->SetSelection(k);
     for (int j = 0; j < Flow::nHars; j++) {
@@ -987,7 +986,7 @@ void StFlowAnalysisMaker::FillFromFlowEvent() {
 	int i = Flow::nSels*k + n;
 	// sub-event quantities
 	mPsiSub[i][j] = pFlowEvent->Psi(pFlowSelect);
-      }
+     }
 
       pFlowSelect->SetSubevent(-1);
       // full event quantities
@@ -1257,7 +1256,6 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 // 	  //psi_i = mQSub[i][j].Phi() / order;
 // 	  psi_i = mPsiSub[i][j];
 // 	}
-
 	if (pFlowSelect->Select(pFlowTrack)) {
 	  // Remove autocorrelations
 	  TVector2 Q_i;
@@ -1281,7 +1279,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	    detId = kUnknownId;
 	  }
 
-	  double phiWgt = pFlowEvent->PhiWeight(phi, k, j, detId);
+	  double phiWgt = pFlowEvent->PhiWeight(phi, k, j, pFlowTrack->TopologyMap());
 
 	  if (detId == kFtpcEastId) {
 	      histFull[k].histFullHar[j].mHistPhiFlatFtpcEast->Fill(phi, phiWgt);
@@ -1642,6 +1640,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.50  2001/04/03 17:46:06  oldi
+// Bug fix that excluded FTPC tracks from the determination of the reaction plane.
+//
 // Revision 1.49  2000/12/12 15:01:10  posk
 // Put log comments at end of file.
 //

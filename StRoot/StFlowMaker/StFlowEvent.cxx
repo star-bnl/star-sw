@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.20 2000/12/12 20:22:05 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.21 2001/04/03 17:47:17 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -121,24 +121,25 @@ StFlowEvent::~StFlowEvent() {
 
 //-------------------------------------------------------------
 
-Double_t StFlowEvent::PhiWeight(Float_t mPhi, Int_t selN, Int_t harN, Int_t detId) const {
+Double_t StFlowEvent::PhiWeight(Float_t mPhi, Int_t selN, Int_t harN, StTrackTopologyMap topologyMap) const {
 
   if (mPhi < 0.) mPhi += twopi;
   int n;
 
-  if (detId == kFtpcEastId) { 
+  if (topologyMap.numberOfHits(kTpcId) || // Tpc track or no topologyMap available
+      topologyMap.data(0) == 0 && topologyMap.data(1) == 0) {
+    n = (int)((mPhi/twopi)*Flow::nPhiBins);
+    return mPhiWgt[selN][harN][n];
+  }
+
+  else if (topologyMap.numberOfHits(kFtpcEastId)) { // Ftpc east track
     n = (int)((mPhi/twopi)*Flow::nPhiBinsFtpc);
     return mPhiWgtFtpcEast[selN][harN][n];
   }
   
-  else if (detId == kFtpcWestId) {
+  else if (topologyMap.numberOfHits(kFtpcWestId)) { // Ftpc west track
     n = (int)((mPhi/twopi)*Flow::nPhiBinsFtpc);
     return mPhiWgtFtpcWest[selN][harN][n];
-  }
-  
-  else { // (detId == kTpcId) or otherwise !!!
-    n = (int)((mPhi/twopi)*Flow::nPhiBins);
-    return mPhiWgt[selN][harN][n];
   }
 }
 
@@ -191,7 +192,7 @@ TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
     StFlowTrack* pFlowTrack = *itr;
     if (pFlowSelect->Select(pFlowTrack)) {
       Float_t mPhi = pFlowTrack->Phi();
-      double phiWgt = PhiWeight(mPhi, selN, harN);
+      double phiWgt = PhiWeight(mPhi, selN, harN, pFlowTrack->TopologyMap());
       if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
       if (mPtWgt) {
 	float pt = pFlowTrack->Pt();
@@ -213,6 +214,7 @@ Float_t StFlowEvent::Psi(StFlowSelection* pFlowSelect) {
   Float_t psi = 0.;
 
   TVector2 mQ = Q(pFlowSelect);
+
   if (mQ.Mod()) {
     psi= mQ.Phi() / order;
     if (psi < 0.) { psi += twopi / order; }
@@ -618,6 +620,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.21  2001/04/03 17:47:17  oldi
+// Bug fix that excluded FTPC tracks from the determination of the reaction plane.
+//
 // Revision 1.20  2000/12/12 20:22:05  posk
 // Put log comments at end of files.
 // Deleted persistent StFlowEvent (old micro DST).
