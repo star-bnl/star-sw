@@ -380,7 +380,7 @@ ABEND:
    vec/inp v[mod] 0.0
    
   enddo
- 
+  asu/malloc/stats 
  ABEND:
  NEXT_EVENT:
  EOF:
