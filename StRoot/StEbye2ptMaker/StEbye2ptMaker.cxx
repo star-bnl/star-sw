@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbye2ptMaker.cxx,v 1.2 2000/02/22 00:04:14 jgreid Exp $
+ * $Id: StEbye2ptMaker.cxx,v 1.3 2000/05/25 01:29:24 fisyak Exp $
  *
  * StEbye2ptMaker.cxx
  *
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StEbye2ptMaker.cxx,v $
+ * Revision 1.3  2000/05/25 01:29:24  fisyak
+ * Add const to currentTrack to make Solaris happy
+ *
  * Revision 1.2  2000/02/22 00:04:14  jgreid
  * changed from global to primary tracks, added more track quality cuts
  *
@@ -34,7 +37,7 @@
 using namespace units;
 #endif
 
-static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.2 2000/02/22 00:04:14 jgreid Exp $";
+static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.3 2000/05/25 01:29:24 fisyak Exp $";
 
 ClassImp(StEbye2ptMaker)
 
@@ -217,7 +220,7 @@ StEbye2ptMaker::processEvent(StEvent& event)
 
   float Minimum = (1+(PionMass/Temperature))*exp(-PionMass/Temperature);
 
-  StTrack *currentTrack;
+  const StTrack *currentTrack;
   StVertex *primeVertex;
 
   StThreeVectorD origin(0,0,0);
