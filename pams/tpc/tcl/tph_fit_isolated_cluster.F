@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.23 2001/04/19 19:54:07 hardtke Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.24 2001/04/24 16:22:18 hardtke Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.24  2001/04/24 16:22:18  hardtke
+* remove uneeded variable ipad_last
+*
 * Revision 1.23  2001/04/19 19:54:07  hardtke
 * add pad-by-pad t0 correction to cluster fitting routine
 *
@@ -235,7 +238,6 @@ c
       enddo
 c
       adc_sum = 0.
-      ipad_last =0
       do ipix = 1,nclspix
          adc_ipix = FLOAT(iadc(ipix))
          adc_sum = adc_sum + adc_ipix
