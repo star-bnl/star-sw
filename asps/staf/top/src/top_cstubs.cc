@@ -22,8 +22,14 @@ top_count()
 STAFCV_T 
 top_list()
 {
+  char *herb980615;
   char *s;
-  printf("%s",s=top->list() );
+  s=top->list();
+  herb980615=strtok(s,"\n");
+  while(herb980615) {
+     printf("%s\n",herb980615);    // You can't write more than BUFSIZ at
+     herb980615=strtok(NULL,"\n");
+  }
   FREE(s);  /*fix memory leak -akio*/
   EML_SUCCESS(STAFCV_OK);
 }
@@ -317,7 +323,8 @@ topcut_agent_function(char* agent)
     EML_FAILURE(OBJECT_NOT_FOUND);
   }
   char *s;
-  printf("%s\n",s=cut->cutFunction());
+  s=cut->cutFunction();
+  fputs(s,stdout); printf("\n");
   FREE(s); /*fix memory leak -akio*/
   EML_SUCCESS(STAFCV_OK);
 }

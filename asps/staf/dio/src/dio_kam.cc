@@ -72,7 +72,13 @@ void kam_dio_list_()
 STAFCV_T dio_list()
 {
    char* s;
-   printf("%s",s=dio->list() );
+   char *herb980615;
+   s=dio->list();
+   herb980615=strtok(s,"\n");
+   while(herb980615) {
+     printf("%s\n",herb980615);
+     herb980615=strtok(NULL,"\n");
+   }
    if(s) FREE(s); /*fix memory leak -akio*/
    EML_SUCCESS(STAFCV_OK);
 }

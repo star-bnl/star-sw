@@ -268,8 +268,14 @@ void kam_spx_list_()
 }
 STAFCV_T spx_list()
 {
+   char *herb980615;
    char *c=NULL;
-   printf("%s", c = spx->list() );
+   c=spx->list();
+   herb980615=strtok(c,"\n");
+   while(herb980615) {
+     printf("%s\n",herb980615);
+     herb980615=strtok(NULL,"\n");
+   }
    FREE(c);
    EML_SUCCESS(STAFCV_OK);
 }

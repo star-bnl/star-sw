@@ -30,8 +30,14 @@ ami_count()
 STAFCV_T 
 ami_list()
 {
+   char *herb980615;
    char* amilist;
-   printf("%s",(amilist = ami->list()) );
+   amilist = ami->list();
+   herb980615=strtok(amilist,"\n");
+   while(herb980615) {
+     printf("%s\n",herb980615);
+     herb980615=strtok(NULL,"\n");
+   }
    FREE(amilist);  /*fix memory leak -akio*/
    EML_SUCCESS(STAFCV_OK);
 }

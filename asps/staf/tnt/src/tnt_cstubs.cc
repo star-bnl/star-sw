@@ -36,8 +36,14 @@ tnt_count()
 STAFCV_T 
 tnt_list()
 {
+  char *herb980615;
   char *s;
-  printf("%s", s=tnt->list());
+  s=tnt->list();
+  herb980615=strtok(s,"\n");
+  while(herb980615) {
+     printf("%s\n",herb980615);    
+     herb980615=strtok(NULL,"\n");
+  }
   FREE(s); /*fix memory leak -akio*/
   EML_SUCCESS(STAFCV_OK);
 }

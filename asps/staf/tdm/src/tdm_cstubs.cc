@@ -51,8 +51,14 @@ tdm_count()
 STAFCV_T 
 tdm_list()
 {
+   char *herb980615;
    char *c=NULL;
-   printf("%s",c = tdm->list() );
+   c = tdm->list();
+   herb980615=strtok(c,"\n");
+   while(herb980615) {
+     printf("%s\n",herb980615);
+     herb980615=strtok(NULL,"\n");
+   }
    FREE(c);
    EML_SUCCESS(STAFCV_OK);
 }
