@@ -1,7 +1,14 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.19 2004/02/08 00:08:19 calderon Exp $
+ * $Id: StAssociationMaker.h,v 1.20 2004/03/26 23:26:34 calderon Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.20  2004/03/26 23:26:34  calderon
+ * -Adding switch to control Association based on IdTruth or on Distance.
+ * -Adding debug2 output to print out all hits in a padrow, both reco and MC,
+ * along with the IdTruth, quality (StHit) and the parentTrack()->key() (StMcHit)
+ * as well as the hit coordiantes.  This is useful for debugging, but produces
+ * lots of output, so it is only turned on in Debug()>=2.
+ *
  * Revision 1.19  2004/02/08 00:08:19  calderon
  * Added method useEstTracks() requested by Helen, for association of estGlobals.
  *
@@ -422,6 +429,8 @@ class StAssociationMaker : public StMaker {
     void useL3Trigger() {mL3TriggerOn = true;}
     void useInTracker() {mInTrackerOn = true;}
     void useEstTracks() {mEstTracksOn = true;}
+    void useDistanceAssoc() {mDistanceAssoc = true;}
+    void useIdAssoc() {mDistanceAssoc = false;}
     TH2F*     mTpcLocalHitResolution;    //! Diff btw local  x and z coords of TPC hits.
     TH2F*     mSvtHitResolution;         //! Diff btw global x and z coords of SVT hits.
     TH2F*     mFtpcHitResolution;        //! Diff btw global r and phi coords of FTPC hits.
@@ -467,8 +476,9 @@ private:
     bool              mL3TriggerOn; //!
     bool              mInTrackerOn; //!
     bool              mEstTracksOn; //!
+    bool              mDistanceAssoc; //!
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.19 2004/02/08 00:08:19 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.20 2004/03/26 23:26:34 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker,0)
 
