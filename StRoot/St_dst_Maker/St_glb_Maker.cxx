@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.45 1999/03/04 00:06:22 caines Exp $
+// $Id: St_glb_Maker.cxx,v 1.46 1999/03/04 01:19:21 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.46  1999/03/04 01:19:21  fisyak
+// Put release tag to run_summary table
+//
 // Revision 1.45  1999/03/04 00:06:22  caines
 // Fixed so that tte_eval is made if no tracks - for pp events
 //
@@ -178,7 +181,8 @@
 #include "global/St_particle_dst_filler_Module.h"
 #include "global/St_dst_point_filler_Module.h"
 #include "global/St_fill_dst_event_summary_Module.h"
-
+#include "St_dst_summary_param_Table.h"
+#include "St_dst_run_summary_Table.h"
 ClassImp(St_glb_Maker)
 
 //_____________________________________________________________________________
@@ -352,7 +356,34 @@ Int_t St_glb_Maker::Init(){
   exipar->bpn_v0  = 2.;
   exipar->pchisq  = 0.;
   exipar++;
+  // Run summary
+  m_dst_summary_param = new St_dst_summary_param("summary_param",1);
+  dst_summary_param_st dst_summary_param;
+  dst_summary_param.eta_bins[0]=  -2.;
+  dst_summary_param.eta_bins[1]=  -1.;
+  dst_summary_param.eta_bins[2]=  -.5;
+  dst_summary_param.eta_bins[3]=   .5;
+  dst_summary_param.eta_bins[4]=   1.;
+  dst_summary_param.eta_bins[5]=   2.;
   
+  dst_summary_param.pt_bins[0]=    .1;
+  dst_summary_param.pt_bins[1]=    .15;
+  dst_summary_param.pt_bins[2]=    .2;
+  dst_summary_param.pt_bins[3]=    .3;
+  dst_summary_param.pt_bins[4]=    .5;
+  dst_summary_param.pt_bins[5]=    1.;
+  
+  dst_summary_param.mt_bins[0]=    .03;
+  dst_summary_param.mt_bins[1]=    .12;
+  dst_summary_param.mt_bins[2]=    .2;
+  dst_summary_param.mt_bins[3]=    .3;
+  dst_summary_param.mt_bins[4]=    .5;
+  dst_summary_param.mt_bins[5]=    1.;
+  
+  dst_summary_param.n_phi_bins=  8;
+
+  m_dst_summary_param->AddAt(&dst_summary_param,1);
+
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -374,10 +405,18 @@ Int_t St_glb_Maker::Make(){
   St_dst_xi_vertex  *dst_xi_vertex = (St_dst_xi_vertex *) dst("dst_xi_vertex");
   St_dst_dedx       *dst_dedx    = (St_dst_dedx      *) dst("dst_dedx");
   St_dst_point      *point       = (St_dst_point     *) dst("point");
+  St_dst_run_summary *dst_run_summary = (St_dst_run_summary *) dst("dst_run_summary");
   St_dst_event_header  *event_header  = (St_dst_event_header  *) dst("event_header");
   St_dst_event_summary *event_summary = (St_dst_event_summary *) dst("event_summary");
   St_dst_monitor_soft  *monitor_soft  = (St_dst_monitor_soft  *) dst("monitor_soft");
 
+  if (!dst_run_summary) {
+    dst_run_summary = new St_dst_run_summary("dst_run_summary",1);
+    dst.Add(dst_run_summary);
+    dst_run_summary_st run_summary = {" "};// * DST production software version               */
+    strcpy (&run_summary.version[0],gStChain->VersionTag());
+    dst_run_summary->AddAt(&run_summary,0);
+  }
   if (! event_header) {
     event_header  = new St_dst_event_header("event_header",1);
     dst.Add(event_header);
@@ -708,28 +747,19 @@ Int_t St_glb_Maker::Make(){
     }      
   }
 //--------------- ????????? --------------
-    St_DataSet *run_summary = gStChain->DataSet("run_summary");
     St_dst_run_header *run_header = 0;
-    St_dst_summary_param *summary_param = 0;
-    if (run_summary) {
-      St_DataSetIter summary(run_summary);
-      run_header    = (St_dst_run_header *) summary("run_header");
-      summary_param = (St_dst_summary_param *) summary("summary_param");
-    }
-    if (!run_header) {
-      run_header = new St_dst_run_header("run_header",1);
-      dst_run_header_st run;
-      run.run_id = gStChain->Run();
-      strcpy (run.event_type,gStChain->EvenType()->Data());
-      run.sqrt_s = gStChain->CenterOfMassEnergy();
-      run.east_a = gStChain->Aeast();
-      run.west_a = gStChain->Awest();
-      run_header->AddAt(&run,0);
-   }
-    if (summary_param && run_header) {
+    run_header = new St_dst_run_header("run_header",1);
+    dst_run_header_st run;
+    run.run_id = gStChain->Run();
+    strcpy (run.event_type,gStChain->EvenType()->Data());
+    run.sqrt_s = gStChain->CenterOfMassEnergy();
+    run.east_a = gStChain->Aeast();
+    run.west_a = gStChain->Awest();
+    run_header->AddAt(&run,0);
+    if (m_dst_summary_param && run_header) {
       cout << " run_dst: Calling fill_dst_event_summary" << endl;
     
-      Int_t Res_fill_dst_event_summary = fill_dst_event_summary(summary_param,run_header,event_header,
+      Int_t Res_fill_dst_event_summary = fill_dst_event_summary(m_dst_summary_param,run_header,event_header,
 								globtrk,vertex,event_summary);
     
       if (Res_fill_dst_event_summary != kSTAFCV_OK) 
@@ -737,7 +767,6 @@ Int_t St_glb_Maker::Make(){
       
       cout << " run_dst: finished calling fill_dst_event_summary" << endl;
     }
-    
     // Fill histograms
     
     // look for generator data
@@ -752,7 +781,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.45 1999/03/04 00:06:22 caines Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.46 1999/03/04 01:19:21 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
