@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.13 2003/04/16 17:48:32 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.14 2003/07/25 19:47:37 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.14  2003/07/25 19:47:37  ullrich
+ * Added StSPtrVecCalibrationVertex to I/O list.
+ *
  * Revision 2.13  2003/04/16 17:48:32  ullrich
  * Added StTriggerData and inherited classe(s).
  *
@@ -53,7 +56,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.13 2003/04/16 17:48:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.14 2003/07/25 19:47:37 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -82,6 +85,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StSPtrVecKinkVertex",         "evt_vertices", 5);
     setBranch("StSPtrVecV0Vertex",           "evt_vertices", 5);
     setBranch("StSPtrVecXiVertex",           "evt_vertices", 5);
+    setBranch("StSPtrVecCalibrationVertex",  "evt_vertices", 5);
     setBranch("StEmcCollection",             "evt_emc",      6);
     setBranch("StRichCollection",            "evt_aux",      7);
     setBranch("StTofCollection",             "evt_aux",      7);
@@ -118,6 +122,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StSPtrVecV0Vertex",           "event", 1);
     setBranch("StSPtrVecXiVertex",           "event", 1);
     setBranch("StSPtrVecTrackDetectorInfo",  "event", 1);
+    setBranch("StSPtrVecCalibrationVertex",  "event", 1);
     setBranch("StSPtrVecPrimaryVertex",      "event", 1);
     setBranch("StSPtrVecTrackNode",          "event", 1);
     setBranch("StPhmdCollection",            "event", 1);
