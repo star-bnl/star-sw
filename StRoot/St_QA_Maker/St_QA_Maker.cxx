@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.7 1999/02/25 21:11:56 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.8 1999/02/26 17:24:42 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.8  1999/02/26 17:24:42  kathy
+// fix histograms
+//
 // Revision 1.7  1999/02/25 21:11:56  kathy
 // fix histograms
 //
@@ -405,7 +408,7 @@ void St_QA_Maker::MakeHistPrim(){
       if (t->iflag>0) {
        Float_t pT = 9999.;
        if (t->invpt) pT = 1./TMath::Abs(t->invpt);
-       Float_t theta = TMath::Pi() - TMath::ATan(t->tanl);
+       Float_t theta = TMath::Pi()/2.0 - TMath::ATan(t->tanl);
        Float_t eta   =-TMath::Log(TMath::Tan(theta/2.));
        m_prim_pT->Fill(pT);
        m_prim_eta->Fill(eta);
@@ -534,7 +537,7 @@ void St_QA_Maker::MakeHistPID(){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.7 1999/02/25 21:11:56 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.8 1999/02/26 17:24:42 kathy Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

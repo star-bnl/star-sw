@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.cxx,v 1.4 1999/02/16 18:15:44 fisyak Exp $
+// $Id: St_emc_Maker.cxx,v 1.5 1999/02/26 17:28:50 kathy Exp $
 // $Log: St_emc_Maker.cxx,v $
+// Revision 1.5  1999/02/26 17:28:50  kathy
+// fix histograms
+//
 // Revision 1.4  1999/02/16 18:15:44  fisyak
 // Check in the latest updates to fix them
 //
@@ -48,11 +51,11 @@ Int_t St_emc_Maker::Init(){
   const Float_t xl[] = {-1.0,-1.0,-1.0,-1.0, 0.5 , 0.5, 0.5, 0.5};
   const Float_t xu[] = { 1.0, 1.0, 1.0, 1.0, 12.5,12.5,12.5,12.5};
   const Int_t   ny[] = {120, 120, 60, 900, 60, 60, 60, 60};
-  m_nhit = new TH2F("nhit_emc" ,"Number of hit(log) .vs. Detector #",100,0.0,4.5,8,0.5,8.5);
-  m_etot = new TH2F("etot_emc" ,"Total energy(log) .vs. Detector #",100,-4.0,4.5,8,0.5,8.5);
+  m_nhit = new TH2F("EmcNHitsVsDet" ,"Number of hit(log) .vs. Detector #",100,0.0,4.5,8,0.5,8.5);
+  m_etot = new TH2F("EmcEtotVsDet" ,"Total energy(log) .vs. Detector #",100,-4.0,4.5,8,0.5,8.5);
   for (i=0; i<MAXDET; i++){
-    TString name_h = detname[i] + "_hits";
-    TString name_e = detname[i] + "_energy";
+    TString name_h = "Emc" + detname[i] + "Hits";
+    TString name_e = "Emc" + detname[i] + "Energy";
     m_hits[i]   = new TH2F(name_h,title_h[i],nx[i],xl[i],xu[i],ny[i],0.0,C_2PI);
     m_energy[i] = new TH2F(name_e,title_e[i],nx[i],xl[i],xu[i],ny[i],0.0,C_2PI);
   }
@@ -138,7 +141,7 @@ void St_emc_Maker::MakeHistograms(){
 //_____________________________________________________________________________
 void St_emc_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_emc_Maker.cxx,v 1.4 1999/02/16 18:15:44 fisyak Exp $\n");
+  printf("* $Id: St_emc_Maker.cxx,v 1.5 1999/02/26 17:28:50 kathy Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
