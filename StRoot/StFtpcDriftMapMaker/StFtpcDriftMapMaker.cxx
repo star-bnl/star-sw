@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.17 2003/09/02 17:58:15 perev Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.18 2003/09/18 10:00:55 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.18  2003/09/18 10:00:55  jcs
+// remove obsolete version of StFtpcMagboltz2 (FORTRAN version in $CVSROOT/online/ftpc/Magboltz)
+//
 // Revision 1.17  2003/09/02 17:58:15  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -62,7 +65,6 @@
 #include <stdlib.h>
 #include "StFtpcDriftMapMaker.h"
 #include "StFtpcMagboltz1.hh"
-#include "StFtpcMagboltz2.hh"
 #include "StFtpcClusterMaker/StFtpcDbReader.hh"
 
 #include "StMessMgr.h"
@@ -163,9 +165,6 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
   
   // create magboltz
   StFtpcMagboltz1 *magboltz = new StFtpcMagboltz1();
-  //  StFtpcMagboltz2 *magboltz = new StFtpcMagboltz2();
-  // only use Magboltz2 if you have a lot of time.
-  // measurements on a PII400MHz indicate about 17 days...
 
   int i, j;
   float thisField, thisRadius;
