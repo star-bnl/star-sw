@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.11 2003/01/09 18:59:45 laue Exp $
+ * $Id: StMuDst.cxx,v 1.12 2003/02/18 20:38:30 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -233,6 +233,16 @@ StTrack* StMuDst::createStTrack(StMuTrack* track) {
   helix = track->helix(); t->setGeometry( trackGeometry( track->charge(), &helix ) );
   helix = track->outerHelix(); t->setOuterGeometry( trackGeometry( track->charge(), &helix ) );
 
+  t->setLength(track->length());
+  t->setImpactParameter((track->dca()).mag());
+  t->addPidTraits(new StDedxPidTraits(kTpcId, kTruncatedMeanId, track->nHitsDedx(), track->dEdx(),0));                                              
+  Float_t a[2],b[15];
+  a[0]=track->chi2();
+  StTrackFitTraits *traits=new StTrackFitTraits(0,track->nHitsFit(),a,b);
+  t->setFitTraits(*traits);
+  delete traits;  
+  t->setNumberOfPossiblePoints(track->nHitsPoss());
+  
   return t;
 }
 
@@ -242,6 +252,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.12  2003/02/18 20:38:30  laue
+ * updates from Alex Suaide for filling StTrack from StMuTrack
+ *
  * Revision 1.11  2003/01/09 18:59:45  laue
  * initial check in of new EMC classes and the changes required
  *
