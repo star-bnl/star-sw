@@ -165,28 +165,30 @@ Int_t StBET4pMaker::Make()
 	return kStOk;
     }
     
+
+    if (0) {
+	//First look at global tracks to remove MIP response from BTOWers
+	TClonesArray& gtracks = *(uDst->globalTracks());
+	int nglobals =  gtracks.GetLast()+1;
     
-    //First look at global tracks to remove MIP response from BTOWers
-    TClonesArray& gtracks = *(uDst->globalTracks());
-    int nglobals =  gtracks.GetLast()+1;
-    
-    for(int t=0; t<nglobals; ++t)  {
+	for(int t=0; t<nglobals; ++t)  {
 	
-	StMuTrack *track = static_cast<StMuTrack*>( gtracks[t] );
-	if(!track || track->momentum().mag()<0.2 || track->nHitsFit()<15)  continue;
+	    StMuTrack *track = static_cast<StMuTrack*>( gtracks[t] );
+	    if(!track || track->momentum().mag()<0.2 || track->nHitsFit()<15)  continue;
 	
-	//check projection to BEMC and remember for later: ---------------------------------------------
-	StThreeVectorD momentumAt,positionAt;
+	    //check projection to BEMC and remember for later: ---------------------------------------------
+	    StThreeVectorD momentumAt,positionAt;
 	
-	bool tok = mMuPosition->trackOnEmc(&positionAt, &momentumAt, track, mField, geom->Radius() );
-	if(tok) {
-	    int m,e,s,id=0;
-	    float eta=positionAt.pseudoRapidity();
-	    float phi=positionAt.phi();
-	    int stat = geom->getBin(phi,eta,m,e,s);
-	    stat = geom->getId(m,e,s,id);
-	    if(stat==0) {
-		mNtracksOnTower[id]++; //increment number of tracks on this tower
+	    bool tok = mMuPosition->trackOnEmc(&positionAt, &momentumAt, track, mField, geom->Radius() );
+	    if(tok) {
+		int m,e,s,id=0;
+		float eta=positionAt.pseudoRapidity();
+		float phi=positionAt.phi();
+		int stat = geom->getBin(phi,eta,m,e,s);
+		stat = geom->getId(m,e,s,id);
+		if(stat==0) {
+		    mNtracksOnTower[id]++; //increment number of tracks on this tower
+		}
 	    }
 	}
     }
@@ -221,9 +223,21 @@ Int_t StBET4pMaker::Make()
 	}
 	++ntkept;
 
-
-
-
+	//check projection to BEMC and remember for later: ---------------------------------------------
+	StThreeVectorD momentumAt,positionAt;
+	
+	bool tok = mMuPosition->trackOnEmc(&positionAt, &momentumAt, track, mField, geom->Radius() );
+	if(tok) {
+	    int m,e,s,id=0;
+	    float eta=positionAt.pseudoRapidity();
+	    float phi=positionAt.phi();
+	    int stat = geom->getBin(phi,eta,m,e,s);
+	    stat = geom->getId(m,e,s,id);
+	    if(stat==0) {
+		mNtracksOnTower[id]++; //increment number of tracks on this tower
+	    }
+	}
+	
 	//construct four momentum
 	StThreeVectorF momentum = track->momentum();
 	double mass = 0.1395700; //assume pion+ mass for now
