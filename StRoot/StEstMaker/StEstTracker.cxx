@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.cxx,v 1.18 2003/10/21 19:34:46 perev Exp $ 
+ * $Id: StEstTracker.cxx,v 1.19 2004/02/11 23:25:17 caines Exp $ 
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.cxx,v $
+ * Revision 1.19  2004/02/11 23:25:17  caines
+ * Avoid crash for missing SVT events by quiting earlier
+ *
  * Revision 1.18  2003/10/21 19:34:46  perev
  * defence agains zero poiters added
  *
@@ -102,8 +105,14 @@ StEstTracker::StEstTracker(int npass,
   mNTPCTrack = 0;
   mNTrack = 0;
   mNWafers = 0;
+  mIndexGeom = 0;
   mPreprojNumber = 0;
-
+  mTrack = 0;
+  mTPCTrack = 0;
+  mSvtHit = 0;
+  mVertex = 0;
+  mIndexWaf = 0;
+  mTptIndex = 0;
 }
 
 StEstTracker::~StEstTracker() {
@@ -727,7 +736,7 @@ void StEstTracker::CleanUp(){
   }
   delete [] mTrack;
   delete [] mTPCTrack;
-  mIndexGeom->ResetWafTab();
+  if( mIndexGeom) mIndexGeom->ResetWafTab();
   delete mIndexGeom;
   // Delete the Eval_mchits array.
   if (mIdealTracking==1) {
@@ -750,6 +759,18 @@ void StEstTracker::CleanUp(){
 
   delete [] mTptIndex;
 
+  mNIdealPrim=0;
+  mNIdealSeco=0;
+  mNGoodPrim=0;
+  mNGoodSeco=0;
+  mNBadPrim=0;
+  mNBadSeco=0;
+  mNSvtHit = 0;
+  mNTPCTrack = 0;
+  mNTrack = 0;
+  mNWafers = 0;
+  mPreprojNumber = 0;
+  
   if (mDebugLevel>0) gMessMgr->Info()<<" CleanUp : Done"<<endm;
 
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.22 2003/10/11 03:16:18 perev Exp $
+ * $Id: StEstMaker.cxx,v 1.23 2004/02/11 23:25:17 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.23  2004/02/11 23:25:17  caines
+ * Avoid crash for missing SVT events by quiting earlier
+ *
  * Revision 1.22  2003/10/11 03:16:18  perev
  * Cleanup+bugfix: test for zer pointer, initialization added.
  *
@@ -586,17 +589,29 @@ Int_t StEstMaker::Make() {
   //		   Stsvgshape,
   //		   Stsvgconf,
   //		   Stscsspt);
-  Tracker->SVTInit(m_geom,
+  int status;
+  status = Tracker->SVTInit(m_geom,
 		   Stsvgshape,
 		   Stsvgconf,
 		   Stscsspt);
+  if( status ==1 ) {
+    Tracker->CleanUp();
+    return kStOK;
+  }
 
   gMessMgr->Info()<<"StEstMaker : Making a Vertex object"<<endm;
-  Tracker->VertexSetup(preVertex);
-
+  status = Tracker->VertexSetup(preVertex);
+  if( status ==1 ) {
+    Tracker->CleanUp();
+    return kStOk;
+  }
 
   gMessMgr->Info()<<"StEstMaker : Making the Track objects"<<endm;
-  Tracker->TPCInit(Sttptrack,Sttphit);
+  status = Tracker->TPCInit(Sttptrack,Sttphit);
+  if( status ==1 ) {
+    Tracker->CleanUp();
+    return kStOk;
+  }
   Tracker->BranchInit();
 
   if (mIdealTracking==1) {
