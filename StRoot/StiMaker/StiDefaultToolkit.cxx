@@ -17,7 +17,7 @@
 #include "Sti/Base/Messenger.h"
 #include "Sti/Base/Filter.h"
 #include "Sti/Base/Factory.h"
-#include "Sti/Base/Parameter.h"
+#include "Sti/Base/EditableParameter.h"
 #include "Sti/Base/VectorizedFactory.h"
 #include "Sti/StiMcTrack.h"
 #include "Sti/StiHit.h"
@@ -123,15 +123,15 @@ Factory< Filter<StiTrack>   >  * StiDefaultToolkit::getTrackFilterFactory()
   return _trackFilterFactory;
 }
 
-Factory<Parameter>  * StiDefaultToolkit::getParameterFactory()
+Factory<EditableParameter>  * StiDefaultToolkit::getParameterFactory()
 {
   if (_parameterFactory)
     return _parameterFactory;
   StiIOBroker * ioBroker = getIOBroker();
   if (ioBroker->useGui())
-    _parameterFactory = new VectorizedFactory<RootEditableParameter,Parameter>("ParameterFactory",100,20,10);
+    _parameterFactory = new VectorizedFactory<RootEditableParameter,EditableParameter>("EditableParameterFactory",100,20,10);
   else
-    _parameterFactory = new VectorizedFactory<Parameter,Parameter>("ParameterFactory",100,20,10);
+    _parameterFactory = new VectorizedFactory<EditableParameter,EditableParameter>("EditableParameterFactory",100,20,10);
   return _parameterFactory;
 }
 

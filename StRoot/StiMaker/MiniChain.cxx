@@ -100,6 +100,10 @@ void MiniChain::run(int first,
     {
       cout<< "MiniChain::eventLoop() - Run Time Error :" << rte.what() << endl;
     }
+  catch (logic_error & logicError)
+    {
+      cout<< "MiniChain::eventLoop() - Logic Error :" << logicError.what() << endl;
+    }
   catch (exception & e)
     {
       cout << "MiniChain::eventLoop() - Exception :"<< e.what()<<endl;
