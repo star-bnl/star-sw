@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   02/12/99
-// $Id: TurnDisplay.C,v 1.1 2000/07/19 21:13:46 fine Exp $
+// $Id: TurnDisplay.C,v 1.2 2000/07/19 21:23:30 fine Exp $
   StEventDisplayMaker *dsMaker = 0;
   StVirtualEventFilter *trackFilter;
   Int_t secRows[] = {140,141,142,143,144};
@@ -77,11 +77,9 @@ void TurnDisplay(const Char_t *filterName="StSectorHitFilter") {
        // dsMaker->AddName("dst/point(id_track,position[0]:position[1]:charge)");       //Add the tables to the Event Display list
 
        // "Irregular" tables: has no column associated directly with (x,y,z) coordinates
-
-       dsMaker->AddName("dst/globtrk");                // the table has no column with (x,y,z) coordinates,
-                                                   // a special method has to be invoked to draw this table 
-//       dsMaker->AddName("tptrack");                // the table has no column with (x,y,z) coordinates,
-                                                   // a special method has to be invoked to draw this table 
+       dsMaker->AddName("dst/globtrk"); // the table has no column with (x,y,z) coordinates,
+                                        // a special method has to be invoked to draw this table
+       dsMaker->AddName("dst/primtrk(id)");  
 
      //___________________________________________________________________
      //
@@ -96,6 +94,9 @@ void TurnDisplay(const Char_t *filterName="StSectorHitFilter") {
   }
 //__________________________________________________________________________
 // $Log: TurnDisplay.C,v $
+// Revision 1.2  2000/07/19 21:23:30  fine
+// dst/primtrk has been added to the list of the source tables
+//
 // Revision 1.1  2000/07/19 21:13:46  fine
 // Graphical filter to draw the hits from the selected PadRows and the associated tracks too
 //
