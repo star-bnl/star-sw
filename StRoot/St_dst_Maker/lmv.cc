@@ -1,5 +1,8 @@
-// $Id: lmv.cc,v 1.7 1999/12/02 18:23:43 nystrand Exp $
+// $Id: lmv.cc,v 1.8 1999/12/15 01:29:54 nystrand Exp $
 // $Log: lmv.cc,v $
+// Revision 1.8  1999/12/15 01:29:54  nystrand
+// changed return code to kStWarn when no vertex is found (needed by StPrimaryMaker)
+//
 // Revision 1.7  1999/12/02 18:23:43  nystrand
 // Bugs fixed correctly this time, thanks to Victor
 //
@@ -64,7 +67,7 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 //#include "StMagF/StMagF.h"
 
 
-//static const char rcsid[] = "$Id: lmv.cc,v 1.7 1999/12/02 18:23:43 nystrand Exp $";
+//static const char rcsid[] = "$Id: lmv.cc,v 1.8 1999/12/15 01:29:54 nystrand Exp $";
 
 long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 {
@@ -126,7 +129,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
   if( Ntrk <= 1 ){
     cout<<"lmv: Event contains "<<Ntrk<<" global tracks. ";
     cout<<"No vertex can be reconstructed."<<endl;
-    return kStOK; 
+    return kStWarn; 
   }
   cout<<"lmv: Low Multiplicity Vertex Finder. Number of global tracks: "<<Ntrk<<endl;
 
@@ -374,7 +377,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     // Check that there at least are 2 tracks
     if( helices.size() <= 1 ){
       cout<<"lmv: Fewer than 2 track remains. No vertex found."<<endl;
-      return kStOK;
+      return kStWarn;
     }
 
     // Begin by doing a fit
@@ -524,6 +527,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
   dst_vertex_pointer->chisq[0]    = chi2pdof;
   dst_vertex_pointer->chisq[1]    = 1.0; // Need to find the prob func in Root
 
+  cout<<"lmv: Primary Vertex found! Position: "<<XVertex<<endl;
   return kStOK;
 }
 
