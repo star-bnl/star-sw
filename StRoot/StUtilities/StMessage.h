@@ -1,5 +1,8 @@
-// $Id: StMessage.h,v 1.10 2001/05/16 15:18:50 genevb Exp $
+// $Id: StMessage.h,v 1.11 2001/05/16 15:50:56 genevb Exp $
 // $Log: StMessage.h,v $
+// Revision 1.11  2001/05/16 15:50:56  genevb
+// Switch TROOT.h to Rtypes.h
+//
 // Revision 1.10  2001/05/16 15:18:50  genevb
 // Need include for TROOT
 //
@@ -47,7 +50,7 @@
 #define ClassStMessage
 
 #ifdef __ROOT__
-#include "TROOT.h"
+#include "Rtypes.h"
 #endif
 #include <time.h>
 
