@@ -14,6 +14,7 @@
 #include "StiGui/StiRootDrawableHitContainer.h"
 
 //Sti
+#include "Messenger.h"
 #include "StiHit.h"
 #include "StiPlacement.h"
 #include "StiDetector.h"
@@ -70,17 +71,18 @@ void StiHitContainer::kill()
     }
 }
 
-StiHitContainer::StiHitContainer() 
+StiHitContainer::StiHitContainer()
+    : mMessenger(*(Messenger::instance(kHitMessage)))
 {
-    cout <<"StiHitContainer::StiHitContainer()"<<endl;
+    mMessenger <<"StiHitContainer::StiHitContainer()"<<endl;
     mminpoint = new StiHit();
     mmaxpoint = new StiHit();
-    cout <<"\tLeaving StiHitContainer()"<<endl;
+    mMessenger <<"\tLeaving StiHitContainer()"<<endl;
 }
 
 StiHitContainer::~StiHitContainer()
 {
-    cout <<"StiHitContainer::~StiHitContainer()"<<endl;
+    mMessenger <<"StiHitContainer::~StiHitContainer()"<<endl;
     delete mminpoint;
     mminpoint=0;
     delete mmaxpoint;
@@ -176,9 +178,9 @@ hitvector& StiHitContainer::hits(const StiDetector* layer)
 void StiHitContainer::setRefPoint(double position, double refAngle,
 				  double y, double z)
 {
-    //cout <<"\nStiHitContainer::setRefPoint(double, double, double, double)"<<endl;
-    //cout <<"\tposition: "<<position<<"\trefAngle: "<<refAngle<<"\t";
-    //cout <<"y: "<<y<<"\tz: "<<z<<endl;
+    //mMessenger <<"\nStiHitContainer::setRefPoint(double, double, double, double)"<<endl;
+    //mMessenger <<"\tposition: "<<position<<"\trefAngle: "<<refAngle<<"\t";
+    //mMessenger <<"y: "<<y<<"\tz: "<<z<<endl;
     
     mUtilityHit.reset();
     mUtilityHit.setPosition(position);
@@ -236,7 +238,7 @@ void StiHitContainer::setRefPoint(StiHit* ref)
     }
     
     else {
-	//cout <<"mstart==tempvec.end()\tAbort"<<endl;
+	//mMessenger <<"mstart==tempvec.end()\tAbort"<<endl;
 	mstart = tempvec.end();
 	mstop = mstart;
         mcurrent = mcandidatevec.end();

@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 
 //Sti
+#include "Messenger.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
 #include "StiCompositeTreeNode.h"
@@ -23,22 +24,20 @@ StiDetectorTreeBuilder::StiDetectorTreeBuilder()
     : mroot(0), mnodefactory(0), mdetfactory(0), mregion(0)
 {
   mDetectorBuilder = new StiCodedDetectorBuilder();
-  cout <<"StiDetectorTreeBuilder::StiDetectorTreeBuilder()"<<endl;
 }
 
 StiDetectorTreeBuilder::~StiDetectorTreeBuilder()
 {
   delete mDetectorBuilder;
-  cout <<"StiDetectorTreeBuilder::~StiDetectorTreeBuilder()"<<endl;
 }
 
 data_node* StiDetectorTreeBuilder::build(StiObjectFactoryInterface<StiDetectorNode>* nodefactory,
 					 StiObjectFactoryInterface<StiDetector>* detfactory)
 {
     if (mroot) {
-      cout << "StiDetectorTreeBuilder::build()\tError!\t" 
-           << "root tree already built"<<endl;
-      return 0;
+	*(Messenger::instance(kDetectorMessage)) << "StiDetectorTreeBuilder::build()\tError!\t"
+						 << "root tree already built"<<endl;
+	return 0;
     }
     
     mnodefactory = nodefactory;
@@ -84,8 +83,6 @@ void StiDetectorTreeBuilder::addToTree(StiDetector* layer)
 data_node* StiDetectorTreeBuilder::hangWhere(
     data_node* parent, StiOrderKey_t order, string& keystring)
 {
-//  cout << "hangWhere(" << parent->getName() << ", " << order << ", " 
-//       << keystring << ")" << endl;
     SameOrderKey<data_t> mySameOrderKey;
     mySameOrderKey.morderKey = order;
 
@@ -125,7 +122,6 @@ void StiDetectorTreeBuilder::loopOnDetectors()
     StiDetectorFinder *pFinder = StiDetectorFinder::instance();
     pFinder->addDetector(layer);
 
-    //cout << "Added detector " << layer->getName() << endl;
   }
 
   return;

@@ -12,6 +12,7 @@
 #include "StGetConfigValue.hh"
 
 //Sti
+#include "Messenger.h"
 #include "StiHit.h"
 #include "StiMapUtilities.h"
 #include "StiCompositeTreeNode.h"
@@ -24,7 +25,7 @@
 //Equality defined by same refangle and position
 bool HitMapKey::operator==(const HitMapKey& key2) const
 {
-    cout <<"HitMapKey::operator==(const HitMapKey&)"<<endl;
+    //cout <<"HitMapKey::operator==(const HitMapKey&)"<<endl;
     return (this->refangle==key2.refangle && this->position==key2.position);
 }
 
@@ -84,8 +85,8 @@ bool StiDetectorNodePositionLessThan::operator() (const StiDetectorNode* lhs,
 					  const StiDetectorNode* rhs) const
 {
     if (lhs->getData()==0 || rhs->getData()==0) {
-	cout <<"StiDetectorNodeLessThan::operator(). ERROR:\t";
-	cout <<"null data.  Return false"<<endl;
+	*(Messenger::instance(kHitMessage)) <<"StiDetectorNodeLessThan::operator(). ERROR:\t";
+	*(Messenger::instance(kHitMessage)) <<"null data.  Return false"<<endl;
     }
     StiPlacement* lhsp = lhs->getData()->getPlacement();
     StiPlacement* rhsp = rhs->getData()->getPlacement();
@@ -117,24 +118,27 @@ bool StTpcPadrowHitFilter::operator()(const StTpcHit& hit) const
 
 void StTpcPadrowHitFilter::build(const string& buildPath)
 {
-    cout <<"StTpcPadrowHitFilter::build()"<<endl;
+    *(Messenger::instance(kHitMessage)) <<"StTpcPadrowHitFilter::build()"<<endl;
     if (mBuilt==true) {
-	cout <<"StTpcPadrowHitFilter::build(). ERROR:\tAlread built!  Abort."<<endl;
+	*(Messenger::instance(kHitMessage)) <<"StTpcPadrowHitFilter::build(). ERROR:\tAlread built!  Abort."<<endl;
 	return;
     }
     
     if (buildPath=="empty") {
-	cout <<"StTpcPadrowHitFilter::build(). ERROR:\tbuildPath==empty.  Abort."<<endl;
+	*(Messenger::instance(kHitMessage)) <<"StTpcPadrowHitFilter::build(). ERROR:\t"
+					    << "buildPath==empty.  Abort."<<endl;
 	return;
     }
     StGetConfigValue(buildPath.c_str(), "mMinPadrow", mMinPadrow);
     StGetConfigValue(buildPath.c_str(), "mMaxPadrow", mMaxPadrow);
     
     if (mMinPadrow==999 || mMaxPadrow==999) {
-	cout <<"StTpcPadrowHitFilter::build(). ERROR:\tmembers not initialized.  ABORT"<<endl;
+	*(Messenger::instance(kHitMessage)) <<"StTpcPadrowHitFilter::build(). ERROR:\t"
+					    <<"members not initialized.  ABORT"<<endl;
 	return;
     }
-    cout <<"\tMinPadrow:\t"<<mMinPadrow<<"\tMaxPadrow:\t"<<mMaxPadrow<<endl;
+    *(Messenger::instance(kHitMessage)) <<"\tMinPadrow:\t"<<mMinPadrow
+					<<"\tMaxPadrow:\t"<<mMaxPadrow<<endl;
     mBuilt=true;
 }
 
