@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.121 2002/02/22 20:42:42 perev Exp $
+# $Id: Construct,v 1.122 2002/02/25 00:27:33 jeromel Exp $
 use Env;
 use lib $STAR . "/mgr";    # Modify perl include path
 use ConsDefs;
@@ -64,10 +64,15 @@ if ( defined( $ARG{ROOTLIBS} ) ) {
 }
 else {
   if ( !defined( $ARG{NoNew} ) ) { $ROOTLIBS = " -lNew "; }
-#VP  $ROOTLIBS .=
-#VP    " -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui -lGpad -lPhysics -lMatrix";
-    $ROOTLIBS .=
-  " -lCore -lCint -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics";
+  if( $ENV{ROOT_LEVEL} gt "3.02.00"){
+      # New root scheme
+      $ROOTLIBS .=
+	  " -lCore -lCint -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics";
+  } else {
+      # Old 'cons' build root scheme.
+      $ROOTLIBS .=
+	  " -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui -lGpad -lPhysics -lMatrix";
+  }
   print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
   
 }
