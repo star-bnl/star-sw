@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.28 1998/12/21 19:45:49 fisyak Exp $
+// $Id: bfc.C,v 1.29 1998/12/27 03:17:43 fine Exp $
 // $Log: bfc.C,v $
+// Revision 1.29  1998/12/27 03:17:43  fine
+// STAR_shapes to test two brand new classes: St_Node St_NodePosition
+//
 // Revision 1.28  1998/12/21 19:45:49  fisyak
 // Move ROOT includes to non system
 //
@@ -78,13 +81,16 @@
 // Revision 1.2  1998/07/20 15:08:19  fisyak
 // Add tcl and tpt
 //
+TBrowser *b = 0;
+class StChain;
+StChain  *chain=0;
+bfc(const Int_t   Nevents=1,
+    const Char_t *fileinp = "/afs/rhic/star/data/samples/hijet-g2t.xdf",
+    const Char_t *fileout = "hijet-bfc.xdf",
+    const Char_t *FileOut = "hijet-bfc.root")
 {
-         const Int_t  Nevents=0;
-	 const Char_t *fileinp = "/afs/rhic/star/data/samples/hijet-g2t.xdf";
-	 //	 const Char_t *fileinp = "/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/g2t/psc091_03_34evts.xdf";
-         const Char_t *fileout = "hijet-bfc.xdf";
-         const Char_t *FileOut = "hijet-bfc.root";
-
+// Dynamically link some shared libs
+if (gClassTable->GetID("StChain") < 0){
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("xdf2root");
@@ -116,6 +122,7 @@
   //  gSystem->Load("St_fss_Maker");
   //  gSystem->Load("St_fcl_Maker");
   //  gSystem->Load("St_fpt_Maker");
+}
   St_XDFFile   *xdf_in   = 0;
   if (fileinp)  xdf_in   = new St_XDFFile(fileinp,"r");
   St_XDFFile  *xdf_out   = 0;
@@ -124,35 +131,33 @@
   if (FileOut) root_out  =  new TFile(FileOut,"RECREATE");
 //TFile      *root_tree= new TFile("auau_central_hijing.tree.root","RECREATE");
 // Create the main chain object
-  StChain *chain = new StChain("bfc");
+  chain = new StChain("bfc");
   //  StChainSpy chain("bfc");
 
 //  Create the makers to be called by the current chain
-  St_params_Maker params("params","run/params");
-  St_geom_Maker     geom("geom","run/geant/Run");
-  //  St_TLA_Maker     geom("geom","run/geant/Run");
+  St_params_Maker *params = new St_params_Maker("params","run/params");
+  St_geom_Maker     *geom = new St_geom_Maker("geom","run/geant/Run");
   if (xdf_in) {
-    St_xdfin_Maker xdfin("xdfin");
+    St_xdfin_Maker *xdfin = new St_xdfin_Maker("xdfin");
     chain->SetInputXDFile(xdf_in);
   }
-  St_calib_Maker    calib("calib","calib"); 
-  St_evg_Maker      evgen("evgen","event/evgen");
-  St_geant_Maker    geant("geant","event/geant/Event");
-  //  St_TLA_Maker    geant("geant","event/geant/Event");
-//  St_fss_Maker   ftpc_raw("ftpc_raw","event/raw_data/ftpc");
-  //  St_tss_Maker    tpc_raw("tpc_raw","event/raw_data/tpc");
+  St_calib_Maker    *calib = new St_calib_Maker("calib","calib"); 
+  St_evg_Maker      *evgen = new St_evg_Maker("evgen","event/evgen");
+  St_geant_Maker    *geant = new St_geant_Maker("geant","event/geant/Event");
+//  St_fss_Maker   *ftpc_raw = new St_fss_Maker("ftpc_raw","event/raw_data/ftpc");
+//  St_tss_Maker    *tpc_raw = new St_tss_Maker("tpc_raw","event/raw_data/tpc");
 // Set parameters
-//  tpc_raw.adcxyzon();
-  St_srs_Maker         svt_hits("svt_hits","event/data/svt/hits");
-  St_tcl_Maker         tpc_hits("tpc_hits","event/data/tpc/hits");
-  St_TLA_Maker         ctf_hits("ctf_hits","event/data/ctf/hits");
-//  St_fcl_Maker         fcl_hits("ftpc_hits","event/data/ftpc/hits");
-  St_stk_Maker       stk_tracks("svt_tracks","event/data/svt/tracks");
-  St_tpt_Maker       tpc_tracks("tpc_tracks","event/data/tpc/tracks");
-//  St_TLA_Maker      ftpc_tracks("ftpc_tracks","event/data/ftpc/tracks");
-  St_glb_Maker           global("global","event/data/global");
-  St_TLA_Maker        dst_Maker("dst","event/data/global/dst");
-  St_run_summary_Maker  summary("run_summary","run/dst");
+//  tpc_raw->adcxyzon();
+  St_srs_Maker         *svt_hits = new St_srs_Maker("svt_hits","event/data/svt/hits");
+  St_tcl_Maker         *tpc_hits = new St_tcl_Maker("tpc_hits","event/data/tpc/hits");
+  St_TLA_Maker         *ctf_hits = new St_TLA_Maker("ctf_hits","event/data/ctf/hits");
+//St_fcl_Maker         *fcl_hits = new St_fcl_Maker("ftpc_hits","event/data/ftpc/hits");
+  St_stk_Maker       *stk_tracks = new St_stk_Maker("svt_tracks","event/data/svt/tracks");
+  St_tpt_Maker       *tpc_tracks = new St_tpt_Maker("tpc_tracks","event/data/tpc/tracks");
+//St_TLA_Maker      *ftpc_tracks = new St_TLA_Maker("ftpc_tracks","event/data/ftpc/tracks");
+  St_glb_Maker           *global = new St_glb_Maker("global","event/data/global");
+  St_dst_Maker        *dst_Maker = new St_dst_Maker("dst","event/data/global/dst");
+  St_run_summary_Maker  *summary = new St_run_summary_Maker("run_summary","run/dst");
   chain->PrintInfo();
 // Init the chain and all its makers
   int iInit = chain->Init();
@@ -211,7 +216,6 @@
     }
     gBenchmark->Print("bfc");
   }
-#if 0
-  else TBrowser b;
-#endif
+  else {if (!b)   b = new TBrowser;
+  }
 }

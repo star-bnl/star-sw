@@ -1,5 +1,8 @@
-// $Id: SavePrimitive.C,v 1.2 1998/12/21 19:45:49 fisyak Exp $
+// $Id: SavePrimitive.C,v 1.3 1998/12/27 03:17:43 fine Exp $
 // $Log: SavePrimitive.C,v $
+// Revision 1.3  1998/12/27 03:17:43  fine
+// STAR_shapes to test two brand new classes: St_Node St_NodePosition
+//
 // Revision 1.2  1998/12/21 19:45:49  fisyak
 // Move ROOT includes to non system
 //
@@ -91,8 +94,8 @@
     if (t->HasData()){ // Table
       path += ".C";
       dirname = gSystem->DirName(path.Data());
-      if (strcmp("/afs/rhic/star/packages/dev/StDb/svt/stkpars",dirname.Data()) == 0) {go = kTRUE;}
-      if (! go) continue;
+      //      if (strcmp("/afs/rhic/star/packages/dev/StDb/svt/stkpars",dirname.Data()) == 0) {go = kTRUE;}
+      //      if (! go) continue;
       if (!gSystem->OpenDirectory(dirname.Data())) { 
         if (gSystem->mkdir(dirname.Data())) {
 	  cout << "Directoty " << dirname << " creation failed" << endl;

@@ -52,7 +52,7 @@
      gSystem->Load("St_ebye_Maker");
      gSystem->Load("St_laser_Maker");
      gSystem->Load("St_run_Maker");
-//     gSystem->Load("St_tpctest_Maker");
+     gSystem->Load("St_tpctest_Maker");
 
      gSystem->Load("St_calib_Maker");
    }
@@ -89,25 +89,10 @@
     lookup += STAR;
     lookup += "/.share/tables:";
     lookup += STAR;
-    lookup += "/StRoot/base:";
-    lookup += STAR;
-    lookup += "/StRoot/St_tpctest_Maker";
+    lookup += "/StRoot/base";
   }
 
-  
-  TString giffile = STAR;
-  giffile += "/StRoot/html/src/gif";
-  
-  if (gSystem->AccessPathName(giffile.Data()) && !NT) {
-    // Create "gif" subdirectory for the first time
-    gSystem->MakeDirectory(giffile.Data());
-    // Create links 
-    gSystem->Symlink("../src/gif","/afs/rhic/star/packages/dev/StRoot/html/examples/gif");
-    gSystem->Symlink("src/gif","/afs/rhic/star/packages/dev/StRoot/html/gif");
-    // Copy the old images into a new directrory
-    gSystem->Exec("cp /afs/rhic/star/packages/pro/StRoot/html/src/gif/*.* /afs/rhic/star/packages/dev/StRoot/html/src/gif");
-  }
-  
+    
   html->SetSourceDir(lookup.Data());
 
   if (NT) 
@@ -119,12 +104,13 @@
 
   Char_t *classes[] = {"St_XDFFile",  "St_Module",   "St_Table"
                        ,"St_DataSet", "St_DataSetIter","St_FileSet"
-                       ,"StParticleView",
+                       ,"StParticleView", St_ObjectSet
                        ,"StMaker",     "StChain"
                        ,"table_head_st"
                        ,"St_srs_Maker","St_tpt_Maker","St_xdfin_Maker"
                        ,"St_evg_Maker","St_tcl_Maker","St_tss_Maker"
                        ,"St_ebye_Maker","St_laser_Maker","St_run_Maker"
+                       ,"St_calib_Maker"
                        ,"St_tpctest_Maker","St_calib_Maker"
                         };
   Int_t nclass = 21;
@@ -140,7 +126,22 @@
   Int_t i=0;
 
   for (i=0;i<nclass;i++) 
-                  html.MakeClass(classes[i]);
+                   html.MakeClass(classes[i]);
+
+  TString giffile = STAR;
+  giffile += "/StRoot/html/src/gif";
+  
+  if (gSystem->AccessPathName(giffile.Data()) && !NT) {
+    // Create "gif" subdirectory for the first time
+    printf(" Image directiry is created: <%s>\n", giffile.Data());
+    gSystem->MakeDirectory(giffile.Data());
+    // Create links 
+    gSystem->Symlink("../src/gif","/afs/rhic/star/packages/dev/StRoot/html/examples/gif");
+    gSystem->Symlink("src/gif","/afs/rhic/star/packages/dev/StRoot/html/gif");
+    // Copy the old images into a new directrory
+//    gSystem->Exec("cp /afs/rhic/star/packages/new/StRoot/html/src/gif/*.* /afs/rhic/star/packages/dev/StRoot/html/src/gif")
+    gSystem->Exec("cp /afs/rhic/star/packages/pro/StRoot/html/src/gif/*.* /afs/rhic/star/packages/dev/StRoot/html/src/gif");
+  }
 
   // Make HTML docs for the "plain" text files those are not in the dictionaries
 
@@ -148,8 +149,6 @@
   html.Convert("./../test/XDFcopy.C","How to read/write XDF file");
   html.Convert("./../test/XDFtest.C","How to read/write XDF and ROOT files");
   html.Convert("./par_anal.cxx","How to create several histrograms from XDF file");
-  html.Convert("./ana.C","Multiple DST files analysis");
-  html.Convert("./dedx.C","Multiple DST files analysis: de/dx vs P ");
   html.Convert("./../test/test10.C","How to use the dataset iterator class");
   html.Convert("./../test/test9.C","How to read the event from XDF file and build some histograms with ROOT");
   html.Convert("./makedoc.C","How to create the HTML documentation");
@@ -175,6 +174,6 @@
   html.Convert("./tst.kumac","An example of  Iwona's old tst.kumac of the analysis of laser events");
   html.Convert("./tpctest.C","ROOT based TPC test analysis");
 
- html.MakeClass("EModuleTypes");
- html.MakeIndex();
+ // html.MakeClass("EModuleTypes");
+ // html.MakeIndex();
 }
