@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.7 2003/01/21 23:51:19 fine Exp $
+// $Id: StEventControlPanel.cxx,v 1.8 2003/01/28 23:10:47 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -58,7 +58,6 @@
 #include "StSimplePanel.h"
 #include "StPadControlPanel.h"
 #include "StFilterDialog.h"
-#include "StEventHelper.h"
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TList.h"
@@ -70,6 +69,8 @@
 #include "StChain.h"
 #include "StMaker.h"
 #include "StEventDisplayMaker.h"
+#include "StEventHelper.h"
+// #include "StFilterABC.h"
 
 #include <qapplication.h>
 #include <qbuttongroup.h>
