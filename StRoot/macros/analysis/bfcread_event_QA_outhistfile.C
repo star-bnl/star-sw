@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QA_outhistfile.C,v 1.6 2001/04/28 21:45:19 genevb Exp $ 
+// $Id: bfcread_event_QA_outhistfile.C,v 1.7 2001/05/16 20:53:37 lansdell Exp $ 
 // $Log: bfcread_event_QA_outhistfile.C,v $
+// Revision 1.7  2001/05/16 20:53:37  lansdell
+// added StMcEvent to chain
+//
 // Revision 1.6  2001/04/28 21:45:19  genevb
 // include libs for EMC
 //
@@ -91,6 +94,8 @@ void bfcread_event_QA_outhistfile(
   gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
   gSystem->Load("StEmcUtil");
+  gSystem->Load("StMcEvent");
+  gSystem->Load("StMcEventMaker");
   gSystem->Load("St_QA_Maker"); 
   gSystem->Load("StTreeMaker");
 
@@ -102,6 +107,7 @@ void bfcread_event_QA_outhistfile(
   StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
   IOMk->SetIOMode("r");
   IOMk->SetBranch("event",0,"r");
+  IOMk->SetBranch("geantBranch",0,"r");
 
 // database stuff
   const char* calibDB = "MySQL:StarDb";
@@ -119,6 +125,7 @@ void bfcread_event_QA_outhistfile(
   HU->SetPntrToMaker((StMaker *)IOMk);
 
 //  add other makers to chain:
+  StMcEventMaker *mcEvent = new StMcEventMaker;
   StEventQAMaker *EventQA = new StEventQAMaker(MakerHistDir,"StEvent/QA-notused");
 
 // output hist.root file:
