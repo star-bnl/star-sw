@@ -19,7 +19,7 @@ tdmFactory *tdm;
 //:<--------------------------------------------------------------------
 int tdm_init()
 {
-   EML_MESSAGE(TDM: Initializing.);
+   EML_MESSAGE("TDM:Initializing. ");
 
 /*- Define the TDM KUIP commands. -*/
    tdm_def_();
@@ -35,7 +35,7 @@ int tdm_init()
 //:<--------------------------------------------------------------------
 int tdm_start()
 {
-   EML_MESSAGE(TDM: Starting.);
+   EML_MESSAGE("TDM:Starting. ");
 
 /*- Create the TDM Factory. -*/
    tdm = new tdmFactory("tdm");
@@ -51,12 +51,13 @@ int tdm_start()
 //:<--------------------------------------------------------------------
 int tdm_stop()
 {
-   EML_MESSAGE(TDM: Stopping.);
+   EML_MESSAGE("TDM:Stopping. ");
 
 /*- Delete the TDM Factory.
    delete tdm;
 unecessary -- soc will do it. -*/
 
+   printf("\n");
 #ifndef OLD_DSL
    dsAllocStats();			/* show allocation stats */
 #else   /*OLD_DSL*/

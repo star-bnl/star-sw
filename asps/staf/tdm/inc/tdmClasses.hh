@@ -21,7 +21,7 @@
 #include "dstype.h"
 #include "asu_macros.h"
 #include "asu_types.h"
-#include "socClasses.hh"
+#include "socLib.h"
 #include "tdm_macros.h"
 #include "tdm_types.h"
 
@@ -38,6 +38,9 @@ public:
    virtual unsigned char isDataset ();
    virtual unsigned char isTable ();
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- OVERRIDE VIRTUALS
+   virtual unsigned char implementsInterface (const char * iface);
+
 //- Use this function ONLY in a collocated process.
    virtual DS_DATASET_T * dslPointer();
 
@@ -75,6 +78,8 @@ public:
    virtual char * listing();
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- OVERRIDE VIRTUALS
+   virtual unsigned char implementsInterface (const char * iface);
 
    virtual unsigned char isType (const char * aType);
 
@@ -142,6 +147,9 @@ public:
    virtual char * listing();
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- OVERRIDE VIRTUALS
+   virtual unsigned char implementsInterface (const char * iface);
+
    virtual STAFCV_T addDataset (const char * name, long setDim);
    virtual STAFCV_T addTable (const char * name, const char * spec
 		, long rows);
@@ -178,7 +186,10 @@ public:
 //:**NONE**
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- OVERRIDE VIRTUALS
+   virtual unsigned char implementsInterface (const char * iface);
    virtual char * list ();
+
 /*- Datasets -*/
    virtual STAFCV_T deleteDataset (const char * name);
    virtual tdmDataset* findDataset (const char * name);

@@ -109,6 +109,7 @@ extern CC_P void kam_tdm_newdataset_();
 extern CC_P void kam_tdm_newtable_();
 extern CC_P void kam_tdm_type_list_();
 extern CC_P void kam_tdm_type_show_();
+extern CC_P void kam_tdm_type_load_();
 extern CC_P void kam_tdmdataset_adddataset_();
 extern CC_P void kam_tdmdataset_addtable_();
 extern CC_P void kam_tdmdataset_entrycount_();
@@ -148,6 +149,7 @@ extern CC_P STAFCV_T tdm_newtable(char* name, char* spec
 		, long rowcount);
 extern CC_P STAFCV_T tdm_type_list(long tid);
 extern CC_P STAFCV_T tdm_type_show(char* name);
+extern CC_P STAFCV_T tdm_type_load(char* fname);
 extern CC_P STAFCV_T tdmdataset_adddataset(char* dsname,char* name
 		, long dim);
 extern CC_P STAFCV_T tdmdataset_addtable(char* dsname, char* name

@@ -53,6 +53,8 @@ int tdm_cvtDst2st(DS_DATASET_T *pT
    }
    tbl_h = (TABLE_HEAD_ST*)MALLOC(sizeof(header));
 
+//- HACK -- THIS SHOULD BE FREE()'D
+
 /*- WARNING - Following strncpy's write \000 into next struct word. -*/
    strncpy(tbl_h->name,name,20);		/*- WARNING -*/
    memset((char*)(int(tbl_h->name)+strlen(name)),' ',
