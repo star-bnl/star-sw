@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.313 2003/01/14 01:01:14 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.314 2003/01/16 18:03:10 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -66,6 +66,7 @@ Bfc_st BFC1[] = {
   {"Physics"     ,"","","trg"                                        ,"","","Select Physics events",kFALSE},
   {"LaserTest"   ,"","","trg"                                          ,"","","Select Laser events",kFALSE},
   {"PulserSvt"   ,"","","trg"                                     ,"","","Select SVT Pulser events",kFALSE},
+  {"alltrigger"  ,"","","trg"                              ,"","","Select all events (no trig sel)",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"C H A I N S ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -527,6 +528,7 @@ Bfc_st BFC2[] = {
   {"Physics"     ,"","","trg"                                        ,"","","Select Physics events",kFALSE},
   {"LaserTest"   ,"","","trg"                                          ,"","","Select Laser events",kFALSE},
   {"PulserSvt"   ,"","","trg"                                     ,"","","Select SVT Pulser events",kFALSE},
+  {"alltrigger"  ,"","","trg"                              ,"","","Select all events (no trig sel)",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"C H A I N S ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1286,9 +1288,13 @@ Int_t StBFChain::Instantiate()
 	  if (maker == "StV0Maker" && GetOption("Ev03")) mk->SetMode(1); // Turn on alternative V0 method
 	  if (maker == "St_trg_Maker") {
 	    Int_t mode = 0;
-	    if (GetOption("Physics"))   mode += 1;
-	    if (GetOption("LaserTest")) mode += 2;
-	    if (GetOption("PulserSvt")) mode += 4;
+	    if (! GetOption("alltrigger")){
+	      if (GetOption("Physics"))   mode += 1;
+	      if (GetOption("LaserTest")) mode += 2;
+	      if (GetOption("PulserSvt")) mode += 4;
+	    } else {
+	      printf("QAInfo: 'alltrigger' option on. All others ignored\n");
+	    }
 	    if (mode) mk->SetMode(mode);
 	  }
 	  if ((maker == "StdEdxMaker" || maker == "StdEdxY2Maker" ) &&
