@@ -6,7 +6,22 @@
  * with zero curvature. This represents only the mathematical model of 
  * a helix. See the SCL user guide for more. 
  */
-
+/***************************************************************************
+ *
+ * $Id: StHelix.hh,v 1.6 2002/04/24 02:41:55 ullrich Exp $
+ *
+ * Author: Thomas Ullrich, Sep 1997
+ ***************************************************************************
+ *
+ * Description: Parametrization of a helix
+ * 
+ ***************************************************************************
+ *
+ * $Log: StHelix.hh,v $
+ * Revision 1.6  2002/04/24 02:41:55  ullrich
+ * Restored old format.
+ *
+ **************************************************************************/
 
 #ifndef ST_HELIX_HH
 #define ST_HELIX_HH
