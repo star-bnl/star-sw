@@ -1,5 +1,8 @@
-// $Id: estimateVertexZ.cc,v 1.1 2000/06/15 19:02:28 wdeng Exp $
+// $Id: estimateVertexZ.cc,v 1.2 2000/06/20 19:24:11 wdeng Exp $
 // $Log: estimateVertexZ.cc,v $
+// Revision 1.2  2000/06/20 19:24:11  wdeng
+// Take out histogram drawing.
+//
 // Revision 1.1  2000/06/15 19:02:28  wdeng
 // Estimate the z position of primary vertex by using the straight line model in x-y and r-z planes.
 //
@@ -14,8 +17,7 @@
 
 #include "tables/St_tcl_tphit_Table.h"
 
-void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, 
-                     Float_t& relativeHeight, Bool_t drawHistogram = kFALSE) 
+void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHeight) 
 {
   TH1F*  vertexZHistogram = new TH1F("vertex_z","estimated_z_distribution",4000,-200,200);
 
@@ -66,6 +68,7 @@ void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ,
               if( fabs(deltaR) < 0.000001 ) continue;
 
               Float_t z0 = (innerR*outerZ - outerR*innerZ)/ deltaR;
+	      //	      if( fabs(z0)>200 ) continue;
               
               vertexZHistogram->Fill(z0);
           }
@@ -94,6 +97,7 @@ void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ,
   // output
   vertexZ =  vertexZHistogram->GetBinCenter(maximumBin);
   relativeHeight = peakValue/background;
+  //  vertexZHistogram->Draw();
 
-  if( drawHistogram ) vertexZHistogram->Draw();
+  delete vertexZHistogram;
 }
