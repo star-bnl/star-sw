@@ -85,10 +85,10 @@ c---                            for charged track
 c---
 c---                             for pi0
 
-      real cxx(np_e),cyy(np_e),czz(np_e),egam1,egam2,ep(np_e,np_p),
+      real cxx(np_e),cyy(np_e),czz(np_e),egam1,egam2,ep(np_e,np_p)
       real egam(np_e),sig(np_e),sig12 
       integer k_eta,k_phi,ngam,str_efp_min,str_efp_max,im,jm
-      integer n_sho_eta,n_sho_phi,iep(np_e),max_epi,lvmin,
+      integer n_sho_eta,n_sho_phi,iep(np_e),max_epi,lvmin
       real sampl_smde,sampl_smdp,ep_smd_sum,s12
 c
       real smin
