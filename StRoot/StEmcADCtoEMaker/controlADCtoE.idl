@@ -9,7 +9,7 @@ struct  controlADCtoE
 {
     short DeductPedestal[8];    /* switch for deducting pedestal */
     short Calibration[8];       /* switch for calibration */    
-    short AdcCutOff[8];         /* cutoff value for hits close to pedestal. -1 = none */
+    float EnergyCutOff[8];      /* cutoff value for hits close to pedestal. -1 = none */
     short OnlyCalibrated[8];    /* save only calibrated hits */
     short messLimit;            /* limit for warning message */
 };

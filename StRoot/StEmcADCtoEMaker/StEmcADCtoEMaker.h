@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.19 2002/05/22 22:04:24 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.20 2002/09/19 21:32:23 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.20  2002/09/19 21:32:23  suaide
+// Modifications to use a new internal data format
+//
 // Revision 1.19  2002/05/22 22:04:24  suaide
 // small bug fixed to reconstruct micro DST's
 //
@@ -85,6 +88,7 @@ The defaults values are:<br>
 class StEmcCollection;
 class StEmcDecoder;
 class StEmcGeom;
+class StBemcData;
 
 class StEmcADCtoEMaker : public StMaker 
 {
@@ -94,41 +98,29 @@ class StEmcADCtoEMaker : public StMaker
            TH2F              *mHits[MAXDET];   //!
            TH2F              *mAdc[MAXDET];    //!
            TH2F              *mEnergyHist[MAXDET]; //!
-           TH1F              *mAdc1d[MAXDET];  //!
+           TH1F              *mAdc1d[MAXDET];  //!           
+           TH2F              *mTower;          //!           
+           TH2F              *mSmdTimeBinHist; //!
            
-           TH2F              *mTower;          //!
+           controlADCtoE_st  *mControlADCtoE; 
            
-           TH2F              *mSmdTimeBinHist;     //!
-           
-           controlADCtoE_st  *mControlADCtoE; //!
-           
-           TDataSet          *mCalibDb;
-           TDataSet          *mStatusDb;
-           StEmcCollection   *mEmc;            //!
-           StEmcDecoder      *mDecoder;          //!
-           
-           Int_t             mStatus[MAXDET][18000];
-           Int_t             mNChannels[MAXDET];
-           
-           Float_t           mADC[MAXDET][18000];
-           Float_t           mADCPedSub[MAXDET][18000];
-           Float_t           mEnergy[MAXDET][18000];
-           
-           Int_t             mSmdTimeBin[8];
-           
-           StEmcGeom         *mGeo[MAXDET]; //!
-
-           Bool_t            getEmcFromDaq(TDataSet* daq);///< This method gets EMC collection from DAQ dataset.
-           Bool_t            getEmcFromStEvent(StEmcCollection*); ///< This method creates a temporary ADC vector for each detector.
-           void              getStatus(Int_t); ///< This method gets the status tables 
+           TDataSet          *mDb;
+           StEmcCollection   *mEmc;            
+           StEmcDecoder      *mDecoder;          
+					 StBemcData        *mData;                      
+           StEmcGeom         *mGeo[MAXDET]; 
+					 
+					 
            void              zeroAll(); ///< Zero all temporary vectors
            Bool_t            getEmc(); ///< This method gets EMC hits from different sources.
-           Bool_t            calibrate(Int_t,Int_t*,Float_t*); ///< This method applies the calibration constants to get the hit energy.
-           Bool_t            subtractPedestal(Int_t); ///< This method creates a temporary ADC vector for each detector.
-           Bool_t            fillHistograms(Int_t,Int_t,Float_t); ///< This method fills QA histograms
+           Bool_t            getStatus(Int_t); ///< This method gets the status tables 
+           Bool_t            calibrate(Int_t); ///< This method applies the calibration constants to get the hit energy.
+           Bool_t            fillHistograms(); ///< This method fills QA histograms
            Bool_t            fillStEvent(); ///< This method makes a clean up of StEvent
-           Bool_t            saveHit(Int_t,Int_t);///< Decide if a hit should be saved or not
+           Bool_t            getEmcFromDaq(TDataSet* daq);///< This method gets EMC collection from DAQ dataset.
            Bool_t            clearOldEmc(); ///< Clear old emc collection
+           Bool_t            getEmcFromStEvent(StEmcCollection*); ///< This method creates a temporary ADC vector for each detector.
+           Bool_t            saveHit(Int_t,Int_t);///< Decide if a hit should be saved or not
   protected:    
     
   public: 
@@ -141,8 +133,9 @@ class StEmcADCtoEMaker : public StMaker
    
            controlADCtoE_st* getControlTable()  {return mControlADCtoE;} ///< Return Control table (NULL)
            StEmcCollection*  getEmcCollection() {return mEmc;} ///< Return emcCollection
-           void              clearStEventStaf() {mEmc = NULL;} ///< Clear emcCollection (does not delete from memory)
-
+           StBemcData*       getBemcData()      {return mData;} ///< Return BemcData pointer
+					 void              clearStEventStaf() {mEmc = NULL;} ///< Clear emcCollection (does not delete from memory)
+         
    ClassDef(StEmcADCtoEMaker, 1)  
 };
 

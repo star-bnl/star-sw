@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.31 2002/05/22 22:04:23 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.32 2002/09/19 21:32:23 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.32  2002/09/19 21:32:23  suaide
+// Modifications to use a new internal data format
+//
 // Revision 1.31  2002/05/22 22:04:23  suaide
 // small bug fixed to reconstruct micro DST's
 //
@@ -67,6 +70,10 @@
 #include "StDaqLib/EMC/EMC_Reader.hh"
 #include "StDAQMaker/StDAQReader.h"
 #include "StDaqLib/EMC/StEmcDecoder.h"
+#include "StBemcData.h"
+
+#define STATUS_OK 1
+#define MAXDET 4
 
 ClassImp(StEmcADCtoEMaker)
 
@@ -80,19 +87,19 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
 
   Int_t calib[]   = {1, 0, 1, 1, 0, 0, 0, 0};
   Int_t pedSub[]  = {1, 0, 1, 1, 0, 0, 0, 0};
-  Int_t adcCut[]  = {-1, -1, 4, 4, -1, -1, -1, -1};
+  Float_t energyCut[]  = {-1000, -1000, .15, .15, -1000, -1000, -1000, -1000};
   Int_t onlyCal[] = {0, 0, 0, 0, 0, 0, 0, 0};
   
   for(Int_t i=0; i<MAXDET; i++)
   {
     mControlADCtoE->DeductPedestal[i]=pedSub[i];  
     mControlADCtoE->Calibration[i]=calib[i];
-    mControlADCtoE->AdcCutOff[i]=adcCut[i];
+    mControlADCtoE->EnergyCutOff[i]=energyCut[i];
     mControlADCtoE->OnlyCalibrated[i]=onlyCal[i];
     cout <<"det = "<<detname[i].Data()
          <<"  DeductPedestal = "<<mControlADCtoE->DeductPedestal[i]
          <<"  Calibration = "<<mControlADCtoE->Calibration[i]
-         <<"  AdcCutOff = "<<mControlADCtoE->AdcCutOff[i]
+         <<"  EnergyCutOff = "<<mControlADCtoE->EnergyCutOff[i]
          <<"  OnlyCalibrated = "<<mControlADCtoE->OnlyCalibrated[i]<<endl;
   } 
 
@@ -143,12 +150,9 @@ Int_t StEmcADCtoEMaker::Init()
     mHits[i]   = new TH2F(name_h,title_h,nx[i],xl[i],xu[i],ny[i],-rpi, rpi);
     mEnergyHist[i] = new TH2F(name_e,title_e,nx[i],xl[i],xu[i],ny[i],-rpi, rpi);
     mAdc[i]    = new TH2F(name_a,title_a,nx[i],xl[i],xu[i],ny[i],-rpi, rpi);
-    mAdc1d[i]  = new TH1F(name_a1,title_a1,1000,0,8);
-    
-    // creating geometry ...
-    mGeo[i]=StEmcGeom::getEmcGeom(detname[i].Data());
+    mAdc1d[i]  = new TH1F(name_a1,title_a1,1000,0,8);   
   }
-  
+  for (Int_t i=0; i<MAXDET; i++) mGeo[i]=StEmcGeom::getEmcGeom(detname[i].Data());
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -159,25 +163,13 @@ Int_t StEmcADCtoEMaker::Finish()
 {
   return kStOk;
 }
+//_____________________________________________________________________________
 void StEmcADCtoEMaker::zeroAll()
 { 
   if(mDecoder) delete mDecoder;
   mDecoder=new StEmcDecoder(GetDate(),GetTime());
-  mStatusDb=NULL;
-  
-  for(Int_t i=0;i<MAXDET;i++)
-  {
-    mNChannels[i]=0;
-    for(Int_t j=0;j<18000;j++)
-    {
-      mStatus[i][j]=0;
-      mADC[i][j]=0;
-      mADCPedSub[i][j]=0;
-      mEnergy[i][j]=0;
-    }
-  }
-  for(Int_t i=0;i<8;i++) mSmdTimeBin[i]=0;
-	clearStEventStaf();
+  mDb=NULL;
+ 	clearStEventStaf();
 } 
 //_____________________________________________________________________________
 /*!
@@ -192,48 +184,34 @@ Int_t StEmcADCtoEMaker::Make()
   clock.Start();
   cout <<"\n\nStEmcADCtoEMaker::Make()******************************************************************\n";
   
-  zeroAll();      
-
-  mStatusDb=GetInputDB("Calibrations/emc/status");
-  if(!mStatusDb) gMessMgr->Warning("StEmcADCtoEMaker::Make() - Can not get new status tables.... will use default ");
-  for(Int_t det=0;det<MAXDET;det++) if(mControlADCtoE->Calibration[det]==1) getStatus(det);
-  
-  if(!getEmc())
+  zeroAll(); 
+	
+	mData = new StBemcData(); 
+	AddData(mData);
+		
+	Bool_t dataOk = getEmc();    
+	
+  if(dataOk) for(Int_t det=0;det<MAXDET;det++)
   {
-    gMessMgr->Warning("StEmcADCtoEMaker::Make() - Can not get pointer to EMC Event");
-    return kStWarn;
+		Bool_t present = kFALSE;
+		if(det==0 && mData->TowerPresent) present = kTRUE;
+		if(det==2 && mData->SMDPresent) present = kTRUE;
+		if(det==3 && mData->SMDPresent) present = kTRUE;
+		if(present && mControlADCtoE->Calibration[det]==1)
+		{
+			Bool_t ok = getStatus(det);
+			if(ok)
+			{
+				Int_t nCh = 0;
+				if(det==0) nCh = mData->NTowerHits;
+				if(det==2) nCh = mData->NSmdHits;
+				if(det==3) nCh = mData->NSmdHits;
+				if(nCh>0) calibrate(det);				
+			}
+		}
   }
-   
-  // loop over detectors...
-  for(Int_t det=0;det<MAXDET;det++)
-  {
-    if(mNChannels[det]>0)
-    {
-      cout <<"**** Calibrating detector "<<detname[det].Data()<<endl;
-      Bool_t ok=kTRUE;
-      
-      cout <<"***** Getting calibration tables\n";            
-      mCalibDb=NULL;
-      TString DbName="Calibrations/emc/"+detname[det];      
-      mCalibDb=GetInputDB(DbName.Data());
-      if(!mCalibDb) 
-      {
-        gMessMgr->Warning("StEmcADCtoEMaker::Make() - Can not get new calib tables.... ");
-        ok=kFALSE;       
-      }
-                              
-      if(ok)
-      {
-        Int_t nhits=0;
-        Float_t energy=0;
-        Bool_t CalOk=calibrate(det,&nhits,&energy);
-        if(CalOk) fillHistograms(det,nhits,energy);
-        cout <<"***** NHits = "<<nhits<<"  E = "<<energy<<endl;
-      }
-    }
-  }
-    
-  if(!fillStEvent()) gMessMgr->Warning("StEmcADCtoEMaker::Make() - No StEvent to save EmcCollection");
+	fillHistograms();
+	fillStEvent();
   
   clock.Stop();
   cout <<"Time to run StEmcADCtoEMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<" \n";
@@ -246,72 +224,49 @@ Int_t StEmcADCtoEMaker::Make()
 This method gets the status tables for a given detector and stores it in the
 array mStatus[det][index].
 */
-void StEmcADCtoEMaker::getStatus(Int_t det)
+Bool_t StEmcADCtoEMaker::getStatus(Int_t det)
 {
-  cout <<"Getting status table for detector "<<detname[det].Data()<<endl;
+	mDb=NULL;
+	mDb=GetInputDB("Calibrations/emc/status");
+  if(!mDb) {gMessMgr->Warning("StEmcADCtoEMaker::Make() - Can not get new status tables.... "); return kFALSE;}
+  
+	cout <<"Getting status table for detector "<<detname[det].Data()<<endl;
   TString TableName=detname[det]+"Running";
-  Int_t total=0;
+	
+	Int_t NGOOD = 0;
   
-  Int_t d = GetDate();
-  //Int_t t = GetTime();
+  if(det==0)
+	{
+		St_emcRunning* run = NULL;
+		if(mDb) run = (St_emcRunning*)mDb->Find(TableName.Data());
+		if(run)
+		{
+			emcRunning_st* runst=run->GetTable();
+			for(Int_t i=1;i<=4800;i++) 
+			{
+				mData->TowerStatus[i-1] = runst[0].IsRunning[i-1];
+				if(mData->TowerStatus[i-1]==STATUS_OK) NGOOD++;
+			}
+		} 
+	}
   
-  if(det<2) // bemc and bprs
+	if(det==2 || det==3)
   {
-    total = 4800;
-    St_emcRunning* run = NULL;
-    if(mStatusDb) run = (St_emcRunning*)mStatusDb->Find(TableName.Data());
-    if(run)
-    {
-      cout <<"Got status table from DataBase\n";
-      emcRunning_st* runst=run->GetTable(); 
-      for(Int_t i=1;i<=4800;i++) 
-      {
-        mStatus[det][i-1]=(Int_t) runst[0].IsRunning[i-1];
-        if(mStatus[det][i-1]==1) mNChannels[det]++;
-      }
-    } 
-    else  // standard status table for bemc
-    {
-      if(det==0)
-      {
-        cout <<"Using bemc default status table\n ";
-        for(Int_t i=1;i<=4800;i++)
-        {
-          mStatus[det][i-1]=0;
-          if (i>=1861 && i<=2340) mStatus[det][i-1]=1; // initial 2001 configuration
-          if (i>=2021 && i<=2100) mStatus[det][i-1]=0; // initial 2001 configuration
-          if (i>=1861 && i<=2020)  // remove crate 0x12
-          {
-            if(d>=20011015 && d<=20011020) mStatus[det][i-1]=0;
-          }
-          if(mStatus[det][i-1]==1) mNChannels[det]++;
-
-        }
-
-        mStatus[det][2309-1]=0;
-        mStatus[det][1986-1]=0;
-        mStatus[det][1979-1]=0;
-        mNChannels[det]-=3;
-      }
-    }
-  }
-  else
-  {
-    total = 18000;
     St_smdRunning* run = NULL;
-    if(mStatusDb) run = (St_smdRunning*)mStatusDb->Find(TableName.Data());
+    if(mDb) run = (St_smdRunning*)mDb->Find(TableName.Data());
     if(run)
     {
       smdRunning_st* runst=run->GetTable(); 
-      for(Int_t i=1;i<=18000;i++) 
+      for(Int_t i=1;i<=18000;i++)
       {
-        mStatus[det][i-1]=(Int_t)runst[0].IsRunning[i-1];
-        if(mStatus[det][i-1]==1) mNChannels[det]++;
+        if(det==2) mData->SmdeStatus[i-1]=runst[0].IsRunning[i-1];
+				if(det==3) mData->SmdpStatus[i-1]=runst[0].IsRunning[i-1];
+				if(runst[0].IsRunning[i-1]==STATUS_OK) NGOOD++;
       }
     }
   }
-  cout <<"Total number of channels = "<<total<<"  active = "<<mNChannels[det]<<endl;
-  return;
+	cout <<"Detector: "<<detname[det].Data()<<"  STATUS_OK = "<<NGOOD<<"  channels\n";
+  return kTRUE;
 
 }
 //_____________________________________________________________________________
@@ -322,83 +277,76 @@ for SMD and saves it in the calibrationType member of StEmcRawHit.
 Bool_t StEmcADCtoEMaker::getEmcFromDaq(TDataSet* daq)
 {
   cout <<"***** Getting EMC event from daq file\n";
-  UInt_t eta[]={20,20,150,10};
-  UInt_t sub[]={2,2,1,15};
 
-  cout <<"***** Getting Daq Reader\n";
-  StDAQReader* TheDataReader=(StDAQReader*)(daq->GetObject());
-  if(!TheDataReader) return kFALSE;
+	StDAQReader* TheDataReader=(StDAQReader*)(daq->GetObject());
   if(!TheDataReader->EMCPresent()) return kFALSE;
 
-  cout <<"***** Getting point to EMC data bank\n";
   StEMCReader* TheEmcReader=TheDataReader->getEMCReader();
   if(!TheEmcReader) return kFALSE;
-  
-  cout <<"***** Loop over detectors\n";
-  for(Int_t det=0;det<4;det++) if(mControlADCtoE->Calibration[det]==1) 
-  {
-    Float_t sum=0,validChannels=0;    
-    Bool_t Ok=kTRUE;
-    
-    if(det==0) // check if data is Ok for bemc
-    {
-      cout <<"EMC VALID TOWER HITS = "<<TheEmcReader->NTowerHits()<<" OFFLINE ACTIVE CHANNELS = "<<mNChannels[det]<<endl;
-      if(TheEmcReader->NTowerHits()==0) Ok=kFALSE;
-    }
-      
-    if(det==2 || det ==3) // get time bin
-    {
-      unsigned int timebin;
-      for(Int_t RDO=0;RDO<8;RDO++)
-      {
-        TheEmcReader->getSMD_TIMEBIN(RDO,timebin);
-        if(timebin>255) timebin=255;
-        mSmdTimeBin[RDO]=(Int_t)timebin;
-      }
-    }
-    
-    if(Ok)
-    {
-      for(UInt_t m=1;m<=120;m++)
-        for(UInt_t e=1;e<=eta[det];e++)
-          for(UInt_t s=1;s<=sub[det];s++)
-          {
-            unsigned short adc=0;
-            if(det==0) if(!TheEmcReader->getTowerADC((int)m,(int)e,(int)s,adc)) goto next;
-            if(det==2) if(!TheEmcReader->getSMDE_ADC((int)m,(int)e,adc)) goto next;
-            if(det==3) if(!TheEmcReader->getSMDP_ADC((int)m,(int)e,(int)s,adc)) goto next;
-            Int_t idh;
-            mGeo[det]->getId(m,e,s,idh);
-            //cout <<"m = "<<m<<"  e = "<<e<<"  s = "<<s<<"  adc = "<<ADC<<endl;
-            if(adc>0)
-            {
-              sum+=(Float_t)adc;
-              validChannels++;
-              mADC[det][idh-1] = (Float_t)adc;
-            }
-            next: continue;
-          }
-      cout <<"Total ADC sum = "<<sum<<"  validChannels = "<<validChannels<<endl;
-    }
-    else
-    {
-      cout <<"***** BAD event for detector "<<detname[det].Data()<<endl;
-      mNChannels[det]=0;
-    }
-  }
+	
+	EMC_Reader* reader = TheEmcReader->getBemcReader();
+	if(!reader) return kFALSE;
+	 
+  // tower data
+	mData->TowerPresent = reader->isTowerPresent();
+	if(reader->isTowerPresent())
+	{
+		Bank_BTOWERADCR& tower = reader->getBTOWERADCR();
+		mData->EventNumber = tower.EventNumber;
+		mData->TowerByteCount = tower.ReceivedByteCount;
+		mData->NTowerHits = tower.NTowerHits;
+		mData->TDCErrorFlag = tower.TDCErrorFlag;
+		mData->NTDCChannels = tower.NTDCChannels;
+		for(Int_t i=0;i<30;i++)
+		{
+			mData->TDCError[i] = tower.TDCError[i];
+			mData->TDCToken[i] = tower.TDCToken[i];
+			mData->TDCTrigger[i] = tower.TDCTrigger[i];
+			mData->TDCCrateId[i] = tower.TDCCrateId[i];
+			mData->TDCCount[i] = tower.TDCCount[i];
+		}
+		for(Int_t id=1;id<=4800;id++)
+		{
+			Int_t m,e,s;
+			mGeo[0]->getBin(id,m,e,s);
+			mData->TowerADC[id-1] = tower.TowerMatrix[m-1][e-1][s-1];
+		}
+	}	
+	
+	// smd data
+	mData->SMDPresent=reader->isSmdPresent();
+	if(reader->isSmdPresent())
+	{
+		Bank_BSMDADCR& smd =  reader->getSMD_ADCR();
+		mData->SMDErrorFlag = smd.SMDErrorFlag;
+		mData->SMDByteCount = smd.ReceivedByteCount;
+		mData->NSmdHits = smd.NSmdHits;
+		for(Int_t i=0;i<8;i++) mData->TimeBin[i]=(Char_t)smd.TimeBin[i];
+		for(Int_t id=1;id<=18000;id++)
+		{
+			Int_t m,e,s;
+			//smd-eta
+			mGeo[2]->getBin(id,m,e,s);
+			mData->SmdeADC[id-1] =  smd.SmdE_ADCMatrix[m-1][e-1];
+			//smd-phi
+			mGeo[3]->getBin(id,m,e,s);
+			mData->SmdpADC[id-1] =  smd.SmdP_ADCMatrix[m-1][e-1][s-1];			
+		}
+	}
+	mData->validateData();
   return kTRUE;
 }
+//_____________________________________________________________________________
 Bool_t StEmcADCtoEMaker::getEmcFromStEvent(StEmcCollection *emc)
 {
   if(!emc) return kFALSE;
-  for(Int_t det=0;det<MAXDET;det++) if(mControlADCtoE->Calibration[det]==1)
+  for(Int_t det=0;det<MAXDET;det++)
   {
     StDetectorId id = static_cast<StDetectorId>(det+kBarrelEmcTowerId);
     StEmcDetector* detector=emc->detector(id);
     if(detector)
     {
-      Float_t sum=0,validChannels=0;    
-      for(UInt_t j=1;j<121;j++)
+      for(UInt_t j=1;j<=120;j++)
       {
         StEmcModule* module = detector->module(j);
         if(module)
@@ -409,28 +357,27 @@ Bool_t StEmcADCtoEMaker::getEmcFromStEvent(StEmcCollection *emc)
             Int_t m=rawHit[k]->module();
             Int_t e=rawHit[k]->eta();
             Int_t s=abs(rawHit[k]->sub());
-            Float_t adc=(Float_t) rawHit[k]->adc();
+            Short_t adc=(Short_t) rawHit[k]->adc();
        
             Int_t idh;
             mGeo[det]->getId(m,e,s,idh);
-            mADC[det][idh-1]=adc;
-            sum+=adc;
-            validChannels++;
+            if(det==0) {mData->TowerADC[idh-1] = adc; mData->ValidTowerEvent=kTRUE;}
+						if(det==2) mData->SmdeADC[idh-1] = adc;
+						if(det==3) mData->SmdpADC[idh-1] = adc;
             if(det==2 || det==3) 
             {
               Int_t RDO,index;
               mDecoder->GetSmdRDO(det+1,m,e,s,RDO,index);
-              mSmdTimeBin[RDO]=rawHit[k]->calibrationType();
+              mData->TimeBin[RDO]=rawHit[k]->calibrationType();
+							mData->ValidSMDEvent=kTRUE;
             }
           }
         }
       }
-      if(validChannels==0) mNChannels[det]=0;
-    } else mNChannels[det]=0;
+    } 
   }
   return kTRUE;
 }
-
 //_____________________________________________________________________________
 /*!
 This method gets EMC hits from different sources. First it looks for DAQ datasets.
@@ -439,78 +386,34 @@ if Not present, looks for StEvent hits to recalibrate.
 Bool_t StEmcADCtoEMaker::getEmc()
 {  
 // check if there is event from DAQ
-  TDataSet* TheEmcData   = GetDataSet("StDAQReader");
-  if(TheEmcData)
-  {
-    if(!getEmcFromDaq(TheEmcData)) return kFALSE;
-    return kTRUE;
-  }
+	mData->EventDate = GetDate();
+	mData->EventTime = GetTime();
+	
+  TDataSet* TheData   = GetDataSet("StDAQReader");
+  if(TheData) 
+	{
+  	StDAQReader* TheDataReader=(StDAQReader*)(TheData->GetObject());
+  	if(!TheDataReader) return kFALSE;
+		mData->RunNumber = TheDataReader->getRunNumber();
+		mData->TriggerWord = TheDataReader->getTrigWord();
+		
+		if(getEmcFromDaq(TheData)) return kTRUE; 
+		return kFALSE;
+	}
       
   // check if there is event from StEvent
-  cout <<"Trying to get event from StEvent\n";
   StEvent* event = (StEvent*)GetInputDS("StEvent");
-  if(!event) return kFALSE;
-  StEmcCollection* emctemp=event->emcCollection();
-  if(!emctemp)  return kFALSE;
-  if(getEmcFromStEvent(emctemp)) return kTRUE;
-  
-  return kFALSE;
-  
-}
-//_____________________________________________________________________________
-/*!
-This method gets the pedestal table for a given detector from database and subtract 
-pedestal values from data if required.
-*/
-Bool_t StEmcADCtoEMaker::subtractPedestal(Int_t det)
-{
-  cout <<"getting pedestal tables for "<<detname[det].Data()<<endl;
-  TString TableName=detname[det]+"Pedestal";
-  emcPedestal_st *emcpedst=NULL;
-  smdPedestal_st *smdpedst=NULL;
-   
-  if(det<2) //bemc and bprs
-  {
-    St_emcPedestal* ped=(St_emcPedestal*)mCalibDb->Find(TableName.Data());
-    if(!ped) return kFALSE;
-    emcpedst=ped->GetTable();
-    if(!emcpedst) return kFALSE;
-  }
-  else // SMD
-  {
-    St_smdPedestal* ped=(St_smdPedestal*)mCalibDb->Find(TableName.Data());
-    if(!ped) return kFALSE;
-    smdpedst=ped->GetTable();
-    if(!smdpedst) return kFALSE;  
-  }
-    
-  Int_t nMax=120*mGeo[det]->NEta()*mGeo[det]->NSub();
-  for(Int_t id=1;id<=nMax;id++)
-  {
-    Float_t pedestal=0;
-        
-    if(det<2) //bemc and bprs
-      pedestal=emcpedst[id-1].AdcPedestal;
-    else // SMD
-    {
-      Int_t m,e,s;
-      mGeo[det]->getBin(id,m,e,s);
-      Int_t RDO,index;
-      mDecoder->GetSmdRDO(det+1,m,e,s,RDO,index);
-      Int_t timeBin=mSmdTimeBin[RDO];
-      if(timeBin>=0 && timeBin<128) pedestal=smdpedst[id-1].AdcPedestal[timeBin];
-    }
-      
-    if(mADC[det][id-1]>0) 
-    {
-      //cout <<"id = "<<id<<"  ADC = "<<ADCTemp[id-1]<<"  ped = "<<pedestal;
-      mADCPedSub[det][id-1]=mADC[det][id-1]-pedestal;
-      //if(mADCPedSub[det][id-1]<0) mADCPedSub[det][id-1]=0;
-      //cout <<"  ADCSub = "<<ADCTemp[id-1]<<endl;
-    }
-    else mADCPedSub[det][id-1]=0;
-  }  
-  return kTRUE;
+  if(event)
+	{
+  	mData->RunNumber = event->runId();
+		mData->TriggerWord = event->triggerMask();
+		
+		StEmcCollection* emctemp=event->emcCollection();
+  	if(!emctemp)  return kFALSE;
+  	if(getEmcFromStEvent(emctemp)) return kTRUE;
+	}  
+	
+  return kFALSE;  
 }
 //_____________________________________________________________________________
 /*!
@@ -518,93 +421,135 @@ This method applies the calibration constants to get the hit energy. The calibra
 is applied only to the hits which tower/strip status is set to 1 (mStatus[det][index==1).
 It also checks if the calibration is done for that bin
 */
-Bool_t StEmcADCtoEMaker::calibrate(Int_t det,Int_t* NHITS,Float_t* ENERGY)
+Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 {
-  cout <<"applying calibration for detector "<<detname[det].Data()<<endl;
-  Int_t nhits=0;
-  Float_t totalenergy=0;
-
-  if(mControlADCtoE->DeductPedestal[det]==1)  subtractPedestal(det);
-  else for(Int_t i=0;i<18000;i++)  mADCPedSub[det][i] = mADC[det][i];
-
-    
-  cout <<"getting calibration table \n";
-  TString TableName=detname[det]+"Calibration";
-  St_emcCalibration* cal=(St_emcCalibration*)mCalibDb->Find(TableName.Data());
-  if(!cal) return kFALSE;
-
-  emcCalibration_st* cal_st=cal->GetTable();
-  if(!cal_st) return kFALSE;
-
-  cout <<"applying calibration... loop over modules \n";
-  Int_t nMax=120*mGeo[det]->NEta()*mGeo[det]->NSub();
-  for(Int_t id=1;id<=nMax;id++)
-  {
-    Float_t adc=mADCPedSub[det][id-1];
-    Float_t energy=0;
-    if(mStatus[det][id-1]==1 && 
-       cal_st[id-1].Status==1 && 
-       cal_st[id-1].CalibStatus==1)
-    {
-      Float_t adcpower=1;
+  cout <<"Calibrating detector "<<detname[det].Data()<<endl;
+	
+	Bool_t Valid = kTRUE;
+	if(det==0) Valid = mData->ValidTowerEvent;
+	if(det==2 || det==3) Valid = mData->ValidSMDEvent;	
+	if(!Valid) return kFALSE;
+	
+	mDb=NULL;
+  TString DbName="Calibrations/emc/"+detname[det];      
+  mDb=GetInputDB(DbName.Data());
+  if(!mDb) return kFALSE;
+  	
+	//calibration tables ////////////////////////////////////////////////////
+	TString TableName=detname[det]+"Calibration";
+	emcCalibration_st* cal_st = NULL;
+	St_emcCalibration* cal=(St_emcCalibration*)mDb->Find(TableName.Data());
+  if(cal) cal_st=cal->GetTable();
+	if(!cal_st) return kFALSE;
+  
+	//pedestal tables ////////////////////////////////////////////////////
+	emcPedestal_st *emcpedst=NULL;
+  smdPedestal_st *smdpedst=NULL;
+	if(mControlADCtoE->DeductPedestal[det]==1)
+	{
+		TString TableName=detname[det]+"Pedestal";
+  	if(det<2) //bemc and bprs
+  	{
+    	St_emcPedestal* ped=(St_emcPedestal*)mDb->Find(TableName.Data());
+    	if(ped) emcpedst=ped->GetTable();
+    	if(!emcpedst) return kFALSE;
+  	}
+  	else // SMD
+  	{
+      St_smdPedestal* ped=(St_smdPedestal*)mDb->Find(TableName.Data());
+    	if(ped) smdpedst=ped->GetTable();
+    	if(!smdpedst) return kFALSE;  
+  	}
+	}
+		
+	//loop over all channels ///////////////////////////////////////////////
+	Int_t MAX = 18000;
+	if(det<2) MAX = 4800;
+	Float_t TOTALE=0;
+	Int_t   NHITS=0;
+	for(Int_t id=1;id<=MAX;id++)
+	{
+		Float_t ADC = 0;
+		Float_t PED = 0;
+		Char_t status = 0;
+		if(det==0) { ADC = (Float_t)mData->TowerADC[id-1]; status = mData->TowerStatus[id-1]; }
+		if(det==2) { ADC = (Float_t)mData->SmdeADC[id-1];  status = mData->SmdeStatus[id-1];  }
+		if(det==3) { ADC = (Float_t)mData->SmdpADC[id-1];  status = mData->SmdpStatus[id-1];  }
+		if(mControlADCtoE->DeductPedestal[det]==1)
+		{
+      if(det<2) PED = (Float_t)emcpedst[id-1].AdcPedestal;
+			else
+			{
+      	Int_t RDO,index,m,e,s;
+				mGeo[det]->getBin(id,m,e,s);
+      	mDecoder->GetSmdRDO(det+1,m,e,s,RDO,index);
+      	Int_t capacitor=mData->TimeBin[RDO];
+				if(capacitor>=0 && capacitor<128) PED = (Float_t)smdpedst[id-1].AdcPedestal[RDO];
+		  }
+		}
+    if(status==STATUS_OK)
+		{
+			Float_t ADCSUB=ADC-PED;
+			Float_t EN=0;
+			Float_t ADCPOWER=1;
       for(Int_t i=0;i<5;i++) 
       {
-        energy+=cal_st[id-1].AdcToE[i]*adcpower; 
-        adcpower*=fabs(adc);
-      }            
-      if(adc<0) energy*=-1;
-			//if (energy<0) energy=0;
-      nhits++;
-      //cout <<"id = "<<id<<" ADC = "<<mADC[det][id-1]<<"  ADC ped Sub = "<<adc<<"  energy = "<<energy<<endl;
-      totalenergy+=energy;
-    }
-    mEnergy[det][id-1] = energy;
-  }
-       
-  *NHITS=nhits;
-  *ENERGY=totalenergy;
+        EN+=cal_st[id-1].AdcToE[i]*ADCPOWER; 
+        ADCPOWER*=ADCSUB;
+      }
+			if(det==0) mData->TowerEnergy[id-1] = EN;
+			if(det==2) mData->SmdeEnergy[id-1] = EN;     
+			if(det==3) mData->SmdpEnergy[id-1] = EN;     
+			TOTALE+=EN;
+			NHITS++;
+			//cout <<"id = "<<id<<"  ADC = "<<ADC<<"  PED = "<<PED<<"  ADCSUB = "<<ADCSUB<<"  E = "<<EN<<endl;
+		}
+	}
+	cout <<"detector: "<<detname[det].Data()<<"  NHITS = "<<NHITS<<"  TOTALE = "<<TOTALE<<endl;
   return kTRUE;
 }
 //_____________________________________________________________________________
 /*!
 This method fills QA histograms
 */
-Bool_t StEmcADCtoEMaker::fillHistograms(Int_t det,Int_t nhits,Float_t energy)
+Bool_t StEmcADCtoEMaker::fillHistograms()
 {
-  cout <<"***** Filling histograms for detector "<<detname[det].Data()<<endl;
-  if(nhits>0)  mNhit->Fill(log((Float_t)nhits),(Float_t)det+1);
-  if(energy>0) mEtot->Fill(log(energy),(Float_t)det+1);
-        
-  if(det==2) // fill time bin for SMDE only becasue they are the same for SMDP
-  {
-    for(Int_t RDO=0;RDO<8;RDO++) if(mSmdTimeBin[RDO]<128) mSmdTimeBinHist->Fill(RDO,mSmdTimeBin[RDO]);
-  }
-  
-  if(det==0) // gain monitor histogram for tower
-  {
-    for(Int_t i=0;i<4800;i++) if(mADCPedSub[0][i]>0 && mADCPedSub[0][i]<500) mTower->Fill(i+1,mADCPedSub[0][i]);
-  }
-  
-  if(mControlADCtoE->Calibration[det]==1)  
-  {
-    Float_t totalAdc=0;
-    Int_t Max = 120*mGeo[det]->NEta()*mGeo[det]->NSub();
-    for(Int_t idh=1;idh<=Max;idh++)
-    {
-      Float_t eta,phi;
-      mGeo[det]->getEtaPhi(idh,eta,phi);
-      Int_t ADC = (Int_t)mADC[det][idh-1];
-      Float_t Energy = mEnergy[det][idh-1];
-      if(ADC>0)
-      {
-        mHits[det]->Fill(eta,phi);
+
+  for(Int_t det=0;det<MAXDET;det++)
+	{
+		Int_t nHits = 0;
+		Float_t totalE = 0;
+		Float_t totalADC = 0;
+		Int_t MAXCHANNEL = 18000;
+		if(det<2) MAXCHANNEL = 4800;
+		for(Int_t i=0;i<MAXCHANNEL;i++)
+		{
+			Char_t status = 0;
+			if(det==0) status = mData->TowerStatus[i];
+			if(det==2) status = mData->SmdeStatus[i];
+			if(det==3) status = mData->SmdpStatus[i];
+			if(status==1)
+			{
+				Float_t ADC = 0;
+				Float_t E = 0;
+				if(det==0) { ADC = (Float_t)mData->TowerADC[i]; E = mData->TowerEnergy[i]; mTower->Fill(i+1,ADC);}
+				if(det==2) { ADC = (Float_t)mData->SmdeADC[i]; E = mData->SmdeEnergy[i]; }
+				if(det==3) { ADC = (Float_t)mData->SmdpADC[i]; E = mData->SmdpEnergy[i]; }
+				totalE+=E;
+				totalADC+=ADC;
+				nHits++;
+				Float_t eta,phi;
+				mGeo[det]->getEtaPhi(i+1,eta,phi);
+				mHits[det]->Fill(eta,phi);
         mAdc[det]->Fill(eta,phi,ADC);
-        totalAdc+=(Float_t)ADC;
-      }
-      if(Energy>0) mEnergyHist[det]->Fill(eta,phi,Energy);
-    }
-    if(totalAdc>0) mAdc1d[det]->Fill(log(totalAdc));
-  }
+				mEnergyHist[det]->Fill(eta,phi,E);
+			}
+		}
+		if(nHits>0)    mNhit->Fill(log((Float_t)nHits),(Float_t)det+1);
+		if(totalE>0)   mEtot->Fill(log(totalE),(Float_t)det+1);
+		if(totalADC>0) mAdc1d[det]->Fill(log(totalADC));
+  	if(det==2) for(Int_t RDO=0;RDO<8;RDO++) mSmdTimeBinHist->Fill(RDO,mData->TimeBin[RDO]);
+	}
   return kTRUE;
 }
 //_____________________________________________________________________________
@@ -614,63 +559,67 @@ This method makes a clean up of StEvent before store it in the .data
 Bool_t StEmcADCtoEMaker::fillStEvent()
 {  
   // first need to clean hits with adc = 0
-	
-	StEvent* event = (StEvent*)GetInputDS("StEvent");
-  
-  mEmc = NULL;
-	
+	StEvent* event = (StEvent*)GetInputDS("StEvent");  
+  mEmc = NULL;	
 	if(event) mEmc = event->emcCollection();
 	if(mEmc) clearOldEmc();
   
-  for(Int_t det=0;det<MAXDET;det++) if(mControlADCtoE->Calibration[det]==1 && mNChannels[det]>0)
+  for(Int_t det=0;det<MAXDET;det++) if(mControlADCtoE->Calibration[det]==1)
   {
-    Int_t totalhits=0,totalhitsused=0;
-    Int_t Max = 120*mGeo[det]->NEta()*mGeo[det]->NSub();
-    
-    // first check if there is at least one valid hit to save
-    Bool_t saveDet=kFALSE;
-    for(Int_t idh=1;idh<=Max;idh++) if(saveHit(det,idh)) { saveDet = kTRUE; break; }
+    Bool_t Valid = kTRUE;
+		Int_t NHITS = 0;
+	  if(det==0) Valid = mData->ValidTowerEvent;
+	  if(det==2 || det==3) Valid = mData->ValidSMDEvent;	
+		if(Valid)
+		{
+			Int_t Max = 120*mGeo[det]->NEta()*mGeo[det]->NSub();    
+    	// first check if there is at least one valid hit to save
+    	Bool_t saveDet=kFALSE;
+    	for(Int_t idh=1;idh<=Max;idh++) if(saveHit(det,idh)) { saveDet = kTRUE; break; }
 
-    if(saveDet)
-    {
-      if(!mEmc) 
-			{
-				mEmc =new StEmcCollection();
-				if(event)event->setEmcCollection(mEmc);
-			}
-      StDetectorId id = static_cast<StDetectorId>(det+kBarrelEmcTowerId);
-      StEmcDetector* detector=mEmc->detector(id);
-			if(!detector)
-			{
-				detector = new StEmcDetector(id,120); 
-				mEmc->setDetector(detector);
-			}
+    	if(saveDet)
+    	{
+      	if(!mEmc) 
+				{
+					mEmc =new StEmcCollection();
+					if(event) event->setEmcCollection(mEmc);
+				}
+      	StDetectorId id = static_cast<StDetectorId>(det+kBarrelEmcTowerId);
+      	StEmcDetector* detector=mEmc->detector(id);
+				if(!detector)
+				{
+					detector = new StEmcDetector(id,120); 
+					mEmc->setDetector(detector);
+				}
     
-      for(Int_t idh=1;idh<=Max;idh++)
-      {      
-        if(saveHit(det,idh))
-        {
-          Int_t ADC = (Int_t)mADC[det][idh-1];
-          Float_t Energy = mEnergy[det][idh-1];
-          Int_t m,e,s;
-          mGeo[det]->getBin(idh,m,e,s);
+      	for(Int_t idh=1;idh<=Max;idh++)
+      	{      
+        	if(saveHit(det,idh))
+        	{
+          	Int_t ADC = 0;
+						Float_t E = 0;
+						if(det==0) { ADC = mData->TowerADC[idh-1]; E = mData->TowerEnergy[idh-1]; }
+						if(det==2) { ADC = mData->SmdeADC[idh-1]; E = mData->SmdeEnergy[idh-1]; }
+						if(det==3) { ADC = mData->SmdpADC[idh-1]; E = mData->SmdpEnergy[idh-1]; }
+          	Int_t m,e,s;
+          	mGeo[det]->getBin(idh,m,e,s);
           
-          StEmcRawHit* hit=new StEmcRawHit(id,m,e,s,(UInt_t)ADC);
-          hit->setEnergy(Energy);
-          if(det==2 || det==3) 
-          {
-            Int_t RDO,index;
-            mDecoder->GetSmdRDO(det+1,m,e,s,RDO,index);
-            Int_t timeBin=mSmdTimeBin[RDO];
-            hit->setCalibrationType(timeBin);
+          	StEmcRawHit* hit=new StEmcRawHit(id,m,e,s,(UInt_t)ADC);
+          	hit->setEnergy(E);
+          	if(det==2 || det==3) 
+          	{
+            	Int_t RDO,index;
+            	mDecoder->GetSmdRDO(det+1,m,e,s,RDO,index);
+            	Int_t timeBin=mData->TimeBin[RDO];
+            	hit->setCalibrationType(timeBin);
+          	}
+          	detector->addHit(hit);
+						NHITS++;
           }
-          detector->addHit(hit);
-          totalhitsused++;
-          if(ADC>0) totalhits++;
-         }
-      }
-    }
-    cout <<"Total hits for detector "<<detname[det].Data()<<" = "<<totalhits<<"  after clean up = "<<totalhitsused<<endl;
+      	}
+    	}
+		}
+		cout <<"NHITS Saved on StEvent for detector "<<detname[det].Data()<<"  =  "<<NHITS<<endl;
   }  
   // finished clean up
   
@@ -682,19 +631,23 @@ Check if this hit is ok to be saved on StEvent
 */
 Bool_t StEmcADCtoEMaker::saveHit(Int_t det,Int_t idh)
 {  
-  Int_t ADC = (Int_t)mADC[det][idh-1];
-  Int_t ADCPedSub = (Int_t)mADCPedSub[det][idh-1];
-  Float_t Energy = mEnergy[det][idh-1];
+  Int_t ADC = 0;
+	Float_t E = 0;
+	Char_t S = 0;
+	if(det==0) {ADC = mData->TowerADC[idh-1]; E = mData->TowerEnergy[idh-1]; S = mData->TowerStatus[idh-1]; }
+	if(det==2) {ADC = mData->SmdeADC[idh-1]; E = mData->SmdeEnergy[idh-1]; S = mData->SmdeStatus[idh-1]; }
+	if(det==3) {ADC = mData->SmdpADC[idh-1]; E = mData->SmdpEnergy[idh-1]; S = mData->SmdpStatus[idh-1]; }
   
-  Bool_t save = kTRUE;
-      
-  if(ADC==0) save = kFALSE;
-  if(mControlADCtoE->AdcCutOff[det]!=-1) if(ADCPedSub<mControlADCtoE->AdcCutOff[det]) save = kFALSE;
-  if(mControlADCtoE->OnlyCalibrated[det]==1) if(Energy==0) save = kFALSE;
+  Bool_t save = kTRUE;  
+	if(S!=STATUS_OK) save = kFALSE;   
+  if(mControlADCtoE->EnergyCutOff[det]>0) if(E<mControlADCtoE->EnergyCutOff[det]) save = kFALSE;
   
   return save;
 }
 //_____________________________________________________________________________
+/*!
+Clear old EMC stuff
+*/
 Bool_t StEmcADCtoEMaker::clearOldEmc()
 {  
 	if(!mEmc) return kFALSE;
@@ -727,8 +680,5 @@ Bool_t StEmcADCtoEMaker::clearOldEmc()
   }
 	return kTRUE;
 }
-
-
-
 
 
