@@ -25,6 +25,7 @@ my @Sets = (
               "auau128/hijing/b0_12/halffield/year_1e/hadronic_on", 
               "auau200/single/default/central/year_1e/hadronic_on", 
               "auau130/mevsim/vanilla_flow/central/year_1h/hadronic_on",
+              "auau130/mevsim/vanilla/central/year_1e/hadronic_on",
 #             "pp200/pythia/default/minibias/year_2a/hadronic_on",
 #              "auau200/hijing/beamgas/nitrogen/year_1h/hadronic_on",
 #              "auau200/hijing/beamgas/hydrogen/year_1h/hadronic_on" 
