@@ -19,17 +19,6 @@ EEmcSmdMap::EEmcSmdMap() {
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
 /////////////////////////////////////////////////////////////////////////////
 
 void EEmcSmdMap::Init() {
@@ -818,7 +807,9 @@ void EEmcSmdMap::Init() {
 
   };
 
-  // Copy over to the permanent storage
+  //--
+  //-- Initialize the strip-range to tower mapping
+  //--
   Int_t itow = 0;
   for ( Int_t isec = 0; isec < 12; isec++ ) {
     for ( Int_t isub = 0; isub < 5; isub++ ) {
@@ -828,5 +819,45 @@ void EEmcSmdMap::Init() {
     }
   }
 
+
+  //--
+  //-- Initialize the tower to strip mapping
+  //--
+  itow = 0;
+  for ( Int_t isec = 0; isec < 12; isec++ ) {
+    for ( Int_t isub = 0; isub < 5; isub++ ) {
+      for ( Int_t ieta = 0; ieta < 12; ieta++ ) {
+
+	//-- Get the range in U and V strips for this tower
+	Int_t uMin, uMax;
+	Int_t vMin, vMax;
+
+	getRangeU(isec,isub,ieta, uMin,uMax);
+	getRangeV(isec,isub,ieta, vMin,vMax);
+
+	//-- Loop over the range in u strips and add tower to
+	//-- the flat list of towers, and increment the count
+	for ( Int_t u = uMin; u <= uMax; u++ ) {
+	  mTowerMap[isec][0][u].nTower++;
+	  mTowerMap[isec][0][u].towers.push_back( TString( stripData[itow].tower ) );
+	  mTowerMap[isec][0][u].sector.push_back(isec);
+	  mTowerMap[isec][0][u].subsector.push_back(isub);
+	  mTowerMap[isec][0][u].etabin.push_back(ieta);
+	}
+	//-- Repeat for v strips
+	for ( Int_t v = vMin; v <= vMax; v++ ) {
+	  mTowerMap[isec][1][v].nTower++;
+	  mTowerMap[isec][1][v].towers.push_back( TString( stripData[itow].tower ) );
+	  mTowerMap[isec][1][v].sector.push_back(isec);
+	  mTowerMap[isec][1][v].subsector.push_back(isub);
+	  mTowerMap[isec][1][v].etabin.push_back(ieta);
+	}
+
+	//-- Increment the tower index
+	itow++;
+
+      }
+    }
+  }
 
 }
