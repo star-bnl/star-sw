@@ -16,64 +16,64 @@ StTpcHitMover::StTpcHitMover(const Char_t *name) : StMaker(name),
 						   mAlignSector(kTRUE),
 						   mSectorAligner(NULL),
 						   mExB(NULL) {
+  gMessMgr->Info("StTpcHitMover::StTpcHitMover: constructor called");
   setInputDataSetName("tpc_hits");
   setInputHitName("tphit");
   setOutputMode(0);
 }
 
 StTpcHitMover::~StTpcHitMover() {
-  if (mSectorAligner) {
-    delete mSectorAligner;
-  }
-  if (mExB) {
-    delete mExB;
-  }
+  if (mSectorAligner) delete mSectorAligner;
+  if (mExB)           delete mExB;
 }
 
 Int_t StTpcHitMover::Init() {
-  Char_t buffer[1024];
-  snprintf(buffer,1023,"StTpcHitMover::Init() - reading hits from %s:%s\n",
-	   getInputDataSetName().Data(),getInputHitName().Data());
-  buffer[1023] = '\0';
-  gMessMgr->Info(buffer);
-  snprintf(buffer,1023,"StTpcHitMover::Init() - sector align: %d\n",
-	   mAlignSector);
-  buffer[1023] = '\0';
-  gMessMgr->Info(buffer);
-  snprintf(buffer,1023,"StTpcHitMover::Init() - ExB corrections: %d\n",
-	   (m_Mode & 0x01));
-  buffer[1023] = '\0';
-  gMessMgr->Info(buffer);
-  snprintf(buffer,1023,"StTpcHitMover::Init() - mag utils options: 0x%X\n",
-	   ((m_Mode & 0x3FFE) >> 1));
+
+  gMessMgr->Info() << "StTpcHitMover::Init() - reading hits from "  <<
+    getInputDataSetName().Data() << ":" << getInputHitName().Data() << endm;
+
+  gMessMgr->Info() << "StTpcHitMover::Init() - sector align:     "  <<
+    mAlignSector   << endm;
+
+  gMessMgr->Info() << "StTpcHitMover::Init() - ExB corrections:  " <<
+    (m_Mode & 0x01)<< endm;
+
+  gMessMgr->Info() << "StTpcHitMover::Init() - mag utils options " <<
+    ((m_Mode & 0x3FFE) >> 1) << endm;
+
   return StMaker::Init();
 }
 
 Int_t StTpcHitMover::InitRun(Int_t runnumber) {
-  // delete StMagUtilities just to be sure...
-  if (mExB) {
-    delete mExB;
-  }
+  // delete StMagUtilities just to be sure... <-- no (would reload maps)
+  // if (mExB) delete mExB;
   return kStOk;
 }
 
 Int_t StTpcHitMover::Make() {
   St_DataSet *tpc_data = GetInputDS(mInputDataSetName);
-  if (!tpc_data) {
+  if (!tpc_data){
     // no TPC ???
-    return kStOk;
+    gMessMgr->Warning() << "StTpcHitMover::Make: no " << mInputDataSetName << endm;
+    return kStOk;   
   }
+
+  //tpc_data->ls(4);
+  //(void) printf("DEBUG1 :: [%s]\n",mInputHitName.Data());
+
   St_DataSetIter gime(tpc_data);
   St_tcl_tphit *tphit = (St_tcl_tphit *) gime(mInputHitName);
-  if (!tphit) {
+  if (!tphit){
     // no cluster data?
-    return kStWarn;
+    gMessMgr->Warning() << "StTpcHitMover::Make: no " << mInputHitName     << endm;
+    return kStWarn; 
   }
   
   tcl_tphit_st* spc = tphit->GetTable();
-  if (!spc) {
-    return kStWarn;
-  }
+  if (!spc)      return kStWarn;
+
+  gMessMgr->Info() << "StTpcHitMover::Make: Input hit table size is " << 
+    (int) tphit->GetNRows() << " m_Mode=" << m_Mode << endm;
 
   Float_t x[3];
   Float_t xprime[3];
@@ -144,11 +144,11 @@ void StTpcHitMover::moveTpcHit(Float_t pos[3], Float_t posMoved[3],
   if (m_Mode & 0x01) {
     // option handling needs some clean up, but right now we stay compatible
     Int_t option = (m_Mode & 0x3FFE) >> 1;
-    if (mExB == 0) {
+    if (! mExB ) {
       TDataSet *RunLog = GetDataBase("RunLog");
       mExB = new StMagUtilities(gStTpcDb, RunLog, option);
     }
-    mExB->UndoDistortion(pos,posMoved);
+    mExB->UndoDistortion(pos,posMoved);   // input pos[], returns posMoved[]
     pos[0] = posMoved[0];
     pos[1] = posMoved[1];
     pos[2] = posMoved[2];
