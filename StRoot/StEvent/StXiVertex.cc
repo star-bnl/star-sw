@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.cc,v 1.4 1999/02/24 01:55:35 genevb Exp $
+ * $Id: StXiVertex.cc,v 1.5 1999/04/09 19:34:05 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.cc,v $
+ * Revision 1.5  1999/04/09 19:34:05  genevb
+ * Added vertex daughter functionality
+ *
  * Revision 1.4  1999/02/24 01:55:35  genevb
  * Add Xi vertex type
  *
@@ -28,7 +31,7 @@
 #include <iostream.h>
 #include "StEvent/StXiVertex.hh"
 
-static const char rcsid[] = "$Id: StXiVertex.cc,v 1.4 1999/02/24 01:55:35 genevb Exp $";
+static const char rcsid[] = "$Id: StXiVertex.cc,v 1.5 1999/04/09 19:34:05 genevb Exp $";
 
 StXiVertex::StXiVertex() : 
  StVertex()
@@ -101,3 +104,20 @@ void StXiVertex::setV0Vertex(StV0Vertex* v0vtx)
 {
     mV0Vertex = v0vtx;
 }
+
+StGlobalTrack* StXiVertex::bachelor() const
+{
+    if ((numberOfDaughters()))
+      return daughters()[0]; 
+    else
+      return 0;
+}
+
+double StXiVertex::chargeOfBachelor(double B) const
+{
+    if ((numberOfDaughters()))
+      return bachelor()->helix().charge(B);
+    else
+      return 0;
+}
+
