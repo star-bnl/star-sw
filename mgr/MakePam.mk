@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.130 1999/12/04 22:46:24 fine Exp $
+# $Id: MakePam.mk,v 1.131 2001/04/05 22:57:39 jeromel Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.131  2001/04/05 22:57:39  jeromel
+# 4x_58
+#
 # Revision 1.130  1999/12/04 22:46:24  fine
 # St_Table::GetTable method became const
 #
@@ -301,7 +304,7 @@ endif
 INC_DIRS  += $(STAF)/inc
 INC_DIRS+= $(STAF_UTILS_INCS)
 DINCINT  :=  -DROOT_CINT $(filter-out -DST_NO_TEMPLATE_DEF_ARGS, $(CPPFLAGS)) $(ROOTCINTD) $(INCINT)
-ifeq ($(STAR_HOST_SYS),sun4x_56)
+ifeq ($(STAR_HOST_SYS),sun4x_56 sun4x_58)
   CXXFLAGS +=-ptr$(OBJ_DIR)
 endif
 VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_TAB) $(GEN_TAB_INC) $(OBJ_DIR) $(IDL_DIRS) $(INC_DIRS)
