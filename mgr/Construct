@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.145 2004/03/01 17:46:16 fisyak Exp $
+# $Id: Construct,v 1.146 2005/02/05 01:23:28 perev Exp $
 use Env;
 use lib $ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -173,7 +173,7 @@ if ( !$param::quiet ) {
 PrintHash($env,"\$env->{") if ($param::debug);
 my @subdirs = ();
 # install includes
-my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg StRoot/*/include/.includes_for_export.flg StRoot/StRTSClient/include/.includes_for_export.flg";
+my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StarVMC/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg StRoot/*/include/.includes_for_export.flg StRoot/StRTSClient/include/.includes_for_export.flg";
 @DirsWithIncludes = map File::Basename::dirname($_), @DirsWithIncludes;
 my @DirsIdlInc = glob "pams/*/idl pams/*/inc";
 print "DirsWithIncludes = @DirsWithIncludes @DirsIdlInc\n" if ($param::debug);
@@ -204,7 +204,7 @@ if ( defined($SKIP_DIRS) ){ @items = split(" ",$SKIP_DIRS);}
 # list of targets
 #
 
-foreach my $dir( "pams", "StRoot" ,"StPiD") {
+foreach my $dir( "pams", "StRoot" ,"StPiD", "StarVMC" ) {
     next if !-d $dir;
     opendir( DIR, $dir ) or die "Can't open $dir\n";
     my @subdirS = readdir DIR;
