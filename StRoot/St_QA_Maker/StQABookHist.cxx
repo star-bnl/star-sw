@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.21 2001/10/10 05:00:19 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.22 2001/10/25 20:43:43 lansdell Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.22  2001/10/25 20:43:43  lansdell
+// changed 2d ftpc globtrk histo ranges
+//
 // Revision 2.21  2001/10/10 05:00:19  genevb
 // Changed ftpc point/track ranges
 //
@@ -631,7 +634,7 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_good_tot->Rebin(1,"TPC/total");
   m_globtrk_good_tot->SetStats(kFALSE);
   m_globtrk_goodTTS  = QAH::H1F("QaGtrkGoodTTS","globtrk: tot good tracks - tpc,tpc+svt",40,0.,10000.);
-  m_globtrk_goodF    = QAH::H2F("QaGtrkGoodF","globtrk: tot good tracks - ftpc",40,0.,1000.,40,0.,4000.);
+  m_globtrk_goodF    = QAH::H2F("QaGtrkGoodF","globtrk: tot good tracks - ftpc",40,0.,4000.,40,0.,4000.);
   m_globtrk_goodF->SetXTitle("FTPC East");
   m_globtrk_goodF->SetYTitle("FTPC West");
   m_globtrk_fit_prob = QAH::H1F("QaGtrkFitProb","globtrk: prob. fit is correct",100,0,1.2);
