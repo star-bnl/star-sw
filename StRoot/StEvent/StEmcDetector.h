@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcDetector.h,v 2.4 2002/02/22 22:56:47 jeromel Exp $
+ * $Id: StEmcDetector.h,v 2.5 2003/09/12 21:54:53 jeromel Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.h,v $
+ * Revision 2.5  2003/09/12 21:54:53  jeromel
+ * Zeroing
+ *
  * Revision 2.4  2002/02/22 22:56:47  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -58,6 +61,7 @@ public:
 
     void setCluster(StEmcClusterCollection*);
     void setModule(StEmcModule*,int);
+    void Zero();
     
 private:
     StDetectorId            mDetectorId;

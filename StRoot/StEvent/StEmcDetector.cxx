@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcDetector.cxx,v 2.7 2001/04/05 04:00:48 ullrich Exp $
+ * $Id: StEmcDetector.cxx,v 2.8 2003/09/12 21:54:53 jeromel Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.cxx,v $
+ * Revision 2.8  2003/09/12 21:54:53  jeromel
+ * Zeroing
+ *
  * Revision 2.7  2001/04/05 04:00:48  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -37,22 +40,24 @@
 #include "StEmcModule.h"
 #include "StEmcClusterCollection.h"
 
-static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.7 2001/04/05 04:00:48 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.8 2003/09/12 21:54:53 jeromel Exp $";
 
 ClassImp(StEmcDetector)
 
-StEmcDetector::StEmcDetector() { /* noop */ }
+StEmcDetector::StEmcDetector() { 
+  Zero();
+}
 
 StEmcDetector::StEmcDetector(StDetectorId id, unsigned int n)
 {
-    mDetectorId = id;
-    mNumberOfModules = n;
-    for(int i=0; i<120;i++)
+  Zero();
+  mDetectorId = id;
+  mNumberOfModules = n;
+  for(int i=0; i<120;i++)
     {
       StEmcModule * module = new StEmcModule();
       this->setModule(module,i);
     }
-
 }
 
 StEmcDetector::~StEmcDetector()
@@ -60,6 +65,15 @@ StEmcDetector::~StEmcDetector()
     for(int i=0; i<120;i++) if(mModules[i]) delete mModules[i];
     if (mClusters) delete mClusters;
 }
+
+StEmcDetector::Zero()
+{
+  for(int i=0; i<120;i++) mModules[i] = 0;
+  mClusters = 0;
+}
+
+
+
 
 bool
 StEmcDetector::addHit(StEmcRawHit* hit)
