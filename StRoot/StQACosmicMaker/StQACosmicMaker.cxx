@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.cxx,v 1.16 2000/06/23 00:29:52 snelling Exp $
+ * $Id: StQACosmicMaker.cxx,v 1.17 2000/07/03 04:10:28 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the data from the tables (hitfinding, tracking etc.)
  *
  * $Log: StQACosmicMaker.cxx,v $
+ * Revision 1.17  2000/07/03 04:10:28  snelling
+ * Fixed bug in ntuple (changed :: to :)
+ *
  * Revision 1.16  2000/06/23 00:29:52  snelling
  * Added hit charge to the ntuple
  *
@@ -66,7 +69,10 @@ Int_t StQACosmicMaker::Init() {
 Int_t StQACosmicMaker::Make() {
 
   fillTablePointers();
-  if (bWriteTNtupleOn && brestpt && btphit && btptrack) {fillTNtuple();}
+  if (bWriteTNtupleOn && brestpt && btphit && btptrack) {fillHitTNtuple();}
+  if (bWriteTNtupleOn && bmorph && btphit && btptrack) {fillMorphTNtuple();}
+  if (bWriteTNtupleOn && brestpt && btphit && btptrack) {fillHitTNtupleNoTrk();}
+  if (bWriteTNtupleOn && bmorph && btphit && btptrack) {fillMorphTNtupleNoTrk();}
   if (btphit && btptrack) {fillClusHistograms();}
   if (bmorph && btphit && btptrack) {fillMorphHistograms();}
   if (brestpt&& btphit && btptrack) {fillResHistograms();}
@@ -80,7 +86,7 @@ Int_t StQACosmicMaker::Make() {
 
 void StQACosmicMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StQACosmicMaker.cxx,v 1.16 2000/06/23 00:29:52 snelling Exp $\n");
+  printf("* $Id: StQACosmicMaker.cxx,v 1.17 2000/07/03 04:10:28 snelling Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -212,7 +218,7 @@ void StQACosmicMaker::setSector(const Int_t sectorNumber) {
 
   SectorSelectionOn();
 
-  if (sectorNumber > 0 && sectorNumber <=24) {
+  if (sectorNumber > 0 && sectorNumber <= 24) {
   SelectedSector = sectorNumber;
   cout << "Sector: " << SelectedSector << " selected" << endl;
   }
@@ -240,14 +246,20 @@ Int_t StQACosmicMaker::writeOutHistograms() {
 //-----------------------------------------------------------------------
 
 Int_t StQACosmicMaker::initTNtuple() {
-  
-  mTNtupleTPC = new TNtuple("nttpc",
-			    "TPC TNtuple",
-			    "hrow:hx:hy:hz:hq:halpha:hlamda::hdalpha:\
-hdlamda:resy:resz:trknfit:trkcalcp");
+
+  char* ntVars = "hrow:hx:hy:hz:hq:dedx:halpha:hlambda:hdalpha:hdlambda:resy:resz:trknfit:trkp";  
+  mTNtupleTPC = new TNtuple("nttpc","TPC TNtuple",ntVars);
 
   mTNtupleMorph = new TNtuple("ntmorph",
 			    "Morph TNtuple",
+			    "hx:hy:hz:cnseq:cnpix:cnpads");
+
+  mTNtupleTPCNoTrk = new TNtuple("nttpcnotrk",
+			    "TPC TNtuple Hits not on track",
+			    "hrow:hx:hy:hz:hq:dedx");
+
+  mTNtupleMorphNoTrk = new TNtuple("ntmorphnotrk",
+			    "Morph TNtuple Hits not on track",
 			    "hx:hy:hz:cnseq:cnpix:cnpads");
   
   return kStOK;
@@ -255,49 +267,169 @@ hdlamda:resy:resz:trknfit:trkcalcp");
 
 //-----------------------------------------------------------------------
 
-Int_t StQACosmicMaker::fillTNtuple() {
+Int_t StQACosmicMaker::fillHitTNtuple() {
 
   for(Int_t i=0; i<phtcl->GetNRows();i++) {
     Int_t irow_res = ressorter->operator[]((Int_t)(pttphit[i].id));
     // track in row table is 1000*id + position on track
     Int_t irow_trk = trksorter->operator[]((Int_t)(pttphit[i].track/1000.));
-    // cluster information
-    Int_t irow_morph = morphsorter->operator[]((Int_t)(pttphit[i].cluster));
-
     
     // global cuts and only particles belonging to track
-    if (irow_trk >= 0 && irow_morph >= 0 && irow_res >= 0) {
-      // calculate total momentum of the track where the hit belongs to
-      Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
-			      (pttrk[irow_trk].invp * pttrk[irow_trk].invp));
-      
+    if (irow_trk >= 0 && irow_res >= 0) {
+      if (pttrk[irow_trk].flag >= 0) {
+	// calculate total momentum of the track where the hit belongs to
+	Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1.) /
+				(pttrk[irow_trk].invp * pttrk[irow_trk].invp));
+	if (Debug()) {cout << "track momentum" << trkcalcp << endl;}
+	if (Debug()) {cout << "z residual" << ptres[irow_res].resz << endl;}
+
+	// row in tphit table 100*sector + row
+	Int_t isector = (Int_t)(floor(pttphit[i].row / 100.));
+	Int_t irowsector = pttphit[i].row - 100 * isector;
+
+	ntEntries[hrow]     = (Float_t)(irowsector);
+	ntEntries[hx]       = pttphit[i].x;
+	ntEntries[hy]       = pttphit[i].y;
+	ntEntries[hz]       = pttphit[i].z;
+	ntEntries[hq]       = pttphit[i].q;
+	ntEntries[dedx]     = pttphit[i].dedx;
+	ntEntries[halpha]   = pttphit[i].alpha;
+	ntEntries[hlambda]  = pttphit[i].lambda;
+	ntEntries[hdalpha]  = pttphit[i].dalpha;
+	ntEntries[hdlambda] = pttphit[i].dlambda;
+	ntEntries[resy]     = ptres[irow_res].resy;
+	ntEntries[resz]     = ptres[irow_res].resz;
+	ntEntries[trknfit]  = (Float_t)(pttrk[irow_trk].nfit);
+	ntEntries[trkp]     = trkcalcp;
+
+	mTNtupleTPC->Fill(ntEntries);
+	
+	if (Debug()) {cout << "dip angle " <<pttphit[i].lambda << endl;}
+      }
+    }
+  }
+
+  return kStOK;
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StQACosmicMaker::fillMorphTNtuple() {
+
+  for(Int_t i=0; i<phtcl->GetNRows();i++) {
+    // track in row table is 1000*id + position on track
+    Int_t irow_trk = trksorter->operator[]((Int_t)(pttphit[i].track/1000.));
+    // cluster information
+    Int_t irow_morph = morphsorter->operator[]((Int_t)(pttphit[i].cluster));
+    
+    // global cuts and only particles belonging to track
+    if (irow_trk >= 0 && irow_morph >= 0) {
+      if (pttrk[irow_trk].flag >= 0) {
+	mTNtupleMorph->Fill(
+			    (Float_t)(pttphit[i].x),
+			    (Float_t)(pttphit[i].y),
+			    (Float_t)(pttphit[i].z),
+			    (Float_t)(ptmorph[irow_morph].numberOfSequences),
+			    (Float_t)(ptmorph[irow_morph].numberOfPixels),
+			    (Float_t)(ptmorph[irow_morph].numberOfPads)
+			    );
+	if (Debug()) {cout << "number of Pixels: " 
+			   << ptmorph[irow_morph].numberOfSequences 
+			   << endl;}
+      }
+    }
+  }
+
+  return kStOK;
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StQACosmicMaker::fillHitTNtupleNoTrk() {
+
+  for(Int_t i=0; i<phtcl->GetNRows();i++) {
+    // track in row table is 1000*id + position on track
+    Int_t irow_trk = trksorter->operator[]((Int_t)(pttphit[i].track/1000.));
+    
+    // global cuts and only particles belonging to track
+    if (irow_trk < 0) {
       // row in tphit table 100*sector + row
-      mTNtupleTPC->Fill(
-			(Float_t)(pttphit[i].row/100.),
+      Int_t isector = (Int_t)(floor(pttphit[i].row / 100.));
+      Int_t irowsector = pttphit[i].row - 100 * isector;
+
+      mTNtupleTPCNoTrk->Fill(
+			(Float_t)(irowsector),
 			(Float_t)(pttphit[i].x),
 			(Float_t)(pttphit[i].y),
 			(Float_t)(pttphit[i].z),
 			(Float_t)(pttphit[i].q),
-			(Float_t)(pttphit[i].alpha),
-			(Float_t)(pttphit[i].lambda),
-			(Float_t)(pttphit[i].dalpha),
-                        (Float_t)(pttphit[i].dlambda),
-			(Float_t)(ptres[irow_res].resy),
-			(Float_t)(ptres[irow_res].resz),
-			(Float_t)(pttrk[irow_trk].nfit),
-			(Float_t)(trkcalcp)
+			(Float_t)(pttphit[i].dedx)
 			);
 
-      mTNtupleMorph->Fill(
-			  (Float_t)(pttphit[i].x),
-			  (Float_t)(pttphit[i].y),
-			  (Float_t)(pttphit[i].z),
-			  (Float_t)(ptmorph[irow_morph].numberOfSequences),
-			  (Float_t)(ptmorph[irow_morph].numberOfPixels),
-			  (Float_t)(ptmorph[irow_morph].numberOfPads)
-			  );
+      if (Debug()) {cout << "x " << pttphit[i].x << endl;}
+    }
 
-      if (Debug()) {cout << "dip angle " <<pttphit[i].lambda << endl;}
+    if (irow_trk >= 0) {
+      if (pttrk[irow_trk].flag < 0) {
+	// row in tphit table 100*sector + row
+	Int_t isector = (Int_t)(floor(pttphit[i].row / 100.));
+	Int_t irowsector = pttphit[i].row - 100 * isector;
+
+	mTNtupleTPCNoTrk->Fill(
+			       (Float_t)(irowsector),
+			       (Float_t)(pttphit[i].x),
+			       (Float_t)(pttphit[i].y),
+			       (Float_t)(pttphit[i].z),
+			       (Float_t)(pttphit[i].q),
+			       (Float_t)(pttphit[i].dedx)
+			       );
+
+	if (Debug()) {cout << "x " << pttphit[i].x << endl;}
+      }
+    }
+  }
+
+  return kStOK;
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StQACosmicMaker::fillMorphTNtupleNoTrk() {
+
+  for(Int_t i=0; i<phtcl->GetNRows();i++) {
+    // track in row table is 1000*id + position on track
+    Int_t irow_trk = trksorter->operator[]((Int_t)(pttphit[i].track/1000.));
+    // cluster information
+    Int_t irow_morph = morphsorter->operator[]((Int_t)(pttphit[i].cluster));
+    
+    // global cuts and only particles belonging to track
+    if (irow_trk < 0 && irow_morph >= 0) {
+
+      mTNtupleMorphNoTrk->Fill(
+			       (Float_t)(pttphit[i].x),
+			       (Float_t)(pttphit[i].y),
+			       (Float_t)(pttphit[i].z),
+			       (Float_t)(ptmorph[irow_morph].numberOfSequences),
+			       (Float_t)(ptmorph[irow_morph].numberOfPixels),
+			       (Float_t)(ptmorph[irow_morph].numberOfPads)
+			       );
+      if (Debug()) {cout << "number of Pixels: " << 
+		      ptmorph[irow_morph].numberOfSequences  << endl;}
+    }
+
+    if (irow_trk >= 0 && irow_morph >= 0) {
+      if (pttrk[irow_trk].flag < 0) {
+	mTNtupleMorphNoTrk->Fill(
+				 (Float_t)(pttphit[i].x),
+				 (Float_t)(pttphit[i].y),
+				 (Float_t)(pttphit[i].z),
+				 (Float_t)(ptmorph[irow_morph].numberOfSequences),
+				 (Float_t)(ptmorph[irow_morph].numberOfPixels),
+				 (Float_t)(ptmorph[irow_morph].numberOfPads)
+				 );
+	if (Debug()) {cout << "number of Pixels: " << 
+			ptmorph[irow_morph].numberOfSequences  << endl;}
+      }
     }
   }
 
@@ -315,6 +447,8 @@ Int_t StQACosmicMaker::writeOutTNtuple() {
   TFile outTNtupleFile(mTNtupleFileName->Data(),"RECREATE"); 
   mTNtupleTPC->Write();
   mTNtupleMorph->Write();
+  mTNtupleTPCNoTrk->Write();
+  mTNtupleMorphNoTrk->Write();
   outTNtupleFile.Close();
 
   delete mTNtupleFileName;
@@ -661,102 +795,13 @@ Int_t StQACosmicMaker::fillResHistograms() {
 
     // global cuts and only particles belonging to track
     if (ptres[irow_res].resy != 0. && pttphit[i].alpha != 0. && irow_trk >= 0) {
-      // calculate total momentum of the track where the hit belongs to
-      Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
-			      (pttrk[irow_trk].invp * pttrk[irow_trk].invp));
+      if (pttrk[irow_trk].flag >= 0) {
+	// calculate total momentum of the track where the hit belongs to
+	Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
+				(pttrk[irow_trk].invp * pttrk[irow_trk].invp));
 
-      //  no specific sector selected 
-      if (!bSectorSelectionOn) {
-	// inner sector
-	if (irowsector <= 13) {
-	  if (trkcalcp >= 0.3) {
-	    ResidualHists[0].mXYResVersusAlpha->
-	      Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    if (fabs(pttphit[i].z) <= 50.) {
-	      ResidualHists[0].mXYResVersusAlphaZ1->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    }
-	    if (fabs(pttphit[i].z) > 50. && fabs(pttphit[i].z) <= 100.) {
-	      ResidualHists[0].mXYResVersusAlphaZ2->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    }
-	    if (fabs(pttphit[i].z) > 100. && fabs(pttphit[i].z) <= 150.) {
-	      ResidualHists[0].mXYResVersusAlphaZ3->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    }
-	    if (fabs(pttphit[i].z) > 150. && fabs(pttphit[i].z) <= 200.) {
-	      ResidualHists[0].mXYResVersusAlphaZ4->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    }
-	  }
-	  else {
-	    ResidualHists[1].mXYResVersusAlpha->
-	      Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
-	    if (fabs(pttphit[i].z) <= 50.) {
-	      ResidualHists[1].mXYResVersusAlphaZ1->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    }
-	    if (fabs(pttphit[i].z) > 50. && fabs(pttphit[i].z) <= 100.) {
-	      ResidualHists[1].mXYResVersusAlphaZ2->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    }
-	    if (fabs(pttphit[i].z) > 100. && fabs(pttphit[i].z) <= 150.) {
-	      ResidualHists[1].mXYResVersusAlphaZ3->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    }
-	    if (fabs(pttphit[i].z) > 150. && fabs(pttphit[i].z) <= 200.) {
-	      ResidualHists[1].mXYResVersusAlphaZ4->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    }
-	  }
-	}
-	// outer sector
-	else {
-	  if (trkcalcp >= 0.3) {
-	    ResidualHists[2].mXYResVersusAlpha->
-	      Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
-	    if (fabs(pttphit[i].z) <= 50.) {
-	      ResidualHists[2].mXYResVersusAlphaZ1->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    }
-	    if (fabs(pttphit[i].z) > 50. && fabs(pttphit[i].z) <= 100.) {
-	      ResidualHists[2].mXYResVersusAlphaZ2->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    }
-	    if (fabs(pttphit[i].z) > 100. && fabs(pttphit[i].z) <= 150.) {
-	      ResidualHists[2].mXYResVersusAlphaZ3->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    }
-	    if (fabs(pttphit[i].z) > 150. && fabs(pttphit[i].z) <= 200.) {
-	      ResidualHists[2].mXYResVersusAlphaZ4->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    }
-	  }
-	  else {
-	    ResidualHists[3].mXYResVersusAlpha->
-	      Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
-	    if (fabs(pttphit[i].z) <= 50.) {
-	      ResidualHists[3].mXYResVersusAlphaZ1->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    }
-	    if (fabs(pttphit[i].z) > 50. && fabs(pttphit[i].z) <= 100.) {
-	      ResidualHists[3].mXYResVersusAlphaZ2->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    }
-	    if (fabs(pttphit[i].z) > 100. && fabs(pttphit[i].z) <= 150.) {
-	      ResidualHists[3].mXYResVersusAlphaZ3->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    }
-	    if (fabs(pttphit[i].z) > 150. && fabs(pttphit[i].z) <= 200.) {
-	      ResidualHists[3].mXYResVersusAlphaZ4->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	    }
-	  }
-	}
-      }
-      // fill histograms only for selected sector, low momentum in hist1 rest in hist0
-      else {
-	if (isector == SelectedSector) {
+	//  no specific sector selected 
+	if (!bSectorSelectionOn) {
 	  // inner sector
 	  if (irowsector <= 13) {
 	    if (trkcalcp >= 0.3) {
@@ -804,7 +849,7 @@ Int_t StQACosmicMaker::fillResHistograms() {
 	  else {
 	    if (trkcalcp >= 0.3) {
 	      ResidualHists[2].mXYResVersusAlpha->
-		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
 	      if (fabs(pttphit[i].z) <= 50.) {
 		ResidualHists[2].mXYResVersusAlphaZ1->
 		  Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
@@ -844,10 +889,100 @@ Int_t StQACosmicMaker::fillResHistograms() {
 	    }
 	  }
 	}
+	// fill histograms only for selected sector, low momentum in hist1 rest in hist0
+	else {
+	  if (isector == SelectedSector) {
+	    // inner sector
+	    if (irowsector <= 13) {
+	      if (trkcalcp >= 0.3) {
+		ResidualHists[0].mXYResVersusAlpha->
+		  Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		if (fabs(pttphit[i].z) <= 50.) {
+		  ResidualHists[0].mXYResVersusAlphaZ1->
+		    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		}
+		if (fabs(pttphit[i].z) > 50. && fabs(pttphit[i].z) <= 100.) {
+		  ResidualHists[0].mXYResVersusAlphaZ2->
+		    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		}
+		if (fabs(pttphit[i].z) > 100. && fabs(pttphit[i].z) <= 150.) {
+		  ResidualHists[0].mXYResVersusAlphaZ3->
+		    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		}
+		if (fabs(pttphit[i].z) > 150. && fabs(pttphit[i].z) <= 200.) {
+		  ResidualHists[0].mXYResVersusAlphaZ4->
+		    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		}
+	      }
+	      else {
+		ResidualHists[1].mXYResVersusAlpha->
+		  Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
+		if (fabs(pttphit[i].z) <= 50.) {
+		  ResidualHists[1].mXYResVersusAlphaZ1->
+		    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		}
+		if (fabs(pttphit[i].z) > 50. && fabs(pttphit[i].z) <= 100.) {
+		  ResidualHists[1].mXYResVersusAlphaZ2->
+		    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		}
+		if (fabs(pttphit[i].z) > 100. && fabs(pttphit[i].z) <= 150.) {
+		  ResidualHists[1].mXYResVersusAlphaZ3->
+		    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		}
+		if (fabs(pttphit[i].z) > 150. && fabs(pttphit[i].z) <= 200.) {
+		  ResidualHists[1].mXYResVersusAlphaZ4->
+		    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		}
+	      }
+	    }
+	    // outer sector
+	    else {
+	      if (trkcalcp >= 0.3) {
+		ResidualHists[2].mXYResVersusAlpha->
+		  Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		if (fabs(pttphit[i].z) <= 50.) {
+		  ResidualHists[2].mXYResVersusAlphaZ1->
+		    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		}
+		if (fabs(pttphit[i].z) > 50. && fabs(pttphit[i].z) <= 100.) {
+		  ResidualHists[2].mXYResVersusAlphaZ2->
+		    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		}
+		if (fabs(pttphit[i].z) > 100. && fabs(pttphit[i].z) <= 150.) {
+		  ResidualHists[2].mXYResVersusAlphaZ3->
+		    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		}
+		if (fabs(pttphit[i].z) > 150. && fabs(pttphit[i].z) <= 200.) {
+		  ResidualHists[2].mXYResVersusAlphaZ4->
+		    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		}
+	      }
+	      else {
+		ResidualHists[3].mXYResVersusAlpha->
+		  Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
+		if (fabs(pttphit[i].z) <= 50.) {
+		  ResidualHists[3].mXYResVersusAlphaZ1->
+		    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		}
+		if (fabs(pttphit[i].z) > 50. && fabs(pttphit[i].z) <= 100.) {
+		  ResidualHists[3].mXYResVersusAlphaZ2->
+		    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		}
+		if (fabs(pttphit[i].z) > 100. && fabs(pttphit[i].z) <= 150.) {
+		  ResidualHists[3].mXYResVersusAlphaZ3->
+		    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		}
+		if (fabs(pttphit[i].z) > 150. && fabs(pttphit[i].z) <= 200.) {
+		  ResidualHists[3].mXYResVersusAlphaZ4->
+		    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+		}
+	      }
+	    }
+	  }
+	}
       }
     }
   }
-
   return kStOK;
 }
 
@@ -1393,38 +1528,18 @@ Int_t StQACosmicMaker::fillChargeHistograms() {
     
     // global cuts and only particles belonging to track
     if (pttphit[i].q != 0. && irow_trk >= 0) {
-      // calculate total momentum of the track where the hit belongs to
-      Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
-			      (pttrk[irow_trk].invp * pttrk[irow_trk].invp));
-      
-      if (Debug()) {
-	cout << "trk row nr in table: " << irow_trk << endl;
-      }
-      
-      if (trkcalcp >= 0.3) {
-	//  no specific sector selected 
-	if (!bSectorSelectionOn) {
-	  ChargeHists[0].mQdist->
-	    Fill((Float_t)(pttphit[i].x),(Float_t)(pttphit[i].q) );
-	  ChargeHists[1].mQdist->
-	    Fill((Float_t)(pttphit[i].y),(Float_t)(pttphit[i].q) );
-	  ChargeHists[2].mQdist->
-	    Fill((Float_t)(pttphit[i].z),(Float_t)(pttphit[i].q) );
-	  ChargeHists[3].mQdist->
-	    Fill((Float_t)(irowsector),(Float_t)(pttphit[i].q) );
-	  // profile histogram
-	  ChargeHists[0].mQprof->
-	    Fill((Float_t)(pttphit[i].x),(Float_t)(pttphit[i].q) );
-	  ChargeHists[1].mQprof->
-	    Fill((Float_t)(pttphit[i].y),(Float_t)(pttphit[i].q) );
-	  ChargeHists[2].mQprof->
-	    Fill((Float_t)(pttphit[i].z),(Float_t)(pttphit[i].q) );
-	  ChargeHists[3].mQprof->
-	    Fill((Float_t)(irowsector),(Float_t)(pttphit[i].q) );
+      if (pttrk[irow_trk].flag >= 0) {
+	// calculate total momentum of the track where the hit belongs to
+	Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
+				(pttrk[irow_trk].invp * pttrk[irow_trk].invp));
+	
+	if (Debug()) {
+	  cout << "trk row nr in table: " << irow_trk << endl;
 	}
-	// fill histograms only for selected sector
-	else {
-	  if (isector == SelectedSector) {
+	
+	if (trkcalcp >= 0.3) {
+	  //  no specific sector selected 
+	  if (!bSectorSelectionOn) {
 	    ChargeHists[0].mQdist->
 	      Fill((Float_t)(pttphit[i].x),(Float_t)(pttphit[i].q) );
 	    ChargeHists[1].mQdist->
@@ -1433,7 +1548,7 @@ Int_t StQACosmicMaker::fillChargeHistograms() {
 	      Fill((Float_t)(pttphit[i].z),(Float_t)(pttphit[i].q) );
 	    ChargeHists[3].mQdist->
 	      Fill((Float_t)(irowsector),(Float_t)(pttphit[i].q) );
-	    // profile histograms
+	    // profile histogram
 	    ChargeHists[0].mQprof->
 	      Fill((Float_t)(pttphit[i].x),(Float_t)(pttphit[i].q) );
 	    ChargeHists[1].mQprof->
@@ -1442,6 +1557,28 @@ Int_t StQACosmicMaker::fillChargeHistograms() {
 	      Fill((Float_t)(pttphit[i].z),(Float_t)(pttphit[i].q) );
 	    ChargeHists[3].mQprof->
 	      Fill((Float_t)(irowsector),(Float_t)(pttphit[i].q) );
+	  }
+	  // fill histograms only for selected sector
+	  else {
+	    if (isector == SelectedSector) {
+	      ChargeHists[0].mQdist->
+		Fill((Float_t)(pttphit[i].x),(Float_t)(pttphit[i].q) );
+	      ChargeHists[1].mQdist->
+		Fill((Float_t)(pttphit[i].y),(Float_t)(pttphit[i].q) );
+	      ChargeHists[2].mQdist->
+		Fill((Float_t)(pttphit[i].z),(Float_t)(pttphit[i].q) );
+	      ChargeHists[3].mQdist->
+		Fill((Float_t)(irowsector),(Float_t)(pttphit[i].q) );
+	      // profile histograms
+	      ChargeHists[0].mQprof->
+		Fill((Float_t)(pttphit[i].x),(Float_t)(pttphit[i].q) );
+	      ChargeHists[1].mQprof->
+		Fill((Float_t)(pttphit[i].y),(Float_t)(pttphit[i].q) );
+	      ChargeHists[2].mQprof->
+		Fill((Float_t)(pttphit[i].z),(Float_t)(pttphit[i].q) );
+	      ChargeHists[3].mQprof->
+		Fill((Float_t)(irowsector),(Float_t)(pttphit[i].q) );
+	    }
 	  }
 	}
       }
@@ -1613,38 +1750,13 @@ Int_t StQACosmicMaker::fillClusHistograms() {
 
     // global cuts and only particles belonging to track
     if (irow_trk >= 0) {
-      // calculate total momentum of the track where the hit belongs to
-      Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
-			      (pttrk[irow_trk].invp * pttrk[irow_trk].invp));
-
-      //  no specific sector selected 
-      if (!bSectorSelectionOn) {
-	// inner sector
-	if (irowsector <= 13) {
-	  if (trkcalcp >= 0.3) {
-	    ClusterHists[0].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
-	    ClusterHists[0].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
-	  }
-	  else {
-	    ClusterHists[1].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
-	    ClusterHists[1].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
-	  }
-	}
-	// outer sector
-	else {
-	  if (trkcalcp >= 0.3) {
-	    ClusterHists[2].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
-	    ClusterHists[2].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
-	  }
-	  else {
-	    ClusterHists[3].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
-	    ClusterHists[3].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
-	  }
-	}
-      }
-      // fill histograms only for selected sector, low momentum in hist1 rest in hist0
-      else {
-	if (isector == SelectedSector) {
+      if (pttrk[irow_trk].flag >= 0) {
+	// calculate total momentum of the track where the hit belongs to
+	Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
+				(pttrk[irow_trk].invp * pttrk[irow_trk].invp));
+	
+	//  no specific sector selected 
+	if (!bSectorSelectionOn) {
 	  // inner sector
 	  if (irowsector <= 13) {
 	    if (trkcalcp >= 0.3) {
@@ -1665,6 +1777,33 @@ Int_t StQACosmicMaker::fillClusHistograms() {
 	    else {
 	      ClusterHists[3].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
 	      ClusterHists[3].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
+	    }
+	  }
+	}
+	// fill histograms only for selected sector, low momentum in hist1 rest in hist0
+	else {
+	  if (isector == SelectedSector) {
+	    // inner sector
+	    if (irowsector <= 13) {
+	      if (trkcalcp >= 0.3) {
+		ClusterHists[0].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
+		ClusterHists[0].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
+	      }
+	      else {
+		ClusterHists[1].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
+		ClusterHists[1].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
+	      }
+	    }
+	    // outer sector
+	    else {
+	      if (trkcalcp >= 0.3) {
+		ClusterHists[2].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
+		ClusterHists[2].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
+	      }
+	      else {
+		ClusterHists[3].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
+		ClusterHists[3].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
+	      }
 	    }
 	  }
 	}
@@ -1906,98 +2045,13 @@ Int_t StQACosmicMaker::fillMorphHistograms() {
     
     // global cuts and only particles belonging to track
     if ( irow_trk >= 0 && irow_morph >= 0 ) {
-      // calculate total momentum of the track where the hit belongs to
-      Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
-			      (pttrk[irow_trk].invp * pttrk[irow_trk].invp));
-
-      //  no specific sector selected 
-      if (!bSectorSelectionOn) {
-	// inner sector
-	if (irowsector <= 13) {
-	  if (trkcalcp >= 0.3) {
-	    MorphHists[0].mNumberOfSequences->Fill((Float_t)(ptmorph[irow_morph].numberOfSequences));
-	    MorphHists[0].mNumberOfPixels->Fill((Float_t)(ptmorph[irow_morph].numberOfPixels));
-	    MorphHists[0].mNumberOfPads->Fill((Float_t)(ptmorph[irow_morph].numberOfPads));
-	    MorphHists[0].mNumberOfHits->Fill((Float_t)(ptmorph[irow_morph].numberOfHits));
-	    MorphHists[0].mTotalCharge->Fill((Float_t)(ptmorph[irow_morph].totalCharge));
-	    MorphHists[0].mMaxCharge->Fill((Float_t)(ptmorph[irow_morph].maxCharge));
-	    MorphHists[0].mAverageCharge->Fill((Float_t)(ptmorph[irow_morph].averageCharge));
-	    MorphHists[0].mPadSigma1->Fill((Float_t)(ptmorph[irow_morph].padSigma1));
-	    MorphHists[0].mTimeSigma1->Fill((Float_t)(ptmorph[irow_morph].timeSigma1));
-	    MorphHists[0].mPadTimeSigma1Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma1Sq ));
-	    MorphHists[0].mEcc1->Fill((Float_t)(ptmorph[irow_morph].ecc1));
-	    MorphHists[0].mLinEcc1->Fill((Float_t)(ptmorph[irow_morph].linEcc1));
-	    MorphHists[0].mPadSigma2->Fill((Float_t)(ptmorph[irow_morph].padSigma2));
-	    MorphHists[0].mTimeSigma2->Fill((Float_t)(ptmorph[irow_morph].timeSigma2));
-	    MorphHists[0].mPadTimeSigma2Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma2Sq ));
-	    MorphHists[0].mEcc2->Fill((Float_t)(ptmorph[irow_morph].ecc2));
-	    MorphHists[0].mLinEcc2->Fill((Float_t)(ptmorph[irow_morph].linEcc2));
-	  }
-	  else {
-	    MorphHists[1].mNumberOfSequences->Fill((Float_t)(ptmorph[irow_morph].numberOfSequences));
-	    MorphHists[1].mNumberOfPixels->Fill((Float_t)(ptmorph[irow_morph].numberOfPixels));
-	    MorphHists[1].mNumberOfPads->Fill((Float_t)(ptmorph[irow_morph].numberOfPads));
-	    MorphHists[1].mNumberOfHits->Fill((Float_t)(ptmorph[irow_morph].numberOfHits));
-	    MorphHists[1].mTotalCharge->Fill((Float_t)(ptmorph[irow_morph].totalCharge));
-	    MorphHists[1].mMaxCharge->Fill((Float_t)(ptmorph[irow_morph].maxCharge));
-	    MorphHists[1].mAverageCharge->Fill((Float_t)(ptmorph[irow_morph].averageCharge));
-	    MorphHists[1].mPadSigma1->Fill((Float_t)(ptmorph[irow_morph].padSigma1));
-	    MorphHists[1].mTimeSigma1->Fill((Float_t)(ptmorph[irow_morph].timeSigma1));
-	    MorphHists[1].mPadTimeSigma1Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma1Sq ));
-	    MorphHists[1].mEcc1->Fill((Float_t)(ptmorph[irow_morph].ecc1));
-	    MorphHists[1].mLinEcc1->Fill((Float_t)(ptmorph[irow_morph].linEcc1));
-	    MorphHists[1].mPadSigma2->Fill((Float_t)(ptmorph[irow_morph].padSigma2));
-	    MorphHists[1].mTimeSigma2->Fill((Float_t)(ptmorph[irow_morph].timeSigma2));
-	    MorphHists[1].mPadTimeSigma2Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma2Sq ));
-	    MorphHists[1].mEcc2->Fill((Float_t)(ptmorph[irow_morph].ecc2));
-	    MorphHists[1].mLinEcc2->Fill((Float_t)(ptmorph[irow_morph].linEcc2));
-	  }
-	}
-	// outer sector
-	else {
-	  if (trkcalcp >= 0.3) {
-	    MorphHists[2].mNumberOfSequences->Fill((Float_t)(ptmorph[irow_morph].numberOfSequences));
-	    MorphHists[2].mNumberOfPixels->Fill((Float_t)(ptmorph[irow_morph].numberOfPixels));
-	    MorphHists[2].mNumberOfPads->Fill((Float_t)(ptmorph[irow_morph].numberOfPads));
-	    MorphHists[2].mNumberOfHits->Fill((Float_t)(ptmorph[irow_morph].numberOfHits));
-	    MorphHists[2].mTotalCharge->Fill((Float_t)(ptmorph[irow_morph].totalCharge));
-	    MorphHists[2].mMaxCharge->Fill((Float_t)(ptmorph[irow_morph].maxCharge));
-	    MorphHists[2].mAverageCharge->Fill((Float_t)(ptmorph[irow_morph].averageCharge));
-	    MorphHists[2].mPadSigma1->Fill((Float_t)(ptmorph[irow_morph].padSigma1));
-	    MorphHists[2].mTimeSigma1->Fill((Float_t)(ptmorph[irow_morph].timeSigma1));
-	    MorphHists[2].mPadTimeSigma1Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma1Sq ));
-	    MorphHists[2].mEcc1->Fill((Float_t)(ptmorph[irow_morph].ecc1));
-	    MorphHists[2].mLinEcc1->Fill((Float_t)(ptmorph[irow_morph].linEcc1));
-	    MorphHists[2].mPadSigma2->Fill((Float_t)(ptmorph[irow_morph].padSigma2));
-	    MorphHists[2].mTimeSigma2->Fill((Float_t)(ptmorph[irow_morph].timeSigma2));
-	    MorphHists[2].mPadTimeSigma2Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma2Sq ));
-	    MorphHists[2].mEcc2->Fill((Float_t)(ptmorph[irow_morph].ecc2));
-	    MorphHists[2].mLinEcc2->Fill((Float_t)(ptmorph[irow_morph].linEcc2));
-	  }
-	  else {
-	    MorphHists[3].mNumberOfSequences->Fill((Float_t)(ptmorph[irow_morph].numberOfSequences));
-	    MorphHists[3].mNumberOfPixels->Fill((Float_t)(ptmorph[irow_morph].numberOfPixels));
-	    MorphHists[3].mNumberOfPads->Fill((Float_t)(ptmorph[irow_morph].numberOfPads));
-	    MorphHists[3].mNumberOfHits->Fill((Float_t)(ptmorph[irow_morph].numberOfHits));
-	    MorphHists[3].mTotalCharge->Fill((Float_t)(ptmorph[irow_morph].totalCharge));
-	    MorphHists[3].mMaxCharge->Fill((Float_t)(ptmorph[irow_morph].maxCharge));
-	    MorphHists[3].mAverageCharge->Fill((Float_t)(ptmorph[irow_morph].averageCharge));
-	    MorphHists[3].mPadSigma1->Fill((Float_t)(ptmorph[irow_morph].padSigma1));
-	    MorphHists[3].mTimeSigma1->Fill((Float_t)(ptmorph[irow_morph].timeSigma1));
-	    MorphHists[3].mPadTimeSigma1Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma1Sq ));
-	    MorphHists[3].mEcc1->Fill((Float_t)(ptmorph[irow_morph].ecc1));
-	    MorphHists[3].mLinEcc1->Fill((Float_t)(ptmorph[irow_morph].linEcc1));
-	    MorphHists[3].mPadSigma2->Fill((Float_t)(ptmorph[irow_morph].padSigma2));
-	    MorphHists[3].mTimeSigma2->Fill((Float_t)(ptmorph[irow_morph].timeSigma2));
-	    MorphHists[3].mPadTimeSigma2Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma2Sq ));
-	    MorphHists[3].mEcc2->Fill((Float_t)(ptmorph[irow_morph].ecc2));
-	    MorphHists[3].mLinEcc2->Fill((Float_t)(ptmorph[irow_morph].linEcc2));
-	  }
-	}
-      }
-      // fill histograms only for selected sector, low momentum in hist1 rest in hist0
-      else {
-	if (isector == SelectedSector) {
+      if (pttrk[irow_trk].flag >= 0) {
+	// calculate total momentum of the track where the hit belongs to
+	Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
+				(pttrk[irow_trk].invp * pttrk[irow_trk].invp));
+	
+	//  no specific sector selected 
+	if (!bSectorSelectionOn) {
 	  // inner sector
 	  if (irowsector <= 13) {
 	    if (trkcalcp >= 0.3) {
@@ -2078,6 +2132,93 @@ Int_t StQACosmicMaker::fillMorphHistograms() {
 	      MorphHists[3].mPadTimeSigma2Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma2Sq ));
 	      MorphHists[3].mEcc2->Fill((Float_t)(ptmorph[irow_morph].ecc2));
 	      MorphHists[3].mLinEcc2->Fill((Float_t)(ptmorph[irow_morph].linEcc2));
+	    }
+	  }
+	}
+	// fill histograms only for selected sector, low momentum in hist1 rest in hist0
+	else {
+	  if (isector == SelectedSector) {
+	    // inner sector
+	    if (irowsector <= 13) {
+	      if (trkcalcp >= 0.3) {
+		MorphHists[0].mNumberOfSequences->Fill((Float_t)(ptmorph[irow_morph].numberOfSequences));
+		MorphHists[0].mNumberOfPixels->Fill((Float_t)(ptmorph[irow_morph].numberOfPixels));
+		MorphHists[0].mNumberOfPads->Fill((Float_t)(ptmorph[irow_morph].numberOfPads));
+		MorphHists[0].mNumberOfHits->Fill((Float_t)(ptmorph[irow_morph].numberOfHits));
+		MorphHists[0].mTotalCharge->Fill((Float_t)(ptmorph[irow_morph].totalCharge));
+		MorphHists[0].mMaxCharge->Fill((Float_t)(ptmorph[irow_morph].maxCharge));
+		MorphHists[0].mAverageCharge->Fill((Float_t)(ptmorph[irow_morph].averageCharge));
+		MorphHists[0].mPadSigma1->Fill((Float_t)(ptmorph[irow_morph].padSigma1));
+		MorphHists[0].mTimeSigma1->Fill((Float_t)(ptmorph[irow_morph].timeSigma1));
+		MorphHists[0].mPadTimeSigma1Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma1Sq ));
+		MorphHists[0].mEcc1->Fill((Float_t)(ptmorph[irow_morph].ecc1));
+		MorphHists[0].mLinEcc1->Fill((Float_t)(ptmorph[irow_morph].linEcc1));
+		MorphHists[0].mPadSigma2->Fill((Float_t)(ptmorph[irow_morph].padSigma2));
+		MorphHists[0].mTimeSigma2->Fill((Float_t)(ptmorph[irow_morph].timeSigma2));
+		MorphHists[0].mPadTimeSigma2Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma2Sq ));
+		MorphHists[0].mEcc2->Fill((Float_t)(ptmorph[irow_morph].ecc2));
+		MorphHists[0].mLinEcc2->Fill((Float_t)(ptmorph[irow_morph].linEcc2));
+	      }
+	      else {
+		MorphHists[1].mNumberOfSequences->Fill((Float_t)(ptmorph[irow_morph].numberOfSequences));
+		MorphHists[1].mNumberOfPixels->Fill((Float_t)(ptmorph[irow_morph].numberOfPixels));
+		MorphHists[1].mNumberOfPads->Fill((Float_t)(ptmorph[irow_morph].numberOfPads));
+		MorphHists[1].mNumberOfHits->Fill((Float_t)(ptmorph[irow_morph].numberOfHits));
+		MorphHists[1].mTotalCharge->Fill((Float_t)(ptmorph[irow_morph].totalCharge));
+		MorphHists[1].mMaxCharge->Fill((Float_t)(ptmorph[irow_morph].maxCharge));
+		MorphHists[1].mAverageCharge->Fill((Float_t)(ptmorph[irow_morph].averageCharge));
+		MorphHists[1].mPadSigma1->Fill((Float_t)(ptmorph[irow_morph].padSigma1));
+		MorphHists[1].mTimeSigma1->Fill((Float_t)(ptmorph[irow_morph].timeSigma1));
+		MorphHists[1].mPadTimeSigma1Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma1Sq ));
+		MorphHists[1].mEcc1->Fill((Float_t)(ptmorph[irow_morph].ecc1));
+		MorphHists[1].mLinEcc1->Fill((Float_t)(ptmorph[irow_morph].linEcc1));
+		MorphHists[1].mPadSigma2->Fill((Float_t)(ptmorph[irow_morph].padSigma2));
+		MorphHists[1].mTimeSigma2->Fill((Float_t)(ptmorph[irow_morph].timeSigma2));
+		MorphHists[1].mPadTimeSigma2Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma2Sq ));
+		MorphHists[1].mEcc2->Fill((Float_t)(ptmorph[irow_morph].ecc2));
+		MorphHists[1].mLinEcc2->Fill((Float_t)(ptmorph[irow_morph].linEcc2));
+	      }
+	    }
+	    // outer sector
+	    else {
+	      if (trkcalcp >= 0.3) {
+		MorphHists[2].mNumberOfSequences->Fill((Float_t)(ptmorph[irow_morph].numberOfSequences));
+		MorphHists[2].mNumberOfPixels->Fill((Float_t)(ptmorph[irow_morph].numberOfPixels));
+		MorphHists[2].mNumberOfPads->Fill((Float_t)(ptmorph[irow_morph].numberOfPads));
+		MorphHists[2].mNumberOfHits->Fill((Float_t)(ptmorph[irow_morph].numberOfHits));
+		MorphHists[2].mTotalCharge->Fill((Float_t)(ptmorph[irow_morph].totalCharge));
+		MorphHists[2].mMaxCharge->Fill((Float_t)(ptmorph[irow_morph].maxCharge));
+		MorphHists[2].mAverageCharge->Fill((Float_t)(ptmorph[irow_morph].averageCharge));
+		MorphHists[2].mPadSigma1->Fill((Float_t)(ptmorph[irow_morph].padSigma1));
+		MorphHists[2].mTimeSigma1->Fill((Float_t)(ptmorph[irow_morph].timeSigma1));
+		MorphHists[2].mPadTimeSigma1Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma1Sq ));
+		MorphHists[2].mEcc1->Fill((Float_t)(ptmorph[irow_morph].ecc1));
+		MorphHists[2].mLinEcc1->Fill((Float_t)(ptmorph[irow_morph].linEcc1));
+		MorphHists[2].mPadSigma2->Fill((Float_t)(ptmorph[irow_morph].padSigma2));
+		MorphHists[2].mTimeSigma2->Fill((Float_t)(ptmorph[irow_morph].timeSigma2));
+		MorphHists[2].mPadTimeSigma2Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma2Sq ));
+		MorphHists[2].mEcc2->Fill((Float_t)(ptmorph[irow_morph].ecc2));
+		MorphHists[2].mLinEcc2->Fill((Float_t)(ptmorph[irow_morph].linEcc2));
+	      }
+	      else {
+		MorphHists[3].mNumberOfSequences->Fill((Float_t)(ptmorph[irow_morph].numberOfSequences));
+		MorphHists[3].mNumberOfPixels->Fill((Float_t)(ptmorph[irow_morph].numberOfPixels));
+		MorphHists[3].mNumberOfPads->Fill((Float_t)(ptmorph[irow_morph].numberOfPads));
+		MorphHists[3].mNumberOfHits->Fill((Float_t)(ptmorph[irow_morph].numberOfHits));
+		MorphHists[3].mTotalCharge->Fill((Float_t)(ptmorph[irow_morph].totalCharge));
+		MorphHists[3].mMaxCharge->Fill((Float_t)(ptmorph[irow_morph].maxCharge));
+		MorphHists[3].mAverageCharge->Fill((Float_t)(ptmorph[irow_morph].averageCharge));
+		MorphHists[3].mPadSigma1->Fill((Float_t)(ptmorph[irow_morph].padSigma1));
+		MorphHists[3].mTimeSigma1->Fill((Float_t)(ptmorph[irow_morph].timeSigma1));
+		MorphHists[3].mPadTimeSigma1Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma1Sq ));
+		MorphHists[3].mEcc1->Fill((Float_t)(ptmorph[irow_morph].ecc1));
+		MorphHists[3].mLinEcc1->Fill((Float_t)(ptmorph[irow_morph].linEcc1));
+		MorphHists[3].mPadSigma2->Fill((Float_t)(ptmorph[irow_morph].padSigma2));
+		MorphHists[3].mTimeSigma2->Fill((Float_t)(ptmorph[irow_morph].timeSigma2));
+		MorphHists[3].mPadTimeSigma2Sq->Fill((Float_t)(ptmorph[irow_morph].padTimeSigma2Sq ));
+		MorphHists[3].mEcc2->Fill((Float_t)(ptmorph[irow_morph].ecc2));
+		MorphHists[3].mLinEcc2->Fill((Float_t)(ptmorph[irow_morph].linEcc2));
+	      }
 	    }
 	  }
 	}
