@@ -1,20 +1,16 @@
-/***************************************************************************
+/*!
+ * \class StMinuitVertexFinder
+ * \author Thomas Ullrich, Feb 2002
  *
- * $Id: StMinuitVertexFinder.h,v 1.4 2004/04/06 02:43:43 lbarnby Exp $
+ *  Modified for pp by David Hardtke, Summer 2002
  *
- * Author: Thomas Ullrich, Feb 2002
- * Modified for pp by David Hardtke, Summer 2002
- ***************************************************************************
- *
- * Description:
- * StEvent based vertex fitter using a robust potential.
- * The actual fit is performed by MINUIT (TMinuit).
- * For documentation the following links and documents
- * are very useful:
- * http://wwwinfo.cern.ch/asdoc/minuit/minmain.html
- * http://root.cern.ch/root/html/TMinuit.html
- * http://www-glast.slac.stanford.edu/software/root/GRUG/docs/Feature/GRUGminuit.pdf
- *
+ *  StEvent based vertex fitter using a robust potential.
+ *  The actual fit is performed by MINUIT (TMinuit).
+ *  For documentation the following links and documents
+ *  are very useful:
+ *  http://wwwinfo.cern.ch/asdoc/minuit/minmain.html
+ *  http://root.cern.ch/root/html/TMinuit.html
+ *  http://www-glast.slac.stanford.edu/software/root/GRUG/docs/Feature/GRUGminuit.pdf
  *
  * Member Functions:
  * -----------------
@@ -73,33 +69,12 @@
  *
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
- * We also have the option of requiring that at least one track matches
- * the CTB during the first two scans for the vertex (these are coarse scans
- * to locate the probable z vertex
  *
- * myvertex.CTBforSeed();
+ *  $Id: StMinuitVertexFinder.h,v 1.5 2004/07/23 00:59:36 jeromel Exp $
  *
- * During the final fit (once the z position of the vertex has been constrained)
- * there is no CTB requirement.  To get the number of tracks with CTB match:
- *
- *  myvertex.NCtbMatches()
- *  
- ***************************************************************************
- *
- * $Log: StMinuitVertexFinder.h,v $
- * Revision 1.4  2004/04/06 02:43:43  lbarnby
- * Fixed identification of bad seeds (no z~0 problem now). Better flagging. Message manager used.
- *
- * Revision 1.3  2003/05/12 21:10:06  lbarnby
- * Made destructor virtual
- *
- * Revision 1.2  2003/05/09 22:19:51  lbarnby
- * Now also calculates and reports error on vertex. Corrected filter to use ITTF tracks. Some temporary protections against inf/Nan. Skip delete of TMinuit class since causing seg. fault.
- *
- * Revision 1.1  2002/12/05 23:42:46  hardtke
- * Initial Version for development and integration
- *
- **************************************************************************/
+ */
+
+
 #include <vector>
 #include "StThreeVectorD.hh"
 #include "StPhysicalHelixD.hh"
@@ -112,24 +87,16 @@ class TMinuit;
 class StMinuitVertexFinder: public StGenericVertexFinder {
 public:
     StMinuitVertexFinder();
-    virtual ~StMinuitVertexFinder();
 
-    bool            fit(StEvent*);       // fit the vertex
-    StThreeVectorD  result() const;      // result of fit
-    StThreeVectorD  error() const;       // error on fit result
-    int             status() const;      // error and status flag
+    // mandatory implementations
+    virtual         ~StMinuitVertexFinder();
+    bool            fit(StEvent*);       
+    int             NCtbMatches();
 
-    void            setExternalSeed(const StThreeVectorD&);
+    // Added, not part of base-class
     void            setPrintLevel(int = 0);
     void            printInfo(ostream& = cout) const;
     void            UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
-    void            NoVertexConstraint();
-    void            CTBforSeed();
-    void            NoCTBforSeed();
-    int             NCtbMatches();
-    void            SetFitPointsCut(int fitpoints);
-    inline void DoUseITTF(){use_ITTF=kTRUE;};
-    inline void DoNotUseITTF(){use_ITTF=kFALSE;};
 
 private:
     bool accept(StTrack*) const;   // track filter
@@ -149,28 +116,36 @@ private:
     static double                   mdydz; // beam slope
     static double beamX(double z); // beamline parameterization
     static double beamY(double z); // beamline parameterization
-    inline void setFlagBase(UInt_t base){mFlagBase=base;};
+    //inline void setFlagBase(UInt_t base){mFlagBase=base;};
 
     
     TMinuit*                 mMinuit;
-    StThreeVectorD           mFitResult;
-    StThreeVectorD           mFitError;
-    unsigned int             mMinNumberOfFitPointsOnTrack;
-    bool                     mExternalSeedPresent;
-    StThreeVectorD           mExternalSeed;
     double                   mFmin;       // best function value found
     double                   mFedm;       // estimated vertical distance remaining to minimum
     double                   mErrdef;     // value of UP defining parameter uncertainty
     int                      mNpari;      // number of variable parameters
     int                      mNparx;      // highest parameter number defined
-    int                      mStatus;     // status flag 
-    bool                     mVertexConstrain; // Use vertex constraint from db
-    bool                     mRequireCTB; // require CTB for seed
-    bool            use_ITTF;    //Use only tracks with ITTF encoded method
-    double                   mWeight ; // Weight in fit for vertex contraint
-    StPhysicalHelixD*        mBeamHelix ; // Beam Line helix
 };
 
 
 
 
+/***************************************************************************
+ *
+ * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.5  2004/07/23 00:59:36  jeromel
+ * Removed methods (moved in base class) + doxygenized
+ *
+ * Revision 1.4  2004/04/06 02:43:43  lbarnby
+ * Fixed identification of bad seeds (no z~0 problem now). Better flagging. Message manager used.
+ *
+ * Revision 1.3  2003/05/12 21:10:06  lbarnby
+ * Made destructor virtual
+ *
+ * Revision 1.2  2003/05/09 22:19:51  lbarnby
+ * Now also calculates and reports error on vertex. Corrected filter to use ITTF tracks. Some temporary protections against inf/Nan. Skip delete of TMinuit class since causing seg. fault.
+ *
+ * Revision 1.1  2002/12/05 23:42:46  hardtke
+ * Initial Version for development and integration
+ *
+ **************************************************************************/
