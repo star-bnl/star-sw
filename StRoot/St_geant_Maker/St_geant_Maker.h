@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.22 2000/02/03 19:34:42 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.23 2000/02/07 18:58:38 fisyak Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.23  2000/02/07 18:58:38  fisyak
+// Set default NwGeant = 20 000 000 words
+//
 // Revision 1.22  2000/02/03 19:34:42  fisyak
 // Clean up St_geant_Maker::Init, move its parameters to ctor
 //
@@ -38,7 +41,7 @@ protected:
 
 public: 
                   St_geant_Maker(const char *name="geant",
-				 Int_t nwgeant=2000000,Int_t nwpaw=0, Int_t iwtype=0);
+				 Int_t nwgeant=20000000,Int_t nwpaw=0, Int_t iwtype=0);
    virtual       ~St_geant_Maker(){};
    virtual Int_t  Finish(){SafeDelete(m_DataSet); return kStOK;}
    virtual Int_t  Init();
@@ -99,7 +102,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.22 2000/02/03 19:34:42 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.23 2000/02/07 18:58:38 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
