@@ -33,7 +33,7 @@ void StiDedxCalculator::getDedx(const StiKalmanTrack* track,
  			         double &dEdx, double &dEdxE,
 			         double &nPointsUsed)
 {
-    mVector.clear();
+  mVector.clear();
     //hopefully this can be a reference to a vec
     //We assume that the vector contains only nodes with hits!!!!!
     vector<StiKalmanTrackNode*> nodes = track->getNodes(mDetector); //Claude t.b.d.
@@ -67,39 +67,30 @@ void StiDedxCalculator::getDedx(const StiKalmanTrack* track,
 
 double NodeDedxCalculator::operator()(const StiKalmanTrackNode *mNode)
 {
-    double dedx=0.;
-    double dx, ds;
-    //double dx;
-    //double radius, dr;                //radius and thickness of the detector
-    //StThreeVectorD dPlane, dNormal;
+  //The dE of the hit is provided as a hit parameter, but the dx is
+  //a characteristic of the track. There are two ways to calculate the
+  //dx; first, a straight line approximation can be used, and second,
+  //the helix can be assumed to be a circle intersecting the pad, and 
+  //the pathlength can be calculated explicitly.
+  //The first method involves a straightforward calculation of the 
+  //length of the  
 
-    //The real dx for each hit is calculated through the helix 
-    //extrapolation between top and bottom of pad. A fair 
-    //approximation is to use the TanL to get the pathlength.
-
-    //To use the helix extrapolation, first we need the coordinates 
-    //of the top and bottom mid point of the pad in question. The 
-    //detector coordinates are specified as z,r,phi of the center of
-    //the detector, and dx,dy,dz the detector spans.
-    //For the helix extraplolation, we need the global coordinates of a 
-    //point on the top and bottom of the detector, and the normal.
-    //radius = mNode->getDetector()->getPlacement()->getCenterRadius();
-    //dr     = mNode->getDetector()->getShape()->getThickness() / 2.;
-
-    //dNormal.setMagnitude(mNode->getDetector()->getPlacement());
-    //dsBot = mNode->getDetecotr()->getPlacement();
-    //dx = abs( dsTop - dsBot );
-    ds   = mNode->getDetector()->getShape()->getThickness();
-    ds   = ds * ds;
-    dx   = sqrt(ds + ds / (mNode->getTanL() * mNode->getTanL()));
  
+  //line aproximation
+    double dedx= (mNode->getHit()->getEloss())/
+                  sqrt((mNode->getDetector()->getShape()->getThickness()
+                   *(1.+(mNode->fP4)*(mNode->fP4))));
 
-    //dx is checked here for pathologic values; if the pathlength is
-    //greater than the length of the pad, then there is significant
-    //curvature in the pad. If the pathlength is greater than
-    //length+2*width, then the track must oscillate in the
-    //pad itself.
-    
-    dedx = (mNode->getHit()->getEloss())/dx;
+
+  //curve calculation
+//     dedx=(mNode->getHit()->getEloss())/
+//       (2.*(mNode->fP3)*
+//        (asin(.5*(mNode->getDetector()->getShape()->getThickness())*
+// 	    sqrt(1.+(mNode->fP4)*(mNode->fP4))/(mNode->fP3))
+// 	+M_PI/2.));
+
+	    
+
+
     return dedx;
 }
