@@ -1,7 +1,7 @@
-/* dst_TriggerDetectors.idl      */
-/* Table: dst_TriggerDetectors   */
+/* dst_TrgDet.idl      */
+/* Table: dst_TrgDet   */
 
- struct dst_TriggerDetectors {
+ struct dst_TrgDet {
   float     nCtb[240];      /* CTB counter # mips                    */
   float     timeCtb[240];   /* CTB counter corrected time            */
   float     nMwc[96];       /* MWC sector # mips                     */
@@ -16,4 +16,4 @@
   float     adcZDCWest;     /* Sum west ZDC ADCs                     */
   float     adcZDCsum;      /* Sum ZDC ADCs                          */
 } ;
-/*  Last mod. for dst_TriggerDetectors:   $Date: 1998/06/03 13:52:00 $ */
+/*  Last mod. for dst_TrgDet:   $Date: 1999/07/11 19:45:25 $ */
