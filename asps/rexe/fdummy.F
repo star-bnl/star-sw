@@ -158,16 +158,20 @@ C Check IX>=0
 ******************************************************************
       logical first/.true./
 *
-        if (first) 
-     &  print *,' *******  RNDM substituted by GRNDM  *******'
-        first=.false.
-        call GRNDM(r,1)
+       if (first) then
+          print *,' *******  RNDM substituted by GRNDM  *******'
+          first=.false.
+          CALL GRNDMQ(0,0,1,' ')
+       endif 
+       call GRNDM(r,1)
         rndm=r
       return
       entry IRNDM
-        if (first) 
-     &  print *,' *******  RNDM substituted by GRNDM  *******'
-        first=.false.
+        if (first) then
+          print *,' *******  RNDM substituted by GRNDM  *******'
+          first=.false.
+          CALL GRNDMQ(0,0,1,' ')
+        endif 
         call GRNDM(i,1)
         irndm=i
         return
@@ -176,8 +180,10 @@ C Check IX>=0
       subroutine NORRAN (a)
       real    a,b/99999/
       logical first/.true./
-       if (first) 
-     &  print *,' *******  NORRAN substituted by RANNOR  *******'
+       if (first) then
+          print *,' *******  NORRAN substituted by RANNOR  *******'
+          CALL GRNDMQ(0,0,1,' ')
+       endif
        if (b .eq. 99999) then 
          call rannor(a,b)
          first=.false. 
@@ -190,9 +196,11 @@ C Check IX>=0
       function  RANF (a)
       real      RANF,a,b
       logical   first/.true./
-       if (first) 
-     &  print *,' *******  RANF substituted by GRNDM  *******'
-       first=.false.
+       if (first) then 
+         print *,' *******  RANF substituted by GRNDM  *******'
+         first=.false.
+          CALL GRNDMQ(0,0,1,' ')
+       endif 
        Call GRNDM(b,1)
        RANF=b
       end
@@ -200,9 +208,11 @@ C Check IX>=0
       function  RN32(a)
       real      RN32,a,b
       logical   first/.true./
-       if (first) 
-     &  print *,' *******  RN32 substituted by GRNDM  *******'
-       first=.false.
+       if (first)  then
+         print *,' *******  RN32 substituted by GRNDM  *******'
+         first=.false.
+          CALL GRNDMQ(0,0,1,' ')
+       endif
        Call GRNDM(b,1)
        RN32=b
       end
@@ -210,8 +220,10 @@ C Check IX>=0
       function  RG32(d)
       real      RG32,d,a,b/99999/
       logical   first/.true./
-       if (first) 
-     &  print *,' *******  RG32 substituted by RANNOR  *******'
+       if (first) then
+        print *,' *******  RG32 substituted by RANNOR  *******'
+          CALL GRNDMQ(0,0,1,' ')
+       endif
        if (b .eq. 99999) then
          call rannor(a,b)
          first=.false. 
