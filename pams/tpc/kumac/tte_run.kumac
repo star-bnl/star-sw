@@ -1,7 +1,8 @@
 *********************************************************************
 
 macro run_tte_track
-macro/global/import *
+  
+  macro/global/import *
 
  message 'start run_tte_track'
 
@@ -11,8 +12,8 @@ macro/global/import *
  ami/module/call tte_track _
                         [data]/tpc/tracks/tptrack _
                         [data]/tpc/hits/tphit _
-                        [geant]/Event/g2t_tpc_hit _
-                        [geant]/Event/g2t_track _
+                        [geant_Event]/g2t_tpc_hit _
+                        [geant_Event]/g2t_track _
                         [data]/tpc/hits/index _
                         [params]/tpc/tclpars/type
  
@@ -38,16 +39,11 @@ message 'start run_tte'
  alias/create STAFCV_OK  1
  alias/create STAFCV_BAD 0
 
-  cd /dui
-  tdm/table/rowcount [data]/tpc/tracks/mctrk   0
-  tdm/table/rowcount [data]/tpc/tracks/evaltrk 0
-
-
  ami/module/call tte _
                [data]/tpc/tracks/tptrack _
                [data]/tpc/hits/tphit _
-               [geant]/Event/g2t_tpc_hit _
-               [geant]/Event/g2t_track _
+               [geant_Event]/g2t_tpc_hit _
+               [geant_Event]/g2t_track _
                [data]/tpc/hits/index _
                [params]/tpc/tclpars/type _
                [data]/tpc/tracks/evaltrk _
@@ -77,12 +73,9 @@ message 'start run_tte_hit_match'
 alias/create STAFCV_OK  1
 alias/create STAFCV_BAD 0
 
-cd /dui
-  tdm/table/rowcount [data]/tpc/hits/index 0
-
 
  ami/module/call tte_hit_match _
-               [geant]/Event/g2t_tpc_hit _
+               [geant_Event]/g2t_tpc_hit _
                [data]/tpc/hits/index _
                [params]/tpc/tclpars/type _
                [data]/tpc/hits/tphit 
@@ -97,6 +90,12 @@ cd /dui
  message 'finish run_tte_hit_match'
 
 return
+ 
+* ******************************************************************
+
+
+
+
 
 
 
