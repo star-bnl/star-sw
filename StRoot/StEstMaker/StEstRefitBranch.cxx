@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstRefitBranch.cxx,v 1.8 2004/01/26 22:47:17 caines Exp $
+ * $Id: StEstRefitBranch.cxx,v 1.9 2005/02/05 00:59:58 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstRefitBranch.cxx,v $
+ * Revision 1.9  2005/02/05 00:59:58  perev
+ * Defence 1/0
+ *
  * Revision 1.8  2004/01/26 22:47:17  caines
  * Take out prolific print statement
  *
@@ -289,7 +292,7 @@ int StEstTracker::RefitBranch(StEstBranch *br, int usevertex, int *fitstatus) {
       else {
 	// call the fitting routine
  	iret = egr_helix_fit(row_in_gtrk,gtrk,xcir,ycir,zcir,wcir,wlin,ncir,m_egrpar_h,egrpar,covar);
-	if (iret==1) {
+	if (iret==1 && ncir>3) {
 	  if ((gtrk[0].p[7]/float(ncir-3)<egrpar[0].prob[0] || 
 	       egrpar[0].prob[0]<0) &&
 	      (gtrk[0].p[8]/float(ncir-2)<egrpar[0].prob[1] ||
