@@ -1,5 +1,8 @@
-// $Id: StPreVertexMaker.cxx,v 1.8 2000/05/17 21:25:36 wdeng Exp $
+// $Id: StPreVertexMaker.cxx,v 1.9 2000/06/20 20:22:08 wdeng Exp $
 // $Log: StPreVertexMaker.cxx,v $
+// Revision 1.9  2000/06/20 20:22:08  wdeng
+// Copy cluster vertex to dst_vertex table.
+//
 // Revision 1.8  2000/05/17 21:25:36  wdeng
 // Copy nfit. evr needs it now.
 //
@@ -79,6 +82,14 @@ Int_t StPreVertexMaker::Make(){
 
   St_dst_vertex *preVertex = new St_dst_vertex("preVertex",4); 
   AddData(preVertex);   
+  St_dst_vertex  *clusterVertex = (St_dst_vertex *)GetDataSet("tpc_tracks/.data/clusterVertex");
+  if( clusterVertex ) {
+    Int_t numRowClusterVertex = clusterVertex->GetNRows();
+    preVertex->ReAllocate( numRowClusterVertex+4 );
+    Int_t sizeToCopy = sizeof(dst_vertex_st) *numRowClusterVertex ;
+    memcpy(preVertex->GetTable(), clusterVertex->GetTable(), sizeToCopy);
+    preVertex->SetNRows( numRowClusterVertex );
+  }
   
   St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
   St_tpt_track  *tptrack   = 0;

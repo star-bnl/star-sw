@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.46 2000/05/10 20:57:31 lbarnby Exp $
+// $Id: StPrimaryMaker.cxx,v 1.47 2000/06/20 20:22:08 wdeng Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.47  2000/06/20 20:22:08  wdeng
+// Copy cluster vertex to dst_vertex table.
+//
 // Revision 1.46  2000/05/10 20:57:31  lbarnby
 // Call new primary verex confidence level calculation module
 //
@@ -297,22 +300,23 @@ Int_t StPrimaryMaker::Make(){
 
   St_dst_vertex *vertex = new St_dst_vertex("vertex", 4); 
   AddData(vertex);  
- 
-  St_DataSet     *preVertex = GetDataSet("preVertex"); 
-  St_DataSetIter  preVertexI(preVertex);
-  St_dst_vertex  *preVtx  = (St_dst_vertex *) preVertexI("preVertex");
 
-  if( preVtx ) {
-    Int_t numRowPreVtx = preVtx->GetNRows();
-    vertex->ReAllocate( numRowPreVtx+4 );
-    
-    dst_vertex_st *preVtxPtr = preVtx->GetTable();
-    dst_vertex_st *vertexPtr = vertex->GetTable();
-    Int_t sizeToCopy = sizeof(dst_vertex_st) * numRowPreVtx;
-    memcpy(vertexPtr, preVtxPtr, sizeToCopy);
-    vertex->SetNRows( numRowPreVtx );
+  St_dst_vertex  *preVertex = (St_dst_vertex *)GetDataSet("preVertex/.data/preVertex"); 
+  St_dst_vertex  *clusterVertex = (St_dst_vertex *)GetDataSet("tpc_tracks/.data/clusterVertex");
+  if( preVertex ) {
+    Int_t numRowPreVertex = preVertex->GetNRows();
+    vertex->ReAllocate( numRowPreVertex+4 );
+    Int_t sizeToCopy = sizeof(dst_vertex_st) * numRowPreVertex;
+    memcpy(vertex->GetTable(), preVertex->GetTable(), sizeToCopy);
+    vertex->SetNRows( numRowPreVertex );
+  } else if( clusterVertex ) {
+    Int_t numRowClusterVertex = clusterVertex->GetNRows();
+    vertex->ReAllocate( numRowClusterVertex+4 );
+    Int_t sizeToCopy = sizeof(dst_vertex_st) *numRowClusterVertex ;
+    memcpy(vertex->GetTable(), clusterVertex->GetTable(), sizeToCopy);
+    vertex->SetNRows( numRowClusterVertex );
   }
-
+ 
   St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
   St_tpt_track  *tptrack   = 0;
   if (tpctracks) {
