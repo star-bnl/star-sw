@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.25 2004/06/04 13:30:24 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.26 2004/06/25 22:55:53 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -65,7 +65,7 @@ class StEEmcDbMaker : public StMaker {
   // private:
  public:
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.25 2004/06/04 13:30:24 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.26 2004/06/25 22:55:53 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -73,7 +73,7 @@ class StEEmcDbMaker : public StMaker {
   unsigned int myTimeStampUnix;
   void  clearItemArray();
   void mRequestDataBase(); ///< reads tables from STAR-DB
-  void mOptimizeMapping(int isec);
+  int mOptimizeMapping(int isec);
   void mOptimizeOthers(int isec);
   void mOptimizeFibers(); ///< decodes crates -->fiber map
 
@@ -169,7 +169,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.25 2004/06/04 13:30:24 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.26 2004/06/25 22:55:53 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -180,6 +180,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.26  2004/06/25 22:55:53  balewski
+// now it survives missing fiberMap in DB , also gMessMgr is used
+//
 // Revision 1.25  2004/06/04 13:30:24  balewski
 // use gMessMgr for most of output
 //
