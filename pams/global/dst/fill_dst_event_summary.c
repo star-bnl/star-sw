@@ -18,6 +18,7 @@
 #define  NRANGE      5
 #define  NPHIBINS   40
 #define  NETARANGE   3
+#define  NPHIRANGE   8
 
 #ifdef DEBUG
 #undef DEBUG
@@ -145,7 +146,7 @@ long  type_of_call fill_dst_event_summary_ (
   for (irange=0; irange<NETARANGE; irange++) {
     dst_eventsummary->T_eta_bins[irange]      = 0;
   }
-  for (irange=0; irange<nphirange; irange++) {
+  for (irange=0; irange<NPHIRANGE; irange++) {
     dst_eventsummary->mult_phi[irange]        = 0;
     dst_eventsummary->energy_emc_phi[irange]  = 0;
   }
@@ -319,6 +320,8 @@ long  type_of_call fill_dst_event_summary_ (
   }  /* end of looping over ranges */
   
   nphirange = dst_runsummary->n_phi_bins;
+  if (nphirange < 1) nphirange = 1;
+  if (nphirange > NPHIRANGE)  nphirange = NPHIRANGE;
   binrange = (int) (NPHIBINS/nphirange); 
   
   /* Fill  phi  bin multiplicities  */
