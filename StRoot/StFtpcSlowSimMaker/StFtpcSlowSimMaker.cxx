@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.16 2003/02/28 13:00:27 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.17 2003/06/10 13:15:12 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.17  2003/06/10 13:15:12  jcs
+// get min,max gas temperature and pressure limits from database
+//
 // Revision 1.16  2003/02/28 13:00:27  jcs
 // for embedding, calculate temperature,pressure corrections using values from offline database
 //
@@ -334,7 +337,7 @@ Int_t StFtpcSlowSimMaker::Make(){
           return kStWarn;
       }
       // Barometric Pressure
-      if (gas->getBarometricPressure() >= paramReader->minPressure() && gas->getBarometricPressure() <= paramReader->maxPressure()) {
+      if (gas->getBarometricPressure() >= dbReader->minPressure() && gas->getBarometricPressure() <= dbReader->maxPressure()) {
           gMessMgr->Info() <<"Change normalizedNowPressure from "<<paramReader->normalizedNowPressure()<<" to "<<gas->getBarometricPressure()<<endm;
           paramReader->setNormalizedNowPressure(gas->getBarometricPressure());
       }
@@ -352,29 +355,29 @@ Int_t StFtpcSlowSimMaker::Make(){
          Int_t numberBodyTemperaturesWest = 0;
          Float_t averageBodyTemperatureWest = 0.0;
 	  
-	 if (gas->getBody1West() >= paramReader->minGasTemperature() && gas->getBody1West()<= paramReader->maxGasTemperature() ) {
+	 if (gas->getBody1West() >= dbReader->minGasTemperature() && gas->getBody1West()<= dbReader->maxGasTemperature() ) {
 		 averageBodyTemperatureWest = averageBodyTemperatureWest + gas->getBody1West();
 		 numberBodyTemperaturesWest++;
 		 cout<<"gas->getBody1West() = "<<gas->getBody1West()<<" numberBodyTemperaturesWest = "<<numberBodyTemperaturesWest<<" averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
          }		 
-	 if (gas->getBody2West() >= paramReader->minGasTemperature() && gas->getBody2West()<= paramReader->maxGasTemperature() ) {
+	 if (gas->getBody2West() >= dbReader->minGasTemperature() && gas->getBody2West()<= dbReader->maxGasTemperature() ) {
 		 averageBodyTemperatureWest = averageBodyTemperatureWest + gas->getBody2West();
 		 numberBodyTemperaturesWest++;
 		 cout<<"gas->getBody2West() = "<<gas->getBody2West()<<" numberBodyTemperaturesWest = "<<numberBodyTemperaturesWest<<" averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
          }		 
-	 if (gas->getBody3West() >= paramReader->minGasTemperature() && gas->getBody3West()<= paramReader->maxGasTemperature() ) {
+	 if (gas->getBody3West() >= dbReader->minGasTemperature() && gas->getBody3West()<= dbReader->maxGasTemperature() ) {
 		 averageBodyTemperatureWest = averageBodyTemperatureWest + gas->getBody3West();
 		 numberBodyTemperaturesWest++;
 		 cout<<"gas->getBody3West() = "<<gas->getBody3West()<<" numberBodyTemperaturesWest = "<<numberBodyTemperaturesWest<<" averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
          }		 
-	 if (gas->getBody4West() >= paramReader->minGasTemperature() && gas->getBody4West()<= paramReader->maxGasTemperature() ) {
+	 if (gas->getBody4West() >= dbReader->minGasTemperature() && gas->getBody4West()<= dbReader->maxGasTemperature() ) {
 		 averageBodyTemperatureWest = averageBodyTemperatureWest + gas->getBody4West();
 		 numberBodyTemperaturesWest++;
 		 cout<<"gas->getBody4West() = "<<gas->getBody4West()<<" numberBodyTemperaturesWest = "<<numberBodyTemperaturesWest<<" averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
          }		 
 		 
 	 averageBodyTemperatureWest = averageBodyTemperatureWest/numberBodyTemperaturesWest;
-	 if (averageBodyTemperatureWest >= paramReader->minGasTemperature() && averageBodyTemperatureWest <= paramReader->maxGasTemperature()) {
+	 if (averageBodyTemperatureWest >= dbReader->minGasTemperature() && averageBodyTemperatureWest <= dbReader->maxGasTemperature()) {
             paramReader->setGasTemperatureWest(averageBodyTemperatureWest);
 	    cout<<"Set paramReader->setGasTemperatureWest = averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
          }
@@ -409,29 +412,29 @@ Int_t StFtpcSlowSimMaker::Make(){
          Int_t numberBodyTemperaturesEast = 0;
          Float_t averageBodyTemperatureEast = 0.0;
 	  
-	 if (gas->getBody1East() >= paramReader->minGasTemperature() && gas->getBody1East()<= paramReader->maxGasTemperature() ) {
+	 if (gas->getBody1East() >= dbReader->minGasTemperature() && gas->getBody1East()<= dbReader->maxGasTemperature() ) {
 		 averageBodyTemperatureEast = averageBodyTemperatureEast + gas->getBody1East();
 		 numberBodyTemperaturesEast++;
 		 cout<<"gas->getBody1East() = "<<gas->getBody1East()<<" numberBodyTemperaturesEast = "<<numberBodyTemperaturesEast<<" averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
          }		 
-	 if (gas->getBody2East() >= paramReader->minGasTemperature() && gas->getBody2East()<= paramReader->maxGasTemperature() ) {
+	 if (gas->getBody2East() >= dbReader->minGasTemperature() && gas->getBody2East()<= dbReader->maxGasTemperature() ) {
 		 averageBodyTemperatureEast = averageBodyTemperatureEast + gas->getBody2East();
 		 numberBodyTemperaturesEast++;
 		 cout<<"gas->getBody2East() = "<<gas->getBody2East()<<" numberBodyTemperaturesEast = "<<numberBodyTemperaturesEast<<" averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
          }		 
-	 if (gas->getBody3East() >= paramReader->minGasTemperature() && gas->getBody3East()<= paramReader->maxGasTemperature() ) {
+	 if (gas->getBody3East() >= dbReader->minGasTemperature() && gas->getBody3East()<= dbReader->maxGasTemperature() ) {
 		 averageBodyTemperatureEast = averageBodyTemperatureEast + gas->getBody3East();
 		 numberBodyTemperaturesEast++;
 		 cout<<"gas->getBody3East() = "<<gas->getBody3East()<<" numberBodyTemperaturesEast = "<<numberBodyTemperaturesEast<<" averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
          }		 
-	 if (gas->getBody4East() >= paramReader->minGasTemperature() && gas->getBody4East()<= paramReader->maxGasTemperature() ) {
+	 if (gas->getBody4East() >= dbReader->minGasTemperature() && gas->getBody4East()<= dbReader->maxGasTemperature() ) {
 		 averageBodyTemperatureEast = averageBodyTemperatureEast + gas->getBody4East();
 		 numberBodyTemperaturesEast++;
 		 cout<<"gas->getBody4East() = "<<gas->getBody4East()<<" numberBodyTemperaturesEast = "<<numberBodyTemperaturesEast<<" averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
          }		 
 		 
 	 averageBodyTemperatureEast = averageBodyTemperatureEast/numberBodyTemperaturesEast;
-	 if (averageBodyTemperatureEast >= paramReader->minGasTemperature() && averageBodyTemperatureEast <= paramReader->maxGasTemperature()) {
+	 if (averageBodyTemperatureEast >= dbReader->minGasTemperature() && averageBodyTemperatureEast <= dbReader->maxGasTemperature()) {
              paramReader->setGasTemperatureEast(averageBodyTemperatureEast);
 	     cout<<"Set paramReader->setGasTemperatureEast = averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
          }
