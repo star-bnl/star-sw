@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.h,v 1.2 2000/02/02 21:20:56 fisyak Exp $
+// $Id: StTagsMaker.h,v 1.3 2000/03/28 19:09:37 fine Exp $
 // $Log: StTagsMaker.h,v $
+// Revision 1.3  2000/03/28 19:09:37  fine
+// Adjuested to ROOT 2.24
+//
 // Revision 1.2  2000/02/02 21:20:56  fisyak
 // Remove user parametes from GetTags
 //
@@ -7,7 +10,11 @@
 // Initial revision of Tags Maker
 //
 #ifndef StTagsMaker_H
+#define StTagsMaker_H
+
 #include "StMaker.h"
+#include "St_DataSet.h"
+
 class TTree;
 class EvtHddr_st;
 class HighPtTag_st; 
@@ -19,7 +26,7 @@ class StrangeTag_st;
 class TClass;
 class StTagsMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StTagsMaker.h,v 1.2 2000/02/02 21:20:56 fisyak Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTagsMaker.h,v 1.3 2000/03/28 19:09:37 fine Exp $";
  protected:
  public: 
                   StTagsMaker(const char *name="tags");
@@ -29,7 +36,7 @@ class StTagsMaker : public StMaker {
    virtual Int_t  Make();
    static EDataSetPass  GetTags (St_DataSet* ds);
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTagsMaker.h,v 1.2 2000/02/02 21:20:56 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTagsMaker.h,v 1.3 2000/03/28 19:09:37 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTagsMaker, 1)   //StAF chain virtual base class for Makers
 };
