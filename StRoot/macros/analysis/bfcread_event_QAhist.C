@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QAhist.C,v 1.9 2001/07/17 03:22:31 genevb Exp $
+// $Id: bfcread_event_QAhist.C,v 1.10 2003/01/28 23:52:14 genevb Exp $
 // $Log: bfcread_event_QAhist.C,v $
+// Revision 1.10  2003/01/28 23:52:14  genevb
+// Allow for multiple zones per page
+//
 // Revision 1.9  2001/07/17 03:22:31  genevb
 // Modify TPC DB info for year 2001
 //
@@ -75,7 +78,10 @@ void bfcread_event_QAhist(
     const Char_t *psFile="EventQAhist.ps",
     const Char_t *PageTitle="",
     const Char_t *PrintList="",
-    const Char_t *MakerHistDir="EventQA")
+    const Char_t *MakerHistDir="EventQA",
+    const Int_t ZoneH=2,
+    const Int_t ZoneV=3
+  )
 {
 //
   cout << "bfcread_event_QAhist.C, num events to process " << 
@@ -181,7 +187,7 @@ void bfcread_event_QAhist(
 
   HU->SetHistsNamesDraw("*","*");
   HU->SetPostScriptFile(psFile);
-  HU->SetZones(2,3);
+  HU->SetZones(ZoneH,ZoneV);
   HU->SetPaperSize();
   HU->SetDefaultLogXList(MakerHistDir);
   HU->SetDefaultLogYList(MakerHistDir);
