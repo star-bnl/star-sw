@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.32 2000/07/14 23:49:03 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.33 2000/07/20 17:25:51 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.33  2000/07/20 17:25:51  posk
+// Fixed bug in readPico checkEvent.
+//
 // Revision 1.32  2000/07/14 23:49:03  snelling
 // Changed to ConstIterator for new StEvent and removed comparison int uint
 //
@@ -198,15 +201,7 @@ Int_t StFlowMaker::Make() {
     pFlowEvent = new StFlowEvent;
     if (!pFlowEvent) return kStOK;
     if (!FillFromPicoDST(pPicoEvent)) return kStEOF; // false if EOF
-    if (!pFlowEvent) return kStOK;    // could have been deleted
-    // Check the event cuts and fill StFlowEvent
-    if (StFlowCutEvent::CheckEvent(pPicoEvent)) {
-      if (!pFlowEvent) return kStOK;  // could have been deleted
-      if (mFlowEventWrite) pFlowMicroTree->Fill();  // fill the tree
-    } else {
-      Int_t eventID = pPicoEvent->EventID();
-      gMessMgr->Info() << "##### FlowMaker: picoevent " << eventID << " cut" << endm;
-    }
+    if (!pFlowEvent) return kStOK; // could have been deleted
   }
 
   UInt_t flowEventMult;
@@ -235,7 +230,7 @@ Int_t StFlowMaker::Init() {
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.32 2000/07/14 23:49:03 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.33 2000/07/20 17:25:51 posk Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -546,13 +541,16 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
     }
   }
     
-  // Check Eta Symmetry
-  if (!StFlowCutEvent::CheckEtaSymmetry(pPicoEvent)) {  
+  // Check event cuts and Eta Symmetry
+  if (!StFlowCutEvent::CheckEvent(pPicoEvent) ||
+      !StFlowCutEvent::CheckEtaSymmetry(pPicoEvent)) {  
+    Int_t eventID = pPicoEvent->EventID();
+    gMessMgr->Info() << "##### FlowMaker: picoevent " << eventID << " cut" << endm;
     delete pFlowEvent;             // if kFALSE delete this event
     pFlowEvent = NULL;
     return kTRUE;
   }
-
+  
   // For use with STL vector
 //   random_shuffle(pFlowEvent->TrackCollection()->begin(),
 // 		 pFlowEvent->TrackCollection()->end());

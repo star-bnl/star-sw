@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.15 2000/07/14 23:49:03 snelling Exp $
+// $Id: StFlowCutEvent.cxx,v 1.16 2000/07/20 17:25:49 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.16  2000/07/20 17:25:49  posk
+// Fixed bug in readPico checkEvent.
+//
 // Revision 1.15  2000/07/14 23:49:03  snelling
 // Changed to ConstIterator for new StEvent and removed comparison int uint
 //
@@ -258,18 +261,21 @@ void StFlowCutEvent::PrintCutList() {
   cout << "# Primary Vertex Events= " << mEventN << endl;
   cout << "# Event Cut List:" << endl;
   cout << "#   Mult cuts= " << mMultCuts[0] << ", " << mMultCuts[1]
-       << " :\t\t Events Cut= " << mMultCut << endl;
+       << " :\t Events Cut= " << mMultCut << "\t (" <<  setprecision(3) << 
+    (float)mMultCut/(float)mEventN/perCent << "% cut)" << endl;
   cout << "#   VertexX cuts= " << mVertexXCuts[0] << ", " << mVertexXCuts[1]
-       << " :\t\t Events Cut= " << mVertexXCut << endl;
+       << " :\t Events Cut= " << mVertexXCut << "\t (" <<  setprecision(3) << 
+    (float)mVertexXCut/(float)mEventN/perCent << "% cut)" << endl;
   cout << "#   VertexY cuts= " << mVertexYCuts[0] << ", " << mVertexYCuts[1]
-       << " :\t\t Events Cut= " << mVertexYCut << endl;
+       << " :\t Events Cut= " << mVertexYCut << "\t (" <<  setprecision(3) << 
+    (float)mVertexYCut/(float)mEventN/perCent << "% cut)" << endl;
   cout << "#   VertexZ cuts= " << mVertexZCuts[0] << ", " << mVertexZCuts[1]
-       << " :\t\t Events Cut= " << mVertexZCut << endl;
-  cout << "#   Eta Symmetry cuts= " << mEtaSymCuts[0] << ", " << mEtaSymCuts[1] 
-       << " :\t Events Cut= " << mEtaSymCutN << endl;
-  cout << "# \t\t\t\t\t (" <<  setprecision(4) << 
+       << " :\t Events Cut= " << mVertexZCut << "\t (" <<  setprecision(3) << 
+    (float)mVertexZCut/(float)mEventN/perCent << "% cut)" << endl;
+  cout << "#   EtaSym cuts= " << mEtaSymCuts[0] << ", " << mEtaSymCuts[1] 
+       << " :\t Events Cut= " << mEtaSymCutN << "\t (" <<  setprecision(3) << 
     (float)mEtaSymCutN/(float)mEventN/perCent << "% cut)" << endl;
-  cout << "# Good Events = " << mGoodEventN << ", " << setprecision(4) <<
+  cout << "# Good Events = " << mGoodEventN << ", " << setprecision(3) <<
     (float)mGoodEventN/(float)mEventN/perCent << "%" << endl;
   cout << "#######################################################" << endl;
 
