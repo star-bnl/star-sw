@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.15 2001/05/30 17:46:41 perev Exp $
+// $Id: StObject.cxx,v 1.16 2002/01/27 23:46:49 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.16  2002/01/27 23:46:49  perev
+// Zombie test added
+//
 // Revision 1.15  2001/05/30 17:46:41  perev
 // StEvent branching
 //
@@ -43,6 +46,7 @@
 // Ad StObject, modification StArray for StRootEvent
 //
 #include "StObject.h"
+#include "TDataSetIter.h"
 #include "TROOT.h"
 #include "TError.h"
 #include "TMath.h"
@@ -212,7 +216,16 @@ void StXRef::Add(TDataSet *ds)
    if (ds->GetParent() == this) return;
    TDataSet *os = FindByName(ds->GetName());
    if (os == ds) 		return;
-   Assert(!os);
+   if (os){
+     Assert(os->IsA()==ds->IsA());
+     TDataSetIter   Next(this);
+     StXRef *xr;
+     while((xr = (StXRef*)Next())) {
+       if (!xr->InheritsFrom(Class())) 	continue;
+       if (fUUId.Compare(xr->GetUUId()))continue;
+       Remove(xr);
+     }
+   }  
    if (ds->InheritsFrom(Class())) 
       Assert(!fUUId.Compare(((StXRef*)ds)->GetUUId()));
    ds->Shunt(0); TDataSet::Add(ds);
@@ -332,8 +345,10 @@ void StXRefManager::AddColl (const StStrArray *sarr)
      if (!(to = it[i]))			continue;
      if (!(u = to->GetUniqueID()))	continue;
      p = (const TObject**)fObjTab.GET(u);
-     if (*p && *p == to)		continue;
-     assert(!*p);
+     if (*p) 	{// Used already		
+       if (*p == to)			continue;
+       assert(to->IsA() == (*p)->IsA()); 
+     }
      *p = to;
    }
 }

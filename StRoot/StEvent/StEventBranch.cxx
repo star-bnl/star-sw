@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventBranch.cxx,v 2.2 2001/09/27 00:56:26 perev Exp $
+ * $Id: StEventBranch.cxx,v 2.3 2002/01/27 23:48:54 perev Exp $
  *
  * Author: Victor Perev, May 2001
  ***************************************************************************
@@ -53,6 +53,7 @@ void StEventBranch::Synchro(int toMain)
      for (icl=0;icl<cntSize;icl++) {//contLoop
        if (!(so = cnt[icl])) 				continue;
        if (strcmp(className,so->ClassName())!=0)	continue;
+       if (so->IsZombie())				continue;
        break;
      }//end contLoop
      if (icl>=cntSize) so = 0;
