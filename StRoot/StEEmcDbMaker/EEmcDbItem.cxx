@@ -1,4 +1,4 @@
-// $Id: EEmcDbItem.cxx,v 1.11 2004/04/28 20:38:10 jwebb Exp $
+// $Id: EEmcDbItem.cxx,v 1.12 2005/02/02 01:36:50 balewski Exp $
  
 #include <stdio.h>
 #include <string.h>
@@ -17,8 +17,15 @@ EEmcDbItem::EEmcDbItem() {
 
 //--------------------------------------------------
 //--------------------------------------------------
-int EEmcDbItem::isEmpty() const{
+bool EEmcDbItem::isEmpty() const{
   return name[0]==0;
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+bool EEmcDbItem::isTower() const{
+  if (isEmpty()) return false;
+  return (name[2]=='T');
 }
 
 
@@ -33,9 +40,9 @@ void EEmcDbItem::print() const{
   }
 
   if(strchr(name,'U') || strchr(name,'V') )
-    printf(" %s crate=%d chan=%3d sec=%2d plane=%c strip=%3d gain=%.3f  ped=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x pix=%s key=%d\n",name,crate,chan,sec,plane,strip,gain,ped,thr,stat,fail,tube,key);
+    printf(" %s crate=%d chan=%3d sec=%2d plane=%c strip=%3d gain=%.3f  ped=%.2f sPed=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x pix=%s key=%d\n",name,crate,chan,sec,plane,strip,gain,ped,sigPed,thr,stat,fail,tube,key);
   else
-    printf(" %s crate=%d chan=%3d sec=%2d sub=%c eta=%2d gain=%.3f  ped=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x tube=%s key=%d\n",name,crate,chan,sec,sub,eta,gain,ped,thr,stat,fail,tube,key);
+    printf(" %s crate=%d chan=%3d sec=%2d sub=%c eta=%2d gain=%.3f  ped=%.2f sPed=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x tube=%s key=%d\n",name,crate,chan,sec,sub,eta,gain,ped,sigPed,thr,stat,fail,tube,key);
 }
 
 
@@ -110,12 +117,25 @@ void EEmcDbItem::clear() {
   sub='Z';
   eta=-5;  
   thr=-6;
+  sigPed=-7;
   strip=-299;
   plane='X';	
   stat=fail=0;
   key=-999;
 }
 
+
+//________________________________________________________
+//________________________________________________________
+int  
+EEmcDbItem::mapmtId() const{
+  if(isTower()) return 0;
+  if(chan<0 || chan>=192) return 0; // nonsens channel value
+  int iTube=chan/16;
+  int tubeID=(iTube<=5) ? 2*iTube+1 :14-  2*(iTube-5); // tube ID counting from 1
+  // printf("chan=%d mapmtID=%d\n",chan,tubeID);
+  return tubeID;
+}
 
 //--------------------------------------------------
 //--------------------------------------------------
@@ -125,8 +145,8 @@ void EEmcDbItem::setDefaultTube(int cr_off) {
   int ch2pix[16]={13, 14, 15, 16,   9, 10, 11, 12,   5, 6, 7, 8,   1,2,3,4};
   
   int iCrate=crate-cr_off;
-  int iTube=chan/16;
-  int tubeID=(iTube<=5) ? 2*iTube+1 :14-  2*(iTube-5); // tube ID counting from 1
+
+  int tubeID=mapmtId();
   // int cwID=tubeID+ 12*(iCrate%8); // offset for every pair of subsectors, not used
 
   int secID=1 + ((iCrate/4)+11)%12;
@@ -183,6 +203,9 @@ void EEmcDbItem::setName(char *text) {
 }
 
 // $Log: EEmcDbItem.cxx,v $
+// Revision 1.12  2005/02/02 01:36:50  balewski
+// few more access methods + sigPed visible in EEmcDbItem
+//
 // Revision 1.11  2004/04/28 20:38:10  jwebb
 // Added StEEmcDbMaker::setAsciiDatabase().  Currently not working, since
 // tube name missing for some towers, triggereing a "clear" of all EEmcDbItems.

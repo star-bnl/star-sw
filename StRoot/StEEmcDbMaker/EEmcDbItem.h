@@ -22,7 +22,7 @@ class EEmcDbItem {
 
   int crate, chan; ///< hardware channel
   float gain; 
-  float ped,thr; // in ADC channals
+  float ped,thr,sigPed; // in ADC channals
   unsigned  stat; // bits, see eemcConstDB.hh for definitions
   unsigned  fail; // bits, see eemcConstDB.hh for definitions
 
@@ -32,8 +32,10 @@ class EEmcDbItem {
   void setName(char *text);
   void setTube(char *text);
   void setDefaultTube(int cr_off);
-  int isEmpty() const;
-  int isSMD() const { return (plane=='U' || plane=='V');}
+  int mapmtId()const;  
+  bool isEmpty() const;
+  bool isSMD() const { return (plane=='U' || plane=='V');}
+  bool isTower() const;
   void exportAscii(FILE *fd) const;
   int  importAscii(FILE *fd);
 };
