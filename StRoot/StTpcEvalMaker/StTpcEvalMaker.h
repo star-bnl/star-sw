@@ -1,5 +1,8 @@
-//  $Id: StTpcEvalMaker.h,v 1.4 2001/06/19 12:49:37 flierl Exp $
+//  $Id: StTpcEvalMaker.h,v 1.5 2001/07/10 09:22:07 flierl Exp $
 //  $Log: StTpcEvalMaker.h,v $
+//  Revision 1.5  2001/07/10 09:22:07  flierl
+//  add posibility to cut on vertex z-positions
+//
 //  Revision 1.4  2001/06/19 12:49:37  flierl
 //  add l3 option
 //
@@ -85,20 +88,23 @@ public:
     // l3 switch
     void useL3Trigger() {mL3TriggerOn = true;}
  
+    // vertex switch
+    void useVertexConstraint(Double_t constraint) { mVertexConstraint = constraint; }
 
     // Filling of persistent event
     // not implemented yet 
     // void FillTpcEvalEvent() ; 
-    
+   
     // return cvs version
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTpcEvalMaker.h,v 1.4 2001/06/19 12:49:37 flierl Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StTpcEvalMaker.h,v 1.5 2001/07/10 09:22:07 flierl Exp $ built "__DATE__" "__TIME__; return cvs;}	
         
  private:
 
     Bool_t           mHitIteration;    //! switch for hit iteration
     Bool_t           mHitSeparation;   //! switch for hit separation
     Bool_t           mL3TriggerOn;     //!
+    Double_t         mVertexConstraint ; //! switch on/off and set vertex constraint
     StTpcDb*         mStTpcDb;         //! database
     StEvent*         mStEvent;         //! stevent object
     StL3Trigger*     ml3TriggerEvent;  //! stl3trigger
