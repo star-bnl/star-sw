@@ -113,8 +113,8 @@ SO  := $(CXX)
 ###############################################################
 
 LIBS += $(EXTRA_LIBS)
-LOCAL_INCS = -I. -I$(OPTSTAR)/include
-SHARED_LIBS = -L$(OPTSTAR)/lib/ -L$(OPTSTAR)/lib/mysql -lmysqlclient $(LIBS)
+LOCAL_INCS = -I. -I$(OPTSTAR)/include -I/usr/include/mysql
+SHARED_LIBS = -L$(OPTSTAR)/lib/ -L$(OPTSTAR)/lib/mysql -L/usr/lib/mysql/ -lmysqlclient $(LIBS)
 STATIC_LIBS = $(OPTSTAR)/lib/libmysqlclient.a $(LIBS)
 
 ########################################

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.20 2002/03/22 19:05:38 porter Exp $
+ * $Id: MysqlDb.cc,v 1.21 2002/04/16 19:44:49 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.21  2002/04/16 19:44:49  porter
+ * changed non-dbname in arguement of mysql_real_connect from 0 to NULL.  mysql
+ * perfers this.  Updated rules.make for local mysql installation on linux
+ *
  * Revision 1.20  2002/03/22 19:05:38  porter
  * #-of-retries on server connect increased to 7 with timeout period doubled per
  * retry starting at 1 sec.  DOES NOT work (is ignored) on STAR's Redhat 6.2
@@ -155,7 +159,7 @@ static const char* binaryMessage = {"Cannot Print Query with Binary data"};
 
 ////////////////////////////////////////////////////////////////////////
 
-MysqlDb::MysqlDb(): mdbhost(0), mdbName(0), mdbuser(0), mdbpw(0), mdbPort(0),mlogTime(false) {
+MysqlDb::MysqlDb(): mdbhost(0), mdbName(NULL), mdbuser(0), mdbpw(0), mdbPort(0),mlogTime(false) {
 
 mhasConnected=false;
 mtimeout=1;
@@ -193,7 +197,9 @@ bool MysqlDb::reConnect(){
     if(!connected){
       timeOutConnect*=2;
       ostrstream wm;
-      wm<<" Connection Failed: will re-try with timeout set at \n==> "<<timeOutConnect<<" seconds <=="<<ends;
+      wm<<" Connection Failed with MySQL returned error ";
+      wm<<mysql_error(&mData)<<"  will re-try with timeout set at \n==> ";
+      wm<<timeOutConnect<<" seconds <=="<<ends;
       StDbManager::Instance()->printInfo(wm.str(),dbMConnect,__LINE__,__CLASS__,__METHOD__); wm.freeze(0);
     }
   }      
@@ -221,12 +227,11 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
 
   if(mdbName) {
     delete [] mdbName;
-    mdbName=0;
+    mdbName=NULL;
   }
-  char* bDb=0;
-  if(aDb){
-    mdbName  = new char[strlen(aDb)+1];     strcpy(mdbName,aDb);
-    if(strcmp(aDb," ")!=0)bDb=(char*)aDb;
+  if(aDb && (strcmp(aDb," ")!=0)){
+    mdbName  = new char[strlen(aDb)+1];     
+    strcpy(mdbName,aDb);
   }
 
   bool tRetVal = false;
@@ -240,7 +245,7 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
   if(reConnect()){
     //  if(mysql_real_connect(&mData,aHost,aUser,aPasswd,bDb,aPort,NULL,0)){ 
        t0=mqueryLog.wallTime()-t0;
-       cs<< "Server Connecting:"; if(bDb)cs<<" DB=" << bDb ;
+       cs<< "Server Connecting:"; if(mdbName)cs<<" DB=" << mdbName ;
        cs<< "  Host=" << aHost <<":"<<aPort<<endl;
        cs<< " --> Connection Time="<<t0<<" sec"<<ends;
        //       connString = cs.str();
