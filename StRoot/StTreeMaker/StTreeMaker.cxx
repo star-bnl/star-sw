@@ -266,8 +266,6 @@ void StTreeMaker::UpdateHddr()
   StMaker *failmk = GetFailedMaker();
   TString ts;
   if (failmk ) {
-      if (strcmp("St_geant_Maker",failmk->ClassName())==0
-    ||  failmk->InheritsFrom(StIOInterFace::Class())   ) hd =0;
     ts = "discarded by ";
     ts += failmk->ClassName();
     ts += "::";
