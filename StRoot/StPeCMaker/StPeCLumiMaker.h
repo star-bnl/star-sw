@@ -47,6 +47,7 @@ public:
   virtual ~StPeCLumiMaker();
   //  virtual void Clear(Option_t *option="");
   virtual Int_t  Init();
+  virtual Int_t  InitRun(Int_t runnr);
   virtual Int_t  Make();
   virtual Int_t  Finish();
 
@@ -55,7 +56,7 @@ private:
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPeCLumiMaker.h,v 1.1 2002/03/19 22:23:42 meissner Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPeCLumiMaker.h,v 1.2 2002/04/18 19:02:11 meissner Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPeCLumiMaker, 1)
 };
