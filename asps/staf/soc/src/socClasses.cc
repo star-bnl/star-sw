@@ -6,7 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.14 1997/05/10 02:05:36 tull Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.15 1997/11/15 02:55:14 tull Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <stream.h>
@@ -24,6 +24,7 @@
 
 //:----------------------------------------------- PROTOTYPES         --
 extern "C" char *id2name(char *base, long id);
+extern "C" char *shortname(char *longname, size_t length);
 
 //:#####################################################################
 //:=============================================== CLASS              ==
@@ -135,10 +136,11 @@ char * socObject:: listing () {
    memset(c,0,79);
    char l='|';
    if(lock())l='-';
-   char *n, *t;
+   char *n, *t, *nn, *tt;
    sprintf(c,"| %5d %c %-15s | %-15s |"
-   		, idRef(), l, n=name(), t=type());
-   FREE(n); FREE(t);
+   		, idRef(), l, nn=shortname(n=name(),15)
+		, tt=shortname(t=type()));
+   FREE(n); FREE(t); FREE(nn); FREE(tt);
    return c;
 }
 
