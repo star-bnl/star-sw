@@ -190,7 +190,7 @@ int PassCuts(DS_DATASET_T *pTable,long row,char *cuts) {
   int ser,ip,len,pp; char copy[PSIZE],left[PSIZE],rite[PSIZE];
   /* if(row!=1) return FALSE; */
   if(*cuts=='\0') return TRUE;  /* no cuts, so return TRUE */
-  DelWhiteSpace(cuts); ToLowerCase(cuts);
+  DelWhiteSpace(cuts); /* October 9 1995 ToLowerCase(cuts); */ 
   strncpy(gCopy,cuts,PSIZE-2); strncpy(copy,cuts,PSIZE-2);
   if(!DelOutParens(cuts)) {
     Say1("Parse error in dsuDoCuts().");
