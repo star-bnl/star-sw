@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.56 2005/03/17 06:19:36 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.56 2005/03/17 06:19:36 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.57 2005/03/24 17:59:38 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.57 2005/03/24 17:59:38 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.57  2005/03/24 17:59:38  perev
+ * refit() method added
+ *
  * Revision 2.56  2005/03/17 06:19:36  perev
  * Cleanup
  *
@@ -281,16 +284,7 @@ StiKalmanTrackNode * StiKalmanTrack::add(StiHit *h,double alpha, double eta, dou
     }
   TRACKMESSENGER << "StiKalmanTrack::add(...) -I- have valid n"<<endl;
   n->initialize(h,alpha,eta,curvature,tanl);
-
-  // calculate the estimate error of this node
-  const StiHitErrorCalculator * calc = h->detector()->getHitErrorCalculator();
-  if (!calc)
-    {
-      cout << "SKT::add(...) -E- Detector:"<<h->detector()->getName()<<" has no calculator"<<endl;
-      throw runtime_error("SKT::add(...) -E- calc==0");
-    }
-  calc->calculateError(n);
-
+  
   if (lastNode!=0)
     lastNode->add(n);
   else 
@@ -1115,7 +1109,7 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 
       _vDca = d;
       _vChi2= chi2;
-      //if (chi2<pars->maxChi2Vertex)
+//      if (chi2<pars->maxChi2Vertex)
       if (d<4.)
 	{
 	  //_dca = ::sqrt(dy*dy+dz*dz);
@@ -1148,32 +1142,10 @@ static int nCall=0; nCall++;
   try 
     {
       if (debug()) cout << "StiKalmanTrack::find seed " << *((StiTrack *) this);
-      if (trackFinder->find(this,kOutsideIn))
-	{
-        int nn = getNNodes(3);
-        if (!nn) return false;
-        StiKalmanTrackNode *inn = getInnerMostNode(3);
-        double pars[kNPars]; memcpy(pars,inn->getPars(),sizeof(pars));
-	if (debug()) cout << "StiKalmanTrack::find find" << *((StiTrack *) this);
-	//cout<<"/////////////////fit(InOut)";
-          for (int iter=0;iter<10;iter++) {
-	    fit(kInsideOut);  
-	    if (debug()) cout << "StiKalmanTrack::find fit(kInsideOut)" << *((StiTrack *) this);
-	  //------
-            
-	    fit(kOutsideIn);
-	    if (debug()) cout << "StiKalmanTrack::find fit(kOutsideIn)" << *((StiTrack *) this);
-            if (!inn->isValid())	continue;
-            if (inn->getChi2()>1000.) 	continue;
-            double est=0;
-	    for (int i=1;i<kNPars;i++) {
-	      est += pow(pars[i]-inn->getPars()[i],2)/inn->getDiag(i);
-	    } 
-            memcpy(pars,inn->getPars(),sizeof(pars));
-            if (est<0.01) break;
-          }
-	  trackExtended = getNNodes(3)>0;
-	}	
+      if (trackFinder->find(this,kOutsideIn)) {
+          int status = refit();
+	  trackExtended = getNNodes(3)>5;
+      }	
     }
   catch (runtime_error & error)
     {
@@ -1339,5 +1311,31 @@ StiKalmanTrackNode * StiKalmanTrack::add(StiKalmanTrackNode * node)
   lastNode->add(node);
   lastNode = node;
   return lastNode;
+}
+//_____________________________________________________________________________
+int StiKalmanTrack::refit() 
+{
+  enum {kMaxIter=10};
+
+  int nn = getNNodes(3);
+//??  if (nn<5) return -1;
+  StiKalmanTrackNode *inn = getInnerMostNode(3);
+  int fail = 1;
+  double pars[kNPars]; memcpy(pars,inn->getPars(),sizeof(pars));
+
+  for (int iter=0;iter<kMaxIter;iter++) {
+    fit(kInsideOut);  
+    fit(kOutsideIn);
+//??    if (getNNodes(3)<5) return -2;
+    if (!inn->isValid())	continue;
+    if (inn->getChi2()>1000.) 	continue;
+    double est=0;
+    for (int i=1;i<kNPars;i++) {
+	est += pow(pars[i]-inn->getPars()[i],2)/inn->getDiag(i);} 
+
+    memcpy(pars,inn->getPars(),sizeof(pars));
+      if (est<0.01) { fail=0; break;}
+  }
+  return fail;
 }
 
