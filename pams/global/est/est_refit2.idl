@@ -9,7 +9,6 @@
 #include "est_ctrl.idl"
 #include "est_match.idl"
 #include "egr_egrpar.idl"
-/*#include "egr_fitter.idl"*/
 
 interface est_refit2 : amiModule {
 	STAFCV_T call
