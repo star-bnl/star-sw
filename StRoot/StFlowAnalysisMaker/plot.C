@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.46 2003/02/25 19:25:32 posk Exp $
+// $Id: plot.C,v 1.47 2003/03/11 23:04:30 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -488,7 +488,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	if (singleGraph) {
 	  TH1D* projX = hist2D->ProjectionX(histName->Data());
 	} else {
-	  TH1D* projX = hist2D->ProjectionX(histName->Data(), -1, 9999, "E");
+	  //TH1D* projX = hist2D->ProjectionX(histName->Data(), -1, 9999, "E");
+	  TH1D* projX = hist2D->ProjectionX(histName->Data());
 	}
 	projX->SetName(histProjName->Data());
 	char* xTitle = hist2D->GetXaxis()->GetTitle();
@@ -796,6 +797,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.47  2003/03/11 23:04:30  posk
+// Includes scalar product hists.
+//
 // Revision 1.46  2003/02/25 19:25:32  posk
 // Improved plotting.
 //
