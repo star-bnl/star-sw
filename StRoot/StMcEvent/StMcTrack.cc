@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.14 2003/02/19 03:16:05 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.15 2003/08/20 18:50:21 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.15  2003/08/20 18:50:21  calderon
+ * Addition of Tof classes and Pixel classes.  Modified track, event, and
+ * container code to reflect this.
+ * Fix bug in StMcVertex and in clearing of some hit collections.
+ *
  * Revision 2.14  2003/02/19 03:16:05  calderon
  * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
  * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
@@ -10,8 +15,13 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.14 2003/02/19 03:16:05 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.15 2003/08/20 18:50:21 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.15  2003/08/20 18:50:21  calderon
+ * Addition of Tof classes and Pixel classes.  Modified track, event, and
+ * container code to reflect this.
+ * Fix bug in StMcVertex and in clearing of some hit collections.
+ *
  * Revision 2.14  2003/02/19 03:16:05  calderon
  * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
  * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
@@ -88,7 +98,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.14 2003/02/19 03:16:05 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.15 2003/08/20 18:50:21 calderon Exp $";
 
 StMcTrack::StMcTrack() 
 {
@@ -137,6 +147,15 @@ StMcTrack::~StMcTrack() {
     mTpcHits.clear();
     mSvtHits.clear();
     mFtpcHits.clear();
+    mRichHits.clear();
+    mCtbHits.clear();
+    mBemcHits.clear();
+    mBprsHits.clear();
+    mBsmdeHits.clear();
+    mBsmdpHits.clear();
+    mTofHits.clear();
+    mPixelHits.clear();
+    
 }
 
 void StMcTrack::initToZero()
@@ -183,6 +202,8 @@ ostream&  operator<<(ostream& os, const StMcTrack& t)
     os << "No. Bprs  Hits: " << t.bprsHits().size()  << endl;
     os << "No. Bsmde Hits: " << t.bsmdeHits().size() << endl;
     os << "No. Bsmdp Hits: " << t.bsmdpHits().size() << endl;
+    os << "No. Tof   Hits: " << t.tofHits().size()   << endl;
+    os << "No. Pixel Hits: " << t.pixelHits().size()  << endl;
     os << "Is Shower     : " << t.isShower() << endl;
     os << "Geant Id      : " << t.geantId()  << endl;
     os << "Pdg Code      : " << t.pdgId()  << endl;
@@ -208,6 +229,8 @@ void StMcTrack::setFtpcHits(StPtrVecMcFtpcHit& val) { mFtpcHits = val; }
 
 void StMcTrack::setRichHits(StPtrVecMcRichHit& val) { mRichHits = val; }
 
+void StMcTrack::setCtbHits(StPtrVecMcCtbHit& val) { mCtbHits = val; }
+
 void StMcTrack::setBemcHits(StPtrVecMcCalorimeterHit& val) { mBemcHits = val; }
 
 void StMcTrack::setBprsHits(StPtrVecMcCalorimeterHit& val) { mBprsHits = val; }
@@ -215,6 +238,10 @@ void StMcTrack::setBprsHits(StPtrVecMcCalorimeterHit& val) { mBprsHits = val; }
 void StMcTrack::setBsmdeHits(StPtrVecMcCalorimeterHit& val) { mBsmdeHits = val; }
 
 void StMcTrack::setBsmdpHits(StPtrVecMcCalorimeterHit& val) { mBsmdpHits = val; }
+
+void StMcTrack::setTofHits(StPtrVecMcTofHit& val) { mTofHits = val; }
+
+void StMcTrack::setPixelHits(StPtrVecMcPixelHit& val) { mPixelHits = val; }
 
 void StMcTrack::setShower(char val) { mIsShower = val; }
 
@@ -272,6 +299,17 @@ void StMcTrack::addBsmdpHit(StMcCalorimeterHit* hit)
 {
   mBsmdpHits.push_back(hit);
 }
+
+void StMcTrack::addTofHit(StMcTofHit* hit)
+{
+  mTofHits.push_back(hit);
+}
+
+void StMcTrack::addPixelHit(StMcPixelHit* hit)
+{
+  mPixelHits.push_back(hit);
+}
+
 // Not very elegant.  Maybe should have kept all collections as
 // vector<StMcHit*> so that then we could have used the same
 // routine for all of them... 
@@ -338,5 +376,21 @@ void StMcTrack::removeBsmdeHit(StMcCalorimeterHit* hit)
 void StMcTrack::removeBsmdpHit(StMcCalorimeterHit* hit)
 {
     removeCalorimeterHit(mBsmdpHits, hit);
+}
+
+void StMcTrack::removeTofHit(StMcTofHit* hit)
+{
+    StMcTofHitIterator iter = find(mTofHits.begin(), mTofHits.end(), hit);
+    if (iter != mTofHits.end()){
+        mTofHits.erase(iter);
+    }
+}
+
+void StMcTrack::removePixelHit(StMcPixelHit* hit)
+{
+    StMcPixelHitIterator iter = find (mPixelHits.begin(), mPixelHits.end(),hit);
+    if (iter != mPixelHits.end()) {
+	mPixelHits.erase(iter);
+    }    
 }
 //void StMcTrack::setTopologyMap(StTrackTopologyMap& val) { mTopologyMap = val; }

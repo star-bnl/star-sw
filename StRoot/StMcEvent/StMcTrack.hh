@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.9 2003/02/19 03:16:05 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.10 2003/08/20 18:50:21 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.10  2003/08/20 18:50:21  calderon
+ * Addition of Tof classes and Pixel classes.  Modified track, event, and
+ * container code to reflect this.
+ * Fix bug in StMcVertex and in clearing of some hit collections.
+ *
  * Revision 2.9  2003/02/19 03:16:05  calderon
  * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
  * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
@@ -10,8 +15,13 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
  *
- * $Id: StMcTrack.hh,v 2.9 2003/02/19 03:16:05 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.10 2003/08/20 18:50:21 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.10  2003/08/20 18:50:21  calderon
+ * Addition of Tof classes and Pixel classes.  Modified track, event, and
+ * container code to reflect this.
+ * Fix bug in StMcVertex and in clearing of some hit collections.
+ *
  * Revision 2.9  2003/02/19 03:16:05  calderon
  * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
  * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
@@ -109,8 +119,8 @@ public:
     const StPtrVecMcFtpcHit&        ftpcHits() const; //!
     StPtrVecMcRichHit&              richHits(); //!
     const StPtrVecMcRichHit&        richHits() const; //!
-    StPtrVecMcCtbHit&              ctbHits(); //!
-    const StPtrVecMcCtbHit&        ctbHits() const; //!
+    StPtrVecMcCtbHit&               ctbHits(); //!
+    const StPtrVecMcCtbHit&         ctbHits() const; //!
     StPtrVecMcCalorimeterHit&       bemcHits(); //!
     const StPtrVecMcCalorimeterHit& bemcHits() const; //!
     StPtrVecMcCalorimeterHit&       bprsHits(); //!
@@ -119,6 +129,10 @@ public:
     const StPtrVecMcCalorimeterHit& bsmdeHits() const; //!
     StPtrVecMcCalorimeterHit&       bsmdpHits(); //!
     const StPtrVecMcCalorimeterHit& bsmdpHits() const; //!
+    StPtrVecMcTofHit&               tofHits(); //!
+    const StPtrVecMcTofHit&         tofHits() const; //!
+    StPtrVecMcPixelHit&             pixelHits(); //!
+    const StPtrVecMcPixelHit&       pixelHits() const; //!
     StParticleDefinition*           particleDefinition(); //!
     const StParticleDefinition*     particleDefinition() const; //!
     int                             isShower() const; //! 1 = yes, 0 = no
@@ -141,7 +155,9 @@ public:
     void setBprsHits(StPtrVecMcCalorimeterHit&); //!
     void setBsmdeHits(StPtrVecMcCalorimeterHit&); //!
     void setBsmdpHits(StPtrVecMcCalorimeterHit&); //!
-  
+    void setTofHits(StPtrVecMcTofHit&); //!
+    void setPixelHits(StPtrVecMcPixelHit&); //!
+
     void setShower(char); //!
     void setGeantId(long); //!
     void setPdgId(long); //!
@@ -158,6 +174,8 @@ public:
     void addBprsHit(StMcCalorimeterHit*); //!
     void addBsmdeHit(StMcCalorimeterHit*); //!
     void addBsmdpHit(StMcCalorimeterHit*); //!
+    void addTofHit(StMcTofHit*); //!
+    void addPixelHit(StMcPixelHit*); //!
     void removeTpcHit(StMcTpcHit*); //!
     void removeSvtHit(StMcSvtHit*); //!
     void removeFtpcHit(StMcFtpcHit*); //!
@@ -168,6 +186,8 @@ public:
     void removeBprsHit(StMcCalorimeterHit*); //!
     void removeBsmdeHit(StMcCalorimeterHit*); //!
     void removeBsmdpHit(StMcCalorimeterHit*); //!
+    void removeTofHit(StMcTofHit*); //!
+    void removePixelHit(StMcPixelHit*); //!
 
     //    void setTopologyMap(StTrackTopologyMap&); //!
     
@@ -180,11 +200,13 @@ protected:
     StPtrVecMcSvtHit         mSvtHits; //!
     StPtrVecMcFtpcHit        mFtpcHits; //!
     StPtrVecMcRichHit        mRichHits; //!
-    StPtrVecMcCtbHit        mCtbHits; //!
+    StPtrVecMcCtbHit         mCtbHits; //!
     StPtrVecMcCalorimeterHit mBemcHits; //!
     StPtrVecMcCalorimeterHit mBprsHits; //!
     StPtrVecMcCalorimeterHit mBsmdeHits; //!
     StPtrVecMcCalorimeterHit mBsmdpHits; //!
+    StPtrVecMcTofHit         mTofHits; //!
+    StPtrVecMcPixelHit       mPixelHits; //!
     StParticleDefinition*    mParticleDefinition; //!
     StMcTrack*               mParent;
     char                     mIsShower; //!
@@ -260,6 +282,14 @@ inline const StPtrVecMcCalorimeterHit& StMcTrack::bsmdeHits() const { return mBs
 inline StPtrVecMcCalorimeterHit& StMcTrack::bsmdpHits() { return mBsmdpHits; }
 
 inline const StPtrVecMcCalorimeterHit& StMcTrack::bsmdpHits() const { return mBsmdpHits; }
+
+inline StPtrVecMcTofHit& StMcTrack::tofHits() { return mTofHits; }
+
+inline const StPtrVecMcTofHit& StMcTrack::tofHits() const { return mTofHits; }
+
+inline StPtrVecMcPixelHit& StMcTrack::pixelHits() { return mPixelHits; }
+
+inline const StPtrVecMcPixelHit& StMcTrack::pixelHits() const { return mPixelHits; }
 
 inline StParticleDefinition* StMcTrack::particleDefinition() { return mParticleDefinition; }
 

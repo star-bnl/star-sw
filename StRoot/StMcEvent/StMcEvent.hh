@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.9 2003/05/15 18:28:47 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.10 2003/08/20 18:50:21 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.10  2003/08/20 18:50:21  calderon
+ * Addition of Tof classes and Pixel classes.  Modified track, event, and
+ * container code to reflect this.
+ * Fix bug in StMcVertex and in clearing of some hit collections.
+ *
  * Revision 2.9  2003/05/15 18:28:47  calderon
  * Added data members from modified g2t_event table:
  * Event Generator Final State Tracks, N Binary Collisions,
@@ -67,7 +72,8 @@ class StMcRichHitCollection;
 class StMcCtbHitCollection;
 class StMcSvtHitCollection;
 class StMcEmcHitCollection;
-
+class StMcTofHitCollection;
+class StMcPixelHitCollection;
 class StMcVertex;
 class g2t_event_st;
 
@@ -123,8 +129,8 @@ public:
     const StMcFtpcHitCollection*   ftpcHitCollection() const;
     StMcRichHitCollection*         richHitCollection();
     const StMcRichHitCollection*   richHitCollection() const;
-    StMcCtbHitCollection*         ctbHitCollection();
-    const StMcCtbHitCollection*   ctbHitCollection() const;
+    StMcCtbHitCollection*          ctbHitCollection();
+    const StMcCtbHitCollection*    ctbHitCollection() const;
     
     StMcEmcHitCollection*          bemcHitCollection();
     const StMcEmcHitCollection*    bemcHitCollection() const;
@@ -135,6 +141,11 @@ public:
     const StMcEmcHitCollection*    bsmdeHitCollection() const;
     StMcEmcHitCollection*          bsmdpHitCollection();
     const StMcEmcHitCollection*    bsmdpHitCollection() const;
+
+    StMcTofHitCollection*          tofHitCollection();
+    const StMcTofHitCollection*    tofHitCollection() const;
+    StMcPixelHitCollection*         pixelHitCollection();
+    const StMcPixelHitCollection*   pixelHitCollection() const;
     
     // "Set" Methods
     
@@ -165,8 +176,9 @@ public:
     void setBprsHitCollection(StMcEmcHitCollection*);              
     void setBsmdeHitCollection(StMcEmcHitCollection*);              
     void setBsmdpHitCollection(StMcEmcHitCollection*);              
-    
-    
+    void setTofHitCollection(StMcTofHitCollection*);
+    void setPixelHitCollection(StMcPixelHitCollection*);       
+
 protected:
     unsigned long                  mEventGeneratorEventLabel;
     unsigned long                  mEventNumber;
@@ -198,6 +210,8 @@ protected:
     StMcEmcHitCollection*          mBprsHits;
     StMcEmcHitCollection*          mBsmdeHits;
     StMcEmcHitCollection*          mBsmdpHits;
+    StMcTofHitCollection*          mTofHits;
+    StMcPixelHitCollection*        mPixelHits;
     static TString                 mCvsTag;
 private:
     const StMcEvent& operator=(const StMcEvent&);
@@ -277,15 +291,29 @@ inline StMcCtbHitCollection* StMcEvent::ctbHitCollection() { return mCtbHits;}
 
 inline const StMcCtbHitCollection* StMcEvent::ctbHitCollection() const { return mCtbHits;}
 
-
 inline StMcEmcHitCollection* StMcEvent::bemcHitCollection() { return mBemcHits;}
+
 inline const StMcEmcHitCollection* StMcEvent::bemcHitCollection() const {return mBemcHits;}
+
 inline StMcEmcHitCollection* StMcEvent::bprsHitCollection() { return mBprsHits;}
+
 inline const StMcEmcHitCollection* StMcEvent::bprsHitCollection() const {return mBprsHits;}
+
 inline StMcEmcHitCollection* StMcEvent::bsmdeHitCollection() { return mBsmdeHits;}
+
 inline const StMcEmcHitCollection* StMcEvent::bsmdeHitCollection() const {return mBsmdeHits;}
+
 inline StMcEmcHitCollection* StMcEvent::bsmdpHitCollection() { return mBsmdpHits;}
+
 inline const StMcEmcHitCollection* StMcEvent::bsmdpHitCollection() const {return mBsmdpHits;}
+
+inline StMcTofHitCollection* StMcEvent::tofHitCollection() { return mTofHits;}
+
+inline const StMcTofHitCollection* StMcEvent::tofHitCollection() const { return mTofHits;}
+
+inline StMcPixelHitCollection* StMcEvent::pixelHitCollection() { return mPixelHits;}
+
+inline const StMcPixelHitCollection* StMcEvent::pixelHitCollection() const { return mPixelHits;}
 
 #endif
 

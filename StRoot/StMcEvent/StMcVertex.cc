@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.cc,v 2.7 2000/05/05 15:25:44 calderon Exp $
+ * $Id: StMcVertex.cc,v 2.8 2003/08/20 18:50:21 calderon Exp $
  * $Log: StMcVertex.cc,v $
+ * Revision 2.8  2003/08/20 18:50:21  calderon
+ * Addition of Tof classes and Pixel classes.  Modified track, event, and
+ * container code to reflect this.
+ * Fix bug in StMcVertex and in clearing of some hit collections.
+ *
  * Revision 2.7  2000/05/05 15:25:44  calderon
  * Reduced dependencies and made constructors more efficient
  *
@@ -47,7 +52,7 @@ using std::find;
 #include "StMcVertex.hh"
 #include "tables/St_g2t_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StMcVertex.cc,v 2.7 2000/05/05 15:25:44 calderon Exp $";
+static const char rcsid[] = "$Id: StMcVertex.cc,v 2.8 2003/08/20 18:50:21 calderon Exp $";
 
 StMcVertex::StMcVertex()
 {
@@ -65,7 +70,8 @@ StMcVertex::StMcVertex(g2t_vertex_st* vtx)
   mPosition.setX(vtx->ge_x[0]);
   mPosition.setY(vtx->ge_x[1]);
   mPosition.setZ(vtx->ge_x[2]);
-  mGeantVolume=vtx->ge_volume;
+  char tmp[5]; tmp[4]=0; strncpy(tmp,vtx->ge_volume,4);
+  mGeantVolume=tmp;
   mTof = vtx->ge_tof;
   mGeantProcess = vtx->ge_proc;
   mGeneratorProcess = vtx->eg_proc;

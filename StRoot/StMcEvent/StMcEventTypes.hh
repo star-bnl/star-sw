@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEventTypes.hh,v 2.5 2003/02/19 03:16:05 calderon Exp $
+ * $Id: StMcEventTypes.hh,v 2.6 2003/08/20 18:50:21 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StMcEventTypes.hh,v $
+ * Revision 2.6  2003/08/20 18:50:21  calderon
+ * Addition of Tof classes and Pixel classes.  Modified track, event, and
+ * container code to reflect this.
+ * Fix bug in StMcVertex and in clearing of some hit collections.
+ *
  * Revision 2.5  2003/02/19 03:16:05  calderon
  * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
  * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
@@ -58,6 +63,11 @@
 #include "StMcTpcHitCollection.hh"
 #include "StMcTpcPadrowHitCollection.hh"
 #include "StMcTpcSectorHitCollection.hh"
+#include "StMcTofHit.hh"
+#include "StMcTofHitCollection.hh"
+#include "StMcPixelHit.hh"
+#include "StMcPixelHitCollection.hh"
+#include "StMcPixelLayerHitCollection.hh"
 #include "StMcTrack.hh"
 #include "StMcVertex.hh"
 
