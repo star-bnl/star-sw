@@ -66,10 +66,8 @@ void StiKalmanTrackFinder::initialize()
   _mcTrackFactory    = _toolkit->getMcTrackFactory(); 
   _hitFactory        = _toolkit->getHitFactory(); 
   _detectorContainer = _toolkit->getDetectorContainer(); 
-  //_detectorContainer->build(_toolkit->getDetectorBuilder());
   _detectorContainer->reset();
   _trackSeedFinder   = _toolkit->getTrackSeedFinder();
-  //_trackSeedFinder->initialize();*/
   _hitLoader         = _toolkit->getHitLoader();
   _hitContainer      = _toolkit->getHitContainer();
   _trackContainer    = _toolkit->getTrackContainer();

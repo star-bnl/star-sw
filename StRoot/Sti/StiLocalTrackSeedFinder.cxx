@@ -37,7 +37,7 @@ StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder()
 
 void StiLocalTrackSeedFinder::initialize()
 {
-  _messenger << "StiLocalTrackSeedFinder::initialize() -I- Started" << endl;
+  cout << "StiLocalTrackSeedFinder::initialize() -I- Started" << endl;
   Factory<EditableParameter> * f = StiToolkit::instance()->getParameterFactory();
   if (!f)
     {
@@ -57,8 +57,7 @@ void StiLocalTrackSeedFinder::initialize()
   add(f->getInstance()->set("DoHelixFit","Do Helix Fit",  &mDoHelixFit, true, 0));
   
   StiMasterDetectorBuilder * builder = StiToolkit::instance()->getDetectorBuilder();
-  if (!builder)
-    throw runtime_error("StiCompositeSeedFinder::build() -F- builder==0 ");
+  if (!builder) throw runtime_error("StiCompositeSeedFinder::build() -F- builder==0 ");
   for (unsigned int row=0;row<builder->getNRows();row++)
     {
       for (unsigned int sector=0;sector<builder->getNSectors(row);sector++)
@@ -66,7 +65,7 @@ void StiLocalTrackSeedFinder::initialize()
 	  StiDetector * detector = builder->getDetector(row,sector);
 	  if (!detector)
 	    {
-	      cout << "StiCompositeSeedFinder::build() row:"<<row<<" sector:"<<sector<<" ERROR" << endl;
+	      cout << "StiLocalSeedFinder::build() row:"<<row<<" sector:"<<sector<<" ERROR" << endl;
 	      throw runtime_error("StiCompositeSeedFinder::build() -F- detector==0 ");
 	    }
 	  if (detector->isActive()) 
@@ -76,7 +75,7 @@ void StiLocalTrackSeedFinder::initialize()
 	    }
 	}
     }
-  _messenger << "StiLocalTrackSeedFinder::initialize() -I- Done" << endl;
+  cout << "StiLocalTrackSeedFinder::initialize() -I- Done" << endl;
 }
 
 /// Produce the next track seed 
