@@ -14,6 +14,7 @@
        short     dEdxNTruncate ;  // # points to truncate in dEdx
        short     eventReset   ;   // Flag to reset event in fft 
        short     getErrors    ;   // Flag to switch error calculation
+       short     fillTracks   ;   // Flag to switch FtfTrack class filling
        short     ghostFlag    ;   // =1 when there are ghost hits
        short     goBackwards  ;   // Flag to go backwards at the end of track reco
        short     init;            // Control initialization 
@@ -73,6 +74,11 @@
        int       nPhiTrackPlusOne, nEtaTrackPlusOne ;                
        float     phiSlice, etaSlice ;
        float     phiSliceTrack, etaSliceTrack ;
+#ifdef TRDEBUG
+       int       trackDebug ;
+       int       hitDebug ;
+       int       debugLevel ;
+#endif
    } ;
 #endif
 

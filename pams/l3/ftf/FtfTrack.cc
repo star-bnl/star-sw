@@ -113,6 +113,12 @@ void FtfTrack::add ( FtfTrack *piece )
   g1Xy  += piece->g1Xy   ;
   g2Xy  += piece->g2Xy   ;
 
+<<<<<<< FtfTrack.cc
+  ddXy  =   s11Xy * s22Xy - square ( s12Xy ) ;
+  a1Xy  = ( g1Xy * s22Xy - g2Xy * s12Xy ) / ddXy ;
+  a2Xy  = ( g2Xy * s11Xy - g1Xy * s12Xy ) / ddXy ;
+=======
+>>>>>>> 1.4
 //
 //     Now in the sz plane
 //
@@ -123,6 +129,12 @@ void FtfTrack::add ( FtfTrack *piece )
      g1Sz  += piece->g1Sz   ;
      g2Sz  += piece->g2Sz   ;
 
+<<<<<<< FtfTrack.cc
+     ddSz  = s11Sz * s22Sz - square ( s12Sz ) ;
+     a1Sz  = ( g1Sz * s22Sz - g2Sz * s12Sz ) / ddSz ;
+     a2Sz  = ( g2Sz * s11Sz - g1Sz * s12Sz ) / ddSz ;
+=======
+>>>>>>> 1.4
    }
 //
 //  Add space points to first track
@@ -161,7 +173,7 @@ void FtfTrack::add ( FtfTrack *piece )
 //
 //   Update track parameters
 //
-   fill ( ) ;
+   if ( para->fillTracks ) fill ( ) ;
 //
 //   Declare track 2 not to be used
 //
@@ -204,12 +216,12 @@ void FtfTrack::dEdx (  ){
 //
 //   Define array to keep largest de's
 //
-   float *de = new float[nTruncate] ;
+   double *de = new double[nTruncate] ;
 //
 //    Reset
 //
    dedx = 0.F ;
-   memset ( de, 0, nTruncate*sizeof(float) ) ;
+   memset ( de, 0, nTruncate*sizeof(double) ) ;
 //
 //
 //
@@ -267,7 +279,7 @@ void FtfTrack::fill (  ) {
 //
    double xc, yc ;
    double rc   = sqrt ( a2Xy * a2Xy + 1 ) / ( 2 * fabs(a1Xy) ) ;
-   pt          = (float)(2.9979e-3 * para->bField * rc );
+   pt          = (double)(2.9979e-3 * para->bField * rc );
 
    if ( pt > para->ptMinHelixFit == 1 ) fitHelix ( ) ;
    else{
@@ -278,10 +290,10 @@ void FtfTrack::fill (  ) {
 //    Get Errors
 //
       if ( para->getErrors ) {
-         getErrorsCircleFit (  (float)xc, (float)yc, (float)rc ) ;
+         getErrorsCircleFit (  (double)xc, (double)yc, (double)rc ) ;
          double det = s11Sz * s22Sz - s12Sz * s12Sz ;
-         dtanl = (float) ( s11Sz / det );
-         dz0   = (float) ( s22Sz / det );
+         dtanl = (double) ( s11Sz / det );
+         dz0   = (double) ( s22Sz / det );
       }
    }
 }
@@ -318,19 +330,19 @@ void FtfTrack::fillPrimary (  double &xc, double &yc, double &rc  ) {
    q = ( ( d_angle < 0 ) ? 1 : -1 ) ;
    r0   = para->rVertex ;
    phi0 = para->phiVertex ;
-   psi  = (float)(angle_vertex - q * 0.5F * pi) ;
-   if ( psi < 0        )  psi = (float)(psi + twoPi );
-   if ( psi > 2. * pi  )  psi = (float)(psi - twoPi );
+   psi  = (double)(angle_vertex - q * 0.5F * pi) ;
+   if ( psi < 0        )  psi = (double)(psi + twoPi );
+   if ( psi > 2. * pi  )  psi = (double)(psi - twoPi );
 //
 //      Get z parameters if needed       
 //
    if ( para->szFitFlag ){
-      tanl = -(float)a2Sz ;
-      z0   =  (float)(a1Sz + a2Sz * ( trackLength - rc * d_angle * q ) );
+      tanl = -(double)a2Sz ;
+      z0   =  (double)(a1Sz + a2Sz * ( trackLength - rc * d_angle * q ) );
    }
    else{
       tanl = firstHit->z /
-          (float)sqrt ( firstHit->x*firstHit->x + firstHit->y*firstHit->y ) ;
+          (double)sqrt ( firstHit->x*firstHit->x + firstHit->y*firstHit->y ) ;
       z0      = 0.F ;
    }
 //
@@ -370,18 +382,18 @@ void FtfTrack::fillSecondary ( double &xc, double &yc, double &rc )
    q    = ( ( dangle > 0 ) ? 1 : -1 ) ;
    r0   = lastHit->r   ;
    phi0 = lastHit->phi ;
-   psi  = (float)(angle2 - q * piHalf );
-   if ( psi < 0     ) psi = (float)(psi + twoPi );
+   psi  = (double)(angle2 - q * piHalf );
+   if ( psi < 0     ) psi = (double)(psi + twoPi );
 //
 //      Get z parameters if needed       
 //
    if ( para->szFitFlag ){
-      tanl = -(float)a2Sz ;
-      z0   =  (float)(a1Sz + a2Sz * trackLength  );
+      tanl = -(double)a2Sz ;
+      z0   =  (double)(a1Sz + a2Sz * trackLength  );
    }
    else{
       tanl = firstHit->z /
-           (float)sqrt ( firstHit->x*firstHit->x + firstHit->y*firstHit->y ) ;
+           (double)sqrt ( firstHit->x*firstHit->x + firstHit->y*firstHit->y ) ;
       z0      = 0.F ;
    }
 //
@@ -411,8 +423,8 @@ int FtfTrack::follow ( VOLUME *volume, int way, int ir_stop ) {
 //
 //     Define variables to keep total chi2
 //
-   float xyChi2 = chi2[0] ;
-   float szChi2 = chi2[1] ;
+   double xyChi2 = chi2[0] ;
+   double szChi2 = chi2[1] ;
    
 //
 //    Loop as long a a hit is found and the segment
@@ -448,7 +460,7 @@ int FtfTrack::follow ( VOLUME *volume, int way, int ir_stop ) {
 //
 //   Keep total chi2
 //
-      float lxyChi2 = chi2[0]-chi2[1] ;
+      double lxyChi2 = chi2[0]-chi2[1] ;
       xyChi2 += lxyChi2 ;
       nextHit->xyChi2 = lxyChi2 ;
 //
@@ -477,12 +489,12 @@ int FtfTrack::follow ( VOLUME *volume, int way, int ir_stop ) {
 //
 //        Check total chi2
 //
-   float normalized_chi2 = (chi2[0]+chi2[1])/nHits ;
+   double normalized_chi2 = (chi2[0]+chi2[1])/nHits ;
    if ( normalized_chi2 > para->trackChi2Cut ) return 0 ;
 //
 //  Otherwise go for it
 //
-   fill ( ) ;
+   if ( para->fillTracks ) fill ( ) ;
 #ifdef TRDEBUG
    debugFill ( ) ;
 #endif
@@ -515,9 +527,9 @@ int FtfTrack::followHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
 //      If looking for secondaries calculate conformal coordinates
 //
    if ( para->primaries == 0 ){
-      float xx = candidateHit->x - refHit->x ;
-      float yy = candidateHit->y - refHit->y ;
-      float rr = xx * xx + yy * yy ;
+      double xx = candidateHit->x - refHit->x ;
+      double yy = candidateHit->y - refHit->y ;
+      double rr = xx * xx + yy * yy ;
       candidateHit->xp =   xx / rr ;
       candidateHit->yp = - yy / rr ;
 
@@ -562,10 +574,10 @@ int FtfTrack::followHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
 //         Check whether the chi2 square is better than previous one
 //
    if ( lchi2 < chi2[0] ) {
-      chi2[0]       = (float)lchi2    ;
-      chi2[1]       = (float)lszChi2 ;
+      chi2[0]       = (double)lchi2    ;
+      chi2[1]       = (double)lszChi2 ;
       
-      if ( para->szFitFlag  ) candidateHit->s = (float)slocal ;
+      if ( para->szFitFlag  ) candidateHit->s = (double)slocal ;
 //
 //       if a good chi2 is found let's stop here
 //
@@ -587,7 +599,7 @@ int FtfTrack::mergePrimary ( AREA *trackArea ){
    int    i_phi, i_eta ;
    FtfTrack *i_track ;
    int    ip, ie ;
-   float  delta_psi ;
+   double  delta_psi ;
 //-
 //   Get track area       
 //
@@ -640,7 +652,7 @@ int FtfTrack::mergePrimary ( AREA *trackArea ){
 //    Tracks close enough
 //
             if ( fabs(eta-i_track->eta) > para->detaMerge ) continue ;
-            delta_psi = (float)fabs(psi - i_track->psi) ;
+            delta_psi = (double)fabs(psi - i_track->psi) ;
             if ( delta_psi > para->dphiMerge && delta_psi < twoPi - para->dphiMerge ) continue ;
 
             i_track->add ( this ) ;
@@ -819,7 +831,7 @@ int FtfTrack::segment( VOLUME *volume, int way ){
 //
 //   Define some variables
 //
-	float dx, dy, rr ;
+	double dx, dy, rr ;
 	FtfHit* nextHit ;
 //
 //   Check which way to go
@@ -860,7 +872,7 @@ int FtfTrack::segment( VOLUME *volume, int way ){
          if ( para->szFitFlag  ){
             dx = nextHit->x - lastHit->x ;
             dy = nextHit->y - lastHit->y ;
-            trackLength    += (float)sqrt ( dx * dx + dy * dy ) ;
+            trackLength    += (double)sqrt ( dx * dx + dy * dy ) ;
             nextHit->s      = trackLength ;
          }
 //
@@ -897,27 +909,27 @@ int FtfTrack::segment( VOLUME *volume, int way ){
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 int FtfTrack::segmentHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
    
-   float dx, dy, dr, d3, dangle ;
-   float dphi, deta ;
-   float   angle ;
+   double dx, dy, dr, d3, dangle ;
+   double dphi, deta ;
+   double   angle ;
 //
 //   select hit with the
 //   the smallest value of d3 (defined below)
 //
-   dphi  = (float)fabs((baseHit->phi) - (candidateHit->phi)) ; 
-   if ( dphi > pi ) dphi = (float)fabs( twoPi - dphi ) ;
+   dphi  = (double)fabs((baseHit->phi) - (candidateHit->phi)) ; 
+   if ( dphi > pi ) dphi = (double)fabs( twoPi - dphi ) ;
    if ( dphi > para->dphi && dphi < twoPi -para->dphi ) return 0 ;
 //
 //    Make sure we want to look at the difference in eta
 //
    if ( baseHit->dz < 1000. && candidateHit->dz < 1000. ){
-        deta  = (float)fabs((baseHit->eta) - (candidateHit->eta)) ; 
+        deta  = (double)fabs((baseHit->eta) - (candidateHit->eta)) ; 
         if ( deta > para->deta ) return 0 ;
    }
    else deta = 0.F ;
 
-   dr    = (float)fabs(baseHit->row - candidateHit->row);
-   d3    = (float)(toDeg * dr * ( dphi  + deta ) ) ;
+   dr    = (double)fabs(baseHit->row - candidateHit->row);
+   d3    = (double)(toDeg * dr * ( dphi  + deta ) ) ;
 //
 //     If initial segment is longer than 2 store angle info in 
 //     a1Xy and a1_sz
@@ -925,7 +937,7 @@ int FtfTrack::segmentHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
    if ( para->nHitsForSegment > 2 && nHits-1 < para->nHitsForSegment ) {
       dx = candidateHit->x - baseHit->x ;
       dy = candidateHit->y - baseHit->y ;
-      angle = (float)atan2 ( dy, dx ) ;
+      angle = (double)atan2 ( dy, dx ) ;
       if ( angle < 0  ) angle = angle + twoPi ;
       lastXyAngle = angle ;
    }
@@ -951,9 +963,9 @@ int FtfTrack::segmentHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
       if ( nHits > 1 ) {
 	 dx     = candidateHit->x - baseHit->x ;
          dy     = candidateHit->y - baseHit->y ;
-         angle  = (float)atan2 ( dy, dx ) ;
+         angle  = (double)atan2 ( dy, dx ) ;
          if ( angle < 0  ) angle = angle + twoPi ;
-	    dangle = (float)fabs ( lastXyAngle - angle );
+	    dangle = (double)fabs ( lastXyAngle - angle );
 	    lastXyAngle = angle ;
          if ( dangle > para->segmentMaxAngle ) return 0 ;
       }
@@ -1054,8 +1066,8 @@ void FtfTrack::debugFollowCandidate ( FtfHit* candidateHit )
 /*******************************************************************************
         Reconstructs tracks
 *********************************************************************************/
-void FtfTrack::debugFollowSuccess ( float dxy,      float dsz, float lxyChi2, 
-                                       float  lszChi2, float chi2_min,
+void FtfTrack::debugFollowSuccess ( double dxy,      double dsz, double lxyChi2, 
+                                       double  lszChi2, double chi2_min,
                                        FtfHit *candidateHit ) {
 //
 //     Check whether track needs to be debugged
@@ -1065,7 +1077,7 @@ void FtfTrack::debugFollowSuccess ( float dxy,      float dsz, float lxyChi2,
 //
 //      Show first level of info
 //
-   float lchi2 = lxyChi2 + lszChi2 ;
+   double lchi2 = lxyChi2 + lszChi2 ;
    
    printf ( " \n ------------------------------------- " ) ;
    if ( lchi2 < chi2_min ){
@@ -1130,10 +1142,10 @@ void FtfTrack::debugInVolume ( FtfHit *baseHit, FtfHit *candidateHit )
          candidateHit->Show ( 0 );
       }
       else {
-         float dphi  = (float)fabs(baseHit->phi - candidateHit->phi) ;
-         float deta ;
+         double dphi  = (double)fabs(baseHit->phi - candidateHit->phi) ;
+         double deta ;
          if ( baseHit->dz < 1000 && candidateHit->dz < 1000 )
-            deta  = (float)fabs(baseHit->eta - candidateHit->eta) ;
+            deta  = (double)fabs(baseHit->eta - candidateHit->eta) ;
          else
             deta  = 0.F ;
 

@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
-#include <iostream.h>
+//#include <iostream.h>
 
 #include "FtfGeneral.h"
 #include "FtfPara.h"
@@ -19,6 +19,17 @@ public:
    FtfFinder( ) ;
    friend FtfTrack ;
 	
+<<<<<<< FtfFinder.h
+   void    dEdx                    ( ) ;
+   void    getTracks               ( ) ;
+   void    mergePrimaryTracks      ( ) ;
+   double  process ( ) ;
+   int     reset                   ( ) ;
+   int     setConformalCoordinates ( ) ;
+   int     setPointers             ( ) ;
+   double  CpuTime                 ( ) ;
+   double  RealTime                ( ) ;
+=======
    void   dEdx                    ( ) ;
    int    getTracks               ( ) ;
    void   mergePrimaryTracks      ( ) ;
@@ -27,11 +38,13 @@ public:
    int    setConformalCoordinates ( ) ;
    int    setPointers             ( ) ;
    float  time                    ( ) ;
+>>>>>>> 1.5
 //
    void		printVols ( ) ;
    void		printRows ( ) ;
 //
    int           nHits      ;  
+   int           maxHits    ;  
    FtfHit        *hit       ;  
    int           nTracks    ; 
    FtfTrack      *track     ;  
@@ -42,7 +55,8 @@ public:
    VOLUME        *volume     ;
    ROW           *rowk       ;
    AREA          *trackArea ;
-   float initTime, totalTime ;
+   double        cpuTime ;
+   double        realTime ;
 private: 
 
    FtfTrack      *currentTrack ;
