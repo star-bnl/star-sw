@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.1 2000/08/25 22:06:50 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.2 2000/08/28 19:21:40 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.2  2000/08/28 19:21:40  genevb
+// Plot MultiH1F hists like 1d
+//
 // Revision 2.1  2000/08/25 22:06:50  genevb
 // Added histo descriptor in top right
 //
@@ -278,8 +281,9 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
           chkdim = ((TH1 *)obj)->GetDimension();
 
           // actually draw,print
-          if (chkdim == 2) obj->Draw("box");
-          else {
+          if ((chkdim == 2) && (!obj->InheritsFrom("StMultiH1F"))) {
+            obj->Draw("box");
+          } else {
 	    TH1F* tempHist = (TH1F*) obj;
 	    tempHist->SetLineWidth(5);
 	    tempHist->Draw();
