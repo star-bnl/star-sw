@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.35 1999/05/06 22:15:32 perev Exp $
+// $Id: StMaker.cxx,v 1.36 1999/05/07 15:46:10 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.36  1999/05/07 15:46:10  perev
+// Added test for the same object into AddObj
+//
 // Revision 1.35  1999/05/06 22:15:32  perev
 // fix objLast should not be included in StMaker::Init
 //
@@ -92,7 +95,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.35 1999/05/06 22:15:32 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.36 1999/05/07 15:46:10 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -176,7 +179,8 @@ St_ObjectSet *StMaker::AddObj(TObject *obj,const char *dir)
   if (!list) {// No list, make it
     list = new TList();
     set->SetObject((TObject*)list);}
-  if (obj) list->Add(obj);
+  if (!obj) return set;
+  if(!list->FindObject(obj)) list->Add(obj);
   return set;
 }
 //______________________________________________________________________________
@@ -186,7 +190,9 @@ St_DataSet *StMaker::AddData(St_DataSet *ds, const char* dir)
   St_DataSet *set = Find(dir);
   if (!set) { // No dir, make it
     set = new St_ObjectSet(dir); Add(set);}
-  if (ds) set->Add(ds);
+  if (ds) return set;
+  TList *tl = set->GetList();
+  if (!tl || !tl->FindObject(ds)) set->Add(ds);
   return set;
 }
 //______________________________________________________________________________
