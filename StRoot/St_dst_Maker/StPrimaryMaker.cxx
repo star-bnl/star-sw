@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.45 2000/04/29 19:57:23 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.46 2000/05/10 20:57:31 lbarnby Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.46  2000/05/10 20:57:31  lbarnby
+// Call new primary verex confidence level calculation module
+//
 // Revision 1.45  2000/04/29 19:57:23  caines
 // Protection for zero global tracks and tpc hits not on tpc tracks
 //
@@ -160,6 +163,7 @@
 #include "global/St_evr_am_Module.h"
 #include "global/St_egr_fitter_Module.h"
 #include "global/St_track_propagator_Module.h"
+#include "global/St_egr_impactcl_Module.h"
 #include "St_db_Maker/St_db_Maker.h"
 
 long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
@@ -467,6 +471,14 @@ Int_t StPrimaryMaker::Make(){
       primtrk = new St_dst_track("primtrk", NGlbTrk);
       AddData(primtrk);
       
+
+      //calculate impact parameter Confidence Level
+      if(Debug())
+	gMessMgr->Debug() << "Calling EGR_impactcl" << endm;
+
+      iRes = egr_impactcl (vertex,m_egr2_egrpar,globtrk);
+      //     ============================================
+
       if(Debug())
         gMessMgr->Debug() << "Calling EGR_fitter - Second time" << endm;
       iRes = egr_fitter (tphit,    vertex,       tptrack, tpc_groups,
