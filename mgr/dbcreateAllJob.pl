@@ -16,17 +16,19 @@ use File::Basename;
 use File::Find;
 use Net::FTP;
 
-require "dbCpProdSetup.pl";
+require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
 
 my $debugOn=0;
 
 my @Sets = (
-             "auau200/venus412/default/b0_3/year_1b/hadronic_on",
-             "auau200/venus412/default/b3_6/year_1b/hadronic_on",
-             "auau200/venus412/default/b6_9/year_1b/hadronic_on",
-             "auau200/hijing135/Bjets/b0_3/year_2a/hadronic_on",
-             "auau200/hijing135/Cjets/b0_3/year_2a/hadronic_on",
-             "auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on", 
+#             "auau200/venus412/default/b0_3/year_1b/hadronic_on",
+#             "auau200/venus412/default/b3_6/year_1b/hadronic_on",
+#             "auau200/venus412/default/b6_9/year_1b/hadronic_on",
+#             "auau200/hijing135/Bjets/b0_3/year_2a/hadronic_on",
+#             "auau200/hijing135/Cjets/b0_3/year_2a/hadronic_on",
+#             "auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on", 
+             "auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on", 
+             "auau200/hijing135/jetq_on/b9_12/year_1b/hadronic_on",
 );
 
 my $SetD = "daq/1999/12/";
@@ -369,18 +371,18 @@ my $jbset;
 
      if($jb_fstat eq 1)  {
 
-         &create_jobs($jfile, $jset, $mchain, $mlibVer, $JOB_DIR[1]); 
+#         &create_jobs($jfile, $jset, $mchain, $mlibVer, $JOB_DIR[1]); 
 
         print "JOB ID = " ,$mjobID, "\n";
 
 ###  fill  JobStatus table
        print "filling JobStatus table\n";
  
-      &fillJSTable();   
+#      &fillJSTable();   
 
 ###  fill  jobRelations table
         print "filling jobRelations table\n";
-       &fillJRelTable();
+#       &fillJRelTable();
 
       }
      }  
