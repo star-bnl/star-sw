@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.hh,v 1.5 2005/03/18 14:04:06 lmartin Exp $
+// $Id: StSsdBarrel.hh,v 1.6 2005/03/22 13:45:01 lmartin Exp $
 //
 // $Log: StSsdBarrel.hh,v $
+// Revision 1.6  2005/03/22 13:45:01  lmartin
+// new member mActiveLadders added
+//
 // Revision 1.5  2005/03/18 14:04:06  lmartin
 // missing CVS header added
 //
@@ -51,6 +54,7 @@ class StSsdBarrel
   void  sortListStrip();
   void  sortListCluster();
   int   getNumberOfLadders();
+  int   isActiveLadder(int i);
   void  debugUnPeu(int monLadder, int monwafer);
 
   StSsdLadder** mLadders;
@@ -63,7 +67,7 @@ class StSsdBarrel
   int    mNLadder;
   int    mNWaferPerLadder;
   int    mNStripPerSide;
-
+  int    mActiveLadders[20];
   int idWaferToWaferNumb(int idWafer);
   int waferNumbToIdWafer(int waferNumb);
 };
