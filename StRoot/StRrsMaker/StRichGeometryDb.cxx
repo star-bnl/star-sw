@@ -1,10 +1,13 @@
 /*******************************************************************
- * $Id: StRichGeometryDb.cxx,v 2.5 2001/10/04 22:16:48 dunlop Exp $
+ * $Id: StRichGeometryDb.cxx,v 2.6 2002/02/22 18:37:18 dunlop Exp $
  *
  * Description:
  *
  *******************************************************************
  * $Log: StRichGeometryDb.cxx,v $
+ * Revision 2.6  2002/02/22 18:37:18  dunlop
+ * adjusted production version as short-term fix
+ *
  * Revision 2.5  2001/10/04 22:16:48  dunlop
  * Fixing small mistake in new euler angles
  *
@@ -218,7 +221,7 @@ void StRichGeometryDb::my_fill()
 	cout << "Year 2000 Geometry 2nd production: " << endl;
 	this->fill2001he();	 
      }
-     else if(strstr(starVersion, "01")||strstr(starVersion, "DEV")) {
+     else if(strstr(starVersion, "01")||strstr(starVersion, "DEV")||strstr(starVersion,"02")) {
 	cout << "Year 2001 Geometry: " << endl;
 	this->fill2001();	 
      }
@@ -226,8 +229,8 @@ void StRichGeometryDb::my_fill()
 	 cout << "Warning:\n";
 	 cout << "\tStRichGeometry::my_fill()\n";
 	 cout << "\tUnknown starVersion: " << starVersion << endl;
-	 cout << "\tUse Year 2000 Geometry" << endl;
-	 this->fill2000();
+	 cout << "\tUse Year 2001 Geometry" << endl;
+	 this->fill2001();
      }
 
      mNormalVectorToPadPlane = 
