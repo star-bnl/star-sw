@@ -161,17 +161,8 @@
 *   - global reconstruction
 *   - dst packages
 *
-* 6. call_bfc_readfz_to_sim_tfs_year1.kumac
-*   - read in fz file with year1 simulations
-*   - run g2t
-*   - run tpc & svt & emc simulation
 *
-* 7. call_bfc_readfz_to_sim_tfs_year2.kumac
-*   - read in fz file with year2 simulations
-*   - run g2t
-*   - run tpc & svt & emc simulation
-*
-* 8. call_bfc_reco.kumac                  
+* 6. call_bfc_reco.kumac                  
 *  - read in simulated data file (thru tss & srs)
 *  - run tpc & svt clustering
 *  - run tpc & svt tracking
@@ -180,39 +171,39 @@
 *  - write xdf file containing full directories
 * 
 * 
-* 9. call_bfc_reco_trk_ftpc.kumac              
+* 7. call_bfc_reco_trk_ftpc.kumac              
 *  - read in simulated data file (thru tss & srs)
 *  - run tpc & svt clustering
 *  - run tpc & svt tracking
 *  - run ftpc slow sim, clustering, tracking
 *  - write xdf file containing full directories
 *  
-* 10. call_bfc_svt_fast_sim_tracker.kumac
+* 8. call_bfc_svt_fast_sim_tracker.kumac
 *   - read in g2t file
 *   - run svt sim
 *   - run svt tracking
 *   - write xdf file containing full directories
 * 
-* 11. call_bfc_tfs_global_dst_testv0.kumac
+* 9. call_bfc_tfs_global_dst_testv0.kumac
 *   - read in g2t test file with lots of V0's
 *   - process thru whole chain to dst pkgs
 *   - write out ntuple
 *   - read back in ntuple and make plot and save to file
 * 
-* 12. call_bfc_tpc_fast_sim_tracker.kumac
+* 10. call_bfc_tpc_fast_sim_tracker.kumac
 *   - read in g2t file
 *   - run tpc fast sim 
 *   - run tpc tracking
 *   - write xdf file containing full directories
 * 
-* 13. call_bfc_tpc_slow_sim_tracker.kumac
+* 11. call_bfc_tpc_slow_sim_tracker.kumac
 *   - read in g2t file
 *   - run tpc slow sim & clustering
 *   - run tpc tracking
 *   - write xdf file containing full directories
 * 
 * 
-* 14. call_bfc_txt_gstar_g2t.kumac
+* 12. call_bfc_txt_gstar_g2t.kumac
 *   - read in text file
 *   - run gstar
 *   - run g2t
