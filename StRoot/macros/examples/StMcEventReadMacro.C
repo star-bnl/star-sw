@@ -1,5 +1,8 @@
-// $Id: StMcEventReadMacro.C,v 1.6 1999/07/28 21:29:34 calderon Exp $
+// $Id: StMcEventReadMacro.C,v 1.7 1999/11/03 22:47:33 calderon Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.7  1999/11/03 22:47:33  calderon
+// Changed default file.  Previous one no longer existed.
+//
 // Revision 1.6  1999/07/28 21:29:34  calderon
 // Modified event loop: use 'if' and 'goto' to avoid using 'for'
 //
@@ -41,10 +44,8 @@ TBrowser *brow=0;
 
 
 void StMcEventReadMacro(Int_t nevents=1,
-const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on/tfsr/set0043_04_56evts.geant.root")
-// /disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfsr/psc0030_02_40evts.geant.root
-// /star/u2b/lisa/workdir/gtrack.PetersBranch.root
-// /disk00000/star/test/new/tfs_Solaris/year_2a/psc0210_01_40evts.geant.root
+const char *MainFile="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0373_12_35evts.geant.root")
+// /disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0373_12_35evts.geant.root
 // /disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on/tfsr/set0043_04_56evts.geant.root
 {
 // Load all the System libraries
