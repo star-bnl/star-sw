@@ -6,7 +6,9 @@ StiTrackToIntMap::StiTrackToIntMap()
 {}
 
 StiTrackToIntMap::~StiTrackToIntMap()
-{}
+{
+  clear();
+}
 
 void StiTrackToIntMap::add(StiTrack* track)
 {
