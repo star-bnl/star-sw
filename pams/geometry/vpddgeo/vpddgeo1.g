@@ -1,5 +1,9 @@
-* $Id: vpddgeo1.g,v 1.1 2004/07/08 01:49:27 potekhin Exp $
+* $Id: vpddgeo1.g,v 1.2 2004/07/08 01:52:50 potekhin Exp $
 * $Log: vpddgeo1.g,v $
+* Revision 1.2  2004/07/08 01:52:50  potekhin
+* Need to properly name the module here (different from
+* the previosu version)
+*
 * Revision 1.1  2004/07/08 01:49:27  potekhin
 * Need a new source to properly version recent
 * changes by Frank
@@ -48,7 +52,7 @@
 *
 *
 *************************************************************************
-module  VPDDGEO  is the Pseudo Vertex Position Detector of STAR
+module  VPDDGEO1  is the Pseudo Vertex Position Detector of STAR
 Author  Frank Geurts
 Created 21 June 2000
 *
