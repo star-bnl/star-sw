@@ -1,3 +1,4 @@
+//////////////////////////////////////////////////////////////////////////////////
 // This is a Coulomb correction class which
 // 1. Reads in the dat from a file
 // 2. Performs a linear interpolation in R and creates any array of interpolations
@@ -12,6 +13,9 @@
 
 #include <stdio.h>
 #include "StChain/StMaker.h"
+#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
+#include "StHbtMaker/Infrastructure/StHbtPair.hh"
+#include "StHbtMaker/Infrastructure/StHbtParticle.hh"
 
 class StHbtCoulomb {
 
@@ -30,6 +34,9 @@ public:
   double CoulombCorrect(const double& Z1Z2, const double& mass1,
 			const double& mass2, const double& Qinv,
 			const double& radius);
+  double CoulombCorrect(const StHbtPair* pair, const double& charge);
+  double CoulombCorrect(const StHbtPair* pair, const double& charge,
+                        const double& radius);
 
 
 private:
