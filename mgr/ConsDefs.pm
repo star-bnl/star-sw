@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.26 2000/09/20 13:19:37 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.27 2000/11/08 14:43:19 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -37,8 +37,9 @@
  $AFSLIBS  = "-L" . $AFSDIR . "/lib -L" . $AFSDIR . "/lib/afs";
  $AFSLIBS .= " -lkauth -lprot -lubik -lauth -lrxkad -lsys -ldes -lrx -llwp";
  $AFSLIBS .= " -lcmd -lcom_err -laudit ". $AFSDIR . "/lib/afs/util.a";
+ if (! $ROOT) {$ROOT = "/afs/rhic/star/ROOT";}
  if (! $ROOT_LEVEL) {$ROOT_LEVEL = "2.25.01";}
- if (! $ROOTSYS) {$ROOTSYS = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL;}
+ if (! $ROOTSYS) {$ROOTSYS = $ROOT . "/" . $ROOT_LEVEL;}
  $SRPDIR   = $ROOTSYS . "/lib";
  $SRPFLAGS = "";# -DR__SRP -I" . $SRPDIR . "/include";
  $SRPLIBS  = "";# -L" . $SRPDIR . "/lib -lsrp -lgmp";
@@ -363,7 +364,7 @@
  if ($STAR_SYS ne $STAR_HOST_SYS) {$OSFID .= " " . $STAR_HOST_SYS;}
  my $FLAGS = $OSFID . " CERNLIB_TYPE" . " __ROOT__";
  $CPPFLAGS .= " -D" . join (" -D", split (" ",$FLAGS));
- if (defined($ARG{NODEBUG}) or $NODEBUG)  {$DEBUG = "-O1 -g"              ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
+ if (defined($ARG{NODEBUG}) or $NODEBUG)  {$DEBUG = "-O -g"              ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
  if (defined($ARG{DEBUG}))    {$DEBUG = $ARG{DEBUG}        ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
  if (defined($ARG{CPPFLAGS})) {$CPPFLAGS = $ARG{CPPFLAGS}  ; print "set CPPFLAGS = $CPPFLAGS\n" unless ($param::quiet);}
  if (defined($ARG{EXTRA_CPPFLAGS})) {$EXTRA_CPPFLAGS = $ARG{EXTRA_CPPFLAGS}  ; print "set EXTRA_CPPFLAGS = $EXTRA_CPPFLAGS\n" unless ($param::quiet);}
