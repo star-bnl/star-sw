@@ -4,6 +4,8 @@
 *B.VE    1.00
 *B.ST    /GCBANK/
 *B.DV    Constant
+*B.NL    1
+*B.NS    1
 *B.IO    -H
 *B.UP    NONE
 *B.DATA
@@ -18,6 +20,8 @@
 *B.VE    1.00
 *B.ST    /GCBANK/
 *B.DV    Constant
+*B.NL    1
+*B.NS    1
 *B.IO    -I
 *B.UP    DETM   -1
 *B.DATA
@@ -32,8 +36,8 @@
 *B.9   RECO     - reconstruction flag
 *B.10  MFLD     - magnetic field flag
 *B.11  ANAL     - user analysis level
-*B.12  BACK     - pile-up bunch select.
-*B.13  resa     - reserve
+*B.12  BACK     - pile-up bunch selection key
+*B.13  resa     - address of a user step routine (do not change)
 *B.14  resb     - reserve
 *B.15  resc     - reserve
 *B/DATA
@@ -112,7 +116,7 @@
 *B.30     reserve   - not used
 *B/DATA
 *B/
- 
+
 +BANK,HEAD.--------------------    HEAD    ------------------------------
 *B..HEAD   event header
 *B.AU    R. Brun
@@ -136,7 +140,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,PART.--------------------    PART    ------------------------------
 *B..PART Particle data set
 *B.AU    R.Brun
@@ -153,7 +157,7 @@
 *B/REP
 *B/LINK
 *B/
- 
+
 +BANK,PART.--------------------    PART    ------------------------------
 *B..PART single particle data
 *B.AU    R.Brun
@@ -197,7 +201,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,PAMO.--------------------    PAMO    ------------------------------
 *B..PAMO decay mode
 *B.AU    R.Brun
@@ -213,8 +217,8 @@
 *B/REP
 *B/DATA
 *B/
- 
- 
+
+
 +BANK,SETS.--------------------    SETS    ------------------------------
 *B..SETS   subsytem  sets
 *B.AU    R. Brun
@@ -236,7 +240,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,SETS.--------------------    SETS    ------------------------------
 *B..SETS    Detectors
 *B.AU    R. Brun
@@ -252,7 +256,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,SEJD.--------------------    SEJD    ------------------------------
 *B..SEJD    GEANT detector parameters
 *B.AU    R. Brun
@@ -284,7 +288,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,SJDH.--------------------    SJDH    ------------------------------
 *B..SJDH    Hit parameters (GSDETH)
 *B.AU    R. Brun
@@ -303,7 +307,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,SJDD.--------------------    SJDD    ------------------------------
 *B..SJDD    Digit parameters (GSDETD)
 *B.AU    R. Brun
@@ -318,7 +322,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,SJDU.--------------------    SJDU    ------------------------------
 *B..SJDU    User Hit/Digit description
 *B.AU    Pavel Nevski
@@ -356,14 +360,14 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,SAME.--------------------    SETS    ------------------------------
 *B..SAME   same for digits
 *B.NL    1
 *B.ND    1
 *B.UP    SETS   -1
 *B/
- 
+
 +BANK,TMED.--------------------    TMED    ------------------------------
 *B..TMED   standart tracking parameters
 *B.AU    R. Brun
@@ -420,7 +424,7 @@
 *B.40      -    -
 *B/DATA
 *B/
- 
+
 +BANK,TCUT.--------------------    TCUT    ------------------------------
 *B..TCUT     tracking parameters
 *B.AU    R. Brun
@@ -473,7 +477,7 @@
 *B.40      -    -
 *B/DATA
 *B/
- 
+
 +BANK,MATE.--------------------    MATE    ------------------------------
 *B..MATE  Materials
 *B.AU    R.Brun
@@ -491,7 +495,7 @@
 *B/REP
 *B/LINK
 *B/
- 
+
 +BANK,MATE.--------------------    MATE    ------------------------------
 *B..MATE    Material description
 *B.AU
@@ -519,7 +523,7 @@
 *B.11     NLMAT - number of components for mixtures
 *B/DATA
 *B/
- 
+
 +BANK,TMED.--------------------    TMED    ------------------------------
 *B..TMED   tracking medium parameters
 *B.AU    R. Brun
@@ -549,7 +553,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,VERT.--------------------    VERT    ------------------------------
 *B..VERT    simulated vertex list
 *B.AU    R.Brun
@@ -599,7 +603,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,VERU.--------------------    VERU    ------------------------------
 *B..VERU    some vertex parameters
 *B.AU    R.Brun
@@ -610,11 +614,12 @@
 *B.IO    -F
 *B.UP    VERT   -1
 *B.DATA
-*B.1     one    - yet unknown vertex parameters
-*B.2     two    - yet unknown vertex parameters
+*B.REP
+*B.1     user   - user defined vertex parameters
+*B/REP
 *B/DATA
 *B/
- 
+
 +BANK,KINE.--------------------    KINE    ------------------------------
 *B..KINE    list of tracks
 *B.AU    R.Brun
@@ -637,7 +642,7 @@
 *B.2     NTROFF - offset in track number
 *B/DATA
 *B/
- 
+
 +BANK,KINE.--------------------    KINE    ------------------------------
 *B..KINE   single track parameters
 *B.AU    R.Brun
@@ -664,7 +669,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,KINU.--------------------    KINU    ------------------------------
 *B..KINU    additional track parameters
 *B.AU    R.Brun
@@ -675,11 +680,12 @@
 *B.IO    -F
 *B.UP    KINE   -1
 *B.DATA
-*B.1     one    - yet unknown track parameter
-*B.2     two    - yet unknown track parameter
+*B.REP
+*B.1     user   - user defined track parameter
+*B/REP
 *B/DATA
 *B/
- 
+
 +BANK,HITS.--------------------    HITS    ------------------------------
 *B..HITS GEANT hit bank
 *B.AU    R.Brun
@@ -695,7 +701,7 @@
 *B/REP
 *B/LINK
 *B/
- 
+
 +BANK,HITS.--------------------    HITS    ------------------------------
 *B..HITS Set hit sets
 *B.AU    R.Brun
@@ -715,7 +721,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,SJHD.--------------------    SJHD    ------------------------------
 *B..SJHD   Detector hits
 *B.AU    R.Brun
@@ -730,7 +736,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,DIGI.--------------------    DIGI    ------------------------------
 *B..DIGI GEANT digi bank
 *B.AU    R.Brun
@@ -746,7 +752,7 @@
 *B/REP
 *B/LINK
 *B/
- 
+
 +BANK,DIGI.--------------------    DIGI    ------------------------------
 *B..DIGI Set of digi sets
 *B.AU    R.Brun
@@ -766,7 +772,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,SJDX.--------------------    SJDX    ------------------------------
 *B..SJDX Detector digits
 *B.AU    R.Brun
@@ -781,7 +787,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,ROTM.--------------------    ROTM    ------------------------------
 *B..ROTM  Rotation structure
 *B.AU    Rene Brun
@@ -797,7 +803,7 @@
 *B/REP
 *B/LINK
 *B/
- 
+
 +BANK,ROTM.--------------------    ROTM    ------------------------------
 *B..ROTM rotation matrix
 *B.AU    R.Brun
@@ -826,7 +832,7 @@
 *B.16     PhiZ       - azimuth of the Z axis
 *B/DATA
 *B/
- 
+
 +BANK,RUNT.--------------------    RUNT    ------------------------------
 *B..RUNT     Run Tree Bank
 *B.AU        R. DeWolf
@@ -846,7 +852,7 @@
 *B.5         JOCRUN   Run number
 *B/DATA
 *B/
- 
+
 +BANK,GENR.--------------------    GENR    ------------------------------
 *B..GENR     GENZ Run Information Bank
 *B.AU        R. DeWolf
@@ -869,12 +875,12 @@
 *B.13        JOZBVR   Zebra version * 10000
 *B/DATA
 *B/
- 
+
 +BANK,EVNT.--------------------    EVNT    ------------------------------
 *B..EVNT     Event Tree Bank
 *B.AU        R. DeWolf
-*B.NL        2
-*B.NS        2
+*B.NL        3
+*B.NS        3
 *B.ND        6
 *B.UP        NONE
 *B.IO        -I
@@ -891,7 +897,7 @@
 *B.6         JOCEVT   Event (gate) number
 *B/DATA
 *B/
- 
+
 *B..PASS     Pass Record Bank
 *B.AU        R. DeWolf
 *B.NX        PASS
@@ -908,7 +914,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,GENE.--------------------    GENE    ------------------------------
 *B..GENE     GENZ Event Bank
 *B.AU        R. DeWolf
@@ -936,7 +942,7 @@
 *B.12        JOWEIG   Interaction weight
 *B/DATA
 *B/
- 
+
 +BANK,GENP.--------------------    GENP    ------------------------------
 *B..GENP     GENZ parton/particle data
 *B.AU        R. DeWolf
@@ -965,7 +971,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,RECB.--------------------    RECB    ------------------------------
 *B..RECB    Reconstructed Event
 *B.IO    -I
@@ -980,7 +986,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,SECT.--------------------    SECT    ------------------------------
 *B..SECT    Reconstruction Phase 1
 *B.IO    -F
@@ -999,7 +1005,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,INNE.-------------------    INNE    ------------------------------
 *B..INNE    inner detector reconstruction
 *B.IO    -F
@@ -1014,8 +1020,8 @@
 *B/REP
 *B/DATA
 *B/
- 
- 
+
+
 +BANK,RAWH.--------------------    RAWH    ------------------------------
 *B..RAWH    RD13 event header
 *B.AU    Giuseppe Mornacci, RD13 note 109
@@ -1041,7 +1047,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,DETE.--------------------    DETE    ------------------------------
 *B..DETE    DETECTOR Header
 *B.AU    Giuseppe Mornacci
@@ -1067,7 +1073,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,STAK.--------------------    STAK    ------------------------------
 *B..STAK    Geant temporary stack
 *B.AU    R.Brun
@@ -1096,7 +1102,7 @@
 *B/REP
 *B/DATA
 *B/
- 
+
 +BANK,CODE.--------------------    CODE    ------------------------------
 *B..CODE EGZ generator header
 *B.AU    Unknown STAR hero
@@ -1118,7 +1124,7 @@
 *B.10  bmax   - max impact parameter
 *B/DATA
 *B/
- 
+
 +BANK,RUN .--------------------    RUN     ------------------------------
 *B..RUN  EGZ run bank (empty)
 *B.AU    Unknown STAR hero
@@ -1126,7 +1132,7 @@
 *B.IO    -I
 *B.UP    NONE
 *B/
- 
+
 +BANK,EVEN.--------------------    EVEN    ------------------------------
 *B..EVEN EGZ event bank
 *B.AU    Unknown STAR hero
@@ -1152,7 +1158,7 @@
 *B/REP
 *B/DATA
 *B/
- 
- 
- 
- 
+
+
+
+
