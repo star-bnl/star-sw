@@ -1,5 +1,8 @@
-// $Id: StFtpcPrimaryMaker.cxx,v 1.6 2001/05/08 22:01:31 jcs Exp $
+// $Id: StFtpcPrimaryMaker.cxx,v 1.7 2001/05/29 12:20:33 jcs Exp $
 // $Log: StFtpcPrimaryMaker.cxx,v $
+// Revision 1.7  2001/05/29 12:20:33  jcs
+// increase n_fit_point by 1 for FTPC primary tracks to include vertex point
+//
 // Revision 1.6  2001/05/08 22:01:31  jcs
 // set dst_track.iflag x=8 for FTPC primary tracks
 //
@@ -206,7 +209,7 @@ Int_t StFtpcPrimaryMaker::Make(){
    
     ptrk->n_point     = gtrk[iglobtrk].n_point;
     ptrk->n_max_point = gtrk[iglobtrk].n_max_point;
-    ptrk->n_fit_point = gtrk[iglobtrk].n_fit_point;
+    ptrk->n_fit_point = gtrk[iglobtrk].n_fit_point + 1;
 
     ptrk->icharge  = trk->q;
     ptrk->id_start_vertex =  10*trk->id_start_vertex;
