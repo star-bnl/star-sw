@@ -88,9 +88,6 @@ StiMaker::~StiMaker()
     delete mtrackseedfinder;
     mtrackseedfinder = 0;
     
-    //delete md_trackfactory;
-    md_trackfactory = 0;
-    
     StiDetectorContainer::kill();
     mdetector = 0;
     
@@ -122,9 +119,6 @@ void StiMaker::Clear(const char*)
     //Reset TrackFactory
     mtrackfactory->reset();
 
-    //Reset Drawable TrackFactory
-    md_trackfactory->reset();
-    
     //Reset DisplayManager
     mdisplay->reset();
     
@@ -153,10 +147,6 @@ Int_t StiMaker::Init()
     mtrackfactory = new StiEvaluableTrackFactory("EvaluableTrackFactory");
     mtrackfactory->setIncrementalSize(1000);
     mtrackfactory->setMaxIncrementCount(10);
-
-    md_trackfactory = new StiRDEvaluableTrackFactory("DrawableEvaluableTrackFactory");
-    md_trackfactory->setIncrementalSize(1000);
-    md_trackfactory->setMaxIncrementCount(10);
 
     //EvaluableTrack SeedFinder
     mtrackseedfinder = new StiEvaluableTrackSeedFinder();
@@ -232,22 +222,14 @@ Int_t StiMaker::Make()
 	}
 	mdrawablehits->fillHitsForDrawing();
 
-	//Temp patch to test the SeedFinder, draw some tracks
 	//Initialize the SeedFinder, loop on tracks
 	mtrackseedfinder->setEvent(mevent);
 	while (mtrackseedfinder->hasMore()) {
-	    StiEvaluableTrack* thetrack = dynamic_cast<StiEvaluableTrack*>(mtrackseedfinder->next());
+	    StiRootDrawableStiEvaluableTrack* thetrack =
+		dynamic_cast<StiRootDrawableStiEvaluableTrack*>(mtrackseedfinder->next());
 	    if (thetrack) {
-		StTrack* sttrack = thetrack->stTrack();
-		cout <<sttrack->geometry()->momentum()<<endl;
-
-		//Make a drawable track, add to display
-		StiRootDrawableStiEvaluableTrack* drawabletrack = md_trackfactory->getObject();
-		drawabletrack->setStTrack(sttrack);
-		drawabletrack->fillHitsForDrawing();
-		mdisplay->addDrawable(drawabletrack);
+		thetrack->fillHitsForDrawing();
 	    }
-	    
 	}
 	
     }
