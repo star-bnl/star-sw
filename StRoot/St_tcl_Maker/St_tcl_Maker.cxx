@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.67 2002/02/05 22:21:56 hardtke Exp $
+// $Id: St_tcl_Maker.cxx,v 1.68 2002/02/07 22:02:52 hardtke Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.68  2002/02/07 22:02:52  hardtke
+// Give Init a return type -- make redhat 7.2 happy
+//
 // Revision 1.67  2002/02/05 22:21:56  hardtke
 // Move Init code to InitRun
 //
@@ -88,7 +91,7 @@ St_tcl_Maker::St_tcl_Maker(const char *name):
 St_tcl_Maker::~St_tcl_Maker() {
 }
 //____________________________________________________________________________
-St_tcl_Maker::Init() {
+Int_t St_tcl_Maker::Init() {
   m_tcl_sector_index = new St_tcl_sector_index("tcl_sector_index",1);
   m_tcl_sector_index->SetNRows(1); 
   AddConst(m_tcl_sector_index);
@@ -466,7 +469,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.67 2002/02/05 22:21:56 hardtke Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.68 2002/02/07 22:02:52 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
