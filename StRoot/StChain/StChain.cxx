@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.10 1998/07/23 21:03:30 fisyak Exp $
+// $Id: StChain.cxx,v 1.11 1998/08/07 19:34:53 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.11  1998/08/07 19:34:53  fisyak
+// Add St_run_Maker
+//
 // Revision 1.10  1998/07/23 21:03:30  fisyak
 // Add more comments
 //
@@ -197,6 +200,7 @@
 #include <TBrowser.h>
 #include <TClonesArray.h>
 #include "St_XDFFile.h"
+#include "St_FileSet.h"
 #include "StChain.h"
 #include "StMaker.h"
 // #include "stHistBrowser.h"
@@ -394,34 +398,18 @@ void StChain::GetEvent(Int_t event)
 
 //_____________________________________________________________________________
 void StChain::Init()
-{
-//    Initialise makers
-   TIter next(m_Makers);
-   StMaker *maker;
-   TObject *objfirst, *objlast;
+{// Initialize Chain
    if (! m_DataSet) m_DataSet = new St_DataSet(GetName()); 
-   SafeDelete(m_EventSet);
-   if (m_File) {
-     St_DataSet *set = m_File->NextEventGet(); // Get Run parameters
-     if (set) {
-       if (strcmp(set->GetName(),"run")==0 || 
-           strcmp(set->GetName(),"Run")==0){
-          m_RunSet = set;
-          m_DataSet->Add(m_RunSet); 
-          if (m_RunIter) m_RunIter->Reset(set);
-          else           m_RunIter = new St_DataSetIter (set);
-       }
-       else {
-        Warning("Init","The first record has no \"Run\" dataset");
-        delete set;
-       }
-     }
-   }
-   if (! m_RunSet) {
+   if (! m_RunSet) {//
      m_RunSet = new St_DataSet("run"); 
      St_DataSetIter local(m_DataSet);
      local.Add(m_RunSet);
    }
+//    Initialise makers
+   TIter next(m_Makers);
+   StMaker *maker;
+   TObject *objfirst, *objlast;
+   SafeDelete(m_EventSet);
    while ((maker = (StMaker*)next())) {
      // save last created histogram in current Root directory
       objlast = gDirectory->GetList()->Last();
@@ -463,7 +451,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.10 1998/07/23 21:03:30 fisyak Exp $    *\n");
+   printf("* $Id: StChain.cxx,v 1.11 1998/08/07 19:34:53 fisyak Exp $    *\n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");

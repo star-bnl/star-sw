@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.2 1998/07/21 01:04:39 fisyak Exp $
+// $Id: St_tpt_Maker.cxx,v 1.3 1998/08/07 19:34:55 fisyak Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.3  1998/08/07 19:34:55  fisyak
+// Add St_run_Maker
+//
 // Revision 1.2  1998/07/21 01:04:39  fisyak
 // Clean up
 //
@@ -11,7 +14,7 @@
 // St_tpt_Maker class for Makers                                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
+#include "iostream.h"
 #include "St_tpt_Maker.h"
 #include "StChain.h"
 #include "St_DataSet.h"
@@ -54,7 +57,7 @@ void St_tpt_Maker::Init(){
        St_DataSetIter partable(tpgpar);
        m_tpg_pad_plane = (St_tpg_pad_plane *) partable("tpg_pad_plane");
        if (!(m_tpg_pad_plane)) 
-       printf("tpc/tpgpar is not initialized. Please add tss_Maker to your chain\n");
+       printf("tpc/tpgpar is not initialized. Please add run_Maker to your chain\n");
    }
 // tpt parameters
    St_DataSet *tptpars = local("tpc/tptpars");
@@ -62,16 +65,10 @@ void St_tpt_Maker::Init(){
      St_DataSetIter partable(tptpars);
      m_tpt_pars = (St_tpt_pars *) partable("tpt_pars");
      m_tpt_spars = (St_tpt_spars *) partable("tpt_spars");
-     if (!(m_tpt_pars && m_tpt_spars)) SafeDelete(tptpars);
-   }
-   if (!tptpars){
-//   Char_t *tpt_pars = "${STAR}/params/tpc/tpt_pars.xdf";
-     Char_t *tpt_pars = "/afs/rhic/star/packages/dev/params/tpc/tpt_pars.xdf";
-     St_XDFFile::GetXdFile(tpt_pars,tpc);
-     tptpars = local("tpc/tptpars");
-     St_DataSetIter partable(tptpars);
-     m_tpt_pars = (St_tpt_pars *) partable("tpt_pars");
-     m_tpt_spars = (St_tpt_spars *) partable("tpt_spars");
+     if (!(m_tpt_pars && m_tpt_spars)) {
+       cout << " St_tpt_Maker: tpt parameters have not been initialized" << endl;
+       SafeDelete(tptpars);
+     }
    }
 // tid parameters
    St_DataSet *tidpars = local("tpc/tidpars");
@@ -79,18 +76,11 @@ void St_tpt_Maker::Init(){
      St_DataSetIter partable(tidpars);
      m_tdeparm = (St_tdeparm *) partable("tdeparm");
      m_tpipar  = (St_tpipar *)  partable("tpipar");
-     if (!(m_tdeparm && m_tpipar)) SafeDelete(tidpars);
+     if (!(m_tdeparm && m_tpipar)) {
+       cout << " St_tpt_Maker: tid parameters have not been initialized" << endl;
+       SafeDelete(tidpars);
+     }
    }
-   if (!tidpars){
-//   Char_t *tid_pars = "$STAR/params/tpc/tid_pars.xdf";
-     Char_t *tid_pars = "/afs/rhic/star/packages/dev/params/tpc/tid_pars.xdf";
-     St_XDFFile::GetXdFile(tid_pars,tpc);
-     tidpars = local("tpc/tidpars");
-     St_DataSetIter partable(tidpars);
-     m_tdeparm = (St_tdeparm *) partable("tdeparm");
-     m_tpipar  = (St_tpipar *)  partable("tpipar");
-   }
-
 // Create Histograms    
    StMaker::Init();
 }
@@ -114,7 +104,7 @@ Int_t St_tpt_Maker::Make(){
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.2 1998/07/21 01:04:39 fisyak Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.3 1998/08/07 19:34:55 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

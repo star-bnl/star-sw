@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.6 1998/07/20 15:08:08 fisyak Exp $
+// $Id: StChain.h,v 1.7 1998/08/07 19:34:53 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.7  1998/08/07 19:34:53  fisyak
+// Add St_run_Maker
+//
 // Revision 1.6  1998/07/20 15:08:08  fisyak
 // Add tcl and tpt
 //
@@ -35,7 +38,7 @@
 class TBrowser;
 class TChain;
 class St_XDFFile; 
-//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.6 1998/07/20 15:08:08 fisyak Exp $";//StChain header CVS version
+//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.7 1998/08/07 19:34:53 fisyak Exp $";//StChain header CVS version
 
 class StChain : public TNamed {
 
@@ -43,18 +46,13 @@ typedef  enum {kNormal, kDebug} EDebugLevel;
 private:
    Int_t               m_Version;           //StChain version number
    Int_t               m_VersionDate;       //StChain version date
-   Int_t               m_Run;               //Run number
-   Int_t               m_Event;             //Event number
+   Int_t               m_Run;               //Run number 
+   Int_t               m_Event;             //Event event number
    Int_t               m_Mode;              //Run mode
    EDebugLevel         m_DebugLevel;        //Debug level
    St_DataSet         *m_DataSet;           //The main chain dataset structure
    St_DataSet         *m_RunSet;            //Run
    St_DataSet         *m_EventSet;          //Event
-   St_DataSetIter     *m_RunIter;           //The parameters
-   St_DataSetIter     *m_CalibIter;         //The calibration       
-   St_DataSetIter     *m_EventIter;         //The Event (fruits)
-   St_DataSetIter     *m_raw_dataIter;      //The raw data
-   St_DataSetIter     *m_dataIter;          //The data
    TTree              *m_Tree;              //Pointer to the Root tree
    TList              *m_Makers;            //List of Makers
    St_XDFFile         *m_File;              //!Pointer to input file 
@@ -92,8 +90,6 @@ public:
    virtual void       SetDefaultParameters();
    virtual void       SetInputXDFile(St_XDFFile *file) {m_File = file;}
    virtual void       SetOutputXDFile(St_XDFFile *file) {m_FileOut = file;}
-   void               SetRunIter(St_DataSetIter *run) {m_RunIter = run;}
-   void               SetCalibIter(St_DataSetIter *calib) {m_CalibIter = calib;}
 
    virtual St_XDFFile *XDFFile() {return m_File;}
 
