@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.2 2002/11/02 01:46:59 fisyak Exp $
+// $Id: StdEdxY2Maker.h,v 1.3 2002/11/11 17:08:59 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -47,6 +47,8 @@ class StdEdxY2Maker : public StMaker {
   StThreeVectorD      *mNormal[24];     //!
   StThreeVectorD      *mRowPosition[24][45][3]; //!
   St_tpcGainMonitor   *m_tpcGainMonitor;//!
+  Bool_t               m_OldCLusterFinder;//!
+  Int_t                m_Calibration;   //!
  public: 
   StdEdxY2Maker(const char *name="dEdxY2");
   virtual       ~StdEdxY2Maker();
@@ -63,7 +65,7 @@ class StdEdxY2Maker : public StMaker {
   void    PrintdEdx(Int_t iop = 0);
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.2 2002/11/02 01:46:59 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.3 2002/11/11 17:08:59 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
