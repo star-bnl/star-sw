@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.15 1998/09/26 00:17:27 fisyak Exp $
+// $Id: bfc.C,v 1.16 1998/09/26 00:35:31 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.16  1998/09/26 00:35:31  fisyak
+// Add real files
+//
 // Revision 1.15  1998/09/26 00:17:27  fisyak
 // Add SetWrite
 //
@@ -77,9 +80,9 @@
   St_XDFFile *xdf_in   = 0;
   xdf_in   = new St_XDFFile(filename,"r");
   St_XDFFile *xdf_out  = 0;
-  xdf_out  = new St_XDFFile("auau_central_hijing.xdf","w");
+  xdf_out  = new St_XDFFile("/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc079_01_46evts.xdf","w");
   TFile      *root_out= 0; 
-  root_out=  new TFile("auau_central_hijing.root","RECREATE");
+  root_out=  new TFile("/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc079_01_46evts.root","RECREATE");
 //TFile      *root_tree= new TFile("auau_central_hijing.tree.root","RECREATE");
 // Create the main chain object
   StChain chain("StChain");
@@ -119,7 +122,7 @@
   }
   gBenchmark->Start("bfc");
   Int_t i=0;
-  const Int_t Nevents=1;
+  const Int_t Nevents=100;
   for (Int_t i =1; i <= Nevents; i++){
     if (chain.Make(i)) break;
     St_DataSetIter local(chain.DataSet());
