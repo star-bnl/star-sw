@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: client.cxx,v 1.8 2000/06/07 15:06:26 jml Exp $
+ * $Id: client.cxx,v 1.9 2000/06/08 12:45:10 jml Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: sample top-level code sould be used as a tutorial
@@ -14,6 +14,9 @@
  *
  ***************************************************************************
  * $Log: client.cxx,v $
+ * Revision 1.9  2000/06/08 12:45:10  jml
+ * Added <assert.h> to fix compile error in offline
+ *
  * Revision 1.8  2000/06/07 15:06:26  jml
  * Changed exit() calls to assert(0) to aid in debugging
  *
@@ -70,7 +73,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
+#include <assert.h>
 #include <iostream>
 
 #include "StDaqLib/GENERIC/EventReader.hh"
