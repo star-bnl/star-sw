@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.32 2002/01/17 01:29:10 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.33 2002/01/17 01:34:07 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.33  2002/01/17 01:34:07  ullrich
+ * Fixed the fix in psd() methods.
+ *
  * Revision 2.32  2002/01/17 01:29:10  ullrich
  * Fixed bug in psd() methods.
  *
@@ -152,8 +155,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.32 2002/01/17 01:29:10 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.32 2002/01/17 01:29:10 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.33 2002/01/17 01:34:07 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.33 2002/01/17 01:34:07 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -760,8 +763,8 @@ StPsd*
 StEvent::psd(StPwg p, int i)
 {
     StPsd *thePsd = 0;
-    for (unsigned int i=0; i<mContent.size(); i++) {
-	thePsd = dynamic_cast<StPsd*>(mContent[i]);
+    for (unsigned int k=0; k<mContent.size(); k++) {
+	thePsd = dynamic_cast<StPsd*>(mContent[k]);
 	if (thePsd && thePsd->pwg() == p && thePsd->id() == i)
 	    return thePsd;
     }
@@ -772,8 +775,8 @@ const StPsd*
 StEvent::psd(StPwg p, int i) const
 {
     const StPsd *thePsd = 0;
-    for (unsigned int i=0; i<mContent.size(); i++) {
-	thePsd = dynamic_cast<StPsd*>(mContent[i]);
+    for (unsigned int k=0; k<mContent.size(); k++) {
+	thePsd = dynamic_cast<StPsd*>(mContent[k]);
 	if (thePsd && thePsd->pwg() == p && thePsd->id() == i)
 	    return thePsd;
     }
