@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.6 2002/02/28 20:41:37 caines Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.7 2002/05/06 00:42:51 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.7  2002/05/06 00:42:51  munhoz
+ * adding bad anode list reading
+ *
  * Revision 1.6  2002/02/28 20:41:37  caines
  * Fix filling of global coord from fortran
  *
@@ -138,6 +141,7 @@ Int_t StSvtDbMaker::Init()
   readSvtConfig();
   readSvtGeometry();
   readSvtDriftVelocity();
+  readSvtBadAnodes();
 
   return StMaker::Init();
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.cc,v 1.3 2002/02/15 22:45:43 munhoz Exp $
+ * $Id: St_SvtDb_Reader.cc,v 1.4 2002/05/06 00:42:51 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.cc,v $
+ * Revision 1.4  2002/05/06 00:42:51  munhoz
+ * adding bad anode list reading
+ *
  * Revision 1.3  2002/02/15 22:45:43  munhoz
  * introducing drift velocity reading capability
  *
@@ -421,8 +424,10 @@ StSvtHybridCollection* St_SvtDb_Reader::getBadAnodes()
 	  
 	  // loop over anodes
 	  for (int anode=1;anode<=mSvtConfig->getNumberOfAnodes();anode++) {
-	    if (badAnode[index].isBadAnode[anode-1])
+	    if (badAnode->isBadAnode[anode-1]) {
 	      hybridBadAnodes->setBadAnode(anode);
+	      //cout << "hybrid = "<< index << ", anode = " << anode << endl;
+	    }
 	  }
 
 	  svtBadAnodes->put_at(hybridBadAnodes,index);
