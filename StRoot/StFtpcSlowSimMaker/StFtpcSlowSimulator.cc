@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.12 2002/06/07 10:35:31 fsimon Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.13 2002/09/13 13:46:41 fsimon Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.13  2002/09/13 13:46:41  fsimon
+// Include functionality for smearing and kicking out hits,
+// uncomment if needed
+//
 // Revision 1.12  2002/06/07 10:35:31  fsimon
 // Additional debug info (tracing of hits)
 //
@@ -53,6 +57,8 @@
 #include "StFtpcClusterMaker/StFtpcGeantReader.hh"
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
 #include "StFtpcClusterMaker/StFtpcDbReader.hh"
+
+#include "TF1.h"
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -116,6 +122,16 @@ int StFtpcSlowSimulator::simulate()
     int n_cross_ang_max = 0;
     int counter=0;
     
+    //create smearing function
+    //TF1* noise = new TF1("noise","gaus",-2,2);
+    //noise->SetParameters(1,0,0.035);
+    //cout << "Using gaussian smearing of GEANT hits  with a sigma of 350 um\n";
+
+    //create smearing function
+    //TF1* kickout = new TF1("kickout","1",0,1);
+    //cout << "Using Probability Function to throw out a certain percentage of all hits\n";
+
+
     for ( i=0; i<number_hits; ++i ) 
       {
       
@@ -136,6 +152,16 @@ int StFtpcSlowSimulator::simulate()
 	xx = mGeant->x(i);
 	yy = mGeant->y(i);
 	zz = mGeant->z(i);
+
+	// Add gaussian smearing to x and y coordinates
+       
+	//xx += noise->GetRandom();
+	//yy += noise->GetRandom();
+
+
+	// Throw out a given percentage of hits
+	//if (kickout->GetRandom() < 0.2) continue;
+
 	//   Test that current point is within chamber          
          rad = sqrt ( xx*xx + yy*yy );
         if(rad < r_min || rad > r_max) {
@@ -290,6 +316,9 @@ int StFtpcSlowSimulator::simulate()
     delete rdout;
     delete field;
     delete[] ADC;
+
+    //delete noise;
+    //delete kickout;
 
     return 1;
 }
