@@ -221,6 +221,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$FPPFLAGS = " -DCOMMONS_CONFIG_H -DCERNLIB_LINUX -DCPP_VERS=\"'W'\"";
       } elsif ( $pkg =~ m/^g2t/ || $pkg =~ m/^gstar/ || $pkg =~ m/^geometry/ ) {
 	$FCPATH .=  $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include/atlsim";
+#wait 
+#	$FCPATH  = $INCLUDE;
+#	$FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include";
+#	$FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/geant321/include";
+#	$FCPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
       } 
     if ( $#idlM > -1 ) {
 	$CPPPATH = $INCLUDE . "/" . $pkg . $main::PATH_SEPARATOR . $CPPPATH;
@@ -245,6 +250,12 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       $EXTRA_CPPFLAGS .= " -DDEBUGMESSAGE\\\(x\\\)=\"\"  -DDEBUGMESSAGE1\\\(x\\\)=\"\"  -DDEBUGMESSAGE2\\\(x\\\)=\"\"  -DDEBUGMESSAGE3\\\(x\\\)=\"\"  -DFORCEDDEBUGMESSAGE\\\(x\\\)=\"\"";
     }
     #print "_+_+_+_+_+ $CPPPATH $CXXFLAGS $LIBS $CPPPATH $LIBPATH _+_+_+_+_+\n";
+    if ($pkg =~ /^StStarLogger$/) {
+      $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{Logger}->{INCDIR};
+      $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{Logger}->{LIBDIR};
+      $LIBS    .= " " . $env->{Packages}->{Logger}->{LIBS};
+      print "CPPPATH = $CPPPATH\n";
+    }
 
     if ( $STAR_SYS =~ /^sun4x_5.$/ ) { $CXXFLAGS .= " -ptr" . $obj_dir; }
     if ( $STAR_SYS =~ /kcc$/ ) { $LIBPATH = ""; $LIBS = ""; }
@@ -567,21 +578,21 @@ if ( $#src > -1 ) {
 
 #_________________________________________________________________________________
 sub script::MakeMoc {
-    my $env  = shift;
+    my $envQt  = shift;
     my $pkg  = shift;
     my $done = shift;
     my @includes = split $main::PATH_SEPARATOR,shift;
-    my $Dir  = $env->{Dir};
+    my $Dir  = $envQt->{Dir};
     my $ROOTCINTFLAGS = "-I" . $Dir . "/inc";
     my @src      = ();
     my @Defs     = ();
-    my $PLATFORM = $env->{PLATFORM};
+    my $PLATFORM = $envQt->{PLATFORM};
     foreach my $header (@includes) {
 	my $dd = $d;
 	my $G__name = "moc_" . $header;
 	$G__name =~ s/\.h$/\.cxx/; 
-	my $moc = $env->{Packages}->{QT}->{BINDIR} . "/moc";
-	Command $env ($G__name), ($header), qq($moc -o %>  %<);
+	my $moc = $envQt->{Packages}->{QT}->{BINDIR} . "/moc";
+	Command $envQt ($G__name), ($header), qq($moc -o %>  %<);
 	push @src, $G__name;
 	print "+==========add moc file: $G__name\n" if $param::debug;
     }

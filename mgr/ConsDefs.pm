@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.70 2004/04/03 00:58:30 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.71 2004/05/12 19:30:29 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -464,7 +464,15 @@
        if $QTLIBDIR && ! $param::quiet;
    }
  }
-
+# Logger
+ $LoggerDir = $OPTSTAR . "/include/log4cxx";
+ if (-d $LoggerDir) {
+   $LoggerINCDIR = $OPTSTAR . "/include";
+   $LoggerLIBDIR = $OPTSTAR . "/lib";
+   $LoggerLIBS   = "-llog4cxx";
+   print "Use LoggerLIBDIR = \t$LoggerLIBDIR \tLoggerINCDIR = \t$LoggerINCDIR \tLoggerLIBS = \t$LoggerLIBS\n" 
+     if $LoggerLIBDIR && ! $param::quiet;
+ }
     
     my @params = (
       'CPP'           => $CPP,
@@ -501,7 +509,7 @@
       'CFLAGS'        => $CFLAGS,
       'EXTRA_CFLAGS'  => $EXTRA_CFLAGS,
       'KUIP'          => $KUIP,
-      'KUIPCOM'       => '%KUIP %< %<.f && %FC %FFLAGS -c %<.f -o %>',
+      'KUIPCOM'       => '%KUIP %< %<.f && %FC %FDEBUG %FFLAGS -c %<.f -o %>',
       'CCCOM'         =>
       '%CC %CFLAGS %EXTRA_CFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS -c %Cinp%< %Cout%>',
       'CXX'            => $CXX,
@@ -597,6 +605,11 @@
 				  'FLAGS' => $QTFLAGS,
 				  'LIBDIR'=> $QTLIBDIR,
 				  'LIBS'  => $QTLIBS 
+				 },
+			 'Logger' => {
+				  'INCDIR'=> $LoggerINCDIR,
+				  'LIBDIR'=> $LoggerLIBDIR,
+				  'LIBS'  => $LoggerLIBS 
 				 }
 			}
     );
