@@ -46,7 +46,11 @@ int kam_tdm_allocstats()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
 
+#ifdef	OLD_DSL
    dsDatasetAllocStats();
+#else	/*OLD_DSL*/
+   dsAllocStats();
+#endif	/*OLD_DSL*/
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -125,10 +129,22 @@ int kam_tdm_newtable()
    char* spec = ku_gets();	/* table row specifier */
    long rowcount = ku_geti();	/* rows to allocate */
 
-   if( !tdm->newTable(name,spec,rowcount) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+   if( sutMatchPrefix("struct",spec) ){
+      if( !tdm->newTable(name,spec,rowcount) ){
+	 EML_ERROR(KAM_METHOD_FAILURE);
+      }
+      EML_SUCCESS(STAFCV_OK);
    }
-   EML_SUCCESS(STAFCV_OK);
+   else {
+      char *specs=NULL;
+      if( !tdm->findTypeSpecification(spec,specs)
+      ||  !tdm->newTable(name,specs,rowcount) ){
+	 ASUFREE(specs);
+	 EML_ERROR(KAM_METHOD_FAILURE);
+      }
+      ASUFREE(specs);
+      EML_SUCCESS(STAFCV_OK);
+   }
 }
 
 /*
