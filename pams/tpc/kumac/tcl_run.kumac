@@ -29,7 +29,7 @@ do j = [tpc_sector_first],[tpc_sector_last]
         /dui/data/tpc/hits/tpcluster_
         /dui/data/tpc/hits/tpseq
    if ( staf_status(1) .ne. STAFCV_OK) then
-     message 'Problem running tcl_make_clusters...'
+     message 'Problem running tcl...'
    endif
 
  enddo  
@@ -37,7 +37,7 @@ do j = [tpc_sector_first],[tpc_sector_last]
  
   RTRN:
 
-  message 'finish run_tcl_make_clusters'
+  message 'finish run_tcl'
 
 return
  
