@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.34 1999/04/12 23:17:11 fine Exp $Id: 1999/03/11 00:15:22 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.35 1999/04/15 20:36:40 fine Exp $Id: 1999/03/11 00:15:22 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.35  1999/04/15 20:36:40  fine
+// St_geant::Work() was void becomes St_Node *
+//
 // Revision 1.34  1999/04/12 23:17:11  fine
 // Unique postion ID has been introduced
 //
@@ -451,7 +454,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.34 1999/04/12 23:17:11 fine Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.35 1999/04/15 20:36:40 fine Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -722,7 +725,7 @@ void St_geant_Maker::Call(const Char_t *name)
   if (address) csjcal(&address,&narg);
 }
 //_____________________________________________________________________________
-void St_geant_Maker::Work()
+St_Node *St_geant_Maker::Work()
 {  
   struct   Medium 
     { Char_t name[20]; Int_t nmat, isvol, ifield; Float_t fieldm; };
@@ -860,6 +863,7 @@ void St_geant_Maker::Work()
 
   fNode=node;
   gGeometry->GetListOfNodes()->Add(node);
+  return GetNode();
 }
 
 //------------------------------------------------------------------------
