@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichPadMonitor.h,v 1.3 2000/03/13 21:50:35 lasiuk Exp $
+ * $Id: StRichPadMonitor.h,v 1.4 2000/04/05 16:02:13 lasiuk Exp $
  * Description:
  *  First aTtempt at a simple Pad Monitor.
  *  Runs only in ROOT
@@ -7,8 +7,8 @@
  ***************************************************************
  *
  * $Log: StRichPadMonitor.h,v $
- * Revision 1.3  2000/03/13 21:50:35  lasiuk
- * coordinates
+ * Revision 1.4  2000/04/05 16:02:13  lasiuk
+ * GEANT info now drawable
  *
  * Revision 1.3  2000/03/13 21:50:35  lasiuk
  * coordinates
@@ -37,10 +37,15 @@ using std::vector;
 
 #include "TColor.h"
 
+#include "StRichG2TInfo.h"
+
+#include "StRchMaker/StRichHit.h"
+
 class StRichPadMonitorText;
 class StRichGeometryDb;
 class StRichCoordinateTransform;
 class StRichSinglePixel;
+class StRichSingleMCPixel;
 class StRichDrawableTPad;
 
 class StRichPadMonitor : public TObject {
@@ -52,13 +57,28 @@ public:
     //StRichPadMonitor(const StRichPadMonitor&) {/*nopt*/}
     //StRichPadMonitor& operator=(const StRichPadMonitor&) {/*nopt*/}
 
+    void clearAll();
     void clearPads();
+    void clearG2T();
+    void clearHits();
+
     void drawPads();
-    void drawPad(StRichSinglePixel pad);
-    void addPad(StRichSinglePixel* pad);
+    void addPad(StRichSinglePixel*);
+
+    void drawPad(const StRichSingleMCPixel&);
+    void drawPad(const StRichSinglePixel&);
+    void drawG2T(const StRichG2TInfo&);
+    void drawGeantGroup(int track, int color=1);
+    void drawHit(StRichHit*);
+
+    // Controls
+    //void removeGeantPoints();
+    //void drawGeantPoints();
+    
     void update();
     
-    void calculatePadPosition(StRichSinglePixel* pad, double* zl, double* xl, double* zu, double* xu);
+    void calculatePadPosition(const StRichSinglePixel* pad,
+			      double* xl, double* yl, double* xu, double* yu);
 
     // Ring stuff
     void addInnerRingPoint(double x, double y);
@@ -76,6 +96,10 @@ private:
     TObjArray   mAllFilledPads;
     TObjArray   mColorBoxes;
     TObjArray   mTextLabels;
+    TObjArray   mControls;
+    TObjArray   mG2TSegments;
+    TObjArray   mHits;
+    
     TObjArray   mRingPoints;
     TObjArray   mORingPoints;
     vector<double>     mXPoints;
