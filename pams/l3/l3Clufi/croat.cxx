@@ -1,10 +1,10 @@
-/*//
+//      1/02/00 flierl cleaned up offline version
+//------------------------------------------------------------
 //      7/21/99 struck. first offline verison
-//
 //------------------------------------------------------------
 //	7/1/99	Tonko. first working version...
 //------------------------------------------------------------
-*/
+
 
 #include <stdio.h>
 #include <strings.h>
@@ -12,161 +12,49 @@
 #include <stdlib.h>
 #include <Rtypes.h> /* use ROOT variables: ..._t */
 
-/* Run as unix offline version */
-#define UNIX_OFFLINE
-
-/* Due to a bug in the VRAM must NOT use bursts!!!!! */
-#define VRAM_BUG
 
 
-/* must be present before the TPC defines... */
-#define ROWS		45
-#define PADS_PER_ROW	182 /* Max_PADS = 184 !!! */
+
+/*  must be present before the TPC defines... */
+/*  these defines go into offset.h            */
+//#define ROWS		45
+//#define PADS_PER_ROW	182 
+/* Max_PADS = 184 !!! */
 
 #include "trans_table.h"
-#include "offsets.h"
 #include "padfinder.h"
-#include "daqFormats.h"
-
 #include "croat.h"
 
 
-#define register	/* noticed that it's better to let the compiler decide... */
-
-
-/* STATICS */
-
-/* the "real" padrow number [1..45] */
-static int rowAbs[MAX_LOGICAL_ROWS] ;
-/* first pad in the padrow */
-static int rowStart[MAX_LOGICAL_ROWS] ;
-/* last pad in the padrow */
-static int rowEnd[MAX_LOGICAL_ROWS] ;
-
-#ifndef UNIX_OFFLINE
-static uint adcOff[MAX_LOGICAL_ROWS][PADS_PER_ROW] ;
-static ushort cppOff[MAX_LOGICAL_ROWS][PADS_PER_ROW] ;
-#else
-//extern uint adcOff[ABS_ROWS][MAX_P] ;
-//extern uint cppOff[ABS_ROWS][MAX_P] ;
-#endif
-
-
-/* local results */
-static struct resx 
+struct resx 
 {
-    uint t ;
-    uint pad ;
-    uint charge ;
-    uint flags ;
-
-    int    mean ;
-    uint falling ;
-    uint scharge ;
-
-} resx[1000] ;
-
-#ifndef UNIX_OFFLINE 
-/* structures which reside in the on-chip CPU memory */
-/* careful!!!! NEVER CHANGE! */
-static ushort *adc8to10 = (ushort *) 0x100 ;	/* size 512 bytes */
-static uint *pres1 = (uint *) 0x300 ;		/* size 256 bytes (i.e. MAXIMUM 64 old clusters) */
-static uint *pres2 = (uint *) 0x400 ;		/* size 256 bytes (i.e. MAXIMUM 64 new clusters) */
-static struct resx *rr = (struct resx *) 0x500 ;	/* sizeof(resx[0]) */
-#else  /* UNIX_OFFLINE */
-//extern ushort adc8to10[256];
-static uint pres1[500], pres2[500] ;
-static struct resx rr_local ;
-static struct resx *rr = &rr_local ;
-#endif
+    UInt_t t ;
+    UInt_t pad ;
+    UInt_t charge ;
+    UInt_t flags ;
+    Int_t  mean ;
+    UInt_t falling ;
+    UInt_t scharge ;
+} ;
 
 
-/* These assembly routines are meant to speed up excecution on an Intel I960 */
-#ifndef UNIX_OFFLINE
 
-#ifdef VRAM_BUG
-extern __inline volatile void preburst(uint where)
-{
-    __asm__ volatile ("ld (%0), r8 " : : "r" (where) : "r8" ) ;
-    where += 4 ;
-    __asm__ volatile ("ld (%0), r9 " : : "r" (where) : "r9" ) ;
-    where += 4 ;
-    __asm__ volatile ("ld (%0), r10 " : : "r" (where) : "r10" ) ;
-    where += 4 ;
-    __asm__ volatile ("ld (%0), r11 " : : "r" (where) : "r11" ) ;
-
-    return ;
-
-}
-#else
-extern __inline volatile void preburst(uint where)
-{
-    __asm__ volatile ("ldq (%0), r8" : : "r" (where) : "r8", "r9", "r10", "r11") ;
-
-    return ;
-}
-#endif
-
-extern __inline volatile void memcpy7(uint *dst, uint *src)
-{
-    __asm__ volatile (" \
-\n \
-ldq (%0),r8 \n \
-stq r8, (%1) " : : "r" (src), "r" (dst) : "r8", "r9", "r10", "r11" ) ;
-
-    src += 4 ;
-    dst += 4 ;
-
-    __asm__ volatile (" \
-\n \
-ldt (%0),r8 \n \
-stt r8,(%1) " : : "r" (src), "r" (dst) : "r8", "r9", "r10", "r11" ) ;
-
-    return ;
-}
-
-
-extern __inline volatile void mstore(uint *r, uint av, uint pad, uint ch, uint flags, int mean)
-{
-    __asm__ volatile (" \
-\n \
-lda (%2),r8 \n \
-mov %3,r9 \n \
-lda (%4),r10
-mov %5,r11 \n \
-\n \
-stq r8,(%0) \n \
-\n \
-lda 16(%0),%0 \n \
-\n \
-mov %6,r8 \n \
-ldconst 0,r9 \n \
-\n \
-stt r8,(%0) " \
-		      : "r=" (r) : "0" (r), "r" (av), "r" (pad), "r" (ch), "r" (flags), "r" (mean) : "r8", "r9", "r10", "r11", "cc") ;
-
-    return ;
-}
-
-#else /* UNIX_OFFLINE */
-
-void preburst(uint where)
+void preburst(UInt_t where)
 {
     return ;
 }
 
-void memcpy7(uint *dst, uint *src)
+void memcpy7(UInt_t *dst, UInt_t *src)
 {
-    int i ;
-
-    for(i=0;i<7;i++) {
-	*dst++ = *src++ ;
-    }
-
+    Int_t i ;
+    for(i=0;i<7;i++) 
+	{
+	    *dst++ = *src++ ;
+	}
     return ;
 }
 
-void mstore(uint *r, uint av, uint pad, uint ch, uint flags, int mean)
+void mstore(UInt_t *r, UInt_t av, UInt_t pad, UInt_t ch, UInt_t flags, Int_t mean)
 {
     struct resx *rr = (struct resx *) r ;
 
@@ -181,27 +69,36 @@ void mstore(uint *r, uint av, uint pad, uint ch, uint flags, int mean)
     return ;
 }
 
-#endif  /* UNIX_OFFLINE */
 
 
-int croatFinder(u_char *adcin, ushort *cppin, uint *outres)
+
+Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int_t mz)
 {
-    int i ;
-    uint *padrows ;
-    int cl_found ;
-    uint rows ;
+    /* Define variables */
+    Int_t i ;
+    UInt_t *padrows ;
+    Int_t cl_found ;
+    UInt_t rows ;
 
-    register struct resx  *r ;
 
-    ushort adc8to10[256];
- 
-    int adcOff[ABS_ROWS][MAX_P] ;
-    int cppOff[ABS_ROWS][MAX_P] ;
-    
-    /* fill adcOff and cppOff arrays with offsets  */
+    /* Do init number of pads in each padrow belonging to this mz */
+    Int_t rowAbs[MAX_LOGICAL_ROWS] ;   /* the "real" padrow number [1..45] */ 
+    Int_t rowStart[MAX_LOGICAL_ROWS] ; /* first pad in the padrow */
+    Int_t rowEnd[MAX_LOGICAL_ROWS] ;   /* last pad in the padrow */
+    /* First set them 0 */
+    bzero((char *)rowStart, sizeof(rowStart)) ;
+    bzero((char *)rowEnd, sizeof(rowEnd)) ;
+    bzero((char *)rowAbs, sizeof(rowAbs)) ;
+    /* Then call init routine */
+    croatInit(rb, mz, rowAbs , rowStart, rowEnd );
+
+
+    /* Fill offsets */
+    Int_t adcOff[ABS_ROWS][MAX_P] ;
+    Int_t cppOff[ABS_ROWS][MAX_P] ;
     for( i=0; i<ABS_ROWS; i++) 
 	{
-	    int j;
+	    Int_t j;
 	    for( j=0; j<MAX_P; j++) 
 		{
 		    adcOff[i][j] = i*MAX_T*MAX_P + j*MAX_T ;
@@ -210,382 +107,420 @@ int croatFinder(u_char *adcin, ushort *cppin, uint *outres)
 	}
 
 
-    padrows = outres ;	/* reserve this space */
-    outres++ ;		/* and advance the counter */
+    /* Reserve array for found clusters */
+    struct resx resx[1000] ;
+    bzero((char *)resx, sizeof(resx)) ;
+    
+    /* local results */
+    register struct resx  *r ;
+    UInt_t pres1[500], pres2[500] ;
+    struct resx rr_local ;
+    struct resx *rr = &rr_local ;
 
+
+  
+    /* preparations */
+    padrows = outres ;	/* reserve the beginning of the bank */
+    outres++ ;		/* and advance the counter */
     rows = 0 ;		/* count of rows that had data */
 	
-    /* loop over rows of this mezz */
+    /********************************************/
+    /* loop over all possible rows of this mezz */
+    /********************************************/
     for(i=0; i<MAX_LOGICAL_ROWS; i++) 
 	{
-	    int j ;
-	    register int pres_cou1, pres_cou2 ;
-	    register uint *r1, *r2 ;
+	    /* Define variables */
+	    Int_t j ;
+	    register Int_t pres_cou1, pres_cou2 ;
+	    register UInt_t *r1, *r2 ;
+
 	    /* check if this row is to be done */
 	    if(rowAbs[i] == 0) break ;
 
+	    /* Set variables for the beginning of each row */
 	    pres_cou1 = pres_cou2 = 0 ;
-
 	    r1 = pres2 ;
 	    r2 = pres1 ;
 	    
 	    /* in r = resx we will store the clustercandidats of this row */
+	    /* increase only r to get the number of clusters = resx - r */
 	    r =  resx ;	/* start again per each row ... */
 
 #define DO_STUFF
 #ifdef DO_STUFF
+	    /******************************/
 	    /* loop over pads in this row */
-	    for(j=rowStart[i]; j<=rowEnd[i]; j++) {
+	    /******************************/
+	    for(j=rowStart[i]; j<=rowEnd[i]; j++) 
+		{
+		    register UInt_t start, stop ;
+		    register UShort_t *cv ;
+		    register UChar_t *val ;
+		    register Int_t start_new ;
+		    Int_t go_on ;
 
-		register uint start, stop ;
-		register ushort *cv ;
-		register u_char *val ;
-		register int start_new ;
-		int go_on ;
+		    /* HACK */
+		    Int_t cl_counter ;
+		    Int_t prev_start ;
 
-		/* HACK */
-		int cl_counter ;
-		int prev_start ;
+		    /* set offsets for adc & cpp */
+		    val = adcin + adcOff[rowAbs[i]-1][j-1];
+		    cv  = cppin + cppOff[rowAbs[i]-1][j-1];
 
-		/* set offsets for adc & cpp */
-		val = adcin + adcOff[rowAbs[i]-1][j-1];
-		cv  = cppin + cppOff[rowAbs[i]-1][j-1];
+		    /*  ??? just needed online*/
+		    //preburst((UInt_t)cv) ;
 
-		/*  ??? */
-		preburst((uint)cv) ;
-
-		if(r2 == pres2) 
-		    {
-			r1 = pres2 ;
-			r2 = pres1 ;
-		    }
-		else 
-		    {
-			r1 = pres1 ;
-			r2 = pres2 ;
-		    }
+		    /* the old results are always in r1 the new go into r2              */
+		    /* but one time r2 uses the array pres2 the next time it uses pres1 */
+		    if(r2 == pres2) 
+			{
+			    r1 = pres2 ;
+			    r2 = pres1 ;
+			}
+		    else 
+			{
+			    r1 = pres1 ;
+			    r2 = pres2 ;
+			}
 		
-		/*  ???? */
-		preburst((uint)cv+16) ;
+		    /*  ???? */
+		    preburst((UInt_t)cv+16) ;
 
-		/* counters to result pointers */
-		pres_cou1 = pres_cou2 ;
-		pres_cou2 = 0 ;
-		/* pres_cou1 is the previous pad */
-		/* pres_cou2 is the current pad */
+		    /* counters to result pointers                                               */
+		    /* pres_cou1 knows how many entries on previous pad : r1[0..prescou1]        */
+		    /* pres_cou2 counts the new found r2[0..prescou2], so it has to start with 0 */		       
+		    pres_cou1 = pres_cou2 ;
+		    pres_cou2 = 0 ;
+		    /* pres_cou1 is the previous pad */
+		    /* pres_cou2 is the current pad */
 
+		    /* ?????? just needed online */
+		    /*preburst((UInt_t)cv+32) ;*/
 
-		preburst((uint)cv+32) ;
+		    // time deconvolusion reset
+		    start_new = -1 ;
 
+		    // set counters 0 
+		    cl_counter = 0 ;
+		    prev_start = 0 ;
 
-		start_new = -1 ;
-
-		/* HACK */ 
-		cl_counter = 0 ;
-		prev_start = 0 ;
-
-		/*fprintf(stderr,"Doing row %d, pad %d\n", i, j) ; */ 
+		    /*fprintf(stderr,"Doing row %d, pad %d\n", i, j) ; */ 
 			
-		/*loop over sequenzes */
-		/*we'll stop when start is LESS than 349 due to a bug in the ASIC */
-		/*for start==349 */
-		while((start = (uint)*cv++) < 349) 
-		    {
-			register u_char *val1 ;
-			register uint av, charge ;
-			register int mean ;
-			register uint flags ;
-			register int last_falling ;
-			register int k ;
-			register uint *ri ;
-			uint tmp_charge ;
+		    /**********************/
+		    /*loop over sequenzes */
+		    /**********************/
+		    while((start = (UInt_t)*cv++) < (MAX_T-1)) 
+			{
+			    register UChar_t *val1 ;
+			    register UInt_t av, charge ;
+			    register Int_t mean ;
+			    register UInt_t flags ;
+			    register Int_t last_falling ;
+			    register Int_t k ;
+			    register UInt_t *ri ;
+			    UInt_t tmp_charge ;
 			
-			/* this statment is senseless, just to produce no warning of the compiler */
-			/* this is bad style :( */
-			flags = last_falling;
-			flags = adc_offset[0][0];
-			flags = 0;
+			    /* Set flag */
+			    flags = 0;
 
-			/* HACK */
-			cl_counter++ ; /* cluster counter */
-			if(cl_counter > 31) break ; /* too many clusters on this pad */
+			    /* Make sure that we don't find more than 31 clusters in this pad = MAX_C/2 */
+			    /* (because in MAX_C we have 2 values per sequenz :start pixel and end pixel) */
+			    cl_counter++ ; // cluster counter (for this pad only) 
+			    if(cl_counter > MAX_C2) break ; // too many clusters on this pad -> stop this pad 
 
-			/* HACK */
-			if((int)start < (int)prev_start) break ; 
-			prev_start = start ;
+			    
+			    /* Make sure that this sequenz starts behind the previous one */
+			    if((Int_t)start < (Int_t)prev_start) break ; 
+			    prev_start = start ;
 
-			/* get the stop bucket */
-			stop = (uint) *cv++ ;
+			    /* Get the stop bucket ( the order in cpp is cpp[x]=start, cpp[x+1]=stop for this sequenz */
+			    stop = (UInt_t) *cv++ ;
 		       	
-		       	/* exclude possible nonsense situations */
-			if(stop < start) stop = start ;
-			if(stop > 349) stop = 349 ;
+			    /* exclude possible nonsense situations */
+			    if(stop < start) stop = start ;
+			    if(stop > MAX_T) stop = MAX_T ;
 			
-			/* sequenz is not longer than 3 consequtive timebuckets ... */
-/*
-			if((stop-start)>3) stop = start + 3 ;
-*/
-			if(stop > 349) stop = 349 ;
+			    /* sequenz is not longer than 3 consequtive timebuckets ... */
+			    /*
+			      if((stop-start)>3) stop = start + 3 ;
+			    */
+			    /*if(stop > 349) stop = 349 ;*/
 			
 
 				
 
 #ifdef DECONVOLUTE_TIME
-			/* this is a goto label ... */
-		    redo: ;
+			    /* this is a goto label ... */
+			redo: ;
 
-			/* divide one pixelsequenz into two */  
-			if(start_new > -1) 
-			    {
-				start=start_new ;
-				start_new = -1 ;
-			    }
+			    // divide one pixelsequenz into two in case we found a change of sign in slope 
+			    if(start_new > -1) 
+				{
+				    start=start_new ;
+				    start_new = -1 ;
+				}
 #endif
-			/* average and charge 0 */
-			av = charge = 0 ; 
+			    // average and charge 0 
+			    av = charge = 0 ; 
 
-			go_on = 1 ;
+			    // yes, create a new cluster
+			    go_on = 1 ;
 
-			val1 = val + start ;
+			    // now get the adc value adress 
+			    val1 = val + start ;
 
 
 #ifdef DECONVOLUTE_TIME
-			/* flags = 0 */
-			last_falling = flags = 0 ;
-			flags = last_falling;
+			    // flags = 0 
+			    last_falling = flags = 0 ;
+			    
 #endif
 #ifdef DECONVOLUTE_PAD
-			flags = 0 ;
+			    flags = 0 ;
 #endif
 			
-			/* block to introduce new variables */
-			{
-			    register ushort *a8to10 ;
-			    register uint last_a ;
-			    a8to10 = adc8to10 ;
-
-			    last_a = 0 ;
-
-			    /* loop over this sequenz */
-			    for(;start<=stop;start++) 
-				{
-				    
-				    
-
-				    register uint a ;
-				    register uint aa  ;
-
-				    aa = *val1++ ;
+			    // block to introduce new variables 
+			    {
+				// this variable we need for a deconvolusion in time	
+				register UInt_t last_a ;
+				last_a = 0 ;
+				
+				/**************************/
+				/* loop over this sequenz */
+				/**************************/
+				for(;start<=stop;start++) 
+				    {
+					// this variable holds actual adc value					
+					register UInt_t a ;
+					register UInt_t aa  ;
+					
+					// go get the adc value
+					aa = *val1++ ;
 				
 #ifdef DECONVOLUTE_TIME 
-				    /* check if last pixel in this sequenz is bigger or smaller */
-				    /* than this one */
-				    if(aa > last_a) 
-					{
-					    if(last_falling) 
-						{
-						    start_new = start ;
-						    break ;
-						}
-					}
-				    else last_falling =  1;
-				
-				    last_a = aa ;
-#endif
-				    /*dominik change:a = a8to10[aa] ;*/
-				    a = log8to10_table[aa] ;
-				    
-				    /* sum of adc-values equals total charge of this cluster */
-				    charge += a ; 
-				    
-				    av += start* (a) ;
-				}
-			
-			}
-#ifdef DECONVOLUTE_TIME
-			if(start_new > 0) flags = FLAG_DOUBLE_T ;
-#endif
-			/* HACK */
-			if(charge) 
-			    {
-				/* mean := center of gravity for this sequenz */
-				mean = av/charge ;
-			    }
-			else 
-			    {
-				charge = 1 ;
-				mean = 1 ;
-			    }
-
-			ri = r1 ;	/* point to old results */
-		    
-			tmp_charge = charge * j;
-
-			/*if(pres_cou1 || pres_cou2) LOG(DBG,"before - pres_cou1 %d [%d]",pres_cou1,pres_cou2,0,0,0) ;*/
-			/*if(pres_cou1 >60) pres_cou1 = 60 ; */
-
-				/* compare with previously stored results*/
-				
-			for(k=0;k<pres_cou1;k++) 
-			    {
-				register int v ;
-				register struct resx *rr_tmp ;
-			    
-				rr_tmp = (struct resx *) *ri ;
-				
-				v = mean - rr_tmp->mean ;
-
-								    
-				/* since the results are ordered in rising order
-				// we can break as soon as the previos is larger than
-				// this one...
-				// this leads to a new cluster */
-				if(v < -PARAM1) break ;
-						
-				ri++ ;
-			    
-				/*					if(v < 0) v = -v ;*/
-
-				if(v<=PARAM1) 
-				    {
-					/* OK - got one to continue with so
-					   // we'll "add" the new and the old*/
-				    
-					/* make a temp. copy to on-CPU RAM (rr)*/
-					memcpy7((uint *)rr,(uint *)rr_tmp) ;
-
-					/* in case we found another sequenz-section on this pad
-  					 don't loop over all sequenzes on last pad but start 
-					 where we found a matching candidate for this sequenz-section*/
-					r1 = ri ;
-					pres_cou1 -= 1+k ;
-					/*LOG(DBG,"after - pres_cou1 %d [%d]",pres_cou1,pres_cou2,0,0,0) ;*/
-
-				    
-#ifdef DECONVOLUTE_PAD
-					if(charge > rr->scharge) 
+					// check if last pixel in this sequenz is bigger or smaller than this
+					if(aa > last_a) 
 					    {
-						if(rr->falling) 
-						    { /* previous state was falling*/
-							flags |= FLAG_DOUBLE_PAD ;
-							rr_tmp->flags |= flags ;
-							break ;	/* and create a new one*/
+						if(last_falling) 
+						    {
+							start_new = start ;
+							break ;
 						    }
 					    }
-					else 
-					    {
-						rr->falling = 1 ;	/* falling */
-					    }
+					else last_falling = 1;
+					last_a = aa ;
+#endif
+					
+					// 8 to 10 bit conversion :  as late as possible
+					a = log8to10_table[aa] ;
+				    
+					// sum of adc-values equals total charge of this cluster on this pad
+					charge += a ; 
+				    
+					// this one we need to determine the time mean over all pads
+					av += start * (a) ;
+				    } // loop over sequenz 
+			    }// block to introduce new variables 
+#ifdef DECONVOLUTE_TIME
+			    if(start_new > 0) flags = FLAG_DOUBLE_T ;
+#endif
+			    // calculate mean in time direction for this sequenz 
+			    if(charge) 
+				{
+				    /* mean := center of gravity for this sequenz */
+				    mean = av/charge ;
+				}
+			    else 
+				{
+				    /* if charge == 0 : set them to low values, why ? */
+				    charge = 1 ;
+				    mean = 1 ;
+				}
+
+			    // get the pointer to results on previous pad(s) 
+			    ri = r1 ;	
+		    
+			    // center of gravity in pad direction 
+			    tmp_charge = charge * j;
+
+			    
+			    /******************************************************************/
+			    /* compare with previously stored results (=means previous pad(s))*/
+			    /******************************************************************/	
+			    for(k=0;k<pres_cou1;k++) 
+				{
+				    // variable to store differenz 
+				    register Int_t v ;
+				    
+				    // struct which contains means(+more) of last pad(s) 
+				    register struct resx *rr_tmp ;
+			    
+				    // go get it 
+				    rr_tmp = (struct resx *) *ri ;
+				
+				    // differenz between this mean and mean of sequenz on previous pad 
+				    v = mean - rr_tmp->mean ;
+
+								    
+				    // since the results are ordered in rising order
+				    // the remaining means of the last pad are for sure too far away -> stop it
+				    if(v < -PARAM1) break ;
+				    
+				    // goto next mean on previous pad
+				    ri++ ;
+			    
+			            /* if(v < 0) v = -v ;*/
+					
+				    // is there a matching cluster on previous pad(s)
+				    if(v<=PARAM1) 
+					{
+					    // OK - got one to continue with so
+					    // we'll "add" the new and the old
+					    
+					    // make a temp. copy to on-CPU RAM (rr)
+					    // memcpy7(destination,source)
+					    memcpy7((UInt_t *)rr,(UInt_t *)rr_tmp) ;
+
+					    // in case we found another sequenz-section on this pad
+					    // don't loop over all sequenzes on last pad but start 
+					    // where we found a matching candidate for this sequenz-section
+					    // adjust upper limit (=prescou1)
+					    r1 = ri ;
+					    pres_cou1 -= 1+k ;
+
+					    /*LOG(DBG,"after - pres_cou1 %d [%d]",pres_cou1,pres_cou2,0,0,0) ;*/
+				    
+#ifdef DECONVOLUTE_PAD
+					    if(charge > rr->scharge) 
+						{
+						    if(rr->falling) 
+							{ 
+							    /* previous state was falling*/
+							    flags |= FLAG_DOUBLE_PAD ;
+							    rr_tmp->flags |= flags ;
+							    /* and create a new one*/
+							    break ;    
+							}
+						}
+					    else 
+						{
+						    rr->falling = 1 ;	/* falling */
+						}
 #endif
 
-					/* don't create a new one*/
-					go_on = 0 ;
-				    
-					/*if(pres_cou1 || pres_cou2) LOG(DBG,"1. pres_cou2 %d [%d]",pres_cou2,pres_cou1,0,0,0) ;
-					//if(pres_cou2 >60) pres_cou2 = 60 ;
-					// increment and store the pointer to the new one
-					// in "2" */
-					r2[pres_cou2++] = (uint) rr_tmp ;
-				    
-					rr->scharge = charge ;
-					rr->flags &= (~FLAG_ONEPAD) ;
-				    
+					    // don't create a new one 
+					    go_on = 0 ;
+					    					    
+					    // store the pointer to the matched in "2" 
+					    r2[pres_cou2++] = (UInt_t) rr_tmp ;
 
-					rr->charge += charge ;
-					rr->pad += tmp_charge ;
-					rr->t += av ;
-					rr->mean = mean ;
-				    
-					/* copy it back to storage */
-					memcpy7((uint *)rr_tmp,(uint *)rr) ;
-				    
-					break ;
-				    
-				    }
-			    }
+					    ////////////////////////
+					    // calculate and fill the new means, charge etc in rr = rr_tmp
+					    ////////////////////////
+					    // charge on this pad to determine whether we cut in pad direction
+					    rr->scharge = charge ;
+					    // unset FLAG_ONEPAD since we have at least 2 pads
+					    rr->flags &= (~FLAG_ONEPAD) ;
+					    // summ the charges for de/dx
+					    rr->charge += charge ;
+					    // calculate mean in pad direction
+					    rr->pad += tmp_charge ;
+					    // calculate mean in time direction
+					    rr->t += av ;
+					    // store mean of this sequenz on this pad
+					    rr->mean = mean ;
+					    
+					    // copy it back to storage 
+					    // memcpy7(destination,source)
+					    memcpy7((UInt_t *)rr_tmp,(UInt_t *)rr) ;
+					    
+					    // we found a matching one so stop looping over means on previous pad
+					    break ;
+					    
+					} /* if PARAM1 */
+				} /* loop : means on previous pad (prescou1) */
+			    
 
-
-			/* here we create from scratch new clusters...*/
-			if(go_on) 
-			    {
-				/* store this guy because it's the first*/
-				/*if(pres_cou1 || pres_cou2) LOG(DBG,"2. pres_cou2 %d [%d]",pres_cou2,pres_cou1,0,0,0) ;*/
-				/*if(pres_cou2 >60) pres_cou2 = 60 ;*/
-					
-				r2[pres_cou2++] = (uint )r ;
-				mstore((uint *)r,av,tmp_charge,charge,flags|FLAG_ONEPAD,mean) ;
-				r++ ;
-			    }
+			    // here we create from scratch new clusters...
+			    if(go_on) 
+				{
+				    // store this guy because it's the first
+				    r2[pres_cou2++] = (UInt_t )r ;
+				    mstore((UInt_t *)r,av,tmp_charge,charge,flags|FLAG_ONEPAD,mean) ;
+				    r++ ;
+				}
 
 
 #ifdef DECONVOLUTE_TIME
-			if(start_new>=0) goto redo ;
+			    // maybe we still have to do something
+			    if(start_new>=0) goto redo ;
 #endif
-		    }	/* for CPPs */
-	    }	/* for minpad to maxpad */
+			}	/* for loop : CPPs on this pad */
+		}    /* for loop : minpad to maxpad */
 	    
 #endif	/* DO_STUFF */
-
+	    // number of clusters found
 	    cl_found = r - resx ;
-	    /*LOG(DBG,"Found %d clusters in row %d",cl_found,i,0,0,0) ;*/
+	  
 	    
 #ifndef DO_STUFF
 	    /* HACK*/
 	    cl_found = 1 ;
 #endif
-	    /* here we come afte we examined one pad row */
-	    if(cl_found == 0) continue ;	/* nothing in this row*/
-
+	    /* here we come after we examined one pad row */
+	    if(cl_found == 0) continue ;	/* nothing in this row goto next row */
 
 	    /* there was something in this padrow...*/
 	    rows++ ;
 
-	    /* let's output the data in the 2.1 format
+	    // let's output the data in the 2.1 format
 	    // we'll do it stupidly for now and later use assembly or something...
-	    // now we are filling the TPCMZCLD DATA WORD 2 3*/
+	    // now we are filling the TPCMZCLD DATA WORD 2 3
 	    *outres++ = rowAbs[i] ;
 	    *outres++ = cl_found ;
 
 #ifdef DO_STUFF
-	    /* now fill the found clusters in the TPCMZCLD bank */
+	    // now fill the found clusters in the TPCMZCLD bank 
 	    for(j=0;j<cl_found;j++) 
 		{
-		    /* find the pointer where to store it */
+		    // find the pointer where to store it 
 		    struct fmt21_c 
 		    {
-			ushort x ;
-			ushort t ;
+			UShort_t x ;
+			UShort_t t ;
 		    } *c ;
 
 		    struct fmt21_f 
 		    {
-			ushort f ;
-			ushort c ;
+			UShort_t f ;
+			UShort_t c ;
 		    } *f ;
 
 		    c = (struct fmt21_c *) outres++ ;
 		    f = (struct fmt21_f *) outres++ ;
 
-		    /* if cluster is not empty*/
+		    // if cluster is not empty
 		    if(resx[j].charge) 
 			{   
-			    /* fill it in 1/64 units*/
-			    /* to get the center of gravity we have to devide by charge */
+			    // fill it in 1/64 units
+			    // to get the center of gravity we have to devide by charge 
 			    c->x = (resx[j].pad << 6) / resx[j].charge ;
 			    c->t = (resx[j].t << 6 )  / resx[j].charge ;
 			}
 		    else 
 			{
-			    /* if we don't find anything fill it with dummies */
-			    c->x = 10 ;
-			    c->t = 10 ;
+			    // if we don't find anything fill it with dummies 
+			    c->x = 700 ;
+			    c->t = 700 ;
 			}
-		    /* fill flags and charge */
+		    // fill flags and charge 
 		    f->f = resx[j].flags ;
 		    f->c = resx[j].charge ;
 		}
 #else
-
+	    // fill first pad and last pad of this row 
+	    // this is NOT in the official DAQ-Raw Format 
+	    // but it has no impact ...
 	    *outres++ = rowStart[i] ;
 	    *outres++ = rowEnd[i] ;
 #endif
@@ -598,76 +533,47 @@ int croatFinder(u_char *adcin, ushort *cppin, uint *outres)
 
     /* return length in qwords */
     return (outres - padrows) ;	
-
 } 
 
-int croatInit(int myRB, int myMZ)
+Int_t croatInit(Int_t myRB, Int_t myMZ,Int_t* rowAbs ,Int_t* rowStart,Int_t* rowEnd )
 {
     /* this function fills the rowStart,rowEnd & rowAbs arrays */
     /* with the informations provided by padfinder.h file */
-    int i, j ;
-    int rel ;
-
-    rel = 0 ;
-
-
-    bzero((char *)resx, sizeof(resx)) ;
-
-
-#ifndef UNIX_OFFLINE
-    for(i=0; i<256; i++) {
-	adc8to10[i] = log8to10_table[i] ;
-    }
-#endif
-
-    bzero((char *)rowStart, sizeof(rowStart)) ;
-    bzero((char *)rowEnd, sizeof(rowEnd)) ;
-    bzero((char *)rowAbs, sizeof(rowAbs)) ;
-
-#ifndef UNIX_OFFLINE
-    bzero((char *)adcOff, sizeof(adcOff)) ;
-    bzero((char *)cppOff, sizeof(cppOff)) ;
-#endif
-
+    Int_t i=0 ;
+    Int_t j=0 ;
+    Int_t rel =0 ;
+ 
     /* fprintf(stderr, "Initializing RB %d, MZ %d\n", myRB, myMZ); */
 	
     /* loop over rows */
     for(i=1;i<=45;i++) 
 	{
-	    /* loop over up to 3 different mz cards which are responsible for this row */
+	    /* loop over up to 3 mz cards which are responsible for this row */
+	    /* ( in fact just 2 DIFFERENT mz cards but in case of a row : xxx-------xxx we need 3 */
 	    for(j=0;j<3;j++) 
 		{
 		    /* fprintf(stderr, "RB%d, row %d, j %d: rdo %d, mz %d\n", */
-		       /*	myRB, i, j, padfinder[i-1][j].rdo, padfinder[i-1][j].mezz);  */
+		    /*	myRB, i, j, padfinder[i-1][j].rdo, padfinder[i-1][j].mezz);  */
 		    if(padfinder[i-1][j].rdo == 0) break ;
-		    if((padfinder[i-1][j].rdo == myRB) && (padfinder[i-1][j].mezz == myMZ)) {
-			rowAbs[rel] = i ;
-			rowStart[rel] = padfinder[i-1][j].minpad ;
-			rowEnd[rel] = padfinder[i-1][j].maxpad ;
-			rel++ ;
-			if(rel > MAX_LOGICAL_ROWS) {
-			    fprintf(stderr, "Too many logical rows!\n");
-			    return -1 ;
-			}
-			else {
-			    /*fprintf(sterr, "Logical row %d-> abs %d, start %d, end %d\n", */
-			    /*	  rel, rowAbs[rel-1], rowStart[rel-1], rowEnd[rel-1]); */
-			}
-		    }
-		}
-	}
-
-#ifndef UNIX_OFFLINE
-    for(i=0;i<MAX_LOGICAL_ROWS;i++) {
-	if(rowAbs[i] == 0) break ;	/* no more rows*/
-	for(j=rowStart[i];j<=rowEnd[i];j++) {
-	    cppOff[i][j] = (adc_offset[i][j] & 0x1FF) << 5 ;
-	    adcOff[i][j] = (adc_offset[i][j] & 0x1FF) << 9 ;
-	}
-    }
-#endif
-
-
-    return rel ;	/* number of logical rows... */
+		    if((padfinder[i-1][j].rdo == myRB) && (padfinder[i-1][j].mezz == myMZ)) 
+			{
+			    rowAbs[rel] = i ;
+			    rowStart[rel] = padfinder[i-1][j].minpad ;
+			    rowEnd[rel] = padfinder[i-1][j].maxpad ;
+			    rel++ ;
+			    if(rel > MAX_LOGICAL_ROWS) 
+				{
+				    fprintf(stderr, "Too many logical rows!\n");
+				    return -1 ;
+				}
+			    else 
+				{
+				    /*fprintf(sterr, "Logical row %d-> abs %d, start %d, end %d\n", */
+				    /*	  rel, rowAbs[rel-1], rowStart[rel-1], rowEnd[rel-1]); */
+				}
+			} /* if matching entry in padfinder[x] found ... */
+		} /* loop over responsible mz cards */
+	}  /* loop over rows */
+    return rel ;	/* number of logical rows... not needed! */
 }
 

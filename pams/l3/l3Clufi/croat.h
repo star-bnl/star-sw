@@ -20,10 +20,10 @@
 #define PARAM1		2
 
 /* perform deconv. in the time direction */
-/*#define DECONVOLUTE_TIME */
+#define DECONVOLUTE_TIME 
 
 /* perform deconv. in the pad direction */
-/*#define DECONVOLUTE_PAD */
+#define DECONVOLUTE_PAD 
 
 
 /* output flags */
@@ -46,6 +46,6 @@
 
 
 /* routines */
-Int_t croatInit(Int_t rb, Int_t mz);
+Int_t croatInit(Int_t rb, Int_t mz, Int_t*,Int_t*,Int_t* );
 
 #endif
