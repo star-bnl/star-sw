@@ -1,5 +1,8 @@
-// $Id: StArray.cxx,v 1.20 2000/01/28 20:37:03 perev Exp $
+// $Id: StArray.cxx,v 1.21 2000/04/18 02:57:25 perev Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.21  2000/04/18 02:57:25  perev
+// StEvent browse
+//
 // Revision 1.20  2000/01/28 20:37:03  perev
 // Home made SetLast removed
 //
@@ -70,7 +73,8 @@ void StRegistry::Clear()
 //______________________________________________________________________________
 UInt_t StRegistry::Ident(UInt_t colidx,UInt_t objidx)
 {
- assert(colidx<=0xffff && objidx <= 0xffff);
+ assert(colidx <= 0xffff);
+ assert(objidx <= 0xffff);
  return (colidx<<16)|objidx;
 }
 //______________________________________________________________________________
@@ -109,7 +113,8 @@ void StRegistry::RemColl(StStrArray *coll)
   UInt_t colIdx,objIdx;
   assert(fReg); 
   StRegistry::Ident(coll->GetUniqueID(), colIdx, objIdx);
-  assert(objIdx);  assert(!colIdx);
+  assert(objIdx); 
+  assert(!colIdx);
   assert( fReg->At(objIdx-1)==coll);
   fReg->RemoveAt(objIdx-1);
   if (objIdx-1 < (UInt_t)fReg->GetLast()) {

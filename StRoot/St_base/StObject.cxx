@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.6 1999/12/21 15:42:58 fine Exp $
+// $Id: StObject.cxx,v 1.7 2000/04/18 02:57:25 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.7  2000/04/18 02:57:25  perev
+// StEvent browse
+//
 // Revision 1.6  1999/12/21 15:42:58  fine
 // remove compilation warning
 //
@@ -25,6 +28,7 @@
 #include "TDataMember.h"
 #include "TRealData.h"
 #include "StArray.h"
+#include "StAutoBrowse.h"
 
 ClassImp(StObject)
 //_____________________________________________________________________________
@@ -45,34 +49,5 @@ StObject::~StObject()
 //_____________________________________________________________________________
 void StObject::Browse(TBrowser *tb)
 {
-StObject::Browse(this,tb);
-}
-//_____________________________________________________________________________
-int StObject::Browse(const TObject *This,TBrowser *tb)
-{
-  int num=0;
-  TClass *tc = This->IsA();
-  if (!tc) 	return 0;
-  const TList *tl = tc->GetListOfRealData();
-  if (!tl) tc->BuildRealData(); 
-  tl = tc->GetListOfRealData();
-  if (!tl) 	return 0;
-  TListIter nextMember(tl);
-  TRealData *tr = 0; TDataMember *tm=0;
-  while ((tr=(TRealData*)nextMember()))
-  {
-    tm = tr->GetDataMember();
-    if (!tm->IsaPointer())	continue;
-    if (tm->IsBasic())		continue;
-    TClass *cm = gROOT->GetClass(tm->GetTypeName(),1);
-    if (!cm) 			continue;
-    if (!cm->InheritsFrom(TObject::Class())) 	continue;
-    int offset = tr->GetThisOffset();
-    if (offset<=0)		continue;
-    TObject **our = (TObject **)((const char*)This+offset);
-    if (!*our) continue;
-    num++; if (!tb) return 1;
-    tb->Add(*our);
-  }
-  return num;
+  StAutoBrowse::Browse(this,tb);
 }
