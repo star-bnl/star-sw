@@ -1,12 +1,15 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.4 2000/01/27 17:10:03 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 1.5 2000/01/28 20:35:08 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
- * Revision 1.4  2000/01/27 17:10:03  lasiuk
- * modify to work stand-alone from ROOT
+ * Revision 1.5  2000/01/28 20:35:08  lasiuk
+ * namespace std is NOT in!
  *
+ *
+ * Revision 1.8  2000/02/12 21:54:25  lasiuk
+ * Introduce provisions to read in local coordinates
  *
  * Revision 1.7  2000/02/08 23:46:46  lasiuk
  * comment to prevent streamer for ionize and inducesignal. Remove filter
@@ -247,7 +250,7 @@ int StRrsMaker::whichVolume(int val, string* vName)
 			 (momentum.z()/abs(momentum)),
 			 step,
 			 rch_hit->de,
-		raw << "volumeName= " << volumeName         << endl;
+			 rch_hit->volume_id,
 		    
 		    mMomentumTransform->localMomentum(gTrackMomentum,lTrackMomentum);
 		raw << "volumeName= " << volumeName.c_str() << endl;
