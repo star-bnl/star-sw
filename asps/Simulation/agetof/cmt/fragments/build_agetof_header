@@ -1,0 +1,12 @@
+
+${CONSTITUENT} :: $(src)agetof.def
+
+$(src)agetof.def : ../agetof.def $(bin)agetof.exe
+	cp   $< $@
+	echo '##########.def##########' >> $(bin)agetof.exe
+	echo '#chto v imeni tebe moem#' >> $(bin)agetof.exe
+	echo '##########.def.#########' >> $(bin)agetof.exe
+	cat  $< >> $(bin)agetof.exe         
+	echo '#######.endfile.########' >> $(bin)agetof.exe
+	cp   $<    $(bin)agetof.def         
+
