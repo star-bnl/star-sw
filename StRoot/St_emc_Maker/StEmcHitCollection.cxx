@@ -1,5 +1,8 @@
-// $Id: StEmcHitCollection.cxx,v 1.1 1999/02/12 19:15:19 akio Exp $
+// $Id: StEmcHitCollection.cxx,v 1.2 1999/02/21 21:00:15 pavlinov Exp $
 // $Log: StEmcHitCollection.cxx,v $
+// Revision 1.2  1999/02/21 21:00:15  pavlinov
+// Delete one line with debugging print
+//
 // Revision 1.1  1999/02/12 19:15:19  akio
 // *** empty log message ***
 //
@@ -230,7 +233,6 @@ Int_t StEmcHitCollection::ADCtoEnergy(St_emc_hits *emc_hit, TArrayF *E){
 	Float_t eta, phi;
 	Int_t id  = getID((Int_t)hit[i].module, (Int_t)hit[i].eta, (Int_t)hit[i].sub);
 	getPos((Int_t)hit[i].module, (Int_t)hit[i].eta, (Int_t)hit[i].sub, &eta, &phi);
-	cout << i <<" "<< id <<" "<< eta <<" "<< phi <<endl;
         if(hit[i].adc>-1){   
           if(slp[id].p0 > 0.0){
 	    Float_t Et = (hit[i].adc-ped[id].ped)/slp[id].p0;	      
