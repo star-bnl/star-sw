@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.9 2001/04/25 17:26:13 perev Exp $
+// $Id: StEpcMaker.cxx,v 1.10 2001/07/25 15:29:18 subhasis Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.10  2001/07/25 15:29:18  subhasis
+// check if clusters exist in bemc , bsmde and bsmdp
+//
 // Revision 1.9  2001/04/25 17:26:13  perev
 // HPcorrs
 //
@@ -182,6 +185,13 @@ mTheEmcCollection=0;
      EmcDet =mTheEmcCollection->detector(EmcId);
      if(EmcDet){
      cluscoll = EmcDet->cluster();
+// added to check if clusters exist for all detectors (not PRS now).
+
+     if((idet==0||idet==2||idet==3)&&(!cluscoll)){
+       cout<<" NO Clusters for detector" <<idet<<endl;
+       return kStWarn;
+      }
+
      if(cluscoll){
        //     Int_t Nclusters=cluscoll->numberOfClusters();
      //     if(Nclusters>0){
