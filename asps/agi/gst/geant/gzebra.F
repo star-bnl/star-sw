@@ -1,7 +1,10 @@
 *
-* $Id: gzebra.F,v 1.3 1998/07/20 20:17:30 perev Exp $
+* $Id: gzebra.F,v 1.4 1998/08/20 16:51:28 perev Exp $
 *
 * $Log: gzebra.F,v $
+* Revision 1.4  1998/08/20 16:51:28  perev
+* decrease default size geant=1Mw paw=1Mw
+*
 * Revision 1.3  1998/07/20 20:17:30  perev
 * Mods for exe SGI64 and HP rubber Zebra
 *
@@ -34,7 +37,7 @@ C.
 C.    ------------------------------------------------------------------
 C.
        NZEBRA = abs(NZEB)
-       NZEBRA = max(NZEBRA,1000000)
+       NZEBRA = max(NZEBRA,100000)
        I1     = LOCF   (IQ)
        Do iTry=0,5
           I2  = memget (NZEBRA*4+1000)
