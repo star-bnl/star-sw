@@ -5,7 +5,7 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.17 2004/05/24 18:33:40 zolnie Exp $
+ * $Id: EEmcGeomSimple.h,v 1.18 2004/05/25 15:32:37 zolnie Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
@@ -35,6 +35,8 @@ public:
 /// class EEmcGeomSimple
 class  EEmcGeomSimple : public TObject { 
 public:
+  static const double TwoPi; 
+
   /// chirality defined
   enum Chiral_t { CounterClockwise=-1, Clockwise=1, Undefined=0};
 
@@ -44,9 +46,9 @@ public:
   virtual ~EEmcGeomSimple();
 
   /// gets EEMC tower center given sector,subsector and eta indices (0-offset) 
-  /// \param sec     sector index    [0 ... mNumSec  ]
-  /// \param sub     subsector index [0 ... mNumSSec ]
-  /// \param etabin  tile/eta index  [0 ... mNumEta  ]
+  /// \param sec     sector index    [0,mNumSec )
+  /// \param sub     subsector index [0,mNumSSec)
+  /// \param etabin  tile/eta index  [0,mNumEta )
   /// \return tower center as TVector3
   TVector3 getTowerCenter(const UInt_t  sec, const UInt_t sub, const UInt_t etabin) const;
 
@@ -68,57 +70,58 @@ public:
   inline Float_t getEtaMax() const { return mEtaBin[mNumEta]; };
   
   /// returns the "mean" value of a tile (eta bin)
-  /// \param eta tile index (eta bin) [0 ... mNumEta ]
+  /// \param eta tile index (eta bin) [0,mNumEta)
   inline Float_t getEtaMean(UInt_t eta) const {
     if(mNumEta<=eta) throw EEmcGeomException("getEtaHalfWidth: invalid eta index"); 
     return 0.5 * ( mEtaBin[eta] + mEtaBin[eta+1] );
   }
 
   /// returns the "half-width" of a tile (eta bin)
-  /// \param eta tile index (eta bin) [0 .. mNumEta ]
+  /// \param eta tile index (eta bin) [0,mNumEta)
   inline Float_t getEtaHalfWidth(UInt_t eta) const { 
     if(mNumEta<=eta) throw EEmcGeomException("getEtaHalfWidth: invalid eta index");
     return 0.5 * fabs( mEtaBin[eta] - mEtaBin[eta+1] );
   }
 
   /// returns the center value of phi for a given sector
-  /// \param sec sector index [0 ... mNumSec ]
-  /// \note: may return negative angles
+  /// \param sec sector index [0,mNumSec)
   inline Float_t getPhiMean(UInt_t sec) const {
-    const  double dPhi=2.0*M_PI/mNumSec;
+    //const  double dPhi=2.0*M_PI/mNumSec;
+    const  double dPhi= TwoPi/mNumSec;
     if(mNumSec<=sec) throw EEmcGeomException("getPhiMean: invalid sector index");
-    return mClock*(sec+0.5)*dPhi+mPhi0;
+    return AdjustAngle(mClock*(sec+0.5L)*dPhi+mPhi0);
   }
   
   /// returns the center value of phi for a subsector
-  /// \param sec  sector index    [0 ... mNumSec  ]
-  /// \param ssec subsector index [0 ... mNumSSec ]
-  /// \note: may return negative angles
+  /// \param sec  sector index    [0,mNumSec )
+  /// \param ssec subsector index [0,mNumSSec)
   inline Float_t getPhiMean(UInt_t sec, UInt_t ssec) const {
-    const double dPhi=2.0*M_PI/mNumSec;
+    //const double dPhi=2.0*M_PI/mNumSec;
+    const double dPhi=TwoPi/mNumSec;
     if(mNumSec <=sec ) throw EEmcGeomException("getPhiMean: invalid sector index");
     if(mNumSSec<=ssec) throw EEmcGeomException("getPhiMean: invalid subsector index");
-    return mClock*(Float_t(sec)+(ssec+0.5)/mNumSSec)*dPhi+mPhi0;
+    return AdjustAngle(mClock*(Double_t(sec)+(ssec+0.5L)/mNumSSec)*dPhi+mPhi0);
   }
   
   /// returns the half-width (in phi) of a subsector
-  /// \param sec  sector index    [0 ... mNumSec  ]
-  /// \param ssec subsector index [0 ... mNumSSec ]
+  /// \param sec  sector index    [0,mNumSec )
+  /// \param ssec subsector index [0,mNumSSec)
   inline Float_t getPhiHalfWidth(UInt_t sec=0, UInt_t ssec=0) const {
-    const double dPhi=2.0*M_PI/mNumSec;
+    //const double dPhi=2.0*M_PI/mNumSec;
+    const double dPhi=TwoPi/mNumSec;
     if(mNumSec <=sec ) throw EEmcGeomException("getPhiMean: invalid sector index");
     if(mNumSSec<=ssec) throw EEmcGeomException("getPhiMean: invalid subsector index");
-    return 0.5/mNumSSec*dPhi;
+    return (Float_t)(0.5L/mNumSSec*dPhi);
   }
 
   /// returns the center of EEMC in z direction 
   inline Float_t getZMean() const {
-    return 0.5*(mZ1+mZ2);
+    return (Float_t)(0.5L*(mZ1+mZ2));
   }
   
   /// returns the half-width of EEMC (in z-direction)
   inline Float_t getZHalfWidth() const {
-     return 0.5*fabs(mZ1-mZ2);
+    return (Float_t)(0.5L*fabs(mZ1-mZ2));
   }
 
 
@@ -139,23 +142,32 @@ public:
   /// returns a reference to a static instance of EEmcGeomSimple
   static EEmcGeomSimple& Instance() { return sInstance; } 
 
+  
+
 protected:  
   Float_t  mZ1   ;   // z preshower)
   Float_t  mZ2   ;   // z postshower)
   Float_t  mZSMD ;   // z smd
-  Float_t *mEtaBin;  // eta bins [0..mNumEta]
+  Float_t *mEtaBin;  // eta bins [0,mNumEta)
   UInt_t   mNumEta;  // number of eta bins 
   UInt_t   mNumSec;  // number of sectors    (in phi)
   UInt_t   mNumSSec; // number of subsectors (in phi)
-  Float_t  mPhi0;    // phi0 of the 0th sector 
+  Double_t mPhi0;    // phi0 of the 0th sector 
   Chiral_t mClock;   // +1 == clockwise  -1 == counter-clockwise
 
   void    useDefaultGeometry();
+  
+  // adjust angle so it falls into [0,pi) interval
+  static inline double AdjustAngle(double alpha) { 
+    while(alpha<0    ) alpha += TwoPi;
+    while(alpha>TwoPi) alpha -= TwoPi;
+    return alpha;
+  }
+
 
 private:
-  
-  
   static EEmcGeomSimple sInstance; //! 
+
 
   ClassDef(EEmcGeomSimple,2)  // STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
    
@@ -166,6 +178,9 @@ private:
 
 /*********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.18  2004/05/25 15:32:37  zolnie
+ * phi angles adjusted to [0,2pi] interval
+ *
  * Revision 1.17  2004/05/24 18:33:40  zolnie
  * comment cleanup, added a small exception class
  * more argument checking, exception thrown when argument invalid
