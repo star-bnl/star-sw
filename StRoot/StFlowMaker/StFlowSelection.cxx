@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.13 2000/12/12 20:22:06 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.14 2001/05/22 20:17:58 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -21,10 +21,8 @@ ClassImp(StFlowSelection)
 //-----------------------------------------------------------------------
 
 
-StFlowSelection::StFlowSelection() : mCentrality(0), mSubevent(-1) {
+StFlowSelection::StFlowSelection() : mSubevent(-1) {
   // To make selections
-  mNumber[0]  = '\0';
-  mPid[0]     = '\0';
   mPidPart[0] = '\0';
   mPtPart[0]            = 0.;
   mPtPart[1]            = 0.;
@@ -56,12 +54,6 @@ StFlowSelection::~StFlowSelection() {
 Bool_t StFlowSelection::Select(StFlowEvent* pFlowEvent) {
   // Returns kTRUE if the event is selected
 
-  // Centrality
-  if (mCentrality) {
-    UInt_t cent = pFlowEvent->Centrality();
-    if (mCentrality != cent) return kFALSE;
-  }
-
   return kTRUE;
 }
 
@@ -71,11 +63,6 @@ Bool_t StFlowSelection::Select(StFlowTrack* pFlowTrack) {
   // Selects particles for event plane determination
   // Returns kTRUE if the track is selected
 
-  // PID
-  if (mPid[0] != '\0') {
-    const Char_t* pid = pFlowTrack->Pid();
-    if (strstr(pid, mPid)==0) return kFALSE;
-  }
   // Selected for event plane
   if (!pFlowTrack->Select(mHarmonic, mSelection, mSubevent)) return kFALSE;
   return kTRUE;
@@ -152,9 +139,6 @@ void StFlowSelection::PrintList() const {
   cout << "#################################################################"
        << endl;
   cout << "# Selection List:" << endl;
-  cout << "# Number = " << mNumber << endl;
-  cout << "# Centrality = " << mCentrality << endl;
-  cout << "# Particles used for the event plane: " << mPid << endl;
   cout << "# Particles correlated with the event plane: " << mPidPart << endl;
   cout << "# Pt for particles correlated with the event plane: " << 
     mPtPart[0] << " to " << mPtPart[1] << " GeV/c" <<endl;
@@ -182,6 +166,9 @@ void StFlowSelection::PrintList() const {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.14  2001/05/22 20:17:58  posk
+// Now can do pseudorapidity subevents.
+//
 // Revision 1.13  2000/12/12 20:22:06  posk
 // Put log comments at end of files.
 // Deleted persistent StFlowEvent (old micro DST).

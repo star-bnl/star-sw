@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.h,v 1.10 2000/12/12 20:22:05 posk Exp $
+// $Id: StFlowCutTrack.h,v 1.11 2001/05/22 20:17:23 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -145,14 +145,19 @@ inline void StFlowCutTrack::SetPtFtpc(Float_t lo, Float_t hi) {
 inline void StFlowCutTrack::SetEtaTpc(Float_t lo, Float_t hi) {
   mEtaTpcCuts[0] = lo; mEtaTpcCuts[1] = hi; }
 
-inline void StFlowCutTrack::SetEtaFtpc(Float_t lo_neg, Float_t hi_neg, Float_t lo_pos, Float_t hi_pos) {
-  mEtaFtpcCuts[0] = lo_neg; mEtaFtpcCuts[1] = hi_neg; mEtaFtpcCuts[2] = lo_pos; mEtaFtpcCuts[3] = hi_pos;}
+inline void StFlowCutTrack::SetEtaFtpc(Float_t lo_neg, Float_t hi_neg,
+				       Float_t lo_pos, Float_t hi_pos) {
+  mEtaFtpcCuts[0] = lo_neg; mEtaFtpcCuts[1] = hi_neg; 
+  mEtaFtpcCuts[2] = lo_pos; mEtaFtpcCuts[3] = hi_pos;}
 
 #endif
 
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.h,v $
+// Revision 1.11  2001/05/22 20:17:23  posk
+// Now can do pseudorapidity subevents.
+//
 // Revision 1.10  2000/12/12 20:22:05  posk
 // Put log comments at end of files.
 // Deleted persistent StFlowEvent (old micro DST).

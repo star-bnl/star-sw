@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.21 2001/04/03 17:47:17 oldi Exp $
+// $Id: StFlowEvent.cxx,v 1.22 2001/05/22 20:17:26 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -50,19 +50,6 @@ Float_t  StFlowEvent::mEtaFtpcCuts[2][Flow::nHars][Flow::nSels] = {{{2.7,2.7},
 								    {4.0,4.0},
 								    {4.0,4.0},
 								    {4.0,4.0}}};
-//For gap of |eta| < 0.05
-// Float_t  StFlowEvent::mEtaTpcCuts[2][Flow::nHars][Flow::nSels] = {{{0.05,0.5},
-// 								{0.05,0.},
-// 								{0.05,0.5},
-// 								{0.05,0.},
-// 								{0.05,0.5},
-// 								{0.05,0.}},
-// 							       {{1.0,2.},
-// 								{1.0,1.},
-// 								{1.0,2.},
-// 								{1.0,1.},
-// 								{1.0,2.},
-// 								{1.0,1.}}};
 
 Float_t  StFlowEvent::mPtTpcCuts[2][Flow::nHars][Flow::nSels] =  {{{0.1,0.1},
 								   {0.1,0.1},
@@ -101,6 +88,8 @@ Float_t StFlowEvent::mElectronCuts[2]      = {-3., 3.};
 Float_t StFlowEvent::mPositronCuts[2]      = {-3., 3.};
 Bool_t  StFlowEvent::mPtWgt                = kFALSE;
 Bool_t  StFlowEvent::mProbPid              = kFALSE;
+Bool_t  StFlowEvent::mEtaSubs              = kFALSE;
+Char_t  StFlowEvent::mPid[10]              = {'\0'};
 
 //-----------------------------------------------------------
 
@@ -121,12 +110,13 @@ StFlowEvent::~StFlowEvent() {
 
 //-------------------------------------------------------------
 
-Double_t StFlowEvent::PhiWeight(Float_t mPhi, Int_t selN, Int_t harN, StTrackTopologyMap topologyMap) const {
+Double_t StFlowEvent::PhiWeight(Float_t mPhi, Int_t selN, Int_t harN,
+				StTrackTopologyMap topologyMap) const {
 
   if (mPhi < 0.) mPhi += twopi;
   int n;
 
-  if (topologyMap.numberOfHits(kTpcId) || // Tpc track or no topologyMap available
+  if (topologyMap.numberOfHits(kTpcId) || // Tpc track, or no topologyMap
       topologyMap.data(0) == 0 && topologyMap.data(1) == 0) {
     n = (int)((mPhi/twopi)*Flow::nPhiBins);
     return mPhiWgt[selN][harN][n];
@@ -184,6 +174,7 @@ TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
   Int_t  selN  = pFlowSelect->Sel();
   Int_t  harN  = pFlowSelect->Har();
   double order = (double)(harN + 1);
+  bool  oddHar = (harN+1) % 2;
   double mQx=0., mQy=0.;
 
   StFlowTrackIterator itr;
@@ -193,7 +184,7 @@ TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
     if (pFlowSelect->Select(pFlowTrack)) {
       Float_t mPhi = pFlowTrack->Phi();
       double phiWgt = PhiWeight(mPhi, selN, harN, pFlowTrack->TopologyMap());
-      if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
+      if (pFlowTrack->Eta() < 0. && oddHar) phiWgt *= -1.;
       if (mPtWgt) {
 	float pt = pFlowTrack->Pt();
 	phiWgt *= pt;
@@ -203,6 +194,7 @@ TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
     }
   }
   mQ.Set(mQx, mQy);
+
   return mQ;
 }
 
@@ -237,6 +229,7 @@ Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) {
 //-----------------------------------------------------------------------
 
 void StFlowEvent::SetSelections() {
+  // for particles correlated with the event plane
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); 
@@ -245,11 +238,17 @@ void StFlowEvent::SetSelections() {
     Double_t eta = (double)(pFlowTrack->Eta());
     Float_t  Pt  = pFlowTrack->Pt();
 
+    // PID
+    Char_t pid[10];
+    strcpy(pid, pFlowTrack->Pid());
+    if (mPid[0] != '\0' && strstr(pid, mPid)==0) continue;
+    
     for (int selN = 0; selN < Flow::nSels; selN++) {
       for (int harN = 0; harN < Flow::nHars; harN++) {
 	    
 	  if (pFlowTrack->TopologyMap().numberOfHits(kTpcId) ||  
-	      (pFlowTrack->TopologyMap().data(0) == 0 && pFlowTrack->TopologyMap().data(1) == 0)) {
+	      (pFlowTrack->TopologyMap().data(0) == 0 && 
+	       pFlowTrack->TopologyMap().data(1) == 0)) {
 	    // hits in Tpc or TopologyMap not available
 	    
 	    // Eta
@@ -265,7 +264,8 @@ void StFlowEvent::SetSelections() {
 		 Pt >= mPtTpcCuts[1][harN][selN])) continue;
 	  }
 	  
-	  else if (pFlowTrack->TopologyMap().numberOfHits(kFtpcEastId) || pFlowTrack->TopologyMap().numberOfHits(kFtpcWestId)) {
+	  else if (pFlowTrack->TopologyMap().numberOfHits(kFtpcEastId) || 
+		   pFlowTrack->TopologyMap().numberOfHits(kFtpcWestId)) {
 	    // hits in Ftpc
 	    
 	    // Eta
@@ -334,42 +334,30 @@ void StFlowEvent::MakeSubEvents() {
 
 //-------------------------------------------------------------
 
-// void StFlowEvent::MakeSubEvents() {
-//   // subevents with positive and negative eta
+void StFlowEvent::MakeEtaSubEvents() {
+  // subevents with positive and negative eta
 
-//   StFlowTrackIterator itr;
-//   int eventMult[Flow::nHars][Flow::nSels] = {{0}};
-//   int harN, selN, subN = 0;
+  StFlowTrackIterator itr;
+  int harN, selN = 0;
   
-//   // loop to set the SubEvent member variable
-//   for (selN = 0; selN < Flow::nSels; selN++) {
-//     for (harN = 0; harN < Flow::nHars; harN++) {
-//       for (itr = TrackCollection()->begin(); 
-//            itr != TrackCollection()->end(); itr++) {
-// 	StFlowTrack* pFlowTrack = *itr;
-// 	if (pFlowTrack->Select(harN, selN)) {
-// 	  float eta = pFlowTrack->Eta();
-// 	  if (eta > 0.) {
-// 	    pFlowTrack->SetSubevent(harN, selN, 0);
-// 	  } else {
-// 	    pFlowTrack->SetSubevent(harN, selN, 1);
-// 	  }
-// 	}
-//       }
-//     }
-//   }
+  // loop to set the SubEvent member variable
+  for (selN = 0; selN < Flow::nSels; selN++) {
+    for (harN = 0; harN < Flow::nHars; harN++) {
+      for (itr = TrackCollection()->begin(); 
+           itr != TrackCollection()->end(); itr++) {
+	StFlowTrack* pFlowTrack = *itr;
+	if (pFlowTrack->Select(harN, selN)) {
+	  float eta = pFlowTrack->Eta();
+	  if (eta > 0.) {
+	    pFlowTrack->SetSubevent(harN, selN, 0);
+	  } else {
+	    pFlowTrack->SetSubevent(harN, selN, 1);
+	  }
+	}
+      }
+    }
+  }
   
-// }
-
-//-----------------------------------------------------------------------
-
-void StFlowEvent::SetPids() {
-     if (mProbPid) {
-       SetPidsProb();
-     }  
-     else {
-       SetPidsDeviant();
-     }
 }
 
 //-----------------------------------------------------------------------
@@ -569,11 +557,16 @@ void StFlowEvent::PrintSelectionList() {
   // Call in Finish
 
   cout << "#######################################################" << endl;
-  cout << "# Pt Weighting:" << endl; 
+  cout << "# Weighting and Striping:" << endl; 
   if (mPtWgt) {
     cout << "#    PtWgt= TRUE" << endl;
   } else {
     cout << "#    PtWgt= FALSE" << endl;
+  }
+  if (mEtaSubs) {
+    cout << "#    EtaSubs= TRUE" << endl;
+  } else {
+    cout << "#    EtaSubs= FALSE" << endl;
   }
   cout << "#######################################################" << endl;
   cout << "# Pid Cuts:" << endl; 
@@ -620,6 +613,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.22  2001/05/22 20:17:26  posk
+// Now can do pseudorapidity subevents.
+//
 // Revision 1.21  2001/04/03 17:47:17  oldi
 // Bug fix that excluded FTPC tracks from the determination of the reaction plane.
 //

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.22 2001/04/03 17:47:23 oldi Exp $
+// $Id: StFlowEvent.h,v 1.23 2001/05/22 20:17:30 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -13,7 +13,6 @@
 
 #ifndef StFlowEvent_h
 #define StFlowEvent_h
-//#include "St_DataSet.h"
 #include "StObject.h"
 #include "StFlowTrackCollection.h"
 #include "StTrackTopologyMap.h"
@@ -23,7 +22,6 @@
 #include "TVector2.h"
 class StFlowSelection;
 
-//class StFlowEvent  : public St_DataSet {
 class StFlowEvent  : public StObject {
 
 public:
@@ -49,14 +47,18 @@ public:
   Float_t        ZDCw() const;
   Bool_t         PtWgt() const;
   Bool_t         ProbPid() const;
+  Char_t*        Pid();
+  Bool_t         EtaSubs() const;
   StFlowTrackCollection* TrackCollection() const;
  
   void SetSelections();
+  void SetPid(const Char_t*);
   void SetPids();
   void SetPidsDeviant();
   void SetPidsProb();
   void PrintSelectionList();
   void MakeSubEvents();
+  void MakeEtaSubEvents();
   void SetEventID(const Int_t&);
   void SetRunID(const Int_t&);
   void SetOrigMult(const UInt_t&);
@@ -87,13 +89,15 @@ public:
   static void SetAntiDeuteronCut(Float_t lo, Float_t hi);
   static void SetPtWgt();
   static void SetProbPid();
+  static void SetEtaSubs();
 
 private:
 
   Int_t               mEventID;                                  // ID of the event
   Int_t               mRunID;                                    // ID of the run
   UInt_t              mOrigMult;                                 // number of tracks
-  UInt_t              mMultEta;                                  // number of tracks with pos. flag in 1.5 unit of eta
+  UInt_t              mMultEta;                                  // number of tracks
+  // with pos. flag in 1.5 unit of eta
   UInt_t              mCentrality;                               // centrality bin
   StThreeVectorF      mVertexPos;                                // primary vertex position
   Float_t             mCTB;                                      // CTB value sum
@@ -104,11 +108,13 @@ private:
   static Float_t      mPtTpcCuts[2][Flow::nHars][Flow::nSels];   // range
   static Float_t      mPtFtpcCuts[2][Flow::nHars][Flow::nSels];  // range
   Flow::PhiWgt_t      mPhiWgt;                                   //!flattening weights (all)
-  Flow::PhiWgtFtpc_t  mPhiWgtFtpcEast;                           //!flattening weights (Ftpc east)
-  Flow::PhiWgtFtpc_t  mPhiWgtFtpcWest;                           //!flattening weights (Ftpc west)
+  Flow::PhiWgtFtpc_t  mPhiWgtFtpcEast;                           //!flattening weights Ftpc east
+  Flow::PhiWgtFtpc_t  mPhiWgtFtpcWest;                           //!flattening weights Ftpc west
   static Float_t      mPiPlusCuts[2];                            // PID cuts
   static Bool_t       mPtWgt;                                    // flag for pt weighting
+  static Char_t       mPid[10];                       // pi-, pi+, pi, pbar, proton, e+, e-
   static Bool_t       mProbPid;                                  // flag for probability pid
+  static Bool_t       mEtaSubs;                                  // flag for eta subevents
   static Float_t      mPiMinusCuts[2];
   static Float_t      mProtonCuts[2];
   static Float_t      mKMinusCuts[2];
@@ -149,7 +155,11 @@ inline Float_t  StFlowEvent::ZDCw() const { return mZDCw; }
 
 inline Bool_t   StFlowEvent::PtWgt() const { return mPtWgt; }
 
+inline Char_t*  StFlowEvent::Pid() { return mPid; }
+
 inline Bool_t   StFlowEvent::ProbPid() const { return mProbPid; }
+
+inline Bool_t   StFlowEvent::EtaSubs() const { return mEtaSubs; }
 
 #ifndef __CINT__
 inline void StFlowEvent::SetPhiWeight(const Flow::PhiWgt_t& pPhiWgt) {
@@ -223,13 +233,21 @@ inline void  StFlowEvent::SetZDCw(const Float_t zdcw) { mZDCw = zdcw; }
 
 inline void  StFlowEvent::SetPtWgt() { mPtWgt = kTRUE; }
 
+inline void  StFlowEvent::SetPid(const Char_t* pid)  { 
+  strncpy(mPid, pid, 9); mPid[9] = '\0'; }
+
 inline void  StFlowEvent::SetProbPid() { mProbPid = kTRUE; }
+
+inline void  StFlowEvent::SetEtaSubs() { mEtaSubs = kTRUE; }
 
 #endif
 
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.23  2001/05/22 20:17:30  posk
+// Now can do pseudorapidity subevents.
+//
 // Revision 1.22  2001/04/03 17:47:23  oldi
 // Bug fix that excluded FTPC tracks from the determination of the reaction plane.
 //

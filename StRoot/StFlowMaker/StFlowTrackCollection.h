@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrackCollection.h,v 1.6 2000/12/12 20:22:06 posk Exp $
+// $Id: StFlowTrackCollection.h,v 1.7 2001/05/22 20:18:08 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -14,24 +14,18 @@
 #define StFlowTrackCollection_h
 #include "StArray.h"
 #include "StFlowTrack.h"
-//#include <vector>
 
-//#if !defined(ST_NO_NAMESPACES)
-//using std::vector;
-//#endif
-
-//typedef vector<StFlowTrack*>            StFlowTrackCollection;
-//typedef vector<StFlowTrack*>::iterator  StFlowTrackIterator;
 StCollectionDef(FlowTrack)
 typedef StSPtrVecFlowTrack StFlowTrackCollection;
-
-//typedef StFlowTrackIterator StFlowTrackIterator;
 
 #endif
 
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrackCollection.h,v $
+// Revision 1.7  2001/05/22 20:18:08  posk
+// Now can do pseudorapidity subevents.
+//
 // Revision 1.6  2000/12/12 20:22:06  posk
 // Put log comments at end of files.
 // Deleted persistent StFlowEvent (old micro DST).

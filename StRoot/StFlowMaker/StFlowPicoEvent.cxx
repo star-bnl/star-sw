@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.cxx,v 1.7 2000/12/12 20:22:06 posk Exp $
+// $Id: StFlowPicoEvent.cxx,v 1.8 2001/05/22 20:17:51 posk Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -30,22 +30,20 @@ TClonesArray *StFlowPicoEvent::fgTracks = 0;
 
 //-----------------------------------------------------------------------
 
-StFlowPicoEvent::StFlowPicoEvent()
-{
+StFlowPicoEvent::StFlowPicoEvent() {
   // Create an StFlowPicoEvent object.
   // When the constructor is invoked for the first time, the class static
   // variable fgTracks is 0 and the TClonesArray fgTracks is created.
   
   if (!fgTracks) fgTracks = new TClonesArray("StFlowPicoTrack", 4000);
-  fTracks = fgTracks;
-  mNtrack = 0;
+  fTracks  = fgTracks;
+  mNtrack  = 0;
   mVersion = 0;
 }
 
 //-----------------------------------------------------------------------
 
-void StFlowPicoEvent::Clear(Option_t *option)
-{
+void StFlowPicoEvent::Clear(Option_t *option) {
   fTracks->Clear(option);
   mNtrack=0;
 }
@@ -61,6 +59,9 @@ void StFlowPicoEvent::AddTrack(StFlowPicoTrack* inputTrack) {
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.cxx,v $
+// Revision 1.8  2001/05/22 20:17:51  posk
+// Now can do pseudorapidity subevents.
+//
 // Revision 1.7  2000/12/12 20:22:06  posk
 // Put log comments at end of files.
 // Deleted persistent StFlowEvent (old micro DST).

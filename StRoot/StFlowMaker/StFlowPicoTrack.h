@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoTrack.h,v 1.5 2000/12/12 20:22:06 posk Exp $
+// $Id: StFlowPicoTrack.h,v 1.6 2001/05/22 20:17:57 posk Exp $
 //
 // Author: Raimond Snellings, March 2000
 //
@@ -89,9 +89,9 @@ private:
    Int_t     mPidKaon;
    Int_t     mPidDeuteron;
    Int_t     mPidElectron;
-   Int_t   mMostLikelihoodPID;  
-   Float_t mMostLikelihoodProb;
-   Int_t   mExtrapTag; //merging area tag.
+   Int_t     mMostLikelihoodPID;  
+   Float_t   mMostLikelihoodProb;
+   Int_t     mExtrapTag;                  //merging area tag.
    StTrackTopologyMap mTopology;
 
    ClassDef(StFlowPicoTrack,1)
@@ -102,6 +102,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoTrack.h,v $
+// Revision 1.6  2001/05/22 20:17:57  posk
+// Now can do pseudorapidity subevents.
+//
 // Revision 1.5  2000/12/12 20:22:06  posk
 // Put log comments at end of files.
 // Deleted persistent StFlowEvent (old micro DST).

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.18 2000/12/12 20:22:06 posk Exp $
+// $Id: StFlowTrack.h,v 1.19 2001/05/22 20:18:04 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //         FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -203,8 +203,6 @@ inline void StFlowTrack::SetMostLikelihoodProb(Float_t val){
 inline void StFlowTrack::SetExtrapTag(Int_t val){
          mExtrapTag=val;} 
 
-
-
 inline void StFlowTrack::SetPidPiPlus(Float_t pid)  {
   if (fabs(pid) > maxInt) pid = maxInt; mPidPiPlus = (Int_t)(pid*1000.); }
 
@@ -277,6 +275,9 @@ inline void StFlowTrack::SetTopologyMap(StTrackTopologyMap map) { mTopology = ma
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.19  2001/05/22 20:18:04  posk
+// Now can do pseudorapidity subevents.
+//
 // Revision 1.18  2000/12/12 20:22:06  posk
 // Put log comments at end of files.
 // Deleted persistent StFlowEvent (old micro DST).
