@@ -32,8 +32,8 @@ StiMaterial::~StiMaterial(){
  \param ionization potential in eV.
 */
 void StiMaterial::set(const string& name,
-		      double a,
 		      double z,
+		      double a,
 		      double density,
 		      double radLength,
 		      double ionization)
