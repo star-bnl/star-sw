@@ -615,20 +615,34 @@ tracing diagnostic. To provide a meaningful diagnostic, user code should
 be compiled with '-g' option (unfortunatly, not all of the cernlib
 routines are compiled with it!).
  
-List of possible faults is computer dependant.
-In particular, HP can detect: (I) - illegal instruction, (D) - division by 0,
+ - fault parameter:
+ 
+List of possible fault types is computer dependant.
+Here we describe the HPUX version only, which can detect:
+(I) - illegal instruction, (D) - division by 0,
 (O) - floating overflow, (U) - floating underflow,  and (X) - inexact numbers.
 Last two happens very often and should not be normally considered as errors.
 In addition (*) subsitutes all five flags, (+) means do not alter flags other
-then mentioned in the command, which normally are reset to IGNORE.
+then mentioned in the command, which otherwise are reset to IGNORE.
+If a fault type was never mentioned in any ONFAULT commands and they all
+had +'s, corresponding error handler is still activated with the default
+behaviour defined in libm.a.
  
-Counter sets the number of extended error messages to be printed,
+ - counter meaning:
+ 
+A positive counter sets the number of extended error messages to be printed,
 the rest is counted in the common block /agerrorcount/ nnum(5),mmax(5),
-but not reported. If counter is negative, corresponding faults are ignored.
+but not reported. Error handler is permanently activated.
  
-After the message is printed, program behaviour depends on the counter,
-i.e. when counter is positive, error is ignored and execution continues,
-otherwise control is transfered to the kuip.
+A zero counter forces the program to simulate a kuip break after the error
+message is printed. If this happens in a macro, executed on a kuip prompt,
+the kuip will issue the prompt again. If this happens in macro started in
+a command line, program will stop.
+ 
+If the counter is negative, corresponding faults are completely ignored
+(not even counted).
+ 
+ - handler:
  
 If defined, a user handler routine is called instead of the
 standard CERNLIB tracing routine.
