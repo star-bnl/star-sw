@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.129 2000/04/07 15:48:38 perev Exp $
+// $Id: bfc.C,v 1.130 2000/04/10 16:43:37 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StMaker;        
@@ -120,6 +120,8 @@ printf ("QAInfo: with %s\n", chain->GetCVS());
 // Init the chain and all its makers
 if (Last >= 0) {
   Int_t iInit = chain->Init();
+  StEvtHddr *hd = (StEvtHddr*)chain->GetDataSet("EvtHddr");
+  hd->SetRunNumber(-2); // to be sure that InitRun calls at least once
   // skip if any
   St_geant_Maker *geant = (St_geant_Maker *) chain->GetMaker("geant");
   St_XDFFile *xdf_out = chain->GetXdfOut();
