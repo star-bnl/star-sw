@@ -30,6 +30,7 @@ public:
            Int_t  MakeBfcStatus();
    virtual Int_t  Finish();
    virtual Int_t  Save();
+   virtual Int_t  Skip(int nskip);
    virtual void   Clear(Option_t *opt);
    virtual Int_t  Open(const Char_t *ioFile=0);
    virtual void   Close(Option_t *opt=0);
@@ -44,7 +45,7 @@ public:
      {if(!fTree)return 0;return (StBranch*)fTree->Find(brName);};   
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.14 2000/06/19 01:32:53 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.15 2001/05/04 19:55:37 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTreeMaker, 1)   //StAR chain virtual base class for Makers
 };
