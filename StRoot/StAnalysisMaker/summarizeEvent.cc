@@ -1,4 +1,28 @@
+// $Id: summarizeEvent.cc,v 1.2 1999/02/11 15:39:16 wenaus Exp $
+// $Log: summarizeEvent.cc,v $
+// Revision 1.2  1999/02/11 15:39:16  wenaus
+// cleanup
+//
+//
+///////////////////////////////////////////////////////////////////////////////
+//
+// summarizeEvent.cc
+//
+// Description: 
+//  StEvent summary printout
+//
+// Environment:
+//  Software developed for the STAR Detector at Brookhaven National Laboratory
+//
+// Author List: 
+//  Torre Wenaus, BNL  1/99
+//
+// History:
+//
+///////////////////////////////////////////////////////////////////////////////
 #include "StEvent/StEvent.hh"
+
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 1.2 1999/02/11 15:39:16 wenaus Exp $";
  *
 void summarizeEvent(StEvent& event)
 {
