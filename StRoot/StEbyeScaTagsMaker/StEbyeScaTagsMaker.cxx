@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.20 2000/06/06 17:55:39 jgreid Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.21 2000/06/27 17:47:26 jseger Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.21  2000/06/27 17:47:26  jseger
+ * Removed default production of Ebyesca.out file
+ *
  * Revision 1.20  2000/06/06 17:55:39  jgreid
  * Don't use exit(0)lsls Us kStWarn instead!
  *
@@ -203,7 +206,7 @@ Int_t StEbyeScaTagsMaker::fillTag(StEvent& event) {
 
   // uncomment the next line (and 'outFile' << line below) to APPEND output to a file
   //  !! If this file already exists it will just add the new data to the end !!
-  ofstream outFile("EbyeSca.out",ios::app);
+  //ofstream outFile("EbyeSca.out",ios::app);
 
   // Number of primary vertices
   Int_t npvtx = event.numberOfPrimaryVertices();
@@ -363,13 +366,13 @@ Int_t StEbyeScaTagsMaker::fillTag(StEvent& event) {
 
     //uncomment the next line (and declaration of outFile above) to append results to a file
     //    for charge > 0 ...
-    outFile << trackCountPlus << " " << meanPtPlus/GeV << " " << meanPtSquaredPlus/(GeV*GeV);
+    //outFile << trackCountPlus << " " << meanPtPlus/GeV << " " << meanPtSquaredPlus/(GeV*GeV);
     //    for charge < 0 ...
-    outFile << trackCountMinus << " " << meanPtMinus/GeV << " " << meanPtSquaredMinus/(GeV*GeV);
+    //outFile << trackCountMinus << " " << meanPtMinus/GeV << " " << meanPtSquaredMinus/(GeV*GeV);
     //    for charge > 0 ...
-    outFile << meanEtaPlus << " " << meanEtaSquaredPlus << " " << totalAbsEtaPlus;
+    //outFile << meanEtaPlus << " " << meanEtaSquaredPlus << " " << totalAbsEtaPlus;
     //    for charge < 0 ...
-    outFile << meanEtaMinus << " " << meanEtaSquaredMinus << " " << totalAbsEtaMinus << endl;
+    //outFile << meanEtaMinus << " " << meanEtaSquaredMinus << " " << totalAbsEtaMinus << endl;
   }
 
   return kStOk;
