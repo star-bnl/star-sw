@@ -6,7 +6,7 @@ class StChain;
 StChain *chain=0;
 
 void RunStiMaker(Int_t nevents=1,
-		 const char *MainFile="/star/rcf/data08/reco/central/P01hbOS/2000/09/*.dst.root")
+		 const char *MainFile="/star/data15/reco/central/P01hbOS/2000/09/*.dst.root")
     //const char *MainFile="/star/rcf/scratch/haibin/geantTest/muon_10.dst.root")
 {    
     // Dynamically link needed shared libs
@@ -75,8 +75,12 @@ void RunStiMaker(Int_t nevents=1,
     eventReader->doPrintEventInfo = 0;
     
     //StiMaker
-    //StiMaker* anaMk = new StiMaker;
     StiMaker* anaMk = StiMaker::instance();
+    //anaMk->setMaterialBuildPath("/scr20/TempIttf/StiGeometryParameters/Materials");
+    //anaMk->setDetectorBuildPath("/scr20/TempIttf/StiGeometryParameters/Detectors");
+    anaMk->setMaterialBuildPath("/scr20/TempIttf/StiGeometryParameters/Materials");
+    anaMk->setDetectorBuildPath("/scr20/TempIttf/StiGeometryParameters/Detectors");
+    anaMk->setPolygonBuildPath("/scr20/TempIttf/StiGeometryParameters/Polygons");
     
     // now execute the chain member functions    
     chain->PrintInfo();

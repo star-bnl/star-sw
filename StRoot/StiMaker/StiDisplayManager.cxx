@@ -125,6 +125,50 @@ void StiDisplayManager::addDrawable(StiDrawable* val)
     return;
 }
 
+void StiDisplayManager::setSvtVisible()
+{
+    for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
+	string::size_type where = (*it).first.find("Svg");
+	if ( where != (*it).first.npos ) {
+	    (*it).second->setVisibility(true);
+	}
+    }
+    return;
+}
+
+void StiDisplayManager::setSvtInvisible()
+{
+    for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
+	string::size_type where = (*it).first.find("Svg");
+	if ( where != (*it).first.npos ) {
+	    (*it).second->setVisibility(false);
+	}
+    }
+    return;
+}
+
+void StiDisplayManager::setTpcVisible()
+{
+    for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
+	string::size_type where = (*it).first.find("Tpc");
+	if ( where != (*it).first.npos ) {
+	    (*it).second->setVisibility(true);
+	}
+    }
+    return;
+}
+
+void StiDisplayManager::setTpcInvisible()
+{
+    for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
+	string::size_type where = (*it).first.find("Tpc");
+	if ( where != (*it).first.npos ) {
+	    (*it).second->setVisibility(false);
+	}
+    }
+    return;
+}
+
 void StiDisplayManager::print() const
 {
     cout <<"\nStiDisplayManager::print()"<<endl;
