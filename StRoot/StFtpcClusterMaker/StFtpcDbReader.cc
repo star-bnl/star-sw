@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.16 2002/10/16 12:25:13 fsimon Exp $
+// $Id: StFtpcDbReader.cc,v 1.17 2003/01/07 16:15:18 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.17  2003/01/07 16:15:18  jcs
+// get all values in ftpcGas table for cluster finding
+//
 // Revision 1.16  2002/10/16 12:25:13  fsimon
 // Cleanup: Use gMessMgr instead of cout
 //
@@ -178,8 +181,17 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   //  just copy gas table start to pointer
   ftpcGas_st* gasTable = (ftpcGas_st*)gas->GetTable();
   if(gasTable){
+   mPercentAr              = gasTable->percentAr;
+   mPercentCO2             = gasTable->percentCO2;
+   mPercentNe              = gasTable->percentNe;
+   mPercentHe              = gasTable->percentHe;
+   mGasGain                = gasTable->gasGain;
+   mGasAttenuation         = gasTable->gasAttenuation;
+   mGasIonizationPotential = gasTable->gasIonizationPotential;
    mBaseTemperature        = gasTable->baseTemperature;
-   mTemperatureDifference   = gasTable->temperatureDifference;
+   mBasePressure           = gasTable->basePressure;
+   mPressureOffset         = gasTable->pressureOffset;
+   mTemperatureDifference  = gasTable->temperatureDifference;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcGas","E");
   }
