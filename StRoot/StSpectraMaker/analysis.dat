@@ -1,6 +1,8 @@
+TpcDeviant
 pi+
 piplus
-StRoot/StSpectraMaker/effic.config
+StRoot/StSpectraMaker/efficYPT.config
+NoPid
 pi-
-piminus
-StRoot/StSpectraMaker/effic.config
+inclusiveNeg
+StRoot/StSpectraMaker/efficEtaPT.config
