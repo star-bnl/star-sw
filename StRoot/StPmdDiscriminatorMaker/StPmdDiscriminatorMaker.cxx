@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdDiscriminatorMaker.cxx,v 1.5 2004/07/13 12:59:11 subhasis Exp $
+ * $Id: StPmdDiscriminatorMaker.cxx,v 1.6 2004/07/16 14:29:32 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  ***************************************************************
  *
@@ -9,8 +9,11 @@
  *
  ****************************************************************
  * $Log: StPmdDiscriminatorMaker.cxx,v $
+ * Revision 1.6  2004/07/16 14:29:32  subhasis
+ * more checks on edep Discriminate
+ *
  * Revision 1.5  2004/07/13 12:59:11  subhasis
- * Ncluster() is put with check in PrepareInput()
+ *  Ncluster() is put with check in PrepareInput()
  *
  * Revision 1.4  2003/09/02 17:58:48  perev
  * gcc 3.2 updates + WarnOff
@@ -149,7 +152,7 @@ Int_t StPmdDiscriminatorMaker::Make()
     if(disc){
       disc->SetEdepcut(0.0000063);  //! 3 MIP cut
       disc->Discriminate();   //! Discrimination through Energy cut
-      disc->Print();  //! Print photon like hits
+    //  disc->Print();  //! Print photon like hits
     }
     fillHistograms(pmd_det,cpv_det);
   }	
