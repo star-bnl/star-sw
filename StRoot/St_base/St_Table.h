@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.37 1999/09/07 19:30:29 fine Exp $
+// $Id: St_Table.h,v 1.38 1999/09/24 21:56:08 fisyak Exp $
 // $Log: St_Table.h,v $
+// Revision 1.38  1999/09/24 21:56:08  fisyak
+// Add operator [] for particular table (VF)
+//
 // Revision 1.37  1999/09/07 19:30:29  fine
 // table descriptor access has been changed. All tables are affected and must be re-compiled
 //
@@ -97,6 +100,7 @@
 #ifndef __CINT__
 #  include <string.h>
 #include <fstream.h>
+#include <assert.h>
 #endif
 enum  EBufSizes { kChar1Byte   =sizeof(Char_t) 
                  ,kShort2Bytes =sizeof(Short_t)
@@ -224,7 +228,7 @@ public:
    virtual     void       Reset(Int_t c=0);
    virtual     void       Update();
    virtual     void       Update(St_DataSet *set,UInt_t opt=0);
-   virtual     void      *operator[](Int_t i);
+               void      *operator[](Int_t i);
 
  //  ----   Table descriptor service   ------
 
