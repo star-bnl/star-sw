@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.3 2000/02/23 20:14:48 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.4 2000/03/07 14:38:12 fisyak Exp $
 {
  if (defined($AFS)) {$File::Find::dont_use_nlink;}
  use File::Basename;
@@ -484,5 +484,9 @@
    &File::Find::find (\&wanted_dead,$include) if -d $include;
    &File::Find::find (\&wanted_dead,$build)   if -d $build;
  }
+#________________________________________________________________________________
+sub script::wanted_dead {
+  -l and not -e and print "bigus link: $File::Find::name \t--- remove it\n" and `rm $_`;
+}
 }
 1;
