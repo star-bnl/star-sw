@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.7 2001/04/28 19:46:29 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.8 2001/04/29 16:26:32 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.8  2001/04/29 16:26:32  pavlinov
+ * clean up
+ *
  * Revision 1.7  2001/04/28 19:46:29  pavlinov
  * Reject output
  *
@@ -483,7 +486,8 @@ Int_t &sub, Int_t &detector)
   // See  emc/util/volid_bsmd.F
   static Int_t smdIvid[5]={100000000,1000000,1000,100,1}; //matched with AGI&G2T
   Int_t smdChid[5], i, ividw, rl, phi, t, strip;
-  assert(mCalg_st); // 24-apr
+  //  assert(mCalg_st); // 24-apr
+  if(mCalg_st == 0) getGeantGeometryTable();
 
   ividw = ivid;
   for(i=0; i<5; i++){
