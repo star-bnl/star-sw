@@ -30,7 +30,7 @@ endif
 # C++
 export CXX := CC
 #export CXX := g++
-export CXXFLAGS += -xansi
+export CXXFLAGS += -xansi -use_cfront
 ifeq ($(DEBUG),$(TRUE))
 export CXXFLAGS += -g
 endif
