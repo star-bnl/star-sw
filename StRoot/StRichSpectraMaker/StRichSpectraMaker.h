@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.h,v 1.5 2001/11/21 20:36:07 lasiuk Exp $
+ * $Id: StRichSpectraMaker.h,v 1.6 2001/12/19 20:18:38 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRichSpectraMaker.h,v $
+ * Revision 1.6  2001/12/19 20:18:38  lasiuk
+ * Changeover in algorithm of isolating the Cherenkov angle
+ *
  * Revision 1.5  2001/11/21 20:36:07  lasiuk
  * azimuth angle calculation, trace and retracing algorithms, rotation
  * matrices, clean up intersection calculation.  Addition of quick
@@ -34,6 +37,11 @@
 
 #ifndef StMaker_H
 #include "StMaker.h"
+#endif
+
+#include <utility>
+#ifndef ST_NO_NAMESPACES
+using std::pair;
 #endif
 
 #define RICH_SPECTRA_HISTOGRAM 1
@@ -83,6 +91,7 @@ public:
     Int_t  Make();
     void   PrintInfo();
     Int_t  Finish();
+    pair<double,double> expectedCerenkov(float, int) const;
 
 protected:
     void  initCutParameters();
@@ -91,7 +100,6 @@ protected:
     bool  checkMomentumThreshold(StTrack*) const;
     bool  checkMomentumLimit(StTrack*) const;
     bool  checkMomentumWindow(StTrack*) const;
-    float expectedNumberOfPhotons(float, int) const;
 
     void  printCutParameters(ostream& os=cout) const;
     
@@ -110,6 +118,7 @@ protected:
     void qualityAssessment();
     void doIdentification(StTrack*);
     StThreeVectorF calculateRadiationPoint(StTrack*, StThreeVectorF&);
+    void calculateResidual(StTrack*);
     
 protected:
     StEvent*                    mEvent;//!
@@ -154,6 +163,7 @@ protected:
     float mMomentumLimit;
 
     StThreeVectorF mMipResidual;
+    StThreeVectorF mCalculatedResidual;
     StThreeVectorF mAssociatedMip;
 
     
@@ -197,7 +207,7 @@ protected:
     
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.5 2001/11/21 20:36:07 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.6 2001/12/19 20:18:38 lasiuk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 public:
