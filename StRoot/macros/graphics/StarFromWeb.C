@@ -1,4 +1,9 @@
 //*-- Author :    Valery Fine   26/03/99  (E-mail: fine@bnl.gov)
+// $Id: StarFromWeb.C,v 1.2 1999/03/29 19:17:54 fine Exp $
+// $Log: StarFromWeb.C,v $
+// Revision 1.2  1999/03/29 19:17:54  fine
+// x3d view has been activated. Some improvement as well
+//
 {
  // To run this example one needs the access to Internet
  // To start this example launch ROOT as follows:
@@ -30,41 +35,47 @@
   TList *listOfNode = star.GetListOfNodes();
   St_Node *hall = listOfNode->First();
   St_DataSetIter volume(hall);
+  volume.Cd("HALL/CAVE");
 
-  cout << "Drawing \"HALL/CAVE/TPCE\"" << endl;
-  St_Node *vol = volume("HALL/CAVE/TPCE");
-  starCanvas.cd(1);
-  if (vol) vol->Draw();
-  gPad->Update();
+  const Char_t *parts[] = {"TPCE"
+                           ,"MAGP"
+                           ,"CALB/RICH/SRIC"
+                           ,"UPST" };
+  const Int_t numParts = sizeof(parts)/sizeof(void *);
+  cout << numParts << " different parts of the STAR detector will be built" << endl;
 
-  cout << "Drawing \"HALL/CAVE/BTOF\"" << endl;
-  vol = (St_Node *)volume("HALL/CAVE/BTOF");
-  starCanvas.cd(2);  
-  if (vol) vol->Draw();
-  gPad->Update();
-
-  cout << "Drawing \"HALL/CAVE/CALB/RICH/SRIC\"" << endl;
-  vol = (St_Node *)volume("HALL/CAVE/CALB/RICH/SRIC");
-  starCanvas.cd(3);  
-  if (vol) vol->Draw();
-  gPad->Update();
-
-  cout << "Drawing \"HALL/CAVE/UPST\"" << endl;
-  vol = (St_Node *)volume("HALL/CAVE/UPST");
-  starCanvas.cd(4);  
-  if (vol) vol->Draw();
-  gPad->Update();
-
+  for (Int_t i =0; i< numParts; i++) {
+    const Char_t *part = parts[i];
+    cout << "Drawing \"" << part << "\"" << endl;
+    St_Node *vol = volume(part);
+    starCanvas.cd(i+1);
+    if (vol) vol->Draw();
+    gPad->Update();
+  }
+  
+  Int_t ThreeDPart = 2;
+  cout << " Plot  3D view of the " << ThreeDPart << " part: " << parts[ThreeDPart-1]              << endl << 
+          " Note: Under Windows NT OpenGL will be used by default instead x3d for UNIX"           << endl << 
+          " ================================================================"   << endl <<   
+          " Select x3d windows and type \"m\" in there to get x3d HELP windows" << endl <<
+          " ================================================================"   << endl <<   
+          " DON NOT FORGET to type \"q\" letter to terminate x3d widget and"    << endl <<   
+          " to continue this session"                                           << endl <<
+          " ================================================================"   << endl;
+  starCanvas.cd(ThreeDPart);
+  gPad->x3d();
 
   cout << "Drawing ROOT TBrowser" << endl;
   TBrowser b("STAR",hall);
   cout << "Now. Try yourself:" << endl <<
-  "     1. Select any STAR geomentry St_Node object with  \"double-left-mouse click\" on the St_NodePosition" << endl <<
+  "     1. Select any STAR geometry St_Node object with  \"double-left-mouse click\" on the St_NodePosition" << endl <<
   "               St_Node object has no \";<n>\" in its name." << endl <<
   "               The objects with trail  \";<n>\" are St_NodePosition ones" << endl <<
   "     2. Pop the context menu up with \"right-mouse click\" on the ROOT browser" << endl <<
   "     3. Select \"Draw\" position" << endl <<
   "     4. Click OK" << endl;
   cout << " Get this macro form $(STAR)/StRoot/macro/StarFromWeb.C and customize it for fun" << endl;
+
+
 
 } 
