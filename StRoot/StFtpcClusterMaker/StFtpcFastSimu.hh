@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.hh,v 1.13 2001/03/19 15:52:47 jcs Exp $
+// $Id: StFtpcFastSimu.hh,v 1.14 2002/09/16 12:43:22 jcs Exp $
 //
 // $Log: StFtpcFastSimu.hh,v $
+// Revision 1.14  2002/09/16 12:43:22  jcs
+// replace large statically dimensioned arrays with dynamically dimensioned arrays
+//
 // Revision 1.13  2001/03/19 15:52:47  jcs
 // use ftpcDimensions from database
 //
@@ -54,8 +57,6 @@
 
 #define TRUE 1
 #define FALSE 0
-#define MXMROW 150000
-#define SIZE 20
 
 class RandGauss;
 class StFtpcParamReader;
@@ -71,6 +72,9 @@ class StFtpcFastSimu
   StFtpcReducedPoint *mPoint;
   StFtpcGeantPoint *mGeantPoint;
   int nPoints;
+  int nPadrows;
+  int * nrowmax;
+  int * nrow;
 
   float Va;
   float Vhm[4];
@@ -81,15 +85,10 @@ class StFtpcFastSimu
   float err_azi[4];
   float ri;
   float ra;
-  float padrows;
-  float z1;
-  float z2;
   float phimin;
   float phisec;
   float sector_phi_min;
   float sector_phi_max;
-  int nrow[SIZE][MXMROW];
-  int nrowmax[SIZE];
   double myModulo(double x1, double x2)
     {
       return x1-(double)(int)(x1/x2)*x2;

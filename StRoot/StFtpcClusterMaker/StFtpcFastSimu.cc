@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.24 2002/03/05 16:51:35 jcs Exp $
+// $Id: StFtpcFastSimu.cc,v 1.25 2002/09/16 12:43:22 jcs Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.25  2002/09/16 12:43:22  jcs
+// replace large statically dimensioned arrays with dynamically dimensioned arrays
+//
 // Revision 1.24  2002/03/05 16:51:35  jcs
 // force data type definitions to avoid compiler warnings (this is a correct
 // but inelegant fix which must be changed)
@@ -110,6 +113,10 @@ StFtpcFastSimu::StFtpcFastSimu(StFtpcGeantReader *geantReader,
   mPoint=new StFtpcReducedPoint[nPoints];
   mGeantPoint=new StFtpcGeantPoint[nPoints];
 
+  nPadrows = mDb->numberOfPadrows();
+  nrowmax = new int[nPadrows];
+  nrow = new int[nPadrows*nPoints];
+
   //    check that fppoint and gepoint are large enough to hold g2t_ftp_hit
 
   //  Read paramenter tables and inititialize  
@@ -159,6 +166,8 @@ StFtpcFastSimu::StFtpcFastSimu(StFtpcGeantReader *geantReader,
   
   delete[] mGeantPoint;
   delete[] mPoint;
+  delete[] nrowmax;
+  delete[] nrow;
 }
 
 StFtpcFastSimu::~StFtpcFastSimu()
@@ -457,7 +466,6 @@ int StFtpcFastSimu::ffs_ini()
     // mk
     ri = mDb->sensitiveVolumeInnerRadius()+mParam->radiusTolerance();
     ra = mDb->sensitiveVolumeOuterRadius()-mParam->radiusTolerance();
-    padrows = mDb->numberOfPadrowsPerSide();
 
     //mk Drift-Velocity:
     Vhm[0]  = mParam->vDriftEstimates(0);
@@ -537,13 +545,15 @@ int StFtpcFastSimu::ffs_merge_tagger()
     int id_1, id_2, rem_count1, rem_count2, n_gepoints;
     float sig_azi_1, v1, sig_rad_1;
     float dist_rad_in, dist_rad_out;
-//     float r2, phi2;
     float delta_azi, delta_r;
-    float sigazi[MXMROW], sigrad[MXMROW];
-    float r1[MXMROW], phi1[MXMROW];
 
     // Loop Variables
     int h,i,j,k;
+   
+    float * sigazi = new float[nPoints];
+    float * sigrad = new float[nPoints];
+    float * r1 = new float[nPoints];
+    float * phi1 = new float[nPoints];
 
     //-----------------------------------------------------------------------
 
@@ -579,18 +589,18 @@ int StFtpcFastSimu::ffs_merge_tagger()
 
       }
 
-    for(h=0;h<SIZE;h++)
+    for(h=0;h<nPadrows;h++)
       {
 	if(nrowmax[h]==0) 
 	  continue;
 	
         for(i=0;i<nrowmax[h];i++)
 	  {
-	    id_1 = nrow[h][i]-1;
+	    id_1 = nrow[h*nPoints+i]-1;
 	    
 	    for(j=i+1; j<nrowmax[h]; j++)
 	      {
-		id_2 = nrow[h][j]-1;
+		id_2 = nrow[h*nPoints+j]-1;
  		if((mPoint[id_2].GetFlags()==mParam->mergedClusterFlag()) || 
  		   (mPoint[id_2].GetSector()!=mPoint[id_1].GetSector()))
  		  continue;
@@ -729,39 +739,34 @@ int StFtpcFastSimu::ffs_merge_tagger()
     gMessMgr->Message("", "I", "OST") << "Deleted " << rem_count1 << " merged clusters." << endm;
     gMessMgr->Message("", "I", "OST") << "Deleted " << rem_count2 << " clusters on sector limit." << endm;
       
+    delete [] sigazi;
+    delete [] sigrad;
+    delete [] r1;
+    delete [] phi1;
+
     return TRUE;
   }
 
 int StFtpcFastSimu::ffs_tag()
   {
-      int i, k, num_nok;
+      int i, k;
       //-----------------------------------------------------------------------
       //     Tag hits according to row. Up to maximum row number=20
 
       //   nrowmax(k) is the #of hits in hitplane k
       //   k is the hitplane-# given by gstar
 
-      for(k=0; k<SIZE; k++)
+      for(k=0; k<nPadrows; k++)
 	{
 	  nrowmax[k] = 0;
 	}
 
-      num_nok=nPoints;
-
-      if (num_nok > MXMROW )
-	{
-	  gMessMgr->Message("", "I", "OST") << "FFS WARNING: number of Points (" << nPoints
-	       << ") greater than mxmrow ("<< MXMROW<<")"<< endm;
-	  gMessMgr->Message("", "I", "OST") << "              Setting num_nok =  mxmrow ("
-	       << MXMROW <<")" << endm;
-	  num_nok=MXMROW;
-	}
  
-      for(i = 0; i< num_nok; i++)
+      for(i = 0; i< nPoints; i++)
 	{
 	  k = mPoint[i].GetPadRow();
 	  nrowmax[k-1]++;
-	  nrow[k-1][nrowmax[k-1]-1] = i+1;
+	  nrow[(k-1)*nPoints+(nrowmax[k-1]-1)] = i+1;
 	}
 
       return TRUE;
