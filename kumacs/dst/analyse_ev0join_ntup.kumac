@@ -1,0 +1,44 @@
+* 9/24/98 K. Turner
+* - this kumac reads in an ntuple with the ev0join table
+*   and makes plots
+* - input the ntuple file name!
+******************************************************************
+macro run ntuple_file
+
+trace on
+
+message ' input ntuple is ==> ' [ntuple_file]
+
+ntuple/cut $11 dcav0**2/sqrt(px**2+py**2+pz**2).lt.0.1
+ntuple/cut $12 (sqrt(x**2+y**2+z**2).gt.5.0)
+ntuple/cut $13 ((dcapn/sqrt(x**2+y**2+z**2)).lt.0.1)
+ntuple/cut $21 sagitta_pos>1.0
+ntuple/cut $22 sagitta_neg>1.0
+ntuple/cut $31 dcap>0.3
+ntuple/cut $32 dcan>1.0
+
+***
+1D 101 'Mass(p pi-) - Gev -- nominal cuts' 30 1.10 1.14
+1D 102 'Mass(p pi-) - Gev -- cuts 11,12,13' 30 1.10 1.14
+1D 103 'Mass(p pi-) - Gev -- cuts 11,12,13,21,22,31,32' 30 1.10 1.14
+***
+
+hi/file 1 [ntuple_file]
+ 
+nt/proj 101 111.inv_mass_la 
+nt/proj 102 111.inv_mass_la $11.and.$12.and.$13
+nt/proj 103 111.inv_mass_la $11.and.$12.and.$13.and.$21.and.$22.and.$31.and.$32
+ 
+ for/file 40 ev0join_Mlambda.ps
+ meta 40 -111
+ hi/pl 101
+ hi/pl 102
+ hi/pl 103
+ close 40
+ 
+trace off
+
+return
+
+
+
