@@ -288,8 +288,8 @@ ccc
      4 iskip(TRKS_MAX),jskip(TRKS_MAX),pin(6),isvt2(TRKS_MAX),
      5 pout(7),pcov(6,6),ptmp(6),dirvec(3),partal(3,6),
      6 poserr(3),nbad(2),nmat(2),nunasg(2),
-     7 loop_1(30000),loop_2(30000),chisav(30000),
-     8   chisav_2(30000)
+     7 loop_1(TRKS_MAX),loop_2(TRKS_MAX),chisav(TRKS_MAX),
+     8   chisav_2(TRKS_MAX)
 
 c
 
@@ -349,51 +349,6 @@ c
       endif        
 
       print *,'Begin matching'
-
-      NO_TKS_MAX= svtin_h.nok + tpcin_h.nok
-
-
-      jtmp_p = malloc(NO_TKS_MAX*4)
-      chitmp_p = malloc(NO_TKS_MAX*4)
-      idsvt_p = malloc(NO_TKS_MAX*4)
-      psvt_p = malloc(NO_TKS_MAX*4)
-      pidsvt_p = malloc(NO_TKS_MAX*4)
-      pmsvt_p = malloc(NO_TKS_MAX*4)
-      zersvt_p = malloc(NO_TKS_MAX*4)
-      persvt_p = malloc(NO_TKS_MAX*4)
-      zsvt_p = malloc(NO_TKS_MAX*4)
-      phisvt_p = malloc(NO_TKS_MAX*4)
-      dirsvt_p = malloc(NO_TKS_MAX*4)
-      eangsv_p = malloc(NO_TKS_MAX*4)
-      idtpc_p = malloc(NO_TKS_MAX*4)
-      ptpc_p  = malloc(NO_TKS_MAX*4)
-      pidtpc_p = malloc(NO_TKS_MAX*4)
-      pmtpc_p = malloc(NO_TKS_MAX*4)
-      zertpc_p = malloc(NO_TKS_MAX*4)
-      pertpc_p = malloc(NO_TKS_MAX*4)
-      ztpc_p = malloc(NO_TKS_MAX*4)
-      phitpc_p = malloc(NO_TKS_MAX*4)
-      dirtpc_p = malloc(NO_TKS_MAX*4)
-      eangtp_p = malloc(NO_TKS_MAX*4)
-      ichk_p = malloc(NO_TKS_MAX*4)
-      jchk_p = malloc(NO_TKS_MAX*4)
-      chisq_p = malloc(NO_TKS_MAX*4)
-      jtpc_p = malloc(NO_TKS_MAX*4)
-      ntpc_p = malloc(NO_TKS_MAX*4)
-      iflag_p = malloc(NO_TKS_MAX*4)
-      jflag_p = malloc(NO_TKS_MAX*4)
-      nsvt_p = malloc(NO_TKS_MAX*4)
-      isvt_p = malloc(NO_TKS_MAX*4)
-      jtpc1_p = malloc(NO_TKS_MAX*4)
-      isvt1_p = malloc(NO_TKS_MAX*4)
-      iskip_p = malloc(NO_TKS_MAX*4)
-      jskip_p = malloc(NO_TKS_MAX*4)
-      isvt2_p = malloc(NO_TKS_MAX*4)
-      chisav_p = malloc(NO_TKS_MAX*4)
-      loop_1_p =  malloc(NO_TKS_MAX*4)
-      loop_2_p = malloc(NO_TKS_MAX*4)
-      chisav_2_p =  malloc(NO_TKS_MAX*4)
-
 c
 ccc
 ccc   set parameters:
@@ -402,90 +357,108 @@ ccc
       rad = 180.00/pi
       fac1 = 0.0029980
       rad_tpc = rad
+
+      NO_TKS_MAX= svtin_h.nok + tpcin_h.nok
+
+
 ccc
 ccc   initialize arrays to zero:
 ccc
-      do 201 i = 1,NO_TKS_MAX
-      idsvt(i) = 0
-      pidsvt(i) = 0
-      pmsvt(i) = 0.00
-      zersvt(i) = 0.00
-      persvt(i) = 0.00
-      zsvt(i) = 0.00
-      phisvt(i) = 0.00
-      eangsv(i) = 0.00
+      idsvt_p    = malloc (4*NO_TKS_MAX)
+      pidsvt_p   = malloc (4*NO_TKS_MAX)
+      pmsvt_p    = malloc (4*NO_TKS_MAX)
+      zersvt_p   = malloc (4*NO_TKS_MAX)
+      persvt_p   = malloc (4*NO_TKS_MAX)
+      zsvt_p     = malloc (4*NO_TKS_MAX)
+      phisvt_p   = malloc (4*NO_TKS_MAX)
+      eangsv_p   = malloc (4*NO_TKS_MAX)
+      idtpc_p    = malloc (4*NO_TKS_MAX)
+      pidtpc_p   = malloc (4*NO_TKS_MAX)
+      pmtpc_p    = malloc (4*NO_TKS_MAX)
+      zertpc_p   = malloc (4*NO_TKS_MAX)
+      pertpc_p   = malloc (4*NO_TKS_MAX)
+      ztpc_p     = malloc (4*NO_TKS_MAX)
+      phitpc_p   = malloc (4*NO_TKS_MAX)
+      eangtp_p   = malloc (4*NO_TKS_MAX)
+      chitmp_p   = malloc (4*NO_TKS_MAX)
+      jtmp_p     = malloc (4*NO_TKS_MAX)
+      chisav_p   = malloc (4*NO_TKS_MAX)
+      chisav_2_p = malloc (4*NO_TKS_MAX)
+      ntpc_p     = malloc (4*NO_TKS_MAX)
+      iflag_p    = malloc (4*NO_TKS_MAX)
+      jflag_p    = malloc (4*NO_TKS_MAX)
+      loop_1_p   = malloc (4*NO_TKS_MAX)
+      loop_2_p   = malloc (4*NO_TKS_MAX)
+      nsvt_p     = malloc (4*NO_TKS_MAX)
+      jtpc1_p    = malloc (4*NO_TKS_MAX)
+      isvt1_p    = malloc (4*NO_TKS_MAX)
+      isvt2_p    = malloc (4*NO_TKS_MAX)
+      jchk_p     = malloc (4*NO_TKS_MAX)
+      ichk_p     = malloc (4*NO_TKS_MAX)
+      iskip_p    = malloc (4*NO_TKS_MAX)
+      jskip_p    = malloc (4*NO_TKS_MAX)
+      dirsvt_p   = malloc (4*NO_TKS_MAX*3)
+      dirtpc_p   = malloc (4*NO_TKS_MAX*3)
+      psvt_p     = malloc (4*NO_TKS_MAX*6)
+      ptpc_p     = malloc (4*NO_TKS_MAX*6)
+      chisq_p    = malloc (4*NO_TKS_MAX*5)
+      jtpc_p     = malloc (4*NO_TKS_MAX*5)
+      isvt_p     = malloc (4*NO_TKS_MAX*5)
+      call vzero (idsvt,    NO_TKS_MAX)
+      call vzero (pidsvt,   NO_TKS_MAX)
+      call vzero (pmsvt,    NO_TKS_MAX)
+      call vzero (zersvt,   NO_TKS_MAX)
+      call vzero (persvt,   NO_TKS_MAX)
+      call vzero (zsvt,     NO_TKS_MAX)
+      call vzero (phisvt,   NO_TKS_MAX)
+      call vzero (eangsv,   NO_TKS_MAX)
+      call vzero (idtpc,    NO_TKS_MAX)
+      call vzero (pidtpc,   NO_TKS_MAX)
+      call vzero (pmtpc,    NO_TKS_MAX)
+      call vzero (zertpc,   NO_TKS_MAX)
+      call vzero (pertpc,   NO_TKS_MAX)
+      call vzero (ztpc,     NO_TKS_MAX)
+      call vzero (phitpc,   NO_TKS_MAX)
+      call vzero (eangtp,   NO_TKS_MAX)
+      call vzero (chitmp,   NO_TKS_MAX)
+      call vzero (jtmp,     NO_TKS_MAX)
+      call vzero (chisav,   NO_TKS_MAX)
+      call vzero (chisav_2, NO_TKS_MAX)
+      call vzero (ntpc,     NO_TKS_MAX)
+      call vzero (iflag,    NO_TKS_MAX)
+      call vzero (jflag,    NO_TKS_MAX)
+      call vzero (loop_1,   NO_TKS_MAX)
+      call vzero (loop_2,   NO_TKS_MAX)
+      call vzero (nsvt,     NO_TKS_MAX)
+      call vzero (jtpc1,    NO_TKS_MAX)
+      call vzero (isvt1,    NO_TKS_MAX)
+      call vzero (isvt2,    NO_TKS_MAX)
+      call vzero (jchk,     NO_TKS_MAX)
+      call vzero (ichk,     NO_TKS_MAX)
+      call vzero (iskip,    NO_TKS_MAX)
+      call vzero (jskip,    NO_TKS_MAX)
+      call vzero (dirsvt, 3*NO_TKS_MAX)
+      call vzero (dirtpc, 3*NO_TKS_MAX)
+      call vzero (psvt,   6*NO_TKS_MAX)
+      call vzero (ptpc,   6*NO_TKS_MAX)
+      call vzero (chisq,  5*NO_TKS_MAX)
+      call vzero (jtpc,   5*NO_TKS_MAX)
+      call vzero (isvt,   5*NO_TKS_MAX)
 c
-      idtpc(i) = 0
-      pidtpc(i) = 0
-      pmtpc(i) = 0.00
-      zertpc(i) = 0.00
-      pertpc(i) = 0.00
-      ztpc(i) = 0.00
-      phitpc(i) = 0.00
-      eangtp(i) = 0.00
-c
-      chitmp(i) = 0.0
-      jtmp(i) = 0
-      chisav(i) = 0.0
-      chisav_2(i) = 0.0
-c
-      do 202 j = 1,3
-      dirsvt(j,i) = 0.00
-202   dirtpc(j,i) = 0.00
-      do 203 j = 1,6
-      psvt(j,i) = 0.00
-203   ptpc(j,i) = 0.00
-c
-      do 204 j = 1,5
-      chisq(i,j) = 0.00
-      jtpc(i,j) = 0
-204   isvt(i,j) = 0
-c
-      ntpc(i) = 0
-      iflag(i) = 0
-      jflag(i) = 0
-      loop_1(i) = 0
-      loop_2(i) = 0
-      nsvt(i) = 0
-      jtpc1(i) = 0
-      isvt1(i) = 0
-      isvt2(i) = 0
-      jchk(i) = 0
-      ichk(i) = 0
-      iskip(i) = 0
-      jskip(i) = 0
-201   continue
-      do 205 i = 1,6
-      pin(i) = 0.00
-      pout(i) = 0.00
-      ptmp(i) = 0.00
-      do 206 j = 1,6
-206   pcov(i,j) = 0.00
-      do 207 k = 1,3
-      dirvec(k) = 0.00
-      poserr(k) = 0.00
-207   partal(k,i) = 0.00
-205   continue
-      pout(7) = 0.0
+      call vzero (pin,6)
+      call vzero (pout,7)
+      call vzero (ptmp,6)
+      call vzero (pcov, 36)
+      call vzero (dirvec, 3)
+      call vzero (poserr, 3)
+      call vzero (partal, 18)
 
 
 ccc
 ccc   Set evt_match.nok to zero and all rows to zero
 ccc
-      do i = 1,evtin_h.maxlen
-      evtin(i).id = 0
-      evtin(i).idsvt = 0
-      evtin(i).idsvt_2 = 0
-      evtin(i).idtpc = 0
-      evtin(i).loop1 = 0
-      evtin(i).loop2 = 0
-      evtin(i).mc_check = 0
-      evtin(i).pid   = 0
-      evtin(i).quality = 0
-      evtin(i).quality_2 = 0
-      evtin(i).eta   = 0.0
-      evtin(i).invpt = 0.0
-      end do
+      i = abs(loc(evtin(2))-loc(evtin(1)))/4
+      call vzero (evtin, i*evtin_h.maxlen)
       evtin_h.nok = 0
 
       ksvt = 0
