@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.96 2000/06/21 21:12:39 perev Exp $
+// $Id: StMaker.cxx,v 1.97 2000/06/21 23:59:24 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -320,11 +320,14 @@ TDataSet *StMaker::GetDataBase(const char* logInput)
 {
   TDataSet *ds;
   StMaker *mk;
-  ds = GetInputDS(logInput);
-  if (!ds) 				return 0;
-  mk = GetMaker(ds); if (!mk) 		return 0;
-  if (!mk->InheritsFrom("St_db_Maker"))	return 0;
-  return mk->UpdateDB(ds);
+  StMakerIter mkiter(this);
+  while ((mk = mkiter.NextMaker())) {//loop over makers
+    if (!mk->InheritsFrom("St_db_Maker")) 	continue;
+    ds = GetInputDS(logInput);
+    if (!ds) 					continue;
+    return mk->UpdateDB(ds);
+  }
+  return 0;
 }
 //______________________________________________________________________________
 Int_t   StMaker::GetValidity(const TTable *tb, TDatime *val) const
@@ -1049,6 +1052,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.97  2000/06/21 23:59:24  perev
+// getDataBase loop over makers added
+//
 // Revision 1.96  2000/06/21 21:12:39  perev
 // StMakerIter class added
 //
