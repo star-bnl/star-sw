@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helensV0Cut.h,v 1.5 2000/10/09 21:56:16 laue Exp $
+ * $Id: helensLaPV0Cut.h,v 1.1 2000/10/09 21:56:15 laue Exp $
  *
  * Authors: Helen Caines, Tom Humanic, Ohio State, humanic@mps.ohio-state.edu
  ***************************************************************************
@@ -10,8 +10,8 @@
  *
  ***************************************************************************
  *
- * $Log: helensV0Cut.h,v $
- * Revision 1.5  2000/10/09 21:56:16  laue
+ * $Log: helensLaPV0Cut.h,v $
+ * Revision 1.1  2000/10/09 21:56:15  laue
  * Helens new cuts
  *
  * Revision 1.4  2000/01/25 17:35:02  laue
@@ -47,13 +47,13 @@
  * Helens realistic V0Cut and Franks memory-sealed McReader
  *
  * Revision 1.1  1999/09/23 23:28:03  lisa
- * add helensV0Cut  AND  rename mikes and franks ParticleCuts to TrackCuts  AND  update documentation
+ * add helensLaPV0Cut  AND  rename mikes and franks ParticleCuts to TrackCuts  AND  update documentation
  *
  *
  **************************************************************************/
 
-#ifndef helensV0Cut_hh
-#define helensV0Cut_hh
+#ifndef helensLaPV0Cut_hh
+#define helensLaPV0Cut_hh
 
 //#ifndef StMaker_H
 //#include "StMaker.h"
@@ -62,12 +62,12 @@
 #include "StHbtMaker/Base/StHbtV0Cut.h"
 #include "StHbtMaker/Infrastructure/StHbtV0.hh"	//9-17-99 seems like good idea
 
-class helensV0Cut : public StHbtV0Cut {
+class helensLaPV0Cut : public StHbtV0Cut {
 
 public:
 
-  helensV0Cut();
-  //~helensV0Cut();
+  helensLaPV0Cut();
+  //~helensLaPV0Cut();
 
   virtual bool Pass(const StHbtV0*);
 
@@ -112,45 +112,44 @@ private:   // here are the quantities we want to cut on...
   char*             V0Type;                // String selecting v0 (la,antil,k0)
 
 #ifdef __ROOT__ 
-  ClassDef(helensV0Cut, 1)
+  ClassDef(helensLaPV0Cut, 1)
 #endif
 };
 
 
-inline void helensV0Cut::SetV0MassRange(const float& lo, const float& hi) {
+inline void helensLaPV0Cut::SetV0MassRange(const float& lo, const float& hi) {
 mV0MassRange[0] =lo; mV0MassRange[1]=hi;}
-inline void helensV0Cut::SetdcaV0daughters(const float& lo, const float& hi)
+inline void helensLaPV0Cut::SetdcaV0daughters(const float& lo, const float& hi)
 {mdcaV0daughters[0]=lo; mdcaV0daughters[1]=hi;}
-inline void helensV0Cut::SetdcaV0ToPrimVertex(const float& lo, const float& hi)
+inline void helensLaPV0Cut::SetdcaV0ToPrimVertex(const float& lo, const float& hi)
 {mdcaV0ToPrimVertex[0]=lo; mdcaV0ToPrimVertex[1]=hi;}
-inline void helensV0Cut::SetdecayLengthV0(const float& lo, const float& hi)
+inline void helensLaPV0Cut::SetdecayLengthV0(const float& lo, const float& hi)
 {mdecayLengthV0[0]=lo; mdecayLengthV0[1]=hi;}
 
-inline void helensV0Cut::SettpcHitsPos(const int& lo, const int& hi)
+inline void helensLaPV0Cut::SettpcHitsPos(const int& lo, const int& hi)
 {mtpcHitsPos[0]=lo;mtpcHitsPos[1]=hi;}
-inline void helensV0Cut::SettpcHitsNeg(const int& lo, const int& hi)
+inline void helensLaPV0Cut::SettpcHitsNeg(const int& lo, const int& hi)
 {mtpcHitsNeg[0]=lo;mtpcHitsNeg[1]=hi;}
 
-inline void helensV0Cut::SetdcaPosToPrimVertex(const float& lo, const float& hi)
+inline void helensLaPV0Cut::SetdcaPosToPrimVertex(const float& lo, const float& hi)
 {mdcaPosToPrimVertex[0]=lo; mdcaPosToPrimVertex[1]=hi;}
-inline void helensV0Cut::SetdcaNegToPrimVertex(const float& lo, const float& hi)
+inline void helensLaPV0Cut::SetdcaNegToPrimVertex(const float& lo, const float& hi)
 {mdcaNegToPrimVertex[0]=lo; mdcaNegToPrimVertex[1]=hi;}
-inline void helensV0Cut::SetptArmV0(const float& lo, const float& hi)
+inline void helensLaPV0Cut::SetptArmV0(const float& lo, const float& hi)
 {mptArmV0[0]=lo; mptArmV0[1]=hi;}
-inline void helensV0Cut::SetalphaV0(const float& lo, const float& hi)
+inline void helensLaPV0Cut::SetalphaV0(const float& lo, const float& hi)
 {malphaV0[0]=lo; malphaV0[1]=hi;}
 
-inline void helensV0Cut::SetdEdx(const float& charge,
-				 const float& m1,  const float& c1,
-				 const float& m2, const float& c2)
+inline void helensLaPV0Cut::SetdEdx(const float& charge,const float& m1, const float& c1,
+				       const float& m2, const float& c2)
 {mChargedEdx=charge;mdEdx[0]=m1; mdEdx[1]=c1; mdEdx[2]=m2; mdEdx[3]=c2;}
 
-inline void helensV0Cut::SetPt(const float& lo, const float& hi)
+inline void helensLaPV0Cut::SetPt(const float& lo, const float& hi)
 {mPt[0]=lo; mPt[1]=hi;}
-inline void helensV0Cut::SetRapidity(const float& lo,const float& hi)
+inline void helensLaPV0Cut::SetRapidity(const float& lo,const float& hi)
 {mRapidity[0]=lo; mRapidity[1]=hi;}
 
-inline void helensV0Cut::SetV0Type(const char* type)
+inline void helensLaPV0Cut::SetV0Type(const char* type)
 {V0Type = (char*)type;}
 
 #endif
