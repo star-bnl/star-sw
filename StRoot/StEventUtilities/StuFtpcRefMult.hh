@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StuFtpcRefMult.hh,v 1.4 2004/02/06 15:04:25 putschke Exp $
+ * $Id: StuFtpcRefMult.hh,v 1.5 2004/04/11 11:19:33 putschke Exp $
  ***************************************************************************
  *
  * Description:
@@ -32,6 +32,9 @@
  *
  **************************************************************************
  * $Log: StuFtpcRefMult.hh,v $
+ * Revision 1.5  2004/04/11 11:19:33  putschke
+ * Remove dAu minbias trigger cut
+ *
  * Revision 1.4  2004/02/06 15:04:25  putschke
  * Update and fix multiplicity cuts
  *
@@ -55,22 +58,15 @@ inline bool
 multiplicityEventCutFtpc(const StEvent& evt)
 {
 
-  // check dAu minbias
-  if (evt.triggerIdCollection() &&
-      evt.triggerIdCollection()->nominal() )
-    if (evt.triggerIdCollection()->nominal()->isTrigger(2001) 
-   ||
-   evt.triggerIdCollection()->nominal()->isTrigger(2003))
-      {
-   const StPrimaryVertex* primVtx = evt.primaryVertex();
-
-   if (!primVtx) return false;
-   else if (fabs(primVtx->position().x())<10e-3 && fabs(primVtx->position().y())<10e-3 && fabs(primVtx->position().z())<10e-3) return false;
-   else if (fabs(primVtx->position().z())>=50) return false;
-   else return true;
-      }
-
+  const StPrimaryVertex* primVtx = evt.primaryVertex();
+  
+  if (!primVtx) return false;
+  else if (fabs(primVtx->position().x())<10e-3 && fabs(primVtx->position().y())<10e-3 && fabs(primVtx->position().z())<10e-3) return false;
+  else if (fabs(primVtx->position().z())>=50) return false;
+  else return true;
+  
   return false;
+
 }
 
 inline unsigned int
