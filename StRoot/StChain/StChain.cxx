@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.9 1998/07/23 11:32:11 fisyak Exp $
+// $Id: StChain.cxx,v 1.10 1998/07/23 21:03:30 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.10  1998/07/23 21:03:30  fisyak
+// Add more comments
+//
 // Revision 1.9  1998/07/23 11:32:11  fisyak
 // Add comments
 //
@@ -52,8 +55,8 @@
 // Each Maker has an associated companion class corresponding to the    //
 // type of physics object reconstructed by the Maker.                   //
 // For example, St_tcl_Maker     fill   event/data/tpc/hits DataSet     //
-//              St_tpt_Maker     fill   event/data/tpc/tracks FataSet   // 
-// The pointer supporting the created object(s) is defined in ATLFMaker //
+//              St_tpt_Maker     fill   event/data/tpc/tracks DataSet   // 
+// The pointer supporting the created object(s) is defined in StMaker   //
 //   m_DataSet points to a DataSet owned by the Maker                   //
 //                                                                      //
 // The function StChain::Maketree must be called after the creation     //
@@ -460,7 +463,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.9 1998/07/23 11:32:11 fisyak Exp $    *\n");
+   printf("* $Id: StChain.cxx,v 1.10 1998/07/23 21:03:30 fisyak Exp $    *\n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
