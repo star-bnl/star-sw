@@ -9,25 +9,26 @@
 #ifndef StiDetectorContainer_HH
 #define StiDetectorContainer_HH
 
+#include <vector>
+using std::vector;
 #include <map>
+using std::map;
 #include "StiMapUtilities.h"
+
+#include "StiFactoryTypedefs.h"
 
 using std::map;
 
 class StiDetector;
 class StiMaterial;
-class StiDetPolygon;
-
-typedef map<double, StiDetPolygon*> detectormap;
-typedef detectormap::value_type detectorMapValType;
 
 typedef map<MaterialMapKey, StiMaterial*> materialmap;
 typedef materialmap::value_type materialMapValType;
 
-class StiDetectorContainer : public detectormap
+class StiDetectorContainer
 {
 public:
-    
+
     virtual ~StiDetectorContainer();
 
     //Singleton Access
@@ -35,20 +36,19 @@ public:
     static void kill();
 
     //Gets/sets
-    void setDraw(bool val) {mdraw=val;}
     StiMaterial* material(const MaterialMapKey& key) const;
     const materialmap& materialMap() const;
 
+    //Temporary, MLM 7/30/01
+    data_node* root() const {return mroot;}
     
     //Build functions
     virtual void buildMaterials(const char* buildDirectory);
-    virtual void buildPolygons(const char* buildDirectory);
-    virtual void buildDetectors(const char* buildDirectory); //Temp build from txt file using SCL parser
+    virtual void buildDetectors(const char* buildDirectory, data_node_factory* nodefactory,
+				detector_factory* detfactory);
 
     //Action
     void reset(); //full internal reset of interator structure
-    void push_back(StiDetector* layer);
-    void push_back(StiDetPolygon* poly);
     void clearAndDestroy();
     
     //Navigation
@@ -61,15 +61,17 @@ public:
     //Step in radially
     void moveIn();
 
-    //Step around in increasing phi (clockwise if viewing sectors 1-12 from the membrane, increasing phi in STAR TPC global coordinates)
+    //Step around in increasing phi (clockwise if viewing sectors 1-12 from the membrane,
+    //increasing phi in STAR TPC global coordinates)
     void movePlusPhi();
-    //ibid
     void moveMinusPhi();
 
     //Set iterators to the detector nearest to this guy (Useful if you get lost)
     void setToDetector(StiDetector* layer);
+    
     //Set iterators to the first detector in the yaer closest to this position
     void setToDetector(double position);
+    
     //Set iterators to the position nearest this guy
     void setToDetector(double position, double angle);
     
@@ -78,20 +80,19 @@ public:
     
 private:
 
+    //The Tree
+    data_node* mroot;
+    data_node* mregion; //current region (mid/forward/backward rapidity, etc)
+    
+    //iterators
+    data_node_vec::const_iterator mradial_it;
+    data_node_vec::const_iterator mphi_it;
+    
     //Singleton Management
     StiDetectorContainer();
     static StiDetectorContainer* sinstance;
 
-protected:
-    virtual StiDetector* makeDetectorObject() const;
-    
-    bool mdraw;
     materialmap mmaterialmap;
-    
-protected:
-    
-    //iterator implementation
-    detectormap::const_iterator mcurrent;
     
 };
 

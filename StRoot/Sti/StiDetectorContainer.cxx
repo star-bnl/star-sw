@@ -2,26 +2,30 @@
 //M.L. Miller (Yale Software)
 //02/02/01
 
+//Std
 #include <iostream.h>
 #include <stdio.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <string>
 
+#include <algorithm>
+using std::find_if;
+
 //StiGui
-#include "StiGui/StiRootDrawableDetector.h"
+//#include "StiGui/StiRootDrawableDetector.h"
 
 //Sti
 #include "StiMapUtilities.h"
-#include "StiDetPolygon.h"
 #include "StiDetector.h"
 #include "StiMaterial.h"
+#include "StiFactoryTypedefs.h"
+#include "StiDetectorTreeBuilder.h"
+#include "StlUtilities.h"
 #include "StiDetectorContainer.h"
-
 
 StiDetectorContainer* StiDetectorContainer::sinstance = 0;
 
-ostream& operator<<(ostream&, const DetectorMapKey&);
 ostream& operator<<(ostream&, const MaterialMapKey&);
 
 StiDetectorContainer* StiDetectorContainer::instance()
@@ -38,7 +42,7 @@ void StiDetectorContainer::kill()
     return;
 }
 
-StiDetectorContainer::StiDetectorContainer() : mdraw(true)
+StiDetectorContainer::StiDetectorContainer() : mroot(0), mregion(0)
 {
     cout <<"StiDetectorContainer::StiDetectorContainer()"<<endl;
     sinstance = this;
@@ -48,6 +52,15 @@ StiDetectorContainer::~StiDetectorContainer()
 {
     cout <<"StiDetectorContainer::~StiDetectorContainer()"<<endl;
     clearAndDestroy();
+}
+
+void StiDetectorContainer::clearAndDestroy()
+{
+    for (materialmap::iterator it=mmaterialmap.begin(); it!=mmaterialmap.end(); ++it) {
+	delete (*it).second;
+	(*it).second = 0;
+    }
+    return;
 }
 
 const materialmap& StiDetectorContainer::materialMap() const
@@ -61,127 +74,102 @@ StiMaterial* StiDetectorContainer::material(const MaterialMapKey& key) const
     return (where!= mmaterialmap.end()) ? (*where).second : 0;
 }
 
-void StiDetectorContainer::push_back(StiDetPolygon* poly)
-{
-    insert( detectorMapValType( poly->radius(), poly ) );
-    return;
-}
-
-void StiDetectorContainer::clearAndDestroy()
-{
-    for (detectormap::iterator it=begin(); it!=end(); ++it) {
-	delete (*it).second;
-	(*it).second = 0;
-    }
-    
-    for (materialmap::iterator it=mmaterialmap.begin(); it!=mmaterialmap.end(); ++it) {
-	delete (*it).second;
-	(*it).second = 0;
-    }
-    return;
-}
-
 void StiDetectorContainer::setToDetector(double radius)
 {
-    reset(); //full reset
-    //Look to see first instance with position greater than this
-    detectormap::iterator where = lower_bound(radius);
-    if (where==end()) { //Didn't find it, set to outermost layer
-	--where;
-    }
-
-    mcurrent = where;
-
-    //Now we have to check if one less postion is closer (as long as we're not at the beginning)
-    if ( where!=begin()) { //Nothing below us
-	double found_radius = (*mcurrent).second->operator*()->getCenterRadius();
-	double one_less_radius = (*(--where)).second->operator*()->getCenterRadius();
-	if ( fabs(one_less_radius - radius) < fabs(found_radius - radius) ) {
-	    mcurrent = where;
-	}
-    }
+    reset();
     return;
 }
 
 void StiDetectorContainer::setToDetector(double radius, double angle)
 {
-    setToDetector(radius);
-    (*mcurrent).second->setToAngle( angle);
 }
 
 void StiDetectorContainer::setToDetector(StiDetector*layer)
 {
-    setToDetector( layer->getCenterRadius(), layer->getCenterRefAngle() );
-}
-
-void StiDetectorContainer::push_back(StiDetector* layer)
-{
-    //Which radial layer should this detector belong to?
-    detectormap::const_iterator where = find( layer->getCenterRadius() );
-    if (where==end()) {
-	cout <<"StiDetectorContainer::push_back(StiDetector*) !!!! Error: no layer for detector"<<endl;
-	return;
-    }
-    (*where).second->push_back(layer);
-    return;
 }
 
 void StiDetectorContainer::reset()
 {
-    mcurrent = begin();
-    for (detectormap::iterator it=begin(); it!=end(); ++it) {
-	(*it).second->reset();
-    }
+    mradial_it = mregion->begin();
+    mphi_it = (*mradial_it)->begin();
+    
     return;
 }
 
 StiDetector* StiDetectorContainer::operator*() const
 {
-    if (mcurrent==end()) return 0;
-    else {
-	StiDetPolygon& rpoly = *((*mcurrent).second);
-	return *rpoly;
-    }
+    return (*mphi_it)->getData();
 }
 
 void StiDetectorContainer::moveIn()
 {
-    double currentangle = (*mcurrent).second->operator*()->getCenterRefAngle();
-    if (mcurrent==begin()) return;
-    
-    else {
-	--mcurrent;
-	(*mcurrent).second->setToAngle(currentangle);
+    if (mradial_it == mregion->begin() ) {
+	cout <<"StiDetecotrContainer::moveIn()\tNowhere to go"<<endl;
+	return;
     }
-    return;
+    else {
+	--mradial_it;
+	mphi_it = (*mradial_it)->begin();
+	return;
+    }
 }
 
 void StiDetectorContainer::moveOut()
 {
-    if (mcurrent==end() ) {
-	return; //Nowhere to go
+    ++mradial_it;
+    if (mradial_it == mregion->end()) {
+	cout <<"StiDetectorContainer::moveOut()\tNowhere to go"<<endl;
+	--mradial_it;
+	return;
     }
-    
     else {
-    double currentangle = (*mcurrent).second->operator*()->getCenterRefAngle();
-	++mcurrent;
-	if (mcurrent==end()) {
-	    --mcurrent;
-	}
-	(*mcurrent).second->setToAngle(currentangle);
+	mphi_it = (*mradial_it)->begin();
+	return;
     }
-    return;
 }
 
 void StiDetectorContainer::movePlusPhi()
 {
-    (*mcurrent).second->operator++();
+    ++mphi_it;
+    if (mphi_it == (*mradial_it)->end()) { //Wrap around 2pi
+	cout <<"StiDetectorContainer::movePlusPhi()\tWrap around 2pi"<<endl;
+	mphi_it = (*mradial_it)->begin();
+    }
 }
 
 void StiDetectorContainer::moveMinusPhi()
 {
-    (*mcurrent).second->operator--();
+    if (mphi_it == (*mradial_it)->begin()) { //Wrap around 2pi
+	cout <<"StiDetectorContainer::moveMinusPhi()\tWrap around 2pi"<<endl;
+	mphi_it = (*mradial_it)->end();
+    }
+    --mphi_it;
 }
+
+// Recursively load all detector definition files from the given directory.
+void StiDetectorContainer::buildDetectors(const char* buildDirectory, data_node_factory* nodefactory,
+					 detector_factory* detfactory)
+{
+    StiDetectorTreeBuilder mybuilder;
+    mroot = mybuilder.build(buildDirectory, nodefactory, detfactory);
+
+    //Set region to midrapidity, hard-coded for now, update later to allow for other regions
+    SameName<data_t> mySameName;
+    mySameName.mname = "midrapidity";
+    data_node_vec::iterator where = find_if(mroot->begin(), mroot->end(), mySameName);
+    if (where==mroot->end()) {
+	cout <<"Error:\tmidrapidity region not found"<<endl;
+    }
+    mregion = (*where);
+    reset();
+
+    return;
+}
+
+void StiDetectorContainer::print() const
+{
+}
+
 
 // Load all material definition files from a given directory
 void StiDetectorContainer::buildMaterials(const char* buildDirectory){
@@ -214,88 +202,4 @@ void StiDetectorContainer::buildMaterials(const char* buildDirectory){
   closedir(pDir);
 }// buildMaterials
 
-void StiDetectorContainer::buildPolygons(const char* buildDirectory)
-{
-    char* buildfile = new char[200];
-    
-    DIR *pDir = opendir(buildDirectory);
-    struct dirent *pDirEnt;
-    struct stat fileStat;
-    
-    while( (pDirEnt = readdir(pDir)) != 0){
-	sprintf(buildfile, "%s/%s", buildDirectory, pDirEnt->d_name);
-	
-	// get file attributes
-	stat(buildfile, &fileStat);
-	
-	// if regular file, process
-	if(S_ISREG(fileStat.st_mode)){
 
-	    //do action here
-	    StiDetPolygon* poly = new StiDetPolygon();
-	    poly->build(buildfile);
-	    //cout <<"Building Polygon from "<<buildfile<<endl;
-	    //cout <<(*poly)<<endl;
-	    push_back(poly);
-
-	} // if is regular file
-    }
-    
-    closedir(pDir);
-    return;
-}
-
-// Recursively load all detector definition files from the given directory.
-void StiDetectorContainer::buildDetectors(const char* buildDirectory)
-{
-  char* buildfile = new char[200];
-
-  DIR *pDir = opendir(buildDirectory);
-  struct dirent *pDirEnt;
-  struct stat fileStat;
-
-  while( (pDirEnt = readdir(pDir)) != 0){
-    sprintf(buildfile, "%s/%s", buildDirectory, pDirEnt->d_name);
-    
-    // get file attributes
-    stat(buildfile, &fileStat);
-
-    // is this a directory?  if so, recursively build directory
-    if((S_ISDIR(fileStat.st_mode)) && pDirEnt->d_name[0] != '.'){
-      buildDetectors(buildfile);
-    } // if is directory
-    
-    // if regular file, process as detector
-    if(S_ISREG(fileStat.st_mode)){
-      StiDetector* layer = makeDetectorObject();
-      layer->build(buildfile);
-      if (layer->isOn()) push_back(layer);
-
-    } // if is regular file
-
-  }
-
-  closedir(pDir);
- 
-  return;
-}
-
-StiDetector* StiDetectorContainer::makeDetectorObject() const
-{
-    StiDetector* layer = 0;
-    if (mdraw) {
-        layer = new StiRootDrawableDetector();
-    }else {
-        layer = new StiDetector();
-    }
-    return layer;
-}
-
-void StiDetectorContainer::print() const
-{
-    cout <<"\nStiDetecotrContainer::print()\n"<<endl;
-    for (detectormap::const_iterator it=begin(); it!=end(); ++it) {
-	cout <<"\t"<<(*it).first<<"\t";
-	(*it).second->print();
-    }
-}
