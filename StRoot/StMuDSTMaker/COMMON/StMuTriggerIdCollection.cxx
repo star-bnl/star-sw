@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTriggerIdCollection.cxx,v 1.1 2003/02/20 15:50:30 laue Exp $
+ * $Id: StMuTriggerIdCollection.cxx,v 1.2 2003/03/19 18:58:04 laue Exp $
  *
  * Author: Frank Laue
  ***************************************************************************
@@ -26,6 +26,10 @@ void StMuTriggerIdCollection::fill(const StTriggerIdCollection* c) {
   if ( c->nominal() ) setNominal( *(c->nominal()) );
 }
 
+bool StMuTriggerIdCollection::isEmpty(const StTriggerId& id){
+    if ( id.triggerIds().size()==0) return true;
+    return false;
+}
 
 const StTriggerId&
 StMuTriggerIdCollection::nominal() const {return mNTriggerId;}
@@ -55,6 +59,10 @@ StMuTriggerIdCollection::setNominal(const StTriggerId val) {mNTriggerId = val;}
 /**************************************************************************
  *
  * $Log: StMuTriggerIdCollection.cxx,v $
+ * Revision 1.2  2003/03/19 18:58:04  laue
+ * StMuChainMaker: updates for moved file catalog
+ * StTriggerIdCollection added to the createStEvent function in StMuDst.cxx
+ *
  * Revision 1.1  2003/02/20 15:50:30  laue
  * New. Wrapper around StEVent/StStriggerIdCollection
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.12 2003/02/18 20:38:30 laue Exp $
+ * $Id: StMuDst.cxx,v 1.13 2003/03/19 18:58:04 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -189,7 +189,7 @@ StEvent* StMuDst::createStEvent() {
   } 
   /// do the same excercise for the l3 tracks
   /// we do this later
-  /// we do this laterb
+  /// we do this later
   /// we do this later
   
   // add detector states
@@ -207,6 +207,22 @@ StEvent* StMuDst::createStEvent() {
     StEmcCollection *EMC = mEmcUtil->getEmc(emc);
     if(EMC) ev->setEmcCollection(EMC);
   }
+
+
+  // now create, fill and add new StTriggerIdCollection to the StEvent
+  StTriggerIdCollection* triggerIdCollection = new StTriggerIdCollection();
+  StTriggerId triggerId;
+  triggerId = mu->triggerIdCollection().l1();
+  if ( !StMuTriggerIdCollection::isEmpty( triggerId ) ) triggerIdCollection->setL1( new StTriggerId( triggerId ) );
+  triggerId = mu->triggerIdCollection().l2();
+  if ( !StMuTriggerIdCollection::isEmpty( triggerId ) ) triggerIdCollection->setL2( new StTriggerId( triggerId ) );
+  triggerId = mu->triggerIdCollection().l3();
+  if ( !StMuTriggerIdCollection::isEmpty( triggerId ) ) triggerIdCollection->setL3( new StTriggerId( triggerId ) );
+  triggerId = mu->triggerIdCollection().nominal();
+  if ( !StMuTriggerIdCollection::isEmpty( triggerId ) ) triggerIdCollection->setNominal( new StTriggerId( triggerId ) );
+  ev->setTriggerIdCollection( triggerIdCollection );
+  
+  
   
   DEBUGVALUE2(timer.elapsedTime());
   return ev;
@@ -252,6 +268,10 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.13  2003/03/19 18:58:04  laue
+ * StMuChainMaker: updates for moved file catalog
+ * StTriggerIdCollection added to the createStEvent function in StMuDst.cxx
+ *
  * Revision 1.12  2003/02/18 20:38:30  laue
  * updates from Alex Suaide for filling StTrack from StMuTrack
  *
