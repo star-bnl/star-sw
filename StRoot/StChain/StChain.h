@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.14 1998/10/31 00:21:31 fisyak Exp $
+// $Id: StChain.h,v 1.15 1998/11/19 01:23:56 fine Exp $
 // $Log: StChain.h,v $
+// Revision 1.15  1998/11/19 01:23:56  fine
+// StChain::MakeDoc has been introduced, StChain::MakeDoc has been fixed (see macros/bfc_doc.C macro
+//
 // Revision 1.14  1998/10/31 00:21:31  fisyak
 // Makers take care about branches
 //
@@ -75,7 +78,7 @@
 class TBrowser;
 class TChain;
 class St_XDFFile; 
-//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.14 1998/10/31 00:21:31 fisyak Exp $";//StChain header CVS version
+//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.15 1998/11/19 01:23:56 fine Exp $";//StChain header CVS version
 
 class StChain : public StMaker {
 public:
@@ -117,6 +120,7 @@ public:
    virtual Int_t      Make() {return 0;}
    virtual void       StartMaker(StMaker *mk);
    virtual Int_t      Make(Int_t i);
+   virtual void       MakeDoc(const TString &stardir="$(afs)/rhic/star/packages/dev",const TString &outdir="$(star)/StRoot/html");
    virtual void       EndMaker  (StMaker *mk,Int_t iret);
    virtual void       Paint(Option_t *option="");
    virtual void       PrintInfo();

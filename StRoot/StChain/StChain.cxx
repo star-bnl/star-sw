@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.18 1998/10/31 00:21:30 fisyak Exp $
+// $Id: StChain.cxx,v 1.19 1998/11/19 01:23:56 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.19  1998/11/19 01:23:56  fine
+// StChain::MakeDoc has been introduced, StChain::MakeDoc has been fixed (see macros/bfc_doc.C macro
+//
 // Revision 1.18  1998/10/31 00:21:30  fisyak
 // Makers take care about branches
 //
@@ -401,6 +404,18 @@ Int_t StChain::Init()
    }
    return kStOK;
 }
+//_____________________________________________________________________________
+void StChain::MakeDoc(const TString &stardir,const TString &outdir)
+{
+  // Create html documentation of this class and all makers as well
+  StMaker::MakeDoc(stardir,outdir);
+  
+  //     Make html-docs for all defined Makers
+   TIter next(m_Makers);
+   StMaker *maker=0;
+   while ((maker = (StMaker*)next())) 
+      maker->MakeDoc(stardir,outdir);  
+}
 
 //_____________________________________________________________________________
 void StChain::Paint(Option_t *option)
@@ -418,7 +433,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.18 1998/10/31 00:21:30 fisyak Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.19 1998/11/19 01:23:56 fine Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
