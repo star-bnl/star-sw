@@ -258,7 +258,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.12 2003/02/11 22:24:20 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.13 2003/02/12 04:19:39 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -388,17 +388,20 @@ void StVertexSeedMaker::GetFillDateTime() {
   char queryStr[128];
 
   // Find beamInfo entry for this date time
-  sprintf(queryStr,"%8d %6d",date,time);
+  sprintf(queryStr,"%08d %06d",date,time);
   TString tdStr = queryStr;
   tdStr.Insert(4,'-').Insert(7,'-').Insert(13,':').Insert(16,':');
   const char* tdstr = tdStr.Data();
-  sprintf(queryStr," where beginTime<='%s' order by beginTime desc limit 1",tdstr);
+  sprintf(queryStr,
+    " where beginTime<='%s' and deactive=0 order by beginTime desc limit 1",
+    tdstr);
   ts = db->QueryDb(tab,queryStr);
 
   if (ts) {
     // Find earliest entry for this fill
     float thisFill = *(float*) (tab->getDataValue("blueFillNumber",0));
-    sprintf(queryStr," where blueFillNumber=%f order by beginTime limit 1",
+    sprintf(queryStr,
+      " where blueFillNumber=%f and deactive=0 order by beginTime asc limit 1",
       thisFill);
     ts = db->QueryDb(tab,queryStr);
 
@@ -537,8 +540,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.12 2003/02/11 22:24:20 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.13 2003/02/12 04:19:39 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.13  2003/02/12 04:19:39  genevb
+// Small improvements
+//
 // Revision 1.12  2003/02/11 22:24:20  genevb
 // Update to use beamInfo table from database
 //
