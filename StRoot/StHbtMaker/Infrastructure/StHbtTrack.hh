@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.7 1999/09/03 22:39:16 lisa Exp $
+ * $Id: StHbtTrack.hh,v 1.8 2000/01/06 17:36:38 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.8  2000/01/06 17:36:38  laue
+ * mNHits changed from 'int' to 'unsigned short'
+ * 'int' is inconsistend with the corresponding getters and setters
+ *
  * Revision 1.7  1999/09/03 22:39:16  lisa
  * Readers now MUST have Report() methods and MAY have WriteHbtEvent() methods
  *
@@ -61,7 +65,7 @@ public:
   float ChiSquaredZ() const;
   StHbtThreeVector P() const;
   float Pt() const;
-  StPhysicalHelixD& Helix() const;
+  StPhysicalHelixD& Helix();
 
   void SetCharge(const char&);
   void SetNHits(const unsigned short&);
@@ -84,7 +88,7 @@ public:
 
 private:
   char mCharge;
-  int mNHits;
+  unsigned short mNHits;
   unsigned short mNHitsPoss; 
   float mNSigmaPion;
   float mNSigmaKaon;
@@ -130,6 +134,6 @@ inline float StHbtTrack::ChiSquaredXY() const {return mChiSqXY;}
 inline float StHbtTrack::ChiSquaredZ() const {return mChiSqZ;}   
 inline StHbtThreeVector StHbtTrack::P() const {return mP;}
 inline float StHbtTrack::Pt() const {return mPt;}                
-inline StPhysicalHelixD& StHbtTrack::Helix() const {return mHelix;}
+inline StPhysicalHelixD& StHbtTrack::Helix() {return mHelix;}
 
 #endif
