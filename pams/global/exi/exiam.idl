@@ -1,31 +1,27 @@
 /*   exiam.idl
 *    Module: exiam
-*        description: IDL file for the basic module
+*    Description: IDL file for the exiam module
 */
 #include "PAM.idl"
 #include "exi_exipar.idl"
-#include "egr_globtrk.idl"
+#include "dst_track.idl"
 #include "dst_vertex.idl"
-#include "ev0_ev0out.idl"
-#include "exi_exiout.idl"
-#include "g2t_track.idl"
-#include "g2t_vertex.idl"
-#include "g2t_svt_hit.idl"
+#include "dst_v0_vertex.idl"
+#include "dst_xi_vertex.idl"
+#include "exi_aux.idl"
 
 interface exiam : amiModule {
 	STAFCV_T call
 		( inout	exi_exipar	exipar
-  	        , inout	egr_globtrk    	globtrk
-                , in    dst_vertex      privert
-                , out   ev0_ev0out      ev0out
-		, inout	exi_exiout	exiout
-	        , in    g2t_track       g2t_track
-        	, in    g2t_vertex      g2t_vertex
-                , in    g2t_svt_hit     g2t_svt_hit
+  	        , inout	dst_track    	globtrk
+                , inout dst_vertex      vertex
+                , in    dst_v0_vertex   v0_vertex
+                , out   dst_xi_vertex   xi_vertex
+		, out	exi_aux		exiaux
 	);
    } ;
 
-/*  Last mod. for exiout:  $Date: 1998/12/11 16:45:58 $ */
+/*  Last mod. for exiout:  $Date: 1999/02/11 03:15:21 $ */
 
 
 
