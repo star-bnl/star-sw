@@ -1,4 +1,4 @@
-// $Id: EEmcDbCrate.cxx,v 1.1 2004/03/19 21:31:52 balewski Exp $
+// $Id: EEmcDbCrate.cxx,v 1.2 2004/03/28 04:09:08 balewski Exp $
 
 #include <stdio.h>
 #include <string.h>
@@ -32,7 +32,7 @@ void EEmcDbCrate::print() const{
     return;
   }
 
-  printf("%s crID=%d crIDswitch=%d fiber=%d nch=%d nHead=%d\n",name, crID, crIDswitch,fiber,nch,nHead);
+  printf("%s crID=%d crIDswitch=%d fiber=%d nCh=%d nHead=%d type=%c\n",name, crID, crIDswitch,fiber,nCh,nHead,type);
 }
 
 //--------------------------------------------------
@@ -42,8 +42,9 @@ void EEmcDbCrate::clear() {
   crID=-1;
   crIDswitch=-2; 
   fiber=-3;
-  nch=-4;
+  nCh=-4;
   nHead=-5;
+  type='X';
 }
 
 
@@ -114,6 +115,9 @@ int EEmcDbCrate::importAscii(FILE *fd){
 
 
 // $Log: EEmcDbCrate.cxx,v $
+// Revision 1.2  2004/03/28 04:09:08  balewski
+// storage of EEMC raw data, not finished
+//
 // Revision 1.1  2004/03/19 21:31:52  balewski
 // new EEMC data decoder
 //
