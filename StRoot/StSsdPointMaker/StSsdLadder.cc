@@ -50,11 +50,11 @@ void StSsdLadder::initWafers(St_ssdWafersPosition *wafpos)
 
 
 
-void StSsdLadder::initWafers(ssdWafersPosition_st *position)
+void StSsdLadder::initWafers(ssdWafersPosition_st *position, int positionSize)
 {
   int idWafer = 0;
   int iWaf    = 0;
-  for (int i = 0; i < 10*mNWaferPerLadder ; i++)    // need to be change
+  for (int i = 0; i <positionSize ; i++)    // loop over the full table now.
     {
       idWafer = position[i].id;
       iWaf = idWaferToWaferNumb(idWafer);
