@@ -53,7 +53,7 @@ MESS ************************************************************
 MESS ****  Open input and output disk files.                 ****
 MESS ************************************************************
 
-DIO/NEWFILESTREAM idat test_data.xdf R
+DIO/NEWFILESTREAM idat  $STAR_DATA/samples/event_0000050.xdf R
 DIO/NEWFILESTREAM odat t140out.xdf W
 MESS
 MESS ************************************************************
