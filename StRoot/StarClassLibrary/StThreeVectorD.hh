@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.hh,v 1.9 2005/02/05 01:14:48 perev Exp $
+ * $Id: StThreeVectorD.hh,v 1.10 2005/03/28 06:03:58 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.hh,v $
+ * Revision 1.10  2005/03/28 06:03:58  perev
+ * Defence FPE added
+ *
  * Revision 1.9  2005/02/05 01:14:48  perev
  * test for zero mag added
  *
@@ -215,12 +218,12 @@ inline double StThreeVectorD::z() const {return mX3;}
 
 inline double StThreeVectorD::theta() const
 {
-    return acos(mX3/(this->mag()+1.e-10));
+    return acos(mX3/(this->mag()+1.e-20));
 }
 
 inline double StThreeVectorD::cosTheta() const
 {
-    return mX3/(this->mag()+1.e-10);
+    return mX3/(this->mag()+1.e-20);
 }
 
 inline double StThreeVectorD::phi() const
@@ -231,12 +234,12 @@ inline double StThreeVectorD::phi() const
 
 inline double StThreeVectorD::pseudoRapidity() const
 {
-    return -::log(tan(theta()/2.));
+    return -::log(tan(theta()/2.)+1e-20);
 }
 
 inline StThreeVectorD StThreeVectorD::unit() const
 {
-    return *this/(this->mag()+1.e-10);
+    return *this/(mag()+1e-20);
 }
 
 inline double StThreeVectorD::massHypothesis(double mass) const

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVectorD.hh,v 1.4 2003/09/02 17:59:35 perev Exp $
+ * $Id: StLorentzVectorD.hh,v 1.5 2005/03/28 06:03:06 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StLorentzVectorD.hh,v $
+ * Revision 1.5  2005/03/28 06:03:06  perev
+ * Defence FPE added
+ *
  * Revision 1.4  2003/09/02 17:59:35  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -291,7 +294,7 @@ inline double& StLorentzVectorD::operator[] (size_t i)
 
 inline double StLorentzVectorD::rapidity() const
 {
-    return 0.5*::log((mX4+mThreeVector.z())/(mX4-mThreeVector.z()));
+    return 0.5*::log((mX4+mThreeVector.z())/(mX4-mThreeVector.z())+1e-20);
 }
 
 inline StLorentzVectorD StLorentzVectorD::operator- ()

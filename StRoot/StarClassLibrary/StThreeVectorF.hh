@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.hh,v 1.12 2005/02/05 01:15:19 perev Exp $
+ * $Id: StThreeVectorF.hh,v 1.13 2005/03/28 06:04:25 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.hh,v $
+ * Revision 1.13  2005/03/28 06:04:25  perev
+ * Defence FPE added
+ *
  * Revision 1.12  2005/02/05 01:15:19  perev
  * test for zero mag added
  *
@@ -229,7 +232,7 @@ inline float StThreeVectorF::theta() const
 
 inline float StThreeVectorF::cosTheta() const
 {
-    return mX3/(this->mag()+1.e-10);
+    return mX3/(mag()+1.e-10);
 }
 
 inline float StThreeVectorF::phi() const
@@ -240,12 +243,12 @@ inline float StThreeVectorF::phi() const
 
 inline float StThreeVectorF::pseudoRapidity() const
 {
-    return -::log(tan(theta()/2.));
+    return -::log(tan(theta()/2.)+1e-20);
 }
 
 inline StThreeVectorF StThreeVectorF::unit() const
 {
-    return *this/(this->mag()+1.e-10);
+    return *this/(mag()+1.e-10);
 }
 
 inline float StThreeVectorF::massHypothesis(float mass) const
