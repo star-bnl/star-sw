@@ -27,6 +27,8 @@
 #include "tables/St_HitError_Table.h"
 #include "StMatrixD.hh"
 
+//#define TPC_IDEAL_GEOM
+
 StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active, const string & inputFile)
   : StiDetectorBuilder("Tpc",active,inputFile), _gas(0), _fcMaterial(0), _padPlane(0), _dimensions(0)
 {
@@ -468,12 +470,17 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       local2GlobalRotation = unit;
       for (int i = 0; i < 3; i++) {
 	//	if (debug>1) cout << "dirLS\t" << dirLS[i] << endl;
+#ifndef TPC_IDEAL_GEOM 
 	StTpcLocalDirection        dirL;      
 	StTpcLocalSectorAlignedDirection  dirLSA;
 	transform(dirLS[i],dirLSA);//   if (debug>1) cout << "dirLSA\t" << dirLSA << endl;
 	transform(dirLSA,dirL);    //   if (debug>1) cout << "dirL\t" << dirL << endl;
 	StGlobalDirection          dirG;
 	transform(dirL,dirG);//      if (debug>1) cout << "dirG\t" << dirG << endl;
+#else
+	StTpcLocalDirection  dirG;
+	transform(dirLS[i],dirG);
+#endif
 	local2GlobalRotation(i+1,1) = dirG.position().x();
 	local2GlobalRotation(i+1,2) = dirG.position().y();
 	local2GlobalRotation(i+1,3) = dirG.position().z();
@@ -481,11 +488,15 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       //      if (debug>1) cout << "Local2GlobalRotation = " << local2GlobalRotation << endl;
       double y  = transform.yFromRow(row+1);
        StTpcLocalSectorCoordinate  lsCoord(0., y, dZ, sector+1, row+1);// if (debug>1) cout << lsCoord << endl;
+#ifndef TPC_IDEAL_GEOM 
       StTpcLocalSectorAlignedCoordinate lsCoordA;  
       transform(lsCoord,lsCoordA);//                       if (debug>1) cout << lsCoordA << endl;                   
       StGlobalCoordinate  gCoord; 
       transform(lsCoordA, gCoord);//                       if (debug>1) cout << gCoord << endl;                   
-      
+#else  // Ideal geom
+      StTpcLocalCoordinate gCoord;
+      transform(lsCoord, gCoord);
+#endif      
       //unit vector normal to the pad plane
       double nx = local2GlobalRotation(2,1);
       double ny = local2GlobalRotation(2,2);
