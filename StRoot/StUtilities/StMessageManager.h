@@ -1,5 +1,8 @@
-// $Id: StMessageManager.h,v 1.3 1999/06/24 23:23:59 genevb Exp $
+// $Id: StMessageManager.h,v 1.4 1999/06/28 02:40:56 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.4  1999/06/28 02:40:56  genevb
+// Additional backward compatibilit with MSG (msg_enable, msg_enabled, msg_disable
+//
 // Revision 1.3  1999/06/24 23:23:59  genevb
 // Added message call for compatibility with old fortran code
 //
@@ -30,6 +33,9 @@
 #ifndef __CINT__
 #include "fortranc.h"
 #define Message_ F77_NAME(message,MESSAGE)
+#define Msg_Enable_ F77_NAME(msg_enable,MSG_ENABLE)
+#define Msg_Enabled_ F77_NAME(msg_enabled,MSG_ENABLED)
+#define Msg_Disable_ F77_NAME(msg_disable,MSG_DISABLE)
 #define StMessage_ F77_NAME(stmessage,STMESSAGE)
 #define StInfo_ F77_NAME(stinfo,STINFO)
 #define StWarning_ F77_NAME(stwarning,STWARNING)
@@ -37,6 +43,9 @@
 #define StMessAddType_ F77_NAME(stmessaddtype,StMESSADDTYPE)
 extern "C" {
 R__EXTERN  void type_of_call Message_(Char_t* mess="", int lines=1, int id=-1);
+R__EXTERN  void type_of_call Msg_Enable_(Char_t* mess="");
+R__EXTERN   int type_of_call Msg_Enabled_(Char_t* mess="", int id=-1);
+R__EXTERN  void type_of_call Msg_Disable_(Char_t* mess="");
 R__EXTERN  void type_of_call StMessage_(Char_t* mess="", Char_t* type="I", Char_t* opt="O");
 R__EXTERN  void type_of_call StInfo_(Char_t* mess="", Char_t* opt="O");
 R__EXTERN  void type_of_call StWarning_(Char_t* mess="", Char_t* opt="O");
@@ -89,6 +98,7 @@ class StMessageManager {
          Char_t* s3="", Char_t* s4="")
          {return RemoveMessage(FindMessage(s1,s2,s3,s4));}
    virtual       void SetLimit(Char_t* str, Int_t n=0) {messCounter->SetLimit(str,n);}
+   virtual        int GetLimit(Char_t* str) {return messCounter->GetLimit(str);}
    virtual       void ListLimits() {messCounter->ListLimits();}
    virtual       void RemoveLimit(Char_t* str) {SetLimit(str,-1);}
    virtual       void SwitchOff(Char_t* str) {SetLimit(str,0);}

@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.5 1999/06/26 00:24:53 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.6 1999/06/28 02:40:56 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.6  1999/06/28 02:40:56  genevb
+// Additional backward compatibilit with MSG (msg_enable, msg_enabled, msg_disable
+//
 // Revision 1.5  1999/06/26 00:24:53  genevb
 // Fixed const type mismatches
 //
@@ -298,27 +301,40 @@ void type_of_call Message_(Char_t* mess, int lines, int id) {
   char* cptr = strchr(mess,'-');
   char* type = defaultMessType;
   if (cptr) strncpy(type,++cptr,1);
-  StMessageManager::Instance()->Message(mess,type);
+  gMessMgr->Message(mess,type);
+}
+//________________________________________
+void type_of_call Msg_Enable_(Char_t* mess) {
+  gMessMgr->SwitchOn(mess);
+}
+//________________________________________
+int type_of_call Msg_Enabled_(Char_t* mess, int id) {
+  if ((gMessMgr->GetLimit(mess))==0) return 0;
+  return 1;
+}
+//________________________________________
+void type_of_call Msg_Disable_(Char_t* mess) {
+  gMessMgr->SwitchOff(mess);
 }
 //________________________________________
 void type_of_call StMessage_(Char_t* mess, Char_t* type, Char_t* opt) {
-  StMessageManager::Instance()->Message(mess,type,opt);
+  gMessMgr->Message(mess,type,opt);
 }
 //________________________________________
 void type_of_call StInfo_(Char_t* mess, Char_t* opt) {
-  StMessage_(mess,"I",opt);
+  gMessMgr->Message(mess,"I",opt);
 }
 //________________________________________
 void type_of_call StWarning_(Char_t* mess, Char_t* opt) {
-  StMessage_(mess,"W",opt);
+  gMessMgr->Message(mess,"W",opt);
 }
 //________________________________________
 void type_of_call StError_(Char_t* mess, Char_t* opt) {
-  StMessage_(mess,"E",opt);
+  gMessMgr->Message(mess,"E",opt);
 }
 //________________________________________
 void type_of_call StMessAddType_(const Char_t* type, const Char_t* text) {
-  StMessageManager::Instance()->AddType(type,text);
+  gMessMgr->AddType(type,text);
 }
 
 //
@@ -556,7 +572,7 @@ int StMessageManager::AddType(const Char_t* type, const Char_t* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.5 1999/06/26 00:24:53 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.6 1999/06/28 02:40:56 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
