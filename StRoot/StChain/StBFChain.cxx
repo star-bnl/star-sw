@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.9 1999/08/10 17:15:10 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.10 1999/08/13 01:12:24 fine Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.10  1999/08/13 01:12:24  fine
+// StMaker::GetHist has been introduced
+//
 // Revision 1.9  1999/08/10 17:15:10  fisyak
 // Add xin == in
 //
@@ -110,7 +113,7 @@ Char_t *ChainComments[] = {
   "Trigger        \tin Chain (St_[ctf+mwc+trg]_Maker)",
   "St_ctf_Maker   \tin Chain",
   "St_mwc_Maker   \tin Chain",
-  "St_l2t_Maker   \tin Chain",
+  "St_l3t_Maker   \tin Chain",
   "StRchMaker     \tin Chain",
   "GLOBAL         \tin Chain (St[Match+Primary+V0+Xi+Kink]Maker)",
   "StMatchMaker   \tin Chain",
