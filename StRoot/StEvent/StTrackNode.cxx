@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackNode.cxx,v 2.9 2002/04/18 23:38:21 jeromel Exp $
+ * $Id: StTrackNode.cxx,v 2.10 2002/04/24 02:26:57 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackNode.cxx,v $
+ * Revision 2.10  2002/04/24 02:26:57  ullrich
+ * Replaced iterator loop by index loop in entries(StTrackType).
+ *
  * Revision 2.9  2002/04/18 23:38:21  jeromel
  * Implementation of the SVT 2 tables scheme ...
  *
@@ -46,7 +49,7 @@
 
 ClassImp(StTrackNode)
 
-static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.9 2002/04/18 23:38:21 jeromel Exp $";
+static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.10 2002/04/24 02:26:57 ullrich Exp $";
 
 StTrackNode::StTrackNode() { /* noop */ }
 
@@ -144,6 +147,7 @@ StTrackNode::track(unsigned int i)
 unsigned int
 StTrackNode::entries(StTrackType type) const
 {
+    unsigned int i;
     StSPtrVecTrackConstIterator iterS;
     StPtrVecTrackConstIterator  iter;
     unsigned int                counter;
@@ -151,8 +155,8 @@ StTrackNode::entries(StTrackType type) const
     switch (type) {
     case primary:
     case estPrimary:
-        for (counter = 0, iter = mReferencedTracks.begin(); iter != mReferencedTracks.end(); iter++)
-            if ((*iter)->type() == type) counter++;
+        for (counter=0, i=0; i < mReferencedTracks.size(); i++)
+            if (mReferencedTracks[i]->type() == type) counter++;
         return counter;
         break;
     case secondary:                // not implemented yet
@@ -162,8 +166,8 @@ StTrackNode::entries(StTrackType type) const
     case tpt:
     case global:
     case estGlobal:
-        for (counter = 0, iterS = mOwnedTracks.begin(); iterS != mOwnedTracks.end(); iterS++)
-            if ((*iterS)->type() == type) counter++;
+        for (counter=0, i=0; i < mOwnedTracks.size(); i++)
+            if (mOwnedTracks[i]->type() == type) counter++;
         return counter;
         break;
     default:
