@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.114  2003/03/13 16:30:59  andrewar
+// Added plotting package
+//
 // Revision 1.113  2003/03/13 15:15:51  pruneau
 // various
 //
@@ -90,6 +93,7 @@
 #include "StiSvt/StiSvtDetectorGroup.h"
 #include "StiEmc/StiEmcDetectorGroup.h"
 #include "Sti/StiKalmanTrackNode.h"
+#include "Sti/StiTrackingPlots.h"
 #include "Sti/StiKalmanTrack.h"
 
 #include "StiGui/StiRootDisplayManager.h"
@@ -205,6 +209,7 @@ Int_t StiMaker::Make()
       InitDetectors();
       cout << "StiMaker::Make() -I- Instantiate Tracker" <<  endl;
       tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
+
       if (!tracker)
 	throw runtime_error("StiMaker::Make() - FATAL - tracker is not a StiKalmanTrackFinder");
       tracker->initialize();
@@ -217,6 +222,7 @@ Int_t StiMaker::Make()
 	  _toolkit->getDisplayManager()->draw();
 	  _toolkit->getDisplayManager()->update();
 	}
+      plotter = new StiTrackingPlots();
       cout <<"\n --- StiMaker::InitRun(): Done building --- \n"<<endl;
     }
   eventIsFinished = false;
@@ -258,6 +264,7 @@ void StiMaker::finishEvent()
   clockGlobalFinder.start();   
   tracker->findTracks();  
   clockGlobalFinder.stop();
+  plotter->fillStandardPlots(_toolkit->getTrackContainer());
   if (_toolkit->isGuiEnabled())
 	{
 	tracker->update();
