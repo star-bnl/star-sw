@@ -1,6 +1,9 @@
       subroutine control
 +CDE,gcbank,gcnum,gcflag,quest.
       print *,' control ready '
+      IQUEST(100) = JVOLUM
+      call agsbegm('CONTROL',IPRIN)
+      if (ISLFLAG('CONT','HIST')<=0) return
       call hbook1(11,'all particle PID',           60, 0.5, 60.5, 0) 
       call hbook1(12,'primary particle PID',       60, 0.5, 60.5, 0) 
       call hbook1(13,'all particles with Nhit>10', 60, 0.5, 60.5, 0) 
@@ -8,13 +11,12 @@
       call hbook1(15,'particle theta  ',           50,   0, 3.14, 0) 
       call hbook1(16,'particle rapidity  ',        50, -10,  10, 0) 
       call hbook1(21,'particle vertex (LOG) ',     50, -15,  5, 0) 
-      IQUEST(100)=JVOLUM
       end
 
       subroutine agudigi
       implicit   none
 +CDE,gcbank,gcnum,gcflag,quest.
-      integer IEV/0/,Itrac,Ipart,Ivert,Nu,NtpcHit,Iad,
+      integer ISLFLAG,IEV/0/,Itrac,Ipart,Ivert,Nu,NtpcHit,Iad,
      >        Iw,Ihit,Ltra,Ntbeam,Nttarg,Nhit,N10,
      >        Nvs(15)/15*0/,NBV(15),IP,ISTAT,IDPDG,MOTH(2),IDAU(2)
       real    VMOD,Tofg,vert(4),pvert(4),ubuf(100),Digi(15),
@@ -28,6 +30,8 @@
          go to :e:
       endif
 * 
+      if (ISLFLAG('CONT','HIST')<=0) goto :r:
+
       call xntup ('Ieotri',Ieotri)
       call xntup ('Ntrack',Ntrack)
       call xntup ('Nvertx',Nvertx)
@@ -93,11 +97,12 @@
                      
       enddo
 
-      IEV=IEV+1
       call xntup ('Ntr10',N10)
       call xntup ('*** end_of_event ***',1)
-      if (idebug>0) print *,' EVENT ',IEV,' DONE '
+
+:r:   IEV=IEV+1
       iquest(100)=Iev
+      if (ISLFLAG('CONT','PRIN')>0) print *,' EVENT ',IEV,' DONE '
       return
 :e:
       IEOTRI = 1
