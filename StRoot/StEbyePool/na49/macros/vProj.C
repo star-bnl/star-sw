@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: vProj.C,v 1.9 2002/03/23 21:46:20 posk Exp $
+// $Id: vProj.C,v 1.10 2002/03/26 17:48:42 posk Exp $
 //
 // Author:       Art Poskanzer, May 2000
 // Description:  Projects v(y,pt) on the y and Pt axes
@@ -228,8 +228,12 @@ void vProj(char* part = "pion") {
 	// Get the resolution and calculate chi
 	double res = resHist[n]->GetBinContent(j+1);
 	double chi = chi(res);
-	double chiSub = chi / 2.;
-
+	double chiSub;
+	if (eBeam == 158) {
+	  chiSub = chi /  sqrt(2.);
+	} else {
+	  chiSub = chi / 2.;
+	}
 	double resCorr;
 	double chiFactCorr;
 	if (chiSub < 0.1 && frac < 0.1) {
@@ -423,7 +427,7 @@ void vProj(char* part = "pion") {
 	    content = vSum / yieldSum;
 	    error   = sqrt(err2Sum) / yieldSum;
 	  }
-	  if(j != 1 || n != 1 || eBeam != 40)
+	  if(j != 1 || n != 1 || eBeam != 40) // 40 GeV v2 cen 1 res. zero
 	    yieldY[n]->SetBinContent(xBin, yieldSum);
 	  vY[n][j]->SetBinContent(xBin, content);
 	  vY[n][j]->SetBinError(xBin, error);
@@ -469,7 +473,7 @@ void vProj(char* part = "pion") {
 	  error   = sqrt(err2Sum) / yieldSum;
           if (pTFlow) error *= pt;
 	}
-	if(j != 1 || n != 1 || eBeam != 40)
+	if(j != 1 || n != 1 || eBeam != 40) // 40 GeV v2 cen 1 res. zero
 	  yieldPt[n]->SetBinContent(yBin, yieldSum);
 	vPt[n][j]->SetBinContent(yBin, content);
 	vPt[n][j]->SetBinError(yBin, error);
@@ -522,7 +526,7 @@ void vProj(char* part = "pion") {
 	content = vSum / yieldSum;
 	error   = sqrt(err2Sum) / yieldSum;
       }
-      if(j != 1 || n != 1 || eBeam != 40) 
+      if(j != 1 || n != 1 || eBeam != 40)  // 40 GeV v2 cen 1 res. zero
 	yieldPt[0]->SetBinContent(xBin, yieldSum);
       vPt[0][j]->SetBinContent(xBin, content);
       vPt[0][j]->SetBinError(xBin, error);
@@ -931,6 +935,9 @@ static Double_t F(double chi) {
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: vProj.C,v $
+// Revision 1.10  2002/03/26 17:48:42  posk
+// Corrected sqrt(2) mistake.
+//
 // Revision 1.9  2002/03/23 21:46:20  posk
 // More 40 GeV compatability.
 //
@@ -948,22 +955,6 @@ static Double_t F(double chi) {
 //
 // Revision 1.3  2001/03/16 22:35:10  posk
 // plotGraphs.C makes the final graphs.
-//
-// $Log: vProj.C,v $
-// Revision 1.9  2002/03/23 21:46:20  posk
-// More 40 GeV compatability.
-//
-// Revision 1.8  2002/01/16 18:21:49  posk
-// Fit q in plot.C. Updated momentum conservation corr. in vProj.C.
-//
-// Revision 1.7  2001/11/06 18:02:54  posk
-// 40 GeV compatability.
-//
-// Revision 1.6  2001/10/24 21:46:36  posk
-// Added conservation of momentum correction. Calculate triply integrated v values.
-//
-// Revision 1.4  2001/05/14 23:20:29  posk
-// Uses cross section weighting for all projections.
 //
 // Revision 1.2  2001/03/06 17:33:04  posk
 // All macros now work.
