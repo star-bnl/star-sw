@@ -28,6 +28,7 @@
 
 class TBrowser;
 class TChain;
+class St_XDFFile; 
 
 class StChain : public TNamed {
 
@@ -38,8 +39,12 @@ private:
    Int_t               m_Event;             //Event number
    Int_t               m_Mode;              //Run mode
    St_DataSet         *m_DataSet;           //The main chain dataset structure
+   St_DataSetIter     *m_RunIter;           //The parameters
+   St_DataSetIter     *m_CalibIter;         //The calibration       
+   St_DataSetIter     *m_EventIter;         //The Event (fruits)
    TTree              *m_Tree;              //Pointer to the Root tree
    TList              *m_Makers;            //List of Makers
+   St_XDFFile         *m_File;              //!Pointer to input file 
 
 public:
                       StChain();
@@ -47,19 +52,28 @@ public:
    virtual           ~StChain();
    virtual void       Browse(TBrowser *b);
    virtual void       Draw(Option_t *option="");  // *MENU*
-   St_DataSet        *DataSet(){ return m_DataSet; }
+   St_DataSet        *DataSet(){return m_DataSet;}
+   St_DataSet        *DataSet(Char_t *makername); // find the maker by name and return its dataset
    Int_t              GetVersion() {return m_Version;}
    Int_t              GetVersionDate() {return m_VersionDate;}
    virtual void       Clear(Option_t *option="");
    virtual void       FillClone();
+   virtual void       FillXDF(St_XDFFile &file);
    virtual void       Finish();
    virtual void       GetEvent(Int_t event=1);  // *MENU*
+   St_DataSetIter    *GetRunIter() {return m_RunIter;}
+   St_DataSetIter    *GetCalibIter() {return m_CalibIter;}
    virtual void       Init();
    Bool_t             IsFolder() {return kTRUE;}
    virtual Int_t      Make(Int_t i=0);
    virtual void       Paint(Option_t *option="");
    virtual void       PrintInfo();
    virtual void       SetDefaultParameters();
+   virtual void       SetInputXDFile(St_XDFFile *file) {m_File = file;}
+   void               SetRunIter(St_DataSetIter *run) {m_RunIter = run;}
+   void               SetCalibIter(St_DataSetIter *calib) {m_CalibIter = calib;}
+
+   virtual St_XDFFile *XDFFile() {return m_File;}
 
    TList             *Makers()    {return m_Makers;}
    StMaker           *Maker(const char *name) {return (StMaker*)m_Makers->FindObject(name);}
