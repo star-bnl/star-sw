@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.43 2003/10/30 20:08:13 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.44 2003/11/03 22:24:45 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -239,13 +239,16 @@ void StMuDstMaker::clear(TClonesArray* t, int& counter,int del){
   if (!t)  return;
   int num = t->GetLast()+1;
   if(!num) return;
-  if (del) t->Delete(); else t->Clear();
-  for (int i=0;i<num; i++) {
-    TObject *to = (*t)[i];
-    if (!to) 				continue;
-    if (to->TestBit(kNotDeleted)) 	continue;
-    t->New(i);
+  if (del) {
+    t->Delete(); 
+    for (int i=0;i<num; i++) {
+      TObject *to = (*t)[i];
+      if (!to) 				continue;
+      if (to->TestBit(kNotDeleted)) 	continue;
+      t->New(i);
+    }
   }
+  t->Clear();
   counter=0;
   DEBUGMESSAGE3("out");
 }
@@ -921,6 +924,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.44  2003/11/03 22:24:45  perev
+ * TClones::Clear added into StMuDstMaker::clear to avoid empty ebjects writing
+ *
  * Revision 1.43  2003/10/30 20:08:13  perev
  * Check of quality added
  *
