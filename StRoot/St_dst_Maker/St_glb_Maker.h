@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.h,v 1.14 1999/02/16 03:03:47 fisyak Exp $
+// $Id: St_glb_Maker.h,v 1.15 1999/02/18 16:43:12 caines Exp $
 // $Log: St_glb_Maker.h,v $
+// Revision 1.15  1999/02/18 16:43:12  caines
+// Added in est the 4th layer tracking
+//
 // Revision 1.14  1999/02/16 03:03:47  fisyak
 // Split Make and Histograms
 //
@@ -67,6 +70,7 @@
 #endif
 
 class St_svm_ctrl;
+class St_est_ctrl;
 class St_evr_privert;
 class St_evr_evrpar;
 class St_egr_propagate;
@@ -82,7 +86,7 @@ class St_glb_Maker : public StMaker {
 
  private:
   Bool_t drawinit;
-  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.14 1999/02/16 03:03:47 fisyak Exp $";
+  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.15 1999/02/18 16:43:12 caines Exp $";
   // egr
   Int_t         m_scenario;   
   //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
@@ -129,8 +133,7 @@ class St_glb_Maker : public StMaker {
   Int_t            m_usevert;    // 
   Int_t            m_flag;       //
   St_svm_ctrl    *m_svm_ctrl;    // ! 
-  St_evr_privert *m_evr_privert; //!
-  
+  St_evr_privert *m_evr_privert; //!  
   St_evr_evrpar  *m_evr_evrpar;  //!
   St_egr_propagate *m_tp_param;  //!
   St_ev0_ev0par  *m_ev0par;      //!
@@ -141,6 +144,7 @@ class St_glb_Maker : public StMaker {
   St_egr_egrpar  *m_egr_egrpar;  //!
   St_egr_egrpar  *m_egr2_egrpar; //!
   St_particle_dst_param *m_particle_dst_param; //!
+  St_est_ctrl    *m_est_ctrl; //!
   
   // Histograms
   static const Int_t nxpT;
@@ -162,6 +166,7 @@ class St_glb_Maker : public StMaker {
   TH1F     *m_ev0_lama_hist;//! Lambda mass
   TH1F     *m_ev0_k0ma_hist;//! K0 mass
   TH2F     *m_p_dedx_rec;   //! dedx vs p
+  
  public: 
   St_glb_Maker(const char *name="global", const char *title="event/data/global");
   virtual       ~St_glb_Maker();
