@@ -35,7 +35,9 @@ extern CC_P int tbr_init();
 extern CC_P int tbr_start();
 extern CC_P int tbr_stop();
 extern CC_P void tbr_def_();
-
+extern CC_P void tbrProgress(int ,int, char *, char *);
+extern CC_P void DoXStuff();
+extern CC_P void GetRidOfWindows();
 #ifndef NOKUIP
 extern CC_P void kam_tbr_count_();
 extern CC_P void kam_tbr_list_();
