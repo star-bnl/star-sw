@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.14 2000/07/19 22:03:43 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.15 2000/07/27 18:06:18 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.15  2000/07/27 18:06:18  ward
+// Put TriggerWd into DST instead of TrgToken (for Jan Belewski).
+//
 // Revision 1.14  2000/07/19 22:03:43  ward
 // Switch from non-attenuated to attenuated ZDC.
 //
@@ -119,7 +122,7 @@ void St_trg_Maker::SecondDstDaq(St_dst_L0_Trigger *dst2) {
   int i;
   dst_L0_Trigger_st *tt = dst2->GetTable();
   tt->TriggerActionWd  = GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd;
-  tt->TriggerWd        = GraceSlick->EvtDesc.TCU1.FIFO1.TrgToken;
+  tt->TriggerWd        = GraceSlick->EvtDesc.TCU3.FIFO3.TriggerWd;
   for(i=0;i<32;i++) tt->CPA[i]=GraceSlick->TrgSum.DSM.CPA[i];
   tt->MWC_CTB_mul      = GraceSlick->TrgSum.DSM.lastDSM[2]; // Per Hank Crawford, Jan 6 2000.
   tt->MWC_CTB_dipole   = 0;
