@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Module.cxx,v 1.11 2000/03/24 20:35:22 fine Exp $
+// $Id: St_Module.cxx,v 1.12 2000/03/26 01:59:23 fine Exp $
 
 #include <assert.h>
 #include <string.h>
@@ -79,6 +79,14 @@ St_Module::~St_Module()
   SafeDelete(fParams);     
 }
 //______________________________________________________________________________
+void St_Module::ClearParams()
+{
+  if (fHeaders) {
+     fHeaders->Delete();
+     fParams->Clear();
+  }
+}
+//______________________________________________________________________________
 void St_Module::SetAllParameters(TTable *f1,TTable *f2,TTable *f3,TTable *f4
                                ,TTable *f5,TTable *f6,TTable *f7,TTable *f8
                                ,TTable *f9,TTable *f10,TTable *f11,TTable *f12
@@ -91,6 +99,7 @@ void St_Module::SetAllParameters(TTable *f1,TTable *f2,TTable *f3,TTable *f4
                                ,TTable *f37,TTable *f38
                                ) 
 {  
+  ClearParams();
   SetParameter(f38);
   SetParameter(f37);
   SetParameter(f36);
@@ -232,34 +241,32 @@ Int_t St_Module::ExecuteModule()
 {
 
    Int_t errcode = 0;
-#if 0
    printf(" This \"%s\" module has ", GetName());
    if (fParams) 
    {
-     if (fN == 1)
+     Int_t thisSize = fParams->GetSize();
+     if (thisSize == 1)
        printf("only one parameter: ");
      else
-       printf("%i parameters: ",fN);
-     for (Int_t i=0;i<fN;i++)
+       printf("%i parameters: ",thisSize);
+     for (Int_t i=0;i<thisSize;i++)
      {
-        if (st_Params[i]) printf(" %x ",*((ULong_t *)st_Params[i]));
+        if (fParams->At(i)) printf(" %x ",*((ULong_t *)fParams->At(i)));
         else { 
             errcode++; 
 	    //yf            Char_t *suffix[4]={"st","nd","d","th"};
-            Char_t *title[2] = {"header","table"};
 	    //yf            Bool_t istable = i & 1;
-            printf("%i %s has not been defined yet\n"
-                   ,(i>>1)+1, title[i&1]);
+            printf("%i parameter has not been defined yet\n"
+                   ,i+1);
         }
 
-        if (i < fN-1) printf(", ");
+        if (i < thisSize-1) printf(", ");
      }
      printf("; \n");
 ///=====     assert (!errcode);
    }
    else
     printf(" NO parameters \n");
-#endif
    return errcode;
 }
 #if 0
@@ -336,6 +343,9 @@ void St_Module::Streamer(TBuffer &)
 
 //________________________________________________________________________
 // $Log: St_Module.cxx,v $
+// Revision 1.12  2000/03/26 01:59:23  fine
+// new version of St_Module. Works for STAF module only
+//
 // Revision 1.11  2000/03/24 20:35:22  fine
 // adjusted to ROOT 2.24. Doesn't work yet. Under development
 //
