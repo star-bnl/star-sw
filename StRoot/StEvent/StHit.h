@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.13 2004/07/30 22:28:31 fisyak Exp $
+ * $Id: StHit.h,v 2.14 2004/08/06 15:37:09 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.14  2004/08/06 15:37:09  fisyak
+ * Add clster id
+ *
  * Revision 2.13  2004/07/30 22:28:31  fisyak
  * Add transient pointer to next Hit
  *
@@ -77,7 +80,7 @@ public:
     StHit(const StThreeVectorF&,
           const StThreeVectorF&,
           unsigned int, float, unsigned char = 0,
-	  UShort_t idTruth=0, UShort_t quality=0);
+	  UShort_t idTruth=0, UShort_t quality=0, UShort_t id =0);
     // StHit(const StHit&);            use default
     // StHit& operator=(const StHit&); use default
     ~StHit();
@@ -94,6 +97,7 @@ public:
     int             usedInFit() const;
     UShort_t        idTruth() const {return mIdTruth;}
     UShort_t        quality() const {return mQuality;}
+    UShort_t        id()      const {return mId;}
     StHit*          nextHit() const {return mNextHit;}
     void setCharge(float);
     void setFlag(unsigned char);
@@ -117,8 +121,9 @@ protected:
     UChar_t        mFitFlag;
     UShort_t       mIdTruth; // simulation track id 
     UShort_t       mQuality; // quality of this information (percentage of charge produced by mIdTruth)
+    UShort_t       mId;
     StHit*         mNextHit; //!
-    ClassDef(StHit,2)
+    ClassDef(StHit,3)
 };
 
 inline unsigned int StHit::bits(unsigned int bit, unsigned int nbits) const

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.10 2004/07/15 16:36:25 ullrich Exp $
+ * $Id: StTpcHit.h,v 2.11 2004/08/06 15:37:09 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.11  2004/08/06 15:37:09  fisyak
+ * Add clster id
+ *
  * Revision 2.10  2004/07/15 16:36:25  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -61,7 +64,8 @@ public:
     StTpcHit();
     StTpcHit(const StThreeVectorF&,
              const StThreeVectorF&,
-             unsigned int, float, unsigned char = 0);
+             unsigned int, float, unsigned char = 0,
+	     UShort_t idTruth=0, UShort_t quality=0, UShort_t id =0);
     StTpcHit(const dst_point_st&);
     // StTpcHit(const StTpcHit&);            use default
     // StTpcHit& operator=(const StTpcHit&); use default

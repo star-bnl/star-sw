@@ -86,7 +86,7 @@ CC:  Loop thru TPC space points; store all points
          do i = 1,tcl_tphit_h.nok
             if(dst_point_h.nok .lt. dst_point_h.maxlen) then
                dst_point_h.nok = dst_point_h.nok + 1
-
+               dst_point(dst_point_h.nok).cluster = tcl_tphit(i).cluster
 CC:  Fill hardware position for hit>>>
 
                dst_point(dst_point_h.nok).hw_position =
@@ -195,6 +195,7 @@ CC:  Loop thru SVT and SSD space points; store all points.
          do i = 1,scs_spt_h.nok
             if(dst_point_h.nok .lt. dst_point_h.maxlen) then
                dst_point_h.nok = dst_point_h.nok + 1
+               dst_point(dst_point_h.nok).cluster = scs_spt(i).id
 
 CC:  Fill hardware position for hit>>>
 CC:            Following line checks for SSD hits:

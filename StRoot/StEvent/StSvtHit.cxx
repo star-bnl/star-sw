@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.10 2004/07/15 16:36:25 ullrich Exp $
+ * $Id: StSvtHit.cxx,v 2.11 2004/08/06 15:37:09 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
+ * Revision 2.11  2004/08/06 15:37:09  fisyak
+ * Add clster id
+ *
  * Revision 2.10  2004/07/15 16:36:25  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -48,7 +51,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.10 2004/07/15 16:36:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.11 2004/08/06 15:37:09 fisyak Exp $";
 
 ClassImp(StSvtHit)
     
@@ -105,6 +108,7 @@ StSvtHit::StSvtHit(const dst_point_st& pt)
     // The hardware position stays at it is
     //
     mHardwarePosition = pt.hw_position;
+    mId               = pt.cluster;
 }
 
 StSvtHit::~StSvtHit() {/* noop */}

@@ -77,6 +77,7 @@
   long      charge;          /* total charge and max_adc                */
   short     id_simtrk;       /* id of simulated track */
   short     id_quality;      /* percentage of charge associated with above id */
+  long      cluster;         /* cluster index from clustering algorithm */	
  } ;
-/*  Last mod. for dst_point:   $Date: 2004/01/15 00:35:31 $ */
+/*  Last mod. for dst_point:   $Date: 2004/08/06 15:35:00 $ */
 
