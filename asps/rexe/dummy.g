@@ -25,10 +25,11 @@ subroutine pawfca;       print *,' dummy pawfca called ';       end
 subroutine pawbrk;       print *,' dummy pawbrk called ';       end
 subroutine pawcs;        print *,' dummy pawcs  called ';       end
 subroutine pgexi;        print *,' dummy pgexi  called ';       end
-subroutine gkfort;       print *,' dummy gkfort called ';       end
+*yf subroutine gkfort;       print *,' dummy gkfort called ';       end
+subroutine gpdcay;       print *,' dummy gpdcay called ';       end
 subroutine csrmsl;       print *,' dummy csrmsl called ';       end
-subroutine csjcal;       print *,' dummy csjcal called ';       end
-subroutine csaddr;       print *,' dummy csaddr called ';       end
+*yf subroutine csjcal;       print *,' dummy csjcal called ';       end
+*yf subroutine csaddr;       print *,' dummy csaddr called ';       end
 subroutine csfile;       print *,' dummy csfile called ';       end
 subroutine csext;        print *,' dummy csext  called ';       end
 subroutine csexec;       print *,' dummy csexec called ';       end

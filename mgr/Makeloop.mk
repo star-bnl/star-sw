@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.38  1998/12/16 16:38:39  fisyak
+#  Add gstar to Root
+#
 #  Revision 1.37  1998/12/12 00:58:42  fisyak
 #  remove STAF
 #
@@ -190,7 +193,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/12/12 00:58:42 $ 
+#           Last modification $Date: 1998/12/16 16:38:39 $ 
 #  default setings
 # Current Working Directory
 #
@@ -276,6 +279,11 @@ ifneq (,$(findstring $(STAR_SYS),sgi_64 ))
 endif
 ifdef NT
 SUBDIRS := $(filter-out db, $(SUBDIRS)) 
+SUBDIRS := $(filter-out sim, $(SUBDIRS))
+SUBDIRS := $(filter-out g2t, $(SUBDIRS))
+SUBDIRS := $(filter-out gstar, $(SUBDIRS))
+SUBDIRS := $(filter-out dig, $(SUBDIRS))
+SUBDIRS := $(filter-out trg, $(SUBDIRS))
 endif
 SUBDIRS := $(filter-out global, $(SUBDIRS)) $(filter global, $(SUBDIRS))
 SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS)) 
