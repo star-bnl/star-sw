@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98   
-// $Id: St_NodePosition.h,v 1.3 1998/12/27 02:33:17 fine Exp $
+// $Id: St_NodePosition.h,v 1.4 1999/01/31 02:03:07 fine Exp $
 // $Log: St_NodePosition.h,v $
+// Revision 1.4  1999/01/31 02:03:07  fine
+// St_DataSetIter::Notify - new method + clean up
+//
 // Revision 1.3  1998/12/27 02:33:17  fine
 // St_Node, St_NodePosition - first working versions have been introduced *see macros/STAR_shapes.C for an example)
 //
@@ -25,7 +28,7 @@
   
 class TBrowser;
 class TRotMatrix;
- 
+  
 class St_NodePosition  : public TObject {
  protected:
    Double_t        fX;           //X offset with respect to parent object
@@ -37,6 +40,7 @@ class St_NodePosition  : public TObject {
  public:
         St_NodePosition(St_Node *node=0,Double_t x=0, Double_t y=0, Double_t z=0, TRotMatrix *matrix=0);
         St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t z, const Text_t *matrixname);
+        St_NodePosition(const St_NodePosition&pos):fNode(pos.GetNode()),fX(pos.GetX()),fY(pos.GetY()),fZ(pos.GetZ()),fMatrix(pos.GetMatrix()){;}
         virtual ~St_NodePosition(){;}
         virtual void        Browse(TBrowser *b);
         virtual Int_t       DistancetoPrimitive(Int_t px, Int_t py);

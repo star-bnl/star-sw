@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_Node.h,v 1.6 1999/01/30 04:24:21 fine Exp $
+// $Id: St_Node.h,v 1.7 1999/01/31 02:03:07 fine Exp $
 // $Log: St_Node.h,v $
+// Revision 1.7  1999/01/31 02:03:07  fine
+// St_DataSetIter::Notify - new method + clean up
+//
 // Revision 1.6  1999/01/30 04:24:21  fine
 // St_Table: Print memory leak fixed
 //
@@ -82,7 +85,7 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
                 TShape     *GetShape()  const {return fShape;}
         Int_t               GetVisibility() const {return fVisibility;}
         virtual TList      *GetListOfPositions() { return (TList *)(GetObject());}
-        virtual ULong_t   Hash() { return TObject::Hash();}
+        virtual ULong_t     Hash() { return TObject::Hash();}
         virtual void        ImportShapeAttributes();
         virtual Bool_t      Is3D()  {return kTRUE;}
         virtual TList      *Nodes() const { return GetList(); }
