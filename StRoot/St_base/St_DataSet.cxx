@@ -2,14 +2,18 @@
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
- 
-//*KEEP,TDataset,T=C++.
+// $Id: St_DataSet.cxx,v 1.50 1999/06/09 22:08:53 fine Exp $
+// $Log: St_DataSet.cxx,v $
+// Revision 1.50  1999/06/09 22:08:53  fine
+// Comment clean up
+//
+
 #include <iostream.h>
 #include "St_DataSetIter.h"
 #include "St_DataSet.h"
-//*KEEP,TBrowser.
+
 #include "TBrowser.h"
-//*KEND.
+
 #include "TSystem.h"
  
 //////////////////////////////////////////////////////////////////////////
@@ -28,13 +32,23 @@
 //                                                                      //
 //  The service this class does provide is to help the user to build    //
 //  and manage the hierarchy of his/her data but the data itself.       //
-//  So it is useful as soon as the "real file system folder" is useful  //
-//  with no real files loaded in.                                       //
 //                                                                      //
-//  So it is not "Container" but the basement (base class) to built     //
-//  the containers.                                                     //
-//  The one may derive the custom container classes from St_DataSet     //
-//  (see for example St_ObjectSet, St_Table, St_Node, St_FileSet etc )  //                                                                    //
+//  So it is not "Container" itself rather the basement (base class)    //
+//  to built the containers.                                            //
+//                                                                      //
+//  One may derive the custom container classes from St_DataSet.        //
+//  See for example St_ObjectSet, St_Table, St_Node, St_FileSet         //
+//  These classes  derived from St_DataSet:                             //
+//                                                                      //
+//   Class Name                                                         //
+//   ----------                                                         //
+//  St_ObjectSet::public St_DataSet - is a container for TObject        //
+//  St_Table::    public St_DataSet - is a container for the array      // 
+//                                    of any "plain" C-structure        //
+//  St_Node::     public St_DataSet - is a container for 3D objects     //
+//  StMaker::     public St_DataSet - is a container for STAR "control" //
+//                                    objects                           //
+//   etc etc                                                            //
 //                                                                      //
 //  St_DataSet class is a base class to implement the directory-like    //
 //  data structures and maintain it via St_DataSetIter class iterator   //
