@@ -44,9 +44,10 @@ typedef int pid_t;
 #define LEV_VER_MAX_ROWS 350
 #define PP printf(
 //:----------------------------------------------- PROTOTYPES         --
-#ifdef sun4os5pc
+
+#if defined(sun)
 extern "C" int gethostname(char *name, int namelen);
-#endif /* sun4os5pc */
+#endif
 
 extern CC_P void LogEnvInfo();
 void levConvertToDigits(char *xx) {
@@ -307,7 +308,7 @@ STAFCV_T levFactory:: registerVersion(const char *name,
 } /* nrow val */
 char *levFactory:: version() {
   char *c=NULL;
-  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.10 1998/05/18 18:13:59 dave Exp $";
+  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.11 1998/05/19 14:00:37 dave Exp $";
   c=(char*)MALLOC(strlen(v)+1);
   strcpy(c,v);
   return c;
