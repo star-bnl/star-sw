@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.hh,v 1.2 1999/02/10 04:26:32 lasiuk Exp $
+ * $Id: StTrsUnpacker.hh,v 1.3 1999/03/24 22:22:13 lasiuk Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.hh,v $
+ * Revision 1.3  1999/03/24 22:22:13  lasiuk
+ * confirm dataset delete
+ *
  * Revision 1.2  1999/02/10 04:26:32  lasiuk
  * TObject for passing
  *
@@ -34,7 +37,7 @@ class StTrsUnpacker : public StTpcUnpacker {
 public:
     StTrsUnpacker();
     ~StTrsUnpacker();
-    
+
     //StTrsUnpacker(const StTrsUnpacker&);
     //StTrsUnpacker& operator=(const StTrsUnpacker&);
 
