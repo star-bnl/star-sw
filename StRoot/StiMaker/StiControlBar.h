@@ -20,8 +20,10 @@ public:
 
     //To be called with buttons
     static void doNextStiGuiAction(); //do next action within this event
+    static void finishEvent(); //fit/find the entire event
     static void stepToNextEvent(); //step to the next event
-    static void stepThroughNEvents(); //step through user-specified number of events
+    static void stepThroughNEvents();
+    //step through user-specified number of events
     static void finish(); //call StChain::Finish() and close control
     static void printDisplayManager(); //call StiDisplayManager::print()
     static void printDetector(); //call StiDetecotrLayerContainer::print()

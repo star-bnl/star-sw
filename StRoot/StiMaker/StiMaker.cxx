@@ -68,12 +68,14 @@ ClassImp(StiMaker)
   
 StiMaker::StiMaker(const Char_t *name) : StMaker(name),
 					 //flags
-					 mSimulation(false), mUseGui(true), mDoTrackFit(true), mSeedFinderType(kUndefined),
+					 mSimulation(false), mUseGui(true),
+					 mDoTrackFit(true), mSeedFinderType(kUndefined),
 					 //Containers
 					 mhitstore(0), mdetector(0), mtrackstore(0),
 					 //Factories
-					 mhitfactory(0), mtrackfactory(0), mktracknodefactory(0),
-					 mdetectorfactory(0), mdatanodefactory(0),
+					 mhitfactory(0), mtrackfactory(0),
+					 mktracknodefactory(0), mdetectorfactory(0),
+					 mdatanodefactory(0),
 					 //Display
 					 mdisplay(0),
 					 //Utilities
@@ -324,9 +326,7 @@ Int_t StiMaker::Make()
 
 	//Now we can loop, if we're not using the gui
 	if (mUseGui==false) {
-	    while (mtracker->hasMore()) {
-		doNextAction();
-	    }
+	    finishEvent();
 	}
 
     }
@@ -336,7 +336,6 @@ Int_t StiMaker::Make()
 	mdisplay->update();
     }
 
-    StiEvaluator::instance()->evaluateForEvent(mtrackstore);
     return kStOK;
 }
 
@@ -345,6 +344,14 @@ void StiMaker::printStatistics() const
     cout <<"HitFactory Size:\t"<<mhitfactory->getCurrentSize()<<endl;
     cout <<"HitContainer size:\t"<<mhitstore->size()<<endl;
     cout <<"Number of Primary Vertices:\t"<<mhitstore->numberOfVertices()<<endl;
+}
+
+void StiMaker::finishEvent()
+{
+    while (mtracker->hasMore()) {
+	doNextAction();
+    }
+    StiEvaluator::instance()->evaluateForEvent(mtrackstore);
 }
 
 void StiMaker::doNextAction()
