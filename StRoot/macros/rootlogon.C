@@ -1,4 +1,4 @@
-// $Id: rootlogon.C,v 1.34 2003/04/15 20:53:27 jeromel Exp $
+// $Id: rootlogon.C,v 1.35 2003/07/29 16:39:11 fine Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -32,7 +32,7 @@
   // 	from Alice.
   gStyle->SetCanvasColor(10);
   gStyle->SetStatColor(10);
-  gStyle->SetTitleColor(10);
+  gStyle->SetTitleFillColor(10);
   gStyle->SetPadColor(10);
    
   // Settings for statistics information
