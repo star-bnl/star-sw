@@ -99,10 +99,10 @@ void StMixerEmbedding::doEmbedding()
 	  accum[bin2]+=conversion2;
 	  if (accum[bin2]>1015) accum[bin2]=1015; 
 	}
-	for(int bin=0; bin<mTimeBins; bin++) {
-	  if (accum[bin]>0) {
-	  //if (irow==3 && ipad==54) cout << irow << ' ' << ipad << ' ' << bin << ' ' << accum[bin] <<endl;  
-	  StMixerAnalogSignal padSignal(bin,accum[bin]);
+	for(int binn=0; binn<mTimeBins; binn++) {
+	  if (accum[binn]>0) {
+	  //if (irow==3 && ipad==54) cout << irow << ' ' << ipad << ' ' << binn << ' ' << accum[binn] <<endl;  
+	  StMixerAnalogSignal padSignal(binn,accum[binn]);
 	  mSector->addEntry(irow,ipad,padSignal);
 	  }
 	}
