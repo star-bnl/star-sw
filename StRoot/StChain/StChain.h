@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.25 1999/03/11 01:23:58 perev Exp $
+// $Id: StChain.h,v 1.26 1999/03/19 20:30:49 perev Exp $
 // $Log: StChain.h,v $
+// Revision 1.26  1999/03/19 20:30:49  perev
+// GetCVSTag introduced
+//
 // Revision 1.25  1999/03/11 01:23:58  perev
 // new schema StChain
 //
@@ -92,8 +95,6 @@ class TChain;
 class St_XDFFile; 
 class StChain : public StMaker {
 private:
-   const Char_t        *m_VersionCVS;       //StChain header CVS version
-   const Char_t        *m_VersionTag;       //StChain tag
    Int_t               m_Version;           //StChain version number
    Int_t               m_VersionDate;       //StChain version date
    St_DataSet         *m_RunSet;            //Run
@@ -111,13 +112,17 @@ public:
    virtual void       Clear(Option_t *option="");
    virtual void       PrintInfo();
 
+//		must be in .cxx
+   static const char   *GetCVSIdC();
 
+//		must be here in .h
+   static const char   *GetCVSIdH()
+    {static const char cvs[]="$Id: StChain.h,v 1.26 1999/03/19 20:30:49 perev Exp $";
+     return cvs;};
 
-   void           InitChain(TChain *chain);
 
    ClassDef(StChain, 0)   //StChain control class
 };
 
-EXTERN StChain *gStChain;
 
 #endif
