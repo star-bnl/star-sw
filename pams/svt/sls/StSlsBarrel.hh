@@ -1,6 +1,6 @@
 #ifndef STSLSBARREL_HH
 #define STSLSBARREL_HH
-# include <iostream.h>
+# include "Stiostream.h"
 # include <stdlib.h>
 # include <math.h>
 #include "sls_am.h"

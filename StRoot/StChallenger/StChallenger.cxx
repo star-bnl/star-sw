@@ -7,7 +7,7 @@
 //                                                                      //
 // Alexandre V. Vaniachine <AVVaniachine@lbl.gov>                       //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "TROOT.h"
 #include "TClass.h"

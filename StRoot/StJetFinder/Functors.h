@@ -5,7 +5,7 @@
 #ifndef Functors_HH
 #define Functors_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 class StJetEtCell;
 

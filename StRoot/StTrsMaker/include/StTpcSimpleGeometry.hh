@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcSimpleGeometry.hh,v 1.5 2000/01/10 23:11:30 lasiuk Exp $
+ * $Id: StTpcSimpleGeometry.hh,v 1.6 2003/09/02 17:59:16 perev Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -12,6 +12,9 @@
  **********************************************************************
  *
  * $Log: StTpcSimpleGeometry.hh,v $
+ * Revision 1.6  2003/09/02 17:59:16  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2000/01/10 23:11:30  lasiuk
  * Include MACROS for compatibility with SUN CC5.0
  *
@@ -57,7 +60,7 @@
 #ifndef ST_TPC_SIMPLE_GEOMETRY_HH
 #define ST_TPC_SIMPLE_GEOMETRY_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <vector>
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
    using std::vector;

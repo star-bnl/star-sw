@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstEval.cxx,v 1.5 2001/04/23 12:29:21 lmartin Exp $
+ * $Id: StEstEval.cxx,v 1.6 2003/09/02 17:58:04 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstEval.cxx,v $
+ * Revision 1.6  2003/09/02 17:58:04  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2001/04/23 12:29:21  lmartin
  * Information on the findable pattern added in the results vs the segment patterns
  * to facilitate the parameter tuning.
@@ -126,13 +129,13 @@ void StEstTracker::Eval(int onoffmatrix, int nminhit) {
     mcid = Eval_id_mctrk2est_Track[mTrack[i]->mTPCTrack->GetMcId()];
 
     while (Eval_mchits[mcid][j]!=NULL && j<10) {      
-      matrix = matrix | int(pow(2,Eval_mchits[mcid][j]->GetWafer()->GetLayer()));
+      matrix = matrix | 1<<Eval_mchits[mcid][j]->GetWafer()->GetLayer();
       j++;    
     }
     nPerfectHit=0;
     for (k=0;k<4;k++) 
       nPerfectHit = nPerfectHit + 
-	((int (pow(2,k))) == ((int (pow(2,k))) & matrix));
+	(((1<<k)) == ((1<<k) & matrix));
 
     if (j>0 && (onoffmatrix == (matrix & onoffmatrix)) 
 	&& nPerfectHit>=nminhit) {
@@ -168,7 +171,7 @@ void StEstTracker::Eval(int onoffmatrix, int nminhit) {
     mcid = Eval_id_mctrk2est_Track[mcid];
 
     while (Eval_mchits[mcid][j]!=NULL && j<10) { 
-      matrix2 = matrix2 | int(pow(2,Eval_mchits[mcid][j]->GetWafer()->GetLayer()));
+      matrix2 = matrix2 | (1<<Eval_mchits[mcid][j]->GetWafer()->GetLayer());
       j++;    
     }
 
@@ -176,7 +179,7 @@ void StEstTracker::Eval(int onoffmatrix, int nminhit) {
     k=0;
     
     for (j=0;j<mTrack[i]->GetBranch(_NBR)->GetNHits();j++) {
-      matrix |= int(pow(2,mTrack[i]->GetBranch(_NBR)->GetHit(j)->GetWafer()->GetLayer()));
+      matrix |= 1<<mTrack[i]->GetBranch(_NBR)->GetHit(j)->GetWafer()->GetLayer();
       k=0;
       while (mTrack[i]->GetBranch(_NBR)->GetHit(j) != Eval_mchits[mcid][k] 
 	     && Eval_mchits[mcid][k]!=NULL)
@@ -251,7 +254,7 @@ void StEstTracker::Eval(int onoffmatrix, int nminhit) {
   cout << "0123 | POSS\t| FIND\t| GOOD\tBAD\t| GOOD\tBAD\t| GOOD\tBAD"<<endl;
   for (i=0;i<16;i++) {
     for (j=0;j<4;j++) {
-      if (i & int(pow(2,j))) 
+      if (i & 1<<j) 
 	cout << "1";
       else
 	cout << "0";
@@ -492,7 +495,7 @@ void StEstTracker::Eval(int onoffmatrix, int nminhit) {
 	k=0;
 	while (mTrack[i]->GetBranch(jb)->GetHit(j) != Eval_mchits[mcid][k] && Eval_mchits[mcid][k]!=NULL)
 	  k++;
-	matrix |= int(pow(2,mTrack[i]->GetBranch(jb)->GetHit(j)->GetWafer()->GetLayer()));
+	matrix |= 1<<mTrack[i]->GetBranch(jb)->GetHit(j)->GetWafer()->GetLayer();
 	if (Eval_mchits[mcid][k]==NULL) {
 	  ok = 0;
 	}

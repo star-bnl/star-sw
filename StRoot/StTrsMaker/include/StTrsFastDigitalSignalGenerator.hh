@@ -16,7 +16,7 @@
  **************************************************************************/
 #ifndef ST_TRS_PARAMETERIZED_DIGITAL_SIGNAL_GENERATOR_HH
 #define ST_TRS_PARAMETERIZED_DIGITAL_SIGNAL_GENERATOR_HH
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StTrsDigitalSignalGenerator.hh"
 #include "trans_table.hh" 
 class StTrsFastDigitalSignalGenerator : public StTrsDigitalSignalGenerator {

@@ -1,5 +1,8 @@
-// $Id: StTpcCalibSetup.h,v 1.3 1999/10/11 08:04:14 fretiere Exp $
+// $Id: StTpcCalibSetup.h,v 1.4 2003/09/02 17:59:11 perev Exp $
 // $Log: StTpcCalibSetup.h,v $
+// Revision 1.4  2003/09/02 17:59:11  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.3  1999/10/11 08:04:14  fretiere
 // Fix bugg + add README, LOG and ID
 //
@@ -9,7 +12,7 @@
 #ifndef STAR_StTpcCalibSetup
 #define STAR_StTpcCalibSetup
 
-#include <strstream.h>
+#include <Stsstream.h>
 #include "TH1.h"
 
 class StTpcCalibSetup {

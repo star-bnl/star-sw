@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofSimParam.cxx,v 1.3 2003/04/22 00:03:35 geurts Exp $
+ * $Id: StTofSimParam.cxx,v 1.4 2003/09/02 17:59:10 perev Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofSimParam.cxx,v $
+ * Revision 1.4  2003/09/02 17:59:10  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2003/04/22 00:03:35  geurts
  * doubled the m_nphe_to_adc parameter (used in StTofSimMaker).
  *
@@ -36,7 +39,7 @@
     </ul>
 */
 #include "StTofSimParam.h"
-#include <iostream.h>
+#include <Stiostream.h>
 //#include "St_XDFFile.h"
 //#include "St_DataSetIter.h"
 

@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCL0.cxx,v 1.5 2003/04/30 20:37:54 perev Exp $
+// $Id: StPeCL0.cxx,v 1.6 2003/09/02 17:58:46 perev Exp $
 // $Log: StPeCL0.cxx,v $
+// Revision 1.6  2003/09/02 17:58:46  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.5  2003/04/30 20:37:54  perev
 // Warnings cleanup. Modified lines marked VP
 //
@@ -18,7 +21,7 @@
 // Revision 1.0  2000/12/11 
 //
 //////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "StPeCL0.h"
 #include "StCtbTriggerDetector.h"

@@ -3,7 +3,7 @@
 //04/01
 //modified by bum.
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include <assert.h>
 
@@ -676,7 +676,7 @@ StGlobalTrackRefitter::hitError(const StHit* hit)
   }
   else if(mDoSameError &&
 	  tpcHit->padrow()>=mMinPadrow && tpcHit->padrow()<=mMaxPadrow){
-    error->setX(1./sqrt(2)); error->setY(1./sqrt(2)); error->setZ(1);
+    error->setX(1./::sqrt(2)); error->setY(1./::sqrt(2)); error->setZ(1);
   }
   else{
     *error = tpcHit->positionError();
@@ -700,7 +700,7 @@ StGlobalTrackRefitter::hitError(const StMcHit* hit)
     error->setX(mPadrowError); error->setY(0); error->setZ(mZError);
   }
   else{
-    error->setX(1./sqrt(2)); error->setY(1./sqrt(2)); error->setZ(1.);
+    error->setX(1./::sqrt(2)); error->setY(1./::sqrt(2)); error->setZ(1.);
   }
   return error;
 }

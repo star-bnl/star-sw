@@ -5,7 +5,7 @@
 **:  Id: idl.y,v 1.16 1998/12/16 18:49:48 ward Exp  
 **:<------------------------------------------------------------------*/
 # include "sce_am.h"
-# include <iostream.h>
+# include "Stiostream.h"
 # include <stdlib.h>
 # include <math.h>
 # include "StSceBarrel.hh"

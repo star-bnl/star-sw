@@ -6,9 +6,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 #ifdef __HP_aCC
-#include <iostream.h>
+#include <Stiostream.h>
 #else
-#include <iostream>
+#include "Stiostream.h"
 #endif
 #include "StMultiH1F.h"
 #include "TString.h"
@@ -54,7 +54,7 @@ void StMultiH1F::Draw(Option_t *option) {
   Int_t maxbin = -1;
   Float_t offset = fMOffset;
   if (fMOffset && gPad->GetLogy()) {
-    Float_t max_offset = pow(
+    Float_t max_offset = ::pow(
       1.0e10*GetNonZeroMinimum()/GetNonZeroMaximum(),
       1.0/(ybins-1.0));
     if (offset > max_offset) offset = max_offset;
@@ -76,7 +76,7 @@ void StMultiH1F::Draw(Option_t *option) {
     if (fMOffset && ybin) {
       temp[ybin]->SetLineColor(slice);
       if (gPad->GetLogy()) {
-        temp[ybin]->Scale(pow(offset,ybin));
+        temp[ybin]->Scale(::pow(offset,ybin));
       } else {
         for (Int_t xbin=0; xbin<GetNbinsX(); xbin++)
           temp[ybin]->AddBinContent(xbin,offset*ybin);
@@ -185,8 +185,11 @@ Double_t StMultiH1F::GetNonZeroMaximum() const {
   return maximum;
 }
 
-// $Id: StMultiH1F.cxx,v 1.8 2003/01/21 18:33:27 genevb Exp $
+// $Id: StMultiH1F.cxx,v 1.9 2003/09/02 17:59:20 perev Exp $
 // $Log: StMultiH1F.cxx,v $
+// Revision 1.9  2003/09/02 17:59:20  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.8  2003/01/21 18:33:27  genevb
 // Better handling of temporary hists
 //

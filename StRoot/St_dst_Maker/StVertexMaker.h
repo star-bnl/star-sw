@@ -24,8 +24,8 @@ class CtbResponse;
 class MatchedTrk ;
 
 class StVertexMaker : public StMaker {
-  friend CtbResponse;
-  friend MatchedTrk;
+  friend class CtbResponse;
+  friend class MatchedTrk;
  
  private:
   St_evr_privert *m_evr_privert; //!  
@@ -83,7 +83,7 @@ class StVertexMaker : public StMaker {
     unsigned int GetCTBMode(){ return mCTBMode;};
     
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StVertexMaker.h,v 1.2 2002/12/04 15:43:06 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StVertexMaker.h,v 1.3 2003/09/02 17:59:26 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StVertexMaker, 0)   //StAF chain virtual base class for Makers
     
@@ -97,8 +97,11 @@ inline Int_t StVertexMaker::FixVertexFileMatch(char* fname)
   { embedVerts=kFALSE; return FixVertexFileRead(fname, kTRUE ); }
 #endif
 
-// $Id: StVertexMaker.h,v 1.2 2002/12/04 15:43:06 jeromel Exp $
+// $Id: StVertexMaker.h,v 1.3 2003/09/02 17:59:26 perev Exp $
 // $Log: StVertexMaker.h,v $
+// Revision 1.3  2003/09/02 17:59:26  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.2  2002/12/04 15:43:06  jeromel
 // Changes by J.Gans. Approved by Gene
 //

@@ -3,7 +3,7 @@
 //11/02
 
 //std
-#include <iostream>
+#include "Stiostream.h"
 #include <algorithm>
 
 //StSpinMaker
@@ -17,7 +17,7 @@ double deltaphi(double p1, double p2);
 AssocJetPair::AssocJetPair(StJet* j1, StJet* j2)
     : mJet1(j1), mJet2(j2),
       mDeltaPhi(deltaphi(j1->Phi(), j2->Phi())), mDeltaEta(j1->PseudoRapidity() - j2->PseudoRapidity() ),
-    mDistance( sqrt(mDeltaEta*mDeltaEta + mDeltaPhi*mDeltaPhi) )
+    mDistance( ::sqrt(mDeltaEta*mDeltaEta + mDeltaPhi*mDeltaPhi) )
 {
     //cout <<"AssocJetPair::AssocJetPair)()"<<endl;
     //cout <<"j1.eta: "<<j1->eta<<"\tj2.eta: "<<j2->eta<<"\tdEta: "<<mDeltaEta<<"\t"

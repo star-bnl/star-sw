@@ -1,4 +1,4 @@
-#include <iostream>
+#include "Stiostream.h"
 #include <cmath>
 #include <stdio.h>
 
@@ -60,7 +60,8 @@ void StiSvtHitLoader::loadHits(StEvent* source,
 	      _messenger <<" StSvtWaferHitCollection retrieved" << endl;
 	      if (!waferhits) break;
 	      const StSPtrVecSvtHit& hits = waferhits->hits(); 
-	      for (vector<StSvtHit*>::const_iterator it=hits.begin(); 
+              const_StSvtHitIterator it;
+	      for (it=hits.begin(); 
 		   it!=hits.end(); 
 		   ++it) 
 		{

@@ -1,18 +1,12 @@
 #ifndef StDetectorDbIntegratedTriggerID_h
 #define StDetectorDbIntegratedTriggerID_h
 
+#include <Stiostream.h>
 #include "StMaker.h"
 
 struct triggerInfo_st;
 struct defaultTrgLvl_st;
 
-#ifdef sun
-#include <iostream.h>
-#endif
-
-#ifndef sun
-class ostream;
-#endif
 
 class StDetectorDbIntegratedTriggerID{
 public:

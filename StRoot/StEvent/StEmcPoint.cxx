@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcPoint.cxx,v 2.5 2001/04/05 04:00:48 ullrich Exp $
+ * $Id: StEmcPoint.cxx,v 2.6 2003/09/02 17:58:05 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.cxx,v $
+ * Revision 2.6  2003/09/02 17:58:05  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.5  2001/04/05 04:00:48  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -28,9 +31,9 @@
  *
  **************************************************************************/
 #include "StEmcPoint.h"
-#include <iostream.h>
+#include <Stiostream.h>
 
-static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.5 2001/04/05 04:00:48 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.6 2003/09/02 17:58:05 perev Exp $";
 
 ClassImp(StEmcPoint)
 

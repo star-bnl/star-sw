@@ -3,7 +3,7 @@
 //02/02/01
 
 //Std
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include <stdio.h>
 #include <dirent.h>
@@ -97,8 +97,8 @@ void StiDetectorContainer::reset()
 StiDetector* StiDetectorContainer::operator*() const
 {
     //cout << "StiDetectorContainer::operator*() const - INFO - Started" <<endl;
-    if (!mphi_it)
-	throw runtime_error("StiDetectorContainer::operator*() const - FATAL - mphi_it==0");
+//VP    if (!mphi_it)
+//VP	throw runtime_error("StiDetectorContainer::operator*() const - FATAL - mphi_it==0");
     if (!(*mphi_it))
 	throw runtime_error("StiDetectorContainer::operator*() const - FATAL - *mphi_it==0");
     StiDetector * det = (*mphi_it)->getData();
@@ -296,7 +296,7 @@ StiDetectorContainer::build(StiDetectorBuilder * builder)
       if (!(*where))
       throw runtime_error("StiDetectorContainer::build() - ERROR - mid-rapidity region not found - *where==0");
       mMessenger <<"StiDetectorContainer::build() - INFO - Find Leaves and set mregion"<<endl;
-      //Sort by name for O(log(n)) calls to setDetector()
+      //Sort by name for O(::log(n)) calls to setDetector()
       //sort(mLeafIt->begin(), mLeafIt->end(), DataNameLessThan<StiDetector>() );
       
       mregion = (*where); //change (MLM)

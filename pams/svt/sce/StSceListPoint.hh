@@ -2,7 +2,7 @@
 #define STSCELISTPOINT_HH
 #include <stdlib.h>
 #include <math.h>
-#include <iostream.h>
+#include "Stiostream.h"
 #include "StScePoint.hh"
 
 class StSceListPoint

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: PIDFitter.cxx,v 1.8 2003/08/04 18:46:26 perev Exp $
+// $Id: PIDFitter.cxx,v 1.9 2003/09/02 17:58:46 perev Exp $
 //
 // Authors: Aihong Tang
 //
@@ -12,7 +12,7 @@
 
 #include "PIDFitter.h"
 #include <strstream>
-#include <fstream.h>
+#include "Stiostream.h"
 
 //#include "TH1.h"
 #include "TH2.h"
@@ -30,7 +30,7 @@
 //#include "MaxllBoltz.hh"
 
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 ClassImp(PIDFitter);
 Double_t sigmaNSampleFitFcn(Double_t* x, Double_t *par);
@@ -1197,13 +1197,16 @@ gausHistFile->Close();
 
 Double_t sigmaNSampleFitFcn(Double_t* x, Double_t *par){
 
-  if (x[0])  return par[0]/sqrt(x[0]);
+  if (x[0])  return par[0]/::sqrt(x[0]);
   else return 0.;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: PIDFitter.cxx,v $
+// Revision 1.9  2003/09/02 17:58:46  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.8  2003/08/04 18:46:26  perev
 // warnOff
 //

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.85 2003/08/26 21:08:28 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.86 2003/09/02 17:58:12 perev Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -13,7 +13,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <math.h>
 #include "StFlowMaker.h"
@@ -221,7 +221,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.85 2003/08/26 21:08:28 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.86 2003/09/02 17:58:12 perev Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -715,7 +715,7 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
     pFlowTrack->SetPhiGlobal( phi );
     double pz = pParticle->P().z();
     double pTotal = pParticle->P().mag();
-    double eta = 0.5*log( (1.0+pz/pTotal)/(1.0-pz/pTotal) );
+    double eta = 0.5*::log( (1.0+pz/pTotal)/(1.0-pz/pTotal) );
     pFlowTrack->SetEta( eta );
     pFlowTrack->SetEtaGlobal( eta );
     pFlowTrack->SetPt( pParticle->Pt() );
@@ -723,7 +723,7 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
     pFlowTrack->SetCharge( int(pParticle->Charge()) );
     double dcaXY = pParticle->DCAxy();
     double dcaZ = pParticle->DCAz();
-    double dca = sqrt( dcaXY*dcaXY + dcaZ*dcaZ );
+    double dca = ::sqrt( dcaXY*dcaXY + dcaZ*dcaZ );
     //pFlowTrack->SetDca( dca );
     pFlowTrack->SetDcaGlobal( dca );
     pFlowTrack->SetChi2( pParticle->ChiSquaredXY() );
@@ -1530,7 +1530,7 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
   double yCenter = gTrack->geometry()->helix().ycenter();
   double radius = 1.0/gTrack->geometry()->helix().curvature();
 
-  double dPosCenter = sqrt( (vertex.x() - xCenter) * (vertex.x() - xCenter) +
+  double dPosCenter = ::sqrt( (vertex.x() - xCenter) * (vertex.x() - xCenter) +
 			    (vertex.y() - yCenter) * (vertex.y() - yCenter));
 
   return (Float_t)(radius - dPosCenter);
@@ -1548,7 +1548,7 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
   double yCenter = helix.ycenter();
   double radius = 1.0/helix.curvature();
 
-  double dPosCenter = sqrt( (vertex.x() - xCenter) * (vertex.x() - xCenter) +
+  double dPosCenter = ::sqrt( (vertex.x() - xCenter) * (vertex.x() - xCenter) +
                             (vertex.y() - yCenter) * (vertex.y() - yCenter));
 
   return (Float_t)(radius - dPosCenter);
@@ -1557,6 +1557,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.86  2003/09/02 17:58:12  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.85  2003/08/26 21:08:28  posk
 // Removed commented lines.
 //

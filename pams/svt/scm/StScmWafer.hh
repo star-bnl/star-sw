@@ -1,6 +1,6 @@
 #ifndef STSCMWAFER_HH
 #define STSCMWAFER_HH
-#include <iostream.h>
+#include "Stiostream.h"
 #include <stdlib.h>
 #include <math.h>
 #include "StScmListCluster.hh"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcFourPMaker.cxx,v 1.5 2003/07/24 22:05:19 thenry Exp $
+ * $Id: StTpcFourPMaker.cxx,v 1.6 2003/09/02 17:58:39 perev Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -14,7 +14,7 @@
  *
  **************************************************************************/
 #include <string.h>
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StChain.h"
 #include "StEventTypes.h"
@@ -53,10 +53,10 @@ Int_t StTpcFourPMaker::Make() {
     if(t->flag()<=0) continue;
     StThreeVectorF mom = t->momentum();
     float mommag2 = mom.mag2();
-    float ee = sqrt(me*me + mommag2);
-    float epr = sqrt(mpr*mpr + mommag2);
-    float epi = sqrt(mpi*mpi + mommag2);
-    float ek = sqrt(mk*mk + mommag2);
+    float ee = ::sqrt(me*me + mommag2);
+    float epr = ::sqrt(mpr*mpr + mommag2);
+    float epi = ::sqrt(mpi*mpi + mommag2);
+    float ek = ::sqrt(mk*mk + mommag2);
     float energy = t->pidProbElectron()*ee + t->pidProbProton()*epr +
       t->pidProbPion()*epi + t->pidProbKaon()*ek;
     StLorentzVectorF P(energy, mom);

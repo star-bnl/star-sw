@@ -1,6 +1,6 @@
 //*CMZ :          29/04/99  16.26.07  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine     17/08/95
-// $Id: St_PolyLine3D.cxx,v 1.2 2003/08/02 02:51:59 perev Exp $ 
+// $Id: St_PolyLine3D.cxx,v 1.3 2003/09/02 17:59:34 perev Exp $ 
 // ***********************************************************************
 // * Defines 3D polyline base class to construct STAR "event" geometry
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -21,8 +21,8 @@
 // ************************************************************************
  
 #include <assert.h>
-#include <fstream.h>
-#include <iostream.h>
+#include "Stiostream.h"
+#include <Stiostream.h>
  
 //*KEEP,TROOT.
 #include "TROOT.h"
@@ -431,6 +431,9 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
 }   
 //__________________________________________________________________________
 // $Log: St_PolyLine3D.cxx,v $
+// Revision 1.3  2003/09/02 17:59:34  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.2  2003/08/02 02:51:59  perev
 // warnOff
 //

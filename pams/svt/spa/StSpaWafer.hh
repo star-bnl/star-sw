@@ -1,6 +1,6 @@
 #ifndef STSPAWAFER_HH
 #define STSPAWAFER_HH
-# include <iostream.h>
+# include "Stiostream.h"
 # include <stdlib.h>
 # include <math.h>
 # include "StSpaListNoise.hh"

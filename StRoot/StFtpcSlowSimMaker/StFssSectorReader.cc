@@ -1,6 +1,6 @@
 #include "StFssSectorReader.hh"
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 StFssSectorReader::StFssSectorReader(int sector,
 				     unsigned short *fcl_ftpcsqndx, int nSeq,

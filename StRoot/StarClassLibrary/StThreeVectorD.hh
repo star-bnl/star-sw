@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.hh,v 1.4 2002/06/21 17:47:36 genevb Exp $
+ * $Id: StThreeVectorD.hh,v 1.5 2003/09/02 17:59:35 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.hh,v $
+ * Revision 1.5  2003/09/02 17:59:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.4  2002/06/21 17:47:36  genevb
  * Added pseudoProduct
  *
@@ -34,7 +37,7 @@
 #ifndef ST_THREE_VECTOR_D_HH
 #define ST_THREE_VECTOR_D_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #ifdef __ROOT__
 #include "Rtypes.h"
@@ -214,7 +217,7 @@ inline double StThreeVectorD::phi() const
 
 inline double StThreeVectorD::pseudoRapidity() const
 {
-    return -log(tan(theta()/2.));
+    return -::log(tan(theta()/2.));
 }
 
 inline StThreeVectorD StThreeVectorD::unit() const
@@ -224,7 +227,7 @@ inline StThreeVectorD StThreeVectorD::unit() const
 
 inline double StThreeVectorD::massHypothesis(double mass) const
 {
-    return sqrt((*this)*(*this) + mass*mass);
+    return ::sqrt((*this)*(*this) + mass*mass);
 }
 
 inline StThreeVectorD StThreeVectorD::orthogonal() const
@@ -273,7 +276,7 @@ inline void StThreeVectorD::rotateZ(double angle)
 
 inline double StThreeVectorD::perp() const
 {
-    return sqrt(mX1*mX1+mX2*mX2);
+    return ::sqrt(mX1*mX1+mX2*mX2);
 }
 
 inline double StThreeVectorD::perp2() const
@@ -288,7 +291,7 @@ inline double StThreeVectorD::magnitude() const
 
 inline double StThreeVectorD::mag() const
 {
-    return sqrt(mX1*mX1+mX2*mX2+mX3*mX3);
+    return ::sqrt(mX1*mX1+mX2*mX2+mX3*mX3);
 }
 
 inline double StThreeVectorD::mag2() const

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeEvent.h,v 1.1 2000/08/14 22:05:20 jseger Exp $
+ * $Id: StEbyeEvent.h,v 1.2 2003/09/02 17:57:56 perev Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -14,6 +14,9 @@
  **********************************************************************
  *
  * $Log: StEbyeEvent.h,v $
+ * Revision 1.2  2003/09/02 17:57:56  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2000/08/14 22:05:20  jseger
  * Added eta-spectra.  Now reads Ebye mini-DST as input.  Bins events in
  * multiplicity and z-vertex position.  Name of output file is no longer hard-wired.
@@ -30,7 +33,7 @@
 #ifndef _StEbyeEvent
 #define _StEbyeEvent
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TObject.h"
 #include "TClonesArray.h"
 #include "StEbyeTrack.h"

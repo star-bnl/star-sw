@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppTrack.cxx,v 1.2 2002/12/04 20:28:09 thenry Exp $
+// $Id: StppTrack.cxx,v 1.3 2003/09/02 17:59:01 perev Exp $
 // $Log: StppTrack.cxx,v $
+// Revision 1.3  2003/09/02 17:59:01  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.2  2002/12/04 20:28:09  thenry
 // StppuDstMaker was modified to allow multiple jet analysis modules to be
 // run simultaneosly with various parameters while the Maker loads the events
@@ -31,7 +34,7 @@
 // Light weighted Track class for Spin pp uDst
 //
 //////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 
 #include "StppTrack.h"
@@ -86,7 +89,7 @@ void StppTrack::fill(StTrack* trk){
     pt      = trk->geometry()->momentum().perp();
     p       = trk->geometry()->momentum().mag();
     psi     = trk->geometry()->momentum().phi();
-    eta     = -log(tan(trk->geometry()->momentum().theta()/2.));
+    eta     = -::log(tan(trk->geometry()->momentum().theta()/2.));
     phi0    = trk->geometry()->origin().phi(); 
     z0      = trk->geometry()->origin().z(); 
     r0      = trk->geometry()->origin().perp(); 

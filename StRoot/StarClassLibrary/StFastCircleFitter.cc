@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFastCircleFitter.cc,v 1.1 1999/12/21 16:28:48 ullrich Exp $
+ * $Id: StFastCircleFitter.cc,v 1.2 2003/09/02 17:59:34 perev Exp $
  *
  * Author: Thomas Ullrich, Dec 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StFastCircleFitter.cc,v $
+ * Revision 1.2  2003/09/02 17:59:34  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  1999/12/21 16:28:48  ullrich
  * Initial Revision
  *
@@ -146,11 +149,11 @@ bool StFastCircleFitter::fit()
 	dx = mX[i]-(mXCenter);
 	dy = mY[i]-(mYCenter);
 	dradius2 = dx*dx+dy*dy;
-	mVariance += dradius2+radius2-2.*sqrt(dradius2*radius2);
+	mVariance += dradius2+radius2-2.*::sqrt(dradius2*radius2);
     }
     mVariance /= npoints-3.0;
     
-    mRadius  = sqrt(radius2);
+    mRadius  = ::sqrt(radius2);
     mRC      = 0;
     
     return true;

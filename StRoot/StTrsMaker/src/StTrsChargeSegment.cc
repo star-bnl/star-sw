@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.35 2002/04/26 06:05:26 long Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.36 2003/09/02 17:59:19 perev Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -13,6 +13,9 @@
  *
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.36  2003/09/02 17:59:19  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.35  2002/04/26 06:05:26  long
  * add triton and correct charge for he3
  *
@@ -473,11 +476,11 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
     //PR(mNumberOfElectrons);
 
     //  int numberOfLevels =
-    //	static_cast<int>(log(static_cast<double>(subSegments))/M_LN2 + .999);
+    //	static_cast<int>(::log(static_cast<double>(subSegments))/M_LN2 + .999);
 	
     // numberOfLevels++;  // take care of the zero!
 
-    double totalNumberOfSubSegments = pow(2.,(numberOfLevels-1));
+    double totalNumberOfSubSegments = ::pow(2.,(numberOfLevels-1));
 	
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<double>          tmp;
@@ -528,13 +531,13 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 	double xBinary;
       	
 	for(ii=1; ii<numberOfLevels; ii++) {
-	    numberOfSubSegmentsInCurrentLevel = pow(2.,ii);
+	    numberOfSubSegmentsInCurrentLevel = ::pow(2.,ii);
 	    float dL = mDs/numberOfSubSegmentsInCurrentLevel;
 	    //PR(dL/centimeter);
 		
 	    // In this level you must create "numberOfSubSegments" subsegments
 	    // Loop over the existing ones...
-	      numberOfSubSegmentsInPreviousLevel = pow(2.,(ii-1)); 
+	      numberOfSubSegmentsInPreviousLevel = ::pow(2.,(ii-1)); 
 	    for(jj=0; jj<numberOfSubSegmentsInPreviousLevel; jj++) {
 		double parentdEdx = ionizationSegments[(ii-1)][jj];
 		
@@ -625,9 +628,9 @@ double StTrsChargeSegment::sigmaParameter(double l, double derelave, double xmip
     double delta[2] = {-.022,-.0058};
     double d[2]     = {-1.88, -1.92};
     
-    double a     = pow(xmip,delta[index])+d[index]+b[index]*derelave;
-    double alpha = (pow(xmip,gamma[index])+c[index])/(pow(derelave,beta[index]));
-    return (pow(l,alpha)+a);
+    double a     = ::pow(xmip,delta[index])+d[index]+b[index]*derelave;
+    double alpha = (::pow(xmip,gamma[index])+c[index])/(::pow(derelave,beta[index]));
+    return (::pow(l,alpha)+a);
 }
 
 double StTrsChargeSegment::meanParameter(double l, double derelave, double xmip, int index) const
@@ -637,7 +640,7 @@ double StTrsChargeSegment::meanParameter(double l, double derelave, double xmip,
     double beta[2]  = {.2, 1.0};
     double gamma[2] = {.0423, .0852};
 
-    return ( (a[index]*pow(l,gamma[index])*pow(xmip,alpha[index]))/(pow(derelave,beta[index])) );
+    return ( (a[index]*::pow(l,gamma[index])*::pow(xmip,alpha[index]))/(::pow(derelave,beta[index])) );
 }
 
 double StTrsChargeSegment::xReflectedGauss(double x0, double sig) const

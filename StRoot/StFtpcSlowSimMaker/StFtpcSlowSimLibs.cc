@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimLibs.cc,v 1.1 2000/11/23 10:16:43 hummler Exp $
+// $Id: StFtpcSlowSimLibs.cc,v 1.2 2003/09/02 17:58:16 perev Exp $
 // $Log: StFtpcSlowSimLibs.cc,v $
+// Revision 1.2  2003/09/02 17:58:16  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.1  2000/11/23 10:16:43  hummler
 // New FTPC slow simulator in pure maker form
 //
@@ -10,7 +13,7 @@
 //  Date:  Oct 25, 1996
 ///////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 
 

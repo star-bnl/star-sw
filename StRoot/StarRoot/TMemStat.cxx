@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TMemStat.cxx,v 1.5 2002/04/06 03:50:25 jeromel Exp $
+ * $Id: TMemStat.cxx,v 1.6 2003/09/02 17:59:39 perev Exp $
  *
  ***************************************************************************
  *
@@ -59,7 +59,7 @@ void TMemStat::Print(const char *) const
 {
   if (!fTally) return;
   double aver = fAver/fTally;
-  double rms  = sqrt(fabs(fRms/fTally - aver*aver));
+  double rms  = ::sqrt(fabs(fRms/fTally - aver*aver));
   if (fabs(aver) < 0.000001) aver = 0;
   if (fabs(rms ) < 0.000001) rms  = 0;
   printf("%40s(%d)%12.6f%12.6f%12.6f%12.6f\n"
@@ -92,7 +92,7 @@ void TMemStat::Summary()
    if(!dtally) return;
    {for(int i=0;i<40+4*12;i++) printf("-");} printf("\n");
    daver /=dtally;
-   drms = sqrt(fabs(drms/dtally-daver*daver));
+   drms = ::sqrt(fabs(drms/dtally-daver*daver));
    printf("%40s(%d)%12.6f%12.6f%12.6f%12.6f\n"
         ,"Total",(int)dtally,dmin,daver,dmax,drms);
    {for(int i=0;i<40+4*12;i++) printf("=");} printf("\n");

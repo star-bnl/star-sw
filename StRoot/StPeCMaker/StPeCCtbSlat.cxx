@@ -3,7 +3,7 @@
 // Revision 1.0  2001/2/15           Pablo Yepes: yepes@rice.edu
 //
 //////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StPeCCtbSlat.h"
 
 ClassImp(StPeCCtbSlat)

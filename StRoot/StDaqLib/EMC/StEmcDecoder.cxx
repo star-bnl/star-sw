@@ -1,7 +1,7 @@
 #include "StEmcDecoder.h"
 #include <time.h>
 #include <stdlib.h>
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdio.h>
 
 //--------------------------------------------------------
@@ -366,8 +366,8 @@ int StEmcDecoder::GetTowerIdFromPMTBox(int PMT, int Position, int& TowerId)
   if(PMT<1 || PMT >60) return 0; // 0 is bad
   if(Position<1 || Position >80) return 0; // 0 is bad
   
-  int start = PMT_Box[PMT-1];
-	int row = (Position-1)/20;
+//  int start = PMT_Box[PMT-1] ; 
+//  int row   = (Position-1)/20;
 	
 	
   
@@ -525,7 +525,7 @@ int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int&
     int dummy=checkDummy(wire);
     if(dummy==0)
     {
-      int stat=getSmdPin(det,half,wire,pin);
+      int stat=getSmdPin(det,half,wire,pin); if(stat){/*nothing*/}
 
       /*cout <<"RDO = "<<RDO
            <<"  idx = "<<index

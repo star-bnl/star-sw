@@ -1,5 +1,6 @@
 #include "StDbDefaults.hh"
-#include <strstream.h>
+#include <Stsstream.h>
+#include <Stiostream.h>
 #include <dirent.h>
 #include <stdlib.h>
 
@@ -47,7 +48,7 @@ char* StDbDefaults::getFileName(const char* fileName){
     fn<<ends;
   }
 
-  char* tmpString = fn.str();
+  const char* tmpString = fn.str();
   char* retVal= new char[strlen(tmpString)+1];
   strcpy(retVal,tmpString);
   fn.freeze(0);

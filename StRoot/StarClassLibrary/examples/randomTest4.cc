@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: randomTest4.cc,v 1.1 2000/03/16 16:30:27 ullrich Exp $
+ * $Id: randomTest4.cc,v 1.2 2003/09/02 17:59:38 perev Exp $
  *
  * Author: Thomas Ullrich, Mar 2000
  ***************************************************************************
@@ -10,11 +10,14 @@
  ***************************************************************************
  *
  * $Log: randomTest4.cc,v $
+ * Revision 1.2  2003/09/02 17:59:38  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2000/03/16 16:30:27  ullrich
  * Initial Revision
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StRandom.hh"
 #include "StGlobals.hh"
 

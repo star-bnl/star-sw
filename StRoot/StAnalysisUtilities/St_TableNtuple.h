@@ -1,5 +1,8 @@
-// $Id: St_TableNtuple.h,v 1.3 2003/01/08 19:43:09 perev Exp $
+// $Id: St_TableNtuple.h,v 1.4 2003/09/02 17:55:26 perev Exp $
 // $Log: St_TableNtuple.h,v $
+// Revision 1.4  2003/09/02 17:55:26  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.3  2003/01/08 19:43:09  perev
 // CleanUp
 //
@@ -78,6 +81,7 @@ class St_TableNtuple : public TTree {
    virtual   Int_t AddXDFFile(St_XDFFile &f, Char_t *dataset, Char_t *tname="same", Int_t firstEvent=1, Int_t nEvents=-1);
    virtual    void Browse(TBrowser *b);
    virtual   Int_t Fill(const St_Table &table, Int_t firstRow=0, Int_t nRows=-1);
+             Int_t Fill(){return TTree::Fill();} //WarnOff
    virtual   Int_t GetNvar() const { return mNvar; }
    virtual   const Char_t* GetStTableClassName() const { return mTableClass.Data(); }
    virtual TClass* GetTableClass() const { return mClassPtr; }

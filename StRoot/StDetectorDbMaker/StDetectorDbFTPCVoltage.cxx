@@ -1,4 +1,4 @@
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StDetectorDbFTPCVoltage.h"
 #include "tables/St_ftpcVoltage_Table.h"
 

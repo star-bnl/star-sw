@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSimpleMagneticField.hh,v 1.5 2000/01/10 23:11:29 lasiuk Exp $
+ * $Id: StSimpleMagneticField.hh,v 1.6 2003/09/02 17:59:16 perev Exp $
  *
  * Author: Thomas Ullrich, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSimpleMagneticField.hh,v $
+ * Revision 1.6  2003/09/02 17:59:16  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2000/01/10 23:11:29  lasiuk
  * Include MACROS for compatibility with SUN CC5.0
  *
@@ -35,7 +38,7 @@
 #ifndef ST_SIMPLE_MAGNETIC_FIELD
 #define ST_SIMPLE_MAGNETIC_FIELD
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #if  defined(__sun) && ! defined(__GNUG__)
 #include <stdcomp.h>

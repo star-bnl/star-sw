@@ -17,8 +17,8 @@ StTrackForPool::StTrackForPool(Double_t px, Double_t py, Double_t pz)
   mPx=px;
   mPy=py;
   mPz=pz;
-  Double_t p=sqrt(px*px+py*py+pz*pz);
-  mPsuedoRap=0.5*log((p+pz)/(p-pz));
+  Double_t p=::sqrt(px*px+py*py+pz*pz);
+  mPsuedoRap=0.5*::log((p+pz)/(p-pz));
   mId=0;
 }
 
@@ -43,13 +43,13 @@ StTrackForPool::GetMomentum(Double_t& px, Double_t& py, Double_t& pz)
 void 
 StTrackForPool::GetMomentum(Double_t& p) 
 {
-  p=sqrt(mPx*mPx+mPy*mPy+mPz*mPz);
+  p=::sqrt(mPx*mPx+mPy*mPy+mPz*mPz);
 }
 
 void 
 StTrackForPool::GetPt(Double_t& pt) 
 {
-  pt=sqrt(mPx*mPx+mPy*mPy);
+  pt=::sqrt(mPx*mPx+mPy*mPy);
 }
 
 void 

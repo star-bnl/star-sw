@@ -46,7 +46,7 @@ public:
     void setSplitFraction(double v);
     double splitFraction(void);
 
-    ///Use r/sqrt(2) for iteration search?
+    ///Use r/::sqrt(2) for iteration search?
     void setDoMidpointFix(bool v);
     bool doMidpointFix() const;
     

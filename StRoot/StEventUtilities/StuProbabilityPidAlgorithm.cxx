@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.31 2003/06/24 02:53:14 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.32 2003/09/02 17:58:09 perev Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.32  2003/09/02 17:58:09  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.31  2003/06/24 02:53:14  aihong
  * update for dAu PIDtable
  *
@@ -73,8 +76,8 @@
  *
  **************************************************************************/
 #include <float.h>
-#include <strstream.h>
-#include <fstream.h> //this line should be deleted later
+#include <Stsstream.h>
+#include "Stiostream.h" //this line should be deleted later
 #include "TFile.h"
 #include "TF1.h"
 
@@ -477,7 +480,7 @@ void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx,int theCharge)
        //triton
        m = -1.5374;  //New slope needed for deuterons and tritons.
        a = 1.8121e-5;
-       upper = a*pow(rigidity,m);
+       upper = a*::pow(rigidity,m);
        if (mdedx>lower && mdedx<upper){
          PID[0]=46;  //triton
          mProb[0]=1.0;

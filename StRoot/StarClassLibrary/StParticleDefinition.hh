@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleDefinition.hh,v 1.2 1999/12/21 15:14:21 ullrich Exp $
+ * $Id: StParticleDefinition.hh,v 1.3 2003/09/02 17:59:35 perev Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleDefinition.hh,v $
+ * Revision 1.3  2003/09/02 17:59:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  1999/12/21 15:14:21  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
  *
@@ -25,7 +28,7 @@
 #define StParticleDefinition_hh
 
 #include <string>
-#include <iostream.h>
+#include <Stiostream.h>
 #if !defined(ST_NO_NAMESPACES)
 using std::string;
 #endif

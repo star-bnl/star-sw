@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichRingCalculator.cxx,v 2.7 2001/02/07 16:03:34 lasiuk Exp $
+ * $Id: StRichRingCalculator.cxx,v 2.8 2003/09/02 17:58:54 perev Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingCalculator.cxx,v $
+ *  Revision 2.8  2003/09/02 17:58:54  perev
+ *  gcc 3.2 updates + WarnOff
+ *
  *  Revision 2.7  2001/02/07 16:03:34  lasiuk
  *  systemOfUnits added
  *  getRing() modified for return value
@@ -222,7 +225,7 @@ double StRichRingCalculator::getNormalArea() {
 
     double mass = mInnerRing->getParticleType()->mass();
     double p    = mInnerRing->getTrack()->getMomentum().mag();
-    double beta = p/sqrt(p*p + mass*mass);
+    double beta = p/::sqrt(p*p + mass*mass);
 
     // detector parameters used in light propagation to pad plane depth
     double depthRad  = mRichGeometryDb->radiatorDimension().z()*centimeter;  

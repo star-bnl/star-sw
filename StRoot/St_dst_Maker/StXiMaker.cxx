@@ -2,8 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.19 2002/01/31 18:07:49 genevb Exp $
+// $Id: StXiMaker.cxx,v 1.20 2003/09/02 17:59:26 perev Exp $
 // $Log: StXiMaker.cxx,v $
+// Revision 1.20  2003/09/02 17:59:26  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.19  2002/01/31 18:07:49  genevb
 // Switch to using database for cut parameters
 //
@@ -57,7 +60,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <string.h>
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCoulomb.cxx,v 1.16 2003/02/04 21:10:31 magestro Exp $
+ * $Id: StHbtCoulomb.cxx,v 1.17 2003/09/02 17:58:32 perev Exp $
  *
  * Author: Randy Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtCoulomb.cxx,v $
+ * Revision 1.17  2003/09/02 17:58:32  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.16  2003/02/04 21:10:31  magestro
  * Cleaned up a couple functions
  *
@@ -38,7 +41,7 @@
  **************************************************************************/
 
 #include "StHbtCoulomb.h"
-#include <fstream.h>
+#include "Stiostream.h"
 #include <stdio.h>
 #include <cassert>
 #include "PhysicalConstants.h"
@@ -328,7 +331,7 @@ double StHbtCoulomb::Eta(const StHbtPair* pair) {
   VcmsX = VcmsXnew;
   // Gamma and Beta
   beta = VcmsX;
-  gamma = 1.0/sqrt( 1.0-beta*beta );
+  gamma = 1.0/::sqrt( 1.0-beta*beta );
 
   // Rotate p1 and p2 to new frame
   px1new = px1*cos(psi)+py1*sin(psi);
@@ -366,7 +369,7 @@ double StHbtCoulomb::Eta(const StHbtPair* pair) {
   vz2cms = pz2/e2new;
 
   // Velocity difference in CMS frame
-  dv = sqrt( (vx1cms-vx2cms)*(vx1cms-vx2cms) +
+  dv = ::sqrt( (vx1cms-vx2cms)*(vx1cms-vx2cms) +
 	     (vy1cms-vy2cms)*(vy1cms-vy2cms) +
 	     (vz1cms-vz2cms)*(vz1cms-vz2cms) );
 

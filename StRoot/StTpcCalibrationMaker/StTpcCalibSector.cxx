@@ -1,5 +1,8 @@
-// $Id: StTpcCalibSector.cxx,v 1.6 1999/10/11 08:04:09 fretiere Exp $
+// $Id: StTpcCalibSector.cxx,v 1.7 2003/09/02 17:59:11 perev Exp $
 // $Log: StTpcCalibSector.cxx,v $
+// Revision 1.7  2003/09/02 17:59:11  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.6  1999/10/11 08:04:09  fretiere
 // Fix bugg + add README, LOG and ID
 //
@@ -24,9 +27,8 @@
 #include "StDAQMaker/StDAQReader.h"
 #include "StDaqLib/TPC/trans_table.hh"
 // C/C++
-#include <fstream.h>
-#include <strstream.h>
-#include <iomanip.h>
+#include "Stiostream.h"
+#include <Stsstream.h>
 #include <math.h>
 // Root
 #include "TH1.h"
@@ -64,160 +66,165 @@ int tMaxNumberOfOuterPad=144;
 
 mNEvt=0;
 
-  char tBuffHName[20];
-  char tBuffHTitle[100];
-  ostrstream* tHName;
-  ostrstream* tHTitle;
 
-  tHName = new  ostrstream(tBuffHName, 20);
-  (*tHName) << "HCor" << mSectorId << ends;
-  tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHTitle) <<"Number of corrupted pad, sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHCorrupted= new TH1F(tHName->str(),tHTitle->str(),513,0.,512.);
-
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HRMS" << mSectorId << ends;
-  (*tHTitle) <<"Mean RMS, sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHMeanRMS= new TH1F(tHName->str(),tHTitle->str(),65,0.,16.);
-
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HCorMap" << mSectorId << ends;
-  (*tHTitle) <<"Corrupted pad, sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHCorruptedMap= new TH2F(tHName->str(),tHTitle->str(),
-			   tMaxNumberOfPad, 0.5, tMaxNumberOfPad+0.5,
-			   tNumberOfRow, 0.5, tNumberOfRow+0.5);
-
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HBadMap" << mSectorId << ends;
-  (*tHTitle) <<"Bad pad map, sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHBadMap = new TH2S(tHName->str(),tHTitle->str(),
+  {
+    ostrstream tHName,tHTitle;
+    tHName  << "HCor" << mSectorId << ends;
+    tHTitle <<"Number of corrupted pad, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHCorrupted= new TH1F(tHName.str(),tHTitle.str(),513,0.,512.);
+  }
+  {
+    ostrstream tHName,tHTitle;
+    tHName  << "HRMS" << mSectorId << ends;
+    tHTitle <<"Mean RMS, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHMeanRMS= new TH1F(tHName.str(),tHTitle.str(),65,0.,16.);
+  }
+  {
+    ostrstream tHName,tHTitle;
+    tHName  << "HCorMap" << mSectorId << ends;
+    tHTitle <<"Corrupted pad, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHCorruptedMap= new TH2F(tHName.str(),tHTitle.str(),
+ 			     tMaxNumberOfPad, 0.5, tMaxNumberOfPad+0.5,
+			     tNumberOfRow, 0.5, tNumberOfRow+0.5);
+  }
+  {
+    ostrstream tHName,tHTitle;
+    tHName  << "HBadMap" << mSectorId << ends;
+    tHTitle <<"Bad pad map, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHBadMap = new TH2S(tHName.str(),tHTitle.str(),
 		      tMaxNumberOfPad, 0.5, tMaxNumberOfPad+0.5,
 		      tNumberOfRow, 0.5, tNumberOfRow+0.5);
-
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HBadFEE" << mSectorId << ends;
-  (*tHTitle) <<"Number of bad pads per FEE, sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHBadFEE = new TH1S(tHName->str(),tHTitle->str(),182,0.5,182.5);
-
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HBadRDO" << mSectorId << ends;
-  (*tHTitle) <<"Number of bad pads per RDO, sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHBadRDO = new TH1S(tHName->str(),tHTitle->str(),6,0.5,6.5);
-
+  }
+  {
+    ostrstream tHName,tHTitle;
+    tHName   << "HBadFEE" << mSectorId << ends;
+    tHTitle  << "Number of bad pads per FEE, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHBadFEE = new TH1S(tHName.str(),tHTitle.str(),182,0.5,182.5);
+  }
+  {
+    ostrstream tHName,tHTitle;
+    tHName   << "HBadRDO" << mSectorId << ends;
+    tHTitle  <<"Number of bad pads per RDO, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHBadRDO = new TH1S(tHName.str(),tHTitle.str(),6,0.5,6.5);
+  }
+  {
   // Pulser calc
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HAmp" << mSectorId << ends;
-  (*tHTitle) <<"Cluster amplitude, sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHAmp = new TH1F(tHName->str(),tHTitle->str(),201,0.,2000.);
-
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HNSeq" << mSectorId << ends;
-  (*tHTitle) <<"Number sequence per pads, sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHNSequence = new TH1F(tHName->str(),tHTitle->str(),101,0.,100.);
-
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HNSeqMap" << mSectorId << ends;
-  (*tHTitle) <<"Number sequence per pads, sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHNSequenceMap = new TH2F(tHName->str(),tHTitle->str(),
+    ostrstream tHName,tHTitle;
+    tHName  << "HAmp" << mSectorId << ends;
+    tHTitle <<"Cluster amplitude, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHAmp = new TH1F(tHName.str(),tHTitle.str(),201,0.,2000.);
+  
+  }			    
+  {
+    ostrstream tHName,tHTitle;
+    tHName  << "HNSeq" << mSectorId << ends;
+    tHTitle <<"Number sequence per pads, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHNSequence = new TH1F(tHName.str(),tHTitle.str(),101,0.,100.);
+  }
+  {
+    ostrstream tHName,tHTitle;
+    tHName << "HNSeqMap" << mSectorId << ends;
+    tHTitle <<"Number sequence per pads, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHNSequenceMap = new TH2F(tHName.str(),tHTitle.str(),
 		      tMaxNumberOfPad, 0.5, tMaxNumberOfPad+0.5,
 		      tNumberOfRow, 0.5, tNumberOfRow+0.5);
-			    
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HT0" << mSectorId << ends;
-  (*tHTitle) <<"t0 distribution, sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHT0 = new TH1F(tHName->str(),tHTitle->str(),100,
+  }			    
+  {
+    ostrstream tHName,tHTitle;
+    tHName <<   "HT0" << mSectorId << ends;
+    tHTitle <<  "t0 distribution, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHT0 = new TH1F(tHName.str()  ,tHTitle.str()  ,100,
 		  mSetup->getExpectedPulsePos()-mSetup->getMinDistToPulse(),
 		  mSetup->getExpectedPulsePos()+mSetup->getMinDistToPulse());
 
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HAmpMap" << mSectorId << ends;
-  (*tHTitle) <<"Cluster amplitude, sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHAmpMap = new TH2F(tHName->str(),tHTitle->str(),
+  }			    
+  {
+    ostrstream tHName,tHTitle;
+    tHName <<   "HAmpMap" << mSectorId << ends;
+    tHTitle <<  "Cluster amplitude, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHAmpMap = new TH2F(tHName.str()  ,tHTitle.str()  ,
 		      tMaxNumberOfPad, 0.5, tMaxNumberOfPad+0.5,
 		      tNumberOfRow, 0.5, tNumberOfRow+0.5);
+  }			    
 
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HT0Map" << mSectorId << ends;
-  (*tHTitle) <<"Cluster t0, sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHT0Map = new TH2F(tHName->str(),tHTitle->str(),
+  {
+    ostrstream tHName,tHTitle;
+    tHName <<   "HT0Map" << mSectorId << ends;
+    tHTitle <<  "Cluster t0, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHT0Map = new TH2F(tHName.str()  ,tHTitle.str()  ,
 		     tMaxNumberOfPad, 0.5, tMaxNumberOfPad+0.5,
 		     tNumberOfRow, 0.5, tNumberOfRow+0.5);
 
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HFoundMap" << mSectorId << ends;
-  (*tHTitle) <<"N Cluster found, sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHFoundMap = new TH2F(tHName->str(),tHTitle->str(),
+  }			    
+  {
+    ostrstream tHName,tHTitle;
+    tHName <<   "HFoundMap" << mSectorId << ends;
+    tHTitle <<  "N Cluster found, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHFoundMap = new TH2F(tHName.str()  ,tHTitle.str()  ,
                         tMaxNumberOfPad, 0.5, tMaxNumberOfPad+0.5,
                         tNumberOfRow, 0.5, tNumberOfRow+0.5);
 
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HDeadMap" << mSectorId << ends;
-  (*tHTitle) <<"Dead pads, sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHDeadMap = new TH2F(tHName->str(),tHTitle->str(),
+  }			    
+  {
+    ostrstream tHName,tHTitle;
+    tHName <<   "HDeadMap" << mSectorId << ends;
+    tHTitle <<  "Dead pads, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHDeadMap = new TH2F(tHName.str()  ,tHTitle.str()  ,
                         tMaxNumberOfPad, 0.5, tMaxNumberOfPad+0.5,
                         tNumberOfRow, 0.5, tNumberOfRow+0.5);
 
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HDeadFEE" << mSectorId << ends;
-  (*tHTitle) <<"Number of dead pads per FEE, sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHDeadFEE = new TH1S(tHName->str(),tHTitle->str(),182,0.5,182.5);
+  }			    
+  {
+    ostrstream tHName,tHTitle;
+    tHName <<   "HDeadFEE" << mSectorId << ends;
+    tHTitle <<  "Number of dead pads per FEE, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHDeadFEE = new TH1S(tHName.str()  ,tHTitle.str()  ,182,0.5,182.5);
 
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HDeadRDO" << mSectorId << ends;
-  (*tHTitle) <<"Number of dead pads per RDO, sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHDeadRDO = new TH1S(tHName->str(),tHTitle->str(),6,0.5,6.5);
+  }			    
+  {
+    ostrstream tHName,tHTitle;
+    tHName <<   "HDeadRDO" << mSectorId << ends;
+    tHTitle <<  "Number of dead pads per RDO, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHDeadRDO = new TH1S(tHName.str()  ,tHTitle.str()  ,6,0.5,6.5);
 
-
+  }			    
+  {
+    ostrstream tHName,tHTitle;
   // Calibration histo
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HICal" << mSectorId << ends;
-  (*tHTitle) <<"Calibration coeficient, inner sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle ->str()<< endl;  
-  mHInnerCalibMap = new TH2F(tHName->str(),tHTitle->str(),
+    tHName <<   "HICal" << mSectorId << ends;
+    tHTitle <<  "Calibration coeficient, inner sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle .str()  << endl;  
+    mHInnerCalibMap = new TH2F(tHName.str()  ,tHTitle.str()  ,
 			     tMaxNumberOfPad, 0.5, tMaxNumberOfPad+0.5,
 			     tNumberOfInnerRow, 0.5, tNumberOfInnerRow+0.5);
 
-  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
-  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
-  (*tHName) << "HOCal" << mSectorId << ends;
-  (*tHTitle) <<"Calibration coeficient, outer sector " << mSectorId << ends;
-  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
-  mHOuterCalibMap = new TH2F(tHName->str(),tHTitle->str(),
+  }			    
+  {
+    ostrstream tHName,tHTitle;
+    tHName <<   "HOCal" << mSectorId << ends;
+    tHTitle <<  "Calibration coeficient, outer sector " << mSectorId << ends;
+  //cout << "Construct " << tHName.str()   << " " << tHTitle.str()   << endl;  
+    mHOuterCalibMap = new TH2F(tHName.str()  ,tHTitle.str()  ,
 			     tMaxNumberOfOuterPad, 0.5, tMaxNumberOfOuterPad+0.5,
 			     tNumberOfOuterRow, tFirstOuterRow-0.5, 
 			     tLastOuterRow+0.5);
+  }			    
 
 }
 // __________________________________

@@ -1,4 +1,4 @@
-#include <iostream>
+#include "Stiostream.h"
 #include <cmath>
 #include "StEvent.h"
 #include "StMcEvent.hh"
@@ -38,7 +38,8 @@ void StiSsdHitLoader::loadHits(StEvent* source,
   unsigned int ladder;
   unsigned int wafer;
   StSsdHit* hit;
-  vector<StSsdHit*>::const_iterator it;
+//VP  vector<StSsdHit*>::const_iterator it;
+  const_StSsdHitIterator it;
   StSsdLadderHitCollection* ssdLadderHitCollection;
   StSsdWaferHitCollection* ssdWaferHitCollection;
   for (ladder=1; 

@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.20 2001/05/14 20:53:20 genevb Exp $
+// $Id: StMessage.cxx,v 1.21 2003/09/02 17:59:20 perev Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.21  2003/09/02 17:59:20  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.20  2001/05/14 20:53:20  genevb
 // Add features to examine memory use, switch from TDatime to time_t
 //
@@ -76,14 +79,12 @@
 #include <string.h>
 #include "StMessage.h"
 #include "StMessageCounter.h"
-#include <strstream.h>
+#include "Stsstream.h"
+#include "Stiostream.h"
 
 static StMessageCounter* messCounter = StMessageCounter::Instance();
 
-static int messBuffSize = 1024;
-char* tempPtr = new char[messBuffSize];
-static char* messBuff = strcpy(tempPtr,"Empty\n");
-static ostrstream messBuffer(messBuff,messBuffSize,ios::out);
+static ostrstream messBuffer;
 static char space = ' ';
 static char tab = '\t';
 
@@ -155,26 +156,26 @@ int StMessage::Print(int nChars) {
       messBuffer << endofline;                           // "\n" end-line
     }
   }
-  char* addedMessage=0;
+  const char* addedMessage=0;
   if (!nChars) {
     addedMessage = messCounter->str();
   } else {
     if (nChars>0) {
       if (messBuffer.tellp() >= nChars)
         messBuffer.seekp(nChars-1);   // set end-of-string at nChars
-      int noReturns = strcspn(messBuff,endofline);
+      int noReturns = strcspn(messBuffer.str(),endofline);
       if (noReturns < messBuffer.tellp()) messBuffer.seekp(noReturns);
     } else
       nChars = 0;
   }
   messBuffer << ends;
   if ((strchr(option,'O')) || (nChars)) {
-    cout << messBuff;
+    cout << messBuffer.str();
     if (addedMessage) cout << addedMessage;
     cout.flush();
   }
   if ((strchr(option,'E')) && !(nChars)) {
-    cerr << messBuff;
+    cerr << messBuffer.str();
     if (addedMessage) cout << addedMessage;
     cerr.flush();
   }
@@ -189,7 +190,7 @@ size_t StMessage::GetMemoryUsage() {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.20 2001/05/14 20:53:20 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.21 2003/09/02 17:59:20 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include <math.h>
-#include <iostream>
+#include "Stiostream.h"
 using std::string;
 #include "Sti/Base/Named.h"
 #include "Sti/StiPlacement.h"

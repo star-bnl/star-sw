@@ -101,8 +101,8 @@
 #include <vector>
 #include <map>
 #include <time.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Described.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichCerenkovHistogram.h,v 1.3 2002/01/12 00:10:23 lasiuk Exp $
+ * $Id: StRichCerenkovHistogram.h,v 1.4 2003/09/02 17:58:55 perev Exp $
  *
  * Author:  bl Mar 2, 2001
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichCerenkovHistogram.h,v $
+ * Revision 1.4  2003/09/02 17:58:55  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2002/01/12 00:10:23  lasiuk
  * debin addition; quartz cerenkov angle, tuple modification, shift
  * to 183 nm for ray tracing, no temperature effect yet
@@ -25,7 +28,7 @@
 #ifndef StRichCerenkovHistogram_h
 #define StRichCerenkovHistogram_h
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include <stdio.h>
 #include <vector>

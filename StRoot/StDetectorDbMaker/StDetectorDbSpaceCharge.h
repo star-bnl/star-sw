@@ -1,15 +1,10 @@
 #ifndef StDetectorDbSpaceCharge_h
 #define StDetectorDbSpaceCharge_h
+#include <Stiostream.h>
 
 #include "StMaker.h"
 
-#ifdef sun
-#include <iostream.h>
-#endif
 
-#ifndef sun
-class ostream;
-#endif
 class  TTable;
 struct spaceChargeCor_st;
 

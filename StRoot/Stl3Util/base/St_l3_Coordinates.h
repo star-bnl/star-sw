@@ -1,7 +1,7 @@
 #ifndef St_l3_Coordinates_hh
 #define St_l3_Coordinates_hh
 
-#include <iostream>
+#include "Stiostream.h"
 
 class St_l3_xyz_Coordinate  {
 

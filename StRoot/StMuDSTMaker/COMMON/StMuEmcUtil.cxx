@@ -163,7 +163,7 @@ void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
       StMuEmcPoint *muPt=muEmc->getPoint(muEmc->getNPoints()-1);
       muPt->setEta(position.pseudoRapidity());
       muPt->setPhi(position.phi());
-      muPt->setRadius(sqrt(position.x()*position.x()+position.y()*position.y()));
+      muPt->setRadius(::sqrt(position.x()*position.x()+position.y()*position.y()));
       muPt->setDeltaEta(point->deltaEta());
       muPt->setDeltaPhi(point->deltaPhi());
       muPt->setEnergy(point->energy());
@@ -209,7 +209,7 @@ void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
       StMuEmcPoint *muPt=muEmc->getEndcapPoint(muEmc->getNPoints()-1);
       muPt->setEta(position.pseudoRapidity());
       muPt->setPhi(position.phi());
-      muPt->setRadius(sqrt(position.x()*position.x()+position.y()*position.y()));
+      muPt->setRadius(::sqrt(position.x()*position.x()+position.y()*position.y()));
       muPt->setDeltaEta(point->deltaEta());
       muPt->setDeltaPhi(point->deltaPhi());
       muPt->setEnergy(point->energy());

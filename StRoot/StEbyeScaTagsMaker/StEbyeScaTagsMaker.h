@@ -3,7 +3,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEbyeScaTagsMaker.h,v 1.8 2001/09/14 17:49:48 perev Exp $
+// $Id: StEbyeScaTagsMaker.h,v 1.9 2003/09/02 17:57:58 perev Exp $
 //
 // StEbyeScaTagsMaker
 //
@@ -19,6 +19,9 @@
 // History:
 //
 // $Log: StEbyeScaTagsMaker.h,v $
+// Revision 1.9  2003/09/02 17:57:58  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.8  2001/09/14 17:49:48  perev
 // Removed references to StRun.
 //
@@ -30,8 +33,8 @@
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include "StMaker.h"
 #include "ScaTag.h"
 #include "tables/St_ScaTag_Table.h"
@@ -67,7 +70,7 @@ public:
   void printTag(ostream& = cout);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeScaTagsMaker.h,v 1.8 2001/09/14 17:49:48 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeScaTagsMaker.h,v 1.9 2003/09/02 17:57:58 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEbyeScaTagsMaker, 1)
 };

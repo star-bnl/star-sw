@@ -12,7 +12,7 @@
 #ifndef StHbtXi_hh
 #define StHbtXi_hh
 
-#include <fstream.h>
+#include "Stiostream.h"
 #include "StHbtMaker/Infrastructure/StHbtVector.hh" //same as in StHbtTrack.hh
 #include "StHbtMaker/Infrastructure/StHbtV0.hh"
 
@@ -250,6 +250,9 @@ inline void StHbtXi::SetdedxBac(float x){mDedxBachelor=x;}
 /***********************************************************************
  *
  * $Log: StHbtXi.hh,v $
+ * Revision 1.3  2003/09/02 17:58:33  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2001/12/05 15:10:33  laue
  * Boris' updates (mainly access functions)
  *

@@ -17,7 +17,7 @@
 
 
 #include "StFtpcSequencer.hh"
-#include "iostream.h"
+#include "Stiostream.h"
 #include "StChain.h"
 
 // Message System
@@ -246,9 +246,12 @@ int StFtpcSequencer::writeArray(const int *cArray,
 
  /***************************************************************************
  *
- * $Id: StFtpcSequencer.cc,v 1.1 2003/02/14 18:11:25 fsimon Exp $
+ * $Id: StFtpcSequencer.cc,v 1.2 2003/09/02 17:58:15 perev Exp $
  *
  * $Log: StFtpcSequencer.cc,v $
+ * Revision 1.2  2003/09/02 17:58:15  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2003/02/14 18:11:25  fsimon
  * Initial commit of FTPC embedding code
  *

@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.cxx,v $
+// Revision 1.17  2003/09/02 17:58:49  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.16  2003/05/26 13:44:18  suaide
 // added setPrint() method
 //
@@ -622,10 +625,10 @@ Float_t StEmcPreClusterCollection::calcChiSqrt(Int_t nc,TArrayF en,TArrayF xavg,
   {
     Float_t yprofile=0.0;
     for(Int_t j=0;j<nc;j++) yprofile+=profile(x[i],xavg[j],en[j]);
-    Float_t sigma=0.15*sqrt(y[i]);
+    Float_t sigma=0.15*::sqrt(y[i]);
     chi+=(y[i]-yprofile)*(y[i]-yprofile)/(sigma*sigma);
   }
-  chi=sqrt(chi/(nh-nc));
+  chi=::sqrt(chi/(nh-nc));
   return chi;
 }
 //_____________________________________________________________________________
@@ -667,17 +670,17 @@ Float_t StEmcPreClusterCollection::profile(Float_t x,Float_t xavg,Float_t e)
   if(!strcmp(GetName(),"bsmde"))  
   {
     A1=-6.486e-4+1.149*e+0.03786*e*e;
-    sig1=0.002638-0.0002124*log(e);
+    sig1=0.002638-0.0002124*::log(e);
     A2=0.02278+0.01308*e+0.0008117*e*e;
-    sig2=0.01268-0.01074*exp(-e)*pow(e,0.2686);
+    sig2=0.01268-0.01074*exp(-e)*::pow(e,0.2686);
     assym=1.069+1.975*fabs(xavg); 
   }
   if(!strcmp(GetName(),"bsmdp"))
   {
     A1=-0.01927+0.7533*e+0.02308*e*e;
-    sig1=0.004426-0.0008858*log(e);
+    sig1=0.004426-0.0008858*::log(e);
     A2=0.03264-0.04145*e+0.01796*e*e;
-    sig2=0.00833+0.03117*exp(-e)*pow(e,1.873);
+    sig2=0.00833+0.03117*exp(-e)*::pow(e,1.873);
     assym=1;
   }
   if((fabs(x)-fabs(xavg))>0) assym2=assym;

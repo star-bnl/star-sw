@@ -1,6 +1,6 @@
 #ifndef StiKalmanTrackNode_H
 #define StiKalmanTrackNode_H 1
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <stdexcept>
 #include <math.h>
@@ -363,7 +363,7 @@ inline double StiKalmanTrackNode::getPt() const
 */
 inline double StiKalmanTrackNode::getP() const
 {
-  return (getPt()*sqrt(1.+_p4*_p4));
+  return (getPt()*::sqrt(1.+_p4*_p4));
 }
 
 inline double StiKalmanTrackNode::mcs2(double relRadThickness, double beta2, double p2)
@@ -477,7 +477,7 @@ inline double StiKalmanTrackNode::pathlength() const
   const StiDetector * det = getDetector();
   if (!det) return 0.; 
   double thickness = det->getShape()->getThickness();
-  return (thickness*sqrt(1.+_p4*_p4)) / _cosCA;
+  return (thickness*::sqrt(1.+_p4*_p4)) / _cosCA;
 }
 
 ///Return the radiation length (in cm) of the 
@@ -574,7 +574,7 @@ inline  void StiKalmanTrackNode::initialize(StiHit*h,double alpha, double eta, d
   _sinCA   = _p3*_x-_p2;
   if (fabs(_sinCA)>1.) 
       throw runtime_error("SKTN::initialize() - ERROR - fabs(_sinCA)>1.");
-  _cosCA   = sqrt(1.-_sinCA*_sinCA);
+  _cosCA   = ::sqrt(1.-_sinCA*_sinCA);
   //cout << "StiKalmanTrackNode::initialize(...) -I- Done"<<endl;
 };
 

@@ -6,7 +6,7 @@
 #ifndef STI_MATERIAL_HH
 #define STI_MATERIAL_HH
 
-#include <iostream>
+#include "Stiostream.h"
 #include <string>
 using namespace std;
 #include "Sti/Base/Named.h"

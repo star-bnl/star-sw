@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichGeantCalculator.h,v 1.1 2001/11/21 21:06:04 lasiuk Exp $
+ * $Id: StRichGeantCalculator.h,v 1.2 2003/09/02 17:58:55 perev Exp $
  *
  * Author:  bl Sept 10, 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichGeantCalculator.h,v $
+ * Revision 1.2  2003/09/02 17:58:55  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2001/11/21 21:06:04  lasiuk
  * Initial Revision
  *
@@ -17,7 +20,7 @@
 #ifndef StRichGeantCalculator_h
 #define StRichGeantCalculator_h
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include <stdio.h>
 #include <vector>

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstProjection.cxx,v 1.9 2003/04/30 20:36:54 perev Exp $
+ * $Id: StEstProjection.cxx,v 1.10 2003/09/02 17:58:04 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstProjection.cxx,v $
+ * Revision 1.10  2003/09/02 17:58:04  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.9  2003/04/30 20:36:54  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -411,12 +414,12 @@ int StEstTracker::Projection(StEstBranch* branch, int slay) {
       for(jl=0; jl<mPreprojTable[il]->GetNHits(); jl++) {
 	if (mPreprojTable[il]->GetHit(jl)->GetFlag()>0) continue; //hit cannot be taken into account
 	hit=mPreprojTable[il]->GetHit(jl);
-	dist=sqrt((vect1.x() - hit->GetGlobX()->x())*(vect1.x() - hit->GetGlobX()->x()) + 
+	dist=::sqrt((vect1.x() - hit->GetGlobX()->x())*(vect1.x() - hit->GetGlobX()->x()) + 
 		  (vect1.y() - hit->GetGlobX()->y())*(vect1.y() - hit->GetGlobX()->y()) +
 		  (vect1.z() - hit->GetGlobX()->z())*(vect1.z() - hit->GetGlobX()->z()));
 	
 	tmpd1b=fabs(vect1.z() - hit->GetGlobX()->z()); //distl
-	tmpd1c=sqrt((vect1.x() - hit->GetGlobX()->x())*(vect1.x() - hit->GetGlobX()->x()) + 
+	tmpd1c=::sqrt((vect1.x() - hit->GetGlobX()->x())*(vect1.x() - hit->GetGlobX()->x()) + 
 		    (vect1.y() - hit->GetGlobX()->y())*(vect1.y() - hit->GetGlobX()->y())); //distw
 	
 

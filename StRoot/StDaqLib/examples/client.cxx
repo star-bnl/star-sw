@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: client.cxx,v 1.12 2003/01/29 20:08:09 geurts Exp $
+ * $Id: client.cxx,v 1.13 2003/09/02 17:55:34 perev Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: sample top-level code sould be used as a tutorial
@@ -14,6 +14,9 @@
  *
  ***************************************************************************
  * $Log: client.cxx,v $
+ * Revision 1.13  2003/09/02 17:55:34  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.12  2003/01/29 20:08:09  geurts
  * disabled usage of TRG_Reader::PrintAllTheData() and ::PrintDataCompact().
  * Both methods are unavailabe in TRG_Reader.
@@ -84,7 +87,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <assert.h>
-#include <iostream>
+#include "Stiostream.h"
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/EMC/EMC_Reader.hh"

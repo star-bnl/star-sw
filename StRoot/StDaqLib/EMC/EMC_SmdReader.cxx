@@ -3,7 +3,7 @@
 #define MAX_ADC 0xFFF
 #include <time.h>
 #include <stdlib.h>
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdio.h>
 
 /////////////////////////////////////////////////////////////////////

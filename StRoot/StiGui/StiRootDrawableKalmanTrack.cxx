@@ -2,7 +2,7 @@
 /// \author M.L. Miller (Yale Software)
 /// \author Claude A Pruneau, Wayne State University
 #include <stdexcept>
-#include <iostream.h>
+#include <Stiostream.h>
 #include <algorithm>
 using namespace std;
 #include "StEventTypes.h"

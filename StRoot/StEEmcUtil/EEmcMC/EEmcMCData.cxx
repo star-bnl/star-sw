@@ -1,5 +1,8 @@
-// $Id: EEmcMCData.cxx,v 1.6 2003/03/26 21:16:59 balewski Exp $
+// $Id: EEmcMCData.cxx,v 1.7 2003/09/02 17:57:56 perev Exp $
 // $Log: EEmcMCData.cxx,v $
+// Revision 1.7  2003/09/02 17:57:56  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.6  2003/03/26 21:16:59  balewski
 // swap U & V on Wei-Ming request
 //
@@ -116,7 +119,7 @@
 #include "StEEmcUtil/EEevent/EEeventDst.h"
 #include "StEEmcUtil/EEevent/EEsectorDst.h"
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 
 ClassImp(EEmcMCData)

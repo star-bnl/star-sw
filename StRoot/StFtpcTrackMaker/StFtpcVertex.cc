@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.cc,v 1.15 2003/05/20 18:35:10 oldi Exp $
+// $Id: StFtpcVertex.cc,v 1.16 2003/09/02 17:58:17 perev Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.16  2003/09/02 17:58:17  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.15  2003/05/20 18:35:10  oldi
 // Cuts for vertex estimation introduced (globDca < 1 cm, multiplicity >= 200).
 //
@@ -138,7 +141,7 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
   for(Int_t ii=0; ii<120; ii++) mapMax[ii]=0;
   
   for(Int_t i=0; i<numFppoints;i++) {
-    rmap[(thisFppoint[i].row-1)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*(thisFppoint[i].sector-1)+120*mapMax[(thisFppoint[i].row-1)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*(thisFppoint[i].sector-1)]]=sqrt(thisFppoint[i].x*thisFppoint[i].x+thisFppoint[i].y*thisFppoint[i].y);
+    rmap[(thisFppoint[i].row-1)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*(thisFppoint[i].sector-1)+120*mapMax[(thisFppoint[i].row-1)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*(thisFppoint[i].sector-1)]]=::sqrt(thisFppoint[i].x*thisFppoint[i].x+thisFppoint[i].y*thisFppoint[i].y);
     zmap[thisFppoint[i].row-1]=thisFppoint[i].z;
     mapMax[(thisFppoint[i].row-1)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*(thisFppoint[i].sector-1)]++;
   }
@@ -205,12 +208,12 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
   else {
       
     // do gaussfit 
-    sigma = sqrt (1 / ((2 * log(myhist[maxBin])) -
-		       (log(myhist[maxBin+1]) + 
-			log(myhist[maxBin-1]))));
+    sigma = sqrt (1 / ((2 * ::log((double)myhist[maxBin])) -
+		       (::log((double)myhist[maxBin+1]) + 
+			::log((double)myhist[maxBin-1]))));
     vertex =  ((maxBin+0.5)/hratio+StFtpcTrackingParams::Instance()->HistoMin()) + 
-      sigma*sigma/(hratio*hratio) * (log(myhist[maxBin+1]) - 
-				     log(myhist[maxBin-1]));
+      sigma*sigma/(hratio*hratio) * (::log((double)myhist[maxBin+1]) - 
+				     ::log((double)myhist[maxBin-1]));
   } 
 		  
   delete[] myhist;
@@ -259,7 +262,7 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
 
     StFtpcPoint *thispoint = (StFtpcPoint *)hits->At(i);
 
-    rmap[(thispoint->GetPadRow()-1)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*(thispoint->GetSector()-1)+120*mapMax[(thispoint->GetPadRow()-1)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*(thispoint->GetSector()-1)]]=sqrt(thispoint->GetX()*thispoint->GetX()+thispoint->GetY()*thispoint->GetY());
+    rmap[(thispoint->GetPadRow()-1)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*(thispoint->GetSector()-1)+120*mapMax[(thispoint->GetPadRow()-1)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*(thispoint->GetSector()-1)]]=::sqrt(thispoint->GetX()*thispoint->GetX()+thispoint->GetY()*thispoint->GetY());
     zmap[thispoint->GetPadRow()-1]=thispoint->GetZ();
     mapMax[(thispoint->GetPadRow()-1)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*(thispoint->GetSector()-1)]++;
   }
@@ -326,12 +329,12 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
   else {
       
     // do gaussfit 
-    sigma = sqrt (1 / ((2 * log(myhist[maxBin])) -
-		       (log(myhist[maxBin+1]) + 
-			log(myhist[maxBin-1]))));
+    sigma = sqrt (1 / ((2 * ::log((double)myhist[maxBin])) -
+		       (::log((double)myhist[maxBin+1]) + 
+			::log((double)myhist[maxBin-1]))));
     vertex =  ((maxBin+0.5)/hratio+StFtpcTrackingParams::Instance()->HistoMin()) + 
-      sigma*sigma/(hratio*hratio) * (log(myhist[maxBin+1]) - 
-				     log(myhist[maxBin-1]));
+      sigma*sigma/(hratio*hratio) * (::log((double)myhist[maxBin+1]) - 
+				     ::log((double)myhist[maxBin-1]));
   } 
 		  
   delete[] myhist;

@@ -3,7 +3,7 @@
 #ifndef VectorizedFactory_HH
 #define VectorizedFactory_HH
 #include <stdexcept>
-#include <iostream>
+#include "Stiostream.h"
 #include <vector>
 
 using std::vector;

@@ -4,7 +4,7 @@
 
 #ifndef SubjectObserver_HH
 #define SubjectObserver_HH
-
+#include "Stiostream.h"
 #include <vector>
 using std::vector;
 

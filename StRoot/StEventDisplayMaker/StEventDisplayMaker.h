@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.32 2003/01/26 23:54:36 fine Exp $
+// $Id: StEventDisplayMaker.h,v 1.33 2003/09/02 17:58:08 perev Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.33  2003/09/02 17:58:08  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.32  2003/01/26 23:54:36  fine
-// Add Riostream.h header lost due removing the redundant headers files from StEvent package. Redundant iostream was removed
+// Add RStiostream.h header lost due removing the redundant headers files from StEvent package. Redundant iostream was removed
 //
 // Revision 1.31  2003/01/26 17:23:03  jeromel
 // Missing iostream
@@ -81,7 +84,7 @@ class StEventDisplayInfo;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.32 2003/01/26 23:54:36 fine Exp $";
+// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.33 2003/09/02 17:58:08 perev Exp $";
 
  private: 
  enum {kCOLORS=20};
@@ -157,7 +160,7 @@ static StEventDisplayInfo *fgInfo;
    virtual void         TurnOn() { SetMode(); }  // *MENU*
    virtual void         TurnOff(){ SetMode(1); } // *MENU*
    static  Int_t        MakeLoop(Int_t flag);
-   static  void         Info(const char*info);
+   static  void         MakeInfo(const char*info);
      // --   Filters  --
 
      enum EDisplayEvents 
@@ -185,7 +188,7 @@ static StEventDisplayInfo *fgInfo;
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.32 2003/01/26 23:54:36 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.33 2003/09/02 17:58:08 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:

@@ -3,7 +3,7 @@
 //3/01
 
 //STD
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 
 //SCL
@@ -57,8 +57,8 @@ bool StHitRadiusLessThan::operator() (const StHit* hit1, const StHit* hit2) cons
 {
     const StThreeVectorD& pos1 = hit1->position();
     const StThreeVectorD& pos2 = hit2->position();
-    return (sqrt( pos1.x()*pos1.x() + pos1.y()*pos1.y() + pos1.z()*pos1.z() ) <
-	    sqrt( pos2.x()*pos2.x() + pos2.y()*pos2.y() + pos2.z()*pos2.z() ) );
+    return (::sqrt( pos1.x()*pos1.x() + pos1.y()*pos1.y() + pos1.z()*pos1.z() ) <
+	    ::sqrt( pos2.x()*pos2.x() + pos2.y()*pos2.y() + pos2.z()*pos2.z() ) );
 }
 */
 
@@ -74,8 +74,8 @@ bool StHitRadiusGreaterThan::operator() (const StHit* hit1, const StHit* hit2) c
 {
     const StThreeVectorD& pos1 = hit1->position();
     const StThreeVectorD& pos2 = hit2->position();
-    return (sqrt( pos1.x()*pos1.x() + pos1.y()*pos1.y() + pos1.z()*pos1.z() ) >
-	    sqrt( pos2.x()*pos2.x() + pos2.y()*pos2.y() + pos2.z()*pos2.z() ) );
+    return (::sqrt( pos1.x()*pos1.x() + pos1.y()*pos1.y() + pos1.z()*pos1.z() ) >
+	    ::sqrt( pos2.x()*pos2.x() + pos2.y()*pos2.y() + pos2.z()*pos2.z() ) );
 }
 */
 	

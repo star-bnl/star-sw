@@ -295,7 +295,7 @@ Int_t StVeloMaker::Make()
       zz = fHitChair->GetZ(ihit);
       fHits[nacc].z = fHitChair->GetZ(ihit);
       fHits[nacc].s = (short)fHitChair->Sector(ihit);
-      fHits[nacc].r = sqrt(pow(fHits[nacc].x,2)+pow(fHits[nacc].y,2));
+      fHits[nacc].r = ::sqrt(::pow(fHits[nacc].x,2)+::pow(fHits[nacc].y,2));
       fHits[nacc].u = 0;
       fGate[nacc] = anglim(fHits+nacc);
 
@@ -436,7 +436,7 @@ Int_t StVeloMaker::Make00()
 
 	xr2 = x2/rr2; yr2 = y2/rr2;
 	xc = -(yr2-yr1); yc = (xr2-xr1);
-	tmp = sqrt(xc*xc+yc*yc); xc = xc/tmp; yc = yc/tmp;
+	tmp = ::sqrt(xc*xc+yc*yc); xc = xc/tmp; yc = yc/tmp;
 	rho = xc*(xr1+xr2)+yc*(yr1+yr2);
 	if (fabs(rho) > 1./RTRKMIN)  		continue;
 	if (rho < 0) {xc = -xc; yc = -yc; rho = -rho;}
@@ -526,8 +526,8 @@ double StVeloMaker::MakeTrack(int *tr)
      nacc++;
    }
 
-   //double r1 = sqrt(pow(pnts[i1REG][0],2)+pow(pnts[i1REG][1],2));
-   //double r2 = sqrt(pow(pnts[i2REG][0],2)+pow(pnts[i2REG][1],2));
+   //double r1 = ::sqrt(::pow(pnts[i1REG][0],2)+::pow(pnts[i1REG][1],2));
+   //double r2 = ::sqrt(::pow(pnts[i2REG][0],2)+::pow(pnts[i2REG][1],2));
    //double z0 = (pnts[i1REG][2]*r2- pnts[i2REG][2]*r1)/(r2-r1);
 
    THelixTrack hel(pnts[0],nacc);
@@ -583,7 +583,7 @@ Int_t StVeloMaker::Make01()
       corr -= averi*averj;
       aver2i -= averi*averi;
       aver2j -= averj*averj;
-      corr   /= sqrt(aver2i*aver2j);
+      corr   /= ::sqrt(aver2i*aver2j);
       if (corr < bestCorr) continue;
       bestCorr = corr; bestShift=iShift;
 
@@ -640,9 +640,9 @@ Int_t StVeloMaker::Make02()
   
 
   FitVtx(0);
-  printf("StVelo: +ZV = %12.7g %12.7g \n",fV[0][2],sqrt(fG[0][8]));
+  printf("StVelo: +ZV = %12.7g %12.7g \n",fV[0][2],::sqrt(fG[0][8]));
   FitVtx(1);
-  printf("StVelo: -ZV = %12.7g %12.7g \n",fV[1][2],sqrt(fG[1][8]));
+  printf("StVelo: -ZV = %12.7g %12.7g \n",fV[1][2],::sqrt(fG[1][8]));
   double c[3][9],v[3][3];  
   for (is=0;is<2;is++) {
     TCL  ::ucopy(fG[is],c[is],9);
@@ -660,12 +660,12 @@ Int_t StVeloMaker::Make02()
 
   for (is=0;is<4;is++){
     printf("Vtx+-Err = ");
-    for (j=0;j<3;j++)printf("%8.3f(+-%5.3f) ",fV[is][j],sqrt(fG[is][j*4]));   
+    for (j=0;j<3;j++)printf("%8.3f(+-%5.3f) ",fV[is][j],::sqrt(fG[is][j*4]));   
     printf("\n");
   }
     hDZ[0]->Fill(fV[3][2]);
-    hDZ[1]->Fill(fV[3][2]/sqrt(fG[3][8]));
-    hDZ[2]->Fill(sqrt(fG[3][8]));
+    hDZ[1]->Fill(fV[3][2]/::sqrt(fG[3][8]));
+    hDZ[2]->Fill(::sqrt(fG[3][8]));
     hDZ[3]->Fill(fV[2][2]);
     hZdZPlot->Fill(fV[2][2],fV[3][2]);
     padRefresh(fC3);padRefresh(fC4);

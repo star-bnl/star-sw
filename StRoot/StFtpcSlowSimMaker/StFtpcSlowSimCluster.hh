@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimCluster.hh,v 1.3 2002/06/07 09:55:41 fsimon Exp $
+// $Id: StFtpcSlowSimCluster.hh,v 1.4 2003/09/02 17:58:16 perev Exp $
 // $Log: StFtpcSlowSimCluster.hh,v $
+// Revision 1.4  2003/09/02 17:58:16  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.3  2002/06/07 09:55:41  fsimon
 // Additional debug info to trace electron drift
 //
@@ -48,9 +51,9 @@ public:
   void Print() const;
   float GetElectron() const  {return electron;}   
                                 // get the number of electrons
-  float GetSigRad() const    {return sqrt(sigma_rad_squared);}
+  float GetSigRad() const    {return ::sqrt(sigma_rad_squared);}
                                 // get the radial sigma
-  float GetSigPhi() const    {return sqrt(sigma_phi_squared);}
+  float GetSigPhi() const    {return ::sqrt(sigma_phi_squared);}
                                 // get the azimuthal sigma
   float GetRadOff() const    { return radialDipWidth;}
                                 // get the radial dip width

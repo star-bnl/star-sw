@@ -163,7 +163,7 @@ int FtfBaseTrack::fitCircle (  )
 //->  NOW GET <R**2> AND RSCALE= SQRT(<R**2>)
 //
   double rrav   = xxav + yyav ;
-  double rscale = sqrt(rrav) ;
+  double rscale = ::sqrt(rrav) ;
 
   xxav   = 0.0 ;
   yyav   = 0.0 ;
@@ -291,13 +291,13 @@ int FtfBaseTrack::fitCircle (  )
   if ( fabs(h22) > fabs(h24) ) {
      ratio  = h24 / h22 ;
      rootsq = ratio * ratio + rootsq ;
-     kappa = 1.0 / sqrt(rootsq) ;
+     kappa = 1.0 / ::sqrt(rootsq) ;
      beta  = - ratio * kappa ;
   }
   else {
      ratio  = h22 / h24 ;
      rootsq = 1.0 + ratio * ratio * rootsq ;
-     beta  = 1.0 / sqrt(rootsq) ;
+     beta  = 1.0 / ::sqrt(rootsq) ;
      if ( h24 > 0 ) beta = - beta ;
      kappa = -ratio * beta ;
   }            
@@ -446,8 +446,8 @@ int FtfBaseTrack::fitLine ( )
 //     calculate estimated variance
 //      varsq=chi/(double(n)-2.) 
 //     calculate covariance matrix 
-//      siga=sqrt(varsq*sxx/det) 
-//      sigb=sqrt(varsq*sum/det) 
+//      siga=::sqrt(varsq*sxx/det) 
+//      sigb=::sqrt(varsq*sum/det) 
 //
     dtanl = (double) ( sum / det );
     dz0   = (double) ( sss / det );
@@ -505,7 +505,7 @@ int FtfBaseTrack::getErrorsCircleFit ( double a, double b, double r ) {
       FtfBaseHit* cHit = (FtfBaseHit *)currentHit ;
       dx = cHit->x - a;
       dy = cHit->y - b;
-      hyp = (double)sqrt( dx * dx + dy * dy );
+      hyp = (double)::sqrt( dx * dx + dy * dy );
       s1 = dx / hyp;
       c1 = dy / hyp;
       ratio = r / hyp;
@@ -758,7 +758,7 @@ int FtfBaseTrack::extraRCyl ( double &r,  double &phi, double &z,
 //     Check helix and cylinder intersect
 // 
    fac1 = xc*xc + yc*yc ;
-   sfac = sqrt( fac1 ) ;
+   sfac = ::sqrt( fac1 ) ;
 //  
 //  If they don't intersect return
 //  Trick to solve equation of intersection of two circles
@@ -855,7 +855,7 @@ int FtfBaseTrack::intersectorZLine ( double a, double b,
 	cross2.set(0,0,0);
 	return 1 ;
     }
-    double rootRacine = sqrt(racine) ;
+    double rootRacine = ::sqrt(racine) ;
     
     double oneOverA = 1./aa;
     //
@@ -944,7 +944,7 @@ int FtfBaseTrack::intersectorYCteLine ( double a, Ftf3DHit& cross ) {
       return 1 ;
    }
 
-   double sf2  = sqrt(r2-f1);
+   double sf2  = ::sqrt(r2-f1);
    double y1   = ycoc + sf2;
    double y2   = ycoc - sf2;
    double yHit = y1;
@@ -1154,7 +1154,7 @@ void FtfBaseTrack::updateToClosestApproach ( double xBeam, double yBeam, double 
 // ftfLog ( "FtfBaseTrack::updateClosestApproach: closest x y z %f %f %f \n", 
 //               closest.x, closest.y, closest.z ) ;
 
-   double radius = sqrt(closest.x*closest.x+closest.y*closest.y);
+   double radius = ::sqrt(closest.x*closest.x+closest.y*closest.y);
    if ( radius > rMax ) return ;
 //
    double tPhi = atan2(closest.y-yc,closest.x-xc);

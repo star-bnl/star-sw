@@ -1,6 +1,6 @@
 #ifndef StiTreeNode_H
 #define StiTreeNode_H 1
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 
 class StiTreeNode 

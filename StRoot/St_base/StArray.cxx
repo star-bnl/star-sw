@@ -45,6 +45,21 @@ Int_t StObjArray::getEntries() const
    return en;
 }
 //______________________________________________________________________________
+TObject** StObjArray::Erase(TObject** it,int del) 
+{
+   int i = it-&fV[0];
+   if (del) delete fV[i];
+   return &(*(fV.erase(fV.begin()+i)));		
+}		
+//______________________________________________________________________________
+TObject** StObjArray::Erase(TObject** fst,TObject** lst,int del)
+{
+   int ifst = fst-&fV[0];
+   int ilst = lst-&fV[0];
+   if (del) {for (int i=ifst;i<ilst;i++) delete fV[i];}
+   return &(*(fV.erase(fV.begin()+ifst,fV.begin()+ilst)));		
+}		
+//______________________________________________________________________________
 void StObjArray::Streamer(TBuffer &b)
 {
 
@@ -164,6 +179,7 @@ void StRefArray::Streamer(TBuffer &R__b)
 ClassImp(StStrArray)
 //______________________________________________________________________________
 StStrArray::StStrArray(Int_t sz):StObjArray(sz){}
+#if 0
 //______________________________________________________________________________
  void StStrArray::operator=(const StStrArray &a)
 {
@@ -178,20 +194,16 @@ StStrArray::StStrArray(Int_t sz):StObjArray(sz){}
     push_back(sto);
   }
 } 
+#endif //0
 //______________________________________________________________________________
 StStrArray::StStrArray(const StStrArray &from){ *this = from;}
 //______________________________________________________________________________
- VecTObjIter StStrArray::erase(VecTObjIter fst,VecTObjIter lst)
-{
-   VecTObjIter it;
-   if(!lst) lst = fst;
-   for (it = fst; it < lst; it++) delete *it;
-   return fV.erase(fst,lst);
-}
-//______________________________________________________________________________
  void StStrArray::clear()
 { 
-  erase(begin(),end());
+  int n,i;
+  
+  n = fV.size();
+  for (i=0; i<n; i++){delete fV[i];}
   fV.clear();
 } 
 StStrArray::~StStrArray()

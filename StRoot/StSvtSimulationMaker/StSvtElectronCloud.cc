@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtElectronCloud.cc,v 1.2 2003/07/31 19:18:09 caines Exp $
+ * $Id: StSvtElectronCloud.cc,v 1.3 2003/09/02 17:59:09 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtElectronCloud.cc,v $
+ * Revision 1.3  2003/09/02 17:59:09  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2003/07/31 19:18:09  caines
  * Petrs improved simulation code
  *
@@ -18,9 +21,9 @@
  *
  **************************************************************************/
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <string.h>
-#include <fstream.h>
+#include "Stiostream.h"
 
 #include "StSvtElectronCloud.hh"
 
@@ -119,8 +122,8 @@ if(mTheta == 0.)
 
  mSigmaSq1Prev = mSigma10*mSigma10;
  mSigmaSq2Prev = mSigma20*mSigma20;
- sigma1 = sqrt(mSigmaSq1Prev);
- sigma2 = sqrt(mSigmaSq2Prev);
+ sigma1 = ::sqrt(mSigmaSq1Prev);
+ sigma2 = ::sqrt(mSigmaSq2Prev);
 
  dSigma1SqBydt[0] = func1(0.0,sigma1,sigma2);
  dSigma2SqBydt[0] = func2(0.0,sigma1,sigma2); 
@@ -229,14 +232,14 @@ int StSvtElectronCloud::runge_kutta4(int stepBefore, int numBinDiv, double stepl
   if(!stepBefore && mWrite)
    {
      if(!strncmp(mOption , "coulomb", strlen("coulomb")))
-       out1N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
+       out1N<<tim<<setw(20)<<::sqrt(mSigmaSq1Prev)*a<<setw(20)<<::sqrt(mSigmaSq2Prev)*a<<"\n";
      else if(!strncmp(mOption,"diffusion",strlen("diffusion")))
-       out2N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
+       out2N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<::sqrt(mSigmaSq2Prev)*a<<"\n";
      else if(!strncmp(mOption,"both",strlen("both")))
-       out3N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
+       out3N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<::sqrt(mSigmaSq2Prev)*a<<"\n";
 
      //cout<<"I got here 1st"<<endl;  
-     //cout<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<endl;
+     //cout<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<::sqrt(mSigmaSq2Prev)*a<<endl;
    }
 
  tim = stepBefore*mTimBinSize;
@@ -283,16 +286,16 @@ int StSvtElectronCloud::runge_kutta4(int stepBefore, int numBinDiv, double stepl
    if(mFineDiv && mWrite)
      {
        if(!strncmp(mOption , "coulomb", strlen("coulomb"))){
-           out1N<<tim<<setw(20)<<sqrt(sigma1)*a<<setw(20)<<sqrt(sigma2)*a<<"\n";
-	   //cout<<tim<<setw(20)<<sqrt(sigma1)*a<<setw(20)<<sqrt(sigma2)*a<<endl;
+           out1N<<tim<<setw(20)<<::sqrt(sigma1)*a<<setw(20)<<::sqrt(sigma2)*a<<"\n";
+	   //cout<<tim<<setw(20)<<::sqrt(sigma1)*a<<setw(20)<<::sqrt(sigma2)*a<<endl;
        }
        else if(!strncmp(mOption,"diffusion",strlen("diffusion"))){
-           out2N<<tim<<setw(20)<<sqrt(sigma1)*a<<setw(20)<<sqrt(sigma2)*a<<"\n";
-	   //cout<<tim<<setw(20)<<sqrt(sigma1)*a<<setw(20)<<sqrt(sigma2)*a<<endl;
+           out2N<<tim<<setw(20)<<::sqrt(sigma1)*a<<setw(20)<<::sqrt(sigma2)*a<<"\n";
+	   //cout<<tim<<setw(20)<<::sqrt(sigma1)*a<<setw(20)<<::sqrt(sigma2)*a<<endl;
        }
        else if(!strncmp(mOption,"both",strlen("both"))){
-           out3N<<tim<<setw(20)<<sqrt(sigma1)*a<<setw(20)<<sqrt(sigma2)*a<<"\n";
-	   //cout<<tim<<setw(20)<<sqrt(sigma1)*a<<setw(20)<<sqrt(sigma2)*a<<endl;
+           out3N<<tim<<setw(20)<<::sqrt(sigma1)*a<<setw(20)<<::sqrt(sigma2)*a<<"\n";
+	   //cout<<tim<<setw(20)<<::sqrt(sigma1)*a<<setw(20)<<::sqrt(sigma2)*a<<endl;
        }
      }
   
@@ -316,11 +319,11 @@ int StSvtElectronCloud::runge_kutta4(int stepBefore, int numBinDiv, double stepl
     {
      
        if(!strncmp(mOption , "coulomb", strlen("coulomb")))
-           out1N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
+           out1N<<tim<<setw(20)<<::sqrt(mSigmaSq1Prev)*a<<setw(20)<<::sqrt(mSigmaSq2Prev)*a<<"\n";
         else if(!strncmp(mOption,"diffusion",strlen("diffusion")))
-           out2N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
+           out2N<<tim<<setw(20)<<::sqrt(mSigmaSq1Prev)*a<<setw(20)<<::sqrt(mSigmaSq2Prev)*a<<"\n";
         else if(!strncmp(mOption,"both",strlen("both")))
-           out3N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
+           out3N<<tim<<setw(20)<<::sqrt(mSigmaSq1Prev)*a<<setw(20)<<::sqrt(mSigmaSq2Prev)*a<<"\n";
        //cout<<tim<<setw(20)<<sqrt(mSigmaSq1Now)*a<<setw(20)<<sqrt(mSigmaSq2Now)*a<<endl;
      }
 
@@ -345,8 +348,8 @@ int StSvtElectronCloud::adamsBushFort(int n, int  numBinDiv, double steplen)
    sigma1SqPre = mSigmaSq1Prev + (numBinDiv*steplen/24)*(-9.0*dSigma1SqBydt[0] + 37.0*dSigma1SqBydt[1] - 59.0*dSigma1SqBydt[2] + 55.0*dSigma1SqBydt[3]);
    sigma2SqPre = mSigmaSq2Prev + (numBinDiv*steplen/24)*(-9.0*dSigma2SqBydt[0] + 37.0*dSigma2SqBydt[1] - 59.0*dSigma2SqBydt[2] + 55.0*dSigma2SqBydt[3]);
 
-    sigma1 = sqrt(sigma1SqPre);
-    sigma2 = sqrt(sigma2SqPre);
+    sigma1 = ::sqrt(sigma1SqPre);
+    sigma2 = ::sqrt(sigma2SqPre);
     
 
     dSigmaSqBydt1 = func1(tim,sigma1,sigma2);
@@ -374,16 +377,16 @@ int StSvtElectronCloud::adamsBushFort(int n, int  numBinDiv, double steplen)
      {
       
       if(!strncmp(mOption , "coulomb", strlen("coulomb"))){
-	out1N<<tim<<setw(20)<<sqrt(sigma1SqCor)*a<<setw(20)<<sqrt(sigma2SqCor)*a<<"\n";
-	//cout<<tim<<setw(20)<<sqrt(sigma1SqCor)*a<<setw(20)<<sqrt(sigma2SqCor)*a<<endl;
+	out1N<<tim<<setw(20)<<::sqrt(sigma1SqCor)*a<<setw(20)<<::sqrt(sigma2SqCor)*a<<"\n";
+	//cout<<tim<<setw(20)<<::sqrt(sigma1SqCor)*a<<setw(20)<<::sqrt(sigma2SqCor)*a<<endl;
 	}
       else if(!strncmp(mOption,"diffusion",strlen("diffusion"))){
-	out2N<<tim<<setw(20)<<sqrt(sigma1SqCor)*a<<setw(20)<<sqrt(sigma2SqCor)*a<<"\n";
-	//cout<<tim<<setw(20)<<sqrt(sigma1SqCor)*a<<setw(20)<<sqrt(sigma2SqCor)*a<<endl;
+	out2N<<tim<<setw(20)<<::sqrt(sigma1SqCor)*a<<setw(20)<<::sqrt(sigma2SqCor)*a<<"\n";
+	//cout<<tim<<setw(20)<<::sqrt(sigma1SqCor)*a<<setw(20)<<::sqrt(sigma2SqCor)*a<<endl;
 	}
       else if(!strncmp(mOption,"both",strlen("both"))){
-	out3N<<tim<<setw(20)<<sqrt(sigma1SqCor)*a<<setw(20)<<sqrt(sigma2SqCor)*a<<"\n";
-	//cout<<tim<<setw(20)<<sqrt(sigma1SqCor)*a<<setw(20)<<sqrt(sigma2SqCor)*a<<endl;
+	out3N<<tim<<setw(20)<<::sqrt(sigma1SqCor)*a<<setw(20)<<::sqrt(sigma2SqCor)*a<<"\n";
+	//cout<<tim<<setw(20)<<::sqrt(sigma1SqCor)*a<<setw(20)<<::sqrt(sigma2SqCor)*a<<endl;
       }
      }
 
@@ -402,14 +405,14 @@ int StSvtElectronCloud::adamsBushFort(int n, int  numBinDiv, double steplen)
   if(!mFineDiv && mWrite)
     {
       if(!strncmp(mOption , "coulomb", strlen("coulomb")))
-           out1N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
+           out1N<<tim<<setw(20)<<::sqrt(mSigmaSq1Prev)*a<<setw(20)<<::sqrt(mSigmaSq2Prev)*a<<"\n";
         else if(!strncmp(mOption,"diffusion",strlen("diffusion")))
-           out2N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
+           out2N<<tim<<setw(20)<<::sqrt(mSigmaSq1Prev)*a<<setw(20)<<::sqrt(mSigmaSq2Prev)*a<<"\n";
         else if(!strncmp(mOption,"both",strlen("both")))
-           out3N<<tim<<setw(20)<<sqrt(mSigmaSq1Prev)*a<<setw(20)<<sqrt(mSigmaSq2Prev)*a<<"\n";
+           out3N<<tim<<setw(20)<<::sqrt(mSigmaSq1Prev)*a<<setw(20)<<::sqrt(mSigmaSq2Prev)*a<<"\n";
         
       
-      //cout<<tim<<setw(20)<<sqrt(mSigmaSq1Now)*a<<setw(20)<<sqrt(mSigmaSq2Now)*a<<endl;
+      //cout<<tim<<setw(20)<<::sqrt(mSigmaSq1Now)*a<<setw(20)<<::sqrt(mSigmaSq2Now)*a<<endl;
      }
 
 return 0;
@@ -425,8 +428,8 @@ double StSvtElectronCloud::func1(double tim, double sigmaSq1, double sigmaSq2)
  double fun1 ,multFactor, denominator,numerator;
  // double const1 = 0.43, const2 = 0.25, const3 = 0.58;
 
- sigma1 = sqrt(sigmaSq1);
- sigma2 = sqrt(sigmaSq2);
+ sigma1 = ::sqrt(sigmaSq1);
+ sigma2 = ::sqrt(sigmaSq2);
 
  sr = sigma2/sigma1;
  sr2 = sr*sr; sr3 = sr*sr2; sr4 = sr*sr3;
@@ -435,7 +438,7 @@ double StSvtElectronCloud::func1(double tim, double sigmaSq1, double sigmaSq2)
  //cons = const1*sigma2/(const2*mSDD_thickness);
  cons = 5.73333333333333*sigma2;
  cons3 = cons*cons*cons;
- cons3 = 1.0 + sqrt(cons3);
+ cons3 = 1.0 + ::sqrt(cons3);
 
  mChargeNow = mTotCharge*exp(-tim/mLifeTime);
 
@@ -445,10 +448,10 @@ double StSvtElectronCloud::func1(double tim, double sigmaSq1, double sigmaSq2)
     multFactor = 0.00000001619961;
     //mChargeNow = mTotCharge*exp(-tim/mLifeTime);
 
-    //numerator = const1*pow(sr2, 1.0/3) - (const3/4)*log(sr4 + 1.0/sd2);
-    numerator = 0.43*pow(sr2, 1.0/3) - 0.145*log(sr4 + 1.0/sd2);
+    //numerator = const1*::pow(sr2, 1.0/3) - (const3/4)*::log(sr4 + 1.0/sd2);
+    numerator = 0.43*::pow(sr2, 1.0/3) - 0.145*::log(sr4 + 1.0/sd2);
 
-    denominator = sigma1*pow(cons3, 1.0/3);
+    denominator = sigma1*::pow(cons3, 1.0/3);
      
    fun1 = multFactor*mChargeNow*(numerator/denominator);
 
@@ -464,10 +467,10 @@ double StSvtElectronCloud::func1(double tim, double sigmaSq1, double sigmaSq2)
     multFactor = 0.00000001619961;
     //mChargeNow = mTotCharge*exp(-tim/mLifeTime);
 
-    //numerator = const1*pow(sr2, 1.0/3) - (const3/4)*log(sr4 + 1.0/sd2);
-    numerator = 0.43*pow(sr2, 1.0/3) - 0.145*log(sr4 + 1.0/sd2);
+    //numerator = const1*::pow(sr2, 1.0/3) - (const3/4)*::log(sr4 + 1.0/sd2);
+    numerator = 0.43*::pow(sr2, 1.0/3) - 0.145*::log(sr4 + 1.0/sd2);
 
-    denominator = sigma1*pow(cons3, 1.0/3);
+    denominator = sigma1*::pow(cons3, 1.0/3);
      
    fun1 = 2*mDiffConst + multFactor*mChargeNow*(numerator/denominator);
 
@@ -483,13 +486,13 @@ double StSvtElectronCloud::func2(double tim, double sigmaSq1, double sigmaSq2)
  double fun2, multFactor, denominator,numerator;
  //double const1 = 0.43, const2 = 0.25, const3 = 0.58;
 
- sigma1 = sqrt(sigmaSq1);
- sigma2 = sqrt(sigmaSq2);
+ sigma1 = ::sqrt(sigmaSq1);
+ sigma2 = ::sqrt(sigmaSq2);
 
  //cons = const1*sigma2/(const2*mSDD_thickness);
  cons = 5.73333333333333*sigma2;
  cons3 = cons*cons*cons;
- cons3 = 1.0 + sqrt(cons3);
+ cons3 = 1.0 + ::sqrt(cons3);
 
  mChargeNow = mTotCharge*exp(-tim/mLifeTime);
  
@@ -499,10 +502,10 @@ double StSvtElectronCloud::func2(double tim, double sigmaSq1, double sigmaSq2)
 
    mChargeNow  = mTotCharge*exp(-tim/mLifeTime);
 
-   //numerator = const3 - (const3 - const1)*sqrt(sigma2/sigma1);
-    numerator = 0.58 - 0.15*sqrt(sigma2/sigma1);
+   //numerator = const3 - (const3 - const1)*::sqrt(sigma2/sigma1);
+    numerator = 0.58 - 0.15*::sqrt(sigma2/sigma1);
 
-    denominator = sigma1*pow(cons3, 1.0/3);
+    denominator = sigma1*::pow(cons3, 1.0/3);
  
    fun2 = multFactor*mChargeNow*(numerator/denominator);
 
@@ -517,10 +520,10 @@ else if(!strncmp(mOption,"both",strlen("both"))){
 
    mChargeNow  = mTotCharge*exp(-tim/mLifeTime);
 
-   //numerator = const3 - (const3 - const1)*sqrt(sigma2/sigma1);
-    numerator = 0.58 - 0.15*sqrt(sigma2/sigma1);
+   //numerator = const3 - (const3 - const1)*::sqrt(sigma2/sigma1);
+    numerator = 0.58 - 0.15*::sqrt(sigma2/sigma1);
 
-    denominator = sigma1*pow(cons3, 1.0/3);
+    denominator = sigma1*::pow(cons3, 1.0/3);
  
    fun2 = 2*mDiffConst + multFactor*mChargeNow*(numerator/denominator);
 
@@ -535,28 +538,28 @@ double StSvtElectronCloud::getSigma1()
 {
  double sigma1, sigma2,  sigmaSq1, sigmaSq2, sn, cs; 
 
- sigma1 = sqrt(mSigmaSq1Now);    // in mm
- sigma2 =  sqrt(mSigmaSq2Now);   // in mm
+ sigma1 = ::sqrt(mSigmaSq1Now);    // in mm
+ sigma2 =  ::sqrt(mSigmaSq2Now);   // in mm
  sigmaSq1 = sigma1*sigma1;
  sigmaSq2 = sigma2*sigma2;
 
  sn = sin(mPhi); cs = cos(mPhi);
 
- return sqrt(sn*sn*sigmaSq1 + cs*cs*sigmaSq2);
+ return ::sqrt(sn*sn*sigmaSq1 + cs*cs*sigmaSq2);
 }
 
 double StSvtElectronCloud::getSigma2()
 {
  double sigma1, sigma2,  sigmaSq1, sigmaSq2, sn, cs; 
 
- sigma1 = sqrt(mSigmaSq1Now);    // in mm
- sigma2 =  sqrt(mSigmaSq2Now);   // in mm
+ sigma1 = ::sqrt(mSigmaSq1Now);    // in mm
+ sigma2 =  ::sqrt(mSigmaSq2Now);   // in mm
  sigmaSq1 = sigma1*sigma1;
  sigmaSq2 = sigma2*sigma2;
 
  sn = sin(mPhi); cs = cos(mPhi);
 
- return sqrt(cs*cs*sigmaSq1 + sn*sn*sigmaSq2);
+ return ::sqrt(cs*cs*sigmaSq1 + sn*sn*sigmaSq2);
 
 }
 double StSvtElectronCloud::getPhi()

@@ -1,13 +1,13 @@
 /***************************************************************************
  *
- * $Id: SchedulerExample.cxx,v 1.1 2003/01/23 21:59:50 laue Exp $
+ * $Id: SchedulerExample.cxx,v 1.2 2003/09/02 17:58:44 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
 
 #include "SchedulerExample.h"
 
-#include <iostream>
+#include "Stiostream.h"
 
 #include "TH1.h"
 #include "TH2.h"
@@ -110,6 +110,9 @@ Int_t SchedulerExample::Make() {
 /***************************************************************************
  *
  * $Log: SchedulerExample.cxx,v $
+ * Revision 1.2  2003/09/02 17:58:44  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2003/01/23 21:59:50  laue
  * Modification to compile on Solaris.
  *

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StHbtKink.hh,v 1.3 2001/11/14 21:07:21 lisa Exp $
+ * $Id: StHbtKink.hh,v 1.4 2003/09/02 17:58:32 perev Exp $
  *
  * Author: Mike Lisa, Ohio State, 23May2001
  *
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StHbtKink.hh,v $
+ * Revision 1.4  2003/09/02 17:58:32  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2001/11/14 21:07:21  lisa
  * Fixed several small things (mostly discarded const) that caused fatal errors with gcc2.95.3
  *
@@ -44,7 +47,7 @@ class StHbtTTreeKink;
 //#include "StEvent/StKinkVertex.h"  // from StEvent
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 
-#include <fstream.h>
+#include "Stiostream.h"
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh" //same as in StHbtTrack.hh
 
 class StHbtKink {

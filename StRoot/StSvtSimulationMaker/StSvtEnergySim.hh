@@ -1,7 +1,7 @@
 #ifndef STSVTENERGYSIM_HH
 #define STSVTENERGYSIM_HH
 
-#include<iostream.h>
+#include<Stiostream.h>
 
 typedef struct StParticle
 {

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.cxx,v 1.11 2002/05/23 18:54:13 posk Exp $
+// $Id: StFlowPicoEvent.cxx,v 1.12 2003/09/02 17:58:12 perev Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -22,7 +22,7 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StFlowPicoEvent.h"
 #include "StFlowConstants.h"
 #include "TClonesArray.h"
@@ -95,6 +95,9 @@ UInt_t StFlowPicoEvent::CalcCentrality() {
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.cxx,v $
+// Revision 1.12  2003/09/02 17:58:12  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.11  2002/05/23 18:54:13  posk
 // Moved centrality cuts into StFlowConstants
 //

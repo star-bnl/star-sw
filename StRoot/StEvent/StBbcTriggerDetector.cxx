@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.cxx,v 2.4 2003/02/05 23:17:34 ullrich Exp $
+ * $Id: StBbcTriggerDetector.cxx,v 2.5 2003/09/02 17:58:05 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.cxx,v $
+ * Revision 2.5  2003/09/02 17:58:05  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.4  2003/02/05 23:17:34  ullrich
  * Corrected bug in adcSumWest(). Index needed offset.
  *
@@ -24,9 +27,10 @@
  *
  **************************************************************************/
 #include "StBbcTriggerDetector.h"
+#include "Stiostream.h"
 #include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.4 2003/02/05 23:17:34 ullrich Exp $";
+static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.5 2003/09/02 17:58:05 perev Exp $";
 
 ClassImp(StBbcTriggerDetector)
 

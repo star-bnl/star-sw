@@ -1,6 +1,7 @@
 #ifndef StiHitToHitMap_H_INCLUDED
 #define StiHitToHitMap_H_INCLUDED
 #include <map>
+using namespace std;
 class StiHit;
 class StiHitContainer;
 typedef map<StiHit*,StiHit*> HitToHitMap;

@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.22 2001/10/04 19:45:18 lasiuk Exp $
+ * $Id: StRichTrack.cxx,v 2.23 2003/09/02 17:58:54 perev Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
+ *  Revision 2.23  2003/09/02 17:58:54  perev
+ *  gcc 3.2 updates + WarnOff
+ *
  *  Revision 2.22  2001/10/04 19:45:18  lasiuk
  *  Remove the px/pz correction for track extrapolation
  *
@@ -114,7 +117,7 @@
 
 #include "StRichMcSwitch.h"
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include <string>
 #include <vector>
@@ -953,8 +956,8 @@ bool StRichTrack::fastEnough(StParticleDefinition* particle) {
     //cout << "inner = " << indexOfRefraction1 << endl;
     //cout << "outer = " << indexOfRefraction2 << endl;
 
-    if ( p/sqrt(p*p + m*m) > (1./indexOfRefraction1) && 
-	 p/sqrt(p*p + m*m) > (1./indexOfRefraction2)) { 
+    if ( p/::sqrt(p*p + m*m) > (1./indexOfRefraction1) && 
+	 p/::sqrt(p*p + m*m) > (1./indexOfRefraction2)) { 
 	status = true;
     }
     
@@ -1022,7 +1025,7 @@ double StRichTrack::getExpectedNPhots(StParticleDefinition* particle) {
   double pathlengthInmeth = myGeometryDb->proximityGap()*cos(mTheta);
 
   double particleBeta = mMomentum.mag()
-    /sqrt(particle->mass()*particle->mass() + mMomentum.mag()*mMomentum.mag());
+    /::sqrt(particle->mass()*particle->mass() + mMomentum.mag()*mMomentum.mag());
   
   
   double startLamda = 170.0;

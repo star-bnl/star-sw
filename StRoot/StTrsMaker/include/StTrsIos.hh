@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsIos.hh,v 1.3 2000/01/10 23:11:32 lasiuk Exp $
+ * $Id: StTrsIos.hh,v 1.4 2003/09/02 17:59:16 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsIos.hh,v $
+ * Revision 1.4  2003/09/02 17:59:16  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2000/01/10 23:11:32  lasiuk
  * Include MACROS for compatibility with SUN CC5.0
  *
@@ -29,7 +32,7 @@
 #ifndef ST_TRS_IOS_HH
 #define ST_TRS_IOS_HH
 
-#include <fstream.h>
+#include "Stiostream.h"
 #include <assert.h>
 #include <string>
 #include <vector>

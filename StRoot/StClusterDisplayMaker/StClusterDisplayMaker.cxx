@@ -1,5 +1,5 @@
 // Author : Dominik Flierl 
-// $Id: StClusterDisplayMaker.cxx,v 1.8 2003/04/30 20:36:27 perev Exp $
+// $Id: StClusterDisplayMaker.cxx,v 1.9 2003/09/02 17:55:30 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 //                                                                      //
@@ -362,10 +362,10 @@ void StClusterDisplayMaker::displayScale()
       arrow1->SetLineColor(1) ;
       arrow1->SetLineWidth(2) ;
       arrow1->Draw() ;
-      double diff_pad = sqrt(
-			     pow((XYZ1.Getx()-XYZ2.Getx()),2) + 
-			     pow((XYZ1.Gety()-XYZ2.Gety()),2) + 
-			     pow((XYZ1.Getz()-XYZ2.Getz()),2) );
+      double diff_pad = ::sqrt(
+			     ::pow((XYZ1.Getx()-XYZ2.Getx()),2) + 
+			     ::pow((XYZ1.Gety()-XYZ2.Gety()),2) + 
+			     ::pow((XYZ1.Getz()-XYZ2.Getz()),2) );
       cout << "diff pad = " << diff_pad << endl;
 	 
       Char_t padscale[30]; 
@@ -396,10 +396,10 @@ void StClusterDisplayMaker::displayScale()
       arrow2->SetLineWidth(2) ;
       arrow2->SetAngle(90) ;
       arrow2->Draw();
-      double diff_time = sqrt(
-			      pow((XYZ4.Getx()-XYZ3.Getx()),2) + 
-			      pow((XYZ4.Gety()-XYZ3.Gety()),2) + 
-			      pow((XYZ4.Getz()-XYZ3.Getz()),2) );
+      double diff_time = ::sqrt(
+			      ::pow((XYZ4.Getx()-XYZ3.Getx()),2) + 
+			      ::pow((XYZ4.Gety()-XYZ3.Gety()),2) + 
+			      ::pow((XYZ4.Getz()-XYZ3.Getz()),2) );
       Char_t timescale[30]; 
       sprintf ( timescale, "%.2f cm", diff_time) ;
       Double_t pad3 = pad_min + (pad_max-pad_min)*0.77 ; 
@@ -1083,7 +1083,7 @@ Int_t StClusterDisplayMaker::Get_matched_points(Int_t& num_not_matched)
 		{ 
 		  Double_t dy = tcl_hits[offindex ].y - l3_hits[original_index].y ;
 		  Double_t dx = tcl_hits[offindex ].x - l3_hits[original_index].x ;
-		  Double_t dis = ( pow(dx,2) + pow(dy,2) + pow(dz,2) ) ;
+		  Double_t dis = ( ::pow(dx,2) + ::pow(dy,2) + ::pow(dz,2) ) ;
 		  if ( dis < MAX_DIS_SQUARE ) 
 		    {
 		      if (dis < best_value)

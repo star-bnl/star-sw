@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- *  $Id: hbookTest2.cc,v 1.3 1999/12/21 15:14:46 ullrich Exp $
+ *  $Id: hbookTest2.cc,v 1.4 2003/09/02 17:59:38 perev Exp $
  *
  *  Author: brian
  *
@@ -11,6 +11,9 @@
  *************************************************************************
  *
  * $Log: hbookTest2.cc,v $
+ * Revision 1.4  2003/09/02 17:59:38  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  1999/12/21 15:14:46  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
  *
@@ -24,7 +27,7 @@
  * Initial Revision
  *
  *************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <unistd.h>
 #include <string>
 #include "Random.h"

@@ -1,3 +1,4 @@
+#include "Stiostream.h"
 #include "StTptCircleFitter.h"
 #include <cmath>
 
@@ -55,7 +56,7 @@ bool StTptCircleFitter::fit()
   double wsum(0);       // [n]
   double xxav(0),yyav(0),xyav(0); // <xx>,<yy>,<xy> 
   double cosRot(0),sinRot(0); // cos and sin of rotated frame 
-  double rscale(0); // sqrt(<xx>+<yy>) 
+  double rscale(0); // ::sqrt(<xx>+<yy>) 
   double xrrav(0),yrrav(0),rrrrav(0);
 
   // first check if we have enough points
@@ -90,17 +91,17 @@ bool StTptCircleFitter::fit()
   // where 
   //       u=sin^2(rot), B=4[xy]^2, A=|[y^2-x^2]|
   // roots are
-  // u1 = .5(1-A/sqrt(B+A^2)), u2 = 0.5(1+A/sqrt(B+A^2))
+  // u1 = .5(1-A/::sqrt(B+A^2)), u2 = 0.5(1+A/::sqrt(B+A^2))
     
   double A         = fabs(xxav-yyav);
   double B         = 4.*xyav*xyav;
-  double D         = A/sqrt(B+A*A);
+  double D         = A/::sqrt(B+A*A);
 
   double uPlus  = .5*(1.+ D); // only need positive root
 
   // sinRotMinus = cosRotPlus, sinRotPlus = cosRotMinus
-  double sinRotPlus  = sqrt(uPlus);
-  double cosRotPlus  = sqrt(1-uPlus);
+  double sinRotPlus  = ::sqrt(uPlus);
+  double cosRotPlus  = ::sqrt(1-uPlus);
 
   // require sign(cosRot^2-sinRot^2)=sign([x^2]-[y^2])
   if(xxav<yyav){ // means cosRot<sinRot, i.e take pos solution
@@ -123,7 +124,7 @@ bool StTptCircleFitter::fit()
 
   // calculate rscale, gauss brackets in new coordinate system
 
-  rscale = sqrt(xxav + yyav);
+  rscale = ::sqrt(xxav + yyav);
  
   // NOTE: i'm reusing the variables xxav, yyav, xyav.
   // from now on, they refer to the rotated+translated frame values.
@@ -218,13 +219,13 @@ bool StTptCircleFitter::fit()
   if(fabs(H22) > fabs(H24)){
     ratio = H24/H22;
     rootsq += ratio*ratio;
-    kappa = 1./sqrt(rootsq);
+    kappa = 1./::sqrt(rootsq);
     beta  = -ratio*kappa;
   }
   else{
     ratio = H22/H24;
     rootsq = 1. + ratio*ratio*rootsq;
-    beta = 1./sqrt(rootsq);
+    beta = 1./::sqrt(rootsq);
     if(H24 > 0.) beta *= -1;
     kappa = -ratio*beta;
   }
@@ -254,7 +255,7 @@ bool StTptCircleFitter::fit()
     double dx = mX[i]-(mXCenter);
     double dy = mY[i]-(mYCenter);
     double dradius2 = dx*dx+dy*dy;
-    mVariance += dradius2+radius2-2.*sqrt(dradius2*radius2);
+    mVariance += dradius2+radius2-2.*::sqrt(dradius2*radius2);
   }
   mVariance /= nPoint-3;
 

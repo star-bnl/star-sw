@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StEtCell.cxx,v 1.3 2002/12/04 20:28:07 thenry Exp $
+// $Id: StEtCell.cxx,v 1.4 2003/09/02 17:59:01 perev Exp $
 // $Log: StEtCell.cxx,v $
+// Revision 1.4  2003/09/02 17:59:01  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.3  2002/12/04 20:28:07  thenry
 // StppuDstMaker was modified to allow multiple jet analysis modules to be
 // run simultaneosly with various parameters while the Maker loads the events
@@ -27,7 +30,7 @@
 // Revision 1.0  2001/06/14 Akio Ogawa
 //
 //////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StEventTypes.h"
 #include "StEvent.h"
 #include "StEtCell.h"
@@ -61,7 +64,7 @@ float  StEtCell::distancePhi(const StEtCell* othercell) const{
 float  StEtCell::distance(const StEtCell* othercell) const{
   float deta = distanceEta(othercell);
   float dphi = distancePhi(othercell);
-  return sqrt(deta*deta + dphi*dphi);
+  return ::sqrt(deta*deta + dphi*dphi);
 }
 
 int StEtCell::check(int key,float e1,float e2,float p1,float p2) const{

@@ -77,7 +77,7 @@ class StTinyRcTrack {
   float pxPr()const { return mPtPr*cos(mPhiPr); }
   float pyPr()const { return mPtPr*sin(mPhiPr); }
   float pzPr()const { return mPzPr; }
-  float pPr()const { return sqrt((mPtPr*mPtPr) + (mPzPr*mPzPr)); }
+  float pPr()const { return ::sqrt((mPtPr*mPtPr) + (mPzPr*mPzPr)); }
   float etaPr() const { return mEtaPr; }
   float phiPr() const { return mPhiPr; }
   float dcaPr() const { return mDcaPr; }
@@ -95,7 +95,7 @@ class StTinyRcTrack {
   float pxGl()const { return mPtGl*cos(mPhiGl); }
   float pyGl()const { return mPtGl*sin(mPhiGl); }
   float pzGl()const { return mPzGl; }
-  float pGl()const { return sqrt((mPtGl*mPtGl) + (mPzGl*mPzGl)); }
+  float pGl()const { return ::sqrt((mPtGl*mPtGl) + (mPzGl*mPzGl)); }
   float etaGl() const { return mEtaGl; }
   float phiGl() const { return mPhiGl; }
   float dcaGl() const { return mDcaGl; }
@@ -203,6 +203,9 @@ private:
 #endif
 //
 // $Log: StTinyRcTrack.h,v $
+// Revision 1.5  2003/09/02 17:58:43  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.4  2003/05/14 00:07:40  calderon
 // Added members so that curvature and tan(lambda) pull plots can be made.
 // Curvature and tan(lambda) are now stored.  The 5 diagonal elements of the
@@ -219,6 +222,9 @@ private:
 //
 // Revision 1.2  2002/06/06 18:58:30  calderon
 // Added $Log: StTinyRcTrack.h,v $
+// Added Revision 1.5  2003/09/02 17:58:43  perev
+// Added gcc 3.2 updates + WarnOff
+// Added
 // Added Revision 1.4  2003/05/14 00:07:40  calderon
 // Added Added members so that curvature and tan(lambda) pull plots can be made.
 // Added Curvature and tan(lambda) are now stored.  The 5 diagonal elements of the

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFpdCollection.cxx,v 2.4 2002/09/25 14:04:17 akio Exp $
+ * $Id: StFpdCollection.cxx,v 2.5 2003/09/02 17:58:05 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFpdCollection.cxx,v $
+ * Revision 2.5  2003/09/02 17:58:05  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.4  2002/09/25 14:04:17  akio
  * Bug fix in the service functions, no change in data
  *
@@ -24,9 +27,9 @@
  *
  **************************************************************************/
 #include "StFpdCollection.h"
-#include <iostream>
+#include "Stiostream.h"
 
-static const char rcsid[] = "$Id: StFpdCollection.cxx,v 2.4 2002/09/25 14:04:17 akio Exp $";
+static const char rcsid[] = "$Id: StFpdCollection.cxx,v 2.5 2003/09/02 17:58:05 perev Exp $";
 
 ClassImp(StFpdCollection)
 

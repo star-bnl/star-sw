@@ -6,7 +6,7 @@
 // of classes.
 //
 
-#include <fstream.h>
+#include "Stiostream.h"
 #include <string.h>
 #include <stdlib.h>
 #include "utility.hh"
@@ -14,7 +14,7 @@
 
 ////////////////////////////////////////////////////////////
 // debug()
-// This function returns a debug_t structure which is used
+// This function returns a sca_debug_t structure which is used
 // by the overloaded << operator to decide whether to print
 // something or not.
 // Usage example:
@@ -22,14 +22,14 @@
 // will output the message if Calc_Entropy or SCALE_DEBUG
 // is defined.
 
-debug_t& debug(char *level)
+sca_debug_t& debug(char *level)
 {
-  static debug_t d;
+  static sca_debug_t d;
   d.print = FALSE;
   return d;
 }  // end debug()
 
-ostream& operator << (ostream& s, debug_t& d)
+ostream& operator << (ostream& s, sca_debug_t& d)
 {
   static int init=0;
   static ostream *blank;
@@ -45,7 +45,7 @@ ostream& operator << (ostream& s, debug_t& d)
     }
   else
     return *blank;
-}  // end << overloading for debug_t
+}  // end << overloading for sca_debug_t
 
 
 ////////////////////////////////////////////////////////////
@@ -65,11 +65,11 @@ ostream& operator << (ostream& s, debug_t& d)
 // defined to LOW, MEDIUM, or not defined, but will not
 // print anything if SCALE_ERRORS is HIGH or SILENT.
 
-error_t& error(int level)
+sca_error_t& error(int level)
 {
   static int first_time = TRUE;
   static int print_level;
-  static error_t e;
+  static sca_error_t e;
 
   e.level = level;		// save level every time
 
@@ -104,7 +104,7 @@ error_t& error(int level)
   return e;
 }  // end error()
 
-ostream& operator << (ostream& s, error_t& e)
+ostream& operator << (ostream& s, sca_error_t& e)
 {
   static int init=0;
   static ostream *blank;
@@ -123,7 +123,7 @@ ostream& operator << (ostream& s, error_t& e)
     }
   else
     return *blank;
-}  // end << overloading for error_t
+}  // end << overloading for sca_error_t
 
 
 ////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.39 2003/06/11 00:51:25 oldi Exp $
+// $Id: StFlowCutTrack.cxx,v 1.40 2003/09/02 17:58:11 perev Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -10,8 +10,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
-#include <iomanip.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "StEvent.h"
 #include "StTrackTopologyMap.h"
@@ -703,6 +702,9 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.40  2003/09/02 17:58:11  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.39  2003/06/11 00:51:25  oldi
 // Default cut for FitPtsFtpc changed to correct values (long tracks were cut before).
 //
@@ -796,7 +798,7 @@ void StFlowCutTrack::PrintCutList() {
 // New centralities. pt and eta cuts.
 //
 // Revision 1.13  2000/07/12 17:54:35  posk
-// Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
+// Added chi2 and dca cuts. Multiplied EtaSym by ::sqrt(mult).
 // Apply cuts when reading picoevent file.
 //
 // Revision 1.12  2000/06/30 14:48:31  posk

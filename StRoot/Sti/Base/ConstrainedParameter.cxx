@@ -31,7 +31,7 @@ ConstrainedParameter::ConstrainedParameter(const ConstrainedParameter & paramete
 }
 
 ConstrainedParameter::ConstrainedParameter(const string & name, const string & description,
-					   bool * value, bool defaultValue, int key=0)
+					   bool * value, bool defaultValue, int key)
   : Parameter(name,description,value,key),
     _minimum(0),
     _maximum(1),

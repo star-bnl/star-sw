@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichWindowHistogram.h,v 1.2 2002/01/12 00:10:23 lasiuk Exp $
+ * $Id: StRichWindowHistogram.h,v 1.3 2003/09/02 17:58:55 perev Exp $
  *
  * Author:  bl Nov 2, 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichWindowHistogram.h,v $
+ * Revision 1.3  2003/09/02 17:58:55  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2002/01/12 00:10:23  lasiuk
  * debin addition; quartz cerenkov angle, tuple modification, shift
  * to 183 nm for ray tracing, no temperature effect yet
@@ -21,18 +24,16 @@
 #ifndef StRichWindowHistogram_h
 #define StRichWindowHistogram_h
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include <stdio.h>
 #include <vector>
 #include <utility>
 #include "SystemOfUnits.h"
 
-#ifndef ST_NO_NAMESPACES
-using units;
+using namespace units;
 using std::vector;
 using std::pair;
-#endif
 
 class StRichWindowBin {
 public:

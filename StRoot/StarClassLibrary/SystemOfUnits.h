@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: SystemOfUnits.h,v 1.4 1999/03/22 16:21:38 fisyak Exp $
+ * $Id: SystemOfUnits.h,v 1.5 2003/09/02 17:59:35 perev Exp $
  *
  * Author: blasiuk adapted from CLHEP
  ***************************************************************************
@@ -35,6 +35,9 @@
  ***************************************************************************
  *
  * $Log: SystemOfUnits.h,v $
+ * Revision 1.5  2003/09/02 17:59:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.4  1999/03/22 16:21:38  fisyak
  * Add anti CINT flags
  *
@@ -56,9 +59,7 @@
 
 #include <math.h>
 
-#ifndef ST_NO_NAMESPACES
 namespace units {
-#endif
     // new macro for CLHEP SystemOfUnits: at end of file
     //  ST_ADD_OLD_CLHEP_SYSTEM_OF_UNITS
     // 
@@ -291,7 +292,6 @@ namespace units {
 
 #endif
 
-#ifndef ST_NO_NAMESPACES
-}
-#endif
+};
+using namespace units;
 #endif /* HEP_SYSTEM_OF_UNITS_H */

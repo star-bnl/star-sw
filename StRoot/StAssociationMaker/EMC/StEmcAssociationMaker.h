@@ -160,7 +160,7 @@ class StEmcPointAssociation:StEmcAssociation
     virtual          ~StEmcPointAssociation();
     StEmcPoint*      getPoint()                 { return mPoint; }      ///< returns pointer to the EMC point
     int              getAssociation()           { return mAssocType; }  ///< returns Association information between MC track and EMC point
-    int              getAssociation(int det)    { if (det>0 && det<NDETECTORS) return (mAssocType&(int)pow(2,det-1))>>(det-1); else return 0; } ///<returns bit information (0,1) for each EMC subdetector
+    int              getAssociation(int det)    { return (det>0 && det<=NDETECTORS) ? ((mAssocType&(1<<(det-1)))!=0): 0; } ///<returns bit information (0,1) for each EMC subdetector
     ClassDef(StEmcPointAssociation, 1)
 };
 

@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.cxx,v 1.11 2001/08/08 23:28:39 fisyak Exp $
+// $Id: StMagFMaker.cxx,v 1.12 2003/09/02 17:58:40 perev Exp $
 // $Log: StMagFMaker.cxx,v $
+// Revision 1.12  2003/09/02 17:58:40  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.11  2001/08/08 23:28:39  fisyak
 // Fit Reverse Field option
 //
@@ -44,7 +47,7 @@
 //  Submit any problem with this code via begin_html <A HREF="http://www.star.bnl.gov/STARAFS/comp/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html   //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StMagFMaker.h"
 #include "StBFChain.h"
 #include "St_geant_Maker/St_geant_Maker.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPhysicalHelix.cc,v 1.5 2002/06/21 17:49:26 genevb Exp $
+ * $Id: StPhysicalHelix.cc,v 1.6 2003/09/02 17:59:35 perev Exp $
  *
  * Author: Brian Lasiuk, Sep 1997
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPhysicalHelix.cc,v $
+ * Revision 1.6  2003/09/02 17:59:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2002/06/21 17:49:26  genevb
  * Some minor speed improvements
  *
@@ -130,7 +133,7 @@ double StPhysicalHelix::geometricSignedDistance(double x, double y)
 double StPhysicalHelix::curvatureSignedDistance(double x, double y) 
 {
     // Protect against mH = 0 or zero field
-    if (this->mSingularity || fabs(this->mH)<=static_cast<double>(0)) {
+    if (this->mSingularity || abs(this->mH)<=0) {
 	return (this->geometricSignedDistance(x,y));
     }
     else {

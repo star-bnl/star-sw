@@ -16,7 +16,7 @@
 
 #ifndef StHbtTagMaker_H
 #define StHbtTagMaker_H
-#include <iostream.h>
+#include <Stiostream.h>
 //#include <stdlib.h>
 #include "StMaker.h"
 #include "tables/St_HbtTag_Table.h"

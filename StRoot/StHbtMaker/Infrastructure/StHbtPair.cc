@@ -19,6 +19,9 @@
  * corrected calculation of opening angle 
  **
  * $Log: StHbtPair.cc,v $
+ * Revision 1.27  2003/09/02 17:58:32  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.26  2003/01/31 19:57:15  magestro
  * Cleared up simple compiler warnings on i386_linux24
  *
@@ -166,7 +169,7 @@ double StHbtPair::kT() const
 //_________________
 double StHbtPair::rap() const
 {
-  // longitudinal pair rapidity : Y = 0.5 log( E1 + E2 + pz1 + pz2 / E1 + E2 - pz1 - pz2 )
+  // longitudinal pair rapidity : Y = 0.5 ::log( E1 + E2 + pz1 + pz2 / E1 + E2 - pz1 - pz2 )
   double  tmp = 0.5 * log (
 			   (mTrack1->FourMomentum().e() + mTrack2->FourMomentum().e() + mTrack1->FourMomentum().z() + mTrack2->FourMomentum().z()) / 
 			   (mTrack1->FourMomentum().e() + mTrack2->FourMomentum().e() - mTrack1->FourMomentum().z() - mTrack2->FourMomentum().z()) 
@@ -228,8 +231,8 @@ void StHbtPair::qYKPLCMS(double& qP, double& qT, double& q0) const
   double beta2 =  beta*beta ;
   // unfortunately STAR Class lib knows only boost(particle) not boost(beta) :(
   // -> create particle with velocity beta and mass 1.0
-  // actually this is : dummyPz = sqrt( (dummyMass*dummyMass*beta2) / (1-beta2) ) ; 
-  double dummyPz = sqrt( (beta2) / (1-beta2) ) ;
+  // actually this is : dummyPz = ::sqrt( (dummyMass*dummyMass*beta2) / (1-beta2) ) ; 
+  double dummyPz = ::sqrt( (beta2) / (1-beta2) ) ;
   // boost in the correct direction
   if (beta>0.0) { dummyPz = -dummyPz; } ;
   // create dummy particle
@@ -287,7 +290,7 @@ double StHbtPair::qOutCMS() const
     double dy = tmp1.y() - tmp2.y();
     double yt = tmp1.y() + tmp2.y();
 
-    double k1 = (sqrt(xt*xt+yt*yt));
+    double k1 = (::sqrt(xt*xt+yt*yt));
     double k2 = (dx*xt+dy*yt);
     double tmp = k2/k1;
     return (tmp);
@@ -302,7 +305,7 @@ double StHbtPair::qSideCMS() const
     double x2 = tmp2.x();  double y2 = tmp2.y();
 
     double xt = x1+x2;  double yt = y1+y2;
-    double k1 = sqrt(xt*xt+yt*yt);
+    double k1 = ::sqrt(xt*xt+yt*yt);
 
     double tmp = 2.0*(x2*y1-x1*y2)/k1;
     return (tmp);
@@ -321,7 +324,7 @@ double StHbtPair::qLongCMS() const
     double tt = tmp1.t() + tmp2.t();
 
     double beta = zz/tt;
-    double gamma = 1.0/sqrt(1.0 - beta*beta);
+    double gamma = 1.0/::sqrt(1.0 - beta*beta);
 
     double temp = gamma*(dz - beta*dt);
     return (temp);
@@ -339,9 +342,9 @@ double StHbtPair::qOutPf() const
     double xt = tmp1.x() + tmp2.x();
     double yt = tmp1.y() + tmp2.y();
 
-    double k1 = sqrt(xt*xt + yt*yt);
+    double k1 = ::sqrt(xt*xt + yt*yt);
     double bOut = k1/tt;
-    double gOut = 1.0/sqrt(1.0 - bOut*bOut);
+    double gOut = 1.0/::sqrt(1.0 - bOut*bOut);
 
     double temp = gOut*(this->qOutCMS() - bOut*dt);
     return (temp);
@@ -382,7 +385,7 @@ double StHbtPair::qLongBf(double beta) const
     double dz = tmp1.z() - tmp2.z();
     double dt = tmp1.t() + tmp2.t();
 
-    double gamma = 1.0/sqrt(1.0 - beta*beta);
+    double gamma = 1.0/::sqrt(1.0 - beta*beta);
 
     double temp = gamma*(dz - beta*dt);
     return (temp);
@@ -582,7 +585,7 @@ double StHbtPair::pInv() const{
               (tP1.py()+tP2.py())*(tP1.py()+tP2.py())+
               (tP1.pz()+tP2.pz())*(tP1.pz()+tP2.pz())-
               (tP1.e() -tP2.e() )*(tP1.e() -tP2.e() );
-  return sqrt(fabs(tP));
+  return ::sqrt(fabs(tP));
 }
 
 double StHbtPair::qInvFlippedXY() const{
@@ -599,12 +602,12 @@ void StHbtPair::calcNonIdPar() const{ // fortran like function! faster?
   double py1 = mTrack1->FourMomentum().vect().y();
   double pz1 = mTrack1->FourMomentum().vect().z();
   double pE1  = mTrack1->FourMomentum().e();
-  double Particle1Mass = sqrt(pE1*pE1 - px1*px1 - py1*py1 - pz1*pz1);
+  double Particle1Mass = ::sqrt(pE1*pE1 - px1*px1 - py1*py1 - pz1*pz1);
   double px2 = mTrack2->FourMomentum().vect().x();
   double py2 = mTrack2->FourMomentum().vect().y();
   double pz2 = mTrack2->FourMomentum().vect().z();
   double pE2  = mTrack2->FourMomentum().e();
-  double Particle2Mass = sqrt(pE2*pE2 - px2*px2 - py2*py2 - pz2*pz2);
+  double Particle2Mass = ::sqrt(pE2*pE2 - px2*px2 - py2*py2 - pz2*pz2);
 
   double Px = px1+px2;
   double Py = py1+py2;
@@ -613,9 +616,9 @@ void StHbtPair::calcNonIdPar() const{ // fortran like function! faster?
       
   double Ptrans = Px*Px + Py*Py;
   double Mtrans = PE*PE - Pz*Pz;
-  double Pinv =   sqrt(Mtrans - Ptrans);
-  Mtrans = sqrt(Mtrans);
-  Ptrans = sqrt(Ptrans);
+  double Pinv =   ::sqrt(Mtrans - Ptrans);
+  Mtrans = ::sqrt(Mtrans);
+  Ptrans = ::sqrt(Ptrans);
 	
   double QinvL = (pE1-pE2)*(pE1-pE2) - (px1-px2)*(px1-px2) -
     (py1-py2)*(py1-py2) - (pz1-pz2)*(pz1-pz2);
@@ -651,7 +654,7 @@ void StHbtPair::calcNonIdPar() const{ // fortran like function! faster?
   // fill histogram for out projection ( x - axis )
   mDKOut  = px1C;
 
-  mCVK = (mDKOut*Ptrans + mDKLong*Pz)/kStarCalc/sqrt(Ptrans*Ptrans+Pz*Pz);
+  mCVK = (mDKOut*Ptrans + mDKLong*Pz)/kStarCalc/::sqrt(Ptrans*Ptrans+Pz*Pz);
 }
 
 
@@ -661,15 +664,15 @@ void StHbtPair::calcNonIdParGlobal() const{ // fortran like function! faster?
   double py1 = mTrack1->Track()->PGlobal().y();
   double pz1 = mTrack1->Track()->PGlobal().z();
   double Particle1Mass =  mTrack1->FourMomentum().m2();
-  double pE1  = sqrt(Particle1Mass + px1*px1 + py1*py1 + pz1*pz1);
-  Particle1Mass = sqrt(Particle1Mass);
+  double pE1  = ::sqrt(Particle1Mass + px1*px1 + py1*py1 + pz1*pz1);
+  Particle1Mass = ::sqrt(Particle1Mass);
 
   double px2 = mTrack2->Track()->PGlobal().x();
   double py2 = mTrack2->Track()->PGlobal().y();
   double pz2 = mTrack2->Track()->PGlobal().z();
   double Particle2Mass =  mTrack2->FourMomentum().m2();
-  double pE2  = sqrt(Particle2Mass + px2*px2 + py2*py2 + pz2*pz2);
-  Particle2Mass = sqrt(Particle2Mass);
+  double pE2  = ::sqrt(Particle2Mass + px2*px2 + py2*py2 + pz2*pz2);
+  Particle2Mass = ::sqrt(Particle2Mass);
 
   double Px = px1+px2;
   double Py = py1+py2;
@@ -678,9 +681,9 @@ void StHbtPair::calcNonIdParGlobal() const{ // fortran like function! faster?
       
   double Ptrans = Px*Px + Py*Py;
   double Mtrans = PE*PE - Pz*Pz;
-  double Pinv =   sqrt(Mtrans - Ptrans);
-  Mtrans = sqrt(Mtrans);
-  Ptrans = sqrt(Ptrans);
+  double Pinv =   ::sqrt(Mtrans - Ptrans);
+  Mtrans = ::sqrt(Mtrans);
+  Ptrans = ::sqrt(Ptrans);
 	
   double QinvL = (pE1-pE2)*(pE1-pE2) - (px1-px2)*(px1-px2) -
     (py1-py2)*(py1-py2) - (pz1-pz2)*(pz1-pz2);
@@ -717,7 +720,7 @@ void StHbtPair::calcNonIdParGlobal() const{ // fortran like function! faster?
   mDKOutGlobal  = px1C;
 
   mCVKGlobal = (mDKOutGlobal*Ptrans + mDKLongGlobal*Pz)/
-    kStarCalcGlobal/sqrt(Ptrans*Ptrans+Pz*Pz);
+    kStarCalcGlobal/::sqrt(Ptrans*Ptrans+Pz*Pz);
 }
 
 
@@ -741,7 +744,7 @@ double StHbtPair::dcaInsideTpc() const{
   // --- 2 helix
   double dx = tHelix2.xcenter() - tHelix1.xcenter();
   double dy = tHelix2.ycenter() - tHelix1.ycenter();
-  double dd = sqrt(dx*dx + dy*dy);
+  double dd = ::sqrt(dx*dx + dy*dy);
   double r1 = 1/tHelix1.curvature();
   double r2 = 1/tHelix2.curvature();
   double cosAlpha = (r1*r1 + dd*dd - r2*r2)/(2*r1*dd);
@@ -752,7 +755,7 @@ double StHbtPair::dcaInsideTpc() const{
     double sinAlpha = sin(acos(cosAlpha));
     x = tHelix1.xcenter() + r1*(cosAlpha*dx - sinAlpha*dy)/dd;
     y = tHelix1.ycenter() + r1*(sinAlpha*dx + cosAlpha*dy)/dd;
-    r = sqrt(x*x+y*y);
+    r = ::sqrt(x*x+y*y);
     if( r > rMin &&  r < rMax && 
 	fabs(atan2(y,x)-mTrack1->NominalTpcEntrancePoint().phi())< 0.5
 	){ // first solution inside
@@ -763,7 +766,7 @@ double StHbtPair::dcaInsideTpc() const{
     else{ 
       x = tHelix1.xcenter() + r1*(cosAlpha*dx + sinAlpha*dy)/dd;
       y = tHelix1.ycenter() + r1*(cosAlpha*dy - sinAlpha*dx)/dd;
-      r = sqrt(x*x+y*y);
+      r = ::sqrt(x*x+y*y);
       if( r > rMin &&  r < rMax &&
 	  fabs(atan2(y,x)-mTrack1->NominalTpcEntrancePoint().phi())< 0.5
 	  ) {  // second solution inside
@@ -792,13 +795,13 @@ void StHbtPair::calcMergingPar() const{
       tN++;
       if(ti<13){
 	mFracOfMergedRow += (tDu<mMaxDuInner && tDz<mMaxDzInner);
-	tDist = sqrt(tDu*tDu/mMaxDuInner/mMaxDuInner+
+	tDist = ::sqrt(tDu*tDu/mMaxDuInner/mMaxDuInner+
 		     tDz*tDz/mMaxDzInner/mMaxDzInner);
 	//mFracOfMergedRow += (tDu<mMaxDuInner && tDz<mMaxDzInner);
       }
       else{
 	mFracOfMergedRow += (tDu<mMaxDuOuter && tDz<mMaxDzOuter);
-	tDist = sqrt(tDu*tDu/mMaxDuOuter/mMaxDuOuter+
+	tDist = ::sqrt(tDu*tDu/mMaxDuOuter/mMaxDuOuter+
 		     tDz*tDz/mMaxDzOuter/mMaxDzOuter);
 	//mFracOfMergedRow += (tDu<mMaxDuOuter && tDz<mMaxDzOuter);
       }
@@ -1034,12 +1037,12 @@ void StHbtPair::CalcMergingParFctn(short* tmpMergingParNotCalculatedFctn,
 	tN++;
       if(ti<13){
 	*tmpFracOfMergedRow += (tDu<mMaxDuInner && tDz<mMaxDzInner);
-	tDist = sqrt(tDu*tDu/mMaxDuInner/mMaxDuInner+
+	tDist = ::sqrt(tDu*tDu/mMaxDuInner/mMaxDuInner+
 		     tDz*tDz/mMaxDzInner/mMaxDzInner);
       }
       else{
 	*tmpFracOfMergedRow += (tDu<mMaxDuOuter && tDz<mMaxDzOuter);
-	tDist = sqrt(tDu*tDu/mMaxDuOuter/mMaxDuOuter+
+	tDist = ::sqrt(tDu*tDu/mMaxDuOuter/mMaxDuOuter+
 		     tDz*tDz/mMaxDzOuter/mMaxDzOuter);
 	}
       if(tDist<tDistMax){

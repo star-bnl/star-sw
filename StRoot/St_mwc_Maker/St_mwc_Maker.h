@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.h,v 1.10 2002/04/08 22:35:27 vlmrz Exp $
+// $Id: St_mwc_Maker.h,v 1.11 2003/09/02 17:59:30 perev Exp $
 // $Log: St_mwc_Maker.h,v $
+// Revision 1.11  2003/09/02 17:59:30  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.10  2002/04/08 22:35:27  vlmrz
 // *** empty log message ***
 //
@@ -59,7 +62,7 @@
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
-#include <fstream.h>
+#include "Stiostream.h"
 //#include "TFile.h"
 #include "TNtuple.h"
 #endif
@@ -74,7 +77,7 @@ class TH2F;
 class St_mwc_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_mwc_Maker.h,v 1.10 2002/04/08 22:35:27 vlmrz Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_mwc_Maker.h,v 1.11 2003/09/02 17:59:30 perev Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
    St_mwc_geo  *m_geom; //!
@@ -113,7 +116,7 @@ class St_mwc_Maker : public StMaker {
    virtual Int_t  Finish();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_mwc_Maker.h,v 1.10 2002/04/08 22:35:27 vlmrz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_mwc_Maker.h,v 1.11 2003/09/02 17:59:30 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_mwc_Maker, 1)   //StAF chain virtual base class for Makers
 };

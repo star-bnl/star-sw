@@ -47,7 +47,7 @@ int FtfDedx::TruncatedMean(FtfTrack *track) {
 // 	 fTrack->id, fTrack->pt, fTrack->nHits, fTrack->q, fTrack->tanl);
 
   // calculate dip angle correction factor 
-  double cosl = 1 / (sqrt( 1 + (double) track->tanl*track->tanl));
+  double cosl = 1 / (::sqrt( 1 + (double) track->tanl*track->tanl));
 
 //   printf("   cosl %f\n", cosl);
   if ( cosl==0 ) return 0;

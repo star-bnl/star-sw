@@ -24,25 +24,25 @@ int gl3Track::addTrack ( gl3Track* piece ){
    double w2   = 1./ ( piece->dpt * piece->dpt ) ;
    double wsum = w1 + w2 ;
    pt          = ( w1 * pt + w2 * piece->pt ) / wsum ;
-   dpt         = 1./sqrt(wsum);
+   dpt         = 1./::sqrt(wsum);
 
    w1    = 1./ ( dpsi * dpsi ) ;
    w2    = 1./ ( piece->dpsi * piece->dpsi ) ;
    wsum  = w1 + w2 ;
    psi   = ( w1 * psi + w2 * piece->psi ) / wsum ;
-   dpsi  = 1./sqrt(wsum) ;
+   dpsi  = 1./::sqrt(wsum) ;
 
    w1    = 1./ ( dtanl * dtanl ) ;
    w2    = 1./ ( piece->dtanl * piece->dtanl ) ;
    wsum  = w1 + w2 ;
    tanl  = ( w1 * tanl + w2 * piece->tanl ) / wsum ;
-   dtanl = 1./sqrt(wsum);
+   dtanl = 1./::sqrt(wsum);
 
    w1   = 1./ ( dz0 * dz0 ) ;
    w2   = 1./ ( piece->dz0 * piece->dz0 ) ;
    wsum = w1 + w2 ;
    z0   = ( w1 * z0 + w2 * piece->z0 ) / wsum ;
-   dz0  = 1./sqrt(wsum);
+   dz0  = 1./::sqrt(wsum);
 
    if ( piece->innerMostRow < innerMostRow ) innerMostRow = piece->innerMostRow ;
    if ( piece->outerMostRow > outerMostRow ) outerMostRow = piece->outerMostRow ;

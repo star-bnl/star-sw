@@ -3,7 +3,7 @@
 #include "HtmlTitle.h"
 #include "HtmlHead.h"
 #include "HtmlHeading.h"
-#include <iostream>
+#include "Stiostream.h"
 #include <fstream>
 
 HtmlDocument::HtmlDocument(const string & fileName,

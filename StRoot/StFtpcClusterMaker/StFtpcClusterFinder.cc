@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.49 2003/06/11 12:06:03 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.50 2003/09/02 17:58:14 perev Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.50  2003/09/02 17:58:14  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.49  2003/06/11 12:06:03  jcs
 // get inner cathode and cluster geometry parameters from database
 //
@@ -154,7 +157,7 @@
 // Add CVS Id strings
 //
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "StMessMgr.h"
 #include "StFtpcClusterFinder.hh"
@@ -316,7 +319,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
   /* calculate fastlog lookup */
   for(iIndex=1; iIndex<256; iIndex++)
     {
-      fastlog[iIndex] = log((double) iIndex);
+      fastlog[iIndex] = ::log((double) iIndex);
     }
 
   /* reset counter for found clusters */
@@ -1296,17 +1299,17 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	      + fDriftLength*fDriftLength*mParam->timeDiffusionErrors(2);
 	  if(thispoint->GetNumberPads()==2)
 	    {
-	      fPhiError = sqrt(fPhiError * fPhiError
+	      fPhiError = ::sqrt(fPhiError * fPhiError
 			       + sqr(mParam->twoPadWeightedError()));
 	    }
 	  if(thispoint->GetNumberPads()==3 && iUseGauss & 1 == 1)
 	    {
-	      fPhiError = sqrt(fPhiError * fPhiError
+	      fPhiError = ::sqrt(fPhiError * fPhiError
 			       + sqr(mParam->threePadGaussError()));
 	    }
 	  if(thispoint->GetNumberPads()==3 && iUseGauss & 1 == 0)
 	    {
-	      fPhiError = sqrt(fPhiError * fPhiError
+	      fPhiError = ::sqrt(fPhiError * fPhiError
 			       + sqr(mParam->threePadWeightedError()));
 	    }
 
@@ -1315,17 +1318,17 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	  if(iADCValue>254)
 	    {
 	      thispoint->SetFlags(4);
-	      fPhiError = sqrt(fPhiError * fPhiError
+	      fPhiError = ::sqrt(fPhiError * fPhiError
 			       + sqr(mParam->padSaturatedClusterError()));
-	      fRadError = sqrt(fRadError * fRadError
+	      fRadError = ::sqrt(fRadError * fRadError
 			       + sqr(mParam->timeSaturatedClusterError()));
 	    }	  
 	  if(Cluster->CutOff==1)
 	    {
 	      thispoint->SetFlags(thispoint->GetFlags() | 16);
-	      fPhiError = sqrt(fPhiError * fPhiError
+	      fPhiError = ::sqrt(fPhiError * fPhiError
 			       + sqr(mParam->padCutoffClusterError()));
-	      fRadError = sqrt(fRadError * fRadError
+	      fRadError = ::sqrt(fRadError * fRadError
 			       + sqr(mParam->timeCutoffClusterError()));
 	    }
 	  
@@ -1343,11 +1346,11 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	  fRadError *= (pRadius[10*PadtransBin]-pRadius[10*PadtransBin+10])
 	    / (pRadius[10]-pRadius[20]);
 
-	  thispoint->SetXerr(sqrt(fRadError*cos(Peak->Phi)
+	  thispoint->SetXerr(::sqrt(fRadError*cos(Peak->Phi)
 				  *fRadError*cos(Peak->Phi) 
 				  + fPhiError*sin(Peak->Phi)
 				  *fPhiError*sin(Peak->Phi)));
-	  thispoint->SetYerr(sqrt(fRadError*sin(Peak->Phi)
+	  thispoint->SetYerr(::sqrt(fRadError*sin(Peak->Phi)
 				  *fRadError*sin(Peak->Phi) 
 				  + fPhiError*cos(Peak->Phi)
 				  *fPhiError*cos(Peak->Phi)));
@@ -1761,41 +1764,41 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	      
 	      /* clusters are unfolded */ 
 	      thispoint->SetFlags(1);
-	      fPhiError = sqrt(fPhiError * fPhiError
+	      fPhiError = ::sqrt(fPhiError * fPhiError
 			       + sqr(mParam->padUnfoldError()));
-	      fRadError = sqrt(fRadError * fRadError
+	      fRadError = ::sqrt(fRadError * fRadError
 			       + sqr(mParam->timeUnfoldError()));
 	      
 	      if(iADCValue>254)
 		{
 		  thispoint->SetFlags(5);
-		  fPhiError = sqrt(fPhiError * fPhiError
+		  fPhiError = ::sqrt(fPhiError * fPhiError
 				   + sqr(mParam->padSaturatedClusterError()));
-		  fRadError = sqrt(fRadError * fRadError
+		  fRadError = ::sqrt(fRadError * fRadError
 				   + sqr(mParam->timeSaturatedClusterError()));
 		}	  
 	      if(BadFit==1)
 		{
 		  thispoint->SetFlags(thispoint->GetFlags() | 8);
-		  fPhiError = sqrt(fPhiError * fPhiError
+		  fPhiError = ::sqrt(fPhiError * fPhiError
 				   + sqr(mParam->padBadFitError()));
-		  fRadError = sqrt(fRadError * fRadError
+		  fRadError = ::sqrt(fRadError * fRadError
 				   + sqr(mParam->timeBadFitError()));
 		}	  
 	      if(iNumUnfoldLoops == MAXLOOPS)
 		{
 		  thispoint->SetFlags(thispoint->GetFlags() | 10);
-		  fPhiError = sqrt(fPhiError * fPhiError
+		  fPhiError = ::sqrt(fPhiError * fPhiError
 				   + sqr(mParam->padFailedFitError()));
-		  fRadError = sqrt(fRadError * fRadError
+		  fRadError = ::sqrt(fRadError * fRadError
 				   + sqr(mParam->timeFailedFitError()));
 		}	  
 	      if(Cluster->CutOff==1)
 		{
 		  thispoint->SetFlags(thispoint->GetFlags() | 16);
-		  fPhiError = sqrt(fPhiError * fPhiError
+		  fPhiError = ::sqrt(fPhiError * fPhiError
 				   + sqr(mParam->padCutoffClusterError()));
-		  fRadError = sqrt(fRadError * fRadError
+		  fRadError = ::sqrt(fRadError * fRadError
 				   + sqr(mParam->timeCutoffClusterError()));
 		}
 
@@ -1813,11 +1816,11 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	      fRadError *= (pRadius[10*PadtransBin]-pRadius[10*PadtransBin+10])
 		/ (pRadius[10]-pRadius[20]);
 
-	      thispoint->SetXerr(sqrt(fRadError*cos(Peak[iPeakIndex].Phi)
+	      thispoint->SetXerr(::sqrt(fRadError*cos(Peak[iPeakIndex].Phi)
 				      *fRadError*cos(Peak[iPeakIndex].Phi) 
 				      + fPhiError*sin(Peak[iPeakIndex].Phi)
 				      *fPhiError*sin(Peak[iPeakIndex].Phi)));
-	      thispoint->SetYerr(sqrt(fRadError*sin(Peak[iPeakIndex].Phi)
+	      thispoint->SetYerr(::sqrt(fRadError*sin(Peak[iPeakIndex].Phi)
 				      *fRadError*sin(Peak[iPeakIndex].Phi) 
 				      + fPhiError*cos(Peak[iPeakIndex].Phi)
 				      *fPhiError*cos(Peak[iPeakIndex].Phi)));

@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide 
 // 
-// $Id: StEmcPreCalibrationMaker.cxx,v 1.11 2003/01/25 01:42:14 suaide Exp $
+// $Id: StEmcPreCalibrationMaker.cxx,v 1.12 2003/09/02 17:57:59 perev Exp $
 // $Log: StEmcPreCalibrationMaker.cxx,v $
+// Revision 1.12  2003/09/02 17:57:59  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.11  2003/01/25 01:42:14  suaide
 // included trigger data
 //
@@ -35,7 +38,7 @@
 //
 #include "StEmcPreCalibrationMaker.h"
 #include "StChain.h"
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "St_DataSetIter.h"
 #include "StEvent.h"

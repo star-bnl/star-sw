@@ -44,7 +44,7 @@ void StiCompositeMaterial::update(){
   _z          = 0.;
   _ionization = 0.;
 
-  vWeightedMaterial_t::iterator pMaterialIterator = 0;
+  vWeightedMaterial_t::iterator pMaterialIterator;
   StiMaterial *pMaterial = 0;
   Weight_t weight;
   double dNumberFraction, dMassFraction;

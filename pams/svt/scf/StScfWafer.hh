@@ -1,6 +1,6 @@
 #ifndef STSCFWAFER_HH
 #define STSCFWAFER_HH
-# include <iostream.h>
+# include "Stiostream.h"
 # include <stdlib.h>
 # include <math.h>
 # include "StScfListCluster.hh"

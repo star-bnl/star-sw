@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.11 2003/08/29 17:30:04 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.12 2003/09/02 17:58:39 perev Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.12  2003/09/02 17:58:39  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.11  2003/08/29 17:30:04  thenry
  * Added some comments
  *
@@ -63,7 +66,7 @@
 #ifndef StEmcTpcFourPMaker_h
 #define StEmcTpcFourPMaker_h
 using namespace std;
-#include <iostream>
+#include "Stiostream.h"
 #include <sstream>
 #include <iterator>
 #include <map>
@@ -120,14 +123,15 @@ class StCorrectedEmcPoint
 
     inline bool init(StMuEmcPoint* p, StThreeVectorD vertex)
       {
-	init(p, vertex.z());
+	return init(p, vertex.z());
       };
     bool init(StMuEmcPoint* p, double zv)
       {
 	mPoint = p;
         if(p)
 	  correctedE = p->getEnergy();
-        thetaShift = atan2(zv/100.0, SMDR);
+        thetaShift = ::atan2(zv/100.0, SMDR);
+        return 0;
       };
     inline double pEta(void) { return Eta(); };
     inline double Eta(void) { 
@@ -187,7 +191,7 @@ class StProjectedTrack
       StPhysicalHelixD helix = mTrack->outerHelix();
       pairD s = helix.pathLength(SMDR);
       if(isnan(s.first) || isnan(s.second)) throw BadPathLengthException();
-      double path = ((s.first < 0) || (s.second < 0)) ? max(s.first, s.second) : min(s.first, s.second);
+      double path = ((s.first < 0) || (s.second < 0)) ? ::max(s.first, s.second) : ::min(s.first, s.second);
       projection = helix.at(path);
     };
     StProjectedTrack(StMuTrack* t, int _index, StThreeVectorD vertex) : 
@@ -198,7 +202,7 @@ class StProjectedTrack
       StPhysicalHelixD helix = mTrack->outerHelix();
       pairD s = helix.pathLength(SMDR);
       if(isnan(s.first) || isnan(s.second)) throw BadPathLengthException();
-      double path = ((s.first < 0) || (s.second < 0)) ? max(s.first, s.second) : min(s.first, s.second);
+      double path = ((s.first < 0) || (s.second < 0)) ? ::max(s.first, s.second) : ::min(s.first, s.second);
       projection = helix.at(path) - vertex;
     };
     StProjectedTrack(const StProjectedTrack &t) { 
@@ -248,7 +252,7 @@ class StProjectedTrack
 	pairD s = helix.pathLength(SMDR);
         if(isnan(s.first) || isnan(s.second)) throw BadPathLengthException();
 	double path = ((s.first < 0) || (s.second < 0)) 
-	  ? max(s.first, s.second) : min(s.first, s.second);
+	  ? ::max(s.first, s.second) : ::min(s.first, s.second);
 	projection = helix.at(path) - vertex;
       };
     inline double Eta(void) { return fourP.pseudoRapidity(); };
@@ -272,7 +276,7 @@ class StProjectedTrack
     inline double eProton(void) { return ePart(mpr); };
     inline double ePion(void) { return ePart(mpi); };
     inline double ePart(double parMass) 
-      { return sqrt(parMass*parMass + mom().mag2()); };
+      { return ::sqrt(parMass*parMass + mom().mag2()); };
     inline StThreeVectorD mom(void) { return mTrack->momentum(); };
     inline const StLorentzVectorD &P(void) const 
       { const StLorentzVectorD &ret = fourP; return ret; };

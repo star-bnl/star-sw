@@ -6,7 +6,7 @@
 #include "TCanvas.h"
 #include "TGraph.h"
 #include "TNtuple.h"
-#include <iostream>
+#include "Stiostream.h"
 #include "TStopwatch.h"
 
 ClassImp(StEmcNeuralNet)
@@ -131,7 +131,7 @@ void StEmcNeuralNet::drawNNetHists() {
 	mHSignal->Scale(100. / mHSignal->Integral());	// rescale signal histo --> 100 events per histo
 	mHBack->Scale(100. / mHBack->Integral());	// the same for background histo
 	Float_t maxitr = (Float_t)TMath::Max(mHSignal->GetMaximum(), mHBack->GetMaximum());
-	mHSignal->SetMaximum( maxitr + sqrt(maxitr) );
+	mHSignal->SetMaximum( maxitr + ::sqrt(maxitr) );
 	mHSignal->Draw();
 	mHBack->Draw("same");
 

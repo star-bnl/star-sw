@@ -730,9 +730,9 @@ c     is moving away from the beam axis - not coming back
                   v2x  = x(3) - xh
                   v2y  = y(3) - yh
                   if (v1x*v2y-v2x*v1y .gt. 0.) then
-                     ch = sign(1,-1.*bfield)
+                     ch = sign(1.,-bfield)
                   else
-                     ch = sign(1.,1*bfield)
+                     ch = sign(1.,bfield)
                   end if
                
 c     vector direction

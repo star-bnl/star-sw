@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: kaonPid.cc,v 1.2 2000/10/16 19:35:47 ullrich Exp $
+ * $Id: kaonPid.cc,v 1.3 2003/09/02 17:58:42 perev Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: kaonPid.cc,v $
+ * Revision 1.3  2003/09/02 17:58:42  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2000/10/16 19:35:47  ullrich
  * Updated to run on Sun/CC5.
  *
@@ -59,7 +62,7 @@ kaonPid::operator() (const StTrack& track, const StSPtrVecTrackPidTraits& vec)
     double betagamma = p/particle->mass();
     double z = dedx/bb(betagamma);
 
-    return (fabs(log(z)) < 0.2) ? particle : 0;  // return K+ or K-
+    return (fabs(::log(z)) < 0.2) ? particle : 0;  // return K+ or K-
 }
 
 const StDedxPidTraits*

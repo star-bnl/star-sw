@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.26 2003/04/30 20:39:21 perev Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.27 2003/09/02 17:59:29 perev Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.27  2003/09/02 17:59:29  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.26  2003/04/30 20:39:21  perev
 // Warnings cleanup. Modified lines marked VP
 //
@@ -431,7 +434,7 @@ Int_t St_l3Clufi_Maker::Make(){
 	{
 	    totalMemory += clbanklengths[ssindex] ;
 	}
-    cout << "Done with l3 clusterfinding " << totalMemory/pow(2,16) << " Mb of clusters found." << endl << endl ;
+    cout << "Done with l3 clusterfinding " << totalMemory/::pow(2,16) << " Mb of clusters found." << endl << endl ;
     return kStOK;    
 }
 //_____________________________________________________________________________

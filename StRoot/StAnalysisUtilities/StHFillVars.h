@@ -1,5 +1,8 @@
-// $Id: StHFillVars.h,v 1.1 1999/08/31 20:40:20 genevb Exp $
+// $Id: StHFillVars.h,v 1.2 2003/09/02 17:55:26 perev Exp $
 // $Log: StHFillVars.h,v $
+// Revision 1.2  2003/09/02 17:55:26  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.1  1999/08/31 20:40:20  genevb
 // Introduction of library and inclusion of StHFillObject
 //
@@ -75,6 +78,8 @@ class StHFillFormula : public TFormula {
   Int_t DefinedVariable(TString& variable);
   Double_t DefinedValue(Int_t code);
   Double_t Eval();
+  Double_t Eval(double d1, double d2, double d3, double d4)
+           {return TFormula::Eval(d1,d2,d3,d4);}
 };
 
 #endif

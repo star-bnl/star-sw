@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimField.hh,v 1.6 2003/07/03 13:30:56 fsimon Exp $
+// $Id: StFtpcSlowSimField.hh,v 1.7 2003/09/02 17:58:16 perev Exp $
 // $Log: StFtpcSlowSimField.hh,v $
+// Revision 1.7  2003/09/02 17:58:16  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.6  2003/07/03 13:30:56  fsimon
 // Implementation of cathode offset simulation:
 // 	The inner radius (and thus the E-field) is changed according to
@@ -111,9 +114,9 @@ private:
     float rhit;    // hit radius in cm
     float ef;    // Efield in V/cm
     float vel_z;    // long.  drift speed in cm/usec
-    float diff_z;    // long. diffusion coeff. in um/sqrt(cm)
-    float diff_x;    // trans. diffusion coef. in um/sqrt(cm)
-    float diff_y;    // trans. diffusion coef. in um/sqrt(cm)
+    float diff_z;    // long. diffusion coeff. in um/::sqrt(cm)
+    float diff_x;    // trans. diffusion coef. in um/::sqrt(cm)
+    float diff_y;    // trans. diffusion coef. in um/::sqrt(cm)
     float lorentz;    // Lorentz angle in rad
     float dlnv_dr;    // drift velocity gradient
   };

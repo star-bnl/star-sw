@@ -110,7 +110,7 @@ void gl3Event::addTracks ( short sector, int nTrk, local_track* localTrack ) {
     int idTrack ;
     for ( int i = 0 ; i < nTrk ; i++ ) { 
 	lTrack->set ( sector, trk ) ; 
-	lTrack->id     = sector * 1000 + (int)fabs(trk->id) ;
+	lTrack->id     = sector * 1000 + abs(trk->id) ;
 	lTrack->para   = &para ;
 	lTrack->sector = sector ;
 	idTrack        = trk->id ; 
@@ -497,7 +497,7 @@ int gl3Event::readSectorTracks ( char* buffer ){
     sectorP->xVert     = float(head->xVert)/1000000 ;
     sectorP->yVert     = float(head->yVert)/1000000 ;
     sectorP->zVert     = float(head->zVert)/1000000 ;
-    sectorP->rVert     = sqrt((double)( sectorP->xVert*sectorP->xVert +
+    sectorP->rVert     = ::sqrt((double)( sectorP->xVert*sectorP->xVert +
 					sectorP->yVert*sectorP->yVert)) ;
     sectorP->phiVert   = atan2((double)sectorP->yVert,(double)sectorP->xVert) ;
     if ( sectorP->phiVert < 0 ) sectorP->phiVert += 2. * M_PI ;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsZeroSuppressedReader.cc,v 1.7 2000/06/07 02:03:12 lasiuk Exp $
+ * $Id: StTrsZeroSuppressedReader.cc,v 1.8 2003/09/02 17:59:19 perev Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsZeroSuppressedReader.cc,v $
+ * Revision 1.8  2003/09/02 17:59:19  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.7  2000/06/07 02:03:12  lasiuk
  * exit/abort ultimatum
  *
@@ -42,6 +45,7 @@
 #include "StTrsZeroSuppressedReader.hh"
 
 #include <algorithm>
+#include <iterator>
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using std::find;
 using std::distance;
@@ -201,11 +205,12 @@ int StTrsZeroSuppressedReader::getSequences(int PadRow, int Pad, int *nSeq, Sequ
     do {
 	digitalTimeBinIterator rangeEnd = find(rangeBegin, TrsPadData->end(), static_cast<unsigned char>(0));
 	int length=0;
-	distance(rangeBegin,rangeEnd,length);
+//VP	distance(rangeBegin,rangeEnd,length);
+        length=rangeBegin-rangeEnd;
 	if (length){
 	    Sequence aSequence;
 	    aSequence.startTimeBin = currentTimeBin;
-	    aSequence.FirstAdc     = rangeBegin;
+	    aSequence.FirstAdc     = &(*rangeBegin);
 	    aSequence.Length       = length;
 	    tmp.push_back(aSequence);
 	    currentTimeBin += length;

@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.cxx,v 1.5 2003/08/06 23:45:36 geurts Exp $
+ * $Id: StTofGeometry.cxx,v 1.6 2003/09/02 17:59:10 perev Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.cxx,v $
+ * Revision 1.6  2003/09/02 17:59:10  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2003/08/06 23:45:36  geurts
  * refer to tofPathLength.hh for function definitions
  *
@@ -307,7 +310,7 @@ void StTofGeometry::initDaqMap(){
 StThreeVectorD StTofGeometry::tofSlatNormPoint(const Int_t slatId) const {
   tofSlatGeom_st thisSlat = tofSlat(slatId);
   double cosAng = thisSlat.cosang;
-  double sinAng = sqrt(1.0 - cosAng*cosAng);                 
+  double sinAng = ::sqrt(1.0 - cosAng*cosAng);                 
   double tanAng = fabs(sinAng/cosAng);
   double r = (fabs(thisSlat.z) + thisSlat.r/tanAng) * sinAng;
   double x = r * fabs(cosAng) * cos(thisSlat.phi);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.3 2003/05/12 21:10:06 lbarnby Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.4 2003/09/02 17:58:19 perev Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.4  2003/09/02 17:58:19  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2003/05/12 21:10:06  lbarnby
  * Made destructor virtual
  *
@@ -126,8 +129,8 @@ StMinuitVertexFinder::fit(StEvent* event)
 	      continue;
 	    }
 	    mHelices.push_back(g->geometry()->helix());
-	    // sigma = 0.45+0.0093*sqrt(g->length())/abs(g->geometry()->momentum()); HIJING + TRS
-	    sigma = 0.6+0.0086*sqrt(g->length())/abs(g->geometry()->momentum());
+	    // sigma = 0.45+0.0093*::sqrt(g->length())/abs(g->geometry()->momentum()); HIJING + TRS
+	    sigma = 0.6+0.0086*::sqrt(g->length())/abs(g->geometry()->momentum());
 	    mSigma.push_back(sigma);         
             bool shouldHitCTB = false;
             double etaInCTBFrame = -999;
@@ -397,7 +400,7 @@ void StMinuitVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz
   cout << "weight in fit = " << weight <<  endl;
   StThreeVectorD origin(mX0,mY0,0.0);
   double pt  = 88889999;   
-  double nxy=sqrt(mdxdz*mdxdz +  mdydz*mdydz);
+  double nxy=::sqrt(mdxdz*mdxdz +  mdydz*mdydz);
     if(nxy<1.e-5){ // beam line _MUST_ be tilted
       cout << "StMinuitVertexFinder:: Beam line must be tilted!" << endl;
       nxy=mdxdz=1.e-5; 

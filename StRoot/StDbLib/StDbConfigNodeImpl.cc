@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNodeImpl.cc,v 1.4 2003/01/10 04:19:20 porter Exp $
+ * $Id: StDbConfigNodeImpl.cc,v 1.5 2003/09/02 17:57:49 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNodeImpl.cc,v $
+ * Revision 1.5  2003/09/02 17:57:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.4  2003/01/10 04:19:20  porter
  * added feature of getting timestamp list (but no data) for a table.
  * fixed 2 features sometimes used in online in query-by-whereclause.
@@ -41,8 +44,8 @@
  *
  *
  **************************************************************************/
-#include <iostream.h>
-#include <strstream.h>
+#include <Stiostream.h>
+#include <Stsstream.h>
 #include <string.h>
 #include "StDbConfigNodeImpl.hh"
 #include "StDbManagerImpl.hh" // could be StDbManager.hh but for dbEnvList def
@@ -112,13 +115,13 @@ StDbConfigNodeImpl::updateDbInfo(){
      setBranchID(0);
      char* version=StDbManager::Instance()->getExternalVersion(mdbType,mdbDomain);
      if(version && strcmp(version,mversion)){
-       char *nMes; ostrstream nm;
+       const char *nMes; ostrstream nm;
        nm<<" Overriding Key="<<mversion<<" with Environment Var Key="<<version;
        nm<<" for DataBase=";
        nm<<StDbManager::Instance()->printDbName(mdbType,mdbDomain)<<ends;
        nMes = nm.str();
        StDbManager::Instance()->printInfo(nMes,dbMWarn,__LINE__,__CLASS__,__METHOD__);
-       delete [] nMes;
+//VP       delete [] nMes;
        setVersion(version);
      }
   }
@@ -383,12 +386,12 @@ StDbConfigNodeImpl::addChildren(dbEnvList* elist){
     if(id){
       id++;
       if(strcmp(id,mname) && !findChildConfigNode(id)){
-        char* nMes; ostrstream nm;
+        const char* nMes; ostrstream nm;
         nm<<" Adding DataBase="<<elist->envVar[i]<<" with KEY=";
         nm<<elist->envDef[i]<<" from Environment variable definition"<<ends;
         nMes = nm.str();
 	StDbManager::Instance()->printInfo(nMes,dbMWarn,__LINE__,__CLASS__,__METHOD__);    
-        delete [] nMes;
+//VP        delete [] nMes;
             new StDbConfigNodeImpl(this,id,elist->envDef[i]);
       }
     }
@@ -404,7 +407,7 @@ StDbConfigNodeImpl::printTables(int depth){
     ostrstream os;
     for(int k=0;k<depth;k++)os<<" ";
     os<<ends;
-    char* pdepth=os.str();
+    const char* pdepth=os.str();
    TableList::iterator itr;
    for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
      cout<<pdepth<<"Table="<<(*itr)->printName()<<", Version="<<(*itr)->printVersion();
@@ -414,7 +417,7 @@ StDbConfigNodeImpl::printTables(int depth){
       if(nRows==1)cout<<", elementID="<<eIDs[0];
       cout<<endl;
     }
-    delete [] pdepth;
+//VP    delete [] pdepth;
   }
 }
 
@@ -433,9 +436,9 @@ unsigned int numNodes, numTables, numBytes;
  cos<<"Total Size of Data in Tables = "<<kbs<<" kBytes"<<endl;
  cos<<"******************************************************"<<endl<<ends;
 
- char* nstats=cos.str();
+ const char* nstats=cos.str();
  StDbManager::Instance()->printInfo(nstats,dbMConnect,__LINE__,__CLASS__,__METHOD__);
- delete [] nstats;
+//VP delete [] nstats;
 
 #undef __METHOD__
 }

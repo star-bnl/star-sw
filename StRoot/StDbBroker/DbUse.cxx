@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbUse.cxx,v 1.9 2000/04/13 20:22:56 porter Exp $
+ * $Id: DbUse.cxx,v 1.10 2003/09/02 17:55:35 perev Exp $
  *
  * Author: S. Vanyashin
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: DbUse.cxx,v $
+ * Revision 1.10  2003/09/02 17:55:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.9  2000/04/13 20:22:56  porter
  * - reconnected tableDescriptor that had been broken via St_tableDescriptor.
  * - added unix timestamp as standard
@@ -48,10 +51,10 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <stdio.h>
-#include <iomanip.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strstream.h>
+#include "Stiostream.h"
+#include "Stsstream.h"
 #include "mysql.h"
 #include "mysql_com.h"
 
@@ -85,9 +88,8 @@ unsigned int num_fields;
 unsigned int num_rows;
 //unsigned int num_struct;
 
-const int MAXBUF=1024;
-char buf[MAXBUF];
-ostrstream Query(buf,MAXBUF);
+//const int MAXBUF=1024;
+ostrstream Query;
 char temps[128];
 
 char validFrom[20];

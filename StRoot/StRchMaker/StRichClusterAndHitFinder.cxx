@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 2.10 2003/04/30 20:38:00 perev Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 2.11 2003/09/02 17:58:51 perev Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
+ * Revision 2.11  2003/09/02 17:58:51  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.10  2003/04/30 20:38:00  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -77,7 +80,7 @@
 #define RICH_CF_DEBUG 0
 #define ivb if(RICH_CF_DEBUG)cout
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <vector>
 #include <algorithm>
 #include <map>
@@ -1226,8 +1229,8 @@ bool StRichClusterAndHitFinder::centerOfGravity(vector<StRichSinglePixel*>& aVec
     //  this is temp:
     //                2       2        2
     //              dx  =  < x  > - < x >
-    hitInfo->setPositionError(sqrt(tmpX2/amp-sqr(tmpX/amp)),
-			      sqrt(tmpY2/amp-sqr(tmpY/amp)),
+    hitInfo->setPositionError(::sqrt(tmpX2/amp-sqr(tmpX/amp)),
+			      ::sqrt(tmpY2/amp-sqr(tmpY/amp)),
 			      0.);
 
     hitInfo->setCharge(amp);

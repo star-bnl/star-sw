@@ -1,6 +1,6 @@
 #ifndef STSCMLISTPACKAGE_HH
 #define STSCMLISTPACKAGE_HH
-#include <iostream.h>
+#include "Stiostream.h"
 #include <stdlib.h>
 #include <math.h>
 #include "StScmPackage.hh"

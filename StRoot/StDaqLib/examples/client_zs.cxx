@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: client_zs.cxx,v 1.2 2003/01/29 13:55:18 ward Exp $
+ * $Id: client_zs.cxx,v 1.3 2003/09/02 17:55:34 perev Exp $
  * Author: J. Schambach
  ***************************************************************************
  * Description: sample top-level code should be used as a tutorial
@@ -8,6 +8,9 @@
  *
  ***************************************************************************
  * $Log: client_zs.cxx,v $
+ * Revision 1.3  2003/09/02 17:55:34  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2003/01/29 13:55:18  ward
  * Turn off memory mapped operation in the examples, which appears to fail for 2003 daq files.
  *
@@ -25,7 +28,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <assert.h>
-#include <iostream>
+#include "Stiostream.h"
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/SVT/SVTV1P0_Reader.hh"

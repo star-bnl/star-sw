@@ -1,6 +1,6 @@
 #ifndef STSCFLISTCLUSTER_HH
 #define STSCFLISTCLUSTER_HH
-# include <iostream.h>
+# include "Stiostream.h"
 # include <stdlib.h>
 # include <math.h>
 # include "StScfCluster.hh"

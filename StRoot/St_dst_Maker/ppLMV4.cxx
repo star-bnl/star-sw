@@ -1,5 +1,8 @@
-// $Id: ppLMV4.cxx,v 1.10 2002/03/25 19:35:07 balewski Exp $
+// $Id: ppLMV4.cxx,v 1.11 2003/09/02 17:59:26 perev Exp $
 // $Log: ppLMV4.cxx,v $
+// Revision 1.11  2003/09/02 17:59:26  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.10  2002/03/25 19:35:07  balewski
 // correct ppLMV for 0filed, still not vry good
 //
@@ -14,7 +17,7 @@
 //
 // *** empty log message ***
 ///////////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -32,7 +35,7 @@ void cts_get_ctb_indexes ( long volume, long &i_phi, long &i_eta ) ;
 
 #include "SystemOfUnits.h"
 #if !defined(ST_NO_NAMESPACES)
-using namespace std::vector;
+using namespace std;
 using namespace units;
 #endif
 #include "StThreeVectorD.hh"
@@ -52,7 +55,7 @@ using namespace units;
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 
-//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.10 2002/03/25 19:35:07 balewski Exp $";
+//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.11 2003/09/02 17:59:26 perev Exp $";
 
 struct Jcyl {float eta,phi;};
 
@@ -86,7 +89,7 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
     
     if (! (beam4ppLMV.equivNtr>0)) return kStErr;
     double pt  = 88889999;   
-    double nxy=sqrt(beam4ppLMV.nx*beam4ppLMV.nx +beam4ppLMV.ny*beam4ppLMV.ny);
+    double nxy=::sqrt(beam4ppLMV.nx*beam4ppLMV.nx +beam4ppLMV.ny*beam4ppLMV.ny);
     if(nxy<1.e-5){ // beam line _MUST_ be tilted
       nxy=beam4ppLMV.nx=1.e-5; 
     }
@@ -107,7 +110,7 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
       if(sigMin>sig) sigMin=sig;
     }
 
-    trk1.sigma=sigMin/sqrt(beam4ppLMV.equivNtr); //<== assigne weight
+    trk1.sigma=sigMin/::sqrt(beam4ppLMV.equivNtr); //<== assigne weight
     (*tracks).push_back(trk1);
     printf("WARN ppLMV: nominal beam line added with sigma=%f, now nTrack=%d beamLineX=%f, Y=%f Weight=%d\n", trk1.sigma,(*tracks).size(),beam4ppLMV.x0,beam4ppLMV.y0,beam4ppLMV.equivNtr);
     
@@ -198,7 +201,7 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
     double Zv = C31*b1 + C32*b2 + C33*b3;
     XVertex.setX(Xv); XVertex.setY(Yv); XVertex.setZ(Zv);
     //    cout<<"Vertex Position   : "<<XVertex.x()<<" "<<XVertex.y()<<" "<<XVertex.z()<<endl;
-    // cout<<"Error in Position : "<<sqrt(C11)<<" "<<sqrt(C22)<<" "<<sqrt(C33)<<endl;
+    // cout<<"Error in Position : "<<::sqrt(C11)<<" "<<::sqrt(C22)<<" "<<::sqrt(C33)<<endl;
     
 
     // Check if the fit is any good
@@ -223,7 +226,7 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
       double d=(XHel.x()-XVertex.x())*(XHel.x()-XVertex.x());
          d = d+(XHel.y()-XVertex.y())*(XHel.y()-XVertex.y());
          d = d+(XHel.z()-XVertex.z())*(XHel.z()-XVertex.z());
-         d = sqrt(d);
+         d = ::sqrt(d);
       chi2 = chi2 + (d*d)/(sig*sig);
       double drel = d;  // do not use sig during track rejection;
       //      printf(" DCA x=%f y=%f z=%f d=%f drel=%f dmax=%f\n",XHel.x(),XHel.y(),XHel.z(),d,drel,dmax);
@@ -310,7 +313,7 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
       double dx=maTrk.primCan[j].x0 - XVertex.x();
       double dy=maTrk.primCan[j].y0 - XVertex.y();
       double dr2=dx*dx + dy*dy + dz*dz;
-      double dr=sqrt(dr2);
+      double dr=::sqrt(dr2);
       if(dr>DVtxMax) continue; // too fare in X*Y*Z
       maTrk.primCan[j].glb_track_pointer->id_start_vertex+=10*IVertex ;
   }

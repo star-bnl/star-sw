@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEbye2ptMaker.cxx,v 1.9 2000/12/16 18:54:14 aya Exp $
+ * $Id: StEbye2ptMaker.cxx,v 1.10 2003/09/02 17:57:56 perev Exp $
  *
  * StEbye2ptMaker.cxx
  *
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StEbye2ptMaker.cxx,v $
+ * Revision 1.10  2003/09/02 17:57:56  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.9  2000/12/16 18:54:14  aya
  * fixed eta cut
  *
@@ -34,7 +37,7 @@
  *
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <math.h>
 #include "StEbye2ptMaker.h"
@@ -56,7 +59,7 @@
 using namespace units;
 #endif
 
-static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.9 2000/12/16 18:54:14 aya Exp $";
+static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.10 2003/09/02 17:57:56 perev Exp $";
 
 ClassImp(StEbye2ptMaker)
 
@@ -369,7 +372,7 @@ StEbye2ptMaker::processEvent(StEbyeEvent& event)
             // get the momentum of the current track	    
             px = ntrack->Px();
             py = ntrack->Py();
-	    pt = sqrt(px*px +py*py);
+	    pt = ::sqrt(px*px +py*py);
 
             // get the charge of the current track
              charge = ntrack->Charge();
@@ -389,7 +392,7 @@ StEbye2ptMaker::processEvent(StEbyeEvent& event)
               //if (((dcaX > dcaX_min) && (dcaX < dcaX_max)) && ((dcaY >dcaY_min) && (dcaY < dcaY_max))) {
 
                 // calculate mt (needed for temperature calculation)
-                mtOnly = sqrt(pt*pt + PionMass*PionMass);
+                mtOnly = ::sqrt(pt*pt + PionMass*PionMass);
 
                 // fill eta
 		eta = ntrack->Eta();
@@ -407,7 +410,7 @@ StEbye2ptMaker::processEvent(StEbyeEvent& event)
 		    mX->Fill(mThisEventMinus[minusCount]);
 
 		    if(eta >= eta_min && eta <= eta_max ){
-		    // mEtaThisEventMinus[minusCount]=erf(eta/(sqrt(2)*width));
+		    // mEtaThisEventMinus[minusCount]=erf(eta/(::sqrt(2)*width));
 		    mEtaThisEventMinus[minusCount]=eta;
 		    // mEtaX->Fill(mEtaThisEventMinus[minusCount]);
 		    mEta->Fill(mEtaThisEventMinus[minusCount]);
@@ -421,7 +424,7 @@ StEbye2ptMaker::processEvent(StEbyeEvent& event)
                     mThisEventPlus[plusCount]=1-(1+(mtOnly/Temperature))*exp(-mtOnly/Temperature)/Minimum;
 		    mX->Fill(mThisEventPlus[plusCount]);
 		    if(eta >= eta_min && eta <= eta_max ){
-		    //		    mEtaThisEventPlus[plusCount]=erf(eta/(sqrt(2)*width));
+		    //		    mEtaThisEventPlus[plusCount]=erf(eta/(::sqrt(2)*width));
 		    mEtaThisEventPlus[plusCount]=eta;
 		    //		    mEtaX->Fill(mEtaThisEventPlus[plusCount]);
 		    mEta->Fill(mEtaThisEventPlus[plusCount]);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandPoisson.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
+ * $Id: RandPoisson.cc,v 1.3 2003/09/02 17:59:34 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: RandPoisson.cc,v $
+ * Revision 1.3  2003/09/02 17:59:34  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  1999/12/07 23:43:04  ullrich
  * Modified to get rid of warnings on Linux.
  *
@@ -49,14 +52,14 @@ HepDouble gammln(HepDouble xx) {
   register HepInt j;
   HepDouble x = xx - 1.0;
   HepDouble tmp = x + 5.5;
-  tmp -= (x + 0.5) * log(tmp);
+  tmp -= (x + 0.5) * ::log(tmp);
   HepDouble ser = 1.000000000190015;
 
   for ( j = 0; j <= 5; j++ ) {
     x += 1.0;
     ser += cof[j]/x;
   }
-  return -tmp + log(2.5066282746310005*ser);
+  return -tmp + ::log(2.5066282746310005*ser);
 }
 
 long RandPoisson::shoot(HepDouble xm) {
@@ -92,8 +95,8 @@ long RandPoisson::shoot(HepDouble xm) {
   else if ( xm < getMaxMean() ) {
     if ( xm != om ) {
       setOldMean(xm);
-      sq = sqrt(2.0*xm);
-      alxm = log(xm);
+      sq = ::sqrt(2.0*xm);
+      alxm = ::log(xm);
       g = xm*alxm - gammln(xm + 1.0);
     }
     do {
@@ -108,8 +111,8 @@ long RandPoisson::shoot(HepDouble xm) {
   else {
     if ( xm != om ) {
       setOldMean(xm);
-      sq = sqrt(2.0*xm);
-      alxm = log(xm);
+      sq = ::sqrt(2.0*xm);
+      alxm = ::log(xm);
       g = xm*alxm - gammln(xm + 1.0);
     }
     em = xm;
@@ -168,8 +171,8 @@ long RandPoisson::shoot(HepRandomEngine* anEngine, HepDouble xm) {
   else if ( xm < getMaxMean() ) {
     if ( xm != om ) {
       setOldMean(xm);
-      sq = sqrt(2.0*xm);
-      alxm = log(xm);
+      sq = ::sqrt(2.0*xm);
+      alxm = ::log(xm);
       g = xm*alxm - gammln(xm + 1.0);
     }
     do {
@@ -184,8 +187,8 @@ long RandPoisson::shoot(HepRandomEngine* anEngine, HepDouble xm) {
   else {
     if ( xm != om ) {
       setOldMean(xm);
-      sq = sqrt(2.0*xm);
-      alxm = log(xm);
+      sq = ::sqrt(2.0*xm);
+      alxm = ::log(xm);
       g = xm*alxm - gammln(xm + 1.0);
     }
     em = xm;
@@ -245,8 +248,8 @@ long RandPoisson::fire(HepDouble xm) {
   else if ( xm < meanMax ) {
     if ( xm != oldm ) {
       oldm = xm;
-      sq = sqrt(2.0*xm);
-      alxm = log(xm);
+      sq = ::sqrt(2.0*xm);
+      alxm = ::log(xm);
       g = xm*alxm - gammln(xm + 1.0);
     }
     do {
@@ -261,8 +264,8 @@ long RandPoisson::fire(HepDouble xm) {
   else {
     if ( xm != oldm ) {
       oldm = xm;
-      sq = sqrt(2.0*xm);
-      alxm = log(xm);
+      sq = ::sqrt(2.0*xm);
+      alxm = ::log(xm);
       g = xm*alxm - gammln(xm + 1.0);
     }
     em = xm;

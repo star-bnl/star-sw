@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAihongPid.cxx,v 1.3 2003/01/31 19:44:00 magestro Exp $
+ * $Id: StHbtAihongPid.cxx,v 1.4 2003/09/02 17:58:32 perev Exp $
  *
  * Author: Frank Laue, Ohio State, laue@bnl.gov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAihongPid.cxx,v $
+ * Revision 1.4  2003/09/02 17:58:32  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2003/01/31 19:44:00  magestro
  * Cleared up simple compiler warnings on i386_linux24
  *
@@ -20,7 +23,7 @@
  **************************************************************************/
 
 #include "StHbtMaker/Infrastructure/StHbtAihongPid.h"
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StEventUtilities/StuProbabilityPidAlgorithm.h"
 
 #ifdef __ROOT__

@@ -1,6 +1,6 @@
 #ifndef STSPALISTSTRIP_HH
 #define STSPALISTSTRIP_HH
-# include <iostream.h>
+# include "Stiostream.h"
 # include <stdlib.h>
 # include <math.h>
 # include "StSpaStrip.hh"

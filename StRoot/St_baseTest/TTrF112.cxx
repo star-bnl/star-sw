@@ -4,8 +4,11 @@
 // matrix / vector "derived" from  
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f112/top.html 
 //
-// $Id: TTrF112.cxx,v 1.4 2000/03/26 03:16:05 fine Exp $
+// $Id: TTrF112.cxx,v 1.5 2003/09/02 17:59:25 perev Exp $
 // $Log: TTrF112.cxx,v $
+// Revision 1.5  2003/09/02 17:59:25  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.4  2000/03/26 03:16:05  fine
 // Adjusted to ROOT 2.24
 //
@@ -21,7 +24,7 @@
 
 #include "StMicky.h"
 #include "TCL.h"
-#include <iostream.h>
+#include <Stiostream.h>
 
 //____________________________________________________________________________________
 int StMicky::ttrinv()

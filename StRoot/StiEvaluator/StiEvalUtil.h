@@ -11,8 +11,8 @@
 
 
 float pirapidity(float pt,float pz) {
-    float E = sqrt(.13957018*.13957018 + pt*pt + pz*pz);
-    float y = .5 * log((E+pz)/(E-pz));    
+    float E = ::sqrt(.13957018*.13957018 + pt*pt + pz*pz);
+    float y = .5 * ::log((E+pz)/(E-pz));    
     return y;
 }
 

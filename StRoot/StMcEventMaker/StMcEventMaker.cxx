@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.43 2003/08/20 18:51:01 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.44 2003/09/02 17:58:41 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.44  2003/09/02 17:58:41  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.43  2003/08/20 18:51:01  calderon
  * Filling of Tof and Pixel classes.
  *
@@ -153,7 +156,7 @@
  *
  *
  *************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <string>
 #include <algorithm>
@@ -202,7 +205,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.43 2003/08/20 18:51:01 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.44 2003/09/02 17:58:41 perev Exp $";
 ClassImp(StMcEventMaker)
 
 

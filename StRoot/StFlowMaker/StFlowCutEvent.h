@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.h,v 1.10 2003/01/10 16:41:56 oldi Exp $
+// $Id: StFlowCutEvent.h,v 1.11 2003/09/02 17:58:11 perev Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -16,7 +16,7 @@
 
 #ifndef _StFlowCutEvent_INCLUDED_
 #define _StFlowCutEvent_INCLUDED_
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "Rtypes.h"
 class StEvent;
@@ -107,6 +107,9 @@ inline void StFlowCutEvent::SetTrigger(const Float_t value) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.h,v $
+// Revision 1.11  2003/09/02 17:58:11  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.10  2003/01/10 16:41:56  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.
@@ -142,7 +145,7 @@ inline void StFlowCutEvent::SetTrigger(const Float_t value) {
 // Added pt and eta selections for particles corr. wrt event plane.
 //
 // Revision 1.4  2000/07/12 17:54:34  posk
-// Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
+// Added chi2 and dca cuts. Multiplied EtaSym by ::sqrt(mult).
 // Apply cuts when reading picoevent file.
 //
 // Revision 1.3  2000/06/30 14:48:30  posk

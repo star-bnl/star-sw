@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFourPMaker.cxx,v 1.4 2003/08/27 23:20:38 thenry Exp $
+ * $Id: StFourPMaker.cxx,v 1.5 2003/09/02 17:58:39 perev Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -13,7 +13,7 @@
  *
  **************************************************************************/
 #include <string.h>
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StChain.h"
 #include "StEventTypes.h"

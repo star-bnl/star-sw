@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.12 2003/07/31 19:18:10 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.13 2003/09/02 17:59:09 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.13  2003/09/02 17:59:09  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.12  2003/07/31 19:18:10  caines
  * Petrs improved simulation code
  *
@@ -41,10 +44,8 @@
  * First version of Slow Simulator - S. Bekele
  *
  **************************************************************************/
-
-#include <iostream.h>
+#include <Stiostream.h>
 #include <string.h>
-#include <fstream.h>
 #include <math.h>
 
 #include "St_DataSetIter.h"

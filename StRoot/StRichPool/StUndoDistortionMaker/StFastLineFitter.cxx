@@ -8,7 +8,7 @@
 //        M. L. Miller   - adapted for STAR use, Converted to C++
 
 #include <math.h>
-#include <iostream>
+#include "Stiostream.h"
 #include "StFastLineFitter.h"
 
 StFastLineFitter::StFastLineFitter()
@@ -118,8 +118,8 @@ int StFastLineFitter::dofit()
   /* double varsq=chi/(static_cast<double>(n)-2.) */
   
   /*  calculate covariance matrix */
-  /*  siga=sqrt(varsq*sxx/det) */
-  /*  sigb=sqrt(varsq*sum/det) */
+  /*  siga=::sqrt(varsq*sxx/det) */
+  /*  sigb=::sqrt(varsq*sum/det) */
   
   msiga = sum/det;
   msigb = sxx/det;

@@ -1,7 +1,10 @@
 #ifndef StKinkLocalTrack_hh
 #define StKinkLocalTrack_hh
-// $Id: StKinkLocalTrack.hh,v 1.7 2001/04/09 19:56:55 wdeng Exp $
+// $Id: StKinkLocalTrack.hh,v 1.8 2003/09/02 17:59:26 perev Exp $
 // $Log: StKinkLocalTrack.hh,v $
+// Revision 1.8  2003/09/02 17:59:26  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.7  2001/04/09 19:56:55  wdeng
 // Added 'const' to Compare function signature
 //
@@ -18,7 +21,7 @@
 // Add tabs, remove St_glb_Maker
 //
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TMath.h"
 #include "TObject.h"
 #include "StPhysicalHelixD.hh"

@@ -1,7 +1,7 @@
 //StiHit.cxx
 //M.L. Miller (Yale Software)
 //04/01
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StEventTypes.h"
 #include "StiHit.h"
 #include "StiDetector.h"
@@ -137,7 +137,7 @@ double StiHit::getValue(int key) const
   switch (key)
     {
     case kZ: value = _zg; break;
-    case kR: value = sqrt(_xg*_xg+_yg*_yg); break;
+    case kR: value = ::sqrt(_xg*_xg+_yg*_yg); break;
     case kPseudoRapidity: value = getPseudoRapidity(); break;
     case kPhi: value = atan2(_yg,_xg);break;
     default: value = -999999.; break;
@@ -147,10 +147,10 @@ double StiHit::getValue(int key) const
   
 double StiHit::getPseudoRapidity() const
 {
-  double r=sqrt(_xg*_xg+_yg*_yg);
-  double tanTheta = tan(atan2(r,_zg)/2.);
+  double r=::sqrt(_xg*_xg+_yg*_yg);
+  double tanTheta = ::tan(::atan2(r,_zg)/2.);
   if (tanTheta>0.)
-    return -log(tanTheta);
+    return -::log(tanTheta);
   else
     return 1.e10;
 }

@@ -22,7 +22,7 @@
 #define StiHelixFitter_HH
 
 //std
-#include <iostream.h>
+#include <Stiostream.h>
 #include <float.h>
 #include <vector>
 using std::vector;

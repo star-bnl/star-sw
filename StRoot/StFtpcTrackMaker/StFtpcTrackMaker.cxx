@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.47 2003/07/07 20:29:30 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.48 2003/09/02 17:58:16 perev Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.48  2003/09/02 17:58:16  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.47  2003/07/07 20:29:30  oldi
 // Pointer to geant taken out (no actual code change).
 //
@@ -213,7 +216,7 @@
 #include "StFormulary.hh"
 #include "StFtpcTrackingParams.hh"
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 
 #include "St_DataSet.h"
@@ -664,7 +667,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.47 2003/07/07 20:29:30 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.48 2003/09/02 17:58:16 perev Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {

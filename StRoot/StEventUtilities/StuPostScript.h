@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuPostScript.h,v 1.5 2002/10/11 17:34:15 ullrich Exp $
+ * $Id: StuPostScript.h,v 1.6 2003/09/02 17:58:09 perev Exp $
  *
  * Author: Thomas Ullrich, April 2002
  ***************************************************************************
@@ -65,6 +65,9 @@
  ***************************************************************************
  *
  * $Log: StuPostScript.h,v $
+ * Revision 1.6  2003/09/02 17:58:09  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2002/10/11 17:34:15  ullrich
  * Hits on tracks drawn as circles not diamonds
  *
@@ -82,8 +85,8 @@
  *
  **************************************************************************/
 #include "StEventTypes.h"
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include <vector>
 
 class StuPostScript {

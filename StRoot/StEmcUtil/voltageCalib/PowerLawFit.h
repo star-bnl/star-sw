@@ -66,8 +66,8 @@ void PowerLawFit<Number>::fit()
   double x,y;
   for (i=_data->begin();i!=_data->end();i++)
     {
-      x = log(i->first);
-      y = log(i->second);
+      x = ::log(i->first);
+      y = ::log(i->second);
       _logData[x]=y;
     }
   _points = &_logData;

@@ -1,4 +1,4 @@
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StDetectorDbRichScalers.h"
 #include "tables/St_trigDetSums_Table.h"
 #include "tables/St_richvoltages_Table.h"

@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.17  2003/09/02 17:58:03  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.16  2003/05/26 13:44:34  suaide
 // added setPrint() method
 //
@@ -59,7 +62,7 @@
 #include "emc_def.h"
 
 // copied from StEpcMaker
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "StChain.h"
 #include <TDataSetIter.h>
@@ -734,7 +737,7 @@ Int_t StPointCollection::TrackSort( const StTrackVec & TrackToFit) const
     double xo = 0.0; double yo = 0.0;
     spath = helices[jj].pathLength(xo, yo);
     double s=0.0;
-    double R1St = sqrt( helices[jj].x(s)*helices[jj].x(s) + helices[jj].y(s)*helices[jj].y(s) );
+    double R1St = ::sqrt( helices[jj].x(s)*helices[jj].x(s) + helices[jj].y(s)*helices[jj].y(s) );
     
     if( R1St > RIN ) {if(mPrint) cout<<"GlobSort: ERROR: Radius of First point > EmcInnerradius!! R1St= "<<R1St<<endl; return kStWarn;}
 
@@ -751,16 +754,16 @@ Int_t StPointCollection::TrackSort( const StTrackVec & TrackToFit) const
       // Find momentum at this point
       StThreeVectorD pmom;
       pmom = helices[jj].momentumAt(ifcpath, bfield*tesla);
-      Float_t Mom = sqrt(pmom.x()*pmom.x()+pmom.y()*pmom.y()+pmom.z()*pmom.z());
+      Float_t Mom = ::sqrt(pmom.x()*pmom.x()+pmom.y()*pmom.y()+pmom.z()*pmom.z());
 
       StThreeVectorD xpos;
       xpos = helices[jj].at(ifcpath);
       
       // Calculate eta and phi at the point of intersection
 	    Float_t Phi_hit=atan2(xpos.y(),xpos.x());
-	    double rr=sqrt(xpos.x()*xpos.x()+xpos.y()*xpos.y());
+	    double rr=::sqrt(xpos.x()*xpos.x()+xpos.y()*xpos.y());
 	    Float_t theta_hit=atan(rr/fabs(xpos.z()));
-	    Float_t eta_hit=-log(tan(theta_hit/2.));
+	    Float_t eta_hit=-::log(tan(theta_hit/2.));
 	    if(xpos.z()<0)eta_hit=0.-eta_hit;
 
 	    Int_t imod,HitPhiBin;
@@ -815,15 +818,15 @@ Int_t StPointCollection::TrackSort( const StTrackVec & TrackToFit) const
       // Find momentum at this point
 //      StThreeVectorD pmom;
       pmom = helices[jj].momentumAt(ifcpath, bfield*tesla);
-      Mom = sqrt(pmom.x()*pmom.x()+pmom.y()*pmom.y()+pmom.z()*pmom.z());
+      Mom = ::sqrt(pmom.x()*pmom.x()+pmom.y()*pmom.y()+pmom.z()*pmom.z());
 //-----------------------------------------------------------------
       StThreeVectorD xposO;
       xposO = helices[jj].at(ifcpath);
 // Calculate eta and phi at the point of intersection
 	   Phi_hit=atan2(xposO.y(),xposO.x());
-	   rr=sqrt(xposO.x()*xposO.x()+xposO.y()*xposO.y());
+	   rr=::sqrt(xposO.x()*xposO.x()+xposO.y()*xposO.y());
 	   theta_hit=atan(rr/fabs(xposO.z()));
-	   eta_hit=-log(tan(theta_hit/2.));
+	   eta_hit=-::log(tan(theta_hit/2.));
 	   if(xposO.z()<0)eta_hit=0.-eta_hit;
 	   if(TMath::Abs(eta_hit)<1.0){   
 	   Int_t & imd =imod;

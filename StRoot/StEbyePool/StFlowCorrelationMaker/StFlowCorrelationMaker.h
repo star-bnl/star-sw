@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCorrelationMaker.h,v 1.1 2001/01/31 19:47:28 snelling Exp $
+// $Id: StFlowCorrelationMaker.h,v 1.2 2003/09/02 17:57:58 perev Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings
 //
@@ -12,7 +12,7 @@
 
 #ifndef StFlowCorrelationMaker_H
 #define StFlowCorrelationMaker_H
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StMaker.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "TVector2.h"
@@ -40,7 +40,7 @@ public:
   Int_t    Make();
   Int_t    Finish();
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowCorrelationMaker.h,v 1.1 2001/01/31 19:47:28 snelling Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowCorrelationMaker.h,v 1.2 2003/09/02 17:57:58 perev Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -52,7 +52,7 @@ private:
   TVector2 mQ[Flow::nSels][Flow::nHars];                     //! flow vector
   Float_t  mPsi[Flow::nSels][Flow::nHars];                   //! event plane angle
   UInt_t   mMult[Flow::nSels][Flow::nHars];                  //! multiplicity
-  Float_t  m_q[Flow::nSels][Flow::nHars];                    //! Q/sqrt(Mult)
+  Float_t  m_q[Flow::nSels][Flow::nHars];                    //! Q/::sqrt(Mult)
   TVector2 mQSub[Flow::nSels*Flow::nSubs][Flow::nHars];      //! flow vector subs
   Float_t  mPsiSub[Flow::nSels*Flow::nSubs][Flow::nHars];    //! plane angle subs
   UInt_t   mMultSub[Flow::nSels*Flow::nSubs][Flow::nHars];   //! multiplicity subs
@@ -129,6 +129,9 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCorrelationMaker.h,v $
+// Revision 1.2  2003/09/02 17:57:58  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.1  2001/01/31 19:47:28  snelling
 // A simple correlation program so far only used for simulations (no mixing)
 //

@@ -65,7 +65,7 @@ int Bank_TRGD::HerbSwap2003(char *ptr) {
   // Herb, Mar 28 2003.  There is a bug, from which the npre/npost numbers in the 
   // trigger data (5/5) sometimes do not agree with the bank len in the TRGD header, which causes a seg vio
   // in the for() loop below.  Here I check for the bug, and if it's present, I override npre and npost.
-  if( 4*header.BankLength < (int)(1+gs2003->EvtDesc.npre+gs2003->EvtDesc.npost) * sizeof(RawTrgDet2003) ) {
+  if( 4*header.BankLength < int((1+gs2003->EvtDesc.npre+gs2003->EvtDesc.npost) * sizeof(RawTrgDet2003)) ) {
     gs2003->EvtDesc.npre=0; gs2003->EvtDesc.npost=0;
   }
 

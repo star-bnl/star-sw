@@ -92,11 +92,11 @@ int FtfSl3::canItBeMerged ( FtfTrack* tTrack ) {
 
       b2minus4ac = b * b - 4. * a * c ;
       if ( b2minus4ac > 0 ) {
-	 double rootB2Minus4ac = sqrt(b2minus4ac);
+	 double rootB2Minus4ac = ::sqrt(b2minus4ac);
 
 	 x1 = 0.5 * (-b + rootB2Minus4ac) / a ;
 	 y1 = x1 * tanPhi ;
-	 r1 = sqrt(x1*x1+y1*y1);
+	 r1 = ::sqrt(x1*x1+y1*y1);
 
 //	 ftfLog ( " x1 y1 %e %e cos sin %e %e\n", x1, y1, cosPhi, sinPhi ) ; 
   	 double ratiox = 0 ;
@@ -112,7 +112,7 @@ int FtfSl3::canItBeMerged ( FtfTrack* tTrack ) {
 
 	 x2 = 0.5 * (-b - rootB2Minus4ac) / a ;
 	 y2 = x2 * tanPhi ;
-	 r2 = sqrt(x2*x2+y2*y2);
+	 r2 = ::sqrt(x2*x2+y2*y2);
          ratiox = 0 ;
          if ( cosPhi != 0 ) ratiox = x2/cosPhi ;
   	 ratioy = 0 ;
@@ -136,7 +136,7 @@ int FtfSl3::canItBeMerged ( FtfTrack* tTrack ) {
    double angle       = dangle + trackPhi0  ; 
    double xMembrane   = xc + rc * cos(angle) ;
    double yMembrane   = yc + rc * sin(angle) ;
-   double rMembrane   = sqrt(xMembrane*xMembrane+yMembrane*yMembrane);
+   double rMembrane   = ::sqrt(xMembrane*xMembrane+yMembrane*yMembrane);
    if ( rMembrane > rTpcMin   &&  rMembrane < rTpcMax ) {
 //    ftfLog ( "Membrane crossed at r %f !!!!\n", rMembrane ) ;
       return 1 ;

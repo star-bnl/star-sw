@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.15 2003/02/20 20:08:36 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.16 2003/09/02 17:55:26 perev Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.16  2003/09/02 17:55:26  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 2.15  2003/02/20 20:08:36  genevb
 // Add new prefixes, other small modifications
 //
@@ -54,12 +57,11 @@
 ///////////////////////////////////////////////////////////////////////////////
                                                                           
 
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strstream.h>
+#include <Stsstream.h>
 
 #include "PhysicalConstants.h"
 #include "TStyle.h"
@@ -226,10 +228,9 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
   // now put in page # at bottom left of canvas - first page
   Int_t Ipagenum=1;
+  char Ctmp[100];
   //convert to character
-  Char_t Ctmp[10];
-  ostrstream Cpagenum(Ctmp,10);
-  Cpagenum << Ipagenum << ends;
+  sprintf(Ctmp,"%d",Ipagenum);
   TPaveLabel *Lpage = new TPaveLabel(0.1,0.01,0.16,0.03,Ctmp,"br");
   Lpage->SetTextSize(0.6);
   Lpage->Draw();
@@ -298,8 +299,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
             // update the page number
             Ipagenum++;
-            Cpagenum.seekp(0);
-            Cpagenum << Ipagenum << ends;
+            sprintf(Ctmp,"%d",Ipagenum);
             Lpage->SetLabel(Ctmp);
 
             // must redraw the histcanvas for each new page!

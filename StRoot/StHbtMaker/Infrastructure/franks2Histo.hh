@@ -4,7 +4,7 @@
 #define FRANKS2HISTO__HH
 
 #ifndef __CINT__
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #ifdef GNU_GCC
 #   include <stddef.h>

@@ -7,7 +7,7 @@
 #define MESSAGE_TYPE_H
 
 #include <string>
-#include <iostream>
+#include "Stiostream.h"
 
 using std::string;
 using std::ostream;

@@ -1,3 +1,4 @@
+#include "Stiostream.h"
 #include "StiEvaluator/EfficiencyPlots.h"
 #include "StMiniMcEvent/StMiniMcEvent.h"
 #include "StMiniMcEvent/StMiniMcPair.h"

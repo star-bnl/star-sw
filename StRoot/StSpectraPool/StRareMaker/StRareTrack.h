@@ -61,8 +61,8 @@ inline int   StRareTrack::iflag() const {return fiflag;}
 inline float StRareTrack::px() const {return fpx;}
 inline float StRareTrack::py() const {return fpy;}
 inline float StRareTrack::pz() const {return fpz;}
-inline float StRareTrack::p() const {return sqrt(fpx*fpx+fpy*fpy+fpz*fpz);}
-inline float StRareTrack::pt() const {return sqrt(fpx*fpx+fpy*fpy);}
+inline float StRareTrack::p() const {return ::sqrt(fpx*fpx+fpy*fpy+fpz*fpz);}
+inline float StRareTrack::pt() const {return ::sqrt(fpx*fpx+fpy*fpy);}
 inline short StRareTrack::chargesign() const {return fchargesign;}
 inline float StRareTrack::dca() const {return fdca;} 
 inline float StRareTrack::dedx() const {return fdedx;}

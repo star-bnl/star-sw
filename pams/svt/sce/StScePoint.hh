@@ -1,6 +1,6 @@
 #ifndef STSCEPOINT_HH
 #define STSCEPOINT_HH
-#include <iostream.h>
+#include "Stiostream.h"
 #include <stdlib.h>
 #include <math.h>
 

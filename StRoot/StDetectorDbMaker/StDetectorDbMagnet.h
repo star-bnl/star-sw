@@ -1,15 +1,8 @@
 #ifndef StDetectorDbMagnet_h
 #define StDetectorDbMagnet_h
+#include <Stiostream.h>
 
 #include "StMaker.h"
-
-#ifdef sun
-#include <iostream.h>
-#endif
-
-#ifndef sun
-class ostream;
-#endif
 class  TTable;
 struct starMagOnl_st;
 

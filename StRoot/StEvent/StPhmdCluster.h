@@ -4,7 +4,7 @@
  */
 /********************************************************************
  *
- * $Id: StPhmdCluster.h,v 2.2 2003/04/22 00:08:13 ullrich Exp $
+ * $Id: StPhmdCluster.h,v 2.3 2003/09/02 17:58:05 perev Exp $
  *
  * Author: Subhasis Chattopadhyay, Dec 2002
  ********************************************************************
@@ -14,6 +14,9 @@
  ********************************************************************
  *
  * $Log: StPhmdCluster.h,v $
+ * Revision 2.3  2003/09/02 17:58:05  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.2  2003/04/22 00:08:13  ullrich
  * Removed //! comments
  *
@@ -25,7 +28,7 @@
 #define STAR_StPhmdCluster
 
 #include <math.h>
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StObject.h"
 #include "StPhmdHit.h"
 #include "StContainers.h"

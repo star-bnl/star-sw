@@ -1,5 +1,8 @@
-// $Id: StTpcCalibSector.h,v 1.9 2003/04/30 20:38:51 perev Exp $
+// $Id: StTpcCalibSector.h,v 1.10 2003/09/02 17:59:11 perev Exp $
 // $Log: StTpcCalibSector.h,v $
+// Revision 1.10  2003/09/02 17:59:11  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.9  2003/04/30 20:38:51  perev
 // Warnings cleanup. Modified lines marked VP
 //
@@ -25,12 +28,6 @@ class TH1F;
 class TH2F;
 class TH2S;
 
-#ifndef __STD_ISTREAM__   	// defence against Solaris typedef (VP)
-class ifstream;
-#endif
-#ifndef __STD_OSTREAM__  	// defence against Solaris typedef (VP)
-class ofstream;
-#endif
 
 class StTpcCalibSector {
 private :

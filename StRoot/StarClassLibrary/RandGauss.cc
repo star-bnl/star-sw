@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandGauss.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
+ * $Id: RandGauss.cc,v 1.3 2003/09/02 17:59:34 perev Exp $
  *
  * Author: Gabriele Cosmo - Created: 5th September 1995
  *         modified for SCL bl
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: RandGauss.cc,v $
+ * Revision 1.3  2003/09/02 17:59:34  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  1999/12/07 23:43:04  ullrich
  * Modified to get rid of warnings on Linux.
  *
@@ -57,7 +60,7 @@ HepDouble RandGauss::shoot()
     r = v1*v1 + v2*v2;
   } while ( r > 1.0 );
 
-  fac = sqrt(-2.0*log(r)/r);
+  fac = ::sqrt(-2.0*::log(r)/r);
   val = v1*fac;
   setVal(val);
   setFlag(true);
@@ -105,7 +108,7 @@ HepDouble RandGauss::shoot( HepRandomEngine* anEngine )
     r = v1*v1 + v2*v2;
   } while ( r > 1.0 );
 
-  fac = sqrt( -2.0*log(r)/r);
+  fac = ::sqrt( -2.0*::log(r)/r);
   val = v1*fac;
   setVal(val);
   setFlag(true);
@@ -157,7 +160,7 @@ HepDouble RandGauss::fire()
     r = v1*v1 + v2*v2;
   } while ( r > 1.0 );
 
-  fac = sqrt(-2.0*log(r)/r);
+  fac = ::sqrt(-2.0*::log(r)/r);
   val = v1*fac;
   nextGauss = val;
   set = true;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helensV0Cut.cxx,v 1.10 2001/09/28 20:41:19 lisa Exp $
+ * $Id: helensV0Cut.cxx,v 1.11 2003/09/02 17:58:21 perev Exp $
  *
  * Authors: Helen Caines, Tom Humanic, Ohio State, humanic@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: helensV0Cut.cxx,v $
+ * Revision 1.11  2003/09/02 17:58:21  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.10  2001/09/28 20:41:19  lisa
  * fixes to V0 object and cut
  *
@@ -184,8 +187,8 @@ bool helensV0Cut::Pass(const StHbtV0* V0){
   }
 
   if (goodPID){
-    float TEnergy = sqrt((V0->ptotV0())*(V0->ptotV0())+mMass*mMass);
-    float TRapidity = 0.5*log((TEnergy+V0->momV0().z())/
+    float TEnergy = ::sqrt((V0->ptotV0())*(V0->ptotV0())+mMass*mMass);
+    float TRapidity = 0.5*::log((TEnergy+V0->momV0().z())/
 			    (TEnergy-V0->momV0().z()));
 
     float Pt = V0->ptV0();

@@ -51,7 +51,7 @@ void StPmtSignal::init() // See impsig_init
 //...Secondary electron conversion coefficients
   sne = 1.;
   for(j=0; j<mNumDynodes; j++) {sne = sne * mNodeVoltage[j];}
-  sne = pow((mPmtGain/sne),1./float(mNumDynodes));
+  sne = ::pow(double(mPmtGain/sne),1./(mNumDynodes));
   for(j=0; j<mNumDynodes; j++) {sec[j] = sne*mNodeVoltage[j];}
 
 //...Inversed partial gains after each dynode and "g1=G-1" constants (see SN301)
@@ -92,7 +92,7 @@ Int_t StPmtSignal::getAdc(Int_t nphe, Int_t iver) // See impsig
     sne = gain*float(nel)*dyngain[j];
     r   = mRandom.Gaus(gausMean,gausRms);
     sne = sne + gain*dnoise*gdyn[j] +
-    r*sqrt(gain*(sne*gdyn[j]+gain*dnw[j])+gnoise*gnoise);
+    r*::sqrt(gain*(sne*gdyn[j]+gain*dnw[j])+gnoise*gnoise);
   }
 // -----  F U L L   V E R S I O N ----------------------
   else{

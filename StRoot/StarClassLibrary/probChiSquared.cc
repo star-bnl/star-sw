@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: probChiSquared.cc,v 1.2 2000/09/25 19:30:19 ullrich Exp $
+ * $Id: probChiSquared.cc,v 1.3 2003/09/02 17:59:35 perev Exp $
  *
  * Author: Thomas Ullrich, Apr 2000
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: probChiSquared.cc,v $
+ * Revision 1.3  2003/09/02 17:59:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2000/09/25 19:30:19  ullrich
  * Fixed code to avoid signed/unsigned comparison warning.
  *
@@ -48,13 +51,13 @@ double probChiSquared(double x, unsigned int n)
     if (x == 0 || n/20 > x) 
 	h=1;
     else if (n == 1) {
-	w = sqrt(u);
+	w = ::sqrt(u);
         h = w < xlim ? erfc(w) : 0;
     }
     else if (n > nmax) {
 	s = r1/n;
 	t = f1*s;
-	w = (pow(x*s,th)-(1-t))/sqrt(2*t);
+	w = (::pow(x*s,th)-(1-t))/::sqrt(2*t);
 	if (w < -xlim) 
 	    h=1;
         else if (w < xlim) 
@@ -84,7 +87,7 @@ double probChiSquared(double x, unsigned int n)
 		    t=t*x/fi;
 		    s=s+t;
 		}
-		w=sqrt(u);
+		w=::sqrt(u);
 		h = w < xlim ? c1*w*s*e+erfc(w) : 0;
 	    }
         }

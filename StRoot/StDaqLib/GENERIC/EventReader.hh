@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.17 2002/12/09 18:54:23 ward Exp $
+ * $Id: EventReader.hh,v 1.18 2003/09/02 17:55:32 perev Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -21,6 +21,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.18  2003/09/02 17:55:32  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.17  2002/12/09 18:54:23  ward
  * EMC stuff from Subhassis.
  *
@@ -99,7 +102,7 @@
 #ifndef EVENTREADER_HH
 #define EVENTREADER_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include <sys/types.h>
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.25 2003/07/02 18:39:23 porter Exp $
+ * $Id: MysqlDb.cc,v 1.26 2003/09/02 17:57:49 perev Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.26  2003/09/02 17:57:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.25  2003/07/02 18:39:23  porter
  * added server version to connection notification and host:port to connection failure notification
  *
@@ -139,7 +142,7 @@
  **************************************************************************/
 #include "MysqlDb.h"
 #include "StDbManager.hh" // for now & only for getting the message service
-#include <strstream.h>
+#include <Stsstream.h>
 
 //#include "errmsg.h"
 

@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.28 2003/07/09 21:51:57 pfachini Exp $
+// $Id: StLaserEventMaker.cxx,v 1.29 2003/09/02 17:58:40 perev Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.29  2003/09/02 17:58:40  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.28  2003/07/09 21:51:57  pfachini
 // The minimum number of valid tracks (minValidTracks) for a good drift velocity
 // calculation is 500 if both east and west lasers are up and 250 if one of them
@@ -77,7 +80,7 @@
  * laser information.
  *
  */
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StLaserEventMaker.h"
 #include "StBFChain.h"
 #include "St_DataSetIter.h"
@@ -346,10 +349,10 @@ void StLaserEventMaker::MakeHistograms()
 	      Float_t psic = (te->psi + te->q*90)*C_RAD_PER_DEG;
 	      Float_t xc = x1-radius*cos(psic);
 	      Float_t yc = y1-radius*sin(psic);
-	      Float_t resy = (sqrt((h->x-xc)*(h->x-xc)+(h->y-yc)*(h->y-yc))
+	      Float_t resy = (::sqrt((h->x-xc)*(h->x-xc)+(h->y-yc)*(h->y-yc))
 			      -radius)/cos(h->alpha*C_RAD_PER_DEG);
 	      Float_t resz = h->z-z1-te->tanl*
-		sqrt((h->x-x1)*(h->x-x1) + (h->y-y1)*(h->y-y1));
+		::sqrt((h->x-x1)*(h->x-x1) + (h->y-y1)*(h->y-y1));
 	      Float_t phi = te->psi;
 
 	      event->AddHit(h->q,h->x,h->y,h->z,h->row,h->track, h->flag,
@@ -486,7 +489,7 @@ void StLaserEventMaker::DOCA(Float_t r0,Float_t phi0,Float_t z0,
 	  Float_t xp = xpt[iz][i]; Float_t yp= ypt[iz][i];
 	  Double_t d = xc - xp; Double_t a = yc - yp;
 	  Double_t c = d/a;
-	  Double_t dy = 1./sqrt(1. + c*c)/curvature;
+	  Double_t dy = 1./::sqrt(1. + c*c)/curvature;
 	  Double_t dx = c*dy;
 	  if(a<0) { x = xc + dx;  y = yc + dy;}
 	  else    { x = xc - dx;  y = yc - dy;}
@@ -496,7 +499,7 @@ void StLaserEventMaker::DOCA(Float_t r0,Float_t phi0,Float_t z0,
 	    if(iz>5) *sector-=12;
     	    Float_t sign =1.0; // account for direction to origin
             if((*xl*px+*yl*py)<0) sign=-1.0;
-            disxy = sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
+            disxy = ::sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
             *zl = z0 + sign*tanl*disxy;}
 	}
       }
@@ -513,7 +516,7 @@ void StLaserEventMaker::DOCA(Float_t r0,Float_t phi0,Float_t z0,
 	  y = (ay + ax*ax*yp - ax*ay*xp)/d;
    	  Float_t sign =1.0; // account for direction to origin
           if((x*px+y*py)<0) sign=-1.0;
-          disxy = sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
+          disxy = ::sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
           z = z0 + sign*tanl*disxy;
           if(TMath::Abs(z-zpt[iz])<15.0){
 	    Float_t disq = (x-xp)*(x-xp) + (y-yp)*(y-yp);
@@ -550,14 +553,14 @@ void StLaserEventMaker::DOCA(Float_t r0,Float_t phi0,Float_t z0,
 	Float_t yc = y0 - q*px/curvature;
         Float_t d = xc - xp; Float_t a = yc - yp;
         Float_t c = d/a;
-        Float_t dy = 1./sqrt(1. + c*c)/curvature;
+        Float_t dy = 1./::sqrt(1. + c*c)/curvature;
         Float_t dx = c*dy;
         if(a<0) { x = xc + dx;  y = yc + dy;}
 	else    { x = xc - dx;  y = yc - dy;}
 	Float_t disq = (x-xp)*(x-xp) + (y-yp)*(y-yp);
 	if (disq<test) {
             *xl=x; *yl=y;
-            disxy = sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
+            disxy = ::sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
             *zl = z0 - tanl*disxy;
 	    // calculate phi angle at the POCA to the vertex.
 	    *phil = 57.29578*atan(a/d) +90.0;
@@ -574,7 +577,7 @@ void StLaserEventMaker::DOCA(Float_t r0,Float_t phi0,Float_t z0,
       x = (ax + ay*ay*xp - ax*ay*yp)/d;
       y = (ay + ax*ax*yp - ax*ay*xp)/d;
       //extrapolate back to x,y
-      disxy = sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
+      disxy = ::sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
       z = z0 + -tanl*disxy;
       Float_t disq = (x-xp)*(x-xp) + (y-yp)*(y-yp);
 	 if (disq<test) {
@@ -665,7 +668,7 @@ void StLaserEventMaker::UndoExB(Float_t *x, Float_t *y, Float_t *z){
   xp = *x;
   yp = *y;
   zp = *z;
-  r    = sqrt( xp*xp + yp*yp ) ;
+  r    = ::sqrt( xp*xp + yp*yp ) ;
   xv[1] = ( r - ROFF ) / RSCALE ;
   phi  = atan2( yp, xp ) ;
   if ( phi < 0 ) phi = phi + 2*PI ;
@@ -812,7 +815,7 @@ Int_t StLaserEventMaker::Finish() {
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.28 2003/07/09 21:51:57 pfachini Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.29 2003/09/02 17:58:40 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

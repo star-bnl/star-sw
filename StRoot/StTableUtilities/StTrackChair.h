@@ -21,6 +21,7 @@ class StTrackChair : public TChair {
   StTrackChair(TTable *track);
  ~StTrackChair(){;}
   StHelixD *MakeHelix(Int_t i, float bField) const ;
+  TDataSet* Instance() const {return TDataSet::Instance();}//WarnOff
   static StTrackChair *Instance(TTable *table);
   static Int_t IsTrack(TTable *table);
   Float_t R0(Int_t i)        const;

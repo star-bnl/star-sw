@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPadMonitor.cxx,v 2.10 2003/04/30 20:38:04 perev Exp $
+ * $Id: StRichPadMonitor.cxx,v 2.11 2003/09/02 17:58:52 perev Exp $
  * Description:
  *  A Pad Monitor for the STAR-RICH.
  *  Runs only in ROOT
@@ -7,6 +7,9 @@
  *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
+ * Revision 2.11  2003/09/02 17:58:52  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.10  2003/04/30 20:38:04  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -505,7 +508,7 @@ void StRichPadMonitor::doResiduals(double zVertex,long numPrim[],int runId,int e
 	    curMipX = currentMIP->GetX();
 	    curMipY = currentMIP->GetY();
 	    
-	    currentResid = sqrt( (curHitX-curMipX)*(curHitX-curMipX)+
+	    currentResid = ::sqrt( (curHitX-curMipX)*(curHitX-curMipX)+
 				 (curHitY-curMipY)*(curHitY-curMipY));
 		
 	    if(currentResid < closestResid){
@@ -598,7 +601,7 @@ void StRichPadMonitor::update()
 
 Color_t StRichPadMonitor::GetColorAttribute(double amp)
 {
-    //return Color_t(50+(log(static_cast<int>((amp/200.)*50))) );
+    //return Color_t(50+(::log(static_cast<int>((amp/200.)*50))) );
 
     double tmpAmp;
     //
@@ -620,7 +623,7 @@ Color_t StRichPadMonitor::GetColorAttribute(double amp)
 //     else
 // 	tmpAmp = amp;
 //     //tmpAmp = max(1,amp);  // sigh. if only STL was used
-//     Color_t ret = (50+(static_cast<int>(log(tmpAmp)*7.21)) );
+//     Color_t ret = (50+(static_cast<int>(::log(tmpAmp)*7.21)) );
 //     if(ret <= 50)
 // 	ret +=1;
 //     return ret;
@@ -680,7 +683,7 @@ void StRichPadMonitor::drawRingInfo() {
 
 	char title[50];
 
-	//theta = acos(-pz/sqrt(px**2+py**2+pz**2));ls
+	//theta = acos(-pz/::sqrt(px**2+py**2+pz**2));ls
 
 	sprintf(title,"%.3f  %.3f", tt->getMomentum().mag(), tt->getTheta()*180./M_PI);
 	particledata->AddText(title);

@@ -1,4 +1,4 @@
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 
 //#include "StThreeVector.hh"
@@ -33,7 +33,7 @@ void StSvtAngles::svtTheta(double Vx, double Vy, double Vz, double ux,double uy,
 {
  double thetaZ = 0;
 
- thetaZ = (Vx*ux + Vy*uy + Vz*uz)/sqrt(Vx*Vx + Vy*Vy + Vz*Vz);
+ thetaZ = (Vx*ux + Vy*uy + Vz*uz)/::sqrt(Vx*Vx + Vy*Vy + Vz*Vz);
  mTheta = acos(thetaZ);
 }
 
@@ -42,16 +42,16 @@ void StSvtAngles::svtPhi(const StThreeVector <double>& V, const StThreeVector <d
  
  double csPhi = 0, Vx = 0,  Vy = 0;
 
- //thetaX = (V.x()*ux.x() + V.y()*ux.y() + V.z()*ux.z())/sqrt(V.x()*V.x() + V.y()*V.y() + V.z()*V.z());
- //thetaY = (V.x()*uy.x() + V.y()*uy.y() + V.z()*uy.z())/sqrt(V.x()*V.x() + V.y()*V.y() + V.z()*V.z());
+ //thetaX = (V.x()*ux.x() + V.y()*ux.y() + V.z()*ux.z())/::sqrt(V.x()*V.x() + V.y()*V.y() + V.z()*V.z());
+ //thetaY = (V.x()*uy.x() + V.y()*uy.y() + V.z()*uy.z())/::sqrt(V.x()*V.x() + V.y()*V.y() + V.z()*V.z());
  
- // Vx = sqrt(V.x()*V.x() + V.y()*V.y() + V.z()*V.z())*thetaX;
+ // Vx = ::sqrt(V.x()*V.x() + V.y()*V.y() + V.z()*V.z())*thetaX;
  //Vy = qrt(V.x()*V.x() + V.y()*V.y() + V.z()*V.z())*thetaY;
  
  Vx = V.x()*ux.x() + V.y()*ux.y() + V.z()*ux.z(); 
  Vy = V.x()*uy.x() + V.y()*uy.y() + V.z()*uy.z();
 
- csPhi = Vx/sqrt(Vx*Vx + Vy*Vy);
+ csPhi = Vx/::sqrt(Vx*Vx + Vy*Vy);
  mPhi = acos(csPhi);
 
 }

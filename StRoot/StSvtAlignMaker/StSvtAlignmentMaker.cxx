@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAlignmentMaker.cxx,v 1.3 2002/02/23 19:13:25 perev Exp $
+ * $Id: StSvtAlignmentMaker.cxx,v 1.4 2003/09/02 17:59:05 perev Exp $
  *
  * Author: Helen Caines
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAlignmentMaker.cxx,v $
+ * Revision 1.4  2003/09/02 17:59:05  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2002/02/23 19:13:25  perev
  * SetFormat removed
  *
@@ -21,7 +24,7 @@
 
 
 #include <stdio.h>
-#include <fstream.h>
+#include "Stiostream.h"
 #include "StMessMgr.h"
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"

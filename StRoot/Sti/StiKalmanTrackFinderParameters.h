@@ -35,9 +35,9 @@ public:
   //double getInnerScaling() const;
 
   void   initialize();
-  friend StiKalmanTrackFinder;
-  friend StiKalmanTrack;
-  friend StiKalmanTrackNode;
+  friend class StiKalmanTrackFinder;
+  friend class StiKalmanTrack;
+  friend class StiKalmanTrackNode;
   
  protected:
   bool   useMcAsRec;

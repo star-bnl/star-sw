@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsChargeTransporter.cc,v 1.6 2001/12/14 20:54:36 hardtke Exp $
+ * $Id: StTrsChargeTransporter.cc,v 1.7 2003/09/02 17:59:19 perev Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsChargeTransporter.cc,v $
+ * Revision 1.7  2003/09/02 17:59:19  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.6  2001/12/14 20:54:36  hardtke
  * Fix bug such that transverse diffusion coefficient is set correctly
  *
@@ -88,7 +91,7 @@ StTrsChargeTransporter::~StTrsChargeTransporter() {/* nopt */}
 //
 void StTrsChargeTransporter::Lg()
 {
-    mLg =  mZGate - mGatePitch/(2*pi)*log(2*pi*mGateWireRadius/mGatePitch)-sqr(mZGate)/mDriftDistance; 
+    mLg =  mZGate - mGatePitch/(2*pi)*::log(2*pi*mGateWireRadius/mGatePitch)-sqr(mZGate)/mDriftDistance; 
 }
 
 double StTrsChargeTransporter::transitionVoltage()
@@ -123,7 +126,7 @@ double StTrsChargeTransporter::sigmaGPlus()
     sigmaG();
     double term1, term2, value;
 
-    term1 = ( 1./pi*(mSGC*sqrt(1-sqr(mSG/mSGC))) );
+    term1 = ( 1./pi*(mSGC*::sqrt(1-sqr(mSG/mSGC))) );
     term2 = ( 1./pi*mSG*acos(-mSG/mSGC) ) ;
     value = term1 + term2;
     //cout << "  term1: " << term1 << " term2 " << term2 << endl;

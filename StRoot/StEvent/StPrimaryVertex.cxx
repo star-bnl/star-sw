@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.cxx,v 2.8 2002/04/18 23:38:21 jeromel Exp $
+ * $Id: StPrimaryVertex.cxx,v 2.9 2003/09/02 17:58:05 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.cxx,v $
+ * Revision 2.9  2003/09/02 17:58:05  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.8  2002/04/18 23:38:21  jeromel
  * Implementation of the SVT 2 tables scheme ...
  *
@@ -36,7 +39,7 @@
  * Initial Revision
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StPrimaryVertex.h"
 #include "StPrimaryTrack.h"
 #include "StTrack.h"
@@ -45,7 +48,7 @@
 
 ClassImp(StPrimaryVertex)
 
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.8 2002/04/18 23:38:21 jeromel Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.9 2003/09/02 17:58:05 perev Exp $";
 
 StPrimaryVertex::StPrimaryVertex()
 { mType = kEventVtxId; }

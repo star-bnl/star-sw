@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.28 2002/01/30 15:40:47 porter Exp $
+ * $Id: StDbManager.cc,v 1.29 2003/09/02 17:57:49 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.29  2003/09/02 17:57:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.28  2002/01/30 15:40:47  porter
  * changed limits on flavor tag & made defaults retrieving more readable
  *
@@ -132,7 +135,7 @@
 #include "StDbManager.hh"
 #include "StDbManagerImpl.hh" // for new method only
 #include "StDbMessenger.hh"
-#include <strstream.h>
+#include <Stsstream.h>
 #include <string.h>
 #ifdef __ROOT__
 ClassImp(StDbManager)

@@ -8,7 +8,7 @@
 #include <list>
 using std::list;
 
-#include <iostream>
+#include "Stiostream.h"
 
 #include "StProtoJet.h"
 

@@ -187,7 +187,7 @@ Int_t StSvtdEdxMaker::Make()
 		  svtCluster[spacePoints[0]].x[1]); 
        u_ab_z = (svtCluster[spacePoints[1]].x[2] - 
 		 svtCluster[spacePoints[0]].x[2]); 
-	norm = sqrt((u_ab_x*u_ab_x)+(u_ab_y*u_ab_y)+(u_ab_z*u_ab_z));
+	norm = ::sqrt((u_ab_x*u_ab_x)+(u_ab_y*u_ab_y)+(u_ab_z*u_ab_z));
 	
 	u_ab_x /= norm;
 	u_ab_y /= norm;
@@ -229,7 +229,7 @@ Int_t StSvtdEdxMaker::Make()
 		    svtCluster[spacePoints[jj]].x[1]); 
 	  u_ab_z = (svtCluster[spacePoints[jj+1]].x[2] - 
 		    svtCluster[spacePoints[jj]].x[2]); 
-	  norm = sqrt((u_ab_x*u_ab_x)+(u_ab_y*u_ab_y)+(u_ab_z*u_ab_z));
+	  norm = ::sqrt((u_ab_x*u_ab_x)+(u_ab_y*u_ab_y)+(u_ab_z*u_ab_z));
 	  
 	  u_ab_x /= norm;
 	  u_ab_y /= norm;
@@ -244,8 +244,8 @@ Int_t StSvtdEdxMaker::Make()
 	float dEdx=0;
 	float dEdxError=0;
 	for (jj=0; jj<numberOfPointsOnTrack; jj++) {
-	  dEdx      += log(spacePointsCharge[jj]);
-	  dEdxError += log(spacePointsCharge[jj]);
+	  dEdx      += ::log(spacePointsCharge[jj]);
+	  dEdxError += ::log(spacePointsCharge[jj]);
 	}
 	
 	//
@@ -255,7 +255,7 @@ Int_t StSvtdEdxMaker::Make()
 	dEdxError /= numberOfPointsOnTrack;      
 	
 	dEdx = exp(dEdx);
-	dEdxError = sqrt(exp(dEdxError));
+	dEdxError = ::sqrt(exp(dEdxError));
 
 	// Assign to tables
 	//
@@ -279,7 +279,7 @@ Int_t StSvtdEdxMaker::Make()
 	double p= (svtTrack[ii].tanl/svtTrack[ii].invpt)*
 	  (svtTrack[ii].tanl/svtTrack[ii].invpt);
 	p += 1/(svtTrack[ii].invpt*svtTrack[ii].invpt);
-	p = sqrt(p);
+	p = ::sqrt(p);
 	FillHistograms(svtTrack[ii].dedx[0],p);
 	
       }

@@ -8,7 +8,7 @@
 **:
 **:<------------------------------------------------------------------*/
 #include <math.h>
-#include <iostream.h>
+#include "Stiostream.h"
 #include <malloc.h>
 #include "PAM.h"
 #include "cts.h"

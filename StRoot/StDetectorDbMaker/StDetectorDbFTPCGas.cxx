@@ -1,4 +1,4 @@
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StDetectorDbFTPCGas.h"
 #include "tables/St_ftpcGasOut_Table.h"
 #include "tables/St_ftpcGasSystem_Table.h"

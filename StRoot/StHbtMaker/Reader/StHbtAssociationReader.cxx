@@ -371,7 +371,7 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     
     //cout << "StHbtTrack instantiated " << endl;
     
-    hbtTrack->SetTrackId((int)(rTrack->key()+motherTrackId*pow(2,16)));
+    hbtTrack->SetTrackId((int)(rTrack->key()+motherTrackId*::pow(2,16)));
 
     hbtTrack->SetNHits(nhits);
     
@@ -441,7 +441,7 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     StPhysicalHelixD  helix = rTrack->geometry()->helix();
     hbtTrack->SetHelix( helix );
     
-    float pt = sqrt(p[0]*p[0]+p[1]*p[1]);
+    float pt = ::sqrt(p[0]*p[0]+p[1]*p[1]);
     //cout << "pt\t\t\t" << pt << endl;
     //hbtTrack->SetPt(pt);
     

@@ -3,6 +3,9 @@
 // MCBS
 //
 // $Log: EfficiencyAnalysis.h,v $
+// Revision 1.3  2003/09/02 17:59:47  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.2  2003/06/19 01:37:03  calderon
 // Adding all the histograms from Zbigniew.
 //
@@ -14,6 +17,7 @@
 #define EfficiencyAnalysis_HH
 #include "TObject.h"
 #include <string>
+using namespace std;
 class TH2D;
 class TH1D;
 class TProfile;

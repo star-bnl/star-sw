@@ -107,8 +107,8 @@ bool franksXiCut::Pass(const StHbtXi* Xi){
   }
 
   if (goodPID){
-    float TEnergy = sqrt((Xi->ptotXi())*(Xi->ptotXi())+mMass*mMass);
-    float TRapidity = 0.5*log((TEnergy+Xi->momXi().z())/
+    float TEnergy = ::sqrt((Xi->ptotXi())*(Xi->ptotXi())+mMass*mMass);
+    float TRapidity = 0.5*::log((TEnergy+Xi->momXi().z())/
 			    (TEnergy-Xi->momXi().z()));
 
     float Pt = Xi->ptXi();

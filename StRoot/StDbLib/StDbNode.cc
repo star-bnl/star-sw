@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNode.cc,v 1.6 2001/02/09 23:06:25 porter Exp $
+ * $Id: StDbNode.cc,v 1.7 2003/09/02 17:57:49 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbNode.cc,v $
+ * Revision 1.7  2003/09/02 17:57:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.6  2001/02/09 23:06:25  porter
  * replaced ostrstream into a buffer with ostrstream creating the
  * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
@@ -58,8 +61,8 @@
 
 #include "StDbNode.hh"
 #include "StDbDefaults.hh"
-#include <iostream.h>
-#include <strstream.h>
+#include <Stiostream.h>
+#include <Stsstream.h>
 #include <stdlib.h>
 
 #ifdef __ROOT__
@@ -180,7 +183,7 @@ while(id){
    if(id)id++;
 }
  sl << ends;
- char* islist = sl.str();
+ const char* islist = sl.str();
 
  // cout << "My string list = " << islist << endl;
 
@@ -213,7 +216,7 @@ while(id){
  for(k=0;k<numElements;k++)retVal[k]=tmpElements[k];
  numRows = numElements;
  
- delete [] islist;
+//VP delete [] islist;
  delete [] tmpElements;
  delete [] tmpName; 
 

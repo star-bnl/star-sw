@@ -1,6 +1,6 @@
 #ifndef STSPALISTNOISE_HH
 #define STSPALISTNOISE_HH
-# include <iostream.h>
+# include "Stiostream.h"
 # include <stdlib.h>
 # include <math.h>
 # include "StSpaListStrip.hh"

@@ -1,5 +1,8 @@
-// $Id: MakeHists.cxx,v 1.12 2000/01/19 21:00:40 kathy Exp $
+// $Id: MakeHists.cxx,v 1.13 2003/09/02 18:00:19 perev Exp $
 // $Log: MakeHists.cxx,v $
+// Revision 1.13  2003/09/02 18:00:19  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.12  2000/01/19 21:00:40  kathy
 // update macros to use standard default xdf files in /afs/rhic/star/data/samples
 //
@@ -64,17 +67,17 @@ void MakeHists(Char_t *xdffilename=
      TH1F *h1 = new TH1F("h1","phep(3)",100);
      h1->SetFillColor(16);
 
-//*-*  nt/plot 666.sqrt(phep(1)**2+phep(2)**2) (0.ne.phep(1))
+//*-*  nt/plot 666.::sqrt(phep(1)**2+phep(2)**2) (0.ne.phep(1))
 
      TH1F *h1Sqrt=new TH1F("h1Sqrt","666.sqrt",100);
 
 
-//*-* nt/plot 666.log(tan(0.5*atan(phep(3)/sqrt(phep(1)**2+phep(2)**2))+.7854)) (0.ne.phep(1))
+//*-* nt/plot 666.::log(tan(0.5*atan(phep(3)/::sqrt(phep(1)**2+phep(2)**2))+.7854)) (0.ne.phep(1))
 
      TH1F *h2Log1= new TH1F("h2Log1","666.log1",100);
      h2Log1->SetFillColor(42);
 
-//*-* nt/plot 666.log(tan(0.5*atan(phep(3)/sqrt(phep(1)**2+phep(2)**2))+.7854)) (idhep.eq.211.or.idhep.eq.-211)\n");
+//*-* nt/plot 666.::log(tan(0.5*atan(phep(3)/::sqrt(phep(1)**2+phep(2)**2))+.7854)) (idhep.eq.211.or.idhep.eq.-211)\n");
 
      TH1F *h3Log2=new TH1F("h3Log2","666.log2",100);
      h3Log2->SetFillColor(46);
@@ -101,9 +104,9 @@ void MakeHists(Char_t *xdffilename=
         h1->Fill(p->phep[2]);
     //
     //
-    // Fill a'la nt/plot 666.sqrt(phep(1)**2+phep(2)**2) (0.ne.phep(1))
+    // Fill a'la nt/plot 666.::sqrt(phep(1)**2+phep(2)**2) (0.ne.phep(1))
     //                         and 
-    //           nt/plot 666.log(tan(0.5*atan(phep(3)/sqrt(phep(1)**2+phep(2)**2))+.7854)) (0.ne.phep(1))
+    //           nt/plot 666.::log(tan(0.5*atan(phep(3)/::sqrt(phep(1)**2+phep(2)**2))+.7854)) (0.ne.phep(1))
     //
     // in a single step because of the common condition:  (0.ne.phep(1))
     //
@@ -112,15 +115,15 @@ void MakeHists(Char_t *xdffilename=
 
         if ( p->phep[0] != 0 ) 
         {
-          h1Sqrt->Fill(sqrt(p->phep[0]**2+p->phep[1]**2)); 
-          h2Log1->Fill(sqrt(tan(0.5*atan(p->phep[2]/sqrt(p->phep[0]**2+p->phep[1]**2))+.7854)));
+          h1Sqrt->Fill(::sqrt(p->phep[0]**2+p->phep[1]**2)); 
+          h2Log1->Fill(::sqrt(tan(0.5*atan(p->phep[2]/::sqrt(p->phep[0]**2+p->phep[1]**2))+.7854)));
         }
 
     //*-*
-    //*-* Fill a'la nt/plot 666.log(tan(0.5*atan(phep(3)/sqrt(phep(1)**2+phep(2)**2))+.7854)) (idhep->eq.211.or.idhep->eq.-211)\n");
+    //*-* Fill a'la nt/plot 666.::log(tan(0.5*atan(phep(3)/::sqrt(phep(1)**2+phep(2)**2))+.7854)) (idhep->eq.211.or.idhep->eq.-211)\n");
     //
         if ( p->idhep ==211 || p->idhep == -211) 
-          h3Log2->Fill(log(tan(0.5*atan(p->phep[2]/sqrt(p->phep[0]**2+p->phep[1]**2))+.7854)));
+          h3Log2->Fill(::log(tan(0.5*atan(p->phep[2]/::sqrt(p->phep[0]**2+p->phep[1]**2))+.7854)));
 
     // Update the view of these histograms (just for fun)
 

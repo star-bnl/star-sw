@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.hh,v 2.5 2000/06/06 02:58:41 calderon Exp $
+ * $Id: StMcHit.hh,v 2.6 2003/09/02 17:58:41 perev Exp $
  * $Log: StMcHit.hh,v $
+ * Revision 2.6  2003/09/02 17:58:41  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.5  2000/06/06 02:58:41  calderon
  * Introduction of Calorimeter classes.  Modified several classes
  * accordingly.
@@ -33,7 +36,7 @@
 #ifndef StMcHit_hh
 #define StMcHit_hh
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StThreeVectorF.hh"
 
 class StMcTrack;

@@ -1,4 +1,4 @@
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StDetectorDbIntegratedTriggerID.h"
 #include "tables/St_triggerInfo_Table.h"
 #include "tables/St_defaultTrgLvl_Table.h"

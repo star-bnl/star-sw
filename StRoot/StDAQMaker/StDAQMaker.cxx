@@ -4,7 +4,7 @@
 // Author Victor Perev							//
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TObjectSet.h"
 #include "StDAQMaker.h"
 #include "StDAQReader.h"

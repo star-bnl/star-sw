@@ -16,14 +16,12 @@
 class TObject;
 #include <vector>
 #include <algorithm>
-#ifndef ST_NO_NAMESPACES
     using std::vector;
     using std::random_shuffle;
-#endif /*ST_NO_NAMESPACES*/
   typedef vector<TObject*> VecTObj;
 #ifndef __CINT__
   typedef vector<TObject*>::iterator       VecTObjIter;
-  typedef vector<TObject* const>::iterator const_VecTObjIter;
+  typedef vector<TObject*>::const_iterator const_VecTObjIter;
   typedef VecTObjIter StObjArrayIter;
   typedef VecTObjIter StStrArrayIter;
   typedef VecTObjIter StRefArrayIter;
@@ -35,7 +33,7 @@ class TObject;
 #ifdef __CINT__NEVER
 	class VecTObj;
 	class VecTObjIter;
-	class  const_VecTObjIter;
+	class const_VecTObjIter;
 	class StObjArrayIter;
 	class StStrArrayIter;
 	class StRefArrayIter;
@@ -111,12 +109,12 @@ virtual Bool_t IsFolder() const;
         TObject *       &back()        { return fV.back();}
 
 #ifndef __CINT__
-const_VecTObjIter begin() const {return fV.begin();}
-        VecTObjIter begin()       {return fV.begin();}
+	const_VecTObjIter begin() const {return fV.begin();}
+        VecTObjIter       begin()       {return fV.begin();}
 const_VecTObjIter end()   const {return fV.end();}
         VecTObjIter end()         {return fV.end();}
-        VecTObjIter erase(VecTObjIter it                 ) {return fV.erase(it);}
-        VecTObjIter erase(VecTObjIter fst,VecTObjIter lst) {return fV.erase(fst,lst);}
+        TObject**   Erase(TObject**    it                 ,int del); 
+        TObject**   Erase(TObject**    fst,TObject**   lst,int del);
 #endif /*!__CINT__*/
 
         TObject *&       operator[](Int_t i)       {return fV[i];}
@@ -140,12 +138,9 @@ public:
  StStrArray(Int_t sz=0);
  StStrArray(const StStrArray &from);
  virtual ~StStrArray();
- virtual void operator =(const StStrArray &a); 
+// virtual void operator=(const StStrArray &a); 
 
  void push_back(const TObject *to){fV.push_back((TObject*)to);}
-#ifndef __CINT__
- VecTObjIter erase(VecTObjIter fst,VecTObjIter lst=0);
-#endif /*!__CINT__*/
  void clear();
  virtual void makeZombie(int flg);			
 private:
@@ -188,14 +183,14 @@ virtual        ~StPtrVec ## QWERTY(){};\
  St ## QWERTY * const &back()        const {return (St ## QWERTY  * const &)fV.back();}\
  St ## QWERTY *       &back()              {return (St ## QWERTY  *       &)fV.back();}\
 \
-const_St ## QWERTY ## Iterator begin() const {return (const_St ## QWERTY ## Iterator)fV.begin();}\
-      St ## QWERTY ## Iterator begin()       {return (      St ## QWERTY ## Iterator)fV.begin();}\
-const_St ## QWERTY ## Iterator end()   const {return (const_St ## QWERTY ## Iterator)fV.end();}\
-      St ## QWERTY ## Iterator end()         {return (      St ## QWERTY ## Iterator)fV.end();}\
+const_St ## QWERTY ## Iterator begin() const {return (const_St ## QWERTY ## Iterator)&(*(fV.begin()));}\
+      St ## QWERTY ## Iterator begin()       {return (      St ## QWERTY ## Iterator)&(*(fV.begin()));}\
+const_St ## QWERTY ## Iterator end()   const {return (const_St ## QWERTY ## Iterator)&(*(fV.end()));}\
+      St ## QWERTY ## Iterator end()         {return (      St ## QWERTY ## Iterator)&(*(fV.end()));}\
       St ## QWERTY ## Iterator erase(St ## QWERTY ## Iterator  it)\
-      {return (St ## QWERTY ## Iterator)fV.erase((VecTObjIter)it);}\
+      {return (St ## QWERTY ## Iterator)Erase((TObject**)it,0);}\
       St ## QWERTY ## Iterator erase(St ## QWERTY ## Iterator fst,St ## QWERTY ## Iterator lst)\
-      {return (St ## QWERTY ## Iterator)fV.erase((VecTObjIter)fst,(VecTObjIter)lst);}\
+      {return (St ## QWERTY ## Iterator)Erase((TObject**)fst,(TObject**)lst,0);}\
       St ## QWERTY *       &operator[](Int_t i)       {return at(i);}\
       St ## QWERTY * const &operator[](Int_t i) const {return at(i);}\
 void  push_back(const St ## QWERTY * const to){fV.push_back((TObject*const)to);}\
@@ -219,14 +214,14 @@ StSPtrVec ## QWERTY(const StSPtrVec ## QWERTY &from):StStrArray(from){};\
  St ## QWERTY * const &back()        const {return (St ## QWERTY  * const &)fV.back();}\
  St ## QWERTY *       &back()              {return (St ## QWERTY  *       &)fV.back();}\
 \
-const_St ## QWERTY ## Iterator begin() const {return (const_St ## QWERTY ## Iterator)fV.begin();}\
-      St ## QWERTY ## Iterator begin()       {return (      St ## QWERTY ## Iterator)fV.begin();}\
-const_St ## QWERTY ## Iterator end()   const {return (const_St ## QWERTY ## Iterator)fV.end();}\
-      St ## QWERTY ## Iterator end()         {return (      St ## QWERTY ## Iterator)fV.end();}\
+const_St ## QWERTY ## Iterator begin() const {return (const_St ## QWERTY ## Iterator)&(*(fV.begin()));}\
+      St ## QWERTY ## Iterator begin()       {return (      St ## QWERTY ## Iterator)&(*(fV.begin()));}\
+const_St ## QWERTY ## Iterator end()   const {return (const_St ## QWERTY ## Iterator)&(*(fV.end()));}\
+      St ## QWERTY ## Iterator end()         {return (      St ## QWERTY ## Iterator)&(*(fV.end()));}\
       St ## QWERTY ## Iterator erase(St ## QWERTY ## Iterator  it)\
-      {return (St ## QWERTY ## Iterator)fV.erase((VecTObjIter)it);}\
+      {return (St ## QWERTY ## Iterator)Erase((TObject**)it,1);}\
       St ## QWERTY ## Iterator erase(St ## QWERTY ## Iterator fst,St ## QWERTY ## Iterator lst)\
-      {return (St ## QWERTY ## Iterator)fV.erase((VecTObjIter)fst,(VecTObjIter)lst);}\
+      {return (St ## QWERTY ## Iterator)Erase((TObject**)fst,(TObject**)lst,1);}\
       St ## QWERTY *       &operator[](Int_t i)       {return at(i);}\
       St ## QWERTY * const &operator[](Int_t i) const {return at(i);}\
 void  push_back(const St ## QWERTY *to){StStrArray::push_back((TObject*)to);}\

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.19 2003/05/15 06:08:41 aihong Exp $
+// $Id: StFlowSelection.cxx,v 1.20 2003/09/02 17:58:12 perev Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -9,7 +9,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "StFlowSelection.h"
 #include "StFlowEvent.h"
@@ -173,6 +173,9 @@ void StFlowSelection::PrintList() const {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.20  2003/09/02 17:58:12  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.19  2003/05/15 06:08:41  aihong
 // default PID is changed from none to NA, SetDedxPtsPart() added
 //

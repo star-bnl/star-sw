@@ -10,7 +10,7 @@
 // this is done by
 // 1) reading the kinetic energy and dedx value
 // 2) obtain energy by energy = kinetic energy + mass
-// 3) calculate beta*gamma = p/m where p = sqrt(e^2 - m^2)
+// 3) calculate beta*gamma = p/m where p = ::sqrt(e^2 - m^2)
 // 4) insert into the map of beta gamma - dedx values
 //
 // The function returns a linear interpolation between
@@ -447,7 +447,7 @@ myBetheBloch::myBetheBloch(){
     for(size_t i=0; i<ionizVec.size(); ++i) {
 // 	double energy = kinVec[i];
 // 	energy +=muonmass; // kinetic energy = energy - mass
-// 	double betagamma = sqrt(energy*energy-muonmass*muonmass)/muonmass;
+// 	double betagamma = ::sqrt(energy*energy-muonmass*muonmass)/muonmass;
 // 	mMap.insert(map<double,double>::value_type(betagamma,ionizVec[i]));
 	mMap.insert(map<double,double>::value_type(kinVec[i],ionizVec[i]));
 	

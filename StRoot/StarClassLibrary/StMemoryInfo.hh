@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemoryInfo.hh,v 1.3 2000/01/04 14:57:54 ullrich Exp $
+ * $Id: StMemoryInfo.hh,v 1.4 2003/09/02 17:59:35 perev Exp $
  *
  * Author: Thomas Ullrich, June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMemoryInfo.hh,v $
+ * Revision 1.4  2003/09/02 17:59:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2000/01/04 14:57:54  ullrich
  * Added friend declaration to avoid warning messages
  * under Linux.
@@ -25,7 +28,7 @@
 #define StMemoryInfo_hh
 
 #include <malloc.h>
-#include <iostream.h>
+#include <Stiostream.h>
 
 class StMemoryInfo {
 public:

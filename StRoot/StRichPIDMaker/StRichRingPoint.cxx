@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichRingPoint.cxx,v 2.7 2001/02/07 16:01:06 lasiuk Exp $
+ * $Id: StRichRingPoint.cxx,v 2.8 2003/09/02 17:58:54 perev Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingPoint.cxx,v $
+ *  Revision 2.8  2003/09/02 17:58:54  perev
+ *  gcc 3.2 updates + WarnOff
+ *
  *  Revision 2.7  2001/02/07 16:01:06  lasiuk
  *  no units with mass of particle in c'tor
  *  momentum loss (uses local copy) taken into account
@@ -150,7 +153,7 @@ void StRichRingPoint::setParticleType(StParticleDefinition* particle) {
     
     mMomentum -= mTrack->getMomentumLoss(particle);
     
-    mBeta       = mMomentum/sqrt(mMomentum*mMomentum + mMass*mMass);
+    mBeta       = mMomentum/::sqrt(mMomentum*mMomentum + mMass*mMass);
     mCher       = acos(1.0/(mBeta*mIndexRad[mRingType]));
 
     

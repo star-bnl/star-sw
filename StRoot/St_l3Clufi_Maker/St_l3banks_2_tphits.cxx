@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <iostream.h>
+#include <Stiostream.h>
 #include <strings.h>
 #include <sys/types.h>
 #include <stdlib.h>

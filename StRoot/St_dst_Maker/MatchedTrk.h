@@ -6,7 +6,7 @@
 #include <vector>
 #include "SystemOfUnits.h"
 #if !defined(ST_NO_NAMESPACES)
-using namespace std::vector;
+using namespace std;
 using namespace units;
 #endif
 

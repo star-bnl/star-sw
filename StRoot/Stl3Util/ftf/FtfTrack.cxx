@@ -335,7 +335,7 @@ void FtfTrack::fill (  ) {
 
 //    if ( id == 303) Print(31);
       if ( getPara()->vertexConstrainedFit && getPara()->parameterLocation ){ 
-	 updateToRadius ( sqrt(xLastHit*xLastHit+yLastHit*yLastHit) ) ;
+	 updateToRadius ( ::sqrt(xLastHit*xLastHit+yLastHit*yLastHit) ) ;
       }
       else if ( !getPara()->vertexConstrainedFit && !getPara()->parameterLocation ) {
          updateToClosestApproach ( getPara()->xVertex, getPara()->yVertex, 2000. ) ;
@@ -349,7 +349,7 @@ void FtfTrack::fill (  ) {
    
          fillPrimary ( xc, yc, rc, getPara()->xVertex, getPara()->yVertex ) ;
          if ( getPara()->parameterLocation ) {// give track parameters at inner most point
-	    updateToRadius ( sqrt(xLastHit*xLastHit+yLastHit*yLastHit) ) ;
+	    updateToRadius ( ::sqrt(xLastHit*xLastHit+yLastHit*yLastHit) ) ;
          }
       }
       else { // Secondaries now
@@ -406,7 +406,7 @@ void FtfTrack::fillPrimary (  double &xc, double &yc, double &rc,
    if ( d_angle < -pi ) d_angle += twoPi  ;
 
    q = ( ( d_angle < 0 ) ? 1 : -1 ) ;
-   r0   = sqrt(xPar*xPar+yPar*yPar) ;
+   r0   = ::sqrt(xPar*xPar+yPar*yPar) ;
    phi0 = atan2(yPar,xPar) ;
    if ( phi0 < 0 ) phi0 += 2. * M_PI ;
    psi  = (double)(angle_vertex - q * 0.5F * pi) ;

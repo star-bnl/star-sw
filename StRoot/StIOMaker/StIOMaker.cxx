@@ -3,7 +3,7 @@
 // StIOMaker class for Makers                                           //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TClass.h"
 #include "TROOT.h"
 #include "StMaker.h"
@@ -98,7 +98,7 @@ Int_t StIOMaker::Skip()
 }
 
 //_____________________________________________________________________________
-Int_t StIOMaker::Open()
+Int_t StIOMaker::Open(const char *)
 {
   if (fIOMode[0]==0) return 0;
   if (fIOMode[0]=='r') { Skip(); return OpenRead();}

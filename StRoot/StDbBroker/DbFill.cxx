@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbFill.cxx,v 1.5 2000/04/13 20:22:56 porter Exp $
+ * $Id: DbFill.cxx,v 1.6 2003/09/02 17:55:34 perev Exp $
  *
  * Author: S. Vanyashin
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: DbFill.cxx,v $
+ * Revision 1.6  2003/09/02 17:55:34  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2000/04/13 20:22:56  porter
  * - reconnected tableDescriptor that had been broken via St_tableDescriptor.
  * - added unix timestamp as standard
@@ -39,7 +42,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strstream.h>
+#include <Stsstream.h>
+#include <Stiostream.h>
 
 #include "mysql.h"
 #include "mysql_com.h"
@@ -79,8 +83,9 @@ unsigned int num_rows;
 
 const int MAXBUF=2048;
 char query[MAXBUF];
-char buf[MAXBUF];
-ostrstream Query(buf,MAXBUF);
+//VP char buf[MAXBUF];
+//VP ostrstream Query(buf,MAXBUF);
+ostrstream Query;
 char *end;
 char *binQuery;
 

@@ -1,7 +1,7 @@
 #ifndef STACCEPTALLTRACKS_HH
 #define STACCEPTALLTRACKS_HH
 #include "StRareTrackCut.h"
-#include <iostream.h>
+#include <Stiostream.h>
 class StPrimaryTrack;
 class StAcceptAllTracks : public StRareTrackCut {
  

@@ -3,12 +3,15 @@
  **************************************************************************
  *
  * $Log: St_scm_Maker.cxx,v $
+ * Revision 1.4  2003/09/02 17:59:03  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2002/03/25 20:13:05  suire
  * Small memory leak fixes, doxygen documentation
  *
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "St_scm_Maker.h"
 #include "StChain.h"
@@ -113,7 +116,7 @@ void St_scm_Maker::makeScmCtrlHistograms()
   if (scm_spt->GetNRows()){
     scm_spt_st *dSpt = scm_spt->GetTable();
     sls_ctrl_st *sls_ctrl_t = m_sls_ctrl->GetTable();
-    Float_t convMeVToAdc = (int)pow(2,sls_ctrl_t[0].NBitEncoding)/(sls_ctrl_t[0].PairCreationEnergy*sls_ctrl_t[0].ADCDynamic*sls_ctrl_t[0].NElectronInAMip);
+    Float_t convMeVToAdc = (int)::pow(2,sls_ctrl_t[0].NBitEncoding)/(sls_ctrl_t[0].PairCreationEnergy*sls_ctrl_t[0].ADCDynamic*sls_ctrl_t[0].NElectronInAMip);
     for (Int_t iScm = 0; iScm < scm_spt->GetNRows(); iScm++, dSpt++)
       {
 	if (dSpt->id_match == 11)// case 11  		    

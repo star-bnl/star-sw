@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: franksV0Cut.cxx,v 1.1 2000/08/28 22:32:04 laue Exp $
+ * $Id: franksV0Cut.cxx,v 1.2 2003/09/02 17:58:21 perev Exp $
  *
  * Authors: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: franksV0Cut.cxx,v $
+ * Revision 1.2  2003/09/02 17:58:21  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2000/08/28 22:32:04  laue
  * NEW: a V0 cut that allows to reject V0 pairs with share a track
  *
@@ -119,8 +122,8 @@ bool franksV0Cut::Pass(const StHbtV0* V0){
 #ifdef STHBTDEBUG  
 	cout << "now calculate rapidity" << endl;
 #endif
-	float TEnergy = sqrt((V0->ptotV0())*(V0->ptotV0())+mMass*mMass);
-	float TRapidity = 0.5*log((TEnergy+V0->momV0().z())/
+	float TEnergy = ::sqrt((V0->ptotV0())*(V0->ptotV0())+mMass*mMass);
+	float TRapidity = 0.5*::log((TEnergy+V0->momV0().z())/
 				  (TEnergy-V0->momV0().z()));
 	float Pt = V0->ptV0();
         

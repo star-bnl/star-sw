@@ -41,8 +41,8 @@ adamsTrackCut::~adamsTrackCut(){
 bool adamsTrackCut::Pass(const StHbtTrack* track){
   //   cout << " *** adamsTrackCut::Pass(const StHbtTrack* track) " << endl;
 
-  float TEnergy = sqrt(track->P().mag2()+mMass*mMass);
-  float TRapidity = 0.5*log((TEnergy+track->P().z())/
+  float TEnergy = ::sqrt(track->P().mag2()+mMass*mMass);
+  float TRapidity = 0.5*::log((TEnergy+track->P().z())/
 			    (TEnergy-track->P().z()));
 
 #ifdef STHBTDEBUG

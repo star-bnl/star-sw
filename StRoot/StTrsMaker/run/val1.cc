@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: val1.cc,v 1.1 1998/11/10 23:40:27 lasiuk Exp $
+ * $Id: val1.cc,v 1.2 2003/09/02 17:59:18 perev Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: val1.cc,v $
+ * Revision 1.2  2003/09/02 17:59:18  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  1998/11/10 23:40:27  lasiuk
  * BNL initialization
  *
@@ -28,8 +31,8 @@
  *
  **************************************************************************/
 #include <unistd.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include <string>
 #include <math.h>
 #include <vector>

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcElectronics.hh,v 1.5 2000/06/23 00:12:24 snelling Exp $
+ * $Id: StTpcElectronics.hh,v 1.6 2003/09/02 17:59:16 perev Exp $
  *
  * Author: brian Nov 3, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTpcElectronics.hh,v $
+ * Revision 1.6  2003/09/02 17:59:16  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2000/06/23 00:12:24  snelling
  * Removed dependence on local files now pointed to StDbUtilities
  *
@@ -33,7 +36,7 @@
 #ifndef ST_TPC_ELECTRONICS_HH
 #define ST_TPC_ELECTRONICS_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StGlobals.hh"
 #include "StDbUtilities/StTpcPadCoordinate.hh"

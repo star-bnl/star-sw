@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.72 2003/05/02 23:54:18 hardtke Exp $
+// $Id: StTrsMaker.cxx,v 1.73 2003/09/02 17:59:14 perev Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.73  2003/09/02 17:59:14  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.72  2003/05/02 23:54:18  hardtke
 // Allow user to adjust normalFactor (i.e. Fudge Factor)
 //
@@ -279,9 +282,9 @@
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <unistd.h>    // needed for access()/sleep()
-#include <fstream.h>
+#include "Stiostream.h"
 #include <math.h>
 #include <string>
 #include <algorithm>
@@ -382,7 +385,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.72 2003/05/02 23:54:18 hardtke Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.73 2003/09/02 17:59:14 perev Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -958,7 +961,7 @@ Int_t StTrsMaker::Make(){
 	    //
 	    // Break the segment for diffusion reproduction.
 	    // Fast Simulation can use breakNumber = 1 
-         double ptot=sqrt(absP[0]*absP[0]+absP[1]*absP[1]+absP[2]*absP[2]);
+         double ptot=::sqrt(absP[0]*absP[0]+absP[1]*absP[1]+absP[2]*absP[2]);
                              
        	     d[0] =tpc_hit->ds*absP[0]/ptot;
              d[1] =tpc_hit->ds*absP[1]/ptot; 
@@ -968,10 +971,10 @@ Int_t StTrsMaker::Make(){
 	      if(breakNumber<1)   breakNumber = 1;
 	     breakNumber = min(breakNumber,16);  // set limit
             int numberOfLevels =
-	    static_cast<int>(log(static_cast<double>(breakNumber))/M_LN2 + .999);
-	    d[0]/=pow(2.,numberOfLevels);
-            d[1]/=pow(2.,numberOfLevels); 
-            d[2]/=pow(2.,numberOfLevels);// approximation
+	    static_cast<int>(::log(static_cast<double>(breakNumber))/M_LN2 + .999);
+	    d[0]/=::pow(2.,numberOfLevels);
+            d[1]/=::pow(2.,numberOfLevels); 
+            d[2]/=::pow(2.,numberOfLevels);// approximation
             numberOfLevels++;  // take care of the zero!  in aSegment.tssSplit
 // 	    PR(aSegment.ds()/millimeter);
 // 	    PR(breakNumber); 

@@ -602,7 +602,7 @@ Int_t StV0FinderMaker::Make() {
       //Cut: dca of V0 to prim vtx
       if (rmin >= (pars2->dcav0*pars2->dcav0)) continue;
 
-      tmp3V = pp/sqrt(ppmag);
+      tmp3V = pp/::sqrt(ppmag);
       pPosAlongV0 = pi.dot(tmp3V);
       pNegAlongV0 = pj.dot(tmp3V);
       alpha = (pPosAlongV0-pNegAlongV0) /
@@ -616,8 +616,8 @@ Int_t StV0FinderMaker::Make() {
       //Cut: Armenteros pt
       if (ptArm_sq > (pars2->ptarm_max*pars2->ptarm_max)) continue;
 
-      rmin   = sqrt(rmin);
-      dca_ij = sqrt(dca_ij);
+      rmin   = ::sqrt(rmin);
+      dca_ij = ::sqrt(dca_ij);
       if (trk[i]->fittingMethod() == ITTFflag) dca_ij=-dca_ij;
       
       // Fill an StV0Vertex
@@ -732,8 +732,11 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.10 2003/08/22 17:47:14 caines Exp $
+// $Id: StV0FinderMaker.cxx,v 1.11 2003/09/02 17:58:59 perev Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.11  2003/09/02 17:58:59  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.10  2003/08/22 17:47:14  caines
 // Get sign AND magnitude of mag field correctly for Xi and V0 finder
 //

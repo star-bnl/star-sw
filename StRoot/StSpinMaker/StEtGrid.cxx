@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StEtGrid.cxx,v 1.3 2003/04/30 20:38:37 perev Exp $
+// $Id: StEtGrid.cxx,v 1.4 2003/09/02 17:59:01 perev Exp $
 // $Log: StEtGrid.cxx,v $
+// Revision 1.4  2003/09/02 17:59:01  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.3  2003/04/30 20:38:37  perev
 // Warnings cleanup. Modified lines marked VP
 //
@@ -15,7 +18,7 @@
 // Revision 1.0  2001/06/14 Akio Ogawa
 //
 //////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StEventTypes.h"
 #include "StEvent.h"
 #include "StSpinMaker/StppTrack.h"
@@ -87,7 +90,7 @@ int StEtGrid::add(StMuTrack *trk){
 
 int StEtGrid::add(StTrack *trk){
   if(trk->flag() <= 0) return 8;
-  float eta = -log(tan(trk->geometry()->momentum().theta()/2.));
+  float eta = -::log(tan(trk->geometry()->momentum().theta()/2.));
   float phi = trk->geometry()->momentum().phi();
   float et = trk->geometry()->momentum().mag();
   return add(eta, phi, et);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.21 2003/05/07 15:30:43 magestro Exp $
+ * $Id: StHbtParticle.cc,v 1.22 2003/09/02 17:58:32 perev Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.22  2003/09/02 17:58:32  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.21  2003/05/07 15:30:43  magestro
  * Fixed bug related to finding merged hits (commit for Fabrice)
  *
@@ -157,7 +160,7 @@ StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass
   mTrack = new StHbtTrack(*hbtTrack);
   StHbtThreeVector temp = hbtTrack->P();
   mFourMomentum.setVect(temp);
-  double ener = sqrt(temp.mag2()+mass*mass);
+  double ener = ::sqrt(temp.mag2()+mass*mass);
   mFourMomentum.setE(ener);
   mMap[0] = hbtTrack->TopologyMap(0);
   mMap[1] = hbtTrack->TopologyMap(1);
@@ -199,7 +202,7 @@ StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mT
   // I know there is a better way to do this...
   StHbtThreeVector temp = hbtV0->momV0();
   mFourMomentum.setVect(temp);
-  double ener = sqrt(temp.mag2()+mass*mass);
+  double ener = ::sqrt(temp.mag2()+mass*mass);
   mFourMomentum.setE(ener);
   // Calculating TpcEntrancePoint for Positive V0 daugther
   mPrimaryVertex = hbtV0->primaryVertex();
@@ -245,7 +248,7 @@ StHbtParticle::StHbtParticle(const StHbtKink* const hbtKink,const double& mass) 
   // I know there is a better way to do this...
   StHbtThreeVector temp = hbtKink->Parent().P();
   mFourMomentum.setVect(temp);
-  double ener = sqrt(temp.mag2()+mass*mass);
+  double ener = ::sqrt(temp.mag2()+mass*mass);
   mFourMomentum.setE(ener);
 }
 
@@ -256,7 +259,7 @@ StHbtParticle::StHbtParticle(const StHbtXi* const hbtXi, const double& mass)  {
   mMap[1]= 0;
   StHbtThreeVector temp;// = hbtXi->mMomXi;
   mFourMomentum.setVect(temp);
-  double ener = sqrt(temp.mag2()+mass*mass);
+  double ener = ::sqrt(temp.mag2()+mass*mass);
   mFourMomentum.setE(ener);
   mHiddenInfo = 0;
 }

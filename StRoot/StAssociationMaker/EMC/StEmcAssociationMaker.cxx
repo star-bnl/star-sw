@@ -8,7 +8,7 @@
 
 #include "StEmcAssociationMaker.h"
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 
 #include "StEmcUtil/geometry/StEmcGeom.h"
@@ -241,7 +241,7 @@ Int_t StEmcAssociationMaker::Make()
                 Int_t clSub=abs(clHit[l]->sub());
 
                 //Doing comparision between hit track and hit cluster from a point
-                if (module==clModule && eta==clEta && sub==clSub) assoc+=pow(2,detnum);
+                if (module==clModule && eta==clEta && sub==clSub) assoc+=(1<<(detnum));
               }
             }
           }

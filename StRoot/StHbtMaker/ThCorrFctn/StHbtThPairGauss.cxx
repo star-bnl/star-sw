@@ -72,9 +72,9 @@ void StHbtThPairGauss::SetMomentum_PID( const StHbtPair* aPair ){
     mMomentum2=new StHbtLorentzVector(*(tEvtGenHidInf2->getFreezeOutMomEn()));
   }else{
     mMom1=aPair->track1()->FourMomentum();
-    mMom1.setE(sqrt(mMassSq1+mMom1.vect().mag2()));
+    mMom1.setE(::sqrt(mMassSq1+mMom1.vect().mag2()));
     mMom2=aPair->track2()->FourMomentum();
-    mMom2.setE(sqrt(mMassSq2+mMom2.vect().mag2()));
+    mMom2.setE(::sqrt(mMassSq2+mMom2.vect().mag2()));
     if ((!mUseHidMom)&&(mBetaRCMS>0)) {
       double tE=mMom1.e();
       mMom1.setE(mGammaRCMS*(tE-mBetaRCMS*mMom1.pz()));
@@ -114,7 +114,7 @@ void StHbtThPairGauss::BoostPosition(){
   case RCMS: break;
   case LCMS:
     tBeta=(mMomentum1->pz()+mMomentum2->pz())/(mMomentum1->e()+mMomentum2->e());
-     tGamma=sqrt(1/1-tBeta*tBeta);
+     tGamma=::sqrt(1/1-tBeta*tBeta);
      tT=mPos1.t();
     mPos1.setT(tGamma*(tT-tBeta*mPos1.z()));
     mPos1.setZ(tGamma*(tBeta*mPos1.z()-tBeta*tT));
@@ -161,8 +161,8 @@ inline  void          StHbtThPairGauss::SetLCMS(){mRef=LCMS;};
 inline  void          StHbtThPairGauss::SetPRF(){mRef=PRF;};
 
 inline  void          StHbtThPairGauss::SetBoostRCMS(double aPlab,double aMBeam, double aMTarget){
-  double tEBeamLab=sqrt(aPlab*aPlab+aMBeam*aMBeam);
-  mGammaRCMS=(tEBeamLab+aMTarget)/sqrt(aMBeam*aMBeam+aMTarget*aMTarget+2*tEBeamLab*aMTarget);
-  mBetaRCMS=sqrt(1.-1/(mGammaRCMS*mGammaRCMS));
+  double tEBeamLab=::sqrt(aPlab*aPlab+aMBeam*aMBeam);
+  mGammaRCMS=(tEBeamLab+aMTarget)/::sqrt(aMBeam*aMBeam+aMTarget*aMTarget+2*tEBeamLab*aMTarget);
+  mBetaRCMS=::sqrt(1.-1/(mGammaRCMS*mGammaRCMS));
 }
   

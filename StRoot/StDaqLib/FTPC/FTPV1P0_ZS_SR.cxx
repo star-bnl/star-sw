@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_ZS_SR.cxx,v 1.9 2002/05/24 14:35:30 jcs Exp $
+ * $Id: FTPV1P0_ZS_SR.cxx,v 1.10 2003/09/02 17:55:31 perev Exp $
  * Author: M.J. LeVine, H.Huemmler
  ***************************************************************************
  * Description: FTPC V1.0 Zero Suppressed Reader
@@ -11,6 +11,9 @@
  * 
  ***************************************************************************
  * $Log: FTPV1P0_ZS_SR.cxx,v $
+ * Revision 1.10  2003/09/02 17:55:31  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.9  2002/05/24 14:35:30  jcs
  * Use index pad_seq-1 when current sequence adjacent to previous sequence
  *
@@ -53,7 +56,7 @@
  *
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <assert.h>
 
 #include "StDaqLib/GENERIC/EventReader.hh"

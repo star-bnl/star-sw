@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.hh,v 1.3 2000/01/04 14:57:56 ullrich Exp $
+ * $Id: StParticleTable.hh,v 1.4 2003/09/02 17:59:35 perev Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.hh,v $
+ * Revision 1.4  2003/09/02 17:59:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2000/01/04 14:57:56  ullrich
  * Added friend declaration to avoid warning messages
  * under Linux.
@@ -28,7 +31,7 @@
 #ifndef StParticleTable_hh
 #define StParticleTable_hh
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <string>
 #include <map>
 #include <vector>

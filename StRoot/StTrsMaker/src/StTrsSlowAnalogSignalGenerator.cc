@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.25 2000/06/23 00:12:41 snelling Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.26 2003/09/02 17:59:19 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
+ * Revision 1.26  2003/09/02 17:59:19  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.25  2000/06/23 00:12:41  snelling
  * Removed dependence on local files now pointed to StDbUtilities
  *
@@ -133,7 +136,7 @@
 //static const double asymGausUnRFactor = (M_2_SQRTPI/M_SQRT2)/(mSigma1+mSigma2);
 // This should really come from the gas database...
 // Hmmm...actually why should the electronics have to know about this?
-static const double sigmaL = .05*centimeter/sqrt(centimeter);
+static const double sigmaL = .05*centimeter/::sqrt(centimeter);
 
 StTrsAnalogSignalGenerator* StTrsSlowAnalogSignalGenerator::mInstance = 0; // static data member
 
@@ -268,29 +271,29 @@ double StTrsSlowAnalogSignalGenerator::imageChargeIntegral(double xo, double yo,
 	double t3 = xo*xu;
 	double t4 = t1+t2-2.0*t3;
 	double t5 = yo-yu;
-	double t8 = pow(-xu+xo,2.0);
-	double t9 = sqrt(t8);
+	double t8 = ::pow(-xu+xo,2.0);
+	double t9 = ::sqrt(t8);
 	double t10 = 1/t9;
 	double t11 = yu*yu;
 	double t12 = yo*yu;
 	double t13 = yo*yo;
-	double t15 = 5*sqrt(t1+t2+t11+(d*d)/100.-2.*t12-2.*t3+t13);
+	double t15 = 5*::sqrt(t1+t2+t11+(d*d)/100.-2.*t12-2.*t3+t13);
 	double t19 = atan((50./d)*t4*t5*t10/t15);
-	double t22 = pow(-xl+xo,2.0);
-	double t23 = sqrt(t22);
+	double t22 = ::pow(-xl+xo,2.0);
+	double t23 = ::sqrt(t22);
 	double t27 = xl*xl;
 	double t28 = xo*xl;
 	double t29 = t27+t2-2.0*t28;
 	double t31 = 1/t23;
-	double t33 = 5*sqrt(t27+t2+t11+(d*d)/100-2.*t12-2.*t28+t13);
+	double t33 = 5*::sqrt(t27+t2+t11+(d*d)/100-2.*t12-2.*t28+t13);
 	double t37 = atan((50./d)*t29*t5*t31/t33);
 	double t44 = t10*t31;
 	double t46 = yo-yl;
 	double t48 = yl*yl;
 	double t49 = yo*yl;
-	double t51 = 5*sqrt(t1+t2+t48+(d*d)/100-2.*t49-2.*t3+t13);
+	double t51 = 5*::sqrt(t1+t2+t48+(d*d)/100-2.*t49-2.*t3+t13);
 	double t55 = atan((50./d)*t4*t46*t10/t51);
-	double t62 = 5*sqrt(t27+t2+t48+(d*d)/100-2.*t49-2.*t28+t13);
+	double t62 = 5*::sqrt(t27+t2+t48+(d*d)/100-2.*t49-2.*t28+t13);
 	double t66 = atan((50./d)*t29*t46*t31/t62);
 	double t74 = 0.1591549431*q*(-t19*xu*t23+t19*xo*t23+t37*xl*t9-t37*xo*t9)*t44
 	    -0.1591549431*q*(-t55*xu*t23+t55*xo*t23+t66*xl*t9-t66*xo*t9)*t44;
@@ -529,7 +532,7 @@ double StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximateResponse(doub
     double value=0;
 
     // Now defined as static const double mSymGausApproxFactor
-    //double factor = 1/(sqrt(2*pi)*mSigma1);
+    //double factor = 1/(::sqrt(2*pi)*mSigma1);
     //double factor = (M_SQRT1_2*M_2_SQRTPI/(2.*mSigma1));
 
     // Calculate at bin Centroid (from static const double)
@@ -617,7 +620,7 @@ double StTrsSlowAnalogSignalGenerator::realShaperResponse(double tbin, StTrsAnal
     // Oh darn! Why do we need gas parmeters here...it is because
     // we convolute the response of the electronics with the diffusion
     // DON'T DO THAT!!!!
-    //double sigmaL = .05*centimeter/sqrt(centimeter);
+    //double sigmaL = .05*centimeter/::sqrt(centimeter);
     double t = mTimeBinWidth*(tbin+.5);
 
     // Remember centroid is at 2tau+10ns
@@ -627,8 +630,8 @@ double StTrsSlowAnalogSignalGenerator::realShaperResponse(double tbin, StTrsAnal
     // For now use the approximation:
     double tzero = sig.time() - 2.*mTau+10.*nanosecond;
     
-    //double K = sigmaL*sqrt(sig.time())/(tau*sqrt(driftVelocity));
-    double K = sigmaL/mTau*sqrt(tzero/mDriftVelocity);
+    //double K = sigmaL*::sqrt(sig.time())/(tau*::sqrt(driftVelocity));
+    double K = sigmaL/mTau*::sqrt(tzero/mDriftVelocity);
 
     //double lambda =  (sig.time() - t)/(K*tau) + K;
     double lambda =  (tzero - t)/(K*mTau) + K;
@@ -636,7 +639,7 @@ double StTrsSlowAnalogSignalGenerator::realShaperResponse(double tbin, StTrsAnal
     // Corrected From SN197
     value = 1./(2.*mTau)*sqr(K)*exp(K*(lambda-.5*K))*
 	( .5*(1+sqr(lambda))*(1-erf(lambda/M_SQRT2)) -
-	  lambda/(sqrt(2*M_PI))*exp(-sqr(lambda)/2));
+	  lambda/(::sqrt(2*M_PI))*exp(-sqr(lambda)/2));
 
     value *= mFractionSampled*mGain*sig.amplitude();
 
@@ -671,10 +674,10 @@ double StTrsSlowAnalogSignalGenerator::oneOverT(double t, double to)
 
 //     // These are taken from DB at Constructor
 // //     double mSigma1 = 1;
-// //     double mSigma2 = sqrt(8.);
+// //     double mSigma2 = ::sqrt(8.);
 
 // ---->  use     mAsymGausUnRestFactor
-//     double factor = sqrt(2/pi)/(mSigma1+mSigma2);
+//     double factor = ::sqrt(2/pi)/(mSigma1+mSigma2);
 //     if(t<sig.time())
 // 	value =  sig.amplitude()*mAsymGausUnRestFactor*exp(-sqr(t-sig.time())/(2*sqr(mSigma1)));
 //     else {

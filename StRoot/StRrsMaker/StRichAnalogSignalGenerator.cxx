@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StRichAnalogSignalGenerator.cxx,v 2.0 2000/08/09 16:16:59 gans Exp $
+ * $Id: StRichAnalogSignalGenerator.cxx,v 2.1 2003/09/02 17:58:55 perev Exp $
  *
  * Description:
  *  StRichAnalogSignalGenerator generates signals on pads
@@ -32,6 +32,9 @@
  * 
  *************************************************************************
  * $Log: StRichAnalogSignalGenerator.cxx,v $
+ * Revision 2.1  2003/09/02 17:58:55  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.0  2000/08/09 16:16:59  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -203,7 +206,7 @@ double StRichAnalogSignalGenerator::induceTension(double ratioy, double ratiox) 
     qsum = 0;
     
     for (int i=1; i<=29 ; i+=2) {
-	arctan = atan(c1/(i*sqrt(i*i + c2)));
+	arctan = atan(c1/(i*::sqrt(i*i + c2)));
 	qsum += s*(arctan-c1/(i*i));
 	s = -s;
     }

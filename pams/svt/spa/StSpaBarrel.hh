@@ -1,6 +1,6 @@
 #ifndef STSPABARREL_HH
 #define STSPABARREL_HH
-# include <iostream.h>
+# include "Stiostream.h"
 # include <stdlib.h>
 # include <math.h>
 # include "spa_am.h"

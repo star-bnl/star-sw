@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichCerenkovPhoton.h,v 1.1 2001/08/21 17:58:33 lasiuk Exp $
+ * $Id: StRichCerenkovPhoton.h,v 1.2 2003/09/02 17:58:55 perev Exp $
  *
  * Author:  bl Mar 27, 2001
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichCerenkovPhoton.h,v $
+ * Revision 1.2  2003/09/02 17:58:55  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2001/08/21 17:58:33  lasiuk
  * for 2000 analysis
  *
@@ -18,7 +21,7 @@
 #ifndef StRichCerenkovPhoton_h
 #define StRichCerenkovPhoton_h
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StRichHit.h"
 
 class StRichCerenkovPhoton {

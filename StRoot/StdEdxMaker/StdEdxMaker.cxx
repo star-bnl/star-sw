@@ -1,5 +1,5 @@
-// $Id: StdEdxMaker.cxx,v 1.29 2002/04/26 19:51:46 fisyak Exp $
-#include <iostream.h>
+// $Id: StdEdxMaker.cxx,v 1.30 2003/09/02 17:59:39 perev Exp $
+#include <Stiostream.h>
 #include <time.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -206,47 +206,47 @@ Int_t StdEdxMaker::Init(){
       //      XYZ = new TProfile2D("XYZ","xyz for clusters",100,-200,200,100,-200,200,100,-200,200);
       //      XYZbad = new TProfile2D("XYZbad","xyz for clusters with mismatched sectors",
       //			100,-200,200,100,-200,200,100,-200,200);
-      Z   = new TProfile2D("Z","log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and Z",
+      Z   = new TProfile2D("Z","::log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and Z",
 		     2*NoSector,1., 2*NoSector+1,100,0.,200.);
-      Z3  = new TH3F("Z3","log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and Z",
+      Z3  = new TH3F("Z3","::log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and Z",
 		     2*NoSector,1., 2*NoSector+1,100,0.,200., 200,-5.,5.);
       ZC  = new TProfile2D("ZC","dEdxN versus sector(inner <= 24 and outter > 24)  and Z",
 		     2*NoSector,1., 2*NoSector+1,100,0.,200.);
-      ETA   = new TProfile2D("ETA","log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and #{eta}",
+      ETA   = new TProfile2D("ETA","::log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and #{eta}",
 		       2*NoSector,1., 2*NoSector+1, 125,-.25,2.25);
-      SecRow = new TProfile2D("SecRow","<log(dEdx/Pion)> (uncorrected) versus sector and row",
+      SecRow = new TProfile2D("SecRow","<::log(dEdx/Pion)> (uncorrected) versus sector and row",
 		       NoSector,1., NoSector+1, NoRow,1., NoRow+1);
       SecRow->SetXTitle("Sector number");
       SecRow->SetYTitle("Row number");
-      SecRowC= new TProfile2D("SecRowC","<log(dEdx/Pion)> (corrected) versus sector and row",
+      SecRowC= new TProfile2D("SecRowC","<::log(dEdx/Pion)> (corrected) versus sector and row",
 		       NoSector,1., NoSector+1, NoRow,1., NoRow+1);
       SecRowC->SetXTitle("Sector number");
       SecRowC->SetYTitle("Row number");
-      SecRow3= new TH3F("SecRow3","<log(dEdx/Pion)> (uncorrected) versus sector and row",
+      SecRow3= new TH3F("SecRow3","<::log(dEdx/Pion)> (uncorrected) versus sector and row",
 		       NoSector,1., NoSector+1, NoRow,1., NoRow+1, 200,-5.,5.);
       SecRow3->SetXTitle("Sector number");
       SecRow3->SetYTitle("Row number");
-      MulRow = new TProfile2D("MulRow","log(dEdx/Pion) versus Multiplicity of global tracks and row",
+      MulRow = new TProfile2D("MulRow","::log(dEdx/Pion) versus Multiplicity of global tracks and row",
 		       36,0.,6000., NoRow,1.,NoRow+1);
-      ZRow = new TProfile2D("ZRow","log(dEdx/Pion) versus Z and row",
+      ZRow = new TProfile2D("ZRow","::log(dEdx/Pion) versus Z and row",
 		       80,-200.,200., NoRow,1., NoRow+1);
-      Ipad = new TProfile2D("Ipad","log(dEdx/Pion) versus charge collected on given pad and row",
+      Ipad = new TProfile2D("Ipad","::log(dEdx/Pion) versus charge collected on given pad and row",
 		       200,0,200e-6, NoRow,1.,NoRow+1);
-      I3pad = new TProfile2D("I3pad","log(dEdx/Pion) versus charge collected +/- pad and row",
+      I3pad = new TProfile2D("I3pad","::log(dEdx/Pion) versus charge collected +/- pad and row",
 		       200,0,400e-6, NoRow,1.,NoRow+1);
-      II3padI = new TProfile2D("II3padI","log(dEdx/Pion) versus charge collected Ipad vs I3pad-Ipad Inner",
+      II3padI = new TProfile2D("II3padI","::log(dEdx/Pion) versus charge collected Ipad vs I3pad-Ipad Inner",
 		       200,0,200e-6, 200, 0, 400e-6);
-      II3padO = new TProfile2D("II3padO","log(dEdx/Pion) versus charge collected Ipad vs I3pad-Ipad Outer",
+      II3padO = new TProfile2D("II3padO","::log(dEdx/Pion) versus charge collected Ipad vs I3pad-Ipad Outer",
 		       200,0,200e-6, 200, 0, 400e-6);
-      Irow = new TProfile2D("Irow","log(dEdx/Pion) versus charge collected on given row and row",
+      Irow = new TProfile2D("Irow","::log(dEdx/Pion) versus charge collected on given row and row",
 		       200,0,1e-3, NoRow,1., NoRow+1);
-      Trow = new TProfile2D("Trow","log(dEdx/Pion) versus charge collected on given row at given time and row",
+      Trow = new TProfile2D("Trow","::log(dEdx/Pion) versus charge collected on given row at given time and row",
 		       200,0,200e-6, NoRow,1., NoRow+1);
-      T3row = new TProfile2D("T3row","log(dEdx/Pion) versus charge collected on given row at given time and row",
+      T3row = new TProfile2D("T3row","::log(dEdx/Pion) versus charge collected on given row at given time and row",
 		       200,0,200e-6, NoRow,1., NoRow+1);
-      T5row = new TProfile2D("T5row","log(dEdx/Pion) versus charge collected on given row at given time and row",
+      T5row = new TProfile2D("T5row","::log(dEdx/Pion) versus charge collected on given row at given time and row",
 		       200,0,200e-6, NoRow,1., NoRow+1);
-      dYrow = new TProfile2D("dYrow","log(dEdx/Pion) versus cluseer projection on the wire for given row",
+      dYrow = new TProfile2D("dYrow","::log(dEdx/Pion) versus cluseer projection on the wire for given row",
 		       100,-2.5,2.5, NoRow,1., NoRow+1);
 #ifdef CORELATION
       corrI   = new TH2F("corrI","Correlation for Inner Sector for pair of nearest rows",
@@ -288,15 +288,15 @@ Int_t StdEdxMaker::Init(){
 			  150,10.,160., 200,-1.,1.);
       TPoints70= new TH2F("TPoints70","dEdx(fit) versus length", 
 			  150,10.,160., 200,-1.,1.);
-      FShapeI  = new TH2F("FShapeI","(log(dEdx)-<z_{fit}>)*(dx)**0.36 versus log(dx) for Inner Sector", 
+      FShapeI  = new TH2F("FShapeI","(::log(dEdx)-<z_{fit}>)*(dx)**0.36 versus ::log(dx) for Inner Sector", 
 			  26,0.1, 1.4, 800,-15.,25.);
-      FShapeO  = new TH2F("FShapeO","(log(dEdx)-<z_{fit}>)*(dx)**0.36 versus log(dx) for Outer Sector", 
+      FShapeO  = new TH2F("FShapeO","(::log(dEdx)-<z_{fit}>)*(dx)**0.36 versus ::log(dx) for Outer Sector", 
 			  36,0.6, 2.4, 800,-15.,25.);
 
       if (m_Mode == 2) {
-	FdEdxSI  = new TH3F("FdEdxSI","dEdx versus log10(beta*gamma for pion) and log(dx) for Inner Sector", 
+	FdEdxSI  = new TH3F("FdEdxSI","dEdx versus log10(beta*gamma for pion) and ::log(dx) for Inner Sector", 
 			    50,-.5,2.,26,0.1, 1.4,1000,0,1.e-4);
-	FdEdxSO  = new TH3F("FdEdxSO","dEdx versus log10(beta*gamma for pion) and log(dx) for Outer Sector", 
+	FdEdxSO  = new TH3F("FdEdxSO","dEdx versus log10(beta*gamma for pion) and ::log(dx) for Outer Sector", 
 			    50,-.5,2.,36,0.6, 2.4,1000,0,1.e-4);
       }
       Int_t nBinbg = 101; Double_t bgrange[2] = { -1., 4.};  //  Double_t bglow = -1.025, bgup = 4.025;
@@ -313,37 +313,37 @@ Int_t StdEdxMaker::Init(){
 	  else        nameP += "N";
 	  TString name = nameP;
 	  name += "70";
-	  TString title = "log(dE/dx70/I(";
+	  TString title = "::log(dE/dx70/I(";
 	  title += Names[hyp];
 	  title += ")) versus log10(p/m)";
 	  hist70[hyp][sCharge] = new TH2D(name.Data(),title.Data(),100,-1.,4.,200,-1.,1.);
 	  name = nameP;
 	  name += "60";
-	  title = "log(dE/dx60/I(";
+	  title = "::log(dE/dx60/I(";
 	  title += nameP;
 	  title += ")) versus log10(p/m)";
 	  hist60[hyp][sCharge] = new TH2D(name.Data(),title.Data(),100,-1.,4.,200,-1.,1.);
 	  name = nameP;
 	  name += "z";
-	  title = "zFit - log(I(";
+	  title = "zFit - ::log(I(";
 	  title += nameP;
 	  title += ")) versus log10(p/m)";
 	  histz[hyp][sCharge] = new TH2D(name.Data(),title.Data(),100,-1.,4.,200,-1.,1.);
 	  name = nameP;
 	  name += "B";
-	  title = "log(I_{Sirrf}(";
+	  title = "::log(I_{Sirrf}(";
 	  title += nameP;
 	  title += ")) versus log10(p/m)";
 	  histB[hyp][sCharge] = new TProfile(name.Data(),title.Data(),100,-1.,4.);
 	  name += "B";
-	  title = "log(I_{BB}(";
+	  title = "::log(I_{BB}(";
 	  title += nameP;
 	  title += ")) versus log10(p/m)";
 	  histBB[hyp][sCharge] = new TProfile(name.Data(),title.Data(),100,-1.,4.);
 	}
 	TString nameP = Names[hyp];
 	nameP += "Shape";
-	TString title = "log(dEdx)-z_{BB_{";
+	TString title = "::log(dEdx)-z_{BB_{";
 	title += Names[hyp];
 	title += "}) versus log10(bg) and log2(dx)", 
  	Shape3[hyp] = new TH3F(nameP.Data(),title.Data(),
@@ -352,11 +352,11 @@ Int_t StdEdxMaker::Init(){
       TDatime t1(2001,6,1,0,0,0); UInt_t i1 = t1.Convert();
       TDatime t2(2002,2,1,0,0,0); UInt_t i2 = t2.Convert();
       Int_t Nt = (i2 - i1)/(3600); // eac hour 
-      Time   = new TH2F("Time","log(dE/dx)_{uncorrected} - log(I(pi)) versus Date& Time", 
+      Time   = new TH2F("Time","::log(dE/dx)_{uncorrected} - ::log(I(pi)) versus Date& Time", 
 			Nt,i1,i2, 200,-5.,5.);
-      TimeC  = new TH2F("TimeC","log(dE/dx)_{corrected} - log(I(pi)) versus Date& Time after correction", 
+      TimeC  = new TH2F("TimeC","::log(dE/dx)_{corrected} - ::log(I(pi)) versus Date& Time after correction", 
 			Nt,i1,i2, 200,-5.,5.);
-      FitPull= new TH2F("FitPull","(zFit - log(I(pi)))/dzFit  versus track length", 
+      FitPull= new TH2F("FitPull","(zFit - ::log(I(pi)))/dzFit  versus track length", 
 			150,10.,160, 200,-5.,5.);
     }
     // Create a ROOT Tree and one superbranch
@@ -857,7 +857,7 @@ Int_t StdEdxMaker::Make(){
     }
     if (N70 > 0) {
       I70 /= N70; D70 /= N70;
-      D70  = sqrt(D70 - I70*I70);
+      D70  = ::sqrt(D70 - I70*I70);
       I70 *= Scale70;
       D70 *= Scale70;
       dedx.id_track  =  Id;
@@ -865,12 +865,12 @@ Int_t StdEdxMaker::Make(){
       dedx.method    =  kTruncatedMeanIdentifier;
       dedx.ndedx     =  N70 + 100*((int) TrackLength);
       dedx.dedx[0]   =  I70;
-      dedx.dedx[1]   =  0.708437*pow(TrackLength,-0.484222);// range = [25,140] cm
+      dedx.dedx[1]   =  0.708437*::pow(TrackLength,-0.484222);// range = [25,140] cm
       dst_dedx->AddAt(&dedx);
     }
     if (N60 > 0) {
       I60 /= N60; D60 /= N60;
-      D60  = sqrt(D60 - I60*I60);
+      D60  = ::sqrt(D60 - I60*I60);
       I60 *= Scale60;
       D60 *= Scale60;
       dedx.id_track  =  Id;
@@ -878,7 +878,7 @@ Int_t StdEdxMaker::Make(){
       dedx.method    =  kOtherMethodIdentifier;
       dedx.ndedx     =  N60 + 100*((int) TrackLength);
       dedx.dedx[0]   =  I60;
-      dedx.dedx[1]   =  0.736496*pow(TrackLength,-0.490062);// range = [25,140] cm
+      dedx.dedx[1]   =  0.736496*::pow(TrackLength,-0.490062);// range = [25,140] cm
       dst_dedx->AddAt(&dedx);
     }
     DoFitZ(chisq, fitZ, fitdZ);
@@ -891,7 +891,7 @@ Int_t StdEdxMaker::Make(){
       dedx.ndedx     =  NdEdx + 100*((int) TrackLength);
       dedx.dedx[0]   =  TMath::Exp(fitZ);
       if (fitdZ >= 1.) fitdZ = 0.999;
-      dedx.dedx[1]   =  fitdZ; // 0.660001*pow(TrackLength,-0.468743);// range = [25,140] cm
+      dedx.dedx[1]   =  fitdZ; // 0.660001*::pow(TrackLength,-0.468743);// range = [25,140] cm
       dst_dedx->AddAt(&dedx);
     }
     //    if (primtrkC && iprim >= 0&& m_Mode > 0) {

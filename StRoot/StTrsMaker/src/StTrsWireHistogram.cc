@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.26 2003/04/30 20:39:09 perev Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.27 2003/09/02 17:59:19 perev Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.27  2003/09/02 17:59:19  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.26  2003/04/30 20:39:09  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -184,8 +187,8 @@ StTrsWireHistogram::StTrsWireHistogram(StTpcGeometry* geoDb, StTpcSlowControl* s
     mGasGainCalculationDone = true;
     FreqFunctionTableBuilder();
     mOmegaTau=2.34*mag->at(StThreeVector<double>(0,0,0)).z()/kilogauss/5.0;
-    dx[0]=mOmegaTau*0.14/sqrt((1+mOmegaTau*mOmegaTau)*(1+mOmegaTau*mOmegaTau)*0.75+0.25);
-    dx[1]=mOmegaTau*0.04/sqrt((1+mOmegaTau*mOmegaTau)*(1+mOmegaTau*mOmegaTau)*0.925+0.075);
+    dx[0]=mOmegaTau*0.14/::sqrt((1+mOmegaTau*mOmegaTau)*(1+mOmegaTau*mOmegaTau)*0.75+0.25);
+    dx[1]=mOmegaTau*0.04/::sqrt((1+mOmegaTau*mOmegaTau)*(1+mOmegaTau*mOmegaTau)*0.925+0.075);
     dx[2]=-dx[1];
     dx[3]=-dx[0];
     dz[0]=0.08; //cm old 0.068cm
@@ -250,7 +253,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin,int sector)
    double *d=bin.d();
     double innerSectorBoundary =
 	mGeomDb->outerSectorEdge() - mGeomDb->ioSectorSpacing();
-    double yCoordinateOfHit = random->Gaus(bin.position().y(),(bin.sigmaT()+d[1]/12)/sqrt(Q)); 
+    double yCoordinateOfHit = random->Gaus(bin.position().y(),(bin.sigmaT()+d[1]/12)/::sqrt(Q)); 
     double sigma=bin.sigmaT();
     double D=mGeomDb->anodeWirePitch()/2.;
   
@@ -308,7 +311,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin,int sector)
 	  //  y1=(wireCoordinate(WireIndex)+w*gWire-D-yCoordinateOfHit)/sigma/M_SQRT2;
 	 Prob=y2*table_fast(y2)-y1*table_fast(y1)
              -y4*table_fast(y4)+y3*table_fast(y3)
-             +1./sqrt(M_PI)*(exp(-y2*y2)- exp(-y1*y1)
+             +1./::sqrt(M_PI)*(exp(-y2*y2)- exp(-y1*y1)
 	     +exp(-y3*y3)- exp(-y4*y4));
 	    Prob=Prob*sigma/dy/4.0*M_SQRT2;
 	    // Prob=0.5*(table_fast(y2)-table_fast(y1));
@@ -325,12 +328,12 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin,int sector)
 
           nQ+=nQOnWire;
 	  //  float unknown=0.02;
-	  //	  newx=random->Gaus(bin.position().x(),bin.sigmaT()/sqrt(nQOnWire)+unknown); 
+	  //	  newx=random->Gaus(bin.position().x(),bin.sigmaT()/::sqrt(nQOnWire)+unknown); 
 	  //	  cout<<bin.position().x()<<" "<<bin.sigmaT()<<" "<<nQOnWire<<" "<<bin.position().z()<<" "<<bin.sigmaL()<<endl;
 	  // cin>>newx;
-          newx=random->Gaus(bin.position().x(),(bin.sigmaT()+d[0]/12)/sqrt(nQOnWire)); 
+          newx=random->Gaus(bin.position().x(),(bin.sigmaT()+d[0]/12)/::sqrt(nQOnWire)); 
           
-	  newz=random->Gaus(bin.position().z(),(bin.sigmaL()+d[2]/12)/sqrt(nQOnWire)); 
+	  newz=random->Gaus(bin.position().z(),(bin.sigmaL()+d[2]/12)/::sqrt(nQOnWire)); 
      
            if(newz<0.)continue; 
 	    if(sector>12.5)newx+=dx[gWire+2];
@@ -411,7 +414,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin,int sector)
 	    // the factor is ~1
 	    //
 // 	    double ne = bin.numberOfElectrons()*chargeFraction;
-// 	    double scaledSigma = sqrt(fabs((ne-1)/ne)*sigma);
+// 	    double scaledSigma = ::sqrt(fabs((ne-1)/ne)*sigma);
 // 	    double xPosition =
 // 		mGaussianDistribution.shoot(theNewSegment.position().x(),
 // 					    (scaledSigma));
@@ -523,7 +526,7 @@ double StTrsWireHistogram::polya(){
   do{
     x=drand48()*8.0;
     y=drand48();
-  }while(y>2.4395225*x*sqrt(x)/exp(x));
+  }while(y>2.4395225*x*::sqrt(x)/exp(x));
   return x;
 }
           
@@ -595,8 +598,8 @@ double StTrsWireHistogram::gaussianAvalanche(int iWire, double numElec)
     //  mDoGasGainFluctuations=0;
     if(mDoGasGainFluctuations) 
         return (iWire < mNumberOfInnerSectorAnodeWires) ?
-	mGaussianDistribution.shoot(mInnerSectorGasGain*numElec,mInnerSectorGasGain*sqrt(numElec*b)):
-	mGaussianDistribution.shoot(mOuterSectorGasGain*numElec,mOuterSectorGasGain*sqrt(numElec*b));
+	mGaussianDistribution.shoot(mInnerSectorGasGain*numElec,mInnerSectorGasGain*::sqrt(numElec*b)):
+	mGaussianDistribution.shoot(mOuterSectorGasGain*numElec,mOuterSectorGasGain*::sqrt(numElec*b));
       
     
     else

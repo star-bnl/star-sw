@@ -1,5 +1,5 @@
 /********************************************************
- * $Id: StRichAnalogToDigitalConverter.cxx,v 2.1 2002/04/01 21:55:22 lasiuk Exp $
+ * $Id: StRichAnalogToDigitalConverter.cxx,v 2.2 2003/09/02 17:58:55 perev Exp $
  *
  * Description:
  *  StRichAnalogToDigitalConverter takes an analog signal
@@ -11,6 +11,9 @@
  *
  ******************************************************
  * $Log: StRichAnalogToDigitalConverter.cxx,v $
+ * Revision 2.2  2003/09/02 17:58:55  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.1  2002/04/01 21:55:22  lasiuk
  * pedestal convolution
  *
@@ -61,8 +64,8 @@ StRichAnalogToDigitalConverter::StRichAnalogToDigitalConverter()
     : mAddPedestal(0)
 {
     mPhysicsDb      = StRichPhysicsDb::getDb();
-    //mMaxADC     = static_cast<int>(pow(2.,mPhysicsDb->channel_width));
-    mMaxADC         = static_cast<int>(pow(2.,mPhysicsDb->adcChannelWidth()));
+    //mMaxADC     = static_cast<int>(::pow(2.,mPhysicsDb->channel_width));
+    mMaxADC         = static_cast<int>(::pow(2.,mPhysicsDb->adcChannelWidth()));
     mPedestal       = mPhysicsDb->averagePedestal();
     mAdcConversion  = mPhysicsDb->adcConversion();// fC/ADC_channels
 

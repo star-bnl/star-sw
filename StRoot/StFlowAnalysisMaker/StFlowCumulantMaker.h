@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.h,v 1.3 2003/03/03 16:24:37 aihong Exp $
+// $Id: StFlowCumulantMaker.h,v 1.4 2003/09/02 17:58:11 perev Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -24,7 +24,7 @@
 
 #ifndef StFlowCumulantMaker_H
 #define StFlowCumulantMaker_H
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StMaker.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "TString.h"
@@ -55,7 +55,7 @@ public:
   void     SetHistoRanges(Bool_t ftpc_included = kFALSE);
 
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowCumulantMaker.h,v 1.3 2003/03/03 16:24:37 aihong Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowCumulantMaker.h,v 1.4 2003/09/02 17:58:11 perev Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -149,6 +149,9 @@ inline void StFlowCumulantMaker::SetOldMethod(Bool_t flag)
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.h,v $
+// Revision 1.4  2003/09/02 17:58:11  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.3  2003/03/03 16:24:37  aihong
 // blow up 4-part cumulant by 1000 in order to let error bars calculated by ROOT
 //

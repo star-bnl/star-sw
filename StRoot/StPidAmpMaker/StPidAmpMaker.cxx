@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StPidAmpMaker.cxx,v 1.11 2003/04/30 20:37:56 perev Exp $
+// $Id: StPidAmpMaker.cxx,v 1.12 2003/09/02 17:58:46 perev Exp $
 //
 // Authors: Aihong Tang
 //
@@ -10,7 +10,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <math.h>
 #include "StMaker.h"
@@ -106,7 +106,7 @@ Int_t StPidAmpMaker::Init() {
 
 
   gMessMgr->SetLimit("##### StPidAmp", 2);
-  gMessMgr->Info("##### StPidAmp: $Id: StPidAmpMaker.cxx,v 1.11 2003/04/30 20:37:56 perev Exp $");
+  gMessMgr->Info("##### StPidAmp: $Id: StPidAmpMaker.cxx,v 1.12 2003/09/02 17:58:46 perev Exp $");
 
   return StMaker::Init();
 }
@@ -283,6 +283,9 @@ Int_t StPidAmpMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StPidAmpMaker.cxx,v $
+// Revision 1.12  2003/09/02 17:58:46  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.11  2003/04/30 20:37:56  perev
 // Warnings cleanup. Modified lines marked VP
 //

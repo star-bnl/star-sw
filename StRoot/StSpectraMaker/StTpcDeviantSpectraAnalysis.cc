@@ -144,11 +144,11 @@ void StTpcDeviantSpectraAnalysis::fillHistograms(StEvent& event) {
 	    double deviant = tpcDedxAlgorithm.numberOfSigma(mParticle);
 
 	    double pperp = mom.perp();
-	    double mt = sqrt(pperp*pperp + mMassPid*mMassPid);
-	    double E = sqrt(p*p+mMassPid*mMassPid);
+	    double mt = ::sqrt(pperp*pperp + mMassPid*mMassPid);
+	    double E = ::sqrt(p*p+mMassPid*mMassPid);
 	    double pz = mom.z();
-	    double y = 0.5*log((E+pz)/(E-pz));
-	    double pseudoy = 0.5*log((p+pz)/(p-pz));
+	    double y = 0.5*::log((E+pz)/(E-pz));
+	    double pseudoy = 0.5*::log((p+pz)/(p-pz));
             double xvalue=-1000.;
 	    double yvalue=0.;
 	    if (mAbscissa == kRapidity) {

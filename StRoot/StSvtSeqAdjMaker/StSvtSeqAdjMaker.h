@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.21 2003/07/18 17:15:40 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.22 2003/09/02 17:59:08 perev Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.22  2003/09/02 17:59:08  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.21  2003/07/18 17:15:40  caines
 // Fix Pedoffset to be 20 not 10 change variables to int from floats to avoid casting problems, fix that when pedestal goes negative we dont
 //
@@ -77,8 +80,8 @@
 #include "StMaker.h"
 #endif
 
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include <string>
 
 class TH1D;
@@ -128,7 +131,7 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t SetLowInvProd(int LowInvProd);// Set the low threshold based on the frequency distribution
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSvtSeqAdjMaker.h,v 1.21 2003/07/18 17:15:40 caines Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSvtSeqAdjMaker.h,v 1.22 2003/09/02 17:59:08 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
     

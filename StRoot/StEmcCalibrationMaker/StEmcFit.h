@@ -1,5 +1,8 @@
-// $Id: StEmcFit.h,v 1.8 2002/12/02 21:30:56 suaide Exp $
+// $Id: StEmcFit.h,v 1.9 2003/09/02 17:57:59 perev Exp $
 // $Log: StEmcFit.h,v $
+// Revision 1.9  2003/09/02 17:57:59  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.8  2002/12/02 21:30:56  suaide
 // New EMC calibration maker
 //
@@ -73,7 +76,7 @@ class StEmcFit : public TObject
             void      Fit(); ///< Fit
             void      Fit(Int_t); ///< Fit using a fixed number of iterations
             Float_t   GetParameter(Int_t i)                        { return a[i]; } ///< Get parameter value
-            Float_t   GetParameterError(Int_t i)                   { return sqrt(covar[i][i]); } ///< Get parameter error
+            Float_t   GetParameterError(Int_t i)                   { return ::sqrt(covar[i][i]); } ///< Get parameter error
             Float_t   GetCovariance(Int_t i,Int_t j)               { return covar[i][j]; } ///< Get covariance matrix element
             Float_t   GetChiSquare()                               { return chisq; } ///< Get chi square / sqrt (Npoints - Nparam)
             Int_t     GetNPoints()                                 { return ndata; } ///< Get number of points

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichCerenkovHistogram.cxx,v 1.8 2002/05/21 22:52:55 lasiuk Exp $
+ * $Id: StRichCerenkovHistogram.cxx,v 1.9 2003/09/02 17:58:55 perev Exp $
  *
  * Author:  bl Mar 2, 2001
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichCerenkovHistogram.cxx,v $
+ * Revision 1.9  2003/09/02 17:58:55  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.8  2002/05/21 22:52:55  lasiuk
  * attempt 2
  *
@@ -221,7 +224,7 @@ StRichCerenkovHistogram::calculateBinStatistics(double lowerBound, double upperB
 
     if(binAngles.size()>0) {
 	binValue = moment1/sumWeight;
-	binSigma = sqrt(fabs((moment2/sumWeight) - sqr(binValue)));
+	binSigma = ::sqrt(fabs((moment2/sumWeight) - sqr(binValue)));
 
 	for(size_t jj=0; jj<binAngles.size(); jj++) {
 	    binSymmetry += (binValue-binAngles[jj])*this->weight(binAngles[jj]);

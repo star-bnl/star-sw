@@ -336,10 +336,10 @@ void StEventQAMaker::MakeHistGlob() {
       Float_t xcenter = geom->helix().xcenter();
       Float_t ycenter = geom->helix().ycenter();
       Float_t rcircle = 1./geom->helix().curvature();
-      Float_t centerOfCircleToFP = sqrt(pow(xcenter-firstPoint.x(),2) +
-					pow(ycenter-firstPoint.y(),2));
-      Float_t centerOfCircleToLP = sqrt(pow(xcenter-lastPoint.x(),2) +
-					pow(ycenter-lastPoint.y(),2));
+      Float_t centerOfCircleToFP = ::sqrt(::pow(xcenter-firstPoint.x(),2) +
+					::pow(ycenter-firstPoint.y(),2));
+      Float_t centerOfCircleToLP = ::sqrt(::pow(xcenter-lastPoint.x(),2) +
+					::pow(ycenter-lastPoint.y(),2));
       Float_t azimdif = dif.perp();
       if (rcircle<centerOfCircleToFP) azimdif *= -1.;
       Float_t azimdifl = difl.perp();
@@ -514,8 +514,8 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_pT_eta_recT->Fill(eta,lmevpt);
 	if (event->primaryVertex()) {
 	  Float_t denom = 2*rcircle*
-	    asin(sqrt((pow(firstPoint.x()-event->primaryVertex()->position().x(),2))+
-		      (pow(firstPoint.y()-event->primaryVertex()->position().y(),2)))/
+	    asin(::sqrt((::pow(firstPoint.x()-event->primaryVertex()->position().x(),2))+
+		      (::pow(firstPoint.y()-event->primaryVertex()->position().y(),2)))/
 		 (2*rcircle));
 	  hists->m_tanl_zfT->Fill((firstPoint.z() -
 				   event->primaryVertex()->position().z())/denom,
@@ -634,8 +634,8 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_pT_eta_recTS->Fill(eta,lmevpt);
 	if (event->primaryVertex()) {
 	  Float_t denom = 2*rcircle*
-	    asin(sqrt((pow(firstPoint.x()-event->primaryVertex()->position().x(),2))+
-		      (pow(firstPoint.y()-event->primaryVertex()->position().y(),2)))/
+	    asin(::sqrt((::pow(firstPoint.x()-event->primaryVertex()->position().x(),2))+
+		      (::pow(firstPoint.y()-event->primaryVertex()->position().y(),2)))/
 		 (2*rcircle));
 	  if (radf>40) {
 	    hists->m_tanl_zfT->Fill((firstPoint.z() -
@@ -936,10 +936,10 @@ void StEventQAMaker::MakeHistPrim() {
 	Float_t xcenter = geom->helix().xcenter();
 	Float_t ycenter = geom->helix().ycenter();
 	Float_t rcircle = 1./geom->helix().curvature();
-	Float_t centerOfCircleToFP = sqrt(pow(xcenter-firstPoint.x(),2) +
-					  pow(ycenter-firstPoint.y(),2));
-	Float_t centerOfCircleToLP = sqrt(pow(xcenter-lastPoint.x(),2) +
-					  pow(ycenter-lastPoint.y(),2));
+	Float_t centerOfCircleToFP = ::sqrt(::pow(xcenter-firstPoint.x(),2) +
+					  ::pow(ycenter-firstPoint.y(),2));
+	Float_t centerOfCircleToLP = ::sqrt(::pow(xcenter-lastPoint.x(),2) +
+					  ::pow(ycenter-lastPoint.y(),2));
 	Float_t azimdif = dif.perp();
 	if (rcircle<centerOfCircleToFP) azimdif *= -1.;
 	Float_t azimdifl = difl.perp();
@@ -955,10 +955,10 @@ void StEventQAMaker::MakeHistPrim() {
 	Float_t outerXcenter = outerGeom->helix().xcenter();
 	Float_t outerYcenter = outerGeom->helix().ycenter();
 	Float_t outerRcircle = 1./outerGeom->helix().curvature();
-	Float_t outerCenterOfCircleToFP = sqrt(pow(outerXcenter-firstPoint.x(),2) +
-					       pow(outerYcenter-firstPoint.y(),2));
-	Float_t outerCenterOfCircleToLP = sqrt(pow(outerXcenter-lastPoint.x(),2) +
-					       pow(outerYcenter-lastPoint.y(),2));
+	Float_t outerCenterOfCircleToFP = ::sqrt(::pow(outerXcenter-firstPoint.x(),2) +
+					       ::pow(outerYcenter-firstPoint.y(),2));
+	Float_t outerCenterOfCircleToLP = ::sqrt(::pow(outerXcenter-lastPoint.x(),2) +
+					       ::pow(outerYcenter-lastPoint.y(),2));
 	Float_t outerAzimdif = outerDif.perp();
 	if (outerRcircle<outerCenterOfCircleToFP) outerAzimdif *= -1.;
 	Float_t outerAzimdifl = outerDifl.perp();
@@ -1078,8 +1078,8 @@ void StEventQAMaker::MakeHistPrim() {
 // these are TPC only
 	  hists->m_ppT_eta_recT->Fill(eta,lmevpt);
 	  Float_t denom = 2*rcircle*
-	    asin(sqrt((pow(firstPoint.x()-event->primaryVertex()->position().x(),2))+
-		      (pow(firstPoint.y()-event->primaryVertex()->position().y(),2)))/
+	    asin(::sqrt((::pow(firstPoint.x()-event->primaryVertex()->position().x(),2))+
+		      (::pow(firstPoint.y()-event->primaryVertex()->position().y(),2)))/
 		 (2*rcircle));
 	  hists->m_ptanl_zfT->Fill((firstPoint.z() -
 				    event->primaryVertex()->position().z())/denom,
@@ -1176,8 +1176,8 @@ void StEventQAMaker::MakeHistPrim() {
 
 	  hists->m_ppT_eta_recTS->Fill(eta,lmevpt);
 	  Float_t denom = 2*rcircle*
-	    asin(sqrt((pow(firstPoint.x()-event->primaryVertex()->position().x(),2))+
-		      (pow(firstPoint.y()-event->primaryVertex()->position().y(),2)))/
+	    asin(::sqrt((::pow(firstPoint.x()-event->primaryVertex()->position().x(),2))+
+		      (::pow(firstPoint.y()-event->primaryVertex()->position().y(),2)))/
 		 (2*rcircle));
 	  if (radf>40) hists->m_ptanl_zfT->
 			 Fill((firstPoint.z() - event->primaryVertex()->position().z())/denom,
@@ -1488,13 +1488,13 @@ void StEventQAMaker::MakeHistVertex() {
   for (UInt_t k=0; k<v0Vtx.size(); k++) {
     StV0Vertex *v0 = v0Vtx[k];
     if ((v0) && (v0->dcaParentToPrimaryVertex() >= 0.)) {
-      Float_t e1a = pow(abs(v0->momentumOfDaughter(positive)),2);
-      Float_t e2 = pow(abs(v0->momentumOfDaughter(negative)),2);
+      Float_t e1a = ::pow(abs(v0->momentumOfDaughter(positive)),2);
+      Float_t e2 = ::pow(abs(v0->momentumOfDaughter(negative)),2);
       Float_t e1 = e1a + m_prmass2;
       e2 += m_pimass2;
       e1 = TMath::Sqrt(e1);
       e2 = TMath::Sqrt(e2);
-      Float_t p = pow(abs(v0->momentum()),2);
+      Float_t p = ::pow(abs(v0->momentum()),2);
       Float_t inv_mass_la = TMath::Sqrt((e1+e2)*(e1+e2) - p);
       e1 = e1a + m_pimass2;
       e1 = TMath::Sqrt(e1);
@@ -1522,8 +1522,8 @@ void StEventQAMaker::MakeHistVertex() {
         if (phi<0.) phi += 360.;
         hists->m_vtx_phi_dist->Fill(phi);
 	hists->m_vtx_z_dist->Fill(v0->position().z() - primVtx->position().z());
-	Float_t r_dist = sqrt(pow(v0->position().x()-primVtx->position().x(),2)+
-			      pow(v0->position().y()-primVtx->position().y(),2));
+	Float_t r_dist = ::sqrt(::pow(v0->position().x()-primVtx->position().x(),2)+
+			      ::pow(v0->position().y()-primVtx->position().y(),2));
 	hists->m_vtx_r_dist->Fill(r_dist);
 	//        v0PhiHist.Fill(phi);
 	//        if (phi<180.) phi += 360.;
@@ -1574,10 +1574,10 @@ void StEventQAMaker::MakeHistVertex() {
       Float_t pP2 = pMom.mag2();
       Float_t pL2 = lMom.mag2();
       Float_t pX2 = xMom.mag2();
-      Float_t epi = sqrt(pP2 + m_pimass2);
-      Float_t ela = sqrt(pL2 + m_lamass2);
+      Float_t epi = ::sqrt(pP2 + m_pimass2);
+      Float_t ela = ::sqrt(pL2 + m_lamass2);
       Float_t eXi = ela + epi;
-      Float_t inv_mass_xi = sqrt(eXi*eXi - pX2);
+      Float_t inv_mass_xi = ::sqrt(eXi*eXi - pX2);
 
       hists->m_xi_ma_hist->Fill(inv_mass_xi);
 
@@ -2009,8 +2009,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.47 2003/04/14 15:20:38 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.48 2003/09/02 17:59:21 perev Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.48  2003/09/02 17:59:21  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 2.47  2003/04/14 15:20:38  genevb
 // Add pp 2003 trigger (first attempt)
 //

@@ -23,35 +23,35 @@
 /*  28Jun01 JMN Added definition of ADD_BITs                                           */
 /***************************************************************************************/
 
-#define MAX_RAW_DATA_BLOCKS   11              /* Maximum number of Raw Data Blocks:  current + npre + npost */
-#define FORMAT_VERSION   0x13                 /* Format Version number for trigger data */
-#define EVT_HEAD_LEN     sizeof(TrgEvtHeader) /* Trigger Event Header Length */
-#define EV_DESC_LEN      sizeof(EvtDescData)  /* Number of bytes in event descriptor */
-#define L0DSM_DATA_LEN   sizeof(L0_DSM_Data)  /* Size of data block in L0 DSM Tree */
-#define RAW_DET_DATA_LEN sizeof(RawTrgDet)    /* Size of Raw Detector Data from CTB, MWC with headers */
-#define TRG_SUM_LEN      sizeof(TrgSumData)   /* Number of bytes in the trigger summary for DAQ with headers */
+#define y2MAX_RAW_DATA_BLOCKS   11              /* Maximum number of Raw Data Blocks:  current + npre + npost */
+#define y2FORMAT_VERSION   0x13                 /* Format Version number for trigger data */
+#define y2EVT_HEAD_LEN     sizeof(TrgEvtHeader) /* Trigger Event Header Length */
+#define y2EV_DESC_LEN      sizeof(EvtDescData)  /* Number of bytes in event descriptor */
+#define y2L0DSM_DATA_LEN   sizeof(L0_DSM_Data)  /* Size of data block in L0 DSM Tree */
+#define y2RAW_DET_DATA_LEN sizeof(RawTrgDet)    /* Size of Raw Detector Data from CTB, MWC with headers */
+#define y2TRG_SUM_LEN      sizeof(TrgSumData)   /* Number of bytes in the trigger summary for DAQ with headers */
 
-#define L1_DATA_LEN  (EVT_HEAD_LEN+EV_DESC_LEN+TRG_SUM_LEN)   /* Size of data passed from L1ANA to L1DC */ 
-#define TRG_EVT_LEN  (L1_DATA_LEN+(MAX_RAW_DATA_BLOCKS*RAW_DET_DATA_LEN))  /* Max size of a trigger event */
-#define TDI_EVT_LEN  (EV_DESC_LEN+TRG_SUM_LEN+(MAX_RAW_DATA_BLOCKS*RAW_DET_DATA_LEN)) /* size of event sent to TDI */
+#define y2L1_DATA_LEN  (y2EVT_HEAD_LEN+y2EV_DESC_LEN+y2TRG_SUM_LEN)   /* Size of data passed from L1ANA to L1DC */ 
+#define y2TRG_EVT_LEN  (y2L1_DATA_LEN+(y2MAX_RAW_DATA_BLOCKS*y2RAW_DET_DATA_LEN))  /* Max size of a trigger event */
+#define y2TDI_EVT_LEN  (y2EV_DESC_LEN+y2TRG_SUM_LEN+(y2MAX_RAW_DATA_BLOCKS*y2RAW_DET_DATA_LEN)) /* size of event sent to TDI */
 
-#define L0_SUM_LEN           148              /* Number of bytes in L0 Summary + Header */
-#define L1_SUM_LEN           132              /* Number of bytes in L1 Summary + Header */
-#define L2_SUM_LEN           116              /* Number of bytes in L2 Summary + Header */
-#define L0_REG_LEN            16              /* Number of bytes in L0 Register + Header */
+#define y2L0_SUM_LEN           148              /* Number of bytes in L0 Summary + Header */
+#define y2L1_SUM_LEN           132              /* Number of bytes in L1 Summary + Header */
+#define y2L2_SUM_LEN           116              /* Number of bytes in L2 Summary + Header */
+#define y2L0_REG_LEN            16              /* Number of bytes in L0 Register + Header */
 
-#define CTB_DATA_OFFSET        8              /* Number of bytes CTB Raw data is offset in raw trigger structure */
-#define RAW_CTB_LEN          256              /* Number of bytes in raw CTB DSMs */
-#define MWC_DATA_OFFSET      272              /* Number of bytes MWC Raw data is offset in raw trigger structure */
-#define RAW_MWC_LEN          128              /* Number of bytes in raw CTB DSMs */
-#define BEMC_DATA_OFFSET     408              /* Number of bytes MWC Raw data is offset in raw trigger structure */
-#define RAW_BEMC_LEN         128              /* Number of bytes in raw CTB DSMs */
+#define y2CTB_DATA_OFFSET        8              /* Number of bytes CTB Raw data is offset in raw trigger structure */
+#define y2RAW_CTB_LEN          256              /* Number of bytes in raw CTB DSMs */
+#define y2MWC_DATA_OFFSET      272              /* Number of bytes MWC Raw data is offset in raw trigger structure */
+#define y2RAW_MWC_LEN          128              /* Number of bytes in raw CTB DSMs */
+#define y2BEMC_DATA_OFFSET     408              /* Number of bytes MWC Raw data is offset in raw trigger structure */
+#define y2RAW_BEMC_LEN         128              /* Number of bytes in raw CTB DSMs */
 
-#define ADD_BIT_PILEUP         0              /* Pileup bit in event descriptor add-bits */
-#define ADD_BIT_PRIORITY       1              /* Priority bit */
-#define ADD_BIT_FORCE          5              /* Force store of this event */
-#define ADD_BIT_L2_5           6              /* Level 2.5 abort */
-#define ADD_BIT_SIM            7              /* Simulated event - used by DAQ */
+#define y2ADD_BIT_PILEUP         0              /* Pileup bit in event descriptor add-bits */
+#define y2ADD_BIT_PRIORITY       1              /* Priority bit */
+#define y2ADD_BIT_FORCE          5              /* Force store of this event */
+#define y2ADD_BIT_L2_5           6              /* Level 2.5 abort */
+#define y2ADD_BIT_SIM            7              /* Simulated event - used by DAQ */
 /********** Trigger Structures ***********/
 
 /*

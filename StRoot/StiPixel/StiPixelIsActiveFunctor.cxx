@@ -1,4 +1,4 @@
-#include <iostream>
+#include "Stiostream.h"
 #include "StiPixelIsActiveFunctor.h"
 
 StiPixelIsActiveFunctor::StiPixelIsActiveFunctor(){

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.25 2003/02/25 19:28:41 posk Exp $
+// $Id: StFlowTrack.h,v 1.26 2003/09/02 17:58:13 perev Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //         FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -205,11 +205,11 @@ inline const StTrackTopologyMap& StFlowTrack::TopologyMap() const { return mTopo
 
 
 inline Float_t StFlowTrack::P()             const { 
-  float momentum = mPt/sqrt(1-(tanh(mEta)*tanh(mEta)));
+  float momentum = mPt/::sqrt(1-(tanh(mEta)*tanh(mEta)));
   return momentum; }
 
 inline Float_t StFlowTrack::PGlobal()       const { 
-  float momentum = mPtGlobal/sqrt(1-(tanh(mEtaGlobal)*tanh(mEtaGlobal)));
+  float momentum = mPtGlobal/::sqrt(1-(tanh(mEtaGlobal)*tanh(mEtaGlobal)));
   return momentum; }
 
 inline Float_t StFlowTrack::Y()             const { 
@@ -225,10 +225,10 @@ inline Float_t StFlowTrack::Y()             const {
   else if (strcmp(mPid, "d-")  == 0)      { M = 1.876; }
   else if (strcmp(mPid, "e-")  == 0)      { M = 0.0005; }
   else if (strcmp(mPid, "e+")  == 0)      { M = 0.0005; }
-  double Pz = sqrt(this->P()*this->P() - mPt*mPt); 
+  double Pz = ::sqrt(this->P()*this->P() - mPt*mPt); 
   if (mEta < 0) { Pz = -Pz; }
-  double E = sqrt(this->P()*this->P() + M*M);
-  float rapidity = 0.5*log((E + Pz)/(E - Pz));
+  double E = ::sqrt(this->P()*this->P() + M*M);
+  float rapidity = 0.5*::log((E + Pz)/(E - Pz));
   return rapidity;
 }
 
@@ -348,6 +348,9 @@ inline void StFlowTrack::SetTopologyMap(StTrackTopologyMap map) { mTopology = ma
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.26  2003/09/02 17:58:13  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.25  2003/02/25 19:28:41  posk
 // Changed a few unimportant default cuts.
 //

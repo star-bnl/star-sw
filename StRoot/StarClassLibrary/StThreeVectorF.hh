@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.hh,v 1.7 2003/05/07 20:34:12 perev Exp $
+ * $Id: StThreeVectorF.hh,v 1.8 2003/09/02 17:59:35 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.hh,v $
+ * Revision 1.8  2003/09/02 17:59:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.7  2003/05/07 20:34:12  perev
  * functions for CINT added
  *
@@ -42,7 +45,7 @@
  **************************************************************************/
 #ifndef ST_THREE_VECTOR_F_HH
 #define ST_THREE_VECTOR_F_HH
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #ifdef __ROOT__
 #include "Rtypes.h"
@@ -222,7 +225,7 @@ inline float StThreeVectorF::phi() const
 
 inline float StThreeVectorF::pseudoRapidity() const
 {
-    return -log(tan(theta()/2.));
+    return -::log(tan(theta()/2.));
 }
 
 inline StThreeVectorF StThreeVectorF::unit() const
@@ -232,7 +235,7 @@ inline StThreeVectorF StThreeVectorF::unit() const
 
 inline float StThreeVectorF::massHypothesis(float mass) const
 {
-    return sqrt((*this)*(*this) + mass*mass);
+    return ::sqrt((*this)*(*this) + mass*mass);
 }
 
 inline StThreeVectorF StThreeVectorF::orthogonal() const
@@ -281,7 +284,7 @@ inline void StThreeVectorF::rotateZ(float angle)
 
 inline float StThreeVectorF::perp() const
 {
-    return sqrt(mX1*mX1+mX2*mX2);
+    return ::sqrt(mX1*mX1+mX2*mX2);
 }
 
 inline float StThreeVectorF::perp2() const
@@ -296,7 +299,7 @@ inline float StThreeVectorF::magnitude() const
 
 inline float StThreeVectorF::mag() const
 {
-    return sqrt(mX1*mX1+mX2*mX2+mX3*mX3);
+    return ::sqrt(mX1*mX1+mX2*mX2+mX3*mX3);
 }
 
 inline float StThreeVectorF::mag2() const

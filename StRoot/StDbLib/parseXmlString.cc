@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: parseXmlString.cc,v 1.4 2000/01/10 20:37:55 porter Exp $
+ * $Id: parseXmlString.cc,v 1.5 2003/09/02 17:57:50 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: parseXmlString.cc,v $
+ * Revision 1.5  2003/09/02 17:57:50  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.4  2000/01/10 20:37:55  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -30,8 +33,8 @@
  *
  **************************************************************************/
 #include "parseXmlString.hh"
-#include <iostream.h>
-#include <strstream.h>
+#include <Stiostream.h>
+#include <Stsstream.h>
 #include <string.h>
 
 /////////////////////////////////////////////////////////////////

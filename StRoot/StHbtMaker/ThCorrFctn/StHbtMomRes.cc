@@ -10,16 +10,16 @@ StHbtMomRes::StHbtMomRes(int pdgPid) {
   setPDGPid(pdgPid);
 } 
 inline Float_t StHbtMomRes::getPtError(const Float_t pt) const {
-  return mMult * (mPta + mPtb*pow(pt,mPtalfa) + mPtc*pt);
+  return mMult * (mPta + mPtb*::pow(pt,mPtalfa) + mPtc*pt);
 }
 inline Float_t StHbtMomRes::getPhiError(const Float_t p) const {
-  return mMult * (mPhia + mPhib*pow(p,mPhialfa));
+  return mMult * (mPhia + mPhib*::pow(p,mPhialfa));
 }
 inline Float_t StHbtMomRes::getThetaError(const Float_t p) const {
-  return mMult * (mThetaa + mThetab*pow(p,mThetaalfa));
+  return mMult * (mThetaa + mThetab*::pow(p,mThetaalfa));
 }
 inline Float_t StHbtMomRes::getPShift(const Float_t p) const {
-  return mPShiftMult * mMult * (mPShifta + mPShiftb*pow(p,mPShiftalfa));
+  return mPShiftMult * mMult * (mPShifta + mPShiftb*::pow(p,mPShiftalfa));
 }
 
 void StHbtMomRes::setMult(const Float_t mult) {

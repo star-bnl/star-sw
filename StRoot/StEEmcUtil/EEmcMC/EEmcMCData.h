@@ -5,12 +5,15 @@
 #ifndef EEmcMCData_h
 #define EEmcMCData_h
 /*********************************************************************
- * $Id: EEmcMCData.h,v 1.3 2003/02/20 21:27:06 zolnie Exp $
+ * $Id: EEmcMCData.h,v 1.4 2003/09/02 17:57:56 perev Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Monte Carlo Data
  *********************************************************************
  * $Log: EEmcMCData.h,v $
+ * Revision 1.4  2003/09/02 17:57:56  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2003/02/20 21:27:06  zolnie
  * added simple geometry class
  *
@@ -83,16 +86,17 @@ enum EEmcVolId {
 };
 
 
+struct EEmcMCHitTower { 
+  UChar_t  ssec;  // endcap subsector  1:5 (A-E)
+  UChar_t  eta;   // endcap eta        1:12
+};
 
 
 struct EEmcMCHit {
   UChar_t  detector;  // endcap detector part  (prs,tower,post,smdu,smdv)
   UChar_t  sector;    // endcap phi sector 1:12
   union {
-    struct EEmcMCHitTower { 
-      UChar_t  ssec;  // endcap subsector  1:5 (A-E)
-      UChar_t  eta;   // endcap eta        1:12
-    } tower;
+    EEmcMCHitTower tower;
     UShort_t strip;   // smd's  strip numbers
   };
   Float_t  de;        // energy loss in the element (GeV)

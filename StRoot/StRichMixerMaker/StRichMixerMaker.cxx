@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichMixerMaker.cxx,v 1.1 2001/08/27 16:43:43 lasiuk Exp $
+ * $Id: StRichMixerMaker.cxx,v 1.2 2003/09/02 17:58:53 perev Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -14,12 +14,15 @@
  ***************************************************************************
  *
  * $Log: StRichMixerMaker.cxx,v $
+ * Revision 1.2  2003/09/02 17:58:53  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2001/08/27 16:43:43  lasiuk
  * Initial Revision
  *
  ***************************************************************************/
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include <algorithm>
 
 #include "StChain.h"
@@ -428,7 +431,7 @@ Int_t StRichMixerMaker::Make() {
 void StRichMixerMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRichMixerMaker.cxx,v 1.1 2001/08/27 16:43:43 lasiuk Exp $\n");
+    printf("* $Id: StRichMixerMaker.cxx,v 1.2 2003/09/02 17:58:53 perev Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.18 2003/07/02 18:39:24 porter Exp $
+ * $Id: MysqlDb.h,v 1.19 2003/09/02 17:57:49 perev Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.19  2003/09/02 17:57:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.18  2003/07/02 18:39:24  porter
  * added server version to connection notification and host:port to connection failure notification
  *
@@ -113,8 +116,8 @@ typedef  int MYSQL_FIELD;
 #endif
 
 #include <string.h>
-#include <iostream.h>
-#include <strstream.h>
+#include <Stiostream.h>
+#include <Stsstream.h>
 #include "StDbBuffer.h"
 #include "StDbLogger.hh"
 
@@ -266,43 +269,43 @@ inline void MysqlDb::Close(){
 
 inline MysqlDb &MysqlDb::operator<<( const short aq){
   ostrstream ts;  ts<<aq<<ends;
-  char* mStrBuff=ts.str(); ts.freeze(0);
+  const char* mStrBuff=ts.str(); ts.freeze(0);
   return *this<<mStrBuff;
 }
 
 inline MysqlDb &MysqlDb::operator<<( const unsigned short aq){
   ostrstream ts;  ts<<aq<<ends;
-  char* mStrBuff=ts.str(); ts.freeze(0);
+  const char* mStrBuff=ts.str(); ts.freeze(0);
   return *this<<mStrBuff;
 }
 
 inline MysqlDb &MysqlDb::operator<<( const int aq){
   ostrstream ts;  ts<<aq<<ends;
-  char* mStrBuff=ts.str(); ts.freeze(0);
+  const char* mStrBuff=ts.str(); ts.freeze(0);
   return *this<<mStrBuff;
 }
 
 inline MysqlDb &MysqlDb::operator<<( const unsigned int aq){
   ostrstream ts;  ts<<aq<<ends;
-  char* mStrBuff=ts.str(); ts.freeze(0);
+  const char* mStrBuff=ts.str(); ts.freeze(0);
   return *this<<mStrBuff;
 }
 
 inline MysqlDb &MysqlDb::operator<<( const long long aq){
   ostrstream ts;  ts<<aq<<ends;
-  char* mStrBuff=ts.str(); ts.freeze(0);
+  const char* mStrBuff=ts.str(); ts.freeze(0);
   return *this<<mStrBuff;
 }
 
 inline MysqlDb &MysqlDb::operator<<( const float aq){
   ostrstream ts;  ts<<aq<<ends;
-  char* mStrBuff=ts.str(); ts.freeze(0);
+  const char* mStrBuff=ts.str(); ts.freeze(0);
   return *this<<mStrBuff;
 }
 
 inline MysqlDb &MysqlDb::operator<<( const double aq){
   ostrstream ts;  ts<<aq<<ends;
-  char* mStrBuff=ts.str(); ts.freeze(0);
+  const char* mStrBuff=ts.str(); ts.freeze(0);
   return *this<<mStrBuff;
 }
 

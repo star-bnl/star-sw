@@ -12,7 +12,7 @@
 #include <TCanvas.h>
 #include <TPad.h>
 #include "TObject.h"
-#include <iostream>
+#include "Stiostream.h"
 
 extern "C" void ktjetp_(int &, float &, float &, float &, float &);
 extern "C" void ktjet_(int &, float *, int *, int &, float &);
@@ -111,10 +111,10 @@ Int_t StJetFinderKonst::FindCone(Int_t ntrk, Float_t *pt, Float_t *eta, Float_t 
 //      if(Kaon[I_max] > 950) mass = mKaon;
 //      else
 //        if(Proton[I_max] > 950) mass = mProton;              
-    EJet[NJets]=sqrt(vjet*vjet+mass);
+    EJet[NJets]=::sqrt(vjet*vjet+mass);
     eta_i   = vjet.Eta();
     phi_i   = vjet.Phi();
-    PtPartM[NJets]=sqrt(vjet(0)*vjet(0)+vjet(1)*vjet(1));
+    PtPartM[NJets]=::sqrt(vjet(0)*vjet(0)+vjet(1)*vjet(1));
     NpartJ[NJets]++;
     ninjet[I_max] = NJets;        
       //      cout << "eta_i = " << eta_i << "  phi_i = " << phi_i << endl; 
@@ -142,14 +142,14 @@ Int_t StJetFinderKonst::FindCone(Int_t ntrk, Float_t *pt, Float_t *eta, Float_t 
 //        if(Kaon[I_max] > 950) mass = mKaon;
 //        else
 //          if(Proton[I_max] > 950) mass = mProton;      
-      EJet[NJets]+=sqrt(vpart*vpart+mass);
+      EJet[NJets]+=::sqrt(vpart*vpart+mass);
       vjet+=vpart;
       eta_i   = vjet.Eta();
       phi_i   = vjet.Phi();
       NpartJ[NJets]++;
       ninjet[i] = NJets;            // attach particle to jet
     }
-    PtJ[NJets] = sqrt(vjet(0)*vjet(0)+vjet(1)*vjet(1));
+    PtJ[NJets] = ::sqrt(vjet(0)*vjet(0)+vjet(1)*vjet(1));
     if(PtJ[NJets] > mMinJetEt) { // o'k - this is a jet
       EtaJ[NJets] = vjet.Eta();
       PhiJ[NJets] = vjet.Phi();
@@ -161,7 +161,7 @@ Int_t StJetFinderKonst::FindCone(Int_t ntrk, Float_t *pt, Float_t *eta, Float_t 
           vpart.SetY(pt[i]*sin(phi[i]));
           vpart.SetZ(pt[i]*sinh(eta[i]));
           Double_t angle = vjet.Angle(vpart);
-          Double_t Pl= sqrt(vpart*vpart)*cos(angle);
+          Double_t Pl= ::sqrt(vpart*vpart)*cos(angle);
           Dz[NJets][npart_dz]=Pl/EJet[NJets];
 	  npart_dz++;
         }
@@ -234,7 +234,7 @@ Int_t StJetFinderKonst::FindKt(Int_t ntrk, Float_t *pt, Float_t *eta, Float_t *p
       float px = pt[i]*cos(phi[i]);
       float py = pt[i]*sin(phi[i]);
       float pz = pt[i]*sinh(eta[i]);
-      float e = sqrt(px*px+py*py+pz*pz+mass);
+      float e = ::sqrt(px*px+py*py+pz*pz+mass);
       ktjetp_(nprt_eta, px, py, pz, e);    
     }
     int NJets_kt;
@@ -268,11 +268,11 @@ Int_t StJetFinderKonst::FindKt(Int_t ntrk, Float_t *pt, Float_t *eta, Float_t *p
     TVector3 vpart;
     float eta_p, phi_p, deta, dphi, radius;
     vjet.SetXYZ(PJet[NJets_kt-1][0],PJet[NJets_kt-1][1],PJet[NJets_kt-1][2]);            
-    PtJ[NJets] = sqrt(vjet(0)*vjet(0)+vjet(1)*vjet(1));
+    PtJ[NJets] = ::sqrt(vjet(0)*vjet(0)+vjet(1)*vjet(1));
     if(NJets_kt) {
       for(int i=NJets_kt-1; i>=0; i--) {
         vjet.SetXYZ(PJet[i][0],PJet[i][1],PJet[i][2]);            
-        PtJ[NJets] = sqrt(vjet(0)*vjet(0)+vjet(1)*vjet(1));
+        PtJ[NJets] = ::sqrt(vjet(0)*vjet(0)+vjet(1)*vjet(1));
         if(PtJ[NJets] > mMinJetEt && !nsub) {
           EtaJ[NJets] = vjet.Eta();
           PhiJ[NJets] = vjet.Phi();
@@ -311,7 +311,7 @@ Int_t StJetFinderKonst::FindKt(Int_t ntrk, Float_t *pt, Float_t *eta, Float_t *p
               vpart.SetY(pt[j]*sin(phi[j]));
               vpart.SetZ(pt[j]*sinh(eta[j]));
               Double_t angle = vjet.Angle(vpart);
-              Double_t Pl= sqrt(vpart*vpart)*cos(angle);
+              Double_t Pl= ::sqrt(vpart*vpart)*cos(angle);
               Dz[NJets][NpartJ[NJets]]=Pl/EJet[NJets];
               NpartJ[NJets]++;
             }              

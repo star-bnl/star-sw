@@ -1,7 +1,7 @@
 #ifndef PmtIdentifier_H_INCLUDED
 #define PmtIdentifier_H_INCLUDED
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 ///Class used to encapsulate all data need to uniquely identify each PMT.
 ///

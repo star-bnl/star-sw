@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.cxx,v 1.17 2003/04/30 20:38:16 perev Exp $
+ * $Id: StRichSpectraMaker.cxx,v 1.18 2003/09/02 17:58:55 perev Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StRichSpectraMaker.cxx,v $
+ * Revision 1.18  2003/09/02 17:58:55  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.17  2003/04/30 20:38:16  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -75,8 +78,8 @@
 //#define WITH_GEANT_INFO 1
 //#define P00hm 0
 
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include <assert.h>
 #include <float.h>
 #include <vector>
@@ -778,7 +781,7 @@ Int_t StRichSpectraMaker::Make() {
 void StRichSpectraMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRichSpectraMaker.cxx,v 1.17 2003/04/30 20:38:16 perev Exp $\n");
+    printf("* $Id: StRichSpectraMaker.cxx,v 1.18 2003/09/02 17:58:55 perev Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -935,7 +938,7 @@ StRichSpectraMaker::expectedCerenkov(float p, int pid) const
 
     float beta2 = p*p/(p*p + mass*mass);
 
-    double cosine = sqrt(p*p+mass*mass)/(p*mIndex);
+    double cosine = ::sqrt(p*p+mass*mass)/(p*mIndex);
     if(fabs(cosine)<=1)
 	values.first = acos(cosine);
     else

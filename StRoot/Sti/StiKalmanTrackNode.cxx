@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.30 2003/08/13 21:04:21 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.31 2003/09/02 17:59:41 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.31  2003/09/02 17:59:41  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.30  2003/08/13 21:04:21  pruneau
  * transfered relevant tracking pars to detector builders
  *
@@ -70,7 +73,7 @@
  *
  */
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdexcept>
 #include <math.h>
 using namespace std;
@@ -490,7 +493,7 @@ int  StiKalmanTrackNode::propagate(double xk, int option)
       double b = L*L/(a*a);
       double sq = b*r0sq-1;
       if (sq<0) return -1;
-      sq = sqrt(sq);				
+      sq = ::sqrt(sq);				
       double x_p = a*(x0+y0*sq)/r0sq;
       if (x_p>0)
 	x2 = x_p;
@@ -510,7 +513,7 @@ int  StiKalmanTrackNode::propagate(double xk, int option)
     sinCA2 = 0.999999;
   else if (sinCA2<-1.) 
   sinCA2 = -0.999999;*/
-  cosCA2   = sqrt(1.-sinCA2*sinCA2);
+  cosCA2   = ::sqrt(1.-sinCA2*sinCA2);
   sumSin   = sinCA1+sinCA2;
   sinCA1plusCA2    = sinCA1*cosCA2 + sinCA2*cosCA1;
   if (sinCA1plusCA2==0) 
@@ -533,7 +536,7 @@ void StiKalmanTrackNode::nudge()
   sinCA2=_p3*(_x+deltaX) - _p2; 
   MESSENGER << " StiKalmanTrackNode::nudge() -I- sin(CA2):"<<sinCA2<<endl;
   if (fabs(sinCA2)>1.) return;
-  cosCA2   = sqrt(1.-sinCA2*sinCA2);
+  cosCA2   = ::sqrt(1.-sinCA2*sinCA2);
   sumSin   = sinCA1+sinCA2;
   sinCA1plusCA2    = sinCA1*cosCA2 + sinCA2*cosCA1;
   if (fabs(sinCA1plusCA2)==0) return;
@@ -752,11 +755,11 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
     cout << "_p3 is NOT finite"<<endl;
   /*if (fabs(getP())<0.2)
     cout << "MCS: _x:"<<_x<<" dx:"<<dx<<" dxEloss:"<<dxEloss
-	 <<" pt:"<<pt<<" p:"<<sqrt(p2)<<" E="<<sqrt(e2)<<" b="
-	 << sqrt(beta2)<<endl
-	 << " eloss:"<<eloss<<" dE:"<<dE<<" dE/E="<<dE/sqrt(e2)
-	 << " correction:"<<(1.- sqrt(e2)*dE/p2)
-	 << " pcorr:"<< _p3*(1.- sqrt(e2)*dE/p2) << endl;*/
+	 <<" pt:"<<pt<<" p:"<<::sqrt(p2)<<" E="<<::sqrt(e2)<<" b="
+	 << ::sqrt(beta2)<<endl
+	 << " eloss:"<<eloss<<" dE:"<<dE<<" dE/E="<<dE/::sqrt(e2)
+	 << " correction:"<<(1.- ::sqrt(e2)*dE/p2)
+	 << " pcorr:"<< _p3*(1.- ::sqrt(e2)*dE/p2) << endl;*/
   if (fabs(dE)>0)
     {
       double cc=_p3;
@@ -765,7 +768,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
 	{
 	  cout << "STKN::propagate() -E- _p3 is not finite before eloss correction."<<endl;
 	}
-      correction =1.- sqrt(e2)*dE/p2;
+      correction =1.- ::sqrt(e2)*dE/p2;
       if(!finite(correction))
 	{
 	  cout << "STKN::propagate() -E- Correction is not finite"<<endl;
@@ -801,7 +804,7 @@ double StiKalmanTrackNode::pathLToNode(const StiKalmanTrackNode * const oNode)
   const StThreeVector<double> delta = 
     getGlobalPoint() - oNode->getGlobalPoint();
   double R = getCurvature();
-  // s = 2c * asin( t/(2c)); t=sqrt(dx^2+dy^2+dz^2)
+  // s = 2c * asin( t/(2c)); t=::sqrt(dx^2+dy^2+dz^2)
   return length(delta, R);
 }
 
@@ -819,7 +822,7 @@ StThreeVector<double> StiKalmanTrackNode::getPointAt(double xk) const
   dx=x2-x1;
   sinCA2=_p3*x2 - _p2;
   if (fabs(sinCA2)>1.) throw runtime_error("SKTN::getPointAt() -W- fabs(sinCA2)>1.");
-  cosCA2=sqrt(1.- sinCA2*sinCA2);
+  cosCA2=::sqrt(1.- sinCA2*sinCA2);
   double sumSin = sinCA1+sinCA2;
   double yy = _p0 + dx*sumSin/(cosCA1+cosCA2);
   double sinCA1plusCA2  = sinCA1*cosCA2 + sinCA2*cosCA1;
@@ -852,7 +855,7 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
       //const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
       //if (!calc)throw runtime_error("SKTN::evaluateChi2(const StiHit &) - calc==0");
       //calc->calculateError(this);
-      //cout << " _c00:"<<_c00<<" _c10:"<<_c10<<" _c11:"<<_c11<<" ey:"<<sqrt(eyy)<<" ez:"<<sqrt(ezz)<<endl;
+      //cout << " _c00:"<<_c00<<" _c10:"<<_c10<<" _c11:"<<_c11<<" ey:"<<::sqrt(eyy)<<" ez:"<<::sqrt(ezz)<<endl;
       r00=_c00+eyy;
       r01=_c10; r11=_c11+ezz;
     }
@@ -950,7 +953,7 @@ void StiKalmanTrackNode::updateNode()
     {
       _sinCA = -0.999999;
     }
-  _cosCA = sqrt(1.-_sinCA*_sinCA); 
+  _cosCA = ::sqrt(1.-_sinCA*_sinCA); 
   if (_cosCA==0)
     throw logic_error("StiKalmanTrackNode::updateNode() -E- _cosCA==0");
 
@@ -1011,7 +1014,7 @@ void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
       _cosCA =  0.;
     }
   else
-    _cosCA = sqrt(1.- _sinCA*_sinCA);
+    _cosCA = ::sqrt(1.- _sinCA*_sinCA);
   //double y0=_p0 + _cosCA/_p3;
   ////if ((_p0-y0)*_p3 >= 0.) throw runtime_error("SKTN::rotate() - Error - Rotation failed!\n");
   //f = F - 1
@@ -1102,7 +1105,7 @@ double StiKalmanTrackNode::getWindowY()
   const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
   if (!calc)throw runtime_error("SKTN::getWindowY() -E- calc==0");
   calc->calculateError(this);
-  double window = searchWindowScale*sqrt(_c00+eyy);
+  double window = searchWindowScale*::sqrt(_c00+eyy);
   if (window<minSearchWindow)
     window = minSearchWindow;
   else if (window>maxSearchWindow)
@@ -1122,7 +1125,7 @@ double StiKalmanTrackNode::getWindowZ()
   const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
   if (!calc)throw runtime_error("SKTN::getWindowY() -E- calc==0");
   calc->calculateError(this);
-  double window = searchWindowScale*sqrt(_c11+ezz); 
+  double window = searchWindowScale*::sqrt(_c11+ezz); 
   if (window<minSearchWindow)
     window = minSearchWindow;
   else if (window>maxSearchWindow)

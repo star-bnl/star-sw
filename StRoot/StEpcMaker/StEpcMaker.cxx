@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.22 2003/05/26 13:44:34 suaide Exp $
+// $Id: StEpcMaker.cxx,v 1.23 2003/09/02 17:58:03 perev Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.23  2003/09/02 17:58:03  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.22  2003/05/26 13:44:34  suaide
 // added setPrint() method
 //
@@ -73,7 +76,7 @@
 //                                                             
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "StChain.h"
 #include <TDataSetIter.h>

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLCMSFrame3DCorrFctn_SIM.cxx,v 1.5 2003/01/31 19:21:09 magestro Exp $
+ * $Id: BPLCMSFrame3DCorrFctn_SIM.cxx,v 1.6 2003/09/02 17:58:20 perev Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: BPLCMSFrame3DCorrFctn_SIM.cxx,v $
+ * Revision 1.6  2003/09/02 17:58:20  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2003/01/31 19:21:09  magestro
  * Cleared up simple compiler warnings on i386_linux24
  *
@@ -256,13 +259,13 @@ void BPLCMSFrame3DCorrFctn_SIM::AddMixedPair(const StHbtPair* pair){
 
     float Rout2,Rside2,Rlong2;
 
-    if (mRout_alpha!=0){Rout2 = mRout2*pow(mT2,mRout_alpha);}
+    if (mRout_alpha!=0){Rout2 = mRout2*::pow(mT2,mRout_alpha);}
     else{Rout2 = mRout2;}
 
-    if (mRside_alpha!=0){Rside2 = mRside2*pow(mT2,mRside_alpha);}
+    if (mRside_alpha!=0){Rside2 = mRside2*::pow(mT2,mRside_alpha);}
     else{Rside2 = mRside2;}
 
-    if (mRlong_alpha!=0){Rlong2 = mRlong2*pow(mT2,mRlong_alpha);}
+    if (mRlong_alpha!=0){Rlong2 = mRlong2*::pow(mT2,mRlong_alpha);}
     else{Rlong2 = mRlong2;}
       
     double CorrWeight = 1.0 + 

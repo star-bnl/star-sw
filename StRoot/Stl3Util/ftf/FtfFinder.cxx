@@ -23,6 +23,7 @@
 //: DESCRIPTION: Functions associated with this class
 //: AUTHOR:      ppy - Pablo Yepes, yepes@physics.rice.edu
 //:>------------------------------------------------------------------
+#include "Stiostream.h"
 #include "Stl3Util/ftf/FtfFinder.h"
 
 
@@ -335,7 +336,7 @@ int FtfFinder::reset (void) {
     }
     
     if ( para.dxVertex != 0 || para.dyVertex != 0 )
-	para.xyWeightVertex = 1. / sqrt(para.dxVertex*para.dxVertex+
+	para.xyWeightVertex = 1. / ::sqrt(para.dxVertex*para.dxVertex+
 					para.dyVertex*para.dyVertex) ;
     else para.xyWeightVertex = 1.0F ;
     //

@@ -1,5 +1,5 @@
 #include "StEfficiency.h"
-#include <fstream.h>
+#include "Stiostream.h"
 #include "StSpectraCutNhit.h"
 #include "StSpectraCutDCA.h"
 #include "StSpectraCutDcaParent.h"
@@ -102,8 +102,8 @@ double StEfficiency::efficiency(StTrack* track) {
  double pz = mom.z();
  double pperp = mom.perp();
  double mass = mParticle->mass();
- double E = sqrt(p*p + mass*mass);
- double y = 0.5*log((E+pz)/(E-pz)); 
+ double E = ::sqrt(p*p + mass*mass);
+ double y = 0.5*::log((E+pz)/(E-pz)); 
  
  double effic;
  if ((y < (*this).getLowEdge('x')) ||
@@ -129,8 +129,8 @@ double StEfficiency::efficiency(StV0Vertex* v0) {
  double pz = mom.z();
  double pperp = mom.perp();
  double mass = mParticle->mass();
- double E = sqrt(p*p + mass*mass);
- double y = 0.5*log((E+pz)/(E-pz)); 
+ double E = ::sqrt(p*p + mass*mass);
+ double y = 0.5*::log((E+pz)/(E-pz)); 
  
  double effic;
  if ((y < (*this).getLowEdge('x')) ||

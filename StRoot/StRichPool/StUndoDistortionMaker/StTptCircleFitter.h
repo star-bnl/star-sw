@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTptCircleFitter.h,v 1.1 2002/11/19 18:44:28 dunlop Exp $
+ * $Id: StTptCircleFitter.h,v 1.2 2003/09/02 17:58:54 perev Exp $
  *
  * 
  * Modified by bum by copying the tpc circle fitting algorithm.
@@ -23,6 +23,9 @@
  ***************************************************************************
  *
  * $Log: StTptCircleFitter.h,v $
+ * Revision 1.2  2003/09/02 17:58:54  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2002/11/19 18:44:28  dunlop
  * This undoes the distortions and refits.
  * Modifications made to Bum's refitter in order to do a "primary" fit.
@@ -36,9 +39,7 @@
 #define ST_TPT_CIRCLE_FITTER_HH
 
 #include <vector>
-#if !defined(ST_NO_NAMESPACES)
 using std::vector;
-#endif
 
 class StTptCircleFitter {
 public:

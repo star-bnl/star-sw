@@ -7,7 +7,7 @@ modified by bum
 #ifndef StGlobalTrackRefitter_HH
 #define StGlobalTrackRefitter_HH
 
-#include <iostream>
+#include "Stiostream.h"
 #include "StPhysicalHelixD.hh"
 #include "TObject.h"
 #include <vector>

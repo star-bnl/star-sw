@@ -2,6 +2,7 @@
 #include <values.h>
 #include <math.h>
 #include "Sti/StiMath.h"
+using namespace std;
 double StiMath::_logGammaCof[6]={76.18009172947146,-86.50532032941677,
 				 24.01409824083091,-1.231739572450155,
 				 0.1208650973866179e-2,-0.5395239384953e-5};
@@ -12,7 +13,7 @@ double StiMath::_logFac[101];
 double StiMath::chi2(double x, int n)
 {
   double n2 = double(n)/2.;
-  double logChi2 = (n2-1.)*log(x)-x/2.-n2*log(2.)-logGamma(n2);
+  double logChi2 = (n2-1.)*::log(x)-x/2.-n2*::log(2.)-logGamma(n2);
   return exp(logChi2);
 }
 
@@ -27,10 +28,10 @@ double StiMath::logGamma(double xx)
    
  y=x=xx;
  tmp=x+5.5;
- tmp -= (x+0.5)*log(tmp);
+ tmp -= (x+0.5)*::log(tmp);
  ser=1.000000000190015;
  for (j=0;j<=5;j++) ser += _logGammaCof[j]/++y;
- return -tmp+log(2.5066282746310005*ser/x);
+ return -tmp+::log(2.5066282746310005*ser/x);
 }
 
 ///Calculates and returns the value of the Gamma function
@@ -61,7 +62,7 @@ double StiMath::factorial(int n)
   return _fac[n];
 }
 
-///Calculates and returns the log(factorial(n))
+///Calculates and returns the ::log(factorial(n))
 ///Valid only for n>=0
 ///May overflow for large n
 double StiMath::logFactorial(int n)

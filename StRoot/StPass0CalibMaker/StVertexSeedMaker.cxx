@@ -9,7 +9,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include <fstream.h>
+#include "Stiostream.h"
 #include "StVertexSeedMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -54,17 +54,17 @@ void fnch(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag) {
   double delta_sq;
   double error_sq;
   for (int i=0;i<nverts; i++) {
-    // Error1 set such that 5 tracks => ~7mm, proportional to 1/sqrt(mult)
+    // Error1 set such that 5 tracks => ~7mm, proportional to 1/::sqrt(mult)
     // This was determined by trying to get the chisq/dof distribution
     // to peak near 1.0
-    //                              =>  Error1   = (0.7cm) / sqrt(mult/5)
+    //                              =>  Error1   = (0.7cm) / ::sqrt(mult/5)
     //                              =>  Error1^2 = (2.45) cm^2 / mult
     // Beam spot size (sigma) Error2 ~= 0.04 cm (400 microns)
     //                              =>  Error2^2 = 0.0016 cm^2
-    // The total error should be sqrt(Error1^2 + Error2^2)
+    // The total error should be ::sqrt(Error1^2 + Error2^2)
     error_sq = 0.0016 + (2.45 / mult[i]); 
-    delta_sq = pow(xVert[i]-funcX(zVert[i],par),2) +
-               pow(yVert[i]-funcY(zVert[i],par),2);
+    delta_sq = ::pow(xVert[i]-funcX(zVert[i],par),2) +
+               ::pow(yVert[i]-funcY(zVert[i],par),2);
     chisq += (delta_sq/error_sq);
   }
   f = chisq;
@@ -236,7 +236,7 @@ Int_t StVertexSeedMaker::Make(){
   gMessMgr->Info() << "StVertexSeedMaker::y guess = " << yguess << endm; 
 
   // Check to see if vertex is good for use in the fit
-  float r2vertex = pow(xvertex,2) + pow(yvertex,2);
+  float r2vertex = ::pow(xvertex,2) + ::pow(yvertex,2);
   if ((zvertex > zVertexMin) && (zvertex < zVertexMax) &&
       (mult >= 5) && (r2vertex < r2VertexMax)){
     xdist->Fill(xvertex);
@@ -299,7 +299,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.18 2003/05/30 19:02:51 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.19 2003/09/02 17:58:45 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -584,8 +584,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.18 2003/05/30 19:02:51 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.19 2003/09/02 17:58:45 perev Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.19  2003/09/02 17:58:45  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.18  2003/05/30 19:02:51  genevb
 // Add ppFPDw-slow
 //

@@ -1,6 +1,9 @@
-// $Id: StEmcPreCluster.cxx,v 1.12 2003/01/23 03:49:59 jeromel Exp $
+// $Id: StEmcPreCluster.cxx,v 1.13 2003/09/02 17:58:49 perev Exp $
 //
 // $Log: StEmcPreCluster.cxx,v $
+// Revision 1.13  2003/09/02 17:58:49  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.12  2003/01/23 03:49:59  jeromel
 // Include changed
 //
@@ -184,7 +187,7 @@ void StEmcPreCluster::calcMeanAndRms(StEmcDetector* mDet,Int_t mod)
       mSigmaEta = 0.0; // Same eta
     else {
       if(mSigmaEta <= 0.0) mSigmaEta = 0.0;
-      else mSigmaEta = sqrt(mSigmaEta);
+      else mSigmaEta = ::sqrt(mSigmaEta);
     }
 
     mPhi /= mEnergy;
@@ -193,7 +196,7 @@ void StEmcPreCluster::calcMeanAndRms(StEmcDetector* mDet,Int_t mod)
        mSigmaPhi = 0.0;  // Same phi
     else {
       if(mSigmaPhi <= 0.0) mSigmaPhi = 0.0;
-      else mSigmaPhi = sqrt(mSigmaPhi);
+      else mSigmaPhi = ::sqrt(mSigmaPhi);
     }
     mPhi += phi0;                 // Rotate to STAR system
     mPhi  = StEmcMath::getPhiPlusMinusPi(mPhi);

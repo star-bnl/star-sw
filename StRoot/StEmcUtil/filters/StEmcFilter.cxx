@@ -441,7 +441,7 @@ Bool_t StEmcFilter::accept(StMcTrack *track)
     if(stop) // check if the stop vertex is before EMC
     {
      StThreeVectorF po = stop->position(); 
-     Float_t stopRadius = sqrt(po.x()*po.x()+po.y()*po.y());
+     Float_t stopRadius = ::sqrt(po.x()*po.x()+po.y()*po.y());
      if(stopRadius<mGeo[0]->Radius()) return kFALSE; // track stopped before EMC. Not accepted
     }
     
@@ -590,7 +590,7 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Int_t& nPoints,Float_t& dEdX,Float
     if(nPoints==0) return kFALSE;
     Double_t dedx_expected;
     Double_t dedx_resolution = (Double_t)pid->errorOnMean();
-    if(dedx_resolution<=0) dedx_resolution=npt > 0 ? 0.45/sqrt(npt) : 1000.;
+    if(dedx_resolution<=0) dedx_resolution=npt > 0 ? 0.45/::sqrt(npt) : 1000.;
     Double_t z;
     Float_t nSigma[4],nSigmaTmp[4];
     Float_t length = (Float_t)pid->length();
@@ -599,7 +599,7 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Int_t& nPoints,Float_t& dEdX,Float
     {
       //dedx_expected=mBB(momentum/m[i])*mdEdXScale;      
 			dedx_expected = 1.0e-6*mBB.Sirrf(momentum/m[i],length,kk[i])*mdEdXScale;
-			z = log((Double_t)dEdX/dedx_expected);
+			z = ::log((Double_t)dEdX/dedx_expected);
 			nSigmaTmp[i]=(Float_t) z/dedx_resolution;
       nSigma[i]=fabs(nSigmaTmp[i]) ;
     }

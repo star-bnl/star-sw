@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 2.12 2002/02/23 02:25:08 dunlop Exp $
+ * $Id: StRchMaker.cxx,v 2.13 2003/09/02 17:58:51 perev Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -13,8 +13,8 @@
  * See Log Comments at bottom
  ***************************************************************************/
 
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 
 #include "StRchMaker.h"
 #include "StChain.h"
@@ -961,7 +961,7 @@ void StRchMaker::fillStEvent()
 void StRchMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRchMaker.cxx,v 2.12 2002/02/23 02:25:08 dunlop Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 2.13 2003/09/02 17:58:51 perev Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -1006,6 +1006,9 @@ void StRchMaker::clearPadMonitor(){
 /****************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 2.13  2003/09/02 17:58:51  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.12  2002/02/23 02:25:08  dunlop
  * Removed the junk data at the end of a saturated pixel before
  * filling into the clusterfinder.  If pixel has value > 1023, make

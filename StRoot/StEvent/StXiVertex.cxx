@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.cxx,v 2.8 2003/01/24 22:30:05 genevb Exp $
+ * $Id: StXiVertex.cxx,v 2.9 2003/09/02 17:58:06 perev Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.cxx,v $
+ * Revision 2.9  2003/09/02 17:58:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.8  2003/01/24 22:30:05  genevb
  * Allow for signed DCA of Xi to PrimVertex
  *
@@ -38,7 +41,7 @@
  * Completely Revised for New Version
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TClass.h"
 #include "StXiVertex.h"
 #include "StV0Vertex.h"
@@ -47,7 +50,7 @@
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_xi_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.8 2003/01/24 22:30:05 genevb Exp $";
+static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.9 2003/09/02 17:58:06 perev Exp $";
 
 ClassImp(StXiVertex)
 

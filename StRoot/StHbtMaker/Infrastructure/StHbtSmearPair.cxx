@@ -1,5 +1,5 @@
 /***************************************
- * $Id: StHbtSmearPair.cxx,v 1.1 2001/05/23 00:19:05 lisa Exp $
+ * $Id: StHbtSmearPair.cxx,v 1.2 2003/09/02 17:58:32 perev Exp $
  *
  * Author: Mike Lisa, Ohio State lisa@mps.ohio-state.edu
  ****************************************
@@ -13,6 +13,9 @@
  ******************************************
  *
  * $Log: StHbtSmearPair.cxx,v $
+ * Revision 1.2  2003/09/02 17:58:32  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2001/05/23 00:19:05  lisa
  * Add in Smearing classes and methods needed for momentum resolution studies and correction
  *
@@ -66,13 +69,13 @@ StHbtLorentzVector StHbtSmearPair::SmearedMomentum(StHbtLorentzVector fourmom){
   sin2theta = sin2theta*sin2theta;
   //
   double DpT_div_pT = StRandom::gauss(0.0,mFracPtRes);
-  double Dphi = StRandom::gauss(0.0,mPhi_a+mPhi_b*pow(pT,mPhi_alpha));
-  double Dtheta = StRandom::gauss(0.0,mTheta_a+mTheta_b*pow(pT,mTheta_alpha));
+  double Dphi = StRandom::gauss(0.0,mPhi_a+mPhi_b*::pow(pT,mPhi_alpha));
+  double Dtheta = StRandom::gauss(0.0,mTheta_a+mTheta_b*::pow(pT,mTheta_alpha));
   //
   fourmom.setX(px*(1.0+DpT_div_pT) - py*Dphi);
   fourmom.setY(py*(1.0+DpT_div_pT) + px*Dphi);
   fourmom.setZ(pz*(1.0+DpT_div_pT) - pT*Dtheta/sin2theta);
-  fourmom.setE(sqrt(mass2 + fourmom.x()*fourmom.x()+fourmom.y()*fourmom.y()+fourmom.z()*fourmom.z()));
+  fourmom.setE(::sqrt(mass2 + fourmom.x()*fourmom.x()+fourmom.y()*fourmom.y()+fourmom.z()*fourmom.z()));
   //
   return fourmom;
 }

@@ -103,26 +103,26 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
      double a   = (rrxm*yym-rrym*xym);
      double b   = (rrym*xxm-rrxm*xym);
      double ab2  = (a*a+b*b);
-     double ab  = sqrt(ab2);
+     double ab  = ::sqrt(ab2);
 
      if (fabs(det) < ab ) { 	//small Rhoc
        Xcd = a/ab; if (det<0) Xcd = -Xcd;  
        Ycd = b/ab; if (det<0) Ycd = -Ycd;  
        Rhoc2 = det*det/(ab2);   
-       Rhoc = sqrt(Rhoc2);   
+       Rhoc = ::sqrt(Rhoc2);   
        double c = 2.*((xm*Xcd+ym*Ycd)-rrm*Rhoc);
-       dR = -c/(1.+sqrt(1.-Rhoc*c));
+       dR = -c/(1.+::sqrt(1.-Rhoc*c));
        Rho = Rhoc/(1.+dR*Rhoc);
      } else {			//big Rhoc
        Xcd = a/det;   
        Ycd = b/det;   
        double Rc2 = (ab2)/(det*det);
-       double Rc  = sqrt(Rc2);
+       double Rc  = ::sqrt(Rc2);
        double c = 2.*((xm*Xcd+ym*Ycd)-rrm);
-       dR = -c/(Rc+sqrt(Rc*Rc-c));
+       dR = -c/(Rc+::sqrt(Rc*Rc-c));
        Rho = 1./(Rc+dR);
-       ab = sqrt(Xcd*Xcd+Ycd*Ycd);
-       double r1st = sqrt(x1st*x1st + y1st*y1st);
+       ab = ::sqrt(Xcd*Xcd+Ycd*Ycd);
+       double r1st = ::sqrt(x1st*x1st + y1st*y1st);
        if (ab < 0.001*r1st) {
          Xcd = -x1st/r1st;
          Ycd = -y1st/r1st;
@@ -171,7 +171,7 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
        if (ign[ip]) 	continue;
        Step(stp[ip]/fCosL,xyz);
        double rs = 0;
-       for(int i=0;i<3;i++) {rs += pow(pnts[lv+i]-xyz[i],2);}
+       for(int i=0;i<3;i++) {rs += ::pow(pnts[lv+i]-xyz[i],2);}
        if (rs>resmax) {resmax = rs; maxres = ip;} 
        res += rs;
      }
@@ -185,7 +185,7 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
   delete [] ign;
   delete [] stp;
   
-  return sqrt(resmax);
+  return ::sqrt(resmax);
 }
 //_____________________________________________________________________________
 void THelixTrack::Set(const double *xyz,const double *dir,double rho,const double *hxyz)
@@ -209,18 +209,18 @@ void THelixTrack::Build()
   double tmp;
   tmp = fH[0]*fH[0]+ fH[1]*fH[1]+ fH[2]*fH[2];
   if (fabs(tmp-1.) > 1.e-12) {
-    tmp = sqrt(tmp); fH[0] /=tmp; fH[1] /=tmp; fH[2] /=tmp; }
+    tmp = ::sqrt(tmp); fH[0] /=tmp; fH[1] /=tmp; fH[2] /=tmp; }
     
   tmp = fP[0]*fP[0]+ fP[1]*fP[1]+ fP[2]*fP[2];
   if (fabs(tmp-1.) > 1.e-12) {
-    tmp = sqrt(tmp); fP[0] /=tmp; fP[1] /=tmp; fP[2] /=tmp; }
+    tmp = ::sqrt(tmp); fP[0] /=tmp; fP[1] /=tmp; fP[2] /=tmp; }
     
   fHXP[0] = fH[1]*fP[2] - fH[2]*fP[1];
   fHXP[1] = fH[2]*fP[0] - fH[0]*fP[2];
   fHXP[2] = fH[0]*fP[1] - fH[1]*fP[0];
 
   fHP   =        fH[0]*fP[0]  +  fH[1]*fP[1]  +  fH[2]*fP[2];
-  fCosL = sqrt(fHXP[0]*fHXP[0]+fHXP[1]*fHXP[1]+fHXP[2]*fHXP[2]);
+  fCosL = ::sqrt(fHXP[0]*fHXP[0]+fHXP[1]*fHXP[1]+fHXP[2]*fHXP[2]);
   for (int i=0;i<3;i++) {fPxy[i] = (fP[i]-fH[i]*fHP)/fCosL;}
 
 
@@ -406,7 +406,7 @@ double THelixTrack::StepHZ(const double *su, int nsurf,
      tri[1] += su45*2*f0*fc;
      tri[2] += su45*2*f0*fs;
    }
-   costet = -tri[0]/sqrt(tri[1]*tri[1]+tri[2]*tri[2]);
+   costet = -tri[0]/::sqrt(tri[1]*tri[1]+tri[2]*tri[2]);
    if(fabs(costet)>1.) return 1.e+12;
    tet0 = atan2(tri[2],tri[1]);
    tet  = acos(costet);
@@ -444,7 +444,7 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
 //		R estimated step
       if (fRho < 0) yy = -yy;
 
-      tmp = sqrt(pow(xx*fRho,2)+pow(yy*fRho-1.,2));
+      tmp = ::sqrt(::pow(xx*fRho,2)+::pow(yy*fRho-1.,2));
       step = xx/tmp;
       if (arho > Zero) {
         dx = step*arho; if (fabs(dx) <= Zero) dx = 0;
@@ -515,7 +515,7 @@ int THelixTrack::SqEqu(double *cba, double *sol)
   if (fabs(dis) <= zero2)  dis = 0;
   if (dis < 0.) { nsol = 0; dis  = 0.;}
 
-  dis = sqrt(dis); bdis = b + dis;
+  dis = ::sqrt(dis); bdis = b + dis;
   if (fabs(c) > 1.e+10*bdis)	return -1;
   sol[0] = 0.;
   if (fabs(bdis) <= 0.)      	return nsol;

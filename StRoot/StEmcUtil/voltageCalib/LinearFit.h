@@ -100,7 +100,7 @@ void LinearFit<Number>::fit()
   if (fabs(syy) == 0)
     _r = 1;
   else
-    _r = sxy/sqrt(sxx*syy);
+    _r = sxy/::sqrt(sxx*syy);
 }
 
 template<typename Number>

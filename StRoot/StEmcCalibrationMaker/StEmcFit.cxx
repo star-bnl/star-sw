@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide and Marcia Moura
 // 
-// $Id: StEmcFit.cxx,v 1.6 2003/04/30 20:36:43 perev Exp $
+// $Id: StEmcFit.cxx,v 1.7 2003/09/02 17:57:59 perev Exp $
 // $Log: StEmcFit.cxx,v $
+// Revision 1.7  2003/09/02 17:57:59  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.6  2003/04/30 20:36:43  perev
 // Warnings cleanup. Modified lines marked VP
 //
@@ -21,7 +24,7 @@
 // Add README
 //
 #include "StEmcFit.h"
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #define SWAP(a,b) {temp=(a);(a)=(b);(b)=temp;}
 

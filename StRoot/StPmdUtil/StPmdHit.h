@@ -3,7 +3,7 @@
  *\author
 */
 /*************************************************
- * $Id: StPmdHit.h,v 1.2 2002/09/09 11:27:59 subhasis Exp $
+ * $Id: StPmdHit.h,v 1.3 2003/09/02 17:58:49 perev Exp $
  * 
  * Author: Subhasis Chattopadhyay
  * Revision: Prem Ghosh
@@ -15,6 +15,9 @@
  *
  **************************************************
  * $Log: StPmdHit.h,v $
+ * Revision 1.3  2003/09/02 17:58:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2002/09/09 11:27:59  subhasis
  * ADC added
  *
@@ -23,7 +26,7 @@
 #define STAR_StPmdHit
 
 #include <math.h>
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TArrayI.h"
 #include "StObject.h"
 

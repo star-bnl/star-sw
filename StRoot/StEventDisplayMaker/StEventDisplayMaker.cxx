@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.93 2003/02/28 00:33:54 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.94 2003/09/02 17:58:08 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -59,7 +59,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "TROOT.h"
-#include "Riostream.h"
+#include "Stiostream.h"
 #include "TError.h"
 #include "TCanvas.h"
 #include "TColor.h"
@@ -1052,11 +1052,11 @@ Int_t StEventDisplayMaker::MakeLoop(Int_t flag)
 
    if (fgEventLoop == -1 && flag == 0) {
      fgEventLoop=-2;
-     Info("Waiting...");
+     MakeInfo("Waiting...");
      while (fgEventLoop==-2)                              {gSystem->DispatchOneEvent(1);}
-     Info("Waiting finished");
+     MakeInfo("Waiting finished");
      int ans = fgEventLoop; fgEventLoop=-1;
-     Info(infos[ans]);
+     MakeInfo(infos[ans]);
      return ans;
    }
 
@@ -1065,14 +1065,14 @@ Int_t StEventDisplayMaker::MakeLoop(Int_t flag)
      StEventDisplayMaker *edMk = (StEventDisplayMaker*)fgStChain->GetMaker("EventDisplay");
      if (edMk==0) return 0;
      switch(flag) {
-       case 1: Info("Redrawing...");
+       case 1: MakeInfo("Redrawing...");
                edMk->ReDraw(); 
-               Info("Redrawing finished");
+               MakeInfo("Redrawing finished");
                break;
-       case 2: Info("Next event, please!"); 
+       case 2: MakeInfo("Next event, please!"); 
                fgStChain->Clear(); 
                fgStChain->Make(); 
-               Info("Next event done");
+               MakeInfo("Next event done");
                break;
      }
      return 0;
@@ -1080,7 +1080,7 @@ Int_t StEventDisplayMaker::MakeLoop(Int_t flag)
   return 2001;
 }   
 //_____________________________________________________________________________
-void StEventDisplayMaker::Info(const char *info)
+void StEventDisplayMaker::MakeInfo(const char *info)
 {
   if (!fgInfo) new StEventDisplayInfo(&fgInfo," Info ");
   fgInfo->SetText(info);
@@ -1106,11 +1106,14 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.94  2003/09/02 17:58:08  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.93  2003/02/28 00:33:54  fine
 // Exchange Accept and AccpetCB methods
 //
 // Revision 1.92  2003/01/26 23:54:36  fine
-// Add Riostream.h header lost due removing the redundant headers files from StEvent package. Redundant iostream was removed
+// Add RStiostream.h header lost due removing the redundant headers files from StEvent package. Redundant iostream was removed
 //
 // Revision 1.91  2003/01/24 21:14:42  fine
 // remove the redundant include file

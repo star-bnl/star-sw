@@ -1,5 +1,5 @@
 //*********************************************************************
-//   $Id: trsLandau.cc,v 1.2 1998/11/12 22:39:57 lasiuk Exp $
+//   $Id: trsLandau.cc,v 1.3 2003/09/02 17:59:15 perev Exp $
 //
 //   Author: brian, October 1998
 //
@@ -9,6 +9,9 @@
 //            -- Primary Energy Distribution
 //
 //   $Log: trsLandau.cc,v $
+//   Revision 1.3  2003/09/02 17:59:15  perev
+//   gcc 3.2 updates + WarnOff
+//
 //   Revision 1.2  1998/11/12 22:39:57  lasiuk
 //   compatibility at BNL
 //
@@ -20,8 +23,8 @@
 //
 //*********************************************************************
 #include <unistd.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include <string>
 
 // SCL

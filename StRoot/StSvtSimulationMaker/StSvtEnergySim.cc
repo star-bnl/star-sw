@@ -1,5 +1,5 @@
-#include<iostream.h>
-#include <fstream.h>
+#include<Stiostream.h>
+#include "Stiostream.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -52,7 +52,7 @@ void StSvtEnergySim::CalculateEnAndMom(char* option, char* parType)
 
   //cout<<mParticle[i].energy<<endl;
 
-   mParticle[i].momentum = sqrt((mParticle[i].energy )-(mParticle[i].mass*mParticle[i].mass ));
+   mParticle[i].momentum = ::sqrt((mParticle[i].energy )-(mParticle[i].mass*mParticle[i].mass ));
 
    mParticle[i].momentumZ =  mParticle[i].momentum *cos( mParticle[i].theta);
 
@@ -73,7 +73,7 @@ float StSvtEnergySim::Expdev(){
    do
       dum = (float)rand()/(float)RAND_MAX;
    while(dum==0.0);
-    return -log(dum);
+    return -::log(dum);
 
    }
 
@@ -94,9 +94,9 @@ float StSvtEnergySim::Gausdev()
         rsq = v1*v1 + v2*v2;
     } while(rsq >= 1.0 || rsq == 1.0);
 
-     fac = 3.0*sqrt(-2.0*log(rsq)/rsq);
+     fac = 3.0*::sqrt(-2.0*::log(rsq)/rsq);
 
-     gset = v1*fac;  // gset = 3.0*sqrt(-2.0*log(rsq))*(v1/sqrt(rsq))
+     gset = v1*fac;  // gset = 3.0*::sqrt(-2.0*::log(rsq))*(v1/::sqrt(rsq))
      iset = 1;
      return v2*fac;
    }

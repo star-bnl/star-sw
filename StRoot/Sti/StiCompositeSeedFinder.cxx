@@ -3,9 +3,8 @@
 ///\author C. Pruneau (Wayne) Jan 03
 #include <stdexcept>
 #include <stdio.h>
-#include <iostream.h>
+#include <Stiostream.h>
 #include <algorithm>
-using std::ostream_iterator;
 using std::copy;
 #include "StMeasuredPoint.h"
 #include "Sti/Base/MessageType.h"

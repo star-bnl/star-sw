@@ -1,5 +1,5 @@
 //*******************************************************/
-// $Id: trsSector.cc,v 1.2 1998/11/13 21:33:06 lasiuk Exp $
+// $Id: trsSector.cc,v 1.3 2003/09/02 17:59:15 perev Exp $
 //
 // Author: brian, October, 1998
 //
@@ -7,11 +7,14 @@
 //          at several levels
 //
 // $Log: trsSector.cc,v $
+// Revision 1.3  2003/09/02 17:59:15  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.2  1998/11/13 21:33:06  lasiuk
 // update
 //
 /********************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <unistd.h>    // needed for access()
 // #include <math.h>
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.20 2000/11/15 21:02:02 ward Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.21 2003/09/02 17:55:33 perev Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -25,7 +25,7 @@
  * 07-Jul-99 MJL if no banks found for a given rcb,mz just skip it. 
  *           No longer return FALSE
  * 27-Jul-99 MJL init RowSpacePts = 0 to make destructor robust
- * 29-Aug-99 MJL #include <iostream.h> for HP platform
+ * 29-Aug-99 MJL #include <Stiostream.h> for HP platform
  * 07-Feb-00 MJL add diagnostics when bad cluster data encountered
  * 23-Feb-00 MJL fix bug (~line 229) which didn't handle split sequences
  *               correctly. Thanks to Herb Ward.
@@ -35,6 +35,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.21  2003/09/02 17:55:33  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.20  2000/11/15 21:02:02  ward
  * Another .daq corruption check.  It is on the TPCSEQD bank.
  *
@@ -96,7 +99,7 @@
  *
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <assert.h>
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "TPCV2P0.hh"

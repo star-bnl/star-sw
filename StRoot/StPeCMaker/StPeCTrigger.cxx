@@ -1,7 +1,10 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.6 2002/12/16 23:04:02 yepes Exp $
+// $Id: StPeCTrigger.cxx,v 1.7 2003/09/02 17:58:46 perev Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.7  2003/09/02 17:58:46  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.6  2002/12/16 23:04:02  yepes
 // Field comes in KGauss and should be passed to routines in Teslas
 // problem pointed out by Vladimir
@@ -19,7 +22,7 @@
 // Revision 1.0  2000/12/11 
 //
 //////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StPeCTrigger.h"
 #include "StPeCMaker.h"
 #include "StEventTypes.h"

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.43 2003/07/30 22:00:39 oldi Exp $
+// $Id: StFlowEvent.cxx,v 1.44 2003/09/02 17:58:11 perev Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -12,7 +12,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <math.h>
 #include "StFlowEvent.h"
@@ -321,7 +321,7 @@ Double_t StFlowEvent::G_Old(StFlowSelection* pFlowSelect, Double_t Zx, Double_t 
 //-------------------------------------------------------------
 
 TVector2 StFlowEvent::NormQ(StFlowSelection* pFlowSelect) { 
-  // Return normalized Q = Q / sqrt(sum of weights**2)
+  // Return normalized Q = Q / ::sqrt(sum of weights**2)
 
   TVector2 mQ;
   Double_t mQx=0., mQy=0.;
@@ -347,7 +347,7 @@ TVector2 StFlowEvent::NormQ(StFlowSelection* pFlowSelect) {
   }
   
   if (SumOfWeightSqr)
-    mQ.Set(mQx/sqrt(SumOfWeightSqr), mQy/sqrt(SumOfWeightSqr));
+    mQ.Set(mQx/::sqrt(SumOfWeightSqr), mQy/::sqrt(SumOfWeightSqr));
   else mQ.Set(0.,0.);
   
   return mQ;
@@ -484,7 +484,7 @@ Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) {
   }
   
   if (SumOfWeightSqr)
-    mQ.Set(mQx/sqrt(SumOfWeightSqr), mQy/sqrt(SumOfWeightSqr));
+    mQ.Set(mQx/::sqrt(SumOfWeightSqr), mQy/::sqrt(SumOfWeightSqr));
   else mQ.Set(0.,0.);
   
   return mQ.Mod();
@@ -923,6 +923,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.44  2003/09/02 17:58:11  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.43  2003/07/30 22:00:39  oldi
 // Eta cuts for event plane selection separated for FTPC east and west.
 // PtWgtSaturation parameter introduced (default set to 2. -> no change of default behavior).

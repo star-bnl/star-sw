@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mikesStarStandardEventCut.h,v 1.2 2001/04/25 17:57:46 perev Exp $
+ * $Id: mikesStarStandardEventCut.h,v 1.3 2003/09/02 17:58:21 perev Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: mikesStarStandardEventCut.h,v $
+ * Revision 1.3  2003/09/02 17:58:21  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2001/04/25 17:57:46  perev
  * HPcorrs
  *
@@ -35,7 +38,7 @@
 
 #include "StHbtMaker/Base/StHbtEventCut.h"
 #ifdef HPUX
-#include <fstream.h>
+#include "Stiostream.h"
 #else
 #include <fstream>
 #endif

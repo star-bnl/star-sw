@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.1 2003/01/23 01:30:28 suaide Exp $
+ * $Id: StEmcGeom.h,v 1.2 2003/09/02 17:58:01 perev Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.2  2003/09/02 17:58:01  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2003/01/23 01:30:28  suaide
  * moving to sub directories
  *
@@ -94,7 +97,7 @@
 // StEmcGeom main class for <FONT COLOR="RED"> Geometry of BEMC for OFFline </FONT>      //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include "math_constants.h"
 #include <math.h>
 #include <TArrayF.h>

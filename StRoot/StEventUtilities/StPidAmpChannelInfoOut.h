@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannelInfoOut.h,v 1.1 2000/07/22 22:27:14 aihong Exp $
+ * $Id: StPidAmpChannelInfoOut.h,v 1.2 2003/09/02 17:58:09 perev Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannelInfoOut.h,v $
+ * Revision 1.2  2003/09/02 17:58:09  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2000/07/22 22:27:14  aihong
  * move files from StPidAmpMaker to StEventUtilities
  *
@@ -37,7 +40,7 @@
 //*KEND.
 #endif
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 class StPidAmpChannelInfoOut : public TObject {
 //this is a TObject version of StPidAmpChannelInfo

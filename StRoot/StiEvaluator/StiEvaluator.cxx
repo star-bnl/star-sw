@@ -8,6 +8,9 @@
 // and both charge signs
 // 
 // $Log: StiEvaluator.cxx,v $
+// Revision 1.37  2003/09/02 17:59:47  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.36  2003/07/09 01:08:07  calderon
 // Changes to access StMiniMcEvent through methods, rather than data members
 //
@@ -22,7 +25,7 @@
 // New version of evaluator using the minimctrees
 //
 
-#include <iostream>
+#include "Stiostream.h"
 #include <string>
 #include "StiEvaluator.h"
 #include "TChain.h"

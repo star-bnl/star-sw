@@ -11,7 +11,7 @@
  **************************************************************************/
 
 #include "dFitter3d.h"
-#include <iostream>
+#include "Stiostream.h"
 #include "TH3.h"
 #include "TH1.h"
 #include "TMinuit.h"
@@ -141,8 +141,8 @@ void dFitter3d::FillInternalArrays()
 			    // normalize and fill background
 			    mDenominatorInternalArray[mInternalArraySize]  = denom * mNorm ;
 			    
-			    // the error is cacluated using Gauss' error propagation : e = num/(denom*norm) * sqrt(1/num + 1/(denom))
-			    double error = num/(denom*mNorm) * sqrt( (1/num) + (1/denom) ) ;
+			    // the error is cacluated using Gauss' error propagation : e = num/(denom*norm) * ::sqrt(1/num + 1/(denom))
+			    double error = num/(denom*mNorm) * ::sqrt( (1/num) + (1/denom) ) ;
 			    mErrorInternalArray[mInternalArraySize]  = error ;
 			    // the simple case : take center of the BIN ( as according position in qlong,qside,qnull )
 			    mVariablePositionArray[mInternalArraySize].SetX(qx) ;
@@ -244,7 +244,7 @@ void  dFitter3d::fcnMml(Int_t &nParameters, Double_t *gin, Double_t &finalMLH, D
 	    // measured value
 	    double measueredValue = mNumeratorInternalArray[index] ;
 	    // sum up
-	    MLH += -expectedValue + measueredValue * log(expectedValue) - lnfactorial(measueredValue) ;
+	    MLH += -expectedValue + measueredValue * ::log(expectedValue) - lnfactorial(measueredValue) ;
 	}
     // likelihood for this set of paramters
     finalMLH = - MLH ;
@@ -262,12 +262,12 @@ double dFitter3d::lnfactorial(double arg)
 	{
 	    for (int index = 1; index < iarg+1 ; index++)
 		{ fac *=(double)index; } ;
-	    fac = log(fac) ;
+	    fac = ::log(fac) ;
 	}
     else 
 	{
 	  //if the argument is too large : use Stirlings formula
-	    fac = 0.91 + (iarg+0.5) * log(iarg) - iarg ;
+	    fac = 0.91 + (iarg+0.5) * ::log(double(iarg)) - iarg ;
 	}
 
     return fac;
@@ -303,13 +303,13 @@ double dFitter3d::ykpCorrelationFunction(TVector3& position, double* parameterSe
     // parameterSet[2] = Rperp  
     // parameterSet[3] = Rnull
     // parameterSet[4] = beta
-    double gamma2 = 1.0/fabs(1.0-pow(parameterSet[4],2)) ;
+    double gamma2 = 1.0/fabs(1.0-::pow(parameterSet[4],2)) ;
     double mhcc =  0.038937929230 ;
     double c2 = 1.0 +  parameterSet[0] * TMath::Exp(
 						    (
-						     (-1.0) * pow(position.y(),2) * pow(parameterSet[2],2) 
-						     - gamma2 * pow((position.x() - parameterSet[4]*position.z()),2) * pow(parameterSet[1],2)
-						     - gamma2 * pow((position.z() - parameterSet[4]*position.x()),2) * pow(parameterSet[3],2)
+						     (-1.0) * ::pow(position.y(),2) * ::pow(parameterSet[2],2) 
+						     - gamma2 * ::pow((position.x() - parameterSet[4]*position.z()),2) * ::pow(parameterSet[1],2)
+						     - gamma2 * ::pow((position.z() - parameterSet[4]*position.x()),2) * ::pow(parameterSet[3],2)
 						     ) 
 						    / mhcc );
     return c2;
@@ -329,10 +329,10 @@ double dFitter3d::bpCorrelationFunction(TVector3& position, double* parameterSet
     // parameterSet[4] = Routlong
     double  c2 = 1.0 + parameterSet[0] * TMath::Exp(
 						    (
-						     (-1.0) * pow(position.y(),2) * pow(parameterSet[1],2) 
-						     - pow(position.z(),2) * pow(parameterSet[2],2) 
-						     - pow(position.x(),2) * pow(parameterSet[3],2) 
-						     - 2* position.x() * position.z() * pow(parameterSet[4],2) 
+						     (-1.0) * ::pow(position.y(),2) * ::pow(parameterSet[1],2) 
+						     - ::pow(position.z(),2) * ::pow(parameterSet[2],2) 
+						     - ::pow(position.x(),2) * ::pow(parameterSet[3],2) 
+						     - 2* position.x() * position.z() * ::pow(parameterSet[4],2) 
 						     ) 
 						    / mhc2 );
     return c2 ;

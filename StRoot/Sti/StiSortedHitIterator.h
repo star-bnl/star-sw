@@ -1,5 +1,10 @@
 #ifndef StiSortedHitIterator_HH
 #define StiSortedHitIterator_HH
+#ifdef GNU_GCC
+  #if __GNUC__<3
+    #define HACK_forward_iterator
+  #endif
+#endif
 #include <vector>
 #include <iterator>
 using namespace std;
@@ -14,7 +19,7 @@ typedef StiHit Hit_t;
 ///
 /// \author Claude A Pruneau (Wayne State University)
 class StiSortedHitIterator
-#ifndef GNU_GCC
+#ifndef HACK_forward_iterator
 : public iterator<forward_iterator_tag, Hit_t, ptrdiff_t, Hit_t*, Hit_t&>
 #else
     : public forward_iterator<Hit_t, int>

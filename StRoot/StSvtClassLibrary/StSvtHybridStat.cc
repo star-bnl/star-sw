@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtHybridStat.cc,v 1.3 2000/11/30 20:39:12 caines Exp $
+ * $Id: StSvtHybridStat.cc,v 1.4 2003/09/02 17:59:06 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridStat.cc,v $
+ * Revision 1.4  2003/09/02 17:59:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2000/11/30 20:39:12  caines
  * Changed to allow us of database
  *
@@ -127,7 +130,7 @@ float StSvtHybridStat::getRMS(int anode, int time)
   else 
     return 0;
 
-  float rms = sqrt(meanSQ - mean*mean);
+  float rms = ::sqrt(meanSQ - mean*mean);
 
   return rms;
 }

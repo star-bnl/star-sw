@@ -5,7 +5,7 @@
 * This is responsible for emc equalization
 ***********************************************************************/
 #include "StEmcPedSpectra.h"
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "emc_def.h"
 #include "TCanvas.h"
@@ -59,7 +59,7 @@ Bool_t StEmcPedSpectra::CalculatePedestals()
   
   Int_t ngood=0,nped=0,nrms=0,nchi=0,nbad=0;
   
-  TF1 *func = new TF1("ped","([0]/sqrt(6.28*[2]))*exp(-0.5*((x-[1])/[2])*((x-[1])/[2]))");
+  TF1 *func = new TF1("ped","([0]/::sqrt(6.28*[2]))*exp(-0.5*((x-[1])/[2])*((x-[1])/[2]))");
   for(Int_t id = 1;id<=GetNBin();id++) if(GetStatus(id)==1)
   {
     TH1D *h = GetSpectra(id);
@@ -67,7 +67,7 @@ Bool_t StEmcPedSpectra::CalculatePedestals()
     Float_t avg = (Float_t)h->GetBinCenter(ibin);
     Float_t max = (Float_t)h->GetMaximum();
     Float_t rms = 1.0;
-    max/=sqrt(6.28*rms);
+    max/=::sqrt(6.28*rms);
     func->SetParameter(0,max);
     func->SetParameter(1,avg);
     func->SetParameter(2,rms);

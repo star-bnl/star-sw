@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSimpleCluster.h,v 2.0 2000/08/09 16:22:12 gans Exp $
+ * $Id: StRichSimpleCluster.h,v 2.1 2003/09/02 17:58:51 perev Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichSimpleCluster.h,v $
+ * Revision 2.1  2003/09/02 17:58:51  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.0  2000/08/09 16:22:12  gans
  * Cosmetic Changes. Naming convention for TDrawable objects
  *
@@ -24,7 +27,7 @@
 #ifndef ST_RICH_CLUSTER
 #define ST_RICH_CLUSTER
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <vector>
 
 #ifndef ST_NO_NAMESPACES

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.35 2003/05/06 20:38:05 posk Exp $
+//  $Id: StFlowMaker.h,v 1.36 2003/09/02 17:58:12 perev Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -16,7 +16,7 @@
 
 #ifndef StFlowMaker_H
 #define StFlowMaker_H
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "StMaker.h"
 #include "TString.h"
@@ -66,7 +66,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.35 2003/05/06 20:38:05 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.36 2003/09/02 17:58:12 perev Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -171,6 +171,9 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.36  2003/09/02 17:58:12  perev
+//  gcc 3.2 updates + WarnOff
+//
 //  Revision 1.35  2003/05/06 20:38:05  posk
 //  Removed all but last two versions of pico file read.
 //
@@ -255,7 +258,7 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 //  Changed naming pico files (1 pico per dst)
 //
 //  Revision 1.14  2000/07/12 17:54:38  posk
-//  Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
+//  Added chi2 and dca cuts. Multiplied EtaSym by ::sqrt(mult).
 //  Apply cuts when reading picoevent file.
 //
 //  Revision 1.13  2000/06/30 14:48:34  posk

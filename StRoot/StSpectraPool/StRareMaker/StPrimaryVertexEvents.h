@@ -1,7 +1,7 @@
 #ifndef STPrimaryVertexEVENTS_HH
 #define STPrimaryVertexEVENTS_HH
 #include "StRareEventCut.h"
-#include <iostream.h>
+#include <Stiostream.h>
 class StEvent;
 class StPrimaryVertexEvents : public StRareEventCut {
  

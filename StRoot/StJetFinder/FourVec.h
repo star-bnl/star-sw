@@ -3,7 +3,7 @@
 #ifndef FourVec_HH
 #define FourVec_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 
 class AbstractFourVec
@@ -54,7 +54,7 @@ public:
     virtual double px() const {return mParticle->px();}
     virtual double py() const {return mParticle->py();}
     virtual double pz() const {return mParticle->pz();}
-    virtual double p() const {return sqrt(pt()*pt()+pz()*pz());}
+    virtual double p() const {return ::sqrt(pt()*pt()+pz()*pz());}
 	
     //angles
     virtual double theta() const {return mParticle->theta();}
@@ -89,7 +89,7 @@ public:
 		mPx = pt*cos(phi);
 		mPy = pt*sin(phi);
 		mPz = pt*sinh(eta);
-		mE = sqrt(fabs(mPx*mPx + mPy*mPy +mPz*mPz + m*m) );
+		mE = ::sqrt(fabs(mPx*mPx + mPy*mPy +mPz*mPz + m*m) );
 		mCharge = charge;
     }
 	
@@ -139,7 +139,7 @@ inline void StFourVec::clear()
 
 inline double StFourVec::pt() const
 {
-    return sqrt( mPx*mPx + mPy*mPy );
+    return ::sqrt( mPx*mPx + mPy*mPy );
 }
 
 inline double StFourVec::px() const
@@ -159,7 +159,7 @@ inline double StFourVec::pz() const
 
 inline double StFourVec::p() const
 {
-    return sqrt(mPx*mPx + mPy*mPy + mPz*mPz);
+    return ::sqrt(mPx*mPx + mPy*mPy + mPz*mPz);
 }
 
 inline double StFourVec::theta() const
@@ -180,20 +180,20 @@ inline double StFourVec::rapidity() const
     if (den==0.) {return -999;}
     double arg = num/den;
     if (arg<0.) {return -999;}
-    return 0.5 * log(arg);
+    return 0.5 * ::log(arg);
 }
 
 inline double StFourVec::eta() const
 {
     double arg = tan(theta()/2.);
-    return (arg>0.) ? -log(arg) : -999;
+    return (arg>0.) ? -::log(arg) : -999;
 }
 
 //4-th component
 inline double StFourVec::eT() const
 {
     if(p() == 0.0) return 0.0;
-    return sqrt(e()*e()*pt()*pt()/(p()*p()));
+    return ::sqrt(e()*e()*pt()*pt()/(p()*p()));
 }
 
 inline double StFourVec::eZ() const
@@ -208,7 +208,7 @@ inline double StFourVec::e() const
 
 inline double StFourVec::mass() const
 {
-    return sqrt(fabs(mE*mE - p()*p() ) );
+    return ::sqrt(fabs(mE*mE - p()*p() ) );
 }
 
 inline double StFourVec::charge() const

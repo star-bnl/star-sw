@@ -1,5 +1,8 @@
-// $Id: StTpcHitFilterMaker.cxx,v 1.3 2001/04/13 21:34:46 hardtke Exp $
+// $Id: StTpcHitFilterMaker.cxx,v 1.4 2003/09/02 17:59:13 perev Exp $
 // $Log: StTpcHitFilterMaker.cxx,v $
+// Revision 1.4  2003/09/02 17:59:13  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.3  2001/04/13 21:34:46  hardtke
 // Add option to disable hit deletion
 //
@@ -15,7 +18,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "StTpcHitFilterMaker.h"
 #include "StChain.h"

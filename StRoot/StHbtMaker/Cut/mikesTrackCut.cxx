@@ -49,11 +49,11 @@ bool mikesTrackCut::Pass(const StHbtTrack* track){
   }
 
   if (goodPID){
-    float TEnergy = sqrt(track->P().mag2()+mMass*mMass);
-    float TRapidity = 0.5*log((TEnergy+track->P().z())/
+    float TEnergy = ::sqrt(track->P().mag2()+mMass*mMass);
+    float TRapidity = 0.5*::log((TEnergy+track->P().z())/
 			    (TEnergy-track->P().z()));
 
-    float Pt = sqrt((track->P().x())*(track->P().x())+
+    float Pt = ::sqrt((track->P().x())*(track->P().x())+
                     (track->P().y())*(track->P().y()));
 
 

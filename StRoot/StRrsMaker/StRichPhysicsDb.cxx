@@ -1,11 +1,14 @@
 /*******************************************************************
- * $Id: StRichPhysicsDb.cxx,v 2.0 2000/08/09 16:17:03 gans Exp $
+ * $Id: StRichPhysicsDb.cxx,v 2.1 2003/09/02 17:58:56 perev Exp $
  *
  * Description:
  *  Implementation of the two databases modules
  *
  *******************************************************************
  * $Log: StRichPhysicsDb.cxx,v $
+ * Revision 2.1  2003/09/02 17:58:56  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.0  2000/08/09 16:17:03  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -30,7 +33,7 @@
 
 // STL
 #include <algorithm>
-#include <iostream.h>
+#include <Stiostream.h>
 
 #ifndef ST_NO_NAMESPACES
 using std::max_element;

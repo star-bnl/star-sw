@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: vecTest3.cc,v 1.1 1999/02/17 12:44:05 ullrich Exp $
+ * $Id: vecTest3.cc,v 1.2 2003/09/02 17:59:38 perev Exp $
  *
  * Author: Thomas Ullrich, Oct 1998
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: vecTest3.cc,v $
+ * Revision 1.2  2003/09/02 17:59:38  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  1999/02/17 12:44:05  ullrich
  * New Revision
  *
@@ -17,7 +20,7 @@
  * Initial Revision
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "StGlobals.hh"
 #include "StLorentzVector.hh"
@@ -57,15 +60,15 @@ int main()
     double massParent  = abs(parent);
     double E1  = (massParent*massParent + mass1*mass1 - mass2*mass2)/(2.*massParent);
     double E2  = massParent - E1;
-    double p1  = sqrt((E1 + mass1)*(E1 - mass1));
-    double p2  = sqrt((massParent*massParent-(mass1+mass2)*(mass1+mass2))*
+    double p1  = ::sqrt((E1 + mass1)*(E1 - mass1));
+    double p2  = ::sqrt((massParent*massParent-(mass1+mass2)*(mass1+mass2))*
                       (massParent*massParent-(mass1-mass2)*(mass1-mass2)))/(2.*massParent);
 
     //
     //	Orientation in decaying particle rest frame
     //
     double costheta = 2*rflat.shoot() - 1;
-    double sintheta = sqrt((1 + costheta)*(1 - costheta));
+    double sintheta = ::sqrt((1 + costheta)*(1 - costheta));
     double phi      = 2*pi*rflat.shoot();
 
     //

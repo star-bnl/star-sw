@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireBinEntry.hh,v 1.6 2000/07/30 02:42:10 long Exp $
+ * $Id: StTrsWireBinEntry.hh,v 1.7 2003/09/02 17:59:16 perev Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireBinEntry.hh,v $
+ * Revision 1.7  2003/09/02 17:59:16  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.6  2000/07/30 02:42:10  long
  * add d()
  *
@@ -39,7 +42,7 @@
  **************************************************************************/
 #ifndef ST_TRS_WIRE_BIN_ENTRY_HH
 #define ST_TRS_WIRE_BIN_ENTRY_HH
-#include <iostream.h>
+#include <Stiostream.h>
 
 #if  defined(__sun) && ! defined(__GNUG__)
 #include <stdcomp.h>  // bool type

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMCInfo.cxx,v 2.2 2003/05/21 18:23:18 ullrich Exp $
+ * $Id: StTofMCInfo.cxx,v 2.3 2003/09/02 17:58:06 perev Exp $
  *
  * Author: Wei-Ming Zhang, April 2001 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofMCInfo.cxx,v $
+ * Revision 2.3  2003/09/02 17:58:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.2  2003/05/21 18:23:18  ullrich
  * Major Revision of ToF classes (F. Geurts)
  *
@@ -17,10 +20,10 @@
  * Initial Revision.
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StTofMCInfo.h"
 
-static const char rcsid[] = "$Id: StTofMCInfo.cxx,v 2.2 2003/05/21 18:23:18 ullrich Exp $";
+static const char rcsid[] = "$Id: StTofMCInfo.cxx,v 2.3 2003/09/02 17:58:06 perev Exp $";
 
 ClassImp(StTofMCInfo)
 

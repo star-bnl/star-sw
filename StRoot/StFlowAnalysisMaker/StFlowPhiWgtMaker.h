@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowPhiWgtMaker.h,v 1.1 2003/05/16 20:44:51 posk Exp $
+// $Id: StFlowPhiWgtMaker.h,v 1.2 2003/09/02 17:58:11 perev Exp $
 //
 // Authors: Art Poskanzer and Jamie Dunlop, May 2003
 //
@@ -12,7 +12,7 @@
 
 #ifndef StFlowPhiWgtMaker_H
 #define StFlowPhiWgtMaker_H
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StMaker.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "TString.h"
@@ -37,7 +37,7 @@ public:
   Int_t    Finish();
 
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowPhiWgtMaker.h,v 1.1 2003/05/16 20:44:51 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowPhiWgtMaker.h,v 1.2 2003/09/02 17:58:11 perev Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -94,6 +94,9 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPhiWgtMaker.h,v $
+// Revision 1.2  2003/09/02 17:58:11  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.1  2003/05/16 20:44:51  posk
 // First commit of StFlowPhiWgtMaker
 //

@@ -1,6 +1,6 @@
 #ifndef STSCFLISTSTRIP_HH
 #define STSCFLISTSTRIP_HH
-# include <iostream.h>
+# include "Stiostream.h"
 # include <stdlib.h>
 # include <math.h>
 # include "StScfStrip.hh"

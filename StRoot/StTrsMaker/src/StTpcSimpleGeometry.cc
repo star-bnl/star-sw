@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleGeometry.cc,v 1.10 2001/03/30 21:23:40 jeromel Exp $
+ * $Id: StTpcSimpleGeometry.cc,v 1.11 2003/09/02 17:59:18 perev Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleGeometry.cc,v $
+ * Revision 1.11  2003/09/02 17:59:18  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.10  2001/03/30 21:23:40  jeromel
  * Fixes for Insure smooth compilation
  *
@@ -332,7 +335,7 @@ double StTpcSimpleGeometry::innerSectorAnodeWire(int n) const
 // change return type for sun ??
 bool StTpcSimpleGeometry::acceptance(StThreeVector<StDouble>& tmp) const
 {
-    double radial = sqrt((tmp.x()*tmp.x())+(tmp.y()*tmp.y()));
+    double radial = ::sqrt((tmp.x()*tmp.x())+(tmp.y()*tmp.y()));
 
     if((radial > mIfcRadius) &&
        (radial < mOfcRadius) &&

@@ -75,7 +75,7 @@ void StNoPidSpectraAnalysis::fillHistograms(StEvent& event) {
 		float weight = 1./effic;
 		double pperp = mom.perp();
                 double pz = mom.z();
-		double pseudoy = 0.5*log((p+pz)/(p-pz));
+		double pseudoy = 0.5*::log((p+pz)/(p-pz));
                 double xvalue =-1000.;
                 double yvalue = 0.;
 		if (mAbscissa == kPseudoRapidity) {

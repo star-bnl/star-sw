@@ -1,5 +1,8 @@
-// $Id: StHistMaker.cxx,v 2.2 2002/09/06 02:51:34 genevb Exp $
+// $Id: StHistMaker.cxx,v 2.3 2003/09/02 17:59:21 perev Exp $
 // $Log: StHistMaker.cxx,v $
+// Revision 2.3  2003/09/02 17:59:21  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 2.2  2002/09/06 02:51:34  genevb
 // Remove limit on maximum number of histograms that can be copied
 //
@@ -17,7 +20,7 @@
 //
 //
 ///////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StHistMaker.h"
 #include "StHistUtil.h"

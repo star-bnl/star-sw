@@ -6,7 +6,7 @@
 // Revision 1.0  2000/03/20 23:28:50  nystrand
 //
 //////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StPeCSpec.h"
 
 ClassImp(StPeCSpec)

@@ -17,9 +17,12 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //
-//  $Id: Stl3CounterMaker.cxx,v 1.6 2002/04/19 22:24:21 perev Exp $
+//  $Id: Stl3CounterMaker.cxx,v 1.7 2003/09/02 18:00:16 perev Exp $
 //
 //  $Log: Stl3CounterMaker.cxx,v $
+//  Revision 1.7  2003/09/02 18:00:16  perev
+//  gcc 3.2 updates + WarnOff
+//
 //  Revision 1.6  2002/04/19 22:24:21  perev
 //  fixes for ROOT/3.02.07
 //
@@ -46,8 +49,8 @@
 
 
 #include <stdlib.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include "Stl3CounterMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"

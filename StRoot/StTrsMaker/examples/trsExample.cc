@@ -1,5 +1,5 @@
 //*******************************************************/
-// $Id: trsExample.cc,v 1.3 1999/01/22 23:36:47 lasiuk Exp $
+// $Id: trsExample.cc,v 1.4 2003/09/02 17:59:15 perev Exp $
 //
 // Author: brian, October, 1998
 //
@@ -10,6 +10,9 @@
 #define DIAGNOSTICS
 //
 // $Log: trsExample.cc,v $
+// Revision 1.4  2003/09/02 17:59:15  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.3  1999/01/22 23:36:47  lasiuk
 // macro TRUE
 //
@@ -19,9 +22,9 @@
 // Revision 1.1  1999/01/18 10:54:48  lasiuk
 // Initial revision
 /********************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <unistd.h>    // needed for access()
-#include <fstream.h>
+#include "Stiostream.h"
 
 #include <string>
 #include <vector>

@@ -173,7 +173,7 @@ Int_t StSvtVertexFinderMaker::Make()
 	  float my_x = s_spt[i].x[0]-xtpc;
 	  float my_y = s_spt[i].x[1]-ytpc;
 	  float my_z = s_spt[i].x[2];
-	  float my_r = sqrt(my_x*my_x+my_y*my_y);
+	  float my_r = ::sqrt(my_x*my_x+my_y*my_y);
 	  float ix = atan2(my_y,my_x);
 	  float my_z0 = (float)ztpc;
 	  float iz = ((11*my_z)/my_r)+((11*my_z0)/my_r)-my_z0;

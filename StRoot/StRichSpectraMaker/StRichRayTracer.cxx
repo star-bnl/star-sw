@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichRayTracer.cxx,v $
+ * Revision 1.10  2003/09/02 17:58:55  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.9  2002/05/21 22:52:56  lasiuk
  * attempt 2
  *
@@ -901,7 +904,7 @@ StRichRayTracer::calculatePoints(StThreeVectorF& radPt, double mass)
     //
     double beta2 =
 	sqr(abs(mLocalTrackMomentum))/(sqr(abs(mLocalTrackMomentum))+sqr(mass));
-    double beta = sqrt(beta2);
+    double beta = ::sqrt(beta2);
 
     double nF;
     double nQ;

@@ -1,6 +1,6 @@
 /****************************************************
  *
- * $Id: StPmdAbsClustering.cxx,v 1.3 2003/05/14 10:49:04 subhasis Exp $
+ * $Id: StPmdAbsClustering.cxx,v 1.4 2003/09/02 17:58:48 perev Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -11,13 +11,16 @@
  ******************************************************
  *
  * $Log: StPmdAbsClustering.cxx,v $
+ * Revision 1.4  2003/09/02 17:58:48  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2003/05/14 10:49:04  subhasis
  * CPV clustering added
  *
  *
  ******************************************************/
 
-#include<iostream.h>
+#include<Stiostream.h>
 #include<assert.h>
 #include<math.h>
 #include"TROOT.h"

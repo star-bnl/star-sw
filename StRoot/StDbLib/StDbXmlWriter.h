@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlWriter.h,v 1.6 2001/10/24 04:05:20 porter Exp $
+ * $Id: StDbXmlWriter.h,v 1.7 2003/09/02 17:57:50 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbXmlWriter.h,v $
+ * Revision 1.7  2003/09/02 17:57:50  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.6  2001/10/24 04:05:20  porter
  * added long long type to I/O and got rid of obsolete dataIndex table
  *
@@ -34,12 +37,11 @@
 #ifndef STDBXMLWRITER_HH
 #define STDBXMLWRITER_HH
 
-#include "tableAcceptor.hh"
-#include <iostream.h>
-#include <fstream.h>
 #include <stdlib.h>
-#include <strstream.h>
 #include <string.h>
+#include <Stiostream.h>
+#include <Stsstream.h>
+#include "tableAcceptor.hh"
 
 class StDbTable;
 

@@ -19,8 +19,8 @@
 */
 
 #include <stdio.h>      
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include <ctime>      // time functions
 
 #include "StFtpcMixerMaker.h"
@@ -411,9 +411,12 @@ Int_t StFtpcMixerMaker::Finish()
 
  /***************************************************************************
  *
- * $Id: StFtpcMixerMaker.cxx,v 1.3 2003/07/18 18:31:47 perev Exp $
+ * $Id: StFtpcMixerMaker.cxx,v 1.4 2003/09/02 17:58:15 perev Exp $
  *
  * $Log: StFtpcMixerMaker.cxx,v $
+ * Revision 1.4  2003/09/02 17:58:15  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2003/07/18 18:31:47  perev
  * test for nonexistance of XXXReader added
  *

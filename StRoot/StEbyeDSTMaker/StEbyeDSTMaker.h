@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeDSTMaker.h,v 1.3 2001/09/14 17:47:08 perev Exp $
+ * $Id: StEbyeDSTMaker.h,v 1.4 2003/09/02 17:57:57 perev Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -19,6 +19,9 @@
  **********************************************************************
  *
  * $Log: StEbyeDSTMaker.h,v $
+ * Revision 1.4  2003/09/02 17:57:57  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2001/09/14 17:47:08  perev
  * Removed forward decleration of StRun.
  *
@@ -34,8 +37,8 @@
 #ifndef StEbyeDSTMaker_HH
 #define StEbyeDSTMaker_HH
 
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include "TTree.h"
 #include "TFile.h"
 #include "TString.h"
@@ -70,7 +73,7 @@ public:
   Int_t Finish();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeDSTMaker.h,v 1.3 2001/09/14 17:47:08 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeDSTMaker.h,v 1.4 2003/09/02 17:57:57 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEbyeDSTMaker, 1)
 };

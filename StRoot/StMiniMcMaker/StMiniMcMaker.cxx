@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.11 2003/07/09 01:07:23 calderon Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.12 2003/09/02 17:58:43 perev Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,6 +7,9 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.12  2003/09/02 17:58:43  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.11  2003/07/09 01:07:23  calderon
  * Addition of FTPC reference multiplicity
  * Addition of other multiplicity values for StMiniMcEvent
@@ -61,6 +64,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.12  2003/09/02 17:58:43  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.11  2003/07/09 01:07:23  calderon
  * Addition of FTPC reference multiplicity
  * Addition of other multiplicity values for StMiniMcEvent
@@ -111,7 +117,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.11 2003/07/09 01:07:23 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.12 2003/09/02 17:58:43 perev Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -128,7 +134,7 @@
 
 
 
-#include <iostream>
+#include "Stiostream.h"
 #include <assert.h>
 #include "StMiniMcEvent/StMiniMcEvent.h"
 #include "StMiniMcEvent/StMiniMcPair.h"

@@ -1,6 +1,6 @@
 #ifndef STSPANOISE_HH
 #define STSPANOISE_HH
-# include <iostream.h>
+# include "Stiostream.h"
 # include <stdlib.h>
 # include <math.h>
 

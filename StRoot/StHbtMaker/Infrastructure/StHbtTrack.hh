@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.22 2003/03/18 14:41:48 kisiel Exp $
+ * $Id: StHbtTrack.hh,v 1.23 2003/09/02 17:58:32 perev Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.23  2003/09/02 17:58:32  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.22  2003/03/18 14:41:48  kisiel
  * Bugfix update for the theoretical part of the code. Reverts the changes to the Lednicky weight calculator, as the previuos one had problems with strong interaction
  *
@@ -112,7 +115,7 @@
 #ifndef StHbtTrack_hh
 #define StHbtTrack_hh
 
-#include <fstream.h>
+#include "Stiostream.h"
 
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StPhysicalHelixD.hh"

@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.14 2003/07/04 14:06:43 fsimon Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.15 2003/09/02 17:58:16 perev Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.15  2003/09/02 17:58:16  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.14  2003/07/04 14:06:43  fsimon
 // Now rotating hits from global GEANT coordinates into local FTPC coordinates.
 // This uses the instance of StFtpcTrackingParams defined in StFtpcSlowSimMaker.
@@ -50,7 +53,7 @@
 //
 // This is the main routine  for the FTPC Simulator
 //
-#include <iostream.h>
+#include <Stiostream.h>
 #include "PhysicalConstants.h"
 
 #include "StFtpcSlowSimulator.hh"

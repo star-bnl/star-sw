@@ -13,31 +13,25 @@
 /***************************************************************************************/
 #ifndef trgStructures2000_h
 #define trgStructures2000_h
-#undef FORMAT_VERSION
-#undef EVT_HEAD_LEN
-#undef EV_DESC_LEN
-#undef L0DSM_DATA_LEN
-#undef RAW_DET_DATA_LEN
-#undef TRG_SUM_LEN
 
 /* several shortcut definitions */
 
-#define MAX_RAW_DATA_BLOCKS   11   /* Maximum number of Raw Data Blocks:  current + npre + npost */
+#define y0MAX_RAW_DATA_BLOCKS   11   /* Maximum number of Raw Data Blocks:  current + npre + npost */
                                
-#define FORMAT_VERSION      0x11   /* Format Version number for trigger data */
-#define EVT_HEAD_LEN           4   /* Trigger Event Header Length */
-#define EV_DESC_LEN           28   /* Number of bytes in event descriptor */
-#define L0DSM_DATA_LEN       144   /* Size of data block in L0 DSM Tree */
-#define RAW_DET_DATA_LEN     408   /* Size of Raw Detector Data from CTB, MWC with headers */
-#define TRG_SUM_LEN          432   /* Number of bytes in the trigger summary for DAQ with headers */
+#define y0FORMAT_VERSION      0x11   /* Format Version number for trigger data */
+#define y0EVT_HEAD_LEN           4   /* Trigger Event Header Length */
+#define y0EV_DESC_LEN           28   /* Number of bytes in event descriptor */
+#define y0L0DSM_DATA_LEN       144   /* Size of data block in L0 DSM Tree */
+#define y0RAW_DET_DATA_LEN     408   /* Size of Raw Detector Data from CTB, MWC with headers */
+#define y0TRG_SUM_LEN          432   /* Number of bytes in the trigger summary for DAQ with headers */
 
-#define L1_DATA_LEN  (EVT_HEAD_LEN+EV_DESC_LEN+TRG_SUM_LEN)   /* Size of data passed from L1ANA to L1DC */ 
+#define y0L1_DATA_LEN  (y0EVT_HEAD_LEN+y0EV_DESC_LEN+y0TRG_SUM_LEN)   /* Size of data passed from L1ANA to L1DC */ 
 
-#define TRG_EVT_LEN  (L1_DATA_LEN+(MAX_RAW_DATA_BLOCKS*RAW_DET_DATA_LEN))  /* Max size of a trigger event */
-#define TDI_EVT_LEN  (EV_DESC_LEN+TRG_SUM_LEN+(MAX_RAW_DATA_BLOCKS*RAW_DET_DATA_LEN)) /* size of event sent to TDI */
+#define y0TRG_EVT_LEN  (y0L1_DATA_LEN+(y0MAX_RAW_DATA_BLOCKS*y0RAW_DET_DATA_LEN))  /* Max size of a trigger event */
+#define y0TDI_EVT_LEN  (y0EV_DESC_LEN+y0TRG_SUM_LEN+(y0MAX_RAW_DATA_BLOCKS*y0RAW_DET_DATA_LEN)) /* size of event sent to TDI */
 
-#define CTB_DATA_OFFSET        8  /* Number of bytes CTB Raw data is offset in raw trigger structure */
-#define RAW_CTB_LEN          256  /* Number of bytes in raw CTB DSMs */
+#define y0CTB_DATA_OFFSET        8  /* Number of bytes CTB Raw data is offset in raw trigger structure */
+#define y0RAW_CTB_LEN          256  /* Number of bytes in raw CTB DSMs */
 
 /********** trigger structures ***********/
 
@@ -185,6 +179,6 @@ class TrgDataType2000 { public:
   TrgEvtHeader2000   TrgHead; 
   EvtDescData2000    EvtDesc;       /* L1 Event Descriptor Data */  
   TrgSumData2000     TrgSum;        /* summary data */
-  RawTrgDet2000      RAW[MAX_RAW_DATA_BLOCKS]; /* raw Detector Data with pre and post History */
+  RawTrgDet2000      RAW[y0MAX_RAW_DATA_BLOCKS]; /* raw Detector Data with pre and post History */
 };          /* 4952 bytes */
 #endif 

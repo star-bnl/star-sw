@@ -3,7 +3,7 @@
 #include "StMiniMcPair.h"
 #include "StContamPair.h"
 
-#include <iostream>
+#include "Stiostream.h"
 
 Int_t StMiniMcEvent::mSFirst=1; 
 ClassImp(StMiniMcEvent)

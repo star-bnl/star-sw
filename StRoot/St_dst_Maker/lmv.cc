@@ -1,5 +1,8 @@
-// $Id: lmv.cc,v 1.16 2002/02/22 04:35:57 genevb Exp $
+// $Id: lmv.cc,v 1.17 2003/09/02 17:59:26 perev Exp $
 // $Log: lmv.cc,v $
+// Revision 1.17  2003/09/02 17:59:26  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.16  2002/02/22 04:35:57  genevb
 // Set vertex id to vertex table entry row
 //
@@ -79,7 +82,7 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -87,7 +90,7 @@
 #include "StChain.h"
 #include "SystemOfUnits.h"
 #if !defined(ST_NO_NAMESPACES)
-using namespace std::vector;
+using namespace std;
 using namespace units;
 #endif
 #include "StThreeVectorD.hh"
@@ -108,7 +111,7 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 //#include "StMagF/StMagF.h"
 
 
-//static const char rcsid[] = "$Id: lmv.cc,v 1.16 2002/02/22 04:35:57 genevb Exp $";
+//static const char rcsid[] = "$Id: lmv.cc,v 1.17 2003/09/02 17:59:26 perev Exp $";
 
 static double  MinTrackLen= 1.;
 
@@ -219,7 +222,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
       StThreeVectorD XMinVec = TrkHlx.at(spath);
       //    cout<<"Min Position: "<<XMinVec<<endl;
       double x_m = XMinVec.x(), y_m = XMinVec.y();
-      double dmin = sqrt(x_m*x_m + y_m*y_m);
+      double dmin = ::sqrt(x_m*x_m + y_m*y_m);
       if( dmin > Rmincut ) continue;
       n3++;
 
@@ -244,7 +247,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     double xo = 0.0; double yo = 0.0;
     spath = helices[jj].pathLength(xo, yo);
     double s=0.0;
-    double R1St = sqrt( helices[jj].x(s)*helices[jj].x(s) + helices[jj].y(s)*helices[jj].y(s) );
+    double R1St = ::sqrt( helices[jj].x(s)*helices[jj].x(s) + helices[jj].y(s)*helices[jj].y(s) );
     if( R1St < RBPipe ){cout<<"lmv: ERROR: Radius of First point < RBeamPipe!! R1St= "<<R1St<<endl; return kStWarn;}
 
     // Find Coordinates of Intersect with IFC
@@ -263,7 +266,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 
       StThreeVectorD xpos;
       xpos = helices[jj].at(ifcpath);
-      double xmagn = sqrt( xpos.x()*xpos.x() + xpos.y()*xpos.y() );
+      double xmagn = ::sqrt( xpos.x()*xpos.x() + xpos.y()*xpos.y() );
       // Find momentum at this point
       StThreeVectorD pmom;
       pmom = helices[jj].momentumAt(ifcpath, bfield*tesla);
@@ -290,7 +293,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
       }
       StThreeVectorD xpos;
       xpos = helices[jj].at(svt3path);
-      double xmagn = sqrt( xpos.x()*xpos.x() + xpos.y()*xpos.y() );
+      double xmagn = ::sqrt( xpos.x()*xpos.x() + xpos.y()*xpos.y() );
       // Find momentum at this point
       StThreeVectorD pmom;
       pmom = helices[jj].momentumAt(svt3path, bfield*tesla);
@@ -314,7 +317,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
       }
       StThreeVectorD xpos;
       xpos = helices[jj].at(svt2path);
-      double xmagn = sqrt( xpos.x()*xpos.x() + xpos.y()*xpos.y() );
+      double xmagn = ::sqrt( xpos.x()*xpos.x() + xpos.y()*xpos.y() );
       // Find momentum at this point
       StThreeVectorD pmom;
       pmom = helices[jj].momentumAt(svt2path, bfield*tesla);
@@ -338,7 +341,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
       }
       StThreeVectorD xpos;
       xpos = helices[jj].at(svt1path);
-      double xmagn = sqrt( xpos.x()*xpos.x() + xpos.y()*xpos.y() );
+      double xmagn = ::sqrt( xpos.x()*xpos.x() + xpos.y()*xpos.y() );
       // Find momentum at this point
       StThreeVectorD pmom;
       pmom = helices[jj].momentumAt(svt1path, bfield*tesla);
@@ -363,7 +366,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     }
 
     StThreeVectorD xpos = helices[jj].at(bpipepath);
-    double xmagn = sqrt( xpos.x()*xpos.x() + xpos.y()*xpos.y() );
+    double xmagn = ::sqrt( xpos.x()*xpos.x() + xpos.y()*xpos.y() );
     // Find momentum at this point
     StThreeVectorD pmom = helices[jj].momentumAt(bpipepath, bfield*tesla);
 
@@ -379,9 +382,9 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 
     if( lpath_tot <= 0.0 )cout<<"lmv: ERROR lpath_tot= "<<lpath_tot<<endl;
     // From Particle Data Booklet
-    double beta = pmom.mag()/sqrt(pmom.mag()*pmom.mag()+0.139*0.139); //Assume pion
+    double beta = pmom.mag()/::sqrt(pmom.mag()*pmom.mag()+0.139*0.139); //Assume pion
 
-    double dth4 = (0.0136/(beta*pmom.mag()))*sqrt(lpath_tot)*(1+0.038*log(lpath_tot));
+    double dth4 = (0.0136/(beta*pmom.mag()))*::sqrt(lpath_tot)*(1+0.038*::log(lpath_tot));
            dth4 = C_SQRT2*dth4;
 
     double dr4 = fabs(dth4*spath);
@@ -401,7 +404,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     double dr_ext = 0.0;
     if( TrkLength[kk] > MinTrackLen ){
       dr_ext = D_fst_point + D_fst_point*fabs(spath/TrkLength[kk]);
-      sigma[kk] = sqrt( sigma[kk]*sigma[kk] + dr_ext*dr_ext );
+      sigma[kk] = ::sqrt( sigma[kk]*sigma[kk] + dr_ext*dr_ext );
     }
 
   }
@@ -468,7 +471,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     double Zv = C31*b1 + C32*b2 + C33*b3;
     XVertex.setX(Xv); XVertex.setY(Yv); XVertex.setZ(Zv);
     //    cout<<"Vertex Position   : "<<XVertex.x()<<" "<<XVertex.y()<<" "<<XVertex.z()<<endl;
-    //    cout<<"Error in Position : "<<sqrt(C11)<<" "<<sqrt(C22)<<" "<<sqrt(C33)<<endl;
+    //    cout<<"Error in Position : "<<::sqrt(C11)<<" "<<::sqrt(C22)<<" "<<::sqrt(C33)<<endl;
     
 
     // Check if the fit is any good
@@ -494,7 +497,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
       double d=(XHel.x()-XVertex.x())*(XHel.x()-XVertex.x());
          d = d+(XHel.y()-XVertex.y())*(XHel.y()-XVertex.y());
          d = d+(XHel.z()-XVertex.z())*(XHel.z()-XVertex.z());
-         d = sqrt(d);
+         d = ::sqrt(d);
       chi2 = chi2 + (d*d)/(sig*sig);
       double drel = d/sig;
       if( drel > dmax ){

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManagerImpl.hh,v 1.1 2001/01/22 18:37:56 porter Exp $
+ * $Id: StDbManagerImpl.hh,v 1.2 2003/09/02 17:57:49 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.hh,v $
+ * Revision 1.2  2003/09/02 17:57:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2001/01/22 18:37:56  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -33,7 +36,7 @@
 
 #include "StDbManager.hh"
 #include "parseXmlString.hh"
-#include <fstream.h>
+#include "Stiostream.h"
 #include "StDbTime.h"
 #include "StDataBaseI.hh"
 #include "StDbTableFactory.hh"

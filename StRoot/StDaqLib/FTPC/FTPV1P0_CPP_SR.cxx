@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_CPP_SR.cxx,v 1.3 2001/06/27 22:06:54 jcs Exp $
+ * $Id: FTPV1P0_CPP_SR.cxx,v 1.4 2003/09/02 17:55:31 perev Exp $
  * Author: Jeff Landgraf, M.J. LeVine, J.Klay, H.Huemmler
  ***************************************************************************
  * Description: 
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: FTPV1P0_CPP_SR.cxx,v $
+ * Revision 1.4  2003/09/02 17:55:31  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2001/06/27 22:06:54  jcs
  * Remove unused variables mz, rb
  *
@@ -27,7 +30,7 @@
  *
  **************************************************************************/
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "FTPV1P0.hh"

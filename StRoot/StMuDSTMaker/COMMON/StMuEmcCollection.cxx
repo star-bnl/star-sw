@@ -8,11 +8,9 @@
 #include <assert.h>
 
 #include "StMuEmcCollection.h"
-
+#include "Stiostream.h"
 #include "StMuEmcUtil.h"
 static StMuEmcUtil util; // to ease decoding of EEMC hits
-
-#include <iostream>
 ClassImp(StMuEmcCollection)
 
 StMuEmcCollection::StMuEmcCollection()
@@ -139,7 +137,7 @@ void StMuEmcCollection::packbits(unsigned char *data, unsigned int value, unsign
   unsigned int a         = 0;
   unsigned int s         = 1;
   for(int i=0;i<4;i++)  { a+=data[startByte+i]*s; s*=256; }
-  unsigned int mask = ((unsigned int)pow(2,nbits)-1);
+  unsigned int mask = ((unsigned int)(1<<nbits)-1);
   unsigned int b = ((value&mask)<<startBit) | (a&(~(mask<<startBit)));  
   data[startByte+0] = (unsigned char)((b & 0x000000FF));
   data[startByte+1] = (unsigned char)((b & 0x0000FF00)>>8);
@@ -155,7 +153,7 @@ unsigned int StMuEmcCollection::unpackbits(unsigned char *data, unsigned int nbi
   unsigned int a         = 0;
   unsigned int s         = 1;
   for(int i=0;i<4;i++)  { a+=data[startByte+i]*s; s*=256; }  
-  unsigned int mask = ((unsigned int)pow(2,nbits)-1);
+  unsigned int mask = ((unsigned int)(1<<nbits)-1);
   unsigned int b = (unsigned int)(a&(mask<<startBit))>>startBit;
   return b;
 }

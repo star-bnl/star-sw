@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.cxx,v 2.3 2003/07/16 19:58:31 perev Exp $
+ * $Id: StTriggerData2003.cxx,v 2.4 2003/09/02 17:58:06 perev Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.cxx,v $
+ * Revision 2.4  2003/09/02 17:58:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.3  2003/07/16 19:58:31  perev
  * Cleanup of StTriggerData2003 at all
  *
@@ -172,12 +175,12 @@ unsigned int StTriggerData2003::spinBitBlueUnpol() const
   return (sb/128)%2;
 }
 
-unsigned short  StTriggerData2003::ctb(int pmt, int prepost=0) const
+unsigned short  StTriggerData2003::ctb(int pmt, int prepost) const
 {
     static const unsigned char ctbMap[240] = {
-	7, 6, 5, 4, 3, 23, 22, 21, 20, 19,
-	2, 1, 0, 15, 14, 18, 17, 16, 31, 30,
-	13, 12, 11, 10, 9, 29, 28, 27, 26, 25,
+	 7,  6,  5,  4,  3, 23, 22, 21, 20, 19,
+	 2,  1,  0, 15, 14, 18, 17, 16, 31, 30,
+	13, 12, 11, 10,  9, 29, 28, 27, 26, 25,
 	39, 38, 37, 36, 35, 55, 54, 53, 52, 51,
 	34, 33, 32, 47, 46, 50, 49, 48, 63, 62,
 	45, 44, 43, 42, 41, 61, 60, 59, 58, 57,
@@ -203,7 +206,7 @@ unsigned short  StTriggerData2003::ctb(int pmt, int prepost=0) const
     return mData->rawTriggerDet[prepostAddress(prepost)].CTB[ctbMap[pmt]];
 }
 
-unsigned short StTriggerData2003::mwc(int pmt, int prepost=0) const
+unsigned short StTriggerData2003::mwc(int pmt, int prepost) const
 {
     static const unsigned char mwcMap[96] = {
 	71, 70, 69, 68, 67, 66, 65, 64, 79, 78, 77, 76,
@@ -218,7 +221,7 @@ unsigned short StTriggerData2003::mwc(int pmt, int prepost=0) const
     return mData->rawTriggerDet[prepostAddress(prepost)].MWC[mwcMap[pmt]];
 }
 
-unsigned short StTriggerData2003::bbcADC(int eastwest, int pmt, int prepost=0) const
+unsigned short StTriggerData2003::bbcADC(int eastwest, int pmt, int prepost) const
 {
     static const int q_map[2][24] = { 
 	{ 8  , 5  , 4  , 40 , 37 , 36 , 7  , 6  ,
@@ -231,7 +234,7 @@ unsigned short StTriggerData2003::bbcADC(int eastwest, int pmt, int prepost=0) c
     return mData->rawTriggerDet[prepostAddress(prepost)].BBC[q_map[eastwest][pmt-1]-1];
 }
 
-unsigned short StTriggerData2003::bbcTDC(int eastwest, int pmt, int prepost=0) const
+unsigned short StTriggerData2003::bbcTDC(int eastwest, int pmt, int prepost) const
 {      
     static const int t_map[2][16] ={ 
 	{ 16 , 13 , 12 , 48 , 45 , 44 , 15 , 14 ,
@@ -242,7 +245,7 @@ unsigned short StTriggerData2003::bbcTDC(int eastwest, int pmt, int prepost=0) c
     return mData->rawTriggerDet[prepostAddress(prepost)].BBC[t_map[eastwest][pmt-1]-1];
 }
 
-unsigned short StTriggerData2003::bbcADCSum(int eastwest, int prepost=0) const
+unsigned short StTriggerData2003::bbcADCSum(int eastwest, int prepost) const
 {
     int address = prepostAddress(prepost);
     if(eastwest==0){
@@ -256,14 +259,14 @@ unsigned short StTriggerData2003::bbcADCSum(int eastwest, int prepost=0) const
     }
 }
 
-unsigned short StTriggerData2003::bbcADCSumLargeTile(int eastwest, int prepost=0) const
+unsigned short StTriggerData2003::bbcADCSumLargeTile(int eastwest, int prepost) const
 {
     int address = prepostAddress(prepost);
     if(eastwest==0){ return mData->rawTriggerDet[address].BBClayer1[11]%2048; }
     else           { return mData->rawTriggerDet[address].BBClayer1[10]%2048; }
 }
 
-unsigned short StTriggerData2003::bbcEarliestTDC(int eastwest, int prepost=0) const
+unsigned short StTriggerData2003::bbcEarliestTDC(int eastwest, int prepost) const
 {
     int address = prepostAddress(prepost), t1, t2;
     if(eastwest==0){
@@ -281,7 +284,7 @@ unsigned short StTriggerData2003::bbcTimeDifference() const
     return mData->TrgSum.DSMdata.VTX[3]%512;
 }
 
-unsigned short StTriggerData2003::fpd(int eastwest, int module, int pmt, int prepost=0) const
+unsigned short StTriggerData2003::fpd(int eastwest, int module, int pmt, int prepost) const
 {
     static const short fpdmap[2][6][49] = {
 	//East

@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.13 2003/08/20 17:09:03 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.14 2003/09/02 17:59:40 perev Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -12,7 +12,7 @@
 //#define  SpaceChargeStudy
 //#define  GetTpcGainMonitor
 //#define UseI60
-#include <iostream.h>
+#include <Stiostream.h>
 #include <time.h>
 #include "StdEdxY2Maker.h"
 // ROOT
@@ -212,29 +212,29 @@ Int_t StdEdxY2Maker::Init(){
       XYZbad = new TH3D("XYZbad","xyz for clusters with mismatched sectors",
 			20,-200,200,20,-200,200,20,-200,200);
 #endif
-      Z   = new TProfile2D("Z","log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and Z",
+      Z   = new TProfile2D("Z","::log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and Z",
 			   2*NoSector,1., 2*NoSector+1,100,-250.,250.);
-      Z3  = new TH3D("Z3","log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and Drift Distance",
+      Z3  = new TH3D("Z3","::log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and Drift Distance",
 		     2*NoSector,1., 2*NoSector+1,100,0.,200., 200,-5.,5.);
-      Z3O = new TH3D("Z3O","log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and (Drift Distance)*ppmOxygenIn",
+      Z3O = new TH3D("Z3O","::log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and (Drift Distance)*ppmOxygenIn",
 		     2*NoSector,1., 2*NoSector+1,100,0.,1.e4, 200,-5.,5.);
       ZC  = new TProfile2D("ZC","dEdxN versus sector(inner <= 24 and outter > 24) and Drift Distance",
 			   2*NoSector,1., 2*NoSector+1,100,0.,200.);
-      ETA   = new TProfile2D("ETA","log(dEdx/Pion) versus sector(inner <= 24 and outter > 24) and #{eta}",
+      ETA   = new TProfile2D("ETA","::log(dEdx/Pion) versus sector(inner <= 24 and outter > 24) and #{eta}",
 			     2*NoSector,1., 2*NoSector+1, 125,-.25,2.25);
-      SecRow = new TProfile2D("SecRow","<log(dEdx/Pion)> (uncorrected) versus sector and row",
+      SecRow = new TProfile2D("SecRow","<::log(dEdx/Pion)> (uncorrected) versus sector and row",
 			      NoSector,1., NoSector+1, NoRow,1., NoRow+1);
       SecRow->SetXTitle("Sector number");
       SecRow->SetYTitle("Row number");
-      SecRowC= new TProfile2D("SecRowC","<log(dEdx/Pion)> (corrected) versus sector and row",
+      SecRowC= new TProfile2D("SecRowC","<::log(dEdx/Pion)> (corrected) versus sector and row",
 			      NoSector,1., NoSector+1, NoRow,1., NoRow+1);
       SecRowC->SetXTitle("Sector number");
       SecRowC->SetYTitle("Row number");
-      SecRow3= new TH3D("SecRow3","<log(dEdx/Pion)> (uncorrected) versus sector and row",
+      SecRow3= new TH3D("SecRow3","<::log(dEdx/Pion)> (uncorrected) versus sector and row",
 			NoSector,1., NoSector+1, NoRow,1., NoRow+1, 200,-5.,5.);
       SecRow3->SetXTitle("Sector number");
       SecRow3->SetYTitle("Row number");
-      SecRow3C= new TH3D("SecRow3C","<log(dEdx/Pion)> (corrected) versus sector and row",
+      SecRow3C= new TH3D("SecRow3C","<::log(dEdx/Pion)> (corrected) versus sector and row",
 			 NoSector,1., NoSector+1, NoRow,1., NoRow+1, 200,-5.,5.);
       SecRow3C->SetXTitle("Sector number");
       SecRow3C->SetYTitle("Row number");
@@ -280,16 +280,16 @@ Int_t StdEdxY2Maker::Init(){
 #ifdef Mip
       SecRow3Mip = new TH3D
 	("SecRow3Mip",
-	 "<log(dEdx/Pion)>/sigma (corrected) versus row and log2(dx) for MIP particle)",
+	 "<::log(dEdx/Pion)>/sigma (corrected) versus row and log2(dx) for MIP particle)",
 	 NoRow,1., NoRow+1,Nlog2dx, log2dxLow, log2dxHigh, 200,-5,15);
 #endif
-      MulRow = new TH3D("MulRow","log(dEdx/Pion) versus log10(Multplicity) and row",
+      MulRow = new TH3D("MulRow","::log(dEdx/Pion) versus log10(Multplicity) and row",
 			20,0.,4., NoRow,1.,NoRow+1,200,-5.,5.);
-      MulRowC = new TH3D("MulRowC","log(dEdx/Pion) versus log10(Multplicity) and row corrected",
+      MulRowC = new TH3D("MulRowC","::log(dEdx/Pion) versus log10(Multplicity) and row corrected",
 			 20,0.,4., NoRow,1.,NoRow+1,200,-5.,5.);
-      ZRow = new TProfile2D("ZRow","log(dEdx/Pion) versus Z and row",
+      ZRow = new TProfile2D("ZRow","::log(dEdx/Pion) versus Z and row",
 			    80,-200.,200., NoRow,1., NoRow+1);
-      dYrow = new TProfile2D("dYrow","log(dEdx/Pion) versus cluseer projection on the wire for given row",
+      dYrow = new TProfile2D("dYrow","::log(dEdx/Pion) versus cluseer projection on the wire for given row",
 			     100,-2.5,2.5, NoRow,1., NoRow+1);
 #ifdef CORELATION
       corrI   = new TH2D("corrI","Correlation for Inner Sector for pair of nearest rows",
@@ -359,7 +359,7 @@ Int_t StdEdxY2Maker::Init(){
 	nameP = "zbgx";
 	nameP += StProbPidTraits::mPidParticleDefinitions[hyp]->name().data();
 	if (zbgx) 
-	  zbgx[hyp] = new TH3D(nameP.Data(),"z = log(dE/dx) versus log10(beta*gamma) and log2(dx)",
+	  zbgx[hyp] = new TH3D(nameP.Data(),"z = ::log(dE/dx) versus log10(beta*gamma) and log2(dx)",
 			       100,-1,4,Nlog2dx,log2dxLow,log2dxHigh,320,-2,6);
 #endif
   	for (int sCharge = 0; sCharge < 2; sCharge++) {
@@ -369,7 +369,7 @@ Int_t StdEdxY2Maker::Init(){
 	  else              nameP += "N";
 	  TString name = nameP;
 	  name += "70";
-	  title = "log(dE/dx70/I(";
+	  title = "::log(dE/dx70/I(";
 	  title += nameP;
 	  title += ")) versus log10(p/m)";
 	  hist70[hyp][sCharge] = new TH2D(name.Data(),title.Data(),100,-1.,4.,600,-2.,4.);
@@ -378,7 +378,7 @@ Int_t StdEdxY2Maker::Init(){
 	  hist70B[hyp][sCharge] = new TH2D(name.Data(),title.Data(),100,-1.,4.,600,-2.,4.);
 	  name = nameP;
 	  name += "60";
-	  title = "log(dE/dx60/I(";
+	  title = "::log(dE/dx60/I(";
 	  title += nameP;
 	  title += ")) versus log10(p/m)";
 	  hist60[hyp][sCharge] = new TH2D(name.Data(),title.Data(),100,-1.,4.,600,-2.,4.);
@@ -387,7 +387,7 @@ Int_t StdEdxY2Maker::Init(){
 	  hist60B[hyp][sCharge] = new TH2D(name.Data(),title.Data(),100,-1.,4.,600,-2.,4.);
 	  name = nameP;
 	  name += "z";
-	  title = "zFit - log(I(";
+	  title = "zFit - ::log(I(";
 	  title += nameP;
 	  title += ")) versus log10(p/m)";
 	  histz[hyp][sCharge] = new TH2D(name.Data(),title.Data(),100,-1.,4.,600,-2.,4.);
@@ -396,33 +396,33 @@ Int_t StdEdxY2Maker::Init(){
 	  histzB[hyp][sCharge] = new TH2D(name.Data(),title.Data(),100,-1.,4.,600,-2.,4.);
 	  name = nameP;
 	  name += "B";
-	  title = "log(I_{Sirrf}(";
+	  title = "::log(I_{Sirrf}(";
 	  title += nameP;
 	  title += ")) versus log10(p/m)";
 	  histB[hyp][sCharge] = new TProfile(name.Data(),title.Data(),100,-1.,4.);
 	  name += "B";
-	  title = "log(I_{BB}(";
+	  title = "::log(I_{BB}(";
 	  title += nameP;
 	  title += ")) versus log10(p/m) Bichsel";
 	  histBB[hyp][sCharge] = new TProfile(name.Data(),title.Data(),100,-1.,4.);
 	}
       }
-      Pressure   = new TH2D("Pressure","log(dE/dx)_{uncorrected} - log(I(pi)) versus Log(Pressure)", 
+      Pressure   = new TH2D("Pressure","::log(dE/dx)_{uncorrected} - ::log(I(pi)) versus Log(Pressure)", 
 			    100,6.9,6.95, 200,-5.,5.);
-      PressureC  = new TH2D("PressureC","log(dE/dx)_{corrected} - log(I(pi)) versus Log(Pressure)", 
+      PressureC  = new TH2D("PressureC","::log(dE/dx)_{corrected} - ::log(I(pi)) versus Log(Pressure)", 
 			    100,6.9,6.95, 200,-5.,5.);
-      GainMonitor  = new TH2D("GainMonitor","log(dE/dx)_{corrected} - log(I(pi)) versus GainMonitor", 
+      GainMonitor  = new TH2D("GainMonitor","::log(dE/dx)_{corrected} - ::log(I(pi)) versus GainMonitor", 
 			      100,70.,120., 200,-5.,5.);
       TDatime t1(2001,6,1,0,0,0); UInt_t i1 = t1.Convert();
       TDatime t2(2002,2,1,0,0,0); UInt_t i2 = t2.Convert();
       Int_t Nt = (i2 - i1)/(3600); // each hour 
-      Time   = new TH2D("Time","log(dE/dx)_{uncorrected} - log(I(pi)) versus Date& Time", 
+      Time   = new TH2D("Time","::log(dE/dx)_{uncorrected} - ::log(I(pi)) versus Date& Time", 
 			Nt,i1,i2, 200,-5.,5.);
-      TimeC  = new TH2D("TimeC","log(dE/dx)_{corrected} - log(I(pi)) versus Date& Time after correction", 
+      TimeC  = new TH2D("TimeC","::log(dE/dx)_{corrected} - ::log(I(pi)) versus Date& Time after correction", 
 			Nt,i1,i2, 200,-5.,5.);
-      TimeP  = new TH2D("TimeP","log(dE/dx)_{after pressure correction} - log(I(pi)) versus Date& Time", 
+      TimeP  = new TH2D("TimeP","::log(dE/dx)_{after pressure correction} - ::log(I(pi)) versus Date& Time", 
 			Nt,i1,i2, 200,-5.,5.);
-      FitPull= new TH2D("FitPull","(zFit - log(I(pi)))/dzFit  versus track length", 
+      FitPull= new TH2D("FitPull","(zFit - ::log(I(pi)))/dzFit  versus track length", 
 			150,10.,160, 200,-5.,5.);
       Center = new TProfile("Center","Tpc Gain Monitor center versus Time",Nt,i1,i2);
       Height = new TProfile("Height","Tpc Gain Monitor height versus Time",Nt,i1,i2);
@@ -443,22 +443,22 @@ Int_t StdEdxY2Maker::Init(){
       ppmWaterOut = new TProfile("ppmWaterOut","ppmWaterOut (ppm) versus time",Nt,i1,i2);
       ppmOxygenOut = new TProfile("ppmOxygenOut","ppmOxygenOut (ppm) versus time",Nt,i1,i2);
       flowRateRecirculation = new TProfile("flowRateRecirculation","flowRateRecirculation (liters/min) versus time",Nt,i1,i2);
-      CenterPressure = new TProfile("CenterPressureP","log(center) vs log(Pressure)",100,6.9,6.95);
+      CenterPressure = new TProfile("CenterPressureP","::log(center) vs ::log(Pressure)",100,6.9,6.95);
       
-      inputTPCGasPressureP =new TH2D("inputTPCGasPressureP","log(dE/dx/Pion) vs inputTPCGasPressure (mbar)",100,1.95,2.05,200,-5.,5.);
-      nitrogenPressureP =new TH2D("nitrogenPressureP","log(dE/dx/Pion) vs nitrogenPressure (mbar)",100,1.,2.,200,-5.,5.);
-      gasPressureDiffP =new TH2D("gasPressureDiffP","log(dE/dx/Pion) vs gasPressureDiff (mbar)",100,0.6,1.,200,-5.,5.);
-      inputGasTemperatureP =new TH2D("inputGasTemperatureP","log(dE/dx/Pion) vs inputGasTemperature (degrees C)",100,295.,300.,200,-5.,5.);
-      outputGasTemperatureP =new TH2D("outputGasTemperatureP","log(dE/dx/Pion) vs outputGasTemperature (degrees C)",100,295.,300.,200,-5.,5.);
-      flowRateArgon1P =new TH2D("flowRateArgon1P","log(dE/dx/Pion) vs flowRateArgon1 (liters/min)",100,14.95,15.0,200,-5.,5.);
-      flowRateArgon2P =new TH2D("flowRateArgon2P","log(dE/dx/Pion) vs flowRateArgon2 (liters/min)",100,0.,0.25,200,-5.,5.);
-      flowRateMethaneP =new TH2D("flowRateMethaneP","log(dE/dx/Pion) vs flowRateMethane (liters/min)",100,1.34,1.37,200,-5.,5.);
-      percentMethaneInP =new TH2D("percentMethaneInP","log(dE/dx/Pion) vs percentMethaneIn (percent)",100,9.,11.,200,-5.,5.);
-      ppmOxygenInP =new TH2D("ppmOxygenInP","log(dE/dx/Pion) vs ppmOxygenIn (ppm)",100,20.,30.,200,-5.,5.);
-      flowRateExhaustP =new TH2D("flowRateExhaustP","log(dE/dx/Pion) vs flowRateExhaust (liters/min)",100,5.,20.,200,-5.,5.);
-      ppmWaterOutP =new TH2D("ppmWaterOutP","log(dE/dx/Pion) vs ppmWaterOut (ppm)",100,6.,12.,200,-5.,5.);
-      ppmOxygenOutP =new TH2D("ppmOxygenOutP","log(dE/dx/Pion) vs ppmOxygenOut (ppm)",100,-.285,-.265,200,-5.,5.);
-      flowRateRecirculationP =new TH2D("flowRateRecirculationP","log(dE/dx/Pion) vs flowRateRecirculation (liters/min)",100,515.,545.,200,-5.,5.);
+      inputTPCGasPressureP =new TH2D("inputTPCGasPressureP","::log(dE/dx/Pion) vs inputTPCGasPressure (mbar)",100,1.95,2.05,200,-5.,5.);
+      nitrogenPressureP =new TH2D("nitrogenPressureP","::log(dE/dx/Pion) vs nitrogenPressure (mbar)",100,1.,2.,200,-5.,5.);
+      gasPressureDiffP =new TH2D("gasPressureDiffP","::log(dE/dx/Pion) vs gasPressureDiff (mbar)",100,0.6,1.,200,-5.,5.);
+      inputGasTemperatureP =new TH2D("inputGasTemperatureP","::log(dE/dx/Pion) vs inputGasTemperature (degrees C)",100,295.,300.,200,-5.,5.);
+      outputGasTemperatureP =new TH2D("outputGasTemperatureP","::log(dE/dx/Pion) vs outputGasTemperature (degrees C)",100,295.,300.,200,-5.,5.);
+      flowRateArgon1P =new TH2D("flowRateArgon1P","::log(dE/dx/Pion) vs flowRateArgon1 (liters/min)",100,14.95,15.0,200,-5.,5.);
+      flowRateArgon2P =new TH2D("flowRateArgon2P","::log(dE/dx/Pion) vs flowRateArgon2 (liters/min)",100,0.,0.25,200,-5.,5.);
+      flowRateMethaneP =new TH2D("flowRateMethaneP","::log(dE/dx/Pion) vs flowRateMethane (liters/min)",100,1.34,1.37,200,-5.,5.);
+      percentMethaneInP =new TH2D("percentMethaneInP","::log(dE/dx/Pion) vs percentMethaneIn (percent)",100,9.,11.,200,-5.,5.);
+      ppmOxygenInP =new TH2D("ppmOxygenInP","::log(dE/dx/Pion) vs ppmOxygenIn (ppm)",100,20.,30.,200,-5.,5.);
+      flowRateExhaustP =new TH2D("flowRateExhaustP","::log(dE/dx/Pion) vs flowRateExhaust (liters/min)",100,5.,20.,200,-5.,5.);
+      ppmWaterOutP =new TH2D("ppmWaterOutP","::log(dE/dx/Pion) vs ppmWaterOut (ppm)",100,6.,12.,200,-5.,5.);
+      ppmOxygenOutP =new TH2D("ppmOxygenOutP","::log(dE/dx/Pion) vs ppmOxygenOut (ppm)",100,-.285,-.265,200,-5.,5.);
+      flowRateRecirculationP =new TH2D("flowRateRecirculationP","::log(dE/dx/Pion) vs flowRateRecirculation (liters/min)",100,515.,545.,200,-5.,5.);
 #ifdef SpaceChargeStudy
       SpaceCharge = new TProfile2D("SpaceCharge","dE versus R and Z",85,40.,210.,92,-230.,230.);
       SpaceChargeU = new TProfile2D("SpaceChargeU","dEU versus R and Z",85,40.,210.,92,-230.,230.);
@@ -483,7 +483,7 @@ Int_t StdEdxY2Maker::Init(){
     hdEZ = new TH1D("hdEZ","log10(dEZ) after TimeScale + SecRow + Sec Z corrections ",100,-8.,-3.);
     hdEM = new TH1D("hdEM","log10(dEM) after TimeScale + SecRow + Sec Z + Multiplicity corrections",
 		    100,-8.,-3.);
-    Prob = new TH3D("Prob","Z(=log(I70/Bichsel)) versun log10(bg) for pion and Probability",
+    Prob = new TH3D("Prob","Z(=::log(I70/Bichsel)) versun log10(bg) for pion and Probability",
 		    100,-1.,4.,10*NHYPS+1,-.1,NHYPS,600,-2.,4.);
     NdEdxHits = new TH2D("NdEdxHits","No. of dEdx point versus No. of Fit points",100,0,100,100,0,100);
     // Create a ROOT Tree and one superbranch
@@ -848,7 +848,7 @@ Int_t StdEdxY2Maker::Make(){
 #else
 #if 1
 	    // correction using positive tracks with built it drift time correction
-	    // x:x*pow(10.,mu+7.6e-7*y); x = predicted; y = DriftLength*ppOx
+	    // x:x*::pow(10.,mu+7.6e-7*y); x = predicted; y = DriftLength*ppOx
 #endif
 	    dER = 1.e-6*CalcCorrection(cor+4+kTpcOutIn,1.e6*dE);
 #endif
@@ -1580,7 +1580,7 @@ void Landau(Double_t x, Double_t *val){
 //________________________________________________________________________________
 void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 {
-  static Double_t sigma_p[3] = {// sigma versus log(dX)
+  static Double_t sigma_p[3] = {// sigma versus ::log(dX)
            5.31393e-01,//    1  p0  1.33485e-03   7.13072e-07   7.08416e-08
           -1.43277e-01,//    2  p1  3.36846e-03   6.62434e-07  -1.13681e-05
            2.43800e-02 //    3  p2  1.81240e-03   4.02492e-07  -2.08423e-05

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.h,v 2.4 2001/02/07 16:07:21 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.h,v 2.5 2003/09/02 17:58:51 perev Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.h,v $
+ * Revision 2.5  2003/09/02 17:58:51  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.4  2001/02/07 16:07:21  lasiuk
  * Charge sharing by ratio of local maximum implemented
  * loadPixels(interface) removed
@@ -57,7 +60,7 @@
 #ifndef ST_RICH_CLUSTER_AND_HOT_FINDER
 #define ST_RICH_CLUSTER_AND_HOT_FINDER
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <vector>
 #include <stack>
 

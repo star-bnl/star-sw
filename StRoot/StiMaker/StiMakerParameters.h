@@ -1,7 +1,7 @@
 #ifndef StiMakerParameters_H_INCLUDED
 #define StiMakerParameters_H_INCLUDED
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TObject.h"
 
 class StiMakerParameters : public TObject

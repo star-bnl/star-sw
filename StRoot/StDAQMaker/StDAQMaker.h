@@ -32,12 +32,12 @@ class StDAQMaker : public StIOInterFace {
   virtual Int_t  MakeRead(const StUKey &){return MakeRead();}
   virtual Int_t  Skip(Int_t Nskip=1);
 //	for compatability with StIOInterFace
-  void SetBranch(const Char_t *,const Char_t *,const Char_t *){};
+  void SetBranch(const Char_t*,const Char_t*,const Char_t*, const Option_t*){};
 
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StDAQMaker.h,v 1.6 2001/06/05 22:06:42 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StDAQMaker.h,v 1.7 2003/09/02 17:55:30 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StDAQMaker, 0)   //
 };

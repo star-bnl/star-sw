@@ -17,7 +17,7 @@
 #include "StHbtMaker/Base/StHbtThPair.hh"
 #include "StHbtMaker/Base/StHbtThCorrFctn.hh"
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
-#include <strstream.h>
+#include <Stsstream.h>
 
 #ifdef __ROOT__
 ClassImp(StHbtThCFManager)

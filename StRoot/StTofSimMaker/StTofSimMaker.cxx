@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofSimMaker.cxx,v 1.4 2003/08/08 00:22:11 geurts Exp $
+ * $Id: StTofSimMaker.cxx,v 1.5 2003/09/02 17:59:10 perev Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofSimMaker.cxx,v $
+ * Revision 1.5  2003/09/02 17:59:10  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.4  2003/08/08 00:22:11  geurts
  * changed location of header files for the local collections
  *
@@ -35,8 +38,7 @@
     detector response from GSTAR's GEANT simulation. It takes the G2T tof
     hit tables and build an StEvent Tof SlatCollection.</p>
 */
-#include <iostream.h>
-#include <iomanip.h>    //fg only now needed for setw()
+#include <Stiostream.h>
 #include "StTofSimMaker.h"
 
 // SCL
@@ -338,7 +340,7 @@ StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
 
     // calculate TOFs with all kinds of resolutions
     float time= tof_hit->tof + length*mSimDb->delay();
-    float resl=  mSimDb->time_res() * sqrt(length);
+    float resl=  mSimDb->time_res() * ::sqrt(length);
     if (resl<50e-12) resl=50e-12;
     float tt =  tof_hit->tof + (float) random.shoot()* resl;
     float tt1 =  time +  (float) random.shoot()* mSimDb->start_res();

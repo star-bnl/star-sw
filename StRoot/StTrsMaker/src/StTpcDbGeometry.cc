@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcDbGeometry.cc,v 1.8 2001/03/30 21:22:52 jeromel Exp $
+ * $Id: StTpcDbGeometry.cc,v 1.9 2003/09/02 17:59:18 perev Exp $
  *
  * Authors: Brain Lasiuk & Manuel Calderon de la Barca Sanchez September 8, 1999
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcDbGeometry.cc,v $
+ * Revision 1.9  2003/09/02 17:59:18  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.8  2001/03/30 21:22:52  jeromel
  * Fixes for Insure smooth compilation
  *
@@ -322,7 +325,7 @@ double StTpcDbGeometry::innerSectorAnodeWire(int n) const
 // change return type for sun ??
 bool StTpcDbGeometry::acceptance(StThreeVector<StDouble>& tmp) const
 {
-    double radial = sqrt((tmp.x()*tmp.x())+(tmp.y()*tmp.y()));
+    double radial = ::sqrt((tmp.x()*tmp.x())+(tmp.y()*tmp.y()));
 
     if((radial > mIfcRadius) &&
        (radial < mOfcRadius) &&

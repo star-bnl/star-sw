@@ -1,10 +1,13 @@
 /***************************************************************
- * $Id: StRichDrawableTHit.cxx,v 2.1 2000/11/01 16:53:57 lasiuk Exp $
+ * $Id: StRichDrawableTHit.cxx,v 2.2 2003/09/02 17:58:52 perev Exp $
  *
  * Description:
  *
  ***************************************************************
  * $Log: StRichDrawableTHit.cxx,v $
+ * Revision 2.2  2003/09/02 17:58:52  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.1  2000/11/01 16:53:57  lasiuk
  * add interface for the StRichHit
  *
@@ -29,8 +32,8 @@
  * Initial Revision
  *
  ***************************************************************/
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #ifdef __ROOT__
 #include "StRichDrawableTHit.h"
 #include "StRchMaker/StRichSimpleHit.h"

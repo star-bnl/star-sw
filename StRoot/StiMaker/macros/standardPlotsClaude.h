@@ -1,9 +1,12 @@
 /*
- * $Id: standardPlotsClaude.h,v 1.1 2002/07/11 18:21:31 pruneau Exp $
+ * $Id: standardPlotsClaude.h,v 1.2 2003/09/02 18:00:00 perev Exp $
  * A. Rose, WSU
  *
  *
  * $Log: standardPlotsClaude.h,v $
+ * Revision 1.2  2003/09/02 18:00:00  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2002/07/11 18:21:31  pruneau
  * new plots added
  *
@@ -25,7 +28,7 @@
 #ifndef standardPlots_h
 #define standardPlots_h
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>

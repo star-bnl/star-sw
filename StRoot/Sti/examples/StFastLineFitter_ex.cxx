@@ -1,7 +1,7 @@
 //StFastLineFitter_ex.cxx
 
 #include "Sti/StiFastLineFitter.h"
-#include <iostream>
+#include "Stiostream.h"
 #include <cmath>
 
 //This is meant as an example of how to use StFastLineFitter_ex.cxx
@@ -14,7 +14,7 @@ int main()
     double intercept = 7.;
     for (double x=1.; x<=10.; ++x) {
 	double y=slope*x + intercept;
-	double weight = sqrt(y);
+	double weight = ::sqrt(y);
 	myFitter.addPoint(x, y, weight);
     }
     bool rc = myFitter.fit();

@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.130 2003/07/03 19:40:14 perev Exp $
+// $Id: StMaker.cxx,v 1.131 2003/09/02 17:55:29 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -16,8 +16,8 @@
  * The method will be described.
  *                                                                     
  */
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -1159,6 +1159,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.131  2003/09/02 17:55:29  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.130  2003/07/03 19:40:14  perev
 // Cleanup prints in Finish
 //

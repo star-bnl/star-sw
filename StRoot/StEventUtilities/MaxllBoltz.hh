@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MaxllBoltz.hh,v 1.2 2000/12/18 23:23:22 aihong Exp $
+ * $Id: MaxllBoltz.hh,v 1.3 2003/09/02 17:58:09 perev Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MaxllBoltz.hh,v $
+ * Revision 1.3  2003/09/02 17:58:09  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2000/12/18 23:23:22  aihong
  * change formula
  *
@@ -36,10 +39,10 @@ double MaxllBoltz(double *rig,double *par) {
        double aa; double bb;
 
            if(par[0]!=0.0 && wd!=0.0)  aa = 2.7182818*par[0]*wd;
-    if (wd>0.0 && (par[1]-intercept)>0.0 && log(par[1]-intercept)!=0.0) bb =
- -1.0*(log(wd))/log(par[1]-intercept);  
+    if (wd>0.0 && (par[1]-intercept)>0.0 && ::log(par[1]-intercept)!=0.0) bb =
+ -1.0*(::log(wd))/::log(par[1]-intercept);  
       
-  double mb=aa*(pow((fabs(rig[0]) - fabs(intercept)),bb) * exp(-wd*pow((fabs
+  double mb=aa*(::pow((fabs(rig[0]) - fabs(intercept)),bb) * exp(-wd*::pow((fabs
 (rig[0]) - fabs(intercept)),bb)));
 
           return mb;

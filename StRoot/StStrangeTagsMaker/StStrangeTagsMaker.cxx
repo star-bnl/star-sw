@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.15 2003/01/22 23:37:18 genevb Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.16 2003/09/02 17:59:05 perev Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.16  2003/09/02 17:59:05  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.15  2003/01/22 23:37:18  genevb
  * Change function for abs()
  *
@@ -138,16 +141,16 @@ void StStrangeTagsMaker::fillTag()
         Float_t pN2 = nMom.mag2();
         Float_t pP2 = pMom.mag2();
         Float_t pV2 = vMom.mag2();
-        Float_t eNpi = sqrt(pN2 + mMasspi2);
-        Float_t eNpr = sqrt(pN2 + mMasspr2);
-        Float_t ePpi = sqrt(pP2 + mMasspi2);
-        Float_t ePpr = sqrt(pP2 + mMasspr2);
+        Float_t eNpi = ::sqrt(pN2 + mMasspi2);
+        Float_t eNpr = ::sqrt(pN2 + mMasspr2);
+        Float_t ePpi = ::sqrt(pP2 + mMasspi2);
+        Float_t ePpr = ::sqrt(pP2 + mMasspr2);
         Float_t eK0 = eNpi + ePpi;
         Float_t eLa = eNpi + ePpr;
         Float_t eLb = eNpr + ePpi;
-        Float_t maK0 = sqrt(eK0*eK0 - pV2);
-        Float_t maLa = sqrt(eLa*eLa - pV2);
-        Float_t maLb = sqrt(eLb*eLb - pV2);
+        Float_t maK0 = ::sqrt(eK0*eK0 - pV2);
+        Float_t maLa = ::sqrt(eLa*eLa - pV2);
+        Float_t maLb = ::sqrt(eLb*eLb - pV2);
 
         perc = (maK0/kaon_0_short_mass_c2) - 1.;
         if (TMath::Abs(perc) < mRange) nK0++;
@@ -174,10 +177,10 @@ void StStrangeTagsMaker::fillTag()
         Float_t pP2 = pMom.mag2();
         Float_t pL2 = lMom.mag2();
         Float_t pX2 = xMom.mag2();
-        Float_t epi = sqrt(pP2 + mMasspi2);
-        Float_t ela = sqrt(pL2 + mMassla2);
+        Float_t epi = ::sqrt(pP2 + mMasspi2);
+        Float_t ela = ::sqrt(pL2 + mMassla2);
         Float_t eXi = ela + epi;
-        Float_t maXi = sqrt(eXi*eXi - pX2);
+        Float_t maXi = ::sqrt(eXi*eXi - pX2);
 
         perc = (maXi/xi_minus_mass_c2) - 1.;
         if (TMath::Abs(perc) < mRange) nXi++;
