@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHitCollection.hh,v 2.0 1999/11/17 02:12:16 calderon Exp $
+ * $Id: StMcFtpcHitCollection.hh,v 2.1 1999/11/19 19:06:32 calderon Exp $
  * $Log: StMcFtpcHitCollection.hh,v $
+ * Revision 2.1  1999/11/19 19:06:32  calderon
+ * Recommit after redoing the files.
+ *
  * Revision 2.0  1999/11/17 02:12:16  calderon
  * Completely revised for new StEvent
  *
@@ -14,19 +17,24 @@
 #ifndef StMcFtpcHitCollection_hh
 #define StMcFtpcHitCollection_hh
 
+#include "StMcFtpcPlaneHitCollection.hh"
 
-#include <vector>
-#if !defined(ST_NO_NAMESPACES)
-using namespace std;
-#endif
 class StMcFtpcHit;
 
-#ifdef ST_NO_TEMPLATE_DEF_ARGS
-typedef vector<StMcFtpcHit*, allocator<StMcFtpcHit*> >            StMcFtpcHitCollection;
-typedef vector<StMcFtpcHit*, allocator<StMcFtpcHit*> >::iterator  StMcFtpcHitIterator;
-#else
-typedef vector<StMcFtpcHit*>            StMcFtpcHitCollection;
-typedef vector<StMcFtpcHit*>::iterator  StMcFtpcHitIterator;
-#endif
+class StMcFtpcHitCollection {
+public:
 
+    StMcFtpcHitCollection();
+    ~StMcFtpcHitCollection();
+    
+    bool addHit(StMcFtpcHit*);
+    unsigned long numberOfHits() const;
+    unsigned int  numberOfPlanes() const;
+    
+    StMcFtpcPlaneHitCollection*       plane(unsigned int);
+    const StMcFtpcPlaneHitCollection* plane(unsigned int) const;
+private:
+    enum { mNumberOfPlanes = 20 };
+    StMcFtpcPlaneHitCollection mPlanes[mNumberOfPlanes];
+};
 #endif

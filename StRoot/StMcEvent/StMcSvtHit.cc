@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.cc,v 2.0 1999/11/17 02:12:16 calderon Exp $
+ * $Id: StMcSvtHit.cc,v 2.1 1999/11/19 19:06:33 calderon Exp $
  * $Log: StMcSvtHit.cc,v $
+ * Revision 2.1  1999/11/19 19:06:33  calderon
+ * Recommit after redoing the files.
+ *
  * Revision 2.0  1999/11/17 02:12:16  calderon
  * Completely revised for new StEvent
  *
@@ -11,12 +14,15 @@
  *
  *
  **************************************************************************/
-#include "StThreeVectorF.hh"
-
 #include "StMcSvtHit.hh"
 #include "StMcTrack.hh"
+#include "tables/St_g2t_svt_hit_Table.h"
 
-static const char rcsid[] = "$Id: StMcSvtHit.cc,v 2.0 1999/11/17 02:12:16 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSvtHit.cc,v 2.1 1999/11/19 19:06:33 calderon Exp $";
+
+StMemoryPool StMcSvtHit::mPool(sizeof(StMcSvtHit));
+
+StMcSvtHit::StMcSvtHit() { /* noop */ };
 
 StMcSvtHit::StMcSvtHit(const StThreeVectorF& p,
 		       const float de, const float ds,
@@ -32,8 +38,8 @@ StMcSvtHit::StMcSvtHit(g2t_svt_hit_st* pt)
   mPosition.setX(pt->x[0]); 
   mPosition.setY(pt->x[1]);
   mPosition.setZ(pt->x[2]);
-  // For parent track, the g2t_hits table only gives the id of 
-  // the parent track :  pt->track_p  .  We need to decode this and assign
-  // mParentTrack to the pointer to the parent track.
+  mVolumeId = pt->volume_id;
 }
+
+StMcSvtHit::~StMcSvtHit() {/* noop */}
 

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.0 1999/11/17 02:12:16 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.1 1999/11/19 19:06:34 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.1  1999/11/19 19:06:34  calderon
+ * Recommit after redoing the files.
+ *
  * Revision 2.0  1999/11/17 02:12:16  calderon
  * Completely revised for new StEvent
  *
@@ -17,19 +20,11 @@
 #ifndef StMcTrack_hh
 #define StMcTrack_hh 
 #include <algorithm>
-#include "StThreeVectorF.hh"
-
-
-#include "tables/St_g2t_track_Table.h"
-
-#include "StMcFtpcHitCollection.hh"
-#include "StMcVertexCollection.hh"
-#include "StMcSvtHitCollection.hh"
-#include "StMcTpcHitCollection.hh"
-
-
+#include "StLorentzVectorF.hh"
+#include "StMcContainers.hh"
+#include "StTrackTopologyMap.h"
 class StParticleDefinition;
-
+class g2t_track_st;
 class StMcTrack {
 public:
     StMcTrack();
@@ -42,65 +37,83 @@ public:
     int operator==(const StMcTrack&) const;
     int operator!=(const StMcTrack&) const;
 
-    void init();
+    void initToZero();
   // "Get" Methods
-    StThreeVectorF&        momentum();
-    StMcVertex*            startVertex();
-    StMcVertex*            stopVertex();
-    StMcVertexCollection*  intermediateVertices(); //do these need to be virtual and/or const 
-    StMcTpcHitCollection*  tpcHits();
-    StMcSvtHitCollection*  svtHits();
-    StMcFtpcHitCollection* ftpcHits();
-    StParticleDefinition*  particleDefinition();
-    char                   isShower();
-    long                   geantId();
+    StLorentzVectorF&      fourMomentum(); //!
+    const StThreeVectorF&  momentum() const; //!
+    float                  energy(); //!
+    float                  pt(); //!
+    float                  rapidity(); //!
+    float                  pseudoRapidity(); //!
+    StMcVertex*            startVertex(); //!
+    StMcVertex*            stopVertex(); //!
+    StPtrVecMcVertex&      intermediateVertices(); //!
+    StPtrVecMcTpcHit&      tpcHits(); //!
+    StPtrVecMcSvtHit&      svtHits(); //!
+    StPtrVecMcFtpcHit&     ftpcHits(); //!
+    StParticleDefinition*  particleDefinition(); //!
+    char                   isShower(); //!
+    long                   geantId(); //!
 
 
   // "Set" Methods
-    void setMomentum(const StThreeVectorF&);
-    void setStartVertex(StMcVertex*);
-    void setStopVertex(StMcVertex*);
-    void setIntermediateVertices(StMcVertexCollection*);
-    void setTpcHits(StMcTpcHitCollection*);
-    void setSvtHits(StMcSvtHitCollection*);
-    void setFtpcHits(StMcFtpcHitCollection*);
+    void setFourMomentum(const StLorentzVectorF&); //!
+    void setStartVertex(StMcVertex*); //!
+    void setStopVertex(StMcVertex*); //!
+    void setIntermediateVertices(StPtrVecMcVertex&); //!
+    void setTpcHits(StPtrVecMcTpcHit&); //!
+    void setSvtHits(StPtrVecMcSvtHit&); //!
+    void setFtpcHits(StPtrVecMcFtpcHit&); //!
   
-    void setShower(char);
-    void setGeantId(long);
+    void setShower(char); //!
+    void setGeantId(long); //!
 
-    virtual void addTpcHit(StMcTpcHit*);
-    virtual void addFtpcHit(StMcFtpcHit*);
-    virtual void addSvtHit(StMcSvtHit*);
-    virtual void removeTpcHit(StMcTpcHit*);
-    virtual void removeFtpcHit(StMcFtpcHit*);
-    virtual void removeSvtHit(StMcSvtHit*);
+    void addTpcHit(StMcTpcHit*); //!
+    void addFtpcHit(StMcFtpcHit*); //!
+    void addSvtHit(StMcSvtHit*); //!
+    void removeTpcHit(StMcTpcHit*); //!
+    void removeFtpcHit(StMcFtpcHit*); //!
+    void removeSvtHit(StMcSvtHit*); //!
+
+    void setTopologyMap(StTrackTopologyMap&); //!
     
 protected:
-    StThreeVectorF         mMomentum;
-    StMcVertex*            mStartVertex;
-    StMcVertex*            mStopVertex;
-    StMcVertexCollection*  mIntermediateVertices;
-    StMcTpcHitCollection*  mTpcHits;
-    StMcSvtHitCollection*  mSvtHits;
-    StMcFtpcHitCollection* mFtpcHits;
-    StParticleDefinition*  mParticleDefinition;
-    char                   mIsShower;
-    long                   mGeantId;
+    StLorentzVectorF       mFourMomentum; //! 
+    StMcVertex*            mStartVertex; //!
+    StMcVertex*            mStopVertex; //!
+    StPtrVecMcVertex       mIntermediateVertices; //!
+    StPtrVecMcTpcHit       mTpcHits; //!
+    StPtrVecMcSvtHit       mSvtHits; //!
+    StPtrVecMcFtpcHit      mFtpcHits; //!
+    StParticleDefinition*  mParticleDefinition; //!
+    char                   mIsShower; //!
+    long                   mGeantId; //!
+    StTrackTopologyMap     mTopologyMap; //!
 };
 
-inline StThreeVectorF& StMcTrack::momentum() { return mMomentum; }
+inline StLorentzVectorF& StMcTrack::fourMomentum() { return mFourMomentum; }
+
+inline const StThreeVectorF& StMcTrack::momentum() const { return mFourMomentum.vect(); }
+
+inline float StMcTrack::energy() { return mFourMomentum.e(); }
+
+inline float StMcTrack::pt() { return mFourMomentum.perp(); }
+
+inline float StMcTrack::rapidity() { return mFourMomentum.rapidity(); }
+
+inline float StMcTrack::pseudoRapidity() { return mFourMomentum.pseudoRapidity(); }
 
 inline StMcVertex* StMcTrack::startVertex() { return mStartVertex; }
 
 inline StMcVertex* StMcTrack::stopVertex() { return mStopVertex; }
 
-inline StMcVertexCollection* StMcTrack::intermediateVertices() { return mIntermediateVertices; }
+inline StPtrVecMcVertex& StMcTrack::intermediateVertices() { return mIntermediateVertices; }
 
-inline StMcTpcHitCollection* StMcTrack::tpcHits() { return mTpcHits; }
+inline StPtrVecMcTpcHit& StMcTrack::tpcHits() { return mTpcHits; }
 
-inline StMcSvtHitCollection* StMcTrack::svtHits() { return mSvtHits; }
+inline StPtrVecMcSvtHit& StMcTrack::svtHits() { return mSvtHits; }
 
-inline StMcFtpcHitCollection* StMcTrack::ftpcHits() { return mFtpcHits; }
+inline StPtrVecMcFtpcHit& StMcTrack::ftpcHits() { return mFtpcHits; }
 
 inline StParticleDefinition* StMcTrack::particleDefinition() { return mParticleDefinition; }
 

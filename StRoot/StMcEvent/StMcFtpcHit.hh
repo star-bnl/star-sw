@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.hh,v 2.0 1999/11/17 02:12:16 calderon Exp $
+ * $Id: StMcFtpcHit.hh,v 2.1 1999/11/19 19:06:32 calderon Exp $
  * $Log: StMcFtpcHit.hh,v $
+ * Revision 2.1  1999/11/19 19:06:32  calderon
+ * Recommit after redoing the files.
+ *
  * Revision 2.0  1999/11/17 02:12:16  calderon
  * Completely revised for new StEvent
  *
@@ -18,10 +21,11 @@
 #define StMcFtpcHit_hh
 
 #include "StMcHit.hh"
-#include "tables/St_g2t_ftp_hit_Table.h" 
+#include "StMemoryPool.hh"
 
 class StMcTrack;
 class StThreeVectorF;
+class g2t_ftp_hit_st;
 
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
@@ -29,15 +33,21 @@ using namespace std;
 
 class StMcFtpcHit : public StMcHit {
 public:
+    StMcFtpcHit();
     StMcFtpcHit(const StThreeVectorF&,
 	     const float, const float, StMcTrack*);
     StMcFtpcHit(g2t_ftp_hit_st*);
+    ~StMcFtpcHit();
+
+    void* operator new(size_t)     { return mPool.alloc(); }
+    void  operator delete(void* p) { mPool.free(p); }
+
+    unsigned long plane() const; // 0-19
     
+private:
+    long mVolumeId;
 
-
-// Here we need to include special functions specific to the FTPC,
-// like going to local coordinates.
-
+    static StMemoryPool mPool; //!
 };
 
 #endif
