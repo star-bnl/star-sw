@@ -1,7 +1,13 @@
-// $Id: StBFChain.cxx,v 1.19 1999/11/02 18:50:21 didenko Exp $
+// $Id: StBFChain.cxx,v 1.20 1999/11/04 22:21:25 fisyak Exp $
 // $Log: StBFChain.cxx,v $
-// Revision 1.19  1999/11/02 18:50:21  didenko
-// changes reference from St_fcl_Maker to StFtpcClusterMaker
+// Revision 1.20  1999/11/04 22:21:25  fisyak
+// Reorganize chain as Table
+//
+// Revision 1.18  1999/10/28 01:57:16  fisyak
+// Add ParseString
+//
+// Revision 1.17  1999/10/16 20:20:19  fisyak
+// Allow to have xdf file for gstar option
 //
 // Revision 1.16  1999/10/14 14:43:25  fisyak
 // Ad casts
@@ -100,93 +106,98 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "StTreeMaker/StTreeMaker.h"
 #include "StIOMaker/StIOMaker.h"
+#include "StMessMgr.h"
 //_____________________________________________________________________
-Char_t  *ChainOptions[] = {
-  "FIRST"
- ,"SD97"   ,"SD98"   ,"Y1a"    ,"Y1b"    ,"Y1c"
- ,"ES99"   ,"ER99"   ,"Y1d"    ,"Y1e"    ,"Y2a"
- ,"Eval"   ,"OFF"    ,"XIN"    ,"XOUT"   ,"GSTAR"
- ,"TDAQ"   ,"FZIN"   ,"GEANT"  ,"UTIL"   
- ,"FieldOn","FieldOff","HalfField","ReverseField"
- ,"TPC"    ,"TSS"    ,"TRS"    ,"MINIDAQ","TFS"    ,"TCL"    ,"TPT"
- ,"SVT"    ,"SRS"    ,"STK"
- ,"FTPC"   ,"FSS"    ,"FCL"    ,"FTP"
- ,"EMS"    ,"EMC"
- ,"TRG"    ,"CTF"    ,"MWC"    ,"L3T"
- ,"RICH"
- ,"GLOBAL" ,"MATCH"  ,"PRIMARY","V0"     ,"XI"     ,"KINK"
- ,"DST"    ,"EVENT"  ,"ANALYSIS","QA"
- ,"TREE"   ,"AllEvent","DISPLAY","LAST"
- ,"DEFAULT"
- ,"MakeDoc","DEBUG"  ,"HIGZ"
+struct BfcItem {
+  Char_t       *Key;      // nick name
+  Char_t       *Name;     // maker name
+  Char_t       *Chain;    // its chain
+  Char_t       *Opts;     // required options
+  Char_t       *Maker;    // required Makers
+  Char_t       *Libs;     // libraries to be loaded
+  Char_t       *Comment;  
+  Bool_t        Flag;     // F/T to use it in chain
 };
-Int_t NoChainOptions = sizeof (ChainOptions)/sizeof (Char_t *);
-Bool_t *ChainFlags   = new Bool_t [NoChainOptions]; 
-Char_t *ChainComments[] = {
-  "Nothing to comment",
-  "Turn on Year 1a geometry and 1997 test parameters (and corresponding Makers)",
-  "Turn on Year 1a geometry and 1998 test parameters (and corresponding Makers)",
-  "Turn on Year 1a geometry (and corresponding Makers)",
-  "Turn on Year 1b geometry (and corresponding Makers)",
-  "Turn on Year 1c geometry (and corresponding Makers)",
-  "Turn on Year 1a geometry and 1999 engineering run simulation parameters",
-  "Turn on Year 1a geometry and 1999 engineering run real data parameters",
-  "Turn on Year 1d geometry (and corresponding Makers)",
-  "Turn on Year 1e geometry (and corresponding Makers)",
-  "Turn on Year 2a geometry (and corresponding Makers)",
-  "Turn on evaluation switch for different makers",
-  "Turn off default chain",
-  "Read [XDF|DAQ|ROOT] input file",
-  "Write dst to XDF file",
-  "Run gstar for 10 muon track with pT = 10 GeV in |eta|<1",
-  "TPC DAQ chain",
-  "read GSTAR fz-file",
-  "initailize GEANT",
-  "Load StAnalysisUtilities",
-  "Use nominal STAR field",
-  "No Field option",
-  "Half Field option",
-  "Reverse Field option",
-  "TPC            \tin Chain (St_[tcl_+tpt]_Maker)",
-  "St_tss_Maker   \tin Chain",
-  "StTrsMaker     \tin Chain",
-  "StMinidaqMaker \tin Chain",
-  "use TFS \t(no St_[tss_ and no Trs]Maker)",
-  "St_tcl_Maker   \tin Chain",
-  "St_tpt_Maker   \tin Chain",
-  "SVT            \tin Chain (St_[srs+stk]_Maker)",
-  "St_srs_Maker   \tin Chain",
-  "St_stk_Maker   \tin Chain",
-  "FTPC           \tin Chain (St_[fcl+fpt]_Maker)",
-  "St_fss_Maker   \tin Chain",
-  "StFtpcClusterMaker   \tin Chain",
-  "St_fpt_Maker   \tin Chain",
-  "St_ems_Maker   \tin Chain",
-  "St_emc_Maker   \tin Chain",
-  "Trigger        \tin Chain (St_[ctf+mwc+trg]_Maker)",
-  "St_ctf_Maker   \tin Chain",
-  "St_mwc_Maker   \tin Chain",
-  "St_l3t_Maker   \tin Chain",
-  "StRchMaker     \tin Chain",
-  "GLOBAL         \tin Chain (St[Match+Primary+V0+Xi+Kink]Maker)",
-  "StMatchMaker   \tin Chain",
-  "StPrimaryMaker \tin Chain",
-  "StV0Maker      \tin Chain",
-  "StXiMaker      \tin Chain",
-  "StKinkMaker    \tin Chain",
-  "St_dst_Maker   \tin Chain",
-  "StEventMaker   \tin Chain",
-  "StAnalysisMaker\tin Chain",
-  "St_QA_Maker    \tin Chain",
-  "StTreeMaker    \tin Chain",
-  "Write whole event to StTree",
-  "StEventDisplayMaker \tin Chain",
-  "Nothing to comment",
-  "Default has been set",
-  "Make HTML documentation for the given Chain",
-  "Set debug flag",
-  "Pop HIGZ window"
+BfcItem BFC[] = {
+  {"Key"         ,"Name","Chain","Opts"                                   ,"Maker","Libs","Comment",kFALSE},
+  {"doEvents",""  ,"","xin,event,analysis,FiledOn",""                                        ,"","",kFALSE},
+  {"SD97"  ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree","","","Turn on 1997 test parameters",kFALSE},
+  {"SD98"  ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree","","","Turn on 1998 test parameters",kFALSE},
+  {"Y1a"    ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree,ftpc,l0,l3t","","","Turn on Year 1a",kFALSE},
+  {"Y1b"    ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree,ftpc,l0,l3t,ems,emc,rich","",""
+                                                                                         ,"Year 1b",kFALSE},
+  {"Y1c"    ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree,ftpc,l0,l3t","","","Turn on Year 1c",kFALSE},
+  {"ES99","","","db,tpc,global,dst,qa,event,analysis,tree","",""
+                                                   ,"Turn on 1999 engineering run simulation param",kFALSE},
+  {"ER99","","","db,tpc,global,dst,qa,event,analysis,tree","",""
+                                                   ,"Turn on 1999 engineering run real data params",kFALSE},
+  {"Y1d"         ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree",""       ,"","Turn on Year 1d",kFALSE},
+  {"Y1e"         ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree","",""       ,"Turn on Year 1e",kFALSE},
+  {"Y2a"         ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree,svt,ftpc,l0,l3t,ems,emc,rich","","",
+                                                                                  "Turn on Year 2a",kFALSE},
+  {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
+  {"OFF"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
+  {"db"          ,""  ,"",""           ,"St_db_Maker","St_Tables,StDbLib,StDbBroker,St_db_Maker","",kFALSE},
+  {"calib"       ,""  ,"",""           ,"St_db_Maker","St_Tables,StDbLib,StDbBroker,St_db_Maker","",kFALSE},
+  {"XIN"    ,"inputStream","","","St_Tables,StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
+  {"GSTAR"  ,""  ,"","geant","","" ,"St_Tables,gstar for 10 muon track with pT = 10 GeV in |eta|<1",kFALSE}, 
+  {"TDAQ"        ,""  ,"","er99,xin,tpc_daq"                                              ,"","","",kFALSE},  
+  {"FZIN"        ,""  ,"","geant","" ,""                                      ,"read GSTAR fz-file",kFALSE},
+  {"GEANT","geant","","","St_geant_Maker","St_Tables,geometry,St_g2r,St_geant_Maker"
+                                                                                ,"initailize GEANT",kFALSE}, 
+  {"UTIL"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
+  {"FieldOn"     ,""  ,"","-FieldOff,-HalfField,-ReverseField","StMagFC","StMagF"  ,"Nominal field",kFALSE},
+  {"FieldOff"    ,""  ,"","-FieldOn,-HalfField,-ReverseField","StMagFC","StMagF" ,"No Field option",kFALSE},
+  {"HalfField"   ,""  ,"","-FieldOn,-FieldOff,-ReverseField","StMagFC","StMagF","Half Field option",kFALSE},
+  {"ReverseField",""  ,"","-FieldOn,-FieldOff,-HalfField","StMagFC","StMagF","Reverse Field option",kFALSE},
+  {"TPC"         ,"tpc","","db,-tss,-trs,tcl,tpt"                 ,"StMaker","St_Tables,StChain","",kFALSE},
+  {"TSS"         ,"tpc_raw","tpc","-trs"             ,"St_tss_Maker"  ,"tls,St_tpc,St_tss_Maker","",kFALSE},  
+  {"TRS"         ,"tpc_raw","tpc","-tss,tpc_daq"     ,"StTrsMaker","StarClassLibrary,StTrsMaker","",kFALSE},
+  {"MINIDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
+  {"tpc_daq"     ,"tpc_raw","tpc",""               ,"St_tpcdaq_Maker","StDaqLib,St_tpcdaq_Maker","",kFALSE},
+  {"TFS"         ,""  ,"","tpc,-trs,-tss","",""     ,"use TFS       (no St_[tss_ and no Trs]Maker)",kFALSE},
+  {"TCL"         ,"tpc_hits","tpc",""                  ,"St_tcl_Maker","tls,St_tpc,St_tcl_Maker","",kFALSE},
+  {"TPT"         ,"tpc_tracks","tpc",""      ,"St_tpt_Maker","St_Tables,tls,St_tpc,St_tpt_Maker","",kFALSE},
+  {"SVT"         ,"svt","","srs,stk"                              ,"St_Tables,StMaker","StChain","",kFALSE},
+  {"SRS"         ,"svt_hits","svt",""                  ,"St_srs_Maker","tls,St_svt,St_srs_Maker","",kFALSE},
+  {"STK"         ,"svt_tracks","svt",""                ,"St_stk_Maker","tls,St_svt,St_stk_Maker","",kFALSE},
+  {"FTPC"        ,"ftpc"  ,"","-fss,fcl,fpt"                      ,"St_Tables,StMaker","StChain","",kFALSE},
+  {"FSS"         ,"ftpc_raw","ftpc",""   ,"St_fss_Maker","StarClassLibrary,St_ftpc,St_fss_Maker","",kFALSE},
+  {"FCL"         ,"ftpc_hits","ftpc","","StFtpcClusterMaker","StarClassLibrary,St_ftpc,StFtpcClusterMaker"
+                                                                                                ,"",kFALSE},
+  {"FPT"         ,"ftpc_tracks","ftpc","","St_fpt_Maker","StarClassLibrary,St_ftpc,St_fpt_Maker","",kFALSE},
+  {"EMC"         ,"emc","","ems,emh"                              ,"StMaker","St_Tables,StChain","",kFALSE},
+  {"EMS"         ,"emc_raw","emc",""             ,"St_ems_Maker","St_Tables,St_emc,St_ems_Maker","",kFALSE},
+  {"EMH"         ,"emc_hits","emc",""            ,"St_emc_Maker","St_Tables,St_emc,St_emc_Maker","",kFALSE},
+  {"L0"          ,"l0","","ctf,mwc,trg"                           ,"St_Tables,StMaker","StChain","",kFALSE}, 
+  {"CTF"         ,"ctf","l0",""                  ,"St_ctf_Maker","St_Tables,St_ctf,St_ctf_Maker","",kFALSE}, 
+  {"MWC"         ,"mwc","l0",""                  ,"St_mwc_Maker","St_Tables,St_mwc,St_mwc_Maker","",kFALSE}, 
+  {"TRG"         ,"trg","l0",""                  ,"St_trg_Maker","St_trg,St_Tables,St_trg_Maker","",kFALSE},
+  {"L3T"         ,"l3Tracks","",""                ,"St_l3t_Maker","St_Tables,St_l3,St_l3t_Maker","",kFALSE},
+  {"RICH"        ,"rch","",""                               ,"StRchMaker","St_Tables,StRchMaker","",kFALSE},
+  {"GLOBAL"      ,"global","","match,primary,v0,xi,kink,dst"      ,"StMaker","St_Tables,StChain","",kFALSE},
+  {"MATCH"       ,"match","global",""        ,"StMatchMaker","tls,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"MATCH"       ,"match","global",""        ,"StMatchMaker","tls,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"PRIMARY"     ,"primary","global",""    ,"StPrimaryMaker","tls,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"V0"          ,"v0","global",""              ,"StV0Maker","tls,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"XI"          ,"xi","global",""              ,"StXIMaker","tls,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"KINK"        ,"kink","global",""          ,"StKinkMaker","tls,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"DST"         ,"dst","global",""          ,"St_dst_Maker","tls,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"EVENT"       ,"StEventMaker","",""          ,"StEventMaker","St_Tables,StEvent,StEventMaker","",kFALSE},
+  {"ANALYSIS"    ,"analysis","",""                  ,"StAnalysisMaker","StEvent,StAnalysisMaker","",kFALSE},
+  {"QA"          ,"QA","",""                              ,"St_QA_Maker","St_Tables,St_QA_Maker","",kFALSE},
+  {"QAC"         ,"CosmicsQA","",""               ,"StQACosmicMaker","St_Tables,StQACosmicMaker","",kFALSE},
+  {"AllEvent"    ,""  ,"",""                                   ,"","","Write whole event to StTree",kFALSE},
+  {"St_geom"     ,"","",""       ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
+  {"DISPLAY"    ,"EventDisplay","","St_geom","StEventDisplayMaker","StEvent,StEventDisplayMaker","",kFALSE},
+  {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},
+  {"DEBUG"       ,""  ,"",""                                                ,"","","Set debug flag",kFALSE},
+  {"HIGZ"        ,""  ,"",""                                               ,"","","Pop HIGZ window",kFALSE},  
+  {"XOUT"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE}, 
+  {"TREE"        ,"tree","",""                                      ,"StTreeMaker","StTreeMaker","",kFALSE}
 };
+
+Int_t NoChainOptions = sizeof (BFC)/sizeof (BfcItem);
 StFile  *setFiles= 0;
 TString *InFile = 0;
 TString *FileOut= 0;
@@ -207,581 +218,113 @@ StBFChain::~StBFChain(){
   Finish();
 }
 //_____________________________________________________________________________
-void StBFChain::SetFlags(const Char_t *Chain )
-{
-  Int_t k;
-  for (k = kFIRST;k<NoChainOptions;k++)  ChainFlags[k] = kFALSE;
-  TString STAR_VERSION("$STAR_VERSION");
-  gSystem->ExpandPathName(STAR_VERSION);
-  printf ("==============================================\n");
-  printf ("QAInfo:============= You are in %s ===============\n",STAR_VERSION.Data());
-  if (!Chain || !strlen(Chain)) {
-    printf ("============= \tPossible Chain Options are: \n"); 
-    for (k=kFIRST;k<NoChainOptions;k++)
-      printf ("============ %2d\t:[-]%-8s\t:%s \n",k,ChainOptions[k],ChainComments[k]);
-    return;
-  }
-  TString tChain(Chain);
-  printf ("QAInfo:Requested chain is :\t%s\n",tChain.Data());
-  tChain.ToLower(); //printf ("Chain %s\n",tChain.Data());
-  Ssiz_t begin, index, end, end2;
-  begin = index = end = end2 = 0;
-  TRegexp separator("[^ ;,\\t\\s]+");
-  TString Tag, opt, nopt;
-  while ( (begin < tChain.Length()) && (index != kNPOS) ) { // loop over given Chain options 
-    index = tChain.Index(separator,&end,begin);
-    if (index >= 0) Tag = tChain(index,end);
-    begin += end+1;
-    if (index >=0) {
-      Int_t kgo = 0;
-      for (k = kFIRST+1; k<NoChainOptions; k++) {
-	opt = TString(ChainOptions[k]);
-	opt.ToLower();
-	nopt = TString("-");
-	nopt += opt;
-	if       (Tag == "in") Tag = "xin";
-	if       (Tag ==  opt) kgo =  k;
-	else {if (Tag == nopt) kgo = -k;}
-	if (kgo) {SetOption(kgo); break;}
-      }
-      if (!kgo) printf ("Option %s has been not recognized\n", Tag.Data());
-    }
-  }
-  // Check flags consistency   
-  if (!GetOption(kFZIN) && !GetOption(kGEANT) &&
-      !GetOption(kXIN) && !GetOption(kGSTAR) &&!GetOption(kTDAQ)) {
-    SetOption(kFZIN);
-    SetOption(kGEANT);
-  }
-  if (!GetOption(kGEANT) && !GetOption(kFieldOff) && 
-      !GetOption(kHalfField) && !GetOption(kFieldOn)) { 
-    SetOption(kFieldOn ); 
-  }
-  if (!GetOption(kGLOBAL) && 
-      (GetOption(kMATCH) || GetOption(kPRIMARY) || GetOption(kV0) ||
-       GetOption(kXI)    || GetOption(kKINK))) SetOption(kGLOBAL);
-  if (!GetOption(kEval) && GetOption(kAllEvent))  SetOption(kEval); 
-  //  SetOption(-kEMC);
-  //  SetOption(-kKINK);
-  // Print set values
-  for (k = kFIRST; k<NoChainOptions;k++) {
-    if (GetOption(k)) {
-      printf ("QAInfo:================== %2d \t%s      \tis ON \t:%s \n",k,ChainOptions[k],ChainComments[k]);
-    }
-  }
-  //  gSystem->Exit(1);
-}
-//_____________________________________________________________________________
 Int_t StBFChain::Load() 
 {
-  gSystem->Load("StarClassLibrary");
-  gSystem->Load("xdf2root");
-  gSystem->Load("St_Tables");
-  gSystem->Load("StUtilities");
-  if (kUTIL) gSystem->Load("StAnalysisUtilities");
-  //gSystem->Load("libmsg");
-  gSystem->Load("libtls");
-  gSystem->Load("StDbBroker");
-  gSystem->Load("St_db_Maker");
-  if (GetOption(kFieldOff) || 
-      GetOption(kFieldOn)  || 
-      GetOption(kHalfField)||  
-      GetOption(kReverseField))
-       gSystem->Load("StMagF");
-  else gSystem->Load("geometry");
-  if (GetOption(kXIN)) gSystem->Load("StIOMaker");
-  if (GetOption(kGEANT))  {
-    gSystem->Load("St_g2r"); 
-    gSystem->Load("St_geant_Maker");
-  }
-
-  if (GetOption(kTPC)) {
-    gSystem->Load("St_tpc");
-    if (GetOption(kTCL)) gSystem->Load("St_tcl_Maker");
-    if (GetOption(kTPT)) gSystem->Load("St_tpt_Maker");
-    if (GetOption(kTDAQ) || GetOption(kTRS)) {
-       if (GetOption(kTRS)) gSystem->Load("StTrsMaker"); 
-	gSystem->Load("StDaqLib");
-	gSystem->Load("St_tpcdaq_Maker");
-    }
-    else {
-      if (GetOption(kTSS)) gSystem->Load("St_tss_Maker");
-    }
-  }
-  if (GetOption(kMINIDAQ)) {
-    gSystem->Load("StMinidaqMaker");
-  }
-  if (GetOption(kFTPC)) {
-    gSystem->Load("St_ftpc");
-    if (GetOption(kFSS)) gSystem->Load("St_fss_Maker");
-    if (GetOption(kFCL)) gSystem->Load("StFtpcClusterMaker");
-    if (GetOption(kFPT)) gSystem->Load("St_fpt_Maker");
-  }
-  if (GetOption(kEMS) || GetOption(kEMC)) {
-    gSystem->Load("St_emc");
-    if (GetOption(kEMS)) gSystem->Load("St_ems_Maker");
-    if (GetOption(kEMC)) gSystem->Load("St_emc_Maker");
-  }
-  if (GetOption(kTRG)) {
-    if (GetOption(kCTF)) {
-      gSystem->Load("St_ctf");
-      gSystem->Load("St_ctf_Maker");
-    }
-    if (GetOption(kMWC)) {
-      gSystem->Load("St_mwc");
-      gSystem->Load("St_mwc_Maker");
-    }
-    gSystem->Load("St_trg");
-    gSystem->Load("St_trg_Maker");
-  }
-  if (GetOption(kL3T)){
-    gSystem->Load("St_l3");
-    gSystem->Load("St_l3t_Maker");
-  }
-  if (GetOption(kRICH)) {
-    gSystem->Load("StRchMaker");
-  }
-  if (GetOption(kSVT) || GetOption(kGLOBAL)) {
-    gSystem->Load("St_svt");
-    if (GetOption(kSRS)) gSystem->Load("St_srs_Maker");
-    if (GetOption(kSTK)) gSystem->Load("St_stk_Maker");
-  }
-  if (GetOption(kGLOBAL)) {
-    gSystem->Load("St_global");
-    gSystem->Load("St_dst_Maker");
-    if (GetOption(kEVENT)) {
-      gSystem->Load("StEvent");
-      gSystem->Load("StEventMaker");
-      if (GetOption(kANALYSIS)) gSystem->Load("StAnalysisMaker");
-    }
-    gSystem->Load("St_QA_Maker");
-  }
-  if (GetOption(kDISPLAY)) {
-    gSystem->Load("St_geom_Maker");
-    gSystem->Load("StEventDisplayMaker");
-  }
-  if (GetOption(kTREE)) gSystem->Load("StTreeMaker");
-
-  //  gSystem->Exit(1);
-  // Instantiate makers
-  //  Create the makers to be called by the current chain
-  if (GetOption(kXIN) && setFiles) {
-    inpMk = new StIOMaker("inputStream","r",setFiles);
-    if (inpMk) {
-      SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
-      SetInput("geant",".make/inputStream/.make/inputStream_XDF/.data/event/geant/Event");
-    }
-  }
-  if (GetOption(kGEANT))  {
-    geant = new St_geant_Maker("geant");
-    if (geant) {
-      geant->SetNwGEANT(10000000);
-      SetInput("geant",".make/geant/.data");
-      if (GetOption(kHIGZ))  geant->SetIwtype(1);
-      if (GetOption(kGSTAR)) {
-	if (GetOption(kSD97) || GetOption(kSD98) || GetOption(kY1a) || 
-	    GetOption(kES99) || GetOption(kER99)) geant->LoadGeometry("detp geometry YEAR_1A");
-	else {
-	  if (GetOption(kY1b))                     geant->LoadGeometry("detp geometry YEAR_1B");
-	  else {
-	    if (GetOption(kY1c))                   geant->LoadGeometry("detp geometry YEAR_1C");
-	    else {
-	      if (GetOption(kES99))                geant->LoadGeometry("detp geometry YEAR_1A");
-	      else {
-		if (GetOption(kER99))              geant->LoadGeometry("detp geometry YEAR_1A");
-		else {
-		  if (GetOption(kY2a))             geant->LoadGeometry("detp geometry YEAR_2A");
-		  else                              geant->LoadGeometry("detp geometry YEAR_2A");
-		}
-	      }
+  Int_t i, j, iok;
+  for (i = 1; i< NoChainOptions; i++) {// Load Libraries if any
+    if (BFC[i].Flag) {
+      if (strlen(BFC[i].Libs) > 0) { 
+	TString *Libs[80];
+	Int_t NParsed = ParseString(BFC[i].Libs,Libs);
+	const Char_t *lib = gSystem->GetLibraries(); 
+	for (j=0;j<=NParsed;j++) {
+	  if (!strstr(lib,Libs[j]->Data())) {
+	    iok = gSystem->Load(Libs[j]->Data());
+	    if (iok < 0)  {
+	      gMessMgr->QAInfo() << "\tproblem with loading\t" << Libs[j]->Data() << endm;
+	      gMessMgr->QAInfo() << "\tswitch off\t" << BFC[i].Key << "\t !!!!!" << endm;
+	      BFC[i].Flag = kFALSE;
+	      break;
 	    }
-	  }
-	}
-	geant->Do("subevent 0;");
-	// gkine #particles partid ptrange yrange phirange vertexrange 
-	geant->Do("gkine 10 6 1. 1. -1. 1. 0 6.28  0. 0.;");
-	geant->Do("mode g2tm prin 1;");
-	//  geant->Do("next;");
-	//  geant->Do("dcut cave z 1 10 10 0.03 0.03;");
-	if (GetOption(kDEBUG)) geant->Do("debug on;");
-	geant->Do("swit 2 3;");
-	// geant->LoadGeometry("detp geometry GetOption(kFieldOn) field_off");
-      }
-      else {
-	if (GetOption(kFZIN)) {
-	  if (geant->SetInputFile(InFile->Data()) > kStOK) {
-	    printf ("File %s cannot be opened. Exit! \n",InFile->Data());
-	    gSystem->Exit(1);
+	    else          gMessMgr->QAInfo() << "\tLibrary " << Libs[j]->Data() << "\tis loaded" << endm;
 	  }
 	}
       }
     }
   }
-  const char *mainDB = "$STAR/StDb/params";
-  //DbInit from StDbBroker.so checks that mysql db1 server is accessible
-  //  if (StDbBroker::DbInit("params")==0) mainDB = "MySQL:params";
-  printf ("QAInfo: Main DataBase == %s\n",mainDB);  
-  dbMk = new St_db_Maker("db",mainDB);
-  if (GetOption(kSD97)) { dbMk->SetDateTime("sd97");}
-  if (GetOption(kSD98)) { dbMk->SetDateTime("sd98");}
-  if (GetOption(kY1a))  { dbMk->SetDateTime("year_1a");}
-  if (GetOption(kY1b))  { dbMk->SetDateTime("year_1b");}
-  if (GetOption(kY1c))  { dbMk->SetDateTime("year_1c");}
-  if (GetOption(kES99)) { dbMk->SetDateTime("es99");}
-  if (GetOption(kER99)) { dbMk->SetDateTime("er99");}
-  if (GetOption(kY1d))  { dbMk->SetDateTime("year_1d");}
-  if (GetOption(kY1e))  { dbMk->SetDateTime("year_1e");}
-  if (GetOption(kY2a))  { dbMk->SetDateTime("year_2a");}
-  printf ("QAInfo:db Maker set time = %d %d \n",dbMk->GetDateTime().GetDate(),
-	  dbMk->GetDateTime().GetTime());
-  const char *calibDB = "$STAR_ROOT/calib";
-  calibMk = new St_db_Maker("calib",calibDB);
-  if (GetOption(kFieldOff) ||
-      GetOption(kHalfField)||
-      GetOption(kFieldOn)  ||
-      GetOption(kReverseField)) {
-    Float_t Scale = 1.0;
-    TString FieldName("STAR Normal field");
-    if (GetOption(kFieldOff))     {Scale = 0.00002; FieldName = "STAR no field";}
-    if (GetOption(kHalfField))    {Scale = 0.5;     FieldName = "STAR Normal field";}
-    if (GetOption(kReverseField)) {Scale = - Scale; FieldName += " Reverse";}
-    new StMagFC("field",FieldName.Data(),Scale);
-  }
-  if (GetOption(kMINIDAQ)) New("StMinidaqMaker","tpc_raw");
-  else {
-    //  S I M U L A T I O N  or D A Q
-    if (GetOption(kTDAQ))  {
-      StMaker *tpcdaq = New("St_tpcdaq_Maker","tpc_raw"); 
-      tpcdaq->SetMode(0); // daq
-    }
-    else {
-      if (GetOption(kTRS)) {//		trs
-	New("StTrsMaker");
-        StMaker *tpcdaq = New("St_tpcdaq_Maker","tpc_raw");
-	tpcdaq->SetMode(1); // trs
+  for (i = 1; i< NoChainOptions; i++) {// Instantiate Makers if any
+    if (BFC[i].Flag) {
+      if (strlen(BFC[i].Maker) > 0) { 
+	TString maker(BFC[i].Maker);
+	TString Key(BFC[i].Key);
+	Key.ToLower();
+	StMaker *saveMk = 0;
+        if (strlen(BFC[i].Chain) > 0) {
+	  StMaker *chain = GetMaker(BFC[i].Chain);
+	  if (chain) saveMk = chain->cd();
+	}
+	if (maker == "StMagFC") {
+	  Float_t Scale = 1.0;
+	  TString FieldName("STAR Normal field");
+	  if (GetOption("FieldOff"))     {Scale = 0.00002; FieldName = "STAR no field";}
+	  if (GetOption("HalfField"))    {Scale = 0.5;     FieldName = "STAR Normal field";}
+	  if (GetOption("ReverseField")) {Scale = - Scale; FieldName += " Reverse";}
+	  new StMagFC("field",FieldName.Data(),Scale);
+	  continue;
+	}
+	if (maker == "St_db_Maker") {
+	  if (Key == "calib") {
+	    const char *calibDB = "$STAR_ROOT/calib";
+	    calibMk = new St_db_Maker("calib",calibDB);
+	  }
+	  else {
+	    const char *mainDB = "$STAR/StDb/params";
+	    //DbInit from StDbBroker.so checks that mysql db1 server is accessible
+	    //  if (StDbBroker::DbInit("params")==0) mainDB = "MySQL:params";
+	    gMessMgr->QAInfo() << " Main DataBase == " << mainDB << endm;  
+	    dbMk = new St_db_Maker("db",mainDB);
+	    SetDbOptions();
+	  }
+	  continue;
+	}
+	if (maker == "StIOMaker" && setFiles) {
+	  inpMk = new StIOMaker("inputStream","r",setFiles);
+	  if (inpMk) {
+	    SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
+	    SetInput("geant",".make/inputStream/.make/inputStream_XDF/.data/event/geant/Event");
+	  }
+	  continue;
+	}
+	if (maker == "StTreeMaker" && FileOut) {
+	  treeMk = new StTreeMaker("tree",FileOut->Data());
+	  if (treeMk) {
+	    treeMk->SetIOMode("w");
+	    if (GetOption("DST"))      treeMk->IntoBranch("dstBranch","dst");
+	    else {
+	      if (GetOption("GLOBAL")) treeMk->IntoBranch("globalBranch","global/.data");
+	    }
+	    if (GetOption("EVENT"))    treeMk->IntoBranch("eventBranch","StEvent");
+	    if (GetOption("AllEvent")) SetTreeOptions();
+	    treeMk->SetBranch("histBranch");
+	    continue;
+	  }
+	}
+	if (Key == "geant") {
+	  geant = new St_geant_Maker("geant");
+	  SetGeantOptions();
+	  continue;
+	}
+	StMaker *mk = 0;
+	if (strlen(BFC[i].Name) > 0) mk = New(BFC[i].Maker,BFC[i].Name);
+	else                                mk = New(BFC[i].Maker);
+	if (mk && maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
+	if (mk && maker == "St_tpcdaq_Maker") {
+	  if (GetOption("TRS")) mk->SetMode(1); // trs
+	  else                  mk->SetMode(0); // daq
+	}
+	if (saveMk) saveMk->cd();
       }
-      else { 
-	if (GetOption(kTSS)) New("St_tss_Maker","tpc_raw");
-      }
-    }
-  }
-  if (GetOption(kFSS)) New("St_fss_Maker","ftpc_raw");
-  if (GetOption(kEMS)) New("St_ems_Maker","emc_raw" );
-  if (GetOption(kEMC)) New("St_emc_Maker","emc_hits"); 
-  // L O C A L    R E C O N S T R U C T I O
-  if (GetOption(kTCL)) New ("St_tcl_Maker","tpc_hits");
-  if (GetOption(kSRS)) New("St_srs_Maker","svt_hits");
-  if (GetOption(kFCL)) New("StFtpcClusterMaker","ftpc_hits");  
-  // T R A C K I N G
-  if (GetOption(kTPT)) New("St_tpt_Maker","tpc_tracks");
-  if (GetOption(kSTK)) New("St_stk_Maker","svt_tracks");
-  if (GetOption(kFPT)) New("St_fpt_Maker","ftpc_tracks");
-  // T R I G G E R
-  if (GetOption(kTRG)) {
-    if (GetOption(kCTF)) New("St_ctf_Maker","ctf");
-    if (GetOption(kMWC)) New("St_mwc_Maker","mwc");
-                         New("St_trg_Maker","trg");
-  }
-  // G L O B A L chain
-  if (GetOption(kGLOBAL)) {//		global
-    StMaker *glbMk = new StMaker("global");
-    //    SetInput("dst",".make/global/.data/dst");
-    if (glbMk) {
-      StMaker *saveMK = glbMk->cd();
-      if (GetOption(kMATCH))   New("StMatchMaker");
-      if (GetOption(kPRIMARY)) New("StPrimaryMaker");
-      if (GetOption(kV0))      New("StV0Maker");
-      if (GetOption(kXI))      New("StXiMaker");
-      if (GetOption(kKINK))    New("StKinkMaker");
-      saveMK->cd();
-    }
-  }
-  if (GetOption(kL3T)) New("St_l3t_Maker","l3Tracks"); 
-  if (GetOption(kGLOBAL)) {
-  //		dst
-    if (GetOption(kDST) && New("St_dst_Maker","dst")) SetInput("dst",".make/dst/.data/dst");
-    if (GetOption(kEVENT)){New("StEventMaker");
-      if (GetOption(kANALYSIS)) New("StAnalysisMaker");
-    }
-    if (GetOption(kQA)) New("St_QA_Maker");  
-  }
-  if (GetOption(kDISPLAY)) {
-    New("St_geom_Maker"); // this maker open its own TFile !!
-    New("StEventDisplayMaker");
-  }  
-  
-  if (GetOption(kTREE)) {//		Tree
-    treeMk = new StTreeMaker("tree",FileOut->Data());
-    if (treeMk) {
-      treeMk->SetIOMode("w");
-      if (GetOption(kDST)) {
-	//  treeMk->SetBranch("dstBranch",FileOut->Data());
-	treeMk->IntoBranch("dstBranch","dst");
-	//      TString hist(FileOut);
-	//      hist.ReplaceAll(".root",".hist.root");
-	//      treeMk->SetBranch("histBranch",hist.Data());
-      }
-      else if (GetOption(kGLOBAL)) {
-	//  treeMk->SetBranch("globalBranch",FileOut->Data());
-	treeMk->IntoBranch("globalBranch","global/.data");
-      }
-      if (GetOption(kEVENT)){
-	//  treeMk->SetBranch("EventBranch",FileOut->Data());
-	treeMk->IntoBranch("eventBranch","StEvent");
-      }
-      if (GetOption(kAllEvent)) {
-	if (geant) {
-	  treeMk->IntoBranch("geantBranch","geant");
-	  //  treeMk->SetBranch("geantBranch",FileOut->Data());
-	  treeMk->IntoBranch("geantBranch","geant/.data/particle");
-	  treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
-	}
-	if (GetOption(kFSS)) {
-	  //  treeMk->SetBranch("ftpc_rawBranch",FileOut->Data());
-	  treeMk->IntoBranch("ftpc_rawBranch","ftpc_raw/.data");
-	}
-	if (GetOption(kEMS)) {
-	  //  treeMk->SetBranch("emc_rawBranch",FileOut->Data());
-	  treeMk->IntoBranch("emc_rawBranch","emc_raw/.data");
-	}
-	if (GetOption(kTSS) || GetOption(kTRS)) { 
-	  //  treeMk->SetBranch("tpc_rawBranch",FileOut->Data());
-	  treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
-	}
-	if (GetOption(kTCL)) treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
-	if (GetOption(kTPT)) treeMk->IntoBranch("tpc_tracksBranch","tpc_tracks/.data");
-	if (GetOption(kTRG)) {
-	  //  treeMk->SetBranch("trgBranch",FileOut->Data());
-	  treeMk->IntoBranch("trgBranch","ctf mwc trg");
-	}
-	if (GetOption(kL3T)) {
-	  //  treeMk->SetBranch("l3TBranch",FileOut->Data());
-	  treeMk->IntoBranch("l3tBranch","l3Tracks");
-	}
-      }      
-      treeMk->SetBranch("histBranch");
     }
   }
   if (XdfFile) xdf_out = new St_XDFFile(XdfFile->Data(),"wb"); 
+  //  PrintQAInfo();
   PrintInfo();
   // START the chain (may the force be with you)
-  // Create HTML docs of all Maker's inv#ifdef GetOption(kTRG)
-  if (GetOption(kMakeDoc)) MakeDoc();
-  if (GetOption(kDEBUG)) SetDEBUG();
+  // Create HTML docs of all Maker's inv#ifdef GetOption("TRG")
+  if (GetOption("MakeDoc")) MakeDoc();
+  if (GetOption("DEBUG")) SetDEBUG();
   return kStOk;
 }
-//_____________________________________________________________________
-void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
-  // define input file
-  Char_t *Infile  = (Char_t *) infile;
-  Char_t *Outfile = (Char_t *) outfile;
-  if (!Infile) {
-    if (GetOption(kMINIDAQ)) {
-      Infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"; // laser data
-      //Infile ="/scratch/sakrejda/tpc_s01w_981021_21h_cos_t7_f3.xdf"; // laser data
-      printf ("Use default input file %s for %s \n",Infile,ChainOptions[kMINIDAQ]);
-    }
-    else {
-      if (GetOption(kFZIN)) {
-	if (GetOption(kY1b)) Infile = "/disk0/star/test/venus412/b0_3/year_1b/psc0050_01_40evts.fzd";
-	else {
-	  if (GetOption(kY2a))  Infile = "/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fzd";
-	  else                  Infile ="/disk1/star/test/psc0049_08_40evts.fzd";
-	}
-	printf ("Use default input file %s for %s \n",Infile,ChainOptions[kFZIN]);
-      }
-      else { 
-	if (!GetOption(kGSTAR)) {
-	  Infile ="/afs/rhic/star/data/samples/hijet-g2t.xdf";	       // g2t xdf file
-	  printf ("Use default input file %s for %s \n",Infile,ChainOptions[kXIN]);
-	}
-      }
-    }
-  }
-  if (Infile) {
-    InFile = new TString(Infile);
-    if (!strstr(InFile->Data(),"*") &&
-	gSystem->AccessPathName(InFile->Data())) {// file does not exist
-      printf (" *** NO FILE: %s, exit!\n", InFile->Data());
-      gSystem->Exit(1); 
-    }
-    if (!GetOption(kFZIN)) {
-      setFiles= new StFile();
-      setFiles->AddFile(InFile->Data());
-    }
-  }
-  if (GetOption(kGSTAR)) {
-    if (!Outfile) FileOut = new TString("gtrack");
-    else          FileOut = new TString(Outfile);
-    printf ("QAInfo:Output root file name %s\n", FileOut->Data());
-    printf ("==============================================\n");
-  }
-  else {
-    if (Outfile) FileOut = new TString(Outfile);
-    else {
-      FileOut = new TString(gSystem->BaseName(InFile->Data()));
-      FileOut->ReplaceAll("*","");
-      FileOut->ReplaceAll("..",".");
-      FileOut->ReplaceAll(".daq","");
-      FileOut->ReplaceAll(".fzd","");
-      FileOut->ReplaceAll(".fz","");
-      FileOut->ReplaceAll(".xdf","");
-      FileOut->Strip();
-    }
-    printf ("==============================================\n");
-    printf ("QAInfo:Input file name = %s\n"
-	   ,InFile->Data());
-    printf ("QAInfo:Output root file name %s\n", FileOut->Data());
-    printf ("==============================================\n");
-    if (GetOption(kXOUT)) {
-      XdfFile = new TString(FileOut->Data());
-      XdfFile->Append(".dst.xdf");
-      printf ("QAInfo:Open output xdf file  = %s \n ++++++++++++++++++++++\n",XdfFile->Data());
-    }
-  }
-  //    gSystem->Exit(1);
-}
-//_____________________________________________________________________
-void StBFChain::SetOption(int k){// set all OFF
-
-  if (k > 0 && !ChainFlags[k]) {
-    //    printf ("SetOption: %s %i",ChainOptions[k],k);
-    ChainFlags[k] = kTRUE;
-    printf (" Switch On  %s\n", ChainOptions[k]);
-  }
-  else {
-    if (k < 0 && ChainFlags[-k]) {
-      //      printf ("SetOption: %s %i",ChainOptions[-k],k);
-      ChainFlags[-k] = kFALSE;
-      printf (" Switch Off %s\n", ChainOptions[-k]);
-    }
-    else return;
-  }
-  switch (k) {
-  case kFZIN:
-    SetOption(kGEANT);
-    break;
-  case kGLOBAL:
-    SetOption(kMATCH);
-    SetOption(kPRIMARY);
-    SetOption(kV0);
-    SetOption(kXI);
-    SetOption(kKINK);
-    break;
-  case -kGLOBAL:
-    SetOption(-kMATCH);
-    SetOption(-kPRIMARY);
-    SetOption(-kV0);
-    SetOption(-kXI);
-    SetOption(-kKINK);
-    break;
-  case kTPC:
-    SetOption(kTCL);
-    SetOption(kTPT);
-    break;
-  case -kTPC:
-    SetOption(-kTCL);
-    SetOption(-kTPT);
-    break;
-  case kSVT:
-    SetOption(kSRS);
-    SetOption(kSTK);
-    break;
-  case -kSVT:
-    SetOption(-kSRS);
-    SetOption(-kSTK);
-    break;
-  case kFTPC:
-    SetOption(kFCL);
-    SetOption(kFPT);
-    break;
-  case -kFTPC:
-    SetOption(-kFCL);
-    SetOption(-kFPT);
-    break;
-  case kTRG:
-    SetOption(kCTF);
-    SetOption(kMWC);
-    break;
-  case -kTRG:
-    SetOption(-kCTF);
-    SetOption(-kMWC);
-    break;
-  case kOFF:
-    SetOption(kDEFAULT);
-    break;
-  case kMINIDAQ:
-    if (!GetOption(kDEFAULT)) {
-      SetOption(kXIN);
-      SetOption(kFieldOff);
-      SetOption(kSD97);
-      SetOption(kEval);
-    }
-    break;
-  case kTDAQ:
-    SetOption(kER99);
-    SetOption(kXIN);
-    break;
-  case  kY1b:
-    if (!GetOption(kDEFAULT)) {
-      SetOption(kEMS);
-      SetOption(kEMC);
-      SetOption(kRICH);
-    }
-  case  kY1a:
-  case  kY1c:
-    if (!GetOption(kDEFAULT)) {
-      SetOption(kFTPC);
-      SetOption(kTRG);
-      SetOption(kL3T);
-    }
-  case kSD97:
-  case kSD98:
-  case kER99:
-  case kES99:
-    if (!GetOption(kDEFAULT)) {
-      SetOption(kDEFAULT);
-      SetOption(kTPC);
-      SetOption(kGLOBAL);
-      SetOption(kDST);
-      SetOption(kQA);
-      SetOption(kEVENT);
-      SetOption(kANALYSIS);
-      SetOption(kTREE);
-    }
-    break;
-  case  kY2a:
-    if (!GetOption(kDEFAULT)) {
-      SetOption(kDEFAULT);
-      SetOption(kSVT);
-      SetOption(kEMS);
-      SetOption(kEMC);
-      SetOption(kTPC);
-      SetOption(kFTPC);
-      SetOption(kTRG);
-      SetOption(kGLOBAL);
-      SetOption(kL3T);
-      SetOption(kDST);
-      SetOption(kQA);
-      SetOption(kEVENT);
-      SetOption(kANALYSIS);
-      SetOption(kTREE);
-    }
-    break;
-  case kGSTAR:
-    if (!GetOption(kDEFAULT)) {
-      printf ("QAInfo:no setup defined ==> use Y2a\n");
-      SetOption(kY2a);
-    }
-    SetOption(kGEANT);
-    break;
-  default:
-    break;
-  }
-}
-//_____________________________________________________________________
-Bool_t StBFChain::GetOption(Int_t k) {return (k>0 && k <=NoChainOptions) ? ChainFlags[k] : kFALSE;}
-//_____________________________________________________________________
 Int_t StBFChain::Finish()
 {
   SafeDelete (xdf_out);
@@ -799,7 +342,276 @@ Int_t StBFChain::AddAB (const Char_t *mkname,const StMaker *maker,const Int_t Op
   StMaker *mk      = GetMaker(mkname);      if (!mk)     return kStErr;
   parent  = mk->GetParentMaker();  if (!parent) return kStErr;
   TList   *list    = parent->GetMakeList(); if (!list)   return kStErr;
-  if (Opt > 0) list->AddAfter ((StMaker*)maker,mk);
-  else         list->AddBefore((StMaker*)maker,mk);
+  if (Opt > 0) list->AddAfter (mk,(StMaker*)maker);
+  else         list->AddBefore(mk,(StMaker*)maker);
   return kStOk;
+}
+//_____________________________________________________________________
+Int_t StBFChain::ParseString (const TString &tChain, TString *Opt[]) {
+  Int_t nParsed = -1;
+  Ssiz_t begin, index, end, end2;
+  begin = index = end = end2 = 0;
+  TRegexp separator("[^ ;,\\t\\s]+");
+  TString Tag, opt, nopt;
+  while ( (begin < tChain.Length()) && (index != kNPOS) ) { 
+    // loop over given Chain options 
+    index = tChain.Index(separator,&end,begin);
+    if (index >= 0) Opt[++nParsed] = new TString(tChain(index,end));
+    begin += end+1;
+  }
+  return nParsed;
+}
+//_____________________________________________________________________
+Int_t StBFChain::kOpt (const Char_t *tag) const {
+  TString *Tag = new TString(tag);
+  Int_t kO = kOpt(Tag);
+  delete Tag;
+  return kO;
+}
+//_____________________________________________________________________
+Int_t StBFChain::kOpt (const TString *tag) const {
+  TString Tag = *tag;
+  Tag.ToLower();
+  if       (Tag == "in") Tag = "xin";
+  TString opt, nopt;
+  for (Int_t i = 1; i< NoChainOptions; i++) {
+    opt = TString(BFC[i].Key);
+    opt.ToLower();
+    nopt = TString("-");
+    nopt += opt;
+    if       (Tag ==  opt) {return  i;}
+    else {if (Tag == nopt) {return -i;}}
+  }
+  printf ("Option %s has been not recognized\n", Tag.Data());
+  return 0;
+}//_____________________________________________________________________
+void StBFChain::SetOption(const Int_t k) {// set all OFF
+  if (k > 0 && !BFC[k].Flag) {
+    //    printf ("SetOption: %s %i",BFC[k].Key,k);
+    BFC[k].Flag = kTRUE;
+    printf (" Switch On  %s\n", BFC[k].Key);
+    if (strlen(BFC[k].Opts) > 0) {
+      TString *Opt[80];
+      Int_t NParsed = ParseString(BFC[k].Opts,Opt);
+      Int_t i;
+      for (i=0;i<=NParsed;i++) SetOption(Opt[i]);
+    }
+  }
+  else {
+    if (k < 0 && BFC[-k].Flag) {
+      //      printf ("SetOption: %s %i",BFC[-k].Key,k);
+      BFC[-k].Flag = kFALSE;
+      printf (" Switch Off %s\n", BFC[-k].Key);
+    }
+    else return;
+  }
+}
+//_____________________________________________________________________
+Bool_t StBFChain::GetOption(const Int_t k) {
+  return (k>0 && k <NoChainOptions) ? BFC[k].Flag : kFALSE;
+}
+//_____________________________________________________________________________
+void StBFChain::SetFlags(const Char_t *Chain )
+{
+  Int_t k;
+  if (!Chain || !strlen(Chain)) {
+    printf ("\tPossible Chain Options are: \n"); 
+    for (k=0;k<NoChainOptions;k++)
+      printf (" %2d:[-]%-12s:%-12s:%-6s:%-12s :%s :%s :%s\n"
+	      ,k,BFC[k].Key,BFC[k].Name,BFC[k].Chain,BFC[k].Opts,BFC[k].Maker,BFC[k].Libs,BFC[k].Comment);
+    return; 
+  }         
+  TString STAR_VERSION("$STAR_VERSION");
+  gSystem->ExpandPathName(STAR_VERSION);
+  printf ("==============================================\n");
+  gMessMgr->QAInfo() << "============= You are in " << STAR_VERSION.Data() << " ===============" << endm;
+  TString tChain(Chain);
+  gMessMgr->QAInfo() << "Requested chain is :\t" << tChain.Data() << endm;
+  tChain.ToLower(); //printf ("Chain %s\n",tChain.Data());
+  TString *Opt[80];
+  Int_t NParsed = ParseString(tChain,Opt);
+  Int_t i;
+  for (i=0;i<=NParsed;i++){
+    Int_t kgo = kOpt(*Opt[i]);
+    if (kgo != 0) SetOption(kgo);
+  }
+  // Check flags consistency   
+  if (!GetOption("FZIN") && !GetOption("GEANT") &&
+      !GetOption("XIN") && !GetOption("GSTAR") &&!GetOption("TDAQ")) {
+    SetOption("FZIN");
+    SetOption("GEANT");
+  }
+  if (!GetOption("GEANT") && !GetOption("FieldOff") && 
+      !GetOption("HalfField") && !GetOption("FieldOn")) { 
+    SetOption("FieldOn"); 
+  }
+  if (!GetOption("GLOBAL") && 
+      (GetOption("MATCH") || GetOption("PRIMARY") || GetOption("V0") ||
+       GetOption("XI")    || GetOption("KINK"))) SetOption("GLOBAL");
+  if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval"); 
+  //  SetOption("-EMC");
+  //  SetOption("-KINK");
+  // Print set values
+  for (k = 1; k<NoChainOptions;k++) {
+    if (GetOption(k)) {
+      gMessMgr->QAInfo() << "================== " << k << "\t" << BFC[k].Key << "\tis ON \t:" << BFC[k].Comment << endm;
+    }
+  }
+  //  gSystem->Exit(1);
+}
+//_____________________________________________________________________
+void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
+  // define input file
+  Char_t *Infile  = (Char_t *) infile;
+  Char_t *Outfile = (Char_t *) outfile;
+  if (!Infile) {
+    if (GetOption("MINIDAQ")) {
+      Infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"; // laser data
+      //Infile ="/scratch/sakrejda/tpc_s01w_981021_21h_cos_t7_f3.xdf"; // laser data
+      printf ("Use default input file %s for %s \n",Infile,"MINIDAQ");
+    }
+    else {
+      if (GetOption("FZIN")) {
+	if (GetOption("Y1b")) Infile = "/disk0/star/test/venus412/b0_3/year_1b/psc0050_01_40evts.fzd";
+	else {
+	  if (GetOption("Y2a"))  Infile = "/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fzd";
+	  else                  Infile ="/disk1/star/test/psc0049_08_40evts.fzd";
+	}
+	printf ("Use default input file %s for %s \n",Infile,"FZIN");
+      }
+      else {
+	if (GetOption("doEvents")){
+	  Infile ="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf";
+	  printf ("Use default input file %s for %s \n",Infile,"doEvent");
+	}
+	else { 
+	  if (!GetOption("GSTAR")) {
+	    Infile ="/afs/rhic/star/data/samples/hijet-g2t.xdf";	       // g2t xdf file
+	    printf ("Use default input file %s for %s \n",Infile,"XIN");
+	  }
+	}
+      }
+    }
+  }
+  if (Infile) {
+    setFiles= new StFile();
+    InFile = new TString(Infile);
+    TString *Files[80];
+    Int_t NParsed = ParseString((const TString )*InFile,Files);
+    Int_t i;
+    for (i=0;i<=NParsed;i++) {
+      if (!strstr(Files[i]->Data(),"*") &&
+	gSystem->AccessPathName(Files[i]->Data())) {// file does not exist
+	printf (" *** NO FILE: %s, exit!\n", Files[i]->Data());
+	gSystem->Exit(1); 
+      }
+    }
+    if (!GetOption("FZIN")) {
+      setFiles->AddFile(Files[i]->Data());
+    }
+  }
+  if (GetOption("GSTAR")) {
+    if (!Outfile) FileOut = new TString("gtrack");
+    else          FileOut = new TString(Outfile);
+    gMessMgr->QAInfo() << "Output root file name " << FileOut->Data() << endm;
+    printf ("==============================================\n");
+  }
+  else {
+    if (Outfile) FileOut = new TString(Outfile);
+    else {
+      FileOut = new TString(gSystem->BaseName(InFile->Data()));
+      FileOut->ReplaceAll("*","");
+      FileOut->ReplaceAll("..",".");
+      FileOut->ReplaceAll(".daq","");
+      FileOut->ReplaceAll(".fzd","");
+      FileOut->ReplaceAll(".fz","");
+      FileOut->ReplaceAll(".xdf","");
+      FileOut->Strip();
+    }
+    printf ("==============================================\n");
+    gMessMgr->QAInfo() << "Input file name = " << InFile->Data() << endm;
+    gMessMgr->QAInfo() << "Output root file name " <<  FileOut->Data() << endm;
+    printf ("==============================================\n");
+  }
+  if (GetOption("XOUT") && FileOut) {
+    XdfFile = new TString(FileOut->Data());
+    XdfFile->Append(".dst.xdf");
+    gMessMgr->QAInfo() << "Open output xdf file  = " << XdfFile->Data() <<  "++++++++++++++++++++++" << endm;
+  }
+  //    gSystem->Exit(1);
+}
+//_____________________________________________________________________
+void StBFChain::SetGeantOptions(){
+  if (geant) {
+    geant->SetNwGEANT(10000000);
+    SetInput("geant",".make/geant/.data");
+    if (GetOption("HIGZ"))  geant->SetIwtype(1);
+    if (GetOption("GSTAR")) {
+      if (GetOption("SD97") || GetOption("SD98") || GetOption("Y1a") || 
+	  GetOption("ES99") || GetOption("ER99")) geant->LoadGeometry("detp geometry YEAR_1A"); 
+      else {
+	if (GetOption("Y1b"))                     geant->LoadGeometry("detp geometry YEAR_1B");
+	else {
+	  if (GetOption("Y1c"))                   geant->LoadGeometry("detp geometry YEAR_1C");
+	  else {
+	    if (GetOption("ES99"))                geant->LoadGeometry("detp geometry YEAR_1A");
+	    else {
+	      if (GetOption("ER99"))              geant->LoadGeometry("detp geometry YEAR_1A");
+	      else {
+		if (GetOption("Y2a"))             geant->LoadGeometry("detp geometry YEAR_2A");
+		else                              geant->LoadGeometry("detp geometry YEAR_2A");
+	      }
+	    }
+	  }
+	}
+      }
+      geant->Do("subevent 0;");
+      // gkine #particles partid ptrange yrange phirange vertexrange 
+      geant->Do("gkine 10 6 1. 1. -1. 1. 0 6.28  0. 0.;");
+      geant->Do("mode g2tm prin 1;");
+      //  geant->Do("next;");
+      //  geant->Do("dcut cave z 1 10 10 0.03 0.03;");
+      if (GetOption("DEBUG")) geant->Do("debug on;");
+      geant->Do("swit 2 3;");
+      // geant->LoadGeometry("detp geometry GetOption("FieldOn") field_off");
+    }
+    else {
+      if (GetOption("FZIN")) {
+	if (geant->SetInputFile(InFile->Data()) > kStOK) {
+	  printf ("File %s cannot be opened. Exit! \n",InFile->Data());
+	  gSystem->Exit(1);
+	}
+      }
+    }
+  }
+}//_____________________________________________________________________
+void StBFChain::SetDbOptions(){
+  if (GetOption("SD97")) { dbMk->SetDateTime("sd97");}
+  if (GetOption("SD98")) { dbMk->SetDateTime("sd98");}
+  if (GetOption("Y1a"))  { dbMk->SetDateTime("year_1a");}
+  if (GetOption("Y1b"))  { dbMk->SetDateTime("year_1b");}
+  if (GetOption("Y1c"))  { dbMk->SetDateTime("year_1c");}
+  if (GetOption("ES99")) { dbMk->SetDateTime("es99");}
+  if (GetOption("ER99")) { dbMk->SetDateTime("er99");}
+  if (GetOption("Y1d"))  { dbMk->SetDateTime("year_1d");}
+  if (GetOption("Y1e"))  { dbMk->SetDateTime("year_1e");}
+  if (GetOption("Y2a"))  { dbMk->SetDateTime("year_2a");}
+  gMessMgr->QAInfo() << "db Maker set time = " << dbMk->GetDateTime().GetDate() 
+		   << dbMk->GetDateTime().GetTime() << endm;
+}
+//_____________________________________________________________________
+void StBFChain::SetTreeOptions(){
+  if (geant) {
+    treeMk->IntoBranch("geantBranch","geant");
+    treeMk->IntoBranch("geantBranch","geant/.data/particle");
+    treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
+  }
+  if (GetOption("FSS"))    treeMk->IntoBranch("ftpc_rawBranch","ftpc_raw/.data");
+  if (GetOption("EMS"))    treeMk->IntoBranch("emc_rawBranch","emc_raw/.data");
+  if (GetOption("TSS") || GetOption("TRS"))
+    treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
+  if (GetOption("TCL"))    treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
+  if (GetOption("TPT"))    treeMk->IntoBranch("tpc_tracksBranch","tpc_tracks/.data");
+  if (GetOption("TRG"))    treeMk->IntoBranch("trgBranch","ctf mwc trg");
+  if (GetOption("L3T"))    treeMk->IntoBranch("l3tBranch","l3Tracks");
 }

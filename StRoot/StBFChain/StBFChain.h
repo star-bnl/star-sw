@@ -1,5 +1,8 @@
-// $Id: StBFChain.h,v 1.6 1999/10/28 01:57:17 fisyak Exp $
+// $Id: StBFChain.h,v 1.7 1999/11/04 22:21:25 fisyak Exp $
 // $Log: StBFChain.h,v $
+// Revision 1.7  1999/11/04 22:21:25  fisyak
+// Reorganize chain as Table
+//
 // Revision 1.6  1999/10/28 01:57:17  fisyak
 // Add ParseString
 //
@@ -49,25 +52,6 @@
 #include "StChain.h"
 #include "TFile.h"
 //_____________________________________________________________________
-enum EChainOptions { 
-  kFIRST   ,
-  kSD97    ,kSD98    ,kY1a     ,kY1b     ,kY1c     ,          // time stamps
-  kES99    ,kER99    ,kY1d     ,kY1e     ,kY2a     ,
-  kEval    ,kOFF     ,kXIN     ,kXOUT    ,kGSTAR   ,          // Chains, options
-  kTDAQ    ,kFZIN    ,kGEANT   ,kUTIL    ,
-  kFieldOn ,kFieldOff,kHalfField,kReverseField     ,          // Magnetic Field
-  kTPC     ,kTSS     ,kTRS     ,kMINIDAQ ,kTFS     ,kTCL     ,kTPT     ,// TPC
-  kSVT     ,kSRS     ,kSTK     ,                              // SVT  
-  kFTPC    ,kFSS     ,kFCL     ,kFPT     ,                    // FTPC
-  kEMS     ,kEMC     ,                                        // EMC
-  kTRG     ,kCTF     ,kMWC     ,kL3T     ,
-  kRICH    ,                                                  // RICH
-  kGLOBAL  ,kMATCH   ,kPRIMARY ,kV0      ,kXI      ,kKINK    ,// Global Chain
-  kDST     ,kEVENT   ,kANALYSIS,kQA      ,                    // Dst
-  kTREE    ,kAllEvent,kDISPLAY ,kLAST    ,                    // StEvent
-  kDEFAULT ,
-  kMakeDoc ,kDEBUG   ,kHIGZ
-};
 
 class St_XDFFile;
 
@@ -85,15 +69,24 @@ class StBFChain : public StChain {
    virtual Int_t       ParseString (const TString &tChain, TString *Opt[]);
    void                SetFlags(const Char_t *Chain="gstar tfs"); // *MENU*
    void                Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0); // *MENU
+   virtual Int_t       kOpt(const TString *Tag) const; 
+   virtual Int_t       kOpt(const Char_t  *Tag) const; 
    virtual void        SetXdfOut(St_XDFFile *xdf=0) {xdf_out = xdf;}
-   virtual void        SetOption(Int_t k);
+   virtual void        SetDbOptions();
+   virtual void        SetGeantOptions();
+   virtual void        SetTreeOptions();
+   virtual void        SetOption(const Int_t k);
+   virtual void        SetOption(const Char_t*  Opt) {SetOption(kOpt(Opt));}
+   virtual void        SetOption(const TString* Opt) {SetOption(kOpt(Opt));}
    virtual void        SetTFile(TFile *m) {m_TFile = m;}
    virtual Int_t       Finish();
    virtual TFile      *GetTFile() {return m_TFile;}
    virtual St_XDFFile *GetXdfOut() {return xdf_out;}
-   virtual Bool_t      GetOption(Int_t k);
+   virtual Bool_t      GetOption(const Int_t k);
+   virtual Bool_t      GetOption(const TString *Opt) {return GetOption(kOpt(Opt));}
+   virtual Bool_t      GetOption(const Char_t *Opt)  {return GetOption(kOpt(Opt));}
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.6 1999/10/28 01:57:17 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.7 1999/11/04 22:21:25 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StBFChain, 0)   //StBFChain control class
 };
 #endif
