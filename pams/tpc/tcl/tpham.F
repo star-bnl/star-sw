@@ -29,12 +29,41 @@ C
 
 C   Input arguments  (One to a line with definition after ! ) 
 C
+C     tsspar_h:
+C     tsspar:
+C     detector_h:
+C     detector:
+C     sector_h:
+C     setctor:
+C     pad_plane_h:
+C     pad_plane:
+C     wire_plane_h:
+C     wire_plane:
+C     tpppixel_h
+C     tppixel:
+C     tpmcpix_h
+C     tpmcpix:
+C     tpseqh
+C     tpseq:
+C     tpclusterh
+C     tpcluster:
 C
 C   Output arguments : 
 C
+C     tphith
+C     tphit:
+C
+C  Returns:
+C       TAS user status code, defined in tas_user_codes_inc, one of:
+C       tucod_ok       !General successful completion.
+C       tucod_fail     !General failure.
+C       tucod_abevt    !Abort event.
+C       tucod_abgo     !Abort GO event looping.
+C       tucod_exit     !Force program termination.
+C       tucod_unkmode  !Unknown mode in call to TAE_USER.
+C     
 C   Functional Description : 
 C    This module reconstructs hits given cluster data in tpseq/tpcluster
-C
 C
 C   Moved into TAS 12-Apr-1994   Richard Morse
 C   Copyright 1994    Lawrence Berkeley Laboratory
@@ -303,6 +332,43 @@ C-----------------------------------------------------------------------
 
       IMPLICIT NONE
 
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     jseq:
+C     nseq:
+C     id_pad:
+C     irow:
+C     tpseqh:
+C     tpseq:
+C     tpppixel_h
+C     tppixel:
+C     tpmcpix_h
+C     tpmcpix:
+C
+C   Output arguments : 
+C
+C     nclspix:
+C     ipad:
+C     itdc:
+C     iadc:
+C     itrk:
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C    This subroutine unpacks the data associated with a given cluster
+C    into the caller arrays.
+C
+C   Moved into TAS 12-Apr-1994   Richard Morse
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C-----------------------------------------------------------------------
 #include "tas_structures.inc"
 #include "tas_user_codes.inc"
 
@@ -438,6 +504,34 @@ C-----------------------------------------------------------------------
 
       IMPLICIT NONE
 
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     nclspix:
+C     ipad:
+C     itdc:
+C     iadc:
+C
+C   Output arguments : 
+C
+C     tphith:
+C     tphit:
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C    This subroutine calculates the center of gravity of the data 
+C    presented in the caller arrays.
+C
+C   Moved into TAS 12-Apr-1994   Richard Morse
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C-----------------------------------------------------------------------
 #include "tas_structures.inc"
 #include "tas_user_codes.inc"
 
@@ -500,6 +594,38 @@ C-----------------------------------------------------------------------
 
       IMPLICIT NONE
 
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     jseq:
+C     nseq:
+C     id_pad:
+C     irow:
+C     tpseqh:
+C     tpseq:
+C     tppixel_h:
+C     tppixel:
+C
+C   Output arguments : 
+C
+C     ipad:
+C     iadc:
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C    This subroutine projects pixel data presented in the 
+C    caller arrays onto the pad dimension.
+C
+C   Moved into TAS 12-Apr-1994   Richard Morse
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C-----------------------------------------------------------------------
 #include "tas_structures.inc"
 #include "tas_user_codes.inc"
 
@@ -563,6 +689,32 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
       IMPLICIT NONE
 
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     nseq:
+C     ipad:
+C     iadc:
+C
+C   Output arguments : 
+C
+C  Returns:
+C       The response width, in units of pixels, of the data 
+C       presented in the caller arrays.
+C     
+C   Functional Description : 
+C    This function returns the response width, in units of 
+C    pixels, of the data presented in the caller arrays 
+C    under the assumption of a Gaussian response function.
+C    
+C
+C   Moved into TAS 12-Apr-1994   Richard Morse
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
 C-----------------------------------------------------------------------
 
       integer lvmax
@@ -615,6 +767,34 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
       IMPLICIT NONE
 
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     nseq:
+C     ipad:
+C     iadc:
+C     sigma:
+C
+C   Output arguments : 
+C
+C
+C  Returns:
+C       The response centroid, in units of pixels, of the data 
+C       presented in the caller arrays.
+C     
+C   Functional Description : 
+C    This function returns the response centroid, in units of 
+C    pixels, of the data presented in the caller arrays 
+C    under the assumption of a Gaussian response function.
+C    
+C
+C   Moved into TAS 12-Apr-1994   Richard Morse
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
 C-----------------------------------------------------------------------
       integer lvmax
 C-----------------------------------------------------------------------
@@ -676,6 +856,32 @@ C-----------------------------------------------------------------------
 
       IMPLICIT NONE
 
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     nclspix:
+C     ipad:
+C     itdc:
+C
+C   Output arguments : 
+C
+C     itdc:
+C     ntim:
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C    This subroutine projects pixel data presented in the 
+C    caller arrays onto the time dimension.
+C
+C   Moved into TAS 12-Apr-1994   Richard Morse
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
 C-----------------------------------------------------------------------
         real vmin,vmax
 
