@@ -1,8 +1,11 @@
 //
-// $Id: StPreEclMaker.h,v 1.11 2001/05/02 15:28:19 suaide Exp $
+// $Id: StPreEclMaker.h,v 1.12 2001/10/15 01:40:20 pavlinov Exp $
 //
 //
 // $Log: StPreEclMaker.h,v $
+// Revision 1.12  2001/10/15 01:40:20  pavlinov
+// Added Clear method and EmcCollection not in .data
+//
 // Revision 1.11  2001/05/02 15:28:19  suaide
 // the default option is not to clear the old emc info. use it only
 // if you want to re-run cluster finder
@@ -97,6 +100,8 @@ public:
   virtual       ~StPreEclMaker();
   virtual Int_t Init();
   virtual Int_t Make();
+  virtual void   Clear(Option_t *option="");
+
   virtual Int_t ClearEmc();
   virtual void  PrintInfo();
           void  SetClusterConditions(char*,Int_t,Float_t,Float_t,Float_t);

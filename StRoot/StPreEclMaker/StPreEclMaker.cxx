@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.18 2001/10/03 17:29:24 pavlinov Exp $
+// $Id: StPreEclMaker.cxx,v 1.19 2001/10/15 01:40:20 pavlinov Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.19  2001/10/15 01:40:20  pavlinov
+// Added Clear method and EmcCollection not in .data
+//
 // Revision 1.18  2001/10/03 17:29:24  pavlinov
 // clean up for production
 //
@@ -242,19 +245,22 @@ Int_t StPreEclMaker::Make()
 	currevent->setEmcCollection(ecmpreecl);
 	if(simnew) simnew->clearStEventStaf();  // We move StEmcCollection from new simulator to StEvent 
       }
-      else cout<<" => No EmcCollection from simulator\n";
+      else cout<<"=> No EmcCollection from simulator\n";
     }
-    else cout<<"***** Get EmcCollection from StEvent\n";
+    else cout<<"=>Get EmcCollection from StEvent\n";
 
     if(ecmpreecl == 0) {
     // Try to get from calibration - 28-sep-2001 by PAI 
-      StEmcADCtoEMaker *adcE =(StEmcADCtoEMaker*)GetMaker("adctoe");     
+      StEmcADCtoEMaker *adcE =(StEmcADCtoEMaker*)GetMaker("Eread");     
       if(adcE) ecmpreecl = (StEmcCollection*)adcE->getEmcCollection();
       if(ecmpreecl) {
         currevent->setEmcCollection(ecmpreecl);
         adcE->clearStEventStaf();// We move StEmcCollection to StEvent 
-        cout<<" => Get EmcCollection from StEmcADCtoEMaker " << ecmpreecl << "\n";
-      } else  cout<<"***** => No EmcCollection or StEmcADCtoEMaker\n";
+        cout<<"=> Get EmcCollection from StEmcADCtoEMaker " << ecmpreecl << "\n";
+      } else {
+         if(adcE==0)      cout<<"=> No StEmcADCtoEMaker\n";
+         if(ecmpreecl==0) cout<<"=> No EmcCollection\n";
+      }
     }
 
     if(ecmpreecl == 0) return kStWarn;
@@ -293,8 +299,8 @@ Int_t StPreEclMaker::Make()
     } else cout<<" ..  NO !!! \n";
   }
   
-  AddData(new St_ObjectSet("PreEclEmcCollection",ecmpreecl));  // for what ??
-  cout <<"***** New EmcCollection on local .data\n";
+  //AddData(new St_ObjectSet("PreEclEmcCollection",ecmpreecl));  // comments 14-oct-2001
+  //cout <<"***** New EmcCollection on local .data\n";
     
   return kStOK;
 }
@@ -466,8 +472,13 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.18 2001/10/03 17:29:24 pavlinov Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.19 2001/10/15 01:40:20 pavlinov Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
 
+void 
+StPreEclMaker::Clear(Option_t *option)
+{// 14-oct-2001
+  if(option){};
+}
