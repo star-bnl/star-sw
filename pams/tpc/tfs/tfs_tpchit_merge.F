@@ -1,5 +1,8 @@
-* $Id: tfs_tpchit_merge.F,v 1.4 1998/07/28 12:54:47 sakrejda Exp $
+* $Id: tfs_tpchit_merge.F,v 1.5 1998/07/30 12:34:01 sakrejda Exp $
 * $Log: tfs_tpchit_merge.F,v $
+* Revision 1.5  1998/07/30 12:34:01  sakrejda
+* loop index taken out from calls to the tgc functions
+*
 * Revision 1.4  1998/07/28 12:54:47  sakrejda
 * problem fixed following Herb's suggestion
 *
@@ -115,6 +118,7 @@ C Local variables
       integer  max_hit_merge,n_hit_merge,imerge_hit_id
       parameter (max_hit_merge=50000)
       integer  imerge_id(max_hit_merge,2)
+      integer IsectorDummy
       integer idI1, idI2, idI3
       character*132 m132  ! And some message-generating space.
       data idI1, idI2, idI3 /0, 0, 0/
@@ -281,11 +285,11 @@ C     rotate into local sector coord system
                xglob(1) = tphit(k).x
                xglob(2) = tphit(k).y
                xglob(3) = tphit(k).z
-               iret  = tgc_global_to_local(i,xglob,xoutk)
+               iret  = tgc_global_to_local(IsectorDummy,xglob,xoutk)
                xglob(1) = tphit(l).x
                xglob(2) = tphit(l).y
                xglob(3) = tphit(l).z
-               iret  = tgc_global_to_local(i,xglob,xoutl)
+               iret  = tgc_global_to_local(IsectorDummy,xglob,xoutl)
 
 C     In the new tgc routines, local Z coordinate is measured relative to
 C     pad-plane and is alway positive. So Z-direction hit merging needs to be 
@@ -366,7 +370,8 @@ C     add the amplitudes and quadrature the errors
                      endif
                xoutl(2) = (rmax + rmin) / 2.
                xoutl(3) = (zmax + zmin) / 2.
-               iret  = tgc_local_to_global(i,xoutl,xglob) 
+               IsectorDummy=i
+               iret  = tgc_local_to_global(IsectorDummy,xoutl,xglob) 
                tphit(l).x = xglob(1)
                tphit(l).y = xglob(2)
                tphit(l).z = xglob(3)
