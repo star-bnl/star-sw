@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 1.1 1999/01/30 03:58:08 fisyak Exp $
+ * $Id: StTrackFitTraits.cxx,v 1.2 1999/02/09 23:11:17 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
- * Revision 1.1  1999/01/30 03:58:08  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 23:11:17  fisyak
+ * Torre stuff
  *
  * Revision 1.4  1999/04/28 22:27:37  fisyak
  * New version with pointer instead referencies
@@ -26,7 +26,7 @@
  *
 #ifdef __ROOT__
  * Revision 2.2  1999/11/01 12:45:14  ullrich
-static const Char_t rcsid[] = "$Id: StTrackFitTraits.cxx,v 1.1 1999/01/30 03:58:08 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StTrackFitTraits.cxx,v 1.2 1999/02/09 23:11:17 fisyak Exp $";
 #endif
 #include "tables/dst_track.h"
 ClassImp(StTrackFitTraits)

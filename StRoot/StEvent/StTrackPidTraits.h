@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.h,v 1.1 1999/01/30 03:58:08 fisyak Exp $
+ * $Id: StTrackPidTraits.h,v 1.2 1999/02/09 23:11:18 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.h,v $
- * Revision 1.1  1999/01/30 03:58:08  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 23:11:18  fisyak
+ * Torre stuff
  *
  * Revision 1.3  1999/04/08 15:01:18  ullrich
  * Added dE/dx PID from TPC.
