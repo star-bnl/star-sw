@@ -146,8 +146,8 @@ class StEmcClusterAssociation:public StEmcAssociation
                      StEmcClusterAssociation(StMcTrack*, StEmcCluster*, float,float);
     virtual          ~StEmcClusterAssociation();
     const StEmcCluster* getCluster() const      { return mCluster; }  ///< returns pointer to the EMC cluster
-    float            getFractionTrack()         { return mFTrack; }   ///< returns the fraction of the energy deposited by the track on the EMC that ended in the reconstructed cluster
-    float            getFractionCluster()       { return mFEmc; }     ///< returns the fraction of the energy of the cluster that was deposited by the MC track
+    float            getFractionTrack() const   { return mFTrack; }   ///< returns the fraction of the energy deposited by the track on the EMC that ended in the reconstructed cluster
+    float            getFractionCluster() const { return mFEmc; }     ///< returns the fraction of the energy of the cluster that was deposited by the MC track
     ClassDef(StEmcClusterAssociation, 1)
 };
 class StEmcPointAssociation:public StEmcAssociation
@@ -159,7 +159,7 @@ class StEmcPointAssociation:public StEmcAssociation
                      StEmcPointAssociation(StMcTrack*, StEmcPoint*, int);
     virtual          ~StEmcPointAssociation();
     const StEmcPoint*getPoint() const           { return mPoint; }      ///< returns pointer to the EMC point
-    int              getAssociation()           { return mAssocType; }  ///< returns Association information between MC track and EMC point
+    int              getAssociation() const     { return mAssocType; }  ///< returns Association information between MC track and EMC point
     int              getAssociation(int det)    { return (det>0 && det<=NDETECTORS) ? ((mAssocType&(1<<(det-1)))!=0): 0; } ///<returns bit information (0,1) for each EMC subdetector
     ClassDef(StEmcPointAssociation, 1)
 };
@@ -213,9 +213,6 @@ class StEmcAssociationMaker : public StMaker
                  
                  void           printMaps();
          
-                 TMatrix*       getMatrix(const char*,const char*); ///< Returns clusters association matrixes (old style association)
-                 TMatrix*       getMatrix() { return mAssocPointMatrix; } ///< Returns points association matrix (old style association)
-                 
          multiEmcTrackCluster*  getTrackClusterMap(Int_t i)      { if(i>0 && i<=NDETECTORS) return mTrackCluster[i-1]; else return NULL; } ///< returns multimap for association betwwen MC tracks and clusters 
          multiEmcTrackCluster*  getTrackClusterMap(const char*);  ///< returns multimap for association betwwen MC tracks and clusters 
          multiEmcClusterTrack*  getClusterTrackMap(Int_t i)      { if(i>0 && i<=NDETECTORS) return mClusterTrack[i-1]; else return NULL; } ///< returns multimap for association betwwen clusters and MC tracks 
@@ -229,14 +226,8 @@ class StEmcAssociationMaker : public StMaker
          
   protected: 
          virtual Float_t        dEToEnergy(StMcCalorimeterHit*,Int_t);
-                 void           fillMaps(); 
                  Bool_t         mPrint;
                  
-                 TMatrix*       mAssocMatrix[NDETECTORS];
-                 TMatrix*       mTrackHitEnergyRtMatrix[NDETECTORS];
-                 TMatrix*       mClHitEnergyRtMatrix[NDETECTORS];
-                 TMatrix*       mAssocPointMatrix;
- 
          multiEmcTrackCluster*  mTrackCluster[NDETECTORS];
          multiEmcClusterTrack*  mClusterTrack[NDETECTORS];
          multiEmcTrackPoint*    mTrackPoint;
