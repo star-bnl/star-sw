@@ -1,7 +1,10 @@
 *
-* $Id: gtrack.F,v 1.3 1998/06/11 21:48:40 nevski Exp $
+* $Id: gtrack.F,v 1.4 1998/06/13 22:04:21 nevski Exp $
 *
 * $Log: gtrack.F,v $
+* Revision 1.4  1998/06/13 22:04:21  nevski
+* tracking in MANY corrected once more
+*
 * Revision 1.3  1998/06/11 21:48:40  nevski
 * MANY logic corrected
 *
@@ -302,8 +305,8 @@ C.    ------------------------------------------------------------------
       ENDIF
 *
       IF (INWVOL.EQ.0) then
-         if (GONLY(NLEVEL).eq.0.and.Safety.eq.0.and.Iswit(10).ge.0)
-     +                                           CALL GTMEDI(VECT,NMED)
+         if (GONLY(NLEVEL).eq.0.and.Safety.le.0.and.Iswit(10).ge.0)
+     +                                       CALL GTMEDI(VECT,NMED)
          GO TO 80
       endif
 *
