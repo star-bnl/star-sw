@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.hh,v 1.15 2000/02/24 20:30:46 porter Exp $
+ * $Id: StDbManager.hh,v 1.16 2000/03/01 20:56:16 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbManager.hh,v $
+ * Revision 1.16  2000/03/01 20:56:16  porter
+ * 3 items:
+ *    1. activated reConnect for server timeouts
+ *    2. activated connection sharing; better resource utilization but poorer
+ *       logging
+ *    3. made rollback method in mysqlAccessor more robust (affects writes only)
+ *
  * Revision 1.15  2000/02/24 20:30:46  porter
  * fixed padding for uchar; beginTime in mysqlAccessor;
  * added rollback safety checkes in StDbManger
@@ -70,6 +77,7 @@
 #include "parseXmlString.hh"
 #include <fstream.h>
 #include "StDbTime.h"
+#include "tableQuery.hh"
 
 class dbType;
 class dbDomain;
@@ -86,6 +94,7 @@ class StDbNode;
 typedef list<dbType*,allocator<dbType*> > dbTypes;
 typedef list<dbDomain*,allocator<dbDomain*> > dbDomains;
 typedef list<StDbServer*,allocator<StDbServer*> > ServerList;
+typedef list<tableQuery*,allocator<tableQuery*> > QueryObjects;
 #else
 #if !defined(ST_NO_NAMESPACES)
 using std::list;
@@ -93,12 +102,14 @@ using std::list;
 typedef list<dbType*> dbTypes;
 typedef list<dbDomain*> dbDomains;
 typedef list<StDbServer*> ServerList;
+typedef list<tableQuery*> QueryObjects;
 #endif
 #endif
 #ifdef __CINT__
 class dbTypes;
 class dbDomains;
 class ServerList;
+class QueryObjects;
 #endif
 
 
@@ -111,6 +122,7 @@ private:
   dbTypes mTypes;  // enum mapping shortcut
   dbDomains mDomains; // enum mapping shortcut
   ServerList mservers;  // servers to handle the Query 
+  QueryObjects mqobjects;
   parseXmlString mparser; // parses strings in XML
 
   StDbManager(): misVerbose(false), misQuiet(false), mhasServerList(false), mhasDefaultServer(false)             { 
@@ -136,6 +148,7 @@ protected:
   virtual void deleteServers();
   virtual void deleteTypes();
   virtual void deleteDomains();
+  virtual void deleteQueryObjects();
 
   // These lookup up ServerInfo from XML files
 

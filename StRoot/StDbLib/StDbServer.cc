@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServer.cc,v 1.11 2000/02/24 20:30:47 porter Exp $
+ * $Id: StDbServer.cc,v 1.12 2000/03/01 20:56:16 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbServer.cc,v $
+ * Revision 1.12  2000/03/01 20:56:16  porter
+ * 3 items:
+ *    1. activated reConnect for server timeouts
+ *    2. activated connection sharing; better resource utilization but poorer
+ *       logging
+ *    3. made rollback method in mysqlAccessor more robust (affects writes only)
+ *
  * Revision 1.11  2000/02/24 20:30:47  porter
  * fixed padding for uchar; beginTime in mysqlAccessor;
  * added rollback safety checkes in StDbManger
@@ -71,6 +78,7 @@ StDbServer::StDbServer(StDbServer& server) :  mserverName(0), mhostName(0), muni
  name = server.getTypeName();   setTypeName(name);    if(name) delete [] name;
 
  setPortNumber(server.getPortNumber());
+ setQueryObject(server.getQueryObject());
  
 
 }
@@ -110,7 +118,7 @@ StDbServer::initServer(){
 
 if(!mdbName){
    cerr << "StDbServer:: DataBase not Identified" << endl;
-   cerr << "port = "<< mportNumber;
+   cerr << " port = "<< mportNumber;
    cerr << " type = " << (int)mdbType <<" domain = " << (int)mdbDomain << endl;
    if(mserverName) cerr << " server = " << mserverName;
    if(mhostName) cerr << " host = " << mhostName;
@@ -118,19 +126,35 @@ if(!mdbName){
    return false;
 }
 
+
 if(!mconnectState){
-  if(!mdatabase)mdatabase = new mysqlAccessor(mdbType, mdbDomain);
-  if(mdatabase->initDbQuery(mdbName,mserverName,mhostName,mportNumber)){
-     mconnectState = true;
-     if(!StDbManager::Instance()->IsQuiet()){
-       cout << "Server connecting to DB =" << mdbName ;
-       cout << " On Host = " << mhostName <<":"<<mportNumber<<endl; 
-     }
+
+  if(!mdatabase){
+    cerr<< "InitServer::Error QueryObject not available"<< endl;
+    return false;
   }
+
+  if(!mdatabase->IsConnected()){
+    //cout << " Will init server = " << mserverName<<endl;;
+     mdatabase->initDbQuery(mdbName,mserverName,mhostName,mportNumber);
+     // cout << " Did init server = " << mserverName<<endl;;
+     mconnectState = true;
+  } else {
+       selectDb();
+       mconnectState=true;
+  }
+
+       if(!StDbManager::Instance()->IsQuiet()){
+         cout << "Server connecting to DB =" << mdbName ;
+         cout << " On Host = " << mhostName <<":"<<mportNumber<<endl; 
+       }
+
+
 }
 
 return true;
 }
+
 
 ////////////////////////////////////////////////////////////////
 bool
@@ -147,7 +171,7 @@ StDbServer::~StDbServer(){
    if(mdbName)delete [] mdbName;
    if(mdomainName) delete [] mdomainName;
    if(mtypeName) delete [] mtypeName;
-   if(mdatabase) delete mdatabase;
+   //   if(mdatabase) delete mdatabase;
 
 }
 
