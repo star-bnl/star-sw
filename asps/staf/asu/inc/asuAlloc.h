@@ -42,7 +42,7 @@ extern CC_P void asuMallocReset();
 extern CC_P void asuMallocStats();
 extern CC_P void asuMallocPrintTrace(void *p, size_t size, char* file
 		, int line);
-extern CC_P void asuMallocLevel(ASU_MALLOCLEVEL_T level);
+extern CC_P ASU_MALLOCLEVEL_T asuMallocLevel(ASU_MALLOCLEVEL_T level);
 
 extern CC_P void asuMallocAdd(void *p, size_t size
 		, char* file, int line);
