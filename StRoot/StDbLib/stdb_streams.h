@@ -2,7 +2,7 @@
 #define _STDB_STREAMS_H
 
 #ifdef __STDB_STANDALONE__
-#include <iostream>
+#include "Stiostream.h"
 #include <fstream>
 #include "StString.h"
 #include <string>
