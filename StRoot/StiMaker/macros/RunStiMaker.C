@@ -5,12 +5,12 @@
 class StChain;
 StChain *chain=0;
 
-void RunStiMaker(Int_t nevents=10,
+void RunStiMaker(Int_t nevents=1,
 		 
 		 bool simulated=true, /*sim or data?*/
 		 
-		 //bool draw=true, /* use gui, click your way around */
-		 bool draw=false, /*consol version, run through nevents */
+		 bool draw=true, /* use gui, click your way around */
+		 //bool draw=false, /*consol version, run through nevents */
 		 
 		 bool doFit=true, /* true->fit track only */
 		 //bool doFit=false, /* false->find track only */
