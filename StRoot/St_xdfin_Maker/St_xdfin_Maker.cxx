@@ -39,8 +39,8 @@ Int_t St_xdfin_Maker::Open(const char*)
   printf("*** St_xdfin_Maker::Init:  Open Input file %s ***\n",GetFile());
   iret = fXdfin.OpenXDF(GetFile(),"r");
   if (iret) return iret;
-  while (!m_InitDone && !iret) iret = Make();
-  return iret;
+//  while (!m_InitDone && !iret) iret = Make();
+  return 0;
 }
 //_____________________________________________________________________________
 void St_xdfin_Maker::Close(Option_t *)
@@ -59,7 +59,7 @@ Int_t St_xdfin_Maker::Make(){
   const char *mkdir = 0;
   St_DataSet *curdir = 0, *set = 0;
   Bool_t      CONST;
-  PrintInfo();
+//  PrintInfo();
 
   St_DataSetIter local(m_DataSet);
   St_DataSetIter cons(m_ConstSet);
@@ -77,13 +77,12 @@ Int_t St_xdfin_Maker::Make(){
     mkdir = 0;
     CONST = kFALSE;
     if (!strcmp("dst",dsname)) {
-      if (!m_InitDone) 
+      if (set->Find("globtrk")) m_InitDone=1999;
+      if (!m_InitDone)         
       {
         mkdir = "run";  CONST = kTRUE;
       }else {
         mkdir = "event/data/global"; 
-        SetOutput("dst",".data/event/data/global/dst");
-        SetOutput("DST",".data/event/data/global/dst");
       }  
     }
     if (!strcmp("run",dsname)) 		{                     CONST = kTRUE;}
@@ -99,9 +98,10 @@ Int_t St_xdfin_Maker::Make(){
       if (mkdir) {local.Mkdir(mkdir); local.Cd(mkdir);}
       curdir = local.Mkdir(dsname);
     }
-    if (GetDebug()) set->ls(0);
-    curdir->Update(set); if(GetDebug()) curdir->ls(0);
-    curdir->Purge();     if(GetDebug()) curdir->ls(0);
+    if (GetDebug()) set->ls(1);
+    curdir->Update(set); if(GetDebug()) curdir->ls(1);
+    curdir->Purge();     if(GetDebug()) curdir->ls(1);
+    if (!CONST && !strcmp("dst",dsname)) SetOutput("dst",curdir);
     SafeDelete(set);
     if (CONST) {if (!m_InitDone) {m_InitDone = CONST; return kStOK;} else continue;}
     if (strstr(Data,dsname)) return kStOK;
