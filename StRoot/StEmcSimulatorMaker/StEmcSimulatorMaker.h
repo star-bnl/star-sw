@@ -20,101 +20,109 @@
 class StMcEmcHitCollection;
 class StEmcCollection;
 class StEmcVirtualSimulator;
-class St_db_Maker;
 class St_controlEmcSimulatorMaker; 
 class St_controlEmcPmtSimulator; 
 
-class StEmcSimulatorMaker : public StMaker {
-private:
+class StEmcSimulatorMaker : public StMaker 
+{
+  private:
 
-  UInt_t  mBEMC;            // Switch for BEMC; 0 => off; >0 => on
-  UInt_t  mEEMC;            // Switch for EEMC; 0 => off; >0 => on
-  UInt_t  mHistControl;     // Do histogramms (1) or no (0)
-  UInt_t  mDB;               // =0, no DB; >=1, using DB
-  St_db_Maker *mDbMaker;    //!
+    UInt_t                  mBEMC;            // Switch for BEMC; 0 => off; >0 => on
+    UInt_t                  mEEMC;            // Switch for EEMC; 0 => off; >0 => on
+    UInt_t                  mHistControl;     // Do histogramms (1) or no (0)
+    UInt_t                  mDB;               // =0, no DB; >=1, using DB
 
-  StEmcGeom *mGeom[MAXDET]; //! Geometry 
+    StEmcGeom*              mGeom[MAXDET]; //! Geometry 
   
-  Bool_t  mCompare;
-  Bool_t  mPrint;
-  TCanvas *mC1;             //!
+    Bool_t                  mCompare;
+    Bool_t                  mPrint;
+    TCanvas*                mC1;             //!
+    
+    Float_t                 mGain[MAXDET][18000];
 
-protected:
-  StMcEmcHitCollection*  mEmcMcHits[MAXDET];  //! For convinience 
-  St_emc_hits*           mEmcRawHits[MAXDET]; //! For convinience 
-  StEmcCollection*       mEmcCollection;      //! As in StEvent
+  protected:
+    StMcEmcHitCollection*   mEmcMcHits[MAXDET];  //! For convinience 
+    St_emc_hits*            mEmcRawHits[MAXDET]; //! For convinience 
+    StEmcCollection*        mEmcCollection;      //! As in StEvent
 
-  StEmcVirtualSimulator* mSimulator[MAXDET];  //!
+    StEmcVirtualSimulator*  mSimulator[MAXDET];  //!
 
-  TH2F *m_nhit;           //! 
-  TH2F *m_etot;           //!
-  TH2F *m_hits[MAXDET];   //!
-  TH2F *m_energy[MAXDET]; //!
-  TH1F *m_adc[MAXDET];    //!
-  TH1F *mEnergySum[MAXDET];    //!
+    TH2F*                   m_nhit;           //! 
+    TH2F*                   m_etot;           //!
+    TH2F*                   m_hits[MAXDET];   //!
+    TH2F*                   m_energy[MAXDET]; //!
+    TH1F*                   m_adc[MAXDET];    //!
+    TH1F*                   mEnergySum[MAXDET];    //!
 
-  TH1F *mhModule[MAXDET];    //! For testing only
-  TH1F *mhSub[MAXDET];
-  TH1F *mhDiffNumHits[4];    //! 
-  TH1F *mhDiffDe[4];         //!
-public: 
-  StEmcSimulatorMaker(const char *name="EmcSimulator"); 
-  virtual ~StEmcSimulatorMaker();
-  virtual Int_t Init();
-  virtual Int_t Make();
-  virtual void Clear(const char *);
-  Int_t fillStEvent();
-  void  saveRunco();
+    TH1F*                   mhModule[MAXDET];    //! For testing only
+    TH1F*                   mhSub[MAXDET];
+    TH1F*                   mhDiffNumHits[4];    //! 
+    TH1F*                   mhDiffDe[4];         //!
+        
+    void                    addBemcAndBprsHit(Int_t,Int_t,Int_t,Int_t,Float_t);
+    void                    addBsmdeAndBsmdpHit(Int_t,Int_t,Int_t,Int_t,Float_t);
+    
+  public: 
+                            StEmcSimulatorMaker(const char *name="EmcSimulator"); 
+    virtual                 ~StEmcSimulatorMaker();
+    virtual Int_t           Init();
+    virtual Int_t           InitRun(Int_t);
+    virtual Int_t           Make();
+    virtual void            Clear(const char *);
+    Int_t                   fillStEvent();
+    void                    saveRunco();
 
-  Int_t makeBemc();
-  Int_t makeBemcAndBprsMcHits();
-  Int_t makeBsmdeAndBsmdpMcHits();
-  Int_t makeAllRawHitsForBemc();
+    Int_t                   makeBemc();
+    Int_t                   makeBemcAndBprsMcHits();
+    Int_t                   makeBsmdeAndBsmdpMcHits();
+    Int_t                   makeAllRawHitsForBemc();
 
-  Int_t makeEemc();
+    Int_t                   makeEemc();
 
-  void  bookHistograms(const Int_t);
-  void  makeHistograms(const Int_t); //! must be changed
+    void                    bookHistograms(const Int_t);
+    void                    makeHistograms(const Int_t); //! must be changed
 
-  UInt_t  getBEMC(){return mBEMC;}
-  UInt_t  getEEMC(){return mEEMC;}
-  UInt_t  getHistControl(){return mHistControl;}
-  StMcEmcHitCollection* getEmcMcHits(Int_t det) {return mEmcMcHits[det-1];}
-  StMcEmcHitCollection* getBemcMcHits() {return getEmcMcHits(BEMC);}
-  StMcEmcHitCollection* getBprsMcHits() {return getEmcMcHits(BPRS);}
-  StMcEmcHitCollection* getBsmdeMcHits() {return getEmcMcHits(BSMDE);}
-  StMcEmcHitCollection* getBsmdpMcHits() {return getEmcMcHits(BSMDP);}
-  StEmcCollection*      getEmcCollection() {return  mEmcCollection;}
-  void                  clearStEventStaf() {mEmcCollection = 0;}
-  void                  Browse(TBrowser* b); // StEvent staf will be visible in browser
-            St_controlEmcSimulatorMaker *getControlSimulator(); 
-            St_controlEmcPmtSimulator   *getControlPmtSimulator(); 
+    UInt_t                  getBEMC() {return mBEMC;}
+    UInt_t                  getEEMC() {return mEEMC;}
+    UInt_t                  getHistControl() {return mHistControl;}
+    StMcEmcHitCollection*   getEmcMcHits(Int_t det) {return mEmcMcHits[det-1];}
+    StMcEmcHitCollection*   getBemcMcHits() {return getEmcMcHits(BEMC);}
+    StMcEmcHitCollection*   getBprsMcHits() {return getEmcMcHits(BPRS);}
+    StMcEmcHitCollection*   getBsmdeMcHits() {return getEmcMcHits(BSMDE);}
+    StMcEmcHitCollection*   getBsmdpMcHits() {return getEmcMcHits(BSMDP);}
+    StEmcCollection*        getEmcCollection() {return  mEmcCollection;}
+    
+    void                    clearStEventStaf() {mEmcCollection = 0;}
+    void                    Browse(TBrowser* b); // StEvent staf will be visible in browser
+    St_controlEmcSimulatorMaker* getControlSimulator(); 
+    St_controlEmcPmtSimulator*   getControlPmtSimulator(); 
 
-  void   pictureAllDetectors(Int_t print=0);                          // *MENU* 
-  void   pictureForDetector(Int_t det, Int_t logy=1, Int_t print=0);  // *MENU* 
-  void   pictureCompareDe(Int_t print=0);                             // *MENU* 
-  void   printSimulator(Int_t det=0);                                 // *MENU* 
-  void   printStatusTable(Int_t det=1, Int_t hist=0);                 // *MENU*
-  //  void   print(const char *filename, Option_t *option) {if(mC1) mC1->Print(filename,option);}
-  TDataSet* getStatus(const Int_t ind, TDataSet* statusDB);
+    void                    pictureAllDetectors(Int_t print=0);                          // *MENU* 
+    void                    pictureForDetector(Int_t det, Int_t logy=1, Int_t print=0);  // *MENU* 
+    void                    pictureCompareDe(Int_t print=0);                             // *MENU* 
+    void                    printSimulator(Int_t det=0);                                 // *MENU* 
+    void                    printStatusTable(Int_t det=1, Int_t hist=0);                 // *MENU*
+    TDataSet*               getStatus(const Int_t ind, TDataSet* statusDB);
 
-  void   compareOldSimulator();
+    void                    compareOldSimulator();
 
-  void   printmBEMC();
-  void   setBEMC(UInt_t  key){mBEMC = key; if (Debug()) printmBEMC();}
-  void   setPrint(Bool_t a) {mPrint = a;}
-  void   setHistControl(UInt_t key) {mHistControl = key;}
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.12 2004/04/08 21:35:45 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    void                    printmBEMC();
+    void                    setBEMC(UInt_t  key) {mBEMC = key; if (Debug()) printmBEMC();}
+    void                    setPrint(Bool_t a) {mPrint = a;}
+    void                    setHistControl(UInt_t key) {mHistControl = key;}
+    virtual const char*     GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.13 2004/08/06 13:24:48 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StEmcSimulatorMaker,0)  // Simulation maker for BEMC and EEMC
+    ClassDef(StEmcSimulatorMaker,0)  // Simulation maker for BEMC and EEMC
 };
 
 #endif
 //////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEmcSimulatorMaker.h,v 1.12 2004/04/08 21:35:45 perev Exp $
+// $Id: StEmcSimulatorMaker.h,v 1.13 2004/08/06 13:24:48 suaide Exp $
 // $Log: StEmcSimulatorMaker.h,v $
+// Revision 1.13  2004/08/06 13:24:48  suaide
+// New features added and fixed some bugs in the database
+//
 // Revision 1.12  2004/04/08 21:35:45  perev
 // Leak off
 //

@@ -17,6 +17,7 @@
 
 #include "StEmcVirtualSimulator.h"
 #include "tables/St_controlEmcPmtSimulator_Table.h"
+#include <TRandom.h>
 
 class StEmcSimpleSimulator : public StEmcVirtualSimulator{
 private:
@@ -31,6 +32,7 @@ protected:
   Int_t    mMaxAdc;
   Double_t mMaxEnergy;
   Double_t mC1;            // reverse for calibration coefficient
+  Double_t mC4;            // gain uncertainty
   // for pedestal
   UInt_t   mPedType;
   Double_t mPedMean;
@@ -44,6 +46,7 @@ protected:
   Int_t    mAdc;
   
   Bool_t   mPrint;
+  TRandom  mRandom;
 
   void  checkAdc();
 
@@ -61,7 +64,7 @@ public:
 
   virtual void    init();
   virtual void    setPedestal(const UInt_t type, const Float_t pedMean, const Float_t pedRMS);
-  virtual void    setParameters(const Float_t calibCoeff,const UInt_t type, const Float_t pedMean, const Float_t pedRMS);  
+  virtual void    setParameters(const Float_t calibCoeff,const UInt_t type, const Float_t pedMean, const Float_t pedRMS, const Float_t gainUnc);  
 
   Int_t   getPedestalType() {return mPedType;}
 
@@ -78,8 +81,11 @@ public:
 };
 #endif
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcSimpleSimulator.h,v 1.3 2003/09/23 15:19:51 suaide Exp $
+//  $Id: StEmcSimpleSimulator.h,v 1.4 2004/08/06 13:24:48 suaide Exp $
 //  $Log: StEmcSimpleSimulator.h,v $
+//  Revision 1.4  2004/08/06 13:24:48  suaide
+//  New features added and fixed some bugs in the database
+//
 //  Revision 1.3  2003/09/23 15:19:51  suaide
 //  fixed bugs and modifications for embedding
 //
