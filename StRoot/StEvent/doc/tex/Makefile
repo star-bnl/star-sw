@@ -47,5 +47,5 @@ $(TEXSRC).ind:		$(TEXSRC).idx
 clean:			
 			@rm -f $(TEXSRC).psnup $(TEXSRC).dvi \
 			$(TEXSRC).log $(TEXSRC).toc $(TEXSRC).aux \
-			$(TEXSRC).idx $(TEXSRC).ilg \
-			$(TEXSRC).ind .tex $(TEXSRC).ps
+			$(TEXSRC).idx $(TEXSRC).ilg $(TEXSRC).pdf \
+			$(TEXSRC).ind .tex $(TEXSRC).ps $(TEXSRC).out 
