@@ -234,7 +234,7 @@ return pADCR;
    int index_jose=i*160+i1;
    int m=0,e=0,s=0;
 //  int binstat=getTowerBin(index+1,m,e,s);
-  int binstat=getTowerBin(index_jose,m,e,s);
+  int binstat=getTowerBin(index_jose+1,m,e,s);
   if(!binstat)
     {
     cout<<" problem in bin conversion "<<index<<endl;
