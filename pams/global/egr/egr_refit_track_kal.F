@@ -178,7 +178,7 @@ C     Load the fitting arrays with the SVT space points
             do iplane=gtrk(igtrk).ntpc+1,
      +           gtrk(igtrk).ntpc+svt_track(isvtt).nspt
                if (good_hit(iplane) ) then
-                  write(6,*) ' EGR not designed to work this way!!!!!'
+
                   ncir = ncir + 1
                   good_hit_tpc(ncir) = .true.
                   i_index(ncir) = gtrk(igtrk).pos(iplane)
