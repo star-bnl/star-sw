@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.8 2000/04/19 20:05:27 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.9 2000/04/19 21:40:58 didenko Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -226,9 +226,9 @@
    }
    else {
      $MAKELIB = "%SO %DEBUG %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS ;"; 
-     $MAKELIB.= "test -d %>:d/SunWS_cache && rm -rf %>:d/SunWS_cache";
+     $MAKELIB.= "test -d %>:d/SunWS_cache && rm -rf %>:d/SunWS_cache ; echo $status";
      $LINKCOM = "%LD %DEBUG %LDFLAGS %EXTAR_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%> ;";
-     $LINKCOM.= "test -d %>:d/SunWS_cache && rm -rf %>:d/SunWS_cache";
+     $LINKCOM.= "test -d %>:d/SunWS_cache && rm -rf %>:d/SunWS_cache; echo $status";
    }
  }
  elsif (/^sun4x_5.$/) {
