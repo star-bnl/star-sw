@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMiniDstMaker.h,v 1.1 2000/10/13 19:26:18 ullrich Exp $
+ * $Id: StMiniDstMaker.h,v 1.2 2000/10/16 19:35:44 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 2000
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StMiniDstMaker.h,v $
- * Revision 1.1  2000/10/13 19:26:18  ullrich
- * Initial Revision.
+ * Revision 1.2  2000/10/16 19:35:44  ullrich
+ * Updated to run on Sun/CC5.
  *
  * Revision 1.1  2000/10/13 19:26:18  ullrich
  * Initial Revision.
@@ -20,8 +20,6 @@
  **************************************************************************/
 #ifndef StMiniDstMaker_h
 #define StMiniDstMaker_h
-#include <vector>
-#include <string>
 #include "StMaker.h"
 #include "StThreeVectorD.hh"
 
