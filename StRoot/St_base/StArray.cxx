@@ -1,7 +1,7 @@
-// $Id: StArray.cxx,v 1.9 1999/06/17 12:50:50 fisyak Exp $
+// $Id: StArray.cxx,v 1.10 1999/06/23 20:31:04 perev Exp $
 // $Log: StArray.cxx,v $
-// Revision 1.9  1999/06/17 12:50:50  fisyak
-// Make StArray classes visible in RootCint, remove ShowMembers
+// Revision 1.10  1999/06/23 20:31:04  perev
+// StArray I/O + browser
 //
 // Revision 1.8  1999/05/22 17:46:45  perev
 // StVectorInt class added
@@ -27,10 +27,13 @@
 #include "TBrowser.h"
 
 TObjArray *StRegistry::fReg = 0;
+TList     *StRegistry::fNon = 0;
 
 ClassImp(StVectorInt)
 //______________________________________________________________________________
- void StVectorInt::Streamer(TBuffer &b){}
+ void StVectorInt::Streamer(TBuffer &){}
+//______________________________________________________________________________
+// void StVectorInt::ShowMembers(TMemberInspector &, char *){}
 //______________________________________________________________________________
  void StVectorInt::Set(Int_t n)
 {
@@ -53,9 +56,10 @@ ClassImp(StVectorInt)
 { if (++fLast >=fN) Set(fN*2);
   fArray[fLast]=c;
 }
-
-
-
+//______________________________________________________________________________
+ClassImp(StRegistry)
+//______________________________________________________________________________
+void StRegistry::Streamer(TBuffer &){assert(0);}
 
 //______________________________________________________________________________
 Int_t StRegistry::SetColl (StStrArray *coll) 		
@@ -70,11 +74,14 @@ Int_t StRegistry::SetColl (StStrArray *coll)
   for (i=0;i<=n;i++) 
   {
     StStrArray *koll = (StStrArray*)fReg->At(i);
-    if (!koll) continue;
-    assert(strcmp(collname,koll->GetIDName()));
+    if (!koll) 					continue;
+    if (strcmp(collname,koll->GetIDName()))	continue;
+    printf("Warning <WaStRegistry::SetColl> Same collection %s \n  %s\n"
+    ,coll->GetName(),collname);
+    return i+1;
   }
   fReg->AddLast(coll);
-  return fReg->GetLast();
+  return fReg->GetLast()+1;
 }
 //______________________________________________________________________________
 void StRegistry::RemColl(StStrArray *coll)  
@@ -87,7 +94,7 @@ Int_t StRegistry::GetColl(const char *collname)
 // get index of container
 {
   assert(collname);
-  if (fReg) return 0;
+  if (!fReg) return 0;
 
   int i=0,n=fReg->GetLast();  
   for (i=0;i<=n;i++) 
@@ -108,9 +115,26 @@ StStrArray *StRegistry::GetColl (Int_t idx )
 const char *StRegistry::GetCollName (Int_t idx ) 
 // get name of collection by index
 {
- StObjArray *coll = GetColl(idx-1); assert(coll); return coll->GetName();
+ StStrArray *coll = (StStrArray*)GetColl(idx); assert(coll); 
+ return coll->GetIDName();
 }
  
+//______________________________________________________________________________
+ void  StRegistry::AddNon(StRefArray *coll)
+{
+  if (!fNon) fNon = new TList();
+  fNon->Add(coll);
+}
+//______________________________________________________________________________
+ void  StRegistry::Init()
+{
+  if (!fNon) return;
+  StRefArray *coll;
+  while((coll = (StRefArray*)fNon->First())) 
+  { coll->Decode(); fNon->Remove(coll); }
+  delete fNon; fNon = 0;
+  
+}
 //______________________________________________________________________________
 void StRegistry::List() 
 {
@@ -134,6 +158,8 @@ ClassImp(StObjArray)
 void StObjArray::Streamer(TBuffer &)
 {;}
 //______________________________________________________________________________
+// void StObjArray::ShowMembers(TMemberInspector &, char *){}
+//______________________________________________________________________________
 const TIterator *StObjArray::Begin() const
 { 
 //  TIterator *(StObjArray::*mkit)(Bool_t dir) const = (TIterator *(StObjArray::*)(Bool_t) const)&MakeIterator;
@@ -149,23 +175,21 @@ void StObjArray::Browse(TBrowser *b)
    // If b=0, there is no Browse call TObject::Browse(0) instead.
    //         This means TObject::Inspect() will be invoked indirectly
  
+   if (!b) return;
+   StRegistry::Init();
    const Int_t maxBrowsable =  10;
    TIter next(this);
    TObject *obj;
     
-   if (b) {
-      Int_t counter = 0;
-      Int_t totalSize = size();
-      while ((obj = next()) && ++counter <  maxBrowsable ) {
-          TString browseName = obj->GetName();
-          char buffer[100];
-          sprintf(buffer,"_%d_of_%d",counter,totalSize);
-          browseName += buffer;
-          b->Add(obj,browseName.Data());
-      }
+   Int_t counter = 0;
+   Int_t totalSize = GetEntries();
+   while ((obj = next()) && ++counter <  maxBrowsable ) {
+       TString browseName = obj->GetName();
+       char buffer[100];
+       sprintf(buffer,"_%d_of_%d",counter,totalSize);
+       browseName += buffer;
+       b->Add(obj,browseName.Data());
    }
-   else
-      TObject::Browse(b);
 }
 //______________________________________________________________________________
 const TIterator *StObjArray::End() const
@@ -194,6 +218,8 @@ TIterator* StObjArray::MakeIterator(Bool_t dir) const
 }
 //______________________________________________________________________________
 ClassImp(StObjArrayIter)
+//______________________________________________________________________________
+// void StObjArrayIter::ShowMembers(TMemberInspector &, char *){}
 //______________________________________________________________________________
 void StObjArrayIter::SetCursor(Int_t kursor)
 {
@@ -264,46 +290,44 @@ void StObjArrayIter::operator=(const StObjArrayIter &iter)
 //______________________________________________________________________________
 ClassImp(StRefArray)
 //______________________________________________________________________________
+//void StRefArray::ShowMembers(TMemberInspector &, char *){}
+//______________________________________________________________________________
 void StRefArray::Streamer(TBuffer &R__b)
 {
    // Stream all objects in the array to or from the I/O buffer.  
 
    Int_t nobjects,newcol,i;
-   Int_t icolls[100]; 
    ULong_t ulong,objidx,colidx,kolidx,nkoll=0; 
-   TObject *obj; TString colname;
-   StObjArray *coll;
+   TObject *obj; TString *colname;
 
    if (R__b.IsReading()) {
       R__b.ReadVersion();   // Version_t v = R__b.ReadVersion();
       R__b >> nobjects;
 //    R__b >> fLowerBound;
-      
+      char cbuf[100];
       for (i = 0; i < nobjects; i++) {
         R__b >> ulong;
-        if (! ulong) continue; 
-        StRegistry::Ident(ulong,kolidx,objidx);
-        if (kolidx > nkoll) {
-          colname.Streamer(R__b);  
-          colidx = StRegistry::GetColl(colname);
-          if(!colidx) Warning("Input Streamer","Collection %s Not Loaded.",(const char*)colname);
-          icolls[kolidx]=colidx; nkoll = kolidx;
+        colname = 0;
+        if (ulong) {; 
+          StRegistry::Ident(ulong,kolidx,objidx);
+          if (kolidx > nkoll) {
+            R__b.ReadString(cbuf,100);
+            colname = new TString(cbuf);
+            nkoll = kolidx;
+          }
         }
-        colidx = icolls[kolidx];
-        if (!colidx) continue;
-        coll = StRegistry::GetColl(colidx); 
-        assert(coll);
-        obj = coll->At(objidx);
-        
-        AddAtAndExpand(obj, i);
+        AddLast((TObject*)ulong);
+        if (colname) Add((TObject*)colname);
       }
+      StRegistry::AddNon(this);
    } else {
 
       R__b.WriteVersion(StRefArray::IsA());
       Int_t ncoll = StRegistry::GetNColl();
-      assert(ncoll <= 100);
-      memset(icolls,0,sizeof(Int_t)*ncoll);
-      nobjects = GetSize();
+      Int_t icolls[100]; 
+      assert(ncoll < 100);
+      memset(icolls,0,sizeof(Int_t)*(ncoll+1));
+      nobjects = GetLast()+1;
       R__b << nobjects;
 //    R__b << fLowerBound;
 //		First pass, collect different collections
@@ -323,8 +347,38 @@ void StRefArray::Streamer(TBuffer &R__b)
       }
    }
 }
-
+//______________________________________________________________________________
+void StRefArray::Decode()
+{
+  int i,j,colidx;
+  ULong_t ulong,kolidx,objidx,nkoll=0;
+  int nobjects = GetLast() + 1 ;
+  TString *colname;
+  int icolls[100];
+  TObject *obj;
+  StStrArray *coll;
+  
+  for (i = 0,j=0; i < nobjects; i++) {
+    ulong = (ULong_t)At(i); AddAt(0,i);
+    if (! ulong) continue; 
+    StRegistry::Ident(ulong,kolidx,objidx);
+    if (kolidx > nkoll) {
+      colname= (TString*)At(++i);  AddAt(0,i); assert(colname);
+      colidx = StRegistry::GetColl((const char*)*colname);
+      if(!colidx) Warning("Decode","Collection %s Not Loaded.",(const char*)colname);
+      delete colname; colname=0;
+      icolls[kolidx]=colidx; nkoll = kolidx;
+    }
+    colidx = icolls[kolidx];  assert(colidx);
+    coll = StRegistry::GetColl(colidx); 
+    assert(coll);
+    obj = coll->At(objidx);
+    AddAt(obj, j++);
+  }
+}
 ClassImp(StStrArray)
+//______________________________________________________________________________
+//void StStrArray::ShowMembers(TMemberInspector &, char *){}
 //______________________________________________________________________________
 StStrArray::StStrArray(const Char_t *name, Int_t s):StObjArray(s)
 { 

@@ -4,6 +4,7 @@
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
+#pragma link C++ class StRegistry-;
 #pragma link C++ class StObjArrayIter-;
 #pragma link C++ class StObjArray-;
 #pragma link C++ class StRefArray-;
@@ -55,10 +56,12 @@ ClassDef(StVectorInt,0)
 
 class StObjArray;
 class StStrArray;
-class StRegistry 
+class StRefArray;
+class StRegistry : public TObject
 {
  protected: 
     static TObjArray *fReg;				// pointer to container of containers
+    static TList     *fNon;				// pointer to container of non init containers
  public:
  StRegistry(){};
  static void Clear(){if (fReg) fReg->Clear();};
@@ -70,8 +73,11 @@ class StRegistry
  static void  List() ;					// print list of registered conts    
  static ULong_t Ident(ULong_t colidx,ULong_t objidx){return colidx<<24 |objidx;};
  static void    Ident(ULong_t ident,ULong_t &colidx,ULong_t &objidx)
-  {colidx = ident<<24;  objidx = ident & 0x00ffffff;};
+  {colidx = ident>>24;  objidx = ident & 0x00ffffff;};
  static Int_t GetNColl(){return (fReg) ? fReg->GetLast()+1:0;};				// Number of collections
+ static void  AddNon(StRefArray *coll);
+ static void  Init();
+ClassDef(StRegistry,0)
 };
 class StObjArrayIter;
  
@@ -110,7 +116,8 @@ virtual        ~StObjArray(){delete fObjArr;};
             virtual void RemoveAt(Int_t idx){fObjArr->RemoveAt(idx);};
             virtual void Sort(Int_t upto = kMaxInt){fObjArr->Sort(upto);};
                 TObject* UncheckedAt(Int_t i) const {return fObjArr->UncheckedAt(i);};
-                
+           virtual Int_t GetSize() const { return fObjArr->GetSize(); }          
+
 virtual void 	push_back(const TObject *obj) {AddLast((TObject*)obj);};
 virtual void 	pop_back() {RemoveAt(GetLast());};
 virtual UInt_t  size() const {return GetLast()+1;};
@@ -159,7 +166,7 @@ virtual void operator=(const StObjArrayIter &iter);
 virtual Bool_t operator==(const StObjArrayIter &iter);
 virtual Bool_t operator!=(const StObjArrayIter &iter);
 
-private:
+
 const StObjArray* fColl;
 ClassDef(StObjArrayIter,1)
 };
@@ -203,6 +210,7 @@ class StRefArray : public StObjArray
 public:
 StRefArray(Int_t s = TCollection::kInitCapacity)
 :StObjArray(s){};
+virtual void Decode();
 virtual ~StRefArray(){};
 ClassDef(StRefArray,1)
 };
@@ -266,8 +274,6 @@ ClassDef(QWERTYIter,1)
 
 
 void testqwe();
-//ClassDef(StArray,1)
-
 #endif // 0
 
 
