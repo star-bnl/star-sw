@@ -201,6 +201,15 @@ void THelixTrack::Set(const double *xyz,const double *dir,double rho,const doubl
   fRho = rho;
   Build();
 }
+//_____________________________________________________________________________
+void THelixTrack::Backward()
+{
+
+  double x[3],d[3],h[3],rho;
+  for (int i=0;i<3;i++) { x[i]=fX[i]; d[i]=-fP[i];h[i]=fH[i];}
+  rho = -fRho;
+  Set(x,d,rho,h); 
+}
 
 //_____________________________________________________________________________
 void THelixTrack::Build()
