@@ -1,6 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.40 1999/09/24 01:23:29 fisyak Exp $
+// $Id: StTrsMaker.cxx,v 1.41 1999/10/04 16:09:51 long Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.41  1999/10/04 16:09:51  long
+// minor change on how to loop over geant hits
+//
+//
 // Revision 1.40  1999/09/24 01:23:29  fisyak
 // Reduced Include Path
 //
@@ -26,7 +30,7 @@
 // Remove histograms
 //
 // Revision 1.33  1999/04/29 00:15:10  lasiuk
-// make sure to clean up pointers that are stored
+// make sure to clean up pointers that are store
 // in the StTrsRawDataEvent() because they are allocated
 // for each event.  This is done with StTrsRawDataEvent::clear()
 // which has been added.
@@ -139,7 +143,7 @@
 #include <iostream.h>
 #include <unistd.h>    // needed for access()/sleep()
 #include <fstream.h>
-
+#include <math.h>
 #include <string>
 #include <vector>
 #include <list>
@@ -186,7 +190,10 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 // processes
 #include "StTrsFastChargeTransporter.hh"
 #include "StTrsSlowAnalogSignalGenerator.hh"
-#include "StTrsFastDigitalSignalGenerator.hh"
+//***************************** SEE the default options for Analog Signal generator
+#include "StTrsParameterizedAnalogSignalGenerator.hh"
+//*****************************
+#include "StTrsParameterizedDigitalSignalGenerator.hh"
 
 // containers
 #include "StTrsChargeSegment.hh"
@@ -210,17 +217,22 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.40 1999/09/24 01:23:29 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.41 1999/10/04 16:09:51 long Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
 ClassImp(slowcontrolDataSet)
 ClassImp(StTrsMaker)
 
+
+
+
 StTrsMaker::StTrsMaker(const char *name):
-mMiniSegmentLength(400.*millimeter),  // used to be 4mm
+  //  mMiniSegmentLength(400.*millimeter),  // used to be 4mm
+mMiniSegmentLength(4.*millimeter),  // test trial,Hui Long
 mFirstSectorToProcess(1),
-mLastSectorToProcess(24),
+mLastSectorToProcess(24), 
+mUseParameterizedSignalGenerator(1), // test trial,Hui Long
 StMaker(name)
 {/* nopt */ }
 
@@ -337,11 +349,12 @@ Int_t StTrsMaker::Init()
        StTrsWireHistogram::instance(mGeometryDb, mSlowControlDb ,mGasDb);
    mWireHistogram->setDoGasGain(true);
    mWireHistogram->setDoGasGainFluctuations(true); // used to be true
+   mWireHistogram->setDoGasGainFluctuations(false);
    mWireHistogram->setDoSingleElectronMultiplication(false);
    mWireHistogram->setGasGainInnerSector(mSlowControlDb->innerSectorGasGain());
    mWireHistogram->setGasGainOuterSector(mSlowControlDb->outerSectorGasGain());
    mWireHistogram->setDoTimeDelay(false);
-   mWireHistogram->setRangeOfWiresForChargeDistribution(3);
+   mWireHistogram->setRangeOfWiresForChargeDistribution(0);
 
    //
    // An Analog Sector(for calculation)
@@ -356,10 +369,18 @@ Int_t StTrsMaker::Init()
    // set status:
    mChargeTransporter->setChargeAttachment(false); // used to be true
    mChargeTransporter->setGatingGridTransparency(false);
-   mChargeTransporter->setTransverseDiffusion(true);  // used to be true
-   mChargeTransporter->setLongitudinalDiffusion(true); // used to be true
+   mChargeTransporter->setTransverseDiffusion(false);  // used to be true
+   mChargeTransporter->setLongitudinalDiffusion(false); // used to be true
    mChargeTransporter->setExB(false);
 
+   if(mUseParameterizedSignalGenerator) {
+   //**************for the ParameterizedAnalogSignalGenerator
+   mAnalogSignalGenerator =
+     StTrsParameterizedAnalogSignalGenerator::instance(mGeometryDb, mSlowControlDb, mElectronicsDb, mSector);
+   // Any options that are needed can go here:
+   //*******************************************************
+   }
+   else {
 
    mAnalogSignalGenerator =
        StTrsSlowAnalogSignalGenerator::instance(mGeometryDb, mSlowControlDb, mElectronicsDb, mSector);
@@ -367,7 +388,8 @@ Int_t StTrsMaker::Init()
    // Set the function for the induced charge on Pad
    // -->StTrsSlowAnalogSignalGenerator::endo
    //-->StTrsSlowAnalogSignalGenerator::gatti
-   //-->StTrsSlowAnalogSignalGenerator::dipole
+   //-->StTrsSlowAnalogSignalGeneratommetricGaussianApproximation:
+// 	    retr::dipole
    static_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
        setChargeDistribution(StTrsSlowAnalogSignalGenerator::endo);
    //
@@ -386,10 +408,10 @@ Int_t StTrsMaker::Init()
    mAnalogSignalGenerator->addNoise(false);
    mAnalogSignalGenerator->generateNoiseUnderSignalOnly(false);
    mAnalogSignalGenerator->setNoiseRMS(900);  // set in  #e
-	
+   }
 
    mDigitalSignalGenerator =
-       StTrsFastDigitalSignalGenerator::instance(mElectronicsDb, mSector);
+       StTrsParameterizedDigitalSignalGenerator::instance(mElectronicsDb, mSector);
 
    //
    // Output is into an StTpcRawDataEvent* vector<StTrsDigitalSector*>
@@ -481,25 +503,29 @@ Int_t StTrsMaker::Make(){
     //PR(geantPID);
 
     // inRange should be a boolean
-    bool inRange;
+    bool inRange,start=true;
     int  bisdet, bsectorOfHit, bpadrow;
     int  numberOfProcessedPointsInCurrentSector = 0;
     // Limit the  processing to a fixed number of segments
-    //no_tpc_hits = 20;
-    for (int i=1; i<=no_tpc_hits; i++){
-// 	cout << "--> tpc_hit:  " << i << endl;
-//  	raw << tpc_hit->volume_id   << ' '
-//  	    << tpc_hit->de          << ' '
-//  	    << tpc_hit->ds          << ' '
-//  	    << tpc_hit->x[0]        << ' '
-//  	    << tpc_hit->x[1]        << ' '
-//  	    << tpc_hit->x[2]        << ' '
-//  	    << tpc_hit->p[0]        << ' '
-//  	    << tpc_hit->p[1]        << ' '
-//  	    << tpc_hit->p[2]        << ' '  << endl;
-
+    //  no_tpc_hits = 4;
+      for (int i=1; i<=no_tpc_hits; i++,tpc_hit++){
+        
+	//	cout << "--> tpc_hit:  " << i << endl;
+	//	cout << tpc_hit->volume_id   << ' '
+	//	    << tpc_hit->de          << ' '
+  	//    << tpc_hit->ds          << ' '
+	//	    << tpc_hit->x[0]        << ' '
+	//	    << tpc_hit->x[1]        << ' '
+  	//    << tpc_hit->x[2]        << ' '
+  	//    << tpc_hit->p[0]        << ' '
+	//	    << tpc_hit->p[1]        << ' '
+  	//    << tpc_hit->p[2]        << ' '  << endl;
+	// int sss;
+	//  cin>>sss;
+        
 	whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
-// 	PR(bsectorOfHit);
+	//	PR(bsectorOfHit);
+	// cout<< mFirstSectorToProcess<<" "<< mLastSectorToProcess<<endl;
 	if(bsectorOfHit >= mFirstSectorToProcess &&
 	   bsectorOfHit <= mLastSectorToProcess)
 	    inRange = true;
@@ -508,9 +534,10 @@ Int_t StTrsMaker::Make(){
 
 	// Save time initially  - by not processing pseudo padrows
 	if(bisdet && !mProcessPseudoPadRows) {
- 	    //cout << "Segment in a pseudo-padRow. Skipping..." << endl;
-	    tpc_hit++;
-	    if(i != no_tpc_hits) continue;
+	  //   cout << "Segment in a pseudo-padRow. Skipping..." << endl;
+	    //  tpc_hit++;
+	     if(i != no_tpc_hits) continue;
+             inRange=false;
 	}
 	//sleep(2);
 
@@ -518,14 +545,22 @@ Int_t StTrsMaker::Make(){
 	// If not in range AND there are no points processed, skip to next point
 	if(!inRange && !numberOfProcessedPointsInCurrentSector) {
 	    cout << "out of range and no points" << endl;
-	    tpc_hit++;
+	    //  tpc_hit++;
 	    continue;
 	}
-	
-	if((inRange)  &&
-	   (bsectorOfHit == currentSectorProcessed) &&
-	   (i            != no_tpc_hits           )) {
-
+	if((inRange)  &&                                 //HL
+	   (bsectorOfHit != currentSectorProcessed&&start==false) &&//HL
+	   (i            <= no_tpc_hits           )) {//HL
+	  currentSectorProcessed=bsectorOfHit;//HL
+          
+          tpc_hit--;
+          i--;
+	}  //HL    ,continue to another sector....
+		if((inRange)  &&
+	 (bsectorOfHit == currentSectorProcessed||start==true) &&
+	(i            <= no_tpc_hits           )) {
+                  currentSectorProcessed=bsectorOfHit;//HL
+		  start=false;//HL,9/9/99
 	    // CAREFUL:
 	    // GEANT uses: (which is not correct!)
 	    //double GEANTDriftLength = 208.55119*centimeter;
@@ -541,7 +576,7 @@ Int_t StTrsMaker::Make(){
 	    
 	    StThreeVector<double> hitPosition(tpc_hit->x[0]*centimeter,
 	    				      tpc_hit->x[1]*centimeter,
-	    				      tpc_hit->x[2]*centimeter); 
+	    				      (tpc_hit->x[2])*centimeter); 
 	    //PR(hitPosition);
 
 // 	    // Drift Length is calculated with respect to the FG!
@@ -565,11 +600,12 @@ Int_t StTrsMaker::Make(){
 	    double yp = hitPosition.x()*sb + hitPosition.y()*cb;
 
 	    StThreeVector<double>
-		sector12Coordinate(xp,yp,tpc_hit->x[2]);
+		sector12Coordinate(xp,yp,(tpc_hit->x[2]));
 
-	    if(bsectorOfHit>12) {
-		sector12Coordinate.setX(-xp);
-	    }
+	    if(bsectorOfHit>12) {   
+	       
+                sector12Coordinate.setZ(-(tpc_hit->x[2]));
+	    }   
 
 	    // Must rotate the momentum as well,  BUT you should
 	    // only incur this calculational penalty if you split
@@ -581,6 +617,12 @@ Int_t StTrsMaker::Make(){
 					      pyPrime*GeV,
 					      tpc_hit->p[2]*GeV);
 
+	    //added by Hui Long ,8/24/99
+           if(bsectorOfHit>12) {
+	     
+               hitMomentum.setZ(-(tpc_hit->p[2]*GeV));
+	    }
+	   //
 
 //	    PR(tpc_hit->p[0]*GeV);
 //	    PR(pxPrime*GeV);
@@ -588,12 +630,13 @@ Int_t StTrsMaker::Make(){
 
 	    
 	    // I need PID info here, for the ionization splitting (beta gamma)!
-	    int geantPID = tpc_track[tpc_hit->track_p].ge_pid;
-	    //cout << "gentPID " << gentPID << " " << tpc_hit->de << endl;
+	   // int geantPID = tpc_track[tpc_hit->track_p].ge_pid;
+             int geantPID = tpc_track[tpc_hit->track_p-1].ge_pid;
+	   
 	    // WARNING:  cannot use "abs" (not overloaded (double) for LINUX!
 	    StTrsChargeSegment aSegment(sector12Coordinate,
 					hitMomentum,
-					(fabs(tpc_hit->de*GeV)),
+					tpc_hit->de*GeV,
 					tpc_hit->ds*centimeter,
 					geantPID);
 
@@ -621,27 +664,32 @@ Int_t StTrsMaker::Make(){
 	    // Break the segment for diffusion reproduction.
 	    // Fast Simulation can use breakNumber = 1
 	    //
-	    int breakNumber = max(aSegment.ds()/mMiniSegmentLength,1.);
+	    int breakNumber = (int)max(aSegment.ds()/mMiniSegmentLength,1.);
 	    breakNumber = min(breakNumber,16);  // set limit
 // 	    PR(aSegment.ds()/millimeter);
 // 	    PR(breakNumber);
 
 // 	    aSegment.split(mGasDb, mMagneticFieldDb, breakNumber, &comp);
+           
  	    aSegment.tssSplit(mGasDb, mMagneticFieldDb, breakNumber, &comp);
+         
 	    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 	    //copy(comp.begin(), comp.end(), ostream_iterator<StTrsMiniChargeSegment>(cout,"\n"));
 #endif
+
+	   
 	    
 	    // Loop over the miniSegments
 	    for(iter = comp.begin();
 		iter != comp.end();
 		iter++) {
-		
+	            
 		//
 	        // TRANSPORT HERE
 	        //
 		mChargeTransporter->transportToWire(*iter);
+              
   		//PR(*iter);
 		
 		//
@@ -653,19 +701,22 @@ Int_t StTrsMaker::Make(){
 		//		StTrsWireBinEntry anEntry(iter->position(), iter->charge());
 // 		PR(anEntry);
 		//#else
+              
 		StTrsWireBinEntry anEntry((*iter).position(), (*iter).charge());
+               
 		//#endif
 		mWireHistogram->addEntry(anEntry);
 		
 	    } // Loop over the list of iterators
 
-	    tpc_hit++;  // increase the pointer to the next hit
+	    //  tpc_hit++;  // increase the pointer to the next hit
 	    numberOfProcessedPointsInCurrentSector++;
-	    continue;   // don't digitize, you still have data in the same sector to process
+	   
+	   if(i<no_tpc_hits)continue;   // don't digitize, you still have data in the same sector to process
 	} // if (currentSector == bsectorOfHit)
 	// Otherwise, do the digitization...
 	
-	cout << "Current Sector: " << currentSectorProcessed << endl;
+     
 
 	//
 	// Generate the ANALOG Signals on pads
@@ -691,7 +742,7 @@ Int_t StTrsMaker::Make(){
 	// ...and digitize it
 	cout << "--->digitizeSignal()..." << endl;
 	mDigitalSignalGenerator->digitizeSignal();
-
+	cout<<"--->digitizeSignal() Finished..." << endl;
 	//
 	// Fill it into the event structure...
 	// and you better check the sector number!
@@ -703,11 +754,12 @@ Int_t StTrsMaker::Make(){
 	
 	//
 	// Go to the next sector --> should be identical to a simple increment
-	currentSectorProcessed = bsectorOfHit;
+	//	currentSectorProcessed = bsectorOfHit;
         numberOfProcessedPointsInCurrentSector = 0;
 // you can skip out here if you only want to process a single sector...
 // 	if(currentSectorProcessed>3)
 // 	    break;  // Finish here
+        
 	//
     } // loop over all segments: for(int i...
   } // mDataSet
