@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.8 1999/02/26 17:24:42 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.9 1999/02/26 18:42:33 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.9  1999/02/26 18:42:33  kathy
+// added vertex histograms
+//
 // Revision 1.8  1999/02/26 17:24:42  kathy
 // fix histograms
 //
@@ -55,6 +58,7 @@
 #include "St_dst_v0_vertex_Table.h"
 #include "St_dst_dedx_Table.h"
 #include "St_dst_event_summary_Table.h"
+#include "St_dst_vertex_Table.h"
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -143,6 +147,7 @@ Int_t St_QA_Maker::Init(){
  BookHistGen();
  BookHistV0();
  BookHistPID();
+ BookHistVertex();
 
    return StMaker::Init();
 }
@@ -166,7 +171,8 @@ Int_t St_QA_Maker::Make(){
   MakeHistV0();
 // histograms from table primtrk & dst_dedx
   MakeHistPID();
-    
+// histograms from table dst_vertex
+  MakeHistVertex();
 
   return kStOK;
 }
@@ -268,7 +274,8 @@ void St_QA_Maker::BookHistGen(){
 			  nyeta,kmineta,kmaxeta,nxpT,xminpT,xmaxpT);
     m_H_pT_eta_gen->SetXTitle("eta");
     m_H_pT_eta_gen->SetYTitle("pT (GeV)");
-
+ m_H_pT_gen  = new TH1F("QaParticlePt","pt (generated)",nxpT,xminpT,xmaxpT);
+ m_H_eta_gen = new TH1F("QaParticleEta","eta (generated)",nyeta,kmineta,kmaxeta);
 }
 
 //_____________________________________________________________________________
@@ -293,6 +300,20 @@ void St_QA_Maker::BookHistPID(){
 
 }
 
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistVertex(){
+// for MakeHistVertex - from table dst_vertex
+
+    m_v_flag  = new TH1F("QaVertexFlag", " vertex: flag ",10,0.,10.);
+    m_v_detid = new TH1F("QaVertexDetId"," vertex: Detector ID ",10,0.,10.);
+    m_v_vtxid = new TH1F("QaVertexVtxId"," vertex: Vertex ID ",10,0.,10.);
+    m_v_ndau  = new TH1F("QaVertexNDau"," vertex: num daughters ",10,0.,10.);
+    m_v_x     = new TH1F("QaVertexX"," vertex: x ",50,-25.,25.);
+    m_v_y     = new TH1F("QaVertexY"," vertex: y ",50,-25.,25.);
+    m_v_z     = new TH1F("QaVertexZ"," vertex: z ",100,-50.,50.);
+    m_v_pchi2 = new TH1F("QaVertexChisq"," vertex: chisq/dof ",50,0.,50.);
+
+}
 //_____________________________________________________________________________
 void St_QA_Maker::MakeHistEvSum(){
  //  PrintInfo();
@@ -449,6 +470,8 @@ void St_QA_Maker::MakeHistGen(){
 	    //        Double_t theta =  atan2 ( pT, pz );
             Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
             m_H_pT_eta_gen->Fill(eta, (Float_t) pT);
+            m_H_pT_gen->Fill((Float_t) pT);
+            m_H_eta_gen->Fill(eta);
 	  }
 	}
       }
@@ -531,13 +554,40 @@ void St_QA_Maker::MakeHistPID(){
   }
 }
 
+//_____________________________________________________________________________
+
+
+void St_QA_Maker::MakeHistVertex(){
+   cout << " *** in St_QA_Maker - filling vertex histograms " << endl;
+  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSetIter dstI(dst);
+  St_dst_vertex      *vertex     = (St_dst_vertex *) dstI["vertex"];
+
+  if (vertex) {
+    table_head_st *trk_h = vertex->GetHeader();
+    dst_vertex_st  *trk   = vertex->GetTable();
+    for (Int_t i = 0; i < vertex->GetNRows(); i++){
+      dst_vertex_st *t = trk + i;
+      m_v_flag->Fill(t->iflag);
+         if (t->iflag>0) {            
+           m_v_detid->Fill(t->det_id); 
+           m_v_vtxid->Fill(t->vtx_id);
+           m_v_ndau->Fill(t->n_daughters);  
+           m_v_x->Fill(t->x);     
+           m_v_y->Fill(t->y);     
+           m_v_z->Fill(t->z);     
+           m_v_pchi2->Fill(t->pchi2); 
+	 }
+    }
+  }
+}
 
 //_____________________________________________________________________________
 
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.8 1999/02/26 17:24:42 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.9 1999/02/26 18:42:33 kathy Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
