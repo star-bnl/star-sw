@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.hh,v 1.13 2002/04/05 16:51:13 oldi Exp $
+// $Id: StFtpcTracker.hh,v 1.14 2002/06/04 13:41:37 oldi Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.14  2002/06/04 13:41:37  oldi
+// Minor change: 'west' -> 'hemisphere' (just a naming convention)
+//
 // Revision 1.13  2002/04/05 16:51:13  oldi
 // Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
 // Each Track inherits from StHelix, now.
@@ -131,7 +134,7 @@ public:
   virtual  ~StFtpcTracker();  // destructor
 
   void    EstimateVertex(StFtpcVertex *vertex, UChar_t iterations = 1);     // vertex estimation with fit tracks for FTPC east amd west
-  void    EstimateVertex(StFtpcVertex *vertex, Char_t west, UChar_t iterations);  // vertex estimation with fit tracks
+  void    EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere, UChar_t iterations);  // vertex estimation with fit tracks
   void    CalcEnergyLoss(FDE_FDEPAR_ST *fdepar);                            // calculates dE/dx
   void    Sorter(Double_t *arr, Int_t *index, Int_t len);                   // sorts by dE/dx
   Int_t   FitAnddEdxAndWrite(St_fpt_fptrack *trackTable, 
