@@ -121,7 +121,7 @@ int FtfFinder::getTracks ( ) {
 //
 //
          if ( nTracks > maxTracks ){
-            printf("\n FtfFinder::getTracks: Max nr tracks reached !") ;
+            printf("FtfFinder::getTracks: Max nr %d tracks reached !\n", maxTracks ) ;
             nTracks = maxTracks  ;
             return 1 ;
          }

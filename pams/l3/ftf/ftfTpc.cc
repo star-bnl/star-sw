@@ -2,6 +2,10 @@
 **: FILE:       ftfTpc.cc
 
 **: HISTORY:
+**:             13aug1999 ppy FtFinder class creation moved to inside ftfTpc
+**:             13aug1999 ppy track variable initialize to 0 for FtfHit strucs
+**:                           This was crashing bfc in second event
+**:                           cosmetics changes in some printf's
 **:   
 **:  
 **:<------------------------------------------------------------------*/
@@ -10,10 +14,10 @@
 #include "tcl_tphit.h"
 #include "tpt_track.h"
 #include "FtfFinder.h"
+#include "FtfPara.h"
 
-FtfFinder      tracker ;
 
-extern "C" void ftfSetParameters ( SL3TPCPARA_ST* para ) ;
+extern "C" void ftfSetParameters ( FtfPara *ftfPara, SL3TPCPARA_ST* para ) ;
 
 typedef FtfHit* PHit ; // type is hit pointer 
 
@@ -36,12 +40,14 @@ extern "C" long type_of_call ftfTpc_(
 **:        tpt_track      - TPC Tracks
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
+  FtfFinder      tracker ;
   float toDeg = 57.29577951F ;
 //
 //    Set parameters
 //
   tracker.para.setDefaults ( ) ;
-  ftfSetParameters ( para ) ;
+  FtfPara *ftfPara = &(tracker.para) ;
+  ftfSetParameters ( ftfPara, para ) ;
 //
 //    Reset tracker
 //
@@ -50,14 +56,14 @@ extern "C" long type_of_call ftfTpc_(
 //   Check there is something coming in
 //
   if ( tphit_h->nok < 1 ) {
-     printf ( " \n rft: tphit table is empty " ) ;
+     printf ( "ftfTpc: tphit table is empty \n" ) ;
      return STAFCV_BAD ;
   }
 //
 //    Check min hits per track
 //
-  if ( tracker.para.minHitsPerTrack < 3 ) {
-     printf ( " \n Minimum # hits per track %d ", tracker.para.minHitsPerTrack ) ;
+  if ( ftfPara->minHitsPerTrack < 3 ) {
+     printf ( "ftfTpc: Minimum # hits per track %d\n", ftfPara->minHitsPerTrack ) ;
      return STAFCV_BAD ;
   }
 //
@@ -105,7 +111,7 @@ extern "C" long type_of_call ftfTpc_(
 //
      nSectors = para->LastSector - para->FirstSector + 1 ;
      if ( nSectors > 24 ) {
-        printf ( " \n ftf: Too many sectors %d ", nSectors ) ;
+        printf ( "ftfTpc: Too many sectors %d \n", nSectors ) ;
         return STAFCV_BAD ;
      }
 //  
@@ -158,13 +164,14 @@ extern "C" long type_of_call ftfTpc_(
 //   Check # hits in sector
 //
         if ( nSectorHits[sectorIndex] >= maxSectorHits[sectorIndex] ) {
-           printf ( " \n ftf: Too many hits in sector %d ", sector ) ;
+           printf ( "ftfTpc: Too many hits in sector %d\n", sector ) ;
            continue ;
         }
 //
         j = nSectorHits[sectorIndex] ;
         tphit[i].track             = 0 ;
         (pHit[sectorIndex])[j].id  = i ;
+        (pHit[sectorIndex])[j].track  = 0 ;
         (pHit[sectorIndex])[j].row = (short)fmod(tphit[i].row,100)   ;
         (pHit[sectorIndex])[j].x   = tphit[i].x ;
         (pHit[sectorIndex])[j].y   = tphit[i].y ;
@@ -179,6 +186,7 @@ extern "C" long type_of_call ftfTpc_(
 //    Loop over sectors
 //
   int monCounter    =  monitor_h->nok ;
+  tracker.nTracks   = 0 ;
   int nTracksLast = 0 ;
 
   for ( int sectorIndex = 0 ; sectorIndex < nSectors ; sectorIndex++ ) {
@@ -191,11 +199,11 @@ extern "C" long type_of_call ftfTpc_(
 //
      if ( para->FirstSector <= para->LastSector ) {
         sector = para->FirstSector + sectorIndex -1 ;
-        tracker.para.phiMin  = para->sectorPhiMin[sector]/toDeg ;
-        tracker.para.phiMax  = para->sectorPhiMax[sector]/toDeg ;
-        tracker.para.phiShift = para->sectorPhiShift[sector]/toDeg ;
-        tracker.para.etaMin  = para->sectorEtaMin[sector] ;
-        tracker.para.etaMax  = para->sectorEtaMax[sector] ;
+        ftfPara->phiMin  = para->sectorPhiMin[sector]/toDeg ;
+        ftfPara->phiMax  = para->sectorPhiMax[sector]/toDeg ;
+        ftfPara->phiShift = para->sectorPhiShift[sector]/toDeg ;
+        ftfPara->etaMin  = para->sectorEtaMin[sector] ;
+        ftfPara->etaMax  = para->sectorEtaMax[sector] ;
      }
      else
         sector = -1 ;
@@ -205,6 +213,9 @@ extern "C" long type_of_call ftfTpc_(
      tracker.nHits  = nSectorHits[sectorIndex] ;
      tracker.hit    = pHit[sectorIndex] ;
      nTracksLast    = tracker.nTracks ;
+     if ( para->infoLevel > 2 ) 
+         printf ( "ftfTpc: start tracking sector %d maxHits %d\n", 
+                             sectorIndex, tracker.nHits ) ;
      float sectorTime = tracker.process ( ) ;
 //
 //    Fill monitoring table
@@ -221,7 +232,7 @@ extern "C" long type_of_call ftfTpc_(
 //
 //    Merge primary tracks
 //
-  if ( tracker.para.mergePrimaries ) tracker.mergePrimaryTracks ( ) ;
+  if ( ftfPara->mergePrimaries ) tracker.mergePrimaryTracks ( ) ;
 //
 //    Transfer hit assignment
 //
@@ -263,8 +274,10 @@ extern "C" long type_of_call ftfTpc_(
     tptrack[counter].r0       = tracker.track[i].r0      ; 
     tptrack[counter].tanl     = tracker.track[i].tanl    ; 
     tptrack[counter].z0       = tracker.track[i].z0      ; 
-    tptrack[counter].hitid    = tracker.track[i].lastHit->id    ; 
- // tptrack[counter].hitid    = 0    ; 
+    if ( tracker.track[i].lastHit != 0 ) 
+       tptrack[counter].hitid    = tracker.track[i].lastHit->id    ; 
+    else
+       tptrack[counter].hitid    = 0    ; 
     tptrack[counter].dedx[0]  = tracker.track[i].dedx ;
     tptrack[counter].dedx[1]  = 0.F ;
 
@@ -288,42 +301,42 @@ extern "C" long type_of_call ftfTpc_(
 //***************************************************************************
 //     Set parameters
 //**************************************************************************
-   void ftfSetParameters ( SL3TPCPARA_ST* para ) { 
+   void ftfSetParameters ( FtfPara* ftfPara, SL3TPCPARA_ST* para ) { 
       float Todeg = 57.29577951F ;
 
-      tracker.para.infoLevel       = para->infoLevel ;
-      tracker.para.segmentRowSearchRange = (short)para->SMaxSearchPadrowsSegment;
-      tracker.para.trackRowSearchRange   = (short)para->SMaxSearchPadrowsTrack;
-      tracker.para.mergePrimaries  = para->MergePrimaries;
-      tracker.para.minHitsPerTrack = (short)para->SMinimumHitsPerTrack;    
-      tracker.para.nHitsForSegment = (short)para->SMinimumHitsPerSegment;
-      tracker.para.nEta            = (short)para->EtaSlices ;
-      tracker.para.nPhi            = (short)para->PhiSlices ;
-      tracker.para.nEtaTrack       = (short)para->NumberOfTanLSlices;
-      tracker.para.nPhiTrack       = (short)para->NumberOfPsiSlices ;
-      tracker.para.phiMin          = para->Phimin / Todeg ;
-      tracker.para.phiMax          = para->Phimax / Todeg ;
-      tracker.para.etaMin          = para->Etamin ;
-      tracker.para.etaMax          = para->Etamax ;
-      tracker.para.phiMinTrack     = para->MinSlicePsi / Todeg ;
-      tracker.para.phiMaxTrack     = para->MaxSlicePsi / Todeg ;
-      tracker.para.etaMinTrack     = para->MinSliceTanL ;
-      tracker.para.etaMaxTrack     = para->MaxSliceTanL ;
-      tracker.para.rowInnerMost    = (short)para->InnerMostRow ;
-      tracker.para.rowOuterMost    = (short)para->OuterMostRow ;
-      tracker.para.rowStart        = (short)para->startRow     ;
-      tracker.para.szFitFlag       = para->SFitSz ;
-      tracker.para.bField          = para->BField ;
-      tracker.para.hitChi2Cut      = para->SChi2Cut;
-      tracker.para.goodHitChi2     = para->SGoodChi2;
-      tracker.para.trackChi2Cut    = para->SChi2TrackCut;
-      tracker.para.deta            = para->SDEtaLimit ;
-      tracker.para.dphi            = para->SDPhiLimit ;
-      tracker.para.detaMerge       = para->SDTanlMaxMerge;
-      tracker.para.dphiMerge       = para->SDPsiMaxMerge;
-      tracker.para.szErrorScale    = para->ErrorScaleSz;
-      tracker.para.xyErrorScale    = para->ErrorScaleXy;
+      ftfPara->infoLevel       = para->infoLevel ;
+      ftfPara->segmentRowSearchRange = (short)para->SMaxSearchPadrowsSegment;
+      ftfPara->trackRowSearchRange   = (short)para->SMaxSearchPadrowsTrack;
+      ftfPara->mergePrimaries  = para->MergePrimaries;
+      ftfPara->minHitsPerTrack = (short)para->SMinimumHitsPerTrack;    
+      ftfPara->nHitsForSegment = (short)para->SMinimumHitsPerSegment;
+      ftfPara->nEta            = (short)para->EtaSlices ;
+      ftfPara->nPhi            = (short)para->PhiSlices ;
+      ftfPara->nEtaTrack       = (short)para->NumberOfTanLSlices;
+      ftfPara->nPhiTrack       = (short)para->NumberOfPsiSlices ;
+      ftfPara->phiMin          = para->Phimin / Todeg ;
+      ftfPara->phiMax          = para->Phimax / Todeg ;
+      ftfPara->etaMin          = para->Etamin ;
+      ftfPara->etaMax          = para->Etamax ;
+      ftfPara->phiMinTrack     = para->MinSlicePsi / Todeg ;
+      ftfPara->phiMaxTrack     = para->MaxSlicePsi / Todeg ;
+      ftfPara->etaMinTrack     = para->MinSliceTanL ;
+      ftfPara->etaMaxTrack     = para->MaxSliceTanL ;
+      ftfPara->rowInnerMost    = (short)para->InnerMostRow ;
+      ftfPara->rowOuterMost    = (short)para->OuterMostRow ;
+      ftfPara->rowStart        = (short)para->startRow     ;
+      ftfPara->szFitFlag       = para->SFitSz ;
+      ftfPara->bField          = para->BField ;
+      ftfPara->hitChi2Cut      = para->SChi2Cut;
+      ftfPara->goodHitChi2     = para->SGoodChi2;
+      ftfPara->trackChi2Cut    = para->SChi2TrackCut;
+      ftfPara->deta            = para->SDEtaLimit ;
+      ftfPara->dphi            = para->SDPhiLimit ;
+      ftfPara->detaMerge       = para->SDTanlMaxMerge;
+      ftfPara->dphiMerge       = para->SDPsiMaxMerge;
+      ftfPara->szErrorScale    = para->ErrorScaleSz;
+      ftfPara->xyErrorScale    = para->ErrorScaleXy;
 
-      tracker.para.goBackwards     = 1 ;
+      ftfPara->goBackwards     = 1 ;
 
    }
