@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.29 2004/08/14 00:48:41 mvl Exp $
+ * $Id: StMuDst.cxx,v 1.30 2004/10/19 01:45:26 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -29,9 +29,12 @@ TClonesArray** StMuDst::strangeArrays= 0;
 TClonesArray** StMuDst::emcArrays    = 0;
 TClonesArray** StMuDst::pmdArrays    = 0;
 TClonesArray** StMuDst::tofArrays    = 0;
+StMuEmcCollection *StMuDst::mEmcCollection =0;
+StMuPmdCollection *StMuDst::mPmdCollection =0;
 
 StMuDst::StMuDst() {
   DEBUGMESSAGE("");
+  mEmcCollection=0;
   /* no-op */
 }
 
@@ -44,6 +47,7 @@ void StMuDst::unset() {
     emcArrays     = 0;
     pmdArrays     = 0;
     tofArrays     = 0;
+    mEmcCollection = 0;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -56,6 +60,8 @@ void StMuDst::set(StMuDstMaker* maker) {
   emcArrays     = maker->mEmcArrays;
   pmdArrays     = maker->mPmdArrays;
   tofArrays     = maker->mTofArrays;
+  mEmcCollection = maker->mEmcCollection;
+  mPmdCollection = maker->mPmdCollection;
 
   StStrangeEvMuDst* ev = strangeEvent();
   int nV0s = v0s()->GetEntries(); for (int i=0;i<nV0s; i++) v0s(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
@@ -70,16 +76,21 @@ void StMuDst::set(TClonesArray** theArrays,
 		  TClonesArray** theStrangeArrays, 
 		  TClonesArray** theEmcArrays,
 		  TClonesArray** thePmdArrays,
-                  TClonesArray** theTofArrays) 
+                  TClonesArray** theTofArrays,
+		  StMuEmcCollection *emc,
+		  StMuPmdCollection *pmd) 
 {
+  // I don't understand why this method is still needed,
+  // but cannot comile dictionary  when it is removed
   DEBUGMESSAGE2("");
   arrays        = theArrays;
   strangeArrays = theStrangeArrays;
   emcArrays     = theEmcArrays;
   pmdArrays     = thePmdArrays;
   tofArrays     = theTofArrays;
+  mEmcCollection = emc;  
+  mPmdCollection = pmd;
 }
-
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -103,19 +114,31 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
   timer.start();
 
   // fill an array with the indices to the global tracks as function of trackId
-  static int *globalIndex = new int[StMuArrays::arraySizes[muGlobal]];
-  for (int i=0; i<StMuArrays::arraySizes[muGlobal]; i++) globalIndex[i]=-1;   // there must be an better way
   int nGlobals = global->GetEntries();
+  int nIndex=2*nGlobals;
+  Int_t *globalIndex=new Int_t(nIndex);
+
+  for (int i=0; i<2*nGlobals; i++) globalIndex[i]=-1;
+
   for (int i=0; i<nGlobals; i++) {
-    globalIndex[ globalTracks(i)->id() ] = i;
-    globalTracks(i)->setIndex2Global(i);
+    if (globalTracks(i)->id()<nIndex) {
+      globalIndex[ globalTracks(i)->id() ] = i;
+      globalTracks(i)->setIndex2Global(i);
+    }
+    else {
+      gMessMgr->Warning("fixTrackIndices","Running out of array space for global indices");
+    }
   }
   // set the indices for the primary tracks
   DEBUGVALUE2(primary->GetEntries());
   int nPrimaries = primary->GetEntries();
   for (int i=0; i<nPrimaries; i++) {
-     primaryTracks(i)->setIndex2Global( globalIndex[ primaryTracks(i)->id() ] );
+    if (globalTracks(i)->id()<nIndex) 
+      primaryTracks(i)->setIndex2Global( globalIndex[ primaryTracks(i)->id() ] );
+    else
+      gMessMgr->Warning("fixTrackIndices","Running out of array space for global indices");
   }
+  delete [] globalIndex;
   DEBUGVALUE2(timer.elapsedTime());
 }
 
@@ -135,6 +158,8 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 StEvent* StMuDst::createStEvent() {
+  static TObjArray nodes;
+
   DEBUGMESSAGE1("");
   StTimer timer;
   timer.start();
@@ -173,11 +198,10 @@ StEvent* StMuDst::createStEvent() {
   ev->addPrimaryVertex(vp);
   vp->setPosition( mu->eventSummary().primaryVertexPosition() );
 
-  /// create an array of pointers to track nodes as a function of trackId 
-  static StTrackNode** nodes = new StTrackNode*[StMuArrays::arraySizes[muGlobal]];
-  for (int i=0; i<StMuArrays::arraySizes[muGlobal]; i++) nodes[i]=0;   // there must be an better way
-  // add global tracks to tracknodes
   int nGlobals = arrays[muGlobal]->GetEntries();
+  nodes.Clear(); // tracknodes are owned by StEvent
+
+  // add global tracks to tracknodes
   for (int i=0; i<nGlobals; i++) if(globalTracks(i)) {
     int id = globalTracks(i)->id();
     StMuTrack *mt = globalTracks(i);
@@ -185,24 +209,26 @@ StEvent* StMuDst::createStEvent() {
     if (mt->bad())	continue;
     StTrack *st = createStTrack(mt);
     if (!st)		continue;
-    if (nodes[id]==0) nodes[id] = new StTrackNode();
-    nodes[id]->addTrack(st);
+    nodes.AddAtAndExpand(new StTrackNode(),id);
+    ((StTrackNode*)nodes[id])->addTrack(st);
   }
 
   /// add primary tracks to tracknodes and primary vertex
   int nPrimaries = arrays[muPrimary]->GetEntries();
   for (int i=0; i<nPrimaries; i++) if(primaryTracks(i)) {
     int id = primaryTracks(i)->id();
-    if (nodes[id]==0) nodes[id] = new StTrackNode();
+    if (nodes[id]==0) nodes.AddAtAndExpand(new StTrackNode(),id);
     StTrack* t = createStTrack(primaryTracks(i));
-    nodes[id]->addTrack( t );
+    ((StTrackNode*)nodes[id])->addTrack( t );
     vp->addDaughter( t );
   }
 
   /// add all tracknodes to the event
-  for (int i=0; i<StMuArrays::arraySizes[muGlobal]; i++) {
-    if (nodes[i]) ev->trackNodes().push_back(nodes[i]);
+  Int_t nNodes=nodes.GetEntriesFast();
+  for (int i=0; i<nNodes; i++) {
+    if (nodes[i]) ev->trackNodes().push_back((StTrackNode*)nodes[i]);
   } 
+
   /// do the same excercise for the l3 tracks
   /// we do this later
   /// we do this later
@@ -341,6 +367,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.30  2004/10/19 01:45:26  mvl
+ * Changes to split Emc and Pmd collections. Minor change to track copying logic
+ *
  * Revision 1.29  2004/08/14 00:48:41  mvl
  * Bug fix in createStTrack & mods for vertex flag in fitTraits
  *
