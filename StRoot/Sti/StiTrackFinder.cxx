@@ -9,6 +9,12 @@ StiTrackFinder::~StiTrackFinder()
 {
 }
 
+//Was defined and not implemented. BROKE THE PROJECT... Blame and shame... ;)
+void StiTrackFinder::findTracks()
+{
+    return;
+}
+
 void StiTrackFinder::setTrackSeedFinder(StiSeedFinder * finder)
 {
   //----------------------------------------------------------------- 

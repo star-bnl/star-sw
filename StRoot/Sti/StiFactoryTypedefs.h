@@ -6,10 +6,13 @@
 #define StiFactoryTypedefs_HH
 
 #include "StiObjectFactory.h"
+
 #include "StiHit.h"
 #include "StiDefaultMutableTreeNode.h"
+#include "StiTrackNode.h"
 
 typedef StiObjectFactory<StiHit> StiHitFactory;
 typedef StiObjectFactory<StiDefaultMutableTreeNode> StiTreeNodeFactory;
+typedef StiObjectFactory<StiTrackNode> StiTrackNodeFactory;
 
 #endif
