@@ -38,6 +38,18 @@ StConeJetFinder::StConeJetFinder(StConeJetFinderPars& pars) : mPars(pars)
     mTheEnd = mVec.end();
 }
 
+StConeJetFinder::StConeJetFinder()
+{
+    mDoMinimization=true;
+    mAddMidpoints=true;
+    mDoSplitMerge=true;
+    mDoMidpointFix=false;
+    mRequireStableMidpoints=true;    
+    
+    mSearchCounter=0;
+    mMerger = new StJetSpliterMerger();
+}
+
 StConeJetFinder::~StConeJetFinder()
 {
     delete mMerger;
@@ -60,10 +72,10 @@ StConeJetFinder::SearchResult StConeJetFinder::doSearch()
     //cout <<"--- new cell ---"<<endl;
     
     ++mSearchCounter;
-    if (mSearchCounter>100) {
+    if (mDoMinimization==true && mSearchCounter>100) {
 	return kTooManyTries;
     }
-	
+    
     //now search for clusters!  We walk in a square in eta-phi space, testing 
     //each cluster for it's distance from the centerCell
     //define the search window as phi +- deltaPhi, same for eta
@@ -331,6 +343,10 @@ void StConeJetFinder::addSeedsAtMidpoint()
     }
 }
 
+StJetEtCell* StConeJetFinder::makeCell(double etaMin, double etaMax, double phiMin, double phiMax)
+{
+    return new StJetEtCell(etaMin, etaMax, phiMin, phiMax);
+}
 
 void StConeJetFinder::buildGrid()
 {
@@ -351,8 +367,8 @@ void StConeJetFinder::buildGrid()
 			
 	    double phiMin = mPars.mPhiMin + static_cast<double>(j)*phiBinWidth;
 	    double phiMax = phiMin + phiBinWidth;
-			
-	    StJetEtCell* cell = new StJetEtCell(etaMin, etaMax, phiMin, phiMax);
+
+	    StJetEtCell* cell = makeCell(etaMin, etaMax, phiMin, phiMax);
 			
 	    //add it to the vector for ownership and et sorting
 	    mVec.push_back( cell );
@@ -406,7 +422,8 @@ StEtGridKey StConeJetFinder::findKey(double eta, double phi) const
 
 bool StConeJetFinder::acceptSeed(const StJetEtCell* cell)
 {
-    return (cell->nTimesUsed()==0 && cell->empty()==false);
+    //return (cell->nTimesUsed()==0 && cell->empty()==false);
+    return (cell->empty()==false);
 }
 
 bool StConeJetFinder::acceptPair(const StJetEtCell* centerCell, const StJetEtCell* otherCell) const
@@ -456,12 +473,12 @@ const StProtoJet& StConeJetFinder::collectCell(StJetEtCell* seed)
     }
     
     else {
-		
+	
 	//arbitrarily choose protojet from first cell in list
 	CellList& cells = seed->cellList();
 	StJetEtCell* centerCell = cells.front();
 	StProtoJet& center = centerCell->protoJet();
-		
+	
 	//cout <<"\tcombine protojets from other cells"<<endl;
 	//int icell=0;
 		
