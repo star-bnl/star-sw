@@ -313,6 +313,8 @@ class StiKalmanTrack : public StiTrack
 
   StiKalmanTrackNode * extrapolateToBeam();
   StiKalmanTrackNode * extrapolateToRadius(double radius);
+  static void setDebug(int m = 0) {_debug = m;}
+  static int  debug() {return _debug;}
 
 protected:
     
@@ -331,7 +333,7 @@ protected:
 
   double  _dca;
   double  _gdca;
-  
+  static int _debug; // Debug level
   friend ostream& operator<<(ostream& os, const StiKalmanTrack& track);
 
  public:

@@ -2,7 +2,7 @@
 #include "StiKalmanTrackFitter.h"
 #include "StiKalmanTrack.h"
 #include "StiKTNIterator.h"
-  
+int StiKalmanTrackFitter::_debug = 0;
 
 StiKalmanTrackFitter::StiKalmanTrackFitter()
 {
@@ -27,7 +27,7 @@ StiKalmanTrackFitter::~StiKalmanTrackFitter()
 */
 void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (Exception)
 {
-  //cout << "SKTFitter::fit() -I- Started:"<<endl;
+  if (debug() > 2) cout << "SKTFitter::fit() -I- Started:"<<endl;
   StiKalmanTrack * track = dynamic_cast<StiKalmanTrack * >(stiTrack);
   if (track==0) 
     throw runtime_error("StiKalmanTrack::fit() - ERROR:\t Dynamic cast to StiKalmanTrack failed");
@@ -43,9 +43,55 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
   double chi2;
   int status;
   bool started = false;
-  if (direction)
+#if 1
+  if (direction) {
+    first = track->begin();
+    last  = track->end();
+  } else {
+    last  = track->rend();
+    first = track->rbegin();
+  }
+  if (debug()) cout << "StiKalmanTrackFitter::fit set direction T/F= " << trackingDirection << "\t" << fitDirection << endl;
+  for (source=first;source!=last;source++) {
+    if (direction) {
+      if ((*source).getChildCount()<=0) break;
+      targetNode= static_cast<StiKalmanTrackNode*>((*source).getFirstChild());
+    }
+    else 
+      targetNode= static_cast<StiKalmanTrackNode*>((*source).getParent());
+    if (! targetNode) break;
+    targetDet = targetNode->getDetector();
+    targetHit = targetNode->getHit();
+    //begin refit at first hit
+    if (!targetHit && !started)	goto ENDLB;
+    started = true;
+    // evolve state from that of source using dets source to target
+    if (targetDet)
+      status = targetNode->propagate(&(*source),targetDet,fitDirection);	// hit
+    else if (targetHit)
+      status = targetNode->propagate(&(*source),targetHit,fitDirection);  // vertex
+    if (status) 		goto ENDLB;
+    // if targetNode has hit, get chi2 and update track parameters accordingly
+    if (!targetHit) 		goto ENDLB;
+    if (targetNode->nudge())	goto ENDLB;
+    chi2 = targetNode->evaluateChi2(targetHit);
+    targetNode->setChi2(1e52);
+    if (!(chi2<_pars.getMaxChi2()))goto ENDLB;
+    status = targetNode->updateNode();
+    if (status) 			goto ENDLB;
+    targetNode->setChi2(chi2);
+    //cout<<"=="<<endl;
+  ENDLB:
+    if (debug()) {
+      if (status) cout << "failed";
+      else        cout << "passed";
+      cout <<"\t" << StiKalmanTrackNode::Comment() << endl;
+    }
+  }
+#else
+  if (direction) {
     { 
-      //cout << "set =="<<endl;
+      if (debug()) cout << "StiKalmanTrackFitter::fit set =="<<endl;
       first = track->begin();
       last  = track->end();
       //cout << " ||||||" << endl;
@@ -56,24 +102,26 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	  targetDet = targetNode->getDetector();
 	  targetHit = targetNode->getHit();
 	  //begin refit at first hit
-	  if (!targetHit && !started)	continue;
+	  if (!targetHit && !started)	goto ENDLB;
 	  started = true;
 	  // evolve state from that of source using dets source to target
 	  if (targetDet)
 	    status = targetNode->propagate(&(*source),targetDet,fitDirection);	// hit
 	  else if (targetHit)
 	    status = targetNode->propagate(&(*source),targetHit,fitDirection);  // vertex
-            if (status) 		continue;
+            if (status) 		goto ENDLB;
 	  // if targetNode has hit, get chi2 and update track parameters accordingly
-	  if (!targetHit) 		continue;
-	  if (targetNode->nudge())	continue;
+	  if (!targetHit) 		goto ENDLB;
+	  if (targetNode->nudge())	goto ENDLB;
 	  chi2 = targetNode->evaluateChi2(targetHit);
 	  targetNode->setChi2(1e52);
-	  if (!(chi2<_pars.getMaxChi2()))continue;
+	  if (!(chi2<_pars.getMaxChi2()))goto ENDLB;
 	  status = targetNode->updateNode();
-	  if (status) 			continue;
+	  if (status) 			goto ENDLB;
 	  targetNode->setChi2(chi2);
 	  //cout<<"=="<<endl;
+	ENDLB:
+	  if (debug()) cout << status << "\t" << StiKalmanTrackNode::Comment() << endl;
 	}
     }
   else
@@ -81,7 +129,7 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
       //cout << " set ++" << endl;
       last  = track->rend();
       first = track->rbegin();
-      //cout << " <<<<<refit<<<<<"<<endl;
+      if (debug()) cout << "StiKalmanTrackFitter::fit <<<<<refit<<<<<"<<endl;
       for (source=first;source!=last;source++)
 	{
 	  targetNode= static_cast<StiKalmanTrackNode*>((*source).getParent());
@@ -89,7 +137,7 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	  targetDet = targetNode->getDetector();
 	  targetHit = targetNode->getHit();
 	  //begin refit at first hit
-	  if (!targetHit && !started) 	continue;
+	  if (!targetHit && !started) 	goto ENDLF;
 	  started = true;
 	  //cout << "  ==== " << *source << endl;
 	  // evolve state from that of source using dets source to target
@@ -97,21 +145,26 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	    status = targetNode->propagate(&(*source),targetDet,fitDirection);	// hit
 	  else if (targetHit)
 	    status = targetNode->propagate(&(*source),targetHit,fitDirection);  // vertex
-          if (status) 			continue;
+          if (status) 			goto ENDLF;
 	  // if targetNode has hit, get chi2 and update track parameters accordingly
-	  if (!targetHit) 		continue;
+	  if (!targetHit) 		goto ENDLF;
 	  targetNode->nudge();
 	  chi2 = targetNode->evaluateChi2(targetHit);
 	  targetNode->setChi2(1e51);
-	  if (!(chi2 <_pars.getMaxChi2()))continue;
+	  if (!(chi2 <_pars.getMaxChi2()))goto ENDLF;
 	  status = targetNode->updateNode();
-          if (status) 			continue;
+          if (status) 			goto ENDLF;
           targetNode->setChi2(chi2);
 	  //cout<<"!="<<endl;
+	ENDLF:
+	  if (debug()) {
+	    cout << status << "\t" << StiKalmanTrackNode::Comment() << endl;
+	  }
 	}
-      //cout << "   <<<<<<<<<<<Done Refit" << endl; 
+      if (debug()) cout << "StiKalmanTrackFitter::fit   <<<<<<<<<<<Done Refit" << endl; 
     }
   //cout << "SKTFitter::fit() -I- Done:"<<endl;
+#endif
 }
 
 

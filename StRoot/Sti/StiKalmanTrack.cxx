@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.51 2005/02/07 18:33:42 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.51 2005/02/07 18:33:42 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.52 2005/02/17 19:58:06 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.52 2005/02/17 19:58:06 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.52  2005/02/17 19:58:06  fisyak
+ * Add debug print out flags
+ *
  * Revision 2.51  2005/02/07 18:33:42  fisyak
  * Add VMC dead material
  *
@@ -201,7 +204,7 @@ ostream& operator<<(ostream&, const StiHit&);
 Factory<StiKalmanTrackNode>* StiKalmanTrack::trackNodeFactory = 0;
 StiKalmanTrackFinderParameters* StiKalmanTrack::pars = 0;
 StiKalmanTrackFitterParameters* StiKalmanTrack::fitpars = 0;
-
+int StiKalmanTrack::_debug = 0;
 int debugCount=0;
 
 /*! 
@@ -1185,12 +1188,16 @@ bool StiKalmanTrack::find(int direction)
   //cout <<"StiKalmanTrack::find(int) -I- Outside-in"<<endl;
   try 
     {
+      if (debug()) cout << "StiKalmanTrack::find seed " << *((StiTrack *) this);
       if (trackFinder->find(this,kOutsideIn))
 	{
+	  if (debug()) cout << "StiKalmanTrack::find find" << *((StiTrack *) this);
 	  //cout<<"/////////////////fit(InOut)";
 	  fit(kInsideOut);  
+	  if (debug()) cout << "StiKalmanTrack::find fit(kInsideOut)" << *((StiTrack *) this);
 	  //------
 	  fit(kOutsideIn);
+	  if (debug()) cout << "StiKalmanTrack::find fit(kOutsideIn)" << *((StiTrack *) this);
 	  trackExtended = true;
 	  //cout<<"/////////////////fit(InOut) Done";
 	}	
@@ -1213,7 +1220,9 @@ bool StiKalmanTrack::find(int direction)
       swap();      
       try
 	{
+	  if (debug()) cout << "StiKalmanTrack::find swap " << *((StiTrack *) this);
 	  trackExtendedOut= trackFinder->find(this,kInsideOut);
+	  if (debug()) cout << "StiKalmanTrack::find find(this,kInsideOut)" << *((StiTrack *) this);
 	}
       catch (...)
 	{
@@ -1222,6 +1231,7 @@ bool StiKalmanTrack::find(int direction)
       try
 	{
 	  if (trackExtendedOut) fit(kOutsideIn);
+	  if (debug()) cout << "StiKalmanTrack::find trackExtendedOut fit(kOutsideIn)" << *((StiTrack *) this);
 	}
       catch (...)
 	{

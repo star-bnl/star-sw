@@ -53,5 +53,7 @@ namespace StiVMCToolKit {
   void              MakeVolume(TGeoPhysicalNode *nodeP);
   Double_t          GetPotI(const TGeoMaterial *mat);
   Double_t          Nice(Double_t phi);
+  void              SetDebug(Int_t m);
+  Int_t             Debug();
 }
 #endif

@@ -78,6 +78,8 @@ public:
   void loadFS(ifstream&);
   
   StiKalmanTrackFinderParameters  _pars;
+  static void setDebug(int m = 0) {_debug = m;}
+  static int  debug() {return _debug;}
   
  protected:
 
@@ -123,7 +125,7 @@ private:
     bool scanningDone;
     bool hasHit;
     bool hasDet;
-
+    static int   _debug;
 };
 
 inline Filter<StiTrack> * StiKalmanTrackFinder::getTrackFilter() 
