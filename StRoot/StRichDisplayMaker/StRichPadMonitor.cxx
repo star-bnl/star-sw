@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPadMonitor.cxx,v 2.7 2001/02/07 16:08:26 lasiuk Exp $
+ * $Id: StRichPadMonitor.cxx,v 2.8 2001/11/21 20:57:18 lasiuk Exp $
  * Description:
  *  A Pad Monitor for the STAR-RICH.
  *  Runs only in ROOT
@@ -7,6 +7,9 @@
  *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
+ * Revision 2.8  2001/11/21 20:57:18  lasiuk
+ * add quick rings, text drawing
+ *
  * Revision 2.7  2001/02/07 16:08:26  lasiuk
  * saturated pads are now black
  *
@@ -251,6 +254,8 @@ void StRichPadMonitor::clearAll() {
   this->clearTracks();
   this->clearRingInfo();
   this->clearMisc();
+  this->clearQuickRings();
+  this->clearText();
 }
 
 void StRichPadMonitor::clearPads()
@@ -325,6 +330,16 @@ void StRichPadMonitor::clearMisc()
 //     mMisc.Expand(0);
 
     mMisc.Delete();
+}
+
+void StRichPadMonitor::clearQuickRings()
+{
+    mQuickRings.Delete();
+}
+
+void StRichPadMonitor::clearText()
+{
+    mText.Delete();
 }
 
 void StRichPadMonitor::drawPads()
@@ -814,6 +829,17 @@ void StRichPadMonitor::drawLine(StThreeVectorF& from, StThreeVectorF& to)
     mMisc.Add(line);
 }
 
+void StRichPadMonitor::drawText(double x, double y, char* txt)
+{
+    // TLine(x1,y1,x2,y2)
+    // store in mLine;
+    TText* text = new TText(x,y,txt);
+    text->SetTextSize(.030);
+    text->Draw();
+
+    mText.Add(text);
+}
+
 StRichDrawableTTrack* StRichPadMonitor::getTrack(StRichTrack* track) {
   
     for(unsigned int i = 0; i < mVectorTracks.size() ; i++) {
@@ -822,6 +848,117 @@ StRichDrawableTTrack* StRichPadMonitor::getTrack(StRichTrack* track) {
     }
 
     return 0;
+}
+
+void StRichPadMonitor::drawQuickRing(vector<StThreeVectorF>& ipi, vector<StThreeVectorF>& opi,
+				     vector<StThreeVectorF>& ik, vector<StThreeVectorF>& ok,
+				     vector<StThreeVectorF>& ip, vector<StThreeVectorF>& op)
+{
+    unsigned int ii;
+
+    //
+    // pions
+    //
+#ifndef Solaris
+    const unsigned int ssipi = ipi.size();
+    const unsigned int ssopi = opi.size();
+#else
+    const unsigned int ssipi = 1000;
+    const unsigned int ssopi = 1000;
+#endif
+    Float_t ixpi[ssipi];
+    Float_t iypi[ssipi];
+    for(ii=0; ii<ipi.size(); ii++) {
+	ixpi[ii] = ipi[ii].x();
+	iypi[ii] = ipi[ii].y();
+    }
+    TPolyLine* innerPi = new TPolyLine(ipi.size(),ixpi,iypi);
+    innerPi->SetLineStyle(1);
+    innerPi->SetLineColor(2);
+    innerPi->Draw();
+    mQuickRings.Add(innerPi);
+
+    Float_t oxpi[ssopi];
+    Float_t oypi[ssopi];
+    for(ii=0; ii<opi.size(); ii++) {
+	oxpi[ii] = opi[ii].x();
+	oypi[ii] = opi[ii].y();
+    }
+    TPolyLine* outerPi = new TPolyLine(opi.size(),oxpi,oypi);
+    outerPi->SetLineStyle(1);
+    outerPi->SetLineColor(2);
+    outerPi->Draw();
+    mQuickRings.Add(outerPi);
+
+    //
+    // kaons
+    //
+#ifndef Solaris
+    const unsigned int ssik = ik.size();
+    const unsigned int ssok = ok.size();
+#else
+    const unsigned int ssik = 1000;
+    const unsigned int ssok = 1000;
+#endif
+
+    Float_t ixk[ssik];
+    Float_t iyk[ssik];
+    for(ii=0; ii<ik.size(); ii++) {
+	ixk[ii] = ik[ii].x();
+	iyk[ii] = ik[ii].y();
+    }
+    TPolyLine* innerK = new TPolyLine(ik.size(),ixk,iyk);
+    innerK->SetLineStyle(1);
+    innerK->SetLineColor(1);
+    innerK->Draw();
+    mQuickRings.Add(innerK);
+
+    Float_t oxk[ssok];
+    Float_t oyk[ssok];
+    for(ii=0; ii<ok.size(); ii++) {
+	oxk[ii] = ok[ii].x();
+	oyk[ii] = ok[ii].y();
+    }
+    TPolyLine* outerK = new TPolyLine(ok.size(),oxk,oyk);
+    outerK->SetLineStyle(1);
+    outerK->SetLineColor(1);
+    outerK->Draw();
+    mQuickRings.Add(outerK);
+
+    //
+    // protons
+    //
+#ifndef Solaris
+    const unsigned int ssip = ip.size();
+    const unsigned int ssop = op.size();
+#else
+    const unsigned int ssip = 1000;
+    const unsigned int ssop = 1000;
+#endif
+
+    Float_t ixp[ssip];
+    Float_t iyp[ssip];
+    for(ii=0; ii<ip.size(); ii++) {
+	ixp[ii] = ip[ii].x();
+	iyp[ii] = ip[ii].y();
+    }
+    TPolyLine* innerP = new TPolyLine(ip.size(),ixp,iyp);
+    innerP->SetLineStyle(1);
+    innerP->SetLineColor(3);
+    innerP->Draw();
+    mQuickRings.Add(innerP);
+
+    Float_t oxp[ssop];
+    Float_t oyp[ssop];
+    for(ii=0; ii<op.size(); ii++) {
+	oxp[ii] = op[ii].x();
+	oyp[ii] = op[ii].y();
+    }
+    TPolyLine* outerP = new TPolyLine(op.size(),oxp,oyp);
+    outerP->SetLineStyle(1);
+    outerP->SetLineColor(3);
+    outerP->Draw();
+    mQuickRings.Add(outerP);
 }
 
 void StRichPadMonitor::drawRings() {
