@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.cc,v 1.5 2001/07/12 23:20:43 laue Exp $
+ * $Id: StHbtTrack.cc,v 1.6 2001/07/16 13:16:41 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: StHbtTrack.cc,v $
+ * Revision 1.6  2001/07/16 13:16:41  laue
+ * new constructor added [ StHbtTrack(const StEvent*, cons StTrack*) ]
+ *
  * Revision 1.5  2001/07/12 23:20:43  laue
  * mDCAGlobal,mPGlobal,mPtGlobal added
  *
@@ -136,6 +139,58 @@ StHbtTrack::StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex)
   mTrackId = ST->key();
 }
 
+StHbtTrack::StHbtTrack(const StEvent* EV, const StTrack* ST) {
+  StTpcDedxPidAlgorithm PidAlgorithm;
+  // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
+  // pointers to track and pidTraits are set 
+  // So, even though BestGuess will generate a "variable not used" warning, DO NOT DELETE THE NEXT LINE
+  ST->pidTraits(PidAlgorithm);
+
+  // the following just point to particle definitions in StEvent
+  StElectron* Electron = StElectron::instance();
+  StPionPlus* Pion = StPionPlus::instance();
+  StKaonPlus* Kaon = StKaonPlus::instance();
+  StProton* Proton = StProton::instance();
+
+   // OK let's go...
+  mHiddenInfo = 0;
+  mTrackType = ST->type();
+  mCharge = ST->geometry()->charge();
+  mNHits = ST->detectorInfo()->numberOfPoints(kTpcId);
+  mNHitsPoss = ST->numberOfPossiblePoints(kTpcId);
+  mNSigmaElectron = PidAlgorithm.numberOfSigma(Electron);
+  mNSigmaPion = PidAlgorithm.numberOfSigma(Pion);
+  mNSigmaKaon = PidAlgorithm.numberOfSigma(Kaon);
+  mNSigmaProton = PidAlgorithm.numberOfSigma(Proton);
+  mdEdx = PidAlgorithm.traits()->mean();
+
+
+  mChiSqXY = ST->fitTraits().chi2(0);
+  mChiSqZ = ST->fitTraits().chi2(1);
+
+  StHbtThreeVector primaryVertex = EV->primaryVertex()->position();
+  
+  mHelix = ST->geometry()->helix();
+  double pathlength = mHelix.pathLength(primaryVertex);
+  StHbtThreeVector  DCAxyz = mHelix.at(pathlength)-primaryVertex;
+  mDCAxy = DCAxyz.perp();
+  mDCAz = DCAxyz.z();
+  mP = mHelix.momentumAt(pathlength,EV->summary()->magneticField()*kilogauss);
+  mPt = mP.perp();
+
+  mHelixGlobal = ST->node()->track(global)->geometry()->helix();
+  double pathlengthGlobal = mHelixGlobal.pathLength(primaryVertex);
+  StHbtThreeVector  DCAxyzGlobal = mHelixGlobal.at(pathlengthGlobal)-primaryVertex;
+  mDCAxyGlobal = DCAxyzGlobal.perp();
+  mDCAzGlobal = DCAxyzGlobal.z();
+  mPGlobal = mHelixGlobal.momentumAt(pathlengthGlobal,EV->summary()->magneticField()*kilogauss);
+  mPtGlobal = mPGlobal.perp();
+
+  mMap[0] = ST->topologyMap().data(0);
+  mMap[1] = ST->topologyMap().data(1);
+  mTrackId = ST->key();
+}
+
 StHbtTrack::StHbtTrack(const StHbtTTreeEvent* ev, const StHbtTTreeTrack* t) { // copy constructor
   mTrackType = t->mTrackType;
   mTrackId = t->mTrackId;
@@ -163,9 +218,8 @@ StHbtTrack::StHbtTrack(const StHbtTTreeEvent* ev, const StHbtTTreeTrack* t) { //
   mHelixGlobal = StPhysicalHelixD(t->mHelixGlobalC,t->mHelixGlobalDip,t->mHelixGlobalPhase,
 			    StThreeVectorD(t->mHelixGlobalX,t->mHelixGlobalY,t->mHelixGlobalZ),
 			    t->mHelixGlobalH);
-  //ev->mMagneticField
-  //  cout << mHelix << endl;
   mCharge =mHelix.charge(ev->mMagneticField*kilogauss);
+
   StHbtThreeVector vertex(ev->mVertexX,ev->mVertexY,ev->mVertexZ);
   double pathlength = mHelix.pathLength(vertex);
   //  cout << pathlength << endl;
