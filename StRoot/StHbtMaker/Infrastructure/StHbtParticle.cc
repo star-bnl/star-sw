@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.19 2002/12/12 17:01:49 kisiel Exp $
+ * $Id: StHbtParticle.cc,v 1.20 2003/01/14 09:41:26 renault Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.20  2003/01/14 09:41:26  renault
+ * changes on average separation calculation, hit shared finder and memory optimisation
+ * for Z,U and Sectors variables.
+ *
  * Revision 1.19  2002/12/12 17:01:49  kisiel
  * Hidden Information handling and purity calculation
  *
@@ -114,7 +118,7 @@ double StHbtParticle::mPrimPpPar2= 0.;
 int TpcLocalTransform(StThreeVectorD& xgl, 
 		      int& iSector, 
 		      int& iPadrow, 
-		      double& xlocal,
+		      float& xlocal,
 		      double& ttPhi);
 
 
@@ -127,7 +131,13 @@ StHbtParticle::~StHbtParticle(){
   //  cout << "Issuing delete for StHbtParticle." << endl;
 
   if (mTrack) delete mTrack;
-  if (mV0) delete mV0;
+  if (mV0) {
+    delete[] mTpcV0NegPosSample;
+    delete[] mV0NegZ;
+    delete[] mV0NegU;
+    delete[] mV0NegSect;
+    delete mV0;
+  }
   if (mKink) delete mKink;
   //  cout << "Trying to delete HiddenInfo: " << mHiddenInfo << endl;
   if (mHiddenInfo) 
@@ -150,34 +160,26 @@ StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass
   mMap[1] = hbtTrack->TopologyMap(1);
   mNhits = hbtTrack->NHits();
   mHelix = hbtTrack->Helix();
-  CalculateNominalTpcExitAndEntrancePoints();
-  CalculatePurity();
-  
-  // test
-  mHelixTrackTest = hbtTrack->Helix();
+  //CalculateNominalTpcExitAndEntrancePoints();
 
-  StHbtThreeVector ZeroVectTrackTest(0.,0.,0.);
-  ZeroVectTrackTest = hbtTrack->Helix().origin();
-  CalculateTpcExitAndEntrancePoints(&mHelixTrackTest,&ZeroVectTrackTest,
-				    &mTpcTrackTestEntrancePoint,
-				    &mTpcTrackTestExitPoint,
-				    &mTpcTrackTestPosSample[0],&mTrackTestZ[0],
-				    &mTrackTestU[0],&mTrackTestSect[0]);
-//   cout <<"Entrance Orig ="<< mNominalTpcEntrancePoint << endl;
-//   cout <<"Entrance Modi ="<< mTpcTrackTestEntrancePoint << endl;
-//   cout <<"Exit Orig ="<< mNominalTpcExitPoint << endl;
-//   cout <<"Exit Modi ="<< mTpcTrackTestExitPoint << endl;
-//   cout <<"PosSample Orig0 ="<< mNominalPosSample[0] << endl;
-//   cout <<"PosSample Modi0 ="<< mTpcTrackTestPosSample[0] << endl;
-//   cout <<"PosSample Orig1 ="<< mNominalPosSample[1] << endl;
-//   cout <<"PosSample Modi1 ="<< mTpcTrackTestPosSample[1] << endl;
-//   cout <<"Z Orig0 ="<<mZ[0] << endl;
-//   cout <<"Z Modi0 ="<<mTrackTestZ[0] << endl;
-//   cout <<"U Orig0 ="<<mU[0] << endl;
-//   cout <<"U Modi0 ="<<mTrackTestU[0] << endl;
-//   cout <<"Sect Orig0 ="<<mSect[0] << endl;
-//   cout <<"Sect Modi0 ="<<mTrackTestSect[0] << endl;
-  // end test
+ 
+  mPrimaryVertex.setX(0.);
+  mPrimaryVertex.setY(0.);
+  mPrimaryVertex.setZ(0.);
+  mSecondaryVertex.setX(0.);
+  mSecondaryVertex.setY(0.);
+  mSecondaryVertex.setZ(0.);
+
+  CalculateTpcExitAndEntrancePoints(&mHelix,&mPrimaryVertex,
+				    &mSecondaryVertex,
+				    &mNominalTpcEntrancePoint,
+				    &mNominalTpcExitPoint,
+				    &mNominalPosSample[0],
+				    &mZ[0],
+				    &mU[0],
+				    &mSect[0]);
+
+  CalculatePurity();
   // ***
   mHiddenInfo= 0;
   if(hbtTrack->ValidHiddenInfo()){
@@ -196,44 +198,41 @@ StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mT
   mFourMomentum.setVect(temp);
   double ener = sqrt(temp.mag2()+mass*mass);
   mFourMomentum.setE(ener);
-  //  cout << mPosTrackId << " " << mNegTrackId << " " << hbtV0->idPos() << " " << hbtV0->idNeg() << endl;
-  //  mHelix = hbtTrack->Helix(); ?? what to do with mHelix for a Particle coming from a V0?
   // Calculating TpcEntrancePoint for Positive V0 daugther
   mPrimaryVertex = hbtV0->primaryVertex();
-//   cout <<"StHbtParticle---DEBUT_V0" << endl;
-
-
-
+  mSecondaryVertex = hbtV0->decayVertexV0();
   mHelixV0Pos = hbtV0->HelixPos();
-//   cout <<"StHbtParticle---mHelixV0Pos->x==" << mHelixV0Pos.origin().x() << endl;
-//   cout <<"StHbtParticle---mHelixV0Pos->y==" << mHelixV0Pos.origin().y() << endl;
-//   cout <<"StHbtParticle---mHelixV0Pos->z==" << mHelixV0Pos.origin().z() << endl;
-//   cout <<"StHbtParticle---==PrimVtx" << mPrimaryVertex << endl;
 
-  CalculateTpcExitAndEntrancePoints(&mHelixV0Pos,&mPrimaryVertex,&mTpcV0PosEntrancePoint,
-				    &mTpcV0PosExitPoint,&mTpcV0PosPosSample[0],&mV0PosZ[0],
-				    &mV0PosU[0],&mV0PosSect[0]);
+  mTpcV0NegPosSample = new StHbtThreeVector[45];//for V0Neg
+  mV0NegZ = new float[45];//for V0Neg
+  mV0NegU = new float[45];//for V0Neg
+  mV0NegSect = new int[45];//for V0Neg
+
+  CalculateTpcExitAndEntrancePoints(&mHelixV0Pos,&mPrimaryVertex,
+				    &mSecondaryVertex,
+				    &mTpcV0PosEntrancePoint,
+				    &mTpcV0PosExitPoint,
+				    &mNominalPosSample[0],
+				    &mZ[0],
+				    &mU[0],&mSect[0]);
 
   mHelixV0Neg = hbtV0->HelixNeg();
-  CalculateTpcExitAndEntrancePoints(&mHelixV0Neg,&mPrimaryVertex,&mTpcV0NegEntrancePoint,
-				    &mTpcV0NegExitPoint,&mTpcV0NegPosSample[0],&mV0NegZ[0],
+
+  CalculateTpcExitAndEntrancePoints(&mHelixV0Neg,
+				    &mPrimaryVertex,
+				    &mSecondaryVertex,
+				    &mTpcV0NegEntrancePoint,
+				    &mTpcV0NegExitPoint,
+				    &mTpcV0NegPosSample[0],
+				    &mV0NegZ[0],
 				    &mV0NegU[0],&mV0NegSect[0]);
-//   cout <<"StHbtParticle---==mTpcV0PosEntrancePoint" << mTpcV0PosEntrancePoint << endl;
-//   cout <<"StHbtParticle---==mTpcV0PosExitPoint" << mTpcV0PosExitPoint << endl;
-//   cout <<"StHbtParticle---==mTpcV0PosPosSample[0]" << mTpcV0PosPosSample[0] << endl;
-//   cout <<"StHbtParticle---==mV0PosZ[0]" <<mV0PosZ[0]  << endl;
-//   cout <<"StHbtParticle---==mV0PosU[0]" << mV0PosU[0] << endl;
-//   cout <<"StHbtParticle---==mV0PosSect[0]" <<mV0PosSect[0]  << endl;
 
-//   cout <<"StHbtParticle---==mTpcV0MegEntrancePoint" << mTpcV0NegEntrancePoint << endl;
-//   cout <<"StHbtParticle---==mTpcV0MegExitPoint" << mTpcV0NegExitPoint << endl;
-//   cout <<"StHbtParticle---==mTpcV0MegMegSample[0]" << mTpcV0NegPosSample[0] << endl;
-//   cout <<"StHbtParticle---==mV0MegZ[0]" <<mV0NegZ[0]  << endl;
-//   cout <<"StHbtParticle---==mV0MegU[0]" << mV0NegU[0] << endl;
-//   cout <<"StHbtParticle---==mV0MegSect[0]" <<mV0NegSect[0]  << endl;
-
-//   cout <<"StHbtParticle---FIN_V0" << endl;
-
+  // ***
+  mHiddenInfo= 0;
+  if(hbtV0->ValidHiddenInfo()){
+    mHiddenInfo= hbtV0->getHiddenInfo()->clone();
+  }
+  // ***
 }
 //_____________________
 StHbtParticle::StHbtParticle(const StHbtKink* const hbtKink,const double& mass) : mTrack(0), mV0(0), mHiddenInfo(0) {
@@ -271,178 +270,182 @@ const StHbtThreeVector& StHbtParticle::NominalTpcEntrancePoint() const{
   return mNominalTpcEntrancePoint;
 }
 //_____________________
-void StHbtParticle::CalculateNominalTpcExitAndEntrancePoints(){
-  // this calculates the "nominal" exit point of a track, either through the endcap or through the Outer Field Cage
-  // "nominal" means the track is assumed to start at (0,0,0)
-  // it also calculates the "nominal" entrance point of the track, which is the point at which it crosses the
-  // inner field cage
-  static StHbtThreeVector ZeroVec(0.,0.,0.);
-  double dip, curv, phase;
-  int h;
-  curv = mHelix.curvature();
-  dip  = mHelix.dipAngle();
-  phase= mHelix.phase();
-  h    = mHelix.h();
-  StHelixD hel(curv,dip,phase,ZeroVec,h);
+//***************WARNING*************************
+// Gael includes this in a function with parameters to use it for 
+// tracks and V0 daughters GR 5 dec 02
+//***************WARNING*************************
+// void StHbtParticle::CalculateNominalTpcExitAndEntrancePoints(){
+//   // this calculates the "nominal" exit point of a track, either through the endcap or through the Outer Field Cage
+//   // "nominal" means the track is assumed to start at (0,0,0)
+//   // it also calculates the "nominal" entrance point of the track, which is the point at which it crosses the
+//   // inner field cage
+//   static StHbtThreeVector ZeroVec(0.,0.,0.);
+//   double dip, curv, phase;
+//   int h;
+//   curv = mHelix.curvature();
+//   dip  = mHelix.dipAngle();
+//   phase= mHelix.phase();
+//   h    = mHelix.h();
+//   StHelixD hel(curv,dip,phase,ZeroVec,h);
 
-  pairD candidates;
-  double sideLength;  // this is how much length to go to leave through sides of TPC
-  double endLength;  // this is how much length to go to leave through endcap of TPC
-  // figure out how far to go to leave through side...
-  candidates = hel.pathLength(200.0);  // bugfix MAL jul00 - 200cm NOT 2cm
-  sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
+//   pairD candidates;
+//   double sideLength;  // this is how much length to go to leave through sides of TPC
+//   double endLength;  // this is how much length to go to leave through endcap of TPC
+//   // figure out how far to go to leave through side...
+//   candidates = hel.pathLength(200.0);  // bugfix MAL jul00 - 200cm NOT 2cm
+//   sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
 
-  static StHbtThreeVector WestEnd(0.,0.,200.);  // bugfix MAL jul00 - 200cm NOT 2cm
-  static StHbtThreeVector EastEnd(0.,0.,-200.); // bugfix MAL jul00 - 200cm NOT 2cm
-  static StHbtThreeVector EndCapNormal(0.,0.,1.0);
+//   static StHbtThreeVector WestEnd(0.,0.,200.);  // bugfix MAL jul00 - 200cm NOT 2cm
+//   static StHbtThreeVector EastEnd(0.,0.,-200.); // bugfix MAL jul00 - 200cm NOT 2cm
+//   static StHbtThreeVector EndCapNormal(0.,0.,1.0);
 
-  endLength = hel.pathLength(WestEnd,EndCapNormal);
-  if (endLength < 0.0) endLength = hel.pathLength(EastEnd,EndCapNormal);
+//   endLength = hel.pathLength(WestEnd,EndCapNormal);
+//   if (endLength < 0.0) endLength = hel.pathLength(EastEnd,EndCapNormal);
 
-  if (endLength < 0.0) cout << "StHbtParticle::CalculateNominalTpcExitAndEntrancePoints(): "
-                            << "Hey-- I cannot find an exit point out endcaps" << endl;
+//   if (endLength < 0.0) cout << "StHbtParticle::CalculateNominalTpcExitAndEntrancePoints(): "
+//                             << "Hey-- I cannot find an exit point out endcaps" << endl;
 
-  // OK, firstExitLength will be the shortest way out of the detector...
-  double firstExitLength = (endLength < sideLength) ? endLength : sideLength;
+//   // OK, firstExitLength will be the shortest way out of the detector...
+//   double firstExitLength = (endLength < sideLength) ? endLength : sideLength;
 
-  // now then, let's return the POSITION at which particle leaves TPC...
-  mNominalTpcExitPoint = hel.at(firstExitLength);
+//   // now then, let's return the POSITION at which particle leaves TPC...
+//   mNominalTpcExitPoint = hel.at(firstExitLength);
 
 
-  // Finally, calculate the position at which the track crosses the inner field cage
-  candidates = hel.pathLength(50.0);  // bugfix MAL jul00 - 200cm NOT 2cm
+//   // Finally, calculate the position at which the track crosses the inner field cage
+//   candidates = hel.pathLength(50.0);  // bugfix MAL jul00 - 200cm NOT 2cm
 
-  sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
-//   if (sideLength < 0.0)
-//     {
-//       cout 
-//      << "no crossing with IFC" 
-//      << " curve=" << curv 
-//      << " candidates=" << candidates.first << " " << candidates.second 
-//       << "origin=" << mHelix.origin() << " "<< dip << " " << phase << " " << h << endl;
+//   sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
+// //   if (sideLength < 0.0)
+// //     {
+// //       cout 
+// //      << "no crossing with IFC" 
+// //      << " curve=" << curv 
+// //      << " candidates=" << candidates.first << " " << candidates.second 
+// //       << "origin=" << mHelix.origin() << " "<< dip << " " << phase << " " << h << endl;
+// //     }
+// //   else
+// //     {
+// //       cout 
+// //      << "does cross       IFC" 
+// //      << " curve=" << curv 
+// //      << " candidates=" << candidates.first << " " << candidates.second 
+// //      << "origin=" << mHelix.origin() << " "<< dip << " " << phase << " " << h << endl;
+// //     }
+
+
+// //   if (sideLength < 0.0)
+// //     {
+// //       if (phase > C_PI)
+// //      {
+// //        cout << "righto" << endl;
+// //      }
+// //       else
+// //      {
+// //        cout << "WRONGO!! 1 " << phase << endl;
+// //      }
+// //     }
+// //   else
+// //     {
+// //       if (phase > C_PI)
+// //      {
+// //        cout << "WRONGO!! 2 " << phase << endl;
+// //      }
+// //       else
+// //      {
+// //        cout << "righto " << endl;
+// //      }
+// //    }
+
+//   mNominalTpcEntrancePoint = hel.at(sideLength);
+
+
+//   // This is the secure way !  
+// //   if (isnan(mNominalTpcEntrancePoint.x()) || 
+// //       isnan(mNominalTpcEntrancePoint.x()) || 
+// //       isnan(mNominalTpcEntrancePoint.x()) ) mNominalTpcEntrancePoint = StHbtThreeVector(-9999.,-9999.,-9999); 
+// //   if (isnan(mNominalTpcExitPoint.x()) || 
+// //       isnan(mNominalTpcExitPoint.x()) || 
+// //       isnan(mNominalTpcExitPoint.x()) ) mNominalTpcExitPoint = StHbtThreeVector(-9999.,-9999.,-9999); 
+
+//   // This is faster  
+//   if (isnan(mNominalTpcExitPoint.x())) mNominalTpcExitPoint = StHbtThreeVector(-9999.,-9999.,-9999); 
+
+
+//   // 03Oct00 - mal.  OK, let's try something a little more along the lines of NA49 and E895 strategy.
+//   //    calculate the "nominal" position at N radii (say N=11) within the TPC, and for a pair cut
+//   //    use the average separation of these N
+//   for (int irad=0; irad<11; irad++){
+//     float radius = 50.0 + irad*15.0;
+//     candidates = hel.pathLength(radius);
+//     sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
+//     mNominalPosSample[irad] = hel.at(sideLength);
+//   }
+
+
+
+//   static double tSectToPhi[24]={2.,1.,0.,11.,10.,9.,8. ,7. ,6.,5.,4.,3.,
+// 				4.,5.,6., 7., 8.,9.,10.,11.,0.,1.,2.,3.};
+//   static float tRowRadius[45] = {60,64.8,69.6,74.4,79.2,84,88.8,93.6,98.8, 
+// 				 104,109.2,114.4,119.6,127.195,129.195,131.195,
+// 				 133.195,135.195,137.195,139.195,141.195,
+// 				 143.195,145.195,147.195,149.195,151.195,
+// 				 153.195,155.195,157.195,159.195,161.195,
+// 				 163.195,165.195,167.195,169.195,171.195,
+// 				 173.195,175.195,177.195,179.195,181.195,
+// 				 183.195,185.195,187.195,189.195};
+//   int tRow,tSect,tOutOfBound;
+//   double tU,tLength,tPhi;
+//   StHbtThreeVector tPoint;
+//   StThreeVectorD tn(0,0,0);
+//   StThreeVectorD tr(0,0,0);
+//   for(int ti=0;ti<45;ti++){
+//     // Find which sector it is on
+//     candidates =  hel.pathLength(tRowRadius[ti]);
+//     tLength = (candidates.first > 0) ? candidates.first : candidates.second;
+//     tPoint = hel.at(tLength);
+//     TpcLocalTransform(tPoint,mSect[ti],tRow,tU,tPhi);
+//     // calculate crossing plane
+//     //tPhi = tSectToPhi[mSect[ti]-1]*TMath::Pi()/6.;
+//     tn.setX(cos(tPhi));
+//     tn.setY(sin(tPhi));       
+//     tr.setX(tRowRadius[ti]*cos(tPhi));
+//     tr.setY(tRowRadius[ti]*sin(tPhi));
+//     // find crossing point
+//     tLength = hel.pathLength(tr,tn);
+//     tPoint = hel.at(tLength);
+//     mZ[ti] = tPoint.z();
+//     tOutOfBound = TpcLocalTransform(tPoint,tSect,tRow,mU[ti],tPhi);
+//     if(tOutOfBound || (mSect[ti] == tSect && tRow!=(ti+1))){
+//       //cout << "Out of bound " << tOutOfBound2 << " " << tOutOfBound << " " 
+//       //   << tSect << " " << mSect[ti] << " "
+//       //   << ti+1 << " " << tRow << " " << tRowRadius[ti] << " " 
+//       //   << tU << " " << mU[ti] << endl;
+//       mSect[ti]=-1;
 //     }
-//   else
-//     {
-//       cout 
-//      << "does cross       IFC" 
-//      << " curve=" << curv 
-//      << " candidates=" << candidates.first << " " << candidates.second 
-//      << "origin=" << mHelix.origin() << " "<< dip << " " << phase << " " << h << endl;
+//     else{
+//       if(mSect[ti] != tSect){
+// 	// Try again on the other sector
+// 	tn.setX(cos(tPhi));
+// 	tn.setY(sin(tPhi));       
+// 	tr.setX(tRowRadius[ti]*cos(tPhi));
+// 	tr.setY(tRowRadius[ti]*sin(tPhi));
+// 	// find crossing point
+// 	tLength = hel.pathLength(tr,tn);
+// 	tPoint = hel.at(tLength);
+// 	mZ[ti] = tPoint.z();
+// 	mSect[ti] = tSect;
+// 	tOutOfBound = TpcLocalTransform(tPoint,tSect,tRow,mU[ti],tPhi);
+// 	if(tOutOfBound || tSect!= mSect[ti] || tRow!=(ti+1)){
+// 	  mSect[ti]=-1;
+// 	  //cout << "Twice bad : OutOfBound =  " << tOutOfBound 
+// 	  //   << " SectOk = " << (tSect!= mSect[ti])
+// 	  //   << " RowOk = " <<  (tRow!=(ti+1)) << endl;
+// 	}
+//       }
 //     }
-
-
-//   if (sideLength < 0.0)
-//     {
-//       if (phase > C_PI)
-//      {
-//        cout << "righto" << endl;
-//      }
-//       else
-//      {
-//        cout << "WRONGO!! 1 " << phase << endl;
-//      }
-//     }
-//   else
-//     {
-//       if (phase > C_PI)
-//      {
-//        cout << "WRONGO!! 2 " << phase << endl;
-//      }
-//       else
-//      {
-//        cout << "righto " << endl;
-//      }
-//    }
-
-  mNominalTpcEntrancePoint = hel.at(sideLength);
-
-
-  // This is the secure way !  
-//   if (isnan(mNominalTpcEntrancePoint.x()) || 
-//       isnan(mNominalTpcEntrancePoint.x()) || 
-//       isnan(mNominalTpcEntrancePoint.x()) ) mNominalTpcEntrancePoint = StHbtThreeVector(-9999.,-9999.,-9999); 
-//   if (isnan(mNominalTpcExitPoint.x()) || 
-//       isnan(mNominalTpcExitPoint.x()) || 
-//       isnan(mNominalTpcExitPoint.x()) ) mNominalTpcExitPoint = StHbtThreeVector(-9999.,-9999.,-9999); 
-
-  // This is faster  
-  if (isnan(mNominalTpcExitPoint.x())) mNominalTpcExitPoint = StHbtThreeVector(-9999.,-9999.,-9999); 
-
-
-  // 03Oct00 - mal.  OK, let's try something a little more along the lines of NA49 and E895 strategy.
-  //    calculate the "nominal" position at N radii (say N=11) within the TPC, and for a pair cut
-  //    use the average separation of these N
-  for (int irad=0; irad<11; irad++){
-    float radius = 50.0 + irad*15.0;
-    candidates = hel.pathLength(radius);
-    sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
-    mNominalPosSample[irad] = hel.at(sideLength);
-  }
-
-
-
-  static double tSectToPhi[24]={2.,1.,0.,11.,10.,9.,8. ,7. ,6.,5.,4.,3.,
-				4.,5.,6., 7., 8.,9.,10.,11.,0.,1.,2.,3.};
-  static float tRowRadius[45] = {60,64.8,69.6,74.4,79.2,84,88.8,93.6,98.8, 
-				 104,109.2,114.4,119.6,127.195,129.195,131.195,
-				 133.195,135.195,137.195,139.195,141.195,
-				 143.195,145.195,147.195,149.195,151.195,
-				 153.195,155.195,157.195,159.195,161.195,
-				 163.195,165.195,167.195,169.195,171.195,
-				 173.195,175.195,177.195,179.195,181.195,
-				 183.195,185.195,187.195,189.195};
-  int tRow,tSect,tOutOfBound;
-  double tU,tLength,tPhi;
-  StHbtThreeVector tPoint;
-  StThreeVectorD tn(0,0,0);
-  StThreeVectorD tr(0,0,0);
-  for(int ti=0;ti<45;ti++){
-    // Find which sector it is on
-    candidates =  hel.pathLength(tRowRadius[ti]);
-    tLength = (candidates.first > 0) ? candidates.first : candidates.second;
-    tPoint = hel.at(tLength);
-    TpcLocalTransform(tPoint,mSect[ti],tRow,tU,tPhi);
-    // calculate crossing plane
-    //tPhi = tSectToPhi[mSect[ti]-1]*TMath::Pi()/6.;
-    tn.setX(cos(tPhi));
-    tn.setY(sin(tPhi));       
-    tr.setX(tRowRadius[ti]*cos(tPhi));
-    tr.setY(tRowRadius[ti]*sin(tPhi));
-    // find crossing point
-    tLength = hel.pathLength(tr,tn);
-    tPoint = hel.at(tLength);
-    mZ[ti] = tPoint.z();
-    tOutOfBound = TpcLocalTransform(tPoint,tSect,tRow,mU[ti],tPhi);
-    if(tOutOfBound || (mSect[ti] == tSect && tRow!=(ti+1))){
-      //cout << "Out of bound " << tOutOfBound2 << " " << tOutOfBound << " " 
-      //   << tSect << " " << mSect[ti] << " "
-      //   << ti+1 << " " << tRow << " " << tRowRadius[ti] << " " 
-      //   << tU << " " << mU[ti] << endl;
-      mSect[ti]=-1;
-    }
-    else{
-      if(mSect[ti] != tSect){
-	// Try again on the other sector
-	tn.setX(cos(tPhi));
-	tn.setY(sin(tPhi));       
-	tr.setX(tRowRadius[ti]*cos(tPhi));
-	tr.setY(tRowRadius[ti]*sin(tPhi));
-	// find crossing point
-	tLength = hel.pathLength(tr,tn);
-	tPoint = hel.at(tLength);
-	mZ[ti] = tPoint.z();
-	mSect[ti] = tSect;
-	tOutOfBound = TpcLocalTransform(tPoint,tSect,tRow,mU[ti],tPhi);
-	if(tOutOfBound || tSect!= mSect[ti] || tRow!=(ti+1)){
-	  mSect[ti]=-1;
-	  //cout << "Twice bad : OutOfBound =  " << tOutOfBound 
-	  //   << " SectOk = " << (tSect!= mSect[ti])
-	  //   << " RowOk = " <<  (tRow!=(ti+1)) << endl;
-	}
-      }
-    }
-  }
-}
+//   }
+// }
 //_____________________
 void StHbtParticle::CalculatePurity(){
   double tPt = mFourMomentum.perp();
@@ -484,12 +487,15 @@ double StHbtParticle::GetProtonPurity()
     return mPurity[4];
 }
 
-void StHbtParticle::CalculateTpcExitAndEntrancePoints( const StPhysicalHelixD* tHelix,
+void StHbtParticle::CalculateTpcExitAndEntrancePoints(StPhysicalHelixD* tHelix,
 						       StHbtThreeVector*  PrimVert,
+						       StHbtThreeVector*  SecVert,
 						       StHbtThreeVector* tmpTpcEntrancePoint,
 						       StHbtThreeVector* tmpTpcExitPoint,
 						       StHbtThreeVector* tmpPosSample,
-						       double* tmpZ,double* tmpU,int* tmpSect){
+						       float* tmpZ,
+						       float* tmpU,
+						       int* tmpSect){
   // this calculates the exit point of a secondary track, 
   // either through the endcap or through the Outer Field Cage
   // We assume the track to start at tHelix.origin-PrimaryVertex
@@ -498,9 +504,12 @@ void StHbtParticle::CalculateTpcExitAndEntrancePoints( const StPhysicalHelixD* t
   // inner field cage
   //  static StHbtThreeVector ZeroVec(0.,0.,0.);
   StHbtThreeVector ZeroVec(0.,0.,0.);
-  ZeroVec.setX(tHelix->origin().x()-PrimVert->x());
-  ZeroVec.setY(tHelix->origin().y()-PrimVert->y());
-  ZeroVec.setZ(tHelix->origin().z()-PrimVert->z());
+//   ZeroVec.setX(tHelix->origin().x()-PrimVert->x());
+//   ZeroVec.setY(tHelix->origin().y()-PrimVert->y());
+//   ZeroVec.setZ(tHelix->origin().z()-PrimVert->z());
+  ZeroVec.setX(SecVert->x()-PrimVert->x());
+  ZeroVec.setY(SecVert->y()-PrimVert->y());
+  ZeroVec.setZ(SecVert->z()-PrimVert->z());
   double dip, curv, phase;
   int h;
   curv = tHelix->curvature();
@@ -524,37 +533,79 @@ void StHbtParticle::CalculateTpcExitAndEntrancePoints( const StPhysicalHelixD* t
   endLength = hel.pathLength(WestEnd,EndCapNormal);
   if (endLength < 0.0) endLength = hel.pathLength(EastEnd,EndCapNormal);
 
-  if (endLength < 0.0) cout << "StHbtParticle::CalculateTpcExitAndEntrancePoints(): "
+  if (endLength < 0.0) cout << 
+			 "StHbtParticle::CalculateTpcExitAndEntrancePoints(): "
                             << "Hey -- I cannot find an exit point out endcaps" << endl;
-
   // OK, firstExitLength will be the shortest way out of the detector...
   double firstExitLength = (endLength < sideLength) ? endLength : sideLength;
-
   // now then, let's return the POSITION at which particle leaves TPC...
   *tmpTpcExitPoint = hel.at(firstExitLength);
-
   // Finally, calculate the position at which the track crosses the inner field cage
   candidates = hel.pathLength(50.0);  // bugfix MAL jul00 - 200cm NOT 2cm
 
   sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
-
+  //  cout << "sideLength 2 ="<<sideLength << endl;
   *tmpTpcEntrancePoint = hel.at(sideLength);
+  // This is the secure way !  
+  if (isnan(tmpTpcEntrancePoint->x()) || 
+      isnan(tmpTpcEntrancePoint->y()) || 
+      isnan(tmpTpcEntrancePoint->z()) ){ 
+    cout << "tmpTpcEntrancePoint NAN"<< endl; 
+    cout << "tmpNominalTpcEntrancePoint = " <<tmpTpcEntrancePoint<< endl;
+    tmpTpcEntrancePoint->setX(-9999.);
+    tmpTpcEntrancePoint->setY(-9999.);
+    tmpTpcEntrancePoint->setZ(-9999.);
+  } 
+    
+  if (isnan(tmpTpcExitPoint->x()) || 
+      isnan(tmpTpcExitPoint->y()) || 
+      isnan(tmpTpcExitPoint->z()) ) {
+//     cout << "tmpTpcExitPoint NAN set at (-9999,-9999,-9999)"<< endl; 
+//     cout << "tmpTpcExitPoint X= " <<tmpTpcExitPoint->x()<< endl;
+//     cout << "tmpTpcExitPoint Y= " <<tmpTpcExitPoint->y()<< endl;
+//     cout << "tmpTpcExitPoint Z= " <<tmpTpcExitPoint->z()<< endl;
+    tmpTpcExitPoint->setX(-9999.);
+    tmpTpcExitPoint->setY(-9999.);
+    tmpTpcExitPoint->setZ(-9999.);
+  }
 
-  if (isnan(tmpTpcExitPoint->x())) *tmpTpcExitPoint = StHbtThreeVector(-9999.,-9999.,-9999); 
 
+//   if (isnan(tmpTpcExitPoint->x())) *tmpTpcExitPoint = StHbtThreeVector(-9999.,-9999.,-9999); 
+//   if (isnan(tmpTpcEntrancetPoint->x())) *tmpTpcEntrancePoint = StHbtThreeVector(-9999.,-9999.,-9999); 
+  //  cout << "tmpTpcEntrancePoint"<<*tmpTpcEntrancePoint << endl;
 
   // 03Oct00 - mal.  OK, let's try something a little more 
   // along the lines of NA49 and E895 strategy.
   // calculate the "nominal" position at N radii (say N=11) 
   // within the TPC, and for a pair cut
   // use the average separation of these N
-  for (int irad=0; irad<11; irad++){
+  int irad = 0;
+  candidates = hel.pathLength(50.0);
+  sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
+  while (irad<11 && !isnan(sideLength)){
     float radius = 50.0 + irad*15.0;
     candidates = hel.pathLength(radius);
     sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
-    //    cout <<"StHbtParticle==sideLength==" << sideLength<< endl;
     tmpPosSample[irad] = hel.at(sideLength);
-  }
+    if(isnan(tmpPosSample[irad].x()) ||
+       isnan(tmpPosSample[irad].y()) ||
+       isnan(tmpPosSample[irad].z()) 
+       ){
+      cout << "tmpPosSample for radius=" << radius << " NAN"<< endl; 
+      cout << "tmpPosSample=(" <<tmpPosSample[irad]<<")"<< endl;
+      tmpPosSample[irad] =  StHbtThreeVector(-9999.,-9999.,-9999);
+    }
+    irad++;
+    if (irad<11){
+      float radius = 50.0 + irad*15.0;
+      candidates = hel.pathLength(radius);
+      sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
+    }
+   }
+   for (int i = irad; i<11; i++)
+     {
+       tmpPosSample[i] =  StHbtThreeVector(-9999.,-9999.,-9999);   
+     }
 
   static float tRowRadius[45] = {60,64.8,69.6,74.4,79.2,84,88.8,93.6,98.8, 
 				 104,109.2,114.4,119.6,127.195,129.195,131.195,
@@ -565,29 +616,76 @@ void StHbtParticle::CalculateTpcExitAndEntrancePoints( const StPhysicalHelixD* t
 				 173.195,175.195,177.195,179.195,181.195,
 				 183.195,185.195,187.195,189.195};
   int tRow,tSect,tOutOfBound;
-  double tU,tLength,tPhi;
+  double tLength,tPhi;
+  float tU;
   StHbtThreeVector tPoint;
   StThreeVectorD tn(0,0,0);
   StThreeVectorD tr(0,0,0);
-  for(int ti=0;ti<45;ti++){
-    // Find which sector it is on
+  int ti =0;
+  // test to enter the loop
+  candidates =  hel.pathLength(tRowRadius[ti]);
+  tLength = (candidates.first > 0) ? candidates.first : candidates.second;
+  if (isnan(tLength)){
+    cout <<"tLength Init tmp NAN" << endl;
+    cout <<"padrow number= "<<ti << "not reached" << endl;
+    cout << "*** DO NOT ENTER THE LOOP***" << endl;
+    tmpSect[ti]=-1;//sector
+  }
+  // end test
+  while(ti<45 && !isnan(tLength)){
     candidates =  hel.pathLength(tRowRadius[ti]);
     tLength = (candidates.first > 0) ? candidates.first : candidates.second;
+    if (isnan(tLength)){
+      cout <<"tLength loop 1st NAN" << endl;
+      cout <<"padrow number=  " << ti << " not reached" << endl;
+      cout << "*** THIS IS AN ERROR SHOULDN'T  LOOP ***" << endl;
+      tmpSect[ti]=-1;//sector
+    }
     tPoint = hel.at(tLength);
+    // Find which sector it is on
     TpcLocalTransform(tPoint,tmpSect[ti],tRow,tU,tPhi);
+    if (isnan(tmpSect[ti])){
+      cout <<"***ERROR tmpSect"<< endl; 
+    }
+    if (isnan(tRow)){
+      cout <<"***ERROR tRow"<< endl;
+    }
+    if (isnan(tU)){
+      cout <<"***ERROR tU"<< endl;
+    }
+    if (isnan(tPhi)){
+      cout <<"***ERROR tPhi"<< endl;
+    }  
     // calculate crossing plane
-    //tPhi = tSectToPhi[tmpSect[ti]-1]*TMath::Pi()/6.;
     tn.setX(cos(tPhi));
     tn.setY(sin(tPhi));       
     tr.setX(tRowRadius[ti]*cos(tPhi));
     tr.setY(tRowRadius[ti]*sin(tPhi));
     // find crossing point
-    tLength = hel.pathLength(tr,tn);
+    tLength = hel.pathLength(tr,tn); 
+    if (isnan(tLength)){
+      cout <<"tLength loop 2nd  NAN" << endl;
+      cout <<"padrow number=  " << ti << " not reached" << endl;
+      tmpSect[ti]=-1;//sector
+    }
     tPoint = hel.at(tLength);
     tmpZ[ti] = tPoint.z();
     tOutOfBound = TpcLocalTransform(tPoint,tSect,tRow,tmpU[ti],tPhi);
+    if (isnan(tSect)){
+      cout <<"***ERROR tSect 2"<< endl; 
+    }
+    if (isnan(tRow)){
+      cout <<"***ERROR tRow 2"<< endl;
+    }
+    if (isnan(tmpU[ti])){
+      cout <<"***ERROR tmpU[ti] 2"<< endl;
+    }
+    if (isnan(tPhi)){
+      cout <<"***ERROR tPhi 2 "<< endl;
+    }  
     if(tOutOfBound || (tmpSect[ti] == tSect && tRow!=(ti+1))){
       tmpSect[ti]=-1;
+      //	  cout << "missed once"<< endl;
     }
     else{
       if(tmpSect[ti] != tSect){
@@ -599,14 +697,58 @@ void StHbtParticle::CalculateTpcExitAndEntrancePoints( const StPhysicalHelixD* t
 	// find crossing point
 	tLength = hel.pathLength(tr,tn);
 	tPoint = hel.at(tLength);
+	if (isnan(tLength)){
+	  cout <<"tLength loop 3rd NAN" << endl;
+	  cout <<"padrow number=  "<< ti << " not reached" << endl;
+	  tmpSect[ti]=-1;//sector
+	}
 	tmpZ[ti] = tPoint.z();
 	tmpSect[ti] = tSect;
 	tOutOfBound = TpcLocalTransform(tPoint,tSect,tRow,tmpU[ti],tPhi);
+	if (isnan(tSect)){
+	  cout <<"***ERROR tSect 3"<< endl; 
+	}
+	if (isnan(tRow)){
+	  cout <<"***ERROR tRow 3"<< endl;
+	}
+	if (isnan(tmpU[ti])){
+	  cout <<"***ERROR tmpU[ti] 3"<< endl;
+	}
+	if (isnan(tPhi)){
+	  cout <<"***ERROR tPhi 3 "<< endl;
+	}  
 	if(tOutOfBound || tSect!= tmpSect[ti] || tRow!=(ti+1)){
 	  tmpSect[ti]=-1;
 	}
       }
     }
+    if (isnan(tmpSect[ti])){
+      cout << "*******************ERROR***************************" << endl;
+      cout <<"StHbtParticle--Fctn tmpSect=" << tmpSect[ti] << endl;
+      cout << "*******************ERROR***************************" << endl;
+    }
+    if (isnan(tmpU[ti])){
+      cout << "*******************ERROR***************************" << endl;
+      cout <<"StHbtParticle--Fctn tmpU=" << tmpU[ti] << endl;
+      cout << "*******************ERROR***************************" << endl;
+    }
+    if (isnan(tmpZ[ti])){
+      cout << "*******************ERROR***************************" << endl;
+      cout <<"StHbtParticle--Fctn tmpZ=" << tmpZ[ti] << endl;
+      cout << "*******************ERROR***************************" << endl;
+    }
+    // If padrow ti not reached all other beyond are not reached
+    // in this case set sector to -1
+    if (tmpSect[ti]==-1){
+      for (int tj=ti; tj<45;tj++){
+	tmpSect[tj] = -1;
+	ti=45;
+      }
+    }
+    ti++;
+    if (ti<45){
+      candidates =  hel.pathLength(tRowRadius[ti]);
+      tLength = (candidates.first > 0) ? candidates.first : candidates.second;}
   }
 }
 //_____________________
