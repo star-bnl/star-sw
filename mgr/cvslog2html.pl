@@ -35,7 +35,6 @@ name to browse that module's CVS area.
 </tr></td>
 </table>
 
-<blockquote>
 <table border=1 cellpadding=3 cellspacing=0>
 <tr bgcolor=lightgrey>
   <td align=center><b> User </b></td>
@@ -132,7 +131,6 @@ END_BLOCK
 $firstTime = $timeA[1];
 $content =<<END_BLOCK;
 </table>
-</blockquote>
 <font size=-1>
 Commits since $firstTime <br>
 <a href="mailto:wenaus\@bnl.gov">Torre Wenaus</a>
@@ -148,6 +146,8 @@ $content = <<END_BLOCK;
 <html>
 <head>
 <title>Recent CVS commit history</title>
+<meta http-equiv="Refresh" content="1200">
+<meta http-equiv="expires" content="$currentTime">
 </head>
 <body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
 <basefont face="verdana,arial,helvetica,sans-serif">
@@ -165,7 +165,6 @@ name to browse that module's CVS area.
 </tr></td>
 </table>
 
-<blockquote>
 <table border=1 cellpadding=3 cellspacing=0>
 <tr bgcolor=lightgrey>
   <td align=center><b> User </b></td>
@@ -192,7 +191,6 @@ END_BLOCK
 
 $content =<<END_BLOCK;
 </table>
-</blockquote>
 <font size=-1><a href="mailto:wenaus\@bnl.gov">Torre Wenaus</a></font>
 </body></html>
 END_BLOCK
