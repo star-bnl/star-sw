@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.hh,v 1.3 2000/09/25 20:21:08 ullrich Exp $
+ * $Id: StHelixD.hh,v 1.4 2002/06/21 17:49:26 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHelixD.hh,v $
+ * Revision 1.4  2002/06/21 17:49:26  genevb
+ * Some minor speed improvements
+ *
  * Revision 1.3  2000/09/25 20:21:08  ullrich
  * Includes updated.
  *
@@ -87,6 +90,9 @@ public:
     // path length at given r (cylindrical r)
     pairD        pathLength(double r)   const;
     
+    // path length at given r (cylindrical r, cylinder axis at x,y)
+    pairD        pathLength(double r, double x, double y);
+
     // path length at distance of closest approach to a given point
     double       pathLength(const StThreeVectorD& p) const;
     

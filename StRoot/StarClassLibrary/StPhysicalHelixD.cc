@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPhysicalHelixD.cc,v 1.4 2002/02/20 00:56:31 ullrich Exp $
+ * $Id: StPhysicalHelixD.cc,v 1.5 2002/06/21 17:49:26 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StPhysicalHelixD.cc,v $
+ * Revision 1.5  2002/06/21 17:49:26  genevb
+ * Some minor speed improvements
+ *
  * Revision 1.4  2002/02/20 00:56:31  ullrich
  * Added methods to calculate signed DCA.
  *
@@ -92,12 +95,14 @@ StThreeVectorD StPhysicalHelixD::momentum(double B) const
     }
 }
 
-StThreeVectorD StPhysicalHelixD::momentumAt(double S, double B)
+StThreeVectorD StPhysicalHelixD::momentumAt(double S, double B) const
 {
-    this->moveOrigin(S);
-    StThreeVectorD p = this->momentum(B);
-    this->moveOrigin(-S);
-    return p;
+    // Obtain phase-shifted momentum from phase-shift of origin
+    double xc = this->xcenter();
+    double yc = this->ycenter();
+    double rx = (y(S)-yc)/(mOrigin.y()-yc);
+    double ry = (x(S)-xc)/(mOrigin.x()-xc);
+    return (this->momentum(B)).pseudoProduct(rx,ry,1.0);
 }
 
 int StPhysicalHelixD::charge(double B) const

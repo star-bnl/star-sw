@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.cc,v 1.9 2000/07/17 21:44:24 ullrich Exp $
+ * $Id: StHelixD.cc,v 1.10 2002/06/21 17:49:25 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHelixD.cc,v $
+ * Revision 1.10  2002/06/21 17:49:25  genevb
+ * Some minor speed improvements
+ *
  * Revision 1.9  2000/07/17 21:44:24  ullrich
  * Fixed problem in pathLength(cyl_rad).
  *
@@ -330,11 +333,11 @@ pairD StHelixD::pathLength(double r) const
 	double p = period();
 	if (!isnan(value.first)) {
 	    if (fabs(value.first-p) < fabs(value.first)) value.first = value.first-p;
-	    if (fabs(value.first+p) < fabs(value.first)) value.first = value.first+p;
+	    else if (fabs(value.first+p) < fabs(value.first)) value.first = value.first+p;
 	}
 	if (!isnan(value.second)) {
 	    if (fabs(value.second-p) < fabs(value.second)) value.second = value.second-p;
-	    if (fabs(value.second+p) < fabs(value.second)) value.second = value.second+p;
+	    else if (fabs(value.second+p) < fabs(value.second)) value.second = value.second+p;
 	}
     }
     if (value.first > value.second) {
@@ -343,6 +346,18 @@ pairD StHelixD::pathLength(double r) const
 	value.second = tmp;
     }
     return(value);
+}
+
+pairD StHelixD::pathLength(double r, double x, double y) 
+{   
+    double x0 = mOrigin.x();
+    double y0 = mOrigin.y();
+    mOrigin.setX(x0-x);
+    mOrigin.setY(y0-y);
+    pairD result = this->pathLength(r);
+    mOrigin.setX(x0);
+    mOrigin.setY(y0);
+    return result;
 }
 
 double StHelixD::pathLength(const StThreeVectorD& r,
