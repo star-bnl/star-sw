@@ -1,0 +1,20 @@
+<pre><h3>void strterm_set_wait_</h3></pre>
+<pre>
+(void) /* Turn terminal I/O waiting on */
+{
+/*
+  FORTRAN callable:
+
+	CALL STRTERM_SET_WAIT
+
+  No arguments
+
+  Return value:  none ("void")
+
+  Description:
+	Set the terminal into "wait", or synchronous I/O mode.  ie, if
+	no characters are available at a read,  program flow halts,
+	waiting for something to be transmitted, rather than returning
+	a null byte and continuing.  This is the "normal" mode.
+*/
+</pre>

@@ -1,0 +1,22 @@
+<pre><h3>void strterm_set_line_</h3></pre>
+<pre>
+(void)  /* Set terminal to wait-for-line mode  */
+{
+/*
+  FORTRAN callable:
+
+	CALL STRTERM_SET_LINE
+
+  No arguments
+
+  Return value:  none ("void")
+
+  Description:
+	Set the terminal into "line" I/O mode.  ie, characters are not
+	available until an EOT (End Of Transmission, eg, a Return, Line Feed,
+	etc.) is sent.
+	This is independent of whether terminal I/O is synchronous
+	(reads wait until something is really read) or asynchronous
+	(reads return a null byte if nothing is read).
+*/
+</pre>
