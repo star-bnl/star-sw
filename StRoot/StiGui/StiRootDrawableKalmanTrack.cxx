@@ -109,7 +109,7 @@ void StiRootDrawableKalmanTrack::fillHitsForDrawing()
 
     //now fill hits for real:
     //remember, we *ARE* an StiKalmanTrack (public inheritance)
-    StiKalmanTrackNode* node = lastNode; //start at innermost
+    StiKalmanTrackNode* node = getLastNode(); //start at innermost
     int hits=0;
     bool go=true;
     while (go) {
