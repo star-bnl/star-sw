@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackingParams.hh,v 1.13 2003/09/11 21:31:30 jeromel Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.14 2003/09/26 06:08:58 oldi Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.14  2003/09/26 06:08:58  oldi
+// Check if the magentic field was reversed 'by hand' with a chain option.
+// If yes, multiply the scaleFactor of the field with -1.
+//
 // Revision 1.13  2003/09/11 21:31:30  jeromel
 // removed inline as it would leave a few undefined reference
 //
@@ -75,6 +79,7 @@ using namespace units;
 
 #include "StDbUtilities/StMagUtilities.h"
 #include "StTpcDb/StTpcDb.h"
+#include "StBFChain.h"
 
 class St_ftpcDimensions;
 class St_ftpcPadrowZ;
@@ -185,7 +190,7 @@ protected:
   Int_t InitCoordTransformation();
   Int_t InitCoordTransformation(ftpcCoordTrans_st* ftpcCoordTrans);
   Int_t InitSpaceTransformation();
-  Int_t ResetMagField(TDataSet *RunLog = 0);
+  Int_t ResetMagField(TDataSet *RunLog = 0, StBFChain *chain = 0);
   
 public:
   
@@ -196,7 +201,8 @@ public:
 					St_ftpcPadrowZ *padrow_z);
   static StFtpcTrackingParams* Instance(Bool_t debug, 
 					St_ftpcCoordTrans *ftpcCoordTrans, 
-					TDataSet *RunLog);
+					TDataSet *RunLog,
+					StBFChain *chain);
   static StFtpcTrackingParams* Instance(Bool_t debug, Double_t magFieldFactor);
   static StFtpcTrackingParams* Instance();
   

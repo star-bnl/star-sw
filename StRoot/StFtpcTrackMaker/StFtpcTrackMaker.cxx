@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.48 2003/09/02 17:58:16 perev Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.49 2003/09/26 06:08:55 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.49  2003/09/26 06:08:55  oldi
+// Check if the magentic field was reversed 'by hand' with a chain option.
+// If yes, multiply the scaleFactor of the field with -1.
+//
 // Revision 1.48  2003/09/02 17:58:16  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -275,7 +279,8 @@ Int_t StFtpcTrackMaker::InitRun(Int_t run){
   // get run dependend tracking parameters from database
   StFtpcTrackingParams::Instance(kTRUE, 
 				 (St_ftpcCoordTrans *)ftpcCalibrations("ftpcCoordTrans"),
-				 GetDataBase("RunLog"));
+				 GetDataBase("RunLog"),
+				 (StBFChain*) GetChain());
 
   return kStOK;
 }
@@ -667,7 +672,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.48 2003/09/02 17:58:16 perev Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.49 2003/09/26 06:08:55 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
