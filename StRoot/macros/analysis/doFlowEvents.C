@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.46 2003/06/27 21:17:18 posk Exp $
+// $Id: doFlowEvents.C,v 1.47 2003/07/30 22:09:18 oldi Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -334,10 +334,10 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   StFlowEvent::SetPtTpcCut(0.0, 1., 1, 1);    // harmonic 2, selection 2
 //   StFlowEvent::SetDcaGlobalTpcCut(0., 1.);    // for event plane
   // FTPC
-//   StFlowEvent::SetEtaFtpcCut(0., 10., 0, 0);  // harmonic 1, selection 1
-//   StFlowEvent::SetEtaFtpcCut(0., 10., 1, 0);  // harmonic 2, selection 1
-//   StFlowEvent::SetEtaFtpcCut(0., 10., 0, 1);  // harmonic 1, selection 2
-//   StFlowEvent::SetEtaFtpcCut(0., 10., 1, 1);  // harmonic 2, selection 2
+//   StFlowEvent::SetEtaFtpcCut(-10. 0., 0., 10., 0, 0);  // harmonic 1, selection 1
+//   StFlowEvent::SetEtaFtpcCut(-10. 0., 0., 10., 1, 0);  // harmonic 2, selection 1
+//   StFlowEvent::SetEtaFtpcCut(-10. 0., 0., 10., 0, 1);  // harmonic 1, selection 2
+//   StFlowEvent::SetEtaFtpcCut(-10. 0., 0., 10., 1, 1);  // harmonic 2, selection 2
 //   StFlowEvent::SetPtFtpcCut(0., 10., 0, 0);   // harmonic 1, selection 1
 //   StFlowEvent::SetPtFtpcCut(0., 10., 1, 0);   // harmonic 2, selection 1
 //   StFlowEvent::SetPtFtpcCut(0., 10., 0, 1);   // harmonic 1, selection 2
@@ -350,8 +350,9 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   // Make Eta subevents
 //     StFlowEvent::SetEtaSubs();
 
-  // Disanable weights in the event plane calcualtion
+  // Disenable weights in the event plane calculation
 //   StFlowEvent::SetPtWgt(kFALSE);
+//   StFlowEvent::SetPtWgtSaturation(2.);
 //   StFlowEvent::SetEtaWgt(kFALSE);
 
   // Use Aihong's probability PID method
@@ -527,6 +528,10 @@ void doFlowEvents(const Int_t nevents, Bool_t phiWgtOnly) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.47  2003/07/30 22:09:18  oldi
+// Eta cuts for event plane selection separated for FTPC east and west.
+// PtWgtSaturation parameter introduced (default set to 2. -> no change of default behavior).
+//
 // Revision 1.46  2003/06/27 21:17:18  posk
 // Event plane cuts now only odd and even, instead of different for each harmonic.
 //
