@@ -132,9 +132,10 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
 	  (my $core = $class) =~ s/^St//g; 		#print "core $core\n";
           my $cl = "";
 	  foreach my $stem ("Iterator","PtrVec","SPtrVec") {
-	    if ($stem eq "Iterator") {$cl = "St" . $core . $stem . "-";}
+	    if ($stem eq "Iterator") {$cl = "St" . $core . $stem      ;}
 	    else                     {$cl = "St" . $stem . $core . "-";}
-	    push @classes, $cl; $class_hfile{$cl} = $new_h; $class_hfile_depens_on{$cl} = $includes;
+	    push @classes, $cl; 
+	    $class_hfile{$cl} = $new_h; $class_hfile_depens_on{$cl} = $includes;
 	    				#print "class: $stem $core $cl includes  $includes\n";
 	  }
 	  open(DEF, $macro) || die "Can't open Macros $macro \n";
@@ -162,6 +163,8 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
 }
 my $opened = "";
 for my $class (@classes) {
+#  if ($class =~ /Iterator/ || $class =~ /PtrVec/ ||
+#      $class =~ /SPtrVec/) {$class_written{$class} = "YES";}
   if ($class) {
     if (!$class_written{$class}) {
       if (!$opened) {
@@ -180,8 +183,13 @@ for my $class (@classes) {
 	print Out "#pragma link C++ global $global;\n"; print  "#pragma link C++ global $global;\n";
       }
       else {
-       if ($class =~ /-$/) {print Out "#pragma link C++ class $class;\n"; print  "#pragma link C++ class $class;\n";}
-       else {print Out "#pragma link C++ class $class+;\n"; print  "#pragma link C++ class $class+;\n";}
+	if ($class =~ /^St/ and $class =~ /Iterator$/) {
+	  print Out "#pragma link C++ typedef $class;\n"; print  "#pragma link C++ typedef $class;\n"; 
+	}
+	else {
+	  if ($class =~ /-$/) {print Out "#pragma link C++ class $class;\n"; print  "#pragma link C++ class $class;\n";}
+	  else {print Out "#pragma link C++ class $class+;\n"; print  "#pragma link C++ class $class+;\n";}
+	}
       }
       $class_written{$class} = "YES";
     }
