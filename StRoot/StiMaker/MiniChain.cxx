@@ -7,7 +7,7 @@ using namespace std;
 #include "StiMaker/StiMaker.h"
 #include "StiMaker/MiniChain.h"
 #include "StiMaker/StiMakerParameters.h"
-#include "StiMaker/MainFrame.h"
+#include "StiGui/EventDisplay.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StDetectorDbMaker/StDetectorDbMaker.h"
 #include "StTpcDb/StTpcDb.h"
@@ -163,19 +163,17 @@ void MiniChain::setupInput(const char ** fileList)
 
 /*!
   Setup the graphical interface used to visualize the reconstruction of tracks.
-  This is done via the instantiation of a ROOT based class called MainFrame.
-  MainFrame must be made "aware" of the chain and the ioMaker so it can read
+  This is done via the instantiation of a ROOT based class called EventDisplay
+  EventDisplay must be made "aware" of the chain and the ioMaker so it can read
   and process events on its own.
 */
 void MiniChain::setupGui()
 {  
   cout <<"MiniChain::setupGui - INFO - Started"<<endl;
-  MainFrame * mainFrame=0;
-  cout << "     Interactive mode selected."<<endl
-       << "          ITTF Run in Gui Mode."<<endl;
-  mainFrame = new MainFrame(gClient->GetRoot(), 400, 220);
-  mainFrame->setStChain(_chain);
-  mainFrame->setIoMaker(_ioMaker);
+  EventDisplay * display = new EventDisplay("STAR Event Display","STAR",_toolkit,gClient->GetRoot(), 400, 220);
+  display->setStChain(_chain);
+  display->setIoMaker(_ioMaker);
+  _stiMaker->setEventDisplay(display);
   cout <<"MiniChain::setupGui - INFO - Done"<<endl;
 }
 

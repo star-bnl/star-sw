@@ -12,6 +12,7 @@ using std::find_if;
 #include "TCanvas.h"
 #include "TPaveLabel.h"
 #include "DetectorActivator.h"
+#include "Sti/StiToolkit.h"
 
 DetectorActivator::DetectorActivator(const TGWindow *p, const TGWindow *main,
 				     UInt_t w, UInt_t h, UInt_t options) :
@@ -65,7 +66,7 @@ DetectorActivator::DetectorActivator(const TGWindow *p, const TGWindow *main,
 			    0, 0, 5, 0);
     const  StiCompositeTreeNode<StiDetector>   foo;
     //Build Dynamically from Detector Tree:
-    StiDetectorContainer* detStore = StiDetectorContainer::instance();
+    StiDetectorContainer* detStore = StiToolkit::instance()->getDetectorContainer();
     const  StiCompositeTreeNode<StiDetector>  * root = detStore->root();
     const  StiCompositeTreeNode<StiDetector>  * midRapidity = *(root->begin());
     if (midRapidity->getName()!="midrapidity") {
@@ -213,7 +214,7 @@ void DetectorActivator::updateDetectors()
 
 void DetectorActivator::activateLayer(const string& name, bool on)
 {
-    StiDetectorContainer* detStore = StiDetectorContainer::instance();
+    StiDetectorContainer* detStore = StiToolkit::instance()->getDetectorContainer();
     const  StiCompositeTreeNode<StiDetector>  * root = detStore->root();
     const  StiCompositeTreeNode<StiDetector>  * midRapidity = *(root->begin());
     if (midRapidity->getName()!="midrapidity") {
@@ -249,7 +250,7 @@ void DetectorActivator::activateLayer(const string& name, bool on)
 	//cout <<"Setting detector  "<<tempDetector->getName()<<" to state isOn="<<on<<endl;
 	StiDrawable* tempDrawable = dynamic_cast<StiDrawable*>(tempDetector);
 	if (tempDrawable) {
-	    tempDrawable->setVisibility(on);
+	    tempDrawable->setVisible(on);
 	    //cout <<"Setting detector  "<<tempDetector->getName()
 	    //<<" to state visible="<<on<<endl;	    
 	}

@@ -4,10 +4,11 @@
 #include "Sti/StiDetectorContainer.h"
 #include "StiGui/StiRootDrawableDetector.h"
 #include "StiGui/StiDrawable.h"
+#include "Sti/StiToolkit.h"
 
 void StiZoomSkeletonView::setToDefault()
 {
-    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+    StiDetectorContainer& rdet = *(StiToolkit::instance()->getDetectorContainer());
     StiRootDrawableDetector* layer = dynamic_cast<StiRootDrawableDetector*>(*rdet);
     if (!layer) {
 	cout <<"Error! MainFrame::setCurrentDetectorToDefault():";
@@ -17,11 +18,11 @@ void StiZoomSkeletonView::setToDefault()
     layer->setColor(1);
     
     //Keep all silicon layers visible
-    const string& name = layer->StiDrawable::name();
+    const string& name = layer->getName();
     string::size_type where = name.find("Svt");
 
     if ( where != name.npos && layer->isOn() ) {
-	layer->setVisibility(true);
+	layer->setVisible(true);
 	return;
     }
 
@@ -29,16 +30,16 @@ void StiZoomSkeletonView::setToDefault()
     where = name.find("Tpc");
     string::size_type where2 = name.find("Padrow_0/");
     if (where!=name.npos && where2!=name.npos && layer->isOn()) {
-	layer->setVisibility(true);
+	layer->setVisible(true);
     }
     else {    //else, hide!
-	layer->setVisibility(false);
+	layer->setVisible(false);
     }
 }
 
 void StiSkeletonView::setToDefault()
 {
-    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+  StiDetectorContainer& rdet = *(StiToolkit::instance()->getDetectorContainer());
     StiRootDrawableDetector* layer = dynamic_cast<StiRootDrawableDetector*>(*rdet);
     if (!layer) {
 	cout <<"Error! MainFrame::setCurrentDetectorToDefault() Error:\t";
@@ -48,11 +49,11 @@ void StiSkeletonView::setToDefault()
     layer->setColor(1);
     
     //Keep all active silicon layers visible
-    const string& name = layer->StiDrawable::name();
+    const string& name = layer->getName();
     string::size_type where = name.find("Svt");
     
     if ( where != name.npos && layer->isOn() ) {
-	layer->setVisibility(true);
+	layer->setVisible(true);
 	return;
     }
 
@@ -60,16 +61,16 @@ void StiSkeletonView::setToDefault()
     where = name.find("Tpc");
     string::size_type where2 = name.find("Ofc");
     if (where!=name.npos && where2!=name.npos && layer->isOn()) {
-	layer->setVisibility(true);
+	layer->setVisible(true);
     }
     else {    //else, hide!
-	layer->setVisibility(false);
+	layer->setVisible(false);
     }
 }
 
 void StiManualView::setToDefault()
 {
-    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+    StiDetectorContainer& rdet = *(StiToolkit::instance()->getDetectorContainer());
     StiRootDrawableDetector* layer = dynamic_cast<StiRootDrawableDetector*>(*rdet);
     if (!layer) {
 	cout <<"Error! MainFrame::setCurrentDetectorToDefault():";
