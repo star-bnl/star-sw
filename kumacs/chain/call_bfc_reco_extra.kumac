@@ -1,13 +1,12 @@
-* 8/12/98 K. Turner
+* 8/25/98 K. Turner
 * 
 * This kumac is to run bfc (98g version) in the following way
 * - read in file that already has simulated tpc and svt data on it
 *   (i.e. have already run through tss and srs )
+* - execute all other available detector simulations
 * - execute all reconstruction packages from this point through
 *    clustering, tracking, global reconstruction and creating dst file
-* 
-* 8/25/98 K. Turner 
-*     - updated with additional/corrected arguments
+* - write out full event 
 * 
  exec $STAR/kumacs/chain/bfc _
    TOP=$STAR _
@@ -15,13 +14,13 @@
    tpc_sector_last=24 _
    gstar_settings=' field_only' _
    domain=' geometry tpc svt global ' _
-   chain=' evin tpg svg tcl tpt tte_e tid sgr evr svm egr ev0 evout' _
+   chain=' evin tpg svg tcl tpt tte_e tid sgr evr svm egr ev0 ddedx dpnt desum dmsft evout' _
    skip=0 _
    first=1 _
    no_events=20 _
    input_data_prefix=/star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/tss/ _
    input_data_file=auau_ce_b0-2_2301_2320.xdf _
-   output_file=/star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/reco/bfc_reco_output _
-   log=bfc_reco.log
+   output_file=/star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/reco/bfc_reco_extra_output _
+   log=bfc_reco_extra.log
 
  
