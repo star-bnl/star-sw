@@ -8,7 +8,8 @@ int
 mysqlAccessor::QueryDb(StDbConfigNode* node){
   
   char* configName = node->getConfigName();
-  char* keyName = getKeyName(configName);
+  char* nodeName = node->getName();
+  char* keyName = getKeyName(nodeName);
 
     Db<< "SELECT NodeKeys.ID FROM NodeKeys WHERE NodeKeys.KeyName='";
     Db<<configName<<"' AND NodeKeys.Name='"<<keyName<<"'"<<endsql;
@@ -20,7 +21,8 @@ mysqlAccessor::QueryDb(StDbConfigNode* node){
     //    buff.Print();
     if(!buff.ReadScalar(TableID,"ID")){
       cerr <<"QueryDb::Config: No Key = "<< configName<< " found " << endl;
-      return 0;
+       cerr <<"QueryDb::Config: No Name = "<< keyName<< " found " << endl;
+     return 0;
     }
 
    Db.Release(); 
