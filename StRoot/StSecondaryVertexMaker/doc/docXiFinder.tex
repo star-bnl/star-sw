@@ -3,7 +3,8 @@
 \usepackage{footnpag,array}
 \usepackage{fancyhdr,fancybox}
 \usepackage{amsmath}
-\usepackage{french}
+%\usepackage{french}
+% Ca fait chier de pas pouvoir utiliser ca : les captions ne sont plus en italique et ca marque "Figure 1:" [sans espace devant le chiffre] au lieu de "{\sc Fig.} 1 :". 'faut que je me redefinisse une commande "caption".
 
 \oddsidemargin=-7mm
 \textwidth=174mm
@@ -33,7 +34,18 @@
 \pagestyle{fancy}
 \renewcommand{\sectionmark}[1]{\markboth{#1}{}}
 \lhead{V0Finder and XiFinder}
-\rhead{\leftmark}
+\rhead{\thesection\ - {\em \leftmark}}
+%\renewcommand{\caption}[1]{\addtocounter{figure}{1}Figgg \thefigure : {#1}}  %Evidemment, ca n'est pas considere comme un caption ! Donc pour lui c;est juste du texte qu'il ajoute apres chaque figure (=> pas a la ligne, pas centre, et apparait pas dans la table des matieres).
+\def\figurename{{\sc Fig.}} %C'est mieux, mais j'ai toujours pas d'espace entre le chiffre et les ":". C'est chose faite avec le truc qui suit :-))
+\makeatletter
+\renewcommand{\fnum@figure}{\figurename~\thefigure~}
+\makeatother
+%Reste le probleme du texte qui n'est pas automatiquement en italique.
+%\newcommand{\mycaption}{\caption}
+%\renewcommand{\caption}[1]{\mycaption{#1}}
+%Ca va pas, c'est malheureusement recursif. Tant pis, je me redefinis un caption perso.
+\newcommand{\mycaption}[1]{\caption[\hspace{-10pt}{#1}]{{\em {#1}.}}}
+% Et j'en ai profite pour raccourcir l'espace dans la liste des figures (entre le numero et la legende), et pour gerer le point correctement (pas de point dans la liste des figures, mais un point a la fin des legendes sous les figures). Youpi, c'est cool LaTeX !  :-D
 
 %\discretionary{Avant la coupure}{après}{s'il n'y en a pas}
 %\discretionary{}{-}{}
@@ -262,7 +274,7 @@ Container of V0 vertices \\
 \end{tabular} \\
 \end{array}
 $
-\caption{Overall algorithm of the V0Finder.}
+\mycaption{Overall algorithm of the V0Finder}
 \label{V0Algo}
 
 %\end{flushleft}
@@ -351,7 +363,7 @@ Container of Xi vertices \\
 $
 
 
-\caption{Overall algorithm of the XiFinder.}
+\mycaption{Overall algorithm of the XiFinder}
 \label{XiAlgo}
 
 %\end{flushleft}
@@ -442,7 +454,7 @@ Function & Role in the V0Finder & Role in the XiFinder \\
 {\tt Trim} & Remove the V0's that don't pass cuts & Not redefined (not used) \\
 \hline
 \end{tabular}
-\caption{Member-functions of {\tt StV0FinderMaker} and {\tt StXiFinderMaker}.}
+\mycaption{Member-functions of {\tt StV0FinderMaker} and {\tt StXiFinderMaker}}
 \label{fonctions-membres}
 
 \end{center}
@@ -550,7 +562,7 @@ Call {\tt UseV0} to find if V0 is used for Xis \\
 \hline
 \end{array}
 $
-\caption{Algorithm of the V0Finder.}
+\mycaption{Algorithm of the V0Finder}
 \label{V0AlgoMieux}
 
 \end{center}
@@ -559,6 +571,8 @@ $
 
 
 \subsection{XiFinder}
+
+\subsubsection{Differences between Fortran and C++}
 
 The differences between the Fortran code and the C++ code are shown in {\sc Fig}. \ref{XiFC}, on the half-detailed algorithm. The red lines show what has disappeared, either because of the new structure of the code, or because of the fact that we are using StEvent. The green lines show the parts that have been reshaped, for the same reasons as several parts have been removed.
 
@@ -685,7 +699,7 @@ Subroutine {\tt ev0\_project\_track} \\
 \end{array}
 $
 
-\caption{Algorithm of the XiFinder.}
+\mycaption{Algorithm of the XiFinder}
 \label{XiFC}
 
 \end{center}
@@ -817,7 +831,7 @@ Block 3 \\
 \end{array}                           % Fin array 0
 \end{array}
 $
-\caption{Reshaping of {\tt casc\_geom} : Fortran to C++.}
+\mycaption{Reshaping of {\tt casc\_geom} : Fortran to C++}
 \label{cascgeom}
 
 \end{center}
@@ -928,11 +942,13 @@ Block 5 \\
 \end{array}
 $
 
-\caption{Reshaping of the loop over the intersection points : Fortran to C++.}
+\mycaption{Reshaping of the loop over the intersection points : Fortran to C++}
 \label{blocs}
 
 \end{center}
 
+
+\subsubsection{Calculation of the intersection points and dca}
 
 Now, here is how the coordinates of the intersection points {\em in the bending plane (xOy)} between the V0's straight line and the bachelor's helix (actually, of their projection in the bending plane).
 
@@ -982,7 +998,7 @@ $$
 
 
 
-
+\subsubsection{Detailed algorithm and cuts}
 
 {\sc Fig}. \ref{XiAlgoMieux} shows...
 
@@ -1014,10 +1030,16 @@ Apply cuts \\
 \end{array}
 $
 
-\caption{Algorithm of the XiFinder.}
+\mycaption{Algorithm of the XiFinder}
 \label{XiAlgoMieux}
 
 \end{center}
+
+
+
+\subsubsection{Detectors}
+
+Blablabla
 
 
 
