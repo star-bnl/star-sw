@@ -8,19 +8,19 @@
 ************************************************************************
 ************************************************************************
 macro initialize
-   macro/global/import *
-   message ' initializing svt_fast_sim '
-   exec init_srs
-return
+  
+  macro/global/import *
+      exec create_tables_svt#srs
+    exec init_srs
+    
+  return
 
 ********************************************************************
  
-macro process_event nev
-  macro/global/import *
+ macro process_event 
    
-      message ' SVT fast sim: Processing Event # ' [nev]
-
-      exec run_srs  [ievent]
+   macro/global/import 
+     exec run_srs  [ievent]
 	 if (staf_status(1) .ne. 1) goto NEXT_EVENT
 	 
  NEXT_EVENT:

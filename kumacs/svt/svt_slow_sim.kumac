@@ -1,5 +1,6 @@
 * created June 3, 1998 - Kathy Turner
-*   -  just have macros in this kumac
+* -  just have macros in this kumac
+*  6/25/98 Kathy Turner
 ***********************************************************************
 ************************************************************************
 ************************************************************************
@@ -10,8 +11,7 @@
  
  macro initialize
 macro/global/import *
-   
-    message ' SVT slow simulator initialization'
+  
       exec init_sss
       exec init_ssf
       

@@ -99,9 +99,9 @@ Message 'Doing' [no_events] 'events'
  *****************************************
  
  if [svt_simul] = sss then
-   exec svt_slow_sim#initialization
+   exec svt_slow_sim#initialize
  elseif [svt_simul] = srs then
-    exec init_srs
+    exec svt_fast_sim#initialize
  endif
  
  *****************************************
@@ -109,7 +109,7 @@ Message 'Doing' [no_events] 'events'
  *****************************************
  
  if [svt_tracker].eq.stk .or. [svt_tracker].eq.sgr then
-   exec svt_tracker#initialization
+   exec svt_tracker#initialize
  endif
 
 
