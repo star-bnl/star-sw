@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.25 2004/06/03 21:02:28 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.26 2004/07/08 00:45:21 balewski Exp $
 // doxygen info here
 /** 
  * \class  EEmcTTMMaker
@@ -10,8 +10,8 @@
  * of towers with associated tracks (list of EEmcTTMatch objects)
  *
  * \author Piotr A. Zolnierczuk
- * $Date: 2004/06/03 21:02:28 $
- * $Revision: 1.25 $
+ * $Date: 2004/07/08 00:45:21 $
+ * $Revision: 1.26 $
  *
  * \section ttmakerremarks Remarks
  *
@@ -205,7 +205,7 @@ EEmcTTMMaker::Init() {
 /// Make()
 Int_t 
 EEmcTTMMaker::Make(){
-  static int nDPhi=0;
+ // static int nDPhi=0;
   mNEvents++;
   //
   mTrackList->Clear(); 
@@ -476,6 +476,9 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm)  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.26  2004/07/08 00:45:21  balewski
+// cleanup
+//
 // Revision 1.25  2004/06/03 21:02:28  zolnie
 // fixed subtle bug: when e.g. dphi = +180.(tower center) - -180.0(track)
 //  the match would be rejected - in practice it never happen
