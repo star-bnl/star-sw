@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   14/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_TablePoints.h,v 1.1 1999/05/18 20:21:25 fine Exp $
+// $Id: St_TablePoints.h,v 1.2 1999/11/04 18:03:10 fine Exp $
 // $Log: St_TablePoints.h,v $
+// Revision 1.2  1999/11/04 18:03:10  fine
+// new ctor for tablepoints introduced to make EventDiplay happy
+//
 // Revision 1.1  1999/05/18 20:21:25  fine
 // New class to 3D table viewer
 //  
@@ -25,6 +28,7 @@ class St_TablePoints : public TPoints3DABC
     St_TablePoints();
   public:
     St_TablePoints(St_TableSorter *sorter,const void *key,Option_t *opt="");
+    St_TablePoints(St_TableSorter *sorter, Int_t keyIndex,Option_t *opt="");
    ~St_TablePoints(){}
     virtual Int_t     GetLastPosition()const;
     virtual Float_t   GetX(Int_t idx)  const = 0;

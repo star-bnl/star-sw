@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   14/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_TablePoints.cxx,v 1.1 1999/05/18 20:21:25 fine Exp $
+// $Id: St_TablePoints.cxx,v 1.2 1999/11/04 18:03:10 fine Exp $
 // $Log: St_TablePoints.cxx,v $
+// Revision 1.2  1999/11/04 18:03:10  fine
+// new ctor for tablepoints introduced to make EventDiplay happy
+//
 // Revision 1.1  1999/05/18 20:21:25  fine
 // New class to 3D table viewer
 //  
@@ -53,3 +56,20 @@ St_TablePoints::St_TablePoints(St_TableSorter *sorter,const void *key,Option_t *
   }
   SetOption(opt);
 }
+
+//____________________________________________________________________________
+St_TablePoints::St_TablePoints(St_TableSorter *sorter, Int_t keyIndex,Option_t *opt)
+{
+  m_TableSorter =  0;
+  m_Key         =  0;
+  m_FirstRow    = -1;
+  m_Size        =  0;
+  if (sorter) {
+     m_TableSorter = sorter;
+     m_Key         = sorter->GetKeyAddress(keyIndex);
+     m_Size        = sorter->CountKey(m_Key,keyIndex,kFALSE,&m_FirstRow);
+     SetTablePointer(GetTable());
+  }
+  SetOption(opt); 
+}
+

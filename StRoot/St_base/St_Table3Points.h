@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_Table3Points.h,v 1.1 1999/05/18 20:21:24 fine Exp $
+// $Id: St_Table3Points.h,v 1.2 1999/11/04 18:03:04 fine Exp $
 // $Log: St_Table3Points.h,v $
+// Revision 1.2  1999/11/04 18:03:04  fine
+// new ctor for tablepoints introduced to make EventDiplay happy
+//
 // Revision 1.1  1999/05/18 20:21:24  fine
 // New class to 3D table viewer
 //  
@@ -22,6 +25,8 @@ class St_Table3Points :  public St_TablePoints
         enum EPointDirection {kXPoints,kYPoints,kZPoints,kTotalSize};
         St_Table3Points();
         St_Table3Points(St_TableSorter *sorter,const void *key, const Char_t *xName="x", 
+                        const Char_t *yName="y", const Char_t *zName="z",Option_t *opt="");
+        St_Table3Points(St_TableSorter *sorter,Int_t keyIndex, const Char_t *xName="x", 
                         const Char_t *yName="y", const Char_t *zName="z",Option_t *opt="");
         ~St_Table3Points();
         virtual void    SetAnyColumn(const Char_t *anyName, EPointDirection indx);
