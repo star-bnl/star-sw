@@ -1,4 +1,4 @@
-// $Id: bfcz.C,v 1.7 1999/02/22 23:28:13 fisyak Exp $
+// $Id: bfcz.C,v 1.8 1999/02/24 19:45:46 fisyak Exp $
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -89,15 +89,15 @@ bfcz(const Int_t Nevents=100,
   St_tcl_Maker         *tpc_hits = new St_tcl_Maker("tpc_hits","event/data/tpc/hits");
   St_srs_Maker         *svt_hits = new St_srs_Maker("svt_hits","event/data/svt/hits");
   St_fcl_Maker         *fcl_hits = new St_fcl_Maker("ftpc_hits","event/data/ftpc/hits");
-  St_ctf_Maker         *ctf      = new St_ctf_Maker("ctf","event/data/ctf");
-  St_mwc_Maker         *mwc      = new St_mwc_Maker("mwc","event/data/mwc");
-  St_trg_Maker         *trg      = new St_trg_Maker("trg","event/data/trg");
   StRchMaker           *rch      = new StRchMaker("rch","event/raw_data/rch");
   St_tpt_Maker         *tpc_tracks = new St_tpt_Maker("tpc_tracks","event/data/tpc/tracks");
-  St_l3t_Maker         *l3Tracks   = new St_l3t_Maker("l3Tracks","event/data/l3/tracks");
   St_stk_Maker         *stk_tracks = new St_stk_Maker("svt_tracks","event/data/svt/tracks");
   St_fpt_Maker         *ftpc_tracks = new St_fpt_Maker("ftpc_tracks","event/data/ftpc/tracks");
   St_glb_Maker         *global = new St_glb_Maker("global","event/data/global");
+  St_ctf_Maker         *ctf      = new St_ctf_Maker("ctf","event/data/ctf");
+  St_mwc_Maker         *mwc      = new St_mwc_Maker("mwc","event/data/mwc");
+  St_trg_Maker         *trg      = new St_trg_Maker("trg","event/data/trg");
+  St_l3t_Maker         *l3Tracks   = new St_l3t_Maker("l3Tracks","event/data/l3/tracks");
   St_run_summary_Maker *summary = new St_run_summary_Maker("run_summary","run/dst");
   St_dst_Maker         *dst     = new St_dst_Maker("dst","dst");
   //  dst_Maker->Save();
