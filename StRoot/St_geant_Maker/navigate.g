@@ -34,7 +34,7 @@
 *----------------------------------------------------------------------------
  function agvolume(node,par,pos,mot,who,mcopy,par1)
 +CDE,TYPING,GCBANK,GCVOLU,GCUNIT.
- integer  agvolume,node,par,pos,mot,old,LOCB,par1
+ integer  agvolume,node,par,pos,mot,old,LOCB,par1,npar,natt
 *
  Integer k,n,mother,daughter,where,who,copy,found,ier,ia,mcopy,nvol
  Integer item(20),count(20),list(20),nodes(0:20),
@@ -44,6 +44,7 @@
  save    item,count,list,nodes;
 * integer i;
  character cn*4;
+ real    para(100),attr(100);
 
  agvolume=0;
  If node==0
@@ -74,9 +75,12 @@
    Call GLVOLU(k,Lnam, Lnum, ier)
    par1=LOCB(Q(LQ(JGPAR-Nlevel)+1))
    call UHTOC(Lnam(k),4,cn,4)
+   call GFPARA(Cn,copy,0,npar,natt,para,attr)
+   par1=LOCB(para);
 *   if (count(k)<0) print *,count(k),copy,Nlevel,(GRMAT(i,Nlevel),i=1,9);
 *   if (count(k)=-30 & iax(k)==2) _
 *   print *,count(k),copy,Nlevel,cn,(GRMAT(i,Nlevel),i=1,9);
+
    if (k>1 & birth(Lvol(k-1))>0) node=0;
 end
 
