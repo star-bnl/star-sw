@@ -1,7 +1,10 @@
-// $Id: StMaker.h,v 1.18 1999/04/30 14:58:41 perev Exp $
+// $Id: StMaker.h,v 1.19 1999/05/06 00:19:05 fine Exp $
 // $Log: StMaker.h,v $
+// Revision 1.19  1999/05/06 00:19:05  fine
+// StMaker::MakeDoc method has been re-introduced for the 3d time
+//
 // Revision 1.18  1999/04/30 14:58:41  perev
-// cd() added to StMaker class
+//  cd() added to StMaker class
 //
 // Revision 1.17  1999/03/20 20:57:35  perev
 // add StEvtHddr.h and fix Get/SetNumber in maker
@@ -96,6 +99,8 @@ public:
    virtual void	       	Fatal(int Ierr, const char *Com);  
    virtual void   	PrintInfo() const;
 
+   virtual void   MakeDoc(const TString &stardir="$(STAR)",const TString &outdir="$(STAR)/StRoot/html",Bool_t baseClasses=kTRUE); 
+
 //		User methods
    virtual St_DataSet   *AddData (St_DataSet *data=0,const char *dir=".data");
    virtual St_ObjectSet *AddObj  (TObject *obj,const char *dir);
@@ -172,7 +177,7 @@ public:
 
 //		must be in here in .h
    static const char   *GetCVSIdH() 
-    {static const char cvs[]="$Id: StMaker.h,v 1.18 1999/04/30 14:58:41 perev Exp $";
+    {static const char cvs[]="$Id: StMaker.h,v 1.19 1999/05/06 00:19:05 fine Exp $";
      return cvs;};
    static const char   *GetCVSTag()
      {static const char cvs[]="$Name:  $"; return cvs;};
