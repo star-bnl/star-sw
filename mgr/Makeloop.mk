@@ -1,6 +1,6 @@
 #  $Log: Makeloop.mk,v $
-#  Revision 1.19  1998/10/06 19:52:30  fisyak
-#  Add g2t script
+#  Revision 1.20  1998/10/07 20:23:47  perev
+#  cleanup of .mk
 #
 #  Revision 1.18  1998/09/22 02:21:32  fisyak
 #  Fix NOROOT version
@@ -139,7 +139,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/10/06 19:52:30 $ 
+#           Last modification $Date: 1998/10/07 20:23:47 $ 
 #  default setings
 # Current Working Directory
 #
@@ -156,25 +156,45 @@ TWO        :=2
 THREE      :=3
 FOUR       :=4
 FIVE       :=5
+
+MakePam := $(wildcard $(CWD)/MakePam.mk)
 ifndef MakePam
-MakePam = $(STAR)/mgr/Makeloop.mk
-Makepam = $(STAR)/mgr/MakePam.mk
-MakeDll = $(STAR)/mgr/MakeDll.mk
-endif          
+  MakePam := $(wildcard $(CWD)/mgr/MakePam.mk)  
+endif
+ifndef MakePam
+  MakePam := $(wildcard $(STAR)/mgr/MakePam.mk)  
+endif
+
+MakeDll := $(wildcard $(CWD)/MakeDll.mk)
+ifndef MakeDll
+  MakeDll := $(wildcard $(CWD)/mgr/MakeDll.mk)  
+endif
+ifndef MakeDll
+  MakeDll := $(wildcard $(STAR)/mgr/MakeDll.mk)  
+endif
+
+Makeloop := $(wildcard $(CWD)/Makeloop.mk)
+ifndef Makeloop
+  Makeloop := $(wildcard $(CWD)/mgr/Makeloop.mk)  
+endif
+ifndef Makeloop
+  Makeloop := $(wildcard $(STAR)/mgr/Makeloop.mk)  
+endif
+
 ifndef INP_DIR 
-INP_DIR := $(CWD)
+  INP_DIR := $(CWD)
 endif           
 NAME    := $(notdir $(INP_DIR))
 # define level pams -> domain -> package from *.idl and *.g files
 #======================= level ===========================
-PAMS    := pams
-pams    := $(findstring $(PAMS),$(INP_DIR))
-LEVEL   := $(words  $(subst /, ,$(subst $(word 1, $(subst /pams, ,$(INP_DIR))),, $(INP_DIR))))
-ROOT_DIR:= $(word 1,$(subst /pams, ,$(INP_DIR)))
-#___________ non PAM ___________________
-ifeq ($(LEVEL),$(ZERO))
-LEVEL   := $(words  $(subst /, ,$(subst $(word 1, $(subst /StRoot, ,$(INP_DIR))),, $(INP_DIR))))
+PAMS    := $(findstring /pams,$(INP_DIR))
+ifndef PAMS
+  PAMS    := $(findstring /StRoot,$(INP_DIR))
 endif
+ROOT_DIR:= $(word 1,$(subst $(PAMS), ,$(INP_DIR)))
+LEVEL   := $(words  $(subst /, ,$(subst $(ROOT_DIR),, $(INP_DIR))))
+
+
 ifeq ($(LEVEL),$(ZERO))
 	SUBDIRS :=$(shell test -d pams && echo pams)
 else
@@ -278,6 +298,7 @@ Makers  :=  $(filter-out St_ebye_Maker, $(Makers))
 Makers  :=  $(filter-out St_TLA_Maker, $(Makers))
 Makers  :=  $(filter-out St_fss_Maker, $(Makers))
 Makers  :=  $(filter-out St_mev_Maker, $(Makers))
+Makers  :=  $(filter-out St_tpctest_Maker, $(Makers))
 endif
 #          I have subdrs
 .PHONY               :  all $(BASE) $(XDF2ROOT) $(TARGET) $(StRoot) test clean clean_lib clean_share clean_obj
@@ -286,53 +307,53 @@ all:  $(BASE) $(XDF2ROOT)  $(TARGETS) $(StRoot)
 ifndef NOROOT
 ROOT:      St_base xdf2root St_Makers StChain St_Tables
 St_base:
-	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so
 xdf2root:
-	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root    SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.so 
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root    SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.so 
 St_Makers: $(Makers)
 StChain:   
-	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain    SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.so
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain    SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.so
 St_Tables:
-	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/.share/tables  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so NODEBUG=YES
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so NODEBUG=YES
 ifneq ($(EMPTY),$(findstring $(STAR_LEVEL),dev))
 St_TablesDoc: 
 	root.exe -b -q MakeHtmlTables.cxx
 endif
 St_%_Maker: 
-	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St_$(STEM)_Maker  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_$(STEM)_Maker.so
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St_$(STEM)_Maker  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_$(STEM)_Maker.so
 endif
 %_all:  $(BASE)
-	$(MAKE) -f $(MakePam) -C $(STEM) $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) $(MAKFLAGS) 
 test:  $(BASE) $(addsuffix _test, $(SUBDIRS))
 %_test: 
-	$(MAKE) -f $(MakePam) -C $(STEM) test $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) test $(MAKFLAGS) 
 clean: $(addsuffix _clean, $(SUBDIRS))
 %_clean: 
-	$(MAKE) -f $(MakePam) -C $(STEM) clean $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) clean $(MAKFLAGS) 
 clean_lib: $(addsuffix _clean_lib, $(SUBDIRS))
 %_clean_lib: 
-	$(MAKE) -f $(MakePam) -C $(STEM) clean_lib $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) clean_lib $(MAKFLAGS) 
 clean_share: $(addsuffix _clean_share, $(SUBDIRS))
 %_clean_share: 
-	$(MAKE) -f $(MakePam) -C $(STEM) clean_share $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) clean_share $(MAKFLAGS) 
 clean_obj: $(addsuffix _clean_obj, $(SUBDIRS))
 %_clean_obj: 
-	$(MAKE) -f $(MakePam) -C $(STEM) clean $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) clean $(MAKFLAGS) 
 else # I have no subdirs
 PKG     := $(notdir $(shell pwd))
 GEN_DIR := $(ROOT_DIR)/.share/$(PKG)
 GEN_TAB := $(DIR_GEN)/tables
 .PHONY               : default clean clean_lib clean_share clean_obj test
 all:
-	$(MAKE) -f $(Makepam) $(MAKFLAGS)
+	$(MAKE)  -f $(MakePam) $(MAKFLAGS)
 ifndef NOROOT
-	$(MAKE) -f $(MakeDll) $(MAKFLAGS) -C  $(GEN_DIR) SO_LIB=$(SO_LIB)
+	$(MAKE)  -f $(MakeDll) $(MAKFLAGS) -C  $(GEN_DIR) SO_LIB=$(SO_LIB)
  endif
-clean:;      $(MAKE) -f $(Makepam) $(MAKFLAGS)  clean
-clean_lib:;  $(MAKE) -f $(Makepam) $(MAKFLAGS)  clean_lib
-clean_share:;$(MAKE) -f $(Makepam) $(MAKFLAGS)  clean_share
-clean_obj:;  $(MAKE) -f $(Makepam) $(MAKFLAGS)  clean_obj
-clean_test:; $(MAKE) -f $(Makepam) $(MAKFLAGS)  test
+clean:;      $(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean
+clean_lib:;  $(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean_lib
+clean_share:;$(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean_share
+clean_obj:;  $(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean_obj
+clean_test:; $(MAKE)  -f $(MakePam) $(MAKFLAGS)  test
 endif
 endif
 test: test_level
