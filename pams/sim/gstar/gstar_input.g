@@ -1,6 +1,9 @@
-* $Id: gstar_input.g,v 1.28 2000/02/15 15:45:34 nevski Exp $
+* $Id: gstar_input.g,v 1.29 2000/02/17 00:06:12 nevski Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.29  2000/02/17 00:06:12  nevski
+* cscall truncates strings - corrected
+*
 * Revision 1.28  2000/02/15 15:45:34  nevski
 * Event offset: n0
 *
@@ -77,7 +80,7 @@
     else if C=='X'                       " xdf format "
     {  J=Csaddr('XDF_OPEN')
        If ( J==0 )  goto :e:
-       call CsJCAL(J,2,file(:L))
+       call CsJCAL(J,2,file(:L+3))
     }
     else if C=='T'                       "  any text  "
     {  Call ApFOPEN(21-N,file(:L),ier) 
