@@ -41,7 +41,7 @@ public:
   ofstream* mOStream;
   ifstream* mIStream;
 
-  StHbtIOBinary(const char* fileName, const char* readWrite);
+  StHbtIOBinary(const char* dirName, const char* fileName, const char* appendix, const char* readWrite);
   ~StHbtIOBinary();
 
   // StHbtEvent
@@ -61,6 +61,8 @@ public:
   int bytesRead();
 
   
+  char* parseDirFile(const char*, const char*, const char*);
+
   void wait(int n, const char* c) { 
     for (int i = 0; i< 1e6*n; i++) {
       cout << c;
@@ -70,14 +72,26 @@ public:
   // ////////////////////////////////////////////////
   // please read the comment at the beginning of file
   // ////////////////////////////////////////////////
-  //  template<class T> int binaryWrite(T x){
-  //    mOStream->write( (char*) &x, sizeof(x) );
-  //    return sizeof(x);
-  //  }
-  //  template<class T> int binaryRead(T& x){
-  //    mIStream->read( (char*)&x, sizeof(x) );
-  //    return sizeof(x);
-  //  }
+#ifndef ST_NO_MEMBER_TEMPLATES
+  template<class T> int write(T x){ //!
+    mOStream->write( (char*) &x, sizeof(x) );
+    return sizeof(x);
+  }
+  template<class T> int read(T& x){ //!
+    mIStream->read( (char*)&x, sizeof(x) );
+    return sizeof(x);
+  }
+#else
+  int write(unsigned short x){
+    mOStream->write( (char*) &x, sizeof(x) );
+    return sizeof(x);
+  }
+  int read(unsigned short& x){
+    mIStream->read( (char*)&x, sizeof(x) );
+    return sizeof(x);
+  }
+#endif
+
 };
 
 #endif

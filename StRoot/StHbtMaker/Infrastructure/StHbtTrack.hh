@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.11 2000/02/18 21:32:24 laue Exp $
+ * $Id: StHbtTrack.hh,v 1.12 2000/04/03 16:21:51 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.12  2000/04/03 16:21:51  laue
+ * some include files changed
+ * Multi track cut added
+ *
  * Revision 1.11  2000/02/18 21:32:24  laue
  * franksTrackCut changed. If mCharge is set to '0' there will be no cut
  * on charge. This is important for front-loaded cuts.
@@ -80,6 +84,7 @@ public:
   char Charge() const;
   unsigned short NHits() const;
   unsigned short NHitsPossible() const;
+  float NSigmaElectron() const;
   float NSigmaPion() const;
   float NSigmaKaon() const;
   float NSigmaProton() const;
@@ -91,10 +96,13 @@ public:
   StHbtThreeVector P() const;
   float Pt() const;
   const StPhysicalHelixD& Helix() const;
+  unsigned long TopologyMap(const int word) const;
+  unsigned long TrackId() const;
 
   void SetCharge(const char&);
   void SetNHits(const unsigned short&);
   void SetNHitsPossible(const unsigned short&);
+  void SetNSigmaElectron(const float&);
   void SetNSigmaPion(const float&);
   void SetNSigmaKaon(const float&);
   void SetNSigmaProton(const float&);
@@ -106,6 +114,8 @@ public:
   void SetP(const StHbtThreeVector&);
   void SetPt(const float&);
   void SetHelix(const StPhysicalHelixD&);
+  void SetTopologyMap(const int word, const unsigned long map);
+  void SetTrackId(const unsigned long&);
 
   // For I/O of this object -- functions defined in StHbtIO.cc
   friend ostream& operator<<(ostream& out, StHbtTrack& trk);
@@ -115,6 +125,7 @@ private:
   char mCharge;
   unsigned short mNHits;
   unsigned short mNHitsPoss; 
+  float mNSigmaElectron;
   float mNSigmaPion;
   float mNSigmaKaon;
   float mNSigmaProton;
@@ -123,15 +134,21 @@ private:
   float mDCAz; 
   float mChiSqXY;
   float mChiSqZ;
-  
+  unsigned long mMap[2];
+  unsigned long mTrackId;
+
+
   StHbtThreeVector mP;
   float mPt;
   StPhysicalHelixD mHelix;
+
+
 };
 
 inline void StHbtTrack::SetNHits(const unsigned short& nh){mNHits=nh;}
 inline void StHbtTrack::SetNHitsPossible(const unsigned short& nh){mNHitsPoss=nh;}
 inline void StHbtTrack::SetCharge(const char& ch){mCharge=ch;}
+inline void StHbtTrack::SetNSigmaElectron(const float& x){mNSigmaElectron = x;}
 inline void StHbtTrack::SetNSigmaPion(const float& x){mNSigmaPion = x;}
 inline void StHbtTrack::SetNSigmaKaon(const float& x){mNSigmaKaon = x;}
 inline void StHbtTrack::SetNSigmaProton(const float& x){mNSigmaProton = x;}
@@ -144,10 +161,13 @@ inline void StHbtTrack::SetChiSquaredZ(const float& x){mChiSqZ = x;}
 inline void StHbtTrack::SetP(const StHbtThreeVector& p){mP = p;}
 inline void StHbtTrack::SetPt(const float& pt){mPt = pt;}              
 inline void StHbtTrack::SetHelix(const StPhysicalHelixD& h){mHelix = h;}
+inline void StHbtTrack::SetTopologyMap(const int word, const unsigned long map) { mMap[word]=map;}
+inline void StHbtTrack::SetTrackId(const unsigned long& id) { mTrackId=id;}
 
 inline char StHbtTrack::Charge() const {return mCharge;}
 inline unsigned short StHbtTrack::NHits() const {return mNHits;}
 inline unsigned short StHbtTrack::NHitsPossible() const {return mNHitsPoss;}
+inline float StHbtTrack::NSigmaElectron() const {return mNSigmaElectron;}
 inline float StHbtTrack::NSigmaPion() const {return mNSigmaPion;}
 inline float StHbtTrack::NSigmaKaon() const {return mNSigmaKaon;}
 inline float StHbtTrack::NSigmaProton() const {return mNSigmaProton;}
@@ -160,5 +180,6 @@ inline float StHbtTrack::ChiSquaredZ() const {return mChiSqZ;}
 inline StHbtThreeVector StHbtTrack::P() const {return mP;}
 inline float StHbtTrack::Pt() const {return mPt;}                
 inline const StPhysicalHelixD& StHbtTrack::Helix() const {return mHelix;}
-
+inline unsigned long StHbtTrack::TopologyMap(const int word) const { return mMap[word];}
+inline unsigned long StHbtTrack::TrackId() const { return mTrackId; }
 #endif
