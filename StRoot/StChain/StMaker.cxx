@@ -1,10 +1,15 @@
-// $Id: StMaker.cxx,v 1.11 1998/10/31 00:21:31 fisyak Exp $
+// $Id: StMaker.cxx,v 1.12 1998/11/18 22:46:09 fine Exp $
 // $Log: StMaker.cxx,v $
-// Revision 1.11  1998/10/31 00:21:31  fisyak
-// Makers take care about branches
+// Revision 1.12  1998/11/18 22:46:09  fine
+// The lost MakeDoc method has been re-introduced
+//
+// Revision 1.9  1998/09/23 20:22:52  fisyak
+// Prerelease SL98h
 //
 // Revision 1.10  1998/10/06 18:00:27  perev
 // cleanup
+// Revision 1.8  1998/09/22 01:39:07  fine
+// Some make up
 //
 // Revision 1.6  1998/08/18 14:05:02  fisyak
 // Add to bfc dst
@@ -17,6 +22,11 @@
 // StChain virtual base class for StMaker                              //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
+
+#include <TSystem.h>
+#include <TClass.h>
+#include <TROOT.h>
+#include <THtml.h>
 
 #include <TChain.h>
 #include <TTree.h>
@@ -149,6 +159,96 @@ Int_t StMaker::Make()
 {
    Warning("Make","Dummy function called");
    return kStOK;
+}
+
+//_____________________________________________________________________________
+void StMaker::MakeDoc(const TString &stardir,const TString &outdir)
+{
+ //
+ // MakeDoc - creates the HTML doc for this class and for the base classes:
+ //         *  St_XDFFile  St_Module      St_Table       *
+ //         *  St_DataSet  St_DataSetIter St_FileSet     *
+ //         *  StMaker     StChain                       *
+ //
+ // stardir - the "root" directory to lookup the subdirectories as follows.
+ // outdir  - directory to write the generated HTML and Postscript files into
+ //
+ //            The following subdirectories are used to look it up:
+ //            $(stardir) + "StRoot/base"
+ //            $(stardir) + "StRoot/StChain"
+ //            $(stardir) + "StRoot/xdf2root"
+ //            $(stardir) + ".share/tables"
+ //            $(stardir) + "inc",
+ //
+ //   where $(stardir) is the input parameter (by default = "$(afs)/rhic/star/packages/dev/")
+ //
+
+  // Define the type of the OS
+  TString STAR= stardir;
+  TString delim = ":";
+  Bool_t NT=kFALSE;
+
+  if (strcmp(gSystem->GetName(),"WinNT") == 0 ) {
+     NT=kTRUE;
+     delim = ";";
+     STAR.ReplaceAll("$(afs)","//sol/afs");
+  }
+  else 
+     STAR.ReplaceAll("$(afs)","/afs");
+
+  TString classname = ClassName();
+
+  THtml html;
+
+  // Define the set of the subdirectories with the STAR class sources
+  const Char_t *source[] = {"StRoot/base"
+                           ,"StRoot/StChain"
+                           ,"StRoot/xdf2root"
+                           ,".share/tables"
+                           ,"inc"
+                           };
+  const Int_t lsource = 5;
+ 
+  TString lookup = STAR;
+  lookup += "StRoot/";
+  lookup += classname;
+  Int_t i = 0;
+  for (i=0;i<lsource;i++) {
+    lookup += delim;
+    lookup += STAR;
+    lookup += source[i];
+  }
+
+  html.SetSourceDir(lookup);
+
+  TString odir = outdir;
+  odir.ReplaceAll("$(star)",STAR);
+   
+  html.SetOutputDir(odir);
+
+  // Create the list of the classes defined with the loaded DLL's to be documented
+
+  Char_t *classes[] = { "St_XDFFile",  "St_Module",      "St_Table"
+                       ,"St_DataSet",  "St_DataSetIter", "St_FileSet"
+                       ,"StMaker",     "StChain"
+                       ,"table_head_st"
+                      };
+  Int_t nclass = 9;
+  // Create the definitions of the classes not derived from TObjects
+  TString header = STAR;
+  header += "inc/table_header.h";
+
+  gROOT->LoadMacro(header);
+
+  TClass header1("table_head_st",1,"table_header.h","table_header.h");
+
+  // Update the docs of the base classes
+  for (i=0;i<nclass;i++) 
+                   html.MakeClass(classes[i]);
+
+  // Create the doc for this class
+  const Char_t *c = ClassName();  // This tric has to be done since a bug within ROOT
+  html.MakeClass((Char_t *)c);
 }
 
 //_____________________________________________________________________________
