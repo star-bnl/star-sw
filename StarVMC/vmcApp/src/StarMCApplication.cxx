@@ -1,5 +1,9 @@
-// $Id: StarMCApplication.cxx,v 1.2 2004/07/13 19:10:25 potekhin Exp $
+// $Id: StarMCApplication.cxx,v 1.3 2004/07/13 19:10:59 potekhin Exp $
+// $Log: StarMCApplication.cxx,v $
+// Revision 1.3  2004/07/13 19:10:59  potekhin
+// Added a log tag
 //
+
 
 #include <iostream.h>
 
