@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.16 2001/04/19 11:32:39 oldi Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.17 2001/04/23 19:37:40 oldi Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.17  2001/04/23 19:37:40  oldi
+// Output will be sent to StMessMgr.
+//
 // Revision 1.16  2001/04/19 11:32:39  oldi
 // Reject clusters with x = 0. and y = 0.
 // This is just to avoid a crash in StFtpcTrackMaker but the origin of the problem
@@ -120,21 +123,21 @@ int StFtpcClusterFinder::search()
 
   if(pradius == NULL || pdeflection == 0)
     {
-      printf("Padtrans memory allocation failed, exiting!\n");
+      gMessMgr->Message("", "E", "OST") << "Padtrans memory allocation failed, exiting!" << endm;
       return 0;
     }
 
   /* integrate padtrans table from magboltz database */
   if(!calcpadtrans(pradius, pdeflection))
     {
-      printf("Couldn't calculate padtrans table, exiting!\n");
+      gMessMgr->Message("", "E", "OST") << "Couldn't calculate padtrans table, exiting!" << endm;
       return 0;
     }
 
   /* initialize CUC memory handling */
   if(!cucInit(CUCMemory, CUCMemoryArray, &CUCMemoryPtr))
     {
-      printf("Couldn't initialize CUC memory, exiting!\n");
+      gMessMgr->Message("", "E", "OST") << "Couldn't initialize CUC memory, exiting!" << endm;
       return 0;
     }
 
@@ -235,7 +238,7 @@ int StFtpcClusterFinder::search()
 		      if(!cucFree(CUCMemory, CUCMemoryArray, 
 				  &CUCMemoryPtr, DeleteCUC))
 			{
-			  printf("Fatal memory management error.\n");
+			  gMessMgr->Message("", "E", "OST") << "Fatal memory management error."  << endm;
 			  return 0;
 			}
 		    }
@@ -549,7 +552,7 @@ int StFtpcClusterFinder::search()
 	      if(!cucFree(CUCMemory, CUCMemoryArray, 
 			  &CUCMemoryPtr, DeleteCUC))
 		{
-		  printf("Fatal memory management error.\n");
+		  gMessMgr->Message("", "E", "OST") << "Fatal memory management error." << endm;
 		  return 0;
 		}
 	      LastCUC=CurrentCUC;
@@ -558,7 +561,7 @@ int StFtpcClusterFinder::search()
 	} // end of: for(iSec...)
     } // end of: for(iRow...)
 
-  printf("StFtpcClusterFinder Found %d clusters and processed to %d hits.\n", clusters,(int) mPoint->GetEntriesFast() );
+  gMessMgr->Message("", "I", "OST") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  mPoint->GetEntriesFast() << " hits." << endm;
   
 #ifdef DEBUGFILE
   fclose(fin);
@@ -1806,8 +1809,7 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
 	    && j<mDb->numberOfMagboltzBins(); j++);
       if(j<1 || j>=mDb->numberOfMagboltzBins())
 	{
-	  printf("Error 1: j=%d, v_buf=%d e_drift=%f, e_now=%f\n", 
-		 j, v_buf, mDb->magboltzEField(j), e_now);
+	  gMessMgr->Message("", "E", "OST") << "Error 1: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
 	  return FALSE;
 	}
       v_buf=j-1;
@@ -1841,8 +1843,7 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
 	  
 	  if(j<1 || j>=mDb->numberOfMagboltzBins())
 	    {
-	      printf("Error 2: j=%d, v_buf=%d e_drift=%f, e_now=%f\n", 
-		     j, v_buf, mDb->magboltzEField(j), e_now);
+	      gMessMgr->Message("", "E", "OST") << "Error 2: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
 	      return FALSE;
 	    }
 	  
