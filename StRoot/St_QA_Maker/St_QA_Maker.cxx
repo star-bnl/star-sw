@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.2 1999/02/20 00:24:48 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.3 1999/02/22 21:27:17 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.3  1999/02/22 21:27:17  kathy
+// moved hist from St_glb_Maker to St_QA_Maker and had to rename some etc
+//
 // Revision 1.2  1999/02/20 00:24:48  kathy
 // fixed some of the histograms
 //
@@ -26,8 +29,11 @@
 
 #include <iostream.h>
 #include <stdlib.h>
+#include <string.h>
+#include "PhysicalConstants.h"
 #include "TMath.h"
 #include "St_QA_Maker.h"
+
 #include "St_particle_Table.h"
 #include "St_hepe_gent_Table.h"
 #include "St_dst_track_Table.h"
@@ -102,15 +108,20 @@ Int_t St_QA_Maker::Init(){
     
 
  //book histograms --------------
-  
-   m_pT_eta_rec = new TH2F("pT_eta_rec","pT versus eta (reconstructed)",
-                           nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
-     m_pT_eta_rec->SetXTitle("eta");
-     m_pT_eta_rec->SetYTitle("pT (GeV)");
+
+ //for MakeGen
+
    m_pT_eta_gen = new TH2F("pT_eta_gen","pT versus eta (generated)",
                            nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
      m_pT_eta_gen->SetXTitle("eta");
      m_pT_eta_gen->SetYTitle("pT (GeV)");
+  
+ //for MakeGlob
+   m_pT_eta_rec = new TH2F("pT_eta_rec","pT versus eta (reconstructed)",
+                           nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
+     m_pT_eta_rec->SetXTitle("eta");
+     m_pT_eta_rec->SetYTitle("pT (GeV)");
+
    m_trk_tot_gd = new TH2F("glb_trk","number of good track versus total",
                              ntrk, mintrk, maxtrk, ntrk, mintrk, maxtrk);
      m_trk_tot_gd->SetXTitle("total number of tracks");
@@ -177,46 +188,62 @@ Int_t St_QA_Maker::Init(){
    m_vrtx_chisq = new TH1F("vrtx_chisq", "chisq of primary vertex",
                                             nchisq, minchisq, maxchisq); 
      
+ // for MakeHistGen:
+  m_H_pT_eta_gen = new TH2F("pT_eta_gen","pT versus eta (generated)",
+			  nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
+    m_H_pT_eta_gen->SetXTitle("eta");
+    m_H_pT_eta_gen->SetYTitle("pT (GeV)");
+
+
+ // for MakeHistPrim:
+  m_prim_pT_eta_rec = new TH2F("primtrk_pT_eta_rec","primtrk: pT versus eta (reconstructed)",
+			  nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
+    m_prim_pT_eta_rec->SetXTitle("eta");
+    m_prim_pT_eta_rec->SetYTitle("pT (GeV)");
+
+  m_prim_pT   = new TH1F("primtrk_pT","primtrk: pT distribution",nxpT,xminpT,xmaxpT);
+  m_prim_eta  = new TH1F("primtrk_eta","primtrk: eta distribution",nyeta,ymineta,ymaxeta);
+  m_prim_tlength = new TH1F("primtrk_tlength","primtrk: track length",100,0.,200.);
+  m_prim_chi2xd  = new TH1F("primtrk_chi2xd","primtrk: - x chisq/degf",100,0.,10.);
+  m_prim_chi2yd  = new TH1F("primtrk_chi2yd","primtrk: - y chisq/degf",100,0.,10.);
+
+  // for MakeHistV0:
+  m_ev0_lama_hist  = new TH1F("ev0_lama","dst_v0_vertex: Lambda mass",50,1.05,1.25);
+  m_ev0_k0ma_hist  = new TH1F("ev0_k0ma","dst_v0_vertex: k0 mass",50,.4,.6);
+
+
+  // for MakeHistPID:
+  // Spectra/pid histograms. C.Ogilvie
+  Int_t cnp = 100;
+  Int_t cndedx = 100;
+  Float_t cminp = 0.0;
+  Float_t cmaxp = 2.0;
+  Float_t cmindedx = 0.0;
+  Float_t cmaxdedx =  0.1e-04;
+  m_p_dedx_rec = new TH2F("p_dedx_rec","primtrk-dst_dedx: p versus dedx (reconstructed)",
+                           cnp,cminp,cmaxp,cndedx,cmindedx,cmaxdedx);
+    m_p_dedx_rec->SetYTitle("dedx");
+    m_p_dedx_rec->SetXTitle("p (GeV)");
+
+
    return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_QA_Maker::Make(){
   //  PrintInfo();
 
-  // Fill histograms for global tracks
-  St_DataSet *global = gStChain->DataSet("global");
-  St_DataSetIter dst(global);         // data/global/dst
-  dst.Cd("dst");
-  St_dst_track *globtrk = (St_dst_track *) dst["globtrk"];
-  if (globtrk) {
-    table_head_st *trk_h = globtrk->GetHeader();
-    dst_track_st  *trk   = globtrk->GetTable();
-    for (Int_t i = 0; i < globtrk->GetNRows(); i++){
-      dst_track_st *t = trk + i;
-      Float_t pT = 9999.;
-      if (t->invpt) pT = 1./TMath::Abs(t->invpt);
-      Float_t theta = asin(1.) - atan(t->tanl);
-      Float_t eta   =-log(tan(theta/2.));
-      m_pT->Fill(pT);
-      m_eta->Fill(eta);
-      m_pT_eta_rec->Fill(eta,pT);
-      Float_t chisq0 = t->chisq[0];
-      Float_t chisq1 = t->chisq[1]; 
-      Float_t pointk = t->n_point ;
-      Float_t chisq0_p = chisq0/pointk ;
-      Float_t chisq1_p = chisq1/pointk ;
-      m_point->Fill(pointk);
-      m_fit_point->Fill(t->n_fit_point); 
-      m_chisq0->Fill(chisq0_p);
-      m_chisq1->Fill(chisq1_p);
-      m_length->Fill(t->length);
-      m_psi->Fill(t->psi);
-    }
-    MakeV0();
-    MakeDE();
-  }
-  MakeGen();
+  // Call methods to fill histograms
+
   MakeEvSum();
+  MakeV0();
+  MakeGlob();
+  MakeDE();
+  MakeGen();
+  MakeHistPrim();
+  MakeHistGen();
+  MakeHistV0();
+  MakeHistPID();
+
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -256,6 +283,8 @@ void St_QA_Maker::MakeEvSum(){
 } 
 //_____________________________________________________________________________
 
+// *** need to fix this!
+
 void St_QA_Maker::MakeV0(){
    // Fill histograms for V0
   St_DataSet *global = gStChain->DataSet("global");
@@ -283,7 +312,45 @@ void St_QA_Maker::MakeV0(){
      }       
   }
 }
+
+//-----------------------------------------------------------------
+
+void St_QA_Maker::MakeGlob(){
+
+   // Fill histograms for globtrk
+  St_DataSet *global = gStChain->DataSet("global");
+  St_DataSetIter dst(global);         // data/global/dst
+  dst.Cd("dst");
+  St_dst_track *globtrk = (St_dst_track *) dst["globtrk"];
+  if (globtrk) {
+    table_head_st *trk_h = globtrk->GetHeader();
+    dst_track_st  *trk   = globtrk->GetTable();
+    for (Int_t i = 0; i < globtrk->GetNRows(); i++){
+      dst_track_st *t = trk + i;
+      Float_t pT = 9999.;
+      if (t->invpt) pT = 1./TMath::Abs(t->invpt);
+      Float_t theta = asin(1.) - atan(t->tanl);
+      Float_t eta   =-log(tan(theta/2.));
+      m_pT->Fill(pT);
+      m_eta->Fill(eta);
+      m_pT_eta_rec->Fill(eta,pT);
+      Float_t chisq0 = t->chisq[0];
+      Float_t chisq1 = t->chisq[1]; 
+      Float_t pointk = t->n_point ;
+      Float_t chisq0_p = chisq0/pointk ;
+      Float_t chisq1_p = chisq1/pointk ;
+      m_point->Fill(pointk);
+      m_fit_point->Fill(t->n_fit_point); 
+      m_chisq0->Fill(chisq0_p);
+      m_chisq1->Fill(chisq1_p);
+      m_length->Fill(t->length);
+      m_psi->Fill(t->psi);
+    }
+  }       
+}
+
 //_____________________________________________________________________________
+
  void St_QA_Maker::MakeDE() {
    // Fill histograms for dE/dx
 
@@ -304,6 +371,7 @@ void St_QA_Maker::MakeV0(){
    }
 
 //_____________________________________________________________________________
+
 void St_QA_Maker::MakeGen() {
   //  Fill histograms for event generator
 
@@ -373,9 +441,166 @@ void St_QA_Maker::MakeGen() {
 }
 //_____________________________________________________________________________
 
+
+void St_QA_Maker::MakeHistPrim(){
+   cout << " *** in St_QA_Maker - filling primtrk histograms " << endl;
+  St_DataSetIter global(m_DataSet);         // data/global
+  St_dst_track      *primtrk     = (St_dst_track     *) global("dst/primtrk");
+
+  if (primtrk) {
+    table_head_st *trk_h = primtrk->GetHeader();
+    dst_track_st  *trk   = primtrk->GetTable();
+    for (Int_t i = 0; i < primtrk->GetNRows(); i++){
+      dst_track_st *t = trk + i;
+      Float_t pT = 9999.;
+      if (t->invpt) pT = 1./TMath::Abs(t->invpt);
+      Float_t theta = TMath::Pi() - TMath::ATan(t->tanl);
+      Float_t eta   =-TMath::Log(TMath::Tan(theta/2.));
+      m_prim_pT->Fill(pT);
+      m_prim_eta->Fill(eta);
+      m_prim_pT_eta_rec->Fill(eta,pT);
+      // Al histograms
+      m_prim_tlength->Fill(t->length);
+      if (t->ndegf>0) {
+        m_prim_chi2xd->Fill(t->chisq[0]/((t->ndegf+5.)/2.-3.));  
+        m_prim_chi2yd->Fill(t->chisq[1]/((t->ndegf+5.)/2.-2.));  
+      }
+    }
+  }
+}
+
+//_____________________________________________________________________________
+
+
+void St_QA_Maker::MakeHistGen(){
+   cout << " *** in St_QA_Maker - filling generator histograms " << endl;
+  St_DataSetIter global(m_DataSet);         // data/global
+
+
+  St_hepe_gent *hepev = (St_hepe_gent *) global("dst/particle");
+  St_particle  *particle=0;
+  if (hepev) {
+    hepe_gent_st *p = hepev->GetTable();
+    for (Int_t l=0; l < hepev->GetNRows(); l++, p++){
+      if (p->isthep == 1) {
+	Double_t px = p->phep[0];
+	Double_t py = p->phep[1];
+	Double_t pz = p->phep[2];
+	Double_t pT    =  TMath::Sqrt(px*px+py*py);
+	Double_t theta =  TMath::ATan2 ( pT, pz );
+	Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
+	m_H_pT_eta_gen->Fill(eta, (Float_t) pT);
+      }
+    }
+  }
+  else {
+    St_DataSet *evgen = gStChain->DataSet("evgen");
+    if (evgen) {
+      St_DataSetIter local(evgen);
+      St_particle *pa = (St_particle *) local("particle");
+      if (pa){
+        particle_st *p = pa->GetTable();
+        for (Int_t l=0; l < pa->GetNRows(); l++, p++){
+          if (p->isthep == 1) {
+            Double_t px = p->phep[0];
+            Double_t py = p->phep[1];
+            Double_t pz = p->phep[2];
+            Double_t pT    =  TMath::Sqrt(px*px+py*py);
+            Double_t theta =  TMath::ATan2 ( pT, pz );
+	    //        Double_t theta =  atan2 ( pT, pz );
+            Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
+            m_H_pT_eta_gen->Fill(eta, (Float_t) pT);
+	  }
+	}
+      }
+    }
+  }
+}
+
+//_____________________________________________________________________________
+
+
+void St_QA_Maker::MakeHistV0(){
+   cout << " *** in St_QA_Maker - filling V0 histograms " << endl;
+  St_DataSetIter global(m_DataSet);         // data/global
+
+  // V0
+  St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex *) global("dst/dst_v0_vertex");
+  if (dst_v0_vertex) {
+
+    cout << "Filling ev0 histos" << endl;
+    dst_v0_vertex_st *v0 = dst_v0_vertex->GetTable();
+    Float_t m_prmass2 = proton_mass_c2*proton_mass_c2;
+    Float_t m_pimass2 = (0.139567*0.139567);
+    for (Int_t k=0; k<dst_v0_vertex->GetNRows(); k++, v0++){
+      Float_t e1a = v0->pos_px*v0->pos_px +  v0->pos_py*v0->pos_py
+	+ v0->pos_pz*v0->pos_pz;
+      Float_t e2 = v0->neg_px*v0->neg_px +  v0->neg_py*v0->neg_py
+	+ v0->neg_pz*v0->neg_pz;
+      Float_t e1 = e1a + m_prmass2;  
+      e2 += m_pimass2;
+      e1 = TMath::Sqrt(e1);
+      e2 = TMath::Sqrt(e2);
+      Float_t p = (v0->neg_px+v0->pos_px)*(v0->neg_px+v0->pos_px)
+	+  (v0->neg_py+v0->pos_py)*(v0->neg_py+v0->pos_py)
+	+ (v0->neg_pz+v0->pos_pz)*(v0->neg_pz+v0->pos_pz);
+      Float_t inv_mass_la = TMath::Sqrt((e1+e2)*(e1+e2) - p);
+      e1 = e1a + m_pimass2;
+      e1 = TMath::Sqrt(e1);
+      Float_t inv_mass_k0 = TMath::Sqrt((e1+e2)*(e1+e2) - p);
+      m_ev0_lama_hist->Fill(inv_mass_la);
+      m_ev0_k0ma_hist->Fill(inv_mass_k0);   
+    }
+  }
+}
+
+//_____________________________________________________________________________
+
+
+void St_QA_Maker::MakeHistPID(){
+   cout << " *** in St_QA_Maker - filling PID histograms " << endl;
+  St_DataSetIter global(m_DataSet);         // data/global
+
+  // spectra-PID diagnostic histograms
+  St_dst_track      *primtrk     = (St_dst_track     *) global("dst/primtrk");
+  St_dst_dedx       *dst_dedx    = (St_dst_dedx *) global("dst/dst_dedx");
+
+  if (dst_dedx && primtrk) {
+     	dst_dedx_st  *de   = dst_dedx->GetTable();
+        dst_track_st  *trk   = primtrk->GetTable();
+	// loop over dedx entries
+        for (Int_t l = 0; l < dst_dedx->GetNRows(); l++){
+	       dst_dedx_st *d = de + l;
+               Float_t dedx_m = d->dedx[0];
+               Int_t igl = d->id_track;
+               Int_t igl_use = igl - 1;
+    // this is bad style, since it assumes the global track has not been sorted
+    // it works for now
+               dst_track_st  *t = trk + igl_use ;
+               Float_t invpt = t->invpt;
+	       Float_t pT = 9999.;
+	       if (invpt) pT = 1./TMath::Abs(invpt);
+               Float_t pz = pT*t->tanl;
+               Float_t  p = sqrt(pT*pT+pz*pz);
+               Float_t z0 = abs(t->x_first[2]);
+               Float_t x0 = t->x_first[0];
+               Float_t y0 = t->x_first[1];
+               Float_t r0 = sqrt(x0*x0+y0*y0);
+
+	       if (d->det_id==1 && d->ndedx >15 ) {
+		 m_p_dedx_rec->Fill(p,dedx_m);
+	       }
+	}
+	cout << "  finished filling dedx histograms" << endl;
+  }
+}
+
+//_____________________________________________________________________________
+
+
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.2 1999/02/20 00:24:48 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.3 1999/02/22 21:27:17 kathy Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

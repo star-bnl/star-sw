@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.34 1999/02/20 18:49:16 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.35 1999/02/22 21:27:20 kathy Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.35  1999/02/22 21:27:20  kathy
+// moved hist from St_glb_Maker to St_QA_Maker and had to rename some etc
+//
 // Revision 1.34  1999/02/20 18:49:16  fisyak
 // Add event/run information
 //
@@ -151,12 +154,6 @@
 
 #include "St_dst_tof_Table.h"
 
-const Int_t St_glb_Maker::nxpT = 50;
-const Int_t St_glb_Maker::nyeta = 50;
-const Float_t St_glb_Maker::xminpT = 0.0;
-const Float_t St_glb_Maker::xmaxpT = 5.0;
-const Float_t St_glb_Maker::ymineta = -2.0;
-const Float_t St_glb_Maker::ymaxeta =  2.0;
 
 ClassImp(St_glb_Maker)
 
@@ -329,37 +326,6 @@ Int_t St_glb_Maker::Init(){
   exipar->pchisq  = 0.;
   exipar++;
   
-  // Create Histograms    
-  m_pT_eta_rec = new TH2F("glb_primtrk_pT_eta_rec","glb/primtrk: pT versus eta (reconstructed)",
-			  nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
-    m_pT_eta_rec->SetXTitle("eta");
-    m_pT_eta_rec->SetYTitle("pT (GeV)");
-  m_pT_eta_gen = new TH2F("pT_eta_gen","pT versus eta (generated)",
-			  nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
-    m_pT_eta_gen->SetXTitle("eta");
-    m_pT_eta_gen->SetYTitle("pT (GeV)");
-  m_pT   = new TH1F("glb_primtrk_pT","glb/primtrk: pT distribution",nxpT,xminpT,xmaxpT);
-  m_eta  = new TH1F("glb_primtrk_eta","glb/primtrk: eta distribution",nyeta,ymineta,ymaxeta);
-
-  // Al Saulys histograms
-  m_tlength = new TH1F("glb_primtrk_tlength","glb/primtrk: track length",100,0.,200.);
-  m_chi2xd  = new TH1F("glb_primtrk_chi2xd","glb/primtrk: - x chisq/degf",100,0.,10.);
-  m_chi2yd  = new TH1F("glb_primtrk_chi2yd","glb/primtrk: - y chisq/degf",100,0.,10.);
-  m_ev0_lama_hist  = new TH1F("glb_ev0_lama","glb/dst_v0_vertex: Lambda mass",50,1.05,1.25);
-  m_ev0_k0ma_hist  = new TH1F("glb_ev0_k0ma","glb/dst_v0_vertex: k0 mass",50,.4,.6);
-
-  // Spectra/pid histograms. C.Ogilvie
-  Int_t np = 100;
-  Int_t ndedx = 100;
-  Float_t minp = 0.0;
-  Float_t maxp = 2.0;
-  Float_t mindedx = 0.0;
-  Float_t maxdedx =  0.1e-04;
-  m_p_dedx_rec = new TH2F("glb_p_dedx_rec","glb/primtrk-dst_dedx: p versus dedx (reconstructed)",
-                           np,minp,maxp,ndedx,mindedx,maxdedx);
-    m_p_dedx_rec->SetYTitle("dedx");
-    m_p_dedx_rec->SetXTitle("p (GeV)");
-
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -392,7 +358,7 @@ Int_t St_glb_Maker::Make(){
   dst_event_header_st  event =   {"Collision", //event_type
 				  {0,0},       // n_event[2]
 				  0, 0, 0, 0}; // n_run,time,trig_mask,bunch_cross
-  strcpy (&event.event_type[0],gStChain->EvenType());
+  strcpy (&event.event_type[0],gStChain->EvenType()->Data());
   event.n_event[0] = gStChain->Event();
   event.n_run      = gStChain->Run();
   event.time       = 1000000*gStChain->Date() + gStChain->Time();
@@ -697,7 +663,7 @@ Int_t St_glb_Maker::Make(){
       m_DataSet->Add(run_header);
       dst_run_header_st *run = run_header->GetTable();
       run->run_id = gStChain->Run();
-      strcpy (run->event_type,gStChain->EvenType());
+      strcpy (run->event_type,gStChain->EvenType()->Data());
       run->sqrt_s = gStChain->CenterOfMassEnergy();
       run->east_a = gStChain->Aeast();
       run->west_a = gStChain->Awest();
@@ -715,7 +681,7 @@ Int_t St_glb_Maker::Make(){
     }
   }
   // Fill histograms
-  Histograms();
+
  // look for generator data
 
   // delete temp dir which holds fake svt when its not there
@@ -724,132 +690,11 @@ Int_t St_glb_Maker::Make(){
 }
 
 //_____________________________________________________________________________
-void St_glb_Maker::Histograms(){
-   cout << " *** in St_glb_Maker - filling histograms " << endl;
-  St_DataSetIter global(m_DataSet);         // data/global
-  St_dst_track      *primtrk     = (St_dst_track     *) global("dst/primtrk");
 
-  if (primtrk) {
-    table_head_st *trk_h = primtrk->GetHeader();
-    dst_track_st  *trk   = primtrk->GetTable();
-    for (Int_t i = 0; i < primtrk->GetNRows(); i++){
-      dst_track_st *t = trk + i;
-      Float_t pT = 9999.;
-      if (t->invpt) pT = 1./TMath::Abs(t->invpt);
-      Float_t theta = TMath::Pi() - TMath::ATan(t->tanl);
-      Float_t eta   =-TMath::Log(TMath::Tan(theta/2.));
-      m_pT->Fill(pT);
-      m_eta->Fill(eta);
-      m_pT_eta_rec->Fill(eta,pT);
-      // Al histograms
-      m_tlength->Fill(t->length);
-      if (t->ndegf>0) {
-        m_chi2xd->Fill(t->chisq[0]/((t->ndegf+5.)/2.-3.));  
-        m_chi2yd->Fill(t->chisq[1]/((t->ndegf+5.)/2.-2.));  
-      }
-    }
-  }
-  St_hepe_gent *hepev = (St_hepe_gent *) global("dst/particle");
-  St_particle  *particle=0;
-  if (hepev) {
-    hepe_gent_st *p = hepev->GetTable();
-    for (Int_t l=0; l < hepev->GetNRows(); l++, p++){
-      if (p->isthep == 1) {
-	Double_t px = p->phep[0];
-	Double_t py = p->phep[1];
-	Double_t pz = p->phep[2];
-	Double_t pT    =  TMath::Sqrt(px*px+py*py);
-	Double_t theta =  TMath::ATan2 ( pT, pz );
-	Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
-	m_pT_eta_gen->Fill(eta, (Float_t) pT);
-      }
-    }
-  }
-  else {
-    St_DataSet *evgen = gStChain->DataSet("evgen");
-    if (evgen) {
-      St_DataSetIter local(evgen);
-      St_particle *pa = (St_particle *) local("particle");
-      if (pa){
-        particle_st *p = pa->GetTable();
-        for (Int_t l=0; l < pa->GetNRows(); l++, p++){
-          if (p->isthep == 1) {
-            Double_t px = p->phep[0];
-            Double_t py = p->phep[1];
-            Double_t pz = p->phep[2];
-            Double_t pT    =  TMath::Sqrt(px*px+py*py);
-            Double_t theta =  TMath::ATan2 ( pT, pz );
-	    //        Double_t theta =  atan2 ( pT, pz );
-            Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
-            m_pT_eta_gen->Fill(eta, (Float_t) pT);
-	  }
-	}
-      }
-    }
-  }
-  // V0
-  St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex *) global("dst/dst_v0_vertex");
-  if (dst_v0_vertex) {
-
-    cout << "Filling ev0 histos" << endl;
-    dst_v0_vertex_st *v0 = dst_v0_vertex->GetTable();
-    Float_t m_prmass2 = proton_mass_c2*proton_mass_c2;
-    Float_t m_pimass2 = (0.139567*0.139567);
-    for (Int_t k=0; k<dst_v0_vertex->GetNRows(); k++, v0++){
-      Float_t e1a = v0->pos_px*v0->pos_px +  v0->pos_py*v0->pos_py
-	+ v0->pos_pz*v0->pos_pz;
-      Float_t e2 = v0->neg_px*v0->neg_px +  v0->neg_py*v0->neg_py
-	+ v0->neg_pz*v0->neg_pz;
-      Float_t e1 = e1a + m_prmass2;  
-      e2 += m_pimass2;
-      e1 = TMath::Sqrt(e1);
-      e2 = TMath::Sqrt(e2);
-      Float_t p = (v0->neg_px+v0->pos_px)*(v0->neg_px+v0->pos_px)
-	+  (v0->neg_py+v0->pos_py)*(v0->neg_py+v0->pos_py)
-	+ (v0->neg_pz+v0->pos_pz)*(v0->neg_pz+v0->pos_pz);
-      Float_t inv_mass_la = TMath::Sqrt((e1+e2)*(e1+e2) - p);
-      e1 = e1a + m_pimass2;
-      e1 = TMath::Sqrt(e1);
-      Float_t inv_mass_k0 = TMath::Sqrt((e1+e2)*(e1+e2) - p);
-      m_ev0_lama_hist->Fill(inv_mass_la);
-      m_ev0_k0ma_hist->Fill(inv_mass_k0);   
-    }
-  }
-  // spectra-PID diagnostic histograms
-  St_dst_dedx       *dst_dedx    = (St_dst_dedx *) global("dst/dst_dedx");
-  if (dst_dedx && primtrk) {
-     	dst_dedx_st  *de   = dst_dedx->GetTable();
-        dst_track_st  *trk   = primtrk->GetTable();
-	// loop over dedx entries
-        for (Int_t l = 0; l < dst_dedx->GetNRows(); l++){
-	       dst_dedx_st *d = de + l;
-               Float_t dedx_m = d->dedx[0];
-               Int_t igl = d->id_track;
-               Int_t igl_use = igl - 1;
-    // this is bad style, since it assumes the global track has not been sorted
-    // it works for now
-               dst_track_st  *t = trk + igl_use ;
-               Float_t invpt = t->invpt;
-	       Float_t pT = 9999.;
-	       if (invpt) pT = 1./TMath::Abs(invpt);
-               Float_t pz = pT*t->tanl;
-               Float_t  p = sqrt(pT*pT+pz*pz);
-               Float_t z0 = abs(t->x_first[2]);
-               Float_t x0 = t->x_first[0];
-               Float_t y0 = t->x_first[1];
-               Float_t r0 = sqrt(x0*x0+y0*y0);
-
-	       if (d->det_id==1 && d->ndedx >15 ) {
-		 m_p_dedx_rec->Fill(p,dedx_m);
-	       }
-	}
-	cout << " run_dst: finished filling dedx histograms" << endl;
-  }
-}
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.34 1999/02/20 18:49:16 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.35 1999/02/22 21:27:20 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
