@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.22 2000/12/28 21:00:57 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.23 2001/03/21 17:54:30 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.23  2001/03/21 17:54:30  aihong
+ * add processPIDAsFunction()
+ *
  * Revision 1.22  2000/12/28 21:00:57  aihong
  * remove temp. fix
  *
@@ -837,3 +840,79 @@ void StuProbabilityPidAlgorithm::setCalibrations(double theEta, int theNhits){
 
 
 }
+//-------------------------------------cent,dca,charge,rig,eta,nhits,dedx
+void StuProbabilityPidAlgorithm::processPIDAsFunction (double theCent, double theDca, int theCharge, double theRig, double theEta, int theNhits, double theDedx){
+
+
+
+      PID[0]=-1;//should be sth.standard say unIdentified.
+      PID[1]=-1;     
+      PID[2]=-1;
+      PID[3]=-1;
+
+     mProb[0]=0;
+     mProb[1]=0;
+     mProb[2]=0;
+     mProb[3]=0;
+
+     mExtrap=false;
+
+
+     mPionMinusProb=0.;
+     mElectronProb=0.;
+     mKaonMinusProb=0.;
+     mAntiProtonProb=0.;
+     mPionPlusProb=0.;
+     mPositronProb=0.;
+     mKaonPlusProb=0.;
+     mProtonProb=0.;
+
+     if (mPIDTableRead) {
+
+          double rig    =theRig;
+          double dedx   =theDedx;
+	  double dca    =theDca; //in units of cm.
+          int    nhits  =theNhits;
+          int    charge =theCharge;
+          double eta    =theEta; 
+          double cent   =theCent; // % central
+
+
+
+       if (dedx!=0.0 && nhits>=0 //dedx ==0.0 no sense 
+	   && thisPEnd > 0. && thisEtaEnd > 0. // *End ==0, no PIDTable read.
+           && thisNHitsEnd > 0. ){
+
+    rig   = fabs(rig);
+    dedx  = (dedx>thisDedxStart) ? dedx : thisDedxStart;
+    rig   = (rig >thisPStart)  ? rig  : thisPStart;
+    rig   = (rig <thisPEnd  )  ? rig  : thisPEnd*0.9999;   
+    eta   = (eta  >thisEtaStart)   ? eta   : thisEtaStart;
+    eta   = (eta  <thisEtaEnd  )   ? eta   : thisEtaEnd*0.9999;
+    nhits = (nhits > int(thisNHitsStart)) ? nhits : int(thisNHitsStart);
+    nhits = (nhits < int(thisNHitsEnd) ) ? nhits : int(thisNHitsEnd-1);
+
+    //----------------get all info. I want for a track. now do PID
+
+    setCalibrations(eta, nhits);
+
+   if (dedx<thisDedxEnd){
+
+   fillPIDByLookUpTable(cent, dca, charge,rig, eta, nhits,dedx);
+
+   } else { lowRigPID(rig,dedx,charge);}
+ 
+       } else if (dedx==0.0){ fillAsUnknown();}
+
+     // do not do deuteron or higher
+      myBandBGFcn->SetParameter(3,1);
+      myBandBGFcn->SetParameter(4,1.45);
+      if (dedx>myBandBGFcn->Eval(rig,0,0)) fillAsUnknown();
+
+     } else fillAsUnknown();
+
+       fillPIDHypothis();
+
+
+
+ }

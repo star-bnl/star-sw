@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.h,v 1.11 2000/12/20 16:55:16 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.h,v 1.12 2001/03/21 17:54:31 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.h,v $
+ * Revision 1.12  2001/03/21 17:54:31  aihong
+ * add processPIDAsFunction()
+ *
  * Revision 1.11  2000/12/20 16:55:16  aihong
  * let it survive when no support PIDTable is present
  *
@@ -91,7 +94,9 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
 
       StParticleDefinition*
       operator() (const StTrack&, const StSPtrVecTrackPidTraits&);
-      
+
+      void processPIDAsFunction (double theCent, double theDca, int theCharge, double theRig, double theEta, int theNhits, double theDedx);
+
       static void setDedxMethod(StDedxMethod method);
 
       static void readParametersFromFile(TString fileName);
