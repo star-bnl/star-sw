@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.37 2001/02/07 02:09:09 nevski Exp $
+* $Id: geometry.g,v 1.38 2001/02/13 02:28:52 nevski Exp $
 * $Log: geometry.g,v $
+* Revision 1.38  2001/02/13 02:28:52  nevski
+* Y2B: extend CALB patch, add VPD
+*
 * Revision 1.37  2001/02/07 02:09:09  nevski
 * 6 silicon layers in y_2b geometry
 *
@@ -90,20 +93,22 @@ If LL>1
   on YEAR_1A    { poor approximation to year1: TPC+CTB+FTPC;      
                                               {vpdd,calb,ecal}=off;    Nsi=0; }
   on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch+RICH, no svt; 
-                        {vpdd,ecal}=off;  {rich,ems,t1}=on;
-                        Itof=1;  Rv=1;  Nsi=0;                                }
+                        {vpdd,ecal}=off;  {rich,ems,t1}=on; 
+                        nmod={12,0};  shift={87,0};  Itof=1;  Rv=1;    Nsi=0; }
   on YEAR_1C    { not a year1:  TPC+CTB+FTPC+calo;  {vpdd,ecal}=off;   Nsi=0; }
   on YEAR_1H    { even better y1:  TPC+CTB+FTPC+RICH+caloPatch+svtLadder;  
-                        {vpdd,ecal}=off;  {rich,ems,t1}=on; 
-                        Itof=1;  Rv=2;  Wdm=6.0;  Nsi=-3;                     }
+                        {vpdd,ecal}=off;  {rich,ems,t1}=on; nmod={12,0};
+                        shift={87,0}; Itof=1; Rv=2; Wdm=6.0; Nsi=-3;          }
   on YEAR_1E    { even better y1:  TPC+CTB+RICH+caloPatch+svtLadder(4);  
 *    HELEN:       one ladder at R=10.16cm with 7 wafers at the 12 O'Clock...
-                        {vpdd,ecal,ftpc}=off; {rich,ems,t1}=on;
-                        Itof=1;  Rv=2;  Wfr=7;  Wdm=6.0;  Nsi=-3;             }
+                        {vpdd,ecal,ftpc}=off; {rich,ems,t1}=on; nmod={12,0}; 
+                        shift={87,0}; Itof=1; Rv=2; Wfr=7; Wdm=6.0; Nsi=-3;   }
+
   on YEAR_2A    { asymptotic STAR;                                            }
   on YEAR_2B    { 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
-                        {vpdd,ecal}=off;  {rich,ems,t1}=on;  
-                        Itof=2;  Rv=2;  Wfr=7;  Wdm=6.305; Nsi=6;             }
+                        ecal=off;  {rich,ems,t1}=on;  nmod={24,0};
+                        shift={21,0}; Itof=2; Rv=2; Wfr=7; Wdm=6.305;  Nsi=6; }
+
   on HADR_ON    { all Geant Physics On;                                       }
   on HADR_OFF   { all Geant Physics on, except for hadronic interactions; 
                                                                        IHADR=0}
@@ -182,7 +187,6 @@ If LL>1
    if (vpdd) Call vpddgeo
 
 *  - barrel calorimeter may be a patch of 12 modules at the left side
-   nmod={12,0};  shift={87,0}
    If (LL>1) call AgDETP new ('CALB')
    if (ems)  call AgDETP add ('calg.nmodule=',Nmod,2)
    if (ems)  call AgDETP add ('calg.shift=',shift,2)
