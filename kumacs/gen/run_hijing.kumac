@@ -30,7 +30,8 @@ $STAR/pams/gen/kumac
  
  exec setup_dir
  
-
+ message ' !!! HIJING expects input file hijev.inp in top directory !!! '
+ 
 * initialize
    
 RNDM   114399  54720141

@@ -30,7 +30,7 @@ $STAR/pams/gen/kumac
  
  exec setup_dir
  
-
+message ' !!! MEVSIM expects to find mult_gen.in in top directory !!!!! '
 * initialize
    
 RNDM  184144  3450220 
