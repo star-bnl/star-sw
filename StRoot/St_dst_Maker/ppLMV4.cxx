@@ -1,5 +1,8 @@
-// $Id: ppLMV4.cxx,v 1.3 2001/12/05 23:21:44 balewski Exp $
+// $Id: ppLMV4.cxx,v 1.4 2001/12/06 02:27:10 balewski Exp $
 // $Log: ppLMV4.cxx,v $
+// Revision 1.4  2001/12/06 02:27:10  balewski
+// *** empty log message ***
+//
 // Revision 1.3  2001/12/05 23:21:44  balewski
 // *** empty log message ***
 //
@@ -53,7 +56,7 @@ using namespace units;
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 
-//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.3 2001/12/05 23:21:44 balewski Exp $";
+//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.4 2001/12/06 02:27:10 balewski Exp $";
 
 struct Jcyl {float eta,phi;};
 
@@ -346,4 +349,25 @@ const  char *nameF[]={"CtbThres/MeV","MaxTrkDcaRxy","MinTrkPt/GeV","CtbEtaErr","
       }
     }
   }
+#endif
+
+#if 0
+.. goes to duplicate.code
+
+  int nCtbOK=0;
+  {// JB temporary extraction of bXIng & CTB hits
+   int pp=0; // ignore pre & post
+   for(int slat=0;slat<2;slat++) {
+      for(int tray=0;tray<120;tray++)
+        if( SWITCH(gs)->RAW[pp].CTB[ctbmap[tray][slat]]>1)nCtbOK++;
+    }
+   }
+
+  printf("\n\n\n BBBBBBBBBBBBBBBBB JB  %s-maker nCtbOK=%d\n\n\n",GetName(),nCtbOK );
+
+  if(1&&nCtbOK>80) {// WARN  WARN  WARN  WARN
+          printf("\n WARN %s-Maker JB: TEMPORARY HIGH MULTIPLICITY EVENT DISCARDED\n
+  # of CTB hits=%d  SET to ZERO by Jan BAlewski, No Vertex will be found\n\n",GetName(),nCtbOK);
+  return kStErr;
+
 #endif
