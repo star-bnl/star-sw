@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + egr )                                     //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.41 2002/05/16 01:59:19 caines Exp $
+// $Id: StMatchMaker.cxx,v 1.42 2002/05/16 02:02:43 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.42  2002/05/16 02:02:43  caines
+// Send in differnt group tables for the TPC and est refit so flagging of hits correct
+//
 // Revision 1.41  2002/05/16 01:59:19  caines
 // Send in differnt group tables for the TPC and est refit so flagging of hits correct
 //
@@ -630,8 +633,8 @@ Int_t StMatchMaker::Make(){
        
        for( i=0; i<tpc_groupsEst->GetNRows(); i++, tgroupEst++, tgroup++){
 	 
-	 if( tgroupEst->ident != tgroup->ident)
-	 cout << tgroupEst->ident << " " << tgroup->ident << endl;
+	 //if( tgroupEst->ident != tgroup->ident)
+	 //cout << tgroupEst->ident << " " << tgroup->ident << endl;
 	 if( tgroupEst->id1 != 0 && tgroupEst->ident > -5){
 	   spt_id = tgroupEst->id2-1;
 	   row = spc[spt_id].row/100;
