@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_CPP_SR.cxx,v 1.2 2001/06/25 22:58:54 jcs Exp $
+ * $Id: FTPV1P0_CPP_SR.cxx,v 1.3 2001/06/27 22:06:54 jcs Exp $
  * Author: Jeff Landgraf, M.J. LeVine, J.Klay, H.Huemmler
  ***************************************************************************
  * Description: 
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: FTPV1P0_CPP_SR.cxx,v $
+ * Revision 1.3  2001/06/27 22:06:54  jcs
+ * Remove unused variables mz, rb
+ *
  * Revision 1.2  2001/06/25 22:58:54  jcs
  * cleanup code
  *
@@ -71,7 +74,7 @@ int FTPV1P0_CPP_SR::getClusters(int PadRow, int Pad,
 		  int *nClusters, struct ASIC_Cluster **clusters)
 {
   // Return a pointer to the cluster array for this (padrow,pad)
-  int i, mz, rb;
+  int i;
   FTPPADK_entry ent;
 
   // check pad, padrow for validity
