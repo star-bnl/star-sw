@@ -73,7 +73,7 @@ public:
   /// Get Tracking Mode used for Interactive Tracking
   virtual StiFindStep getTrackingMode() const = 0;
 
-  virtual EditableParameters * getParameters()=0;
+  virtual EditableParameters & getParameters()=0;
 };
 
 
