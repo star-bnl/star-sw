@@ -1,6 +1,10 @@
-// $Id: StFtpcClusterFinder.hh,v 1.12 2002/03/01 14:22:20 jcs Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.13 2002/06/04 12:33:13 putschke Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.13  2002/06/04 12:33:13  putschke
+// new 2-dimenisional hitfinding algorithm
+// correct error in padposition numbering
+//
 // Revision 1.12  2002/03/01 14:22:20  jcs
 // add additional histograms to monitor cluster finding
 //
@@ -71,15 +75,6 @@ typedef struct tagClusterUC
 
 typedef struct
 {
-  int Timebin;
-  TPCSequence Sequence;
-  int height;
-  int slope;
-  int width;
-} TPadPeak;
-
-typedef struct
-{
   int pad;
   int Timebin;
   int pad_saved;
@@ -100,6 +95,14 @@ typedef struct
   float z;
 } TPeak;
 
+const int mMaxPadlengthMed=30;
+const int mMaxTimelengthMed=30;
+const int mMaxPadlengthOut=10;
+const int mMaxTimelengthOut=10;
+
+// width of search window in StFtpcFindhits()
+const int DeltaTime=2;
+const int DeltaPad=2;
 
 class StFtpcClusterFinder
 {
@@ -133,7 +136,6 @@ class StFtpcClusterFinder
   ~StFtpcClusterFinder();
   int search();
   int findHits(TClusterUC *Cluster, int, int, double*, double*, float *);//!
-  int getSeqPeaksAndCalibAmp(TPCSequence*, int, int, int, TPadPeak*, int*);//!
   int fitPoints(TClusterUC*, int, int, double*, double*, TPeak*, int, float*);//!
   int padtrans(TPeak*, int, int, double*, double*);//!
   float gauss_2d(int, int, float, float, float, float, float);//!
@@ -143,6 +145,7 @@ class StFtpcClusterFinder
   int cucInit(TClusterUC*, int*, int*);//!
   TClusterUC *cucAlloc(TClusterUC*, int*, int*);//!
   int cucFree(TClusterUC*, int*, int*, TClusterUC*);//!
+  bool geometryCut(TClusterUC*);
 };
 
 #endif
