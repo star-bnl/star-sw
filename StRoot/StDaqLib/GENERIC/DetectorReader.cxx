@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.17 2004/08/07 02:43:32 perev Exp $
+ * $Id: DetectorReader.cxx,v 1.18 2004/11/11 20:06:58 jeromel Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,8 +12,11 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.18  2004/11/11 20:06:58  jeromel
+ * Message format change only (explicit)
+ *
  * Revision 1.17  2004/08/07 02:43:32  perev
- * more test for corruption added
+ *  more test for corruption added
  *
  * Revision 1.16  2004/02/18 20:31:14  ward
  * There was a big mess.  I am trying to fix it.
@@ -149,9 +152,9 @@ RICH_Reader *getRICHReader(EventReader *er)
   Bank_RICP *pRICP;
   pRICP = (Bank_RICP *)er->findBank("RICP");
   if (pRICP)  {
-    if (!pRICP->test_CRC())  printf("CRC error in RICP: %s %d\n",
+    if (!pRICP->test_CRC())  printf("DetectorReader - getRICHReader: CRC error in RICP: %s %d\n",
 					__FILE__,__LINE__) ;
-    if (pRICP->swap() < 0)   printf("swap error in RICP: %s %d\n",
+    if (pRICP->swap() < 0)   printf("DetectorReader - getRICHReader: swap error in RICP: %s %d\n",
 					__FILE__,__LINE__) ;
     pRICP->header.CRC = 0;
     return new RICH_Reader(er,pRICP);
@@ -164,9 +167,9 @@ EEMC_Reader *getEEMCReader(EventReader *er)
   Bank_EEMCP *pEEMCP;
   pEEMCP = (Bank_EEMCP *)er->findBank("EECP");
   if (pEEMCP)  {
-    if (!pEEMCP->test_CRC())  printf("CRC error in EEMCP: %s %d\n",
+    if (!pEEMCP->test_CRC())  printf("DetectorReader - getEMCReader: CRC error in EEMCP: %s %d\n",
 					__FILE__,__LINE__) ;
-    if (pEEMCP->swap() < 0)   printf("swap error in EEMCP: %s %d\n",
+    if (pEEMCP->swap() < 0)   printf("DetectorReader - getEMCReader: swap error in EEMCP: %s %d\n",
 					__FILE__,__LINE__) ;
     pEEMCP->header.CRC = 0;
     return new EEMC_Reader(er,pEEMCP);
@@ -175,7 +178,7 @@ EEMC_Reader *getEEMCReader(EventReader *er)
 }
 SSD_Reader *getSSDReader(EventReader *er)
 {
-  printf("this is diag msg H in DetectorReader.cxx before instantiation of SSD_Reader.\n"); 
+  printf("DetectorReader - getSSDReader: before instantiation of SSD_Reader.\n"); 
   return new SSD_Reader(er);
   return FALSE;
 }
@@ -184,9 +187,9 @@ EMC_Reader *getEMCReader(EventReader *er)
   Bank_EMCP *pEMCP;
   pEMCP = (Bank_EMCP *)er->findBank("EMCP");
   if (pEMCP)  {
-    if (!pEMCP->test_CRC())  printf("CRC error in EMCP: %s %d\n",
+    if (!pEMCP->test_CRC())  printf("DetectorReader - getEMCReader: CRC error in EMCP: %s %d\n",
 					__FILE__,__LINE__) ;
-    if (pEMCP->swap() < 0)   printf("swap error in EMCP: %s %d\n",
+    if (pEMCP->swap() < 0)   printf("DetectorReader - getEMCReader: swap error in EMCP: %s %d\n",
 					__FILE__,__LINE__) ;
     pEMCP->header.CRC = 0;
     return new EMC_Reader(er,pEMCP);
@@ -198,9 +201,9 @@ PMD_Reader *getPMDReader(EventReader *er)
   Bank_PMDP *pPMDP;
   pPMDP = (Bank_PMDP *)er->findBank("PMDP");
   if (pPMDP)  {
-    if (!pPMDP->test_CRC())  printf("CRC error in PMDP: %s %d\n",
+    if (!pPMDP->test_CRC())  printf("DetectorReader - getPMDReader: CRC error in PMDP: %s %d\n",
 					__FILE__,__LINE__) ;
-    if (pPMDP->swap() < 0)   printf("swap error in PMDP: %s %d\n",
+    if (pPMDP->swap() < 0)   printf("DetectorReader - getPMDReader: swap error in PMDP: %s %d\n",
 					__FILE__,__LINE__) ;
     pPMDP->header.CRC = 0;
     return new PMD_Reader(er,pPMDP);
@@ -212,13 +215,14 @@ TRG_Reader *getTRGReader(EventReader *er)
   Bank_TRGP *pTRGP;
   pTRGP = (Bank_TRGP *)er->findBank("TRGP");
   if (pTRGP)  {
-    if (!pTRGP->test_CRC())  {printf("CRC error in TRGP: %s %d\n",
+    if (!pTRGP->test_CRC())  {printf("DetectorReader - getTRGReader: CRC error in TRGP: %s %d\n",
 					__FILE__,__LINE__) ; return 0;}
-    if (pTRGP->swap() < 0)   {printf("swap error in TRGP: %s %d\n",
+    if (pTRGP->swap() < 0)   {printf("DetectorReader - getTRGReader: swap error in TRGP: %s %d\n",
 					__FILE__,__LINE__) ; return 0;}
     pTRGP->header.CRC = 0;
     TRG_Reader *r = new TRG_Reader(er,pTRGP);
     if (!r->GetErr()) return r;
+    (void) printf("DetectorReader - getTRGReader: Error => deleting implementation (check will cause event to be skipped)\n");
     delete r;
     return 0;
   }
@@ -231,9 +235,9 @@ L3_Reader *getL3Reader(EventReader *er)
   pL3P = (Bank_L3_P *)er->findBank("L3_P");
   if(pL3P)
   {
-    if(!pL3P->test_CRC()) printf("CRC error in L3P: %s %d\n",
+    if(!pL3P->test_CRC()) printf("DetectorReader - getL3Reader:  CRC error in L3P: %s %d\n",
 				 __FILE__,__LINE__);
-    if(pL3P->swap() < 0)  printf("swap error in L3P: %s %d\n",
+    if(pL3P->swap() < 0)  printf("DetectorReader - getL3Reader:  swap error in L3P: %s %d\n",
 				 __FILE__,__LINE__);
     pL3P->header.CRC = 0;
     return new L3_Reader(er,pL3P);
@@ -246,9 +250,9 @@ TOF_Reader *getTOFReader(EventReader *er)
   Bank_TOFP *pTOFP;
   pTOFP = (Bank_TOFP *)er->findBank("TOFP");
   if (pTOFP)  {
-    if (!pTOFP->test_CRC())  printf("CRC error in TOFP: %s %d\n",
+    if (!pTOFP->test_CRC())  printf("DetectorReader - getTOFReader: CRC error in TOFP: %s %d\n",
                                       __FILE__,__LINE__) ;
-    if (pTOFP->swap() < 0)   printf("swap error in TOFP: %s %d\n",
+    if (pTOFP->swap() < 0)   printf("DetectorReader - getTOFReader: swap error in TOFP: %s %d\n",
                                       __FILE__,__LINE__) ;
     pTOFP->header.CRC = 0;
     return new TOF_Reader(er,pTOFP);
@@ -261,9 +265,9 @@ FPD_Reader *getFPDReader(EventReader *er)
   Bank_FPDP *pFPDP;
   pFPDP = (Bank_FPDP *)er->findBank("FPDP");
   if (pFPDP)  {
-    if (!pFPDP->test_CRC())  printf("CRC error in FPDP: %s %d\n",
+    if (!pFPDP->test_CRC())  printf("DetectorReader - getFPDReader: CRC error in FPDP: %s %d\n",
                                       __FILE__,__LINE__) ;
-    if (pFPDP->swap() < 0)   printf("swap error in FPDP: %s %d\n",
+    if (pFPDP->swap() < 0)   printf("DetectorReader - getFPDReader: swap error in FPDP: %s %d\n",
                                       __FILE__,__LINE__) ;
     pFPDP->header.CRC = 0;
     return new FPD_Reader(er,pFPDP);
