@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.67  1999/04/06 21:26:26  fisyak
+#  take out StDisplay
+#
 #  Revision 1.66  1999/04/02 22:59:01  fisyak
 #  filter-out St_laser_Maker St_run_summary_Maker St_tpctest_Maker
 #
@@ -277,7 +280,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/04/02 22:59:01 $ 
+#           Last modification $Date: 1999/04/06 21:26:26 $ 
 #  default setings
 # Current Working Directory
 #
@@ -327,6 +330,7 @@ ifndef SUBDIRS
   endif
   SUBDIRS := $(filter-out global, $(SUBDIRS)) $(filter global, $(SUBDIRS))
   SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS)) 
+  SUBDIRS := $(filter-out StDisplay, $(SUBDIRS))
   SUBDIRS := $(filter-out StREvent, $(SUBDIRS))
   SUBDIRS := $(filter-out St_mev_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
