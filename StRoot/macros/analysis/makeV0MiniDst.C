@@ -1,7 +1,10 @@
 // Using StV0MiniDstMaker to make v0 mini-DST
 // Peter G. Jones, University of Birmingham, p.g.jones@bham.ac.uk
-// $Id: makeV0MiniDst.C,v 1.3 1999/08/13 13:36:44 jones Exp $
+// $Id: makeV0MiniDst.C,v 1.4 1999/08/31 20:49:08 genevb Exp $
 // $Log: makeV0MiniDst.C,v $
+// Revision 1.4  1999/08/31 20:49:08  genevb
+// StV0MiniDst class now depends on StAnalysisUtilities library
+//
 // Revision 1.3  1999/08/13 13:36:44  jones
 // Modified to reflect new revision of StV0MiniDstMaker
 //
@@ -15,6 +18,7 @@
 void load() {
   gSystem->Load("St_base");
   gSystem->Load("StUtilities");
+  gSystem->Load("StAnalysisUtilities");
   gSystem->Load("St_Tables");
   gSystem->Load("StChain");
   gSystem->Load("StIOMaker");
