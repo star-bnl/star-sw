@@ -8,9 +8,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
-//  $Id: Stl3RawReaderMaker.cxx,v 1.12 2002/02/26 21:40:38 struck Exp $
+//  $Id: Stl3RawReaderMaker.cxx,v 1.13 2002/02/27 20:17:58 struck Exp $
 //
 //  $Log: Stl3RawReaderMaker.cxx,v $
+//  Revision 1.13  2002/02/27 20:17:58  struck
+//  adding globalTrack->setEncodedMethod() to mark tracks as l3 tracks in StEvent
+//
 //  Revision 1.12  2002/02/26 21:40:38  struck
 //  move GetDataSet("StDAQReader") from Init() to Make(), solves a seg. fault in current dev release
 //
@@ -513,10 +516,14 @@ Int_t Stl3RawReaderMaker::fillStEventWithL3GlobalTracks()
 						     *momentum, -1 );		
       // StGlobalTrack
       StGlobalTrack* globalTrack = new StGlobalTrack();
-      globalTrack->setFlag(globalL3Tracks[trackindex].flag) ;
-      globalTrack->setLength(globalL3Tracks[trackindex].length) ;
-      globalTrack->setDetectorInfo(detectorInfo) ;
-      globalTrack->setGeometry(helixModel) ;
+      globalTrack->setFlag(globalL3Tracks[trackindex].flag);
+      globalTrack->setLength(globalL3Tracks[trackindex].length);
+      globalTrack->setDetectorInfo(detectorInfo);
+      globalTrack->setGeometry(helixModel);
+      // set finder/fitting method
+      int l3word = kL3FitId + (1<<l3Standard);
+      //cout << l3word << endl; // should print 16390
+      globalTrack->setEncodedMethod(l3word); 
 
       // helicity h = -sign(q*B)
       short h = globalTrack->geometry()->charge()*signOfField > 0 ? -1 : 1;
