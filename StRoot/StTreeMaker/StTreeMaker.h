@@ -30,6 +30,7 @@ public:
    virtual Int_t  Open(const Char_t *ioFile=0);
    virtual void   Close(Option_t *opt=0);
            void   UpdateTree(Int_t flag);
+           void   UpdateHddr();
    virtual void   FillHistBranch(StBranch *histBr);
   
 
@@ -39,7 +40,7 @@ public:
      {if(!fTree)return 0;return (StBranch*)fTree->Find(brName);};   
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.11 2000/04/03 23:55:26 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.12 2000/04/07 15:30:29 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTreeMaker, 1)   //StAR chain virtual base class for Makers
 };

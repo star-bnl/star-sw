@@ -194,7 +194,8 @@ Int_t StTreeMaker::MakeWrite()
 
 //		Fill branches
 
-  UpdateTree(1);
+  if (!GetFailedMaker())  UpdateTree(1);
+  UpdateHddr();
 
 //		Write StTree
   ULong_t ukey = GetNumber();
@@ -202,6 +203,42 @@ Int_t StTreeMaker::MakeWrite()
   fTree->Clear(); 
   return 0;
 }
+//_____________________________________________________________________________
+void StTreeMaker::UpdateHddr()
+{
+//		Fill branches by Run/Event info
+
+  StBranch *br;
+  Option_t *opt=0;
+  St_DataSet *hd = GetDataSet("EvtHddr");
+  StMaker *failmk = GetFailedMaker();
+  TString ts;
+  if (failmk ) {
+      if (strcmp("St_geant_Maker",failmk->ClassName())==0
+    ||  failmk->InheritsFrom(StIOInterFace::Class())   ) hd =0;
+    if (!hd) 	return;
+    ts = "discarded by ";
+    ts += failmk->ClassName();
+    ts += "::";
+    ts += failmk->GetName();
+    hd->SetTitle(ts);
+  }
+    
+  St_DataSetIter nextBr(fTree);
+  
+  while ((br = (StBranch *)nextBr())) {	//Looop over branches
+    if ((opt = br->GetOption()) && strstr(opt,"const")) continue;
+    if (!failmk && !br->First())			continue;
+    St_DataSet *ds = br;
+    if (ds->First() && ds->First() == ds->Last()) ds = ds->First();
+    if (ds->Find("RunEvent"))			continue; 
+    St_DataSet *hdd = (St_DataSet*)hd->Clone();
+    hdd->SetName ("RunEvent");
+    hdd->SetTitle(ts);
+    ds->AddFirst(hdd);
+  }
+}          
+
 //_____________________________________________________________________________
 void StTreeMaker::UpdateTree(Int_t flag)
 {
