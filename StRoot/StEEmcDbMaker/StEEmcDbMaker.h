@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.21 2004/04/12 16:19:52 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.22 2004/04/28 20:38:11 jwebb Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -27,7 +27,7 @@ Example how to use this maker:
 www.star.bnl.gov/STAR/eemc -->How To
 
 </pre>
-*/ 
+*/  
 
 #ifndef STAR_SteemcDbMaker
 #define STAR_SteemcDbMaker
@@ -62,9 +62,10 @@ class DbFlavor {
 
 
 class StEEmcDbMaker : public StMaker {
- private:
-  
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.21 2004/04/12 16:19:52 balewski Exp $";
+  // private:
+ public:
+
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.22 2004/04/28 20:38:11 jwebb Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -104,11 +105,17 @@ class StEEmcDbMaker : public StMaker {
 
   const EEmcDbItem* getStrip(int sec, char uv, int strip);  //ranges: sec=1-12, uv=U,V ,strip=1-288; slow method
 
+  TString mAsciiDbase; // Ascii database filename (default NONE)
+
  protected:
  public:  
   
   void setSectors(int ,int); ///< limit the range of sectors for speed
   void setThreshold(float x);// defines threshold for ADCs
+
+
+  void setAsciiDatabase ( const Char_t *dbfile );
+
 
   const EEmcDbCrate * getFiber(int icr);
   const  int getNFiber(){return nFiber;}
@@ -123,15 +130,15 @@ class StEEmcDbMaker : public StMaker {
   const  EEmcDbItem*  getByStrip(int sec, char uv, int strip) //ranges: sec=1-12, uv=U,V ,strip=1-288; fast method
     {return getByStrip0(sec-1,uv-'U',strip-1);}
 
-  const EEmcDbItem* getTail(int sec,char sub, int eta, char type); //ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
+  const EEmcDbItem* getTile(int sec,char sub, int eta, char type); //ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
 
-  const EEmcDbItem* getT(int sec, char sub, int eta){return getTail(sec,sub,eta,'T');}
+  const EEmcDbItem* getT(int sec, char sub, int eta){return getTile(sec,sub,eta,'T');}
 
 
 
-  const EEmcDbItem* getP(int sec, char sub, int eta){return getTail(sec,sub,eta,'P');}
-  const EEmcDbItem* getQ(int sec, char sub, int eta){return getTail(sec,sub,eta,'Q');}
-  const EEmcDbItem* getR(int sec, char sub, int eta){return getTail(sec,sub,eta,'R');}
+  const EEmcDbItem* getP(int sec, char sub, int eta){return getTile(sec,sub,eta,'P');}
+  const EEmcDbItem* getQ(int sec, char sub, int eta){return getTile(sec,sub,eta,'Q');}
+  const EEmcDbItem* getR(int sec, char sub, int eta){return getTile(sec,sub,eta,'R');}
   const EEmcDbItem* getU(int sec, int strip){return getStrip(sec,strip,'U');}
   const EEmcDbItem* getV(int sec, int strip){return getStrip(sec,strip,'V');}
 
@@ -157,7 +164,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.21 2004/04/12 16:19:52 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.22 2004/04/28 20:38:11 jwebb Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -168,6 +175,10 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.22  2004/04/28 20:38:11  jwebb
+// Added StEEmcDbMaker::setAsciiDatabase().  Currently not working, since
+// tube name missing for some towers, triggereing a "clear" of all EEmcDbItems.
+//
 // Revision 1.21  2004/04/12 16:19:52  balewski
 // DB cleanup & update
 //

@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.28 2004/04/12 16:19:51 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.29 2004/04/28 20:38:10 jwebb Exp $
  
 
 #include <time.h>
@@ -31,6 +31,7 @@
 #include "tables/St_kretDbBlobS_Table.h"
 #include "cstructs/eemcConstDB.hh"
 
+//#include <iostream>
 
 ClassImp(StEEmcDbMaker)
 
@@ -58,8 +59,9 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
 
 
   mDbFiber=0; nFiber=0;
-
   setDBname("Calibrations/eemc");
+
+  mAsciiDbase = "";
   
 }
 
@@ -233,9 +235,18 @@ void StEEmcDbMaker::clearItemArray(){
 //__________________________________________________
 //__________________________________________________
 
-Int_t  StEEmcDbMaker::InitRun  (int runumber){
-  printf("\n\nInitRun :::::: %s\n\n\n",GetName());
+Int_t  StEEmcDbMaker::InitRun  (int runNumber)
+{
+  // Reloads database for each occurence of a new run number.
+  // If an ascii file has been loaded, via setAsciiDatabase(),
+  // issue a warning and return.
 
+  if ( mAsciiDbase.Length() > 0 ) {
+    Warning("InitRun","Database not reloaded for run number %i, values taken from %s",runNumber,mAsciiDbase.Data());
+    return kStOK;
+  }
+
+  printf("\n\nInitRun :::::: %s\n\n\n",GetName());
   printf("%s::use(flav='%s', mask='%s')\n",GetName(),dbFlavor.flavor,dbFlavor.nameMask);
 
   clearItemArray();
@@ -708,7 +719,7 @@ StEEmcDbMaker::getByStrip0(int isec, int iuv, int istrip){
 //__________________________________________________
 
 const EEmcDbItem*  
-StEEmcDbMaker::getTail(int sec, char sub, int eta, char type){
+StEEmcDbMaker::getTile(int sec, char sub, int eta, char type){
   char name[20];
   sprintf(name,"%2.2d%c%c%2.2d",sec,type,sub,eta);
   int key=EEname2Index(name);
@@ -729,7 +740,110 @@ StEEmcDbMaker::getStrip(int sec, char uv, int strip){
 
 
 
+//__________________________________________________
+//__________________________________________________
+//__________________________________________________
+
+void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
+{
+  // This method allows the user to initialize database
+  // values for each EEMC detector from an ascii file
+  // rather from a database query.  InitRun() will be
+  // blocked from reloading the database on subsequent
+  // run numbers.
+  
+  mAsciiDbase = ascii;
+
+  //-- Clear database values
+  //$$$  clearItemArray();
+
+  //-- Initialize timestamp to something obviously dumb.
+  myTimeStampDay = 1; 
+
+  //-- No provision (for now) for loading in partial info
+  Int_t sec1  = 1;
+  Int_t sec2  = 12;
+  nFound      = 0;
+  mfirstSecID = sec1;
+  mlastSecID  = sec2;
+  mNSector    = mlastSecID - mfirstSecID + 1;  
+
+  //-- Open the specified file
+  FILE *fd=fopen(ascii,"r"); 
+  EEmcDbItem item;
+  int nd=0;
+  if(fd==0) goto crashIt;
+
+
+  
+  //-- Loop over all entries in the specified data file
+  while (1) {
+
+    //-- Read in each individual entry.  The return value is checked
+    //-- for success or failure
+    int ret = item.importAscii(fd);
+
+    if(ret==0) break;
+    if(ret==1) continue;
+    if(ret <0) goto crashIt;
+
+    //-- Index for the specified (named) item
+    int key=EEname2Index(item.name);
+
+    //-- Apply a sanity check on the item
+    if(key!=item.key) {
+      printf("WARN: name='%s' key=%d!=inpKey=%d, inpKey ignored\n",item.name,key,item.key);
+      item.key=key;
+    }
+    assert(key>=0 && key<EEindexMax);
+
+
+    int isec=item.sec-sec1;
+    if (sec1>sec2 ) isec+=12;
+    
+    if( isec <0 ) continue;
+    if( isec >=  mNSector) continue;
+    nd++;
+
+    //-- Copy the database record read in from the file into
+    //-- our local arrays.
+    EEmcDbItem *x=&byIndex[key];
+    if(!x->isEmpty()) goto crashIt;
+    *x=item; // copy this DB record
+    //    x->print();
+
+    assert(byCrate[x->crate]); // ERROR: unsupported crate ID
+    if(byCrate[x->crate][x->chan]) {
+      printf("Fatal Error of eemc DB records: the same crate=%d / channel=%d entered twice for :\n",x->crate,x->chan);
+      byCrate[x->crate][x->chan]->print(); // first time
+      x->print(); // second time
+      assert(1==2);
+    }
+    byCrate[x->crate][x->chan]=x;
+    // assert(2==311);
+  }
+  
+  printf("setAsciiDataBase() done, found %d valid records\n",nd);
+
+
+
+
+  return;
+
+ crashIt:// any failure of reading of the data
+
+  clearItemArray();
+  //  assert(2==3);
+  printf("EEmcDb - no/corrupted input file, all cleared, continue\n");
+
+}
+
+
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.29  2004/04/28 20:38:10  jwebb
+// Added StEEmcDbMaker::setAsciiDatabase().  Currently not working, since
+// tube name missing for some towers, triggereing a "clear" of all EEmcDbItems.
+//
 // Revision 1.28  2004/04/12 16:19:51  balewski
 // DB cleanup & update
 //
