@@ -81,24 +81,25 @@ MatchedTrk:: MatchedTrk(StPrimaryMaker* head, int *ipar, float *fpar, CtbRespons
     n3++;
     head->hmtr[0]->Fill(3);
 
-    //Find momentum direction at vertex point
-    StThreeVectorD pmom;
-    pmom = TrkHlx.momentumAt(spath, bfield*tesla);
-    double beta = pmom.mag()/sqrt(pmom.mag()*pmom.mag()+0.139*0.139); //Assume pion
-    float strag=0.0136/beta/pmom.mag()*fabs(spath);
-    head->hmtr[1]->Fill(strag); 
-    head->hmtr[2]->Fill(-spath); 
-    //printf("stragling=%f %f %f %f \n",strag,beta,pmom.mag(),spath);
-
-
     // reject low pT tracks
     if(1./ptinv<MinTrkPt){
       //printf("ignore this low PT=%f track\n",1./ptinv);
       continue;
     }
+
+    //Find momentum direction at vertex point
+    StThreeVectorD pmom;
+    pmom = TrkHlx.momentumAt(spath, bfield*tesla);
+    double beta = pmom.mag()/sqrt(pmom.mag()*pmom.mag()+0.139*0.139); //Assume pion 
+    float strag=0.0136/beta/pmom.mag()*fabs(spath);
+
+    head->hmtr[1]->Fill(strag); 
+    head->hmtr[2]->Fill(-spath); 
+    //printf("stragling=%f %f %f %f \n",strag,beta,pmom.mag(),spath);
+
+
     n4++;
     head->hmtr[0]->Fill(4);
-
 
     pairD  d2; 
     d2 = TrkHlx.pathLength(Rctb);

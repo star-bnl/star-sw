@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.67 2002/01/02 21:49:49 balewski Exp $
+// $Id: StPrimaryMaker.cxx,v 1.68 2002/01/21 01:35:07 balewski Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.68  2002/01/21 01:35:07  balewski
+// Optional beam line constrain was added to ppLMV
+//
 // Revision 1.67  2002/01/02 21:49:49  balewski
 // Zdca for ppLMV changed from 90 -->180 cm
 //
@@ -258,7 +261,9 @@ ClassImp(StPrimaryMaker)
 {
   m_flag      = 2;
   zCutppLMV=0; // turn off ppLMV  as default
+  UnSetBeam4ppLMV(); // turn off adding beam line to ppLMV  as default (1)
   embedVerts = kFALSE;
+
 }
 //_____________________________________________________________________________
 StPrimaryMaker::~StPrimaryMaker(){
@@ -449,6 +454,7 @@ Int_t StPrimaryMaker::Init(){
     int   ppLMVparIdef[10]={2, 10, 0, 0, 0, 0, 0, 0, 0, 9999};
     float ppLMVparFdef[10]={1., 3.9, 0.20, .02, 1.,180., 0, 0, 0, 8888};
     ppLMVuse(ppLMVparIdef,ppLMVparFdef);
+    UnSetBeam4ppLMV(); // turn off adding beam line to ppLMV  as default (2)
   }
 
    // few histos for monitoring of ppLMV
@@ -463,7 +469,7 @@ Int_t StPrimaryMaker::Init(){
 
      hPiFi[7] = new TH1F("Fin7","Vertex X/cm found",100,-5,5);
      hPiFi[8] = new TH1F("Fin8","Vertex Y/cm found",100,-5,5);
-     hPiFi[9] = new TH1F("Fin9","Vertex Z/cm found",100,-100,100);
+     hPiFi[9] = new TH1F("Fin9","Vertex Z/cm found",100,-250,250);
 
      hPiFi[10] = new TH1F("Fin10","Vertex Z/cm Geant-found/cm ",100,-5,5);
      hPiFi[11] = new TH1F("Fin11","Vertex X/cm Geant-found/cm ",100,-5,5);
@@ -472,6 +478,8 @@ Int_t StPrimaryMaker::Init(){
      hPiFi[13] = new TH1F("Fin13","Primary multiplicity",551,-0.5,550.5);
      hPiFi[14] = new TH1F("Fin14","Primary (global) pT distrib",100,0.,10.);
      hPiFi[15] = new TH1F("Fin15","Primary No. of points/track",51,-0.5,50.5);
+     hPiFi[16] =(TH1F *) new TH2F("vXZ","Vertex X/cm vs. Z/cm found",50,-250,250,30,-1.5,1.5); 
+     hPiFi[17] =(TH1F *) new TH2F("vYZ","Vertex Y/cm vs. Z/cm found",50,-250,250,30,-1.5,1.5); 
   }
    {// matching to many bXing
      
@@ -485,7 +493,7 @@ Int_t StPrimaryMaker::Init(){
 
      hmtr[0] = new TH1F("mtr0","counts(1,...6)",11,-0.5,10.5);
      hmtr[1] = new TH1F("mtr1","starggling (a.u.) of tracks",100,.0,10.);
-     hmtr[2] = new TH1F("mtr2","Spath (cm) of tracks",100,.0,200.);
+     hmtr[2] = new TH1F("mtr2","Spath (cm) of tracks",100,.0,250.);
 
   }
 
@@ -618,12 +626,14 @@ Int_t StPrimaryMaker::Make(){
       St_db_Maker *db = ( St_db_Maker *)GetMaker("db");
       Int_t mdate = db->GetDateTime().GetDate();
       if(Debug()) gMessMgr->Debug() << "run_lmv: calling lmv" << endm;
-
+ 
+      //SetBeam4ppLMV(0.0,0.3,0.0001, 0.0001);
       if(zCutppLMV>0) {
 	assert( ppLMVparI[1]>0); // Do you initialized ppLMV ?!
         CtbResponse ctbResponse(this, ppLMVparI, ppLMVparF);
 	
         MatchedTrk maTrk(this, ppLMVparI, ppLMVparF, &ctbResponse,globtrk) ;
+	  
         iRes = ppLMV4(maTrk,globtrk,vertex,mdate);
 
       }  else {

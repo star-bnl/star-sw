@@ -1,5 +1,8 @@
-// $Id: ppLMV4.cxx,v 1.4 2001/12/06 02:27:10 balewski Exp $
+// $Id: ppLMV4.cxx,v 1.5 2002/01/21 01:35:07 balewski Exp $
 // $Log: ppLMV4.cxx,v $
+// Revision 1.5  2002/01/21 01:35:07  balewski
+// Optional beam line constrain was added to ppLMV
+//
 // Revision 1.4  2001/12/06 02:27:10  balewski
 // *** empty log message ***
 //
@@ -56,7 +59,7 @@ using namespace units;
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 
-//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.4 2001/12/06 02:27:10 balewski Exp $";
+//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.5 2002/01/21 01:35:07 balewski Exp $";
 
 struct Jcyl {float eta,phi;};
 
@@ -71,29 +74,51 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
   printf(" THIS IS ppLMV4 -START, use only tracks matched to CTB in bXing=%d\n",bXing+firstBXing);
 
   if(bXing<0) 
-    {printf("No tracks matched to selected bXing\n"); return kStOk;}
+    {printf("No tracks matched to selected bXing=%d\n",bXing); return kStOk;}
 
   vector <Jtrk> *tracks=&(maTrk.tracks[bXing]);
 
-  int Ntrk=(*tracks).size();
-  printf("passed tracks match to CTB  nTracks=%d\n",Ntrk);
+  printf("passed tracks match to CTB  nTracks=%d, Beam_equivNtr=%d\n",(*tracks).size(), beam4ppLMV.equivNtr);
 
-  if( Ntrk <= 1 ){
-    cout<<"ppLMV4: Event contains "<<Ntrk<<" global tracks. ";
-    cout<<"No vertex can be reconstructed. continue.."<<endl;
-    //return kStWarn; 
-  }
-
-  static int eveId=0;
-  eveId++;
-   
   // Get BField from gufld(,) 
   //  cout<<"Trying to Get the BField the old way..."<<endl;
   float x[3] = {0,0,0};
   float b[3];
   gufld(x,b);
   double bfield = 0.1*b[2]; //This is now Tesla.
+  
 
+  if( beam4ppLMV.equivNtr>0) { // add beam line to ppLMV to constrain vertex
+    
+    double pt  = 88889999;   
+    double nxy=sqrt(beam4ppLMV.nx*beam4ppLMV.nx +beam4ppLMV.ny*beam4ppLMV.ny);
+    assert(nxy>1.e-5); // beam line _MUST_ be tilted
+    double p0=pt/nxy;  
+    double px   = p0*beam4ppLMV.nx;
+    double py   = p0*beam4ppLMV.ny;
+    double pz   = p0; // approximation: nx,ny<<0
+    StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
+    StThreeVectorD origin(beam4ppLMV.x0, beam4ppLMV.y0, 0.); 
+    
+    struct Jtrk trk1;
+    trk1.glb_track_pointer=0; // marker for the beam line
+    trk1.helix=StPhysicalHelixD (MomFstPt, origin, bfield*tesla, 1.);
+
+    float sigMin=100000; // pick large weight for this track 
+    for( uint j=0;j<(*tracks).size();j++) {
+      float sig=(*tracks)[j].sigma;
+      if(sigMin>sig) sigMin=sig;
+    }
+
+    trk1.sigma=sigMin/sqrt(beam4ppLMV.equivNtr); //<== assigne weight
+    (*tracks).push_back(trk1);
+    printf("WARN ppLMV: nominal beam line added with sigma=%f, now nTrack=%d \n", trk1.sigma,(*tracks).size());
+    
+  }//
+
+  static int eveId=0;
+  eveId++;
+   
   // Parameters
   double DVtxMax      = 4.0;
 
@@ -104,7 +129,7 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
 
   //  ----------  D O   F I N D    V E R T E X
   
-  printf("%s - search for vertex using %d matched tracks: start ...\n",GetName(),Ntrk);
+  printf("%s - search for vertex using %d matched tracks: start ...\n",GetName(),(*tracks).size());
 
   //Do the actual vertex fitting, continue until good
   double A11=0.0,A12=0.0,A13=0.0,A21=0.0,A22=0.0,A23=0.0;
@@ -130,8 +155,12 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
     double b1=0.0,b2=0.0,b3=0.0;
     // Compute matrix A and vector b
     for(unsigned int itr=0; itr < (*tracks).size(); itr++){ 
-      //      sigma[itr]=1.0;
+
       double xo=0.0,yo=0.0;
+      if( beam4ppLMV.equivNtr>0) {// use the beam line as a starting point
+	xo=beam4ppLMV.x0;
+	yo=beam4ppLMV.y0;
+      }
       double spath = (*tracks)[itr].helix.pathLength(xo,yo);
       StThreeVectorD XClosest = (*tracks)[itr].helix.at(spath);
       StThreeVectorD XMomAtClosest = (*tracks)[itr].helix.momentumAt(spath,bfield*tesla);
@@ -168,13 +197,13 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
     double Yv = C21*b1 + C22*b2 + C23*b3;
     double Zv = C31*b1 + C32*b2 + C33*b3;
     XVertex.setX(Xv); XVertex.setY(Yv); XVertex.setZ(Zv);
-    //    cout<<"Vertex Position   : "<<XVertex.x()<<" "<<XVertex.y()<<" "<<XVertex.z()<<endl;
-    //    cout<<"Error in Position : "<<sqrt(C11)<<" "<<sqrt(C22)<<" "<<sqrt(C33)<<endl;
+    cout<<"Vertex Position   : "<<XVertex.x()<<" "<<XVertex.y()<<" "<<XVertex.z()<<endl;
+    cout<<"Error in Position : "<<sqrt(C11)<<" "<<sqrt(C22)<<" "<<sqrt(C33)<<endl;
     
 
     // Check if the fit is any good
     // Loop over tracks again to get Chi2 and check each track's deviation
-    double dmax=0.0;
+
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
   wrong lines  
   vector<StPhysicalHelixD,allocator<StPhysicalHelixD> >::iterator itehlx=(*tracks).helix.begin(), i1keep;
@@ -183,8 +212,10 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
 #else
     vector<Jtrk >::iterator itehlx=(*tracks).begin(), i1keep;
 #endif
-    while( itehlx != (*tracks).end()){
-      //      sigma[itr]=1.0;
+
+    double dmax=0.0;
+    while(itehlx != (*tracks).end()){
+      if( (*itehlx).glb_track_pointer==0) {itehlx++; continue;}
       StPhysicalHelixD hlx = (*itehlx).helix;
       double sig = (*itehlx).sigma;
       double spath = hlx.pathLength(XVertex); 
@@ -222,6 +253,7 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
   {// fill some histos
     hPiFi[13]->Fill((*tracks).size());
     for(uint j=0;j<(*tracks).size();j++) {
+      if((*tracks)[j].glb_track_pointer==0) continue;
       float pt=1./(*tracks)[j].glb_track_pointer->invpt;
       int npoint=(*tracks)[j].glb_track_pointer->n_point;
      hPiFi[14]->Fill(pt);
@@ -236,6 +268,8 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
     hPiFi[7]->Fill(rXver);
     hPiFi[8]->Fill(rYver);
     hPiFi[9]->Fill(rZver);
+    ((TH2F*)hPiFi[16])->Fill(rZver,rXver);
+    ((TH2F*)hPiFi[17])->Fill(rZver,rYver);
 
     // --------------  A C C E S S    G E A N T   V E R T E X  (for histo)
     g2t_vertex_st *GVER=(g2t_vertex_st *)maTrk.GVER[bXing];  
@@ -261,6 +295,7 @@ long StPrimaryMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_ver
     long icheck;
     icheck = 0;
     for(unsigned int ine=0; ine < (*tracks).size(); ine++){
+      if((*tracks)[ine].glb_track_pointer==0) continue;
       if( idt == (*tracks)[ine].glb_track_pointer->id )icheck=1;
     }  
     Int_t istart_old;
