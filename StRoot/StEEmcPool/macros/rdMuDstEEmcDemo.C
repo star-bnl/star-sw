@@ -9,36 +9,15 @@ int rdMuDstEEmcDemo(
 	  char* inDir   = "/star/data29/reco/pp200/pythia6_203/default/pt5/year2003/gheisha_on/trs_if/",
 	  int nEve=10)
 { 
-  if (gClassTable->GetID("TTable") < 0)
-  gSystem->Load("libStar");
-  gSystem->Load("St_base");
-  gSystem->Load("StChain");
-  gSystem->Load("St_Tables");
-  gSystem->Load("StMagF");
-  gSystem->Load("StUtilities");  // new addition 22jul99
-  gSystem->Load("StTreeMaker");
-  gSystem->Load("StIOMaker");
-  gSystem->Load("StarClassLibrary");
-  gSystem->Load("StTpcDb");
-  gSystem->Load("StDbUtilities");
-  gSystem->Load("StEvent");
-  gSystem->Load("StEventUtilities"); 
-  gSystem->Load("StMcEvent"); 
-  gSystem->Load("StMcEventMaker"); 
-  gSystem->Load("StAssociationMaker");
-  gSystem->Load("StMcAnalysisMaker");
-  gSystem->Load("StStrangeMuDstMaker");
+
+
+  gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+  loadSharedLibraries();
+  cout << " loading done " << endl;
+
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  gSystem->Load("libgeometry_Tables");
-  gSystem->Load("StDaqLib");
-  gSystem->Load("StEmcUtil");
-  gSystem->Load("StEmcADCtoEMaker");
-  gSystem->Load("StPreEclMaker");
-  gSystem->Load("StEpcMaker");
-
-  gSystem->Load("StMuDSTMaker");
 
 // Load my maker
   assert(gSystem->Load("StEEmcUtil")==0);
@@ -61,13 +40,13 @@ int rdMuDstEEmcDemo(
   // request DB for sectors you need (dafault:1-12)
   // myMk->setSectors(5,8);
 
-  // overwritte the time stamp (if needed)
-  // reverse order of makers: first #2, then #1
+  // to overwritte the time stamp 
+  // reverse order of the above makers: first #2, then #1
   // activate the line below
   //myMk->setTimeStampDay(20030514);  // format: yyyymmdd
 
   // change DB-server name (if needed)
-  // myMk->setDBname("TestScheme/emc");
+  // myMk->setDBname("TestScheme/eemc");
  
   // request alternative flavor of DB table (if needed)
   // myMk->setPreferedFlavor("set430","eemcPMTcal");
