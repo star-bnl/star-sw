@@ -2,8 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.7 1999/07/17 00:31:25 genevb Exp $
+// $Id: StXiMaker.cxx,v 1.8 1999/07/17 19:00:21 fisyak Exp $
 // $Log: StXiMaker.cxx,v $
+// Revision 1.8  1999/07/17 19:00:21  fisyak
+// Add sanctimonious checks
+//
 // Revision 1.7  1999/07/17 00:31:25  genevb
 // Use StMessMgr
 //
@@ -110,19 +113,22 @@ Int_t StXiMaker::Make(){
   int iRes = 0;
 
   St_DataSet *match = GetDataSet("match"); 
+  if (!match) return kStWarn;
   St_DataSetIter matchI(match);         
   St_dst_track     *globtrk  = (St_dst_track *) matchI("globtrk");
 
   St_DataSet     *primary = GetDataSet("primary"); 
+  if (!primary) return kStWarn;
   St_DataSetIter primaryI(primary);         
   St_dst_vertex  *vertex   = (St_dst_vertex *) primaryI("vertex");
 
   St_DataSet *v0 = GetDataSet("v0"); 
+  if (!v0) return kStWarn;
   St_DataSetIter v0I(v0);         
   St_dst_v0_vertex *dst_v0_vertex  = (St_dst_v0_vertex *) v0I("dst_v0_vertex");
   St_dst_xi_vertex  *dst_xi_vertex = 0;
   
-  dst_track_st *glob  = globtrk->GetTable();
+  if (!globtrk || !vertex || !dst_v0_vertex) return kStWarn;
   dst_vertex_st *vrtx = vertex->GetTable();
   if( vrtx->vtx_id != 1 || vrtx->iflag != 1){
     for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,vrtx++){
