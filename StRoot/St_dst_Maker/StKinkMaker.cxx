@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.27 2000/02/02 21:37:36 lbarnby Exp $
+// $Id: StKinkMaker.cxx,v 1.28 2000/03/14 23:42:46 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.28  2000/03/14 23:42:46  wdeng
+// Avoid memory leak. Some cleaning up.
+//
 // Revision 1.27  2000/02/02 21:37:36  lbarnby
 // CC5
 //
@@ -49,7 +52,7 @@
 // Use StMessMgr
 //
 // Revision 1.11  1999/07/15 22:27:43  wdeng
-// debug
+// Debug with the unit of magnetic field
 //
 // Revision 1.10  1999/07/14 14:58:33  wdeng
 // Check if there is primary vertex. Uncomment PrintInfo().
@@ -68,17 +71,9 @@
 //
 // Revision 1.5  1999/07/07 15:47:53  wdeng
 // add Id and Log at the first two lines for the purpose of version maintainance
-//
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// StKinkMaker class for Makers                                        //
-//                                                                      //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
 #include <stdlib.h>
 #include <string.h>
-#include <TMath.h>
 
 #include "StKinkMaker.h"
 
@@ -118,16 +113,18 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 
 ClassImp(StKinkMaker)
   
-  //_____________________________________________________________________________
+//_____________________________________________________________________________
 StKinkMaker::StKinkMaker(const char *name):
     StMaker(name),
     m_tkfpar(0)
 {
   m_kinkEvalOn = kTRUE;
 }
+
 //_____________________________________________________________________________
 StKinkMaker::~StKinkMaker(){
 }
+
 //_____________________________________________________________________________
 Int_t StKinkMaker::Init(){
   m_tkfpar =  new St_tkf_tkfpar("tkf_tkfpar",1);
@@ -154,6 +151,7 @@ Int_t StKinkMaker::Init(){
   AddRunCont(m_tkfpar);
   return StMaker::Init();
 }
+
 //_____________________________________________________________________________
 Int_t StKinkMaker::Make(){
   PrintInfo();
@@ -230,34 +228,38 @@ Int_t StKinkMaker::Make(){
 
     if( dstTrackPtr->iflag > 0 ) 
       {
-	Float_t dip   = atan(dstTrackPtr->tanl);
-	Int_t    h     = (B*dstTrackPtr->icharge > 0 ? -1 : 1);
-	Float_t phase = dstTrackPtr->psi*degree-h*pi/2;
-	Float_t curvature = dstTrackPtr->curvature;
-	Float_t x0 = dstTrackPtr->r0 * cos(dstTrackPtr->phi0 * degree);
-	Float_t y0 = dstTrackPtr->r0 * sin(dstTrackPtr->phi0 * degree);
-	Float_t z0 = dstTrackPtr->z0;
-	StThreeVectorD origin(x0, y0, z0);  
-
-	tempTrack = new StKinkLocalTrack(dstTrackPtr,
-					 curvature/centimeter,					 
-					 dip*radian, 
-					 phase*radian,
-					 origin*centimeter,
-					 h);
-	
-	if(((*tempTrack).startRadius2D()<tkfpar->vertexRMin2D ) &&
-	   ((*tempTrack).endRadius2D()>tkfpar->vertexRMax2D )) 
+	Float_t dstTrkStartRadius2D = dstTrackPtr->r0;
+	Float_t dstTrkEndRadius2D = 
+	             sqrt( dstTrackPtr->x_last[0] * dstTrackPtr->x_last[0] 
+                         + dstTrackPtr->x_last[1] * dstTrackPtr->x_last[1] );
+	if( dstTrkStartRadius2D < tkfpar->vertexRMin2D &&
+            dstTrkEndRadius2D > tkfpar->vertexRMax2D ) 
 	  continue; 
 	
-	if(((*tempTrack).startRadius2D()<tkfpar->vertexRMax2D ) ||
-	   ((*tempTrack).endRadius2D()>tkfpar->vertexRMin2D ))	
+	if( dstTrkStartRadius2D < tkfpar->vertexRMax2D ||
+	    dstTrkEndRadius2D > tkfpar->vertexRMin2D )	
 	  {
+	    Float_t dip   = atan(dstTrackPtr->tanl);
+	    Int_t    h     = (B*dstTrackPtr->icharge > 0 ? -1 : 1);
+	    Float_t phase = dstTrackPtr->psi*degree-h*pi/2;
+	    Float_t curvature = dstTrackPtr->curvature;
+	    Float_t x0 = dstTrackPtr->r0 * cos(dstTrackPtr->phi0 * degree);
+	    Float_t y0 = dstTrackPtr->r0 * sin(dstTrackPtr->phi0 * degree);
+	    Float_t z0 = dstTrackPtr->z0;
+	    StThreeVectorD origin(x0, y0, z0);  
+	    
+	    tempTrack = new StKinkLocalTrack(dstTrackPtr,
+					     curvature/centimeter,
+					     dip*radian, 
+					     phase*radian,
+					     origin*centimeter,
+					     h);
+	
 	    trackArray->Add(tempTrack);
 	  }
       }
   }
-
+  
   trackArray->Sort();
   
   dstVtxIndex  = vertex->GetNRows();
@@ -311,10 +313,10 @@ Int_t StKinkMaker::Make(){
 		  (radiusTwo2D > tkfpar->vertexRMin2D) && 	  
 		  (radiusTwo2D < tkfpar->vertexRMax2D) ) 
 		{
-		  Float_t distanceOne = sqrt(TMath::Power((xCords[0]-myTrack2->startPoint(0)), 2) + 
-					     TMath::Power((yCords[0]-myTrack2->startPoint(1)), 2));
-		  Float_t distanceTwo = sqrt(TMath::Power((xCords[1]-myTrack2->startPoint(0)), 2) + 
-					     TMath::Power((yCords[1]-myTrack2->startPoint(1)), 2));	
+		  Float_t distanceOne = sqrt(pow((xCords[0]-myTrack2->startPoint(0)), 2) + 
+					     pow((yCords[0]-myTrack2->startPoint(1)), 2));
+		  Float_t distanceTwo = sqrt(pow((xCords[1]-myTrack2->startPoint(0)), 2) + 
+					     pow((yCords[1]-myTrack2->startPoint(1)), 2));	
 		  if ( distanceOne < distanceTwo ) 
 		    {
 		      xtarget = xCords[0];	    
@@ -364,14 +366,14 @@ Int_t StKinkMaker::Make(){
 	  mKinkVertex.setY((point1AtDca[1]+point2AtDca[1])/2.);
 	  mKinkVertex.setZ((point1AtDca[2]+point2AtDca[2])/2.);
 	  
-	  Float_t distanceKinkParent2D   = sqrt( TMath::Power(mKinkVertex.x()-myTrack1->lastPoint(0), 2) +
-					         TMath::Power(mKinkVertex.y()-myTrack1->lastPoint(1), 2) );
+	  Float_t distanceKinkParent2D   = sqrt( pow(mKinkVertex.x()-myTrack1->lastPoint(0), 2) +
+					         pow(mKinkVertex.y()-myTrack1->lastPoint(1), 2) );
 	  
-	  Float_t distanceKinkDaughter2D = sqrt( TMath::Power(mKinkVertex.x()-myTrack2->startPoint(0), 2) +
-						 TMath::Power(mKinkVertex.y()-myTrack2->startPoint(1), 2) );
+	  Float_t distanceKinkDaughter2D = sqrt( pow(mKinkVertex.x()-myTrack2->startPoint(0), 2) +
+						 pow(mKinkVertex.y()-myTrack2->startPoint(1), 2) );
 	  
-	  Float_t distanceKinkParentZ    = sqrt( TMath::Power(mKinkVertex.z()-myTrack1->lastPoint(2), 2) );
-	  Float_t distanceKinkDaughterZ  = sqrt( TMath::Power(mKinkVertex.z()-myTrack2->startPoint(2), 2) );
+	  Float_t distanceKinkParentZ    = sqrt( pow(mKinkVertex.z()-myTrack1->lastPoint(2), 2) );
+	  Float_t distanceKinkDaughterZ  = sqrt( pow(mKinkVertex.z()-myTrack2->startPoint(2), 2) );
 	  
 	  if( distanceKinkParent2D > tkfpar->distanceKinkParent2D ) continue; 
 	  if( distanceKinkDaughter2D > tkfpar->distanceKinkDaughter2D ) continue; 
@@ -530,13 +532,13 @@ void StKinkMaker::FillTableRow()
   kinkVtxRow.dca  = dca;
   kinkVtxRow.dcad = daughterImpact;
   kinkVtxRow.dcap = parentImpact;
-  kinkVtxRow.dlf  = sqrt( TMath::Power(myTrack2->startPoint(0)-myTrack1->lastPoint(0), 2) +
-			  TMath::Power(myTrack2->startPoint(1)-myTrack1->lastPoint(1), 2) + 
-			  TMath::Power(myTrack2->startPoint(2)-myTrack1->lastPoint(2), 2) ); 
+  kinkVtxRow.dlf  = sqrt( pow(myTrack2->startPoint(0)-myTrack1->lastPoint(0), 2) +
+			  pow(myTrack2->startPoint(1)-myTrack1->lastPoint(1), 2) + 
+			  pow(myTrack2->startPoint(2)-myTrack1->lastPoint(2), 2) ); 
   
-  kinkVtxRow.dlv  = sqrt( TMath::Power(mKinkVertex.x()-myTrack1->lastPoint(0), 2) +
-			  TMath::Power(mKinkVertex.y()-myTrack1->lastPoint(1), 2) +
-			  TMath::Power(mKinkVertex.z()-myTrack1->lastPoint(2), 2) );
+  kinkVtxRow.dlv  = sqrt( pow(mKinkVertex.x()-myTrack1->lastPoint(0), 2) +
+			  pow(mKinkVertex.y()-myTrack1->lastPoint(1), 2) +
+			  pow(mKinkVertex.z()-myTrack1->lastPoint(2), 2) );
   
   kinkVtxRow.dE[0] = deltaKaonMuon;
   kinkVtxRow.dE[1] = deltaKaonPion;
@@ -606,7 +608,6 @@ void StKinkMaker::FillIflag()
 	    tptPtr++;
 	  }
 	
-	//==============================================================
 	tpt_track_st* tptPtr1  = tptTrack->GetTable();
 	tte_eval_st*  tteEPtr1 = tteEval->GetTable();
 	
@@ -631,7 +632,6 @@ void StKinkMaker::FillIflag()
 	    tptPtr1++;
 	  }
 	
-	//=====================================================================
 	Int_t stopIdParent;
 	Int_t startIdDaughter;	
 	Int_t vertexGeProc; 
@@ -657,11 +657,9 @@ void StKinkMaker::FillIflag()
 	}
 	
 	g2tTrackPtr = g2tTrackStart + (parentMcId -1);
-	
 	stopIdParent = g2tTrackPtr->stop_vertex_p;
-	//=====================================================================
+
 	g2tTrackPtr = g2tTrackStart + (daughterMcId -1);
-	
 	startIdDaughter = g2tTrackPtr->start_vertex_p;
 	
 	if( stopIdParent>g2tVertex->GetNRows() || stopIdParent<0 )  {
@@ -704,7 +702,7 @@ void StKinkMaker::FillIflag()
       }
     }
   }
-  //================================================================================ 
+
  WRONGFILL:
   dstVtxRow.iflag = 2;
  PROPERFILL:	  
@@ -713,9 +711,11 @@ void StKinkMaker::FillIflag()
 }
 
 //_____________________________________________________________________________
-Int_t StKinkMaker::MeetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& helix1, 
-				    const StPhysicalHelixD& helix2, Float_t xCords[2], 
-				    Float_t yCords[2])
+Int_t StKinkMaker::MeetTwoHelices2D(const Float_t cut, 
+                                    const StPhysicalHelixD& helix1,
+                                    const StPhysicalHelixD& helix2, 
+                                    Float_t xCords[2], 
+                                    Float_t yCords[2])
 {       
   
   Float_t  om1, om2, ph1, ph2;
@@ -732,16 +732,14 @@ Int_t StKinkMaker::MeetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& h
   r1 = 1./(helix1.curvature());
   r2 = 1./(helix2.curvature());
   
-  /*    Clear variables */
-  
+  // Clear variables
   xCords[0] = 0.;
   xCords[1] = 0.;
   yCords[0] = 0.;
   yCords[1] = 0.;
   flag = 2;
   
-  /*    Find the two intersections      */
-  
+  // Find the two intersections 
   a = xc1[0]-xc2[0];
   b = xc1[1]-xc2[1];
   dia = sqrt(a*a + b*b);
@@ -749,8 +747,7 @@ Int_t StKinkMaker::MeetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& h
   c = (r1*r1 - r2*r2 + a*a + b*b)/2.0;
   d = (a*a + b*b)*r1*r1 - c*c;
   
-  /*    Check if there is any solution, one or two      */
-  
+  // Check if there is any solution, one or two
   if (d < 0.0)
     {
       if (dtouch <= cut)
@@ -775,14 +772,13 @@ Int_t StKinkMaker::MeetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& h
       om1       = ( -b*c+fabs(a*sqrt(d)) ) / (a*a+b*b);
       om2       = ( -b*c-fabs(a*sqrt(d)) ) / (a*a+b*b);
       
-      /*        Find the right pair     */
-      
+      // Find the right pair
       if ( (r1*r1-om1*om1) >= 0.0)
         {
           ph1 = sqrt(r1*r1-om1*om1);
           ph2 = -ph1;
-	  if ( fabs(TMath::Power((ph1+a), 2)+TMath::Power((om1+b), 2)-r2*r2) 
-	       <= fabs(TMath::Power((ph2+a), 2) + TMath::Power((om1+b), 2) - r2*r2) )
+	  if ( fabs(pow((ph1+a), 2)+pow((om1+b), 2)-r2*r2) 
+	       <= fabs(pow((ph2+a), 2) + pow((om1+b), 2) - r2*r2) )
             {
 	      xCords[0] = ph1+xc1[0];
             }
@@ -793,14 +789,13 @@ Int_t StKinkMaker::MeetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& h
 	  yCords[0] = om1+xc1[1];
         }
       
-      /*        Second pair     */
-      
+      // Second pair
       if ( (r1*r1-om2*om2) >= 0.0)
         {
           ph1 = sqrt(r1*r1-om2*om2);
           ph2 = -ph1;
-          if ( fabs(TMath::Power((ph1+a), 2) + TMath::Power((om2+b), 2) - r2*r2)
-	       <= fabs(TMath::Power((ph2+a), 2) + TMath::Power((om2+b), 2) - r2*r2) )
+          if ( fabs(pow((ph1+a), 2) + pow((om2+b), 2) - r2*r2)
+	       <= fabs(pow((ph2+a), 2) + pow((om2+b), 2) - r2*r2) )
             {
               xCords[1] = ph1 + xc1[0];
             }
@@ -815,9 +810,12 @@ Int_t StKinkMaker::MeetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& h
 }
 
 //_____________________________________________________________________________
-Float_t  StKinkMaker::DcaTwoLines(const StThreeVectorD& t1Project, const StThreeVectorD& t2Project, 
-				  const StThreeVectorD& parentMom, const StThreeVectorD& daughterMom, 
-				  Float_t point1AtDca[3], Float_t point2AtDca[3])
+Float_t  StKinkMaker::DcaTwoLines(const StThreeVectorD& t1Project, 
+                                  const StThreeVectorD& t2Project, 
+				  const StThreeVectorD& parentMom, 
+                                  const StThreeVectorD& daughterMom, 
+				  Float_t point1AtDca[3], 
+                                  Float_t point2AtDca[3])
 {
   Float_t        x1, x2, y1, y2, z1, z2;
   Float_t        sxz1, syz1, sxz2, syz2; 
