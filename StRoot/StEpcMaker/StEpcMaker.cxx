@@ -1,6 +1,11 @@
 //
-// $Id: StEpcMaker.cxx,v 1.20 2003/01/23 04:03:21 jeromel Exp $
+// $Id: StEpcMaker.cxx,v 1.21 2003/04/30 16:08:30 alexst Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.21  2003/04/30 16:08:30  alexst
+// Two changes:
+// 1. Clear vector of existing barrel points in StEvent. This accounts for the case when one needs to redo points with different parameters.
+// 2. Don't require clusters in both SMD planes to proceed with point reconstruction. Only tower clusters are required.
+//
 // Revision 1.20  2003/01/23 04:03:21  jeromel
 // Include fixed
 //
@@ -196,6 +201,12 @@ Int_t StEpcMaker::Make()
 	  return kStOK;
 	}
 
+      // when this maker is running there aren't supposed to be
+      // any bemc points in StEvent. If there are, clean up first.
+      StSPtrVecEmcPoint& bemcPoints = mTheEmcCollection->barrelPoints();
+      if(bemcPoints.size())
+	bemcPoints.clear();
+
       StDetectorId EmcId;
       StEmcDetector* EmcDet;
       StEmcClusterCollection* cluscoll=NULL;
@@ -207,21 +218,17 @@ Int_t StEpcMaker::Make()
       for(Int_t idet=0;idet<4;idet++)
 	{
 	  EmcId = static_cast<StDetectorId>(idet+kBarrelEmcTowerId);
-	  EmcDet =mTheEmcCollection->detector(EmcId);
-	  cluscoll=NULL;
+	  EmcDet = mTheEmcCollection->detector(EmcId);
+	  cluscoll = NULL;
 	  if(EmcDet)
 	    {
 	      cluscoll = EmcDet->cluster();
 	      UInt_t ncl=0;
 	      if(cluscoll) ncl = cluscoll->numberOfClusters();
 
-	      // Attn: this maker tuned-up for High Pt Pi0 and requires
-	      // clusters in all EMC sub-detectors (except preshower)
-          
-	      // added to check if clusters exist for all detectors (not PRS now).
-	      if(idet !=1 && ncl==0)
+	      if(idet==0 && ncl==0)
 		{
-		  cout<<" NO Clusters for detector " << idet <<endl;
+		  cout << "EPC:: No BEMC tower clusters, cannot continue" << endl;
 		  return kStWarn;
 		}
 
