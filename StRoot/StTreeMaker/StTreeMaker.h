@@ -13,9 +13,12 @@
 #include "StIOInterFace.h"
 #include "StTree.h"
 
+class St_dst_bfc_status;
+
 class StTreeMaker : public StIOInterFace {
 private:
-   Int_t  fFinished;
+   Int_t  fFinished;			//!noIO
+   St_dst_bfc_status *fBfcStatus;	//!noIO
 public:
    StTreeMaker(const char *name="",const char *ioFile="",const char *treeName=0);
    virtual       ~StTreeMaker();
@@ -24,6 +27,7 @@ public:
    virtual Int_t  MakeRead(UInt_t *RunEvent);
    virtual Int_t  MakeRead(){return MakeRead(0);};
    virtual Int_t  MakeWrite();
+           Int_t  MakeBfcStatus();
    virtual Int_t  Finish();
    virtual Int_t  Save();
    virtual void   Clear(Option_t *opt);
@@ -40,7 +44,7 @@ public:
      {if(!fTree)return 0;return (StBranch*)fTree->Find(brName);};   
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.12 2000/04/07 15:30:29 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.13 2000/05/20 01:09:29 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTreeMaker, 1)   //StAR chain virtual base class for Makers
 };
