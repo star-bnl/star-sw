@@ -352,11 +352,13 @@ StHbt1DHisto* StHbtCoulomb::CorrectionHistogram(const double& mass1, const doubl
   double qInv = low;
   double dQinv = (high-low)/( (double)nBins );
   double eta;
-  for (int ii=0; ii<nBins; ii++) {
-    qInv = low+ (double)ii*dQinv;
-    eta = 2.0*mZ1Z2*reducedMass*fine_structure_const/( qInv );
-    CoulombCorrect( eta );
-    correction->Fill( low+((double)ii+0.5)*dQinv, CoulombCorrect(eta,mRadius) );
-  }
+  for (int ii=1; ii<=nBins; ii++) 
+    {
+      qInv = correction->GetBinCenter(ii);
+      eta = 2.0*mZ1Z2*reducedMass*fine_structure_const/( qInv );
+      CoulombCorrect( eta );
+      correction->Fill( qInv, CoulombCorrect(eta,mRadius) );
+    }
+
   return (correction);
 }
