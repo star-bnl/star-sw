@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: PIDFitter.cxx,v 1.1 2002/02/14 21:25:55 aihong Exp $
+// $Id: PIDFitter.cxx,v 1.2 2002/02/25 18:31:24 jeromel Exp $
 //
 // Authors: Aihong Tang
 //
@@ -62,7 +62,6 @@ void PIDFitter::GetSigmaOfSingleTrail(Char_t* fileName4SigmaOfSingleTrail,Char_t
 
        if (mWriteSigmaNSampleGraph) {
          fitResoFile = new TFile("sigmaNSample.root","UPDATE");
-         fitResoFile->SetFormat(1);
        }
 
 
@@ -171,8 +170,7 @@ float PIDFitter::FitResoGaus(TH1F* resoHist,float fitRange,float& er,float theSt
   TFile* fitResoFile;
 
   if (mWriteGaus4SigmaNSampleHist) {
-  fitResoFile = new TFile("Gaus4SigmaNSample.root","UPDATE"); //no name change!
-  fitResoFile->SetFormat(1);
+    fitResoFile = new TFile("Gaus4SigmaNSample.root","UPDATE"); //no name change!
   }
 
     Double_t tempSigmaOfSingleTrial =0.42;
@@ -507,7 +505,6 @@ void PIDFitter::Init(){
 
   if (mWriteSigmaNSampleGraph) {
      TFile* fitResoFile = new TFile("sigmaNSample.root","RECREATE");
-     fitResoFile->SetFormat(1);
      delete fitResoFile;
   }
 
@@ -621,7 +618,6 @@ void PIDFitter::FitMultiGaus(Char_t* fileNameOfInput, Char_t* fileNameOfOutput){
 
   TFile fittedHistoFile(fileNameOfOutput,"RECREATE");
   
-  fittedHistoFile.SetFormat(1);
 
  TH1F* theHist =0;
  TF1*  sumGs   =0;
@@ -1090,6 +1086,9 @@ Double_t sigmaNSampleFitFcn(Double_t* x, Double_t *par){
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: PIDFitter.cxx,v $
+// Revision 1.2  2002/02/25 18:31:24  jeromel
+// More SetFormat() stripped.
+//
 // Revision 1.1  2002/02/14 21:25:55  aihong
 // re-install the new version
 //
