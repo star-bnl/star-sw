@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.2 1999/11/01 12:45:02 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.3 1999/11/04 13:32:00 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
- * Revision 2.2  1999/11/01 12:45:02  ullrich
- * Modified unpacking of point counter
+ * Revision 2.3  1999/11/04 13:32:00  ullrich
+ * Added non-const versions of some methods
  *
  * Revision 2.9  1999/12/01 15:58:08  ullrich
  * New decoding for dst_track::method. New enum added.
@@ -46,7 +46,7 @@
  **************************************************************************/
 #include "StTrack.h"
 #include "tables/St_dst_track_Table.h"
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.2 1999/11/01 12:45:02 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.3 1999/11/04 13:32:00 ullrich Exp $";
 #include "StVertex.h"
 #include "StTrackGeometry.h"
     mReconstructionMethod = 0;
@@ -55,7 +55,7 @@ static const char rcsid[] = "$Id: StTrack.cxx,v 2.2 1999/11/01 12:45:02 ullrich 
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.2 1999/11/01 12:45:02 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.3 1999/11/04 13:32:00 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -172,6 +172,9 @@ StTrack::numberOfPossiblePoints(StDetectorId det) const
 	return (mNumberOfPossiblePoints%10000)/1000;
 	break;
 	break;
+    case kSsdId:
+	return mNumberOfPossiblePoints/10000;
+	break;
     default:
 	return 0;
     }
@@ -194,6 +197,9 @@ StTrack::detectorInfo() const { return mDetectorInfo; }
 
 const StSPtrVecTrackPidTraits&
 StTrack::pidTraits() const { return mPidTraitsVec; }
+
+StSPtrVecTrackPidTraits&
+StTrack::pidTraits() { return mPidTraitsVec; }
 
 StPtrVecTrackPidTraits
 StTrack::pidTraits(StDetectorId det) const
