@@ -1,5 +1,8 @@
-// $Id: dst.C,v 1.2 1998/12/29 19:38:22 fine Exp $
+// $Id: dst.C,v 1.3 1999/01/03 20:59:55 fisyak Exp $
 // $Log: dst.C,v $
+// Revision 1.3  1999/01/03 20:59:55  fisyak
+// Remove St_geom_Maker
+//
 // Revision 1.2  1998/12/29 19:38:22  fine
 // STAR_shapes: test of the brand new St_NodeView class has been added
 //
@@ -33,7 +36,7 @@ if (gClassTable->GetID("StChain") < 0){
 // Create the main chain object
   StChain *chain = new StChain("dst_ana");
   //  St_params_Maker *params = new St_params_Maker("params","run/params");
-  //  St_geom_Maker     *geom = new St_geom_Maker("geom","run/geant/Run");
+  //  St_geant_Maker     *geant = new St_geant_Maker("geant","run/geant/Run");
   if (xdf_in) {
     St_xdfin_Maker *xdfin = new St_xdfin_Maker("xdfin");
     chain->SetInputXDFile(xdf_in);

@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.31 1999/01/02 19:08:25 fisyak Exp $
+// $Id: bfc.C,v 1.32 1999/01/03 20:59:55 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.32  1999/01/03 20:59:55  fisyak
+// Remove St_geom_Maker
+//
 // Revision 1.31  1999/01/02 19:08:25  fisyak
 // Add ctf
 //
@@ -157,14 +160,13 @@ bfc(const Int_t   Nevents=1,
   
   //  Create the makers to be called by the current chain
   St_params_Maker *params = new St_params_Maker("params","params");
-  St_geom_Maker     *geom = new St_geom_Maker("geom","run/geant/Run");
+  St_geant_Maker    *geant = new St_geant_Maker("geant","event/geant/Event");
   if (xdf_in) {
     St_xdfin_Maker *xdfin = new St_xdfin_Maker("xdfin");
     chain->SetInputXDFile(xdf_in);
   }
   //  St_calib_Maker    *calib = new St_calib_Maker("calib","calib"); 
   //  St_evg_Maker      *evgen = new St_evg_Maker("evgen","event/evgen");
-  St_geant_Maker    *geant = new St_geant_Maker("geant","event/geant/Event");
   //  St_fss_Maker   *ftpc_raw = new St_fss_Maker("ftpc_raw","event/raw_data/ftpc");
   //  St_tss_Maker    *tpc_raw = new St_tss_Maker("tpc_raw","event/raw_data/tpc");
   // Set parameters
