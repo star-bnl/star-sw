@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.25 2004/02/08 00:10:58 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.26 2004/02/08 00:13:05 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.26  2004/02/08 00:13:05  calderon
+ * Check that the size of the map is non-zero to get the first track.
+ *
  * Revision 1.25  2004/02/08 00:10:58  calderon
  * Histogram of rc hits is now not restricted to TPC only.   Histogram of mc hits is
  * done looping over tpc and svt hits.
@@ -464,7 +467,7 @@ Int_t StMcAnalysisMaker::Make()
     return kStWarn;
   }
   cout << "MC Tracks associated with first Track in collection: " << theTrackMap->count(firstTrack) << endl;
-  if (!theTrackMap->count(firstTrack)) {
+  if (!theTrackMap->count(firstTrack) && theTrackMap->size()) {
       cout << "First track in track node container was not associated.  Pick first track in map." << endl;
       firstTrack = theTrackMap->begin()->first; //first entry in the map is a pair, and first entry of pair is the global track
   }
