@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.7 2001/10/24 14:47:16 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.8 2001/10/25 21:31:36 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.8  2001/10/25 21:31:36  suaide
+// modifications to get new database tables
+//
 // Revision 1.7  2001/10/24 14:47:16  suaide
 // type correction
 //
@@ -21,6 +24,8 @@
 #include "tables/St_emcCalibration_Table.h"
 #include "tables/St_emcPedestal_Table.h"
 #include "tables/St_smdPedestal_Table.h"
+#include "tables/St_emcRunning_Table.h"
+#include "tables/St_smdRunning_Table.h"
 
 #include "tables/St_controlADCtoE_Table.h"
 #include "StEmcUtil/emcInternalDef.h"
