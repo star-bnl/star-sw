@@ -1,5 +1,9 @@
-// $Id: StFtpcConfMapper.cc,v 1.11 2001/01/30 13:31:27 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.12 2001/03/30 21:30:27 jeromel Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.12  2001/03/30 21:30:27  jeromel
+// Constructor #2 argument 1 had an implicit/hidden copy of object.
+// Removed const  in declaration.
+//
 // Revision 1.11  2001/01/30 13:31:27  oldi
 // New variable mTime introduced to count total time consumption.
 //
@@ -121,7 +125,7 @@ StFtpcConfMapper::StFtpcConfMapper()
 }
 
 
-StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t vertexPos[3], Bool_t bench, 
+StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3], Bool_t bench, 
 				   Int_t phi_segments, Int_t eta_segments) 
   : StFtpcTracker(fcl_fppoint, vertexPos, bench)
 {
