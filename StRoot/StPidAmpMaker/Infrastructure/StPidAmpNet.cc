@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNet.cc,v 1.7 2000/05/01 16:59:25 aihong Exp $
+ * $Id: StPidAmpNet.cc,v 1.8 2000/07/06 01:55:15 perev Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNet.cc,v $
+ * Revision 1.8  2000/07/06 01:55:15  perev
+ * fix related to ROOT float -> double
+ *
  * Revision 1.7  2000/05/01 16:59:25  aihong
  * clean up
  *
@@ -914,7 +917,7 @@ double StPidAmpNet::maxPoint(TGraph* gr, bool value){
   //value=false, return the position of the max value.
 
       int i;
-      float x,y;
+      double x,y;
       double maxDedx=0;
       double maxX=0;
 
@@ -922,8 +925,8 @@ double StPidAmpNet::maxPoint(TGraph* gr, bool value){
       gr->GetPoint(i,x,y);
 
        if (maxDedx<y){
-        maxDedx=double(y);
-        maxX=double(x);
+        maxDedx=y;
+        maxX=x;
        }
 
      }
