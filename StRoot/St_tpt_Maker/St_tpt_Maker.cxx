@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.33 1999/05/21 14:41:18 sakrejda Exp $
+// $Id: St_tpt_Maker.cxx,v 1.34 1999/05/21 21:40:34 liq Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.34  1999/05/21 21:40:34  liq
+// set protection for no selected tracks from mctrk
+//
 // Revision 1.33  1999/05/21 14:41:18  sakrejda
 // tte is called now only if the evaluation flag is on
 //
@@ -463,7 +466,6 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
   
   m_vertex_xy->Fill(vertex_xy);
   
-  //  cout<<"run1 StVertexEffMaker::MakeHistogram"<<endl; 
   //before loop, initialize 
   TH1F *m_rapidity1=new TH1F("m_rapidity1", "rapidity with vid=1,nfst>5", 30,-3.,3.);
   TH1F *m_rapidity2=new TH1F("m_rapidity2", "rapidity with vid=1,nfst>5,nrec>0", 30,-3.,3.);
@@ -566,12 +568,21 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
   cout<<"No. of tracks selected in mctrk="<<nmctrk<<endl;
   cout<<"No. of tracks in evaltrk="<<nevaltrk<<endl;
   
+  if(!nmctrk){
+    cout<<"No. of tracks selected in mctrk=0,quit from VertexEffResolutionMakeHistogram "<<endl;     
+    return;
+  }
   Float_t average_ptr=total_ptr/nmctrk;
   Float_t average_ptg=total_ptg/nmctrk;
   cout<<"total_ptr="<<total_ptr<<"average_ptr="<<average_ptr<<endl;
   cout<<"total_ptg="<<total_ptg<<"average_ptg="<<average_ptg<<endl;
   Float_t average_rapidity=total_rapidity/nmctrk;
   cout<<"total_rapidity="<<total_rapidity<<"  average_rapidity="<<average_rapidity<<endl;
+
+  if(!nevaltrk){
+    cout<<"No. of tracks selected in evaltrk=0,quit from VertexEffResolutionMakeHistogram "<<endl;  
+    return;
+  }
   Float_t average_chisqxy=total_chisqxy/nevaltrk;
   cout<<"total_chisqxy="<<total_chisqxy<<"  average_chisqxy="<<average_chisqxy<<endl;
   Float_t average_chisqz=total_chisqz/nevaltrk;
@@ -608,7 +619,7 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.33 1999/05/21 14:41:18 sakrejda Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.34 1999/05/21 21:40:34 liq Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -742,8 +753,6 @@ void St_tpt_Maker::VertexEffResolutionInit() {
  
  m_ptg_rapidity_1=new TH2F("TptrackPtgRapidity1","Ptg vs. pseudo_rapidity (nrec1>=0)", 30,0.,3.,30,-3.,3.);
  m_ptg_rapidity_2=new TH2F("TptrackPtgRapidity2","Ptg vs. pseudo_rapidity (nrec1>0)", 30,0.,3.,30,-3.,3.);
- //m_ptg_rapidity_1=new TH2F("Tptrackptg_rapidity_1","Ptg vs. pseudo_rapidity ", 30,0.,3.,30,-3.,3.);
- //m_ptg_rapidity_2=new TH2F("Tptrackptg_rapidity_2","Ptg vs. pseudo_rapidity ", 30,0.,3.,30,-3.,3.);
  
  m_ptg_rapidity_dpt=new TH3F("TptrackPtgRapidityDpt","Ptg vs. pseudo_rapidity vs. abs(ptr-ptg)/ptg", 30,0.,3.,30,-3.,3.,20,-0.0001,0.0099);
  m_ptg_rapidity_dpt->SetMarkerStyle(21); m_ptg_rapidity_dpt->SetMarkerSize(0.7);
