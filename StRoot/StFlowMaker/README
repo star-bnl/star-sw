@@ -85,6 +85,12 @@ the square root of the multiplicity. The purpose is to eliminate
 beam-gas background where most of the particles would go one way or
 the other.
 
+Before run 4 trigger words were used to describe the triggers. After 
+run 4 multiple triggers could be satisfied by one event and a trigger
+collection is used. The scheme for selecting triggers therefore changed
+with the user being forced to make a choice as to which triggers to look
+for.
+
 ** StFlowPicoEvent:
 
 This is a persistent sub-set of StFlowEvent which can be written out
