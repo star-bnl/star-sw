@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.141  2004/03/26 15:30:06  andrewar
+// bug in field reset
+//
 // Revision 1.140  2004/03/26 14:52:43  calderon
 // Print out the magnetic field read from StEvent::eventSummary()
 //
@@ -271,6 +274,7 @@ Int_t StiMaker::Init()
 {
 
   runField =0.;
+
   _loaderHitFilter = 0; // not using this yet.
   _loaderTrackFilter = new StiDefaultTrackFilter("LoaderTrackFilter","MC Tracks Filter"); 
   _loaderTrackFilter->add(new EditableParameter("PhiUsed",  "Use Phi",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPhi));
@@ -398,6 +402,10 @@ Int_t StiMaker::Make()
 
   // Retrieve bfield in Tesla
   double field = event->summary()->magneticField()/10.;
+
+  if (runField==0) runField=field;
+  if (field==0 && field != runField) field=runField;
+
   cout << "StiMaker::Make() -I- Reading eventSummary()->magneticField() " << field << endl; 
   if (fabs(field)<2.)
     static_cast<StiKalmanTrackFinderParameters&>(_tracker->getParameters()).setField(field);
@@ -407,8 +415,6 @@ Int_t StiMaker::Make()
       return -1;
     }
 
-  if (runField==0) runField=field;
-  if (field==0 && field != runField) field=runField;
   
   if (_toolkit->isMcEnabled() )
     {
