@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.35 2000/11/27 13:31:23 fisyak Exp $
+// $Id: StChain.h,v 1.36 2000/11/27 22:46:39 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.36  2000/11/27 22:46:39  fisyak
+// Introduce kIsCalibrated BIT
+//
 // Revision 1.35  2000/11/27 13:31:23  fisyak
 // Add Production time set
 //
@@ -96,7 +99,9 @@
 #include "StMaker.h"
 #endif
 class StEvtHddr;
-
+enum EChainBits {
+  kIsCalibrated = BIT(24)   // if the TObject has been created after calibration
+};
 class StChain : public StMaker {
 private:
    Int_t               m_Version;    	//StChain version number
@@ -118,7 +123,7 @@ public:
    Int_t              GetVersionDate() {return m_VersionDate;}
 
  virtual const char *GetCVS() const 
- {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.35 2000/11/27 13:31:23 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+ {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.36 2000/11/27 22:46:39 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StChain, 0)   //StChain control class
 };
 
