@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.49 2001/04/10 21:38:49 perev Exp $
+// $Id: StMaker.h,v 1.50 2001/05/04 19:15:59 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.50  2001/05/04 19:15:59  perev
+// Fatal() -> FatalErr()
+//
 // Revision 1.49  2001/04/10 21:38:49  perev
 // Maki(int) --> IMake(int)
 //
@@ -191,7 +194,7 @@ public:
    virtual void   	EndMaker  (int ierr);
    virtual Int_t  	Finish();
    virtual Int_t  	FinishRun(int oldrunumber);
-   virtual void	       	Fatal(int Ierr, const char *Com);  
+   virtual void	       	FatalErr(int Ierr, const char *Com);  
    virtual void   	PrintInfo() const;
    virtual void         AddMaker (StMaker *mk);
 
@@ -290,7 +293,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.49 2001/04/10 21:38:49 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.50 2001/05/04 19:15:59 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   // base class to define  one step of the recontsruction chain
 };
