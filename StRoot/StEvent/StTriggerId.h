@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerId.h,v 2.1 2003/01/30 18:14:15 ullrich Exp $
+ * $Id: StTriggerId.h,v 2.2 2003/02/18 21:34:46 jeromel Exp $
  *
  * Author: Thomas Ullrich, January 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerId.h,v $
+ * Revision 2.2  2003/02/18 21:34:46  jeromel
+ * Changed vector to arrays
+ *
  * Revision 2.1  2003/01/30 18:14:15  ullrich
  * Initial Revision.
  *
@@ -19,6 +22,8 @@
 #include "StObject.h"
 #include <iostream.h>
 #include <vector>
+
+#define TRIGGER_ID_DIM 32
 
 class StTriggerId : public StObject {
 public:
@@ -45,14 +50,15 @@ private:
     unsigned int index(unsigned int) const;
     
 private:
-    UInt_t         mMask;
-    vector<UInt_t> mId;
-    vector<UInt_t> mVersion;
-    vector<UInt_t> mNameVersion;
-    vector<UInt_t> mThresholdVersion;
-    vector<UInt_t> mPrescaleVersion;
+    UInt_t       mIdx;
+    UInt_t       mMask;
+    UInt_t       mId[TRIGGER_ID_DIM];
+    UInt_t	 mVersion[TRIGGER_ID_DIM];
+    UInt_t	 mNameVersion[TRIGGER_ID_DIM];
+    UInt_t	 mThresholdVersion[TRIGGER_ID_DIM];
+    UInt_t	 mPrescaleVersion[TRIGGER_ID_DIM];
     
-    ClassDef(StTriggerId,1)
+    ClassDef(StTriggerId,2)
 };
 
 ostream& operator<<(ostream&, const StTriggerId&);
