@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.21 2000/07/13 22:29:52 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.22 2000/08/28 22:19:10 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.22  2000/08/28 22:19:10  ward
+ * Skip corrupted events. StDaqLib/GENERIC/EventReader.cxx & StDAQMaker/StDAQReader.cxx.
+ *
  * Revision 1.21  2000/07/13 22:29:52  perev
  * Return kStErr when TPC data is not in event.
  *
@@ -160,6 +163,7 @@ int StDAQReader::readEvent()
   //  fEventReader->InitEventReader(fFd, fOffset, 0);
   fEventReader->InitEventReader(fFd, fOffset);
   fOffset = fEventReader->NextEventOffset();
+  if(fEventReader->eventIsCorrupted(fFd,fOffset)) return kStErr; // Herb, Aug 28 2000
   if(fEventReader->errorNo()) return kStErr;  
   *fEventInfo = fEventReader->getEventInfo();
   if(fEventInfo->Token==0) return kStErr;  // Herb, July 5 2000
