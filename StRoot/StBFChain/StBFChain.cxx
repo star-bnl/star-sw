@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.324 2003/02/16 22:48:42 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.325 2003/03/05 19:35:09 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -105,6 +105,8 @@ Bfc_st BFC1[] = {
                                                                     "","","Turn on chain for ppMDC",kFALSE},
 
   {"dAuMDC"      ,""  ,"","ppOpt,C2003,-PreVtx,trs,srs,fss,big,GeantOut","","","Chain for d+Au",kFALSE},
+  {"dAuMDCa"     ,""  ,"","ppOpt,C2003,-PreVtx,trs,srs,fss,big,GeantOut,est","","",
+                                                                                   "Chain for d+Au",kFALSE},
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
 
 
@@ -472,8 +474,8 @@ Bfc_st BFC1[] = {
   {"EventQA"     ,"EventQA","","Event"     ,"StEventQAMaker","St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
-  {"Display"     ,"","","SCL,St_geom",
-                                    "StEventDisplayMaker","StEventDisplayMaker,StTableUtilities","",kFALSE},
+  {"Display"     ,"","","TbUtil,St_geom",
+                       "StEventDisplayMaker","StEventUtilities,StEventDisplayMaker","Event Display",kFALSE},
   {"Mc"          ,"McChain","","sim_T,globT,McAss,McAna"                    ,"StMaker","StChain","",kFALSE},
   {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
   {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
@@ -574,6 +576,8 @@ Bfc_st BFC2[] = {
                                                                     "","","Turn on chain for ppMDC",kFALSE},
 
   {"dAuMDC"      ,""  ,"","ppOpt,C2003,-PreVtx,trs,srs,fss,big,GeantOut","","","Chain for d+Au",kFALSE},
+  {"dAuMDCa"     ,""  ,"","ppOpt,C2003,-PreVtx,trs,srs,fss,big,GeantOut,est","","",
+                                                                                   "Chain for d+Au",kFALSE},
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
 
 
@@ -944,8 +948,8 @@ Bfc_st BFC2[] = {
   {"EventQA"     ,"EventQA","","Event"     ,"StEventQAMaker","St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
-  {"Display"     ,"","","SCL,St_geom",
-                                    "StEventDisplayMaker","StEventDisplayMaker,StTableUtilities","",kFALSE},
+  {"Display"     ,"","","TbUtil,St_geom",
+                       "StEventDisplayMaker","StEventUtilities,StEventDisplayMaker","Event Display",kFALSE},
   {"Mc"          ,"McChain","","sim_T,globT,McAss,McAna"                    ,"StMaker","StChain","",kFALSE},
   {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
   {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},

@@ -20,14 +20,35 @@ if (! -d $dir    && !mkdir ($dir,    0755)) {
     die "$0:Can't create directory $dir\n";
 }
 
+# From where we are, get the STIC command
+my $STIC;
+chomp($STIC=`which stic`);
+if ($STIC eq ""){
+    # try one more thing which is to find it locally
+    # This would happen if we freshly created stic and
+    # the path .$STAR_SYS/bin is not yet in the path 
+    # (until a rehash)
+    my $lexec=".".$ENV{STAR_SYS}."/bin/stic";
+    if ( -x $lexec || -l $lexec ){
+	# make it absolute 
+	my $tmp;
+	chomp($tmp = `pwd`);
+	$STIC = $tmp."/".$lexec;
+    } else {
+	# Ho well ... we tried 2 method now
+	die "$0 :: FATAL : Cannot find stic anywhere\n";
+    }
+}
+
+
 # create temp dir
 my $tmpdir = "/tmp/" . $$;
 if (! -d $tmpdir && !mkdir ($tmpdir, 0755)) {
-    die "$0:Can't create directory $tmpdir\n";
+    die "$0 :: ERROR : Can't create directory $tmpdir\n";
 }
 
 # exec command
-my $com = "cd $tmpdir && stic @pars $idl";
+my $com = "cd $tmpdir && $STIC @pars $idl";
 my $exec = `$com`; if ($?) { exit 2; }
 
 # copy file and delete temp directory
@@ -36,4 +57,6 @@ if (-f $sfile) {copy ($sfile,$target);}
 `rm -rf $tmpdir`; 
 if ($?) { exit 2; }
 exit 0;
+
+
 

@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.69 2002/02/05 22:21:27 hardtke Exp $
+// $Id: StTrsMaker.cxx,v 1.70 2003/04/10 21:30:34 hardtke Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.70  2003/04/10 21:30:34  hardtke
+// only call Init Run once per job
+//
 // Revision 1.69  2002/02/05 22:21:27  hardtke
 // Move Init code to InitRun
 //
@@ -373,7 +376,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.69 2002/02/05 22:21:27 hardtke Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.70 2003/04/10 21:30:34 hardtke Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -418,11 +421,13 @@ int StTrsMaker::writeFile(char* file, int numEvents)
 }
 
 Int_t StTrsMaker::Init(){
+  mAllTheData = 0;
    return StMaker::Init();
 }
 
 Int_t StTrsMaker::InitRun(int runnumber)
 {
+  if (mAllTheData) {cout << "StTrsMaker::InitRun Already called" << endl; return kStOK;}
 #ifdef TPC_DATABASE_PARAMETERS
     // The global pointer to the Db is gStTpcDb and it should be created in the macro.
     
@@ -649,7 +654,7 @@ Int_t StTrsMaker::InitRun(int runnumber)
    //
    // Output is into an StTpcRawDataEvent* vector<StTrsDigitalSector*>
    // which is accessible via the StTrsUnpacker.  Initialize the pointers!
-   mAllTheData=0;
+   //DH  now in Init mAllTheData=0;
 
    //
    // Maker Initialization ---now given by default arguments in the constructor
@@ -662,9 +667,10 @@ Int_t StTrsMaker::InitRun(int runnumber)
 
    //
    // Construct constant data sets.  This is what is passed downstream
-   mAllTheData = new StTrsRawDataEvent(mGeometryDb->numberOfSectors());
-   AddConst(new St_ObjectSet("Event"  , mAllTheData, 0));
-
+   if (!mAllTheData) {
+    mAllTheData = new StTrsRawDataEvent(mGeometryDb->numberOfSectors());
+    AddConst(new St_ObjectSet("Event"  , mAllTheData, 0));
+   }
 #ifdef HISTOGRAM
    mTrsNtupleFile          = new TFile("TrsOutput.root","RECREATE","Trs Ntuples");
    mWireNtuple             = new TNtuple("WireNtuple", "Wire Histogram Info.", "electrons:wire:sector");
