@@ -1,5 +1,8 @@
-// $Id: St2eemcFeeRawMaker.h,v 1.2 2003/09/10 19:47:09 perev Exp $
+// $Id: St2eemcFeeRawMaker.h,v 1.3 2003/11/17 15:47:04 balewski Exp $
 // $Log: St2eemcFeeRawMaker.h,v $
+// Revision 1.3  2003/11/17 15:47:04  balewski
+// fix of bug
+//
 // Revision 1.2  2003/09/10 19:47:09  perev
 // ansi corrs
 //
@@ -31,15 +34,15 @@ class TTree;
 class StEEmcDbMaker;
 class EEfeeDataBlock;
 class EEfeeRawEvent;
-class EEfeeRunDescr;
+class EEmcEventHeader;
 
 class St2eemcFeeRawMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: St2eemcFeeRawMaker.h,v 1.2 2003/09/10 19:47:09 perev Exp $";
+  // static Char_t  m_VersionCVS = "$Id: St2eemcFeeRawMaker.h,v 1.3 2003/11/17 15:47:04 balewski Exp $";
   TTree *moutTTree; ///< output TTree
   StEEmcDbMaker * meeDb; ///< to assess DB
   EEfeeRawEvent *meveTT; ///< output event
-  EEfeeRunDescr *mrunTT; ///< header of the output event
+  EEmcEventHeader *mrunTT; ///< header of the output event
   int mNFeeCrate; ///<  numbers of FEE Data blocks
   EEfeeDataBlock *mcrateData; ///<holds data from crates
 
@@ -53,7 +56,7 @@ class St2eemcFeeRawMaker : public StMaker {
   virtual Int_t InitRun  (int runumber);///< to change time stamp in TTree
   virtual Int_t  Make();
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2eemcFeeRawMaker.h,v 1.2 2003/09/10 19:47:09 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2eemcFeeRawMaker.h,v 1.3 2003/11/17 15:47:04 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   

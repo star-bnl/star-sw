@@ -1,7 +1,10 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: St2eemcFeeRawMaker.cxx,v 1.11 2003/09/02 17:57:55 perev Exp $
+// $Id: St2eemcFeeRawMaker.cxx,v 1.12 2003/11/17 15:47:04 balewski Exp $
 // $Log: St2eemcFeeRawMaker.cxx,v $
+// Revision 1.12  2003/11/17 15:47:04  balewski
+// fix of bug
+//
 // Revision 1.11  2003/09/02 17:57:55  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -58,7 +61,7 @@
 #include "StEEmcDbMaker/StEEmcDbIndexItem1.h"
 #include "EEfeeRaw/EEfeeDataBlock.h"
 #include "EEfeeRaw/EEfeeRawEvent.h"
-#include "EEfeeRaw/EEfeeRunDescr.h"
+#include "EEfeeRaw/EEmcEventHeader.h"
 #include "EEfeeRaw/EEname2Index.h"
 
 
@@ -69,7 +72,7 @@ St2eemcFeeRawMaker::St2eemcFeeRawMaker(const char *name):StMaker(name){
   moutTTree=0;
   meeDb=0;
   meveTT=new EEfeeRawEvent();
-  mrunTT=new EEfeeRunDescr();
+  mrunTT=new EEmcEventHeader();
   mNFeeCrate=6; // max numbers of FEE Data blocks
 }
 
@@ -98,8 +101,8 @@ Int_t St2eemcFeeRawMaker::Init(){
   // assigne eveTT with output TTree
   // assigne runTT with output TTree
 
-  moutTTree->Branch("desc","EEfeeRunDescr",&mrunTT,16000,99);
-  //printf("aa runDescr Brunch added \n");
+  moutTTree->Branch("head","EEmcEventHeader",&mrunTT,16000,99);
+  //printf("aa runHead Branch added \n");
 
   moutTTree->Branch("evt","EEfeeRawEvent",&meveTT,16000,99);
   //  printf("aa eve-Tbranch added \n");
