@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbSlowControl.hh,v 1.3 2000/02/10 01:21:46 calderon Exp $
+ * $Id: StTpcDbSlowControl.hh,v 1.4 2000/05/18 17:48:47 long Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbSlowControl.hh,v $
+ * Revision 1.4  2000/05/18 17:48:47  long
+ * re_pointing drift velocity to calibrated drift velocity
+ *
  * Revision 1.3  2000/02/10 01:21:46  calderon
  * Switch to use StTpcDb.
  * Coordinates checked for consistency.
@@ -107,7 +110,7 @@ private:
 //     double mOSGasGainb;
 };
 
-inline double StTpcDbSlowControl::driftVelocity() const {return gTpcDbPtr->SlowControlSim()->driftVelocity()*(centimeter/(microsecond));}
+inline double StTpcDbSlowControl::driftVelocity() const {return gTpcDbPtr->DriftVelocity()*(centimeter/(second));}
     // Voltages
 inline double StTpcDbSlowControl::driftVoltage() const{return gTpcDbPtr->SlowControlSim()->driftVoltage()*volt;}
 inline double StTpcDbSlowControl::innerSectorAnodeVoltage() const{return gTpcDbPtr->SlowControlSim()->innerSectorAnodeVoltage()*volt;}
