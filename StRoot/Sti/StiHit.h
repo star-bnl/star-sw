@@ -28,7 +28,7 @@ public:
     double syz() const;
     double refangle() const;
     double position() const;
-    StHit* stHit() const;
+    const StHit* stHit() const;
     bool   isUsed() const;
 
     //Sets
@@ -100,7 +100,7 @@ inline double StiHit::refangle() const {return mrefangle;}
 
 inline double StiHit::position() const {return mposition;}
 
-inline StHit* StiHit::stHit() const {return msthit;}
+inline const StHit* StiHit::stHit() const {return msthit;}
 
 inline bool   StiHit::isUsed() const { return mused;}
 

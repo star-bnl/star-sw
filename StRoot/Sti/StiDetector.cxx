@@ -98,7 +98,7 @@ void StiDetector::build(const char* buildfile)
       gas = store->material( MaterialMapKey(gasName.c_str()) );
     }
     else {
-	gas = 0;
+		gas = 0;
     }
     string materialName;
     StGetConfigValue(buildfile, "material", materialName);
@@ -107,7 +107,7 @@ void StiDetector::build(const char* buildfile)
       //material = materialMap[MaterialMapKey(materialName.c_str())];
     }
     else {
-	material=0;
+		material=0;
     }
     int code;
     StGetConfigValue(buildfile, "shapeCode", code);
@@ -171,16 +171,16 @@ ostream& operator<<(ostream& os, const StiDetector& d)
 {
     os <<d.isOn()<<" "<<d.isActive()<<" "<<d.isContinuousMedium()<<" "<<d.isDiscreteScatterer()<<" ";
     if (!d.getGas()) {
-	cout <<"No Gas ";
+		cout <<"No Gas ";
     }
     else {
-	os <<*(d.getGas())<<" ";
+		os <<*(d.getGas())<<" ";
     }
     if (!d.getMaterial()) {
-	cout <<"No Material ";
+		cout <<"No Material ";
     }
     else {
-	os <<*(d.getMaterial())<<" ";
+		os <<*(d.getMaterial())<<" ";
     }
     os <<d.getShapeCode()<<" "<<d.getCenterRadius()<<" "<<d.getCenterRefAngle()<<" ";
     os <<d.getOrientationAngle()<<" "<<d.getHalfWidth()<<" ";
