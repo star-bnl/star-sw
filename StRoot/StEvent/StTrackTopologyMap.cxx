@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.13 2001/05/10 19:12:15 genevb Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.14 2002/03/18 17:11:31 jeromel Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
+ * Revision 2.14  2002/03/18 17:11:31  jeromel
+ * Typo found by Jamie while testing P02gd. Corrected.
+ *
  * Revision 2.13  2001/05/10 19:12:15  genevb
  * Switch FTPC definitions
  *
@@ -60,7 +63,7 @@ using std::adjacent_difference;
 using std::max_element;
 #endif
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.13 2001/05/10 19:12:15 genevb Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.14 2002/03/18 17:11:31 jeromel Exp $";
 
 ClassImp(StTrackTopologyMap)
 
@@ -227,7 +230,7 @@ StTrackTopologyMap::trackFtpcWest() const
 bool
 StTrackTopologyMap::trackFtpc() const
 {
-    return ((hasHitInDetector(kFtpcWestId)) | (hasHitInDetector(kFtpcWestId)));
+    return ((hasHitInDetector(kFtpcWestId)) | (hasHitInDetector(kFtpcEastId)));
 }
 
 int
