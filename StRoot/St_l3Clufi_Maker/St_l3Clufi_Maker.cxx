@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.19 2000/07/22 21:19:29 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.20 2001/04/06 22:17:11 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.20  2001/04/06 22:17:11  flierl
+// add outcommented code to write clusters into files in order to run standalone tracking
+//
 // Revision 1.19  2000/07/22 21:19:29  flierl
 // switch off writing clusters to table for embedding !
 //
@@ -339,6 +342,17 @@ Int_t St_l3Clufi_Maker::Make(){
 		      {
 			  St_hit_bank_this->AddAt(&hit_bank_this_st[tt],tt);
 		      }
+		  /* Comment this out and files will be written out containing clusters in online format
+		     This can be used to run clusterfinding on some generated (geant,trs) events and
+		     run tracking code in a standalone version
+		   */
+		  /*  Char_t ccc[40] ;
+		      sprintf(ccc,"HitsInSector%d.bin",sectorindex) ;
+		      FILE *fp = fopen(ccc,"wb");
+		      fwrite(hit_bank_this_st,4,Buffer_size,fp);
+		      cout << "done writing out !" << endl;
+		      fclose(fp);
+		  */
 		}
 
 	      ////// ---> goto next sector
