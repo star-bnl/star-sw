@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.60 2001/06/12 23:15:58 balewski Exp $
+// $Id: StPrimaryMaker.cxx,v 1.61 2001/09/05 21:28:29 genevb Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.61  2001/09/05 21:28:29  genevb
+// Added vertex file-reading ability
+//
 // Revision 1.60  2001/06/12 23:15:58  balewski
 // reject pileup in ppLMV
 //
@@ -221,7 +224,10 @@ ClassImp(StPrimaryMaker)
   m_evr_evrpar(0),
   m_egr_egrpar(0),
   m_egr2_egrpar(0),
-  m_fixedVertex(0)
+  m_fixedVertex(0),
+  m_fixedArrayX(0),
+  m_fixedArrayY(0),
+  m_fixedArrayZ(0)
 {
   m_flag      = 2;
   zCutppLMV=0; // turn off ppLMV  as default
@@ -256,6 +262,49 @@ void StPrimaryMaker::FixVertex(Float_t x, Float_t y, Float_t z){
     m_fixedVertex->chisq[0] = -1.;
     m_fixedVertex->chisq[1] = -1.;
   }
+}
+//_____________________________________________________________________________
+Int_t StPrimaryMaker::FixVertex(Int_t eventNumber){
+  if (eventNumber >= GetFixedSize()) {
+    gMessMgr->Error() << "StPrimaryMaker: exceeded number of events for\n"
+      << "      vertices in file!!! EXITING WITH ERROR!!!" << endm;
+    return kStErr;
+  }
+  FixVertex(m_fixedArrayX.At(eventNumber),
+            m_fixedArrayY.At(eventNumber),
+            m_fixedArrayZ.At(eventNumber));
+  return kStOK;
+}
+//_____________________________________________________________________________
+Int_t StPrimaryMaker::FixVertexFile(char* fname){
+  FILE* fp = fopen(fname,"r");
+  if (fp) {
+    int asize=1024;
+    int count=0;
+    float fX,fY,fZ;
+    while (fscanf(fp,"%f %f %f",&fX,&fY,&fZ) != EOF) {
+      if ((count + 1) > GetFixedSize()) {
+        m_fixedArrayX.Set(asize);
+        m_fixedArrayY.Set(asize);
+        m_fixedArrayZ.Set(asize);
+        asize *= 2;
+      }
+      m_fixedArrayX.AddAt(fX,count);
+      m_fixedArrayY.AddAt(fY,count);
+      m_fixedArrayZ.AddAt(fZ,count);
+      count++;
+    }
+    m_fixedArrayX.Set(count);
+    m_fixedArrayY.Set(count);
+    m_fixedArrayZ.Set(count);
+    fclose(fp);
+    gMessMgr->Info() << "StPrimaryVertex: read in " << count <<
+      " event vertices from vertex file: " << fname << endm;
+    return kStOK;
+  }
+  gMessMgr->Error() << "StPrimaryVertex: Failed to find vertex file: "
+    << fname << "\n           NOT FIXING VERTICES!!!" <<  endm;
+  return kStErr;
 }
 //_____________________________________________________________________________
 void StPrimaryMaker::UnFixVertex(){
@@ -450,6 +499,11 @@ Int_t StPrimaryMaker::Make(){
   if( globtrk){
    NGlbTrk = globtrk->GetNRows();
     
+  }
+
+  // Using file of fixed vertices
+  if (GetFixedSize()) {
+    if (FixVertex(GetNumber()-1)) return kStErr;
   }
 
   if (m_fixedVertex) {  // Fixed primary vertex

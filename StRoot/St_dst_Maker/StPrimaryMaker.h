@@ -5,8 +5,11 @@
 //                                                                      //
 // StPrimaryMaker virtual base class for Maker                          //
 //                                                                      //
-// $Id: StPrimaryMaker.h,v 1.9 2001/06/12 22:59:38 balewski Exp $
+// $Id: StPrimaryMaker.h,v 1.10 2001/09/05 21:28:29 genevb Exp $
 // $Log: StPrimaryMaker.h,v $
+// Revision 1.10  2001/09/05 21:28:29  genevb
+// Added vertex file-reading ability
+//
 // Revision 1.9  2001/06/12 22:59:38  balewski
 // reject pileup in ppLMV
 //
@@ -31,6 +34,7 @@
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
+#include "TArrayF.h"
 #endif
 
 class St_evr_privert;
@@ -45,7 +49,7 @@ class St_srs_activea;
 class St_srs_srspar;
 class dst_vertex_st;
 class St_dst_track;
-class  St_dst_vertex;
+class St_dst_vertex;
  
 class StPrimaryMaker : public StMaker {
   
@@ -57,6 +61,9 @@ class StPrimaryMaker : public StMaker {
   St_egr_egrpar  *m_egr_egrpar;  //!
   St_egr_egrpar  *m_egr2_egrpar; //!
   dst_vertex_st  *m_fixedVertex; //!
+  TArrayF m_fixedArrayX;
+  TArrayF m_fixedArrayY;
+  TArrayF m_fixedArrayZ;
   float zCutppLMV;
   long ppLMV(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
   long ppLMV3(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
@@ -72,11 +79,14 @@ class StPrimaryMaker : public StMaker {
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual void  FixVertex(Float_t x=0, Float_t y=0, Float_t z=0);
+  virtual Int_t FixVertex(Int_t eventNumber);
+  virtual Int_t FixVertexFile(char* fname);
   virtual void  UnFixVertex();
+  Int_t GetFixedSize() { return m_fixedArrayX.GetSize(); }
   void ppLMVuse(float z)
     { zCutppLMV=z; printf("ppLMVuse(z=%f cm) called\n", zCutppLMV=z);}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.9 2001/06/12 22:59:38 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.10 2001/09/05 21:28:29 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPrimaryMaker, 0)   //StAF chain virtual base class for Makers
     };
