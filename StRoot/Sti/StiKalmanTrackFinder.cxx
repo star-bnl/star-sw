@@ -81,7 +81,7 @@ void StiKalmanTrackFinder::initialize()
   _hitContainer      = _toolkit->getHitContainer();
   _trackContainer    = _toolkit->getTrackContainer();
   _mcTrackContainer  = _toolkit->getMcTrackContainer();
-  //_vertexFinder     = _toolkit->getVertexFinder();
+  _vertexFinder      = _toolkit->getVertexFinder();
   _eventFiller       = new StiStEventFiller();
 }
 
