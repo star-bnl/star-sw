@@ -1,5 +1,8 @@
-#  $Id: MakeSYS.mk,v 1.5 1998/03/27 14:32:54 fisyak Exp $
+#  $Id: MakeSYS.mk,v 1.6 1998/04/04 14:45:51 fisyak Exp $
 #  $Log: MakeSYS.mk,v $
+#  Revision 1.6  1998/04/04 14:45:51  fisyak
+#  Fix bug with geant3.def
+#
 #  Revision 1.5  1998/03/27 14:32:54  fisyak
 #  Simplify MakePam
 #
@@ -38,7 +41,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/03/27 14:32:54 $ 
+#             Last modification $Date: 1998/04/04 14:45:51 $ 
 ALL_DEPS    = $^
 FIRST_DEP   = $<
 FIRSTF      = $(<D)/$(<F)
@@ -78,8 +81,8 @@ OPSYS      := OSF1V32
 endif
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),hp700_ux90))
 CXX        :=      CC
-CXXFLAGS   += -w -O +a1
-CFLAGS     +=  +z  -Aa -D_HPUX_SOURCE
+CXXFLAGS   += -w -O +a1 -Dextname
+CFLAGS     +=  +z  -Aa -D_HPUX_SOURCE -Dextname
 FFLAGS     += +ppu +z +O2
 LDFLAGS    += -b +a1 -z
 LD_LIBS    := /opt/fortran/lib/libU77.a
@@ -162,7 +165,8 @@ CPPFLAGS   += -Dlynx
 ifdef PGI
 FC         := /usr/pgi/linux86/bin/pgf77
 F_EXTENDED := -Mextend
-LD_LIBS    := -ldl -L/usr/X11R6/lib/ -lX11 -lXt -L/usr/local/lib/ -lF77 -lI77  -L/usr/pgi/linux86/lib/ -lpgftnrtl -lpgc
+LD_LIBS    := -ldl -L/usr/X11R6/lib/ -lX11 -lXt -L/usr/local/lib/ -lF77 -lI77  -L/usr/pgi/linux86/lib/ -lpgftnrtl -lpgc 
+#                                       -lstdc++
 #CC         := /usr/pgi/linux86/bin/pgcc -g77libs 
 #CXX        := /usr/pgi/linux86/bin/pgCC
 endif
@@ -181,7 +185,7 @@ CXXFLAGS   += -KPIC                        # V.P.
 #CXXFLAGS   += -w
 #LD         := $(CXX)                      # V.P.
 LDFLAGS    += -G
-LD_LIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib -lM77 -lF77 -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb
+LD_LIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib -lM77 -lF77 -lm -lc -lC -L/usr/ucblib -R/usr/ucblib -lucb
 CC_LIBS    := -L/usr/ucblib -R/usr/ucblib -lm -ldl -lform -lmalloc
 endif 
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sunx86_55))
@@ -192,7 +196,7 @@ CFLAGS     +=  -KPIC +w2
 FFLAGS     +=-KPIC                         # V.P. -xlX[
 F_EXTENDED :=-e
 LDFLAGS    += -G -t -z muldefs
-LD_LIBS    :=-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib -lM77 -lF77 -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lsunmath
+LD_LIBS    :=-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib -lM77 -lF77 -lm -lc -lC -L/usr/ucblib -R/usr/ucblib -lucb -lsunmath
 OPSYS      := sun4os5pc
 endif
 # defaul flags

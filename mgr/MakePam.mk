@@ -1,4 +1,7 @@
 #  $Log: MakePam.mk,v $
+#  Revision 1.6  1998/04/04 14:45:50  fisyak
+#  Fix bug with geant3.def
+#
 #  Revision 1.5  1998/03/27 14:32:54  fisyak
 #  Simplify MakePam
 #
@@ -46,7 +49,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/03/27 14:32:54 $ 
+#           Last modification $Date: 1998/04/04 14:45:50 $ 
 #  #. default setings
 include $(STAR)/mgr/MakeSYS.mk
 PWD       = /bin/pwd
@@ -170,7 +173,8 @@ IDL_DIRS:= $(wildcard $(ROOT)/$(PAMS)/*/idl $(STAR)/$(PAMS)/*/idl)
 INC_DIRG:= $(wildcard $(STAR)/lib/share/*.gen)
 INC_DIRS:= $(wildcard $(ROOT)/$(PAMS)/*/inc $(STAR)/$(PAMS)/*/inc)
 VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_DIR) $(OBJ_DIR)
-VPATH   := $(filter-out $(DOM_DIR)/idl, $(VPATH))
+VPATH   += $(IDL_DIRS)
+#VPATH   := $(filter-out $(DOM_DIR)/idl, $(VPATH))
 #                 I have idl- or g-files
 FILES_CC := $(wildcard $(addsuffix /*.cc, $(SRC_DIRS)))
 FILES_C  := $(wildcard $(addsuffix /*.c , $(SRC_DIRS)))
@@ -187,8 +191,9 @@ NAMES_CDF:= $(basename $(notdir $(FILES_CDF)))
 FILES_I  := $(addprefix $(GEN_DIR)/, $(addsuffix .inc, $(NAMES_IDM)))
 FILES_H  := $(addprefix $(GEN_DIR)/, $(addsuffix .h,   $(NAMES_IDM)))
 FILES_CA := $(addprefix $(GEN_DIR)/, $(addsuffix _i.cc,$(NAMES_IDM)))
-FILES_O  := $(addprefix $(OBJ_DIR)/, $(addsuffix .o,   $(NAMES_F) \
-                                                       $(NAMES_C) $(NAMES_CC)))
+FILES_O  := $(strip \
+            $(addprefix $(OBJ_DIR)/, $(addsuffix .o,   $(NAMES_F) \
+                                                       $(NAMES_C) $(NAMES_CC))))
 ifeq ($(DOMAIN),gen)           
 ifneq ($(PKG),$(EMPTY))         
 		PKG_LIB := lib$(PKG).a
@@ -234,12 +239,12 @@ ifneq (,$(NAMES_G))
 FILES_SL  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(NAMES_G)))
 endif                          
 #-------------------------------includes----------------------------
-STICFLAGS =  $(addprefix -I,  $(STAR)/asps/../.$(STAR_HOST_SYS)/inc $(SRC_DIR) $(IDL_DIRS))
+STICFLAGS =  $(addprefix -I,  $(STAR)/asps/staf/inc $(SRC_DIR) $(IDL_DIRS))
 ifneq ($(STAR_SYS),hp_ux102)   
 CPPFLAGS += -D$(STAR_SYS) $(strip -D$(shell uname)) 
 endif                          
-CPPFLAGS += -I. -I../ -I/usr/include -I$(STAR)/asps/../.$(STAR_HOST_SYS)/inc \
-             $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) 
+CPPFLAGS += -I. -I../ -I/usr/include -I$(STAR)/asps/staf/inc \
+             $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) -I$(CERN_ROOT)/src/cfortran
 ifneq ($(ROOT),$(STAR))        
 CPPFLAGG :=  $(addprefix -I, $(INC_DIRG))
 endif                          
@@ -250,20 +255,21 @@ CFLAGS   += -g
 CXXFLAGS += -g
 CPPFLAGS += -DDEBUG
 endif                          
+ifeq ($(EMPTY),$(findstring $(STAR_HOST_SYS),hp_ux102 hp_ux102_aCC))
 ifndef CERN_LIBS               
     CERN_LIBS := $(shell cernlib mathlib kernlib)
+endif
+else
+    CERN_LIBS :=
 endif                          
-ifndef LIBRARIES               
-ifeq ($(STAR_PATH),$(ROOTD))   
-		LIBRARIES :=  $(STAR_LIB)/$(PKG_LIB) \
-               -L$(STAR)/asps/../.$(STAR_HOST_SYS)/lib -L$(STAR_LIB)
-else                            
-		LIBRARIES :=  $(LIB_PKG)  \
-                $(shell test -f $(STAR_LIB)/$(PKG_LIB) && echo $(STAR_LIB)/$(PKG_LIB)) \
-               -L$(STAR)/asps/../.$(STAR_HOST_SYS)/lib -L$(LIB_DIR) -L$(STAR_LIB)
+ifndef LIBRARIES
+		LIBRARIES := $(LIB_PKG)	               
+ifneq ($(STAR_PATH),$(ROOTD))   
+ifneq ($(LIB_PKG),$(EMPTY))
+		LIBRARIES += $(shell test -f $(LIB_PKG) && echo $(LIB_PKG)) -L$(STAR_LIB)
 endif                           
-#LIBRARIES +=  -lutil
-LIBRARIES +=  -ltls -lmsg
+endif                           
+LIBRARIES += -L$(STAR)/asps/../.$(STAR_HOST_SYS)/lib -ltls -lmsg
 endif                          
 #-------------------------------rules-------------------------------
 # phony - not a file
@@ -280,13 +286,8 @@ $(LIB_PKG): $(FILES_O)
 endif                          
 ifneq ($(FILES_SL),$(EMPTY))   
 $(SL_PKG): $(FILES_SL) $(LIB_PKG)
-#ifneq ($(STAR_SYS),hp_ux102)
 	$(LD) $(LDFLAGS) $(FILES_SL) -o $(SL_PKG) \
         $(LIBRARIES) $(CERN_LIBS) $(LD_LIBS) $(CC_LIBS) 
-#else
-#	$(CXX) $(CPPFLAGS) $(CPPFLAGG) $(CXXFLAGS) $(LDFLAGS) $(GEN_DIR)/$(PKG)_init.cc\
-#      -o $(SL_PKG) $(LIBRARIES) $(CERN_LIBS) $(LD_LIBS) $(CC_LIBS)
-#endif
 	@echo "          Shared library " $(SL_PKG) " has been created"
 #--------- module ---------
 ifneq ($(NAMES_IDM),)           
@@ -331,9 +332,12 @@ endif       # LEVEL 4
 $(GEN_DIR)/%.h $(GEN_DIR)/%.inc %.h %.inc: %.idl
 	cp  $(FIRST_DEP) $(GEN_DIR)/ ; cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(FIRST_DEP); $(RM) $(STEM).idl
 #--- compilation -
-$(OBJ_DIR)/%.o: %.g
-	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR_BIN)/geant3.def  $(GEN_DIR)/geant3.def
-	cd $(GEN_DIR); geant3    $(FIRST_DEP)  -o  $(GEN_DIR)/$(STEM).f 
+$(GEN_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
+	test -h $(GEN_DIR)/geant3.def || $(RM)  $(GEN_DIR)/geant3.def
+	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def 
+$(OBJ_DIR)/%.o:%.g $(GEN_DIR)/geant3.def
+#	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def
+	cp $(FIRST_DEP) $(GEN_DIR); cd $(GEN_DIR); geant3 $(FIRST_DEP) -o  $(GEN_DIR)/$(STEM).f 
 	$(FC) $(FFLAGS) -c $(GEN_DIR)/$(STEM).f  -o  $(ALL_TAGS)
 $(OBJ_DIR)/%.o: %.F
 	$(FC)  $(CPPFLAGS) $(FFLAGS) $(F_EXTENDED)   -c $(FIRST_DEP) -o $(OBJ_DIR)/$(STEM).o
