@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.311 2003/01/11 21:38:43 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.312 2003/01/12 21:40:02 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -49,6 +49,7 @@ Bfc_st BFC1[] = {
   {"RY2000","","","db,calib,detDb,VtxOffSet","","","actual 2000: Real data with Year2000 geometry ",kFALSE},
   {"RY2000a","","","db,calib,detDb"      ,"","","alternate 2000: Real data with Year2000 geometry ",kFALSE},
   {"RY2001","","","db,calib,detDb"          ,"","","actual 2001: Real data with Year2001 geometry ",kFALSE},
+  {"RY2003","","","db,calib,detDb"             ,"","","actual 2003: Real data with Year3 geometry ",kFALSE},
   {"Y2a"   ,"","","db,calib,detDb"                            ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,calib,detDb" ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
   {"Y2001" ,"","","db,calib,detDb","","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
@@ -131,8 +132,17 @@ Bfc_st BFC1[] = {
   // pp Chains 
   {"pp2001"      ,""  ,"","pp,B2001,-PreVtx,-SpinTag,l3onl,tofDat,emcDY2,Corr2","",""          
                                                                         ,"pp 2001 (+ l3, tof, emc)",kFALSE},
-  {"pp2001a"      ,""  ,"","pp2001,svt_daq,SvtD,ftpc","",""                          
+  {"pp2001a"     ,""  ,"","pp2001,svt_daq,SvtD,ftpc","",""                          
                                                              ,"pp 2001 (+ ftpc, svt, l3, tof, emc)",kFALSE},
+  
+
+  // Year 3 chains *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
+  // B2003 is a base-chain with tpc only for now
+  {"B2003"       ,""  ,"","ry2003,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
+                                                                       ,"Base chain for 2003 (tpc)",kFALSE},
+  {"dau2003"     ,""  ,"","B2003,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
+                  ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc",kFALSE},
+  
 
 
   // Other chains/Calibration
@@ -208,8 +218,10 @@ Bfc_st BFC1[] = {
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
-  {"pp"      ,""  ,"","SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","","Use pp specific parameters",kFALSE},
-  {"ppOpt"       ,""  ,"","pp,-SpinTag,-ppLPfind1,-SpinSortA,-ppLPprojectA",   "","","pp no makers",kFALSE},
+  {"pp"      ,""  ,"","SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
+                                   "Use pp-like specific treatement (ppLMV, enable beamline etc..)",kFALSE},
+  {"ppOpt"       ,""  ,"","pp,-SpinTag,-ppLPfind1,-SpinSortA,-ppLPprojectA","","",
+                                                                    "pp option without spin makers",kFALSE},
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
@@ -1152,7 +1164,8 @@ Int_t StBFChain::Instantiate()
 	    } else {
 	      // depend on RY option i.e. take default for that RealYear data
 	      // expectations.
-	      if( GetOption("RY2001") ) mask = mask | 2 ;  // Jim Thomas request
+	      if( GetOption("RY2001") ||
+		  GetOption("RY2003")) mask = mask | 2 ;  // Jim Thomas request
 	    }
 	    // Other options introduced in October 2001 for distortion corrections
 	    // studies and year1 re-production. Those are OR additive to the mask.
@@ -1698,7 +1711,8 @@ void StBFChain::SetGeantOptions(){
       else if (GetOption("Y2001")  ||
 	       GetOption("Y2001n") ||
 	       GetOption("RY2001"))   geantMk->LoadGeometry("detp geometry year2001");
-      else if (GetOption("Y2003"))    geantMk->LoadGeometry("detp geometry year2003");
+      else if (GetOption("Y2003")  ||
+	       GetOption("RY2003"))   geantMk->LoadGeometry("detp geometry year2003");
       else if (GetOption("Y2b"))      geantMk->LoadGeometry("detp geometry YEAR_2b");
       else if (GetOption("Complete")) geantMk->LoadGeometry("detp geometry complete");
       else                            geantMk->LoadGeometry("detp geometry year2001");
