@@ -1,5 +1,8 @@
-* $Id: tpt_row_sect_pnt.F,v 1.13 1999/07/19 19:15:56 genevb Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.14 1999/11/23 03:53:49 sakrejda Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.14  1999/11/23 03:53:49  sakrejda
+* Allow tfs_filt.c  to pass hits with >1 flags and catch them here
+*
 * Revision 1.13  1999/07/19 19:15:56  genevb
 * Use StMessMgr
 *
@@ -176,7 +179,7 @@ C     set up information about the slices
       do i=1,hit_h.nok
 C       loop through row-sorted list
         ipnt = loc_hit(i)
-        if(hit(ipnt).track.le.0) then
+        if(hit(ipnt).track.le.0.and.hit(ipnt).flag.le.1) then
           isect = rhit(ipnt)/100
           irow = mod(rhit(ipnt),100)
           if( isect.lt.1 .or. isect.gt.mxsector .or. irow.lt.1 .or.
@@ -207,7 +210,7 @@ C       loop through row-sorted list
             do while (k.lt.ic)
 *              check whether this hit is available 
 *              want to eliminate used hits in subsequent passes
-               if(hit(loc_hit(ipnt+kc)).track.le.0) then
+               if(hit(loc_hit(ipnt+kc)).track.le.0.and.hit(loc_hit(ipnt+kc)).flag.le.1) then
                   k=k+1
 *
 *                 tpsort(k).ipnt is a location of the hit in the hit table
