@@ -15,246 +15,250 @@ class StiRootIOBroker : public StiIOBroker
 {
 public:
     
-    //You should only call this once.
-    //Cint forces us to violate singleton pattern.
-    StiRootIOBroker();
+	//You should only call this once.
+	//Cint forces us to violate singleton pattern.
+	StiRootIOBroker();
+	
+	//Main Program flow
+	
+	///Are we using simulated data?
+	virtual void setSimulated(bool);
+	virtual bool simulated() const;
+	
+	///Are we running in GUI version?
+	virtual void setUseGui(bool);
+	virtual bool useGui() const;
+	
+	///Toggle the track find/fit option, True->doFit, false->doFind
+	virtual void setDoTrackFit(bool);
+	virtual bool doTrackFit() const;
+	
+	///SeedFinderType
+	//enum SeedFinderType {kUndefined=0, kComposite=1, kEvaluable=3};
+	virtual void setSeedFinderType(SeedFinderType);
+	virtual SeedFinderType seedFinderType() const;
+	
+	
+	//Evaluable Track Seed Finder
+	
+	/// acronyms: TPHF: TpcPadrowHitFilter
+	///           ETSF: EvaluableTrackSeedFinder
+	
+	virtual void setTPHFMinPadrow(unsigned int);
+	virtual unsigned int tphfMinPadrow() const;
+	virtual void setTPHFMaxPadrow(unsigned int);
+	virtual unsigned int tphfMaxPadrow() const;
+	
+	virtual void setETSFLowerBound(unsigned int);
+	virtual unsigned int etsfLowerBound() const;
+	virtual void setETSFMaxHits(unsigned int);
+	virtual unsigned int etsfMaxHits() const;
+	
+	//Local Track Seed Finder (LTSF) IO
+	
+	virtual void addLTSFPadrow(unsigned int);
+	virtual void addLTSFSector(unsigned int);
+	virtual const vector<unsigned int>& ltsfPadrows() const;
+	virtual const vector<unsigned int>& ltsfSectors() const;
+	
+	virtual void setLTSFZWindow(double);
+	virtual double ltsfZWindow() const;
+	
+	virtual void setLTSFYWindow(double);
+	virtual double ltsfYWindow() const;
+	
+	virtual void setLTSFSeedLength(unsigned int);
+	virtual unsigned int ltsfSeedLength() const;
+	
+	virtual void setLTSFExtrapZWindow(double);
+	virtual double ltsfExtrapZWindow() const;
+	
+	virtual void setLTSFExtrapYWindow(double);
+	virtual double ltsfExtrapYWindow() const;
+	
+	virtual void setLTSFExtrapMaxSkipped(unsigned int);
+	virtual unsigned int ltsfExtrapMaxSkipped() const;
+	
+	virtual void setLTSFExtrapMinLength(unsigned int);
+	virtual unsigned int ltsfExtrapMinLength() const;
+	
+	virtual void setLTSFExtrapMaxLength(unsigned int);
+	virtual unsigned int ltsfExtrapMaxLength() const;
+	
+	virtual void setLTSFUseVertex(bool);
+	virtual bool ltsfUseVertex() const;
+	
+	virtual void setLTSFDoHelixFit(bool);
+	virtual bool ltsfDoHelixFit() const;
+	
+	//Kalman Track Finder (KTF) IO
+	
+	//whether MCS must be calc-ed
+	virtual void setKTFMcsCalculated(bool);
+	virtual bool ktfMcsCalculated() const;
+	
+	//whether E-loss must be calculate
+	virtual void setKTFElossCalculated(bool);
+	virtual bool ktfElossCalculated() const;
+	
+	//Max chi1 increment allowed/hit
+	virtual void setKTFMaxChi2ForSelection(double);
+	virtual double ktfMaxChi2ForSelection() const;
+	
+	//Tesla magnetic field
+	virtual void setKTFBField(double); 
+	virtual double ktfBField() const;
+	
+	//GeV mass used in MCS calcualtions
+	virtual void setKTFMassHypothesis(double); 
+	virtual double ktfMassHypothesis() const;
+	
+	//?
+	virtual void setKTFMinContiguousHitCount(unsigned int); 
+	virtual unsigned int ktfMinContiguousHitCount() const;
+	
+	//max # layers w/o a hit
+	virtual void setKTFMaxNullCount(unsigned int); 
+	virtual unsigned int ktfMaxNullCount() const;
+	
+	//max # contiguous layers w/o hit
+	virtual void setKTFMaxContiguousNullCount(unsigned int); 
+	virtual unsigned int ktfMaxContiguousNullCount() const;
+	
+	//Min search radius to be passed to track finder
+	virtual void setKTFMinSearchRadius(double);
+	virtual double ktfMinSearchRadius() const;
+	
+	//Maxs search radius to be passed to track finder
+	virtual void setKTFMaxSearchRadius(double);
+	virtual double ktfMaxSearchRadius() const;
+	
+	virtual void setKTFSearchWindowScale(double);
+	virtual double ktfSearchWindowScale() const;
+	
+	//Use helix extrapolation (defaults to line)
+	virtual void setKTFUseHelixExtrapolation(bool);
+	virtual bool ktfUseHelixExtrapolation() const;
+	
+	
+	// LocalTrackMerger (ltm)
+	
+	virtual void setLTMDeltaR(double);
+	virtual double ltmDeltaR() const;
+	
+	// Track Filter (filter)
+	
+	//This enum must be identical to the one in StiDynamicTrackFilter.h
+	//enum FilterType {kPtFilter=0, kEtaFilter=1, kChi2Filter=2, kNptsFilter=3, kNFitPtsFilter=4,
+	//kNGapsFilter=5, kFitPointRatioFilter=6, kPrimaryDcaFilter=7};
+	virtual void addFilterType(FilterType t) {mFilterTypes.push_back(t); notify();}
+	virtual void clearFilterTypes() {mFilterTypes.clear();notify();}
+	virtual const vector<int>& filterTypes() const {return mFilterTypes;}
+	
+	virtual void setFilterPtMin(double);
+	virtual double filterPtMin() const;
+	
+	virtual void setFilterPtMax(double);
+	virtual double filterPtMax() const;
+	
+	virtual void setFilterEtaMin(double);
+	virtual double filterEtaMin() const;
+	
+	virtual void setFilterEtaMax(double);
+	virtual double filterEtaMax() const;
+	
+	virtual void setFilterChi2Max(double);
+	virtual double filterChi2Max() const;
+	
+	virtual void setFilterNptsMin(unsigned int);
+	virtual unsigned int filterNptsMin() const;
+	
+	virtual void setFilterNFitPtsMin(unsigned int);
+	virtual unsigned int filterNFitPtsMin() const;
+	
+	virtual void setFilterNGapsMax(unsigned int);
+	virtual unsigned int filterNGapsMax() const;
+	
+	virtual void setFilterFitPointRatioMin(double);
+	virtual double filterFitPointRatioMin() const;
+	
+	virtual void setFilterPrimaryDcaMax(double);
+	virtual double filterPrimaryDcaMax() const;
+	
+ protected:
+	friend class StiIOBroker;
+	
+	virtual ~StiRootIOBroker();
+	
+	//Program Flow
+	bool mSimulated;
+	bool mUseGui;
+	bool mDoTrackFit;
+	SeedFinderType mSeedFinderType;
+	
+	//Evaluable Track Seed Finder
+	unsigned int mTPHFMinPadrow;
+	unsigned int mTPHFMaxPadrow;
+	unsigned int mETSFLowerBound;
+	unsigned int mETSFMaxHits;
+	
+	//Local Track Seed Finder
+	vector<unsigned int> mLTSFPadrows;
+	vector<unsigned int> mLTSFSectors;
+	double mLTSFZWindow;
+	double mLTSFYWindow;
+	unsigned int mLTSFSeedLength;
+	double mLTSFExtrapZWindow;
+	double mLTSFExtrapYWindow;
+	unsigned int mLTSFExtrapMaxSkipped;
+	unsigned int mLTSFExtrapMinLength;
+	unsigned int mLTSFExtrapMaxLength;
+	bool mLTSFUseVertex;
+	bool mLTSFDoHelixFit;
+	
+	//Kalman Track Finder
+	bool mKTFMcsCalculated;
+	bool mKTFElossCalculated;
+	double mKTFMaxChi2ForSelection;
+	double mKTFBField;
+	double mKTFMassHypothesis;
+	unsigned int mKTFMinContiguousHitCount;
+	unsigned int mKTFMaxNullCount;
+	unsigned int mKTFMaxContiguousNullCount;
+	double mKTFMinSearchRadius;
+	double mKTFMaxSearchRadius;
+	double mKTFSearchWindowScale;
+	bool mKTFUseHelixExtrapolation;
+	
+	//LocalTrackMerger
+	double mLTMDeltaR;
+	
+	//Filter
+	vector<int> mFilterTypes;
+	double mFilterPtMin;
+	double mFilterPtMax;
+	double mFilterEtaMin;
+	double mFilterEtaMax;
+	double mFilterChi2Max;
+	unsigned int mFilterNptsMin;
+	unsigned int mFilterNFitPtsMin;
+	unsigned int mFilterNGapsMax;
+	double mFilterFitPointRatioMin;
+	double mFilterPrimaryDcaMax;
+	
+ protected:
 
-    //Main Program flow
+	//	static StiRootIOBroker * sInstance;
 
-    ///Are we using simulated data?
-    virtual void setSimulated(bool);
-    virtual bool simulated() const;
+ private:
+	ClassDef(StiRootIOBroker, 1)
 
-    ///Are we running in GUI version?
-    virtual void setUseGui(bool);
-    virtual bool useGui() const;
-
-    ///Toggle the track find/fit option, True->doFit, false->doFind
-    virtual void setDoTrackFit(bool);
-    virtual bool doTrackFit() const;
-
-    ///SeedFinderType
-    //enum SeedFinderType {kUndefined=0, kComposite=1, kEvaluable=3};
-    virtual void setSeedFinderType(SeedFinderType);
-    virtual SeedFinderType seedFinderType() const;
-
-    
-    //Evaluable Track Seed Finder
-    
-    /// acronyms: TPHF: TpcPadrowHitFilter
-    ///           ETSF: EvaluableTrackSeedFinder
-        
-    virtual void setTPHFMinPadrow(unsigned int);
-    virtual unsigned int tphfMinPadrow() const;
-    virtual void setTPHFMaxPadrow(unsigned int);
-    virtual unsigned int tphfMaxPadrow() const;
-
-    virtual void setETSFLowerBound(unsigned int);
-    virtual unsigned int etsfLowerBound() const;
-    virtual void setETSFMaxHits(unsigned int);
-    virtual unsigned int etsfMaxHits() const;
-    
-    //Local Track Seed Finder (LTSF) IO
-    
-    virtual void addLTSFPadrow(unsigned int);
-    virtual void addLTSFSector(unsigned int);
-    virtual const vector<unsigned int>& ltsfPadrows() const;
-    virtual const vector<unsigned int>& ltsfSectors() const;
-
-    virtual void setLTSFZWindow(double);
-    virtual double ltsfZWindow() const;
-
-    virtual void setLTSFYWindow(double);
-    virtual double ltsfYWindow() const;
-
-    virtual void setLTSFSeedLength(unsigned int);
-    virtual unsigned int ltsfSeedLength() const;
-
-    virtual void setLTSFExtrapZWindow(double);
-    virtual double ltsfExtrapZWindow() const;
-    
-    virtual void setLTSFExtrapYWindow(double);
-    virtual double ltsfExtrapYWindow() const;
-    
-    virtual void setLTSFExtrapMaxSkipped(unsigned int);
-    virtual unsigned int ltsfExtrapMaxSkipped() const;
-
-    virtual void setLTSFExtrapMinLength(unsigned int);
-    virtual unsigned int ltsfExtrapMinLength() const;
-    
-    virtual void setLTSFExtrapMaxLength(unsigned int);
-    virtual unsigned int ltsfExtrapMaxLength() const;
-    
-    virtual void setLTSFUseVertex(bool);
-    virtual bool ltsfUseVertex() const;
-
-    virtual void setLTSFDoHelixFit(bool);
-    virtual bool ltsfDoHelixFit() const;
-
-    //Kalman Track Finder (KTF) IO
-    
-    //whether MCS must be calc-ed
-    virtual void setKTFMcsCalculated(bool);
-    virtual bool ktfMcsCalculated() const;
-
-     //whether E-loss must be calculate
-    virtual void setKTFElossCalculated(bool);
-    virtual bool ktfElossCalculated() const;
-
-    //Max chi1 increment allowed/hit
-    virtual void setKTFMaxChi2ForSelection(double);
-    virtual double ktfMaxChi2ForSelection() const;
-
-    //Tesla magnetic field
-    virtual void setKTFBField(double); 
-    virtual double ktfBField() const;
-
-    //GeV mass used in MCS calcualtions
-    virtual void setKTFMassHypothesis(double); 
-    virtual double ktfMassHypothesis() const;
-
-    //?
-    virtual void setKTFMinContiguousHitCount(unsigned int); 
-    virtual unsigned int ktfMinContiguousHitCount() const;
-
-    //max # layers w/o a hit
-    virtual void setKTFMaxNullCount(unsigned int); 
-    virtual unsigned int ktfMaxNullCount() const;
-
-    //max # contiguous layers w/o hit
-    virtual void setKTFMaxContiguousNullCount(unsigned int); 
-    virtual unsigned int ktfMaxContiguousNullCount() const;
-
-    //Min search radius to be passed to track finder
-    virtual void setKTFMinSearchRadius(double);
-    virtual double ktfMinSearchRadius() const;
-    
-    //Maxs search radius to be passed to track finder
-    virtual void setKTFMaxSearchRadius(double);
-    virtual double ktfMaxSearchRadius() const;
-
-    virtual void setKTFSearchWindowScale(double);
-    virtual double ktfSearchWindowScale() const;
-
-    //Use helix extrapolation (defaults to line)
-    virtual void setKTFUseHelixExtrapolation(bool);
-    virtual bool ktfUseHelixExtrapolation() const;
-
-
-    // LocalTrackMerger (ltm)
-
-    virtual void setLTMDeltaR(double);
-    virtual double ltmDeltaR() const;
-
-    // Track Filter (filter)
-    
-    //This enum must be identical to the one in StiDynamicTrackFilter.h
-    //enum FilterType {kPtFilter=0, kEtaFilter=1, kChi2Filter=2, kNptsFilter=3, kNFitPtsFilter=4,
-    //kNGapsFilter=5, kFitPointRatioFilter=6, kPrimaryDcaFilter=7};
-    virtual void addFilterType(FilterType t) {mFilterTypes.push_back(t); notify();}
-    virtual void clearFilterTypes() {mFilterTypes.clear();notify();}
-    virtual const vector<int>& filterTypes() const {return mFilterTypes;}
-    
-    virtual void setFilterPtMin(double);
-    virtual double filterPtMin() const;
-
-    virtual void setFilterPtMax(double);
-    virtual double filterPtMax() const;
-
-    virtual void setFilterEtaMin(double);
-    virtual double filterEtaMin() const;
-    
-    virtual void setFilterEtaMax(double);
-    virtual double filterEtaMax() const;
-
-    virtual void setFilterChi2Max(double);
-    virtual double filterChi2Max() const;
-
-    virtual void setFilterNptsMin(unsigned int);
-    virtual unsigned int filterNptsMin() const;
-
-    virtual void setFilterNFitPtsMin(unsigned int);
-    virtual unsigned int filterNFitPtsMin() const;
-
-    virtual void setFilterNGapsMax(unsigned int);
-    virtual unsigned int filterNGapsMax() const;
-
-    virtual void setFilterFitPointRatioMin(double);
-    virtual double filterFitPointRatioMin() const;
-    
-    virtual void setFilterPrimaryDcaMax(double);
-    virtual double filterPrimaryDcaMax() const;
-    
-protected:
-    friend class StiIOBroker;
-    
-    virtual ~StiRootIOBroker();
-
-    //Program Flow
-    bool mSimulated;
-    bool mUseGui;
-    bool mDoTrackFit;
-    SeedFinderType mSeedFinderType;
-    
-    //Evaluable Track Seed Finder
-    unsigned int mTPHFMinPadrow;
-    unsigned int mTPHFMaxPadrow;
-    unsigned int mETSFLowerBound;
-    unsigned int mETSFMaxHits;
-
-    //Local Track Seed Finder
-    vector<unsigned int> mLTSFPadrows;
-    vector<unsigned int> mLTSFSectors;
-    double mLTSFZWindow;
-    double mLTSFYWindow;
-    unsigned int mLTSFSeedLength;
-    double mLTSFExtrapZWindow;
-    double mLTSFExtrapYWindow;
-    unsigned int mLTSFExtrapMaxSkipped;
-    unsigned int mLTSFExtrapMinLength;
-    unsigned int mLTSFExtrapMaxLength;
-    bool mLTSFUseVertex;
-    bool mLTSFDoHelixFit;
-
-    //Kalman Track Finder
-    bool mKTFMcsCalculated;
-    bool mKTFElossCalculated;
-    double mKTFMaxChi2ForSelection;
-    double mKTFBField;
-    double mKTFMassHypothesis;
-    unsigned int mKTFMinContiguousHitCount;
-    unsigned int mKTFMaxNullCount;
-    unsigned int mKTFMaxContiguousNullCount;
-    double mKTFMinSearchRadius;
-    double mKTFMaxSearchRadius;
-    double mKTFSearchWindowScale;
-    bool mKTFUseHelixExtrapolation;
-
-    //LocalTrackMerger
-    double mLTMDeltaR;
-
-    //Filter
-    vector<int> mFilterTypes;
-    double mFilterPtMin;
-    double mFilterPtMax;
-    double mFilterEtaMin;
-    double mFilterEtaMax;
-    double mFilterChi2Max;
-    unsigned int mFilterNptsMin;
-    unsigned int mFilterNFitPtsMin;
-    unsigned int mFilterNGapsMax;
-    double mFilterFitPointRatioMin;
-    double mFilterPrimaryDcaMax;
-
-    
-private:
-    ClassDef(StiRootIOBroker, 1)
 };
-
+		
 //inlines
 inline void StiRootIOBroker::setETSFLowerBound(unsigned int val)
 {
-    mETSFLowerBound=val;
+	mETSFLowerBound=val;
     notify();
 }
 
