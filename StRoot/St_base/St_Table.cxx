@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.82 1999/09/13 13:13:21 fine Exp $ 
+// $Id: St_Table.cxx,v 1.83 1999/10/04 14:39:07 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.83  1999/10/04 14:39:07  fine
+// the fixed header size 20 was replaced with sizeof() operator
+//
 // Revision 1.82  1999/09/13 13:13:21  fine
 // One blank has been deleted to Draw method comment in place
 //
@@ -1995,7 +1998,7 @@ void   St_Table::SetTableName(const Char_t *name){
  if (s_TableHeader)
  {
     s_TableHeader->name[0] = '\0';
-    strncat(s_TableHeader->name,name,20); 
+    strncat(s_TableHeader->name,name,sizeof(s_TableHeader->name)); 
  }
 }
 //______________________________________________________________________________
@@ -2003,7 +2006,7 @@ void   St_Table::SetTableType(const Char_t *type){
 // Fill staf table header with the table type information
    if (s_TableHeader) {
      s_TableHeader->type[0] = '\0';
-     strncat(s_TableHeader->type,type,20); 
+     strncat(s_TableHeader->type,type,sizeof(s_TableHeader->type)); 
    }
 }
 
@@ -2528,8 +2531,8 @@ void St_Table::StreamerHeader(TBuffer &b)
    b >> s_TableHeader->data_pointer; /* swizzled (char*) */
   }
   else {
-   b.WriteArray(s_TableHeader->name,20);         /* table name */
-   b.WriteArray(s_TableHeader->type,20);         /* table type */
+   b.WriteArray(s_TableHeader->name,sizeof(s_TableHeader->name));    /* table name */
+   b.WriteArray(s_TableHeader->type,sizeof(s_TableHeader->type));    /* table type */
    b << s_TableHeader->maxlen;       /* # rows allocated */
    b << s_TableHeader->nok;          /* # rows filled */
    b << s_TableHeader->rbytes;       /* number of bytes per row */
