@@ -67,6 +67,8 @@ class StEmcFilter: public TObject
     Float_t         mPtTower[NTOWER];
     Float_t         mETower[NTOWER];
     Int_t           mNTracksTower[NTOWER];
+    Int_t           mCentralityBin;
+    Int_t           mCentrality[10];
 
 
     // status tables
@@ -128,6 +130,7 @@ class StEmcFilter: public TObject
     Float_t         mMcEtaMax;           
     
     void            msg(char* a,char* b) {if(mPrintLog) cout <<"StEmcFiletr:: "<<a<<" rejected: "<<b<<endl; }
+    void            calcCentrality(StEvent*); 
     
   public:
                 		StEmcFilter();                        ///< StEmcFilter constructor
@@ -150,6 +153,9 @@ class StEmcFilter: public TObject
     Float_t     		getPtTower(Int_t,Int_t,Int_t);        ///< Returns the total pt from projected tracks in tower with with module, eta, sub    
 
     EmcStatus   		getEmcStatus(Int_t,Int_t);            ///< Return EMC status (kGOOD, kBAD, kOTHER) for a given detector and bin.
+    
+    Int_t           getCentralityBin() { return mCentralityBin; } ///< Return centrality bin
+    Int_t           getCentrality(Int_t i) { return mCentrality[i]; } ///< Return centrality definition for a given bin
         
     Bool_t      		getTrackId(StTrack*,Float_t&,Int_t&); ///< Return track id based on dE/dX
     Bool_t      		getTrackId(StTrack*,Int_t&,Float_t&,Float_t&,Int_t&,Int_t*,Float_t*); ///< Return track id based on dE/dX and nsigma for each particle

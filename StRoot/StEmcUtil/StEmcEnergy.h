@@ -52,7 +52,8 @@ class StEmcEnergy : public TObject
  StEmcFilter*   getFilter();                      ///< Return EmcFilter being used
             
     	Float_t   getChHadEnergyInBtow(UInt_t);     ///< Return Charged hadronic energy in one tower               
-    	Float_t   getEnergyInBtow(UInt_t);          ///< Return EMC energy in one tower         
+    	Float_t   getEnergyInBtow(UInt_t);          ///< Return EMC energy in one tower       
+      Float_t   getEmEnergyInBtow(UInt_t);        ///< Return electromagnetic energy in one tower  
                
          void   setEval(evalMetd);                ///< Set evaluation method if using geant
          void   setEvent(StEvent*);               ///< Set StEvent pointer
@@ -132,6 +133,7 @@ inline void    StEmcEnergy::setTPCEff(Bool_t option)  { mTPCEff = option; }
 inline void    StEmcEnergy::setQ0Factor(Float_t factor)  { mQ0Factor = factor; }
 inline Float_t StEmcEnergy::getEnergyInBtow(UInt_t towerNdx) { return mEnergyInBtow[towerNdx]; }
 inline Float_t StEmcEnergy::getChHadEnergyInBtow(UInt_t towerNdx) { return mChHadEnergyInBtow[towerNdx]; }
+inline Float_t StEmcEnergy::getEmEnergyInBtow(UInt_t towerNdx) { return mEmEnergyInBtow[towerNdx]; }
 inline StEmcFilter* StEmcEnergy::getFilter() { return mEmcFilter; }
 
 //------------------------------------------------------------------------------
