@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.53  1998/12/24 16:39:40  fine
+#  Some extra checl of env variable INCLUDE under Windows
+#
 #  Revision 1.52  1998/12/17 17:21:00  fisyak
 #  Add Akio's insure++
 #
@@ -134,7 +137,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/12/17 17:21:00 $ 
+#             Last modification $Date: 1998/12/24 16:39:40 $ 
 #. default setings
 
 MAKE  := gmake
@@ -301,6 +304,12 @@ endif
   FEXTEND := -extend_source
   KUIPC   :=kuipc.exe
   FLIBS   := DFORDLL.LIB
+# check whether the system INCLUDE path was defined 
+  ifeq (,$(INCLUDE))
+  CXX  := echo ** ERROR ** Please define Visual C++ INCLUDE environment variable first
+  CC := $(CXX)
+  FC := (CXX)
+  endif
 endif 
 
 ifneq (,$(findstring $(STAR_SYS),rs_aix31 rs_aix32 rs_aix41))
