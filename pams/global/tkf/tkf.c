@@ -7,8 +7,8 @@
 
 /* ------- STAF generated includes ------- */
 
-#include "tkf_am.h"
-#include "tkf_utilities.h"
+#include "tkf.h"
+#include "/afs/rhic/star/starlib/ref/ana/tkf/inc/tkf_utilities.h"
 
 #define		kaonMass		.493677		/*	Kaon (+ or -) mass in GeV	*/
 #define		pionMass		.139569		/*	Pi (+ or -) mass in GeV		*/
@@ -26,11 +26,11 @@
 	
 /************************************************************/			
 /*					      		*/
-/*	tkf_am_						*/
+/*	tkf_						*/
 /*					       		*/
 /*					       		*/
 /*	Functional Description				*/
-/*		This is the main routine of tkf_am.c which is called	*/
+/*		This is the main routine of tkf.c which is called	*/
 /*		by the outside world.  After finding all tracks and	*/
 /*		converting them to local coordinates the function	*/
 /*		cycles through all unique track pairings and 		*/
@@ -50,7 +50,7 @@
 /*	C code ported to STAF 8/97 by S. Margetis				*/
 /* 									*/
 /************************************************************/
-long tkf_am_(
+long tkf_(
   TABLE_HEAD_ST         *tkfpar_h,     TKF_TKFPAR_ST           *tkfpar ,
   TABLE_HEAD_ST         *tkfout_h,     TKF_TKFOUT_ST           *tkfout ,
   TABLE_HEAD_ST      *g2t_track_h,      G2T_TRACK_ST        *g2t_track ,
