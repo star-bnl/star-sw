@@ -1,16 +1,21 @@
 // Using StV0MiniDstMaker to make v0 mini-DST
 // Peter G. Jones, University of Birmingham, p.g.jones@bham.ac.uk
-// $Id: makeV0MiniDst.C,v 1.1 1999/07/13 12:51:01 jones Exp $
+// $Id: makeV0MiniDst.C,v 1.2 1999/07/30 15:07:31 genevb Exp $
 // $Log: makeV0MiniDst.C,v $
+// Revision 1.2  1999/07/30 15:07:31  genevb
+// Take advantage of StHFillObject inheritance
+//
 // Revision 1.1  1999/07/13 12:51:01  jones
 // Added macros for making and reading v0 mini-DSTs using StV0MiniDstMaker
 //
 
 void load() {
   gSystem->Load("St_base");
+  gSystem->Load("StUtilities");
   gSystem->Load("St_Tables");
   gSystem->Load("StChain");
   gSystem->Load("StIOMaker");
+  gSystem->Load("StarClassLibrary");
   gSystem->Load("StEvent");
   gSystem->Load("StEventMaker");
   gSystem->Load("StV0MiniDstMaker");
@@ -19,7 +24,7 @@ void load() {
 void run() {
   // Open input file
   //  const Char_t *file = "/afs/rhic/star/strange/jones/xi_new.xdf";
-  const Char_t *file = "/afs/rhic/star/data3/test/dev/tfs_Solaris/Fri/year_1b/psc0050_01_40evts_dst.xdf";
+  const Char_t *file = "/afs/rhic/star/data3/test/dev/tfs_Solaris/Wed/year_1b/psc0050_01_40evts.dst.xdf";
 
   StFile *files = new StFile();
   files->AddFile(file);
