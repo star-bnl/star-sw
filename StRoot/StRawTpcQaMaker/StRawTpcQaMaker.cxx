@@ -1,6 +1,12 @@
+//! $Id: StRawTpcQaMaker.cxx,v 1.3 2000/06/19 19:01:21 kathy Exp $
+//! $Log: StRawTpcQaMaker.cxx,v $
+//! Revision 1.3  2000/06/19 19:01:21  kathy
+//! put in Sergei's new versions of the code
+//!
+
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StRawTpcQaMaker class for Makers                                        //
+// StRawTpcQaMaker.cxx                                                  //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
@@ -10,6 +16,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
 #include <math.h>
 
 
@@ -24,6 +31,7 @@
 
 #include "TH1.h"
 #include "TH2.h"
+#include "TFile.h"
 
 #include "hardWired.h"
 
@@ -46,7 +54,6 @@ ClassImp(StRawTpcQaMaker)
 
 StRawTpcQaMaker::~StRawTpcQaMaker(){}
 
-
 //_____________________________________________________________________________
 
 Int_t StRawTpcQaMaker::Init(){
@@ -56,19 +63,32 @@ Int_t StRawTpcQaMaker::Init(){
   St_DataSet *herb;
   herb=GetDataSet("StDAQReader");
   assert(herb);
+  //  herb->setVerbose(0); // stop messages
 
   victorPrelim=(StDAQReader*)(herb->GetObject());
   assert(victorPrelim);
 
-  // count # times make called (ntmc defined in header file)
-  ntmc=0;   
+  
+  //  cout << " herb = " << herb << endl;
+  //  cout << " victorPrelim = " << victorPrelim <<  endl;
 
-   myH1 = new TH2F("RawTpcMxPad","Tpc - max pads vs row",
-          50,0.,50.,50,0.,5000.); 
+  cout << " Initializing histograms" <<  endl;
 
-   myH2 = new TH1F("RawTpcSectNum","Tpc - sector number",25,0.,25.);   
+   mhist_1 = new TH1F("hist_1","sectors", 25, 0., 25.);   
 
- 
+  // create histograms for each sector
+   for (int i=0; i< N__SECTORS; i++) { // loop over sectors
+    mSector[i]=0;
+
+      char name[128];
+      sprintf(name," Sector# %d ",i);
+      mSector[i]= new TH2D(name, name, 182, -.5, 181.5, 45, -0.5, 44.5);
+      mSector[i]->SetDirectory(0);
+      mSector[i]->SetOption("LineWidth=2");
+      mSector[i]->Sumw2();
+    
+  } //loop over sectors
+
   return StMaker::Init();
 
 }
@@ -79,12 +99,14 @@ Int_t StRawTpcQaMaker::Make(){
 
   cout << endl << " in StRawTpcQaMaker::Make() " << endl << endl;
 
+  //
+   TFile *hfiler = new TFile("test.hist.root","recreate");
+   hfiler->cd();
+
+  //
   victor=victorPrelim->getTPCReader();
   assert(victor);
 
-  // count # times make called (ntmc defined in header file)
-  ntmc++;
-  cout << " StRawTpcQaMaker: event # " << ntmc << endl;
 
   // Now you have a pointer named "victor".  It is a pointer to class
   // StTPCReader, which is defined in $STAR/StDAQMaker/StDAQReader.h.
@@ -92,50 +114,53 @@ Int_t StRawTpcQaMaker::Make(){
   //         victor->getPadList(....
   //         victor->getSequences(....
 
-// this is a test:
-  //  Int_t kathy30;
-  //Int_t kathy45;
-  //kathy30 = victor->getMaxPad(30);
-  //  cout << " max pads in row 30 = " << kathy30 << endl;
-  //kathy45 = victor->getMaxPad(45);
-  //  cout << " max pads in row 45 = " << kathy45 << endl;
-
-  Float_t mMxPd=0.0;
-  for (Int_t nRow=1; nRow<=45; nRow++) {
-    mMxPd=victor->getMaxPad(nRow);
-    //    cout << " row#, max pads = " << nRow << " " << mMxPd << endl;
-    myH1->Fill(nRow,mMxPd);
-  }
-
   //
   int npad;
   unsigned char* padList;
-   
-// loop over sectors
-  for (Int_t sectorIndex=0; sectorIndex < N__SECTORS; sectorIndex++) 
-  {
-    if (ntmc<=1){
-      cout << "   working on sector# ";
-      cout << " " << sectorIndex << "===>"<< endl;
-    }
+  int iret;
+  int aPad;
+  int nseq;
+  TPCSequence* sequence;
 
-    myH2->Fill(sectorIndex);
+  for (int sectorIndex=0; sectorIndex < N__SECTORS; sectorIndex++) {// loop over sectors
+    // cout << "working on sector# ";
+    //    cout << " " << sectorIndex << "===>"<< endl;
 
-// loop over rows
-    for ( int r=0; r < ROWS__PER__SECTOR; r++) 
-    { 
+
+    for ( int r=0; r < ROWS__PER__SECTOR; r++) { // loop over rows
       npad = victor->getPadList(sectorIndex+1, r+1 ,padList);
-      //  cout << "Row " << r << " Npad " << npad << endl;
+      mhist_1->Fill((Float_t)(sectorIndex));
+      for(int p=0; p<npad; p++) { // loop over pads with data in that row 
+	aPad = padList[p]-1;
+	//	cout << "zero   sector# " << sectorIndex << " row# " << r << " pad# " << aPad << endl; 
+	 iret = victor->getSequences(sectorIndex+1, r+1, aPad+1, nseq, sequence);
+	if (iret!=0) continue;
+
+	for(int seq=0; seq < nseq; seq++) { //sequences
+	  int start  = (sequence+seq)->startTimeBin;
+	  int length = (sequence+seq)->Length;
+	  int stop   = start+length-1; 
+	  //  cout << endl << " startTimeBin " << (sequence+seq)->startTimeBin;
+	  //	cout << " Length       " << (sequence+seq)->Length << " : " ;
+	  unsigned char*  firstAdc = (sequence+seq)->FirstAdc;
+	  for ( int i=0; i < length; i++) {// length
+	    unsigned char* adc=firstAdc+i;
+	    if (start+i < TIME__BUCKETS) { 
+	      mSector[sectorIndex]->Fill(p,r,*adc);
+	    }
+	  } // length
+	} // loop over sequences	
+      } // loop over pads
     } // loop over rows 
 
-  }
+  }// loop over sectors
+
   return kStOK;
 }
-
 //_____________________________________________________________________________
 void StRawTpcQaMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StRawTpcQaMaker.cxx,v 1.2 2000/06/14 15:01:53 kathy Exp $\n");
+  printf("* $Id: StRawTpcQaMaker.cxx,v 1.3 2000/06/19 19:01:21 kathy Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
