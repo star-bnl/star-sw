@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.39 2002/02/13 22:37:09 posk Exp $
+// $Id: doFlowEvents.C,v 1.40 2002/06/07 17:29:43 kirill Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -16,6 +16,7 @@
 // If 'file' ends in '.dst.root', ROOT DSTs are searched for.
 // If 'file' ends in '.event.root' a StEvent file is used.
 // If 'file' ends in 'flowpicoevent.root' a StFlowPicoEvent file is used.
+// If 'file' ends in 'MuDst.root' a common MuDST file is used.
 //
 //  inputs:
 //      nevents = # events to process
@@ -96,6 +97,9 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   gSystem->Load("StFlowMaker");
   gSystem->Load("StFlowTagMaker");
   gSystem->Load("StFlowAnalysisMaker");
+
+  gSystem->Load("StStrangeMuDstMaker");
+  gSystem->Load("StMuDSTMaker");
   
   // Make a chain with a file list
   chain  = new StChain("StChain");
@@ -136,7 +140,18 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   // uncomment next line if you make a selection object
 //   sprintf(makerName, "Flow");
 
-  if (strstr(fileList[0], "picoevent.root")) {
+  if (strstr(fileList[0], "MuDst.root")) {
+    //Read mu-DST
+    //cout << "##### doFlowEvents: MuDST file" << endl;
+    if (makerName[0]=='\0') {
+      StFlowMaker* flowMaker = new StFlowMaker();
+    } else {
+      StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
+    }
+    flowMaker->MuEventRead(kTRUE);
+    flowMaker->SetMuEventFileName(setFiles);
+    
+  } else if (strstr(fileList[0], "picoevent.root")) {
     //Read pico-DST
     //cout << "##### doFlowEvents: pico file" << endl;
     if (makerName[0]=='\0') {
@@ -187,8 +202,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   //   Use of the TagMaker is optional.
   //   The AnalysisMaker, CumulantMaker, and ScalarProdMaker may be used with
   //   a selection object.
-  //bool tagMaker = kFALSE;
-  bool tagMaker = kTRUE;
+  bool tagMaker = kFALSE;
+  //bool tagMaker = kTRUE;
   //bool anaMaker = kFALSE;
   bool anaMaker = kTRUE;
   bool cumMaker = kFALSE;
@@ -221,8 +236,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   }
 
   // Set write flages and file names
-//  flowMaker->PicoEventWrite(kTRUE);
-//  flowMaker->SetPicoEventDir("./");
+  //  flowMaker->PicoEventWrite(kTRUE);
+  //  flowMaker->SetPicoEventDir("./");
 //  flowMaker->SetPicoEventDir(*OutPicoDir);
   
   // Set Debug status
@@ -289,7 +304,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 //   StFlowEvent::SetPid("h-");                 // for event plane
 
   // Make Eta subevents
-//   StFlowEvent::SetEtaSubs();
+//  StFlowEvent::SetEtaSubs();
 
   // Enable weights in the event plane calcualtion
   StFlowEvent::SetPtWgt(kTRUE);
@@ -457,6 +472,12 @@ void doFlowEvents(const Int_t nevents)
   // 20 GeV
   // /auto/stardata/starspec2/flow_pDST_from_fastoffline_DST/020GeV_AuAu/reco/dev/
 
+  // muDST
+   //Char_t* filePath="/beta/starprod/MuDST/P02gc/Common/ProductionMinBias/RevFullField/";
+   //Char_t* fileExt="st_physics_2269002_raw_0177.MuDst.root"; 
+  // event.root
+  // Char_t* filePath="/beta/starprod/kirill/";
+  // Char_t* fileExt="st_physics_2269002_raw_0177.event.root"; 
 
   doFlowEvents(nevents, filePath, fileExt);
 }
@@ -464,6 +485,9 @@ void doFlowEvents(const Int_t nevents)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.40  2002/06/07 17:29:43  kirill
+// Introduced MuDst reader
+//
 // Revision 1.39  2002/02/13 22:37:09  posk
 // Added SetEtaWeight(bool) command.
 //
