@@ -82,7 +82,6 @@ macro/global/import *
   cd tclpars
   
     tdm/newtable tcl_sector_index tcl_sector_index 1  
-
     
   cd /dui
 
@@ -107,7 +106,6 @@ return
 
 *-------------------------------------------------------
 
-
 macro tcl_fast
 macro/global/import *
 
@@ -121,9 +119,7 @@ macro/global/import *
 return
 
 
-
 *-------------------------------------------------------
-
 
 macro tpt
 macro/global/import *
