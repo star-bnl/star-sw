@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.2 2004/06/25 03:11:48 porter Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.3 2004/07/01 00:34:52 porter Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -176,6 +176,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
         t1=e1->TrackCollectionP();
         t2=e2->TrackCollectionP();
         mPair.setPairType(0);
+        mpossiblePairs[j]+=floor(0.5*(t1->getEntries()*(t2->getEntries()-1)));
         break;
       }
         
@@ -184,6 +185,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
         t1=e1->TrackCollectionP();
         t2=e2->TrackCollectionM();
         mPair.setPairType(1);
+        mpossiblePairs[j]+=(t1->getEntries()*t2->getEntries());
         break;
     }       
   case 2:
@@ -191,6 +193,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
         t1=e1->TrackCollectionM();
         t2=e2->TrackCollectionM();
         mPair.setPairType(0);
+        mpossiblePairs[j]+=floor(0.5*(t1->getEntries()*(t2->getEntries()-1)));
         break;
     }
   case 3:
@@ -198,6 +201,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
         t1=e1->TrackCollectionP();
         t2=e2->TrackCollectionP();
         mPair.setPairType(2);
+        mpossiblePairs[j]+=(t1->getEntries()*t2->getEntries());
         break;
     }
   case 4:
@@ -205,6 +209,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
         t1=e1->TrackCollectionP();
         t2=e2->TrackCollectionM();
         mPair.setPairType(3);
+        mpossiblePairs[j]+=(t1->getEntries()*t2->getEntries());
         break;
     }
   case 5:
@@ -212,6 +217,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
         t1=e1->TrackCollectionM();
         t2=e2->TrackCollectionM();
         mPair.setPairType(2);
+        mpossiblePairs[j]+=(t1->getEntries()*t2->getEntries());
         break;
     }
   }
@@ -227,7 +233,6 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
 
   if(mtimer)mtimer->start();
 
-  mpossiblePairs[j]+=(t1->getEntries()*t2->getEntries());
   for(Iter1=t1->begin(); Iter1!=t1->end();++Iter1){
 
     mPair.SetTrack1(*Iter1);
@@ -734,6 +739,9 @@ void StEStruct2ptCorrelations::deleteArraysAndHistograms(){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.3  2004/07/01 00:34:52  porter
+ * correct accounting for possible pairs in stats files
+ *
  * Revision 1.2  2004/06/25 03:11:48  porter
  * New cut-binning implementation and modified pair-cuts for chunhui to review
  *
