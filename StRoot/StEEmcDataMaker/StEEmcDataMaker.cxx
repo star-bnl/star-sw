@@ -1,4 +1,4 @@
-// $Id: StEEmcDataMaker.cxx,v 1.15 2004/04/04 06:10:28 balewski Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.16 2004/04/08 16:28:03 balewski Exp $
 
 #include <Stiostream.h>
 #include <math.h>
@@ -246,7 +246,6 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
   
   StEmcRawData* raw=emcC->eemcRawData();
   assert(raw);
-  printf("%s::raw2pixels()\n",GetName());
 
   int mxSector = 12;
 
@@ -263,12 +262,13 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
     emcC->setDetector(emcDet[det]);
   }
 
+  printf("%s::raw2pixels() collections created\n",GetName());
 
 #if 1
   // store data from raw blocks to StEvent
   int nDrop=0;
   int nMap=0;
-  int nTow=0;
+  int nTow=0, nPre=0,nSmd=0;
   int icr;
   for(icr=0;icr<mDb->getNFiber();icr++) {
     const EEmcDbCrate *fiber=mDb-> getFiber(icr);
@@ -285,32 +285,32 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
 	continue;
       }
 
-      int isec=x->sec-1;   //range 0-11 ???
+      int det = 0;
+      char type=x->name[2];
+      int sec=x->sec;   //range 1-12
+      int sub=1+x->sub-'A'; //range 1-5
+      int eta=x->eta;   //range 1-12      
+
       int rawAdc=data[chan];
       float energy=123.456; // dumm value
-      int det = 0;
-      int ieta=0, isub=0;
-      char type=x->name[2];
 
       switch(type) { // tw/pre/post/SMD
       case 'T': // towers
-	isub=x->sub-'A'; //range 0-4
-	ieta=x->eta-1;   //range 0-11
 	det = kEndcapEmcTowerId;
 	nTow++;
 	break;
       case 'P': // pres1
       case 'Q': // pres2
       case 'R': // post
-	isub=x->sub-'A'; //range 0-4
-	ieta=x->eta-1;   //range 0-11
-	isub+=5* (type-'P'); // this is even more sily
+	sub+=5* (type-'P'); // pack pre1,2,post together
 	det = kEndcapEmcPreShowerId;
+	nPre++;
 	break;
       case 'U': //SMD
       case 'V': 
-	isub=0; // not used for SMD
-	ieta=x->strip-1;   //range 0-287
+	sub=1; // not used for SMD
+	eta=x->strip;  //range 1-288
+	nSmd++;
 	det = kEndcapSmdUStripId;
 	if(type=='V') det = kEndcapSmdVStripId;
 	break;
@@ -319,9 +319,9 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
       }
 
       assert(det);
-      if(type=='T') printf("EEMC crate=%3d chan=%3d  ADC: raw=%4d  energy=%+10g  -->   %2.2dT%c%2.2d\n",fiber->crID,chan,rawAdc,energy,x->sec,x->sub,x->eta);
+      // if(type=='T') printf("EEMC crate=%3d chan=%3d  ADC: raw=%4d  energy=%+10g  -->   %2.2dT%c%2.2d\n",fiber->crID,chan,rawAdc,energy,x->sec,x->sub,x->eta);
       
-      StEmcRawHit* h = new StEmcRawHit(emcId[det],isec,ieta,isub,rawAdc,energy);
+      StEmcRawHit* h = new StEmcRawHit(emcId[det],sec,eta,sub,rawAdc,energy);
       emcDet[det]->addHit(h);
       nMap++;
 
@@ -329,37 +329,76 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
   }// end of loop over crates 
   
     
-  printf("%s event finished nDrop=%d nMap=%d nTow=%d\n",GetName(), nDrop,nMap,nTow);
+  printf("%s event finished nDrop=%d nMap=%d nTow=%d nPre=%d nSMD=%d\n",GetName(), nDrop,nMap,nTow,nPre, nSmd);
 
 #endif
 
 
-#if 0
-  int jeta;
-  int isub;
-  int isec=10;
-  for(isec=0;isec<12;isec++)
-  for(isub=0;isub<5;isub++)
-  for(jeta=0;jeta<12;jeta++) {
-    int adc=1000+ jeta + isub*12 +isec*60;
+#if 0 // test of tower data storage
+ {
+  int det= kEndcapEmcTowerId;
+  int eta,sub=1,sec=12;
+  for(sec=1;sec<=12;sec++)
+  for(sub=1;sub<=5;sub++)
+  for(eta=1;eta<=12;eta++) {
+    int adc=1000+ (eta-1) + (sub-1)*12 +(sec-1)*60;
     float ener=777;
-    StEmcRawHit* h = new StEmcRawHit(emcId[det],isec,jeta,isub,adc,ener);
+    StEmcRawHit* h = new StEmcRawHit(emcId[det], sec,eta,sub,adc,ener);
     emcDet[det]->addHit(h);
   }
+ }
 #endif
 
-  for(det = kEndcapEmcTowerId; det<= kEndcapSmdVStripId; det++){
+
+
+#if 0 // test of Pre/post data storage
+ {
+   int det= kEndcapEmcPreShowerId;
+   int eta,sub,sec=12, pre=1;
+   for(pre=1;pre<=3;pre++)
+     for(sec=1;sec<=12;sec++)
+       for(sub=1;sub<=5;sub++)
+	 for(eta=1;eta<=12;eta++) {
+	   int ssub=sub + 5*(pre-1);
+	   int adc= eta-1 + (sub-1)*12 +(sec-1)*60 +pre*1000;
+	   StEmcRawHit* h = new StEmcRawHit(emcId[det], sec,eta,ssub,adc);
+	   emcDet[det]->addHit(h);
+	 }
+ }
+#endif
+ 
+ 
+ 
+#if 0 // test of U-smd data storage
+ {
+   det = kEndcapSmdUStripId;
+   int eta,sub=1,sec=12;
+   for(sec=1;sec<=12;sec++)
+     for(eta=1;eta<=288;eta++) {
+       int adc= 1000 + eta-1  +(sec-1)*300;
+       StEmcRawHit* h = new StEmcRawHit(emcId[det], sec,eta,sub,adc);
+       emcDet[det]->addHit(h);
+     }
+ }
+#endif
+ 
+ printf("%s filling done\n",GetName());
+
+ for(det = kEndcapEmcTowerId; det<= kEndcapSmdVStripId; det++){
    StEmcDetector* emcDetX= emcC->detector( StDetectorId(det));
    assert(emcDetX);
    printf("det=%d ID=%d nHits=%d\n",det,StDetectorId(det),emcDetX->numberOfHits());
-  }  
+ }  
 }
 
-
+ 
 
  
 
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.16  2004/04/08 16:28:03  balewski
+// new EEMC hit indexing + new DB access
+//
 // Revision 1.15  2004/04/04 06:10:28  balewski
 // towards full access to DB
 //
