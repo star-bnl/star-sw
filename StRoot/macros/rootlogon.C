@@ -1,5 +1,8 @@
-// $Id: rootlogon.C,v 1.12 1999/08/06 15:00:41 fisyak Exp $
+// $Id: rootlogon.C,v 1.13 1999/08/11 13:30:31 fisyak Exp $
 // $Log: rootlogon.C,v $
+// Revision 1.13  1999/08/11 13:30:31  fisyak
+// Add root4star usage statistics
+//
 // Revision 1.12  1999/08/06 15:00:41  fisyak
 // Keep formwer bfc.C as BFC.C
 //
@@ -96,5 +99,7 @@ TBuffer::SetGlobalWriteParam(2003);
  gSystem->ExpandPathName(STAR_LEVEL);
  gSystem->ExpandPathName(ROOT_LEVEL);
  printf("QAInfo:You are using STAR_LEVEL : %s and ROOT_LEVEL : %s \n",  STAR_LEVEL.Data(),ROOT_LEVEL.Data());
+  gSystem->Exec("echo $USER from $HOST in STAR_LEVEL=$STAR_LEVEL / STAR_VERSION=$STAR_VERSION  `date` >>  $GROUP_DIR/statistics/root4star${STAR_VERSION}");
+
 }
  
