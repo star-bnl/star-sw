@@ -58,10 +58,13 @@
 
      long deltaTime;                 /* width of unfolding window in time */
      long deltaPad;                  /* width of unfolding window in pad */
+     float minChargeWindow;          /* minimum charge to make hit in search window */
 
      // shift of inner cathode
      float offsetCathodeWest;        /* inner cathode offset in cm west */
      float offsetCathodeEast;        /* inner cathode offset in cm east */
+     float angleOffsetWest;          /* angle offset of inner cathode displ. in radians west */
+     float angleOffsetEast;          /* angle offset of inner cathode displ. in radians east */
 
      // run parameters
      float normalizedNowPressure;   /* normalized air pressure (in hPa) */
