@@ -58,7 +58,7 @@ DS_MODULUS_STRUCT(2, DS_TYPE_U_SHORT, unsigned short);
                       long and ulong are 8 bytes (not 4!)
 		      John Lajoie - lajoie@iastate.edu
 */
-#ifdef OSF1
+#if defined(__alpha)
 DS_MODULUS_STRUCT(8, DS_TYPE_LONG,    long);
 DS_MODULUS_STRUCT(8, DS_TYPE_U_LONG,  unsigned long);
 #else
@@ -79,7 +79,7 @@ static DS_TYPE_T basicType[] = {
                       long and ulong are 8 bytes (not 4!)
 		      John Lajoie - lajoie@iastate.edu
 */
-#ifdef OSF1
+#if defined(__alpha)
 	DS_TYPE_INIT(8, DS_TYPE_LONG,    long),
 	DS_TYPE_INIT(8, DS_TYPE_U_LONG,  unsigned long),
 #else
