@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.32 2003/01/10 04:19:20 porter Exp $
+ * $Id: StDbTable.cc,v 1.33 2003/02/12 22:12:45 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,12 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.33  2003/02/12 22:12:45  porter
+ * moved warning message about null columns (checked in 2 days ago) from the
+ * depths of the mysql coding into the StDbTable code. This suppresses confusing
+ * warnings from tables that have had elements removed but their storage columns
+ * still exist in the database.
+ *
  * Revision 1.32  2003/01/10 04:19:20  porter
  * added feature of getting timestamp list (but no data) for a table.
  * fixed 2 features sometimes used in online in query-by-whereclause.
@@ -142,6 +148,12 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.33  2003/02/12 22:12:45  porter
+ * moved warning message about null columns (checked in 2 days ago) from the
+ * depths of the mysql coding into the StDbTable code. This suppresses confusing
+ * warnings from tables that have had elements removed but their storage columns
+ * still exist in the database.
+ *
  * Revision 1.32  2003/01/10 04:19:20  porter
  * added feature of getting timestamp list (but no data) for a table.
  * fixed 2 features sometimes used in online in query-by-whereclause.
@@ -280,6 +292,7 @@
 #include "typeAcceptor.hh"
 #include "StTableDescriptorI.h"
 #include "StDbDefaults.hh"
+#include "StDbManager.hh"
 #include <string.h>
 #include <iostream.h>
 #include <strstream.h>
@@ -866,7 +879,6 @@ float* mfloat; double* mdouble;
         cn<<name<<".text"<<ends; char* commentName = cn.str();
         mchar = 0;
         if(!buff->ReadScalar(mchar,commentName))buff->ReadScalar(mchar,name);
-        delete [] commentName;
         if(mchar){
              int len1=strlen(mchar);
              if(len>len1) len=len1;
@@ -874,17 +886,18 @@ float* mfloat; double* mdouble;
              delete [] mchar;
         } else {
              *ptr='\0';
+             printNoDataReturned(name);
         }
-
+        cn.freeze(0);
     break;
     }
   case Stuchar:
     {
       if(buff->ReadArray(muchar,blen,name)){
-	if(len>blen)len=blen;
+     	if(len>blen)len=blen;
         memcpy(ptr,muchar,len*sizeof(unsigned char));
-       delete [] muchar;
-      }
+        delete [] muchar;
+      } else { printNoDataReturned(name); }
     break;
     }
   case Stshort:
@@ -893,7 +906,7 @@ float* mfloat; double* mdouble;
 	if(len>blen)len=blen;
         memcpy(ptr,mshort,len*sizeof(short));
         delete [] mshort;
-      }
+      } else { printNoDataReturned(name); }
     break;
     }
   case Stushort:
@@ -902,7 +915,7 @@ float* mfloat; double* mdouble;
 	if(len>blen)len=blen;
         memcpy(ptr,mushort,len*sizeof(unsigned short));
         delete [] mushort;
-      }
+      } else { printNoDataReturned(name); }
     break;
     }
   case Stint:
@@ -911,7 +924,7 @@ float* mfloat; double* mdouble;
 	if(len>blen)len=blen;
          memcpy(ptr,mint,len*sizeof(int));
          delete [] mint;
-      }
+      } else { printNoDataReturned(name); }
     break;
     }
   case Stuint:
@@ -920,7 +933,7 @@ float* mfloat; double* mdouble;
 	if(len>blen)len=blen;
        memcpy(ptr,muint,len*sizeof(unsigned int));
        delete [] muint;
-      }
+      } else { printNoDataReturned(name); }
     break;
     }
   case Stlong:
@@ -929,7 +942,7 @@ float* mfloat; double* mdouble;
 	if(len>blen)len=blen;
        memcpy(ptr,mlong,len*sizeof(long));
        delete [] mlong;
-      }
+      } else { printNoDataReturned(name); }
     break;
     }
   case Stulong:
@@ -938,7 +951,7 @@ float* mfloat; double* mdouble;
 	if(len>blen)len=blen;
        memcpy(ptr,mulong,len*sizeof(unsigned long));
        delete [] mulong;
-      }
+      } else { printNoDataReturned(name); }
     break;
     }
   case Stlonglong:
@@ -947,7 +960,7 @@ float* mfloat; double* mdouble;
 	if(len>blen)len=blen;
        memcpy(ptr,mlonglong,len*sizeof(long long));
        delete [] mlonglong;
-      }
+      } else { printNoDataReturned(name); }
     break;
     }
   case Stfloat:
@@ -956,7 +969,7 @@ float* mfloat; double* mdouble;
        if(len>blen)len=blen;
        memcpy(ptr,mfloat,len*sizeof(float));
        delete [] mfloat;
-      }
+      } else { printNoDataReturned(name); }
     break;
     }
   case Stdouble:
@@ -965,7 +978,7 @@ float* mfloat; double* mdouble;
        if(len>blen)len=blen;
        memcpy(ptr,mdouble,len*sizeof(double));
        delete [] mdouble;
-      }
+      } else { printNoDataReturned(name); }
     break;
     }
   }
@@ -1272,4 +1285,18 @@ unsigned int size = mdescriptor->getTotalSizeInBytes();
    cout <<" type = " <<(int)mdescriptor->getElementType(k)<<endl;
  }
 }
+
+
+void StDbTable::printNoDataReturned(const char* elementName){
+
+  ostrstream emess;
+  emess<<" No data return from table="<<printName()<<" column="<<elementName<<ends;
+  StDbManager::Instance()->printInfo(emess.str(),dbMWarn,__LINE__,__CLASS__,"ReadElement(ptr,name,len,type,buffer)");
+
+  emess.freeze(0);
+}
+
 #undef __CLASS__
+
+
+
