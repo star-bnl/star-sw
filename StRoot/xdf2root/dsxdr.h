@@ -5,7 +5,7 @@
 /*
 modification history
 --------------------
-01a,24apr93,whg  written.
+24apr93,whg  written.
 */
 
 /*
@@ -15,7 +15,11 @@ TBS ...
 
 #ifndef DSXDR_H
 #define DSXDR_H
-
+#include <rpc/rpc.h>
+#include "dstype.h"
+int dsReadAll(XDR *xdrs);
+int dsReadTest(XDR *xdrs, size_t count);
+int dsWriteTest(XDR *xdrs, size_t count);
 bool_t xdr_dataset(XDR *xdrs, DS_DATASET_T **ppDataset);
 bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset, size_t dim);
 bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset);
@@ -24,8 +28,8 @@ bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset);
 /******************************************************************************
 *
 */
-#define DS_SWAP_BUF_SIZE	512 /* size of xdr_swap buffer */
-#define DS_XDR_HASH_LEN	1023	/* size of xdr_dataset hash table (2^N - 1) */
+#define DS_SWAP_BUF_SIZE	512 	/* xdr_swap buffer size (multiple of 8) */
+#define DS_XDR_HASH_LEN		1023	/* xdr_dataset hash table size(2^N - 1) */
 /******************************************************************************
 *
 * Definitions for ANSI C
