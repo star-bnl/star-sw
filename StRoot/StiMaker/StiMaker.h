@@ -32,7 +32,6 @@ class StAssociationMaker;
 
 class StiMaker : public StMaker {
  public:
-    enum SeedFinderType {kUndefined=0, kComposite=1, kEvaluable=3};
     
     virtual ~StiMaker();
 
@@ -42,7 +41,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.33 2001/10/22 16:54:16 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.34 2001/11/07 21:51:08 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -53,10 +52,6 @@ public:
     //Gets/sets
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
-    void setSimulation(bool);
-    void setGui(bool); // true->gui version.  Defaults to true
-    void setDoFit(bool);// true->doFit, false->doFind
-    void setSeedFinderType(SeedFinderType);
     void setEvaluationFileName(const char*);
 
     void printStatistics() const;
@@ -77,12 +72,6 @@ private:
 
     //Names
     string mEvalFileName; //!
-    
-    //flags
-    bool mSimulation;//! true->m.c.
-    bool mUseGui; //!
-    bool mDoTrackFit; //! ture->doFit, false->doFind
-    SeedFinderType mSeedFinderType;
     
     //Containers
     StiHitContainer* mhitstore; //!
@@ -132,21 +121,6 @@ inline void StiMaker::setEvaluationFileName(const char* val)
 inline void StiMaker::setAssociationMaker(StAssociationMaker* val)
 {
     mAssociationMaker = val;
-}
-
-inline void StiMaker::setSimulation(bool val)
-{
-    mSimulation=val;
-}
-
-inline void StiMaker::setGui(bool val)
-{
-    mUseGui=val;
-}
-
-inline void StiMaker::setDoFit(bool val)
-{
-    mDoTrackFit=val;
 }
 
 #endif

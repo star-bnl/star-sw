@@ -109,7 +109,6 @@ void RunStiMaker(Int_t nevents=1,
     const char* paramsDB = "$STAR/StarDb";
     St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB,paramsDB);
     calibMk->SetDateTime("year_2b");
-    //calibMk->SetDateTime("year_1h");
     calibMk->SetDebug();
     
     //Read Tpc Database access
@@ -140,13 +139,13 @@ void RunStiMaker(Int_t nevents=1,
     stiIO->setETSFLowerBound(5);
     stiIO->setETSFMaxHits(6);
 
-    anaMk->setDoFit(doFit);
-    
-    //enum SeedFinderType {kUndefined=0, kComposite=1, kEvaluable=2};
-    anaMk->setSeedFinderType(StiMaker::kEvaluable);
-    //anaMk->setSeedFinderType(StiMaker::kComposite);
-    
-    anaMk->setSimulation(simulated);
+    stiIO->setDoTrackFit(doFit);
+
+    //This line has to match the corresponding enumeration in StiIOBroker.h
+    enum SeedFinderType {kUndefined=0, kComposite=1, kEvaluable=2};
+    stiIO->setSeedFinderType(kEvaluable);
+
+    stiIO->setSimulated(simulated);
     anaMk->setEvaluationFileName(outfile);
     
     if (simulated) {
@@ -170,8 +169,8 @@ void RunStiMaker(Int_t nevents=1,
 	sti->setStChain(chain);
 	sti->setIoMaker(ioMaker);
 	
-	//Tell StiMaker that we're in batch mode
-	anaMk->setGui(true);
+	//we're in batch mode
+	stiIO->setUseGui(true);
 	
 	//Maker io gateway
 	guiIO = StiGuiIOBroker::instance();
@@ -184,11 +183,11 @@ void RunStiMaker(Int_t nevents=1,
 	//Values for hits assigned to tracks
 	guiIO->setMarkedHitSize(.3);
 	guiIO->setMarkedHitColor(2);
-	guiIO->setMarkedHitStyle(8);
+	guiIO->setMarkedHitStyle(3);
     }
     else {
 	cout <<"Batch option detector.  Run Integrated Tracker in non-Gui Mode."<<endl;
-	anaMk->setGui(false);
+	stiIO->setUseGui(false);
     }
     
     cout <<"Calling Init() Methods "<<endl;

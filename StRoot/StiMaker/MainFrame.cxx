@@ -1001,10 +1001,10 @@ void MainFrame::toggleFitFind()
     cout <<"Please enter a number\n\t1\tFit Tracks\n\t2\tFind Tracks"<<endl;
     cin >> dummy;
     if (dummy==1) {
-	StiMaker::instance()->setDoFit(true);
+	StiIOBroker::instance()->setDoTrackFit(true);
     }
     else if (dummy==2) {
-	StiMaker::instance()->setDoFit(false);
+	StiIOBroker::instance()->setDoTrackFit(false);
     }
     else {
 	cout <<"Error: entry "<<dummy<<" invalid.  No action taken"<<endl;
