@@ -1,8 +1,11 @@
 #! /opt/star/bin/perl
 #
-# $Id: dbrunhpss.pl,v 1.5 2000/02/22 20:12:52 wenaus Exp $
+# $Id: dbrunhpss.pl,v 1.6 2000/03/08 12:59:58 wenaus Exp $
 #
 # $Log: dbrunhpss.pl,v $
+# Revision 1.6  2000/03/08 12:59:58  wenaus
+# fix filename extraction
+#
 # Revision 1.5  2000/02/22 20:12:52  wenaus
 # Lengthen ftp timeout
 #
@@ -114,12 +117,14 @@ print "Total files in RunFile table: ".@theDbFiles."\n" if $debugOn;
      $daqESize     = ($$daqE)->size;
 
      $onlyName =  (split(/\//,$daqEName))[7];
-
+     @fullName =  (split(/\//,$daqEName));
+     $onlyName = $fullName[@fullName-1];
+     print "Name $onlyName\n" if $debugOn;
      if ( $daqENameForm == 1 ) {
        $onlyName =~ m/st_([a-z0-9]+)_([0-9]+)_([a-z0-9]+)_([0-9]+)\.([\.a-z0-9]+)/;
        $type = $1;
        if ( $type eq 'pedestal' ) {
-	 $type = substr($type,0,3);
+         $type = substr($type,0,3);
        }
        $nrun = $2;
        $stage = $3;
@@ -152,7 +157,7 @@ print "Total files in RunFile table: ".@theDbFiles."\n" if $debugOn;
      $sql.="size=$daqESize,";
      $sql.="hpss='Y'";
      print "$sql\n" if $debugOn;
-     $rv = $dbh->do($sql) || die $dbh->errstr;
+     $rv = $dbh->do($sql) || die $dbh->errstr . "\nSQL: $sql";
  }
 
 &StDbDisconnect();
