@@ -2,12 +2,12 @@
 *
 *  Table: ftpcAmpOffset
 *
-*       description:
+*       description: //   FTPC detector calibration amplitude offset table
 */ 
 
 
 struct ftpcAmpOffset { 
 
-   float  offset[960];   /*   amplitude offset for this channel  */
+   float  offset[960];   /*   amplitude offset for this pad  */
 
  };  

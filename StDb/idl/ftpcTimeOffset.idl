@@ -2,12 +2,12 @@
 *
 *  Table: ftpcTimeOffset
 *
-*       description:
+*       description: //    FTPC detector calibration time offset table
 */ 
 
 
 struct ftpcTimeOffset { 
 
-   float  offset[960];   /*   time offset for this channel  */
+   float  offset[960];   /*   time offset for this pad  */
 
  };  
