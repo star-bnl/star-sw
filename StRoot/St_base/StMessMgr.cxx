@@ -40,6 +40,8 @@ bool  StMessMgr::isInfoEnabled()   const{ return true; }
 bool  StMessMgr::isFatalEnabled()  const{ return true; }
 //______________________________________________________________________________
 bool  StMessMgr::isEnabledFor()    const{ return true; }
+//______________________________________________________________________________
+bool  StMessMgr::isQAInfoEnabled()   const{ return true; }
 
 //
 // C and Fortran routines:
@@ -246,4 +248,4 @@ void type_of_call StMessAddType_(const char* type, const char* text,
 }
 
 //_____________________________________________________________________________
-// $Id: StMessMgr.cxx,v 1.3 2004/11/03 01:32:40 fine Exp $
+// $Id: StMessMgr.cxx,v 1.4 2004/11/03 16:39:17 fine Exp $

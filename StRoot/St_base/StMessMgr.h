@@ -177,6 +177,7 @@ class StMessMgr : public ostrstream {
   virtual bool isInfoEnabled()   const;
   virtual bool isFatalEnabled()  const;
   virtual bool isEnabledFor()    const;
+  virtual bool isQAInfoEnabled()   const;
 
   
    
@@ -282,4 +283,4 @@ inline ostream& operator-(StMessMgr&) {
 
 #endif
 
-// $Id: StMessMgr.h,v 1.4 2004/11/03 16:03:30 fine Exp $
+// $Id: StMessMgr.h,v 1.5 2004/11/03 16:39:17 fine Exp $

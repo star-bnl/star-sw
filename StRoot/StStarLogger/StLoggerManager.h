@@ -95,6 +95,7 @@ protected:
    virtual bool isInfoEnabled()   const;
    virtual bool isFatalEnabled()  const;
    virtual bool isEnabledFor()    const;
+   virtual bool isQAInfoEnabled() const;
 
 
 // Generic Messages:
@@ -202,4 +203,4 @@ inline int StLoggerManager::LevelIndex(char level)
 }
 #endif
 
-// $Id: StLoggerManager.h,v 1.2 2004/11/03 01:33:22 fine Exp $
+// $Id: StLoggerManager.h,v 1.3 2004/11/03 16:39:32 fine Exp $
