@@ -1,5 +1,8 @@
-// $Id: StBFChain.h,v 1.14 2000/07/26 14:09:03 fisyak Exp $
+// $Id: StBFChain.h,v 1.15 2000/08/06 19:10:15 fisyak Exp $
 // $Log: StBFChain.h,v $
+// Revision 1.15  2000/08/06 19:10:15  fisyak
+// Clean up BFC, add Bfc table to runco with chain parameters
+//
 // Revision 1.14  2000/07/26 14:09:03  fisyak
 // Split and move emc, remove SetDataBases
 //
@@ -72,11 +75,13 @@
 //////////////////////////////////////////////////////////////////////////
 #include "StChain.h"
 #include "TFile.h"
+#include "tables/St_Bfc_Table.h"
 //_____________________________________________________________________
 
 class St_XDFFile;
 class StFile;
 class TObjArray;
+#if 0
 struct BfcItem {
   Char_t       *Key;      // nick name
   Char_t       *Name;     // maker name
@@ -87,12 +92,12 @@ struct BfcItem {
   Char_t       *Comment;  
   Bool_t        Flag;     // F/T to use it in chain
 };
-
+#endif
 class StBFChain : public StChain {
  private:
   St_XDFFile          *fXdfOut;  //! xdf output file if any
   TFile               *fTFile;   //TFile associated with the chain
-  BfcItem             *fBFC;      // Private chain
+  Bfc_st              *fBFC;      // Private chain
   StFile              *fSetFiles; //
   TString             *fInFile;   //
   TString             *fFileOut;  //
@@ -129,7 +134,7 @@ class StBFChain : public StChain {
    virtual Bool_t      GetOption(const TString *Opt) {return GetOption(kOpt(Opt));}
    virtual Bool_t      GetOption(const Char_t *Opt)  {return GetOption(kOpt(Opt));}
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.14 2000/07/26 14:09:03 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.15 2000/08/06 19:10:15 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StBFChain, 0)   //StBFChain control class
 };
 #endif
