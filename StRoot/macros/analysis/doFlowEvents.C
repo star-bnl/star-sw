@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.8 2000/05/09 19:38:22 kathy Exp $
+// $Id: doFlowEvents.C,v 1.9 2000/05/11 00:22:28 posk Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -36,6 +36,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.9  2000/05/11 00:22:28  posk
+// Can read StEvent files which have extention .event.root .
+//
 // Revision 1.8  2000/05/09 19:38:22  kathy
 // update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
 //
@@ -77,78 +80,85 @@ const char *xdfFile = 0;
 const char *mdcFile = 0;
 const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 
-//void doFlowEvents()
-//{
-//    cout << "Usage: doFlowEvents.C(nevents,\"-\",\"some_directory/some_dst_file.xdf\")" << endl;
-//    cout << "       doFlowEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
-//    cout << "       doFlowEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
-//}
+// Usage: 
+// doFlowEvents.C(nevents, -, some_directory/some_dst_file.xdf)
+// doFlowEvents.C(nevents, -, some_directory/some_dst_file.root)
+// doFlowEvents.C(nevents, some_directory, *.dst.root/*.event.root)	
+// doFlowEvents.C(nevents)	
+// doFlowEvents.C()	
 
-void doFlowEvents(Int_t,const Char_t **,const char *qaflag = "");
-void doFlowEvents(Int_t nevents=2,
-           const Char_t *path="-",
-           const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
-           const char *qaflag = "off");
-
+void doFlowEvents(Int_t, const Char_t **, const char *qaflag = "");
+void doFlowEvents(Int_t, const Char_t *, const Char_t *, 
+		  const char *qaflag = "off");
+void doFlowEvents(Int_t nevents=2);
 void doFlowEvents(Int_t);
 
 void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 {
-    //
-    // First load some shared libraries we need
-    //
-    gSystem->Load("St_base");
-    gSystem->Load("StChain");
+  //
+  // First load some shared libraries we need
+  // Do it in this order
+  //
+  gSystem->Load("St_base");
+  gSystem->Load("StChain");
 
-    gSystem->Load("libgen_Tables");
-    gSystem->Load("libsim_Tables");
-    gSystem->Load("libglobal_Tables");
+  gSystem->Load("libgen_Tables");
+  gSystem->Load("libsim_Tables");
+  gSystem->Load("libglobal_Tables");
 
-    gSystem->Load("StUtilities");
-    gSystem->Load("StIOMaker");
-    gSystem->Load("StarClassLibrary");
-    gSystem->Load("StEvent");
-    gSystem->Load("StMagF");
+  gSystem->Load("StUtilities");
+  gSystem->Load("StIOMaker");
+  gSystem->Load("StarClassLibrary");
+  gSystem->Load("StEvent");
+  gSystem->Load("StMagF");
+
+  gSystem->Load("StFlowMaker");
+  //gSystem->Load("StFlowTagMaker");
+  //gSystem->Load("StFlowAnalysisMaker");
+  
+  //
+  // Handling depends on whether file is a ROOT file or XDF file
+  //
+  chain  = new StChain("StChain");
+  
+  StFile *setFiles= new StFile();
+  
+  for (int ifil=0; fileList[ifil]; ifil++)
+    { setFiles->AddFile(fileList[ifil]); }
+  StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
+  IOMk->SetBranch("runcoBranch",0,"r");
+  //IOMk->SetDebug();
+  
+  cout << "#### First File = " << fileList[0] << endl;
+  if (strstr(fileList[0], ".event.root")==0) {
+    //
+    // Maker to read raw events and make StEvent
+    //
     gSystem->Load("StEventMaker");
-    gSystem->Load("StFlowMaker");
-    gSystem->Load("StFlowTagMaker");
-    gSystem->Load("StFlowAnalysisMaker");
-
-    //
-    // Handling depends on whether file is a ROOT file or XDF file
-    //
-    chain  = new StChain("StChain");
-
-    StFile *setFiles= new StFile();
-    
-    for (int ifil=0; fileList[ifil]; ifil++)
-      { setFiles->AddFile(fileList[ifil]);}
-    StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
-    IOMk->SetBranch("runcoBranch",0,"r");
-    //IOMk->SetDebug();
-
-    //
-    // Maker to read events from file or database into StEvent
-    //
     StEventMaker *readerMaker =  new StEventMaker("events","title");
-
-    //
-    // Flow Makers
-    //   Use of the TagMaker is optional.
-    //   The AnalysisMaker may be used with a selection object.
-    //   If you instantiate more than one AnalysisMaker,
-    //      make sure each has a different selection object number
-    //      and that you do not instantiate the TagMaker.
-    //   If you want to read more than one PhiWeight file, instantiate multiple
-    //      FlowMakers with the corresponding selection objects.
-    //
-    StFlowMaker* flowMaker = new StFlowMaker();
-    StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
-    StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
+  } else {               // read StEvent file
+    IOMk->SetBranch("event");
+  }
+  
+  //
+  // Flow Makers
+  //   Use of the TagMaker is optional.
+  //   The AnalysisMaker may be used with a selection object.
+  //   If you instantiate more than one AnalysisMaker,
+  //      make sure each has a different selection object number
+  //      and that you do not instantiate the TagMaker.
+  //   If you want to read more than one PhiWeight file, instantiate multiple
+  //      FlowMakers with the corresponding selection objects.
+  //
+  StFlowMaker* flowMaker = new StFlowMaker();
+  //StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
+  //StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
+  
+  // Make Selection objects and instantiate Makers
 //     StFlowSelection flowSelect;
 //     StFlowSelection flowSelect1;
 //     flowSelect1->SetNumber(1);
-//     //flowSelect->SetCentrality(0);
+//     flowSelect->SetCentrality(0);
 //     flowSelect1->SetPid("pi"); // pi+, pi-, pi, or proton
 //     flowSelect1->SetPidPart("pi"); // pi+, pi-, pi, or proton
 //     char makerName[30];
@@ -161,91 +171,109 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 //     sprintf(makerName, "FlowAnalysis%s", flowSelect1->Number());
 //     StFlowAnalysisMaker* flowAnalysisMaker1 = new StFlowAnalysisMaker(makerName, flowSelect1);
 
+    // Set read-write flages
 //     flowMaker->NanoFlowEventOff();
 //     flowMaker->NanoFlowEventOn();
+//     flowMaker->FlowEventWrite(kTRUE);
+//     flowMaker->FlowEventRead(kTRUE);
 
+    // Set Debug status
 //     flowMaker->SetDebug();
 //     flowTagMaker->SetDebug();
 //     flowAnalysisMaker->SetDebug();
 
-    //
-    // Initialize chain
-    //
-    Int_t iInit = chain->Init();
-    if (iInit) chain->Fatal(iInit,"on init");
-    chain->PrintInfo();
-
-    //
-    // Set the parameters
-    //
-    // Set the event cuts
-    //StFlowCutEvent::SetMult(100, 10000);
-    //StFlowCutEvent::SetVertexX(0., 0.);
-    //StFlowCutEvent::SetVertexY(0., 0.);
-    //StFlowCutEvent::SetVertexZ(-10., 10.);
-    //StFlowCutEvent::SetEtaSym(-0.05, 0.05);
-
-    // Set the track cuts
-    //StFlowCutTrack::SetFitPts(15, 200);
-    //StFlowCutTrack::SetFitOverMaxPts(0, 0);
-
-    // Set the event plane selections
-    //StFlowEvent::SetEtaCut(0.5, 1., 0, 0); // selection 1, harmonic 1
-    //StFlowEvent::SetPtCut(0.2, 1., 0, 0);
-
-    // Set the PID windows
-    //StFlowEvent::SetPiPlusCut(-2., 2.);
-    //StFlowEvent::SetPiMinusCut(-2., 2.);
-    //StFlowEvent::SetProtonCut(-2., 2.);
-
-    //
-    // Event loop
-    //
-    int istat=0,i=1;
+  //
+  // Initialize chain
+  //
+  Int_t iInit = chain->Init();
+  if (iInit) chain->Fatal(iInit,"on init");
+  chain->PrintInfo();
+  
+  //
+  // Set the parameters
+  //
+  // Set the event cuts
+  //StFlowCutEvent::SetMult(100, 10000);
+  //StFlowCutEvent::SetVertexX(0., 0.);
+  //StFlowCutEvent::SetVertexY(0., 0.);
+  //StFlowCutEvent::SetVertexZ(-10., 10.);
+  //StFlowCutEvent::SetEtaSym(-0.05, 0.05);
+  
+  // Set the track cuts
+  //StFlowCutTrack::SetFitPts(15, 200);
+  //StFlowCutTrack::SetFitOverMaxPts(0, 0);
+  
+  // Set the event plane selections
+  //StFlowEvent::SetEtaCut(0.5, 1., 0, 0); // selection 1, harmonic 1
+  //StFlowEvent::SetPtCut(0.2, 1., 0, 0);
+  
+  // Set the PID windows
+  //StFlowEvent::SetPiPlusCut(-2., 2.);
+  //StFlowEvent::SetPiMinusCut(-2., 2.);
+  //StFlowEvent::SetProtonCut(-2., 2.);
+  
+  //
+  // Event loop
+  //
+  int istat=0,i=1;
  EventLoop: if (i <= nevents && !istat) {
-     cout << "============================ Event " << i
-	  << " start ============================" << endl;
-     chain->Clear();
-     istat = chain->Make(i);
-     if (istat) {cout << "Last event processed. Status = " << istat << endl;}
-     i++;
-     goto EventLoop;
+   cout << "============================ Event " << i
+	<< " start ============================" << endl;
+   chain->Clear();
+   istat = chain->Make(i);
+   if (istat) {cout << "Last event processed. Status = " << istat << endl;}
+   i++;
+   goto EventLoop;
  }
-
-    i--;
-    cout << "============================ Event " << i
-	 << " finish ============================" << endl;
-    if (nevents > 1) {
-	chain->Clear();
-	chain->Finish();
+  
+  i--;
+  cout << "============================ Event " << i
+       << " finish ============================" << endl;
+  if (nevents > 1) {
+    chain->Clear();
+    chain->Finish();
+  }
+  else {
+    if (!b) {
+      b = new TBrowser;
     }
-    else {
-	if (!b) {
-	    b = new TBrowser;
-	}
-    }
+  }
 }
 
-void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file,const char *qaflag)
+void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file, const char *qaflag)
 {
-    const char *fileListQQ[]={0,0};
-    if (path[0]=='-') {
-	fileListQQ[0]=file;
-    } else {
-	fileListQQ[0] = gSystem->ConcatFileName(path,file);
-    }
-    doFlowEvents(nevents,fileListQQ,qaflag);
+  const char *fileListQQ[]={0,0};
+  if (path[0]=='-') {
+    fileListQQ[0]=file;
+  } else {
+    fileListQQ[0] = gSystem->ConcatFileName(path,file);
+  }
+  doFlowEvents(nevents,fileListQQ,qaflag);
 }
 
 void doFlowEvents(const Int_t nevents)
 {
-  //path="/afs/rhic/star/ebye/flow/fixed10/";
-  //path="/afs/rhic/star/ebye/flow/random10/";
-  //file="*.xdf";
+  
+  // Commit to cvs with these defaults:
+  const Char_t *filePath="-";
+  const Char_t *fileExt="/afs/rhic/star/data/samples/gstar.dst.root";
 
-  filePath="/data06/snelling/flow/";
-  fileExt="*.dst.root";
+  //Char_t* filePath="/star/rcf/data03/reco/auau200/mevsim/vanilla/flow/year_1h/hadronic_on/tfs_6/";
+  //Char_t* fileExt="*.dst.root";
 
+  //Char_t* filePath="/afs/rhic/star/ebye/flow/";
+  //Char_t* fileExt="test2.event.root";
+
+  //Char_t* filePath="/afs/rhic/star/ebye/flow/fixed10/";
+  //Char_t* filePath="/afs/rhic/star/ebye/flow/random10/";
+  //Char_t* fileExt="*.xdf";
+  
+  //Char_t* filePath="/data06/snelling/flow/";
+  //Char_t* fileExt="*.dst.root";
+  
+  //Char_t* filePath="./";
+  //Char_t* fileExt="*.event.root";
+  
   doFlowEvents(nevents, filePath, fileExt);
 }
 
