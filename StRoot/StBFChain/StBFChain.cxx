@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.355 2003/09/22 00:47:15 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.356 2003/09/28 01:55:56 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -41,34 +41,34 @@ Bfc_st BFC1[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"SD97"  ,"","","db,detDb"                                  ,"","","Turn on 1997 test parameters",kFALSE},
   {"SD98"  ,"","","db,detDb"                                  ,"","","Turn on 1998 test parameters",kFALSE},
-  {"Y1a"   ,"","","db,calib,detDb"           ,"","","YEAR_1A  approximation to year1: TPC+CTB+FTPC",kFALSE},
-  {"Y1b"   ,"","","db,calib,detDb"           ,"","","YEAR_1B: TPC+CTB+FTPC+calo patch+RICH, no svt",kFALSE},
-  {"Y1s"   ,"","","db,calib,detDb"          ,"","","YEAR_1S  started in summer: TPC, CONE, AL pipe",kFALSE},
-  {"Y1d"   ,"","","db,calib,detDb","","","YEAR_1D  even better y1:TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
-  {"Y1e"   ,"","","db,calib,detDb","","","YEAR_1E  even better y1:TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
-  {"Y1e"   ,"","","db,calib,detDb","","","YEAR_1E  even better y1:TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
+  {"Y1a"   ,"","","db,detDb"                 ,"","","YEAR_1A  approximation to year1: TPC+CTB+FTPC",kFALSE},
+  {"Y1b"   ,"","","db,detDb"                 ,"","","YEAR_1B: TPC+CTB+FTPC+calo patch+RICH, no svt",kFALSE},
+  {"Y1s"   ,"","","db,detDb"                ,"","","YEAR_1S  started in summer: TPC, CONE, AL pipe",kFALSE},
+  {"Y1d"   ,"","","db,detDb"      ,"","","YEAR_1D  even better y1:TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
+  {"Y1e"   ,"","","db,detDb"      ,"","","YEAR_1E  even better y1:TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
+  {"Y1e"   ,"","","db,detDb"      ,"","","YEAR_1E  even better y1:TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
   {"ES99"  ,"","","db,detDb"            ,"","","Turn on 1999 engineering run simulation parameters",kFALSE},
   {"ER99"  ,"","","db,detDb"             ,"","","Turn on 1999 engineering run real data parameters",kFALSE},
   {"DC99"  ,"","","db,detDb"         ,"","","Turn on December 1999 engineering run real parameters",kFALSE},
-  {"Y1h"   ,"","","db,calib,detDb",
+  {"Y1h"   ,"","","db,detDb",
                                  "","","YEAR_1H fantastic y1:TPC+CTB+FTPC+RICH+caloPatch+svtLadder",kFALSE},
-  {"Y2000" ,"","","db,calib,detDb"          ,"","","actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
-  {"RY1h"  ,"","","db,calib,detDb,VtxOffSet"                ,"","","Real data with Year1h geometry",kFALSE},
-  {"RY2000","","","db,calib,detDb,VtxOffSet","","","actual 2000: Real data with Year2000 geometry ",kFALSE},
-  {"RY2000a","","","db,calib,detDb"      ,"","","alternate 2000: Real data with Year2000 geometry ",kFALSE},
-  {"RY2001","","","db,calib,detDb"          ,"","","actual 2001: Real data with Year2001 geometry ",kFALSE},
-  {"RY2003","","","db,calib,detDb"             ,"","","actual 2003: Real data with Year3 geometry ",kFALSE},
-  {"RY2003X","","","db,calib,detDb"      ,"","","actual 2003: Real data with Year4 study geometry ",kFALSE},
-  {"Y2a"   ,"","","db,calib,detDb"                            ,"","","Old (CDR time) complete STAR",kFALSE},
-  {"Y2b"   ,"","","db,calib,detDb" ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
-  {"Y2001" ,"","","db,calib,detDb","","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
-  {"Y2001n","","","db,calib,detDb","","",
+  {"Y2000" ,"","","db,detDb"                ,"","","actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
+  {"RY1h"  ,"","","db,detDb,VtxOffSet"                      ,"","","Real data with Year1h geometry",kFALSE},
+  {"RY2000","","","db,detDb,VtxOffSet"      ,"","","actual 2000: Real data with Year2000 geometry ",kFALSE},
+  {"RY2000a","","","db,detDb"            ,"","","alternate 2000: Real data with Year2000 geometry ",kFALSE},
+  {"RY2001","","","db,detDb"                ,"","","actual 2001: Real data with Year2001 geometry ",kFALSE},
+  {"RY2003","","","db,detDb"                   ,"","","actual 2003: Real data with Year3 geometry ",kFALSE},
+  {"RY2003X","","","db,detDb"            ,"","","actual 2003: Real data with Year4 study geometry ",kFALSE},
+  {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
+  {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
+  {"Y2001" ,"","","db,detDb"      ,"","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
+  {"Y2001n","","","db,detDb","","",
                                      "year2001: new geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
-  {"Y2003" ,"","","db,calib,detDb","","",
+  {"Y2003" ,"","","db,detDb","","",
                                "year2003: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL",kFALSE},
-  {"Y2003X" ,"","","db,calib,detDb","","",
+  {"Y2003X" ,"","","db,detDb","","",
                   "y2003X: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL - Full B/E EMC",kFALSE},
-  {"Complete","","","db,calib,detDb"      ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
+  {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"NoDb"  ,""  ,"","HalfField"                                     ,"","","Take out Db from Chain",kFALSE},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -300,23 +300,22 @@ Bfc_st BFC1[] = {
   {"db"          ,"db"   ,"","StDbT,xdf2root"    ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"svtDb"       ,"svtDb","","SvtCL,db" ,                          "StSvtDbMaker","StSvtDbMaker","",kFALSE},
   {"dbutil"      ,""     ,"","SCL"            ,"","StSvtDbMaker,StDbUtilities","Load StDbUtilities",kFALSE},
-  {"calib"       ,"calib","","xdf2root"          ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"detDb"       ,""     ,"",""   ,"StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker",kFALSE},
   {"eemcDb"      ,"eeDb" ,"","db",                               "StEEmcDbMaker","StEEmcDbMaker","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Valid Db    ","Versions   ","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"DbV"         ,""  ,"","db,calib,ry1h"                   ,"","","19940614/0 Db Version for none",kFALSE},
-  {"DbV0614"     ,""  ,"","db,calib,ry1h"                  ,"","","20000614/0 Db Version for p00hd",kFALSE},
-  {"DbV0624"     ,""  ,"","db,calib,ry1h"                ,"","","20000624/0 Db Version for p00hd_1",kFALSE},
-  {"DbV0713"     ,""  ,"","db,calib,ry1h"                  ,"","","20000713/0 Db Version for p00he",kFALSE},
-  {"DbV0727"     ,""  ,"","db,calib,ry1h"                  ,"","","20000727/0 Db Version for p00he",kFALSE},
-  {"DbV0819"     ,""  ,"","db,calib,ry1h"                  ,"","","20000819/0 Db Version for p00hg",kFALSE},
-  {"DbV1123"     ,""  ,"","db,calib,ry1h"  ,"","","20001123/0 Db wo TpcDriftVel. from StTpcT0Maker",kFALSE},
-  {"DbV0523"     ,""  ,"","db,calib,ry1h"  ,"","",                "20010523/0 Db Version for p01he",kFALSE},
-  {"DbV1007"     ,""  ,"","db,calib,ry1h"  ,"","",                "20011007/0 Db Version for p01hi",kFALSE},
-  {"DbV1107"     ,""  ,"","db,calib,ry1h"  ,"","",          "20011107/0 Db Version for pass1 p01gk",kFALSE},
-  {"DbV1211"     ,""  ,"","db,calib,ry1h"  ,"","",           "20011211/0 Db Version for prod p01gl",kFALSE},
+  {"DbV"         ,""  ,"","db,ry1h"                         ,"","","19940614/0 Db Version for none",kFALSE},
+  {"DbV0614"     ,""  ,"","db,ry1h"                        ,"","","20000614/0 Db Version for p00hd",kFALSE},
+  {"DbV0624"     ,""  ,"","db,ry1h"                      ,"","","20000624/0 Db Version for p00hd_1",kFALSE},
+  {"DbV0713"     ,""  ,"","db,ry1h"                        ,"","","20000713/0 Db Version for p00he",kFALSE},
+  {"DbV0727"     ,""  ,"","db,ry1h"                        ,"","","20000727/0 Db Version for p00he",kFALSE},
+  {"DbV0819"     ,""  ,"","db,ry1h"                        ,"","","20000819/0 Db Version for p00hg",kFALSE},
+  {"DbV1123"     ,""  ,"","db,ry1h"        ,"","","20001123/0 Db wo TpcDriftVel. from StTpcT0Maker",kFALSE},
+  {"DbV0523"     ,""  ,"","db,ry1h"        ,"","",                "20010523/0 Db Version for p01he",kFALSE},
+  {"DbV1007"     ,""  ,"","db,ry1h"        ,"","",                "20011007/0 Db Version for p01hi",kFALSE},
+  {"DbV1107"     ,""  ,"","db,ry1h"        ,"","",          "20011107/0 Db Version for pass1 p01gk",kFALSE},
+  {"DbV1211"     ,""  ,"","db,ry1h"        ,"","",           "20011211/0 Db Version for prod p01gl",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -392,7 +391,7 @@ Bfc_st BFC1[] = {
 
 
 
-  {"emcY2"             ,"emcY2","","geant,emc_T,tpc_T,db,calib,emcSim,PreEcl,epc"      ,"StMaker","StChain",
+  {"emcY2"             ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim"   ,"emcRaw","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
                                                                            "New simulator for BEMC",kFALSE},
@@ -445,7 +444,7 @@ Bfc_st BFC1[] = {
                                                               "Special: use estGlobal from StEvent",kFALSE},
 
 
-  {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
+  {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,PreEcl,EmcUtil"      ,"StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
 
   {"Epc"         ,"epc","PostChain","PreEcl,Match,EmcUtil"            ,"StEpcMaker","StEpcMaker","",kFALSE},
@@ -465,7 +464,7 @@ Bfc_st BFC1[] = {
   {"RichPiD"     ,"","RichChain","Event"                      ,"StRichPIDMaker","StRichPIDMaker","",kFALSE},
 
   {"tofDat"      ,"tof_raw","","db,Tofutil","StTofMaker","StEvent,StTofMaker","TOF Data base chain",kFALSE},
-  {"tofsim"      ,"","","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker","TOF Simulator",kFALSE},
+  {"tofsim"     ,"","","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker","TOF Simulator",kFALSE},
 
   {"l3"          ,"l3Chain","","l3cl,l3t"                                   ,"StMaker","StChain","",kFALSE},
   {"l3cl"        ,"","l3Chain","l3_T,l3util"        ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
@@ -543,34 +542,34 @@ Bfc_st BFC2[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"SD97"  ,"","","db,detDb"                                  ,"","","Turn on 1997 test parameters",kFALSE},
   {"SD98"  ,"","","db,detDb"                                  ,"","","Turn on 1998 test parameters",kFALSE},
-  {"Y1a"   ,"","","db,calib,detDb"           ,"","","YEAR_1A  approximation to year1: TPC+CTB+FTPC",kFALSE},
-  {"Y1b"   ,"","","db,calib,detDb"           ,"","","YEAR_1B: TPC+CTB+FTPC+calo patch+RICH, no svt",kFALSE},
-  {"Y1s"   ,"","","db,calib,detDb"          ,"","","YEAR_1S  started in summer: TPC, CONE, AL pipe",kFALSE},
-  {"Y1d"   ,"","","db,calib,detDb","","","YEAR_1D  even better y1:TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
-  {"Y1e"   ,"","","db,calib,detDb","","","YEAR_1E  even better y1:TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
-  {"Y1e"   ,"","","db,calib,detDb","","","YEAR_1E  even better y1:TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
+  {"Y1a"   ,"","","db,detDb"                 ,"","","YEAR_1A  approximation to year1: TPC+CTB+FTPC",kFALSE},
+  {"Y1b"   ,"","","db,detDb"                 ,"","","YEAR_1B: TPC+CTB+FTPC+calo patch+RICH, no svt",kFALSE},
+  {"Y1s"   ,"","","db,detDb"                ,"","","YEAR_1S  started in summer: TPC, CONE, AL pipe",kFALSE},
+  {"Y1d"   ,"","","db,detDb"      ,"","","YEAR_1D  even better y1:TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
+  {"Y1e"   ,"","","db,detDb"      ,"","","YEAR_1E  even better y1:TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
+  {"Y1e"   ,"","","db,detDb"      ,"","","YEAR_1E  even better y1:TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
   {"ES99"  ,"","","db,detDb"            ,"","","Turn on 1999 engineering run simulation parameters",kFALSE},
   {"ER99"  ,"","","db,detDb"             ,"","","Turn on 1999 engineering run real data parameters",kFALSE},
   {"DC99"  ,"","","db,detDb"         ,"","","Turn on December 1999 engineering run real parameters",kFALSE},
-  {"Y1h"   ,"","","db,calib,detDb",
+  {"Y1h"   ,"","","db,detDb",
                                  "","","YEAR_1H fantastic y1:TPC+CTB+FTPC+RICH+caloPatch+svtLadder",kFALSE},
-  {"Y2000" ,"","","db,calib,detDb"          ,"","","actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
-  {"RY1h"  ,"","","db,calib,detDb,VtxOffSet"                ,"","","Real data with Year1h geometry",kFALSE},
-  {"RY2000","","","db,calib,detDb,VtxOffSet","","","actual 2000: Real data with Year2000 geometry ",kFALSE},
-  {"RY2000a","","","db,calib,detDb"      ,"","","alternate 2000: Real data with Year2000 geometry ",kFALSE},
-  {"RY2001","","","db,calib,detDb"          ,"","","actual 2001: Real data with Year2001 geometry ",kFALSE},
-  {"RY2003","","","db,calib,detDb"             ,"","","actual 2003: Real data with Year3 geometry ",kFALSE},
-  {"RY2003X","","","db,calib,detDb"      ,"","","actual 2003: Real data with Year4 study geometry ",kFALSE},
-  {"Y2a"   ,"","","db,calib,detDb"                            ,"","","Old (CDR time) complete STAR",kFALSE},
-  {"Y2b"   ,"","","db,calib,detDb" ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
-  {"Y2001" ,"","","db,calib,detDb","","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
-  {"Y2001n","","","db,calib,detDb","","",
+  {"Y2000" ,"","","db,detDb"                ,"","","actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
+  {"RY1h"  ,"","","db,detDb,VtxOffSet"                      ,"","","Real data with Year1h geometry",kFALSE},
+  {"RY2000","","","db,detDb,VtxOffSet"      ,"","","actual 2000: Real data with Year2000 geometry ",kFALSE},
+  {"RY2000a","","","db,detDb"            ,"","","alternate 2000: Real data with Year2000 geometry ",kFALSE},
+  {"RY2001","","","db,detDb"                ,"","","actual 2001: Real data with Year2001 geometry ",kFALSE},
+  {"RY2003","","","db,detDb"                   ,"","","actual 2003: Real data with Year3 geometry ",kFALSE},
+  {"RY2003X","","","db,detDb"            ,"","","actual 2003: Real data with Year4 study geometry ",kFALSE},
+  {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
+  {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
+  {"Y2001" ,"","","db,detDb"      ,"","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
+  {"Y2001n","","","db,detDb","","",
                                      "year2001: new geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
-  {"Y2003" ,"","","db,calib,detDb","","",
+  {"Y2003" ,"","","db,detDb","","",
                                "year2003: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL",kFALSE},
-  {"Y2003X" ,"","","db,calib,detDb","","",
+  {"Y2003X" ,"","","db,detDb","","",
                   "y2003X: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL - Full B/E EMC",kFALSE},
-  {"Complete","","","db,calib,detDb"      ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
+  {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"NoDb"  ,""  ,"","HalfField"                                     ,"","","Take out Db from Chain",kFALSE},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -803,23 +802,22 @@ Bfc_st BFC2[] = {
   {"db"          ,"db"   ,"","StDbT,xdf2root"    ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"svtDb"       ,"svtDb","","SvtCL,db" ,                          "StSvtDbMaker","StSvtDbMaker","",kFALSE},
   {"dbutil"      ,""     ,"","SCL"            ,"","StSvtDbMaker,StDbUtilities","Load StDbUtilities",kFALSE},
-  {"calib"       ,"calib","","xdf2root"          ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"detDb"       ,""     ,"",""   ,"StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker",kFALSE},
   {"eemcDb"      ,"eeDb" ,"","db",                               "StEEmcDbMaker","StEEmcDbMaker","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Valid Db    ","Versions   ","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"DbV"         ,""  ,"","db,calib,ry1h"                   ,"","","19940614/0 Db Version for none",kFALSE},
-  {"DbV0614"     ,""  ,"","db,calib,ry1h"                  ,"","","20000614/0 Db Version for p00hd",kFALSE},
-  {"DbV0624"     ,""  ,"","db,calib,ry1h"                ,"","","20000624/0 Db Version for p00hd_1",kFALSE},
-  {"DbV0713"     ,""  ,"","db,calib,ry1h"                  ,"","","20000713/0 Db Version for p00he",kFALSE},
-  {"DbV0727"     ,""  ,"","db,calib,ry1h"                  ,"","","20000727/0 Db Version for p00he",kFALSE},
-  {"DbV0819"     ,""  ,"","db,calib,ry1h"                  ,"","","20000819/0 Db Version for p00hg",kFALSE},
-  {"DbV1123"     ,""  ,"","db,calib,ry1h"  ,"","","20001123/0 Db wo TpcDriftVel. from StTpcT0Maker",kFALSE},
-  {"DbV0523"     ,""  ,"","db,calib,ry1h"  ,"","",                "20010523/0 Db Version for p01he",kFALSE},
-  {"DbV1007"     ,""  ,"","db,calib,ry1h"  ,"","",                "20011007/0 Db Version for p01hi",kFALSE},
-  {"DbV1107"     ,""  ,"","db,calib,ry1h"  ,"","",          "20011107/0 Db Version for pass1 p01gk",kFALSE},
-  {"DbV1211"     ,""  ,"","db,calib,ry1h"  ,"","",           "20011211/0 Db Version for prod p01gl",kFALSE},
+  {"DbV"         ,""  ,"","db,ry1h"                         ,"","","19940614/0 Db Version for none",kFALSE},
+  {"DbV0614"     ,""  ,"","db,ry1h"                        ,"","","20000614/0 Db Version for p00hd",kFALSE},
+  {"DbV0624"     ,""  ,"","db,ry1h"                      ,"","","20000624/0 Db Version for p00hd_1",kFALSE},
+  {"DbV0713"     ,""  ,"","db,ry1h"                        ,"","","20000713/0 Db Version for p00he",kFALSE},
+  {"DbV0727"     ,""  ,"","db,ry1h"                        ,"","","20000727/0 Db Version for p00he",kFALSE},
+  {"DbV0819"     ,""  ,"","db,ry1h"                        ,"","","20000819/0 Db Version for p00hg",kFALSE},
+  {"DbV1123"     ,""  ,"","db,ry1h"        ,"","","20001123/0 Db wo TpcDriftVel. from StTpcT0Maker",kFALSE},
+  {"DbV0523"     ,""  ,"","db,ry1h"        ,"","",                "20010523/0 Db Version for p01he",kFALSE},
+  {"DbV1007"     ,""  ,"","db,ry1h"        ,"","",                "20011007/0 Db Version for p01hi",kFALSE},
+  {"DbV1107"     ,""  ,"","db,ry1h"        ,"","",          "20011107/0 Db Version for pass1 p01gk",kFALSE},
+  {"DbV1211"     ,""  ,"","db,ry1h"        ,"","",           "20011211/0 Db Version for prod p01gl",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -895,7 +893,7 @@ Bfc_st BFC2[] = {
 
 
 
-  {"emcY2"             ,"emcY2","","geant,emc_T,tpc_T,db,calib,emcSim,PreEcl,epc"      ,"StMaker","StChain",
+  {"emcY2"             ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim"   ,"emcRaw","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
                                                                            "New simulator for BEMC",kFALSE},
@@ -913,8 +911,8 @@ Bfc_st BFC2[] = {
                            ,"StVertexMaker","St_svt,St_global,St_dst_Maker","Primary Vertex finder",kFALSE},
   {"Primary"    ,"primary","globalChain","SCL,globT,tls"
                                                ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"V0"         ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Xi"         ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"V0"         ,"v0","globalChain","SCL,globT,tls" ,"StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Xi"         ,"xi","globalChain","SCL,globT,tls" ,"StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Kink"   ,"kink","globalChain","SCL,globT,tls","StKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"fpt"      ,"ftpc_tracks","globalChain","SCL"
                                           ,"StFtpcTrackMaker","StFtpcTrackMaker","FTPC Track Maker",kFALSE},
@@ -945,7 +943,7 @@ Bfc_st BFC2[] = {
   {"Xi2"      ,"xi2","","db,StEvent","StXiFinderMaker","StSecondaryVertexMaker",
                                                                          "Xis AND V0s from StEvent",kFALSE},
 
-  {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
+  {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,PreEcl,EmcUtil",      "StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
 
   {"Epc"         ,"epc","PostChain","PreEcl,Match,EmcUtil"            ,"StEpcMaker","StEpcMaker","",kFALSE},
@@ -965,7 +963,7 @@ Bfc_st BFC2[] = {
   {"RichPiD"     ,"","RichChain","Event"                      ,"StRichPIDMaker","StRichPIDMaker","",kFALSE},
 
   {"tofDat"      ,"tof_raw","","db,Tofutil","StTofMaker","StEvent,StTofMaker","TOF Data base chain",kFALSE},
-  {"tofsim"      ,"","","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker","TOF Simulator",kFALSE},
+  {"tofsim"     ,"","","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker","TOF Simulator",kFALSE},
 
   {"l3"          ,"l3Chain","","l3cl,l3t"                                   ,"StMaker","StChain","",kFALSE},
   {"l3cl"        ,"","l3Chain","l3_T,l3util"        ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
@@ -1043,7 +1041,6 @@ class StIOMaker;
 class St_geant_Maker; St_geant_Maker *geantMk = 0;
 class St_db_Maker;
 static St_db_Maker *dbMk    = 0;
-static St_db_Maker *calibMk = 0;
 class StTreeMaker;
 ClassImp(StBFChain)
 
@@ -1176,15 +1173,6 @@ Int_t StBFChain::Instantiate()
 	}
 	if (maker == "St_db_Maker"){
 	  St_db_Maker *mk = 0;
-	  if (Key.CompareTo("calib",TString::kIgnoreCase) == 0) {
-	    if (!calibMk && ! GetChain()->GetMaker(fBFC[i].Name)) {
-	      if (!GetOption("NoCintCalDb"))
-		calibMk = new St_db_Maker(fBFC[i].Name,"$STAR_ROOT/calib","$PWD/calib");
-	      else
-		calibMk = new St_db_Maker(fBFC[i].Name,"$PWD/calib");
-	    }
-	    mk = calibMk;
-	  }
 	  if (Key.CompareTo("db",TString::kIgnoreCase) == 0) {
             if (!dbMk && ! GetChain()->GetMaker(fBFC[i].Name)) {
 	      if (!GetOption("NoMySQLDb") && !GetOption("NoCintDb"))
@@ -1784,7 +1772,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
     if (!(GetOption("fzin") || GetOption("gstar"))) SetOption("magF");
     if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval");
     if (!GetOption("event")) SetOption("-analysis");
-    if (GetOption("NoDb")) {SetOption("-db"); SetOption("-calib");}
+    if (GetOption("NoDb")) SetOption("-db"); 
   }
   // Print set values
   St_Bfc *Bfc = new St_Bfc("BFChain",NoChainOptions);
