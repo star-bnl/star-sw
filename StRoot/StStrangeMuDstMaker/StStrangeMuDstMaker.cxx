@@ -33,6 +33,7 @@ static char* altName = "MuDst";
 static char* defTitle = "Strangeness Micro-DST";
 
 Int_t thisRun,thisEvent,lastRun,lastEvent,readEventNumber;
+TFile* lastFile;
 
 ClassImp(StStrangeMuDstMaker)
 //_____________________________________________________________________________
@@ -68,6 +69,7 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
   thisEvent = -1;
   lastRun = -1;
   lastEvent = -1;
+  lastFile = 0;
 }
 //_____________________________________________________________________________
 StStrangeMuDstMaker::~StStrangeMuDstMaker() {
@@ -235,6 +237,13 @@ Int_t StStrangeMuDstMaker::MakeReadDst() {
 
   if (((skippingFile) && (curTree == chain->GetNtrees())) ||
       (tree->GetEvent(readEventNumber) <= 0)) return kStErr; // Read the event
+
+  TFile* thisFile = chain->GetFile();
+  if (thisFile != lastFile) {
+    gMessMgr->Info() << "StStrangeMuDstMaker: Now reading from event file:\n  "
+        << thisFile->GetName() << endm;
+    lastFile = thisFile;
+  }
 
   // Overcome a bug where event wasn't meant to be recorded into 
   // a muDst, but was anyhow (with the previous event's info)
@@ -628,8 +637,11 @@ char* StStrangeMuDstMaker::GetFile() const {
 }       
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.22 2003/02/10 16:02:24 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.23 2003/02/10 17:55:55 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.23  2003/02/10 17:55:55  genevb
+// Output currently read file
+//
 // Revision 3.22  2003/02/10 16:02:24  genevb
 // Now read files using TChains; no splitting of MuDst file
 //
