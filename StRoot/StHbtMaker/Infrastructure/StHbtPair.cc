@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.11 2000/07/17 20:03:16 lisa Exp $
+ * $Id: StHbtPair.cc,v 1.12 2000/10/05 23:09:05 lisa Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.12  2000/10/05 23:09:05  lisa
+ * Added kT-dependent radii to mixed-event simulator AND implemented AverageSeparation Cut and CorrFctn
+ *
  * Revision 1.11  2000/07/17 20:03:16  lisa
  * Implemented tools for addressing and assessing trackmerging
  *
@@ -279,4 +282,14 @@ double StHbtPair::NominalTpcEntranceSeparation() const {
   return (diff.mag());
 }
 
+double StHbtPair::NominalTpcAverageSeparation() const {
+  StHbtThreeVector diff;
+  double AveSep = 0.0;
+  for (int ipt=0; ipt<11; ipt++){
+    diff = mTrack1->mNominalPosSample[ipt] - mTrack2->mNominalPosSample[ipt];
+    AveSep += diff.mag();
+  }
+  AveSep = AveSep/11.0;
+  return (AveSep);
+}
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.13 2000/08/31 22:31:31 laue Exp $
+ * $Id: StHbtParticle.cc,v 1.14 2000/10/05 23:09:05 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.14  2000/10/05 23:09:05  lisa
+ * Added kT-dependent radii to mixed-event simulator AND implemented AverageSeparation Cut and CorrFctn
+ *
  * Revision 1.13  2000/08/31 22:31:31  laue
  * StHbtAnalysis: output changed (a little bit less)
  * StHbtEvent: new version, members for reference mult added
@@ -219,6 +222,18 @@ void StHbtParticle::CalculateNominalTpcExitAndEntrancePoints(){
 
   // This is faster  
   if (isnan(mNominalTpcExitPoint.x())) mNominalTpcExitPoint = StHbtThreeVector(-9999.,-9999.,-9999); 
+
+
+  // 03Oct00 - mal.  OK, let's try something a little more along the lines of NA49 and E895 strategy.
+  //    calculate the "nominal" position at N radii (say N=11) within the TPC, and for a pair cut
+  //    use the average separation of these N
+  for (int irad=0; irad<11; irad++){
+    float radius = 50.0 + irad*15.0;
+    candidates = hel.pathLength(radius);
+    sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
+    mNominalPosSample[irad] = hel.at(sideLength);
+  }
+
 
 }
 //_____________________

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLCMSFrame3DCorrFctn_SIM.h,v 1.1 2000/09/14 18:36:53 lisa Exp $
+ * $Id: BPLCMSFrame3DCorrFctn_SIM.h,v 1.2 2000/10/05 23:08:59 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: BPLCMSFrame3DCorrFctn_SIM.h,v $
+ * Revision 1.2  2000/10/05 23:08:59  lisa
+ * Added kT-dependent radii to mixed-event simulator AND implemented AverageSeparation Cut and CorrFctn
+ *
  * Revision 1.1  2000/09/14 18:36:53  lisa
  * Added Qinv and ExitSep pair cuts and BPLCMSFrame3DCorrFctn_SIM CorrFctn
  *
@@ -59,6 +62,10 @@ public:
   void SetRside(float Rside);
   void SetRlong(float Rlong);
 
+  void SetRoutAlpha(float alpha);
+  void SetRsideAlpha(float alpha);
+  void SetRlongAlpha(float alpha);
+
 private:
   StHbt3DHisto* mNumerator;
   StHbt3DHisto* mDenominator;
@@ -80,6 +87,16 @@ private:
   float mRout2;
   float mRside2;
   float mRlong2;
+
+  // following describe evolution in radii with mT
+  // the evolution model is R = R(0)*mt^alpha
+  // alpha is set zero by default, so if you don't change
+  // them, then R = R(0) = what you input for all mT
+  float mRout_alpha;
+  float mRside_alpha;
+  float mRlong_alpha;
+
+
 
   bool mToggleNumDen; //!
 
@@ -103,7 +120,9 @@ inline  void BPLCMSFrame3DCorrFctn_SIM::SetRout(float Rout){mRout2 = Rout*Rout;}
 inline  void BPLCMSFrame3DCorrFctn_SIM::SetRside(float Rside){mRside2 = Rside*Rside;}
 inline  void BPLCMSFrame3DCorrFctn_SIM::SetRlong(float Rlong){mRlong2 = Rlong*Rlong;}
 
-
+inline  void BPLCMSFrame3DCorrFctn_SIM::SetRoutAlpha(float alpha){mRout_alpha = alpha;}
+inline  void BPLCMSFrame3DCorrFctn_SIM::SetRsideAlpha(float alpha){mRside_alpha = alpha;}
+inline  void BPLCMSFrame3DCorrFctn_SIM::SetRlongAlpha(float alpha){mRlong_alpha = alpha;}
 
 
 #endif
