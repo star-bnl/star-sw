@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cc,v 1.11 1999/03/04 18:11:41 ullrich Exp $
+ * $Id: StEvent.cc,v 1.12 1999/03/09 22:31:18 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cc,v $
- * Revision 1.11  1999/03/04 18:11:41  ullrich
- * Mods to cope with CC5
+ * Revision 1.12  1999/03/09 22:31:18  wenaus
+ * new Sun hack needed even though C++ 4.2 is supposed to be same as before
+ *
+ * Revision 1.12  1999/03/09 22:31:18  wenaus
+ * new Sun hack needed even though C++ 4.2 is supposed to be same as before
  *
  * Revision 1.11  1999/03/04 18:11:41  ullrich
  * Mods to cope with CC5
@@ -47,11 +50,15 @@
  * Revision 1.2  1999/01/15 22:53:39  wenaus
  * version with constructors for table-based loading
  *
+ **************************************************************************/
+#include "StEvent/StEvent.hh"
+#include "StThreeVector.hh"
+#include <string>
 #if !defined(ST_NO_NAMESPACES)
-static const char rcsid[] = "$Id: StEvent.cc,v 1.11 1999/03/04 18:11:41 ullrich Exp $";
+using namespace std;
 #endif
 
-static const char rcsid[] = "$Id: StEvent.cc,v 1.11 1999/03/04 18:11:41 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.12 1999/03/09 22:31:18 wenaus Exp $";
 
 StEvent::StEvent()
 {
@@ -67,6 +74,9 @@ StEvent::StEvent(StRun* run, dst_event_header_st& hdr, dst_event_summary_st& sum
     mTime = hdr.time;
     mTriggerMask = hdr.trig_mask;
     mBunchCrossingNumber = hdr.bunch_cross;
+    StThreeVector<double> v;
+#ifdef ST_NO_TEMPLATE_DEF_ARGS
+    cout << "Ignore this line; required to make Sun's lousy compiler work " << v << endl;
     string dummyString;
     dummyString = "Ditto!";
     cout << dummyString << endl;
