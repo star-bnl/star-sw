@@ -2,7 +2,7 @@
 /***********************************************************  INCLUDES  **/
 #include <stdio.h>
 #include <math.h>
-#include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 #include "dstype.h"
 #include "dsxdr.h"
