@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.h,v 1.3 2001/03/19 15:53:10 jcs Exp $
+// $Id: StFtpcSlowSimMaker.h,v 1.4 2001/04/02 12:04:36 jcs Exp $
 // $Log: StFtpcSlowSimMaker.h,v $
+// Revision 1.4  2001/04/02 12:04:36  jcs
+// get FTPC calibrations,geometry from MySQL database and code parameters from StarDb/ftpc
+//
 // Revision 1.3  2001/03/19 15:53:10  jcs
 // use ftpcDimensions from database
 //
@@ -21,9 +24,9 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-class St_fss_gas;
-class St_fss_param;
-class St_fcl_det;
+class St_ftpcClusterPars;
+class St_ftpcSlowSimGas;
+class St_ftpcSlowSimPars;
 class St_ftpcDimensions;
 class St_ftpcPadrowZ;
 class St_ftpcEField;
@@ -31,17 +34,19 @@ class St_ftpcVDrift;
 class St_ftpcDeflection;
 class St_ftpcdVDriftdP;
 class St_ftpcdDeflectiondP;
+class St_ftpcGas;
+class St_ftpcDriftField;
 
 class TH1F;
 class TH2F;
 
 class StFtpcSlowSimMaker : public StMaker {
  private:
-  // static Char_t m_VersionCVS = "$Id: StFtpcSlowSimMaker.h,v 1.3 2001/03/19 15:53:10 jcs Exp $";
+  // static Char_t m_VersionCVS = "$Id: StFtpcSlowSimMaker.h,v 1.4 2001/04/02 12:04:36 jcs Exp $";
   // Int_t         m_mode;        // mode 1 = primaries;
-  St_fss_gas      *m_fss_gas;  //!
-  St_fss_param    *m_fss_param;//!
-  St_fcl_det      *m_det;      //!
+  St_ftpcClusterPars   *m_clusterpars;    //!
+  St_ftpcSlowSimGas    *m_slowsimgas;     //!
+  St_ftpcSlowSimPars   *m_slowsimpars;    //!
   St_ftpcDimensions    *m_dimensions;     //!
   St_ftpcPadrowZ       *m_padrow_z;       //!
   St_ftpcEField        *m_efield;         //!
@@ -49,6 +54,8 @@ class StFtpcSlowSimMaker : public StMaker {
   St_ftpcDeflection    *m_deflection;     //!
   St_ftpcdVDriftdP     *m_dvdriftdp;      //!
   St_ftpcdDeflectiondP *m_ddeflectiondp;  //!
+  St_ftpcGas           *m_gas;            //! 
+  St_ftpcDriftField    *m_driftfield;     //!
 
   void                  MakeHistograms();// Histograms for FTPC slow simulator
   
@@ -63,7 +70,7 @@ class StFtpcSlowSimMaker : public StMaker {
   virtual Int_t  Make();
   // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcSlowSimMaker.h,v 1.3 2001/03/19 15:53:10 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcSlowSimMaker.h,v 1.4 2001/04/02 12:04:36 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StFtpcSlowSimMaker, 1)   //StAF chain virtual base class for Makers
 };
