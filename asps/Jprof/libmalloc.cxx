@@ -15,6 +15,7 @@
 // Additional contributors:
 //  L. David Baron - JP_REALTIME, JPROF_PTHREAD_HACK, and SIGUSR1 handling
 
+
 // The linux glibc hides part of sigaction if _POSIX_SOURCE is defined
 #if defined(linux)
 #undef _POSIX_SOURCE
@@ -195,6 +196,7 @@ int signum,
 siginfo_t *info,
 void *mystry)
 {
+  char *Wptr;
     static struct timeval tFirst;
     static int first=1;
     size_t milisec;
@@ -219,7 +221,12 @@ void *mystry)
     // information I need.
     // it's really ((ucontext_t *)mystry)->uc_mcontext.gregs[14] which is
     // the EIP register when the handler was called
-    Log(milisec, ((char**)mystry)[19]);
+    Wptr = ((char**)mystry)[19];
+    if ( Wptr ){
+      Log(milisec, Wptr);
+    } else {
+      writeStrStdout("Jprof: could not find where we were in stack\n");
+    }
 #endif
     startSignalCounter(timerMiliSec);
 }
