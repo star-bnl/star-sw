@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.hh,v 1.3 1999/11/30 18:52:48 snelling Exp $
+// $Id: StFlowCutEvent.hh,v 1.4 1999/12/15 22:01:23 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -13,6 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.hh,v $
+// Revision 1.4  1999/12/15 22:01:23  posk
+// Added StFlowConstants.hh
+//
 // Revision 1.3  1999/11/30 18:52:48  snelling
 // First modification for the new StEvent
 //
@@ -41,14 +44,15 @@ class StFlowCutEvent {
 
                StFlowCutEvent();
   virtual      ~StFlowCutEvent();
+
+  static Int_t CheckEvent(StEvent* pEvent);
+  static Int_t CheckEtaSymmetry();
+  static void  PrintCutList();
   static void  SetMult(const Int_t lo, const Int_t hi);
   static void  SetVertexX(const Float_t lo, const Float_t hi);
   static void  SetVertexY(const Float_t lo, const Float_t hi);
   static void  SetVertexZ(const Float_t lo, const Float_t hi);
   static void  SetEtaSym(Float_t lo, Float_t hi);
-  static Int_t CheckEvent(StEvent* pEvent);
-  static Int_t CheckEtaSymmetry();
-  static void  PrintCutList();
   
  private:
 
@@ -84,7 +88,7 @@ inline void StFlowCutEvent::SetVertexY(const Float_t lo, const Float_t hi) {
 inline void StFlowCutEvent::SetVertexZ(const Float_t lo, const Float_t hi) {
   mVertexZCuts[0] = lo; mVertexZCuts[1] = hi; }
 
-inline void StFlowCutEvent::SetEtaSym(Float_t lo, Float_t hi) 
-  {mEtaSymCuts[0] = lo; mEtaSymCuts[1] = hi;}
+inline void StFlowCutEvent::SetEtaSym(Float_t lo, Float_t hi) {
+  mEtaSymCuts[0] = lo; mEtaSymCuts[1] = hi; }
 
 #endif

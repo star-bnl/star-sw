@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.4 1999/12/04 00:10:30 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.5 1999/12/15 22:01:22 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.5  1999/12/15 22:01:22  posk
+// Added StFlowConstants.hh
+//
 // Revision 1.4  1999/12/04 00:10:30  posk
 // Works with the new StEvent
 //
@@ -39,16 +42,7 @@
 #include "StThreeVectorF.hh"
 #define PR(x) cout << "##### FlowCutEvent: " << (#x) << " = " << (x) << endl;
 
-//-----------------------------------------------------------------------
-
-StFlowCutEvent::StFlowCutEvent() {
-  // To apply event cuts
-}
-
-//-----------------------------------------------------------------------
-
-StFlowCutEvent::~StFlowCutEvent() {
-}
+//ClassImp(StFlowCutEvent)
 
 //-----------------------------------------------------------------------
 
@@ -67,30 +61,40 @@ UInt_t   StFlowCutEvent::mEtaSymCutN     = 0;
 
 //-----------------------------------------------------------------------
 
+StFlowCutEvent::StFlowCutEvent() {
+  // To apply event cuts
+}
+
+//-----------------------------------------------------------------------
+
+StFlowCutEvent::~StFlowCutEvent() {
+}
+
+//-----------------------------------------------------------------------
+
 Int_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
   // Returns kTRUE if the event survives all the cuts
+
   mEventN++;
   
   // Number of primary vertices
   Long_t nvtx = pEvent->numberOfPrimaryVertices();
-  if (nvtx == 0) {
-    return kFALSE;
-  }
+  if (nvtx == 0) return kFALSE;
 
   // have to add a mechanism to select the most relevant primary
   // vertex and use only this one (for now only one vertex is assumed)
 
+  StPrimaryVertex* pVertex = pEvent->primaryVertex(0);
+  if (!pVertex) return kFALSE;
+
   // Multiplicity
-  Long_t mult = pEvent->primaryVertex(0)->numberOfDaughters();
+  Long_t mult = pVertex->numberOfDaughters();
   if (mMultCuts[1] > mMultCuts[0] && 
      (mult < mMultCuts[0] || mult >= mMultCuts[1])) {
     mMultCut++;
     return kFALSE;
   }
   
-  //StThreeVectorF vertex = pEvent->summary->PrimaryVertexPosition();
-  StPrimaryVertex* pVertex = pEvent->primaryVertex(0);
-  if (!pVertex) return kFALSE;
   const StThreeVectorF& vertex = pVertex->position();
  
   // Vertex x
@@ -127,6 +131,7 @@ Int_t StFlowCutEvent::CheckEtaSymmetry() {
   // Returns kTRUE if the event survives this Eta symmetry cut
   // Call at the end of the event after doing CheckTrack for each track
   // If kFALSE you should delete the last event
+
   Float_t mEtaSymPosN = (float)StFlowCutTrack::EtaSymPos();
   Float_t mEtaSymNegN = (float)StFlowCutTrack::EtaSymNeg();
   Float_t EtaSym = (mEtaSymPosN - mEtaSymNegN) / 
@@ -138,6 +143,7 @@ Int_t StFlowCutEvent::CheckEtaSymmetry() {
     mGoodEventN--;
     return kFALSE;
   }
+
   return kTRUE;
 }
 
@@ -145,6 +151,7 @@ Int_t StFlowCutEvent::CheckEtaSymmetry() {
 
 void StFlowCutEvent::PrintCutList() {
   // Prints the list of cuts
+
   cout << "#######################################################" << endl;
   cout << "# Total Events= " << mEventN << endl;
   cout << "# Event Cut List:" << endl;
@@ -162,7 +169,5 @@ void StFlowCutEvent::PrintCutList() {
   cout << "# Good Events = " << mGoodEventN << ", " << setprecision(4) <<
     (float)mGoodEventN/(float)mEventN/perCent << "%" << endl;
   cout << "#######################################################" << endl;
+
 }
-
-
-

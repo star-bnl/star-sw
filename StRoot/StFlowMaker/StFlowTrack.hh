@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.hh,v 1.4 1999/12/04 00:10:35 posk Exp $
+// $Id: StFlowTrack.hh,v 1.5 1999/12/15 22:01:29 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.hh,v $
+// Revision 1.5  1999/12/15 22:01:29  posk
+// Added StFlowConstants.hh
+//
 // Revision 1.4  1999/12/04 00:10:35  posk
 // Works with the new StEvent
 //
@@ -30,26 +33,33 @@
 #ifndef StFlowTrack_hh
 #define StFlowTrack_hh
 #include "Rtypes.h"
+#include "StFlowConstants.hh"
 
 class StFlowTrack{
 
 public:
 
-          StFlowTrack(){ };
-  virtual ~StFlowTrack(){ };
+          StFlowTrack()  { };
+  virtual ~StFlowTrack() { };
 
-  Char_t  Pid() const;
-  Float_t Phi() const;
-  Float_t Eta() const;
-  Float_t Pt()  const;
-  Int_t   Select(Int_t harmonic, Int_t selection, Int_t subevent=0) const;
+  Char_t  Pid()       const;
+  Float_t Phi()       const;
+  Float_t Eta()       const;
+  Float_t Pt()        const;
+  Int_t   Charge()    const;
+  Float_t ImpactPar() const;
+  Float_t Chi2()      const;
+  Int_t   Select(Int_t harmonic, Int_t selection, Int_t subevent= -1) const;
 
-  void SetPid(Char_t);
-  void SetPhi(Float_t);
-  void SetEta(Float_t);
-  void SetPt(Float_t);
-  void SetSelect(Int_t harmonic, Int_t selection);
-  void SetSubevent(Int_t harmonic, Int_t selection, Int_t subevent);
+  void    SetPid(Char_t);
+  void    SetPhi(Float_t);
+  void    SetEta(Float_t);
+  void    SetPt(Float_t);
+  void    SetCharge(Int_t);
+  void    SetImpactPar(Float_t);
+  void    SetChi2(Float_t);
+  void    SetSelect(Int_t harmonic, Int_t selection);
+  void    SetSubevent(Int_t harmonic, Int_t selection, Int_t subevent);
 
   // For I/O of this object -- functions defined in FlowIO.cc
   //  friend ostream& operator<<(ostream& out, StFlowTrack& trk);
@@ -57,45 +67,50 @@ public:
 
 private:
 
-  enum {nHars = 4, nSels = 2, nSubs = 2};
-
   Char_t  mPid;
   Float_t mPhi;
   Float_t mEta;
   Float_t mPt;
-  Int_t  mSelection;
-  Int_t  mSubevent[nHars][nSels];
+  Int_t   mCharge;
+  Float_t mImpactPar;
+  Float_t mChi2;
+  Int_t   mSelection;
+  Int_t   mSubevent[Flow::nHars][Flow::nSels];
 
 };
 
-inline void StFlowTrack::SetPid(Char_t pid){mPid=pid;}
-inline void StFlowTrack::SetPhi(Float_t phi){mPhi = phi;}              
-inline void StFlowTrack::SetEta(Float_t eta){mEta = eta;}              
-inline void StFlowTrack::SetPt(Float_t pt){mPt = pt;}              
-
-// The harmonic and selection arguments start at 0
-// but the subevent argument starts at 1
-inline void StFlowTrack::SetSelect(Int_t harmonic, Int_t selection) {
-  Int_t bitShift = harmonic + nHars * selection;
-  mSelection |= 1 << bitShift;
-  //cout << harmonic << " " << selection << " " << mSelection << endl;
-}
-inline void StFlowTrack::SetSubevent(Int_t harmonic, Int_t selection,
- Int_t subevent) {mSubevent[harmonic][selection] = subevent;}
-
-inline Char_t  StFlowTrack::Pid() const {return mPid;}
-inline Float_t StFlowTrack::Phi() const {return mPhi;}                
-inline Float_t StFlowTrack::Eta() const {return mEta;}                
-inline Float_t StFlowTrack::Pt() const {return mPt;}                
+inline Char_t  StFlowTrack::Pid()       const { return mPid; }
+inline Float_t StFlowTrack::Phi()       const { return mPhi; }                
+inline Float_t StFlowTrack::Eta()       const { return mEta; }                
+inline Float_t StFlowTrack::Pt()        const { return mPt; }                
+inline Int_t   StFlowTrack::Charge()    const { return mCharge; }                
+inline Float_t StFlowTrack::ImpactPar() const { return mImpactPar; }
+inline Float_t StFlowTrack::Chi2()      const { return mChi2; }                
 
 inline Int_t   StFlowTrack::Select(Int_t harmonic, Int_t selection,
  Int_t subevent) const {
-  if (!subevent || subevent == mSubevent[harmonic][selection]) {
-    Int_t bitShift = harmonic + nHars * selection;
+  if (subevent == -1 || subevent == mSubevent[harmonic][selection]) {
+    Int_t bitShift = harmonic + Flow::nHars * selection;
     return (mSelection & (1 << bitShift)) ? kTRUE : kFALSE;
   }
   return kFALSE;         
 }
+
+inline void StFlowTrack::SetPid(Char_t pid)      { mPid = pid; }
+inline void StFlowTrack::SetPhi(Float_t phi)     { mPhi = phi; }              
+inline void StFlowTrack::SetEta(Float_t eta)     { mEta = eta; }              
+inline void StFlowTrack::SetPt(Float_t pt)       { mPt = pt; }              
+inline void StFlowTrack::SetCharge(Int_t charge) { mCharge = charge; }     
+inline void StFlowTrack::SetImpactPar(Float_t b) { mImpactPar = b; }   
+inline void StFlowTrack::SetChi2(Float_t chi2)   { mChi2 = chi2; }              
+
+inline void StFlowTrack::SetSelect(Int_t harmonic, Int_t selection) {
+  Int_t bitShift = harmonic + Flow::nHars * selection;
+  mSelection |= 1 << bitShift; 
+}
+
+inline void StFlowTrack::SetSubevent(Int_t harmonic, Int_t selection,
+ Int_t subevent) { mSubevent[harmonic][selection] = subevent; }
 
 #endif
 

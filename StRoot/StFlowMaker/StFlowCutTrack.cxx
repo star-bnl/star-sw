@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.3 1999/11/30 18:52:49 snelling Exp $
+// $Id: StFlowCutTrack.cxx,v 1.4 1999/12/15 22:01:23 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.4  1999/12/15 22:01:23  posk
+// Added StFlowConstants.hh
+//
 // Revision 1.3  1999/11/30 18:52:49  snelling
 // First modification for the new StEvent
 //
@@ -30,13 +33,25 @@
 #include "StEvent.h"
 #include "StEventTypes.h"
 #include "StFlowCutTrack.hh"
-#include "StFlowTrack.hh"
+#include "StFlowMaker.hh"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "StThreeVectorD.hh"
 #define PR(x) cout << "##### FlowCutTrack: " << (#x) << " = " << (x) << endl;
 
 //ClassImp(StFlowCutTrack)
+
+//-----------------------------------------------------------------------
+
+Int_t    StFlowCutTrack::mFitPtsCuts[2]     = {10, 200};
+Float_t  StFlowCutTrack::mFitOverMaxCuts[2] = {0.6, 1.};
+
+UInt_t   StFlowCutTrack::mTrackN            = 0;     
+UInt_t   StFlowCutTrack::mGoodTrackN        = 0;
+UInt_t   StFlowCutTrack::mEtaSymPosN        = 0;     
+UInt_t   StFlowCutTrack::mEtaSymNegN        = 0;     
+UInt_t   StFlowCutTrack::mFitPtsCutN        = 0;
+UInt_t   StFlowCutTrack::mFitOverMaxCutN    = 0;
 
 //-----------------------------------------------------------------------
 
@@ -51,34 +66,9 @@ StFlowCutTrack::~StFlowCutTrack() {
 
 //-----------------------------------------------------------------------
 
-enum {nSels = 2, nHars = 4};
-
-Int_t    StFlowCutTrack::mFitPtsCuts[2]     = {10, 200};
-Float_t  StFlowCutTrack::mFitOverMaxCuts[2] = {0.6, 1.};
-
-Float_t  StFlowCutTrack::mEtaCuts[2][nSels][nHars] = {{{0.,0.,0.,0.},
-							 {0.5,0.,0.5,0.}},
-							{{2.,2.,2.,2.},
-							 {2.,1.,2.,1.}}};
-Float_t  StFlowCutTrack::mPtCuts[2][nSels][nHars] = {{{0.05,0.05,0.05,0.05},
-							{0.05,0.05,0.05,0.05}},
-						       {{2.,2.,2.,2.},
-							{2.,2.,2.,2.}}};
-UInt_t   StFlowCutTrack::mTrackN          = 0;     
-UInt_t   StFlowCutTrack::mGoodTrackN      = 0;
-UInt_t   StFlowCutTrack::mEtaSymPosN      = 0;     
-UInt_t   StFlowCutTrack::mEtaSymNegN      = 0;     
-UInt_t   StFlowCutTrack::mFitPtsCutN      = 0;
-UInt_t   StFlowCutTrack::mFitOverMaxCutN  = 0;
-UInt_t   StFlowCutTrack::mEtaCutN         = 0;
-UInt_t   StFlowCutTrack::mPtCutN          = 0;
-
-const Double_t bField = 0.5*tesla;
-
-//-----------------------------------------------------------------------
-
 Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
   // Returns kTRUE if the track survives all the cuts
+
   mTrackN++;
   
   // Fit Points
@@ -91,7 +81,7 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
 
   // Fit points / max points
   Int_t nMaxPoints = pTrack->numberOfPossiblePoints();
-  Float_t fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.8;
+  float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.8;
   if (mFitOverMaxCuts[1] > mFitOverMaxCuts[0] && 
       (fitOverMax < mFitOverMaxCuts[0] || fitOverMax >= mFitOverMaxCuts[1])) {
     mFitOverMaxCutN++;
@@ -100,38 +90,14 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
 
 
   // Increment counters for Eta symmetry cut
+  double bField = StFlowMaker::BField();
   StThreeVectorD p = pTrack->geometry()->helix().momentum(bField); 
   if (p.pseudoRapidity() > 0.) {
     mEtaSymPosN++;
   } else {
     mEtaSymNegN++;
   }
-
   mGoodTrackN++;
-  return kTRUE;
-}
-
-//-----------------------------------------------------------------------
-
-Int_t StFlowCutTrack::SelectTrack(StFlowTrack* pFlowTrack, Int_t selN, Int_t harN) {
-  // Returns kTRUE if the track meets all the selection criteria
-  
-  // Eta
-  Float_t mEta =  pFlowTrack->Eta();
-  if (mEtaCuts[1][selN][harN] > mEtaCuts[0][selN][harN] && 
-      (fabs(mEta) < mEtaCuts[0][selN][harN] || 
-       fabs(mEta) >= mEtaCuts[1][selN][harN])) {
-    mEtaCutN++;
-    return kFALSE;
-  }
-
-  // Pt
-  Float_t mPt  =  pFlowTrack->Pt();
-  if (mPtCuts[1][selN][harN] > mPtCuts[0][selN][harN] && 
-      (mPt < mPtCuts[0][selN][harN] || mPt >= mPtCuts[1][selN][harN])) {
-    mPtCutN++;
-    return kFALSE;
-  }
   return kTRUE;
 }
 
@@ -140,18 +106,8 @@ Int_t StFlowCutTrack::SelectTrack(StFlowTrack* pFlowTrack, Int_t selN, Int_t har
 void StFlowCutTrack::PrintCutList() {
   // Prints the list of cuts
   // Call in Finish
+
   cout << "#######################################################" << endl;
-  cout << "# Track Selections List:" << endl; 
-  for (int k = 0; k < nSels; k++) {
-    for (int j = 0; j < nHars; j++) {
-      cout << "#  selection= " << k+1 << " harmonic= " 
-	   << j+1 << endl;
-      cout << "#    abs(Eta) cuts= " << mEtaCuts[0][k][j] << ", " 
-	   << mEtaCuts[1][k][j] << endl;
-      cout << "#    Pt cuts= " << mPtCuts[0][k][j] << ", "
-	   << mPtCuts[1][k][j] << endl;
-    }
-  }
   cout << "# Track Cut List:" << endl;
   cout << "#   FitPts cuts= " << mFitPtsCuts[0] << ", " << mFitPtsCuts[1] 
        << " :\t " << setprecision(4) << (float)mFitPtsCutN/(float)mTrackN/perCent 
@@ -162,4 +118,5 @@ void StFlowCutTrack::PrintCutList() {
   cout << "# Good Tracks = " << (float)mGoodTrackN/(float)mTrackN/perCent
        << "%" << endl;
   cout << "#######################################################" << endl;
+
 }
