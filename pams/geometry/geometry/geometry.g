@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.99 2005/01/03 22:11:23 potekhin Exp $
+* $Id: geometry.g,v 1.100 2005/01/19 16:40:53 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.100  2005/01/19 16:40:53  potekhin
+* We extended the y2005x tag from y2004x and made
+* a mistake of creating only a half barrel of the SSD,
+* which in fact has now been completed. I fixed that
+* in y2205x and y2005 now.
+*
 * Revision 1.99  2005/01/03 22:11:23  potekhin
 * Need to update the experimental IST1 tag to better
 * refelct the needs of the new tracking group. Took
@@ -1203,7 +1209,7 @@ If LL>1
 
                   "Silicon Strip Detector Version "
                      sisd=on;
-                     SisdConfig = 22;
+                     SisdConfig = 23; "second version, full barrel"
 
 
                   "FTPC Readout barrel "
@@ -1265,7 +1271,7 @@ If LL>1
 
                   "Silicon Strip Detector Version "
                      sisd=on;
-                     SisdConfig = 22;
+                     SisdConfig = 23; "second version, full barrel"
 
 
                   "FTPC Readout barrel "
@@ -1397,12 +1403,16 @@ If LL>1
        sisd_level=0
        call AgDETP new ('SISD')
 
-* if no SVT, need to position in CAVE - valid for all versions
-       if(svtt) {
-         call AgDETP add ('ssdp.Placement=',1 ,1)
-       }
+* if SVT is present, position the SSD in it, otherwise need to position in CAVE (default)
+
+       if(svtt) { call AgDETP add ('ssdp.Placement=',1 ,1) };
+
+* In the following, level means the version of the ssd geo code to be loaded
+* It is the most important decimal place of the SisdConfig, and we just check
+* for it here:
 
        if (SisdConfig>10) then
+
          sisd_level=SisdConfig/10
          SisdConfig=SisdConfig-sisd_level*10
 
@@ -1412,11 +1422,14 @@ If LL>1
             call sisdgeo1
          elseif (sisd_level.eq.2) then
             call sisdgeo2
-         else
+         else ! Unimplemented level
+
             write(*,*) '************************* ERROR IN PARSING THE SSD GEOMETRY LEVEL! ************************'
+            if (IPRIN==0) stop 'You better stop here to avoid problems'     
+
          endif
 
-       else
+       else ! The original verion
          call AgDETP add ('ssdp.Config=',SisdConfig ,1)
          call sisdgeo
        endif
