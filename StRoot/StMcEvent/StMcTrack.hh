@@ -1,7 +1,13 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.3 2000/01/18 20:52:31 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.4 2000/03/06 18:05:23 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.4  2000/03/06 18:05:23  calderon
+ * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
+ * barrel-ladder-wafer.
+ * 2) Added Rich Hit class and collection, and links to them in other
+ * classes.
+ *
  * Revision 2.3  2000/01/18 20:52:31  calderon
  * Works with CC5
  *
@@ -64,11 +70,13 @@ public:
     const StPtrVecMcSvtHit&      svtHits() const; //!
     StPtrVecMcFtpcHit&           ftpcHits(); //!
     const StPtrVecMcFtpcHit&     ftpcHits() const; //!
+    StPtrVecMcRichHit&           richHits(); //!
+    const StPtrVecMcRichHit&     richHits() const; //!
     StParticleDefinition*        particleDefinition(); //!
     const StParticleDefinition*  particleDefinition() const; //!
     int                          isShower() const; //! 1 = yes, 0 = no
-    long                         geantId() const; //!
-
+    long                         geantId() const;  //!
+    long                         key()     const;  //!
 
   // "Set" Methods
     void setFourMomentum(const StLorentzVectorF&); //!
@@ -78,16 +86,20 @@ public:
     void setTpcHits(StPtrVecMcTpcHit&); //!
     void setSvtHits(StPtrVecMcSvtHit&); //!
     void setFtpcHits(StPtrVecMcFtpcHit&); //!
+    void setRichHits(StPtrVecMcRichHit&); //!
   
     void setShower(char); //!
     void setGeantId(long); //!
+    void setKey(long);     //!
 
     void addTpcHit(StMcTpcHit*); //!
-    void addFtpcHit(StMcFtpcHit*); //!
     void addSvtHit(StMcSvtHit*); //!
+    void addFtpcHit(StMcFtpcHit*); //!
+    void addRichHit(StMcRichHit*); //!
     void removeTpcHit(StMcTpcHit*); //!
-    void removeFtpcHit(StMcFtpcHit*); //!
     void removeSvtHit(StMcSvtHit*); //!
+    void removeFtpcHit(StMcFtpcHit*); //!
+    void removeRichHit(StMcRichHit*); //!
 
     //    void setTopologyMap(StTrackTopologyMap&); //!
     
@@ -99,9 +111,11 @@ protected:
     StPtrVecMcTpcHit       mTpcHits; //!
     StPtrVecMcSvtHit       mSvtHits; //!
     StPtrVecMcFtpcHit      mFtpcHits; //!
+    StPtrVecMcRichHit      mRichHits; //!
     StParticleDefinition*  mParticleDefinition; //!
     char                   mIsShower; //!
     long                   mGeantId; //!
+    long                   mKey;     //!
     //    StTrackTopologyMap     mTopologyMap; //!
 };
 
@@ -142,6 +156,10 @@ inline const StPtrVecMcSvtHit& StMcTrack::svtHits() const { return mSvtHits; }
 inline StPtrVecMcFtpcHit& StMcTrack::ftpcHits() { return mFtpcHits; }
 
 inline const StPtrVecMcFtpcHit& StMcTrack::ftpcHits() const { return mFtpcHits; }
+
+inline StPtrVecMcRichHit& StMcTrack::richHits() { return mRichHits; }
+
+inline const StPtrVecMcRichHit& StMcTrack::richHits() const { return mRichHits; }
 
 inline StParticleDefinition* StMcTrack::particleDefinition() { return mParticleDefinition; }
 

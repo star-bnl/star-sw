@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtWaferHitCollection.cc,v 2.1 1999/11/19 19:06:33 calderon Exp $
+ * $Id: StMcSvtWaferHitCollection.cc,v 2.2 2000/03/06 18:05:23 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StMcSvtWaferHitCollection.cc,v $
+ * Revision 2.2  2000/03/06 18:05:23  calderon
+ * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
+ * barrel-ladder-wafer.
+ * 2) Added Rich Hit class and collection, and links to them in other
+ * classes.
+ *
  * Revision 2.1  1999/11/19 19:06:33  calderon
  * Recommit after redoing the files.
  *
@@ -21,11 +27,7 @@
 #include "StMcSvtWaferHitCollection.hh"
 #include "StMcSvtHit.hh"
 
-static const char rcsid[] = "$Id: StMcSvtWaferHitCollection.cc,v 2.1 1999/11/19 19:06:33 calderon Exp $";
-
-#ifdef __PERSISTENT
-    ClassImp(StMcSvtWaferHitCollection)
-#endif
+static const char rcsid[] = "$Id: StMcSvtWaferHitCollection.cc,v 2.2 2000/03/06 18:05:23 calderon Exp $";
 
 StMcSvtWaferHitCollection::StMcSvtWaferHitCollection() { /* noop */ }
 

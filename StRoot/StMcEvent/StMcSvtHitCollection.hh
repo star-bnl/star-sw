@@ -1,7 +1,13 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHitCollection.hh,v 2.1 1999/11/19 19:06:33 calderon Exp $
+ * $Id: StMcSvtHitCollection.hh,v 2.2 2000/03/06 18:05:22 calderon Exp $
  * $Log: StMcSvtHitCollection.hh,v $
+ * Revision 2.2  2000/03/06 18:05:22  calderon
+ * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
+ * barrel-ladder-wafer.
+ * 2) Added Rich Hit class and collection, and links to them in other
+ * classes.
+ *
  * Revision 2.1  1999/11/19 19:06:33  calderon
  * Recommit after redoing the files.
  *
@@ -17,7 +23,7 @@
 #ifndef StMcSvtHitCollection_hh
 #define StMcSvtHitCollection_hh
 
-#include "StMcSvtLayerHitCollection.hh"
+#include "StMcSvtBarrelHitCollection.hh"
 class StMcSvtHit;
 
 class StMcSvtHitCollection {
@@ -29,14 +35,14 @@ public:
     
     bool          addHit(StMcSvtHit*);
     unsigned long numberOfHits() const;
-    unsigned int  numberOfLayers() const;
+    unsigned int  numberOfBarrels() const;
     
-    StMcSvtLayerHitCollection*       layer(unsigned int);
-    const StMcSvtLayerHitCollection* layer(unsigned int) const;
+    StMcSvtBarrelHitCollection*       barrel(unsigned int);
+    const StMcSvtBarrelHitCollection* barrel(unsigned int) const;
 
 private:
-    enum { mNumberOfLayers = 6 };
-    StMcSvtLayerHitCollection mLayers[mNumberOfLayers];
+    enum { mNumberOfBarrels = 3 };
+    StMcSvtBarrelHitCollection mBarrels[mNumberOfBarrels];
     
 };
 

@@ -1,7 +1,13 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.3 2000/01/18 20:52:31 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.4 2000/03/06 18:05:21 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.4  2000/03/06 18:05:21  calderon
+ * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
+ * barrel-ladder-wafer.
+ * 2) Added Rich Hit class and collection, and links to them in other
+ * classes.
+ *
  * Revision 2.3  2000/01/18 20:52:31  calderon
  * Works with CC5
  *
@@ -34,6 +40,7 @@
 
 #include "StMcTpcHitCollection.hh"
 #include "StMcFtpcHitCollection.hh"
+#include "StMcRichHitCollection.hh"
 #include "StMcSvtHitCollection.hh"
 #include "StMcContainers.hh" 
 #include "TString.h"
@@ -86,6 +93,8 @@ public:
     const StMcSvtHitCollection*    svtHitCollection() const;
     StMcFtpcHitCollection*         ftpcHitCollection();
     const StMcFtpcHitCollection*   ftpcHitCollection() const;
+    StMcRichHitCollection*         richHitCollection();
+    const StMcRichHitCollection*   richHitCollection() const;
     
     // "Set" Methods
     
@@ -105,6 +114,7 @@ public:
     void setTpcHitCollection(StMcTpcHitCollection*);               
     void setSvtHitCollection(StMcSvtHitCollection*);               
     void setFtpcHitCollection(StMcFtpcHitCollection*);              
+    void setRichHitCollection(StMcRichHitCollection*);              
     
     
 protected:
@@ -126,6 +136,7 @@ protected:
     StMcTpcHitCollection*          mTpcHits;
     StMcSvtHitCollection*          mSvtHits;
     StMcFtpcHitCollection*         mFtpcHits;
+    StMcRichHitCollection*         mRichHits;
     static TString                 mCvsTag;
 private:
     const StMcEvent& operator=(const StMcEvent&);
@@ -185,6 +196,9 @@ inline StMcFtpcHitCollection* StMcEvent::ftpcHitCollection() { return mFtpcHits;
 
 inline const StMcFtpcHitCollection* StMcEvent::ftpcHitCollection() const { return mFtpcHits;}
 
+inline StMcRichHitCollection* StMcEvent::richHitCollection() { return mRichHits;}
+
+inline const StMcRichHitCollection* StMcEvent::richHitCollection() const { return mRichHits;}
 
 #endif
 

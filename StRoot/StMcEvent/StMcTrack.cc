@@ -1,7 +1,13 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.4 2000/01/18 20:52:31 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.5 2000/03/06 18:05:23 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.5  2000/03/06 18:05:23  calderon
+ * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
+ * barrel-ladder-wafer.
+ * 2) Added Rich Hit class and collection, and links to them in other
+ * classes.
+ *
  * Revision 2.4  2000/01/18 20:52:31  calderon
  * Works with CC5
  *
@@ -42,7 +48,7 @@ using std::find;
 
 #include "tables/St_g2t_track_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.4 2000/01/18 20:52:31 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.5 2000/03/06 18:05:23 calderon Exp $";
 
 StMcTrack::StMcTrack() 
 {
@@ -59,6 +65,7 @@ StMcTrack::StMcTrack(g2t_track_st* trk) {
     mFourMomentum.setE(trk->e);
     mIsShower = trk->is_shower;
     mGeantId = trk->ge_pid;
+    mKey     = trk->id;
     mParticleDefinition = StParticleTable::instance()->findParticleByGeantId(trk->ge_pid);
     
     // The information to fill the collections 

@@ -1,7 +1,13 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.cc,v 2.4 2000/01/18 20:52:31 calderon Exp $
+ * $Id: StMcVertex.cc,v 2.5 2000/03/06 18:05:24 calderon Exp $
  * $Log: StMcVertex.cc,v $
+ * Revision 2.5  2000/03/06 18:05:24  calderon
+ * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
+ * barrel-ladder-wafer.
+ * 2) Added Rich Hit class and collection, and links to them in other
+ * classes.
+ *
  * Revision 2.4  2000/01/18 20:52:31  calderon
  * Works with CC5
  *
@@ -36,7 +42,7 @@ using std::find;
 #include "StMcTrack.hh"
 #include "tables/St_g2t_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StMcVertex.cc,v 2.4 2000/01/18 20:52:31 calderon Exp $";
+static const char rcsid[] = "$Id: StMcVertex.cc,v 2.5 2000/03/06 18:05:24 calderon Exp $";
 
 StMcVertex::StMcVertex()
 {
@@ -56,7 +62,7 @@ StMcVertex::StMcVertex(g2t_vertex_st* vtx)
   mPosition.setZ(vtx->ge_x[2]);
   mGeantVolume=vtx->ge_volume;
   mTof = vtx->ge_tof;
-  mGeantProcess = vtx->eg_proc;
+  mGeantProcess = vtx->ge_proc;
   
   mParent = 0;
     

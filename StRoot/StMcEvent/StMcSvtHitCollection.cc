@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHitCollection.cc,v 2.1 1999/12/14 07:04:49 calderon Exp $
+ * $Id: StMcSvtHitCollection.cc,v 2.2 2000/03/06 18:05:22 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StMcSvtHitCollection.cc,v $
+ * Revision 2.2  2000/03/06 18:05:22  calderon
+ * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
+ * barrel-ladder-wafer.
+ * 2) Added Rich Hit class and collection, and links to them in other
+ * classes.
+ *
  * Revision 2.1  1999/12/14 07:04:49  calderon
  * Numbering scheme as per SVT request.
  *
@@ -21,40 +27,36 @@
 #include "StMcSvtHitCollection.hh"
 #include "StMcSvtHit.hh"
 
-static const char rcsid[] = "$Id: StMcSvtHitCollection.cc,v 2.1 1999/12/14 07:04:49 calderon Exp $";
-
-#ifdef PERSISTENT
-ClassImp(StMcSvtHitCollection)
-#endif
+static const char rcsid[] = "$Id: StMcSvtHitCollection.cc,v 2.2 2000/03/06 18:05:22 calderon Exp $";
 
 StMcSvtHitCollection::StMcSvtHitCollection()
 {
     //
-    //  Layer and ladder collections have to know
-    //  their layer number in order to return the
+    //  Barrel and ladder collections have to know
+    //  their barrel number in order to return the
     //  proper numberOfLadders() and numberOfWafers().
     //
-    for (int i=0; i<mNumberOfLayers; i++) {
-        mLayers[i].setLayerNumber(i+1);
-        for (unsigned int j=0; j<mLayers[i].numberOfLadders(); j++)
-            mLayers[i].ladder(j)->setLayerNumber(i+1);
+    for (int i=0; i<mNumberOfBarrels; i++) {
+        mBarrels[i].setBarrelNumber(i);
+        for (unsigned int j=0; j<mBarrels[i].numberOfLadders(); j++)
+            mBarrels[i].ladder(j)->setBarrelNumber(i);
     }
 }
 
 StMcSvtHitCollection::~StMcSvtHitCollection() { /* noop */ }
     
 unsigned int
-StMcSvtHitCollection::numberOfLayers() const { return mNumberOfLayers; }
+StMcSvtHitCollection::numberOfBarrels() const { return mNumberOfBarrels; }
 
 bool
 StMcSvtHitCollection::addHit(StMcSvtHit* hit)
 {
     unsigned int l, d, w;
     if (hit &&
-        (l = hit->layer()-1) < mNumberOfLayers &&
-        (d = hit->ladder()-1) < mLayers[l].numberOfLadders() &&
-        (w = hit->wafer()-1) < mLayers[l].ladder(d)->numberOfWafers()) {
-        mLayers[l].ladder(d)->wafer(w)->hits().push_back(hit);
+        (l = hit->barrel()-1) < mNumberOfBarrels &&
+        (d = hit->ladder()-1) < mBarrels[l].numberOfLadders() &&
+        (w = hit->wafer()-1) < mBarrels[l].ladder(d)->numberOfWafers()) {
+        mBarrels[l].ladder(d)->wafer(w)->hits().push_back(hit);
         return true;
     }
     else
@@ -65,27 +67,27 @@ unsigned long
 StMcSvtHitCollection::numberOfHits() const
 {
     unsigned long sum = 0;
-    for (int i=0; i<mNumberOfLayers; i++)
-        for (unsigned int j=0; j<mLayers[i].numberOfLadders(); j++)
-            for (unsigned int k=0; k<mLayers[i].ladder(j)->numberOfWafers(); k++)
-                sum += mLayers[i].ladder(j)->wafer(k)->hits().size();
+    for (int i=0; i<mNumberOfBarrels; i++)
+        for (unsigned int j=0; j<mBarrels[i].numberOfLadders(); j++)
+            for (unsigned int k=0; k<mBarrels[i].ladder(j)->numberOfWafers(); k++)
+                sum += mBarrels[i].ladder(j)->wafer(k)->hits().size();
     return sum;
 }
 
-StMcSvtLayerHitCollection*
-StMcSvtHitCollection::layer(unsigned int i)
+StMcSvtBarrelHitCollection*
+StMcSvtHitCollection::barrel(unsigned int i)
 {
-    if (i < mNumberOfLayers)
-        return &(mLayers[i]);
+    if (i < mNumberOfBarrels)
+        return &(mBarrels[i]);
     else
         return 0;
 }
 
-const StMcSvtLayerHitCollection*
-StMcSvtHitCollection::layer(unsigned int i) const
+const StMcSvtBarrelHitCollection*
+StMcSvtHitCollection::barrel(unsigned int i) const
 {
-    if (i < mNumberOfLayers)
-        return &(mLayers[i]);
+    if (i < mNumberOfBarrels)
+        return &(mBarrels[i]);
     else
         return 0;
 }

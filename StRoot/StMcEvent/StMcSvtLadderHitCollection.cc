@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtLadderHitCollection.cc,v 2.2 1999/12/14 07:04:49 calderon Exp $
+ * $Id: StMcSvtLadderHitCollection.cc,v 2.3 2000/03/06 18:05:22 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StMcSvtLadderHitCollection.cc,v $
+ * Revision 2.3  2000/03/06 18:05:22  calderon
+ * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
+ * barrel-ladder-wafer.
+ * 2) Added Rich Hit class and collection, and links to them in other
+ * classes.
+ *
  * Revision 2.2  1999/12/14 07:04:49  calderon
  * Numbering scheme as per SVT request.
  *
@@ -23,39 +29,32 @@
  **************************************************************************/
 #include "StMcSvtLadderHitCollection.hh"
 
-static const char rcsid[] = "$Id: StMcSvtLadderHitCollection.cc,v 2.2 1999/12/14 07:04:49 calderon Exp $";
-
-#ifdef PERSISTENT
-ClassImp(StMcSvtLadderHitCollection)
-#endif
+static const char rcsid[] = "$Id: StMcSvtLadderHitCollection.cc,v 2.3 2000/03/06 18:05:22 calderon Exp $";
 
 StMcSvtLadderHitCollection::StMcSvtLadderHitCollection()
 {
-    mLayerNumber = -1;
+    mBarrelNumber = -1;
 }
 
 StMcSvtLadderHitCollection::~StMcSvtLadderHitCollection() { /* noop */ }
 
 void
-StMcSvtLadderHitCollection::setLayerNumber(int i)
+StMcSvtLadderHitCollection::setBarrelNumber(int i)
 {
-    if (mLayerNumber == -1) mLayerNumber = i;
+    if (mBarrelNumber == -1) mBarrelNumber = i;
 }
     
 unsigned int
 StMcSvtLadderHitCollection::numberOfWafers() const
 {
-    switch (mLayerNumber) {
-    case 1:
-    case 2:
+    switch (mBarrelNumber) {
+    case 0:
         return 4;
         break;
-    case 3:
-    case 4:
+    case 1:
         return 6;
         break;
-    case 5:
-    case 6:
+    case 2:
         return 7;
         break;
     default:
