@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.11 2003/02/28 06:17:56 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.12 2004/01/10 01:10:18 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.12  2004/01/10 01:10:18  genevb
+// Preparations for Year 5, added some svt plots
+//
 // Revision 2.11  2003/02/28 06:17:56  genevb
 // Allow StQAMakerBase::Make to be called for all events
 //
@@ -46,9 +49,10 @@
 enum StQAHistSetType {
   StQA_Undef = -1,
   StQA_MC = 0,
-  StQA_AuAu = 1,
+  StQA_AuAuOld = 1,
   StQA_pp = 2,
-  StQA_dAu = 3
+  StQA_dAu = 3,
+  StQA_AuAu = 4
 };
 
 #include "StMaker.h"
@@ -70,7 +74,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.11 2003/02/28 06:17:56 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.12 2004/01/10 01:10:18 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************

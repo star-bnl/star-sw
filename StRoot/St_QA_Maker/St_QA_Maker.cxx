@@ -79,7 +79,7 @@ Int_t St_QA_Maker::Make(){
         event_header_st* evh = evHeader->GetTable();
         if (evh) {
           if (!strcmp(evh->event_type,"NONE")) {
-            histsSet = StQA_AuAu;
+            histsSet = StQA_AuAuOld;
           } else {
             // process Monte Carlo events
             histsSet = StQA_MC;
@@ -96,7 +96,7 @@ Int_t St_QA_Maker::Make(){
 	if (tt->iflag==1 && tt->vtx_id==kEventVtxId) {
 	  St_dst_track* gtracks = (St_dst_track*) dstI["globtrk"];
 	  multiplicity = gtracks->GetNRows();
-          if (histsSet == StQA_AuAu) {
+          if (histsSet == StQA_AuAuOld) {
             if (multiplicity < 50) eventClass = 0;
             else if (multiplicity < 500) eventClass = 1;
             else if (multiplicity < 2500) eventClass = 2;
@@ -108,7 +108,7 @@ Int_t St_QA_Maker::Make(){
 	  int makeStat = StQAMakerBase::Make();
 	  foundPrimVtx = kTRUE;
 	  mNullPrimVtx->Fill(1);
-          if ((histsSet == StQA_AuAu) && (hists))
+          if ((histsSet == StQA_AuAuOld) && (hists))
             hists->mNullPrimVtxClass->Fill(1);
           return makeStat;
         }
@@ -120,7 +120,7 @@ Int_t St_QA_Maker::Make(){
     mNullPrimVtx->Fill(-1);
     fillHists = kFALSE;
     int makeStat = StQAMakerBase::Make();
-    if ((histsSet == StQA_AuAu) && (hists))
+    if ((histsSet == StQA_AuAuOld) && (hists))
       hists->mNullPrimVtxClass->Fill(-1);
     return makeStat;
   }
@@ -394,7 +394,11 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_glb_zf0->Fill(zdif);
 	hists->m_glb_rzf0->Fill(azimdif,0.);
         hists->m_glb_rzf0->Fill(zdif,1.);
-        hists->m_glb_impactT->Fill(logImpact);
+        hists->m_glb_impactT->Fill(logImpact,2.);
+        if ((t->x_first[2] < 0) && (t->x_last[2] < 0))  // east-only
+          hists->m_glb_impactT->Fill(logImpact,0.);
+        if ((t->x_first[2] > 0) && (t->x_last[2] > 0))  // west-only
+          hists->m_glb_impactT->Fill(logImpact,1.);
         hists->m_glb_impactrT->Fill(t->impact);
 
 	// need padrow histogram -CPL
@@ -1351,8 +1355,11 @@ void St_QA_Maker::MakeHistEval(){
 }
 
 //_____________________________________________________________________________
-// $Id: St_QA_Maker.cxx,v 2.18 2003/11/25 04:19:51 perev Exp $
+// $Id: St_QA_Maker.cxx,v 2.19 2004/01/10 01:10:18 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.19  2004/01/10 01:10:18  genevb
+// Preparations for Year 5, added some svt plots
+//
 // Revision 2.18  2003/11/25 04:19:51  perev
 // FPE protection
 //

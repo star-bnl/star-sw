@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.41 2003/09/02 17:59:21 perev Exp $
+// $Id: StQABookHist.cxx,v 2.42 2004/01/10 01:10:18 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.42  2004/01/10 01:10:18  genevb
+// Preparations for Year 5, added some svt plots
+//
 // Revision 2.41  2003/09/02 17:59:21  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -238,6 +241,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_max_pointFW=0;
   m_fit_pointT=0;
   m_fit_pointTTS=0;
+  m_glb_sptsTS=0;
   m_glb_ratioT=0;
   m_glb_ratioTTS=0;
   m_glb_ratiomTTS=0;
@@ -638,6 +642,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pnt_tot_med=0; //! number of hits, med range
   m_pnt_tot_sm=0;  //! number of hits, small range
   m_pnt_id=0;      //! detector id of the hit
+  m_pnt_xyS=0;     //! xy dist. of hits, svt
   m_pnt_xyTE=0;    //! xy dist. of hits, tpcE
   m_pnt_xyTW=0;    //! xy dist. of hits, tpcW
   m_pnt_phiT=0;    //! phi dist. of hits, tpc
@@ -744,6 +749,7 @@ void StQABookHist::BookHistGlob(){
   m_zDcaPhi0         = QAH::H2F("QaGtrkZdcaPhi0","globtrk: z-DCA to Beam Axis vs azimuth (phi0) at start",80,-20,20,64,0,360);
   m_zDcaPhi0->SetXTitle("z-DCA");
   m_zDcaPhi0->SetYTitle("phi0");
+  m_glb_sptsTS       = QAH::H1F("QaGtrkSptsTS","globtrk: number of svt points, tpc+svt",4,0.,4.);
   m_glb_ratioTTS     = QAH::MH1F("QaGtrkRnfTTS","globtrk: ratio Nfit/tot pnt, tpc,svt", 55,0.,1.1,2);
   m_glb_ratioTTS->SetMinimum(10);
   m_glb_ratioTTS->Rebin(0,"TPC+SVT");
@@ -846,7 +852,11 @@ void StQABookHist::BookHistGlob(){
   m_momT        = QAH::H1F("QaGtrkPT",      "globtrk: momentum, tpc",50,0.,10.);
   m_chisq0T     = QAH::H1F("QaGtrkChisq0T", "globtrk: chisq0, tpc", 50, 0.,5.);
   m_chisq1T     = QAH::H1F("QaGtrkChisq1T", "globtrk: chisq1, tpc", 50, 0.,1.2);
-  m_glb_impactT = QAH::H1F("QaGtrkImpactT", "globtrk: log10 impact param from prim vtx, tpc",120,-3.0,3.0);
+  m_glb_impactT = QAH::MH1F("QaGtrkImpactT", "globtrk: log10 impact param from prim vtx, tpc",120,-3.0,3.0,3);
+  m_glb_impactT->Rebin(0,"East");
+  m_glb_impactT->Rebin(1,"West");
+  m_glb_impactT->Rebin(2,"All");
+  m_glb_impactT->SetStats(kFALSE);
   m_glb_impactrT = QAH::H1F("QaGtrkImpactrT", "globtrk: impact param from prim vtx, tpc",100,0.,300.);
 
 
@@ -1697,6 +1707,7 @@ void StQABookHist::BookHistPoint(){
   // east and west on separate plots
   m_pnt_ftpcE   = QAH::H1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,25000.);
   m_pnt_ftpcW   = QAH::H1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,25000.);
+  m_pnt_xyS     = QAH::H2F("QaPointXYSvt","point: x-y distribution of hits, svt",60,-15,15,60,-15,15);
   m_pnt_xyTE    = QAH::H2F("QaPointXYTpcE","point: x-y distribution of hits, tpcE",40,-200,200,40,-200,200);
   m_pnt_xyTW    = QAH::H2F("QaPointXYTpcW","point: x-y distribution of hits, tpcW",40,-200,200,40,-200,200);
   m_z_hits      = QAH::H1F("QaPointZhits","point: z distribution of hits, tpc",100,-210,210);

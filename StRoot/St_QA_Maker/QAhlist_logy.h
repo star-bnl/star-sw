@@ -1,5 +1,8 @@
-// $Id: QAhlist_logy.h,v 2.11 2003/01/24 15:02:41 genevb Exp $
+// $Id: QAhlist_logy.h,v 2.12 2004/01/10 01:10:17 genevb Exp $
 // $Log: QAhlist_logy.h,v $
+// Revision 2.12  2004/01/10 01:10:17  genevb
+// Preparations for Year 5, added some svt plots
+//
 // Revision 2.11  2003/01/24 15:02:41  genevb
 // Updates for FTPC histos
 //
@@ -144,6 +147,7 @@
  "QaGtrkImpactrT",
  "QaGtrkImpactrTS",
  "QaGtrkImpactrTTS",
+ "QaGtrkSptsTS",
 
  "QaPtrkDetId",
  "QaPtrkFlag",
