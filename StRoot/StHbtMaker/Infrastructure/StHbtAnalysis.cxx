@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.cxx,v 1.13 2000/08/11 16:35:40 rcwells Exp $
+ * $Id: StHbtAnalysis.cxx,v 1.14 2000/08/31 22:31:30 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,13 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.cxx,v $
+ * Revision 1.14  2000/08/31 22:31:30  laue
+ * StHbtAnalysis: output changed (a little bit less)
+ * StHbtEvent: new version, members for reference mult added
+ * StHbtIOBinary: new IO for new StHbtEvent version
+ * StHbtTypes: TTree typedef to StHbtTTree added
+ * StHbtVertexAnalysis: overflow and underflow added
+ *
  * Revision 1.13  2000/08/11 16:35:40  rcwells
  * Added number of events processed to each HBT analysis
  *
@@ -332,7 +339,7 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
       
     // ok, now make mixed pairs, if the Mixing buffer is full
       
-    cout << "StHbtAnalysis::ProcessEvent() - reals done" << endl;
+    cout << "StHbtAnalysis::ProcessEvent() - reals done   ";
     if (MixingBufferFull()){
       cout << "Mixing Buffer is full - lets rock and roll" << endl;
     }
@@ -420,10 +427,11 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
     MixingBuffer()->push_front(picoEvent);  // store the current pico-event in buffer
   }   // if currentEvent is accepted by currentAnalysis
   EventEnd(hbtEvent);  // cleanup for EbyE 
-  cout << "StHbtAnalysis::ProcessEvent() - return to caller ... " << endl;
+  //cout << "StHbtAnalysis::ProcessEvent() - return to caller ... " << endl;
 }
 //_________________________
 void StHbtAnalysis::EventBegin(const StHbtEvent* ev){
+  //cout << " StHbtAnalysis::EventBegin(const StHbtEvent* ev) " << endl;
   mFirstParticleCut->EventBegin(ev);
   mSecondParticleCut->EventBegin(ev);
   mPairCut->EventBegin(ev);

@@ -93,7 +93,11 @@ public:
   int outputStreamStatus();
   int inputStreamStatus();
 
-  
+  int readTrackList(StHbtEvent&, unsigned short trVersion);
+  int readV0List(StHbtEvent&, unsigned short v0Version);
+  int writeTrackList(const StHbtEvent&, unsigned short trVersion);
+  int writeV0List(const StHbtEvent&, unsigned short v0Version);
+
   const char* parseDirFile(const char*, const char*, const char*);
   
   void wait(int n, const char* c) { 
