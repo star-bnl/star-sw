@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.30 1999/07/15 13:56:46 perev Exp $
+// $Id: StChain.h,v 1.31 1999/12/03 01:24:40 fine Exp $
 // $Log: StChain.h,v $
+// Revision 1.31  1999/12/03 01:24:40  fine
+// Advanced timer has been introduced
+//
 // Revision 1.30  1999/07/15 13:56:46  perev
 // cleanup
 //
@@ -90,16 +93,18 @@ private:
 public:
                       StChain(const char *name="bfcChain");
    virtual           ~StChain();
-   virtual Int_t      Finish();    // *MENU*
+   virtual void       Clear(Option_t *option="");
+   virtual Int_t      Finish();   // *MENU*
+   virtual Int_t      Init();
+   virtual Int_t      Make();
    virtual Int_t      IsChain() const {return 1;}
    virtual Int_t      MakeEvent(); // *MENU*
    Int_t              GetVersion() {return m_Version;}
    Int_t              GetVersionDate() {return m_VersionDate;}
 
  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.30 1999/07/15 13:56:46 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.31 1999/12/03 01:24:40 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StChain, 0)   //StChain control class
 };
 
-inline Int_t StChain::Finish(){ return StMaker::Finish(); }
 #endif
