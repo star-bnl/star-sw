@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.36 2003/10/10 13:38:29 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.37 2003/10/14 13:27:32 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.37  2003/10/14 13:27:32  suaide
+// new methods added in order to select either energy of pedestal cut for the SMD
+//
 // Revision 1.36  2003/10/10 13:38:29  suaide
 // change to allow RMS or Energy CUT. Default is now RMS.
 //
@@ -178,6 +181,7 @@ class StEmcADCtoEMaker : public StMaker
   Bool_t            mSave[MAXDETBARREL]; 
   Bool_t            mFillHisto;
   Bool_t            mDebug;
+  Bool_t            mSMDEidMinus1Bug;
   
   TString           mMuName;
 					 
@@ -207,10 +211,15 @@ class StEmcADCtoEMaker : public StMaker
   StEmcCollection*          getEmcCollection() {return mEmc;} ///< Return emcCollection
   StBemcData*               getBemcData()      {return mData;} ///< Return BemcData pointer
   void                      clearStEventStaf() {mEmc = NULL;} ///< Clear emcCollection (does not delete from memory)
+  
   void                      setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
   void                      setPrint(Bool_t a) {mPrint = a; } ///< Set it to kFALSE if you do not want to print messages
   void                      setFillHisto(Bool_t a) {mFillHisto = a;} ///< Turns on/off histogram filling
-  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.36 2003/10/10 13:38:29 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  void                      setSMDEnergyCut(Float_t a = 0.07,Float_t a = 0.07); ///< Turns on SMD hit cut based on energy and set the thresholds for eta and phi planes
+  void                      setSMDRmsCut(Float_t a = 1.5,Float_t a = 1.5); ///< Turns on SMD hit cut based on pedestal RMS and set the thresholds for eta and phi planes
+  void                      setSMDEidMinus1Bug(Bool_t a = kFALSE) { mSMDEidMinus1Bug = a;} ///< Turns on the correction for the SMD-phi id-1 Pedestal bug if using old Pedestal tables for the y2003 d+Au and p+p runs
+  
+  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.37 2003/10/14 13:27:32 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcADCtoEMaker, 2)  
 };
