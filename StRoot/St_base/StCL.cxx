@@ -4,8 +4,11 @@
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f112/top.html 
 //
-// $Id: StCL.cxx,v 1.1 1999/09/28 19:45:10 fine Exp $
+// $Id: StCL.cxx,v 1.2 1999/09/29 00:31:49 fine Exp $
 // $Log: StCL.cxx,v $
+// Revision 1.2  1999/09/29 00:31:49  fine
+// RMath class has been repleaced with StCL one
+//
 // Revision 1.1  1999/09/28 19:45:10  fine
 // RMath class has been renamed to StCL - STAR CERN Library
 //
@@ -838,8 +841,8 @@ end_html
 	    ib = 1;
 	    for (m = 1; m <= k; ++m,++ic) {
 	    switch (n1) {
-		    case 1:  c[ic] = (float)0.; break;
-		    case 3:  c[ic] = -c[ic];    break;
+		    case 1:  c[ic] = 0.;     break;
+		    case 3:  c[ic] = -c[ic]; break;
 	    };
 	    if (j == 0) continue;
 	    ja = ia; jb = ib;
@@ -854,47 +857,50 @@ end_html
  return;
 } /* mxmad_ */
 
-//___________________________________________________________________________
-void StCL::mxmad_0_(int n_, double *a, double *b, double *c, int i, int j, int k)
-{
-    /* Local variables */
-    int l, m, n, ia, ic, ib, ja, jb, iia, iib, ioa, iob;
-
-    /* Parameter adjustments */
-    --a;  --b;  --c;
-    /* Function Body */
-//                      MXMAD MXMAD1 MXMAD2 MXMAD3 MXMPY MXMPY1 MXMPY2 MXMPY3 MXMUB MXMUB1 MXMUB2 MXMUB3
-//  const int iandj1[] = {21,   22,    23,    24,   11,    12,    13,    14,    31,   32,   33,    34 };
-    const int iandj1[] = {2,    2 ,    2 ,    2 ,   1 ,    1 ,    1 ,    1 ,    3 ,   3 ,   3 ,    3  };
-    const int iandj2[] = { 1,    2,     3,     4,    1,     2,     3,     4,     1,    2,    3,     4 };
-    int n1 = iandj1[n_];
-    int n2 = iandj2[n_];
-    if (i == 0 || k == 0) return;
-    
-    switch (n2) {
-	    case 1: iia = 1; ioa = j; iib = k; iob = 1; break;
-      case 2: iia = 1; ioa = j; iib = 1; iob = j; break;
-	    case 3: iia = i; ioa = 1; iib = k; iob = 1; break;
-      case 4: iia = i; ioa = 1; iib = 1; iob = j; break;
-    };
-
-    ia = 1; ic = 1;
-    for (l = 1; l <= i; ++l) {
-	    ib = 1;
-	    for (m = 1; m <= k; ++m,++ic) {
-	      switch (n1) {
-		      case 1:  c[ic] = (double)0.; break;
-		      case 3:  c[ic] = -c[ic];    break;
-	      };
-	      if (j == 0) continue;
-	      ja = ia; jb = ib;
-	      for (n = 1; n <= j; ++n, ja+=iia, jb+=iib) 
-		      c[ic] += a[ja] * b[jb];
-	      ib += iob;
-	    }
-	    ia += ioa;
+#define StCL_mxmad(n_,a,b,c,i,j,k)                       \
+    /* Local variables */                                \
+    int l, m, n, ia, ic, ib, ja, jb, iia, iib, ioa, iob; \
+\
+    /* Parameter adjustments */                          \
+    --a;  --b;  --c;                                     \
+    /* Function Body */                                  \
+//                      MXMAD MXMAD1 MXMAD2 MXMAD3 MXMPY MXMPY1 MXMPY2 MXMPY3 MXMUB MXMUB1 MXMUB2 MXMUB3 \
+//  const int iandj1[] = {21,   22,    23,    24,   11,    12,    13,    14,    31,   32,   33,    34 }; \
+    const int iandj1[] = {2,    2 ,    2 ,    2 ,   1 ,    1 ,    1 ,    1 ,    3 ,   3 ,   3 ,    3  }; \
+    const int iandj2[] = { 1,    2,     3,     4,    1,     2,     3,     4,     1,    2,    3,     4 }; \
+    int n1 = iandj1[n_];                                  \
+    int n2 = iandj2[n_];                                  \
+    if (i == 0 || k == 0) return 0;                       \
+    \
+    switch (n2) {                                         \
+      case 1: iia = 1; ioa = j; iib = k; iob = 1; break;  \
+      case 2: iia = 1; ioa = j; iib = 1; iob = j; break;  \
+      case 3: iia = i; ioa = 1; iib = k; iob = 1; break;  \
+      case 4: iia = i; ioa = 1; iib = 1; iob = j; break;  \
+    };                                                    \
+  \
+    ia = 1; ic = 1;                                       \
+    for (l = 1; l <= i; ++l) {                            \
+	    ib = 1;                                           \
+	    for (m = 1; m <= k; ++m,++ic) {                   \
+	      switch (n1) {                                   \
+		      case 1:  c[ic] = 0.;      break;            \
+		      case 3:  c[ic] = -c[ic];  break;            \
+	      };                                              \
+	      if (j == 0) continue;                           \
+	      ja = ia; jb = ib;                               \
+	      for (n = 1; n <= j; ++n, ja+=iia, jb+=iib)      \
+		      c[ic] += a[ja] * b[jb];                     \
+	      ib += iob;                                      \
+	    }                                                 \
+	    ia += ioa;                                        \
     }
-    return;
+
+//___________________________________________________________________________
+double *StCL::mxmad_0_(int n_, double *a, double *b, double *c, int i, int j, int k)
+{
+   StCL_mxmad(n_,a,b,c,i,j,k)
+   return c;
 } /* mxmad_ */
 
 //___________________________________________________________________________
