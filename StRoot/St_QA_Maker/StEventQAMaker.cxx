@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.7 2001/04/28 22:05:13 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.8 2001/04/30 19:09:27 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.8  2001/04/30 19:09:27  genevb
+// Catch missing EMC info
+//
 // Revision 2.7  2001/04/28 22:05:13  genevb
 // Added EMC histograms
 //
@@ -1191,12 +1194,13 @@ void StEventQAMaker::MakeHistEMC() {
   if (Debug()) 
     gMessMgr->Info(" *** in StEventQAMaker - filling EMC histograms ");
 
-  //Get vertex
-
-  StPrimaryVertex* pvert = event->primaryVertex(0);
-
   StEmcCollection* emccol = event->emcCollection();
   cout <<"emccol = "<<emccol<<"\n";
+  if (!emccol) return;
+
+  //Get vertex
+  StPrimaryVertex* pvert = event->primaryVertex(0);
+
   UInt_t i;
 
   for(i=0; i<4; i++){
