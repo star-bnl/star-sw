@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.60 2000/09/06 22:42:41 ullrich Exp $
+// $Id: doEvents.C,v 1.61 2001/02/14 23:39:17 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -46,6 +46,8 @@
 //                 file --- set to off by default 
 //      
 ///////////////////////////////////////////////////////////////////////////////
+
+#include "iostream.h"
 
 Int_t    usePath = 0;
 Int_t    nFile = 0;
@@ -218,14 +220,14 @@ void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, cons
                TDataSetIter bfcstatiter(ddb);
                St_dst_bfc_status *bfcstat = 
                  (St_dst_bfc_status *) bfcstatiter.Find("BfcStatus");
-               dst_bfc_status_st *bth = bfcstat->GetTable();
+               St_dst_bfc_status::iterator bth    = bfcstat->begin();
+               St_dst_bfc_status::iterator bthEnd = bfcstat->end();
 //  loop over all rows in table BfcStatus:
-               Int_t ij = 0;
-               for (ij=0; ij< bfcstat->GetNRows(); ij++)
+               for (; bth != bthEnd; bth++)
                {
 	         cout << " QAInfo:       BfcStatus table -- row " << ij <<
-		   ", Maker: "     <<  bth[ij]->maker_name <<
-                   " has istat = "  <<  bth[ij]->status << endl;	
+		   ", Maker: "     <<  (*bth).maker_name <<
+                   " has istat = "  << (*bth).status << endl;	
 	       }   // for bfcstat
              }  // if dsName
            } // if ddb
@@ -267,6 +269,9 @@ void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.61  2001/02/14 23:39:17  perev
+// classs TTable::iterator example introdiced
+//
 // Revision 1.60  2000/09/06 22:42:41  ullrich
 // Moved WriteOut StEvent block after the line where the analysis
 // maker gets created.
