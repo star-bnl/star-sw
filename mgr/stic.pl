@@ -18,7 +18,9 @@ my $tmpdir = "/tmp/" . $$;# print "tmpdir = $tmpdir \n";
 if (! -d $dir    && !mkdir ($dir,    0755)) {die "$0:Can't create directory $dir\n";};
 if (! -d $tmpdir && !mkdir ($tmpdir, 0755)) {die "$0:Can't create directory $tmpdir\n";};
 my $com = "cd $tmpdir && stic @pars $idl";# print "=========================\n$com\n";
-my $exec = `$com`; if ($exec) { exit $exec; }
+my $exec = `$com`; if ($?) { exit 2; }
 my $sfile = $tmpdir . "/" . $file;# print "sfile $sfile\n";
 if (-f $sfile) {copy ($sfile,$target);}
-exit `rm -rf $tmpdir`;
+`rm -rf $tmpdir`; 
+if ($?) { exit 2; }
+exit 0;

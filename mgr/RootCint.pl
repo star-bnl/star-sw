@@ -209,11 +209,8 @@ if ($h_files) {
   my $local_cint = basename($Cint_cxx);#  print "files = $#files\n";
   my $cmd  = "cd $DirName && rootcint -f $local_cint -c -DROOT_CINT -D__ROOT__ -I. $CPPFLAGS $h_files && rm -f $h_files";
   print "cmd = ",$cmd,"\n";
-  my $flag = `$cmd`;
+  my $flag = `$cmd`; if ($?) {exit 2;}
   
-}
-else {
-#    my $flag = `touch $Cint_cxx $Cint_h $LinkDef`;
 }
 exit(0);
 # last line
