@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.cxx,v 1.8 1999/06/27 22:45:27 fisyak Exp $
+ * $Id: StFtpcHit.cxx,v 1.9 1999/09/24 01:23:00 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.cxx,v $
- * Revision 1.8  1999/06/27 22:45:27  fisyak
- * Merge StRootEvent and StEvent
+ * Revision 1.9  1999/09/24 01:23:00  fisyak
+ * Reduced Include Path
+ *
+ * Revision 1.9  1999/09/24 01:23:00  fisyak
+ * Reduced Include Path
  *
  * Revision 1.8  1999/06/27 22:45:27  fisyak
  * Merge StRootEvent and StEvent
@@ -28,12 +31,12 @@
  * Revision 1.2  1999/01/15 22:53:42  wenaus
  * version with constructors for table-based loading
  *
-#include "tables/dst_point.h"
+ * Revision 2.5  1999/12/13 20:16:12  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
-static const Char_t rcsid[] = "$Id: StFtpcHit.cxx,v 1.8 1999/06/27 22:45:27 fisyak Exp $";
+#include "StGlobalTrack.h"
 #include "dst_point.h"
  * Changed method names xxxInCluster to xxxInHit
-static const Char_t rcsid[] = "$Id: StFtpcHit.cxx,v 1.8 1999/06/27 22:45:27 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StFtpcHit.cxx,v 1.9 1999/09/24 01:23:00 fisyak Exp $";
  * Revision 2.3  1999/11/09 19:35:09  ullrich
  * Memory now allocated using StMemoryPool via overloaded new/delete
  *
@@ -57,7 +60,7 @@ StFtpcHit::StFtpcHit(dst_point_st* pt)
 
 #include "StTrack.h"
 
-static const char rcsid[] = "$Id: StFtpcHit.cxx,v 1.8 1999/06/27 22:45:27 fisyak Exp $";
+static const char rcsid[] = "$Id: StFtpcHit.cxx,v 1.9 1999/09/24 01:23:00 fisyak Exp $";
 
 StMemoryPool StFtpcHit::mPool(sizeof(StFtpcHit));
 

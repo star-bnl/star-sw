@@ -1,5 +1,8 @@
-// $Id: StRootEventManager.cc,v 1.5 1999/07/24 00:25:50 fisyak Exp $
+// $Id: StRootEventManager.cc,v 1.6 1999/09/24 01:23:05 fisyak Exp $
 // $Log: StRootEventManager.cc,v $
+// Revision 1.6  1999/09/24 01:23:05  fisyak
+// Reduced Include Path
+//
 // Revision 1.5  1999/07/24 00:25:50  fisyak
 // Gene corrections
 //
@@ -62,7 +65,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
  * Removed remaining pieces of the RICH pixel table.
-#include "StChain/StChain.h"
+ *
  * Revision 2.3  2000/01/05 16:08:25  ullrich
  * Removed some unnecessary checks.
  *
@@ -158,7 +161,7 @@ TABLE_TYPE ##_st* StRootEventManager::returnTable_ ## TABLE_TYPE(long& nentries)
 RETURN_TABLE(dst_monitor_soft,monitor_soft)
 RETURN_TABLE(dst_monitor_hard,monitor_hard)
     nentries = tableWrap->GetNRows();\
-RETURN_TABLE(dst_TrgDet,TriggerDetectors)
+  else {\
 RETURN_TABLE(dst_event_header,event_header)
 RETURN_TABLE(dst_run_summary,run_summary)
 RETURN_TABLE(dst_run_header,run_header)

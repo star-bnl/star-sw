@@ -19,7 +19,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
 #include "StMaker.h"
-#include "tables/ScaTag.h"
+#include "ScaTag.h"
 
 class StEvent;
 class StRun;
@@ -53,7 +53,7 @@ public:
   void printTag(ostream& = cout);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeScaTagsMaker.h,v 1.3 1999/07/15 13:57:00 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeScaTagsMaker.h,v 1.4 1999/09/24 01:22:57 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEbyeScaTagsMaker, 1)
 };

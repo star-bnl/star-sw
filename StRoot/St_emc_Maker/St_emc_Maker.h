@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.h,v 1.7 1999/07/15 13:58:02 perev Exp $
+// $Id: St_emc_Maker.h,v 1.8 1999/09/24 01:23:39 fisyak Exp $
 // $Log: St_emc_Maker.h,v $
+// Revision 1.8  1999/09/24 01:23:39  fisyak
+// Reduced Include Path
+//
 // Revision 1.7  1999/07/15 13:58:02  perev
 // cleanup
 //
@@ -28,13 +31,13 @@
 #include "StMaker.h"
 #endif
 #include "TH2.h"
-#include "St_ems_hits_Table.h"
-#include "St_emc_pedestal_Table.h"
-#include "St_emc_adcslope_Table.h"
-#include "St_emc_calib_header_Table.h"
-#include "St_emc_hits_Table.h"
+#include "tables/St_ems_hits_Table.h"
+#include "tables/St_emc_pedestal_Table.h"
+#include "tables/St_emc_adcslope_Table.h"
+#include "tables/St_emc_calib_header_Table.h"
+#include "tables/St_emc_hits_Table.h"
 #include "StEmcHitCollection.h"
-#include "emc/inc/emc_def.h"
+#include "emc_def.h"
 
 class St_emc_Maker : public StMaker {
 private:
@@ -55,7 +58,7 @@ public:
   virtual void Set_mode (Int_t m = 0){m_mode = m;}; // *MENU*  
   St_DataSet     *getEmcCalib()   {return mEmcCalib;};
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_emc_Maker.h,v 1.7 1999/07/15 13:58:02 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_emc_Maker.h,v 1.8 1999/09/24 01:23:39 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_emc_Maker, 1)   //Macro
 };

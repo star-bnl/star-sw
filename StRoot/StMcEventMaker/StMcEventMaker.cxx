@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.6 1999/09/23 21:25:59 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.7 1999/09/24 01:23:18 fisyak Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.7  1999/09/24 01:23:18  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.6  1999/09/23 21:25:59  calderon
  * Added Log & Id
  * Modified includes according to Yuri
@@ -36,21 +39,13 @@
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 
-#include "tables/g2t_event.h"
-#include "tables/g2t_ftp_hit.h"
-#include "tables/g2t_svt_hit.h"
-#include "tables/g2t_tpc_hit.h"
-#include "tables/g2t_track.h"
-#include "tables/g2t_vertex.h"
+#include "tables/St_g2t_event_Table.h"
+#include "tables/St_g2t_ftp_hit_Table.h"
+#include "tables/St_g2t_svt_hit_Table.h"
+#include "tables/St_g2t_tpc_hit_Table.h"
+#include "tables/St_g2t_track_Table.h"
+#include "tables/St_g2t_vertex_Table.h"
 
-#include "St_g2t_event_Table.h"
-#include "St_g2t_ftp_hit_Table.h"
-#include "St_g2t_svt_hit_Table.h"
-#include "St_g2t_tpc_hit_Table.h"
-#include "St_g2t_track_Table.h"
-#include "St_g2t_vertex_Table.h"
-
-// #include "StMcEvent/StMemoryInfo.hh"
 
 #include "StMcEvent.hh"
 #include "StMcTrack.hh"
@@ -116,7 +111,7 @@ void StMcEventMaker::Clear(const char*)
 void StMcEventMaker::PrintInfo() {
     // StMcEventMaker - PrintInfo,
     printf("**************************************************************\n");
-    printf("* $Id: StMcEventMaker.cxx,v 1.6 1999/09/23 21:25:59 calderon Exp $\n");
+    printf("* $Id: StMcEventMaker.cxx,v 1.7 1999/09/24 01:23:18 fisyak Exp $\n");
     printf("**************************************************************\n");
 
    

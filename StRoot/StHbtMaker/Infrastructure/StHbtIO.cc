@@ -12,8 +12,8 @@
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 
-#include "float.h"    // these tell maximum values of types so we
-#include "limits.h"   // don't write the characters "inf" to our microDST
+#include <float.h>    // these tell maximum values of types so we
+#include <limits.h>   // don't write the characters "inf" to our microDST
 
 
 //------------------------- StHbtTrack -----------------------------------

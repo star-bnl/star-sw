@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.h,v 1.11 1999/08/26 17:30:38 wdeng Exp $
+// $Id: StKinkMaker.h,v 1.12 1999/09/24 01:23:36 fisyak Exp $
 // $Log: StKinkMaker.h,v $
+// Revision 1.12  1999/09/24 01:23:36  fisyak
+// Reduced Include Path
+//
 // Revision 1.11  1999/08/26 17:30:38  wdeng
 // Fix typo. Reorganize Make() function. Use shorter names for identifiers
 //
@@ -39,15 +42,15 @@
 #include "StKinkLocalTrack.hh"
 #include "StPhysicalHelixD.hh"
 
-#include <tables/St_tkf_tkfpar_Table.h>
-#include <tables/St_dst_track_Table.h>
-#include <tables/St_dst_vertex_Table.h>
-#include <tables/St_dst_tkf_vertex_Table.h>
+#include "tables/St_tkf_tkfpar_Table.h"
+#include "tables/St_dst_track_Table.h"
+#include "tables/St_dst_vertex_Table.h"
+#include "tables/St_dst_tkf_vertex_Table.h"
 
-#include <tables/St_tpt_track_Table.h>
-#include <tables/St_tte_eval_Table.h>
-#include <tables/St_g2t_track_Table.h>
-#include <tables/St_g2t_vertex_Table.h>
+#include "tables/St_tpt_track_Table.h"
+#include "tables/St_tte_eval_Table.h"
+#include "tables/St_g2t_track_Table.h"
+#include "tables/St_g2t_vertex_Table.h"
 
 class St_tkf_tkfpar;
 class St_dst_track;
@@ -64,7 +67,7 @@ using namespace std;
 class StKinkMaker : public StMaker {
  private:
   Bool_t            m_kinkEvalOn;   //switch for the evaluation
-  // static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.11 1999/08/26 17:30:38 wdeng Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.12 1999/09/24 01:23:36 fisyak Exp $";
   St_tkf_tkfpar    *m_tkfpar;          //!
 
   StKinkLocalTrack *myTrack1;          //! 
@@ -99,7 +102,7 @@ class StKinkMaker : public StMaker {
   virtual  void   kinkEvalOn() {kinkEval();} 
   virtual  void   kinkEvalOff(){kinkEval(kFALSE);}      
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.11 1999/08/26 17:30:38 wdeng Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.12 1999/09/24 01:23:36 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StKinkMaker, 1)   //StAF chain virtual base class for Makers
 };
     

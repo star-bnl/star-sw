@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.10 1999/09/17 22:38:03 lisa Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.11 1999/09/24 01:23:14 fisyak Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.11  1999/09/24 01:23:14  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.10  1999/09/17 22:38:03  lisa
  * first full integration of V0s into StHbt framework
  *
@@ -53,7 +56,7 @@
  **************************************************************************/
 
 #include "StHbtMaker/Reader/StStandardHbtEventReader.h"
-#include "StChain/StChain.h"
+#include "StChain.h"
 #include "TOrdCollection.h"
 
 

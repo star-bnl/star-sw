@@ -17,7 +17,7 @@ routines for sharing structures in VxWorks or other multi-threaded OS
 #define DS_PRIVATE
 #include "dstype.h"
 #ifdef VXWORKS
-#include "semLib.h"
+#include <semLib.h>
 SEM_ID errSemID = NULL;
 SEM_ID tidSemID = NULL;
 #endif

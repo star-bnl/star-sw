@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.40 1999/09/04 15:42:41 fine Exp $
+// $Id: St_tpt_Maker.cxx,v 1.41 1999/09/24 01:23:47 fisyak Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.41  1999/09/24 01:23:47  fisyak
+// Reduced Include Path
+//
 // Revision 1.40  1999/09/04 15:42:41  fine
 // St_XDFFIle include has been removed to break dependences
 //
@@ -124,7 +127,7 @@
 #include "St_tpt_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
-#include "StUtilities/StMessMgr.h"
+#include "StMessMgr.h"
 #include "tpc/St_tcl_Module.h"
 #include "tpc/St_tph_Module.h"
 #include "tpc/St_tpt_Module.h"
@@ -136,7 +139,7 @@
 #include "TH2.h"
 #include "TH3.h"
 #include "TNtuple.h"
-#include "St_type_index_Table.h"
+#include "tables/St_type_index_Table.h"
 #include "tpc/St_tfs_g2t_Module.h"  
 ClassImp(St_tpt_Maker)
   

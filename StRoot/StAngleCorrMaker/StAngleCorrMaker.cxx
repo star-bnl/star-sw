@@ -19,7 +19,7 @@
 #include "StAngleCorrMaker.h"
 #include "StTrackForPool.hh"
 
-#include "StChain/StChain.h"
+#include "StChain.h"
 #include "StRun.h"
 #include "StEvent.h"
 

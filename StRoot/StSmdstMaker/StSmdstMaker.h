@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.h,v 1.2 1999/07/15 13:57:25 perev Exp $
+// $Id: StSmdstMaker.h,v 1.3 1999/09/24 01:23:23 fisyak Exp $
 // $Log: StSmdstMaker.h,v $
+// Revision 1.3  1999/09/24 01:23:23  fisyak
+// Reduced Include Path
+//
 // Revision 1.2  1999/07/15 13:57:25  perev
 // cleanup
 //
@@ -24,7 +27,7 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-#include "St_smdst_v0_Table.h"
+#include "tables/St_smdst_v0_Table.h"
 
 class St_smdst_v0cut;
 class TH1F;
@@ -80,7 +83,7 @@ class StSmdstMaker : public StMaker {
    virtual Int_t  Init();              // Initialize analysis
    virtual Int_t  Make();              // Run analysis
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSmdstMaker.h,v 1.2 1999/07/15 13:57:25 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSmdstMaker.h,v 1.3 1999/09/24 01:23:23 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSmdstMaker, 1)   //StAF chain virtual base class for Makers
 };

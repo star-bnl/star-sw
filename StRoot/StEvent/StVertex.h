@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.h,v 1.7 1999/09/10 09:16:12 ullrich Exp $
+ * $Id: StVertex.h,v 1.8 1999/09/24 01:23:02 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -15,8 +15,11 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
- * Revision 1.7  1999/09/10 09:16:12  ullrich
- * Made position() and positionError() const methods.
+ * Revision 1.8  1999/09/24 01:23:02  fisyak
+ * Reduced Include Path
+ *
+ * Revision 1.8  1999/09/24 01:23:02  fisyak
+ * Reduced Include Path
  *
  * Revision 1.7  1999/09/10 09:16:12  ullrich
  * Made position() and positionError() const methods.
@@ -52,7 +55,7 @@
  * Fixed typo introduced at last check-in.
  *
  * Revision 2.2  2000/01/11 19:22:14  ullrich
-#include "tables/dst_vertex.h"
+#include "StEnumerations.h"
 #include "StThreeVectorF.hh"
 #include "StGlobalTrack.h"
 #include "dst_vertex.h"

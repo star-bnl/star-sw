@@ -1,5 +1,8 @@
-// $Id: StEmcHitCollection.cxx,v 1.6 1999/07/16 18:04:00 pavlinov Exp $
+// $Id: StEmcHitCollection.cxx,v 1.7 1999/09/24 01:23:38 fisyak Exp $
 // $Log: StEmcHitCollection.cxx,v $
+// Revision 1.7  1999/09/24 01:23:38  fisyak
+// Reduced Include Path
+//
 // Revision 1.6  1999/07/16 18:04:00  pavlinov
 // Little correction for StEclMake
 //
@@ -29,7 +32,7 @@
 #include "St_TableSorter.h"
 #include "TArrayF.h"
 #include "TArrayL.h"
-#include "emc/inc/emc_def.h"
+#include "emc_def.h"
 ClassImp(StEmcHitCollection)
 
 StEmcHitCollection::StEmcHitCollection() : St_DataSet("bemc") , StEmcGeom("bemc") {

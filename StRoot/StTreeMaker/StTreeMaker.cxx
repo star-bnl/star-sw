@@ -8,7 +8,6 @@
 #include "St_DataSetIter.h"
 #include "StTreeMaker.h"
 #include "TInterpreter.h"
-#include "St_particle_Table.h"
 
 ClassImp(StTreeMaker)
 

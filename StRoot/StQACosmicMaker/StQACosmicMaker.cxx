@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.cxx,v 1.9 1999/09/23 18:25:17 snelling Exp $
+ * $Id: StQACosmicMaker.cxx,v 1.10 1999/09/24 01:23:21 fisyak Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking etc.)
  *
  * $Log: StQACosmicMaker.cxx,v $
+ * Revision 1.10  1999/09/24 01:23:21  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.9  1999/09/23 18:25:17  snelling
  * Added QA hists for hitclus table and morphology table
  *
@@ -39,20 +42,7 @@
 #include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
-#include "St_TableSorter.h"
-#include "tpc/St_tcl_Module.h"
-#include "tpc/St_tph_Module.h"
-#include "tpc/St_tpt_residuals_Module.h"
-#include "tpc/St_xyz_newtab_Module.h"
-#include "St_tcc_morphology_Table.h"
-#include "TF1.h"
-#include "TH1.h"
-#include "TH2.h"
-#include "TNtuple.h"
-#include "TProfile.h"
 #include "TFile.h"
-#include "TString.h"
-
 //-----------------------------------------------------------------------
 
 ClassImp(StQACosmicMaker)
@@ -106,7 +96,7 @@ Int_t StQACosmicMaker::Make() {
 
 void StQACosmicMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StQACosmicMaker.cxx,v 1.9 1999/09/23 18:25:17 snelling Exp $\n");
+  printf("* $Id: StQACosmicMaker.cxx,v 1.10 1999/09/24 01:23:21 fisyak Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

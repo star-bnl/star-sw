@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.1 1999/05/14 18:48:14 ullrich Exp $
+ * $Id: StParticleTable.cc,v 1.2 1999/09/24 01:23:52 fisyak Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,15 +14,18 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
- * Revision 1.1  1999/05/14 18:48:14  ullrich
- * Initial Revision
+ * Revision 1.2  1999/09/24 01:23:52  fisyak
+ * Reduced Include Path
+ *
+ * Revision 1.3  1999/12/21 15:14:23  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.2  1999/09/24 01:23:52  fisyak
  * Reduced Include Path
  *
  * Revision 1.1  1999/05/14 18:48:14  ullrich
  * Initial Revision
-#include "ospace/stl/src/treeaux.cpp" // CC4.2 with ObjectSpace only
+ *
  **************************************************************************/
 #if defined(__SUNPRO_CC) && defined(OS_OBJECTSPACE) 
 #include "StParticleDefinition.hh"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFlowAnalysisMaker.cxx,v 1.5 1999/09/16 19:54:12 posk Exp $
+ * $Id: StFlowAnalysisMaker.cxx,v 1.6 1999/09/24 01:23:06 fisyak Exp $
  *
  * Author: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
  * Description:  Maker to analyze Flow using the FlowTags
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFlowAnalysisMaker.cxx,v $
+ * Revision 1.6  1999/09/24 01:23:06  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.5  1999/09/16 19:54:12  posk
  * Added more histograms.
  *
@@ -37,7 +40,6 @@
 #include "StThreeVector.hh"
 #include "StLorentzVector.hh"
 #include "StMaker.h"
-#include "tables/FlowTag.h"
 #include "StEvent.h"
 #include "StGlobalTrack.h"
 #include "StChain.h"
@@ -90,7 +92,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.5 1999/09/16 19:54:12 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.6 1999/09/24 01:23:06 fisyak Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 1.3 1999/09/23 21:25:50 calderon Exp $
+ * $Id: StMcEvent.hh,v 1.4 1999/09/24 01:23:15 fisyak Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 1.4  1999/09/24 01:23:15  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.3  1999/09/23 21:25:50  calderon
  * Added Log & Id
  * Modified includes according to Yuri
@@ -17,7 +20,7 @@
 #include <iostream.h>
 
 
-#include "tables/g2t_event.h"
+#include "tables/St_g2t_event_Table.h"
 
 
 #if !defined(ST_NO_NAMESPACES)

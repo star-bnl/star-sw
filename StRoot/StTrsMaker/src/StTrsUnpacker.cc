@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.cc,v 1.10 1999/07/25 02:14:17 lasiuk Exp $
+ * $Id: StTrsUnpacker.cc,v 1.11 1999/09/24 01:23:31 fisyak Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.cc,v $
+ * Revision 1.11  1999/09/24 01:23:31  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.10  1999/07/25 02:14:17  lasiuk
  * correct memory deallocation without modifying interface
  *
@@ -45,7 +48,7 @@
 
 #include "StGlobals.hh"
 
-#include "StTrsUnpacker.hh"
+#include "StTrsMaker/include/StTrsUnpacker.hh"
 
 StTrsUnpacker::StTrsUnpacker()
 {

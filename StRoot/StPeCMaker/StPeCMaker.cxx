@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.5 1999/07/15 13:57:20 perev Exp $
+// $Id: StPeCMaker.cxx,v 1.6 1999/09/24 01:23:19 fisyak Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.6  1999/09/24 01:23:19  fisyak
+// Reduced Include Path
+//
 // Revision 1.5  1999/07/15 13:57:20  perev
 // cleanup
 //
@@ -36,18 +39,18 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "StPeCMaker.h"
-#include "StChain/StChain.h"
+#include "StChain.h"
 #include "StRun.h"
 #include "StEvent.h"
 #include "StL0Trigger.h"
 #include "StGlobalTrack.h"
 #include "TH1.h"
 #include "SystemOfUnits.h"
-#include "/afs/rhic/star/packages/SL99b/pams/global/inc/phys_constants.h"
+#include "phys_constants.h"
 #include <vector>
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.5 1999/07/15 13:57:20 perev Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.6 1999/09/24 01:23:19 fisyak Exp $";
 
 double minv(double m1, double px1, double py1, double pz1, double m2, double px2, double py2, double pz2);
 void tagFiller(StEvent& event, HighPtTag_st& hptTag);

@@ -1,5 +1,8 @@
-// $Id: tagFiller.cc,v 1.3 1999/06/27 22:45:30 fisyak Exp $
+// $Id: tagFiller.cc,v 1.4 1999/09/24 01:23:20 fisyak Exp $
 // $Log: tagFiller.cc,v $
+// Revision 1.4  1999/09/24 01:23:20  fisyak
+// Reduced Include Path
+//
 // Revision 1.3  1999/06/27 22:45:30  fisyak
 // Merge StRootEvent and StEvent
 //
@@ -35,9 +38,9 @@
 #include "SystemOfUnits.h"
 #include "StEvent.h"
 #include "StGlobalTrack.h"
-#include "tables/HighPtTag.h"
+#include "HighPtTag.h"
 
-static const char rcsid[] = "$Id: tagFiller.cc,v 1.3 1999/06/27 22:45:30 fisyak Exp $";
+static const char rcsid[] = "$Id: tagFiller.cc,v 1.4 1999/09/24 01:23:20 fisyak Exp $";
 
 void tagFiller(StEvent& event, HighPtTag_st& hptTag)
 {

@@ -4,7 +4,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.h
-// $Id: StFlowTagMaker.h,v 1.4 1999/08/17 21:47:42 fisyak Exp $
+// $Id: StFlowTagMaker.h,v 1.5 1999/09/24 01:23:07 fisyak Exp $
 //
 // Description: 
 //  Maker to access and analyze StEvent and fill Tag for flow analysis
@@ -17,6 +17,9 @@
 //
 // History:
 // $Log: StFlowTagMaker.h,v $
+// Revision 1.5  1999/09/24 01:23:07  fisyak
+// Reduced Include Path
+//
 // Revision 1.4  1999/08/17 21:47:42  fisyak
 // iostream => iostream.h for HP
 //
@@ -28,10 +31,10 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include "StMaker.h"
-#include "tables/FlowTag.h"
+#include "FlowTag.h"
 #include "StEvent.h"
 #include "StGlobalTrack.h"
-#include "StChain/StChain.h"
+#include "StChain.h"
 #include "TMath.h"
 #include "TString.h"
 #include "TH1.h"

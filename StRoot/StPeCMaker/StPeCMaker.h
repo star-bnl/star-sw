@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.3 1999/07/15 13:57:21 perev Exp $
+// $Id: StPeCMaker.h,v 1.4 1999/09/24 01:23:19 fisyak Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.4  1999/09/24 01:23:19  fisyak
+// Reduced Include Path
+//
 // Revision 1.3  1999/07/15 13:57:21  perev
 // cleanup
 //
@@ -34,7 +37,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "StMaker.h"
-#include "tables/HighPtTag.h"
+#include "HighPtTag.h"
 #include "TH1.h"
 
 class StEvent;
@@ -81,7 +84,7 @@ public:
   HighPtTag_st* tag() {return theTag;};
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.3 1999/07/15 13:57:21 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.4 1999/09/24 01:23:19 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPeCMaker, 1)
 };

@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.8 1999/07/21 13:33:55 gans Exp $
+ * $Id: StRchMaker.cxx,v 1.9 1999/09/24 01:23:22 fisyak Exp $
  *
  * Author: Jon Gans
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 1.9  1999/09/24 01:23:22  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.8  1999/07/21 13:33:55  gans
  * *** empty log message ***
  *
@@ -46,7 +49,7 @@
  *
  * Revision 1.9  1999/09/24 01:23:22  fisyak
 // Data set definitions:
-#include "St_g2t_rch_hit_Table.h"
+#endif
 // Internal Rch
 
 // dst tables in $STAR/include/tables/
@@ -140,13 +143,13 @@ StRchMaker::StRchMaker(const char *name) : StMaker(name) {
 //     }
 	mTheRichReader = 0;
   printf("**************************************************************\n");
-  printf("* $Id: StRchMaker.cxx,v 1.8 1999/07/21 13:33:55 gans Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.9 1999/09/24 01:23:22 fisyak Exp $\n");
 	}
     AddData(new St_ObjectSet("StRichEvent", richCollection));
-  printf("* $Id: StRchMaker.cxx,v 1.8 1999/07/21 13:33:55 gans Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.9 1999/09/24 01:23:22 fisyak Exp $\n");
 }
 //-----------------------------------------------------------------
-  printf("* $Id: StRchMaker.cxx,v 1.8 1999/07/21 13:33:55 gans Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.9 1999/09/24 01:23:22 fisyak Exp $\n");
   printf("**************************************************************\n");
 Int_t StRchMaker::Finish() {  
     cout << "Delete the cluster finder" << endl;

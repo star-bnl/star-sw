@@ -16,7 +16,7 @@
 
 #include <string>
 #include "StHbtMaker/Reader/StHbtAsciiReader.h"
-//#include "StChain/StChain.h"
+//#include "StChain.h"
 //#include "StHbtMaker/Infrastructure/StHbtIO.cc"
 
 

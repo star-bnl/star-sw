@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StSubDetector.cc,v 1.5 1999/09/23 21:25:22 calderon Exp $
+ * $Id: StSubDetector.cc,v 1.6 1999/09/24 01:22:50 fisyak Exp $
  * $Log: StSubDetector.cc,v $
+ * Revision 1.6  1999/09/24 01:22:50  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.5  1999/09/23 21:25:22  calderon
  * Added Log & Id
  * Modified includes according to Yuri
@@ -10,7 +13,7 @@
  **************************************************************************/
 
 // #include "StThreeVector.hh"
-// #include "StEvent/StTpcHit.hh"
+// #include "StTpcHit.hh"
 #include "StThreeVectorF.hh"
 #include "StTpcHit.h"
 

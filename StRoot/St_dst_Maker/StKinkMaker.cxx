@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.19 1999/09/12 23:03:03 fisyak Exp $
+// $Id: StKinkMaker.cxx,v 1.20 1999/09/24 01:23:36 fisyak Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.20  1999/09/24 01:23:36  fisyak
+// Reduced Include Path
+//
 // Revision 1.19  1999/09/12 23:03:03  fisyak
 // Move parameters into makers
 //
@@ -63,10 +66,10 @@
 
 #include "StMessMgr.h"
 
-#include "pams/global/inc/StDetectorId.h"
-#include "pams/global/inc/StVertexId.h"
-#include "pams/global/inc/math_constants.h"
-#include "pams/global/inc/phys_constants.h"
+#include "StDetectorId.h"
+#include "StVertexId.h"
+#include "math_constants.h"
+#include "phys_constants.h"
 
 #include "PhysicalConstants.h"
 #include "StThreeVector.hh"

@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.h,v 1.8 1999/07/15 13:58:03 perev Exp $ 
+// $Id: St_ems_Maker.h,v 1.9 1999/09/24 01:23:40 fisyak Exp $ 
 // $Log: St_ems_Maker.h,v $
+// Revision 1.9  1999/09/24 01:23:40  fisyak
+// Reduced Include Path
+//
 // Revision 1.8  1999/07/15 13:58:03  perev
 // cleanup
 //
@@ -56,9 +59,9 @@
 #endif
 #include "TH2.h"
 #include "TH1.h"
-#include "emc/inc/emc_def.h"
+#include "emc_def.h"
 #include "St_emc_Maker/StEmcGeom.h"
-#include "St_emc_hits_Table.h"
+#include "tables/St_emc_hits_Table.h"
 
 class St_ems_control;
 class St_control_toadc;
@@ -109,7 +112,7 @@ public:
   void   setEEMC(Short_t key){mEEMC = key; if (Debug()) printmEEMC();}
   void   setHistControl(Short_t key) {mHistControl = key;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_ems_Maker.h,v 1.8 1999/07/15 13:58:03 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_ems_Maker.h,v 1.9 1999/09/24 01:23:40 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_ems_Maker, 1)  
 };

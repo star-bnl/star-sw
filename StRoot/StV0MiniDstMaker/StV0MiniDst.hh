@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MiniDst.hh,v 1.6 1999/09/02 09:04:56 jones Exp $
+ * $Id: StV0MiniDst.hh,v 1.7 1999/09/24 01:23:32 fisyak Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 04-Jun-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StV0MiniDst.hh,v $
+ * Revision 1.7  1999/09/24 01:23:32  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.6  1999/09/02 09:04:56  jones
  * Added StEvMiniDst class, New file handling, Partially implemented TTrees
  *
@@ -33,7 +36,7 @@
  ***********************************************************************/
 #ifndef StV0MiniDst_hh
 #define StV0MiniDst_hh
-#include "StAnalysisUtilities/StHFillObject.h"
+#include "StHFillObject.h"
 #include "StEvMiniDst.hh"
 #include "TClonesArray.h"
 

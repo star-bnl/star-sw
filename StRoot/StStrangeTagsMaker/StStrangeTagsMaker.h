@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.h,v 1.3 1999/07/15 13:57:29 perev Exp $
+ * $Id: StStrangeTagsMaker.h,v 1.4 1999/09/24 01:23:26 fisyak Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.h,v $
+ * Revision 1.4  1999/09/24 01:23:26  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.3  1999/07/15 13:57:29  perev
  * cleanup
  *
@@ -26,7 +29,7 @@
 #include <iostream.h>
 #include "TROOT.h"
 #include "StMaker.h"
-#include "tables/StrangeTag.h"
+#include "StrangeTag.h"
 class StEvent;
 
 class StStrangeTagsMaker : public StMaker {
@@ -54,7 +57,7 @@ private:
     Float_t         mMassla2;
     
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StStrangeTagsMaker.h,v 1.3 1999/07/15 13:57:29 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StStrangeTagsMaker.h,v 1.4 1999/09/24 01:23:26 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     ClassDef(StStrangeTagsMaker, 1)   // macro for rootcint
 };

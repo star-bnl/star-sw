@@ -1,7 +1,10 @@
 #ifndef StKinkLocalTrack_hh
 #define StKinkLocalTrack_hh
-// $Id: StKinkLocalTrack.hh,v 1.4 1999/08/26 17:30:51 wdeng Exp $
+// $Id: StKinkLocalTrack.hh,v 1.5 1999/09/24 01:23:35 fisyak Exp $
 // $Log: StKinkLocalTrack.hh,v $
+// Revision 1.5  1999/09/24 01:23:35  fisyak
+// Reduced Include Path
+//
 // Revision 1.4  1999/08/26 17:30:51  wdeng
 // Use shorter names for identifiers
 //
@@ -14,7 +17,7 @@
 #include "TObject.h"
 #include "StPhysicalHelixD.hh"
 #include "StThreeVectorD.hh"
-#include "tables/dst_track.h"
+#include "dst_track.h"
 
 #if !defined(ST_NO_NAMESPACES) 
 using namespace std;

@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.11 1999/09/18 00:56:33 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.12 1999/09/24 01:22:51 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.12  1999/09/24 01:22:51  fisyak
+// Reduced Include Path
+//
 // Revision 1.11  1999/09/18 00:56:33  fisyak
 // remove .root
 //
@@ -77,18 +80,18 @@
 #include "StChain.h"
 #include "St_XDFFile.h"
 #include "StMagF.h"
-#include "St_geant_Maker.h"
+#include "St_geant_Maker/St_geant_Maker.h"
 #include "StDbBroker.h"
-#include "St_db_Maker.h"
-#include "StTreeMaker.h"
-#include "StIOMaker.h"
+#include "St_db_Maker/St_db_Maker.h"
+#include "StTreeMaker/StTreeMaker.h"
+#include "StIOMaker/StIOMaker.h"
 //_____________________________________________________________________
 Char_t  *ChainOptions[] = {
   "FIRST"
  ,"SD97"   ,"SD98"   ,"Y1a"    ,"Y1b"    ,"Y1c"
  ,"ES99"   ,"ER99"   ,"Y1d"    ,"Y1e"    ,"Y2a"
  ,"Eval"   ,"OFF"    ,"XIN"    ,"XOUT"   ,"GSTAR"
- ,"TDAQ"   ,"FZIN"   ,"GEANT"
+ ,"TDAQ"   ,"FZIN"   ,"GEANT"  ,"UTIL"   
  ,"FieldOn","FieldOff","HalfField","ReverseField"
  ,"TPC"    ,"TSS"    ,"TRS"    ,"MINIDAQ","TFS"    ,"TCL"    ,"TPT"
  ,"SVT"    ,"SRS"    ,"STK"
@@ -124,6 +127,7 @@ Char_t *ChainComments[] = {
   "TPC DAQ chain",
   "read GSTAR fz-file",
   "initailize GEANT",
+  "Load StAnalysisUtilities",
   "Use nominal STAR field",
   "No Field option",
   "Half Field option",
@@ -259,6 +263,7 @@ Int_t StBFChain::Load()
   gSystem->Load("xdf2root");
   gSystem->Load("St_Tables");
   gSystem->Load("StUtilities");
+  if (kUTIL) gSystem->Load("StAnalysisUtilities");
   //gSystem->Load("libmsg");
   gSystem->Load("libtls");
   gSystem->Load("StDbBroker");

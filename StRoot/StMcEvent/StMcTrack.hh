@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.hh,v 1.3 1999/09/23 21:25:54 calderon Exp $
+ * $Id: StMcTrack.hh,v 1.4 1999/09/24 01:23:17 fisyak Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 1.4  1999/09/24 01:23:17  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.3  1999/09/23 21:25:54  calderon
  * Added Log & Id
  * Modified includes according to Yuri
@@ -14,7 +17,7 @@
 #include "StThreeVectorF.hh"
 
 
-#include "tables/g2t_track.h"
+#include "tables/St_g2t_track_Table.h"
 
 #include "StMcFtpcHitCollection.hh"
 #include "StMcVertexCollection.hh"

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.hh,v 1.3 1999/09/23 21:25:55 calderon Exp $
+ * $Id: StMcVertex.hh,v 1.4 1999/09/24 01:23:17 fisyak Exp $
  * $Log: StMcVertex.hh,v $
+ * Revision 1.4  1999/09/24 01:23:17  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.3  1999/09/23 21:25:55  calderon
  * Added Log & Id
  * Modified includes according to Yuri
@@ -11,7 +14,7 @@
 #ifndef StMcVertex_hh
 #define StMcVertex_hh
 #include <string>
-#include "tables/g2t_vertex.h"  // Need to include a header file for the table!!
+#include "tables/St_g2t_vertex_Table.h"  // Need to include a header file for the table!!
 
 class StThreeVectorF;
 class StMcTrack;

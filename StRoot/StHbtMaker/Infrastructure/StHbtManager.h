@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.h,v 1.5 1999/09/08 04:15:52 lisa Exp $
+ * $Id: StHbtManager.h,v 1.6 1999/09/24 01:23:12 fisyak Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.h,v $
+ * Revision 1.6  1999/09/24 01:23:12  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.5  1999/09/08 04:15:52  lisa
  * persistent microDST implementation tweaked to please fickle solaris details
  *
@@ -39,7 +42,7 @@
 #include "StHbtMaker/Infrastructure/StHbtAnalysis.h"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Base/StHbtEventReader.hh"
-#include "StChain/StMaker.h"
+#include "StMaker.h"
 
 class StHbtManager{
 

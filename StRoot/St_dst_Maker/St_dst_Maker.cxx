@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.26 1999/09/17 21:28:11 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.27 1999/09/24 01:23:36 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.27  1999/09/24 01:23:36  fisyak
+// Reduced Include Path
+//
 // Revision 1.26  1999/09/17 21:28:11  fisyak
 // Add l3Track to dst
 //
@@ -62,8 +65,8 @@
 
 #include "St_dst_Maker.h"
 
-#include "St_particle_Table.h"
-#include "St_hepe_gent_Table.h"
+#include "tables/St_particle_Table.h"
+#include "tables/St_hepe_gent_Table.h"
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -77,10 +80,10 @@
 #include "global/St_particle_dst_filler_Module.h"
 #include "global/St_dst_point_filler_Module.h"
 #include "global/St_fill_dst_event_summary_Module.h"
-#include "St_dst_summary_param_Table.h"
-#include "St_dst_run_summary_Table.h"
+#include "tables/St_dst_summary_param_Table.h"
+#include "tables/St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.26 1999/09/17 21:28:11 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.27 1999/09/24 01:23:36 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________

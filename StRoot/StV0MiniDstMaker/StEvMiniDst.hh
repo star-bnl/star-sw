@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StEvMiniDst.hh,v 1.1 1999/09/02 09:04:55 jones Exp $
+ * $Id: StEvMiniDst.hh,v 1.2 1999/09/24 01:23:32 fisyak Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 19-Aug-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StEvMiniDst.hh,v $
+ * Revision 1.2  1999/09/24 01:23:32  fisyak
+ * Reduced Include Path
+ *
  * Revision 1.1  1999/09/02 09:04:55  jones
  * Added StEvMiniDst class, New file handling, Partially implemented TTrees
  *
@@ -18,7 +21,7 @@
  ***********************************************************************/
 #ifndef StEvMiniDst_hh
 #define StEvMiniDst_hh
-#include "StAnalysisUtilities/StHFillObject.h"
+#include "StHFillObject.h"
 
 class StVertex;
 class StEvVertex;

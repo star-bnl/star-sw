@@ -1,5 +1,8 @@
-// $Id: St_LSEvent_Maker.cxx,v 1.3 1999/07/15 13:57:35 perev Exp $
+// $Id: St_LSEvent_Maker.cxx,v 1.4 1999/09/24 01:23:33 fisyak Exp $
 // $Log: St_LSEvent_Maker.cxx,v $
+// Revision 1.4  1999/09/24 01:23:33  fisyak
+// Reduced Include Path
+//
 // Revision 1.3  1999/07/15 13:57:35  perev
 // cleanup
 //
@@ -25,12 +28,12 @@
 #include "tpc/St_tcl_Module.h"
 #include "tpc/St_tph_Module.h"
 #include "tpc/St_tpt_sts_Module.h"
-#include "St_tfc_adcxyz_Table.h"
-#include "St_tpt_strack_Table.h"
-#include "St_tpt_res_Table.h"
+#include "tables/St_tfc_adcxyz_Table.h"
+#include "tables/St_tpt_strack_Table.h"
+#include "tables/St_tpt_res_Table.h"
 #include "TTree.h"
 #include "LSEvent/LSEvent.h"
-#include "St_type_index_Table.h"
+#include "tables/St_type_index_Table.h"
 
 ClassImp(St_LSEvent_Maker)
 
