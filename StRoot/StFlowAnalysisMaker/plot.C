@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.44 2003/01/16 16:02:30 posk Exp $
+// $Id: plot.C,v 1.45 2003/02/05 18:52:50 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -33,6 +33,9 @@ TCanvas* can;
 
 TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
+  Bool_t includeFtpc = kTRUE;
+  //Bool_t includeFtpc = kFALSE;
+
   bool multiGraph  = kFALSE;                            // set flags
   bool singleGraph = kFALSE;
   if (selN == 0) multiGraph = kTRUE;
@@ -45,7 +48,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
   // names of histograms made by StFlowAnalysisMaker
   // also projections of some of these histograms
-  const char* baseName[] = {
+  const char* baseName1[] = {
     "Flow_Res_Sel",
     "Flow_Trigger",
     "Flow_VertexZ",
@@ -150,13 +153,112 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_vEta_ScalarProd_Sel",
     "Flow_vPt_ScalarProd_Sel"
   };
-  const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles = 49 + 1;
 
-  // construct array of short names
+  const char* baseName2[] = {
+    "Flow_Res_Sel",
+    "Flow_Trigger",
+    "Flow_VertexZ",
+    "Flow_VertexXY2D",
+    "Flow_EtaSymVerZ2D_Tpc",
+    "Flow_EtaSym_Tpc",
+    "Flow_CTBvsZDC2D",
+    "Flow_Cent",
+    "Flow_Mult",
+    "Flow_OrigMult",
+    "Flow_MultOverOrig",
+    "Flow_MultEta",
+    "Flow_MultPart",
+    "Flow_Charge_Tpc",
+    "Flow_DcaGlobal_Tpc",
+    "Flow_Chi2_Tpc",
+    "Flow_FitPts_Tpc",
+    "Flow_MaxPts_Tpc",
+    "Flow_FitOverMax_Tpc",
+    //"Flow_EtaPtPhi3D",
+    "Flow_EtaPtPhi2D.PhiEta",
+    "Flow_EtaPtPhi2D.PhiPt",
+    "Flow_YieldAll2D",
+    "Flow_YieldAll.Eta",
+    "Flow_YieldAll.Pt",
+    "Flow_YieldPart2D",
+    "Flow_YieldPart.Eta",
+    "Flow_YieldPart.Pt",
+    //"Flow_Bin_Eta",
+    //"Flow_Bin_Pt",
+    "Flow_CosPhiLab",
+    "Flow_MeanDedxPos2D",
+    "Flow_MeanDedxNeg2D",
+//     "Flow_PidPiPlusPart",
+//     "Flow_PidPiMinusPart",
+//     "Flow_PidProtonPart",
+//     "Flow_PidAntiProtonPart",
+//     "Flow_PidKplusPart",
+//     "Flow_PidKminusPart",
+//     "Flow_PidDeuteronPart",
+//     "Flow_PidAntiDeuteronPart",
+//     "Flow_PidElectronPart",
+//     "Flow_PidPositronPart",
+    "Flow_PidMult",
+    "Flow_Phi_FarEast_Sel",                      // first multi graph hist
+    "Flow_Phi_Flat_FarEast_Sel",
+    "Flow_Phi_Weight_FarEast_Sel",
+    "Flow_Phi_East_Sel",
+    "Flow_Phi_Flat_East_Sel",
+    "Flow_Phi_Weight_East_Sel",
+    "Flow_Phi_West_Sel",
+    "Flow_Phi_Flat_West_Sel",
+    "Flow_Phi_Weight_West_Sel",
+    "Flow_Phi_FarWest_Sel",
+    "Flow_Phi_Flat_FarWest_Sel",
+    "Flow_Phi_Weight_FarWest_Sel",
+    "Flow_Mul_Sel",
+    "Flow_Yield2D_Sel",
+    "Flow_Yield.Eta_Sel",
+    "Flow_Yield.Pt_Sel",
+    "Flow_EtaPhi2D_Sel",
+    "Flow_EtaPhi.Eta_Sel",
+    "Flow_EtaPhi.Phi_Sel",
+    "Flow_Psi_Subs",
+    "Flow_Psi_Sel",
+//     "Flow_Psi_Diff_Sel",
+    "Flow_Psi_Sub_Corr_Sel",
+    "Flow_Psi_Sub_Corr_Diff_Sel",
+    "Flow_Phi_Corr_Sel",
+    "Flow_vObs2D_Sel",
+    "Flow_vObsEta_Sel",
+    "Flow_vObsPt_Sel",
+    "Flow_v2D_Sel",
+    "Flow_vEta_Sel",
+    "Flow_vPt_Sel",
+    "Flow_q_Sel",
+    "Flow_vObs2D_ScalarProd_Sel",
+    "Flow_vObsEta_ScalarProd_Sel",
+    "Flow_vObsPt_ScalarProd_Sel",
+    "Flow_v2D_ScalarProd_Sel",
+    "Flow_vEta_ScalarProd_Sel",
+    "Flow_vPt_ScalarProd_Sel"
+  };
+
+  int nSingles;
+  if (includeFtpc) {
+    const int nNames = sizeof(baseName1) / sizeof(char*);
+    nSingles = 49 + 1;
+  } else {
+    const int nNames = sizeof(baseName2) / sizeof(char*);
+    nSingles = 49 + 1 - 19;
+  }
+
+  // construct arrays of base and short names
+  char* baseName[]  = new char*[nNames];
   char* shortName[] = new char*[nNames];
   for (int n = 0; n < nNames; n++) {
+    baseName[n]  = new char[35];
     shortName[n] = new char[35];
+    if (includeFtpc) {
+      strcpy(baseName[n], baseName1[n]);
+    } else {
+      strcpy(baseName[n], baseName2[n]);
+    }
     strcpy(shortName[n], baseName[n]);
     char* cp = strstr(shortName[n],"_Sel");
     if (cp) *cp = '\0';                                  // truncate
@@ -676,6 +778,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.45  2003/02/05 18:52:50  posk
+// Added Bool_t includeFtpc
+//
 // Revision 1.44  2003/01/16 16:02:30  posk
 // Some plotting changes.
 //
