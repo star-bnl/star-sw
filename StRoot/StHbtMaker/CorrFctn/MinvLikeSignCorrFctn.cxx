@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvLikeSignCorrFctn.cxx,v 1.2 2001/01/23 15:12:55 laue Exp $
+ * $Id: MinvLikeSignCorrFctn.cxx,v 1.3 2001/01/23 16:40:52 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -38,19 +38,19 @@ MinvLikeSignCorrFctn::MinvLikeSignCorrFctn(char* title1, char* title2,
   sprintf(theTitle1,"MinvLikeSignCorrFctnNum_%s",title1);
    mNumerator = new StHbt1DHisto(theTitle1,theTitle2,nbins,MinvLo,MinvHi);
   // set up denominator
-  sprintf(theTitle1,"MinvLikeSignCorrFctnMixedEventDen_%s\n",title1);
+  sprintf(theTitle1,"MinvLikeSignCorrFctnMixedEventDen_%s",title1);
   mMixedEventDenominator = new StHbt1DHisto(theTitle1,theTitle2,nbins,MinvLo,MinvHi);
   // set up denominator
-  sprintf(theTitle1,"MinvLikeSignCorrFctnPositiveDen_%s\n",title1);
+  sprintf(theTitle1,"MinvLikeSignCorrFctnPositiveDen_%s",title1);
   mPositiveDenominator = new StHbt1DHisto(theTitle1,theTitle2,nbins,MinvLo,MinvHi);
   // set up denominator
-  sprintf(theTitle1,"MinvLikeSignCorrFctnNegativeDen_%s\n",title1);
+  sprintf(theTitle1,"MinvLikeSignCorrFctnNegativeDen_%s",title1);
   mNegativeDenominator = new StHbt1DHisto(theTitle1,theTitle2,nbins,MinvLo,MinvHi);
   // set up difference
-  sprintf(theTitle1,"MinvLikeSignCorrFctnMixedEventDif_%s\n",title1);
+  sprintf(theTitle1,"MinvLikeSignCorrFctnMixedEventDif_%s",title1);
   mMixedEventDifference = new StHbt1DHisto(theTitle1,theTitle2,nbins,MinvLo,MinvHi);
   // set up difference
-  sprintf(theTitle1,"MinvLikeSignCorrFctnLikeSignDif_%s\n",title1);
+  sprintf(theTitle1,"MinvLikeSignCorrFctnLikeSignDif_%s",title1);
   mLikeSignDifference = new StHbt1DHisto(theTitle1,theTitle2,nbins,MinvLo,MinvHi);
   // this next bit is unfortunately needed so that we can have many histos of same "title"
   // it is neccessary if we typedef StHbt1DHisto to TH1d (which we do)
