@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.cxx,v 1.11 2004/07/02 01:51:09 perev Exp $
+ * $Id: StMuIOMaker.cxx,v 1.12 2004/10/19 01:46:46 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  * Made it integrated to StIOMaker for applying Grid Collector 
@@ -108,7 +108,7 @@ int StMuIOMaker::Make(){
 int StMuIOMaker::Make(int index){
   DEBUGMESSAGE("");
 // as default clear(0)
-  clear();
+  //clear();
   DEBUGVALUE3(index);
   mCurrentIndex = index;
   DEBUGVALUE3(mNumberOfEvents);
@@ -293,6 +293,9 @@ void StMuIOMaker::closeMuWrite(){
 /***************************************************************************
  *
  * $Log: StMuIOMaker.cxx,v $
+ * Revision 1.12  2004/10/19 01:46:46  mvl
+ * Removed call to StMuDstMaker::clear() in Make() (Obsolete)
+ *
  * Revision 1.11  2004/07/02 01:51:09  perev
  * Wei-Ming Zhang developments
  *
