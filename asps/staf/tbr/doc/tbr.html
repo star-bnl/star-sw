@@ -16,21 +16,25 @@ It is the simplest way currently available to look at dynamic tables.
 It make simple histograms.  Its design is modularized, so that, eg,
 you can apply cuts while making histograms.
 It runs both<ul>
-<li>inside of TAS++ (both static and dynamic tables)
+<li>inside of STAF
 <li>at the UNIX prompt (.xdf files)
 </ul>
 
 <h2>To run inside of TAS++</h2>
 The table browser is available in TAS++, but not in the "regular"
 TAS.  (TAS++ is TAS with a GUI interface.) To make TAS++ instead
-of TAS, uncomment the MOTIF:= line in your bin/Makefile.
-After you have the TAS prompt, to bring up the browser type
-<pre>                  dspace/show -b</pre>
+of TAS, uncomment the MOTIF:= line in your bin/Makefile,
+and add tbr at the beginning of LHS of the the ASPS line in
+your Makefile.control.
+After you have the STAF prompt, to bring up the browser type
+<pre>                  tbr/motif/viewdataset
+</pre>
 
 <h2>To run at the UNIX prompt</h2>
-From the UNIX prompt type
-<pre>        /u2/ward/tbr/bin/$STAR_ARCH/tbr myfile.xdf</pre>
-You can generate <code>.xdf</code> files from TAS tables by
+From the UNIX prompt type (if tbr is not in your PATH, contact
+starlib@bnl.gov)
+<pre>        tbr myfile.xdf</pre>
+You can generate <code>.xdf</code> files from STAF tables by
 typing, for example,
 <pre>        data_io/write myfile.xdf xdf table1 table2</pre>
 

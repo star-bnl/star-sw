@@ -35,12 +35,14 @@
 #include "brow.h"
 #include "x.h"
 #define CUTS_WIDTH 50
+#define BUF 1000
 /******************************************************  GLOBALS  **/
 extern int gNDs;
-int gToFile,gTruncateStrings=7;
+int gCallBackData,gNVisDump,gOutType,gTruncateStrings=7;
 FILE *gDump;
 int gLastWhWin=-10,gDone2,gDone;
 myBool gBlurb2,gBlurb1;
+char *gColor;
 char *gBlurb7="Click on the abbreviation (to\n\
 expand/contract) to the left.  Do not click\n\
 directly on the names of datasets.  (You can\n\
@@ -53,7 +55,13 @@ char *gMess0=
     on the abbreviation \"TB\") of the table\n\
     which contains this column.";
 Widget gSecondLabel,gCutsPopup,gProgressPopup,gCutsText,gProgressScale;
+Widget gColorSelPopup;
 /******************************************************  PROTOTYPES  **/
+void writeTheVisualization(void);
+int ConvertToVisData(char*,int,int count);
+void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad);
+void VisHelpCB(Widget w,caddr_t cld,caddr_t cad);
+void TableName(int wh_gDs,char *name);
 void SetHilite(int control,int whWin,int lineNum);
 myBool TableHasMoreThanZeroRows(int tlm);
 void HelpCutsCB(Widget w,caddr_t cld,caddr_t cad);
@@ -73,7 +81,7 @@ void RunTheRows(myBool,int whWin,void (*fnct)());
 void MakeWindow(int,int,int);
 Widget Column(Widget parent);
 Widget Row(Widget parent);
-void CreateMenuItems(Widget mbar,int whichWindow);
+void CreateMenuItems(char *tableName,Widget mbar,int whichWindow);
 XtCP TextCB(Widget w,caddr_t cld,caddr_t cad);
 void Say(char *mess);
 /***********************************************************  FUNCTIONS  **/
@@ -221,13 +229,60 @@ void ReadCalcAve(void) {
 }
 void DoOnce2(void) {
   ReadCalcAve(); /* SendMail(); */
-  gLast=-1; gNGraphicsUp=0; gNWin=0;
+  gLast=-1; gNGraphicsUp=0; gNWin=0; gNVisDump=0; gColor="White";
 }
 XtCP CutsCancelCB(Widget w,caddr_t cld,caddr_t cad) {
   gDone2=63;
 }
 XtCP CutsOkCB(Widget w,caddr_t cld,caddr_t cad) {
   gDone2=7;
+}
+char *Color(int ii) {
+  char *color;
+    switch(ii) {
+      case 0: color="Red"; break; case 1: color="Pink"; break;
+      case 2: color="Yellow"; break; case 3: color="Green"; break;
+      case 4: color="Blue"; break; case 5: color="Purple"; break;
+      case 6: color="White"; break; case 7: color="Black"; break;
+      case 8: color="Quit"; break;
+    }
+  return color;
+}
+XtCP RadioCB(Widget w,caddr_t cld,caddr_t cad) {
+  int which = (int) cld;
+  XmToggleButtonCallbackStruct *state=(XmToggleButtonCallbackStruct*) cad;
+  if(state->set) {
+    gColor=Color(which);
+  }
+}
+XtCP ColorSelOkCB(Widget w,caddr_t cld,caddr_t cad) {
+  XtPopdown(gColorSelPopup);
+  OneLnPerRowCB((Widget)100,(caddr_t)gCallBackData,(caddr_t)100);
+}
+XtCP ColorSelCancelCB(Widget w,caddr_t cld,caddr_t cad) {
+  XtPopdown(gColorSelPopup);
+}
+void PrepareColorSelPopup() {
+  Arg args[24]; Widget col,button,rad; int nn,ii; char *color;
+  nn=0;
+  gColorSelPopup=XtCreatePopupShell("",transientShellWidgetClass,gMainWindow,
+  args,nn);
+  col=Column(gColorSelPopup);
+  rad=XmCreateRadioBox(col,"radio_box",NULL,0);
+  for(ii=0;;ii++) {
+    color=Color(ii);
+    if(!strcmp(color,"Quit")) break;
+    button=XtVaCreateManagedWidget(color,xmToggleButtonGadgetClass,rad,NULL);
+    XtAddCallback(button,XmNvalueChangedCallback,(XtCP)RadioCB,(XtPointer)ii);
+  }
+  XtManageChild(rad);
+  button=XmCreatePushButton(col," OK ",NULL,0);
+  XtManageChild(button);
+  XtAddCallback(button,XmNactivateCallback,(XtCP)ColorSelOkCB,NULL);
+  button=XmCreatePushButton(col," Cancel ",NULL,0);
+  XtManageChild(button);
+  XtAddCallback(button,XmNactivateCallback,(XtCP)ColorSelCancelCB,NULL);
+  XtManageChild(col);
 }
 void PrepareCutsPopup() {
   Arg args[24];
@@ -347,6 +402,7 @@ void Say(char *mess) {
   XtManageChild(mess_box);
 }
 void MakeMenuItem(int actionNumber,Widget mpane,char *item,XtCP cb) {
+  /* actionNumber gets translated into whAct in several callback fncts */
   Widget but;
   but=XmCreatePushButton(mpane,item,NULL,0);
   XtManageChild(but);
@@ -380,9 +436,6 @@ void Write(char *mess,int whWin) {
     Complain5(); gWin[whWin]->textOutput[0]='\0'; gBreakRowsLoop=TRUE;
   }
   strcat(gWin[whWin]->textOutput,mess);
-  /*-------------------------------------------------------------
-  XmTextSetString(gWin[whWin]->txtWidWrite,gWin[whWin]->textOutput);
-  -------------------------------------------------------------*/
   XmTextInsert(gWin[whWin]->txtWidWrite,
       (XmTextPosition)strlen(gWin[whWin]->textOutput),mess);
   XmTextSetInsertionPosition(gWin[whWin]->txtWidWrite,
@@ -482,6 +535,7 @@ char *ColName(int ln,int whWin) {
   for(ii=0;ii<len;ii++) {
     if(nl>=ln) break; if(gWin[whWin]->textClickPart[ii]=='\n') nl++;
   }
+  if(ii>=len) return NULL;
   strncpy(gPass,(gWin[whWin]->textClickPart)+ii,40); gPass[38]='\0';
   rr=strstr(gPass,"( "); if(rr!=NULL) rr[1]='@';
   cc=strtok(gPass," ");
@@ -609,7 +663,7 @@ void DrawHist(int whWin) {
   DrawYaxisTicks(minnY,maxxY,tsY);
   ExposeCB(junk1,junk2,junk3);
 }
-void SayError0(void) {
+void SayError0(int codePos) {
  Say("\
  You have to highlight at least one column\n\
  so I'll have something to output.\n\
@@ -695,18 +749,72 @@ void ConvertToHex(char *out,float val) {
   for(ii=WIDE+14;ii>=0;ii--) buf[ii]=' ';
   buf[WIDE-4]='\0'; strcat(buf,out); strcpy(out,buf);
 }
+int IsAVisualizationColumn(char *xx) {
+  if(!strcmp(gWin[gRunWhWin]->tableName,"tpt_track")) {
+    if(!strcmp(xx,"id")) return 7;
+    if(!strcmp(xx,"q")) return 7;
+    if(!strcmp(xx,"r0")) return 7;
+    if(!strcmp(xx,"phi0")) return 7;
+    if(!strcmp(xx,"z0")) return 7;
+    if(!strcmp(xx,"tanl")) return 7;
+    if(!strcmp(xx,"psi")) return 7;
+    if(!strcmp(xx,"invp")) return 7;
+  } else if(!strcmp(gWin[gRunWhWin]->tableName,"tphit")) {
+    if(!strcmp(xx,"id")) return 7;
+    if(!strcmp(xx,"x")) return 7;
+    if(!strcmp(xx,"y")) return 7;
+    if(!strcmp(xx,"z")) return 7;
+  } else if(!strcmp(gWin[gRunWhWin]->tableName,"egr_globtrk")) {
+    if(!strcmp(xx,"icharge")) return 7;
+    if(!strcmp(xx,"r0")) return 7;
+    if(!strcmp(xx,"id")) return 7;
+    if(!strcmp(xx,"phi0")) return 7;
+    if(!strcmp(xx,"z0")) return 7;
+    if(!strcmp(xx,"tanl")) return 7;
+    if(!strcmp(xx,"psi")) return 7;
+    if(!strcmp(xx,"invpt")) return 7;
+    if(!strcmp(xx,"xlast(1")) return 7;
+    if(!strcmp(xx,"xlast(2")) return 7;
+    if(!strcmp(xx,"xlast(3")) return 7;
+  } else {
+    Err(996); /* The menu item should only appear for proper tables. */
+  }
+  return 0;
+}
+void SetHiliteListForVisDump(void) {
+  char *cc; int nn=0,ii;
+  /* This function sets the interior highlight list to correspond to
+  ** what is expected by BrowDump2Vis.  This external program may be
+  ** internalized later.  The interior list is reset later elsewhere
+  ** to re-correspond to what the user has hilited in the table window's
+  ** list of columns. */
+  if(gDump) fprintf(gDump,"List of columns:\n");
+  for(ii=0;;ii++) {
+    cc=ColName(ii,gRunWhWin);
+    if(!cc) break;
+    if(!IsAVisualizationColumn(cc)) continue;
+    gWin[gRunWhWin]->hlLst[nn++]=ii;
+    if(gDump) fprintf(gDump,"%s ",cc);
+  }
+  if(gDump) fprintf(gDump,"\n");
+  gWin[gRunWhWin]->nhlLst=nn;
+}
 void RunValue(size_t row) {
-  int fo=0,tt,hlLstIx,lnfhl,irow=row; float val;
-  char tt2[60],format[22],tmp[100],buf[422];
-  sprintf(buf,"%s%6d",gSumCol,row+1);
-  if(strlen(buf)!=EXT) {
-    PP"Table browser fatal error 611p.\n");
-    PP"buf=%s, len should be %d.\n",buf,EXT); gDone=7; return;
+  int i,fo=0,tt,hlLstIx,lnfhl,irow=row;
+  float val;
+  char tt2[60],format[22],tmp[100],buf[BUF+2];
+  if(gOutType==15) *buf=0;
+  else {
+    sprintf(buf,"%s%6d",gSumCol,row+1);
+    if(strlen(buf)!=EXT) {
+      PP"Table browser fatal error 611p.\n");
+      PP"buf=%s, len should be %d.\n",buf,EXT); gDone=7; return;
+    }
   }
   if(!gTruncateStrings) strcat(buf," ");
   for(hlLstIx=0;hlLstIx<gWin[gRunWhWin]->nhlLst;hlLstIx++) {
     lnfhl=gWin[gRunWhWin]->hlLst[hlLstIx];
-    if(!gWin[gRunWhWin]->isHilited[lnfhl]) Err( 60);
+    if(!gWin[gRunWhWin]->isHilited[lnfhl]&&gOutType!=15) Err( 60);
     fo++;
     if(gWin[gRunWhWin]->tlm[lnfhl]<0) Err( 51);
     val=ValueWrapper(gWin[gRunWhWin]->wh_gDs,
@@ -726,24 +834,35 @@ void RunValue(size_t row) {
       }
       sprintf(tt2,format,gStr);
     } else if(gVWType==VWNUMBER) {
-      Format(WIDE-1,tmp,val); sprintf(tt2,format,tmp);
+      if(gOutType==15) {
+        sprintf(tmp," %g",val);
+        if(strstr(tmp,".")) sprintf(tt2,"%10s",tmp);
+        else sprintf(tt2,"%4s",tmp);
+      }
+      else { Format(WIDE-1,tmp,val); sprintf(tt2,format,tmp); }
     } else if(gVWType==VWHEX) {
       ConvertToHex(tt2,val);
     }
-    strcat(buf,tt2);
+    if(strlen(buf)+strlen(tt2)>BUF) Err(998); strcat(buf,tt2);
   }
   if(fo>0) {
     strcat(buf,"\n");
-    if(gToFile) { if(gDump) fprintf(gDump,"%s",buf); }
-    else Write(buf,gRunWhWin);
-  }
-  else if(gRunNRowsDone==0) SayError0();
+    if(gOutType==3||gOutType==15) {
+      if(gDump) fprintf(gDump,"%s",buf);
+    }
+    else if(gOutType==0) Write(buf,gRunWhWin);
+    else Err(155);
+  } else if(gRunNRowsDone==0) SayError0(__LINE__);
 }
 int NumRows(int whWin) {
   return ((int)(gWin[whWin]->nRow));
 }
+void VisFileCB(Widget w,caddr_t cld,caddr_t cad) {
+  gCallBackData=(int)cld;
+  XtPopup(gColorSelPopup,XtGrabNone);
+}
 void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
-  int whAct,whWin; char act[111];
+  int e,whAct,whWin; char act[311];
   static int whActS,whWinS;
   void (*runFunc)();
   if((int)w==2&&(int)cld==5&&(int)cad==14) { whAct=whActS; whWin=whWinS; }
@@ -752,24 +871,44 @@ void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
   gLastWhWin=whWin;
   gRunWhWin=whWin; if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(128);
   switch(whAct) {
-    case 0: strcpy(act,"Value"); runFunc=RunValue; gToFile=0;
+    case 0: strcpy(act,"Value"); runFunc=RunValue; gOutType=0;
       gDump=NULL; break;
-    case 1: strcpy(act,"Value"); runFunc=RunValue; gToFile=7; 
+    case 1: strcpy(act,"Value"); runFunc=RunValue; gOutType=3; 
       gDump=fopen(TXTOUT,"w");
       if(gDump)
           fprintf(gDump,"%s\n",XmTextGetString(gWin[whWin]->txtWidWriteH));
       break;
+    case 2: 
+      strcpy(act,"Value"); runFunc=RunValue; gOutType=15;
+      gDump=fopen(".tbr.temp","w");
+      if(!gDump) { PP"Can't write file.\n"); Err(994); }
+      fprintf(gDump,"=== %s, from table %s\n",
+      gColor,gWin[whWin]->tableName); break;
     default: Err(129);
   }
   sprintf(gSumCol,"%6s ",act); /* for passing to runFunc */
   gRunNRowsDone=0;
   RunTheRows(FALSE,whWin,runFunc);
-  if(gDump) fclose(gDump);
+  if(gDump) {
+    fclose(gDump);
+    if(gOutType==15) {
+      e=ConvertToVisData("xxx",0,gNVisDump++);
+      if(e) { PP"e=%d.\n",e); Err(991); }
+    }
+  }
   if(gRunNRowsDone==0&&gDone2<10) {
     Say("No rows were\nselected by \"ROW SELECTION\".");
   } else {
     if(whAct==1) {
       sprintf(act,"Your output file is %s.\n",TXTOUT); Say(act);
+    }
+    if(whAct==2) {
+      sprintf(act,"The color was >>  %s  <<.\nOutput file = %s.\n",
+      gColor,"vis.dump");
+      strcat(act,"You can add other tables besides\n");
+      strcat(act,gWin[whWin]->tableName);
+      strcat(act,".");
+      Say(act);
     }
   }
   whActS=whAct; whWinS=whWin;
@@ -839,13 +978,14 @@ void OneLnAllRowsCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
   if(gMax==gMin) { gMax=gMin+0.1*fabs(gMin); gMin=gMin-0.1*fabs(gMin); }
   if(gMax==gMin) { gMax+=1; gMin-=1; }
   switch(whAct) {
-    case 0: if(fo==0) SayError0();
+    case 0: if(fo==0) SayError0(__LINE__);
       else { strcat(sumCol,"\n"); Write(sumCol,whWin); } break;
     case 1: break;
     case 2:
       if(gDone2<11) {
         for(ii=HIST-1;ii>=0;ii--) gHist[ii]=0;
-        if(fo==0) { SayError0(); return; } RunTheRows(TRUE,whWin,RunHistFill);
+        if(fo==0) { SayError0(__LINE__); return; }
+        RunTheRows(TRUE,whWin,RunHistFill);
       }
       break; /* 950709, FALSE->TRUE */
     default: Err(126);
@@ -891,6 +1031,7 @@ void Complain6(void) {
  ");
 }
 void RunTheRows(myBool skipInit,int whWin,void (*fnct)()) {
+  int h,nsave,save[MAX_LINES_CLICK_PART];
   size_t row,start,end; char cuts[MAX_CUTS_STRING];
   static char ba[MAXROW_DIV_BY_8];
   if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(109);
@@ -905,12 +1046,22 @@ void RunTheRows(myBool skipInit,int whWin,void (*fnct)()) {
     strcpy(gCuts+COL-8," etc...");
   }
   gBreakRowsLoop=FALSE;
+  if(gOutType==15) {
+    nsave=gWin[gRunWhWin]->nhlLst;
+    for(h=0;h<gWin[gRunWhWin]->nhlLst;h++) save[h]=gWin[gRunWhWin]->hlLst[h];
+    SetHiliteListForVisDump();
+  }
   for(row=start;row<=end;row++) {
     /* ActionCB/RunAverage are a simple example of how to use this */
     if(gWin[whWin]->useCuts) { if(!dsuRowPassedCuts(ba,(long)row)) continue; }
     fnct(row);
     gRunNRowsDone++;
     if(gBreakRowsLoop) break;
+  }
+  if(gOutType==15) {
+    gWin[gRunWhWin]->nhlLst=nsave;
+    for(h=0;h<gWin[gRunWhWin]->nhlLst;h++)
+        gWin[gRunWhWin]->hlLst[h]=save[h];
   }
 }
 void DumpPsCB(Widget w,caddr_t cld,caddr_t cad) {
@@ -934,7 +1085,7 @@ void SkipCB(Widget w,caddr_t cld,caddr_t cad) {
 void NotTruncCB(Widget w,caddr_t cld,caddr_t cad) {
  gTruncateStrings=0;
  Say("\
- Warning: This destroys alignment of the columns\n\
+ This destroys alignment of the columns\n\
  in all browser windows.\n");
 }
 void TruncCB(Widget w,caddr_t cld,caddr_t cad) {
@@ -943,6 +1094,19 @@ void TruncCB(Widget w,caddr_t cld,caddr_t cad) {
 void SigFigCB(Widget w,caddr_t cld,caddr_t cad) { /* pops it up */
   Say("This does not work yet.");
   /* XtPopup(gSigFigScalePopup,XtGrabNone); */
+}
+void VisHelpCB(Widget w,caddr_t cld,caddr_t cad) {
+ Say("\
+ 1. Select rows in upper right corner.\n
+ 2. Choose menu item 'Write visualizer file'.\n
+ 3. OPTIONAL: Repeat 1 to 2.*\n
+ 4. OPTIONAL: Repeat 1 to 3 with a different table**
+    (to change tables, go back to the primary window).\n
+ 5. FTP the resultant file (vis.dump) to the machine
+    where you visualize.\n\n
+    *Eg, to color pions green and electrons red.\n
+    **Eg, to visualize hits and tracks together.\n
+ ");
 }
 void HelpSelTabCB(Widget w,caddr_t cld,caddr_t cad) {
  Say("\
@@ -999,7 +1163,13 @@ void HelpBugRptCB(Widget w,caddr_t cld,caddr_t cad) {
 #else
 #define QUITSTRING "Close all browser windows"
 #endif
-void CreateMenuItems(Widget mbar,int type) {
+int VisualizableTable(char *name) {
+  if(!strcmp(name,"tpt_track")) return 7;
+  if(!strcmp(name,"egr_globtrk")) return 7;
+  if(!strcmp(name,"tphit")) return 7;
+  return 0;
+}
+void CreateMenuItems(char *tableName,Widget mbar,int type) {
   register int nn; Arg args[19]; Widget mpane;
   mpane=XmCreatePulldownMenu(mbar,"a2",args,0);
   if(type==WIN_TYPE_PRIMARY) {
@@ -1057,6 +1227,12 @@ void CreateMenuItems(Widget mbar,int type) {
   }
   MakeMenuItem(NOTUSED,mpane,"Talk to programmer",(XtCP)HelpBugRptCB);
   FinishThisMenu(mbar,mpane,"Help ");
+  if(VisualizableTable(tableName)) {
+    mpane=XmCreatePulldownMenu(mbar,"a2",args,0);
+    MakeMenuItem(NOTUSED,mpane,"Help.",(XtCP)VisHelpCB);
+    MakeMenuItem(2,mpane,"Write visualizer file.",(XtCP)VisFileCB);
+    FinishThisMenu(mbar,mpane,"Visualization ");
+  }
 
 }
 void SetToPrimaryInfo(char *xx,int max) {
@@ -1127,12 +1303,7 @@ void AddToHiliteList(int whWin,int lineNum) {
   int ii;
   for(ii=gWin[whWin]->nhlLst-1;ii>=0;ii--) {
     if(gWin[whWin]->hlLst[ii]==lineNum) {
-      return;
-      /*------- so user can click twice on same line in primary window
-      PP"I am being asked to add line# %d to my highlight list for\n",lineNum);
-      PP"window %d, but it is already on the list.\n",whWin);
-      Err(xxx);
-      -----------------------------------------------*/
+      return; /*so user can click twice on same line in primary window*/
     }
   }
   ii=gWin[whWin]->nhlLst;
@@ -1417,7 +1588,8 @@ void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
   }
   XtManageChild(mw);
   mbar=XmCreateMenuBar(mw,"mbar",args,0); XtManageChild(mbar);
-  CreateMenuItems(mbar,type);
+  if(type==WIN_TYPE_TABLE) TableName(wh_gDs,name); else strcpy(name,"BadType");
+  CreateMenuItems(name,mbar,type);
   gWin[gNWin]=malloc(sizeof(WINDOW_INFO)); if(gWin[gNWin]==0) Err(100);
   for(ii=MAX_LINES_CLICK_PART-1;ii>=0;ii--) gWin[gNWin]->isHilited[ii]=FALSE;
   gWin[gNWin]->win_type=type; ver=Column(mw);
@@ -1530,7 +1702,7 @@ void DoXStuff(void) {
   "starbrowser",applicationShellWidgetClass,gDisplay,args,nn);
   PP"MakeWindow()\n");
   MakeWindow(0,0,WIN_TYPE_PRIMARY);
-  PrepareProgressPopup(); PrepareCutsPopup();
+  PrepareProgressPopup(); PrepareCutsPopup(); PrepareColorSelPopup();
   PP"XtRealizeWidget()\n");
   haveInited=TRUE;
   XtRealizeWidget(gAppShell);

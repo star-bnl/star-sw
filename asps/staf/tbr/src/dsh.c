@@ -192,6 +192,9 @@ void SetToDatasetInfo(int wh_gDs,char *xx,int max) { /* BBB max unused */
   /* if(!dsDatasetMaxEntryCount(&nCol,gDs[wh_gDs]->dsPtr)) Err( 37); */
   sprintf(buf,"Max Number of Tables: %s\n","???"); strcat(xx,buf);
 }
+void TableName(int wh_gDs,char *name) {
+  strcpy(name,gDs[wh_gDs]->name);
+}
 void SetToTableInfo(char *name,size_t *nRow,int wh_gDs,char *xx,int max) {
   /* BBB max unused */
   char buf[100]; size_t nCol;
@@ -568,6 +571,75 @@ void UpdateUsageLog(void) {
     } fclose(ff);
   }
   system("rm UiR77xEe3T 2> /dev/null"); system("rm UiR77xEe3t 2> /dev/null");
+}
+/* float Value(int *dt,DS_DATASET_T *tp,size_t colNum,int row,int ss); */
+int WriteTempTphit(int *nlines,DS_DATASET_T *tphit) {
+  FILE *ff; int toGo;
+  char *colName[]={ "id", "x", "y", "z", "quit" };
+  size_t nRow,colNum; int col,dt,row; float val;
+  ff=fopen(".tbr.temp","w"); if(!ff) return 5;
+  fprintf(ff,"=== Red, from table tphit\n");
+  fprintf(ff,"List of columns:\n");
+  fprintf(ff,"id x y z\n");
+  if(!dsTableRowCount(&nRow,tphit)) return 2;
+  PP"Number of rows in tphit = %d\n",nRow); (*nlines)=nRow;
+  for(row=0;row<nRow;row++) {
+    toGo=nRow-row;
+    if(toGo%9000==0||(row<100&&row%10==0)) 
+        PP"Phase I, rows to go, tphit = %d\n",toGo);
+    for(col=0;;col++) {
+      if(!strcmp(colName[col],"quit")) break;
+      if(!dsFindColumn(&colNum,tphit,colName[col])) return 1;
+      val=Value(&dt,tphit,colNum,row,0);
+      fprintf(ff,"%g ",val);
+    }
+    fprintf(ff,"\n");
+  }
+  fclose(ff);
+  return 0;
+}
+int WriteTempTpt_track(int *nlines,DS_DATASET_T *tpt_track) {
+  FILE *ff; int toGo;
+  char *colName[]={"id","q","invp","phi0","psi","r0","tanl","z0","quit"};
+  size_t nRow,colNum; int col,dt,row; float val;
+  ff=fopen(".tbr.temp","w"); if(!ff) return 5;
+  fprintf(ff,"=== Green, from table tpt_track\n");
+  fprintf(ff,"List of columns:\n");
+  fprintf(ff,"id q invp phi0 psi r0 tanl z0\n");
+  if(!dsTableRowCount(&nRow,tpt_track)) return 2;
+  PP"Number of rows in tpt_track = %d\n",nRow); (*nlines)=nRow;
+  for(row=0;row<nRow;row++) {
+    toGo=nRow-row;
+    if(toGo%9000==0||(row<100&&row%10==0)) {
+      PP"Phase I, rows to go tpt_track = %d\n",toGo);
+    }
+    for(col=0;;col++) {
+      if(!strcmp(colName[col],"quit")) break;
+      if(!dsFindColumn(&colNum,tpt_track,colName[col])) return 1;
+      val=Value(&dt,tpt_track,colNum,row,0);
+      fprintf(ff,"%g ",val);
+    }
+    fprintf(ff,"\n");
+  }
+  fclose(ff);
+  return 0;
+}
+void writeTheVisualization(DS_DATASET_T *pDataset) { /* www */
+  DS_DATASET_T *tphit,*tpt_track;
+  int e,cnt=0,nlines;
+  if(!dsFindEntry(&tphit,pDataset,"tphit")) {
+    PP"Can't find tphit.\n"); return;
+  }
+  if(!dsFindEntry(&tpt_track,pDataset,"tpt_track")) {
+    PP"Can't find tpt_track.\n"); return;
+  }
+  e=WriteTempTphit(&nlines,tphit); 
+  if(e) { PP"Error %d for tphit.\n",e); return; }
+  ConvertToVisData("tphit",nlines,cnt++);
+  e=WriteTempTpt_track(&nlines,tpt_track);
+  if(e) { PP"Error %d for t_track.\n",e); return; }
+  ConvertToVisData("tpt_track",nlines,cnt++);
+  PP"Success.  Please FTP file 'vis.dump' to your visualization computer.\n");
 }
 void tbrNewDSView(DS_DATASET_T **dsPtrs,long nDsPtr) {
   /* Must wait for return before calling this again, until port to C++. */

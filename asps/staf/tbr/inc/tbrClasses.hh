@@ -28,6 +28,7 @@ public:
 //:----------------------------------------------- ATTRIBUTES         --
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+   virtual STAFCV_T writeVisualization (tdmDataset * dataset);
    virtual STAFCV_T viewDataset (tdmDataset * dataset);
    virtual STAFCV_T viewTable (tdmTable * table);
 
