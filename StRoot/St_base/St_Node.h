@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_Node.h,v 1.10 1999/04/08 16:44:09 fine Exp $
+// $Id: St_Node.h,v 1.11 1999/04/13 14:26:40 fine Exp $
 // $Log: St_Node.h,v $
+// Revision 1.11  1999/04/13 14:26:40  fine
+// Geometry-based dataset implementation, next step
+//
 // Revision 1.10  1999/04/08 16:44:09  fine
 // Working version of the NodeView family
 //
@@ -80,8 +83,8 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
         St_Node(const Text_t *name, const Text_t *title, TShape *shape, Option_t *option="");
         St_Node(TNode &node);
         virtual ~St_Node();
-        virtual St_NodePosition *Add(St_Node *node, Double_t x=0, Double_t y=0, Double_t z=0, TRotMatrix *matrix=0, Option_t *option="");
-        virtual St_NodePosition *Add(St_Node *node, Double_t x, Double_t y, Double_t z,  const Text_t *matrixname, Option_t *option="");
+        virtual St_NodePosition *Add(St_Node *node, Double_t x=0, Double_t y=0, Double_t z=0, TRotMatrix *matrix=0, UInt_t id=0, Option_t *option="");
+        virtual St_NodePosition *Add(St_Node *node, Double_t x, Double_t y, Double_t z,  const Text_t *matrixname,  UInt_t id=0, Option_t *option="");
         virtual void        Browse(TBrowser *b);
         virtual TNode      *CreateTNode(const St_NodePosition *position=0);
         virtual void        DeletePosition(St_NodePosition *position);

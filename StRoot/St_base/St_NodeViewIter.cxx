@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/01/99  
-// $Id: St_NodeViewIter.cxx,v 1.6 1999/04/08 16:44:11 fine Exp $
+// $Id: St_NodeViewIter.cxx,v 1.7 1999/04/13 14:26:41 fine Exp $
 // $Log: St_NodeViewIter.cxx,v $
+// Revision 1.7  1999/04/13 14:26:41  fine
+// Geometry-based dataset implementation, next step
+//
 // Revision 1.6  1999/04/08 16:44:11  fine
 // Working version of the NodeView family
 //
@@ -84,7 +87,11 @@ St_NodePosition *St_NodeViewIter::UpdateTempMatrix(St_NodePosition *curPosition)
   // Pick the "old" position by pieces
   St_NodePosition *newPosition = 0;
   St_Node *curNode = 0;
-  if (curPosition) curNode = curPosition->GetNode();
+  UInt_t curPositionId    = 0;
+  if (curPosition) {
+      curNode       = curPosition->GetNode();
+      curPositionId = curPosition->GetId();
+  }
   if (fDepth-1) {
     St_NodePosition *oldPosition = 0;
     TRotMatrix *oldMatrix = 0;
@@ -92,13 +99,12 @@ St_NodePosition *St_NodeViewIter::UpdateTempMatrix(St_NodePosition *curPosition)
     Double_t oldTranslation[] = { 0, 0, 0 };
     if (oldPosition) 
     {
-      oldMatrix         = oldPosition->GetMatrix();
- 
+      oldMatrix         = oldPosition->GetMatrix(); 
       oldTranslation[0] = oldPosition->GetX();
       oldTranslation[1] = oldPosition->GetY();
       oldTranslation[2] = oldPosition->GetZ();
     }
-
+ 
     // Pick the "current" position by pieces
     TRotMatrix *curMatrix        = curPosition->GetMatrix();
  
@@ -131,6 +137,7 @@ St_NodePosition *St_NodeViewIter::UpdateTempMatrix(St_NodePosition *curPosition)
        }
        else 
          Error("UpdateTempMatrix","No position has been defined");
+  if (newPosition) newPosition->SetId(curPositionId);
   return newPosition;
 }
 
