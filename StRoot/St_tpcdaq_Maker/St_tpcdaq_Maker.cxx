@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.27  1999/06/22 19:21:43  ward
+// Fix crash found by Lidia.
+//
 // Revision 1.26  1999/06/21 22:27:08  ward
 // Prototype connection to StDaqLib.
 //
@@ -430,7 +433,7 @@ int St_tpcdaq_Maker::Output() {
     if(dataOuter[isect-1]) singlerow.RowRefOut='R'; else singlerow.RowRefOut='N';
     raw_sec_m->AddAt(&singlerow,isect-1);
   }
-  delete er; delete gDetectorReader;
+  if(daqInputFile) { delete er; delete gDetectorReader; }
   return 0;
 }
 /*------------------------------------------------------------------------
@@ -459,7 +462,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am Leave it to Beaver. St_tpcdaq_Maker::Make().\n");
+  printf("I am Ben Casey. St_tpcdaq_Maker::Make().\n");
   errorCode=GetEventAndDecoder();
   printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
@@ -480,7 +483,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.26 1999/06/21 22:27:08 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.27 1999/06/22 19:21:43 ward Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }
