@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.22 2003/09/16 22:44:17 porter Exp $
+ * $Id: StDbSql.cc,v 1.23 2003/09/23 04:37:16 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.23  2003/09/23 04:37:16  porter
+ * fixed leak of timeValues array
+ *
  * Revision 1.22  2003/09/16 22:44:17  porter
  * got rid of all ostrstream objects; replaced with ostringstream+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
@@ -410,6 +413,7 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
   delete [] idMap;
   delete [] dataIDList;
   delete [] dataTable;
+  delete [] timeValues;
 
  return retVal;
 #undef __METHOD__
