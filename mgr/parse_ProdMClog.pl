@@ -11,9 +11,9 @@ use Sys::Hostname;
 #my $debugOn=0;
 
 my $hostname     = hostname();
-my $mdir_log      = "/star/rcf/disk00001/star/prod6/log/";
-my $mdir_sum      = "/star/rcf/disk00001/star/prod6/sum/"; 
-my @dir_ext      = ("tfs","daq");  
+my $mdir_log      = "/star/rcf/disk00001/star/P00hi/log/";
+my $mdir_sum      = "/star/rcf/disk00001/star/P00hi/sum/"; 
+my @dir_ext      = ("trs","daq");  
 my @set ;
 my @list;
 my $nlist = 0; 
@@ -56,7 +56,7 @@ struct FileAttr => {
   while( defined($flname = readdir(DIR)) ) {
            next if $flname =~ /^\.\.?$/;
            next if $flname =~ /.err/; 
-
+#           next if $flname =~ /rcf150_p/;
         $fullname = $dir_log ."/".$flname;
          $size = (stat($fullname))[7];
                
@@ -79,7 +79,7 @@ foreach my $logFile (@list) {
        
         my $ltime = `mod_time $mfile`;
            if( $ltime > 3600){
-		    if ($msize < 5000 )  {
+		    if ($msize < 12000 )  {
 #     print "Crashed job :", $mfile, "\n";
    }else { 
               $f_flag = 0;
@@ -462,7 +462,8 @@ sub parse_log($) {
    print (">>>>>>>>>>>>  Run options: <<<<<<<<<<<< \n", $run_option_string, "\n");
    print '-' x 80, "\n";
   
- 
+    $last_evts = $EvDone;
+
     print ("Number of Events Done: ", $EvDone, "\n");
     print ("Number of Events Skiped: ", $EvSkip, "\n"); 
     print ("First event no.: ", $first_evts, "\n");
@@ -545,7 +546,7 @@ sub parse_log($) {
     print '=' x 80, "\n";    
 
    if ($num_event ne 0) {
- @cpu_output = `tail -1000 $job_log`;
+ @cpu_output = `tail -1500 $job_log`;
   foreach $end_line (@cpu_output){
           chop $end_line;
    if ($end_line =~ /seconds Cpu Time/) {
