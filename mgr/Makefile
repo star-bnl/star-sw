@@ -1,4 +1,7 @@
 #  $Log: Makefile,v $
+#  Revision 1.12  1998/02/21 18:33:54  fisyak
+#  Add util domain
+#
 #  Revision 1.11  1998/02/21 00:58:31  fisyak
 #  Add tls library
 #
@@ -28,7 +31,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/02/21 00:58:31 $ 
+#             Last modification $Date: 1998/02/21 18:33:54 $ 
 ifdef SILENT
 .SILENT:
 endif
@@ -76,6 +79,7 @@ else
 	SUBDIRS := $(filter-out src, $(SUBDIRS))
 	SUBDIRS := $(filter-out exa, $(SUBDIRS))
 	SUBDIRS := $(strip $(sort $(SUBDIRS)))
+        SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS))
 ifeq ($(PAMS), $(strip $(SN)))                #pams level
 		LEVEL   :=1
 		ROOT    := $(shell cd $(INP_DIR)/../; $(PWD))
@@ -139,16 +143,6 @@ ifeq ($(LEVEL),$(FOUR))
 all:
 	@echo "Please run make in parent directory"
 else
-ifeq ($(EMPTY),$(SUBDIRS))
-#          I have no subdrs
-# all files:
-ifeq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G)))
-#                 I have NO idl- and NO g-files
-.PHONY               : default
-all:
-	@echo "Nothing to do for domain/module" $(PKG)
-else
-#                                                       $(IDL_DIRS)
 ifndef RANLIB
 override RANLIB := /bin/true
 endif
@@ -244,19 +238,31 @@ endif
 ifndef LIBRARIES
 ifeq ($(LIB_STAR),$(LIB_DIR))
 		LIBRARIES :=  $(LIB_STAR)/$(PKG_LIB) \
-               -L$(STAR)/asps/../lib/$(SYS_HOST_STAR)
+               -L$(STAR)/asps/../lib/$(SYS_HOST_STAR) -L$(LIB_STAR)
 else
 		LIBRARIES :=  $(LIB_DIR)/$(PKG_LIB)  \
                 $(shell test -f $(LIB_STAR)/$(PKG_LIB) && echo $(LIB_STAR)/$(PKG_LIB)) \
-               -L$(STAR)/asps/../lib/$(SYS_HOST_STAR)
+               -L$(STAR)/asps/../lib/$(SYS_HOST_STAR) -L$(LIB_DIR) -L$(LIB_STAR)
 endif
-LIBRARIES +=  $(shell test -f $(STAR)/asps/../lib/$(SYS_HOST_STAR)/libtls.a && echo -ltls)
-LIBRARIES +=  $(shell test -f $(STAR)/asps/../lib/$(SYS_HOST_STAR)/libmsg.a && echo -lmsg)
+LIBRARIES +=  -lutil
+#LIBRARIES +=  $(shell test -f $(STAR)/asps/../lib/$(SYS_HOST_STAR)/libtls.a && echo -ltls)
+#LIBRARIES +=  $(shell test -f $(STAR)/asps/../lib/$(SYS_HOST_STAR)/libmsg.a && echo -lmsg)
 endif
 #-------------------------------rules-------------------------------
 # phony - not a file
 .PHONY               : $(PKG) depend clean test
 all                  : $(PKG)  
+ifeq ($(EMPTY),$(SUBDIRS))
+#          I have no subdrs
+# all files:
+ifeq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G)))
+#                 I have NO idl- and NO g-files
+$(PKG)               : $(LIB_DIR)/$(PKG_LIB)
+$(LIB_DIR)/$(PKG_LIB): $(FILES_O)
+	$(AR) $(ARFLAGS) $(LIB_DIR)/$(PKG_LIB) $(FILES_O)
+	@echo "          Library " $(LIB_DIR)/$(PKG_LIB) " has been updated"
+else
+#                                                       $(IDL_DIRS)
 $(PKG)               : $(LIB_DIR)/$(PKG_SL)
 ifeq ($(FILES_IDM),$(EMPTY))
 $(LIB_DIR)/$(PKG_SL): $(FILES_O)
@@ -292,9 +298,10 @@ ifneq ($(NAMES_IDM),)
 endif    #
 	$(CXX) $(CPPFLAGS) $(CPPFLAGG) $(CXXFLAGS) -c $(GEN_DIR)/$(PKG)_init.cc -o $(ALL_TAGS)
 endif
+endif # NO idl- or g-files
 #--------  idm, idl --------
 $(GEN_DIR)/%.h $(GEN_DIR)/%.inc %.h %.inc: %.idl
-	cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(ALL_DEPS)
+	cp  $(FIRST_DEP) $(GEN_DIR)/ ; cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(FIRST_DEP); $(RM) $(STEM).idl
 #--- compilation -
 $(OBJ_DIR)/%.o: %.g
 	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/bin/share/geant3.def  $(GEN_DIR)/geant3.def
@@ -349,7 +356,6 @@ endif       #
 ifneq ($(EMPTY), $(strip $(FILES_DM)))
 include $(FILES_DM)
 endif       # 
-endif # NO idl- or g-files
 else
 #      I_have_subdirs
 all:  $(addsuffix _all, $(SUBDIRS))
@@ -360,6 +366,15 @@ test: $(addsuffix _test, $(SUBDIRS))
 	$(MAKE) -f $(MAKEFILE) -C $(STEM) test 
 clean: $(addsuffix _clean, $(SUBDIRS))
 %_clean: 
+	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
+clean_lib: $(addsuffix _clean_lib, $(SUBDIRS))
+%_clean_lib: 
+	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
+clean_share: $(addsuffix _clean_share, $(SUBDIRS))
+%_clean_share: 
+	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
+clean_obj: $(addsuffix _clean_obj, $(SUBDIRS))
+%_clean_obj: 
 	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
 endif # end if of SUBDIR loop
 endif # LEVEL 4
