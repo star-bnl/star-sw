@@ -66,8 +66,12 @@ end
       F = {0,0,0}
 *
       if (first) then
-*     get parameter bank locally
+         if (NZEBRA<=0) then
+           print *,' AGUFLD: ZEBRA is not initialised yet '
+           return
+         endif
          Call RbPUSHD
+*     get parameter bank locally
          USE  MFLDGEO/MFLG stat=Istat  
          if (Istat<0) then
            print *,' AGUFLD: Magnetic Field Description is not available '
