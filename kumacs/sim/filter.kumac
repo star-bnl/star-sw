@@ -17,26 +17,26 @@ macro filter
  mm=0
  len=999999
  do ni=[n1],[n2]
-   gfile pz gsrun.[ni].fz
-   if ($iquest(1)<>0) then
-      nextl
-   endif
-   if ([len].gt.800)  then
-      mm=[mm]+1
-      call hepevnt
-      gfile o [name].[n1]_[mm].fzd
-      if [mm].eq.1 then
-         fort/file 72 [name].[n1].ps
-         meta      72 -111
-         dcut cave x .1 10 10 .03 .03
-         close     72
-      endif      
-   endif 
-   trig 1000000
+    file=gsrun.[ni].fz
+    if ($fexist([file]).eq.0) goto nextl      
+    gfile pz [file]
+    if ([len].gt.800)  then
+       mm=[mm]+1
+       call hepevnt
+       gfile o [name].[n1]_[mm].fzd
+       if [mm].eq.1 then
+          fort/file 72 [name].[n1].ps
+          meta      72 -111
+          dcut cave x .1 10 10 .03 .03
+          close     72
+       endif      
+    endif 
+    trig 30
   * get the output file length in MB:
-   cmd=ls -s [name].[n1]_[mm].fzd 
-   len=$word($shell([cmd]))
-   len=[len]/2000
+    cmd=ls -s [name].[n1]_[mm].fzd 
+    len=$word($shell([cmd]))
+    len=[len]/2000
+    nextl:
  enddo
  gclose all
  exit  
