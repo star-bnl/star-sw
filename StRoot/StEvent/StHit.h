@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.3 2000/06/07 09:43:21 ullrich Exp $
+ * $Id: StHit.h,v 2.4 2000/07/28 23:29:42 calderon Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.4  2000/07/28 23:29:42  calderon
+ * Added handling of Fit Flag: use this flag to tell if the point
+ * is used in the fit.
+ *
  * Revision 2.3  2000/06/07 09:43:21  ullrich
  * Changed return type of flag() to UInt_t
  *
@@ -52,6 +56,7 @@ public:
     UInt_t          flag() const;
     StThreeVectorF  positionError() const;     // overwrite inherited
     StMatrixF       covariantMatrix() const;   // overwrite inherited
+    Int_t           usedInFit() const; 
     
     void setCharge(Float_t);
     void setFlag(UChar_t);
@@ -69,7 +74,8 @@ protected:
     UChar_t        mTrackRefCount;
     StThreeVectorF mPositionError;
     UChar_t        mFlag;
-
+    UChar_t        mFitFlag;
+    
     StObject* clone();
     ClassDef(StHit,1)
 };

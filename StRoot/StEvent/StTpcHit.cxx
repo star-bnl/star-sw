@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.6 2000/06/01 21:39:07 ullrich Exp $
+ * $Id: StTpcHit.cxx,v 2.7 2000/07/28 23:29:42 calderon Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
+ * Revision 2.7  2000/07/28 23:29:42  calderon
+ * Added handling of Fit Flag: use this flag to tell if the point
+ * is used in the fit.
+ *
  * Revision 2.6  2000/06/01 21:39:07  ullrich
  * Added member mFlag and access member flag() and setFlag().
  *
@@ -36,7 +40,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.6 2000/06/01 21:39:07 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.7 2000/07/28 23:29:42 calderon Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
@@ -58,8 +62,8 @@ StTpcHit::StTpcHit(const dst_point_st& pt)
     const ULong_t iflag = pt.charge/(1L<<16);
     const ULong_t tpcq  = pt.charge - iflag*(1L<<16);
     mCharge = Float_t(tpcq)/(1<<25);
-    mFlag = static_cast<UChar_t>(iflag);
-
+    mFlag = static_cast<UChar_t>(iflag&255);  // First 8 bits
+    mFitFlag = static_cast<UChar_t>(iflag>>8);// Last  8 bits
     //
     // Unpack position in xyz
     //
@@ -90,6 +94,8 @@ StTpcHit::StTpcHit(const dst_point_st& pt)
     // The hardware position stays at it is
     //
     mHardwarePosition = pt.hw_position;
+
+    
 }
 
 StTpcHit::~StTpcHit() {/* noop */}
