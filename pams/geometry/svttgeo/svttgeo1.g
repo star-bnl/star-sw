@@ -1,6 +1,9 @@
-* $Id: svttgeo1.g,v 1.2 2003/08/05 22:37:07 potekhin Exp $
+* $Id: svttgeo1.g,v 1.3 2003/08/05 23:38:23 potekhin Exp $
 *
 * $Log: svttgeo1.g,v $
+* Revision 1.3  2003/08/05 23:38:23  potekhin
+* Correct the comment typo
+*
 * Revision 1.2  2003/08/05 22:37:07  potekhin
 * Added Id and Log tags
 *
@@ -9,7 +12,7 @@
 *******************************************************************************
 Module  SVTTGEO1  is the SVT geometry for STAR
    Author  Maxim Potekhin
-   based on the SVTTGEO code, bug corrections
+*   based on the SVTTGEO code, bug corrections
    created 05 Aug 03
 *                                                                             *
 *------------------------------------------------------------------------------
