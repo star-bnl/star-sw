@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 2.1 2000/09/13 21:00:42 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 2.2 2000/09/29 19:04:40 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,12 +11,14 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
- * Revision 2.1  2000/09/13 21:00:42  lasiuk
- * Begin modification for cluster/hit deconvolution
- * - remove matrix interface
- * - add necessary members
- * - unify cog calculation
- * - mapping code is not in place
+ * Revision 2.2  2000/09/29 19:04:40  lasiuk
+ * hit calculation factorized to allow
+ * deconvolution.  A flag was added to denote
+ * this process (eDeconvolution).
+ * MC info restored in classifyHit() member
+ * cut parameters (for decon) added in initializeCutParameters()
+ * startAmplitude set to 0.  This keeps track of the local
+ * max of the hit now.
  *
  * Revision 2.3  2000/10/24 00:24:56  lasiuk
  * boolean flag moved to data member
@@ -63,8 +65,10 @@
  *
  * Revision 1.2  2000/04/07 12:50:21  dunlop
  * Fixed clearAndDestroy of StRichSinglePixelCollection mThePixels
+ *
  * Revision 1.1  2000/04/05 16:39:27  lasiuk
  * Initial Revision
+ *
  **************************************************************************/
 #define RICH_CF_DEBUG 0
 #define ivb if(RICH_CF_DEBUG)cout
@@ -83,43 +87,6 @@ using std::max;
 using std::max_element;
 using std::sort;
 using std::unique;
-// Typedefs for mappings
-typedef const int hitIDToChargeMapKey;
-typedef float hitIDToChargeMapValue;
-typedef const int hitIDToRichIDMapKey;
-typedef const id_type hitIDToRichIDMapValue;
-
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-typedef map<hitIDToChargeMapKey,hitIDToChargeMapValue> hitIDToChargeMapType;
-typedef map<hitIDToRichIDMapKey,hitIDToRichIDMapValue> hitIDToRichIDMapType;
-#else
-typedef map<hitIDToChargeMapKey,hitIDToChargeMapValue, less<HitIDToChargeMapKey>, 
-    allocator< OS_PAIR(hitIDToChargeMapKey,hitIDToChargeMapValue) > > hitIDToChargeMapType;
-typedef map<hitIDToRichIDMapKey,hitIDToRichIDMapValue, less<HitIDToRichIDMapKey>, 
-    allocator< OS_PAIR(hitIDToRichIDMapKey,hitIDToRichIDMapValue) > > hitIDToRichIDMapType;
-#endif
-typedef hitIDToChargeMapType::iterator hitIDToChargeMapIter;
-typedef hitIDToChargeMapType::const_iterator hitIDToChargeMapConstIter;
-typedef hitIDToChargeMapType::value_type hitIDToChargeMapValType;
-typedef hitIDToRichIDMapType::iterator hitIDToRichIDMapIter;
-typedef hitIDToRichIDMapType::iterator hitIDToRichIDMapConstIter;
-
-typedef hitIDToRichIDMapType::value_type hitIDToRichIDMapValType;
-typedef pair<hitIDToChargeMapIter,bool> hitIDToChargeMapRetType;
-typedef pair<hitIDToRichIDMapIter,bool> hitIDToRichIDMapRetType;
-
-// For unrolling the map
-typedef const float chargeToHitIDMapKey;
-typedef const int chargeToHitIDMapValue;
-		
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-typedef multimap < chargeToHitIDMapKey, chargeToHitIDMapValue,  greater<chargeToHitIDMapKey> > chargeToHitIDMapType;
-#else
-typedef multimap < chargeToHitIDMapKey, chargeToHitIDMapValue,  greater<chargeToHitIDMapKey>,
-    allocator< OS_PAIR(chargeToHitIDMapKey, chargeToHitIDMapValue) > > chargeToHitIDMapType;
-#endif
-typedef chargeToHitIDMapType::iterator   chargeToHitIDMapIter;
-typedef chargeToHitIDMapType::value_type chargeToHitIDMapValType;		
 using std::back_inserter;
 #endif
 
@@ -134,15 +101,20 @@ using std::back_inserter;
 #include "StRrsMaker/StRichEnumeratedTypes.h"
 #include "StRrsMaker/StRichOtherAlgorithms.h"
 
+#include "StRrsMaker/StRrsReader.h"
 
 //#include "StDaqLib/GENERIC/EventReader.hh"
 //#include "StDaqLib/RICH/RICH_Reader.hh"
     mGeometryDb = StRichGeometryDb::getDb(); // Singleton
 StRichClusterAndHitFinder::StRichClusterAndHitFinder()
 {
+    this->init();
+    
     mX = mGeometryDb->numberOfPadsInARow();
     mY = mGeometryDb->numberOfRowsInAColumn();
 
+    //
+    // this came from the load() functions
     // --> and should probably go back there
     // if we get rid of the pixels.
     //
@@ -183,6 +155,16 @@ void StRichClusterAndHitFinder::clearAndDestroyTheHits()
     for(size_t i=0; i<mTheHits.size(); i++) {
 	delete mTheHits[i];
     }
+    mTheHits.clear();
+}
+
+void StRichClusterAndHitFinder::clearAndDestroyAll()
+{
+//     cout << "StRichClusterAndHitFinder::clearAndDestroyAll()" << endl;
+    this->clearAndDestroyThePixels();
+    this->clearAndDestroyTheClusters();
+    this->clearAndDestroyTheHits();
+//     PR(mThePixels.size());
 //     PR(mTheClusters.size());
 //     PR(mTheHits.size());
 }
@@ -275,7 +257,7 @@ bool StRichClusterAndHitFinder::makeTheClustersAndFilter()
     if(!makeClusters(2))
 	return false;
 //    if (!makeClusters(5)) return false;
-    const double startAmplitude = 10;
+//    if (!removeBigClusters()) return false;
 //    if (!makeClusters(1)) return false;
 //    removeNoiseClusters();
 //    if (!splitClusters()) return false;
@@ -522,14 +504,14 @@ void StRichClusterAndHitFinder::dumpHitInformation(ostream& os) const
 	os << "\tHit vector is empty!" << endl;
     }
     else {
-//     PR(mTheHits.size());
+	       << "rms" << '\t'
 	       << mTheHits[ii]->internal()     << '\t'
-//     PR(mTheHits.size());
+	       << mTheHits[ii]->local() << endl;
 	       << mTheHits[ii]->clusterNumber()     << '\t'
 	       << mTheHits[ii]->charge()            << '\t'
 	       << mTheHits[ii]->maxAmplitude()      << '\t'
 	       << "rms"                             << '\t'
-//     PR(mTheClusters.size());
+	       << mTheHits[ii]->internal()          << '\t'
 	       << mTheHits[ii]->local()             << '\t'
 	       << mTheHits[ii]->numberOfPads()      << endl;
 	}
@@ -543,8 +525,8 @@ bool StRichClusterAndHitFinder::simpleHitsFromClusters()
 
 //      PR(mTheHits.size());
     clearAndDestroyTheHits();
-// 	cout << " Cluster #" << ii << "\t";
-// 	PR(numberOfLocalMax);
+//      PR(mTheHits.size());
+
     //
     // Loop over the clusters!
     //
@@ -563,8 +545,8 @@ bool StRichClusterAndHitFinder::simpleHitsFromClusters()
 	
 	int numberOfLocalMax = mTheClusters[ii]->numberOfLocalMax();
 //   	cout << " Cluster #" << ii << "\t";
-// 	PR(theLocalMaxima.size());
-// 	PR(numberOfIsolatedLocalMax);
+//  	PR(numberOfLocalMax);
+
 	//
 	// No local max
 	//
@@ -576,8 +558,8 @@ bool StRichClusterAndHitFinder::simpleHitsFromClusters()
 	//
 	vector<StRichSinglePixel*> theLocalMaxima;
 
-	    mTheHits.push_back(new StRichSimpleHit);
-	    this->constructTheMatrix(theLocalMaxima.front(), &aVectorOfPixels);
+	//
+	// These are the isolated local maxima in a row
 	//  --> not in a column
 	//
 	size_t numberOfIsolatedLocalMax =
@@ -591,80 +573,131 @@ bool StRichClusterAndHitFinder::simpleHitsFromClusters()
 	// A single local max
 	//
 	if(numberOfLocalMax == 1) {
+
+	    //
+	    // Make one hit
 	    //
 	    this->constructSquareMatrix(theLocalMaxima.front(), ii, &aVectorOfPixels);
 	    this->classifyHitType(aVectorOfPixels);
+	    this->centerOfGravity(aVectorOfPixels, &hitInfo);
+	    this->fillHitInformation(hitInfo);
 	    continue;
 	}
+    
+	//
+	// Topology check for the cluster
+	//
+	// Calculate the number of rows and columns the cluster spans
+	//
+	vector<int> clusterRows;
+	vector<int> clusterPads;
+
+	mNumberOfSaturatedPads = 0;
 
 	float maxCharge = 1023;
 	for(int uu=firstPadOfCluster; uu<lastPadOfCluster; uu++) {
-// 	copy(uniqueClusterPads.begin(), uniqueClusterPads.end(),
-// 	     ostream_iterator<double>(cout,", "));
-// 	cout << " << pads in cluster " << endl;
+	    clusterPads.push_back(mThePixels[uu]->pad());
+	    clusterRows.push_back(mThePixels[uu]->row());
+	    if(mThePixels[uu]->charge() >= maxCharge)
+		mNumberOfSaturatedPads++;
 	}
 
 	//    ^  <----- x -----> length (# of pads) 
 	//    |
-// 	copy(uniqueClusterRows.begin(), uniqueClusterRows.end(),
-// 	     ostream_iterator<double>(cout,", "));
-// 	cout << " << rows in cluster " << endl;
+	//    
+	//    y  width (# of rows)
+	//    
 	//    |
 	//    v
+	
+	if(mNumberOfSaturatedPads)PR(mNumberOfSaturatedPads);
+
+	sort(clusterPads.begin(),clusterPads.end());
+	vector<int> uniqueClusterPads(clusterPads.begin(),
+				      unique(clusterPads.begin(), clusterPads.end()));
+	mClusterLength = uniqueClusterPads.size();
+//  	ostream_iterator<double>  printer(cout,",");
+//  	copy(uniqueClusterPads.begin(), uniqueClusterPads.end(),printer);
+//  	cout << " << pads in cluster " << endl;
+
+	sort(clusterRows.begin(),clusterRows.end());
+	vector<int> uniqueClusterRows(clusterRows.begin(),
+				      unique(clusterRows.begin(), clusterRows.end()));
+	mClusterWidth = uniqueClusterRows.size();
+//  	copy(uniqueClusterRows.begin(), uniqueClusterRows.end(), printer);
+//  	cout << " << rows in cluster " << endl;
+
+	//
+	// check the cluster characteristics
+	//
+	int badCluster = false;
 	if( mClusterLength > mMaxClusterLength ) {
 	    PR(mClusterLength);
+	    badCluster = true;
 	}
 	if( mClusterWidth  > mMaxClusterWidth  ) {
 	    PR(mClusterWidth);
 	    badCluster = true;
-	    if(numberOfIsolatedLocalMax == 1 &&
-	       uniqueClusterRows.size() == 1) {
-		if(!(theLocalMaxima.front()->isSet(eMaxHasAHorizontalNeighbor) &&
-		     theLocalMaxima.back()->isSet(eMaxHasAHorizontalNeighbor)  )) {
-		    cout << "ERROR->numberOfIsolatedLocalMax == 1 ";
-		    cout << "&& uniqueClusterRows == 1..." << endl;
+	}
+	if( mNumberOfSaturatedPads > mMaxSaturatedPads) {
+	    PR(mNumberOfSaturatedPads);
+	    badCluster = true;
+	}
+
+	// Dervived Quantities
+	// Aspect Ratio
+	// total numberofpads etc...
+	if(badCluster) continue;
+	
 	//
-// 		cout << "make a single hit with adjacent neighbours" << endl;
-		mTheHits.push_back(new StRichSimpleHit);
-		this->constructTheMatrix(theLocalMaxima.front(), &aVectorOfPixels);
-		this->centerOfGravity(aVectorOfPixels, &hitInfo);
-		this->fillHitInformation(hitInfo);
-		continue;
 	// 2 local max
+	//
 
 	if(numberOfLocalMax == 2) {
 	    //
 	    // special case for 2 adjacent local max pads (equal amplitude)
-// 	    cout << "Make two hits" << endl;
+	    // --> make only a single hit
+	    if( (numberOfIsolatedLocalMax == 1) &&
+		(mClusterWidth == 1) ||                         // 1 row only
+		(mClusterWidth == 2 && mClusterLength == 2) ) { // 2x2
 		if((theLocalMaxima.front()->isSet(eMaxHasAHorizontalNeighbor) &&
+		    theLocalMaxima.back()->isSet(eMaxHasAHorizontalNeighbor)  )) {
 // 		    cout << "make a single hit with adjacent neighbours" << endl;
 		    this->constructSquareMatrix(theLocalMaxima.front(), ii, &aVectorOfPixels);
-		    if(!theLocalMaxima[kk]->isSet(eMaxHasAVerticalNeighbor))
-			cout << "Argh!" << endl;
-		    mTheHits.push_back(new StRichSimpleHit);
-		    this->constructTheAdjacentNeighbors(theLocalMaxima[kk],
+		    this->classifyHitType(aVectorOfPixels);
+		    this->centerOfGravity(aVectorOfPixels, &hitInfo);
+		    this->fillHitInformation(hitInfo);
+		    continue;
+		}
+	    }
 
+	
+	    //
 	    // else we are making two hits!
 	    //
 // 	    cout << "StRichClusterAndHitFinder::simpleHitsFromClusters()";
 // 	    cout << "\tMake two hits" << endl;
+
 	    //
 	    // are they vertical neighbors?
 	    //
 	    if(numberOfIsolatedLocalMax == 1) {
 		for(kk=0; kk<theLocalMaxima.size(); kk++) {
 		    if(!theLocalMaxima[kk]->isSet(eMaxHasAVerticalNeighbor)){
-	    //cout << "Loop over them all..." << endl;
-	    for(kk=0;kk<theLocalMaxima.size();kk++) {
-		mTheHits.push_back(new StRichSimpleHit);
+// 			cout << "Not Vertical Neighbors! But isolated" << endl;
+// 			PR(*theLocalMaxima[0]);
 // 			PR(*theLocalMaxima[1]);
-		    this->constructTheAdjacentNeighbors(theLocalMaxima[kk],
+		    }
 		    this->constructTheAdjacentNeighbors(theLocalMaxima[kk], ii,
 							&aVectorOfPixels);
-		    this->constructTheMatrix(theLocalMaxima[kk], &aVectorOfPixels);
-			
+		    this->classifyHitType(aVectorOfPixels);
+		    mTheHits.back()->setBit(eDeconvoluted);
+		    this->centerOfGravity(aVectorOfPixels, &hitInfo);
+		    this->fillHitInformation(hitInfo);
+		    aVectorOfPixels.clear();
 		}
 
+		continue;
 	    }
 
 	    // Are they in the same row? (with small amplitudes?)
@@ -673,11 +706,13 @@ bool StRichClusterAndHitFinder::simpleHitsFromClusters()
 //  	    cout << "Loop over them all..." << endl;
 	    for(kk=0; kk<theLocalMaxima.size(); kk++) {
 		if(uniqueClusterPads.size() > 1)
-// 		PR(*theLocalMaxima[kk]);
+		    this->constructTheAdjacentNeighbors(theLocalMaxima[kk], ii,
 							&aVectorOfPixels);
 		else
-		mTheHits.push_back(new StRichSimpleHit);
-		this->constructTheNearestNeighbors(theLocalMaxima[kk], &aVectorOfPixels);
+		    this->constructSquareMatrix(theLocalMaxima[kk], ii,
+						&aVectorOfPixels);
+
+		this->classifyHitType(aVectorOfPixels);
 		mTheHits.back()->setBit(eDeconvoluted);
 		this->centerOfGravity(aVectorOfPixels, &hitInfo);
 		this->fillHitInformation(hitInfo);
@@ -688,97 +723,137 @@ bool StRichClusterAndHitFinder::simpleHitsFromClusters()
 
 	    //
 	    // otherwise there are no MAX that are NEAREST NEIGHBORS so
+	    // use ONLY nearest neigbours to calculate position!
 	    for(kk=0; kk<theLocalMaxima.size(); kk++) {
 		//PR(*theLocalMaxima[kk]);
 // 		cout << "2 isolated max use all nearest neighbors" << endl;
 		
-	    for(kk=0;kk<theLocalMaxima.size();kk++) {
-		if(theLocalMaxima[kk]->isSet(eNotACentralMaximum)) continue;
-		if(this->useTheMovingMatrix(theLocalMaxima[kk], &hitInfo)) {
-// 		    PR(*theLocalMaxima[kk]);
-		    //
-		    // Make a hit if it works
-		    mTheHits.push_back(new StRichSimpleHit);
+		this->constructTheNearestNeighbors(theLocalMaxima[kk], ii,
+						   &aVectorOfPixels);
+		this->classifyHitType(aVectorOfPixels);
+		mTheHits.back()->setBit(eDeconvoluted);
+		this->centerOfGravity(aVectorOfPixels, &hitInfo);
+		this->fillHitInformation(hitInfo);
 		aVectorOfPixels.clear();
-		    aVectorOfPixels.clear();
 	    }
-	    }
+	    continue;
+	} // if #local max == 2
+
+	//
+	// if there are between 3-5 local max
+	else if(numberOfLocalMax<5) {
+//  	    cout << "=>numberOfLocalMax < 5: " << numberOfLocalMax << endl;
 	    //
 	    // Loop over the isolated max
 	    // use the walking matrix on all
 	    //?
-	    // neglect it.
+	    for(kk=0; kk<theLocalMaxima.size(); kk++) {
 //   		cout << kk << "(*theLocalMaxima[kk]) " << (*theLocalMaxima[kk]) << endl;
+
+		if(this->useTheMovingMatrix(theLocalMaxima[kk], ii, &hitInfo)) {
+//   		    PR(*theLocalMaxima[kk]);
+//   		    PR(hitInfo);
+		    this->fillHitInformation(hitInfo);
 		}
 		else {
 		    cout << "Matrix failed " << kk << '/' << theLocalMaxima.size() << endl;
-	//	if(makeHitFromCluster) {
-	if(true) {
-	    mAnMCHit = 0;
+		}
+		
 		aVectorOfPixels.clear();
+	    } // loop over the local maxima
+
+	}
+	else {
+	    //
+	    // If the number of local maxima are bigger than 4
+	    // neglect it...this a very rare occurence 
+	    // ...This is a project for someone...someday...
 	    
+	    cout << "StRichClusterAndHitFinder::simpleHitsFromCluster()\n";
+	    cout << "\tBad Cluster\n";
+	    cout << "\tNumber of Local Max: " << numberOfLocalMax << "/" << mTheClusters[ii]->numberOfPads(); 
+	    cout << "\tSkipping...." << endl;
+	}
 
-	    //
-	    // Determine whether it is an MC Hit or not?
-	    //
-// 	    if(mAnMCHit) {
-// 		mTheHits.push_back(new StRichSimpleMCHit);
-// 		//
-// 		// Here is where we could do the second loop
-// 		// for evaluation and assignment of the
-// 		// MC information to the hit?
-// 		// Find the biggest contribution to the pixel and add it
 
-// 		// unroll the map.  ordered by GREATEST charge.
-
-// 	    }
-// 	    else {
-// 	    }
-	    //
-{
+    
     } // loop over all clusters!
 
-    //cout << "StRichClusterAndHitFinder::simpleHitsFromCluster() # =" << mTheHits.size() << endl;
+//     cout << "StRichClusterAndHitFinder::simpleHitsFromCluster() # =" << mTheHits.size() << endl;
+    
+    return true;
+}
 
+void StRichClusterAndHitFinder::calculateNeighborVector(int n, vector<int>& vec, StRichBoxType btyp)
+{
+    // make the sequence: (default is eOdd)
+    // n : eOdd          eEven
+    // 1 : 1              2
+    // 2 : 1 3 1          2 4 2
+    // 3 : 1 3 5 3 1      2 4 6 4 2
+    // 4 : 1 3 5 7 5 3 1  2 4 6 8 6  4 2
+    int size = 2*n-1;
+    vec.resize(size);
+    for(int ii=0; ii<n; ii++) {
+	int value = (btyp == eOdd) ? (2*ii+1) : (2*ii+2);
+	vec[ii] = value;
+	vec[size-1-ii] = value;
+    }
+    vec[n-1] = (btyp == eOdd) ? size : (size+1);  
+}
+
+bool StRichClusterAndHitFinder::constructNeighborMatrixFromVector(StRichSinglePixel* pix,
+								  vector<int>& neighborVector,
+								  vector<StRichSinglePixel*>* aVectorOfPixels)
+{
+    int centralRow = pix->row();
+    int centralPad = pix->pad();
     
     int numberOfRows = neighborVector.size();
     int numberOfPads = (*max_element(neighborVector.begin(),neighborVector.end()));
-bool StRichClusterAndHitFinder::constructTheMatrix(StRichSinglePixel* pix, vector<StRichSinglePixel*>* aVectorOfPixels)
+    
+    int deltaRow = (numberOfRows-1)/2;
     int padShift;
+    for(int ir=0; ir<numberOfRows; ir++) { // number of rows to loop
 	int irow = centralRow-deltaRow+ir;
 	if(!(numberOfPads%2))
 	    padShift = neighborVector[ir]/2;
+	else
 	    padShift = (neighborVector[ir]-1)/2;
 	for(int ip=0; ip<neighborVector[ir]; ip++) { // number of pads to loop
 	    int ipad = centralPad-padShift+ip;
-	    if(mThePixels(iPad,iRow) == 0) continue;
+	    if(!mThePixels(ipad,irow)) continue;
 	    aVectorOfPixels->push_back(mThePixels(ipad,irow));
-	    aVectorOfPixels->push_back(mThePixels(iPad,iRow));		
+	}
+    }
+    
+    return true;
 }
 
 bool StRichClusterAndHitFinder::constructSquareMatrix(StRichSinglePixel* pix, int clusNum,
 						      vector<StRichSinglePixel*>* aVectorOfPixels)
 {
 //     cout << "construct square matrix" << endl;
-bool StRichClusterAndHitFinder::useTheMovingMatrix(StRichSinglePixel* pix, StRichHitInformation* info)
+    int pad = pix->pad();
+    int row = pix->row();
 
-    const int maximumNumberOfIterations = 7;
+//     PR(pad); PR(row); PR(aVectorOfPixels->size());
     for(int iPad=pad-1; iPad<pad+2; iPad++) {
 	for(int iRow=row-1; iRow<row+2; iRow++) {
-    double totalCharge = 0;
+
 	    if(!mThePixels(iPad,iRow)) continue;
 
 // 	    PR(*mThePixels(iPad,iRow));
-    
+// 	    PR(aVectorOfPixels->size());
+	    if(clusNum == mThePixels(iPad,iRow)->clusterNumber())
 		aVectorOfPixels->push_back(mThePixels(iPad,iRow));
 	} 
     }
     
     return true;
-	vector<StRichSinglePixel*> aVectorOfPixels;
-	this->constructTheMatrix(pix, &aVectorOfPixels);
+}
+
 bool StRichClusterAndHitFinder::useTheMovingMatrix(StRichSinglePixel* pix, int clusNum,
-	
 						   StRichHitInformation* info)
 {
     const unsigned short maximumNumberOfIterations = 7;
@@ -787,27 +862,54 @@ bool StRichClusterAndHitFinder::useTheMovingMatrix(StRichSinglePixel* pix, int c
     //double totalCharge = 0;
     
     double iPad = pix->pad();
-	//cout << "Iteration " << ii << " x= " << info->position() << endl;
+    double iRow = pix->row();
+
+    vector<StRichSinglePixel*> aVectorOfPixels;
     for(size_t ii=0;
 	(anotherIteration && ii<maximumNumberOfIterations);
 	ii++) {
 
 	anotherIteration = false;
+	aVectorOfPixels.clear();
+	this->constructSquareMatrix(pix, clusNum, &aVectorOfPixels);
+	this->centerOfGravity(aVectorOfPixels, info);
+	if(nearestInteger(info->position().x()) != iPad) {
+	    iPad = nearestInteger(info->position().x());
+	    anotherIteration = true;
+	}
+	if(nearestInteger(info->position().y()) != iRow) {
+	    iRow = nearestInteger(info->position().y());
+	    anotherIteration = true;
+	}
+//   	cout << "Iteration " << ii << " x= " << info->position() << endl;
+	if(mThePixels(iPad,iRow))
+	    pix = mThePixels(iPad,iRow);
+    }
+
+    //
+    // do the diagnostics:
+    // Do I have a hit that makes sense?
+    bool status = true;
+    //
+    // check the properties of the hit
     // -- central pix has at least 20% of charge
-
-
-//     //
-//     // then make the hit
-//     //
-//     mTheHits.push_back(new StRichSimpleHit);
-//     mTheHits.back()->internal() = StThreeVector<double>(fractionalPad,fractionalRow,0);
-//     mTheHits.back()->setCharge(totalCharge);
-//     mTheHits.back()->setClusterNumber(mThePixels(iPad,iRow)->clusterNumber());
-//     mTheHits.back()->setMaxAmplitude(maxAdc->charge());
-//     //mTheHits.back()->setRms()
-//     //cout << *mTheHits.back() << endl;
-
-    return true;
+//     cout << "Check (movingMatrix)" << endl;
+    if(!mThePixels(iPad,iRow)) {
+	//cout << "Central Pixel does not exist" << endl;
+	//status =  false;
+	return false;
+    }
+    else if(!mThePixels(iPad,iRow)->isSet(eLocalMaximum)) {
+	if( (mMinChargeFraction*info->charge()) > mThePixels(iPad,iRow)->charge() ) {
+	    PR(mMinChargeFraction*info->charge());PR( mThePixels(iPad,iRow)->charge());
+	    //status = false;
+	    return false;
+	}
+	else {
+  	    //cout << "ok" << endl;
+	}
+    }
+    //
     // -- too close to existing hits
     //
     for(size_t ii=0; ii<mTheHits.size(); ii++) {
@@ -880,7 +982,8 @@ void StRichClusterAndHitFinder::printList(ostream& os)
 	os <<  "p/r/adc "
 	   << mThePixels(ii)->pad() << " " 
 	   <<  mThePixels(ii)->row() << " " 
-bool StRichClusterAndHitFinder::centerOfGravity(vector<StRichSinglePixel*>& aVectorOfPixels, StRichHitInformation* hitInfo)
+	   << mThePixels(ii)->charge() << endl;
+// 	if(ii!=0 && ii%5==0)
 // 	    os << endl;
     }
 }
@@ -908,15 +1011,35 @@ bool StRichClusterAndHitFinder::centerOfGravity(vector<StRichSinglePixel*>& aVec
     double pixelCharge = 0;
 
 //     PR(aVectorOfPixels.size());
-    //
+    for(size_t jj=0; jj<aVectorOfPixels.size(); jj++) {
+	float pad = aVectorOfPixels[jj]->pad();
+	float row = aVectorOfPixels[jj]->row();
+	
+	pixelCharge = aVectorOfPixels[jj]->charge();
+	maxAdc = max(maxAdc,pixelCharge);
 	amp  += pixelCharge;
 	tmpX += pad * pixelCharge;
 	tmpY += row * pixelCharge;
-    hitInfo->setClusterNumber((aVectorOfPixels.front())->clusterNumber());
+
+	tmpX2 += (pad*pad)*pixelCharge;
+	tmpY2 += (row*row)*pixelCharge;
+    } // loop over all pads in cluster
+
+    hitInfo->setPosition(tmpX/amp,tmpY/amp, 0);
+    hitInfo->setPosition2(tmpX2/amp,tmpY2/amp, 0);
+
+    //
+    // Calculate errors here
+    //  this is temp:
+    //                2       2        2
+    //              dx  =  < x  > - < x >
+    hitInfo->setPositionError(sqrt(tmpX2/amp-sqr(tmpX/amp)),
+			      sqrt(tmpY2/amp-sqr(tmpY/amp)),
 			      0.);
 
     hitInfo->setCharge(amp);
-bool StRichClusterAndHitFinder::constructTheAdjacentNeighbors(StRichSinglePixel* maxPixel, vector<StRichSinglePixel*>* aList)
+    hitInfo->setMaxAdc(maxAdc);
+
     // pre cautionary -- hits that do not make the threshold
     // cut have a cluster number assigned of -1
     // Cluster Number
@@ -927,18 +1050,20 @@ bool StRichClusterAndHitFinder::constructTheAdjacentNeighbors(StRichSinglePixel*
 	    break;
 	}
 // 	cout << " cn=" << cn << endl;
+    }
+    hitInfo->setClusterNumber(cn);
+    hitInfo->setNumberOfPads(aVectorOfPixels.size());
     
-      aList->push_back(mThePixels(jj,row));
     return 0;
 }
 
 bool StRichClusterAndHitFinder::constructTheAdjacentNeighbors(StRichSinglePixel* maxPixel, int clusNum,
 							      vector<StRichSinglePixel*>* aVec)
-bool StRichClusterAndHitFinder::constructTheNearestNeighbors(StRichSinglePixel* maxPixel,
+{
     short row = maxPixel->row();
     short pad = maxPixel->pad();
-    size_t row = maxPixel->row();
-    size_t pad = maxPixel->pad();
+
+    for(short jj=pad-1; jj<pad+2; jj++) {
 
       if(!mThePixels(jj,row)) {
 	continue;
@@ -950,8 +1075,11 @@ bool StRichClusterAndHitFinder::constructTheNearestNeighbors(StRichSinglePixel* 
       
     } // loop over all pads in cluster
 
-	    PR(*mThePixels(ipad,irow));
-	    aVectorOfPixels->push_back(mThePixels(ipad,irow));
+    return true;
+}
+
+bool StRichClusterAndHitFinder::constructTheNearestNeighbors(StRichSinglePixel* maxPixel, int clusNum,
+							    vector<StRichSinglePixel*>* aVectorOfPixels)
 {
     short row = maxPixel->row();
     short pad = maxPixel->pad();
@@ -959,7 +1087,8 @@ bool StRichClusterAndHitFinder::constructTheNearestNeighbors(StRichSinglePixel* 
     //cout << "Nearest" << endl;
     for(short irow=row-1; irow<row+2; irow++) {  // ii = irow
 	for(short ipad=pad-1; ipad<pad+2; ipad++) { // jj = ipad
-size_t StRichClusterAndHitFinder::findTheLocalMaximaInCluster(StRichSimpleCluster* clus, vector<StRichSinglePixel*>& maxPixels)
+	    // if it doesn't exist
+	    if(!mThePixels(ipad,irow)) continue;
 	    short difference =
 		abs(static_cast<int>(mThePixels(ipad,irow)->pad() - pad)) +
 		abs(static_cast<int>(mThePixels(ipad,irow)->row() - row));
@@ -1020,22 +1149,169 @@ size_t StRichClusterAndHitFinder::findTheLocalMaximaInCluster(StRichSimpleCluste
 
 	for(jj=1; jj<maxPixels.size(); jj++) {
 	    int jrow = maxPixels[jj]->row();
-//     cout << "StRichClusterAndHitFinder::fillHitStructure()" << endl;
+	    int jpad = maxPixels[jj]->pad();
 	    
-    // just temporary
-    mTheHits.back()->localError() = info.positionError();
+	    if( abs(irow-jrow) == 1 && (ipad==jpad) ) {
 		maxPixels[ii]->setBit(eMaxHasAVerticalNeighbor);
 		maxPixels[jj]->setBit(eMaxHasAVerticalNeighbor);
-    //mTheHits.back()->setClusterNumber(mThePixels[jj-1]->clusterNumber());
 	    }
 	    if( abs(ipad-jpad) == 1 && (irow==jrow) ) {
-    //mTheHits.back()->setRms()
-//     cout << *mTheHits.back() << endl;
+		maxPixels[ii]->setBit(eMaxHasAHorizontalNeighbor);
+		maxPixels[jj]->setBit(eMaxHasAHorizontalNeighbor);
+	    }
 	}
     }
 
     
     return numberOfCentralMax;
+}
+//      cout << "StRichClusterAndHitFinder::fillHitStructure()" << endl;
+    //
+    // Remember the internal coordinate is in pad/row fractions
+    //
+    mTheHits.back()->internal() = info.position();
+    mTheHits.back()->sigma() = info.positionError();
+    
+    mTheHits.back()->setCharge(info.charge());
+//      cout << *mTheHits.back() << endl;
+	}
+    }
+    
+    //      cout << *mTheHits.back() << endl;
+
+    return 0;
+}
+
+
+bool StRichClusterAndHitFinder::classifyHitType(vector<StRichSinglePixel*>& aPixelVector)
+{
+  //
+  // This function determines the hit type (MC or not) and
+  // adds it to the HitVector.  In addition in modifies the
+  // MCInfo at the pixel level in the necessary manner 
+
+  //
+  // typedefs for mappings:
+  //
+    typedef int hitIDToChargeMapKey;
+    typedef float hitIDToChargeMapValue;
+    typedef int hitIDToRichIDMapKey;
+    typedef const id_type hitIDToRichIDMapValue;
+
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+    typedef map<hitIDToChargeMapKey,hitIDToChargeMapValue> hitIDToChargeMapType;
+    typedef map<hitIDToRichIDMapKey,hitIDToRichIDMapValue> hitIDToRichIDMapType;
+#else
+    typedef map<hitIDToChargeMapKey,hitIDToChargeMapValue, less<HitIDToChargeMapKey>, 
+	allocator< OS_PAIR(hitIDToChargeMapKey,hitIDToChargeMapValue) > > hitIDToChargeMapType;
+    typedef map<hitIDToRichIDMapKey,hitIDToRichIDMapValue, less<HitIDToRichIDMapKey>, 
+	allocator< OS_PAIR(hitIDToRichIDMapKey,hitIDToRichIDMapValue) > > hitIDToRichIDMapType;
+#endif
+    typedef hitIDToChargeMapType::iterator hitIDToChargeMapIter;
+    typedef hitIDToChargeMapType::const_iterator hitIDToChargeMapConstIter;
+    typedef hitIDToChargeMapType::value_type hitIDToChargeMapValType;
+    typedef hitIDToRichIDMapType::iterator hitIDToRichIDMapIter;
+    typedef hitIDToRichIDMapType::iterator hitIDToRichIDMapConstIter;
+    
+    typedef hitIDToRichIDMapType::value_type hitIDToRichIDMapValType;
+    typedef pair<hitIDToChargeMapIter,bool> hitIDToChargeMapRetType;
+    typedef pair<hitIDToRichIDMapIter,bool> hitIDToRichIDMapRetType;
+    
+    //
+    // For unrolling the map
+    //
+    typedef const float chargeToHitIDMapKey;
+    typedef const int chargeToHitIDMapValue;
+    
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+    typedef multimap < chargeToHitIDMapKey, chargeToHitIDMapValue,
+	greater<chargeToHitIDMapKey> > chargeToHitIDMapType;
+#else
+    typedef multimap < chargeToHitIDMapKey, chargeToHitIDMapValue,
+	greater<chargeToHitIDMapKey>,
+	allocator< OS_PAIR(chargeToHitIDMapKey, chargeToHitIDMapValue) > > chargeToHitIDMapType;
+#endif
+    typedef chargeToHitIDMapType::iterator   chargeToHitIDMapIter;
+    typedef chargeToHitIDMapType::value_type chargeToHitIDMapValType;		
+    bool anMCHit = false;
+    
+    //
+    // Define and fill the maps.
+    // Need to SUM the charge for a given hitid
+    //
+    
+    hitIDToChargeMapType hitIDToCharge;
+    hitIDToRichIDMapType hitIDToRichID;
+    
+    mAnMCHit = false;
+    for(size_t jj=0; jj<aPixelVector.size(); jj++) {
+	
+	StRichSingleMCPixel* pix =
+	    dynamic_cast<StRichSingleMCPixel*>(aPixelVector[jj]);
+	
+	if (pix) {
+	    //
+	    // The group of pixels has at least ONE MC pixel associated with it
+	    //
+	    mAnMCHit = 1;
+	    { // scope for sun
+		for (const_id_iter iter=pix->MCInfo().begin(); 
+		     iter!=pix->MCInfo().end(); ++iter) {
+		    int myHitID;
+		    if (iter->mSignalType == eFeedback) {
+			myHitID = -(iter->mHitID);
+		    }
+		    else {
+			myHitID = iter->mHitID;
+		    }
+		    hitIDToCharge[myHitID] += iter->mCharge;
+		    
+		    hitIDToRichIDMapRetType ret = 
+			hitIDToRichID.insert(hitIDToRichIDMapValType(myHitID,*iter));
+		    if ( (!ret.second) && (!(*iter == hitIDToRichID[myHitID]))) { 
+			cout << "StRichClusterAndHitFinder::makeSimpleHitsFromClusters(): ";
+			cout << "Warning:  HitID " << myHitID << " not unique: " << endl;
+			cout << "\t\t\t G_ID: " << iter->mG_ID 
+			     << " blocked by " << hitIDToRichID[myHitID].mG_ID << endl;
+			cout << "\t\t\t HitID: " << iter->mHitID 
+			     << " blocked by " << hitIDToRichID[myHitID].mHitID << endl;
+			cout << "\t\t\t SignalType: " << static_cast<int>(iter->mSignalType) 
+			     << " blocked by " 
+			     << static_cast<int>(hitIDToRichID[myHitID].mSignalType) << endl;
+		    } // if
+		} // iter over IDList
+	    } // scope for sun
+    if(anMCHit) {
+    
+    
+    } // loop over all pads in cluster
+  
+
+    //
+    // if the cluster possess an MCPixel, add
+    // an MCHit to the HitVector
+    //
+    if(mAnMCHit) {
+	mTheHits.push_back(new StRichSimpleMCHit);
+	//
+	// Here is where we could do the second loop
+	// for evaluation and assignment of the
+	// MC information to the hit?
+	// Find the biggest contribution to the pixel and add it
+    
+	// unroll the map.  ordered by GREATEST charge.
+    
+	chargeToHitIDMapType chargeToHitID;
+	
+	{ // Sun scope
+	    for (hitIDToChargeMapConstIter iter = hitIDToCharge.begin(); 
+		 iter!=hitIDToCharge.end(); ++iter) {
+		chargeToHitID.insert(chargeToHitIDMapValType(iter->second,iter->first));
+	    }
+	}
+	
+	// grab the first of the greatest.  
+	// Don't know what else to do (equal contributions)
     
 	chargeToHitIDMapIter iter = chargeToHitID.begin();
 	float topCharge=iter->first;
@@ -1134,100 +1410,6 @@ size_t StRichClusterAndHitFinder::findTheLocalMaximaInCluster(StRichSimpleCluste
 		}
 		
 		// grab the first of the greatest.  Don't know what else to do (equal contributions)
-	    bool StRichClusterAndHitFinder::classifyHitType(vector<StRichSinglePixel*> aPixelVector)
-	      {
-		//
-		// Fill the maps.  Need to SUM the charge for a given hitid
-		//
-		hitIDToChargeMapType hitIDToCharge;
-		hitIDToRichIDMapType hitIDToRichID;
-
-		bool anMCHit = false;
-		for(size_t jj=0; jj<aPixelVector.size(); jj++) {
-
-		  StRichSingleMCPixel* pix = 
-		    dynamic_cast<StRichSingleMCPixel*>(aPixelVector[jj]);
-		  if (pix) {
-		    //
-		    // It is an mc Hit (probably)
-		    //mAnMCHit = 1;
-		    { // scope for sun
-		      for (const_id_iter iter=p->MCInfo().begin(); 
-			   iter!=p->MCInfo().end(); ++iter) {
-			int myHitID;
-			if (iter->mSignalType == eFeedback) {
-			  myHitID = -(iter->mHitID);
-			}
-			else {
-			  myHitID = iter->mHitID;
-			}
-			hitIDToCharge[myHitID] += iter->mCharge;
-			    
-			hitIDToRichIDMapRetType ret = 
-			  hitIDToRichID.insert(hitIDToRichIDMapValType(myHitID,*iter));
-			if ( (!ret.second) && (!(*iter == hitIDToRichID[myHitID]))) { 
-			  cout << "StRichClusterAndHitFinder::makeSimpleHitsFromClusters(): ";
-			  cout << "Warning:  HitID " << myHitID << " not unique: " << endl;
-			  cout << "\t\t\t G_ID: " << iter->mG_ID 
-			       << " blocked by " << hitIDToRichID[myHitID].mG_ID << endl;
-			  cout << "\t\t\t HitID: " << iter->mHitID 
-			       << " blocked by " << hitIDToRichID[myHitID].mHitID << endl;
-			  cout << "\t\t\t SignalType: " << static_cast<int>(iter->mSignalType) 
-			       << " blocked by " 
-			       << static_cast<int>(hitIDToRichID[myHitID].mSignalType) << endl;
-			} // if
-		      } // iter over IDList
-		    } // scope for sun
-		  } // if (p) is it an mc pixel?
-		
-
-		} // loop over all pads in cluster
-
-		//
-		// Calculate values
-		//
-		
-		//
-		// Determine whether it is an MC Hit or not?
-		//
-		if(anMCHit) {
-		  mTheHits.push_back(new StRichSimpleMCHit);
-		  //
-		  // Here is where we could do the second loop
-		  // for evaluation and assignment of the
-		  // MC information to the hit?
-		  // Find the biggest contribution to the pixel and add it
-		  
-		  // unroll the map.  ordered by GREATEST charge.
-
-		  chargeToHitIDMapType chargeToHitID;
-
-		  { // Sun scope
-		    for (hitIDToChargeMapConstIter iter = hitIDToCharge.begin(); 
-			 iter!=hitIDToCharge.end();
-			 ++iter) {
-		      chargeToHitID.insert(chargeToHitIDMapValType(iter->second,iter->first));
-		    }
-		  }
-		  
-		  // grab the first of the greatest.  
-		  // Don't know what else to do (equal contributions)
-
-		  chargeToHitIDMapIter iter = chargeToHitID.begin();
-		  float topCharge=iter->first;
-		  int topHitID=iter->second;
-		  id_type theID = hitIDToRichID[topHitID];
-		  
-		  // Overwrite its charge with the total charge
-		  theID.mCharge = topCharge;
-		  
-		  (dynamic_cast<StRichSimpleMCHit*>(mTheHits.back()))->setMCInfo(theID);
-		  
-		}
-		else {
-		  mTheHits.push_back(new StRichSimpleHit);
-		}
-	}
 		chargeToHitIDMapIter iter = chargeToHitID.begin();
 		float topCharge=iter->first;
 		int topHitID=iter->second;
