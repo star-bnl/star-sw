@@ -35,7 +35,7 @@ void StHbtKaonTTree(const Int_t nevents=9999,
 		    const Char_t *fileName="",
 		    const Char_t *extention=".hbtTTreeMuDst",
 		    const Char_t *filter=".",
-		    const int maxFiles=1000) {
+		    const int maxFiles=10) {
 
   gStyle->SetTextFont(41);
   gStyle->SetStatH(.3);
@@ -50,9 +50,11 @@ void StHbtKaonTTree(const Int_t nevents=9999,
   gSystem->Load("StTreeMaker");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
+  gSystem->Load("StTpcDb");
+  gSystem->Load("StDbUtilities");
   gSystem->Load("StEvent");
   gSystem->Load("StEventMaker");
-    gSystem->Load("StEventDstMaker"); 
+  gSystem->Load("StEventDstMaker"); 
   gSystem->Load("StEventUtilities");
   gSystem->Load("StEmcUtil");
   gSystem->Load("St_emc_Maker");
@@ -110,6 +112,7 @@ void StHbtKaonTTree(const Int_t nevents=9999,
   // 0) now define an analysis...
   //  StHbtVertexAnalysis* kaonAnal = new StHbtVertexAnalysis();
   kaonAnal = new StHbtVertexAnalysis(20,-50.,50.);
+  //  kaonAnal->SetDebug(10);
   // 1) set the Event cuts for the analysis
   rotationEventCut* kaonEvcut = new rotationEventCut();  // use "mike's" event cut object
   kaonEvcut->SetEventRefMult(124,1000);      // selected multiplicity range
