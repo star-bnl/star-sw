@@ -87,7 +87,7 @@ C Adjust for ssd later
       endif
       
       globtrk(iglob).z0 = gtrk(igtrk).p(6)
-      sgn = -1*sign(1.0,gtrk(globtrk(iglob).icharge*bfield)
+      sgn = -1*sign(1.0,gtrk(globtrk(iglob).icharge*bfield))
       globtrk(iglob).psi = gtrk(igtrk).p(5)+sgn*C_PI_2
       globtrk(iglob).psi = globtrk(iglob).psi*C_DEG_PER_RAD  ! to degrees
       globtrk(iglob).psi = AMOD(globtrk(iglob).psi, 360.0)
