@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.4 2001/05/22 20:05:47 posk Exp $
+// $Id: minBias.C,v 1.5 2001/11/09 21:15:00 posk Exp $
 //
 // Author:       Art Poskanzer and Alexander Wetzler, Mar 2001
 // Description:  Macro to add histograms together.
@@ -10,7 +10,6 @@
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-gROOT->Reset();
 
 void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 
@@ -235,6 +234,9 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: minBias.C,v $
+// Revision 1.5  2001/11/09 21:15:00  posk
+// Switched from CERNLIB to TMath. Using global dca instead of dca.
+//
 // Revision 1.4  2001/05/22 20:05:47  posk
 // Now outputs a hist.root file.
 // The v values are averaged with yield weighting.
