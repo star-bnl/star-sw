@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.20 2003/01/14 09:41:26 renault Exp $
+ * $Id: StHbtParticle.cc,v 1.21 2003/05/07 15:30:43 magestro Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.21  2003/05/07 15:30:43  magestro
+ * Fixed bug related to finding merged hits (commit for Fabrice)
+ *
  * Revision 1.20  2003/01/14 09:41:26  renault
  * changes on average separation calculation, hit shared finder and memory optimisation
  * for Z,U and Sectors variables.
@@ -666,7 +669,7 @@ void StHbtParticle::CalculateTpcExitAndEntrancePoints(StPhysicalHelixD* tHelix,
     if (isnan(tLength)){
       cout <<"tLength loop 2nd  NAN" << endl;
       cout <<"padrow number=  " << ti << " not reached" << endl;
-      tmpSect[ti]=-1;//sector
+      tmpSect[ti]=-2;//sector
     }
     tPoint = hel.at(tLength);
     tmpZ[ti] = tPoint.z();
@@ -684,7 +687,7 @@ void StHbtParticle::CalculateTpcExitAndEntrancePoints(StPhysicalHelixD* tHelix,
       cout <<"***ERROR tPhi 2 "<< endl;
     }  
     if(tOutOfBound || (tmpSect[ti] == tSect && tRow!=(ti+1))){
-      tmpSect[ti]=-1;
+      tmpSect[ti]=-2;
       //	  cout << "missed once"<< endl;
     }
     else{
