@@ -15,9 +15,8 @@
 
 use vars qw( $CVS_id $CVS_ver $ver_num $ver_rev $version );
 
-$CVS_id = '$Id: cons,v 1.1.1.25 2001/01/17 17:39:27 fisyak Exp $ ';   
-
-($CVS_ver = $CVS_id);# =~ s/^\$Id: cons,v 1.1.1.25 2001/01/17 17:39:27 fisyak Exp $1/;
+$CVS_id = '$Id: cons,v 1.1.1.26 2001/01/24 14:38:26 fisyak Exp $';
+$CVS_ver = (split(/\s+/, $CVS_id))[2];
 
 $ver_num = "2.3";
 $ver_rev = ".0";
@@ -1249,7 +1248,7 @@ package build;
 sub includes { () }
 
 # Null signature for build script.
-sub signature { () }
+sub scriptsig { () }
 
 # Not compatible with any other builder, by default.
 sub compatible { 0 }
@@ -1331,8 +1330,8 @@ sub action {
 }
 
 # Return script signature.
-sub signature {
-    $_[0]->{act}->signature
+sub scriptsig {
+    $_[0]->{act}->scriptsig
 }
 
 
@@ -1623,9 +1622,9 @@ sub new {
     bless { 'builder' => $builder, 'tgts' => $tgts };
 }
 
-sub signature {
+sub scriptsig {
     my($self, $tgt) = @_;
-    $self->{builder}->signature($tgt);
+    $self->{builder}->scriptsig($tgt);
 }
 
 sub includes {
@@ -1720,7 +1719,7 @@ sub new {
     }
 }
 
-sub signature {
+sub scriptsig {
     $_[0]->{cmdsig};
 }
 
@@ -1976,7 +1975,7 @@ sub new {
     }
 }
 
-sub signature {
+sub scriptsig {
     $_[0]->{crefsig}
 }
 
@@ -2994,7 +2993,7 @@ sub _build {
     # output path name, and (non-substituted) build script.
     my($sig) = 'sig'->collect(map('sig'->signature($_->rfile), @deps),
 			    $builder->includes($self),
-			    $builder->signature);
+			    $builder->scriptsig);
 
     # May have gotten errors during computation of dynamic
     # dependency signature, above.
