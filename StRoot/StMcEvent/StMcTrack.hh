@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.2 1999/12/03 00:51:53 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.3 2000/01/18 20:52:31 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.3  2000/01/18 20:52:31  calderon
+ * Works with CC5
+ *
  * Revision 2.2  1999/12/03 00:51:53  calderon
  * Tested with new StMcEventMaker.  Added messages for
  * diagnostics.
@@ -23,7 +26,7 @@
  **************************************************************************/
 #ifndef StMcTrack_hh
 #define StMcTrack_hh 
-#include <algorithm>
+#include <iostream.h>
 #include "StLorentzVectorF.hh"
 #include "StMcContainers.hh"
 //#include "StTrackTopologyMap.h"

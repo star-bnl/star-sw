@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.cc,v 2.3 1999/12/14 07:04:50 calderon Exp $
+ * $Id: StMcVertex.cc,v 2.4 2000/01/18 20:52:31 calderon Exp $
  * $Log: StMcVertex.cc,v $
+ * Revision 2.4  2000/01/18 20:52:31  calderon
+ * Works with CC5
+ *
  * Revision 2.3  1999/12/14 07:04:50  calderon
  * Numbering scheme as per SVT request.
  *
@@ -25,12 +28,15 @@
  *
  **************************************************************************/
 #include <algorithm>
+#ifndef ST_NO_NAMESPACES
+using std::find;
+#endif
 
 #include "StMcVertex.hh"
 #include "StMcTrack.hh"
 #include "tables/St_g2t_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StMcVertex.cc,v 2.3 1999/12/14 07:04:50 calderon Exp $";
+static const char rcsid[] = "$Id: StMcVertex.cc,v 2.4 2000/01/18 20:52:31 calderon Exp $";
 
 StMcVertex::StMcVertex()
 {

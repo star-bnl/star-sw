@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.hh,v 2.3 1999/12/14 07:04:50 calderon Exp $
+ * $Id: StMcVertex.hh,v 2.4 2000/01/18 20:52:31 calderon Exp $
  * $Log: StMcVertex.hh,v $
+ * Revision 2.4  2000/01/18 20:52:31  calderon
+ * Works with CC5
+ *
  * Revision 2.3  1999/12/14 07:04:50  calderon
  * Numbering scheme as per SVT request.
  *
@@ -27,7 +30,12 @@
 #ifndef StMcVertex_hh
 #define StMcVertex_hh
 #include "StMcContainers.hh"
+#include <iostream.h>
 #include <string>
+#ifndef ST_NO_NAMESPACES
+using std::string;
+#endif
+
 #include "StThreeVectorF.hh"
 
 class g2t_vertex_st;

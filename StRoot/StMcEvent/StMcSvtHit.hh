@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.hh,v 2.3 1999/12/14 07:04:49 calderon Exp $
+ * $Id: StMcSvtHit.hh,v 2.4 2000/01/18 20:52:31 calderon Exp $
  * $Log: StMcSvtHit.hh,v $
+ * Revision 2.4  2000/01/18 20:52:31  calderon
+ * Works with CC5
+ *
  * Revision 2.3  1999/12/14 07:04:49  calderon
  * Numbering scheme as per SVT request.
  *
@@ -34,7 +37,6 @@ class StMcTrack;
 class g2t_svt_hit_st;
 
 #if !defined(ST_NO_NAMESPACES)
-using namespace std;
 #endif
 
 class StMcSvtHit : public StMcHit {
