@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.44 1999/01/04 16:24:38 fisyak Exp $
+# $Id: MakeDll.mk,v 1.45 1999/01/14 13:56:40 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.45  1999/01/14 13:56:40  fisyak
+# Add Victors MakeFun.mk, Add StMagF
+#
 # Revision 1.44  1999/01/04 16:24:38  fisyak
 # Add TGeant3
 #
@@ -218,8 +221,9 @@ FILES_MOD  := $(wildcard $(SRC_DIR)/St_*_Module.cxx)
 FILES_DAT  := $(wildcard $(SRC_DIR)/St_DataSet.cxx)
 FILES_XDF  := $(wildcard $(SRC_DIR)/St_XDFFile.cxx)
 FILES_G3   := $(wildcard $(SRC_DIR)/TGeant3.cxx)
+FILES_CHAIN:= $(wildcard $(SRC_DIR)/StChain.cxx)
 FILES_ALL  := $(filter-out %Cint.cxx,$(wildcard $(SRC_DIR)/*.cxx))
-FILES_ST   := $(FILES_SYM) $(FILES_SYT) $(FILES_TAB) $(FILES_MOD) $(FILES_G3)
+FILES_ST   := $(FILES_SYM) $(FILES_SYT) $(FILES_TAB) $(FILES_MOD) $(FILES_G3) $(FILES_CHAIN)
 #                                                                 $(FILES_DAT)
 FILES_ALL  := $(sort $(filter-out $(FILES_ST),$(FILES_ALL)))
 FILES_ORD  := $(FILES_ALL)
@@ -227,6 +231,11 @@ ifdef FILES_G3
   NAMES_G3      := $(basename $(notdir $(FILES_G3)))
   FILES_G3_H    := $(addprefix $(SRC_DIR)/,$(addsuffix .h,$(NAMES_G3)))
   FILES_CINT_G3 := $(addprefix $(GEN_DIR)/,$(addsuffix Cint.cxx,$(NAMES_G3)))
+endif
+ifdef FILES_CHAIN
+  NAMES_CHAIN      := $(basename $(notdir $(FILES_CHAIN)))
+  FILES_CHAIN_H    := $(addprefix $(SRC_DIR)/,$(addsuffix .h,$(NAMES_CHAIN)))
+  FILES_CINT_CHAIN := $(addprefix $(GEN_DIR)/,$(addsuffix Cint.cxx,$(NAMES_CHAIN)))
 endif
 
 ifdef FILES_SYM
@@ -305,7 +314,7 @@ define  ORD_LINKDEF
 endef
 endif
 
-FILES_O := $(FILES_SRC) $(FILES_CINT_SYM) $(FILES_CINT_G3) $(FILES_CINT_SYT) $(FILES_CINT_TAB) $(FILES_CINT_MOD) $(FILES_ORD) $(FILES_CINT_ORD)
+FILES_O := $(FILES_SRC) $(FILES_CINT_SYM) $(FILES_CINT_G3) $(FILES_CINT_CHAIN)  $(FILES_CINT_SYT) $(FILES_CINT_TAB) $(FILES_CINT_MOD) $(FILES_ORD) $(FILES_CINT_ORD)
 FILES_O := $(addprefix $(OBJ_DIR)/,$(addsuffix .$(O), $(notdir $(basename $(FILES_O)))))
 FILES_O := $(sort $(FILES_O))
 STAR_FILES_O := $(wildcard $(STAR_OBJ_DIR)/*.$(O))
@@ -313,7 +322,7 @@ FILTER  := $(addprefix %/,$(notdir $(FILES_O)))
 STAR_FILES_O := $(filer-out $(FILTER),$(STAR_FILES_O))
 FILES_D := $(addsuffix .d, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_O)))))
 FILES_DCINT := $(addsuffix .d, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_CINT_SYM) \
-  $(FILES_CINT_G3) $(FILES_CINT_SYT) $(FILES_CINT_TAB) $(FILES_CINT_MOD) $(FILES_CINT_ORD)))))
+  $(FILES_CINT_G3) $(FILES_CINT_CHAIN) $(FILES_CINT_SYT) $(FILES_CINT_TAB) $(FILES_CINT_MOD) $(FILES_CINT_ORD)))))
 
 
 ifeq (,$(FILES_O))
@@ -342,7 +351,7 @@ MY_AR  := $(addsuffix .a, $(basename $(MY_SO)))
 
 all:   RootCint Libraries  DeleteDirs
 
-RootCint : $(FILES_CINT_SYT) $(FILES_CINT_SYM) $(FILES_CINT_G3) $(FILES_CINT_TAB) $(FILES_CINT_MOD)
+RootCint : $(FILES_CINT_SYT) $(FILES_CINT_SYM) $(FILES_CINT_G3) $(FILES_CINT_CHAIN) $(FILES_CINT_TAB) $(FILES_CINT_MOD)
 
 $(FILES_CINT_SYT) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h 
 	$(COMMON_LINKDEF)
@@ -375,6 +384,15 @@ $(FILES_CINT_G3) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h
 	@echo "#pragma  link C++ global csets;"	 >> $(LINKDEF);
 	@echo "#pragma  link C++ class  TGeant3;"	 >> $(LINKDEF);
 	@echo "#endif"					 >> $(LINKDEF);
+	@$(CAT) $(LINKDEF);
+$(FILES_CINT_CHAIN) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h 
+	@test -f $(LINKDEF) &&  $(RM) $(LINKDEF);\
+	echo "#ifdef __CINT__"                  	>  $(LINKDEF);\
+	echo "#pragma link off all globals;"    	>> $(LINKDEF);\
+	echo "#pragma link off all classes;"    	>> $(LINKDEF);\
+	echo "#pragma link off all functions;"  	>> $(LINKDEF);\
+	echo "#pragma link C++ class $(STEM)-;"  	>> $(LINKDEF);\
+	echo "#endif"					>> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
 ifndef NT
 	cd $(GEN_DIR); $(CP) $(1ST_DEPS) .; \
@@ -627,6 +645,7 @@ test:
 	@echo FILES_ORD := $(FILES_ORD)
 	@echo FILES_SYM := $(FILES_SYM)
 	@echo FILES_G3  := $(FILES_G3)
+	@echo FILES_CHAIN:= $(FILES_CHAIN)
 	@echo FILES_SYT := $(FILES_SYT)
 	@echo FILES_TAB := $(FILES_TAB)
 	@echo FILES_MOD := $(FILES_MOD) 
