@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.cxx,v 2.4 2000/01/20 14:43:07 ullrich Exp $
+ * $Id: StTrackDetectorInfo.cxx,v 2.5 2000/04/20 13:29:58 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.cxx,v $
- * Revision 2.4  2000/01/20 14:43:07  ullrich
- * Fixed bug in numberOfPoints(). Sum was wrong.
+ * Revision 2.5  2000/04/20 13:29:58  ullrich
+ * Added new methods and removed inconsistencies in numberOfPoints().
  *
  * Revision 2.4  2000/01/20 14:43:07  ullrich
  * Fixed bug in numberOfPoints(). Sum was wrong.
@@ -33,7 +33,7 @@
 
 ClassImp(StTrackDetectorInfo)
 
-static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.4 2000/01/20 14:43:07 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.5 2000/04/20 13:29:58 ullrich Exp $";
 
 StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0)
 { /* noop */ }
@@ -80,6 +80,21 @@ StTrackDetectorInfo::numberOfPoints(StDetectorId det) const
     default:
 	return 0;
     }
+}
+
+UShort_t
+StTrackDetectorInfo::numberOfReferencedPoints() const
+{
+    return static_cast<UShort_t>(mHits.size());
+}
+
+UShort_t
+StTrackDetectorInfo::numberOfReferencedPoints(StDetectorId id) const
+{
+    UShort_t count = 0;
+    for (StPtrVecHitConstIterator iter=mHits.begin(); iter != mHits.end(); iter++)
+        if ((*iter)->detector() == id) count++;
+    return count;
 }
 
 StPtrVecHit
@@ -130,7 +145,6 @@ StTrackDetectorInfo::addHit(StHit* hit)
     if (hit) {
         mHits.push_back(hit);
         hit->setTrackReferenceCount(hit->trackReferenceCount()+1);
-        mNumberOfPoints = mHits.size();
     }
 }
 
@@ -143,5 +157,4 @@ StTrackDetectorInfo::removeHit(StHit*& hit)
         int i = hit->trackReferenceCount();
         hit->setTrackReferenceCount(i > 0 ? i-1 : 0);
     }
-    mNumberOfPoints = mHits.size();
 }
