@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.43 2003/04/03 13:17:49 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.44 2003/08/29 13:01:18 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.44  2003/08/29 13:01:18  suaide
+// QA Histograms fixed. Histogram bin size fixed
+//
 // Revision 1.43  2003/04/03 13:17:49  suaide
 // option to turn off message log was included
 //
@@ -147,10 +150,10 @@ program
 Int_t StEmcADCtoEMaker::Init()
 {     
   //Making QA histgrams
-  const Int_t   nx[] = {40,40,300,20,12,12,12,12};
-  const Float_t xl[] = {-1.0,-1.0,-1.0,-1.0, 0.5 , 0.5, 0.5, 0.5};
-  const Float_t xu[] = { 1.0, 1.0, 1.0, 1.0, 12.5,12.5,12.5,12.5};
-  const Int_t   ny[] = {120, 120, 60, 900, 60, 60, 60, 60};
+  //const Int_t   nx[] = {40,40,300,20,12,12,12,12};
+  //const Float_t xl[] = {-1.0,-1.0,-1.0,-1.0, 0.5 , 0.5, 0.5, 0.5};
+  //const Float_t xu[] = { 1.0, 1.0, 1.0, 1.0, 12.5,12.5,12.5,12.5};
+  //const Int_t   ny[] = {120, 120, 60, 900, 60, 60, 60, 60};
 	
 	mValidEvents = new TH2F("ValidEvents","Valid events for each detector (1=good, 2= bad)",4,-0.5,3.5,8,0.5,8.5);
  
@@ -163,8 +166,72 @@ Int_t StEmcADCtoEMaker::Init()
   // SMD time bin
   mSmdTimeBinHist = new TH2F("SmdTimeBin","SMD Time bin",8,-0.5,7.5,128,0.5,128.5);
 
+  for (Int_t i=0; i<MAXDET; i++) 
+	{
+		mGeo[i]=StEmcGeom::getEmcGeom(detname[i].Data());
+    cout <<"det = "<<detname[i].Data()
+         <<"  DeductPedestal = "<<mControlADCtoE->DeductPedestal[i]
+         <<"  Calibration = "<<mControlADCtoE->Calibration[i]
+         <<"  EnergyCutOff = "<<mControlADCtoE->EnergyCutOff[i]
+         <<"  OnlyCalibrated = "<<mControlADCtoE->OnlyCalibrated[i]<<endl;
+  }
+  
   for (Int_t i=0; i<MAXDET; i++) if(mControlADCtoE->Calibration[i]==1)
   {
+    Int_t nEta=mGeo[i]->NEta();
+    Int_t nSub=mGeo[i]->NSub();
+    
+    TArrayF EtaB(nEta+1,mGeo[i]->EtaB());
+    TArrayF PhiB(nSub+1,mGeo[i]->PhiB());
+    
+    TArrayF EtaBins(2*nEta+2);
+    //Int_t nchannelsEta=2*nEta+2;
+    for(Int_t j=0;j<2*nEta+2;j++)
+    {
+      if (j<nEta+1) EtaBins[j]=-EtaB[nEta-j];
+      else EtaBins[j]=EtaB[j-nEta-1];
+      //if(i==2) cout <<"j "<<j<<"  EtaBin = "<<EtaBins[j]<<endl;
+    } 
+    
+    TArrayF PhiBins1(60*(nSub+1));
+    TArrayF PhiBins(60*(nSub+1));
+    Int_t j=0;
+    for(Int_t m=1;m<=60;m++)
+      for(Int_t s=1;s<=nSub+1;s++)
+      {
+        Float_t center;
+        mGeo[i]->getPhiModule(m,center);
+        PhiBins1[j]=center+PhiB[s-1];
+        //cout <<"j = "<<j<<"  m = "<<m<<"  s = "<<s<<"  PhiBins1 = "<<PhiBins1[j]<<endl;
+        j++;
+      }
+      
+    Bool_t again=kTRUE;
+    j=0;
+    do
+    {
+      again=kFALSE;
+      Float_t phitmp=6.4;
+      Int_t ktmp=-1;
+      for(Int_t k=0;k<60*(nSub+1);k++)
+      {
+        if(PhiBins1[k]<phitmp)
+        {
+          phitmp=PhiBins1[k];
+          ktmp=k;
+        }
+      }
+      if(ktmp!=-1)
+      {
+        //cout << ktmp<<"  "<<phitmp<<endl;
+        PhiBins[j]=phitmp;
+        again=kTRUE;
+        PhiBins1[ktmp]=999;
+        j++;
+      }      
+    } while(again);
+      
+      
     TString name_h = detname[i] + "_Hits";
     TString name_e = detname[i] + "_Energy";
     TString name_a = detname[i] + "_ADC";
@@ -175,21 +242,12 @@ Int_t StEmcADCtoEMaker::Init()
     TString title_a= detname[i] + " ADC distribution";
     TString title_a1= detname[i] +" ADC distribution (log10)";
     TString title_e1= detname[i] +" Energy distribution";
-    Float_t rpi = M_PI + 0.00001; 
-    mHits[i]   = new TH2F(name_h,title_h,nx[i],xl[i],xu[i],ny[i],-rpi, rpi);
-    mEnergyHist[i] = new TH2F(name_e,title_e,nx[i],xl[i],xu[i],ny[i],-rpi, rpi);
-    mAdc[i]    = new TH2F(name_a,title_a,nx[i],xl[i],xu[i],ny[i],-rpi, rpi);
+    //Float_t rpi = M_PI + 0.00001; 
+    mHits[i]   = new TH2F(name_h,title_h,2*nEta+2-1,EtaBins.GetArray(),60*(nSub+1)-1,PhiBins.GetArray());
+    mEnergyHist[i] = new TH2F(name_e,title_e,2*nEta+2-1,EtaBins.GetArray(),60*(nSub+1)-1,PhiBins.GetArray());
+    mAdc[i]    = new TH2F(name_a,title_a,2*nEta+2-1,EtaBins.GetArray(),60*(nSub+1)-1,PhiBins.GetArray());
     mAdc1d[i]  = new TH1F(name_a1,title_a1,1000,0,8);   
     mEn1d[i]   = new TH1F(name_e1,title_e1,1000,-200,2000);   
-  }
-  for (Int_t i=0; i<MAXDET; i++) 
-	{
-		mGeo[i]=StEmcGeom::getEmcGeom(detname[i].Data());
-    cout <<"det = "<<detname[i].Data()
-         <<"  DeductPedestal = "<<mControlADCtoE->DeductPedestal[i]
-         <<"  Calibration = "<<mControlADCtoE->Calibration[i]
-         <<"  EnergyCutOff = "<<mControlADCtoE->EnergyCutOff[i]
-         <<"  OnlyCalibrated = "<<mControlADCtoE->OnlyCalibrated[i]<<endl;
   }
   return StMaker::Init();
 }
@@ -613,6 +671,12 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 				NHITS++;
 			  //if(det==3) cout <<"id = "<<id<<"  ADC = "<<ADC<<"  PED = "<<PED<<"  CAP = "<<cap<<"  ADCSUB = "<<ADCSUB<<"  E = "<<EN<<endl;
 			}
+      else
+      {
+ 			  if(det==0) mData->TowerEnergy[id-1] = 0;
+			  if(det==2) mData->SmdeEnergy[id-1] = 0;     
+			  if(det==3) mData->SmdpEnergy[id-1] = 0;        
+      }
 		}
     else
     {
@@ -649,13 +713,14 @@ Bool_t StEmcADCtoEMaker::fillHistograms()
 			if(det==0) status = mData->TowerStatus[i];
 			if(det==2) status = mData->SmdeStatus[i];
 			if(det==3) status = mData->SmdpStatus[i];
-			if(status==STATUS_OK)
+			if(status==STATUS_OK && saveHit(det,i+1))
 			{
 				Float_t ADC = 0;
 				Float_t E = 0;
 				if(det==0) { ADC = (Float_t)mData->TowerADC[i]; E = mData->TowerEnergy[i]; mTower->Fill(i+1,ADC);}
 				if(det==2) { ADC = (Float_t)mData->SmdeADC[i]; E = mData->SmdeEnergy[i]; }
 				if(det==3) { ADC = (Float_t)mData->SmdpADC[i]; E = mData->SmdpEnergy[i]; }
+			  //if(det==2) cout <<"id = "<<i+1<<"  ADC = "<<ADC<<"  E = "<<E<<endl;
 				totalE+=E;
 				totalADC+=ADC;
 				nHits++;
@@ -666,6 +731,7 @@ Bool_t StEmcADCtoEMaker::fillHistograms()
 				if(E!=0) mEnergyHist[det]->Fill(eta,phi,E);
 			}
 		}
+    if(mPrint) cout <<"HISTOGRAM: det = "<<det+1<<"  NHits = "<<nHits<<"  totalE = "<<totalE<<endl;
 		if(nHits>0)    mNhit->Fill((Float_t)nHits,(Float_t)det+1);
 		if(totalE>0)   mEtot->Fill(log10(totalE),(Float_t)det+1);
 		if(mEn1d[det]) mEn1d[det]->Fill(totalE);
