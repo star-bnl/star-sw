@@ -1997,10 +1997,13 @@
 	IMPLICIT NONE
 
 *  Input:
-	INTEGER TIME(2) !64-bit integer, seconds since midnight, 1-jan-1970.
+	INTEGER TIME(2) !TIME(1) is seconds since midnight, 1-jan-1970.
+	                !TIME(2) is (additional) days since 1-jan-1970.
 *  Output:
 	CHARACTER*23 ASC !ASCII representation of TIME: dd-mmm-yy_hh:mm:ss_____
                          !("_" = "blank" -- last five characters are blank.)
+
+*  Brief Description:  Convert seconds since 1970 to 23-char ASCII date-time.
 
 *  Description:
 *	Convert TIME to 23 character ASCII years, months, days,
@@ -2016,25 +2019,27 @@
 	DATA AMON/'Jan','Feb','Mar','Apr','May','Jun'
      1	         ,'Jul','Aug','Sep','Oct','Nov','Dec'/
 
-	ASC=' ' !Blank this out for starters.
+	ASC = ' ' !Blank this out for starters.
 
-	DAYS=TIME(1)/(24*60*60*100)
-	BAL=TIME(1)-DAYS*(24*60*60*100)
-	DAYS=DAYS+TIME(2)
-	HOURS=BAL/(60*60*100)
-	BAL=BAL-HOURS*(60*60*100)
-	MINS=BAL/(60*100)
-	BAL=BAL-MINS*(60*100)
-	SECS=BAL/(100)
-	BAL=BAL-SECS*100
+	DAYS  = TIME(1) / (24*60*60)
+	BAL   = TIME(1) - DAYS*(24*60*60)
+	DAYS  = DAYS + TIME(2)
+	HOURS = BAL/(60*60)
+	BAL   = BAL - HOURS*(60*60)
+	MINS  = BAL/60
+	BAL   = BAL - MINS*60
+	SECS  = BAL
 
-	LEAPS=DAYS/(366+3*365)
-*	Assume TIME=0 occurs at 10-jan-1970;  1996 is 7 leaps later.
-	IF (LEAPS.GE.8) LEAPS=LEAPS-1 !Skip a leap year in 2000.
-	YEARS=(DAYS-LEAPS)/365
+	LEAPS = ( DAYS + 366 + 365 - 31 - 29 ) / ( 366 + 3*365 ) !Start from 1-mar-1968 for leap-counting.
+
+*	Assume TIME=0 occurs at 1-jan-1970;  1996 is 7 leaps later.
+	IF (LEAPS.GE.8) LEAPS=LEAPS-1 !Skip a leap year in 2000 -- next skip in 2400.
+
+	YEARS=(DAYS-LEAPS)/365   !Year-zero is 1970, here.
 	YEAR=MOD((YEARS+70),100) !Give year in century.
 	DAY=DAYS-LEAPS-365*YEARS !Day in year.
 
+*	Make DAY the day in the month:
 	MON=1
 	DO WHILE (  (MON.LT.12)  .AND.
      1	            ( (DAY-MONTH_DAYS(MON)) .GT. 0 )  )
@@ -2042,7 +2047,9 @@
 	  MON=MON+1
 	END DO
 
-	WRITE(ASC,101) DAYS,AMON(MON),YEAR,HOURS,MINS,SECS
+	DAY = DAY + 1 !1st day of month is 1, not 0.
+
+	WRITE(ASC,101) DAY,AMON(MON),YEAR,HOURS,MINS,SECS
 101	FORMAT(I2'-'A3'-'I2' 'I2.2':'I2.2':'I2.2)
 
 	RETURN
@@ -2495,3 +2502,35 @@
 	RETURN
 	END
 *
+	SUBROUTINE STR_MakeTime1970( Year, Month, Day, Hour, Min, Sec, Seconds_Since_1970 )
+
+	IMPLICIT NONE
+
+*  Inputs:
+	INTEGER Year, Month, Day
+	INTEGER Hour, Min, Sec
+
+*  Output:
+	INTEGER Seconds_Since_1970
+
+*  Description:
+*	Get the number of seconds since 1-Jan-1970, 00:00:00 GMT, of the specified date-time.
+
+	INTEGER Year_1970, Month_1970, Day_1970
+	INTEGER Days_Since_1970
+	INTEGER Seconds_Since_Today
+
+*	The beginning date of 1970:
+	DATA Year_1970 / 1970 /
+	DATA Month_1970 / 1 /
+	DATA Day_1970   / 1 /
+
+
+*	Get number of days since 1970 began:
+	CALL STRDAYSINCE( Year, Month, Day, Year_1970, Month_1970, Day_1970, Days_Since_1970 )
+
+	Seconds_Since_Today = ( Hour * 60 + Min ) * 60 + Sec !Today's contribution.
+	Seconds_Since_1970  = Days_Since_1970 * 24 * 3600 + Seconds_Since_Today
+	RETURN
+	END
+

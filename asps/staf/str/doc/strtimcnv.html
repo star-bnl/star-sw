@@ -2,10 +2,13 @@
 
 
 *  Input:
-	INTEGER TIME(2) !64-bit integer, seconds since midnight, 1-jan-1970.
+	INTEGER TIME(2) !TIME(1) is seconds since midnight, 1-jan-1970.
+	                !TIME(2) is (additional) days since 1-jan-1970.
 *  Output:
 	CHARACTER*23 ASC !ASCII representation of TIME: dd-mmm-yy_hh:mm:ss_____
                          !("_" = "blank" -- last five characters are blank.)
+
+*  Brief Description:  Convert seconds since 1970 to 23-char ASCII date-time.
 
 *  Description:
 *	Convert TIME to 23 character ASCII years, months, days,

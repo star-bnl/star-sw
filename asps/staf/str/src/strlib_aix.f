@@ -1,6 +1,6 @@
 
 *	AIX versions.
-*
+
 	REAL FUNCTION RAN(ISEED)
 *	This is meant to provide VMS look-alike random number generator.
 *	ISEED isn't used at all - VMS ISEED and IBM SEED are different things.
@@ -17,7 +17,7 @@
 
 	RETURN
 	END
-*
+
 	SUBROUTINE STRCPU(TCPU)
 	INTEGER TCPU
 	INTEGER MCLOCK
@@ -28,7 +28,7 @@
 	
 	RETURN
 	END
-*
+
 	SUBROUTINE STRCPUQ(TCPU) !Quad (64-bit) version.
 	INTEGER TCPU(2)
 	INTEGER MCLOCK
@@ -40,7 +40,7 @@
 	
 	RETURN
 	END
-*
+
 	SUBROUTINE STRCPU0
 *	"Initialize" CPU elapsed time counter.
 	IMPLICIT NONE
@@ -50,7 +50,7 @@
 	NATCPU_T0=MCLOCK()
 	RETURN
 	END
-*
+
 	INTEGER FUNCTION STRCPUTPS()
 
 	IMPLICIT NONE
@@ -62,7 +62,7 @@
 
 	RETURN
 	END
-*
+
 	SUBROUTINE STRDATE(YEAR,MONTH,DAY)
 	IMPLICIT NONE
 *  Output arguments:
@@ -120,7 +120,7 @@
 
 	RETURN
 	END
-*
+
 	SUBROUTINE STRDEC_ENDIAN(I32)
 
 *	Swap the two 16-bit half-words in the 32-bit (long) word I32,
@@ -142,7 +142,7 @@
 
 	RETURN
 	END
-*
+
 	SUBROUTINE STRDEC_ENDIAN_BYTE(I32)
 
 *	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
@@ -172,7 +172,7 @@
 
 	RETURN
 	END
-*
+
 	SUBROUTINE STRDEC_ENDIAN_BYTES(Nwords,Block)
 
 	IMPLICIT NONE
@@ -186,7 +186,7 @@
 *  Functional description:
 *	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
-*	DEC-style.  On SGI (here), the swapping is done.
+*	DEC-style.  On AIX (here), the swapping is done.
 
 	INTEGER Iword
 
@@ -214,7 +214,7 @@
 
 	RETURN
 	END
-*
+
 	SUBROUTINE STRDEC_ENDIAN_HALF(I32)
 
 	IMPLICIT NONE
@@ -225,7 +225,7 @@
 *  Functional description:
 *	Swap the two 16-bit half-words in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
-*	DEC-style.  On SGI (here), the swapping is done.
+*	DEC-style.  On AIX (here), the swapping is done.
 
 	INTEGER I4
 	INTEGER*2 I2(2),I2SAVE
@@ -239,7 +239,7 @@
 
 	RETURN
 	END
-*
+
 	INTEGER FUNCTION STRDEC_IBITS(DATA,BIT0,BITS)
 
 *	Do an IBITS, but make it act like DEC.
@@ -252,7 +252,7 @@
 
 	RETURN
 	END
-*
+
 	SUBROUTINE STRFLUSH( LUN )
 
 	IMPLICIT NONE
@@ -276,7 +276,7 @@
 	RETURN
 
 	END
-*
+
 	SUBROUTINE STRMOVE(COUNT,SOURCE,DEST)
 
 *	AIX interface routine to (equivalent) to LIB$MOVC3.
@@ -295,7 +295,7 @@
 
 	RETURN
 	END
-*
+
 	SUBROUTINE STRMSEC(MSECS)
 *	Standard interface routine to return milliseconds since midnight.
 	IMPLICIT NONE
@@ -306,7 +306,7 @@
 	MSECS=1000*SEC !Milliseconds since midnight (only whole secs.).
 	RETURN
 	END
-*
+
 	LOGICAL FUNCTION STRMSEC_DELAY(MSECS)
 
 *	Standard interface routine to delay the specified time in
@@ -355,7 +355,7 @@
 
 	RETURN
 	END
-*
+
 	LOGICAL FUNCTION STROPEN_NAT(LUN,FILENAME
      1	 ,STATUS_CARG,ACCESS_CARG,FORM_CARG
      2	 ,RECL_FLAG,RECL_IARG
@@ -429,7 +429,7 @@
 
 	RETURN
 	END
-*
+
 	SUBROUTINE STRTIME(HOUR,MIN,SEC)
 	IMPLICIT NONE
 	INTEGER HOUR,MIN,SEC
@@ -447,7 +447,63 @@
 	END IF
 	RETURN
 	END
-*
+
+	SUBROUTINE STR_FLOAT_IEEE_TO_HOST( Ireal )
+
+	IMPLICIT NONE
+
+	INTEGER Ireal !Integer-cast of an IEEE-style floating number.
+
+*  Description:
+*	No-op under AIX!
+
+*	Convert Ireal, which is passed to this routine as an integer
+*	cast of a Host-style floating number, into a DEC-style floating
+*	number (see STR_FLOAT_HOST_TO_IEEE for more details).
+
+
+	RETURN !No-op under AIX.
+	END
+
+	SUBROUTINE STR_FLOAT_HOST_TO_IEEE( Ireal )
+
+	IMPLICIT NONE
+
+	INTEGER Ireal !Integer-cast of a Host-style floating number.
+
+*  Description:
+*	No-op under AIX!
+
+*	Convert Ireal, which is passed to this routine as an integer
+*	cast of a Host-style floating number, into an IEEE-style floating
+*	number:
+*	                       DEC-style
+*
+*	_31_____________  16_15_________14___________7_6______________0_
+*	|fraction (F2) ...  | sign (S) | exponent (E) | fraction (F1)  |
+*	|-------------------|----------|--------------|----------------|
+*	                 LSB                          MSB
+*
+*	With the usual:  x = (+/-) f * 2**k
+*	"+/-" is "+" is S (bit 15) is 0, and "-" if not.
+*	"f" is always positive, and:  1 .GT. f   1/2  .LE. f
+*	The leading bit of "f" is always omitted (the "hidden" bit).
+*
+*	           F1(shifted up 16 bits) + F2(shifted down 16 bits) + 2**23
+*	"f"  =   ------------------------------------------------------------
+*	                                   2**24
+*
+*	Note that the MSB of "f" is bit 6, from F1.
+*
+*	"k" is:   E(shifted down 7 bits)
+*
+*	Note that bit 14 (in E) is the sign bit of E.  For E=0, S=0, "x" is
+*	defined to be zero.  For E=0, S=1, "x" is a reserved operand - illegal.
+
+
+	RETURN !No-op under AIX.
+	END
+
 	SUBROUTINE STR_FLOAT_HOST_TO_VAX( Ireal )
 
 	IMPLICIT NONE
@@ -522,7 +578,7 @@
 
 	RETURN
 	END
-*
+
 	SUBROUTINE STR_FLOAT_VAX_TO_HOST( Ireal )
 
 	IMPLICIT NONE
@@ -628,4 +684,14 @@
 
 	RETURN
 	END
-*
+
+	SUBROUTINE STR_Time1970( Seconds_Since_1970 )
+	IMPLICIT NONE
+*  Output:
+	INTEGER Seconds_Since_1970
+*  Description:
+*	Get the number of seconds since 1-Jan-1970, 00:00:00 GMT.
+	CALL TIME( Seconds_Since_1970 ) !Observed to return seconds since 1-jan-1970.
+	RETURN
+	END
+
