@@ -162,15 +162,17 @@ Int_t StPrimaryMaker::Make(){
   long NGlbTrk = 0;
   if (globtrk) NGlbTrk = globtrk->GetNRows();
 
-  // track_propagator
+#if 0  //globtrk2 is filled wrongly but not used anywhere (VP)
+    // track_propagator
   St_dst_track *globtrk2  = new St_dst_track("globtrk2");
   AddData(globtrk2);
   
   *globtrk2  = *globtrk;		//Copy table
   
   if(Debug()) gMessMgr->Debug(" Calling track_propagator ");
-  
-  if (m_tp_param && vertex) {
+#endif //globtrk2 is filled wrongly but not used anywhere (VP)  
+
+    if (m_tp_param && vertex) {
     egr_propagate_st *tp_param = m_tp_param->GetTable();
     tp_param->iflag =   m_flag;
     if (m_flag == 1 || m_flag == 2) {
@@ -179,11 +181,13 @@ Int_t StPrimaryMaker::Make(){
     }
   }
 
+#if 0  //globtrk2 is filled wrongly but not used anywhere (VP)
   iRes = track_propagator(globtrk,m_tp_param,globtrk2);
   if (iRes != kSTAFCV_OK) {
     iMake = kStWarn;
     gMessMgr->Warning("StPrimaryMaker: Problem on return from Track_Propagator");
   }
+#endif //globtrk2 is filled wrongly but not used anywhere (VP)  
   
   dst_track_st *glob  = globtrk->GetTable();
   dst_vertex_st *vrtx = vertex->GetTable();
@@ -541,8 +545,11 @@ Int_t StPrimaryMaker::Make(){
  return iMake;
   }
 //_____________________________________________________________________________
-// $Id: StPrimaryMaker.cxx,v 1.83 2004/05/18 14:42:28 fisyak Exp $
+// $Id: StPrimaryMaker.cxx,v 1.84 2005/02/05 01:13:54 perev Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.84  2005/02/05 01:13:54  perev
+// globtrk2 is filled wrongly but not used anywhere (VP). Remove
+//
 // Revision 1.83  2004/05/18 14:42:28  fisyak
 // Fix bug with spt_id
 //
