@@ -20,6 +20,7 @@
 #include "Sti/StiPlacement.h"
 #include "Sti/StiDetectorContainer.h"
 #include "Sti/StiHitContainer.h"
+#include "Sti/StiKalmanTrackFinder.h"
 
 //StiGui
 #include "StiGui/StiRootDrawableDetector.h"
@@ -98,7 +99,7 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
       fMenuBar(0), fMenuFile(0), fMenuHelp(0), fDetectorMenu(0),
       fDetectorViewMenu(0), mSvtViewMenu(0), mTpcViewMenu(0),
       mIfcViewMenu(0), mAllViewMenu(0), mNavigateMenu(0),
-      mTrackingMenu(0),
+      mTrackingMenu(0), mNextStepMenu(0),
       fMenuBarLayout(0), fMenuBarItemLayout(0), fMenuBarHelpLayout(0),
       mchain(0), mIoMaker(0),
       fTrackingFrame(0), fDoTrackStepButton(0),
@@ -165,10 +166,16 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
     fDetectorMenu->AddPopup("&Navigate", mNavigateMenu);
     fDetectorMenu->AddPopup("&Visibility", fDetectorViewMenu);
 
+    mNextStepMenu = new TGPopupMenu(fClient->GetRoot());
+    mNextStepMenu->AddEntry("Next Detector",M_TrackingSwitch_NextDetector);
+    mNextStepMenu->AddEntry("Scan Layer",M_TrackingSwitch_ScanLayer);
+
     mTrackingMenu = new TGPopupMenu(fClient->GetRoot());
     mTrackingMenu->AddLabel("Access to tracking functions");
     mTrackingMenu->AddEntry("Toggle Fit/Find",M_Tracking_ToggleFitFind);
+    mTrackingMenu->AddPopup("Define Next Step", mNextStepMenu);
     mTrackingMenu->AddSeparator();
+    mTrackingMenu->AddEntry("Next Track Step",M_Tracking_DoTrackStep);
     mTrackingMenu->AddEntry("Finish Track",M_Tracking_FinishTrack);
     mTrackingMenu->AddEntry("Finish Event",M_Tracking_FinishEvent);
     mTrackingMenu->AddEntry("Event Step",M_Tracking_EventStep);
@@ -191,6 +198,7 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
     mIfcViewMenu->Associate(this);
     mAllViewMenu->Associate(this);
     mNavigateMenu->Associate(this);
+    mNextStepMenu->Associate(this);
     mTrackingMenu->Associate(this);
     
     fMenuBar = new TGMenuBar(this, 1, 1, kHorizontalFrame);
@@ -349,6 +357,9 @@ MainFrame::~MainFrame()
     delete fNextEventButton;
     fNextEventButton=0;
 
+    delete mNextStepMenu;
+    mNextStepMenu=0;
+
 }
 
 void MainFrame::CloseWindow()
@@ -486,6 +497,18 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 
 	    case M_Tracking_ToggleFitFind:
 		toggleFitFind();
+		break;
+
+	    case M_TrackingSwitch_NextDetector:
+		StiMaker::instance()->defineNextTrackStep(0);
+		break;
+		
+	    case M_TrackingSwitch_ScanLayer:
+		StiMaker::instance()->defineNextTrackStep(1);
+		break;
+		
+	    case M_Tracking_DoTrackStep:
+		doNextTrackStep();
 		break;
 
 	    case M_Tracking_FinishTrack:

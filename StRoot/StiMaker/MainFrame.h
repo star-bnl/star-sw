@@ -67,6 +67,9 @@ enum ETestCommandIdentifiers {
     M_DetView_IfcVisible,
     M_DetView_IfcInvisible,
 
+    M_TrackingSwitch_NextDetector,
+    M_TrackingSwitch_ScanLayer,
+    
     M_Tracking_ToggleFitFind,
     M_Tracking_DoTrackStep,
     M_Tracking_FinishTrack,
@@ -189,6 +192,7 @@ private:
     TGPopupMenu *mNavigateMenu;
     
     TGPopupMenu *mTrackingMenu;
+    TGPopupMenu* mNextStepMenu;
     
     TGLayoutHints *fMenuBarLayout, *fMenuBarItemLayout, *fMenuBarHelpLayout;
 

@@ -13,6 +13,7 @@ using std::string;
 #include "Sti/StiCompositeTreeNode.h" //For typedefs
 #include "Sti/StiObjectFactoryInterface.h"
 #include "Sti/StiFactoryTypes.h"
+#include "Sti/StiKalmanTrackFinder.h"
 
 class StEvent;
 class StiHitContainer;
@@ -41,7 +42,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.31 2001/10/17 17:39:34 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.32 2001/10/18 13:13:39 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -60,10 +61,11 @@ public:
 
     void printStatistics() const;
     
-    //Used for stepping to next action (via StiControlPad)
+    //Used for stepping to next action (via MainFrame class)
     void doNextTrackStep();
     void finishTrack();
     void finishEvent();
+    void defineNextTrackStep(unsigned int);
 
     //Temporary definition to defaut cvs/DEV mismatch
     void doNextAction() {}; //
