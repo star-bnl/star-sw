@@ -1,5 +1,9 @@
-// $Id: StFtpcGlobalMaker.cxx,v 1.18 2004/03/02 15:56:41 jcs Exp $
+// $Id: StFtpcGlobalMaker.cxx,v 1.19 2004/03/02 17:13:06 jcs Exp $
 // $Log: StFtpcGlobalMaker.cxx,v $
+// Revision 1.19  2004/03/02 17:13:06  jcs
+// Add description of ftpc cluster finding flags
+// (currently in fcl_fppoint.idl which will soon disappear)
+//
 // Revision 1.18  2004/03/02 15:56:41  jcs
 // Fill dst_mon-soft_ftpc table
 //
@@ -550,9 +554,17 @@ Int_t StFtpcGlobalMaker::Make(){
       point[ipnt].pos_err[0] = ftpcx + (two20*ftpcy11);
       point[ipnt].pos_err[1] = ftpcy10 + (two10*ftpcz);
       
-      //        Fill charge and flags for cluster
+      //        Fill charge and  cluster finding flags
       //                     bits 0-15    charge (sum of adc channels)
-      //                     bits 16-31   flags  (see fcl_fppoint.idl)
+      //                     bits 16-31   flags  
+      //                         bit 16  unfolded
+      //                             17  unfold failed
+      //                             18  saturated
+      //                             19  bad shape
+      //                             20  cut off
+      //                             21  tracked
+      //                             22  global coords 
+      //                             23  don't use for tracking   
       point[ipnt].charge  =
 	(hit->GetFlags()<<16)
 	+ hit->GetCharge();
