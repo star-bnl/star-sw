@@ -185,7 +185,6 @@ Int_t StTreeMaker::MakeRead(UInt_t *RunEvent){
    int lv=1; if (strncmp("runco",br->GetName(),5)==0) lv = 2;  
    SetOutputAll(br,lv);
   }
-  gInterpreter->ProcessLine("if (gROOT->GetClass(\"StRegistry\"))StRegistry::Init();");
   return iret;
 }    
 //_____________________________________________________________________________
