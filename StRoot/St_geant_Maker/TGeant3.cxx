@@ -9,6 +9,22 @@
 #endif /* Geant3Dummy */
  
 #include "TGeant3.h" 
+common_gcbank *cbank;
+common_quest  *cquest; 
+common_gclink *clink; 
+common_gccuts *ccuts; 
+common_gcflag *cflag; 
+common_gckine *ckine; 
+common_gcking *cking; 
+common_gcmate *cmate; 
+common_gctmed *ctmed; 
+common_gctrak *ctrak; 
+common_gctpol *ctpol; 
+common_gcvolu *cvolu; 
+common_gcnum  *cnum; 
+common_gcsets *csets; 
+Int_t *z_iq, *z_lq; 
+Float_t *z_q; 
  
 //--------------------------------------------------------- 
  

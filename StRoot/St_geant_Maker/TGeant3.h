@@ -132,9 +132,6 @@ public:
  
 EXTERN TGeant3 *geant; 
  
-//--------------Declarations for ZEBRA--------------------- 
-EXTERN Int_t *z_iq, *z_lq; 
-EXTERN Float_t *z_q; 
 //----------GCBANK
 //      PARAMETER (KWBANK=69000,KWWORK=5200)
 //      COMMON/GCBANK/NZEBRA,GVERSN,ZVERSN,IXSTOR,IXDIV,IXCONS,FENDQ(16)
@@ -142,7 +139,7 @@ EXTERN Float_t *z_q;
 //      DIMENSION IQ(2),Q(2),LQ(8000),IWS(2)
 //      EQUIVALENCE (Q(1),IQ(1),LQ(9)),(LQ(1),LMAIN),(IWS(1),WS(1))  
 typedef struct {
-  Int_t nzebra,gversion,zversn,ixstor,ixdiv,ixcons,fendq[16],lq[8],iq[1],lr1,ws[1];
+  Int_t nzebra,gversion,zversn,ixstor,ixdiv,ixcons,fendq[16],lq[7],iq[1];
 } common_gcbank;
 //----------QUEST 
 //      COMMON/QUEST/IQUEST(100) 
@@ -396,7 +393,8 @@ typedef struct {
   Float_t polar[3]; 
   Int_t   namec1[MAXME1]; 
 } common_gctpol; 
- 
+#ifndef __CINT__
+#if never
 EXTERN common_gcbank *cbank;
 EXTERN common_quest  *cquest; 
 EXTERN common_gclink *clink; 
@@ -411,7 +409,10 @@ EXTERN common_gctpol *ctpol;
 EXTERN common_gcvolu *cvolu; 
 EXTERN common_gcnum  *cnum; 
 EXTERN common_gcsets *csets; 
-#ifndef __CINT__
+//--------------Declarations for ZEBRA--------------------- 
+EXTERN Int_t *z_iq, *z_lq; 
+EXTERN Float_t *z_q; 
+#endif
 #ifndef WIN32 
 # define hlimit  hlimit_ 
 # define gzebra  gzebra_ 
@@ -631,22 +632,8 @@ extern "C" void type_of_call dzddiv   (Int_t*,Int_t*,Char_t*,Char_t*,Int_t*,Int_
 extern "C" void type_of_call gfrotm   (Int_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*);
 extern "C" void type_of_call gfxzrm   (Int_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*);
  
-#endif /* not Geant3Dummy */
- common_gcbank *cbank;
- common_quest  *cquest; 
- common_gclink *clink; 
- common_gccuts *ccuts; 
- common_gcflag *cflag; 
- common_gckine *ckine; 
- common_gcking *cking; 
- common_gcmate *cmate; 
- common_gctmed *ctmed; 
- common_gctrak *ctrak; 
- common_gctpol *ctpol; 
- common_gcvolu *cvolu; 
- common_gcnum  *cnum; 
- common_gcsets *csets; 
- 
+#else  /* Geant3Dummy */
+#endif
  // Geant3 common blocks mapped to C structures 
 #ifndef WIN32 
 //#  define pawc   pawc_
@@ -715,10 +702,7 @@ Int_t  gcvolu;
 Int_t  gcnum ;
 Int_t  gcsets;
 #endif /* Geant3Dummy */
- 
 //--------------Declarations for ZEBRA--------------------- 
-   Int_t *z_iq, *z_lq; 
-   Float_t *z_q; 
  
 #endif /* __CINT__ */ 
 #endif 
