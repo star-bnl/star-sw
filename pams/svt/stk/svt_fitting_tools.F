@@ -89,7 +89,7 @@ c     ------------------
       real    dmin
 c wkw      parameter (dmin=1.e-12)
       parameter (dmin=1.e-20)
-      parameter (infinity=1.e16)
+      parameter (infinity=-1.e9)
 
 c     executable
 c     ----------
@@ -246,7 +246,7 @@ c     ------------------
       real    dmin
 c wkw      parameter (dmin=1.e-12)
       parameter (dmin=1.e-20)
-      parameter (infinity=1.e16)
+      parameter (infinity=-1.e9)
 
 c     executable
 c     ----------
@@ -403,7 +403,7 @@ c     ==================
       real    infinity
       real    dmin
       parameter (dmin=1.e-10)
-      parameter (infinity=1.e12)
+      parameter (infinity=-1.e9)
 
 
 c     format

@@ -93,7 +93,7 @@ c     wkw: add in residues:
       real     v1x, v1y, v2x, v2y, ch, phi, cosl
       real     konst, bfield, x0, y0, yd, xd
       real     infinity,xpart,ypart,sumsq
-      parameter (infinity=-1.e12)
+      parameter (infinity=-1.e9)
 
 c     some temporary variables for dedx consistancy checks
       real dedx_diff,new_dedx_diff,lowest_dedx,ave_dedx
