@@ -11,6 +11,7 @@
 * 13Jul98 K. Turner - change to separate out parts of setup 
 * 21Jul98 K. Turner - removed gethij & gst - not needed
 * 21Jul98 K. Turner - changed to separate out the gstar & g2t parts
+* 22Jul98 K. Turner - fixed to pick up correct gstar files
 * 
 *************************************************************
 *                     BFC_UTIL.KUMAC
@@ -364,18 +365,18 @@ macro bfc_gstar_setup chain
      (rgst)
          message ' !!! bfc_gstar_setup ==> set params for chain:' [mod1]
 * initialize physics types for running gstar
-	 exec set_hadr_phys_[phystype]
+	 exec set_phys_hadronic_[phystype]
          message ' gstar: set hadronic physics ' [phystype]
 * initialize geometry for running gstar
          if ([geomtype].eq.all) then 
            message ' gstar: load star geometry - all '
-           exec load_star_geom#all
+           exec set_geom#all
          elseif ([geomtype].eq.tpc_nofield) then
            message ' gstar: load star geometry - tpc only, no mag.field '
-           exec load_star_geom#tpc_nofield
+           exec set_geom#tpc_nofield
 	 elseif ([geomtype].eq.tpc_field) then
 	   message ' gstar: load star geometry - tpc only with mag field'
-	   exec load_star_geom#tpc_field
+	   exec set_geom#tpc_field
          else 
            message ' gstar: geometry type not available!! '
          endif	  

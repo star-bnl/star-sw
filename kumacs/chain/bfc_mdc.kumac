@@ -1,5 +1,8 @@
-* $Id: bfc_mdc.kumac,v 1.6 1998/07/21 23:35:14 kathy Exp $
+* $Id: bfc_mdc.kumac,v 1.7 1998/07/22 15:04:35 kathy Exp $
 * $Log: bfc_mdc.kumac,v $
+* Revision 1.7  1998/07/22 15:04:35  kathy
+* fixed for correct gstar kumacs
+*
 * Revision 1.6  1998/07/21 23:35:14  kathy
 * changed names of some items in chain, separated gstar and g2t parts, made bfc and bfc_mdc consistent
 *
@@ -40,7 +43,7 @@
 *  editted 7/21/98 K. Turner - renamed rgst -> rungst
 *                                      rg2t -> rung2t
 *                                      g2t -> rdg2t 
-*
+* 
 * *****************************************************************************
 *               
 * -- DICTIONARY OF INPUTS TO BFC.KUMAC --
@@ -146,15 +149,15 @@
 * 
 * 
 MACRO bfc_mdc _
-   TOP=$STAR _
+   TOP=/scr22/kathy/testj6 _
    tpc_sector_first=1 _
-   tpc_sector_last=24 _
+   tpc_sector_last=1 _
    geomtype=all _
    phystype=on _
    domain='geometry sim/g2t sim/gstar tpc svt global' _
    chain='evgin rgst rg2t svg tpg srs tss '_ 
    first=401 _
-   no_events=20 _
+   no_events=1 _
    no_in_bunch=200 _
    nsplit=20 _
    prefix_in=/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2 _
