@@ -164,14 +164,16 @@ for( $ll = 0; $ll<scalar(@SetG); $ll++) {
   $diskRecoDirs[$ll] = $DISK1 . "/" . $SetG[$ll] . "/tfs_5";
   print "diskRecoDir: $diskRecoDirs[$ll]\n" if $debugOn;
 }
- $diskRecoDirs[$inext] = $DISK2 . "/" . $SetG[0] . "/tfs_5";
- $inext++;
- $diskRecoDirs[$inext] = $DISK2 . "/" . $SetG[4] . "/tfs_5";
-
+for( $ll = 0; $ll<scalar(@SetG); $ll++) { 
+  $diskRecoDirs[$inext] = $DISK2 . "/" . $SetG[$ll] . "/tfs_5";
+  print "diskRecoDir: $diskRecoDirs[$inext]\n" if $debugOn;
+   $inext++;
+}
 
 print "\nFinding reco files in disk\n";
  
 foreach $diskDir (@diskRecoDirs) {
+  if (-d $diskDir) {
   opendir(DIR, $diskDir) or die "can't open $diskDir\n";
   while( defined($flname = readdir(DIR)) ) {
      next if $flname =~ /^\.\.?$/;
@@ -215,7 +217,7 @@ foreach $diskDir (@diskRecoDirs) {
   }
 closedir DIR;
 }
-
+}
 print "Total reco files: $nDiskFiles\n";
 
 ###  find daq reco files on disk
