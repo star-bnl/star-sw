@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QA_outhistfile.C,v 1.16 2000/05/09 19:38:03 kathy Exp $
+// $Id: bfcread_dst_QA_outhistfile.C,v 1.17 2000/06/02 20:25:28 lansdell Exp $
 // $Log: bfcread_dst_QA_outhistfile.C,v $
+// Revision 1.17  2000/06/02 20:25:28  lansdell
+// added check on Make() return codes
+//
 // Revision 1.16  2000/05/09 19:38:03  kathy
 // update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
 //
@@ -174,12 +177,19 @@ void bfcread_dst_QA_outhistfile(
 
 // loop over events:
   int iev=0,iret=0, evnum=0;
- EventLoop: if (iev<nevents && !iret) {  // goto loop code
+ EventLoop: if (iev<nevents && iret!=2) {  // goto loop code
    evnum=iev+1;
    cout <<  " bfcread_dst_QA_outhistfile.C, processing event !!! " << evnum << endl ;
    chain->Clear();
-   iret = chain->Make();
-   iev++;                                // goto loop code
+   switch (iret = chain->Make()) {
+     case 0: break;
+     case 2: { gMessMgr->Info("Last event from input."); break; }
+     case 3: { gMessMgr->Error() << "Event " << evnum << " had error " <<
+	       iret << ". Now skipping event."; gMessMgr->Print(); break; }
+     default: { gMessMgr->Warning() << "Event " << evnum << " returned status "
+	        << iret << ". Continuing."; gMessMgr->Print(); }
+   }
+   iev++;
    goto EventLoop;                       // goto loop code
  }
 

@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QAhist.C,v 1.2 2000/05/15 20:24:01 kathy Exp $
+// $Id: bfcread_event_QAhist.C,v 1.3 2000/06/02 20:26:10 lansdell Exp $
 // $Log: bfcread_event_QAhist.C,v $
+// Revision 1.3  2000/06/02 20:26:10  lansdell
+// added check on Make() return codes
+//
 // Revision 1.2  2000/05/15 20:24:01  kathy
 // correct Log,Id so they get written out
 //
@@ -112,11 +115,18 @@ void bfcread_event_QAhist(
 
 // loop over events:
   int iev=0,iret=0, evnum=0;
- EventLoop: if (iev<nevents && !iret) {  // goto loop code
+ EventLoop: if (iev<nevents && iret!=2) {  // goto loop code
    evnum=iev+1;
    cout <<  " !!! bfcread_event_QAhist.C, processing event !!! " << evnum << endl ;
    chain->Clear();
-   iret = chain->Make();
+   switch (iret = chain->Make()) {
+     case 0: break;
+     case 2: { gMessMgr->Info("Last event from input."); break; }
+     case 3: { gMessMgr->Error() << "Event " << evnum << " had error " <<
+	       iret << ". Now skipping event."; gMessMgr->Print(); break; }
+     default: { gMessMgr->Warning() << "Event " << evnum << " returned status "
+	        << iret << ". Continuing."; gMessMgr->Print(); }
+   }
    iev++;                                // goto loop code
    goto EventLoop;                       // goto loop code
  }
@@ -155,11 +165,11 @@ void bfcread_event_QAhist(
   HU->DrawHists(MakerHistDir);
 
 //  overlay two histograms and print to screen
-  Int_t result = HU->Overlay1D(MakerHistDir,"StEQaGtrkRT","StEQaPtrkR");
+  Int_t result = HU->Overlay1D(MakerHistDir,"StEQaGtrkRT","StEQaPtrkRT");
   if (result == kStErr)
     cout << " !!! There was an error in Overlay1D !!!" << endl;  
 
-  result = HU->Overlay2D(MakerHistDir,"StEQaGtrkLengthVEtaT","StEQaPtrkLengthVEta");
+  result = HU->Overlay2D(MakerHistDir,"StEQaGtrkLengthVEtaT","StEQaPtrkLengthVEtaT");
   if (result == kStErr)
     cout << " !!! There was an error in Overlay2D !!!" << endl;  
 
