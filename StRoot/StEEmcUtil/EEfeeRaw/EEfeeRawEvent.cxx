@@ -78,11 +78,12 @@ void EEfeeRawEvent ::addFeeDataBlock(EEfeeDataBlock* b){
 //--------------------------------------------------
 //--------------------------------------------------
 
-void EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken) {
+int EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken, HeadVer headVersion) {
 
   /* check for:
      - token in every data block
      - crateID vs. positon in event
+     - RETURN # of good crate headers
   */
 
   if(timeStamp< 1068744930) {// Thu Nov 13 12:35:30 2003
@@ -134,19 +135,32 @@ void EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken) {
     int trigCommand=4; // physics, 9=laser/LED, 8=??
 
     // this is messy, contact Jan before you change between  ezTree header & .daq header
-    
-    // real .daq content
-    //  int ok=b->isHeadValid(headToken,list[ic],lenCount,trigCommand,errFlag);
+      
+    int ok=0;
 
-    // old ezTree header 
-    int ok=b->isHeadValid(headToken,list[ic],errFlag,trigCommand,lenCount);
-    // printf("XXX b=%d crID=%d=%d  tok=%d=%d ok=%d\n",ic, b->getCrateID() ,list[ic],b->getToken(), headToken,ok);
+    switch (headVersion) {
+    case headVer1:  // real .daq content
+      ok=b->isHeadValid(headToken,list[ic],lenCount,trigCommand,errFlag);
+      break;
+    case  headVer2: // old ezTree header from siew
+      ok=b->isHeadValid(headToken,list[ic],errFlag,lenCount,trigCommand);
+      break;
+    case  headVer3:     // miniDaq2004 ezTree header 
+      if(ic<6) errFlag=9; else errFlag=4;
+      ok=b->isHeadValid(headToken,list[ic],trigCommand,errFlag,lenCount);
+      break;
+    default:
+      assert(1==2); // make up your mind men!
+    }
  
+    // printf("XXX b=%d crID=%d=%d  tok=%d=%d ok=%d\n",ic, b->getCrateID() ,list[ic],b->getToken(), headToken,ok);
+    
     if(ok) nOK++;
    
     if(!ok)  b->maskCrate();
   }
   // printf("nOK=%d\n",nOK);
+  return nOK;
 }
 
 //--------------------------------------------------
@@ -170,6 +184,9 @@ UShort_t  EEfeeRawEvent::getValue(int crateID, int channel) const {
 
 /*
  * $Log: EEfeeRawEvent.cxx,v $
+ * Revision 1.15  2004/06/01 16:05:18  balewski
+ * forgoten update of data block headers check
+ *
  * Revision 1.14  2004/04/16 17:26:46  balewski
  * more header checking, some mess introduced
  *

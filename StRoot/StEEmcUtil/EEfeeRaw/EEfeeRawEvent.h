@@ -1,7 +1,7 @@
 #ifndef EEfeeRawEvent_h
 #define EEfeeRawEvent_h
 /*********************************************************************
- * $Id: EEfeeRawEvent.h,v 1.9 2004/04/02 06:38:52 balewski Exp $
+ * $Id: EEfeeRawEvent.h,v 1.10 2004/06/01 16:05:18 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw FEE Events
@@ -15,6 +15,9 @@ class EEfeeRawEvent :public TObject {
   int ID; // event ID
 
  public:
+  // different content of header data
+  enum HeadVer {headVer1,headVer2,headVer3};
+  // see ::maskWrongCrates() for explanation
   TClonesArray  *block; 
   
   EEfeeRawEvent();
@@ -24,7 +27,7 @@ class EEfeeRawEvent :public TObject {
   void setID(int i){ ID=i; }
   int  getID() const{return ID;};
   void addFeeDataBlock(EEfeeDataBlock*);
-  void maskWrongCrates( long timeStamp,   unsigned token); // tmp, should be changed
+  int maskWrongCrates( long timeStamp,   unsigned token, HeadVer ver=headVer1);
   UShort_t  getValue(int crateID, int channel) const;
   ClassDef(EEfeeRawEvent,1) 
 };
@@ -32,6 +35,9 @@ class EEfeeRawEvent :public TObject {
 
 /*
  * $Log: EEfeeRawEvent.h,v $
+ * Revision 1.10  2004/06/01 16:05:18  balewski
+ * forgoten update of data block headers check
+ *
  * Revision 1.9  2004/04/02 06:38:52  balewski
  * *** empty log message ***
  *
