@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSinglePixel.h,v 2.0 2000/08/09 16:17:05 gans Exp $
+ * $Id: StRichSinglePixel.h,v 2.1 2001/12/05 21:05:18 lasiuk Exp $
  *
  * Description:
  *  Definition of a single pixel object
@@ -9,8 +9,13 @@
  ****************************************************************
  *
  * $Log: StRichSinglePixel.h,v $
+ * Revision 2.1  2001/12/05 21:05:18  lasiuk
+ * Fix the std namespace declaration
+ * to conform with SUN CC6.0
+ *
  * Revision 2.0  2000/08/09 16:17:05  gans
- * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
+ * Readded Files That were not added in last CVS.
+ * Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
  *
  * Revision 1.6  2000/05/25 21:34:53  fisyak
@@ -39,7 +44,7 @@
 #include <stack>
 
 #ifndef ST_NO_NAMESPACES
-using namespace std::stack;
+using std::stack;
 #endif
 #endif
 #include "StRichEnumeratedTypes.h"
