@@ -5,7 +5,7 @@
 ** RICH            = 3
 ** FTPC west       = 4
 ** FTPC east       = 5
-** TOF patch       = 6
+** TOF             = 6
 ** CTB             = 7
 ** SSD             = 8
 ** barrel EMC tower= 9
@@ -34,7 +34,7 @@
 #define kRichIdentifier                3
 #define kFtpcWestIdentifier            4
 #define kFtpcEastIdentifier            5
-#define kTofPatchIdentifier            6
+#define kTofIdentifier                 6
 #define kCtbIdentifier                 7
 #define kSsdIdentifier                 8
 #define kBarrelEmcTowerIdentifier      9
