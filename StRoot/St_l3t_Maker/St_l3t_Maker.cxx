@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.cxx,v 1.21 2000/03/14 17:58:41 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.22 2000/03/28 20:22:15 fine Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.22  2000/03/28 20:22:15  fine
+// Adjuested to ROOT 2.24
+//
 // Revision 1.21  2000/03/14 17:58:41  yepes
 // change tracker setup for online case
 //
@@ -192,7 +195,6 @@ Int_t St_l3t_Maker::MakeOnLine(){
    St_tcl_tphit *hitS = new St_tcl_tphit("l3Hit",maxHits); 
    m_DataSet->Add(hitS);
    tcl_tphit_st*  hit  = (tcl_tphit_st  *)hitS->GetTable();
-   table_head_st* hitH = (table_head_st *)hitS->GetHeader(); 
 
 // create iterator
 
@@ -299,7 +301,6 @@ Int_t St_l3t_Maker::MakeOnLine(){
    m_DataSet->Add(trackS);
    //
    tpt_track_st*  track  = (tpt_track_st *)trackS->GetTable(); 
-   table_head_st* trackH = (table_head_st *)trackS->GetHeader(); 
    //
    //   Copy gl3 to tpt_track_st table
    //
@@ -326,8 +327,8 @@ Int_t St_l3t_Maker::MakeOnLine(){
          tTrk->z0       = gTrk->z0   ;
       }
    }
-   trackH->nok = nTracks ;
-   hitH->nok   = nHits ;
+   trackS->SetNRows(nTracks);
+   hitS->SetNRows(nHits);
    MakeHistograms();
   
    return kStOk ;
@@ -395,7 +396,6 @@ Int_t St_l3t_Maker::MakeOffLine(){
    m_DataSet->Add(trackS);
 //
    tpt_track_st*  track  = (tpt_track_st *)trackS->GetTable(); 
-   table_head_st* trackH = (table_head_st *)trackS->GetHeader();
 //
 //   Copy ftf tracks to tpt_track_st table
 //
@@ -429,7 +429,7 @@ Int_t St_l3t_Maker::MakeOffLine(){
       }
    }
 //
-   trackH->nok = tracker.nTracks ;
+   trackS->SetNRows( tracker.nTracks );
 //
    delete []tracker.hit ;
    delete []tracker.track ;
