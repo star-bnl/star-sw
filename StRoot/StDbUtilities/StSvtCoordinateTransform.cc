@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.27 2004/07/29 16:48:33 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.28 2004/08/02 19:42:43 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -40,6 +40,7 @@ using namespace units;
 StSvtCoordinateTransform::StSvtCoordinateTransform() {
 
   mDeltaDriftVelocity = 1;
+  mPoly9 = new TF1("mPoly9","pol9(0)",0.0,6.0);
 }
 
 //_____________________________________________________________________________
@@ -64,7 +65,6 @@ void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
   mDriftVelocity = driftVeloc;
   mDriftCurve = NULL;
   mT0 = T0;
-  mPoly9 = NULL;
 }
 //_____________________________________________________________________________
 void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
@@ -81,7 +81,6 @@ void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
   mDriftVelocity = driftVeloc;
   mDriftCurve = driftCurve;
   mT0 = T0;
-  mPoly9 = new TF1("mPoly9","pol9(0)",0.0,6.0);
 }
 //_____________________________________________________________________________
 void StSvtCoordinateTransform::setVelocityScale( double deltaV){
@@ -98,7 +97,7 @@ void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
   mDriftVelocity = driftVeloc;
   mDriftCurve = NULL;
   mT0 = T0;
-  mPoly9 = NULL;
+
 }
 //____________________________________________________________________________
 void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
@@ -111,7 +110,7 @@ void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
   mDriftVelocity = driftVeloc;
   mDriftCurve = driftCurve;
   mT0 = T0;
-  mPoly9 = new TF1("mPoly9","pol9(0)",0.0,6.0);
+
 }
 
 //_____________________________________________________________________________
@@ -704,7 +703,7 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
 	  for(Int_t j=1; j<=10; j++)
 	    {
 	      mPoly9->SetParameter(j-1,((StSvtHybridDriftCurve*)mDriftCurve->at(index))->getParameter(anode,j));
-	      //gMessMgr->Info() << "got parameter (" << j-1 << "): " << mPoly9->GetParameter(j-1) << " for index " << index <<  endm;
+	      // gMessMgr->Info() << "got parameter (" << j-1 << "): " << mPoly9->GetParameter(j-1) << " for index " << index <<  endm;
 	      
 	    }
 	  
@@ -713,10 +712,15 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
 	  distance = mPoly9->Eval(x*Ratio*10e5/fsca)/10;
 	  //cout << " Full drift " << mPoly9->Eval(td*Ratio)/10 << " new distance " << distance << " original distance " <<  vd*x/fsca << endl;
 	  if( abs(distance-vd*x/fsca) > 0.03) {
-	    cout << "Got crazy result using data drift vel " << endl;
+	    //cout << " index = " << index << "Got crazy result using data drift vel " << 
+	    // distance << " " << vd*x/fsca <<  endl;
+	   
 	    return vd*x/fsca;
 	  }
+	  //cout << "Got good result " << 
+	  // distance << " index = " << index <<" " << vd*x/fsca <<  endl;
 	  return distance;
+	  
 	}
     }
   else if (mDriftVelocity) 
