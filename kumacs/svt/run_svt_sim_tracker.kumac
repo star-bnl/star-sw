@@ -153,9 +153,7 @@ Message 'Doing' [no_events] 'events'
     else
       message ' svt_tracker not valid! '
     endif
-    
-    
-  ls [data]/svt/tracks
+        
 
   NEXT_EVENT:
  
