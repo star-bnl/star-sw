@@ -6,8 +6,8 @@
 // Macro for running chain with different inputs                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#define GTRACK
-//#define FZIN
+//#define GTRACK
+#define FZIN
 //#define MINIDAQ
 #ifdef MINIDAQ
 #define CTEST
@@ -184,6 +184,12 @@ void tpc (const Int_t Nevents=1,
 #endif
 #endif
 
+
+#ifndef MINIDAQ
+  geant = new St_geant_Maker("geant");
+  geant->SetNwGEANT(10 000 000);
+#endif
+
   //  Create the makers to be called by the current chain
   const char *mainDB = "$STAR/StDb";
   St_db_Maker *dbMk = new St_db_Maker("db",mainDB);
@@ -208,11 +214,6 @@ void tpc (const Int_t Nevents=1,
   St_db_Maker *calibMk = new St_db_Maker("calib",calibDB);
   chain->SetInput("calib","calib:calib");
   calibMk->SetDebug();  
-
-#ifndef MINIDAQ
-  geant = new St_geant_Maker("geant");
-  geant->SetNwGEANT(10 000 000);
-#endif
 
   // open input file 
   // if GTRACK is defined random events are generated
