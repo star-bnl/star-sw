@@ -120,7 +120,6 @@ If LL>1
    if (cave) Call cavegeo
    if (pipe) Call pipegeo
    if (upst) Call upstgeo
-   if (zcal) Call zcalgeo
 
    Call AGSFLAG('SIMU',2)
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6 
@@ -153,10 +152,10 @@ If LL>1
    if (ems)  call AgDETP add ('calg.nmodule=',Nmod,2)
    if (ems)  call AgDETP add ('calg.shift=',shift,2)
    if (calb) Call calbgeo
-   if (ecal) Call ecalgeo
-   if (magp) Call magpgeo
-
    if (rich) Call richgeo
+   if (ecal) Call ecalgeo
+   if (zcal) Call zcalgeo
+   if (magp) Call magpgeo
 *
 * - reset magnetic field value (default is 5): DETP MFLD MFLG.Bfield=5
    If (LL>1) call AgDETP new ('MFLD')

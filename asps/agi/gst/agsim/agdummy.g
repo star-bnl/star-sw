@@ -23,12 +23,9 @@ Replace[LIST #;] with [ #1 _
  " epio  "   epinit,epread,epsetw,epdefu
  "tr-prop    trprfn,trprop,trscsp,trspsc,trscsd,trsdsc,Ssmt5t,Xmm55 "
  ]
-+CDE,GCBANK.
 +CDE,GCFLAG.
   Integer  SystemF,Ix/0/;  Real x/0.0/;  Double Precision d/0.D0/
   list external;
-  Integer JATTF;
-  JATTF(Jj) = Jj+int(Q(Jj+5))+6
 * make sure that real calls will never be done even if this routine is called
   Ix = Ix+1;  if (Ix<=0) Return;
   Ix = Ix+1;  if (Ix>=0) Return;
@@ -43,5 +40,12 @@ Replace[LIST #;] with [ #1 _
 *
   END
  
+  function JATTF(jj)
+  Integer JATTF
++CDE,GCBANK.
+  JATTF = Jj+int(Q(Jj+5))+6
+  end
+
  
- 
+
+

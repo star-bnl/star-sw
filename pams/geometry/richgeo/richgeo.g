@@ -212,8 +212,9 @@ endblock
     CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_QUARZO,EFFIC_all,RINDEX_QUARZO)
     if (isopt>0) then
     HITS  OQUA  x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
-                Slen:16:(0,1.e4)  Tof:16:(0,1.e-6)  Step:16:(0,10),
-                ptot:32:(0,200)   Eloss:32:(0,0.1) 
+               Slen:.1:(0,500)   ptot:18:(0,100),
+               Tof:16:(0,1.e-6)  Step:16:(0,10),
+               Eloss:32:(0,0.1) 
     endif  
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -265,8 +266,9 @@ block rGAP is METANOL gap
     CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_METHANE,EFFIC_all,RINDEX_METHANE)
     if (Isopt>0) then
     HITS rGAP  x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
-               Slen:16:(0,1.e4)  Tof:16:(0,1.e-6)  Step:16:(0,10),
-               ptot:32:(0,200)   Eloss:32:(0,0.1) 
+               Slen:.1:(0,500)   ptot:18:(0,100),
+               Tof:16:(0,1.e-6)  Step:16:(0,10),
+               Eloss:32:(0,0.1) 
     endif
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -307,10 +309,10 @@ Block rCSI is Cesium Iodide
     Attribute RCSI  seen=1   colo=6 
     shape     BOX   dx=19.60  dy=0.025   dz=32.0
     CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_CSI,EFFIC_CSI,RINDEX_methane)
-    HITS rCSI  x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
-               Slen:16:(0,1.e4)  Tof:16:(0,1.e-6)  Step:16:(0,10),
-               ptot:32:(0,200)   USER:32:(-.01,.01) 
-
+    HITS rCSI  x:.005:   y:.01:   z:.005:   cx:10:   cy:10:   cz:10:,
+               Slen:.1:(0,500)   ptot:18:(0,100),
+               Tof:16:(0,1.e-6)  Step:16:(0,10),
+               USER:30:(-0.1,0.1) 
 endblock
 *- - - - - - - - - - - - - - - - - - - - - - - - - - -
 * 1330 /2 = 66.5 bigger than inside box 
@@ -345,8 +347,9 @@ endblock
     enddo
     if (Isopt>0) then
     HITS FREO  x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
-               Slen:16:(0,1.e4)  Tof:16:(0,1.e-6)  Step:16:(0,10),
-               ptot:32:(0,200)   Eloss:32:(0,0.1) 
+               Slen:.1:(0,500)   ptot:18:(0,100),
+               Tof:16:(0,1.e-6)  Step:16:(0,10),
+               Eloss:32:(0,0.1) 
     endif  
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

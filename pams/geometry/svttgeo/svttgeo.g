@@ -470,11 +470,17 @@ Block SVTD is an active wafer volume
       Attribute SVTD       seen=1  Colo=4
       Shape     BOX        dy=swca_WaferLen/2 
       call      GSTPAR (%Imed,'STRA',1.)
+
+*     The following is the corrected hits definition: 25-dec-98 (PN)
+      HITS    SVTD   Z:.001:   Y:.001:   X:.001:     Ptot:18:(0,100),
+                     cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
+                     ToF:16:(0,1.e-6)    Step:.01:   Eloss:22:(0,0.1) 
+
 *      The following is the corrected hits definition: 2-12-97 (wkw)
-       HITS      SVTD   xx:16:SH(-20,20)   yy:16:(-20,20)     zz:16:(-30,30),
-	                px:16:(-100,100)   py:16:(-100,100)   pz:16:(-100,100),
-                        Slen:16:(0,1.e4)   Tof:16:(0,1.e-6)   Step:16:(0,10),
-                        SHTN:16:           Elos:32:(0,1)
+*     HITS    SVTD   xx:16:SH(-20,20)   yy:16:(-20,20)     zz:16:(-30,30),
+*	             px:16:(-100,100)   py:16:(-100,100)   pz:16:(-100,100),
+*                    Slen:16:(0,1.e4)   Tof:16:(0,1.e-6)   Step:16:(0,10),
+*                    SHTN:16:           Elos:32:(0,1)
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block SBER are the Berillium wafer carrier rails
@@ -1289,11 +1295,16 @@ Block SFSD is the strip detector
  		  dy=sfpa_dmThk/2,
 		  dz=sfpa_sdlen/2
       call      GSTPAR (%Imed,'STRA',1.)
+
+*     The following is the corrected hits definition: 25-dec-98 (PN)
+      HITS    SVTD   X:.001:S   Y:.001:   Z:.001:   cx:10:   cy:10:   cz:10:,
+                     Sleng:16:(0,500)     ToF:16:(0,1.e-6)   Step:.01:,
+                     Ptot:16:(0,100)      Eloss:16:(0,0.01) 
 * wkw fixed 4th layer hit definition Feb 27
-       HITS     SFSD   xx:16:SH(-30,30)   yy:16:(-30,30)     zz:16:(-35,35),
-                       px:16:(-100,100)   py:16:(-100,100)   pz:16:(-100,100),
-                       Slen:16:(0,1.e4)   Tof:16:(0,1.e-6)   Step:16:(0,10),
-                       SHTN:16:           Elos:32:(0,1)
+*     HITS    SFSD   xx:16:SH(-30,30)   yy:16:(-30,30)     zz:16:(-35,35),
+*                    px:16:(-100,100)   py:16:(-100,100)   pz:16:(-100,100),
+*                    Slen:16:(0,1.e4)   Tof:16:(0,1.e-6)   Step:16:(0,10),
+*                    SHTN:16:           Elos:32:(0,1)
 
 Endblock
 *

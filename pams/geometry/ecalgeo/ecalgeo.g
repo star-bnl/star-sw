@@ -134,7 +134,7 @@ Endfill
 *
 * ----------------------------------------------------------------------------
 Block ECAL is one EM END-cap wheel
-      Material  Vacuum
+      Material  Air
       Medium    standard
       Attribute ECAL   seen=0 colo=7
       shape     CONE   dz=(emcg_Zend-emcg_ZOrig)/2,
@@ -353,10 +353,11 @@ Block ESCI  is the active scintillator (polystyren) layer
       Call GSTPAR (ag_imed,'BIRK2',0.0130)
       Call GSTPAR (ag_imed,'BIRK3',9.6E-3)
 *     
-       HITS ESCI   xx:16:H(-250,250)   yy:16:(-250,250)   zz:16:(-350,350),
-                   px:16:(-100,100)    py:16:(-100,100)   pz:16:(-100,100),
-                   Slen:16:(0,1.e4)    Tof:16:(0,1.e-6)   Step:16:(0,100),
-                   none:16:            Birk:0:(0,10)
+       HITS ESCI   Birk:0:(0,10)
+*                  xx:16:H(-250,250)   yy:16:(-250,250)   zz:16:(-350,350),
+*                  px:16:(-100,100)    py:16:(-100,100)   pz:16:(-100,100),
+*                  Slen:16:(0,1.e4)    Tof:16:(0,1.e-6)   Step:16:(0,100),
+*                  none:16:         
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block ELED  is lead absorber Plate 
@@ -493,10 +494,11 @@ Block EXSE  is the Shower Max  section
        Position ERIB  x=+(Right+Rleft)/2  y=+(emxg_Rstep)*(ir) 
        Position ERIB  x=+(Right+Rleft)/2  y=-(emxg_Rstep)*(ir) 
        end do
-       HITS     EXSE xx:16:SH(-250,250)  yy:16:(-250,250)  zz:16:(-350,350),
-                     px:16:(-100,100)    py:16:(-100,100)  pz:16:(-100,100),
-                     Slen:16:(0,1.e4)    Tof:16:(0,1.e-6)  Step:16:(0,100),
-                     none:16:            Eloss:0:(0,10)
+       HITS     EXSE  Eloss:0:(0,10)
+*                     xx:16:SH(-250,250)  yy:16:(-250,250)  zz:16:(-350,350),
+*                     px:16:(-100,100)    py:16:(-100,100)  pz:16:(-100,100),
+*                     Slen:16:(0,1.e4)    Tof:16:(0,1.e-6)  Step:16:(0,100),
+*                     none:16:            Eloss:0:(0,10)
 *
       end if
       
