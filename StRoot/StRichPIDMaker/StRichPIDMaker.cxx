@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.53 2003/11/19 18:12:32 perev Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.54 2004/02/11 22:33:13 perev Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.54  2004/02/11 22:33:13  perev
+ * defence agains huge number
+ *
  * Revision 2.53  2003/11/19 18:12:32  perev
  * Fix Float Point Exception
  *
@@ -334,7 +337,7 @@ using std::less;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.53 2003/11/19 18:12:32 perev Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.54 2004/02/11 22:33:13 perev Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -1269,7 +1272,8 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	// the line from the MIP to the hit
 	// 
 	StThreeVectorF referenceLine = (hit-central);
-//  	os << "referenceLine " << referenceLine << endl;
+        if (referenceLine.mag()<1.e-10) continue;
+	//  	os << "referenceLine " << referenceLine << endl;
 #ifdef RICH_WITH_PAD_MONITOR 
 	//mPadMonitor->drawLine(central,hit);
 #endif
