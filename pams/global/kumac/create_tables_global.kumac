@@ -87,6 +87,21 @@ macro svm
 	
  return
  
+ 
+* ----------------------------------------------------
+ macro ev0d
+   
+   macro/global/import *
+     
+      cd [dst]
+      tdm/newtable dst_v0_vertex dst_v0_vertex 100000
+       maxrowcount dst_v0_vertex 100000      
+      cd /dui
+      
+      
+ return
+
+ 
 * ----------------------------------------------------
  
  macro ev0_eval2
