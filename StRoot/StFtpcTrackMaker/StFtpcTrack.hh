@@ -1,5 +1,9 @@
-// $Id: StFtpcTrack.hh,v 1.13 2002/10/24 16:37:45 oldi Exp $
+// $Id: StFtpcTrack.hh,v 1.14 2002/10/31 13:40:27 oldi Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.14  2002/10/31 13:40:27  oldi
+// Method GetSector() added.
+// Method GetMeanR() and GetMeanAlpha() added.
+//
 // Revision 1.13  2002/10/24 16:37:45  oldi
 // dca (impact parameter) is calculated using StHelix::distance(vertexPos), now.
 // Therefore it is the smallest three dimensional distance of the helix to the
@@ -112,7 +116,7 @@ private:
   // data from tracker
   TObjArray *mPoints;         // Array of pointers to clusters of track
   MIntArray *mPointNumbers;   // Array of numbers of clusters
-  Int_t  mRowsWithPoints;     // Binary pattern to know in which row a point is found
+      Int_t  mRowsWithPoints; // Binary pattern to know in which row a point is found
 
      Int_t   mTrackNumber;    // number of track
   Double_t   mChi2Circle;     // Chi squared of circle fit
@@ -139,7 +143,7 @@ private:
   Double_t   mDca;            // radial impact parameter to main vertex
 
   // dE/dx information
-  Double_t   mdEdx;           // Mean nergy loss per length
+  Double_t   mdEdx;           // Mean energy loss per length
      Int_t   mNumdEdxHits;    // Number of hits accepted for dE/dx
 
 
@@ -187,8 +191,10 @@ public:
   Short_t     GetNMax()             const { return mNMax;                            }
   Double_t    GetRFirst()           const { return mRFirst;                          }
   Double_t    GetRLast()            const { return mRLast;                           }
+  Double_t    GetMeanR()            const { return TMath::Abs((mRFirst+mRLast)/2.);  }
   Double_t    GetAlphaFirst()       const { return mAlphaFirst;                      }
   Double_t    GetAlphaLast()        const { return mAlphaLast;                       }
+  Double_t    GetMeanAlpha();
   Int_t       GetNumberOfPoints()   const { return mPoints->GetEntriesFast();        }
   Bool_t      ComesFromMainVertex() const { return mFromMainVertex;                  }
   TVector3    GetMomentum()         const { return mP;                               }
@@ -201,6 +207,7 @@ public:
   Double_t    GetEta() const; 
   Double_t    GetRapidity() const;
   Int_t       GetHemisphere() const;
+  Int_t       GetSector() const;
 
   TVector3    GetVertex()           const { return mV;                               }
   Int_t       GetCharge()           const { return mQ;                               }
@@ -258,6 +265,19 @@ protected:
 
   ClassDef(StFtpcTrack, 1)    // Ftpc track class  
 };
+
+
+inline Double_t StFtpcTrack::GetMeanAlpha()
+{
+  // Returns mean phi angle of track.
+
+  Double_t phi = mAlphaFirst+mAlphaLast;
+  
+  if (phi >= 2*TMath::Pi()) phi -= 2*TMath::Pi();
+  else if (phi <= -2*TMath::Pi())  phi += 2*TMath::Pi();
+
+  return phi/2.;
+}
 
 
 inline Double_t StFtpcTrack::GetPt() const
