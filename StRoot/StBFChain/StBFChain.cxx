@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.39 1999/12/18 00:23:46 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.40 1999/12/20 22:53:16 didenko Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.40  1999/12/20 22:53:16  didenko
+// libtls => tls
+//
 // Revision 1.39  1999/12/18 00:23:46  fisyak
 // Add runco branch
 //
@@ -216,7 +219,7 @@ BfcItem BFC[] = {
   {"fzin"        ,""  ,"","geant","" ,""                                      ,"read gstar fz-file",kFALSE},
   {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
   {"tables"      ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
-  {"tls"         ,""  ,"","",""                                                        ,"libtls","",kFALSE},
+  {"tls"         ,""  ,"","",""                                                           ,"tls","",kFALSE},
   {"SCL"         ,""  ,"","","","StarClassLibrary",                         "Load StarClassLibrary",kFALSE},
   {"FieldOn"     ,""  ,"","-FieldOff,-HalfField,-ReverseField","StMagFC","StMagF"  ,"Nominal field",kFALSE},
   {"FieldOff"    ,""  ,"","-FieldOn,-HalfField,-ReverseField","StMagFC","StMagF" ,"No Field option",kFALSE},
