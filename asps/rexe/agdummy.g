@@ -22,14 +22,14 @@ Replace[LIST #;] with [ #1 _
              trsat,trsinv,trsmlu,trsmul,trupck,
  "kernnum"   dfact,dfeqn,dfinv,dmbil,dmcpy,dmmpa,dvset,
  "minuit "   mnseti,mninit,mnstat,mnexcm,mnpout,mnparm,
- "matrix "   Rsinv,Dsinv,Rinv,Dinv,Dmmlt,assndx,
+ "matrix "   Rsinv,Dsinv,Rinv,Dinv,Dmmlt,
  "ffread "   ffinit,ffset,ffkey,ffget,ffgo,
  "random "   poissn,norran,rnorml,dircos,rnpssn,
  "random "   binomi,gauss,proxim,rnhpre,rnhran,
  "comis  "   csjcal,csaddr,jumpad,msbit,
  "interp "   fint,polint,lfit,divdif,lfitw,lvsimx,lzlong,
- "zebra  "   mzvolm,mzdred,zverif,
- "hbook  "   hplfun,hpagsz,hnoent,hnform,hfith, 
+ "zebra  "   mzvolm,mzdred,zverif,mzlogl,fzfile,
+ "hbook  "   hplfun,hpagsz,hnoent,hnform,hfith,hlimit,
              HBOOK1,HBOOK2,HBOOKN,HFILL,HF1,HF1E,HPRINT,HDELET,HRESET,
              HFITGA,HFITPO,HFITEX,HPROJ1,HPROJ2,HFN,HGFIT,HXE,
              HROPEN,PAOPEN,PACLOS,PAREAD,PAWRIT,HCDIR,HGIVEN,
@@ -63,6 +63,7 @@ Replace[LIST #;] with [ #1 _
 * make sure that real calls will never be done even if this routine is called
   Ix = Ix+1;  if (Ix<=0) Return;
   Ix = Ix+1;  if (Ix>=0) Return;
+#ifdef PGI
   ix = SystemF(' ')+JattF(ix);
   x  = sind(x)+asind(x)+cosd(x)+acosd(x)+tand(x)+atand(x)+atan2d(x,x)
   d  = dsind(d)+dasind(d)+dcosd(d)+dacosd(d)+dtand(d)+datand(d)+datan2d(d,d)
@@ -76,5 +77,6 @@ Replace[LIST #;] with [ #1 _
         (' in G2Tmain: found ',3(1x,a),'   Nhits = ',i6)
    prin5 i; (' g2tmain ===> tdm table for g2t_hits = ',i6)
 *
+#endif
   END
  
