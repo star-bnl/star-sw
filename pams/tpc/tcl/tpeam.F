@@ -79,7 +79,8 @@ C-----------------------------------------------------------------------
 c
 c        functions
 c
-         integer lenocc,lochar
+c        integer lochar        ! Obsolete
+         integer lenocc,icloc
 c
 C-----------------------------------------------------------------------
 c
@@ -133,7 +134,8 @@ c
                outfile = 'tpe.rzd'
             else
                outfile = mctrl(1).infile
-               iper = lochar(1H.,1,mctrl(1).infile,80)
+c              iper = lochar(1H.,1,mctrl(1).infile,80)
+               iper = icloc('.',1,mctrl(1).infile,1,80)
                if(iper.gt.0)then
                   outfile(iper+1:iper+7) = 'tpe_rzd'
                else
