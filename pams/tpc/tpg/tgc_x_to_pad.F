@@ -1,7 +1,7 @@
-* $Id: tgc_x_to_pad.F,v 1.4 1998/11/18 21:59:35 sakrejda Exp $
+* $Id: tgc_x_to_pad.F,v 1.5 1998/11/19 21:06:38 sakrejda Exp $
 * $Log: tgc_x_to_pad.F,v $
-* Revision 1.4  1998/11/18 21:59:35  sakrejda
-* reversing disasterous changes, will have to work more on that
+* Revision 1.5  1998/11/19 21:06:38  sakrejda
+* transformations updated one more time, this time checked by Lidia for simulations and Eric for test data
 *
 * Revision 1.3  1998/11/08 00:20:05  sakrejda
 * definition of the local coordinate system changed so that it is right-handed
@@ -49,6 +49,6 @@ C
       else
           pitch=pitch_out
       endif
-      pad = x/pitch+0.5+0.5*pad_num(int(row+0.5))
+      pad = -x/pitch+0.5+0.5*pad_num(int(row+0.5))
       tgc_x_to_pad=STAFCV_OK
       end
