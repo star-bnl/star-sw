@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.27 2001/02/07 17:53:14 rcwells Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.28 2001/02/08 22:38:26 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,8 +20,8 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
- * Revision 1.27  2001/02/07 17:53:14  rcwells
- * Corrected missing SetNHitsPossible in standard reader
+ * Revision 1.28  2001/02/08 22:38:26  laue
+ * Reader can now switch between different track types: primary is default
  *
  * Revision 1.26  2000/10/17 17:25:23  laue
  * Added the dE/dx information for v0s
@@ -165,7 +165,7 @@ ClassImp(StStandardHbtEventReader)
 
 
 //__________________
-StStandardHbtEventReader::StStandardHbtEventReader(){
+StStandardHbtEventReader::StStandardHbtEventReader() : mTrackType(primary) {
   mTheEventMaker=0;
   mTheV0Maker=0;
   mTheTagReader = 0;
@@ -182,6 +182,9 @@ StStandardHbtEventReader::~StStandardHbtEventReader(){
 //__________________
 StHbtString StStandardHbtEventReader::Report(){
   StHbtString temp = "\n This is the StStandardHbtEventReader\n";
+  char ccc[100];
+  sprintf(ccc," Track type is %d\n",mTrackType);
+  temp += ccc;
   temp += "---> EventCuts in Reader: ";
   if (mEventCut) {
     temp += mEventCut->Report();
@@ -238,15 +241,17 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   */
 
   // if this event has no tags, then return
-  if (!mTheTagReader) {
+  if (!mTheTagReader) 
     cout << " StStandardHbtEventReader::ReturnHbtEvent() -  no tag reader " << endl;
-    return 0;
+  
+  if (mTheTagReader) {
+    cout << " StStandardHbtEventReader::ReturnHbtEvent() -  tag reader is switched on " << endl;    
+    if (!mTheTagReader->EventMatch(rEvent->info()->runId() , rEvent->info()->id()) ) {
+      cout << " StStandardHbtEventReader::ReturnHbtEvent() -  no tags for this event" << endl;
+      return 0;
+    }
   }
-  if (!mTheTagReader->EventMatch(rEvent->info()->runId() , rEvent->info()->id()) ) {
-    cout << " StStandardHbtEventReader::ReturnHbtEvent() -  no tags for this event" << endl;
-    return 0;
-  }
-
+  
 
   StHbtEvent* hbtEvent = new StHbtEvent;
   int mult = rEvent->trackNodes().size();
@@ -272,6 +277,8 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 
   StTrack* pTrack; // primary
   StTrack* gTrack; // global
+  StTrack* cTrack; // current track
+
   cout << "StStandardHbtReader::ReturnHbtEvent() - We have " << mult << " tracks to store - we skip tracks with nhits==0" << endl;
 
   StTpcDedxPidAlgorithm* PidAlgorithm = new StTpcDedxPidAlgorithm();
@@ -284,125 +291,93 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   StKaonPlus* Kaon = StKaonPlus::instance();
   StProton* Proton = StProton::instance();
 
-  int iNoPrimary = 0;
-  int iNoGlobal = 0;
   int iNoHits = 0;
   int iNoPidTraits = 0;
   int iFailedCut =0;
   int iNoBestGuess =0;
   int iBadFlag =0;
-  int iPrimary = 0;
-  int iGoodPrimary = 0;
-
-  int isPrimary = 1;
+  int iTracks = 0;
+  int iGoodTracks =0;
+  int iWrongTrackType =0;
 
   // loop over all the tracks, accept only global
   for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
-    pTrack = rEvent->trackNodes()[icount]->track(primary);
-    if (pTrack) {
-      iPrimary++;
-      if (pTrack->flag()>=0) { 
-	iGoodPrimary++;
-      }
+    cTrack = rEvent->trackNodes()[icount]->track(mTrackType);
+    if (cTrack) {
+      iTracks++;
+      if (cTrack->flag()>=0) iGoodTracks++;
     }
   }
 
-  
-  hbtEvent->SetNumberOfTracks(iPrimary);
-  hbtEvent->SetNumberOfGoodTracks(iGoodPrimary);
-  hbtEvent->SetUncorrectedNumberOfPositivePrimaries(0);
-  hbtEvent->SetUncorrectedNumberOfNegativePrimaries(uncorrectedNumberOfNegativePrimaries(*rEvent));
-  hbtEvent->SetEventNumber(mTheTagReader->tag("mEventNumber"));    
+  hbtEvent->SetNumberOfTracks(iTracks);
+  hbtEvent->SetNumberOfGoodTracks(iGoodTracks);
 
-  // reaction plane from tags 
-  StHbtThreeVector a( mTheTagReader->tag("qxa",1), mTheTagReader->tag("qya",1),0);
-  StHbtThreeVector b( mTheTagReader->tag("qxb",1), mTheTagReader->tag("qyb",1),0);
-  float reactionPlane = (a+b).phi();
-  float reactionPlaneError = a.angle(b);
-  cout << " reactionPlane : " << reactionPlane/3.1415927*180.;
-  cout << " reactionPlaneError : " << reactionPlaneError/3.1415927*180. << endl;
-  hbtEvent->SetReactionPlane(reactionPlane);
-  hbtEvent->SetReactionPlaneError(reactionPlaneError);
+  hbtEvent->SetUncorrectedNumberOfPositivePrimaries(uncorrectedNumberOfPositivePrimaries(*rEvent));
+  hbtEvent->SetUncorrectedNumberOfNegativePrimaries(uncorrectedNumberOfNegativePrimaries(*rEvent));
+  hbtEvent->SetEventNumber(rEvent->info()->id());
   
+  StZdcTriggerDetector zdc = rEvent->triggerDetectorCollection()->zdc();
+  hbtEvent->SetZdcAdcWest(zdc.adc(10)); // Zdc West sum attenuated
+  hbtEvent->SetZdcAdcEast(zdc.adc(13)); // Zdc East sum attenuated
+
+  if (mTheTagReader) {
+    hbtEvent->SetEventNumber(mTheTagReader->tag("mEventNumber"));    
+    // reaction plane from tags 
+    StHbtThreeVector a( mTheTagReader->tag("qxa",1), mTheTagReader->tag("qya",1),0);
+    StHbtThreeVector b( mTheTagReader->tag("qxb",1), mTheTagReader->tag("qyb",1),0);
+    float reactionPlane = (a+b).phi();
+    float reactionPlaneError = a.angle(b);
+    cout << " reactionPlane : " << reactionPlane/3.1415927*180.;
+    cout << " reactionPlaneError : " << reactionPlaneError/3.1415927*180. << endl;
+    hbtEvent->SetReactionPlane(reactionPlane);
+    hbtEvent->SetReactionPlaneError(reactionPlaneError);
+  }
 
   for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
-    //cout << " track# " << icount << endl;
-    pTrack = rEvent->trackNodes()[icount]->track(primary);
+#ifdef STHBTDEBUG
+    cout << " track# " << icount << endl;
+#endif
     gTrack = rEvent->trackNodes()[icount]->track(global);
-
+    pTrack = rEvent->trackNodes()[icount]->track(primary);
+    cTrack = rEvent->trackNodes()[icount]->track(mTrackType);
 
     // don't make a hbtTrack if not a primary track
-    if (!pTrack) {
-      iNoPrimary++;
-      isPrimary = -1;
+    if (!cTrack) {
+      iWrongTrackType++;
       continue;
     }
-    if (pTrack->flag() < 0) {
+    if (cTrack->flag() < 0) {
       iBadFlag++;
-      cout << " Flag < 0 -- skipping track" << endl;
-      continue;
-    }
-    if (!gTrack) {
-      iNoGlobal++;
-      cout <<  " Primary track, but no global track -- skipping track" << endl;
       continue;
     }
 
+    if (!gTrack) {
+      cout << "StStandardHbtEventReader::Return(...) - no global track pointer !?! " << endl;
+      continue;
+    }
 
     // check number points in tpc
-    int nhits = pTrack->detectorInfo()->numberOfPoints(kTpcId);
-    //cout << "nhits\t" << nhits << endl;
+    int nhits = cTrack->detectorInfo()->numberOfPoints(kTpcId);
     if (nhits==0) {
       iNoHits++;
       //cout << "No hits -- skipping track (because it crashes otherwise)" << endl;
       continue;
     }
-    // get dedxPidTraits
-    //cout << " number of pidTraits " << pTrack->pidTraits().size();
-    //cout << " number of pidTraits for tpc: " << pTrack->pidTraits(kTpcId).size() << endl;
+
     StTrackPidTraits* trackPidTraits=0; 
     size_t iPidTraitsCounter=0;
 
-    //for ( int ihit = 0; ihit < pTrack->detectorInfo()->hits(kTpcId).size(); ihit++) {
-    //  cout << pTrack->detectorInfo()->hits(kTpcId)[ihit]->position() << endl;
-    //}
-
-    do {
-      trackPidTraits = pTrack->pidTraits(kTpcId)[iPidTraitsCounter];
-      iPidTraitsCounter++;
-    } while (iPidTraitsCounter < pTrack->pidTraits(kTpcId).size() && (!trackPidTraits) );
-    if (!trackPidTraits) {
-      iNoPidTraits++;
-      //cout << " No dEdx information from Tpc- skipping track with " << nhits << " hits"<< endl;
-      continue;
-    }
-    // SIMPLE WAY  const StDedxPidTraits* dedxPidTraits = (const StDedxPidTraits*)trackPidTraits;
-    // ULLRICH WAY...
-#if defined(__SUNPRO_CC)
-    const StDedxPidTraits *dedxPidTraits = dynamic_cast<const StDedxPidTraits*>((const StDedxPidTraits*)trackPidTraits);
-#else
-    const StDedxPidTraits *dedxPidTraits = dynamic_cast<const StDedxPidTraits*>(trackPidTraits);
-#endif    
-
-
-
     // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
     // pointers to track and pidTraits are set 
-    //cout << "look for best guess " << endl;
-    StParticleDefinition* BestGuess = (StParticleDefinition*)pTrack->pidTraits(*PidAlgorithm);
+    StParticleDefinition* BestGuess = (StParticleDefinition*)cTrack->pidTraits(*PidAlgorithm);
     //    if (BestGuess) cout << "best guess for particle is " << BestGuess->name() << endl; //2dec9
-    
     if (!BestGuess){
       iNoBestGuess++;
       continue;
     }
 
-
-
-    //cout << " dE/dx = " << dedxPidTraits->mean() << endl;
-
     // get fitTraits
-    StTrackFitTraits fitTraits = pTrack->fitTraits();
+    StTrackFitTraits fitTraits = cTrack->fitTraits();
     //cout << " got fitTraits " << endl;
 
     //cout << "Getting readty to instantiate new StHbtTrack " << endl;
@@ -414,10 +389,10 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 
 
     
-    hbtTrack->SetTrackId(pTrack->key());
+    hbtTrack->SetTrackId(cTrack->key());
 
     hbtTrack->SetNHits(nhits);
-    hbtTrack->SetNHitsPossible( pTrack->numberOfPossiblePoints(kTpcId) );
+    hbtTrack->SetNHitsPossible( cTrack->numberOfPossiblePoints(kTpcId) );
 
     float nsige = PidAlgorithm->numberOfSigma(Electron);
     //cout << "nsige\t\t" << nsige << endl;
@@ -439,27 +414,26 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 
     //cout << "Nsig electron,pion,kaon,proton : " << nsige << " " << nsigpi << " " << nsigk << " " << nsigprot << endl;
     
-    float dEdx = dedxPidTraits->mean();
-    //cout << "dEdx\t" << dEdx << endl; 
-    hbtTrack->SetdEdx(dEdx);
+    //cout << "dEdx\t" << PidAlgorithm->traits()->mean() << endl; 
+    hbtTrack->SetdEdx(PidAlgorithm->traits()->mean());
     
-    double pathlength = pTrack->geometry()->helix().pathLength(vp);
+    double pathlength = cTrack->geometry()->helix().pathLength(vp);
     //cout << "pathlength\t" << pathlength << endl;
-    StHbtThreeVector p = pTrack->geometry()->momentum();
+    StHbtThreeVector p = cTrack->geometry()->momentum();
     //cout << "p: " << p << endl;
     hbtTrack->SetP(p);
 
 
 
-    StHbtThreeVector  DCAxyz = pTrack->geometry()->helix().at(pathlength)-vp;
+    StHbtThreeVector  DCAxyz = cTrack->geometry()->helix().at(pathlength)-vp;
     //cout << "DCA\t\t" << DCAxyz << " " << DCAxyz.perp() << endl;
     hbtTrack->SetDCAxy( DCAxyz.perp() );
     hbtTrack->SetDCAz(  DCAxyz.z()  );
 
-    hbtTrack->SetChiSquaredXY( pTrack->fitTraits().chi2(0) );
-    hbtTrack->SetChiSquaredZ( pTrack->fitTraits().chi2(1) ); 
+    hbtTrack->SetChiSquaredXY( cTrack->fitTraits().chi2(0) );
+    hbtTrack->SetChiSquaredZ( cTrack->fitTraits().chi2(1) ); 
 
-    StPhysicalHelixD  helix = pTrack->geometry()->helix();
+    StPhysicalHelixD  helix = cTrack->geometry()->helix();
     hbtTrack->SetHelix( helix );
 
     float pt = sqrt(p[0]*p[0]+p[1]*p[1]);
@@ -468,14 +442,14 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     
     hbtTrack->SetPt(pt);   // flag secondary tracks
     
-    int charge = (pTrack->geometry()->charge());
+    int charge = (cTrack->geometry()->charge());
     //cout << "charge\t\t\t\t" << charge << endl;
     hbtTrack->SetCharge(charge);
     
     hbtTrack->SetTopologyMap( 0, gTrack->topologyMap().data(0) ); // take map from globals
     hbtTrack->SetTopologyMap( 1, gTrack->topologyMap().data(1) ); // take map from globals
 
-    //cout << "pushing..." <<endl;
+    // cout << "pushing..." <<endl;
 
     
     // By now, all track-wise information has been extracted and stored in hbtTrack
@@ -492,8 +466,9 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   }
   delete PidAlgorithm;
 
-  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i non-primary,        tracks skipped \n",iNoPrimary);
-  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i non-global,         tracks skipped \n",iNoGlobal);
+  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i tracks of type %i           \n",iTracks,mTrackType);
+  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i good tracks of type %i      \n",iGoodTracks,mTrackType);
+  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i wrong type tracks \n",iWrongTrackType);
   printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i no hits,            tracks skipped \n",iNoHits);
   printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i no tpcPidTraits,    tracks skipped \n",iNoPidTraits);
   printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i failed tracks cuts, track skipped \n",iFailedCut);
