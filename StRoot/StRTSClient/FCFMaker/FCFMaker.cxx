@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.15 2004/02/15 05:45:38 perev Exp $
+ * $Id: FCFMaker.cxx,v 1.16 2004/03/10 21:55:54 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.16  2004/03/10 21:55:54  jml
+ * support for simulations in FCFMaker
+ *
  * Revision 1.15  2004/02/15 05:45:38  perev
  * Increase size of broken array
  *
@@ -149,12 +152,14 @@ static class fcfAfterburner fcf_after;
 
 // [sector][padrow][result_buffer]
 static u_int croat_out[24][45][(FCF_MAX_CLUSTERS + 2) * 2];
+static u_int croat_simu_out[24][45][(FCF_MAX_CLUSTERS+2)* 2];
 
 // [sector][rb][mz][result_buffer]
 static u_int daq_file_out[24][6][3][(FCF_MAX_CLUSTERS + 2) * 2 * 6];
 
 // points to the raw data contributing...
 
+static j_uintptr simu_resptr[24][45][3];
 static j_uintptr croat_resptr[24][45][3];
 static j_uintptr daq_file_resptr[24][45][3];
 
@@ -317,7 +322,8 @@ Int_t StRTSClientFCFMaker::InitRun(int run)
   fprintf(stderr,"StRTSClientFCFMaker::InitRun called with run %u...\n",run) ;
 	
   St_DataSet *dr = GetDataSet("StDAQReader");
-  daqReader = (StDAQReader *)(dr->GetObject());
+  if(dr) 
+    daqReader = (StDAQReader *)(dr->GetObject());
 
   if(daqReader == NULL) {
     printf("FCFMaker::InitRun No daqReader available...\n");
@@ -433,33 +439,38 @@ Int_t StRTSClientFCFMaker::Make()
       fcfHit h;
 
       // First compare...
+     
       if((n_croat_cl > 0) &&
-	 (n_daq_file_cl > 0)) 
-      {
- 	int e = fcf_after.compare(daq_file_resptr[s][pr],
- 				  croat_resptr[s][pr]);
-
-	mismatch_sector += e;
-	mismatch_tot += e;
-
- // 	if(e != 0) {
-//  	  printf("FCFMaker: %d mismatches between daq_file & calculated clusters (s=%d, pr=%d)\n",e,s,pr);
-//  	}
+	 (n_daq_file_cl > 0)) {
+	if(hasSim) {
+	  printf("FCFMaker: have simulated data as well as daq file clusters. disabling comparison between calculated and file clusters\n");
+	}
+	else {
+	  int e = fcf_after.compare(daq_file_resptr[s][pr],
+				    croat_resptr[s][pr]);
+	  
+	  mismatch_sector += e;
+	  mismatch_tot += e;
+	  
+	  // 	if(e != 0) {
+	  //  	  printf("FCFMaker: %d mismatches between daq_file & calculated clusters (s=%d, pr=%d)\n",e,s,pr);
+	  //  	}
+	}
       }
-
+      
       // Do daq file cluster after burner
       if(n_daq_file_cl > 0) {
 	if(n_burned_daq_file_cl == -1) 
 	  n_burned_daq_file_cl=0;
 
-	fcf_after.burn(daq_file_resptr[s][pr]);
+	fcf_after.burn(daq_file_resptr[s][pr], NULL);
 
 	while(fcf_after.next(&h)) {
 	  n_burned_daq_file_cl++;
 	  n_burned_daq_file_cl_sector++;
 
 	  if(use_daq_file_clusters) {
-	    saveCluster(h.pad,h.tm,h.f,h.c,h.p1,h.p2,h.t1,h.t2,pr,s+1);
+	    saveCluster(h.pad,h.tm,h.f,h.c,h.p1,h.p2,h.t1,h.t2,pr,s+1,0,0);
 	  }
 	}
       }
@@ -469,14 +480,14 @@ Int_t StRTSClientFCFMaker::Make()
 	if(n_burned_croat_cl == -1) 
 	  n_burned_croat_cl = 0;
 
-	fcf_after.burn(croat_resptr[s][pr]);
+	fcf_after.burn(croat_resptr[s][pr], simu_resptr[s][pr]);
 		
 	while(fcf_after.next(&h)) {
 	  n_burned_croat_cl++;
 	  n_burned_croat_cl_sector++;
 
 	  if(!use_daq_file_clusters) {
-	    saveCluster(h.pad,h.tm,h.f,h.c,h.p1,h.p2,h.t1,h.t2,pr,s+1);
+	    saveCluster(h.pad,h.tm,h.f,h.c,h.p1,h.p2,h.t1,h.t2,pr,s+1,h.id_simtrk, h.id_quality);
 	  }
 	}
       }
@@ -632,10 +643,6 @@ Int_t StRTSClientFCFMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad,
     }
   }
 
-  if(offset == -1) {	// Huh?
-	  	gMessMgr->Error() << "<StRTSClientFCFMaker::BuildCPP> Offset not updated???" << endm ;
-  }
-
   return offset;
 }
 
@@ -700,7 +707,7 @@ double StRTSClientFCFMaker::lzFromTB(double timeBin, int sector, int row, int pa
 {
   double tbWidth = (1./gStTpcDb->Electronics()->samplingFrequency());
   
-  double zoffset = ((row > 13) ? 
+  double zoffset ((row > 13) ? 
 		    gStTpcDb->Dimensions()->zOuterOffset() :
 		    gStTpcDb->Dimensions()->zInnerOffset());
 
@@ -807,7 +814,7 @@ void StRTSClientFCFMaker::getCorrections(int sector, int row)
 // Assumes that sector is from 1...24
 //              r      is from 0...44
 //
-void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int p1, int p2, int t1, int t2, int r, int sector)
+void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int p1, int p2, int t1, int t2, int r, int sector, int id_simtrk, int id_quality)
 {
   tss_tsspar_st *tsspar = m_tsspar->GetTable();
 
@@ -890,6 +897,9 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
   // Factors adjusted to match tcl
   hit.prf = hit.npads * ((r>=13) ? .1316 : .0636);
   hit.zrf = hit.ntmbk * .1059;
+
+  hit.id_simtrk = id_simtrk;
+  hit.id_quality = id_quality;
 
 #ifdef FCF_DEBUG_OUTPUT
  
@@ -998,13 +1008,17 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
 					  int sector,
 					  int row,
 					  StDaqClfCppRow *cppRow,
-					  unsigned short *adc)
+					  unsigned short *adc,
+					  unsigned short *trk,
+					  u_int *simu_result_buff,
+					  j_uintptr *simu_mz_ptr)
 {
   int total_clusters=0;
 
  //  static StDaqClfCppRow *cppRowStorage ;
 
   for(int i=0;i<3;i++) result_mz_ptr[i] = NULL;
+  for(int i=0;i<3;i++) simu_mz_ptr[i] = NULL;
 
 
   //printf("s=%d r=%d\n",sector,row);
@@ -1016,13 +1030,15 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
   //cppRowStorage = &cpp[r] ;
 
   u_int *res_ptr = result_buff ;
+  u_int *simu_res_ptr = simu_result_buff ;
   u_int *rows_count = result_buff ;
   u_int *croat_outp ;
   u_int nclusters ;
 
   *rows_count = 0 ;	// row count 0 as default...
 	
-  res_ptr++ ;	// advance space...
+  res_ptr++ ;	   // advance space...
+  simu_res_ptr++;  // keep parallel with res_ptr...
 
   int i ;
   for(i=0;i<3;i++) {
@@ -1053,7 +1069,6 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
       if(padfinder[row][i].rdo == 0) break ;	// no more row fragments
       start = fcf->padStart = padfinder[row][i].minpad ;
       stop = fcf->padStop = padfinder[row][i].maxpad ;
-
     }
 
     if(start == 1) fcf->startFlags[start] |= FCF_ROW_EDGE ;
@@ -1070,6 +1085,7 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
       }
     }
 
+    if(hasSim) memset(&croat_trk[0][0], 0, sizeof(croat_trk));
     memset(&croat_adc[0][0], 0, sizeof(croat_adc));
     memset(&croat_cpp[0][0], 0xff, sizeof(croat_cpp));
 
@@ -1092,6 +1108,12 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
 	  // FCF_10BIT... flag is set.  Convert back here...
 	  croat_adc[pp][time] = log10to8_table[adc[pnt]];
 
+	  if(hasSim) {
+	    croat_trk[pp][time] = trk[pnt];
+	    
+	    //printf("FCF: s=%d pr=%d pad=%d tb=%d adc=%d trk=%d\n",sector, row, pp, time, croat_adc[pp][time], croat_trk[pp][time]);
+	  }
+
 #ifdef FCF_DEBUG_OUTPUT
 	  if(sector==1 && row==0)
 	    fprintf(ff,"%d %d %d %d %d\n",sector,row+1,pp,time,log10to8_table[adc[pnt]]) ;
@@ -1111,6 +1133,11 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
 	croat_cpp[pp][2*ss+1] = (cppRow->r[pp-1][ss].start_bin +
 				 cppRow->r[pp-1][ss].length -1);
       }
+    }
+
+    if(hasSim) {
+      fcf->simIn = (short *)croat_trk;
+      fcf->simOut = simu_res_ptr;
     }
 
     u_int words = fcf->finder((u_char *)croat_adc, 
@@ -1157,8 +1184,13 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
 
     if(nclusters) {
       result_mz_ptr[i] = res_ptr ;
+
+      if(hasSim)
+	simu_mz_ptr[i] = simu_res_ptr;
+
       (*rows_count)++ ;
       res_ptr += 2+2*nclusters ;	// advance pointer
+      simu_res_ptr += 2+2*nclusters;
     }
   }
 
@@ -1375,9 +1407,19 @@ int StRTSClientFCFMaker::build_croat_clusters()
 
   St_DataSet *rawData;
   St_DataSet *sector;
-  
-  int sz;
+  St_DataSet *geant;
 
+  geant = (St_DataSet *)GetInputDS("geant");
+  if(geant) {
+    hasSim = 1;
+    printf("<FCFMaker> event has simulation information\n");
+  }
+  else {
+    hasSim = 0;
+  }
+
+  int sz;
+  
   rawData = (St_DataSet *)GetInputDS("tpc_raw");
   if(!rawData) return -1;
 
@@ -1392,12 +1434,15 @@ int StRTSClientFCFMaker::build_croat_clusters()
     St_raw_pad *Tpad_in, *Tpad_out;
     St_raw_seq *Tseq_in, *Tseq_out;
     St_type_shortdata *Tadc_in, *Tadc_out;
+    St_type_shortdata *Ttrk_in, *Ttrk_out;
 
     // c arrays for this sector
     raw_row_st *row_in, *row_out;
     raw_pad_st *pad_in, *pad_out;
     raw_seq_st *seq_in, *seq_out;
     unsigned short *adc_in, *adc_out;
+    unsigned short *trk_in=NULL;
+    unsigned short *trk_out=NULL;
 
     // look for the sector in the raw data...
     rawIter.Reset();
@@ -1418,7 +1463,9 @@ int StRTSClientFCFMaker::build_croat_clusters()
       Tseq_out = (St_raw_seq *)sectorIter.Find("raw_seq_out");
       Tadc_in = (St_type_shortdata *)sectorIter.Find("pixel_data_in");
       Tadc_out = (St_type_shortdata *)sectorIter.Find("pixel_data_out");
-      
+      Ttrk_in = (St_type_shortdata *)sectorIter.Find("pixel_indx_in");
+      Ttrk_out = (St_type_shortdata *)sectorIter.Find("pixel_indx_out");
+
       // Get the c arrays for this sector
       row_in = Trow_in->GetTable();
       row_out = Trow_out->GetTable();
@@ -1428,7 +1475,18 @@ int StRTSClientFCFMaker::build_croat_clusters()
       seq_out = Tseq_out->GetTable();
       adc_in = (unsigned short *)Tadc_in->GetTable();
       adc_out = (unsigned short *)Tadc_out->GetTable();
-      
+
+      if(hasSim) {
+	trk_in = (unsigned short *)Ttrk_in->GetTable();
+	trk_out = (unsigned short *)Ttrk_out->GetTable();
+
+	//printf("<FCFMaker> Simulation table at 0x%x and 0x%x\n",(u_int)trk_in, (u_int)trk_out);
+      }
+      else {
+	trk_in = NULL;
+	trk_out = NULL;
+      }
+
       haveRaw = 1;
       haveAnyRaw = 1;
     }
@@ -1457,7 +1515,8 @@ int StRTSClientFCFMaker::build_croat_clusters()
       if(r==12) continue ;
       
       j_uintptr *raw_resptr = croat_resptr[sectorIdx-1][r];
-      
+      j_uintptr *sim_resptr = simu_resptr[sectorIdx-1][r];
+
       if(haveRaw) {
 
 	nclusters +=
@@ -1466,7 +1525,10 @@ int StRTSClientFCFMaker::build_croat_clusters()
 			   sectorIdx,
 			   r,
 			   &cpp[r],
-			   ((r<13) ? adc_in : adc_out));
+			   ((r<13) ? adc_in : adc_out),
+			   ((r<13) ? trk_in : trk_out),
+			   croat_simu_out[sectorIdx-1][r],
+			   sim_resptr);
 
 
 // 	printf("(raw)------>        0x%x 0x%x 0x%x (0x%x)\n",

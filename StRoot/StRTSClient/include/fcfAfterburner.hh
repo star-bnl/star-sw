@@ -4,6 +4,8 @@ struct fcfHit {
 	u_short f ;
 	u_short c ;
 	u_short p1,p2,t1,t2 ;
+        short id_simtrk;
+        short id_quality;
 } ;
 
 class fcfAfterburner {
@@ -12,7 +14,7 @@ public:
         fcfAfterburner();
 	~fcfAfterburner() { ; } ;
 
-	int burn(u_int *ptr_res[3]) ;
+        int burn(u_int *ptr_res[3], u_int *ptr_simu_res[3] = NULL) ;
 	int next(fcfHit *out) ;
 	int compare(u_int *p1[3], u_int *p2[3]) ;
 
