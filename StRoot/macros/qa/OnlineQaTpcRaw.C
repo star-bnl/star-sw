@@ -1,5 +1,8 @@
-// $Id: OnlineQaTpcRaw.C,v 1.5 2000/06/14 14:35:42 kathy Exp $
+// $Id: OnlineQaTpcRaw.C,v 1.6 2000/06/14 15:03:55 kathy Exp $
 // $Log: OnlineQaTpcRaw.C,v $
+// Revision 1.6  2000/06/14 15:03:55  kathy
+// changed default input daq file to be a current one
+//
 // Revision 1.5  2000/06/14 14:35:42  kathy
 // comment out setdebug so zillions of daq messages aren't printed out
 //
@@ -34,7 +37,7 @@ StChain *chain;
 void OnlineQaTpcRaw(
  Int_t nevents=2, 
  const char *MainFile=
-    "/star/rcf/daq/2000/03/st_physics_1062004_raw_0002.daq",
+ "/star/rcf/data08/daq/2000/06/st_physics_1164058_raw_0001.daq",
  Int_t nevHistOut=0)
 {
 //
