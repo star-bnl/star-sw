@@ -97,6 +97,9 @@ if (/^i386_/) {
     $FEXTEND  = "-ffixed-line-length-132"; 
   }
   elsif (/kcc$/) {
+    $OSFID    = "f2cFortran";
+    $OSFID   .= " lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC";
+    $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS";
     $DEBUG    = "-g";
     $CXXOPT   = "+K0 -O0 --no_exceptions";
     $CXX      = "KCC";
@@ -561,14 +564,16 @@ foreach my $dir ("pams","StRoot"){#,"StDb") {
 	print "skip dir: $sub_dir \t=> $SKIP_DIRS\n";
 	next;
       }
-      next if ($sub_dir =~ /tables/);
+#      next if ($sub_dir =~ /tables/);
       if ($STAR_HOST_SYS =~ /^hp_ux102$/ &&  $sub_dir =~ /StHbtMaker/) {next;}
+      if ($STAR_HOST_SYS =~ /^sun4x_56$/ &&  
+	  ($sub_dir =~ /StSpectraMaker/ ||  $sub_dir =~ /StSpectraTagsMaker/)) {next;}
       push @subdirs, $sub_DIR;# print "================== add $sub_DIR\n";
     }
   }
 }
 my @Targets = ();
-foreach $dir ("asps/rexe","pams/tables",@subdirs) {
+foreach $dir ("asps/rexe",@subdirs) {
   next if !-d $dir;
   push @Targets, $OBJ . "/" . $dir . "/Conscript";
 }
