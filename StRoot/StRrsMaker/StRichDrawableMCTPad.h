@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichDrawableMCTPad.h,v 1.1 2000/04/05 15:54:59 lasiuk Exp $
+ * $Id: StRichDrawableMCTPad.h,v 1.2 2000/05/17 22:18:40 lasiuk Exp $
  *
  * Description:
  *   MC Pad which is drawn in the pad monitor
@@ -7,6 +7,9 @@
  ****************************************************************
  *
  * $Log: StRichDrawableMCTPad.h,v $
+ * Revision 1.2  2000/05/17 22:18:40  lasiuk
+ * use charge() instead of adc()/amp()
+ *
  * Revision 1.1  2000/04/05 15:54:59  lasiuk
  * Initial Revision
  *
@@ -37,11 +40,11 @@ public:
 protected:
     int mGID1;
     int mTrackp1;
-    int mQ1;
+    float mQ1;
     StRichSignalType mType1;
     int mGID2;
     int mTrackp2;
-    int mQ2;
+    float mQ2;
     StRichSignalType mType2;
     
     ClassDef(StRichDrawableMCTPad,1)

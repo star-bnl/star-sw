@@ -1,10 +1,13 @@
 /***************************************************************
- * $Id: StRichDrawableMCTPad.cxx,v 1.1 2000/04/05 15:55:03 lasiuk Exp $
+ * $Id: StRichDrawableMCTPad.cxx,v 1.2 2000/05/17 22:18:40 lasiuk Exp $
  *
  * Description:
  *
  ***************************************************************
  * $Log: StRichDrawableMCTPad.cxx,v $
+ * Revision 1.2  2000/05/17 22:18:40  lasiuk
+ * use charge() instead of adc()/amp()
+ *
  * Revision 1.1  2000/04/05 15:55:03  lasiuk
  * Initial Revision
  *
@@ -32,14 +35,14 @@ StRichDrawableMCTPad::StRichDrawableMCTPad(double xl, double yl, double xu, doub
     }
     mGID1    = iter->mG_ID;
     mTrackp1 = iter->mTrackp;
-    mQ1      = iter->mAmount;
+    mQ1      = iter->mCharge;
     mType1   = iter->mSignalType;
 
     if(status) {
 	iter++;
 	mGID2    = iter->mG_ID;
 	mTrackp2 = iter->mTrackp;
-	mQ2      = iter->mAmount;
+	mQ2      = iter->mCharge;
 	mType2   = iter->mSignalType;
     }
 }
