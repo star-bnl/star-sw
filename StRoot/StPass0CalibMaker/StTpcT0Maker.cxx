@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.7 2004/03/17 02:29:58 jecc Exp $
+// $Id: StTpcT0Maker.cxx,v 1.8 2004/06/08 23:02:32 jeromel Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.8  2004/06/08 23:02:32  jeromel
+// Made changes according to Javier. Should made it db.
+//
 // Revision 1.7  2004/03/17 02:29:58  jecc
 // Oups... remove useless StPreVertexMaker
 //
@@ -85,10 +88,11 @@
 ClassImp(StTpcT0Maker)
 
 //_____________________________________________________________________________
+/// Default constructor
 StTpcT0Maker::StTpcT0Maker(const char *name):StMaker(name){
-  minEntries = 5;   //require 5 valid t0s for a velocity determination
-  desiredEntries = 99999; // must set limit by hand. 
-  maxRMS     = 0.05; //t0 should be good to 50 ns
+  minEntries     = 5;         // require 5 valid t0s for a velocity determination
+  desiredEntries = 40;        // must set limit by hand if set to 99999 ; was 10 in bfc.C until 2004
+  maxRMS         = 0.05;      // t0 should be good to 50 ns
   //  mHistOut   = kFALSE;
   mHistOut=kTRUE;
   StMaker *saveMk = cd();
@@ -98,13 +102,18 @@ StTpcT0Maker::StTpcT0Maker(const char *name):StMaker(name){
   New("StVertexMaker","vertex"); 
   New("StPrimaryMaker","primary");
   New("St_dst_Maker","dst");
-  zVertexMax = 40.0;
-  zVertexMin = -40.0;
+
+  zVertexMin = -25.0; // was -40.0 until 2004
+  zVertexMax =  25.0; // was 40.0  until 2004
+
   saveMk->cd();
 }
 //_____________________________________________________________________________
+/// Dummy destructor
 StTpcT0Maker::~StTpcT0Maker(){
 }
+
+
 //_____________________________________________________________________________
 Int_t StTpcT0Maker::Init(){
   t0guess = 0;
@@ -140,12 +149,12 @@ Int_t StTpcT0Maker::InitRun(int runnumber){
 
 void StTpcT0Maker::Clear(Option_t *option){
   t0guess = 0;
-  zVertexWest = -999.0;
+  zVertexWest =  -999.0;
   zVertexEast = -1999.0; 
-  yVertexWest = -999.0;
-  yVertexEast = 999.0; 
-  xVertexWest = -999.0;
-  xVertexEast = 999.0; 
+  yVertexWest =  -999.0;
+  yVertexEast =   999.0; 
+  xVertexWest =  -999.0;
+  xVertexEast =   999.0; 
 }
 
 //_____________________________________________________________________________
@@ -312,7 +321,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.7 2004/03/17 02:29:58 jecc Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.8 2004/06/08 23:02:32 jeromel Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
