@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.136 2000/08/31 13:14:03 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.137 2000/08/31 17:29:31 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -12,6 +12,7 @@
 #include "St_XDFFile.h"
 #include "StMagF/StMagF.h"
 #include "St_geant_Maker/St_geant_Maker.h"
+#include "StEventMaker/StEventMaker.h"
 #include "StDbBroker/StDbBroker.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StTreeMaker/StTreeMaker.h"
@@ -430,6 +431,13 @@ Int_t StBFChain::Instantiate()
 	    if (GetOption("Physics"))   mode += 1;
 	    if (GetOption("LaserTest")) mode += 2;
 	    if (mode) mk->SetMode(mode);
+	  }
+	  if (GetOption("dst") && maker == "StEventMaker") {
+	    StEventMaker *EvMk = (StEventMaker *) mk;
+	    EvMk->doLoadTpcHits  = kFALSE;
+	    EvMk->doLoadFtpcHits = kFALSE;
+	    EvMk->doLoadSvtHits  = kFALSE;
+	    EvMk->doLoadSsdHits = kFALSE;
 	  }
 	}
         else status = kStErr;
