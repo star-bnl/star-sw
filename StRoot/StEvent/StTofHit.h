@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofHit.h,v 2.3 2001/04/05 04:00:43 ullrich Exp $
+ * $Id: StTofHit.h,v 2.4 2001/04/16 20:49:00 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTofHit.h,v $
+ * Revision 2.4  2001/04/16 20:49:00  ullrich
+ * Fixed typo in setSlatIndex().
+ *
  * Revision 2.3  2001/04/05 04:00:43  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -63,7 +66,7 @@ inline float
 StTofHit::flightTime() const {return mFlightTime;}
 
 inline void
-StTofHit::setSlatIndex(unsigned short slatId) {mNumberOfMips = slatId;}
+StTofHit::setSlatIndex(unsigned short slatId) {mSlatIndex = slatId;}
 
 inline void
 StTofHit::setNumberOfMips(unsigned short nm) {mNumberOfMips = nm;}
