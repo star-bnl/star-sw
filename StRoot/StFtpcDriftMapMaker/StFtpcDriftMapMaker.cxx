@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.13 2001/10/23 07:27:48 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.14 2001/10/29 13:00:38 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.14  2001/10/29 13:00:38  jcs
+// use new constructor in StFtpcDbReader
+//
 // Revision 1.13  2001/10/23 07:27:48  jcs
 // implement new StFtpcDbReader constructor
 //
@@ -79,8 +82,7 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
     m_dvdriftdp(0),
     m_ddeflectiondp(0),
     m_gas(0),
-    m_driftfield(0),
-    m_electronics(0)
+    m_driftfield(0)
 {
 // Create tables
 
@@ -106,58 +108,17 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
 
 
     m_driftfield    = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
-//    St_ftpcDriftField *m_driftfield = new St_ftpcDriftField("ftpcDriftField",1);
-//    AddData(m_driftfield);
-    ftpcDriftField_st *ftpcDriftField = m_driftfield->GetTable();
-    ftpcDriftField->numberOfEFieldBinsUsed    = 761;
-    ftpcDriftField->maximumNumberOfEFieldBins = 1101;
-    ftpcDriftField->minimumDriftField         = 240;
-    ftpcDriftField->stepSizeDriftField        =   1;
-    ftpcDriftField->radiusTimesField          =  7365.1;
-    ftpcDriftField->driftCathodeVoltage       = 10.0;
-
     m_efield     = (St_ftpcEField *)dblocal_calibrations("ftpcEField" );
-    ftpcEField_st *ftpcEField = m_efield->GetTable();
-
     m_vdrift     = (St_ftpcVDrift *)dblocal_calibrations("ftpcVDrift" );
-    ftpcVDrift_st *ftpcVDrift = m_vdrift->GetTable();
-
     m_deflection = (St_ftpcDeflection *)dblocal_calibrations("ftpcDeflection" );
-    ftpcDeflection_st *ftpcDeflection = m_deflection->GetTable();
-
     m_dvdriftdp     = (St_ftpcdVDriftdP *)dblocal_calibrations("ftpcdVDriftdP" );
-    ftpcdVDriftdP_st *ftpcdVDriftdP = m_dvdriftdp->GetTable();
-
     m_ddeflectiondp = (St_ftpcdDeflectiondP *)dblocal_calibrations("ftpcdDeflectiondP" );
-    ftpcdDeflectiondP_st *ftpcdDeflectiondP = m_ddeflectiondp->GetTable();
     
-    Int_t mNumberOfPadrowsPerSide = 10;
-
-    for ( Int_t iBin=0; iBin<ftpcDriftField->maximumNumberOfEFieldBins; iBin++) 
-    {
-      ftpcEField->e[iBin]   = 0.0;
-      for(Int_t iPadrow=0; iPadrow<mNumberOfPadrowsPerSide; iPadrow++) {
-         ftpcVDrift->v[iPadrow + mNumberOfPadrowsPerSide*iBin]   = 0.0;
-         ftpcDeflection->psi[iPadrow + mNumberOfPadrowsPerSide*iBin]   = 0.0;
-         ftpcdVDriftdP->dv_dp[iPadrow + mNumberOfPadrowsPerSide*iBin]   = 0.0;
-         ftpcdDeflectiondP->dpsi_dp[iPadrow + mNumberOfPadrowsPerSide*iBin]   = 0.0;
-      }
-    }
-    for ( Int_t iBin=0; iBin<ftpcDriftField->numberOfEFieldBinsUsed; iBin++) 
-    {
-      ftpcEField->e[iBin] = ftpcDriftField->minimumDriftField 
-                            + iBin*ftpcDriftField->stepSizeDriftField;
-    }
-
   if (!m_efield || !m_vdrift || !m_deflection || !m_dvdriftdp || !m_ddeflectiondp 
                 || !m_gas  || !m_driftfield) {
     cout<<"MySQLDb:Calibrations/ftpc not complete"<<endl;
     exit(0);
   }
-  
-
-  StMagUtilities  *magField = new StMagUtilities(map,factor);
-
 
   // create FTPC data base reader
   StFtpcDbReader *dbReader = new StFtpcDbReader(m_dimensions,
@@ -168,8 +129,33 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
                                                 m_dvdriftdp,
                                                 m_ddeflectiondp,
                                                 m_gas,
-                                                m_driftfield,
-                                                m_electronics);
+                                                m_driftfield);
+
+    ftpcEField_st *ftpcEField = m_efield->GetTable();
+    ftpcVDrift_st *ftpcVDrift = m_vdrift->GetTable();
+    ftpcDeflection_st *ftpcDeflection = m_deflection->GetTable();
+    ftpcdVDriftdP_st *ftpcdVDriftdP = m_dvdriftdp->GetTable();
+    ftpcdDeflectiondP_st *ftpcdDeflectiondP = m_ddeflectiondp->GetTable();
+    for ( Int_t iBin=0; iBin<dbReader->maximumNumberOfMagboltzBins(); iBin++) 
+    {
+      ftpcEField->e[iBin]   = 0.0;
+      for(Int_t iPadrow=0; iPadrow<dbReader->numberOfPadrowsPerSide(); iPadrow++) {
+         ftpcVDrift->v[iPadrow + dbReader->numberOfPadrowsPerSide()*iBin]   = 0.0;
+         ftpcDeflection->psi[iPadrow + dbReader->numberOfPadrowsPerSide()*iBin]   = 0.0;
+         ftpcdVDriftdP->dv_dp[iPadrow + dbReader->numberOfPadrowsPerSide()*iBin]   = 0.0;
+         ftpcdDeflectiondP->dpsi_dp[iPadrow + dbReader->numberOfPadrowsPerSide()*iBin]   = 0.0;
+      }
+    }
+
+    for ( Int_t iBin=0; iBin<dbReader->numberOfMagboltzBins(); iBin++) 
+    {
+      dbReader->setMagboltzEField(iBin,dbReader->minimumDriftField() + iBin*dbReader->stepSizeDriftField());
+    }
+
+  
+
+  StMagUtilities  *magField = new StMagUtilities(map,factor);
+
   
   // create magboltz
   StFtpcMagboltz1 *magboltz = new StFtpcMagboltz1();
@@ -189,6 +175,7 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
 
   posVector[0]=0;
 
+ftpcDriftField_st *ftpcDriftField = m_driftfield->GetTable();
   for(i=0; i < dbReader->numberOfMagboltzBins(); i++) 
     { 
       
