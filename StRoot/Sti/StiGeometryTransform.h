@@ -43,6 +43,10 @@ public:
     // xform routines
 
     //Local to global
+    double phiForTpcSector(int sector) const{
+      return phiForSector(sector, 12);
+    }
+    double positionForTpcPadrow(int padrow) const;
     StThreeVector<double> centerForTpcPadrow(int sector, int padrow) const;
     StThreeVector<double> centerForSvgLadder(int layer, int ladder) const;
 
