@@ -1,5 +1,49 @@
 #include "StHbtV0.hh"
 #include "phys_constants.h"
+
+// -----------------------------------------------------------------------
+StHbtV0::StHbtV0(const StHbtV0& v){ // copy constructor
+  mdecayLengthV0 = v.mdecayLengthV0;
+  mdecayVertexV0 = v.mdecayVertexV0;
+  mdcaV0Daughters = v.mdcaV0Daughters;
+  mdcaV0ToPrimVertex = v.mdcaV0ToPrimVertex;
+  mdcaPosToPrimVertex = v.mdcaPosToPrimVertex;
+  mdcaNegToPrimVertex = v.mdcaNegToPrimVertex;
+  mmomPos = v.mmomPos;
+  mmomNeg = v.mmomNeg;
+
+  mtpcHitsPos = v.mtpcHitsPos;
+  mtpcHitsNeg = v.mtpcHitsNeg;
+       
+  mmomV0 = v.mmomV0;
+  malphaV0 = v.malphaV0;
+  mptArmV0 = v.mptArmV0;
+  meLambda = v.meLambda;
+  meK0Short = v.meK0Short;
+  mePosProton = v.mePosProton;
+  mePosPion = v.mePosPion;
+  meNegProton = v.meNegProton;
+  meNegPion = v.meNegPion;
+  mmassLambda = v.mmassLambda;
+  mmassAntiLambda = v.mmassAntiLambda;
+  mmassK0Short = v.mmassK0Short;
+  mrapLambda = v.mrapLambda;
+  mrapK0Short = v.mrapK0Short;
+  mcTauLambda = v.mcTauLambda;
+  mcTauK0Short = v.mcTauK0Short;
+  mptV0 = v.mptV0;
+  mptotV0 = v.mptotV0;
+  mptPos = v.mptPos;
+  mptotPos = v.mptotPos;
+  mptNeg = v.mptNeg;
+  mptotNeg = v.mptotNeg;
+
+  midNeg = v.midNeg;
+  midPos = v.midPos;
+
+
+}
+// -----------------------------------------------------------------------
 void StHbtV0::UpdateV0(){
   //Calc. derived memebers of the v0 class
   float MomNegAlongV0, MomPosAlongV0;
