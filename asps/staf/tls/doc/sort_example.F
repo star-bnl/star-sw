@@ -77,6 +77,7 @@ C            In this example we could get as many as 10 hits returned.
 C        Hits for this track are in Hits(i_rows(1:n_found))
 C
          END DO
+      example_module = tucod_ok
       RETURN
       END
 </PRE>
