@@ -21,11 +21,20 @@ require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
 my $debugOn=0;
 
 my @Sets = (
-             "auau200/vni/default/b0_3/year_1h/hadronic_on/",
+             "auau200/vni/default/b0_3/year_1h/hadronic_on",
              "auau200/nexus/default/b0_3/year_1h/hadronic_on",
-             "auau200/mevsim/vanilla_central/year_1h/hadronic_on",
+             "auau200/mevsim/vanilla/central/year_1h/hadronic_on",
+             "auau200/mevsim/cascade/central/year_1h/hadronic_on",
+             "auau200/mevsim/vanilla/flow/year_1h/hadronic_on", 
              "auau200/hijing/b8_15_jetq_off/jet05/year_1h/hadronic_on",
-             "auau200/hijing/b8_15_jetq_on/jet05/year_1h/hadronic_on", 
+             "auau200/hijing/b8_15_jetq_on/jet05/year_1h/hadronic_on",
+             "auau200/hijing/b0_3_jetq_off/jet05/year_1h/hadronic_on",
+             "auau200/hijing/b0_3_jetq_on/jet05/year_1h/hadronic_on",
+             "auau200/hbt/default/peripheral/year_1h/hadronic_on",
+             "auau200/hbt/default/midperipheral/year_1h/hadronic_on",
+             "auau200/mevsim/vanilla/fluct/year_1h/hadronic_on",
+             "auau200/hbt/default/middle/year_1h/hadronic_on",
+             "auau200/hbt/default/central/year_1h/hadronic_on", 
 );
 
 my $SetD = "daq/2000/02/";
@@ -478,6 +487,7 @@ my $jbset;
      my $hpss_dst_file1 = $gfile . ".hist.root";
      my $hpss_dst_file2 = $gfile . ".tags.root";
      my $hpss_dst_file3 = $gfile . ".runco.root";
+     my $hpss_dst_file4 = $gfile . ".geant.root";
      my $executable     = "/afs/rhic/star/packages/" . $jlibVer . "/mgr/bfc.csh";
      my $executableargs = $fchain;
      my $log_dir       = $logDir;
@@ -493,7 +503,7 @@ my $jbset;
        print TOM_SCRIPT "      inputdir[0]=$hpss_raw_dir\n";
        print TOM_SCRIPT "      inputfile[0]=$hpss_raw_file\n";
        print TOM_SCRIPT "#output\n";
-       print TOM_SCRIPT "      outputnumstreams=4\n";
+       print TOM_SCRIPT "      outputnumstreams=5\n";
        print TOM_SCRIPT "#output stream \n";
        print TOM_SCRIPT "      outputstreamtype[0]=HPSS\n";
        print TOM_SCRIPT "      outputdir[0]=$hpss_dst_dir\n";
@@ -507,6 +517,9 @@ my $jbset;
        print TOM_SCRIPT "      outputstreamtype[3]=HPSS\n";
        print TOM_SCRIPT "      outputdir[3]=$hpss_dst_dir\n";
        print TOM_SCRIPT "      outputfile[3]=$hpss_dst_file3\n";
+       print TOM_SCRIPT "      outputstreamtype[4]=HPSS\n";
+       print TOM_SCRIPT "      outputdir[4]=$hpss_dst_dir\n";
+       print TOM_SCRIPT "      outputfile[4]=$hpss_dst_file4\n";
        print TOM_SCRIPT "#standard out -- Should be five outputs\n";
        print TOM_SCRIPT "      stdoutdir=$log_dir\n";
        print TOM_SCRIPT "      stdout=$log_name\n";
