@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 2.6 2000/11/21 19:45:04 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 2.7 2001/02/07 16:07:21 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
+ * Revision 2.7  2001/02/07 16:07:21  lasiuk
+ * Charge sharing by ratio of local maximum implemented
+ * loadPixels(interface) removed
+ *
  * Revision 2.6  2000/11/21 19:45:04  lasiuk
  * Include threshold for different sectors
  *
@@ -63,10 +67,12 @@
  **************************************************************************/
 #define RICH_CF_DEBUG 0
 #define ivb if(RICH_CF_DEBUG)cout
+
 #include <iostream.h>
 #include <vector>
 #include <algorithm>
 #include <map>
+
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 using std::map;
@@ -115,7 +121,8 @@ StRichClusterAndHitFinder::StRichClusterAndHitFinder()
     this->initializeCutParameters();
 }
 
-StRichClusterAndHitFinder::StRichClusterAndHitFinder(unsigned int x, unsigned int y)
+StRichClusterAndHitFinder::StRichClusterAndHitFinder(unsigned int x,
+						     unsigned int y)
 {
     this->init();
     
@@ -152,7 +159,7 @@ void StRichClusterAndHitFinder::init()
 
     //
     // numbers taken from Jamie-arich
-    // e-mail Nov7,2000 (Gains)
+    // e-mail Nov 7,2000 (Gains)
     // reference /plots/Data/Gain/vsrun
     //
     mQuadrantThresholdCharge[0][0] = 0;
@@ -195,13 +202,9 @@ void StRichClusterAndHitFinder::clearAndDestroyTheHits()
 
 void StRichClusterAndHitFinder::clearAndDestroyAll()
 {
-//     cout << "StRichClusterAndHitFinder::clearAndDestroyAll()" << endl;
     this->clearAndDestroyThePixels();
     this->clearAndDestroyTheClusters();
     this->clearAndDestroyTheHits();
-//     PR(mThePixels.size());
-//     PR(mTheClusters.size());
-//     PR(mTheHits.size());
 }
 
 StRichClusterAndHitFinder::~StRichClusterAndHitFinder()
@@ -218,33 +221,17 @@ void StRichClusterAndHitFinder::initializeCutParameters()
     mMinChargeFraction = 0.20;
 }
 
-#ifdef NEVER
-void StRichClusterAndHitFinder::loadPixels(StRichReaderInterface* interface)
-{
-    this->clearAndDestroyAll();
-    
-    unsigned short theADC;
-    //mThePixels.resize(mGeometryDb->numberOfColumns(),mGeometryDb->numberOfRows());
-    for(int iRow=0; iRow<=mGeometryDb->numberOfRowsInAColumn(); iRow++) {
- 	for(int iPad=0; iPad<=mGeometryDb->numberOfPadsInARow(); iPad++) {
- 	    theADC = interface->GetADCFromCoord(iPad,iRow);//GetADCFromCoord
- 	    if(theADC) {
-		cout << "p/r/adc " << iPad << '/' << iRow << '/' << theADC << endl;
- 		mThePixels.push_back(new StRichSinglePixel(iPad,iRow,theADC));
-	    }
- 	}
-    } // loop over rows
-}
-#endif
-
 void StRichClusterAndHitFinder::loadPixels(vector<StRichSinglePixel>& pixs)
 {
     this->clearAndDestroyAll();
-    ivb << "StRichClusterAndHitFinder::loadPixels() allocate for " << pixs.size() << endl;
-    //mThePixels.resize(mX,mY);
+
+    ivb << "StRichClusterAndHitFinder::loadPixels(vector<StRichSinglePixel>&)\n";
+    ivb << "\tallocate for " << pixs.size() << endl;
+
     for(size_t ii=0; ii<pixs.size(); ii++) {
 	mThePixels.push_back(new StRichSinglePixel(pixs[ii]));
     }
+
     ivb << "StRichClusterAndHitFinder::loadPixels() OKAY" << endl;
 }
 
@@ -385,6 +372,7 @@ bool StRichClusterAndHitFinder::makeClusters(double minimumAmplitude)
     size_t ii;
     for(ii=0; ii<mThePixels.size(); ii++) {
 	// if adc is finite and NOT marked used:
+	
 	if( mThePixels[ii]->charge() > minimumAmplitude  &&
 	    !(mThePixels[ii]->isSet(eUsed)) ) {//!(mThePixels[ii]->isSet(eBorder)
 	    
@@ -488,8 +476,10 @@ bool StRichClusterAndHitFinder::makeClusters(double minimumAmplitude)
 	    cout << "==> ?m " << m << " " << *mThePixels[m] << endl;
     }
 
+    //
     // Diagnostic for total number of pads
     //
+    
     //PR(newPads.size());
     //PR(lowAmplitudePixels.size());
     while(!lowAmplitudePixels.empty()) {
@@ -505,11 +495,11 @@ bool StRichClusterAndHitFinder::makeClusters(double minimumAmplitude)
     //if(RICH_CF_DEBUG) PR(mThePixels.size());
     //if(RICH_CF_DEBUG) PR(newPads.size());
 
-    for(unsigned int im=0; im<mThePixels.size(); im++) {
-  	if(mThePixels[im]->charge()>minimumAmplitude &&
-  	   !mThePixels[im]->isSet(eUsed))
-  	    cout << "?im " << im << " " << *mThePixels[im] << endl;
-    }
+//     for(unsigned int im=0; im<mThePixels.size(); im++) {
+//   	if(mThePixels[im]->charge()>minimumAmplitude &&
+//   	   !mThePixels[im]->isSet(eUsed))
+//   	    cout << "?im " << im << " " << *mThePixels[im] << endl;
+//     }
 
     if(mThePixels.size() != newPads.size()) {
 	cout << "StRichClusterAndHitFinder::makeClusters()\n";
@@ -600,7 +590,8 @@ void StRichClusterAndHitFinder::dumpHitInformation(ostream& os) const
     }
     else {
 	os << mTheHits.size() << " Hits identified." << endl;
-	os << "hit cluster# charge AmpLocMax rms internal position pads" << endl;
+	os << "hit cluster# charge AmpLocMax   rms         internal";
+	os << "        position              pads" << endl;
 	for(size_t ii=0; ii<mTheHits.size(); ii++) {
 	    os << ii << '\t'
 	       << mTheHits[ii]->clusterNumber()     << '\t'
@@ -616,51 +607,52 @@ void StRichClusterAndHitFinder::dumpHitInformation(ostream& os) const
 
 bool StRichClusterAndHitFinder::simpleHitsFromClusters()
 {
-//     cout << "************";
 //     cout << "StRichClusterAndHitFinder::simpleHitsFromClusters()" << endl;
 
-//      PR(mTheHits.size());
+    size_t ii, kk;
+
     clearAndDestroyTheHits();
-//      PR(mTheHits.size());
 
     //
     // Loop over the clusters!
     //
-//      PR(mTheClusters.size());
     int firstPadOfCluster = 0;
     int lastPadOfCluster  = 0;
 
-    size_t ii, kk;
+    //
+    // Info/Pixels that are from a single hit
+    //
+    
     StRichHitInformation hitInfo;
     vector<StRichSinglePixel*> aVectorOfPixels;
     
     for(ii=0; ii<mTheClusters.size(); ii++) {
-
+	
 	firstPadOfCluster = mTheClusters[ii]->firstPad();
 	lastPadOfCluster  = firstPadOfCluster+mTheClusters[ii]->numberOfPads();
 	
 	int numberOfLocalMax = mTheClusters[ii]->numberOfLocalMax();
-//   	cout << " Cluster #" << ii << "\t";
-//  	PR(numberOfLocalMax);
 
 	//
 	// No local max
 	//
+
 	if(!numberOfLocalMax) continue;
 
 	//
 	// IF more than 1 max:
 	//   find the local max and store them
 	//
+
 	vector<StRichSinglePixel*> theLocalMaxima;
 
 	//
 	// These are the isolated local maxima in a row
 	//  --> not in a column
+	// Flag the pixels that will be multiply used
 	//
 	size_t numberOfIsolatedLocalMax =
 	    this->findTheLocalMaximaInCluster(mTheClusters[ii], theLocalMaxima);
-//   	PR(theLocalMaxima.size());
 //   	PR(numberOfIsolatedLocalMax);
 
 	aVectorOfPixels.clear();
@@ -690,11 +682,10 @@ bool StRichClusterAndHitFinder::simpleHitsFromClusters()
 
 	mNumberOfSaturatedPads = 0;
 
-	float maxCharge = 1023;
 	for(int uu=firstPadOfCluster; uu<lastPadOfCluster; uu++) {
 	    clusterPads.push_back(mThePixels[uu]->pad());
 	    clusterRows.push_back(mThePixels[uu]->row());
-	    if(mThePixels[uu]->charge() >= maxCharge)
+	    if(mThePixels[uu]->isSet(eSaturatedPixel))
 		mNumberOfSaturatedPads++;
 	}
 
@@ -706,19 +697,24 @@ bool StRichClusterAndHitFinder::simpleHitsFromClusters()
 	//    |
 	//    v
 	
-	if(mNumberOfSaturatedPads)PR(mNumberOfSaturatedPads);
+// 	if(mNumberOfSaturatedPads)
+// 	    cout << "(Saturated Pads)/(Total Pads) = "
+// 		 << mNumberOfSaturatedPads << "/"
+// 		 << mTheClusters[ii]->numberOfPads() << endl;
 
 	sort(clusterPads.begin(),clusterPads.end());
-	vector<int> uniqueClusterPads(clusterPads.begin(),
-				      unique(clusterPads.begin(), clusterPads.end()));
+	vector<int> uniqueClusterPads( clusterPads.begin(),
+				       unique(clusterPads.begin(),
+					      clusterPads.end()) );
 	mClusterLength = uniqueClusterPads.size();
 //  	ostream_iterator<double>  printer(cout,",");
 //  	copy(uniqueClusterPads.begin(), uniqueClusterPads.end(),printer);
 //  	cout << " << pads in cluster " << endl;
 
 	sort(clusterRows.begin(),clusterRows.end());
-	vector<int> uniqueClusterRows(clusterRows.begin(),
-				      unique(clusterRows.begin(), clusterRows.end()));
+	vector<int> uniqueClusterRows( clusterRows.begin(),
+				       unique(clusterRows.begin(),
+					      clusterRows.end()) );
 	mClusterWidth = uniqueClusterRows.size();
 //  	copy(uniqueClusterRows.begin(), uniqueClusterRows.end(), printer);
 //  	cout << " << rows in cluster " << endl;
@@ -744,7 +740,8 @@ bool StRichClusterAndHitFinder::simpleHitsFromClusters()
 	// Aspect Ratio
 	// total numberofpads etc...
 	if(badCluster) continue;
-	
+
+
 	//
 	// 2 local max
 	//
@@ -758,7 +755,7 @@ bool StRichClusterAndHitFinder::simpleHitsFromClusters()
 		(mClusterWidth == 2 && mClusterLength == 2) ) { // 2x2
 		if((theLocalMaxima.front()->isSet(eMaxHasAHorizontalNeighbor) &&
 		    theLocalMaxima.back()->isSet(eMaxHasAHorizontalNeighbor)  )) {
-// 		    cout << "make a single hit with adjacent neighbours" << endl;
+
 		    this->constructSquareMatrix(theLocalMaxima.front(), ii, &aVectorOfPixels);
 		    this->classifyHitType(aVectorOfPixels);
 		    this->centerOfGravity(aVectorOfPixels, &hitInfo);
@@ -902,6 +899,11 @@ bool StRichClusterAndHitFinder::constructNeighborMatrixFromVector(StRichSinglePi
 								  vector<int>& neighborVector,
 								  vector<StRichSinglePixel*>* aVectorOfPixels)
 {
+    //
+    // Not currently used
+    //
+    pix->setBit(eCurrentLocalMaximum);
+
     int centralRow = pix->row();
     int centralPad = pix->pad();
     
@@ -930,6 +932,7 @@ bool StRichClusterAndHitFinder::constructSquareMatrix(StRichSinglePixel* pix, in
 						      vector<StRichSinglePixel*>* aVectorOfPixels)
 {
 //     cout << "construct square matrix" << endl;
+    pix->setBit(eCurrentLocalMaximum);
     int pad = pix->pad();
     int row = pix->row();
 
@@ -989,22 +992,20 @@ bool StRichClusterAndHitFinder::useTheMovingMatrix(StRichSinglePixel* pix, int c
     //
     // check the properties of the hit
     // -- central pix has at least 20% of charge
-//     cout << "Check (movingMatrix)" << endl;
+
     if(!mThePixels(iPad,iRow)) {
-	//cout << "Central Pixel does not exist" << endl;
-	//status =  false;
 	return false;
     }
     else if(!mThePixels(iPad,iRow)->isSet(eLocalMaximum)) {
 	if( (mMinChargeFraction*info->charge()) > mThePixels(iPad,iRow)->charge() ) {
 	    PR(mMinChargeFraction*info->charge());PR( mThePixels(iPad,iRow)->charge());
-	    //status = false;
 	    return false;
 	}
 	else {
   	    //cout << "ok" << endl;
 	}
     }
+
     //
     // -- too close to existing hits
     //
@@ -1094,21 +1095,92 @@ void StRichClusterAndHitFinder::printPadPlane(ostream& os)
     os << endl;
 }
 
+StRichSinglePixel* StRichClusterAndHitFinder::findTheMaximumPixel(vector<StRichSinglePixel*>& pixs) const
+{
+    size_t ii;
+    for(ii=0; ii<pixs.size(); ii++) {
+	if(pixs[ii]->isSet(eCurrentLocalMaximum)) {
+	    //cout << " current maximum=> " << *pixs[ii] << endl;
+	    return pixs[ii];
+	}   
+    }
+    cout << "StRichClusterAndHitFinder::findTheMaximumPixel()\n";
+    cout << "ERROR\n";
+    cout << "\tNo Pixel found that is the current maximum";
+    cout << "\tReturn NULL" << endl;
+    return NULL;
+}
+
+double
+StRichClusterAndHitFinder::findTheSharingMaximum(StRichSinglePixel* pix) const
+{
+    //
+    // pix is the "Shared pixel".  Find the sum of the charge of the
+    // local max that share its charge.
+    //
+    double sharingMaximumCharge = 0;
+
+    int sRow = pix->row();
+    int sPad = pix->pad();
+
+    for(int iRow=sRow-1; iRow<sRow+2; iRow++) {
+	for(int iPad=sPad-1; iPad<sPad+2; iPad++) {
+	    //cout << "p/r" << iPad << " " << iRow << endl;
+	    if(!mThePixels(iPad,iRow)) continue;
+	    //cout << "..exists " << (*mThePixels(iPad,iRow));
+	    //cout << " max=" << mThePixels(iPad,iRow)->isSet(eLocalMaximum) << endl;
+	    if(mThePixels(iPad,iRow)->isSet(eCurrentLocalMaximum)) continue;
+	    if(mThePixels(iPad,iRow)->isSet(eLocalMaximum)) {
+		sharingMaximumCharge += mThePixels(iPad,iRow)->charge();
+	    }
+	}
+    }
+    return sharingMaximumCharge;
+}
+
 bool StRichClusterAndHitFinder::centerOfGravity(vector<StRichSinglePixel*>& aVectorOfPixels,
 						StRichHitInformation* hitInfo)
 {
-
     double amp = 0;      double maxAdc = 0;
     double tmpX = 0;     double tmpX2 = 0;
     double tmpY = 0;     double tmpY2 = 0;
     double pixelCharge = 0;
 
-//     PR(aVectorOfPixels.size());
-    for(size_t jj=0; jj<aVectorOfPixels.size(); jj++) {
+    size_t jj;
+
+    StRichSinglePixel* centralMax = this->findTheMaximumPixel(aVectorOfPixels);
+    
+    for(jj=0; jj<aVectorOfPixels.size(); jj++) {
 	float pad = aVectorOfPixels[jj]->pad();
 	float row = aVectorOfPixels[jj]->row();
-	
-	pixelCharge = aVectorOfPixels[jj]->charge();
+
+	//
+	// share the charge
+	//
+	if( aVectorOfPixels[jj]->isSet(eToBeUsedTwice) ) {
+
+	    if(!centralMax) {
+		cout << "StRichClusterAndHitFinder::centerOfGravity()\n";
+		cout << "\tERROR\n";
+		cout << "\tNo CentralMax\n";
+		cout << "\tContinuing" << endl;
+		pixelCharge = aVectorOfPixels[jj]->charge();
+		break;
+	    }
+	    double sharingMax = this->findTheSharingMaximum(aVectorOfPixels[jj]);
+	    double fraction = centralMax->charge()/(centralMax->charge()+sharingMax);
+	    // cout << "central/sharing/fraction "
+	    //      << centralMax->charge() << " "
+	    //      << sharingMax << " "
+	    //      << fraction << endl;
+		
+	    pixelCharge = aVectorOfPixels[jj]->charge()*fraction;
+	    //PR(aVectorOfPixels[jj]->charge()*fraction);
+	}
+	else {
+	    pixelCharge = aVectorOfPixels[jj]->charge();
+	}
+
 	maxAdc = max(maxAdc,pixelCharge);
 	amp  += pixelCharge;
 	tmpX += pad * pixelCharge;
@@ -1118,6 +1190,10 @@ bool StRichClusterAndHitFinder::centerOfGravity(vector<StRichSinglePixel*>& aVec
 	tmpY2 += (row*row)*pixelCharge;
     } // loop over all pads in cluster
 
+    if(centralMax) {
+	centralMax->unSetBit(eCurrentLocalMaximum);
+    }
+    
     hitInfo->setPosition(tmpX/amp,tmpY/amp, 0);
     hitInfo->setPosition2(tmpX2/amp,tmpY2/amp, 0);
 
@@ -1142,17 +1218,19 @@ bool StRichClusterAndHitFinder::centerOfGravity(vector<StRichSinglePixel*>& aVec
 	    cn = aVectorOfPixels[ii]->clusterNumber();
 	    break;
 	}
-// 	cout << " cn=" << cn << endl;
     }
+
     hitInfo->setClusterNumber(cn);
     hitInfo->setNumberOfPads(aVectorOfPixels.size());
-    
+
     return 0;
 }
 
 bool StRichClusterAndHitFinder::constructTheAdjacentNeighbors(StRichSinglePixel* maxPixel, int clusNum,
 							      vector<StRichSinglePixel*>* aVec)
 {
+    maxPixel->setBit(eCurrentLocalMaximum);
+
     short row = maxPixel->row();
     short pad = maxPixel->pad();
 
@@ -1174,6 +1252,8 @@ bool StRichClusterAndHitFinder::constructTheAdjacentNeighbors(StRichSinglePixel*
 bool StRichClusterAndHitFinder::constructTheNearestNeighbors(StRichSinglePixel* maxPixel, int clusNum,
 							    vector<StRichSinglePixel*>* aVectorOfPixels)
 {
+    maxPixel->setBit(eCurrentLocalMaximum);
+	
     short row = maxPixel->row();
     short pad = maxPixel->pad();
 
@@ -1227,7 +1307,7 @@ size_t StRichClusterAndHitFinder::findTheLocalMaximaInCluster(StRichSimpleCluste
 	    int jpad = maxPixels[jj]->pad();
 
 	    int diff = abs(ipad-jpad) + abs(irow-jrow);
-	    if( (diff == 1) ) {
+	    if(diff == 1) {
 		// they are nearest neighbors
 		// set a flag for the pixel
 		maxPixels[jj]->setBit(eNotACentralMaximum);
@@ -1253,6 +1333,47 @@ size_t StRichClusterAndHitFinder::findTheLocalMaximaInCluster(StRichSimpleCluste
 		maxPixels[jj]->setBit(eMaxHasAHorizontalNeighbor);
 	    }
 	}
+    }
+
+
+    //
+    // Set bit flags for pixels that will be used multiply
+    //
+    for(ii=0; ii<maxPixels.size(); ii++) {
+	if( (maxPixels[ii]->isSet(eNotACentralMaximum)) ) continue;
+	    
+	int ix   = maxPixels[ii]->pad();
+	int iRow = maxPixels[ii]->row();
+
+	if(mThePixels(ix,iRow+1)) {
+	    if(mThePixels(ix,iRow+1)->isSet(eToBeUsedOnce)) {
+		mThePixels(ix,iRow+1)->setBit(eToBeUsedTwice);
+	    }
+	    else {
+		mThePixels(ix,iRow+1)->setBit(eToBeUsedOnce);
+	    }
+	}
+	if(mThePixels(ix,iRow-1)) {
+	    if(mThePixels(ix,iRow-1)->isSet(eToBeUsedOnce)) {
+		mThePixels(ix,iRow-1)->setBit(eToBeUsedTwice);
+	    }
+	    else {
+		mThePixels(ix,iRow-1)->setBit(eToBeUsedOnce);
+	    }
+	}
+	
+	for(int iPad=ix-1; iPad<ix+2; iPad+=2) {
+
+	    if(mThePixels(iPad,iRow) == 0) continue;
+	    if(mThePixels(iPad,iRow)->isSet(eToBeUsedOnce)) {
+		mThePixels(iPad,iRow)->setBit(eToBeUsedTwice);
+	    }
+	    else {
+		mThePixels(iPad,iRow)->setBit(eToBeUsedOnce);
+	    }
+		
+	}
+
     }
 
     
@@ -1453,104 +1574,3 @@ bool StRichClusterAndHitFinder::classifyHitType(vector<StRichSinglePixel*>& aPix
 
     return true;
 }
-
-#ifdef NEVER
-	if(true) {
-	    mAnMCHit = 0;
-	    //
-	    // Fill the maps.  Need to SUM the charge for a given hitid
-	    //
-	    hitIDToChargeMapType hitIDToCharge;
-	    hitIDToRichIDMapType hitIDToRichID;
-
-	    for(jj=firstPadOfCluster; jj<lastPadOfCluster; jj++) {
-		StRichSingleMCPixel* p = dynamic_cast<StRichSingleMCPixel*>(mThePixels[jj]);
-		if (p) {
-		    mAnMCHit = 1;
-		    { // scope for sun
-			for (const_id_iter iter=p->MCInfo().begin(); iter!=p->MCInfo().end(); ++iter) {
-			    int myHitID;
-			    if (iter->mSignalType == eFeedback) {
-				myHitID = -(iter->mHitID);
-			    }
-			    else {
-				myHitID = iter->mHitID;
-			    }
-			    hitIDToCharge[myHitID] += iter->mCharge;
-			    
-			    hitIDToRichIDMapRetType ret = 
-				hitIDToRichID.insert(hitIDToRichIDMapValType(myHitID,*iter));
-			    if ( (!ret.second) && (!(*iter == hitIDToRichID[myHitID]))) { 
-				cout << "StRichClusterAndHitFinder::makeSimpleHitsFromClusters(): ";
-				cout << "Warning:  HitID " << myHitID << " not unique: " << endl;
-				cout << "\t\t\t G_ID: " << iter->mG_ID 
-				     << " blocked by " << hitIDToRichID[myHitID].mG_ID << endl;
-				cout << "\t\t\t HitID: " << iter->mHitID 
-				     << " blocked by " << hitIDToRichID[myHitID].mHitID << endl;
-				cout << "\t\t\t SignalType: " << static_cast<int>(iter->mSignalType) 
-				     << " blocked by " << static_cast<int>(hitIDToRichID[myHitID].mSignalType) << endl;
-			    } // if
-			} // iter over IDList
-		    } // scope for sun
-		} // if (p) is it an mc pixel?
-		
-
-		//ivb  << '\t' << *mThePixels[jj] << endl;
-		amp = mThePixels[jj]->charge();
-		maxAmp = max(maxAmp,amp);
-		sum += amp;
-		x   += mThePixels[jj]->pad()*amp;
-		y   += mThePixels[jj]->row()*amp;
-	    } // loop over all pads in cluster
-
-	    if(RICH_CF_DEBUG) {
-		PR(x);
-		PR(y);
-		PR(sum);
-	    }
-
-	    //
-	    // Determine whether it is an MC Hit or not?
-	    //
-	    if(mAnMCHit) {
-		mTheHits.push_back(new StRichSimpleMCHit);
-		//
-		// Here is where we could do the second loop
-		// for evaluation and assignment of the
-		// MC information to the hit?
-		// Find the biggest contribution to the pixel and add it
-
-		// unroll the map.  ordered by GREATEST charge.
-
-		chargeToHitIDMapType chargeToHitID;
-
-		{ // Sun scope
-		    for (hitIDToChargeMapConstIter iter = hitIDToCharge.begin(); 
-			 iter!=hitIDToCharge.end();
-			 ++iter) {
-			chargeToHitID.insert(chargeToHitIDMapValType(iter->second,iter->first));
-		    }
-		}
-		
-		// grab the first of the greatest.  Don't know what else to do (equal contributions)
-		chargeToHitIDMapIter iter = chargeToHitID.begin();
-		float topCharge=iter->first;
-		int topHitID=iter->second;
-		id_type theID = hitIDToRichID[topHitID];
-
-		// Overwrite its charge with the total charge
-		theID.mCharge = topCharge;
-		
-		(dynamic_cast<StRichSimpleMCHit*>(mTheHits.back()))->setMCInfo(theID);
-		
-	    }
-	    else {
-		mTheHits.push_back(new StRichSimpleHit);
-	    }
-
-
-
-	    //########################################################
-
-
-#endif
