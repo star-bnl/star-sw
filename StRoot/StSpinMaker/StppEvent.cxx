@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.18 2003/09/22 14:28:25 akio Exp $
+// $Id: StppEvent.cxx,v 1.19 2003/09/23 16:08:41 perev Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.19  2003/09/23 16:08:41  perev
+// some inits added
+//
 // Revision 1.18  2003/09/22 14:28:25  akio
 // Fix for RH8.0 and FPD layer1 info to ntuple
 //
@@ -243,7 +246,7 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 	return 1;
     }
   
-    StMuEvent* muevent;
+    StMuEvent* muevent=0;
     if(!event && mudst) {muevent = mudst->event(); }
   
     //event info
@@ -264,7 +267,7 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
     
     // Get primary tracks
     nPrimTrack = 0; 
-    TClonesArray* mutracks;
+    TClonesArray* mutracks=0;
     if(mudst){
 	switch(trackChoice){
 	case 0: mutracks = mudst->primaryTracks(); break;
@@ -290,6 +293,7 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 	    if(l3) exnode = &(l3->trackNodes());
 	    type=global;
 	    break;
+        default: assert(0);
 	}    
 	Int_t nnode=exnode->size();
 	for( Int_t in=0; in<nnode; in++ ) {
@@ -621,7 +625,7 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
     //Bridge to fortran/ntuple filling
     if(runN<4000000){
       //calling fortran pi0 finder from FPD
-      float result[10], rin[10], bbcdif;
+      float result[10], rin[10], bbcdif=-999999.;
       int iin[10], ibbca[32], ibbct[32];
       for(int i=0; i<10; i++){ result[i]=0.0; }
       unsigned short east=1500, west=1500;
