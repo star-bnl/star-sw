@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.26 2001/07/27 20:33:45 snelling Exp $
+//  $Id: StFlowMaker.h,v 1.27 2001/12/11 21:34:06 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -58,12 +58,16 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.26 2001/07/27 20:33:45 snelling Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.27 2001/12/11 21:34:06 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
 
   Flow::PhiWgt_t       mPhiWgt;                   //! To make event plane isotropic
+  Flow::PhiWgt_t       mPhiWgtFarEast;             //! To make event plane isotropic
+  Flow::PhiWgt_t       mPhiWgtEast;               //! To make event plane isotropic
+  Flow::PhiWgt_t       mPhiWgtWest;               //! To make event plane isotropic
+  Flow::PhiWgt_t       mPhiWgtFarWest;            //! To make event plane isotropic
   Flow::PhiWgtFtpc_t   mPhiWgtFtpcEast;           //! To make event plane isotropic
   Flow::PhiWgtFtpc_t   mPhiWgtFtpcWest;           //! To make event plane isotropic
 
@@ -75,7 +79,7 @@ private:
   Bool_t           mPicoEventWrite;           // switch for pico-DST
   Bool_t           mPicoEventRead;            // switch for pico-DST
   UInt_t           mPicoEventCounter;         // number of Bytes in pico event
-  StFlowSelection* pFlowSelect;               //! selection object
+  Bool_t           mOnePhiWgt;                // use old phi weights
   Int_t            ReadPhiWgtFile();          // get the weight file
   Int_t            InitPicoEventWrite();      // open pico-DST
   Int_t            InitPicoEventRead();       // open pico-DST
@@ -90,6 +94,7 @@ private:
   Bool_t           FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent);
   void             CloseEventRead();          // close StEvent
   void             PrintSubeventMults();      // for testing
+  StFlowSelection* pFlowSelect;               //! selection object
   StEvtHddr*       pHeader;                   //! pointer to Event header
   StEvent*         pEvent;                    //! pointer to DST data
   StFlowEvent*     pFlowEvent;                //! pointer flow event
@@ -98,7 +103,7 @@ private:
   TTree*           pFlowTree;                 // pointer to pico-DST Tree
   TFile*           pPicoDST;                  //! pointer to pico-DST File
   TChain*          pPicoChain;                //! pointer to chain of pico files
-  Float_t          calcDcaSigned(const StThreeVectorF pos, 
+  Float_t          CalcDcaSigned(const StThreeVectorF pos, 
 				 const StTrack* track);
 
   ClassDef(StFlowMaker, 1)                    // macro for rootcint
@@ -106,28 +111,33 @@ private:
 
 inline StFlowEvent* StFlowMaker::FlowEventPointer() const { return pFlowEvent; }
 
-inline void StFlowMaker::PicoEventWrite(Bool_t flag) 
-{ mPicoEventWrite=flag; if (flag) mPicoEventRead=kFALSE; }
+inline void StFlowMaker::PicoEventWrite(Bool_t flag) {
+  mPicoEventWrite=flag;
+  if (flag) mPicoEventRead=kFALSE; }
 
-inline void StFlowMaker::PicoEventRead(Bool_t flag) 
-{ mPicoEventRead=flag; if (flag) { mPicoEventWrite=kFALSE; }}
+inline void StFlowMaker::PicoEventRead(Bool_t flag) {
+  mPicoEventRead=flag;
+  if (flag) mPicoEventWrite=kFALSE; }
 
 inline void StFlowMaker::SetPicoEventDir(const Char_t* name) {
   strncpy(mPicoEventDir, name, 63); mPicoEventDir[63] = '\0'; }
 
 inline void StFlowMaker::SetPicoEventFileName(StFileI* fileList) {
-  pPicoFileList = fileList;
-}
+  pPicoFileList = fileList; }
 
 inline StFlowSelection* StFlowMaker::FlowSelection() {
-	return pFlowSelect;
-}
+	return pFlowSelect; }
 
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.27  2001/12/11 21:34:06  posk
+//  Went from one to four sets of histograms for making the event plane isotropic.
+//  StFlowEvent::PhiWeight() has changed arguments and return value.
+//  The ptWgt saturates above 2 GeV/c.
+//
 //  Revision 1.26  2001/07/27 20:33:45  snelling
 //  switched from StRun to StEvtHddr.
 //

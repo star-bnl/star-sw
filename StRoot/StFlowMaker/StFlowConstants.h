@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.9 2001/11/10 01:08:06 posk Exp $
+// $Id: StFlowConstants.h,v 1.10 2001/12/11 21:33:41 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -26,12 +26,13 @@ class Flow{
     nSubs        =   2,
     nPhiBins     = 120,
     nPhiBinsFtpc = 360,
-    nEtaBins     = 90,
+    //nEtaBins     = 90,
+    nEtaBins     = 30,
     nPtBins      = 40,
-    nCumulantIntegratedOrders     =   3, 
-    nCumulantIntegrated_qMax      =   8,
-    nCumulantDifferentialOrders   =   2,
-    nCumulantDifferential_qMax    =   8
+    nCumulIntegOrders =   3, 
+    nCumulInteg_qMax  =   8,
+    nCumulDiffOrders  =   2,
+    nCumulDiff_qMax   =   8
   };
 
   typedef Double_t PhiWgt_t[nSels][nHars][nPhiBins];
@@ -50,6 +51,11 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.10  2001/12/11 21:33:41  posk
+// Went from one to four sets of histograms for making the event plane isotropic.
+// StFlowEvent::PhiWeight() has changed arguments and return value.
+// The ptWgt saturates above 2 GeV/c.
+//
 // Revision 1.9  2001/11/10 01:08:06  posk
 // Moved some constants into StFlowConstants.
 //

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.32 2001/11/09 21:10:42 posk Exp $
+// $Id: StFlowEvent.h,v 1.33 2001/12/11 21:33:50 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -30,7 +30,7 @@ public:
   StFlowEvent();
   virtual        ~StFlowEvent();
 
-  Double_t       PhiWeight(Float_t mPhi, Int_t selN, Int_t harN, StTrackTopologyMap map) const;
+  Double_t       PhiWeight(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) const;
   Int_t          EventID() const;
   Int_t          RunID() const;
   Double_t       CenterOfMassEnergy() const;
@@ -88,6 +88,10 @@ public:
   void SetZDCw(const Float_t zdcw);
 #ifndef __CINT__		
   void SetPhiWeight(const Flow::PhiWgt_t &pPhiWgt);
+  void SetPhiWeightFarEast(const Flow::PhiWgt_t &pPhiWgt);
+  void SetPhiWeightEast(const Flow::PhiWgt_t &pPhiWgt);
+  void SetPhiWeightWest(const Flow::PhiWgt_t &pPhiWgt);
+  void SetPhiWeightFarWest(const Flow::PhiWgt_t &pPhiWgt);
   void SetPhiWeightFtpcEast(const Flow::PhiWgtFtpc_t &pPhiWgt);
   void SetPhiWeightFtpcWest(const Flow::PhiWgtFtpc_t &pPhiWgt);
 #endif
@@ -109,6 +113,7 @@ public:
   static void SetProbPid();
   static void SetEtaSubs();
   static void SetPtWgt(Bool_t);
+  static void SetOnePhiWgt();
 
 private:
 
@@ -122,7 +127,7 @@ private:
   UInt_t              mUncorrNegMult;                            // number of h-
   UInt_t              mUncorrPosMult;                            // number of h+
   UInt_t              mMultEta;                                  // number of tracks
-  // with pos. flag in 1.5 unit of eta
+                                                // with pos. flag in 1.5 unit of eta
   UInt_t              mCentrality;                               // centrality bin
   StThreeVectorF      mVertexPos;                                // primary vertex position
   Float_t             mCTB;                                      // CTB value sum
@@ -132,7 +137,11 @@ private:
   static Float_t      mEtaFtpcCuts[2][Flow::nHars][Flow::nSels]; // range absolute values
   static Float_t      mPtTpcCuts[2][Flow::nHars][Flow::nSels];   // range
   static Float_t      mPtFtpcCuts[2][Flow::nHars][Flow::nSels];  // range
-  Flow::PhiWgt_t      mPhiWgt;                                   //!flattening weights (all)
+  Flow::PhiWgt_t      mPhiWgt;                                   //!flattening weights
+  Flow::PhiWgt_t      mPhiWgtFarEast;                            //!flattening weights FarEast
+  Flow::PhiWgt_t      mPhiWgtEast;                               //!flattening weights East
+  Flow::PhiWgt_t      mPhiWgtWest;                               //!flattening weights West
+  Flow::PhiWgt_t      mPhiWgtFarWest;                            //!flattening weights FarWest
   Flow::PhiWgtFtpc_t  mPhiWgtFtpcEast;                           //!flattening weights Ftpc east
   Flow::PhiWgtFtpc_t  mPhiWgtFtpcWest;                           //!flattening weights Ftpc west
   static Float_t      mPiPlusCuts[2];                            // PID cuts
@@ -140,6 +149,7 @@ private:
   static Char_t       mPid[10];                                  // pi-, pi+, pi, pbar, proton, e+, e-
   static Bool_t       mProbPid;                                  // flag for probability pid
   static Bool_t       mEtaSubs;                                  // flag for eta subevents
+  static Bool_t       mOnePhiWgt;                                // flag for old phi weights
   static Float_t      mPiMinusCuts[2];
   static Float_t      mProtonCuts[2];
   static Float_t      mKMinusCuts[2];
@@ -159,8 +169,7 @@ private:
 };
 
 inline StFlowTrackCollection* StFlowEvent::TrackCollection() const {
-  return pTrackCollection;
-}
+  return pTrackCollection; }
 
 inline Int_t StFlowEvent::EventID() const { return mEventID; }
 
@@ -205,8 +214,22 @@ inline Bool_t   StFlowEvent::EtaSubs() const { return mEtaSubs; }
 #ifndef __CINT__
 inline void StFlowEvent::SetPhiWeight(const Flow::PhiWgt_t& pPhiWgt) {
   memcpy (mPhiWgt, pPhiWgt, sizeof(Flow::PhiWgt_t)); }
+
+inline void StFlowEvent::SetPhiWeightFarEast(const Flow::PhiWgt_t& pPhiWgtFarEast) {
+  memcpy (mPhiWgtFarEast, pPhiWgtFarEast, sizeof(Flow::PhiWgt_t)); }
+
+inline void StFlowEvent::SetPhiWeightEast(const Flow::PhiWgt_t& pPhiWgtEast) {
+  memcpy (mPhiWgtEast, pPhiWgtEast, sizeof(Flow::PhiWgt_t)); }
+
+inline void StFlowEvent::SetPhiWeightWest(const Flow::PhiWgt_t& pPhiWgtWest) {
+  memcpy (mPhiWgtWest, pPhiWgtWest, sizeof(Flow::PhiWgt_t)); }
+
+inline void StFlowEvent::SetPhiWeightFarWest(const Flow::PhiWgt_t& pPhiWgtFarWest) {
+  memcpy (mPhiWgtFarWest, pPhiWgtFarWest, sizeof(Flow::PhiWgt_t)); }
+
 inline void StFlowEvent::SetPhiWeightFtpcEast(const Flow::PhiWgtFtpc_t& pPhiWgtFtpcEast) {
   memcpy (mPhiWgtFtpcEast, pPhiWgtFtpcEast, sizeof(Flow::PhiWgtFtpc_t)); }
+
 inline void StFlowEvent::SetPhiWeightFtpcWest(const Flow::PhiWgtFtpc_t& pPhiWgtFtpcWest) {
   memcpy (mPhiWgtFtpcWest, pPhiWgtFtpcWest, sizeof(Flow::PhiWgtFtpc_t)); }
 #endif
@@ -284,18 +307,20 @@ inline void StFlowEvent::SetPositronCut(Float_t lo, Float_t hi) {
 inline void StFlowEvent::SetDcaGlobalCut(Float_t lo, Float_t hi) { 
   mDcaGlobalCuts[0] = lo; mDcaGlobalCuts[1] = hi; }
 
-inline void  StFlowEvent::SetCTB(const Float_t ctb) { mCTB = ctb; }
+inline void StFlowEvent::SetCTB(const Float_t ctb) { mCTB = ctb; }
 
-inline void  StFlowEvent::SetZDCe(const Float_t zdce) { mZDCe = zdce; }
+inline void StFlowEvent::SetZDCe(const Float_t zdce) { mZDCe = zdce; }
 
-inline void  StFlowEvent::SetZDCw(const Float_t zdcw) { mZDCw = zdcw; }
+inline void StFlowEvent::SetZDCw(const Float_t zdcw) { mZDCw = zdcw; }
 
-inline void  StFlowEvent::SetPid(const Char_t* pid)  { 
+inline void StFlowEvent::SetPid(const Char_t* pid)  { 
   strncpy(mPid, pid, 9); mPid[9] = '\0'; }
 
-inline void  StFlowEvent::SetProbPid() { mProbPid = kTRUE; }
+inline void StFlowEvent::SetProbPid() { mProbPid = kTRUE; }
 
-inline void  StFlowEvent::SetEtaSubs() { mEtaSubs = kTRUE; }
+inline void StFlowEvent::SetEtaSubs() { mEtaSubs = kTRUE; }
+
+inline void StFlowEvent::SetOnePhiWgt() { mOnePhiWgt = kTRUE; }
 
 inline void StFlowEvent::SetPtWgt(Bool_t PtWgt) { mPtWgt = PtWgt; }
 
@@ -304,6 +329,11 @@ inline void StFlowEvent::SetPtWgt(Bool_t PtWgt) { mPtWgt = PtWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.33  2001/12/11 21:33:50  posk
+// Went from one to four sets of histograms for making the event plane isotropic.
+// StFlowEvent::PhiWeight() has changed arguments and return value.
+// The ptWgt saturates above 2 GeV/c.
+//
 // Revision 1.32  2001/11/09 21:10:42  posk
 // Switched from CERNLIB to TMath. Little q is now normalized.
 //
