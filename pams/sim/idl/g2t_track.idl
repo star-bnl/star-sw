@@ -35,6 +35,7 @@ struct g2t_track {          /* G2t_track */
        long      n_smd_hit;  /* number of hits in shower max */
        long      n_svt_hit;  /* Nhits in svt */
        long      n_pix_hit;  /* Nhits in pix */
+       long      n_ist_hit;  /* Nhits in ist */
        long      n_tof_hit;  /* Nhits in tof */
        long      n_tpc_hit;  /* Nhits in tpc */
        long      n_vpd_hit;  /* Nhits in vpd */
