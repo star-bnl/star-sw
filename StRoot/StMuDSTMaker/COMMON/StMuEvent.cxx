@@ -1,11 +1,12 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.5 2003/07/22 19:14:41 laue Exp $
+ * $Id: StMuEvent.cxx,v 1.6 2003/10/20 19:50:13 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
 
+#include <string.h> 
 #include "StEvent/StEvent.h" 
 #include "StEvent/StEventTypes.h" 
 #include "StEvent/StEventSummary.h" 
@@ -36,6 +37,8 @@ ClassImp(StMuEvent)
 //-----------------------------------------------------------------------
 StMuEvent::StMuEvent() {
   DEBUGMESSAGE("");
+  int n = (char*)mReactionPlanePtWgt - (char*)&mRefMultPos+sizeof(mReactionPlanePtWgt);
+  memset(&mRefMultPos,0,n);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -81,10 +84,6 @@ void StMuEvent::fill(const StEvent* event){
     DEBUGVALUE2(event->type());
     DEBUGVALUE2(event->info()->time());
     DEBUGMESSAGE2("no trigger detector collection, creating dummy");
-    StTriggerDetectorCollection trg;
-    mCtbTriggerDetector = trg.ctb();
-    mZdcTriggerDetector = trg.zdc();
-    mBbcTriggerDetector = trg.bbc();
     mEventInfo.setTime(0);
   }
   else {
@@ -115,6 +114,9 @@ void StMuEvent::fill(const StEvent* event){
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.6  2003/10/20 19:50:13  perev
+ * workaround added for TClonesArray::Delete + some cleanup of MuEmc
+ *
  * Revision 1.5  2003/07/22 19:14:41  laue
  * multiplicities for FTPC added
  *

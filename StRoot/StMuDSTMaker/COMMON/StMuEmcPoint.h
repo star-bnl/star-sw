@@ -48,8 +48,8 @@ class StMuEmcPoint: public TObject
     float         mDeltaPhi;
     float         mEnergy;
     float         mChiSquare;    
-    StMuEmcCluster* mEmc[8];
+    StMuEmcCluster* mEmc[8]; //! No IO 
         
-  ClassDef(StMuEmcPoint,2)
+  ClassDef(StMuEmcPoint,3)
 };
 #endif

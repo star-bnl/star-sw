@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.38 2003/10/15 17:34:16 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.39 2003/10/20 19:50:13 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -219,6 +219,7 @@ void StMuDstMaker::createArrays() {
 void StMuDstMaker::clear(){
   DEBUGMESSAGE2("");
   /// from muDst
+
   for ( int i=0; i<__NARRAYS__; i++) {
     clear(mArrays[i],StMuArrays::arrayCounters[i]);
   }
@@ -226,32 +227,26 @@ void StMuDstMaker::clear(){
     clear(mStrangeArrays[i],StMuArrays::strangeArrayCounters[i]);
   }
   for ( int i=0; i<__NEMCARRAYS__; i++) {
-    del(mEmcArrays[i],StMuArrays::emcArrayCounters[i]);
+    clear(mEmcArrays[i],StMuArrays::emcArrayCounters[i]);
   }
   DEBUGMESSAGE2("out");
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDstMaker::clear(TClonesArray* t, int& counter){
+void StMuDstMaker::clear(TClonesArray* t, int& counter,int del){
   DEBUGMESSAGE3("");
-  if (t) { 
-    t->Clear(""); 
-    counter=0;
+  if (!t)  return;
+  int num = t->GetLast()+1;
+  if(!num) return;
+  if (del) t->Delete(); else t->Clear();
+  for (int i=0;i<num; i++) {
+    TObject *to = (*t)[i];
+    if (!to) 				continue;
+    if (to->TestBit(kNotDeleted)) 	continue;
+    t->New(i);
   }
- DEBUGMESSAGE3("out");
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::del(TClonesArray* t, int& counter){
-  DEBUGMESSAGE3("");
-  if (t) { 
-    if (t->UncheckedAt(0)) {
-      ((StMuEmcCollection*)t->UncheckedAt(0))->DeleteThis();
-    }
-    counter=0;
-  }
+  counter=0;
   DEBUGMESSAGE3("out");
 }
 //-----------------------------------------------------------------------
@@ -422,18 +417,23 @@ int StMuDstMaker::Finish() {
 //-----------------------------------------------------------------------
 void StMuDstMaker::setBranchAddresses(TChain* chain) {
   // muDst stuff
+
+  chain->SetBranchStatus("*",0);
   for ( int i=0; i<__NARRAYS__; i++) {
     chain->SetBranchAddress(StMuArrays::arrayNames[i],&mArrays[i]);
+    chain->SetBranchStatus (StMuArrays::arrayNames[i],1);
   } 
   
   // strange stuff
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     chain->SetBranchAddress(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i]);
+    chain->SetBranchStatus (StMuArrays::strangeArrayNames[i],1);
   } 
   
   // emc stuff
   for ( int i=0; i<__NEMCARRAYS__; i++) {
-      chain->SetBranchAddress(StMuArrays::emcArrayNames[i],&mEmcArrays[i]);
+    chain->SetBranchAddress(StMuArrays::emcArrayNames[i],&mEmcArrays[i]);
+    chain->SetBranchStatus (StMuArrays::emcArrayNames[i],1);
   } 
   
   mTTree = mChain->GetTree();
@@ -915,6 +915,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.39  2003/10/20 19:50:13  perev
+ * workaround added for TClonesArray::Delete + some cleanup of MuEmc
+ *
  * Revision 1.38  2003/10/15 17:34:16  laue
  * StMuDstMaker:  Reading fixed. Delete() changed back to Clear()
  * StMuEmcCollection: Re-implemented the DeleteThis() function,
