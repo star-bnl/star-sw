@@ -9,6 +9,8 @@
 #include "StEvent/StEnumerations.h"
 #include "Sti/StiFactoryTypedefs.h"
 #include "Sti/StiTrackNode.h"
+#include "Sti/StiKalmanTrackNode.h"
+
 #include "StiGui/StiGuiTypedefs.h"
 
 class StEvent;
@@ -27,7 +29,6 @@ class StiCompositeSeedFinder;
 class StiMaker : public StMaker {
  public:
     typedef StiObjectFactory<StiKalmanTrack> StiKalmanTrackFactory;
-    typedef StiObjectFactory<StiTrackNode> StiTrackNodeFactory;
     
     virtual ~StiMaker();
 
@@ -37,7 +38,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.16 2001/08/28 21:58:55 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.17 2001/08/29 22:49:34 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -68,7 +69,7 @@ private:
     //Factories
     StiHitFactory* mhitfactory; //!
     StiEvaluableTrackFactory* mtrackfactory; //!
-    StiTrackNodeFactory* mtracknodefactory; //!
+    StiKalmanTrackNodeFactory* mktracknodefactory; //!
     detector_factory* mdetectorfactory; //!
     data_node_factory* mdatanodefactory; //!
     StiKalmanTrackFactory* mkalmantrackfactory; //!

@@ -27,6 +27,7 @@
 
 // Sti
 #include "Sti/StiHitContainer.h"
+#include "Sti/StiHit.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiPlacement.h"
 #include "Sti/StiHitFiller.h"
@@ -51,6 +52,9 @@
 #include "StiMaker.h"
 
 StiMaker* StiMaker::sinstance = 0;
+
+ostream& operator<<(ostream&, const StiHit&);
+
 
 ClassImp(StiMaker)
   
@@ -106,8 +110,8 @@ StiMaker::~StiMaker()
     delete mdatanodefactory;
     mdatanodefactory = 0;
 
-    delete mtracknodefactory;
-    mtracknodefactory = 0;
+    delete mktracknodefactory;
+    mktracknodefactory = 0;
 
     delete mkalmanseedfinder;
     mkalmanseedfinder = 0;
@@ -148,7 +152,7 @@ void StiMaker::Clear(const char*)
 
     //Reset EvaluableTrackFactory
     mtrackfactory->reset();
-    mtracknodefactory->reset();
+    mktracknodefactory->reset();
 
     //Reset KalmanTrackFactory
     mkalmantrackfactory->reset();
@@ -189,10 +193,10 @@ Int_t StiMaker::Init()
     mtrackfactory->setMaxIncrementCount(10);
 
     //The Track node factory
-    mtracknodefactory = new StiTrackNodeFactory("StiTrackNodeFactory");
-    mtracknodefactory->setIncrementalSize(1000);
-    mtracknodefactory->setMaxIncrementCount(100);
-    StiKalmanTrack::trackNodeFactory = mtracknodefactory;
+    mktracknodefactory = new StiKalmanTrackNodeFactory("StiKalmanTrackNodeFactory");
+    mktracknodefactory->setIncrementalSize(1000);
+    mktracknodefactory->setMaxIncrementCount(100);
+    StiKalmanTrack::setKalmanTrackNodeFactory( mktracknodefactory );
     
     //The Kalman Track Factory
     mkalmantrackfactory = new StiKalmanTrackFactory("KalmanTrackFactory");
@@ -201,7 +205,7 @@ Int_t StiMaker::Init()
 
     //EvaluableTrack SeedFinder
     mtrackseedfinder = new StiEvaluableTrackSeedFinder();
-    mtrackseedfinder->setFactory(mtrackfactory, mhitfactory);
+    mtrackseedfinder->setFactory(mtrackfactory);
     mtrackseedfinder->setStTrackType(mStTrackType);
 
     //KalmanTrackSeedFinder
@@ -259,7 +263,7 @@ Int_t StiMaker::Init()
     
     //The Tracker
     mtracker = new StiKalmanTrackFinder();
-    mtracker->setTrackNodeFactory(mtracknodefactory);
+    mtracker->setTrackNodeFactory(mktracknodefactory);
     //mtracker->setTrackSeedFinder(mkalmanseedfinder);
     mtracker->setTrackSeedFinder(mcompseedfinder);
     mtracker->isValid(true);
@@ -284,6 +288,23 @@ Int_t StiMaker::Make()
 	cout <<"StiMaker::Make()\tsortHits"<<endl;
 	mhitstore->sortHits();
 	cout <<"\tdone"<<endl;
+
+	/*
+	  //Temp test of hit container
+	  const hitmap& hitMap = mhitstore->hits();
+	  for (hitmap::const_iterator it=hitMap.begin(); it!=hitMap.end(); ++it) {
+	  const hitvector& tempvec = (*it).second;
+	  for (hitvector::const_iterator vit=tempvec.begin(); vit!=tempvec.end(); ++vit) {
+	  if ((*vit)->detector()==0) {
+	  cout <<"\t\t\t\tNull Detector: "<<**vit<<endl;
+	  }
+	  else {
+	  cout <<"Fine"<<endl;
+	  }
+	  }
+	  }
+	*/
+	
 	
 	//Init seed finder for start
 	mcompseedfinder->reset();
@@ -318,7 +339,6 @@ Int_t StiMaker::Make()
 
     //TEMP !!!!!
     //mcompseedfinder->test();
-
     StiEvaluator::instance()->evaluateForEvent(mtrackstore);
     
     mdisplay->draw();
