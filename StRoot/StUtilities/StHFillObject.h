@@ -1,5 +1,8 @@
-// $Id: StHFillObject.h,v 1.1 1999/07/29 23:27:34 genevb Exp $
+// $Id: StHFillObject.h,v 1.2 1999/08/03 02:29:36 genevb Exp $
 // $Log: StHFillObject.h,v $
+// Revision 1.2  1999/08/03 02:29:36  genevb
+// Re-implemented using TMethodCall's
+//
 // Revision 1.1  1999/07/29 23:27:34  genevb
 // Introduction of new class
 //
@@ -13,35 +16,39 @@
 #ifndef STAR_StHFillObject
 #define STAR_StHFillObject
 
-#include "TNamed.h"
-class StHFillObject;
-class TList;
-typedef float (StHFillObject::* TMemOff) ();  // "Pointer to member" types
-typedef float* (StHFillObject::* TMemOffP) ();
-typedef float* (StHFillObject::* TMemOffI) ();
-typedef float* (StHFillObject::* TMemOffIS) ();
+#include "TObject.h"
+class TMethodCall;
+class TH1;
 
-class StMemOff : public TNamed {
+static const size_t dimMax = 8;
+static const size_t nsMax = 50;
+static const size_t bufSize = 1024;
+
+class StHFillVars {
  public:
-  TMemOff offset;
-  StMemOff(Char_t* name, TMemOff value) : TNamed(name,name), offset(value) {}
-  virtual ~StMemOff() {}
+  StHFillVars();
+  ~StHFillVars();
+  void ClearBuffer();
+  Char_t buffer[bufSize];
+  Char_t buffer1[bufSize];
+  Int_t indices[nsMax][dimMax];
+  Float_t values[nsMax][dimMax];
+  TMethodCall* methods[nsMax][dimMax];
+  Char_t* opt[nsMax];
+  Int_t dims[nsMax];
+  Int_t nsets;
+  TH1* histo[nsMax];
 };
 
 
 class StHFillObject : public TObject {
  private:
  protected:
-  static TList *knownMembers;                  //!
-  static TMemOff GetOffset(Char_t* member);
-
  public:
   StHFillObject();
   virtual ~StHFillObject();
-   static void LearnMember(Char_t* member, TMemOff offset);
-  virtual void LearnMembers()=0;
    static void Reset();
-   static void Setup(Option_t* option, Int_t hists=1);
+          void Setup(Option_t* option, Int_t hists=1);
           void GetValues(Int_t printIt=0);
   virtual void Draw(Option_t* option);
   virtual void Print(Option_t* option);
