@@ -7,8 +7,8 @@ C:ARGUMENTS:    see code
 C:ARGUMENTS:    see code
 C:RETURN VALUE: 
 c:>------------------------------------------------------------------
-#include "math_constants.inc"
       IMPLICIT NONE
+#include "math_constants.inc"
 CCC
 CCC   NEW SUBR: eut_extra_z 
 CCC

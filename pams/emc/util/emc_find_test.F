@@ -9,6 +9,7 @@ C:HISTORY:      3Sep97-v1.0-akio- Creation.
 c:>------------------------------------------------------------------
       INTEGER*4 FUNCTION EMC_FIND_TEST(
      1       ems_control_h,       ems_control )
+      IMPLICIT NONE
 #include "emc_def.h"
 #include "math_constants.inc"
 c:>------------------------------------------------------------------
@@ -18,7 +19,6 @@ C:ARGUMENTS:    ems_control
 C:ARGUMENTS:    
 C:RETURN VALUE: STAFCV_OK on successful completion
 c:>------------------------------------------------------------------
-      IMPLICIT NONE
 #include "emc_find_test.inc"
       integer det, mod, ebin, sub, i
       real   phi, eta
