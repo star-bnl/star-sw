@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.244 2001/11/06 19:57:03 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.245 2001/11/08 00:47:43 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -108,11 +108,8 @@ Bfc_st BFC[] = {
   // as soon as the code will be toroughly tested. NoHits will be turned on
   // later as a final touch. emcY2 removed on Sept 27th 2001.
   {"P2001a"      ,""  ,"",
-   "ry2001,in,tpc_daq,tpc,rich,svt_daq,SvtD,ftpc,l3onl,tofDat,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
-                                ,"Production chain for summer 2001 data (tpc, rich, ftpc, svt, l3, tof)",kFALSE},
-
-  {"P2001b"  ,"" ,"","ry2001,in,tpc_daq,tpc,rich,ftpc,l3onl,tofDat,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
-                                            ,"Production chain for summer 2001 data (P2001a - Svt)",kFALSE},
+   "ry2001,in,tpc_daq,tpc,rich,svt_daq,SvtD,ftpc,l3onl,tofDat,emcDY2,Physics,Cdst,Kalman,tags,Tree,evout,AlignSectors,ExB,OBmap,OClock,OPr13","",""
+                       ,"Production chain for summer 2001 data (tpc, rich, ftpc, svt, l3, tof emc)",kFALSE},
 
 
 
