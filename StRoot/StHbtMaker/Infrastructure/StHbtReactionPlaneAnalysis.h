@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtReactionPlaneAnalysis.h,v 1.1 2001/07/13 20:03:14 rcwells Exp $
+ * $Id: StHbtReactionPlaneAnalysis.h,v 1.2 2002/05/28 14:04:07 rcwells Exp $
  *
  * Author: Randall Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtReactionPlaneAnalysis.h,v $
+ * Revision 1.2  2002/05/28 14:04:07  rcwells
+ * Added multiplicity binning to StHbtReactionPlaneAnalysis
+ *
  * Revision 1.1  2001/07/13 20:03:14  rcwells
  * Adding reaction plane analysis
  *
@@ -29,7 +32,8 @@ class StHbtReactionPlaneAnalysis : public StHbtAnalysis {
 
 public:
 
-  StHbtReactionPlaneAnalysis(int=1, unsigned int =10, double =-100., double=+100.);
+  StHbtReactionPlaneAnalysis(int pTSwitch=1, unsigned int nBinPhi=1, double phiLo=-100., double phiHi=+100.,
+			     unsigned int nBinsMult=1, double multLo=0, double multHi=999999);
   StHbtReactionPlaneAnalysis(const StHbtReactionPlaneAnalysis&);  // copy constructor
   virtual void ProcessEvent(const StHbtEvent*);
   virtual ~StHbtReactionPlaneAnalysis();
@@ -37,9 +41,11 @@ public:
   virtual unsigned int Overflow() { return mOverFlow;}
   virtual unsigned int Underflow() { return mUnderFlow;}
   double ReactionPlane();
+  double VertexZ();
   int PtWeighting();
 protected:
   int mPtWgt;
+  double mVertexZ;
   double mReactionPlaneAngle;
   double mReactionPlane[2];
   unsigned int mReactionPlaneBins;
@@ -52,5 +58,8 @@ protected:
 #endif
     
 };
+
+inline double StHbtReactionPlaneAnalysis::ReactionPlane(){return mReactionPlaneAngle;}
+inline double StHbtReactionPlaneAnalysis::VertexZ(){return mVertexZ;}
 
 #endif
