@@ -118,7 +118,16 @@ Int_t StEmcMicroDstMaker::Make()
     
     // at this point, the event has been accepted.
     StIOMaker* IO=(StIOMaker*)GetMaker("IOMaker");
-    if(IO) mEventFile=strrchr(IO->GetFile(),'/')+1;
+    if(IO)
+      {
+	char* chp = strrchr(IO->GetFile(),'/');
+	if(chp) mEventFile = strrchr(IO->GetFile(),'/')+1;
+	else mEventFile = IO->GetFile();
+      }
+    // char *strrchr(const char *s, int c);
+    // DESCRIPTION
+    // The strrchr() function  returns  a  pointer  to  the  last
+    // occurrence of the character c in the string s.
     else
     {
       //try to get from StTreeMaker
@@ -136,10 +145,10 @@ Int_t StEmcMicroDstMaker::Make()
         mEventFile = f;
       }
     }
-		
+
     if(mOldMaker) mEventFile = mOldMaker->getCurrentFile();
-		
-    // if the input event file has changed, close the Micro dst file and creates another one
+    // if the input event file has changed, 
+    // close the Micro dst file and creates another one
     if(mEventFile!=mEventFileOld)
     {
       if(mMicroDstFile) if(mMicroDstFile->IsOpen())
@@ -155,9 +164,7 @@ Int_t StEmcMicroDstMaker::Make()
       mEventFileOld=mEventFile;
     }
     else cout <<"Filename being written: "<<mEventFile.Data()<<endl;
-		
     mMicroEvent= mMicroUtil->getMicroEvent(mStEvent);
-		
 		if(mOldMaker)
 		{
 			// stuff that are not converted back in StEvent...
@@ -189,7 +196,9 @@ Int_t StEmcMicroDstMaker::Make()
 				mMicroEvent->setFpd(fpd);
 			}						
 		}
+		cout << "before Fill()" << endl;
     mEmcTree->Fill();
+    cout << "after Fill()" << endl;
   }
   else //read Mode
   {  
