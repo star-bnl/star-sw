@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbye2ptMaker.cxx,v 1.1.1.1 2000/02/05 03:15:21 jgreid Exp $
+ * $Id: StEbye2ptMaker.cxx,v 1.2 2000/02/22 00:04:14 jgreid Exp $
  *
  * StEbye2ptMaker.cxx
  *
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StEbye2ptMaker.cxx,v $
+ * Revision 1.2  2000/02/22 00:04:14  jgreid
+ * changed from global to primary tracks, added more track quality cuts
+ *
  * Revision 1.1.1.1  2000/02/05 03:15:21  jgreid
  * Two particle correlationspace generation package
  *
@@ -31,7 +34,7 @@
 using namespace units;
 #endif
 
-static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.1.1.1 2000/02/05 03:15:21 jgreid Exp $";
+static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.2 2000/02/22 00:04:14 jgreid Exp $";
 
 ClassImp(StEbye2ptMaker)
 
@@ -175,6 +178,12 @@ StEbye2ptMaker::processEvent(StEvent& event)
   float pt_min = 0;
   float pt_max = 20;
    
+  float dcaX_min = -0.1/centimeter;
+  float dcaX_max = 0.1/centimeter;
+
+  float dcaY_min = dcaX_min;
+  float dcaY_max = dcaX_max;
+
   // define variables
   float pt, mtOnly;
   float charge;
@@ -208,6 +217,7 @@ StEbye2ptMaker::processEvent(StEvent& event)
 
   float Minimum = (1+(PionMass/Temperature))*exp(-PionMass/Temperature);
 
+  StTrack *currentTrack;
   StVertex *primeVertex;
 
   StThreeVectorD origin(0,0,0);
@@ -231,65 +241,89 @@ StEbye2ptMaker::processEvent(StEvent& event)
     const StSPtrVecTrackNode& theNodes = event.trackNodes();
     for (unsigned int k=0; k<theNodes.size(); k++) {
 
-      // get the momentum of the current track
-      pt = theNodes[k]->track(global)->geometry()->momentum().perp();
+      currentTrack = theNodes[k]->track(primary);
+      if (currentTrack) {
 
-      // get the charge of the current track
-      charge = theNodes[k]->track(global)->geometry()->charge();
+        // cut out tracks marked as bad [cut #1]
+	if (currentTrack->flag() > 0) {
 
-      // get Nfound & Nmax
-      nFound = theNodes[k]->track(global)->fitTraits().numberOfFitPoints();
-      nMax = theNodes[k]->track(global)->numberOfPossiblePoints();
+          // cut out tracks with bad goodness of fit [cut #2]
+          if (currentTrack->fitTraits().chi2() < 3) {
 
-      // calculate distance of closest approach to the primary vertex position
-      s = theNodes[k]->track(global)->geometry()->helix().pathLength(primaryVertexPosition);
-      p = theNodes[k]->track(global)->geometry()->helix().at(s);
-      dca = p-primaryVertexPosition;
-      dcaX = dca.x()/centimeter;
-      dcaY = dca.y()/centimeter;
-      dcaZ = dca.z()/centimeter;
-      dcaM = (abs(dca))/centimeter;
+            // get the momentum of the current track
+            pt = currentTrack->geometry()->momentum().perp();
 
-      // calculate mt (needed for temperature calculation)
-      mtOnly = sqrt(pt*pt + PionMass*PionMass);
+            // get the charge of the current track
+            charge = currentTrack->geometry()->charge();
 
-      // calculate eta
-      dip = theNodes[k]->track(global)->geometry()->dipAngle();
-      theta = (M_PI/2.0)-dip;
-      eta = -log(tan(theta/2.0));
+            // get Nfound & Nmax
+            nFound = currentTrack->fitTraits().numberOfFitPoints();
+            nMax = currentTrack->numberOfPossiblePoints();
 
-      // ** cut out extreme pt values [cut #1]
-      if ((pt > pt_min) && (pt < pt_max)) {
+            // ** nFound/nMax cut [cut #3] 
+            if ( (nFound/nMax) > 0.5 ) {
 
-        if (charge < 0) {
-          // precrement so that the 0th element of the pt arrays can be used
-          //  for the number of quality tracks in the event
-          minusCount++;
-          mThisEventMinus[minusCount]=1-(1+(mtOnly/Temperature))*exp(-mtOnly/Temperature)/Minimum;
-          minusPt += pt;
-          minusPt2 += pt*pt;
-	}
-        else if (charge > 0) {
-          plusCount++;
-          mThisEventPlus[plusCount]=1-(1+(mtOnly/Temperature))*exp(-mtOnly/Temperature)/Minimum;
-          PlusPt += pt;
-          PlusPt2 += pt*pt;
-        }
+              // calculate distance of closest approach to the primary vertex position
+              s = currentTrack->geometry()->helix().pathLength(primaryVertexPosition);
+              p = currentTrack->geometry()->helix().at(s);
+              dca = p-primaryVertexPosition;
+              dcaX = dca.x()/centimeter;
+              dcaY = dca.y()/centimeter;
+              dcaZ = dca.z()/centimeter;
+              dcaM = (abs(dca))/centimeter;
+            
+              // ** transverse DCA cut [cut #4] 
+              if (((dcaX > dcaX_min) && (dcaX < dcaX_max)) && ((dcaY > dcaY_min) && (dcaY < dcaY_max))) {
 
-        // calculate number of particles that make the cuts, and the first two pt moments
-        trackCount++;
-        meanPtSquared += pt*pt;
-        meanPt += pt;
+                // calculate mt (needed for temperature calculation)
+                mtOnly = sqrt(pt*pt + PionMass*PionMass);
 
-  	meanEtaSquared += eta*eta;
-	meanEta += eta;
+                // calculate eta
+                dip = currentTrack->geometry()->dipAngle();
+                theta = (M_PI/2.0)-dip;
+                eta = -log(tan(theta/2.0));
 
-      } // [cut #1]
+                // ** cut out extreme pt values [cut #5]
+                if ((pt > pt_min) && (pt < pt_max)) {
+
+                  if (charge < 0) {
+                    // precrement so that the 0th element of the pt arrays can be used
+                    //  for the number of quality tracks in the event
+                    minusCount++;
+                    mThisEventMinus[minusCount]=1-(1+(mtOnly/Temperature))*exp(-mtOnly/Temperature)/Minimum;
+                    minusPt += pt;
+                    minusPt2 += pt*pt;
+                  }
+                  else if (charge > 0) {
+                    plusCount++;
+                    mThisEventPlus[plusCount]=1-(1+(mtOnly/Temperature))*exp(-mtOnly/Temperature)/Minimum;
+                    PlusPt += pt;
+                    PlusPt2 += pt*pt;
+                  }
+
+                  // calculate number of particles that make the cuts, and the first two pt moments
+                  trackCount++;
+                  meanPtSquared += pt*pt;
+                  meanPt += pt;
+
+                  meanEtaSquared += eta*eta;
+                  meanEta += eta;
+
+	        }// [cut #5]
+	      }// [cut #4]
+            } // [cut #3]
+          } // [cut #2]
+        } // [cut #1]
+
+      } // if(currentTrack)
 
     } // ** end of track loop **
   }
   mThisEventMinus[0] = minusCount;
   mThisEventPlus[0] = plusCount;
+
+  //uncomment this line to see how many tracks pass the cuts
+  //cerr << minusCount << "  -|+ " << plusCount << endl;
 
   minusPt2 /= minusCount;
   minusPt /= minusCount;
