@@ -26,6 +26,7 @@ my $debugOn=0;
 my @SetD = (
              "P00he/2000/06",
              "P00he/2000/07",
+             "P00he/2000/08",
 );
 my $SetD2 = "P00hd/2000/06";
 my $prod_html_back = "/star/u2e/starreco/P00he/summary/P00he.summary\.html_back";
