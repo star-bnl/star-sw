@@ -320,7 +320,7 @@ C      sinl = trk1(5)/(sqrt(1+trk1(5)**2))
 C      cosl = 1/sqrt(1+trk1(5)**2)
 C      sinl = sin( atan(trk1(5)))
        cosl = cos( atan(trk1(5)))
-       inv_coslh = 1/h*cosl
+       inv_coslh = 1/(h*cosl)
 
 *    Make sure you get the correct angle in 2*pi when taking acos etc
 
@@ -462,6 +462,7 @@ C     om2=( -b*c-abs(a)*d ) / asq_plus_bsq
       om1=( om_1+om_2 ) / asq_plus_bsq
       om2=( om_1-om_2 ) / asq_plus_bsq
       r1sq_minus_om1sq = r1sq-om1*om1
+      r1sq_minus_om2sq = r1sq-om2*om2
       IF( r1sq_minus_om1sq.ge.0.) THEN
 C----find the right pair---------------------------------------------
 	ph1=sqrt(r1sq_minus_om1sq)
@@ -477,7 +478,13 @@ C----find the right pair---------------------------------------------
 		y(1)=om1+xc1(2)
 		x(1)=ph2+xc1(1)
 	ENDIF	
+      ENDIF	
 C------second pair------------------------------------------------
+      IF( r1sq_minus_om2sq.ge.0.) THEN
+	ph1=sqrt(r1sq_minus_om2sq)
+	ph2=-ph1
+        ph1_plus_a_sq = (ph1+a)**2
+        ph2_plus_a_sq = (ph2+a)**2
         om2_plus_b_sq_minus_r2sq = (om2+b)**2 - r2sq
 	IF( abs(ph1_plus_a_sq + om2_plus_b_sq_minus_r2sq).le.
      +      abs(ph2_plus_a_sq + om2_plus_b_sq_minus_r2sq) ) THEN
