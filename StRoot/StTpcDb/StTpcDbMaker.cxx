@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.10 2000/02/23 15:09:57 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.11 2000/02/23 21:03:17 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.11  2000/02/23 21:03:17  hardtke
+ * fix tpc_row_par -- causing tpt problems
+ *
  * Revision 1.10  2000/02/23 15:09:57  hardtke
  * move tpg_detector and tpg_pad_plane from .const to .data
  *
@@ -139,7 +142,6 @@ int type_of_call tpc_row_par_(int *isector, float *row, float *a, float *b){
   y2 = gc2.position().y();
   if (abs(x2-x1)<0.000001) {
      *a = 1/x1;
-     if (*isector<=12) *a = -*a;  // opposite sign to match tpg_row_par
      *b = 0.;
      return 1;
   }
@@ -147,7 +149,6 @@ int type_of_call tpc_row_par_(int *isector, float *row, float *a, float *b){
   bb = y1 - m*x1;
   if (bb == 0) return 0;
   *a = -m/bb;
-  if (*isector<=12) *a = -*a;  // opposite sign to match tpg_row_par
   *b = 1/bb;
   return 1;
 }
@@ -179,6 +180,17 @@ Int_t StTpcDbMaker::Init(){
    m_TpcDb = 0;
 // Create Needed Tables:    
    if (!m_TpcDb) m_TpcDb = new StTpcDb(this);
+  m_tpg_pad_plane = new St_tpg_pad_plane("tpg_pad_plane",1);
+  m_tpg_pad_plane->SetNRows(1);
+  m_tpg_detector = new St_tpg_detector("tpg_detector",1);
+  m_tpg_detector->SetNRows(1);
+  AddConst(m_tpg_pad_plane);
+  AddConst(m_tpg_detector);
+  if (tpcDbInterface()->PadPlaneGeometry()&&tpcDbInterface()->Dimensions())
+   Update_tpg_pad_plane();
+  if (tpcDbInterface()->Electronics()&&tpcDbInterface()->Dimensions()&&
+      tpcDbInterface()->DriftVelocity()) 
+   Update_tpg_detector();
 //
    return StMaker::Init();
 }
@@ -187,17 +199,11 @@ Int_t StTpcDbMaker::Init(){
 Int_t StTpcDbMaker::Make(){
 
   if (!m_TpcDb) m_TpcDb = new StTpcDb(this);
-  m_tpg_pad_plane = new St_tpg_pad_plane("tpg_pad_plane",1);
-  m_tpg_pad_plane->SetNRows(1);
-  m_tpg_detector = new St_tpg_detector("tpg_detector",1);
-  m_tpg_detector->SetNRows(1);
   if (tpcDbInterface()->PadPlaneGeometry()&&tpcDbInterface()->Dimensions())
    Update_tpg_pad_plane();
-   AddData(m_tpg_pad_plane);
   if (tpcDbInterface()->Electronics()&&tpcDbInterface()->Dimensions()&&
       tpcDbInterface()->DriftVelocity()) 
    Update_tpg_detector();
-   AddData(m_tpg_detector);
   return kStOK;
 }
 
