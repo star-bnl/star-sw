@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.2 2002/03/08 20:04:31 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.3 2002/03/20 16:04:11 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -72,6 +72,9 @@ class StMuDstMaker : public StMaker{
   TChain* chain();
   TTree* tree();
 
+  void setSplit(int=99);
+  void StMuDstMaker::setCompression(int comp=9);
+
 private:
   StMuDst* mStMuDst;
 
@@ -104,7 +107,7 @@ private:
 
   int mEventCounter;
   int mSplit;
-  int mCompress;
+  int mCompression;
   int mBufferSize;
 
   StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm;
@@ -193,11 +196,17 @@ inline void StMuDstMaker::setReadV0s(bool b) { mReadV0s=b;}
 inline void StMuDstMaker::setReadXis(bool b) { mReadXis=b;}
 inline void StMuDstMaker::setReadKinks(bool b) { mReadKinks=b;}
 
+inline void StMuDstMaker::setSplit(int split) { mSplit = split;}
+inline void StMuDstMaker::setCompression(int comp) { mCompression = comp;}
+
 #endif
 
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.3  2002/03/20 16:04:11  laue
+ * minor changes, mostly added access functions
+ *
  * Revision 1.2  2002/03/08 20:04:31  laue
  * change from two trees to 1 tree per file
  *

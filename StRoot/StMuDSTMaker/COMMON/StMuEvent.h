@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.1 2002/03/08 17:04:17 laue Exp $
+ * $Id: StMuEvent.h,v 1.2 2002/03/20 16:04:11 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -21,6 +21,7 @@
 #include "StEvent/StDetectorState.h"
 
 #include "StStrangeMuDstMaker/StStrangeMuDst.hh"
+//#include "StarClassLibrary/StThreeVectorD.hh"
 
 class StEvent;
 /* class StTrack; */
@@ -55,12 +56,17 @@ class StMuEvent : public TObject {
   StFpdCollection& fpdCollection(); 
   StL0Trigger& l0Trigger(); 
   StMuL3EventSummary& l3EventSummary();
-  UShort_t refMultPos();
-  UShort_t refMultNeg();
-  UShort_t refMult();
-  Float_t reactionPlane(unsigned short);
-  Float_t reactionPlanePtWgt(unsigned short);
-  
+
+  unsigned short refMultPos();
+  unsigned short refMultNeg();
+  unsigned short refMult();
+  double reactionPlane(unsigned short);
+  double reactionPlanePtWgt(unsigned short);
+  double magneticField();
+  double zdcAdcAttentuatedSumWest();
+  double zdcAdcAttentuatedSumEast();
+  double ctbMultiplicity();
+  StThreeVectorF primaryVertexPosition();
  private:
   void clear();
   void fill(const StEvent*);
@@ -100,17 +106,32 @@ inline StBbcTriggerDetector& StMuEvent::bbcTriggerDetector() {return mBbcTrigger
 inline StFpdCollection& StMuEvent::fpdCollection() {return mFpdCollection;} 
 inline StL0Trigger& StMuEvent::l0Trigger() {return mL0Trigger;} 
 inline StMuL3EventSummary& StMuEvent::l3EventSummary() {return mL3EventSummary;}
-inline UShort_t StMuEvent::refMultPos() {return mRefMultPos;}
-inline UShort_t StMuEvent::refMultNeg() {return mRefMultNeg;}
-inline UShort_t StMuEvent::refMult() {return refMultPos()+refMultNeg();}
-inline Float_t StMuEvent::reactionPlane(unsigned short s) {return (s==0) ? mReactionPlane[0] : mReactionPlane[1];}
-inline Float_t StMuEvent::reactionPlanePtWgt(unsigned short s) {return (s==0) ? mReactionPlanePtWgt[0] : mReactionPlanePtWgt[1];;}
-
+inline unsigned short StMuEvent::refMultPos() {return mRefMultPos;}
+inline unsigned short StMuEvent::refMultNeg() {return mRefMultNeg;}
+inline unsigned short StMuEvent::refMult() {return refMultPos()+refMultNeg();}
+inline double StMuEvent::reactionPlane(unsigned short s) {return (s==0) ? mReactionPlane[0] : mReactionPlane[1];}
+inline double StMuEvent::reactionPlanePtWgt(unsigned short s) {return (s==0) ? mReactionPlanePtWgt[0] : mReactionPlanePtWgt[1];}
+inline double StMuEvent::magneticField() { return mEventSummary.magneticField();}
+inline double StMuEvent::zdcAdcAttentuatedSumWest() { return mZdcTriggerDetector.adc(10);}
+inline double StMuEvent::zdcAdcAttentuatedSumEast() { return mZdcTriggerDetector.adc(13);}
+inline double StMuEvent::ctbMultiplicity() { 
+  double ctb=0;
+  for (unsigned int slat = 0; slat < mCtbTriggerDetector.numberOfSlats(); slat++) {
+    for (unsigned int tray = 0; tray < mCtbTriggerDetector.numberOfTrays(); tray++) {
+      ctb += mCtbTriggerDetector.mips(tray,slat,0);
+    }
+  }
+  return ctb;
+}
+inline StThreeVectorF StMuEvent::primaryVertexPosition() { return mEventSummary.primaryVertexPosition();}
 
 #endif
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.2  2002/03/20 16:04:11  laue
+ * minor changes, mostly added access functions
+ *
  * Revision 1.1  2002/03/08 17:04:17  laue
  * initial revision
  *
