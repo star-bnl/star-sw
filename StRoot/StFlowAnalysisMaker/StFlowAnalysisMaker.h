@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.15 2000/05/26 21:25:22 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.16 2000/06/30 14:51:19 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.16  2000/06/30 14:51:19  posk
+// Using MessageMgr. Added graph for Eta Symmetry vs. Vertex Z.
+//
 // Revision 1.15  2000/05/26 21:25:22  posk
 // Use TProfile2D class and profile projection methods.
 // Correction needed for >2 subevents.
@@ -94,12 +97,11 @@ public:
 
   Int_t    Init();
   Int_t    Make();
-  void     PrintInfo();
   Int_t    Finish();
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.15 2000/05/26 21:25:22 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.16 2000/06/30 14:51:19 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -149,6 +151,8 @@ private:
   TH1F*     mHistPidProton;     //!
   TProfile* mHistPidMult;       //!
   TH1F*     mHistCent;          //!
+  TH2F*     mHistEtaSymVerZ2D;  //!
+  TH1F*     mHistEtaSymVerZ;    //!
   
   // for each harmonic, each selection, and each sub-event
   struct histSubHars {

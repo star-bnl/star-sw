@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.31 2000/06/01 18:29:56 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.32 2000/06/30 14:51:18 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.32  2000/06/30 14:51:18  posk
+// Using MessageMgr. Added graph for Eta Symmetry vs. Vertex Z.
+//
 // Revision 1.31  2000/06/01 18:29:56  posk
 // When resolution=0 reset histograms.
 //
@@ -118,6 +121,7 @@
 #include "TProfile2D.h"
 #include "TF1.h"
 #include "TOrdCollection.h"
+#include "StMessMgr.h"
 #define PR(x) cout << "##### FlowAnalysis: " << (#x) << " = " << (x) << endl;
 extern "C" float besi0_(const float&);
 extern "C" float besi1_(const float&);
@@ -181,31 +185,20 @@ Int_t StFlowAnalysisMaker::Make() {
       FillFromTags();                        // get event quantities
       FillEventHistograms();                 // fill from Flow Tags
     } else if (pFlowEvent) {
-      cout << "##### null FlowTag pointer" << endl;
+      gMessMgr->Info("##### FlowAnalysis: null FlowTag pointer");
       FillFromFlowEvent();                   // get event quantities
       FillEventHistograms();                 // fill from FlowEvent
     } else {
-      cout << "##### null FlowEvent and FlowTag pointers" << endl;
+      gMessMgr->Info("##### FlowAnalysis: null FlowEvent and FlowTag pointers");
       return kStOK;
     }
     // Particle quantities
     if (pFlowEvent) FillParticleHistograms(); // fill particle histograms
     
-    PrintInfo();
-    
+    if (Debug()) StMaker::PrintInfo();
   }
   
   return kStOK;
-}
-
-//-----------------------------------------------------------------------
-
-void StFlowAnalysisMaker::PrintInfo() {
-  cout << "******************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.31 2000/06/01 18:29:56 posk Exp $"
-       << endl;
-  cout << "******************************************************************" << endl;
-  if (Debug()) StMaker::PrintInfo();
 }
 
 //-----------------------------------------------------------------------
@@ -237,8 +230,8 @@ Int_t StFlowAnalysisMaker::Init() {
   const float vertexZMax      =  100.; 
   const float vertexXYMin     =   -1.;
   const float vertexXYMax     =    1.; 
-  const float etaSymMin       =  -0.2; 
-  const float etaSymMax       =   0.2; 
+  const float etaSymMin       =  -0.3; 
+  const float etaSymMax       =   0.3; 
   const float phiMin          =    0.;
   const float phiMax          = twopi; 
   const float psiMin          =    0.;
@@ -351,6 +344,18 @@ Int_t StFlowAnalysisMaker::Init() {
       nEtaSymBins, etaSymMin, etaSymMax);
   mHistEtaSym->SetXTitle("Eta Symmetry Ratio");
   mHistEtaSym->SetYTitle("Counts");
+    
+  // EtaSym vs. Vertex Z
+  mHistEtaSymVerZ2D = new TH2F("Flow_EtaSymVerZ2D", "Flow_EtaSymVerZ2D",
+    nVertexZBins, vertexZMin, vertexZMax, nEtaSymBins, etaSymMin, etaSymMax);
+  mHistEtaSymVerZ2D->SetXTitle("Vertex Z (cm)");
+  mHistEtaSymVerZ2D->SetYTitle("Eta Symmetry");
+
+  // EtaSymVertexZ
+  mHistEtaSymVerZ = new TH1F("Flow_EtaSymVerZ", "Flow_EtaSymVerZ",
+      nEtaSymBins, etaSymMin, etaSymMax);
+  mHistEtaSymVerZ->SetXTitle("Eta Symmetry Vertex Z");
+  mHistEtaSymVerZ->SetYTitle("Counts");
     
   // EtaPtPhi
   mHistEtaPtPhi3D = new TH3F("Flow_EtaPtPhi3D", "Flow_EtaPtPhi3D",
@@ -471,7 +476,7 @@ Int_t StFlowAnalysisMaker::Init() {
       sprintf(countHars,"%d",j+1);
 
       // multiplicity
-      histTitle = new TString("Flow_Mult_Sel");
+      histTitle = new TString("Flow_Mul_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
@@ -641,6 +646,9 @@ Int_t StFlowAnalysisMaker::Init() {
 
     }
   }
+
+  gMessMgr->SetLimit("##### FlowAnalysis", 2);
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.32 2000/06/30 14:51:18 posk Exp $");
 
   return StMaker::Init();
 }
@@ -903,6 +911,14 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
   float etaSym = (etaSymPosN - etaSymNegN) / (etaSymPosN + etaSymNegN);
   mHistEtaSym->Fill(etaSym);
 
+  StThreeVectorF vertex = pFlowEvent->VertexPos();
+  Float_t vertexZ = vertex.z();
+  mHistEtaSymVerZ2D->Fill(vertexZ , etaSym);
+
+  float etaSymZSlope = 0.003;
+  etaSym += (etaSymZSlope * vertexZ);
+  mHistEtaSymVerZ->Fill(etaSym);
+
   // PID multiplicities
   float totalMult = (float)pFlowEvent->TrackCollection()->size();
   mHistPidMult->Fill(1., totalMult);
@@ -1020,6 +1036,7 @@ Int_t StFlowAnalysisMaker::Finish() {
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vEta = 
 	histFull[k].histFullHar[j].mHist_vObsEta->ProjectionX(histTitle->Data());
+      histFull[k].histFullHar[j].mHist_vEta->SetTitle(histTitle->Data());
       histFull[k].histFullHar[j].mHist_vEta->SetXTitle("Pseudorapidity");
       histFull[k].histFullHar[j].mHist_vEta->SetYTitle("Flow (%)");
       delete histTitle;
@@ -1031,6 +1048,7 @@ Int_t StFlowAnalysisMaker::Finish() {
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vPt = 
 	histFull[k].histFullHar[j].mHist_vObsPt->ProjectionX(histTitle->Data());
+      histFull[k].histFullHar[j].mHist_vPt->SetTitle(histTitle->Data());
       histFull[k].histFullHar[j].mHist_vPt->SetXTitle("Pt (GeV)");
       histFull[k].histFullHar[j].mHist_vPt->SetYTitle("Flow (%)");
       delete histTitle;
@@ -1109,6 +1127,10 @@ Int_t StFlowAnalysisMaker::Finish() {
     pFlowSelect->PidPart() << endl;
   cout << "########################################################" << endl;
   delete pFlowSelect;
+
+  cout << endl;
+  gMessMgr->Summary(3);
+  cout << endl;
 
   return StMaker::Finish();
 }
