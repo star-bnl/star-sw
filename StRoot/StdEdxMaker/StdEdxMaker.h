@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.h,v 1.5 2001/05/08 16:52:55 fisyak Exp $
+// $Id: StdEdxMaker.h,v 1.6 2001/08/07 20:22:00 fisyak Exp $
 #ifndef STAR_StdEdxMaker
 #define STAR_StdEdxMaker
 
@@ -27,6 +27,7 @@ class StdEdxMaker : public StMaker {
   St_TpcDriftDistCorr *m_drift;         //!
   St_tpcBadPad        *m_badpads;       //!
   Bool_t               m_Simulation;    //!
+  Bool_t               m_InitDone;      //!
   StThreeVectorD      *mNormal[24];     //!
   StThreeVectorD      *mRowPosition[24][45][3]; //!
  public: 
@@ -42,7 +43,7 @@ class StdEdxMaker : public StMaker {
   void DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ);
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxMaker.h,v 1.5 2001/05/08 16:52:55 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxMaker.h,v 1.6 2001/08/07 20:22:00 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
