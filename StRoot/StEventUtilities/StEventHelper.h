@@ -204,6 +204,8 @@ private:
   float fLenMax      ;
   float fPtMin       ;
   float fPtMax       ;
+  float fPsMin       ;
+  float fPsMax       ;
   float fQMin        ;
   float fQMax        ; 
   float fEncodedMethod;  // encoding method
