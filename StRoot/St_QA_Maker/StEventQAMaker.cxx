@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.47 2000/07/28 19:46:04 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.48 2000/07/28 22:05:45 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.48  2000/07/28 22:05:45  lansdell
+// added a few more primary vertex checks for redundancy
+//
 // Revision 1.47  2000/07/28 19:46:04  lansdell
 // changed Encap names
 //
@@ -400,9 +403,11 @@ void StEventQAMaker::MakeHistGlob() {
 
 // these are TPC only
 	m_pT_eta_recT->Fill(eta,lmevpt);
-	m_tanl_zfT->Fill(globtrk->detectorInfo()->firstPoint().z() -
-			 event->primaryVertex()->position().z(),
-		         Float_t(TMath::Tan(globtrk->geometry()->dipAngle())));
+	if (event->primaryVertex()) {
+	  m_tanl_zfT->Fill(globtrk->detectorInfo()->firstPoint().z() -
+			   event->primaryVertex()->position().z(),
+			   Float_t(TMath::Tan(globtrk->geometry()->dipAngle())));
+	}
 	m_mom_trklengthT->Fill(globtrk->length(),lmevmom);
 	m_chisq0_momT->Fill(lmevmom,chisq0);
 	m_chisq1_momT->Fill(lmevmom,chisq1);
@@ -481,9 +486,11 @@ void StEventQAMaker::MakeHistGlob() {
 			       Float_t(globtrk->fitTraits().numberOfFitPoints()));
 
 	m_pT_eta_recTS->Fill(eta,lmevpt);
-	m_tanl_zfTS->Fill(globtrk->detectorInfo()->firstPoint().z() -
-			  event->primaryVertex()->position().z(),
-			  Float_t(TMath::Tan(globtrk->geometry()->dipAngle())));
+	if (event->primaryVertex()) {
+	  m_tanl_zfTS->Fill(globtrk->detectorInfo()->firstPoint().z() -
+			    event->primaryVertex()->position().z(),
+			    Float_t(TMath::Tan(globtrk->geometry()->dipAngle())));
+	}
 	m_mom_trklengthTS->Fill(globtrk->length(),lmevmom);
 	m_chisq0_momTS->Fill(lmevmom,chisq0);
 	m_chisq1_momTS->Fill(lmevmom,chisq1);
@@ -654,11 +661,13 @@ void StEventQAMaker::MakeHistPrim() {
   StPrimaryVertex *primVtx = event->primaryVertex();
   UInt_t daughters=0;
   UInt_t currentNumber=0;
-  for (UInt_t v=0; v<event->numberOfPrimaryVertices(); v++) {
-    currentNumber = event->primaryVertex(v)->numberOfDaughters();
-    if (currentNumber > daughters) {
-      daughters = currentNumber;
-      primVtx = event->primaryVertex(v);
+  if (primVtx) {
+    for (UInt_t v=0; v<event->numberOfPrimaryVertices(); v++) {
+      currentNumber = event->primaryVertex(v)->numberOfDaughters();
+      if (currentNumber > daughters) {
+	daughters = currentNumber;
+	primVtx = event->primaryVertex(v);
+      }
     }
   }
   
