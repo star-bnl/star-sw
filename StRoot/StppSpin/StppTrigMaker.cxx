@@ -1,9 +1,9 @@
 //  modified by JB 2/2/01: trigOnCtb() isolated and upgraded
 // 
 //*-- Author : George , Jan Balewski 
-// $Id: StppTrigMaker.cxx,v 1.5 2001/04/20 20:41:55 balewski Exp $
+// $Id: StppTrigMaker.cxx,v 1.6 2001/04/23 15:02:11 balewski Exp $
 // $Log: StppTrigMaker.cxx,v $
-// Revision 1.5  2001/04/20 20:41:55  balewski
+// Revision 1.6  2001/04/23 15:02:11  balewski
 // *** empty log message ***
 //
 // Revision 1.4  2001/04/13 18:04:35  balewski
@@ -58,7 +58,7 @@ ClassImp(StppTrigMaker)
 StppTrigMaker::StppTrigMaker(const char *name):StMaker(name){
  //  const char *name -  the name of this constructor
   printf("CCCCCCCCCCCCCCC Constructor of class=%s= executed\n", name);
- Setup(70., 1., 3, 777); // trig= (MWC(E&&W) || 2+ CTB slats) ignore DiSlats
+  Setup(70., 1., 0, 0);  
 }
 
 //_____________________________________________________________________________
