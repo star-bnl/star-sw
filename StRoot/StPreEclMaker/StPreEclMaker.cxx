@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.26 2003/10/09 19:22:34 suaide Exp $
+// $Id: StPreEclMaker.cxx,v 1.27 2003/10/14 21:20:44 suaide Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.27  2003/10/14 21:20:44  suaide
+// changed return kStErr to kStWarn
+//
 // Revision 1.26  2003/10/09 19:22:34  suaide
 // small change in StEvent filling
 //
@@ -241,7 +244,7 @@ Int_t StPreEclMaker::Make()
   StEvent *currevent = (StEvent*)GetInputDS("StEvent");
   if(!currevent){
     if(mPrint) cout << "***** Can not get StEvent pointer .. sorry \n";
-    return kStErr;
+    return kStWarn;
   }
   else{
     ecmpreecl = currevent->emcCollection();
@@ -525,7 +528,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.26 2003/10/09 19:22:34 suaide Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.27 2003/10/14 21:20:44 suaide Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
