@@ -176,7 +176,7 @@ macro bfc_init _
             user/input u [evgen]/particle.staf
     (gtxin) user/input dummy [input_file]
      (fzin)  
-            gfile pz [input_file]
+            gfile p [input_file]      | PN: p is a generic format
             tables ' ' [geant_Run]
             detp g2tm dete(cdet=SFSD).onoff=0 gttc.rdir=0
     (g2tin) 
