@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.63 2005/02/18 19:02:55 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.64 2005/02/19 20:23:37 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.64  2005/02/19 20:23:37  perev
+ * Cleanup
+ *
  * Revision 2.63  2005/02/18 19:02:55  fisyak
  * Add debug print out for extendToVertex
  *
@@ -284,27 +287,28 @@ int StiKalmanTrackNode::_debug = 0;
 //______________________________________________________________________________
 void StiKalmanTrackNode::reset()
 { 
-static const double DY=0.3,DZ=0.3,DEta=0.03,DRho=0.01,DTan=0.05;
 
   StiTrackNode::reset();
   memset(_beg,0,_end-_beg+1);
   _cosAlpha = 1.;
-  // diagonal error set to 1
+  resetError();
+  _chi2=1e55;
+  hitCount=nullCount=contiguousHitCount=contiguousNullCount = 0;
+  _detector = 0;
+static int myCount=0;
+  _Kount = ++myCount;
+}
+//______________________________________________________________________________
+void StiKalmanTrackNode::resetError()
+{ 
+static const double DY=0.3,DZ=0.3,DEta=0.03,DRho=0.01,DTan=0.05;
+
+  memset(&_c00,0,15*sizeof(_c00));
   _c00=DY*DY;
   _c11=DZ*DZ;
   _c22=DEta*DEta;
   _c33=DRho*DRho;
   _c44=DTan*DTan;
-
-  _chi2=1e55;
-  hitCount=nullCount=contiguousHitCount=contiguousNullCount = 0;
-  _detector = 0;
-}
-//______________________________________________________________________________
-void StiKalmanTrackNode::resetError()
-{ 
-static const double INCREASE=100.;
-  for (int i=0;i<15;i++) { (&_c00)[i]*=INCREASE; }
 }
 //_____________________________________________________________
 /// Set the Kalman state of this node to be identical 
@@ -557,9 +561,8 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   det = tDet;
   int position = 0;
   setState(pNode);
+//??  _detector = tDet;
   if (debug()) ResetComment(::Form("%30s ",tDet->getName().c_str()));
-  if(_c00 >100.) return -52;   	//VP ?????????
-  if(_c11 >100.) return -53;	//VP ?????????
 
   StiPlacement * place = tDet->getPlacement();
   StiShape * sh = tDet->getShape();
@@ -609,8 +612,6 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   if (position>kEdgeZplus || position<0) return position;
   propagateError();
   if (debug() & 8) { PrintpT("E");}
-  if(_c00 >100.) return -52;   	//VP ?????????
-  if(_c11 >100.) return -53;	//VP ?????????
 
   // Multiple scattering
   if (pars->mcsCalculated && fabs(pars->field)>0 )  propagateMCS(pNode,tDet);
@@ -670,6 +671,7 @@ int StiKalmanTrackNode::propagateToRadius(StiKalmanTrackNode *pNode, double radi
   if (position<0) return position;
   propagateError();
   if (debug() & 8) { PrintpT("R");}
+  _detector = 0;
   return position;
 }
 
@@ -1702,6 +1704,81 @@ static const double MyChi2 = -4.3898059300925496;
   printf("BOT OHO: %g %p\n",chi2,(void*)getHit());
 }
 #endif 
+//______________________________________________________________________________
+
+void StiKalmanTrackNode::initialize(StiHit *h,double alpha, double XcRho, double curvature, double tanl)
+{
+  //cout << "StiKalmanTrackNode::initialize(...) -I- Started"<<endl;
+  reset();
+  _hit     = h;
+  //_refX    = h->detector()->getPlacement()->getNormalRadius();
+  _refX    = h->detector()->getPlacement()->getLayerRadius();
+  _layerAngle= h->detector()->getPlacement()->getLayerAngle();
+  _x       = h->x();
+  _alpha   = alpha;
+  _cosAlpha = cos(alpha);
+  _sinAlpha = sin(alpha);
+  _p0      = h->y();
+  _p1      = h->z();
+  _p2      = XcRho-_x*curvature;
+  _p3      = curvature;
+  _p4      = tanl;
+  _sinCA = 999.;
+  if (fabs(_p2)>1.)   
+      throw runtime_error("SKTN::initialize() - ERROR - fabs(_sinCA)>1.");
+  _sinCA   = -_p2;
+  _cosCA   = ::sqrt((1.-_sinCA)*(1+_sinCA));
+  //cout << "StiKalmanTrackNode::initialize(...) -I- Done"<<endl;
+  setDetector(h->detector());
+};
+
+
+//______________________________________________________________________________
+const StiKalmanTrackNode& StiKalmanTrackNode::operator=(const StiKalmanTrackNode & n)
+{
+  children.clear();
+  parent     = n.parent;
+  _detector  = n._detector;
+  _hit       = n._hit;
+  _alpha     = n._alpha;
+  _cosAlpha = n._cosAlpha;
+  _sinAlpha = n._sinAlpha;
+  _sinCA = n._sinCA;
+  _cosCA = n._cosCA;
+  _refX = n._refX;
+  _layerAngle = n._layerAngle;
+  _x    = n._x;   
+  _p0   = n._p0; 
+  _p1   = n._p1;
+  _p2   = n._p2;
+  _p3   = n._p3;  
+  _p4   = n._p4;
+  _c00  = n._c00;                       
+  _c10  = n._c10;
+  _c11  = n._c11;                 
+  _c20  = n._c20;
+  _c21  = n._c21;
+  _c22  = n._c22;           
+  _c30  = n._c30;
+  _c31  = n._c31;
+  _c32  = n._c32;
+  _c33  = n._c33; 
+  _c40  = n._c40;
+  _c41  = n._c41;
+  _c42  = n._c42;
+  _c43  = n._c43;
+  _c44  = n._c44;
+  setChi2(n._chi2);
+  eyy   = n.eyy;
+  ezz   = n.ezz;
+  hitCount = n.hitCount;
+  nullCount = n.nullCount;
+  contiguousHitCount = n.contiguousHitCount;
+  contiguousNullCount = n.contiguousNullCount;
+  _detector = n._detector;  
+  return *this;
+}
+
 #if 1
 //______________________________________________________________________________
 int StiKalmanTrackNode::testError(double *emx, int begend)
