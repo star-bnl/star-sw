@@ -111,27 +111,27 @@ void StEmcPedestalMaker::calcPedestals()
 		float integral = (float)h->Integral();
 		if(max!=0 && integral > getNPedEvents()/2.)
 		{
-      TF1 *func = new TF1("ped","gaus(0)");
+      TF1 func("ped","gaus(0)");
 			float rmsInit = rms;
-    	func->SetParameter(0,max);
-    	func->SetParameter(1,avg);
-    	func->SetParameter(2,rms);
-    	func->SetParLimits(2,0,100000);
+    	func.SetParameter(0,max);
+    	func.SetParameter(1,avg);
+    	func.SetParameter(2,rms);
+    	func.SetParLimits(2,0,100000);
     	float seed = avg;    
 			float fitleft = avg-left*rms;
 			if(fitleft<0) fitleft = 0;
 			float fitright = avg+right*rms;
-    	func->SetRange(fitleft,fitright);
+    	func.SetRange(fitleft,fitright);
     
     	int npt = (Int_t)((left+right+1.0)*rms);
     	int ndg = (Int_t)((float)npt-3.0);
     
-    	h->Fit(func,"RQN"); // pre fit
-    	max = func->GetParameter(0);
-    	avg = func->GetParameter(1);
-    	rms = func->GetParameter(2);
+    	h->Fit(&func,"RQN"); // pre fit
+    	max = func.GetParameter(0);
+    	avg = func.GetParameter(1);
+    	rms = func.GetParameter(2);
     	int status = 1; // data present
-    	float chi = func->GetChisquare()/(float)ndg;
+    	float chi = func.GetChisquare()/(float)ndg;
     	float res = avg-seed;
 			    
     	if(avg<0)                        {status+= 2; nped++; avg = 0;}// negative pedestal
@@ -146,7 +146,6 @@ void StEmcPedestalMaker::calcPedestals()
 			                                           <<"  peakY = "<<max
                                                  <<"  ped = "<<avg <<"  res = " <<res<<"  rms = "<<rms
                                                  <<"  chi = "<<chi<<"  status = "<<status<<endl;
-			delete func;
 		}
 		else
 		{
