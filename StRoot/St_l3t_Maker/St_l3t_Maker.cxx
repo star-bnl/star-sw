@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.36 2000/07/31 20:50:29 flierl Exp $
+// $Id: St_l3t_Maker.cxx,v 1.37 2000/08/18 16:52:40 yepes Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -78,7 +78,6 @@
 #include "St_DataSetIter.h"
 #include "St_XDFFile.h"
 #include "StDedxDefinitions.h"
-#include "tpc/St_tpt_Module.h"
 #include "tables/St_dst_track_Table.h"
 #include "tables/St_dst_dedx_Table.h"
 #include "FtfSl3.h"
