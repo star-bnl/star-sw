@@ -1,5 +1,8 @@
-// $Id: StFtpcPrimaryMaker.cxx,v 1.4 2001/04/25 17:23:50 perev Exp $
+// $Id: StFtpcPrimaryMaker.cxx,v 1.5 2001/05/03 15:02:57 jcs Exp $
 // $Log: StFtpcPrimaryMaker.cxx,v $
+// Revision 1.5  2001/05/03 15:02:57  jcs
+// change number of refitter arguments
+//
 // Revision 1.4  2001/04/25 17:23:50  perev
 // HPcorrs
 //
@@ -121,7 +124,8 @@ Int_t StFtpcPrimaryMaker::Make(){
 // Refit FTPC tracks with primary vertex
 
     StFtpcVertex *refit_vertex = new StFtpcVertex(primvtx->x,primvtx->y,primvtx->z);
-    StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, points, tracks, 1.);
+    Bool_t bench = (Bool_t)false;
+    StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, points, tracks, bench, 1.);
     refitter->FitAndWrite(tracks,primvtx->id);
     delete refitter;
     delete refit_vertex;
