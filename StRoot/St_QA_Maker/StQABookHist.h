@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.3 1999/11/23 19:00:51 lansdell Exp $ 
+//! $Id: StQABookHist.h,v 1.4 1999/11/29 21:50:38 kathy Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.4  1999/11/29 21:50:38  kathy
+//! remove St_QATestTables_Maker class - not used anywhere; remove SetDraw method from StQABookHist method - not needed
+//!
 //! Revision 1.3  1999/11/23 19:00:51  lansdell
 //! Reorganized Make() and include files (Gene)
 //!
@@ -26,7 +29,7 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.3 1999/11/23 19:00:51 lansdell Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.4 1999/11/29 21:50:38 kathy Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -262,7 +265,7 @@ class StQABookHist : public StMaker {
   
  protected:
 
-   Bool_t drawinit;
+//   Bool_t drawinit;
 
    TString QAHistType;   // character string to prepend to each hist name/title
    TString QAHistName;   // character string for each hist name
@@ -319,11 +322,12 @@ class StQABookHist : public StMaker {
   
  public:
 
-  virtual void   SetDraw(Bool_t drawFlag=kTRUE) {drawinit = drawFlag;}
+
+//  virtual void   SetDraw(Bool_t drawFlag=kTRUE) {drawinit = drawFlag;}
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.3 1999/11/23 19:00:51 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.4 1999/11/29 21:50:38 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };

@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.3 1999/11/23 19:00:51 lansdell Exp $ 
+// $Id: StQABookHist.cxx,v 1.4 1999/11/29 21:50:36 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.4  1999/11/29 21:50:36  kathy
+// remove St_QATestTables_Maker class - not used anywhere; remove SetDraw method from StQABookHist method - not needed
+//
 // Revision 1.3  1999/11/23 19:00:51  lansdell
 // Reorganized Make() and include files (Gene)
 //
@@ -355,7 +358,6 @@ TH2F* StQABookHist::QAH2F(const Text_t* name, const Text_t* title,
 void StQABookHist::BookHistEvSum(){
   
 // for method MakeEvSum - from table event_summary
-  //  m_trk_tot_gd    = QAH1F(   TString::TString("QaEvsumTrkGoodDTotal").Prepend(QAHistType).Data(),"evsum: num good track over total",  50,0.,1.0);
 
   m_trk_tot_gd    = QAH1F("QaEvsumTrkGoodDTotal",
     "evsum: num good track over total",  50,0.,1.0);
