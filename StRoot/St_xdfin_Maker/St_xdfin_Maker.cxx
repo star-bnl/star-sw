@@ -13,11 +13,13 @@
 ClassImp(St_xdfin_Maker)
 
 //_____________________________________________________________________________
-St_xdfin_Maker::St_xdfin_Maker(const char *name, const char *inputFile)
-:StIOInterFace(name)
+  St_xdfin_Maker::St_xdfin_Maker(const char *name, const char *inputFile):
+    StIOInterFace(name),
+    m_InitDone(0)
 {
   if (inputFile && inputFile[0]) SetFile(inputFile);
-  m_InitDone=0;
+  fEvtHddr = new StEvtHddr(m_ConstSet);
+  SetOutput(fEvtHddr);	//Declare this "EvtHddr" for output
 }
 //_____________________________________________________________________________
 St_xdfin_Maker::~St_xdfin_Maker(){
