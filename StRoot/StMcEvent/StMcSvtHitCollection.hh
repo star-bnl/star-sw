@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHitCollection.hh,v 2.0 1999/11/17 02:12:16 calderon Exp $
+ * $Id: StMcSvtHitCollection.hh,v 2.1 1999/11/19 19:06:33 calderon Exp $
  * $Log: StMcSvtHitCollection.hh,v $
+ * Revision 2.1  1999/11/19 19:06:33  calderon
+ * Recommit after redoing the files.
+ *
  * Revision 2.0  1999/11/17 02:12:16  calderon
  * Completely revised for new StEvent
  *
@@ -14,18 +17,27 @@
 #ifndef StMcSvtHitCollection_hh
 #define StMcSvtHitCollection_hh
 
-#include <vector>
-#if !defined(ST_NO_NAMESPACES)
-using namespace std;
-#endif
+#include "StMcSvtLayerHitCollection.hh"
 class StMcSvtHit;
 
-#ifdef ST_NO_TEMPLATE_DEF_ARGS
-typedef vector<StMcSvtHit*, allocator<StMcSvtHit*> >            StMcSvtHitCollection;
-typedef vector<StMcSvtHit*, allocator<StMcSvtHit*> >::iterator  StMcSvtHitIterator;
-#else
-typedef vector<StMcSvtHit*>            StMcSvtHitCollection;
-typedef vector<StMcSvtHit*>::iterator  StMcSvtHitIterator;
-#endif
+class StMcSvtHitCollection {
+public:
+    StMcSvtHitCollection();
+    ~StMcSvtHitCollection();
+    // StMcSvtHitCollection(const StMcSvtHitCollection&);            use default
+    // StMcSvtHitCollection& operator=(const StMcSvtHitCollection&); use default
+    
+    bool          addHit(StMcSvtHit*);
+    unsigned long numberOfHits() const;
+    unsigned int  numberOfLayers() const;
+    
+    StMcSvtLayerHitCollection*       layer(unsigned int);
+    const StMcSvtLayerHitCollection* layer(unsigned int) const;
+
+private:
+    enum { mNumberOfLayers = 6 };
+    StMcSvtLayerHitCollection mLayers[mNumberOfLayers];
+    
+};
 
 #endif

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.0 1999/11/17 02:12:15 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.1 1999/11/19 19:06:31 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.1  1999/11/19 19:06:31  calderon
+ * Recommit after redoing the files.
+ *
  * Revision 2.0  1999/11/17 02:12:15  calderon
  * Completely revised for new StEvent
  *
@@ -22,42 +25,51 @@
 #include "StMcTpcHit.hh"
 #include "StMcFtpcHit.hh"
 #include "StMcSvtHit.hh"
-#include "StMcTrackCollection.hh"
-#include "StMcFtpcHitCollection.hh"
-#include "StMcVertexCollection.hh"
-#include "StMcSvtHitCollection.hh"
-#include "StMcTpcHitCollection.hh"
+#include "tables/St_g2t_event_Table.h"
 
 #include <string>
 #include <utility>
 
-// static const char rcsid[] = "$Id: StMcEvent.cc,v 2.0 1999/11/17 02:12:15 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.1 1999/11/19 19:06:31 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.1 1999/11/19 19:06:31 calderon Exp $";
+
+void StMcEvent::initToZero()
+{
+    
+    mPrimaryVertex = 0;       
+    mTpcHits = 0;             
+    mSvtHits = 0;             
+    mFtpcHits = 0;            
+    
+    // Create the collections
+    
+    mTpcHits = new StMcTpcHitCollection();
+    mSvtHits = new StMcSvtHitCollection();
+    mFtpcHits = new StMcFtpcHitCollection();
+    
+}
 
 StMcEvent::StMcEvent()
 {   cout << "Inside StMcEvent Constructor" << endl;
-    init();
+    initToZero();
 }
 
-StMcEvent::StMcEvent(g2t_event_st& evTable) {
-    init();
-    mEventGeneratorEventLabel = evTable.eg_label;
-    mEventNumber = evTable.n_event; //Check if really need n_event[0] and n_event[1]
-    mRunNumber = evTable.n_run;
-    mZWest = evTable.n_part_prot_west;
-    mNWest = evTable.n_part_neut_west;
-    mZEast = evTable.n_part_prot_east;
-    mNEast = evTable.n_part_neut_east;
-    mImpactParameter = evTable.b_impact;
-    mPhiReactionPlane = evTable.phi_impact;
-    mTriggerTimeOffset = evTable.time_offset;
+StMcEvent::StMcEvent(g2t_event_st* evTable) {
+    
+    mEventGeneratorEventLabel = evTable->eg_label;
+    mEventNumber = evTable->n_event;
+    mRunNumber   = evTable->n_run;
+    mType  = evTable->event_type;
+    mZWest = evTable->n_part_prot_west;
+    mNWest = evTable->n_part_neut_west;
+    mZEast = evTable->n_part_prot_east;
+    mNEast = evTable->n_part_neut_east;
+    mImpactParameter   = evTable->b_impact;
+    mPhiReactionPlane  = evTable->phi_impact;
+    mTriggerTimeOffset = evTable->time_offset;
 
-    StThreeVectorF v;
-#ifdef ST_NO_TEMPLATE_DEF_ARGS
-    cout << "Ignore this line; required to make Sun's lousy compiler work " << v << endl;
-    string dummyString;
-    dummyString = "Ditto!";
-    cout << dummyString << endl;
-#endif
+    initToZero();
+
 }
 
 
@@ -70,49 +82,33 @@ StMcEvent::operator=(const StMcEvent&) { return *this;} // private
 StMcEvent::~StMcEvent()
 {
     cout << "Inside StMcEvent Destructor" << endl; 
-    // Delete hits first
-    if (mTpcHits) for(StMcTpcHitIterator iht=mTpcHits->begin(); iht != mTpcHits->end(); iht++) delete *iht;
-    delete mTpcHits; mTpcHits=0;
+    if (mTpcHits) delete mTpcHits;
+    mTpcHits=0;
     cout << "Deleted Tpc Hits" << endl;
-    if (mSvtHits) for(StMcSvtHitIterator ihs=mSvtHits->begin(); ihs != mSvtHits->end(); ihs++) delete *ihs;
-    delete mSvtHits; mSvtHits=0;
+    if (mSvtHits) delete mSvtHits;
+    mSvtHits=0;
     cout << "Deleted Svt Hits" << endl;
-    if (mFtpcHits) for(StMcFtpcHitIterator ihf=mFtpcHits->begin(); ihf != mFtpcHits->end(); ihf++) delete *ihf;
-    delete mFtpcHits; mFtpcHits=0;
+    if (mFtpcHits) delete mFtpcHits;
+    mFtpcHits=0;
     cout << "Deleted FTpc Hits" << endl;
-    // Then delete tracks
-    if (mTracks) for(StMcTrackIterator it=mTracks->begin(); it != mTracks->end(); it++) delete *it;
-    delete mTracks; mTracks=0;
+    
+    for(StPtrVecMcTrackIterator it=mTracks.begin();
+	it != mTracks.end(); it++)
+	delete *it;    
     cout << "Deleted Tracks" << endl;
-    // Finally, delete vertices
-    if (mVertices) for(StMcVertexIterator iv=mVertices->begin(); iv != mVertices->end(); iv++) delete *iv;
-    delete mVertices; mVertices=0;
+    
+    for(StPtrVecMcVertexIterator iv=mVertices.begin();
+	iv != mVertices.end(); iv++)
+	delete *iv;
     cout << "Deleted Vertices" << endl;
-}
-
-void StMcEvent::init()
-{
-    
-    mPrimaryVertex = 0;       
-    mVertices = 0;            
-    mTracks = 0;  
-    mTpcHits = 0;             
-    mSvtHits = 0;             
-    mFtpcHits = 0;            
-    
-    // Create the collections
-    
-    mTracks = new StMcTrackCollection();
-    mVertices = new StMcVertexCollection();
-    mTpcHits = new StMcTpcHitCollection();
-    mSvtHits = new StMcSvtHitCollection();
-    mFtpcHits = new StMcFtpcHitCollection();
-    
 }
 
 int StMcEvent::operator==(const StMcEvent& e) const
 {
-  return e.mEventNumber == mEventNumber;  // check if we need to do it like e.mEventNumber.first ...
+  return (e.mEventNumber == mEventNumber &&
+	  e.mRunNumber   == mRunNumber &&
+	  e.mType        == mType
+	  );  
 }
 
 int StMcEvent::operator!=(const StMcEvent& e) const
@@ -122,24 +118,24 @@ int StMcEvent::operator!=(const StMcEvent& e) const
 
 ostream&  operator<<(ostream& os, const StMcEvent& e)
 {
-    os << "Label: " << e.eventGeneratorEventLabel() << endl; 
-    os << "Id: " << e.eventNumber() << endl;
-    os << "Run: " << e.runNumber() << endl;
-    
+    os << "Label : " << e.eventGeneratorEventLabel() << endl; 
+    os << "Run   : " << e.runNumber() << endl;
+    os << "Id    : " << e.eventNumber() << endl;
+    os << "Type  : " << e.type() << endl;
+    os << "Impact Parameter : " << e.impactParameter() << endl;
+    os << "Phi Reaction Pl. : " << e.phiReactionPlane() << endl;
+    os << "Trig. Time Offset: " << e.triggerTimeOffset() << endl;
     return os;
 }
 
 
 void StMcEvent::setEventGeneratorEventLabel(unsigned long val) { mEventGeneratorEventLabel = val; }
 
-
-void StMcEvent::setEventNumber(unsigned long  val)
-{
-  mEventNumber = val;  //check if we need to do it like mEventNumber.first ...  and const pair<long,long>& val
-}
-
+void StMcEvent::setEventNumber(unsigned long  val) { mEventNumber = val;  }
 
 void StMcEvent::setRunNumber(unsigned long val) { mRunNumber = val; }                
+
+void StMcEvent::setType(unsigned long val) { mType = val; }              
 
 void StMcEvent::setZWest(unsigned long val) { mZWest = val; }              
 
@@ -155,19 +151,22 @@ void StMcEvent::setPhiReactionPlane(float val) { mPhiReactionPlane = val; }
 
 void StMcEvent::setTriggerTimeOffset(float val) { mTriggerTimeOffset = val; }
 
-void StMcEvent::setPrimaryVertex(StMcVertex* val) {
-  mPrimaryVertex = val;
-  
-}
+void StMcEvent::setPrimaryVertex(StMcVertex* val) {  mPrimaryVertex = val; }
 
-void StMcEvent::setVertexCollection(StMcVertexCollection* val) { mVertices = val; }               
+void StMcEvent::setTpcHitCollection(StMcTpcHitCollection* val)
+{   
+    if (mTpcHits && mTpcHits!= val) delete mTpcHits;
+    mTpcHits = val;
+}               
 
-void StMcEvent::setTrackCollection(StMcTrackCollection* val) { mTracks = val; }                
+void StMcEvent::setSvtHitCollection(StMcSvtHitCollection* val)
+{
+    if (mSvtHits && mSvtHits!= val) delete mSvtHits;
+    mSvtHits = val;
+}               
 
-void StMcEvent::setTpcHitCollection(StMcTpcHitCollection* val) { mTpcHits = val; }               
-
-void StMcEvent::setSvtHitCollection(StMcSvtHitCollection* val) { mSvtHits = val; }               
-
-void StMcEvent::setFtpcHitCollection(StMcFtpcHitCollection* val) { mFtpcHits = val; }              
-
-
+void StMcEvent::setFtpcHitCollection(StMcFtpcHitCollection* val)
+{
+    if (mFtpcHits && mFtpcHits!= val) delete mFtpcHits;
+    mFtpcHits = val;
+}              

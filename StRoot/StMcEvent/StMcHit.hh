@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.hh,v 2.0 1999/11/17 02:12:16 calderon Exp $
+ * $Id: StMcHit.hh,v 2.1 1999/11/19 19:06:33 calderon Exp $
  * $Log: StMcHit.hh,v $
+ * Revision 2.1  1999/11/19 19:06:33  calderon
+ * Recommit after redoing the files.
+ *
  * Revision 2.0  1999/11/17 02:12:16  calderon
  * Completely revised for new StEvent
  *
@@ -18,11 +21,12 @@
 #define StMcHit_hh
 
 #include <iostream.h>
-#include "tables/St_g2t_hits_Table.h"
+#include "StDbUtilities/StGlobalCoordinate.hh"
 
 class StMcTrack;
-class StThreeVectorF;
-class StMcHit {
+class g2t_hits_st;
+
+class StMcHit : public StGlobalCoordinate {
 public:
     StMcHit();
     StMcHit(const StThreeVectorF&,
@@ -39,28 +43,23 @@ public:
 
   // "Get" Methods
 
-    virtual const StThreeVectorF& position() const;
     virtual float                       dE() const;
     virtual float                       dS() const;
     virtual StMcTrack*                  parentTrack() const;	
 
   // "Set" Methods
 
-    virtual void setPosition(const StThreeVectorF&);
     virtual void setdE(float);
     virtual void setdS(float);
     virtual void setParentTrack(StMcTrack*);
     
 protected:
-    StThreeVectorF       mPosition;
     float                mdE;
     float                mdS;
     StMcTrack*           mParentTrack;
 };
 
 ostream&  operator<<(ostream& os, const StMcHit&);
-
-inline const StThreeVectorF& StMcHit::position() const { return mPosition; }
 
 inline float StMcHit::dE() const { return mdE; }
 

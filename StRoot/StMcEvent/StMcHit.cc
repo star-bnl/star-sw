@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.cc,v 2.0 1999/11/17 02:12:16 calderon Exp $
+ * $Id: StMcHit.cc,v 2.1 1999/11/19 19:06:32 calderon Exp $
  * $Log: StMcHit.cc,v $
+ * Revision 2.1  1999/11/19 19:06:32  calderon
+ * Recommit after redoing the files.
+ *
  * Revision 2.0  1999/11/17 02:12:16  calderon
  * Completely revised for new StEvent
  *
@@ -11,13 +14,12 @@
  *
  *
  **************************************************************************/
-#include "StThreeVectorF.hh"
-
 #include "StMcHit.hh"
 #include "StMcTrack.hh"
 
+#include "tables/St_g2t_hits_Table.h"
 
-static const char rcsid[] = "$Id: StMcHit.cc,v 2.0 1999/11/17 02:12:16 calderon Exp $";
+static const char rcsid[] = "$Id: StMcHit.cc,v 2.1 1999/11/19 19:06:32 calderon Exp $";
 
 StMcHit::StMcHit()
 {
@@ -29,7 +31,7 @@ StMcHit::StMcHit()
 
 StMcHit::StMcHit(const StThreeVectorF& p,
 		 float de, float ds, StMcTrack* parent)
-    : mPosition(p), mdE(de), mdS(ds), mParentTrack(parent)
+    : StGlobalCoordinate(p), mdE(de), mdS(ds), mParentTrack(parent)
 { /* noop */ }
 
 StMcHit::StMcHit(g2t_hits_st* pt)
@@ -57,8 +59,6 @@ int StMcHit::operator!=(const StMcHit& h) const
 {
     return !(*this == h);  // use operator==()
 }
-
-void StMcHit::setPosition(const StThreeVectorF& val) { mPosition = val; }
 
 void StMcHit::setdE(float val) { mdE = val; }
 
