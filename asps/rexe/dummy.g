@@ -42,5 +42,4 @@ subroutine hplopt;              print *,' dummy hplopt called ';          end
 subroutine TDM_NEW_TABLE;              print *,' dummy TDM_NEW_TABLE called ';          end
 subroutine AMI_CALL;              print *,' dummy AMI_CALL called ';          end
 subroutine dui_cdir;              print *,' dummy dui_cdir called ';          end
-subroutine agfpara;              print *,' dummy agfpara called ';          end
 
