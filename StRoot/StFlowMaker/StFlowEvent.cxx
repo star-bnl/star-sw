@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.5 2000/05/16 20:59:29 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.6 2000/05/20 00:55:13 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.6  2000/05/20 00:55:13  posk
+// Condensed flownanoevent.root somewhat.
+//
 // Revision 1.5  2000/05/16 20:59:29  posk
 // Voloshin's flownanoevent.root added.
 //
@@ -76,10 +79,6 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include <math.h>
-//#include <algorithm>
-//#if !defined(ST_NO_NAMESPACES)
-//using std::random_shuffle;
-//#endif
 #include "StFlowEvent.h"
 #include "StFlowTrackCollection.h"
 #include "StFlowSelection.h"
@@ -213,10 +212,13 @@ TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
 Float_t StFlowEvent::Psi(StFlowSelection* pFlowSelect) {
   Int_t  harN = pFlowSelect->Har();
   float order = (float)(harN + 1);
+  Float_t psi = 0.;
 
   TVector2 mQ = Q(pFlowSelect);
-  Float_t psi= mQ.Phi() / order;
-  if (psi < 0.) {psi += twopi / order;}
+  if (mQ.Mod()) {
+    psi= mQ.Phi() / order;
+    if (psi < 0.) { psi += twopi / order; }
+  }
   
   return psi;
 }
@@ -267,8 +269,6 @@ void StFlowEvent::MakeSubEvents() {
   StFlowTrackIterator itr;
   int eventMult[Flow::nHars][Flow::nSels] = {{0}};
   int harN, selN, subN = 0;
-
-  //  random_shuffle(TrackCollection()->begin(), TrackCollection()->end());
 
   // loop to count the total number of tracks for each selection
   for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.4 2000/05/16 20:59:35 posk Exp $
+// $Id: StFlowTrack.h,v 1.5 2000/05/20 00:55:20 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.5  2000/05/20 00:55:20  posk
+// Condensed flownanoevent.root somewhat.
+//
 // Revision 1.4  2000/05/16 20:59:35  posk
 // Voloshin's flownanoevent.root added.
 //
@@ -77,7 +80,7 @@ public:
   Float_t       Pt()         const;
   Short_t       Charge()     const;
   Float_t       Dca()        const;
-  Double_t      Chi2()       const;
+  Float_t       Chi2()       const;
   Int_t         FitPts()     const;
   Int_t         MaxPts()     const;
   Int_t Select(Int_t harmonic, Int_t selection, Int_t subevent= -1) const;
@@ -91,7 +94,7 @@ public:
   void SetPt(Float_t);
   void SetCharge(Short_t);
   void SetDca(Float_t);
-  void SetChi2(Double_t);
+  void SetChi2(Float_t);
   void SetFitPts(Int_t);
   void SetMaxPts(Int_t);
   void SetSelect(Int_t harmonic, Int_t selection);
@@ -99,34 +102,34 @@ public:
 
 private:
 
-  Float_t  mPidPiPlus;
-  Float_t  mPidPiMinus;
-  Float_t  mPidProton;
-  Char_t   mPid[10];
-  Float_t  mPhi;
-  Float_t  mEta;
-  Float_t  mPt;
-  Short_t  mCharge;
-  Float_t  mDca;
-  Double_t mChi2;
-  Int_t    mFitPts;
-  Int_t    mMaxPts;
-  Int_t    mSelection;
-  Int_t    mSubevent[Flow::nHars][Flow::nSels];
+  Int_t   mPidPiPlus;
+  Int_t   mPidPiMinus;
+  Int_t   mPidProton;
+  Char_t  mPid[10];
+  Float_t mPhi;
+  Float_t mEta;
+  Float_t mPt;
+  Short_t mCharge;
+  Int_t   mDca;
+  Int_t   mChi2;
+  Int_t   mFitPts;
+  Int_t   mMaxPts;
+  Int_t   mSelection;
+  Short_t mSubevent[Flow::nHars][Flow::nSels];
 
-  ClassDef(StFlowTrack, 1)                    // macro for rootcint
+  ClassDef(StFlowTrack, 1)                     // macro for rootcint
 };
 
-inline Float_t  StFlowTrack::PidPiPlus()  const { return mPidPiPlus; }
-inline Float_t  StFlowTrack::PidPiMinus() const { return mPidPiMinus; }
-inline Float_t  StFlowTrack::PidProton()  const { return mPidProton; }
+inline Float_t  StFlowTrack::PidPiPlus()  const { return mPidPiPlus/1000.; }
+inline Float_t  StFlowTrack::PidPiMinus() const { return mPidPiMinus/1000.; }
+inline Float_t  StFlowTrack::PidProton()  const { return mPidProton/1000.; }
 inline const Char_t* StFlowTrack::Pid()   const { return mPid; }
 inline Float_t  StFlowTrack::Phi()        const { return mPhi; }                
 inline Float_t  StFlowTrack::Eta()        const { return mEta; }                
 inline Float_t  StFlowTrack::Pt()         const { return mPt; }                
 inline Short_t  StFlowTrack::Charge()     const { return mCharge; }   
-inline Float_t  StFlowTrack::Dca()        const { return mDca; }
-inline Double_t StFlowTrack::Chi2()       const { return mChi2; }                
+inline Float_t  StFlowTrack::Dca()        const { return mDca/1000.; }
+inline Float_t  StFlowTrack::Chi2()       const { return mChi2/100.; } 
 inline Int_t    StFlowTrack::FitPts()     const { return mFitPts; }  
 inline Int_t    StFlowTrack::MaxPts()     const { return mMaxPts; }  
 
@@ -139,24 +142,26 @@ inline Int_t    StFlowTrack::Select(Int_t harmonic, Int_t selection,
   return kFALSE;         
 }
 
-inline void StFlowTrack::SetPidPiPlus(Float_t pid)  { mPidPiPlus = pid; }
-inline void StFlowTrack::SetPidPiMinus(Float_t pid) { mPidPiMinus = pid; }
-inline void StFlowTrack::SetPidProton(Float_t pid)  { mPidProton = pid; }
+inline void StFlowTrack::SetPidPiPlus(Float_t pid)  { mPidPiPlus = 
+							(Int_t)(pid*1000.); }
+inline void StFlowTrack::SetPidPiMinus(Float_t pid) { mPidPiMinus =
+							(Int_t)(pid*1000.); }
+inline void StFlowTrack::SetPidProton(Float_t pid)  { mPidProton = 
+							(Int_t)(pid*1000.); }
 inline void StFlowTrack::SetPid(const Char_t* pid)  { strncpy(mPid, pid, 9);
  mPid[9] = '\0'; }
 inline void StFlowTrack::SetPhi(Float_t phi)        { mPhi = phi; }              
 inline void StFlowTrack::SetEta(Float_t eta)        { mEta = eta; }              
 inline void StFlowTrack::SetPt(Float_t pt)          { mPt = pt; }              
 inline void StFlowTrack::SetCharge(Short_t charge)  { mCharge = charge; }     
-inline void StFlowTrack::SetDca(Float_t b)          { mDca = b; }   
-inline void StFlowTrack::SetChi2(Double_t chi2)     { mChi2 = chi2; }
-inline void StFlowTrack::SetFitPts(Int_t fitPts)    { mFitPts = fitPts; }      
-inline void StFlowTrack::SetMaxPts(Int_t maxPts)    { mMaxPts = maxPts; }      
+inline void StFlowTrack::SetDca(Float_t dca)        { mDca = (Int_t)(dca*1000.); }
+inline void StFlowTrack::SetChi2(Float_t chi2)      { mChi2 = (Int_t)(chi2*100.); }
+inline void StFlowTrack::SetFitPts(Int_t fitPts)    { mFitPts = fitPts; }
+inline void StFlowTrack::SetMaxPts(Int_t maxPts)    { mMaxPts = maxPts; }
 
 inline void StFlowTrack::SetSelect(Int_t harmonic, Int_t selection) {
   int bitShift = harmonic + Flow::nHars * selection;
-  mSelection |= 1 << bitShift; 
-}
+  mSelection |= 1 << bitShift; }
 
 inline void StFlowTrack::SetSubevent(Int_t harmonic, Int_t selection,
  Int_t subevent) { mSubevent[harmonic][selection] = subevent; }
