@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.12 1999/08/02 14:43:25 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.13 1999/08/03 14:50:02 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.13  1999/08/03 14:50:02  fine
+// Clean up
+//
 // Revision 1.12  1999/08/02 14:43:25  fine
 // Vertices collection has been introduced, more simple geometry
 //
@@ -173,7 +176,7 @@ Int_t StEventDisplayMaker::BuildGeometry()
   St_Node *sector = 0;
   while ( (sector = ( St_Node *)volume()) ){
       if (strcmp(sector->GetName(),"TPSS") ) continue;
-      sector->SetVisibility(1);
+      sector->SetVisibility(St_Node::kSonUnvisible);
       TTUBE *tubs = (TTUBE *)sector->GetShape();
       tubs->SetNumberOfDivisions(1);
   }
@@ -563,7 +566,7 @@ Int_t StEventDisplayMaker::MakeHits(const StObjArray *eventCollection,StVirtualE
        if (!pp && hitCounter) {
           printf(" no track position %d\n",hitCounter);
        }
-       return hitColor;
+       return hitsPoints->Size(); // hitColor;
     }
   }
   return 0;
