@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.43 2001/05/29 22:04:08 dunlop Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.44 2001/06/22 15:00:38 jeromel Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.44  2001/06/22 15:00:38  jeromel
+ * Removed unused variables cosineOfD and oldsigma
+ *
  * Revision 2.43  2001/05/29 22:04:08  dunlop
  * Made sure to clear mListOfRichTracks, even if event doesn't pass cuts.
  * Removes segvio
@@ -303,7 +306,7 @@ using std::less;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.43 2001/05/29 22:04:08 dunlop Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.44 2001/06/22 15:00:38 jeromel Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -1206,7 +1209,7 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	double olddist  = ((outerDistance/ringWidth > 1 &&
 			    (innerDistance/ringWidth < outerDistance/ringWidth )) ? 
 			   (-1.0):(1.0))*innerDistance/ringWidth;
-	double oldsigma = this->getHitSigma(olddist);
+//	double oldsigma = this->getHitSigma(olddist);
 	  
 
 	photonNumber++;
@@ -1609,7 +1612,7 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 		
 	int signOfD = sign(lengthOfD*hitDVector);
 		
-	float cosineOfD = lengthOfD.unit()*hitDVector.unit();
+//	float cosineOfD = lengthOfD.unit()*hitDVector.unit();
 //  	os << "cosineOfD " << cosineOfD << endl;
 
 	double normalizedD = signOfD * (abs(hitDVector)/abs(lengthOfD));		
