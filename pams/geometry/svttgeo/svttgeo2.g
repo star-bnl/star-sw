@@ -1,6 +1,10 @@
-* $Id: svttgeo2.g,v 1.5 2003/11/13 00:23:05 potekhin Exp $
+* $Id: svttgeo2.g,v 1.6 2004/02/05 20:50:56 potekhin Exp $
 *
 * $Log: svttgeo2.g,v $
+* Revision 1.6  2004/02/05 20:50:56  potekhin
+* Assign the 150um to the radial offset in the wafer position,
+* as desided earlier
+*
 * Revision 1.5  2003/11/13 00:23:05  potekhin
 * We need to accomodate the pixel detector
 * hence the beampipe support AND the inner
@@ -153,6 +157,10 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
       radii(4)=11.27
       radii(5)=14.19
       radii(6)=15.13
+** Important: the radial offset -- we position by the center of the volume,
+** hence half the wafer thicknes should be added. Remember to change it if
+** it will ever be anyhting other than 300 um.
+      rad_offset=0.015
 ***************************
       shield_phi(1)=9.0
       shield_phi(2)=27.0
