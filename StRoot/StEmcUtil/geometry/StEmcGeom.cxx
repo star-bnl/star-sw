@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.4 2003/09/02 17:58:01 perev Exp $
+ * $Id: StEmcGeom.cxx,v 1.5 2004/08/19 17:31:45 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.5  2004/08/19 17:31:45  pavlinov
+ * getBin(const Float_t phi, const Float_t eta, Int_t &m,Int_t &e,Int_t &s) works bsmde too - request of Dmitry Arkhipkin
+ *
  * Revision 1.4  2003/09/02 17:58:01  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -235,8 +238,10 @@ void StEmcGeom::initGeom(const Int_t det)
     initESMDP();
     break;
   default:
-    printf(" StEmcGeom: Bad value of mDtector %i \n", mDetector);
+    printf(" StEmcGeom: Bad value of mDetector %i \n", mDetector);
+    assert(0);
   }
+  mGeom[det-1] = this; // 19-aug-04
 }
 // _____________________________________________________________________
 StEmcGeom::StEmcGeom(const Int_t det, const Char_t *mode) 
@@ -301,6 +306,7 @@ StEmcGeom::defineDefaultCommonConstants()
   // Common information for all detectors
   mNModule  = 120;
   mEtaMax   = 0.99;
+  mEtaMin   = 0.0;
 
   mPhiOffset[0] = (75.-3.)/ 180. * C_PI;
   mPhiOffset[1] = (105.+3.)/180. * C_PI;
@@ -319,6 +325,7 @@ StEmcGeom::defineCommonConstants()
   Float_t lW[2], smdW;
   mNModule      = 120;  // mCalg_st->maxmodul;
   mEtaMax       = 0.99; // mCalg_st->etacut;  ?? Why 1.0 in geometry
+  mEtaMin       = 0.0;
 
   mPhiStepHalf  = 360. / (Float_t)mNModule; // in degree
 
@@ -386,7 +393,7 @@ StEmcGeom::initBEMCorBPRS()
   // Eta variable ( Z direction)
   mEtaB.Set(mNEta+1); Int_t i;
 
-  for(i=0; i<mNEta; i++) {mEtaB[i] = 0.05*i;} mEtaB[mNEta]=mEtaMax;;
+  for(i=0; i<mNEta; i++) {mEtaB[i] = 0.05*i;} mEtaB[mNEta]=mEtaMax;
 
   for(i=0; i< mNEta; i++){
     mEta[i]    = (mEtaB[i+1] + mEtaB[i])/2.;
@@ -456,6 +463,9 @@ void StEmcGeom::initBSMDE(){
     mEtaB[i] = -::log(tan(atan2(mRadius,zb[i])/2.0));
   }
   mEtaB[mNEta] = -::log(tan(atan2(mRadius,zb[mNEta])/2.0));
+  // 19-aug-2004 ; request of Dmitry Arkhipkin
+  mEtaMin = mEtaB[0];
+  mEtaMax = mEtaB[mNEta];
 
   // Phi variable ( Y direction)
   mYlocal.Set(mNSub); mYlocal[0] = 0.0;
@@ -794,6 +804,7 @@ void  StEmcGeom::printGeom()
   cout<<" mNRaw      "<<mNRaw<<endl;
   cout<<" mRadius    "<<mRadius<<endl;
   cout<<" mYWidth    "<<mYWidth<<endl;
+  cout<<" mEtaMin    "<<mEtaMin<<endl;
   cout<<" mEtaMax    "<<mEtaMax<<endl;
   cout<<" mPhiOffset "<<mPhiOffset[0]<<"("<<toDeg(mPhiOffset[0])<<")   "
       <<mPhiOffset[1]<<"("<<toDeg(mPhiOffset[0])<<")"<<endl;
