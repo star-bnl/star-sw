@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.cxx,v 1.4 1999/03/12 15:27:32 perev Exp $
+// $Id: St_l3t_Maker.cxx,v 1.5 1999/04/17 22:37:34 fisyak Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.5  1999/04/17 22:37:34  fisyak
+// remove annoying printf
+//
 // Revision 1.4  1999/03/12 15:27:32  perev
 // New maker schema
 //
@@ -198,7 +201,7 @@ void St_l3t_Maker::MakeHistograms() {
     Int_t flag    = r->flag;
     Float_t rnrec = r->nrec;
 //Unused    Float_t rnfit = r->nfit;
-    printf(" iflag %d ", flag ) ;
+    //    printf(" iflag %d \n", flag ) ;
 
     if(flag<=0) continue;
 
@@ -212,7 +215,7 @@ void St_l3t_Maker::MakeHistograms() {
 //_____________________________________________________________________________
 void St_l3t_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_l3t_Maker.cxx,v 1.4 1999/03/12 15:27:32 perev Exp $\n");
+  printf("* $Id: St_l3t_Maker.cxx,v 1.5 1999/04/17 22:37:34 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
