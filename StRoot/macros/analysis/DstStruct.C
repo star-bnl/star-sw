@@ -1,4 +1,4 @@
-// $Id: DstStruct.C,v 3.4 2000/08/15 15:24:48 fine Exp $
+// $Id: DstStruct.C,v 3.5 2000/08/16 23:19:16 fine Exp $
 
 #include <iomanip.h>
 class StChain;
@@ -55,6 +55,9 @@ void DstStruct(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
   // Loop over events
   if (!numberOfEvents) numberOfEvents = 9999;
   int counter = numberOfEvents;
+  Float_t total = 0;
+  Float_t totalPoints = 0;
+  TStopwatch readTimer;
   for (iev = 0; iev < counter; iev++) {         // goto loop code
      chain->Clear();
      iret = chain->Make();
@@ -81,12 +84,16 @@ void DstStruct(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
           cout << setfill(' ');
 
          while (nextDs = (TDataSet *)next()){
-          if (!strcmp(nextDs->GetName(),"RunEvent")) {continue;}
+	   const char *thisName = nextDs->GetName();
+          if (!strcmp(thisName,"RunEvent")) {continue;}
           TTable &t = *(TTable *)nextDs;
+	  Float_t thisSize = t.GetTableSize()*t.GetRowSize();
+	  total += thisSize;
+	  if (!strcmp(thisName,"point")) totalPoints += thisSize;
           cout << setw(15) << t.GetName() 
                << setw(25) << t.GetType() 
                << setw(10) << t.GetNRows() 
-               << setw(14) << setprecision(3) << t.GetTableSize()*t.GetRowSize()/1024.
+               << setw(14) << setprecision(3) << thisSize/1024.
                << setw(3)  << "Kb"
                << endl;
          }
@@ -113,10 +120,26 @@ void DstStruct(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
      cout << " =================  END OF EVENT " << iev+1 << "  ================= " << endl << endl;
   }
   if (iev) { 
-    cout << endl << 
-   " *** DstStruct.C -- Total: " << iev << 
-   " events starting from " << firstEvent << " have been printed out" << endl << endl; 
-  }
+     Float_t kBytes = total/1024;
+     Float_t thisTime = readTimer->RealTime();
+    cout << endl 
+         << " *** DstStruct.C "
+	 << endl 
+	 << " \t-- Total: " 
+	 << iev 
+	 << " events ("  
+	 << iev/thisTime
+	 << " events/sec);  "
+	 << setprecision(5) << total/1024. 
+	 << " Kbytes ("
+	 << kBytes/thisTime 
+	 << " Kbytes/sec); "
+	 << endl
+	 << "----------- \tstarting from " 
+	 << firstEvent 
+	 << " have been printed out" 
+	 << endl << endl;
+}
   else {
     cout << "DstStruct.C - no events were printed" << endl;
   }
@@ -124,7 +147,9 @@ void DstStruct(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
        << endl 
        << "      Web site for further information" 
        << endl << endl;
-
+  cout << "Total:" << total/1024. << " KBytes,  total hits: " 
+       << totalPoints/1024. << "  Kbytes, hits/total: "<< 100*totalPoints/total << " %"
+       << endl; 
   chain->Finish();   
 }
 
@@ -140,7 +165,7 @@ void DstStruct(Int_t numbertOfEvents)
 
 //__________________________________________________________________________
 void DstStruct(const char *MainFile, Int_t numbertOfEvents)
-{   DstStruct(firstEvent,numbertOfEvents,MainFile);  }
+{   DstStruct(1,numbertOfEvents,MainFile);  }
 
 //__________________________________________________________________________
 void DstStruct(Int_t firstEvent, const char *MainFile)
@@ -153,6 +178,9 @@ void DstStruct(const char *MainFile="/afs/rhic/star/data/samples/gstar.dst.root"
 //__________________________________________________________________________
 //__________________________________________________________________________
 // $Log: DstStruct.C,v $
+// Revision 3.5  2000/08/16 23:19:16  fine
+// Clean up
+//
 // Revision 3.4  2000/08/15 15:24:48  fine
 // new output format
 //
