@@ -437,7 +437,7 @@ C----------------------------------------------------------------------
       REAL	xc1(2),xc2(2),r1,r2,r1sq,r2sq
       REAL	x(2),y(2),om1,om2,ph1,ph2
       REAL	a,b,c,d,dia,dtouch,cut
-      REAL	asq_plus_bsq,r1sq_minus_om1sq,r1_dia
+      REAL	asq_plus_bsq,r1sq_minus_om1sq,r1_dia,r1sq_minus_om2sq
       REAL	ph1_plus_a_sq,ph2_plus_a_sq,om_1,om_2
       REAL	om1_plus_b_sq_minus_r2sq,om2_plus_b_sq_minus_r2sq
 C---clear variables cleared before entering routine--------------------
