@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.h,v 1.4 2003/07/02 20:55:03 geurts Exp $
+ * $Id: StTofGeometry.h,v 1.5 2004/06/09 21:26:32 dongx Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.h,v $
+ * Revision 1.5  2004/06/09 21:26:32  dongx
+ * add function projTrayVector(..) to increase the matching speed
+ *
  * Revision 1.4  2003/07/02 20:55:03  geurts
  * changed all InitXXX() methods from private to public
  *
@@ -36,6 +39,16 @@
 #include <vector>
 #ifndef ST_NO_NAMESPACES
 using std::vector;
+#endif
+
+#if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
+typedef vector<Int_t>  IntVec;
+typedef vector<Double_t>  DoubleVec;
+typedef vector<StThreeVectorD> PointVec;
+#else
+typedef vector<Int_t, allocator<Int_t>>  IntVec;
+typedef vector<Double_t, allocator<Double_t>>  DoubleVec;
+typedef vector<StThreeVectorD, allocator<StThreeVectorD>> PointVec;
 #endif
 
 class StMaker;
@@ -167,6 +180,9 @@ class StTofGeometry{
   int slatIdToDaq(const Int_t) const;
   idVector slatNeighbours(const int);
   idVector slatNeighboursWide(const int);
+
+  Bool_t  projTrayVector(const StHelixD &helix, IntVec &trayVec) const;
+
 };
 
 
