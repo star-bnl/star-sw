@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.61 2003/10/14 13:27:30 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.62 2003/10/14 13:36:41 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.62  2003/10/14 13:36:41  suaide
+// small change
+//
 // Revision 1.61  2003/10/14 13:27:30  suaide
 // new methods added in order to select either energy of pedestal cut for the SMD
 //
@@ -170,7 +173,7 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
 {
   mDecoder       = 0;
   mControlADCtoE = new controlADCtoE_st();
-  mSMDEidMinus1Bug = kFALSE;
+  mSMDPidMinus1Bug = kFALSE;
   Int_t   calib[]      = {1, 0, 1, 1, 0, 0, 0, 0};
   Int_t   pedSub[]     = {1, 0, 1, 1, 0, 0, 0, 0};
   Float_t cut[]        = {-1, -1, 1.25, 1.25, -1, -1, -1, -1};
@@ -518,7 +521,7 @@ Bool_t StEmcADCtoEMaker::getTables()
               // by AAPSUAIDE 20030908
               //
               int shift = 0;
-              if(date>20021101 && date<20030601) if(det==3 && mSMDEidMinus1Bug) shift = 1;
+              if(date>20021101 && date<20030601) if(det==3 && mSMDPidMinus1Bug) shift = 1;
               /////////////////////////////////////////////////////////////////////
               /////////////////////////////////////////////////////////////////////
              
