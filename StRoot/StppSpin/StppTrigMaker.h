@@ -1,10 +1,12 @@
+//
+// JB 3/30/01 - removed creation of miniDST
 //  modified by JB 2/2/01: trigOnCtb() isolated and upgraded
 // 
 //*-- Author : George , Jan Balewski 
-// $Id: StppTrigMaker.h,v 1.3 2001/04/10 16:28:54 perev Exp $
+// $Id: StppTrigMaker.h,v 1.4 2001/04/12 15:19:09 balewski Exp $
 // $Log: StppTrigMaker.h,v $
-// Revision 1.3  2001/04/10 16:28:54  perev
-// ClassDef(,1) -> "ClassDef ( ,0 )
+// Revision 1.4  2001/04/12 15:19:09  balewski
+// *** empty log message ***
 //
 // Revision 1.2  2001/02/28 19:06:13  balewski
 // some reorganizations
@@ -16,7 +18,7 @@
 //////////////////////////////////////////////////////////////////////////
 //                                                                     
 //  Emulates trigger response for the M-C data
-// 
+//  May work active (m_mode==1) or passive (m_mode=0=default) 
 //                                                                     
 //////////////////////////////////////////////////////////////////////////
 #ifndef STAR_StppTrigMaker
@@ -32,7 +34,6 @@
 #endif
 
 class StEvent;
-class StppMiniDst;
 
 #include "TH2.h"// for histos
 class TH1F;
@@ -41,7 +42,7 @@ class TH2F;
 struct trig_set {
   float CtbTofMax_ns; // (ns)
   float CtbDEnThres_mev; // (MeV)
-  int CtbnSlatMax, CtbnDiPatchMax;
+  int CtbnSlatMin, CtbnDiPatchMin;
 };
 
 class StppTrigMaker : public StMaker 
@@ -62,11 +63,10 @@ class StppTrigMaker : public StMaker
   void trigOnCtb(int&, int&, int&);
   void trigOnMwc(int&, int&);
   int getGeneratedLP(float &, int&, int&);
-  void addMiniDst();
 
-  // static Char_t  m_VersionCVS = "$Id: StppTrigMaker.h,v 1.3 2001/04/10 16:28:54 perev Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StppTrigMaker.h,v 1.4 2001/04/12 15:19:09 balewski Exp $";
  
-  // static Char_t  m_VersionCVS = "$Id: StppTrigMaker.h,v 1.3 2001/04/10 16:28:54 perev Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StppTrigMaker.h,v 1.4 2001/04/12 15:19:09 balewski Exp $";
 
  protected:  //....................................................
   
@@ -74,8 +74,8 @@ class StppTrigMaker : public StMaker
    void Setup(float x1, float x2,  int i1, int i2){
      set.CtbTofMax_ns=x1;
      set.CtbDEnThres_mev=x2;
-     set.CtbnSlatMax=i1;
-     set.CtbnDiPatchMax=i2;
+     set.CtbnSlatMin=i1;
+     set.CtbnDiPatchMin=i2;
    } ;
    StppTrigMaker(const char *name="ppTrig");
    virtual       ~StppTrigMaker();
@@ -83,9 +83,9 @@ class StppTrigMaker : public StMaker
    virtual Int_t  Make();
    int  decision ; // see description 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: StppTrigMaker.h,v 1.3 2001/04/10 16:28:54 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StppTrigMaker.h,v 1.4 2001/04/12 15:19:09 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    
-   ClassDef(StppTrigMaker,0)   //StAF chain virtual base class for Makers
+   ClassDef(StppTrigMaker, 0)   //StAF chain virtual base class for Makers
 };
 
 #endif

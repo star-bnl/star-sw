@@ -1,8 +1,11 @@
 //  modified by JB 2/2/01: trigOnCtb() isolated and upgraded
 // 
 //*-- Author : George , Jan Balewski 
-// $Id: StppTrigMaker.cxx,v 1.2 2001/02/28 19:06:12 balewski Exp $
+// $Id: StppTrigMaker.cxx,v 1.3 2001/04/12 15:19:09 balewski Exp $
 // $Log: StppTrigMaker.cxx,v $
+// Revision 1.3  2001/04/12 15:19:09  balewski
+// *** empty log message ***
+//
 // Revision 1.2  2001/02/28 19:06:12  balewski
 // some reorganizations
 //
@@ -30,10 +33,6 @@
 #include "TH1.h"
 #include "TH2.h"
 
-// for MiniDst
-#include "StEventTypes.h" 
-#include "StppMiniDst.h" 
-
 //for ppTag
 #include "tables/St_ppSpinTag_Table.h"
 
@@ -60,7 +59,7 @@ StppTrigMaker::StppTrigMaker(const char *name):StMaker(name){
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 StppTrigMaker::~StppTrigMaker(){  
-  printf("\"%s\" CTB-trig setup:\n  TOF<%f ns, dEn>%f MeV, nSlat>%d, nDiPatch>%d\n",GetName(),set.CtbTofMax_ns,set.CtbDEnThres_mev,set.CtbnSlatMax,set.CtbnDiPatchMax);
+  printf("\"%s\" CTB-trig setup:\n  TOF<%f ns, dEn>%f MeV, nSlat>=%d, nDiPatch>=%d\n",GetName(),set.CtbTofMax_ns,set.CtbDEnThres_mev,set.CtbnSlatMin,set.CtbnDiPatchMin);
 //  printf(" DDDDDDDDDDDDDD Destructor executed\n");
 }
 
@@ -73,8 +72,7 @@ Int_t StppTrigMaker::Init(){
   //  printf(" ppTR add=%d\n",(int)&decision);
 
   printf("InInInInInInInInInIn    Initialization start \"%s\",  m_Mode=%d... \n", GetName(),m_Mode);
-
-  printf("\"%s\" CTB-trig setup:\n  TOF<%f ns, dEn>%f MeV, nSlat>%d, nDiPatch>%d\n",GetName(),set.CtbTofMax_ns,set.CtbDEnThres_mev,set.CtbnSlatMax,set.CtbnDiPatchMax);
+  printf("\"%s\" CTB-trig setup:\n  TOF<%f ns, dEn>%f MeV, nSlat>=%d, nDiPatch>=%d\n",GetName(),set.CtbTofMax_ns,set.CtbDEnThres_mev,set.CtbnSlatMin,set.CtbnDiPatchMin);
 
   h1 = new TH1F("trg_out","Trigger decision",10, -1.5, 8.5);
   h1->SetXTitle(" trigger ") ;
@@ -83,7 +81,7 @@ Int_t StppTrigMaker::Init(){
   h5 = new TH1F("mwc_fir", "MWC  sectors (all) ", 20, -.5, 19.5);
   h5->SetXTitle(" Number of wires") ;
   h5->SetYTitle("Counts   ") ;
-  
+   
   h6 = new TH1F("mwc_bac"," MWC sectors (-Z)",50, -.5, 49.5);
   h6->SetXTitle(" Number of fired sectors") ;
   h6->SetYTitle(" Counts ") ;
@@ -154,17 +152,12 @@ Int_t StppTrigMaker::Init(){
 Int_t StppTrigMaker::Make(){
  
   cout <<" Mmmmmmmmmmmmmmmmmmmmmm   start maker ::"<<GetName() <<" mode="<<m_Mode<<endl;
-  
-  addMiniDst();
    
   float gpT=-1;
   int nTr1=-2, nTr2=-3;
 
   h1->Fill(-1.);  
 
-  if(getGeneratedLP(gpT,nTr1, nTr2) <0) return kStOK; // no valid pT was found
-  printf("Generated pT=%f, nTr1=%d, nTr2=%d\n",gpT,nTr1,nTr2);
-  
   decision=0;  // clear trigger to FALSE
 
   int ibackMWC=-3, iforwMWC=-4;
@@ -174,24 +167,28 @@ Int_t StppTrigMaker::Make(){
   // start processing the C T B  information
 
   int nSlat=-1, nDiPatch=-2, n1Patch=-3;
-  trigOnCtb(nSlat, nDiPatch, n1Patch);
+  //temp_OFF  trigOnCtb(nSlat, nDiPatch, n1Patch);
 
-  if(nSlat<=set.CtbnSlatMax) return kStOK;
-  if(nDiPatch<=set.CtbnDiPatchMax) return kStOK;
-  //decision+=2;
+  if(nSlat>=set.CtbnSlatMin)   decision+=2;
+  if(nDiPatch<=set.CtbnDiPatchMin)   decision+=4;
+
 
   //     H I S T O G R A M M I N G
+
+  if(getGeneratedLP(gpT,nTr1, nTr2) <0) gpT=0.2;; // no valid pT was found
+  printf("Generated pT=%f, nTr1=%d, nTr2=%d\n",gpT,nTr1,nTr2);
+  
 
   h1->Fill(float( decision));
 
   hge[0]->Fill(gpT);
- ((TH2*) hge[1])->Fill(gpT,nTr1);
- ((TH2*) hge[2])->Fill(gpT,nTr2);
- ((TH2*) hge[3])->Fill(gpT,nSlat);
- ((TH2*) hge[4])->Fill(gpT,nDiPatch);
- ((TH2*) hge[5])->Fill(gpT,n1Patch);
-
- 
+  ((TH2*) hge[1])->Fill(gpT,nTr1);
+  ((TH2*) hge[2])->Fill(gpT,nTr2);
+  ((TH2*) hge[3])->Fill(gpT,nSlat);
+  ((TH2*) hge[4])->Fill(gpT,nDiPatch);
+  ((TH2*) hge[5])->Fill(gpT,n1Patch);
+  
+  
   if(gpT<1) {
     ((TH2*) hctb[6])->Fill(nSlat,nDiPatch);
     ((TH2*) hctb[11])->Fill(n1Patch,nDiPatch);
@@ -208,12 +205,10 @@ Int_t StppTrigMaker::Make(){
     ((TH2*) hctb[9])->Fill(nSlat,nDiPatch);
     ((TH2*) hctb[14])->Fill(n1Patch,nDiPatch);
   } 
-
-  // ppMiniDst  test/update only
-  //StppMiniDst *my2=StppMiniDst::GetppMiniDst(this);  assert(my2);
-  //printf("add=%d, polDir=%d\n",(int)my2, my2->polDir);
-    
+  
   printf("\n \"%s\":  n-MWC=%d, n+MWC=%d CTBnSlat=%d  CTBnDiPatch=%d decision=%d\n",GetName(),ibackMWC,iforwMWC,nSlat,nDiPatch,decision);  
+
+  if(m_Mode==1 && decision==0) return kStErr;
   return kStOK;
 }
 
@@ -413,30 +408,3 @@ int   StppTrigMaker::getGeneratedLP(float &pT, int &nTr1, int &nTr2)
  
   return 0;
 }
-  
-//------------------------------------------------------------------------
-//------------------------------------------------------------------------
-//------------------------------------------------------------------------
-void  StppTrigMaker::addMiniDst()
-{
-  printf("add StppSpinTag ..\n");
-  // Create a data set and add the table to it.
-  St_ppSpinTag *tagtab= new St_ppSpinTag("ppSpinTag",1); 
-  m_DataSet->Add(tagtab);
-  
-  ppSpinTag_st tagrow;
-  //fill default values for the ppSPin Tags
-  tagrow.chargeLeadingParticlePt=-55.;
-  tagtab->AddAt(&tagrow,0);
-  // end of tag initialization
-
-  
-  printf("StppMiniDst STORE..\n");
-  StppMiniDst *my=new StppMiniDst;
-  my->CtbAdcSumChan=888;
-  StEvent *stEvent= (StEvent *) GetInputDS("StEvent");  assert(stEvent);
-  stEvent->content().push_back(my);   
-}
-
-
-
