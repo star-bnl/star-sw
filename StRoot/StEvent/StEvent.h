@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.22 2001/09/18 00:15:25 ullrich Exp $
+ * $Id: StEvent.h,v 2.23 2001/11/07 21:19:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.23  2001/11/07 21:19:42  ullrich
+ * Added L1 trigger.
+ *
  * Revision 2.22  2001/09/18 00:15:25  ullrich
  * Added StRunInfo and access functions.
  *
@@ -106,6 +109,7 @@ class StRichCollection;
 class StTofCollection;
 class StTriggerDetectorCollection;
 class StL0Trigger;
+class StL1Trigger;
 class StL3Trigger;
 class StPrimaryVertex;
 class StRunInfo;
@@ -162,6 +166,8 @@ public:
     
     StL0Trigger*                        l0Trigger();
     const StL0Trigger*                  l0Trigger() const;
+    StL1Trigger*                        l1Trigger();
+    const StL1Trigger*                  l1Trigger() const;
     StL3Trigger*                        l3Trigger();
     const StL3Trigger*                  l3Trigger() const;
     StTriggerDetectorCollection*        triggerDetectorCollection();
@@ -215,6 +221,7 @@ public:
     void setTofCollection(StTofCollection*);
     void setTriggerDetectorCollection(StTriggerDetectorCollection*);
     void setL0Trigger(StL0Trigger*);
+    void setL1Trigger(StL1Trigger*);
     void setL3Trigger(StL3Trigger*);
     void addPrimaryVertex(StPrimaryVertex*);
     void addPsd(StPsd*);

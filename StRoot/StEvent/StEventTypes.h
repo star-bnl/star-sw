@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.16 2001/10/01 19:40:31 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.17 2001/11/07 21:19:43 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.17  2001/11/07 21:19:43  ullrich
+ * Added L1 trigger.
+ *
  * Revision 2.16  2001/10/01 19:40:31  ullrich
  * Added StTofData.
  *
@@ -91,6 +94,7 @@
 #include "StHit.h"
 #include "StKinkVertex.h"
 #include "StL0Trigger.h"
+#include "StL1Trigger.h"
 #include "StL3Trigger.h"
 #include "StL3EventSummary.h"
 #include "StL3AlgorithmInfo.h"
