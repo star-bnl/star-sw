@@ -1,8 +1,11 @@
 //
-// $Id: TestEvalIT.C,v 1.6 2002/06/25 15:09:16 pruneau Exp $
+// $Id: TestEvalIT.C,v 1.7 2002/06/25 21:44:40 pruneau Exp $
 //
 //
 // $Log: TestEvalIT.C,v $
+// Revision 1.7  2002/06/25 21:44:40  pruneau
+// *** empty log message ***
+//
 // Revision 1.6  2002/06/25 15:09:16  pruneau
 // *** empty log message ***
 //
@@ -71,25 +74,101 @@ void Help()
     cout << "       TestEvalIT.C(firstEvtIndex,nevents,\"some_directory\",\"*.dst.root\")" << endl;	
 }
 
-void loadLibrairies(bool doProfile);
+void loadLibrairies(bool doProfile)
+{	
+	cout<<"Loading modules:";
+	gSystem->Load("St_base");
+	gSystem->Load("StChain");
+	gSystem->Load("StUtilities");
+	gSystem->Load("StBFChain"); 
+	gSystem->Load("St_Tables");
+	
+	gSystem->Load("libgen_Tables");
+	gSystem->Load("libsim_Tables");
+	gSystem->Load("libglobal_Tables");
+	gSystem->Load("geometry");
+	gSystem->Load("St_g2t");
+	gSystem->Load("St_geant_Maker");
+	gSystem->Load("StIOMaker");
+	gSystem->Load("StTreeMaker");
+	gSystem->Load("StarClassLibrary");
+	gSystem->Load("St_db_Maker");
+	gSystem->Load("StDbLib");
+	gSystem->Load("StDbBroker");
+	gSystem->Load("StSvtDbMaker");
+	gSystem->Load("StDbUtilities");
+	gSystem->Load("StTpcDb");
+	gSystem->Load("StEvent");
+	gSystem->Load("StEventMaker");
+	gSystem->Load("StEmcUtil"); 
+	gSystem->Load("StMcEvent");
+	gSystem->Load("StMcEventMaker");
+	gSystem->Load("StAssociationMaker");
+	gSystem->Load("StDaqLib");
+	gSystem->Load("StDAQMaker");
+	gSystem->Load("StDetectorDbMaker");
+	gSystem->Load("StSvtClassLibrary");
+	gSystem->Load("StSvtDaqMaker");
+	gSystem->Load("StSvtSimulationMaker");
+	gSystem->Load("StSvtCalibMaker");
+	gSystem->Load("StSvtSeqAdjMaker");
+	//gSystem->Load("StSvtEvalMaker");
+	gSystem->Load("StSvtClusterMaker");
+	cout <<"/StMcEventMaker";	      gSystem->Load("StMcEventMaker");
+	cout <<"/AssociationMaker";     gSystem->Load("StAssociationMaker");
+	cout <<"/Sti";                  gSystem->Load("Sti");
+	cout <<"/StiGui";              	gSystem->Load("StiGui");
+	cout <<"/StiEvaluator";        	gSystem->Load("StiEvaluator");
+	cout <<"/libGui";               gSystem->Load("libGui");
+	cout <<"/StiMaker";           	gSystem->Load("StiMaker");
+	cout <<"/StMiniMcEvent";        gSystem->Load("StMiniMcEvent");
+	cout <<"/StMiniMcMaker";        gSystem->Load("StMiniMcMaker");
+	if(doProfile)
+		{
+			cout <<"/Jprof";
+			gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001");
+			gSystem->Load("libJprof");
+		}
+	cout <<"\nDone.";
+}
 
 
-void TestEvalIT(Int_t, 
-								Int_t, 
-								const Char_t **, 
-								const Char_t *qaflag = "");
 
-void TestEvalIT(Int_t firstEvtIndex, 
-								Int_t nevents=10,
+//void TestEvalIT(Int_t, 
+//								Int_t, 
+//								const Char_t **, 
+//								const Char_t *qaflag = "");
+
 								//const Char_t *path="/star/data13/reco/dev/2002/01/",
 								//const Char_t *path = "/star/data22/ITTF/data/simple_geant/DEV_10_8_01/",
 								//const Char_t *path = "data/simple_geant/DEV_10_8_01/",
+
+void TestEvalIT(Int_t firstEvtIndex=1, 
+								Int_t nevents=10,
 								const Char_t *path= "/star/data17/reco/auau200/hijing/b0_20/standard/year2001/hadronic_on/trs_gl/",
-								
 								const Char_t *file="rcf0183_20_300evts.geant.root",
 								const Char_t *qaflag = "off",
 								const Int_t  wrStEOut = 0,
-								const int    associateStiTrack=1);
+								const int    associateStiTrack=1)
+{
+	if (nevents==-1) 
+		{
+			Help(); 
+			return;
+		}
+	const char *fileListQQ[]={0,0};
+	if (strncmp(path,"GC",2)==0) 
+		fileListQQ=0;
+	else if (path[0]=='-') 
+		fileListQQ[0]=file;
+	else if (!file[0]) 
+		fileListQQ[0]=path;
+	else 
+		fileListQQ[0] = gSystem->ConcatFileName(path,file);
+	TestEvalIT(firstEvtIndex, nevents,fileListQQ,qaflag,wrStEOut,associateStiTrack);
+}
+
+
 
 // ------------------ Here is the actual method -----------------------------------------
 
@@ -97,7 +176,8 @@ void TestEvalIT(Int_t firstEvtIndex,
 								Int_t nevents, 
 								const Char_t **fileList, 
 								const Char_t *qaflag, 
-								const Int_t wrStEOut)
+								const Int_t   wrStEOut,
+								const int     associateStiTrack)
 {
 	Int_t theRunNumber=0;
 	bool simulated = true;
@@ -341,89 +421,5 @@ void TestEvalIT(Int_t firstEvtIndex,
 	 }
 	//chain->Finish();
 	cout << "\n=============== Event "<<i<< " finished ============" << endl;
-}
-
-//--------------------------------------------------------------------------
-
-void TestEvalIT(Int_t firstEvtIndex, 
-								Int_t nevents, 
-								const Char_t *path, 
-								const Char_t *file,
-								const Char_t *qaflag, 
-								const Int_t wrStEOut)
-{
-	if (nevents==-1) { Help(); return;}
-
-	const char *fileListQQ[]={0,0};
-	if (strncmp(path,"GC",2)==0) {
-		fileListQQ=0;
-	} else if (path[0]=='-') {
-		fileListQQ[0]=file;
-	} else if (!file[0]) {
-		fileListQQ[0]=path;
-	} else {
-		fileListQQ[0] = gSystem->ConcatFileName(path,file);
-	}
-
-	TestEvalIT(firstEvtIndex, nevents,fileListQQ,qaflag,wrStEOut);
-}
-
-
-void loadLibrairies(bool doProfile)
-{	
-	cout<<"Loading modules:";
-	gSystem->Load("St_base");
-	gSystem->Load("StChain");
-	gSystem->Load("StUtilities");
-	gSystem->Load("StBFChain"); 
-	gSystem->Load("St_Tables");
-	
-	gSystem->Load("libgen_Tables");
-	gSystem->Load("libsim_Tables");
-	gSystem->Load("libglobal_Tables");
-	gSystem->Load("geometry");
-	gSystem->Load("St_g2t");
-	gSystem->Load("St_geant_Maker");
-	gSystem->Load("StIOMaker");
-	gSystem->Load("StTreeMaker");
-	gSystem->Load("StarClassLibrary");
-	gSystem->Load("St_db_Maker");
-	gSystem->Load("StDbLib");
-	gSystem->Load("StDbBroker");
-	gSystem->Load("StSvtDbMaker");
-	gSystem->Load("StDbUtilities");
-	gSystem->Load("StTpcDb");
-	gSystem->Load("StEvent");
-	gSystem->Load("StEventMaker");
-	gSystem->Load("StEmcUtil"); 
-	gSystem->Load("StMcEvent");
-	gSystem->Load("StMcEventMaker");
-	gSystem->Load("StAssociationMaker");
-	gSystem->Load("StDaqLib");
-	gSystem->Load("StDAQMaker");
-	gSystem->Load("StDetectorDbMaker");
-	gSystem->Load("StSvtClassLibrary");
-	gSystem->Load("StSvtDaqMaker");
-	gSystem->Load("StSvtSimulationMaker");
-	gSystem->Load("StSvtCalibMaker");
-	gSystem->Load("StSvtSeqAdjMaker");
-	//gSystem->Load("StSvtEvalMaker");
-	gSystem->Load("StSvtClusterMaker");
-	cout <<"/StMcEventMaker";	      gSystem->Load("StMcEventMaker");
-	cout <<"/AssociationMaker";     gSystem->Load("StAssociationMaker");
-	cout <<"/Sti";                  gSystem->Load("Sti");
-	cout <<"/StiGui";              	gSystem->Load("StiGui");
-	cout <<"/StiEvaluator";        	gSystem->Load("StiEvaluator");
-	cout <<"/libGui";               gSystem->Load("libGui");
-	cout <<"/StiMaker";           	gSystem->Load("StiMaker");
-	cout <<"/StMiniMcEvent";        gSystem->Load("StMiniMcEvent");
-	cout <<"/StMiniMcMaker";        gSystem->Load("StMiniMcMaker");
-	if(doProfile)
-		{
-			cout <<"/Jprof";
-			gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001");
-			gSystem->Load("libJprof");
-		}
-	cout <<"\nDone.";
 }
 
