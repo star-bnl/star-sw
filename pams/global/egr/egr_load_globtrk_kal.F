@@ -236,7 +236,7 @@ C---  <<<<<<<
       endif
       globtrk(iglob).impact = 0.
       globtrk(iglob).id_start_vertex = 0
-      globtrk(iglob).mathod = 0
+      globtrk(iglob).method = 0
       globtrk(iglob).map(1) = 0
       globtrk(iglob).map(2) = 0
       globtrk(iglob).curvature = abs(C_D_CURVATURE*bfield*

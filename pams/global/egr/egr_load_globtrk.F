@@ -65,7 +65,7 @@ c---<<<<<<<<<<<<<<<<<<<<<<<<
       globtrk(iglob).r0 = abs(gtrk(igtrk).p(2))+
      +     gtrk(igtrk).p(3)
       globtrk(iglob).phi0 = gtrk(igtrk).p(5)*C_DEG_PER_RAD
-     globtrk(iglob).phi0 = AMOD(globtrk(iglob).phi0, 360.0)
+      globtrk(iglob).phi0 = AMOD(globtrk(iglob).phi0, 360.0)
       if( globtrk(iglob).phi0 .lt. .0) then
          globtrk(iglob).phi0 = globtrk(iglob).phi0 + 360.0
       endif
@@ -243,7 +243,7 @@ C---  <<<<<<<
       endif
       globtrk(iglob).impact = 0.
       globtrk(iglob).curvature = gtrk(igtrk).p(2)
-      globtrk(iglob).mathod = 0
+      globtrk(iglob).method = 0
       globtrk(iglob).map(1) = 0
       globtrk(iglob).map(2) = 0
       globtrk(iglob).id_start_vertex = 0
