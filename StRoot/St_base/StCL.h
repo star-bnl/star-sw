@@ -5,8 +5,11 @@
 // The set of methods to work with the plain matrix / vector
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: StCL.h,v 1.5 1999/10/27 23:57:57 fine Exp $
+// $Id: StCL.h,v 1.6 1999/11/09 01:10:46 fine Exp $
 // $Log: StCL.h,v $
+// Revision 1.6  1999/11/09 01:10:46  fine
+// new method int *ucopy(const *int, ...) has been introduced
+//
 // Revision 1.5  1999/10/27 23:57:57  fine
 // Clean up: const has been introduced instead of non-const
 //
@@ -53,6 +56,7 @@
 
 class StCL  {
   public:
+    static int    *ucopy(const int    *a, int    *b, int n);
     static float  *ucopy(const float  *a, float  *b, int n);
     static double *ucopy(const float  *a, double *b, int n);
     static float  *ucopy(const double *a, float  *b, int n);
@@ -341,6 +345,10 @@ inline double *StCL::mxmltr(const double *a, const double *b, double *c, int ni,
 return mxmlrt_0_(1, a, b, c, ni, nj);   }
 
 // ----
+
+//________________________________________________________
+inline int  *StCL::ucopy(const int  *b, int  *a, int n)
+{ if (n <= 0) return 0; memcpy(a,b,n*sizeof(int)); return a;}
 
 //________________________________________________________
 inline float *StCL::ucopy(const float *b, float *a, int n)
