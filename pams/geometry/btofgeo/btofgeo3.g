@@ -107,13 +107,13 @@ Module  BTOFGEO3 is the Geometry of Barrel Trigger / Time Of Flight system
 * -------------------------------------------------------------------------
 *
       Fill BTOG ! Barrel Trigger, CTB/TOF Basic dimensions 
-         Version   = 3         ! geometry version
+         Version   = 4         ! geometry version
          Rmin      = 207.80    ! minimum CTB/TOF system radius (as built)
          Rmax      = 219.5     ! maximum CTB/TOF system radius
          dz        = 246.0     ! CTB/TOF tube half length
          choice    = 5         ! 1=CTB, 2=TOF, 3=25% TOF, 4=1 tray-TOFp, 5=tray-TOFr, 6=Full-TOFr
          posit1    = 32        ! TOFp tray position for choice 4 or 5
-         posit2    = 36        ! TOFr tray position for choice 5 
+         posit2    = 23        ! TOFr tray position for choice 5 
 *
       Fill TRAY ! general tray stats        
          Height    =  8.89      ! tray height(8.89)
