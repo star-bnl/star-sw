@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.13 1999/03/29 23:10:56 snelling Exp $
+* $Id: tph.F,v 1.14 1999/04/07 19:52:04 hardtke Exp $
 * $Log: tph.F,v $
+* Revision 1.14  1999/04/07 19:52:04  hardtke
+* fix last_cluster_index setting
+*
 * Revision 1.13  1999/03/29 23:10:56  snelling
 * auxiliary hit table eliminated
 *
@@ -571,7 +574,6 @@ c     also put q (magnitude of hit) into units of energy loss
            ENDDO
 
           Else if (isec.gt.CurrentSector) then
-           last_cluster_index = jtpcl 
            goto 555           
           Else         ! isec < Current Sector
            continue
@@ -581,6 +583,7 @@ c     also put q (magnitude of hit) into units of energy loss
         enddo
 c
  555    continue
+           last_cluster_index = jtpcl 
         return
         end
 
