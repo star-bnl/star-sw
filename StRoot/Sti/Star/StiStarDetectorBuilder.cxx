@@ -19,33 +19,30 @@ StiStarDetectorBuilder::~StiStarDetectorBuilder()
 
 void StiStarDetectorBuilder::buildDetectors(StMaker&s)
 {
-  string name;
+	string name;
   cout << "StiStarDetectorBuilder::buildDetectors() -I- Started" << endl;
-  //One row
   setNRows(1);
-  //12 Sectors
   setNSectors(0,12);
-
- _pipeMaterial = add(new StiMaterial("Be", 4.,9.012, 1.848, 65.19, 3.) );  
+	float radius = 4.;  // Kai - set this to 1.45
+	float thickness = 0.076;
+  float dPhi=M_PI/6.;
+	float depth = 20.;
+  _pipeMaterial = add(new StiMaterial("Be", 4.,9.012, 1.848, 65.19, 3.) );  
   _vacuumMaterial = add(new StiMaterial("Vaccum",0., 1., 0., 1e30, 0.)  );
   _beamPipeShape = new StiCylindricalShape;
   _beamPipeShape->setName("Star/pipe");
-  _beamPipeShape->setThickness(0.1); // to be checked
-  _beamPipeShape->setHalfDepth( 200.);
-  _beamPipeShape->setOpeningAngle( M_PI/6. );
-  _beamPipeShape->setOuterRadius(4.00);// to be checked
+  _beamPipeShape->setThickness(thickness); // checked
+  _beamPipeShape->setHalfDepth( depth );
+  _beamPipeShape->setOpeningAngle( dPhi );
+  _beamPipeShape->setOuterRadius(radius+thickness/2.);// checked
   add(_beamPipeShape);
-
-  // vacuum+pipe
-  float dPhi=M_PI/6.;
   for(unsigned int sector = 0; sector<12; sector++)
     {
       StiPlacement *p = new StiPlacement;
       p->setZcenter(0.);
-      p->setLayerRadius(4.);
-      p->setNormalRep(sector*dPhi,4.,0.);
+      p->setLayerRadius(radius);
+      p->setNormalRep(sector*dPhi, radius, 0.);
       p->setRegion(StiPlacement::kMidRapidity);
-
       StiDetector *pipeVolume = _detectorFactory->getInstance();
       name="Star/Pipe/Sector_";
       name+=sector;
