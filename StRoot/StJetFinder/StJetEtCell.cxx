@@ -39,16 +39,16 @@ void StJetEtCell::add(const StProtoJet& pj)
 {
     mEt += pj.eT();
     mProtoJet.add(pj);
-	mUpToDate = false;
+    mUpToDate = false;
     //mProtoJet.merge(pj);
 }
 
 void StJetEtCell::add(StJetEtCell* cell)
 {
-	mEt += cell->eT();
+    mEt += cell->eT();
     mCells.push_back(cell);
     cell->setNtimesUsed( cell->nTimesUsed() + 1 );
-	mUpToDate=false;
+    mUpToDate=false;
 }
 
 double StJetEtCell::distance(const StJetEtCell& rhs) const

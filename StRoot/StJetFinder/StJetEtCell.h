@@ -28,42 +28,42 @@ public:
     //simple access
     double eta() const;
     double phi() const;
-    double eT() const;
+    virtual double eT() const;
     double etaMin() const;
     double etaMax() const;
     double phiMin() const;
     double phiMax() const;
     int nTimesUsed() const;
 
-	//Allow jet-finder power to over-ride eT
-	void setEt(double v) {mEt=v;}
+    //Allow jet-finder power to over-ride eT
+    void setEt(double v) {mEt=v;}
 
-	//operators (sort by Et)
-	bool operator>(const StJetEtCell& rhs) const {
-		return mEt > rhs.mEt;
-	}
-	bool operator<(const StJetEtCell& rhs) const {
-		return mEt < rhs.mEt;
-	}
+    //operators (sort by Et)
+    virtual bool operator>(const StJetEtCell& rhs) const {
+	return eT() > rhs.eT();
+    }
+    virtual bool operator<(const StJetEtCell& rhs) const {
+	return eT() < rhs.eT();
+    }
 
-	//equality via cell geometry
-	bool operator==(const StJetEtCell* rhs) const {
-		return ( (*this)==(*rhs) );
-	};
-	bool operator==(const StJetEtCell& rhs) const {
-		return (mEtaMin==rhs.mEtaMin && mEtaMax==rhs.mEtaMax
-			&& mPhiMin==rhs.mPhiMin && mPhiMax==rhs.mPhiMax);
-	};
+    //equality via cell geometry
+    bool operator==(const StJetEtCell* rhs) const {
+	return ( (*this)==(*rhs) );
+    };
+    bool operator==(const StJetEtCell& rhs) const {
+	return (mEtaMin==rhs.mEtaMin && mEtaMax==rhs.mEtaMax
+		&& mPhiMin==rhs.mPhiMin && mPhiMax==rhs.mPhiMax);
+    };
 
-	//access to the centroid.  If mUpToDate==true, just return.  Else calculate, store, return
-	const StFourVec& centroid();
+    //access to the centroid.  If mUpToDate==true, just return.  Else calculate, store, return
+    const StFourVec& centroid();
 
     //action
     virtual void add(const StProtoJet&);
     virtual void add(StJetEtCell* cell);
 
     void setNtimesUsed(int); ///count how many jets ref this cell
-    void clear(); ///internal reset for next pass at jet-finding
+    virtual void clear(); ///internal reset for next pass at jet-finding
 
     //distance measures (to be moved to polymorphic behavior)
     double deltaPhi(const StJetEtCell& rhs) const;
@@ -73,21 +73,21 @@ public:
     //write access to the contents of the cell
     StProtoJet& protoJet() {return mProtoJet;}
 
-	//daugter cells of this one
+    //daugter cells of this one
     CellList& cellList();
     const CellList& cellList() const;
 
-	//does this cell itself have any energy
+    //does this cell itself have any energy
     bool empty() const {return mProtoJet.size()==0;}
 
-	//number of particles in protojet
+    //number of particles in protojet
     unsigned int size() const; 
 
 protected:
     friend ostream& operator<<(ostream& os, const StJetEtCell& cell);
-	friend struct PreJetUpdater;
-	friend struct PreJetInitializer;
-	friend struct PostMergeUpdater;
+    friend struct PreJetUpdater;
+    friend struct PreJetInitializer;
+    friend struct PostMergeUpdater;
 
     double mEtaMin;
     double mEtaMax;
@@ -96,9 +96,9 @@ protected:
     double mEt;
     int mNtimesUsed;
 
-	//lazy cache of centroid
-	bool mUpToDate;
-	StFourVec mCentroid; 
+    //lazy cache of centroid
+    bool mUpToDate;
+    StFourVec mCentroid;
 
     //JetList mProtoJets; //remember the particles that make up cell!
     CellList mCells;    //remember the cells cluster w/ this one
@@ -113,7 +113,7 @@ inline void StJetEtCell::clear()
     //mProtoJets.clear();
     mCells.clear();
     mProtoJet.clear();
-	mUpToDate=false;
+    mUpToDate=false;
 }
 
 inline double StJetEtCell::eta() const
@@ -164,7 +164,7 @@ inline void StJetEtCell::setNtimesUsed(int v)
 
 inline const StJetEtCell::CellList& StJetEtCell::cellList() const
 {
-	return mCells;
+    return mCells;
 }
 
 inline StJetEtCell::CellList& StJetEtCell::cellList()
@@ -190,14 +190,14 @@ inline double StJetEtCell::deltaEta(const StJetEtCell& rhs) const
 inline ostream& operator<<(ostream& os, const StJetEtCell& cell)
 {
     os <<"eta: "<<cell.eta()<<"\tphi: "<<cell.phi()<<"\tet: "<<cell.eT()
-		//<<"\tsize: "<<cell.size()<<"\tnUsed: "<<cell.nTimesUsed();
-		<<"\tcells:"<<endl;
-	const StJetEtCell::CellList& l = cell.cellList();
-	for (StJetEtCell::CellList::const_iterator it=l.begin(); it!=l.end(); ++it) {
-		cout <<**it;
-	}
+	//<<"\tsize: "<<cell.size()<<"\tnUsed: "<<cell.nTimesUsed();
+       <<"\tcells:"<<endl;
+    const StJetEtCell::CellList& l = cell.cellList();
+    for (StJetEtCell::CellList::const_iterator it=l.begin(); it!=l.end(); ++it) {
+	cout <<**it;
+    }
 
-	return os;
+    return os;
 
 }
 #endif

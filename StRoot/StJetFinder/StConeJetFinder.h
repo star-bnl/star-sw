@@ -92,24 +92,23 @@ protected:
 		
     friend struct PreJetInitializer; //needs access to the grid
 	
-    StConeJetFinder(); ///Not implemented, must pass pars at construction time!
+    StConeJetFinder(); ///Only available for derived classes
+
+    //make a polymorphic cell
+    virtual StJetEtCell* makeCell(double etaMin, double etaMax, double phiMin, double phiMax);
+    virtual void buildGrid(); ///build the grid at construction time
 	
-    void buildGrid(); ///build the grid at construction time
-	
-    void fillGrid(JetList& protoJets); ///put 'em in the grid
+    virtual void fillGrid(JetList& protoJets); ///put 'em in the grid
 	
     void clearAndDestroy();
 
     void initializeWorkCell(const StJetEtCell* other);
 
     void addToPrejets(StJetEtCell* cell);
-
 	
-    //void sort(); //sort vector in descending order of Et
     StJetEtCell* findCellByKey(const StEtGridKey& key);
 	
-    enum SearchResult {kTooManyTries=0, kLeftVolume=1, kConverged=2, kContinueSearch=3};
-	
+    enum SearchResult {kTooManyTries=0, kLeftVolume=1, kConverged=2, kContinueSearch=3};	
     SearchResult doSearch();
 	
     //void doMinimization(StJetEtCell& workCell);
@@ -119,8 +118,8 @@ protected:
 	
     StJetEtCell* defineMidpoint(const StJetEtCell& pj1, const StJetEtCell& pj2) ;
 	
-    bool acceptSeed(const StJetEtCell* cell);
-    bool acceptPair(const StJetEtCell* center, const StJetEtCell* assoc) const;
+    virtual bool acceptSeed(const StJetEtCell* cell);
+    virtual bool acceptPair(const StJetEtCell* center, const StJetEtCell* assoc) const;
 	
     const StProtoJet& collectCell(StJetEtCell* seed);
 	
