@@ -41,7 +41,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
 *******************************************************************************
 *
    Fill  TPCG             !  TPC basic dimensions
-      version    = 2        ! current version
+      version    = $Revision: 1.17 $        ! current version
       rmin       = 46.107   ! TPC inner radius 
       rmax       = 207.750  ! TPC outer radius
       length     = 459.37   ! TPC full length
