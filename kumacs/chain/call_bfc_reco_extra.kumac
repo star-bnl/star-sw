@@ -13,7 +13,7 @@
    tpc_sector_last=24 _
    gstar_settings=' field_only' _
    domain=' geometry tpc svt global ' _
-   chain=' evin tpg svg tcl tpt tid tte_e sgr evr svm egr ev0 ddedx dpnt desum dmsft evout' _
+   chain=' evin tpg svg tcl tpt tid tte_e sgr svm evr egr ev0 ddedx dpnt desum dmsft evout' _
    skip=0 _
    first=1 _
    no_events=1 _

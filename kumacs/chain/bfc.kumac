@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.39 1998/08/25 00:32:11 fisyak Exp $
+* $Id: bfc.kumac,v 1.40 1998/08/31 20:16:18 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.40  1998/08/31 20:16:18  kathy
+* rearranged order of chain variables in call*.kumac to make it correct; cleaned up bfc*.kumac; now have aliases stafcv_ok,bad defined in setup.kumac
+*
 * Revision 1.39  1998/08/25 00:32:11  fisyak
 * Add log summary
 *
@@ -343,10 +346,10 @@ MACRO bfc _
  macro/global/create tpc_sector_last  [tpc_sector_last]   'last sector in TPC'
  macro/global/create ievent           1          'Event counter'
  macro/global/create TOP              [TOP]
- macro/global/create gstar_settings [gstar_settings]
- macro/global/create output_xdf_file [output_xdf_file] 
- macro/global/create output_fzd_file [output_fzd_file]
-	  
+ macro/global/create gstar_settings   [gstar_settings]
+ macro/global/create output_xdf_file  [output_xdf_file] 
+ macro/global/create output_fzd_file  [output_fzd_file]
+
 ***********************************************************
 * BEGINNING STUFF 
 * **********************************************************
@@ -354,8 +357,10 @@ MACRO bfc _
  exec $STAR/kumacs/util/setup_defaults 
    
  exec setup#setup
+
  exec bfc_util#bfc_start _
    domain=[domain] chain=[chain] gstar_settings=[gstar_settings]
+ 
  if (STAF_STATUS(1).ne. 1) goto ABEND
  
  macro/global/import *
