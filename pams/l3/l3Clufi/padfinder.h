@@ -1,11 +1,11 @@
-// here you find for each row up to 3 i960(=mezz cards) which
-// the pads in this row belong to 
+/* here you find for each row up to 3 i960(=mezz cards) which */
+/* the pads in this row belong to */
 
 static struct PADFINDER {
-    int rdo;    // receiver board number
-    int mezz;   // mezzanine card number
-    int minpad; // low pad
-    int maxpad; // max pad
+    int rdo;    /* receiver board number */
+    int mezz;   /* mezzanine card number */
+    int minpad; /* low pad */ 
+    int maxpad; /* max pad */
 } padfinder[45][3] = 
 
 {

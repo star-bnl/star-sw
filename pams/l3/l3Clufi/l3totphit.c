@@ -39,7 +39,7 @@ long type_of_call l3totphit_(
     int hitcounter = 0;
     int cluspersec = 0;
     
-    // find start value in tphit array
+    /* find start value in tphit array */
     for( index = 0 ; index < 50000 ; index ++ )
 	{
 	  if ( tpHit[index].x == 0 && tpHit[index].y == 0 && tpHit[index].z == 0 )
@@ -50,47 +50,47 @@ long type_of_call l3totphit_(
 	}
 
     
-    // get supersector
+    /* get supersector */
     bank = hitarray;
     supersector = (int) (bank[3]+1)/2;
-    //printf("l3totphit :  now converting supersector :%d \n",(bank[3]+1)/2);
-    //printf("\nsupsec : %d",(bank[3]+1)/2);
-    // loop over receiverboards
+    /*printf("l3totphit :  now converting supersector :%d \n",(bank[3]+1)/2); */
+    /*printf("\nsupsec : %d",(bank[3]+1)/2); */
+    /* loop over receiverboards */
     for(rbindex = 1 ;rbindex <=12;rbindex++)
 	{
-	    //printf("l3totphit :  now converting rb:%d   ",rbindex);
-	    //printf("\nrb:%d   ",rbindex);
+	    /*printf("l3totphit :  now converting rb:%d   ",rbindex); */
+	    /*printf("\nrb:%d   ",rbindex); */
 	    rboffset = bank[10+2*(rbindex-1)];
-	    //printf("offset:%d   length:%d\n",rboffset,bank[11+2*(rbindex-1)]);
-	    // loop over mezzanine
+	    /* printf("offset:%d   length:%d\n",rboffset,bank[11+2*(rbindex-1)]); */
+	    /* loop over mezzanine */
 	    for(mzindex = 1 ; mzindex <= 3 ; mzindex++)
 		{
-		    //printf("\t mz:%d",mzindex);
+		    /*printf("\t mz:%d",mzindex); */ 
 		    mzoffset = bank[rboffset+10+2*(mzindex-1)];
 		    mzlength = bank[rboffset+11+2*(mzindex-1)];
-		    //printf("offset:%d   length:%d\n",mzoffset,mzlength);
-		    // is mz empty ?
+		    /* printf("offset:%d   length:%d\n",mzoffset,mzlength); */
+		    /* is mz empty ? */
 		    if ( mzlength == 11 ) 
 			{
-			    //    printf("\t\t 0 clusters on this mz \n");
-			    //printf("\t 0 ");
+			    /*    printf("\t\t 0 clusters on this mz \n"); */
+			    /* printf("\t 0 "); */
 			} 
-		    else // mz is not empty !
+		    else /* mz is not empty ! */
 			{ 
 			    int nrows,row,clusternumb,rowindex,rowoffset;
-			    // loop over rows
+			    /* loop over rows */
 			    nrows = bank[rboffset+mzoffset+10];
 			    rowoffset = 0;
 			    for ( rowindex = 1 ; rowindex <= nrows ; rowindex++ )
 				{ 
 				    int clusindex;
-				    // get row number
+				    /* get row number */ 
 				    row = bank[rboffset+mzoffset+10+1+rowoffset];
-				    // get cluster number  
+				    /* get cluster number  */ 
 				    clusternumb = bank[rboffset+mzoffset+10+2+rowoffset];
-				    //printf("\t\t %d clusters on row : %d\n",clusternumb,row);
-				    //printf("\t%d/%d",row,clusternumb);
-				    // loop over clusters
+				    /* printf("\t\t %d clusters on row : %d\n",clusternumb,row); */
+				    /* printf("\t%d/%d",row,clusternumb); */
+				    /* loop over clusters */
 				    for ( clusindex = 1 ; clusindex <= clusternumb ; clusindex++)
 					{
 					    double pad,time;
@@ -113,35 +113,35 @@ long type_of_call l3totphit_(
 						{ 
 						    sector=2*supersector;
 						};
-					    // extract the pad & time center of gravity
+					    /* extract the pad & time center of gravity */
 					    padinfo = bank[rboffset+mzoffset+10+2+rowoffset+(2*clusindex-1)];
 					    dword = &padinfo;
 					    pad = (double)(dword->info1)/64;
                                             time = (double)(dword->info2)/64;
-					    // etract flag & time
+					    /* etract flag & time
 					    flaginfo = bank[rboffset+mzoffset+10+2+rowoffset+(2*clusindex-1)+1];
 					    dword= &flaginfo;
 					    flag = dword->info1;
 					    charge = dword->info2;
-					    // coordinate transformation
+					    /* coordinate transformation */
 					    rawToGlobal(sector,row,pad,time,&xyz[0],&xyz[1],&xyz[2]);
-					    //printf("sec:%d  row:%d  pad:%f time:%f  ",sector,row,(float)pad,(float)time);
-					    //printf("x:%f  y:%f  z:%f\n",(float)xyz[0],(float)xyz[1],(float)xyz[2]);
-					    // filling
+					    /*printf("sec:%d  row:%d  pad:%f time:%f  ",sector,row,(float)pad,(float)time); */
+					      /*printf("x:%f  y:%f  z:%f\n",(float)xyz[0],(float)xyz[1],(float)xyz[2]); */
+						/* filling */
 					    tpHit[hitcounter].x =  (float) xyz[0];
 					    tpHit[hitcounter].y =  (float) xyz[1];
 					    tpHit[hitcounter].z =  (float) xyz[2];
-					    // couting
+					    /* couting */
 					    hitcounter++;
 					    cluspersec++;
 					}
 
 
-				    // set offset for next row
+				    /* set offset for next row */
 				    rowoffset += ((2 * clusternumb) + 2); 
 				}
 			}
-		    //printf("\t\t # clusters on this mz : %d\n",clusternumb);
+		    /* printf("\t\t # clusters on this mz : %d\n",clusternumb); */
 		}
 
 	}
