@@ -10,7 +10,7 @@ void plPi0Solo( int page=1,char *dd="C/") {
   int pr=0;
 
   TString fName="all" ;
-  fName="mc12";
+  fName="mc4";
   
   TString outDir="outPi0/"; 
   //  outDir="/auto/pdsfdv34/starspin/balewski/calib2004/outPi0";  outDir+=dd;
@@ -309,7 +309,7 @@ void  plotMix(TString hname="m1",float xLo, float xHi,TFile *fd,
   printf("etaB=%d nPi0=%.1f nBckg=%.1f\n",etaB,nPi0,nBckg);
   n=grN->GetN();
   grN->SetPoint(n,etaB,nPi0);
-   grN->SetPointError(n,0.5,0.  );
+  grN->SetPointError(n,0.5,nBckg/10.  );
   return;
   // TH1F* hR=(TH1F*)hr->Clone();
 }

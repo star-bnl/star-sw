@@ -1,4 +1,4 @@
-// $Id: StEEmcDataMaker.cxx,v 1.22 2004/11/12 18:29:52 balewski Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.21 2004/09/06 21:46:52 balewski Exp $
 
 #include <Stiostream.h>
 #include <math.h>
@@ -23,7 +23,6 @@ ClassImp(StEEmcDataMaker)
 
 //_____________________________________________________________________
 StEEmcDataMaker::StEEmcDataMaker(const char *name):StMaker(name){
-	assert(1==2); // this code is obsolete, should not be used for any analysis, intende to retire, JB
   mDb=0;
   memset(hs,0,sizeof(hs));
 }
@@ -478,9 +477,6 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
  
 
 // $Log: StEEmcDataMaker.cxx,v $
-// Revision 1.22  2004/11/12 18:29:52  balewski
-// killed
-//
 // Revision 1.21  2004/09/06 21:46:52  balewski
 // I want all histos, it is just 4KB total
 //

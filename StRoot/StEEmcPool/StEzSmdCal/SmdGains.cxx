@@ -1,4 +1,4 @@
-// $Id: SmdGains.cxx,v 1.5 2004/11/02 21:29:08 balewski Exp $
+// $Id: SmdGains.cxx,v 1.4 2004/10/08 14:34:50 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -79,8 +79,8 @@ void SmdGains::init(){
   
   //............... other initializations ...........
   printf("cuts for %s : adcMin=%d ,adcMax=%d minSum=%d maxRelEr=%f\n",plCore.Data(),adcMin,adcMax,minSum, maxRelEr);
-  //c1=new TCanvas("aa","aa",300,400);// small
-  c1=new TCanvas("aa","aa",800,700);// big
+  c1=new TCanvas("aa","aa",300,400);// small
+  //c1=new TCanvas("aa","aa",800,700);// big
 
   for(i=0;i<mxS;i++) str[i].id=i+1;
 
@@ -323,7 +323,7 @@ void SmdGains::fitSlopesTile(int eta1, int nEta, char cT, int pl) {
   TString ttC=tit;
   float xLow=-50;
 
-  if(cT=='T') { adcMin=15;  adcMax=45; } // towers
+  if(cT=='T') { adcMin=20;  adcMax=60; } // towers
 
   c1->Clear();
   if(pl)
@@ -342,14 +342,13 @@ void SmdGains::fitSlopesTile(int eta1, int nEta, char cT, int pl) {
       k++;
       sprintf(tit,"a%02d%c%c%02d",sectID,cT,sub,i); 
       TH1F* h= (TH1F*)fdIn->Get(tit); assert(h);
-      // h->Rebin(2);
+      // h->Rebin(4);
       HList->Add(h);
       c1->cd(k);
       h->SetAxisRange(adcMin,adcMax);
       float sum=h->Integral();
       h->SetAxisRange(xLow,1.5*adcMax);
-      if(cT=='T') h->SetAxisRange(-20,100);
-      // printf(" %s sum=%f\n",h->GetName(),sum);
+      printf(" %s sum=%f\n",h->GetName(),sum);
       
       h->Draw(); h->SetLineColor(kBlue);
       gPad->SetLogy();
@@ -359,21 +358,12 @@ void SmdGains::fitSlopesTile(int eta1, int nEta, char cT, int pl) {
       
       Lx=h->GetListOfFunctions();    assert(Lx);
       ln=new TLine(adcMin,0,adcMin,30000); ln->SetLineColor(kMagenta); Lx->Add(ln);
-      ln=new TLine(adcMax,0,adcMax,30000);  ln->SetLineColor(kMagenta);  Lx->Add(ln); 
-      float sl=0,esl=0;
-      if(sum>minSum) { //do fit
-	h->Fit("expo","RQ","",adcMin,adcMax);
-	TF1* f=h->GetFunction("expo");
-	f->SetLineColor(kRed);
-	f->SetLineWidth(1);
-	double *par=f->GetParameters();
-	double *epar=f->GetParErrors();
-	sl=par[1];
-	esl=epar[1];
-      }
-
-      printf("# %s %.4f %.4f %f\n",h->GetName(),sl,esl,sum);
-
+      ln=new TLine(adcMax,0,adcMax,30000);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+      if(sum<minSum) {  continue;}
+      h->Fit("expo","RQ","",adcMin,adcMax);
+      TF1* f=h->GetFunction("expo");
+      f->SetLineColor(kRed);
+      f->SetLineWidth(2);
     }
   }
 
@@ -490,9 +480,6 @@ void StripG::print(){
 
 /*****************************************************************
  * $Log: SmdGains.cxx,v $
- * Revision 1.5  2004/11/02 21:29:08  balewski
- * ange hist range
- *
  * Revision 1.4  2004/10/08 14:34:50  balewski
  * as used for PQRUV calib for pp200, 2004
  *

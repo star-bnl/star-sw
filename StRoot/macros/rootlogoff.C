@@ -1,8 +1,5 @@
-// $Id: rootlogoff.C,v 1.11 2004/11/14 17:03:56 fisyak Exp $
+// $Id: rootlogoff.C,v 1.10 2004/02/11 23:23:36 perev Exp $
 // $Log: rootlogoff.C,v $
-// Revision 1.11  2004/11/14 17:03:56  fisyak
-// delete chain in .DEV version only
-//
 // Revision 1.10  2004/02/11 23:23:36  perev
 // avoid ROOT warning
 //
@@ -47,7 +44,7 @@ if (TClassTable::GetDict("StMaker"))
     
 
     rootlogoff::mk->Finish();
-    if (TString(gSystem->Getenv("STAR_VERSION")) == ".DEV") delete rootlogoff::mk;
+    if (strstr(gSystem->Getenv("STAR"),".DEV")) delete rootlogoff::mk;
     else                            printf ("*** Chain not deleted***\n");
   }
 }

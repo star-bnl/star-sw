@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.32 2004/10/13 17:40:48 munhoz Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.31 2004/09/16 02:16:07 perev Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -690,7 +690,6 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
   int index;
   double Ratio = 1;
 
-  /*
   if (mDriftVelocity && mDriftCurve) 
     {
       index = mDriftVelocity->getHybridIndex(barrel,ladder,wafer,hybrid);
@@ -734,10 +733,7 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
 	}
     }
   else if (mDriftVelocity) 
-  */
-  
-  if (mDriftVelocity)
-   {
+    {
       //       gMessMgr->Warning() << "mDriftCurve is NULL: " << x << endm;
       index = mDriftVelocity->getHybridIndex(barrel,ladder,wafer,hybrid);
       if (index >= 0)

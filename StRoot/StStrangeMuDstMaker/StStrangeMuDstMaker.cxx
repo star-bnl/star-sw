@@ -32,7 +32,6 @@ static char* defFileName = "evMuDst.root";
 static char* defName = "StrangeMuDst";
 static char* altName = "MuDst";
 static char* defTitle = "Strangeness Micro-DST";
-static char* trNames[3] = {defName,altName,0};
 
 Int_t thisRun,thisEvent,lastRun,lastEvent,readEventNumber;
 TFile* lastFile;
@@ -62,7 +61,6 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
   }
 
   file = defFileName;
-  fileBlind = kFALSE;
 
   doMc = kFALSE;
   SetMode(StrangeNoFile);
@@ -244,7 +242,17 @@ Int_t StStrangeMuDstMaker::MakeReadDst() {
     readEventNumber = makerEventNumber;
   }
 
+  // LoadTree() returns -4 if no tree is found in the file
+  // Identify and skip those files
+  Int_t curTree = chain->GetTreeNumber() + 1;
+  Bool_t skippingFile = kFALSE;
+  for (; curTree < chain->GetNtrees(); curTree++) {
+    if ((chain->LoadTree(readEventNumber)) != -4) break;
+    skippingFile = kTRUE;
+    SkipChainFile(curTree);
+  }
 
+  if (skippingFile && curTree == chain->GetNtrees()) return kStEOF; 
   if (tree->GetEvent(readEventNumber) <= 0) return kStEOF; // Read the event
 
   TFile* thisFile = chain->GetFile();
@@ -488,50 +496,46 @@ void StStrangeMuDstMaker::SetRead(const char* eFile, char* treeName) {
   SetMode(StrangeRead);
   if (!eFile) eFile = defFileName;
 
-  // If we already have a muDst file, we're all set on TTree names
-  if (!muDst) {
-    if (!treeName) treeName = altName;
-    else fileBlind = kTRUE;       // don't read file headers beforehand
-    
-    if (!tree) tree = (TTree*) (chain = new TChain(treeName,defTitle));
-    else SetTreeName(treeName);
+  if (tree) {
+    treeName = const_cast<char*> (tree->GetName());
+  } else {
+    if (!treeName) treeName = defName;
+    tree = (TTree*) (chain = new TChain(treeName,defTitle));
   }
-  
-  // Try to add the file
-  Int_t nEntries = (Int_t) chain->GetEntriesFast();
-  if (fileBlind) chain->Add(eFile);
-  else chain->Add(eFile,0);
 
+  Int_t nFiles = chain->GetNtrees();
+  chain->Add(eFile);
   cuts->ForceUpdateArray();
 
-  // If we already have an appropriate TTree and file specified, we're done
   if (muDst) return;
 
-  // If a TTree name was specified (so we continue blindly: faster, but
-  //   there are no checks that a file is problematic until we reach it)...
-  if (fileBlind) { muDst = chain->GetFile(); return; }
-
   // Have not yet found an appropriate TTree - attempting to find one
-  // GetEntries() will increase if the tree is found
-  Int_t nEnt = (Int_t) chain->GetEntries();
-  if (nEnt == TChain::kBigNumber) {
-    gMessMgr->Error("StStrangeMuDstMaker::SetRead(): bad file! Giving up.");
-    return;
-  }
-
-  Int_t trial=0;
-  while (nEnt==nEntries) {
-    if (trNames[trial]==0) { SetTreeName(treeName); return; } // No tree found
-    // Trying other names until we succeed...
-    if (strcmp(treeName,trNames[trial])) {
-      SetTreeName(trNames[trial]);
-      chain->Add(eFile,0);
-      nEnt = (Int_t) chain->GetEntries();
+  for (Int_t curTree=nFiles; curTree<chain->GetNtrees(); curTree++) {
+    Int_t loadResult = chain->LoadTree(0);
+    if (loadResult == -2) break;
+    muDst = chain->GetFile();
+    if (!(loadResult)) return;
+    if (strcmp(treeName,defName)) {
+      SetTreeName(defName);
+      loadResult = chain->LoadTree(0);
+      muDst = chain->GetFile();
+      if (!(loadResult)) return;
     }
-    trial++;
+    if (strcmp(treeName,altName)) {
+      SetTreeName(altName);
+      loadResult = chain->LoadTree(0);
+      muDst = chain->GetFile();
+      if (!(loadResult)) return;
+    }
+
+    // Unable to find tree of name treeName, defName, or altName in file,
+    // try with next file...
+    SkipChainFile(curTree);
+    SetTreeName(treeName);
   }
 
-  muDst = chain->GetFile();
+  // Appropriate tree not found in any files so far
+  muDst = 0;
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::SetRead(StFile* eFiles, char* treeName) {
@@ -555,6 +559,15 @@ void StStrangeMuDstMaker::SetTreeName(const char* treeName) {
     for (Int_t i=0; i<chainElems->GetEntriesFast(); i++)
       ((TNamed*) (chainElems->At(i)))->SetName(treeName);
   }
+}
+//_____________________________________________________________________________
+void StStrangeMuDstMaker::SkipChainFile(Int_t curTree) {
+  Int_t* listOfOffsets = chain->GetTreeOffset();
+  TNamed* chainElem = (TNamed*) (chain->GetListOfFiles()->At(curTree));
+  gMessMgr->Warning() <<
+    "StStrangeMuDstMaker: Skipped event file (no appropriate TTree):\n  "
+    << chainElem->GetTitle() << endm;
+  listOfOffsets[curTree+1] = listOfOffsets[curTree];
 }
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::OpenFile() {
@@ -643,11 +656,8 @@ char* StStrangeMuDstMaker::GetFile() const {
 }       
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.33 2004/11/02 17:54:07 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.32 2004/10/13 16:41:19 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
-// Revision 3.33  2004/11/02 17:54:07  genevb
-// Leave corrupt file protection to ROOT / Remove my protection
-//
 // Revision 3.32  2004/10/13 16:41:19  genevb
 // Use kStEOF returns to terminate chain
 //

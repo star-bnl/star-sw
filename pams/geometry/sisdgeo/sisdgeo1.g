@@ -1,20 +1,5 @@
-* $Id: sisdgeo1.g,v 1.4 2004/10/28 22:01:32 potekhin Exp $
+* $Id: sisdgeo1.g,v 1.1 2004/04/23 18:32:21 potekhin Exp $
 * $Log: sisdgeo1.g,v $
-* Revision 1.4  2004/10/28 22:01:32  potekhin
-* Corrected a typo and improved the diagnostic message
-*
-* Revision 1.3  2004/10/26 21:15:28  potekhin
-* Changed the print statement to look nicer,
-* and noted that the radius of the mother volume has been
-* changed to conform with the shield of the SVT
-*
-* Revision 1.2  2004/10/26 21:13:22  potekhin
-* Started improving the structure of the code by replacing
-* hardcoded numbers with variables which encapsulate formulas.
-*
-* However, much work is needed here from the SSD group to rectify th rest
-* of the code, and add much needed documentation
-*
 * Revision 1.1  2004/04/23 18:32:21  potekhin
 * A significantly enhanced new version by the SSD group,
 * including the previously missing material and structures.
@@ -75,16 +60,14 @@ Module  SISDGEO1  is the Silicon Strip Detector
                        }
 *
 
-      Integer ilad,iwaf,jwaf,nc
-      Real    wafpckLen,dthk,radtilt,ang
-      Real    essai,hight,lng,leng,yoffset
-      Real    zS1, zS2, zS3, zS4, zS5, yS1, yS2, yS3, yS4
+      Integer   ilad,iwaf,jwaf,nc
+      Real      wafpckLen,dthk,radtilt,ang
+      Real           essai,hight,lng,leng,yoffset
 
       Fill SSDP               ! Silicon Strips
         Version  = 1          ! Version
         Config   = 1          ! There are a few configuraions possible
       EndFill
-
       Fill SFPB ! Some SSD Shell dimensions
         Hhight   = (0.02/tan(54*pi/180)+0.02/(2*tan(pi/5))+0.2)*sin(pi/5) ! haut 1
         Khight   = 0.02/sin(54*pi/180) ! haut 2
@@ -92,15 +75,11 @@ Module  SISDGEO1  is the Silicon Strip Detector
         Kbase    = 0.02/sin(63*pi/180) ! bas 2
         Fsize    = 0.6/cos(15*pi/180)+0.02*tan(15*pi/180) ! lenght of the side kapton film
         Zcoor    = sqrt((4.4-2.6/tan(56.89*pi/180))**2+(2.6/cos(54*pi/180))**2) ! z coord 
-      EndFill
-
-* Original number for the SFPA_rmax was 31.8 (not sure why)
-* I changed this to fit into the SVT shielding --maxim--
 
       Fill SFPA               ! Silicon Strip detector parameters
         version  = 1          ! geometry version
         rmin     = 21.8       ! mother rmin
-        rmax     = 29.5       ! mother rmax
+        rmax     = 31.8       ! mother rmax
         Len      = 120.       ! mother Len along the z direction
         rad      = 23.        ! distance from beam axis to detector center
         nssd     = 16         ! number of silicon strip detectors 
@@ -112,7 +91,7 @@ Module  SISDGEO1  is the Silicon Strip Detector
         smLen    = 101.9      ! structure mother length 
         ssLen    = 95./20.    ! length of a subvolume of the structure
         wpLen    = 68.8       ! length of wafer pack
-        sdlen    = 4.2        ! length of one strip detector (along beam axis)
+        sdlen    = 4.2        ! lenght of one strip detector (along beam axis)
         tilt     = 5.0        ! tiling angle (degrees)
         cprad    = 0.1        ! cooling pipe outer radius
         cpral    = 0.09       ! cooling pipe inner radius
@@ -199,13 +178,12 @@ Module  SISDGEO1  is the Silicon Strip Detector
         Component O   A=16     Z=8    W=0.4*4*16./174.
         Mixture   G5   Dens=0.85
 
-      write(*,*) 'Level 1 of the SSD geometry'
       Create and Position SFMO in SVTT
 *******************************************************************************
 *
 Block SFMO is the mother of all Silicon Strip Detector volumes
       Material   Air
-      Attribute  SFMO   Seen=1 Colo=6
+      Attribute  SFMO   Seen=0 Colo=6
       Shape TUBE Rmin=SFPA_rmin,
 		 Rmax=SFPA_rmax,
 		 dz=SFPA_Len/2
@@ -230,92 +208,78 @@ Block SFMO is the mother of all Silicon Strip Detector volumes
         endif
       EndDo
 
+*** Putting the mechanical structure in place
 
-** Define some prepackaged constants.This still needs work from the SSD group!
-** I have no idea what 49.8 means --maxim--
-
-        zS1=49.8+0.95+2.5/2.+0.2
-        zS2=49.8+0.95+0.5/2.+0.2
-        zS3=49.8+0.95+0.5+0.2+2.5/2
-        zS4=49.8+0.95+0.5+0.2+2.5+5.05/2.
-        zS5=57.5
-
-        yS1=19.1
-        yS2=18.1
-        yS3=15.945
-        yS4=17.0
-
-***********  Putting the mechanical structure in place *************
 ** Top parts of the small sectors
      	Create SSST
-     	Position SSST x=0.,   y=0.,   z=-zS1
-      	Position SSST x=0.,   y=0.,   z= zS1
-      	Position SSST x=0.,   y=0.,   z=-zS1, AlphaZ=180.
-      	Position SSST x=0.,   y=0.,   z= zS1, AlphaZ=180.
+     	Position SSST x=0., y=0., z=-49.8-0.95-2.5/2.-0.2
+      	Position SSST x=0., y=0., z=+49.8+0.95+2.5/2.+0.2
+      	Position SSST x=0., y=0., z=-49.8-0.95-2.5/2.-0.2, AlphaZ=180.
+      	Position SSST x=0., y=0., z=+49.8+0.95+2.5/2.+0.2, AlphaZ=180.
 ** Side parts of the small sectors
       	Create SSSS
-      	Position SSSS x=0.,   y=0.,   z=-zS2
-      	Position SSSS x=0.,   y=0.,   z= zS2
-      	Position SSSS x=0.,   y=0.,   z=-zS2, AlphaZ=180.
-      	Position SSSS x=0.,   y=0.,   z= zS2, AlphaZ=180.
+      	Position SSSS x=0., y=0., z=-49.8-0.95-0.5/2.-0.2
+      	Position SSSS x=0., y=0., z=+49.8+0.95+0.5/2.+0.2
+      	Position SSSS x=0., y=0., z=-49.8-0.95-0.5/2.-0.2, AlphaZ=180.
+      	Position SSSS x=0., y=0., z=+49.8+0.95+0.5/2.+0.2, AlphaZ=180.
 
 ** Top parts of the ribs
 	Create SSRT
-	Position SSRT x=0.,   y=0.,   z=-zS1
-	Position SSRT x=0.,   y=0.,   z= zS1
-      	Position SSRT x=0.,   y=0.,   z=-zS1, AlphaZ=180.
-      	Position SSRT x=0.,   y=0.,   z= zS1, AlphaZ=180.
+	Position SSRT x=0., y=0., z=-49.8-0.95-2.5/2.-0.2
+	Position SSRT x=0., y=0., z=+49.8+0.95+2.5/2.+0.2
+      	Position SSRT x=0., y=0., z=-49.8-0.95-2.5/2.-0.2, AlphaZ=180.
+      	Position SSRT x=0., y=0., z=+49.8+0.95+2.5/2.+0.2, AlphaZ=180.
 
 ** Side parts of the ribs
 	Create SSRS
-      	Position SSRS x=0.,   y=0.,   z=-zS2
-      	Position SSRS x=0.,   y=0.,   z= zS2
-      	Position SSRS x=0.,   y=0.,   z=-zS2, AlphaZ=180.
-      	Position SSRS x=0.,   y=0.,   z= zS2, AlphaZ=180.
+      	Position SSRS x=0., y=0., z=-49.8-0.95-0.5/2.-0.2
+      	Position SSRS x=0., y=0., z=+49.8+0.95+0.5/2.+0.2
+      	Position SSRS x=0., y=0., z=-49.8-0.95-0.5/2.-0.2, AlphaZ=180.
+      	Position SSRS x=0., y=0., z=+49.8+0.95+0.5/2.+0.2, AlphaZ=180.
 
 ** SSD to cone linking box
 	Create SSLB
-	Position SSLB x= yS1, y= yS1, z=-zS3, AlphaZ= 45.
-	Position SSLB x=-yS1, y=-yS1, z=-zS3, AlphaZ= 45.
-	Position SSLB x= yS1, y=-yS1, z=-zS3, AlphaZ=-45.
-	Position SSLB x=-yS1, y= yS1, z=-zS3, AlphaZ=-45.
-	Position SSLB x= yS1, y= yS1, z= zS3, AlphaZ= 45.
-	Position SSLB x=-yS1, y=-yS1, z= zS3, AlphaZ= 45.
-	Position SSLB x= yS1, y=-yS1, z= zS3, AlphaZ=-45.
-	Position SSLB x=-yS1, y= yS1, z= zS3, AlphaZ=-45.
+	Position SSLB x= 19.1, y= 19.1, z=-49.8-0.95-0.5-0.2-2.5/2., AlphaZ=45.
+	Position SSLB x=-19.1, y=-19.1, z=-49.8-0.95-0.5-0.2-2.5/2., AlphaZ=45.
+	Position SSLB x=19.1, y=-19.1, z=-49.8-0.95-0.5-0.2-2.5/2., AlphaZ=-45.
+	Position SSLB x=-19.1, y=19.1, z=-49.8-0.95-0.5-0.2-2.5/2., AlphaZ=-45.
+	Position SSLB x= 19.1, y= 19.1, z=+49.8+0.95+0.5+0.2+2.5/2., AlphaZ=45.
+	Position SSLB x=-19.1, y=-19.1, z=+49.8+0.95+0.5+0.2+2.5/2., AlphaZ=45.
+	Position SSLB x=19.1, y=-19.1, z=+49.8+0.95+0.5+0.2+2.5/2., AlphaZ=-45.
+	Position SSLB x=-19.1, y=19.1, z=+49.8+0.95+0.5+0.2+2.5/2., AlphaZ=-45.
 
 ** SSD to cone linking tube
 	Create SSLT
-	Position SSLT x= yS2, y= yS2, z=-zS4
-	Position SSLT x=-yS2, y=-yS2, z=-zS4
-	Position SSLT x= yS2, y=-yS2, z=-zS4
-	Position SSLT x=-yS2, y= yS2, z=-zS4
-	Position SSLT x= yS2, y= yS2, z= zS4
-	Position SSLT x=-yS2, y=-yS2, z= zS4
-	Position SSLT x= yS2, y=-yS2, z= zS4
-	Position SSLT x=-yS2, y= yS2, z= zS4
+	Position SSLT x= 18.1, y= 18.1, z=-49.8-0.95-0.5-0.2-2.5-5.05/2.
+	Position SSLT x=-18.1, y=-18.1, z=-49.8-0.95-0.5-0.2-2.5-5.05/2.
+	Position SSLT x= 18.1, y=-18.1, z=-49.8-0.95-0.5-0.2-2.5-5.05/2.
+	Position SSLT x=-18.1, y= 18.1, z=-49.8-0.95-0.5-0.2-2.5-5.05/2.
+	Position SSLT x= 18.1, y= 18.1, z=+49.8+0.95+0.5+0.2+2.5+5.05/2.
+	Position SSLT x=-18.1, y=-18.1, z=+49.8+0.95+0.5+0.2+2.5+5.05/2.
+	Position SSLT x= 18.1, y=-18.1, z=+49.8+0.95+0.5+0.2+2.5+5.05/2.
+	Position SSLT x=-18.1, y= 18.1, z=+49.8+0.95+0.5+0.2+2.5+5.05/2.
 
 ** SSD mounting plate inserted in the cone
 	Create SCMP
-	Position SCMP x= yS3, y= yS3, z= zS5, AlphaZ=-45.
-	Position SCMP x=-yS3, y=-yS3, z= zS5, AlphaZ=-45.
-	Position SCMP x= yS3, y=-yS3, z= zS5, AlphaZ= 45.
-	Position SCMP x=-yS3, y= yS3, z= zS5, AlphaZ= 45.
-	Position SCMP x= yS3, y= yS3, z=-zS5, AlphaZ=-45.
-	Position SCMP x=-yS3, y=-yS3, z=-zS5, AlphaZ=-45.
-	Position SCMP x= yS3, y=-yS3, z=-zS5, AlphaZ= 45.
-	Position SCMP x=-yS3, y= yS3, z=-zS5, AlphaZ= 45.
+	Position SCMP x= 15.945, y= 15.945, z= 57.5 , AlphaZ=-45.
+	Position SCMP x=-15.945, y=-15.945, z= 57.5 , AlphaZ=-45.
+	Position SCMP x= 15.945, y=-15.945, z= 57.5 , AlphaZ= 45.
+	Position SCMP x=-15.945, y= 15.945, z= 57.5 , AlphaZ= 45.
+	Position SCMP x= 15.945, y= 15.945, z=-57.5 , AlphaZ=-45.
+	Position SCMP x=-15.945, y=-15.945, z=-57.5 , AlphaZ=-45.
+	Position SCMP x= 15.945, y=-15.945, z=-57.5 , AlphaZ= 45.
+	Position SCMP x=-15.945, y= 15.945, z=-57.5 , AlphaZ= 45.
 
 ** SSD V-shape mouting piece
 	Create SCVM
-	Position SCVM x= yS4, y= yS4, z= zS5, AlphaZ=-45.
-	Position SCVM x=-yS4, y=-yS4, z= zS5, AlphaZ= 135.
-	Position SCVM x= yS4, y=-yS4, z= zS5, AlphaZ=-135.
-	Position SCVM x=-yS4, y= yS4, z= zS5, AlphaZ= 45.
-	Position SCVM x= yS4, y= yS4, z=-zS5, AlphaZ=-45.
-	Position SCVM x=-yS4, y=-yS4, z=-zS5, AlphaZ= 135.
-	Position SCVM x= yS4, y=-yS4, z=-zS5, AlphaZ=-135.
-	Position SCVM x=-yS4, y= yS4, z=-zS5, AlphaZ= 45.
+	Position SCVM  x= 17.00, y= 17.00, z= 57.5 , AlphaZ=-45.
+	Position SCVM  x=-17.00, y=-17.00, z= 57.5 , AlphaZ=135.
+	Position SCVM  x= 17.00, y=-17.00, z= 57.5 , AlphaZ=-135.
+	Position SCVM  x=-17.00, y= 17.00, z= 57.5 , AlphaZ= 45.
+	Position SCVM  x= 17.00, y= 17.00, z=-57.5 , AlphaZ=-45.
+	Position SCVM  x=-17.00, y=-17.00, z=-57.5 , AlphaZ=135.
+	Position SCVM  x= 17.00, y=-17.00, z=-57.5 , AlphaZ=-135.
+	Position SCVM  x=-17.00, y= 17.00, z=-57.5 , AlphaZ= 45.
 Endblock 
 *
 *------------------------------------------------------------------------------
@@ -493,34 +457,25 @@ Block SFSM is the mother volume of the ladder (mechanic structure)
 	Material Air
 	Attribute SFSM Seen=0 Colo=6
 	Shape BOX dx=SFPA_dmWid/2, dy=SFPA_smThk/2, dz=SFPA_smLen/2.
-
         yoffset=-1.7
-
 Create SFLT "ladder skeleton : top corner of the triangle"
-
 	hight = 2.6*tan(54*pi/180)-SFPB_Hhight/tan(pi/5)-0.02
-
 Position SFLT x=-(SFPB_Hhight-SFPB_Khight),
 	      y=hight+yoffset, z=0, 
 	      AlphaZ=-90-36  
-
 Position SFLT x=(SFPB_Hhight-SFPB_Khight),
 	      y=hight+yoffset, z=0,
 	      AlphaY=180., AlphaZ=90.+36.
 
 Create SFLU "ladder skeleton : side corner of the triangle" 
-
 Position SFLU x=0.-(2.6-(0.2+0.01/tan(pi/5))), y=0.+yoffset, z=0.
 	essai=180
 	essai=essai+27+27
-
 Position SFLU x=-cos(63*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)-(2.6-(0.2+0.01/tan(pi/5))),
               y=cos(27*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+yoffset, 
               z=0, 
               Alphay=180, Alphaz=essai 
-
 Position SFLU x=0.+(2.6-(0.2+0.01/tan(pi/5))), y=0.+yoffset, z=0., Alphay=180.
-
 Position SFLU x=cos(63*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+(2.6-(0.2+0.01/tan(pi/5))),
 	      y=cos(27*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+yoffset,
 	      z=0,
@@ -570,7 +525,6 @@ Position SFCM x=-1.7, y=0.2, z=+(69.75/2-0.6)+15.8/2., AlphaY=180, AlphaZ=+54.
 Create SFKF "Kapton flex 1"
 Position SFKF  x=-0.16, y=2.07, z=-(69.75/2-0.6)-8.1/2-0.2, AlphaZ=+54.
 Position SFKF  x=+0.16, y=2.07, z=+(69.75/2-0.6)+8.1/2+0.2, AlphaZ=-54.
-
 Create SFKS "Kapton flex 2"
 Position SFKS x=+0.505, y=1.585, z=-(69.75/2-0.6)-8.1/2-0.2, AlphaZ=-54.
 Position SFKS x=-0.505, y=1.585, z=+(69.75/2-0.6)+8.1/2+0.2, AlphaZ=+54.
@@ -580,7 +534,6 @@ Position SFPR x=0, y=+1.79, z=-49.8
 Position SFPR x=0, y=+1.79, z=+49.8-3.7
 
 Create SFPB "End mechanical part 2"
-
 *** The y calculation below is strange (good value by chance ??)
 Position SFPB x=0, y=+1.79-3.48+0.08, z=-49.8-0.95/2.
 Position SFPB x=0, y=+1.79-3.48+0.08, z=+49.8+0.95/2.

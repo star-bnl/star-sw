@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.17 2004/10/27 21:48:30 fisyak Exp $
+// $Id: StdEdxY2Maker.h,v 1.16 2004/08/12 17:02:10 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -49,7 +49,7 @@ class StdEdxY2Maker : public StMaker {
   virtual Int_t FinishRun(Int_t OldRunNumber);
   virtual Int_t Make();
   virtual void  SetMask(Int_t mask) {m_Mask = mask;}
-  static  void  SortdEdx();
+  static  Int_t SortdEdx(Int_t N, dEdx_t *dE, dEdx_t *dES);
   Double_t LikeliHood(Double_t Xlog10bg, Int_t NdEdx, dEdx_t *dEdx);
   void    Histogramming(StGlobalTrack* gTrack=0);
   void    TrigHistos(Int_t iok = 0);
@@ -59,13 +59,12 @@ class StdEdxY2Maker : public StMaker {
   void    BadHit(Int_t iFlag, const StThreeVectorF &xyz);
   void    DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ);
   void    PrintdEdx(Int_t iop = 0);
-  void    Correlations();
   static  Bichsel             *m_Bichsel;       //!
   static  void Landau(Double_t x, Double_t *val);
   static  void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.17 2004/10/27 21:48:30 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.16 2004/08/12 17:02:10 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
  private:

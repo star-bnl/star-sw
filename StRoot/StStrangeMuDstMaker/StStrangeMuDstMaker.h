@@ -159,7 +159,7 @@ class StStrangeMuDstMaker : public StMaker {
   virtual void  Clear(Option_t *option="");
   virtual Int_t Finish();
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.18 2004/11/02 17:54:07 genevb Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.17 2004/07/12 21:45:35 genevb Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   //@}
@@ -217,6 +217,7 @@ class StStrangeMuDstMaker : public StMaker {
   //@{
   void SetFile(const char* eFile);
   void SetTreeName(const char* treeName);
+  void SkipChainFile(Int_t curTree);
   Int_t OpenFile();
   Int_t CloseFile();
   void CheckFile();
@@ -234,7 +235,6 @@ class StStrangeMuDstMaker : public StMaker {
   Bool_t firstEvent;
   Int_t evNumber;
   Int_t outFileNum;
-  Bool_t fileBlind;
 
   Bool_t doT[strDstT];
   Bool_t doMc;
@@ -342,11 +342,8 @@ inline Int_t StStrangeMuDstMaker::MatchName(const char* name) const
 
 //____________________________________________________________________
 //
-// $Id: StStrangeMuDstMaker.h,v 3.18 2004/11/02 17:54:07 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.17 2004/07/12 21:45:35 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
-// Revision 3.18  2004/11/02 17:54:07  genevb
-// Leave corrupt file protection to ROOT / Remove my protection
-//
 // Revision 3.17  2004/07/12 21:45:35  genevb
 // Handle missing Event branch info condition
 //
