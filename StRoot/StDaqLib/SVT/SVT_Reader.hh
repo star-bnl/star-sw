@@ -39,29 +39,9 @@ public:
   GainReader *getGainReader(int sector){cout<<sector<<endl; return FALSE;};
   CPPReader *getCPPReader(int sector){cout<<sector<<endl; return FALSE;};
   BadChannelReader *getBadChannelReader(int sector){cout<<sector<<endl; return FALSE;};
-  SVT_Reader(EventReader *er){
-    cout <<"DUMMY implementation"<<endl;
+  SVT_Reader(EventReader *er, Bank_SVTP *psvt){
+    pBankSVTP = psvt; // copy arg into class variable
     ercpy = er; // squirrel away pointer eventreader for our friends
-  // Fix up DATAP
-    pBankDATAP = (Bank_DATAP *)er->getDATAP();
-
-    if (!pBankDATAP->test_CRC()) ERROR(ERR_CRC);
-    if (pBankDATAP->swap() < 0) ERROR(ERR_SWAP);
-    pBankDATAP->header.CRC = 0;
-
-    // position independent pointers to lower banks, variable DATAP length
-    int len = pBankDATAP->header.BankLength - sizeof(Bank_Header)/4;
-    Pointer *ptr = &pBankDATAP->SVT;
-    for (int i=0; i<len; i++, ptr++) {
-      if (ptr->length==0) continue;//invalid entry
-      pBankSVTP = (Bank_SVTP *)(((INT32 *)pBankDATAP)+ (ptr->offset)); 
-      if(!strncmp(pBankSVTP->header.BankType,"SVTP",4)) break;
-    }
-    if(strncmp(pBankSVTP->header.BankType,"SVTP",4)) {
-      printf("detector SVT not found in DATAP\n");
-      exit(0);
-    }
-
     if (!pBankSVTP->test_CRC()) ERROR(ERR_CRC);
     if (pBankSVTP->swap() < 0) ERROR(ERR_SWAP);
     pBankSVTP->header.CRC = 0;

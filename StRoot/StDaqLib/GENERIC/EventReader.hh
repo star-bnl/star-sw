@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.3 1999/07/02 04:37:41 levine Exp $
+ * $Id: EventReader.hh,v 1.4 1999/07/10 21:31:17 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -11,9 +11,15 @@
  * 17-June-99 Herb Ward changed the dimension of errstr0 from 50 to 250
  * 23-Jun-99 MJL add verbose flag and setVerbose() method
  * 25-Jun-99 MJL added TPCV2P0_CPP_SR::getAsicParams(ASIC_params *);
+ * 09-Jul-99 MJL added EventReader::findBank()
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.4  1999/07/10 21:31:17  levine
+ * Detectors RICH, EMC, TRG now have their own (defined by each detector) interfaces.
+ * Existing user code will not have to change any calls to TPC-like detector
+ * readers.
+ *
  * Revision 1.3  1999/07/02 04:37:41  levine
  * Many changes - see change logs in individual programs
  *
@@ -34,6 +40,8 @@
 
 #define TRUE 1
 #define FALSE 0
+
+
 
 // Event Reader header files
 // This file is included by Offline programs
@@ -314,6 +322,7 @@ public:
 
   long NextEventOffset();
   void setVerbose(int); // 0 turns off all internal printout
+  char * findBank(char *bankid); // navigates to pointer bnk below DATAP
   int verbose;
 
   ~EventReader();
@@ -352,9 +361,14 @@ private:
   // later storage for detector buffers
 };
 
+#include "../RICH/RICH_Reader.hh"
+
 // Declaration for the factories
 DetectorReader *getDetectorReader(EventReader *, string);
 EventReader *getEventReader(int fd, long offset, int MMap=1);
 EventReader *getEventReader(char *event);
+RICH_Reader *getRichReader(EventReader *er);
+
+
 
 #endif

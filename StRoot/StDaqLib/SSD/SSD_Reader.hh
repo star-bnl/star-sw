@@ -39,29 +39,10 @@ public:
   GainReader *getGainReader(int sector){cout<<sector<<endl; return FALSE;};
   CPPReader *getCPPReader(int sector){cout<<sector<<endl; return FALSE;};
   BadChannelReader *getBadChannelReader(int sector){cout<<sector<<endl; return FALSE;};
-  SSD_Reader(EventReader *er){
-    cout <<"DUMMY implementation"<<endl;
+
+  SSD_Reader(EventReader *er, Bank_SSDP *pssd){
+    pBankSSDP = pssd; // copy arg into class variable
     ercpy = er; // squirrel away pointer eventreader for our friends
-  // Fix up DATAP
-    pBankDATAP = (Bank_DATAP *)er->getDATAP();
-
-    if (!pBankDATAP->test_CRC()) ERROR(ERR_CRC);
-    if (pBankDATAP->swap() < 0) ERROR(ERR_SWAP);
-    pBankDATAP->header.CRC = 0;
-
-    // position independent pointers to lower banks, variable DATAP length
-    int len = pBankDATAP->header.BankLength - sizeof(Bank_Header)/4;
-    Pointer *ptr = &pBankDATAP->reserved_det; // change RecHeaderFormats.hh someday
-    for (int i=0; i<len; i++, ptr++) {
-      if (ptr->length==0) continue;//invalid entry
-      pBankSSDP = (Bank_SSDP *)(((INT32 *)pBankDATAP)+ (ptr->offset)); 
-      if(!strncmp(pBankSSDP->header.BankType,"SSDP",4)) break;
-    }
-    if(strncmp(pBankSSDP->header.BankType,"SSDP",4)) {
-      printf("detector SSD not found in DATAP\n");
-      exit(0);
-    }
-
     if (!pBankSSDP->test_CRC()) ERROR(ERR_CRC);
     if (pBankSSDP->swap() < 0) ERROR(ERR_SWAP);
     pBankSSDP->header.CRC = 0;

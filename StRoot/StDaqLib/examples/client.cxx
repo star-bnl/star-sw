@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: client.cxx,v 1.2 1999/07/07 19:24:37 levine Exp $
+ * $Id: client.cxx,v 1.3 1999/07/10 21:31:33 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: sample top-level code sould be used as a tutorial
@@ -8,9 +8,15 @@
  *
  *   change log
  *  02-Jul-99 MJL remove #include "StDaqLib/TPC/MemMan.hh"
+ *  09-Jul-99 MJL add calls to various non_TPC detector readers
  *
  ***************************************************************************
  * $Log: client.cxx,v $
+ * Revision 1.3  1999/07/10 21:31:33  levine
+ * Detectors RICH, EMC, TRG now have their own (defined by each detector) interfaces.
+ * Existing user code will not have to change any calls to TPC-like detector
+ * readers.
+ *
  * Revision 1.2  1999/07/07 19:24:37  levine
  * Added comments on using 8-bit to 10-bit translation table by popular request
  * (well, at least one person requested this change)
@@ -32,10 +38,13 @@
 #include <iostream>
 
 #include "StDaqLib/GENERIC/EventReader.hh"
-//#include "StDaqLib/TPC/MemMan.hh"
+#include "StDaqLib/EMC/EMC_Reader.hh"
+#include "StDaqLib/RICH/RICH_Reader.hh"
+#include "StDaqLib/TRG/TRG_Reader.hh"
 
-#include "StDaqLib/TPC/trans_table.hh"  // this contains the 8-bit to 10-bit translation table
-                                        // for PHYSICS running
+#include "StDaqLib/TPC/trans_table.hh"  
+// this contains the 8-bit to 10-bit translation table
+// for PHYSICS running
 
 
 int main(int argc, char *argv[])
@@ -83,13 +92,41 @@ int main(int argc, char *argv[])
 	offset = er->NextEventOffset();
       else
 	offset = -1;
+
+      // try to create RICH reader
+      RICH_Reader *drich = getRICHReader(er);
+      if(!drich)
+	cout << "Error creating RICH_Reader: " << er->errstr() << endl;
+      else {
+	printf("created RICH_Reader!!!\n");
+	// call methods defined for RICH
+      }
+
+      // try to create TRG reader
+      TRG_Reader *dtrg = getTRGReader(er);
+      if(!dtrg)
+	cout << "Error creating TRG_Reader: " << er->errstr() << endl;
+      else {
+	printf("created TRG_Reader!!!\n");
+	// call methods defined for TRG
+      }
+
+      // try to create EMC reader
+      EMC_Reader *demc = getEMCReader(er);
+      if(!demc)
+	cout << "Error creating EMC_Reader: " << er->errstr() << endl;
+      else {
+	printf("created EMC_Reader!!!\n");
+	// call methods defined for EMC
+      }
+
       DetectorReader *dr = getDetectorReader(er, "TPCV2P0");
-      if(!dr)
-	{
-	  cout << "Error creating DR: " << er->errstr() << endl;
-	  close(fd);
-	  exit(0);
-	}
+      if(!dr) {
+	cout << "Error creating TPC_Reader: " << er->errstr() << endl;
+	close(fd);
+	exit(0);
+      } 
+      else printf("created TPC_Reader!!!\n");
 
       for(int sector=1;sector <= 24;sector++)
 	{
@@ -211,7 +248,11 @@ int main(int argc, char *argv[])
 #endif
 	  delete zsr;
 	}
-      delete dr;
+
+      if (demc) delete demc; // remove EMC_Reader
+      if (dtrg) delete dtrg; // remove TRG_Reader
+      if (drich) delete drich; // remove RICH_Reader
+      delete dr; // remove TPC reader
       delete er;
     }
   close(fd);

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV1P0.cxx,v 1.3 1999/07/02 04:43:23 levine Exp $
+ * $Id: TPCV1P0.cxx,v 1.4 1999/07/10 21:31:25 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description:  TPCV1P0 implementation
@@ -10,6 +10,11 @@
  *
  ***************************************************************************
  * $Log: TPCV1P0.cxx,v $
+ * Revision 1.4  1999/07/10 21:31:25  levine
+ * Detectors RICH, EMC, TRG now have their own (defined by each detector) interfaces.
+ * Existing user code will not have to change any calls to TPC-like detector
+ * readers.
+ *
  * Revision 1.3  1999/07/02 04:43:23  levine
  * Many changes -
  *  navigates to head of TPCP bank independent of position.
@@ -209,23 +214,10 @@ TPCV1P0_PADK_SR *TPCV1P0_Reader::getPADKReader(int sector)
   return p;
 }
 
-TPCV1P0_Reader::TPCV1P0_Reader(EventReader *er)
+TPCV1P0_Reader::TPCV1P0_Reader(EventReader *er, classname(Bank_TPCP) *ptpc)
 {
-  //  cout << "TPCV1P0 constructor" << endl;
+  pBankTPCP = ptpc; // copy arg into class variable
 
-  // Fix up DATAP
-  pBankDATAP = (Bank_DATAP *)er->getDATAP();
-  //  printf("pBankDATAP.head: %s\n",pBankDATAP->header.BankType);
-
-  if (!pBankDATAP->test_CRC()) ERROR(ERR_CRC);
-  if (pBankDATAP->swap() < 0) ERROR(ERR_SWAP);
-  pBankDATAP->header.CRC = 0;
-
-  // Fix up TPCP
-  pBankTPCP = (classname(Bank_TPCP) *)
-              (((INT32 *)pBankDATAP) + pBankDATAP->TPC.offset);
-  //  printf("Offset = %d\n",pBankDATAP->TPC.offset);
-  //  printf("pBankTPCP.head: %s\n",pBankTPCP->header.BankType);
   if (!pBankTPCP->test_CRC()) ERROR(ERR_CRC);
   if (pBankTPCP->swap() < 0) ERROR(ERR_SWAP);
   pBankTPCP->header.CRC = 0;
