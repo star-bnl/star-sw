@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.83 2000/02/03 22:02:32 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.84 2000/02/04 19:53:58 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.84  2000/02/04 19:53:58  kathy
+// added 2 more histograms - for med and small range of # hits in detector
+//
 // Revision 1.83  2000/02/03 22:02:32  kathy
 // adding histograms for Akio - needed smaller ranges of some of them for use by peripheral collisions group
 //
@@ -1210,6 +1213,8 @@ void St_QA_Maker::MakeHistPoint(){
     Int_t cntrows=0;
     cntrows = pt->GetNRows();
     m_pnt_tot->Fill(cntrows);
+    m_pnt_tot_med->Fill(cntrows);
+    m_pnt_tot_sm->Fill(cntrows);
 
   }
 
