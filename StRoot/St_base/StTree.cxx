@@ -117,7 +117,7 @@ TObject *StIO::Read(TFile *file, const StUKey &ukey)
 Int_t StIO::GetNextKey(TFile *file, StUKey &ukey)
 {
   TObjLink *lnk; TList *lk; const char *kname; TObject *obj;
-
+  enum { kSorted = 1};
   assert(file);
 
   TString tk = ukey.GetKey(); ukey = kUMAX;
@@ -125,6 +125,7 @@ Int_t StIO::GetNextKey(TFile *file, StUKey &ukey)
   int lname = strlen(ukey.GetName())+1;
 
   lk = file->GetListOfKeys();  if(!lk) return 1;
+  if (!lk->TestBit(kSorted)) {lk->Sort(); lk->SetBit(kSorted);}
 
    // Find an object in this list using its name. Requires a sequential
    // scan till the object has been found. Returns 0 if object with specified
