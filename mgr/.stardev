@@ -1,6 +1,5 @@
 # Set up STAR enviroment
 setenv DIR_STAR /afs/rhic/star/packages
-setenv LEVEL_STAR dev
 if ( -e $DIR_STAR/dev/mgr/login_star.csh ) then
         source $DIR_STAR/dev/mgr/login_star.csh
 endif

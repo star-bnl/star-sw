@@ -1,5 +1,8 @@
 #!/bin/csh
 #  $Log: login_star.csh,v $
+#  Revision 1.3  1998/02/10 01:04:36  fisyak
+#  Activate new/dev vesions
+#
 #  Revision 1.2  1998/02/10 00:06:10  fisyak
 #  SL98a second version
 #
@@ -14,7 +17,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/02/10 00:06:10 $ 
+#             Last modification $Date: 1998/02/10 01:04:36 $ 
 # login_star.csh
 #------------------------------------------------------------------#
 # This script will set up the STAR enviroment.                     #
@@ -22,7 +25,7 @@
 #------------------------------------------------------------------#
 umask 002
 set ECHO = 1
-if ($?LEVEL_STAR == 0) setenv LEVEL_STAR dev
+if ($?LEVEL_STAR == 0) setenv LEVEL_STAR new
 if (($?STAR == 1) || ($?prompt == 0)) set ECHO = 0 
 #
 #       determine the processor architecture...
@@ -36,7 +39,7 @@ set hostname_command = "hostname"
                                              if ($ECHO) cat    /afs/rhic/star/login/logo 
 setenv DIR_STAR  /afs/rhic/star/packages;    if ($ECHO) echo   "Setting up DIR_STAR  = $DIR_STAR"
 setenv VERSION_STAR `ls -l $DIR_STAR | grep "${LEVEL_STAR} ->" |cut -f2 -d">"`  
-setenv STAR $DIR_STAR/dev;                   if ($ECHO) echo   "Setting up STAR = $STAR"
+setenv STAR $DIR_STAR/${LEVEL_STAR} ;         if ($ECHO) echo  "Setting up STAR      = $STAR"
 source $STAR/mgr/SYS_STAR;    
 setenv LIB_STAR  $STAR/lib/${SYS_HOST_STAR}; if ($ECHO) echo   "Setting up LIB_STAR  = $LIB_STAR"
 setenv BIN_STAR  $STAR/bin/${SYS_HOST_STAR}; if ($ECHO) echo   "Setting up BIN_STAR  = $BIN_STAR"
