@@ -79,7 +79,7 @@ CC:>--------------------------------------------------------------------
 CC:  Local Variable Type Declarations:
 
       integer*4 i, j, secnum, padrow, clusterrow,zindex,ntpc_max
-      integer*4 tpc_track,n_svt_trk_pad,n_svt_trk_drf
+      integer*4 tpc_track,n_svt_trk_pad,n_svt_trk_drf,layer
       parameter (ntpc_max = 20000)
       integer*4 track_index(ntpc_max), tpc_trk_row
       integer*4 iftpc, ihit, nhits(2)
@@ -148,12 +148,16 @@ CC:  Fill TPC cluster summary information:
       end if
 
 CC:  Fill SVT cluster summary information: 
+CC:  cluster not yet available due to lack of slow sim/real data (LSB)
 
-CC: should be clusters per layer in n_clus_svt(1-4), how? (LSB)
-      dms_svt(1).n_clus_svt(1) = scs_cluster_h.nok 
+      dms_svt(1).n_clus_svt(1) = 0
       dms_svt(1).n_clus_svt(2) = 0 
       dms_svt(1).n_clus_svt(3) = 0 
-      dms_svt(1).n_clus_svt(4) = 0 
+      dms_svt(1).n_clus_svt(4) = 0
+
+      if(scs_cluster_h.nok .gt. 0) then
+CC:     code to unpack cluster and count layers goes in here when ready
+      end if
 
 CC:  Fill TPC reconstructed space points summary information:
 
@@ -182,11 +186,20 @@ CC:  Fill TPC reconstructed space points summary information:
 
 CC:  Fill SVT reconstructed space points summary information:
 
-CC: should be points per layer in n_pts_svt(1-4), how? (LSB)
-      dms_svt(1).n_pts_svt(1) = scs_spt_h.nok
+      dms_svt(1).n_pts_svt(1) = 0
       dms_svt(1).n_pts_svt(2) = 0
       dms_svt(1).n_pts_svt(3) = 0
       dms_svt(1).n_pts_svt(4) = 0
+
+      if(scs_spt_h.nok .gt. 0) then
+         do i = 1,scs_spt_h.nok
+            layer=((scs_spt(i).id_wafer/1000)+1)/2
+            if(layer .le. 4 .and. layer .gt. 0) then
+               dms_svt(1).n_pts_svt(layer) =
+     1         dms_svt(1).n_pts_svt(layer) + 1
+            end if
+         end do
+      end if
 
 CC:  Fill TPC charge deposition monitor quantities:
 CC:
@@ -240,8 +253,6 @@ CC:  Accumulate total charge deposition in TPC in 10 z-bins:
 
 CC:  Fill total charge deposition in SVT in the assigned space points     
 
-CC: Again have changed to total charge per layer for now goes into (LSB)
-CC: the chrg_svt_tot(1) variable
       dms_svt(1).chrg_svt_tot(1) = 0.0
       dms_svt(1).chrg_svt_tot(2) = 0.0
       dms_svt(1).chrg_svt_tot(3) = 0.0
@@ -249,8 +260,11 @@ CC: the chrg_svt_tot(1) variable
 
       if(scs_spt_h.nok .gt. 0) then
          do i = 1,scs_spt_h.nok
-            dms_svt(1).chrg_svt_tot(1) =
-     1      dms_svt(1).chrg_svt_tot(1) + scs_spt(i).de(1)
+            layer=((scs_spt(i).id_wafer/1000)+1)/2
+            if(layer .le. 4 .and. layer .gt. 0) then
+               dms_svt(1).chrg_svt_tot(layer) =
+     1         dms_svt(1).chrg_svt_tot(layer) + scs_spt(i).de(1)
+         end if
          end do
       end if
 
@@ -468,7 +482,6 @@ CC:           to both be of order 0.5 .
       end if
 
 CC:  Fraction of SVT hits used in SVT tracks
-CC:  Hit fraction should now be per layer also. How to do this? (LSB)
 
       dms_svt(1).hit_frac_svt(1) = 0.0
       dms_svt(1).hit_frac_svt(2) = 0.0
@@ -477,14 +490,19 @@ CC:  Hit fraction should now be per layer also. How to do this? (LSB)
 
       if(scs_spt_h.nok .gt. 0) then
          do i = 1,scs_spt_h.nok
-            if(scs_spt(i).id_track .ne. 0) then
-               dms_svt(1).hit_frac_svt(1) = 
-     1         dms_svt(1).hit_frac_svt(1) + 1.0
+            layer=((scs_spt(i).id_wafer/1000)+1)/2
+            if(layer .le. 4 .and. layer .gt. 0) then
+               if(scs_spt(i).id_track .ne. 0) then
+                  dms_svt(1).hit_frac_svt(layer) = 
+     1            dms_svt(1).hit_frac_svt(layer) + 1.0
+               end if
             end if
          end do
-         dms_svt(1).hit_frac_svt(1) =
-     1      dms_svt(1).hit_frac_svt(1)/
-     2                          float(scs_spt_h.nok)
+         do i = 1,4
+         dms_svt(1).hit_frac_svt(layer) =
+     1      dms_svt(1).hit_frac_svt(layer)/
+     2           float(dms_svt(1).n_pts_svt(layer))
+         end do
       end if
 
 CC:  Fill FTPC monitor information
