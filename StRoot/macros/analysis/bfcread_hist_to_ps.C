@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.24 2000/06/12 19:58:54 lansdell Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.25 2000/06/21 21:15:22 kathy Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.25  2000/06/21 21:15:22  kathy
+// now allow the zone settings for horizontal & vertical axes to be set during input to macro
+//
 // Revision 1.24  2000/06/12 19:58:54  lansdell
 // loaded global shared library
 //
@@ -126,7 +129,10 @@ void bfcread_hist_to_ps(
   const Char_t *TopDirTree="bfcTree",
   const Char_t *psFile="QA_hist.ps",
   const Char_t *PageTitle="",
-  const Char_t *PrintList="")
+  const Char_t *PrintList="",
+  const Int_t ZoneH=2,
+  const Int_t ZoneV=3)
+)
 {             
 
   cout << "bfcread_hist_to_ps.C, input hist file = " 
@@ -139,8 +145,13 @@ void bfcread_hist_to_ps(
        << psFile << endl;
   cout << "bfcread_hist_to_ps.C, page title for histograms = " 
        << PageTitle << endl;
-  cout << "bfcread_hist_to_ps.C, subset list name of which histograms to draw,print = "
+  cout << "bfcread_hist_to_ps.C, subset list name of which histograms to draw,print = " 
        << PrintList  << endl;
+  cout << "bfcread_hist_to_ps.C, # histograms on page horizontally = "
+       << ZoneH << endl;
+  cout << "bfcread_hist_to_ps.C, # histograms on page vertically = "
+       << ZoneV << endl;
+
 //
     gSystem->Load("St_base");
     gSystem->Load("StChain");
@@ -186,7 +197,7 @@ void bfcread_hist_to_ps(
 
     HU->SetHistsNamesDraw("*","*");
     HU->SetPostScriptFile(psFile);
-    HU->SetZones(2,3);
+    HU->SetZones(ZoneH,ZoneV);
     HU->SetPaperSize();
     HU->SetDefaultLogXList(MakerHistDir);
     HU->SetDefaultLogYList(MakerHistDir);
