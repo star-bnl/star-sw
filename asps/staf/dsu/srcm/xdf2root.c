@@ -1249,15 +1249,6 @@ void EndingBlurb() {
   PP">> The output is ");
   PP"in a subdirectory named %s.\n",gDir[0]);
   PP">>\n");
-  PP">> Here are a few commands for mouse capture:\n");
-  PP"     cd %s/%s # go to output dir\n", gBaseDir,gDir[0]);
-  PP"     ls # check that the files are there\n");
-  PP"     $ROOTSYS/bin/root   # Start root.\n");
-  PP">> Enter the next three commands at the root prompt.\n");
-  PP"     gSystem.Load(\"libEvent.so\");\n");
-  PP"     .x RootMacro1.C\n");
-  PP"     .q\n");
-  PP">>\n");
   PP">> Warning: I will erase the directories %s and %s\n",gDir[0],gDir[1]);
   PP">> next time I run.  You may want to rename them.\n");
   PP">> Directory %s contains waste of no interest to typical users.\n",
@@ -1268,6 +1259,16 @@ void EndingBlurb() {
   else PP">> There were %d events.\n", gEventCnt);
   if(gOptionE) rr="the"; else rr="each";
   PP">> There %d tables in %s event.\n",gNtable,rr);
+  PP">>\n");
+  PP">> Here are a few commands for mouse capture:\n");
+  PP">>    For the UNIX prompt:\n");
+  PP"         cd %s/%s # go to output dir\n", gBaseDir,gDir[0]);
+  PP"         ls # check that the files are there\n");
+  PP"         $ROOTSYS/bin/root   # Start root.\n");
+  PP">>    For the root prompt.\n");
+  PP"         gSystem.Load(\"libEvent.so\");\n");
+  PP"         .x RootMacro1.C\n");
+  PP"         .q\n");
   PP">>\n");
 }
 char *ReadOptions(int nnn, char *aaa[]) {
@@ -1390,6 +1391,5 @@ void main(int nnnn,char *aaaa[]) {
   MoveFilesFromScratchToOutputDir();
                    /* DestroyScratchDir(); */
   EndingBlurb();
-  PP">> Input file = %s\n",inFile);
-  PP">> Normal end of %s.\n",aaaa[0]);
+  PP">> Normal end, %s.\n",inFile);
 }
