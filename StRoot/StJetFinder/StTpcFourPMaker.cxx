@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcFourPMaker.cxx,v 1.4 2003/05/09 20:48:19 thenry Exp $
+ * $Id: StTpcFourPMaker.cxx,v 1.5 2003/07/24 22:05:19 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -52,9 +52,14 @@ Int_t StTpcFourPMaker::Make() {
     StMuTrack *t = uDst->primaryTracks(i);
     if(t->flag()<=0) continue;
     StThreeVectorF mom = t->momentum();
-    float mass = t->pidProbElectron()*me + t->pidProbProton()*mpr +
-      t->pidProbPion()*mpi + t->pidProbKaon()*mk;
-    StLorentzVectorF P(sqrt(mass*mass + mom.mag2()), mom);
+    float mommag2 = mom.mag2();
+    float ee = sqrt(me*me + mommag2);
+    float epr = sqrt(mpr*mpr + mommag2);
+    float epi = sqrt(mpi*mpi + mommag2);
+    float ek = sqrt(mk*mk + mommag2);
+    float energy = t->pidProbElectron()*ee + t->pidProbProton()*epr +
+      t->pidProbPion()*epi + t->pidProbKaon()*ek;
+    StLorentzVectorF P(energy, mom);
     StMuTrackFourVec& track = tPile[i];
     track.Init(t, P, i);
     tracks.push_back(&track);
