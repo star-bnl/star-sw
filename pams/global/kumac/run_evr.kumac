@@ -5,7 +5,7 @@ MACRO run
  message 'run_evr: calling evr_am'
 
  ami/mod/call evr_am _
-        [params]/global/evr_evrpar _
+        [params]/global/evrpars/evr_evrpar _
         [data]/tpc/tracks/tptrack  _
         [data]/svt/tracks/stk_track _
         [dst]/globtrk _ 

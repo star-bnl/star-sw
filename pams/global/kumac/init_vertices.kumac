@@ -2,7 +2,7 @@
    
  macro/global/import *
          
- message ' !!! run_stk: vertex not found,  filled from MC ***'
+ message ' !!! init_vertices: vtx not found for stk,sgr - filled from MC ***'
  
 * cd [params]/global/vertices 
 *  cd /dui
