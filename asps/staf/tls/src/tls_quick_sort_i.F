@@ -1,7 +1,7 @@
-* $Id: tls_quick_sort_i.F,v 1.1 1998/03/24 00:42:09 fisyak Exp $
+* $Id: tls_quick_sort_i.F,v 1.2 1998/04/09 15:18:33 fisyak Exp $
 * $Log: tls_quick_sort_i.F,v $
-* Revision 1.1  1998/03/24 00:42:09  fisyak
-* Clean
+* Revision 1.2  1998/04/09 15:18:33  fisyak
+* tls bug fixes from Duncan J. Prindle
 *
       INTEGER FUNCTION tls_Quick_Sort_i( nrows, el1, el2, table )
 C
@@ -18,10 +18,9 @@ C           tls_sort_qs_longrow_cv (E):    temp. row space not long enough.
 C           tls_sort_qs_stackshort_cv (E): stack in quicksort too short.
 C
 C 9/ 8/95 Add code to handle 0,1 row tables   djp
+C 4/ 8/98 Changed method of choosing pivot.   djp
       INTEGER M, NSTACK
-      REAL    FM, FA, FC, FMI
-      PARAMETER (M=7,NSTACK=50,FM=7875.,FA=211.,FC=1663.
-     *         ,FMI=1.2698413E-4)
+      PARAMETER (M=7,NSTACK=50)
 C Inputs:
       INTEGER nrows         ! Number of input rows.
       INTEGER el1(*)        ! Element to sort on (from first row of table)
@@ -31,7 +30,6 @@ C
       INTEGER tls_loc
       INTEGER len, JSTACK, L, LL, I, IR, IQ, J
       INTEGER t(200), tel1
-      REAL    FX
       INTEGER ISTACK(NSTACK)
 C
       IF (nrows.LT.2) THEN
@@ -47,7 +45,6 @@ C
       JSTACK=0
       L=1
       IR=nrows
-      FX=0.
 10    IF(IR-L.LT.M)THEN
         DO 13 J=L+1,IR
           tel1 = el1(1+len*(J-1))
@@ -76,8 +73,7 @@ C
       ELSE
         I=L
         J=IR
-        FX=MOD(FX*FA+FC,FM)
-        IQ=L+(IR-L+1)*(FX*FMI)
+        IQ=(L+IR)/2.0
         tel1 = el1(1+len*(IQ-1))
         DO LL = 1,len
            t(LL)=table(LL+len*(IQ-1))
