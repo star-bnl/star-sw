@@ -19,7 +19,7 @@ const char *gCoPyRiGhT[] = {
 };
 
 const char *Id = {
-    "$Id: St_DataSet.cxx,v 1.57 2000/01/12 18:07:22 fine Exp $"
+    "$Id: St_DataSet.cxx,v 1.58 2000/01/23 20:57:49 fine Exp $"
 };
 #include <iostream.h>
 #include "TSystem.h"
@@ -507,7 +507,11 @@ TString St_DataSet::Path() const
 //______________________________________________________________________________
 void St_DataSet::Remove(St_DataSet *set)
 {
-  if (fList && set) fList->Remove(set);
+  if (fList && set) {
+    if (set->GetParent() == this) set->SetParent(0);
+    fList->Remove(set);
+  }
+  
 }
  
 //______________________________________________________________________________
@@ -519,8 +523,9 @@ St_DataSet  *St_DataSet::RemoveAt(Int_t idx)
   //
   St_DataSet *set = 0;
   if (fList) {
-      set = (St_DataSet *)fList->At(idx);
+      set = (St_DataSet *)fList->At(idx);  
       fList->RemoveAt(idx);
+      if (set && (set->GetParent() == this) ) set->SetParent(0);
   }
   return set;
 }
@@ -645,15 +650,13 @@ void  St_DataSet::SetParent(St_DataSet *parent){
 //______________________________________________________________________________
 void St_DataSet::SetWrite()
 {
- //
+ // One should not use this method but St_DataSet::Write instead
+ // This method os left here for the sake of the backward compatibility
  // To Write object first we should temporary break the 
  // the backward fParent pointer (otherwise ROOT follows this links
  // and will pull fParent out too.
  //
-  St_DataSet *saveParent = fParent; // GetParent();
-  fParent = 0;
-  Write();
-  fParent = saveParent;
+ Write();
 }
 //______________________________________________________________________________
 void St_DataSet::Shunt(St_DataSet *newParent)
@@ -664,8 +667,7 @@ void St_DataSet::Shunt(St_DataSet *newParent)
   //                                of "dataset"
   //                        = 0  -  Make this object "Orphan"
   //
-  if (fParent) fParent->Remove(this);
-  SetParent(0);
+  if (fParent)   fParent->Remove(this);
   if (newParent) newParent->Add(this);
 }
 
@@ -735,6 +737,21 @@ void St_DataSet::Sort()
 //______________________________________________________________________________
 Int_t St_DataSet::Streamer(StBufferAbc &){return 0;}
 
+//______________________________________________________________________________
+void St_DataSet::Write(const Text_t *name, Int_t option, Int_t bufsize)
+{
+ //
+ // To Write object first we should temporary break the 
+ // the backward fParent pointer (otherwise ROOT follows this links
+ // and will pull fParent out too.
+ //
+  St_DataSet *saveParent = fParent; // GetParent();
+  fParent = 0;
+  TObject::Write(name,option, bufsize);
+  fParent = saveParent;
+}
+
+
 class Copyright {public: Copyright(const Char_t *id=0){
   if (gSystem->Getenv("No_Copyright") || 
      ( gSystem->Getenv("STAR") && !gSystem->Getenv("Copyright")) ) return;
@@ -750,8 +767,11 @@ static Copyright St_DataSetLibraryCopyright(Id);
 
 //______________________________________________________________________________
 // $Log: St_DataSet.cxx,v $
+// Revision 1.58  2000/01/23 20:57:49  fine
+// methods St_DataSet:Remove have been fixed for the structural members
+//
 // Revision 1.57  2000/01/12 18:07:22  fine
-// cvs symbols have been added and copyright class introduced
+//  cvs symbols have been added and copyright class introduced
 //
 // Revision 1.56  1999/10/29 23:11:19  fine
 // compilation error for Sun fixed
