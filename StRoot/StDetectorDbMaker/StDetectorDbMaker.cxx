@@ -39,6 +39,8 @@ Int_t StDetectorDbMaker::InitRun(int runNumber){
     // Update Space Charge Correction (must be done after magnet)
     StDetectorDbSpaceCharge* spaceCharge = StDetectorDbSpaceCharge::instance();
     spaceCharge->update(this);
+    spaceCharge = StDetectorDbSpaceCharge::instanceR2();
+    spaceCharge->update(this);
     
     // Update Clock Frequency
     StDetectorDbClock* clock = StDetectorDbClock::instance();
@@ -92,6 +94,7 @@ Int_t StDetectorDbMaker::Make(){
     StDetectorDbTpcRDOMasks* masks = StDetectorDbTpcRDOMasks::instance();
     StDetectorDbMagnet* magnet = StDetectorDbMagnet::instance();
     StDetectorDbSpaceCharge* spaceCharge = StDetectorDbSpaceCharge::instance();
+    StDetectorDbSpaceCharge* spaceChargeR2 = StDetectorDbSpaceCharge::instanceR2();
     StDetectorDbClock* clock = StDetectorDbClock::instance();
     StDetectorDbBeamInfo* beam = StDetectorDbBeamInfo::instance();
     StDetectorDbTriggerID* trigger = StDetectorDbTriggerID::instance();
@@ -104,6 +107,8 @@ Int_t StDetectorDbMaker::Make(){
     
     // Jamie Asked for SpaceCharge to be couted every event
     ~gMess << "Space Charge Correction = " << spaceCharge->getSpaceChargeCoulombs()
+	 << " Coulombs" << endm;
+    ~gMess << "Space Charge CorrectionR2 = " << spaceChargeR2->getSpaceChargeCoulombs()
 	 << " Coulombs" << endm;
 
     return kStOK;
