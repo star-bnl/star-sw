@@ -1,5 +1,12 @@
-// $Id: StFtpcTrackEvaluator.hh,v 1.6 2001/01/25 15:22:19 oldi Exp $
+// $Id: StFtpcTrackEvaluator.hh,v 1.7 2001/07/12 08:34:31 oldi Exp $
 // $Log: StFtpcTrackEvaluator.hh,v $
+// Revision 1.7  2001/07/12 08:34:31  oldi
+// Many new things were developed eg. histograms for time consumption and
+// momentum resolution.
+// File handling was debugged.
+// New constructor to evaluate tracks of good evaluated clusters of a
+// previous run.
+//
 // Revision 1.6  2001/01/25 15:22:19  oldi
 // Review of the complete code.
 // Fix of several bugs which caused memory leaks:
@@ -49,11 +56,14 @@
 #include "TObjArray.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TH3.h"
+#include "TProfile2D.h"
 #include "MIntArray.h"
 #include "TFile.h"
 
 #include "StFtpcVertex.hh"
 #include "StFtpcTrack.hh"
+#include "StFtpcTracker.hh"
 #include "StFtpcDisplay.hh"
 
 #include "tables/St_ffs_gepoint_Table.h"
@@ -77,25 +87,27 @@ private:
 
                MIntArray *mFtpcTrackNum;            // array of numbers of found Ftpc tracks, [geant track]
 
-                   Int_t  mFoundVertexTracks;       // Number of found main vertex tracks
-                   Int_t  mFoundNonVertexTracks;    // Number of found non main vertex tracks
+                   Int_t  mFoundVertexTracks;       // number of found main vertex tracks
+                   Int_t  mFoundNonVertexTracks;    // number of found non main vertex tracks
 
-                   Int_t  mGoodGeantPoints;         // Number of points on good geant tracks
-                   Int_t  mGoodFoundPoints;         // Number of points on good found tracks
+                   Int_t  mGoodGeantPoints;         // number of points on good geant tracks
+                   Int_t  mGoodFoundPoints;         // number of points on good found tracks
 
-                   Int_t  mLookLikeGoodTracks;      // Number of tracks which look like good tracks but aren't  
-                   Int_t  mElectronTracks;          // Number of electrons
-                   Int_t  mNonVertexTracks;         // Number of non main vertex tracks
-                   Int_t  mGoodGTracks;             // Number of good geant tracks (all tracks - - short tracks - electrons - non vertex tracks)
-                   Int_t  mGoodFTracks;             // Number of good found tracks (all tracks - - short tracks - electrons - non vertex tracks)  
-                   Int_t  mSplitTracks;             // Number of split tracks
-                   Int_t  mSplitGoodTracks;         // Number of split good tracks 
-                   Int_t  mUncleanTracks;           // Number of tracks which have picked up wrong clusters
-                   Int_t  mLongTracks;              // Number of tracks with more than 10 points
-                   Int_t  mLongTrackClusters;       // Number of clusters on long tracks
-                   Int_t  mShortTracks;             // Number of tracks with less than 5 points
-                   Int_t  mShortTrackClusters;      // Number of clusters on short tracks
-                   Int_t  mTooShortTracks;          // Number of tracks which should be longer
+                   Int_t  mLookLikeGoodTracks;      // number of tracks which look like good tracks but aren't  
+                   Int_t  mElectronTracks;          // number of electrons
+                   Int_t  mNonVertexTracks;         // number of non main vertex tracks
+                   Int_t  mGoodGTracks;             // number of good geant tracks (all tracks - - short tracks - electrons - non vertex tracks)
+                   Int_t  mGoodFTracks;             // number of good found tracks (all tracks - - short tracks - electrons - non vertex tracks)  
+                   Int_t  mSplitTracks;             // number of split tracks
+                   Int_t  mSplitGoodTracks;         // number of split good tracks 
+                   Int_t  mSplitLoliGoodTracks;     // number of split look-like good tracks 
+                   Int_t  mUncleanTracks;           // number of tracks which have picked up wrong clusters
+                   Int_t  mUncleanGoodTracks;       // number of tracks which have picked up wrong clusters and have a good parent track
+                   Int_t  mLongTracks;              // number of tracks with more than 10 points
+                   Int_t  mLongTrackClusters;       // number of clusters on long tracks
+                   Int_t  mShortTracks;             // number of tracks with less than 5 points
+                   Int_t  mShortTrackClusters;      // number of clusters on short tracks
+                   Int_t  mTooShortTracks;          // number of tracks which should be longer
                    Int_t  mMaxClusters;             // Max. number of clusters on a track
 
             StFtpcVertex *mVertex;                  // pointer ro the main vertex
@@ -115,8 +127,10 @@ private:
                     TH1F *mNumGoodFTracks;          // number of good found tracks per event
                     TH1F *mNumSplitTracks;          // number of split tracks per event
                     TH1F *mNumSplitGoodTracks;      // number of split good tracks per event                   
+                    TH1F *mNumSplitLoliGoodTracks;  // number of split good tracks per event                   
 
                     TH1F *mNumUncleanTracks;        // number of unclean tracks per event
+                    TH1F *mNumUncleanGoodTracks;    // number of unclean tracks which have a good parent track per event 
                     TH1F *mNumLongTracks;           // number of tracks with more than 10 points per event
                     TH1F *mNumLongTrackClusters;    // number of hits belonging to long tracks per event
                     TH1F *mNumShortTracks;          // number of tracks with less than 5 points per event
@@ -156,6 +170,10 @@ private:
                     TH1F *mPyAcc;                   // relative accuracy of momentum in y direction
                     TH1F *mPzAcc;                   // relative accuracy of momentum in z direction
 
+                    TH3F *mPRelErr;                 // relative error of momentum in pt/eta bins
+                    TH3F *mPRelErrqok;              // relative error of momentum in pt/eta bins where the charge sign was measured alright
+                    TH3F *mPRelDiff;                // relative difference of momentum in pt/eta bins
+
                     TH2F *mEtaNghits;               // pseudorapidity vs. number of geant clusters on track
                     TH2F *mEtaNfhits;               // pseudorapidity vs. number of found clusters on track
 
@@ -165,6 +183,11 @@ private:
                     TH2F *mPtEtaBad;                // transverse momentum vs. pseudorapidity of bad found tracks divided by all found tracks
                     TH2F *mPtEtaUnclean;            // transverse momentum vs. pseudorapidity of unclean (found) tracks
                     TH2F *mPtEtaMesUnclean;         // measured transverse momentum vs. measured pseudorapidity of unclean (found) tracks
+                    TH2F *mPtEtaUncleanGood;        // transverse momentum vs. pseudorapidity of unclean good (found) tracks
+                    TH2F *mPtEtaMesUncleanGood;     // measured transverse momentum vs. measured pseudorapidity of unclean good (found) tracks
+                    TH2F *mPtEtaSplit;              // ransverse momentum vs. pseudorapidity of split tracks
+                    TH2F *mPtEtaSplitGood;          // ransverse momentum vs. pseudorapidity of split good tracks
+                    TH2F *mPtEtaSplitLoliGood;      // ransverse momentum vs. pseudorapidity of split look-like good tracks
 
                     TH2F *mPtEtaGoodG;              // transverse momentum vs. pseudorapidity of good geant tracks  
                     TH2F *mPtEtaGoodF;              // transverse momentum vs. pseudorapidity of good found tracks
@@ -176,6 +199,11 @@ private:
                     TH2F *mPtEtaFVtx;               // transverse momentum vs. pseudorapidity of found tracks with main vertex tag
                     TH2F *mPtEtaLookLikeGood;       // transverse momentum vs. pseudorapidity of found tracks which look like good tracks but aren't
                     TH2F *mPtEtaContamination;      // transverse momentum vs. pseudorapidity of found tracks which look like good tracks but aren't divided by found tracks with main vertex tag
+                    TH2F *mPtEtaContaWoSplits;      // transverse momentum vs. pseudorapidity of found tracks which look like good tracks but aren't minus double counted splits divided by found tracks with main vertex tag
+
+                    TH2F *mPtEta10PointTracks;      // transverse momentum vs. pseudorapidity of 10 point Geant tracks
+                    TH2F *mPtEtaWrongCharge;        // transverse momentum vs. pseudorapidity of tracks with wrong charge assigned
+                    TH2F *mPtEtaWrongPosCharge;     // transverse momentum vs. pseudorapidity of tracks with wrong positive charge assigned
 
                     TH2F *mGLengthDistTrackAng;     // length distance vs. track angle of geant tracks
                     TH2F *mGCircleDistTrackAng;     // circle distance vs. track angle of geant tracks
@@ -212,6 +240,13 @@ private:
                     TH2F *mPRatioDist;              // point ratio vs. distance of track pairs
                     TH2F *mPRatioDistSplit;         // point ratio vs. distance of split track pairs
 
+                    TH1F *mSetupTime;               // time consumption for initialisation and setup
+                    TH1F *mTrackingTime;            // time consumption for main vertex tracking
+                    TH1F *mExtensionTime;           // time consumption for track extension
+                    TH1F *mSplitTime;               // time consumption for handling split tracks
+                    TH1F *mFitTime;                 // time consumption for fitting, dE/dx, and writing
+                    TH1F *mTotalTime;               // total time consumption
+  
                MIntArray *mParentTrack;             // array of numbers of parent tracks for each cluster, [found track # * 10 + # of cluster on track]
                MIntArray *mParentTracks;            // array of numbers of different parent tracks, [found track # * 10 + # of cluster on track]
                MIntArray *mNumParentTracks;         // array of number of different parent tracks, [found track # * 10 + # of cluster on track]
@@ -221,6 +256,7 @@ private:
                MIntArray *mUncleanTracksArr;        // array of numbers of unclean tracks
                MIntArray *mSplitTracksArr;          // array of numbers of split tracks
                MIntArray *mSplitGoodTracksArr;      // array of numbers of split good tracks
+               MIntArray *mGoodFastSimHitsArr;      // array of goodness of ffs hits (1 = good, 0 = bad)
 
                   Bool_t *mUnclean;                 //! array of boolean values: indicates if a found track is a unclean track or not
 
@@ -246,8 +282,7 @@ public:
             StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_data, StFtpcVertex *main_vertex,  
 				 St_fcl_fppoint *fcl_fppoint, St_fpt_fptrack *fpt_fptrack, 
 				 Char_t *filename = 0, Char_t *write_permission = 0);                  // real constructor
-            StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_data, StFtpcVertex *main_vertex, 
-				 TObjArray *hits, TObjArray *tracks, 
+            StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_data, StFtpcTracker *tracker, 
 				 Char_t *filename = 0, Char_t *write_permission = 0);                  // another real constructor
   virtual  ~StFtpcTrackEvaluator();                                                                    // destructor
 
@@ -261,6 +296,7 @@ public:
   MIntArray *GetSplitTracksArr()     { return mSplitTracksArr;     }
   MIntArray *GetSplitGoodTracksArr() { return mSplitGoodTracksArr; }
   MIntArray *GetUncleanTracksArr()   { return mUncleanTracksArr;   }
+  MIntArray *GetGoodFastSimHitsArr() { return mGoodFastSimHitsArr; }
 
     Int_t   GetNumFoundVertexTracks()   { return mFoundVertexTracks;             }  // returns the number of found main vertex tracks
     Int_t   GetNumFoundNonVertexTracks(){ return mFoundNonVertexTracks;          }  // returns the number of found non main vertex tracks
@@ -271,7 +307,9 @@ public:
     Int_t   GetNumGoodFoundTracks()     { return mGoodFTracks;                   }  // returns the number of good found tracks
     Int_t   GetNumSplitTracks()         { return mSplitTracks;                   }  // returns the number of split tracks
     Int_t   GetNumSplitGoodTracks()     { return mSplitGoodTracks;               }  // returns the number of split good tracks
+    Int_t   GetNumSplitLookLikeGoodTracks() { return mSplitLoliGoodTracks;       }  // returns the number of split good tracks
     Int_t   GetNumUncleanTracks()       { return mUncleanTracks;                 }  // returns the number of tracks which have picked up wrong clusters
+    Int_t   GetNumUncleanGoodTracks()   { return mUncleanGoodTracks;             }  // returns the number of tracks which have picked up wrong clusters and have a good parent track
     Int_t   GetNumLongTracks()          { return mLongTracks;                    }  // returns number of tracks with more than 10 points in the Ftpc
     Int_t   GetNumLongTrackClusters()   { return mLongTrackClusters;             }  // returns number of clusters on long tracks
     Int_t   GetNumShortTracks()         { return mShortTracks;                   }  // returns number of tracks with less than 5 points in the Ftpc
@@ -297,6 +335,7 @@ public:
 
      void   Loop();
      void   FillEventHistos();                                    // Fills histograms which are filled only once per event.
+     void   FillTimeHistos(StFtpcTracker* tracker);               // Fills histogramms of time consumption
      void   FillParentHistos();                                   // Fills histogram of number of parents
      void   FillParentHistos(Int_t t_counter);                    // Fills histogram of number of parents
      void   FillMomentumHistos();                                 // Fills histograms of rel. momentum difference
@@ -309,6 +348,8 @@ public:
      void   FillFCutHistos();                                     // Fills cut histograms (found tracks)
      void   DivideHistos();                                       // Divides histograms
      void   WriteHistos();                                        // Writes histograms to file
+
+     void   GetGoodHits(TObjArray *good_clusters);                // Fills all good hits in given array    
 
      void   ShowTracks();    // Displays geant and/or found tracks
      void   GeantInfo();     // Shows information about GEANT output.
