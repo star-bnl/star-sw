@@ -186,21 +186,36 @@ public:
    * Returns the number of hits associated with this track.
    * @return number of hits associated with the track
    */
-   int getNPts() const;
-
-  /**
-   * Returns the number of gaps on this track. The gaps correspond to missing hits 
-   * in active layers along the track
-   * @return number of gaps along this track
-   */
-   int getNGaps() const;
+   int getPointCount() const;
 
   /**
    * Returns the number of hits associated with this track.
    * @return number of hits associated with the track
    */
-   int    getNFitPts() const;  
+   int getFitPointCount() const;  
    
+  /**
+   * Returns the number of gaps on this track. The gaps correspond to missing hits 
+   * in active layers along the track
+   * @return number of gaps along this track
+   */
+   int getGapCount() const;
+
+	 /**
+    * Returns the track length (in centimeters) from the first to the last point on 
+		* track. The main vertex is included in the calculation if associated with 
+		* the track.
+		*/
+	 double getTrackLength() const;
+
+	 /**
+		* Returns the maximum number of points that can possibly be on the track given
+		* its track parameters, i.e. its position in the detector. The calculation 
+		* accounts for sublayers that are not active, and nominally active volumes 
+		* that were turned off or had no data for some reason.
+		*/
+	 int getMaxPointCount() const;
+
   /**
    * Identifies the track as a primary or secondary track. The track
    * is defined as primary if it contains a primary vertex i.e. if the
@@ -209,6 +224,10 @@ public:
    */
   bool isPrimary() const;
 
+	double calculateTrackLength() const;
+	double calculateTrackSegmentLength(StiKalmanTrackNode *p1, StiKalmanTrackNode *p2) const;
+	int calculatePointCount() const;
+	int calculateMaxPointCount() const;
 
   double getTpcDedx() const;
   double getSvtDedx() const;
@@ -253,7 +272,7 @@ public:
        of the track.
    */
    StiKalmanTrackNode * addHit(StiHit *h);
-   
+  
   /// Method to insert a hit in this track
   StiKalmanTrackNode * insertHit(StiHit *hInserted, StiHit * targetParent);
   
@@ -312,15 +331,12 @@ public:
   // Function to reverse the node geometry of a track
   void swap();
 
+
   double  getMass() const;   // mass when pid known
   int     getCharge()const;   // charge of the particle
   double  getChi2() const;   // chi2 of fit
 	double  getDca2(StiTrack *t) const;   // distance of closest approach to given track - 2D calc
 	double  getDca3(StiTrack *t) const;   // distance of closest approach to given track - 3D calc
-	int    getFitPointCount()  const;  // number of points used in fit
-	int    getGapCount()  const;
-	// number of total number of points currently assigned to the track
-	int    getPointCount()      const;
 
 protected:
     

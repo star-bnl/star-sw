@@ -21,7 +21,7 @@ enum StiFindStep {StepByLayer=1,StepByDetector=2 };
 class StiKalmanTrackFinder : public StiTrackFinder, public Observer
 {
 public:
-    StiKalmanTrackFinder();
+    StiKalmanTrackFinder(StiToolkit * userToolkit);
     ~StiKalmanTrackFinder();
     //action methods_______________________________________________
 
@@ -30,8 +30,14 @@ public:
     virtual void forgetSubject(Subject* theObsoleteSubject);
     
     //inherited
-    virtual void reset();
     virtual void findTracks();
+		virtual void fitTracks(); 
+		virtual void extendTracksToVertex();
+		virtual void findNextTrack();
+		virtual void fitNextTrack();
+		virtual void findNextTrackSegment();
+    
+		virtual void reset();
     virtual bool isValid(bool debug=false) const; //Check if everything is kosher
     
     virtual void doTrackFit();
@@ -41,23 +47,6 @@ public:
 		void setParameters(StiKalmanTrackFinderParameters *par);
 		StiKalmanTrackFinderParameters * getParameters();
 
-		/*
-    virtual void setElossCalculated(bool option);
-    virtual void setMCSCalculated(bool option);
-    void   setMassHypothesis(double m);
-    double getMassHypothesis();
-    void   setField(double f);
-    void   setMinContiguousHitCount(int count);
-    void   setMaxNullCount(int count);
-    void   setMaxContiguousNullCount(int count);
-    void   setMaxChi2ForSelection(double chi);
-    void   setMinSearchWindow(double val);
-    void   setMaxSearchWindow(double val);
-    void   setSearchWindowScale(double val);
-    double getMinSearchWindow();
-    double getMaxSearchWindow();
-    double getSearchWindowScale();
-		*/
     //Local
     virtual void findTrack(StiTrack * t); //throw ( Exception);
     virtual StiKalmanTrackNode * followTrackAt(StiKalmanTrackNode * node); //throw (Exception);
@@ -74,22 +63,22 @@ public:
     void doFinishTrackSearch();
     void doNextTrackStep();
     void setStepMode(StiFindStep m)
-    {
-	mode = m;
-    }
+			{
+				mode = m;
+			}
     StiFindStep getStepMode()
-    {
-	return mode;
-    }
+			{
+				return mode;
+			}
     
 protected:
 
     void getNewState();
     
-    int    singleNodeFrom;
-    bool   singleNodeDescent;
-    double massHypothesis;
-    double maxChi2ForSelection;
+    //int    singleNodeFrom;
+    //bool   singleNodeDescent;
+    //double massHypothesis;
+    //double maxChi2ForSelection;
     void printState();
     
 private:

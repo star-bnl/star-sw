@@ -43,7 +43,7 @@ void StiDetectorContainer::kill()
 	sinstance = 0;
     }
     return;
-}
+} 
 
 StiDetectorContainer::StiDetectorContainer()
     : mroot(0), mregion(0), mLeafIt(0),

@@ -45,7 +45,7 @@ public:
     ///Preserve simple interface to add tracks
     void push_back(StiKalmanTrack*);
     
-protected:
+		//protected:
     StiTrackContainer();
     virtual ~StiTrackContainer();
     

@@ -172,19 +172,21 @@ private:
     /// to point to the position (or position closest to) that given by node.
     void setToLeaf(data_node* node);
     
-
-private:
-
+		
+		//private:
+ public:
     //Singleton Management
-
+		
     ///Private destructor: implementation of singleton pattern.
     virtual ~StiDetectorContainer();
-
+		
     ///Private destructor: implementation of singleton pattern.
     StiDetectorContainer();
-
+		
+ private:
     ///Static pointer to StiDetectorContainer: implementation of singelton
     ///pattern.
+
     static StiDetectorContainer* sinstance;
 };
 
