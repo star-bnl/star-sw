@@ -2,10 +2,13 @@
 //                                                                      //
 // StMatchMaker class ( svm + egr )                                     //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.35 2001/02/02 16:09:07 caines Exp $
+// $Id: StMatchMaker.cxx,v 1.36 2001/02/28 18:25:33 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.36  2001/02/28 18:25:33  caines
+// Update bit map for SVT
+//
 // Revision 1.35  2001/02/02 16:09:07  caines
-// Remove usage of svm and get svt tracks from est branch
+//  Remove usage of svm and get svt tracks from est branch
 //
 // Revision 1.34  2001/01/29 21:01:06  caines
 // Remove est calls from StMatchMaker no longer used
@@ -480,21 +483,25 @@ Int_t StMatchMaker::Make(){
   }
 
 
-  // scs_spt_st *s_spc = scs_spt->GetTable();
-  //  sgr_groups_st *sgroup = svt_groups->GetTable();
+  scs_spt_st *s_spc = scs_spt->GetTable();
+  sgr_groups_st *sgroup = svt_groups->GetTable();
     
-  //for( i=0; i<svt_groups->GetNRows(); i++, sgroup++){
+  for( i=0; i<svt_groups->GetNRows(); i++, sgroup++){
 
-  // if( sgroup->id1 != 0){
-  //  spt_id = sgroup->id2;
-  //  row = s_spc[spt_id].id_wafer/1000;
-  //  if( row>7)row=7;
-  //   track[s_spc[spt_id].id_globtrk-1].map[0] += (1UL<<row);
-
-  // }
- 
-  //}
-
+    if( sgroup->id1 != 0){
+      spt_id = sgroup->id2-1;
+      row = s_spc[spt_id].id_wafer/1000;
+      if(  s_spc[spt_id].id_globtrk-1 < 0){
+	cout << spt_id << " " << s_spc[spt_id].id_globtrk<< " " << endl;
+	assert(0);
+      }
+      if( row>7)row=7;
+      track[s_spc[spt_id].id_globtrk-1].map[0] += (1UL<<row);
+      
+    }
+    
+  }
+  
 
   return iMake;
 }
