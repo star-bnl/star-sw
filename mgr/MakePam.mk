@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.79 1999/01/31 22:31:44 fisyak Exp $
+# $Id: MakePam.mk,v 1.80 1999/02/08 02:29:20 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.80  1999/02/08 02:29:20  fisyak
+# New Makefile scheme
+#
 # Revision 1.79  1999/01/31 22:31:44  fisyak
 # Ad includes in dependencies
 #
@@ -125,22 +128,6 @@ endif
 ASU_MALLOC_OFF :=YES
 
 include $(STAR_MAKE_HOME)/MakeEnv.mk
-include $(STAR_MAKE_HOME)/MakeArch.mk
-
-#	INPUT DIR
-ifndef INP_DIR
-  INP_DIR := $(CWD)
-endif
-
-inp_dir = $(word 2,$(subst :, ,$(INP_DIR)))
-ifneq (,$(inp_dir))
-  override INP_DIR := $(inp_dir)
-endif
-ifeq (,$(strip $(filter /%,$(INP_DIR))))
-  override INP_DIR := $(CWD)/$(INP_DIR)
-endif
-
-LEVEL   := $(words  $(subst /, ,$(subst $(word 1, $(subst /pams, ,$(INP_DIR))),, $(INP_DIR))))
 ifeq (,$(findstring $(LEVEL),0 1))
   ifndef OUT_DIR
     OUT_DIR := $(word 1, $(subst /pams, ,$(INP_DIR)))
@@ -573,26 +560,7 @@ else
 	@echo PLEASE, Run this make with UNIX first !
 endif #/* NT */
 endif #IDM
-$(DEP_DIR)/%.d:%.cc 
-	$(MAKEDEPEND)  $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
-'s/$(notdir $(STEM))\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
-        > $(ALL_TAGS)
-$(DEP_DIR)/%.d:%.c
-	$(MAKEDEPEND)  $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
-'s/$(notdir $(STEM))\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
-        > $(ALL_TAGS)
-$(DEP_DIR)/%.d:%.F
-	$(MAKEDEPEND) -traditional -x c  $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
-'s/$(notdir $(STEM))\.F\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
-        > $(ALL_TAGS)
-$(DEP_DIR)/%.d:%.g
-	$(MAKEDEPEND) -traditional -x c  $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
-'s/$(notdir $(STEM))\.g\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
-        > $(ALL_TAGS)
-$(DEP_DIR)/%.d:%.cdf
-	cd $(SRC_DIR); \
-        echo "$(notdir $(STEM)).c $(ALL_TAGS): $(ALL_DEPS)" > $(ALL_TAGS) ;
-        echo "$(STEM).$(O): $(STEM).c" >> $(ALL_TAGS)
+include $(STAR_MAKE_HOME)/MakeDep.mk
 #-----test variables------------------------
 endif
 endif

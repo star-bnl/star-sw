@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.49  1999/02/08 02:29:20  fisyak
+#  New Makefile scheme
+#
 #  Revision 1.48  1999/01/31 23:12:08  fisyak
 #  Cleanup St Wrapper libraries
 #
@@ -223,7 +226,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/01/31 23:12:08 $ 
+#           Last modification $Date: 1999/02/08 02:29:20 $ 
 #  default setings
 # Current Working Directory
 #
@@ -231,221 +234,77 @@ ifdef SILENT
 .SILENT:.
 endif       
 
-ifdef STAR_MAKE_HOME
-  include $(STAR_MAKE_HOME)/MakeEnv.mk
-  include $(STAR_MAKE_HOME)/MakeArch.mk
-else
-  include $(STAR)/mgr/MakeEnv.mk
-  include $(STAR)/mgr/MakeArch.mk
-endif
-
-EMPTY      :=
-ZERO       :=0
-ONE        :=1
-TWO        :=2
-THREE      :=3
-FOUR       :=4
-FIVE       :=5
-
 ifndef STAR_MAKE_HOME
   STAR_MAKE_HOME := $(STAR)/mgr
 endif
-
-ifndef MakePam
-  MakePam := $(STAR_MAKE_HOME)/MakePam.mk
+include $(STAR_MAKE_HOME)/MakeEnv.mk
+ifneq (,$(wildcard StRoot/St_base))
+  BASE := St_base
 endif
-ifndef MakeFun
-  MakeFun := $(STAR_MAKE_HOME)/MakeFun.mk
-endif
-
-ifndef MakeDll
-MakeDll :=$(STAR_MAKE_HOME)/MakeDll.mk
-endif
-
-ifndef Makeloop
-Makeloop :=$(STAR_MAKE_HOME)/Makeloop.mk
-endif
-
-export Makeloop
-export MakeDll
-export MakePam
-export MakeFun
-ifndef INP_DIR 
-  INP_DIR := $(CWD)
-endif           
-NAME    := $(notdir $(INP_DIR))
-MAKFLAGS := $(filter-out w, $(MAKEFLAGS))
-#MAKFLAGS := $(filter-out s, $(MAKFLAGS))
-#MAKFLAGS := $(filter-out --, $(MAKFLAGS))
-# define level pams -> domain -> package from *.idl and *.g files
-#======================= level ===========================
-PAMS    := $(findstring /pams,$(INP_DIR))
-ifndef PAMS
-  PAMS    := $(findstring /StRoot,$(INP_DIR))
-endif
-ROOT_DIR:= $(word 1,$(subst $(PAMS), ,$(INP_DIR)))
-LEVEL   := $(words  $(subst /, ,$(subst $(ROOT_DIR),, $(INP_DIR))))
-
 ifeq ($(LEVEL),$(ZERO))
-	SUBDIRS := $(wildcard pams)
-else
-	DIRS    := $(subst /.,,$(strip $(wildcard */.)))
-#	SUBDIRS := $(foreach dir, $(DIRS), $(shell test -d $(dir) && echo $(dir))) 
-	SUBDIRS := $(filter-out inc idl doc CVS wrk src exa kumac html, $(DIRS))
-	SUBDIRS := $(strip    $(sort $(SUBDIRS)))
-ifndef NT
-        SUBDIRS := $(filter-out util, $(SUBDIRS))
-else
-	SUBDIRS := $(filter-out strange, $(SUBDIRS))
-endif
-ifneq (,$(findstring sim, $(SUBDIRS)))
-        SUBDIRS := $(filter-out sim, $(SUBDIRS))
-        DIRS    := $(subst /.,,$(strip $(wildcard sim/*/.)))
-        SUBDIRS += $(filter-out sim/CVS sim/kumac sim/idl sim/inc,$(DIRS))
-endif
-ifneq (,$(findstring gen, $(SUBDIRS)))
-        SUBDIRS := $(filter-out gen, $(SUBDIRS))
-        DIRS    := $(subst /.,,$(strip $(wildcard gen/*/.)))
-        SUBDIRS += $(filter-out gen/CVS gen/kumac gen/inc gen/idl,$(DIRS))
-endif
-#. take out trg for sgi
-ifneq (,$(findstring $(STAR_SYS),sgi_64 ))
-#        SUBDIRS := $(filter-out trg, $(SUBDIRS))
-endif
-ifdef NT
-SUBDIRS := $(filter-out db, $(SUBDIRS)) 
-SUBDIRS := $(filter-out sim, $(SUBDIRS))
-SUBDIRS := $(filter-out g2t, $(SUBDIRS))
-SUBDIRS := $(filter-out gstar, $(SUBDIRS))
-SUBDIRS := $(filter-out dig, $(SUBDIRS))
-SUBDIRS := $(filter-out trg, $(SUBDIRS))
-endif
-SUBDIRS := $(filter-out global, $(SUBDIRS)) $(filter global, $(SUBDIRS))
-SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS)) 
-SUBDIRS := $(filter-out l3, $(SUBDIRS)) $(filter l3, $(SUBDIRS))
-SUBDIRS := $(filter-out objy, $(SUBDIRS))
-ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
-         SUBDIRS := $(filter-out tcc, $(SUBDIRS))
-         SUBDIRS := $(filter-out trg, $(SUBDIRS))
-         SUBDIRS := $(filter-out l3, $(SUBDIRS))
-endif
-endif
-ifeq ($(LEVEL), $(TWO))  #default is domain
-DOM_DIR := $(CWD)
-PKG     := $(notdir $(DOM_DIR))
-ifeq (gen,$(PKG))              
-PKG     :=
-endif                          
-ifeq (sim,$(PKG))              
-PKG     :=
+  SUBDIRS :=$(wildcard pams) $(wildcard StRoot)
+  ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/.share/tables))
+    St_Tables := St_Tables
+  endif
 endif
 ifndef SUBDIRS
-SUBDIRS := ./
-endif         
+  DIRS    := $(subst /.,,$(strip $(wildcard */.)))
+  SUBDIRS := $(DIRS)
+  SUBDIRS := $(filter-out inc idl doc CVS wrk src exa kumac html test macros, $(DIRS))
+  SUBDIRS := $(strip    $(sort $(SUBDIRS)))
+  SUBDIRS := $(filter StChain, $(SUBDIRS)) $(filter-out StChain, $(SUBDIRS)) 
+  ifneq (,$(findstring sim, $(SUBDIRS)))
+    SUBDIRS := $(filter-out sim, $(SUBDIRS))
+    DIRS    := $(subst /.,,$(strip $(wildcard sim/*/.)))
+    SUBDIRS += $(filter-out sim/CVS sim/kumac sim/idl sim/inc,$(DIRS))
+  endif
+  ifneq (,$(findstring gen, $(SUBDIRS)))
+    SUBDIRS := $(filter-out gen, $(SUBDIRS))
+    DIRS    := $(subst /.,,$(strip $(wildcard gen/*/.)))
+    SUBDIRS += $(filter-out gen/CVS gen/kumac gen/inc gen/idl,$(DIRS))
+  endif
+  ifdef NT
+    SUBDIRS := $(filter-out db, $(SUBDIRS)) 
+    SUBDIRS := $(filter-out sim, $(SUBDIRS))
+    SUBDIRS := $(filter-out g2t, $(SUBDIRS))
+    SUBDIRS := $(filter-out gstar, $(SUBDIRS))
+    SUBDIRS := $(filter-out dig, $(SUBDIRS))
+    SUBDIRS := $(filter-out trg, $(SUBDIRS))
+    SUBDIRS := $(filter-out strange, $(SUBDIRS))
+  endif
+  SUBDIRS := $(filter-out global, $(SUBDIRS)) $(filter global, $(SUBDIRS))
+  SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS)) 
+  SUBDIRS := $(filter-out l3, $(SUBDIRS)) $(filter l3, $(SUBDIRS))
+  SUBDIRS := $(filter-out objy, $(SUBDIRS))
+  ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
+    SUBDIRS := $(filter-out trg, $(SUBDIRS))
+    SUBDIRS := $(filter-out l3, $(SUBDIRS))
+  endif
+  ifdef PKG
+    SUBDIRS:=
+  endif
 endif
-ifeq ($(LEVEL), $(THREE)) #package level
-DOM_DIR := $(subst / ,,$(dir $(INP_DIR)/../) )
-PKG     := $(NAME)
-SUBDIRS:=
-endif                       
-ifeq ($(LEVEL),$(FOUR)) #subpackage level
-DOM_DIR := $(subst / ,,$(INP_DIR)/../../) )
-PKG     := $(NAME)
-endif
-ifndef DOMAIN
-DOMAIN  := $(notdir $(DOM_DIR))                          
-endif
-SYS_DIR := $(ROOT_DIR)/.$(STAR_HOST_SYS)
-LIB_DIR := $(SYS_DIR)/lib
-SO_LIB  := $(LIB_DIR)/St_$(PKG).$(So)
-ifeq ($(LEVEL),$(FIVE))        
-.PHONY               : default
-all:
-	@echo "Please run make in parent directory"
-else                           
-ifndef ROOT_DIR                 
-	override ROOT_DIR := $(subst /.,,$(wildcard $(ROOT_DIR)/.))
-endif                          
-ifeq ($(NAME),$(PKG))          
-	SUBDIRS :=
-endif                          
-ifneq ($(EMPTY),$(findstring $(LEVEL),0 1))
-ifneq ($(EMPTY),$(SUBDIRS))     
-TARGETS += $(addsuffix _all, $(SUBDIRS))
-endif
-ifndef NOROOT
-ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/base))
-BASE := St_base 
-endif
-ifndef NT
-ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/xdf2root))
-XDF2ROOT := xdf2root
-endif
-endif
-ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/.share/tables))
-StRoot += St_Tables
-endif
-ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/StChain))
-StRoot += StChain
-endif
-Makers  :=  $(notdir $(wildcard $(ROOT_DIR)/StRoot/St*Maker)) 
-#Makers  :=  $(notdir $(wildcard $(ROOT_DIR)/StRoot/St*)) 
-#ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56 hp_ux102))
-ifneq (,$(findstring $(STAR_SYS),hp_ux102))
-Makers  :=  $(filter-out StTrsMaker, $(Makers))
-endif
-Makers  :=  $(filter-out St_ebye_Maker, $(Makers))
-Makers  :=  $(filter-out St_laser_Maker, $(Makers))
-Makers  :=  $(filter-out St_mev_Maker, $(Makers))
-Makers  :=  $(filter-out St_hbt_Maker, $(Makers))
-Makers  :=  $(filter-out StEventReaderMaker, $(Makers))
-ifneq ($(EMPTY),$(Makers))
-StRoot += St_Makers
-endif
-ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/StDisplay))
-StRoot += StDisplay
-endif
-ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/StMagF))
-StRoot += StDisplay
-endif
-
-endif
+include $(STAR_MAKE_HOME)/MakeDirs.mk
 #          I have subdrs
-.PHONY               :  all $(TARGET) ROOT test clean clean_lib clean_share clean_obj
-#      I_have_subdirs
-all:    $(TARGETS) ROOT
-ifndef NOROOT
-ROOT:   $(BASE) $(XDF2ROOT)  $(StRoot)
-St_base:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base     SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St_base.$(So)
-xdf2root:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/xdf2root.$(So) 
-StSclRoot:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StSclRoot SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StSclRoot.$(So) 
-StDisplay:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StDisplay SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StDisplay.$(So) 
-StMakers: St_Makers
-St_Makers: $(Makers)
-StChain:   
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain  SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StChain.$(So)
-St_Tables:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables   SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St_Tables.$(So) NODEBUG=YES
-StMagF: 
-#	$(MAKE) -f $(MakeFun) fun=StMagF -C $(ROOT_DIR)/StRoot/StMagF   SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StMagF.$(So)
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StMagF  SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StMagF.$(So)
-StRootEvent: 
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StRootEvent  SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StRootEvent.$(So)
-ifneq ($(EMPTY),$(findstring $(STAR_LEVEL),dev))
+.PHONY               :  all $(BASE)  $(St_TABLES) test clean clean_lib clean_share clean_obj
+all:    $(BASE) $(addsuffix _loop, $(SUBDIRS)) $(addsuffix _$(branch),$(PKG))
+	@echo $(TARGETS)
+$(BASE):
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/$(BASE)
 St_TablesDoc: 
 	root.exe -b -q MakeHtmlTables.cxx
-endif
-St%Maker: 
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St$(STEM)Maker  SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St$(STEM)Maker.$(So)
-endif
-%_all:  $(BASE)
+%_loop:
 	$(MAKE)  -f $(Makeloop) -C $(STEM) $(MAKFLAGS) 
-test:  $(BASE) $(addsuffix _test, $(SUBDIRS))
-%_test: 
+%_pams:
+	$(MAKE)  -f $(MakePam) $(MAKFLAGS)
+	$(MAKE)  -f $(MakeDll) $(MAKFLAGS) -C  $(GEN_DIR)
+%_StRoot:
+	$(MAKE)  -f $(MakeDll) $(MAKFLAGS)
+St_Tables: $(BASE)
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables \
+         SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St_Tables.$(So) NODEBUG=YES
+test:   $(addsuffix _test, $(SUBDIRS))
+%_test:
 	$(MAKE)  -f $(Makeloop) -C $(STEM) test $(MAKFLAGS) 
 clean: $(addsuffix _clean, $(SUBDIRS))
 %_clean: 
@@ -459,24 +318,11 @@ clean_share: $(addsuffix _clean_share, $(SUBDIRS))
 clean_obj: $(addsuffix _clean_obj, $(SUBDIRS))
 %_clean_obj: 
 	$(MAKE)  -f $(Makeloop) -C $(STEM) clean $(MAKFLAGS) 
-else # I have no subdirs
-PKG     := $(notdir $(shell $(PWD)))
-GEN_DIR := $(ROOT_DIR)/.share/$(PKG)
-GEN_TAB := $(DIR_GEN)/tables
-.PHONY               : default clean clean_lib clean_share clean_obj test
-all:
-	$(MAKE)  -f $(MakePam) $(MAKFLAGS)
-ifndef NOROOT
-	$(MAKE)  -f $(MakeDll) $(MAKFLAGS) -C  $(GEN_DIR) SO_LIB=$(SO_LIB)
-endif
 clean:;      $(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean
 clean_lib:;  $(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean_lib
 clean_share:;$(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean_share
 clean_obj:;  $(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean_obj
 clean_test:; $(MAKE)  -f $(MakePam) $(MAKFLAGS)  test
-endif
-endif
-w:
 test: test_level
 test_level:
 	@echo MAKELEVEL = $(MAKELEVEL) 
@@ -498,4 +344,16 @@ test_level:
 	@echo "STAR_MAKE_HOME=|"$(STAR_MAKE_HOME)"|"
 	@echo "DIRS=|"$(DIRS)"|"
 	@echo "Makers    = |"$(Makers)"|"
+	@echo "PAMS      = |"$(PAMS)"|"
 #	@echo "NT        ="$(NT)"
+	@echo "DIR_GEN   = |"$(DIR_GEN)"|"
+	@echo "GEN_TMP   = |"$(GEN_TMP)"|"
+	@echo "GEN_TAB   = |"$(GEN_TAB)"|"
+	@echo "LIB_DIR   = |"$(LIB_DIR)"|"
+	@echo "OBJ_DIR   = |"$(OBJ_DIR)"|"
+	@echo "DEP_DIR   = |"$(DEP_DIR)"|"
+	@echo "SYS_DIR   = |"$(SYS_DIR)"|"
+	@echo "SRC_DIR   = |"$(SRC_DIR)"|"
+	@echo "PKG       = |"$(PKG)"|"
+	@echo "NAME      = |"$(NAME)"|"
+	@echo "branch    = |"$(branch)"|"
