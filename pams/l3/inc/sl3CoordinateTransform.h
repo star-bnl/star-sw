@@ -68,21 +68,13 @@ static double SectorCos[NSECTORS] = {
     -0.866025404, -0.5, // 7-8
      0.,           0.5, // 9-10
      0.866025404,  1.0, // 11-12
-     0.866025404,  0.5, // 13-14
-     0.,          -0.5, // 15-16
-    -0.866025404, -1.0, // 17-18
-    -0.866025404, -0.5, // 19-20
-     0.,           0.5, // 21-22
-     0.866025404,  1.0, // 23-24
+     -0.866025404, -0.5, // 13-14
+     0.,           0.5,  // 15-16
+     0.866025404,  1.0,  // 17-18
+     0.866025404,  0.5,  // 19-20
+     0.,          -0.5,  // 21-22
+     -0.866025404, -1.0, // 23-24
 };
-/*
-    -0.866025404, -0.5, ! 13-14
-     0.,           0.5, ! 15-16
-     0.866025404,  1.0, ! 17-18
-     0.866025404,  0.5, ! 19-20
-     0.,          -0.5, ! 21-22
-    -0.866025404, -1.0, ! 23-24
-*/
 
 inline int rawToLocal ( int row, double pad, double tb,
 			double *xLocal, double *yLocal, double *zLocal) {
@@ -101,8 +93,23 @@ inline int rawToLocal ( int row, double pad, double tb,
   // needs access to db probably
   //     Brian's version (see TRS lib):
   //     double z = frischGrid - driftVelocity * (tZero + tb*timebinWidth);
-  *zLocal = driftLength - tb*lengthPerTb;
-
+  //*zLocal = driftLength - tb*lengthPerTb;
+  
+  //
+  // temporary patch for inner and outer rows
+  //
+   if (row<13)
+      {
+	  double driftlen = 209.86;
+	  double lengthpertimebucket = driftlen/512;
+	  *zLocal = driftlen - tb*lengthpertimebucket;
+      }
+   else
+       {
+	   double driftlen = 210.34;
+	   double lengthpertimebucket = driftlen/512;
+	   *zLocal = driftlen - tb*lengthpertimebucket;  
+       }
   //printf("z coordinate: %f\n", *zLocal);
   return 0;
 }
