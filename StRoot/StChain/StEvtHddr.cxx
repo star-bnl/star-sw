@@ -55,7 +55,7 @@ void StEvtHddr::FillTag(EvtHddr_st *tag)
     return unixTime.GetUTime();
 }
 //_____________________________________________________________________________
-  void StEvtHddr::Print()
+  void StEvtHddr::Print(Option_t*)
 {
   printf("\n *********** Event Info **********************\n");
   printf("\tRun: \t%5d  Event %5d  TimeStamp %8d.%6d  Bunch %u\n"
