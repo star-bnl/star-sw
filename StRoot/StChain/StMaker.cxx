@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.13 1998/11/19 01:23:57 fine Exp $
+// $Id: StMaker.cxx,v 1.14 1998/12/21 19:42:51 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.14  1998/12/21 19:42:51  fisyak
+// Move ROOT includes to non system
+//
 // Revision 1.13  1998/11/19 01:23:57  fine
 // StChain::MakeDoc has been introduced, StChain::MakeDoc has been fixed (see macros/bfc_doc.C macro
 //
@@ -26,19 +29,22 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include <TSystem.h>
-#include <TClass.h>
-#include <TROOT.h>
-#include <THtml.h>
+#include "TSystem.h"
+#include "TClass.h"
+#include "TROOT.h"
+#include "THtml.h"
 
-#include <TChain.h>
-#include <TTree.h>
-#include <TList.h>
-#include <TClonesArray.h>
-#include <TBrowser.h>
+#include "TChain.h"
+#include "TTree.h"
+#include "TList.h"
+#include "TClonesArray.h"
+#include "TBrowser.h"
 
 #include "StMaker.h"
 #include "StChain.h"
+
+static StMaker *thisMakers[100];
+static Int_t     thisMakerIndx=0;
 
 ClassImp(StMaker)
 
@@ -133,15 +139,24 @@ void StMaker::Draw(Option_t *)
   } else {
      m_Fruits->AppendPad();
   }
-}
+} 
 
 //_____________________________________________________________________________
 void StMaker::FillClone()
 {
-//   Copy original fruits in a separate list (clones)
+   if (!m_Save) return;
 
-   if (!m_IsClonable || m_Fruits == 0) return;
-   m_Clones = m_Fruits->Clone();
+   if (!m_Tree) {
+     m_Tree = new TTree(GetName(),GetTitle());
+     thisMakers[thisMakerIndx]=this;     
+//     m_Tree->Branch(m_DataSet->GetName(),m_DataSet->IsA()->GetName(),&m_DataSet,0);
+     printf(" Branch %s \n", m_Tree->Branch(GetName(),IsA()->GetName(),&thisMakers[thisMakerIndx])->GetName());
+     printf(" Maker number %d \n",thisMakerIndx++);
+   }
+
+   if (m_Tree) {
+     m_Tree->Fill();
+   }
 }
 
 //_____________________________________________________________________________

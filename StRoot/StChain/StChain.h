@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.17 1998/11/25 21:58:21 fisyak Exp $
+// $Id: StChain.h,v 1.18 1998/12/21 19:42:50 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.18  1998/12/21 19:42:50  fisyak
+// Move ROOT includes to non system
+//
 // Revision 1.17  1998/11/25 21:58:21  fisyak
 // Cleanup
 //
@@ -58,7 +61,7 @@
 
 
 #ifndef ROOT_TTree
-#include <TTree.h>
+#include "TTree.h"
 #endif
 
 #include "St_DataSet.h"
@@ -68,12 +71,12 @@
 #endif
 
 #ifndef __CINT__
-#include <TROOT.h>
-#include <TChain.h>
-#include <TTree.h>
-#include <TBrowser.h>
-#include <TClonesArray.h>
-#include <TBenchmark.h>
+#include "TROOT.h"
+#include "TChain.h"
+#include "TTree.h"
+#include "TBrowser.h"
+#include "TClonesArray.h"
+#include "TBenchmark.h"
 #include "St_XDFFile.h"
 #include "St_DataSetIter.h"
 #include "St_FileSet.h"

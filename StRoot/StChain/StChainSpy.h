@@ -1,5 +1,8 @@
-// $Id: StChainSpy.h,v 1.1 1998/10/07 18:44:01 perev Exp $
+// $Id: StChainSpy.h,v 1.2 1998/12/21 19:42:51 fisyak Exp $
 // $Log: StChainSpy.h,v $
+// Revision 1.2  1998/12/21 19:42:51  fisyak
+// Move ROOT includes to non system
+//
 // Revision 1.1  1998/10/07 18:44:01  perev
 // Add Spy classes for Farm Monitor
 //
@@ -40,7 +43,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #ifndef ROOT_TTree
-#include <TTree.h>
+#include "TTree.h"
 #define ROOT_TTree
 #endif
 

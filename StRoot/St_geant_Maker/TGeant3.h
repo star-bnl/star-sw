@@ -4,7 +4,7 @@
 //  C++ interface to Geant3 basic routines    // 
 //////////////////////////////////////////////// 
  
-#include <TNamed.h> 
+#include "TNamed.h" 
   
 class TGeant3 : public TNamed { 
 

@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.h,v 1.2 1998/12/15 22:39:52 akio Exp $
+// $Id: St_emc_Maker.h,v 1.3 1998/12/21 19:45:40 fisyak Exp $
 // $Log: St_emc_Maker.h,v $
+// Revision 1.3  1998/12/21 19:45:40  fisyak
+// Move ROOT includes to non system
+//
 // Revision 1.2  1998/12/15 22:39:52  akio
 // Add emc_hit object and  adc_to_energy in here.
 //
@@ -14,7 +17,7 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-#include <TH2.h>
+#include "TH2.h"
 #include "St_ems_hits_Table.h"
 #include "St_emc_pedestal_Table.h"
 #include "St_emc_adcslope_Table.h"

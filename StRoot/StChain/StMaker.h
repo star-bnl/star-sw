@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.9 1998/11/19 01:23:57 fine Exp $
+// $Id: StMaker.h,v 1.10 1998/12/21 19:42:51 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.10  1998/12/21 19:42:51  fisyak
+// Move ROOT includes to non system
+//
 // Revision 1.9  1998/11/19 01:23:57  fine
 // StChain::MakeDoc has been introduced, StChain::MakeDoc has been fixed (see macros/bfc_doc.C macro
 //
@@ -26,14 +29,15 @@
 
 #include "Stypes.h"
 #include "St_DataSet.h"
-#include <TString.h>
+#include "TString.h"
 #ifndef ROOT_TClonesArray
-#include <TClonesArray.h>
+#include "TClonesArray.h"
 #endif
 
 class TList;
 class TBrowser;
 class TChain;
+class TTree;
 
 class StMaker : public TNamed {
 
@@ -42,11 +46,12 @@ protected:
    Bool_t         m_IsClonable;  //!True if Maker objects are clonable
    Int_t          m_Save;        // = 1 if m-Maker to be saved in the Tree
    TObject       *m_Fruits;      //Pointer to maker fruits (result)
-   TObject       *m_Clones;      //Pointer to clones of fruits
+   TClonesArray  *m_Clones;      //Pointer to clones of fruits
    TString        m_BranchName;  //Name of branch (if any)
    TList         *m_Histograms;  //Pointer to list supporting Maker histograms
    St_DataSet    *m_DataSet;     //Pointer to the Maker's dataset
    TString        m_BranchFile;  //
+   TTree         *m_Tree;        //! TTree to write this branch out
 
 public:
 

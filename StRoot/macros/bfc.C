@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.27 1998/12/12 02:38:43 fisyak Exp $
+// $Id: bfc.C,v 1.28 1998/12/21 19:45:49 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.28  1998/12/21 19:45:49  fisyak
+// Move ROOT includes to non system
+//
 // Revision 1.27  1998/12/12 02:38:43  fisyak
 // Clean up
 //
@@ -75,12 +78,13 @@
 // Revision 1.2  1998/07/20 15:08:19  fisyak
 // Add tcl and tpt
 //
-void bfc(
-         const Int_t  Nevents=1000,
-         const Char_t *fileinp = "/afs/rhic/star/data/samples/hijet-g2t.xdf",
-         const Char_t *fileout = "hijet-bfc.xdf",
-         const Char_t *FileOut = "hijet-bfc.root")
 {
+         const Int_t  Nevents=0;
+	 const Char_t *fileinp = "/afs/rhic/star/data/samples/hijet-g2t.xdf";
+	 //	 const Char_t *fileinp = "/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/g2t/psc091_03_34evts.xdf";
+         const Char_t *fileout = "hijet-bfc.xdf";
+         const Char_t *FileOut = "hijet-bfc.root";
+
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("xdf2root");
@@ -91,8 +95,7 @@ void bfc(
   gSystem->Load("St_xdfin_Maker");
   gSystem->Load("St_calib_Maker");
   gSystem->Load("St_evg_Maker");
-  //  gSystem->Load("geometry");
-  gSystem->Load("St_geometry");
+  gSystem->Load("geometry");
   gSystem->Load("St_geant_Maker");
   gSystem->Load("St_TLA_Maker");
   gSystem->Load("tpc");
@@ -121,8 +124,8 @@ void bfc(
   if (FileOut) root_out  =  new TFile(FileOut,"RECREATE");
 //TFile      *root_tree= new TFile("auau_central_hijing.tree.root","RECREATE");
 // Create the main chain object
-  //  StChain chain("bfc");
-  StChainSpy chain("bfc");
+  StChain *chain = new StChain("bfc");
+  //  StChainSpy chain("bfc");
 
 //  Create the makers to be called by the current chain
   St_params_Maker params("params","run/params");
@@ -130,14 +133,14 @@ void bfc(
   //  St_TLA_Maker     geom("geom","run/geant/Run");
   if (xdf_in) {
     St_xdfin_Maker xdfin("xdfin");
-    chain.SetInputXDFile(xdf_in);
+    chain->SetInputXDFile(xdf_in);
   }
   St_calib_Maker    calib("calib","calib"); 
   St_evg_Maker      evgen("evgen","event/evgen");
   St_geant_Maker    geant("geant","event/geant/Event");
   //  St_TLA_Maker    geant("geant","event/geant/Event");
 //  St_fss_Maker   ftpc_raw("ftpc_raw","event/raw_data/ftpc");
-//  St_tss_Maker    tpc_raw("tpc_raw","event/raw_data/tpc");
+  //  St_tss_Maker    tpc_raw("tpc_raw","event/raw_data/tpc");
 // Set parameters
 //  tpc_raw.adcxyzon();
   St_srs_Maker         svt_hits("svt_hits","event/data/svt/hits");
@@ -147,32 +150,32 @@ void bfc(
   St_stk_Maker       stk_tracks("svt_tracks","event/data/svt/tracks");
   St_tpt_Maker       tpc_tracks("tpc_tracks","event/data/tpc/tracks");
 //  St_TLA_Maker      ftpc_tracks("ftpc_tracks","event/data/ftpc/tracks");
-  St_TLA_Maker           global("global","event/data/global");
-  St_dst_Maker        dst_Maker("dst","event/data/global/dst");
+  St_glb_Maker           global("global","event/data/global");
+  St_TLA_Maker        dst_Maker("dst","event/data/global/dst");
   St_run_summary_Maker  summary("run_summary","run/dst");
-  chain.PrintInfo();
+  chain->PrintInfo();
 // Init the chain and all its makers
-  int iInit = chain.Init();
-  if (iInit) chain.Fatal(iInit,"on init");
-//  chain.MakeTree("StChainTree","Title");
+  int iInit = chain->Init();
+  if (iInit) chain->Fatal(iInit,"on init");
+//  chain->MakeTree("StChainTree","Title");
 // Prepare TCanvas to show some histograms created by makers
   if (xdf_out){
     gBenchmark->Start("xdf out");
-    xdf_out->NextEventPut(chain.DataSet("params")); // xdf output
+    xdf_out->NextEventPut(chain->DataSet("params")); // xdf output
     gBenchmark->Stop("xdf out");
   }
   if (root_out) {
     gBenchmark->Start("root i/o");
     root_out->cd();
-    St_DataSet *run = chain.DataSet("params");// root output
+    St_DataSet *run = chain->DataSet("params");// root output
     run->SetWrite();
     gBenchmark->Stop("root i/o");
   }
   gBenchmark->Start("bfc");
   Int_t i=0;
   for (Int_t i =1; i <= Nevents; i++){
-    if (chain.Make(i)) break;
-    St_DataSet *dst = chain.DataSet("dst");
+    if (chain->Make(i)) break;
+    St_DataSet *dst = chain->DataSet("dst");
     if (xdf_out){
       gBenchmark->Start("xdf out");
       xdf_out->NextEventPut(dst); // xdf output
@@ -186,16 +189,16 @@ void bfc(
     }
     //    root_tree->cd();
     //    printf ("Fill Tree\n");
-    //    chain.FillTree();
+    //    chain->FillTree();
     //  histCanvas->Modified();
     //  histCanvas->Update();
-    if (i != Nevents) chain.Clear();
+    if (i != Nevents) chain->Clear();
     printf ("===========================================\n");
     printf ("=========================================== Done with Event no. %d\n",i);
     printf ("===========================================\n");
   }
   if (Nevents > 1) {
-    chain.Finish();
+    chain->Finish();
     delete xdf_in;
     if (xdf_out){
       delete xdf_out;;

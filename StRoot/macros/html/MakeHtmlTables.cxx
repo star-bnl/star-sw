@@ -18,8 +18,8 @@
  //  Char_t buffer[256];
    for(Int_t i=0;i<nlist;i++) {
     const char *buffer = libs[i];
-    printf(" %s \n", buffer);
-    if (gSystem.Load(buffer))  printf(" Loading DLL \"%s\" failed \n",buffer);
+    printf(" %s \n", libs[i]);
+    if (gSystem.Load(libs[i]))  printf(" Loading DLL \"%s\" failed \n",libs[i]);
   }
 
   void *dirhandle = 0;
