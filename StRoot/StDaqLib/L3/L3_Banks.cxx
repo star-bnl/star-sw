@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Banks.cxx,v 1.2 2001/06/21 19:24:50 struck Exp $
+ * $Id: L3_Banks.cxx,v 1.3 2001/07/17 19:16:11 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: L3_Banks.cxx,v $
+ * Revision 1.3  2001/07/17 19:16:11  struck
+ * update to 2001 data format (backwards compatible)Z
+ *
  * Revision 1.2  2001/06/21 19:24:50  struck
  * corrected typo in filenames
  *
@@ -37,6 +40,34 @@
 #include <assert.h>
 
 
+int Bank_L3_SUMD::swap()
+{
+  // get bank length 
+  int words = header.BankLength;
+  int iret = swap_raw(header.ByteOrder,&words,1);
+
+  // returns zero means none needed
+  if(!iret) return(0);  
+  // returns negative means error
+  if(iret < 0) return iret;
+
+  // swap body first
+  iret = swap_raw(header.ByteOrder, (INT32 *)&nProcessed, 3);
+  assert(iret > 0);
+
+  // now swap algorithm_data structure
+  for (int i=0; i<nAlg; i++) {
+        iret = swap_raw(header.ByteOrder, (INT32 *)&alg[i].algId, 1);
+	iret = swap_raw(header.ByteOrder, (INT32 *)&alg[i].nProcessed, 13);
+  }
+
+  // swap the header
+  iret = header.swap();
+
+  return iret;
+}
+
+
 int Bank_L3_GTD::swap()
 {
   // get bank length 
@@ -53,7 +84,7 @@ int Bank_L3_GTD::swap()
   assert(iret > 0);
 
   // now swap globalTrack structure
-  for ( unsigned int i=0; i<nTracks; i++) {
+  for (unsigned int i=0; i<nTracks; i++) {
         iret = swap_raw(header.ByteOrder, (int *)&track[i].id, 1);
 	iret = l3Swap_short((short *)&track[i].flag, (short) 1);
 	iret = swap_raw(header.ByteOrder, (int *)&track[i].chi2, 13);
