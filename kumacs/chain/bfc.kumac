@@ -1,7 +1,10 @@
-* $Id: bfc.kumac,v 1.52 1998/09/16 15:27:14 kathy Exp $
+* $Id: bfc.kumac,v 1.53 1998/09/16 16:08:54 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.53  1998/09/16 16:08:54  kathy
+* new chain variable ntup to write ntuple in bfc
+*
 * Revision 1.52  1998/09/16 15:27:14  kathy
-* fix for skip events so it picks up correct bfc_util
+*  fix for skip events so it picks up correct bfc_util
 *
 * Revision 1.51  1998/09/15 21:08:55  kathy
 * make bfc skip events for fzin & dstin also
@@ -374,9 +377,13 @@ MACRO bfc _
    no_events=1 _
    input_data_file=/net/rmds03/disk1/star/auau200/hijing135/default/b0_3/year1a/hadronic_off/Gstardata/set100/set100_01_45evts.fz _
    output_file=set100_01_45evts _
-   log=bfc.log
-    
-***********************************************************
+   log=bfc.log _
+   funit=21 _
+   nfile=globtrk.ntup _
+   nid=111 _
+   table=global/dst/globtrk 
+  
+* **********************************************************
 * CALCULATE STUFF FROM MACRO INPUTS 
 ***********************************************************
     
@@ -402,7 +409,14 @@ MACRO bfc _
  message ' *** output dst (dout) file name  --> ' [output_file]_dst.xdf
  message ' *** tpc_sector_first        --> ' [tpc_sector_first]
  message ' *** tpc_sector_last         --> ' [tpc_sector_last]
-
+ 
+ message ' ***  ntuple file unit # --> ' [funit]
+ message ' ***  ntuple file name   --> ' [nfile]
+ message ' ***  ntuple id          --> ' [nid]
+ message ' ***  ntuple table       --> ' [table]
+ 
+ 
+ 
 ***********************************************************
 * GLOBAL VARIABLES 
 * **********************************************************
@@ -417,7 +431,12 @@ MACRO bfc _
  macro/global/create output_xdf_file  [output_xdf_file] 
  macro/global/create output_fzd_file  [output_fzd_file]
  macro/global/create output_dst_file  [output_dst_file]
- 
+   
+   macro/global/create funit [funit]
+   macro/global/create nfile [nfile]
+   macro/global/create nid   [nid]
+   macro/global/create table [table]
+	   
 ***********************************************************
 * BEGINNING STUFF 
 * **********************************************************

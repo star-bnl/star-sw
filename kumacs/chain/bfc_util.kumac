@@ -107,6 +107,8 @@
 * editted 9/14/98 K. Turner - new chain variable dstin to read in dst
 *                             file and put tables in correct directories
 * editted 9/15/98 Y. Fisyak - fixed "fzin" so it gets to EOF properly
+* editted 9/16/98 K. Turner - new chain variable "ntup" to write ntuple
+*
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -297,6 +299,7 @@ macro bfc_init _
      (dehd) exec create_tables_global#fill_dst_event_header
      (drhd) exec create_tables_global#fill_dst_run_header
 	    exec init_dst#init_rhead
+    (ntup)  exec write_table_to_ntuple#init_disk [funit] [nfile]
     (fzout) user/output o [output_fzd_file]
     (evout)
             if output_xdf_file="" then
@@ -497,6 +500,7 @@ ABEND:
     (dmhrd)    nextl 1
     (desum)    exec run_dst#dst_event_summary
     (drsum)    exec run_dst#dst_run_summary
+    (ntup)     exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
     (evout)    if [output_xdf_file]="" then
                  message "Empty output file"
                else
@@ -573,6 +577,7 @@ macro bfc_finish _
      (drsum) exec  finish_dst#dst_run_summary
              exec  run_dst#dst_run_summary
              vec/create randst
+      (ntup) exec write_table_to_ntuple#close_disk [funit] [nid]
      (evout,esout) 
             if [output_xdf_file]="" then
                  message "Empty output file"
