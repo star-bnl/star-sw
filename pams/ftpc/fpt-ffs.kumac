@@ -1,0 +1,101 @@
+************* fpt-ffs.kumac  ***************************************************
+****************************************************************************
+
+* Create and initialize fpt input tables
+exec setpars
+
+* Remove old files
+shell rm fort.*
+shell rm interm_hit_prot.txt
+
+* Define input stream:
+*         ffs output for the fast simulator chain
+*         there is 1 event in this dataset
+DIO/NEWFILESTREAM  ffsout  /afs/rhic/star/users/jcs/public/ffs_pipealu_1.tab R
+
+* Define output stream
+DIO/NEWFILESTREAM fptout /afs/rhic/star/users/jcs/public/fpt_pipealu_1.tab W
+
+* Create output tables
+mkdir Track
+cd Track
+tdm/newtable fpt_fptrack fpt_fptrack 20000
+cd ..
+* Create dummy fcl_point table
+tdm/newtable dummy fcl_fppoint 1
+
+* Skip events
+exec skip 0
+
+* Process events
+exec process 1
+
+* Close input data stream
+DIO/STREAM/CLOSE  ffsout
+
+* Close output data stream
+DIO/STREAM/CLOSE fptout
+
+return
+
+*****  setpars ****************************************************************
+* macro to define and initialize fpt tables
+****************************************************************************
+
+macro setpars
+exec $PAMS_STAR/ftpc/kumac/diagnostics.kumac
+exec $PAMS_STAR/ftpc/kumac/fpt_fptpar.kumac
+return
+
+*****  skip ****************************************************************
+* macro to skip events already processed
+****************************************************************************
+
+macro skip nskip
+DO i=1,[nskip]
+message Skipping event [i]
+/DIO/STREAM/GETEVENT ffsout
+ENDDO
+message Skipped [nskip] events
+return
+
+*****  process  ************************************************************
+* macro to process events
+****************************************************************************
+
+macro process nevents
+
+message Start processing [nevents] events
+
+DO i=1,[nevents]
+* Read in next Event
+message Reading in event [i]
+/DIO/STREAM/GETEVENT ffsout
+
+* Clear output tables
+cd Track
+tdm/table/rowcount fpt_fptrack 0
+dui/ls 
+*tdm/table/print fpt_fptrack
+cd ..
+
+* Process next Event
+ami/module/call fpt fptpar dummy Cluster/ffs_gepoint Track/fpt_fptrack cortr
+
+* Output Event
+DIO/STREAM/PUTEVENT fptout Track
+
+* Debug
+*cd Cluster
+*dui/ls
+*tdm/table/print ffs_gepoint
+*cd ..
+
+*/TNT/NEWCWNTUPLE [i] Cluster/ffs_gepoint
+
+
+ENDDO
+
+message Finished processing [nevents] events
+return
+

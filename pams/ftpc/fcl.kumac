@@ -1,0 +1,82 @@
+************* fcl.kumac  ***************************************************
+****************************************************************************
+
+trace on
+
+* Create and initialize fcl input tables
+exec $PAMS_STAR/ftpc/kumac/fcl_setpars.kumac
+
+* Define input stream
+/DIO/NEWFILESTREAM fclin /afs/rhic/star/users/jcs/public/fss_pipealu_1.tab R
+
+* Define output stream
+/DIO/NEWFILESTREAM fclout /afs/rhic/star/users/jcs/public/fcl_pipealu_1.tab W
+
+* Create output tables
+mkdir Cluster 
+cd Cluster
+tdm/newtable fcl_fppoint fcl_fppoint 2000
+cd ..
+
+
+* Skip events
+* exec skip 0
+
+* Process events
+exec process 1
+
+* Close input data stream
+DIO/STREAM/CLOSE fclin
+
+* Close output data stream
+DIO/STREAM/CLOSE fclout
+
+return
+
+* macro to skip events already processed
+
+macro skip nskip
+DO i=1,[nskip]
+message Skipping event [i]
+/DIO/STREAM/GETEVENT fclin 
+ENDDO
+message Skipped [nskip] events
+return
+
+* macro to process events
+
+macro process nevents
+
+message Start processing [nevents] events
+
+DO i=1,[nevents]
+* Read in next Event
+message Reading in event [i]
+/DIO/STREAM/GETEVENT fclin 
+
+* Clear output tables
+cd Cluster
+tdm/table/rowcount fcl_fppoint 0
+dui/ls 
+tdm/table/print fcl_fppoint
+cd ..
+
+* Process next Event
+ami/module/call fcl Raw/fcl_raw Cluster/fcl_fppoint padtrans det zrow
+
+cd Raw
+dui/ls
+cd ..
+cd Cluster
+dui/ls
+cd ..
+
+* Output Event
+DIO/STREAM/PUTEVENT fclout Cluster
+
+
+ENDDO
+
+message Finished processing [nevents] events
+return
+
