@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.22 2004/04/06 20:18:19 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.23 2004/04/08 15:11:27 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.23  2004/04/08 15:11:27  caines
+ * Ensure array is initialised to zeros
+ *
  * Revision 1.22  2004/04/06 20:18:19  caines
  * Initialise variable counter in the constructor to NULL to avoid crash
  *
@@ -368,9 +371,12 @@ void  StSvtSimulationMaker::setGeantData()
   }
 
 //+++++++++++++++++
-  if(!counter)
+  if(!counter){
     counter = new int[mNumOfHybrids];
-
+    for( int ii=0; ii<mNumOfHybrids; ii++){
+      counter[ii] = 0;
+    }
+  }
 }
 
 //__________________________________________________________________________________________________
