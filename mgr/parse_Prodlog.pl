@@ -491,8 +491,6 @@ sub parse_log($) {
    print (">>>>>>>>>>>>  Run options: <<<<<<<<<<<< \n", $run_option_string, "\n");
    print '-' x 80, "\n";
   
-    $last_evts = $EvDone;
-
     print ("Number of Events Done: ", $EvDone, "\n");
     print ("Number of Events Skiped: ", $EvSkip, "\n"); 
     print ("First event no.: ", $first_evts, "\n");
