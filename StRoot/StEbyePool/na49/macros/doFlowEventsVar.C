@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEventsVar.C,v 1.1 2001/03/06 17:32:55 posk Exp $
+// $Id: doFlowEventsVar.C,v 1.2 2001/05/14 23:15:22 posk Exp $
 //
 // Description: 
 // Chain to read events from microDST files into StFlowEvent and analyze.
@@ -41,6 +41,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEventsVar.C,v $
+// Revision 1.2  2001/05/14 23:15:22  posk
+// Lower pt uppers for centralities 1 and 2.
+//
 // Revision 1.1  2001/03/06 17:32:55  posk
 // All macros now work.
 //
@@ -207,6 +210,10 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
 //   StFlowEvent::SetPtCut(0., 2., 0, 1);
 //   StFlowEvent::SetPtCut(0., 2., 1, 1);
 //   StFlowEvent::SetPtCut(0., 2., 2, 1);
+  if(centrality == 1)
+    StFlowEvent::SetPtCut(0., .3, 0, 1);
+  if(centrality == 2)
+    StFlowEvent::SetPtCut(0., .6, 0, 1);
 
 //   StFlowEvent::SetMeanSinCosCut(-0.1, 0.1);
 
@@ -285,11 +292,11 @@ void doFlowEvents(const Int_t nevents)
 
   //LBL
   if (RunType > 10 && RunType < 20 || RunType > 50 && RunType < 60) 
-    Char_t* filePath="/auto/pdsfdv04/na49/160GeV/std+";
+    Char_t* filePath="/auto/pdsfdv03/na49/160GeV/std+";
   if (RunType > 20 && RunType < 30 || RunType > 60 && RunType < 70)
-    Char_t* filePath="/auto/pdsfdv04/na49/160GeV/std-";
+    Char_t* filePath="/auto/pdsfdv03/na49/160GeV/std-";
   if (RunType > 30 && RunType < 40 || RunType > 70 && RunType < 80)
-    Char_t* filePath="/auto/pdsfdv04/na49/160GeV/std+cen";
+    Char_t* filePath="/auto/pdsfdv03/na49/160GeV/std+cen";
   Char_t* fileExt="*muDST.root";
 
   doFlowEvents(nevents, filePath, fileExt);
