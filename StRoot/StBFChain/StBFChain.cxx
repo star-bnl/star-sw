@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.15 1999/10/14 14:23:17 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.16 1999/10/14 14:43:25 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.16  1999/10/14 14:43:25  fisyak
+// Ad casts
+//
 // Revision 1.15  1999/10/14 14:23:17  fisyak
 // Take out MySQL from chain
 //
@@ -783,7 +786,7 @@ Int_t StBFChain::Finish()
   return StMaker::Finish();
 }
 //_____________________________________________________________________
-Int_t StBFChain::AddAB (const Char_t *mkname,const StMaker *maker, Int_t Opt) {
+Int_t StBFChain::AddAB (const Char_t *mkname,const StMaker *maker,const Int_t Opt) {
   if (! maker || strlen(mkname) == 0) return kStErr;
   StMaker *parent = maker->GetParentMaker();
   if (parent) {
@@ -793,7 +796,7 @@ Int_t StBFChain::AddAB (const Char_t *mkname,const StMaker *maker, Int_t Opt) {
   StMaker *mk      = GetMaker(mkname);      if (!mk)     return kStErr;
   parent  = mk->GetParentMaker();  if (!parent) return kStErr;
   TList   *list    = parent->GetMakeList(); if (!list)   return kStErr;
-  if (Opt > 0) list->AddAfter (maker,mk);
-  else         list->AddBefore(maker,mk);
+  if (Opt > 0) list->AddAfter ((StMaker*)maker,mk);
+  else         list->AddBefore((StMaker*)maker,mk);
   return kStOk;
 }
