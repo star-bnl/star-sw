@@ -390,6 +390,7 @@ int dsValidDataset(DS_DATASET_T *pDset);
 *
 * ANSI stuff for sun
 */
+/*
 #ifdef sun
 #ifndef VXWORKS
 #include <stdio.h>
@@ -399,5 +400,6 @@ int printf(char *fmt, ...);
 long strtol(char *str, char **ptr, int base);
 #endif
 #endif
-#endif /* DS_PRIVATE */
-#endif /* DSTYPE_H */
+*/
+#endif  /* DS_PRIVATE */
+#endif  /* DSTYPE_H */
