@@ -1,4 +1,6 @@
 ****************************************************************************
+* $Id: tpcegeo.g,v 1.26 2003/11/13 00:55:54 potekhin Exp $
+*
 module   TPCEGEO  is the TPC system in GSTAR
    Author   Pavel Nevski (MEPhI) 
    Created  March 16, 1996
@@ -25,7 +27,8 @@ Content   TPCE,TOFC,TOFS,TOST,TOKA,TONX,TOAD,TOHA,TPGV,TPSS,
 *
 Structure TPCG { version,rmin,rmax,length,WheelIR,WheelOR,WheelTHK,
                  SenGasOR,tpeaTHK,MembTHK,tiadDR,tinxDR,tikaDR,tialDR, 
-                 tocsDR,tokaDR,tonxDR,toadDR,toigDR,toalDR,tohaDR,MWCread }
+                 tocsDR,tokaDR,tonxDR,toadDR,toigDR,toalDR,tohaDR,MWCread,
+                 gasCorr }
 *
 Structure TECW { sec,GapRad,GapHeit,GapWidI,GapWidO,inwidth,ouwidth,
                  height,ppdepth,asdepth,ggdepth,MWCdepth,boundary,
@@ -39,6 +42,9 @@ Real      tocsIR,tocsOR,tokaIR,tokaOR,tonxIR,tonxOR,toadIR,toadOR,toigIR,toigOR,
           tiadIR,tiadOR,tinxIR,tinxOR,tikaIR,tikaOR,tialIR,tialOR,
           tifcIR,tifcOR,tpgvIR,tpgvLeng,tofcLeng,
           tpcwz,tpgvz,tpeaZ,dx_dz,dxb,del,a,b
+
+Real      T, P, PATM, RHO, density
+
 Integer   i_row,i_sec,i
 External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
 *******************************************************************************
@@ -66,6 +72,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
       tikaDR     = 0.015    ! inner Kapton layer thickness
       tialDR     = 0.004    ! inner aluminum layer thickness
       MWCread    = 2        ! MWC readout flag
+      gasCorr    = 1        ! gas density correction version
 *
    Fill TPRS              ! sector of padrows
       sec    = 1            ! sector number: 1 for inner, 2 for outer
@@ -267,7 +274,14 @@ Block  TPGV is the Gas Volume placed in TPC
       Component Ar    A=40  Z=18 W=9
       Component C     A=12  Z=6  W=1
       Component H     A=1   Z=1  W=4
-      Mixture   p10   Dens=0.9*0.001782+0.1*0.000667    " g/cm**3 "
+
+      if(TPCG_gasCorr==1) then
+         density=0.9*0.001782+0.1*0.000667
+      else
+         density=rho*(273.15/T)*PATM
+      endif
+
+      Mixture   p10   Dens=density   " g/cm**3 "
       SHAPE     TUBE  rmin=tpgvIR  rmax=tpcg_SenGasOR  dz=tpgvLeng/2
       Create    TPSS
 endblock
