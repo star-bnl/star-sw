@@ -1,17 +1,20 @@
-#  $Log: star_init.csh,v $
+#  $Log: init_star.csh,v $
+#  Revision 1.1  1998/01/31 23:32:52  fisyak
+#  New Environment variables
+#
 #  Revision 1.2  1998/01/30 12:42:16  fisyak
 #  Save changes before moving to SL97b
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/01/30 12:42:16 $ 
+#             Last modification $Date: 1998/01/31 23:32:52 $ 
 #! /bin/csh -f
 #. default setings
 	setenv CC        gcc
 	setenv CFLAGS   -fpic
 	setenv CXX       gcc
 	setenv CXXFLAGS -fpic
-switch ($STAR_SYS_HOST)
+switch ($SYS_HOST_STAR)
     case "rs_aix31":
 #  ====================
 #   breaksw
@@ -75,9 +78,10 @@ switch ($STAR_SYS_HOST)
 	setenv CXX         aCC
 	setenv CXXFLAGS  "-w -z +Z"
 	setenv CC         cc
-	setenv CFLAGS    "-w +a1 -z +z"
+	setenv CFLAGS    "-Ae -w -z +z"
 	setenv FFLAGS    "+ppu +z +O2"
 	setenv LDFLAGS   "-b -z"
+        setenv LD         aCC
 	setenv LD_LIBS    /opt/fortran/lib/libU77.a
 	setenv CC_LIBS   "-lm"
 	setenv CERN_LIBS " "
