@@ -44,12 +44,17 @@ enum StHbtParticleType {hbtUndefined, hbtTrack, hbtV0};
 #include "TF3.h"
 #endif
 
+#ifndef ROOT_TTree
+#include "TTree.h"
+#endif
+
 typedef TH1D StHbt1DHisto;
 typedef TH2D StHbt2DHisto;
 typedef TH3D StHbt3DHisto;
 typedef TF1 StHbtTF1;
 typedef TF2 StHbtTF2;
 typedef TF3 StHbtTF3;
+typedef TTree StHbtTree;
 
 #else 
 
