@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.2 1999/11/18 19:36:04 kathy Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.3 1999/11/29 20:25:55 kathy Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.3  1999/11/29 20:25:55  kathy
+// remove call to method SetDraw - doesn't do anything
+//
 // Revision 1.2  1999/11/18 19:36:04  kathy
 // fix to pick up library in the new area
 //
@@ -105,7 +108,7 @@ void bfcread_dst_EventQAhist(Int_t nevents=10,
   brow = new TBrowser("BName","BTitle");   
 
 // the following methods are already set to default values in St_QA_Maker::Init - now write over them
-   EventQA->SetDraw(kTRUE);
+//   EventQA->SetDraw(kTRUE);
 
 // Set the default canvas style to plain (so it won't print out grey!)
     gROOT->SetStyle("Plain");
