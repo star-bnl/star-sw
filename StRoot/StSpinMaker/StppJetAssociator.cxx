@@ -3,7 +3,8 @@
 //11/02
 
 //std
-#include "Stiostream.h"
+using namespace std;
+#include <iostream>
 #include <algorithm>
 
 //StSpinMaker
