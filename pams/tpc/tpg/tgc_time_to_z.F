@@ -1,5 +1,8 @@
-* $Id: tgc_time_to_z.F,v 1.4 1998/09/01 21:36:34 sakrejda Exp $
+* $Id: tgc_time_to_z.F,v 1.5 1999/07/26 21:17:25 sakrejda Exp $
 * $Log: tgc_time_to_z.F,v $
+* Revision 1.5  1999/07/26 21:17:25  sakrejda
+* z<->time changedto follow Tom's formula
+*
 * Revision 1.4  1998/09/01 21:36:34  sakrejda
 * trigger offset added
 *
@@ -54,7 +57,7 @@ C     z - z coodinate in the local coordinate system
 
       zoff=0
       if(padrow.lt.14)zoff=z_offset
-      z = dvel_local*((float(time)-0.5)/clock_local - t0_offset)-zoff
+      z = dvel_local*((float(time)-1.0)/clock_local) - int(t0_offset*clock_local-1.0)*dvel_local/clock_local-zoff
 
       tgc_time_to_z = STAFCV_OK      
 
