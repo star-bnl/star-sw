@@ -15,6 +15,9 @@
 
 /*
 $Log: TGeant3.cxx,v $
+Revision 1.5  2000/03/13 00:03:30  fisyak
+remove dependence on St_Table
+
 Revision 1.4  2000/01/10 16:21:28  fisyak
 Modify Eufilv for multiple volume entries
 
@@ -66,7 +69,6 @@ Introduction of the Copyright and cvs Log
 #include <TDatabasePDG.h>
 #ifndef __CINT__
 #include "StarCallf77.h" 
-#include "St_Table.h"
 #define    hlimit	 F77_NAME(hlimit,HLIMIT)
 #define    gzebra	 F77_NAME(gzebra,GZEBRA)
 #define    grfile	 F77_NAME(grfile,GRFILE)
