@@ -1,5 +1,8 @@
-// $Id: StArray.cxx,v 1.19 1999/11/19 20:40:12 perev Exp $
+// $Id: StArray.cxx,v 1.20 2000/01/28 20:37:03 perev Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.20  2000/01/28 20:37:03  perev
+// Home made SetLast removed
+//
 // Revision 1.19  1999/11/19 20:40:12  perev
 // StObjArray::Streamer==TCollection::Streamer(b)
 //
@@ -248,11 +251,6 @@ const TIterator *StObjArray::End() const
   iter =  MakeIterator();
   ((StObjArrayIter*)iter)->SetCursor(GetLast()+1);
   return iter;
-}
-//______________________________________________________________________________
-void StObjArray::SetLast(Int_t last)
-{
-  *((int*)((int*)((void*)(this))+8)) = last;
 }
 //______________________________________________________________________________
 void StObjArray::Resize(Int_t num)
