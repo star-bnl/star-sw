@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.36 2003/09/10 19:47:51 perev Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.37 2003/10/28 20:35:54 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.37  2003/10/28 20:35:54  ward
+// Chain control of NOISE_ELIM GAIN_CORRECTION ASIC_THRESHOLDS.
+//
 // Revision 1.36  2003/09/10 19:47:51  perev
 // ansi corrs
 //
@@ -129,35 +132,27 @@ class StTpcRawDataEvent;
 class StTpcUnpacker;
 class StSequence;
 class TH1F;
-#define NOISE_ELIM 1 // Removed Feb 13 2002 on suggestion from Yuri in email w/Fabrice.  Replaced Feb 
-                     // 13 2003 on request from Hardtke.
-#define GAIN_CORRECTION
 #define MAXROWPADPERSECTOR 400
 #define BINRANGE 3
-#define ASIC_THRESHOLDS
+
 class ZeroSuppressedReader;
 class StTrsDetectorReader;
 class StTrsZeroSuppressedReader;
-#ifdef NOISE_ELIM
 typedef struct {
   int npad,row[MAXROWPADPERSECTOR],pad[MAXROWPADPERSECTOR];
   int nbin,low[BINRANGE],up[BINRANGE];
 } tpcdaq_noiseElim; /* one of these for each of the 24 sectors */
-#endif
 class St_tpcdaq_Maker : public StMaker {
  private:
+   int               m_CorrectionMask; //!
    Char_t            *gConfig; //!
    char               alreadySet; //!
    char               mErr; //!
    StTpcRawDataEvent *mEvent; //!
    void MakeHistograms();
    void SetGainCorrectionStuff(int);
-#ifdef GAIN_CORRECTION
    float fGain[45][182];
-#endif
-#ifdef NOISE_ELIM
   tpcdaq_noiseElim noiseElim[24]; //!
-#endif
 
    StTrsDetectorReader* mTdr;  //!
    ZeroSuppressedReader* mZsr; //!
@@ -176,6 +171,8 @@ class St_tpcdaq_Maker : public StMaker {
    void DAQ100clOutput(const unsigned int *pTPCP); //!
    void DAQ100clTableOut(unsigned int, char,const unsigned int *); //!
  public: 
+   void SetCorrection(int);
+   int GetCorrection(void);
    char WhetherToSwap(unsigned int x);
    unsigned int Swap4(char,unsigned int x); //!
    unsigned short int Swap2(char,unsigned short int x); //!
@@ -211,10 +208,8 @@ class St_tpcdaq_Maker : public StMaker {
    int Output();
    int getSector(Int_t isect);
    int getPadList(int whichPadRow,unsigned char **padlist);
-#ifdef ASIC_THRESHOLDS
    int mNseqLo,mNseqHi,mThreshLo,mThreshHi; // ASICS parameters
    void AsicThresholds(float gain,int *nseq,StSequence **lst);
-#endif
    int getSequences(float gain,int whichPadRow,int pad,int *nseq,StSequence **seqList);
    void SetDAQFlag(Int_t);
    void SetNoiseEliminationStuff();
@@ -234,7 +229,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.36 2003/09/10 19:47:51 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.37 2003/10/28 20:35:54 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker,0)   //StAF chain virtual base class for Makers
 };
