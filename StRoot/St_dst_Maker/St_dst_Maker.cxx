@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.28 1999/10/01 17:07:24 wdeng Exp $
+// $Id: St_dst_Maker.cxx,v 1.29 1999/10/19 00:11:30 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.29  1999/10/19 00:11:30  fisyak
+// Remove aux tables
+//
 // Revision 1.28  1999/10/01 17:07:24  wdeng
 // Accommodate new dst tables. Check it in though I am not sure what I did.
 //
@@ -86,7 +89,7 @@
 #include "tables/St_dst_summary_param_Table.h"
 #include "tables/St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.28 1999/10/01 17:07:24 wdeng Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.29 1999/10/19 00:11:30 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -100,8 +103,8 @@ St_dst_Maker::~St_dst_Maker(){
 //_____________________________________________________________________________
 Int_t St_dst_Maker::Init(){
   static const char *todst[] = {
-    "match:",  "globtrk", "globtrk_aux",
-    "primary:","globtrk2", "primtrk", "primtrk_aux", "vertex",
+    "match:",  "globtrk", 
+    "primary:","globtrk2", "primtrk", "vertex",
     "v0:",     "dst_v0_vertex","ev0_eval",
     "xi:",     "dst_xi_vertex",
     "kink:",   "kinkVertex",
@@ -156,39 +159,40 @@ Int_t St_dst_Maker::Init(){
   AddConst(dst_run_summary);
   dst_run_summary_st run_summary;
 
+#if 0
   // Spiros says he initialize the table in his filler. I am not sure what should be done here. 
   // So just comment it out. -Wensheng
-
   // comment-out begins
   if(0) {
   dst_run_summary_st run_summary = 
 {
-  "Unknown", //char   version[20];     /* DST production software version               */
-  0,         //long   prod_run;        /* Prod. run number, F.key to run_header     */
-  0,         //long   n_events_tot;    /* Total number of events in the run             */
-  0,         //long   n_events_good;   /* Total number events successfully processed    */
-  {0,0},     //long   date[2];         /* Start/stop date for processing                */
-  {0,0},     //long   time[2];         /* Start/stop time of day (sec)                  */
-  0.,        //float  cpu_total;       /* Total cpu sec for production run              */
-  {0.,0.,0.,0.,0.,0.}, //float  eta_bins[6];     /* Pseudorapidity bins, lower->upper ranges */
-  {0.,0.,0.,0.,0.,0.}, //float  pt_bins[6];      /* Trans. momen. bins, lower->upper ranges  */
-  {0.,0.,0.,0.,0.,0.}, //float  mt_bins[6];      /* Trans. mass bins, lower->upper ranges    */
-  0,         //long   n_phi_bins;      /* # of phi bins, start at phi=0, max # is 8     */
-  {0.,0.},   //float  mean_eta[2];     /* Mean and std.dev. of <eta> for all events     */
-  {0.,0.},   //float  mean_pt[2];      /* Mean and std.dev. of <pt> for all events      */
-  { 0, 0},   //long   multiplicity[2]; /* Mean and std.dev. of total chrg. mult.        */
-  { 0, 0},   //long   num_vert[2];     /* Mean and std.dev. of total # vertices         */
-  { 0, 0},   //long   energy_emc[2];   /* Mean and std.dev. of total energy in EMC      */
+  0,     // long   bfc_run_id;      /* Unique BFC run ID, F.key to run_header          */
+  0,     // long   n_events_tot;    /* Total number of events in the BFC prod. run     */
+  0,     // long   n_events_good;   /* Total number events successfully processed      */
+  {0,0}, // long   date[2];         /* Start/stop date for processing                  */
+  {0,0}, // long   time[2];         /* Start/stop time of day (sec)                    */
+  0,     // float  cpu_total;       /* Total cpu sec for production run                */
+  0,     // float  east_pol_L;      /* Avg magnitude of east beam Longitudinal Pol     */
+  0,     // float  east_pol_T;      /* Avg magnitude of east beam Transverse Pol       */
+  0,     // float  west_pol_L;      /* Avg magnitude of west beam Longitudinal Pol     */
+  0,     // float  west_pol_T;      /* Avg magnitude of west beam Transverse Pol       */
+  0,     // float  luminosity;      /* Avg luminosity during experiment for events     */
+                                    /* in production run, 1.0/[cm^2 sec]               */
+  {0,0}, // float  eta[2];          /* Mean and std.dev. of &lt;eta&gt; for all events */
+  {0,0}, // float  pt[2];           /* Mean and std.dev. of &lt;pt&gt; for all events  */
+  {0,0}, // float  num_vert[2];     /* Mean and std.dev. of total # vertices           */
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
+         // float  mean_mult[30];   /* Mean multiplicity (energy) per detector for run */ 
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} 
+        // float  rms_mult[30];    /* RMS multiplicity (energy) per detector for run  */
  };
-
 
   run_summary.version[0]=0;
   strncat (run_summary.version,GetCVS(),sizeof(run_summary.version)-1); // DST production software version
+  dst_run_summary->AddAt(&run_summary,0);
   }
   // comment-out ends
-
-
-dst_run_summary->AddAt(&run_summary,0);
+#endif
  
   // Create Histograms    
   return StMaker::Init();
@@ -228,7 +232,6 @@ Int_t  St_dst_Maker::Filler(){
   int iMake = kStOK;
   int iRes = 0;
   St_dst_track     *globtrk     = (St_dst_track *)     dstI("globtrk");
-  St_dst_track_aux *globtrk_aux = (St_dst_track_aux *) dstI("globtrk_aux");
   St_dst_vertex    *vertex      = (St_dst_vertex *)    dstI("vertex");    
   St_svm_evt_match *evt_match   = (St_svm_evt_match *) dstI("evt_match");
   St_dst_run_summary *dst_run_summary = (St_dst_run_summary   *) m_ConstSet->Find("dst_run_summary");
@@ -330,10 +333,9 @@ Int_t  St_dst_Maker::Filler(){
     if(Debug()) gMessMgr->Debug()<<" run_dst: Calling fill_ftpc_dst"<<endm;
     Int_t No_of_Tracks = globtrk->GetNRows() + fpt_fptrack->GetNRows();
     globtrk->ReAllocate(No_of_Tracks);
-    globtrk_aux->ReAllocate(No_of_Tracks);
     dst_dedx->ReAllocate(No_of_Tracks);
     iRes = fill_ftpc_dst(fpt_fptrack, fcl_fppoint, globtrk,
-                         globtrk_aux,point,vertex,dst_dedx);
+                         point,vertex,dst_dedx);
     //             ==========================================================
     if (iRes != kSTAFCV_OK) {
       iMake = kStWarn;

@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.13 1999/09/30 13:34:21 wdeng Exp $
+// $Id: StPrimaryMaker.cxx,v 1.14 1999/10/19 00:11:30 fisyak Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.14  1999/10/19 00:11:30  fisyak
+// Remove aux tables
+//
 // Revision 1.13  1999/09/30 13:34:21  wdeng
 // Diminish the degree or radian bug
 //
@@ -152,7 +155,6 @@ Int_t StPrimaryMaker::Make(){
   St_dst_track     *globtrk  = (St_dst_track *) matchI("globtrk");
   St_svm_evt_match *evt_match = (St_svm_evt_match *) matchI("evt_match");
   St_dst_track     *primtrk     = 0;   
-  St_dst_track_aux *primtrk_aux = 0;   
   St_dst_vertex *vertex = new St_dst_vertex("vertex",1); 
   AddData(vertex);   
   
@@ -204,7 +206,7 @@ Int_t StPrimaryMaker::Make(){
   // evr
   if(Debug()) gMessMgr->Debug() << "run_evr: calling evr_am" << endm;
   
-  iRes = evr_am(m_evr_evrpar,m_egr_egrpar,globtrk,vertex);
+  iRes = evr_am(m_evr_evrpar,globtrk,vertex);
   //	 ================================================
   
   if (iRes !=kSTAFCV_OK) return kStWarn;
@@ -262,15 +264,13 @@ Int_t StPrimaryMaker::Make(){
       int nglob = globtrk->GetNRows();
       primtrk = new St_dst_track("primtrk",nglob);
       AddData(primtrk);
-      primtrk_aux = new St_dst_track_aux("primtrk_aux",nglob);
-      AddData(primtrk_aux);
       
       if(Debug())
         gMessMgr->Debug() << "Calling EGR_fitter - Second time" << endm;
       
       iRes = egr_fitter (tphit,    vertex,       tptrack,  evaltrk,
 			 scs_spt,m_egr2_egrpar,stk_track,groups,
-			 evt_match,primtrk,primtrk_aux);
+			 evt_match,primtrk);
       //	   ======================================================
       
       if (iRes !=kSTAFCV_OK) iMake = kStWarn;
