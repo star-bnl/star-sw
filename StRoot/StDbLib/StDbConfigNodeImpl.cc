@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNodeImpl.cc,v 1.2 2001/02/09 23:06:24 porter Exp $
+ * $Id: StDbConfigNodeImpl.cc,v 1.3 2001/10/26 16:35:28 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNodeImpl.cc,v $
+ * Revision 1.3  2001/10/26 16:35:28  porter
+ * improved directory search
+ *
  * Revision 1.2  2001/02/09 23:06:24  porter
  * replaced ostrstream into a buffer with ostrstream creating the
  * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
@@ -128,19 +131,20 @@ StDbConfigNodeImpl::buildTree(int opt){
  if(!db)
   return StDbManager::Instance()->printInfo(" No DB found for Node=",mname,dbMErr,__LINE__,__CLASS__,__METHOD__);
 
- if(!db->QueryDb(this))return 0;
-
- // check if we should connect via environment variables
- if(isDbNode() && mdbDomain==dbStar){
-   dbEnvList* elist = StDbManager::Instance()->getEnvList(mname);
-   if(elist){
-     addChildren(elist);
-     delete elist;
-   }
+ if(db->QueryDb(this)){
+  // check if we should connect via environment variables
+  if(isDbNode() && mdbDomain==dbStar){
+    dbEnvList* elist = StDbManager::Instance()->getEnvList(mname);
+    if(elist){
+      addChildren(elist);
+      delete elist;
+    }
+  }
+  // load descriptors & element structure as needed 
+  updateDbTables(opt);
+  if(mfirstChildNode)mfirstChildNode->buildTree(opt);
  }
- // load descriptors & element structure as needed 
- updateDbTables(opt);
- if(mfirstChildNode)mfirstChildNode->buildTree(opt);
+
  if(mnextNode)mnextNode->buildTree(opt);
 
  return 1;

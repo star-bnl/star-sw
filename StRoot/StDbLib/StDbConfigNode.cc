@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.20 2001/01/22 18:37:52 porter Exp $
+ * $Id: StDbConfigNode.cc,v 1.21 2001/10/26 16:35:28 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.21  2001/10/26 16:35:28  porter
+ * improved directory search
+ *
  * Revision 1.20  2001/01/22 18:37:52  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -252,6 +255,7 @@ if(node){
  bool found = false;
  while(!found){
    if(!node->checkName(nextNodeName)){
+     cout<<" this node "<<node->printName()<<endl;
        node=node->getNextNode();
        if(!node) found=true;
    } else {
@@ -260,7 +264,11 @@ if(node){
  }
 
 }
-if(node && id) node=findConfigNode(id);
+
+if(node && id) { 
+  node=node->findConfigNode(id);
+  *id='/'; // make path whole again
+}
 
 delete [] path;
 delete [] nextNodeName;
