@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.46 2004/12/08 16:56:16 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.47 2004/12/10 15:51:44 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.47  2004/12/10 15:51:44  fisyak
+ * Remove fudge factor from eloss calculation, add more debug printout and tests, reorder calculation of cov. matrix for low triangular form
+ *
  * Revision 2.46  2004/12/08 16:56:16  fisyak
  * Fix sign in dE/dx; move from upper to lower triangular matrix convention (StEvent) for px,py,pz
  *
@@ -966,8 +969,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
     sign = -1.;
   const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
   double eloss = _elossCalculator->calculate(1.,0.5,m, beta2,I2Ar);
-  double fudge = 2.;
-  dE = fudge*sign*dxEloss*eloss;
+  dE = sign*dxEloss*eloss;
   if(!finite(dxEloss) || !finite(beta2) || !finite(m) || m==0 || !finite(eloss) || !finite(_p3) || p2==0 )
     {
       cout << "STKN::propagate() -E- Null or Infinite values detected" << endl
@@ -1141,7 +1143,7 @@ int StiKalmanTrackNode::updateNode()
     }  
   TRSymMatrix V(2,
 		eYY,
-		eYZ, eZZ);
+		eYZ, eZZ); PrPP(updateNode,V);
   TRSymMatrix C(5,&_c00);  PrPP(updateNode,C);
   TRSymMatrix R(H,TRArray::kAxSxAT,C); PrPP(updateNode,R);
   R += V;                              PrPP(updateNode,R);
@@ -1230,28 +1232,33 @@ int StiKalmanTrackNode::updateNode()
     }
   _cosCA = ::sqrt(1.-_sinCA*_sinCA); 
   // update error matrix
-  double c01=_c10, c02=_c20, c03=_c30, c04=_c40;
-  double c12=_c21, c13=_c31, c14=_c41;
-  _c00-=k00*_c00+k01*_c10; 
-  _c10-=k00*c01+k01*_c11;
-  _c20-=k00*c02+k01*c12;   
-  _c30-=k00*c03+k01*c13;
-  _c40-=k00*c04+k01*c14; 
-  _c11-=k10*c01+k11*_c11;
-  _c21-=k10*c02+k11*c12;   
-  _c31-=k10*c03+k11*c13;
-  _c41-=k10*c04+k11*c14; 
-  _c22-=k20*c02+k21*c12;   
-  _c32-=k20*c03+k21*c13;
-  _c42-=k20*c04+k21*c14; 
-  _c33-=k30*c03+k31*c13;
-  _c43-=k30*c04+k31*c14; 
-  _c44-=k40*c04+k41*c14;
+  double c00=_c00;                       
+  double c10=_c10, c11=_c11;                 
+  double c20=_c20, c21=_c21;//, c22=_c22;           
+  double c30=_c30, c31=_c31;//, c32=_c32, c33=_c33;     
+  double c40=_c40, c41=_c41;//, c42=_c42, c43=_c43, c44=_c44;
+  _c00-=k00*c00+k01*c10;
+  _c10-=k10*c00+k11*c10;_c11-=k10*c10+k11*c11;
+  _c20-=k20*c00+k21*c10;_c21-=k20*c10+k21*c11;_c22-=k20*c20+k21*c21;
+  _c30-=k30*c00+k31*c10;_c31-=k30*c10+k31*c11;_c32-=k30*c20+k31*c21;_c33-=k30*c30+k31*c31;
+  _c40-=k40*c00+k41*c10;_c41-=k40*c10+k41*c11;_c42-=k40*c20+k41*c21;_c43-=k40*c30+k41*c31;_c44-=k40*c40+k41*c41;
 #ifdef Sti_DEBUG
-  TRSymMatrix W(H,TRArray::kATxSxA,G); 
-  C -= TRSymMatrix(C,TRArray::kRxSxR,W);
-  TRSymMatrix C1(5,&_c00);
-  C1.Verify(C);//,1e-7,2);
+  TRSymMatrix W(H,TRArray::kATxSxA,G);    PrPP(updateNode,W); 
+  TRSymMatrix C0(C);
+  C0 -= TRSymMatrix(C,TRArray::kRxSxR,W); PrPP(updateNode,C0);
+  TRSymMatrix C1(5,&_c00); PrPP(updateNode,C1);
+  C1.Verify(C0);//,1e-7,2);
+  //   update of the covariance matrix:
+  //    C_k = (I - K_k * H_k) * C^k-1_k * (I - K_k * H_k)T + K_k * V_k * KT_k
+  // P* C^k-1_k * PT
+  TRMatrix A(K,TRArray::kAxB,H);
+  TRMatrix P(TRArray::kUnit,5);
+  P -= A;
+  TRSymMatrix C2(P,TRArray::kAxSxAT,C); PrPP(updateNode,C2);
+  TRSymMatrix Y(K,TRArray::kAxSxAT,V);  PrPP(updateNode,Y);
+  C2 += Y;                              PrPP(updateNode,C2);
+  C2.Verify(C0);
+  C2.Verify(C1);
 #endif 
   return 0;
 }
@@ -1362,24 +1369,26 @@ void StiKalmanTrackNode::add(StiKalmanTrackNode * newChild)
 /// and all its children recursively
 ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 {
+  const StiDetector *det = n.getDetector();
+  if (det) os  <<"Det:"<<n.getDetector()->getName();
+  else     os << "Det:UNknown";
   os << " a:" << 180*n._alpha/M_PI<<" degs"
      << " refX:" << n._refX
-     << " refAngle:" << n._refAngle
-     << " x:" << n._x
+     << " refAngle:" << n._refAngle <<endl
+     << "\tx:" << n._x
      << " p0:" << n._p0 
      << " p1:" << n._p1 
      << " p2:" << n._p2 
-     << " p3:" << n._p3 
+      << " p3:" << n._p3 
      << " p4:" << n._p4
-     << " c00:" <<n._c00<< " c11:"<<n._c11
-     << " chi2:" << n._chi2 
-     << " n:"<<n.hitCount
-     << " null:"<<n.nullCount;
+     << " c00:" <<n._c00<< " c11:"<<n._c11 
+     << " pT:" << n.getPt() << endl;
   StiHit * hit = n.getHit();
-  if (hit) 
-    os << endl<<" hit:"<<*hit;
-  else
-    os << endl;
+  if (hit) os << "\thas hit with chi2 = " << n.getChi2()
+	      << " n:"<<n.hitCount
+	      << " null:"<<n.nullCount
+	      << endl<<"\t hit:"<<*hit;
+  else os << endl;
   return os;
 }
 
