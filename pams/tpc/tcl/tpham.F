@@ -385,7 +385,7 @@ c
               
 c     correct (in average way) for time-offset -- (this is not beautiful)
 c     22jun95 mal
-              invec(3) = invec(3) - 0.88
+cccc  invec(3) = invec(3) - 0.88 now we do this in fit_isolated_cluster
               
               invec(2)=tpg_row_to_y(iirow,iisec)
               
@@ -440,14 +440,36 @@ c     with the ansatz that the track comes from (0,0,0)
               tphit(tphith.nok).lambda = 
      +             - abs(atand(tphit(tphith.nok).z/rad)) ! lambda < 0 always
 
-c     and I *think* I can calcualte alpha as well
-              if (tand(tphit(tphith.nok).phi).ne.0.0) then
-                 tphit(tphith.nok).alpha =
-     +                atand(tand(tphit(tphith.nok).lambda)/
-     +                tand(tphit(tphith.nok).phi))
+c     and I can calcualte alpha as well -- see notebook 2, pp 25-32 for
+c     explanation...
+              if (tand(tphit(tphith.nok).lambda).ne.0.0) then
+                 if (tphit(tphith.nok).lambda.ge.10.0) then
+                    tphit(tphith.nok).alpha = atand(
+     +                   0.5*tand(tphit(tphith.nok).phi)/
+     +                   tand(tphit(tphith.nok).lambda))
+                 else
+                    if (tphit(tphith.nok).flag.eq.0) then
+                       tphit(tphith.nok).alpha = atand(
+     +                      tand(tphit(tphith.nok).phi)/
+     +                      tand(tphit(tphith.nok).lambda))
+                    else
+                       tphit(tphith.nok).alpha = atand(
+     +                      4.0*tand(tphit(tphith.nok).phi)/
+     +                      tand(tphit(tphith.nok).lambda))
+                    endif
+                 endif
               else
-                 tphit(tphith.nok).alpha=0.0
+                 tphit(tphith.nok).alpha = 0.0
               endif
+
+c also, need a fudge factor for the uncertainties dx dy dz.
+c  this should be understood and fixed, but for now....
+              tphit(tphith.nok).dx = tphit(tphith.nok).dx 
+     +             * tclpar(1).dxy_fact
+              tphit(tphith.nok).dy = tphit(tphith.nok).dy 
+     +             * tclpar(1).dxy_fact
+              tphit(tphith.nok).dx = tphit(tphith.nok).dz 
+     +             * tclpar(1).dz_fact
               
 c     here, at the very end, I make up for the sins of Bob Hackenburg, who
 c     spurns convention, and makes the fast and slow simulator routes have
@@ -769,21 +791,30 @@ c        parameter(max_hits_in_cluster=30)
       real zrf(max_hits_in_cluster)
       real phi(max_hits_in_cluster)
       real track(max_hits_in_cluster)
-      
+
+      logical look_for_many,triage_cuts
 c----------------------------------------------------------------
 
 c*** skip the neural net for now..... mal 21jun95
 ***        nhits = nhits_nnet(nseq,nclspix,npix_seq,ipad,itdc,iadc)
 	! this is experimental
 
+      nhits=0
       if (tclpar(1).decon.ne.0) then
-         call mountain_finder(tclpar, nseq, nclspix, npix_seq,
-     +        ipad, itdc, iadc, itrk,
-     +        rms_noise,
-     +        nhits,
-     +        q,x,dx,prf,z,dz,zrf,phi,track)
-         if (nhits.gt.max_hits_in_cluster) 
-     +        write(6,*)'TPHAM - ERROR! array overrun! - fix this!'
+         if (tclpar(1).triage.eq.1) then
+            look_for_many = triage_cuts(ipad,itdc,iadc,nclspix,tclpar)
+         else
+            look_for_many = .true.
+         endif
+         if (look_for_many) then
+            call mountain_finder(tclpar, nseq, nclspix, npix_seq,
+     +           ipad, itdc, iadc, itrk,
+     +           rms_noise,
+     +           nhits,
+     +           q,x,dx,prf,z,dz,zrf,phi,track)
+            if (nhits.gt.max_hits_in_cluster) 
+     +           write(6,*)'TPHAM - ERROR! array overrun! - fix this!'
+         endif
          if (nhits.eq.0) then
             call tph_fit_isolated_cluster(tclpar, nclspix,
      +           ipad, itdc, iadc, itrk,
@@ -809,6 +840,55 @@ c*****************
       return
       end
 
+
+C-----------------------------------------------------------------------
+      logical function triage_cuts(ipad,itdc,iadc,nclspix,tclpar)
+c
+c performs quick cuts on cluster data to determine whether to go ahead
+c  with multi-peak search in cluster.  This is supposed to speed up the
+c  processing by not trying multi-peak searches on clusters that have
+c  no possibility to have more than one in them (that we can find).
+c
+c Inputs:
+c     ipad: pad number array for pixels in cluster
+c     itdc: tdc number array for pixels in cluster
+c     iadc: adc number array for pixels in cluster
+c     nclspix: # pixels in cluster
+c     tclpar: switch table for cluster/hitfinder.  has cut values.
+c
+c Returns: true if should proceed with multi-peak search. false otherwise
+c
+      implicit none
+#include "tas_structures.inc"
+#include "tcl_tclpar_pars.inc"
+#include "tcl_tclpar_st.inc"
+      RECORD/ tclpar_row_st/ tclpar(*)
+
+      integer ipad(*),itdc(*),iadc(*),nclspix
+      real ppa,tta,pa,ta,a,pta ! these are produce sums (ta = tdc(i)*adc(i))
+      real rms_pad,rms_tdc
+      integer ipix
+
+      ppa=0.0
+      tta=0.0
+      pa=0.0
+      ta=0.0
+      a=0.0
+      do ipix=1,nclspix
+         ppa = ppa + ipad(ipix)*ipad(ipix)*iadc(ipix)
+         tta = tta + itdc(ipix)*itdc(ipix)*iadc(ipix)
+         pa  = pa  + ipad(ipix)*iadc(ipix)
+         ta  = ta  + itdc(ipix)*iadc(ipix)
+         a   = a   + iadc(ipix)
+      enddo
+      rms_pad = sqrt(ppa/a - (pa/a)**2)
+      rms_tdc = sqrt(tta/a - (ta/a)**2)
+
+      triage_cuts = (rms_pad+rms_tdc.gt.tclpar(1).triage_rmscut)
+      end
+
+
+
 C-----------------------------------------------------------------------
       subroutine ouput_practice(ipad,itdc,iadc,nclspix,irow,nhits)
 c
@@ -820,16 +900,19 @@ c
 c
 c see pp21-22 of STAR tcl notebook #2
 c
-      integer rms2_pad,rms2_tdc,rms2_mix,tdc_mean
-      integer ppa,tta,pa,ta,a,pta ! these are produce sums (ta = tdc(i)*adc(i))
+c      integer rms2_pad,rms2_tdc,rms2_mix,tdc_mean
+      real rms2_pad,rms2_tdc,rms2_mix,tdc_mean
+c      integer ppa,tta,pa,ta,a,pta ! these are produce sums (ta = tdc(i)*adc(i)
+      real ppa,tta,pa,ta,a,pta ! these are produce sums (ta = tdc(i)*adc(i))
       integer ipix
+      character*1 junk
 
-      ppa=0
-      tta=0
-      pa=0
-      ta=0
-      a=0
-      pta=0
+      ppa=0.0
+      tta=0.0
+      pa=0.0
+      ta=0.0
+      a=0.0
+      pta=0.0
       do ipix=1,nclspix
          ppa = ppa + ipad(ipix)*ipad(ipix)*iadc(ipix)
          tta = tta + itdc(ipix)*itdc(ipix)*iadc(ipix)
@@ -838,9 +921,9 @@ c
          a   = a   + iadc(ipix)
          pta = pta + ipad(ipix)*itdc(ipix)*iadc(ipix)
       enddo
-      rms2_pad = ppa/a - (pa/a)**2
-      rms2_tdc = tta/a - (ta/a)**2
-      rms2_mix = pta/a - pa*ta/(a**2)
+      rms2_pad = sqrt(ppa/a - (pa/a)**2)
+      rms2_tdc = sqrt(tta/a - (ta/a)**2)
+      rms2_mix = sqrt(pta/a - pa*ta/(a**2))
       tdc_mean = ta/a
 
       write(55,*)rms2_pad,rms2_tdc,rms2_mix,tdc_mean,irow,nhits
@@ -1273,8 +1356,14 @@ c z,dz,zrf: - do weighted mean
               d_rvec(indx) = 0.0
            endif
         enddo
-        call tph_weighted_mean(identity_vector,rvec,d_rvec,
+        if (tclpar(1).tfit.eq.1) then ! fancy fit
+           call tph_fit_pulse(identity_vector,rvec,d_rvec,
      +       nbuck_max,centroid,sigma,uncertainty)
+        else                          ! simple weighted mean
+           call tph_weighted_mean(identity_vector,rvec,d_rvec,
+     +          nbuck_max,centroid,sigma,uncertainty)
+           centroid = centroid - 2.146 ! ** very crude phase correction!
+        endif
         z(1) = centroid
         dz(1) = uncertainty
         zrf(1) = sigma
@@ -1322,122 +1411,390 @@ c  switch if interested in real data (or real data performance)
 
 
 
-*	integer lvsimx
-*	integer iseq,iptr_lo,iptr_hi
-*	integer itim,ipix
-*	integer nsequences_max,npixels_in_sequence_max
-*	parameter (nsequences_max=300,npixels_in_sequence_max=300)
-*	real padsum(nsequences_max)
-*	real padnum(nsequences_max)
-*	real padtime(nsequences_max)
-*	real padwidth(nsequences_max)
-*	real d_padsum(nsequences_max)
-*	real tseq(npixels_in_sequence_max)	! for passing to pulse-
-*	real aseq(npixels_in_sequence_max)	!   fitting routine
-*	real t0,tau
-**	real hitsum
-*(	real mom1,mom2
-*	integer ngood_times
-*	real adc_sum
-*	integer id,imax
-*	real dylin(nsequences_max),slope,intercept
-*	real dslope,dintercept
-*	real padtime_arr(nsequences_max),padwidth_arr(nsequences_max)
-*	real padsum_arr(nsequences_max)
-*	real padnum_arr(nsequences_max),d_padsum_arr(nsequences_max)
+
+
+C-----------------------------------------------------------------------
+	Subroutine tph_fit_pulse(tseq, aseq, daseq, npts_max,
+     +				 t0, tau, dt0)
 C-----------------------------------------------------------------------
 
-*	hitsum = 0.0
-*	ngood_times = 0
-*	iptr_lo = 1
-*	do iseq = 1,nseq
-*	  padsum(iseq) = 0.0
-*	  padnum(iseq) = ipad(iptr_lo)
-*	  iptr_hi = iptr_lo + npix_seq(iseq) - 1
-*	  itim = 0
-*	  do ipix=iptr_lo,iptr_hi
-*	    itim = itim+1
-*	    padsum(iseq) = padsum(iseq) + iadc(ipix)
-*	    tseq(itim) = itdc(ipix)
-*	    aseq(itim) = iadc(ipix)
-*	  enddo
-*	  d_padsum(iseq)=sqrt(padsum(iseq))*rms_noise
-*	  iptr_lo = iptr_hi + 1
-*	  hitsum = hitsum + padsum(iseq)
-*	  if (npix_seq(iseq).ge.3) then		! little time info if <3 bkts
-*	    call tph_fit_pulse(tseq, aseq, itim, t0, tau)
-*	    padtime(iseq) = t0
-*	    padwidth(iseq) = tau
-*	    if (tau.gt.0.0) then
-*	      ngood_times = ngood_times + 1
-*	      padtime_arr(ngood_times)  = padtime(iseq)
-*	      padwidth_arr(ngood_times) = padwidth(iseq)
-*	      padsum_arr(ngood_times)   = padsum(iseq)
-*	      d_padsum_arr(ngood_times) = d_padsum(iseq)
-*	      padnum_arr(ngood_times)   = padnum(iseq)
-*	      dylin(ngood_times)	= 1.0/sqrt(padsum(iseq)) ! ad hoc
-*	    endif
-*	  else
-*	    padwidth(iseq) = -1.0
-*	  endif
-*	enddo
+      IMPLICIT NONE
 
-*	tphit(tphith.nok).q = hitsum
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     tseq:	tdc values for the pulse to be fit
+C     aseq:	adc values for the pulse to be fit
+C     daseq:	adc values for the pulse to be fit
+C     npts_max:	size of tseq, aseq, and daseq arrays
+C
+C   Output arguments : 
+C
+C     t0:	"time-zero" of the pulse (not neccessarily gauss centroid)
+C     dt0:	uncertainty in "time-zero" of the pulse
+C     tau:	"width" of the pulse (not neccessarily gaussian width)
+C	
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C
+C	This routine fits a pad-pulse passed in the tseq, aseq arrays
+C	and returns the time and width of the pulse.
+C	Right now, we use the experimentally-realistic functional form:
+C
+C			N    -(t-t0)/tau
+C	y(t) = A * (t-t0) * e
+C
+C	for STAR, N=2, and tau ~ 59 ns.  Units used here are time buckets.
+C
+C   Originally written 25 November 1994 by Mike Lisa
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C-----------------------------------------------------------------------
+	integer npts_max
+	real tseq(npts_max),aseq(npts_max),daseq(npts_max)
+	real t0,tau,dt0
+C-----------------------------------------------------------------------
+	integer lvmax
+	integer N
+	parameter(N=2)          ! for STAR
+	real B
+	real y1,y2,y3,t1,t2,t3,dy1,dy2,dy3
+	integer imax
+	integer id,istart
+        real delta,root1B,rat
+        logical retry
+C-----------------------------------------------------------------------
 
-c calculate hit position along pad row: fit to gaussian.  If that does not
-c   work, do a weighted mean
-c
-*        if (tph_3point_gauss(padnum, padsum,
-*     +       d_padsum, nseq, centroid, sigma, uncertainty).ne.1) then
-*           call tph_weighted_mean(padnum, padsum, d_padsum, nseq,
-*     +          centroid, sigma, uncertainty)
-*           sigma = -sigma       ! use sign to flag different algorithm
-*        endif
+	imax = lvmax(aseq,npts_max)
 
-*	tphit(tphith.nok).x = centroid
-*	tphit(tphith.nok).prf = sigma
-*	tphit(tphith.nok).dx = uncertainty
+        if ((imax.eq.1).or.(aseq(imax-1).lt.1.0e-14)) then ! max at early edge
+           istart=imax
+        elseif ((imax.eq.npts_max).or.(aseq(imax+1).lt.1.0e-14)) then !lt edge
+           istart=imax-2
+        else                    ! "normal"
+           istart=imax-1
+        endif
 
-c Calculate hit position along time direction from sequences with well-defined
-c  t0's
+        retry=.false.
 
-*	if (ngood_times.ge.1) then
-*	  call tph_weighted_mean(padtime_arr, padsum_arr,
-*     +				 d_padsum_arr, ngood_times,
-*     +				 t0, mom2,dt0)
-*	  call tph_weighted_mean(padwidth_arr, padsum_arr,
-*     +				 d_padsum_arr, ngood_times,
-*     +				 tau, mom2,uncertainty)
-*	else
-*	  id = 0
-*	  call message('TPH_FIT_CLUSTER no good time peaks-taking max',
-*     +			1, id)
-*c	  imax = lvmax(iadc,nclspix)
-*	  imax = lvsimx(iadc,nclspix,1) ! because iadc is now integer
-*	  t0 = itdc(imax)
-*	  tau = 0.0
-*	  dt0 = 1.0
-*	endif
-
-*
-*	tphit(tphith.nok).z   = t0
-*	tphit(tphith.nok).dz  = dt0
-*	tphit(tphith.nok).zrf = tau
+ 1      t1 = tseq(istart)
+	t2 = tseq(istart+1)
+	t3 = tseq(istart+2)
+        delta = t2 - t1         ! (delta also = t3-t2)
+	y1 = aseq(istart)
+	y2 = aseq(istart+1)
+	y3 = aseq(istart+2)
+	dy1 = daseq(istart)
+	dy2 = daseq(istart+1)
+	dy3 = daseq(istart+2)
 
 
-c now linear fit to padtime vs padnum:
-*	if (ngood_times.gt.1) then	
-* 	  call tph_lin_fit(padnum_arr, padtime_arr, dylin, ngood_times,
-*     +			   slope, dslope, intercept, dintercept)
-*	else
-*	  slope = -1000.0
-*	endif
+        rat = y1*y3/(y2*y2)
+        if (rat.eq.0.0) goto 99
+c       B = (rat)**(1.0/float(N))	! for arbitrary N
+	B = sqrt(rat)           ! this is faster for N=2
 
-*	tphit(tphith.nok).phi = slope
+        if (B.ge.1.0) then      ! this should be rare
+           if (retry) then      ! this is already the 2nd chance...
+              goto 99
+           else                 ! ok, try it again...
+              retry=.true.
+              istart=istart+1
+              goto 1
+           endif
+        endif
 
-*	return
-*	end
+        root1B = sqrt(1.0-B)
+        t0 = t2 - delta / root1B
+        tau = delta/(log((y1/y2)/(1.0-root1B)**N))
+        dt0 = delta/(2.0*root1B**3) * B/float(N) *
+     +       sqrt( (dy1/y1)**2 + 4.0*(dy2/y2)**2 + (dy3/dy3)**2)
 
+        return
+ 99     continue                ! failure...
+        id=0
+        call message('TPH_FIT_PULSE failure; going to mean',
+     +       1,id)
+        call tph_weighted_mean(tseq,aseq,daseq,npts_max,
+     +       t0,tau,dt0)
+c     should correct for phase here!!!!!!!! *** mal 27jul95
+        return
+	end
+
+
+C-----------------------------------------------------------------------
+	integer function tph_3point_gauss(x, y, dy, npts,
+     +				centroid, sigma, uncertainty)
+C-----------------------------------------------------------------------
+
+      IMPLICIT NONE
+
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     y		- y(x) distribution to fit to gaussian
+C     dy	- uncertainties on y(x)
+C     x		- x coordinate for each point
+C     npts	- number of samples in distribution
+C
+C   Output arguments : 
+C
+C     centroid 	- Gaussian centroid from 3-point fit to y(x)
+C     sigma	- Gaussian width from 3-point fit to y(x)
+C     uncertainty - uncertainty in centroid
+C
+C  Returns:
+C
+C     +1 if successful, -1 if unable to fit Gaussian
+C     
+C   Functional Description : 
+C
+C	Performs 3-point gaussian fit to passed distribution y(x)
+C
+C   Originally written 25 November 1994 by Mike Lisa
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C
+C     If the distribution is not well described by a gaussian, (i.e.
+C	it has a peak on one edge and is not monotonic) the function
+C       returns a value of -1
+C
+C-----------------------------------------------------------------------
+	real y(*),x(*),dy(*)
+	integer npts
+	real centroid,sigma,uncertainty,x0
+C-----------------------------------------------------------------------
+	integer lvmax
+	integer ipt,imax,istart,id
+	real y1,y2,y3,delta,r213
+
+        tph_3point_gauss = 1
+        
+        if (npts.lt.3) then
+           tph_3point_gauss = -1
+           return
+        endif
+
+	imax = lvmax(y,npts)
+        
+	if ((imax.ge.2).and.(imax.lt.npts)) then ! normal - max not at edge
+           istart=imax-1
+        elseif (imax.eq.1) then ! maximum occupancy at first point
+           if (y(2).le.y(3)) then
+              id = 0
+              tph_3point_gauss = -1
+              call message('TPH_3POINT_GAUSS bad shape',
+     +             1,id)
+              return
+           endif
+           istart=1
+	else                    ! maximum occupancy at last point
+           if (y(npts-1).le.y(npts-2)) then
+              id = 0
+              tph_3point_gauss = -1
+              call message('TPH_3POINT_GAUSS bad shape',
+     +             1,id)
+              return
+           endif
+           istart=npts-2
+	endif
+
+	y1 = y(istart)
+	y2 = y(istart+1)
+	y3 = y(istart+2)
+
+        if (y1*y3.lt.1.0e-10) then ! zero occupancy - no can do
+           tph_3point_gauss=-1
+           return
+        endif
+
+	delta = x(istart+1) - x(istart)
+	if (delta.ne.1.0) then
+	  id = 0
+	  call message('TPH_3POINT_GAUSS unexpected delta .ne. 1',
+     +			1,id)
+          tph_3point_gauss = -1
+	  return
+	endif
+
+	r213 = log(y2*y2/(y1*y3))
+        if (r213.le.0.0) then
+           id = 0
+           tph_3point_gauss = -1
+           call message('TPH_3POINT_GAUSS bad shape - r213',
+     +          1,id)
+           return
+        endif
+	x0 = (delta/2.0) * log(y3/y1)/r213
+	centroid = x(istart+1) + x0
+	sigma = delta/sqrt(r213)
+
+	uncertainty = sqrt( (dy(istart)*(delta/2.0-x0)/y(istart))**2 +
+     +			    (dy(istart+1)*(2.0*x0)/y(istart+1))**2 +
+     +			    (dy(istart+2)*(delta/2.0+x0)/y(istart+2))**2
+     +				)/r213
+
+	return
+	end
+
+
+
+
+C-----------------------------------------------------------------------
+	Subroutine tph_weighted_mean(x, y, dy, npts,
+     +				     mom1, mom2, uncertainty)
+C-----------------------------------------------------------------------
+
+      IMPLICIT NONE
+
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     x		- x coordinate of each point
+C     y		- y(x) distribution
+C     dy	- uncertainty in y(x)
+C     npts	- number of samples in distribution
+C
+C   Output arguments : 
+C
+C     mom1	- first moment of y(x) distribution (mean x)
+C     uncertainty - uncertainty of mean
+C     mom2	- second moment of y(x) distribution (rms)
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C
+C	takes first and second moment of input distribution
+C
+C   Originally written 25 November 1994 by Mike Lisa
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C
+C-----------------------------------------------------------------------
+	real x(*),y(*),dy(*)
+	integer npts
+	real mom1,mom2,uncertainty
+        integer n_nonzero
+C-----------------------------------------------------------------------
+	real ysum
+	integer ipt
+C-----------------------------------------------------------------------
+
+	mom1 = 0.0
+	mom2 = 0.0
+	ysum = 0.0
+	n_nonzero = 0
+	do ipt=1,npts
+	  ysum = ysum + y(ipt)
+          if (y(ipt).gt.1.0e-10) n_nonzero=n_nonzero+1
+	  mom1 = mom1 + x(ipt)*y(ipt)
+	  mom2 = mom2 + x(ipt)*x(ipt)*y(ipt)
+	enddo
+	mom1 = mom1 / ysum
+	mom2 = mom2 / ysum
+	mom2 = sqrt(mom2 - mom1*mom1)
+c what follows is what I think is right... however, it does not give
+c  good z-errors, so I calculate uncertainty differently for now...
+c	uncertainty = 0.0
+c	do ipt=1,npts
+c	  uncertainty = uncertainty+((x(ipt)-mom1)*dy(ipt)/ysum)**2
+c	enddo
+c	uncertainty = sqrt(uncertainty)
+
+	uncertainty = mom2/sqrt(float(n_nonzero))
+
+	return
+	end
+
+
+c ****** what follows here are old routines no longer in use ******
+c********************************************************************
+
+
+C-----------------------------------------------------------------------
+	Subroutine tph_lin_fit(x, y, dy, npts,
+     +			       slope, dslope,
+     +			       intercept, dintercept)
+C-----------------------------------------------------------------------
+
+      IMPLICIT NONE
+
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     x		- x coordinate of each point
+C     y		- y(x) distribution to fit to line
+C     dy	- uncertainty in y
+C     npts	- number of samples in distribution
+C
+C   Output arguments : 
+C
+C     slope	- slope of best fit line
+C     dslope	- uncertainty in slope
+C     intercept - y-intercept of best fit line
+C     dintercept- uncertainty in intercept
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C
+C	returns slope and intercept of best fit line to (x,y,dy) data
+C
+C   Originally written 25 November 1994 by Mike Lisa
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C
+C-----------------------------------------------------------------------
+	real x(*),y(*),dy(*)
+	integer npts
+	real slope,intercept,dslope,dintercept
+C-----------------------------------------------------------------------
+	real sxx,sxy,sx,sy,s,denom
+	integer ipt
+C-----------------------------------------------------------------------
+
+        sxx = 0.0
+        sxy = 0.0
+        sx = 0.0
+        sy = 0.0
+        s = 0.0
+        do ipt=1,npts
+           sxx = sxx + x(ipt)*x(ipt)/dy(ipt)**2
+           sxy = sxy + x(ipt)*y(ipt)/dy(ipt)**2
+           sx  = sx  + x(ipt)/dy(ipt)**2
+           sy  = sy  + y(ipt)/dy(ipt)**2
+           s   = s   + 1/dy(ipt)**2
+        enddo
+        denom = s*sxx-sx*sx
+        slope = (s*sxy - sx*sy)/denom
+        intercept = (sxx*sy - sx*sxy)/denom
+        dslope = sqrt(s/denom)
+        dintercept = sqrt(sxx/denom)
+
+	return
+	end
 
 
       integer function nhits_nnet(nseq,nclspix,npix_seq,ipad,itdc,iadc)
@@ -1619,439 +1976,6 @@ c     scale it pretty now...
 
 
 
-C-----------------------------------------------------------------------
-	Subroutine tph_fit_pulse(tseq, aseq, itim,
-     +				 t0, tau)
-C-----------------------------------------------------------------------
-
-      IMPLICIT NONE
-
-C   Input arguments  (One to a line with definition after ! ) 
-C
-C     tseq:	tdc values for the pulse to be fit
-C     aseq:	adc values for the pulse to be fit
-C     itim:	number of points in the pulse
-C
-C   Output arguments : 
-C
-C     t0:	"time-zero" of the pulse (not neccessarily gauss centroid)
-C     tau:	"width" of the pulse (not neccessarily gaussian width)
-C	
-C
-C  Returns:
-C       Contained in the output arguments...
-C     
-C   Functional Description : 
-C
-C	This routine fits a pad-pulse passed in the tseq, aseq arrays
-C	and returns the time and width of the pulse.
-C	Right now, we use the experimentally-realistic functional form:
-C
-C			N    -(t-t0)/tau
-C	y(t) = A * (t-t0) * e
-C
-C	for STAR, N=2, and tau ~ 59 ns.  Units used here are time buckets.
-C
-C   Originally written 25 November 1994 by Mike Lisa
-C   Copyright 1994    Lawrence Berkeley Laboratory
-c   
-c   modificattions:
-c   ==============
-C
-C   Error conditions : 
-C   ================
-C-----------------------------------------------------------------------
-	real tseq(*),aseq(*)
-	integer itim
-	real t0,tau
-C-----------------------------------------------------------------------
-	integer lvmax
-	integer N
-	parameter(N=2)
-	real X
-	real y1,y2,y3,t1,t2,t3
-	real a,b,c		! coefficients in quadratic equation
-	integer imax
-	integer id,istart,jb
-	real radicand
-	real sum
-C-----------------------------------------------------------------------
-
-	real dummy_errs(50),uncertainty
-	data dummy_errs/50*1/
-
-***** I am bypassing all the fancy stuff below for a simple weighted mean **
-
-	call tph_weighted_mean(tseq,aseq,dummy_errs,itim,t0,tau,uncertainty)
-	return
-
-************************************************************8
-
-	imax = lvmax(aseq,itim)
-	if ((imax.ge.2.).and.(imax.lt.itim)) then
-	  istart=imax-1
-	elseif (imax.eq.1) then
-c	  id = 0
-c	  call message('TPH_FIT_PULSE peak at first bucket',
-c     +			1, id)
-	  istart=1
-	else
-c	  id = 0
-c	  call message('TPH_FIT_PULSE peak at last bucket',
-c     +			1, id)
-	  istart=itim-2
-	endif
-	t1 = tseq(istart)
-	t2 = tseq(istart+1)
-	t3 = tseq(istart+2)
-	y1 = aseq(istart)
-	y2 = aseq(istart+1)
-	y3 = aseq(istart+2)
-
-c	X = (y1*y3/(y2*y2))**(1.0/float(N))	! for arbitrary N
-	X = sqrt(y1*y3/(y2*y2))			! this is faster for N=2
-
-	a = X-1.0
-	if (a.eq.0.0) then			! this shoud be very rare
-c	  This happens if y1=y2=y3.  If so, try one more time by
-c	    shifting istart later in time (if possible)
-c
-	  if (itim.eq.3) then		   ! no room to shift
-	    id = 0
-	    call message('TPH_FIT_PULSE a=0; going to mean',
-     +			1,id)
-	    goto 99
-	  elseif (istart.ne.itim-2) then   ! shift sample later in time
-	    istart=istart+1
-	  else				   ! if we must, shift sample earlier
-	    istart=istart-1
-	  endif
-	  t1 = tseq(istart)
-	  t2 = tseq(istart+1)
-	  t3 = tseq(istart+2)
-	  y1 = aseq(istart)
-	  y2 = aseq(istart+1)
-	  y3 = aseq(istart+2)
-c	  X = (y1*y3/(y2*y2))**(1.0/float(N))	! for arbitrary N
-	  X = sqrt(y1*y3/(y2*y2))		! this is faster for N=2
-	  a = X-1.0
-	  if (a.eq.0.0) then	! if FOUR points are the same, give up!
-	    id = 0
-	    call message('TPH_FIT_PULSE a=0; going to mean',
-     +			1,id)
-	    goto 99
-	  endif
-	endif
-	b = 2.0*t2*(1-X)
-	c = X*t2*t2 - t1*t3
-
-	radicand = b*b - 4.0*a*c
-	if (radicand.gt.0.0) then
-c 	  2 solutions exist (normal) we want the *earlier* one
-	  if (a.lt.0) then
-	    t0 = (-b + sqrt(radicand) ) / (2.0*a)
-	  else
-	    t0 = (-b - sqrt(radicand) ) / (2.0*a)
-	  endif
-	elseif (radicand.eq.0) then
-c 	  1 solution (shouldn't happen)
-	  id = 0
-	  call message('TPH_FIT_PULSE one solution?',
-     +			1,id)
-	  t0 = -b/(2.0*a)
-	else
-c 	  no real solutions... error
-	  id = 0
-	  call message('TPH_FIT_PULSE no solutions! going to mean',
-     +			1,id)
-	  goto 99
-	endif
-
-c calculate "width" tau
-	tau = 1.0/(log(y2/y3)-float(N)*log((t2-t0)/(t3-t0)))
-
-	return
-
- 99	continue	! what to do if normal fit fails
-
-	t0 = 0.0
-	sum = 0.0
-	do jb=1,itim
-	  t0 = t0 + aseq(jb)*tseq(jb)
-	  sum = sum + aseq(jb)
-	enddo
-	t0 = t0/sum
-	tau = -1.0
-
-	return
-	end
-
-
-C-----------------------------------------------------------------------
-	integer function tph_3point_gauss(x, y, dy, npts,
-     +				centroid, sigma, uncertainty)
-C-----------------------------------------------------------------------
-
-      IMPLICIT NONE
-
-C   Input arguments  (One to a line with definition after ! ) 
-C
-C     y		- y(x) distribution to fit to gaussian
-C     dy	- uncertainties on y(x)
-C     x		- x coordinate for each point
-C     npts	- number of samples in distribution
-C
-C   Output arguments : 
-C
-C     centroid 	- Gaussian centroid from 3-point fit to y(x)
-C     sigma	- Gaussian width from 3-point fit to y(x)
-C     uncertainty - uncertainty in centroid
-C
-C  Returns:
-C
-C     +1 if successful, -1 if unable to fit Gaussian
-C     
-C   Functional Description : 
-C
-C	Performs 3-point gaussian fit to passed distribution y(x)
-C
-C   Originally written 25 November 1994 by Mike Lisa
-C   Copyright 1994    Lawrence Berkeley Laboratory
-c   
-c   modificattions:
-c   ==============
-C
-C   Error conditions : 
-C   ================
-C
-C     If the distribution is not well described by a gaussian, (i.e.
-C	it has a peak on one edge and is not monotonic) the function
-C       returns a value of -1
-C
-C-----------------------------------------------------------------------
-	real y(*),x(*),dy(*)
-	integer npts
-	real centroid,sigma,uncertainty,x0
-C-----------------------------------------------------------------------
-	integer lvmax
-	integer ipt,imax,istart,id
-	real y1,y2,y3,delta,r213
-
-        tph_3point_gauss = 1
-        
-        if (npts.lt.3) then
-           tph_3point_gauss = -1
-           return
-        endif
-
-	imax = lvmax(y,npts)
-        
-	if ((imax.ge.2).and.(imax.lt.npts)) then ! normal - max not at edge
-           istart=imax-1
-        elseif (imax.eq.1) then ! maximum occupancy at first point
-           if (y(2).le.y(3)) then
-              id = 0
-              tph_3point_gauss = -1
-              call message('TPH_3POINT_GAUSS bad shape',
-     +             1,id)
-              return
-           endif
-           istart=1
-	else                    ! maximum occupancy at last point
-           if (y(npts-1).le.y(npts-2)) then
-              id = 0
-              tph_3point_gauss = -1
-              call message('TPH_3POINT_GAUSS bad shape',
-     +             1,id)
-              return
-           endif
-           istart=npts-2
-	endif
-
-	y1 = y(istart)
-	y2 = y(istart+1)
-	y3 = y(istart+2)
-
-        if (y1*y3.lt.1.0e-10) then ! zero occupancy - no can do
-           tph_3point_gauss=-1
-           return
-        endif
-
-	delta = x(istart+1) - x(istart)
-	if (delta.ne.1.0) then
-	  id = 0
-	  call message('TPH_3POINT_GAUSS unexpected delta .ne. 1',
-     +			1,id)
-          tph_3point_gauss = -1
-	  return
-	endif
-
-	r213 = log(y2*y2/(y1*y3))
-        if (r213.le.0.0) then
-           id = 0
-           tph_3point_gauss = -1
-           call message('TPH_3POINT_GAUSS bad shape - r213',
-     +          1,id)
-           return
-        endif
-	x0 = (delta/2.0) * log(y3/y1)/r213
-	centroid = x(istart+1) + x0
-	sigma = delta/sqrt(r213)
-
-	uncertainty = sqrt( (dy(istart)*(delta/2.0-x0)/y(istart))**2 +
-     +			    (dy(istart+1)*(2.0*x0)/y(istart+1))**2 +
-     +			    (dy(istart+2)*(delta/2.0+x0)/y(istart+2))**2
-     +				)/r213
-
-	return
-	end
-
-
-
-C-----------------------------------------------------------------------
-	Subroutine tph_lin_fit(x, y, dy, npts,
-     +			       slope, dslope,
-     +			       intercept, dintercept)
-C-----------------------------------------------------------------------
-
-      IMPLICIT NONE
-
-C   Input arguments  (One to a line with definition after ! ) 
-C
-C     x		- x coordinate of each point
-C     y		- y(x) distribution to fit to line
-C     dy	- uncertainty in y
-C     npts	- number of samples in distribution
-C
-C   Output arguments : 
-C
-C     slope	- slope of best fit line
-C     dslope	- uncertainty in slope
-C     intercept - y-intercept of best fit line
-C     dintercept- uncertainty in intercept
-C
-C  Returns:
-C       Contained in the output arguments...
-C     
-C   Functional Description : 
-C
-C	returns slope and intercept of best fit line to (x,y,dy) data
-C
-C   Originally written 25 November 1994 by Mike Lisa
-C   Copyright 1994    Lawrence Berkeley Laboratory
-c   
-c   modificattions:
-c   ==============
-C
-C   Error conditions : 
-C   ================
-C
-C-----------------------------------------------------------------------
-	real x(*),y(*),dy(*)
-	integer npts
-	real slope,intercept,dslope,dintercept
-C-----------------------------------------------------------------------
-	real sxx,sxy,sx,sy,s,denom
-	integer ipt
-C-----------------------------------------------------------------------
-
-        sxx = 0.0
-        sxy = 0.0
-        sx = 0.0
-        sy = 0.0
-        s = 0.0
-        do ipt=1,npts
-           sxx = sxx + x(ipt)*x(ipt)/dy(ipt)**2
-           sxy = sxy + x(ipt)*y(ipt)/dy(ipt)**2
-           sx  = sx  + x(ipt)/dy(ipt)**2
-           sy  = sy  + y(ipt)/dy(ipt)**2
-           s   = s   + 1/dy(ipt)**2
-        enddo
-        denom = s*sxx-sx*sx
-        slope = (s*sxy - sx*sy)/denom
-        intercept = (sxx*sy - sx*sxy)/denom
-        dslope = sqrt(s/denom)
-        dintercept = sqrt(sxx/denom)
-
-	return
-	end
-
-
-C-----------------------------------------------------------------------
-	Subroutine tph_weighted_mean(x, y, dy, npts,
-     +				     mom1, mom2, uncertainty)
-C-----------------------------------------------------------------------
-
-      IMPLICIT NONE
-
-C   Input arguments  (One to a line with definition after ! ) 
-C
-C     x		- x coordinate of each point
-C     y		- y(x) distribution
-C     dy	- uncertainty in y(x)
-C     npts	- number of samples in distribution
-C
-C   Output arguments : 
-C
-C     mom1	- first moment of y(x) distribution (mean x)
-C     uncertainty - uncertainty of mean
-C     mom2	- second moment of y(x) distribution (rms)
-C
-C  Returns:
-C       Contained in the output arguments...
-C     
-C   Functional Description : 
-C
-C	takes first and second moment of input distribution
-C
-C   Originally written 25 November 1994 by Mike Lisa
-C   Copyright 1994    Lawrence Berkeley Laboratory
-c   
-c   modificattions:
-c   ==============
-C
-C   Error conditions : 
-C   ================
-C
-C-----------------------------------------------------------------------
-	real x(*),y(*),dy(*)
-	integer npts
-	real mom1,mom2,uncertainty
-        integer n_nonzero
-C-----------------------------------------------------------------------
-	real ysum
-	integer ipt
-C-----------------------------------------------------------------------
-
-	mom1 = 0.0
-	mom2 = 0.0
-	ysum = 0.0
-	n_nonzero = 0
-	do ipt=1,npts
-	  ysum = ysum + y(ipt)
-          if (y(ipt).gt.1.0e-10) n_nonzero=n_nonzero+1
-	  mom1 = mom1 + x(ipt)*y(ipt)
-	  mom2 = mom2 + x(ipt)*x(ipt)*y(ipt)
-	enddo
-	mom1 = mom1 / ysum
-	mom2 = mom2 / ysum
-	mom2 = sqrt(mom2 - mom1*mom1)
-c what follows is what I think is right... however, it does not give
-c  good z-errors, so I calculate uncertainty differently for now...
-c	uncertainty = 0.0
-c	do ipt=1,npts
-c	  uncertainty = uncertainty+((x(ipt)-mom1)*dy(ipt)/ysum)**2
-c	enddo
-c	uncertainty = sqrt(uncertainty)
-
-	uncertainty = mom2/sqrt(float(n_nonzero))
-
-	return
-	end
-
-
-c ****** what follows here are old routines no longer in use ******
-c********************************************************************
 C-----------------------------------------------------------------------
         Subroutine tph_calc_cntr_of_grvty(nclspix, ipad, itdc, iadc
      +,                            tphith, tphit )
