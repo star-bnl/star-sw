@@ -135,14 +135,27 @@ ifneq (.,$(output))
 endif
 INC_DIR1  := $(OUTDIR).$(SHARE)/inc
 INC_DIR2  := $(OUTDIR).$(ARCH)/inc
-WRK_DIR   := $(OUTDIR).$(SHARE)/wrk
-OBJ_DIR   := $(OUTDIR).$(ARCH)/obj
-ifdef TARGET
-  WRK_DIR := $(OUTDIR).$(SHARE)/$(TARGET)
-  OBJ_DIR := $(OUTDIR).$(SHARE)/$(TARGET)
-endif
 
-LIB_DIR   := $(OUTDIR).$(ARCH)/lib
+## need to comply with the new STAR layout
+OBJ_DIR = .$(STAR_HOST_SYS)/obj
+LIB_DIR = .$(STAR_HOST_SYS)/lib
+
+## don't need this just yet
+# BINDIR = .$(STAR_HOST_SYS)/bin
+
+WRK_DIR   := $(OUTDIR).$(SHARE)/wrk
+
+## see above
+# OBJ_DIR   := $(OUTDIR).$(ARCH)/obj
+
+## commented out
+#ifdef TARGET
+#  WRK_DIR := $(OUTDIR).$(SHARE)/$(TARGET)
+#  OBJ_DIR := $(OUTDIR).$(SHARE)/$(TARGET)
+#endif
+## replaced
+# LIB_DIR   := $(OUTDIR).$(ARCH)/lib
+
 ifneq (config,$(input))
   OLIBS   := $(wildcard $(LIB_DIR)/*.$(SL))
 # OLIBS   := $(shell ls $(LIB_DIR)/*.$(SL) 2> /dev/null)
@@ -282,8 +295,10 @@ OLIB      := $(shell (test -f  $(LIB_DIR)/$(outlib).$(SL)) || echo newlib)
 # - - - - - - - - - - - - include rules - - - - - - - - - - - - - - - - - - - -
 INC_ALL   := -I$(INC_DIR2)
 INC_ALL   += -I$(INC_DIR1)
+
 ifdef STAR  # stic has its own inc_all   (STAR+STAF)
   INC_ALL += -I$(STAF)/inc
+  INC_ALL += -I$(STAR)/.$(STAR_HOST_SYS)/include
   INC_ALL += -I$(STAR)/include
   INCLOC  := inc
 else
