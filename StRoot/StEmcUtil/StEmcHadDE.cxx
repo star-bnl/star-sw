@@ -49,14 +49,14 @@ StEmcHadDE::StEmcHadDE(UInt_t particleId):TObject()
     }
   }
 
-  if (particleId==8) // Default option
+//  if (particleId==8) // Default option
 #include "pionPlusGeant.dat"
 
-  if (particleId==9)
-#include "pionMinusGeant.dat"
+//  if (particleId==9)
+//#include "pionMinusGeant.dat"
 
-  if (particleId==14)
-#include "protonGeant.dat"
+//  if (particleId==14)
+//#include "protonGeant.dat"
 }
 //------------------------------------------------------------------------------
 StEmcHadDE::~StEmcHadDE()
@@ -196,6 +196,25 @@ Float_t StEmcHadDE::interp3D( Double_t momentum, Double_t eta, Float_t dist )
 
 }
 //------------------------------------------------------------------------------
+Float_t StEmcHadDE::getNormDepEnergy(StTrack* track, Double_t magField, Int_t nTowersdEta, Int_t nTowersdPhi)
+{
+  Float_t momMag = track->geometry()->momentum().mag();
+  Float_t a = normDEfactor(momMag);
+  
+  Float_t tempDepEnergy = getDepEnergy(track, magField, nTowersdEta, nTowersdPhi );
+  Float_t mNormDepEnergy = a * tempDepEnergy;
+  return mNormDepEnergy;
+}
+//-------------------------------------------------------------------------------
+Float_t StEmcHadDE::normDEfactor(Float_t mom)
+{
+  Float_t mNormDEfactor = 1;
+  Float_t a1 = 0.48;
+  Float_t a2 = 0.4;
+
+  if (mom <= 1.3) mNormDEfactor = a1 + a2 * mom;
+  return mNormDEfactor;
+}
 
 
 

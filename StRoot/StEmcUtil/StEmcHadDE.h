@@ -45,6 +45,7 @@ class StEmcHadDE : public TObject
     Float_t  getDepEnergy(Double_t, Double_t, Double_t, Int_t, Int_t);  ///< Return deposited energy in one tower
     Float_t  getDepEnergy(StTrack*, Double_t, Float_t);                 ///< Return deposited energy in one tower
     Float_t  interp3D(Double_t, Double_t, Float_t);                     ///< Interpolation method
+    Float_t  getNormDepEnergy(StTrack*, Double_t, Int_t, Int_t);            ///< Return deposited energy in one tower for StTrack
 
   protected:     
     UInt_t  pNdx, etaNdx, distNdx;
@@ -53,6 +54,7 @@ class StEmcHadDE : public TObject
 
     Float_t depEnergy[30][10][40];
     Float_t sigmaDepEnergy[30][10][40];
+    Float_t normDEfactor(Float_t);
 
   ClassDef(StEmcHadDE,1)
 

@@ -157,7 +157,7 @@ void StEmcEnergy::chHadEnergyInBtow()
                 if (towerNdx != -1 && mEmcFilter->getEmcStatus(1,towerId)==kGOOD)
                 {
                   Float_t tempDepEnergy = 0;
-                  tempDepEnergy = emcHadDE->getDepEnergy(track, mBfield, nTowersdEta,
+                  tempDepEnergy = emcHadDE->getNormDepEnergy(track, mBfield, nTowersdEta,
                                                          nTowersdPhi);
                   //tempDepEnergy*=0.88; // Checking if Et_em smaller is due to wrong had dep
                   if (tempDepEnergy >= 0)
@@ -562,7 +562,7 @@ Float_t StEmcEnergy::dEToTotaldE(StMcCalorimeterHit* hit, const char* detname)
   Int_t e=hit->eta();
   //UInt_t s=abs(hit->sub());
   Float_t dE=hit->dE();
-  Float_t hitEnergy;
+  Float_t hitEnergy=0;
 
   StEmcGeom* localBemcGeom = StEmcGeom::getEmcGeom(detname);
   Float_t Eta;
@@ -572,7 +572,7 @@ Float_t StEmcEnergy::dEToTotaldE(StMcCalorimeterHit* hit, const char* detname)
   {
     if (!strcmp (detname, det[i])) // For i<4, only Barrel EMC
     {
-      Float_t x=abs(Eta);
+      Float_t x=fabs(Eta);
       Float_t sf=P0[i]+P1[i]*x+P2[i]*x*x;
       hitEnergy=dE*sf;
       if (hitEnergy<=0)hitEnergy=0;
