@@ -262,8 +262,8 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
  Old Structure GENE {int SYS1, int SYS2, int SYS3, int GRUN,int GEVT,
                      Char GNAM, VRTX, VRTY, VRTZ, VRTT, int WTFL, WEIG }
 
- Old Structure GENT {int STAT, int PDGC, int MOT1,int MOT2, int DAU1,int DAU2,
-                     PX, PY, PZ, ENER, MASS, VERTX, VERTY, VERTZ, TIME }
+ Old Structure GENT {int IstHEP, int IdHEP, int JmoHEP(2), int JdaHEP(2),
+                     PHEP(3), ENER, MASS, VHEP(3), TIME }
 
      If (LkEvnt==0) Call MZBOOK(IxDIV,LKAR P2,LkEvnt, 1,'EVNT',2,2,7,2,0)
 
@@ -295,21 +295,15 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
  
      IrbDIV=IxDIV;             LKARP2=LkEvnt
      Fill /EVNT/GENE/GENT(1) ! HEPEVT parton level data 
-       STAT  =   0       !  Status flag
-       PDGC  =   0       !  PDG particle code
-       MOT1  =   0       !  First mother
-       MOT2  =   0       !  Second mother. If -ve, mothers give a range
-       DAU1  =   0       !  First daughter. If<0, reference to GEANT
-       DAU2  =   0       !  Last daughter.  If<0, reference to GEANT
-       PX    = 0.0       !  x-Momentum of particle in GeV/c
-       PY    = 0.0       !  idem in y
-       PZ    = 0.0       !  idem in z
-       ENER  = 0.0       !  particle Total Energy 
-       MASS  = 0.0       !  Mass in GeV/c. Not necessarily the on-shell m
-       VERTX = 0.0       !  particle origin in x
-       VERTY = 0.0       !  idem in y
-       VERTZ = 0.0       !  idem in z
-       TIME  = 0.0       !  Start time of particle relative to the interact
+       IstHEP  =   0     !  Status flag
+       IdHEP   =   0     !  PDG particle code
+       JmoHEP  = {0,0}   !  First and last mother (-ve gives a range)
+       JdaHEP  = {0,0}   !  First and last daughter (<0 reference to GEANT)
+       PHEP    = {0,0,0} !  particle momentum in GeV/c
+       ENER    =  0.0    !  particle Total Energy 
+       MASS    =  0.0    !  Mass in GeV/c. Not necessarily the on-shell m
+       VHEP    = {0,0,0} !  particle origin in x (mm)
+       TIME    =  0.0    !  Start time of particle (mm/c)
      endfill
 
  end
