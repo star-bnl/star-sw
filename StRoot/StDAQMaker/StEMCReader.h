@@ -37,7 +37,7 @@ class StEMCReader
 
  protected:
   EMC_Reader *fEMCImpReader;
-
+  StDAQReader* fDAQReader;
 };
 
 #endif

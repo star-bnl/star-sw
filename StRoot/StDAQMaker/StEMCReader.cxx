@@ -23,6 +23,9 @@
 typedef EventInfo DAQEventInfo;
   
 StEMCReader::StEMCReader(StDAQReader *daqr) {
+  fEMCImpReader=0;
+   fDAQReader = daqr;
+  delete fEMCImpReader;
   fEMCImpReader = ::getEMCReader(daqr->getEventReader());
   printf("bbb this is the StEMCReader ctor.  fEMCImpReader=%p.\n",fEMCImpReader);
 
@@ -45,11 +48,14 @@ StEMCReader::~StEMCReader() {
 }
 
 int StEMCReader::close() {
-  delete fEMCImpReader; fEMCImpReader=0;
+//  delete fEMCImpReader; fEMCImpReader=0;
   return 1;
 }
 
 int StEMCReader::Update() {
+  delete fEMCImpReader;
+  fEMCImpReader = ::getEMCReader(fDAQReader->getEventReader());
+ // close();
  cout<<" EMC Updated**"<<endl;
  return 1;
 }
