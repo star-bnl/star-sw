@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.23 1999/08/12 16:54:02 ogilvie Exp $
+// $Id: St_dst_Maker.cxx,v 1.24 1999/09/08 00:12:21 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.24  1999/09/08 00:12:21  fisyak
+// Add check that no_of_points > 0
+//
 // Revision 1.23  1999/08/12 16:54:02  ogilvie
 // added tpc_dedx table to dst_dedx_filler
 //
@@ -70,7 +73,7 @@
 #include "St_dst_summary_param_Table.h"
 #include "St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.23 1999/08/12 16:54:02 ogilvie Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.24 1999/09/08 00:12:21 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -240,13 +243,16 @@ Int_t  St_dst_Maker::Filler(){
   if (ftpc_hits) fcl_fppoint = (St_fcl_fppoint *) ftpc_hits->Find("fcl_fppoint");
   if (!fcl_fppoint) {fcl_fppoint = new St_fcl_fppoint("fcl_fppoint",1); AddGarb(fcl_fppoint);}
   Int_t no_of_points    = tphit->GetNRows() + scs_spt->GetNRows() + fcl_fppoint->GetNRows();
-  St_dst_point   *point = new St_dst_point("point",no_of_points);  dstI.Add(point);
-  iRes = dst_point_filler(tphit, scs_spt, point);
+  St_dst_point   *point = 0;
+  if (no_of_points > 0) { 
+    point = new St_dst_point("point",no_of_points);  dstI.Add(point);
+    iRes = dst_point_filler(tphit, scs_spt, point);
   //	   ========================================
-  if (iRes !=kSTAFCV_OK) {
-    iMake = kStWarn;
-    gMessMgr->Warning() << "Problem on return from DST_POINT_FILLER" << endm;
-    if(Debug()) gMessMgr->Debug() << " run_dst: finished calling dst_point_filler" << endm;
+    if (iRes !=kSTAFCV_OK) {
+      iMake = kStWarn;
+      gMessMgr->Warning() << "Problem on return from DST_POINT_FILLER" << endm;
+      if(Debug()) gMessMgr->Debug() << " run_dst: finished calling dst_point_filler" << endm;
+    }
   }
   // dst_dedx_filler
   St_dst_dedx       *dst_dedx    = 0;
@@ -283,7 +289,7 @@ Int_t  St_dst_Maker::Filler(){
   St_DataSet *ftpc_tracks = GetInputDS("ftpc_tracks");
   St_fpt_fptrack *fpt_fptrack = 0;
   if (ftpc_tracks)  fpt_fptrack = (St_fpt_fptrack *) ftpc_tracks->Find("fpt_fptrack");
-  if (fcl_fppoint &&  fpt_fptrack) {
+  if (point && fcl_fppoint &&  fpt_fptrack) {
     if(Debug()) gMessMgr->Debug()<<" run_dst: Calling fill_ftpc_dst"<<endm;
     Int_t No_of_Tracks = globtrk->GetNRows() + fpt_fptrack->GetNRows();
     globtrk->ReAllocate(No_of_Tracks);
