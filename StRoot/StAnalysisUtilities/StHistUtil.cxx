@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.27 2000/08/17 21:13:53 lansdell Exp $
+// $Id: StHistUtil.cxx,v 1.28 2000/08/18 20:30:13 lansdell Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.28  2000/08/18 20:30:13  lansdell
+// added global track probability of fit histogram; extra, empty page is currently printed for some reason, still checking
+//
 // Revision 1.27  2000/08/17 21:13:53  lansdell
 // loop over all TPC hits for the z-hit distribution histogram
 //
@@ -1040,6 +1043,7 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "QaInnerSectorDeDx",
  "QaOuterSectorDeDx",
  "QaDedxAllSectors",
+ "QaGtrkFitProb",
  "QaGtrkDetId",
  "QaGtrkFlag",
  "QaGtrkf0",
@@ -1633,7 +1637,6 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // St_QA_Maker histograms without the svt and ftpc histograms
   if (strcmp(dirName,"EventQA")==0 && strcmp(analType,"year1")==0) {
     Char_t* sdefList6[] = {
-     "StEQaPointZhits",
      "StEQaNullPrimVtx",
      "QaInnerSectorDeDx",
      "QaOuterSectorDeDx",
@@ -1661,6 +1664,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
      "StEQaGtrkFlag",
      "StEQaGtrkGood",
      "StEQaGtrkGoodsm",
+     "StEQaGtrkFitProb",
      "StEQaGtrkDetId",
      "StEQaGtrkDcaBeamXY",
      "StEQaGtrkDcaBeamZ1",
@@ -1802,7 +1806,8 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
      "StEQaPointTotmed",
      "StEQaPointTotsm",
      "StEQaPointTpc",
-     "StEQaRichTot"
+     "StEQaRichTot",
+     "StEQaPointZhits"
     };
    sdefList = sdefList6;
    lengofList = sizeof(sdefList6)/4;  
@@ -1885,7 +1890,6 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // St_QA_Maker histograms for QA shift
   if (strcmp(dirName,"EventQA")==0 && strcmp(analType,"qa_shift")==0) {
     Char_t* sdefList8[] = {
-     "StEQaPointZhits",
      "StEQaNullPrimVtx",
      "QaDedxAllSectors",
      "StEQaEvsumTrkGoodDTotal",
@@ -1895,6 +1899,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
      "StEQaEvsumMeanPt",
      "StEQaEvsumPrimVertR",
      "StEQaEvsumPrimVertZ",
+     "StEQaGtrkFitProb",
      "StEQaGtrkDcaBeamXY",
      "StEQaGtrkDcaBeamZ1",
      "StEQaGtrkDcaBeamZ2",
@@ -1961,7 +1966,8 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
      "StEQaV0K0Mass",
      "StEQaXiVtxTot",
      "StEQaXiaMass",
-     "StEQaKinkTot"
+     "StEQaKinkTot",
+     "StEQaPointZhits"
     };
    sdefList = sdefList8;
    lengofList = sizeof(sdefList8)/4;

@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.26 2000/08/17 18:52:30 lansdell Exp $ 
+//! $Id: StQABookHist.h,v 1.27 2000/08/18 20:30:17 lansdell Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.27  2000/08/18 20:30:17  lansdell
+//! added global track probability of fit histogram; extra, empty page is currently printed for some reason, still checking
+//!
 //! Revision 1.26  2000/08/17 18:52:30  lansdell
 //! added z distribution of hits histogram to StEventQA set
 //!
@@ -95,7 +98,7 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.26 2000/08/17 18:52:30 lansdell Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.27 2000/08/18 20:30:17 lansdell Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -180,21 +183,22 @@ class StQABookHist : public StMaker {
 
   
   // for method MakeGlob - from table globtrk
-  TH1F     *m_z_hits;          //! z dist. of hits
-  TH1F     *m_globtrk_tot;     //! # tracks in table
-  TH1F     *m_globtrk_tot_sm;  //! # tracks in table, small range
-  TH1F     *m_globtrk_good;    //! # tracks in table with iflag>0 
-  TH1F     *m_globtrk_good_sm; //! # tracks in table with iflag>0,small range
-  TH1F     *m_globtrk_iflag;   //! iflag value
-  TH1F     *m_det_id;          //! detector id of track
-  TH2F     *m_dcaToBeamXY;     //! xy-dca to beam axis
-  TH1F     *m_dcaToBeamZ1;     //! z-dca to beam axis -210 to -105
-  TH1F     *m_dcaToBeamZ2;     //! z-dca to beam axis -105 to 0
-  TH1F     *m_dcaToBeamZ3;     //! z-dca to beam axis 0 to 105
-  TH2F     *m_zDcaTanl;        //! z-dca vs tanl
-  TH2F     *m_zDcaZf;          //! z-dca vs z-first
-  TH2F     *m_zDcaPsi;         //! z-dca vs psi
-  TH2F     *m_zDcaPhi0;        //! z-dca vs phi0
+  TH1F     *m_z_hits;           //! z dist. of hits
+  TH1F     *m_globtrk_fit_prob; //!
+  TH1F     *m_globtrk_tot;      //! # tracks in table
+  TH1F     *m_globtrk_tot_sm;   //! # tracks in table, small range
+  TH1F     *m_globtrk_good;     //! # tracks in table with iflag>0 
+  TH1F     *m_globtrk_good_sm;  //! # tracks in table with iflag>0,small range
+  TH1F     *m_globtrk_iflag;    //! iflag value
+  TH1F     *m_det_id;           //! detector id of track
+  TH2F     *m_dcaToBeamXY;      //! xy-dca to beam axis
+  TH1F     *m_dcaToBeamZ1;      //! z-dca to beam axis -210 to -105
+  TH1F     *m_dcaToBeamZ2;      //! z-dca to beam axis -105 to 0
+  TH1F     *m_dcaToBeamZ3;      //! z-dca to beam axis 0 to 105
+  TH2F     *m_zDcaTanl;         //! z-dca vs tanl
+  TH2F     *m_zDcaZf;           //! z-dca vs z-first
+  TH2F     *m_zDcaPsi;          //! z-dca vs psi
+  TH2F     *m_zDcaPhi0;         //! z-dca vs phi0
 
   TH1F     *m_pointT;        //! number of points on the track - tpc
   TH1F     *m_pointTS;       //! number of points on the track - tpc+svt
@@ -636,7 +640,7 @@ class StQABookHist : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.26 2000/08/17 18:52:30 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.27 2000/08/18 20:30:17 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };

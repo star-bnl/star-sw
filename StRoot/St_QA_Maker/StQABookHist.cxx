@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.51 2000/08/17 21:13:55 lansdell Exp $ 
+// $Id: StQABookHist.cxx,v 1.52 2000/08/18 20:30:16 lansdell Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.52  2000/08/18 20:30:16  lansdell
+// added global track probability of fit histogram; extra, empty page is currently printed for some reason, still checking
+//
 // Revision 1.51  2000/08/17 21:13:55  lansdell
 // loop over all TPC hits for the z-hit distribution histogram
 //
@@ -767,20 +770,21 @@ void StQABookHist::BookHistGlob(){
 
 // general
 
-  m_globtrk_tot     = QAH1F("QaGtrkTot","globtrk: tot num tracks - all",40,0.,10000.);
-  m_globtrk_tot_sm  = QAH1F("QaGtrkTotsm","globtrk: tot num tracks - all",40,0.,20.);
-  m_globtrk_iflag   = QAH1F("QaGtrkFlag","globtrk: iflag - all ",200,-999.,1001.);
-  m_globtrk_good    = QAH1F("QaGtrkGood","globtrk: tot good tracks - all",40,0.,10000.);
-  m_globtrk_good_sm = QAH1F("QaGtrkGoodsm","globtrk: tot good tracks - all",40,0.,20.);
-  m_det_id          = QAH1F("QaGtrkDetId","globtrk: Detector ID good tracks - all",25,0.,25.);
-  m_dcaToBeamXY     = QAH2F("QaGtrkDcaBeamXY","globtrk: xy-DCA to Beam Axis (z=0)",80,-4,4,80,-4,4);
-  m_dcaToBeamZ1     = QAH1F("QaGtrkDcaBeamZ1","globtrk: z-DCA to Beam Axis, coarse scale",100,-200,0);
-  m_dcaToBeamZ2     = QAH1F("QaGtrkDcaBeamZ2","globtrk: z-DCA to Beam Axis, coarse scale",100,0,200);
-  m_dcaToBeamZ3     = QAH1F("QaGtrkDcaBeamZ3","globtrk: z-DCA to Beam Axis, near z=0",80,-20,20);
-  m_zDcaTanl        = QAH2F("QaGtrkZdcaTanl","globtrk: z-DCA to Beam Axis vs tanl",80,-20,20,32,-4,4);
-  m_zDcaZf          = QAH2F("QaGtrkZdcaZf","globtrk: z-DCA to Beam Axis vs z-first",80,-20,20,50,-300,300);
-  m_zDcaPsi         = QAH2F("QaGtrkZdcaPsi","globtrk: z-DCA to Beam Axis vs psi",80,-20,20,64,0,360);
-  m_zDcaPhi0        = QAH2F("QaGtrkZdcaPhi0","globtrk: z-DCA to Beam Axis vs azimuth (phi0) at start",80,-20,20,64,0,360);
+  m_globtrk_tot      = QAH1F("QaGtrkTot","globtrk: tot num tracks - all",40,0.,10000.);
+  m_globtrk_tot_sm   = QAH1F("QaGtrkTotsm","globtrk: tot num tracks - all",40,0.,20.);
+  m_globtrk_iflag    = QAH1F("QaGtrkFlag","globtrk: iflag - all ",200,-999.,1001.);
+  m_globtrk_good     = QAH1F("QaGtrkGood","globtrk: tot good tracks - all",40,0.,10000.);
+  m_globtrk_good_sm  = QAH1F("QaGtrkGoodsm","globtrk: tot good tracks - all",40,0.,20.);
+  m_globtrk_fit_prob = QAH1F("QaGtrkFitProb","globtrk: prob. fit is correct",100,0,1.2);
+  m_det_id           = QAH1F("QaGtrkDetId","globtrk: Detector ID good tracks - all",25,0.,25.);
+  m_dcaToBeamXY      = QAH2F("QaGtrkDcaBeamXY","globtrk: xy-DCA to Beam Axis (z=0)",80,-4,4,80,-4,4);
+  m_dcaToBeamZ1      = QAH1F("QaGtrkDcaBeamZ1","globtrk: z-DCA to Beam Axis, coarse scale",100,-200,0);
+  m_dcaToBeamZ2      = QAH1F("QaGtrkDcaBeamZ2","globtrk: z-DCA to Beam Axis, coarse scale",100,0,200);
+  m_dcaToBeamZ3      = QAH1F("QaGtrkDcaBeamZ3","globtrk: z-DCA to Beam Axis, near z=0",80,-20,20);
+  m_zDcaTanl         = QAH2F("QaGtrkZdcaTanl","globtrk: z-DCA to Beam Axis vs tanl",80,-20,20,32,-4,4);
+  m_zDcaZf           = QAH2F("QaGtrkZdcaZf","globtrk: z-DCA to Beam Axis vs z-first",80,-20,20,50,-300,300);
+  m_zDcaPsi          = QAH2F("QaGtrkZdcaPsi","globtrk: z-DCA to Beam Axis vs psi",80,-20,20,64,0,360);
+  m_zDcaPhi0         = QAH2F("QaGtrkZdcaPhi0","globtrk: z-DCA to Beam Axis vs azimuth (phi0) at start",80,-20,20,64,0,360);
 
 // 1D tpc
 
