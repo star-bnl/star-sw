@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.31 2004/02/12 19:37:11 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.32 2004/02/27 21:24:09 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.32  2004/02/27 21:24:09  oldi
+// Unnecessary check for number of tracks removed.
+//
 // Revision 1.31  2004/02/12 19:37:11  oldi
 // *** empty log message ***
 //
@@ -531,12 +534,6 @@ void StFtpcTracker::CalcEnergyLoss()
     }
     
     itrk_ok++;
-
-    if (itrk > GetNumberOfTracks()) {
-      gMessMgr->Message("", "I", "OS") << " itrk ("<< itrk <<") > fpt_fptrack_h->maxlen (" 
-					<< GetNumberOfTracks() << ")" << endm;
-      break;
-    }
     
   } // end loop itrk 
 
