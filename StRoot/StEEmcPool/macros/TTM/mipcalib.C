@@ -61,6 +61,26 @@ using namespace std;
 
 #endif
 
+const float etaBinTable[] = {
+  2.0000,1.9008,1.8065,1.7168,1.6317,1.5507,1.4738,
+  1.4007,1.3312,1.2651,1.2023,1.1427,1.0860,-1.0 };
+
+const float SamplingFraction    = 0.05;       // 5%
+const float EnergyLossMip       = 0.0018*9.6; // 0.020 GeV at eta=1.3
+const short AdcRange            = 4076;       // 4096 - 20(pedestals)
+const float EnergyTransverseMax = 60.0;       // 60 GeV
+
+const int   MaxSec  = 12;
+const int   MaxSSec =  5;
+const int   MaxEta  = 12;
+
+const int   FirstSec= 5-1;
+const int   LastSec = 8-1;
+const int   MinEta  = 5-1;
+
+const float MinPt   = 0.500;
+const float MaxDEta = 0.020;
+const float MaxDPhi = 0.026;
 
 
 
@@ -74,41 +94,31 @@ int  miptower( TH1   **hadc,
 	       const float xmin = 10.0,
 	       const float xmax = 80.0);
 
+
 // ===========================================================================
 // the main routine
 // ===========================================================================
 // WHAT A MESS!!!
 void 
 mipcalib(
-	 const int   secnum  = 0,  // counting from 1!! (0==all)
-	 const char *fname   = "*.root",
-	 const char *outname = "mipcalib", 
-	 const char *fitfunc = "landau"   ,
-	 const float xmin    = 10.0,
-	 const float xmax    = 80.0,
-	 const bool  dosort  = false,
-	 const int   trig    = 0   // select trigger, 0==all 
+	 const int   secNum  = 0,           // counting from 1!! (0==all)
+	 const char *fName   = "",          // if fName=="", use root global file list
+	 const char *histName= "calib.root",// histogram file name 
+	 const char *fitFunc = "landau"    ,// function to fit (gaus or landau)
+	 const float xMin    = 10.0,        // lower limit of the fit 
+	 const float xMax    = 80.0,        // upper limit of the fit 
+	 const int   trig    = 0,           // select trigger, 0==all 
+	 const bool  doSort  = false        // a flag that decides whether we sort or plot the data
 	)
 {
   gROOT->Reset();
   gErrorIgnoreLevel=1000;
 
-
-  const int   FirstSec= 5-1;
-  const int   LastSec = 8-1;
-  const int   MaxSec  = 12;
-  const int   MaxSSec =  5;
-  const int   MinEta  = 5-1;
-  const int   MaxEta  = 12;
-  const int   MaxHist = MaxEta*MaxSec*MaxSSec;
-
-  const float MinPt   = 0.500;
-  const float MaxDEta = 0.020;
-  const float MaxDPhi = 0.026;
+  const int   MaxHist    = MaxEta*MaxSec*MaxSSec;
+  const int   MaxTracks  = 1024;
+  const int   MaxTrigger =   32;
     
-
   // track info
-  const int     MaxTracks = 1024;
   int   numtracks;
   int   sector[MaxTracks];
   int   subsec[MaxTracks];
@@ -125,28 +135,30 @@ mipcalib(
   float dphismd[MaxTracks];
 
   // trigger Info
-  const  int   MaxTrigger  = 32;
   int   numtrig;
   int   trigid[MaxTrigger];
-  int   daqbits;
-  //
 
+  // histogram list
+  TH1*   hadc[MaxHist];   for(int i=0; i<MaxHist; i++) hadc[i]=NULL;
+  TH1*   heta[MaxEta];    for(int i=0; i<MaxEta ; i++) heta[i]=NULL;
 
-  TH1*   hadc[MaxHist];
-  TH1*   heta[MaxEta];
-  for(int i=0; i<MaxHist; i++) hadc[i]=NULL;
-  for(int i=0; i<MaxEta ; i++) heta[i]=NULL;
+  int      nentries= 0;
+  long     ntracks = 0;
+  TChain  *chain   = NULL;
 
-  int      nentries=0;
-  long     ntracks =0;
-  TChain  *chain   =NULL;
+  if(doSort) { 
 
-
-
-  if(dosort) { 
-    cout << fname   << " sorting (trigger=" << trig << ") to " << outname << endl;
     chain = new TChain("track");
-    chain->Add(fname);
+    if( fName!="" ) { 
+      chain->Add(fName);
+    } else {
+      TFile          *f   = NULL;
+      TSeqCollection *seq = gROOT->GetListOfFiles();
+      TIter next(seq);
+      while ( ( f = (TFile *)next() ) != NULL ) chain->Add(f->GetName());
+      fName = "attached files";
+    }
+    cout << "sorting " << fName   << " (trigger=" << trig << ") to " << histName << endl;
     nentries =  (int)chain->GetEntries();
 
     chain->SetBranchAddress("ntracks" ,&numtracks);
@@ -167,62 +179,50 @@ mipcalib(
     
     chain->SetBranchAddress("ntrig"   ,&numtrig );
     chain->SetBranchAddress("trigid"  , trigid  );
-    chain->SetBranchAddress("daqbits" ,&daqbits );
-    
   } else {
-    cout << outname << " fitting " << fitfunc  << endl;
+    cout << histName << " fitting " << fitFunc  << endl;
   }
 
+  int sec1=(secNum>0) ? secNum-1 : FirstSec;
+  int sec2=(secNum>0) ? secNum-1 : LastSec; 
 
-  int sec1=(secnum>0) ? secnum-1 : FirstSec;
-  int sec2=(secnum>0) ? secnum-1 : LastSec; 
-
-  TFile    *histfile = new TFile(TString(outname)+".hist.root",dosort ? "RECREATE" : "");
+  TFile    *histfile = new TFile(histName,doSort ? "RECREATE" : "READ");
+  TString   outName  = TString(histName).ReplaceAll(".root","");
 
   // histograms
   // individual towers
+  char dir[256];
+  char name[256],titl[256];
   for(int sec=sec1;sec<=sec2 ;sec++) {
     for( int ssec=0; ssec<MaxSSec; ssec++)   {
-      char dname[256];
-      sprintf(dname,"%02dT%1c",sec+1,ssec+'A');
-      if(dosort) histfile->mkdir(dname);
-      histfile->cd(dname);
+      sprintf(dir,"%02dT%1c",sec+1,ssec+'A');
+      if(doSort) histfile->mkdir(dir);
+      histfile->cd(dir);
       for( int eta=0; eta<MaxEta; eta++ ) {
-	char name[256],titl[256];
 	sprintf(titl,"ADC(%02dT%1c%02d)",sec+1,ssec+'A',eta+1);
+	sprintf(name,"%02dT%1c%02d"     ,sec+1,ssec+'A',eta+1);
 	int hidx=(sec*MaxSSec+ssec)*MaxEta+eta;
 	if(hidx<0 || MaxHist<=hidx) continue;
-	if(dosort) { 
-	  sprintf(name,"%02dT%1c%02d"           ,sec+1,ssec+'A',eta+1);
-	  hadc[hidx] = new TH1F(name,titl,60,0.0,120.0);
-	} else {
-	  sprintf(name,"%s/%02dT%1c%02d;1",dname,sec+1,ssec+'A',eta+1);
-	  hadc[hidx] = (TH1F *)histfile->Get(name);
-	}
-	//cerr << name << " " << hidx << " " << sec << " " << ssec << " " << eta << endl;    
+	if(doSort) hadc[hidx] = new TH1F(name,titl,60,0.0,120.0);
+	else 	   hadc[hidx] = (TH1F *)gDirectory->Get(name);
+
       }
     }
   }
   // summed over eta
   {
-    char dname[256];
-    sprintf(dname,"eta");
-    if(dosort) histfile->mkdir(dname);
-    histfile->cd(dname);
+    sprintf(dir,"eta");
+    if(doSort) histfile->mkdir(dir);
+    histfile->cd(dir);
     for( int eta=0; eta<MaxEta; eta++ ) {
-      char name[256],titl[256];
       sprintf(titl,"ADC(ETA%02d)",eta+1);
-      if(dosort) { 
-	sprintf(name,"ETA%02d",eta+1);
-	heta[eta] = new TH1F(name,titl,60,0.0,120.0);
-      } else {
-	sprintf(name,"%s/ETA%02d;1",dname,eta+1);
-	heta[eta] = (TH1F *)histfile->Get(name);
-      }
+      sprintf(name,"ETA%02d"     ,eta+1);
+      if(doSort) heta[eta] = new TH1F(name,titl,60,0.0,120.0);
+      else       heta[eta] = (TH1F *)gDirectory->Get(name);
     }
   }
 
-  if(dosort) {     // sort data
+  if(doSort) {     // sort data
     int ie=0;
     for(ie=0;ie<nentries;ie++) {
       ntracks += numtracks;
@@ -256,17 +256,16 @@ mipcalib(
     histfile->Write();
   } else {        // plot
     int nFitOK=0;
-    TCanvas  *c1      = new TCanvas(outname,"MIP CALIB",800,0,1024,1024);    
-    c1->Print(TString(outname)+".ps[");
+    TCanvas  *c1      = new TCanvas(outName,"MIP CALIB",800,0,1024,1024);    
+    c1->Print(outName+".ps[");
     bool go_on = true;
     for(int sec=sec1;sec<=sec2 && go_on;sec++) {
       for(int ssec=0;ssec<MaxSSec && go_on;ssec++) {
-	char dname[256];
-	sprintf(dname,"%02dT%1c",sec+1,ssec+'A');
+	sprintf(dir,"%02dT%1c",sec+1,ssec+'A');
 	c1->Clear();
-	nFitOK += miptower(hadc+(sec*MaxSSec+ssec)*MaxEta,MinEta,MaxEta,dname,fitfunc,xmin,xmax);
+	nFitOK += miptower(hadc+(sec*MaxSSec+ssec)*MaxEta,MinEta,MaxEta,dir,fitFunc,xMin,xMax);
 	c1->Update();
-	c1->Print(TString(outname)+".ps");
+	c1->Print(outName+".ps");
 	//c1->Print(epsfn,"eps");
 	
 	// a lousy loop break for interactive session
@@ -302,12 +301,13 @@ mipcalib(
     }
     cout << "TOTAL FIT OK " << nFitOK << endl;
     c1->Clear();
-    (void) miptower(heta,MinEta,MaxEta,"ETA",fitfunc,xmin,xmax);
+    (void) miptower(heta,MinEta,MaxEta,"ETA",fitFunc,xMin,xMax);
     c1->Update();
-    c1->Print(TString(outname)+".ps");
-    c1->Print(TString(outname)+".ps]");
+    c1->Print(outName+".ps");
+    c1->Print(outName+".ps]");
   }
 }
+
 
 // ===========================================================================
 // fit/plot/get calib for one tower (sec,ssec,eta=4..11)
@@ -317,10 +317,10 @@ int
 miptower( TH1 **hadc, 
 	  const int   MinEta,
 	  const int   MaxEta,
-	  const char *dname,
+	  const char *dir,
 	  const char *func , 
-	  const float xmin ,
-	  const float xmax )
+	  const float xMin ,
+	  const float xMax )
 {
   const Double_t MinCounts = 50.0; // King's constants or the cuts
   const Double_t MinPeakV  = 10.0;
@@ -336,7 +336,7 @@ miptower( TH1 **hadc,
   // root mumbo-jumbo
   TString gltit("EEMC TOWERS ");
   TString pz   ("Piotr A. Zolnierczuk (IU) ");
-  TPaveLabel *tlab = new TPaveLabel(0.005,0.955,0.990,0.985,gltit+dname);
+  TPaveLabel *tlab = new TPaveLabel(0.005,0.955,0.990,0.985,gltit+dir);
   TDatime    *now  = new TDatime;
   TPaveLabel *date = new TPaveLabel(0.555,0.005,0.995,0.045,pz+now->AsString());
   TPad       *gpad = new TPad("Graphs","Graphs",0.005,0.05,0.995,0.95);
@@ -350,22 +350,23 @@ miptower( TH1 **hadc,
   gpad->cd(1);
   gpad->Update();
 
-  if(gROOT->IsBatch()) cout << "TOWERS " << dname << " " << flush;
+  if(gROOT->IsBatch()) cout << "TOWERS " << dir << " " << flush;
 
   //TFile      *f    = gDirectory->GetFile();
-  //f->mkdir(dname);
-  //f->cd(dname);
+  //f->mkdir(dir);
+  //f->cd(dir);
 
   
   for(int eta=0,pad=0; pad<MaxPad && eta<MaxEta; eta++) {
     Double_t xint;
     Double_t xmean , xmnerr;
     Double_t xpeak , xpkerr;
+    Double_t xgain , xgnerr;
     Double_t par[20];
     Double_t chi2;
     Int_t    ndf;
     char     name[256];
-    sprintf(name,"%s%02d",dname,eta+1);
+    sprintf(name,"%s%02d",dir,eta+1);
 
     if(hadc[eta]==NULL) continue;
     
@@ -378,8 +379,6 @@ miptower( TH1 **hadc,
     fit1->SetParameters(par); 
     fit1->SetLineWidth(2);    
     fit1->SetLineColor(kRed); 
-    Float_t xMin = (xmin<0.0) ? (2.0*int((eta+0.5)/2)+1) : xmin; 
-    Float_t xMax = (xmax<0.0) ? 100.0                    : xmax;
     hadc[eta]->Fit("fit1","Q0","",xMin,xMax);
 
     mystat(hadc[eta],xMin,xMax,xmean,xmnerr,xint);
@@ -390,10 +389,16 @@ miptower( TH1 **hadc,
     ndf     = fit1->GetNDF();
     chi2    = (ndf>=1) ? chi2/ndf : -1.0;
     xpkerr *= (chi2>0.0) ? sqrt(chi2) : 1.0 ;
+
+    // calculate gain and gain error
+    Double_t xeta    = 0.5*(etaBinTable[eta-1]+etaBinTable[eta]);
+    Double_t xscale  = SamplingFraction/EnergyLossMip*TMath::TanH(xeta);
+    xgain   = xpeak  * xscale;  
+    xgnerr  = xpkerr * xscale;
     
     // print all the stuff
-    fprintf(stderr,"%6s  %8.3g %8.3g %8.3g  %6.0f",
-	    name,xpeak,xpkerr,chi2,xint); 
+    fprintf(stderr,"%6s  %8.3f %8.3f 0.0   # %8.3f  %6.0f",
+	    name,xgain,xgnerr,chi2,xint); 
 
     // now get the error message
     char    *errmsg = NULL;
@@ -464,37 +469,26 @@ mystat(TH1 *h,
 }
 
 
-
-
-
-
-
 #ifndef __CINT__
-
 int   sector  =  0;
-char *fname   = "ntuple.root";
-char *outname = "mipcalib";
+char *outname = "mipcalib.hist.root";
 char *fitfunc = "landau";
 
-int   trig    = 0;
+int   trig    =     0;
 float xmin    =   9.0;
 float xmax    = 100.0;
-
-
 
 void
 usage(char *name)
 {
-  cerr << "usage: "  << name << "   [options]                         \n";
-  cerr << "       -s <sector>         - (0 == all)                    \n";
-  cerr << "       -t <trigger_id>     - (0 == any)                    \n";
-  cerr << "       -f <inpfile(s)>     - input TTree file (ntuple.root)\n";
-  cerr << "       -o <histogram file> - .hist.root file   (mipcalib)\n";
+  cerr << "usage: "  << name << "   [options]   rootfile(s)   \n";
+  cerr << "       -s <sector>         - (0 == all)       \n";
+  cerr << "       -t <trigger_id>     - (0 == any)       \n";
+  cerr << "       -o <histogram file> - .hist.root file  \n";
   cerr << "       -L                  - fit Landau/Gauss distributions\n";
   cerr << "       -G                  - fit Landau/Gauss distributions\n";
   cerr << "       -x <xmin>           - fit lower bound\n";
   cerr << "       -X <xmax>           - fit upper bound\n";
-  cerr << "       -n                  - do not sort (just use the existing histogram file)\n";
   cerr << "       -b                  - run in batch mode without graphics \n";
   cerr << "       -h                  - this help\n";
   cerr << endl;
@@ -505,46 +499,42 @@ int
 main(int argc, char **argv)
 {
   extern char *optarg;
+  extern int   optind;
   char         optchar;
-  bool         dosort=true;
 
-  while((optchar = getopt(argc, argv, "s:t:f:o:LGx:X:bnh")) != EOF) {
+  while((optchar = getopt(argc, argv, "s:t:o:LGx:X:bqnlh")) != EOF) {
     switch(optchar) {
     case 's': sector  = atoi(optarg);  break;
-    case 'f': fname   = optarg ;       break;
     case 'o': outname = optarg ;       break;
     case 't': trig    = atoi(optarg);  break;
     case 'L': fitfunc = "landau";      break;
     case 'G': fitfunc = "gaus"  ;      break;
     case 'x': xmin    = atof(optarg);  break;
     case 'X': xmax    = atof(optarg);  break;
-    case 'n': dosort  = false;         break;
-    case 'b': gROOT->SetBatch(kTRUE);  break; 
+    case 'b': gROOT->SetBatch(kTRUE);  // fall down
+    case 'q':                          // pass
+    case 'n':                          // pass
+    case 'l': break; // targv[targc++]=optarg;   break; 
     case 'h': usage(argv[0]); exit(0); break;
-
+    case '?': 
     default:  usage(argv[0]); exit(-1);break;
     }
   }
+
+  // attach root files from the in the list
+  for(int k=optind;k<argc; k++) new TFile(argv[k],"");  argc=optind;
 
   TApplication *myApp;
   if(gROOT->IsBatch()) 
     myApp = new TApplication("mipcalib",&argc,argv);
   else
-    myApp = new TRint("mipcalib",&argc,argv);
+    myApp = new TRint       ("mipcalib",&argc,argv);
 
-  // first sort data
-  if(dosort) mipcalib(sector,fname,outname,fitfunc,xmin,xmax,true  ,trig);
-  
-  // then plot them
-  mipcalib(sector,fname,outname,fitfunc,xmin,xmax,false ,trig);
+  mipcalib(sector,"",outname,fitfunc,xmin,xmax,trig,true );   // sort 
+  mipcalib(sector,"",outname,fitfunc,xmin,xmax,trig,false);   // fit and plot 
 
-  // Here we don't return from the eventloop. "Exit ROOT" will quit the app.
-  if(!gROOT->IsBatch() ) { 
-    cout << "close root window to exit" << endl;
-    myApp->Run();
-  }
+  if(!gROOT->IsBatch() ) myApp->Run(); // "Exit ROOT" will quit the application
 
   return 0;
 }
-
 #endif
