@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.47 1999/03/04 03:01:27 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.48 1999/03/04 03:08:14 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.48  1999/03/04 03:08:14  fisyak
+// take out PhysicalConstants
+//
 // Revision 1.47  1999/03/04 03:01:27  fisyak
 // fix typo
 //
@@ -153,7 +156,7 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include <string.h>
-#include "PhysicalConstants.h"
+//#include "PhysicalConstants.h"
 #include "TMath.h"
 #include "St_glb_Maker.h"
 #include "St_particle_Table.h"
@@ -784,7 +787,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.47 1999/03/04 03:01:27 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.48 1999/03/04 03:08:14 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
