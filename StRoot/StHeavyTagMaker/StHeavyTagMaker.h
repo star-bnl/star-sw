@@ -1,17 +1,20 @@
 /***************************************************************************
  *
- * $Id: StHeavyTagMaker.h,v 1.1 2004/07/29 14:04:53 jeromel Exp $
+ * $Id: StHeavyTagMaker.h,v 1.2 2004/07/29 23:06:12 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, July 2004
  ***************************************************************************
  *
- * Description:   Maker to fill the Strangeness Tags
+ * Description:   Maker to fill the Heavy Flavor Tags
  *
  ***************************************************************************
  *
  * $Log: StHeavyTagMaker.h,v $
- * Revision 1.1  2004/07/29 14:04:53  jeromel
- * Written by MC. First version
+ * Revision 1.2  2004/07/29 23:06:12  calderon
+ * Changed adc cut to match towers to 360 ADC counts,
+ * and documented the origin.
+ * Added Description to cxx file.
+ * Removed unnecessary static_cast for StDetectorId
  *
  **************************************************************************/
 
@@ -35,7 +38,7 @@ class StHeavyTagMaker : public StMaker {
    HeavyTag_st* tag(); 
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHeavyTagMaker.h,v 1.1 2004/07/29 14:04:53 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHeavyTagMaker.h,v 1.2 2004/07/29 23:06:12 calderon Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
     void   fillTag();                 // does the actual work;
 private:

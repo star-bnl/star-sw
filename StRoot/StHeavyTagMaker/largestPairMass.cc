@@ -1,14 +1,26 @@
 //
-// largestPairMass.cc
+// $Id: largestPairMass.cc,v 1.2 2004/07/29 23:06:13 calderon Exp $
 //
 // Author: Manuel Calderon de la Barca Sanchez
+//
+// Calculates the largest invariant mass of track pairs
+// from StEvent primary tracks.
+// 
 // For use in the creation of the Heavy Flavor Tags
 // Track cuts are:
 // flag>0
 // tpc fit points >=15
 // |eta|<1.5
 // p>1 GeV/c
-
+//
+// $Log: largestPairMass.cc,v $
+// Revision 1.2  2004/07/29 23:06:13  calderon
+// Changed adc cut to match towers to 360 ADC counts,
+// and documented the origin.
+// Added Description to cxx file.
+// Removed unnecessary static_cast for StDetectorId
+//
+//
 
 #include "StEvent.h"
 #include "StPrimaryVertex.h"
