@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.19 2000/01/12 23:16:37 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.20 2000/01/13 16:55:11 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.20  2000/01/13 16:55:11  kathy
+// updating bfcread_dst*.C macros to use the new methods in StHistUtil which allow printing from a list; also make sure all libraries needed are loaded in the ones running St_QA_Maker; also update documentation
+//
 // Revision 1.19  2000/01/12 23:16:37  kathy
 // add all libraries that are now needed to load for St_QA_Maker; add code for using new print methods - can't yet print from list though....
 //
@@ -83,16 +86,21 @@
 //   - draws & prints histograms from given input Maker
 //
 // inputs: nevents - # events to process
-//         MainFile - *.dst.root file from bfc output
+//         MainFile - input *.dst.root file from bfc output
 //         psFile - output postscript filename
-//         PageTitle - title you want on each output page, default is
+//         PageTitle - title you want on each output page, default = "" is
 //                       MainFile name
+//         PrintList - name of subset histogram list that you want printed
+//                   - these are defined in StHistUtil, method SetDefaultPrintList
+//                   - default = "", prints all histograms in directory
+//         MakerHistDir - this is the Maker name that you want to get histograms
+//                        from - leave as "QA" for this macro since this 
+//                        macro is setup to run St_QA_Maker!
 //
 // standard Maker names in bfc 
 //   (but if you run your own Maker here, then use whatever name you give it)
 //  are listed at 
-// http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/St_QA_Maker/doc/
-//
+//  http://www.star.bnl.gov/STAR/html/comp_l/train/tut/bfc_maker_names.html
 //======================================================================
 
 class StChain;
@@ -134,11 +142,6 @@ void bfcread_dst_QAhist(
   gSystem->Load("St_svt");
   gSystem->Load("St_global");
 
-// force the directory name for histograms since this macro is 
-// specifically for running St_QA_Maker
-  const Char_t *MakerHistDir="QA";
-  cout << "bfcread_dst_QAhist.C, directory of Maker name      " << 
-     MakerHistDir<< endl;
 
 //  Setup top part of chain
   chain = new StChain("bfc");
@@ -198,7 +201,6 @@ void bfcread_dst_QAhist(
   Int_t numLog = 0;
   numLog = HU->ExamineLogYList();
   cout << " bfcread_dst_QAhist.C, Number hist to plot with log scale = " << numLog << endl;
-
 
   Int_t numPrint = 0;
   numPrint = HU->ExaminePrintList();
