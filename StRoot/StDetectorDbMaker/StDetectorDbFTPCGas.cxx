@@ -1,7 +1,7 @@
 #include "StDetectorDbFTPCGas.h"
-#include "TDataSet.h"
-#include "TTable.h"
-#include "StMaker.h"
+#include "tables/St_ftpcGasOut_Table.h"
+#include "tables/St_ftpcGasSystem_Table.h"
+#include "tables/St_tpcGas_Table.h"
 
 /* !
   The class holds the FTPC Gas system database values needed in the chain. It is a singleton which requires manual updating, usually taken care of in StDetectorDbMaker.cxx::Make(). If no data exists all values return 0. To use:

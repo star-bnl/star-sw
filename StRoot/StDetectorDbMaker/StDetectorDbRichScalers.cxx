@@ -1,7 +1,7 @@
 #include "StDetectorDbRichScalers.h"
-#include "TDataSet.h"
-#include "TTable.h"
-#include "StMaker.h"
+#include "tables/St_trigDetSums_Table.h"
+#include "tables/St_richvoltages_Table.h"
+#include "tables/St_y1Mult_Table.h"
 
 /*!
   The class holds the Rich database values needed in the chain. It is a singleton which requires manual updating, usually taken care of in StDetectorDbMaker.cxx::Make(). If no data exists all values return 0. To use:
