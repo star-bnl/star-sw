@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.4 1998/08/10 02:34:34 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.5 1998/08/14 15:25:41 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.5  1998/08/14 15:25:41  fisyak
+// Move out tpg from run
+//
 // Revision 1.4  1998/08/10 02:34:34  fisyak
 // Add St_laser_Maker
 //
@@ -60,12 +63,23 @@ void St_tcl_Maker::Init(){
    if (! tpc)  tpc = local.Mkdir("tpc");
    St_DataSet *tpgpar = local("tpc/tpgpar");
    if (tpgpar){
-       St_DataSetIter partable(tpgpar);
-       m_tpg_pad_plane = (St_tpg_pad_plane *) partable("tpg_pad_plane");
-       m_tpg_detector  = (St_tpg_detector  *) partable("tpg_detector");
-       m_tpg_pad       = (St_tpg_pad       *) partable("tpg_pad");
-       if (!(m_tpg_pad_plane && m_tpg_detector && m_tpg_pad)) 
-       printf("tpc/tpgpar is not initialized. Please add run_Maker to your chain\n");
+     St_DataSetIter partable(tpgpar);
+     m_tpg_pad_plane = (St_tpg_pad_plane *) partable("tpg_pad_plane");
+     m_tpg_detector  = (St_tpg_detector  *) partable("tpg_detector");
+     m_tpg_pad       = (St_tpg_pad       *) partable("tpg_pad");
+     if (!(m_tpg_pad_plane && m_tpg_detector)) {
+       cout << " St_run_Maker:tpg_pad_plane or tpg_detector do not exist" << endl;
+     }
+     else {
+       if (!m_tpg_pad) {
+         m_tpg_pad       = new St_tpg_pad("tpg_pad",1); partable.Add(m_tpg_pad); 
+         Int_t res = tpg_main(m_tpg_pad_plane,m_tpg_detector,m_tpg_pad); 
+       }
+     }
+     if (!(m_tpg_pad_plane && m_tpg_detector && m_tpg_pad)){ 
+       cout << "TPC geometry parameter tables are incomplete."<< endl;
+       SafeDelete(tpgpar);
+     }
    }
 // tss parameters ?
    St_DataSet *tsspars = local("tpc/tsspars");
@@ -155,7 +169,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.4 1998/08/10 02:34:34 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.5 1998/08/14 15:25:41 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
