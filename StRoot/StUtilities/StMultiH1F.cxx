@@ -1,23 +1,10 @@
-// $Id: StMultiH1F.cxx,v 1.6 2000/09/15 21:23:36 fisyak Exp $
-// $Log: StMultiH1F.cxx,v $
-// Revision 1.6  2000/09/15 21:23:36  fisyak
-// HP does not have iostream
-//
-// Revision 1.5  2000/08/28 19:21:05  genevb
-// Improved projection code
-//
-// Revision 1.4  2000/08/28 18:47:50  genevb
-// Better handling of 1 y-bin case
-//
-// Revision 1.3  2000/08/25 22:03:39  genevb
-// Fixed entries problem
-//
-// Revision 1.2  2000/08/25 15:46:42  genevb
-// Added stats box, legend names
-//
-// Revision 1.1  2000/07/26 22:00:27  lansdell
-// new multi-hist class for superimposing the x-projections of y-bins (of a TH2F histogram) into one TH1F histogram
-//
+//////////////////////////////////////////////////////////////////////////
+//                                                                      //
+//  StMultiH1F allows multiple similar TH1F histograms to be            //
+//  easily plotted on one graph                                         //
+//                                                                      //
+//////////////////////////////////////////////////////////////////////////
+
 #ifdef __HP_aCC
 #include <iostream.h>
 #else
@@ -30,22 +17,24 @@
 
 ClassImp(StMultiH1F)
 
-StMultiH1F::StMultiH1F() {}
+StMultiH1F::StMultiH1F() : fMOffset(0.) {}
 
 StMultiH1F::StMultiH1F(const char *name,const char *title,Int_t nbinsx,
 		       Axis_t xlow,Axis_t xup ,Int_t nbinsy) :
-  TH2F(name,title,nbinsx,xlow,xup,nbinsy,-0.5,-0.5+nbinsy) {}
+  TH2F(name,title,nbinsx,xlow,xup,nbinsy,-0.5,-0.5+nbinsy), fMOffset(0.) {}
 
 StMultiH1F::StMultiH1F(const char *name,const char *title,Int_t nbinsx,
 		       Double_t *xbins,Int_t nbinsy) :
-  TH2F(name,title,nbinsx,xbins,nbinsy,-0.5,-0.5+nbinsy) {}
+  TH2F(name,title,nbinsx,xbins,nbinsy,-0.5,-0.5+nbinsy), fMOffset(0.) {}
 
 void StMultiH1F::Draw(Option_t *option) {
 
+  TAxis* axis = GetXaxis();
   Int_t ybins = GetNbinsY();
   if (ybins == 1) {
     TH1F* temp0 = XProjection(GetName());
     temp0->SetStats((!TestBit(kNoStats)));
+    axis->Copy(*(temp0->GetXaxis()));
     temp0->Draw();
     return;
   }
@@ -62,6 +51,13 @@ void StMultiH1F::Draw(Option_t *option) {
   Int_t ybin;
   Double_t maxval = -999999.;
   Int_t maxbin = -1;
+  Float_t offset = fMOffset;
+  if (fMOffset && gPad->GetLogy()) {
+    Float_t max_offset = pow(
+      1.0e10*GetNonZeroMinimum()/GetNonZeroMaximum(),
+      1.0/(ybins-1.0));
+    if (offset > max_offset) offset = max_offset;
+  }
 
   // dummy histogram pointer
   TH1F** temp = new TH1F*[ybins];
@@ -74,6 +70,18 @@ void StMultiH1F::Draw(Option_t *option) {
     temp[ybin] = XProjection(n0.Data(),slice);
     temp[ybin]->SetLineStyle(slice);
     temp[ybin]->SetStats(kFALSE);
+    axis->Copy(*(temp[ybin]->GetXaxis()));
+
+    if (fMOffset && ybin) {
+      temp[ybin]->SetLineColor(slice);
+      if (gPad->GetLogy()) {
+        temp[ybin]->Scale(pow(offset,ybin));
+      } else {
+        for (Int_t xbin=0; xbin<GetNbinsX(); xbin++)
+          temp[ybin]->AddBinContent(xbin,offset*ybin);
+      }
+    }
+
     Double_t binmax = temp[ybin]->GetMaximum();
     if (binmax > maxval) {
       maxval = binmax;
@@ -111,3 +119,85 @@ TH1F* StMultiH1F::XProjection(const char* name, Int_t ybin) {
   TAttMarker::Copy(*temp);
   return temp;
 }
+
+void StMultiH1F::SetBarOffset(Float_t offset) {
+  if (offset == 0.25) {
+    fMOffset = 1.2 * (GetMaximum() - GetMinimum());
+    if (!fMOffset) fMOffset = 10.0;
+  } else {
+    fMOffset = offset;
+  }
+}
+
+Double_t StMultiH1F::GetNonZeroMinimum() const {
+  Double_t value, minimum = GetMinimum();
+  if (minimum) return minimum;
+  minimum = GetMaximum();
+  Int_t bin, binx, biny, binz;
+  Int_t xfirst  = fXaxis.GetFirst();
+  Int_t xlast   = fXaxis.GetLast();
+  Int_t yfirst  = fYaxis.GetFirst();
+  Int_t ylast   = fYaxis.GetLast();
+  Int_t zfirst  = fZaxis.GetFirst();
+  Int_t zlast   = fZaxis.GetLast();
+  for (binz=zfirst;binz<=zlast;binz++) {
+     for (biny=yfirst;biny<=ylast;biny++) {
+        for (binx=xfirst;binx<=xlast;binx++) {
+           bin = GetBin(binx,biny,binz);
+           value = GetBinContent(bin);
+           if (value && value < minimum) minimum = value;
+        }
+     }
+  }
+  if (!minimum) minimum = -1.0;
+  return minimum;
+}
+
+Double_t StMultiH1F::GetNonZeroMaximum() const {
+  Double_t value, maximum = GetMaximum();
+  if (maximum) return maximum;
+  maximum = GetMinimum();
+  Int_t bin, binx, biny, binz;
+  Int_t xfirst  = fXaxis.GetFirst();
+  Int_t xlast   = fXaxis.GetLast();
+  Int_t yfirst  = fYaxis.GetFirst();
+  Int_t ylast   = fYaxis.GetLast();
+  Int_t zfirst  = fZaxis.GetFirst();
+  Int_t zlast   = fZaxis.GetLast();
+  for (binz=zfirst;binz<=zlast;binz++) {
+     for (biny=yfirst;biny<=ylast;biny++) {
+        for (binx=xfirst;binx<=xlast;binx++) {
+           bin = GetBin(binx,biny,binz);
+           value = GetBinContent(bin);
+           if (value && value > maximum) maximum = value;
+        }
+     }
+  }
+  if (!maximum) maximum = -1.0;
+  return maximum;
+}
+
+// $Id: StMultiH1F.cxx,v 1.7 2002/04/23 01:59:16 genevb Exp $
+// $Log: StMultiH1F.cxx,v $
+// Revision 1.7  2002/04/23 01:59:16  genevb
+// New offset abilities
+//
+// Revision 1.6  2000/09/15 21:23:36  fisyak
+// HP does not have iostream
+//
+// Revision 1.5  2000/08/28 19:21:05  genevb
+// Improved projection code
+//
+// Revision 1.4  2000/08/28 18:47:50  genevb
+// Better handling of 1 y-bin case
+//
+// Revision 1.3  2000/08/25 22:03:39  genevb
+// Fixed entries problem
+//
+// Revision 1.2  2000/08/25 15:46:42  genevb
+// Added stats box, legend names
+//
+// Revision 1.1  2000/07/26 22:00:27  lansdell
+// new multi-hist class for superimposing the x-projections of y-bins (of a TH2F histogram) into one TH1F histogram
+//
+
