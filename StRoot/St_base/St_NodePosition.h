@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98   
-// $Id: St_NodePosition.h,v 1.4 1999/01/31 02:03:07 fine Exp $
+// $Id: St_NodePosition.h,v 1.5 1999/02/04 19:22:23 fine Exp $
 // $Log: St_NodePosition.h,v $
+// Revision 1.5  1999/02/04 19:22:23  fine
+// Severak drawing method have been added to draw STAR nodes
+//
 // Revision 1.4  1999/01/31 02:03:07  fine
 // St_DataSetIter::Notify - new method + clean up
 //
@@ -61,6 +64,7 @@ class St_NodePosition  : public TObject {
         virtual void        Local2Master(Double_t *local, Double_t *master);
         virtual void        Local2Master(Float_t *local, Float_t *master);
         virtual void        Paint(Option_t *option="");
+        virtual void        UpdatePosition(Option_t *option="");
         virtual void        SetMatrix(TRotMatrix *matrix=0) {fMatrix = matrix;}
         virtual void        SetPosition( Double_t x=0, Double_t y=0, Double_t z=0) {fX=x; fY=y; fZ=z;}
 //        virtual void        UpdateMatrix();

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.12 1999/02/04 16:26:11 fine Exp $
+// $Id: St_Node.cxx,v 1.13 1999/02/04 19:22:22 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.13  1999/02/04 19:22:22  fine
+// Severak drawing method have been added to draw STAR nodes
+//
 // Revision 1.12  1999/02/04 16:26:11  fine
 // St_NodeView::Paint method has been introduced
 //
@@ -337,10 +340,8 @@ void St_Node::Browse(TBrowser *b)
    if (GetListOfPositions()){
        St_NodePosition *nodePosition = 0;
        TIter next(GetListOfPositions());
-       while (nodePosition = (St_NodePosition *)next()){
-//         b->Add(nodePosition->GetNode());
-         b->Add(nodePosition,nodePosition->GetNode()->GetName());
-       }
+       while (nodePosition = (St_NodePosition *)next())
+         b->Add(nodePosition,nodePosition->GetNode()->GetName());       
 //       GetListOfPositions()->Browse(b);
    }
 //    if( GetList() ) {
@@ -354,23 +355,29 @@ void St_Node::Browse(TBrowser *b)
  //      gPad->Update();
     }
 } 
- 
+
 //______________________________________________________________________________
-Int_t St_Node::DistancetoPrimitive(Int_t , Int_t )
+Int_t St_Node::DistancetoPrimitive(Int_t px, Int_t py)
 {
-//*-*-*-*-*-*-*-*-*-*-*Compute distance from point px,py to a Node*-*-*-*-*-*
+  return DistancetoNodePrimitive(px,py);
+}
+
+//______________________________________________________________________________
+Int_t St_Node::DistancetoNodePrimitive(Int_t px, Int_t py,St_NodePosition *pos)
+{
+//*-*-*-*-*-*-*-*-*Compute distance from point px,py to a St_NodeView*-*-*-*-*-*
 //*-*                  ===========================================
-//*-*  Compute the closest distance of approach from point px,py to this node.
+//*-*  Compute the closest distance of approach from point px,py to the position of 
+//*-*  this node.
 //*-*  The distance is computed in pixels units.
 //*-*
+//*-*  It is restricted by 2 levels of St_Nodes
 //*-*
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-#if 0 
+ 
    const Int_t big = 9999;
    const Int_t inaxis = 7;
    const Int_t maxdist = 5;
- 
-   Int_t i;
  
    Int_t puxmin = gPad->XtoAbsPixel(gPad->GetUxmin());
    Int_t puymin = gPad->YtoAbsPixel(gPad->GetUymin());
@@ -386,59 +393,50 @@ Int_t St_Node::DistancetoPrimitive(Int_t , Int_t )
    TView *view =gPad->GetView();
    if (!view) return big;
  
-//*-*- Update translation vector and rotation matrix for new level
-   if (gGeomLevel) {
-      Int_t ig = gGeomLevel;
-      UpdateTempMatrix(&(gTranslation[ig-1][0]),&gRotMatrix[ig-1][0]
-                      ,fX,fY,fZ,fMatrix->GetMatrix()
-                      ,&gTranslation[ig][0],&gRotMatrix[ig][0]);
- 
-   } else {
-      for (i=0;i<kVectorSize;i++) gTranslation[0][i] = 0;
-      for (i=0;i<kMatrixSize;i++) gRotMatrix[0][i] = 0;
-      gRotMatrix[0][0] = 1;   gRotMatrix[0][4] = 1;   gRotMatrix[0][8] = 1;
-   }
- 
+   static St_NodePosition nullPosition;
+   St_NodePosition *position = pos;
+   if (!position) position = &nullPosition;
+   TShape  *shape = 0;
+
+   shape    = GetShape();
+   if (pos) position->UpdatePosition();      
+
 //*-*- Paint Referenced shape
    Int_t dist = big;
-   if (fVisibility && fShape->GetVisibility()) {
-      gNode = this;
-      dist = fShape->DistancetoPrimitive(px,py);
-      if (dist < maxdist) {
-         gPad->SetSelected(this);
-         return 0;
-      }
+   if (GetVisibility() && shape && shape->GetVisibility()) {
+//         gNode = this;
+        dist = shape->DistancetoPrimitive(px,py);
+        if (dist < maxdist) {
+           gPad->SetSelected(this);
+           return 0;
+        }
    }
-   if ( TestBit(kSonsInvisible) ) return dist;
+//   if ( TestBit(kSonsInvisible) ) return dist;
  
 //*-*- Loop on all sons
-   Int_t nsons = 0;
-   if (Nodes()) nsons = Nodes()->GetSize();
+   TList *posList = GetListOfPositions();
    Int_t dnode = dist;
-   if (nsons) {
- 
-      Int_t levelsave = gGeomLevel;
-      gGeomLevel++;
-      St_Node *node;
+   if (posList && posList->GetSize()) {
+      gGeometry->PushLevel();
+      St_NodePosition *thisPosition;
       TObject *obj;
-      TIter  next(Nodes());
+      TIter  next(posList);
       while ((obj = next())) {
-         node = (St_Node*)obj;
-         dnode = node->DistancetoPrimitive(px,py);
-         if (dnode <= 0) break;
+         thisPosition = (St_NodePosition*)obj;
+         St_Node *node = thisPosition->GetNode();
+         dnode = node->DistancetoNodePrimitive(px,py,thisPosition);
+         if (dnode <= 0)  break;
          if (dnode < dist) dist = dnode;
+         if (gGeometry->GeomLevel() > 2) break;
       }
-      gGeomLevel = levelsave;
+      gGeometry->PopLevel();
    }
  
-   if (gGeomLevel==0 && dnode > maxdist) {
+   if (gGeometry->GeomLevel()==0 && dnode > maxdist) {
       gPad->SetSelected(view);
       return 0;
    } else
       return dnode;
-#else
-   return 0;
-#endif
 }
  
 //______________________________________________________________________________
@@ -455,22 +453,23 @@ void St_Node::Draw(Option_t *option)
       (gROOT->GetMakeDefCanvas())();
    }
    if (!opt.Contains("same")) gPad->Clear();
-#if 0
-   St_NodeStruct *nodeToDraw = new St_NodeStruct(this);
-   nodeToDraw->Draw(option);
-#endif
-
+ 
+//*-*- Draw Referenced node
+   gGeometry->SetGeomLevel();
+   gGeometry->UpdateTempMatrix();
+ 
+   AppendPad(option);
+ 
 //*-*- Create a 3-D View
    TView *view = gPad->GetView();
    if (!view) {
       view = new TView(1);
       view->SetAutoRange(kTRUE);
-#if 0
-      nodeToDraw->Paint();
-#endif
+      Paint();
       view->SetAutoRange(kFALSE);
    }
 }
+
  
 //______________________________________________________________________________
 void St_Node::DrawOnly(Option_t *option)
@@ -598,11 +597,77 @@ void St_Node::ls(Option_t *option)
 //______________________________________________________________________________
 void St_Node::Paint(Option_t *)
 {
-  Error("Paint","Bug, this method  should not be called");
+  PaintNodePosition();
   return; 
 }
- 
 
+//______________________________________________________________________________
+void St_Node::PaintNodePosition(Option_t *option,St_NodePosition *pos)
+{
+//*-*-*-*-*-*-*-*-*-*-*-*Paint Referenced node with current parameters*-*-*-*
+//*-*                   ==============================================
+//*-*
+//*-*  vis = 1  (default) shape is drawn
+//*-*  vis = 0  shape is not drawn but its sons may be not drawn
+//*-*  vis = -1 shape is not drawn. Its sons are not drawn
+//*-*  vis = -2 shape is drawn. Its sons are not drawn
+//*-*
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+  static St_NodePosition nullPosition;
+  TPadView3D *view3D=gPad->GetView3D();
+
+  St_NodePosition *position = pos;
+  if (!position)   position   = &nullPosition;
+
+  // PaintPosition does change the current matrix and it MUST be callled FIRST !!!
+
+  position->UpdatePosition(option);      
+
+  PaintShape(option);  
+////---   if ( thisNode->TestBit(kSonsInvisible) ) return;
+ 
+//*-*- Paint all sons
+  TList *posList = GetListOfPositions();
+  if (posList && posList->GetSize()) {  
+    gGeometry->PushLevel();
+    St_NodePosition *thisPosition;
+    TObject *obj;
+    TIter  next(posList);
+    while ((obj = next())) {
+       if (view3D)
+           view3D->PushMatrix();
+ 
+       thisPosition = (St_NodePosition*)obj;
+       St_Node *node = thisPosition->GetNode();
+       if (node) node->PaintNodePosition(option,thisPosition);
+       if (view3D)
+           view3D->PopMatrix();
+    }
+    gGeometry->PopLevel();
+  }
+}
+ 
+//______________________________________________________________________________
+void St_Node::PaintShape(Option_t *option)
+{
+  // Paint shape of the node
+  // To be called from the TObject::Paint method only
+  TAttLine::Modify();
+  TAttFill::Modify();
+  TShape *shape    = GetShape();
+  if (GetVisibility() && shape->GetVisibility()) {
+//      gNode = thisNode;
+    shape->SetLineColor(GetLineColor());
+    shape->SetLineStyle(GetLineStyle());
+    shape->SetLineWidth(GetLineWidth());
+    shape->SetFillColor(GetFillColor());
+    shape->SetFillStyle(GetFillStyle());
+    TPadView3D *view3D=gPad->GetView3D();
+    if (view3D)
+          view3D->SetLineAttr(GetLineColor(),GetLineWidth(),option);
+    shape->Paint(option);
+  }
+}
 //______________________________________________________________________________
 void St_Node::DeletePosition(St_NodePosition *position)
 {

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.7 1999/01/31 02:03:07 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.8 1999/02/04 19:22:23 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.8  1999/02/04 19:22:23  fine
+// Severak drawing method have been added to draw STAR nodes
+//
 // Revision 1.7  1999/01/31 02:03:07  fine
 // St_DataSetIter::Notify - new method + clean up
 //
@@ -443,7 +446,19 @@ void St_NodePosition::Paint(Option_t *option)
 #endif 
 }
    
-  
+//_______________________________________________________________________
+void St_NodePosition::UpdatePosition(Option_t *)
+{
+  TPadView3D *view3D=gPad->GetView3D();
+//*-*- Update translation vector and rotation matrix for new level
+  if (gGeometry->GeomLevel() && fMatrix) {
+     gGeometry->UpdateTempMatrix(fX,fY,fZ
+                                ,fMatrix->GetMatrix()
+                                ,fMatrix->IsReflection());
+     if (view3D)
+        view3D->UpdatePosition(fX,fY,fZ,fMatrix);
+  }
+}
 #if 0  
 //_______________________________________________________________________
 void St_NodePosition::Streamer(TBuffer &b)
