@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.28 1999/03/24 22:16:24 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.29 1999/03/28 02:59:11 perev Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.29  1999/03/28 02:59:11  perev
+// Put interfaces to .const area
+//
 // Revision 1.28  1999/03/24 22:16:24  lasiuk
 // ROOT deletes the dataSet so you have to make
 // a new one each time thru Make().  Don't check the
@@ -164,8 +167,11 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.28 1999/03/24 22:16:24 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.29 1999/03/28 02:59:11 perev Exp $";
 
+ClassImp(electronicsDataSet)
+ClassImp(geometryDataSet)
+ClassImp(slowcontrolDataSet)
 ClassImp(StTrsMaker)
 
 StTrsMaker::StTrsMaker(const char *name):
@@ -344,6 +350,10 @@ Int_t StTrsMaker::Init()
    // This should really be a boolean
    mProcessPseudoPadRows = 0;  // 0 is no!
 
+   mUnPacker = new StTrsUnpacker();
+   mAllTheData = new StTrsRawDataEvent();
+   AddConst(new St_ObjectSet("Event"  , mAllTheData));
+   AddConst(new St_ObjectSet("Decoder", mUnPacker));
    
    return StMaker::Init();
 }
@@ -370,8 +380,6 @@ Int_t StTrsMaker::Make(){
     // the data set each time through the loop, so an "event" and
     // a "reader" must be created each time...The maker shouldn't have
     // to do that...
-    mUnPacker = new StTrsUnpacker();
-    mAllTheData = new StTrsRawDataEvent();
     
     //Do not use this unless you really know what you are
     // doing...
@@ -775,8 +783,6 @@ Int_t StTrsMaker::Make(){
 #endif    
     // CAUTION: ROOT is resposible for the memory at this point
     // ROOT deletes m_DataSet in the chain after every event.
-    m_DataSet->Add(new St_ObjectSet("Event", mAllTheData));
-    m_DataSet->Add(new St_ObjectSet("Decoder", mUnPacker));
 
     return kStOK;
 }
@@ -807,7 +813,7 @@ Int_t StTrsMaker::Finish()
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.28 1999/03/24 22:16:24 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.29 1999/03/28 02:59:11 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
