@@ -1,5 +1,11 @@
-* $Id: tpt_extend_segments.F,v 1.6 1999/09/14 00:55:45 liq Exp $
+* $Id: tpt_extend_segments.F,v 1.7 1999/09/30 07:52:44 sakrejda Exp $
 * $Log: tpt_extend_segments.F,v $
+* Revision 1.7  1999/09/30 07:52:44  sakrejda
+* Tracks that cannot be refit are marked as bad. Also after segment extension
+* all the hits that belong to that track are marked again even if number
+* of points did not change because new points might be added and old removed.
+* Tis cured a problem of nfit>nrec (tested on 4 events).
+*
 * Revision 1.6  1999/09/14 00:55:45  liq
 * use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
 *
@@ -146,30 +152,27 @@ C              mark all the points on this track as used
 C              mark candidate as used
                tmp(ipos) = -1.0
                if(iret.ne.STAFCV_OK) then
-C                 copy in the original parametrs
+c                 could not refit the track, flag it as invalid an release hits.
+                  track(ipos).flag = -66
+                  trk(ipos).flag = -66
                   trk(ipos).nhit = save_nhit
                   do j=1,save_nhit
                     trk(ipos).ipnt(j)=save_ipnt(j)
                   enddo
-                  do j=1,9
-                    trk(ipos).p(j) = save_p(j)
-                  enddo
-                  trk(ipos).nfit = save_nfit
-                  trk(ipos).flag = save_flag
+C                 free the remaining points
+                  do j=1,trk(ipos).nhit
+                    hit(trk(ipos).ipnt(j)).track= 0
+                  end do
                else
 C                 update affected chains
                   naf = 0
                   do j=1,trk(ipos).nhit
                      ld=trk(ipos).ipnt(j)
                      itrack = abs(hit(ld).track)/1000
-                     if(itrack.eq.0) then
-C                      it's a free hit, mark it as used
-                       hit(ld).track = ipos*1000+j
-                     else if(itrack.ne.ipos) then
+                     if(itrack.ne.ipos.and.itrack.ne.0) then
                        if(tmp(itrack).eq.-1.0) then
                          write(m132,*)'TPT_EXTEND_SEGMENTS - accounting problems II',
-     >                   hit(ld).track,
-     >                   ipos,itrack
+     >                   hit(ld).track,ipos,itrack,trk(itrack).flag
                          call StWarning(m132)
                          read(5,*) tpar(ipass).debug(9)
                        endif
@@ -186,13 +189,13 @@ C                      check which hit it was on the track
                          laf(naf)=itrack
                        endif
                        trk(itrack).ipnt(lc) = 0
-                       hit(ld).track = ipos*1000+j
-                     else 
-                       hit(ld).track = ipos*1000+j
                      endif
+C                    mark it as used
+                     hit(ld).track = ipos*1000+j
                   end do
 C                 loop through all the affected chains and update 
 C	          track and hit information
+C                 reset number of hits on a track
                   do k=1,naf
                      ng = 0
                      do l=1,trk(laf(k)).nhit
@@ -202,6 +205,8 @@ C	          track and hit information
                         endif
                      end do
                      trk(laf(k)).nhit = ng
+c                    mark that the track needs to be re-fit
+                     trk(laf(k)).nfit = -1
                      do l=1,trk(laf(k)).nhit
                           trk(laf(k)).ipnt(l) = ihit(l)
                           hit(ihit(l)).track = -(laf(k)*1000+l)
