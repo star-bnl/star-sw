@@ -189,6 +189,8 @@ void StEmcMicroUtil::createTrack(StTrack* track,StEmcMicroTrack* MicroTrack)
   MicroTrack->setPhi(p.phi());
   MicroTrack->setCurvature(track->geometry()->curvature());
   
+  MicroTrack->setFlag(track->flag());
+  
   MicroTrack->setOrigin(o.x(),o.y(),o.z());
   
   MicroTrack->setCharge(track->geometry()->charge());
@@ -586,6 +588,8 @@ void StEmcMicroUtil::createTrack(StEmcMicroTrack* MicroTrack,StTrack* Track)
   StTrackFitTraits *traits=new StTrackFitTraits(0,MicroTrack->getFitPts(),a,b);
   Track->setFitTraits(*traits);
   delete traits;
+  
+  Track->setFlag((Short_t)MicroTrack->getFlag());
   
   return;
 }

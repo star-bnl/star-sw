@@ -39,6 +39,7 @@ public:
    Int_t    getNdedxPts()              const { return (Int_t)mNdedxPts; }            ///<Return dE/dX number of points of the track
    Float_t  getTrackLength()           const { return mTrackLength; }                ///<Return track length
    Int_t    getTrackNode()             const { return mTrackNode; }                  ///<Return track node (useful for StEvent Reconstruction)
+   Int_t    getFlag()                  const { return (Int_t)mFlag; }                ///<Return flag of the track
 
    void  setP(Float_t p)             { mP = p; }
    void  setEta(Float_t eta)         { mEta = eta; }
@@ -57,6 +58,7 @@ public:
    void  setNdedxPts(Int_t ndedxPts) { mNdedxPts = (Char_t)ndedxPts; }
    void  setTrackLength(Float_t tl)  { mTrackLength = tl; }
    void  setTrackNodeNumber(Int_t n) { mTrackNode = n; } 
+   void  setFlag(Int_t n)            { mFlag = (Char_t)n; } 
 private:   
                                           
    Float_t   mP;                          // total momentum
@@ -76,7 +78,7 @@ private:
    Char_t    mNdedxPts;                   // number of hits use for dE/dx
    Float_t   mTrackLength;                // lenght of the track (cm)
    Int_t     mTrackNode;                  // original track node
- 
+   Char_t    mFlag;                       // flag
    ClassDef(StEmcMicroTrack,1)
 };
  
