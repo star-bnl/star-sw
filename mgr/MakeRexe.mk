@@ -1,5 +1,8 @@
-# $Id: MakeRexe.mk,v 1.18 1999/04/24 13:15:24 fisyak Exp $
+# $Id: MakeRexe.mk,v 1.19 1999/04/30 13:20:56 fisyak Exp $
 # $Log: MakeRexe.mk,v $
+# Revision 1.19  1999/04/30 13:20:56  fisyak
+# Split root4star into two version root4star with StEvent and Root.exe without it
+#
 # Revision 1.18  1999/04/24 13:15:24  fisyak
 # Add --sillent mode for set SILENT environmnet variable
 #
@@ -86,12 +89,10 @@ CCload = YES
 
 # static linking of SCL and StEvent needed with current Solaris compiler
 ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
-  STEVENT_OBJS =  $(wildcard $(STAR)/.$(STAR_HOST_SYS)/obj/StarClassLibrary/*.o \
-$(STAR)/.$(STAR_HOST_SYS)/obj/StarClassLibrary/Templates.DB/*.o) $(wildcard \
-$(STAR)/.$(STAR_HOST_SYS)/obj/StEvent/*.o \
+  STCLASS_OBJS =  $(wildcard $(STAR)/.$(STAR_HOST_SYS)/obj/StarClassLibrary/*.o \
+$(STAR)/.$(STAR_HOST_SYS)/obj/StarClassLibrary/Templates.DB/*.o) 
+  STEVENT_OBJS = $(wildcard $(STAR)/.$(STAR_HOST_SYS)/obj/StEvent/*.o \
 $(STAR)/.$(STAR_HOST_SYS)/obj/StEvent/Templates.DB/*.o)
-else
-  STEVENT_OBJS = 
 endif
 
 
@@ -133,10 +134,14 @@ ALL_EXE_LIBS += -lXpm $(FLIBS) $(CLIBS)
 .SUFFIXES:
 .SUFFIXES:  .o .g .f .c .cc .cxx   .F
 #all: Root.exe root4star 
+ifndef STEVENT_OBJS
 all: root4star 
-Root.exe: $(FILES_O) 
+else
+all: root4star Root.exe
+endif
+Root.exe: $(FILES_O) $(STCLASS_OBJS)
 	$(DOEXE) $(ALL_DEPS) $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
-root4star: $(FILES_O) $(STEVENT_OBJS)
+root4star: $(FILES_O) $(STCLASS_OBJS) $(STEVENT_OBJS)
 	$(DOEXE) $(ALL_DEPS) $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
 #
 #
