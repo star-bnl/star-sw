@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.cc,v 1.6 2004/01/27 02:37:54 perev Exp $
+ * $Id: St_SvtDb_Reader.cc,v 1.7 2004/01/29 17:24:39 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.cc,v $
+ * Revision 1.7  2004/01/29 17:24:39  perev
+ * Replace assert to delete
+ *
  * Revision 1.6  2004/01/27 02:37:54  perev
  * LeakOff
  *
@@ -140,7 +143,8 @@ StSvtConfig* St_SvtDb_Reader::getConfiguration()
 StSvtHybridCollection* St_SvtDb_Reader::getDriftVelocity()
 {
   cout << "St_SvtDb_Reader::getDriftVelocity" << endl;
-  assert(!mSvtDriftVeloc);
+//  assert(!mSvtDriftVeloc);
+  delete mSvtDriftVeloc;
   mSvtDriftVeloc = new StSvtHybridCollection(mSvtConfig);
   getDriftVelocityAverage(mSvtDriftVeloc);
 
