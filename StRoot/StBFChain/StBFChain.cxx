@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.206 2001/06/24 16:24:22 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.207 2001/07/03 15:06:59 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -41,6 +41,7 @@ Bfc_st BFC[] = {
   {"Y2000"    ,"","","db,calib"             ,"","","actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
   {"RY1h"        ,""  ,"","db,calib,VtxOffSet"              ,"","","Real data with Year1h geometry",kFALSE},
   {"RY2000"   ,"","","db,calib,VtxOffSet"   ,"","","actual 2000: Real data with Year2000 geometry ",kFALSE},
+  {"RY2001"   ,"","","db,calib,VtxOffSet"   ,"","","actual 2001: Real data with Year2001 geometry ",kFALSE},
   {"Y2a"         ,""  ,"","db,calib"                          ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"         ,"" ,"","db,calib","","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
   {"Y2001"       ,"","","db,calib","","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
@@ -72,7 +73,7 @@ Bfc_st BFC[] = {
   {"cy1h"        ,""  ,"","y1h,C1default"                                ,"","","Turn on chain y1e",kFALSE},
   {"Cy2a"        ,""  ,"","y2a,CAdefault"                                ,"","","Turn on chain y2a",kFALSE},
   {"Cy2b"        ,""  ,"","y2b,C2default"                                ,"","","Turn on chain y2b",kFALSE},
-  {"C2000"       ,""  ,"","y2000,C1default"                            ,"","","Turn on chain Y2001",kFALSE},
+  {"C2000"       ,""  ,"","y2000,C1default"                            ,"","","Turn on chain Y2000",kFALSE},
   {"C2001"       ,""  ,"","y2001,C2default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"MDC4"        ,""  ,"","C2001,trs,srs,fss,rrs,big,GeantOut"      ,"","","Turn on chain for MDC4",kFALSE},
   {"PostMDC4"    ,""  ,"","C2001,trs,sss,fss,rrs,big,GeantOut"     ,"","","Turn on Post MDC4 chain",kFALSE},
@@ -83,6 +84,8 @@ Bfc_st BFC[] = {
                                                            ,"Production chain for summer 2000 data",kFALSE},
   {"P2000"       ,""  ,"","ry2000,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
+  {"P2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,ftpc,svt,emcY2,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
+                                                           ,"Production chain for summer 2001 data (incomplete)",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -883,26 +886,30 @@ void StBFChain::SetGeantOptions(){
   if (geantMk) {
     SetInput("geant",".make/geant/.data");
     if (!GetOption("fzin")) {
-            if (GetOption("SD97") || 
-		GetOption("SD98") || 
-		GetOption("Y1a")  || 
-		GetOption("ES99") || 
-		GetOption("ER99") || 
-		GetOption("DC99"))    geantMk->LoadGeometry("detp geometry YEAR_1A"); 
+      if (GetOption("SD97") || 
+	  GetOption("SD98") || 
+	  GetOption("Y1a")  || 
+	  GetOption("ES99") || 
+	  GetOption("ER99") || 
+	  GetOption("DC99"))          geantMk->LoadGeometry("detp geometry YEAR_1A"); 
       else {if (GetOption("Y1b"))     geantMk->LoadGeometry("detp geometry YEAR_1B");
       else {if (GetOption("Y1E"))     geantMk->LoadGeometry("detp geometry YEAR_1E");
       else {if (GetOption("Y1h") || 
 		GetOption("RY1h"))    geantMk->LoadGeometry("detp geometry YEAR_1H");
       else {if (GetOption("Y1s"))     geantMk->LoadGeometry("detp geometry YEAR_1S");
-      else {if (GetOption("Y2000") ||
+      else {if (GetOption("Y2000")  ||
 		GetOption("RY2000"))  geantMk->LoadGeometry("detp geometry year2000");
       else {if (GetOption("Y2a"))     geantMk->LoadGeometry("detp geometry YEAR_2A");
-      else {if (GetOption("Y2001"))   geantMk->LoadGeometry("detp geometry year2001");
+      else {if (GetOption("Y2001")  ||
+		GetOption("RY2001"))  geantMk->LoadGeometry("detp geometry year2001");
       else {if (GetOption("Y2b"))     geantMk->LoadGeometry("detp geometry YEAR_2b");
-      else {if (GetOption("Y2001"))   geantMk->LoadGeometry("detp geometry year2001");
+      //else {if (GetOption("Y2001"))   geantMk->LoadGeometry("detp geometry year2001");
       else {if (GetOption("Complete"))geantMk->LoadGeometry("detp geometry complete");
-      else                            geantMk->LoadGeometry("detp geometry year2001");}}}}}}}}}}
-	    if (GetOption("gstar")) {
+      else                            geantMk->LoadGeometry("detp geometry year2001");
+      }}}}}}}}
+    }
+
+    if (GetOption("gstar")) {
 	      geantMk->Do("subevent 0;");
 	      // gkine #particles partid ptrange yrange phirange vertexrange 
 	      geantMk->Do("gkine 80 6 1. 1. -4. 4. 0 6.28  0. 0.;");
