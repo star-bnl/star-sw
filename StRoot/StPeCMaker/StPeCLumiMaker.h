@@ -17,8 +17,8 @@
 #ifndef StPeCLumiMaker_HH
 #define StPeCLumiMaker_HH
 #include "StMaker.h"
-#include "StPeCEvent.h"
 #include "StPeCLumiEntry.h"
+#include "StPeCEvent.h"
 #include "StPeCGeant.h"
 #include "TH1.h"
 #include "TH2.h"
@@ -31,6 +31,7 @@ class StPeCEvent;
 class StRun;
 class TH1F;
 class TH2F;
+class StMuDst;
 
 class StPeCLumiMaker : public StMaker {
 
@@ -50,13 +51,15 @@ public:
   virtual Int_t  InitRun(Int_t runnr);
   virtual Int_t  Make();
   virtual Int_t  Finish();
+  void setMuDst(StMuDst* mu) {muDst = mu;};	//Accessor for muDst pointer
+  //  void setFileName ( TString name ) { treeFileName = name ; } ;
 
-
+  //  TString treeFileName ;
 private:
 
-
+  StMuDst* muDst;
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPeCLumiMaker.h,v 1.2 2002/04/18 19:02:11 meissner Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPeCLumiMaker.h,v 1.3 2003/02/01 18:50:18 yepes Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPeCLumiMaker, 1)
 };

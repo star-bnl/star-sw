@@ -42,8 +42,79 @@ void StPeCLumiEntry::Clear() {
 StPeCLumiEntry::~StPeCLumiEntry() {
 }
 
+Int_t StPeCLumiEntry::fill ( StMuDst *muDst) {
+  StPeCLumiEntry::Clear();
+  StMuEvent *MuEvent = muDst->event();
+  if (MuEvent) {
+   eventNr = MuEvent->eventNumber();
+   runNr = MuEvent->runNumber();
+   uTime = (int ) MuEvent->runInfo().productionTime(); 
+   uTime-= 946681200;  // 1 January 2000
+   // triggerMask = 
+   triggerWord = MuEvent->l0Trigger().triggerWord();
+   triggerActionWord = MuEvent->l0Trigger().triggerActionWord();
 
-// Int_t StPeCLumiEntry::fill ( StEvent *event, int filenumber ) {
+   nhminus = MuEvent->refMultNeg();
+
+   // trigger information
+   StZdcTriggerDetector* zdc=0;
+   StCtbTriggerDetector* ctb=0;
+
+   zdc = & MuEvent->zdcTriggerDetector();
+   ctb = & MuEvent->ctbTriggerDetector();
+  
+   if(zdc){
+     // attenuated 
+     zdcWest = zdc->adcSum(west) ;
+     zdcEast = zdc->adcSum(east) ;
+     zdcSum  = zdc->adcSum() ;
+     // unattenuated see StEvent Manual
+     zdcWestUA = zdc->adc(0) ;
+     zdcEastUA = zdc->adc(4) ;
+     zdcSumUA  = zdcEastUA+zdcWestUA;    
+   }
+   // shorter  but more risky 
+   // zdcEast= event->triggerDetectorCollection()->zdc().adcSum(east);
+   // zdcWest= event->triggerDetectorCollection()->zdc().adcSum(west);
+   // zdcSum = event->triggerDetectorCollection()->zdc().adcSum();
+  
+   ctbSum=0;
+   ctbSumMips=0;
+   if(ctb){
+    for(UInt_t i=0; i < ctb->numberOfTrays(); i++){
+      for(UInt_t j=0; j < ctb->numberOfSlats(); j++){
+	ctbSum += ctb->mips(i,j,0);
+	ctbSumMips += int(ctb->mips(i,j,0)/5);
+      }
+    }
+   }
+  
+
+   nGlobal = muDst->numberOfGlobalTracks ();
+   nPrimary = muDst->numberOfPrimaryTracks(); 
+
+   StThreeVectorF vtx = MuEvent->primaryVertexPosition();
+
+   xVtx = vtx.x();
+   yVtx = vtx.y();
+   zVtx = vtx.z();   
+
+    // Test Stuff 
+    cout << "utime       " << uTime<< endl;
+    //   cout << "trigger mask" <<event->triggerMask()  << endl;  
+    cout << "tw          " << triggerWord<< endl;  
+    cout << "taw         " << triggerActionWord<< endl;  
+    cout << "Primaries:  " << nPrimary << endl; 
+    cout << "Globals  :  " << nGlobal << endl; 
+    cout << "Uncorr hminus:" << nhminus << endl; 
+    cout << "StPeCEvent : primary vertex " << xVtx << " " 
+	<< yVtx << " " << zVtx << endl;
+    cout << "LumiMaker: ZDC W:" <<zdcWest << " E: "<< zdcEast << " Sum " << zdcSum << endl;
+  }
+  return 0;
+}
+
+
 Int_t StPeCLumiEntry::fill ( StEvent *event) {
 
   StPeCLumiEntry::Clear();

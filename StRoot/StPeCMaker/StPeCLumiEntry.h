@@ -20,8 +20,8 @@
 #include "StEvent.h"
 #endif /* __CINT__ */
 #include "SystemOfUnits.h"
-
-
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
 
 
 class StPeCLumiEntry : public TObject {
@@ -60,6 +60,7 @@ public:
 
 #ifndef __CINT__
   Int_t     fill ( StEvent* event ); 
+  Int_t     fill ( StMuDst* muDst );
 #endif /*__CINT__*/
   
 

@@ -1,5 +1,8 @@
-// $Id: StPeCLumiMaker.cxx,v 1.5 2002/06/04 17:55:01 meissner Exp $
+// $Id: StPeCLumiMaker.cxx,v 1.6 2003/02/01 18:50:18 yepes Exp $
 // $Log: StPeCLumiMaker.cxx,v $
+// Revision 1.6  2003/02/01 18:50:18  yepes
+// New Lumi version for MuDst
+//
 // Revision 1.5  2002/06/04 17:55:01  meissner
 // filtering: filter all  UPC triggerwords
 //
@@ -59,7 +62,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCLumiMaker.cxx,v 1.5 2002/06/04 17:55:01 meissner Exp $";
+static const char rcsid[] = "$Id: StPeCLumiMaker.cxx,v 1.6 2003/02/01 18:50:18 yepes Exp $";
 
 ClassImp(StPeCLumiMaker)
 
@@ -82,7 +85,7 @@ Int_t StPeCLumiMaker::InitRun(Int_t runnr) {
 //
 //  Set uDst output file
 //
-  TString uDstFileName("StPecMaker.uDst.root");    
+  TString uDstFileName("StPeCMaker.tree.root");    
   StIOMaker* pIOMaker = (StIOMaker*)GetMaker("IO");
   if ( pIOMaker) {
      uDstFileName = pIOMaker->GetFile() ;
@@ -131,45 +134,88 @@ Int_t StPeCLumiMaker::Make() {
   // Count all the events
   //if ( infoLevel > 0 ) printf ( "StPeCLumiMaker::Make: Start \n" ) ;
 
-  StEvent* event = 0 ;
-  event = (StEvent *) GetInputDS("StEvent");
-  if (!event){
+  //Vladimir - first check if muDst is available, if not, see if StEvent is 
+
+  if (muDst) {
+    cout<<"StPeCLumiMaker: Reading muDst"<<endl;
+    Int_t NTracks = muDst->globalTracks()->GetEntries();
+    cout<<"StPeCLumiMaker: Number of tracks "<<NTracks<<endl;
+
+    Int_t flag = kStOk ;
+ 
+    if( NTracks > StPeCnMaxTracks ){
+     cout<<"StPeCLumiMaker: Number of tracks: "<<NTracks<<endl;
+     cout<<"Not a peripheral event (NTracks>15)"<<endl;
+     flag = kStErr;
+    }
+    if( NTracks <= 1 ){
+     cout<<"StPeCLumiMaker: Event has no tracks!"<<endl;
+     flag = kStErr;
+    }
+
+
+    StL0Trigger &trig = muDst->event()->l0Trigger();
+    int tw = trig.triggerWord();
+    cout << "Trigger word " << tw << endl;
+    if (tw == 0x3001 || tw==0x3002 || tw == 0x3011 || tw == 0x1001  ) {
+     cout << "UPC trigger filter event"  << endl;
+     flag= kStOk;
+    }
+
+    //fill LumiEntry
+    LumiEntry->fill(muDst );
+    // fill the tree 
+    uDstTree->Fill();
+    //return kStOk ;
+    return flag ;
+
+  }
+
+
+  else {
+   // look for StEvent
+   StEvent* event = 0 ;
+   event = (StEvent *) GetInputDS("StEvent");
+
+   if (event){
+
+    // Do this way since call to event->summary->numberOfTracks() crashes
+    StSPtrVecTrackNode& tempn = event->trackNodes();
+    Int_t NTracks=tempn.size();
+    cout<<"StPeCLumiMaker: Number of  tracks: "<<NTracks<<endl;
+  
+    Int_t flag = kStOk ;
+ 
+    if( NTracks > StPeCnMaxTracks ){
+     cout<<"StPeCLumiMaker: Number of tracks: "<<NTracks<<endl;
+     cout<<"Not a peripheral event (NTracks>15)"<<endl;
+     flag = kStErr;
+    }
+    if( NTracks <= 1 ){
+     cout<<"StPeCLumiMaker: Event has no tracks!"<<endl;
+     flag = kStErr;
+    }
+
+    int tw = event->l0Trigger()->triggerWord();
+    cout << "Trigger word " << tw << endl;
+    if (tw == 0x3001 || tw==0x3002 || tw == 0x3011 || tw == 0x1001  ) {
+     cout << "UPC trigger filter event"  << endl;
+     flag= kStOk;
+    }
+    
+    // put runnumber to fill function
+    //   LumiEntry->fill(  event , filenumber);
+    LumiEntry->fill(  event );
+    // fill the tree 
+    uDstTree->Fill();
+    //return kStOk ;
+    return flag ;
+   }
+   else {
     cout<<"StPeCLumiMaker: There was no StEvent!  Return."<<endl;
     return kStOK; 
+   }
   }
-
-
-  // Do this way since call to event->summary->numberOfTracks() crashes
-  StSPtrVecTrackNode& tempn = event->trackNodes();
-  Int_t NTracks=tempn.size();
-  cout<<"StPeCLumiMaker: Number of  tracks: "<<NTracks<<endl;
-  
-  Int_t flag = kStOk ;
-
-  if( NTracks > StPeCnMaxTracks ){
-    cout<<"StPeCLumiMaker: Number of tracks: "<<NTracks<<endl;
-    cout<<"Not a peripheral event (NTracks>15)"<<endl;
-    flag = kStErr;
-  }
-  if( NTracks <= 1 ){
-    cout<<"StPeCLumiMaker: Event has no tracks!"<<endl;
-    flag = kStErr;
-  }
-
-  int tw = event->l0Trigger()->triggerWord();
-  cout << "Trigger word " << tw << endl;
-  if (tw == 0x3001 || tw==0x3002 || tw == 0x3011 || tw == 0x1001  ) {
-    cout << "UPC trigger filter event"  << endl;
-    flag= kStOk;
-  }
-    
-  // put runnumber to fill function
-  //   LumiEntry->fill(  event , filenumber);
-  LumiEntry->fill(  event );
-  // fill the tree 
-  uDstTree->Fill();
-  //return kStOk ;
-  return flag ;
 }
 
 Int_t StPeCLumiMaker::Finish() {
