@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulation.cc,v 1.1 2000/11/30 20:47:49 caines Exp $
+ * $Id: StSvtSimulation.cc,v 1.2 2001/02/07 19:13:51 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulation.cc,v $
+ * Revision 1.2  2001/02/07 19:13:51  caines
+ * Small fixes to allow to run without setup from command line
+ *
  * Revision 1.1  2000/11/30 20:47:49  caines
  * First version of Slow Simulator - S. Bekele
  *
@@ -107,8 +110,8 @@ void StSvtSimulation::calcAngles(svg_geom_st *geom_st, double x, double y, doubl
      }
     
     mom.setX(x);
-    mom.setX(y);
-    mom.setX(z);
+    mom.setY(y);
+    mom.setZ(z);
 
     uVecN.setX(geom_st[index].n[0]);
     uVecN.setY(geom_st[index].n[1]);

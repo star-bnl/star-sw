@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.1 2000/11/30 20:47:49 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.2 2001/02/07 19:13:51 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.2  2001/02/07 19:13:51  caines
+ * Small fixes to allow to run without setup from command line
+ *
  * Revision 1.1  2000/11/30 20:47:49  caines
  * First version of Slow Simulator - S. Bekele
  *
@@ -57,8 +60,16 @@ int* counter = 0;
 //___________________________________________________________________________
 StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
 {
-  mConfig = TString("Y1L");
-  mNumOfHybrids = 0;
+  mConfig = TString("FULL");  // SVT config
+  mNumOfHybrids = 0;          
+  mExpOption = "both";     // both, coulomb, diffusion
+  mWrite = 0;              // Debug option
+  mFineDiv = 0;            // Debug option
+  mSigOption = 0;          // Debug option 
+  mTimeBinSize = 0.04;  //micro sec
+  mAnodeSize =  0.25;  //mm
+  mBackGSigma = 2.1;
+  mBackGrOption = "doBackGr";
 }
 
 //____________________________________________________________________________
@@ -67,11 +78,10 @@ StSvtSimulationMaker::~StSvtSimulationMaker()
 
 //____________________________________________________________________________
 
-Int_t StSvtSimulationMaker::setConst(char * backgr,double backgSigma, double driftVel, double timBinSize, double anodeSize)
+Int_t StSvtSimulationMaker::setConst(char * backgr,double backgSigma, double timBinSize, double anodeSize)
 {
  mBackGrOption = backgr;
  mBackGSigma = backgSigma;
- mDriftVel = driftVel;
  mTimeBinSize = timBinSize ;
  mAnodeSize = anodeSize;    
 
@@ -133,7 +143,16 @@ Int_t StSvtSimulationMaker::Init()
   if (dataSet)
     setConfig((StSvtConfig*)(dataSet->GetObject()));
 
+
+  setSvtRawData();
+  setTables();
+
   mCoordTransform =  new StSvtCoordinateTransform();
+  
+  mTimeBinSize = 1.E6/mSvtSrsPar->fsca;  // Micro Secs
+  mAnodeSize = mSvtSrsPar->pitch*10;  // mm
+  mDriftVelocity = 1.E-5*mSvtSrsPar->vd;  // mm/MicroSec (?)
+
 
   mSvtAngles =  new StSvtAngles();
 
@@ -143,7 +162,7 @@ Int_t StSvtSimulationMaker::Init()
 
   mSvtSignal = new StSvtSignal();
   mSvtSignal->setOption(mSigOption);
-  mSvtSignal->setParam(mTimeBinSize,mAnodeSize,mDriftVel);
+  mSvtSignal->setParam(mTimeBinSize,mAnodeSize,mDriftVelocity);
   mSvtSignal->pasaRelatedStuff();
 
   mSvtSimulation = new StSvtSimulation();
@@ -154,8 +173,8 @@ Int_t StSvtSimulationMaker::Init()
 
   mSvtSimPixelColl = new StSvtHybridCollection(mConfig.Data());
 
-  setSvtRawData();
-  setTables();
+  mSvtSimulation->setParam(mTimeBinSize , mAnodeSize);
+
   setEval();
 
   //CreateHistograms();
@@ -186,19 +205,17 @@ Int_t StSvtSimulationMaker::setTables()
   // Create tables
   St_DataSetIter       local(GetInputDB("svt"));
 
-  mSvtShape = (St_svg_shape   *) local("svgpars/shape");
+   St_srs_srspar* SvtSrsPar=0;
+
+   SvtSrsPar  = (St_srs_srspar  *) local("srspars/srs_srspar");
   
-  if ( !strncmp(mConfig.Data(), "Y1L", strlen("Y1L")) )
-    mSvtGeom  = (St_svg_geom    *) local("svgpars/geomy1l");
-  else
-    mSvtGeom = (St_svg_geom    *) local("svgpars/geom");
-  
-  mSvtSrsPar  = (St_srs_srspar  *) local("srspars/srs_srspar");
-  
-  if ((!mSvtGeom) || (!mSvtShape) || (!mSvtSrsPar)) { 
-    gMessMgr->Error() << "SVT- StSvtHitMaker:svt srspar geom or shapes do not exist" << endm;
+  if (!SvtSrsPar) { 
+    gMessMgr->Error() << "SVT- StSvtHitMaker:svt srspar do not exist" << endm;
     return kStErr;
   }
+
+ //get svt geometry table and parameter tables
+  mSvtSrsPar = SvtSrsPar->GetTable();
 
    return kStOK;
 }
@@ -320,23 +337,37 @@ Int_t StSvtSimulationMaker::Make()
       St_DataSetIter g2t_svt_hit_it(g2t_svt_hit);
       mG2tSvtHit = (St_g2t_svt_hit *) g2t_svt_hit_it.Find("g2t_svt_hit");
       g2t_svt_hit_st *trk_st = mG2tSvtHit->GetTable();
+      St_svg_shape* SvtShape=0;
+      St_svg_geom* SvtGeom=0;
+      St_srs_srspar* SvtSrsPar=0;
+      St_DataSetIter       local(GetInputDB("svt"));
+      SvtShape = (St_svg_shape   *) local("svgpars/shape");
+      
+      if ( !strncmp(mConfig.Data(), "Y1L", strlen("Y1L")) )
+	SvtGeom  = (St_svg_geom    *) local("svgpars/geomy1l");
+      else
+	SvtGeom = (St_svg_geom    *) local("svgpars/geom");
+      
+      SvtSrsPar  = (St_srs_srspar  *) local("srspars/srs_srspar");
 
-      //get svt geometry table
-      srs_srspar_st *srs_par = mSvtSrsPar->GetTable();
-      svg_shape_st *shape_st = mSvtShape->GetTable();
-      svg_geom_st *geom_st = mSvtGeom->GetTable();
+      mSvtSrsPar = SvtSrsPar->GetTable();
+      mSvtShape  = SvtShape->GetTable();
+      mSvtGeom   = SvtGeom->GetTable();
+      mCoordTransform->setParamPointers(mSvtSrsPar, mSvtGeom, mSvtShape, mSvtSimDataColl->getSvtConfig());
 
-      mCoordTransform->setParamPointers(&srs_par[0], &geom_st[0], &shape_st[0], mSvtSimDataColl->getSvtConfig());
+
      if(Debug()) gMessMgr->Debug() << "number of particles = "<<mG2tSvtHit->GetNRows() << endm;
  
       StSvtWaferCoordinate *waferCoordArray = new StSvtWaferCoordinate[mG2tSvtHit->GetNRows()];
+
 
       //
       // Loop over geant hits
       //
       for (int j=0;j<mG2tSvtHit->GetNRows() ;j++)
 	{
-	  volId = trk_st[j].volume_id;  
+	  volId = trk_st[j].volume_id;
+	  if( volId > 7000) continue; // SSD hit
 	  x = trk_st[j].x[0];    y = trk_st[j].x[1];   z = trk_st[j].x[2];
 	  px = trk_st[j].p[0];  py = trk_st[j].p[1];  pz = trk_st[j].p[2];
 	  // mEnergy =  trk_st[j].de*1e9;
@@ -375,7 +406,7 @@ Int_t StSvtSimulationMaker::Make()
 	 
 	  fillEval(barrel,ladder,wafer,hybrid,waferCoordArray[j]);
 
-	  mSvtSimulation->calcAngles(geom_st,px,py,pz,layer,ladder,wafer);
+	  mSvtSimulation->calcAngles(mSvtGeom,px,py,pz,layer,ladder,wafer);
       
 	  mTheta = mSvtAngles->getTheta();
 	  mPhi = mSvtAngles->getPhi();
@@ -444,7 +475,7 @@ Int_t StSvtSimulationMaker::setHybrid()
 }
 
 //____________________________________________________________________________
-Int_t StSvtSimulationMaker::doOneHit(StSvtHybridPixels* mSvtSimDataPixels)
+Int_t StSvtSimulationMaker::doOneHit(StSvtHybridPixels* SvtSimDataPixels)
 {
       mSvtSimulation->doCloud(mTime,mEnergy,mTheta,mPhi);
  
@@ -454,7 +485,7 @@ Int_t StSvtSimulationMaker::doOneHit(StSvtHybridPixels* mSvtSimDataPixels)
 
       mSvtSimulation->reset();
 
-      mSvtSimulation->fillBuffer(mAnode,mTime,mBackGSigma,mSvtSimDataPixels);
+      mSvtSimulation->fillBuffer(mAnode,mTime,mBackGSigma,SvtSimDataPixels);
 
       //histTimeDist();
       //histChargeDist();
