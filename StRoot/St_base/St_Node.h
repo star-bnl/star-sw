@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_Node.h,v 1.7 1999/01/31 02:03:07 fine Exp $
+// $Id: St_Node.h,v 1.8 1999/02/04 19:22:23 fine Exp $
 // $Log: St_Node.h,v $
+// Revision 1.8  1999/02/04 19:22:23  fine
+// Severak drawing method have been added to draw STAR nodes
+//
 // Revision 1.7  1999/01/31 02:03:07  fine
 // St_DataSetIter::Notify - new method + clean up
 //
@@ -62,8 +65,9 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
 
    virtual void             Add(St_NodePosition *position);
    virtual St_NodePosition *Add(St_Node *node, St_NodePosition *nodePosition);
+   virtual Int_t            DistancetoNodePrimitive(Int_t px, Int_t py,St_NodePosition *position=0);
            void             SetPositionsList(TList *list=0){AddObject((TObject *)list);}
-
+   virtual void             PaintNodePosition(Option_t *option="",St_NodePosition *postion=0);
  public:
         St_Node();
         St_Node(const Text_t *name, const Text_t *title, const Text_t *shapename, Option_t *option="");
@@ -90,6 +94,7 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
         virtual Bool_t      Is3D()  {return kTRUE;}
         virtual TList      *Nodes() const { return GetList(); }
         virtual void        Paint(Option_t *option="");
+        virtual void        PaintShape(Option_t *option="");
         virtual void        SetVisibility(Int_t vis=1); // *MENU*
         virtual void        Sizeof3D() const;
  

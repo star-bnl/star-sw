@@ -108,25 +108,21 @@ Int_t St_NodeView::DistancetoPrimitive(Int_t px, Int_t py)
   if (thisNode) {
     shape    = thisNode->GetShape();
     position = GetPosition();
-
-//*-*- Update translation vector and rotation matrix for new level
-     gGeometry->UpdateTempMatrix(position->GetX(),position->GetY(),position->GetZ()
-                                ,position->GetMatrix()->GetMatrix()
-                                ,position->GetMatrix()->IsReflection());
-   }     
+    position->UpdatePosition();      
+  } 
 //*-*- Paint Referenced shape
-   Int_t dist = big;
-   if (thisNode) {
-     if (thisNode->GetVisibility() && shape->GetVisibility()) {
+  Int_t dist = big;
+  if (thisNode) {
+    if (thisNode->GetVisibility() && shape->GetVisibility()) {
 //        gNode = this;
-        dist = shape->DistancetoPrimitive(px,py);
-        if (dist < maxdist) {
-           gPad->SetSelected(this);
-           return 0;
-        }
-     }
+       dist = shape->DistancetoPrimitive(px,py);
+       if (dist < maxdist) {
+          gPad->SetSelected(this);
+          return 0;
+       }
+    }
 ////      if ( TestBit(kSonsInvisible) ) return dist;
-   }
+  }
  
 //*-*- Loop on all sons
    Int_t nsons = 0;
@@ -211,59 +207,34 @@ void St_NodeView::Paint(Option_t *option)
 
   St_Node *thisNode  = GetNode();
   St_NodePosition *position = &nullPosition;
-  TShape  *shape = 0;
-  if (thisNode) {
-    shape    = thisNode->GetShape();
-    position = GetPosition();
-  }
-      
-    
-//*-*- Update translation vector and rotation matrix for new level
-  if (gGeometry->GeomLevel()) {
-     gGeometry->UpdateTempMatrix(position->GetX(),position->GetY(),position->GetZ()
-                                ,position->GetMatrix()->GetMatrix()
-                                ,position->GetMatrix()->IsReflection());
-     if (view3D)
-        view3D->UpdatePosition(position->GetX(),position->GetY(),position->GetZ(),position->GetMatrix());
-  }
- 
-  Int_t nsons = 0;
-  TList *fNodes =  GetList();
-  if (fNodes) nsons = fNodes->GetSize();
-  if (thisNode) {
-    thisNode->TAttLine::Modify();
-    thisNode->TAttFill::Modify();
-    if (thisNode->GetVisibility() && shape->GetVisibility()) {
-//      gNode = thisNode;
-       shape->SetLineColor(thisNode->GetLineColor());
-       shape->SetLineStyle(thisNode->GetLineStyle());
-       shape->SetLineWidth(thisNode->GetLineWidth());
-       shape->SetFillColor(thisNode->GetFillColor());
-       shape->SetFillStyle(thisNode->GetFillStyle());
-       if (view3D)
-            view3D->SetLineAttr(thisNode->GetLineColor(),thisNode->GetLineWidth(),option);
-       shape->Paint(option);
-    }
-  
+  if (thisNode)    position = GetPosition();
+
+  // UpdatePosition does change the current matrix and it MUST be callled FIRST !!!
+
+  position->UpdatePosition(option);      
+
+  if (thisNode) thisNode->PaintShape(option);  
 ////---   if ( thisNode->TestBit(kSonsInvisible) ) return;
-  }
  
 //*-*- Paint all sons
-   if(!nsons) return;
+  TList *fNodes =  GetList();
+  Int_t nsons = fNodes?fNodes->GetSize():0;
+
+  if(!nsons) return;
  
-   gGeometry->PushLevel();
-   St_Node *node;
-   TObject *obj;
-   TIter  next(fNodes);
-   while ((obj = next())) {
-      if (view3D)
-          view3D->PushMatrix();
+  gGeometry->PushLevel();
+  St_Node *node;
+  TObject *obj;
+  TIter  next(fNodes);
+  while ((obj = next())) {
+     if (view3D)
+         view3D->PushMatrix();
  
-      node = (St_Node*)obj;
-      node->Paint(option);
-      if (view3D)
-          view3D->PopMatrix();
-   }
-   gGeometry->PopLevel();
+     node = (St_Node*)obj;
+     node->Paint(option);
+     if (view3D)
+         view3D->PopMatrix();
+  }
+  gGeometry->PopLevel();
 }
 
