@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL3AlgorithmInfo.cxx,v 2.2 2001/08/20 21:29:00 ullrich Exp $
+ * $Id: StL3AlgorithmInfo.cxx,v 2.3 2003/05/23 20:40:44 ullrich Exp $
  *
  * Author: Christof Struck, July 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL3AlgorithmInfo.cxx,v $
+ * Revision 2.3  2003/05/23 20:40:44  ullrich
+ * Removed dependcies on DAQ lib in header file.
+ *
  * Revision 2.2  2001/08/20 21:29:00  ullrich
  * Changed counter type from UInt_t to Int_t.
  *
@@ -20,8 +23,9 @@
 
 #include <string.h>
 #include "StL3AlgorithmInfo.h"
+#include "StDaqLib/L3/L3_Banks.hh"
 
-static const char rcsid[] = "$Id: StL3AlgorithmInfo.cxx,v 2.2 2001/08/20 21:29:00 ullrich Exp $";
+static const char rcsid[] = "$Id: StL3AlgorithmInfo.cxx,v 2.3 2003/05/23 20:40:44 ullrich Exp $";
 
 ClassImp(StL3AlgorithmInfo)
 
