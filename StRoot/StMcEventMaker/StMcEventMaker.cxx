@@ -1,7 +1,12 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.13 2000/02/04 15:40:52 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.14 2000/03/06 18:07:36 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.14  2000/03/06 18:07:36  calderon
+ * 1) Check tpc hit volume id to not load hits in pseudo pad rows.
+ * 2) Sort the hits in the collections, in order to save time
+ * later during hit associations.
+ *
  * Revision 1.13  2000/02/04 15:40:52  calderon
  * Fix dumping of vertex info when there is just one vertex.
  *
@@ -49,9 +54,11 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 using std::string;
+using std::sort;
 #endif
 
 #include "TStyle.h"
@@ -73,6 +80,7 @@ using std::string;
 
 #include "tables/St_g2t_event_Table.h"
 #include "tables/St_g2t_ftp_hit_Table.h"
+#include "tables/St_g2t_rch_hit_Table.h"
 #include "tables/St_g2t_svt_hit_Table.h"
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
@@ -86,7 +94,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.13 2000/02/04 15:40:52 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.14 2000/03/06 18:07:36 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -99,9 +107,9 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title):StMaker(name
     // - set all pointers defined in the header file to zero
 
     mCurrentMcEvent = 0; //! I think this tells root not to parse it 
-    doPrintEventInfo  = kTRUE;  // TMP
-    doPrintMemoryInfo = kTRUE;  
-    doPrintCpuInfo    = kTRUE; 
+    doPrintEventInfo  = kFALSE;  // TMP
+    doPrintMemoryInfo = kFALSE;  
+    doPrintCpuInfo    = kFALSE; 
 
 }
 
@@ -188,6 +196,7 @@ Int_t StMcEventMaker::Make()
     St_g2t_tpc_hit *g2t_tpc_hitTablePointer =  (St_g2t_tpc_hit *) geantDstI("g2t_tpc_hit");
     St_g2t_svt_hit *g2t_svt_hitTablePointer =  (St_g2t_svt_hit *) geantDstI("g2t_svt_hit");
     St_g2t_ftp_hit *g2t_ftp_hitTablePointer =  (St_g2t_ftp_hit *) geantDstI("g2t_ftp_hit");
+    St_g2t_rch_hit *g2t_rch_hitTablePointer =  (St_g2t_rch_hit *) geantDstI("g2t_rch_hit");
 
     // Now we check if we have the pointer, if we do, then we can access the tables!
   
@@ -236,6 +245,15 @@ Int_t StMcEventMaker::Make()
 	else
 	    cerr << "Table g2t_svt_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 	
+	//
+	// Rich Hit Table
+	//
+	g2t_rch_hit_st *rchHitTable;
+	if (g2t_rch_hitTablePointer)
+	    rchHitTable = g2t_rch_hitTablePointer->GetTable();
+	else
+	    cerr << "Table g2t_rch_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+	
        
        // Before filling StMcEvent, we can check whether we can actually
        // access the tables.
@@ -273,6 +291,11 @@ Int_t StMcEventMaker::Make()
 // 	  cout << "p[0] :" << ftpHitTable[0].p[0] << endl;
 // 	  cout << "p[1] :" << ftpHitTable[0].p[1] << endl;
 // 	  cout << "p[2] :" << ftpHitTable[0].p[2] << endl;
+	  
+// 	  cout << "Rich Hit Table Examples:" << endl;
+// 	  cout << "p[0] :" << rchHitTable[0].p[0] << endl;
+// 	  cout << "p[1] :" << rchHitTable[0].p[1] << endl;
+// 	  cout << "p[2] :" << rchHitTable[0].p[2] << endl;
 	  
 	// Ok, now we have the g2t tables for this event, now we can create the
 	// StMcEvent with them.
@@ -431,6 +454,7 @@ Int_t StMcEventMaker::Make()
 	StMcTpcHit* th = 0;
 	StMcSvtHit* sh = 0;
 	StMcFtpcHit* fh = 0;
+	StMcRichHit* rh = 0;
 
 	//
 	// TPC Hits
@@ -439,12 +463,13 @@ Int_t StMcEventMaker::Make()
 	long NHits = g2t_tpc_hitTablePointer->GetNRows();
 	long iTrkId = 0;
 	long nBadVolId = 0;
-
+	long nPseudoPadrow = 0;
 	long ihit;
 	for(ihit=0; ihit<NHits; ihit++) {
-	    if (tpcHitTable[ihit].volume_id < 101 || tpcHitTable[ihit].volume_id > 202445) {
-		
-		nBadVolId++;
+	    if (tpcHitTable[ihit].volume_id < 101 || tpcHitTable[ihit].volume_id > 2445) {
+		if (tpcHitTable[ihit].volume_id <= 202445 &&
+		    tpcHitTable[ihit].volume_id > 2445) nPseudoPadrow++; 
+		else nBadVolId++;
 		continue;
 	    }
 	    
@@ -462,8 +487,19 @@ Int_t StMcEventMaker::Make()
 	    
 	}
 	cout << "Filled TPC Hits" << endl;
+	cout << "Found " << nPseudoPadrow << " Pseudo-Padrows." << endl;
 	if (nBadVolId) gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
 					   << " TPC hits, wrong Volume Id." << endm;
+	// Sort the hits
+	for (unsigned int iSector=0;
+	     iSector<mCurrentMcEvent->tpcHitCollection()->numberOfSectors(); iSector++)
+	    for (unsigned int iPadrow=0;
+		 iPadrow<mCurrentMcEvent->tpcHitCollection()->sector(iSector)->numberOfPadrows();
+		 iPadrow++) {
+		StSPtrVecMcTpcHit& tpcHits = mCurrentMcEvent->tpcHitCollection()->sector(iSector)->padrow(iPadrow)->hits();
+		sort (tpcHits.begin(), tpcHits.end(), compMcTpcHit() );
+	        
+	    }
 	
 	//
 	// SVT Hits
@@ -492,7 +528,20 @@ Int_t StMcEventMaker::Make()
 	    if (nBadVolId)
 		gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
 				    << " SVT hits, wrong Volume Id." << endm;
-	    
+	    // Sort the hits
+	    for (unsigned int iBarrel=0;
+		 iBarrel<mCurrentMcEvent->svtHitCollection()->numberOfBarrels(); iBarrel++)
+		for (unsigned int iLadder=0;
+		     iLadder<mCurrentMcEvent->svtHitCollection()->barrel(iBarrel)->numberOfLadders();
+		     iLadder++)
+		    for (unsigned int iWafer=0;
+			 iWafer<mCurrentMcEvent->svtHitCollection()->barrel(iBarrel)->ladder(iLadder)->numberOfWafers();
+			 iWafer++) {
+			StSPtrVecMcSvtHit& svtHits = mCurrentMcEvent->svtHitCollection()->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits();
+			sort (svtHits.begin(), svtHits.end(), compMcSvtHit() );
+	        
+	    }
+
 	}
 	else {
 	    cout << "No SVT Hits in this file" << endl;
@@ -524,9 +573,48 @@ Int_t StMcEventMaker::Make()
 	    if (nBadVolId)
 		gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
 				    << " FTPC hits, wrong Volume Id." << endm;
+	    // Sort the hits
+	    for (unsigned int iPlane=0;
+		 iPlane<mCurrentMcEvent->ftpcHitCollection()->numberOfPlanes(); iPlane++) {
+		StSPtrVecMcFtpcHit& ftpcHits = mCurrentMcEvent->ftpcHitCollection()->plane(iPlane)->hits();
+		sort (ftpcHits.begin(), ftpcHits.end(), compMcFtpcHit() );
+	        
+	    }
 	}
 	else {
 	    cout << "No FTPC Hits in this file" << endl;
+	}
+	
+	// RICH Hits
+	if (g2t_rch_hitTablePointer) {
+	    NHits = g2t_rch_hitTablePointer->GetNRows();
+	    iTrkId = 0;
+	    nBadVolId = 0;
+	    for(ihit=0; ihit<NHits; ihit++) {
+		if (rchHitTable[ihit].volume_id < 257 // 2^8 + 1 
+		    || ftpHitTable[ihit].volume_id > 2560) { // 10*2^8
+		    nBadVolId++;
+		    continue;
+		}
+
+		rh = new StMcRichHit(&rchHitTable[ihit]);
+		mCurrentMcEvent->richHitCollection()->addHit(rh); // adds hit rh to collection
+		
+		// point hit to its parent and add it to collection
+		// of the appropriate track
+		
+		iTrkId = (rchHitTable[ihit].track_p) - 1;
+		rh->setParentTrack(ttemp[iTrkId]);
+		ttemp[iTrkId]->addRichHit(rh);
+		
+	    }
+	    cout << "Filled RICH Hits" << endl;
+	    if (nBadVolId)
+		gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
+				    << " RICH hits, wrong Volume Id." << endm;
+	}
+	else {
+	    cout << "No RICH Hits in this file" << endl;
 	}
 	
 	
@@ -637,6 +725,13 @@ StMcEventMaker::printEventInfo()
 		    cout << "Parent track of this Hit" << endl;
 		    cout << *(tpcColl->sector(k)->padrow(j)->hits()[0]->parentTrack()) << endl;
 		    gotOneHit = kTRUE;
+		    cout << "Dumping all the z coordinates in this padrow" << endl;
+		    cout << "Should be sorted according to z: " << endl;
+		    cout << "---------------------------------------------------------" << endl;
+    		    for (StMcTpcHitIterator thi = tpcColl->sector(k)->padrow(j)->hits().begin();
+			 thi!=tpcColl->sector(k)->padrow(j)->hits().end(); thi++)
+			cout << (*thi)->position().z() << " ";
+		    cout << endl;
 		}
     }
     
@@ -661,6 +756,24 @@ StMcEventMaker::printEventInfo()
 	    }
     }
     
+    StMcRichHitCollection *richColl = mCurrentMcEvent->richHitCollection();
+    cout << "---------------------------------------------------------" << endl;
+    cout << "StMcRichHitCollection at " << (void*) richColl             << endl;
+    cout << "Dumping collection size and one hit only."                 << endl;
+    cout << "---------------------------------------------------------" << endl;
+    nhits = richColl->numberOfHits();
+    cout << "# of hits in collection = " << nhits << endl;
+    if (richColl &&  nhits) {
+	
+	if (richColl->hits().size()) {
+	    cout << "Rich Hit" << endl;
+	    cout << *(richColl->hits()[0]);
+	    cout << "Parent track of this Hit" << endl;
+	    cout << *(richColl->hits()[0]->parentTrack()) << endl;
+		
+	}
+    }
+    
     StMcSvtHitCollection *svtColl = mCurrentMcEvent->svtHitCollection();
     cout << "---------------------------------------------------------" << endl;
     cout << "StMcSvtHitCollection at " << (void*) svtColl               << endl;
@@ -672,14 +785,14 @@ StMcEventMaker::printEventInfo()
     if (svtColl && nhits) {
 	
 	gotOneHit = kFALSE;
-	for (k=1; !gotOneHit && k<=svtColl->numberOfLayers(); k++)
-	    for (j=1; !gotOneHit && j<=svtColl->layer(k)->numberOfLadders(); j++)
-		for (i=1; !gotOneHit && i<=svtColl->layer(k)->ladder(j)->numberOfWafers(); i++)
-		    if (svtColl->layer(k)->ladder(j)->wafer(i)->hits().size()) {
+	for (k=1; !gotOneHit && k<=svtColl->numberOfBarrels(); k++)
+	    for (j=1; !gotOneHit && j<=svtColl->barrel(k)->numberOfLadders(); j++)
+		for (i=1; !gotOneHit && i<=svtColl->barrel(k)->ladder(j)->numberOfWafers(); i++)
+		    if (svtColl->barrel(k)->ladder(j)->wafer(i)->hits().size()) {
 			cout << "Svt Hit" << endl;
-			cout << *(svtColl->layer(k)->ladder(j)->wafer(i)->hits()[0]);
+			cout << *(svtColl->barrel(k)->ladder(j)->wafer(i)->hits()[0]);
 			cout << "Parent track of this Hit" << endl;
-			cout << *(svtColl->layer(k)->ladder(j)->wafer(i)->hits()[0]->parentTrack()) << endl;
+			cout << *(svtColl->barrel(k)->ladder(j)->wafer(i)->hits()[0]->parentTrack()) << endl;
 			gotOneHit = kTRUE;
 		    }
     }
