@@ -46,8 +46,8 @@ int stafArgs(int argc, char **argv)
    nargs = argc;
    argvs = (char**)malloc(nargs);
    for( i=0;i<nargs;i++ ){
-      argvs[i] = (char*)malloc(strlen(argv[i]) +1);
-      strcpy(argvs[i],argv[i]);
+      argvs[i] = (char*)malloc(strlen(argv[i]) +1);/*INS++:WRITE_BAD_INDEX*/
+      strcpy(argvs[i],argv[i]);/*INS++:READ_BAD_INDEX*/
    }
 
 /*- Interpret arguments. -*/

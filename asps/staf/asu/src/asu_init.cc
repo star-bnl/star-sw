@@ -30,7 +30,7 @@ int asu_init()
 
 /*- Setup basic KUIP commands. -*/
 /* asu_kuip_init_();------------- use STAF_CERN_INIT in main instead */
-   staf_kuip_init_();
+/*22jul97 this is called in main()   staf_kuip_init_(); */
 
 /*- Define the ASU KUIP commands. -*/
    asu_def_();

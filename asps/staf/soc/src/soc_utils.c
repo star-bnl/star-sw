@@ -12,7 +12,7 @@ char *id2name(char *base, long id)
    }
    else {
       name = (char*)MALLOC(strlen(base) +1
-                +(int)(1 +log10((double)id)));
+                +(int)(1 +log10((double)id)));	/*INS++:BAD_DECL*/
       sprintf(name,"%s%d",base,id);
       return name;
    }

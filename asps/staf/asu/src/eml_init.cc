@@ -29,8 +29,9 @@ int eml_init()
 
 /*- Initialize STAF vectors. -*/
 /* 23OCT96 ---- TEMPORARY DEBUG HACK ----
+			15may97 - REMOVE HACK... vectors were missing
+-- 22JUL97 ---- TEMPORARY DEBUG REHACK --*/
    eml_kuvec_init_();
--- 23OCT96 ---- TEMPORARY DEBUG HACK --*/
 
    return TRUE;
 }

@@ -8,6 +8,7 @@ modification history
 24apr93,whg  written.
 23feb95,whg  CORBA style types
 29may96,whg  ds_dataset_t struct with link indirection
+21jul97,cet  add dsError
 */				
 /*
 DESCRIPTION
@@ -175,6 +176,7 @@ int dsNewDataset(DS_DATASET_T **ppDataset, char *name);
 int dsNewTable(DS_DATASET_T **ppTable, char *tableName,
 	char *typeSpecifier,  unsigned rowCount, void *pData);
 void dsPerror(char *msg);
+const char * dsError(char *msg);
 int dsProjectTable(DS_DATASET_T *pDst, DS_DATASET_T *pSrc, char *projectList);
 int dsRealloc(DS_DATASET_T *dataset, size_t maxcount);
 int dsReallocTable(DS_DATASET_T *pTable, size_t nRow);

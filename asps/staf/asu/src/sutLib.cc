@@ -117,18 +117,19 @@ int sutMatchPrefix(char *prefix,char* string)
    char *p=NULL;
 
    if( string == strstr(string, prefix) ){
-      return TRUE;
+      return (int)TRUE;
    }
    if( 0== sutStripWhitespace(&s,string)
    ||  0== sutStripWhitespace(&p,prefix)
    ){
       FREE(s); FREE(p);
-      return FALSE;
+      return (int)FALSE;
    }
    if( string == strstr(s, p) ){
       FREE(s); FREE(p);
-      return TRUE;
+      return (int)TRUE;
    }
+   return (int)FALSE;
 }
 
 /*
@@ -252,3 +253,42 @@ int isInteger(char *c)
    return TRUE;
 }
 
+/*--------------------------------------------------------------------*/
+int sutFortran2Cindex(char ** index)
+{
+   int nc=0;
+   char *s=*index;;
+   char lb='[',rb=']',lp='(',rp=')';
+   char *c, *cc, *ccc;
+   char *a;
+   int i;
+
+/* _PRINTF("%s\n",s); */
+   while (1){
+      if( NULL == (c = strchr(s,lp))
+      ||  NULL == (cc = strchr(s,rp))
+      ){
+	 return nc;
+      }
+      nc++;
+      *c = lb;
+      *cc = rb;
+      if(cc > c){
+	 a = (char*)malloc(cc-c);
+	 strncpy(a,c+1,cc-c);
+/*	 ccc = strpbrk(a,","); */
+	 i = atoi(a);
+	 if( 0 < i ){
+	    i--;
+	    sprintf(a,"%d",i);
+	    ccc = c;
+	    for(i=0;i<cc-c;i++){
+	      ccc++;
+	      *ccc = *(a+i);
+	    }
+	 }
+      }
+      *cc = rb;
+      free(a);
+   }
+}
