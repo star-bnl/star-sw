@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: daqscan-all.pl,v 1.1 1999/08/19 16:35:41 wenaus Exp $
+# $Id: daqscan-all.pl,v 1.2 1999/09/21 12:25:36 wenaus Exp $
 #
 # $Log: daqscan-all.pl,v $
+# Revision 1.2  1999/09/21 12:25:36  wenaus
+# Update bad file list
+#
 # Revision 1.1  1999/08/19 16:35:41  wenaus
 # Runs scanner on disk-resident DAQ files to load DB info
 #
@@ -18,8 +21,6 @@
 # Usage: From wenaus account!
 #
 
-use strict;
-
 use lib "/star/u2d/wenaus/datadb";
 require "dbsetup.pl";
 
@@ -30,7 +31,7 @@ $debugOn = 0;
              '/disk1/star/daq' => 'rmds03.rhic.bnl.gov',
              '/star/datapool/1/daq' => 'robinson.star.bnl.gov'
              );
-# Files which hang in StDaqLib
+# Files which hang in StDaqLib or otherwise screw up
 %badFiles = (
              '990618.107.daq' => 1,
              '990624.301.daq' => 1,
@@ -41,7 +42,13 @@ $debugOn = 0;
              '990624.308.daq' => 1,
              '990624.309.daq' => 1,
              '990719.2503.daq' => 1,
-             '990719.2521.daq' => 1
+             '990719.2521.daq' => 1,
+             'st_physics_0003459_raw_0001.daq' => 1,
+             'st_physics_0003459_raw_0002.daq' => 1,
+             'st_physics_0003460_raw_0001.daq' => 1,
+             'st_physics_0003452_raw_0001.daq' => 1,
+             'st_physics_0003455_raw_0001.daq' => 1,
+             'st_physics_0003455_raw_0002.daq' => 1
              );
 
 &StDbConnect();
