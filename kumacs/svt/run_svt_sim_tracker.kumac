@@ -94,12 +94,22 @@ Message 'Doing' [no_events] 'events'
 
  exec  init_svg
  
-  *****************************************
+ *****************************************
  * initialize for slow simulator
  *****************************************
  
  if [svt_simul] = sss then
    exec svt_slow_sim#initialization
+ elseif [svt_simul] = srs then
+    exec init_srs
+ endif
+ 
+ *****************************************
+ * initialize for tracking
+ *****************************************
+ 
+ if [svt_tracker].eq.stk .or. [svt_tracker].eq.sgr then
+   exec svt_tracker#initialization
  endif
 
 
@@ -116,9 +126,7 @@ Message 'Doing' [no_events] 'events'
  exec input_g2t_file#read
  
     if (staf_status(1).ne.STAFCV_OK) goto EOF
-
-   
-
+    
   message 'cput time is ' $cptime
  
  *  SVT detector response simulation 
@@ -132,7 +140,6 @@ Message 'Doing' [no_events] 'events'
     else
       message ' SVT simulator not valid!!'
     endif
-
 
 
 * SVT track finding and momentum reconstruction -----------------------

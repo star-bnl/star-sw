@@ -1,6 +1,7 @@
 * created June 3, 1998 - Kathy Turner
 *   -  just have macros in this kumac
-***********************************************************************
+*  editted 6/25/98 Kathy Turner
+* **********************************************************************
 ************************************************************************
 ************************************************************************
 ************************************************************************
@@ -9,30 +10,33 @@
 ************************************************************************
 *******************************************************************
  
- macro initialize_stk
+ macro initialize
   macro/global/import *
-   message ' initializing svt_tracker stk '
    exec init_stk
-   exec init_sgr 
- return
-
-*****************************************************************
-
- macro initialize_sgr
-  macro/global/import *
-   message 'initializing svt_tracker sgr '
    exec init_sgr
-   exec init_stk 
+   
+  message ' !!! svt_tracker: Warning vertex not found,  filled from MC '
+  cd [data]/global/vertices
+   tdm/newtable stk_vtx stk_vtx 1
+   tdm/table/rowcount stk_vtx 1
+   tdm/table/cell/putvalue 'stk_vtx[0].id' 1
+   tdm/table/cell/putvalue 'stk_vtx[0].flag' 1
+   tdm/table/cell/putvalue 'stk_vtx[0].t' 0
+   tdm/table/cell/putvalue 'stk_vtx[0].x' 0.0 0.0 0.0
+   tdm/table/cell/putvalue 'stk_vtx[0].cov' 0.0 0.0 0.0 0.0 0.0 0.0
+  cd /dui 
+
  return
+
 
 *****************************************************************
 
-macro process_event_stk nev
+macro process_event_stk 
   macro/global/import *
    
       message ' !! SVT tracker STK: Processing Event # ' [nev]
       
-      exec run_stk  [nev] 
+      exec run_stk  
       if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
       
  NEXT_EVENT:
@@ -41,22 +45,20 @@ macro process_event_stk nev
  
 * ***********************************************************
 
- macro process_event_sgr nev
-macro/global/import *
-   
-      message ' !! SVT tracker SGR: Processing Event # ' [nev]
-      
-      exec run_sgr  [nev] 
+macro process_event_sgr nev
+ macro/global/import *
+         
+      exec run_sgr  
 	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
         sigma vsgr = vsgr + $cptime
-      exec run_stk  [nev]+1 
+      exec run_stk  
         if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
       
  NEXT_EVENT:
  
  return
  
-* *******************************************************
+********************************************************
 
 
 
