@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.14 2000/01/27 05:54:33 porter Exp $
+ * $Id: StDbConfigNode.cc,v 1.15 2000/02/15 20:27:44 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.15  2000/02/15 20:27:44  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.14  2000/01/27 05:54:33  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -147,6 +154,7 @@ StDbConfigNode::buildTree(){
    if(!server->QueryDb(this)){
      if(StDbManager::Instance()->IsVerbose())
        cout<<"Node "<<mnode.name<<"::"<<mnode.versionKey<<" has no children or tables "<<endl;
+     return;
    }
  }
 
@@ -235,17 +243,23 @@ StDbConfigNode::addTable(const char* tableName, const char* version){
 
   if(!mfactory)mfactory = StDbFactories::Instance()->getFactory(mnode.dbType);
 
-  if(!mfactory) cout << " No Factory " << endl;
   StDbTable* table = 0;
+  if(!mfactory){
+    cout << "Error:: No Factory for table in dbType" << endl;
+    return table;
+  }
+
   table = mfactory->getDbTable(tableName,0);
+
+  StDbServer* server;
 
   if(table){
     table->setVersion((char*)version);
-    table->setDbType(mnode.dbType);
-    table->setDbDomain(mnode.dbDomain);
-    table->setDbName(mnode.dbName);
+    server = StDbManager::Instance()->findServer(mnode.dbType, mnode.dbDomain);
+    if(server)server->QueryDb((StDbNode*)table);
     mTables.push_back(table);
     if(!mhasData)mhasData=true;
+
   } else {
     cout << " Could not Find table " << tableName << endl;
   }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.5 2000/01/27 05:54:32 porter Exp $
+ * $Id: StDbBuffer.cc,v 1.6 2000/02/15 20:27:44 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.6  2000/02/15 20:27:44  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.5  2000/01/27 05:54:32  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -323,7 +330,9 @@ Wscal(double,_double,1);
 
 
 bool StDbBuffer::WriteScalar(const char* s,const char *aName)
-{ char** tVal=new char*[1];
+{
+  if(!s) return false;
+  char** tVal=new char*[1];
   tVal[0]=new char[strlen(s)+1];
   strcpy(tVal[0],s);
  if (Find_Col(aName))

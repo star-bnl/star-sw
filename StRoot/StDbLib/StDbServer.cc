@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServer.cc,v 1.9 2000/01/27 05:54:34 porter Exp $
+ * $Id: StDbServer.cc,v 1.10 2000/02/15 20:27:44 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbServer.cc,v $
+ * Revision 1.10  2000/02/15 20:27:44  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.9  2000/01/27 05:54:34  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -97,30 +104,27 @@ StDbServer::StDbServer(StDbType type, StDbDomain domain){
 bool
 StDbServer::initServer(){
 
+if(!mdbName){
+   cerr << "StDbServer:: DataBase not Identified" << endl;
+   cerr << "port = "<< mportNumber;
+   cerr << " type = " << (int)mdbType <<" domain = " << (int)mdbDomain << endl;
+   if(mserverName) cerr << " server = " << mserverName;
+   if(mhostName) cerr << " host = " << mhostName;
+   cerr<<endl;
+   return false;
+}
 
-  if(!mdbName){
-
-    cerr << "StDbServer:: DataBase not Identified" << endl;
-    cerr << "port = "<< mportNumber;
-    cerr << " type = " << (int)mdbType <<" domain = " << (int)mdbDomain << endl;
-    if(mserverName) cerr << " server = " << mserverName;
-    if(mhostName) cerr << " host = " << mhostName;
-    cerr<<endl;
-    return false;
-
-  } else {
-
-    if(!StDbManager::Instance()->IsQuiet()){
+if(!mconnectState){
+  if(!mdatabase)mdatabase = new mysqlAccessor(mdbType, mdbDomain);
+  if(mdatabase->initDbQuery(mdbName,mserverName,mhostName,mportNumber)){
+     mconnectState = true;
+     if(!StDbManager::Instance()->IsQuiet()){
        cout << "Server connecting to DB =" << mdbName ;
-       cout << " On Host = " << mhostName << endl;
-    }
-
-    if(!mdatabase)mdatabase = new mysqlAccessor(mdbType, mdbDomain);
-
-    if(mdatabase->initDbQuery(mdbName,mserverName,mhostName,mportNumber)){    
-      mconnectState = true;
-    }
+       cout << " On Host = " << mhostName << endl; 
+     }
   }
+}
+
 
 return true;
 }
@@ -376,11 +380,13 @@ return mdatabase->getDateTime(time);
 bool
 StDbServer::QueryDb(StDbTable* table, unsigned int reqTime) { 
 
+  if(!mconnectState) initServer();
+  if(!mconnectState){ connectError(); return false; }
 
   if(!mdatabase->QueryDb(table,reqTime)){
     cerr<<"WARNING:: ";
-    if(table) cerr << "table ["<<table->getMyName()<<"] "; 
-    cerr<< " Table Data is not Filled from DB" << endl;
+    if(table) cerr << "Read table ["<<table->getMyName()<<"] Failed. "; 
+    cerr<< " Data is not Filled from DB" << endl;
     return false;
   }
 
@@ -392,10 +398,13 @@ return true;
 bool 
 StDbServer::QueryDb(StDbTable* table, const char* whereClause) { 
 
+  if(!mconnectState) initServer();
+  if(!mconnectState){ connectError(); return false; }
+
   if(!mdatabase->QueryDb(table,whereClause)){
     cerr<<"WARNING:: ";
-    if(table) cerr << "table ["<<table->getMyName()<<"] "; 
-    cerr<< " Table Data is not Filled from DB " << endl;
+    if(table) cerr << "Read table ["<<table->getMyName()<<"] Failed. "; 
+    cerr<< " Data is not Filled from DB " << endl;
     return false;
   }
 
@@ -407,12 +416,14 @@ return true;
 bool 
 StDbServer::WriteDb(StDbTable* table, unsigned int storeTime) { 
 
+  if(!mconnectState) initServer();
+  if(!mconnectState){ connectError(); return false; }
+
 bool retVal = false;
  
  if(!mdatabase->WriteDb(table, storeTime)){
-    if(table) cout << "Wrote table ["<<table->getName()<<"] ";
-    cout << "Table is not Updated" << endl;
-    return retVal;
+   if(table) cout << "Write table ["<<table->getName()<<"] Failed"<<endl;
+   return retVal;
   }
 
 return true;
@@ -424,6 +435,20 @@ return true;
 bool
 StDbServer::QueryDb(StDbConfigNode* node) { 
 
+  if(!mconnectState) initServer();
+  if(!mconnectState){ connectError(); return false; }
+  if(!mdatabase->QueryDb(node))return false;
+
+return true;
+}
+
+///////////////////////////////////////////////////////////////////////
+
+bool
+StDbServer::QueryDb(StDbNode* node) { 
+
+  if(!mconnectState) initServer();
+  if(!mconnectState){ connectError(); return false; }
   if(!mdatabase->QueryDb(node))return false;
 
 return true;
@@ -434,6 +459,8 @@ return true;
 int
 StDbServer::WriteDb(StDbConfigNode* node,int currentID) { 
 
+  if(!mconnectState) initServer();
+if(!mconnectState){ connectError(); return 0; }
 return mdatabase->WriteDb(node,currentID);
 
 }
@@ -443,6 +470,8 @@ return mdatabase->WriteDb(node,currentID);
 bool
 StDbServer::rollBack(StDbNode* node) { 
 
+  if(!mconnectState) initServer();
+  if(!mconnectState){ connectError(); return false; }
 return mdatabase->rollBack(node);
 
 }
@@ -452,6 +481,8 @@ return mdatabase->rollBack(node);
 bool
 StDbServer::rollBack(StDbTable* table) { 
 
+  if(!mconnectState) initServer();
+if(!mconnectState){ connectError(); return false; }
 return mdatabase->rollBack(table);
 
 }
@@ -462,6 +493,8 @@ return mdatabase->rollBack(table);
 bool
 StDbServer::QueryDescriptor(StDbTable* table) { 
 
+  if(!mconnectState) initServer();
+  if(!mconnectState){ connectError(); return false; }
   if(!mdatabase->QueryDescriptor(table)){
     if(table) cout << "table ["<<table->getName()<<"] ";
     cout << "Table Descriptor is not found " << endl;
@@ -482,6 +515,12 @@ strcpy(retString,str);
 
 return retString;
 }
+
+
+
+
+
+
 
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNode.hh,v 1.2 2000/01/19 20:20:06 porter Exp $
+ * $Id: StDbNode.hh,v 1.3 2000/02/15 20:27:44 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbNode.hh,v $
+ * Revision 1.3  2000/02/15 20:27:44  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.2  2000/01/19 20:20:06  porter
  * - finished transaction model needed by online
  * - fixed CC5 compile problem in StDbNodeInfo.cc
@@ -69,7 +76,7 @@ public:
    virtual void  setDbName(const char* nodeDbName);
    virtual void  setDbType(StDbType type);
    virtual void  setDbDomain(StDbDomain domain);
-
+   virtual void  setNodeID(int id);
    virtual void  setElementID(const char* elementID);
    virtual char* getElementID() ;
    virtual int*  getElementID(int& nrows) ;
@@ -112,6 +119,9 @@ void StDbNode::setDbDomain(StDbDomain domain) { mnode.dbDomain=domain; }
 
 inline
 int StDbNode::getNodeID() const { return mnode.nodeID; }
+
+inline
+void StDbNode::setNodeID(int id ) {mnode.nodeID = id; }
 
 inline
 void StDbNode::setConfigured(bool isConfigured){ misConfigured=isConfigured; }

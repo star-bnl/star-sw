@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.6 2000/01/27 05:54:32 porter Exp $
+ * $Id: MysqlDb.h,v 1.7 2000/02/15 20:27:43 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.7  2000/02/15 20:27:43  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.6  2000/01/27 05:54:32  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -130,6 +137,8 @@ public:
   char* CodeStrArray(char** strarr , int aLen);
   virtual int GetLastInsertID(){ return (int)mysql_insert_id(&mData);}
   virtual bool QueryStatus() { return mqueryState; }
+  virtual void Close();
+  virtual bool IsConnected() { return mhasConnected; }
 
 protected:
   virtual void RazQuery() ;
@@ -144,8 +153,16 @@ protected:
 
 };  
 
+inline
+void
+MysqlDb::Close(){
+if(mhasConnected)mysql_close(&mData);
+mhasConnected=false;
+}
+
 
 extern MysqlBin *Binary(const unsigned long int aLen,const float *aBin);
 //extern MysqlBin *Binary(const unsigned long int aLen,const char  *aBin);
 #endif
+
 

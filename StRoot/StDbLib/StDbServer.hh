@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServer.hh,v 1.8 2000/01/27 05:54:34 porter Exp $
+ * $Id: StDbServer.hh,v 1.9 2000/02/15 20:27:44 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbServer.hh,v $
+ * Revision 1.9  2000/02/15 20:27:44  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.8  2000/01/27 05:54:34  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -39,6 +46,7 @@
 #define STDBSERVER_HH
 
 #include "StDbDefs.hh"    // enumeration of type & domain
+#include <iostream.h>
 
 class StDbNode;
 class StDbTable;
@@ -118,6 +126,7 @@ public:
   virtual bool  hasConnected() const { return mconnectState; }
   virtual bool  isDefault() const { return misDefault; };
   virtual bool  reConnect();
+  virtual void  closeConnection();
 
   // timestamp translation
   virtual unsigned int getUnixTime(const char* dateTime);
@@ -129,6 +138,7 @@ public:
   virtual int  WriteDb(StDbConfigNode* node, int currentID);
 
   virtual bool QueryDb(StDbConfigNode* node);
+  virtual bool QueryDb(StDbNode* node);
   virtual bool WriteDb(StDbTable* table, unsigned int storeTime);
 
   virtual bool rollBack(StDbNode* node);
@@ -137,6 +147,8 @@ public:
 
   // provide direct SQL access
   virtual tableQuery* getQueryObject();
+
+  virtual void connectError();
  
 };
 
@@ -150,26 +162,28 @@ return mdatabase->IsConnected();
 
 }
  
+////////////////////////////////////////////////////////////////
+
+inline
+void
+StDbServer::closeConnection(){ 
+ mdatabase->close();
+ mconnectState=false;
+}
+
 
 inline
 tableQuery* 
 StDbServer::getQueryObject(){ return mdatabase;}
 
+inline
+void StDbServer::connectError() {
+cerr<<"ERROR:: No Connection to Database =";
+if(!mdbName){  
+   cerr<<"name-unknown"<<endl; } else {
+   cerr<<mdbName<< endl;
+}
+}
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

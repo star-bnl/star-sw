@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTime.h,v 1.3 2000/01/27 05:54:35 porter Exp $
+ * $Id: StDbTime.h,v 1.4 2000/02/15 20:27:45 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbTime.h,v $
+ * Revision 1.4  2000/02/15 20:27:45  porter
+ * Some updates to writing to the database(s) via an ensemble (should
+ * not affect read methods & haven't in my tests.
+ *  - closeAllConnections(node) & closeConnection(table) method to mgr.
+ *  - 'NullEntry' version to write, with setStoreMode in table;
+ *  -  updated both StDbTable's & StDbTableDescriptor's copy-constructor
+ *
  * Revision 1.3  2000/01/27 05:54:35  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -46,15 +53,16 @@ char* mdateTime;
   StDbTime(): munixTime(0), mdateTime(0) {};
   StDbTime(unsigned int utime): mdateTime(0) { munixTime = utime;};
 
-  StDbTime(const char* dtime): munixTime(0) { 
+  StDbTime(const char* dtime): munixTime(0) { if(dtime){
                                          mdateTime=new char[strlen(dtime)+1]; 
-                                         strcpy(mdateTime,dtime);};
+                                         strcpy(mdateTime,dtime);
+                                         } else {mdateTime=0;}};
 
 
   virtual ~StDbTime() { if(mdateTime) delete [] mdateTime; }
 
   void setUnixTime(unsigned int utime) { munixTime = utime;}
-  virtual void setDateTime(const char* dtime) { 
+  virtual void setDateTime(const char* dtime) { if(!dtime) return;
                                   if(mdateTime) delete [] mdateTime;
                                   mdateTime=new char[strlen(dtime)+1]; 
                                   strcpy(mdateTime,dtime); };
