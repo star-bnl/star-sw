@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeEvMuDst.hh,v 3.1 2001/05/04 20:15:14 genevb Exp $
+ * $Id: StStrangeEvMuDst.hh,v 3.2 2001/08/23 13:20:54 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 19-Aug-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeEvMuDst.hh,v $
+ * Revision 3.2  2001/08/23 13:20:54  genevb
+ * Many bug workarounds...
+ *
  * Revision 3.1  2001/05/04 20:15:14  genevb
  * Common interfaces and reorganization of components, add MC event info
  *
@@ -51,6 +54,8 @@ public:
   void Fill(StEvent&);
   void Fill(StMcEvent&);
   void Clear() {}
+  static void SetCorrectionFile(char*);
+  static void SetFractionFile(char*);
 
   Int_t   run() const;            // Run number
   Int_t   event() const;          // Event number
@@ -59,6 +64,9 @@ public:
   Float_t primaryVertexZ() const;
   Int_t   globalTracks() const;
   Int_t   primaryTracks() const;
+  Int_t   primaryNegTracks() const;
+  Float_t primaryCorrectedTracks() const;
+  Float_t fractionSigma() const;
 
 protected:
   Int_t   mRun;                   // These are written out
@@ -68,8 +76,9 @@ protected:
   Float_t mPrimaryVertexZ;
   Int_t   mGlobalTracks;
   Int_t   mPrimaryTracks;
+  Int_t   mPrimaryNegTracks;
 
-  ClassDef(StStrangeEvMuDst,4)
+  ClassDef(StStrangeEvMuDst,5)
 };
 
 inline         StStrangeEvMuDst::StStrangeEvMuDst(StEvent& event)
@@ -90,5 +99,7 @@ inline Int_t   StStrangeEvMuDst::globalTracks() const
                { return mGlobalTracks; }
 inline Int_t   StStrangeEvMuDst::primaryTracks() const
                { return mPrimaryTracks; }
+inline Int_t   StStrangeEvMuDst::primaryNegTracks() const
+               { return mPrimaryNegTracks; }
 
 #endif

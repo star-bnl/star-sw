@@ -1,7 +1,7 @@
-// $Id: StStrangeControllerBase.h,v 3.3 2001/05/31 02:47:18 perev Exp $
+// $Id: StStrangeControllerBase.h,v 3.4 2001/08/23 13:20:53 genevb Exp $
 // $Log: StStrangeControllerBase.h,v $
-// Revision 3.3  2001/05/31 02:47:18  perev
-// const(ing)
+// Revision 3.4  2001/08/23 13:20:53  genevb
+// Many bug workarounds...
 //
 // Revision 3.2  2000/12/18 21:35:18  genevb
 // Introduced variable buffer-sizing
@@ -58,7 +58,7 @@ class StStrangeControllerBase : public TNamed {
   StStrangeMuDst* GetMc(Int_t i = 0);
   StStrangeAssoc* GetAssoc(Int_t i = 0);
 
-  virtual void  Clear(const char* opt="");
+  virtual void  Clear(Option_t* opt=0);
   virtual void  Finish();
   
   // Functions for sub-dsts:
@@ -72,6 +72,10 @@ class StStrangeControllerBase : public TNamed {
   virtual Int_t MakeCreateDst(StEvent& event) = 0;
   virtual Int_t MakeCreateMcDst(StMcVertex* mcVert) = 0;
   virtual Int_t MakeCreateSubDst();
+
+  TClass* GetDataClass() const;
+  TClass* GetMcClass() const;
+  TClass* GetAssocClass() const;
 
   void PrintNumMc();
   const char* GetMcName() const;
@@ -99,6 +103,8 @@ class StStrangeControllerBase : public TNamed {
   char* file;                       //!
   Int_t dstType;                    //!
   TClass* dataClass;                //!
+  TClass* mcClass;                  //!
+  TClass* assocClass;               //!
 
   // Array of muDst indices to copy
   TArrayI* selections;              //!
@@ -142,6 +148,13 @@ inline StStrangeMuDst* StStrangeControllerBase::GetMc(Int_t i)
 inline StStrangeAssoc* StStrangeControllerBase::GetAssoc(Int_t i)
             { return (assocArray ? (StStrangeAssoc*) (*assocArray)[i] : 0); }
 
+inline TClass* StStrangeControllerBase::GetDataClass() const
+            { return dataClass; }
+inline TClass* StStrangeControllerBase::GetMcClass() const
+            { return mcClass; }
+inline TClass* StStrangeControllerBase::GetAssocClass() const
+            { return assocClass; }
+	    
 inline const char* StStrangeControllerBase::GetMcName() const
             { return mcName.Data(); }
 inline const char* StStrangeControllerBase::GetAssocName() const

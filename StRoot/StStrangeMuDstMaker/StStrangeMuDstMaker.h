@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.h,v 3.5 2001/05/04 20:15:14 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.6 2001/08/23 13:20:56 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.6  2001/08/23 13:20:56  genevb
+// Many bug workarounds...
+//
 // Revision 3.5  2001/05/04 20:15:14  genevb
 // Common interfaces and reorganization of components, add MC event info
 //
@@ -88,6 +91,10 @@ class StStrangeMuDstMaker : public StMaker {
   void Do(Int_t dstType, Bool_t doIt=kTRUE);
   void Do(const char* name, Bool_t doIt=kTRUE);
   Bool_t GetDoMc();
+
+  void SetCorrectionFile(char*);
+  void SetFractionFile(char*);
+
   
   StStrangeControllerBase* Get(const char* name) const;
   StStrangeControllerBase* Get(Int_t dstType) const;
