@@ -1,5 +1,8 @@
-* $Id: tpg_main.F,v 1.16 1998/09/01 21:36:36 sakrejda Exp $
+* $Id: tpg_main.F,v 1.17 1999/02/25 02:41:21 sakrejda Exp $
 * $Log: tpg_main.F,v $
+* Revision 1.17  1999/02/25 02:41:21  sakrejda
+* diagnostics improved
+*
 * Revision 1.16  1998/09/01 21:36:36  sakrejda
 * trigger offset added
 *
@@ -47,7 +50,7 @@ C  I. Sakrejda 19/12/97
 CCCCCCCCCCCC
       integer i,j,tgc_local_to_global,tgc_global_to_local
       integer tgc_row_par
-      real xlocal(3), xglobal(3), xback(3), pad
+      real xlocal(3), xglobal(3), xback(3), pad, orow
       integer idummy
 CCCCCCCCCCCC
       integer flag_length
@@ -81,23 +84,25 @@ CCCCC
         iret=tgc_local_to_global(i,xlocal,xglobal)
         write(44,*)i,xlocal,xglobal
         iret=tgc_global_to_local(j,xglobal,xback)
-        write(55,*)j,xglobal,xback
+        write(44,*)j,xback,xglobal
       end do
       do i=1,45
-        iret=tgc_pad_to_x(0.5*real(pad_plane(1).npads(i))+0.5,real(i),
-     >                   xlocal(1),dummy1,dummy2)
+        xlocal(1) = 5.0
+        iret=tgc_row_to_y(real(i),xlocal(2),dummy1,dummy2)        
         iret=tgc_x_to_pad(real(i),xlocal(1),pad,dummy1,dummy2)
-        iret=tgc_row_to_y(real(i),xlocal(2),dummy1,dummy2)
-        write(33,*)i,0.5*real(pad_plane(1).npads(i))+0.5,
-     >             pad,xlocal(1),xlocal(2)
+        write(33,*) real(i),pad,xlocal(1),xlocal(2)
+        pad = int(pad+0.5)
+        iret=tgc_pad_to_x(pad,real(i),xback(1),dummy1,dummy2)
+        iret=tgc_y_to_row(xlocal(2),orow, dummy1,dummy2)
+        write(33,*)orow,pad,xback(1),xlocal(2)
         end do
 *
-      do i=1,24
-         do j=1,45
-         iret=tgc_row_par(i,real(j),xlocal(1),xlocal(2),dummy1,dummy2)
-         write(66,*)i,j,xlocal(1),xlocal(2)
-         end do
-      enddo
+*      do i=1,24
+*         do j=1,45
+*         iret=tgc_row_par(i,real(j),xlocal(1),xlocal(2),dummy1,dummy2)
+*         write(66,*)i,j,xlocal(1),xlocal(2)
+*         end do
+*      enddo
       iret=tgc_drift_velocity(dummy1,tpg_detector_h,tpg_detector)
       write(6,*) 'drift velocity',dummy1
       iret=tgc_clock_frequency(dummy1, tpg_detector_h,tpg_detector)
