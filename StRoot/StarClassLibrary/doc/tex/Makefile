@@ -2,6 +2,7 @@ TEXSRC		= StarClassLibrary
 MAKEFILE	= Makefile
 GV              = gv
 DVIPS           = dvips -Z -D 600 -tletter
+DVIPDF          = dvipdf
 LATEX           = latex
 MKINDEX         = makeindex -s sclindex.sty
 PSNUP		= psnup -2 -pletter
@@ -9,6 +10,8 @@ PSSRC		= StarClassLibraryTitle.eps StarIcon.eps helix1.eps \
 	          helix2.eps helix3.eps twoHelices.eps
 
 all:			$(TEXSRC).ps
+
+pdf:			$(TEXSRC).pdf
 
 view:			$(TEXSRC).ps
 			$(GV) $(TEXSRC).ps &
@@ -23,6 +26,9 @@ $(TEXSRC).psnup:	$(TEXSRC).ps
 
 $(TEXSRC).ps:		$(TEXSRC).dvi $(MAKEFILE) $(PSSRC)
 			$(DVIPS) $(TEXSRC).dvi -o $(TEXSRC).ps
+
+$(TEXSRC).pdf:		$(TEXSRC).dvi $(MAKEFILE) $(PSSRC)
+			$(DVIPDF) $(TEXSRC).dvi $(TEXSRC).pdf
 
 $(TEXSRC).dvi:		$(TEXSRC).tex $(TEXSRC).ind $(MAKEFILE) $(PSSRC) $(STY)
 			$(LATEX) $(TEXSRC)
