@@ -579,6 +579,11 @@ StFilterABC::StFilterABC(const char *name,bool active):TNamed(name,""),fActive(a
 #endif
 }
 //______________________________________________________________________________
+Int_t StFilterABC::Accept(StPoints3DABC *pnt, Color_t&, Size_t&, Style_t&)
+{
+  return Accept(pnt);
+}
+//______________________________________________________________________________
 void StFilterABC::SetDefs()
 {
   for (int i=0; GetNams()[i]; i++) {GetPars()[i]=GetDefs()[i];}
@@ -661,8 +666,9 @@ const float  *StFilterDef::GetDefs() const
    0};
   return defs;   
 }   
+
 //______________________________________________________________________________
-Int_t StFilterDef::Accept(StPoints3DABC *pnt) 
+Int_t StFilterDef::Accept(StPoints3DABC *pnt,Color_t &color, Size_t&, Style_t&)
 {
    static TRandom rrr;
    float x,y,z,r2xy,phid,len,pt,ps,q;
@@ -671,8 +677,7 @@ Int_t StFilterDef::Accept(StPoints3DABC *pnt)
    
    int cut = 1;
    if (fRandomSelect < 1. && fRandomSelect < rrr.Rndm())return 0;
-
-
+ 
    z = pnt->GetZ(0);				
    cut++;
    if (fZMin >z || z > fZMax)				goto SKIP;	
@@ -688,6 +693,10 @@ Int_t StFilterDef::Accept(StPoints3DABC *pnt)
    to = pnt->GetObject();
    if (!to) 						return 1;
    if (!to->InheritsFrom(StTrack::Class()))		return 1;
+
+   // set default color for tracks
+   color = (((color-kRed)+1)%6)+kRed;
+
    trk = (StTrack*)to;
    len = trk->length();
    cut++;

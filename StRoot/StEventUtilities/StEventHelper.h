@@ -12,6 +12,7 @@
 
 #include "TNamed.h"
 #include "TString.h"
+#include "Gtypes.h"
 #include "TPoints3DABC.h"
 
 class StEvent;
@@ -159,6 +160,8 @@ public:
            void          SetDefs();
            bool          Active() const {return fActive;}
            void          SetActive(bool active){fActive = active;}
+
+           Int_t         AcceptCB(StPoints3DABC *pnt, Color_t&, Size_t&, Style_t&);
            Int_t         AcceptCB(StPoints3DABC *pnt);
            void          Update();
 protected:
@@ -166,6 +169,8 @@ protected:
 
 protected:
    virtual Int_t         Accept(StPoints3DABC *pnt) =0;
+   virtual Int_t         Accept(StPoints3DABC *pnt, Color_t&, Size_t&, Style_t&);
+
 private:
    static int fgDial;
    ClassDef(StFilterABC,0)
@@ -175,6 +180,12 @@ inline Int_t StFilterABC::AcceptCB(StPoints3DABC *pnt)
 {
    //  Apply the user-provided filter if the filter is activated
    return fActive ? Accept(pnt): 1;
+}
+//______________________________________________________________________________
+inline Int_t StFilterABC::AcceptCB(StPoints3DABC *pnt,Color_t &color, Size_t &size, Style_t &style) 
+{
+   //  Apply the user-provided filter if the filter is activated
+   return fActive ? Accept(pnt,color,size,style): 1;
 }
 //______________________________________________________________________________
 
@@ -187,9 +198,8 @@ virtual const float  *GetDefs() const;
 virtual const char  **GetNams() const;
 
 protected:
-  virtual Int_t   Accept(StPoints3DABC *pnt) ;
-
-
+   Int_t   Accept(StPoints3DABC *pnt) {return 0;}
+   Int_t   Accept(StPoints3DABC *pnt, Color_t&, Size_t&, Style_t&);
 
 private:
   float fFirst;
@@ -226,6 +236,8 @@ virtual const char  **GetNams() const;
 protected:
   virtual Int_t         Accept(StPoints3DABC *pnt) ;
   Int_t Accept(const StTrack *track); // proxy for /StMuDSTMaker/COMMON/StMStMuL3Filter
+  Int_t         Accept(StPoints3DABC *pnt, Color_t&, Size_t&, Style_t&)
+  { return Accept(pnt); } 
 
 protected:
   BetheBloch* mBB;

@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.98 2004/01/26 22:57:10 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.99 2004/07/21 00:56:06 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -785,7 +785,7 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
 
   TListIter nextFilter(mFilterList);
   int ncut = 0;
-  Color_t col = 0;
+  Color_t col = kRed;
   StFilterABC *filt=0;
   Style_t sty; Size_t siz;
   StPoints3DABC *pnt;
@@ -793,22 +793,26 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
 
   for (int i = 0; i < ntrk; i++ )
   {
-    rndCol = (((rndCol-kRed)+1)%6)+kRed;
+    // rndCol = (((rndCol-kRed)+1)%6)+kRed;
     pnt = (StPoints3DABC*)shaps->At(i);
-//		Filtration
-    nextFilter.Reset();
-    while ((filt=(StFilterABC*)nextFilter())) {if (!filt->AcceptCB(pnt)) break;}
-    if (filt) {ncut++; continue;}
-//
+    // default attributes
     P = ( pnt->Size()==1 ) || ( kase & kHIT ) ;
     L = (P) ? "P":"L";
-
     sty = defSty; siz = defSiz;
     if (P && !(kase&kHIT)) { sty = VertSty ; siz = VertSiz; }
 
-    col = pnt->GetUniqueID();
-    if (!col) col = defCol;
-    if (!col) col = rndCol;
+    Color_t paint = pnt->GetUniqueID();
+    // col = pnt->GetUniqueID();
+    if (!paint) paint = defCol;
+    if (paint) col = paint;
+
+    //		Filtration
+    nextFilter.Reset();
+    while ((filt=(StFilterABC*)nextFilter())) {if (!filt->AcceptCB(pnt,col,siz,sty)) break;}
+    if (filt) {ncut++; continue;}
+
+//  Draw it
+
     DrawIt(pnt,L,col,sty,siz);
     trackCounter++;
   }
@@ -1128,6 +1132,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.99  2004/07/21 00:56:06  fine
+// Chnage the abstract custom filter interface to allow use the custom visual attributes
+//
 // Revision 1.98  2004/01/26 22:57:10  perev
 // WarnOff
 //

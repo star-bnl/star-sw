@@ -29,7 +29,8 @@ virtual const float  *GetDefs() const;
 virtual const char  **GetNams() const;
 
 protected:
-  virtual Int_t  Accept(StPoints3DABC *pnt) ;
+  virtual Int_t  Accept(StPoints3DABC *pnt) {;}
+  virtual Int_t  AcceptCB(StPoints3DABC *pnt, Color_t&, Size_t&, Style_t&);
 private:
           Int_t Accept(const StTrack *track); // proxy for /StMuDSTMaker/COMMON/StMStMuL3Filter
 
