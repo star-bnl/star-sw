@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StL0Trigger.h,v 2.7 2002/11/26 02:19:11 perev Exp $
+ * $Id: StL0Trigger.h,v 2.8 2003/07/29 19:50:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.h,v $
+ * Revision 2.8  2003/07/29 19:50:53  ullrich
+ * Fix for spin bits added.
+ *
  * Revision 2.7  2002/11/26 02:19:11  perev
  * StEventMaker ITTF modif
  *
@@ -74,11 +77,12 @@ void set(const dst_TrgDet_st    *);
 
     unsigned int bunchCrossingId7bit(int) const;
     unsigned int bunchCrossingId() const;
-    int spinBits() const;
-    int spinBitYellowUp() const;
-    int spinBitYellowDown() const;
-    int spinBitBlueUp() const;
-    int spinBitBlueDown() const;
+    
+    int spinBits(int runNumber=3000000) const;
+    int spinBitYellowUp(int runNumber=3000000) const;
+    int spinBitYellowDown(int runNumber=3000000) const;
+    int spinBitBlueUp(int runNumber=3000000) const;
+    int spinBitBlueDown(int runNumber=3000000) const;
 
     void setMwcCtbMultiplicity(int);
     void setMwcCtbDipole(int);
