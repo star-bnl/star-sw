@@ -10,7 +10,7 @@ Author    Yiqun Wang
 ******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
 *
-	Content		BBCE,BBCW,BBCA,THXM,SHXT,BPOL,CLAD
+	Content		BBCM,BBCA,THXM,SHXT,BPOL,CLAD
 *
 	Structure	BBCG {version,onoff(3),zdis(2)}
 *
@@ -77,59 +77,34 @@ Fill	HEXG					! hexagon tile geometry
 
 * West BBC Module
 	if(bbcg_OnOff(1)==1 | bbcg_OnOff(1)==3) then
-		Create and Position BBCW in CAVE z=bbcg_zdis(1) x=0 y=0
+		Create and Position BBCM in CAVE z=bbcg_zdis(1) x=0 y=0
 	endif
 * East BBC Module
 	if(bbcg_OnOff(1)==2 | bbcg_OnOff(1)==3) then
-		Create and Position BBCE in CAVE z=bbcg_zdis(2) x=0 y=0 ThetaZ=180
+		Create and Position BBCM in CAVE z=bbcg_zdis(2) x=0 y=0 ThetaZ=180
 	endif
 
 	prin1
 	 	('BBCMGEO finished')
 *
 * ----------------------------------------------------------------------------
-Block BBCW is one BBC West module 
+Block BBCM is one BBC Module 
 	Material  Air
 	Medium    standard
-	Attribute BBCW   seen=0 colo=7				!  lightblue
+	Attribute BBCM   seen=0 colo=7				!  lightblue
 	shape     tube   dz=ztotal/2 rmin=0 rmax=lrad
 
 * Small BBC hex tiles
 	Use HEXG type=1
-* West
-	if(bbcg_OnOff(2)==1 | bbcg_OnOff(2)==3) then
-		Create and Position BBCA in BBCW z=hexg_zoffset(1) x=hexg_xoffset(1) y=hexg_yoffset(1)
-	endif
-*
-* Large BBC hex tiles
-	Use HEXG type=2
-* West
-	if(bbcg_OnOff(3)==1 | bbcg_OnOff(3)==3) then
-		Create and Position BBCA in BBCW z=hexg_zoffset(1) x=hexg_xoffset(1) y=hexg_yoffset(1)
-	endif
-EndBlock
-*
-* ----------------------------------------------------------------------------
-Block BBCE is one BBC Eest module 
-	Material  Air
-	Medium    standard
-	Attribute BBCE   seen=0 colo=7				!  lightblue
-	shape     tube   dz=ztotal/2 rmin=0 rmax=lrad
 
-* Small BBC hex tiles
-	Use HEXG type=1
-* East
-	if(bbcg_OnOff(2)==2 | bbcg_OnOff(2)==3) then
-		Create and Position BBCA in BBCE z=hexg_zoffset(2) x=hexg_xoffset(2) y=hexg_yoffset(2)
-	endif
-*
+	Create and Position BBCA in BBCM z=hexg_zoffset(1) x=hexg_xoffset(1) y=hexg_yoffset(1)
+
 *
 * Large BBC hex tiles
 	Use HEXG type=2
-* East
-	if(bbcg_OnOff(3)==2 | bbcg_OnOff(3)==3) then
-		Create and Position BBCA in BBCE z=hexg_zoffset(2) x=hexg_xoffset(2) y=hexg_yoffset(2)
-	endif
+
+	Create and Position BBCA in BBCM z=hexg_zoffset(1) x=hexg_xoffset(1) y=hexg_yoffset(1)
+
 EndBlock
 *
 * ----------------------------------------------------------------------------
