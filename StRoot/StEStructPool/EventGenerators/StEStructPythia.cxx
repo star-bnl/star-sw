@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.cxx,v 1.5 2004/07/01 00:35:29 porter Exp $
+ * $Id: StEStructPythia.cxx,v 1.6 2004/09/24 01:43:12 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -53,6 +53,7 @@ StEStructEvent* StEStructPythia::generateEvent(){
   retVal = new StEStructEvent();
 
   fillTracks(retVal);
+  retVal->SetCentrality((double) mrefMult);
   bool useEvent= (mstarTrigger && mECuts->goodNumberOfTracks(mrefMult));
   if(!useEvent){
     delete retVal;
@@ -207,6 +208,9 @@ void StEStructPythia::setTrackCuts(StEStructTrackCuts* cuts){
 /**********************************************************************
  *
  * $Log: StEStructPythia.cxx,v $
+ * Revision 1.6  2004/09/24 01:43:12  prindle
+ * Add call to define centrality by multiplicity.
+ *
  * Revision 1.5  2004/07/01 00:35:29  porter
  * modified 'startrigger'... still need to make this a switch
  *
