@@ -1,5 +1,8 @@
-* $Id: tgc_local_to_global_p.F,v 1.3 1998/02/28 02:06:23 sakrejda Exp $
+* $Id: tgc_local_to_global_p.F,v 1.4 1998/11/10 01:25:01 sakrejda Exp $
 * $Log: tgc_local_to_global_p.F,v $
+* Revision 1.4  1998/11/10 01:25:01  sakrejda
+* conversion between loccal and global fixed for z>0, there rotation is actually counterclockwise
+*
 * Revision 1.3  1998/02/28 02:06:23  sakrejda
 * math_constants.inc used in the geometry package
 *
@@ -22,7 +25,7 @@ C
       real  b_rot
       pglobal(3)=-plocal(3)
       if(isect.le.12) then    
-        b_rot=real(isect)*(C_PI_2/3.)
+        b_rot=-real(isect)*(C_PI_2/3.)
       else
         b_rot=real(24-isect)*(C_PI_2/3.)
       endif

@@ -1,5 +1,8 @@
-* $Id: tgc_global_to_local.F,v 1.3 1998/02/28 02:06:21 sakrejda Exp $
+* $Id: tgc_global_to_local.F,v 1.4 1998/11/10 01:24:58 sakrejda Exp $
 * $Log: tgc_global_to_local.F,v $
+* Revision 1.4  1998/11/10 01:24:58  sakrejda
+* conversion between loccal and global fixed for z>0, there rotation is actually counterclockwise
+*
 * Revision 1.3  1998/02/28 02:06:21  sakrejda
 * math_constants.inc used in the geometry package
 *
@@ -41,7 +44,7 @@ C
          xlocal(3)=drift_vol_length-xglobal(3)
          isect=15-isect
          if(isect.gt.12) isect=isect-12
-         b_rot=real(isect)*(C_PI_2/3.)
+         b_rot=-real(isect)*(C_PI_2/3.)
       else
          isect=isect+9
          if(isect.le.12) isect=isect+12
