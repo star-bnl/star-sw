@@ -82,6 +82,7 @@
 * sss        - SVT slow simulator - not implemented yet
 * tss        - TPC slow simulator
 * tfc        - unpacks tpc raw data into adcxyz table for diagnostics
+* evin       - to read from tpc raw data file that already has results of tss
 * tcl        - TPC clustering - slow sim only !
 * tte_c      - TPC cluster evaluation - slow sim only
 * tfs        - TPC fast simulator
@@ -149,7 +150,7 @@ MACRO bfc _
    geomtype=all _
    phystype=on _
    domain=' geometry tpc svt global ' _
-   chain=' g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout' _
+   chain='  g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout' _
    first=1 _
    no_events=1 _
    input_data_prefix=$AFS_RHIC/star/data/samples/ _
