@@ -31,6 +31,7 @@
  extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}   
  #define gufld F77_NAME(gufld,GUFLD) */
 
+static const int BLOCK=512;
 
 
 StV0FinderMaker* StV0FinderMaker::mInstance = 0;
@@ -299,7 +300,23 @@ Int_t StV0FinderMaker::Prepare() {
       //Cut: track flag
       if (tri->flag() <= 0) continue;
       
-      if (trks >= trk.size()) ExpandVectors(trks);
+      // Manage vector memory usage
+      //   If maximum needed is less than half allocated for 10 events, resize
+      static int trkcnt = 0;
+      static int trkmax = 0;
+      if ((trks > BLOCK) && (trks < (trk.size()/2))) {
+        if (trks > trkmax) trkmax = trks;
+        trkcnt++;
+        if (trkcnt >= 10) {
+          ExpandVectors(trkmax);
+          trkcnt = 0;
+          trkmax = 0;
+        }
+      } else {
+        trkcnt = 0;
+        trkmax = 0;
+        if (trks >= trk.size()) ExpandVectors(trks);
+      }
 
       // Determine detector id of track i
       const StTrackTopologyMap& map = tri->topologyMap();
@@ -797,20 +814,22 @@ void StV0FinderMaker::Trim() {
 //_____________________________________________________________________________
 void StV0FinderMaker::ExpandVectors(unsigned short size) {
   unsigned int newsize = trk.size();
-  while (newsize <= size) newsize += 512;
-  for (unsigned int i=trk.size(); i<newsize; i++) {
-    trk.push_back(0);
-    hits.push_back(0);
-    detId.push_back(0);
-    pt.push_back(0);
-    ptot.push_back(0);
-    heli.push_back(StPhysicalHelixD());
-    trkID.push_back(0);
-  }
+  if (newsize > size) newsize = BLOCK;
+  while (newsize <= size) newsize += BLOCK;
+  trk.resize(newsize);
+  hits.resize(newsize);
+  detId.resize(newsize);
+  pt.resize(newsize);
+  ptot.resize(newsize);
+  heli.resize(newsize);
+  trkID.resize(newsize);
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.23 2004/08/11 21:26:38 genevb Exp $
+// $Id: StV0FinderMaker.cxx,v 1.24 2004/08/23 23:14:53 genevb Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.24  2004/08/23 23:14:53  genevb
+// Use resize() for vectors, and allow downsizing.
+//
 // Revision 1.23  2004/08/11 21:26:38  genevb
 // Trade static arrays for vectors
 //
