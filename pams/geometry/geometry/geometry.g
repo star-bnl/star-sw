@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.85 2004/03/31 16:37:51 potekhin Exp $
+* $Id: geometry.g,v 1.86 2004/04/14 19:02:12 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.86  2004/04/14 19:02:12  potekhin
+* Introducing the geometry Y2004A, which is same as
+* Y2004 but with full Barrel Calorimeter, a-la Y2003X,
+* as per requests of PWG's. Subject to final approval.
+*
 * Revision 1.85  2004/03/31 16:37:51  potekhin
 * Added version control for the FPD,
 * via the variable FpdmConfig
@@ -436,6 +441,7 @@ If LL>1
 * convert input line into a string of upprecase characters
   CALL UHTOC(PAR(2),4,Commands,LL*4-4);  Call CLTOU(Commands);
 
+
 * set geant processes and cuts only if any detp geometry was issued:
   {CUTGAM,CUTELE,CUTNEU,CUTHAD,CUTMUO,BCUTE,BCUTM,DCUTE,DCUTM,PPCUTM} =.001;
   {IDCAY,IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,ILOSS,IDRAY,IMULS} = 1;
@@ -740,6 +746,62 @@ If LL>1
                   "Photon Multiplicity Detector Version "
                      phmd=on;
                      PhmdVersion = 1;
+                }
+
+****************************************************************************************
+* NOTE:  this geometry, y2004a, should logically follow the baseline y2004,
+* however the parser we used isn't too good and it grabs the y2004 and then
+* stumbles, hence the order of tags is sometimes important and we have to list
+* the y2004a prior to y2004
+
+  on Y2004A    { hypothetical 2004 geometry: full barrel;
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+* note the upgrade with respect to previous years:
+                     BtofConfig=7;
+
+* note the full barrel same as in y2003x:
+                  "calb" 
+                     ems=on ;
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                  "geometry correction "
+                     CorrNum = 3;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdVersion = 1;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 2;
                 }
 
 *
