@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPid.cxx,v 1.5 1999/08/11 19:29:16 ogilvie Exp $
+ * $Id: StTpcDedxPid.cxx,v 1.6 1999/08/11 20:41:48 fisyak Exp $
  *
  * Author: Craig Ogilvie, April 1999
  ***************************************************************************
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPid.cxx,v $
- * Revision 1.5  1999/08/11 19:29:16  ogilvie
- * gain typo fixed
+ * Revision 1.6  1999/08/11 20:41:48  fisyak
+ * Add quickPid from Aihong Tang
+ *
+ * Revision 1.6  1999/08/11 20:41:48  fisyak
+ * Add quickPid from Aihong Tang
  *
  * Revision 1.5  1999/08/11 19:29:16  ogilvie
  * gain typo fixed
@@ -36,9 +39,13 @@
  *
  **************************************************************************/
 #include "StTpcDedxPid.h"
+#include "StGlobalTrack.h"
 #include "StDedx.h"
+#include "SystemOfUnits.h"
 #ifndef __CINT__
+#include "fortranc.h"
 #define gufld F77_NAME(gufld,GUFLD)
+extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define quickid F77_NAME(quickid,QUICKID)
 extern "C" {Int_t type_of_call F77_NAME(quickid,QUICKID)(float *, float*);}
 #endif
@@ -153,6 +160,7 @@ Double_t StTpcDedxPid::sigmaPidFunction(Double_t mass) const
 	resolution = 0.4 * dedx_expected /sqrt(nhit) ;
     else 
 	resolution = 1000.0 ;
+    
     return resolution;
 }
 Int_t StTpcDedxPid::quickPid(Float_t rig, Float_t dedx) {return  quickid(&rig,&dedx);}
