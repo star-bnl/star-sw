@@ -20,6 +20,7 @@ my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};# print "SO_PKG = $SO_PKG\n";
 my $LIBPKG = "lib" . $PKG . "." . $env->{SUFLIB};
 $FCPATH  = "#asps/Simulation/starsim/include";
 $FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/gcalor/include";
+$FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/geant321/include";
 $FCPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
 my $CPP_DATE = "031201";
 my $CPP_TIME = "1937";
@@ -136,32 +137,34 @@ $envP = $env2->clone('LDFLAGS'   => $LDFLAGS,
 		    );
 #print "LIBPATH = $envP->{LIBPATH}\n";
 Program      $envP $pgm . ".new", @starsim;
-InstallAs $envP $BIN . "/gstar", $pgm;
+#InstallAs $envP $BIN . "/gstar", $pgm;
 my $d = $Dir . "/";
 my @list = glob $d . "atlsim.*";# print "Dir  = $Dir; list = @list\n";
 my @Deps = ($pgm . ".new","#" . $d . "atlsim.makefile","#" . $d . "atlsim.bank","#" . $d . "atlsim.logon.kumac");
 foreach my $l (@list) {
   my $f = File::Basename::basename($l); 
   my $s = $f; $s =~ s/atlsim/starsim/; #  print "$l => $s\n";
-  InstallAs $envP $BIN ."/". $s, "#" . $d ."/". $f;
+#  InstallAs $envP $BIN ."/". $s, "#" . $d ."/". $f;
+  Command $envP $BIN ."/". $s, "#" . $d ."/". $f, qq(cp -v %< %>);
   push @Deps, $BIN . "/" . $s;
 }		 
-Command      $env  $pgm, @Deps, 
-		 q(
-		   cp     %1  %>
-		   echo  '#######.makefile########' >> %>
-		   echo  '#chto v imeni tebe moem#' >> %>
-		   echo  '#######.makefile.#######' >> %>
-		   cat      %2      >> %>
-		   echo  '#######.endfile.########' >> %>
-		   echo  '#########.bank##########' >> %>
-		   echo  '#chto v imeni tebe moem#' >> %>
-		   echo  '#########.bank.#########' >> %>
-		   cat      %3          >> %>
-		   echo  '#######.endfile.########' >> %>
-		   echo  '#chto v imeni tebe moem#' >> %>
-		   echo  '#####.logon.kumac#######' >> %>
-		   cat      %4   >> %>
-		   echo  '#######.endfile.########' >> %>
-);
-Install $envP $BIN, $pgm;
+# Command      $env  $pgm, @Deps, 
+# 		 q(
+# 		   cp     %1  %>
+# 		   echo  '#######.makefile########' >> %>
+# 		   echo  '#chto v imeni tebe moem#' >> %>
+# 		   echo  '#######.makefile.#######' >> %>
+# 		   cat      %2      >> %>
+# 		   echo  '#######.endfile.########' >> %>
+# 		   echo  '#########.bank##########' >> %>
+# 		   echo  '#chto v imeni tebe moem#' >> %>
+# 		   echo  '#########.bank.#########' >> %>
+# 		   cat      %3          >> %>
+# 		   echo  '#######.endfile.########' >> %>
+# 		   echo  '#chto v imeni tebe moem#' >> %>
+# 		   echo  '#####.logon.kumac#######' >> %>
+# 		   cat      %4   >> %>
+# 		   echo  '#######.endfile.########' >> %>
+# );
+#Install $envP $BIN, $pgm;
+Command $envP $BIN . "/" . $pgm, $pgm, qq(cp -v %< %>);
