@@ -1,7 +1,10 @@
 *
-* $Id: gsdetv.F,v 1.2 1998/04/16 16:59:40 fisyak Exp $
+* $Id: gsdetv.F,v 1.3 1998/10/18 23:24:17 nevski Exp $
 *
 * $Log: gsdetv.F,v $
+* Revision 1.3  1998/10/18 23:24:17  nevski
+* make it re-entrant and overwrite old banks
+*
 * Revision 1.2  1998/04/16 16:59:40  fisyak
 * 2nd pass with gstar
 *
@@ -93,6 +96,7 @@ C.    *       Authors   R.Brun, F.Bruyant    **********                *
 C.    *                                                                *
 C.    * Modifications:                                                 *
 C.    *  PN, 20.04.96:  warning on non-sensetive volume in DEBUG only  *
+C.    *  PN, 07.09.98:  make it re-entrant and overwrite old banks     *
 C.    ******************************************************************
 C.
 #include "geant321/gcbank.inc"
@@ -129,42 +133,48 @@ C     Create mother JSET bank
 C
          CALL MZBOOK (IXCONS, JSET, JSET, 1, 'SETS', 0,0,0, 5, 0)
          IQ(JSET-5)=0
-         NSET = 0
-      ELSE
-C
-         NSET = IQ(JSET-1)
-         CALL GLOOK (IUSET, IQ(JSET+1), NSET, ISET)
-         IF (ISET.NE.0) GO TO 30
       ENDIF
+C
+      ISET = 0
+      NSET = IQ(JSET-1)
+      CALL GLOOK (IUSET, IQ(JSET+1), NSET, ISET)
 C
 C     Create JSET bank
 C
-      CALL MZPUSH (IXCONS, JSET, 1, 1, 'I')
-      NSET = NSET +1
+      IF (ISET.EQ.0) THEN
+         CALL MZPUSH (IXCONS, JSET, 1, 1, 'I')
+         NSET = NSET +1
+         ISET = NSET
+      ENDIF
 C
-      ISET = NSET
-      CALL UCTOH (IUSET, IQ(JSET+ISET), 4, 4)
-      CALL MZBOOK (IXCONS, JS, JSET, -ISET, 'SETS', 0,0,0, 5, 0)
-      IQ(JS-5) = ISET
+      CALL UCTOH  (IUSET, IQ(JSET+ISET), 4, 4)
+      IF (LQ(JSET-ISET).LE.0) THEN
+         CALL MZBOOK (IXCONS, JS, JSET, -ISET, 'SETS', 0,0,0, 5, 0)
+         IQ(JS-5) = ISET
+      ENDIF
 C
 C     Check if detector has already been defined
 C
   30  JS = LQ(JSET-ISET)
+      IDET = 0
       NDET = IQ(JS-1)
-      IF (NDET.NE.0)THEN
-         CALL GLOOK (IUDET, IQ(JS+1), NDET, IDET)
-         IF (IDET.NE.0) GO TO 930
-      ENDIF
+      IF (NDET.NE.0) CALL GLOOK (IUDET, IQ(JS+1), NDET, IDET)
 C
 C     If not, create detector bank
 C
-      CALL MZPUSH (IXCONS, JS, 1, 1, 'I')
-      NDET = NDET +1
-      IDET = NDET
+      IF (IDET.EQ.0) THEN
+         CALL MZPUSH (IXCONS, JS, 1, 1, 'I')
+         NDET = NDET +1
+         IDET = NDET
+      ENDIF
+ 
       CALL UCTOH (IUDET, IQ(JS+IDET), 4, 4)
-      CALL MZBOOK (IXCONS, JD, JS, -IDET, 'SEJD', 4,4,100, IOSEJD, 0)
-      IQ(JD-5) = IDET
+      IF (LQ(JS-IDET).LE.0) THEN
+         CALL MZBOOK (IXCONS, JD, JS, -IDET, 'SEJD', 4,4,100, IOSEJD, 0)
+         IQ(JD-5) = IDET
+      ENDIF
 C
+      JD = LQ(JS-IDET)
       IQ(JD+7) = NWHI
       IQ(JD+8) = NWDI
       IQ(JD+9) = -1
