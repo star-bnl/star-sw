@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.13 1999/08/25 21:27:14 liq Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.14 1999/09/05 04:58:30 sakrejda Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.14  1999/09/05 04:58:30  sakrejda
+* tph_fit_isolated_cluster.F
+*
 * Revision 1.13  1999/08/25 21:27:14  liq
 * add new table tphitclus
 *
@@ -233,7 +236,7 @@ C-----------------------------------------------------------------------
         save bucket_length_in
         save bucket_length_out
 C-----------------------------------------------------------------------
-        character*132 m132
+        character*132 m132(2)
 C-----------------------------------------------------------------------
         ierr = 0
 
@@ -291,9 +294,9 @@ C time direction no longer a projection - WAL 13 Feb 98
            endif
         enddo
 	if (adc_sum.eq.0.) then
-	 call StError('TPHAM - Hey -- ADCSUM=0!!!!')
-         write(m132,*) 'number of pixels in cluster = ',nclspix
-         call StError(m132)
+         write(m132(1),*)'TPHAM - Hey -- ADCSUM=0!!!!'
+         write(m132(2),*) 'number of pixels in cluster = ',nclspix
+         call Message(m132,2,-1)
 cIS 08/07 commented the following two lines as a potential source of
 c         writting past the array boundary
 c         write(m132,*) 'ADC vaulues = ',(iadc(ir),ir=1,nclspix)
