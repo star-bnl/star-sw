@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.6 2003/04/04 14:44:22 pruneau Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.7 2003/04/29 18:48:34 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.7  2003/04/29 18:48:34  pruneau
+ * *** empty log message ***
+ *
  * Revision 2.6  2003/04/04 14:44:22  pruneau
  * Fix to the hit error calculator and the getCharge methods.
  *
@@ -97,6 +100,10 @@ void StiTrackingPlots::initialize()
   _xLastHitVsXLastNode = book("xLastHitVsXLastNode","xLastHitVsXLastNode",200,0.,200.,200,0.,200.);
   _xLastHitVsXLastNode1 = book("xLastHitVsXLastNode1","xLastHitVsXLastNode1",200,0.,200.,200,0.,200.);
   _xLastHitVsXLastNode2 = book("xLastHitVsXLastNode2","xLastHitVsXLastNode2",200,0.,200.,200,0.,200.);
+
+  _chi2 = book("chi2","chi2",100,0.,10.);
+  _chi2VsNpts = book("chi2VsNpts","chi2VsNpts",50,0.,50.,100,0.,10.);
+
   //cout <<"StiTrackingPlots::StiTrackingPlots() -I- Done"<<endl;
 }
   
@@ -115,7 +122,7 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
   //numTracks->Fill(mTrackStore->getTrackCount(mFilter));
 
   //loop over tracks
-  for (TrackMap::const_iterator trackIt = mTrackStore->begin(); 
+  for (TrackToTrackMap::const_iterator trackIt = mTrackStore->begin(); 
        trackIt!=mTrackStore->end();
        ++trackIt)
     {
@@ -139,7 +146,12 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
       _nptsVsPt->Fill(thePt,nPts);
       _nptsVsEta->Fill(eta,nPts);
       _nptsVsPhi->Fill(phi,nPts);
-
+      if (nPts>5)
+	{
+	  double chi2 = track->getChi2()/(nPts-5);
+	  _chi2->Fill(chi2);
+	  _chi2VsNpts->Fill(nPts,chi2);
+	}
       if (kTrack)
 	{
 	  //cout << "StiTrackPlots::fill() -I- kTrack OK";

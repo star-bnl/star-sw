@@ -286,7 +286,7 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
   int minus=0;
   int helPlus = 0;
   int helMinus = 0;
-  for (TrackMap::const_iterator it=_trackContainer->begin(); 
+  for (TrackToTrackMap::const_iterator it=_trackContainer->begin(); 
        it!=_trackContainer->end(); 
        ++it) 
     {
@@ -385,33 +385,22 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 	      trackDone = true; break;
 	    }
 	  else if (position<=kEdgeZplus) 
-	    { // within detector on reached layer
-	      //if (testNode._x<65. && testNode._x>57.) cout <<"WITHIN VOLUME"<<endl;
+	    { 
 	      testNode.setDetector(tDet);
 	      if (tDet->isActive()) 
 		{ // active detector may have a hit
 		  _hitContainer->setRefPoint(testNode);
-		  if(debug)cout << " testNode:"<<testNode
-				<<"    - ywin:"<<testNode.getWindowY()<<" zwin:"<<testNode.getWindowZ()<<endl
-				<< " CONTAINERS HAS:"<<_hitContainer->getHitCandidateCount()<<" HITS ";
 		  while (_hitContainer->hasMore()) 
 		    {  
 		      stiHit = _hitContainer->getHit();
 		      if (!stiHit) throw logic_error("StiKalmanTrackFinder::doNextDetector() - FATAL - StiHit*hit==0");
 		      chi2 = testNode.evaluateChi2(stiHit);
-		      //if (testNode._x<65. && testNode._x>57.)
-		      //{
-		      //  cout  << "  Detector:" << tDet->getName()
-		      //	<< "  chi2/max/best:"<< chi2 << "/" << _pars->maxChi2ForSelection<< "/" << testNode.getChi2()<<endl;
-		      //}
 		      if (chi2<_pars->maxChi2ForSelection && chi2<testNode.getChi2())
 			{
 			  testNode.setHit(stiHit);
 			  testNode.setChi2(chi2);
 			  if(debug)cout << " hit OK"<<endl;
 			}
-		      else
-			  if(debug)cout << " ---- hit NOT OK"<<endl;
 		    } 
 		}
 	      // add best node to track if it has a hit or
@@ -448,7 +437,8 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		    } 
 		  else // there should have been a hit but we found none
 		    {
-		      _messenger<<"SKTN::add(SKTN*) -I- Add node WIHTOUT hit:"<<endl;
+		      //cout<<"SKTN::add(SKTN*) -I- Add node WIHTOUT hit:"<<endl
+		      //<< node->getDetector()->getName();
 		      node->nullCount           = sNode->nullCount+1;
 		      node->contiguousNullCount = sNode->contiguousNullCount+1;
 		      node->hitCount            = sNode->hitCount;
@@ -510,7 +500,7 @@ int StiKalmanTrackFinder::getTrackFoundCount(Filter<StiTrack> * filter) const
   // reset filter counter to zero.
   filter->reset();
   // loop over all tracks and filter
-  TrackMap::const_iterator it;
+  TrackToTrackMap::const_iterator it;
   for (it=_trackContainer->begin(); 
        it!=_trackContainer->end(); 
        ++it) 

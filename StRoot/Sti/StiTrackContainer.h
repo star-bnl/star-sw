@@ -32,10 +32,10 @@ struct StiTrackLessThan
     bool operator()(const StiTrack* lhs, const StiTrack* rhs) const;
 };
 
-typedef map<StiTrack*, StiTrack*, StiTrackLessThan> TrackMap;
-typedef TrackMap::value_type TrackMapValType;
+typedef map<StiTrack*, StiTrack*, StiTrackLessThan> TrackToTrackMap;
+typedef TrackToTrackMap::value_type TrackToTrackMapValType;
 
-class StiTrackContainer : public TrackMap, public Named, public Described
+class StiTrackContainer : public TrackToTrackMap, public Named, public Described
 {
 public:
     
@@ -53,12 +53,12 @@ public:
 
 inline void StiTrackContainer::add(StiTrack * track)
 {
-  insert(  TrackMapValType(track, track) );
+  insert(  TrackToTrackMapValType(track, track) );
 }
 
 inline void StiTrackContainer::push_back(StiTrack* track)
 {
-    insert(  TrackMapValType(track, track) );
+    insert(  TrackToTrackMapValType(track, track) );
 }
 
 #endif

@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.123  2003/04/29 18:48:50  pruneau
+// *** empty log message ***
+//
 // Revision 1.122  2003/04/13 02:16:13  pruneau
 // *** empty log message ***
 //
@@ -100,6 +103,7 @@
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiDefaultTrackFilter.h"
+#include "Sti/StiMasterDetectorBuilder.h"
 #include "Sti/Star/StiStarDetectorGroup.h"
 #include "Sti/StiKalmanTrackFinderParameters.h"
 #include "StiFtpc/StiFtpcDetectorGroup.h"
@@ -112,6 +116,7 @@
 #include "Sti/StiHitLoader.h"
 #include "Sti/StiTrackSeedFinder.h"
 #include "Sti/StiVertexFinder.h"
+#include "Sti/StiResidualCalculator.h"
 #include "StiMaker/StiMakerParameters.h"
 #include "StiMaker/StiStEventFiller.h"
 #include "StiGui/EventDisplay.h"
@@ -134,6 +139,7 @@ ClassImp(StiMaker)
     _vertexFinder(0),
     mMcEventMaker(0),
     mAssociationMaker(0),
+    _residualCalculator(0),
     _loaderTrackFilter(0),
     _loaderHitFilter(0)
 
@@ -159,6 +165,7 @@ Int_t StiMaker::Finish()
     {
       if (_recPlotter) _recPlotter->write("StiMakerHistograms.root");
       if (_mcPlotter)  _mcPlotter->write("StiMakerHistograms.root","UPDATE");
+      if (_residualCalculator)_residualCalculator->Write("StiMakerResiduals.root"); 
     }
   return StMaker::Finish();
 }
@@ -249,6 +256,7 @@ Int_t StiMaker::Make()
       if (!_tracker)
 	throw runtime_error("StiMaker::Make() -F- tracker is not a StiKalmanTrackFinder");
       _tracker->initialize();
+      _residualCalculator = new StiResidualCalculator(_toolkit->getHitContainer(), _toolkit->getDetectorBuilder() );
       _tracker->clear();
       if (_toolkit->isGuiEnabled())
 	{
@@ -335,6 +343,7 @@ Int_t StiMaker::Make()
       cout<< "StiMaker::Make() -I- Will Fill Plots As Needed"<<endl;
       if (_recPlotter) _recPlotter->fill(_toolkit->getTrackContainer());
       if (_mcPlotter ) _mcPlotter->fill(_toolkit->getMcTrackContainer());  
+      _residualCalculator->calcResiduals(_toolkit->getTrackContainer() );
     }
   cout<< "StiMaker::Make() -I- Done"<<endl;
   return kStOK;

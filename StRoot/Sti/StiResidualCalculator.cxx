@@ -1,7 +1,7 @@
 //StiResidualCalculator.cxx
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.cxx,v 2.1 2003/04/29 14:59:01 andrewar Exp $
+ * $Id: StiResidualCalculator.cxx,v 2.2 2003/04/29 18:48:33 pruneau Exp $
  *
  * \class  StiResidualCalculator provides a utility for determining the
  *         track residuals.
@@ -9,6 +9,9 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.cxx,v $
+ * Revision 2.2  2003/04/29 18:48:33  pruneau
+ * *** empty log message ***
+ *
  * Revision 2.1  2003/04/29 14:59:01  andrewar
  * Modified to conform to naming convention. Added
  * initDetectors(StiDetectorBuilder) to switch desired detectors 'off' during
@@ -85,7 +88,7 @@ void StiResidualCalculator::initDetector(StiDetectorBuilder *detBuilder)
       isNotActiveFunc = new StiNeverActiveFunctor();
       
 
-      for(int i=35, j=0; j<sectors;j++)
+      for(int i=4, j=0; j<sectors;j++)
 	{
 	  StiDetector* det = detBuilder->getDetector(i,j);
 	  //mark detector as unused
@@ -187,7 +190,7 @@ void StiResidualCalculator::calcResiduals(StiTrackContainer *tracks)
     }  
 
   //get iterator from track container
-  TrackMap::const_iterator trackIt = tracks->begin();
+  TrackToTrackMap::const_iterator trackIt = tracks->begin();
   //trackIterator
 
   //loop over tracks
@@ -267,6 +270,8 @@ int StiResidualCalculator::trackResidue(const StiKalmanTrack *track)
 		   <<"Is Active?: "<<iNode.getDetector()->isActive()<<endl
 		   <<"Hit det?: "<<iNode.getHit()->detector()->getName()
 		   <<endl;
+	      ++iT;
+	      continue;
 	    }
 	  //get node values
 	  double cross = iNode.crossAngle();

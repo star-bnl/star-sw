@@ -50,6 +50,8 @@
 #define HITMESSENGER *(Messenger::instance(MessageType::kHitMessage))
 class StMatrixF;
 
+
+
 class StiHit 
 {
 public: 

@@ -125,51 +125,51 @@ inline void    Parameter::setKey(int key)
 
 inline void    Parameter::setValue(bool value)
 {
-	cout << " Parameter::setValue(bool value) value:"<<value<<endl;
+  //cout << " Parameter::setValue(bool value) value:"<<value<<endl;
   if (_exValue)
-		{
-			switch (_type)
-				{
-				case 0: *static_cast<bool*>(_exValue)   = value;  break;
-				case 1: *static_cast<int*>(_exValue)    = (int) value;  break;
-				case 2: *static_cast<float*>(_exValue)  = (float)value;  break;
-				case 3: *static_cast<double*>(_exValue) = (double)value;  break;
-				}
-		}
+    {
+      switch (_type)
+	{
+	case 0: *static_cast<bool*>(_exValue)   = value;  break;
+	case 1: *static_cast<int*>(_exValue)    = (int) value;  break;
+	case 2: *static_cast<float*>(_exValue)  = (float)value;  break;
+	case 3: *static_cast<double*>(_exValue) = (double)value;  break;
+	}
+    }
   else
     _value = value;
 }
 
 inline void    Parameter::setValue(int value)
 { 
-	cout << " Parameter::setValue(int value) value:"<<value<<endl;
+  //	cout << " Parameter::setValue(int value) value:"<<value<<endl;
   if (_exValue)
-		{
-			switch (_type)
-				{
-				case 0: *static_cast<bool*>(_exValue)   = value>0;  break;
-				case 1: *static_cast<int*>(_exValue)    = value;  break;
-				case 2: *static_cast<float*>(_exValue)  = (float)value;  break;
-				case 3: *static_cast<double*>(_exValue) = (double)value;  break;
-				}
-		}
+    {
+      switch (_type)
+	{
+	case 0: *static_cast<bool*>(_exValue)   = value>0;  break;
+	case 1: *static_cast<int*>(_exValue)    = value;  break;
+	case 2: *static_cast<float*>(_exValue)  = (float)value;  break;
+	case 3: *static_cast<double*>(_exValue) = (double)value;  break;
+	}
+    }
   else
     _value = value;
 }
 
 inline void    Parameter::setValue(float value)
 {
-	cout << " Parameter::setValue(float value) value:"<<value<<endl;
+  //cout << " Parameter::setValue(float value) value:"<<value<<endl;
   if (_exValue)
-		{
-			switch (_type)
-				{
-				case 0: *static_cast<bool*>(_exValue)   = value>0;  break;
-				case 1: *static_cast<int*>(_exValue)    = (int) value;  break;
-				case 2: *static_cast<float*>(_exValue)  = value;  break;
-				case 3: *static_cast<double*>(_exValue) = (double)value;  break;
-				}
-		}
+    {
+      switch (_type)
+	{
+	case 0: *static_cast<bool*>(_exValue)   = value>0;  break;
+	case 1: *static_cast<int*>(_exValue)    = (int) value;  break;
+	case 2: *static_cast<float*>(_exValue)  = value;  break;
+	case 3: *static_cast<double*>(_exValue) = (double)value;  break;
+	}
+    }
   else
     _value = value;
 }
@@ -177,17 +177,17 @@ inline void    Parameter::setValue(float value)
 
 inline void    Parameter::setValue(double value)
 {
-	cout << " Parameter::setValue(double value) value:"<<value<<endl;
+  //cout << " Parameter::setValue(double value) value:"<<value<<endl;
   if (_exValue)
-		{
-			switch (_type)
-				{
-				case 0: *static_cast<bool*>(_exValue)   = value>0;  break;
-				case 1: *static_cast<int*>(_exValue)    = (int) value;  break;
-				case 2: *static_cast<float*>(_exValue)  = (float)value;  break;
-				case 3: *static_cast<double*>(_exValue) = value;  break;
-				}
-		}
+    {
+      switch (_type)
+	{
+	case 0: *static_cast<bool*>(_exValue)   = value>0;  break;
+	case 1: *static_cast<int*>(_exValue)    = (int) value;  break;
+	case 2: *static_cast<float*>(_exValue)  = (float)value;  break;
+	case 3: *static_cast<double*>(_exValue) = value;  break;
+	}
+    }
   else
     _value = value;
 }

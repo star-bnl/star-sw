@@ -256,7 +256,7 @@ class StiKalmanTrack : public StiTrack
   void initialize(double curvature,
 		  double tanl,
 		  const StThreeVectorD& origin,
-		  const hitvector &);
+		  const HitVectorType &);
   
   /// Work method returns the node closest to the given position.
   /*! Work method returns the node closest to the given position. 
@@ -276,6 +276,7 @@ class StiKalmanTrack : public StiTrack
    StThreeVector<double> getMomentumNear(double x);
    StThreeVector<double> getHitPositionNear(double x) const;
 
+   virtual vector<StiHit*> getHits();
    virtual vector<StMeasuredPoint*> stHits() const;
    virtual vector<StiKalmanTrackNode*> getNodes(int detectorGroupId) const;
 	 

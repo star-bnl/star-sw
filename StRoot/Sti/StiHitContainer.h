@@ -118,20 +118,19 @@ class StiDetector;
 class Messenger;
 
 ///We define this globally for convenience of users.
-typedef vector<StiHit*> hitvector;
+typedef vector<StiHit*> HitVectorType;
 struct VectorAndEnd
 {	
     VectorAndEnd() {theEffectiveEnd=theHitVec.end();}
-    hitvector theHitVec;
-    hitvector::iterator theEffectiveEnd;
+    HitVectorType theHitVec;
+    HitVectorType::iterator theEffectiveEnd;
 };
 
 ///We define this globally for convenience of users.
-//typedef map<HitMapKey, hitvector, MapKeyLessThan> hitmap;
-typedef map<HitMapKey, VectorAndEnd, MapKeyLessThan> hitmap;
+typedef map<HitMapKey, VectorAndEnd, MapKeyLessThan> HitMapToVectorAndEndType;
 
 ///We define this globally for convenience of users.
-typedef hitmap::value_type hitMapValType;
+typedef HitMapToVectorAndEndType::value_type HitMapToVectorAndEndTypeValType;
 
 class StiHitContainer : public Named, public Described
 {
@@ -163,13 +162,16 @@ public:
     ///Ignore hits marked as used (std::stable_partition)
     void partitionUsedHits();
     ///Return a const reference to a vector of hits.
-    const hitvector& hits(double refangle, double position);
+    const HitVectorType& hits(double refangle, double position);
     ///Return a reference to the vectore of hits, or iterators marking it's bounds
-    hitvector& hits(const StiDetector*);
-    hitvector::iterator hitsBegin(const StiDetector*);
-    hitvector::iterator hitsEnd(const StiDetector*);
+    HitVectorType& hits(const StiDetector*);
+    HitVectorType::iterator hitsBegin(const StiDetector*);
+    HitVectorType::iterator hitsEnd(const StiDetector*);
+    ///Get all hits into a simple vector
+    HitVectorType getAllHits();
     ///Return a const reference ot the hit-vector map.
-    const hitmap& hits() const;
+    const HitMapToVectorAndEndType& hits() const;
+    HitMapToVectorAndEndType& hits();
     ///Set the reference point to define sub-volume of hits to be accessed.
     void setRefPoint(StiHit* ref);
     ///Set the reference point to define sub-volume of hits to be accessed.
@@ -189,30 +191,35 @@ public:
     ///Return the number of vertices stored in the container.
     unsigned int numberOfVertices() const;
     ///Return a const reference to the a vector of vertices.
-    const hitvector& vertices() const;
+    const HitVectorType& vertices() const;
 protected:
     Messenger& mMessenger;
 private:
     //Vertex implementation
-    hitvector mvertexvec; //! Container for primary vertices
+    HitVectorType mvertexvec; //! Container for primary vertices
     //static StiHitContainer* sinstance;
     friend ostream& operator<<(ostream&, const StiHitContainer&);
-    HitMapKey mkey; //store a map key member to avoid constructor call per hit
+    HitMapToVectorAndEndType::key_type mkey; //store a map key member to avoid constructor call per hit
     double mdeltad; //Search limit in local d-direction
     double mdeltaz; //Search limit in local z-direction
     //Used to search for points that satisfy users query
     StiHit* mminpoint;
     StiHit* mmaxpoint;
     StiHit mUtilityHit;
-    hitvector::iterator mstart;
-    hitvector::iterator mstop;
+    HitVectorType::iterator mstart;
+    HitVectorType::iterator mstop;
     //Used to return points that satisfy users query
-    hitvector::const_iterator mcurrent;
-    hitvector mcandidatevec; //! container of candidate points near to ref
-    hitmap mmap; //! the hit container
+    HitVectorType::const_iterator mcurrent;
+    HitVectorType mcandidatevec; //! container of candidate points near to ref
+    HitMapToVectorAndEndType mmap; //! the hit container
 };
 
-inline const hitmap& StiHitContainer::hits() const 
+inline const HitMapToVectorAndEndType& StiHitContainer::hits() const 
+{
+    return mmap;
+}
+
+inline HitMapToVectorAndEndType& StiHitContainer::hits()
 {
     return mmap;
 }
@@ -291,12 +298,12 @@ inline unsigned int StiHitContainer::numberOfVertices() const
 
 /*! The vertices are stored in a single std::vector<StiHit*> object.
  */
-inline const hitvector& StiHitContainer::vertices() const
+inline const HitVectorType& StiHitContainer::vertices() const
 {
     return mvertexvec;
 }
 
-ostream& operator<<(ostream&, const hitvector&);
+ostream& operator<<(ostream&, const HitVectorType&);
 ostream& operator<<(ostream&, const StiHitContainer&);
 
 #endif
