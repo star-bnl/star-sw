@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.2 1999/01/28 02:51:40 lasiuk Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.3 1999/02/16 23:28:46 lasiuk Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,9 +16,10 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
- * Revision 1.2  1999/01/28 02:51:40  lasiuk
- * add ()localSector --> Raw
- * add ()localSector --> Local
+ * Revision 1.3  1999/02/16 23:28:46  lasiuk
+ * matrix(3) is a data member to avoid constructor calls
+ * protection against pad<1
+ * const removed from several functions (because of matrix)
  *
  * Revision 1.3  1999/02/16 23:28:46  lasiuk
  * matrix(3) is a data member to avoid constructor calls
@@ -77,23 +78,23 @@ class StTpcCoordinateTransform {
 public:
     StTpcCoordinateTransform(StTpcGeometry*, StTpcSlowControl*);
 
-    void  operator()(const StTpcPadCoordinate&, StTpcLocalCoordinate&) const;
-    void  operator()(const StTpcLocalCoordinate&, StTpcPadCoordinate&) const;
+    ~StTpcCoordinateTransform();
+    //StTpcCoordinateTransform(const StTpcCoordinateTransform&);
     //StTpcCoordinateTransform& operator=(const StTpcCoordinateTransform&);
     
-    void  operator()(const StTpcLocalSectorCoordinate&, StTpcLocalCoordinate&) const;
-    void  operator()(const StTpcLocalSectorCoordinate&, StTpcPadCoordinate&) const;
+//      Raw Data          <-->  Internal TpcCoordinate
+    void  operator()(const StTpcPadCoordinate&, StTpcLocalCoordinate&);
     void  operator()(const StTpcLocalCoordinate&, StTpcPadCoordinate&);
 
-    void  operator()(const StTpcLocalCoordinate&, StGlobalCoordinate&) const;
-    void  operator()(const StGlobalCoordinate&, StTpcLocalCoordinate&) const;
+// Tpc Local Sector --> TPC Local
+    void  operator()(const StTpcLocalSectorCoordinate&, StTpcLocalCoordinate&);
     void  operator()(const StTpcLocalSectorCoordinate&, StTpcPadCoordinate&);
     
-    void  operator()(const StTpcPadCoordinate&, StGlobalCoordinate&)   const;
-    void  operator()(const StGlobalCoordinate&, StTpcPadCoordinate&)   const;
+// Internal TpcCoordinate <-->  Global Coordinate
+    void  operator()(const StTpcLocalCoordinate&, StGlobalCoordinate&);
     void  operator()(const StGlobalCoordinate&, StTpcLocalCoordinate&);
-    StThreeVector<double> sector12Coordinate(StThreeVector<double>&, int*) const;
-    StThreeVector<double> padCentroid(StTpcLocalCoordinate&, int*, int*)   const;
+
+//      Raw Data          <-->  Global Coordinate
     void  operator()(const StTpcPadCoordinate&, StGlobalCoordinate&);
     void  operator()(const StGlobalCoordinate&, StTpcPadCoordinate&);
 
@@ -105,22 +106,26 @@ private:
     // Raw Data From Coordinates
     int      sectorFromCoordinate(const StTpcLocalCoordinate&)       const;
     int      sectorFromCoordinate(const StThreeVector<double>&)      const;
-    StThreeVector<double> xyFromRaw(const StTpcPadCoordinate&) const;
+    int      rowFromLocal(const StThreeVector<double>&)              const;
     int      padFromLocal(const StThreeVector<double>&, const int)   const;
     int      tBFromZ(const double)                                   const;
 
     // Coordinates from Raw Data
     StThreeVector<double> xyFromRaw(const StTpcPadCoordinate&)      ;
-    StThreeVector<double> rotateToLocal(const StThreeVector<double>&, const int)    const;
-    StThreeVector<double> rotateFromLocal(const StThreeVector<double>&, const int)  const;
+    double                yFromRow(const int)                  const;
+    double                xFromPad(const int, const int)       const;
     double                zFromTB(const int)                   const;
     
     // rotations
     StThreeVector<double> rotateToLocal(const StThreeVector<double>&, const int)  ;
     StThreeVector<double> rotateFromLocal(const StThreeVector<double>&, const int);
 
-    StTpcGeometry    *mTPCdb;  // singleton class
-    StTpcSlowControl *mSCdb;   // singleton class
+    // Utilities
+    double      rad2deg(double)        const; //radians to degrees (should be in global?)
+    int         nearestInteger(double) const;
+
+private:
+    StMatrix<double>  mRotation;  // (2x2)
     StMatrix<double>  mRotate;    // (2x1)
     StMatrix<double>  mResult;    // (2x1)
     

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.6 1999/02/16 18:15:41 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.7 1999/02/16 23:28:59 lasiuk Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,8 +16,10 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
- * Revision 1.6  1999/02/16 18:15:41  fisyak
- * Check in the latest updates to fix them
+ * Revision 1.7  1999/02/16 23:28:59  lasiuk
+ * matrix(3) is a data member to avoid constructor calls
+ * protection against pad<1
+ * const removed from several functions (because of matrix)
  *
  *
  * Revision 1.9  1999/02/24 19:31:25  lasiuk
@@ -57,20 +59,22 @@
  * Revision 1.4  1998/10/22 00:24:19  lasiuk
  * Oct 22
  *
+ * Revision 1.3  1998/06/04 23:24:09  lasiuk
+ * add sector12 coordinate transform as a public member
+ *
  * Revision 1.2  1998/05/25 17:05:25  lasiuk
-StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcGeometry* geomdb, StTpcSlowControl* scdb)
-{
  * use databases instead of filenames
  *
 StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcGeometry* geomdb, StTpcSlowControl* scdb)
  *
+ ***********************************************************************/
 #include "StTpcCoordinateTransform.hh"
 #include "StMatrix.hh"
 
 						   StTpcSlowControl* scdb,
 						   StTpcElectronics* eldb)
     : mRotation(2,2,1), mRotate(2,1,0), mResult(2,1,0) {
-void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a, StGlobalCoordinate& b) const 
+
     mTPCdb = geomdb;
     mSCdb  = scdb;
     mElectronicsDb = eldb;
@@ -78,7 +82,7 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a, StGlobalC
     //system("/opt/audio/bin/send_sound -server xstar3 /home/star/ullrich/tmp/sounds/ferrari.au &");
     //system("/opt/audio/bin/send_sound -server xstar3 /home/star/ullrich/tmp/sounds/james-bond.au &");
     //system("/home/star/lasiuk/bin/xmelt -display xstar1:0 &");
-void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a, StTpcPadCoordinate& b) const
+}
 
 StTpcCoordinateTransform::~StTpcCoordinateTransform() { /* nopt */ }
 
@@ -87,7 +91,7 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a, StGlobalC
 {
     StTpcLocalCoordinate tmp;
     
-void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a, StTpcLocalCoordinate& b) const 
+    this->operator()(a,tmp);
     this->operator()(tmp,b);
 }
 
@@ -100,7 +104,7 @@ void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a, StTpcPadC
 }
 
 //      Raw Data          <-->  Tpc Local Coordinate
-void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate&  a, StTpcPadCoordinate& b) const 
+void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a, StTpcLocalCoordinate& b)
 {
     // Covert to xy and rotate into local sector frame (12)
     StThreeVector<double> tmp = xyFromRaw(a);
@@ -121,7 +125,7 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate&  a, StTpcP
     //PR(sector);
     
     // rotate to local sector frame (12)
-void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, StTpcPadCoordinate& b) const
+    StThreeVector<double> tmp = rotateToLocal(a.pos(),sector);
     //PR(tmp);
     int row = rowFromLocal(tmp);
     //PR(row);
@@ -151,7 +155,7 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
     double thePitch = (row<=13) ?
 	mTPCdb->innerSectorPadPitch() :
 	mTPCdb->outerSectorPadPitch();
-void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, StTpcLocalCoordinate& b) const 
+
     double shift =  (a.pos().x())/thePitch + .5;
     // shift in number of pads from centerline
     int numberOfPads = nearestInteger(shift);
@@ -175,7 +179,7 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
     int isdet = (decodedVolumeId/100000);
     decodedVolumeId -= isdet*100000;
     int sector = decodedVolumeId/100;
-void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate& a, StGlobalCoordinate& b) const 
+    int row = decodedVolumeId - sector*100;
     //PR(row);
 
     double yOffsetInSector12 = mTPCdb->radialDistanceAtRow(row);
@@ -183,7 +187,7 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate& a, StGloba
 					   a.pos().y() + yOffsetInSector12,
 					   a.pos().z() + mTPCdb->frischGrid());
     StThreeVector<double> tmp = rotateFromLocal(sector12Position,sector);
-void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a, StTpcLocalCoordinate& b) const 
+
     b = StTpcLocalCoordinate(tmp);
 }
 
@@ -191,7 +195,7 @@ void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a, StTpcLoca
 void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate& a, StGlobalCoordinate& b) 
 {
     // Requires survey DB i/o!
-StThreeVector<double> StTpcCoordinateTransform::sector12Coordinate(StThreeVector<double>& v, int *sector) const
+    // Take as unity for now
 
     b = StGlobalCoordinate(a.pos());
 }
@@ -199,7 +203,7 @@ StThreeVector<double> StTpcCoordinateTransform::sector12Coordinate(StThreeVector
 void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a, StTpcLocalCoordinate& b)
 {
     // Requires survey DB i/o!
-StTpcCoordinateTransform::padCentroid(StTpcLocalCoordinate& local, int *pad, int *row) const
+    // Take as unity for now
 
     b = StTpcLocalCoordinate(a.pos());   
 }
@@ -317,7 +321,13 @@ int StTpcCoordinateTransform::padFromLocal(const StThreeVector<double>& b, const
     idb << "Row " << row << " has " << mTPCdb->numberOfPadsAtRow(row) << " pads." << endl;
 
     double thePitch = (row<=13) ?
-    if(probablePad<1) probablePad = 1;
+	mTPCdb->innerSectorPadPitch() :
+	mTPCdb->outerSectorPadPitch();
+
+    double shift =  b.x()/thePitch + .5;
+
+    // shift in number of pads from centerline
+    int numberOfPads = nearestInteger(shift);
     
     idb << "Number of Pads (shift): " << numberOfPads << endl;
 
@@ -325,7 +335,7 @@ int StTpcCoordinateTransform::padFromLocal(const StThreeVector<double>& b, const
 
     // CAUTION: pad cannot be <1
     if(probablePad<1) {
-StThreeVector<double> StTpcCoordinateTransform::xyFromRaw(const StTpcPadCoordinate& a) const
+// 	cerr << "ERROR in pad From Local.\n";
 // 	cerr << "Pad is calculated to be '" << probablePad << "'\n";
 // 	cerr << "Assigning Pad='1'"<< endl;
 	probablePad=1;
@@ -392,7 +402,7 @@ int StTpcCoordinateTransform::tBFromZ(const double z) const
 #ifndef ST_NO_NAMESPACES    
     }
 #endif
-				     const int sector) const
+    //PR(z);
     //PR(mSCdb->driftVelocity());
     double tb = (mTPCdb->frischGrid() - mElectronicsDb->tZero()*mSCdb->driftVelocity() - z)/mSCdb->driftVelocity();
 
@@ -400,60 +410,98 @@ int StTpcCoordinateTransform::tBFromZ(const double z) const
 }
 
 //
+// Rotation Matrices
+//
 
-    const int m = 2;  
-    const int n = 2;
-    StMatrix<double> m1(m,n,0);
-
-    // vector to be rotated
-    StMatrix<double> v1(2,1,0);
-    v1(1,1) = a.x();
-    v1(2,1) = a.y();  // z co-ordinate is immaterial
+StThreeVector<double>
+StTpcCoordinateTransform::rotateToLocal(const StThreeVector<double>& a,
+				     const int sector)
+{
+    // Should be replaced with Rotation class:
+    //
+    // define 2x2 rotation matrix
+    //
+    // ( cos Þ   sin Þ )
+    // (-sin Þ   cos Þ )
 
     double beta = sector*M_PI/6;   //(30 degrees)
-  
-    m1(1,1) = cos(beta);
-    m1(1,2) = -sin(beta);
+    
+    //
+    // In order to speed up the code, the Matrix constructors
+    // have been moved to data Members and are initialized in
+    // the constructor.  This has also meant the removal of
+    // a lot of "const" because many functions now modify the
+    // data members.  This is the old code:
+    //
+//     const int m = 2;  
+//     const int n = 2;
+//     StMatrix<double> m1(m,n,0);
 
-    m1(2,1) = -1*m1(1,2); // saves calculation sin(beta);
-    m1(2,2) = m1(1,1);    // saves calculation cos(beta);
+//     // vector to be rotated
+//     StMatrix<double> v1(2,1,0);
+//     v1(1,1) = a.x();
+//     v1(2,1) = a.y();  // z co-ordinate is immaterial
 
-    //PR(m1);
-    StMatrix<double> newMatrix = m1*v1;
-    //PR(newMatrix);
-    return(StThreeVector<double>(newMatrix(1,1),newMatrix(2,1),a.z()));
+//     m1(1,1) = cos(beta);
+//     m1(1,2) = -sin(beta);
+
+//     m1(2,1) = -1*m1(1,2); // saves calculation sin(beta);
+//     m1(2,2) = m1(1,1);    // saves calculation cos(beta);
+
+//     PR(m1);
+//     StMatrix<double> newMatrix = m1*v1;
+//     PR(newMatrix);
+    //
     // Now modify the data members instead:
     mRotation(1,1) =  cos(beta);
     mRotation(1,2) = -sin(beta);
-						     const int sector) const
+    mRotation(2,1) = -1.*mRotation(1,2);   // saves calculation sin(beta);
     mRotation(2,2) =    mRotation(1,1);   // saves calculation cos(beta);
 
     mRotate(1,1) = a.x();
     mRotate(2,1) = a.y();  // z co-ordinate is immaterial
 
     mResult = mRotation*mRotate;
-    
-    const int m = 2;  
-    const int n = 2;
-    StMatrix<double> m1(m,n,0);
 //     PR(mResult);
-    // vector to be rotated
-    StMatrix<double> v1(2,1,0);
+    
+    return(StThreeVector<double>(mResult(1,1),mResult(2,1),a.z()));
+}
 
-    v1(1,1) = a.x();
-    v1(2,1) = a.y();  // z co-ordinate is immaterial
+StThreeVector<double> StTpcCoordinateTransform::rotateFromLocal(const StThreeVector<double>& a,
+						     const int sector)
+{
 
     double beta = -sector*M_PI/6;   //(30 degrees)  NEGATIVE ANGLE!!!!!!!!
-    idb << "Rotation angle is " << beta << endl;
-    m1(1,1) = cos(beta);
-    m1(1,2) = -sin(beta);
+    //
+    // ( cos Þ   sin Þ )
+    // (-sin Þ   cos Þ )
+    double beta = (sector>12) ? (sector-12)*M_PI/6 : -sector*M_PI/6;
+    //double beta = -sector*M_PI/6;   //(30 degrees)  NEGATIVE ANGLE!!!!!!!!
 
-    m1(2,1) = -1*m1(1,2); // saves calculation sin(beta);
-    m1(2,2) = m1(1,1);   // saves calculation cos(beta);
+    //
+    // See above for explanation.  All old code is as below
+    //
+//     const int m = 2;  
+//     const int n = 2;
+//     StMatrix<double> m1(m,n,0);
 
-    StMatrix<double> newMatrix = m1*v1;
-	
-    return(StThreeVector<double>(newMatrix(1,1),newMatrix(2,1),a.z()));
+//     // vector to be rotated
+//     StMatrix<double> v1(2,1,0);
+
+//     v1(1,1) = a.x();
+//     v1(2,1) = a.y();  // z co-ordinate is immaterial
+
+//     idb << "Rotation angle is " << beta << endl;
+//     m1(1,1) = cos(beta);
+//     m1(1,2) = -sin(beta);
+
+//     m1(2,1) = -1*m1(1,2); // saves calculation sin(beta);
+//     m1(2,2) = m1(1,1);   // saves calculation cos(beta);
+
+//     StMatrix<double> newMatrix = m1*v1;
+//     PR(newMatrix);
+
+    //
     // New code:
     //
     mRotation(1,1) =  cos(beta);
