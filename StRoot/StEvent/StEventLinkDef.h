@@ -17,6 +17,9 @@
 #pragma link C++ enum StTrackModel;
 #pragma link C++ enum StTrackType;
 #pragma link C++ enum StPidParticle;
+#pragma link C++ enum StDetectorId;
+#pragma link C++ enum StRichHitFlag;
+#pragma link C++ enum StPwg;
 #pragma link C++ class StTriggerData+;
 #pragma link C++ class StTriggerData2003+;
 #pragma link C++ class StTriggerData2004+;
