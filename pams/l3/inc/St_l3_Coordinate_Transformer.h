@@ -15,18 +15,27 @@
 #ifndef St_l3_Coordinate_Transformer_hh
 #define St_l3_Coordinate_Transformer_hh
 #include "St_l3_Coordinates.h"
-//#include <iostream.h>
+
 #include <math.h>
 
-//#define OFFLINE
+#undef L3OFFLINE
+//#define L3OFFLINE
+#ifdef L3OFFLINE
+#include "Rtypes.h"
+#include <StObject.h>
+#endif
 
-class St_l3_Coordinate_Transformer {
+#ifdef L3OFFLINE
+class St_l3_Coordinate_Transformer { //:public StObject {
+#else
+class St_l3_Coordinate_Transformer{
+#endif
 
 private:
    
     // basic geometry fixed here ... this could be also taken from db
     static int    numberOfPadsAtRow[45];
-    static double radialDistanceAtRow[45];
+    static double radialDistanceAtRow[45]; 
     static double SectorSin[24];
     static double SectorCos[24];
     static double innerSectorPadPitch;
@@ -85,10 +94,11 @@ public:
     double Get_lengthPerTb() { return lengthPerTb ; } ;
     int Get_transformation_errors() { return transformation_errors; } ;
 
-    #ifdef OFFLINE
+    
+#ifdef L3OFFLINE
     // Root connection
-    ClassDef(St_l3_Coordinate_Transformer, 0)
-    #endif
+    ClassDef(St_l3_Coordinate_Transformer,0)
+#endif    
 };
 
 #endif //St_l3_Coordinate_Transformer_hh
