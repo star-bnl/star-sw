@@ -43,7 +43,7 @@ int tNumberOfOuterRow=tLastOuterRow-tFirstOuterRow+1;
 //int tMaxNumberOfOuterPad=gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(gStTpcDb->PadPlaneGeometry()->lastOuterSectorPadRow());
 int tMaxNumberOfOuterPad=144;
 
-
+mNEvt=0;
 
   char tBuffHName[20];
   char tBuffHTitle[100];
@@ -269,6 +269,7 @@ void StTpcCalibSector::updateDead(StTPCReader* aZSupReader){
 //
 void StTpcCalibSector::updateGain(StTPCReader* aZSupReader){
   //int tNumberOfRows=gStTpcDb->PadPlaneGeometry()->numberOfRows();
+  mNEvt++;
   int tNumberOfRows=45;
 
   float tDistToPulseTBPos;
@@ -361,7 +362,7 @@ void StTpcCalibSector::findDead(){
 	tiPad<mNumberOfPadAtRow[tiRow-1];//gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(tiRow);
 	tiPad++){
       if(mHBadMap->GetCellContent(tiPad,tiRow)!=1 && 
-	 mHFoundMap->GetCellContent(tiPad,tiRow)==0.){
+	 (mHFoundMap->GetCellContent(tiPad,tiRow)/mNEvt)<0.95){
 	mHDeadMap->Fill(tiPad,tiRow,1.);
       }
     }
@@ -391,7 +392,7 @@ void StTpcCalibSector::calcGainCoeficient(){
 
   double tGood=0.; double tAll=0.;
   int tiRow,tiPad;
-  double tMeanAmp;
+  double tMeanSectorAmp;
   int tNCount;
 
   mHAmpMap->Divide(mHFoundMap);
@@ -399,7 +400,7 @@ void StTpcCalibSector::calcGainCoeficient(){
 
 // Inner sector
 // >>> Mean amplitude calculation
-  tMeanAmp=0.;
+  tMeanSectorAmp=0.;
   tNCount=0;
   for(tiRow=1;
       tiRow<tFirstOuterPadRow;
@@ -409,13 +410,13 @@ void StTpcCalibSector::calcGainCoeficient(){
 		-tPadExcluded);
 	tiPad++){
       if(mHBadMap->GetCellContent(tiPad,tiRow)==0 &&
-	 mHFoundMap->GetCellContent(tiPad,tiRow)!=0) {
-	tMeanAmp+=mHAmpMap->GetCellContent(tiPad,tiRow);
+	 mHDeadMap->GetCellContent(tiPad,tiRow)==0) {
+	tMeanSectorAmp+=mHAmpMap->GetCellContent(tiPad,tiRow);
 	tNCount++;
       }
     }
   }
-  tMeanAmp/=tNCount;
+  tMeanSectorAmp/=tNCount;
   // >>> make the map
   for(tiRow=1;
       tiRow<tFirstOuterPadRow;
@@ -425,17 +426,14 @@ void StTpcCalibSector::calcGainCoeficient(){
 	tiPad++){
       double tCalibCoef=0.;
       if(mHBadMap->GetCellContent(tiPad,tiRow)==0) {
-	if(mHFoundMap->GetCellContent(tiPad,tiRow)==0 || 
-	   tMeanAmp==0. || tiPad<tPadExcluded || 
+	if(mHDeadMap->GetCellContent(tiPad,tiRow)==1 || 
+	   tMeanSectorAmp==0. || tiPad<tPadExcluded || 
 	   tiPad>(mNumberOfPadAtRow[tiRow-1]//gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(tiRow)
 		  -tPadExcluded)){
           tCalibCoef=1.;
-	  if(mHFoundMap->GetCellContent(tiPad,tiRow)==0) {
-	    mHDeadMap->Fill(tiPad,tiRow,1.);
-	  }
 	}
 	else{
-          tCalibCoef=tMeanAmp/mHAmpMap->GetCellContent(tiPad,tiRow);
+          tCalibCoef=tMeanSectorAmp/mHAmpMap->GetCellContent(tiPad,tiRow);
 	}	
       }
       tAll++;
@@ -445,7 +443,7 @@ void StTpcCalibSector::calcGainCoeficient(){
   }  
   // Outer sector
   // >>> Mean amplitude calculation
-  tMeanAmp=0.;
+  tMeanSectorAmp=0.;
   tNCount=0;
   for(tiRow=tFirstOuterPadRow;tiRow<=tNumberOfRows;tiRow++){
     for(tiPad=tPadExcluded;
@@ -453,13 +451,13 @@ void StTpcCalibSector::calcGainCoeficient(){
 		-tPadExcluded);
 	tiPad++){
       if(mHBadMap->GetCellContent(tiPad,tiRow)==0 &&
-	 mHFoundMap->GetCellContent(tiPad,tiRow)!=0) {
-	tMeanAmp+=mHAmpMap->GetCellContent(tiPad,tiRow);
+	 mHDeadMap->GetCellContent(tiPad,tiRow)==0) {
+	tMeanSectorAmp+=mHAmpMap->GetCellContent(tiPad,tiRow);
 	tNCount++;
       }
     }
   }
-  tMeanAmp/=tNCount;
+  tMeanSectorAmp/=tNCount;
   // >>> make the map
   for(tiRow=tFirstOuterPadRow;tiRow<=tNumberOfRows;tiRow++){
     for(tiPad=1;
@@ -467,18 +465,15 @@ void StTpcCalibSector::calcGainCoeficient(){
 	tiPad++){
       double tCalibCoef=0.;
       if(mHBadMap->GetCellContent(tiPad,tiRow)==0) {
-	if(mHFoundMap->GetCellContent(tiPad,tiRow)==0 || 
-	   tMeanAmp==0. ||
+	if(mHDeadMap->GetCellContent(tiPad,tiRow)==1 || 
+	   tMeanSectorAmp==0. ||
 	   tiPad<tPadExcluded || 
 	   tiPad>(mNumberOfPadAtRow[tiRow-1]//(gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(tiRow)
 		  -tPadExcluded)){
 	  tCalibCoef=1.;
-	  if(mHFoundMap->GetCellContent(tiPad,tiRow)==0){
-	    mHDeadMap->Fill(tiPad,tiRow,1.);
-	  }
 	}
         else{
-          tCalibCoef=tMeanAmp/mHAmpMap->GetCellContent(tiPad,tiRow);
+          tCalibCoef=tMeanSectorAmp/mHAmpMap->GetCellContent(tiPad,tiRow);
         }     
       }
       tAll++;
@@ -615,14 +610,30 @@ void StTpcCalibSector::readDeadTable(ifstream* aInFile){
 //
 void StTpcCalibSector::writeCalibCoefTable(ofstream* aOutFile){
   (*aOutFile) << "Sector " << mSectorId << endl;
-  for(int tiRow=1;tiRow<=mHAmpMap->GetNbinsY();tiRow++){
+
+  int tNInnerSectorRow=13;//gStTpcDb->PadPlaneGeometry()->firstOuterSectorPadRow()-1;
+  int tFirstOuterSectorRow=14;//gStTpcDb->PadPlaneGeometry()->firstOuterSectorPadRow();
+  int tLastOuterSectorRow=45;//gStTpcDb->PadPlaneGeometry()->numberOfRows();
+
+  for(int tiRow=1;tiRow<=tNInnerSectorRow;tiRow++){
     (*aOutFile) << "Row " << tiRow << " " 
-		<< mNumberOfPadAtRow[tiRow] <<endl;
-    for(int tiPad=1; tiPad<=mNumberOfPadAtRow[tiRow];tiPad++){
-      (*aOutFile) <<  mHAmpMap->GetCellContent(tiPad,tiRow) << " ";
+		<< mNumberOfPadAtRow[tiRow-1] <<endl;
+    for(int tiPad=1; tiPad<=mNumberOfPadAtRow[tiRow-1];tiPad++){
+      (*aOutFile) <<  mHInnerCalibMap->GetCellContent(tiPad,tiRow) << " ";
     }
     (*aOutFile) << endl;
   }
+
+  for(int tiRow=tFirstOuterSectorRow;
+      tiRow<=tLastOuterSectorRow;tiRow++){
+    (*aOutFile) << "Row " << tiRow << " " 
+		<< mNumberOfPadAtRow[tiRow-1] <<endl;
+    for(int tiPad=1; tiPad<=mNumberOfPadAtRow[tiRow-1];tiPad++){
+      (*aOutFile) <<  mHOuterCalibMap->GetCellContent(tiPad,tiRow-tNInnerSectorRow) << " ";
+    }
+    (*aOutFile) << endl;
+  }
+
 }
 // __________________________________
 //
