@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.h,v 1.14 2002/01/17 03:25:37 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.h,v 1.15 2003/06/24 02:53:14 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.h,v $
+ * Revision 1.15  2003/06/24 02:53:14  aihong
+ * update for dAu PIDtable
+ *
  * Revision 1.14  2002/01/17 03:25:37  aihong
  * add production Tag to take care of different centrality def. between different productions
  *
@@ -88,6 +91,8 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
       double mostLikelihoodProbability();
       double secondLikelihoodProbability();
       double thirdLikelihoodProbability();
+
+      double getCentrality(int theMult);
   
       double beingPionMinusProb()  const { return  mPionMinusProb;}
       double beingElectronProb()   const { return  mElectronProb; }
@@ -123,8 +128,9 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
       void   fill(double prob, int geantId);
       void   fillAsUnknown();
       void   lowRigPID(double rig,double dedx,int theCharge);
-      double getCentrality(int theMult);
+
       double getCentrality_P01gl(int theMult);
+      double getCentrality_P03ia_dAu(int theMult);
       int    getCentralityBin(double theCent);
       int    getCalibPosition(double theEta, int theNHits);
       void   setCalibrations(double theEta, int theNhits);
