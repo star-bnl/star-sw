@@ -34,7 +34,7 @@ ClassImp(StEmcSimulatorMaker)
 TDataSet  *geaIn, *ems;
 St_g2t_emc_hit *g2t_emc_hit, *g2t_smd_hit;
 
-#include "../StEmcUtil/emcDetectorName.h"
+#include "StEmcUtil/emcDetectorName.h"
 
 St_controlEmcSimulatorMaker* controlMaker; controlEmcSimulatorMaker_st* controlTable;
 
@@ -429,7 +429,7 @@ Int_t StEmcSimulatorMaker::makeAllRawHitsForBemc()
     if(nhits > 0) {
       for(m=0; m<mEmcMcHits[i]->numberOfModules(); m++){ // Cycle on module
         mf = m + 1; // m - C style index; mf - Fortran style index !!!!
-        const StMcEmcModuleHitCollection* module = mEmcMcHits[i]->module(m);
+        const StMcEmcModuleHitCollection* module = mEmcMcHits[i]->module(mf);
         const ULong_t nhm = module->numberOfHits();
         if(nhm>0){
           rawHit.module = mf;
@@ -530,7 +530,7 @@ void StEmcSimulatorMaker::compareOldSimulator()
       de  = tab[nh].energy;
 
       bemcM  = getEmcMcHits(det);
-      module = bemcM->module(m-1);
+      module = bemcM->module(m);
       nbemc[det-1]++;
 
       StSPtrVecMcCalorimeterHit& hits = module->hits(); 
@@ -631,8 +631,11 @@ void StEmcSimulatorMaker::pictureCompareDe(Int_t print)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.5 2001/03/23 19:02:51 pavlinov Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.6 2001/05/14 01:21:45 pavlinov Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.6  2001/05/14 01:21:45  pavlinov
+// In method StMcEmcHitCollection::module(m) m is module number, not index
+//
 // Revision 1.5  2001/03/23 19:02:51  pavlinov
 // Get pointer to chain via list of browsables
 //
