@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireBinEntry.cc,v 1.1 1998/11/10 17:12:27 fisyak Exp $
+ * $Id: StTrsWireBinEntry.cc,v 1.2 1999/01/18 10:18:08 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireBinEntry.cc,v $
- * Revision 1.1  1998/11/10 17:12:27  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/18 10:18:08  lasiuk
+ * constructor by reference
+ * set functions by reference
  *
  * Revision 1.1  1998/11/10 17:12:27  fisyak
  * Put Brian trs versin into StRoot
@@ -30,7 +31,7 @@
 StTrsWireBinEntry::StTrsWireBinEntry() { /* nopt */ }
 #endif
 
-StTrsWireBinEntry::StTrsWireBinEntry(StThreeVector<double> x, float elec)
+StTrsWireBinEntry::StTrsWireBinEntry(StThreeVector<double>& x, float elec)
     : mPosition(x), mNumberOfElectrons(elec) {/* nopt */ }
 
 StTrsWireBinEntry::~StTrsWireBinEntry() {/* nopt */ }
