@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: JetEvent.h,v 1.1 2003/05/15 18:18:16 thenry Exp $
+ * $Id: JetEvent.h,v 1.2 2003/05/15 18:47:24 thenry Exp $
  * $Log: JetEvent.h,v $
+ * Revision 1.2  2003/05/15 18:47:24  thenry
+ * *** empty log message ***
+ *
  * Revision 1.1  2003/05/15 18:18:16  thenry
  * Creation of JetEvent:  This class is little more than a bare Jet structure
  * with the ability to do unformatted stream i/o, and formatted stream output.
@@ -25,6 +28,10 @@
 #include <vector>
 #include <typeinfo>
 using namespace std;
+
+#ifdef __ROOT__
+#include <Rtypes.h>
+#endif
 
 class EventSubStruct {
  public:
@@ -163,7 +170,7 @@ public:
       trackEta(track.trackEta),
       isTpcTrack(track.isTpcTrack) {};
 
-    ~JetEvent();
+    virtual ~JetEvent();
 
     void clear(void) { triggers.clear(); event.clear(); 
       jets.clear(); tracks.clear(); };
@@ -212,6 +219,10 @@ public:
 	  it != newtriggers.end(); ++it)
 	triggers.push_back(static_cast<short>(*it));
     };
+
+#ifdef __ROOT__
+    ClassDef(JetEvent, 0)
+#endif
 };
 
 ostream& write(ostream &os, JetEvent& jets);
