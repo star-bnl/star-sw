@@ -1,14 +1,18 @@
 /***************************************************************************
- * $Id: TPCV2P0.Banks.cxx,v 1.2 1999/07/02 04:43:23 levine Exp $
- * Author: M.W. Shculz, Jeff Landgraf and M.J. LeVine
+ * $Id: TPCV2P0.Banks.cxx,v 1.3 1999/07/22 17:56:26 levine Exp $
+ * Author: M.W. Schulz, Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: Overrides (mostly for the swap functions, 
  *              print functions of each bank)
  *
  *   change log
+ * 12-Jul-99 MJL add TPCMZCLD
  *
  ***************************************************************************
  * $Log: TPCV2P0.Banks.cxx,v $
+ * Revision 1.3  1999/07/22 17:56:26  levine
+ * add TPCMZCLD (mezz cluster pointer bank) description
+ *
  * Revision 1.2  1999/07/02 04:43:23  levine
  * Many changes -
  *  navigates to head of TPCP bank independent of position.
@@ -158,6 +162,24 @@ int classname(Bank_TPCGAINR)::swap()
 }
  
   
+int classname(Bank_TPCMZCLD)::swap()
+{
+  int iret = swap_raw(header.ByteOrder,&NumRows,1);
+  if(iret <= 0) return iret;
+
+  int nsp = 0;
+  int *word = &NumRows;
+  word++; //bump to first instance of PadRow
+  for (int i=0; i<NumRows; i++){
+    swap_raw(header.ByteOrder,word,2);
+    nsp = word[1];
+    word+=2; //point to first cluster
+    swap_short(header.ByteOrder,word,2*nsp);
+    word+=2*nsp; //bump past clusters
+  }
+
+  return header.swap();
+}
   
 
 
