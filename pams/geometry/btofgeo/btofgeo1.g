@@ -1,5 +1,13 @@
-* $Id: btofgeo1.g,v 1.2 2001/03/14 17:39:33 geurts Exp $
+* $Id: btofgeo1.g,v 1.3 2004/01/29 20:48:30 potekhin Exp $
 * $Log: btofgeo1.g,v $
+* Revision 1.3  2004/01/29 20:48:30  potekhin
+* Commented out a few statements that caused the compiler to
+* crash with seemingly normal set of command line keys.
+* This piece of code is very unlikely to be used again and
+* in case such need arises, this will be treated as special
+* case and a custom geo can then be built. The code below
+* is then NON_FUNCTIONAL
+*
 * Revision 1.2  2001/03/14 17:39:33  geurts
 * fixed bug in outer CTB slab dimensioning
 *
@@ -214,11 +222,12 @@ Block BXTR  is a Main TRay covering box for CTB
       Material   Aluminium
       Shape      BOX      DX=tray_height/2,
                           dz=tray_length/2  
-      if (tof==1) then
+
+*      if (tof==1) then
          Create and Position BTTC
-      else
+*      else
          Create and Position BMTC
-      endif
+*      endif
 EndBlock
 *
 *------------------------------------------------------------------------------
@@ -289,9 +298,9 @@ Block BTTC  is  the Main Tray Cavity filled with MANY details for TOF
        Position BFEE X=toff_ElecX Z=zpfee
        zpfee    = zpfee - toff_ElecDz
       Enddo
-   if (1>2) then
+*   if (1>2) then
       Create and Position  BCOO X=0 Y=0 dx=0 dy=0 dz=0
-   endif
+*   endif
       Create and Position  BMTM   
 EndBlock
 *
