@@ -74,25 +74,23 @@ TObject *StIO::Read(TFile *file, const Char_t *name, ULong_t  ukey)
 {
   assert(file);
 
-//VP  StIOEvent event;
-//VP  event.fObj = 0;
   StIOEvent *event = 0;  
+  TObject   *retn  = 0;
   TFile *bakfile = gFile; TDirectory *bakdir = gDirectory; file->cd();
 
-   if (!gFile) { printf("<StIO::Read> No file open \n"); return 0; }
+   if (!gFile) { 
+     printf("<StIO::Read> No file open \n"); 
+     gFile=bakfile; gDirectory=bakdir;return 0; }
+
    TKey *key = (TKey*)gDirectory->GetListOfKeys()->FindObject((const char*)MakeKey(name,ukey));
    if (!key)   { printf("<StIO::Read> Key not found\n"); return 0; }
    event = (StIOEvent*)key->ReadObj();
-
-//VP  event.Read((const char*)MakeKey(name,ukey));
-  gFile=bakfile; gDirectory=bakdir;
-//VP  if (!event.fObj)  return 0; 
-//VP  assert(event.GetUniqueID()==ukey);
-//VP  return event.fObj;
+   gFile=bakfile; gDirectory=bakdir;
    if (!event) 		return 0;
-   if (!event->fObj)  	return 0;
-   assert(event->GetUniqueID()==ukey);
-   return event->fObj;
+   retn = event->fObj; 
+   assert( !retn || event->GetUniqueID()==ukey);
+   delete event;
+   return retn;
 }
 //_______________________________________________________________________________
 ULong_t StIO::GetNextKey(TFile *file, const Char_t *name, ULong_t ukey)
@@ -325,10 +323,8 @@ void StBranch::SetParAll(TList *savList)
 void StBranch::OpenTFile()
 {
   if (fTFile) return;
-  gDirectory = 0;
-  TObject *tf = gROOT->FindObject(GetFile());
-  if (tf && !tf->InheritsFrom(TFile::Class())) tf = 0;
-  fTFile = (TFile*)tf;
+  TFile *tf= gROOT->GetFile(GetFile());
+  fTFile = tf;
   if (!fTFile) fTFile = new TFile(GetFile(),TFOPT[fIOMode],GetName());
   if (fTFile->IsZombie()) {
     Error("OpenTFile","File %s NOT OPENED ***\n",fTFile->GetName());
