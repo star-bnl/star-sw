@@ -59,6 +59,7 @@ C----------------------------------------------------------------------
 C
 C  set counters for number of rows of good data to 0
          ev0out_h.nok  = 0
+         trak_h.nok = 0
 C
 C  set return code to normal success
       EV0_AM=STAFCV_OK
@@ -78,6 +79,7 @@ c Transform tracking parameters to local parameters
         DO i=1,globtrk_h.nok
            if (globtrk(i).sflag .gt. 0 ) then
               nok=nok+1
+              IF(nok.ge. trak_h.maxlen)   GOTO 35
               trak(nok).id  = globtrk(i).id
               trak(nok).r0   = globtrk(i).r0
               trak(nok).phi  = globtrk(i).phi0*degrad
@@ -93,7 +95,6 @@ c Transform tracking parameters to local parameters
               trak(nok).pid = globtrk(i).id_global_pid
               trak(nok).sagitta = globtrk(i).length**2/(8*trak(nok).rc)
 
-              IF(nok.ge. trak_h.maxlen) GOTO 35
            endif
         ENDDO
  35     CONTINUE
@@ -112,6 +113,16 @@ c
 c
 c call analysis (clean up) module, ev0par(1).iflag=1
 c
+        if( ev0out_h.nok .gt. ev0out_h.maxlen )then
+           ev0out_h.nok = ev0out_h.maxlen
+           EV0_AM= STAFCV_BAD
+           return
+        endif
+        if( vertex_h.nok .gt. vertex_h.maxlen) then
+           vertex_h.nok = vertex_h.maxlen
+           EV0_AM = STAFCV_BAD
+           return
+        endif
 
         IF( ev0par(1).iflag.eq.1) THEN
            CALL V0_CLEAN(ev0out_h,ev0out)
@@ -121,6 +132,7 @@ c
         trak_h.nok = 0
 C     return a normal success code
         
+        write(6,*) 'Found',ev0out_h.nok,' v0 candidates'
         EV0_AM=STAFCV_OK
  999    CONTINUE
         RETURN

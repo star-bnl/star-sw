@@ -148,6 +148,9 @@ C---------------
          ev0_eval(i).pz_true=g2t_track(g2t_vertex(iv1).parent_p).p(3)
          ev0_eval(i).rapidity_true = 
      +        g2t_track(g2t_vertex(iv1).parent_p).rapidity
+        ev0_eval(i).pid_true = 
+     +        g2t_track(g2t_vertex(iv1).parent_p).ge_pid
+
         else
       
          ev0_eval(i).x_true= 0
@@ -157,6 +160,7 @@ C---------------
          ev0_eval(i).py_true= 0
          ev0_eval(i).pz_true= 0
          ev0_eval(i).rapidity_true = 0
+        ev0_eval(i).pid_true = 0
          endif
 
         ev0_eval(i).x = vertex(ev0out(i).id_vertex).x
@@ -165,12 +169,15 @@ C---------------
         ev0_eval(i).px = ev0out(i).px
         ev0_eval(i).py = ev0out(i).py
         ev0_eval(i).pz = ev0out(i).pz
+        ev0_eval(i).inv_mass_la = ev0out(i).inv_mass_la
+        ev0_eval(i).inv_mass_lb = ev0out(i).inv_mass_lb
+        ev0_eval(i).inv_mass_k0 = ev0out(i).inv_mass_k0
         ev0_eval(i).rapidity_la = ev0out(i).rapidity_la
         ev0_eval(i).rapidity_lb = ev0out(i).rapidity_lb
         ev0_eval(i).rapidity_k0 = ev0out(i).rapidity_k0
         ev0_eval(i).pid_pos = ev0out(i).pidpos
         ev0_eval(i).pid_neg = ev0out(i).pidneg
-        ev0_eval(i).pid_true = g2t_track(g2t_vertex(iv1).parent_p).ge_pid
+        ev0_eval(i).id = ev0out(i).id
 
         if (iv1t .gt. 0) then
            ev0_eval(i).pid_neg_true = g2t_track(iv1t).ge_pid
