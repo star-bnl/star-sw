@@ -238,8 +238,8 @@ StHbtEvent* StHbtGstarTxtReader::ReturnHbtEvent(){
     StPhysicalHelixD helix = StPhysicalHelixD( hbtTrack->P(), vertexPos, HBT_BFIELD, hbtTrack->Charge() ); 
     hbtTrack->SetHelix(helix);
 
-    hbtTrack->SetDCAxy(0.0);
-    hbtTrack->SetDCAz(0.0);
+    hbtTrack->SetDCAxy(0.001);
+    hbtTrack->SetDCAz(0.001);
     hbtTrack->SetChiSquaredXY( 0.); 
     hbtTrack->SetChiSquaredZ( 0.); 
 
@@ -260,7 +260,7 @@ StHbtString StHbtGstarTxtReader::Report(){
 
 
 //_______________________________
-int StHbtGstarTxtReader::Init(const char* ReadWrite, StHbtString Message){
+int StHbtGstarTxtReader::Init(const char* ReadWrite, StHbtString& Message){
   cout << " *\n *\n *\n StHbtGstarTxtReader::Init() being called*\n *\n";
   mReaderStatus = 0;           // means "good"
   //  if ((ReadWrite=="r")|| (ReadWrite=="R")){  // this object will be a reader

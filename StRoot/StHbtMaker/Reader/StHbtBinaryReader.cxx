@@ -58,21 +58,26 @@ StHbtEvent* StHbtBinaryReader::ReturnHbtEvent(){
 }
 
 //_______________________________
-StHbtString StHbtBinaryReader::Report(){
-  StHbtString temp = "\n This is the StHbtBinaryReader - no Early Cuts applied\n";
-  return temp;
-}
+//StHbtString StHbtBinaryReader::Report(){
+//  StHbtString temp = "\n This is the StHbtBinaryReader - no Early Cuts applied\n";
+//  return temp;
+//}
 
 //_______________________________
 int StHbtBinaryReader::WriteHbtEvent(StHbtEvent* event){
-  int ret = binaryIO->writeEvent(*event);
-  if (!ret) cout << " error #" << ret << " while writing" << endl;
+  int iret=0;
+  if (!mEventCut || mEventCut->Pass(event)) {
+    cout << "StHbtBinaryReader: eventCut passed" << endl;
+    StHbtEvent newEvent(*event, mTrackCut, mV0Cut);
+    iret = binaryIO->writeEvent(newEvent);
+  }
+  if (!iret) cout << " error #" << iret << " while writing" << endl;
   cout << " StHbtBinaryReader::ReturnHbtEvent() *** bytes written : " << binaryIO->bytesWritten() << endl;;
   return (0);
 }
 
 //_______________________________
-int StHbtBinaryReader::Init(const char* ReadWrite, StHbtString Message){
+int StHbtBinaryReader::Init(const char* ReadWrite, StHbtString& Message){
   cout << " *\n *\n *\n StHbtBinaryReader::Init() being called*\n *\n";
   mReaderStatus = 0;           // means "good"
   //  if ((ReadWrite=="r")|| (ReadWrite=="R")){  // this object will be a reader

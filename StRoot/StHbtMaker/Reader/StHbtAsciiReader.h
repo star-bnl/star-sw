@@ -27,18 +27,18 @@ private:
   ifstream* mInputStream;              //!
   ofstream* mOutputStream;             //!
   const char* mFileName;               //!
-
+  
 public:
   StHbtAsciiReader();
   StHbtAsciiReader(char* FileName);
-  virtual ~StHbtAsciiReader();
+  ~StHbtAsciiReader();
 
   // generic StHbtEventReader methods
-  virtual StHbtEvent* ReturnHbtEvent();
-  virtual StHbtString Report();
-  virtual int WriteHbtEvent(StHbtEvent*);
-  virtual int Init(const char* ReadWrite, StHbtString Message=" ");
-  virtual void Finish();
+  //StHbtString Report();
+  StHbtEvent* ReturnHbtEvent();
+  int WriteHbtEvent(StHbtEvent*);
+  int Init(const char* ReadWrite, StHbtString& Message);
+  void Finish();
 
   // methods special to this Reader
   void SetFileName(char* file);

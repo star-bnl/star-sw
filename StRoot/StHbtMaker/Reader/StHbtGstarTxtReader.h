@@ -30,14 +30,14 @@ private:
 public:
   StHbtGstarTxtReader();
   StHbtGstarTxtReader(char* FileName);
-  virtual ~StHbtGstarTxtReader();
+  ~StHbtGstarTxtReader();
 
   // generic StHbtEventReader methods
-  virtual StHbtEvent* ReturnHbtEvent();
-  virtual StHbtString Report();
+  StHbtEvent* ReturnHbtEvent();
+  StHbtString Report();
   //  virtual int WriteHbtEvent(StHbtEvent*);
-  virtual int Init(const char* ReadWrite, StHbtString Message=" ");
-  virtual void Finish();
+  int Init(const char* ReadWrite, StHbtString& Message);
+  void Finish();
 
   // methods special to this Reader
   void SetFileName(char* file);
