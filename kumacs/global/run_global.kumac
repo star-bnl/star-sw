@@ -74,7 +74,7 @@
 * read run tables from input file
   exec read_table_from_file#read simd
   
-  if STAF_STATUS(1).eq.0 goto ENDOFDATA
+  if STAF_STATUS(1).eq.stafcv_bad goto ENDOFDATA
   
 * open output ntuple
   exec write_table_to_ntuple#init_disk [funit] [nfile]  
@@ -116,12 +116,12 @@
 
 * fill_dst_event_summary
   exec create_tables_global#fill_dst_event_summary
-  exec init_dst#init_ehead
 
 * fill_dst_run_summary
    exec create_tables_global#fill_dst_run_summary
-   exec create_tables_global#fill_dst_tof
+*   exec create_tables_global#fill_dst_tof
    exec init_dst#init_rhead
+
 
 ***************************************************************
 *  Run global
@@ -138,17 +138,17 @@
     tabclear [event]
 * read input file
     exec read_table_from_file#read simd
-    if STAF_STATUS(1).eq.0 goto ENDOFDATA
+    if STAF_STATUS(1).eq.stafcv_bad goto ENDOFDATA
 * count the total number of events processed .    DSW  Aug 28, 1998
    ntotevent=[ntotevent]+1
+* svm
+     exec run_svm#run_svm
 * evr  - must be before egr
    exec run_evr#run
-* svm
-     exec run_svm#run_svm 
 * egr
-     exec run_egr#egr 
+     exec run_egr#egr
 * ev0
-     exec run_ev0#ev0_am     
+     exec run_ev0#ev0_am
 * dst_dedx_filler - must be after tpc_tracking
      exec run_dst#dst_dedx_filler
 * dst_point_filler
@@ -160,10 +160,13 @@
 * dst_run_summary - must be called in every event to update sum variables.
 * DSW  Aug 28, 1998
     exec  run_dst#dst_run_summary
+* fill event_header table - must be done in event loop or it
+* gets wiped out!!!
+    exec init_dst#init_head
 * write table to ntuple
     exec write_table_to_ntuple#write_event_disk [nid] [dst]/[table]
 * Count the total #of events processed successfully.  DSW  Aug 28, 1998
-    if STAF_STATUS(1).ne.0  then
+    if STAF_STATUS(1).eq.stafcv_ok  then
       ngoodevents=[ngoodevents]+1
     endif
   enddo
