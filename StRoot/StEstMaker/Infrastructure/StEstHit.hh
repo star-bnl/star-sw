@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstHit.hh,v 1.1 2000/12/07 11:14:27 lmartin Exp $
+ * $Id: StEstHit.hh,v 1.2 2001/01/25 18:15:21 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,23 +10,21 @@
  ***************************************************************************
  *
  * $Log: StEstHit.hh,v $
+ * Revision 1.2  2001/01/25 18:15:21  lmartin
+ * New method DetachFromWafer.
+ *
  * Revision 1.1  2000/12/07 11:14:27  lmartin
  * First CVS commit
  *
  **************************************************************************/
 #ifndef StEstHit_hh
 #define StEstHit_hh
-#ifndef StMaker_H
 #include "StMaker.h"
-#endif
-
 #include "StThreeVectorD.hh"
-#include "StEstBranch.hh"
-
 class StEstWafer;
 class StEstBranch;
 class StEstTrack;
-class StEstMaker;
+class StEstTracker;
 
 class StEstHit {
 
@@ -48,11 +46,7 @@ protected:
 public:
   
   StEstHit(long id, StThreeVectorD *xg, StThreeVectorD *xl, long maxbranches, long maxsh, StEstWafer *det);
-  ~StEstHit() {
-    delete [] mBranch;
-    delete mXL;
-    delete mXG;
-  };
+  ~StEstHit();
   
   int  GetNBranch();
   int  GetMaxBranches();
@@ -66,6 +60,7 @@ public:
   StThreeVectorD* GetGlobX();
   StThreeVectorD* GetLocX();
   StEstWafer*  GetWafer();
+  void DetachFromWafer();
   StEstBranch* GetBranch(int i);
   int GetFlag();
   void SetFlag(int fl);
@@ -74,7 +69,7 @@ public:
   long GetMcId();
   void SetMcId(long i);
 
-  friend class StEstMaker;
+  friend class StEstTracker;
 };
 
 inline int StEstHit::CheckAvailability() {
@@ -100,9 +95,8 @@ inline long StEstHit::GetId() {return mId;};
 inline void StEstHit::SetId(long i) {mId=i;};
 inline long StEstHit::GetMcId() {return mMcId;};
 inline void StEstHit::SetMcId(long i) {mMcId=i;};
+
 #endif
-
-
 
 
 

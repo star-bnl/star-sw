@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstHit.cc,v 1.1 2000/12/07 11:14:27 lmartin Exp $
+ * $Id: StEstHit.cc,v 1.2 2001/01/25 18:15:21 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,11 +10,16 @@
  ***************************************************************************
  *
  * $Log: StEstHit.cc,v $
+ * Revision 1.2  2001/01/25 18:15:21  lmartin
+ * New method DetachFromWafer.
+ *
  * Revision 1.1  2000/12/07 11:14:27  lmartin
  * First CVS commit
  *
  **************************************************************************/
-#include "StEstMaker/Infrastructure/StEstHit.hh"
+#include "StEstHit.hh"
+#include "StEstWafer.hh"
+#include "StEstBranch.hh"
 
 StEstHit::StEstHit(long id, StThreeVectorD *xg, StThreeVectorD *xl, long maxbranches, long maxsh, StEstWafer *det) {
   int i;
@@ -25,18 +30,26 @@ StEstHit::StEstHit(long id, StThreeVectorD *xg, StThreeVectorD *xl, long maxbran
   mMaxBranches = maxbranches;
   mDetector   = det;
   mBranch     = new StEstBranch*[mMaxBranches*mMaxShare];
-  for(i=0;i<=mMaxBranches*mMaxShare;i++)
+  for(i=0;i<mMaxBranches*mMaxShare;i++)
     mBranch[i]=NULL;
   mNShare     = 0;
   mNBranch    = 0;
   mDebugLevel = 0;
   mFlag       = 0;
   mEvalTrack  = 0;
-  //  if (mId==6647) mDebugLevel=1;
   if(!mBranch)
     cerr << "ERROR!!! StEstHit::StEstHit mBrach=NULL" << endl;
 }
 
+StEstHit::~StEstHit() {
+  delete [] mBranch;
+  delete mXL;
+  delete mXG;
+};
+
+void StEstHit::DetachFromWafer() {
+  mDetector->RemoveHit(this);
+  mDetector=NULL;};
 
 int StEstHit::JoinBranch(StEstBranch *br, StEstTrack *tr) {
   // method to add a hit to a branch and the branch to the hit branch list. 
@@ -62,7 +75,7 @@ int StEstHit::JoinBranch(StEstBranch *br, StEstTrack *tr) {
   }
   
   if (br->CheckAvailability()) {
-    if(mDebugLevel>0) cout << " BRANCH AVALAIBLE "<<endl; 
+    if(mDebugLevel>0) cout << " BRANCH AVAILABLE "<<endl; 
     //    if (mNShare>0 
     if(mNBranch>0 && mNBranch<mMaxBranches*mMaxShare) { 
       // the hit is already used but can there is some free space in the list.
@@ -140,6 +153,7 @@ void StEstHit::LeaveBranch(StEstBranch *br) {
     cout << " br=" <<br<<endl;
     cout << " br->GetNHits()=" << br->GetNHits() << endl;
   } 
+  //  cout<<"LeaveBranch : hit_id="<<this->GetId()<<" br="<<br<<" br->GetTrack()="<<br->GetTrack()<<endl;
   if (mNBranch==0) 
     cout <<"ERROR!!! StEstHit::LeaveBranch mNShare=0"<<endl;
   else {
