@@ -41,12 +41,12 @@ StEmcFilter::StEmcFilter(Int_t mode):TObject()
   mGeo[1] = StEmcGeom::getEmcGeom("bprs");
   mGeo[2] = StEmcGeom::getEmcGeom("bsmde");
   mGeo[3] = StEmcGeom::getEmcGeom("bsmdp");
-  
+
   mPion=StPionPlus::instance();
   mProton=StProton::instance();
   mKaon=StKaonPlus::instance();
   mElectron=StElectron::instance();
-    
+
   // event cuts
   mPrintLog=kFALSE;
   mEmcPresent=kTRUE;
@@ -59,27 +59,27 @@ StEmcFilter::StEmcFilter(Int_t mode):TObject()
   mMaxMult=100000;
   mBField=0.5;
   mNTriggerMask=0;
-    
+ 
   // tracks cuts
   mDCACut=300000.0;
   mPtCut=0.0;
-	mPtCutMax=1000.0;
+  mPtCutMax=1000.0;
   mEtaMin=-10000.;
   mEtaMax=10000.;
   mFitPointsCut=0;
   mMustProjectEmc=kTRUE;
-    
+
   // dE/dX cuts
   mdEdXScale=1.0;
   mPointsdEdX=0;
   mdEdXPMax=1.0;
   mdEdXCut=0.0;
   mdEdXNSigma=2.0;
-  
+
   // V0 Vertex cuts
   mV0Pt = 0;
   mV0TrackProjectOnEmc = kTRUE;
-  
+
   // EMC tower cuts
   mMaxTracksPerTower = 0;
   mEMin = -1000;
@@ -89,7 +89,7 @@ StEmcFilter::StEmcFilter(Int_t mode):TObject()
   mPNeighbor = kTRUE;
   mSNeighbor = kFALSE;
   mTNeighbor = kFALSE;  
-  
+
   // MC Tracks cuts
   mOnlyHadrons = kTRUE;
   mMcChargeType = kALL;
@@ -97,13 +97,13 @@ StEmcFilter::StEmcFilter(Int_t mode):TObject()
   mMcPtCut = 0.0;
   mMcEtaMin=-10000.;
   mMcEtaMax=10000.;
-  
+
   mBemcRunning = NULL;
   mBemcRunningOrig=NULL;
   mBprsRunning = NULL;
   mBsmdeRunning = NULL;
   mBsmdpRunning = NULL;
-  
+
   if(mode!=0)
   {
     mBemcRunning = new St_emcStatus("bemcStatus",1);
@@ -116,9 +116,9 @@ StEmcFilter::StEmcFilter(Int_t mode):TObject()
     }
     mBemcRunningOrig=mBemcRunning;
   }
-  
+
   mEmcPosition = new StEmcPosition();
-  
+
 }
 //------------------------------------------------------------------------------
 StEmcFilter::~StEmcFilter()
@@ -130,7 +130,7 @@ StEmcFilter::~StEmcFilter()
 void StEmcFilter::calcCentrality(StEvent* event)
 {
   // works only for AuAu at 200 GeV
-  
+
   if(fabs(mBField)>0.4) //full field
   {
     Int_t cent[]  = {14,30,56,94,146,217,312,431,510,1000};
@@ -141,7 +141,7 @@ void StEmcFilter::calcCentrality(StEvent* event)
     Int_t cent[]  = {14,32,59,98,149,216,302,409,474,1000};
     for(Int_t i=0;i<10;i++) mCentrality[i] = cent[i];
   }
-  
+
   Int_t primaries=uncorrectedNumberOfPrimaries(*event);
 
   mCentralityBin=9;
@@ -154,22 +154,22 @@ void StEmcFilter::calcCentrality(StEvent* event)
 Bool_t StEmcFilter::accept(StEvent* event)
 {
   if(!event) return kFALSE;
-  
+
   if(mNTriggerMask!=0)
   {
     UInt_t trigger = event->triggerMask();
     Bool_t accept = kFALSE;
-    for(UInt_t n = 0;n<mNTriggerMask;n++) if(mTriggerMask[n] == trigger) accept = kTRUE;
+    for(UInt_t n = 0;n<mNTriggerMask;n++) 
+      if(mTriggerMask[n] == trigger) accept = kTRUE;
     if(!accept)  return kFALSE;
-   
+
   }
   
   if(mHaveVertex)
   {
     StPrimaryVertex *vertex = event->primaryVertex();
     if(!vertex) return kFALSE;
-  
-  
+
     StThreeVectorF v = vertex->position();
     Float_t vz=v.z();
     if(fabs(vz)>fabs(mZVertexCut)) 
@@ -177,19 +177,19 @@ Bool_t StEmcFilter::accept(StEvent* event)
       cout <<"\nVertex = "<<vz<<endl<<endl;
       return kFALSE;
     }
-    
+
     if(mHavePrimaries)
     {
       StSPtrVecPrimaryTrack& tracks = vertex->daughters();
       if(tracks.size()==0) return kFALSE;
     }
   }
-  
+
   calcCentrality(event);
-  
+
   Float_t EventMultiplicity = uncorrectedNumberOfNegativePrimaries(*event);
   if(EventMultiplicity<mMinMult || EventMultiplicity>mMaxMult) return kFALSE;
-  
+
   if(mEmcPresent)
   {
     StEmcCollection *emc=event->emcCollection();
@@ -199,7 +199,7 @@ Bool_t StEmcFilter::accept(StEvent* event)
     if(emcETotal<mEmcETotalMin || emcETotal>mEmcETotalMax) return kFALSE;
     
   }
-  
+
   return kTRUE; 
 }
 //------------------------------------------------------------------------------
@@ -207,7 +207,7 @@ Float_t StEmcFilter::getEmcETotal(StEvent * event)
 {
   StEmcCollection *emc=event->emcCollection();
   if(!emc) return 0;
-  
+
   Float_t ETotal = 0;
   StDetectorId id = static_cast<StDetectorId>(0+kBarrelEmcTowerId); 
   StEmcDetector* emcDet = emc->detector(id) ;
@@ -235,10 +235,10 @@ void StEmcFilter::initEmcTowers(StEvent *event,Int_t mode)
     mNTracksTower[i]=0;
   }
   if(!event) return;
-  
+
   StEmcCollection *emc=event->emcCollection();
   if(!emc) return;
-  
+
   // filing emc hits
   StDetectorId id = static_cast<StDetectorId>(0+kBarrelEmcTowerId); 
   StEmcDetector* emcDet = emc->detector(id) ;
@@ -255,16 +255,16 @@ void StEmcFilter::initEmcTowers(StEvent *event,Int_t mode)
           Int_t m = Hits[k]->module();
           Int_t e = Hits[k]->eta();
           Int_t s = abs(Hits[k]->sub());
-					if(abs(m)<=120)
-					{
-          	Int_t rid;
-          	mGeo[0]->getId(m,e,s,rid);
-          	mETower[rid-1]=Hits[k]->energy();
-        	}
-				}
+	  if(abs(m)<=120)
+	  {
+            Int_t rid;
+            mGeo[0]->getId(m,e,s,rid);
+            mETower[rid-1]=Hits[k]->energy();
+          }
+	}
     }
   }
-  
+
   //checking tracks
   UInt_t ntracks =0;
   if(mode==0)
@@ -280,7 +280,7 @@ void StEmcFilter::initEmcTowers(StEvent *event,Int_t mode)
       ntracks=tracks.size();
     }
   }
-    
+
   if(ntracks>0) for (UInt_t i = 0; i < ntracks; i++)
   {    
     
@@ -323,13 +323,13 @@ void StEmcFilter::initEmcTowers(StEvent *event,Int_t mode)
 Bool_t StEmcFilter::accept(StTrack *track)
 {
   if(!track) return kFALSE;
-  
+
   StThreeVectorD p = track->geometry()->momentum();
   if(p.mag()==0) return kFALSE;
 
   if(p.perp()<mPtCut) return kFALSE;
-	if(p.perp()>mPtCutMax) return kFALSE;
-  
+  if(p.perp()>mPtCutMax) return kFALSE;
+
   if(p.pseudoRapidity()<mEtaMin || p.pseudoRapidity()>mEtaMax) return kFALSE;
   if(track->fitTraits().numberOfFitPoints()<mFitPointsCut) return kFALSE;
   if(track->impactParameter()>mDCACut) return kFALSE;
@@ -338,7 +338,7 @@ Bool_t StEmcFilter::accept(StTrack *track)
   {
     StThreeVectorD position, momentum;
     if (!mEmcPosition->trackOnEmc(&position, &momentum, track, mBField,mGeo[0]->Radius())) return kFALSE;
-    
+
     //check if it hit a valid EMC tower
     Float_t eta=position.pseudoRapidity();
     Float_t phi=position.phi();
@@ -352,7 +352,7 @@ Bool_t StEmcFilter::accept(StTrack *track)
     mGeo[0]->getId(m,e,s,id);
     if(getEmcStatus(1,id)==kBAD) return kFALSE;
   }
-  
+
   return kTRUE; 
 
 }
@@ -360,14 +360,13 @@ Bool_t StEmcFilter::accept(StTrack *track)
 Bool_t StEmcFilter::accept(StMcEvent *event)
 {
   if(!event) return kFALSE;
-  
+
   StMcVertex* vertex = event->primaryVertex();
   if(!vertex) return kFALSE;
-  
+
   StThreeVectorF position = vertex->position();
-  
   if(fabs(position.z())>mZVertexCut) return kFALSE;
-  
+
   return kTRUE;
 }
 //------------------------------------------------------------------------------/
@@ -377,7 +376,7 @@ Bool_t StEmcFilter::accept(StV0Vertex *vertex)
   StThreeVectorF p = vertex->momentum();
   if(p.perp()<mV0Pt) return kFALSE;
   if(!mV0TrackProjectOnEmc) return kTRUE;
-  
+
   UInt_t nd = vertex->numberOfDaughters();
   if(nd==0) return kFALSE;
 
@@ -410,30 +409,30 @@ Bool_t StEmcFilter::accept(StV0Vertex *vertex)
 Bool_t StEmcFilter::accept(StMcTrack *track)
 {
   if(!track) return kFALSE;
-  
+
   if(mOnlyHadrons)
   {
     Int_t geantId = (Int_t)track->geantId();
     if(geantId<8 || geantId>32) return kFALSE;
   }
-  
+
   if(mMcChargeType != kALL)
   {
     Int_t charge = (Int_t)track->particleDefinition()->charge();
     Int_t signal = 0;
-  
+
     if(charge!=0) signal = charge/abs(charge);
-    
+
     if(signal == 0   && mMcChargeType != kNEUTRAL) return kFALSE;
     if(signal == -1  && (mMcChargeType != kCHARGED && mMcChargeType != kNEGATIVE)) return kFALSE;
     if(signal == +1  && (mMcChargeType != kCHARGED && mMcChargeType != kPOSITIVE)) return kFALSE;
   }
-  
+
   StThreeVectorD p = track->momentum();
   if(p.mag()==0) return kFALSE;
   if(p.perp()<mMcPtCut) return kFALSE;
   if(p.pseudoRapidity()<mMcEtaMin || p.pseudoRapidity()>mMcEtaMax) return kFALSE;
-    
+
   if(mMcMustProjectEmc)
   {
     // first check if there is a stop vertex
@@ -444,10 +443,10 @@ Bool_t StEmcFilter::accept(StMcTrack *track)
      Float_t stopRadius = ::sqrt(po.x()*po.x()+po.y()*po.y());
      if(stopRadius<mGeo[0]->Radius()) return kFALSE; // track stopped before EMC. Not accepted
     }
-    
+
     StThreeVectorD position, momentum;
     if (!mEmcPosition->trackOnEmc(&position, &momentum, track, mBField,mGeo[0]->Radius())) return kFALSE;
-    
+
     //check if it hit a valid EMC tower
     Float_t eta=position.pseudoRapidity();
     Float_t phi=position.phi();
@@ -467,7 +466,7 @@ Bool_t StEmcFilter::accept(StMcTrack *track)
 Bool_t StEmcFilter::accept(Int_t rid)
 {
   if(rid<1 || rid>4800) return kFALSE;
-	if(getEmcStatus(1,rid)!=kGOOD) return kFALSE;
+  if(getEmcStatus(1,rid)!=kGOOD) return kFALSE;
   if(mNTracksTower[rid-1]>mMaxTracksPerTower) return kFALSE;
   if(mETower[rid-1]<mEMin || mETower[rid-1]>mEMax) return kFALSE;
   if(mPtTower[rid-1]<mPtMin || mPtTower[rid-1]>mPtMax) return kFALSE;
@@ -483,10 +482,11 @@ Bool_t StEmcFilter::accept(Int_t rid)
     for(Int_t j = -size; j<= size; j++)
     {
       if(!(i==0 && j==0))
-			{
-				Int_t rid1 = mEmcPosition->getNextTowerId(eta,phi,i,j);
-      	if(rid1>0) if(mNTracksTower[rid1-1]>0) return kFALSE;
-			}
+      {
+        Int_t rid1 = mEmcPosition->getNextTowerId(eta,phi,i,j);
+      	if(rid1>0) 
+	  if(mNTracksTower[rid1-1]>0) return kFALSE;
+      }
     }
   return kTRUE;
 }
@@ -531,11 +531,11 @@ Float_t StEmcFilter::getPtTower(Int_t m, Int_t e, Int_t s)
 */
 Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id)
 {
-	Float_t nSigma[4];
-	Int_t order[4];
-	Float_t dEdX;
-	Int_t npt;
-	return getTrackId(track,npt,dEdX,mass,id,order,nSigma);
+  Float_t nSigma[4];
+  Int_t order[4];
+  Float_t dEdX;
+  Int_t npt;
+  return getTrackId(track,npt,dEdX,mass,id,order,nSigma);
 }
 //------------------------------------------------------------------------------
 /*!
@@ -558,8 +558,8 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Int_t& nPoints,Float_t& dEdX,Float
   if(!track) return kFALSE;
   if(!track->geometry()) return kFALSE;
   Int_t charge=track->geometry()->charge();
-	if(charge<0) id=9;
-  
+  if(charge<0) id=9;
+
   Double_t momentum  = fabs(track->geometry()->momentum().mag());
   if(momentum==0) return kFALSE;
   StPtrVecTrackPidTraits traits = track->pidTraits(kTpcId);
@@ -571,8 +571,8 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Int_t& nPoints,Float_t& dEdX,Float
   m[1] = mProton->mass();
   m[2] = mKaon->mass();
   m[3] = mElectron->mass();
-	Int_t kk[4]={0,0,0,1};
-  
+  Int_t kk[4]={0,0,0,1};
+
   if (size>0)
   {
     StDedxPidTraits* pid=NULL;
@@ -586,7 +586,7 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Int_t& nPoints,Float_t& dEdX,Float
     dEdX = (Float_t)pid->mean();
     if(dEdX==0) return kFALSE;
     Double_t npt = (Double_t)pid->numberOfPoints();
-		nPoints=(Int_t) npt;
+    nPoints=(Int_t) npt;
     if(nPoints==0) return kFALSE;
     Double_t dedx_expected;
     Double_t dedx_resolution = (Double_t)pid->errorOnMean();
@@ -594,16 +594,16 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Int_t& nPoints,Float_t& dEdX,Float
     Double_t z;
     Float_t nSigma[4],nSigmaTmp[4];
     Float_t length = (Float_t)pid->length();
-		if(length<=0) length = 60.;
-		for(Int_t i=0;i<4;i++)
+    if(length<=0) length = 60.;
+    for(Int_t i=0;i<4;i++)
     {
       //dedx_expected=mBB(momentum/m[i])*mdEdXScale;      
-			dedx_expected = 1.0e-6*mBB.Sirrf(momentum/m[i],length,kk[i])*mdEdXScale;
-			z = ::log((Double_t)dEdX/dedx_expected);
-			nSigmaTmp[i]=(Float_t) z/dedx_resolution;
+      dedx_expected = 1.0e-6*mBB.Sirrf(momentum/m[i],length,kk[i])*mdEdXScale;
+      z = ::log((Double_t)dEdX/dedx_expected);
+      nSigmaTmp[i]=(Float_t) z/dedx_resolution;
       nSigma[i]=fabs(nSigmaTmp[i]) ;
     }
-  
+
     Float_t SigmaOrder[4];
     Int_t type[4];
     for(Int_t i=0;i<4;i++)
@@ -616,23 +616,23 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Int_t& nPoints,Float_t& dEdX,Float
       }
       nSigma[type[i]]=9999; 
     }
-    
-		for(Int_t i=0;i<4;i++)
-		{
-			if(type[i]==0 && charge>0) idOrder[i] = 8; 
-			if(type[i]==0 && charge<0) idOrder[i] = 9; 
-			if(type[i]==1 && charge>0) idOrder[i] = 14; 
-			if(type[i]==1 && charge<0) idOrder[i] = 15; 
-			if(type[i]==2 && charge>0) idOrder[i] = 11; 
-			if(type[i]==2 && charge<0) idOrder[i] = 12; 
-			if(type[i]==3 && charge>0) idOrder[i] = 2; 
-			if(type[i]==3 && charge<0) idOrder[i] = 3; 
-		}
-		
-		if(momentum>mdEdXPMax) return kFALSE;
-		if(npt<mPointsdEdX) return kFALSE;
-		if(dEdX<mdEdXCut) return kFALSE;
-      
+
+    for(Int_t i=0;i<4;i++)
+    {
+      if(type[i]==0 && charge>0) idOrder[i] = 8;
+      if(type[i]==0 && charge<0) idOrder[i] = 9;
+      if(type[i]==1 && charge>0) idOrder[i] = 14;
+      if(type[i]==1 && charge<0) idOrder[i] = 15;
+      if(type[i]==2 && charge>0) idOrder[i] = 11; 
+      if(type[i]==2 && charge<0) idOrder[i] = 12;
+      if(type[i]==3 && charge>0) idOrder[i] = 2;
+      if(type[i]==3 && charge<0) idOrder[i] = 3;
+    }
+
+    if(momentum>mdEdXPMax) return kFALSE;
+    if(npt<mPointsdEdX) return kFALSE;
+    if(dEdX<mdEdXCut) return kFALSE;
+
     if(SigmaOrder[0]<=mdEdXNSigma)
     {  
       if(type[0]==0 && charge>0) {mass=mPion->mass();   id = 8; return kTRUE;}
@@ -735,15 +735,15 @@ EmcStatus StEmcFilter::getEmcStatus(Int_t det, Int_t id)
 Float_t StEmcFilter::getFraction(Int_t det,Int_t etabin,Int_t side)
 {
   if(det<1 || det>4) return 0.;
-  
+
   Float_t ntowers=0;
   Float_t TotalTowers=60*mGeo[det-1]->NSub(); //60 modules x  sub/module
-  
+
   if(etabin<1 || etabin>mGeo[det-1]->NEta()) return 0.;
-  
+
   Int_t mi=1,mf=60;
   if(side==1) {mi=61; mf=120;}
-  
+
   for(Int_t m=mi;m<=mf;m++)
     for(Int_t s=1;s<=mGeo[det-1]->NSub();s++)
     {
@@ -751,7 +751,7 @@ Float_t StEmcFilter::getFraction(Int_t det,Int_t etabin,Int_t side)
       mGeo[det-1]->getId(m,etabin,s,id);
       if(getEmcStatus(det,id)==kGOOD) ntowers++;
     }
-  
+
   return ntowers/TotalTowers;
 }
 //------------------------------------------------------------------------------
@@ -762,7 +762,7 @@ Float_t StEmcFilter::getWestFraction(Int_t det)
 {
   if(det<1 || det>4) return 0.;
   Int_t nEta = mGeo[det-1]->NEta();
-  
+
   Float_t phiFr=0;
   for(Int_t i=1;i<=nEta;i++)
   {
@@ -795,7 +795,7 @@ Float_t StEmcFilter::getTotalFraction(Int_t det)
   if(det<1 || det>4) return 0.;
   Float_t WPhiFr=getWestFraction(det);
   Float_t EPhiFr=getEastFraction(det);
-  
+
   return (WPhiFr+EPhiFr)/2.;
 }
 //------------------------------------------------------------------------------
