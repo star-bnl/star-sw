@@ -18,13 +18,15 @@ static St_db_Maker *dbMk = 0;
 StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) : 
   m_Mask(option), m_tpcGas(0),// m_trigDetSums(0), m_trig(0),
   //  m_tpcGainMonitor(0),
-  m_TpcSecRow(0),
+  m_TpcSecRowB(0),
+  m_TpcSecRowC(0),
   m_Debug(debug)
 {
   assert(gStTpcDb);
   memset (&m_Corrections, 0, kTpcAllCorrections*sizeof(dEdxCorrection_t));
   m_Corrections[kAdcCorrection       ] = dEdxCorrection_t("TpcAdcCorrectionB"   ,"ADC/Clustering nonlinearity correction");
-  m_Corrections[kTpcSecRow           ] = dEdxCorrection_t("TpcSecRowB"         	,"Gas gain correction for sector/row");
+  m_Corrections[kTpcSecRowB          ] = dEdxCorrection_t("TpcSecRowB"         	,"Gas gain correction for sector/row");
+  m_Corrections[kTpcSecRowC          ] = dEdxCorrection_t("TpcSecRowC"         	,"Additional Gas gain correction for sector/row");
   m_Corrections[kDrift               ] = dEdxCorrection_t("TpcDriftDistOxygen" 	,"Correction for Electron Attachment due to O2");
   m_Corrections[kMultiplicity        ] = dEdxCorrection_t("TpcMultiplicity"     ,"Global track multiplicity dependence");
   m_Corrections[kzCorrection         ] = dEdxCorrection_t("TpcZCorrectionB"    	,"Variation on drift distance");
@@ -33,9 +35,11 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   //  m_Corrections[ktpcMethaneIn        ] = dEdxCorrection_t("tpcMethaneIn"       	,"Dependence of the Gain on Methane content");
   m_Corrections[ktpcGasTemperature   ] = dEdxCorrection_t("tpcGasTemperature"  	,"Dependence of the Gain on Gas Density due to Temperature");
   //  m_Corrections[ktpcWaterOut         ] = dEdxCorrection_t("tpcWaterOut"        	,"Dependence of the Gain on Water content");
-  //  m_Corrections[kTpcdCharge          ] = dEdxCorrection_t("TpcdCharge"        	,"Dependence of the Gain on total charge accumulated so far");
+  m_Corrections[kTpcdCharge          ] = dEdxCorrection_t("TpcdCharge"        	,"Dependence of the Gain on total charge accumulated so far");
   //  m_Corrections[kTpcPadTBins         ] = dEdxCorrection_t("TpcPadTBins"        	,"Variation on cluster size");
   m_Corrections[kSpaceCharge         ] = dEdxCorrection_t("TpcSpaceCharge"      ,"Dependence of the Gain on space charge near the wire");
+  m_Corrections[kEdge                ] = dEdxCorrection_t("TpcEdge"             ,"Dependence of the Gain on distance from Chamber edge");
+  m_Corrections[kPhiDirection        ] = dEdxCorrection_t("TpcPhiDirection"     ,"Dependence of the Gain on interception angle");
   m_Corrections[kTpcdEdxCor          ] = dEdxCorrection_t("TpcdEdxCor"         	,"dEdx correction wrt Bichsel parameterization"); 
   m_Corrections[kTpcLengthCorrection ] = dEdxCorrection_t("TpcLengthCorrectionB","Variation on Track length and relative error in Ionization");
 
@@ -69,10 +73,15 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
     //    gMessMgr->Warning() << "StTpcdEdxCorrection: " <<  m_Corrections[k].Name << " is ON" << endm;
     gMessMgr->Warning() << "StTpcdEdxCorrection: " << m_Corrections[k].Name << "/" << m_Corrections[k].Title << endm;
     switch (k) {
-    case kTpcSecRow:
+    case kTpcSecRowB:
       TpcSecRow  = (St_TpcSecRowCor *) tpc_calib->Find("TpcSecRowB"); 
-      assert(TpcSecRow); 
-      SetTpcSecRow(TpcSecRow);
+      if (TpcSecRow) SetTpcSecRowB(TpcSecRow);
+      else {CLRBIT(m_Mask,k); gMessMgr->Warning() << " \tis missing" << endm;}
+      break;
+    case kTpcSecRowC:
+      TpcSecRow  = (St_TpcSecRowCor *) tpc_calib->Find("TpcSecRowC"); 
+      if (TpcSecRow) SetTpcSecRowC(TpcSecRow);
+      else {CLRBIT(m_Mask,k); gMessMgr->Warning() << " \tis missing" << endm;}
       break;
     default:
       table = (St_tpcCorrection *) tpc_calib->Find(m_Corrections[k].Name);
@@ -111,6 +120,7 @@ StTpcdEdxCorrection::~StTpcdEdxCorrection() {
 }
 //________________________________________________________________________________
 Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) { 
+  //  static const Double_t Degree2Rad = TMath::Pi()/180.;
   Double_t dEU = CdEdx.dE;
   Double_t dE  = dEU;
   Int_t sector            = CdEdx.sector; 
@@ -132,17 +142,17 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
   TpcSecRowCor_st *gain = 0;
   for (Int_t k = 0; k <= kTpcLast; k++) {
     if (! TESTBIT(m_Mask, k)) goto ENDL;
-    if (k == kTpcSecRow && ! m_TpcSecRow ||
-	k != kTpcSecRow && ! m_Corrections[k].Chair) goto ENDL;
     switch (k) {
     case kAdcCorrection:
       ADC = dE/mAdc2GeV[kTpcOutIn];
       dE = mAdc2GeV[kTpcOutIn]*m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,ADC);
       break;
-    case kTpcSecRow:
-      gain = m_TpcSecRow->GetTable() + sector - 1;
+    case kTpcSecRowB:
+    case kTpcSecRowC:
+      if (k == kTpcSecRowB)  {gain = m_TpcSecRowB->GetTable() + sector - 1;
+  	                      CdEdx.SigmaFee = gain->GainRms[row-1];}
+      else                    gain = m_TpcSecRowC->GetTable() + sector - 1;
       gc =  gain->GainScale[row-1];
-      CdEdx.SigmaFee = gain->GainRms[row-1];
       if (gc <= 0.0) return 1;
       dE *= gc;
       break;
@@ -192,7 +202,15 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
       dE *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,CdEdx.dCharge));
       break;
     case   kSpaceCharge: 
-      dE *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,CdEdx.QRatioA));
+      cor =  ((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable();
+      if (cor &&
+	  cor[2*kTpcOutIn  ].min <= CdEdx.QRatio && CdEdx.QRatio <= cor[2*kTpcOutIn  ].max &&
+	  cor[2*kTpcOutIn+1].min <= CdEdx.DeltaZ && CdEdx.DeltaZ <= cor[2*kTpcOutIn+1].max) 
+	dE *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(2*kTpcOutIn  ,CdEdx.QRatio)
+			 -m_Corrections[k].Chair->CalcCorrection(2*kTpcOutIn+1,CdEdx.DeltaZ));
+      break;
+    case kEdge:
+      dE *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,CdEdx.PhiR));
       break;
     default:
       break;
@@ -273,11 +291,26 @@ void StTpcdEdxCorrection::SetCorrection(Int_t k, St_tpcCorrection *m) {
   }
 }
 //________________________________________________________________________________
-void StTpcdEdxCorrection::SetTpcSecRow   (St_TpcSecRowCor *m) {
+void StTpcdEdxCorrection::SetTpcSecRowB   (St_TpcSecRowCor *m) {
   if (m) {
-    m_TpcSecRow = m;
-    gMessMgr->Warning() << "StTpcdEdxCorrection::SetTpcSecRow " << m_Corrections[kTpcSecRow].Name << "/" 
-			<< m_Corrections[kTpcSecRow].Title <<  endm; 
+    m_TpcSecRowB = m;
+    gMessMgr->Warning() << "StTpcdEdxCorrection::SetTpcSecRowB " << m_Corrections[kTpcSecRowB].Name << "/" 
+			<< m_Corrections[kTpcSecRowB].Title <<  endm; 
+    gMessMgr->Warning() << " \tcorrection has been set" << endm;
+    if (dbMk) {
+      TDatime t[2];
+      dbMk->GetValidity(m,t);
+      gMessMgr->Warning()  << " Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
+			   << "  -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
+    }
+  }
+}            
+//________________________________________________________________________________
+void StTpcdEdxCorrection::SetTpcSecRowC   (St_TpcSecRowCor *m) {
+  if (m) {
+    m_TpcSecRowC = m;
+    gMessMgr->Warning() << "StTpcdEdxCorrection::SetTpcSecRowC " << m_Corrections[kTpcSecRowC].Name << "/" 
+			<< m_Corrections[kTpcSecRowC].Title <<  endm; 
     gMessMgr->Warning() << " \tcorrection has been set" << endm;
     if (dbMk) {
       TDatime t[2];
