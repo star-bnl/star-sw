@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.85  1999/07/16 17:59:09  fisyak
+#  Add cons
+#
 #  Revision 1.84  1999/07/13 15:54:13  fisyak
 #  Add SKIP_DIRS
 #
@@ -331,7 +334,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/07/13 15:54:13 $ 
+#           Last modification $Date: 1999/07/16 17:59:09 $ 
 #  default setings
 # Current Working Directory
 #
@@ -383,7 +386,7 @@ ifndef SUBDIRS
 #  SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
   SUBDIRS := $(filter-out St_emc_Maker, $(SUBDIRS))
 #                         St_evg_Maker St_ebye_Maker St_fpt_Maker, $(SUBDIRS))
-  SUBDIRS := $(filter-out vpd par crs egz fri g2x mev  St_geom_Maker StHbtMaker StAssociationMaker StPadDisplayMaker, $(SUBDIRS))
+  SUBDIRS := $(filter-out vpd par crs egz fri g2x mev StHbtMaker StAssociationMaker StPadDisplayMaker, $(SUBDIRS))
   SUBDIRS := $(filter-out StDisplayMaker, $(SUBDIRS))
 ifndef OBJY_HOME
   SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker objy, $(SUBDIRS)) 
@@ -391,6 +394,7 @@ endif
 ifneq (wenuas,$(USER))
   SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker objy, $(SUBDIRS)) 
 endif
+    SUBDIRS := $(filter-out StMcAnalysisMaker StMcEvent StMcEvent,  $(SUBDIRS))
  ifneq (,$(findstring $(STAR_SYS),sun4x_56 hp_ux102))
     SUBDIRS := $(filter-out StDaqLib StNoiseMaker StPadDisplayMaker StDisplayMaker, $(SUBDIRS))
     SUBDIRS := $(filter-out StPeCMaker St_hbt_Maker StHbtMaker ftpc St_fpt_Maker, $(SUBDIRS))
