@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.4 1999/02/24 15:34:00 genevb Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.5 1999/02/24 15:38:49 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.5  1999/02/24 15:38:49  genevb
+ * Fixed a typo
+ *
  * Revision 1.4  1999/02/24 15:34:00  genevb
  * Fixed a typo
  *
@@ -72,7 +75,7 @@ Int_t StStrangeTagsMaker::Make()
 
 void StStrangeTagsMaker::PrintInfo()
 {
-    cout << "$Id: StStrangeTagsMaker.cxx,v 1.4 1999/02/24 15:34:00 genevb Exp $" << endl;
+    cout << "$Id: StStrangeTagsMaker.cxx,v 1.5 1999/02/24 15:38:49 genevb Exp $" << endl;
     if (gStChain->Debug()) StMaker::PrintInfo();
 }
 
@@ -184,7 +187,7 @@ void StStrangeTagsMaker::printTag(ostream& os)
         os << "No. La's:       " << mTagTable->NLa << endl;
         os << "No. Lb's:       " << mTagTable->NLb << endl;
         os << "No. Xi's:       " << mTagTable->NXi << endl;
-        od << "Backgrounds: (same bin size)" << endl;
+        os << "Backgrounds: (same bin size)" << endl;
         os << "No. below K0's: " << mTagTable->NbelowK0 << endl;
         os << "No. above K0's: " << mTagTable->NaboveK0 << endl;
         os << "No. below La's: " << mTagTable->NbelowLa << endl;
