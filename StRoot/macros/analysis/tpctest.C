@@ -1,48 +1,20 @@
-// $Id: laser.C,v 1.6 1998/09/08 13:53:31 love Exp $
-// $Log: laser.C,v $
-// Revision 1.6  1998/09/08 13:53:31  love
+// $Id: tpctest.C,v 1.1 1998/09/08 13:53:33 love Exp $
+// $Log: tpctest.C,v $
+// Revision 1.1  1998/09/08 13:53:33  love
 // laser.C divided into load.C and a new laser.C package of routines.  tpctest.C created to use tpt tracking
 //
-// Revision 1.5  1998/08/26 19:04:05  love
-// Event display working (SUN arch only)
-//
-// Revision 1.4  1998/08/26 12:15:15  fisyak
-// Remove asu & dsl libraries
-//
-// Revision 1.3  1998/08/20 12:33:33  fisyak
-// Splitted base libraries
-//
-// Revision 1.2  1998/08/14 18:18:14  love
-// An example analysis of 10 events
-//
-// Revision 1.1  1998/08/10 02:35:13  fisyak
-// add laser
-//
-// Revision 1.6  1998/07/23 11:32:42  fisyak
-// Small fixes
-//
-// Revision 1.5  1998/07/21 13:35:14  fine
-// The new version of the macros: MakeHtmlTables and makedoc have been introduced
-//
-// Revision 1.4  1998/07/21 01:04:41  fisyak
-// Clean up
-//
-// Revision 1.3  1998/07/21 00:36:49  fisyak
-// tcl and tpt
-//
-// Revision 1.2  1998/07/20 15:08:19  fisyak
-// Add tcl and tpt
+
 //
 /*************************************************************\
-   laser.C is a CINT script package to analyse data from the
+   tpctest.C is a CINT script package to analyse data from the
    1997 TPC test at LBL which included both Cosmic Ray 
-   triggers and laser events.  It (and the St_laser_Maker code)
-   is derived from the tst.kumac of Iwona Sakrejda and tries
-   slavishly to reproduce that script to yield a ROOT/STAF(PAW)
-   comparison. There are four functions:  laser() defines and
+   triggers and laser events.  It (and the St_tpctest_Maker code)
+   is derived from the tst.kumac of Iwona Sakrejda modified to
+   use the regular tpt tracking code.
+   There are four functions:  start() defines and
    initializes the system.  loop(n) analyses the next n events
    on the input file.  skip(n) skips n input records.  end()
-   writes the final ntuple to the output.-- WALove 1 Sept 1998
+   writes the final ntuple to the output.-- WALove 2 Sept 1998
 \*************************************************************/
  
 // Define globals over this package
@@ -50,7 +22,7 @@
 Int_t ievt=0;  //local event counter 
   StChain   *chain = 0;
 
-void laser(){
+void start(){
 
 #ifndef __CINT__
 #include "Rtypes.h"
@@ -60,13 +32,13 @@ void laser(){
 #include "St_Table.h"
 #endif
 
-
+// Char_t *filename="/star/mds/data/SD97/cosmic/Sept/log-p274-t23-f6-las.xdf";
+// Char_t *filename="/star/mds/data/SD97/cosmic/Sept/log-p285-t28-f6-las.xdf";
 // Char_t *filename="/star/mds/data/SD97/cosmic/Sept/log-p284-t27-f4-cos.xdf";
 // Char_t *filename="/scr20/love/star/test/log-p284-t27-f4-cos.xdf";
 // Char_t *filename="/scr20/love/star/test/log-p274-t23-f6-las.xdf"; 
-// Char_t *filename="/star/mds/data/SD97/cosmic/Sept/log-p274-t23-f6-las.xdf";
-   Char_t *filename="/star/mds/data/SD97/cosmic/Sept/log-p285-t28-f6-las.xdf";
-
+  Char_t *filename="/scr20/love/star/test/log-p285-t28-f6-las.xdf";
+ 
   St_XDFFile *xdffile_in = new St_XDFFile (filename,"r");
 // Create the main chain object
   chain= new StChain("StChain");
@@ -74,11 +46,11 @@ void laser(){
   St_xdfin_Maker *xdfin=new  St_xdfin_Maker ("xdfin_Maker","event/raw_data/tpc");
   chain->SetInputXDFile(xdffile_in);
   St_run_Maker *run_Maker = new St_run_Maker ("run_Maker","run/params");
-  St_laser_Maker *laser_Maker = new St_laser_Maker ("laser_Maker","event");
+  St_tpctest_Maker *tpctest_Maker = new St_tpctest_Maker ("tpctest_Maker","event");
   //
   chain->PrintInfo();
    // Create a root file to hold the ntuple.
-   TFile *f=new TFile("crentup.root","RECREATE");
+   TFile *f=new TFile("tptntup.root","RECREATE");
 // Init the chain and all its makers
    chain->Init();
 }
@@ -101,4 +73,4 @@ void skip(Int_t nskip=1){
   }
   ievt += nskip;// keep the count of events straight.
 }
-void end(){ chain->Maker("laser_Maker")->Histograms()->Write();}
+void end(){ chain->Maker("tpctest_Maker")->Histograms()->Write();}
