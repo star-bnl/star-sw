@@ -1,10 +1,9 @@
-# $Id: ConsDefs.pm,v 1.24 2000/09/14 21:22:38 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.25 2000/09/20 13:11:16 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
  use Cwd;
  use File::Find ();
- if (defined($AFS)) {$File::Find::dont_use_nlink;}
  #________________________________________
  *name           = *File::Find::name;
  *prune          = *File::Find::prune;
@@ -16,7 +15,7 @@
  *topnlink       = *File::Find::topnlink;
  #use strict;
  my $pwd = cwd();
- if ($pwd =~ '^/afs/') {$File::Find::dont_use_nlink;}
+# if (defined($AFS) || $pwd =~ '^/afs/') {$File::Find::dont_use_nlink;}
  
  @search_files   = ();
  $DEBUG = "-g";
@@ -32,8 +31,8 @@
  $Lout     = "-o ";
  $Cinp     = "";
  $CXXinp   = "";
- $CPP      = "gcc";
  $CPPFLAGS = "";#-I-";
+ $AFSFLAGS = "";
  $AFSDIR   = "/usr/afsws";
  $AFSLIBS  = "-L" . $AFSDIR . "/lib -L" . $AFSDIR . "/lib/afs";
  $AFSLIBS .= " -lkauth -lprot -lubik -lauth -lrxkad -lsys -ldes -lrx -llwp";
@@ -49,6 +48,7 @@
  $AUTHFLAGS   = $SHADOWFLAGS . " " . $AFSFLAGS . " " . $SRPFLAGS;
  $AUTHLIBS    = $SHADOWLIBS . " " .  $AFSLIBS . " " . $SRPLIBS;
  $R_CPPFLAGS = " -DR__AFS -DHAVE_CONFIG ";
+ $CPP      = "";#"gcc -E";
  $CPPPATH  = "";
  $EXTRA_CPPPATH = "";
  $CXX      = "g++";
@@ -68,9 +68,9 @@
  $ARFLAGS  = "rvu";
  $LD       = $CXX;
  $LDFLAGS  = $CXXFLAGS;
+ $EXTRA_LDFLAGS = "";
  $F77LD    = $LD;
  $F77LDFLAGS = $LDFLAGS;
- $EXTRA_LDFLAGS = "";
  $SO       = $CXX;
  $SOFLAGS  = "";
  $STIC     = "stic";
@@ -162,10 +162,8 @@
      $SOFLAGS  = $CXXOPT;
    }
    else {
-     $CLIBS    = "-L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
-     if ($HOST =~ /pcstar/) {# From Janet for MPI /usr/pgi -> /usr/local/pgi
-       $CLIBS    = "-L/usr/local/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11 -lpgc -lm -ldl  -rdynamic";
-     }
+     if ($PGI) {$CLIBS    = "-L" . $PGI . "/linux86/lib";}
+     $CLIBS . = " -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
    }
    if (/^i386_linux2/) {$FLIBS   .= " -lI77 -lF77";}
    if (defined($ARG{INSURE})){
@@ -178,7 +176,7 @@
    } 
    if ($PGI) {
      $FC       = "pgf77";
-     $FLIBS    = "-L/usr/pgi/linux86/lib -lpgftnrtl -lpgc";
+     $FLIBS    = "-L" . $PGI . "/linux86/lib -lpgftnrtl -lpgc";
      $FLIBS   .= " -L" . $OPTSTAR . "/lib -lpgf77S -lpgf77A";
      $FFLAGS   = "-DPGI";  
      $FEXTEND  = "-Mextend";
@@ -402,6 +400,7 @@
 		'SHADOWLIBS'   => $SHADOWLIBS,
 		'AUTHFLAGS'    => $AUTHFLAGS,
 		'AUTHLIBS'     => $AUTHLIBS,
+#		'CPP'	       => $CPP,
 	        'CPPPATH'      => $CPPPATH,
 		'EXTRA_CPPPATH'=> $EXTRA_CPPPATH,
 		'CPPFLAGS'     => $CPPFLAGS,
@@ -443,6 +442,7 @@
 		'LIBS'         => $LIBS,
 		'LD' 	       => $LD,
 		'LDFLAGS'      => $LDFLAGS,
+		'EXTRA_LDFLAGS'=> $EXTRA_LDFLAGS,
 		'F77LD'        => $F77LD,
 		'F77LDFLAGS'   => $F77LDFLAGS,
 		'EXEFLAGS'     => $EXEFLAGS,
