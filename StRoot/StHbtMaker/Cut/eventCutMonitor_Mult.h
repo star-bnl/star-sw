@@ -1,8 +1,6 @@
 #ifndef eventCutMonitor_Mult_hh
 #define eventCutMonitor_Mult_hh
 
-//#include<string>
-#include <typeinfo>
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Base/StHbtCutMonitor.hh"

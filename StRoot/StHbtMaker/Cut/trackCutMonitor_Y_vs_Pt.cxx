@@ -2,7 +2,6 @@
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Cut/trackCutMonitor_Y_vs_Pt.h"
 #include <cstdio>
-#include <typeinfo>
 
 #ifdef __ROOT__ 
 ClassImp(trackCutMonitor_Y_vs_Pt)

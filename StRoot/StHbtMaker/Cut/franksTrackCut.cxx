@@ -34,7 +34,6 @@ bool franksTrackCut::Pass(const StHbtTrack* track){
   float TEnergy = sqrt(track->P().mag2()+mMass*mMass);
   float TRapidity = 0.5*log((TEnergy+track->P().z())/
 			    (TEnergy-track->P().z()));
-
   /*
     cout << 
     track->NSigmaPion() << " " <<
@@ -46,9 +45,8 @@ bool franksTrackCut::Pass(const StHbtTrack* track){
     track->Pt() << " " << 
     TRapidity << " " <<
     track->Charge() << " " <<
-    endl;
+    endl;  
   */
-
   bool goodPID = ((track->NSigmaPion()   >= mNSigmaPion[0]) &&
                   (track->NSigmaPion()   <= mNSigmaPion[1]) &&
                   (track->NSigmaKaon()   >= mNSigmaKaon[0]) &&

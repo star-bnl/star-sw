@@ -1,8 +1,6 @@
 #ifndef trackCutMonitor_Pt_hh
 #define trackCutMonitor_Pt_hh
 
-//#include<string>
-#include <typeinfo>
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #include "StHbtMaker/Base/StHbtCutMonitor.hh"
