@@ -1,6 +1,6 @@
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
-// Top/ffspars/gaspar Allocated rows: 1  Used rows: 1  Row size: 64 bytes
+// Top/ffspars/gaspar Allocated rows: 1  Used rows: 1  Row size: 96 bytes
 //  Table: ffs_gaspar_st[0]--> ffs_gaspar_st[0]
 // ====================================================================
 // ------  Test whether this table share library was loaded ------
@@ -19,12 +19,20 @@ memset(&row,0,tableSet->GetRowSize());
     row.tdrift[3]	 =   3.82e-05;
     row.sig_rad[0]	 =        800; // sigma(rad) ;
     row.sig_rad[1]	 =          0;
-    row.sig_rad[2]	 =         90; // point position smearing rad ;
+    row.sig_rad[2]	 =          0; // 
     row.sig_rad[3]	 =          0;
     row.sig_azi[0]	 =       2000; // sigma(azi) ;
     row.sig_azi[1]	 =          0;
-    row.sig_azi[2]	 =         50; // point position smearing azi ;
+    row.sig_azi[2]	 =          0;
     row.sig_azi[3]	 =          0;
+    row.err_rad[0]	 =         90; // error(rad) ;
+    row.err_rad[1]	 =          0;
+    row.err_rad[2]	 =          0; // 
+    row.err_rad[3]	 =          0;
+    row.err_azi[0]	 =         50; // error(azi) ;
+    row.err_azi[1]	 =          0;
+    row.err_azi[2]	 =          0;
+    row.err_azi[3]	 =          0;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
  return (St_DataSet *)tableSet;
