@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.21 2000/06/13 18:13:59 dunlop Exp $
+ * $Id: StRchMaker.cxx,v 1.22 2000/06/15 13:46:05 dunlop Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 1.21  2000/06/13 18:13:59  dunlop
- * Commented out verbosity under real conditions
+ * Revision 1.22  2000/06/15 13:46:05  dunlop
+ * Fixed segfault when RICH not in datastream
+ *
+ * Revision 1.23  2000/06/16 02:05:38  lasiuk
+ * include paths; drawing cleanup macros
  *
  * Revision 1.21  2000/06/13 18:13:59  dunlop
  * Commented out verbosity under real conditions
@@ -305,6 +308,12 @@ Int_t StRchMaker::Make() {
 	    if(!mTheDataReader) {
 		cout << "\tStDAQReader*: not there\n";
 		cout << "\tSkip this event\n" << endl;
+	    if (!(mTheDataReader->RICHPresent())) {
+		cout << "No RICH in datastream" << endl;
+		cout << "\t Skip this event" << endl;
+		return kStWarn;
+	    }
+	    
 		clearPadMonitor();
 		return kStWarn;
 	    }
@@ -715,10 +724,10 @@ void StRchMaker::fillStEvent()
     
 }
 //-----------------------------------------------------------------
-  printf("* $Id: StRchMaker.cxx,v 1.21 2000/06/13 18:13:59 dunlop Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.22 2000/06/15 13:46:05 dunlop Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
-    printf("* $Id: StRchMaker.cxx,v 1.21 2000/06/13 18:13:59 dunlop Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 1.22 2000/06/15 13:46:05 dunlop Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
