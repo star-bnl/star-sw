@@ -1,5 +1,15 @@
-// $Id: StFtpcConfMapPoint.cc,v 1.2 2000/06/07 09:51:01 oldi Exp $
+// $Id: StFtpcConfMapPoint.cc,v 1.3 2000/07/18 21:22:15 oldi Exp $
 // $Log: StFtpcConfMapPoint.cc,v $
+// Revision 1.3  2000/07/18 21:22:15  oldi
+// Changes due to be able to find laser tracks.
+// Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
+//            to bundle often called functions
+//          - short functions inlined
+//          - formulas of StFormulary made static
+//          - avoid streaming of objects of unknown size
+//            (removes the bunch of CINT warnings during compile time)
+//          - two or three minor bugs cured
+//
 // Revision 1.2  2000/06/07 09:51:01  oldi
 // Wrong setting in SetAllCoord(const StFtpcConfMapPoint *preceding_hit) in case
 // of this == preceding_hit changed. Tracking with no vertex constraint works now
@@ -11,10 +21,11 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 07.06.2000
+//----------Last Modified: 13.07.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcConfMapPoint.hh"
+#include "StMessMgr.h"
 
 /////////////////////////////////////////////////////////////////////////////////////
 //                                                                                 //
@@ -57,6 +68,14 @@ StFtpcConfMapPoint::StFtpcConfMapPoint(fcl_fppoint_st *point_st, StFtpcVertex *v
   // into its data members and calculates necessary information for the confromal mapping 
   // track algorithm. 
   
+  Setup(vertex);
+}
+
+
+StFtpcConfMapPoint::StFtpcConfMapPoint(Double_t *x, Int_t row, StFtpcVertex *vertex) : StFtpcPoint(x, row)
+{
+  // Constructor which handels arbitrary points with given coordinates.
+
   Setup(vertex);
 }
 
@@ -177,7 +196,7 @@ void StFtpcConfMapPoint::SetAngles()
   if (r2dim == 0.) {
   // If r2dim == 0 the pseudorapidity eta cannot be calculated (division by zero)!
   // This can only happen if the point is lying on the z-axis and this should never be possible.
-    cerr << "The pseudorapidity eta cannot be calculated (division by zero)! Set to 1.e-10." << endl;
+    gMessMgr->Message("The pseudorapidity eta cannot be calculated (division by zero)! Set to 1.e-10.", "W", "OST");
     r2dim = 1.e-10;
   }
   

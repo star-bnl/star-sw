@@ -1,5 +1,15 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.4 2000/06/13 14:36:19 oldi Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.5 2000/07/18 21:22:16 oldi Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.5  2000/07/18 21:22:16  oldi
+// Changes due to be able to find laser tracks.
+// Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
+//            to bundle often called functions
+//          - short functions inlined
+//          - formulas of StFormulary made static
+//          - avoid streaming of objects of unknown size
+//            (removes the bunch of CINT warnings during compile time)
+//          - two or three minor bugs cured
+//
 // Revision 1.4  2000/06/13 14:36:19  oldi
 // Changed cout to gMessMgr->Message() (only for non-interactive part).
 //
@@ -17,7 +27,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 09.06.2000
+//----------Last Modified: 18.07.2000
 //----------Copyright:     &copy MDO Production 2000
 
 #include "StFtpcTrackEvaluator.hh"
@@ -257,7 +267,7 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
   TClonesArray &track = *mFoundTracks;
   
   for (Int_t i = 0; i < n_tracks; i++) {
-    new(track[i]) StFtpcTrack(track_st++, mFoundHits);
+    new(track[i]) StFtpcTrack(track_st++, mFoundHits, i);
   }
 
   mObjArraysCreated = (Bool_t)true;
@@ -1060,7 +1070,7 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
       
       if (ftpc_hits) {  // track has hits in Ftpc
 	mGHitsOnTrack->Fill(ftpc_hits);
-	new(track[NumFtpcGeantTracks]) StFtpcTrack();     // create StFtpcTrack
+	new(track[NumFtpcGeantTracks]) StFtpcTrack(NumFtpcGeantTracks);     // create StFtpcTrack
 	StFtpcTrack *t = (StFtpcTrack*)mGeantTracks->At(NumFtpcGeantTracks);
 	TObjArray *points = t->GetHits();
 
@@ -1350,17 +1360,6 @@ void StFtpcTrackEvaluator::DivideHistos()
 }
 
 
-void StFtpcTrackEvaluator::FillCutHistos()
-{
-  // Fills histograms for cuts. This is done for Geant tracks and found tracks.
-
-  FillGCutHistos();
-  FillFCutHistos();
-
-  return;
-}
-
-
 void StFtpcTrackEvaluator::FillGCutHistos()
 {
   // Evaluates the cuts by looking into the distibution od the cut-variables in GEANT tracks.
@@ -1615,9 +1614,7 @@ void StFtpcTrackEvaluator::FillMomentumHistos()
   
   StFtpcTrack *ftrack;
   StFtpcTrack *gtrack;
- 
-  StFormulary f;
-  
+
   for (Int_t t_counter = 0; t_counter<mFoundTracks->GetEntriesFast(); t_counter++) {
   
     ftrack = (StFtpcTrack *)mFoundTracks->At(t_counter);
@@ -1629,11 +1626,11 @@ void StFtpcTrackEvaluator::FillMomentumHistos()
     mPy->Fill((Float_t)gtrack->GetPy(), (Float_t)ftrack->GetPy());
     mPz->Fill((Float_t)gtrack->GetPz(), (Float_t)ftrack->GetPz());
     
-    mPtotDiff->Fill((Float_t)f.RelDiff(ftrack->GetP(), (Float_t)gtrack->GetP()));
-    mPtDiff->Fill((Float_t)f.RelDiff(ftrack->GetPt(), (Float_t)gtrack->GetPt()));
-    mPxDiff->Fill((Float_t)f.RelDiff(ftrack->GetPx(), (Float_t)gtrack->GetPx()));
-    mPyDiff->Fill((Float_t)f.RelDiff(ftrack->GetPy(), (Float_t)gtrack->GetPy()));
-    mPzDiff->Fill((Float_t)f.RelDiff(ftrack->GetPz(), (Float_t)gtrack->GetPz())); 
+    mPtotDiff->Fill((Float_t)StFormulary::RelDiff(ftrack->GetP(), (Float_t)gtrack->GetP()));
+    mPtDiff->Fill((Float_t)StFormulary::RelDiff(ftrack->GetPt(), (Float_t)gtrack->GetPt()));
+    mPxDiff->Fill((Float_t)StFormulary::RelDiff(ftrack->GetPx(), (Float_t)gtrack->GetPx()));
+    mPyDiff->Fill((Float_t)StFormulary::RelDiff(ftrack->GetPy(), (Float_t)gtrack->GetPy()));
+    mPzDiff->Fill((Float_t)StFormulary::RelDiff(ftrack->GetPz(), (Float_t)gtrack->GetPz())); 
 
     mPtotAcc->Fill(ftrack->GetP()/gtrack->GetP());
     mPtAcc->Fill(ftrack->GetPt()/gtrack->GetPt());
@@ -1654,19 +1651,17 @@ void StFtpcTrackEvaluator::FillMomentumHistos(Int_t t_counter)
   StFtpcTrack *ftrack = (StFtpcTrack *)mFoundTracks->At(t_counter);
   StFtpcTrack *gtrack = (StFtpcTrack *)mGeantTracks->At(mParent->At(t_counter));
 
-  StFormulary f;
-
   mPtot->Fill(gtrack->GetP(), ftrack->GetP());
   mPt->Fill(gtrack->GetPt(), ftrack->GetPt());
   mPx->Fill(gtrack->GetPx(), ftrack->GetPx());
   mPy->Fill(gtrack->GetPy(), ftrack->GetPy());
   mPz->Fill(gtrack->GetPz(), ftrack->GetPz());
     
-  mPtotDiff->Fill(f.RelDiff(ftrack->GetP(), gtrack->GetP()));
-  mPtDiff->Fill(f.RelDiff(ftrack->GetPt(), gtrack->GetPt()));
-  mPxDiff->Fill(f.RelDiff(ftrack->GetPx(), gtrack->GetPx()));
-  mPyDiff->Fill(f.RelDiff(ftrack->GetPy(), gtrack->GetPy()));
-  mPzDiff->Fill(f.RelDiff(ftrack->GetPz(), gtrack->GetPz()));
+  mPtotDiff->Fill(StFormulary::RelDiff(ftrack->GetP(), gtrack->GetP()));
+  mPtDiff->Fill(StFormulary::RelDiff(ftrack->GetPt(), gtrack->GetPt()));
+  mPxDiff->Fill(StFormulary::RelDiff(ftrack->GetPx(), gtrack->GetPx()));
+  mPyDiff->Fill(StFormulary::RelDiff(ftrack->GetPy(), gtrack->GetPy()));
+  mPzDiff->Fill(StFormulary::RelDiff(ftrack->GetPz(), gtrack->GetPz()));
 
   mPtotAcc->Fill(ftrack->GetP()/gtrack->GetP());
   mPtAcc->Fill(ftrack->GetPt()/gtrack->GetPt());
@@ -1730,27 +1725,6 @@ void StFtpcTrackEvaluator::FillParentHistos(Int_t t_counter)
   mNumParents->Fill(num_parents);
   mNumWrongHits->Fill((Float_t)num_hits, (Float_t)num_histo);
   mNumWrongHitsAll->Fill(num_hits);
-}
-
-
-void StFtpcTrackEvaluator::FillHitsOnTrack()
-{
-  // Fill hits on all tracks in histograms.
-
-  FillHitsOnTrack(mGeantTracks, 'g');
-  FillHitsOnTrack(mFoundTracks, 'f');
-
-  return;
-}
-
-
-void StFtpcTrackEvaluator::FillFoundHitsOnTrack()
-{
-  // Fill hits on found tracks in histograms.
-
-  FillHitsOnTrack(mFoundTracks, 'f');
-
-  return;
 }
 
 
@@ -1839,48 +1813,6 @@ void StFtpcTrackEvaluator::CalcSplitTracks()
 }
 
 
-Bool_t StFtpcTrackEvaluator::IsGoodTrack(StFtpcTrack* track) 
-{
-  // Returns true if the given track fulfills all requirements to be a "good" track.
-
-  if (track->GetPid() > 3 && track->ComesFromMainVertex() && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= 10) {
-    return (Bool_t)true;
-  }
-
-  else {
-    return (Bool_t)false;
-  }
-} 
-
-
-Bool_t StFtpcTrackEvaluator::IsGoodMainVertexTrack(StFtpcTrack* track) 
-{
-  // Returns true if the given track fulfills all requirements to be a "good" track.
-
-  if (track->GetPid() > 3 && track->ComesFromMainVertex() && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= 10) {
-    return (Bool_t)true;
-  }
-
-  else {
-    return (Bool_t)false;
-  }
-} 
-
-
-Bool_t StFtpcTrackEvaluator::IsGoodNonVertexTrack(StFtpcTrack* track) 
-{
-  // Returns true if the given track fulfills all requirements to be a "good" track.
-
-  if (track->GetPid() > 3 && !(track->ComesFromMainVertex()) && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= 10) {
-    return (Bool_t)true;
-  }
-
-  else {
-    return (Bool_t)false;
-  }
-} 
-
-
 void StFtpcTrackEvaluator::FillEventHistos()
 {
   // Fill the histograms which are filled only once per event.
@@ -1911,17 +1843,6 @@ void StFtpcTrackEvaluator::FillEventHistos()
   mNumGoodGeantPoints->Fill(GetNumGoodGeantPoints());
   mNumGoodFoundPoints->Fill(GetNumGoodFoundPoints());
   mGoodPointRatio->Fill((Float_t)GetNumGoodFoundPoints()/(Float_t)GetNumGoodGeantPoints());
-
-  return;
-}
-
-
-void StFtpcTrackEvaluator::ShowTracks()
-{
-  // Displays the geant and/or found tracks.
-
-  StFtpcDisplay display(GetFoundHits(), GetFoundTracks(), GetGeantHits(), GetGeantTracks());
-  display.ShowEvalTracks(mSplitTracksArr, mUncleanTracksArr, mClusterArr);
 
   return;
 }

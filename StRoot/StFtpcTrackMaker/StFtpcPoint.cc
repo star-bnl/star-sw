@@ -1,5 +1,15 @@
-// $Id: StFtpcPoint.cc,v 1.3 2000/06/13 14:49:01 oldi Exp $
+// $Id: StFtpcPoint.cc,v 1.4 2000/07/18 21:22:16 oldi Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.4  2000/07/18 21:22:16  oldi
+// Changes due to be able to find laser tracks.
+// Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
+//            to bundle often called functions
+//          - short functions inlined
+//          - formulas of StFormulary made static
+//          - avoid streaming of objects of unknown size
+//            (removes the bunch of CINT warnings during compile time)
+//          - two or three minor bugs cured
+//
 // Revision 1.3  2000/06/13 14:49:01  oldi
 // Added SetTrackedFlag(Bool_t tracked) and GetTrackedFlag() to take care of the
 // bit 5 of mFlags.
@@ -13,7 +23,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 09.06.2000
+//----------Last Modified: 18.07.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcPoint.hh"
@@ -102,36 +112,44 @@ StFtpcPoint::StFtpcPoint(fcl_fppoint_st *point_st)
 }
 
 
+StFtpcPoint::StFtpcPoint(Double_t *x, Int_t row)
+{
+  // Constructor which takes the x, y, and z coodrinate and the pad row.
+
+  SetUsage(false);
+  SetHitNumber(-1);
+  SetNextHitNumber(-1);
+  SetTrackNumber(-1);
+
+  SetPadRow(row);
+  SetSector(-1);
+
+  SetNumberPads(-1);
+  SetNumberBins(-1);
+
+  SetMaxADC(-1);
+  SetCharge(0);
+
+  SetX(x[0]);
+  SetY(x[1]);
+  SetZ(x[2]);
+
+  SetXerr(0.);
+  SetYerr(0.);
+  SetZerr(0.);
+
+  SetSigmaPhi(0.);
+  SetSigmaR(0.);
+  SetFlags(0.);
+
+  return;
+}
+
+
 StFtpcPoint::~StFtpcPoint() 
 {
   // Destructor.
   // Does nothing except destruct.
-}
-
-
-StFtpcTrack *StFtpcPoint::GetTrack(TClonesArray *tracks) const
-{
-  // Returns the pointer to the track to which this hit belongs.
-
-  return (StFtpcTrack*)tracks->At(this->GetTrackNumber());
-}
-
-
-void StFtpcPoint::SetTrackedFlag(Bool_t tracked) 
-{
-  // Sets flag, if the cluster was used for tracking.
-  // This has to be done due to consitency with the point bank.
-
-  Long_t old_flag = GetFlags();
-  SetFlags((old_flag & 0xFFFFFFEF) | ((Long_t)tracked*16));
-}
-
-
-Bool_t StFtpcPoint::GetTrackedFlag()
-{
-  // Returns true, if 'tracked flag' ist set, otherwise returns false.
-
-  return (Bool_t)(GetFlags() & (Long_t)16);
 }
 
 

@@ -1,5 +1,15 @@
-// $Id: StFtpcTrack.cc,v 1.7 2000/07/17 14:54:22 jcs Exp $
+// $Id: StFtpcTrack.cc,v 1.8 2000/07/18 21:22:16 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.8  2000/07/18 21:22:16  oldi
+// Changes due to be able to find laser tracks.
+// Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
+//            to bundle often called functions
+//          - short functions inlined
+//          - formulas of StFormulary made static
+//          - avoid streaming of objects of unknown size
+//            (removes the bunch of CINT warnings during compile time)
+//          - two or three minor bugs cured
+//
 // Revision 1.7  2000/07/17 14:54:22  jcs
 // save results of constrained fit
 //
@@ -29,9 +39,10 @@
 //
 
 //----------Author:        Holm G. H&uuml;mmler, Markus D. Oldenburg
-//----------Last Modified: 22.05.2000
+//----------Last Modified: 18.07.2000
 //----------Copyright:     &copy MDO Production 1999
 
+#include "StFormulary.hh"
 #include "StFtpcTrack.hh"
 #include "StFtpcVertex.hh"
 #include "StFtpcConfMapPoint.hh"
@@ -54,41 +65,28 @@ StFtpcTrack::StFtpcTrack()
   // Default constructor.
   // Creates a ObjArray of the hits belonging to the track.
 
-  mPoints = new TObjArray(0, 0);
-  mPointNumbers = new MIntArray();
-
-  SetRadius(0.);
-  SetCenterX(0.);
-  SetCenterY(0.);
-  SetAlpha0(0.);
-  SetPid(0);
-  SetNMax(0);
-
-  ComesFromMainVertex(false);
-
-  mP.setX(0.);
-  mP.setY(0.);
-  mP.setZ(0.);
-
-  mV.setX(0.);
-  mV.setY(0.);
-  mV.setZ(0.);
- 
-  mQ = 0;
-  mChiSq[0] = 0.;
-  mChiSq[1] = 0.;
-  mTheta = 0.;
-  mDca = 0.;
+  SetDefaults();
 }
 
 
-StFtpcTrack::StFtpcTrack(fpt_fptrack_st *track_st, TClonesArray *hits)
+StFtpcTrack::StFtpcTrack(Int_t tracknumber)
+{
+  // Same as default constructor except that the track number is set.
+  
+  SetDefaults();
+  SetTrackNumber(tracknumber);
+}
+
+
+StFtpcTrack::StFtpcTrack(fpt_fptrack_st *track_st, TClonesArray *hits, Int_t tracknumber)
 {
   // Constructor if STAF table track is given.
   // Creates a ObjArray of the hits belonging to the track.
 
   mPoints = new TObjArray(0, 0);
   mPointNumbers = new MIntArray();
+
+  SetTrackNumber(tracknumber);
 
   Int_t id;
 
@@ -138,45 +136,97 @@ StFtpcTrack::~StFtpcTrack()
 }
 
 
-Double_t StFtpcTrack::GetPt() const
+void StFtpcTrack::SetDefaults()
 {
-  // Returns transverse momentum.
+  // Executes the default setup for the track.
 
-  return TMath::Sqrt(mP.x() * mP.x() + mP.y() * mP.y());
+    mPoints = new TObjArray(0, 0);
+  mPointNumbers = new MIntArray();
+
+  mTrackNumber = -1;
+
+  SetRadius(0.);
+  SetCenterX(0.);
+  SetCenterY(0.);
+  SetAlpha0(0.);
+  SetPid(0);
+  SetNMax(0);
+
+  ComesFromMainVertex(false);
+
+  mP.setX(0.);
+  mP.setY(0.);
+  mP.setZ(0.);
+
+  mV.setX(0.);
+  mV.setY(0.);
+  mV.setZ(0.);
+ 
+  mQ = 0;
+  mChiSq[0] = 0.;
+  mChiSq[1] = 0.;
+  mTheta = 0.;
+  mDca = 0.;
+
+  return;
 }
 
 
-Double_t StFtpcTrack::GetP() const
+void StFtpcTrack::SetTrackNumber(Int_t number) 
 {
-  // Returns total momentum.
+  // Sets the tracknumber.
+  // If the track has already some hits assigned the track number of the hits is also set.
 
-  return TMath::Sqrt(mP.x() * mP.x() + mP.y() * mP.y() + mP.z() * mP.z());
+  mTrackNumber = number;
+
+  for (Int_t i = 0; i < mPoints->GetEntriesFast(); i++) {
+    ((StFtpcPoint*)mPoints->At(i))->SetTrackNumber(number);    
+  }
+
+  return;
 }
 
 
-Double_t StFtpcTrack::GetPseudoRapidity() const
+void StFtpcTrack::AddPoint(StFtpcPoint* point)
 {
-  // Returns the pseudo rapidity of the particle.
+  // Adds a given point to the track.
 
-  return 0.5 * TMath::Log((GetP() + GetPz()) / (GetP() - GetPz()));  
+  mPointNumbers->AddLast(point->GetHitNumber());
+  mPoints->AddLast(point);
+  point->SetUsage(true);
+  point->SetTrackNumber(GetTrackNumber());
+
+  return;
 }
 
 
-Double_t StFtpcTrack::GetEta() const
+Double_t StFtpcTrack::CalcAlpha0()
 {
-  // This function returns the value of GetPseudoRapidity().
+  // Calculates the starting angle (with respect to the x-axis) of xt.
   
-  return GetPseudoRapidity();
-}
+  Double_t asin_arg;
+  Double_t alpha0;
 
+  StFtpcConfMapPoint *trackpoint = (StFtpcConfMapPoint *)mPoints->First();
+  asin_arg = StFormulary::CheckASinArg((trackpoint->GetYt() - GetCenterY())/GetRadius());
 
-Double_t StFtpcTrack::GetRapidity() const
-{
-  // Returns the rapidity of the particle with the assumption that the particle is a pion (+/-).
+  if (trackpoint->GetXt() >= GetCenterX() && trackpoint->GetYt() > GetCenterY()) {
+    alpha0 = TMath::ASin(asin_arg);
+  }
 
-  Double_t m_pi = 0.13957;
+  else if (trackpoint->GetXt() < GetCenterX() && trackpoint->GetYt() >= GetCenterY()) {
+    alpha0 = -TMath::ASin(asin_arg) + TMath::Pi();
+  }
 
-  return 0.5 * TMath::Log((m_pi + GetPz()) / (m_pi - GetPz()));
+  else if (trackpoint->GetXt() <= GetCenterX() && trackpoint->GetYt() < GetCenterY()) {
+    alpha0 = TMath::ASin(-asin_arg) +  TMath::Pi();
+  }
+
+  else if (trackpoint->GetXt() > GetCenterX() && trackpoint->GetYt() <= GetCenterY()) {
+    alpha0 = -TMath::ASin(-asin_arg) + 2 * TMath::Pi();
+  }
+
+  return alpha0;
 }
 
 
@@ -186,11 +236,12 @@ void StFtpcTrack::SetProperties(Bool_t usage, Int_t tracknumber)
   // Sets the usage of all points belonging to this track to the value of fUsage and
   // sets the track number of all points belonging to this track to the value of fTrackNumber.
 
+  mRowsWithPoints = 0;
+  
   for (Int_t i = 0; i < mPoints->GetEntriesFast(); i++) {    
     StFtpcConfMapPoint *p = (StFtpcConfMapPoint *)mPoints->At(i);
 
     if (usage == true) {
-      
       mRowsWithPoints += (Int_t)TMath::Power(2, ((p->GetPadRow()-1)%10)+1);
 
       if (i != 0) {
@@ -209,6 +260,30 @@ void StFtpcTrack::SetProperties(Bool_t usage, Int_t tracknumber)
     p->SetUsage(usage);
     p->SetTrackNumber(tracknumber);
   }
+
+  return;
+}
+
+
+void StFtpcTrack::SetPointDependencies()
+{
+  // Sets number of next hit. Counting is started from the vertex. (The tracker finds hits on tracks vice versa!)
+
+  mRowsWithPoints = 0;
+  
+  for (Int_t i = 0; i < mPoints->GetEntriesFast(); i++) {    
+    StFtpcConfMapPoint *p = (StFtpcConfMapPoint *)mPoints->At(i);
+
+    mRowsWithPoints += (Int_t)TMath::Power(2, ((p->GetPadRow()-1)%10)+1);
+    
+    if (i != 0) {
+      p->SetNextHitNumber(((StFtpcConfMapPoint *)mPoints->At(i-1))->GetHitNumber());
+    }
+    
+    else {
+      p->SetNextHitNumber(-1);
+    }
+  }    
 
   return;
 }
@@ -350,7 +425,7 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
     mV.setX(looseFit->x(pl));
     mV.setY(looseFit->y(pl));
     mV.setZ(looseFit->z(pl));
-    mtrackLength = looseFit->pathLength(Hit[numHits-1],nv);
+    mTrackLength = looseFit->pathLength(Hit[numHits-1],nv);
     mChiSq[0] = looseFit->chi2Rad();
     mChiSq[1] = looseFit->chi2Lin();
     mQ = looseFit->usedCharge();
@@ -363,15 +438,17 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
        mFromMainVertex = (Bool_t)true;
     }
   }
+
   else {
+
      if (mDca > max_Dca) {
        mP = looseFit->momentum();
-       StThreeVector<double> firstPoint(Hit[0].x(),Hit[0].y(),Hit[0].z());
+       StThreeVector<double> firstPoint(Hit[0].x(), Hit[0].y(), Hit[0].z());
        pl = looseFit->pathLength(firstPoint,nv);
        mV.setX(looseFit->x(pl));
        mV.setY(looseFit->y(pl));
        mV.setZ(looseFit->z(pl));
-       mtrackLength = looseFit->pathLength(Hit[numHits-1],nv);
+       mTrackLength = looseFit->pathLength(Hit[numHits-1], nv);
        mFromMainVertex = (Bool_t)false;
        mChiSq[0] = looseFit->chi2Rad();
        mChiSq[1] = looseFit->chi2Lin();
@@ -382,12 +459,12 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
 
      else {
        mP = Fit->momentum();
-       StThreeVector<double> firstPoint(vertexPos.x(),vertexPos.y(),vertexPos.z());
+       StThreeVector<double> firstPoint(vertexPos.x(), vertexPos.y(), vertexPos.z());
        pl = Fit->pathLength(firstPoint,nv);
        mV.setX(Fit->x(pl));
        mV.setY(Fit->y(pl));
        mV.setZ(Fit->z(pl));
-       mtrackLength = Fit->pathLength(Hit[numHits-1],nv);
+       mTrackLength = Fit->pathLength(Hit[numHits-1], nv);
        mFromMainVertex = (Bool_t)true;
        mChiSq[0] = Fit->chi2Rad();
        mChiSq[1] = Fit->chi2Lin();
@@ -397,8 +474,6 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
      }
    }
   
-//mTheta = mP.theta();
-
   delete looseFit;
   delete Fit;
   delete[] Hit;
@@ -445,7 +520,7 @@ Int_t StFtpcTrack::Write(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex)
   trackTableEntry->v[0] = mV.x();
   trackTableEntry->v[1] = mV.y();
   trackTableEntry->v[2] = mV.z();
-  trackTableEntry->length = mtrackLength;
+  trackTableEntry->length = mTrackLength;
   trackTableEntry->theta = mTheta;
   trackTableEntry->curvature = 1/mRadius;
   trackTableEntry->impact = mDca;

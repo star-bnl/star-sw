@@ -1,5 +1,15 @@
-// $Id: StFtpcTrackEvaluator.hh,v 1.2 2000/06/07 11:58:57 oldi Exp $
+// $Id: StFtpcTrackEvaluator.hh,v 1.3 2000/07/18 21:22:17 oldi Exp $
 // $Log: StFtpcTrackEvaluator.hh,v $
+// Revision 1.3  2000/07/18 21:22:17  oldi
+// Changes due to be able to find laser tracks.
+// Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
+//            to bundle often called functions
+//          - short functions inlined
+//          - formulas of StFormulary made static
+//          - avoid streaming of objects of unknown size
+//            (removes the bunch of CINT warnings during compile time)
+//          - two or three minor bugs cured
+//
 // Revision 1.2  2000/06/07 11:58:57  oldi
 // Added new histos and Int_t's to count things. :)
 // Cleanup.
@@ -27,6 +37,7 @@
 
 #include "StFtpcVertex.hh"
 #include "StFtpcTrack.hh"
+#include "StFtpcDisplay.hh"
 
 #include "tables/St_ffs_gepoint_Table.h"
 #include "tables/St_g2t_track_Table.h"
@@ -193,7 +204,7 @@ private:
                MIntArray *mSplitTracksArr;          // array of numbers of split tracks
                MIntArray *mSplitGoodTracksArr;      // array of numbers of split good tracks
 
-                  Bool_t *mUnclean;                 // array of boolean values: indicates if a found track is a unclean track or not
+                  Bool_t *mUnclean;                 //! array of boolean values: indicates if a found track is a unclean track or not
 
   void  Setup(St_DataSet *geant, St_DataSet *ftpc_data);                       // Does the setup.
   void  SetupFile(Char_t *filename, Char_t *write_permission);                 // Opens the data file.
@@ -209,8 +220,8 @@ private:
  
 public:
   
-   Char_t  *mFilename;                       // Name of the data file.
-   Char_t  *mWritePermission;                // Write permission of the data file.
+   Char_t  *mFilename;                       //! Name of the data file.
+   Char_t  *mWritePermission;                //! Write permission of the data file.
    TFile   *mFile;                           // Pointer to the data file.
 
             StFtpcTrackEvaluator();                                                                    // default constructor
@@ -289,5 +300,91 @@ public:
 
   ClassDef(StFtpcTrackEvaluator, 1)  //Ftpc track evaluation class
 };
+
+
+inline void StFtpcTrackEvaluator::FillCutHistos()
+{
+  // Fills histograms for cuts. This is done for Geant tracks and found tracks.
+
+  FillGCutHistos();
+  FillFCutHistos();
+
+  return;
+}
+
+
+inline void StFtpcTrackEvaluator::FillHitsOnTrack()
+{
+  // Fill hits on all tracks in histograms.
+
+  FillHitsOnTrack(mGeantTracks, 'g');
+  FillHitsOnTrack(mFoundTracks, 'f');
+
+  return;
+}
+
+
+inline void StFtpcTrackEvaluator::FillFoundHitsOnTrack()
+{
+  // Fill hits on found tracks in histograms.
+
+  FillHitsOnTrack(mFoundTracks, 'f');
+
+  return;
+}
+
+
+inline Bool_t StFtpcTrackEvaluator::IsGoodTrack(StFtpcTrack* track) 
+{
+  // Returns true if the given track fulfills all requirements to be a "good" track.
+
+  if (track->GetPid() > 3 && track->ComesFromMainVertex() && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= 10) {
+    return (Bool_t)true;
+  }
+
+  else {
+    return (Bool_t)false;
+  }
+} 
+
+
+inline Bool_t StFtpcTrackEvaluator::IsGoodMainVertexTrack(StFtpcTrack* track) 
+{
+  // Returns true if the given track fulfills all requirements to be a "good" track.
+
+  if (track->GetPid() > 3 && track->ComesFromMainVertex() && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= 10) {
+    return (Bool_t)true;
+  }
+
+  else {
+    return (Bool_t)false;
+  }
+} 
+
+
+inline Bool_t StFtpcTrackEvaluator::IsGoodNonVertexTrack(StFtpcTrack* track) 
+{
+  // Returns true if the given track fulfills all requirements to be a "good" track.
+
+  if (track->GetPid() > 3 && !(track->ComesFromMainVertex()) && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= 10) {
+    return (Bool_t)true;
+  }
+
+  else {
+    return (Bool_t)false;
+  }
+} 
+
+
+inline void StFtpcTrackEvaluator::ShowTracks()
+{
+  // Displays the geant and/or found tracks.
+
+  StFtpcDisplay display(GetFoundHits(), GetFoundTracks(), GetGeantHits(), GetGeantTracks());
+  display.ShowEvalTracks(mSplitTracksArr, mUncleanTracksArr, mClusterArr);
+
+  return;
+}
+
 
 #endif

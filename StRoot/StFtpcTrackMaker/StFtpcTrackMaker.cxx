@@ -1,5 +1,15 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.9 2000/07/03 12:45:23 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.10 2000/07/18 21:22:17 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.10  2000/07/18 21:22:17  oldi
+// Changes due to be able to find laser tracks.
+// Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
+//            to bundle often called functions
+//          - short functions inlined
+//          - formulas of StFormulary made static
+//          - avoid streaming of objects of unknown size
+//            (removes the bunch of CINT warnings during compile time)
+//          - two or three minor bugs cured
+//
 // Revision 1.9  2000/07/03 12:45:23  jcs
 // get (pre)Vertex coordinates directly from (pre)Vertex table instead of from
 // fptpars
@@ -39,7 +49,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 13.06.2000
+//----------Last Modified: 17.07.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include <iostream.h>
@@ -86,19 +96,19 @@ ClassImp(StFtpcTrackMaker)
 //_____________________________________________________________________________
 StFtpcTrackMaker::StFtpcTrackMaker(const char *name) : StMaker(name),  m_fdepar(0)
 {
-  // default constructor
+  // Default constructor.
 }
 
 //_____________________________________________________________________________
 StFtpcTrackMaker::~StFtpcTrackMaker()
 {
-  // destructor
+  // Destructor.
 }
 
 //_____________________________________________________________________________
 Int_t StFtpcTrackMaker::Init()
 {
-  // Initialisation
+  // Initialisation.
 
   St_DataSet *ftpcpars = GetInputDB("ftpc");
   assert(ftpcpars);
@@ -106,12 +116,12 @@ Int_t StFtpcTrackMaker::Init()
   m_fdepar = (St_fde_fdepar *) gime("fdepars/fdepar");
   
   // Create Histograms    
-  m_q            = new TH1F("fpt_q"         ,"FTPC track charge"                       ,3,-2.,2.);
-  m_theta        = new TH1F("fpt_theta"     ,"FTPC theta"                              ,100,-5.0,5.0);
-  m_ndedx        = new TH1F("fde_ndedx"     ,"Number of points used in FTPC dE/dx calculation" ,10,1.,11.);
-  m_found        = new TH1F("fpt_nrec"      ,"FTPC: number of points found per track"  ,10,1.,11.);
-  m_track        = new TH1F("fpt_track"     ,"FTPC: number of tracks found"            ,100,1.,5000.);    
-  m_nrec_track   = new TH2F("fpt_hits_mom" ,"FTPC: points found per track vs. momentum",10,1.,11.,100,1.,20.);
+  m_q            = new TH1F("fpt_q"         ,"FTPC track charge"                               ,  3,-2. ,  2.  );
+  m_theta        = new TH1F("fpt_theta"     ,"FTPC theta"                                      ,100,-5.0,  5.0 );
+  m_ndedx        = new TH1F("fde_ndedx"     ,"Number of points used in FTPC dE/dx calculation" , 10, 1. , 11.  );
+  m_found        = new TH1F("fpt_nrec"      ,"FTPC: number of points found per track"          , 10, 1. ,  11. );
+  m_track        = new TH1F("fpt_track"     ,"FTPC: number of tracks found"                    ,100, 1. ,5000. );    
+  m_nrec_track   = new TH2F("fpt_hits_mom"  ,"FTPC: points found per track vs. momentum"       , 10, 1. ,  11. , 100, 1., 20.);
  
   return StMaker::Init();
 }
@@ -119,7 +129,8 @@ Int_t StFtpcTrackMaker::Init()
 //_____________________________________________________________________________
 Int_t StFtpcTrackMaker::Make()
 {
-  // Here the real stuff happens...
+  // Setup and tracking.
+
   gMessMgr->Message("", "I", "OST") << "Tracking (FTPC) started..." << endm;
 
   St_DataSet *ftpc_data = GetDataSet("ftpc_hits");
@@ -250,26 +261,14 @@ Int_t StFtpcTrackMaker::Make()
 
   Double_t vertexPos[3] = {preVtxPtr->x, preVtxPtr->y, preVtxPtr->z};
   StFtpcConfMapper *tracker = new StFtpcConfMapper(fcl_fppoint, vertexPos, Debug());
-  
-  // settings
-  tracker->SetMaxDca(1.);
-  tracker->MainVertexSettings(3, 5, 1, 2, 1, 1);
-  tracker->NonVertexSettings (3, 5, 1, 2, 1, 1);
-  
-  // cuts
-  // with vertex constraint
-  tracker->SetTrackletCuts(0.007, true);
-  tracker->SetTrackCuts(0.007, 0.03, 30, true);
-  
-  // without vertex constraint
-  tracker->SetTrackletCuts(0.007, false);
-  tracker->SetTrackCuts(0.007, 0.03, 70., false);
-  
+
   // tracking 
   tracker->MainVertexTracking();
 
-  // Merging of split tracks.
-  tracker->HandleSplitTracks(0.11, 0.5, 0.5);
+  // for the line above you have these possibilities
+  //tracker->MainVertexTracking();
+  //tracker->FreeTracking();
+  //tracker->LaserTracking();
 
   if (Debug()) {
     tracker->SettingInfo();
@@ -277,7 +276,10 @@ Int_t StFtpcTrackMaker::Make()
     tracker->TrackingInfo();
   }
   
-  if (fpt_fptrack) delete fpt_fptrack;
+  if (fpt_fptrack) {
+    delete fpt_fptrack;
+  }
+
   fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", 20000);
   m_DataSet->Add(fpt_fptrack);
   tracker->FitAndWrite(fpt_fptrack, -preVtxPtr->id);
@@ -294,16 +296,16 @@ Int_t StFtpcTrackMaker::Make()
   }
 
   /*
-    // Track Display
-    
-    // Uncomment this block if you want to see (I mean see!) the found tracks.
-    
-    StFtpcDisplay *display = new StFtpcDisplay(tracker->GetClusters(), tracker->GetTracks(), (Bool_t)false);
-    //display->TrackInfo();
-    //display->Info();
-    //display->ShowClusters();
-    display->ShowTracks();
-    delete display;
+  // Track Display
+  
+  // Uncomment this block if you want to see (I mean see!) the found tracks.
+  
+  StFtpcDisplay *display = new StFtpcDisplay(tracker->GetClusters(), tracker->GetTracks());
+  //display->TrackInfo();
+  //display->Info();
+  //display->ShowClusters();
+  display->ShowTracks();
+  delete display;
   */
 
   /*
@@ -326,7 +328,7 @@ Int_t StFtpcTrackMaker::Make()
   
   // Uncomment the following line if you want to 'see' the information (split tracks, unclean tracks, ...) 
   // evaluated by the TrackEvaluator.  
-  eval->ShowTracks();
+  //eval->ShowTracks();
   
   delete eval;
   */
@@ -334,20 +336,20 @@ Int_t StFtpcTrackMaker::Make()
   delete tracker;
 
   /*
-    // Refitting
-    // To do refitting of the tracks after some other module has found a 'better' 
-    // main vertex position include the following lines and insert the new vertex position. 
-    
-    St_DataSet *hit_data = GetDataSet("ftpc_hits");   
-    St_fcl_fppoint *points = (St_fcl_fppoint *)hit_data->Find("fcl_fppoint");
-    St_DataSet *track_data = GetDataSet("ftpc_tracks"); 
-    St_fpt_fptrack *tracks = (St_fpt_fptrack *)track_data->Find("fpt_fptrack");
-    
-    StFtpcVertex *refit_vertex = new StFtpcVertex(0., 0., 0.);   // insert vertex position (x, y, z) here!
-    StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, points, tracks, 1.);
-    refitter->FitAndWrite(tracks);
-    delete refitter;
-    delete refit_vertex;
+  // Refitting
+  // To do refitting of the tracks after some other module has found a 'better' 
+  // main vertex position include the following lines and insert the new vertex position. 
+  
+  St_DataSet *hit_data = GetDataSet("ftpc_hits");   
+  St_fcl_fppoint *points = (St_fcl_fppoint *)hit_data->Find("fcl_fppoint");
+  St_DataSet *track_data = GetDataSet("ftpc_tracks"); 
+  St_fpt_fptrack *tracks = (St_fpt_fptrack *)track_data->Find("fpt_fptrack");
+  
+  StFtpcVertex *refit_vertex = new StFtpcVertex(0., 0., 0.);   // insert vertex position (x, y, z) here!
+  StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, points, tracks, 1.);
+  refitter->FitAndWrite(tracks);
+  delete refitter;
+  delete refit_vertex;
   */
 
   MakeHistograms();
@@ -360,7 +362,8 @@ Int_t StFtpcTrackMaker::Make()
 //_____________________________________________________________________________
 void StFtpcTrackMaker::MakeHistograms()
 {
-  // makes histograms
+  // Fill histograms.
+
   St_DataSetIter ftpc_tracks(m_DataSet);
 
   //Get the table
@@ -386,10 +389,10 @@ void StFtpcTrackMaker::MakeHistograms()
 //_____________________________________________________________________________
 void StFtpcTrackMaker::PrintInfo()
 {
-  // prints some information
+  // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.9 2000/07/03 12:45:23 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.10 2000/07/18 21:22:17 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
