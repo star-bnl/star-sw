@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.15 1999/06/01 22:09:18 sakrejda Exp $
+* $Id: tpt.F,v 1.16 1999/07/31 22:13:07 liq Exp $
 * $Log: tpt.F,v $
+* Revision 1.16  1999/07/31 22:13:07  liq
+* set switch on forming segments on UV
+*
 * Revision 1.15  1999/06/01 22:09:18  sakrejda
 * dynamic allocation for the local trk record array
 *
@@ -194,14 +197,17 @@ C     end of initialisation
 C
 C     Find track segments starting from the outermost row
 C     First do segment formation with the conformal mapping.
-      call timed(time_now)
-      time_all = time_all + time_now
-      iret=tpt_form_segments(hit_h,hit,track_h,track,tpar_h,tpar,
-     >                loc_hit,tpstart,tpcount,trk,
-     >                next_hit,slice_loc,slice_pnt,ipass,1.0)
-      call timed(time_now)
-      time_all = time_all + time_now
-      time_seguv = time_now
+      if(tpar(ipass).form_uv.gt.0) then
+         call timed(time_now)
+         time_all = time_all + time_now
+         iret=tpt_form_segments(hit_h,hit,track_h,track,tpar_h,tpar,
+     >        loc_hit,tpstart,tpcount,trk,
+     >        next_hit,slice_loc,slice_pnt,ipass,1.0)
+         call timed(time_now)
+         time_all = time_all + time_now
+         time_seguv = time_now
+         print *,'use tpt_form_segments fit uv'
+      endif
 
       if(tpar(ipass).form_xy.eq.1) then
 C     Then do the regular segment formation from what is left out.
