@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.158 2000/12/14 16:38:08 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.159 2000/12/14 16:48:46 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -406,7 +406,7 @@ Int_t StBFChain::Instantiate()
 	    sscanf(fBFC[k].Comment,"%s",line);
 	    treeMk = new StTreeMaker("outputStream",fFileOut->Data(),line);
 	  }
-	  else treeMk = new StTreeMaker("Tree",fFileOut->Data());
+	  else treeMk = new StTreeMaker("outputStream",fFileOut->Data());
 	  if (treeMk) {
 	    strcpy (fBFC[i].Name,(Char_t *) treeMk->GetName());
 	    treeMk->SetIOMode("w");
