@@ -1,7 +1,10 @@
-// $Id: TestStarPalette.C,v 1.1 1999/06/24 20:42:22 kathy Exp $
+// $Id: TestStarPalette.C,v 1.2 1999/06/25 19:17:27 kathy Exp $
 // $Log: TestStarPalette.C,v $
+// Revision 1.2  1999/06/25 19:17:27  kathy
+// fix the Palette macros so that you can run StarPalette directly from TestStarPalette - thanks, Thoams & Gene!
+//
 // Revision 1.1  1999/06/24 20:42:22  kathy
-// test to show results of Jon Gans' macro to setup star color palette
+//  test to show results of Jon Gans' macro to setup star color palette
 //
 //
 //======================================================================
@@ -12,14 +15,16 @@
 //
 // To use:
 //    Run root4star, then
-//      .x StarPalette.C
 //      .x TestStarPalette.C
 //=======================================================================
 
 
 {
-  gROOT->Reset();
-  
+// to run another macro from this macro:
+  gROOT->LoadMacro("StarPalette.C");
+  StarPalette();
+
+  gROOT->Reset();  
  
   TCanvas *c1 = new TCanvas("c1","Spectrum Palette",200,10,900,500);
   c1->Divide(2,1); 

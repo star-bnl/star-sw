@@ -1,7 +1,10 @@
-// $Id: StarPalette.C,v 1.1 1999/06/24 20:42:07 kathy Exp $
+// $Id: StarPalette.C,v 1.2 1999/06/25 19:17:26 kathy Exp $
 // $Log: StarPalette.C,v $
+// Revision 1.2  1999/06/25 19:17:26  kathy
+// fix the Palette macros so that you can run StarPalette directly from TestStarPalette - thanks, Thoams & Gene!
+//
 // Revision 1.1  1999/06/24 20:42:07  kathy
-// Jon Gans' macro to setup star color palette
+//  Jon Gans' macro to setup star color palette
 //
 //
 //======================================================================
@@ -14,6 +17,7 @@
 //
 //=======================================================================
 
+void StarPalette()
 {  
   const float  saturation = 1;
   const float  lightness = 0.5;
