@@ -9,6 +9,8 @@
 
 //:----------------------------------------------- INCLUDES           --
 #include <stream.h>
+#include <math.h>
+
 #include "asuAlloc.h"
 #include "asuLib.h"
 #include "emlLib.h"
@@ -17,6 +19,9 @@
 
 #define VALID_IDREF(A)  ( (0 <= A && A < myCount && A < myMaxCount) \
 	&& ( myObjs[A] != NULL ) )
+
+//:----------------------------------------------- PROTOTYPES         --
+extern "C" char *id2name(char *base, long id);
 
 //:=============================================== CLASS              ==
 // socObject
@@ -57,6 +62,33 @@ socObject:: socObject(const char* name, const char* type) {
    myType = new string(type);
    myLock = FALSE;
    soc->signIn(this,myIdRef);
+}
+
+//----------------------------------
+socObject:: socObject(long n, const char* type) {
+   myPtr = NULL; // This must be set in derived CTOR !!!
+   	char *name = id2name((char*)type,n);
+   myName = new string(name);
+   	free(name);
+   myType = new string(type);
+   myLock = FALSE;
+   soc->signIn(this,myIdRef);
+}
+
+char *id2name(char *base, long id)
+{
+   char *name;
+   if(id < 1){
+      name = (char*)malloc(strlen(base) +1);
+      strcpy(name,base);
+      return name;
+   }
+   else {
+      name = (char*)malloc(strlen(base) +1
+		+(int)(1 +log10((double)id)));
+      sprintf(name,"%s%d",base,id);
+      return name;
+   }
 }
 
 //----------------------------------
