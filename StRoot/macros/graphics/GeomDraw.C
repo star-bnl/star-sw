@@ -1,5 +1,6 @@
 class St_geant_Maker;
 St_geant_Maker *geant=0;
+//_________________________________________________________________________________________________________________
 void GeomDrawUsage() {
           printf("\n");
           printf("Usage: root4star \'GeomDraw.C(const char *geomDescriptor)\' \n");
@@ -26,10 +27,10 @@ void GeomDrawUsage() {
           printf(" To get the OpenGL view one has to\n");
           printf("    1. Turn Qt ROOT Layer on (see: http://www.rhic.bnl.gov/~fine/EventDisplay \n");
           printf("    2. Select \"OpenGL view\" from the \"View\" menu of ROOT TCanvas \n");                
-          printf("\n$Id: GeomDraw.C,v 1.4 2004/07/23 20:16:04 fine Exp $\n");
+          printf("\n$Id: GeomDraw.C,v 1.5 2004/07/23 20:48:40 fine Exp $\n");
 }                 
-
-void GeomDraw(const char *fzFile="complete") 
+//_____________________________________________________________________________________________________________
+void GeomDraw(const char *fzFile="complete")
 {
    // Read the ZEBRA file with GEANT geometry
    // Convert it to TVolume format 
