@@ -44,9 +44,8 @@ void loadLibrairies(bool doProfile)
 		 "StiPixel",
 		 "StiMaker",
 		 "StFtpcClusterMaker",
-		 "StSsdDbMaker","StSsdUtil","StiSsd",
-		 "StiTpc","StiSvt","StiEmc","StiFtpc","StiIst","last"};
-  //		 "StSvtSimulationMaker",
+		 "StiTpc","StiSvt","StiEmc","StiFtpc","last"};
+	//		 "StSvtSimulationMaker",
 
   int i=0;  
   cout <<"Run.C::loadLibrairies() - INFO - Started"<<endl;
@@ -88,10 +87,8 @@ void RunMany(int firstEvent = 0,
 	     bool activeEmc=false,
 	     bool useFtpc=false,
 	     bool activeFtpc=false,
-	     bool usePixel=true,
+	     bool usePixel=false,
 	     bool activePixel=false,
-	     bool useIst=true,
-	     bool activeIst=false,
 	     bool useResidualCalculator=false,
 	     bool doProfile=false	 )
 {
@@ -115,7 +112,6 @@ void RunMany(int firstEvent = 0,
       useEmc,activeEmc,
       useFtpc,activeFtpc,
       usePixel,activePixel,
-      useIst, activeIst,
       useResidualCalculator,
       doProfile);
 }
@@ -145,8 +141,6 @@ void RunResiduals(int firstEvent = 0,
 		  bool activeFtpc=false,
 		  bool usePixel=false,
 		  bool activePixel=false,
-		  bool useIst=true,
-		  bool activeIst=false,
 		  bool useResidualCalculator=true,
 		  bool doProfile=false	 )
 {
@@ -169,7 +163,6 @@ void RunResiduals(int firstEvent = 0,
       useEmc,activeEmc,
       useFtpc,activeFtpc,
       usePixel,activePixel,
-      useIst, activeIst,
       useResidualCalculator,
       doProfile);
 }
@@ -177,12 +170,17 @@ void RunResiduals(int firstEvent = 0,
 void RunGui(int firstEvent = 0,
 	    int nEvents    = 1,
 	    const char * filePrefix = "st_physics_",
-	    const char * path= "",
-	    const char * file="pion.event.root",
-	    const char* outfile="",
+	    //const char* path= "/star/data06/ITTF/EvalData/Event/ppMinBias/",
+	    //const char* file ="st_physics_3019045_raw_0031.event.root",
+	    //const char* outfile="",
+	    //const char * path= "/data/r23b/star/hijingAuau/200GeV/b0_20/standard/2001/Unknown/",
+	    //const char * file="rcf0183_02_300evts.geant.root",
+	    const char * path="/home/pruneau/",
+	    const char * file="st_physics_5056006_raw_2010010.event.root",
+	    const char * outfile="",
 	    bool useGui=true,
 	    bool useMcAsRec=false,
-	    bool doPlots=false,
+	    bool doPlots=true,
 	    bool doSimulation=false,
 	    bool doAssociation=false,
 	    bool doMiniMcEvent=false,
@@ -191,18 +189,14 @@ void RunGui(int firstEvent = 0,
 	    bool doStEventInput=true,
 	    bool useTpc=true,
 	    bool activeTpc=true,
-	    bool useSvt=false,
-	    bool activeSvt=false,
-	    bool useSsd=false,
-	    bool activeSsd=false,
+	    bool useSvt=true,
+	    bool activeSvt=true,
 	    bool useEmc=false,
 	    bool activeEmc=false,
 	    bool useFtpc=false,
 	    bool activeFtpc=false,
-	    bool usePixel=true,
+	    bool usePixel=false,
 	    bool activePixel=false,
-	    bool useIst=true,
-	    bool activeIst=false,
 	    bool useResidualCalculator=false,
 	    bool doProfile=false
 	    )
@@ -224,11 +218,9 @@ void RunGui(int firstEvent = 0,
 	doStEventInput,
 	useTpc,activeTpc,
 	useSvt,activeSvt,
-	useSsd,activeSsd,
 	useEmc,activeEmc,
 	useFtpc,activeFtpc,
 	usePixel,activePixel,
-	useIst, activeIst,
 	useResidualCalculator,
 	doProfile);
 } 
@@ -239,31 +231,27 @@ void Run(int firstEvent,
 	 const char * path,
 	 const char * file,
 	 const char * outfile="",
-	 bool useGui=false,
-	 bool useMcAsRec=false,
-	 bool doPlots=true,
-	 bool doSimulation=false,
-	 bool doAssociation=false,
-	 bool doMiniMcEvent=false,
-	 bool doDst=false,
-	 bool doStEventOutput=true,
-	 bool doStEventInput=true,
-	 bool useTpc=true,
-	 bool activeTpc=true,
-	 bool useSvt=true,
-	 bool activeSvt=true,
-	 bool useSsd=false,
-	 bool activeSsd=false,
-	 bool useEmc=false,
-	 bool activeEmc=false,
-	 bool useFtpc=false,
-	 bool activeFtpc=false,
-	 bool usePixel=false,
-	 bool activePixel=false,
-	 bool useIst=true,
-	 bool activeIst=false,
-	 bool useResidualCalculator=false,
-	 bool doProfile=false)
+	     bool useGui=false,
+	     bool useMcAsRec=false,
+	     bool doPlots=true,
+	     bool doSimulation=false,
+	     bool doAssociation=false,
+	     bool doMiniMcEvent=false,
+	     bool doDst=false,
+	     bool doStEventOutput=true,
+	     bool doStEventInput=true,
+	     bool useTpc=true,
+	     bool activeTpc=true,
+	     bool useSvt=true,
+	     bool activeSvt=true,
+	     bool useEmc=false,
+	     bool activeEmc=false,
+	     bool useFtpc=false,
+	     bool activeFtpc=false,
+	     bool usePixel=false,
+	     bool activePixel=false,
+	     bool useResidualCalculator=false,
+	     bool doProfile=false)
 {
   const char *fileList[]={0,0};
   if (strncmp(path,"GC",2)==0) 
@@ -291,11 +279,9 @@ void Run(int firstEvent,
       doStEventInput,
       useTpc,activeTpc,
       useSvt,activeSvt,
-      useSsd,activeSsd,
       useEmc,activeEmc,
       useFtpc,activeFtpc,
       usePixel,activePixel,
-      useIst, activeIst,
       useResidualCalculator,
       doProfile);
 }
@@ -342,16 +328,12 @@ void Run(Int_t firstEvent,
 	 bool activeTpc,
 	 bool useSvt,
 	 bool activeSvt,
-	 bool useSsd,
-	 bool activeSsd,
 	 bool useEmc,
 	 bool activeEmc,
 	 bool useFtpc,
 	 bool activeFtpc,
 	 bool usePixel,
 	 bool activePixel,
-	 bool useIst,
-	 bool activeIst,
 	 bool useResidualCalculator,
 	 bool doProfile)
 {
@@ -371,16 +353,12 @@ void Run(Int_t firstEvent,
   pars->activeTpc       = activeTpc;
   pars->useSvt          = useSvt;
   pars->activeSvt       = activeSvt;
-  pars->useSsd          = useSsd;
-  pars->activeSsd       = activeSsd;
   pars->useEmc          = useEmc;
   pars->activeEmc       = activeEmc;
   pars->useFtpc         = useFtpc;  
   pars->activeFtpc      = activeFtpc;  
   pars->usePixel        = usePixel;
   pars->activePixel     = activePixel;
-  pars->useIst          = useIst;
-  pars->activeIst       = activeiTB
   pars->useResidualCalculator = useResidualCalculator;
 
   pars->trackerInputFile = "StRoot/StiMaker/macros/trackFinderPars.dat";
@@ -392,7 +370,6 @@ void Run(Int_t firstEvent,
   pars->tpcInputFile   = "StRoot/StiMaker/macros/tpcInputFile.dat";
   pars->ftpcInputFile  = "none";
   pars->pixelInputFile = "none";
-  pars->itbInputFile   = "none";
   
   if(outfile=="") outfile = fileList[0];
   miniChain->run(firstEvent,nEvents,filePrefix,fileList,outfile);
