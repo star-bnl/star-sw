@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: tofPathLength.cc,v 1.2 2003/07/11 05:08:49 geurts Exp $
+ * $Id: tofPathLength.cc,v 1.3 2003/08/06 23:42:56 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: tofPathLength.cc,v $
+ * Revision 1.3  2003/08/06 23:42:56  geurts
+ * function definitions in seperate header file
+ *
  * Revision 1.2  2003/07/11 05:08:49  geurts
  * added extra overloaded function.
  *
@@ -20,13 +23,7 @@
  **************************************************/
 #include "StThreeVectorD.hh"
 #include "StThreeVectorF.hh"
-#include "StThreeVector.hh"
-
-double tofPathLength(const StThreeVector<double>*, const StThreeVector<double>*, const double);
-double tofPathLength(const StThreeVectorD*, const StThreeVectorD*, const double);
-double tofPathLength(const StThreeVectorF*, const StThreeVectorD*, const double);
-double tofPathLength(const StThreeVectorF*, const StThreeVectorF*, const double);
-
+#include "tofPathLength.hh"
 
 // ----------------------------------------------------------------------------------------------
 double tofPathLength(const StThreeVectorD*  beginPoint, const StThreeVectorD* endPoint, const double curvature){
