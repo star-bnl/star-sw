@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.22 2004/05/13 21:18:18 jml Exp $
+ * $Id: FCFMaker.cxx,v 1.23 2004/06/09 20:04:27 tonko Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.23  2004/06/09 20:04:27  tonko
+ * New ANNOTATION scheme added
+ *
  * Revision 1.22  2004/05/13 21:18:18  jml
  * turned on zero-truncation, but leave 5cm overlap
  *
@@ -157,7 +160,7 @@
 
 ClassImp(StRTSClientFCFMaker);
 
-
+//#define FCF_DEBUG_OUTPUT
 #ifdef FCF_DEBUG_OUTPUT
 static FILE *ff ;	// used for the cluster dump
 #endif
@@ -364,7 +367,6 @@ Int_t StRTSClientFCFMaker::Init()
 
 #ifdef FCF_DEBUG_OUTPUT
   ff = fopen("fcf.dta","w") ;
-//  fcf_annotate_f = fopen("fcf_shape.dta","w") ;
 #endif
 
   for(int i=0;i<24;i++) {
@@ -428,13 +430,14 @@ Int_t StRTSClientFCFMaker::Make()
   PrintInfo();
 
 
-
+  int do_annot = 0 ;
 #ifdef FCF_ANNOTATE_CLUSTERS
-	// zap the annotation structures in case we use them...
-	memset(fcfPixA,0,sizeof(fcfPixA)) ;
+  fcfPixATop = new TDataSet("fcfPixATop");
+  AddData(fcfPixATop);
+  do_annot = 1 ;
 #endif
 
-  printf("<FCFMaker::Make> Making event %d...\n",Event_counter);
+  printf("<FCFMaker::Make> Making event %d, annotation %d...\n",Event_counter,do_annot);
 
   // Hack for now untill ittf is in more complete shape...
   if(mCreate_stevent)
@@ -1017,8 +1020,8 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
 #ifdef FCF_DEBUG_OUTPUT
   struct Hit_t *ht = getHitInfo(hit.row/100,hit.row%100,hit.id_simtrk) ;
   
-  fprintf(ff,"%d %d %d %d %d %d %f %f %f %f %d %d %d %d ",Event_counter, hit.row/100, hit.row%100, hit.id, hit.id_simtrk,hit.id_quality,
-	 hit.x,hit.y,hit.z,hit.q*1000000.0,cl_f,cl_c,p2-p1+1,t2-t1+1) ;
+  fprintf(ff,"%d %d %d %d %d %d %f %f %f %f %d %d %d %d %d %d ",Event_counter, hit.row/100, hit.row%100, hit.id, hit.id_simtrk,hit.id_quality,
+	 hit.x,hit.y,hit.z,hit.q*1000000.0,cl_x,cl_t,cl_f,cl_c,p2-p1+1,t2-t1+1) ;
 
   if(!ht) {
 	fprintf(ff,"0.0 0.0 0.0 0.0\n") ;
@@ -1027,24 +1030,8 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
 	fprintf(ff,"%f %f %f %f\n",ht->x,ht->y,ht->z,ht->charge*1000000.0) ;
   }
 
-#ifdef FCF_ANNOTATE_CLUSTERS
-  if(cl_id != -1) {	// there was a valid CLuster ID passed to this routing!
-	int i, j ;
-
-	int sec = hit.row/100 - 1 ;
-	int row = hit.row%100 -1 ;
-
-	for(i=0;i<192;i++) {
-		for(j=0;j<512;j++) {
-			if(fcfPixA[sec][row][i][j].cl_id == hit.id) {
-				fprintf(ff,"  s %d %d %d %d %d\n",i+1,j,fcfPixA[sec][row][i][j].adc,
-					fcfPixA[sec][row][i][j].cl_id,fcfPixA[sec][row][i][j].id_simtrk) ;
-			}
-		}
-	}
-  }
 #endif
-				
+#if 0				
   // Raw....
   // This line is to compare with the output from special
   // Special uses a very strange pad origin:
