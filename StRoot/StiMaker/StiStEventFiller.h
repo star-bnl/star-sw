@@ -1,12 +1,20 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.6 2004/01/27 23:40:47 calderon Exp $
+ * $Id: StiStEventFiller.h,v 2.7 2004/03/23 23:12:36 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.7  2004/03/23 23:12:36  calderon
+ * Added an "accept" function to filter unwanted tracks from Sti into StEvent.
+ * The current method just looks for tracks with a negative length, since
+ * these were causing problems for the vertex finder (length was nan).  The
+ * nan's have been trapped (one hopes!) in StiKalmanTrack, and for these
+ * cases the return value is negative, so we can filter them out with a
+ * simple length>0 condition.
+ *
  * Revision 2.6  2004/01/27 23:40:47  calderon
  * The filling of the impactParameter() for global tracks is done now
  * only after finding the vertex.  The StPhysicalHelix::distance(StThreeVectorD)
@@ -122,6 +130,7 @@ public:
     float impactParameter(StiKalmanTrack* kTrack);
     float impactParameter(StTrack* track);
 private:
+    bool accept(StiKalmanTrack* kTrack);
     StEvent* mEvent;
     StiTrackContainer* mTrackStore;
     map<StiKalmanTrack*, StTrackNode*> mTrkNodeMap;
