@@ -25,7 +25,7 @@
 #endif
 
 int rawToGlobal ( int sector, int row, double pad, double tb,
-		  double *x, double *y, double *z);
+		  double &x, double &y, double &z);
 
 class FtfSl3: public FtfFinder 
 {

@@ -295,7 +295,7 @@ int FtfFinder::reset (void)
 -------------------------------------------------------------------------- */
    phiDiff = para.phiMax - para.phiMin ;
    if ( phiDiff > 2. * pi + 0.1 ) {
-      printf ( " Wrong phi range %f7.2, %f7.2 ", 
+      printf ( " Wrong phi range %f, %f ", 
                  para.phiMin*toDeg, para.phiMax*toDeg ) ;
       return 1 ;
    }
