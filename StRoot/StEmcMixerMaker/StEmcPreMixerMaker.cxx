@@ -27,6 +27,8 @@ Int_t StEmcPreMixerMaker::Make()
   Int_t GMTTime = event->time();
   StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
   if(!hd) { hd = new StEvtHddr();  AddData(hd); }
+  cout <<GMTTime<<endl;
+  //if(GMTTime>1893463200) GMTTime = 1893463200;
   hd->SetGMTime(GMTTime);
   return kStOk;
 }
