@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.9 2004/05/04 00:10:28 perev Exp $
+ * $Id: StMuArrays.h,v 1.10 2004/07/27 02:35:23 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -17,7 +17,7 @@
 enum emcTypes {muEmc=0};
 
 /// @enum strangeTypes enumeration to to index the strangeArrays
-enum strangeTypes {smuEv=0, smuEvMc, smuV0, smuV0mc, smuV0Assoc, smuXi, smuXiMc, smuXiAssoc, smuKink, smuKinkMc, smuKinkAssoc, smuCut};
+enum strangeTypes {smuEv=0, smuEvMc, smuV0, smuV0Mc, smuV0Assoc, smuXi, smuXiMc, smuXiAssoc, smuKink, smuKinkMc, smuKinkAssoc, smuCut};
 
 /// @enum enumeration to to index the arrays
 enum muDstTypes {muEvent=0, muPrimary, muGlobal, muOther, muL3, muRich, muState, muAccept, muReject}; 
@@ -73,6 +73,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.10  2004/07/27 02:35:23  mvl
+ * Added access methods for Strangeness Monte-Carlo arrays
+ *
  * Revision 1.9  2004/05/04 00:10:28  perev
  * Cleanup
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.18 2004/05/02 04:10:13 perev Exp $
+ * $Id: StMuDst.h,v 1.19 2004/07/27 02:35:23 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -146,18 +146,33 @@ public:
   static StStrangeEvMuDst* strangeEvent() { return (StStrangeEvMuDst*)strangeArrays[smuEv]->UncheckedAt(0); }
   /// returns pointer to the v0 list
   static TClonesArray* v0s() { return strangeArrays[smuV0]; }
+  /// returns pointer to the mc v0 list
+  static TClonesArray* v0sMc() { return strangeArrays[smuV0Mc]; }
+  /// returns pointer to the v0 association list
+  static TClonesArray* v0Assoc() { return strangeArrays[smuV0Assoc]; }
   /// returns pointer to the xi list
   static TClonesArray* xis() { return strangeArrays[smuXi]; }
+  /// returns pointer to the mc xi list
+  static TClonesArray* xisMc() { return strangeArrays[smuXiMc]; }
+  /// returns pointer to the xi association list
+  static TClonesArray* xiAssoc() { return strangeArrays[smuXiAssoc]; }
   /// returns pointer to the kink list
   static TClonesArray* kinks() { return strangeArrays[smuKink]; }
+  /// returns pointer to the mc kink list
+  static TClonesArray* kinksMc() { return strangeArrays[smuKinkMc]; }
+  /// returns pointer to the kink association list
+  static TClonesArray* kinkAssoc() { return strangeArrays[smuKinkAssoc]; }
   /// returns pointer to the list of strangeCuts
   static TClonesArray* strangeCuts() { return strangeArrays[smuCut]; }
   /// returns pointer to the i-th v0
   static StV0MuDst* v0s(int i) { return (StV0MuDst*)strangeArrays[smuV0]->UncheckedAt(i); }
+  static StV0Mc* v0sMc(int i) { return (StV0Mc*)strangeArrays[smuV0Mc]->UncheckedAt(i); }
   /// returns pointer to the i-th xi
   static StXiMuDst* xis(int i) { return (StXiMuDst*)(void*)strangeArrays[smuXi]->UncheckedAt(i); }
+  static StXiMc* xisMc(int i) { return (StXiMc*)strangeArrays[smuXiMc]->UncheckedAt(i); }
   /// returns pointer to the i-th kink
   static StKinkMuDst* kinks(int i) { return (StKinkMuDst*)(void*)strangeArrays[smuKink]->UncheckedAt(i); }
+  static StKinkMc* kinksMc(int i) { return (StKinkMc*)strangeArrays[smuKinkMc]->UncheckedAt(i); }
   /// returns pointer to the i-th stranneCut (of type TCut)
   static TCut* strangeCuts(int i) { return (TCut*)strangeArrays[smuCut]->UncheckedAt(i); }
 
@@ -180,8 +195,14 @@ public:
   static unsigned int numberOfL3AlgoAccepts()  { return arrays[muAccept]->GetEntries(); }
   static unsigned int numberOfL3AlgoRejects()  { return arrays[muReject]->GetEntries(); }
   static unsigned int numberOfV0s()            { return strangeArrays[smuV0]->GetEntries(); }
+  static unsigned int numberOfV0sMc()          { return strangeArrays[smuV0Mc]->GetEntries(); }
+  static unsigned int numberOfV0Assoc()        { return strangeArrays[smuV0Assoc]->GetEntries(); }
   static unsigned int numberOfXis()            { return strangeArrays[smuXi]->GetEntries(); }
+  static unsigned int numberOfXisMc()          { return strangeArrays[smuXiMc]->GetEntries(); }
+  static unsigned int numberOfXiAssoc()        { return strangeArrays[smuXiAssoc]->GetEntries(); }  
   static unsigned int numberOfKinks()          { return strangeArrays[smuKink]->GetEntries(); }
+  static unsigned int numberOfKinksMc()        { return strangeArrays[smuKinkMc]->GetEntries(); } 
+  static unsigned int numberOfKinkAssoc()      { return strangeArrays[smuKinkAssoc]->GetEntries(); }
   static unsigned int numberOfStrangeCuts()    { return strangeArrays[smuCut]->GetEntries(); }
 
   // tofr
@@ -197,8 +218,14 @@ public:
   static unsigned int GetNL3AlgoAccept()    { return numberOfL3AlgoAccepts(); }  
   static unsigned int GetNL3AlgoReject()    { return numberOfL3AlgoRejects(); }  
   static unsigned int GetNV0()              { return numberOfV0s(); }            
+  static unsigned int GetNV0Mc()            { return numberOfV0sMc(); }            
+  static unsigned int GetNV0Assoc()         { return numberOfV0Assoc(); }            
   static unsigned int GetNXi()              { return numberOfXis(); }            
-  static unsigned int GetNKink()            { return numberOfKinks(); }          
+  static unsigned int GetNXiMc()            { return numberOfXisMc(); }            
+  static unsigned int GetNXiAssoc()         { return numberOfXiAssoc(); }            
+  static unsigned int GetNKink()            { return numberOfKinks(); }
+  static unsigned int GetNKinkMc()          { return numberOfKinksMc(); }            
+  static unsigned int GetNKinkAssoc()       { return numberOfKinkAssoc(); }            
   static unsigned int GetNStrangeCut()      { return numberOfStrangeCuts(); }    
 
   static unsigned int GetNTofHit()          { return numberOfTofHit(); }
@@ -212,6 +239,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.19  2004/07/27 02:35:23  mvl
+ * Added access methods for Strangeness Monte-Carlo arrays
+ *
  * Revision 1.18  2004/05/02 04:10:13  perev
  * private => protected
  *
