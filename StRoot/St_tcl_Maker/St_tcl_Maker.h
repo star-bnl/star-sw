@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.15 1999/10/05 00:46:07 snelling Exp $
+// $Id: St_tcl_Maker.h,v 1.16 1999/10/07 03:24:51 snelling Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.16  1999/10/07 03:24:51  snelling
+// created tables dynamically, correct for TFS - TRS/DATA ipix/10
+//
 // Revision 1.15  1999/10/05 00:46:07  snelling
 // added some histogram protections
 //
@@ -91,6 +94,7 @@ class St_tcl_Maker : public StMaker {
   Bool_t                 m_tclPixTransOn;       // switch for pixel translation evaluation
   Bool_t                 m_tclEvalOn;           // switch for the cluster finder evaluation
   Bool_t                 m_tclMorphOn;          // switch for the cluster morphology study
+  Bool_t                 m_raw_data_tpc;        // bool used to check if there is pixel data
   St_tpg_detector*       m_tpg_detector;  	//! TPC geometry parameters 
   St_tpg_pad*            m_tpg_pad;       	//! characteristics unique to a given pad
 	                                  	// (not used)
@@ -106,7 +110,7 @@ class St_tcl_Maker : public StMaker {
   St_tfs_fsctrl*         m_tfs_fsctrl;  	//! TFS control switches
 
   Int_t cluster_morphology( 
-			   Int_t 		   sectorNumber,
+			   Int_t sectorNumber,
 			   St_type_shortdata *pixel_data_in, 
 			   St_type_shortdata *pixel_data_out,
 			   St_tcl_tpcluster  *tpcluster, 
@@ -194,7 +198,7 @@ class St_tcl_Maker : public StMaker {
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.15 1999/10/05 00:46:07 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.16 1999/10/07 03:24:51 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(St_tcl_Maker, 1)       //StAF chain virtual base class for Makers
 };

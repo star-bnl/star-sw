@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.46 1999/10/05 00:46:02 snelling Exp $
+// $Id: St_tcl_Maker.cxx,v 1.47 1999/10/07 03:24:49 snelling Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.47  1999/10/07 03:24:49  snelling
+// created tables dynamically, correct for TFS - TRS/DATA ipix/10
+//
 // Revision 1.46  1999/10/05 00:46:02  snelling
 // added some histogram protections
 //
@@ -150,6 +153,7 @@
 //////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
 #include <stdlib.h>
+#include <math.h>
 #include "St_tcl_Maker.h"
 #include "StChain.h"
 #include "St_DataSet.h"
@@ -195,6 +199,7 @@ Int_t St_tcl_Maker::Init()
   // Limit Error Messages
   gMessMgr->SetLimit("TPSEQ",10);
   gMessMgr->SetLimit("TPHAM",10);
+  gMessMgr->SetLimit("TCL_Get_Row_Seq-E2",5);
 
 
 // 		Create tables
@@ -216,7 +221,6 @@ Int_t St_tcl_Maker::Init()
     m_tpg_pad =new St_tpg_pad("tpg_pad",1); AddConst(m_tpg_pad);} 
   
   Int_t res = tpg_main(m_tpg_pad_plane,m_tpg_detector,m_tpg_pad); 
-//	      ===================================================
   if(res!=kSTAFCV_OK) Warning("Init","tpg_main = %d",res);
 
 // 		TCL parameters
@@ -236,7 +240,7 @@ Int_t St_tcl_Maker::Init()
   m_tsspar = (St_tss_tsspar *) tsspars->Find("tsspar");
   assert(m_tsspar); 
   tss_tsspar_st *tsspar = m_tsspar->GetTable();
-  tsspar->threshold=1;
+  tsspar->threshold = 1;
 
 
 // 		TFS parameters
@@ -256,30 +260,27 @@ Int_t St_tcl_Maker::Init()
 
 Int_t St_tcl_Maker::Make() {
 
-  const Int_t max_hit = 400000;
-
   St_DataSetIter local(m_DataSet);
 
   if (Debug()) printf("Start of TCL Maker");
 
-  St_tcl_tphit* tphit = new St_tcl_tphit("tphit",max_hit); 
-  local.Add(tphit);
+  // get the parameters for TCL
   tcl_tclpar_st* sttclpar = m_tclpar->GetTable();
-  St_tcl_hitclus* tphitclus = new St_tcl_hitclus("tphitclus",max_hit);
-  local.Add(tphitclus);
-  St_tcl_tpcluster* tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); 
-  local.Add(tpcluster);
+
+  // define the tables used
+  St_tcl_tp_seq *tpseq = 0;
+  St_tcl_tphit* tphit = 0;
+  St_tcl_tpcluster* tpcluster = 0;
   St_tcc_morphology* morph = 0;
-  if(m_tclMorphOn) {
-    morph = new St_tcc_morphology("morph",max_hit);    
-    local.Add(morph);
-  }
+  St_tcl_hitclus* tphitclus = 0;
 
   St_DataSet* sector;
   St_DataSet* raw_data_tpc = GetInputDS("tpc_raw");
+  m_raw_data_tpc = kFALSE;
   Int_t sector_tot = 0;
   
   if (raw_data_tpc) {// Row data exits -> make clustering
+    m_raw_data_tpc = kTRUE;
     St_DataSetIter next(raw_data_tpc);
     St_raw_sec_m  *raw_sec_m = (St_raw_sec_m *) next("raw_sec_m");
     //Create the adcxyz table
@@ -311,16 +312,46 @@ Int_t St_tcl_Maker::Make() {
       }
     }
     
-    //calculate size for this one before creating it
+    //calculate or estimate the size before creating the tables
     if (Debug()) cout << "making tcl_tp table with " << isumseq << " entries" << endl;
-    St_tcl_tp_seq *tpseq = new St_tcl_tp_seq("tpseq",isumseq);      
+    tpseq = new St_tcl_tp_seq("tpseq",isumseq);      
     local.Add(tpseq);
 
-    if (!adcxyz && m_tclPixTransOn) {  // create tfc_adcxyz Table
+    // WARNING no knowledge of actual number of hits here but we need to create the
+    // table smart enough to contain biggest events. Therefore max number of hits
+    // can be number of pixels divided by 10 (no 1 pad hits and estimated sequence
+    // length to be 5)
+    int max_hit = (int) ceil(isumpix/10);
+    cout << "number of estimated hits used: " << max_hit << endl;
+    // create tables used with a reasonable size
+    tphit = new St_tcl_tphit("tphit",max_hit); 
+    local.Add(tphit);
+    tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); 
+    local.Add(tpcluster);
+
+    tphitclus = new St_tcl_hitclus("tphitclus",max_hit);
+    local.Add(tphitclus);
+
+    //    if(!tphitclus && m_tclMorphOn) {
+      // Li Qun's tracking study
+    //      tphitclus = new St_tcl_hitclus("tphitclus",max_hit);
+    //      local.Add(tphitclus);
+    //    }
+
+    if(!morph && m_tclMorphOn) {
+      // UW morphology study 
+      morph = new St_tcc_morphology("morph",max_hit);    
+      local.Add(morph);
+    }
+
+    if (!adcxyz && m_tclPixTransOn) {  
+      // create flat adcxyz Table for pixel viewing
       if (Debug()) cout << "making adcxyz table with " << isumpix << " entries" << endl;
-      adcxyz = new St_tfc_adcxyz("adcxyz",isumpix);  next.Add(adcxyz);
+      adcxyz = new St_tfc_adcxyz("adcxyz",isumpix);  
+      next.Add(adcxyz);
       adcxyz->SetNRows(0);
     }
+    // end creation tables
 
     next.Reset();
 
@@ -380,10 +411,10 @@ Int_t St_tcl_Maker::Make() {
 	if (sector_tot == 1) {k = -k;}
 	tcl_sector_index->CurrentSector = k;
         if(Debug()) printf("Starting %20s for sector %2d.\n","tph",indx);
-	Int_t tph_res =  tph(m_tcl_sector_index,m_tclpar,m_tsspar,
-			     m_tpg_pad_plane,
-			     pixel_data_in,pixel_data_out,
-			     tpseq,tpcluster,tphit,tphitclus);
+	Int_t tph_res = tph(m_tcl_sector_index, m_tclpar,m_tsspar,
+			    m_tpg_pad_plane,
+			    pixel_data_in, pixel_data_out,
+			    tpseq, tpcluster, tphit, tphitclus);
         if (tph_res!=kSTAFCV_OK) Warning("Make","tph == %d",tph_res);
       }
     }
@@ -392,7 +423,7 @@ Int_t St_tcl_Maker::Make() {
 
     if (sector_tot && m_tclEvalOn) { //slow simulation exist
       if (Debug()) cout << "start run_tte_hit_match" << endl;
-      St_DataSet    *geant = GetInputDS("geant");
+      St_DataSet *geant = GetInputDS("geant");
       if (geant) {
 	St_DataSetIter geantI(geant);
 	St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geantI("g2t_tpc_hit");
@@ -400,7 +431,10 @@ Int_t St_tcl_Maker::Make() {
 
 	  // create the index table, if any
 	  St_tcl_tpc_index  *index = (St_tcl_tpc_index *) local("index");
-	  if (!index) {index = new St_tcl_tpc_index("index",2*max_hit); local.Add(index);}
+	  if (!index) {
+	    index = new St_tcl_tpc_index("index",2*max_hit); 
+	    local.Add(index);
+	  }
 	  
 	  Int_t Res_tte =  tte_hit_match(g2t_tpc_hit,index,m_type,tphit); 
 	  //		       ==============================================
@@ -411,26 +445,44 @@ Int_t St_tcl_Maker::Make() {
     }
   }
   else {
-// 		Row data does not exit, check GEANT. if it does then use fast cluster simulation
+// 		Raw data does not exist, check GEANT. if it does then use fast cluster simulation
     St_DataSet *geant = GetInputDS("geant");
     if (geant) {
       St_DataSetIter geantI(geant);
       St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geantI("g2t_tpc_hit");
+      int max_hit;
+      if (g2t_tpc_hit) { 
+	max_hit = g2t_tpc_hit->GetNRows();
+      }
+      else {
+	cout << "No g2t_tpc_hit table!!!!!!" << endl;
+      }
       St_g2t_track   *g2t_track   = (St_g2t_track   *) geantI("g2t_track");
       St_g2t_vertex  *g2t_vertex  = (St_g2t_vertex  *) geantI("g2t_vertex");
       if (g2t_tpc_hit && g2t_track){
 	// create the index table, if any
 	St_tcl_tpc_index  *index = (St_tcl_tpc_index *) local("index");
-	if (!index) {index = new St_tcl_tpc_index("index",2*max_hit); local.Add(index);}
+	if (!index) {
+	  index = new St_tcl_tpc_index("index",2*max_hit); 
+	  local.Add(index);
+	}
 	if (Debug()) cout << "start tfs_run" << endl;
+
+	// make a tphit table with the size of the number of geant hits
+	tphit = new St_tcl_tphit("tphit",max_hit); 
+	local.Add(tphit);
 	
 	Int_t Res_tfs_g2t = tfs_g2t(g2t_tpc_hit, g2t_track, g2t_vertex,
 				    m_tfs_fspar,m_tfs_fsctrl,
 				    index, m_type, tphit);
-	if (Res_tfs_g2t != kSTAFCV_OK){cout << "Problem running tfs_g2t..." << endl;}
+	if (Res_tfs_g2t != kSTAFCV_OK) {
+	  cout << "Problem running tfs_g2t..." << endl;
+	}
 	else {
 	  Int_t Res_tfs_filt = tfs_filt(tphit);
-	  if ( Res_tfs_filt !=  kSTAFCV_OK){cout << " Problem running tfs_filt..." << endl;} 
+	  if ( Res_tfs_filt !=  kSTAFCV_OK){ 
+	    cout << " Problem running tfs_filt..." << endl;
+	  } 
 	}
 	if (Debug()) cout << "finish tfs_run" << endl;
       }
@@ -453,19 +505,21 @@ void St_tcl_Maker::InitHistograms() {
 
   // 		for TPH pam
 
-  m_nseq_hit   = new TH1F("TclTphitNseq","num seq in hit",200,0.5,200.5);
   m_tpc_row    = new TH1F("TclTphitRow" ,"tpc row num"   ,2345,100.5,2445.5);
   m_x_of_hit   = new TH1F("TclTphitHitX","x dist of hits",50,-200.,200.);
   m_y_of_hit   = new TH1F("TclTphitHitY","y dist of hits",50,-200.,200.);
   m_z_of_hit   = new TH1F("TclTphitHitZ","z dist of hits",50,-250.,250.);
   m_charge_hit = new TH1F("TclTphitTotChargeHit","total charge in hit",100,0.,0.00004);
-  
+
+  m_nseq_hit     = new TH1F("TclTphitNseq","num seq in hit (empty for TFS)",
+			    200,0.5,200.5);
   // 		for TCL pam
   m_nseq_cluster = new TH1F("TclTpclusterNseqCluster",
-			    "num seq in cluster",100,0.5,200.5);
+			    "num seq in cluster (empty for TFS)",
+			    100,0.5,200.5);
   m_nhits        = new TH1F("TclTpclusterNhits",
-			    "estimated num overlapping hits in cluster",20,-0.5,19.5);
-  
+			    "estimated num overlapping hits in cluster (empty for TFS)",
+			    20,-0.5,19.5);
 }
 
 //----------------------------------------------------------------------
@@ -490,35 +544,40 @@ void St_tcl_Maker::MakeHistograms() {
   }
   else {
     for(int i=0; i < phtcl->GetNRows(); i++) {
-      m_nseq_hit->Fill((Float_t) pttphit[i].nseq);
       m_tpc_row->Fill((Float_t) pttphit[i].row);
       m_x_of_hit->Fill((Float_t) pttphit[i].x);
       m_y_of_hit->Fill((Float_t) pttphit[i].y);
       m_z_of_hit->Fill((Float_t) pttphit[i].z);
       m_charge_hit->Fill((Float_t) pttphit[i].q);
+      if (m_raw_data_tpc) {
+	m_nseq_hit->Fill((Float_t) pttphit[i].nseq);
+      }
     }
   }
 
-  // cluster table
-  St_tcl_tpcluster *phtpcl =0;
-  tcl_tpcluster_st *pttpcl = 0; 
-  // get pointers to tpc hit table
-  phtpcl = (St_tcl_tpcluster*) tpc_hits.Find("tpcluster");
-  if (phtpcl) {
-    pttpcl = phtpcl->GetTable();
-  }
-  else { 
-    cout << "Warning: tphit cluster table header does not exist "   << endl; 
-  }
-  if (!pttpcl) { 
-    cout << "Warning: tphit cluster table does not exist " << endl; 
-  }
-  else {
-    for(int j=0; j < phtpcl->GetNRows(); j++) {
-      m_nseq_cluster->Fill((Float_t) pttpcl[j].nseq);
-      m_nhits->Fill((Float_t) pttpcl[j].nhits);
+  if (m_raw_data_tpc) {
+    // cluster table
+    St_tcl_tpcluster *phtpcl =0;
+    tcl_tpcluster_st *pttpcl = 0; 
+    // get pointers to tpc hit table
+    phtpcl = (St_tcl_tpcluster*) tpc_hits.Find("tpcluster");
+    if (phtpcl) {
+      pttpcl = phtpcl->GetTable();
+    }
+    else { 
+      cout << "Warning: tphit cluster table header does not exist "   << endl; 
+    }
+    if (!pttpcl) { 
+      cout << "Warning: tphit cluster table does not exist " << endl; 
+    }
+    else {
+      for(int j=0; j < phtpcl->GetNRows(); j++) {
+	m_nseq_cluster->Fill((Float_t) pttpcl[j].nseq);
+	m_nhits->Fill((Float_t) pttpcl[j].nhits);
+      }
     }
   }
+
 }
 
 //_____________________________________________________________________________
