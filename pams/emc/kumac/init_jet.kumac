@@ -1,10 +1,24 @@
+ macro init	
+    
+   macro/global/import *
+     
+ return
+
 * ******************************************************************
- macro fill
+ macro write
       
    macro/global/import *
 
      cd [params]/emc/jet
   
+     tdm/newtable       emc_egrid_par emc_egrid_par 1
+     tdm/table/rowcount emc_egrid_par 1
+
+  tdm/table/cell/putvalue 'emc_egrid_par[0].chrg_eta_min'      -2.0
+  tdm/table/cell/putvalue 'emc_egrid_par[0].chrg_eta_max'       2.0
+  tdm/table/cell/putvalue 'emc_egrid_par[0].ideal_eta_nbin'     100
+  tdm/table/cell/putvalue 'emc_egrid_par[0].ideal_phi_nbin'     100
+
      tdm/newtable       emc_jetpar emc_jetpar 1
      tdm/table/rowcount emc_jetpar 1
      
@@ -28,21 +42,6 @@
  cd /dui
  
  return
+* ******************************************************
  
-* ************************************************************
- macro read
-   macro/global/import *
-     
- return
- 
-*******************************************************************
- macro init 
-   
-   macro/global/import *
-     
- return
- 
-*****************************************************************
-
-
 

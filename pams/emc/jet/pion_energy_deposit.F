@@ -1,17 +1,17 @@
-      subroutine pion_energy_deposit(rl,p_tot,ener_subt,err_subt)
+      subroutine pion_energy_deposit(det,p_tot,ener_subt,err_subt)
 c*-
 c*- Give most probable energy deposit in EMC for pion.
 c*- This parametrization was written by B. Christie.
-c*- rl=3 for Barrel and rl=1,2 for endcap.
 c*- For the moment, same program/parameters gives most probable
 c*- energy deposoit due to charged track. This should be chagnged!
 c*- I guess energy deposit should be a function of energy, not p_tot?
 c*- Estimation of error has not yet impremented.
 c*- 
+#include "emc_def.h"
       IMPLICIT NONE
-      integer rl
+      integer det
       real p_tot, ener_subt,err_subt
-      if(rl.ge.1 .and. rl.le.3)then
+      if(det.eq.BEMC .or. det.eq.EEMC)then
          if(p_tot.le.0.35)then
             ener_subt = 0.049*p_tot
          elseif(p_tot.le.0.45)then
@@ -33,8 +33,9 @@ c*-
          else
             ener_subt = 0.040
          endif      
+         err_subt=ener_subt
       else
-         write(*,*)'PION_ENERGY_DEPOSIT:Wrong detector:',rl
+         write(*,*)'PION_ENERGY_DEPOSIT:Wrong detector:',det
       endif
       return
       end

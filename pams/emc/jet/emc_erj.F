@@ -1,12 +1,12 @@
 c:>------------------------------------------------------------------
 C:FILE:         emc_erj.F
-C:DESCRIPTION:  EMC Analysis Module, package ems, STAF compliant.
+C:DESCRIPTIO:  EMC Analysis Module, package ems, STAF compliant.
 c:AUTHOR:       OGAWA, AKio, PSU/BNL
 c:AUTHOR:       Originaly W.J. Llope, Rice University
 c:AUTHOR:       TAS Version by B. Christie
 C:BUGS:         None known.
 C:HISTORY:      31jul96-v1.0-wjl- Creation.
-c:>------------------------------------------------------------------
+c:>------------------------------------------------------------------      
       INTEGER*4 FUNCTION EMC_ERJ(
      1       ems_control_h,       ems_control ,
      2        emc_energy_h,        emc_energy ,
@@ -21,8 +21,9 @@ C:RETURN VALUE: STAFCV_OK on successful completion
 c:>------------------------------------------------------------------
       IMPLICIT NONE
 #include "emc_erj.inc"
-      real pi,twopi
-      common/erjkeep/ pi,twopi
+#include "emc_def.h"
+#include "math_constants.h"
+#include "phys_constants.h"
       integer ncell_tot
       real ej_min
       save ncell_tot
@@ -32,7 +33,7 @@ c:>------------------------------------------------------------------
       real etc(NMAX),etac(NMAX),phic(NMAX)
       real etj(JMAX),etaj(JMAX,2),phij(JMAX,2)
       integer i,j,nout,i_jet
-      integer ncell_bemc,ncell_eemc,ncell_chrg
+      integer ncell_bemc,ncell_eemc,ncell_gap
       integer nmark,marki,markj,k,ik,imark(JMAX)
       real eta,phi,e_j,px,py,pz
       real phil,phis,dphi,r_int
@@ -66,18 +67,18 @@ c---------------------------------------------------------------------
          write(*,*)
      1        'EMC_ERJ -- Background subtraction mode off=0/on=1  =',
      1        EMC_jetpar(1).mode_bg
-         ncell_bemc=ems_control(1).bemc_eta_nbin
-     +             *ems_control(1).bemc_phi_nbin
-         ncell_eemc=ems_control(1).eemc_eta_nbin
-     +             *ems_control(1).eemc_phi_nbin
-         ncell_chrg=ems_control(1).chrg_eta_nbin
-     +             *ems_control(1).chrg_phi_nbin
-         ncell_tot =ncell_bemc+ncell_eemc+ncell_chrg
+         ncell_bemc=ems_control(1).nmodule(BEMC)
+     +             *ems_control(1).neta(BEMC)
+     +             *ems_control(1).nsub(BEMC)
+         ncell_eemc=ems_control(1).nmodule(EEMC)
+     +             *ems_control(1).neta(EEMC)
+     +             *ems_control(1).nsub(EEMC)
+         ncell_gap =ems_control(1).nmodule(BEMC)
+     +             *ems_control(1).nsub(BEMC)
+         ncell_tot =ncell_bemc+ncell_eemc+ncell_gap
          write(*,*)
-     1        'EMC_ERJ -- # of cell in BEMC/EEMC/track/Total      =',
-     1        ncell_bemc,ncell_eemc,ncell_chrg,ncell_tot
-         pi    = ACOS(-1.0)
-         twopi = 2.0*pi
+     1        'EMC_ERJ -- # of cell in BEMC/EEMC/GAP/Total      =',
+     1        ncell_bemc,ncell_eemc,ncell_gap,ncell_tot
       endif
 c---------------------------------------------------------------------
 C     Initialize nok counter and variable arrays
@@ -89,7 +90,7 @@ C      Load Energy Grid for Jet Finder
 c---------------------------------------------------------------------
       ncell=EMC_energy_h.nok
       if(ncell .gt. NMAX) then
-         write(*,*) 'EMC_ERJ: Assign more memory for et_tot'
+         write(*,*) '***EMC_ERJ: Assign more memory for et_tot'
          EMC_erj = STAFCV_BAD
          return
       endif
@@ -116,21 +117,21 @@ c---------------------------------------------------------------------
          call jet_finder_isa
       else
          write(*,*)
-     1     'ERJ -- Jet Finder option not coded yet...Exiting...'
+     1     '***EMC_ERJ: Jet Finder option not coded yet'
          EMC_ERJ = STAFCV_BAD
          return
       endif
       if(njet .eq. 0) then
-         write(*,*)'EMC_ERJ -- no jets found at all!!!'
+         write(*,*)'EMC_ERJ: no jets found at all!!!'
          return
       endif
       if(ierror .eq. 1) then
          write(*,*)
-     1     'EMC_ERJ -- Found error condition from routine UA1...'
+     1     '***EMC_ERJ: Found error condition from UA1'
          EMC_ERJ = STAFCV_BAD
          return
       end if
-      write(*,*)'EMC_ERJ -- Found No. jets before cut =',njet
+      write(*,*)'EMC_ERJ: Found No. jets before cut =',njet
 c----------------------------------------------------------------
 c  Clusterization is over. Starting from here user can make 
 c           a desirable selection of clusters.
@@ -149,8 +150,8 @@ c----------------------------------------------------------------
      +      eta .le. emc_jetpar(1).eta_max .and.
      +      e_j .gt. emc_jetpar(1).ej_min) then
             if(nout .ge. ems_jetlist_h.maxlen) then
-               write(*,*) 'EMC_ERJ -- WARNING!!! ems_jetlist is full'
-               write(*,*) 'EMC_ERJ -- increase .maxlen and redo...'
+               write(*,*) '***EMC_ERJ: WARNING!!! ems_jetlist is full'
+               write(*,*) '***EMC_ERJ: increase .maxlen and redo...'
                EMC_ERJ = STAFCV_BAD
                return
             endif
@@ -176,9 +177,9 @@ c----------------------------------------------------------------
          ems_jetlist_h.nok=nout
       enddo
 
-      write(*,*)'EMC_ERJ -- Found No. jets after cut =',nout
+      write(*,*)'EMC_ERJ: Found No. jets after cut =',nout
       if(nout .eq. 0) then
-         write(*,*)'EMC_ERJ -- no jets found after ej_min/eta cuts'
+         write(*,*)'EMC_ERJ: no jets found after ej_min/eta cuts'
          return
       end if
 
@@ -198,11 +199,11 @@ c*-back-to-back criteria
           if(i.eq.j) go to 50
           phis=ems_jetlist(j).phi_w          
           dphi=phil-phis
-          do while(dphi.ge.twopi)
-             dphi=dphi-twopi
+          do while(dphi.ge.C_2PI)
+             dphi=dphi-C_2PI
           enddo
           do while(dphi.lt.0.0)
-             dphi=dphi+twopi
+             dphi=dphi+C_2PI
           enddo
           dphi=dphi*57.2958-180.
           if(abs(dphi).le.emc_jetpar(1).phi_dev) then
@@ -222,6 +223,5 @@ c*-back-to-back criteria
       ems_jetlist(marki).id_b=markj
       ems_jetlist(markj).id_b=marki
 
-      EMC_ERJ=STAFCV_OK
 999   RETURN
       END

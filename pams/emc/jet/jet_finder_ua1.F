@@ -11,6 +11,7 @@ c:>------------------------------------------------------------------
      +        cone_rad, et_seed, ej_min, et_min,
      +        min_move, max_move, mode, prec_bg,
      +        ierror)
+#include "math_constants.inc"
       INTEGER NMAX,JMAX
       parameter(NMAX=10000,JMAX=100)
       integer ncell, njet, ierror, ncellj(JMAX), mode, ncell_tot
@@ -18,8 +19,6 @@ c:>------------------------------------------------------------------
       real etj(JMAX),etaj(JMAX,2),phij(JMAX,2)
       real cone_rad, et_seed, ej_min, et_min
       real min_move, max_move, prec_bg
-      real pi,twopi
-      common/erjkeep/ pi,twopi
       integer flag(NMAX),index(NMAX)
       integer n_iter,i,j,k,l,nc
       real et_sum,et_ave,et_sum_old
@@ -73,11 +72,11 @@ c*-weighted eta and phi.
 c*-Is the cell is in the cone?
                   if(abs(deta).le.cone_rad)then
                      dphi=phic(l)-phi
-                     do while(dphi .gt. pi)
-                        dphi=dphi-twopi
+                     do while(dphi .gt. C_PI)
+                        dphi=dphi-C_2PI
                      enddo
-                     do while(dphi .le. -pi)
-                        dphi=dphi+twopi
+                     do while(dphi .le. -C_PI)
+                        dphi=dphi+C_2PI
                      enddo
                      if(abs(dphi).le.cone_rad) then
                         r_int=sqrt(deta**2+dphi**2)
@@ -85,11 +84,11 @@ c*-Is the cell is in the cone?
 c*-calculate offset from initiate cell
                            deta=etac(l)-eta0
                            dphi=phic(l)-phi0
-                           do while(dphi .gt. pi)
-                              dphi=dphi-twopi
+                           do while(dphi .gt. C_PI)
+                              dphi=dphi-C_2PI
                            enddo
-                           do while(dphi .lt. -pi)
-                              dphi=dphi+twopi
+                           do while(dphi .lt. -C_PI)
+                              dphi=dphi+C_2PI
                            enddo
                            et=etc(l)-et_ave
                            etas=etas+abs(et)*deta
@@ -131,11 +130,11 @@ c*-sum up unused cells within required distance of given eta/phi
                   deta=etac(l)-eta
                   if(abs(deta).le.cone_rad)then
                      dphi=phic(l)-phi
-                     do while(dphi .gt. pi)
-                        dphi=dphi-twopi
+                     do while(dphi .gt. C_PI)
+                        dphi=dphi-C_2PI
                      enddo
-                     do while(dphi .le. -pi)
-                        dphi=dphi+twopi
+                     do while(dphi .le. -C_PI)
+                        dphi=dphi+C_2PI
                      enddo
                      if(abs(dphi).le.cone_rad) then
                         r_int=sqrt(deta**2+dphi**2)
@@ -164,11 +163,11 @@ c*-eles, store flags and jet variables
                   if(flag(k).eq.-1) flag(k)=1
                enddo
                phi=phi+phis/ets
-               do while(phi .ge. twopi)
-                  phi=phi-twopi
+               do while(phi .ge. C_2PI)
+                  phi=phi-C_2PI
                enddo
                do while(phi .lt. 0.0)
-                  phi=phi+twopi
+                  phi=phi+C_2PI
                enddo
                njet=njet+1
                etj(njet) =ets
@@ -196,7 +195,8 @@ c*-recalculate energy sum excluding used cells.
          enddo
 c*-if background level changes more than prec_bg, go next iteration!!!
 c*-after 10 iteration, stop working and finish
-         write(*,*) njet,' jet with ',n_iter,' iteration(s) : ',
+         write(*,*) njet,' jet found in ',n_iter,
+     +     ' iteration(s) : EtSum, EtAve =',
      +     et_sum,et_sum/float(ncell_tot-nc)
          if(abs(et_sum-et_sum_old)/et_sum .gt. prec_bg .and.
      +      n_iter .le. 10)then
@@ -219,3 +219,6 @@ c*-Watch out!!! Here is a big jump!!!
       end if
       return
       end
+
+
+

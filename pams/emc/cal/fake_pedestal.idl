@@ -3,12 +3,14 @@
 #include "PAM.idl"
 #include "ems_control.idl"
 #include "ems_cal_control.idl"
+#include "emc_calib_header.idl"
 #include "emc_pedestal.idl"
 
 interface fake_pedestal : amiModule {
 	STAFCV_T call
         ( in    ems_control  ems_control
 	, in    ems_cal_control  ems_cal_control
-	, inout emc_pedestal fake_ped
+	, out   emc_calib_header fake_ped_header
+	, out   emc_pedestal fake_ped
 	);
 };

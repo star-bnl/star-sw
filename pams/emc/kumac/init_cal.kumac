@@ -1,5 +1,12 @@
-* ****************************************************************
- macro fill
+ 
+ macro init
+   macro/global/import *
+     
+ return
+
+* ******************************************************************
+
+ macro write
    macro/global/import *
    cd [params]/emc/cal
    
@@ -30,10 +37,6 @@
    tdm/table/cell/putvalue 'emc_adc_hist_control[0].id_base'       0
    
  return
-* **********************************************************************
- 
- macro init
-   macro/global/import *
-     
- return
-* ******************************************************************
+
+
+

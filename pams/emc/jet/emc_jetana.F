@@ -10,6 +10,7 @@ CC:<-----------------------------------------------------------------
      3       emc_jet_eval_h,      emc_jet_eval) 
       IMPLICIT NONE
 #include "emc_jetana.inc"
+#include "math_constants.inc"
 CC:>-----------------------------------------------------------------
 CC: ROUTINE:    EMC_JETANA
 CC: DESCRIPTION: Jet analysis code. 
@@ -30,8 +31,7 @@ CC:>-----------------------------------------------------------------
       integer MAX
       parameter(MAX=4)
       integer i,j,k,l,n,nj1,nj2,iflag(MAX),jflag(MAX),index(MAX*MAX)
-      real dr(MAX,MAX),de(MAX,MAX),dp(MAX,MAX),PI
-      parameter(PI=3.141592654)
+      real dr(MAX,MAX),de(MAX,MAX),dp(MAX,MAX)
       EMC_JETANA = STAFCV_BAD
       
       n=emc_jet_eval_h.nok+1
@@ -80,8 +80,8 @@ c
          do j=1,nj2
             de(i,j)=ems_jetlist(j).eta_w-emc_jet_eval(n).eta1(i)
             dp(i,j)=ems_jetlist(j).phi_w-emc_jet_eval(n).phi1(i)
-            if(dp(i,j).lt.-PI) dp(i,j)=dp(i,j)+2*PI    
-            if(dp(i,j).gt.PI)  dp(i,j)=dp(i,j)-2*PI
+            if(dp(i,j).lt.-C_PI) dp(i,j)=dp(i,j)+C_2PI  
+            if(dp(i,j).gt. C_PI) dp(i,j)=dp(i,j)-C_2PI
             dr(i,j)=sqrt(de(i,j)*de(i,j)+dp(i,j)*dp(i,j))
          enddo
       enddo

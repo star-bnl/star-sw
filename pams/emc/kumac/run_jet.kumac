@@ -5,10 +5,11 @@
    macro/global/import *
      
   ami/module/call emc_egrid _
-		       [data]/emc/hits/ems_hits_bemc _
-                       [data]/emc/hits/ems_hits_eemc _ 
+		       [data]/emc/hits/emc_hits_bemc _
+                       [data]/emc/hits/emc_hits_eemc _ 
                        [dst]/globtrk _
                        [params]/emc/ems/ems_control _
+                       [params]/emc/jet/emc_egrid_par _
                        [data]/emc/tracks/emc_energy
   
   if ( staf_status(1) .ne. STAFCV_OK) then
@@ -24,7 +25,7 @@
    macro/global/import *
      
      ami/module/call emc_erj _
-                     [params]/emc/ems_control _
+                     [params]/emc/ems/ems_control _
                      [data]/emc/tracks/emc_energy _
 		     [params]/emc/jet/emc_jetpar _
                      [data]/emc/tracks/ems_jetlist
