@@ -66,6 +66,8 @@ Int_t StTreeMaker::Open(const char*)
 	return kStErr;
       }
 
+      Broadcast("InputFile",fFile.Data());
+      
       fTree = StTree::GetTree(&tf,GetTreeName()); assert(fTree);
       if (GetDebug()) 
 	printf("<%s(%s)::Init> FOUND Tree %s in file %s\n",
@@ -123,6 +125,7 @@ Int_t StTreeMaker::Open(const char*)
 
       fTree = new StTree(GetTreeName()); 
       if (!fFile.IsNull()) fTree->SetBaseName(fFile);
+      Broadcast("OutputFile",fFile.Data());
       
 
     }//end of new tree

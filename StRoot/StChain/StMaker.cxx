@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.119 2001/10/13 20:23:45 perev Exp $
+// $Id: StMaker.cxx,v 1.120 2001/11/18 00:58:07 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -28,8 +28,10 @@
 
 #include "StMem.h"
 #include "TMemStat.h"
+#include "StBroadcast.h"
 
 StMaker *StMaker::fgStChain = 0;
+StBroadcast *StMaker::fgBroadcast = 0;
 StMaker *StMaker::fgFailedMaker = 0;
 Int_t    StMaker::fgTallyMaker[kStFatal+1] = {0,0,0,0,0};
 Int_t MaxWarnings = 26;
@@ -54,6 +56,7 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker")
    } else         {	// add this maker to chain  
      fgStChain->AddData(this,".make");
    }
+   if (!fgBroadcast) fgBroadcast = new StBroadcast("ChainBroadcast","");
    m_DataSet  = new TObjectSet(".data") ;Add(m_DataSet);
    m_ConstSet = new TObjectSet(".const");Add(m_ConstSet);
    m_GarbSet  = new TObjectSet(".garb" );Add(m_GarbSet);
@@ -1083,10 +1086,21 @@ AGAIN: switch (fState) {
   }
   assert(0); return 0;
 }
-
-
+//______________________________________________________________________________
+void StMaker::Broadcast(const char *subj,const char *info)
+{
+   fgBroadcast->Broadcast(subj,info,GetName());
+}
+//______________________________________________________________________________
+const char *StMaker::GetBroadcast(const char *subj,const char *author) const
+{
+  return fgBroadcast->GetBroadcast(subj,author);
+}
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.120  2001/11/18 00:58:07  perev
+// Broadcast method added
+//
 // Revision 1.119  2001/10/13 20:23:45  perev
 // SetFlavor  working before and after Init()
 //
