@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.28 2001/11/13 22:43:50 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.29 2002/01/31 21:43:14 aihong Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -37,6 +37,7 @@ Float_t StFlowCutTrack::mDcaFtpcCuts[2]    = {0., 1.};
 Float_t StFlowCutTrack::mPtTpcCuts[2]      = {0.1, 8.};
 Float_t StFlowCutTrack::mPtFtpcCuts[2]     = {0.1, 8.};
 Float_t StFlowCutTrack::mEtaTpcCuts[2]     = {-1.3, 1.3};
+Float_t StFlowCutTrack::mChgTpcCuts[2]     = {-5000., 5000.};
 Float_t StFlowCutTrack::mEtaFtpcCuts[4]    = {-4.0, -2.7, 2.7, 4.0};
 
 UInt_t  StFlowCutTrack::mTrackN            = 0;     
@@ -64,6 +65,7 @@ UInt_t  StFlowCutTrack::mDcaFtpcCutN       = 0;
 UInt_t  StFlowCutTrack::mPtTpcCutN         = 0;
 UInt_t  StFlowCutTrack::mPtFtpcCutN        = 0;
 UInt_t  StFlowCutTrack::mEtaTpcCutN        = 0;
+UInt_t  StFlowCutTrack::mChgTpcCutN        = 0;
 UInt_t  StFlowCutTrack::mEtaFtpcCutN       = 0;
 
 //-----------------------------------------------------------------------
@@ -84,6 +86,7 @@ Int_t StFlowCutTrack::CheckTrack(StTrack* pTrack) {
 
   StThreeVectorD p = pTrack->geometry()->momentum();
 
+  float charge = pTrack->geometry()->charge();
   float eta = p.pseudoRapidity();
   float dca = pTrack->impactParameter();
   float pt = p.perp();
@@ -144,6 +147,14 @@ Int_t StFlowCutTrack::CheckTrack(StTrack* pTrack) {
       return kFALSE;
     }
     
+    // charge
+    if (mChgTpcCuts[1] > mChgTpcCuts[0] && 
+	(charge < mChgTpcCuts[0] || charge >= mChgTpcCuts[1])) {
+      mChgTpcCutN++;
+      return kFALSE;
+    }
+
+
     // Increment counters for Eta symmetry cut
     if (eta > 0.) { 
       mEtaSymPosTpcN++;
@@ -225,6 +236,7 @@ Int_t StFlowCutTrack::CheckTrack(StTrack* pTrack) {
 Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
   // Returns kTRUE if the picotrack survives all the cuts
 
+  float charge =  (float) (pPicoTrack->Charge());
   float eta = pPicoTrack->Eta();
   float dca = pPicoTrack->Dca();
   float pt = pPicoTrack->Pt();
@@ -285,6 +297,14 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
       mEtaTpcCutN++;
       return kFALSE;
     }
+
+   // charge
+    if (mChgTpcCuts[1] > mChgTpcCuts[0] && 
+	(charge < mChgTpcCuts[0] || charge >= mChgTpcCuts[1])) {
+      mChgTpcCutN++;
+      return kFALSE;
+    }
+
       
     // Increment counters for Eta symmetry cut
     if (eta > 0.) { 
@@ -403,6 +423,10 @@ void StFlowCutTrack::PrintCutList() {
   cout << "#   Eta (Tpc) cuts= " << mEtaTpcCuts[0] << ", " << mEtaTpcCuts[1]
        << " :\t\t " << setprecision(3) << (float)mEtaTpcCutN/(float)mTrackN/perCent
        << "%\t (" << setprecision(3) << (float)mEtaTpcCutN/(float)mTpcTrackN/perCent << "% Tpc) cut" << endl;
+ cout << "#   Chg (Tpc) cuts= " << mChgTpcCuts[0] << ", " << mChgTpcCuts[1]
+       << " :\t\t " << setprecision(3) << (float)mChgTpcCutN/(float)mTrackN/perCent
+       << "%\t (" << setprecision(3) << (float)mChgTpcCutN/(float)mTpcTrackN/perCent << "% Tpc) cut" << endl;
+
   cout << "#   Eta (Ftpc) cuts= " << mEtaFtpcCuts[0] << ", " << mEtaFtpcCuts[1]
        << "; " << mEtaFtpcCuts[2] << ", " << mEtaFtpcCuts[3] 
        << " :\t " << setprecision(3) << (float)mEtaFtpcCutN/(float)mTrackN/perCent
@@ -421,6 +445,9 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.29  2002/01/31 21:43:14  aihong
+// add SetChgTpc()
+//
 // Revision 1.28  2001/11/13 22:43:50  posk
 // Documentation updated.
 //

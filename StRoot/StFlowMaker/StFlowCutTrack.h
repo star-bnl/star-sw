@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.h,v 1.13 2001/11/09 21:10:34 posk Exp $
+// $Id: StFlowCutTrack.h,v 1.14 2002/01/31 21:43:14 aihong Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -47,6 +47,7 @@ class StFlowCutTrack {
   static void    SetPtTpc(Float_t lo, Float_t hi);
   static void    SetPtFtpc(Float_t lo, Float_t hi);
   static void    SetEtaTpc(Float_t lo, Float_t hi);
+  static void    SetChgTpc(Float_t lo, Float_t hi);
   static void    SetEtaFtpc(Float_t lo_neg, Float_t hi_neg, Float_t lo_pos, Float_t hi_pos);
 
  private:
@@ -97,6 +98,9 @@ class StFlowCutTrack {
   static UInt_t  mEtaTpcCutN;                // number not accepted
   static Float_t mEtaTpcCuts[2];             // range
 
+  static UInt_t  mChgTpcCutN;                // number not accepted
+  static Float_t mChgTpcCuts[2];             // range
+
   static UInt_t  mEtaFtpcCutN;               // number not accepted
   static Float_t mEtaFtpcCuts[4];            // range
 
@@ -136,6 +140,9 @@ inline void StFlowCutTrack::SetPtFtpc(Float_t lo, Float_t hi) {
 inline void StFlowCutTrack::SetEtaTpc(Float_t lo, Float_t hi) {
   mEtaTpcCuts[0] = lo; mEtaTpcCuts[1] = hi; }
 
+inline void StFlowCutTrack::SetChgTpc(Float_t lo, Float_t hi) {
+  mChgTpcCuts[0] = lo; mChgTpcCuts[1] = hi; }
+
 inline void StFlowCutTrack::SetEtaFtpc(Float_t lo_neg, Float_t hi_neg,
 				       Float_t lo_pos, Float_t hi_pos) {
   mEtaFtpcCuts[0] = lo_neg; mEtaFtpcCuts[1] = hi_neg; 
@@ -146,6 +153,9 @@ inline void StFlowCutTrack::SetEtaFtpc(Float_t lo_neg, Float_t hi_neg,
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.h,v $
+// Revision 1.14  2002/01/31 21:43:14  aihong
+// add SetChgTpc()
+//
 // Revision 1.13  2001/11/09 21:10:34  posk
 // Switched from CERNLIB to TMath. Little q is now normalized.
 //
