@@ -1,5 +1,5 @@
 #include "St_TLA_EventFilter.h"
-
+#include "StGlobalTrack.h"
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_TLA_EventFilter virtual base class                              //
@@ -18,8 +18,10 @@ Int_t St_TLA_EventFilter::Filter(StGlobalTrack *globTrack,Width_t &size,Style_t 
   //              = 0  this track will be not drawn
   //         size (option) - the width of the lines used to draw the selected track
   //         style(option) - the line style to be used to draw the selcted track
+  Int_t color = StVirtualEventFilter::Filter(globTrack,size,style);
+  if (GetFlag() == 2 && globTrack->length() < 250) color = 0; 
+  return color; 
 
-  return StVirtualEventFilter::Filter(globTrack,size,style); 
 }
 //_____________________________________________________________________________
 Int_t St_TLA_EventFilter::Filter(const StObjArray *hitCollection,Width_t &size,Style_t &style)
