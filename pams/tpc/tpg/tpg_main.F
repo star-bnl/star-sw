@@ -84,6 +84,7 @@ CCCCCC
 
       integer function tgc_local_to_global(isect,xlocal,xglobal)
       implicit none
+#include "PAM.inc"
 
       integer isect
       real xlocal(3), xglobal(3)
@@ -108,10 +109,12 @@ C
       endif
       xglobal(1)=xlocal(1)*cos(b_rot)+xlocal(2)*sin(b_rot)
       xglobal(2)=xlocal(2)*cos(b_rot)-xlocal(1)*sin(b_rot)
+      tgc_local_to_global=STAFCV_OK
       end
 
       integer function tgc_global_to_local(isect,xglobal,xlocal)
       implicit none
+#include "PAM.inc"
       integer isect
       real xlocal(3), xglobal(3)
 C
@@ -153,11 +156,13 @@ C
       endif
       xlocal(1)=xglobal(1)*cos(b_rot)-xglobal(2)*sin(b_rot)
       xlocal(2)=xglobal(1)*sin(b_rot)+xglobal(2)*cos(b_rot)
+      tgc_global_to_local=STAFCV_OK
       end
 
       integer function tgc_sector_row_pad_time_to_local(isector,
      >pad,row,time,xlocal)
       implicit none
+#include "PAM.inc"
 
       integer isector
       real    pad, row, time, xlocal(3)
@@ -180,6 +185,7 @@ C
       iret=tgc_pad_to_x(pad,row,xlocal(1),dummy1,dummy2)
       iret=tgc_row_to_y(row,xlocal(2),dummy1,dummy2)
       iret=tgc_time_to_z(time,xlocal(3))
+      tgc_sector_row_pad_time_to_local=STAFCV_OK
       end
 
       integer function tgc_pad_to_x(pad,row,x,pad_plane_h,pad_plane)
@@ -223,7 +229,7 @@ C     x - x coordinate in the local coordinate system
       pad_half=pad_num(int(row+0.5))/2.0
       pad_dif=pad-pad_int
       x=(pad_int-pad_half-0.5+pad_dif)*pitch
-
+      tgc_pad_to_x=STAFCV_OK
       end
       integer function tgc_row_to_y(row,y,pad_plane_h,pad_plane)
 
@@ -265,6 +271,7 @@ C     y - y coordinate in the local coordinate system
       if(int_row.ge.14) wid=row_wid_in
       dif_row=row-real(int_row)
       y=row_cent(int_row)+dif_row*wid
+      tgc_row_to_y=STAFCV_OK
       end
 
       integer function tgc_time_to_z(time,pad,padrow,sector,z,
@@ -403,6 +410,7 @@ ccc
 
       integer function tgc_local_to_global_p(isect,plocal,pglobal)
       implicit none
+#include "PAM.inc"
       integer isect
       real plocal(3), pglobal(3)
 C     Description: Converts momentum from local to global
@@ -422,10 +430,13 @@ C
       endif
       pglobal(1)=plocal(1)*cos(b_rot)+plocal(2)*sin(b_rot)
       pglobal(2)=plocal(2)*cos(b_rot)-plocal(1)*sin(b_rot)
+      tgc_local_to_global_p=STAFCV_OK
       end
 
       integer function tgc_global_to_local_p(isect,pglobal,plocal)
       implicit none
+#include "PAM.inc"
+
       integer isect
       real plocal(3)
       real pglobal(3)
@@ -445,12 +456,13 @@ C     plocal - momentum in local coordinate system
       endif
       plocal(1)=pglobal(1)*cos(b_rot)-pglobal(2)*sin(b_rot)
       plocal(2)=pglobal(1)*sin(b_rot)+pglobal(2)*cos(b_rot)
-
+      tgc_global_to_local_p=STAFCV_OK
       end
 
       integer function tgc_local_to_row_pad_time(xlocal,
      >pad,row,time)
       implicit none
+#include "PAM.inc"
 
       real xlocal(3)
       real pad, row, time
@@ -471,6 +483,7 @@ C
       time=0
       iret=tgc_x_to_pad(row,xlocal(1),pad,dummy1,dummy2)
       iret=tgc_y_to_row(xlocal(2),row,dummy1,dummy2)
+      tgc_local_to_row_pad_time=STAFCV_OK
       end
       
 
@@ -516,7 +529,7 @@ C
           pitch=pitch_out
       endif
       pad = x/pitch+0.5+0.5*pad_num(int(row+0.5))
-
+      tgc_x_to_pad=STAFCV_OK
       end
 
       integer function tgc_y_to_row(y,row,pad_plane_h,pad_plane)
@@ -566,6 +579,7 @@ C     row - row number
          endif
       end do
 50    continue
+      tgc_y_to_row=STAFCV_OK
       end
       
       integer function tgc_row_par(isect,row,a,b,pad_plane_h,pad_plane)
