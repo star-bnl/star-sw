@@ -147,7 +147,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "-=-=-=-=- Will now test $pkg\n" if ($param::debug);
     if ( $pkg =~ m/^StEventDisplay/){
 	# This make requires both ROOT Qt and QT libraries
-	if ( defined($QTDIR) && -r $ENV{ROOTSYS} . "/include/TQt.h"){
+	if ( defined($QTDIR) && (-r $ENV{ROOTSYS} . "/include/TQt.h" || -r $ENV{ROOTSYS} . "/include/TGQt.h")){
 	    #print "-=-=-=-=-=-=-=- QT is defined -=-=-=-=-=-=-=-=-=-=\n";
 	    $QTDIRBIN = $QTDIR . "/bin";
 
