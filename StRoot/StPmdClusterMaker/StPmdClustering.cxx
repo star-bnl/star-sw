@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.6 2003/10/14 07:23:18 subhasis Exp $
+ * $Id: StPmdClustering.cxx,v 1.7 2003/10/23 04:24:14 perev Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -11,6 +11,9 @@
  ***********************************************************
  *
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.7  2003/10/23 04:24:14  perev
+ * Stiostream again
+ *
  * Revision 1.6  2003/10/14 07:23:18  subhasis
  * Dipak's changes on centroid, correct insure warning
  *
@@ -32,8 +35,7 @@
  * Clustering for CPV plane implemented same as PMD plane
  ***********************************************************/
 
-#include<iostream.h>
-#include<fstream.h>
+#include<Stiostream.h>
 #include<assert.h>
 #include<math.h>
 #include"TROOT.h"

@@ -1,6 +1,6 @@
 /****************************************************
  *
- * $Id: StPmdDiscriminator.cxx,v 1.4 2003/10/14 07:26:17 subhasis Exp $
+ * $Id: StPmdDiscriminator.cxx,v 1.5 2003/10/23 04:24:53 perev Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -12,6 +12,9 @@
  ******************************************************
  *
  * $Log: StPmdDiscriminator.cxx,v $
+ * Revision 1.5  2003/10/23 04:24:53  perev
+ * Stiostream again
+ *
  * Revision 1.4  2003/10/14 07:26:17  subhasis
  * fabs changed to ::fabs
  *
@@ -21,7 +24,7 @@
  *
  ******************************************************/
 
-#include<iostream.h>
+#include "Stiostream.h"
 #include<assert.h>
 #include<math.h>
 #include"TROOT.h"

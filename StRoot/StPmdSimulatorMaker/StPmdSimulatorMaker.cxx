@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdSimulatorMaker.cxx,v 1.7 2003/10/15 10:40:18 subhasis Exp $
+ * $Id: StPmdSimulatorMaker.cxx,v 1.8 2003/10/23 04:25:29 perev Exp $
  * Author: Subhasis Chattopadhyay
  ***************************************************************
  *
@@ -8,6 +8,9 @@
  *
  ****************************************************************
  * $Log: StPmdSimulatorMaker.cxx,v $
+ * Revision 1.8  2003/10/23 04:25:29  perev
+ * Stiostream again
+ *
  * Revision 1.7  2003/10/15 10:40:18  subhasis
  * Changes by Dipak (eg GeV to keV
  *
@@ -26,8 +29,7 @@
  *
  ****************************************************************
  ****************************************************************/
-#include <iostream.h>
-#include <fstream.h>
+#include "Stiostream.h"
 #include <assert.h>
 #include <math.h>
 #include "TROOT.h"
