@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.95 1999/07/17 22:40:59 fisyak Exp $
+// $Id: bfc.C,v 1.96 1999/07/17 23:28:09 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -310,7 +310,7 @@ void SetOption(int k){// set all OFF
     break;
   case kGSTAR:
     if (!ChainFlags[kDEFAULT]) {
-      printf ("no setup defined ==> use Y2a\n");
+      printf ("QAInfo:no setup defined ==> use Y2a\n");
       SetOption(kY2a);
     }
     SetOption(kGEANT);
@@ -340,12 +340,19 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
   SetChainOff();
   TString STAR_VERSION("$STAR_VERSION");
   gSystem->ExpandPathName(STAR_VERSION);
-  if (!strcmp("SL99c",STAR_VERSION.Data())) SetOption(kEVENT); 
   printf ("==============================================\n");
-  printf ("============= You are in %s ===============\n",STAR_VERSION.Data());
+  printf ("QAInfo:============= You are in %s ===============\n",STAR_VERSION.Data());
   Int_t k, kgo;
 #ifdef __CINT__
   if (!Chain || !strlen(Chain)) {
+    printf ("============= \tPossible Chain Options are: \n"); 
+    for (Int_t k=kFIRST;k<NoChainOptions;k++)
+      printf ("============ %2d\t:[-]%-8s\t:%s \n",k,ChainOptions[k],ChainComments[k]);
+#if 0
+    printf ("============= \tImportant two changes:
+                           \tIt is required exact matching in Chain definition
+                           \tAll Chain options set in supplyed order\n");
+#endif
     printf ("============= \t U S A G E =============\n");
     printf ("\n
 \tbfc(Int_t First, Int_t Nevents, Char_t *Chain, Char_t *infile, Char_t *outfile)
@@ -388,19 +395,11 @@ Examples:
 \t root4star 'bfc.C(1,\"tdaq FieldOff\",\"/disk1/star/daq/990701.614.daq\")' 
 \t \t//Laser (12) events with no magnetic field 
 \n");
-    printf ("============= \tPossible Chain Options are: \n"); 
-    for (Int_t k=kFIRST;k<NoChainOptions;k++)
-      printf ("============ %2d\t:[-]%-8s\t:%s \n",k,ChainOptions[k],ChainComments[k]);
-#if 0
-    printf ("============= \tImportant two changes:
-                           \tIt is required exact matching in Chain definition
-                           \tAll Chain options set in supplyed order\n");
-#endif
     gSystem->Exit(1);
   }
 #endif
   TString tChain(Chain);
-  printf ("Requested chain is :\t%s\n",tChain.Data());
+  printf ("QAInfo:Requested chain is :\t%s\n",tChain.Data());
   tChain.ToLower(); //printf ("Chain %s\n",tChain.Data());
   Ssiz_t begin, index, end, end2;
   begin = index = end = end2 = 0;
@@ -447,7 +446,7 @@ Examples:
   // Print set values
   for (k = kFIRST; k<NoChainOptions;k++) {
     if (ChainFlags[k]) {
-      printf ("================== %2d \t%s      \tis ON \t:%s \n",k,ChainOptions[k],ChainComments[k]);
+      printf ("QAInfo:================== %2d \t%s      \tis ON \t:%s \n",k,ChainOptions[k],ChainComments[k]);
     }
   }
   //  gSystem->Exit(1);
@@ -459,8 +458,13 @@ void Load(){
   gSystem->Load("StarClassLibrary");
   gSystem->Load("xdf2root");
   gSystem->Load("St_Tables");
+<<<<<<< bfc.C
+  gSystem->Load("StUtilities");
+  //  gSystem->Load("libmsg");
+=======
   gSystem->Load("StUtilities");
   // gSystem->Load("libmsg");
+>>>>>>> 1.95
   gSystem->Load("libtls");
   gSystem->Load("St_db_Maker");
   if (ChainFlags[kFieldOff] || ChainFlags[kFieldOn] || ChainFlags[kHalfField])
@@ -570,15 +574,15 @@ void Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0 ){
   if (infile) {
     InFile = new TString(infile);
     if (gSystem->AccessPathName(InFile->Data())) {// file does not exist
-      printf(" *** NO FILE: %s, exit!\n", InFile->Data());
+      printf (" *** NO FILE: %s, exit!\n", InFile->Data());
       gSystem->Exit(1); 
     }
   }
   if (ChainFlags[kGSTAR]) {
     if (!outfile) FileOut = new TString("gtrack.root");
     else          FileOut = new TString(outfile);
-    printf("Output root file name %s\n", FileOut->Data());
-    printf("==============================================\n");
+    printf ("QAInfo:Output root file name %s\n", FileOut->Data());
+    printf ("==============================================\n");
   }
   else {
     if (outfile) FileOut = new TString(outfile);
@@ -590,11 +594,11 @@ void Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0 ){
       FileOut->ReplaceAll(".xdf",".root");
       FileOut->Strip();
     }
-    printf("==============================================\n");
-    printf("Input file name = %s with No. of Events to process = %i\n"
+    printf ("==============================================\n");
+    printf ("QAInfo:Input file name = %s with No. of Events to process = %i\n"
 	   ,InFile->Data(),NoEvents);
-    printf("Output root file name %s\n", FileOut->Data());
-    printf("==============================================\n");
+    printf ("QAInfo:Output root file name %s\n", FileOut->Data());
+    printf ("==============================================\n");
   }
   //    gSystem->Exit(1);
   
@@ -617,10 +621,14 @@ void bfc(const Int_t First,
   // Create the main chain object
   if (!chain) delete chain;
   chain = new StChain("bfc");
-  printf ("Run chain version %s on %s in %s\n",
-	  chain->GetCVS(),
+  {
+    TDatime t;
+    printf ("QAInfo:Run is started at Date/Time %i/%i\n",t.GetDate(),t.GetTime());
+  }
+  printf ("QAInfo:Run on %s in %s\n",
 	  gSystem->HostName(),
 	  gSystem->WorkingDirectory());
+  printf ("QAInfo: with %s\n", chain->GetCVS());
   if (chain && ChainFlags[kDEBUG]) chain->SetDebug();
   //  Create the makers to be called by the current chain
   const char *mainDB = "$STAR/StDb/params";
@@ -636,7 +644,7 @@ void bfc(const Int_t First,
   if (ChainFlags[kY1d])  { dbMk->SetDateTime("year_1d");}
   if (ChainFlags[kY1e])  { dbMk->SetDateTime("year_1e");}
   if (ChainFlags[kY2a])  { dbMk->SetDateTime("year_2a");}
-  printf ("db Maker set time = %d %d \n",dbMk->GetDateTime().GetDate(),
+  printf ("QAInfo:db Maker set time = %d %d \n",dbMk->GetDateTime().GetDate(),
 	  dbMk->GetDateTime().GetTime());
   const char *calibDB = "$STAR_ROOT/calib";
   calibMk = new St_db_Maker("calib",calibDB);
@@ -894,7 +902,10 @@ void bfc(const Int_t First,
   if (geant && First > 0) geant->Skip(First-1);
   if (xdfMk && First > 1) xdfMk->Skip(First-1);
   Int_t iMake = 0;
+  TBenchmark evnt;
   for (Int_t i = First; i <= NoEvents; i++){
+    evnt->Reset();
+    evnt->Start("QAInfo:");
     chain->Clear();
     iMake = chain->Make(i);
     if (iMake <kStEOF && xdf_out){
@@ -902,18 +913,28 @@ void bfc(const Int_t First,
       if (dstSet) xdf_out->NextEventPut(dstSet); // xdf output
     }
     //    gSystem->Exec("ps ux");
-    printf ("=============== Done with Event no. %d (%d)\n",i,iMake);
+    evnt->Stop("QAInfo:");
+    evnt->Show("QAInfo:");
+    printf ("QAInfo: Done with Event no. %d (%d) Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n",
+	    i,iMake,evnt->GetRealTime("QAInfo:"),evnt->GetCpuTime("QAInfo:"));
     if (iMake>=kStEOF) break;
   }
   if (NoEvents > 1) {
     chain->Finish();
     if (xdf_out) delete xdf_out;
-    printf ("Run completed ");
+    fflush(stdout);
+    printf ("QAInfo:Run completed ");
     gSystem->Exec("date");
   }
   else {
     if (evMk) Event = (StEvent *) chain->GetInputDS("StEvent");
   }
+
+  {
+    TDatime t;
+    printf ("\nQAInfo:Run is finished at Date/Time %i/%i\n",t.GetDate(),t.GetTime());
+  }
+
 }
 //_____________________________________________________________________
 void bfc (const Int_t Nevents, 

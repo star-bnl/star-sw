@@ -1,5 +1,8 @@
-// $Id: rootlogon.C,v 1.9 1999/07/09 20:55:00 didenko Exp $
+// $Id: rootlogon.C,v 1.10 1999/07/17 23:28:09 fisyak Exp $
 // $Log: rootlogon.C,v $
+// Revision 1.10  1999/07/17 23:28:09  fisyak
+// Add QAInfo tag
+//
 // Revision 1.9  1999/07/09 20:55:00  didenko
 // set O0 (VP)
 //
@@ -82,6 +85,6 @@ TBuffer::SetGlobalWriteParam(2003);
  TString ROOT_LEVEL("$ROOT_LEVEL");
  gSystem->ExpandPathName(STAR_LEVEL);
  gSystem->ExpandPathName(ROOT_LEVEL);
- printf("You are using STAR_LEVEL : %s and ROOT_LEVEL : %s \n",  STAR_LEVEL.Data(),ROOT_LEVEL.Data());
+ printf("QAInfo:You are using STAR_LEVEL : %s and ROOT_LEVEL : %s \n",  STAR_LEVEL.Data(),ROOT_LEVEL.Data());
 }
  
