@@ -1,0 +1,11 @@
+/*  dst_gl3_event_summary.idl      */
+/*  Table: dst_gl3_event_summary   */
+
+/*  This table contains global event Level 3 information    */
+
+struct   dst_gl3_event_summary{
+   long    nHits ;         /* total number of clusters in the event */
+   long    nTracks;        /* total number of tracks found by the tracker */
+   long    nPrimaryTracks; /* number of primary tracks found by the tracker */
+   short   triggermask;    /* the result of the trigger inquiry */
+  };

@@ -1,0 +1,10 @@
+/*  dst_l3_run_summary.idl    */
+/*  Table: dst_l3_run_summary */
+
+/*  This table contains Level 3 run information       */
+
+struct dst_l3_run_summary {
+    long id_algorithm; /* id of the algorithm used in global l3 */
+    long id_hardware;  /* id of the hardware configuration */
+ };                             
+
