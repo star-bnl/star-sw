@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.12 2001/05/08 16:52:55 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.13 2001/05/12 21:05:09 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -162,94 +162,6 @@ static const Double_t ShapeSigma[2][3] = {
   { 6.41952e-01,-2.19547e-01, 9.63439e-03}, // Inner
   { 8.29636e-01,-3.71708e-01, 8.65136e-02}	// Outer
 };
-#if 0
-static const Int_t NpGaus = 15;
-static const Double_t parGaus[2][NpGaus] = {
-  { 2.46036e-02, 1.40498e+00, 2.47055e+00, // inner FCN=901.311
-    6.16982e-02, 5.61142e-02, 1.66826e+00,
-    3.32510e-01, 3.37850e-01, 1.11764e+00,
-    -1.50531e-01, 9.43012e-01, 9.06190e-01,
-    3.04151e-06, 1.12750e+01, 4.30190e-01},
-  { 1.59304e-02, 2.47379e+00, 2.20052e+00, // outer  FCN=565.111
-    1.05286e-01, 6.35479e-01, 1.44485e+00,
-    2.25293e-01,-6.02424e-02, 9.03555e-01,
-    7.60663e-03,-1.60403e+00, 8.79636e-01,
-    5.08059e-04, 3.27906e+00, 2.96808e+00}
-  { 2.44360e-02, 1.41908e+00, 2.46617e+00, // inner  FCN=763.674
-    5.41521e-02, 4.51835e-02, 1.68407e+00,
-    3.30108e-01, 3.38426e-01, 1.13457e+00,
-   -1.42026e-01, 9.91257e-01, 8.94599e-01,
-    4.23050e-06, 1.12672e+01, 3.25012e-01},
-  { 8.27670e-02, 8.53089e-01, 1.40245e+00, // outer  FCN=595.211
-    6.41931e-02,-2.60920e-01, 1.21457e+00,
-    1.90489e-01,-4.05723e-02, 8.77975e-01,
-    1.63469e-02, 2.41924e+00, 2.21906e+00,
-    4.63142e-04, 3.36123e+00, 2.97301e+00}
-  { 2.40849e-02, 1.49413e+00, 2.46344e+00, // inner FCN=854.658
-    5.26513e-02, 1.22069e-01, 1.68625e+00,
-    3.31619e-01, 3.99863e-01, 1.13330e+00,
-   -1.40664e-01, 1.06100e+00, 8.88679e-01,
-    4.11536e-07, 2.80579e+01, 2.34485e+01},
-  { 6.31978e-04, 3.25692e+00, 2.91068e+00, // outer FCN=710.717
-    2.68356e-01, 5.83134e-01, 1.34926e+00,
-    1.73532e-01,-6.64869e-02, 8.67080e-01,
-    1.63670e-02, 2.41529e+00, 2.20291e+00,
-   -1.26642e-01, 9.01957e-01, 1.19632e+00}
-#endif
-#if 0
-  // hist105
-  {2.51236e-02, 1.49499e+00, 2.44650e+00,  //inner  FCN=712.118
-   2.53359e-02,-3.88057e-01, 1.68834e+00,
-   1.94876e-01, 1.12537e-01, 9.04175e-01,
-   7.70180e-02,-5.78698e-01, 1.04802e+00,
-   3.47170e-02, 1.71196e+00, 1.08821e+00},
-  {4.06648e-04, 3.46670e+00, 2.99457e+00, // outer FCN=786.88 
-   1.03770e-01, 6.45510e-01, 1.43389e+00,
-   2.24613e-01,-7.05268e-02,-8.98582e-01,
-   1.17338e-02,-1.36852e+00, 9.49288e-01,
-   1.61464e-02, 2.43735e+00, 2.22696e+00}
-#endif 
-#if 0
-  // hist106
-  {2.54573e-02, 1.46158e+00, 2.45209e+00, // inner FCN=849.208
-   1.68554e-02,-8.49510e-01, 1.63215e+00,
-   1.93666e-01, 1.07226e-01, 9.02329e-01,
-   8.18786e-02,-5.74588e-01, 1.06865e+00,
-   4.13393e-02, 1.60599e+00, 1.13103e+00},
-  {1.34596e-02, 2.80908e+00, 2.21314e+00, // outer FCN=15396.7 
-   1.10674e-01, 5.41840e-01,-1.50869e+00,
-   2.20954e-01,-8.18191e-02,-9.15525e-01,
-   2.98126e-06,-4.47518e+00, 1.94091e+00,
-  -1.43647e-04,-3.97706e+00, 6.03893e-01}
-#endif
-#if 0
-  // hist107
-  {2.52509e-02, 1.47556e+00, 2.44826e+00, //inner FCN=717.525
-   1.69754e-02,-7.97257e-01, 1.65429e+00,
-   2.05275e-01, 9.77761e-02, 9.05026e-01,
-   7.19835e-02,-6.69662e-01, 1.05186e+00,
-   4.18627e-02, 1.58204e+00, 1.13563e+00},
-  {4.91703e-04, 3.48585e+00, 2.89921e+00, //outer FCN=732.4
-   1.69263e-02, 2.34496e+00, 2.23209e+00,
-   2.47852e-01,-8.09770e-02, 9.21522e-01,
-   1.55330e-02,-1.46922e+00, 1.00418e+00,
-   8.53491e-02, 9.06487e-01, 1.35601e+00}
-#endif
-#if 0 
-  // hist108
-  {2.53450e-02, 1.46585e+00, 2.45121e+00, // FCN=849.256
-   1.73587e-02,-7.93981e-01, 1.65257e+00,
-   1.93423e-01, 1.02432e-01, 9.01621e-01,
-   8.10181e-02,-5.80975e-01, 1.07027e+00,
-   4.13832e-02, 1.58944e+00, 1.13628e+00},
-  {1.31826e-02, 2.86877e+00, 2.19400e+00, // FCN=23418.7 
-   1.08564e-01, 5.58779e-01,-1.50950e+00,
-   2.23409e-01,-8.53954e-02,-9.22558e-01,
-   5.40738e-06,-6.10004e+00, 4.50896e-01,
-   1.49403e-06,-6.96996e+00, 7.74218e-01}
-};
-#endif
-#if 1
 static const Int_t NpGaus = 18;  // hist108
 static const Double_t parGaus[2][NpGaus] = {
   {2.57760e-02, 1.44032e+00, 2.45484e+00, // inner  FCN=827.986
@@ -278,8 +190,6 @@ static const Double_t parGaus[2][NpGaus] = {
 //    -2.88727e-02, 3.68941e+00, 9.47871e-01,
 //    -5.96186e-01, 2.12406e+00, 1.52948e+00}
 };
-
-#endif
 extern    void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *u, Int_t flag);
 extern    void fGaus(Double_t x, Double_t *val, ESector l = kTpcInner);
 extern    Double_t II3padC(Double_t x, Double_t y, Int_t IO);
@@ -524,8 +434,8 @@ Int_t StdEdxMaker::Finish() {
 }
 //_____________________________________________________________________________
 Int_t StdEdxMaker::Make(){ 
-  Double_t Scale70   = 1.2315;
-  Double_t Scale60   = 1.3146;
+  Double_t Scale70   = 1.2684;//1.2876; //1.2315;
+  Double_t Scale60   = 1.3506;//1.3712; //1.3146;
   StTpcCoordinateTransform transform(gStTpcDb);
   St_DataSet *Dst = GetDataSet("dst"); assert(Dst);
   St_DataSet *dst = Dst->Find(".data/dst");
@@ -895,10 +805,9 @@ Int_t StdEdxMaker::Make(){
       dedx.id_track  =  Id;
       dedx.det_id    =  kTpcId;    // TPC track 
       dedx.method    =  kTruncatedMeanIdentifier;
-      dedx.ndedx     =  N70 + 100*((int) TrackLength70);
+      dedx.ndedx     =  N70 + 100*((int) TrackLength);
       dedx.dedx[0]   =  I70;
-      dedx.dedx[1]   =  D70;
-      // dedx.dedx[1] = 5.14815e-01/pow(TrackLength70, 4.46279e-01); //hist103
+      dedx.dedx[1]   =  0.708437*pow(TrackLength,-0.484222);// range = [25,140] cm
       dst_dedx->AddAt(&dedx);
     }
     if (N60 > 0) {
@@ -909,10 +818,9 @@ Int_t StdEdxMaker::Make(){
       dedx.id_track  =  Id;
       dedx.det_id    =  kTpcId;    // TPC track 
       dedx.method    =  kOtherMethodIdentifier;
-      dedx.ndedx     =  N60 + 100*((int) TrackLength60);
+      dedx.ndedx     =  N60 + 100*((int) TrackLength);
       dedx.dedx[0]   =  I60;
-      dedx.dedx[1]   =  D60;
-      // dedx.dedx[1] = 5.06546e-01/pow(TrackLength60,4.57148e-01); //hist103
+      dedx.dedx[1]   =  0.736496*pow(TrackLength,-0.490062);// range = [25,140] cm
       dst_dedx->AddAt(&dedx);
     }
     Double_t chisq, fitZ, fitdZ;
@@ -926,7 +834,7 @@ Int_t StdEdxMaker::Make(){
       dedx.ndedx     =  NdEdx + 100*((int) TrackLength);
       dedx.dedx[0]   =  TMath::Exp(fitZ);
       if (fitdZ >= 1.) fitdZ = 0.999;
-      dedx.dedx[1]   =  fitdZ; 
+      dedx.dedx[1]   =  fitdZ; // 0.660001*pow(TrackLength,-0.468743);// range = [25,140] cm
       dst_dedx->AddAt(&dedx);
     }
     if (primtrkC && iprim >= 0&& m_Mode > 0) {
@@ -1019,8 +927,8 @@ Int_t StdEdxMaker::Make(){
       Points60B->Fill(N60,TMath::Log(I60/PredBB[2]));
       PointsFit->Fill(NdEdx,fitZ-TMath::Log(Pred[2]));
       TPoints->Fill(TrackLength,fitZ-TMath::Log(Pred[2]));
-      TPoints60->Fill(TrackLength60,TMath::Log(I60/Pred[2]));
-      TPoints70->Fill(TrackLength70,TMath::Log(I70/Pred[2]));
+      TPoints60->Fill(TrackLength,TMath::Log(I60/Pred[2]));
+      TPoints70->Fill(TrackLength,TMath::Log(I70/Pred[2]));
       if (NdEdx > 30) {
 	for (k = 0; k < NdEdx; k++) {
 	  if (FdEdx[k].SigmaFee > 0) {
