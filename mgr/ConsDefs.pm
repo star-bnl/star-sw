@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.19 2000/07/01 23:06:21 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.20 2000/07/05 13:17:05 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -38,6 +38,8 @@
  $AFSLIBS  = "-L" . $AFSDIR . "/lib -L" . $AFSDIR . "/lib/afs";
  $AFSLIBS .= " -lkauth -lprot -lubik -lauth -lrxkad -lsys -ldes -lrx -llwp";
  $AFSLIBS .= " -lcmd -lcom_err -laudit ". $AFSDIR . "/lib/afs/util.a";
+ if (! $ROOT_LEVEL) {$ROOT_LEVEL = "2.25.01";}
+ if (! $ROOTSYS) {$ROOTSYS = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL;}
  $SRPDIR   = $ROOTSYS . "/lib";
  $SRPFLAGS = "";# -DR__SRP -I" . $SRPDIR . "/include";
  $SRPLIBS  = "";# -L" . $SRPDIR . "/lib -lsrp -lgmp";
@@ -98,6 +100,9 @@
  $GEANT3COM.="%GEANT3 %< -o %>.F && %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %>.F -o %>";
  $INCLUDE_PATH  = $INCLUDE;
  $Salt = undef;
+ if (!$STAR_SYS) {
+   $STAR_SYS = `sys`; chop($STAR_SYS); $STAR_HOST_SYS = $STAR_SYS;
+ }
  $_ = $STAR_HOST_SYS;
  print "System: ", $_,"\n" unless ($param::quiet);
  if (/^i386_/) {
@@ -108,7 +113,9 @@
    $OSFID    = "f2cFortran";
    $OSFID   .= " lnx Linux linux LINUX";
    $OSFID   .= " CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX NEW_ARRAY_ON GNU_GCC";
-   $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
+   if ($STAR) {
+     $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
+   }
    $R_CPPFLAGS  .= " -DGNU_CC -DR__GLIBC -DG__REGEXP -DG__UNIX -DG__SHAREDLIB -DG__OSFDLL -DG__ROOT -DG__REDIRECTIO";
    $CXXFLAGS = "-fPIC -Wall";# -march=pentiumpro";
    $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
@@ -122,7 +129,7 @@
    $THREAD   = "-lpthread";
    $CRYPTLIBS= "-lcrypt";
    $SYSLIBS  = "-lm -ldl -rdynamic";
-   if (/egcs$/) {
+   if (/egcs$/ || !$STAR) {
      $CLIBS    = "-L/usr/X11R6/lib  -lXt -lXpm -lX11 -lm -ldl  -rdynamic";
      $FC       = "g77";
 #    $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
@@ -138,7 +145,9 @@
    elsif (/kcc$/) {
      $OSFID    = "f2cFortran";
      $OSFID   .= " lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX NEW_ARRAY_ON GNU_GCC";
-     $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS";
+     if ($STAR) {
+       $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS";
+     }
      $DEBUG    = "-g";
      $CXXOPT   = "+K0 -O0 --no_exceptions";
      $CXX      = "KCC";
@@ -189,7 +198,9 @@
    #  ====================
    $PLATFORM = "hpux"; 
    $ARCH     = "hpuxacc";
-   $OSFID = "HPUX CERNLIB_HPUX CERNLIB_UNIX ST_NO_NAMESPACES ST_NO_EXCEPTIONS";
+   if ($STAR) {
+     $OSFID = "HPUX CERNLIB_HPUX CERNLIB_UNIX ST_NO_NAMESPACES ST_NO_EXCEPTIONS";
+   }
    $OSFID   .= " NEW_ARRAY_ON";
    $CXX      = "aCC";
    $CC       = "cc";
@@ -223,7 +234,9 @@
    $ARCH     = "solarisCC5";
    $OSFID     = "__CC5__ __SunOS_5_6";
    $OSFID    .= " CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS";
-   $OSFID    .= " ST_NO_MEMBER_TEMPLATES";
+   if ($STAR) {
+     $OSFID    .= " ST_NO_MEMBER_TEMPLATES";
+   }
    $OSFID    .= " SUN Solaris sun sun4os5 sun4x_56";
    $EXTRA_CPPPATH = ":/usr/openwin/include";
    $CC        = "/opt/WS5.0/bin/cc";
@@ -267,8 +280,11 @@
    $ARCH     = "solaris";
    $OSFID     = "__SunOS_5_6";
    $OSFID    .= "CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ";
-   $OSFID    .= "ST_NO_EXCEPTIONS ST_NO_MEMBER_TEMPLATES ST_NO_NAMESPACES ";
-   $OSFID    .= "ST_NO_NUMERIC_LIMITS ST_NO_TEMPLATE_DEF_ARGS SUN Solaris sun sun4os5 sun4x_56";
+   if ($STAR) {
+     $OSFID    .= "ST_NO_EXCEPTIONS ST_NO_MEMBER_TEMPLATES ST_NO_NAMESPACES ";
+     $OSFID    .= "ST_NO_NUMERIC_LIMITS ST_NO_TEMPLATE_DEF_ARGS";
+   }
+   $OSFID    .= "SUN Solaris sun sun4os5 sun4x_56";
    $EXTRA_CPPPATH = ":/usr/openwin/include";
    $CC        = "cc";
    $CXX       = "CC";
@@ -333,7 +349,7 @@
    $ROOTCINT += $EXESUF;
    
    $OSFID     = "VISUAL_CPLUSPLUS CERNLIB_WINNT CERNLIB_MSSTDCALL WIN32 ";
-   $OSFID    .= "ST_NO_NAMESPACES ";
+   if ($STAR) {$OSFID    .= "ST_NO_NAMESPACES ";}
    $CPP       = "cl";
    $CC        = "cl";
    #  $CXX       = "set inc && path && cl";
