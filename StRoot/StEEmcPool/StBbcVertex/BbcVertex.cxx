@@ -1,4 +1,4 @@
-// $Id: BbcVertex.cxx,v 1.1 2004/08/31 03:44:13 balewski Exp $
+// $Id: BbcVertex.cxx,v 1.2 2004/12/04 05:07:38 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -147,26 +147,33 @@ int  BbcVertex:: findTime(BbcHex **D){
 
 //-------------------------------------------------
 //-------------------------------------------------
-float  BbcVertex:: findTime2(BbcHex **D){
-  int i;
-  float tMax=0, tMax2=0;
-  int iT=-1, iT2=-2;
-  for(i=0;i<mxHex;i++) {
-    // printf("i=%d a=%d t=%d iT=%d tMin=%d\n",i,D[i]->adc,D[i]->tdc,iT,tMin);
-    if(D[i]->adc<5) continue;
-    if(D[i]->tdc>245) continue;
-    if(D[i]->tof<tMax) continue;
-    tMax2=tMax;
-    tMax=D[i]->tof;
-    iT2=iT;
-    iT=i;
-   }
-  //printf("minT1+2=%f+%f iT=%d+%d  \n",tMax,tMax2,iT,iT2);
-  assert(iT>=0);
-  float tAvr=tMax;
-  if(iT2>=0) tAvr=(tMax+tMax2)/2;
- 
-  return tAvr;
+void  BbcVertex:: export2NN(BbcHex **D){
+  int key[mxHex];
+  memset(key,0,sizeof(key));
+  int k=0, nk=3;
+
+  for(k=0;k<nk;k++) {
+    int i;
+    float tMax=0;
+    int iT=-1;
+    for(i=0;i<mxHex;i++) {
+      // if(k==0) printf("i=%d a=%d t=%d \n",i,D[i]->adc,D[i]->tdc);
+      if(key[i]) continue; 
+      if(D[i]->adc<5) continue;
+      if(D[i]->tdc>245) continue;
+      if(D[i]->tof<tMax) continue;
+      tMax=D[i]->tof;
+      iT=i;
+    }
+    if(iT>=0) {
+      key[iT]=100+k;
+      printf("%d %d %d ",iT,D[iT]->adc,D[iT]->tdc);
+    } else {
+      printf("-1 0 0 ");
+    } 
+    // printf("Tmax=%.1f iT=%d\n",tMax,iT);
+  }
+
 }
 
 
@@ -193,7 +200,12 @@ void BbcVertex:: doVertex(){
 
 
   //............... offline vertex info
-  
+  printf("## ");
+  export2NN(hex[0]);
+  export2NN(hex[1]);
+  printf(" %f\n",zTpc);
+  return; //tmp  
+
   int iE=findTime(hex[0]);
   int iW=findTime(hex[1]);
   int kE=iE+1;
@@ -333,6 +345,9 @@ void BbcVertex::readCalib(char *fname) {
 
 /*******************************************************
  * $Log: BbcVertex.cxx,v $
+ * Revision 1.2  2004/12/04 05:07:38  balewski
+ * export to NN
+ *
  * Revision 1.1  2004/08/31 03:44:13  balewski
  * first
  *

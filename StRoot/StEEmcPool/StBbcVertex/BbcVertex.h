@@ -3,12 +3,11 @@
 #ifndef BbcVertex_h
 #define BbcVertex_h
 /******************************************************
- * $Id: BbcVertex.h,v 1.1 2004/08/31 03:44:13 balewski Exp $
+ * $Id: BbcVertex.h,v 1.2 2004/12/04 05:07:38 balewski Exp $
  ******************************************************
  * Descripion:
  *  finds pi0 based on EEMC tower response
  ******************************************************/
-
 
 class TObjArray;
 class TH1F ;
@@ -29,7 +28,7 @@ class BbcVertex {
         
   BbcHex *hex[mxEW][mxHex];
   int findTime(BbcHex **);
-  float findTime2(BbcHex **);
+  void export2NN(BbcHex **);
 
   //time walk calib
   TH2F  *hC[mxEW][mxHex];
@@ -63,6 +62,9 @@ class BbcVertex {
 
 /*****************************************************************
  * $Log: BbcVertex.h,v $
+ * Revision 1.2  2004/12/04 05:07:38  balewski
+ * export to NN
+ *
  * Revision 1.1  2004/08/31 03:44:13  balewski
  * first
  *

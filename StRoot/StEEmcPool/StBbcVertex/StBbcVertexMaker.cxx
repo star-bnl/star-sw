@@ -1,9 +1,9 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StBbcVertexMaker.cxx,v 1.1 2004/08/31 03:44:13 balewski Exp $
+// $Id: StBbcVertexMaker.cxx,v 1.2 2004/12/04 05:07:38 balewski Exp $
 
 #include <TFile.h>
-
+ 
 #include "StBbcVertexMaker.h"
 
 #include "TChain.h"
@@ -135,6 +135,9 @@ bool StBbcVertexMaker::unpackMuTrig(){
 
 
 // $Log: StBbcVertexMaker.cxx,v $
+// Revision 1.2  2004/12/04 05:07:38  balewski
+// export to NN
+//
 // Revision 1.1  2004/08/31 03:44:13  balewski
 // first
 //
