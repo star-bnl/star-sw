@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: SchedulerExample.h,v 1.1 2003/01/23 21:59:50 laue Exp $
+ * $Id: SchedulerExample.h,v 1.2 2004/05/02 04:10:13 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -48,7 +48,7 @@ class SchedulerExample : public StMaker {
     */
     Int_t Finish(); 
     
- private:
+ protected:
     string mOutputFile; 
     StMuDstMaker* mMuDstMaker;  ///< Pointer to the StMuDstMaker which provides the events to analyse.
     StMuDst* mMuDst; ///< Pointer to the StMuDst class, which holds all the events information. Will be updated in the event loop.
@@ -68,6 +68,9 @@ class SchedulerExample : public StMaker {
 /***************************************************************************
  *
  * $Log: SchedulerExample.h,v $
+ * Revision 1.2  2004/05/02 04:10:13  perev
+ * private => protected
+ *
  * Revision 1.1  2003/01/23 21:59:50  laue
  * Modification to compile on Solaris.
  *

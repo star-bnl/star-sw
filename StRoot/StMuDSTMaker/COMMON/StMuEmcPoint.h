@@ -18,7 +18,9 @@ class StMuEmcPoint: public TObject
 {
   public:
                       StMuEmcPoint();
+  protected:
                       StMuEmcPoint(StMuEmcPoint*);
+  public:
     virtual           ~StMuEmcPoint();
     
     float             getEta()                { return mEta;}            ///< Return Eta of the point
@@ -40,7 +42,7 @@ class StMuEmcPoint: public TObject
     void              setEnergy(float e)      { mEnergy = e;}
     void              setChiSquare(float e)   { mChiSquare = e;}
    
-  private:
+  protected:
     float         mEta;
     float         mPhi;
     float         mRadius;

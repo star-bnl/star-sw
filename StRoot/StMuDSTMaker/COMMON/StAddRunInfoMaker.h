@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StAddRunInfoMaker.h,v 1.2 2003/09/07 03:49:03 perev Exp $
+ * $Id: StAddRunInfoMaker.h,v 1.3 2004/05/02 04:10:13 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StAddRunInfoMaker_hh
@@ -24,11 +24,11 @@ class StAddRunInfoMaker : public StMaker {
     
     int Make();   ///< add StRunInfo to StEvent
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StAddRunInfoMaker.h,v 1.2 2003/09/07 03:49:03 perev Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StAddRunInfoMaker.h,v 1.3 2004/05/02 04:10:13 perev Exp $ built "__DATE__" "__TIME__ ; 
 	return cvs;
     }
   
- private:
+ protected:
     ClassDef(StAddRunInfoMaker, 1)
 }; 
 
@@ -38,6 +38,9 @@ class StAddRunInfoMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StAddRunInfoMaker.h,v $
+ * Revision 1.3  2004/05/02 04:10:13  perev
+ * private => protected
+ *
  * Revision 1.2  2003/09/07 03:49:03  perev
  * gcc 3.2 + WarnOff
  *

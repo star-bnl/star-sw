@@ -15,7 +15,8 @@ class StMuEmcCluster: public TObject
                     StMuEmcCluster();
                     StMuEmcCluster(StMuEmcCluster*);
     virtual         ~StMuEmcCluster();
-    
+    virtual         void Clear(Option_t* opt="");
+   
     float           getEta()                     { return mEta;}                             ///< Return Eta of the cluster
     float           getPhi()                     { return mPhi;}                             ///< Return Phi of the cluster
     float           getSigmaEta()                { return mSigmaEta;}                        ///< Return SigmaEta of the cluster
@@ -33,7 +34,7 @@ class StMuEmcCluster: public TObject
     void            setNHits(int h)              { mNHits = (short)h; mHits.Set(h); mHits.Reset();}
     void            setHitId(int h,int id)       { mHits[h] = (short)id;}
   
-  private:
+  protected:
     float           mEta;
     float           mPhi;
     float           mSigmaEta;

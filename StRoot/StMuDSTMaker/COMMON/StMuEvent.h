@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.8 2003/07/22 19:14:40 laue Exp $
+ * $Id: StMuEvent.h,v 1.9 2004/05/02 04:10:14 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -82,7 +82,7 @@ class StMuEvent : public TObject {
   double ctbMultiplicity();
   ///    The StMuDst is supposed to be structured in 'physical events'.  Therefore there is only 1 primary vertex per mu event.
   StThreeVectorF primaryVertexPosition();
- private:
+ protected:
   void clear();
   void fill(const StEvent*);
 
@@ -155,6 +155,9 @@ inline StThreeVectorF StMuEvent::primaryVertexPosition() { return mEventSummary.
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.9  2004/05/02 04:10:14  perev
+ * private => protected
+ *
  * Revision 1.8  2003/07/22 19:14:40  laue
  * multiplicities for FTPC added
  *

@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StMuPmdCollection.cxx,v 1.3 2004/04/09 23:03:16 jeromel Exp $
+ * $Id: StMuPmdCollection.cxx,v 1.4 2004/05/02 04:10:14 perev Exp $
  *
  * Class : StMuPmdCollection
  * Author: Supriya Das & Subhasis Chattopadhyay
@@ -8,6 +8,9 @@
  * Description: This class holds the PMD clusters for MuDst
  * ****************************************************************
  * $Log: StMuPmdCollection.cxx,v $
+ * Revision 1.4  2004/05/02 04:10:14  perev
+ * private => protected
+ *
  * Revision 1.3  2004/04/09 23:03:16  jeromel
  * Ignoring indent, commented out redundant messages (lots of them in the log file)
  *
@@ -67,6 +70,8 @@ void StMuPmdCollection::init(int detector)
 
 StMuPmdCollection::~StMuPmdCollection()
 {
+  delete mPmdClusters[0];mPmdClusters[0]=0;
+  delete mPmdClusters[1];mPmdClusters[1]=0;
 }
 
 void StMuPmdCollection::DeleteThis()
@@ -76,15 +81,8 @@ void StMuPmdCollection::DeleteThis()
 
 void StMuPmdCollection::clear(Option_t *option)
 {
-  for(int d=0;d<2;d++)
-  {
-    for(int i=0; i<getNClusters(d);i++)
-    {
-      StMuPmdCluster* cluster = getCluster(i,d);
-      if(cluster) delete cluster;
-    }
-  }
-  for(int i=0;i<2;i++) mPmdClusters[i]->Delete();
+  mPmdClusters[0]->Delete();
+  mPmdClusters[1]->Delete();
   return;
 }
 void StMuPmdCollection::packbits(unsigned char *data, unsigned int value, unsigned int nbits, unsigned int index)

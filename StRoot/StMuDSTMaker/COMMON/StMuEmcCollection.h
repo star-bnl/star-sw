@@ -31,6 +31,7 @@ class StMuEmcCollection: public TObject
                       StMuEmcCollection(StMuEmcCollection&);
     virtual           ~StMuEmcCollection();
     void              clear(Option_t *option="");     
+    void              Clear(Option_t *option=""){clear();}     
     void              DeleteThis();
     
     int               getTowerADC(int id, int detector = bemc);    
@@ -66,7 +67,7 @@ class StMuEmcCollection: public TObject
     void              addPoint();
     void              addEndcapPoint();
         
-  private:
+  protected:
     void              init();
     void              packbits(unsigned char*, unsigned int, unsigned int, unsigned int);
     unsigned int      unpackbits(unsigned char*, unsigned int, unsigned int);

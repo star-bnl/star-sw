@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDbReader.h,v 1.5 2003/04/15 18:48:34 laue Exp $
+ * $Id: StMuDbReader.h,v 1.6 2004/05/02 04:10:13 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -30,7 +30,7 @@ class StMuDbReader  {
  protected:
     StMuDbReader();
     virtual ~StMuDbReader();
- private:
+ protected:
     static StMuDbReader* _instance;
     
     /// the internal database, a vector containing pairs of file names and number of events */
@@ -46,6 +46,9 @@ class StMuDbReader  {
 /***************************************************************************
  *
  * $Log: StMuDbReader.h,v $
+ * Revision 1.6  2004/05/02 04:10:13  perev
+ * private => protected
+ *
  * Revision 1.5  2003/04/15 18:48:34  laue
  * Minor changes to be able to filter MuDst.root files and an example
  * how to do this. The StMuDstFilterMaker is just an example, it has to be

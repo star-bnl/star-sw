@@ -72,7 +72,7 @@ void StMuEmcCollection::clear(Option_t *option)
 {
   int n = &mEndcapEmcPoints-&mPrsHits +1;
   TClonesArray **arr = &mPrsHits;
-  for(int i=0;i<n;i++) { if (arr[i]) arr[i]->Delete();} 
+  for(int i=0;i<n;i++) { if (arr[i]) arr[i]->Clear();} 
 
 /*  for(int i=0;i<7200;i++) mTowerADC[i]=0;
   for(int i=0;i<1080;i++) mEndcapTowerADC[i]=0;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTriggerIdCollection.h,v 1.2 2003/03/19 18:58:05 laue Exp $
+ * $Id: StMuTriggerIdCollection.h,v 1.3 2004/05/02 04:10:14 perev Exp $
  *
  * Author: Frank Laue
  ***************************************************************************
@@ -34,7 +34,7 @@ public:
     void setNominal(const StTriggerId);
     
     static bool isEmpty(const StTriggerId&);
-private:
+protected:
     StTriggerId  mL1TriggerId;
     StTriggerId  mL2TriggerId;
     StTriggerId  mL3TriggerId;
@@ -48,6 +48,9 @@ private:
 /**************************************************************************
  *
  * $Log: StMuTriggerIdCollection.h,v $
+ * Revision 1.3  2004/05/02 04:10:14  perev
+ * private => protected
+ *
  * Revision 1.2  2003/03/19 18:58:05  laue
  * StMuChainMaker: updates for moved file catalog
  * StTriggerIdCollection added to the createStEvent function in StMuDst.cxx

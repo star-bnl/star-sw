@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFilter.h,v 1.4 2003/01/23 21:59:50 laue Exp $
+ * $Id: StMuFilter.h,v 1.5 2004/05/02 04:10:14 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -31,7 +31,7 @@ class StMuFilter : public StMuCut {
  public:
     void addEncodedMethod(unsigned short method) { mEncodedMethods.push_back(method); }
     void addEncodedMethod(StTrackFinderMethod find, StTrackFittingMethod fit) { mEncodedMethods.push_back( fit + (1<<find)); }
- private:
+ protected:
     UnsignedShortCollection mEncodedMethods;  
     
     virtual bool accept( const StEvent*);
@@ -51,6 +51,9 @@ class StMuFilter : public StMuCut {
 /***************************************************************************
  *
  * $Log: StMuFilter.h,v $
+ * Revision 1.5  2004/05/02 04:10:14  perev
+ * private => protected
+ *
  * Revision 1.4  2003/01/23 21:59:50  laue
  * Modification to compile on Solaris.
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuHelix.h,v 1.4 2003/10/28 18:57:56 perev Exp $
+ * $Id: StMuHelix.h,v 1.5 2004/05/02 04:10:14 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -29,7 +29,7 @@ class StMuHelix : public TObject {
   short q() const;
   float b() const;
   int   bad() const;
- private:
+ protected:
   StThreeVectorF mP;
   StThreeVectorF mOrigin;
   short mQ;
@@ -48,6 +48,9 @@ inline float StMuHelix::b() const { return mB; }
 /***************************************************************************
  *
  * $Log: StMuHelix.h,v $
+ * Revision 1.5  2004/05/02 04:10:14  perev
+ * private => protected
+ *
  * Revision 1.4  2003/10/28 18:57:56  perev
  * BadData protection added
  *

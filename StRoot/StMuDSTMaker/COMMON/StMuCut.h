@@ -1,13 +1,13 @@
 /***************************************************************************
  *
- * $Id: StMuCut.h,v 1.4 2003/09/10 22:33:41 perev Exp $
+ * $Id: StMuCut.h,v 1.5 2004/05/02 04:10:13 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
 /**
    @class StMuCut
    Abstract base class for cut objects
-   Implementations will have to overwrite the abstract virtual but private accept() functions.
+   Implementations will have to overwrite the abstract virtual but protected accept() functions.
    User code, however, will call the non-virtual pass() funstions which will call() accept and keep track of
    counters.
 */
@@ -39,7 +39,7 @@ class StMuCut : public TObject {
   bool pass( const StV0MuDst*    );///< called by user code,  returns true if argument passes cuts, else false
   bool pass( const StXiMuDst*    );///< called by user code,  returns true if argument passes cuts, else false
   bool pass( const StKinkMuDst*  );///< called by user code,  returns true if argument passes cuts, else false
- private:
+ protected:
   virtual bool accept( const StEvent*      ) = 0;///< abstract cut function, has to be overwritten by derived class
   virtual bool accept( const StTrack*      ) = 0;///< abstract cut function, has to be overwritten by derived class
   virtual bool accept( const StV0Vertex*   ) = 0;///< abstract cut function, has to be overwritten by derived class
@@ -81,6 +81,9 @@ inline bool StMuCut::pass( const StKinkMuDst* k) {    return leave( accept(k), m
 /***************************************************************************
  *
  * $Log: StMuCut.h,v $
+ * Revision 1.5  2004/05/02 04:10:13  perev
+ * private => protected
+ *
  * Revision 1.4  2003/09/10 22:33:41  perev
  * Grid for MuDst corrections
  *
