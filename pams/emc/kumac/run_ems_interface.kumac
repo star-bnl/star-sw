@@ -1,7 +1,7 @@
-MACRO run_ems_interface [g2t]='/dui/geant/Event' _
+MACRO run_ems_interface [g2t]='/dui/event/geant/Event' _
 macro/global/import *
-                        [par]='/dui/constants/emc/params' _
-			[hit]='/dui/data/emc/hits'
+                        [par]='/dui/run/constants/emc/params' _
+			[hit]='/dui/event/data/emc/hits'
 
 MESSAGE '>>>>>>>>>>>>>>>> Calling ems_interface <<<<<<<<<<<<<<<<'
 ami/module/call ems_interface2 _
@@ -13,8 +13,10 @@ ami/module/call ems_interface2 _
                        	[g2t]/g2t_eem_hit _
                         [g2t]/g2t_esm_hit _
                         [par]/ems_control _
-                        [hit]/ems_hits_bemc [hit]/ems_hits_bsmd _
-                        [hit]/ems_hits_eemc [hit]/ems_hits_esmd
+                        [hit]/ems_hits_bemc _
+                        [hit]/ems_hits_bsmd _
+                        [hit]/ems_hits_eemc _
+                        [hit]/ems_hits_esmd
 if ( staf_status(1) .ne. STAFCV_OK) then
 	message '***** Problem with ems_interface *****'
 endif
