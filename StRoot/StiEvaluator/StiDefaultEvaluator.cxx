@@ -1,4 +1,4 @@
-//StiEvaluator.cxx
+//StiDefaultEvaluator.cxx
 // A. Rose (WSU)
 //8/01
 
@@ -31,21 +31,21 @@ using namespace std;
 #include "Sti/StiHit.h"
 #include "Sti/StiKalmanTrackNode.h"
 
-//StiEvaluator includes
+//StiDefaultEvaluator includes
 #include "StiEventAssociator.h"
 #include "StiTrackPairInfo.h"
-#include "StiEvaluator.h"
+#include "StiDefaultEvaluator.h"
 
-StiEvaluator* StiEvaluator::sinstance = 0;
+StiDefaultEvaluator* StiDefaultEvaluator::sinstance = 0;
 
 static unsigned int commonHitCut=5;
 
-StiEvaluator::StiEvaluator(const string& fname)
+StiDefaultEvaluator::StiDefaultEvaluator(const string& fname)
     : mFileName(fname), mFile(0), mTree(0), mEntry(0)
 {
-    cout <<"StiEvaluator::StiEvaluator()"<<endl;
+    cout <<"StiDefaultEvaluator::StiDefaultEvaluator()"<<endl;
     if (mFileName=="empty") {
-	cout <<"StiEvaluator::StiEvaluator() ERROR:\t";
+	cout <<"StiDefaultEvaluator::StiDefaultEvaluator() ERROR:\t";
 	cout <<"No file name specified for output file.";
 	cout <<"Abort witout building!"<<endl;
     }
@@ -55,19 +55,19 @@ StiEvaluator::StiEvaluator(const string& fname)
     sinstance = this;
 }
 
-StiEvaluator::~StiEvaluator()
+StiDefaultEvaluator::~StiDefaultEvaluator()
 {
-    cout <<"StiEvaluator::~StiEvaluator()"<<endl;
+    cout <<"StiDefaultEvaluator::~StiDefaultEvaluator()"<<endl;
     mFile->Write();
     mFile->Close();
 }
 
-StiEvaluator* StiEvaluator::instance(const string val)
+StiDefaultEvaluator* StiDefaultEvaluator::instance(const string val)
 {
-    return (sinstance) ? sinstance : new StiEvaluator(val);
+    return (sinstance) ? sinstance : new StiDefaultEvaluator(val);
 }
 
-void StiEvaluator::kill()
+void StiDefaultEvaluator::kill()
 {
     if (sinstance) {
 	delete sinstance;
@@ -75,9 +75,9 @@ void StiEvaluator::kill()
     }
 }
 
-void StiEvaluator::build()
+void StiDefaultEvaluator::build()
 {
-    cout <<"StiEvaluator::build()"<<endl;
+    cout <<"StiDefaultEvaluator::build()"<<endl;
     
     //Must open TFile first if you want ntuple to disk
     cout <<"Opening ROOT file: "<<mFileName<<endl;
@@ -94,9 +94,9 @@ void StiEvaluator::build()
     
 }
 
-void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
+void StiDefaultEvaluator::evaluate(const StiTrackContainer* trackStore)
 {
-    cout <<"\nStiEvaluator::evaluateForEvent()"<<endl;
+    cout <<"\nStiDefaultEvaluator::evaluateForEvent()"<<endl;
     cout <<"\tNumber of StiTracks:\t"<<trackStore->size()<<endl;
 
     typedef StiEventAssociator::McToInfoPairMap McMap;
@@ -171,7 +171,7 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 		const StiKalmanTrack* tkt =
 		    dynamic_cast<const StiKalmanTrack*>(bestStiPair->partnerTrack());
 		if (!tkt) {
-		    cout <<"StiEvaluator::evaluateForEvent(). ERROR:\t"
+		    cout <<"StiDefaultEvaluator::evaluateForEvent(). ERROR:\t"
 			 <<"cast to kalman track failed."<<endl;
 		}
 		else {
@@ -198,7 +198,7 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 		    const StiKalmanTrack* tkt =
 			dynamic_cast<const StiKalmanTrack*>(info.partnerTrack());
 		    if (!tkt) {
-			cout <<"StiEvaluator::evaluateForEvent(). ERROR:\t"
+			cout <<"StiDefaultEvaluator::evaluateForEvent(). ERROR:\t"
 			     <<"cast to kalman track failed."<<endl;
 		    }
 		    else {
@@ -215,7 +215,7 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
     cout <<"Done Evaluating for event"<<endl;
 }
 
-void StiEvaluator::fillHitEntry(const StiKalmanTrackNode* node)
+void StiDefaultEvaluator::fillHitEntry(const StiKalmanTrackNode* node)
 {
     //Reset the entry:
     mStiHitEntry.reset();
@@ -242,7 +242,7 @@ void StiEvaluator::fillHitEntry(const StiKalmanTrackNode* node)
 
 }
 
-void StiEvaluator::fillHitEntry(const StiHit* hit)
+void StiDefaultEvaluator::fillHitEntry(const StiHit* hit)
 {
     mStiHitEntry.hitTimesUsed = hit->timesUsed();
     
@@ -272,7 +272,7 @@ void StiEvaluator::fillHitEntry(const StiHit* hit)
     */
 }
 
-void StiEvaluator::fillHitEntry(const StiKalmanTrack* track)
+void StiDefaultEvaluator::fillHitEntry(const StiKalmanTrack* track)
 {
     //Start at the last node on the track, work upwards until you find the root of the tree:
     
@@ -289,13 +289,13 @@ void StiEvaluator::fillHitEntry(const StiKalmanTrack* track)
 	else {
 	    node = dynamic_cast<StiKalmanTrackNode*>(node->getParent());
 	    if (!node) {
-		cout <<"StiEvaluator::fillHitEntry(const StiKalmanTrack&) ERROR:\t"
+		cout <<"StiDefaultEvaluator::fillHitEntry(const StiKalmanTrack&) ERROR:\t"
 		     <<"Cast to StiKalmanTrackNodeFailed.  Abort"<<endl;
 		return;
 	    }
 	}
     }
-    // cout <<"StiEvaluator::fillHitEntry(StiKalmanTrack)\t"
+    // cout <<"StiDefaultEvaluator::fillHitEntry(StiKalmanTrack)\t"
     // <<nodes<<" nodes processed for track"<<endl;
 }
 
