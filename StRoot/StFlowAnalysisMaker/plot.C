@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.52 2003/06/27 21:25:44 posk Exp $
+// $Id: plot.C,v 1.53 2003/07/07 21:58:21 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -47,6 +47,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     
   gROOT->SetStyle("Bold");                              // set style
   gROOT->ForceStyle();
+  gStyle->SetOptStat(kFALSE);
 
   // names of histograms made by StFlowAnalysisMaker
   // also projections of some of these histograms
@@ -620,7 +621,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  hist->SetMaximum(25.);
 	  hist->SetMinimum(-5.);
 	}
-	gStyle->SetOptStat(100110);
+	//gStyle->SetOptStat(100110);
+	hist->Fit("pol4");
 	hist->Draw();
 	if (strstr(shortName[pageNumber],"v")!=0) {
 	  TLine* lineZeroPt  = new TLine(0., 0., max, 0.);
@@ -871,6 +873,9 @@ static Double_t StruveL0(Double_t x)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.53  2003/07/07 21:58:21  posk
+// Made units of momentum GeV/c instead of GeV.
+//
 // Revision 1.52  2003/06/27 21:25:44  posk
 // v4 and v6 are with repect to the 2nd harmonic event plane.
 //

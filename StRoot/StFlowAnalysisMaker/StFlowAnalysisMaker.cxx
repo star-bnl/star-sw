@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.73 2003/06/27 21:25:41 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.74 2003/07/07 21:58:16 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -344,7 +344,7 @@ Int_t StFlowAnalysisMaker::Init() {
       mNEtaBins, mEtaMin, mEtaMax, Flow::nPtBins, Flow::ptMin, 
 			     Flow::ptMax, nPhi3DBins, phiMin, phiMax);
   mHistEtaPtPhi3D->SetXTitle("Eta");
-  mHistEtaPtPhi3D->SetYTitle("Pt (GeV)");
+  mHistEtaPtPhi3D->SetYTitle("Pt (GeV/c)");
   mHistEtaPtPhi3D->SetZTitle("Phi (rad)");
     
   // Yield for all particles
@@ -353,7 +353,7 @@ Int_t StFlowAnalysisMaker::Init() {
 			     Flow::ptMax);
   mHistYieldAll2D->Sumw2();
   mHistYieldAll2D->SetXTitle("Pseudorapidty");
-  mHistYieldAll2D->SetYTitle("Pt (GeV)");
+  mHistYieldAll2D->SetYTitle("Pt (GeV/c)");
 
   // Yield for particles correlated with the event plane
   mHistYieldPart2D = new TH2D("Flow_YieldPart2D", "Flow_YieldPart2D",
@@ -361,7 +361,7 @@ Int_t StFlowAnalysisMaker::Init() {
 			      ptMaxPart);
   mHistYieldPart2D->Sumw2();
   mHistYieldPart2D->SetXTitle((char*)xLabel.Data());
-  mHistYieldPart2D->SetYTitle("Pt (GeV)");
+  mHistYieldPart2D->SetYTitle("Pt (GeV/c)");
 
   // Mean Eta in each bin
   mHistBinEta = new TProfile("Flow_Bin_Eta", "Flow_Bin_Eta",
@@ -372,8 +372,8 @@ Int_t StFlowAnalysisMaker::Init() {
   // Mean Pt in each bin
   mHistBinPt = new TProfile("Flow_Bin_Pt", "Flow_Bin_Pt",
     nPtBinsPart, Flow::ptMin, ptMaxPart, Flow::ptMin, ptMaxPart, "");
-  mHistBinPt->SetXTitle("Pt (GeV)");
-  mHistBinPt->SetYTitle("<Pt> (GeV)");
+  mHistBinPt->SetXTitle("Pt (GeV/c)");
+  mHistBinPt->SetYTitle("<Pt> (GeV/c)");
   
   // cos(n*phiLab)
   mHistCosPhi = new TProfile("Flow_CosPhiLab", "Flow_CosPhiLab",
@@ -536,7 +536,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				"Flow_MeanDedxPos2D",
 				nMomenBins, pMin, pMax,
 				nDedxBins, 0, dEdxMax);
-  mHistMeanDedxPos2D->SetXTitle("log(momentum) (GeV)");
+  mHistMeanDedxPos2D->SetXTitle("log(momentum) (GeV/c)");
   mHistMeanDedxPos2D->SetYTitle("mean dEdx");
   
   // MeanDedxNeg
@@ -544,7 +544,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				"Flow_MeanDedxNeg2D",
 				nMomenBins, pMin, pMax,
 			   nDedxBins, 0, dEdxMax);
-  mHistMeanDedxNeg2D->SetXTitle("log(momentum) (GeV)");
+  mHistMeanDedxNeg2D->SetXTitle("log(momentum) (GeV/c)");
   mHistMeanDedxNeg2D->SetYTitle("mean dEdx");
   
   // MeanDedx PiPlus
@@ -552,7 +552,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				   "Flow_MeanDedxPiPlus2D",
 				   nMomenBins, pMin, pMax,
 				   nDedxBins, 0, dEdxMax);
-  mHistMeanDedxPiPlus2D->SetXTitle("log(momentum) (GeV)");
+  mHistMeanDedxPiPlus2D->SetXTitle("log(momentum) (GeV/c)");
   mHistMeanDedxPiPlus2D->SetYTitle("mean dEdx");
   
   // MeanDedxPiMinus
@@ -560,7 +560,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				    "Flow_MeanDedxPiMinus2D",
 				    nMomenBins, pMin, pMax,
 				    nDedxBins, 0, dEdxMax);
-  mHistMeanDedxPiMinus2D->SetXTitle("log(momentum) (GeV)");
+  mHistMeanDedxPiMinus2D->SetXTitle("log(momentum) (GeV/c)");
   mHistMeanDedxPiMinus2D->SetYTitle("mean dEdx");
   
   // MeanDedxProton
@@ -568,7 +568,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				   "Flow_MeanDedxProton2D",
 				   nMomenBins, pMin, pMax,
 				   nDedxBins, 0, dEdxMax);
-  mHistMeanDedxProton2D->SetXTitle("log(momentum) (GeV)");
+  mHistMeanDedxProton2D->SetXTitle("log(momentum) (GeV/c)");
   mHistMeanDedxProton2D->SetYTitle("mean dEdx");
   
   // MeanDedxPbar
@@ -576,7 +576,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				 "Flow_MeanDedxPbar2D",
 				 nMomenBins, pMin, pMax,
 				 nDedxBins, 0, dEdxMax);
-  mHistMeanDedxPbar2D->SetXTitle("log(momentum) (GeV)");
+  mHistMeanDedxPbar2D->SetXTitle("log(momentum) (GeV/c)");
   mHistMeanDedxPbar2D->SetYTitle("mean dEdx");
   
   // MeanDedxKplus
@@ -584,7 +584,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				  "Flow_MeanDedxKplus2D",
 				  nMomenBins, pMin, pMax,
 				  nDedxBins, 0, dEdxMax);
-  mHistMeanDedxKplus2D->SetXTitle("log(momentum) (GeV)");
+  mHistMeanDedxKplus2D->SetXTitle("log(momentum) (GeV/c)");
   mHistMeanDedxKplus2D->SetYTitle("mean dEdx");
   
   // MeanDedxKminus
@@ -592,7 +592,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				   "Flow_MeanDedxKminus2D",
 				   nMomenBins, pMin, pMax,
 				   nDedxBins, 0, dEdxMax);
-  mHistMeanDedxKminus2D->SetXTitle("log(momentum) (GeV)");
+  mHistMeanDedxKminus2D->SetXTitle("log(momentum) (GeV/c)");
   mHistMeanDedxKminus2D->SetYTitle("mean dEdx");
   
   // MeanDedxDeuteron
@@ -600,7 +600,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				     "Flow_MeanDedxDeuteron2D",
 				     nMomenBins, pMin, pMax,
 				     nDedxBins, 0, dEdxMax);
-  mHistMeanDedxDeuteron2D->SetXTitle("log(momentum) (GeV)");
+  mHistMeanDedxDeuteron2D->SetXTitle("log(momentum) (GeV/c)");
   mHistMeanDedxDeuteron2D->SetYTitle("mean dEdx");
 
   // MeanDedxAntiDeuteron
@@ -608,7 +608,7 @@ Int_t StFlowAnalysisMaker::Init() {
 					 "Flow_MeanDedxAntiDeuteron2D",
 					 nMomenBins, pMin, pMax,
 					 nDedxBins, 0, dEdxMax);
-  mHistMeanDedxAntiDeuteron2D->SetXTitle("log(momentum) (GeV)");
+  mHistMeanDedxAntiDeuteron2D->SetXTitle("log(momentum) (GeV/c)");
   mHistMeanDedxAntiDeuteron2D->SetYTitle("mean dEdx");
   
   // MeanDedxElectron
@@ -616,7 +616,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				     "Flow_MeanDedxElectron2D",
 				     nMomenBins, pMin, pMax,
 				     nDedxBins, 0, dEdxMax);
-  mHistMeanDedxElectron2D->SetXTitle("log(momentum) (GeV)");
+  mHistMeanDedxElectron2D->SetXTitle("log(momentum) (GeV/c)");
   mHistMeanDedxElectron2D->SetYTitle("mean dEdx");
   
   // MeanDedxPositron
@@ -624,7 +624,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				     "Flow_MeanDedxPositron2D",
 				     nMomenBins, pMin, pMax,
 				     nDedxBins, 0, dEdxMax);
-  mHistMeanDedxPositron2D->SetXTitle("log(momentum) (GeV)");
+  mHistMeanDedxPositron2D->SetXTitle("log(momentum) (GeV/c)");
   mHistMeanDedxPositron2D->SetYTitle("mean dEdx");
   
   TString* histTitle;
@@ -1118,7 +1118,7 @@ Int_t StFlowAnalysisMaker::Init() {
 			   Flow::nPtBins, Flow::ptMin, Flow::ptMax);
       histFull[k].histFullHar[j].mHistYield2D->Sumw2();
       histFull[k].histFullHar[j].mHistYield2D->SetXTitle("Pseudorapidty");
-      histFull[k].histFullHar[j].mHistYield2D->SetYTitle("Pt (GeV)");
+      histFull[k].histFullHar[j].mHistYield2D->SetYTitle("Pt (GeV/c)");
       delete histTitle;
 
       // Flow observed
@@ -1130,7 +1130,7 @@ Int_t StFlowAnalysisMaker::Init() {
         histTitle->Data(), mNEtaBins, mEtaMin, mEtaMax, nPtBinsPart, 
 		 Flow::ptMin, ptMaxPart, -100., 100., "");
       histFull[k].histFullHar[j].mHist_vObs2D->SetXTitle((char*)xLabel.Data());
-      histFull[k].histFullHar[j].mHist_vObs2D->SetYTitle("Pt (GeV)");
+      histFull[k].histFullHar[j].mHist_vObs2D->SetYTitle("Pt (GeV/c)");
       delete histTitle;
 
       // Flow observed profiles
@@ -1151,7 +1151,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObsPt = new TProfile(histTitle->Data(),
         histTitle->Data(), nPtBinsPart, Flow::ptMin, ptMaxPart, -100., 100., "");
-      histFull[k].histFullHar[j].mHist_vObsPt->SetXTitle("Pt (GeV)");
+      histFull[k].histFullHar[j].mHist_vObsPt->SetXTitle("Pt (GeV/c)");
       histFull[k].histFullHar[j].mHist_vObsPt->SetYTitle("v (%)");
       delete histTitle;
 
@@ -1159,7 +1159,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.73 2003/06/27 21:25:41 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.74 2003/07/07 21:58:16 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1574,7 +1574,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  // Calculate weights for filling histograms
 	  float wt = 1.;
 	  if (pFlowEvent->PtWgt()) {
-	    wt *= (pt < 2.) ? pt : 2.;  // pt weighting going constant above 2 GeV
+	    wt *= (pt < 2.) ? pt : 2.;  // pt weighting going constant above 2 GeV/c
 	  }
 	  float etaAbs = fabs(eta);
  	  if (pFlowEvent->EtaWgt() && oddHar && etaAbs > 1.) {
@@ -1892,7 +1892,7 @@ Int_t StFlowAnalysisMaker::Finish() {
 	histFull[k].histFullHar[j].mHist_vObs2D->ProjectionXY(histTitle->Data());
       histFull[k].histFullHar[j].mHist_v2D->SetTitle(histTitle->Data());
       histFull[k].histFullHar[j].mHist_v2D->SetXTitle((char*)xLabel.Data());
-      histFull[k].histFullHar[j].mHist_v2D->SetYTitle("Pt (GeV)");
+      histFull[k].histFullHar[j].mHist_v2D->SetYTitle("Pt (GeV/c)");
       histFull[k].histFullHar[j].mHist_v2D->SetZTitle("v (%)");
       delete histTitle;
       AddHist(histFull[k].histFullHar[j].mHist_v2D);
@@ -1917,7 +1917,7 @@ Int_t StFlowAnalysisMaker::Finish() {
       histFull[k].histFullHar[j].mHist_vPt = 
 	histFull[k].histFullHar[j].mHist_vObsPt->ProjectionX(histTitle->Data());
       histFull[k].histFullHar[j].mHist_vPt->SetTitle(histTitle->Data());
-      histFull[k].histFullHar[j].mHist_vPt->SetXTitle("Pt (GeV)");
+      histFull[k].histFullHar[j].mHist_vPt->SetXTitle("Pt (GeV/c)");
       histFull[k].histFullHar[j].mHist_vPt->SetYTitle("v (%)");
       delete histTitle;
       AddHist(histFull[k].histFullHar[j].mHist_vPt);
@@ -2071,6 +2071,9 @@ void StFlowAnalysisMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.74  2003/07/07 21:58:16  posk
+// Made units of momentum GeV/c instead of GeV.
+//
 // Revision 1.73  2003/06/27 21:25:41  posk
 // v4 and v6 are with repect to the 2nd harmonic event plane.
 //
