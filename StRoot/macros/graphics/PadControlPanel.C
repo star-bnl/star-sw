@@ -2,8 +2,11 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.8 1999/06/11 01:27:37 fine Exp $
+// $Id: PadControlPanel.C,v 1.9 1999/06/11 18:17:55 fine Exp $
 // $Log: PadControlPanel.C,v $
+// Revision 1.9  1999/06/11 18:17:55  fine
+// View have been standardtized
+//
 // Revision 1.8  1999/06/11 01:27:37  fine
 // TIter fixed
 //
@@ -138,9 +141,11 @@ static void RotateView(Float_t phi, Float_t theta, TVirtualPad *pad=0)
     TView *view = thisPad->GetView(); 
     if (view) {
       Int_t iret;
-      view->SetView(phi, theta, 0, iret);
-      thisPad->SetPhi(-90-phi);
-      thisPad->SetTheta(90-theta);
+      Float_t p = phi;
+      Float_t t = theta;
+      view->SetView(p, t, 0, iret);
+      thisPad->SetPhi(-90-p);
+      thisPad->SetTheta(90-t);
       thisPad->Modified();
       thisPad->Update();
     }
@@ -148,16 +153,16 @@ static void RotateView(Float_t phi, Float_t theta, TVirtualPad *pad=0)
 }
 
 //_______________________________________________________________________________________
+static void SideView(TVirtualPad *pad=0){
+  RotateView(0,90.0,pad);
+}
+//_______________________________________________________________________________________
 static void FrontView(TVirtualPad *pad=0){
-  RotateView(0,-90.0,pad);
+  RotateView(270.0,90.0,pad);
 }
 //_______________________________________________________________________________________
 static void TopView(TVirtualPad *pad=0){
-  RotateView(90.0,-90.0,pad);
-}
-//_______________________________________________________________________________________
-static void SideView(TVirtualPad *pad=0){
-  RotateView(90.0,0.0,pad);
+  RotateView(270.0,0.0,pad);
 }
 //_______________________________________________________________________________________
 static void AdjustScales()
@@ -204,7 +209,7 @@ static void Decrease3DScale()
     Float_t min[3],max[3];
     view->GetRange(min,max);
     int i;
-    for (i=0;i<2; i++) {max[i] /= 0.8; min[i]=max[i]*0.1;}
+    for (i=0;i<3; i++) {max[i] /= 0.8; min[i]=max[i]*0.1;}
     view->SetRange(min,max);
     thisPad->Modified();
     thisPad->Update();
@@ -220,7 +225,7 @@ static void Inscrease3DScale()
     Float_t min[3],max[3];
     view->GetRange(min,max);
     int i;
-    for (i=0;i<2; i++) {max[i] *= 0.8; min[i]=max[i]*0.1;}
+    for (i=0;i<3; i++) {max[i] *= 0.8; min[i]=max[i]*0.1;}
     view->SetRange(min,max);
     thisPad->Modified();
     thisPad->Update();
@@ -279,7 +284,7 @@ void MakeFourView(TVirtualPad *pad=0)
     c->cd(j++); FrontView();
     c->cd(j++); TopView();
     c->cd(j++); SideView();
-    c->cd(j++); RotateView(60.0,60.0,0);
+    c->cd(j++); RotateView(-30.0,60.0,0);
     c->Modified();
     c->Update();
   }
