@@ -159,14 +159,26 @@ macro svm
 
  macro/global/import *
 
- cd [dst]
 
-   tdm/newtable tof           dst_tof        2000
 
  cd [run_dst]
 
   tdm/newtable run_summary   dst_run_summary   1
   tdm/newtable run_header    dst_run_header    1
+
+ cd /dui
+
+ return
+
+*------------------------------------------------------------------*
+ macro fill_dst_tof
+
+ macro/global/import *
+
+ cd [dst]
+
+   tdm/newtable tof           dst_tof        2000
+
 
  cd /dui
 
