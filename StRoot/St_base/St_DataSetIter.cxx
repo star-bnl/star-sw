@@ -186,7 +186,8 @@ St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Option_t *opt) {
 //   dirname[0] != '/' - prints DataSet with respect of the current class
 //
  
-  St_DataSet *set= Next(dirname);
+  St_DataSet *set= fWorkingDataSet;
+  if (dirname && strlen(dirname)) set= Next(dirname);
   if (set) set->ls(opt);
   return set;
 }
@@ -194,7 +195,7 @@ St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Option_t *opt) {
 //______________________________________________________________________________
 St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Int_t depth) {
 //
-//   Ls(const Char_t *dirname,Option_t)
+//   Ls(const Char_t *dirname,Int_t depth)
 //
 //   Prints the list of the St_DataSet defined with dirname
 //
@@ -202,8 +203,11 @@ St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Int_t depth) {
 //   dirname[0]  = '/' - print St_DataSet defined with dirname
 //   dirname[0] != '/' - prints DataSet with respect of the current class
 //
- 
-  St_DataSet *set= Next(dirname);
+//   depth       = 0   - print all level of the St_DataSet defined with dirname
+//               > 0   - print depth levels at most of the dirname St_DataSet
+//
+  St_DataSet *set= fWorkingDataSet;
+  if (dirname && strlen(dirname)) set= Next(dirname);
   if (set) set->ls(depth);
   return set;
 }
