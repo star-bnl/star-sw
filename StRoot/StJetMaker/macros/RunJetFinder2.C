@@ -6,11 +6,14 @@ StChain *chain;
 int total=0;
 
 void RunJetFinder2(int nevents=10,
+		   const char* file,
+		   const char* outfile,
 		   const char* dir = "",
-		   const char* file = "/star/data44/reco/productionPP/ReversedFullField/P04ij/2004/135/st_physics_adc_5135068_raw_2050001.MuDst.root",
-		   const char* outfile = "jets_out.root",
 		   const char *filter = "")
 {
+    cout <<"Read file:\t"<<file<<endl;
+    cout <<"Write file:\t"<<outfile<<endl;
+    
     if (gClassTable->GetID("TTable") < 0) {
 	gSystem->Load("libStar");
 	gSystem->Load("libPhysics");
