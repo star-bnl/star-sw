@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.49 2002/10/28 15:42:29 nevski Exp $
+* $Id: geometry.g,v 1.50 2002/10/28 15:49:35 nevski Exp $
 * $Log: geometry.g,v $
+* Revision 1.50  2002/10/28 15:49:35  nevski
+* fpd as a separate detector added
+*
 * Revision 1.49  2002/10/28 15:42:29  nevski
 * introducing 2002 version
 *
@@ -58,7 +61,7 @@
    Implicit   none
 * system list 
    Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,upst,rich,
-              zcal,mfld,bbcm
+              zcal,mfld,bbcm,fpdm
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse, tof,t25,t1, ems,alpipe,svtw,kusok,
               on/.true./,off/.false./
@@ -96,6 +99,7 @@ replace[;ON#{#;] with [
 *
    field=5                                             "defaults constants"
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
+   {bbcm,fpdm} = off;
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows"   
    {tof,t25,t1,ems,rich,alpipe}=off   "TimeOfFlight, EM calorimeter Sector"
    Nsi=7; Wfr=0;  Wdm=0; " SVT+SSD, wafer number and width as in code     "
@@ -316,6 +320,7 @@ If LL>1
       }
    endif
    if (ecal) Call ecalgeo
+   if (fpdm) Call fpdmgeo
    if (zcal) Call zcalgeo
    if (magp) Call magpgeo
 *
