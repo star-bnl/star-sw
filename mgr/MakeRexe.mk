@@ -1,5 +1,8 @@
-# $Id: MakeRexe.mk,v 1.23 1999/06/27 22:44:03 fisyak Exp $
+# $Id: MakeRexe.mk,v 1.24 1999/07/20 00:24:55 fisyak Exp $
 # $Log: MakeRexe.mk,v $
+# Revision 1.24  1999/07/20 00:24:55  fisyak
+# Remove Objy
+#
 # Revision 1.23  1999/06/27 22:44:03  fisyak
 # Merge StRootEvent and StEvent
 #
@@ -101,10 +104,8 @@ CCload = YES
 
 # static linking of SCL and StEvent needed with current Solaris compiler
 ifeq ($(STAR_HOST_SYS),sun4x_56)
-  STCLASS_OBJS =  $(wildcard $(STAR)/.$(STAR_HOST_SYS)/obj/StarClassLibrary/*.o \
-$(STAR)/.$(STAR_HOST_SYS)/obj/StarClassLibrary/Templates.DB/*.o) 
-#  STEVENT_OBJS = $(wildcard $(STAR)/.$(STAR_HOST_SYS)/obj/StEvent/*.o \
-#$(STAR)/.$(STAR_HOST_SYS)/obj/StEvent/Templates.DB/*.o)
+#  STCLASS_OBJS =  $(wildcard $(STAR)/.$(STAR_HOST_SYS)/obj/*/Templates.DB/*.o) 
+#  STCLASS_OBJS =  $(wildcard $(STAR)/.$(STAR_HOST_SYS)/obj/StarClassLibrary/*.o 
 endif
 
 

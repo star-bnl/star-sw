@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.80  1999/07/20 00:24:55  fisyak
+#  Remove Objy
+#
 #  Revision 1.79  1999/06/24 22:46:20  fisyak
 #  adjust for egcs-1.1.2 on Linux
 #
@@ -215,7 +218,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/06/24 22:46:20 $ 
+#             Last modification $Date: 1999/07/20 00:24:55 $ 
 #. default setings
 
 MAKE  := gmake
@@ -634,15 +637,6 @@ ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
   LDFLAGS  :=  $(DEBUG)  -Bstatic 
   EXEFLAGS :=  $(DEBUG)  -z muldefs -Bdynamic -t 
   SOFLAGS  :=  $(DEBUG) -G
-ifdef NEVR
-# for Objy
-  ifdef OBJY_HOME
-    OBJY_HOME := $(subst /.,,$(wildcard $(OBJY_HOME)/.))
-    ifdef OBJY_HOME
-      CPPFLAGS += -DOBJYBASE -I$(BFWORK)/include -I$(BFWORK)/tmp/$(BFARCH) -I$(BFDIST)/releases/$(BFCURRENT)/include -I$(OBJYBASE)/$(OBJY_ARCH)/include
-    endif
-  endif
-endif
   ifeq ($(STAR_HOST_SYS),sun4x_56egcs)
     OSFID += ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES ASU_MALLOC_OFF GNU_GCC
     CC       := /usr/local/bin/gcc

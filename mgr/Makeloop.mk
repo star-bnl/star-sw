@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.88  1999/07/20 00:24:55  fisyak
+#  Remove Objy
+#
 #  Revision 1.87  1999/07/16 23:22:10  fisyak
 #  Clean up list of skipped directories
 #
@@ -340,7 +343,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/07/16 23:22:10 $ 
+#           Last modification $Date: 1999/07/20 00:24:55 $ 
 #  default setings
 # Current Working Directory
 #
@@ -378,29 +381,15 @@ ifndef SUBDIRS
     SUBDIRS += $(filter-out gen/CVS gen/kumac gen/inc gen/idl,$(DIRS))
   endif
   ifdef NT
-    SUBDIRS := $(filter-out db, $(SUBDIRS)) 
-    SUBDIRS := $(filter-out sim, $(SUBDIRS))
-    SUBDIRS := $(filter-out g2t, $(SUBDIRS))
-    SUBDIRS := $(filter-out gstar, $(SUBDIRS))
-    SUBDIRS := $(filter-out dig, $(SUBDIRS))
-    SUBDIRS := $(filter-out trg, $(SUBDIRS))
-    SUBDIRS := $(filter-out strange, $(SUBDIRS))
+    SUBDIRS := $(filter-out db sim g2t gstar dig trg strange, $(SUBDIRS))
   endif
   SUBDIRS := $(filter-out global, $(SUBDIRS)) $(filter global, $(SUBDIRS))
   SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS)) 
   SUBDIRS := $(filter-out StDisplay, $(SUBDIRS))
-#  SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
-#                         St_evg_Maker St_ebye_Maker St_fpt_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out vpd par crs egz fri g2x mev StHbtMaker StAssociationMaker, $(SUBDIRS))
-ifndef OBJY_HOME
-  SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker objy, $(SUBDIRS)) 
-endif
-ifneq (wenuas,$(USER))
-  SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker objy, $(SUBDIRS)) 
-endif
     SUBDIRS := $(filter-out StMcAnalysisMaker,  $(SUBDIRS))
  ifneq (,$(findstring $(STAR_SYS),sun4x_56 hp_ux102))
-    SUBDIRS := $(filter-out StPeCMaker St_hbt_Maker StHbtMaker, $(SUBDIRS))
+    SUBDIRS := $(filter-out StPeCMaker StHbtMaker, $(SUBDIRS))
  endif
 ifdef SKIP_LIB
     SUBDIRS := $(filter-out $(SKIP_LIB),  $(SUBDIRS))
