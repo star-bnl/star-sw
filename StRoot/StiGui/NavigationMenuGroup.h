@@ -8,7 +8,7 @@ class NavigationMenuGroup : public MenuGroup
 
   enum cmds
     {
-      _cmdNavigator=1, _cmdMoveIn, _cmdMoveOut, _cmdMovePlusPhi, _cmdMoveMinusPhi, _cmdSetLayer, _cmdSetLayerAndAngle
+	_cmdNavigator=1, _cmdMoveIn, _cmdMoveOut, _cmdMovePlusPhi, _cmdMoveMinusPhi, _cmdSetLayer, _cmdSetLayerAndAngle, _cmdMoveToNextRegion, _cmdMoveToPreviousRegion
     };
 
   NavigationMenuGroup(const string & name, 
@@ -23,6 +23,8 @@ class NavigationMenuGroup : public MenuGroup
  protected:
   void showCurrentDetector();
   void hideCurrentDetector();
+  void moveToNextRegion();
+  void moveToPreviousRegion();
   void moveIn();
   void moveOut();
   void movePlusPhi();
