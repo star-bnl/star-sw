@@ -1,29 +1,21 @@
-**************** tfc.kumac **************************************
+**************** tfc_run.kumac **************************************
 **************************************************************************
 **************************************************************************
-
-macro init
-
-
-return
-
-
-
 *********************************************************************
 **********************************************************************
 ************************************************************************
 
-macro xyz
+macro run
 
   cd /dui
-  tdm/table/rowcount ProducedData/Pixels/adcxyz 0
+  tdm/table/rowcount /dui/raw_data/tpc/pixels/adcxyz 0
 
   ami/module/call xyz_
-       Geometry/tpgpar/tpg_pad_plane_
-       Geometry/tpgpar/tpg_detector_
-       ProducedData/Pixels/tppixel_
-       ProducedData/Pixels/tppad_
-       ProducedData/Pixels/adcxyz
+       /dui/constants/tpc/geometry/tpgpar/tpg_pad_plane_
+       /dui/constants/tpc/geometry/tpgpar/tpg_detector_
+       /dui/raw_data/tpc/pixels/tppixel_
+       /dui/raw_data/tpc/pixels/tppad_
+       /dui/raw_data/tpc/pixels/adcxyz
 
 return
 
