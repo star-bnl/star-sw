@@ -4,7 +4,7 @@
  */
 /******************************************************************
  *
- * $Id: StPmdDiscriminatorMaker.h,v 1.3 2003/09/10 19:47:27 perev Exp $
+ * $Id: StPmdDiscriminatorMaker.h,v 1.4 2004/10/30 00:08:06 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -15,6 +15,9 @@
  ******************************************************************
  *
  * $Log: StPmdDiscriminatorMaker.h,v $
+ * Revision 1.4  2004/10/30 00:08:06  subhasis
+ * TranFlag added and set to 0 in ctor
+ *
  * Revision 1.3  2003/09/10 19:47:27  perev
  * ansi corrs
  *
@@ -65,6 +68,7 @@ class StPmdDiscriminatorMaker: public StMaker{
 	  Float_t mDeltaEta;
 	  Float_t mDeltaPhi;
 	  Int_t mApplyFlagNN;
+	  Int_t mTrainFlag;
   protected:
   TH1F *mEdepPmd;    //! 1-D EDep Display for PMD
   TH1F *mEtaPmd;    //!  1-D Eta PMD
@@ -89,6 +93,7 @@ class StPmdDiscriminatorMaker: public StMaker{
   void SetDeltaEta(Float_t);      //! Setting DeltaEta for Matching
   void SetDeltaPhi(Float_t);      //! Setting DeltaPhi for Matching
   void SetApplyFlag(Int_t);      //! Setting Traininbg or testing flag
+  void SetTrainFlag(Int_t);      //! Setting Traininbg or testing flag
   void bookHistograms();          
   void fillHistograms(StPmdDetector*, StPmdDetector*);
   void Matching(StPmdDetector*, StPmdDetector*);
@@ -106,6 +111,7 @@ inline void StPmdDiscriminatorMaker::getEdepThreshold(Float_t de){mEdepThreshold
 inline void StPmdDiscriminatorMaker::SetDeltaEta(Float_t deta){mDeltaEta=deta;}
 inline void StPmdDiscriminatorMaker::SetDeltaPhi(Float_t dphi){mDeltaPhi=dphi;}
 inline void StPmdDiscriminatorMaker::SetApplyFlag(Int_t flag){mApplyFlagNN=flag;}
+inline void StPmdDiscriminatorMaker::SetTrainFlag(Int_t flag){mTrainFlag=flag;}
 #endif
 
 
