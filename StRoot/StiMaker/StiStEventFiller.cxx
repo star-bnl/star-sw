@@ -1,11 +1,23 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.17 2003/05/12 21:21:39 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.18 2003/05/14 00:04:35 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.18  2003/05/14 00:04:35  calderon
+ * The array of 15 floats containing the covariance matrix has a different order
+ * in Sti than in StEvent.  In Sti the array is counted
+ * starting from the first row, column
+ * go to next column until you hit the diagonal,
+ * jump to next row starting from first column.
+ * in StEvent the array is counted
+ * starting from the first row, column
+ * go to the next row until you hit the end,
+ * jump to next column starting from diagonal.
+ * The filling of the fitTraits was fixed to reflect this.
+ *
  * Revision 2.17  2003/05/12 21:21:39  calderon
  * switch back to getting the chi2 from track->getChi2()
  * Covariance matrix is still obtained from node->get(), and the values
@@ -552,9 +564,25 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
 
   // @#$%^&
   // need to transform the covariant matrix from double's (Sti) to floats (StEvent)!
-
+  // Actually, the order of the array in Sti is different than in StEvent,
+  // so we can't use the same indices, otherwise the matrix is constructed wrong
+  // in StTrackFitTraits.
   float covMFloat[15];
-  for (int ind = 0; ind<15; ++ind) covMFloat[ind] = static_cast<float>(covM[ind]);
+  covMFloat[0]  = static_cast<float>(covM[0]);
+  covMFloat[1]  = static_cast<float>(covM[1]);
+  covMFloat[5]  = static_cast<float>(covM[2]);
+  covMFloat[2]  = static_cast<float>(covM[3]);
+  covMFloat[6]  = static_cast<float>(covM[4]);
+  covMFloat[9]  = static_cast<float>(covM[5]);
+  covMFloat[3]  = static_cast<float>(covM[6]);
+  covMFloat[7]  = static_cast<float>(covM[7]);
+  covMFloat[10] = static_cast<float>(covM[8]);
+  covMFloat[12] = static_cast<float>(covM[9]);
+  covMFloat[4]  = static_cast<float>(covM[10]);
+  covMFloat[8]  = static_cast<float>(covM[11]);
+  covMFloat[11] = static_cast<float>(covM[12]);
+  covMFloat[13] = static_cast<float>(covM[13]);
+  covMFloat[14] = static_cast<float>(covM[14]);
     
   // setFitTraits uses assignment operator of StTrackFitTraits, which is the default one,
   // which does a memberwise copy.  Therefore, constructing a local instance of 
