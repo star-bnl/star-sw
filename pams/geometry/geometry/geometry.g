@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.84 2004/03/24 23:33:48 potekhin Exp $
+* $Id: geometry.g,v 1.85 2004/03/31 16:37:51 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.85  2004/03/31 16:37:51  potekhin
+* Added version control for the FPD,
+* via the variable FpdmConfig
+*
 * Revision 1.84  2004/03/24 23:33:48  potekhin
 * Added proper VPD versioning as discussed with the team.
 * No numerical data here, just config flag.
@@ -336,8 +340,9 @@
    Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,kgeom,nmod(2),nonf(3),
               ecal_config, ecal_fill,
               Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,
-              BtofConfig, VpddConfig,
-              CorrNum, PhmdVersion, SisdConfig, PipeConfig, CalbConfig
+              CorrNum, PhmdVersion,
+              BtofConfig, VpddConfig, FpdmConfig,
+              SisdConfig, PipeConfig, CalbConfig
 
 * configuration variables for tuning the geometry:
 *            BtofConfig  -- tof trays
@@ -345,6 +350,7 @@
 *            SisdConfig  -- silicon strip
 *            PipeConfig  -- beam pipe
 *            CalbConfig  -- barrel calorimeter
+*            FpdmConfig  -- fpd
 
 * CorrNum allows us to control incremental bug fixes in a more
 * organized manner
@@ -386,6 +392,7 @@ replace[;ON#{#;] with [
    BtofConfig  = 1 ! ctb only
    VpddConfig  = 1 ! vpd...
    CalbConfig  = 0 ! really make use of it starting in y2004
+   FpdmConfig  = 0 ! 0 means the original source code
 
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
@@ -779,6 +786,7 @@ If LL>1
 
                   "forward pion detector "
                      fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
                      vpdd=on;
@@ -1023,7 +1031,10 @@ If LL>1
 
    if (ecal) Call ecalgeo
    if (bbcm) Call bbcmgeo
-   if (fpdm) Call fpdmgeo
+
+   if (fpdm.and.FpdmConfig==0) Call fpdmgeo
+   if (fpdm.and.FpdmConfig>0)  Call fpdmgeo1
+
    if (zcal) Call zcalgeo
    if (magp) Call magpgeo
    if (pixl) Call pixlgeo
