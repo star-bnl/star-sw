@@ -196,8 +196,9 @@ void **TTreeHelperMem::Alloc(int units)
    if (!fUnits) fUnits=1;
    delete [] fMem;
    fSize = TTreeHelper::TypeSize(fType)*fUnits;
-   fMem = new char[fSize];
+   fMem = new char[fSize+8];
    memset(fMem,0,fSize);
+   strcpy(fMem+fSize,"Perev");
    return (void**)&fMem;
 } 
 
@@ -414,6 +415,7 @@ Int_t TTreeHelper::Next(Int_t entry)
     TBranch *b = (TBranch*)fBraList.UncheckedAt(i);
     ans +=b->GetEntry(ientry); 
   }
+//  IsCorrupted();
   if (ans) return ans;
   fEntry=0;
   return 0;
@@ -425,7 +427,7 @@ Bool_t TTreeHelper::Notify()
   const char *tyName;
   Int_t units,brType;
   void  *add;
-
+  Assert(!IsCorrupted());
   fBraList.Clear();
   int n = fMemList.GetEntriesFast();
   for (int i=0;i<n;i++) {
@@ -434,9 +436,26 @@ Bool_t TTreeHelper::Notify()
     Assert(b);
     b->ResetBit  (kDoNotProcess);
     GetInfo(b,tyName,units,add,brType);
-    if (units > t->fUnits) t->Alloc(units);
-
+    if (units > t->fUnits) {
+      t->Alloc(units);
+      void **pddr = t->GetMem();
+      fTree->SetBranchAddress(b->GetName(),*pddr);
+    }
     fBraList.Add(b);
+  }
+  return 0;
+}
+//______________________________________________________________________________
+const char *TTreeHelper::IsCorrupted() const
+{
+
+  int n = fMemList.GetEntriesFast();
+  for (int i=0;i<n;i++) {
+    TTreeHelperMem *t = (TTreeHelperMem*)fMemList.UncheckedAt(i);
+    char *perev = t->fMem+t->fSize;
+    if (strcmp(perev,"Perev") ==0 ) continue;
+    Error("IsCorrupted","Branch=%s Mem %p ***\n",t->GetName(),perev);
+    return t->GetName();
   }
   return 0;
 }
