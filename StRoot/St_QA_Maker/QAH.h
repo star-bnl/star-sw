@@ -1,5 +1,8 @@
-// $Id: QAH.h,v 2.2 2001/04/28 22:05:12 genevb Exp $ 
+// $Id: QAH.h,v 2.3 2004/12/13 15:52:36 genevb Exp $ 
 // $Log: QAH.h,v $
+// Revision 2.3  2004/12/13 15:52:36  genevb
+// Numerous updates: PMD, primtrk, FPD, QAShift lists
+//
 // Revision 2.2  2001/04/28 22:05:12  genevb
 // Added EMC histograms
 //
@@ -48,11 +51,14 @@ class QAH {
   // methods for multi 1d-hists
   static TH2F* MH1F(const Text_t* name, const Text_t* title,
               Int_t nbinsx, Axis_t xlow, Axis_t xup, Int_t nbinsy);
+  // several similar multi 1d-hists
+  static void MMH1F(TH2F** histp, Int_t nhist, const Text_t* name, const Text_t* title,
+		    Int_t nbinsx, Axis_t xlow, Axis_t xup, Int_t nbinsy, Int_t first=0);
 
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: QAH.h,v 2.2 2001/04/28 22:05:12 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: QAH.h,v 2.3 2004/12/13 15:52:36 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:

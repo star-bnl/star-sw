@@ -13,6 +13,8 @@
 
 class StEvent;
 class HitHistograms;
+class StPmdGeom;
+class StPmdMapUtil;
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -25,7 +27,10 @@ class StEventQAMaker : public StQAMakerBase {
   Int_t n_glob_good;
   Bool_t allTrigs;
   Int_t   multiplicity; // multiplicity of current event
- 
+  StPmdGeom* mPmdGeom;     //!
+  StPmdMapUtil* maputil;   //!
+  Int_t mRunNumber;
+  
 //------------------------------------------------------------------------
   
  public: 
@@ -44,11 +49,11 @@ class StEventQAMaker : public StQAMakerBase {
   virtual void   MakeHistPID();
   virtual void   MakeHistVertex();
   virtual void   MakeHistPoint();
-  virtual void   MakeHistRich();
   virtual void   MakeHistEMC();
   virtual void   MakeHistEval();
   virtual void   MakeHistBBC();
   virtual void   MakeHistFPD();
+  virtual void   MakeHistPMD();
   
   virtual void   AllTriggers() { allTrigs = kTRUE; }
 
@@ -56,15 +61,18 @@ class StEventQAMaker : public StQAMakerBase {
 
   /// the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.9 2003/02/19 06:38:28 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.10 2004/12/13 15:52:36 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
-    };
+};
     
 #endif
 
-// $Id: StEventQAMaker.h,v 2.9 2003/02/19 06:38:28 genevb Exp $
+// $Id: StEventQAMaker.h,v 2.10 2004/12/13 15:52:36 genevb Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.10  2004/12/13 15:52:36  genevb
+// Numerous updates: PMD, primtrk, FPD, QAShift lists
+//
 // Revision 2.9  2003/02/19 06:38:28  genevb
 // Rework trigger and mult/event class sections
 //

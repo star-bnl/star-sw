@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.19 2004/10/04 16:40:42 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.20 2004/12/13 15:52:37 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.20  2004/12/13 15:52:37  genevb
+// Numerous updates: PMD, primtrk, FPD, QAShift lists
+//
 // Revision 2.19  2004/10/04 16:40:42  genevb
 // FTPC radial histos
 //
@@ -90,7 +93,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.19 2004/10/04 16:40:42 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.20 2004/12/13 15:52:37 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -161,7 +164,6 @@ class StQABookHist : public TObject {
   TH1F     *m_globtrk_tot;      //! # tracks in table
   TH1F     *m_globtrk_good;     //! # tracks in table with iflag>0 
   TH1F     *m_globtrk_good_sm;  //! # tracks in table with iflag>0,small range
-  TH2F     *m_globtrk_good_tot; //! ratio of good to total tracks, tpc, svt
   TH1F     *m_globtrk_goodTTS;  //! # tracks in table with iflag>0, tpc, tpc+svt
   TH2F     *m_globtrk_goodF;    //! # tracks in table with iflag>0, ftpc
   TH1F     *m_globtrk_iflag;    //! iflag value
@@ -497,14 +499,6 @@ class StQABookHist : public TObject {
   TH1F     *m_pchisq1T;       //! chi square [1], tpc
   TH1F     *m_pchisq1TS;      //! chi square [1], tpc+svt
   TH2F     *m_pchisq1TTS;     //! chi square [1], tpc,tpc+svt
-  TH1F     *m_prim_impactT;   //! log impact parameter from primary vertex, tpc
-  TH1F     *m_prim_impactTS;  //! log impact parameter from primary vertex, tpc+svt
-  TH2F     *m_prim_impactTTS; //! log impact parameter from primary vertex, tpc,tpc+svt
-  TH2F     *m_prim_impactF;   //! log impact parameter from primary vertex, ftpc
-  TH1F     *m_prim_impactrT;  //! impact parameter from primary vertex, tpc
-  TH1F     *m_prim_impactrTS; //! impact parameter from primary vertex, tpc+svt
-  TH2F     *m_prim_impactrTTS; //! impact parameter from primary vertex, tpc,tpc+svt
-  TH2F     *m_prim_impactrF;  //! impact parameter from primary vertex, fptc
 
   TH2F     *m_prim_f0;          //! overlayed hist of first point - helix point
   TH2F     *m_prim_f0TS;        //! overlayed hist of first point - helix point
@@ -595,6 +589,13 @@ class StQABookHist : public TObject {
 
   // from kinkVertex
   TH1F     *m_kink_tot;   //! number of kinks
+
+  // for FTPC vertex
+  TH2F     *m_vtx_FtpcEastTpc_xy; //! FtpcEast prim vtx - TPC prim vtx, x vs y
+  TH1F     *m_vtx_FtpcEastTpc_z;  //! FtpcEast prim vtx z - TPC prim vtx z
+  TH2F     *m_vtx_FtpcWestTpc_xy; //! FtpcWest prim vtx - TPC prim vtx, x vs y
+  TH1F     *m_vtx_FtpcWestTpc_z;  //! FtpcWest prim vtx z - TPC prim vtx z
+  
   
 // for method MakeHistPoint
   TH1F     *m_z_hits;      //! z dist. of hits, tpc
@@ -673,13 +674,23 @@ class StQABookHist : public TObject {
   TH2F* m_bbc_tdc[4];          //!
 
   // Hists for FPD
-  TH2F* m_fpd_top[2];         //!
-  TH2F* m_fpd_bottom[2];      //!
-  TH2F* m_fpd_south[2];       //!
-  TH2F* m_fpd_north[2];       //!
+  TH2F* m_fpd_top[2];          //!
+  TH2F* m_fpd_bottom[2];       //!
+  TH2F* m_fpd_south[2];        //!
+  TH2F* m_fpd_north[2];        //!
   TH1F* m_fpd_sums[8];         //!
 
-// ********************** Members For Internal Use *************************
+  // Hists for PMD
+  TH2F* m_pmd_sm_adc[3];       //!
+  TH2F* m_pmd_sm_hit[3];       //!
+  TH2F* m_pmd_chain_hit[6];    //!
+  TH2F* m_pmd_chain_adc[6];    //!
+  TH2F* m_pmd_total_hit;       //!
+  TH2F* m_pmd_total_adc;       //!
+  TH2F* m_cpv_total_hit;       //!
+  TH2F* m_cpv_total_adc;       //!
+
+  // ********************** Members For Internal Use *************************
  protected:
 
   TString QAHistType; // character string to prepend to each hist name/title
@@ -695,6 +706,7 @@ class StQABookHist : public TObject {
   virtual void   BookHistEval();
   virtual void   BookHistBBC();
   virtual void   BookHistFPD();
+  virtual void   BookHistPMD();
 
   ClassDef(StQABookHist,0)
 };
