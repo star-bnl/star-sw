@@ -21,6 +21,7 @@ ClassImp(StHbtTagMaker)
 
 //-------------------------------------------------------------
 StHbtTagMaker::StHbtTagMaker(const Char_t* name) : StMaker(name) {
+  mShowTags=0;
   mTagWriter = StHbtTagWriter::Instance();
 }
 
@@ -60,9 +61,7 @@ Int_t StHbtTagMaker::Make() {
     cout << "StHbtTagMaker::Make() -  no tags written " << endl;
   }
 
-  if (Debug()) PrintTag();
-  PrintTag();
-
+  if ( mShowTags>0) PrintTag();
   return kStOK;
 }
 
