@@ -1,5 +1,8 @@
-# $Id: MakeRexe.mk,v 1.16 1999/03/02 20:27:38 fisyak Exp $
+# $Id: MakeRexe.mk,v 1.17 1999/03/27 23:58:42 fisyak Exp $
 # $Log: MakeRexe.mk,v $
+# Revision 1.17  1999/03/27 23:58:42  fisyak
+# Add hbook to root
+#
 # Revision 1.16  1999/03/02 20:27:38  fisyak
 # Filter out #
 #
@@ -61,29 +64,18 @@ SRC_DIRS := $(INP_DIR)  $(addprefix $(STAR)/asps/agi/gst/, agsim geant zebra)
 VPATH := $(SRC_DIRS) $(OUT_DIR) 
 #                                  $(OBJ_DIR)  $(EXE_DIR) 
 
-#SUFFIXES := .c .cc .C .cxx .f .F .g
-#NAMES_O := $(strip $(foreach s, $(SUFFIXES), $(wildcard $(addsuffix $(s), $(SRC_DIR)/*$(s))))
 NAMES_O := $(wildcard $(addsuffix /*.[fFgc]*,$(SRC_DIRS)))
-#NAMES_O := $(wildcard $(NAMES_O))
-#NAMES_O := $(filter %.g %.f %.F %.c %.cc %.cxx %.cdf,$(NAMES_O))
+NAMES_O := $(filter-out $(STAR)/asps/agi/gst/agsim/agdummy.g, $(NAMES_O))
 NAMES_O := $(filter-out \#%\#,$(NAMES_O))
 NAMES_O := $(filter-out %.bck,$(NAMES_O))
 NAMES_O := $(basename $(notdir $(NAMES_O)))
 NAMES_O := $(filter-out traceqc,$(NAMES_O))
-#NAMES_O := $(filter-out gyintf,$(NAMES_O))
-# from asps/rexe
-#NAMES_0 := $(filter-out agmain  fdummy ggsim, $(NAMES_O))
-#NAMES_O := $(filter-out kgsim, $(NAMES_O))
-#NAMES_O := $(filter-out traceqc pawfca pawbrk pawcs pgexi gkfort, $(NAMES_O))
-#NAMES_O := $(filter-out csrmsl csjcal csaddr csfile  csext  csexec, $(NAMES_O))
-#NAMES_O := $(filter-out tdm_clear_all tdm_map_table ami_module_register agpawq hplopt, $(NAMES_O))
-#NAMES_O := $(filter-out UTILS_h2root afmain acmain ,$(NAMES_O))
 NAMES_D := $(filter-out MAIN_rmain, $(NAMES_O))
 FILES_O := $(sort $(addprefix $(OBJ_DIR)/,$(addsuffix .o,$(NAMES_O))))
 FILES_D := $(sort $(addprefix $(DEP_DIR)/,$(addsuffix .d,$(NAMES_D)))) 
 
-# ggsim.o agdummy.o dummy.o 
-INCL  := $(ROOTSYS)/src $(STAR)/StRoot/St_base $(INP_DIR) $(GST_DIR) $(STAF_SYS_INCS) $(STAR)/asps/agi $(STAR)/asps/agi/kuip  $(CERN_ROOT)/include $(CERN_ROOT)/src/pawlib/paw/ntuple 
+INCL  := $(ROOTSYS)/src $(STAR)/StRoot/St_base $(INP_DIR) $(GST_DIR) $(STAF_SYS_INCS) \
+         $(STAR)/asps/agi $(STAR)/asps/agi/kuip  $(CERN_ROOT)/include $(CERN_ROOT)/src/pawlib/paw/ntuple 
 INCL  := $(addprefix -I,$(INCL))
 CPPFLAGS += $(INCL)
 #STAF  = YES
