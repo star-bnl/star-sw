@@ -8,10 +8,6 @@
 #include "StGetConfigValue.hh"
 #include "StThreeVectorF.hh"
 
-//StiGui
-#include "StiGui/StiRootDrawableHits.h"
-#include "StiGui/StiDisplayManager.h"
-
 //Sti
 #include "StiKalmanTrack.h"
 #include "StiMapUtilities.h"
@@ -24,39 +20,21 @@
 ostream& operator<<(ostream& os, const StiHit& hit);
 
 StiTrackSeedFinder::StiTrackSeedFinder(StiDetectorContainer* det,
-				       StiHitContainer* h, Sti2HitComboFilter* filter)
+				       StiHitContainer* h)
     : StiSeedFinder(),
-      mDetStore(det), mhitstore(h), mdrawablehits(new StiRootDrawableHits()),
-      mhitcombofilter(filter)
+      mDetStore(det), mHitStore(h)
 {
-    //mMessenger <<"StiTrackSeedFinder::StiTrackSeedFinder()"<<endl;
-    if (!mhitcombofilter) {
-	mMessenger <<"StiTrackSeedFinder::StiTrackSeedFinder(). ERROR:\t";
-	mMessenger <<"hitComboFilter==0.  Undefined Behavior."<<endl;
-    }
-
-    //Look at seeds (temp, MLM 8/8/01)
-    mdrawablehits->clear();
-    mdrawablehits->setColor(3);
-    mdrawablehits->setMarkerStyle(3);
-    mdrawablehits->setMarkerSize(1.);
-    mdrawablehits->setRemoved(false);
-    //mdrawablehits->setName("Seed Finder Hits");
-    StiDisplayManager::instance()->addDrawable(mdrawablehits);
+    mMessenger <<"StiTrackSeedFinder::StiTrackSeedFinder()"<<endl;
+    
 }
 
 StiTrackSeedFinder::~StiTrackSeedFinder()
 {
     //mMessenger <<"StiTrackSeedFinder::~StiTrackSeedFinder()"<<endl;
-    //Note, do not call delete on drawable hits, they're owned by root
-    
-    delete mhitcombofilter;
-    mhitcombofilter=0;
 }
 
 void StiTrackSeedFinder::reset()
 {
-    mdrawablehits->clear();
     return;
 }
 

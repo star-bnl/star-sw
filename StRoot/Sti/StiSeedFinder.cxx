@@ -9,15 +9,14 @@
 #include "StiSeedFinder.h"
 
 StiSeedFinder::StiSeedFinder()
-    : mFactory(0), mBuildPath("empty"), mBuilt(false),
-      mMessenger(*(Messenger::instance(MessageType::kSeedFinderMessage)))
+    : mFactory(0), mMessenger(*(Messenger::instance(MessageType::kSeedFinderMessage)))
 {
-    //cout <<"StiSeedFinder::StiSeedFinder()"<<endl;
+    mMessenger <<"StiSeedFinder::StiSeedFinder()"<<endl;
 }
 
 StiSeedFinder::~StiSeedFinder()
 {
-    //cout <<"StiSeedFinder::~StiSeedFinder()"<<endl;
+    mMessenger <<"StiSeedFinder::~StiSeedFinder()"<<endl;
 }
 
 

@@ -12,7 +12,11 @@ using std::copy;
 //Scl
 #include "StGetConfigValue.hh"
 
+//StiGui
+#include "StiGui/StiRDLocalTrackSeedFinder.h"
+
 //Sti
+#include "StiIOBroker.h"
 #include "StiHitContainer.h"
 #include "StiDetectorContainer.h"
 #include "StiTrackSeedFinder.h"
@@ -22,11 +26,11 @@ using std::copy;
 #include "StiCompositeSeedFinder.h"
 #include "MessageType.h"
 
-StiTrackSeedFinder* gTrackSeedFinderBuilder(const string& buildPath);
-
-StiCompositeSeedFinder::StiCompositeSeedFinder()
+StiCompositeSeedFinder::StiCompositeSeedFinder(StiObjectFactoryInterface<StiKalmanTrack>* fact)
 {
     mMessenger <<"StiCompositeSeedFinder::StiCompositeSeedFinder()"<<endl;
+    mFactory = fact;
+    build();
 }
 
 StiCompositeSeedFinder::~StiCompositeSeedFinder()
@@ -81,124 +85,37 @@ void StiCompositeSeedFinder::reset()
 void StiCompositeSeedFinder::build()
 {
     mMessenger <<"\nStiCompositeSeedFinder::build()"<<endl;
-    mMessenger <<"BuildFrom:\t"<<mBuildPath<<endl;
 
-    mMessenger <<"Get vector size"<<endl;
-    unsigned int theSize = 0;
-    StGetConfigValue(mBuildPath.c_str(), "theStringVecSize", theSize);
-    mMessenger <<"Read Size, decide"<<endl;
-
-    if (theSize==0) {
-	mMessenger <<"StiCompositeSeedFinder::build(). ERROR:\t";
-	mMessenger <<"theStringVecSize==0  Abort"<<endl;
-	return;
-    }
-    mMessenger <<"vector size:\t"<<theSize<<endl;
-
-    mMessenger <<"Get the vector"<<endl;
-    vector<string> theStringVec(theSize);
-    StGetConfigValue(mBuildPath.c_str(), "theStringVec", theStringVec, theSize);
-    if (theStringVec.empty()) {
-	mMessenger <<"StiCompositeSeedFinder::build(). ERROR:\t";
-	mMessenger <<"theStringVec.empty()==true.  Abort"<<endl;
-	return;
-    }
-    mMessenger <<"Got vector"<<endl;
-    
     //Build each SeedFinder
-    for (vector<string>::iterator it=theStringVec.begin(); it!=theStringVec.end(); ++it) {
-	StiTrackSeedFinder* sf = gTrackSeedFinderBuilder(*it);
-	if (sf) {
-	    mSeedVec.push_back(sf);
-	}
-    }
     
-    return;
-}
-
-// non-members
-
-StiTrackSeedFinder* gTrackSeedFinderBuilder(const string& buildPath)
-{
     StiTrackSeedFinder* sf=0;
-
-    Messenger& mMessenger = *(Messenger::instance(MessageType::kSeedFinderMessage));
-    
-    mMessenger <<" gTrackSeedFinderBuilder().  Build from:\t"<<buildPath<<endl;
-
-    //Get hit filter type
-    string filterType="empty";
-    StGetConfigValue(buildPath.c_str(), "filterType", filterType);
-
-    Sti2HitComboFilter* filt=0;
-
-    if (filterType=="empty") {
-	mMessenger <<"gTrackSeedFinderBuilder() ERROR:\t";
-	mMessenger <<"filterType==empty.  Abort"<<endl;
-	return 0;
-    }
-    else if (filterType=="StiRectangular2HitComboFilter") {
-	filt = new StiRectangular2HitComboFilter;
-	filt->build( buildPath );
+    if (StiIOBroker::instance()->useGui()==true) {
+	sf = new StiRDLocalTrackSeedFinder( StiDetectorContainer::instance(),
+					    StiHitContainer::instance() );
     }
     else {
-	mMessenger <<"gTrackSeedFinderBuilder() ERROR:\t";
-	mMessenger <<"Unknown filter type.  Abort"<<endl;
+	sf = new StiLocalTrackSeedFinder( StiDetectorContainer::instance(),
+					  StiHitContainer::instance() );
     }
-
-    //Get Seed-finder type
-    string seedFinderType = "empty";
-    StGetConfigValue(buildPath.c_str(), "seedFinderType", seedFinderType);
     
-    if (seedFinderType=="empty") {
-	mMessenger <<"gTrackSeedFinderBuilder() ERROR:\t";
-	mMessenger <<"seedFinderType==empty.  Abort"<<endl;
-	return 0;
+    if (!mFactory) {
+	cout <<"StiCompositeSeedFinder::buidl(). ERROR:\t"
+	     <<"factory is null!"<<endl;
     }
-    else if (seedFinderType=="StiLocalTrackSeedFinder") {
-	sf = new StiLocalTrackSeedFinder(StiDetectorContainer::instance(),
-					 StiHitContainer::instance(), filt);
-    }
-    else {
-	mMessenger <<"gTrackSeedFinderBuilder() ERROR:\t";
-	mMessenger <<"Unkown seed finder type.  Abort"<<endl;
-	return 0;
-    }
-
-    //Now read in the padrows and the sectors
-    int nPadrows=0;
-    StGetConfigValue(buildPath.c_str(), "nPadrows", nPadrows);
-
-    if (nPadrows==0) {
-	mMessenger <<"gTrackSeedFinderBuilder(). ERROR:\t";
-	mMessenger <<"nPadrows=0.  Abort"<<endl;
-	return 0;
-    }
-    vector<unsigned int> thePadrows(nPadrows);
-    StGetConfigValue(buildPath.c_str(), "thePadrows", thePadrows, nPadrows);
-    mMessenger <<"Using Padrows: ";
-    copy(thePadrows.begin(), thePadrows.end(), ostream_iterator<unsigned int>(mMessenger, " "));
-    mMessenger <<endl;
     
-    int nSectors=0;
-    StGetConfigValue(buildPath.c_str(), "nSectors",nSectors);
-    if (nSectors==0) {
-	mMessenger <<"gTrackSeedFinderBuilder(). ERROR:\t";
-	mMessenger <<"nSectors=0.  Abort"<<endl;
-	return 0;
-    }
-    vector<unsigned int> theSectors(nSectors);
-    StGetConfigValue(buildPath.c_str(), "theSectors", theSectors, nSectors);
-    mMessenger <<"Using Sectors: ";
-    copy(theSectors.begin(), theSectors.end(), ostream_iterator<unsigned int>(mMessenger, " "));
-    mMessenger <<endl;
+    sf->setFactory(mFactory);
 
-    sf->setBuildPath(buildPath);
-    sf->build();
+    //We should replace this hard loop below with something more elegant and flexible
+    //sf->getNewValues();
 
-    //Now add detectors to the container 
-    for (vector<unsigned int>::iterator padrow=thePadrows.begin(); padrow!=thePadrows.end(); ++padrow) {
-	for (vector<unsigned int>::iterator sector=theSectors.begin(); sector!=theSectors.end();
+    //Now add detectors to the container
+    const StiIOBroker* broker = StiIOBroker::instance();
+    
+    const vector<unsigned int>& thePadrows = broker->ltsfPadrows();
+    const vector<unsigned int>& theSectors = broker->ltsfSectors();
+    
+    for (vector<unsigned int>::const_iterator padrow=thePadrows.begin(); padrow!=thePadrows.end(); ++padrow) {
+	for (vector<unsigned int>::const_iterator sector=theSectors.begin(); sector!=theSectors.end();
 	     ++sector) {
 	    char szBuf[100];
 	    sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d", *padrow, *sector);
@@ -212,8 +129,10 @@ StiTrackSeedFinder* gTrackSeedFinderBuilder(const string& buildPath)
 	    }
 	}
     }
-    sf->print();
     
-    return sf;
+    sf->print();        
+    mSeedVec.push_back(sf);
+    
+    return;
 }
 

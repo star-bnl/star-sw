@@ -112,11 +112,6 @@ void StiEvaluableTrackSeedFinder::getNewState()
     mTpcHitFilter->getNewState();
 }
 
-void StiEvaluableTrackSeedFinder::build()
-{
-    mMessenger <<"StiEvalaubleTrackSeedFinder::build(). No Action"<<endl;
-}
-
 /*! A call to hasMore() simply checks if there are more seeds to be generated.
   It does not implement any increment or decrement calls, and thus may be called without
   ever changing the internal state of the seed finder.

@@ -148,17 +148,20 @@ StiDetector* StiDetectorContainer::operator*() const
   followed by a call to movePlusPhi() or moveMinusPhi(), except in cases of
   extreme assymetry, such as navigation through the Silicon Vertex Tracker.
  */
-void StiDetectorContainer::moveIn()
+bool StiDetectorContainer::moveIn()
 {
     if (mradial_it == mregion->begin() ) {
 	mMessenger <<"StiDetecotrContainer::moveIn()\tNowhere to go"<<endl;
-	return;
+	return false;
     }
 
     //remember where we started:
     double oldOrder = (*mphi_it)->getOrderKey();
     data_node_vec::const_iterator oldRadialIt = mradial_it;
     data_node_vec::const_iterator oldPhiIt = mphi_it;
+    
+    unsigned int oldNDaughters = (*mradial_it)->getChildCount();
+    data_node_vec::difference_type oldDistance = mphi_it-(*mradial_it)->begin();
     
     //Only select layers that are active
     bool go=true;
@@ -169,9 +172,9 @@ void StiDetectorContainer::moveIn()
 	//look for active layer by first detector
 	StiDetector* temp = (*(*mradial_it)->begin())->getData();
 	if (!temp) {
-	    mMessenger <<"StiDetectorContainer::moveIn()\tError:\t";
-	    mMessenger <<"No detector on first phi-node"<<endl;
-	    return;
+	    cout <<"StiDetectorContainer::moveIn()\tError:\t";
+	    cout <<"No detector on first phi-node.  Return false"<<endl;
+	    return false;
 	}
 	//break the loop if "isOn"
 	if (temp->isOn()) {
@@ -187,23 +190,47 @@ void StiDetectorContainer::moveIn()
 	
     //see if we failed:
     if (go) {
+	//cout <<"StiDetectorContainer::moveIn().  No active layer found."<<endl;
 	mMessenger <<"StiDetectorContainer::moveIn().  No active layer found."<<endl;
 	mradial_it = oldRadialIt;
 	mphi_it = oldPhiIt;
+	return false;
     }
     else {
+	return setPhiIterator(oldOrder, oldNDaughters, oldDistance);
+    }    
+}
+
+bool StiDetectorContainer::setPhiIterator(double oldOrder, unsigned int oldNDaughters,
+					  data_node_vec::difference_type oldDistance)
+{
+    //Check to see if this layer has the same symmetry (number of children) as the last
+    if (0) {
+	//if ( (*mradial_it)->getChildCount()==oldNDaughters) {
+	//just index into the vector
+	mMessenger <<"StiDetectorContainer::setPhiIterator()\t"
+		   <<"Index into the vector to fix phi iterator"<<endl;
+	mphi_it = (*mradial_it)->begin()+oldDistance;
+	return true;
+    }
+    else {
+	//Have to do a search
+	mMessenger <<"StiDetectorContainer::setPhiIterator()\t"
+		   <<"Do linear search to fix phi iterator"<<endl;
 	mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
 				       (*mradial_it)->end(), oldOrder);
 	if (mphi_it == (*mradial_it)->end()) {
-	    mMessenger <<"StiDetectorContainer::moveIn()\tError:\t";
+	    cout <<"StiDetectorContainer::setPhiIterator()\tError:\t";
+	    cout <<"Find Phi failed"<<endl;
+	    mMessenger <<"StiDetectorContainer::setPhiIterator()\tError:\t";
 	    mMessenger <<"Find Phi failed"<<endl;
 	    mphi_it = (*mradial_it)->begin();
+	    return false;
 	}
-	return;
+	return true;
     }
-
-    return;
 }
+
 
 /*! A call to moveOut() may not always alter the StiDetector to which the
   container points.  Notably, if there is nowhere else to 'move out to', then
@@ -217,23 +244,28 @@ void StiDetectorContainer::moveIn()
   being 'movedOut' from.  Therefore, a call to moveIn() usually need not be
   followed by a call to movePlusPhi() or moveMinusPhi(), except in cases of
   extreme assymetry, such as navigation through the Silicon Vertex Tracker.
- */
-void StiDetectorContainer::moveOut()
+*/
+bool StiDetectorContainer::moveOut()
 {
+    //if there's nowher to go, get out before doing work!
+    // mMessenger <<"StiDetectorContainer::moveOut()"<<endl;
+    if ( (++mradial_it<mregion->end())==false) {
+	//cout <<"StiDetectorContainer::moveOut():\t";
+	//cout <<"Nowhere to go. return false"<<endl;
+	mMessenger <<"StiDetectorContainer::moveOut():\t";
+	mMessenger <<"Nowhere to go"<<endl;
+	--mradial_it;
+	return false;
+    }
+    
     //remember where we started:
     double oldOrder = (*mphi_it)->getOrderKey();
     data_node_vec::const_iterator oldRadialIt = mradial_it;
     data_node_vec::const_iterator oldPhiIt = mphi_it;
     
-    //if there's nowher to go, get out before doing work!
-    mMessenger <<"StiDetectorContainer::moveOut()"<<endl;
-    if ( (++mradial_it<mregion->end())==false) {
-	mMessenger <<"StiDetectorContainer::moveOut(). ERROR:\t";
-	mMessenger <<"Nowhere to go"<<endl;
-	--mradial_it;
-	return;
-    }
-    
+    unsigned int oldNDaughters = (*mradial_it)->getChildCount();
+    data_node_vec::difference_type oldDistance = mphi_it-(*mradial_it)->begin();
+
     bool go=true;
     
     while ( (mradial_it<mregion->end())==true && go) {
@@ -244,9 +276,9 @@ void StiDetectorContainer::moveOut()
 	//look for active layer by first detector
 	StiDetector* temp = (*(*mradial_it)->begin())->getData();
 	if (!temp) {
-	    mMessenger <<"StiDetectorContainer::moveIn()\tError:\t";
-	    mMessenger <<"No detector on first phi-node"<<endl;
-	    return;
+	    cout <<"StiDetectorContainer::moveIn()\tError:\t";
+	    cout <<"No detector on first phi-node"<<endl;
+	    return false;
 	}
 	//break the loop if "isOn"
 	if (temp->isOn()) {
@@ -265,19 +297,12 @@ void StiDetectorContainer::moveOut()
     if (go) {
 	mradial_it = oldRadialIt;
 	mphi_it = oldPhiIt;
+	// cout <<"StiDetectorContainer::moveOut().  Loop failed.  Return false"<<endl;
+	return false;
     }
     else {
-	mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
-				       (*mradial_it)->end(), oldOrder);
-	if (mphi_it == (*mradial_it)->end()) {
-	    mMessenger <<"StiDetectorContainer::moveOut()\tError:\t";
-	    mMessenger <<"Find Phi failed"<<endl;
-	    mphi_it = (*mradial_it)->begin();
-	}
-	return;
+	return setPhiIterator(oldOrder, oldNDaughters, oldDistance);
     }
-    
-    return;
 }
 
 /*! Plus phi is defined as clockwise if viewing sectors 1-12 from the membrane,

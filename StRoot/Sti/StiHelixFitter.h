@@ -41,13 +41,9 @@ class StiHelixFitter
 public:
     ///For internal convenience.
     typedef vector<StiHit*> StiHitVector;
-    
-    //singleton access
-    
-    ///Return a pointer to the singleton instance.
-    static StiHelixFitter* instance();
 
-    //gets
+    StiHelixFitter();
+    virtual ~StiHelixFitter();
 
     ///Return a boolean that signifies whether the information is valid.
     bool valid() const;
@@ -74,25 +70,10 @@ public:
 
     bool fit(const StiHitVector&);
 
-    ///We include this to avoid compiler warnings triggered by singleton pattern.
-    friend class nobody;
-
-    
 private:
     
-    ///Default constructor.
-    StiHelixFitter();
-
-    ///Default destructor.
-    virtual ~StiHelixFitter();
-
-    static StiHelixFitter* sInstance;
-
     StFastCircleFitter mCircleFitter;
     StFastLineFitter mLineFitter;
-    
-    //CircleFitterInserter mCircleInserter;
-    //LineFitterInserter mLineInserter;
     
     bool mValid;
     
@@ -105,11 +86,6 @@ inline void StiHelixFitter::reset()
     mCircleFitter.clear();
     mLineFitter.clear();
     mValid=false;
-}
-
-inline StiHelixFitter* StiHelixFitter::instance()
-{
-    return (sInstance) ? sInstance : new StiHelixFitter();
 }
 
 inline double StiHelixFitter::xCenter() const

@@ -91,7 +91,6 @@ public:
     //Action
     virtual bool hasMore();
     virtual StiKalmanTrack* next();
-    virtual void build();
     virtual void reset();
 
     //Implementation of Observer pattern
