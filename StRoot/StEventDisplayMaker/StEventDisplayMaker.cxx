@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.91 2003/01/24 21:14:42 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.92 2003/01/26 23:54:36 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -59,6 +59,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "TROOT.h"
+#include "Riostream.h"
 #include "TError.h"
 #include "TCanvas.h"
 #include "TColor.h"
@@ -1105,6 +1106,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.92  2003/01/26 23:54:36  fine
+// Add Riostream.h header lost due removing the redundant headers files from StEvent package. Redundant iostream was removed
+//
 // Revision 1.91  2003/01/24 21:14:42  fine
 // remove the redundant include file
 //
