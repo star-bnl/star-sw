@@ -47,17 +47,19 @@ class  StMessage  {
 
 const char *StLoggerManager::fgLevels = "FEWIDQ";
 
-StMessMgr* gMessMgr = 0;
-StMessage* endm     = 0;
+//StMessMgr* gMessMgr = 0;
+// StMessage* endm     = 0;
 
 //________________________________________
 std::ostream& StLoggerManager::OperatorShift(std::ostream& os, StMessage* stm) {
 // std::ostream& operator<<(std::ostream& os, StMessage* stm) {
-  if (((&os) == (std::ostream*) StLoggerManager::Instance()) && (stm == endm)) {
+  if (((&os) == (std::ostream*) StMessMgr::CurrentMessager()) && (stm == endm)) {
     // There was a StMessage terminator
     *this << ends;
-    StLoggerManager::Instance()->Print();                
+    StMessMgr::Instance()->Print();                
   } else {
+     fprintf(stderr,"StLoggerManager::OperatorShift os  %p StMessMgr = %p, stm = %p endm = %p\n",
+           &os, (std::ostream*) StMessMgr::Instance(), stm, endm);
      assert(0);
     // if (stm) os << stm->GetMessage();  // Output this message to the ostream
   }
@@ -375,7 +377,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.7 2004/11/03 16:39:32 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.8 2004/11/05 20:24:00 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -681,8 +683,11 @@ _NO_IMPLEMENTATION_;   return 5;
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.7 2004/11/03 16:39:32 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.8 2004/11/05 20:24:00 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.8  2004/11/05 20:24:00  fine
+// Replace the obsolete StLoggerManager::Instance with tMessMgr::CurrentMessager()
+//
 // Revision 1.7  2004/11/03 16:39:32  fine
 // add extra method to checl STAR QA info logger
 //
