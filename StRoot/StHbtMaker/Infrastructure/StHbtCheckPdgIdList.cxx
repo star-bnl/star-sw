@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCheckPdgIdList.cxx,v 1.1 2000/05/25 21:23:03 laue Exp $
+ * $Id: StHbtCheckPdgIdList.cxx,v 1.2 2000/07/16 21:38:22 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -8,6 +8,14 @@
  * Description: part of STAR HBT Framework: StHbtMaker package
  *
  * $Log: StHbtCheckPdgIdList.cxx,v $
+ * Revision 1.2  2000/07/16 21:38:22  laue
+ * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
+ * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
+ * StHbtParticle.cc StHbtParticle.hh : pointers mTrack,mV0 initialized to 0
+ * StHbtIOBinary.cc : some printouts in #ifdef STHBTDEBUG
+ * StHbtEvent.cc : B-Field set to 0.25Tesla, we have to think about a better
+ *                 solution
+ *
  * Revision 1.1  2000/05/25 21:23:03  laue
  * Adding to CVS. Tool to select particle Ids from event generator input.
  *
@@ -43,17 +51,18 @@ StHbtString StHbtCheckPdgIdList::Report(){
   StHbtString temp = "\n This is the StHbtCheckPdgIdList\n";  temp += "---> EventCuts in Reader: ";
   char Ctemp[10];
   temp += "\n  Accepted Particles (pdgId): ";
-  for (pdgIdListIterator iter=mAcceptedParticles->begin(); iter!=mAcceptedParticles->end(); iter++) {
+  pdgIdListIterator iter;
+  for (iter=mAcceptedParticles->begin(); iter!=mAcceptedParticles->end(); iter++) {
     sprintf(Ctemp," %i",*iter);
     temp += Ctemp;
   }
   temp += "\n  Accepted Mothers (pdgId): ";
-  for (pdgIdListIterator iter=mAcceptedMothers->begin(); iter!=mAcceptedMothers->end(); iter++) {
+  for (iter=mAcceptedMothers->begin(); iter!=mAcceptedMothers->end(); iter++) {
     sprintf(Ctemp," %i",*iter);
     temp += Ctemp;
   }
   temp += "\n  Accepted Daughters (pdgId): ";
-  for (pdgIdListIterator iter=mAcceptedDaughters->begin(); iter!=mAcceptedDaughters->end(); iter++) {
+  for (iter=mAcceptedDaughters->begin(); iter!=mAcceptedDaughters->end(); iter++) {
     sprintf(Ctemp," %i",*iter);
     temp += Ctemp;
   }

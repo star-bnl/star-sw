@@ -111,7 +111,9 @@ int StHbtIOBinary::readString(StHbtString& Message){
 
 //------------------------- StHbtEvent -----------------------------------
 int StHbtIOBinary::read(StHbtEvent& ev, unsigned short evVersion, unsigned short trVersion, unsigned short v0Version){
+#ifdef STHBTDEBUG
   cout << " StHbtIOBinary::read(StHbtEvent& ev, ...) - Versions: " << evVersion << " " << trVersion << " " << v0Version << endl;
+#endif
   int iret;
   byteCounterEvent = 0;
   switch ( (int)evVersion ) {
@@ -130,7 +132,9 @@ int StHbtIOBinary::read(StHbtEvent& ev, unsigned short evVersion, unsigned short
 
 //------------------------- StHbtEvent -----------------------------------
 int StHbtIOBinary::write( const StHbtEvent& ev, unsigned short evVersion, unsigned short trVersion, unsigned short v0Version){
+#ifdef STHBTDEBUG
   cout << " StHbtIOBinary::write(StHbtEvent& ev, ...) -  Versions: " << evVersion << " " << trVersion << " " << v0Version << endl;
+#endif
   int iret;
   byteCounterEvent = 0;
   switch ( (int)evVersion ) {
@@ -240,7 +244,9 @@ int StHbtIOBinary::write(const StHbtV0& x, unsigned short version){
 //------------------------- StHbtEvent Versions -----------------------------------
 //------------------------- StHbtEvent Versions -----------------------------------
 int StHbtIOBinary::read_V0(StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version ) {
+#ifdef STHBTDEBUG
   cout << " StHbtIOBinary::read_V0(StHbtEvent& event, unsigned short trVersion, unsigned short v0Version )" << endl;
+#endif
   int iret;
   int idummy = 0;
   iret =  read( ev.mEventNumber);
@@ -272,7 +278,9 @@ int StHbtIOBinary::read_V0(StHbtEvent& ev, unsigned short trVersion, unsigned sh
   ev.TrackCollection()->clear();
   colSizeType NtracksInCollection;
   iret =  read( NtracksInCollection);
+#ifdef STHBTDEBUG
   cout << " StHbtIOBinary::read_V0 - reading " << NtracksInCollection << " tracks ";
+#endif
   for (colSizeType itrk=0; itrk <NtracksInCollection; itrk++){
     StHbtTrack* trk = new StHbtTrack;
     iret =  read(*trk, trVersion);
@@ -287,7 +295,9 @@ int StHbtIOBinary::read_V0(StHbtEvent& ev, unsigned short trVersion, unsigned sh
   ev.V0Collection()->clear(); 
   colSizeType NV0sInCollection;
   iret =  read( NV0sInCollection);
+#ifdef STHBTDEBUG
   cout << "  reading " << NV0sInCollection << " V0s ";
+#endif
   if ( !(mIStream->good()) ) {
     cout << "\n StHbtEvent input operator finds stream in bad state ! " << endl;
     return ioERR;
@@ -300,7 +310,9 @@ int StHbtIOBinary::read_V0(StHbtEvent& ev, unsigned short trVersion, unsigned sh
   return ioOK;
 };
 int StHbtIOBinary::write_V0(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version){
+#ifdef STHBTDEBUG
   cout << " StHbtIOBinary::write_V0(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version) " << endl;
+#endif
   int iret;
   int idummy = 0;
   //event properties
@@ -335,7 +347,9 @@ int StHbtIOBinary::write_V0(const StHbtEvent& ev, unsigned short trVersion, unsi
   return ioOK;
 };
 int StHbtIOBinary::read_V1(StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version ) {
+#ifdef STHBTDEBUG
   cout << " StHbtIOBinary::read_V1(StHbtEvent& event, unsigned short trVersion, unsigned short v0Version )" << endl;
+#endif
   int iret;
   iret =  read( ev.mEventNumber);
   if (mIStream->eof()) {
@@ -363,7 +377,9 @@ int StHbtIOBinary::read_V1(StHbtEvent& ev, unsigned short trVersion, unsigned sh
   ev.TrackCollection()->clear();
   colSizeType NtracksInCollection;
   iret =  read( NtracksInCollection);
+#ifdef STHBTDEBUG
   cout << " StHbtIOBinary::read_V1(...) - reading " << NtracksInCollection << " tracks ";
+#endif
   for (colSizeType itrk=0; itrk <NtracksInCollection; itrk++){
     StHbtTrack* trk = new StHbtTrack;
     iret =  read(*trk, trVersion);
@@ -378,7 +394,9 @@ int StHbtIOBinary::read_V1(StHbtEvent& ev, unsigned short trVersion, unsigned sh
   ev.V0Collection()->clear(); 
   colSizeType NV0sInCollection;
   iret =  read( NV0sInCollection);
+#ifdef STHBTDEBUG
   cout << " reading " << NV0sInCollection << " V0s " << endl;
+#endif
   if ( !(mIStream->good()) ) {
     cout << "StHbtIOBinary::read_V1(...) - StHbtEvent input operator finds stream in bad state ! " << endl;
     return ioERR;
@@ -391,7 +409,9 @@ int StHbtIOBinary::read_V1(StHbtEvent& ev, unsigned short trVersion, unsigned sh
   return ioOK;
 };
 int StHbtIOBinary::write_V1(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version){
+#ifdef STHBTDEBUG
   cout << " StHbtIOBinary::write_V1(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version) " << endl;
+#endif
   int iret;
   //event properties
   iret =  write( ev.mEventNumber        );
@@ -426,7 +446,9 @@ int StHbtIOBinary::write_V1(const StHbtEvent& ev, unsigned short trVersion, unsi
 //------------------------- StHbtEvent Versions -----------------------------------
 //------------------------- StHbtEvent Versions -----------------------------------
 int StHbtIOBinary::read_V2(StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version ) {
+#ifdef STHBTDEBUG
   cout << " StHbtIOBinary::read_V2(StHbtEvent& event, unsigned short trVersion, unsigned short v0Version )" << endl;
+#endif
   int iret;
   iret =  read( ev.mEventNumber);
   if (mIStream->eof()) {
@@ -454,7 +476,9 @@ int StHbtIOBinary::read_V2(StHbtEvent& ev, unsigned short trVersion, unsigned sh
   ev.TrackCollection()->clear();
   colSizeType NtracksInCollection;
   iret =  read( NtracksInCollection);
+#ifdef STHBTDEBUG
   cout << " reading " << NtracksInCollection << " tracks " << endl;
+#endif
   for (colSizeType itrk=0; itrk <NtracksInCollection; itrk++){
     StHbtTrack* trk = new StHbtTrack;
     iret =  read(  *trk, trVersion);
@@ -469,7 +493,9 @@ int StHbtIOBinary::read_V2(StHbtEvent& ev, unsigned short trVersion, unsigned sh
   ev.V0Collection()->clear(); 
   colSizeType NV0sInCollection;
   iret =  read( NV0sInCollection);
+#ifdef STHBTDEBUG
   cout << " reading " << NV0sInCollection << " V0s " << endl;
+#endif
   if ( !(mIStream->good()) ) {
     cout << "StHbtEvent input operator finds stream in bad state ! " << endl;
     return ioERR;
@@ -482,7 +508,9 @@ int StHbtIOBinary::read_V2(StHbtEvent& ev, unsigned short trVersion, unsigned sh
   return ioOK;
 };
 int StHbtIOBinary::write_V2(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version){
+#ifdef STHBTDEBUG
   cout << " StHbtIOBinary::write_V2(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version)" << endl;
+#endif
   int iret;
   //event properties
   iret =  write( ev.mEventNumber        );

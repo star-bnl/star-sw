@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.9 2000/05/03 17:44:43 laue Exp $
+ * $Id: StHbtParticle.hh,v 1.10 2000/07/16 21:38:23 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,14 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
+ * Revision 1.10  2000/07/16 21:38:23  laue
+ * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
+ * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
+ * StHbtParticle.cc StHbtParticle.hh : pointers mTrack,mV0 initialized to 0
+ * StHbtIOBinary.cc : some printouts in #ifdef STHBTDEBUG
+ * StHbtEvent.cc : B-Field set to 0.25Tesla, we have to think about a better
+ *                 solution
+ *
  * Revision 1.9  2000/05/03 17:44:43  laue
  * StHbtEvent, StHbtTrack & StHbtV0 declared friend to StHbtIOBinary
  * StHbtParticle updated for V0 pos,neg track Id
@@ -66,7 +74,7 @@ public:
 
   StPhysicalHelixD& Helix();
 
-  const StHbtThreeVector& DecayVertexPosition() const;
+  const StHbtThreeVector DecayVertexPosition() const;
 
   unsigned long TopologyMap(const int word) const;
   int NumberOfHits() const;
@@ -75,26 +83,29 @@ public:
   unsigned short   NegTrackId() const;   // only for particles from v0 
   unsigned short   PosTrackId() const;   // only for particles from v0 
 
+  StHbtTrack* Track() const;
+  StHbtV0* V0() const;
 
 private:
+  StHbtTrack* mTrack;  // copy of the track the particle was formed of, else Null
+  StHbtV0* mV0;        // copy of the v0 the particle was formed of, else Null
+
   StHbtLorentzVector mFourMomentum;
   StPhysicalHelixD mHelix;
-  StHbtThreeVector mDecayVertexV0;
   unsigned long  mMap[2]; 
   int mNhits;
-  unsigned short mTrackId;     // only for particles from tracks 
-  unsigned short mPosTrackId;  // only for particles from v0 
-  unsigned short mNegTrackId;  // only for particles from v0 
-
 
 };
 
+inline StHbtTrack* StHbtParticle::Track() const { return mTrack; }
+inline unsigned long  StHbtParticle::TrackId() const { return mTrack->TrackId(); }; 
 inline const StHbtLorentzVector& StHbtParticle::FourMomentum() const {return mFourMomentum;}
 inline StPhysicalHelixD& StHbtParticle::Helix() {return mHelix;}
-inline const StHbtThreeVector& StHbtParticle::DecayVertexPosition() const {return mDecayVertexV0;}
 inline unsigned long StHbtParticle::TopologyMap(const int word) const {return mMap[word];}
 inline int StHbtParticle::NumberOfHits() const {return mNhits;}
-inline unsigned long  StHbtParticle::TrackId() const { return mTrackId; }; 
-inline unsigned short StHbtParticle::NegTrackId() const { return mNegTrackId; }; 
-inline unsigned short StHbtParticle::PosTrackId() const { return mPosTrackId; }; 
+
+inline StHbtV0* StHbtParticle::V0() const { return mV0; }
+inline unsigned short StHbtParticle::NegTrackId() const { return mV0->idNeg(); }
+inline unsigned short StHbtParticle::PosTrackId() const { return mV0->idPos(); }
+inline const StHbtThreeVector StHbtParticle::DecayVertexPosition() const {return mV0->decayVertexV0(); }
 #endif

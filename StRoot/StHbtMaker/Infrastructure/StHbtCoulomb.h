@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCoulomb.h,v 1.9 2000/05/31 20:12:53 rcwells Exp $
+ * $Id: StHbtCoulomb.h,v 1.10 2000/07/16 21:38:22 laue Exp $
  *
  * Author: Randy Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,14 @@
  ***************************************************************************
  *
  * $Log: StHbtCoulomb.h,v $
+ * Revision 1.10  2000/07/16 21:38:22  laue
+ * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
+ * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
+ * StHbtParticle.cc StHbtParticle.hh : pointers mTrack,mV0 initialized to 0
+ * StHbtIOBinary.cc : some printouts in #ifdef STHBTDEBUG
+ * StHbtEvent.cc : B-Field set to 0.25Tesla, we have to think about a better
+ *                 solution
+ *
  * Revision 1.9  2000/05/31 20:12:53  rcwells
  * Modified StHbtCoulomb for Id and Log entries
  *
@@ -27,7 +35,6 @@
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
 #include "StHbtMaker/Infrastructure/StHbtParticle.hh"
-#include "TH1.h"
 
 class StHbtCoulomb {
 
@@ -48,8 +55,9 @@ public:
   double CoulombCorrect(const StHbtPair* pair, const double& radius);
   StHbt1DHisto* CorrectionHistogram(const double& mass1, const double& mass2, const int& nBins, 
 				    const double& low, const double& high);
-
-
+#ifdef __ROOT__
+  StHbt1DHisto* CorrectionHistogram(const StHbt1DHisto*, const double);
+#endif
 private:
   double Eta(const StHbtPair* pair);                // Calculates eta
   void CreateLookupTable(const double& radius);  // Creates look-up table

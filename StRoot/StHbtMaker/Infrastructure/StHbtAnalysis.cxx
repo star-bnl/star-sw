@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.cxx,v 1.10 2000/07/06 18:45:51 laue Exp $
+ * $Id: StHbtAnalysis.cxx,v 1.11 2000/07/16 21:38:22 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,14 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.cxx,v $
+ * Revision 1.11  2000/07/16 21:38:22  laue
+ * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
+ * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
+ * StHbtParticle.cc StHbtParticle.hh : pointers mTrack,mV0 initialized to 0
+ * StHbtIOBinary.cc : some printouts in #ifdef STHBTDEBUG
+ * StHbtEvent.cc : B-Field set to 0.25Tesla, we have to think about a better
+ *                 solution
+ *
  * Revision 1.10  2000/07/06 18:45:51  laue
  * Copy constructor fixed. It couldn't handle identicle particles.
  *
@@ -131,6 +139,7 @@ StHbtAnalysis::StHbtAnalysis(){
   mEventCut          = 0;
   mFirstParticleCut  = 0;
   mSecondParticleCut = 0;
+  mThirdParticleCut = 0;
   mPairCut           = 0;
   mCorrFctnCollection= 0;
   mCorrFctnCollection = new StHbtCorrFctnCollection;
@@ -143,6 +152,7 @@ StHbtAnalysis::StHbtAnalysis(const StHbtAnalysis& a) : StHbtBaseAnalysis() {
   mEventCut          = 0;
   mFirstParticleCut  = 0;
   mSecondParticleCut = 0;
+  mThirdParticleCut = 0;
   mPairCut           = 0;
   mCorrFctnCollection= 0;
   mCorrFctnCollection = new StHbtCorrFctnCollection;
@@ -345,7 +355,8 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 	      } // if passed pair cut
 	    } // loop over second particle
 	  } // loop over first particle
-	} /* if identical particles */ else { // non identical particles
+	} /* if identical particles */ 
+	else { // non identical particles
 	  // mix current first collection with second collection from the mixing buffer
 	  StartOuterLoop = picoEvent->FirstParticleCollection()->begin();
 	  EndOuterLoop   = picoEvent->FirstParticleCollection()->end();
@@ -392,9 +403,7 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
       }        // loop over pico-events stored in Mixing buffer
       // Now get rid of oldest stored pico-event in buffer.
       // This means (1) delete the event from memory, (2) "pop" the pointer to it from the MixingBuffer
-      picoEventIter = MixingBuffer()->end();
-      picoEventIter--;   // bug fixed malisa 27jul99 - end() is one BEYOND the end! (besides crashing on linux, this was a memory leak)
-      delete *picoEventIter;
+      delete MixingBuffer()->back();
       MixingBuffer()->pop_back();
     }  // if mixing buffer is full
     delete ThePair;
