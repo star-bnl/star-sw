@@ -1,26 +1,23 @@
+//--------------------------------------------------------------------
+//  ** FILE:       l3Clufi.cxx
+//
+//  ** HISTORY:  cleaned up 26.12.2000
+//               written august 1999
+//  ** Author: flierl@bnl.gov
+//------------------------------------------------------------------
 
-/*:>--------------------------------------------------------------------
-   **: FILE:       l3Clufi.c.template
-   **: HISTORY:
-   **:             00jan93-v000a-hpl- Created by stic Version
-   **:  Id: idl.y,v 1.17 1999/06/19 19:21:00 fisyak Exp  
-   **:<------------------------------------------------------------------*/
 /* includings */
-#include "l3Clufi.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
+#include <Rtypes.h> /* use ROOT variables: ..._t */
+#include "l3Clufi.h"
 #include "trans_table.h"
 #include "croat.h"
 #include "daqFormats.h"
 
-/* extern variables */
-short* cpp = NULL;
-char* adc = NULL;
-int adcOff[ABS_ROWS][MAX_P] ;
-int cppOff[ABS_ROWS][MAX_P] ;
-int adc8to10[256];
-int asic_eve();
+/* functions  */
+int asic_eve(UShort_t* cpp, UChar_t* adc);
 int croatFinder(u_char *adcin, ushort *cppin, uint *outres);
 
 /* here we start the callable function */
@@ -28,7 +25,7 @@ long type_of_call l3Clufi_(
 			   TABLE_HEAD_ST         *pixels_h,     PIXELARRAY_ST           *pixels ,
 			   TABLE_HEAD_ST           *hits_h,       HITARRAY_ST             *hits )
 {
-    /*:>--------------------------------------------------------------------
+    /**:>--------------------------------------------------------------------
     **: ROUTINE:    l3Clufi_
     **: DESCRIPTION: Physics Analysis Module ANSI C template.
     **:             This is an ANSI C Physics Analysis Module template
@@ -47,29 +44,27 @@ long type_of_call l3Clufi_(
     **:>------------------------------------------------------------------*/
 
 
-/* Unsuccessful completion of analysis module... */
-/*    return STAFCV_BAD; */
 
-/* Successful completion of analysis module... */
-/*   return STAFCV_OK;  */
+    /*****************/
+    /*     START     */
+    /*****************/
 
-/*****************/
-/*     START     */
-/*****************/
-
-    int i, j;
-    int ret;
-    /*int sector;*/
-    int rb, mz;
-    /*char first; */
-    short* adclong;
-    long* bank;
-    long* receiver;
-    /*int bankoffset;*/
-    int sectornumb;
-    struct TPCSECLP *seclp;
-
-    /*
+    Int_t i, j;
+    Int_t ret;
+ 
+    Int_t rb, mz;
+ 
+    UShort_t* adclong = NULL ;
+    ULong_t* bank = NULL ;
+    ULong_t* receiver = NULL ;
+ 
+    Int_t sectornumb = 0 ;
+    struct TPCSECLP *seclp = NULL ;
+    
+    UShort_t* cpp = NULL;
+    UChar_t* adc = NULL;
+    
+    
     //printf("\n Start clusterfinding module \n");
     
     //////
@@ -83,40 +78,37 @@ long type_of_call l3Clufi_(
     //
     // get the pixeldata only for one sector
     //
-    */
-    adclong = &pixels->data;
+    adclong = (UShort_t*) &pixels->data;
    
     /*
-    // check pixel data
-    //
-    //printf("adc :%d  pixels:%d\n",adclong,&pixels->data);
-    //for(i=780850;i<1000000;i++)
-    //  {
-    //	   if (pixels[i].data!=0)
-    //       {
-    //	   int row,pad,time;
-    //	   row = (int) (i/(63700))+1;
-    //             pad = (int) ((i - (row-1)*182*350)/(350))+1;
-    //	   time =(int) (i - (row-1)*182*350 - (pad-1)*350)+1;
-    // printf("adc [%d] = %d  row:%d   pad:%d  ",i,adc[i],row,pad);
-    // printf("time:%d   pix:%d\n",time,pixels[i].data);
-    //       }
-    // }
+      // check pixel data
+      //
+      //printf("adc :%d  pixels:%d\n",adclong,&pixels->data);
+      //for(i=780850;i<1000000;i++)
+      //  {
+      //	   if (pixels[i].data!=0)
+      //       {
+      //	   int row,pad,time;
+      //	   row = (int) (i/(63700))+1;
+      //             pad = (int) ((i - (row-1)*182*350)/(350))+1;
+      //	   time =(int) (i - (row-1)*182*350 - (pad-1)*350)+1;
+      // printf("adc [%d] = %d  row:%d   pad:%d  ",i,adc[i],row,pad);
+      // printf("time:%d   pix:%d\n",time,pixels[i].data);
+      //       }
+      // }
     */
 
-    /*
+    
     // 10 to 8 bit conversion (croat.c expects packed data)
-    */
-    adc = (char*) calloc (MAX_T*MAX_P*ABS_ROWS,sizeof(*adc));
+    adc = (UChar_t*) calloc (MAX_T*MAX_P*ABS_ROWS,sizeof(*adc));
     for ( i = 0; i < MAX_T*MAX_P*ABS_ROWS; i++)
 	{
 	    adc[i]=log8to10_table[adclong[i]];
 	}
 
-    /*
     // get pointer for outgoing bank, calculate pointer to first rc bank
-    */
     bank = &hits->data;
+
     /*printf("bank :%d  hits:%d\n",bank,&hits->data);*/
     /*printf("offset : %d\n",bank[34]);*/
     
@@ -165,39 +157,27 @@ long type_of_call l3Clufi_(
 	}
     
     /*
-    //printf("receiver: %d\n",receiver);
-    // check it the other way means fill it:
-    //for(i=0;i<1;i++)
-    //	{
-    //bank[i+bankoffset] = 55;
-    //    printf("bank [%d] = %d  hits[%d].data = %d\n",i,bank[i],i,hits[i].data);
-    //	}
+      //printf("receiver: %d\n",receiver);
+      // check it the other way means fill it:
+      //for(i=0;i<1;i++)
+      //	{
+      //bank[i+bankoffset] = 55;
+      //    printf("bank [%d] = %d  hits[%d].data = %d\n",i,bank[i],i,hits[i].data);
+      //	}
     */
 
-    /*
+    
     // prepare cpp array
-    */
-    cpp = (short*) malloc(ABS_ROWS*MAX_P*MAX_C*sizeof(*cpp) );
-    cpp = (short*) memset((short *)cpp, 0x0000, ABS_ROWS*MAX_P*MAX_C*sizeof(*cpp));
+    cpp = (UShort_t*) malloc(ABS_ROWS*MAX_P*MAX_C*sizeof(*cpp) );
+    cpp = (UShort_t*) memset((short *)cpp, 0x0000, ABS_ROWS*MAX_P*MAX_C*sizeof(*cpp));
    
-    /*
+    
     // lets simulate the asic : 
     // means fill cpp array with start and end timebucket of sequenz
     // pretty bad 0 suppresion
     // lets do it for this sector
-    */
-    asic_eve();
+    asic_eve(cpp,adc);
   
-    /* fill adcOff and cppOff arrays with offsets  */
-    for( i=0; i<ABS_ROWS; i++) 
-	{
-	    for( j=0; j<MAX_P; j++) 
-		{
-		    adcOff[i][j] = i*MAX_T*MAX_P + j*MAX_T ;
-		    cppOff[i][j] = i*MAX_C*MAX_P + j*MAX_C ;	/* 2 entities each...  */
-		}
-	}
-
     /* loop over receiver boards  */ 
     for( rb=1; rb<=6; rb++ ) 
 	{ 
@@ -237,7 +217,7 @@ long type_of_call l3Clufi_(
 		    ret = croatInit(rb, mz);
 
 		    /* do the clusterfinding on this mz  */
-		    ret = croatFinder((u_char*)adc,(ushort*) cpp, (uint*) receiver);
+		    ret = croatFinder((UChar_t*)adc,(UShort_t*) cpp, (uint*) receiver);
 
 		    /* set length in TPCMZCLD bank */
 		    mzcld->length += ret;
@@ -264,14 +244,18 @@ long type_of_call l3Clufi_(
 }
 
 
-int asic_eve()
+int asic_eve(UShort_t* cpp, UChar_t* adc)
 {
-    /* fill cpp array for this sector */
-    int i, j, k ;
-    int found_max = 64 ; /* maximum sequenzes on pad : 32 */
-    char val ;
-    int found, start_time ; 
-    int t_max = 512 ;   /* why not MAX_T ? */
+    /****************************************************/
+    /* this routine fills the cpp array for this sector */
+    /****************************************************/
+
+    /* variable definition */
+    Int_t i, j, k ;
+    Int_t found_max = 64 ; /* maximum sequenzes on pad : 32 */
+    Char_t val ;
+    Int_t found, start_time ; 
+    Int_t t_max = 512 ;   /* why not MAX_T ? */
     
     /* loop over rows on this sector */
     for (k=0; k<ABS_ROWS; k++) 
@@ -306,7 +290,7 @@ int asic_eve()
 					    start_time = 0 ;
 					}
 				}
-			}
+			}/* loop over time buckets  */
 
 		    /* if sequenz touches upper end of time scale  */
 		    if(start_time && (found != (found_max-2))) 
@@ -323,8 +307,7 @@ int asic_eve()
 			    *(cpp + k*MAX_C*MAX_P + i*MAX_C + j) = 0xff00 ;
 			    *(cpp + k*MAX_C*MAX_P + i*MAX_C + j + 1) = 0xff00  ;
 			}
-		}
-	}
-
+		}/* loop over pads in this row  */
+	}/* loop over rows on this sector */
     return 0;
 }
