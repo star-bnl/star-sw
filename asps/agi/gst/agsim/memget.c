@@ -1,8 +1,11 @@
 #include <stdlib.h>
 /*
- * $Id: memget.c,v 1.4 1998/08/03 17:23:56 didenko Exp $
+ * $Id: memget.c,v 1.5 2000/01/09 21:20:03 nevski Exp $
  *
  * $Log: memget.c,v $
+ * Revision 1.5  2000/01/09 21:20:03  nevski
+ * hit interface update
+ *
  * Revision 1.4  1998/08/03 17:23:56  didenko
  * correction for NT version by Faine
  *
@@ -19,25 +22,26 @@
 /*-- Author :    Mark Hsu 2/1/91 HPCSD, Kingston, NY.*/
 /* memget.c: allow dynamic memory allocation from FORTRAN
  * Mark Hsu 2/1/91 HPCSD, Kingston, NY.
- * usage from FORTRAN:    a = memget(n)
- * where n is the number of bytes requested and the value returned
- * in a is the base address. To access the allocation, pass the
- * pointer value as an address by using the val function, e.g.,
- *
- *  iptr = memget(n)
- *  call fsub(n, val(iptr),...)
- *  . . .
- *  subroutine fsub(n,array,...)
+ * usage from FORTRAN:    I = memget (n)
+ *                        J = memgetf(n)
+ * where n is the number of bytes (words) requested
+ *       I (returned value) - the base address (bytes)
+ * or    J (returned value) - the base address in word
+ * Comments:
+ * malloc() requires unsigned arg. FORTRAN passes signed integers
+ * malloc() returns a pointer;     memget(f) returns an integer.
  */
-/*  char *malloc(); */
-#include "PAM.h"
-#define memget_ F77_NAME(memget, MEMGET)
-#define iudivd_ F77_NAME(iudivd, IUDIVD)
 
-unsigned long type_of_call memget_(unsigned int *n)
-{
-  /* malloc() requires unsigned arg. FORTRAN passes signed integers */
-  /* malloc() returns a pointer;     memget() returns an integer.   */
-  return ( (unsigned long) malloc(*n) );
-}
-unsigned long type_of_call iudivd_ (unsigned long *u1, unsigned long *u2) { return (*u1 / *u2);}
+#include "PAM.h"
+#define memget_  F77_NAME(memget,  MEMGET)
+#define memgetf_ F77_NAME(memgetf, MEMGETF)
+#define iudivd_  F77_NAME(iudivd,  IUDIVD)
+
+unsigned long type_of_call memget_  (unsigned int *n)
+{  return ( (unsigned long) malloc(*n) );  }
+
+unsigned long type_of_call memgetf_ (unsigned int *n)
+{  return ( (unsigned long) malloc(*n<<2)>>2);  }
+
+unsigned long type_of_call iudivd_ (unsigned long *u1, unsigned long *u2) 
+{ return (*u1 / *u2);}
