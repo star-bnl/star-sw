@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.199 2001/04/26 21:27:00 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.200 2001/04/28 00:50:36 didenko Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -75,7 +75,7 @@ Bfc_st BFC[] = {
   {"C2000"       ,""  ,"","y2000,C1default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"C2001"       ,""  ,"","y2001,C2default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"MDC4"        ,""  ,"","C2001,trs,srs,fss,rrs,big,GeantOut"      ,"","","Turn on chain for MDC4",kFALSE},
-  {"ppMDC4"      ,""  ,"","pp,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,srs,fss,rrs,big,GeantOut",
+  {"ppMDC4"      ,""  ,"","pp,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,srs,rrs,big,GeantOut",
                                                                     "","","Turn on chain for ppMDC",kFALSE},
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
