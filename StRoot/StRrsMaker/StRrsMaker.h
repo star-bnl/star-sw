@@ -1,5 +1,5 @@
 /**********************************************************
- * $Id: StRrsMaker.h,v 1.9 2000/03/13 21:58:02 lasiuk Exp $
+ * $Id: StRrsMaker.h,v 1.10 2000/03/17 14:55:15 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
@@ -15,8 +15,8 @@
  *  memory.
  ***********************************************************
  *  $Log: StRrsMaker.h,v $
- *  Revision 1.9  2000/03/13 21:58:02  lasiuk
- *  singleton classes
+ *  Revision 1.10  2000/03/17 14:55:15  lasiuk
+ *  Large scale revisions after ROOT dependent memory leak
  *
  *  Revision 1.9  2000/03/13 21:58:02  lasiuk
  *  singleton classes
@@ -80,6 +80,7 @@
 #ifndef HEP_SYSTEM_OF_UNITS_H
 #include "SystemOfUnits.h"
 #endif
+class StParticleTable;
 
 #ifndef ST_NO_NAMESPACES
 using namespace units;
@@ -94,10 +95,11 @@ class StRichCoordinateTransform;
 class StRichMomentumTransform;
 class StRichPadPlane;
 class StRichWriter;
+class StRichAnalogSignalGenerator;
 
-//#include "StRichFilter.h"
 #include "StRichIonization.h"
-#include "StRichInduceSignal.h"
+#include "StRichSelectWire.h"
+#include "StRichGasGain.h"
 #include "StRichAnalogToDigitalConverter.h"
 #include "StRichNoiseSimulator.h"
 
@@ -150,13 +152,18 @@ private:
     
     // Processing
     StRichIonization                mIonize;//!
-    StRichInduceSignal              mInduceSignal;//!
+    StRichSelectWire                mWireSelector;//!
+    StRichGasGain                   mAmplification;//!
+    StRichAnalogSignalGenerator*    mAnalogSignalGenerator;//!
     StRichAnalogToDigitalConverter  mADC;//!
     StRichNoiseSimulator            mNoiseSimulator;//!
 
     // Output Data
     StRichPadPlane                 *mPadPlane;//!
     StRichWriter                   *mWriter;//!
+
+    // GEANT helper
+    StParticleTable                *mTable;//!
     
     // I/O streams
     char*                        mInputFileName;//!
@@ -175,7 +182,7 @@ private:
     int       mAddElectricNoise;
     
     virtual const char *GetCVS() const
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.9 2000/03/13 21:58:02 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.10 2000/03/17 14:55:15 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StRrsMaker, 1)            // StAF chain
 };

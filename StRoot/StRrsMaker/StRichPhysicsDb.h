@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPhysicsDb.h,v 1.4 2000/02/11 21:10:54 lasiuk Exp $
+ * $Id: StRichPhysicsDb.h,v 1.5 2000/03/17 14:55:02 lasiuk Exp $
  *
  * Description:
  *  The two classes defined below, geometryDB and physicsDB,
@@ -21,9 +21,8 @@
  *
  **************************************************************
  * $Log: StRichPhysicsDb.h,v $
- * Revision 1.4  2000/02/11 21:10:54  lasiuk
- * maximum energy probability in access function
- * change electrons/cm and gas gain to 10 pwer 5
+ * Revision 1.5  2000/03/17 14:55:02  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.4  2000/02/11 21:10:54  lasiuk
  * maximum energy probability in access function
@@ -55,9 +54,6 @@
 using std::vector;
 #endif
 
-#ifndef ST_NO_NAMESPACES
-//namespace StRichRaw {
-#endif
 #include "StRichRrsMacros.h"
 #include "StRichPhysicsDbInterface.h"
 
@@ -65,6 +61,7 @@ class StRichPhysicsDb : public StRichPhysicsDbInterface {
 public:        
     static StRichPhysicsDb* getDb();
 
+    virtual ~StRichPhysicsDb();
     double version() const;
 
     // Efficiency
@@ -143,9 +140,5 @@ inline int StRichPhysicsDb::averagePedestal() const { return pedestal;}
 inline double StRichPhysicsDb::adcConversion() const { return adc_factor;}	
 inline int StRichPhysicsDb::adcThreshold() const { return adc_threshold;}
 inline int StRichPhysicsDb::adcChannelWidth() const { return channel_width;}
-
-#ifndef ST_NO_NAMESPACES
-//}
-#endif
 
 #endif

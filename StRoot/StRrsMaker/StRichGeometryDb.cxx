@@ -1,13 +1,12 @@
 /*******************************************************************
- * $Id: StRichGeometryDb.cxx,v 1.6 2000/03/12 22:18:45 lasiuk Exp $
+ * $Id: StRichGeometryDb.cxx,v 1.7 2000/03/17 14:54:39 lasiuk Exp $
  *
  * Description:
  *
  *******************************************************************
  * $Log: StRichGeometryDb.cxx,v $
- * Revision 1.6  2000/03/12 22:18:45  lasiuk
- * add from materials Db
- * add normal vector value
+ * Revision 1.7  2000/03/17 14:54:39  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  *
  * Revision 1.7  2000/03/17 14:54:39  lasiuk
@@ -32,17 +31,11 @@
  * Second Revision
  *
  * Revision 1.1  2000/01/18 21:32:02  lasiuk
-//SCL
  * Initial Revision
  *
  *******************************************************************/
 
 #include "SystemOfUnits.h"
-#ifndef ST_NO_NAMESPACES
-//namespace StRichRawData {
-#endif
-
-//RRS
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
@@ -56,6 +49,10 @@ StRichGeometryDb::StRichGeometryDb()
 {
     //StRichGeometryDb::p2Db = this;   // access to current instance
     
+    //star_fill();
+    my_fill();
+}
+
 StRichGeometryDb::~StRichGeometryDb()
 {
     delete p2Db;
@@ -221,9 +218,6 @@ void StRichGeometryDb::print(ostream& os) const
     os << "\nSurvey Geometry:" << endl;
     os << "radial Distance=   " << (radialDistanceToRich()/centimeter) << " cm"      << endl;
     os << "inclination Angle= " << (inclinationAngle()/degree)         << " degrees" << endl;
-#ifndef ST_NO_NAMESPACES
-//}
-#endif
     os << "normal Vector:     " << normalVectorToPadPlane()            << endl;
 
     os << "\n*************** End of Geometry Parameters **********************\n" << endl;

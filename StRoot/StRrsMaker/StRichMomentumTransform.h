@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StRichMomentumTransform.h,v 1.1 2000/03/12 22:19:26 lasiuk Exp $
+ * $Id: StRichMomentumTransform.h,v 1.2 2000/03/17 14:54:54 lasiuk Exp $
  *
  * Author: brian made this on Jan 27, 2000
  *
@@ -14,8 +14,8 @@
  ***********************************************************************
  *
  * $Log: StRichMomentumTransform.h,v $
- * Revision 1.1  2000/03/12 22:19:26  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/03/17 14:54:54  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.1  2000/03/12 22:19:26  lasiuk
  * Initial Revision
@@ -38,7 +38,7 @@ public:
     static StRichMomentumTransform* getTransform(StRichGeometryDbInterface*);
     static StRichMomentumTransform* getTransform(); // do not call!
 
-    ~StRichMomentumTransform();
+    virtual ~StRichMomentumTransform();
     //StRichMomentumTransform(const StRichMomentumTransform&);
     //StRichMomentumTransform& operator=(const StRichMomentumTransform&);
     

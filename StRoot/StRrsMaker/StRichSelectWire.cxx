@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: StRichSelectWire.cxx,v 1.5 2000/03/12 23:56:33 lasiuk Exp $
+ * $Id: StRichSelectWire.cxx,v 1.6 2000/03/17 14:55:06 lasiuk Exp $
  *
  * Description:
  *
@@ -15,9 +15,8 @@
  *
  *********************************************************************
  * $Log: StRichSelectWire.cxx,v $
- * Revision 1.5  2000/03/12 23:56:33  lasiuk
- * new coordinate system
- * exchange MyRound with inline templated funtion
+ * Revision 1.6  2000/03/17 14:55:06  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.5  2000/03/12 23:56:33  lasiuk
  * new coordinate system
@@ -37,49 +36,49 @@
  * Initial Revision
  *********************************************************************/
 
-#ifndef ST_NO_NAMESPACES
-//namespace StRichRawData {
-#endif
-
 #include "StRichSelectWire.h"
-#include "StRichGHit.h"
 #include "StRichOtherAlgorithms.h"
 #include "StRichGeometryDb.h"
+
 #ifdef RICH_WITH_VIEWER
 #include "StRichViewer.h"
 #endif
 
-wirePosition StRichSelectWire::operator()( const StRichGHit& hit ) const 
+StRichSelectWire::StRichSelectWire()
 {
-    static StRichGeometryDb* geoDB     = StRichGeometryDb::getDb();  // locals
-    //static double first_wire_pos = geoDB->wire_x0;
-    //static double first_wire_pos = geoDB->firstWirePositionInX();
-    //static double wire_spacing   = geoDB->wire_spacing;
-    static double wire_spacing   = geoDB->wirePitch();
+    StRichGeometryDb* tmpGeometryDb = StRichGeometryDb::getDb();
 
-    
+    mWirePitch = tmpGeometryDb->wirePitch();
+    mFirstWirePositionInYTop = tmpGeometryDb->firstWirePositionInY(1);
+    mFirstWirePositionInYBottom = tmpGeometryDb->firstWirePositionInY(-1);
+    mNumberOfWires = tmpGeometryDb->numberOfWires();
+}
+StRichSelectWire::~StRichSelectWire() {/* notp */}
+
+double StRichSelectWire::whichWire(const StRichMiniHit* hit) const 
+{
     int wireNumber;  // wire Number starts at zero
     double wirePosition;
     
-    if(hit.position().y() >= 0) {
+    if(hit->position().y() >= 0) {
 	wireNumber =
-	    nearestInteger((geoDB->firstWirePositionInY(1)-hit.position().y())/geoDB->wirePitch());
+	    nearestInteger((mFirstWirePositionInYTop - hit->position().y())/mWirePitch);
 	if(wireNumber<0)
 	    wireNumber = 0;
-	else if (wireNumber>(geoDB->numberOfWires()/2-1))
-	    wireNumber = geoDB->numberOfWires()/2-1;
+	else if (wireNumber>(mNumberOfWires/2-1))
+	    wireNumber = mNumberOfWires/2-1;
 	wirePosition =
-	    geoDB->firstWirePositionInY(1)-(wireNumber)*geoDB->wirePitch();
+	    mFirstWirePositionInYTop-(wireNumber)*mWirePitch;
     }
     else {
 	wireNumber =
-	    nearestInteger((geoDB->firstWirePositionInY(-1)-hit.position().y())/geoDB->wirePitch())+geoDB->numberOfWires()/2.;
-	if(wireNumber>(geoDB->numberOfWires()-1))
-	    wireNumber = geoDB->numberOfWires()-1;
-	else if(wireNumber<geoDB->numberOfWires()/2)
-	    wireNumber = geoDB->numberOfWires()/2;
+	    nearestInteger(( mFirstWirePositionInYBottom - hit->position().y())/mWirePitch)+mNumberOfWires/2.;
+	if(wireNumber>(mNumberOfWires-1))
+	    wireNumber = mNumberOfWires-1;
+	else if(wireNumber<mNumberOfWires/2)
+	    wireNumber = mNumberOfWires/2;
 	wirePosition =
-	    geoDB->firstWirePositionInY(-1)-(wireNumber-geoDB->numberOfWires()/2)*geoDB->wirePitch();
+	     mFirstWirePositionInYBottom - (wireNumber-mNumberOfWires/2)*mWirePitch;
     }
     
 #ifdef RICH_WITH_VIEWER
@@ -87,8 +86,5 @@ wirePosition StRichSelectWire::operator()( const StRichGHit& hit ) const
 	StRichViewer::getView()->mWhichWire->Fill(wireNumber);
 #endif
 	
-	return (wirePosition); 
+    return (wirePosition); 
 }
-#ifndef ST_NO_NAMESPACES
-//}
-#endif

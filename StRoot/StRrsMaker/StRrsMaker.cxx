@@ -1,12 +1,11 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.13 2000/03/13 22:17:37 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 1.14 2000/03/17 14:55:12 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
- * Revision 1.13  2000/03/13 22:17:37  lasiuk
- * unbelievable!  I can't stand it.
- * Comment the Ring drawing routines
+ * Revision 1.14  2000/03/17 14:55:12  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.15  2000/03/21 17:04:21  lasiuk
  * remove forced delete of singleton classes
@@ -65,19 +64,33 @@
 #include "St_ObjectSet.h"
 
 //#include <iostream.h>
+#include <string>
+
+#ifndef ST_NO_NAMESPACES
+using std::string;
+#endif
+
+// SCL
+#include "StGlobals.hh"
+#include "StThreeVector.hh"
+
+#ifdef USE_MEMORY_INFO
 #include "StMemoryInfo.hh"
 #endif
 
 #include "StParticleTable.hh"
+#include "StParticleTypes.hh"
 
 // DataBases
 #include "StRichGeometryDb.h"
 #include "StRichPhysicsDb.h"
+
+// Coordinates
+#include "StRichCoordinates.h"
+#include "StRichCoordinateTransform.h"
 #include "StRichMomentumTransform.h"
-#include "StRichGeantReader.h"
+
 #include "StRichPadPlane.h"
-#include "StRichPadPlane.h"
-#include "StRichWriter.h"
 #include "StRichWriter.h"
 #include "StRichAnalogSignalGenerator.h"
 
@@ -105,9 +118,6 @@
 
 #ifdef RICH_DECODE_DATA
 #include "StRrsReader.h"
-// SCL
-#include "StGlobals.hh"
-#include "StThreeVector.hh"
 #endif
 
 #ifdef  RICH_WITH_VIEWER
@@ -174,6 +184,11 @@ void StRrsMaker::addElectricNoise(int b)
     mAddElectricNoise = b;
 }
 ///////////////////////////////////////////////////////
+//
+//  Standard Public Methods (Init, Make, Finish)
+//
+
+Int_t StRrsMaker::Init()
 {
 #ifdef USE_MEMORY_INFO
     StMemoryInfo* info = StMemoryInfo::instance();
@@ -191,20 +206,22 @@ void StRrsMaker::addElectricNoise(int b)
 
     if ( !mPhysicsDb ) {
       cerr << "Physics database could not be initialized. Aborting!!!\n";
+      return 1;
+    }
+
+    //mGeometryDb->print();
     //mPhysicsDb->print();
 
-    
+    //
     // GEANT Table
-    // ADC
+    mTable = StParticleTable::instance();
+    
     mCoordinateTransform = StRichCoordinateTransform::getTransform(mGeometryDb);
-    // adds a DC level to each pad
-    mADC.setAddPedestal(mAddPedestal);
-    
-    // PadPlane
-    
+    mMomentumTransform   = StRichMomentumTransform::getTransform(mGeometryDb);
 
     //
     // Construct constant data set.  This is what is passed downstream
+    // -->PadPlane
     //
 
     mPadPlane =
@@ -215,9 +232,23 @@ void StRrsMaker::addElectricNoise(int b)
     // Data Writer is here
     mWriter = StRichWriter::getInstance(mPadPlane);
 
-    // Construct constant data set.  This is what is passed downstream
+    if ( !mWriter ) {
+      cerr << "Output module could not be initialized. Aborting!!!\n";
+      return 1;
+    }
+
+    //
     // The processors
-    AddConst(new St_ObjectSet("richPixels", mPadPlane));
+    // ionization is a data member by value
+    //
+    // selectWire is a data member by value
+    //
+    // gasGain    is a data member by value
+    //
+    // Analog2dig is a data member by value
+    // adds a DC level to each pad
+    mADC.setAddPedestal(mAddPedestal);
+
     // ASG        is a SINGLETON
     mAnalogSignalGenerator = StRichAnalogSignalGenerator::getInstance(mWriter);
 #ifdef USE_MEMORY_INFO
@@ -277,8 +308,13 @@ int StRrsMaker::whichVolume(int val, string* vName)
     }
     int volumeNumber = (val - (volume*1000));
     return volumeNumber;
-//     cout << "-- Press return to continue -- ";
-//     char c = cin.get();
+}
+
+Int_t StRrsMaker::Make()
+{
+    cout << " -- Begin RRS Processing --" << endl;
+
+//       cout << "-- Press return to continue -- ";
 //       char c = cin.get();
 #ifdef USE_MEMORY_INFO
     StMemoryInfo* info = StMemoryInfo::instance();
@@ -288,6 +324,12 @@ int StRrsMaker::whichVolume(int val, string* vName)
 
     mPadPlane->clear();
 #ifdef RICH_DIAGNOSTIC
+    ofstream raw("/afs/rhic/star/users/lasiuk/data/rings.txt");
+#endif
+    StRichGHit hit;
+    mWriter->clear();
+
+    //
     // Make a list of segments to process:
     //
     list<StRichMiniHit*> theList;
@@ -420,27 +462,18 @@ int StRrsMaker::whichVolume(int val, string* vName)
 		    local.position().setX(-1.*rch_hit->x[0]*centimeter);
 		    local.position().setY(-1.*rch_hit->x[1]*centimeter);
 		    local.position().setZ(rch_hit->x[2]*centimeter);
-		hit.fill(local.position().x(),
-			 local.position().y(),
-			 local.position().z(),
+
+		    momentum.setX(-1.*rch_hit->p[0]*GeV);
 		
 		    (!mTable->findParticleByGeantId((track[(rch_hit->track_p)-1].ge_pid))) ?
 		    0. : mTable->findParticleByGeantId((track[(rch_hit->track_p)-1].ge_pid))->mass();
 		    
 		hit.fill(local.position(),
 			 momentum,
+			 rch_hit->track_p,
 			 (momentum.x()/abs(momentum)),
 			 (momentum.y()/abs(momentum)),
 			 mTable->findParticleByGeantId((track[(rch_hit->track_p)-1].ge_pid))->mass(),
-#ifdef RICH_WITH_PADMONITOR
-		// momentum of track...needed for drawing tracks/rings
-		if(volumeName == "RGAP" && track[(rch_hit->track_p)-1].ge_pid == 9) {
-		    gTrackMomentum.setX(track[(rch_hit->track_p)-1].p[0]*GeV);
-		    gTrackMomentum.setY(track[(rch_hit->track_p)-1].p[1]*GeV);
-		    gTrackMomentum.setZ(track[(rch_hit->track_p)-1].p[2]*GeV);
-		    mMomentumTransform->localMomentum(gTrackMomentum,lTrackMomentum);
-		}
-#endif
 			 rch_hit->ds*centimeter,
 			 rch_hit->de*GeV,
 			 particleMass,
@@ -477,28 +510,58 @@ int StRrsMaker::whichVolume(int val, string* vName)
 // 			double ptot = (sqrt(tpc_hit[zz].p[0]*tpc_hit[zz].p[0]+
 // 					    tpc_hit[zz].p[1]*tpc_hit[zz].p[1]+
 // 					    tpc_hit[zz].p[2]*tpc_hit[zz].p[2]));
-		
+// 			raw << ptot                << endl;
 // 		    }
-		if(hit.volumeID() == "RGAP") { 
-		    mIonize(hit);		 
+// 		}
+// 		raw << "ctr= " << ctr << endl;
+// 		raw << endl;
 #endif
 
-		    //
-		    // Check if it is photon, and induce signal if so
-		    //
+		//PR((hit.volumeID().c_str()));
+		if(hit.volumeID() == "RGAP") {
 // 		    cout << "RGAP" << "ii/size " << ii << " " << theList.size() << endl;
-			mInduceSignal(hit);
+		    mIonize.splitSegment(&hit,theList);		 
+		}
+		else if(hit.volumeID() == "RCSI") {
+// 		    cout << "RCSI" << "ii/size " << ii << " " << theList.size() << endl;
+		    // if it is photon, add to the list
+		    if ( hit.dE() < 0 ) {
+
 			theList.push_back(new StRichMiniHit(hit.position(),
 							    hit.momentum(),
-		
+							    hit.trackp(),
+							    hit.id(),
+							    0,  // mass
+							    ePhoton));
 		    }
 		}
 		else {
 		    //cout << "don't add" << endl;
 		}
 		//sleep(1);
-	    }  // loop over hits
+#ifdef RICH_WITH_VIEWER
+		if (StRichViewer::histograms )
+		    StRichViewer::getView()->update();
+#endif
+		rch_hit++;
+		
+	    }  // loop over hits and store for 2nd round of processing
+#ifdef USE_MEMORY_INFO
+	    info->snapshot();
+	    info->print();
+#endif
+
+	    //
+	    // Now generate the signal on the pad plane
+	    //
+	    //PR(theList.size());
+	    double wireNumber;
+	    double chargeMultiplied;
+	    int numberOfSegments = 0;
+	    for(iter  = theList.begin();
 		iter != theList.end();
+		iter++) {
+		
 		wireNumber = mWireSelector.whichWire(*iter);
 		chargeMultiplied = mAmplification.avalanche(*iter, wireNumber, theList);
 		mAnalogSignalGenerator->induceSignal(*iter,chargeMultiplied);
@@ -526,7 +589,18 @@ int StRrsMaker::whichVolume(int val, string* vName)
 #endif
 	}	      
 
-    
+
+    if(mWriteToFile) {
+	cout << "StRrsMaker::Maker()";
+	cout << "\tWrite DATA out" << endl; 
+	//mOutPutStream->writeRrsEvent(mPadPlane);
+    }
+
+
+    //
+    // clear up the list<StRichMiniHit*>
+    for(iter  = theList.begin();
+	iter != theList.end();
 	iter++) {
 	delete *iter;
 	*iter = 0;
@@ -607,6 +681,10 @@ int StRrsMaker::whichVolume(int val, string* vName)
 //     for(int kk=90; kk<270;kk+=5) {
 // 	bool status = myCalculator.getRing(eInnerRing)->getPoint(kk*degree, aPoint);
 // 	thePadMonitor->addInnerRingPoint(aPoint.x(), aPoint.y());
+// 	status = myCalculator.getRing(eOuterRing)->getPoint(kk*degree, bPoint);
+// 	thePadMonitor->addOuterRingPoint(bPoint.x(), bPoint.y());
+//     }
+//     thePadMonitor->drawRing();
 // #endif
     thePadMonitor->update();
 #endif

@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichGasGain.cxx,v 1.6 2000/03/12 23:56:33 lasiuk Exp $
+ * $Id: StRichGasGain.cxx,v 1.7 2000/03/17 14:54:34 lasiuk Exp $
  *
  * Description:
  *  StRichGasGain computes an amplification factor of an
@@ -35,9 +35,8 @@
  *
  ****************************************************************
  * $Log: StRichGasGain.cxx,v $
- * Revision 1.6  2000/03/12 23:56:33  lasiuk
- * new coordinate system
- * exchange MyRound with inline templated funtion
+ * Revision 1.7  2000/03/17 14:54:34  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.7  2000/03/17 14:54:34  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -62,57 +61,56 @@
  * Initial Revision
  *
  ****************************************************************/
-#ifndef ST_NO_NAMESPACES
-//namespace StRichRawData {
-#endif
 
+#include <math.h>
 
-#include "StRichInduceSignal.h"
-#include "StRichGHit.h"
+#include "StRichGasGain.h"
 #include "StRichGeometryDb.h"
 #include "StRichPhysicsDb.h"
 #include "StRichOtherAlgorithms.h"
 #ifdef RICH_WITH_VIEWER
 #include "StRichViewer.h" 
 #endif
-    mPhysicsDb  = StRichPhysicsDb::getDb();
-    mGeometryDb = StRichGeometryDb::getDb();
+
+StRichGasGain::StRichGasGain()
 {
-    mAnodePadPlaneSeparation = mGeometryDb->anodeToPadSpacing();
-    mPhotonFeedback          = mPhysicsDb->feedBackPhotonProbability();
-    mPhotoConversion         = mPhysicsDb->photoConversionEfficiency();
+    StRichPhysicsDb* tmpPhysicsDb   = StRichPhysicsDb::getDb();
+    StRichGeometryDb* tmpGeometryDb = StRichGeometryDb::getDb();
+
+    mAnodePadPlaneSeparation = tmpGeometryDb->anodeToPadSpacing();
+    mPhotonFeedback          = tmpPhysicsDb->feedBackPhotonProbability();
     mPhotoConversion         = tmpPhysicsDb->photoConversionEfficiency();
     mGasGainAmplification    = tmpPhysicsDb->gasGainAmplification();
     mPolia                   = tmpPhysicsDb->polia();
 }
 
-double StRichGasGain::operator()(StRichGHit& hit, double wirePos )
+StRichGasGain::~StRichGasGain()
 {/* nopt */}
 
 double StRichGasGain::avalanche(StRichMiniHit* hit, double wirePos, list<StRichMiniHit*>& aList)
 {
-    hit.position().setY(wirePos);
-    hit.position().setZ(mAnodePadPlaneSeparation);
+    double q;
+
     // X better stay where it is
-    double p = mRandom.Polia(mPhysicsDb->polia());
+    hit->position().setY(wirePos);
     hit->position().setZ(mAnodePadPlaneSeparation);
 
     double p = mRandom.Polia(mPolia);
 
 #ifdef RICH_WITH_VIEWER
     if ( StRichViewer::histograms )
-    q = mPhysicsDb->gasGainAmplification() * p;    
+	StRichViewer::getView()->mPolia->Fill(p);
 #endif
     //q = mPhysDB->ampl_factor * p;
-    feedbackPhoton( hit, q );
+    q = mGasGainAmplification * p;    
 
     // produce feedback photon?
     feedbackPhoton(hit, q, aList);
     if(RRS_DEBUG)
 	cout << "StRichGasGain::operator() q = " << q << endl;
-void StRichGasGain::feedbackPhoton( const StRichGHit& hit, double q ) const
+    return q ; 
 }
-    StRichInduceSignal induceSignal;
+
 void StRichGasGain::feedbackPhoton(StRichMiniHit* hit, double q, list<StRichMiniHit*>& theList)
 {
     //StRichInduceSignal induceSignal;
@@ -130,24 +128,25 @@ void StRichGasGain::feedbackPhoton(StRichMiniHit* hit, double q, list<StRichMini
 	
     for (int i=1; i<=P; i++) {
 	cost = mRandom.Flat();
-	x    = hit.position().x() + dist * cos(phi);
- 	y    = hit.position().y() + dist * sin(phi);
+	phi  = 2*M_PI *  mRandom.Flat();
+	
 	dist = mAnodePadPlaneSeparation * sqrt( 1 - cost*cost ) / cost;
 	x    = hit->position().x() + dist * cos(phi);
  	y    = hit->position().y() + dist * sin(phi);
  	z    = mAnodePadPlaneSeparation;
 // 	x    = hit.position().x() + dist * sin(phi);
-	StRichGHit aGHit(x,y,z, hit.trackp(), hit.id());
+// 	z    = hit.position().z() + dist * cos(phi);
+// 	y    = mAnodePadPlaneSeparation;
+	
+	theList.push_back(new StRichMiniHit(StThreeVector<double>(x,y,z),
+					    hit->momentum(),
+					    hit->trackp(),
 					    hit->id(),
 					    hit->mass(),
 					    eFeedback));
-	induceSignal(aGHit);
+    if(RRS_DEBUG)
 	cout << "StRichGasGain::feedbackPhoton()-->induceSignal! " << endl; 
 
-
-#ifndef ST_NO_NAMESPACES
-//}
-#endif
     //induceSignal(aGHit);
     }
 }

@@ -1,18 +1,40 @@
 /****************************************************************
- * $Id: StRichDrawableTPad.h,v 1.1 2000/02/29 18:18:59 lasiuk Exp $
+ * $Id: StRichDrawableTPad.h,v 1.2 2000/03/17 14:54:24 lasiuk Exp $
  *
  * Description:
  *   Pad which is drawn in the pad monitor
  *
+ * Enumerated Types for ROOT Actions are in: TButton.h
+ * enum EEventType {
+ *   kNoEvent       =  0,
+ *  kButton1Down   =  1, kButton2Down   =  2, kButton3Down   =  3, kKeyDown  =  4,
+ *  kButton1Up     = 11, kButton2Up     = 12, kButton3Up     = 13, kKeyUp    = 14,
+ *  kButton1Motion = 21, kButton2Motion = 22, kButton3Motion = 23, kKeyPress = 24,
+ *  kButton1Locate = 41, kButton2Locate = 42, kButton3Locate = 43,
+ *  kMouseMotion   = 51, kMouseEnter    = 52, kMouseLeave    = 53,
+ *  kButton1Double = 61, kButton2Double = 62, kButton3Double = 63
+ *  };
+ *
+ * enum EEditMode {
+ *  kPolyLine  = 1,  kSPolyLine = 2,  kPolyGone  = 3,
+ *  kSPolyGone = 4,  kBox       = 5,  kDelete    = 6,
+ *  kPad       = 7,  kText      = 8,  kEditor    = 9,
+ *  kExit      = 10, kPave      = 11, kPaveLabel = 12,
+ *  kPaveText  = 13, kPavesText = 14, kEllipse   = 15,
+ *  kArc       = 16, kLine      = 17, kArrow     = 18,
+ *  kGraph     = 19, kMarker    = 20, kPolyMarker= 21,
+ *  kPolyLine3D= 22, kWbox      = 23, kGaxis     = 24,
+ *  kF1        = 25, kF2        = 26, kF3        = 27,
+ *  kDiamond   = 28, kPolyMarker3D = 29
+ *  };
  ****************************************************************
  *
  * $Log: StRichDrawableTPad.h,v $
- * Revision 1.1  2000/02/29 18:18:59  lasiuk
- * Initial Revision
- *
  * Revision 1.2  2000/03/17 14:54:24  lasiuk
  * Large scale revisions after ROOT dependent memory leak
  *
+ * Revision 1.2  2000/03/17 14:54:24  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.1  2000/02/29 18:18:59  lasiuk
  * Initial Revision

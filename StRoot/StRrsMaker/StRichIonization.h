@@ -1,5 +1,5 @@
 /***********************************************************************
- *  $Id: StRichIonization.h,v 1.5 2000/03/12 23:56:34 lasiuk Exp $
+ *  $Id: StRichIonization.h,v 1.6 2000/03/17 14:54:46 lasiuk Exp $
  *
  * Description:
  *   StRichIonization function object contains ionization algorithm
@@ -14,9 +14,8 @@
  *
  ***************************************************************************
  * $Log: StRichIonization.h,v $
- * Revision 1.5  2000/03/12 23:56:34  lasiuk
- * new coordinate system
- * exchange MyRound with inline templated funtion
+ * Revision 1.6  2000/03/17 14:54:46  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.6  2000/03/17 14:54:46  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -45,20 +44,19 @@
  *     - 8/10/1999 main implementation                   C & A.
  *
  ****************************************************************************/
-#include <functional>
+#ifndef ST_RICH_IONIZATION_H
+#define ST_RICH_IONIZATION_H
 
-using std::unary_function;
+
 #include <list>
 #ifndef ST_NO_NAMESPACES
-#ifndef ST_NO_NAMESPACES
-//namespace StRichRawData {
-#endif
 using std::list;
-#include "StRichPhysicsDb.h"
 #endif
+
 #include "StRichRrsMacros.h"    
+#include "StRichGHit.h"
 #include "StRichMiniHit.h"
-class StRichIonization : public unary_function<StRichGHit,void> {
+#include "StRichOtherAlgorithms.h"
 class StRichPhysicsDb;
 
 class StRichIonization {
@@ -66,19 +64,49 @@ public:
     StRichIonization();
     ~StRichIonization();
 
-    void operator()( const StRichGHit& );
-
+    //StRichIonization(const StRichIonization&) {/* use default */}
+    //StRichIonization& operator=(const StRichIonization&) {/* use default */}
+	
     void splitSegment(const StRichGHit*, list<StRichMiniHit*>&) const;
     double betheBloch(double bg);
     
-
+private:
     StRichPhysicsDb* mPhysicsDb;
     Randoms          mRandom;
-    double mShapeOfRise;
+    
+    double           mAverageNumberOfInteractions;
+    double           mMaximumElectronEnergyProbability;
 
-#ifndef ST_NO_NAMESPACES
-//} 
-#endif
+    
+    //
+    //  parameters for bethe-bloch parameterization
+    //
+    // mKonstant = constant in Bethe-Bloch curve formalism
+    // mAlfat    = (alpha)(t)
+    // mZa       = Z/A for CH4
+    // mIonize   = ionization potential for CH4
+    // mDensity  = density of CH4
+    // mSaturationValue = low enery cutoff
+    //                    in 1/beta**2 part of the curve
+    //
+    // *** SEE paper for description
+    // mFirstCorner = x0
+    // mPlateau     = x1
+    // mShapeOfRise = m
+    // interSectionOfRiseAndPlateau = xa
+    // bigx           = log(bg) in base 10
+    // saturationTerm = d
+    
+    double mKonstant;
+    double mZa;
+    double mAlfat;
+    double mIonize;
+    double mDensity;
+    double mSaturationValue;
+
+    double mFirstCorner;
+    double mPlateau;
+    double mShapeOfRise;
     double mIntersectionOfRiseAndPlateau;
     double mF;
 };

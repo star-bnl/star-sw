@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StRichGeometryDb.h,v 1.5 2000/03/12 22:18:45 lasiuk Exp $
+ * $Id: StRichGeometryDb.h,v 1.6 2000/03/17 14:54:41 lasiuk Exp $
  *
  * Description:
  *  Both have common_fill,star_fill and my_fill private
@@ -15,9 +15,8 @@
  *
  *****************************************************************
  * $Log: StRichGeometryDb.h,v $
- * Revision 1.5  2000/03/12 22:18:45  lasiuk
- * add from materials Db
- * add normal vector value
+ * Revision 1.6  2000/03/17 14:54:41  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.5  2000/03/12 22:18:45  lasiuk
  * add from materials Db
@@ -54,9 +53,6 @@ using std::vector;
 
 #include "StThreeVector.hh"
 
-#ifndef ST_NO_NAMESPACES
-//namespace StRichRawData {
-#endif
 #include "StRichRrsMacros.h"
 #include "StRichGeometryDbInterface.h"
 
@@ -64,7 +60,8 @@ class StRichGeometryDb : public StRichGeometryDbInterface {
 public:
 	
     static StRichGeometryDb* getDb();
-	
+    virtual ~StRichGeometryDb();
+    
     double mVersion;
     struct Quadrant {
 	Quadrant() { }
@@ -206,9 +203,5 @@ inline double StRichGeometryDb::anodeToPadSpacing() const { return height;}
 
 inline double StRichGeometryDb::inclinationAngle() const { return mInclinationAngle;}
 inline double StRichGeometryDb::radialDistanceToRich() const { return mRadialDistanceToRich;}
-
-#ifndef ST_NO_NAMESPACES
-//}
-#endif  
 
 #endif

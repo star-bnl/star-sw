@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichGHit.h,v 1.4 2000/02/14 01:12:50 lasiuk Exp $
+ * $Id: StRichGHit.h,v 1.5 2000/03/17 14:54:31 lasiuk Exp $
  *
  * Description:
  *   StRichGHit is a data type containing information
@@ -14,8 +14,8 @@
  *       
  ***************************************************************
  * $Log: StRichGHit.h,v $
- * Revision 1.4  2000/02/14 01:12:50  lasiuk
- * keep the track pointer info
+ * Revision 1.5  2000/03/17 14:54:31  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.5  2000/03/17 14:54:31  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -72,13 +72,14 @@ public:
     // Access
     const StThreeVector<double>& position()   const;
     StThreeVector<double>& position();
-    int     trackp() const;
+    const StThreeVector<double>& xGlobal()  const;
     const StThreeVector<double>& momentum() const;
 
     int     trackp()   const;
     double  cosX()     const;
     double  cosY()     const;
     double  cosZ()     const;
+    double  ds()       const;
     double  dE()       const;
     short   id()       const;
     double  mass()     const;
@@ -87,6 +88,13 @@ public:
     void fill(double x, double y, double z, int track_p,
 	      double cosX, double coxY, double cosZ,
 	      double step, double dE,
+	      double px, double py, double pz,
+	      short pID, string vID);
+
+    void fill(StThreeVector<double>& x,
+	      StThreeVector<double>& p,
+	      int track_p,
+	      double cosX, double coxY, double cosZ,
 	      double step, double dE, double mass,
 	      short pID, string vID);
 
@@ -105,6 +113,7 @@ private:
     double                   mCosX, mCosY, mCosZ;
     int                      mTrackp;
     double                   mdS;
+    short                    mId;
     string                   mVolumeId;  //!
     double                   mdE;
     double                   mMass;
@@ -119,6 +128,7 @@ inline int     StRichGHit::trackp() const {return mTrackp;}
 inline double  StRichGHit::cosX()     const {return mCosX;}
 inline double  StRichGHit::cosY()     const {return mCosY;}
 inline double  StRichGHit::cosZ()     const {return mCosZ;}
+inline double  StRichGHit::ds()       const {return mdS;}
 inline double  StRichGHit::dE()       const {return mdE;}
 inline short   StRichGHit::id()       const {return mId ;}
 inline double  StRichGHit::mass()     const {return mMass;}

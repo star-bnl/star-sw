@@ -1,14 +1,13 @@
 /*******************************************************************
- * $Id: StRichPhysicsDb.cxx,v 1.4 2000/02/11 21:10:54 lasiuk Exp $
+ * $Id: StRichPhysicsDb.cxx,v 1.5 2000/03/17 14:54:59 lasiuk Exp $
  *
  * Description:
  *  Implementation of the two databases modules
  *
  *******************************************************************
  * $Log: StRichPhysicsDb.cxx,v $
- * Revision 1.4  2000/02/11 21:10:54  lasiuk
- * maximum energy probability in access function
- * change electrons/cm and gas gain to 10 pwer 5
+ * Revision 1.5  2000/03/17 14:54:59  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.4  2000/02/11 21:10:54  lasiuk
  * maximum energy probability in access function
@@ -39,10 +38,6 @@ using std::max_element;
 using namespace units;
 #endif
 
-#ifndef ST_NO_NAMESPACES
-//namespace StRichRawData {
-#endif
-
 //RRS
 #include "StRichPhysicsDb.h"
 
@@ -56,6 +51,10 @@ StRichPhysicsDb::StRichPhysicsDb()
     common_fill();
 }
 
+StRichPhysicsDb::~StRichPhysicsDb()
+{
+    delete p2Db;
+}
 
 void StRichPhysicsDb::my_fill()
 {
@@ -140,6 +139,3 @@ void StRichPhysicsDb::print(ostream& os) const
     //os << "electronCharge= " << electronCharge() << endl;
     os << "\n***************** End of Physics DB ********************************\n" << endl;
 }
-#ifndef ST_NO_NAMESPACES
-//}
-#endif
