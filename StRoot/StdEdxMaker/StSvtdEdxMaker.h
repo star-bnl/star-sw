@@ -14,7 +14,7 @@
 #include <iostream.h>
 
 class TH2F;
-class St_svg_geom;
+class StSvtGeometry;
 
 class StSvtdEdxMaker : public StMaker
 {
@@ -27,12 +27,12 @@ class StSvtdEdxMaker : public StMaker
   virtual Int_t Make();
   
   void FillHistograms(double dEdx, double p);
+  Int_t GetSvtGeometry();
 
  private:
 
-  St_svg_geom* mGeom; //!
+  StSvtGeometry* mGeom; //!
   TH2F* mSvtdEdx; //!
-
 
   ClassDef(StSvtdEdxMaker,1)   //virtual base class for Makers
 
