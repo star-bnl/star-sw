@@ -1,6 +1,10 @@
-// $Id: StFtpcClusterFinder.cc,v 1.23 2001/11/21 12:51:27 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.24 2001/12/12 16:01:17 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.24  2001/12/12 16:01:17  jcs
+// Remove old PhiDeflect definitions
+// PhiDeflect has correct sign, add instead of subtracting in calculation of phi angle
+//
 // Revision 1.23  2001/11/21 12:51:27  jcs
 // replace malloc/free with new/delete; prevent overstepping table boundaries
 //
@@ -1790,20 +1794,10 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
                +(pDeflection[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)]
                -pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower])/2;
 
-//  PhiDeflect = pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower];
-//  PhiDeflect = 
-//      ((pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]
-//	* ((float) (PadtransLower + 1.0) 
-//	 / (float) PadtransPerTimebin - TimeCoordinate) 
-//	+ pDeflection[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower + 1)] 
-//	* (TimeCoordinate - (float) PadtransLower / (float) PadtransPerTimebin))
-//       / (((float) (PadtransLower + 1.0) / (float) PadtransPerTimebin 
-//	   - (float) PadtransLower / (float) PadtransPerTimebin)));
-			      
   /* calculate phi angle from pad position */
   Peak->Phi = mDb->radiansPerBoundary() / 2 
     + (Peak->PadPosition + 0.5) * mDb->radiansPerPad()
-    - PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
+    + PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
 			   + mDb->radiansPerBoundary())+halfpi;
 
 
