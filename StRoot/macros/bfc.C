@@ -1,98 +1,45 @@
-// $Id: bfc.C,v 1.32 1999/01/03 20:59:55 fisyak Exp $
+// $Id: bfc.C,v 1.33 1999/01/08 21:39:52 fisyak Exp $
 // $Log: bfc.C,v $
-// Revision 1.32  1999/01/03 20:59:55  fisyak
-// Remove St_geom_Maker
+// Revision 1.33  1999/01/08 21:39:52  fisyak
+// Add Gene Van Buren bfc description
 //
-// Revision 1.31  1999/01/02 19:08:25  fisyak
-// Add ctf
-//
-// Revision 1.30  1998/12/29 19:38:22  fine
-// STAR_shapes: test of the brand new St_NodeView class has been added
-//
-// Revision 1.29  1998/12/27 03:17:43  fine
-// STAR_shapes to test two brand new classes: St_Node St_NodePosition
-//
-// Revision 1.28  1998/12/21 19:45:49  fisyak
-// Move ROOT includes to non system
-//
-// Revision 1.27  1998/12/12 02:38:43  fisyak
-// Clean up
-//
-// Revision 1.26  1998/12/10 01:43:46  fisyak
-// Remove geant
-//
-// Revision 1.25  1998/11/25 21:58:36  fisyak
-// Cleanup
-//
-// Revision 1.24  1998/11/07 02:45:05  fisyak
-// cleanup analysis
-//
-// Revision 1.23  1998/11/06 01:42:18  fisyak
-// Add ana.C
-//
-// Revision 1.22  1998/11/01 16:42:28  fisyak
-// dst analysis
-//
-// Revision 1.21  1998/10/31 00:26:26  fisyak
-// Makers take care about branches
-//
-// Revision 1.20  1998/10/21 20:30:56  fine
-// makedoc macro creates "gif" directories and fill it up
-//
-// Revision 1.19  1998/10/18 21:20:49  fisyak
-// typo
-//
-// Revision 1.18  1998/10/12 00:53:02  fisyak
-// Add parameters for bfc
-//
-// Revision 1.17  1998/09/27 01:24:22  fisyak
-// bfc.C for whole file
-//
-// Revision 1.16  1998/09/26 00:35:31  fisyak
-// Add real files
-//
-// Revision 1.15  1998/09/26 00:17:27  fisyak
-// Add SetWrite
-//
-// Revision 1.13  1998/09/23 20:23:23  fisyak
-// Prerelease SL98h
-//
-// Revision 1.12  1998/09/18 14:35:33  fisyak
-// Fix makers
-//
-// Revision 1.11  1998/09/15 20:55:35  fisyak
-// Split St_DataSet -> St_DataSet + St_DataSetIter
-//
-// Revision 1.10  1998/08/26 12:15:15  fisyak
-// Remove asu & dsl libraries
-//
-// Revision 1.9  1998/08/20 12:33:32  fisyak
-// Splitted base libraries
-//
-// Revision 1.8  1998/08/18 14:05:08  fisyak
-// Add to bfc dst
-//
-// Revision 1.7  1998/08/10 02:35:13  fisyak
-// add laser
-//
-// Revision 1.6  1998/07/23 11:32:42  fisyak
-// Small fixes
-//
-// Revision 1.5  1998/07/21 13:35:14  fine
-// The new version of the macros: MakeHtmlTables and makedoc have been introduced
-//
-// Revision 1.4  1998/07/21 01:04:41  fisyak
-// Clean up
-//
-// Revision 1.3  1998/07/21 00:36:49  fisyak
-// tcl and tpt
-//
-// Revision 1.2  1998/07/20 15:08:19  fisyak
-// Add tcl and tpt
-//
+/*------------------------------------- Begin_Html <font color="#800000" size="-1">
+The letters <i>bfc</i> stand for "big full chain," which for STAR
+means running all raw data analyses. This macro starts off with a
+header listing version numbers, all commented by the "//" characters
+at the beginning of the line so that, as in normal C/C++, they are
+not interpretted by Root.<br>
+
+The comments in this macro file follow the outline of the steps
+for writing a macro described in <a href="/STAR/html/comp_l/train/root/RootMacros.html">Understanding Root Macros</a>.
+</font> End_Html -------------------------------------*/
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
+/*------------------------------------- Begin_Html <font color="#800000" size="-1">
+<b>STEP 1:</b> Next in the macro are a series of system load calls.
+This is where Root picks up what it needs to know to run our programs.
+These are calls which load the code libraries containing the classes we
+will use. A few loads are of particular interest here. <a
+href="http://www.rhic.bnl.gov/cgi-bin/star-cgi/cvsweb.pl/StRoot/base/"><i>St_base</i></a> is the
+library which contains all the STAR base classes. It will be necessary
+to load this library for any STAR analysis. <a
+href="http://www.rhic.bnl.gov/cgi-bin/star-cgi/cvsweb.pl/StRoot/StChain/"><i>StChain</i></a> contains the
+classes necessary for running a chain and makers. <a
+href="http://www.rhic.bnl.gov/cgi-bin/star-cgi/cvsweb.pl/StRoot/xdf2root/"><i>xdf2root</i></a> is
+needed to read in xdf files.<br>
+
+<i>St_Tables</i> stores the class definitions of all the tables
+in which data, parameters, calibration, run/event header information,
+etc. are stored. This can be the cause of some confusion. Let me be
+specific here: all tables are defined as derived classes of a base class
+called End_Html St_Table. Begin_Html While the definitions of the derived classes are in
+the <i>St_Tables</i> library, the definition of the base class
+End_Html St_Table Begin_Html itself is in the <a href="http://www.rhic.bnl.gov/cgi-bin/star-cgi/cvsweb.pl/StRoot/base/"><i>St_base</i></a> library.<br>
+
+One can see many individual libraries loaded for each analysis module
+among the load calls as well.
+</font> End_Html -------------------------------------*/
 void Load(){
     gSystem->Load("St_base");
     gSystem->Load("StChain");
@@ -104,6 +51,7 @@ void Load(){
     //    gSystem->Load("St_db_Maker");
     gSystem->Load("St_xdfin_Maker");
     gSystem->Load("St_calib_Maker");
+    gSystem->Load("libEG");
     gSystem->Load("St_evg_Maker");
     gSystem->Load("geometry");
     gSystem->Load("St_geant_Maker");
@@ -136,10 +84,22 @@ void Load(){
     gSystem->Load("St_dst_Maker");
     gSystem->Load("St_run_summary_Maker");
 }
+/*------------------------------------- Begin_Html <font color="#800000" size="-1">
+<b>STEP 2:</b> Next, we must specify input files we want to process.
+Here, any input/output files are given a reference pointer and a class.
+In particular, xdf files need the End_Html St_XDFFile Begin_Html class loaded in the
+<a href="http://www.rhic.bnl.gov/cgi-bin/star-cgi/cvsweb.pl/StRoot/xdf2root/"><i>xdf2root</i></a> library mentioned above, while Root files need
+simply the End_Html TFile Begin_Html base class.<br>
+
+You will see many lines in macro files which call End_HTML gBenchmark->Start() Begin_HTML
+and End_Html gBenchmark->Stop(). Begin_Html These allow processing to be timed, and their use is
+clear enough not to warrant further discussion here.
+</font> End_Html -------------------------------------*/
+
 bfc(const Int_t   Nevents=1,
-    //    const Char_t *fileinp = "/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/g2t/psc091_03_34evts.xdf",
+//  const Char_t *fileinp = "/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/g2t/psc091_03_34evts.xdf",
     const Char_t *fileinp = "/afs/rhic/star/data/samples/hijet-g2t.xdf",
-    //    const Char_t *fileinp = "/disk1/star/kathy/year2a_psc079_01_46evts.xdf",
+//  const Char_t *fileinp = "/disk1/star/kathy/year2a_psc079_01_46evts.xdf",
     const Char_t *fileout =0,
     //    const Char_t *fileout = "hijet-bfc.xdf",
     const Char_t *FileOut = "hijet-bfc.root")
@@ -153,46 +113,78 @@ bfc(const Int_t   Nevents=1,
   TFile       *root_out  = 0; 
   if (FileOut) root_out  =  new TFile(FileOut,"RECREATE");
   //TFile      *root_tree= new TFile("auau_central_hijing.tree.root","RECREATE");
+/*------------------------------------- Begin_Html <font color="#800000" size="-1">
+<b>STEP 3:</b> You may instantly recognize this as the construction of a <i>chain</i>.
+The fact that it is actually End_Html StChainSpy, Begin_HTML and not End_Html StChain, Begin Html may make you
+worry a bit at first. But the difference is minimal: End_Html StChainSpy Begin_Html allows all
+running chains to be monitered across Root sessions and across the network.
+</font> End_Html -------------------------------------*/
+
   // Create the main chain object
   if (chain) delete chain;
   chain = new StChain("bfc");
-  //  StChainSpy chain("bfc");
-  
+/*------------------------------------- Begin_Html <font color="#800000" size="-1">
+<b>STEP 4:</b> Next it's time to construct our <i>makers</i>. Each maker
+puts its name on a list to which the chain has access. This allows the
+chain to call upon the makers when it needs them. Each maker constructor
+requires a name label, and a directory path for where its data set will reside
+in the overall data structure. Knowing the latter would probably require
+some basic knowledge about the analysis module of interest. You can generally
+get by with copying it from a macro like this one. Note that xdf input
+files require a maker to read in the data file.
+</font> End_Html -------------------------------------*/
   //  Create the makers to be called by the current chain
-  St_params_Maker *params = new St_params_Maker("params","params");
+  St_params_Maker  *params = new St_params_Maker("params","params");
+  St_TLA_Maker       *geom = new St_TLA_Maker("geom","run/geant/Run");
   St_geant_Maker    *geant = new St_geant_Maker("geant","event/geant/Event");
+  geant->LoadGeometry("detp geometry field_only");
   if (xdf_in) {
     St_xdfin_Maker *xdfin = new St_xdfin_Maker("xdfin");
     chain->SetInputXDFile(xdf_in);
   }
-  //  St_calib_Maker    *calib = new St_calib_Maker("calib","calib"); 
-  //  St_evg_Maker      *evgen = new St_evg_Maker("evgen","event/evgen");
+  St_calib_Maker    *calib = new St_calib_Maker("calib","calib"); 
+  St_evg_Maker      *evgen = new St_evg_Maker("evgen","event/evgen");
   //  St_fss_Maker   *ftpc_raw = new St_fss_Maker("ftpc_raw","event/raw_data/ftpc");
   //  St_tss_Maker    *tpc_raw = new St_tss_Maker("tpc_raw","event/raw_data/tpc");
   // Set parameters
   //  tpc_raw->adcxyzon();
-  St_ems_Maker          *emc_raw = new St_ems_Maker("emc_raw","event/raw_data/emc");
+  //  St_ems_Maker          *emc_raw = new St_ems_Maker("emc_raw","event/raw_data/emc");
 
-  St_emc_Maker         *emc_hits = new St_emc_Maker("emc_hits","event/data/emc/hits");
+  //  St_emc_Maker         *emc_hits = new St_emc_Maker("emc_hits","event/data/emc/hits");
   St_tcl_Maker         *tpc_hits = new St_tcl_Maker("tpc_hits","event/data/tpc/hits");
   St_srs_Maker         *svt_hits = new St_srs_Maker("svt_hits","event/data/svt/hits");
   St_fcl_Maker         *fcl_hits = new St_fcl_Maker("ftpc_hits","event/data/ftpc/hits");
-  //  St_ctf_Maker         *ctf      = new St_ctf_Maker("ctf","event/data/ctf");
+  St_ctf_Maker         *ctf      = new St_ctf_Maker("ctf","event/data/ctf");
   St_tpt_Maker       *tpc_tracks = new St_tpt_Maker("tpc_tracks","event/data/tpc/tracks");
   St_stk_Maker       *stk_tracks = new St_stk_Maker("svt_tracks","event/data/svt/tracks");
-  //St_TLA_Maker      *ftpc_tracks = new St_TLA_Maker("ftpc_tracks","event/data/ftpc/tracks");
+  St_fpt_Maker      *ftpc_tracks = new St_fpt_Maker("ftpc_tracks","event/data/ftpc/tracks");
   St_glb_Maker           *global = new St_glb_Maker("global","event/data/global");
   St_dst_Maker        *dst_Maker = new St_dst_Maker("dst","dst");
   //  St_dst_Maker        *dst_Maker = new St_dst_Maker("dst","event/data/global/dst");
+  //  dst_Maker->Save();
   //  St_run_summary_Maker  *summary = new St_run_summary_Maker("run_summary","run/dst");
   
   // Create HTML docs of all Maker's involved
   //  chain->MakeDoc();
+/*------------------------------------- Begin_Html <font color="#800000" size="-1">
+<b>STEP 5:</b> The PrintInfo() member function of chain just prints version
+numbers and any other log-worthy information about the makers in the chain.
+The Init() member function goes down the list of makers and calls any
+initiallization routines each maker may have. If any returns a non-zero
+value (failure), then Init() returns a non-zero value as well.
+</font> End_Html -------------------------------------*/
   chain->PrintInfo();
   // Init the chain and all its makers
   int iInit = chain->Init();
   if (iInit) chain->Fatal(iInit,"on init");
+/*------------------------------------- Begin_Html <font color="#800000" size="-1">
+In this macro, the xdfin maker for the xdf file will read
+in the first record of the file, which contains run header
+information including paramaters. These parameters are
+subsequently written to the output files with statements like:
+</font> End_Html -------------------------------------*/
   //  chain->MakeTree("StChainTree","Title");
+  //  chain->SetBranches();
   // Prepare TCanvas to show some histograms created by makers
   if (xdf_out){
     gBenchmark->Start("xdf out");
@@ -206,10 +198,25 @@ bfc(const Int_t   Nevents=1,
     run->SetWrite();
     gBenchmark->Stop("root i/o");
   }
+
+/*------------------------------------- Begin_Html <font color="#800000" size="-1">
+<b>STEP 6a:</b> Now it's time to loop over the events. A simple <i>for</i>
+loop suffices. The key ingredient in the event loop is the call to
+chain.Make(). Again, chain goes through the list of makers, calling their
+individual Make() member functions and returning a zero if all goes OK.
+It is in these makers' Make() routines that analysis code for each event
+is processed. Any new tables these routines create and fill are placed in
+their maker's branch of the overall data tree structure.
+</font> End_Html -------------------------------------*/
   gBenchmark->Start("bfc");
   Int_t i=0;
   for (Int_t i =1; i <= Nevents; i++){
     if (chain->Make(i)) break;
+/*------------------------------------- Begin_Html <font color="#800000" size="-1">
+<b>STEP 6b:</b> The data is now available for any further processing, such
+as histogramming or writing to an output file. Below, the entire "dst"
+branch of the data structure is output to disk:
+</font> End_Html -------------------------------------*/
     St_DataSet *dst = chain->DataSet("dst");
     if (dst) {
       if (xdf_out){
@@ -220,7 +227,8 @@ bfc(const Int_t   Nevents=1,
       if (root_out){
 	gBenchmark->Start("root i/o");
 	root_out->cd();
-	dst->SetWrite();// root output
+	chain->FillClone();
+	//	dst->SetWrite();// root output
 	gBenchmark->Stop("root i/o");
       }
     }
@@ -229,11 +237,27 @@ bfc(const Int_t   Nevents=1,
     //    chain->FillTree();
     //  histCanvas->Modified();
     //  histCanvas->Update();
+/*------------------------------------- Begin_Html <font color="#800000" size="-1">
+<b>STEP 6c:</b> The data for each event must be cleared from memory before the
+next event is read in, and that is performed with the call to chain.Clear(). 
+An <i>if</i> statement here prevents the chain from clearing on the final
+event in this particular example, permitting the data from the last event to
+persist in memory after the macro finishes.
+</font> End_Html -------------------------------------*/
     if (i != Nevents) chain->Clear();
     printf ("===========================================\n");
     printf ("=========================================== Done with Event no. %d\n",i);
     printf ("===========================================\n");
   }
+/*------------------------------------- Begin_Html <font color="#800000" size="-1">
+<b>STEP 7:</b> After the event loop, the macro then makes a call to
+chain.Finish() to perform post-event loop routines in the makers.
+You should note that the file pointers are all deleted, essentially
+closing the files. In this macro, chain.Finish() is called only if
+more than one event is analyzed. Otherwise, a broswer is called up
+to provide simplified access to the data structures, a useful tool
+when debugging/testing your code on a single event.
+</font> End_Html -------------------------------------*/
   if (Nevents > 1) {
     chain->Finish();
     delete xdf_in;
@@ -242,6 +266,7 @@ bfc(const Int_t   Nevents=1,
       gBenchmark->Print("xdf out");
     }
     if (root_out){
+      root_out->Write();
       root_out->Close();   
       delete root_out;
       gBenchmark->Print("root i/o");
