@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.3 2002/09/19 21:54:01 laue Exp $
+ * $Id: StMuTrack.cxx,v 1.4 2002/11/18 14:29:31 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -88,6 +88,8 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Globa
     }
   }
 
+  fillMuProbPidTraits(event,track);
+
   if ( track->outerGeometry() ) 
     mOuterHelix = StMuHelix(track->outerGeometry()->helix(),event->runInfo()->magneticField());
 };
@@ -112,6 +114,30 @@ double StMuTrack::length() const {
 double StMuTrack::lengthMeasured() const { 
   return fabs( helix().pathLength(StThreeVectorD(mLastPoint)) - helix().pathLength(StThreeVectorD(mFirstPoint)) ); }
 
+#include "StEvent/StProbPidTraits.h"
+void StMuTrack::fillMuProbPidTraits(const StEvent* e, const StTrack* t) {
+  // get vector of traits; 
+  StPtrVecTrackPidTraits traits = t->pidTraits(kTpcId);
+  // get the StDedxPidTraits
+  StDedxPidTraits* dedxPidTraits =0;
+  unsigned int size = traits.size();
+  for (unsigned int i = 0; i < size; i++) {
+    if ( (dedxPidTraits=dynamic_cast<StDedxPidTraits*>(traits[i])) ) continue;
+    if (dedxPidTraits->method() == kTruncatedMeanIdentifier)  mProbPidTraits.setdEdxTruncated( dedxPidTraits->mean() ); 
+    if (dedxPidTraits->method() == kLikelihoodFitIdentifier)  mProbPidTraits.setdEdxFit( dedxPidTraits->mean() ); 
+  }
+
+  // get the StProbPidTraits 
+  StProbPidTraits* probPidTraits =0;
+  size = traits.size();
+  for (unsigned int i = 0; i < size; i++) {
+    if ( (probPidTraits=dynamic_cast<StProbPidTraits*>(traits[i])) ) {
+      for (int i=0; i<mProbPidTraits.numberOfParticles(); i++) 	mProbPidTraits.setProbability(i,probPidTraits->GetProbability(i));
+      mProbPidTraits.setNdf(probPidTraits->GetNDF());
+    }
+  } 
+  
+}
 
 ClassImp(StMuTrack)
 
@@ -119,6 +145,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.4  2002/11/18 14:29:31  laue
+ * update for Yuri's new StProbPidTraits
+ *
  * Revision 1.3  2002/09/19 21:54:01  laue
  * fix bug in length() method
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.8 2002/10/01 23:46:13 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.9 2002/11/18 14:29:31 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -31,8 +31,10 @@ ClassImp(StMuChainMaker)
 StMuChainMaker::StMuChainMaker(const char* name) : mTreeName(name) {
   DEBUGMESSAGE2("");
   mChain = new TChain(mTreeName.c_str());
+  mChain->SetDirectory(0);
   mDbReader = StMuDbReader::instance();
   mFileCounter=0;
+  //  mSubFilters = new string[100];
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -44,9 +46,7 @@ StMuChainMaker::StMuChainMaker(const char* name) : mTreeName(name) {
 StMuChainMaker::~StMuChainMaker() {
   DEBUGMESSAGE2("");
   int n=0;
-  while (mSubFilters[n]) {
-    delete mSubFilters[n++];
-  }
+  //  delete []mSubFilters;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -118,7 +118,9 @@ string StMuChainMaker::dirname(string s){
  */
 TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFiles) {
   DEBUGMESSAGE1("");
-  mSubFilters = subFilter(filter);
+  subFilter(filter);
+
+  for (int i=0; i<1e6; i++) double ii=pow(2,i);
 
   if (file!="") {
     if (file.find(".lis")!=string::npos) fromList(file, maxFiles);
@@ -134,22 +136,19 @@ TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFile
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-string**  StMuChainMaker::subFilter(string filter) {
+void StMuChainMaker::subFilter(string filter) {
   DEBUGMESSAGE2("");
-  string** subFilter = new string*[100];
-  for ( int i=0; i<100; i++) subFilter[i]=0;
   string tmp(filter);
   int n=0;
   size_t pos=0;
   while (tmp.find_first_of(":")!=string::npos ) {
     pos = tmp.find_first_of(":");
-    subFilter[n] = new string( tmp.substr(0,pos) );
+    mSubFilters[n] = string( tmp.substr(0,pos) );
     tmp.erase(0,pos+1);
     n++;
   }				
-  subFilter[n++] = new string( tmp );
+  mSubFilters[n] = string("endOfFilters");
   DEBUGMESSAGE2("return");
-  return subFilter;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -241,11 +240,11 @@ void StMuChainMaker::fromFile(string file, int maxFiles) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-bool StMuChainMaker::pass(string file, string**  filters) {
+bool StMuChainMaker::pass(string file, string* filters) {
   bool good = true;
   int n=0;
-  while (filters[n] && good) {
-    if ( file.find(*filters[n])==string::npos ) good=false;
+  while (filters[n].find("endOfFilters")==string::npos  && good) {
+    if ( file.find(filters[n])==string::npos ) good=false;
     n++;
   }
   return good;
@@ -253,6 +252,9 @@ bool StMuChainMaker::pass(string file, string**  filters) {
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.9  2002/11/18 14:29:31  laue
+ * update for Yuri's new StProbPidTraits
+ *
  * Revision 1.8  2002/10/01 23:46:13  laue
  * setting all unused subFilters explicitly to NULL
  *
