@@ -1,7 +1,10 @@
-// $Id: St_glb_Maker.cxx,v 1.27 1999/02/16 21:34:01 caines Exp $
+// $Id: St_glb_Maker.cxx,v 1.28 1999/02/17 20:50:57 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.28  1999/02/17 20:50:57  fisyak
+// reduce no. of reconstructed tracks/verteces from 100K to 20K
+//
 // Revision 1.27  1999/02/16 21:34:01  caines
-// Added exi back in
+//  Added exi back in
 //
 // Revision 1.26  1999/02/16 03:03:46  fisyak
 // Split Make and Histograms
@@ -421,9 +424,9 @@ Int_t St_glb_Maker::Make(){
       if (!evt_match) {evt_match  = new St_svm_evt_match("evt_match",3000); temp->Add(evt_match);}
       Int_t res_svm =  svm_am (stk_track, tptrack,
 			       m_svm_ctrl, evt_match);
-      if (! globtrk)    {globtrk = new St_dst_track("globtrk",100000);             dst.Add(globtrk);}
-      if (! globtrk_aux){globtrk_aux = new St_dst_track_aux("globtrk_aux",100000); dst.Add(globtrk_aux);}
-      if (! vertex) {vertex = new St_dst_vertex("vertex",100000); dst.Add(vertex);}
+      if (! globtrk)    {globtrk = new St_dst_track("globtrk",20000);             dst.Add(globtrk);}
+      if (! globtrk_aux){globtrk_aux = new St_dst_track_aux("globtrk_aux",20000); dst.Add(globtrk_aux);}
+      if (! vertex) {vertex = new St_dst_vertex("vertex",20000); dst.Add(vertex);}
       // egr
       Int_t Res_egr =  egr_fitter (tphit,vertex,tptrack,evaltrk,
 				   scs_spt,m_egr_egrpar,stk_track,groups,
@@ -437,7 +440,7 @@ Int_t St_glb_Maker::Make(){
     cout << "run_evr: calling evr_am" << endl;
     Int_t Res_evr = evr_am(m_evr_evrpar,m_egr_egrpar,globtrk,vertex);
     // track_propagator
-    St_dst_track *globtrk2     = new St_dst_track("globtrk2",100000);
+    St_dst_track *globtrk2     = new St_dst_track("globtrk2",20000);
     dst.Add(globtrk2);
     *globtrk2  = *globtrk;
     cout << " Calling track_propagator " << endl;
@@ -477,8 +480,8 @@ Int_t St_glb_Maker::Make(){
 #endif
     // ev0
     cout << "Calling ev0..." << endl;
-    if (! dst_v0_vertex) {dst_v0_vertex = new St_dst_v0_vertex("dst_v0_vertex",100000); dst.Add(dst_v0_vertex);}
-    St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",100000);
+    if (! dst_v0_vertex) {dst_v0_vertex = new St_dst_v0_vertex("dst_v0_vertex",20000); dst.Add(dst_v0_vertex);}
+    St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",20000);
     dst.Add(ev0track2);
     if (vertex->GetNRows() != 1) {vertex->SetNRows(1);} 
     Int_t Res_ev0 = ev0_am2(m_ev0par2,globtrk,vertex,dst_v0_vertex,ev0track2);
@@ -486,7 +489,7 @@ Int_t St_glb_Maker::Make(){
 #if 0
     //  ev0_eval2
     if (stk_track && tptrack && evaltrk) {
-      St_ev0_eval *ev0_eval = new St_ev0_eval("ev0_eval",100000);
+      St_ev0_eval *ev0_eval = new St_ev0_eval("ev0_eval",20000);
       dst.Add(ev0_eval); 
       St_DataSetIter geant(gStChain->DataSet("geant"));
       St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("Event/g2t_track");
@@ -515,7 +518,7 @@ Int_t St_glb_Maker::Make(){
     if (tptrack && stk_track) {
       cout << " run_dst: Calling dst_dedx_filler" << endl;
       if (!dst_dedx) {
-	dst_dedx = new St_dst_dedx("dst_dedx",100000); dst.Add(dst_dedx);
+	dst_dedx = new St_dst_dedx("dst_dedx",20000); dst.Add(dst_dedx);
       }
       Int_t Res_dedx_filler =  dst_dedx_filler(tptrack,stk_track,dst_dedx);
     
@@ -726,7 +729,7 @@ void St_glb_Maker::Histograms(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.27 1999/02/16 21:34:01 caines Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.28 1999/02/17 20:50:57 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
