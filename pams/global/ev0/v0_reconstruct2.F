@@ -94,7 +94,13 @@ CC:  Load Primary vertex position coordinates:
 C--   calculate impact parameter at main vertex--- wkw
            
            call ev0_project_track(trak(i).xc,trak(i).rc,mainv,xn1)
+           
+           pv0 = trak(i).dca
            trak(i).dca=sqrt(xn1(1)**2.+xn1(2)**2.)
+*           if( abs(pv0-trak(i).dca) .gt. 0.5) then
+*              write(6,*) '***',pv0, trak(i).dca
+*           endif
+           
 
 C--   skip all tracks with impact parameter .lt. dcapnmin
            if( trak(i).det_id .eq. 1 )then
@@ -211,8 +217,8 @@ C               save current point so that no swimming back is necessary
                 trk2sav(5)=trk2(5)
                 trk1sav(6)=trk1(6)
                 trk2sav(6)=trk2(6)
-                xn1sav(1)=xn1(2)
-                xn2sav(1)=xn2(2)
+                xn1sav(1)=xn1(1)
+                xn2sav(1)=xn2(1)
                 xn1sav(2)=xn1(2)
                 xn2sav(2)=xn2(2)
               endif 
