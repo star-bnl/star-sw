@@ -290,6 +290,22 @@ void StiControlBar::printHits()
     cout <<*StiHitContainer::instance()<<endl;
 }
 
+void StiControlBar::toggleFitFind()
+{
+    int dummy;
+    cout <<"Please enter a number\n\t1\tFit Tracks\n\t2\tFind Tracks"<<endl;
+    cin >> dummy;
+    if (dummy==1) {
+	StiMaker::instance()->setDoFit(true);
+    }
+    else if (dummy==2) {
+	StiMaker::instance()->setDoFit(false);
+    }
+    else {
+	cout <<"Error: entry "<<dummy<<" invalid.  No action taken"<<endl;
+    }
+}
+
 void StiControlBar::printVertices()
 {
     cout <<StiHitContainer::instance()->vertices()<<endl;
@@ -311,7 +327,8 @@ TControlBar* StiControlBar::makeControlBar()
     bar->AddButton("Dump Detector","StiControlBar::printDetector()","Show contents of Detector Container");
     bar->AddButton("Dump Hits","StiControlBar::printHits()","Show all contents of Hit Container");
     bar->AddButton("Dump Vertices", "StiControlBar::printVertices()", "Show Primary vertices for this event");
-
+    bar->AddButton("Choose fit/find","StiControlBar::toggleFitFind()","Switch between track fitting and track finding");
+    
     bar->AddSeparator();
     
     bar->AddButton("All Visible","StiControlBar::setVisible()","Set All Drawables to Visible State");

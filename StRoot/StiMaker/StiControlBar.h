@@ -55,6 +55,8 @@ public:
     
     static void memoryInfo();
     static void printFactorySize();
+
+    static void toggleFitFind();
     
     //General access
     void setStChain(StChain* val) {mchain=val;}

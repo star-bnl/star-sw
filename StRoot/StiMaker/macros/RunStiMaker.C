@@ -6,12 +6,20 @@ class StChain;
 StChain *chain=0;
 
 void RunStiMaker(Int_t nevents=1,
-		 bool simulated=true,
-		 bool draw=true,
+		 
+		 bool simulated=true, /*sim or data?*/
+		 
+		 bool draw=true, /* use gui, click your way around */
+		 //bool draw=false, /*consol version, run through nevents */
+		 
+		 bool doFit=true, /* true->fit track only */
+		 //bool doFit=false, /* false->find track only */
+		 
 		 //const char* MainFile="/star/data13/reco/dev/2001/09/*2251008*.event.root")
 		 //const char *MainFile="/scr20/ittf/data/DEV_9_12_01/*.event.root")
 		 const char *MainFile="/direct/star+data02/scratch/haibin/geantTest/muon_10.dst.root")
-		 //const char *MainFile="/scr20/ittf/data/DEV_9_12_01/*.event.root")
+    //const char *MainFile="/scr20/ittf/data/DEV_9_12_01/*.event.root")
+    
 {    
     // Dynamically link needed shared libs
     
@@ -119,6 +127,7 @@ void RunStiMaker(Int_t nevents=1,
     //StiMaker
     StiMaker* anaMk = StiMaker::instance();
 
+    anaMk->setDoFit(doFit);
     //enum SeedFinderType {kUndefined=0, kComposite=1, kEvaluable=2};
     anaMk->setSeedFinderType(StiMaker::kEvaluable);
     //anaMk->setSeedFinderType(StiMaker::kComposite);
