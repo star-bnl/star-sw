@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTPCReader.h,v 1.2 2000/07/13 22:29:52 perev Exp $
+ * $Id: StTPCReader.h,v 1.3 2002/10/13 20:43:36 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTPCReader.h,v $
+ * Revision 1.3  2002/10/13 20:43:36  ward
+ * Support for decoding DAQ100 data and writing it into a table.
+ *
  * Revision 1.2  2000/07/13 22:29:52  perev
  * Return kStErr when TPC data is not in event.
  *
@@ -73,6 +76,7 @@ class StFTPCReader;
 
 class  StTPCReader
 {
+  friend class St_tpcdaq_Maker; // Herb Oct 2002 for DAQ100, for access to ptrTPCP.
   public:
 
   StTPCReader(StDAQReader *rd);
@@ -157,6 +161,9 @@ protected:
   GainReader 		*fGainReader;
   CPPReader 		*fCPPReader;
   BadChannelReader 	*fBadChannelReader;
+
+private:
+  void *ptrTPCP; // Herb Oct 2002 for DAQ100.
 
   int fSector;
 };

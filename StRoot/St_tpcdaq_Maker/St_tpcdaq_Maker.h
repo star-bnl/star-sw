@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.32 2002/10/11 18:10:54 jeromel Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.33 2002/10/13 20:43:38 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.33  2002/10/13 20:43:38  ward
+// Support for decoding DAQ100 data and writing it into a table.
+//
 // Revision 1.32  2002/10/11 18:10:54  jeromel
 // Changes to accomodate for DAQ100 Cluster reading or raw hit reading
 //
@@ -158,7 +161,13 @@ class St_tpcdaq_Maker : public StMaker {
    TH1F *m_seq_padRowNumber;   // and the horizontal axis is startTimeBin".
    TH1F *m_pad_numSeq;         // Happy sailing.
    TH1F *m_pix_AdcValue;       //
+ private:
+   void DAQ100clOutput(const unsigned int *pTPCP); //!
+   void DAQ100clTableOut(unsigned int, char,const unsigned int *); //!
  public: 
+   char WhetherToSwap(unsigned int x);
+   unsigned int Swap4(char,unsigned int x); //!
+   unsigned short int Swap2(char,unsigned short int x); //!
    void ExcludeTheseTimeBins(int lo1,int hi1,int lo2,int hi2,int lo3,int hi3);
    St_tpcdaq_Maker(const char *name="tpc_raw",char *daqInputFile="undefined"); // If
        // the 2nd arg (daqInputFile) is NULL, then we use TRS.
@@ -214,7 +223,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.32 2002/10/11 18:10:54 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.33 2002/10/13 20:43:38 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };

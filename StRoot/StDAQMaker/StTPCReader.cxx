@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTPCReader.cxx,v 1.2 2000/07/13 22:29:52 perev Exp $
+ * $Id: StTPCReader.cxx,v 1.3 2002/10/13 20:43:36 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTPCReader.cxx,v $
+ * Revision 1.3  2002/10/13 20:43:36  ward
+ * Support for decoding DAQ100 data and writing it into a table.
+ *
  * Revision 1.2  2000/07/13 22:29:52  perev
  * Return kStErr when TPC data is not in event.
  *
@@ -38,6 +41,7 @@
 //_____________________________________________________________________________
 StTPCReader::StTPCReader(StDAQReader *daqr)
 {
+  ptrTPCP=NULL; // Herb Oct 2002 for DAQ100.
   fDAQReader = daqr;
   fSector = -1999;
   fTPCImpReader 	= 0;
@@ -71,6 +75,7 @@ int StTPCReader::close()
   delete fBadChannelReader;	fBadChannelReader 	= 0;
   delete fTPCImpReader;  	fTPCImpReader  		= 0;
   fSector=-1999;
+  ptrTPCP=NULL; // Herb Oct 2002 for DAQ100.
   return 0;
  }
 //_____________________________________________________________________________
@@ -88,9 +93,11 @@ int StTPCReader::setSector(int sector)
 
   if (sector == -1) {
    delete fTPCImpReader;
+   ptrTPCP=NULL; // Herb Oct 2002 for DAQ100.
    fTPCImpReader = ::getDetectorReader(fDAQReader->getEventReader(),fDAQReader->getTPCVersion());
    fSector = -1999;
    if(!fTPCImpReader) return 1;
+   ptrTPCP=fTPCImpReader->motherPointerBank; // Herb Oct 2002 for DAQ100.
    return 0;
   }
 
@@ -103,6 +110,7 @@ int StTPCReader::setSector(int sector)
   fGainReader 		= fTPCImpReader->getGainReader(fSector);
   fCPPReader 		= fTPCImpReader->getCPPReader(fSector);
   fBadChannelReader 	= fTPCImpReader->getBadChannelReader(fSector);
+
 
   return 0;
 }

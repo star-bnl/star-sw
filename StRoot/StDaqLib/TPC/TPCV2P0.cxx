@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0.cxx,v 1.8 2000/01/11 22:03:44 levine Exp $
+ * $Id: TPCV2P0.cxx,v 1.9 2002/10/13 20:43:37 ward Exp $
  * Author: Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: common TPC (V2) implementation stuff
@@ -19,6 +19,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0.cxx,v $
+ * Revision 1.9  2002/10/13 20:43:37  ward
+ * Support for decoding DAQ100 data and writing it into a table.
+ *
  * Revision 1.8  2000/01/11 22:03:44  levine
  * convert string to char* via c_str() member
  * (from Brian Lasiuk)
@@ -256,6 +259,7 @@ TPCV2P0_PADK_SR *TPCV2P0_Reader::getPADKReader(int sector)
 TPCV2P0_Reader::TPCV2P0_Reader(EventReader *er, classname(Bank_TPCP) *ptpc)
 {
   pBankTPCP = ptpc; // copy pointer into class variable
+  motherPointerBank=pBankTPCP; // Herb Oct 2002 for DAQ100.
   ercpy = er; // squirrel away pointer eventreader for our friends
 
   if (!pBankTPCP->test_CRC()) ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,"TPCP");

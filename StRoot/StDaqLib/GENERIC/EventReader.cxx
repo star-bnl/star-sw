@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.37 2002/10/10 22:13:58 ward Exp $
+ * $Id: EventReader.cxx,v 1.38 2002/10/13 20:43:37 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.38  2002/10/13 20:43:37  ward
+ * Support for decoding DAQ100 data and writing it into a table.
+ *
  * Revision 1.37  2002/10/10 22:13:58  ward
  * Silence error msg about missing banks in WhereAreThePointers.
  *
@@ -740,7 +743,8 @@ char * EventReader::findBank(char *bankid)
   for (i=0; i<len; i++, ptr++) {
     if (ptr->length==0) continue;//invalid entry
     if ((unsigned int)ptr->length== 0xfeedf00d) continue; // EVB fills DATAP with this
-    pBank = (Bank_Header *)(((INT32 *)pBankDATAP)+ (ptr->offset)); 
+    pBank = (Bank_Header *)(((INT32 *)pBankDATAP)+ (ptr->offset)); // the INT32 cast has 
+                                   // the effect of multiplying the offset by 4
     if(!strncmp(bankid,pBank->BankType,4)) break;
   }
   if (i==len)  return FALSE;
