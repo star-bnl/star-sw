@@ -1,6 +1,10 @@
-// $Id: StFtpcFastSimu.cc,v 1.10 2000/02/04 13:49:40 hummler Exp $
+// $Id: StFtpcFastSimu.cc,v 1.11 2000/08/03 14:39:00 hummler Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.11  2000/08/03 14:39:00  hummler
+// Create param reader to keep parameter tables away from cluster finder and
+// fast simulator. StFtpcClusterFinder now knows nothing about tables anymore!
+//
 // Revision 1.10  2000/02/04 13:49:40  hummler
 // upgrade ffs:
 // -remove unused fspar table
@@ -44,17 +48,19 @@ StFtpcFastSimu::StFtpcFastSimu(G2T_FTP_HIT_ST* g2t_ftp_hit,
 			       G2T_TRACK_ST* g2t_track,
 			       int *g2t_track_nok,
 			       G2T_VERTEX_ST* g2t_vertex,
-			       FFS_GASPAR_ST* ffs_gaspar,
 			       FFS_GEPOINT_ST* ffs_gepoint,
 			       int *ffs_gepoint_nok,
 			       int ffs_gepoint_maxlen,
 			       FCL_FPPOINT_ST* fcl_fppoint,
 			       int *fcl_fppoint_nok,
 			       int fcl_fppoint_maxlen,
-			       FCL_DET_ST* fcl_det)
+			       StFtpcParamReader *paramReader)
 {
   //-----------------------------------------------------------------------
   
+  // store paramReader in data member
+  mParam=paramReader;
+
   //    check that fppoint and gepoint are large enough to hold g2t_ftp_hit
 
   if(*g2t_ftp_hit_nok > fcl_fppoint_maxlen ||
@@ -65,7 +71,7 @@ StFtpcFastSimu::StFtpcFastSimu(G2T_FTP_HIT_ST* g2t_ftp_hit,
   else
     {
       //  Read paramenter tables and inititialize  
-      ffs_ini(ffs_gaspar, fcl_det);
+      ffs_ini();
       
       // hh Transfer the usable g2t_ftp_hit-data into fppoint and gepoint
       ffs_hit_rd(g2t_ftp_hit_nok, g2t_ftp_hit, g2t_track_nok,
@@ -419,58 +425,53 @@ int StFtpcFastSimu::ffs_hit_smear(float phi,
     return TRUE;
   }
 
-int StFtpcFastSimu::ffs_ini(FFS_GASPAR_ST *ffs_gaspar,
-			    FCL_DET_ST* fcl_det)
+int StFtpcFastSimu::ffs_ini()
   {
     //------   TEMPORARY:  put in parameter table   ------------------
     const float phi_origin=90.;
-    const float phi_sector=360/fcl_det->n_sectors;
+    const float phi_sector=360/mParam->numberOfSectors();
     //------   TEMPORARY:  put in parameter table   ------------------
     //-----------------------------------------------------------------------
     // mk
-    ri = fcl_det->r_in+0.25;
-    ra = fcl_det->r_out-0.25;
-    padrows = fcl_det->n_rows/2;
+    ri = mParam->sensitiveVolumeInnerRadius()+0.25;
+    ra = mParam->sensitiveVolumeOuterRadius()-0.25;
+    padrows = mParam->numberOfPadrowsPerSide();
 
     //mk Drift-Velocity:
-    Vhm[0]  = ffs_gaspar[0].vdrift[0];
-    Vhm[1]  = ffs_gaspar[0].vdrift[1];
-    Vhm[2]  = ffs_gaspar[0].vdrift[2];
-    Vhm[3]  = ffs_gaspar[0].vdrift[3];
+    Vhm[0]  = mParam->vDriftEstimates(0);
+    Vhm[1]  = mParam->vDriftEstimates(1);
+    Vhm[2]  = mParam->vDriftEstimates(2);
+    Vhm[3]  = mParam->vDriftEstimates(3);
 
     //mk Drift_Time
-    Tbm[0] = ffs_gaspar[0].tdrift[0];
-    Tbm[1] = ffs_gaspar[0].tdrift[1];
-    Tbm[2] = ffs_gaspar[0].tdrift[2];
-    Tbm[3] = ffs_gaspar[0].tdrift[3];
+    Tbm[0] = mParam->tDriftEstimates(0);
+    Tbm[1] = mParam->tDriftEstimates(1);
+    Tbm[2] = mParam->tDriftEstimates(2);
+    Tbm[3] = mParam->tDriftEstimates(3);
     
     // upper entries of sig_arrays temporarily used to store error parameters
 
     //mk Radial Sigma
-    s_rad[0] = ffs_gaspar[0].sig_rad[0];
-    s_rad[1] = ffs_gaspar[0].sig_rad[1];
-//     s_rad[2] = ffs_gaspar[0].sig_rad[2];
-//     s_rad[3] = ffs_gaspar[0].sig_rad[3];
+    s_rad[0] = mParam->sigmaRadialEstimates(0);
+    s_rad[1] = mParam->sigmaRadialEstimates(1);
     s_rad[2] = 0;
     s_rad[3] = 0;
 
     //mk Azimuthal Sigma
-    s_azi[0] = ffs_gaspar[0].sig_azi[0];
-    s_azi[1] = ffs_gaspar[0].sig_azi[1];
-//     s_azi[2] = ffs_gaspar[0].sig_azi[2];
-//     s_azi[3] = ffs_gaspar[0].sig_azi[3];
+    s_azi[0] = mParam->sigmaAzimuthalEstimates(0);
+    s_azi[1] = mParam->sigmaAzimuthalEstimates(1);
     s_azi[2] = 0;
     s_azi[3] = 0;
     
     //Radial Error
-    err_rad[0] = ffs_gaspar[0].sig_rad[2];
-    err_rad[1] = ffs_gaspar[0].sig_rad[3];
+    err_rad[0] = mParam->sigmaRadialEstimates(2);
+    err_rad[1] = mParam->sigmaRadialEstimates(3);
     err_rad[2] = 0;
     err_rad[3] = 0;
 
     //Azimuthal Error
-    err_azi[0] = ffs_gaspar[0].sig_azi[2];
-    err_azi[1] = ffs_gaspar[0].sig_azi[3];
+    err_azi[0] = mParam->sigmaAzimuthalEstimates(2);
+    err_azi[1] = mParam->sigmaAzimuthalEstimates(3);
     err_azi[2] = 0;
     err_azi[3] = 0;
     
@@ -501,7 +502,7 @@ int StFtpcFastSimu::ffs_ini(FFS_GASPAR_ST *ffs_gaspar,
 
     //     a cluster is too close to lower sector boundary if it is
     //     not more than 2 pads away 
-    sector_phi_min = fcl_det->rad_per_gap/2 + 2*fcl_det->rad_per_pad;
+    sector_phi_min = mParam->radiansPerBoundary()/2 + 2*mParam->radiansPerPad();
 
     //     a cluster is too close to upper sector boundary if it is
     //     not more than 2 pads away 

@@ -1,6 +1,10 @@
-// $Id: StFtpcFastSimu.hh,v 1.6 2000/02/04 13:49:42 hummler Exp $
+// $Id: StFtpcFastSimu.hh,v 1.7 2000/08/03 14:39:00 hummler Exp $
 //
 // $Log: StFtpcFastSimu.hh,v $
+// Revision 1.7  2000/08/03 14:39:00  hummler
+// Create param reader to keep parameter tables away from cluster finder and
+// fast simulator. StFtpcClusterFinder now knows nothing about tables anymore!
+//
 // Revision 1.6  2000/02/04 13:49:42  hummler
 // upgrade ffs:
 // -remove unused fspar table
@@ -20,6 +24,7 @@
 
 #ifndef STAR_StFtpcFastSimu
 #define STAR_StFtpcFastSimu
+#include "StFtpcParamReader.hh"
 #include "g2t_ftp_hit.h"
 #include "g2t_track.h"
 #include "g2t_vertex.h"
@@ -38,6 +43,7 @@ class RandGauss;
 class StFtpcFastSimu
 {
  private:
+  StFtpcParamReader *mParam;
   float Va;
   float Vhm[4];
   float Tbm[4];
@@ -67,14 +73,13 @@ class StFtpcFastSimu
 		 G2T_TRACK_ST* g2t_track,
 		 int *g2t_track_nok,
 		 G2T_VERTEX_ST* g2t_vertex,
-		 FFS_GASPAR_ST* ffs_gaspar,
 		 FFS_GEPOINT_ST* ffs_gepoint,
 		 int *ffs_gepoint_nok,
 		 int ffs_gepoint_maxlen,
 		 FCL_FPPOINT_ST* fcl_fppoint,
 		 int *fcl_fppoint_nok,
 		 int fcl_fppoint_maxlen,
-		 FCL_DET_ST* fcl_det);
+		 StFtpcParamReader *paramReader);
   ~StFtpcFastSimu();
   int ffs_gen_padres(int *g2t_ftp_hit_nok, 
 		     G2T_FTP_HIT_ST *g2t_ftp_hit, 
@@ -108,8 +113,7 @@ class StFtpcFastSimu
 		    float *st_dev_x,
 		    float *st_dev_y,  
 		    RandGauss *quasiRandom);
-  int ffs_ini(FFS_GASPAR_ST *ffs_gaspar,
-	      FCL_DET_ST* fcl_det);
+  int ffs_ini();
   int ffs_merge_tagger(int *ffs_gepoint_nok,
 		       int ffs_gepoint_maxlen,
 		       FFS_GEPOINT_ST *ffs_gepoint,
