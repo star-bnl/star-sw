@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.48 2000/04/18 21:43:12 fine Exp $
+// $Id: doEvents.C,v 1.49 2000/04/21 13:40:08 wenaus Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -12,10 +12,11 @@
 //
 // Ways to run:
 // If you specify a path, all DST files below that path will be
-// found, and 'nevents' events from each will be analyzed.
+// found, and the first 'nevents' events in the file set will be
+// analyzed.
 // The type of DST files searched for is taken from the 'file' parameter.
-// If 'file ends in '.xdf', XDF DSTs are searched for.
 // If 'file ends in '.dst.root', ROOT DSTs are searched for.
+// If 'file ends in '.xdf', XDF DSTs are searched for.
 //
 // If path begins with '-', 'file' will be taken to be a single file
 // to be processed.
@@ -35,6 +36,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.49  2000/04/21 13:40:08  wenaus
+// correct the doc for nevents in multifile mode
+//
 // Revision 1.48  2000/04/18 21:43:12  fine
 // make TurnDisplay macro available for doEvents
 //
