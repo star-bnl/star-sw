@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.8 1999/11/23 17:14:19 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.9 1999/12/07 18:58:39 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.8  1999/11/23 17:14:19  ullrich
- * Forgot to fill PID traits. Fixed now.
+ * Revision 2.9  1999/12/07 18:58:39  ullrich
+ * Modified to get rid of some warnings on Linux
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -84,7 +84,7 @@
     doPrintRunInfo    = kTRUE;  // TMP 
     doPrintEventInfo  = kTRUE;  // TMP
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.8 1999/11/23 17:14:19 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.9 1999/12/07 18:58:39 ullrich Exp $";
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -121,10 +121,10 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.8 1999/11/23 17:14:19 ull
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.8 1999/11/23 17:14:19 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.9 1999/12/07 18:58:39 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.8 1999/11/23 17:14:19 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.9 1999/12/07 18:58:39 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -420,7 +420,7 @@ StEventMaker::makeEvent()
     if (nfailed)
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
     }
-	if (id < nVertices) {
+        if (dstVertices[i].iflag > 0 && dstVertices[i].vtx_id == kEventVtxId) {
     //  Load the dedx table and assign the dE/dx traits to all loaded
     //  global, tpt and primary tracks.
     //
@@ -444,7 +444,7 @@ StEventMaker::makeEvent()
     
 	if (vecPrimaryTracks[k]) {nfailed++; delete vecPrimaryTracks[k];}
     if (nfailed) 
-	if (id < nVertices) {
+	gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot assign " << nfailed
 			    << " primary tracks, no corresponding primary vertex found." << endm;
     
     //  entry in the temporary vector (vecPrimaryTracks)
@@ -468,7 +468,7 @@ StEventMaker::makeEvent()
 
 	    nfailed++;
     }
-	if (id < nVertices) {
+        id = dstV0Vertices[i].id_vertex - 1;
 	gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
 			    << " V0 vertices, no valid id_vertex." << endm;
         if (vecPrimaryTracks[k]) {nfailed++; delete vecPrimaryTracks[k];}
