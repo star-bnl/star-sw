@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofSimMaker.cxx,v 1.6 2003/09/17 19:49:10 geurts Exp $
+ * $Id: StTofSimMaker.cxx,v 1.7 2004/04/01 21:22:47 dongx Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofSimMaker.cxx,v $
+ * Revision 1.7  2004/04/01 21:22:47  dongx
+ * use m_Mode as a switch for the output histograms
+ *
  * Revision 1.6  2003/09/17 19:49:10  geurts
  * zeroed pointers in constructor
  *
@@ -433,20 +436,22 @@ float StTofSimMaker::slatResponseExp(float& dz)
 Int_t StTofSimMaker::Finish(){
 
   //#ifdef TOFSIM_HIST
-  cout << "StTofSimMaker::Finish  writing tofsim.root ...";
-  TFile theFile("tofsim.root","RECREATE","tofsim");
-  theFile.cd();
-  mdE->Write();
-  mdS->Write();
-  mNumberOfPhotoelectrons->Write();
-  mT->Write();
-  mTime->Write();
-  mTime1->Write();
-  mPMlength->Write();
-  mAdc->Write();
-  mTdc->Write();
-  cout << "done"<<endl;
-  //#endif
+  if(m_Mode) {
+    cout << "StTofSimMaker::Finish  writing tofsim.root ...";
+    TFile theFile("tofsim.root","RECREATE","tofsim");
+    theFile.cd();
+    mdE->Write();
+    mdS->Write();
+    mNumberOfPhotoelectrons->Write();
+    mT->Write();
+    mTime->Write();
+    mTime1->Write();
+    mPMlength->Write();
+    mAdc->Write();
+    mTdc->Write();
+    cout << "done"<<endl;
+    //#endif
+  }
   return kStOK;
 }
 
