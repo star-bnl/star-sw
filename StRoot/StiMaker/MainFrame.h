@@ -416,6 +416,7 @@ private:
     NumberEntryVec fNumericEntries;
     TGButton             *fSetButton;
     TGButton             *fExitButton;
+    DetActivatePairVec fC;
     
     void makeNumberEntries();
     

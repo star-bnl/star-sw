@@ -1800,23 +1800,41 @@ void EntryTestDlg::makeNumberEntries()
     fLabel.push_back( new TGLabel(fF.back(), "UnMarked Hit Size") );
     fF.back()->AddFrame(fLabel.back(), fL2);
 
+    //Add a toggle to include the vertex
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    TGCheckButton* tempButton = new TGCheckButton(fF.back(), new TGHotString("Update Each Track"), -1);
+    if ( broker->updateEachTrack()==true) {
+	tempButton->SetState(kButtonDown);
+    }
+    DetectorActivatePair tempPair("UpdateEachTrack", tempButton);
+    fC.push_back(tempPair);
+    fF.back()->AddFrame(tempButton, fL2);
 
 }
 
 EntryTestDlg::~EntryTestDlg()
 {
-    if (fNumericEntries.size()!=fLabel.size() || fLabel.size()!=fF.size()) {
-	cout <<"EntryTestDlg::~EntryTestDlg. ERROR:\t"
-	     <<"Mismatch in cleanup vector size"<<endl;
+    for (unsigned int i=0; i<fC.size(); ++i) {
+	delete fC[i].second;
+	fC[i].second=0;
     }
-    for (unsigned int i=0; i<fF.size(); ++i) {
+    
+    for (unsigned int i=0; i<fNumericEntries.size(); ++i) {
 	delete fNumericEntries[i].second;
-	delete fLabel[i];
-	delete fF[i];
 	fNumericEntries[i].second=0;
+    }
+
+    for (unsigned int i=0; i<fLabel.size(); ++i) {
+	delete fLabel[i];
 	fLabel[i]=0;
+    }
+    
+    for (unsigned int i=0; i<fF.size(); ++i) {
+	delete fF[i];
 	fF[i]=0;
     }
+	
     delete fSetButton;
     delete fExitButton;
     delete fF1;
@@ -1862,6 +1880,19 @@ void EntryTestDlg::SetLimits()
 	    cout <<"EntryTestDlg::SetLimits(). ERROR:\t"
 		 <<"Unknown name for NumberEntry:\t"<<name
 		 <<"\tYou had a compile time error"<<endl;
+	}
+    }
+
+    //Now take care of toggle buttons
+    for (unsigned int j=0; j<fC.size(); ++j) {
+	const string& tag = fC[j].first;
+	
+	if (tag=="UpdateEachTrack") {
+	    broker->setUpdateEachTrack( fC[j].second->GetState()==kButtonDown );
+	}
+	else {
+	    cout <<"EntryTestDlg::ProcessMessage. ERROR:\t"
+		 <<"Tag:\t"<<tag<<" is unkown type.  You had a compile time error."<<endl;
 	}
     }
 }
