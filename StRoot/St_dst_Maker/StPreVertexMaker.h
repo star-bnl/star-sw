@@ -1,5 +1,8 @@
-// $Id: StPreVertexMaker.h,v 1.1 2000/02/01 17:12:18 wdeng Exp $
+// $Id: StPreVertexMaker.h,v 1.2 2000/06/30 18:00:55 wdeng Exp $
 // $Log: StPreVertexMaker.h,v $
+// Revision 1.2  2000/06/30 18:00:55  wdeng
+// Add in GetCVS function.
+//
 // Revision 1.1  2000/02/01 17:12:18  wdeng
 // Initial version. This maker reads in tptrack and produces a preliminary primary vertex.
 //
@@ -31,6 +34,8 @@ class StPreVertexMaker : public StMaker {
   virtual       ~StPreVertexMaker();
   virtual Int_t  Init();
   virtual Int_t  Make();
+  virtual const char *GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StPreVertexMaker.h,v 1.2 2000/06/30 18:00:55 wdeng Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StPreVertexMaker, 1)
 };
