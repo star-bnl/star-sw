@@ -15,21 +15,11 @@
 #include <string.h>
 #include <ctype.h>
 
-#if defined (AIX) || defined(linux)
+#if defined (AIX) || defined(linux) || defined(HPUX)
 #include <fnmatch.h>
-#endif /*AIX*/
-
-#ifdef IRIX
+#elif defined(IRIX) || defined(sun)
 #include <libgen.h>
-#endif /*IRIX*/
-
-#if defined(SOLARIS) || defined(SunOS)
-#include <libgen.h>
-#endif /*SOLARIS*/
-
-#ifdef HPUX
-#include <fnmatch.h>	/*06jan98- HPUX 10.2*/
-#endif /*HPUX*/
+#endif
 
 #include "sutLib.h"
 #include "asuAlloc.h"
@@ -57,23 +47,11 @@
 int 
 sutMatchWild(char *pattern,char* string)
 {
-#ifdef AIX
-   int flags=0;		/* I DONT KNOW WHAT THIS SHOULD BE */
+#if defined(AIX) || defined(HPUX) || defined(linux)
+   int flags = 0;	
    return !fnmatch(pattern,string,flags);
-#endif /*AIX*/
-#ifdef HPUX
-   int flags=0;		/* I DONT KNOW WHAT THIS SHOULD BE */
-   return !fnmatch(pattern,string,flags);
-#endif /*HPUX*/
-#if defined(SOLARIS) || defined(SunOS)
+#elif defined(sun) || defined(IRIX)
    return gmatch(string,pattern);
-#endif /*SOLARIS*/
-#ifdef IRIX
-   return gmatch(string,pattern);
-#endif /*IRIX*/
-#ifdef linux
-   int flags=0;		/* I DONT KNOW WHAT THIS SHOULD BE */
-   return !fnmatch(pattern,string,flags);
 #endif
 }
 
