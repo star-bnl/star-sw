@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.9 2000/10/31 16:20:57 caines Exp $
+ * $Id: StSvtAnalysis.cc,v 1.10 2000/11/30 20:42:58 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -51,6 +51,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.10  2000/11/30 20:42:58  caines
+ * Fix flag error and anode position error, use database
+ *
  * Revision 1.9  2000/10/31 16:20:57  caines
  * Added more functions to make the code more readable
  *
@@ -471,7 +474,7 @@ void StSvtAnalysis::calcMoments(int clu)
  int mseq, Seq, stTimeBin, len, ADC = 0;
  unsigned char* adc;
 
- mNumPixels = 0, mPeakADC = 0,mSumAdc = 0;
+ mNumPixels = 0, mPeakADC = 0,mSumAdc = 0, mHitId=0;
  mDriftMom1 = 0, mAnodeMom1 = 0, mDriftMom2 = 0, mAnodeMom2 = 0, mMom0 = 0, mNeff = 0;
 
  int igt3=0, peakPosAn=0, peakPosTim=0, peakMem=0, peakPixel=0;                         //recall 1ADC = 4mV
@@ -505,9 +508,9 @@ void StSvtAnalysis::calcMoments(int clu)
          mNumPixels++;                                  //calculate the various moments
          if (ADC>3) igt3++;
          mDriftMom1 += ADC * (stTimeBin + j + 0.5);
-         mAnodeMom1 += ADC * (actualAn + 0.5);
+         mAnodeMom1 += ADC * (actualAn - 0.5);
          mDriftMom2 += ADC * (stTimeBin + j + 0.5) * (stTimeBin + j + 0.5);
-         mAnodeMom2 += ADC * (actualAn + 0.5) * (actualAn + 0.5);
+         mAnodeMom2 += ADC * (actualAn - 0.5) * (actualAn - 0.5);
          mNeff       += ADC * ADC;
          mSumAdc     += ADC;
 	 //cout<<"values: "<<ADC<<" "<<actualAn<<" "<<mAnodeMom2<<endl;
@@ -548,9 +551,9 @@ void StSvtAnalysis::oneOrTwoAnodeMoments(int clu, int peakPosTim)
           {                                                                /*some safety checks in*/ 
            mSumAdc     += ADC;
            mDriftMom1 += ADC * (j+0.5);
-           mAnodeMom1 += ADC * (i+0.5);
+           mAnodeMom1 += ADC * (i-0.5);
            mDriftMom2 += ADC * (j+0.5) * (j+0.5);
-           mAnodeMom2 += ADC * (i+0.5) * (i+0.5);
+           mAnodeMom2 += ADC * (i-0.5) * (i-0.5);
            mNeff       += ADC * ADC;
          } 
        }
@@ -729,7 +732,7 @@ int StSvtAnalysis:: CatagorizeCluster(int iRows, int iCols, int igt3, int clu)
 
   if (mCluNumAnodes[clu]>1 &&  (d_sig==1 || (mCluCharge[clu]>50 && d_bkt==1))) m_deconv = 1;
 
-  if (iNumCat%50 == 1) cout<<"Wrong Clusters: iGt8: "<<m_nGt8<<" WrgBkt: "<<m_nWrkBkt<<" Sig: "<<m_nSig<<endl;  
+  // if (iNumCat%50 == 1) cout<<"Wrong Clusters: iGt8: "<<m_nGt8<<" WrgBkt: "<<m_nWrkBkt<<" Sig: "<<m_nSig<<endl;  
 
   return iQual;
 
