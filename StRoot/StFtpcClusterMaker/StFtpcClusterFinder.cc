@@ -1,6 +1,14 @@
-// $Id: StFtpcClusterFinder.cc,v 1.11 2001/01/15 18:18:00 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.12 2001/01/25 15:25:21 oldi Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.12  2001/01/25 15:25:21  oldi
+// Fix of several bugs which caused memory leaks:
+//  - Some arrays were not allocated and/or deleted properly.
+//  - TClonesArray seems to have a problem (it could be that I used it in a
+//    wrong way in StFtpcTrackMaker form where Holm cut and pasted it).
+//    I changed all occurences to TObjArray which makes the program slightly
+//    slower but much more save (in terms of memory usage).
+//
 // Revision 1.11  2001/01/15 18:18:00  jcs
 // replace hidden constants with parameters
 //
@@ -35,7 +43,7 @@
 
 StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,  
 					 StFtpcParamReader *paramReader,
-					 TClonesArray *pointarray)
+					 TObjArray *pointarray)
 {
 //   cout << "StFtpcClusterFinder constructed" << endl;  
 mReader = reader;
@@ -1155,8 +1163,9 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	{
 	  // create new point
 	  Int_t numPoint = mPoint->GetEntriesFast();
-	  TClonesArray &pointInit = *mPoint;
-	  new(pointInit[numPoint]) StFtpcPoint();
+	  if (numPoint >= mPoint->GetSize()) mPoint->Expand(mPoint->GetSize()+5000);
+
+	  mPoint->AddAt(new StFtpcPoint(), numPoint);
 	  StFtpcPoint *thispoint = (StFtpcPoint *) mPoint->At(numPoint);
 
 	  thispoint->SetPadRow(iRow+1);           
@@ -1586,8 +1595,9 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	    {
 	      // create new point
 	      Int_t numPoint = mPoint->GetEntriesFast();
-	      TClonesArray &pointInit = *mPoint;
-	      new(pointInit[numPoint]) StFtpcPoint();
+	      if (numPoint >= mPoint->GetSize()) mPoint->Expand(mPoint->GetSize()+5000);
+	      
+	      mPoint->AddAt(new StFtpcPoint(), numPoint);
 	      StFtpcPoint *thispoint = (StFtpcPoint *) mPoint->At(numPoint);
 	      
 	      thispoint->SetPadRow(iRow+1);           
