@@ -12,7 +12,7 @@ use Tie::IxHash;
 #$star = $ENV{STAR};
 $star_level = $ENV{STAR_LEVEL};
 $star_lib = $ENV{STAR_LIB};
-$star_sys = $ENV{STAR_SYS};
+$star_sys = $ENV{STAR_HOST_SYS};
 
 #-----------------------------------------------------------------
 $now = localtime;
