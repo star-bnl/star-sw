@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.41 2003/02/19 22:28:32 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.42 2003/02/19 23:15:10 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.42  2003/02/19 23:15:10  suaide
+// small modifications
+//
 // Revision 1.41  2003/02/19 22:28:32  suaide
 // small modifications on QA histograms
 //
@@ -646,7 +649,7 @@ Bool_t StEmcADCtoEMaker::fillHistograms()
 				nHits++;
 				Float_t eta,phi;
 				mGeo[det]->getEtaPhi(i+1,eta,phi);
-				mHits[det]->Fill(eta,phi);
+				if(ADC!=0) mHits[det]->Fill(eta,phi);
         if(ADC!=0) mAdc[det]->Fill(eta,phi,ADC);
 				if(E!=0) mEnergyHist[det]->Fill(eta,phi,E);
 			}
