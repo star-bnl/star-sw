@@ -1,6 +1,7 @@
 #ifndef dEdxTrack_h
 #define dEdxTrack_h
-#include "StTpcDb/StTpcdEdxCorrection.h" 
+
+#include "dEdxPoint.h"
 #include "TClonesArray.h"
 class dEdxTrack : public TObject {
  private:
