@@ -7,6 +7,12 @@ using namespace std;
 #include <iostream>
 #include <math.h>
 
+/*!
+  \class AbstractFourVec
+  \author M.L. Miller (Yale Software)
+  Abstract base class to define required interface of a four vector to be fed to a derived instance
+  of StJetFinder
+ */
 class AbstractFourVec
 {
 public:
@@ -40,6 +46,13 @@ public:
 private:
 };
 
+/*!
+  \class FourVec
+  \author M.L. Miller (Yale Software)
+  Template class derived from AbstractFourVec to simultaneously implement interface of a
+  four vector and to wrap the corresponding functionality of the template arguement mParticle.
+  i.e., a class to interface, e.g. StMuTrack with StAbstractFourVec
+ */
 template <class T>
 class FourVec : public AbstractFourVec
 {

@@ -16,7 +16,6 @@ using std::multimap;
 #include "StJetEtCell.h"
 
 //useful struct for recording overlaping jets
-
 struct EtNeighbor {
 
     typedef StConeJetFinder::ValueCellList ValueCellList;
@@ -45,6 +44,14 @@ struct EtNeighborLessThan
     };
 };
 
+/*!
+  \class StJetSpliterMerger
+  \author M.L. Miller (Yale Software)
+  A work class to disentangle a container of jets that overlap (i.e., share cells).
+  Implemented as per the specification of Fermilab RunII Jet Physics working group.
+  Two jets are "split" if the shared_energy/highest_jet_energy is greater than the
+  splitFraction (0<splitFraction<1).
+*/
 class StJetSpliterMerger
 {
 public:
@@ -58,7 +65,7 @@ public:
     void setSplitFraction(double v) {mSplitFraction=v;}
     double splitFraction() const {return mSplitFraction;}
 
-    //action
+    ///action
     void splitMerge(ValueCellList& jets);
 
 private:

@@ -10,6 +10,9 @@
 #include <cmath>
 #include <float.h>
 
+//root
+#include "TObject.h"
+
 //JetFinder
 #include "FourVec.h"
 #include "StProtoJet.h"
@@ -18,7 +21,10 @@
 
 #include "StKtCluJetFinder.h"
 
-StKtCluJetFinder::StKtCluJetFinder()
+ClassImp(StKtCluPars)
+
+    
+StKtCluJetFinder::StKtCluJetFinder(const StKtCluPars& pars) : mPars(pars)
 {
     cout <<"StKtCluJetFinder::StKtCluJetFinder()"<<endl;
 }
@@ -37,7 +43,7 @@ void StKtCluJetFinder::findJets(JetList& pj)
 	
     while (pj.empty()==false) {
 		
-	if (mDebug) {
+	if ( mPars.debug() ) {
 	    cout <<"\n --- protojets after clustering "<<nSteps<<" steps"<<endl;
 	    for (JetList::const_iterator it3=pj.begin(); it3!=pj.end(); ++it3) {
 		cout <<*it3<<endl;
@@ -70,7 +76,7 @@ void StKtCluJetFinder::findJets(JetList& pj)
 	for (JetList::iterator jetIt1=pj.begin(); jetIt1!=pj.end(); ++jetIt1) {
 	    for (JetList::iterator jetIt2=jetIt1; jetIt2!=pj.end(); ++jetIt2) {
 		if (jetIt1!=jetIt2) {
-		    StProtoJetPair myPair(*jetIt1, *jetIt2, mR);
+		    StProtoJetPair myPair(*jetIt1, *jetIt2, mPars.r());
 		    double d = myPair.d();
 		    if (d < d_min_jets) {
 			d_min_jets=d;

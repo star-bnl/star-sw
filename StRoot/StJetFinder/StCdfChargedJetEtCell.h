@@ -7,6 +7,15 @@
 
 #include "StJetEtCell.h"
 
+
+/*!
+  \class StCdfChargedJetEtCell
+  \author M.L. Miller (Yale Software)
+  A cell class derived from StJetEtCell, differing only in the implementation of the eT() method.
+  Here, eT() returns not the total eT of the cell but the eT of the most energetic four-vector
+  in the cell
+ */
+
 class StCdfChargedJetEtCell : public StJetEtCell
 {
 public:
@@ -15,16 +24,21 @@ public:
     StCdfChargedJetEtCell(double etaMin, double etaMax, double phiMin, double phiMax);
     virtual ~StCdfChargedJetEtCell();
 
-    //order cells by lcp-pt instead of overall et
+    ///order cells by lcp-pt instead of overall et
     virtual double eT() const {return mLcpPt;}
 
-    //action
+    ///Add a protojet to the cell
     virtual void add(const StProtoJet&);
+    
+    ///Add another cell to this one
     virtual void add(StJetEtCell* cell);
-    virtual void clear(); ///internal reset for next pass at jet-finding
+    
+    ///internal reset for next pass at jet-finding
+    virtual void clear(); 
 
 protected:
-    double mLcpPt; ///pt of Leading charged particle in cell
+    ///pt of Leading charged particle in cell
+    double mLcpPt;
 };
 
 #endif

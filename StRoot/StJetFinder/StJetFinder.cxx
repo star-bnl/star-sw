@@ -14,7 +14,7 @@
 #include "StProtoJetPair.h"
 #include "StJetFinder.h"
 
-StJetFinder::StJetFinder() : mDebug(false)
+StJetFinder::StJetFinder()
 {
     cout <<"StJetFinder::StJetFinder()"<<endl;
 }

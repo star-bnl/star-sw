@@ -14,7 +14,7 @@ using std::find;
 
 //JetFinder
 #include "StProtoJet.h"
-#include "StSpinMaker/StMuTrackFourVec.h"
+//!#include "StJetMaker/StMuTrackFourVec.h"
 
 StProtoJet::StProtoJet()
 {
@@ -84,10 +84,12 @@ void StProtoJet::merge(const StProtoJet& rhs)
 	
 }
 
-vector<int> StProtoJet::tracks(void)
-{
+/*!
+  vector<int> StProtoJet::tracks(void)
+  {
   vector<int> trackvec;
   for(FourVecList::const_iterator it=mList.begin(); it!=mList.end(); ++it)
-      trackvec.push_back(static_cast<StMuTrackFourVec*>(*it)->getIndex());
+  trackvec.push_back(static_cast<StMuTrackFourVec*>(*it)->getIndex());
   return trackvec;
-} 
+  }
+*/

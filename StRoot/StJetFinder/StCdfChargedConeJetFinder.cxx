@@ -20,7 +20,7 @@ using std::sort;
 
 //careful, can't use buildGrid() call in base class constructor or we'll sef-fault because it calls
 //a virtual function in the constructor while the derived class doesn't yet exist
-StCdfChargedConeJetFinder::StCdfChargedConeJetFinder(StConeJetFinderPars& pars)
+StCdfChargedConeJetFinder::StCdfChargedConeJetFinder(StConePars& pars)
     : StConeJetFinder()
 {
     cout <<"StCdfChargedConeJetFinder::StCdfChargedConeJetFinder()"<<endl;
@@ -57,14 +57,14 @@ void StCdfChargedConeJetFinder::findJets(JetList& protojets)
     //now we sort them in descending order in LcpPt
     std::sort(mVec.begin(), mTheEnd, StJetEtCellEtGreaterThan() ); //This is ok, sorts by lcp-pt here
     
-    if (debug() ) {print();}
+    if (mPars.mDebug ) {print();}
     
     //loop from highest lcp-pt cell to lowest lcp-pt cell.
     cout <<"\tBegin search over seeds"<<endl;
     for (CellVec::iterator vecIt=mVec.begin(); vecIt!=mTheEnd; ++vecIt) {
 	
 	StJetEtCell* centerCell = *vecIt;
-	if (centerCell->eT()<=mSeedEtMin) {break;} //we're all done (lcp-pt below threshold
+	if (centerCell->eT()<=mPars.mSeedEtMin) {break;} //we're all done (lcp-pt below threshold
 	
 	if (acceptSeed(centerCell) ) {
 	    
@@ -116,10 +116,10 @@ bool StCdfChargedConeJetFinder::acceptPair(const StJetEtCell* centerCell,
 	     && otherCell->empty()==false 
 	     
 	     //cut on associated eT
-	     && otherCell->eT()>mAssocEtMin
+	     && otherCell->eT()>mPars.mAssocEtMin
 	     
 	     //within cone?
-	     && centerCell->distance(*otherCell)<r() 
+	     && centerCell->distance(*otherCell)<mPars.mR 
 		
 	     );
 }

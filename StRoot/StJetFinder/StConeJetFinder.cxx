@@ -5,6 +5,8 @@
 //M.L. Miller (Yale Software)
 //07/02
 
+#include "TObject.h"
+
 //std
 #include <iostream>
 #include <algorithm>
@@ -20,34 +22,18 @@ using std::sort;
 #include "StJetSpliterMerger.h"
 #include "StProtoJet.h"
 
-StConeJetFinder::StConeJetFinder(StConeJetFinderPars& pars) : mPars(pars)
+ClassImp(StConePars)
+
+StConeJetFinder::StConeJetFinder(const StConePars& pars) : mPars(pars)
 {
     cout <<"StConeJetFinder::StConeJetFinder()"<<endl;
 	
-    mDoMinimization=true;
-    mAddMidpoints=true;
-    mDoSplitMerge=true;
-    mDoMidpointFix=false;
-    mRequireStableMidpoints=true;
-    
-    
     mSearchCounter=0;
     mMerger = new StJetSpliterMerger();
+    mMerger->setSplitFraction(mPars.mSplitFraction);
     
     buildGrid();
     mTheEnd = mVec.end();
-}
-
-StConeJetFinder::StConeJetFinder()
-{
-    mDoMinimization=true;
-    mAddMidpoints=true;
-    mDoSplitMerge=true;
-    mDoMidpointFix=false;
-    mRequireStableMidpoints=true;    
-    
-    mSearchCounter=0;
-    mMerger = new StJetSpliterMerger();
 }
 
 StConeJetFinder::~StConeJetFinder()
@@ -72,7 +58,7 @@ StConeJetFinder::SearchResult StConeJetFinder::doSearch()
     //cout <<"--- new cell ---"<<endl;
     
     ++mSearchCounter;
-    if (mDoMinimization==true && mSearchCounter>100) {
+    if (mPars.mDoMinimization==true && mSearchCounter>100) {
 	return kTooManyTries;
     }
     
@@ -88,13 +74,13 @@ StConeJetFinder::SearchResult StConeJetFinder::doSearch()
     //begin walk in eta:
     //cout <<"\nClustering around key:\t"<<centerKey<<endl;
 	
-    int iEtaMin = centerKey.iEta-mdeltaEta;
+    int iEtaMin = centerKey.iEta-mPars.mdeltaEta;
     if (iEtaMin<0) iEtaMin=0; //avoid wasted searches in eta
 	
-    for (int iEta=iEtaMin; (iEta<=centerKey.iEta+mdeltaEta) && (iEta<mPars.mNeta); ++iEta) {
+    for (int iEta=iEtaMin; (iEta<=centerKey.iEta+mPars.mdeltaEta) && (iEta<mPars.mNeta); ++iEta) {
 		
 	//begin walk in phi:
-	for (int iPhi=centerKey.iPhi-mdeltaPhi; iPhi<=centerKey.iPhi+mdeltaPhi; ++iPhi) {
+	for (int iPhi=centerKey.iPhi-mPars.mdeltaPhi; iPhi<=centerKey.iPhi+mPars.mdeltaPhi; ++iPhi) {
 			
 	    int iModPhi=iPhi;
 	    if (iModPhi<0) iModPhi= iModPhi+mPars.mNphi;
@@ -217,14 +203,14 @@ void StConeJetFinder::findJets(JetList& protojets)
     //now we sort them in descending order in et: (et1>et2>...>etn)
     std::sort(mVec.begin(), mTheEnd, StJetEtCellEtGreaterThan() );
 	
-    if (debug() ) {print();}
+    if (mPars.mDebug ) {print();}
 	
     //loop from highest et cell to lowest et cell.
     cout <<"\tBegin search over seeds"<<endl;
     for (CellVec::iterator vecIt=mVec.begin(); vecIt!=mTheEnd; ++vecIt) {
 		
 	StJetEtCell* centerCell = *vecIt;
-	if (centerCell->eT()<=mSeedEtMin) {break;} //we're all done
+	if (centerCell->eT()<=mPars.mSeedEtMin) {break;} //we're all done
 		
 	if (acceptSeed(centerCell) ) {
 			
@@ -233,7 +219,7 @@ void StConeJetFinder::findJets(JetList& protojets)
 	    //use a work object: mWorkCell
 	    this->initializeWorkCell(centerCell);
 			
-	    if (mDoMinimization==true) {
+	    if (mPars.mDoMinimization==true) {
 		doMinimization();
 	    }
 	    else {
@@ -243,12 +229,12 @@ void StConeJetFinder::findJets(JetList& protojets)
 	}
     }
     
-    if (mAddMidpoints==true) { 	//add seeds at midpoints
+    if (mPars.mAddMidpoints==true) { 	//add seeds at midpoints
 	cout <<"\tadd seeds at midpoints"<<endl;
 	addSeedsAtMidpoint(); //old style, add midpoints before split/merge
     }
     
-    if (mDoSplitMerge==true) {//split-merge
+    if (mPars.mDoSplitMerge==true) {//split-merge
 	cout <<"\tsplit-merge"<<endl;
 	mMerger->splitMerge(mPreJets);
     }
@@ -296,7 +282,7 @@ void StConeJetFinder::addSeedsAtMidpoint()
 	for (ValueCellList::iterator pj2=pj1; pj2!=mPreJets.end(); ++pj2) {
 	    //don't double count.  ignore same iterators and jets w/ same center location
 	    if (pj1!=pj2 && (*pj1==*pj2)==false ) { 
-		if ( (*pj1).distance(*pj2) <= 2.*r() ) { 
+		if ( (*pj1).distance(*pj2) <= 2.* mPars.mR ) { 
 		    //remember this combination
 		    VCLItPairVec::value_type temp(pj1, pj2);
 		    mMidpointVec.push_back(temp);
@@ -326,7 +312,7 @@ void StConeJetFinder::addSeedsAtMidpoint()
 	    //add in the cone
 	    mSearchCounter=0;
 	    SearchResult res = doSearch();
-	    if (mRequireStableMidpoints==true) {
+	    if (mPars.mRequireStableMidpoints==true) {
 		if (res==kConverged) {
 		    addToPrejets(&mWorkCell);
 		}	
@@ -445,10 +431,10 @@ bool StConeJetFinder::acceptPair(const StJetEtCell* centerCell, const StJetEtCel
 	     && otherCell->empty()==false 
 		
 	     //cut on associated eT
-	     && otherCell->eT()>mAssocEtMin
+	     && otherCell->eT()>mPars.mAssocEtMin
 		
 	     //within cone?
-	     && centerCell->distance(*otherCell)<r() 
+	     && centerCell->distance(*otherCell)<mPars.mR 
 		
 	     );
 }
@@ -456,10 +442,10 @@ bool StConeJetFinder::acceptPair(const StJetEtCell* centerCell, const StJetEtCel
 
 void StConeJetFinder::setSearchWindow()
 {
-    mphiWidth = (mPars.mPhiMax-mPars.mPhiMin)/static_cast<double>(mPars.mNphi);
-    metaWidth = (mPars.mEtaMax-mPars.mEtaMin)/static_cast<double>(mPars.mNeta);
-    mdeltaPhi = static_cast<int>(floor( r() / mphiWidth)) + 1;
-    mdeltaEta = static_cast<int>(floor( r() / metaWidth)) + 1;
+    mPars.mphiWidth = (mPars.mPhiMax-mPars.mPhiMin)/static_cast<double>(mPars.mNphi);
+    mPars.metaWidth = (mPars.mEtaMax-mPars.mEtaMin)/static_cast<double>(mPars.mNeta);
+    mPars.mdeltaPhi = static_cast<int>(floor( mPars.mR / mPars.mphiWidth)) + 1;
+    mPars.mdeltaEta = static_cast<int>(floor( mPars.mR / mPars.metaWidth)) + 1;
 }
 
 const StProtoJet& StConeJetFinder::collectCell(StJetEtCell* seed)
@@ -546,23 +532,47 @@ void StConeJetFinder::clear()
 
 void StConeJetFinder::print()
 {
-    cout <<"StConeJetFinder::print()"<<endl;
-    cout <<"non-empty contents of vector"<<endl;
-    for (CellVec::iterator it1=mVec.begin(); it1!=mVec.end(); ++it1) {
-	//const StJetEtCell* cell = *it1;
-	//if (cell->empty()==false) {
-	//cout <<*cell<<endl;
-	//}
-    }
-	
-    cout <<"\nnon-empty contents of map"<<endl;
-    for (CellMap::iterator it2=mMap.begin(); it2!=mMap.end(); ++it2) {
-	const StEtGridKey& key = (*it2).first;
-	const StJetEtCell* cell = (*it2).second;
-	if (cell->empty()==false) {
-	    cout <<key<<"\t"<<*cell<<endl;
-	}
-    }
+
+    cout <<"\nStConeJetFinder::print()"<<endl;
+    cout <<"mNeta:\t"<<mPars.mNeta<<endl;
+    cout <<"mNphi:\t"<<mPars.mNphi<<endl;
+    cout <<"mEtaMin:\t"<<mPars.mEtaMin<<endl;
+    cout <<"mEtaMax:\t"<<mPars.mEtaMax<<endl;    
+    cout <<"mPhiMin:\t"<<mPars.mPhiMin<<endl;
+    cout <<"mPhiMax:\t"<<mPars.mPhiMax<<endl;
+    cout <<"mR:\t"<<mPars.mR<<endl;
+    cout <<"mAssocEtMin:\t"<<mPars.mAssocEtMin<<endl;
+    cout <<"mSeedEtMin:\t"<<mPars.mSeedEtMin<<endl;
+    cout <<"mphiWidth:\t"<<mPars.mphiWidth<<endl;
+    cout <<"metaWidth:\t"<<mPars.metaWidth<<endl;
+    cout <<"mdeltaPhi:\t"<<mPars.mdeltaPhi<<endl;
+    cout <<"mdeltaEta:\t"<<mPars.mdeltaEta<<endl;
+    cout <<"mDoMinimization:\t"<<mPars.mDoMinimization<<endl;
+    cout <<"mAddMidpoints:\t"<<mPars.mAddMidpoints<<endl;
+    cout <<"mDoSplitMerge:\t"<<mPars.mDoSplitMerge<<endl;
+    cout <<"mSplitFraction:\t"<<mPars.mSplitFraction<<endl;
+    cout <<"splitFraction():\t"<<mMerger->splitFraction()<<endl;
+    cout <<"mRequireStableMidpoints:\t"<<mPars.mRequireStableMidpoints<<endl;
+    cout <<"mDebug:\t"<<mPars.mDebug<<endl;
+    
+    /*
+      cout <<"non-empty contents of vector"<<endl;
+      for (CellVec::iterator it1=mVec.begin(); it1!=mVec.end(); ++it1) {
+      //const StJetEtCell* cell = *it1;
+      //if (cell->empty()==false) {
+      //cout <<*cell<<endl;
+      //}
+      }
+      
+      cout <<"\nnon-empty contents of map"<<endl;
+      for (CellMap::iterator it2=mMap.begin(); it2!=mMap.end(); ++it2) {
+      const StEtGridKey& key = (*it2).first;
+      const StJetEtCell* cell = (*it2).second;
+      if (cell->empty()==false) {
+      cout <<key<<"\t"<<*cell<<endl;
+      }
+      }
+    */
 }
 
 StConeJetFinder::CellMap::iterator 
@@ -582,16 +592,6 @@ StConeJetFinder::CellMap::iterator StConeJetFinder::findIterator(const StEtGridK
 	abort();
     }
     return where;
-}
-
-void StConeJetFinder::setSplitFraction(double v)
-{
-    mMerger->setSplitFraction(v);
-}
-
-double StConeJetFinder::splitFraction() const
-{
-    return mMerger->splitFraction();
 }
 
 //non members ---
