@@ -33,6 +33,14 @@
 	LOGICAL MSG_Journal_Enable
 	COMMON /MSG_I/ MSG_Journal_Enable
 
+*	Time-stamp mode-select:
+	LOGICAL MSG_TimeStamp_CPU        !If true, time-stamps occur on changed CPU times.
+	COMMON /MSG_I/ MSG_TimeStamp_CPU !(Otherwise, only stamp a changed real-time or node name.)
+
+*	Whether ID list is sorted:
+	LOGICAL MSG_Sorted
+	COMMON /MSG_I/ MSG_Sorted
+
 *	msg Summary output features:
 	INTEGER MSG_Summary_Page_Length
 	LOGICAL MSG_Summary_Mode_Active   !Whether Active messages are listed (default = T).
@@ -61,20 +69,26 @@
 *	The Prefixes' data structure:
 	INTEGER MSG_Nprefixes   !Number of prefixes now defined.
 	INTEGER MSG_Nclasses    !Number of classes now defined.
+	INTEGER MSG_SID         !Sorted ID list.
 	INTEGER MSG_Iclass      !Class ID of each defined prefix.
 	INTEGER MSG_Length      !Length of each defined prefix.
 	INTEGER MSG_Counts	!Occurance-counts for each defined prefix.
 	INTEGER MSG_Lookups     !Slow-lookup-counts for each defined prefix.
+	INTEGER MSG_CPU_Mark    !CPU usage at Mark -- see MSG_Mark in msglib.f .
+	INTEGER MSG_CPU_Total   !"Total" CPU usage -- see MSG_Mark in msglib.f .
 	INTEGER MSG_Count_limit !Occurance-count at which each defined prefix is disabled.
 	INTEGER MSG_Abort_limit !Occurance-count at which each defined prefix causes an abort.
 	LOGICAL MSG_Active      !Whether each prefix is active (enabled -- produces a message).
 	LOGICAL MSG_Counting    !Whether each is counting.
 	COMMON /MSG_I/ MSG_Nprefixes
 	COMMON /MSG_I/ MSG_Nclasses
+	COMMON /MSG_I/ MSG_SID(         MSG_Nprefixes_max_P )
 	COMMON /MSG_I/ MSG_Iclass(      MSG_Nprefixes_max_P )
 	COMMON /MSG_I/ MSG_Length(      MSG_Nprefixes_max_P )
 	COMMON /MSG_I/ MSG_Counts(      MSG_Nprefixes_max_P )
 	COMMON /MSG_I/ MSG_Lookups(     MSG_Nprefixes_max_P )
+	COMMON /MSG_I/ MSG_CPU_Mark(    MSG_Nprefixes_max_P )
+	COMMON /MSG_I/ MSG_CPU_Total(   MSG_Nprefixes_max_P )
 	COMMON /MSG_I/ MSG_Count_limit( MSG_Nprefixes_max_P )
 	COMMON /MSG_I/ MSG_Abort_limit( MSG_Nprefixes_max_P )
 	COMMON /MSG_I/ MSG_Active(      MSG_Nprefixes_max_P )

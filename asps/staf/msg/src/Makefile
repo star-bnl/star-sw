@@ -1,8 +1,11 @@
 ARFLAGS    = vqs
 FFLAGS     = -c -O -w -extend_source
+FFLAGS4    = -c -O -w -extend_source -irix4
 FFLAGS_DBG = -c -g -w -extend_source
 
 all : libmsg.a libmsg_dbg.a doc
+
+msg4 : libmsg4.a
 
 msg : libmsg.a
 
@@ -12,14 +15,26 @@ doc : msglib.f msgsub.f
 	cd ../doc; docfor ../src/msglib.f; mv buttons.html msg_application.html; cd ../src
 	cd ../doc; docfor ../src/msgsub.f; mv buttons.html msg_innards.html    ; cd ../src
 
+libmsg4.a : msglib.o4 msgsub.o4 Makefile
+	rm -f libmsg4.a
+	ar $(ARFLAGS) libmsg4.a msglib.o4 msgsub.o4
+	rm -f msglib.o4
+	rm -f msgsub.o4
+
 libmsg.a : msglib.o msgsub.o Makefile
 	rm -f libmsg.a
 	ar $(ARFLAGS) libmsg.a msglib.o msgsub.o
 	rm -f msglib.o
 	rm -f msgsub.o
 
+msglib.o4 : msglib.f msg_ret_inc msg_inc msg_native_inc Makefile
+	f77 $(FFLAGS4) msglib.f -o msglib.o4
+
 msglib.o : msglib.f msg_ret_inc msg_inc msg_native_inc Makefile
 	f77 $(FFLAGS) msglib.f
+
+msgsub.o4 : msgsub.f msg_ret_inc msg_inc msg_native_inc Makefile
+	f77 $(FFLAGS4) msgsub.f -o msgsub.o4
 
 msgsub.o : msgsub.f msg_ret_inc msg_inc msg_native_inc Makefile
 	f77 $(FFLAGS) msgsub.f
