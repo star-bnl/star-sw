@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.cc,v 1.11 2002/06/21 17:47:36 genevb Exp $
+ * $Id: StThreeVectorD.cc,v 1.12 2003/01/22 15:54:24 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.cc,v $
+ * Revision 1.12  2003/01/22 15:54:24  genevb
+ * Remove superfluous inline
+ *
  * Revision 1.11  2002/06/21 17:47:36  genevb
  * Added pseudoProduct
  *
@@ -114,7 +117,7 @@ double StThreeVectorD::angle(const StThreeVectorF& v) const
     return acos(this->dot(v)/this->mag()/v.mag());
 }
 
-inline StThreeVectorD
+StThreeVectorD
 StThreeVectorD::pseudoProduct(const StThreeVectorF& v) const
 {
     return this->pseudoProduct(v.x(),v.y(),v.z());
