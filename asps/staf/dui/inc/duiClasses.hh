@@ -44,7 +44,7 @@ public:
    virtual STAFCV_T du (const char * dirPath,long minsize);
    virtual STAFCV_T precious ();
    virtual STAFCV_T rm_nonprecious ();
-   virtual STAFCV_T df ();
+   virtual STAFCV_T df (char *markerString);
    virtual STAFCV_T cd (const char * dirPath);
    virtual STAFCV_T ln (const char * fromPath, const char * toPath); 
    virtual STAFCV_T cp (const char * fromPath, const char * toPath);

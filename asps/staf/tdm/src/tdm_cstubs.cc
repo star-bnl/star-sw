@@ -20,6 +20,8 @@
 #include "sutLib.h"
 #include "ahsLib.h"
 
+extern CC_P void dsuPrintData(FILE *stream , DS_TYPE_CODE_T type
+                , unsigned int count , void *data);
 char * 
 temp_tablename()
 {
@@ -299,7 +301,7 @@ EML_FAILURE(NOT_YET_IMPLEMENTED);
 }
 
 STAFCV_T 
-tdmtable_cell_getvalue(char* cellSpec)
+tdmtable_cell_getvalue(char* cellSpec,char *screenSwitch)
 {
    tdmTable* table;		/* tdmTable object */
 
@@ -346,10 +348,11 @@ tdmtable_cell_getvalue(char* cellSpec)
       FREE(cs); /*fix memory leak -akio*/
       EML_FAILURE(METHOD_FAILURE);
    }
-/* commented by Bill Love Mar 17 1998 
-   printf("TDMTABLE:\tCell data = ");
-   dsuPrintData(stdout,cellData._d,col.elcount,cellData.data.v);
-   printf("\n"); */
+   if(screenSwitch[1]=='N'||screenSwitch[1]=='n') {
+      printf("TDMTABLE:\tCell data = ");
+      dsuPrintData(stdout,cellData._d,col.elcount,cellData.data.v);
+      printf("\n");
+   }
    float result;
    switch( cellData._d ){
       case DS_TYPE_CHAR:

@@ -15,7 +15,7 @@
 >GUIDANCE
 Dataset_Unix_like_Interface commands.
 .
- #(@)$Id: dui_def.cdf,v 1.12 1998/07/04 02:27:20 ward Exp $  Edited by Bill Love - 24 Feb 1998
+ #(@)$Id: dui_def.cdf,v 1.13 1998/07/09 11:29:12 ward Exp $  Edited by Bill Love - 24 Feb 1998
 .
 DUI is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -205,20 +205,20 @@ BUGS:
 >ACTION kam_dui_cp_%C
 **
 ** ---------------------------------------------------------------------
-** DUI/DF
+** DUI/DF [ MARKER_STRING ]
 >COMMAND DF
 >PARAMETERS
++
+MARKER_STRING 'Any text string to mark the command in a KUMAC' C D='xxx'
 >GUIDANCE
-Print the memory usage of the dataset structures. 
+Print the memory usage of the tables (and all other dynamically
+allocated memory).  The optional parameter allows tracing when
+many DUI/DF commands are placed in a kumac file.
 .
 DESCRIPTION: 
 .
 DF is a member function of the duiFactory interface which prints
 the total memory in use.
-.
-ARGUMENTS: 
-.
-   None.
 .
 RETURN:
 .
@@ -232,6 +232,8 @@ EG1. Use the command.
 .
  staf++ > dui/df
  92,157,884 Bytes of memory allocated
+ staf++ > dui/df positionNumber32
+ 92,157,884 Bytes of memory allocated (positionNumber32)
 .
 EXCEPTIONS: 
 .
@@ -593,15 +595,10 @@ See the related command PRECIOUS.
 Typically, you would run the PRECIOUS command before an
 event loop, and then run RM_NONPRECIOUS at the bottom
 of the loop to remove trash, ie:  
-.
-DUI/PRECIOUS
-.
-top_of_loop
-.
-contents of loop
-.
-DUI/RM_NONPRECIOUS 
-.
-bottom_of_loop
+   DUI/PRECIOUS
+   top_of_loop
+      contents of loop
+      DUI/RM_NONPRECIOUS 
+   bottom_of_loop
 >ACTION kam_dui_rm_nonprecious_%C
 **********************************************************************

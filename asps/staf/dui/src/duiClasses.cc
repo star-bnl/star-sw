@@ -143,7 +143,7 @@ STAFCV_T duiFactory:: cd (const char * dirPath) {
 }
 
 //----------------------------------
-STAFCV_T duiFactory:: df () {
+STAFCV_T duiFactory:: df (char *markerString) {
   static long previous = -123;
   char buf1[40],buf2[40];
   long thisTime;
@@ -161,10 +161,14 @@ STAFCV_T duiFactory:: df () {
   if(previous>=0) {
     duiSprinfWithCommas(buf1,(long)(thisTime));
     duiSprinfWithCommas(buf2,(long)(thisTime-previous));
-    printf("%s alloc, inc=%s\n",buf1,buf2);
+    printf("%s alloc, inc=%s (%s)\n",buf1,buf2,markerString);
   } else {
     duiSprinfWithCommas(buf1,(long)(thisTime));
-    printf("%s Bytes of memory allocated\n",buf1);
+    if(!markerString) { 
+      printf("Crash imminent. Line %d of %s. Exiting...\n",__LINE__,__FILE__); 
+      exit(2);
+    }
+    printf("%s Bytes of memory allocated (%s)\n",buf1,markerString);
   }
   previous=thisTime;
   EML_SUCCESS(STAFCV_OK);

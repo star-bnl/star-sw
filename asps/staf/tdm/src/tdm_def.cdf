@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_and_Dataset_Memory commands.
 .
- #(@)$Id: tdm_def.cdf,v 1.13 1998/06/18 19:32:50 ward Exp $
+ #(@)$Id: tdm_def.cdf,v 1.14 1998/07/09 11:29:16 ward Exp $
  Edited by Bill Love on 23-24 Feb 1998
 .
 TDM is an Analysis Service Package (ASP) for the Standard Analysis
@@ -1137,13 +1137,16 @@ components of objects which implement the tdmTable interface.
 .
 **
 ** ---------------------------------------------------------------------
-** TDM/TABLE/CELL/GETVALUE SOREF      
+** TDM/TABLE/CELL/GETVALUE SOREF      [OFF_SCREEN|ON_SCREEN]
 >COMMAND GETVALUE
 >PARAMETERS
 SOREF 'tdmTable.CELL component SORef' C
++
+SCREEN_SWITCH 'Screen output. Either OFF_SCREEN or ON_SCREEN.' C D='OFF_SCREEN'
 >GUIDANCE
-return the value contained in a single cell of a table.
-
+Return the value contained in a single cell of a table.
+SCREEN_SWITCH controls whether the returned value is written
+to the screen.
 .
 DESCRIPTION: 
 .
@@ -1169,7 +1172,7 @@ RETURN:
 .
 EXAMPLES: 
 .
- EG1. STAF> tdm/table/cell/getvalue 'tpt_spars[0].last_row'
+ EG1. STAF> tdm/table/cell/getvalue 'tpt_spars[0].last_row' ON_SCREEN
  TDMTABLE:       Cell data =     45
 .
 EXCEPTIONS: 

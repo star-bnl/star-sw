@@ -134,6 +134,10 @@ topproject_agent_project(char* agent, char* table1, char* table2
 			 , char* select)
 {
   //- Find Mandatory Input Objects
+  if(strstr(table2,"/")) {
+    EML_CONTEXT("ERROR: No slashes, please:  '%s'.\n",table2);
+    EML_FAILURE(SLASHES_NOT_SUPPORTED);
+  }
   topProject* proj=NULL;
   if( !top->findProject(agent, proj) ){
     EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",agent);
