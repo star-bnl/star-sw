@@ -1,7 +1,13 @@
 /***************************************************************************
  *
- * $Id: StSubDetector.cc,v 1.7 1999/10/01 14:08:59 calderon Exp $
+ * $Id: StSubDetector.cc,v 1.8 1999/10/18 16:11:54 calderon Exp $
  * $Log: StSubDetector.cc,v $
+ * Revision 1.8  1999/10/18 16:11:54  calderon
+ * Frank found 2 leaks that these changes will correct:
+ * -Delete the TrackPairInfos in the Clear() method
+ * -Correct the sub detector destructors to delete all
+ *  instances to StLocalHit.
+ *
  * Revision 1.7  1999/10/01 14:08:59  calderon
  * Added Local Hit resolution Histogram. It is made by default
  * without any requirement of association, to serve
@@ -128,9 +134,8 @@ StSubDetector::StSubDetector(const unsigned int nDevices, const unsigned int nRo
 //__________________________________
 
 StSubDetector::~StSubDetector(){
-  for (unsigned int iDevice=0; iDevice<mDevices.size(); iDevice++){
-    delete mDevices[iDevice];
-  };
+  for (unsigned int iDevice=0; iDevice<mDevices.size(); iDevice++) delete mDevices[iDevice];
+  mDevices.clear();
 }
 
 //__________________________________
