@@ -1,4 +1,4 @@
-// $Id: bfcread_geantBranch.C,v 1.2 2000/03/20 17:50:41 kathy Exp $
+// $Id: bfcread_geantBranch.C,v 1.3 2000/03/21 15:45:07 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -41,11 +41,12 @@ void bfcread_geantBranch(
   St_Table   *tabl=0;
   St_DataSet *obj=0;
 
+  Int_t tottabcntr=0;
 // Event loop
-  int istat=0,i=1;
+  int istat=0,i=0;
 
-EventLoop: if (i <= nevents && !istat) {
-    cout << "============================ Event " << i << " start" << endl;
+EventLoop: if (i < nevents && !istat) {
+
     chain->Clear();
     istat = chain->Make(i);
     cout << "     istat value returned from chain Make = " << istat << endl;
@@ -56,6 +57,10 @@ EventLoop: if (i <= nevents && !istat) {
     int countTable=0;
 
     if (!istat) {
+
+    i++;
+    cout << " start event # " << i << endl;
+
       ds=chain->GetDataSet("geant");
       St_DataSetIter tabiter(ds);
       if (ds) {
@@ -69,34 +74,40 @@ EventLoop: if (i <= nevents && !istat) {
             tabl = (St_Table *)tabiter.Find(obj->GetName());
             if (tabl) {
               countTable++;
-              cout << " Found Object (Table) " << endl;
-              cout << "   Name = " <<  obj->GetName() << 
+	      // cout << " Found Object (Table) " << endl;
+              cout << " QAInfo: Found table, Name = " 
+                   <<  obj->GetName() << 
                       "    # rows =  " << tabl->GetNRows() << endl;
+              tottabcntr++;
              }
           }
 //.. end of counting all tables that exist
 
-
 	}      
       }
     }
-    cout << " End of Event " << i << endl;
-    cout << "  # objects found = " << countObj << endl;
-    cout << "  # tables found = " << countTable << endl;
+    cout << " QAInfo: event # " << i << ", # objects found = " 
+         << countObj << ", # tables found = " << countTable << endl << endl;
 
 
     if (istat) {
       cout << "Last event processed. Status = " << istat << endl;
     }
 
-    i++;
+
     goto EventLoop;
    }
+     
+  cout <<  endl << "QAInfo:  total # events read  = " << i << endl;
+        
+  tottabcntr /= i;
+  cout <<  "QAInfo:  # tables per event   = " << tottabcntr << endl << endl;
 
-  cout << " bfcread GEANT Branch: passed event loop " << endl;
 
  chain->Finish();   
 }
  
+
+
 
 
