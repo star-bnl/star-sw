@@ -8,6 +8,9 @@
 // and both charge signs
 // 
 // $Log: StiEvaluator.cxx,v $
+// Revision 1.36  2003/07/09 01:08:07  calderon
+// Changes to access StMiniMcEvent through methods, rather than data members
+//
 // Revision 1.35  2003/06/19 21:17:07  calderon
 // Check the file name (for debugging)
 // Set the suffix before call to create histograms for the inclusive case.
@@ -211,11 +214,11 @@ void StiEvaluator::makehistograms() {
 	//bNUncNegPrim->GetEntry(i);
 	//bZVertex->GetEntry(i);
 	btree->GetEntry(i);
-	size_t mcMultiplicity = (size_t) minimcevent->mNMcTrack;
+	size_t mcMultiplicity = (size_t) minimcevent->nMcTrack();
 	
-	if (-50. < minimcevent->mVertexZ && minimcevent->mVertexZ < 50.) {
+	if (-50. < minimcevent->vertexZ() && minimcevent->vertexZ() < 50.) {
 
-  	    cout << "Getting Event " << i << ", z vertex " << minimcevent->mVertexZ << ", mc mult " << mcMultiplicity << endl;
+  	    cout << "Getting Event " << i << ", z vertex " << minimcevent->vertexZ() << ", mc mult " << mcMultiplicity << endl;
  	    
 	    size_t index = getIndex(mcMultiplicity);
 	    mEfficiencyAnalysisVector[index].fillHistograms(minimcevent);
