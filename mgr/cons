@@ -13,13 +13,13 @@ use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
 
-# $Id: cons,v 1.50 2000/07/03 18:24:10 fisyak Exp $
+# $Id: cons,v 1.51 2000/07/05 20:54:02 leite Exp $
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 $ver_num = 2.0;
 $ver_rev = ".1";
 $version = sprintf "This is Cons %2.1f%s " .
-	    '($Id: cons,v 1.50 2000/07/03 18:24:10 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.51 2000/07/05 20:54:02 leite Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -3217,12 +3217,12 @@ sub install {
     }
     my $lsp = $dir_prefix . $sp;
     return 1 if $tp eq $sp;
-    return 1 if eval { symlink($lsp, $tp) };
+#    return 1 if eval { symlink($lsp, $tp) };
     unlink($tp);
     if (! futil::mkdir($tgt->{dir})) {
 	return undef;
     }
-    return 1 if eval { link($sp, $tp) };
+#    return 1 if eval { link($sp, $tp) };
     return 1 if eval { symlink($lsp, $tp) }; #yf 
     futil::copy($sp, $tp);
 }
