@@ -781,6 +781,7 @@ C 998  Format(5X,'BAD Value of globtrk(i=',I7,').invpt detected - set to -999999
       globtrk(i).invpt = -999999.
 CSM preserve the detector id information. Instead of -999 put -x99. Spiros
 CSM        globtrk(i).iflag = -999
+      if(globtrk(i).curvature .eq. 0.) continue
       globtrk(i).iflag = -1.*(abs(globtrk(i).iflag/100)*100+99)
             end if  
         end do
