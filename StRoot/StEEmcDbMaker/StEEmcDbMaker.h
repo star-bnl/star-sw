@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.17 2004/03/30 04:44:57 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.18 2004/04/04 06:10:37 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -43,7 +43,8 @@ class eemcDbPMTped_st;
 class eemcDbPMTstat_st;
 class kretDbBlobS_st;
 
-class  StEEmcDbIndexItem1;
+class  StEEmcDbIndexItem1;//old, drop it
+class EEmcDbItem;
 class  EEmcDbCrate;
 
 class DbFlavor {
@@ -57,33 +58,49 @@ class DbFlavor {
 
 class StEEmcDbMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.17 2004/03/30 04:44:57 balewski Exp $";
+  enum {mxAdcCrate=119, mxAdcChan=192,
+	minTwCrateID=1,maxTwCrateID=6, 
+	minMapmtCrateID=64, maxMapmtCrateID=119,
+        maxTwCrateCh=128, maxMapmtCrateCh=192};
+  
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.18 2004/04/04 06:10:37 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
   int myTimeStampDay;
   unsigned int myTimeStampUnix;
+  void  clear();
+  void mOptimizeMapping(int is);
+
+  //........... old
   void mReloadDb(); ///< reads data from STAR-DB
   void mOptimizeDb(); ///< creates local fast look-up tables
-  void mOptimizeCrates(); ///< decodes crates -->fiber map
+  void mOptimizeFibers(); ///< decodes crates -->fiber map
   
+  //  void reloadDbConfig(int secID);
+  // void reloadDbOthers(int secID);
+
+
   // pointers to Db tables for each sector
   int *mDbsectorID; //!
   eemcDbADCconf_st  **mDbADCconf; //!
   eemcDbPMTcal_st   **mDbPMTcal ; //!
   eemcDbPMTped_st   **mDbPMTped ; //!
   eemcDbPMTstat_st  **mDbPMTstat ; //!
-  kretDbBlobS_st  *mDbCrateConfBlob; //!
+  kretDbBlobS_st  *mDbFiberConfBlob; //!
   
   // local fast look-up tables
-  //old, to be revised,jb
+  //old,.........................  to be revised,jb
   StEEmcDbIndexItem1   *mDbItem1; //!  assess via logical name (sec/sub/eta)
   StEEmcDbIndexItem1   ***mLookup; //! access via crate/chan
-  int mxAdcCrate, mxAdcChan;
 
   // new, jb
-  EEmcDbCrate *mDbCrate; // maps tw & mapmt crates to DAQ fibers
-  int nCrate; // # of existing crates
+  // local fast look-up tables
+  EEmcDbItem   *byIndex; //!  assess via plain index
+  EEmcDbItem   ***byCrate; //! access via crate/chan
+ 
+  EEmcDbCrate *mDbFiber; // maps tw & mapmt crates to DAQ fibers
+  int nFiber; // # of existing crates
 
   void mPrintItems();///< utility
  
@@ -98,13 +115,20 @@ class StEEmcDbMaker : public StMaker {
  protected:
  public:  
 
-  void print(int k=0);
+
   void setSectors(int ,int); ///< limit the range of sectors for speed
   void setThreshold(float x);// defines threshold for ADCs
 
-  const EEmcDbCrate * getCrate(int icr);
-  const  int getNCrate(){return nCrate;}
+  const EEmcDbCrate * getFiber(int icr);
+  const  int getNFiber(){return nFiber;}
+  const  EEmcDbItem* getByIndex1(int ikey); ///< returns full DB info for one pixel
+  void exportAscii(char *fname="eemcDbDump.dat") const; 
+  void print() {exportAscii();}
 
+ const  EEmcDbItem*  getByCrate(int crateID, int channel); // full DB info, crateID counts from 1, channel from 0  
+
+
+  //.......................  OLD ............... DB access, drop it
   //
   // Methods to acces DB info for T=tower, P=preshower-1, Q=preshower-2,
   // R=postshower, U=SMD-U strip, V=SMD-V strip
@@ -119,6 +143,8 @@ class StEEmcDbMaker : public StMaker {
 
   const  StEEmcDbIndexItem1* getByIndex(int i); ///< returns full DB info for one any channel
   const  StEEmcDbIndexItem1* get(int crate, int channel); ///< returns full DB info for any ADC channel
+
+  //.......................  OLD ............... end
 
   void setTimeStampDay( int ); ///< to fix  time stamp for all events, default =not fixed 
   void setPreferedFlavor(const char *flavor, const char *tableNameMask);
@@ -136,7 +162,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.17 2004/03/30 04:44:57 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.18 2004/04/04 06:10:37 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -147,6 +173,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.18  2004/04/04 06:10:37  balewski
+// *** empty log message ***
+//
 // Revision 1.17  2004/03/30 04:44:57  balewski
 // *** empty log message ***
 //

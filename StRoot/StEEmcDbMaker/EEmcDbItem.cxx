@@ -1,5 +1,5 @@
-// $Id: EEmcDbItem.cxx,v 1.9 2004/03/19 21:31:53 balewski Exp $
-
+// $Id: EEmcDbItem.cxx,v 1.10 2004/04/04 06:10:37 balewski Exp $
+ 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -180,6 +180,9 @@ void EEmcDbItem::setName(char *text) {
 }
 
 // $Log: EEmcDbItem.cxx,v $
+// Revision 1.10  2004/04/04 06:10:37  balewski
+// *** empty log message ***
+//
 // Revision 1.9  2004/03/19 21:31:53  balewski
 // new EEMC data decoder
 //

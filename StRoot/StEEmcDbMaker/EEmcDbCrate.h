@@ -1,9 +1,10 @@
 #ifndef EEMCDB_CRATE_H
 #define EEMCDB_CRATE_H
 
-#define CrateNameLen 16
 
 class EEmcDbCrate {
+ private:
+  enum {CrateNameLen=16 };
 
  public:
 
@@ -22,6 +23,7 @@ class EEmcDbCrate {
   void setName(char *text);
   void setAll(char *buff);
   int isEmpty() const;
+  void exportAscii(FILE *fd) const;
 };
 
 #endif 

@@ -1,11 +1,9 @@
-// $Id: EEmcDbCrate.cxx,v 1.4 2004/04/03 06:32:48 balewski Exp $
+// $Id: EEmcDbCrate.cxx,v 1.5 2004/04/04 06:10:36 balewski Exp $
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-
-//#include "cstructs/eemcConstDB.hh"
 
 #include "EEmcDbCrate.h"
 
@@ -64,26 +62,15 @@ void EEmcDbCrate::setAll(char *buf   ) {
   assert(ret==8);
 }
 
-
-
-
-
-
-#if 0
 //--------------------------------------------------
 //--------------------------------------------------
 void EEmcDbCrate::exportAscii(FILE *fd) const{
   
   if(name[0]==0) return; // item not defined
-
-  if(strchr(name,'U') || strchr(name,'V') )
-    fprintf(fd,"%s %3d %3d %2d %c %4d %.3f %.2f %.2f 0x%4.4x 0x%4.4x %s %d\n",name,crate,chan,sec,plane,strip,gain,ped,thr,stat,fail,tube,key);
-  else
-    fprintf(fd,"%s %d %3d %2d %c %2d %.3f  %.2f %.2f 0x%4.4x 0x%4.4x %s %d\n",name,crate,chan,sec,sub,eta,gain,ped,thr,stat,fail,tube,key);
-}
+  fprintf(fd,"%s  %d %d   %d   %d %d   %c %d \n",name,crID,crIDswitch,fiber,nCh,nHead,type,useIt);}
 
 
-
+#if 0
 //--------------------------------------------------
 //--------------------------------------------------
 int EEmcDbCrate::importAscii(FILE *fd){
@@ -129,6 +116,9 @@ int EEmcDbCrate::importAscii(FILE *fd){
 
 
 // $Log: EEmcDbCrate.cxx,v $
+// Revision 1.5  2004/04/04 06:10:36  balewski
+// *** empty log message ***
+//
 // Revision 1.4  2004/04/03 06:32:48  balewski
 // *** empty log message ***
 //
