@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.11 2001/09/16 22:24:26 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.12 2001/09/26 18:42:48 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.12  2001/09/26 18:42:48  caines
+// Fix 2 anode subtraction routines
+//
 // Revision 1.11  2001/09/16 22:24:26  caines
 // Fix for when SVT isnt in every event
 //
@@ -126,6 +129,8 @@ class StSvtSeqAdjMaker : public StMaker
   int mPedOffSet;
   int mCommonModeNoise[128];
   int mCommonModeNoiseAn[128];
+
+  float adcCommon[128];
 
  private:
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.27 2001/09/22 00:35:54 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.28 2001/09/26 18:42:48 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.28  2001/09/26 18:42:48  caines
+ * Fix 2 anode subtraction routines
+ *
  * Revision 1.27  2001/09/22 00:35:54  caines
  * Fixes now that AddData() is cleared everyevent
  *
@@ -137,12 +140,11 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
 
   mPedFile = NULL;
   mPedOffSet = 10;
-  m_thresh_lo = 1+mPedOffSet;
-  m_thresh_hi = 10+mPedOffSet; 
+  m_thresh_lo = 3+mPedOffSet;
+  m_thresh_hi = 5+mPedOffSet; 
   m_n_seq_lo  = 2;
   m_n_seq_hi  = 0;
   m_inv_prod_lo = 0;
-  //m_inv_prod_lo = 0;
  
 }
 
@@ -431,8 +433,10 @@ Int_t StSvtSeqAdjMaker::Make()
   if (Debug()) gMessMgr->Debug() << " In StSvtSeqAdjMaker::Make()" << GetName() << endm; 
 
   int Anode, doCommon, status, length;
+  int i, j, startTimeBin;
   int nSequence = 0;
   StSequence* Seq = NULL;
+  unsigned char *adc;
 
   StSvtBadAnode* BadAnode=NULL;
 
@@ -480,21 +484,48 @@ Int_t StSvtSeqAdjMaker::Make()
 	  
 	  status= mHybridRawData->getSequences(1,nSequence,Seq);
 	  length = 0;
-	  // if( (int) Seq[0].firstAdc[0] != 0){
-	    
-// 	    cout << Barrel << " " << Ladder << " " << Wafer << " " << Hybrid <<
-// 	      " " << (int) Seq[0].firstAdc[0] << endl;
-// 	  }
-	    for( int i=0; i<nSequence; i++)  length += Seq[i].length;
+
+	  for( i=0; i<nSequence; i++)  length += Seq[i].length;
 	  if( length != 128) doCommon =1;
+	  if( !doCommon){
+	    
+	    // Fill in array of adc values of first anode
+	    for( int nSeq=0; nSeq< nSequence ; nSeq++){
+	      
+	      adc=Seq[nSeq].firstAdc;
+	      length = Seq[nSeq].length;
+	      startTimeBin=Seq[nSeq].startTimeBin;
+	      j=0;
+	      while( j<length){
+		adcCommon[startTimeBin+j] = (float)adc[j]-mPedOffSet;
+		j++;
+	      }
+	    }
+	  }
 	  
 	  status= mHybridRawData->getSequences(2,nSequence,Seq);
 	  length = 0;
-	    
-	  for( int i=0; i<nSequence; i++)  length += Seq[i].length;
+	  
+	  for( i=0; i<nSequence; i++)  length += Seq[i].length;
 	  if( length != 128) doCommon =1;
 	  
-	  
+	  if( !doCommon){
+	 
+	    // Fill in array of adc values of second anode
+	    
+	    for( int nSeq=0; nSeq< nSequence ; nSeq++){
+	      
+	      adc=Seq[nSeq].firstAdc;
+	      length = Seq[nSeq].length;
+	      startTimeBin=Seq[nSeq].startTimeBin;
+	      j=0;
+	      while( j<length){
+		adcCommon[startTimeBin+j] += (float)adc[j]-mPedOffSet;
+		j++;
+	      }
+	    }
+	  }
+	
 	  if( doCommon){
 	    cout << "Doing Common mode average" << endl;
 	    // Zero Common Mode Noise arrays
@@ -526,7 +557,7 @@ Int_t StSvtSeqAdjMaker::Make()
 	      // here anode is real anode number (1-240)
 	      if (Debug())MakeHistogramsAdc(mHybridRawData,index,Anode,1);
 	      if( doCommon)  CommonModeNoiseCalc(iAnode);
-		}
+	    }
 	 
 	  if( doCommon){
 	    int TimeLast, TimeAv, TimeSum, TimeAvSav;
@@ -866,31 +897,23 @@ void StSvtSeqAdjMaker::SubtractFirstAnode(int iAnode){
 
   // Calc common mode noise
 
-  int  nSeqOrig, nSeqFirst, nSeqSecond, length;
-  int startTimeBin,  status;
+  int  nSeq, nSeqOrig, length;
+  int startTimeBin,  status, j;
   float adcMean;
-  StSequence *Sequence, *SeqFirst, *SeqSecond;
-  unsigned char *adc, *adcFirst, *adcSecond;
-
-  //Anode is the index into the anolist array
-
-  // get first and second anode adc values  
-  status= mHybridRawData->getSequences(1,nSeqFirst,SeqFirst);
-  status= mHybridRawData->getSequences(2,nSeqSecond,SeqSecond);
+  StSequence* Sequence;
+  unsigned char* adc;
 
   status= mHybridRawData->getListSequences(iAnode,nSeqOrig,Sequence);
 
-  for( int nSeq=0; nSeq< nSeqOrig ; nSeq++){
+  for( nSeq=0; nSeq< nSeqOrig ; nSeq++){
   
     adc=Sequence[nSeq].firstAdc;
     length = Sequence[nSeq].length;
-    startTimeBin=Sequence[nSeq].startTimeBin;
-    adcFirst = SeqFirst[0].firstAdc + startTimeBin;
-    adcSecond = SeqSecond[0].firstAdc + startTimeBin;
-    int j =0;
+    startTimeBin=Sequence[nSeq].startTimeBin; 
+    j =0;
     while( j<length){
 
-      adcMean = ((float)adcFirst[j] + (float)adcSecond[j])/2.;
+      adcMean = (float)adcCommon[j+startTimeBin]/2.;
       //adcMean = (float)adcSecond[j];
 
       //cout << "iAnode = " << iAnode << ", time = " << startTimeBin + j << ", adcFirst = " << (int)adcFirst[j] << ", adcSecond = " << (int)adcSecond[j] << ", adcMean = " << adcMean << endl;
