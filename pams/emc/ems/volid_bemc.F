@@ -2,6 +2,8 @@
       implicit none
       integer emc_ivid(5)/10000000,100000,100,10,1/ ! matched with AGI and G2T
       integer ivid, eta, phi, dep, emc_chid(5), i, rl, sphi
+      integer shift /51/
+
       do i = 1,5
          emc_chid(i) = ivid/emc_ivid(i)
          ivid        = ivid - emc_chid(i)*emc_ivid(i)
