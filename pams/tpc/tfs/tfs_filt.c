@@ -29,7 +29,7 @@ long i, count=0;
 
 for (i=0; i < tphit_h[0].nok; i++)
     {  
-       if (tphit[i].flag<0||tphit[i].flag==8||tphit[i].flag==9 )  continue;
+       if (tphit[i].flag<0||tphit[i].flag==8||tphit[i].flag==9||tphit[i].flag==11 )  continue;
        if (count !=i)  tphit[count] = tphit[i];
        count++;
     }
