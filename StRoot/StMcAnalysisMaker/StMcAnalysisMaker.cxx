@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.7 1999/09/23 21:25:48 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.8 1999/09/28 15:03:29 didenko Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.8  1999/09/28 15:03:29  didenko
+ * Cleanup dependencies on non existing h-files
+ *
  * Revision 1.7  1999/09/23 21:25:48  calderon
  * Added Log & Id
  * Modified includes according to Yuri
@@ -62,15 +65,15 @@
 
 #define USING_PERSISTENT
 #ifndef USING_PERSISTENT
-#include "StThreeVector.hh"
+#include <StThreeVector.hh>
 
-#include "StEvent.hh"
-#include "StTpcHit.hh"
-#include "StVecPtrTpcHit.hh"
-#include "StGlobalTrack.hh"
-#include "StTrackCollection.hh"
-#include "StVertex.hh"
-#include "StVertexCollection.hh"
+#include <StEvent.hh>
+#include <StTpcHit.hh>
+#include <StVecPtrTpcHit.hh>
+#include <StGlobalTrack.hh>
+#include <StTrackCollection.hh>
+#include <StVertex.hh>
+#include <StVertexCollection.hh>
 #else
 #include "StThreeVectorF.hh"
 

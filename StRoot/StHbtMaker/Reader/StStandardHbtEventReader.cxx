@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.11 1999/09/24 01:23:14 fisyak Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.12 1999/09/28 15:06:06 didenko Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.12  1999/09/28 15:06:06  didenko
+ * Cleanup dependencies on non existing h-files
+ *
  * Revision 1.11  1999/09/24 01:23:14  fisyak
  * Reduced Include Path
  *
@@ -70,10 +73,10 @@
 #include "StDedxPid.h"
 
 /* .hh files
-   #include "StEvent/StEvent.hh"
-   #include "StEvent/StGlobalTrack.hh"
-   #include "StEvent/StTpcDedxPid.hh"
-   #include "StEvent/StDedxPid.hh"
+//   #include "StEvent/StEvent.hh"
+//   #include "StEvent/StGlobalTrack.hh"
+//   #include "StEvent/StTpcDedxPid.hh"
+//   #include "StEvent/StDedxPid.hh"
 */
 //
 #include "SystemOfUnits.h"   // has "tesla" in it
