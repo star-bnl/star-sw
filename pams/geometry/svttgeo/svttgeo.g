@@ -33,6 +33,9 @@ Module  SVTTGEO  is the SVT geometry for STAR
 *  Dec 15 WKW set space between wafers on ladder in z direction to 0          *
 *  Feb 12/97  WKW changed the hits definition to agree with g2t, this should  *
 *             fix eloss problems                                              *
+*  Feb 27/97  Added Lilian's fourth super layer				      *
+*  May 20/97  4th layer at R=23.cm (same detector as before)                  *
+*  Oct 1/97   Silicon wafers inside, ladders outside			      *	
 *  Apr 29 WKW fixed mistake in glass, O was A=8, Z=16                         *
 *             changed glass density from 2.0 to 2.2 two reflect PDG value     *
 *             dye thickness changed to give .11% per hybrid                   *
@@ -41,6 +44,8 @@ Module  SVTTGEO  is the SVT geometry for STAR
 *  Aug 17 PN  C0,Iring is not used anymore, delete their typedef              *
 * 06/08/98 PN truncate variable in structures to 8 letters maximum
 *             otherwise they can not be converted into tables
+* 06/13/98 PN simplify a bit carbon structure code
+*             error fixed in the SFCP cooling pipe 
 *******************************************************************************
 
 +cde,AGECOM,GCONST,GCUNIT.
@@ -52,7 +57,8 @@ Module  SVTTGEO  is the SVT geometry for STAR
                        STAP,STAC,SHLA,SHLB,SHMA,SHMB,SWHO,SHWA,
                        SCMY,SCAL,SWMM,SWMB,SWMT,SWMS,SWMW,SOTB,SITB,
                        SBRG,SBRM,SBRI,SOES,SIES,SOSM,SISM,SCRW,
-                       SGLA
+                       SGLA,SFMO,SFLM,SFDM,SFSW,SFSD,SFSM,
+                       SFSS,SFCP,SFCF,SFCT,SFCX,SFCW
 *
       structure SVTG { Version,   Nlayer,    RsizeMin,  RsizeMax,
 		       ZsizeMax,  Angoff}
@@ -82,18 +88,24 @@ Module  SVTTGEO  is the SVT geometry for STAR
                        AgPdThk,   GlassThk,  CabThk,    CabWid}
 *
       Structure SVTL { Layer,    Nladder,  Nwafer,   Radius    }
+*
+      Structure SFPA { Version,  rmin,     rmax,     Len,
+                       rad,      nssd,     dmWid,    dmThk,
+		       dmLen,    smWid,    smThk,    smLen,
+                       ssLen,    wpLen,    sdlen,    tilt,     
+                       cprad,    cpral,    cfrad,    gpThk}
 *     
-      Integer        iLayer,s,side
+      Integer        iLayer,s,side,ilad,iwaf
       Real           ladthk,cone_thk1,cone_thk2,roffset,RsizeMax,deg,rad
       Real	     cone_len,cone_sin,cone_cos,rmin,rmax,zmin,zmax,angle
       Real           xpos,ypos,zpos,clearence,rin,rou,elethk,tabLen
-      Real           endrng_z,brack_z,screw_z,ir_rmin               
+      Real           endrng_z,brack_z,screw_z,ir_rmin,ang,wafpckLen,dthk,radtilt
 *
 *******************************************************************************
 *
    Fill SVTG ! Basic SVT dimensions 
       Version   = 1          ! geometry version
-      Nlayer    = 6          ! number of svt layers
+      Nlayer    = 7          ! number of svt layers
       RsizeMin  = 5          ! STV innermost radius
       RsizeMax  = 46.107     ! STV outermost radius
       ZsizeMax  = 270        ! SVT+FTPC length
@@ -204,6 +216,28 @@ Module  SVTTGEO  is the SVT geometry for STAR
    Fill SVTL ! single layer parameters
       layer    = 6          ! layer number
       Radius   = 14.91+.025 ! layer radius
+*
+   Fill SFPA ! fourth layer parameters
+      version  = 1          ! geometry version
+      rmin     = 22.0       ! mother rmin
+      rmax     = 28.0       ! mother rmax
+      Len      = 100.       ! mother Len
+      rad      = 23.        ! distance from beam axis to detector center
+      nssd     = 16         ! number of silicon strip detectors 
+      dmWid    = 7.5        ! detector mother width 
+      dmThk    = 0.03       ! detector mother thickness
+      dmLen    = 90.        ! detector mother length (detectors + adc board) 
+      smWid    = 7.5        ! structure mother width
+      smThk    = 3.5        ! structure mother thickness
+      smLen    = 95.        ! structure mother length (cool. pipe+carbon fiber)
+      ssLen    = 95./20.    ! length of a subvolume of the structure
+      wpLen    = 68.8       ! length of wafer pack
+      sdlen    = 4.2        ! lenght of one strip detector (along beam axis)
+      tilt     = 5.0        ! tiling angle (degrees)
+      cprad    = 0.1        ! cooling pipe outer radius
+      cpral    = 0.09       ! cooling pipe inner radius
+      cfrad    = 0.1        ! carbon fiber tube radius (support structure)
+      gpThk    = 0.5        ! gap between structure mother and detector
    EndFill
 *
       USE SVTG  version=1
@@ -213,6 +247,7 @@ Module  SVTTGEO  is the SVT geometry for STAR
       USE SERG  version=1
       USE SWAM  version=1
       USE SELC  version=1
+      USE SFPA  version=1
 
       Create and Position SVTT in Cave
 *
@@ -250,13 +285,13 @@ Block SVTT is the mother of all SVT volumes
 * (shape is very approximate guess)
 *
       Create    SBRG " Bracket joining the end rungs"
-      Position  SBRG z=  swca_Length/2.0+ssup_ERJzdis+ssup_ERJthk/2.0
-      Position  SBRG z= -swca_Length/2.0-ssup_ERJzdis-ssup_ERJthk/2.0
+      Position  SBRG z=  swca_Length/2+ssup_ERJzdis+ssup_ERJthk/2
+      Position  SBRG z= -swca_Length/2-ssup_ERJzdis-ssup_ERJthk/2
 *
 * Mother volumes for the screws joining the bracket to the end ring
 *
       endrng_z=serg_EndRngZm+serg_EndRngTh
-      brack_z=swca_Length/2.0+ssup_ERJzdis
+      brack_z=swca_Length/2+ssup_ERJzdis
       screw_z=endrng_z+0.5*(brack_z-endrng_z)
       Create    SOES " Volume to hold outer endring screws"
       Position  SOES z= screw_z
@@ -268,17 +303,17 @@ Block SVTT is the mother of all SVT volumes
 * Water manifold
 *
       Create    SWMM  " water manifold mother"
-      Position  SWMM  z= swam_Zmin+swam_Len/2.0
-      Position  SWMM  z=-swam_Zmin-swam_Len/2.0 
+      Position  SWMM  z= swam_Zmin+swam_Len/2
+      Position  SWMM  z=-swam_Zmin-swam_Len/2 
 *
 * Bracket connecting water minifold to support cone 
 * (guess, this is not designed yet)
 *
       Create    SBWC " water manifold to support cone bracket mother"
       Position  SBWC z= (swam_Zmin+swam_Len+ _
-                        (ssup_Cone1zmn-(swam_Zmin+swam_Len))/2.0)
+                        (ssup_Cone1zmn-(swam_Zmin+swam_Len))/2)
       Position  SBWC z=-(swam_Zmin+swam_Len+ _
-                        (ssup_Cone1zmn-(swam_Zmin+swam_Len))/2.0),
+                        (ssup_Cone1zmn-(swam_Zmin+swam_Len))/2),
                      ThetaZ=180
 * 
 * SVT support cones
@@ -290,16 +325,23 @@ Block SVTT is the mother of all SVT volumes
 * SVT support rods
 *
       Create    SROD  " Be support rod"
-      Position  SROD  y=ssup_rodDist+ssup_rodOD/2.0
-      Position  SROD  y=-ssup_rodDist-ssup_rodOD/2.0
+      Position  SROD  y=ssup_rodDist+ssup_rodOD/2
+      Position  SROD  y=-ssup_rodDist-ssup_rodOD/2
 *
 * The SVT layers 
 *
-      Do ilayer = 1, nint(svtg_Nlayer)
+      Do ilayer = 1, min(6,nint(svtg_Nlayer))
          USE SVTL layer=ilayer
          Create   SLYD  " layer mother " 
 	 Position SLYD
       EndDo
+*
+* The fourth (super) layer made of strip detectors
+*
+      if (svtg_Nlayer>6) then
+         Create and position SFMO " mother of 4th layer (strip detectors)"
+      endif
+*
 EndBlock
 *
 *******************************************************************************
@@ -309,7 +351,7 @@ Block SLYD is a single SVT layer
 *     any of the thicknesses in ladthk or elethk, you should make SLYD
 *     visible and check clearences. (wkw)
 *     ladthk is the ladder HALF thickness, wafer is at mid-plane
-      ladthk = swca_WaferThk/2.0+swca_RoHaThk+swca_WafCarTh
+      ladthk = swca_WaferThk/2+swca_RoHaThk+swca_WafCarTh
 *     elethk is the electronics+electronic carrier full thickness
       elethk=2.0*selc_BeThk+selc_WatThk+selc_BeOThk+selc_AgPdThk
       elethk=elethk+selc_GlassThk+selc_DyeThk
@@ -317,8 +359,8 @@ Block SLYD is a single SVT layer
       Attribute SLYD    seen=0    colo=1
       Shape    TUBE rmin=svtl_radius-ladthk,
                     rmax=(sqrt((svtl_radius)**2+ _
-                         (swca_WaferWid/2.0)**2)+elethk),
-                    dz=swca_Length/2.0
+                         (swca_WaferWid/2)**2)+elethk),
+                    dz=swca_Length/2
       Create   SLSD
 EndBlock
 *
@@ -338,13 +380,13 @@ Block SLSD is a single ladder mother (sector of tube)
       deg=180/svtl_Nladder
       rad=(TwoPi/2)/svtl_Nladder
 *     Position electronics carrier on left side of ladder (y pos)
-      xpos=sin(rad)*selc_ElcaWid/2.0-cos(rad)*elethk/2.0
-      ypos=cos(rad)*selc_ElcaWid/2.0+sin(rad)*elethk/2.0
+      xpos=sin(rad)*selc_ElcaWid/2-cos(rad)*elethk/2
+      ypos=cos(rad)*selc_ElcaWid/2+sin(rad)*elethk/2
       do s=-1,1,2
               side=s
 	      Position SELE ORT=YZX AlphaZ=s*deg,
 	      x=svtl_radius-ladthk-xpos,
-	      y=s*(swca_WaferWid/2.0+ypos),
+	      y=s*(swca_WaferWid/2+ypos),
               AlphaX=-90*(1-s)
       EndDo
 EndBlock
@@ -355,46 +397,46 @@ Block SLDI is a ladder volume
 * This contains the active wafer, Roha cell support, and the Be waffer carrier
 * The center of the active wafer is at the center of this cell, the cell is
 * centered on svtl_radius. 
-      tabLen=swca_Length/2.0-7*(swca_WaferWid/2.0+swca_WaferGap)
+      tabLen=swca_Length/2-7*(swca_WaferWid/2+swca_WaferGap)
       Material  Air
       Attribute SLDI   seen=0    colo=1     serial=svtl_Nwafer
-      Shape     BOX    dx=swca_WaferWid/2.0 dy=swca_Length/2.0  dz=ladthk
+      Shape     BOX    dx=swca_WaferWid/2 dy=swca_Length/2  dz=ladthk
       Create and Position STLI          z=0
 *         
 *     SBER are the Berillium wafer carrier rails                     
       Create   SBER " wafer carrier rails"
-      Position SBER x=+swca_WaferWid/2.0-swca_WafCarWd/2.0,
-                    z=-ladthk+swca_WafCarTh/2.0 
-      Position SBER x=-swca_WaferWid/2.0+swca_WafCarWd/2.0,
-                    z=-ladthk+swca_WafCarTh/2.0 
+      Position SBER x=+swca_WaferWid/2-swca_WafCarWd/2,
+                    z=-ladthk+swca_WafCarTh/2 
+      Position SBER x=-swca_WaferWid/2+swca_WafCarWd/2,
+                    z=-ladthk+swca_WafCarTh/2 
 *
 *     STAB are the Berrillium tabs and the ends of the wafer carriers
       Create   STAB " wafter carrier end tabs"
       Position STAB x=0,
-                    y=swca_Length/2.0-tabLen/2.0,
-                    z=-ladthk+swca_WafCarTh/2.0 
+                    y=swca_Length/2-tabLen/2,
+                    z=-ladthk+swca_WafCarTh/2 
       Position STAB x=0,
-                    y=-swca_Length/2.0+tabLen/2.0,
-                    z=-ladthk+swca_WafCarTh/2.0 
+                    y=-swca_Length/2+tabLen/2,
+                    z=-ladthk+swca_WafCarTh/2 
 *
 *     STRU are the Berrillium struts between the wafer carriers rails
 *     note: the positioning of these struts is approximate
       Create   STRU " struts between wafer carrier rails"
       Position STRU x=0,
-                    y=(svtl_Nwafer*(swca_WaferLen/2.0+swca_WaferGap)+ _
-                       swca_WaferGap+swca_strutlen/2.0),
-                    z=-ladthk+swca_WafCarTh/2.0 
+                    y=(svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap)+ _
+                       swca_WaferGap+swca_strutlen/2),
+                    z=-ladthk+swca_WafCarTh/2 
       Position STRU x=0,
-                    y=-(svtl_Nwafer*(swca_WaferLen/2.0+swca_WaferGap)+ _
-                       swca_WaferGap+swca_strutlen/2.0),
-                    z=-ladthk+swca_WafCarTh/2.0 
+                    y=-(svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap)+ _
+                       swca_WaferGap+swca_strutlen/2),
+                    z=-ladthk+swca_WafCarTh/2 
 *
 *     Roha cell spacers support the chips
       Create   SRHC " roha cell wafer supports"
-      Position SRHC x=+swca_WaferWid/2.0-swca_WafCarWd/2.0,
-                    z=-ladthk+2.0*swca_WafCarTh/2.0+swca_RoHaThk/2.0
-      Position SRHC x=-swca_WaferWid/2.0+swca_WafCarWd/2.0,
-                    z=-ladthk+2.0*swca_WafCarTh/2.0+swca_RoHaThk/2.0
+      Position SRHC x=+swca_WaferWid/2-swca_WafCarWd/2,
+                    z=-ladthk+2.0*swca_WafCarTh/2+swca_RoHaThk/2
+      Position SRHC x=-swca_WaferWid/2+swca_WafCarWd/2,
+                    z=-ladthk+2.0*swca_WafCarTh/2+swca_RoHaThk/2
 
 
 EndBlock
@@ -405,15 +447,15 @@ Block SRHC is the roha cell wafer support
       Component H2     A=1   Z=1  W=2
       Mixture   ROHA   Dens=0.0304
       Attribute SRHC   Seen=1   Colo=3
-      Shape     BOX    dx=swca_WafCarWd/2.0,
-                       dy=svtl_Nwafer*(swca_WaferLen/2.0+swca_WaferGap),
-                       dz=swca_RoHaThk/2.0
+      Shape     BOX    dx=swca_WafCarWd/2,
+                       dy=svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap),
+                       dz=swca_RoHaThk/2
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block STLI is the waver pack container
       Attribute STLI   serial=0   seen=0    colo=1
-      Shape     BOX    dy=svtl_Nwafer*(swca_WaferLen/2.0+swca_WaferGap),
-                       dz=swca_WaferThk/2.0
+      Shape     BOX    dy=svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap),
+                       dz=swca_WaferThk/2
       Create    STSI
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -426,7 +468,7 @@ Block SVTD is an active wafer volume
       Material  Silicon  
       Material  Sensitive  Isvol=1       
       Attribute SVTD       seen=1  Colo=4
-      Shape     BOX        dy=swca_WaferLen/2.0 
+      Shape     BOX        dy=swca_WaferLen/2 
       call      GSTPAR (%Imed,'STRA',1.)
 *      The following is the corrected hits definition: 2-12-97 (wkw)
        HITS      SVTD   xx:16:SH(-20,20)   yy:16:(-20,20)     zz:16:(-30,30),
@@ -438,25 +480,25 @@ EndBlock
 Block SBER are the Berillium wafer carrier rails
       Material  Berillium 
       Attribute SBER     Seen=1   Colo=2
-      Shape     BOX      dx=swca_WafCarWd/2.0,
-                         dy=swca_Length/2.0,  
-                         dz=swca_WafCarTh/2.0
+      Shape     BOX      dx=swca_WafCarWd/2,
+                         dy=swca_Length/2,  
+                         dz=swca_WafCarTh/2
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block STAB are the Berillium wafer carrier end tabs
       Material  Berillium 
       Attribute STAB     Seen=1   Colo=2
-      Shape     BOX      dx=swca_WaferWid/2.0-swca_WafCarWd,
-                         dy=tabLen/2.0,
-                         dz=swca_WafCarTh/2.0
+      Shape     BOX      dx=swca_WaferWid/2-swca_WafCarWd,
+                         dy=tabLen/2,
+                         dz=swca_WafCarTh/2
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block STRU are the Berillium struts between the wafer carrier rails
       Material  Berillium 
       Attribute STRU     Seen=1   Colo=2
-      Shape     BOX      dx=swca_WaferWid/2.0-swca_WafCarWd,
-                         dy=swca_strutlen/2.0,
-                         dz=swca_WafCarTh/2.0
+      Shape     BOX      dx=swca_WaferWid/2-swca_WafCarWd,
+                         dy=swca_strutlen/2,
+                         dz=swca_WafCarTh/2
 EndBlock
 *
 *------------------------------------------------------------------------------
@@ -464,51 +506,51 @@ EndBlock
 Block SELE is the electronics mother volume
       Material  Air  
       Attribute SELE  Seen=0  Colo=1
-      Shape     BOX   dx=selc_ElcaWid/2.0  dy=swca_Length/2.0  dz=elethk/2.0
+      Shape     BOX   dx=selc_ElcaWid/2  dy=swca_Length/2  dz=elethk/2
 *
 *     build layers from bottom to top 
       Create    SWCH " water channel top/bottom"
-      Position  SWCH z=-elethk/2.0+selc_BeThk/2.0
-      Position  SWCH z=-elethk/2.0+selc_BeThk+selc_WatThk+selc_BeThk/2.0
+      Position  SWCH z=-elethk/2+selc_BeThk/2
+      Position  SWCH z=-elethk/2+selc_BeThk+selc_WatThk+selc_BeThk/2
       Create    SWCS " water channel side"
-      Position  SWCS z=-elethk/2.0+selc_BeThk+selc_WatThk/2.0,
-                     x=-selc_ElcaWid/2.0+selc_BeThk/2.0
-      Position  SWCS z=-elethk/2.0+selc_BeThk+selc_WatThk/2.0,
-                     x=+selc_ElcaWid/2.0-selc_BeThk/2.0
+      Position  SWCS z=-elethk/2+selc_BeThk+selc_WatThk/2,
+                     x=-selc_ElcaWid/2+selc_BeThk/2
+      Position  SWCS z=-elethk/2+selc_BeThk+selc_WatThk/2,
+                     x=+selc_ElcaWid/2-selc_BeThk/2
       Create    SWCW " water channel water"
-      Position  SWCW z=-elethk/2.0+selc_BeThk+selc_WatThk/2.0
+      Position  SWCW z=-elethk/2+selc_BeThk+selc_WatThk/2
       Create    SBOI " BeO substrate for hybrid"
-      Position  SBOI z=(elethk/2.0-selc_DyeThk-selc_AgPdThk _
-                        -selc_GlassThk-selc_BeOThk/2.0)
+      Position  SBOI z=(elethk/2-selc_DyeThk-selc_AgPdThk _
+                        -selc_GlassThk-selc_BeOThk/2)
       Create    SGLA " Glass insulating plane"
-      Position  SGLA z=elethk/2.0-selc_DyeThk-selc_AgPdThk-selc_GlassThk/2.0
+      Position  SGLA z=elethk/2-selc_DyeThk-selc_AgPdThk-selc_GlassThk/2
       Create    SAGP " Silver-Palladium Grounding plane"
-      Position  SAGP z=elethk/2.0-selc_DyeThk-selc_AgPdThk/2.0
+      Position  SAGP z=elethk/2-selc_DyeThk-selc_AgPdThk/2
       Create    SDYE " ic chips"
-      Position  SDYE z=elethk/2.0-selc_DyeThk/2.0,
-                     x=selc_ElcaWid/2.0-selc_Dyespc-selc_Dyewid/2.0
-      Position  SDYE z=elethk/2.0-selc_DyeThk/2.0,
-                     x=selc_ElcaWid/2.0-2.0*selc_Dyespc-3.0*selc_Dyewid/2.0
+      Position  SDYE z=elethk/2-selc_DyeThk/2,
+                     x=selc_ElcaWid/2-selc_Dyespc-selc_Dyewid/2
+      Position  SDYE z=elethk/2-selc_DyeThk/2,
+                     x=selc_ElcaWid/2-2.0*selc_Dyespc-3.0*selc_Dyewid/2
       Create    SECA " cables on electronics carriers"
-      Position  SECA z=elethk/2.0-selc_DyeThk+selc_CabThk/2.0,
-                     x=-selc_ElcaWid/2.0+selc_CabWid/2.0
+      Position  SECA z=elethk/2-selc_DyeThk+selc_CabThk/2,
+                     x=-selc_ElcaWid/2+selc_CabWid/2
 *
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block SDYE is the ic chip on the hybrid
       Material  Silicon
       Attribute SDYE   seen=1  colo=6
-      Shape     BOX    dx=selc_DyeWid/2.0,
-                       dy=svtl_Nwafer*(swca_WaferLen/2.0+swca_WaferGap),
-                       dz=selc_DyeThk/2.0
+      Shape     BOX    dx=selc_DyeWid/2,
+                       dy=svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap),
+                       dz=selc_DyeThk/2
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block SECA is the cable on the electronics carrier
       Material  Copper
       Attribute SECA   seen=1  colo=2
-      Shape     BOX    dx=selc_CabWid/2.0,
-                       dy=swca_Length/2.0,
-                       dz=selc_CabThk/2.0
+      Shape     BOX    dx=selc_CabWid/2,
+                       dy=swca_Length/2,
+                       dz=selc_CabThk/2
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block SBOI is the Berillia layer
@@ -516,9 +558,9 @@ Block SBOI is the Berillia layer
       Component O      A=16   Z=8   W=1
       Mixture   BeO    Dens=2.85
       Attribute SBOI   seen=1  colo=6
-      Shape     BOX    dx=selc_ElcaWid/2.0,
-	               dy=svtl_Nwafer*(swca_WaferLen/2.0+swca_WaferGap),
-  		       dz=selc_BeOThk/2.0
+      Shape     BOX    dx=selc_ElcaWid/2,
+	               dy=svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap),
+  		       dz=selc_BeOThk/2
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block SAGP is the Silver-Palladium layer
@@ -526,9 +568,9 @@ Block SAGP is the Silver-Palladium layer
       Component Pd     A=106  Z=46   W=1
       Mixture   AgPd   Dens=11.25
       Attribute SAGP   seen=1  colo=2
-      Shape     BOX    dx=selc_ElcaWid/2.0,
-	               dy=svtl_Nwafer*(swca_WaferLen/2.0+swca_WaferGap),
-  		       dz=selc_AgPdThk/2.0
+      Shape     BOX    dx=selc_ElcaWid/2,
+	               dy=svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap),
+  		       dz=selc_AgPdThk/2
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block SGLA is the insulating glass layer
@@ -536,25 +578,25 @@ Block SGLA is the insulating glass layer
       Component O      A=16   Z=8  W=2
       Mixture   glass  Dens=2.2
       Attribute SGLA   seen=1  colo=6
-      Shape     BOX    dx=selc_ElcaWid/2.0,
-	               dy=svtl_Nwafer*(swca_WaferLen/2.0+swca_WaferGap),
-  		       dz=selc_GlassThk/2.0
+      Shape     BOX    dx=selc_ElcaWid/2,
+	               dy=svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap),
+  		       dz=selc_GlassThk/2
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block SWCH is the Be top and bottom of the water channel
       Material  Berillium
       Attribute SWCH   seen=1  colo=2
-      Shape     BOX    dx=selc_ElcaWid/2.0,
-                       dy=swca_Length/2.0,
-                       dz=selc_BeThk/2.0
+      Shape     BOX    dx=selc_ElcaWid/2,
+                       dy=swca_Length/2,
+                       dz=selc_BeThk/2
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block SWCS is the Be side of the water channel
       Material  Berillium
       Attribute SWCS   seen=1  colo=2
-      Shape     BOX    dx=selc_BeThk/2.0,
-                       dy=swca_Length/2.0,
-                       dz=selc_WatThk/2.0
+      Shape     BOX    dx=selc_BeThk/2,
+                       dy=swca_Length/2,
+                       dz=selc_WatThk/2
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block SWCW is the water channel water (probably Evian?) 
@@ -563,9 +605,9 @@ Block SWCW is the water channel water (probably Evian?)
       Component O      A=16  Z=8   W=1
       Mixture   Water  Dens=1.0
       Attribute SWCW   seen=1  colo=6
-      Shape     BOX    dx=(selc_ElcaWid-2.0*selc_BeThk)/2.0,
-                       dy=swca_Length/2.0,
-                       dz=(selc_WatThk/2.0)
+      Shape     BOX    dx=(selc_ElcaWid-2.0*selc_BeThk)/2,
+                       dy=swca_Length/2,
+                       dz=(selc_WatThk/2)
 EndBlock
 *
 * ****************************************************************************
@@ -577,14 +619,14 @@ Block SIRT is the SVT inner end ring tube
       ir_rmin=serg_IrngPrMn*(cos(pi/8.)+sqrt(tan(pi/8.)**2.-sin(pi/8.)**2.))
       Shape     TUBE  rmin=ir_rmin,
                       rmax=serg_IrngTrMx,
-                      dz=serg_EndRngTh/2.0
+                      dz=serg_EndRngTh/2
 Endblock
 *
 * ****************************************************************************
 *
 Block SIRP is the SVT inner end ring polycone (overlaps tube)
-* The inner surface of the ploycone is inscribed within the inner tube radius
-* The outer surface of the ploycone is inscribed within the outer tube radius
+* The inner surface of the polycone is inscribed within the inner tube radius
+* The outer surface of the polycone is inscribed within the outer tube radius
 *
       Material  Berillium
       Attribute SIRP  Seen=1  Colo=2
@@ -603,7 +645,7 @@ Block SOER is the SVT outer end ring
       Attribute SOER  Seen=1  Colo=2
       Shape     TUBE   rmin=serg_OrngRmin,  
                        rmax=serg_OrngRmax,  
-                       dz=serg_EndRngTh/2.0
+                       dz=serg_EndRngTh/2
 Endblock
 *
 *******************************************************************************
@@ -626,7 +668,7 @@ Block SISM is the mother volume division for the inner end ring screws
       Shape Division   Iaxis=2  Ndiv=4   c0=45
 *
       Create    SCRW " Screw for attaching end rings to bracket"
-      Position  SCRW x=ssup_ERJrad-ssup_ERJlen/2.0+ssup_ERJ1x
+      Position  SCRW x=ssup_ERJrad-ssup_ERJlen/2+ssup_ERJ1x
 Endblock
 *
 *******************************************************************************
@@ -649,11 +691,11 @@ Block SOSM is the mother volume division for the outer end ring screws
       Shape Division   Iaxis=2  Ndiv=4   c0=45
 *
       Create    SCRW " Screw for attaching end rings to bracket"
-      Position  SCRW x=ssup_ERJrad+ssup_ERJlen/2.0-ssup_ERJ1x
-      Position  SCRW x=ssup_ERJrad+ssup_ERJlen/2.0-ssup_ERJ2x
-      Position  SCRW x=ssup_ERJrad+ssup_ERJlen/2.0-ssup_ERJ2x,
+      Position  SCRW x=ssup_ERJrad+ssup_ERJlen/2-ssup_ERJ1x
+      Position  SCRW x=ssup_ERJrad+ssup_ERJlen/2-ssup_ERJ2x
+      Position  SCRW x=ssup_ERJrad+ssup_ERJlen/2-ssup_ERJ2x,
                      y=ssup_ERJ2y
-      Position  SCRW x=ssup_ERJrad+ssup_ERJlen/2.0-ssup_ERJ2x,
+      Position  SCRW x=ssup_ERJrad+ssup_ERJlen/2-ssup_ERJ2x,
                      y=-ssup_ERJ2y
 Endblock
 *
@@ -666,7 +708,7 @@ Block SBRG is the bracket joining the end rings
       Attribute SBRG  seen=0  colo=1
       Shape     TUBE  Rmin=rin,
 		      Rmax=rou,
-                      dz=ssup_ERJthk/2.0
+                      dz=ssup_ERJthk/2
 *     
       Create    SBRM " Mother volume for a bracket joining the end rings"     
 Endblock
@@ -689,9 +731,9 @@ Block SBRI is the bracket which joins the rings
 *     This is a major simplification of a complex shape
       Attribute SBRI   Seen=1    Colo=2
       Material Berillium
-      Shape    BOX  dx=ssup_ERJlen/2.0,
-                    dy=ssup_ERJwid/2.0,
-                    dz=ssup_ERJThk/2.0
+      Shape    BOX  dx=ssup_ERJlen/2,
+                    dy=ssup_ERJwid/2,
+                    dz=ssup_ERJThk/2
 EndBlock
 *
 * ****************************************************************************
@@ -699,9 +741,9 @@ EndBlock
 Block SROD is the SVT Be support rod
       Material  Berillium
       Attribute SROD  Seen=1  Colo=2
-      Shape     TUBE   rmin=ssup_RodID/2.0,
-                       rmax=ssup_RodOD/2.0,
-                       dz=ssup_RodLen/2.0
+      Shape     TUBE   rmin=ssup_RodID/2,
+                       rmax=ssup_RodOD/2,
+                       dz=ssup_RodLen/2
 endblock
 *
 * ****************************************************************************
@@ -723,10 +765,10 @@ Block SCON is the Silicon tracker supporting cone mother volume
       attribute SCON    seen=0 colo=1
       SHAPE     PCON    Phi1=0  Dphi=360  Nz=7,
       zi ={ssup_Cone1zmn,
-           ssup_Rodlen/2.0, 
-           ssup_Rodlen/2.0, 
-           ssup_Rodlen/2.0+ssup_GrphThk, 
-           ssup_Rodlen/2.0+ssup_GrphThk, 
+           ssup_Rodlen/2, 
+           ssup_Rodlen/2, 
+           ssup_Rodlen/2+ssup_GrphThk, 
+           ssup_Rodlen/2+ssup_GrphThk, 
 	   ssup_Cone3zmx, 
 	   ssup_Cone4zmx},
       Rmx={ssup_Con1IdMn+cone_thk1,
@@ -751,8 +793,8 @@ Block SCON is the Silicon tracker supporting cone mother volume
       Create    STAC  " twinax cable approximation, copper"
       Position  STAC
       Create    SHLA  " water hose cone 3 layer"
-      Position  SHLA  z=ssup_Rodlen/2.0+ssup_GrphThk+_
-                      0.5*(ssup_Cone3zmx-ssup_Rodlen/2.0-ssup_GrphThk)
+      Position  SHLA  z=ssup_Rodlen/2+ssup_GrphThk+_
+                      0.5*(ssup_Cone3zmx-ssup_Rodlen/2-ssup_GrphThk)
       Create    SHLB  " water hose cone 4 layer"
       Position  SHLB  z=ssup_Cone3zmx+0.5*(ssup_Cone4zmx-ssup_Cone3zmx) 
       Create    SCMY  " support cone mylar wrap"
@@ -768,10 +810,10 @@ Block SGRA is the graphite/epoxy support cone
       Attribute SGRA   Seen=1   Colo=6
       SHAPE     PCON   Phi1=0   Dphi=360   Nz=7,
       zi ={ssup_Cone1zmn,
-           ssup_Rodlen/2.0, 
-           ssup_Rodlen/2.0, 
-           ssup_Rodlen/2.0+ssup_GrphThk, 
-           ssup_Rodlen/2.0+ssup_GrphThk, 
+           ssup_Rodlen/2, 
+           ssup_Rodlen/2, 
+           ssup_Rodlen/2+ssup_GrphThk, 
+           ssup_Rodlen/2+ssup_GrphThk, 
 	   ssup_Cone3zmx, 
 	   ssup_Cone4zmx},
       Rmx={ssup_Con1IdMn+ssup_GrphThk,
@@ -799,12 +841,12 @@ Block STAP is the plastic part of the twin-ax cable layer (guess polyethylene)
       Mixture   CH2    Dens=0.935
       Attribute STAP   Seen=1   Colo=3
       SHAPE     PCON   Phi1=0   Dphi=360  Nz=3,
-      zi ={ssup_Rodlen/2.0+ssup_GrphThk, 
+      zi ={ssup_Rodlen/2+ssup_GrphThk, 
 	   ssup_Cone3zmx, 
 	   ssup_Cone4zmx},
-      Rmx={ssup_Con3IdMn+roffset+ssup_CabThk/2.0,
-	   ssup_Con4IdMn+roffset+ssup_CabThk/2.0,
-	   ssup_Con4IdMx+roffset+ssup_CabThk/2.0},
+      Rmx={ssup_Con3IdMn+roffset+ssup_CabThk/2,
+	   ssup_Con4IdMn+roffset+ssup_CabThk/2,
+	   ssup_Con4IdMx+roffset+ssup_CabThk/2},
       Rmn={ssup_Con3IdMn+roffset, 
 	   ssup_Con4IdMn+roffset,
 	   ssup_Con4IdMx+roffset}
@@ -813,16 +855,16 @@ endblock
 *------------------------------------------------------------------------------
 *
 Block STAC is the copper part of the twin-ax cable layer
-      roffset=ssup_GrphThk+ssup_CabThk/2.0
+      roffset=ssup_GrphThk+ssup_CabThk/2
       Material  Copper
       Attribute STAC   Seen=1   Colo=2
       SHAPE     PCON   Phi1=0   Dphi=360  Nz=3,
-      zi ={ssup_Rodlen/2.0+ssup_GrphThk, 
+      zi ={ssup_Rodlen/2+ssup_GrphThk, 
 	   ssup_Cone3zmx, 
 	   ssup_Cone4zmx},
-      Rmx={ssup_Con3IdMn+roffset+ssup_CabThk/2.0,
-	   ssup_Con4IdMn+roffset+ssup_CabThk/2.0,
-	   ssup_Con4IdMx+roffset+ssup_CabThk/2.0},
+      Rmx={ssup_Con3IdMn+roffset+ssup_CabThk/2,
+	   ssup_Con4IdMn+roffset+ssup_CabThk/2,
+	   ssup_Con4IdMx+roffset+ssup_CabThk/2},
       Rmn={ssup_Con3IdMn+roffset, 
 	   ssup_Con4IdMn+roffset,
 	   ssup_Con4IdMx+roffset}
@@ -834,7 +876,7 @@ Block SHLA is the water hose layer for cone 3 (closer to vertex)
       roffset=ssup_GrphThk+ssup_CabThk
       Material  Air
       Attribute SHLA   Seen=0   Colo=1
-      SHAPE     CONE   Dz=.5*(ssup_Cone3zmx-ssup_Rodlen/2.0-ssup_GrphThk),
+      SHAPE     CONE   Dz=.5*(ssup_Cone3zmx-ssup_Rodlen/2-ssup_GrphThk),
                        Rmn1=ssup_Con3IdMn+roffset,
                        Rmx1=ssup_Con3IdMn+roffset+2.0*ssup_HosRmx,
                        Rmn2=ssup_Con4IdMn+roffset,
@@ -848,7 +890,7 @@ Block SHMA is a single mother volume for a water hose on the cone 3
       roffset=ssup_GrphThk+ssup_CabThk
       rmin=ssup_Con3IdMn+roffset
       rmax=ssup_Con4IdMn+roffset
-      zmin=ssup_Rodlen/2.0+ssup_GrphThk
+      zmin=ssup_Rodlen/2+ssup_GrphThk
       zmax=ssup_Cone3zmx
       cone_len=sqrt((zmax-zmin)**2.+(rmax-rmin)**2.)
       cone_sin=(rmax-rmin)/cone_len
@@ -941,7 +983,7 @@ Block SCMY is a mylar wrap around the support cone
       Mixture   Mylar  Dens=1.39
       Attribute SCMY   Seen=1   Colo=3
       SHAPE     PCON   Phi1=0   Dphi=360  Nz=3,
-      zi ={ssup_Rodlen/2.0+ssup_GrphThk, 
+      zi ={ssup_Rodlen/2+ssup_GrphThk, 
 	   ssup_Cone3zmx, 
 	   ssup_Cone4zmx},
       Rmx={ssup_Con3IdMn+roffset+ssup_WrpMyThk,
@@ -960,7 +1002,7 @@ Block SCAL is the aluminization on the mylar wrap around the support cone
       Material  Aluminium
       Attribute SCAL   Seen=1   Colo=2
       SHAPE     PCON   Phi1=0   Dphi=360  Nz=3,
-      zi ={ssup_Rodlen/2.0+ssup_GrphThk, 
+      zi ={ssup_Rodlen/2+ssup_GrphThk, 
 	   ssup_Cone3zmx, 
 	   ssup_Cone4zmx},
       Rmx={ssup_Con3IdMn+roffset+ssup_WrpAlThk,
@@ -978,12 +1020,10 @@ Block SWMM is the water manifold mother
       rou=swam_Rmax+swam_TbrdThk
       Material  Air
       Attribute SWMM  seen=0  colo=1
-*      Shape     TUBE  Rmin=rin,
-*		      Rmax=rou,
-*                      dz=swam_Len/2.0
+
       Shape     PGON  Phi1=0   Dphi=360  Nz=2,
                       NpDiv=18,
-                      zi ={-swam_Len/2.0,+swam_Len/2.0},
+                      zi ={-swam_Len/2,+swam_Len/2},
                       rmn={rin,rin},
                       rmx={rou,rou}
 *
@@ -992,8 +1032,8 @@ Block SWMM is the water manifold mother
       Create   SWMT  " water manifold top"
       Position SWMT
       Create   SWMS  " water manifold side"
-      Position SWMS  z=-swam_Len/2.0+swam_WallThk/2.0
-      Position SWMS  z= swam_Len/2.0-swam_WallThk/2.0
+      Position SWMS  z=-swam_Len/2+swam_WallThk/2
+      Position SWMS  z= swam_Len/2-swam_WallThk/2
 *
       Create   SWMW  " water manifold water"
       Position SWMW  
@@ -1011,11 +1051,11 @@ Block SWMB is the water manifold bottom piece (small r)
       Attribute  SWMB   Seen=1   Colo=2
 *      Shape      TUBE   Rmin=swam_Rmin,
 *                        Rmax=swam_Rmin+swam_WallThk,
-*                        dz=swam_Len/2.0-swam_WallThk
+*                        dz=swam_Len/2-swam_WallThk
       Shape     PGON  Phi1=0   Dphi=360  Nz=2,
                       NpDiv=18,
-                      zi ={-swam_Len/2.0+swam_WallThk,
-                            swam_Len/2.0-swam_WallThk},
+                      zi ={-swam_Len/2+swam_WallThk,
+                            swam_Len/2-swam_WallThk},
                       rmn={swam_Rmin,swam_Rmin},
                       rmx={swam_Rmin+swam_WallThk,swam_Rmin+swam_WallThk}
 Endblock
@@ -1027,11 +1067,11 @@ Block SWMT is the water manifold top piece (big r)
       Attribute  SWMT   Seen=1   Colo=2
 *      Shape      TUBE   Rmin=swam_Rmax-swam_WallThk,
 *                        Rmax=swam_Rmax,
-*                        dz=swam_Len/2.0-swam_WallThk
+*                        dz=swam_Len/2-swam_WallThk
       Shape     PGON  Phi1=0   Dphi=360  Nz=2,
                       NpDiv=18,
-                      zi ={-swam_Len/2.0+swam_WallThk,
-                            swam_Len/2.0-swam_WallThk},
+                      zi ={-swam_Len/2+swam_WallThk,
+                            swam_Len/2-swam_WallThk},
                       rmn={swam_Rmax-swam_WallThk,swam_Rmax-swam_WallThk},
                       rmx={swam_Rmax,swam_Rmax}
 Endblock
@@ -1043,10 +1083,10 @@ Block SWMS is the water manifold side pieces
       Attribute  SWMS   Seen=1   Colo=2
 *      Shape      TUBE   Rmin=swam_Rmin,
 *                        Rmax=swam_Rmax,
-*                        dz=swam_WallThk/2.0
+*                        dz=swam_WallThk/2
       Shape     PGON  Phi1=0   Dphi=360  Nz=2,
                       NpDiv=18,
-                      zi ={-swam_WallThk/2.0,swam_WallThk/2.0},
+                      zi ={-swam_WallThk/2,swam_WallThk/2},
                       rmn={swam_Rmin,swam_Rmin},
                       rmx={swam_Rmax,swam_Rmax}
 Endblock
@@ -1060,11 +1100,11 @@ Block SWMW is the water in the water manifold
       Attribute SWMW   seen=1  colo=6
 *      Shape     TUBE   Rmin=swam_Rmin+swam_WallThk,
 *                       Rmax=swam_Rmax-swam_WallThk,
-*                       dz=swam_Len/2.0-swam_WallThk
+*                       dz=swam_Len/2-swam_WallThk
       Shape     PGON  Phi1=0   Dphi=360  Nz=2,
                       NpDiv=18,
-                      zi ={-swam_Len/2.0+swam_WallThk,
-                            swam_Len/2.0-swam_WallThk},
+                      zi ={-swam_Len/2+swam_WallThk,
+                            swam_Len/2-swam_WallThk},
                       rmn={swam_Rmin+swam_WallThk,swam_Rmin+swam_WallThk},
                       rmx={swam_Rmax-swam_WallThk,swam_Rmax-swam_WallThk}
 Endblock
@@ -1082,10 +1122,10 @@ Block SOTB is the outer transition board (large r)
       Attribute SOTB   Seen=1   Colo=3
 *      Shape     TUBE   Rmin=swam_Rmax,
 *                       Rmax=swam_Rmax+swam_TbrdThk,
-*                       dz=swam_Len/2.0
+*                       dz=swam_Len/2
       Shape     PGON  Phi1=0   Dphi=360  Nz=2,
                       NpDiv=18,
-                      zi ={-swam_Len/2.0,+swam_Len/2.0},
+                      zi ={-swam_Len/2,+swam_Len/2},
                       rmn={swam_Rmax,swam_Rmax},
                       rmx={swam_Rmax+swam_TbrdThk,swam_Rmax+swam_TbrdThk}
 Endblock
@@ -1100,10 +1140,10 @@ Block SITB is the inner transition board (small r)
       Attribute SITB   Seen=1   Colo=3
 *      Shape     TUBE   Rmin=swam_Rmin-swam_TbrdThk,
 *                       Rmax=swam_Rmin,
-*                       dz=swam_Len/2.0
+*                       dz=swam_Len/2
       Shape     PGON  Phi1=0   Dphi=360  Nz=2,
                       NpDiv=18,
-                      zi ={-swam_Len/2.0,+swam_Len/2.0},
+                      zi ={-swam_Len/2,+swam_Len/2},
                       rmn={swam_Rmin-swam_TbrdThk,swam_Rmin-swam_TbrdThk},
                       rmx={swam_Rmin,swam_Rmin}
 Endblock
@@ -1117,7 +1157,7 @@ Block SBWC is the bracket connecting the water manifold to the cone
       Attribute SBWC  seen=0  colo=1
       Shape     TUBE  Rmin=rin,
 		      Rmax=rou,
-                      dz=(ssup_Cone1zmn-(swam_Zmin+swam_Len))/2.0
+                      dz=(ssup_Cone1zmn-(swam_Zmin+swam_Len))/2
 *     
       Create    SWCM " Mother volume for a bracket between mani and cone"     
 Endblock
@@ -1129,10 +1169,10 @@ Block SWCM is a single bracket mother between mani and cone
       Shape  Division   Iaxis=2   Ndiv=3 c0=0
 *
       Create    SXAI
-      Position  SXAI  Z=(-(ssup_Cone1zmn-(swam_Zmin+swam_Len))/2.0 _
-                        +ssup_BraThk/2.0) 
+      Position  SXAI  Z=(-(ssup_Cone1zmn-(swam_Zmin+swam_Len))/2 _
+                        +ssup_BraThk/2) 
       Create    SXBI
-      Position  SXBI  Z=(ssup_BraThk/2.0) 
+      Position  SXBI  Z=(ssup_BraThk/2) 
 *
 EndBlock
 *
@@ -1143,7 +1183,7 @@ Block SXAI is a first piece (A) of the bracket between mani and cone (X)
       Material   Aluminium
       Shape    TUBS rmin=swam_Rmin,
                     rmax=ssup_Con1IdMn,
-                    dz=ssup_BraThk/2.0,
+                    dz=ssup_BraThk/2,
                     phi1=-5,
 		    phi2=5
 EndBlock
@@ -1156,7 +1196,7 @@ Block SXBI is a second piece (B) of the bracket between mani and cone (X)
       Shape    TUBS rmin=ssup_Con1IdMn-ssup_BraThk,
                     rmax=ssup_Con1IdMn,
                     dz=((ssup_Cone1zmn-(swam_Zmin+swam_Len)- _
-                         ssup_BraThk)/2.0),
+                         ssup_BraThk)/2),
                     phi1=-5,
 		    phi2=5
 EndBlock
@@ -1166,11 +1206,198 @@ Block SCRW is the screw which attaches the end ring to the end ring bracket
       Material  Berillium
       Attribute SCRW   Seen=1  Colo=2
       Shape     TUBE   rmin=0,
-                       rmax=ssup_ERJdia/2.0,  
+                       rmax=ssup_ERJdia/2,  
                        dz=0.5*(brack_z-endrng_z)
 Endblock
 *
 *******************************************************************************
+*
+Block SFMO is the mother of the fourth layer (strip detectors)
+      Material   Air
+      Attribute  SFMO   Seen=0 Colo=1
+      Shape TUBE Rmin=sfpa_rmin,
+		 Rmax=sfpa_rmax,
+		 dz=sfpa_Len/2
+
+	dthk=sfpa_smThk+sfpa_gpThk
+	radtilt=(sfpa_tilt*pi)/180.
+      Do ilad = 1,20
+	Create SFLM " ladder mother"
+	ang=(float(ilad)-1)*2.0*pi/20.0
+      	Position SFLM x=-(sfpa_rad*sin(ang)+ _
+                         (dthk*sin(ang+radtilt))/2),
+		      y=(sfpa_rad*cos(ang)+ _
+                        (dthk*cos(ang+radtilt))/2),
+                      z=0,
+                      AlphaZ=(180.*ang/pi)+sfpa_tilt
+      EndDo
+Endblock 
+*
+*------------------------------------------------------------------------------
+* 
+Block SFLM is the mother of the 4th layer ladder
+* (dets,adc's and struct.)
+      Material Air
+      Attribute SFLM Seen=0 Colo=1
+      Shape BOX dx=sfpa_dmWid/2,
+		dy=(sfpa_dmThk+sfpa_gpThk+sfpa_smThk)/2,
+		dz=sfpa_smLen/2 
+      Create   SFDM " the detectors and adcs mother volume "
+      Position SFDM y=-(sfpa_smThk+sfpa_gpThk)/2
+		    
+
+      Create   SFSM " the structure mother volume"
+      Position SFSM y=(sfpa_dmThk+sfpa_gpThk)/2
+                    
+Endblock 
+*
+*------------------------------------------------------------------------------
+* 
+Block SFDM is the mother of the detectors 
+      Material Air
+      Attribute SFDM Seen=0 Colo=1
+      Shape BOX         dx=sfpa_dmWid/2,
+			dy=sfpa_dmThk/2,
+			dz=sfpa_wpLen/2 
+      
+      wafpckLen=sfpa_wpLen/(sfpa_nssd*1.)
+      Do iwaf=1,sfpa_nssd
+        Create    SFSW " single wafer container"
+        Position  SFSW z=-(sfpa_wpLen+wafpckLen)/2+iwaf*wafpckLen
+     EndDo 
+Endblock 
+*
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+*
+Block SFSW is a single wafer container
+      Attribute SFSW Seen=0 Colo=1
+      Shape BOX dx=sfpa_dmWid/2,
+	        dy=sfpa_dmThk/2,
+	        dz=wafpckLen/2
+ 
+     Create and position  SFSD " strip detector"
+
+Endblock
+*
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+*
+Block SFSD is the strip detector
+      Material  Silicon  
+      Material  Sensitive  Isvol=1       
+      Attribute SFSD       seen=2  Colo=4
+      Shape   BOX dx=sfpa_dmWid/2,
+ 		  dy=sfpa_dmThk/2,
+		  dz=sfpa_sdlen/2
+      call      GSTPAR (%Imed,'STRA',1.)
+* wkw fixed 4th layer hit definition Feb 27
+       HITS     SFSD   xx:16:SH(-30,30)   yy:16:(-30,30)     zz:16:(-35,35),
+                       px:16:(-100,100)   py:16:(-100,100)   pz:16:(-100,100),
+                       Slen:16:(0,1.e4)   Tof:16:(0,1.e-6)   Step:16:(0,10),
+                       SHTN:16:           Elos:32:(0,1)
+
+Endblock
+*
+*------------------------------------------------------------------------------
+* 
+Block SFSM is the mother of the ladder struct. 
+* (cool. pipe and carbon fiber)
+      Material Air
+      Attribute SFSM  Seen=0 Colo=1
+      Shape BOX dx=sfpa_smWid/2,
+		dy=sfpa_smThk/2,
+		dz=sfpa_smLen/2 
+      Create   SFSS " subvolume structure"
+Endblock 
+*
+*------------------------------------------------------------------------------
+* 
+Block SFSS is the subvolume of the mother struct. 
+* (cool. pipe and carbon fiber)
+      Material Air
+      Attribute SFSS Seen=0 Colo=1
+      Shape   division     Iaxis=3  Ndiv=20
+
+      Create   SFCP " cooling pipes"
+      Position SFCP x=sfpa_smWid/2-5.*sfpa_cprad,
+                    y=-sfpa_smThk/2+sfpa_cprad
+      Position SFCP x=-sfpa_smWid/2+5.*sfpa_cprad,
+                    y=-sfpa_smThk/2+sfpa_cprad
+
+      Create   SFCF " carbon fiber"
+      Position SFCF
+Endblock 
+*
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+* 
+Block SFCP is the cooling pipe 
+      Material Carbon
+      Attribute SFCP Seen=1 Colo=6
+* PN,13.06.98:  error fixed - Rmin should be zero .
+      Shape TUBE  rmin=0 rmax=sfpa_cprad dz=sfpa_ssLen/2
+		 
+      Create and Position SFCW " water cylinder"
+
+Endblock
+*
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+* 
+Block SFCW is the water cylinder in the cooling pipe
+      Material Water
+      Attribute SFCW Seen=1 Colo=6
+      Shape TUBE     rmax=sfpa_cpral
+                
+Endblock
+*
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+* 
+Block SFCF is the carbon fiber structure container
+      Material Air
+      Attribute SFCF Seen=0  Colo=3
+      Shape BOX  dx=sfpa_smThk*tan(pi/6.),
+		 dy=sfpa_smThk/2.,
+		 dz=sfpa_ssLen/2
+
+      Create   SFCT " carbon tube"
+      Position SFCT y= sfpa_smThk/2.-sfpa_cfrad
+       
+      Position SFCT x= sfpa_smThk*tan(pi/6.)-sfpa_cfrad,
+                    y=-sfpa_smThk/2.+sfpa_cfrad
+
+      Position SFCT x=-sfpa_smThk*tan(pi/6.)+sfpa_cfrad,
+                    y=-sfpa_smThk/2.+sfpa_cfrad
+
+
+      Create   SFCX " carbon tube (crossing)"
+      Position SFCX y=-sfpa_smThk/2.+sfpa_cfrad,
+                    ort=yzx
+
+      Position SFCX x=sfpa_smThk*tan(pi/6.)/2.-sfpa_cfrad/3.,
+                    ort=yzx AlphaZ=-60
+
+      Position SFCX x=-sfpa_smThk*tan(pi/6.)/2.+sfpa_cfrad/3.,
+                    ort=yzx AlphaZ=+60
+
+Endblock
+*
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+* 
+Block SFCT is the carbon fiber tube
+      Material Carbon
+      Attribute SFCT Seen=1 Colo=6
+      Shape TUBE rmin=0  rmax=sfpa_cfrad,
+		 dz=sfpa_ssLen/2
+Endblock
+*
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+* 
+Block SFCX is the carbon fiber tube
+      Material Carbon
+      Attribute SFCX Seen=1 Colo=7
+      Shape TUBE rmin=0  rmax=sfpa_cfrad,
+		 dz=sfpa_smThk*tan(pi/6.)-sfpa_cfrad
+Endblock
+*
+*------------------------------------------------------------------------------
 *
       End
 

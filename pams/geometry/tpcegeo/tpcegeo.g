@@ -308,7 +308,7 @@ block TPAI is an additional pseudo-padrow below the real one
       HITS     TPAI  xx:16:SHX(-250,250)   yy:16:(-250,250)   zz:32:(-250,250),
                      px:20:(-100,100)      py:20:(-100,100)   pz:20:(-100,100),
                      Slen:16:(0,1.e4)      Tof:16:(0,1.e-6)   Step:16:(0,10),
-                     SHTN:16:              USER:32:(-1,1) 
+                     SHTN:16:              USER:32:(-0.1,0.1) 
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 block TPAO is an additional pseudo-padrow on top of the real one
@@ -318,7 +318,7 @@ block TPAO is an additional pseudo-padrow on top of the real one
       HITS     TPAO  xx:16:SHX(-250,250)   yy:16:(-250,250)   zz:32:(-250,250),
                      px:20:(-100,100)      py:20:(-100,100)   pz:20:(-100,100),
                      Slen:16:(0,1.e4)      Tof:16:(0,1.e-6)   Step:16:(0,10),
-                     SHTN:16:              USER:32:(-1,1) 
+                     SHTN:16:              USER:32:(-0.1,0.1) 
 endblock
 *
 ********************************************************************************
