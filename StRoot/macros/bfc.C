@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.46 1999/05/09 02:12:53 fisyak Exp $
+// $Id: bfc.C,v 1.47 1999/05/09 21:45:12 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.47  1999/05/09 21:45:12  fisyak
+// change default chain
+//
 // Revision 1.46  1999/05/09 02:12:53  fisyak
 // Add to Loac Chain as a parameter
 //
@@ -132,7 +135,7 @@ void SetDefaultChain(){// default for standard chain
   for (Int_t k = kTPC;k<kLAST;k++) if (k != kTSS && k != kTFS) ChainFlags[k] = kTRUE;
 } 
 //_____________________________________________________________________
-void SetFlags(const Char_t *Chain="gtrack"){// parse Chain request
+void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
   TString STAR_VERSION("$STAR_VERSION");
   gSystem->ExpandPathName(STAR_VERSION);
   if (!strcmp("SL99c",STAR_VERSION.Data())) ChainFlags[kEVENT] = kTRUE; 
