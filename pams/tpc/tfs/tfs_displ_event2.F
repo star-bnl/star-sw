@@ -1,5 +1,9 @@
-* $Id: tfs_displ_event2.F,v 1.3 1999/07/19 19:15:48 genevb Exp $
+* $Id: tfs_displ_event2.F,v 1.4 1999/10/11 16:53:09 sakrejda Exp $
 * $Log: tfs_displ_event2.F,v $
+* Revision 1.4  1999/10/11 16:53:09  sakrejda
+* Obsolete parameters removed and the old code to do the pileup
+* deleted (not Akio's , akio's is still in!). It did not work anyway.
+*
 * Revision 1.3  1999/07/19 19:15:48  genevb
 * Use StMessMgr
 *
@@ -69,13 +73,6 @@ C-----------------------------------------------------------------------
       COMMON /TPHPNT/ IROW
 C     IROW  - 1 pointer to a row in a sector
 C     IROW  - 2 number of hits
-      REAL DZXING, EVPXNG
-      INTEGER NXINGS, NXTRIG
-      COMMON /EVMERG/ DZXING, NXINGS, NXTRIG, EVPXNG
-C     DZXING - z separation between beam bunches
-C     NXINGS - number of beam crossings per TPC live time
-C     NXTRIG - the number of the triggered crossing
-C     EVPXNG - average number of events per beam crossing
 
 C Local variables
       integer i, j, istart, iend, k, id0, id1, id2, id3

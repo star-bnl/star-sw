@@ -1,5 +1,9 @@
-* $Id: tfs_tpchit_merge.F,v 1.12 1999/09/09 18:52:48 liq Exp $
+* $Id: tfs_tpchit_merge.F,v 1.13 1999/10/11 16:53:14 sakrejda Exp $
 * $Log: tfs_tpchit_merge.F,v $
+* Revision 1.13  1999/10/11 16:53:14  sakrejda
+* Obsolete parameters removed and the old code to do the pileup
+* deleted (not Akio's , akio's is still in!). It did not work anyway.
+*
 * Revision 1.12  1999/09/09 18:52:48  liq
 * change the way to calculate the y for the merged hit
 *
@@ -28,21 +32,6 @@
 * problem fixed following Herb's suggestion
 *
 * Revision 1.3  1998/04/07 20:56:34  hardtke
-* AZZZZ
-* A
-* B
-* C
-* B
-* B
-* B
-*
-* A
-* A
-* B
-* B
-*
-*
-* C
 * add error message if tphit table too small
 *
 * Revision 1.2  1998/04/02 20:57:23  sakrejda
@@ -205,7 +194,7 @@ C     check separation in z
                      dzmin = tphit(k).zrf + tphit(l).zrf + zsep
                      dz    = abs( tphit(k).z - tphit(l).z )
 C     hits are sorted in z, so can't merge in the limit ...
-                     if ( dz .gt. 2*par(1).reslim + zsep ) go to 10
+                     if ( dz .gt. 2*ctrl(1).reslim + zsep ) go to 10
                      
 C     check separation in r-phi
                      drmin = tphit(k).prf + tphit(l).prf + rsep(ipad)

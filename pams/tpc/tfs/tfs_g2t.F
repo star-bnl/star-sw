@@ -1,5 +1,9 @@
-* $Id: tfs_g2t.F,v 1.9 1999/07/19 19:15:48 genevb Exp $
+* $Id: tfs_g2t.F,v 1.10 1999/10/11 16:53:10 sakrejda Exp $
 * $Log: tfs_g2t.F,v $
+* Revision 1.10  1999/10/11 16:53:10  sakrejda
+* Obsolete parameters removed and the old code to do the pileup
+* deleted (not Akio's , akio's is still in!). It did not work anyway.
+*
 * Revision 1.9  1999/07/19 19:15:48  genevb
 * Use StMessMgr
 *
@@ -107,10 +111,8 @@ C-----------------------------------------------------------------------
 
 C Local variables
 
-      LOGICAL   NEW_EVENT, EVENT_FLAG, LAST_EVENT
-      logical   new_xing, goloop, errflg
-      INTEGER   NEVENT_OUT, NOK
-      integer   ind, ierr, iev, nevent,i
+      logical   errflg
+      integer   ierr, i
       REAL      TIME_NOW, TIME_RD, TIME_POINT, TIME_DISPL
       REAL      TIME_MERGE, TIME_ALL, TIME_SORT
       character*132 m132(7)       ! for messages
@@ -147,12 +149,6 @@ C     initialize the random number generator if needed
 C     start the clock
       CALL TIMED(TIME_NOW)
 
-C     initialise the recdig in the mc table
-C     this is essential for the evaluation
-CCCC      do i=1,g2t_hit_h.nok
-CCCC         g2t_hit(i).recdig = 0
-CCCC      end do
-
 C     initialize
       if( ctrl(1).init .eq. 0 ) then
          CALL TFS_INI( par_h, par, ctrl_h, ctrl, errflg )
@@ -160,45 +156,23 @@ C     initialize
             tfs_g2t = STAFCV_BAD
             goto 999
          endif
-         NEVENT_OUT = 0
          TIME_RD    = 0.
          TIME_SORT  = 0.
          TIME_POINT = 0.
          TIME_DISPL = 0.
          TIME_MERGE = 0.
          TIME_ALL   = 0.
-         new_event = .true.
-         new_xing  = .true.
          ctrl(1).init = 1
-C
-C        obsolete in STAF
-C        ctrl_h.mod_count = ctrl_h.mod_count + 1
-C
       endif
 
 C     book-keeping
-      if( new_event ) then
-         iev = 0                ! sub-event counter
-         nok = 0                ! nok rows in tphit table
-         new_event = .false.
-      endif
-
 C     (re)set running count of OK rows in tphit table
-      if( ctrl(1).evmerg .ne. 1 ) tphit_h.nok = nok
-
-C     update current beam crossing
-      if( new_xing ) then
-         iev = 0
-         nevent = 1
-         new_xing = .false.
-      endif
+      tphit_h.nok = 0
       
 C     read-in the Monte-Carlo hit data
-      if( nevent.gt.0 ) then    ! may be zero for last xing
-         iev = iev + 1
          CALL TFS_G2T_HIT_RD( g2t_hit_h, g2t_hit, 
      >        g2t_track_h, g2t_track, 
-     >        ctrl_h, ctrl,par_h, par, tphit_h, tphit,
+     >        tphit_h, tphit,
      >        tpc_index_h, tpc_index, tpc_index_type_h,
      >        tpc_index_type,ierr)
          If (ierr.gt.0) then
@@ -211,18 +185,7 @@ C          call StWarning('TFS-G2T-I1 tphit table too small')
          CALL TIMED(TIME_NOW)
          TIME_ALL = TIME_ALL + TIME_NOW
          TIME_RD = TIME_RD + TIME_NOW
-      endif
       
-C     
-C     check current sub-event (may be more than one per beam crossing)
-      if( iev .eq. nevent ) new_xing = .true.
-      
-C     abort TAS event loop if not yet done
-      if( ctrl(1).bipass .ne. 0 ) then
-C     bipass any processing of this event
-         tfs_g2t = STAFCV_OK
-         new_event = .true.
-      elseif( iev .eq. nevent ) then
 C     sort according to sector-row and set up pointer index
          CALL TFS_HIT_SORT( tphit_h, tphit )
          CALL TIMED(TIME_NOW)
@@ -230,7 +193,7 @@ C     sort according to sector-row and set up pointer index
          TIME_SORT = TIME_SORT + TIME_NOW
          
 C     generate pad response and spatial resolutions
-         CALL TFS_GEN_PADRES(par_h, par,  tphit_h, tphit )
+         CALL TFS_GEN_PADRES(par_h, par,  ctrl_h, ctrl, tphit_h, tphit )
          CALL TIMED(TIME_NOW)
          TIME_ALL = TIME_ALL + TIME_NOW
          TIME_POINT = TIME_POINT + TIME_NOW
@@ -253,12 +216,10 @@ C     Merge hits that are close in space
          TIME_MERGE = TIME_MERGE + TIME_NOW
          
 C     Increment counter and check if done
-         NEVENT_OUT = NEVENT_OUT + 1
          CALL TIMED(TIME_NOW)
          TIME_ALL = TIME_ALL + TIME_NOW
          
          if( ctrl(1).print .ge. 1 ) then
-            WRITE(m132(1),*) ' EVENTS PROCESSED: ',NEVENT_OUT
             WRITE(m132(2),*) ' TIME_ALL:   ',TIME_ALL,' CPU seconds'
             WRITE(m132(3),*) ' TIME_RD:    ',TIME_RD,' CPU seconds'
             WRITE(m132(4),*) ' TIME_SORT : ',TIME_SORT,' CPU seconds'
@@ -268,19 +229,7 @@ C     Increment counter and check if done
             call Message(m132,7,-1)
          endif
          
-C     write out this event - set flag for new event
-         if( nevent_out .eq. ctrl(1).nevent ) then
-            tfs_g2t = STAFCV_BAD
-         else
-            tfs_g2t = STAFCV_OK
-         endif
-         new_event = .true.
-      else
-C     keep track of rows, but return zero
-         nok = tphit_h.nok
-         tphit_h.nok = 0
-         tfs_g2t = STAFCV_BAD
-      endif
+         tfs_g2t = STAFCV_OK
       
  999  Return
       End
