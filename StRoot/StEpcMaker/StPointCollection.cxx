@@ -3,8 +3,8 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
-// Revision 1.4  2000/12/01 17:06:15  subhasis
-// track matching after assignment, PRS, deltaeta,deltaphi added to StEmcPoint
+// Revision 1.5  2001/03/13 16:23:41  subhasis
+// StEmcGeom.h moved from St_emc_Maker
 //
 // Revision 1.3  2000/08/29 20:33:04  subhasis
 //  Modified to accept input from StEvent and writing output to StEvent for Emc
@@ -38,8 +38,8 @@
 #include "StThreeVector.hh"
 #include "StHelix.hh"
 #include "SystemOfUnits.h"
-#include "St_emc_Maker/StEmcGeom.h"
-#include "St_emc_Maker/StEmcHitCollection.h"
+#include "StEmcUtil/StEmcGeom.h"
+//#include "St_emc_Maker/StEmcHitCollection.h"
 #include <stdlib.h>
 #include <string.h>
 #include <vector>

@@ -1,8 +1,11 @@
 //
-// $Id: StEpcMaker.cxx,v 1.6 2000/08/29 20:40:06 subhasis Exp $
+// $Id: StEpcMaker.cxx,v 1.7 2001/03/13 16:23:29 subhasis Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.7  2001/03/13 16:23:29  subhasis
+// StEmcGeom.h moved from St_emc_Maker
+//
 // Revision 1.6  2000/08/29 20:40:06  subhasis
-// Modified to accept input from StEvent and writing output to StEvent for Emc
+//  Modified to accept input from StEvent and writing output to StEvent for Emc
 //
 // Revision 1.3  2000/05/16 21:48:32  subhasis
 //  new checks for events with no clusters
@@ -32,7 +35,7 @@
 #include "StThreeVector.hh"
 #include "StHelix.hh"
 #include "SystemOfUnits.h"
-#include "St_emc_Maker/StEmcGeom.h"
+#include "StEmcUtil/StEmcGeom.h"
 #include <stdlib.h>
 #include <string.h>
 #include "StThreeVectorD.hh"
@@ -282,7 +285,7 @@ Int_t StEpcMaker::fillStEvent()
    StEmcCollection *emc;
   if(!mTheEmcCollection){
     cout<<"Epc:: Emc Collection does not exist, Create one***"<<endl;
-  //Create StEmcHitCollection
+  //Create StEmcCollection
    emc = new StEmcCollection();
    cout<<" Epc:: EmcCollection created***"<<endl;
      }

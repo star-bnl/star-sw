@@ -1,7 +1,10 @@
 ///
-// $Id: StPi0Candidate.h,v 1.1 2000/05/15 21:18:33 subhasis Exp $
+// $Id: StPi0Candidate.h,v 1.2 2001/03/13 16:23:04 subhasis Exp $
 //
 // $Log: StPi0Candidate.h,v $
+// Revision 1.2  2001/03/13 16:23:04  subhasis
+// StEmcGeom.h moved from St_emc_Maker
+//
 // Revision 1.1  2000/05/15 21:18:33  subhasis
 // initial version
 //
@@ -16,7 +19,7 @@
 #include <iostream.h>
 #include "TArrayI.h"
 #include "TObject.h"
-#include "St_emc_Maker/StEmcHitCollection.h"
+//#include "St_emc_Maker/StEmcHitCollection.h"
 
 class StPi0Candidate : public TObject {
 private:
