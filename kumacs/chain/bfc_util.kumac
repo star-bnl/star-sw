@@ -541,7 +541,7 @@ macro bfc_finish _
             if [output_xdf_file]="" then
                  message "Empty output file"
             else
-              if ($vexist(randst).ne.0) then
+              if ($vexist(randst).ne.0 .or. $vexist(havedstrunsum).ne.0) then
 	        exec write_table_to_file#write outfile [run]
               endif
               exec write_table_to_file#close outfile;
@@ -550,7 +550,7 @@ macro bfc_finish _
             if [output_dst_file]="" then
                  message "Empty dst output file"
             else
-              if ($vexist(randst).ne.0) then
+              if ($vexist(randst).ne.0 .or. $vexist(havedstrunsum).ne.0) then
 	        exec write_table_to_file#write dstout [run_dst]
               endif
               exec write_table_to_file#close dstout;
