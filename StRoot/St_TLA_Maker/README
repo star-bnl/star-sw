@@ -12,8 +12,10 @@ Provides template for creation any user maker.
 
   a) Init()  	//mandatory
   b) Make()  	//mandatory
-  c) Clear() 	//if standard StMaker::Clear()  is not appropriate  
-  d) Finish()	//if standard StMaker::Finish() is not appropriate 
+  c) InitRun(newRunNumber) 	//if needed
+  d) FinishRun(oldRunNumber) 	//if needed
+  e) Clear() 	//if standard StMaker::Clear()  is not appropriate  
+  f) Finish()	//if standard StMaker::Finish() is not appropriate 
 
 3) User can define any other methods, but regularly they
    should not be used by others makers. But some of them
