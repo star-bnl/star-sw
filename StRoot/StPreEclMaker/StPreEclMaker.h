@@ -1,9 +1,14 @@
 //
-// $Id: StPreEclMaker.h,v 1.5 2000/09/08 21:48:00 suaide Exp $
+// $Id: StPreEclMaker.h,v 1.6 2001/02/01 22:23:14 suaide Exp $
 //
 //
 // $Log: StPreEclMaker.h,v $
+// Revision 1.6  2001/02/01 22:23:14  suaide
+// Fixed some memory leaks
+//
 // Revision 1.5  2000/09/08 21:48:00  suaide
+//
+//
 // See README for details
 //
 // Revision 1.4  2000/08/24 22:11:35  suaide
@@ -55,8 +60,8 @@
 class StPreEclMaker : public StMaker {
 private:
   Bool_t        kStEvOk;
-  void          MakeHistograms();   // Filling QA Histograms
-  virtual Int_t fillStEvent();
+  void          MakeHistograms(Int_t,StEmcPreClusterCollection*);   // Filling QA Histograms
+  virtual Int_t fillStEvent(Int_t,StEmcPreClusterCollection*);
 protected:
   TH2F          *m_ncl;             //! 
   TH2F          *m_etot;            //!

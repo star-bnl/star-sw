@@ -1,6 +1,9 @@
-// $Id: StEmcPreCluster.cxx,v 1.7 2001/01/26 21:54:23 suaide Exp $
+// $Id: StEmcPreCluster.cxx,v 1.8 2001/02/01 22:23:09 suaide Exp $
 //
 // $Log: StEmcPreCluster.cxx,v $
+// Revision 1.8  2001/02/01 22:23:09  suaide
+// Fixed some memory leaks
+//
 // Revision 1.7  2001/01/26 21:54:23  suaide
 // fixed a small bug in the phi calculation for a given cluster
 // CVt: ----------------------------------------------------------------------
@@ -90,8 +93,8 @@ StEmcPreCluster::StEmcPreCluster(Int_t mod,TArrayI *hits,Int_t detector) : TObje
   
   mModule=mod;
   
-  emcgeo=new StEmcGeom(detector);
-    
+  mDetector=detector;
+      
   mNhits = hits->GetSize();
   if(mNhits>0) 
   {
@@ -100,9 +103,28 @@ StEmcPreCluster::StEmcPreCluster(Int_t mod,TArrayI *hits,Int_t detector) : TObje
   else printf(" <E> Ctor StEmcPreCluster => mNhits = %i \n", mNhits);
 }
 //_____________________________________________________________________________
+StEmcPreCluster::StEmcPreCluster(Int_t mod,TArrayI *hits,Int_t detector,StEmcDetector* mDet)  
+{
+  mEnergy = 0.0; mEta = 0.0; mPhi = 0.0; 
+  mSigmaEta =0.0; mSigmaPhi=0.0;
+  
+  mModule=mod;
+  
+  mDetector=detector;
+    
+  mNhits = hits->GetSize();
+  if(mNhits>0) 
+  {
+    mHitsID.Set(mNhits,hits->GetArray());
+  }
+  else printf(" <E> Ctor StEmcPreCluster => mNhits = %i \n", mNhits);
+  calcMeanAndRms(mDet,mod);
+}
+//_____________________________________________________________________________
 void StEmcPreCluster::calcMeanAndRms(StEmcDetector* mDet,Int_t mod)
 {
 // For caclulation of cluster's characteristics.
+  emcgeo=new StEmcGeom(mDetector);
   StSPtrVecEmcRawHit& mStEventHits=mDet->module(mod)->hits();
   Float_t etah, phih;
   Int_t m, e, s;
@@ -157,6 +179,7 @@ void StEmcPreCluster::calcMeanAndRms(StEmcDetector* mDet,Int_t mod)
     if(mSigmaPhi<=1.0e-7) mSigmaPhi = 0.0;
     else mSigmaPhi = sqrt(mSigmaPhi);
   }
+  delete emcgeo;
 }
 //_____________________________________________________________________________
 void StEmcPreCluster::print(ostream *os)
