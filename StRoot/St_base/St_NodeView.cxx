@@ -2,6 +2,10 @@
 // 
 // 
 
+#include <fstream.h>
+#include <iostream.h>
+#include <iomanip.h>
+
 #include "TBrowser.h"
 #include "St_NodeView.h"
 #include "St_NodeViewIter.h"
@@ -31,7 +35,7 @@
 ClassImp(St_NodeView)
 //_____________________________________________________________________________
 St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition)
-            : St_ObjectSet(viewNode->GetName(),(TObject *)nodePosition),m_Positions(0)
+            : St_ObjectSet(viewNode->GetName(),(TObject *)nodePosition)
 {
   if (viewNode) 
   {
@@ -53,8 +57,16 @@ St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition)
   }
 }
 //_____________________________________________________________________________
+St_NodeView::St_NodeView(St_Node *thisNode,St_NodePosition *nodePosition)
+            : St_ObjectSet(thisNode->GetName(),(TObject *)nodePosition)
+{
+  if (thisNode) 
+     SetTitle(thisNode->GetTitle());
+}
+
+//_____________________________________________________________________________
 St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,EDataSetPass iopt,Int_t level)
-            : St_ObjectSet(pattern.GetName(),(TObject *)nodePosition),m_Positions(0)
+            : St_ObjectSet(pattern.GetName(),(TObject *)nodePosition)
 {
   //
   // Creates St_DataSet (clone) with a topology similar with St_DataSet *pattern
@@ -86,12 +98,7 @@ St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,ED
     // define the the related St_Node
      St_Node *node = position->GetNode(); 
      if (node) {
-       if ( optMarked) {
-        // Update position
-           position = UpdateTempMatrix(position,thisLevel);
-           if ( !node->IsMarked() )  continue;
-           position = new St_NodePosition(*position);
-       }
+       if (optMarked && !node->IsMarked()) continue;
 
        if (optSel) {
             St_DataSet *parent = node->GetParent(); 
@@ -108,73 +115,7 @@ St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,ED
 //______________________________________________________________________________
 St_NodeView::~St_NodeView()
 {
- if (m_Positions) { m_Positions->Delete(); delete m_Positions; }
-}
 
-//______________________________________________________________________________
-St_NodePosition *St_NodeView::SetPositionAt(Int_t level,St_Node *node,Double_t x,
-                                      Double_t y, Double_t z, TRotMatrix *matrix)
-{
-   if (!m_Positions)  m_Positions = new TObjArray(100);
-   St_NodePosition *position =  (St_NodePosition *) m_Positions->At(level);
-   if (position) position->Reset(node,x,y,z,matrix);
-   else {
-      position = new St_NodePosition(node,x,y,z,matrix);
-      m_Positions->AddAtAndExpand(position,level);
-    }
-   return position;
-}
-
-//______________________________________________________________________________
-St_NodePosition *St_NodeView::UpdateTempMatrix(St_NodePosition *curPosition,Int_t level)
-{
-  // Pick the "old" position by pieces
-  St_NodePosition *newPosition = 0;
-  St_Node *curNode = 0;
-  if (curPosition) curNode = curPosition->GetNode();
-  if (level-1) {
-    St_NodePosition *oldPosition = 0;
-    TRotMatrix *oldMatrix = 0;
-    oldPosition = m_Positions ? (St_NodePosition *)m_Positions->At(level-1):0;
-    Double_t oldTranslation[] = { 0, 0, 0 };
-    if (oldPosition) 
-    {
-      oldMatrix         = oldPosition->GetMatrix();
- 
-      oldTranslation[0] = oldPosition->GetX();
-      oldTranslation[1] = oldPosition->GetY();
-      oldTranslation[2] = oldPosition->GetZ();
-    }
-
-    // Pick the "current" position by pieces
-    TRotMatrix *curMatrix        = curPosition->GetMatrix();
- 
-    // Create a new position
-    Double_t newTranslation[3];
-    Double_t newMatrix[9];
-
-    if(oldMatrix)
-    {
-      TGeometry::UpdateTempMatrix(oldTranslation,oldMatrix->GetMatrix()
-                       ,curPosition->GetX(),curPosition->GetY(),curPosition->GetZ(),curMatrix->GetMatrix()
-                       ,newTranslation,newMatrix);
-      Int_t num = gGeometry->GetListOfMatrices()->GetSize();
-      Char_t anum[100];
-      sprintf(anum,"%d",num+1);
-      newPosition = SetPositionAt(level,curNode
-                                ,newTranslation[0],newTranslation[1],newTranslation[2]
-                                ,new TRotMatrix(anum,"NodeView",newMatrix));
-    }
-    else {
-       newTranslation[0] = oldTranslation[0] + curPosition->GetX();
-       newTranslation[1] = oldTranslation[1] + curPosition->GetY();
-       newTranslation[2] = oldTranslation[2] + curPosition->GetZ();
-       newPosition = SetPositionAt(level,curNode,newTranslation[0],newTranslation[1],newTranslation[2]);
-    }
-  }
-  else
-       newPosition =  SetPositionAt(level,curNode);
-  return newPosition;
 }
 
 //_____________________________________________________________________________
@@ -350,4 +291,106 @@ void St_NodeView::Paint(Option_t *option)
   }
   gGeometry->PopLevel();
 }
+//_______________________________________________________________________
+void St_NodeView::SavePrimitive(ofstream &out, Option_t *option)
+{
+const Char_t *sceleton[] = {
+   "St_NodeView *CreateNodeView(St_Node *topNode)"
+  ,"{"
+  ,"  TString thisNodePath = "
+  ," "
+  ,"  // Define position"
+  ," "
+  ,"  Double_t thisX  = "
+  ,"  Double_t thisY  = "
+  ,"  Double_t thisZ  = "
+  ," "
+  ,"  TString matrixName = " 
+  ,"  Int_t type = "
+  ,"  Double_t *thisMatrix[] = {  "
+  ,"                              "
+  ,"                              "
+  ,"                            };"
+  ,"  St_Node *thisNode = 0;"
+  ,"  // Find St_Node by path;"
+  ,"  if (topNode) {"
+  ,"    thisNode =  (St_Node *)topNode->Find(thisNodePath);    "
+  ,"    if (!thisNode->InheritsFrom(\"St_Node\")) {"
+  ,"           thisNode = 0;"
+  ,"           fprintf(stderr,\"Error wrong node <%s> on path: \\\"%s\\\"\\n\",thisNode->GetName(),thisModePath.Data());"
+  ,"    }" 
+  ,"  }"
+  ,"  TRotMatrix *thisRotMatrix =  gGeometry->GetRotMatrix(matrixName.Data());"
+  ,"  St_NodePosition *thisPosition = 0;"
+  ,"  if (thisRotMatrix) "
+  ,"      thisPosition = new St_NodePosition(thisNode,thisX, thisY, thisZ, matrixName.Data());"
+  ,"  else if (type==2) "
+  ,"       thisPosition = new St_NodePosition(thisNode,thisX, thisY, thisZ);"
+  ,"  else "
+  ,"       thisPosition = new St_NodePosition(thisNode,thisX, thisY, thisZ, thisMatrix);"
+  ,"  }"
+  ,"  St_NodeView *thisView = new St_NodeView(thisNode,thisPosition);"
+  ,"  return thisView;"
+  ,"}"
+  };
+//------------------- end of sceleton ---------------------
+  Int_t sceletonSize = sizeof(sceleton)/4;
+  St_NodePosition *thisPosition = GetPosition();
+  TString thisNodePath = Path();
+  // Define position
+  Double_t thisX  = thisPosition ? thisPosition->GetX():0;
+  Double_t thisY  = thisPosition ? thisPosition->GetY():0;
+  Double_t thisZ  = thisPosition ? thisPosition->GetZ():0;
 
+  TRotMatrix *matrix = thisPosition ? thisPosition->GetMatrix():0;
+  Int_t matrixType = 2;
+  TString matrixName = " ";
+  Double_t *thisMatrix[] = { 0,0,0, 0,0,0, 0,0,0 };
+  if (matrix) {
+     matrixName = matrix->GetName();
+     memcpy(thisMatrix,matrix->GetMatrix(),9*sizeof(Double_t));
+     matrixType = matrix->GetType();
+  }
+  Int_t im = 0;
+  for (Int_t lineNumber =0; lineNumber < sceletonSize; lineNumber++) {
+    out << sceleton[lineNumber];  cout << lineNumber << ". " << sceleton[lineNumber];
+    switch (lineNumber) {
+    case  2:  out  << "\"" << thisNodePath.Data() << "\";" ; cout  << "\"" << thisNodePath.Data() << "\";" ;
+       break;
+    case  6:  out << thisX << ";" ;  cout << thisX << ";" ;
+       break;
+    case  7:  out << thisY << ";" ; cout << thisY << ";" ;
+       break;
+    case  8:  out << thisZ << ";" ; cout << thisZ << ";" ;
+       break;
+    case 10:  out << "\"" << matrixName << "\";" ; cout << "\"" << matrixName << "\";" ;
+       break;
+    case 11:  out <<  matrixType << ";" ; cout <<  matrixType << ";" ;
+       break;
+    case 12:  out << thisMatrix[im++] << ", " << thisMatrix[im++] << ", " << thisMatrix[im++]  << ", " ;
+       break; 
+    case 13:  out << thisMatrix[im++] << ", " << thisMatrix[im++] << ", " << thisMatrix[im++]  << ", " ;
+       break;
+    case 14:  out << thisMatrix[im++] << ", " << thisMatrix[im++] << ", " << thisMatrix[im++] ;
+       break;
+    default:
+       break;
+   };
+   cout << " " << endl;
+   out << " " << endl;
+ }
+
+#if 0
+  // Save itself
+  gSystem->MakeDirectory(GetName());
+  gSystem->ChangeDirectory(GetName());
+  
+  if (option && strstr(option,"f")) {
+    St_DataSetIter next(this)
+    St_NodeView *view = 0;
+    while( (view = next()) 
+       view->SavePrimirtive(out ,option);
+    
+  }
+#endif
+}
