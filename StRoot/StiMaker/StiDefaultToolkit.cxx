@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.23 2004/09/15 21:34:40 pruneau Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.24 2004/10/08 14:50:11 pruneau Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.24  2004/10/08 14:50:11  pruneau
+ * changed hit factory allocation
+ *
  * Revision 2.23  2004/09/15 21:34:40  pruneau
  * Increased maximum allocation for track factory.
  *
@@ -204,7 +207,7 @@ Factory<StiHit>* StiDefaultToolkit::getHitFactory()
 {
   if (_hitFactory)
     return _hitFactory;
-  _hitFactory = new VectorizedFactory<StiHit,StiHit>("StiHitFactory",50000,20000,15);
+  _hitFactory = new VectorizedFactory<StiHit,StiHit>("StiHitFactory",50000,50000,15);
   return _hitFactory;
 }
 
