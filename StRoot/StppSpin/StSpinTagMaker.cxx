@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StSpinTagMaker.cxx,v 1.1 2001/06/22 19:41:45 balewski Exp $
+// $Id: StSpinTagMaker.cxx,v 1.2 2003/01/03 16:40:39 balewski Exp $
 // $Log: StSpinTagMaker.cxx,v $
+// Revision 1.2  2003/01/03 16:40:39  balewski
+// cleanup (2)
+//
 // Revision 1.1  2001/06/22 19:41:45  balewski
 // *** empty log message ***
 //
@@ -74,6 +77,7 @@ Int_t StSpinTagMaker::Make(){
       row.sumAbsPt += pt;
     }
   } 
+#if 0 // tmp off because B-EMC simu was not in the chain,JB
 
   // find highest BEMC tower from StEvent
   StEmcCollection *emc=event->emcCollection();  assert(emc);
@@ -94,6 +98,7 @@ Int_t StSpinTagMaker::Make(){
       //hits[ih]->Dump();      
     }
   }
+#endif
 
   tagtab->AddAt(&row,0);  
   tagtab->Print(0,2);
