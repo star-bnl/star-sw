@@ -1,5 +1,12 @@
-// $Id: St_mwc_Maker.cxx,v 1.16 2000/03/28 20:27:56 fine Exp $
+// $Id: St_mwc_Maker.cxx,v 1.17 2000/04/21 23:11:19 v3240 Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.17  2000/04/21 23:11:19  v3240
+// new database included, must load tpc
+//
+//
+// 2000/04/21 Vladimir Morozov - you must include tpc option in
+//   your maker chain for mwc to work
+//
 // Revision 1.16  2000/03/28 20:27:56  fine
 // Adjuested to ROOT 2.24
 //
@@ -77,11 +84,13 @@
 #include "St_mwc_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
+#include "StTpcDb/StTpcDb.h"
 #include "mwc/St_mwg_Module.h"
 #include "mwc/St_mws_Module.h"
 #include "mwc/St_mwu_Module.h"
 #include "TH1.h"
 #include "TH2.h"
+#include <iostream.h>
 ClassImp(St_mwc_Maker)
 
 //_____________________________________________________________________________
@@ -108,7 +117,22 @@ Int_t St_mwc_Maker::Init(){
    partable->min_ion    = 0;
    m_mpar->AddAt(partable,0);
 
-// Create Histograms 
+   mwc_geo_st *geotable = m_geom->GetTable();
+   if (gStTpcDb) {
+     StTpcWirePlaneI *radius = gStTpcDb->WirePlaneGeometry();
+     Float_t rad1 = radius->firstInnerSectorAnodeWire();
+     Float_t rad2 = radius->lastInnerSectorAnodeWire();
+     Float_t rad3 = radius->firstOuterSectorAnodeWire();
+     Float_t rad4 = radius->lastOuterSectorAnodeWire();
+     geotable->r1max = rad2;
+     geotable->r1min = rad1;
+     geotable->r2min = rad3;
+     geotable->r2max = rad4;
+   }
+   m_geom->AddAt(geotable,0);
+   
+
+// Create Histograms
 
    m_px = new TH1F("MwcHitPx","MWC: px",100,-4.0,4.0);
    m_py = new TH1F("MwcHitPy","MWC: py",100,-4.0,4.0);
@@ -163,7 +187,7 @@ Int_t St_mwc_Maker::Make(){
    }
 
    mwc_sector_st *sec = sector->GetTable();
-   mwc_raw_st    *rw  = raw->GetTable();
+   // mwc_raw_st    *rw  = raw->GetTable();
    /*   for (int ii=0;ii<=95;ii++)
      {
        if ( (rw+ii)->count )
@@ -202,3 +226,23 @@ Int_t St_mwc_Maker::Make(){
 }
 //_____________________________________________________________________________
      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
