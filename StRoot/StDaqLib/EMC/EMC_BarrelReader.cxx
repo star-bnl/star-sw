@@ -44,6 +44,13 @@ void EMC_BarrelReader::Initialize()
    mTheTowerPedR.TowerADCArray[i]=0;
    mTheTowerRMSR.TowerADCArray[i]=0; 
   }
+  for(int i=0;i<120;i++)
+  {
+   mTheTowerAdcR.TDCHeader[i]=0;
+   mTheTowerAdcD.TDCHeader[i]=0;
+   mTheTowerPedR.TDCHeader[i]=0;
+   mTheTowerRMSR.TDCHeader[i]=0; 
+  }
 
   // Initialize TOWERDATA array to 0's
   for(int i = 0 ; i <120 ; i++) 
@@ -188,6 +195,7 @@ int EMC_BarrelReader::FillBarrelTower(Bank_TOWERADCR* pADCR)
   mTheTowerAdcR.TDCErrorFlag=1;                     // Error from TDC (0=good)
   mTheTowerAdcR.NTDCChannels=0;                     // Number of valid TDC channels
   
+  for(int TDC=0;TDC<120;TDC++) mTheTowerAdcR.TDCHeader[TDC] = pADCR->TDCHeader[TDC];
   
   for(int TDC=0;TDC<30;TDC++)  // filling TDC channels information
   {
