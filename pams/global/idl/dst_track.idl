@@ -53,11 +53,9 @@
  *                       packed format. This is defined in 
  *                       $STAR/pams/global/inc/StTrackDefinitions.h
  *                       This is used  to indicate the track finding 
- *                       methods, pass numbers 
- *                       and track fitting methods used to 
+ *                       methods and track fitting methods used to 
  *                       generate the global tracks:
- *                       method=finder+10*quality+100*fitting method+
- *                              1000(if vertex constraint was used in fit).
+ *                       method=fitting method+(bitmap)finder
  *
  *       pid             Geant particle ID number for mass hypothesis
  *                       used in the tracking.  This is included for the
@@ -222,7 +220,7 @@
   float      impact;           /* impact parameter based on 3D DCA from  */
                                /* primary vertex (cm)                    */
  } ;
-/*  Last mod. for dst_track:   $Date: 1999/11/15 19:26:45 $ */
+/*  Last mod. for dst_track:   $Date: 1999/11/29 22:38:49 $ */
 
 
 

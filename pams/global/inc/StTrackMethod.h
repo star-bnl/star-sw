@@ -1,20 +1,4 @@
 #include "StTrackDefinitions.h"
-enum StTrackFindingMethod {
-  kUndefinedFinderId         = kUndefinedFinderIdentifier,
-  kSvtGrouperId              = kSvtGrouperIdentifier,
-  kSvtStkId                  = kSvtStkIdentifier,
-  kTpcStandardId             = kTpcStandardIdentifier,
-  kSvtTpcSvmId               = kSvtTpcSvmIdentifier,
-  kSvtTpcEstId               = kSvtTpcEstIdentifier
- };
-
-enum StTrackQualityScheme {
-  kUndefinedQualityId        = kUndefinedQualityIdentifier,
-  kGrouperPassId             = kGrouperPassIdentifier,
-  kStkPassId                 = kStkPassIdentifier,
-  kSvmPassId                 = kSvmPassIdentifier,
-  kEstPassId                 = kEstPassIdentifier
- };
 
 enum StTrackFittingMethod {
   kUndefinedFitterId         = kUndefinedFitterIdentifier,
