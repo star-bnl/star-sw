@@ -1,11 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.4 2001/03/16 22:35:01 posk Exp $
+// $Id: minBias.C,v 1.5 2001/05/14 23:17:23 posk Exp $
 //
-// Author:       Art Poskanzer, Mar 2001
+// Author:       Art Poskanzer and Alexander Wetzler, Mar 2001
 // Description:  Macro to add histograms together.
-//               Some will be added with statistics weighting.
-//               The _v2D histogram can be done with cross section weighting.
+//               Most will be added with yield weighting.
 //               First file anaXX.root given by first run number XX.
 //               Output file given by output run number.
 //
@@ -13,6 +12,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: minBias.C,v $
+// Revision 1.5  2001/05/14 23:17:23  posk
+// Uses only yield weighting, not cross section weighting.
+//
 // Revision 1.4  2001/03/16 22:35:01  posk
 // plotGraphs.C makes the final graphs.
 //
@@ -26,21 +28,20 @@ gROOT->Reset();
 
 void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 
-  bool   crossSection = kTRUE;   // cross section weighting
-  //bool   crossSection = kFALSE;  // statistics weighting
   const  int nCens = 6;
-  TFile* histFile[nCens+1];
-  TH1*   hist[nCens+1];
   char   fileName[30];
-  int    nSels =    2;
-  int    nHars =    6;
+  int    nSels = 2;
+  const  int nHars = 6;
   float  yCM   = 2.92;
   bool   twoD;
+  TFile* histFile[nCens+1];
+  TH1*   hist[nCens+1];
+  TH2*   yieldPartHist[nCens];
   
-  // names of histograms to be added with statistics weighting
+  // names of histograms to be added with weighting
   const char* baseName[] = { 
     "Flow_Res",
-    "Flow_v2D",
+    "Flow_v2D",   // must be first
     "Flow_vY",
     "Flow_vPt",
     "Flow_v"
@@ -72,7 +73,7 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
     if (obj->InheritsFrom("TH1")) { // TH1 or TProfile
       hist[0] = (TH1*)obj;
       char* objName = key->GetName();
-      cout << " hist name= " << objName << endl;
+      cout << "hist name= " << objName << endl;
       for (int n = 1; n < nCens; n++) {
 	hist[1] = (TH1*)histFile[n]->Get(objName);
 	hist[0]->Add(hist[1]);
@@ -84,10 +85,21 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
     obj = NULL;
   }
    
-  // add histograms with weighting
-  cout<<endl<<"  With weighting"<<endl;
-  gROOT->LoadMacro("dNdydPt.C");
+  // get yield histogram
+  cout<<endl;
+  for (int n = 0; n < nCens; n++) {
+    yieldPartHist[n] = dynamic_cast<TH2*>(histFile[n]->Get("Flow_YieldPart2D"));
+    if (!yieldPartHist[n]) {
+      cout << "### Can't find yield part histogram Flow_YieldPart2D"
+	   << endl;
+      return;
+    }
+  }
+
   for (int pageNumber = 0; pageNumber < nNames; pageNumber++ ) {
+    twoD = kFALSE;
+    if (strstr(baseName[pageNumber],"v2D")) twoD = kTRUE;
+
     for (int selN = 0; selN < nSels; selN++) {
       
       // no harmonics
@@ -112,8 +124,8 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 	  histName->Append("_Har");
 	  histName->Append(*har);
 	}
-	cout << " hist name= " << histName->Data() << endl;
-	
+	cout << "hist name= " << histName->Data() << endl;
+		
 	// get the histograms
 	for (int n = 0; n < nCens+1; n++) {
 	  hist[n] = dynamic_cast<TH1*>(histFile[n]->Get(histName->Data()));
@@ -122,23 +134,30 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 	    return;
 	  }
 	}
-	if (strstr(histName->Data(),"v2D")!=0) twoD = kTRUE;      // 2D
-	else twoD = kFALSE;
 
-	int nBins;
+	int nBins;      // set by 2D
 	int xBins = hist[0]->GetNbinsX();
 	int yBins;
 	if (twoD) {
 	  yBins = hist[0]->GetNbinsY();
-	  nBins = (xBins + 2) * (yBins + 1);
+	  nBins = xBins + (xBins + 2) * yBins;
+	  float yMax  = hist[0]->GetXaxis()->GetXmax();
+	  float yMin  = hist[0]->GetXaxis()->GetXmin();
+	  TH1F* yieldY = new TH1F("Yield_Y", "Yield_Y", xBins, yMin, yMax);
+	  yieldY->SetXTitle("Rapidity");
+	  yieldY->SetYTitle("Counts");
+	  float ptMax  = hist[0]->GetYaxis()->GetXmax();
+	  TH1F* yieldPt = new TH1F("Yield_Pt", "Yield_Pt", yBins, 0., ptMax);
+	  yieldPt->SetXTitle("Pt (GeV/c)");
+	  yieldPt->SetYTitle("Counts");
 	} else {
-	  nBins = xBins;
+	  nBins = xBins + 2;
 	}
 	
 	// loop over the bins
-	if (!crossSection || !twoD) {
-
-	  // with statistics weighting
+	if (strstr(baseName[pageNumber],"Res")) {
+	  // with error weighting
+	  cout<<"  With error weighting"<<endl;
 	  float content;
 	  float error;
 	  float errorSq;
@@ -149,61 +168,76 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 	    meanContent = 0.;
 	    meanError   = 0.;
 	    weight      = 0.;
-	    for (int n = 0; n < nCens; n++) {
+	    for (int n = 0; n < 2; n++) {
 	      content = hist[n]->GetBinContent(bin);
 	      error   = hist[n]->GetBinError(bin);
 	      errorSq = error * error;
 	      if (errorSq > 0.) {
 		meanContent += content / errorSq;
-	      weight      += 1. / errorSq;
+		weight      += 1. / errorSq;
 	      }
 	    }
 	    if (weight > 0.) {
-	      meanContent /= weight;
-	      meanError = sqrt(1. / weight);
-	      hist[nCens]->SetBinContent(bin, meanContent);
-	      hist[nCens]->SetBinError(bin, meanError);
+	    meanContent /= weight;
+	    meanError = sqrt(1. / weight);
+	    hist[nCens]->SetBinContent(bin, meanContent);
+	    hist[nCens]->SetBinError(bin, meanError);
 	    }
 	  }
 	} else {
-
-	  // 2D with cross section weighting
-	  cout << "Please wait" << endl;
-	  double y;
-	  double pt;
-	  double yield;
-	  double yieldSum;
-	  double v;
-	  double vSum;
-	  double err2Sum;
-	  float  content;
-	  float  error;
-	  for (int xBin=1; xBin<=xBins; xBin++) {
-	    y = hist[0]->GetXaxis()->GetBinCenter(xBin);
-	    for (int yBin=1; yBin<=yBins; yBin++) {
-	      pt = hist[0]->GetYaxis()->GetBinCenter(yBin);
-	      yieldSum = 0.;
-	      vSum     = 0.;
-	      err2Sum  = 0.;
-	      content  = 0.;
-	      error    = 0.;
-	      for (int n = 0; n < nCens; n++) {
-		yield     = dNdydPt(0, y - yCM, pt, n+1) +
-		  dNdydPt(1, y - yCM, pt, n+1);               // pi+ + pi-
-		yieldSum += yield;
-		vSum     += yield * hist[n]->GetCellContent(xBin, yBin);
-		err2Sum  += pow(yield * hist[n]->GetCellError(xBin, yBin), 2.);
+	  // with yield weighting
+	  cout<<"  With yield weighting"<<endl;
+	  float v;
+	  float vSum;
+	  float content;
+	  float error;
+	  float error2sum;
+	  float yield;
+	  float yieldSum;
+	  float y;
+	  float pt;
+	  for (int bin = 0; bin < nBins; bin++) {
+	    v         = 0.;
+	    vSum      = 0.;
+	    content   = 0.;
+	    error     = 0.;
+	    error2sum = 0.;
+	    yield     = 0.;
+	    yieldSum  = 0.;
+	    for (int n = 0; n < nCens; n++) {
+	      if (strstr(histName->Data(),"v2D")) {
+		yield = yieldPartHist[n]->GetBinContent(bin);
+	      } else if (strstr(histName->Data(),"vY")) {
+		yield = yieldPartHist[n]->Integral(bin, bin, 1, yBins);
+		if (selN==0 && harN==0) {
+		  y = yieldPartHist[n]->GetXaxis()->GetBinCenter(bin);
+		  yieldY->Fill(y, yield);
+		}
+	      } else if (strstr(histName->Data(),"vPt")) {
+		yield = yieldPartHist[n]->Integral(1, xBins, bin, bin);
+		if (selN==0 && harN==0) {
+		  pt = yieldPartHist[n]->GetYaxis()->GetBinCenter(bin);
+		  yieldPt->Fill(pt, yield);
+		}
+	      } else {                                        // _v
+		yield = yieldPartHist[n]->Integral();
 	      }
-	      if (yieldSum) {
-		content = vSum / yieldSum;
-		error   = sqrt(err2Sum) / yieldSum;
+	      v = hist[n]->GetBinContent(bin);
+	      if (v != 0) {
+		yieldSum  += yield;
+		vSum      += yield * v;
+		error2sum += pow(yield *  hist[n]->GetBinError(bin), 2.);
 	      }
-	      hist[nCens]->SetCellContent(xBin, yBin, content);
-	      hist[nCens]->SetCellError(xBin, yBin, error);
 	    }
+	    if (yieldSum) {
+	      content = vSum / yieldSum;
+	      error   = sqrt(error2sum) / yieldSum;
+	    }
+	    hist[nCens]->SetBinContent(bin, content);
+	    hist[nCens]->SetBinError(bin, error);
 	  }
 	} 
-	delete histName;	
+	delete histName;
       }
     }
   }
