@@ -64,6 +64,7 @@ class EditableParameter : public ConstrainedParameter
   EditableParameter* set(const string & name,const string & description,float*value, float defaultValue, float min, float max, float increment,int key=0);
   EditableParameter* set(const string & name,const string & description,double*value, double defaultValue, double min, double max, double increment,int key=0);
   void    reset();
+	friend ostream& operator<<(ostream& os, const EditableParameter&par);
 
  protected:
   

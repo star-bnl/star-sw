@@ -76,7 +76,7 @@ Parameter * Parameters::getParameter(const string name)
       if ((*iter)->isName(name))
 	return *iter;
     } 
-  throw runtime_error("Parameters::getParameter(name) - ERROR - Requested name not found");
+  throw runtime_error("Parameters::getParameter(name) -E- Requested name not found");
 }
 
 /*

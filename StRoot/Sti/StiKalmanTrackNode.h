@@ -198,10 +198,10 @@ public:
   double _c40, _c41, _c42, _c43, _c44;
   double _chi2;
   float  eyy,ezz;
-  int hitCount;
-  int nullCount;
-  int contiguousHitCount;
-  int contiguousNullCount;
+  short int hitCount;
+  short int nullCount;
+  short int contiguousHitCount;
+  short int contiguousNullCount;
   
  protected:   
   const StiDetector * _detector;

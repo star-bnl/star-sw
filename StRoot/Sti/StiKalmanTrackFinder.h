@@ -99,7 +99,6 @@ public:
   StiFindStep getTrackingMode() const;
   
   void setParameters(StiKalmanTrackFinderParameters *par);
-  //StiKalmanTrackFinderParameters * getParameters();
   virtual EditableParameters * getParameters();
   
   void doInitLayer(int trackingDirection);

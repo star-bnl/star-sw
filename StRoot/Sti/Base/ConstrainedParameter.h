@@ -110,11 +110,11 @@ inline  void    ConstrainedParameter::setDefault(double value)
 inline  void    ConstrainedParameter::setValue(double value)
 {
   if (value<_minimum)
-    _value = _minimum;
+    Parameter::setValue(_minimum);
   else if (value>_maximum)
-    _value = _maximum;
+		Parameter::setValue(_maximum);
   else
-    _value = value;
+		Parameter::setValue(value);
 }
 
 /*! Reset the parameter value to its default value.

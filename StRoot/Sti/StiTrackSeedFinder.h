@@ -14,6 +14,7 @@ class StiHitContainer;
 class StiDetectorContainer;
 class StiDetector;
 class StiHit;
+class EditableParameters;
 template<class Factorized>class Factory;
 class Sti2HitComboFilter;
 
@@ -38,12 +39,10 @@ public:
 								StiHitContainer         * hitContainer,
 								StiDetectorContainer    * detectorContainer);
   virtual ~StiTrackSeedFinder();
-  
-  //Inherited interface
   virtual bool hasMore() = 0;
   virtual StiKalmanTrack* next() = 0;
   virtual void reset() =0;
-  
+	virtual EditableParameters * getParameters();
   ///Set factory
   void setFactory(Factory<StiKalmanTrack>* val);
   ///Set hit container

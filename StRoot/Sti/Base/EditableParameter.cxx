@@ -76,3 +76,21 @@ EditableParameter::EditableParameter(const EditableParameter & parameter)
 EditableParameter::~EditableParameter()
 {}
 
+
+ostream& operator<<(ostream& os, const EditableParameter&par)
+{
+	os <<par.getName()<<"\t";
+	switch (par.getType())
+		{
+		case 0: os << "(BOOL)=" << par.getBoolValue();   break;
+		case 1: os << "(INT) =" << par.getIntValue(); break;
+		case 2: os << "(FLT) =" << par.getFloatValue(); break;
+		case 3: os << "(DBL) =" << par.getDoubleValue(); break;
+		}
+	os << "\tMIN :"<<par.getMinimum()
+		 << "\tMAX :"<<par.getMaximum()
+		 << "\tINC :"<<par.getIncrement()
+		 << "\tKey :"<<par.getKey()
+		 << endl;
+	return os;
+}

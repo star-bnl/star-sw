@@ -15,7 +15,8 @@ class EditableParameters : public Parameters, public Subject
   EditableParameters(const EditableParameters & parameter);
   virtual ~EditableParameters();
   const EditableParameters & operator=(const EditableParameters & parameter);
-  virtual void setDefaults();
+  virtual void setDefaults(); 
+	friend ostream& operator<<(ostream& os, const EditableParameters&pars);
 };
 
 #endif  // !defined(EDITABLEPARAMETERS_H_INCLUDED_)

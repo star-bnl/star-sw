@@ -45,6 +45,12 @@ StiTrackSeedFinder::~StiTrackSeedFinder()
 void StiTrackSeedFinder::reset()
 {}
 
+EditableParameters * StiTrackSeedFinder::getParameters()
+{
+	return this;
+}
+
+
 //STL Functors
 
 void StiRectangular2HitComboFilter::build(const string buildPath)
@@ -85,3 +91,4 @@ bool StiCollinear2HitComboFilter::operator()(const StiHit* hit1, const StiHit* h
   return ( ( fabs( hit1->globalPosition().phi()-hit2->globalPosition().phi()) < deltaPhi) &&
 	   ( fabs( hit1->globalPosition().theta()-hit2->globalPosition().theta()) < deltaTheta) );
 }
+
