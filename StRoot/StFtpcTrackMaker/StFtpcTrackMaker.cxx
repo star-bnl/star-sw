@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.50 2003/10/07 14:08:33 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.51 2004/01/28 01:41:32 jeromel Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.51  2004/01/28 01:41:32  jeromel
+// *** empty log message ***
+//
 // Revision 1.50  2003/10/07 14:08:33  jcs
 // remove previous fix for determining magnetic field
 //
@@ -397,12 +400,12 @@ Int_t StFtpcTrackMaker::Make()
 {
   // Setup and tracking.
   
-  gMessMgr->Message("", "I", "OST") << "Tracking (FTPC) started..." << endm;
+  gMessMgr->Message("", "I", "OS") << "Tracking (FTPC) started..." << endm;
   
   St_DataSet *ftpc_data = GetDataSet("ftpc_hits");
   
   if (!ftpc_data) {
-    gMessMgr->Message("", "W", "OST") << "No FTPC data available!" << endm;
+    gMessMgr->Message("", "W", "OS") << "No FTPC data available!" << endm;
     return kStWarn;
   }
   
@@ -410,7 +413,7 @@ Int_t StFtpcTrackMaker::Make()
   St_fcl_fppoint *fcl_fppoint = (St_fcl_fppoint *)ftpc_data->Find("fcl_fppoint");
   
   if (!fcl_fppoint) {
-    gMessMgr->Message("", "W", "OST") << "No FTPC clusters available!" << endm;
+    gMessMgr->Message("", "W", "OS") << "No FTPC clusters available!" << endm;
     return kStWarn;
   }
   
@@ -512,7 +515,7 @@ Int_t StFtpcTrackMaker::Make()
   }
   
   if (Debug()) {
-    gMessMgr->Message("", "I", "OST") << "Total time consumption         " << tracker->GetTime() << " s." << endm;
+    gMessMgr->Message("", "I", "OS") << "Total time consumption         " << tracker->GetTime() << " s." << endm;
     StFtpcTrackingParams::Instance()->PrintParams();
     tracker->TrackingInfo();
   }
@@ -563,7 +566,7 @@ Int_t StFtpcTrackMaker::Make()
   delete tracker;
   delete vertex;
   
-  gMessMgr->Message("", "I", "OST") << "Tracking (FTPC) completed." << endm;
+  gMessMgr->Message("", "I", "OS") << "Tracking (FTPC) completed." << endm;
   
   return kStOK;;
 }
@@ -672,9 +675,9 @@ void StFtpcTrackMaker::PrintInfo()
 {
   // Prints information.
   
-  gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.50 2003/10/07 14:08:33 jcs Exp $ *" << endm;
-  gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
+  gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.51 2004/01/28 01:41:32 jeromel Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
     StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.30 2003/11/26 11:34:45 jcs Exp $
+// $Id: StFtpcTrack.cc,v 1.31 2004/01/28 01:41:32 jeromel Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.31  2004/01/28 01:41:32  jeromel
+// *** empty log message ***
+//
 // Revision 1.30  2003/11/26 11:34:45  jcs
 // change Sign(Float_t, Double_t) to Sign(Double_t,Double_t)
 //
@@ -705,7 +708,7 @@ Int_t StFtpcTrack::WriteTrack(fpt_fptrack_st *trackTableEntry, StFtpcVertex *ver
   if (primary_fit) {
 
     if (vertex->GetId() == 0) { // no vertex found
-      gMessMgr->Message("", "W", "OST") << "StFtpcTrack::WriteTrack(): Primary fit and vertex ID == 0. This should never happen!" << endm;
+      gMessMgr->Message("", "W", "OS") << "StFtpcTrack::WriteTrack(): Primary fit and vertex ID == 0. This should never happen!" << endm;
       // Primary fit shouldn't be performed without a found vertex!
     }
 
@@ -1045,13 +1048,13 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
   //gMessMgr->precision(16);
     
   if (debug) {
-    gMessMgr->Message("", "I", "OST") << "from circle fitting program" << endm;
+    gMessMgr->Message("", "I", "OS") << "from circle fitting program" << endm;
   }
   
   for(i=0;i<num;i++) {
       
     if (debug) { 
-      gMessMgr->Message("", "I", "OST") << "x: " << x[i] << " y: " << y[i] << "xw: " << xw[i] << " yw: " << yw[i] << endm;
+      gMessMgr->Message("", "I", "OS") << "x: " << x[i] << " y: " << y[i] << "xw: " << xw[i] << " yw: " << yw[i] << endm;
     }
 
     x[i] = x[i] - xav;
@@ -1122,7 +1125,7 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
   Double_t xc = 0., yc = 0.;
   
   if (debug) { 
-    gMessMgr->Message("", "I", "OST") << "Solving by Newton method" << endm;
+    gMessMgr->Message("", "I", "OS") << "Solving by Newton method" << endm;
   }
   
   for(i = 0; i < MaxIter; i++) {
@@ -1131,7 +1134,7 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
     wNew = w - f / fp;
     
     if (debug) { 
-      gMessMgr->Message("", "I", "OST") << "Iteration Number" << i << endm;
+      gMessMgr->Message("", "I", "OS") << "Iteration Number" << i << endm;
     }
     
     if ((wNew-w) < 10e-16 && (w-wNew) < 10e-16) {
