@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.27 2003/09/02 17:59:30 perev Exp $
+// $Id: St_mwc_Maker.cxx,v 1.28 2004/03/01 17:54:19 fisyak Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.28  2004/03/01 17:54:19  fisyak
+// Add include of math.h for osf
+//
 // Revision 1.27  2003/09/02 17:59:30  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -122,6 +125,7 @@
 #include "TH2.h"
 #include "TFile.h"
 #include <Stiostream.h>
+#include <math.h>
 ClassImp(St_mwc_Maker)
  
 //_____________________________________________________________________________
