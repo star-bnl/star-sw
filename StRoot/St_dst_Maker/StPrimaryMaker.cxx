@@ -2,10 +2,13 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.50 2001/02/02 16:09:50 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.51 2001/02/28 18:25:42 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.51  2001/02/28 18:25:42  caines
+// Update bit map for SVT
+//
 // Revision 1.50  2001/02/02 16:09:50  caines
-// Get svt tracks from est branch
+//  Get svt tracks from est branch
 //
 // Revision 1.49  2000/09/27 16:41:05  genevb
 // Handle negative fields
@@ -548,6 +551,26 @@ Int_t StPrimaryMaker::Make(){
 	}
       }
       
+      scs_spt_st *s_spc = scs_spt->GetTable();
+      sgr_groups_st *sgroup = svt_groups->GetTable();
+      
+      for( i=0; i<svt_groups->GetNRows(); i++, sgroup++){
+	
+	if( sgroup->id1 != 0 && sgroup->ident >= 0){
+	  spt_id = sgroup->id2-1;
+	  row = s_spc[spt_id].id_wafer/1000;
+	  if(  s_spc[spt_id].id_globtrk-1 < 0){
+	    cout << spt_id << " " << s_spc[spt_id].id_globtrk<< " " << endl;
+	    assert(0);
+	  }
+	  if( row>7)row=7;
+	  track[s_spc[spt_id].id_globtrk-1].map[0] += (1UL<<row);
+	  
+	}
+    
+      }
+
+
     }
   }
   else {
