@@ -1,9 +1,15 @@
 /***************************************************************************
- *
+ *$Id: StPMDReader.cxx,v 1.2 2003/12/10 10:31:01 subhasis Exp $
+ * 
+ * StPMDReader.cxx
  * Author: Susanta and Subhasis 
  ***************************************************************************
  *
  * Description: Offline Wrapper for DAQ PMD reader classes
+ **************************************************************************
+ *$Log: StPMDReader.cxx,v $
+ *Revision 1.2  2003/12/10 10:31:01  subhasis
+ *loop for No of channels read is changed to PMD_CRAMS_CH_MAX
  *
  **************************************************************************/
 #include <string.h>
@@ -40,7 +46,6 @@ int StPMDReader::Update() {
   fPMDImpReader = ::getPMDReader(fDAQReader->getEventReader());
   getPMD_ADC();
  // close();
- cout<<" PMD Updated**"<<endl;
  return 1;
 }
 
@@ -69,13 +74,12 @@ int StPMDReader::getNoOfChannelsInCramBlock(int sec, int cram, int blk)
 int StPMDReader::getAllPmdCpvData(int *adc)
 {
 	int no_ch=0;
-	for(int sec=0; sec<2; sec++){
+	for(int sec=0; sec<PMD_SECTOR; sec++){
 		for(int cram=0; cram< PMD_CRAMS_MAX; cram++){
-			for(int blk=0; blk <2; blk++ ){
-				for( int ch=0; ch < mPmd.no_of_channels_in_cram_blk[sec][cram][blk]; ch++, adc++){
+			for(int blk=0; blk <PMD_CRAMS_BLOCK; blk++ ){
+				for( int ch=0; ch < PMD_CRAMS_CH_MAX; ch++, adc++){
 					*adc=mPmd.adc[sec][cram][blk][ch];
 					no_ch++;
-	//	cout << sec <<":" << cram <<":" <<blk <<":"<<ch<<":"<< *adc << endl;
 				}
 			}
 		}
@@ -107,7 +111,7 @@ int StPMDReader::getPmdChainData(int chain_no, int *data)
 		sec=0;
 	else
 		sec=1;
-	  for(channel=0; channel < mPmd.no_of_channels_in_cram_blk[sec][cram][blk]; channel++ , data++){
+	  for(channel=0; channel < PMD_CRAMS_CH_MAX; channel++ , data++){
 	    *data=  mPmd.adc[sec][cram][blk][channel];
 	 }  
 
@@ -134,9 +138,41 @@ int StPMDReader::getCpvChainData(int chain_no, int *data)
 		sec=0;
 	else
 		sec=1;
-	  for(channel=0; channel < mPmd.no_of_channels_in_cram_blk[sec][cram][blk]; channel++ , data++){
+	  for(channel=0; channel <PMD_CRAMS_CH_MAX; channel++ , data++){
 	    *data=  mPmd.adc[sec][cram][blk][channel];
 	 }  
 
 	  return mPmd.no_of_channels_in_cram_blk[sec][cram][blk] ;
+}
+
+int StPMDReader::getAllPmdCpvPed(int *ped)
+{
+	int no_ch=0;
+	for(int sec=0; sec<PMD_SECTOR; sec++){
+		for(int cram=0; cram< PMD_CRAMS_MAX; cram++){
+			for(int blk=0; blk <PMD_CRAMS_BLOCK; blk++ ){
+				for( int ch=0; ch < PMD_CRAMS_CH_MAX; ch++, ped++){
+					*ped=mPmd.ped[sec][cram][blk][ch];
+	if(mPmd.ped[sec][cram][blk][ch]>0)no_ch++;
+				}
+			}
+		}
+	}
+	return no_ch;
+}
+int StPMDReader::getAllPmdCpvRms(int *rms)
+{
+	int no_ch=0;
+	for(int sec=0; sec<PMD_SECTOR; sec++){
+		for(int cram=0; cram< PMD_CRAMS_MAX; cram++){
+			for(int blk=0; blk <PMD_CRAMS_BLOCK; blk++ ){
+				for( int ch=0; ch < PMD_CRAMS_CH_MAX; ch++, rms++){
+					*rms=mPmd.rms[sec][cram][blk][ch];
+	if(mPmd.rms[sec][cram][blk][ch]>0)no_ch++;
+					no_ch++;
+				}
+			}
+		}
+	}
+	return no_ch;
 }
