@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.31 1999/07/30 22:50:09 kathy Exp $
+// $Id: doEvents.C,v 1.32 1999/08/06 15:00:41 fisyak Exp $
 // $Log: doEvents.C,v $
-// Revision 1.31  1999/07/30 22:50:09  kathy
-// new version of doEvents which is now the default - has new input flag to turn on QA testing and output file
+// Revision 1.32  1999/08/06 15:00:41  fisyak
+// Keep formwer bfc.C as BFC.C
+//
+// Revision 1.32  1999/08/06 15:00:41  fisyak
+// Keep formwer bfc.C as BFC.C
 //
 // Revision 1.31  1999/07/30 22:50:09  kathy
 // new version of doEvents which is now the default - has new input flag to turn on QA testing and output file
@@ -142,31 +145,19 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 // .x doEvents.C(10,"-","/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
 //
 // example ROOT file invocation:
-// .x doEvents.C(9999,"/disk00001/star/auau200/hijing/b0_3/jet05/year_1b/hadronic_on/tfs/","*.dst.root")
-
-// SPECIAL NOTE (kathy, 30jul99)
-//   If you are using multi-Root file invocation, make sure you put "*.dst.root" so that it only
-//   picks up the type of root file you want!! Otherwise it will pick up all root files in that
-//   area and then find the correct one later - in effect processing same events over and over
-//========================================================================================================
-//
-void doEvents(Int_t,const Char_t **,const char *qaflag);
-
-//void doEvents(Int_t nevents=999,
-//              const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
-//              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf",
-//              const char *qaflag="off");
-
+// .x doEvents.C(9999,"/disk00001/star/auau200/hijing/b0_3/jet05/year_1b/hadronic_on/tfs/","*.root")
+void doEvents(Int_t,const Char_t **,const char *flag = "");
 //===================================================================================================
-              const Char_t *path="/disk00000/star/test/new/tfs_Solaris/year_2a",
-              const Char_t *file="*.dst.root",
-              const char *qaflag="off");
+//
+
+              const char *flag = "");
               const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
               const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf",
-void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
+void doEvents(Int_t nevents,const Char_t **fileList,const char *flag)
     cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
     cout << "       doEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
 void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
+void doEvents(Int_t,const Char_t **,const char *qaflag = "");
 
 
 
@@ -244,8 +235,7 @@ EventLoop: if (i <= nevents && !istat) {
     if (!b) {
       //       gROOT->LoadMacro("PadControlPanel.C");
     b = new TBrowser;
-
-void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,const char *qaflag)
+void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,const char *flag)
   }
     }
 	if (!b) {
