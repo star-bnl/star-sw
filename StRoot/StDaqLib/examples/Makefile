@@ -22,7 +22,7 @@ client.o:	client.cxx $(EMC_DIR)/EMC_Reader.hh $(RICH_DIR)/RICH_Reader.hh $(TRG_D
 EventReader.o:	$(IFACE_DIR)/EventReader.hh $(IFACE_DIR)/EventReader.cxx
 	g++ $(CFLAGS) -c $(IFACE_DIR)/EventReader.cxx
 
-DetectorReader.o:	$(IFACE_DIR)/EventReader.hh $(IFACE_DIR)/DetectorReader.cxx $(TPC_DIR)/TPCV1P0_Reader.hh $(TPC_DIR)/TPCV2P0_Reader.hh $(SVT_DIR)/SVT_Reader.hh $(EMC_DIR)/EMC_Reader.hh $(FTPC_DIR)/FTPC_Reader.hh $(RICH_DIR)/RICH_Reader.hh  $(SSD_DIR)/SSD_Reader.hh $(TRG_DIR)/TRG_Reader.hh
+DetectorReader.o:	$(IFACE_DIR)/EventReader.hh $(IFACE_DIR)/DetectorReader.cxx $(TPC_DIR)/TPCV1P0_Reader.hh $(TPC_DIR)/TPCV2P0_Reader.hh $(SVT_DIR)/SVT_Reader.hh $(EMC_DIR)/EMC_Reader.hh $(FTPC_DIR)/FTPV1P0_Reader.hh $(RICH_DIR)/RICH_Reader.hh  $(SSD_DIR)/SSD_Reader.hh $(TRG_DIR)/TRG_Reader.hh
 	g++ $(CFLAGS) -c $(IFACE_DIR)/DetectorReader.cxx
 
 TPCV1P0.o:	$(IFACE_DIR)/EventReader.hh $(TPC_DIR)/TPCV1P0.hh $(TPC_DIR)/TPCV1P0.cxx 
