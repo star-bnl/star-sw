@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.15 2000/12/08 10:06:32 jcs Exp $
+// $Id: StFtpcFastSimu.cc,v 1.16 2000/12/11 16:38:59 jcs Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.16  2000/12/11 16:38:59  jcs
+// move FTPC geant volume id and cluster flags from code to parameter reader
+//
 // Revision 1.15  2000/12/08 10:06:32  jcs
 // replace cmath.h and math_constants.h with PhysicalConstants.h
 //
@@ -318,10 +321,10 @@ int StFtpcFastSimu::ffs_hit_rd()
 	  {
 	    mGeantPoint[ih].SetPrimaryTag(-1*mGeantPoint[ih].GetPrimaryTag());
 	  }
-	int temp=mGeant->geantVolume(ih) - 100;
-	if (temp > 10)
+	int temp=mGeant->geantVolume(ih) - mParam->ftpcWestGeantVolumeId();
+	if (temp > mParam->numberOfPadrowsPerSide())
 	  {
-	    temp -= 90;
+	    temp = mGeant->geantVolume(ih) - mParam->ftpcEastGeantVolumeId() + mParam->numberOfPadrowsPerSide();
 	  }
 	mPoint[ih].SetPadRow(temp);
 
@@ -564,7 +567,7 @@ int StFtpcFastSimu::ffs_merge_tagger()
 	    for(j=i+1; j<nrowmax[h]; j++)
 	      {
 		id_2 = nrow[h][j]-1;
- 		if((mPoint[id_2].GetFlags()==1000) || 
+ 		if((mPoint[id_2].GetFlags()==mParam->removeClusterFlag()) || 
  		   (mPoint[id_2].GetSector()!=mPoint[id_1].GetSector()))
  		  continue;
 		
@@ -576,11 +579,11 @@ int StFtpcFastSimu::ffs_merge_tagger()
 		   (delta_azi < (2 * sigazi[id_1])))
 		  {
 		    // mark clusters as unfolded 
-		    if(mPoint[id_1].GetFlags() != 1000)
+		    if(mPoint[id_1].GetFlags() != mParam->removeClusterFlag())
 		      {
-			mPoint[id_1].SetFlags(1);
+			mPoint[id_1].SetFlags(mParam->unfoldedClusterFlag());
 		      }
-		    mPoint[id_2].SetFlags(1);
+		    mPoint[id_2].SetFlags(mParam->unfoldedClusterFlag());
 		  }
 		
 		if((delta_r<sigrad[id_1]) &&
@@ -589,11 +592,11 @@ int StFtpcFastSimu::ffs_merge_tagger()
 		    k++;
 		    
 		    // merge clusters, mark second for removal
-		    if(mPoint[id_1].GetFlags() != 1000)
+		    if(mPoint[id_1].GetFlags() != mParam->removeClusterFlag())
 		      {
-			mPoint[id_1].SetFlags(8);
+			mPoint[id_1].SetFlags(mParam->badShapeClusterFlag());
 		      }
-		    mPoint[id_2].SetFlags(1000);
+		    mPoint[id_2].SetFlags(mParam->removeClusterFlag());
 		    mPoint[id_1].SetMaxADC(mPoint[id_1].GetMaxADC()+
 					   mPoint[id_2].GetMaxADC() / 2);
 		      // maxadc adds up somehow, maybe more, maybe less

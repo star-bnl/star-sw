@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.8 2000/11/27 14:09:20 hummler Exp $
+// $Id: StFtpcParamReader.cc,v 1.9 2000/12/11 16:39:07 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.9  2000/12/11 16:39:07  jcs
+// move FTPC geant volume id and cluster flags from code to parameter reader
+//
 // Revision 1.8  2000/11/27 14:09:20  hummler
 // implement tzero and lorentz angle correction factor
 //
@@ -134,6 +137,12 @@ StFtpcParamReader::StFtpcParamReader(St_fcl_ampoff *ampoff,
   //  just copy zrow table start to pointer
   mPadrowZPosition = (Float_t *) &(zrow->GetTable()->z);
 
+  //  temporarily set Ftpc fast simulator parameters until in data base
+  mFtpcWestGeantVolumeId = 100;
+  mFtpcEastGeantVolumeId = 200;
+  mUnfoldedClusterFlag = 1;
+  mBadShapeClusterFlag = 8;
+  mRemoveClusterFlag = 1000;
   //  just copy gaspar array pointers  
   mOrderOfFastEstimates = 4;
   mVDriftEstimates = (Float_t *) &(gaspar->GetTable()->vdrift);

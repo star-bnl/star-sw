@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.8 2000/11/27 14:09:26 hummler Exp $
+// $Id: StFtpcParamReader.hh,v 1.9 2000/12/11 16:39:11 jcs Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.9  2000/12/11 16:39:11  jcs
+// move FTPC geant volume id and cluster flags from code to parameter reader
+//
 // Revision 1.8  2000/11/27 14:09:26  hummler
 // implement tzero and lorentz angle correction factor
 //
@@ -114,6 +117,11 @@ protected:
   Float_t mPercentHe;
   Float_t *mPadrowZPosition;
   //FastSimulator parameters
+  Int_t mFtpcWestGeantVolumeId;
+  Int_t mFtpcEastGeantVolumeId;
+  Int_t mUnfoldedClusterFlag;
+  Int_t mBadShapeClusterFlag;
+  Int_t mRemoveClusterFlag;
   Int_t mOrderOfFastEstimates;
   Float_t *mVDriftEstimates;
   Float_t *mTDriftEstimates;
@@ -243,6 +251,11 @@ public:
   Float_t percentCO2() {return mPercentCO2;}
   Float_t percentNe() {return mPercentNe;}
   Float_t percentHe() {return mPercentHe;}
+  Int_t ftpcWestGeantVolumeId() {return mFtpcWestGeantVolumeId;}
+  Int_t ftpcEastGeantVolumeId() {return mFtpcEastGeantVolumeId;}
+  Int_t unfoldedClusterFlag() {return mUnfoldedClusterFlag;}
+  Int_t badShapeClusterFlag() {return mBadShapeClusterFlag;}
+  Int_t removeClusterFlag() {return mRemoveClusterFlag;}
   Int_t numberOfFssGasValues() {return mNumberOfFssGasValues;}
   Int_t randomNumberGenerator() {return mRandomNumberGenerator;}
   Int_t zeroSuppressThreshold() {return mZeroSuppressThreshold;}
