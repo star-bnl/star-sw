@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.7 1999/09/17 21:27:44 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.8 1999/09/17 22:09:24 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.8  1999/09/17 22:09:24  fisyak
+// Fix typo
+//
 // Revision 1.7  1999/09/17 21:27:44  fisyak
 // Add MySQL
 //
@@ -335,7 +338,7 @@ Int_t StBFChain::Load()
   // Instantiate makers
   //  Create the makers to be called by the current chain
   if (GetOption(kXIN) && setFiles) {
-    StIOMaker *inpMk = new StIOMaker("inputStream","r",setFiles);
+    inpMk = new StIOMaker("inputStream","r",setFiles);
     if (inpMk) {
       SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
       SetInput("geant",".make/inputStream/.make/inputStream_XDF/.data/event/geant/Event");
@@ -554,7 +557,7 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
       if (GetOption(kFZIN)) {
 	if (GetOption(kY1b)) Infile = "/disk0/star/test/venus412/b0_3/year_1b/psc0050_01_40evts.fzd";
 	else {
-	  if (GetOption(kY2a)) Infile = "/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fzd";
+	  if (GetOption(kY2a))  Infile = "/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fzd";
 	  else                  Infile ="/disk1/star/test/psc0049_08_40evts.fzd";
 	}
 	printf ("Use default input file %s for %s \n",Infile,ChainOptions[kFZIN]);
@@ -574,7 +577,7 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
       printf (" *** NO FILE: %s, exit!\n", InFile->Data());
       gSystem->Exit(1); 
     }
-    if (!GetOption(kFZIN) {
+    if (!GetOption(kFZIN)) {
       setFiles= new StFile();
       setFiles->AddFile(InFile->Data());
     }
