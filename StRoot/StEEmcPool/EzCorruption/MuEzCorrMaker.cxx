@@ -1,6 +1,6 @@
 // *-- Author : Rene Fatemi
 // 
-// $Id: MuEzCorrMaker.cxx,v 1.2 2004/11/29 19:37:14 balewski Exp $
+// $Id: MuEzCorrMaker.cxx,v 1.3 2005/01/09 04:46:47 balewski Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -177,8 +177,8 @@ void MuEzCorrMaker::scanETowCorrupt(){
     int crID=ib+1;
     if( eETow->sizeHeader(ib)<=0) continue;
     // printf("ib=%d sizeH=%d sizeD=%d\n",ib,eETow->sizeHeader(ib),eETow->sizeData(ib));
- 
-    UChar_t  sanity  =eETow->isHeadValid(ib,headToken, crID,lenCount,trigComm,errFlag);
+    eETow->tagHeadValid(ib,headToken, crID,lenCount,trigComm,errFlag);
+    UShort_t  sanity  = eETow->getCorruption(ib);
  
     
     int i;
@@ -241,9 +241,11 @@ void MuEzCorrMaker::scanESmdCorrupt(){
     int crID=ib+1;
     if( eESmd->sizeHeader(ib)<=0) continue;
     printf("ib=%d sizeH=%d sizeD=%d\n",ib,eESmd->sizeHeader(ib),eESmd->sizeData(ib));
-    UChar_t  sanity  =eESmd->isHeadValid(ib,headToken, crID,lenCount,trigComm,errFlag);
 
-    int i;
+    eESmd->tagHeadValid(ib,headToken, crID,lenCount,trigComm,errFlag);
+    UShort_t  sanity  =eESmd->getCorruption(ib);
+
+    int i;   
     for(i=0;i<4;i++) {// examin all sanity bits
       if(sanity&(1<<i)) ESlist[ib][i]=1;
     }
@@ -280,6 +282,9 @@ void MuEzCorrMaker::printCorrupt(){
 
 //---------------------------------------------------
 // $Log: MuEzCorrMaker.cxx,v $
+// Revision 1.3  2005/01/09 04:46:47  balewski
+// sync w/  raw->tagHeadValid()
+//
 // Revision 1.2  2004/11/29 19:37:14  balewski
 // fix to match EZTREE evolution
 //
