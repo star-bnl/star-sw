@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.7 2000/12/18 21:35:18 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.8 2001/01/04 01:03:23 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.8  2001/01/04 01:03:23  genevb
+// Add CheckFile() for creating sub-dsts
+//
 // Revision 3.7  2000/12/18 21:35:18  genevb
 // Introduced variable buffer-sizing
 //
@@ -353,6 +356,7 @@ Int_t StStrangeMuDstMaker::MakeCreateSubDst() {
   if (abortEvent) return kStOK;
 
   EachController(MakeCreateSubDst());
+  CheckFile();
   tree->Fill();
 
   return kStOK;
@@ -492,6 +496,7 @@ void StStrangeMuDstMaker::CheckFile() {
       }
       OpenFile();
       InitCreateDst();
+      if (dstMaker) InitCreateSubDst();
     }
   }
 }
