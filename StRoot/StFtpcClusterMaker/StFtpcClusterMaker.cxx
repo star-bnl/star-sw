@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.35 2002/03/01 14:22:20 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.36 2002/03/14 10:53:42 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.36  2002/03/14 10:53:42  jcs
+// turn ftpc timebin charge step histograms back on
+//
 // Revision 1.35  2002/03/01 14:22:20  jcs
 // add additional histograms to monitor cluster finding
 //
@@ -423,7 +426,6 @@ Int_t StFtpcClusterMaker::Make()
 
   if(ftpcReader) {
 
-    /*
     StFtpcChargeStep *step = new StFtpcChargeStep(m_csteps,
                                                   m_chargestep_West,
                                                   m_chargestep_East,
@@ -434,7 +436,6 @@ Int_t StFtpcClusterMaker::Make()
     //step->histogram(1); // This can give wrong values if the decline of the charge step is too steep!
     // uncomment to fill charge step histogram only:
     step->histogram(0);
-    */
 
     if(Debug()) gMessMgr->Message("", "I", "OST") << "start running StFtpcClusterFinder" << endm;
     
