@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSimpleMagneticField.cc,v 1.2 1999/01/18 21:02:45 lasiuk Exp $
+ * $Id: StSimpleMagneticField.cc,v 1.3 1999/03/15 13:45:44 lasiuk Exp $
  *
  * Author: Thomas Ullrich, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSimpleMagneticField.cc,v $
+ * Revision 1.3  1999/03/15 13:45:44  lasiuk
+ * units consistency added here (tesla)
+ *
  * Revision 1.2  1999/01/18 21:02:45  lasiuk
  * comment diagnostics
  *
@@ -36,6 +39,9 @@ StSimpleMagneticField::StSimpleMagneticField(const StThreeVector<double>& v)
 StSimpleMagneticField::StSimpleMagneticField(const char* filename)
 {
     StGetConfigValue(filename, "StSimpleMagneticField.mB", mB);
+    PR(mB);
+    // Make sure units are correct
+    mB *= tesla;
     PR(mB);
 }
 
