@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: swguide.pl,v 1.8 1999/09/20 22:55:16 wenaus Exp $
+# $Id: swguide.pl,v 1.9 1999/09/21 12:25:00 wenaus Exp $
 #
 # $Log: swguide.pl,v $
+# Revision 1.9  1999/09/21 12:25:00  wenaus
+# Update to run on Solaris
+#
 # Revision 1.8  1999/09/20 22:55:16  wenaus
 # Move output area to RCF NFS web area
 #
@@ -220,7 +223,7 @@ page is too old.
 END
 
 # Build list of pams
-@pamList = `cd $root; find pams -maxdepth 2 -mindepth 2 -type d`;
+@pamList = `cd $root; gfind pams -maxdepth 2 -mindepth 2 -type d`;
 foreach $pm (@pamList) {
     $pm =~ m/pams\/([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)/;
     if ( $1 ne "CVS" && $1 ne "idl" && $1 ne "inc" && $1 ne "kumac" ) {
