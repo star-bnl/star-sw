@@ -1,26 +1,18 @@
 #!/usr/local/bin/perl
 use File::Basename;
 Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
-my $PWD = DirPath;                           print "Build in $PWD\n";
-(my $pwd = SourcePath($PWD)) =~ s/\/$PWD//; # print "new pwd = $pwd\n";
-my @sources = `ls -1 $pwd/*/*.c* $pwd/*/*.g`;# $pwd/*/*.[fF]`;# print "@sources\n";  
+my $Dir = "StRoot"; print "Run Conscript in  $Dir\n";
+my @sources = find_sources($Dir); #my $i=0; for my $s (@sources) {print "i=",$i++," sources = ",$s,"\n";}
 my $dirlist = "";
 for $src (@sources) {
-    my $dir = dirname ($src);
-    if (grep (/$dir/,$dirlist)) {next;}
-#    if (grep (/StDbLib/,$dir))  {next;}
-#    if (grep (/StDbMaker/,$dir))  {next;}
-#    if (grep (/StEvent/,$dir))  {next;}
-#    if (grep (/StHbtMaker/,$dir))  {next;}
-#    if (grep (/StTrsMaker/,$dir))  {next;}
-#    if (grep (/StUtilities/,$dir))  {next;}
-#    if (grep (/St_fmg_Maker/,$dir))  {next;}
-#    if (grep (/StarClassLibrary/,$dir))  {next;}
+  (my $dir = $src) =~ s/\/\S*/$1/g; #print "$src => $dir\n";
+  if (grep (/$dir/,$dirlist)) {next;}
+    if (grep (/StTpcDb/,$dir))  {next;}
     $dirlist .= $dir . ": "; #print "dirlist = $dirlist\n";
 }
 $dirlist =~ s/$pwd\///g; #print "dirlist = $dirlist\n";
 $dirlist =~ s/\:/\/Conscript/g; #print "dirlist = $dirlist\n";
 my @dirs = split ' ',$dirlist;
 Build @dirs;
-#Build qw( StDbLib/Conscript );
+#Build qw( StEvent/Conscript );
 
