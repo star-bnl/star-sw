@@ -9,14 +9,20 @@ StHiBaseAnalysis::StHiBaseAnalysis(const char* inDir, const char* outRootName)
      mNHiPtTrack(0)
      
 {
-
-
+  mHiMicroChain = 0; //!
+  mHiMicroEvent = 0; //!
+  mOutRootFile  = 0; //!
+  mBenchmark=0; //!
 }
 
 //__________________
 
 StHiBaseAnalysis::~StHiBaseAnalysis()
 {
+  mHiMicroChain = 0; //!
+  mHiMicroEvent = 0; //!
+  mOutRootFile  = 0; //!
+  delete mBenchmark; mBenchmark=0; //!
 }
 
 //__________________
