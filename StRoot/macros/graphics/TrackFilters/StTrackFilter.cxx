@@ -5,6 +5,7 @@
 #include "tables/St_g2t_svt_hit_Table.h"
 #include "tables/St_tcl_tphit_Table.h"
 #include "tables/St_tpt_track_Table.h"
+#include "tables/St_dst_track_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
 #include "StCL.h"
@@ -54,6 +55,9 @@ Int_t StTrackFilter::Reset(Int_t reset)
 //_____________________________________________________________________________
 Int_t StTrackFilter::SubChannel(St_tcl_tphit &hit, Int_t rowNumber,Size_t &size, Style_t &style)
 {
+  size = 0.5;
+  return kGreen;
+  return hit[rowNumber].id_globtrk;
   if ( m_Lid_globtrk)  { 
     for (int i =0; i <m_Lid_globtrk; i++) {
       if (hit[rowNumber].id_globtrk !=  m_id_globtrk[i]) continue;
@@ -134,8 +138,12 @@ Int_t StTrackFilter::SubChannel(St_g2t_tpc_hit &hit, Int_t rowNumber,Size_t &siz
 //_____________________________________________________________________________
 Int_t StTrackFilter::Channel(const St_TableSorter *tableObject,Int_t index,Size_t &size,Style_t &style)
 {
+  //
+  // This is an example how one can separate tableObject's by the table "name"
+  // rather by the table "type" as the next "Channel" does
+  //
  Int_t rowNumber = tableObject->GetIndex(UInt_t(index));
-
+ 
  Color_t color = -1;
  TString mStr = tableObject->GetTable()->GetName();
 
@@ -179,20 +187,55 @@ Int_t StTrackFilter::Channel(const St_Table *tableObject,Int_t rowNumber,Size_t 
   //         style(option) - the marker style to be used to draw this vertex
   // Note: One may not assign any value for the output parameters size and style
   //       The "default" values will be used instead.
+  //
+  // This is an example how one can separate tableObject's by the table "type"
+  // rather by the table "name" as the previous "Channel" does
+  //
   static int colorIndex = 0;
-  St_tpt_track &track = *((St_tpt_track *)tableObject); 
-  if ( m_Ltpt_track )  { 
-    for (int i =0; i < m_Ltpt_track; i++) {
-       if (track[rowNumber].id != m_tpt_track_id[i]) continue;
-       printf(" track %d %ld  \n", rowNumber,track[rowNumber].id); 
-       style = 6;
-       size = 2;
-       //       return kGreen+rowNumber%20; 
-       colorIndex++;
-       if (colorIndex > 20) colorIndex = 0;
-       // return kBlue+colorIndex;
-       return kGreen;
-    }
-  }
+  TString mStr = tableObject->GetType();
+
+  if( mStr == "dst_track" ) {
+    St_dst_track &track = *((St_dst_track *)tableObject); 
+    return SubChannel(track, rowNumber, size, style);
+  } else {  
+
+   colorIndex++;
+   if (colorIndex > 20) colorIndex = 0;
+   return kBlue+colorIndex;
+
+   St_tpt_track &track = *((St_tpt_track *)tableObject); 
+   if ( m_Ltpt_track )  { 
+     for (int i =0; i < m_Ltpt_track; i++) {
+        if (track[rowNumber].id != m_tpt_track_id[i]) continue;
+        printf(" track %d %ld  \n", rowNumber,track[rowNumber].id); 
+        style = 6;
+        size = 2;
+        //       return kGreen+rowNumber%20; 
+        colorIndex++;
+        if (colorIndex > 20) colorIndex = 0;
+        // return kBlue+colorIndex;
+        return kGreen;
+     }
+   }
+ }
  return 0; 
 }
+//_____________________________________________________________________________
+Int_t StTrackFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t &size,Style_t &style)
+{
+  // SubChannel to provide a selections for St_dst_track tracks.
+  static int colorIndex = 0;
+  static Float_t minCurv = track[rowNumber].curvature;
+  static Float_t maxCurv = track[rowNumber].curvature;
+         Float_t curCurv = track[rowNumber].curvature;
+  colorIndex++;
+  if (curCurv > maxCurv) {maxCurv = curCurv; printf(" MaxCurv = %f\n", curCurv); }
+  if (curCurv < minCurv) {minCurv = curCurv; printf(" MinCurv = %f\n", curCurv); }
+  // Selects only the tracks with the "large" curvature (> 0.1)
+  if (track[rowNumber].curvature > 0.01) {
+    if (colorIndex > 6) colorIndex = 0;
+    return kRed+colorIndex;
+  }
+  return 0;
+}
+
