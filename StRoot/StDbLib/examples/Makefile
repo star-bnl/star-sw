@@ -11,7 +11,7 @@
 #
 # this exec
 #
-ReadConfig = ReadConfig
+ReadConfig = $(THISEXE)
 all :: $(ReadConfig)
 
 #
@@ -23,13 +23,15 @@ include $(STDB_API)/rules.make
 #
 # set pointer to db-cstruct repository
 #
-CSTRUCTS= $(STAR)/StDb/include
+#CSTRUCTS= $(STAR)/StDb/include
+CSTRUCTS= /online/production/dbAdmin/porter/StDb/include/
+
 
 ALL_CPPFLAGS += -I$(STDB_API) 
 ALL_CPPFLAGS += -I$(CSTRUCTS)
-ALL_LIBS = $(STDB_API)/StDbLib.so $(SHARED_LIBS) 
+ALL_LIBS = $(STDB_API)/StDbLib.so $(SHARED_LIBS) -lgen
 
-EXEC_OBJS   =  ReadConfig.o 
+EXEC_OBJS   =  $(ReadConfig).o 
 
 $(ReadConfig): $(EXEC_OBJS)
 	rm -f $@

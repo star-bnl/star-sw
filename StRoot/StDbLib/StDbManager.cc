@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.20 2000/03/01 20:56:16 porter Exp $
+ * $Id: StDbManager.cc,v 1.21 2000/03/28 17:03:18 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,14 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.21  2000/03/28 17:03:18  porter
+ * Several upgrades:
+ * 1. configuration by timestamp for Conditions
+ * 2. query by whereClause made more systematic
+ * 3. conflict between db-stored comments & number lists resolved
+ * 4. ensure endtime is correct for certain query falures
+ * 5. dbstl.h->handles ObjectSpace & RogueWave difference (Online vs Offline)
+ *
  * Revision 1.20  2000/03/01 20:56:16  porter
  * 3 items:
  *    1. activated reConnect for server timeouts
@@ -85,6 +93,7 @@
 #include "StDbTime.h"
 #include "StDbTableIter.hh"
 #include "mysqlAccessor.hh"
+#include "dbCollection.h"
 #include <iostream.h>
 #include <strstream.h>
 #include <strings.h>
@@ -712,7 +721,7 @@ return initConfig(dbtype,dbdomain);
 ////////////////////////////////////////////////////////////////
 
 StDbConfigNode*
-StDbManager::initConfig(const char* dbName, const char* configName){
+StDbManager::initConfig(const char* dbName, const char* configName, int opt){
 
 char* type; 
 char* domain;
@@ -725,7 +734,7 @@ StDbDomain dbdomain = getDbDomain((const char*) domain);
 delete [] type;
 delete [] domain;
 
-return initConfig(dbtype,dbdomain,configName);
+return initConfig(dbtype,dbdomain,configName,opt);
 }
 
 ////////////////////////////////////////////////////////////////
@@ -743,7 +752,7 @@ char* name;
  }
 
  configNode = new StDbConfigNode(type,domain,name);
- configNode->buildTree();
+ // configNode->buildTree(opt);
 
  delete [] name;
  return configNode;
@@ -752,7 +761,7 @@ char* name;
 ////////////////////////////////////////////////////////////////
 
 StDbConfigNode*
-StDbManager::initConfig(StDbType type, StDbDomain domain, const char* configName){
+StDbManager::initConfig(StDbType type, StDbDomain domain, const char* configName, int opt){
 
 StDbConfigNode * configNode = 0;
 
@@ -764,9 +773,70 @@ char* name;
  }
 
  configNode = new StDbConfigNode(type,domain,name,configName);
- configNode->buildTree();
+ configNode->buildTree(opt);
  return configNode;
 }
+
+////////////////////////////////////////////////////////////////
+
+StDbConfigNode*
+StDbManager::initConfig(StDbType type, StDbDomain domain, unsigned int requestTime, int opt){
+
+StDbConfigNode * configNode = 0;
+char* configName = 0;
+
+char* name;
+ if(domain == dbStar){
+  name = getDbTypeName(type);
+ } else {
+  name = getDbDomainName(domain);
+ }
+
+ StDbTable* table = new StDbTable("dbCollection");
+ table->setVersion("default");
+ StDbServer* server = findServer(type,domain);
+ if(server->QueryDb(table,requestTime)){
+    dbCollection* collection = (dbCollection*)table->GetTable();
+    if(collection){
+      configName = new char[strlen(collection->name)+1];
+      strcpy(configName,collection->name);
+    }
+ }
+
+ // just now I am deleting the table... I could add it to node
+ // so that the validity period is kept with the node.
+
+ delete table;
+
+ if(!configName){
+   cerr<<"initConfig:: No named collection for found"<<endl;
+   return configNode;
+ }
+
+ configNode = new StDbConfigNode(type,domain,name,configName);
+ configNode->buildTree(opt);
+ return configNode;
+}
+
+////////////////////////////////////////////////////////////////
+
+StDbConfigNode*
+StDbManager::initConfig(const char* dbName, unsigned int requestTime, int opt){
+
+char* type; 
+char* domain;
+
+getDataBaseInfo(dbName,type,domain);
+
+StDbType dbtype = getDbType((const char*) type);
+StDbDomain dbdomain = getDbDomain((const char*) domain);
+
+delete [] type;
+delete [] domain;
+
+return initConfig(dbtype,dbdomain,requestTime,opt);
+}
+
 
 ////////////////////////////////////////////////////////////////
 void

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.hh,v 1.16 2000/03/01 20:56:16 porter Exp $
+ * $Id: StDbManager.hh,v 1.17 2000/03/28 17:03:19 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,14 @@
  ***************************************************************************
  *
  * $Log: StDbManager.hh,v $
+ * Revision 1.17  2000/03/28 17:03:19  porter
+ * Several upgrades:
+ * 1. configuration by timestamp for Conditions
+ * 2. query by whereClause made more systematic
+ * 3. conflict between db-stored comments & number lists resolved
+ * 4. ensure endtime is correct for certain query falures
+ * 5. dbstl.h->handles ObjectSpace & RogueWave difference (Online vs Offline)
+ *
  * Revision 1.16  2000/03/01 20:56:16  porter
  * 3 items:
  *    1. activated reConnect for server timeouts
@@ -175,10 +183,11 @@ public:
 
   // get Container for StDbTables..
   virtual StDbConfigNode* initConfig(const char* databaseName);
-  virtual StDbConfigNode* initConfig(const char* databaseName, const char* configName);
+  virtual StDbConfigNode* initConfig(const char* databaseName, const char* configName, int opt=0);
   virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain);
-  virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain, const char* configName);
-
+  virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain, const char* configName, int opt=0);
+  virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain, unsigned int requestTime, int opt=0);
+  virtual StDbConfigNode* initConfig(const char* databaseName, unsigned int requestTime, int opt=0);
 
   // message verbosity level
   virtual bool IsVerbose() const { return misVerbose;};

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.7 2000/03/01 20:56:15 porter Exp $
+ * $Id: MysqlDb.cc,v 1.8 2000/03/28 17:03:18 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,14 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.8  2000/03/28 17:03:18  porter
+ * Several upgrades:
+ * 1. configuration by timestamp for Conditions
+ * 2. query by whereClause made more systematic
+ * 3. conflict between db-stored comments & number lists resolved
+ * 4. ensure endtime is correct for certain query falures
+ * 5. dbstl.h->handles ObjectSpace & RogueWave difference (Online vs Offline)
+ *
  * Revision 1.7  2000/03/01 20:56:15  porter
  * 3 items:
  *    1. activated reConnect for server timeouts
@@ -68,39 +76,6 @@
 #define CR_NAMEDPIPEOPEN_ERROR 2017
 #define CR_NAMEDPIPESETSTATE_ERROR 2018
 
-
-/*
-char *MysqlResult::NextRowAscii(){
-  unsigned i;
-  unsigned nl=mysql_num_fields(mRes);
-  MYSQL_ROW row =mysql_fetch_row(mRes);
-  if (row) {
-    char buf[4096]="";
-    ostrstream ost(buf,4096);
-    for (i=0;i<nl;i++) {
-      ost <<row[i]<<"|";
-    }
-    ost << ends;
-    char *ret=new char[strlen(buf)+1];
-    strncpy(ret,buf,strlen(buf)+1);
-    return ret;  }
-  else {
-    return 0;
-  }
-}
-*/
-////////////////////////////////////////////////////////
-/*
-MysqlResult &MysqlResult::operator>>(char *aString){
-
-char *tString  ;
-  if (aString) delete [] aString;
-  tString=NextRowAscii();
-  cout << tString <<endl; 
-  
-  return *this;
-}
-*/
 ////////////////////////////////////////////////////////////////////////
 
 MysqlDb::MysqlDb(): mdbhost(0), mdbName(0), mdbuser(0), mdbpw(0), mdbPort(0) {
@@ -136,16 +111,13 @@ if(mdbName) delete [] mdbName;
 bool MysqlDb::reConnect(){
 
 bool tRetVal=false;
+if(mysql_real_connect(&mData,mdbhost,mdbuser,mdbpw,mdbName,mdbPort,NULL,0)){ 
+    tRetVal=true;
+  } else {
+    cerr << "Error Making Connection to DataBase = " << mdbName << endl;
+    cerr << " MySQL returned error " << mysql_error(&mData) << endl;
+  }
 
-
-    if(mysql_real_connect(&mData,mdbhost,mdbuser,mdbpw,mdbName,mdbPort,NULL,0)){ 
-      tRetVal=true;
-
-    } else {
-
-      cerr << "Error Making Connection to DataBase = " << mdbName << endl;
-      cerr << " MySQL returned error " << mysql_error(&mData) << endl;
-    }
 return tRetVal;
 }
 
@@ -163,8 +135,6 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
 
   if(mdbName) delete [] mdbName;
   mdbName  = new char[strlen(aDb)+1];     strcpy(mdbName,aDb);
-
-
 
   //  if(mhasConnected)mysql_close(&mData);
   bool tRetVal = false;
@@ -251,7 +221,9 @@ unsigned int mysqlError;
 
   return tOk;
 }
+
 ////////////////////////////////////////////////////////////////////////
+
 MysqlDb &MysqlDb::operator<<( const char *aQuery){ 
    
   //cout << "debug in ---"<< mQueryMess << "|" << mQueryLast << endl; 
@@ -277,6 +249,7 @@ MysqlDb &MysqlDb::operator<<( const char *aQuery){
   //cout <<"debug out --->"<< mQueryMess << "|" << mQueryLast << endl;
   return *this;
 }
+
 ////////////////////////////////////////////////////////////////////////
 
 MysqlDb &MysqlDb::operator<<( const MysqlBin *aBin ){
@@ -298,43 +271,6 @@ MysqlDb &MysqlDb::operator<<( const MysqlBin *aBin ){
   
   return *this;
 };
-
-////////////////////////////////////////////////////////////////////////
-/*
-void MysqlDb::Out() {
-
-unsigned i;
-
- for (i=0;i<mRes->NbRows();i++){
-   cout << mRes->NextRowAscii() <<endl;
- };
-};
-*/
-////////////////////////////////////////////////////////////////////////
-/*
-column *MysqlDb::NextRow(){
-  MYSQL_ROW tRow=mysql_fetch_row(mRes->mRes);
-  if (tRow) {
-    unsigned tNbCol=mysql_num_fields(mRes->mRes);
-    column *tCol = new struct column[tNbCol];
-    long unsigned *lengths=mysql_fetch_lengths(mRes->mRes);
-    unsigned i;
-    for (i=0;i<tNbCol;i++) {
-      tCol[i].name=new char[strlen(mRes->mRes->fields[i].name)+1];
-      strcpy(tCol[i].name,mRes->mRes->fields[i].name);
-      tCol[i].length=lengths[i];
-      tCol[i].val=new char [ tCol[i].length];     
-      memcpy(tCol[i].val,tRow[i],tCol[i].length);
-      tCol[i].val[tCol[i].length]='\0';
-      tCol[i].type=mRes->mRes->fields[i].type;
-    };
-    return tCol;
-  } else {
-    return 0;
-  };
-};
-
-*/
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -411,21 +347,8 @@ bool MysqlDb::Input(const char *table,StDbBuffer *aBuff){
   if (change) aBuff->SetClientMode();
   return tRetVal;
 }; 
-////////////////////////////////////////////////////////////////////////
 
-/*
-bool  MysqlDb::InitBuff(StDbBuffer *aBuff){
-  column* tNRow=PrepareWrite();
-  if (tNRow) {
-    aBuff->Init(NbFields(),tNRow);
-    return 1;
-  } else {
-    return 0;
-  }
-}
-*/
 ////////////////////////////////////////////////////////////////////////
-
 
 bool  MysqlDb::Output(StDbBuffer *aBuff){
 
@@ -451,9 +374,18 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
 	       aBuff->WriteArray(tStrPtr,len,mRes->mRes->fields[i].name);
            for(int k=0;k<len;k++)delete tStrPtr[k];
            delete tStrPtr;
+
+           // something of a cludge: "," are used in "Decode.."  
+           // as array delimeters. But we also want to have
+           // char arrays for comment structures - so write'em both
+           // to the buffer. 
+
+           char commentName[1024];
+           ostrstream cn(commentName,1024);
+           cn<<mRes->mRes->fields[i].name<<".text"<<ends;
+	       aBuff->WriteScalar((char*)tRow[i],commentName);
 	    };
       } else {
-        // cout << " Writing Scalar Named = " << mRes->mRes->fields[i].name << endl;
 	       aBuff->WriteScalar((char*)tRow[i],mRes->mRes->fields[i].name);
       };
     };
@@ -463,32 +395,8 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
   return tRetVal;
 }
 
-
-
 ////////////////////////////////////////////////////////////////////////
 
-/*
-column *MysqlDb::PrepareWrite(){
-  unsigned tNbCol=mysql_num_fields(mRes->mRes);
-  if (tNbCol){
-     column *tCol = new struct column[tNbCol];
-    unsigned i;
-    for (i=0;i<tNbCol;i++) {
-      tCol[i].name=new char[strlen(mRes->mRes->fields[i].name)+1];
-      strcpy(tCol[i].name,mRes->mRes->fields[i].name);
-      tCol[i].val=0;
-      tCol[i].length=0;
-      tCol[i].type=mRes->mRes->fields[i].type;
-
-    };
-    return tCol;
-  }else {
-    return 0;
-  };
-};
-      
-*/
-////////////////////////////////////////////////////////////////////////
 char** MysqlDb::DecodeStrArray(char* strinput , int &aLen){
   
   char* tPnt=strinput;
@@ -539,7 +447,9 @@ char** MysqlDb::DecodeStrArray(char* strinput , int &aLen){
   delete [] tBuff;
   return strarr;
 }
+
 ////////////////////////////////////////////////////////////////////////
+
 char* MysqlDb::CodeStrArray(char** strarr , int aLen){
   int tMaxLen=0;
   int i;
@@ -576,6 +486,7 @@ char* MysqlDb::CodeStrArray(char** strarr , int aLen){
 };
   
 /////////////////////////////////////////////////////
+
 bool
 MysqlDb::setDefaultDb(const char* dbName){
 
@@ -608,13 +519,6 @@ unsigned int mysqlError;
 return tOk;
 }
   
-      
-      
-				    
-  
-
-  
-
 ////////////////////////////////////////////////////////////////////////
 
 MysqlBin *Binary(const unsigned long int aLen,const float *aBin){

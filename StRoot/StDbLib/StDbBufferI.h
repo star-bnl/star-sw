@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StDbBufferI.h,v 1.4 1999/12/29 13:49:34 porter Exp $
+ * $Id: StDbBufferI.h,v 1.5 2000/03/28 17:03:18 porter Exp $
  *
  * Author: Laurent Conin & Jeff Porter
  ***************************************************************************
@@ -11,6 +11,14 @@
  ***************************************************************************
  *
  * $Log: StDbBufferI.h,v $
+ * Revision 1.5  2000/03/28 17:03:18  porter
+ * Several upgrades:
+ * 1. configuration by timestamp for Conditions
+ * 2. query by whereClause made more systematic
+ * 3. conflict between db-stored comments & number lists resolved
+ * 4. ensure endtime is correct for certain query falures
+ * 5. dbstl.h->handles ObjectSpace & RogueWave difference (Online vs Offline)
+ *
  * Revision 1.4  1999/12/29 13:49:34  porter
  * fix for Solaris-CC4.2 within StRoot make (cons)...
  * replaced #include <config.h> with #include <ospace/config.h>
@@ -28,18 +36,7 @@
 #ifndef STDBBUFFERI_H
 #define STDBBUFFERI_H
 
-
-#ifdef ST_NO_TEMPLATE_DEF_ARGS
-#include <ospace/config.h>
-#endif
-
-//#ifdef SOLARIS
-//# ifndef false
-//typedef int bool;
-//#define false 0
-//#define true 1
-//#endif
-//#endif
+#include "dbstl.h"
 
 class StDbBufferI  { 
 
