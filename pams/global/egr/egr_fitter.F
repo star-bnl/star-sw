@@ -1,4 +1,4 @@
- 1    INTEGER*4 FUNCTION EGR_FITTER(
+      INTEGER*4 FUNCTION EGR_FITTER(
      1             tphit_h,             tphit ,
      2           privert_h,           privert ,
      3           tptrack_h,           tptrack ,
