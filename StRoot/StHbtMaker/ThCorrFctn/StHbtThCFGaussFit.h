@@ -66,7 +66,7 @@ class StHbtThCFGaussFit : public StHbtCorrFctn {
   void SetLCMS();
   void SetPRF();
 
-  const StHbtThCFGaussSizeCollection *getCollection() const;
+  StHbtThCFGaussSizeCollection *getCollection();
 
  private:
 

@@ -37,6 +37,8 @@ class ThNonId3DCF :  public virtual StHbtThCorrFctn  {
   virtual void Write() ;
   virtual void Finish();
   virtual StHbtString Report();
+  virtual void SetBtRange(double aBtMin, double aBtMax);
+  virtual void SetUtRange(double aUtMin, double aUtMax);
 
  private:
   
@@ -81,6 +83,12 @@ class ThNonId3DCF :  public virtual StHbtThCorrFctn  {
   StHbt2DHisto* mHSideKDiff;
   StHbt2DHisto* mHLongKSame;
   StHbt2DHisto* mHLongKDiff; 
+  
+  double mBtMin;
+  double mBtMax;
+
+  double mUtMin;
+  double mUtMax;
 
 #ifdef __ROOT__
 ClassDef(ThNonId3DCF, 1)

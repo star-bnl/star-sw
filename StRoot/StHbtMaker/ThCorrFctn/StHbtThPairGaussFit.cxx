@@ -60,3 +60,7 @@ double StHbtThPairGaussFit::GetRejectionProb2Size (double aX, double aY, double 
 		   +(pow(tEM1->t(),2)+pow(tEM2->t(),2))*tCorSizeT));
   */
 }
+
+void StHbtThPairGaussFit::setVariables(const StHbtPair*){
+  
+}

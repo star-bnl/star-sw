@@ -35,7 +35,7 @@ StHbtShiftedHiddenInfo::~StHbtShiftedHiddenInfo()
 {/* no-op */};
 
 
-inline const StHbtLorentzVector& StHbtShiftedHiddenInfo::getShiftedMom() const {
+inline const StHbtLorentzVector StHbtShiftedHiddenInfo::getShiftedMom() const {
   return mShiftedMom;
 }
 
@@ -107,7 +107,7 @@ inline StHbtHiddenInfo* StHbtShiftedHiddenInfo::getParticleHiddenInfo()
  const
 {return new StHbtShiftedHiddenInfo(mShiftedMom, mPid);}
 
-inline const StHbtLorentzVector& StHbtShiftedHiddenInfo::getMomentum() const
+inline StHbtLorentzVector StHbtShiftedHiddenInfo::getMomentum() const 
 {
   return mShiftedMom;
 }

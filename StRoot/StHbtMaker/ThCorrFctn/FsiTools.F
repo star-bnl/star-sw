@@ -1,12 +1,9 @@
 *
-* $Id: FsiTools.F,v 1.1 2001/04/03 21:07:45 kisiel Exp $
+* $Id: FsiTools.F,v 1.2 2002/12/12 16:59:34 kisiel Exp $
 *
 * $Log: FsiTools.F,v $
-* Revision 1.1  2001/04/03 21:07:45  kisiel
-* The code to perform Theoretical CF calculations.
-*   Includes Fortran code from Richard Lednicky.
-*   The code also allows to study the effects of
-*   momentum resolution and particle purity.
+* Revision 1.2  2002/12/12 16:59:34  kisiel
+* Update of the Theoretical part. Add Lambda-Lambda system. New momentum resolution parametrization.
 *
 * Revision 1.1.1.1  1996/04/01 15:01:55  mclareni
 * Mathlib gen
@@ -77,14 +74,11 @@ c       CALL MTLPRT(NAME,'C305.1',ERRTXT)
       END
 
 *
-* $Id: FsiTools.F,v 1.1 2001/04/03 21:07:45 kisiel Exp $
+* $Id: FsiTools.F,v 1.2 2002/12/12 16:59:34 kisiel Exp $
 *
 * $Log: FsiTools.F,v $
-* Revision 1.1  2001/04/03 21:07:45  kisiel
-* The code to perform Theoretical CF calculations.
-*   Includes Fortran code from Richard Lednicky.
-*   The code also allows to study the effects of
-*   momentum resolution and particle purity.
+* Revision 1.2  2002/12/12 16:59:34  kisiel
+* Update of the Theoretical part. Add Lambda-Lambda system. New momentum resolution parametrization.
 *
 * Revision 1.1.1.1  1996/04/01 15:02:02  mclareni
 * Mathlib gen

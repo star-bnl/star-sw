@@ -32,16 +32,16 @@ ThQinvCorrFctn::~ThQinvCorrFctn()
 //____________________________
 void ThQinvCorrFctn::AddNum(StHbtThPair* aThPair){
 
-  double tQInv=2 * fabs(aThPair->GetMeasPair()->KStar());
-  if(tQInv>=mHLo && tQInv<=mHHi){
-    mNumerator->Fill(tQInv,aThPair->GetWeightNum());
-  }
 }
 void ThQinvCorrFctn::AddDen(StHbtThPair* aThPair){
 
-  double tQInv=2 * fabs(aThPair->GetMeasPair()->KStar());
+  double tQInv = 2*fabs(aThPair->GetMeasPair()->KStar());
+  //  cout << "Filling ThQinv CF with values: KStar:  " << tQInv << "  wDen:  " << aThPair->GetWeightDen() << " wNum:   " << aThPair->GetWeightNum() << endl;
   if(tQInv>=mHLo && tQInv<=mHHi){
     mDenominator->Fill(tQInv,aThPair->GetWeightDen());
+  }
+  if(tQInv>=mHLo && tQInv<=mHHi){
+    mNumerator->Fill(tQInv,aThPair->GetWeightNum());
   }
 }
 

@@ -10,6 +10,7 @@ StHbtSmearedHiddenInfo::StHbtSmearedHiddenInfo()
 {/* no-op */};
 
 StHbtSmearedHiddenInfo::StHbtSmearedHiddenInfo(const StHbtLorentzVector& aInitialMom, 
+					       const StHbtLorentzVector& aFreezeOut,
 					       const int& aPid,
 					       TRandom* aRand,
 					       const StHbtMomRes* aMomRes)
@@ -17,25 +18,38 @@ StHbtSmearedHiddenInfo::StHbtSmearedHiddenInfo(const StHbtLorentzVector& aInitia
   mPid(aPid)
 {
   setInitialMom(&aInitialMom, aRand, aMomRes);
+  setFreezeOut(&aFreezeOut);
 }
 
 StHbtSmearedHiddenInfo::StHbtSmearedHiddenInfo(const StHbtSmearedHiddenInfo& aHiddenInfo)
   :
   mSmearedMom(aHiddenInfo.getSmearedMom()),
   mPid(aHiddenInfo.getPid())
-{/* no-op */ };
+{ 
+  mFreezeOut = new StHbtLorentzVector(aHiddenInfo.getFreezeOut());
+};
 
 StHbtSmearedHiddenInfo::StHbtSmearedHiddenInfo(const StHbtLorentzVector& aSmearedMom,
+					       const StHbtLorentzVector& aFreezeOut,
 					       const int& aPid):
   mSmearedMom(aSmearedMom),
   mPid(aPid)
-{/* no-op */ };
+{
+  mFreezeOut = new StHbtLorentzVector(aFreezeOut);
+};
 
 StHbtSmearedHiddenInfo::~StHbtSmearedHiddenInfo()
-{/* no-op */};
+{
+  if (mFreezeOut) delete mFreezeOut;
+};
 
 inline const StHbtLorentzVector& StHbtSmearedHiddenInfo::getSmearedMom() const {
   return mSmearedMom;
+}
+
+inline StHbtLorentzVector& StHbtSmearedHiddenInfo::getFreezeOut() const 
+{
+  return *mFreezeOut;
 }
 
 inline int StHbtSmearedHiddenInfo::getPid() const
@@ -52,21 +66,33 @@ inline  void  StHbtSmearedHiddenInfo::setInitialMom(const StHbtLorentzVector* aP
   Float_t pz = aP->z();
 
   /* Calculating helper veriables */
-  Float_t ptmom = hypot(px, py);
-  Float_t pter = aMomRes->getPtError(ptmom);
   Float_t totmom = sqrt ((px * px) + (py * py) + (pz * pz));
+  Float_t per = aMomRes->getPtError(totmom);
+  Float_t thetaan = TMath::ATan2(hypot(px,py),pz);
   Float_t phier = aMomRes->getPhiError(totmom);
   Float_t thetaer = aMomRes->getThetaError(totmom);
+  Float_t pshift = aMomRes->getPShift(totmom);
+
+  /* Rescale the momnentum components according to the P shift */
+  //  Float_t rescale = (totmom - (pshift * totmom)) / totmom;
+  // pP shift now an absolute value
+  Float_t rescale = (totmom - pshift) / totmom;
+  //  cout << "Rescale:   " << rescale << endl;
 
   /* Getting the error distribution widths */
-  Float_t Deltapx = px * pter - py * phier * DEGTORAD;
-  Float_t Deltapy = py * pter + px * phier * DEGTORAD;
-  Float_t Deltapz = pz * pter + ptmom * thetaer * DEGTORAD / (pow((ptmom/pz),2));
+  //  Float_t Deltapx = px * pter - py * phier * DEGTORAD;
+  //  Float_t Deltapy = py * pter + px * phier * DEGTORAD;
+  //  Float_t Deltapz = pz * pter + ptmom * thetaer * DEGTORAD / (pow((ptmom/pz),2));
+  // Angles now in readians - do not recalculate them!
+  Float_t Deltapx = TMath::Abs(px) * per + TMath::Abs(py) * phier + TMath::Abs(px * (1/TMath::Tan(thetaan))) * thetaer;
+  Float_t Deltapy = TMath::Abs(py) * per + TMath::Abs(px) * phier + TMath::Abs(py * (1/TMath::Tan(thetaan))) * thetaer;
+  Float_t Deltapz = TMath::Abs(pz) * per + TMath::Abs(pz * TMath::Tan(thetaan)) * thetaer;
+
 
   /* storing the smeared momentum in the hidden info */
-  mSmearedMom.setX(px + aRand->Gaus(0,fabs(Deltapx)));
-  mSmearedMom.setY(py + aRand->Gaus(0,fabs(Deltapy)));
-  mSmearedMom.setZ(pz + aRand->Gaus(0,fabs(Deltapz)));
+  mSmearedMom.setX((px + aRand->Gaus(0,fabs(Deltapx))) * rescale);
+  mSmearedMom.setY((py + aRand->Gaus(0,fabs(Deltapy))) * rescale);
+  mSmearedMom.setZ((pz + aRand->Gaus(0,fabs(Deltapz))) * rescale);
 
   /* Calclating the energy */
   switch (abs(mPid)) {
@@ -80,13 +106,16 @@ inline  void  StHbtSmearedHiddenInfo::setInitialMom(const StHbtLorentzVector* aP
 }
 
 inline  void StHbtSmearedHiddenInfo:: setPid(int aPid)
-{ mPid=aPid;}
+{ mPid=aPid; }
+
+inline  void StHbtSmearedHiddenInfo:: setFreezeOut(const StHbtLorentzVector* aFreezeOut)
+{ mFreezeOut = new StHbtLorentzVector(*aFreezeOut); } 
 
 inline StHbtHiddenInfo* StHbtSmearedHiddenInfo::getParticleHiddenInfo()
  const
-{return new StHbtSmearedHiddenInfo(mSmearedMom, mPid);}
+{return new StHbtSmearedHiddenInfo(mSmearedMom, *mFreezeOut, mPid);}
 
-inline const StHbtLorentzVector& StHbtSmearedHiddenInfo::getMomentum() const
+inline StHbtLorentzVector& StHbtSmearedHiddenInfo::getMomentum()
 {
   return mSmearedMom;
 }

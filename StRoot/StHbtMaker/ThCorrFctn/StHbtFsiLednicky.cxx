@@ -47,6 +47,10 @@ extern "C" {void type_of_call F77_NAME(fsiw,FSIW)(const int &i,double &weif,
 #define ltran12 F77_NAME(ltran12,LTRAN12)
 extern "C" {void type_of_call ltran12_();}
 
+// Test function for Lambda potential
+#define printlam F77_NAME(printlam,PRINTLAM)
+extern "C" {void type_of_call printlam_();}
+
 // --- Additional prototyping of some CERN functions (in FsiTool.F)
 typedef float   REAL;
 typedef struct { REAL re; REAL im; } COMPLEX;
@@ -60,7 +64,7 @@ ClassImp(StHbtFsiLednicky)
 StHbtFsiLednicky::StHbtFsiLednicky() : StHbtFsiWeight(),
   mItest(0),mIch(1),mIqs(1),mIsi(1),mI3c(0),
   mNuclMass(1.),mNuclCharge(0.),
-  mSphereApp(false),mT0App(false),mNuclChargeSign(1), mLLMax(28),mNumbNonId(0) {
+  mSphereApp(false),mT0App(false),mNuclChargeSign(1), mLLMax(29),mNumbNonId(0) {
 
   mLLName=new char*[mLLMax+1];
   mNumProcessPair=new int[mLLMax+1];
@@ -94,6 +98,7 @@ StHbtFsiLednicky::StHbtFsiLednicky() : StHbtFsiWeight(),
   strcpy( mLLName[26],"proton alpha");
   strcpy( mLLName[27],"proton lambda");
   strcpy( mLLName[28],"neutron lambda");
+  strcpy( mLLName[29],"Lambda lambda");// gael 21May02
   FsiInit();
   FsiNucl();
 };
@@ -164,10 +169,20 @@ StHbtString StHbtFsiLednicky::Report() {
 }
 
 void StHbtFsiLednicky::FsiInit(){
+  cout << "*******************StHbtFsiLednicky check FsiInit ************" << endl;
+  cout <<"mItest dans FsiInit() = " << mItest << endl;
+  cout <<"mIch dans FsiInit() = " << mIch << endl;
+  cout <<"mIqs dans FsiInit() = " << mIqs << endl;
+  cout <<"mIsi dans FsiInit() = " << mIsi << endl;
+  cout <<"mI3c dans FsiInit() = " << mI3c << endl;
   fsiin(mItest,mIch,mIqs,mIsi,mI3c);
 };
 
 void StHbtFsiLednicky::FsiNucl(){
+  cout << "*******************StHbtFsiLednicky check FsiNucl ************" << endl;
+  cout <<"mNuclMass dans FsiNucl() = " << mNuclMass << endl;
+  cout <<"mNuclCharge dans FsiNucl() = " << mNuclCharge << endl;
+  cout <<"mNuclChargeSign dans FsiNucl() = " << mNuclChargeSign << endl;
   fsinucl(mNuclMass,mNuclCharge*mNuclChargeSign);
 };
 
@@ -189,6 +204,8 @@ bool StHbtFsiLednicky::SetPid(const int aPid1,const int aPid2) {
   static const int sNeutPid=2112;
   static const int sProtPid=2212;
   static const int sLamPid=3122;
+  //  static const int sLamLamPid=3122;
+
 
   int tPidl,tPidh;
   int tChargeFactor=1;
@@ -212,7 +229,7 @@ bool StHbtFsiLednicky::SetPid(const int aPid1,const int aPid2) {
     case -sKPid:      mLL=10;tChargeFactor*=1 ;break;  
     case sKPid:       mLL=11;tChargeFactor*=1 ;break;  
     case sProtPid:    mLL=12;tChargeFactor*=1 ;break;
-    case -sProtPid:   mLL=12;tChargeFactor*=-1;break;
+    case -sProtPid:   mLL=13;tChargeFactor*=-1;break;
     default: mLL=0;
     }
     break;
@@ -252,7 +269,13 @@ bool StHbtFsiLednicky::SetPid(const int aPid1,const int aPid2) {
     case sLamPid:       mLL=28;tChargeFactor*=1 ;break;
     default: mLL=0;
     };
-    break; 
+    break;                                             //Gael 21May02 
+  case sLamPid:                                        //Gael 21May02 
+    switch (tPidh) {                                   //Gael 21May02 
+    case sLamPid:       mLL=29;tChargeFactor*=1 ;break;//Gael 21May02  
+    default: mLL=0;                                    //Gael 21May02 
+    };                                                 //Gael 21May02 
+    break;                                             //Gael 21May02 
   default: mLL=0;
   }
   if (tChargeFactor!=mNuclChargeSign) {
@@ -267,6 +290,10 @@ bool StHbtFsiLednicky::SetPid(const int aPid1,const int aPid2) {
     mNumbNonId++;
     return false;
   }
+  cout << "*******************StHbtFsiLednicky check SetPid ************" << endl;
+  cout << "mLL=="<< mLL << endl;
+  cout << "mNuclCharge=="<< mNuclCharge << endl;
+
 }    
 StHbtFsiLednicky::~StHbtFsiLednicky() 
 { /* no-op */ };
@@ -292,6 +319,7 @@ inline  void StHbtFsiLednicky::SetStrongOff(){mItest=1;mIsi=0;FsiInit();};
 inline  void StHbtFsiLednicky::Set3BodyOn(){mItest=1;mI3c=1;FsiInit();FsiNucl();};
 inline  void StHbtFsiLednicky::Set3BodyOff(){mItest=1;mI3c=0;FsiInit();mWeightDen=1.;FsiNucl();};
 
+void StHbtFsiLednicky::PrintLambdas() {printlam();};
 
   
 

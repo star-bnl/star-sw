@@ -2,7 +2,7 @@ c         1         2         3         4         5         6         7         
 c---------|---------|---------|---------|---------|---------|---------|---------|
 *-- Author :    R.Lednicky      20/01/95
       SUBROUTINE FSIW(J,WEIF,WEI,WEIN)
-
+ 
 C=======================================================================
 C    Calculates final state interaction (FSI) weights
 C    WEIF = weight due to particle - (effective) nucleus FSI (p-N)
@@ -31,17 +31,17 @@ C    IQS  : 1(0) quantum statistics for the two particles ON (OFF)
 C    ISI  : 1(0) strong interaction between the two particles ON (OFF)
 C    I3C  : 1(0) Coulomb interaction with residual nucleus ON (OFF)
 C    This data file can contain other information useful for the user.
-C    It is read by subroutines READINT4 and READREA4 (or READ_FILE).
+C    It is read by subroutines READINT4 and READREA8(4) (or READ_FILE).
 C----------------------------------------------------------------------
-C-   LL       1  2  3  4   5    6   7  8  9 10  11  12  13  14 15 16 17
-C-   part. 1: n  p  n alfa pi+ pi0 pi+ n  p pi+ pi+ pi+ pi- K+ K+ K+ K-
-C-   part. 2: n  p  p alfa pi- pi0 pi+ d  d  K-  K+  p   p  K- K+ p  p
-C   NS=1 y/n: +  +  +  +   +    -   -  -  -  -   -   -   -  -  -  -  -
+C-   LL       1  2  3  4  5   6   7   8  9 10  11  12  13  14 15 16 17
+C-   part. 1: n  p  n  a  pi+ pi0 pi+ n  p pi+ pi+ pi+ pi- K+ K+ K+ K-
+C-   part. 2: n  p  p  a  pi- pi0 pi+ d  d  K-  K+  p   p  K- K+ p  p
+C   NS=1 y/n: +  +  +  +  +   -   -   -  -  -   -   -   -  -  -  -  -
 C----------------------------------------------------------------------
-C-   LL       18  19 20  21  22 23 24 25 26    27     28
-C-   part. 1:  d  d   t  t   K0 K0  d p  p      p      n
-C-   part. 2:  d alfa t alfa K0 K0b t t alfa lambda lambda
-C   NS=1 y/n:  -  -   -  -   -  -   - -  -      -      -
+C-   LL       18 19 20 21 22 23  24 25 26 27 28 29
+C-   part. 1: d  d  t  t  K0 K0  d  p  p  p  n  /\
+C-   part. 2: d  a  t  a  K0 K0b t  t  a  /\ /\ /\
+C   NS=1 y/n: -  -  -  -  -  -   -  -  -  +  +  + 
 C----------------------------------------------------------------------
 C   NS=1  Square well potential,
 C   NS=3  not used
@@ -235,7 +235,6 @@ C-----------------------------------------------------------------------
       EE=(E12*E1-P112)/AM12
       AKS=EE**2-AM1**2
       AK=DSQRT(AKS)
-
 CW      WRITE(6,38)'AK ',AK,'K ',PPX,PPY,PPZ,EE
 38    FORMAT(A7,E11.4,A7,4E11.4)
       RETURN
@@ -257,6 +256,8 @@ C  calculating particle-nucleus Coulomb Wave functions FFij
       COMPLEX*16 FF1,FF12,FF21
       FF12=DCMPLX(1.D0,0.D0)
       FF21=DCMPLX(1.D0,0.D0)
+      ACH=1.D0
+      WEIF=1.D0
       IF(I3C.EQ.0)RETURN
       ICH1=IDINT(C1)
       IF(ICH1.EQ.0)GOTO 11
@@ -313,6 +314,16 @@ C--  J=1(2) corresponds to isospin=0(2)
       GPIPI=GPIPI/(1+(AAPI(3,J)+AAPI(2,J)/AAPI(1,J))*XX)
       RETURN
       END
+      
+      FUNCTION GPIN(X,J)
+C--- GPIN = k*COTG(DELTA), X=k^2
+C--  J=1(2) corresponds to piN isospin=1/2(3/2)
+      IMPLICIT REAL*8 (A-H,O-Z)
+      COMMON/FSI_AAPIN/AAPIN(20,2)
+      GPIN=1/AAPIN(1,J)+.5D0*AAPIN(2,J)*X
+      RETURN
+      END
+      
       FUNCTION GND(X,J)
 C--- GND = k*COTG(DELTA), X=k^2
 C--- J=1(2) corresp. to nd(pd), S=1/2,
@@ -359,11 +370,14 @@ C--- J=1,2,3 corresp. to S=0,1,2
       BLOCK DATA
       IMPLICIT REAL*8 (A-H,O-Z)
       COMMON/FSI_AAPI/AAPI(20,2)/FSI_AAND/AAND(20,4)
-      COMMON/FSI_AADD/AADD(20,3)
+      COMMON/FSI_AADD/AADD(20,3)/FSI_AAPIN/AAPIN(20,2)
       COMMON/FSI_AAKK/AAKK(9)
 C---Parameters for GPIPI (I,J), J=1(2) corresp. to isospin=0(2)
       DATA AAPI/.2600D00, .2500D00, .3480D00,-.0637D00, 16*0.D0,
      1         -.0280D00,-.0820D00, .2795D00,-.0086D00, 16*0.D0/
+C---Parameters for GPIN (I,J), J=1(2) corresp. to piN isospin=1/2(3/2)
+      DATA AAPIN/ .12265D1, .1563D2,     18*0.D0,
+     1            -.750D0,  .7688D2,     18*0.D0/
 C---Parameters for GND (I,J), J=1(2) corresp. to nd(pd), S=1/2,
 C---                          J=3(4) corresp. to nd(pd), S=3/2
       DATA AAND/-.3295D1,-.8819D3, .4537D4, .28645D5, 16*0.D0,
@@ -416,7 +430,7 @@ C-- MSPIN= MSPINH(LL)= number of the values of the total pair spin S;
 C-- FD= FDH(LL,JJ), RD= RDH(LL,JJ)= scattering length and effective
 C-- radius for each value of the total pair spin S, JJ= 1,..,MSPIN;     ;
 C-- the corresponding square well parameters EB= EBH(LL,JJ), RB=
-C-- RBH(LL,JJ) (required if NS=1) may be calculated by SEAR;
+C-- RBH(LL,JJ) (required if NS=1) may be calculated by sear.f;
 C-- if the effective range approximation is not valid (as is the case,
 C-- e.g., for two-pion system) a code for calculation of the scattering
 C-- amplitude should be supplemented;
@@ -438,6 +452,7 @@ C-----------------------------------------------------------------------
       COMPLEX*16 C
       COMMON/FSI_AA/AA
       COMMON/FSI_AAPI/AAPI(20,2)/FSI_AAND/AAND(20,4)
+      COMMON/FSI_AAPIN/AAPIN(20,2)
       COMMON/FSI_SW/RB(10),EB(10),BK(10),CDK(10),SDK(10),
      1              SBKRB(10),SDKK(10)
       COMMON/FSI_FDH/FDH(30,10),RDH(30,10),EBH(30,10),RBH(30,10)
@@ -451,76 +466,102 @@ c      REAL*8       REAL8
 c      INTEGER*4    IERR
 C
 C--- mass of the first and second particle
-      DATA AM1H/.9395656D0,.9382723D0,.9395656D0,3.7294D0,.13957D0,
-     C          .13498D0,.13957D0, .9395656D0, .9382723D0,
+      DATA AM1H/.93956563D0,.93827231D0,.93956563D0,3.72737978D0,
+     C          .13957D0,.13498D0,.13957D0, .93956563D0, .93827231D0,
      C          4*.13957D0,4*.493677D0,
-     C          2*1.875613D0,2*2.808D0,2*.497672D0,
-     C          1.875613D0,3*.9382723D0,.9395656D0, 2*0.D0/
-      DATA AM2H/.9395656D0,.9382723D0,.9382723D0,3.7294D0,.13957D0,
-     C          .13498D0,.13957D0, 2*1.875613D0,
-     C          2*.493677D0,2*.9382723D0,
-     C          2*.493677D0,2*.9382723D0,
-     C          1.875613D0,3.7294D0,2.808D0,3.7294D0,
-     C          2*.497672D0,2*2.808D0,3.7294D0,2*1.115684D0, 2*0.D0/
+     C          2*1.87561339D0,2*2.80892165D0,2*.497672D0,
+     C          1.87561339D0,3*.93827231D0,.93956563D0, 
+     C          1.115684D0,1*0.D0/
+      DATA AM2H/.93956563D0,.93827231D0,.93827231D0,3.72737978D0,
+     C          .13957D0,.13498D0,.13957D0, 2*1.87561339D0,
+     C          2*.493677D0,2*.93827231D0,
+     C          2*.493677D0,2*.93827231D0,
+     C          1.87561339D0,3.72737978D0,2.80892165D0,3.72737978D0,
+     C          2*.497672D0,2*2.80892165D0,3.72737978D0,
+     C          3*1.115684D0,1*0.D0/
+c--------|---------|---------|---------|---------|---------|---------|----------
 C---  charge of the first and second particle
       DATA C1H/0.D0,1.D0,0.D0,2.D0, 1.D0,0.D0,1.D0,0.D0,1.D0,
      C         3*1.D0,-1.D0,3*1.D0,-1.D0,
-     C         4*1.D0,2*0.D0,4*1.D0,0.D0, 2*0.D0/
+     C         4*1.D0,2*0.D0,4*1.D0,2*0.D0, 1*0.D0/
       DATA C2H/0.D0,1.D0,1.D0,2.D0,-1.D0,0.D0,3*1.D0,
      C         -1.D0,3*1.D0,-1.D0,3*1.D0,
-     C         1.D0,2.D0,1.D0,2.D0,2*0.D0,2*1.D0,2.D0,2*0.D0,2*0.D0/
+     C         1.D0,2.D0,1.D0,2.D0,2*0.D0,2*1.D0,2.D0,3*0.D0,1*0.D0/
 C---MSPIN vs (LL)
-      DATA MSPINH/3*2,4*1,2*2,8*1,3,1,2,1,2*1,2*2,1,2*2, 2*0/
+      DATA MSPINH/3*2,4*1,2*2,8*1,3,1,2,1,2*1,2*2,1,3*2, 1*0/
 C---Spin factors RHO vs (LL,ISPIN)
       DATA RHOH/3*.25D0, 4*1.D0, 2*.3333D0, 8*1.D0, 
      1          .1111D0,1.D0,.25D0,1.D0,2*1.D0,
-     1          .3333D0,.25D0,1.D0,2*.25D0, 2*0.D0,
+     1          .3333D0,.25D0,1.D0,3*.25D0, 1*0.D0,
      2          3*.75D0, 4*0.D0, 2*.6667D0, 8*0.D0, 
      2          .3333D0,.0D0,.75D0,.0D0,2*0.D0,
-     2          .6667D0,.75D0,0.D0,2*.75D0, 2*0.D0, 
-     3          17*.0D0,.5556D0,3*0.D0, 7*0.D0,2*0.D0,210*0.D0/
+     2          .6667D0,.75D0,0.D0,3*.75D0, 1*0.D0, 
+     3          17*.0D0,.5556D0,3*0.D0, 8*0.D0,1*0.D0,210*0.D0/
 C---Scattering length FD and effective radius RD in fm vs (LL,ISPIN)
       DATA FDH/17.0D0,7.8D0,23.7D0,2230.1218D0,.225D0,.081D0,-.063D0,
-     1        -.65D0,-2.73D0,
-     1        .137D0,-.071D0,-.148D0,.112D0,2*1.D-6,-.360D0,
-     1        2*1.D-6,1.344D0,6*1.D-6,-5.628D0,2.31D0,2.71D0, 2*0.D0,
-     2 -10.8D0,2*-5.4D0,4*0.D0,-6.35D0,-11.88D0,8*0.D0,9*0.D0,
-     2 1.78D0,1.60D0,2*0.D0,
-     3 240*0.D0/
+     1  -.65D0,-2.73D0,
+     1  .137D0,-.071D0,-.148D0,.112D0,2*1.D-6,-.360D0,
+     1  2*1.D-6,1.344D0,6*1.D-6,-5.628D0,2.18D0,2.40D0, 
+     1  2.81D0, ! ND potential /\/\
+C     1  0.50D0, ! NSC97e potential /\/\
+     1  1*0.D0,        
+cc     2 -10.8D0,2*-5.4D0,4*0.D0,-6.35D0,-11.88D0,8*0.D0,9*0.D0,
+     2  3*-5.4D0,4*0.D0,-6.35D0,-11.88D0,8*0.D0,9*0.D0,
+     2  1.93D0,1.84D0,
+     2  0.50D0, ! triplet f0 /\/\=singlet f0 ND
+                ! not contributing in s-wave FSI approx.
+     2  1*0.D0,
+     3  240*0.D0/
 c--------|---------|---------|---------|---------|---------|---------|----------     
       DATA RDH/2.7D0,2.8D0,2.7D0,1.12139906D0,-44.36D0,64.0D0,784.9D0,
      1  477.9D0, 2.27D0, 9*0.D0,-69.973D0, 6*0.D0,3.529D0,
-     1  3.04D0,2.96D0, 2*0.D0,
-     2  3*1.7D0,4*0.D0,2.0D0,2.63D0, 17*0.D0,3.23D0,3.38D0, 2*0.D0, 
+     1  3.19D0,3.15D0,
+     1  2.95D0, ! ND potential /\/\
+C     1  10.6D0, ! NSC97e potential /\/\
+     1  1*0.D0,  
+     2  3*1.7D0,4*0.D0,2.0D0,2.63D0, 17*0.D0,3.35D0,3.37D0, 
+     2  2.95D0, ! triplet d0 /\/\=singlet d0 ND
+                ! not contributing in s-wave approx.  
+     2  1*0.D0, 
      3  240*0.D0/
 C---Corresponding square well parameters RB (width in fm) and
 C-- EB =SQRT(-AM*U) (in GeV/c); U is the well height
       DATA RBH/2.545739D0,   2.779789D0, 2.585795D0, 5.023544D0,
-     1 .124673D0, .3925180D0,.09D0, 2.D0, 4.058058D0, 17*0.D0, 4*0.D0,
-     2         3*2.003144D0,
-     2         4*0.D0, 2.D0, 4.132163D0, 17*0.D0, 4*0.D0, 
-     3         240*0.D0/
+     1 .124673D0, .3925180D0,.09D0, 2.D0, 4.058058D0, 17*0.D0, 
+     1  2.252623D0, 2.278575D0, 
+     1  2.234089D0, ! ND potential /\/\
+C     1  3.065796D0, ! NSC97e potential /\/\
+     1  1*0.D0,  
+     2  3*2.003144D0,
+     2  4*0.D0, 2.D0, 4.132163D0, 17*0.D0, 
+     2  2.272703D0, 2.256355D0, 
+     2  2.234089D0, ! triplet potential /\/\=singlet ND
+                    ! not contributing in s-wave FSI approx.  
+     2  1*0.D0, 
+     3  240*0.D0/
       DATA EBH/.1149517D0,    .1046257D0,   .1148757D0, .1186010D0,
-     1    .7947389D0,2.281208D0,8.7D0,.4D0,.1561219D0,17*0.D0,4*0.D0,
-     2         3*.1847221D0,
-     2         4*0.D0, .4D0, .1150687D0, 17*0.D0, 4*0.D0, 
-     3         240*0.D0/
-
-C++----- add to be able to call several time-------
-      integer ifirst
-      data ifirst/0/
-      ifirst=ifirst+1
-
+     1    .7947389D0,2.281208D0,8.7D0,.4D0,.1561219D0,17*0.D0,
+     1    .1013293D0, .1020966D0, 
+     1    .1080476D0, ! ND potential /\/\
+C     1    .04115994D0, ! NSC97e potential /\/\
+     1    1*0.D0,    
+     2    3*.1847221D0,
+     2    4*0.D0, .4D0, .1150687D0, 17*0.D0, 
+     2    .09736083D0, .09708310D0, 
+     2    .1080476D0, ! triplet potential /\/\= singlet ND 
+                      ! not contributing in s-wave FSI approx. 
+     2    1*0.D0, 
+     3    240*0.D0/
 C=======< constants >========================
       W=1/.1973D0    ! from fm to 1/GeV
       PI=4*DATAN(1.D0)
       PI2=2*PI
       SPI=DSQRT(PI)
       DR=180.D0/PI   ! from radian to degree
-      AC1=1.D10
-      AC2=1.D10
+        AC1=1.D10
+        AC2=1.D10
 C=======< condition de calculs >=============
-      NUNIT=11 ! for IBM in Nantes
+      NUNIT=11 ! for IBM or HP
 C      NUNIT=4 ! for SUN in Prague
 C++      CALL readint4(NUNIT,'ITEST     ',ITEST)      
 C++      CALL readint4(NUNIT,'NS        ',NS) 
@@ -609,12 +650,12 @@ C---Setting spin factors
       MSP=MSPIN
       DO 91 ISPIN=1,10
   91  RHO(ISPIN)=RHOH(LL,ISPIN)
-C---> Integration limit AA in the spherical wave approximation
+C---Integration limit AA in the spherical wave approximation
       AA=0.D0
 cc      IF(NS.EQ.2.OR.NS.EQ.4)AA=.5D0 !!in 1/GeV --> 0.1 fm
       IF(NS.EQ.2.OR.NS.EQ.4)AA=6.D0 !!in 1/GeV --> 1.2 fm
-C---> Setting scatt. length (FD), eff. radius (RD) and, if possible,
-C--   also the corresp. square well parameters (EB, RB)
+C---Setting scatt. length (FD), eff. radius (RD) and, if possible,
+C-- also the corresp. square well parameters (EB, RB)
       DO 55 JJ=1,MSP
       ISPIN=JJ
       FD(JJ)=FDH(LL,JJ)
@@ -740,6 +781,7 @@ C    the weight due to FSI
       COMMON/FSI_AA/AA
       COMMON/FSI_SHH/SH,CHH
       COMMON/FSI_AAPI/AAPI(20,2)/FSI_AAND/AAND(20,4)
+      COMMON/FSI_AAPIN/AAPIN(20,2)
       COMMON/FSI_P12/P12X,P12Y,P12Z,E12,P12,AM12,EPM
 C==>calculating relative 4-coordinates of the particles in PRF
 C-  {T,X,Y,Z} from the relative coordinates {TS,XS,YS,ZS} in NRF
@@ -760,7 +802,8 @@ CW      WRITE(6,38)'RP ',RP,'X ',X,Y,Z,T
  
       CVK=(P12X*PPX+P12Y*PPY+P12Z*PPZ)/(P12*AK)
       V=P12/E12
- 
+
+      ACH=1.D0 
       IF(ICH.EQ.0)GOTO 21
       XH=AC*AK
       ACH=ACP(XH)
@@ -801,7 +844,8 @@ C-- divided by Coulomb penetration factor squared (if ICH=1)
       IF(ICH.EQ.1)AKACH=AK*ACH
       C(JJ)=1/DCMPLX(GAK,-AKACH) ! amplitude for the SW-potential
       GOTO 30
- 230  IF(LL.EQ.5.OR.LL.EQ.6.OR.LL.EQ.7)GOTO20 ! pipi      
+ 230  IF(LL.EQ.5.OR.LL.EQ.6.OR.LL.EQ.7)GOTO20    ! pipi  
+      IF(LL.EQ.12.OR.LL.EQ.13)GOTO20             ! piN 
       IF(LL.EQ.8.OR.LL.EQ.9.OR.LL.EQ.18)GOTO20   ! Nd, dd
       IF(LL.EQ.14.OR.LL.EQ.17.OR.LL.EQ.23)GOTO27 ! K+K-, K-p, K0K0-b
       A1=RD(JJ)*FD(JJ)*AKS
@@ -812,21 +856,24 @@ C-- divided by Coulomb penetration factor squared (if ICH=1)
       C(JJ)=FD(JJ)/DCMPLX(A2,-AKF)
       GOTO30
  20   CONTINUE
-C---Calc. scatt. ampl. C(JJ) for pipi and Nd, dd
+C---Calc. scatt. ampl. C(JJ) for pipi, piN and Nd, dd
       JH=LL-7+2*JJ-2
       IF(LL.EQ.8.OR.LL.EQ.9)GPI2=GND(AKS,JH)
       IF(LL.EQ.18)GPI2=GDD(AKS,JJ)
-      IF(LL.LE.7)GPI2=GPIPI(AKS,2)
-      C(JJ)=1.D0/DCMPLX(GPI2,-AK)
-      IF(LL.GE.7)GOTO27
-      GPI1=GPIPI(AKS,1)
-      IF(LL.EQ.5)C(JJ)=.6667D0/DCMPLX(GPI1,-AK)+.3333D0*C(JJ)
-      IF(LL.EQ.6)C(JJ)=.3333D0/DCMPLX(GPI1,-AK)+.6667D0*C(JJ)
+      IF(LL.EQ.5.OR.LL.EQ.6.OR.LL.EQ.7)GPI2=GPIPI(AKS,2)
+      IF(LL.EQ.12.OR.LL.EQ.13)GPI2=GPIN(AKS,2)
+      C(JJ)=1.D0/DCMPLX(GPI2,-AK) !pi+pi+, nd, pd, pi+p, dd
+      IF(LL.NE.5.AND.LL.NE.6.AND.LL.NE.13)GOTO27
+      IF(LL.EQ.5.OR.LL.EQ.6)GPI1=GPIPI(AKS,1)
+      IF(LL.EQ.13)GPI1=GPIN(AKS,1)
+      IF(LL.EQ.5.OR.LL.EQ.13)
+     c           C(JJ)=.6667D0/DCMPLX(GPI1,-AK)+.3333D0*C(JJ) !pi+pi-,pi-p
+      IF(LL.EQ.6)C(JJ)=.3333D0/DCMPLX(GPI1,-AK)+.6667D0*C(JJ) !pi0pi0
  27   CONTINUE
 C---Calc. K+K-, K0K0-b or K-p s-wave scatt. ampl.
       IF(LL.EQ.14.OR.LL.EQ.23)CALL CKKB
       IF(LL.EQ.17)C(JJ)=DCMPLX(3.29D0,3.55D0)
-C---Calc. pi+pi-, pi+pi+, pd, K+K- or K-p s-wave scatt. amplitude
+C---Calc. pi+pi-, pi+pi+, pd, pi+p, pi-p, K+K- or K-p s-wave scatt. ampl.
 C-- divided by Coulomb penetration factor squared (if ICH=1)
       IF(ICH.EQ.0)GOTO 30
       AAK=ACH*AK
@@ -1245,6 +1292,7 @@ C-- used in calc. of hypergeom. f-s in SEQA, FAS at k*R > 15, 20
  
       FUNCTION G(AK)
 C---Used to calculate SW scattering amplitude for alpa-alpha system
+C-- and for sear.f (square well potential search)
 C---NOTE THAT SCATT. AMPL.= 1/CMPLX(G(AK),-AK*ACH)
       IMPLICIT REAL*8 (A-H,O-Z)
       COMMON/FSI_SW/RB(10),EB(10),BK(10),CDK(10),SDK(10),
@@ -1252,7 +1300,9 @@ C---NOTE THAT SCATT. AMPL.= 1/CMPLX(G(AK),-AK*ACH)
       COMMON/FSI_NS/LL,NS,ICH,ISI,IQS,I3C,I3S
       COMMON/FSI_ACH/HPR,AC,ACH,ACHR,JJ,MSPIN
       COMMON/FSI_BP/B,P/FSI_DERIV/BPR,PPR/FSI_SHH/SH,CHH
+      COMMON/FSI_DAK/DAK,HAC,IFUN
       HAC=.0D0
+      ACH=1.D0
       IF(ICH.EQ.0)GOTO 1
       XH=AC*AK
       HCP=HC(XH)
@@ -1354,3 +1404,13 @@ c      IF(IERR.EQ.1)STOP
       RETURN
       END
 
+      SUBROUTINE PRINTLAM()
+      IMPLICIT REAL*8 (A-H,O-Z)
+      COMMON/FSI_FDH/FDH(30,10),RDH(30,10),EBH(30,10),RBH(30,10)
+      INTEGER*4	LLC
+      INTEGER*4 JJC
+      PRINT *,'Wrting lambda'
+      DO 3 J1=1,30
+        DO 3 J2=1,10
+  3       PRINT *,J1,J2,FDH(J1,J2),RDH(J1,J2),RBH(J1,J2),EBH(J1,J2)
+      END
