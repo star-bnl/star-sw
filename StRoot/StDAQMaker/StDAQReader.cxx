@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.25 2001/03/20 01:43:14 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.26 2001/06/19 21:10:26 jeromel Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.26  2001/06/19 21:10:26  jeromel
+ * Changes for FTPCReader (Janet S.)
+ *
  * Revision 1.25  2001/03/20 01:43:14  perev
  * first event skip fixed
  *
@@ -113,6 +116,7 @@ StDAQReader::StDAQReader(const char *file)
   fRICHReader 	= 0;
   fL3Reader 	= 0;
   fSVTReader 	= 0;
+  fFTPCReader   = 0;
   fOffset = 0;
   fFile = 0;
   fEventInfo = new DAQEventInfo;
@@ -151,6 +155,7 @@ int StDAQReader::close()
   if(fTPCReader) 	fTPCReader ->close();  
   if(fSVTReader) 	fSVTReader ->close();  
 //if (fRICHReader) 	fRICHReader->close();  
+  if(fFTPCReader)       fFTPCReader->close();
   delete fL3Reader; 	fL3Reader  = 0;  
   fOffset = -1;
   return 0;
@@ -179,7 +184,7 @@ int StDAQReader::readEvent()
   if(fEventInfo->Token==0) return kStErr;  // Herb, July 5 2000
 
   if (fTPCReader) { if(fTPCReader ->Update()) return kStErr; }
-  if (fFTPCReader)	fFTPCReader->Update();
+  if (fFTPCReader)	fFTPCReader->Update();  
   if (fTRGReader) 	fTRGReader ->Update();
   if (fSVTReader) 	fSVTReader ->Update();
   return 0;

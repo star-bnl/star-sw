@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.14 2000/07/13 22:35:10 perev Exp $
+ * $Id: StDAQReader.h,v 1.15 2001/06/19 21:10:49 jeromel Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.15  2001/06/19 21:10:49  jeromel
+ * Changes for FTPCReader (Janet S.)
+ *
  * Revision 1.14  2000/07/13 22:35:10  perev
  * More accurate __CINT__ flags added
  *
@@ -142,4 +145,5 @@ char fFTPCVersion[12];
 };
 
 #include "StTPCReader.h"
+#include "StFTPCReader.h"
 #endif
