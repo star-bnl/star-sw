@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.20 1999/10/22 15:51:48 calderon Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.21 1999/10/25 18:38:49 calderon Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
+ * Revision 1.21  1999/10/25 18:38:49  calderon
+ * changed mPos and pos() to mPosition and position() to
+ * be compatible with StEvent/StMcEvent.
+ *
  * Revision 1.20  1999/10/22 15:51:48  calderon
  * Remove ifdefs for erf.  Problem is solved by loading libm at the
  * macro level.
@@ -377,7 +381,7 @@ void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wire
 		centralRow + mDeltaRow : centralRow;
 
 	    // Careful No inner/outer sector coupling!!
-	    if(xyCoord.pos().y() < mGeomDb->outerSectorEdge()) {
+	    if(xyCoord.position().y() < mGeomDb->outerSectorEdge()) {
 		mRowLimits.second = min(mRowLimits.second, mGeomDb->numberOfInnerRows());
 	    }
 	    else {
@@ -420,10 +424,10 @@ void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wire
 // 		    PR(tpcRaw);
 // 		    PR(xyCoord);
 		    // Integral limits for nearest pad
-		    double xl = xyCoord.pos().x() - padWidth/2;
-		    double xu = xyCoord.pos().x() + padWidth/2;
-		    double yl = xyCoord.pos().y() - padLength/2;
-		    double yu = xyCoord.pos().y() + padLength/2;
+		    double xl = xyCoord.position().x() - padWidth/2;
+		    double xu = xyCoord.position().x() + padWidth/2;
+		    double yl = xyCoord.position().y() - padLength/2;
+		    double yu = xyCoord.position().y() + padLength/2;
 
 		    // charge location:  iter->position().x(), ycoord
 		    // pad centroid:     xyCoord  // used to calculate integral limits

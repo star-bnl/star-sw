@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.13 1999/10/04 15:21:58 long Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.14 1999/10/25 18:38:49 calderon Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,10 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.14  1999/10/25 18:38:49  calderon
+ * changed mPos and pos() to mPosition and position() to
+ * be compatible with StEvent/StMcEvent.
+ *
  * Revision 1.13  1999/10/04 15:21:58  long
  * new coordinate system in the trs
  *
@@ -145,13 +149,13 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
 {
   
     int sector = a.fromSector();
-    int row    = rowFromLocal(a.pos());
+    int row    = rowFromLocal(a.position());
     
-    int probablePad =padFromLocal(a.pos(),row);
+    int probablePad =padFromLocal(a.position(),row);
     double zoffset;
     zoffset=(row>13) ? mTPCdb->outerSectorzOffSet():mTPCdb->innerSectorzOffSet() ;
    
-    int tb = tBFromZ(a.pos().z()+zoffset);
+    int tb = tBFromZ(a.position().z()+zoffset);
     b = StTpcPadCoordinate(sector, row, probablePad, tb);
 }
 void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLocalSectorCoordinate& b)
@@ -184,16 +188,16 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
     
 
 
-    StThreeVector<double> sector12Position(a.pos().x(),
-					   a.pos().y() ,
-					   a.pos().z());
+    StThreeVector<double> sector12Position(a.position().x(),
+					   a.position().y() ,
+					   a.position().z());
     StThreeVector<double> tmp = rotateToLocal(sector12Position,sector);
 
     b = StTpcLocalCoordinate(tmp);
 }
 void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate& a, StTpcLocalSectorCoordinate& b)
 {   int sector= sectorFromCoordinate(a);
-    StThreeVector<double> tmp=rotateFromLocal(a.pos(),sector);
+    StThreeVector<double> tmp=rotateFromLocal(a.position(),sector);
     
     b = StTpcLocalSectorCoordinate(tmp,sector);
 }
@@ -203,7 +207,7 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate& a, StGloba
     // Requires survey DB i/o!
     // Take as unity for now
 
-    b = StGlobalCoordinate(a.pos());
+    b = StGlobalCoordinate(a.position());
 }
 
 void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a, StTpcLocalCoordinate& b)
@@ -211,7 +215,7 @@ void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a, StTpcLoca
     // Requires survey DB i/o!
     // Take as unity for now
 
-    b = StTpcLocalCoordinate(a.pos());   
+    b = StTpcLocalCoordinate(a.position());   
 }
 
 StThreeVector<double> StTpcCoordinateTransform::sector12Coordinate(StThreeVector<double>& v, int *sector)
@@ -225,15 +229,15 @@ StThreeVector<double>
 StTpcCoordinateTransform::padCentroid(StTpcLocalSectorCoordinate& localSector, int *pad, int *row)
 {
     StTpcLocalSectorCoordinate centerOfPad;
-    int nRow = rowFromLocal(localSector.pos());
+    int nRow = rowFromLocal(localSector.position());
     StTpcPadCoordinate tmp(12,                      //sector
 			   nRow,     //row
-			   padFromLocal(localSector.pos(),nRow), // pad
+			   padFromLocal(localSector.position(),nRow), // pad
 			   localSector.fromSector());
     
     this->operator()(tmp,centerOfPad);
     *row = nRow;
-    return centerOfPad.pos();
+    return centerOfPad.position();
 }
 /***********************************************************************/
 /*                       TRANSFORMATION ROUTINES                       */
@@ -242,10 +246,10 @@ int StTpcCoordinateTransform::sectorFromCoordinate(const StTpcLocalCoordinate& a
 {
    // 30 degrees should be from db
 
-    double angle = atan2((a.pos()).y(),(a.pos()).x());
+    double angle = atan2((a.position()).y(),(a.position()).x());
     if(angle<0) angle+= 2*M_PI;
     int sectorNumber= (int)( (angle+4*M_PI/3.)/(2*M_PI/3.));
-    if((a.pos()).z()>0){
+    if((a.position()).z()>0){
                sectorNumber=15-sectorNumber;
                if(sectorNumber>12)sectorNumber-=12;
                }

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcLocalCoordinate.cc,v 1.2 1998/11/16 19:41:57 lasiuk Exp $
+ * $Id: StTpcLocalCoordinate.cc,v 1.3 1999/10/25 18:38:49 calderon Exp $
  *
  * Author:  brian May 20, 1998
  *
@@ -11,6 +11,10 @@
  ************************************************************************
  *
  * $Log: StTpcLocalCoordinate.cc,v $
+ * Revision 1.3  1999/10/25 18:38:49  calderon
+ * changed mPos and pos() to mPosition and position() to
+ * be compatible with StEvent/StMcEvent.
+ *
  * Revision 1.2  1998/11/16 19:41:57  lasiuk
  * constructor do not use reference for double&
  *
@@ -30,10 +34,10 @@
 StTpcLocalCoordinate::StTpcLocalCoordinate() {/**/}
 
 StTpcLocalCoordinate::StTpcLocalCoordinate(const double x, const double y, const double z)
-    : mPos(x,y,z) { /* nopt */}
+    : mPosition(x,y,z) { /* nopt */}
 
-StTpcLocalCoordinate::StTpcLocalCoordinate(const StThreeVector<double>& pos)
-    : mPos(pos) { /* nopt */ }
+StTpcLocalCoordinate::StTpcLocalCoordinate(const StThreeVector<double>& position)
+    : mPosition(position) { /* nopt */ }
 
 StTpcLocalCoordinate::~StTpcLocalCoordinate() {/**/}
 
@@ -41,7 +45,7 @@ StTpcLocalCoordinate::~StTpcLocalCoordinate() {/**/}
 ostream& operator<<(ostream& os, const StTpcLocalCoordinate& a)
 {
     return os << "TPC_Local ("
-	      << a.pos().x() << ", "
-	      << a.pos().y() << ", "
-	      << a.pos().z() << ")";
+	      << a.position().x() << ", "
+	      << a.position().y() << ", "
+	      << a.position().z() << ")";
 }
