@@ -3,11 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: FCFMaker.h,v 1.3 2003/11/17 18:53:00 jml Exp $
+ * $Id: FCFMaker.h,v 1.4 2004/01/22 14:20:36 jml Exp $
  *
  *--------------------------------------------------------------------------
  *
  * $Log: FCFMaker.h,v $
+ * Revision 1.4  2004/01/22 14:20:36  jml
+ * Added cluster reading
+ *
  * Revision 1.3  2003/11/17 18:53:00  jml
  * Preliminary tests look good
  *
@@ -56,6 +59,7 @@ class St_tss_tsspar;
 class StEvent;
 class StTpcCoordinateTransform;
 class StTpcHitCollection;
+typedef u_int* j_uintptr;
 
 #define MAX_PADS_EVER 256
 #define MAX_TIMEBINS_EVER 512
@@ -108,6 +112,9 @@ struct StDaqClfCppRow {
 class StRTSClientFCFMaker:public StMaker
 {
  private:
+  bool ignoreFileClusters;
+  bool ignoreRawData;
+
   StDaqClfCppRow cpp[MAX_PADROWS];       // PADROW, PAD, SEQUENCE (0 based)
 
   unsigned short croat_adc[MAX_PADS_EVER+1][MAX_TIMEBINS_EVER];
@@ -169,12 +176,27 @@ class StRTSClientFCFMaker:public StMaker
 
  public:    
 
+  void SetDAQFlag(Int_t mode);
+
   StRTSClientFCFMaker(const char *name="tpc_hits");
   ~StRTSClientFCFMaker() ;
 
   Int_t Init() ;
   Int_t Make() ;
   Int_t InitRun(int run)  ;
+
+  int runClusterFinder(j_uintptr *result_mz_ptr,
+		       u_int *result_buff,
+		       int sector,
+		       int row,
+		       StDaqClfCppRow *cppRow,
+		       unsigned short *adc);
+
+  int build_croat_clusters();
+  int build_daq_file_clusters();
+
+  bool checkSwap(int x);
+  u_int swap32(bool test, u_int x);
 
   // cvs
   const char *GetCVS() const
