@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.14 2000/02/17 19:46:52 jgreid Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.15 2000/02/21 19:07:18 jgreid Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.15  2000/02/21 19:07:18  jgreid
+ * added return value to fillTag()
+ *
  * Revision 1.14  2000/02/17 19:46:52  jgreid
  * bug fix
  *
@@ -85,7 +88,8 @@ Int_t StEbyeScaTagsMaker::Make() {
   StEvent* mEvent = (StEvent *) GetInputDS("StEvent");
   if (!mEvent) return kStOK; // If no event, we're done
   StEvent& ev = *mEvent;
-  StRun *run = (StRun *) GetInputDS("StRun");
+  StRun *run;
+  run = (StRun *) GetInputDS("StRun");
 
   // OK, we've got the event. Do what thou wilst.
 
@@ -104,16 +108,18 @@ Int_t StEbyeScaTagsMaker::Make() {
   mTag = mTagHeader->GetTable(); // table structure
 
   //and fill the tag
-  fillTag(ev);
-
-  return kStOK;
+  if (fillTag(ev) != kStErr) {
+    return kStOK;
+  } else {
+    return kStErr;
+  }
 }
 
 ScaTag_st* StEbyeScaTagsMaker::tag() {
     return mTag;
 }
 
-void StEbyeScaTagsMaker::fillTag(StEvent& event) {
+Int_t StEbyeScaTagsMaker::fillTag(StEvent& event) {
 
   double mt_histo[NBINS];
   
@@ -312,6 +318,8 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event) {
     //     for charge < 0 ... 
     //outFile << trackCountMinus << " " << meanPtMinus/GeV << " " << meanPtSquaredMinus/(GeV*GeV) << endl;
   }
+
+  return kStOk;
 
 }
 

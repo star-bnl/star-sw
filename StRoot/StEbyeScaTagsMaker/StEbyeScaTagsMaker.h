@@ -3,7 +3,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEbyeScaTagsMaker.h,v 1.6 2000/02/04 22:44:30 jgreid Exp $
+// $Id: StEbyeScaTagsMaker.h,v 1.7 2000/02/21 19:07:18 jgreid Exp $
 //
 // StEbyeScaTagsMaker
 //
@@ -19,6 +19,9 @@
 // History:
 //
 // $Log: StEbyeScaTagsMaker.h,v $
+// Revision 1.7  2000/02/21 19:07:18  jgreid
+// added return value to fillTag()
+//
 // Revision 1.6  2000/02/04 22:44:30  jgreid
 // added functionality for ScaTags to be picked up by the TagDB after filling
 //
@@ -42,7 +45,7 @@ private:
   ScaTag_st* mTag; //!
 
 protected:
-  void fillTag(StEvent& event);    // does the actual work;
+  Int_t fillTag(StEvent& event);    // does the actual work;
   float mtInverseSlope(double *mthisto, int ibegin, int istop); 
 
 public:
@@ -61,7 +64,7 @@ public:
   void printTag(ostream& = cout);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeScaTagsMaker.h,v 1.6 2000/02/04 22:44:30 jgreid Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeScaTagsMaker.h,v 1.7 2000/02/21 19:07:18 jgreid Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEbyeScaTagsMaker, 1)
 };
