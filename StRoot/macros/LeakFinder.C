@@ -231,12 +231,12 @@ void LeakFit(char *file)
 
   int ignore[kMaxMake];
   memset(ignore,0,kMaxMake*sizeof(int));
-double A[kMaxMake][kMaxMake],B[kMaxMake],Q[kMaxMake],V[kMaxMake];
+  double A[kMaxMake][kMaxMake],B[kMaxMake],Q[kMaxMake],V[kMaxMake];
   TCL::vzero(A[0],(kMaxMake)*(kMaxMake));
   TCL::vzero(B   ,kMaxMake);
   TCL::vzero(V   ,kMaxMake);
 
-double Corr[5][kMaxMake];
+  double Corr[5][kMaxMake];
   TCL::vzero(Corr[0],5*(kMaxMake));
   int nCorr=0;
 
@@ -280,10 +280,6 @@ double Corr[5][kMaxMake];
      if (iWeight==2) wt =1./pow(eSize-emptySize,2);
      if (iWeight==3) wt =1./pow(Qmax,2);
 
-     for (int i1=1;i1<=nMk;i1++){
-        if (Q[i1] < 0.1*diff) ignore[i1]=1;
-        if(ignore[i1]) Q[i1]=0;
-     }
      for (int i1=0;i1<=nMk;i1++){
 	B[i1]+= diff*Q[i1]*wt;
 //      printf("B[%d] = %12.6g*%12.6g*%12.6g =%12.6g \n",i1,diff,Q[i1],wt,B[i1]);
@@ -301,49 +297,65 @@ double Corr[5][kMaxMake];
 #
 
   }//end LOOP
-
+  int nX = nMk+1;
+  double scale = 1./nFill;
+  TCL::vscale(B,scale,B,nX);
+  TCL::vscale(A[0],scale,A[0],(kMaxMake)*(kMaxMake));
 
 // Regularisation
   int nneg=1;  
-  int nX = nMk+1;
 
   while (nneg) {
-  printf("%d makers %d events filled %d times\n\n",nMk,nEvents,nFill);
+    printf("%d makers %d events filled %d times\n\n",nMk,nEvents,nFill);
 
-  for (int ign=0;ign<nX;ign++) {
-    if(!ignore[ign]) continue;
-    B[ign] = 0;
-    for (int i=0;i<nX;i++) {A[i][ign]=0;A[ign][i]=0;}
-  }
-  double reg = 0;
-  for (int i=0;i<nX;i++) {
-    if (A[i][i]>reg) reg = A[i][i];
-  }
-  reg /=100000.;
-  
-  TArrayD AA(nX*nX),BB(nX);
-  for (int i1=0;i1<nX;i1++) {
-//    printf("B[%d]== %g\n",i1,B[i1]);
-    BB[i1] = B[i1]/nFill; 
-    for (int i2=0;i2<nX;i2++) {
-//      printf("A[%d][%d]== %g\n",i1,i2,A[i1][i2]);
-      AA[i1+nX*i2] = A[i1][i2]/nFill;
-      if(i1==i2)  AA[i1+nX*i2]+=reg;
-//      printf("AA[%d][%d] = %12.6g\n",i1,i2,AA[i1+nX*i2]);
-  }}
-  TCL::trsequ(AA.GetArray(),nX,BB.GetArray(), 1);
-  nneg=0;  
-  for (int i=1;i<nX;i++) {
-     if (ignore[i]) 		continue;
+    for (int ign=0;ign<nX;ign++) {
+      if(!ignore[ign])  	continue;
+      if(ignore[ign]>0)  {//Too big
+	for (int i=0;i<nX;i++) B[i]-=A[i][ign];
+	for (int i=0;i<nX;i++) {A[i][ign]=0;A[ign][i]=0;}
+	A[ign][ign]=1; B[ign]=1;
+      } else  {
+	for (int i=0;i<nX;i++) {A[i][ign]=0;A[ign][i]=0;}
+	A[ign][ign]=1; B[ign]=0;
+      }
+    }
+    double reg = 0;
+    for (int i=0;i<nX;i++) {
+      if (ignore[i]) 	continue;
+      if (A[i][i]>reg) reg = A[i][i];
+    }
+    reg /=10000.;
+
+    TArrayD AA(nX*nX),BB(nX);
+    for (int i1=0;i1<nX;i1++) {
+  //    printf("B[%d]== %g\n",i1,B[i1]);
+      BB[i1] = B[i1]; 
+      for (int i2=0;i2<nX;i2++) {
+  //      printf("A[%d][%d]== %g\n",i1,i2,A[i1][i2]);
+	AA[i1+nX*i2] = A[i1][i2];
+	if(i1==i2)  AA[i1+nX*i2]+=reg;
+  //      printf("AA[%d][%d] = %12.6g\n",i1,i2,AA[i1+nX*i2]);
+    }}
+    TCL::trsequ(AA.GetArray(),nX,BB.GetArray(), 1);
+    nneg=0;  
+    for (int i=1;i<nX;i++) {
+       if (ignore[i]) 		continue;
+       double bj = BB[i];
+       if (bj <  0.01) {nneg++; ignore[i]=-1;}
+       if (bj >  1.00) {nneg++; ignore[i]= 1;}
+    }
+  }//End while
+
+  for (int i=1;i<nX;i++) {//print results
+     if (ignore[i]<0) 		continue;
      double bj = BB[i];
-     if (bj < -0.01 || bj > 1.1) {nneg++; ignore[i]=1;}
-     double est = bj*V[i]/nFill;
+     double est = bj*V[i];
      if (fabs(bj ) <= 0.0)	continue;
      if (fabs(est) <= 0.0)	continue;
-     if ((bj ) < 0.001) 	continue;
-     if ((est) < 0.010)		continue;
+//     if ((bj ) < 0.001) 	continue;
+//     if ((est) < 0.010)		continue;
      printf ("Maker(%d) %s \tCorr =%g \tLeak =%g\n",i,RR.Name(i),bj,est);
-  }}
+  }//end for print results
 
 // Test result
 
