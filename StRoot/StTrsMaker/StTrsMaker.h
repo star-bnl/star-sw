@@ -1,6 +1,19 @@
-// $Id: StTrsMaker.h,v 1.12 1999/10/11 23:54:32 calderon Exp $
+// $Id: StTrsMaker.h,v 1.13 1999/11/05 22:10:13 calderon Exp $
 //
 // $Log: StTrsMaker.h,v $
+// Revision 1.13  1999/11/05 22:10:13  calderon
+// Added Clear() method in StTrsMaker.
+// Removed StTrsUnpacker from maker.
+// Added StTrsDetectorReader and StTrsZeroSuppressedReader
+// for DAQ type interface to event data.
+// Made private copy constructor and operator= in classes that needed it.
+// Renamed the DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast,
+// and the default to use is the new "Fast" which has the 10-8 bit conversion.
+// Removed vestigial loop in AnalogSignalGenerator.
+// Added Time diagnostics.
+// Added trsinterface.pdf in doc/ directory.
+// Write version of data format in .trs data file.
+//
 // Revision 1.12  1999/10/11 23:54:32  calderon
 // Version with Database Access and persistent file.
 // Not fully tested due to problems with cons, it
@@ -83,13 +96,14 @@ class StTrsDigitalSector;
 
 // Output Data
 class StTrsRawDataEvent;
-class StTrsUnpacker;
 class StTrsIstream;
 class StTrsOstream;
 
 class StTrsMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.12 1999/10/11 23:54:32 calderon Exp $";
+    StTrsMaker(const StTrsMaker&);
+    StTrsMaker& operator=(const StTrsMaker&);
+// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.13 1999/11/05 22:10:13 calderon Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
@@ -112,7 +126,6 @@ class StTrsMaker : public StMaker {
     StTrsDigitalSector          *mDigitalSector;//!
 
     // Output
-    StTrsUnpacker               *mUnPacker;//!
     StTrsRawDataEvent           *mAllTheData;//!
 
     // I/O streams
@@ -142,7 +155,8 @@ public:
     Int_t  Init();
     Int_t  Make();
     Int_t  Finish();
-
+    Int_t  Clear();
+    
     void   setMiniSegmentLength(double len=4.) {mMiniSegmentLength = len*millimeter;} // *MENU*
     void   setFirstSectorToProcess(int first=1){mFirstSectorToProcess = first;}       // *MENU*
     void   setLastSectorToProcess(int last=24) {mLastSectorToProcess = last;}         // *MENU*
@@ -152,7 +166,7 @@ public:
     
   virtual const char *GetCVS() const
   {
-      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.12 1999/10/11 23:54:32 calderon Exp $ built __DATE__ __TIME__" ; return cvs;}
+      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.13 1999/11/05 22:10:13 calderon Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StTrsMaker, 1)   //StAF chain virtual base class for Makers
 
