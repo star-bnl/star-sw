@@ -1,4 +1,5 @@
-void ami(){}
+/*void ami(){}*/
+void *ami;
 void hbook1_(){printf("***DUMMY HBOOK1****");}
 void hbook2_(){printf("***DUMMY HBOOK2****");}
 void hbookn_(){printf("***DUMMY HBOOKN****");}
