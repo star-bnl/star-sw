@@ -218,7 +218,7 @@ void StiHit::setGlobal(const StiDetector * detector,
   if (!detector) return;
   double pos = detector->getPlacement()->getNormalRadius();
   double dif = mx-pos;
-  if (fabs(dif)<1.) return;
+  if (fabs(dif)<2.) return;
   printf("**** StiHit.%s too far: x=%f pos=%g dif=%g ****\n"
         ,detector->getName().c_str(),mx,pos,dif);
 }
