@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.cxx,v 3.1 2000/07/17 20:28:40 genevb Exp $
+// $Id: StStrangeControllerBase.cxx,v 3.2 2000/07/18 15:58:04 genevb Exp $
 // $Log: StStrangeControllerBase.cxx,v $
+// Revision 3.2  2000/07/18 15:58:04  genevb
+// Increased buffer size
+//
 // Revision 3.1  2000/07/17 20:28:40  genevb
 // File size limitation workaround, some under the hood improvements
 //
@@ -130,7 +133,7 @@ void StStrangeControllerBase::InitCreateSubDst() {
 TBranch* StStrangeControllerBase::AssignBranch(const char* name,
                                                TClonesArray** address) {
   static Int_t split=2;
-  static Int_t bsize=64000;
+  static Int_t bsize=1024000;
   TBranch* branch = tree->Branch(name,address,bsize,split);
   if (masterMaker->GetMode() == StrangeWrite) branch->SetFile(file);
   return branch;
