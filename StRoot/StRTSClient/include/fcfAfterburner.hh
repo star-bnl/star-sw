@@ -8,7 +8,7 @@ struct fcfHit {
 
 class fcfAfterburner {
 public:
-	fcfAfterburner() { last_n = last_count = last_i = last_stage = 0; do_merge = do_cuts = 1 ; };
+        fcfAfterburner() { last_n = last_count = last_i = last_stage = 0; do_merge = do_cuts = 1 ; verbose = true; };
 	~fcfAfterburner() { ; } ;
 
 	int burn(u_int *ptr_res[3]) ;
@@ -23,8 +23,9 @@ public:
 	u_int do_cuts ;		// apply additional cuts
 	u_int row ;		// picked up from the data...
 
+        void setVerbose(bool v) { verbose = v; };
 private :
-
+        bool verbose;
 
 	u_int last_n, last_i, last_count, last_stage ;
 	u_int **ptr ;	// storage for the burn arg...

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.8 2004/01/22 14:42:59 jml Exp $
+ * $Id: FCFMaker.cxx,v 1.9 2004/01/22 18:36:11 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.9  2004/01/22 18:36:11  jml
+ * more updates to the logging
+ *
  * Revision 1.8  2004/01/22 14:42:59  jml
  * fixed the logging
  *
@@ -122,6 +125,7 @@ static FILE *ff ;
 #endif
 
 static class fcfAfterburner fcf_after ;
+static class fcfAfterburner croat_after ;
 
 
 // The raw cluster data...
@@ -283,6 +287,8 @@ Int_t StRTSClientFCFMaker::Init()
   ff = fopen("fcf.dta","w") ;
 #endif
 
+  fcf_after.setVerbose(false);
+  croat_after.setVerbose(false);
   return StMaker::Init();
 }
 
@@ -392,10 +398,13 @@ Int_t StRTSClientFCFMaker::Make()
   else
     use_daq_file_clusters=0;
 
-  int equal=1;
-
+  int mismatch_tot=0;
   for(int s=0;s<24;s++)
   {
+    int mismatch_sector=0;
+    int n_burned_croat_cl_sector=0;
+    int n_burned_daq_file_cl_sector=0;
+
     for(int pr=0;pr<45;pr++)
     {
       fcfHit h;
@@ -409,6 +418,7 @@ Int_t StRTSClientFCFMaker::Make()
 
 	while(fcf_after.next(&h)) {
 	  n_burned_daq_file_cl++;
+	  n_burned_daq_file_cl_sector++;
 
 	  if(use_daq_file_clusters) {
 	    saveCluster(h.pad,h.tm,h.f,h.c,h.p1,h.p2,h.t1,h.t2,pr,s+1);
@@ -421,11 +431,12 @@ Int_t StRTSClientFCFMaker::Make()
 	if(n_burned_croat_cl == -1) 
 	  n_burned_croat_cl = 0;
 
-	fcf_after.burn(croat_resptr[s][pr]);
+	croat_after.burn(croat_resptr[s][pr]);
 		
-	while(fcf_after.next(&h)) {
+	while(croat_after.next(&h)) {
 	  n_burned_croat_cl++;
-	  
+	  n_burned_croat_cl_sector++;
+
 	  if(!use_daq_file_clusters) {
 	    saveCluster(h.pad,h.tm,h.f,h.c,h.p1,h.p2,h.t1,h.t2,pr,s+1);
 	  }
@@ -435,14 +446,31 @@ Int_t StRTSClientFCFMaker::Make()
       if((n_croat_cl > 0) &&
 	 (n_daq_file_cl > 0)) 
       {
-	int e = fcf_after.compare(daq_file_resptr[s][pr],
-				  croat_resptr[s][pr]);
-	if(e == 0) {
-	  printf("FCFMaker: mismatch between daq_file & calculated clusters (s=%d, pr=%d)\n",s,pr);
-	  equal = 0;
-	}
+ 	int e = fcf_after.compare(daq_file_resptr[s][pr],
+ 				  croat_resptr[s][pr]);
+
+
+	mismatch_sector += e;
+	mismatch_tot += e;
+
+// 	if(e != 0) {
+// 	  printf("FCFMaker: mismatch between daq_file & calculated clusters (s=%d, pr=%d)\n",s,pr);
+// 	}
       }
     }
+    
+    // If no compare this is not satisfied...
+    if(mismatch_sector != 0) {
+      printf("FCFMaker: There were mismatches between file & calculated clusters (sector=%02d mismatches=%6d nfile=%6d nraw=%6d)\n",s+1,mismatch_sector,n_burned_daq_file_cl_sector,n_burned_croat_cl_sector);
+    }
+  }
+
+  if(n_burned_daq_file_cl > 0) {
+    printf("FCFMaker: Merged %d of %d file clusters\n",n_daq_file_cl-n_burned_daq_file_cl,n_daq_file_cl);
+  }
+
+  if(n_burned_croat_cl > 0) {
+    printf("FCFMaker: Merged %d of %d calculated clusters\n",n_croat_cl-n_burned_croat_cl,n_croat_cl);
   }
 
   // Poor mans comparison....
@@ -467,23 +495,23 @@ Int_t StRTSClientFCFMaker::Make()
     {
       printf("*-------------------------------------------------------*\n");
       printf("* FCFMaker: both raw data and clusters exist, but the   *\n");
-      printf("*           number of clusters is different             *\n");
-      printf("*           file-> %6d,  computed-> %6d          *\n",
+      printf("* FCFMaker: number of clusters is different             *\n");
+      printf("* FCFMaker: file-> %6d,  computed-> %6d           *\n",
 	     n_burned_daq_file_cl,
 	     n_burned_croat_cl);      
-      printf("* Check calibrations etc....                            *\n");
-      printf("* Using clusters from file datafile                     *\n");
+      printf("* FCFMaker: Check calibrations etc....                  *\n");
+      printf("* FCFMaker: Using clusters from datafile                *\n");
       printf("*-------------------------------------------------------*\n");
     }
     else {
       printf("*-------------------------------------------------------*\n");
       printf("* FCFMaker: both raw data and clusters exist            *\n");
-      printf("*           they agree on %6d clusters             *\n",n_burned_croat_cl);
-      if(equal) {
-	printf("*           and the contents are equal!!!                 \n");
+      printf("* FCFMaker: they agree on %6d clusters             *\n",n_burned_croat_cl);
+      if(mismatch_tot == 0) {
+	printf("* FCFMaker: and the contents are equal!!!                 \n");
       }
       else {
-	printf("*           but the contents are not equal!!!             \n");
+	printf("* FCFMaker: but the contents are not equal!!!             \n");
       }
       printf("*-------------------------------------------------------*\n");
     }
@@ -503,7 +531,7 @@ Int_t StRTSClientFCFMaker::Make()
 // Note: padrows[1-13] point to the inner sectors pixel buffer 
 //       padrows[14-45] point to the outer sectors pixel buffer
 
-Int_t StRTSClientFCFMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad, raw_seq_st *seq)
+Int_t StRTSClientFCFMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad, raw_seq_st *seq, int sector)
 {
   int i,j,k;
   int r,p,s;
@@ -533,7 +561,8 @@ Int_t StRTSClientFCFMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad,
 	}
 
 	if(n==0) {
-	  gMessMgr->Error() << "Got an illegal CPP of length 0" << endm;
+	  printf("FCFMaker: Got an illegal CPP of length 0 (sector=%d row=%d pad=%d sequence=%d\n",
+		 sector,r,p,s);
 	}
 
 	cpp[r-1].r[p-1][s].start_bin = tb;
@@ -1028,8 +1057,13 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
     u_int wrow = *croat_outp++;
     nclusters = *croat_outp++;
 
-    total_clusters += nclusters;
+    if(words == 1)
+    {
+      wrow = row+1;
+      nclusters = 0;
+    }
 
+    total_clusters += nclusters;
  
     // 	printf("i=%d  ",i); for(int jjj=0;jjj<i;jjj++) printf("  ");
     // 	printf("clust: s=%d r=%d (%d/%d %d/%d %d)\n",
@@ -1040,12 +1074,6 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
     // 	       fcf->padStop,
     // 	       padfinder[r][i].maxpad,  
     // 	       nclusters);
-
-    if(words == 1)
-    {
-      wrow = row+1;
-      nclusters = 0;
-    }
 
     if((int)wrow != row+1)
     {
@@ -1074,7 +1102,7 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
 // 	 result_mz_ptr[2],
 // 	 (u_int)result_buff);
 
-  return nclusters;
+  return total_clusters;
 }
 
 
@@ -1347,11 +1375,11 @@ int StRTSClientFCFMaker::build_croat_clusters()
       sz = 0;	
       int sz2;	
 
-      sz2 = BuildCPP(Trow_in->GetNRows(), row_in, pad_in, seq_in);
+      sz2 = BuildCPP(Trow_in->GetNRows(), row_in, pad_in, seq_in, sectorIdx);
       if(sz2 == -1) printf("No data for sector %d, inner\n", sectorIdx);
       else sz += sz2;
 
-      sz2 = BuildCPP(Trow_out->GetNRows(), row_out, pad_out, seq_out);
+      sz2 = BuildCPP(Trow_out->GetNRows(), row_out, pad_out, seq_out, sectorIdx);
       if(sz2 == -1) printf("No data for sector %d, outer\n", sectorIdx);
       else sz += sz2;
     }

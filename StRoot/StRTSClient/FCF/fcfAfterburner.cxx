@@ -359,6 +359,9 @@ int fcfAfterburner::next(fcfHit *h)
 	This function has resursive use of the object.
 	The "p1" data will use the current object while
 	the "p2" data will be placed into a new object...
+
+	returns # of mismatches
+	0 means match....
 */
 int fcfAfterburner::compare(u_int *p1[3], u_int *p2[3])
 {
@@ -368,7 +371,7 @@ int fcfAfterburner::compare(u_int *p1[3], u_int *p2[3])
 	fcfHit h1, h2 ;
 	static u_char marray[2][10000] ;
 	int i ;
-	int ret = 1 ;	// assume match...
+	int ret = 0 ;	// return number of mismatches
 	int save_merge, save_cuts ;
 
 	// save the original steering variables
@@ -417,8 +420,8 @@ int fcfAfterburner::compare(u_int *p1[3], u_int *p2[3])
 				;
 			}
 			else {
-				print_hit("UNMATCHED 1",&h1) ;
-				ret = 0 ;
+			        if(verbose) print_hit("UNMATCHED 1",&h1) ;
+				ret++;
 			}
 		}
 		i++ ;
@@ -432,8 +435,8 @@ int fcfAfterburner::compare(u_int *p1[3], u_int *p2[3])
 				;
 			}
 			else {
-				print_hit("UNMATCHED 2",&h1) ;
-				ret = 0 ;
+			        if(verbose) print_hit("UNMATCHED 2",&h1) ;
+				ret++;
 			}
 		}
 		i++ ;
