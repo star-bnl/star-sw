@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireBinEntry.hh,v 1.1 1998/11/10 17:12:13 fisyak Exp $
+ * $Id: StTrsWireBinEntry.hh,v 1.2 1999/01/18 10:17:54 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireBinEntry.hh,v $
- * Revision 1.1  1998/11/10 17:12:13  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/18 10:17:54  lasiuk
+ * constructor by reference
+ * set functions by reference
  *
  * Revision 1.1  1998/11/10 17:12:13  fisyak
  * Put Brian trs versin into StRoot
@@ -37,16 +38,16 @@
 
 class StTrsWireBinEntry {
 public:
-    StTrsWireBinEntry(StThreeVector<double>, float);
+    StTrsWireBinEntry(StThreeVector<double>&, float);
     ~StTrsWireBinEntry();
     //StTrsWireBinEntry(const StTrsWireBinEntry&);
     //StTrsWireBinEntry& operator=(cont StTrsWireBinEntry&);
 
     // access functions
-    StThreeVector<double> position()              const;
+    const StThreeVector<double>& position()       const;
     float                 numberOfElectrons()     const;
 
-    StThreeVector<double> position()                   ;
+    StThreeVector<double>& position()                  ;
     void                  setNumberOfElectrons(float)  ;
     void                  scaleNumberOfElectrons(float);
 
@@ -58,11 +59,10 @@ private:
     StThreeVector<double> mPosition;
     float                 mNumberOfElectrons;
 };
-StThreeVector<double>
-inline StTrsWireBinEntry::position() const {return mPosition;}
-float inline StTrsWireBinEntry::numberOfElectrons()  const {return mNumberOfElectrons;}
-StThreeVector<double>
-inline StTrsWireBinEntry::position() {return mPosition;}
+inline const StThreeVector<double>&
+StTrsWireBinEntry::position() const {return mPosition;}
+inline float StTrsWireBinEntry::numberOfElectrons()  const {return mNumberOfElectrons;}
+inline StThreeVector<double>& StTrsWireBinEntry::position() {return mPosition;}
 void inline StTrsWireBinEntry::setNumberOfElectrons(float num)  { mNumberOfElectrons = num;}
 
 //Non Member Function
