@@ -1,8 +1,11 @@
 #ifndef PHYS_CONSTANTS
 #define PHYS_CONSTANTS
 #if 0
-/* $Id: phys_constants.h,v 1.4 1998/11/30 16:06:10 fisyak Exp $ */
-/* $Log: phys_constants.h,v $
+/* $Id: phys_constants.h,v 1.5 1999/07/26 14:43:54 fisyak Exp $ 
+ * $Log: phys_constants.h,v $
+ * Revision 1.5  1999/07/26 14:43:54  fisyak
+ * gcc complains
+ *
  * Revision 1.4  1998/11/30 16:06:10  fisyak
  * Protection versus usage in FORTRAN
  *
