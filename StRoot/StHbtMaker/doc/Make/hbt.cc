@@ -3,6 +3,7 @@
 // Hbt stuff
 #include "StHbtMaker.h"
 #include "StHbtManager.h"
+#include "StHbtAnalysis.h"
 #include "franksTrackCut.h"
 #include "trackCutMonitor_P_vs_Dedx.h"
 #include "mikesEventCut.h"
@@ -44,6 +45,8 @@ int main(int argc, char* argv[]) {
   cout << " fileType = " << fileType << endl;
   cout << " fileName = " << fileName << endl;
 
+  char* fileAppendix = fileName+strlen(fileName) -4 ;
+  cout << " fileAppendix = " << fileAppendix << endl;
   // *********
   // Hbt Maker
   // *********
@@ -62,11 +65,21 @@ int main(int argc, char* argv[]) {
     ascReader = new StHbtAsciiReader;
     ascReader->SetFileName(fileName);
     TheManager->SetEventReader(ascReader);
-  }
+  } 
   else if ( !strcmp(fileType,"bin") ) {
-    binReader = new StHbtBinaryReader;
-    binReader->SetFileName(fileName);
-    TheManager->SetEventReader(binReader);
+    binReader = new StHbtBinaryReader(0,fileName,0);
+    cout << " now parse files " << endl;
+    /*
+    if ( !strcmp(fileAppendix,".lis") ) {
+      binReader->AddFileList(fileName);
+      cout << " file list added " << endl;
+    }
+    else { 
+      binReader->SetFileName(fileName);
+      cout << " file name set " << endl;
+    }
+    */
+  TheManager->SetEventReader(binReader);
   }
   else {
     cout << "unknown fileType : " << fileType  << endl;
@@ -77,12 +90,12 @@ int main(int argc, char* argv[]) {
   // define example particle cut and cut monitors to use in the analyses
   // example particle cut
   franksTrackCut* aParticleCut = new franksTrackCut;  // use "frank's" particle cut object
-  aParticleCut->SetNSigmaPion(3.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
-  aParticleCut->SetNSigmaKaon(-3.,3.);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
-  aParticleCut->SetNSigmaProton(-1000.,-1.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
-  aParticleCut->SetNHits(10,50);            // range on number of TPC hits on the track
-  aParticleCut->SetP(0.0,1.0);              // range in P
-  aParticleCut->SetPt(0.1,2.0);             // range in Pt
+  aParticleCut->SetNSigmaPion(+3.0,1.e5);   // number of Sigma in TPC dEdx away from nominal pion dEdx
+  aParticleCut->SetNSigmaKaon(-2.,2.);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
+  aParticleCut->SetNSigmaProton(-1.e5,-1.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
+  aParticleCut->SetNHits(5,50);            // range on number of TPC hits on the track
+  aParticleCut->SetP(0.23,1.0);              // range in P
+  aParticleCut->SetPt(0.0,2.0);             // range in Pt
   aParticleCut->SetRapidity(-1.5,1.5);      // range in rapidity
   aParticleCut->SetDCA(0,2.);             // range in Distance of Closest Approach to primary vertex
   aParticleCut->SetCharge(+1);              // want positive kaons
@@ -102,7 +115,7 @@ int main(int argc, char* argv[]) {
   phiAnal = new StHbtAnalysis;
   // 1) set the Event cuts for the analysis
   mikesEventCut* phiEvcut = new mikesEventCut;  // use "mike's" event cut object
-  phiEvcut->SetEventMult(0,100000);      // selected multiplicity range
+  phiEvcut->SetEventMult(000,100000);      // selected multiplicity range
   phiEvcut->SetVertZPos(-35.0,35.0);    // selected range of vertex z-position
   //eventCutMonitor_Mult* multMoniPass = new eventCutMonitor_Mult();
   //eventCutMonitor_Mult* multMoniFail = new eventCutMonitor_Mult();
@@ -128,12 +141,12 @@ int main(int argc, char* argv[]) {
   //    phiPairCut->SetAngle(0.,180.);           // opening angle
   phiAnal->SetPairCut(phiPairCut);         // this is the pair cut for this analysis
   // 4) set the number of events to mix (per event)
-  phiAnal->SetNumEventsToMix(10); 
+  phiAnal->SetNumEventsToMix(5); 
   // ********************************************************************
   // 5) now set up the correlation functions that this analysis will make
   // ********************************************************************
   // define example Minv correlation function
-  MinvCorrFctn* MinvCF = new MinvCorrFctn("Minv",100,0.98,1.18); 
+  MinvCorrFctn* MinvCF = new MinvCorrFctn("Minv",150,0.95,1.25); 
   phiAnal->AddCorrFctn(MinvCF);   // adds the just-defined correlation function to the analysis
   
   TheManager->AddAnalysis(phiAnal);
