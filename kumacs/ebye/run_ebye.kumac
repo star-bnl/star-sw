@@ -11,12 +11,12 @@
 *                             exec create_tables_global#egr to make it standard
 * 8/10/98 LDC - added calib_dir  
 * 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk
-*
+* 8/11/98 - K. Turner - made default TOP=$STAR
 ************************************************************************
 ************************************************************************
 
  macro run__
-          TOP=/star/u2d/lcarr/research/stafWork/dev/ _
+          TOP=$STAR _
           domain='geometry tpc svt global ebye' _
           input_data_dir=/star/u2/dhammika/data/ _
           input_data_file=DST_prodrun2_evt1-99.xdf _
