@@ -4,11 +4,11 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer.C,v 1.12 2002/03/12 22:47:44 pfachini Exp $
+// $Id: bfcMixer.C,v 1.13 2002/03/15 16:39:56 pfachini Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
-TBrowser *b = 0;
+//TBrowser *b = 0;
 class StChain;
 class StBFChain;
 StChain  *chain=0;
@@ -32,12 +32,12 @@ void Load(){
   if (chain) delete chain;
 }
 //_____________________________________________________________________
-void bfcMixer(const Int_t Nevents=5,
+void bfcMixer(const Int_t Nevents=3,
              const Char_t *file1="/star/data09/hrm-cache/st_physics_2270008_raw_0030.daq",
-	     const Char_t *file2="/afs/rhic/star/tpc/hjort/gtest.fz",
+	     const Char_t *file2="/direct/star+u/hjort/test/gtest.fz",
              const Char_t *file3="/direct/star+u/hjort/test/st_physics_2270008_raw_0030.vertices.dat",
-             const Float_t zvertex_low=-50.0,
-             const Float_t zvertex_high=50.0)
+             const Float_t zvertex_low=-175.0,
+             const Float_t zvertex_high=175.0)
 {
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load();
@@ -134,11 +134,13 @@ void bfcMixer(const Int_t Nevents=5,
    // strange initialization due to details of inpMk->Skip
    // ...not well understood.  elh
 
+   printf ("bfcMixer: i = %i\n",i);
    printf ("bfcMixer: skip = %i\n",skip);
    printf ("bfcMixer: oldskip = %i\n",oldskip);
    if (inpMk && skip>0) {
      if(i == 1) {skip++;}
      skiptest = inpMk->Skip(skip-oldskip-1);
+     skiptest = inpMk->Skip();
      printf("bfcMixer: skiptest = %i\n",skiptest);
      if(i == 1) {skip--;}
    }
