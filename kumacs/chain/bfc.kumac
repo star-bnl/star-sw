@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.36 1998/08/20 12:37:07 fisyak Exp $
+* $Id: bfc.kumac,v 1.37 1998/08/24 23:36:43 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.37  1998/08/24 23:36:43  kathy
+* cleaned up
+*
 * Revision 1.36  1998/08/20 12:37:07  fisyak
 * Add STAF_STATUS checks
 *
@@ -345,6 +348,7 @@ MACRO bfc _
  if (STAF_STATUS(1).ne. 1) goto ABEND
  
  macro/global/import *
+   
  log_file = [log] 
  message ' *** log_file                --> ' [log_file]
  string =   '---<bfc>-- i:'//[input_file]//' o:'//[output_file]
@@ -354,6 +358,7 @@ MACRO bfc _
  string =  '---<bfc>-- c:'//[chain]
  fmessage $quote([string])  [log_file]
  if $iquest(1)<>0 goto ABEND
+ 
  exec bfc_util#bfc_init chain=[chain]
  if (STAF_STATUS(1).ne. 1) goto ABEND
  
@@ -381,7 +386,7 @@ MACRO bfc _
 *  MAIN EVENT LOOP 
 ***************************************** 
  
- message $cptime
+ message cpu time = $cptime
  do ievent=[first],[last]	| loop over events
    tabclear [event]          | zero all tables
    exec bfc_util#bfc_process [chain]
