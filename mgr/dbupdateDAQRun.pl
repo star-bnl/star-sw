@@ -22,20 +22,20 @@ require "/afs/rhic/star/packages/DEV00/mgr/dbDescriptorSetup.pl";
 
 
 
-my $prodSr = "P00hg"; 
+my $prodSr = "P00hi"; 
 
 my @Sets = (
-             "2000/06",
-             "2000/07",
+#             "2000/06",
+#             "2000/07",
              "2000/08",
-#             "2000/09",
+             "2000/09",
 );
 
 my @DirD = (
-            "P00hg/2000/06",
-            "P00hg/2000/07",
-            "P00hg/2000/08",
-#            "P00hg/2000/09",
+#            "P00hg/2000/06",
+#            "P00hg/2000/07",
+            "P00hi/2000/08",
+            "P00hi/2000/09",
 	  );
 
 struct FileAttr => {
@@ -81,8 +81,8 @@ my @DISKR = (
 #              "/star/rcf/data09/reco",
 #              "/star/rcf/data10/reco",
 #              "/star/rcf/data05/reco",
-              "/star/rcf/data08/reco",
-#              "/star/rcf/data07/reco",
+#              "/star/rcf/data08/reco",
+              "/star/rcf/data03/reco",
 ); 
 
 my %monthHash = (
@@ -161,7 +161,7 @@ my $jbSt = "n\/a";
 for( $ll = 0; $ll<scalar(@Sets); $ll++) {
   $hpssRecoDirs[$ll] = $topHpssReco . "/" . $prodSr . "/" . $Sets[$ll] ;
   }
-my $ftpHpss = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>100)
+my $ftpHpss = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>200)
   or die "HPSS access failed";
 $ftpHpss->login("starsink","MockData") or die "HPSS access failed";
 
@@ -183,7 +183,7 @@ print "\nFinding reco files in disk\n";
 
  for( $kk = 0; $kk<scalar(@DISKR); $kk++)  { 
  for( $ll = 0; $ll<scalar(@Sets); $ll++) {
-   $diskRecoDirs[$ndir] = $DISKR[$kk] . "/" . $Sets[$ll];
+   $diskRecoDirs[$ndir] = $DISKR[$kk] . "/" . $prodSr . "/" . $Sets[$ll];
    print "diskRecotDir: $diskRecoDirs[$ndir]\n";
    $ndir++;   
  }
@@ -272,7 +272,7 @@ print "Total reco files: $nDiskFiles\n";
 
 ### select reco files status from JobStatus
 
- $sql="SELECT JobID, prodSeries, jobfileName, sumFileName, sumFileDir, jobStatus, NoEvents, CPU_per_evt_sec FROM $JobStatusT WHERE JobID like '%$prodSr%' AND jobStatus <> 'n/a'";
+ $sql="SELECT JobID, prodSeries, jobfileName, sumFileName, sumFileDir, jobStatus, NoEvents, CPU_per_evt_sec FROM $JobStatusT WHERE JobID like '%$prodSr%' AND jobfileName like 'P00h%' AND jobStatus <> 'n/a'";
 
   $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
@@ -592,7 +592,7 @@ elsif ( $gflag == 2) {
 
 ##### update RECO DAQ files in Files Catalog if rerun 
    print "Updating Files Catalog\n";
-#   &updateDbTable();  
+   &updateDbTable();  
        last;
       }else{
        next;
