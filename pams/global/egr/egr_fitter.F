@@ -183,8 +183,9 @@ C**
                      gtrk(itrk).det(ient) = 1
                      if( tpc_group(ithit).ident .eq. 0) then     
                         gtrk(itrk).ipnt(ient) = tpc_group(ithit).id2
-                     else
+                     else                     
                         gtrk(itrk).ipnt(ient) = 0
+                        
                      endif
                   endif
                   
@@ -517,11 +518,12 @@ CSM
                   if( ient .le .mxpnt_tpc) then
                      ithit = gtrk(itrk).ipnt(ient)
                      if (ithit.ne.-999 .and. ithit .ne. 0) then
-                        if( gtrk(itrk).pos(ient) .lt. 0) then
-                           tpc_group(ithit).ident = -1
-                        else if( ipriv .eq. 0) then
+                       if( ipriv .eq. 0) then
                            tphit(ithit).id_globtrk 
      +                          = globtrk_h.nok
+                        endif
+                        if( gtrk(itrk).pos(ient) .lt. 0) then
+                           tpc_group(ithit).ident = -1
                         endif
                      endif
                   endif
