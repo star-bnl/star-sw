@@ -38,8 +38,8 @@ class IO : public TObject{
  private:
   int mNFile;
   TString mDir;
-  TString mExt;
   TString mMatch;
+  TString mExt;
 
 /*
   /// the internal database, a vector containing pairs of file names and number of events
