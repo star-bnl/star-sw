@@ -1,6 +1,6 @@
 -*- mode:outline -*-
 This file is best viewed with x(emacs).
-Time-stamp: <99/06/30 14:54:10 ullrich> 
+Time-stamp: <00/03/16 16:28:14 ullrich> 
  
 * README File for StarClassLibrary
 ==================================
@@ -45,17 +45,12 @@ This README file is only to tell you how to get it:
 'make' will make StarClassLibrary.ps. Since the document
 is rather large (> 100 pages) it's best to print it on
 a duplex printer.
-'make' assumes that LaTeX is installed on your machine.
-
-*** WWW
-There is also a web page with the latest news
-and the ps (& pdf) documentation ready for pickup.
-There's also a ps/pdf version with 2 pages/sheet.
-Please note, that this page is not updated automatically
-and hence might not always be up to date. Check the date
-of the last update.
-The index.html file in StarClassLibrary/doc will redirect
-you automatically to the right URL.
+'make' assumes that LaTeX and dvips is installed on your machine.
+There's also an 'make pdf' which creates an pdf file with
+bookmarks and hyperlinks.
+If you cannot manage to make them, have a look at the following
+URL: http://www.star.bnl.gov/STARAFS/comp/root/special_docs.html
+There you always get the actual 'dev' version of the manual.
 
 ** Outline of the directory structure
 -------------------------------------
@@ -71,12 +66,6 @@ SCL Home Page.
 **** StarClassLibrary/doc/tex:
 LaTeX documentation. This is the only real source of
 documentation there is. This is the one you need!
-
-**** StarClassLibrary/doc/html:
-Contains some stuff to create a simple class browser.
-Not a big thing. It is only useful for developers, so
-please ignore it - unless you want to see the most
-excessive use of the <string> class ever written.
 
 *** StarClassLibrary/examples:
 Small, stand-alone example programs and a GNUmakefile.
