@@ -1,5 +1,8 @@
-// $Id: ppLMV4.cxx,v 1.9 2002/02/25 21:12:45 balewski Exp $
+// $Id: ppLMV4.cxx,v 1.10 2002/03/25 19:35:07 balewski Exp $
 // $Log: ppLMV4.cxx,v $
+// Revision 1.10  2002/03/25 19:35:07  balewski
+// correct ppLMV for 0filed, still not vry good
+//
 // Revision 1.9  2002/02/25 21:12:45  balewski
 // correct wrong usage of hlx.pathLength(x,y)
 //
@@ -49,7 +52,7 @@ using namespace units;
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 
-//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.9 2002/02/25 21:12:45 balewski Exp $";
+//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.10 2002/03/25 19:35:07 balewski Exp $";
 
 struct Jcyl {float eta,phi;};
 
@@ -76,7 +79,8 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
   float b[3];
   gufld(x,b);
   double bfield = 0.1*b[2]; //This is now Tesla.
-  
+  if(fabs(bfield)<0.0001) bfield=0.00222; // to make helix heappy
+ 
 
   if( beam4ppLMV.isOn) { // add beam line to ppLMV to constrain vertex
     
@@ -221,7 +225,7 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
          d = d+(XHel.z()-XVertex.z())*(XHel.z()-XVertex.z());
          d = sqrt(d);
       chi2 = chi2 + (d*d)/(sig*sig);
-      double drel = d/sig;
+      double drel = d;  // do not use sig during track rejection;
       //      printf(" DCA x=%f y=%f z=%f d=%f drel=%f dmax=%f\n",XHel.x(),XHel.y(),XHel.z(),d,drel,dmax);
       if( drel > dmax ){
 	// Save the track that deviates the most from vertex

@@ -30,7 +30,7 @@ MatchedTrk:: MatchedTrk(StVertexMaker* head, int *ipar, float *fpar, CtbResponse
   float b[3];
   gufld(x,b);
   double bfield = 0.1*b[2]; //This is now Tesla.
-
+  if(fabs(bfield)<0.0001) bfield=0.00222; // to make helix heappy
 
   dst_track_st *glb_track_pointer = track->GetTable();
   int n1=0,n2=0,n3=0, n4=0,n5=0,n6=0;
@@ -60,6 +60,7 @@ MatchedTrk:: MatchedTrk(StVertexMaker* head, int *ipar, float *fpar, CtbResponse
     double px   = (1./ptinv)*cos(psi);
     double py   = (1./ptinv)*sin(psi);
     double pz   = (1./ptinv)*tanl;
+
     StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
     
     StPhysicalHelixD TrkHlx(MomFstPt, origin, bfield*tesla, qtrk);
@@ -101,10 +102,11 @@ MatchedTrk:: MatchedTrk(StVertexMaker* head, int *ipar, float *fpar, CtbResponse
     pmom = TrkHlx.momentumAt(spath, bfield*tesla);
     double beta = pmom.mag()/sqrt(pmom.mag()*pmom.mag()+0.139*0.139); //Assume pion 
     float strag=0.0136/beta/pmom.mag()*fabs(spath);
+    if(fabs(bfield)<0.01) strag=0.0136*fabs(spath);
 
     head->hmtr[1]->Fill(strag); 
     head->hmtr[2]->Fill(-spath); 
-    //printf("stragling=%f %f %f %f \n",strag,beta,pmom.mag(),spath);
+    printf("stragling=%f %f %f %f \n",strag,beta,pmom.mag(),spath);
 
 
     n4++;
