@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.20 2004/03/22 21:41:05 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.21 2004/03/25 18:53:41 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -295,12 +295,16 @@ Int_t StEmcTpcFourPMaker::Make() {
 	  if(towerProxy->isGood(runNumber, hitId-1) == false) { 
 	    //cout << "throwing away tower: " << hitId-1 << endl; 
 	    continue; }
+	  geom->getEtaPhi(hitId, eta, phi);
+	  while(phi < 0) phi += twoPi;
+	  while(phi > twoPi) phi -= twoPi;
 	  if(adc2E)
 	    {
 	      if(data->TowerStatus[hitId-1] != 1) continue;
 	      if(simpleCal)
                 {
-                  energy = 0.0125*static_cast<double>(data->TowerADC[hitId-1]);
+                  double et = 0.0125*static_cast<double>(data->TowerADC[hitId-1]);
+                  energy = et/sqrt(1.0-tanh(eta)*tanh(eta));
                 }
               else
                 {
@@ -318,7 +322,8 @@ Int_t StEmcTpcFourPMaker::Make() {
 	      ADC = muEmc->getTowerADC(hitId, bemc);
               if(simpleCal)
                 {
-                  energy = 0.0125*ADC;
+                  double et = 0.0125*ADC;
+                  energy = et/sqrt(1.0-tanh(eta)*tanh(eta));
                 }
               else
                 {
@@ -347,9 +352,6 @@ Int_t StEmcTpcFourPMaker::Make() {
 
 	  sumEMC += energy;
 	  if(energy < 0.01) continue;
-	  geom->getEtaPhi(hitId, eta, phi);
-	  while(phi < 0) phi += twoPi;
-	  while(phi > twoPi) phi -= twoPi;
 	  
 	  // now add a fake point to the binmap
 	  StMuEmcPoint& point = fakePoints[hitId];
@@ -403,16 +405,18 @@ Int_t StEmcTpcFourPMaker::Make() {
   }
 
   numberPoints = 0;
-  double maxPointValue = 0;
+  double maxEtValue = 0;
   for(pointMap::iterator point = binmap.moddPoints.begin(); 
       point != binmap.moddPoints.end(); ++point)
     {
       pointMap::value_type &point_val = *point;
       StCorrectedEmcPoint &cPoint = point_val.second;
-      if(cPoint.P().e() > minPointThreshold)
+      double eta = cPoint.P().pseudoRapidity();
+      double et = cPoint.P().e()*sqrt(1.0-tanh(eta)*tanh(eta));
+      if(et > minPointThreshold)
 	numberPoints++;
-      if(cPoint.P().e() > maxPointValue)
-	maxPointValue = cPoint.P().e();
+      if(et > maxEtValue)
+	maxEtValue = et;
     }
   if(!noAbortions)
     if(numberPoints > maxPoints)  // If there are too many points
@@ -423,10 +427,10 @@ Int_t StEmcTpcFourPMaker::Make() {
     {
       const StTriggerId &trigger = uEvent->triggerIdCollection().nominal();
       if(trigger.isTrigger(1101) || trigger.isTrigger(2201))
-	if(maxPointValue < 2.5)
+	if(maxEtValue < 2.5)
 	  return kStOK;
       if(trigger.isTrigger(1102) || trigger.isTrigger(2202))
-	if(maxPointValue < 3.5)
+	if(maxEtValue < 3.5)
 	  return kStOK;
     }
 
