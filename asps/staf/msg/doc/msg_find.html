@@ -1,0 +1,32 @@
+<h3>LOGICAL FUNCTION MSG_Find( PREFIX, ID, ACTIVE, COUNTING )</h3><pre>
+
+
+*  Input:
+	CHARACTER*(*) PREFIX !A STAR-standard message prefix.
+
+*  Outputs:
+	INTEGER ID       !STAR-standard message ID.
+	LOGICAL ACTIVE   !Flag set to .TRUE. if the message selected
+                         !(by PREFIX and/or ID) is active.
+	LOGICAL COUNTING !Flag set to .TRUE. if the message selected
+                         !(by PREFIX and/or ID) is enabled for counting.
+
+*  Brief description:  Lookup a prefix in the MSG prefix index, return fast-ref ID.
+
+*   Description:
+
+*	Find the character string PREFIX in the index of
+*	STAR-standard message prefixes (sic).  If found
+*	in the index, return the index ID and return
+*	MSG_FIND true.  The ID is never used to find PREFIX.
+*	If PREFIX is not found, returns .FALSE..  The flags ACTIVE
+*	and COUNTING are set according to the whether the message
+*	is active (output enabled) and enabled for counting.
+
+*   Return conditions:
+*	.TRUE. if PREFIX is found in the index.
+*	.FALSE. if PREFIX is not found in the index.
+
+*   Error conditions:  none
+
+</pre>

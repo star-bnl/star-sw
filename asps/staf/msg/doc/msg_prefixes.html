@@ -1,0 +1,30 @@
+<h2>MSG Prefixes</h2>
+
+Messages must all contain, in the beginning of the message, a unique 
+identifier, or "prefix", which serves to uniquely and unambiguously 
+identify the source, in the code, of the message.  The prefix should (but 
+need not, as far as the MSG package is concerned) be the name of the 
+routine which generates the message, followed by a dash "-", and the dash 
+followed by a character or characters which uniquely identifies the source 
+of the message within that routine.  The "body" of the message, if there 
+is one, must be separated from the prefix by one or more ASCII spaces, 
+tabs , newlines (ie, carriage return characters, ASCII 10.), formfeeds 
+(ASCII 12 .) or nulls (ASCII 0.).
+<p>
+
+<h2>MSG Fast Reference IDs</h2>
+
+Each prefix is assigned by MSG a unique "fast reference ID", which is
+then used to access the accounting and status information for that
+prefix in a more cpu-efficient way than ASCII string searches in
+subsequent references to a particular prefix.  The caller need only
+supply an integer, declared with SAVE (ie, static), and initialized
+to zero, in addition to a prefix or prefix-containing message, and
+MSG does the rest.  For the purpose of labor-reduction, an option
+is provided within MSG which prevents the setting of fast-reference
+IDs if an MSG call is made with an ID of -1.  In this case, an ASCII
+string lookup is always preformed, but the application writer saves
+a little jockeying around in the code, specifying IDs.  This is more
+than adequate for cases in which a message will rarely or never occur
+(ie, a bug-check message -- one that hopefully never occurs unless
+the program doesn't work as intended).
