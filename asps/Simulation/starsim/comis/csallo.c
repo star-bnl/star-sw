@@ -1,9 +1,9 @@
 /*
- * $Id: csallo.c,v 1.2 2004/09/24 19:29:24 fisyak Exp $
+ * $Id: csallo.c,v 1.3 2004/09/24 19:35:14 fisyak Exp $
  *
  * $Log: csallo.c,v $
- * Revision 1.2  2004/09/24 19:29:24  fisyak
- * Also in csfree
+ * Revision 1.3  2004/09/24 19:35:14  fisyak
+ * Remove  change in csfree, conversion from words to char is done in mhfree already
  *
  * Revision 1.1  2004/09/24 18:57:04  fisyak
  * Fix comis for Scientific Linux
@@ -93,7 +93,6 @@ unsigned  mpntr[];
 {
   void *pntr;
 
-  /*  pntr = (void*)(mpntr[0]+iqpntr); */
-  pntr = (void*)(mpntr[0]+iqpntr)*sizeof(int); /* yf 092404 */
+  pntr = (void*)(mpntr[0]+iqpntr); 
   free(pntr);
 }
