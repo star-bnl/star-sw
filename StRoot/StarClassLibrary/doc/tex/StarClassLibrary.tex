@@ -2,15 +2,16 @@
 %
 % STAR Class Library - User Guide and Reference Manual -- LaTeX Source 
 %
-% $Id: StarClassLibrary.tex,v 1.1 1999/02/17 12:37:56 ullrich Exp $
+% $Id: StarClassLibrary.tex,v 1.2 1999/03/02 23:18:08 ullrich Exp $
 %
 % Author: LaTeX template by Thomas Ullrich, March 19 1998
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StarClassLibrary.tex,v $
-% Revision 1.1  1999/02/17 12:37:56  ullrich
-% New Revision
+% Revision 1.2  1999/03/02 23:18:08  ullrich
+% Modified 'User Guide' for new SCL organization scheme.
+% Updated StHelix reference page.
 %
 % Revision 1.19  2000/04/06 23:01:45  ullrich
 % Added reference section for StMath. Particle section updated.
@@ -159,8 +160,8 @@
   \mbox{\includegraphics[width=\textwidth]{StarClassLibraryTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.1 $ $}  \\[5mm] % replaced by cvs with current revision  
-  {\LARGE $ $Date: 1999/02/17 12:37:56 $ $}  % replaced by cvs with current revision  
+  {\LARGE $ $Revision: 1.2 $ $}  \\[5mm] % replaced by cvs with current revision  
+  {\LARGE $ $Date: 1999/03/02 23:18:08 $ $}  % replaced by cvs with current revision  
   \vfill
 \end{center}
 \cleardoublepage
@@ -229,112 +230,45 @@ For these reasons it was felt that the basic component classes of CLHEP
 new standardized features of the C++
 language.  These include the use of templates, exception handling, 
 namespaces, use of the Standard Template Library (STL)
-\textit{The following is of general interest for software developer only:}
-
 \index{Standard Template Library}
 \index {STL} etc.  It was also felt that additional functionality specific
-It is divided up in five directories:
-\name{./include}, \name{./src}, \name{./lib}, \name{./examples}, and
-\name{./doc}.
+to the STAR experiment could be incorporated to make this a real
+STAR Class Library (SCL); things like implementing the STAR track model,
 data base interfaces etc.  Even a simple interface to HBOOK is included.
 The code in the SCL is written to conform to the ANSI standard
 and conventions of the Standard C++ Library.  The directory 
 and \texttt{Makefile} structure is modelled very closely after the
 pioneering work of the GEANT4 collaboration.  Documentation is also seen as
 an important component of this development.  This manual provides a detailed
+description of each class, its functionality, its dependencies, as well as
+a description of all user accessible member functions.  Example programs
+and there expected output are also included.  More detailed examples
 testing the functionality of each and every member function are provided in
 the \comp{examples} directory in the library itself.  Web based documentation,
-    and \name{./doc/html} for a class browser.
-\item[\name{./include}] contains the different header files
-    (extension \name{.h} and \name{.hh}),
-\item[\name{./src}] the referring source code (extension \name{.cc}),
+giving the user access to the header files and source code is foreseen
+in the near future.
+
 These developments have been made in consultation with the CERN LHC++
-    demonstrate most the features of every classes.
-\item[\comp{./lib/\$STAR\_SYS}] contains the shared and/or
-    archive library for the platform identified by \comp{\$STAR\_SYS}.
+\item Red Hat Linux 5.1, Red Hat Linux 5.2: \index{Linux}
+expressed interest in perhaps incorporating some of this library
 in a future release.  This is also by no means a complete library and as
 more and more people get involved with development, it is expected to
 expand.  So look through the manual and feel free to
-There are two Makefiles in the top directory \name{StarClassLibrary}
-\vspace{-11pt}
-\begin{description}
-\item[\name{GNUmakefile}] is the general makefile used to compile and install
-    the SCL and its documentation
-\item[\name{GNUmakefile.architecture}] defines the macros and compiler flags
-    for each individual supported platform.
-\end{description}
-
-The \name{./examples} directory contains a separate makefile which is not
-invoked when installing the SCL. It must be run manually. 
-It also used the flags defined in \name{GNUmakefile.architecture}.
-
-All makefiles are especially written for the GNU make utility (gmake) and rely on
-certain features only available therein. This is also the reason why we do not
-follow the standard naming scheme but named them \name{GNUmakefile}. 
-Note that these makefiles do not contain any hard-wired file names;
-the dependencies are rather created on-the-fly.
-
-
-\section{Installing the SCL}  \index{Installing SCL} \label{instal}
+make any comments, good or bad to the collaboration and developers.
 
   \end{itemize}
-and is therefore present in the actual STAR software releases.\\
-If you want to install the SCL locally on your machine you should
-continue to read the following three sections which explains how to
-obtain, compile and install the code.
+\item IRIX 6.4: \index{IRIX}
   \begin{itemize}
-\subsection{Getting the source code} 
-
-The {\em StarClassLibrary} is now under {\bf CVS} control at BNL.  It can
+    \item CC 7.1 and Object Space 2.0.2 for IRIX 6.3 modified.
 and compiled with -n32 flag. \index{Object Space}
 
 \section{Platforms and Compilers} \index{compiler} \index{platform}
 \label{platformsAndCompilers}
 
 Further tests on AIX are not foreseen unless there is sufficient user demand. \index{Irix} \index{AIX}
-    \comp{cvs checkout StarClassLibrary}
+\item Red Hat Linux 5.1 to Red Hat Linux 6.0: \index{Linux}
 \item HP-UX 10.20: \index{HP-UX}
     \item egcs 1.0.2 (g++) or higher. 
-\subsection{Compilation}  \index{Compiling SCL} \label{compile}
-
-In order to create the library and (optionally) the referring examples
-first {\bf set the correct system flag}. The flag is stored in the environment
-variable \comp{STAR\_SYS}. If you are using the official STAR login scripts
-it should be already defined. Note, however, that the SCL is not yet supported
-on all STAR platforms.
-See section~\ref{platformsAndCompilers} for the current platforms that have
-been tested.  To compile:
-
-\begin{itemize}
-  \item set the correct system flag:\\
-    In \name{csh, tcsh}:\\
-    \comp{setenv STAR\_SYS}\ \args{system-flag}.\\
-    In \name{sh, ksh, bash, zsh}:\\
-    \comp{export STAR\_SYS=}\args{system-flag}.\\
-    where \args{system-compiler} can be one of:
-    \begin{itemize}
-    \item \comp{i386\_linux2}
-    \item \comp{i386\_redhat50}
-    \item \comp{hp\_ux102}
-    \item \comp{sun4x\_54}
-    \item \comp{sun4x\_55}
-    \item \comp{sun4x\_56}
-    \end{itemize}
-  \item \comp{cd StarClassLibrary}
-  \item \comp{gmake}  \\ creates the library
-  \item \comp{gmake doc} \\ makes the documentation and the class browser 
-\end{itemize}
-
-\textit{Hint}: \index{unsupported platforms} \index{platforms}
-In case your platform is not supported and you  
-encounter problems with your native C++ compiler you can always use
-the GNU \index{GNU} compiler (\name{egcs} or \name{gcc} depending on your
-installation) \index{egcs} \index{gcc} by defining \comp{STAR\_SYS=i386\_linux2}.  Note also
-that ``unsupported platform'' does not necessarily mean that the SCL will not
-compile but rather that it was never tested and that the
-makefiles contain no parameters specific for this environment.  In
-general it should be sufficient to adjust the settings in
-\name{GNUmakefile.architecture} (see also section \ref{Macros}).
     \item aCC A.01.06 or higher versions. \index{aCC (HP compiler)}
     \item gcc/g++ 2.9.5.
   \end{itemize}
@@ -349,7 +283,7 @@ templated member functions and a broken overloading mechanism.
     makefile provided to compile and link the examples.
 \index{Irix} \index{AIX}
 
-If the SCL is installed properly they should be defined
+\section{Organization of the SCL}
 
 All documentation, code, and header files of the SCL is contained in a
 directory named \name{StarClassLibrary}.
@@ -371,15 +305,11 @@ and the referring source code (extension \name{.cc}),
     various sources.
 \item[\name{./examples}] contains small self-describing programs to test and
     demonstrate most the features of every classes. There is a
-\item[\comp{SCL\_WITHOUT\_ROOT}:] makes the SCL without ant reference to ROOT classes.
-    If not set several classes will inherit from the ROOT base class TObject which
-    causes the SCL to depend an essentially all of the ROOT class library.\index{ROOT}
     \name{GNUmakefile}
     provided to compile and link the non-ROOT versions of the examples.
     Note that, except on Linux, you have to use \comp{gmake} in order to
     process the makefile since it contains several GNU extension. Please
-Use \comp{gmake doc} to craete all available SCL documentation.
-It consists of the {\em User Guide and
+    read the \name{examples/README} file for further instructions.
 \end{description}    
 \end{description}
 
@@ -499,7 +429,7 @@ function objects.
         \verb+StLorentzVector<float>+ & \verb+StLorentzVectorF+ \\ \hline
         \verb+StLorentzVector<double>+ & \verb+StLorentzVectorD+ \\ \hline
         \verb+StMatrix<float>+ & \verb+StMatrixF+ \\ \hline
-  and constants are still defined to be of type:\\ \comp{static const HepDouble}. \\ \\
+        \verb+StMatrix<double>+ & \verb+StMatrixD+ \\ \hline
         \verb+StHelix+ & \verb+StHelixD+ \\ \hline
         \verb+StPhysicalHelix+ & \verb+StPhysicalHelixD+ \\ \hline
     \end{tabular}            
@@ -515,9 +445,15 @@ by $\sim$ 12 byte depending on the platform.
 \section{Support and Reporting Bugs} \index{support}
 Currently the \name{StarClassLibrary} is supported by a small group.  Hopefully
 as more people begin to use it and add to it, there will be a larger
-  \verb+electron_mass_c2 = 0.51099906 * MeV+\index{electron\_mass\_c2}\\  
-  \verb+proton_mass_c2   = 938.27231 * MeV+\\
-  \verb+neutron_mass_c2  = 939.56563 * MeV+\\
+support base for it.  If there is a problem or bug, report it to
+one or more of the following:
+\begin{itemize}
+  \item starsoft-l@bnl.gov
+  \item starsofi-l@bnl.gov
+  \item brian.lasiuk@yale.edu
+  \item thomas.ullrich@yale.edu
+\end{itemize}
+
 \clearpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -733,6 +669,7 @@ inline StInt sign(T a)
   \verb+kilometer3  = kilometer*kilometer*kilometer+ \\
 
   \verb+micrometer  = 1.e-6*meter+ \\
+  \verb+nanometer   = 1.e-9*meter+ \\
   \verb+femtometer  = 1.e-15*meter+ \\
   \verb+fermi       = 1*femtometer+ \\
 
@@ -1036,13 +973,7 @@ int main()
     cout << endl;
 
     vector<double> vec(10);
-    \verb+#include "StHbook.hh"+\\
-    \comp{NOTE:} The user must link with \texttt{packlib}.\footnote{The
-      process is somewhat more complicated for SUN.}  This is
-    set up in the \\ \comp{GNUmakefile.architecture} file according
-    to the {\bf CERN\_ROOT}\label{CERN_ROOT} environmental variable
-    set in the STAR login scripts.
-    
+    StGetConfigValue(filename, "vec", vec, 5);
     cout << "vec = ";
     for (int k=0; k<10; k++) cout << vec[k] << ' ';
     cout << endl;
@@ -1531,6 +1462,24 @@ hbookFile status: (1) is good 1
 
     \verb+double ycenter() const;+\\
     Returns the y-coordinate of the center of the circle.
+
+    \verb+double h() const;+\\
+    Returns the orientation of the helix.  In StPhysicalHelix it
+    has the meaning: -sign(q*B) where q is the charge of the particle
+    and B is the sign of the magnetic field.  It specifies whether
+    the helix rotates clockwise or counter-clockwise.
+    
+    \verb+StThreeVector<double>& origin() const;+\\
+    \verb+pair<double, double> pathLengths(const StHelix& h) const;+\\
+    Returns the path lengths at the distance-of-closest-approach
+    \index{dca} \index{distance of closest approach}
+    between self and \args{h}. The first element of the pair is the referring
+    path length of self and the second element the path length of \args{h}.
+    The method is fast and robust but execution time will increase
+    slightly for two helices with very different dip angles and/or for large
+    distances.
+    The following pseudo-code explains how to get the actual dca:
+    \verb+double y(double s) const;+\\
     Returns the y-coordinate of the helix at a pathlength \args{s}.
     
     \verb+double z(double s) const;+\\
