@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.39 2001/11/07 21:20:46 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.40 2001/11/10 23:54:21 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.40  2001/11/10 23:54:21  ullrich
+ * Added calibration vertices.
+ *
  * Revision 2.39  2001/11/07 21:20:46  ullrich
  * Added L1 trigger.
  *
@@ -172,7 +175,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.39 2001/11/07 21:20:46 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.40 2001/11/10 23:54:21 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -627,6 +630,12 @@ StEventMaker::makeEvent()
     //  tracks which couldn't be assigned to a vertex.
     //  Valid iflags in this context are = +[0-9]*10+1.
     //
+    //  New: all vertices which are not event (primary)
+    //  vertices are mostly for test and calibration
+    //  purposes. People asked for it so we add them to
+    //  a new container made for this purpose. They are
+    //  stored via StEvent::addCalibrationVertex().
+    //
     long nVertices;
     dst_vertex_st *dstVertices = mEventManager->returnTable_dst_vertex(nVertices);
 
@@ -644,6 +653,10 @@ StEventMaker::makeEvent()
             }
             mCurrentEvent->addPrimaryVertex(pvtx);
         }
+	else {
+            StCalibrationVertex *cvtx = new StCalibrationVertex(dstVertices[i]);
+            mCurrentEvent->addCalibrationVertex(cvtx);
+	}
     }
     nfailed = 0;
     for (k=0; k<vecPrimaryTracks.size(); k++)
@@ -955,6 +968,12 @@ StEventMaker::printEventInfo()
         return;
 
     cout << "---------------------------------------------------------" << endl;
+    cout << "StRunInfo at " << (void*) mCurrentEvent->runInfo()         << endl;
+    cout << "---------------------------------------------------------" << endl;
+    if (mCurrentEvent->runInfo())
+        mCurrentEvent->runInfo()->Dump();
+
+    cout << "---------------------------------------------------------" << endl;
     cout << "StEventInfo at " << (void*) mCurrentEvent->info()          << endl;
     cout << "---------------------------------------------------------" << endl;
     if (mCurrentEvent->info())
@@ -1156,6 +1175,16 @@ StEventMaker::printEventInfo()
         if (mCurrentEvent->primaryVertex()->numberOfDaughters())
             printTrackInfo(mCurrentEvent->primaryVertex()->daughter(0));
     }
+    
+    cout << "---------------------------------------------------------" << endl;
+    cout << "StSPtrVecCalibrationVertex"                                << endl;
+    cout << "Dumping first element in collection only (if available). " << endl;
+    cout << "---------------------------------------------------------" << endl;
+    cout << "collection size = "
+         << mCurrentEvent->numberOfCalibrationVertices() << endl;
+    
+    if (mCurrentEvent->numberOfCalibrationVertices())
+        mCurrentEvent->calibrationVertex(0)->Dump();
 
     cout << "---------------------------------------------------------" << endl;
     cout << "StSPtrVecV0Vertex"                                         << endl;

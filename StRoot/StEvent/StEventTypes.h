@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.17 2001/11/07 21:19:43 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.18 2001/11/10 23:53:23 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.18  2001/11/10 23:53:23  ullrich
+ * Added calibration vertices.
+ *
  * Revision 2.17  2001/11/07 21:19:43  ullrich
  * Added L1 trigger.
  *
@@ -66,6 +69,7 @@
 #ifndef StEventTypes_hh
 #define StEventTypes_hh
  
+#include "StCalibrationVertex.h"
 #include "StCtbSoftwareMonitor.h"
 #include "StCtbTriggerDetector.h"
 #include "StDedxPidTraits.h"

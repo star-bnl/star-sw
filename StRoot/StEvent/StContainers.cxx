@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.12 2001/10/01 19:40:31 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.13 2001/11/10 23:53:22 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.13  2001/11/10 23:53:22  ullrich
+ * Added calibration vertices.
+ *
  * Revision 2.12  2001/10/01 19:40:31  ullrich
  * Added StTofData.
  *
@@ -47,6 +50,7 @@
  * Initial Revision
  *
  **************************************************************************/
+#include "StCalibrationVertex.h"
 #include "StContainers.h"
 #include "StSvtHit.h"
 #include "StSsdHit.h"
@@ -76,6 +80,7 @@
 #include "StL3AlgorithmInfo.h"
 
 StCollectionImp(Object)
+StCollectionImp(CalibrationVertex)
 StCollectionImp(Hit)
 StCollectionImp(PrimaryTrack)
 StCollectionImp(PrimaryVertex)
