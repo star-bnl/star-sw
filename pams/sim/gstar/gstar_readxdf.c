@@ -121,15 +121,16 @@ int  *igate;
 /****************************************************************************/
 void xdf_open_(file,n)
 char *file;   int n;
-{  char fname[256]; int i;
-   if (n<1 || n>255) { printf(" error in xdf_open n= %d \n",n); return; }
+{  char fname[260]; int i;
+   if (n<1 || n>256) { printf(" error in xdf_open n= %d \n",n); return; }
    strncpy(fname,file,n); fname[n]='\0'; 
-
+   printf(" filename= %s n=%d \n",file,n);
    /* trim the string as COMIS put some spaces at the end */
    for (i=0; i<=n; i++) { if (fname[i]==' ') fname[i]='\0'; } 
-
-   if ((f=fopen(fname,"rb"))==NULL || !dsNewDataset(&d,"gstar"))
-      {  dsPerror("XDF_FORMAT: error opening file");   return; }
+   if (!(f=fopen(fname,"rb")))
+      { printf("XDF_OPEN: error opening file %s \n",fname); return; }
+   if (!dsNewDataset(&d,"gstar"))
+      { printf("XDF_OPEN: can not create dataset\n"); return; }
    xdrstdio_create(&x, f, XDR_DECODE);
 }
 /*----------------------------------------------------------------------------*/
