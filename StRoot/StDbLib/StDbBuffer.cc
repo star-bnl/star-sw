@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.6 2000/02/15 20:27:44 porter Exp $
+ * $Id: StDbBuffer.cc,v 1.7 2000/02/18 22:11:58 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.7  2000/02/18 22:11:58  porter
+ * modified buffer read of unsigned char array
+ *
  * Revision 1.6  2000/02/15 20:27:44  porter
  * Some updates to writing to the database(s) via an ensemble (should
  * not affect read methods & haven't in my tests.
@@ -206,7 +209,7 @@ void StDbBuffer::MemSwapCpy(char* where,char* from,int len,int swaplen,BuffMode 
 
 
 void StDbBuffer::StrConv(char* aVal,char &s){s=aVal[0];};
-void StDbBuffer::StrConv(char* aVal,unsigned char &s){s=aVal[0];};
+void StDbBuffer::StrConv(char* aVal,unsigned char &s){s=(unsigned char)atoi(aVal);};
 void StDbBuffer::StrConv(char* aVal,short &s){s=(short)atoi(aVal);};
 void StDbBuffer::StrConv(char* aVal,unsigned short &s){s=(unsigned short) atoi(aVal);};
 void StDbBuffer::StrConv(char* aVal,int &s){s=atoi(aVal);};
@@ -351,7 +354,7 @@ bool  StDbBuffer::ReadArray(tpe* &s, int &len,const char *aName)\
 { bool tRetVal=false; \
  if (Find_Col(aName)) \
   {int  i;\
-  if (mCol[mCur].type==_char) {\
+  if (mCol[mCur].type==_char ) {\
     len=mCol[mCur].length/sizeof(tpe);\
     s=new tpe[len];\
     MemSwapCpy((char*)s,(char*)mCol[mCur].val,len*sizeof(tpe),mycswapl[tpelist],Auto);\
