@@ -18,6 +18,8 @@ printf ("Run Conscript-standard in %-20s   \tfor %s",$Dir, $PKG) ;
 my $obj  = $ObjDir;  #print "obj = $obj\n";
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; #print "SO_PKG = $SO_PKG\n";
 my $LIBPKG = $PKG . "." . $env->{SUFLIB};
+my $SoLibs  = $env->{SoLibs};
+if ($PKG =~ /^StDb/) {$SoLibs .= " -L/opt/star/lib/mysql/ -lmysqlclient";}
 (my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g;# print "new share $share\n";
 $share =~ s/\/StRoot//g;
 $share =~ s/\/(sim|gen)//g; 
@@ -32,7 +34,8 @@ if ($Dir =~ /pams\//) {
 my $CXXFLAGS = $env->{CXXFLAGS};
 if ($STAR_SYS =~ /^sun4x_5/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
 $env2 = $env->clone('CPPPATH'      => $CPPP,
-		    'CXXFLAGS'     => $CXXFLAGS);
+		    'CXXFLAGS'     => $CXXFLAGS,
+                    'SoLibs'       => $SoLibs);
 my $cscanner= find scan::cpp($env2->{_cwd}, $env2->{CPPPATH});
 my $CPPPATH = $cscanner->iflags;#  print "CPPPATH = $CPPPATH\n";
 my $STIC_CPPPATH = $CPPPATH;
@@ -98,6 +101,7 @@ if ($#idlM > -1) {
 }
 if ($#Defs > -1) {
   if ($STAR_SYS !~ /^intel_wnt$/) {
+#    Install $env2 $share, @Defs;
     Command $env2 [@CintFiles], @Defs,  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
   }
   my $linkdef = pop @CintFiles;# print "ObjDir and Cints: $ObjDir => @CintFiles\n";
