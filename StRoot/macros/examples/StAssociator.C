@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.33 2002/09/22 18:27:11 calderon Exp $
+// $Id: StAssociator.C,v 1.34 2003/03/19 17:16:19 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.34  2003/03/19 17:16:19  calderon
+// remove loading of StarRoot (it's loaded by default).
+//
 // Revision 1.33  2002/09/22 18:27:11  calderon
 // Revert to loading St_Tables instead of all tables individually to avoid
 // chasing dependencies every time someone else requires another table.
@@ -135,7 +138,6 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
 {
 
   // Dynamically link needed shared libs
-  gSystem->Load("StarRoot");
   gSystem->Load("St_base");
   gSystem->Load("StChain");
 
