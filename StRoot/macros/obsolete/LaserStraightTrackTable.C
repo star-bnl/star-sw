@@ -1,5 +1,8 @@
-// $Id: LaserStraightTrackTable.C,v 1.2 1999/05/21 15:33:50 kathy Exp $
+// $Id: LaserStraightTrackTable.C,v 1.1 2000/01/07 21:27:20 kathy Exp $
 // $Log: LaserStraightTrackTable.C,v $
+// Revision 1.1  2000/01/07 21:27:20  kathy
+// moving Bill Love's LaserStraightTrackTable macro from analysis to obsolete as per his request
+//
 // Revision 1.2  1999/05/21 15:33:50  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
