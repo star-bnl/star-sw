@@ -20,6 +20,7 @@ routines to verify data read by sample program
 *
 */
 #define DATA_DIM 13
+
 typedef struct test_type_t {
 	DS_CHAR c;
 	DS_DOUBLE d;
@@ -56,6 +57,7 @@ static char *emptySpecifier = "struct empty{char c;}";
 static int dsCheckTableR(void *pData, size_t count, DS_TYPE_T *type);
 static int dsCheckTest(TEST_TYPE_T *pTest, size_t count);
 static int dsSetTableR(void *pData, size_t count, DS_TYPE_T *type);
+
 /******************************************************************************
 *
 * dsCheckDataset - check that all tables have basic type code in each element

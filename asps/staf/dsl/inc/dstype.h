@@ -360,8 +360,13 @@ int projectTest(void);
 int testSort(void);
 void testStats(void);
 int xdrMemTest(int bigEndian);
+int xdrRandIOTest(void);
+int xdrRandReadTest(void);
+int xdrRandSkipTest(void);
+int xdrRandWriteTest(void);
 int xdrReadTest(int fast);
 int xdrWriteTest(int bigEndian);
+
 #endif /* DS_ADVANCED */
 /******************************************************************************
 *

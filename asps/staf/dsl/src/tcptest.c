@@ -52,7 +52,7 @@ static void clientTest(char *host)
 	xdr.x_op = XDR_DECODE;
 	if (!xdrrec_skiprecord(&xdr)) {
 		TCP_ERROR_PRINT("xdrrec_skiprecord failed");
-		goto done;;
+		goto done;
 	}
 	t0 = msecTime(NULL);
 	if (!dsReadTest(&xdr, DS_COUNT)) {

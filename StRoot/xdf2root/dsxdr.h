@@ -28,9 +28,9 @@ int dsReadAll(XDR *xdrs);
 int dsReadTest(XDR *xdrs, size_t count);
 int dsWriteTest(XDR *xdrs, size_t count, int bigEndian);
 bool_t xdr_dataset(XDR *xdrs, DS_DATASET_T **ppDataset);
-bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset);
 bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset);
-
+bool_t xdr_dataset_skip(XDR *xdrs);
+bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset);
 #ifdef DS_PRIVATE
 /******************************************************************************
 *
