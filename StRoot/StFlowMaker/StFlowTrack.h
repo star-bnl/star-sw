@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.13 2000/09/16 22:20:35 snelling Exp $
+// $Id: StFlowTrack.h,v 1.14 2000/09/22 22:03:01 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.14  2000/09/22 22:03:01  posk
+// Clean up.
+//
 // Revision 1.13  2000/09/16 22:20:35  snelling
 // Added selection on P and global DCA and fixed rapidity calulation
 //
@@ -173,50 +176,51 @@ private:
   ClassDef(StFlowTrack, 1)                     // macro for rootcint
 };
 
-inline Float_t  StFlowTrack::PidPiPlus()   const { return mPidPiPlus/1000.; }
-inline Float_t  StFlowTrack::PidPiMinus()  const { return mPidPiMinus/1000.; }
-inline Float_t  StFlowTrack::PidProton()   const { return mPidProton/1000.; }
+inline Float_t  StFlowTrack::PidPiPlus()    const { return mPidPiPlus/1000.; }
+inline Float_t  StFlowTrack::PidPiMinus()   const { return mPidPiMinus/1000.; }
+inline Float_t  StFlowTrack::PidProton()    const { return mPidProton/1000.; }
 inline Float_t  StFlowTrack::PidKaonMinus() const { return mPidKaonMinus/1000.; }
-inline Float_t  StFlowTrack::PidKaonPlus() const { return mPidKaonPlus/1000.; }
+inline Float_t  StFlowTrack::PidKaonPlus()  const { return mPidKaonPlus/1000.; }
 inline Float_t  StFlowTrack::PidAntiProton() const { return mPidAntiProton/1000.; }
-inline Float_t  StFlowTrack::PidDeuteron() const { return mPidDeuteron/1000.; }
+inline Float_t  StFlowTrack::PidDeuteron()  const { return mPidDeuteron/1000.; }
 inline Float_t  StFlowTrack::PidAntiDeuteron() const { return mPidAntiDeuteron/1000.; }
-inline Float_t  StFlowTrack::PidElectron() const { return mPidElectron/1000.; }
-inline Float_t  StFlowTrack::PidPositron() const { return mPidPositron/1000.; }
-inline const Char_t* StFlowTrack::Pid()    const { return mPid; }
-inline Float_t  StFlowTrack::Phi()         const { return mPhi; }   
-inline Float_t  StFlowTrack::Eta()         const { return mEta; }     
-inline Float_t  StFlowTrack::Dedx()        const { return mDedx; }     
-inline Float_t  StFlowTrack::Pt()          const { return mPt; }                
-inline Short_t  StFlowTrack::Charge()      const { return mCharge; }   
-inline Float_t  StFlowTrack::Dca()         const { return mDca; }
-inline Float_t  StFlowTrack::DcaGlobal()   const { return mDcaGlobal; }
-inline Float_t  StFlowTrack::Chi2()        const { return mChi2; } 
-inline Int_t    StFlowTrack::FitPts()      const { return mFitPts; }  
-inline Int_t    StFlowTrack::MaxPts()      const { return mMaxPts; }  
+inline Float_t  StFlowTrack::PidElectron()  const { return mPidElectron/1000.; }
+inline Float_t  StFlowTrack::PidPositron()  const { return mPidPositron/1000.; }
+inline const Char_t* StFlowTrack::Pid()     const { return mPid; }
+inline Float_t  StFlowTrack::Phi()          const { return mPhi; }   
+inline Float_t  StFlowTrack::Eta()          const { return mEta; }     
+inline Float_t  StFlowTrack::Dedx()         const { return mDedx; }     
+inline Float_t  StFlowTrack::Pt()           const { return mPt; }                
+inline Short_t  StFlowTrack::Charge()       const { return mCharge; }   
+inline Float_t  StFlowTrack::Dca()          const { return mDca; }
+inline Float_t  StFlowTrack::DcaGlobal()    const { return mDcaGlobal; }
+inline Float_t  StFlowTrack::Chi2()         const { return mChi2; } 
+inline Int_t    StFlowTrack::FitPts()       const { return mFitPts; }  
+inline Int_t    StFlowTrack::MaxPts()       const { return mMaxPts; }  
 
-inline Float_t StFlowTrack::P()            const { 
+inline Float_t StFlowTrack::P()             const { 
   float momentum = mPt/sqrt(1-(tanh(mEta)*tanh(mEta)));
   return momentum; }
 
-inline Float_t StFlowTrack::Y()            const { 
+inline Float_t StFlowTrack::Y()             const { 
   float M = 0.139; 
-  if (strcmp(mPid, "none") == 0)     M = 0.139;
-  if (strcmp(mPid, "pi+") == 0)      M = 0.139;
-  if (strcmp(mPid, "pi-") == 0)      M = 0.139;
-  if (strcmp(mPid, "proton") == 0)   M = 0.938;
-  if (strcmp(mPid, "pbar") == 0)     M = 0.938;
-  if (strcmp(mPid, "k+") == 0)       M = 0.494;
-  if (strcmp(mPid, "k-") == 0)       M = 0.494;
-  if (strcmp(mPid, "d") == 0)        M = 1.876;
-  if (strcmp(mPid, "dbar") == 0)     M = 1.876;
-  if (strcmp(mPid, "e-") == 0)       M = 0.0005;
-  if (strcmp(mPid, "e+") == 0)       M = 0.0005;
-  float Pz = sqrt(this->P()*this->P() - mPt*mPt); 
-  if (mEta < 0) {Pz = -Pz;}
-  float E = sqrt(this->P()*this->P() + M*M);
+  if (strcmp(mPid, "none") == 0)          { M = 0.139; }
+  else if (strcmp(mPid, "pi+") == 0)      { M = 0.139; }
+  else if (strcmp(mPid, "pi-") == 0)      { M = 0.139; }
+  else if (strcmp(mPid, "proton") == 0)   { M = 0.938; }
+  else if (strcmp(mPid, "pbar") == 0)     { M = 0.938; }
+  else if (strcmp(mPid, "k+") == 0)       { M = 0.494; }
+  else if (strcmp(mPid, "k-") == 0)       { M = 0.494; }
+  else if (strcmp(mPid, "d") == 0)        { M = 1.876; }
+  else if (strcmp(mPid, "dbar") == 0)     { M = 1.876; }
+  else if (strcmp(mPid, "e-") == 0)       { M = 0.0005; }
+  else if (strcmp(mPid, "e+") == 0)       { M = 0.0005; }
+  double Pz = sqrt(this->P()*this->P() - mPt*mPt); 
+  if (mEta < 0) { Pz = -Pz; }
+  double E = sqrt(this->P()*this->P() + M*M);
   float rapidity = 0.5*log((E + Pz)/(E - Pz));
-  return rapidity; }
+  return rapidity;
+}
 
 inline Int_t StFlowTrack::Select(Int_t harmonic, Int_t selection,
  Int_t subevent) const {

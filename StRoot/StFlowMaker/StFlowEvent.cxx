@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.14 2000/09/15 22:51:28 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.15 2000/09/22 22:02:55 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.15  2000/09/22 22:02:55  posk
+// Clean up.
+//
 // Revision 1.14  2000/09/15 22:51:28  posk
 // Added pt weighting for event plane calcualtion.
 //
@@ -251,7 +254,6 @@ TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
     }
   }
   mQ.Set(mQx, mQy);
-
   return mQ;
 }
 
@@ -277,11 +279,9 @@ Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) {
   TVector2 mQ  = Q(pFlowSelect);
   UInt_t mult  = Mult(pFlowSelect);
   
-  if (mPtWgt) {
-    return 0.;
-  } else {
-    return (mult) ? mQ.Mod() / sqrt((double)mult) : 0.;
-  }
+  if (mPtWgt) return 0.;
+
+  return (mult) ? mQ.Mod() / sqrt((double)mult) : 0.;
 }
 
 //-----------------------------------------------------------------------
@@ -508,27 +508,16 @@ void StFlowEvent::SetPids() {
 void StFlowEvent::SetCentrality(const UInt_t& tracks) {
 
   UInt_t cent[] = {20,100,180,270,360,460,560,660,870};
-  if (tracks < cent[0]) {
-    mCentrality = 0;
-  }
-  else if (tracks < cent[1]) { mCentrality = 1;
-  }
-  else if (tracks < cent[2]) { mCentrality = 2;
-  }
-  else if (tracks < cent[3]) { mCentrality = 3;
-  }
-  else if (tracks < cent[4]) { mCentrality = 4;
-  }
-  else if (tracks < cent[5]) { mCentrality = 5;
-  }
-  else if (tracks < cent[6]) { mCentrality = 6;
-  }
-  else if (tracks < cent[7]) { mCentrality = 7;
-  }
-  else if (tracks < cent[8]) { mCentrality = 8;
-  }
-  else if (tracks >= cent[8]) { mCentrality = 9;
-  }
+  if (tracks < cent[0])       { mCentrality = 0; }
+  else if (tracks < cent[1])  { mCentrality = 1; }
+  else if (tracks < cent[2])  { mCentrality = 2; }
+  else if (tracks < cent[3])  { mCentrality = 3; }
+  else if (tracks < cent[4])  { mCentrality = 4; }
+  else if (tracks < cent[5])  { mCentrality = 5; }
+  else if (tracks < cent[6])  { mCentrality = 6; }
+  else if (tracks < cent[7])  { mCentrality = 7; }
+  else if (tracks < cent[8])  { mCentrality = 8; }
+  else if (tracks >= cent[8]) { mCentrality = 9; }
 
 }
 
@@ -540,7 +529,11 @@ void StFlowEvent::PrintSelectionList() {
 
   cout << "#######################################################" << endl;
   cout << "# Pt Weighting:" << endl; 
-  cout << "#    PtWgt=  " << mPtWgt << endl;
+  if (mPtWgt) {
+    cout << "#    PtWgt= TRUE" << endl;
+  } else {
+    cout << "#    PtWgt= FALSE" << endl;
+  }
   cout << "#######################################################" << endl;
   cout << "# Pid Cuts:" << endl; 
   cout << "#    PiPlus cuts=  " << mPiPlusCuts[0] << ", " 
