@@ -1,5 +1,9 @@
-// $Id: StAssociator.C,v 1.32 2002/04/24 18:25:21 calderon Exp $
+// $Id: StAssociator.C,v 1.33 2002/09/22 18:27:11 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.33  2002/09/22 18:27:11  calderon
+// Revert to loading St_Tables instead of all tables individually to avoid
+// chasing dependencies every time someone else requires another table.
+//
 // Revision 1.32  2002/04/24 18:25:21  calderon
 // added gSystem->Load("libtpc_Tables");
 //       ioMaker->SetBranch("eventBranch",0,"r");
@@ -135,12 +139,7 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
   gSystem->Load("St_base");
   gSystem->Load("StChain");
 
-  gSystem->Load("libglobal_Tables");
-  gSystem->Load("libgeometry_Tables");
-  gSystem->Load("libsim_Tables");
-  gSystem->Load("libgen_Tables");
-  gSystem->Load("libtpc_Tables"); // needed for StTpcDb
-  //gSystem->Load("St_Tables");
+  gSystem->Load("St_Tables");
   gSystem->Load("StUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
