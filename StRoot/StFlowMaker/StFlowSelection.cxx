@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.1 2000/03/15 23:28:53 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.2 2000/03/28 23:21:04 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.2  2000/03/28 23:21:04  posk
+// Allow multiple instances of the AnalysisMaker.
+//
 // Revision 1.1  2000/03/15 23:28:53  posk
 // Added StFlowSelection.
 //
@@ -29,8 +32,9 @@ ClassImp(StFlowSelection)
 //-----------------------------------------------------------------------
 
 
-StFlowSelection::StFlowSelection() : mCentrality(0), mNumber(0), mSubevent(-1) {
+StFlowSelection::StFlowSelection() : mCentrality(0), mSubevent(-1) {
   // To make selections
+  mNumber[0] = '\0';
   mPid[0] = '\0';
   mPidPart[0] = '\0';
 }
@@ -63,7 +67,7 @@ Int_t StFlowSelection::Select(StFlowTrack* pFlowTrack) {
   // PID
   if (mPid[0] != '\0') {
     const Char_t* pid = pFlowTrack->Pid();
-    if (strcmp(mPid, pid)!=0) return kFALSE;
+    if (strstr(pid, mPid)==0) return kFALSE;
   }
   
   // Selected for event plane
@@ -81,7 +85,7 @@ Int_t StFlowSelection::SelectPart(StFlowTrack* pFlowTrack) {
   // PID
   if (mPidPart[0] != '\0') {
     const Char_t* pid = pFlowTrack->Pid();
-    if (strcmp(mPidPart, pid)!=0) return kFALSE;
+    if (strstr(pid, mPidPart)==0) return kFALSE;
   }
   
   return kTRUE;

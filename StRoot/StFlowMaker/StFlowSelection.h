@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.1 2000/03/15 23:28:54 posk Exp $
+// $Id: StFlowSelection.h,v 1.2 2000/03/28 23:21:04 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.2  2000/03/28 23:21:04  posk
+// Allow multiple instances of the AnalysisMaker.
+//
 // Revision 1.1  2000/03/15 23:28:54  posk
 // Added StFlowSelection.
 //
@@ -32,8 +35,8 @@ class StFlowSelection {
           StFlowSelection();
   virtual ~StFlowSelection();
 
-  UInt_t  Number() const;
-  UInt_t   Centrality() const;
+  Char_t* Number();          // return selection number as a character string
+  UInt_t  Centrality() const;
   Char_t* Pid();
   Char_t* PidPart();
   Int_t   Sel() const;
@@ -52,9 +55,9 @@ class StFlowSelection {
   
  private:
 
-  UInt_t mNumber;                           // selection number
+  Char_t mNumber[3];                        // selection number
   UInt_t mCentrality;                       // centrality bin
-  Char_t mPid[10];                          // "pi-", "pi+", or "proton"
+  Char_t mPid[10];                          // "pi-", "pi+", "pi", or "proton"
   Char_t mPidPart[10];                      // PID for particles wrt plane
   Int_t  mHarmonic;
   Int_t  mSelection;
@@ -63,9 +66,9 @@ class StFlowSelection {
   ClassDef(StFlowSelection,1)               // macro for rootcint
 }; 
 
-inline UInt_t StFlowSelection::Number() const { return mNumber; }
+inline Char_t* StFlowSelection::Number() { return mNumber; }
 
-inline UInt_t StFlowSelection::Centrality() const { return mCentrality; }
+inline UInt_t  StFlowSelection::Centrality() const { return mCentrality; }
 
 inline Char_t* StFlowSelection::Pid() { return mPid; }
 
@@ -78,7 +81,8 @@ inline Int_t StFlowSelection::Har() const { return mHarmonic; }
 inline Int_t StFlowSelection::Sub() const { return mSubevent; }
 
 inline void StFlowSelection::SetNumber(const UInt_t& number) {
- mNumber = number; }
+  if (number < 100) { sprintf(mNumber, "%d", number); }
+  else { cout << "### Selection Number " << number << " not valid" << endl; } }
 
 inline void StFlowSelection::SetCentrality(const UInt_t& cent) {
  mCentrality = cent; }
@@ -93,25 +97,19 @@ inline void StFlowSelection::SetHarmonic(const Int_t& harN) {
   if (harN < 0 || harN >= Flow::nHars) {
     cout << "### Harmonic " << harN << " not valid" << endl;
     mHarmonic = 0;
-    return;
-  }
-  mHarmonic = harN; }
+  } else { mHarmonic = harN; } }
 
 inline void StFlowSelection::SetSelection(const Int_t& selN) {
   if (selN < 0 || selN >= Flow::nSels) {
     cout << "### Selection " << selN << " not valid" << endl;
     mSelection = 0;
-    return;
-  }
-  mSelection = selN; }
+  } else { mSelection = selN; } }
 
 inline void StFlowSelection::SetSubevent(const Int_t& subN) {
   if (subN < -1 || subN > Flow::nSubs) {
     cout << "### Subevent " << subN << " not valid" << endl;
     mSubevent = -1;
-    return;
-  }
-  mSubevent = subN; }
+  } else { mSubevent = subN; } }
 
 
 #endif
