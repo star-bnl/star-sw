@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.17 2004/05/03 23:28:39 perev Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.18 2004/07/27 19:34:34 jeromel Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,6 +7,9 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.18  2004/07/27 19:34:34  jeromel
+ * Patch for pileup. Not a primary => a parent but in pileup, not true anymore ...
+ *
  * Revision 1.17  2004/05/03 23:28:39  perev
  * double delete of TTree fixed. TFile deletes it himself
  *
@@ -93,6 +96,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.18  2004/07/27 19:34:34  jeromel
+ * Patch for pileup. Not a primary => a parent but in pileup, not true anymore ...
+ *
  * Revision 1.17  2004/05/03 23:28:39  perev
  * double delete of TTree fixed. TFile deletes it himself
  *
@@ -175,7 +181,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.17 2004/05/03 23:28:39 perev Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.18 2004/07/27 19:34:34 jeromel Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -226,6 +232,9 @@
 #include "StuProbabilityPidAlgorithm.h"
 
 #include "Helper.h"
+
+
+static int StMiniMcMakerErrorCount=0;
 
 //helper funtion prototypes
 void dominatrackInfo(const StTrack*, short&, short&, float&);
@@ -1222,31 +1231,35 @@ StMiniMcMaker::fillTrackPairInfo(StMiniMcPair* miniMcPair,
   //
   StContamPair* contamPair = dynamic_cast<StContamPair*>(miniMcPair);
   if(contamPair){
-    contamPair->setParentGeantId(mcTrack->parent()->geantId());
-    contamPair->setPtMcParent(mcTrack->parent()->momentum().perp());
-    contamPair->setGeantProcess(mcTrack->startVertex()->geantProcess());
-    contamPair->setEtaMcParent(mcTrack->parent()->pseudoRapidity());
-    contamPair->setStartX(mcTrack->startVertex()->position().x());
-    contamPair->setStartY(mcTrack->startVertex()->position().y());
-    contamPair->setStartZ(mcTrack->startVertex()->position().z());  
+     const StMcTrack*    mcTParent = mcTrack->parent();
+     
+     if (mcTParent){
+	contamPair->setParentGeantId(mcTrack->parent()->geantId());
+	contamPair->setPtMcParent(mcTrack->parent()->momentum().perp());
+	contamPair->setEtaMcParent(mcTrack->parent()->pseudoRapidity());
+	contamPair->setGeantProcess(mcTrack->startVertex()->geantProcess());
 
-    Short_t parentParentGeantId=0;
-    Float_t parentParentPt=0;
-    // check for parent of parent
-    if(mcTrack->parent()->parent() && 
-       mcTrack->parent()->parent()->geantId()>0){
-      parentParentGeantId = mcTrack->parent()->parent()->geantId();
-      parentParentPt = mcTrack->parent()->parent()->momentum().perp();
-    }
-    contamPair->setParentParentGeantId(parentParentGeantId);
-    contamPair->setPtMcParentParent(parentParentPt);
+	contamPair->setStartX(mcTrack->startVertex()->position().x());
+	contamPair->setStartY(mcTrack->startVertex()->position().y());
+	contamPair->setStartZ(mcTrack->startVertex()->position().z());  
+
+	Short_t parentParentGeantId=0;
+	Float_t parentParentPt=0;
+	// check for parent of parent
+	if(mcTrack->parent()->parent() && 
+	   mcTrack->parent()->parent()->geantId()>0){
+	   parentParentGeantId = mcTrack->parent()->parent()->geantId();
+	   parentParentPt = mcTrack->parent()->parent()->momentum().perp();
+	}
+	contamPair->setParentParentGeantId(parentParentGeantId);
+	contamPair->setPtMcParentParent(parentParentPt);
 
 
-    //* check if the parent doesnt start from the primary vertex
-    /*
-    if(mcTrack->parent()->parent() && 
-       mcTrack->parent()->parent()->geantId()>0){
-      cout << ">>WARNING: parent doesnt come from the primary vertex!" <<endl
+	//* check if the parent doesnt start from the primary vertex
+	/*
+	 if(mcTrack->parent()->parent() && 
+	 mcTrack->parent()->parent()->geantId()>0){
+	 cout << ">>WARNING: parent doesnt come from the primary vertex!" <<endl
 	   << "geant id : " << mcTrack->geantId() << endl
 	   << "r parent : " << mcTrack->parent()->startVertex()->position().perp() << endl
 	   << "parent geantId: " << mcTrack->parent()->geantId() << endl
@@ -1262,10 +1275,17 @@ StMiniMcMaker::fillTrackPairInfo(StMiniMcPair* miniMcPair,
 	   << "parent p: " << mcTrack->parent()->momentum().mag() << endl
 	   << "parent eta: " << mcTrack->parent()->pseudoRapidity() << endl
 	   << "parent's parent: " << mcTrack->parent()->parent()->momentum().perp() << endl;
-    }
-    */
+	 }
+	 */
+     } else {
+       StMiniMcMakerErrorCount++;
+       if ( StMiniMcMakerErrorCount < 50){
+	 cout << "StMiniMcMaker::fillTrackPairInfo: WARNING mcTrack->parent() is NULL  !! " 
+	      << "   If this comes from a normal simulation or embeding, please report !!" 
+	      << "   This is known to happen in pilup mode ONLY ... "                      << endl;
+       }
+     }
   }
-
 
 }
 /*
