@@ -1,0 +1,21 @@
+StPeCMaker
+
+Description:
+Example Maker for reading DSTs for peripheral collisions. It is
+to be called from script doEvents.C (add one line to doEvents.C 
+to call StPeCMaker). It takes information from the DST and fills 
+a set of histograms. Since the current vertex finder doesn't work
+for low multiplicity events, a simplified vertex fit is done. 
+Only information from the TPC is used at this time. 
+
+In the future, the vertex fit should be done in the bfc also for
+peripheral collisions, eliminating the need for a separate vertex
+search in StPeCMaker. The plan is to update StPeCMaker to make a 
+more refined event selection and to produce mini-DSTs from this
+selection. 
+
+Author:
+Joakim Nystrand, Lawrence Berkeley National Laboratory
+
+REAME File Updated:
+9/27/99:  JN  First version
