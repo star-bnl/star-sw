@@ -1,1 +1,0 @@
-# solib/Makefile
