@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.213 2001/07/18 20:22:44 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.214 2001/07/20 12:15:55 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -41,7 +41,7 @@ Bfc_st BFC[] = {
   {"Y2000"    ,"","","db,calib"             ,"","","actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
   {"RY1h"        ,""  ,"","db,calib,VtxOffSet"              ,"","","Real data with Year1h geometry",kFALSE},
   {"RY2000"   ,"","","db,calib,VtxOffSet"   ,"","","actual 2000: Real data with Year2000 geometry ",kFALSE},
-  {"RY2001"   ,"","","db,calib,VtxOffSet"   ,"","","actual 2001: Real data with Year2001 geometry ",kFALSE},
+  {"RY2001"   ,"","","db,calib"             ,"","","actual 2001: Real data with Year2001 geometry ",kFALSE},
   {"Y2a"         ,""  ,"","db,calib"                          ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"         ,"" ,"","db,calib","","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
   {"Y2001"       ,"","","db,calib","","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
@@ -85,15 +85,13 @@ Bfc_st BFC[] = {
   
   {"P2000"       ,""  ,"","ry2000,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
-  //  {"P2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,ftpc,svt,emcY2,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
-  //                                                         ,"Production chain for summer 2001 data (incomplete)",kFALSE},
   {"SvtD"        ,""  ,"","SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit,SvtVtx", "", "",
                                                                               "SVT makers for Data",kFALSE}, 
 
-  {"P2001"       ,""  ,"","y2001,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
+  {"P2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
                                                            ,"Production chain for summer 2001 data (current)",kFALSE},
 
-  {"P2001a"      ,""  ,"","y2001,in,tpc_daq,tpc,svt_daq,SvtD,emcY2,rich,ftpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
+  {"P2001a"      ,""  ,"","ry2001,in,tpc_daq,tpc,svt_daq,SvtD,emcY2,rich,ftpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
                                                            ,"Production chain for summer 2001 data (full)",kFALSE},
 
 
@@ -978,7 +976,7 @@ void StBFChain::SetDbOptions(){
   else {if (GetOption("Y2a"))  db->SetDateTime("year_2a");
   else {if (GetOption("Y2b"))  db->SetDateTime("year_2b"); 
   else {if (GetOption("Simu")) db->SetDateTime("year_2b");
-  else {if (GetOption("Y2001"))  db->SetDateTime("year_2b");
+  else {if (GetOption("Y2001"))  db->SetDateTime("year_2b"); 
   }}}}}}}}}}}}}}}
 	gMessMgr->QAInfo() << db->GetName() 
 			   << " Maker set time = " 
