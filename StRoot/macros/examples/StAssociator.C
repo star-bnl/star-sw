@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.22 2001/04/09 17:47:13 calderon Exp $
+// $Id: StAssociator.C,v 1.23 2001/04/09 18:04:50 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.23  2001/04/09 18:04:50  calderon
+// remove old DB comments
+//
 // Revision 1.22  2001/04/09 17:47:13  calderon
 // load StEmcUtil instead of St_emc_Maker
 //
@@ -106,22 +109,16 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
     // Dynamically link needed shared libs
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-//     gSystem->Load("St_Tables");
     gSystem->Load("libglobal_Tables");
     gSystem->Load("libsim_Tables");
     gSystem->Load("libgen_Tables");
     gSystem->Load("StUtilities");
-//     gSystem->Load("StDbLib");
-//     gSystem->Load("StDbBroker");
-//     gSystem->Load("St_db_Maker");
-//     gSystem->Load("StTpcDb");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
-//     gSystem->Load("StDbUtilities");
     
     gSystem->Load("StEvent");
     gSystem->Load("StEventMaker"); 
-    gSystem->Load("St_emc_Maker");
+    gSystem->Load("StEmcUtil");
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
     gSystem->Load("StAssociationMaker");
@@ -140,16 +137,6 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
     ioMaker->SetBranch("dstBranch",0,"r"); //activate Event Branch
     ioMaker->SetBranch("runcoBranch",0,"r"); //activate runco Branch
 
-//     const char *mainDB = "MySQL:Geometry_tpc";
-//     St_db_Maker *dbMk = new St_db_Maker("Geometry",mainDB);
-//     dbMk->SetDebug();
-    
-//     const char *calibDB = "MySQL:Calibrations_tpc";
-//     St_db_Maker *calibMk = new St_db_Maker("Calibrations",calibDB);
-//     calibMk->SetDebug();
-    
-//     StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
-    
     // Note, the title "events" is used in the Association Maker, so don't change it.
     StEventMaker*       eventReader   = new StEventMaker("events","title");
     eventReader->doPrintMemoryInfo = kFALSE;
