@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst2StEventMaker.cxx,v 1.10 2003/10/14 14:35:53 laue Exp $
+ * $Id: StMuDst2StEventMaker.cxx,v 1.11 2004/04/15 00:24:07 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDst2StEventMaker.h"
@@ -42,8 +42,7 @@ int StMuDst2StEventMaker::Make(){  ///< create a StEvent from the muDst and put 
     //VP    StMuDst* muDst = mMuDstMaker->muDst();
     if(mStEvent) {
       // set chain date to be the same of event date
-      StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
-      if(!hd) { hd = new StEvtHddr();  AddData(hd); }
+      StEvtHddr *hd = GetEvtHddr();
       hd->SetGMTime(mStEvent->time());
       if(mStEvent->runInfo()) hd->SetRunNumber(mStEvent->runInfo()->runId());
       AddData(mStEvent);     // add StEvent to the .data tree
@@ -133,6 +132,9 @@ ClassImp(StMuDst2StEventMaker)
 /***************************************************************************
  *
  * $Log: StMuDst2StEventMaker.cxx,v $
+ * Revision 1.11  2004/04/15 00:24:07  perev
+ * GetEvtHddr() used now
+ *
  * Revision 1.10  2003/10/14 14:35:53  laue
  * Alex Suaide EMC updates
  *

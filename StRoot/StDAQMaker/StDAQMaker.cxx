@@ -36,11 +36,7 @@ Int_t StDAQMaker::Init()
   fDAQReaderSet = new TObjectSet("StDAQReader",0,kFALSE);
   AddConst(fDAQReaderSet); SetOutput(fDAQReaderSet);	//Declare for output
 
-  fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
-  if (!fEvtHddr) {
-    fEvtHddr = new StEvtHddr(m_ConstSet);
-    SetOutput(fEvtHddr); //Declare this "EvtHddr" for output
-  }
+  fEvtHddr = GetEvtHddr();
 // 		Get run parameters from input file
 
   return Open();  

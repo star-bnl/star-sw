@@ -181,8 +181,8 @@ Int_t StTreeMaker::MakeRead(const StUKey &RunEvent){
   if (!RunEvent.IsNull())	iret = fTree->ReadEvent(RunEvent);
   else                  	iret = fTree->NextEvent(        );
 
-  StEvtHddr *hddr = (StEvtHddr*)GetDataSet("EvtHddr");
-  if (hddr && Debug()) hddr->Print("");
+  StEvtHddr *hddr = GetEvtHddr();
+  if (Debug()) hddr->Print("");
   if (iret) return iret;
   St_DataSetIter nextBr(fTree);
   StBranch *br ;
@@ -262,13 +262,12 @@ void StTreeMaker::UpdateHddr()
 
   StBranch *br;
   Option_t *opt=0;
-  St_DataSet *hd = GetDataSet("EvtHddr");
+  St_DataSet *hd = GetEvtHddr();
   StMaker *failmk = GetFailedMaker();
   TString ts;
   if (failmk ) {
       if (strcmp("St_geant_Maker",failmk->ClassName())==0
     ||  failmk->InheritsFrom(StIOInterFace::Class())   ) hd =0;
-    if (!hd) 	return;
     ts = "discarded by ";
     ts += failmk->ClassName();
     ts += "::";
