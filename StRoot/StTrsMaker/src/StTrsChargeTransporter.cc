@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsChargeTransporter.cc,v 1.1 1998/11/10 17:12:23 fisyak Exp $
+ * $Id: StTrsChargeTransporter.cc,v 1.2 1999/01/18 10:16:28 lasiuk Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -11,8 +11,8 @@
  **********************************************************************
  *
  * $Log: StTrsChargeTransporter.cc,v $
- * Revision 1.1  1998/11/10 17:12:23  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/18 10:16:28  lasiuk
+ * units consistency
  *
  * Revision 1.2  1999/01/18 10:16:28  lasiuk
  * units consistency
@@ -30,6 +30,10 @@
  * Revision 1.1  1998/11/02 22:47:03  lasiuk
  * Initialization in base class
  * add attachment
+ * add transparency
+ *
+ **********************************************************************/
+#include "SystemOfUnits.h"
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
