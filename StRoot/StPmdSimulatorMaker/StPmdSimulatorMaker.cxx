@@ -1,13 +1,19 @@
 /***************************************************************
  *
- * $Id: StPmdSimulatorMaker.cxx,v 1.10 2004/01/26 23:01:49 perev Exp $
+ * $Id: StPmdSimulatorMaker.cxx,v 1.11 2004/06/24 13:52:52 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  ***************************************************************
  *
  * Description: StPmdSimulatorMaker is class for Pmd Simulation
  *
  ****************************************************************
+ * changed detector(1) for PMD and detector(0) for CPV while 
+ * filling StPmdCollection    : Dipak
+ *
  * $Log: StPmdSimulatorMaker.cxx,v $
+ * Revision 1.11  2004/06/24 13:52:52  subhasis
+ * numbering of det0 and det1 interchanged
+ *
  * Revision 1.10  2004/01/26 23:01:49  perev
  * WarnOff
  *
@@ -54,6 +60,7 @@
 #include "StPmdUtil/StPmdDetector.h"
 #include "StPmdUtil/StPmdHit.h"
 #include "StPmdUtil/StPmdModule.h"
+#include "StPmdUtil/StPmdMapUtil.h"
 #include "StBFChain.h"
 #include "tables/St_g2t_pmd_hit_Table.h" //!for PMD information
 #include "tables/St_g2t_track_Table.h"   //!for track information 
@@ -67,8 +74,10 @@ ClassImp(StPmdSimulatorMaker)
   
   TDataSet  *geaIn;
 
-St_g2t_pmd_hit *g2t_pmd_hit;
-StPmdGeom *mpmdgeom;
+St_g2t_pmd_hit *g2t_pmd_hit;   //! hit table for PMD
+StPmdGeom *mpmdgeom;   //!StPmdGeom included
+StPmdMapUtil *mPmdMapUtil; // Mapping from SM,row,col to Chain Number
+
 //St_g2t_track *track;
 
 StPmdSimulatorMaker::StPmdSimulatorMaker(const char *name):StMaker(name)
@@ -76,6 +85,7 @@ StPmdSimulatorMaker::StPmdSimulatorMaker(const char *name):StMaker(name)
   //! Default value of parameters for this maker
   adcconstants();
   mpmdgeom=new StPmdGeom();
+  mPmdMapUtil= new StPmdMapUtil();
   mPmdCollection=NULL;
   gMessMgr->SetLimit("StPmdSimulator",100);
 }
@@ -83,6 +93,7 @@ StPmdSimulatorMaker::StPmdSimulatorMaker(const char *name):StMaker(name)
 StPmdSimulatorMaker::~StPmdSimulatorMaker() 
 {
   delete mpmdgeom;
+  delete mPmdMapUtil;
 }
 
 Int_t StPmdSimulatorMaker::Init()
@@ -127,7 +138,7 @@ Int_t StPmdSimulatorMaker::Make()
       return kStWarn;
     }
   }
-
+  
   Int_t retpmd;
   retpmd = GetPmd();   //! Get Pmd Hits from Geant and fill hits.
   return retpmd;
@@ -138,11 +149,12 @@ Int_t StPmdSimulatorMaker::GetPmd()
   g2t_pmd_hit = (St_g2t_pmd_hit *) geaIn->Find("g2t_pmd_hit");   //! Get g2t table 
   //  track = (St_g2t_track *) geaIn->Find("g2t_track");
   
-  if ( g2t_pmd_hit && g2t_pmd_hit->GetTableSize()>0){ // O"k
+  if ( g2t_pmd_hit && g2t_pmd_hit->GetTableSize()>0)
+    { // O"k
     
-    Int_t phit=makePmdHits();
-    if(phit!=kStOK){cout<<"problem in Hit formation"<<endl;return kStWarn;}
-  }
+      Int_t phit=makePmdHits();
+      if(phit!=kStOK){cout<<"problem in Hit formation"<<endl;return kStWarn;}
+    }
   else gMessMgr->Warning()<<
 	 "StPmdSimulatorMaker::makePmd=>table g2t_PMD_hit isn't found in dataset or size is 0 "<< 
 	 geaIn->GetName()<<endm;
@@ -157,10 +169,9 @@ Int_t StPmdSimulatorMaker::makePmdHits()
   
   mPmdCollection = new StPmdCollection("PmdCollection");
   m_DataSet->Add(mPmdCollection);
-  StPmdDetector* det0 = mPmdCollection->detector(0);
-  StPmdDetector* det1 = mPmdCollection->detector(1);
+  StPmdDetector* det0 = mPmdCollection->detector(1); //! Filling detector(1) for 'PMD' Collection
+  StPmdDetector* det1 = mPmdCollection->detector(0); //! Filling detector(0) for 'CPV' Collection
   
-
   g2t_pmd_hit_st *hit = g2t_pmd_hit->GetTable();
   Int_t nhits         = g2t_pmd_hit->GetNRows();
   
@@ -187,97 +198,118 @@ Int_t StPmdSimulatorMaker::makePmdHits()
     
     //!Create PmdHits and Fill it in StPmdHit
     
-    if(decode==kStOK){
-      StPmdHit *phit = new StPmdHit();
-      phit->setGsuper(Int_t(gsuper));       //! filling supermodule no
-      phit->setSubDetector(Int_t(subdet));  //! filling subdetector
-      phit->setRow(Int_t(row));             //! filling row
-      phit->setColumn(Int_t(col));          //! filling col
-      phit->setEdep((hit->de)*1000000.);    //! filling energy in keV
-
-
-      Float_t xPMD,yPMD;
-      if(subdet==1){   //! for PMD
+    if(decode==kStOK)
+      {
+	StPmdHit *phit = new StPmdHit();
+	phit->setGsuper(Int_t(gsuper));       //! filling supermodule no 1-12
+	phit->setSubDetector(Int_t(subdet));  //! filling subdetector PMD=1 & CPV =2
+	phit->setRow(Int_t(row));             //! filling row 1-72
+	phit->setColumn(Int_t(col));          //! filling col 1-96
+	phit->setEdep((hit->de)*1000000.);    //! filling energy in keV
 	
-	if(det0->module_hit(Int_t(gsuper))==0){
-	  det0->addHit(phit);
-	}
-	else
-	  {
-	    //if phit already exist
-	    StPmdHit *hitmatched=Exist(phit,det0,Int_t(gsuper));
-	    if(hitmatched){
-	      Float_t newEdep=hitmatched->Edep()+(hit->de)*1000000.;
-	      hitmatched->setEdep(newEdep);     //!   energy in keV
-	      delete phit;
+	Int_t ChainNo;
+	Float_t xPMD,yPMD;
+	if(subdet==1){   //! Filling Hit Collection for PMD
+	  
+	  /**** Switch OFF the chains which were not working in RUN-4 *****/
+	  /*
+	    mPmdMapUtil->ChainNumber(gsuper+12,row,col,ChainNo);
+	    Int_t BeamEnergy;
+	    BeamEnergy = 0; //Default setting
+	    switch(BeamEnergy)
+	    {
+	    case 1:    //For 62 GeV data
+	    if(ChainNo == 25 || ChainNo == 27 || ChainNo == 38 || ChainNo == 39 || ChainNo == 40 ||
+	    ChainNo ==45 || ChainNo == 47 || ChainNo == 48)
+	    {
+	    hit->de =0.;
+	    phit->setEdep(0.);     //Putting the cell Edep as Zero
+	    break;
 	    }
-	    
-	    else {
+	    }
+	  */
+	  
+	  if(det0->module_hit(Int_t(gsuper))==0)
+	    {
 	      det0->addHit(phit);
 	    }
-
-	  }
-	
-	m_pmdEdep2D->Fill(xPMD,yPMD,hit->de);
-	//! Filling basic hists for Hits
-	m_pmdsuper->Fill(Float_t(gsuper));
-	m_pmdrow->Fill(Float_t(gsuper),Float_t(row));
-	m_pmdcol->Fill(Float_t(gsuper),Float_t(col));
-      }
-      
-      if(subdet==2){      //! for CPV
-	if(det1->module_hit(Int_t(gsuper))==0){
-	  det1->addHit(phit);}
-	else
-	  {
-	    //if phit already exist
-	    StPmdHit *hitmatched=Exist(phit,det1,Int_t(gsuper));
-	    if(hitmatched){
-	      Float_t newEdep=hitmatched->Edep()+(hit->de)*1000000.;
-	      hitmatched->setEdep(newEdep);   //!  Edep in keV
-	      delete phit;
+	  else
+	    {
+	      //if phit already exist
+	      StPmdHit *hitmatched=Exist(phit,det0,Int_t(gsuper));
+	      if(hitmatched)
+		{
+		  Float_t newEdep=hitmatched->Edep()+(hit->de)*1000000.;
+		  hitmatched->setEdep(newEdep);     //!   energy in keV
+		  delete phit;
+		}
+	      else 
+		{
+		  det0->addHit(phit);
+		}
 	    }
-	    else {det1->addHit(phit);}
-
-	  }
-	//! Fill 2D hist after converting SM,row,col into x,y
-	Float_t xCPV,yCPV,etaCPV,phiCPV;
-	mpmdgeom->DetCell_xy(gsuper,Int_t(row),Int_t(col),xCPV,yCPV,etaCPV,phiCPV);
-	m_cpvEdep2D->Fill(xCPV,yCPV,hit->de);
-	//! Filling basic hists for Hits
-	m_cpvsuper->Fill(Float_t(gsuper));
-	m_cpvrow->Fill(Float_t(gsuper),Float_t(row));
-	m_cpvcol->Fill(Float_t(gsuper),Float_t(col));
+	  
+	  m_pmdEdep2D->Fill(xPMD,yPMD,hit->de);
+	  //! Filling basic hists for Hits
+	  m_pmdsuper->Fill(Float_t(gsuper));
+	  m_pmdrow->Fill(Float_t(gsuper),Float_t(row));
+	  m_pmdcol->Fill(Float_t(gsuper),Float_t(col));
+	}
 	
+	if(subdet==2){      //! Filling Hit Collection for CPV
+	  if(det1->module_hit(Int_t(gsuper))==0)
+	    {
+	      det1->addHit(phit);}
+	  else
+	    {
+	      //if phit already exist
+	      StPmdHit *hitmatched=Exist(phit,det1,Int_t(gsuper));
+	      if(hitmatched)
+		{
+		  Float_t newEdep=hitmatched->Edep()+(hit->de)*1000000.;
+		  hitmatched->setEdep(newEdep);   //!  Edep in keV
+		  delete phit;
+		}
+	      else 
+		{
+		  det1->addHit(phit);
+		}
+	    }
+	  //! Fill 2D hist after converting SM,row,col into x,y
+	  Float_t xCPV,yCPV,etaCPV,phiCPV;
+	  mpmdgeom->DetCell_xy(gsuper,Int_t(row),Int_t(col),xCPV,yCPV,etaCPV,phiCPV);
+	  m_cpvEdep2D->Fill(xCPV,yCPV,hit->de);
+	  //! Filling basic hists for Hits
+	  m_cpvsuper->Fill(Float_t(gsuper));
+	  m_cpvrow->Fill(Float_t(gsuper),Float_t(row));
+	  m_cpvcol->Fill(Float_t(gsuper),Float_t(col));
+	}
       }
-    }
   }
-  //  Int_t n0=0,n1=0;
-  //  for(Int_t ii=1;ii<13;ii++){
-  //    n0 += det0->module_hit(ii);
-  //    n1 += det1->module_hit(ii);
-  //  }
   
-  if(det0){
-    for(Int_t ii=1;ii<13;ii++)
-      {
-	FinalEdep(det0,ii);
-      }
-  }
-  if(det1){
-    for(Int_t ii=1;ii<13;ii++)
+  
+  if(det0)
     {
-       FinalEdep(det1,ii); 
+      for(Int_t ii=1;ii<13;ii++)
+	{
+	  FinalEdep(det0,ii);
+	}
     }
-  }
+  if(det1)
+    {
+      for(Int_t ii=1;ii<13;ii++)
+	{
+	  FinalEdep(det1,ii); 
+	}
+    }
   
   for(Int_t ii=1;ii<13;ii++)
     {
       FillHistograms(det0,det1,ii);
     }
-  //!filling StEvent
+  //!Filling StEvent for PMD and CPV
   fillStEvent(det0,det1);
-
+  
   return kStOK;
 } //! end of makePmdHit
 
@@ -318,12 +350,13 @@ StPmdHit* StPmdSimulatorMaker::Exist(StPmdHit* phit,StPmdDetector* pdet,Int_t id
   for(Int_t im=0; im<nmh; im++)
     {
       spmcl = (StPmdHit*)next();
-      if(spmcl){
-	ypad=spmcl->Row();
-	xpad=spmcl->Column();
-	super = spmcl->Gsuper();
-	if(phit->Row()==ypad && phit->Column()==xpad && phit->Gsuper() == super)   return spmcl;
-      }
+      if(spmcl)
+	{
+	  ypad=spmcl->Row();
+	  xpad=spmcl->Column();
+	  super = spmcl->Gsuper();
+	  if(phit->Row()==ypad && phit->Column()==xpad && phit->Gsuper() == super)   return spmcl;
+	}
     }
   return NULL;
 }
@@ -340,47 +373,48 @@ void StPmdSimulatorMaker::FillHistograms(StPmdDetector* pmd_det,StPmdDetector* c
     for(Int_t im=0; im<nmh1; im++)
       {
 	spmcl1 = (StPmdHit*)next();
-	if(spmcl1){
-	  Int_t gsuper = spmcl1->Gsuper();     //! supermodule
-	  Int_t row=spmcl1->Row();             //! row of the hit
-	  Int_t col=spmcl1->Column();          //! column of the hit
-	  Float_t edep=spmcl1->Edep();         //! edep
-	  Int_t adc=spmcl1->Adc();             //! Adc
-	  if(edep>0.)mEdepPmd->Fill(edep);
-          if(edep>0.) edep_part = edep_part+edep;
-	  mPmdAdc->Fill(Float_t(adc));
-	  Float_t xPMD,yPMD,etaPMD,phiPMD;
-	  
-	  mpmdgeom->DetCell_xy(gsuper,Int_t(row),Int_t(col),xPMD,yPMD,etaPMD,phiPMD);
-	  m_pmdEdep2D->Fill(xPMD,yPMD,edep);
-	  m_pmdsuper->Fill(Float_t(gsuper));
-	  m_pmdrow->Fill(Float_t(gsuper),Float_t(row));
-	  m_pmdcol->Fill(Float_t(gsuper),Float_t(col));
-	}
+	if(spmcl1)
+	  {
+	    Int_t gsuper = spmcl1->Gsuper();     //! supermodule 1-12
+	    Int_t row=spmcl1->Row();             //! row of the hit 1-72
+	    Int_t col=spmcl1->Column();          //! column of the hit 1-96
+	    Float_t edep=spmcl1->Edep();         //! edep in keV
+	    Int_t adc=spmcl1->Adc();             //! Adc
+	    
+	    if(edep>0.)mEdepPmd->Fill(edep);
+	    if(edep>0.) edep_part = edep_part+edep;
+	    mPmdAdc->Fill(Float_t(adc));
+	    Float_t xPMD,yPMD,etaPMD,phiPMD;
+	    mpmdgeom->DetCell_xy(gsuper,Int_t(row),Int_t(col),xPMD,yPMD,etaPMD,phiPMD);
+	    m_pmdEdep2D->Fill(xPMD,yPMD,edep);
+	    m_pmdsuper->Fill(Float_t(gsuper));
+	    m_pmdrow->Fill(Float_t(gsuper),Float_t(row));
+	    m_pmdcol->Fill(Float_t(gsuper),Float_t(col));
+	  }
       }
   }
   if(nmh1>0)mHitPmd->Fill(nmh1);
-
+  
   if(edep_part>0) mEdepPmd_part->Fill(edep_part);
-
-
+  
+  
   StPmdModule* cpv_mod=cpv_det->module(id);
   edep_part = 0.;
   Int_t nmh2=cpv_det->module_hit(id);
   if(nmh2>0){
     TIter next(cpv_mod->Hits());
     StPmdHit *spmcl2;   //! pointer for hits
-
+    
     for(Int_t im=0; im<nmh2; im++)
       {
 	
 	spmcl2 = (StPmdHit*)next();
 	if(spmcl2){
-	  Int_t gsuper = spmcl2->Gsuper();   //! supermodule
-	  Int_t row=spmcl2->Row();           //! row of the hit
-	  Int_t col=spmcl2->Column();        //! column of the hit
-	  Float_t edep=spmcl2->Edep();       //! edep
-
+	  Int_t gsuper = spmcl2->Gsuper();   //! supermodule 1-12
+	  Int_t row=spmcl2->Row();           //! row of the hit 1-72
+	  Int_t col=spmcl2->Column();        //! column of the hit 1-96
+	  Float_t edep=spmcl2->Edep();       //! edep in keV
+	  
 	  Float_t xCPV,yCPV,etaCPV,phiCPV;
 	  mpmdgeom->DetCell_xy(gsuper,Int_t(row),Int_t(col),xCPV,yCPV,etaCPV,phiCPV);		
 	
@@ -397,7 +431,7 @@ void StPmdSimulatorMaker::FillHistograms(StPmdDetector* pmd_det,StPmdDetector* c
       }
   }
   if(nmh2>0)mHitCpv->Fill(nmh2);
-
+  
   if(edep_part>0) mEdepCpv_part->Fill(edep_part);
 }
 
@@ -405,107 +439,115 @@ void StPmdSimulatorMaker::FillHistograms(StPmdDetector* pmd_det,StPmdDetector* c
 
 Int_t StPmdSimulatorMaker::fillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_det)
 {
-  //  cout<<"FILLSTEVENT****"<<endl;
   StEvent *currevent = (StEvent*)GetInputDS("StEvent");
   mevtPmdCollection = new StPhmdCollection();
   currevent->setPhmdCollection(mevtPmdCollection);
-  cout<<"PmdId "<<kPhmdId<<endl;
-  cout<<"CpvId "<<kPhmdCpvId<<endl;
-  StPhmdDetector* evtdet0 = mevtPmdCollection->detector(StDetectorId(kPhmdId));
-  StPhmdDetector* evtdet1 = mevtPmdCollection->detector(StDetectorId(kPhmdCpvId));
-
   
-  for(Int_t id=1;id<13;id++){
-    
-    //    Int_t hitpmd=0, hitcpv=0;
-    Int_t subdet=1;
-    //Filling StEvent for PMD
-
-    StPmdModule * pmd_mod=pmd_det->module(id);  
-    Int_t nmh1=pmd_det->module_hit(id);   
-    if(nmh1>0){
-      TIter next(pmd_mod->Hits());
-      StPmdHit *spmcl1;  
-      for(Int_t im=0; im<nmh1; im++)
+  StPhmdDetector* evtdet0 = mevtPmdCollection->detector(StDetectorId(kPhmdId)); //!DetectorId = 26 for PMD in StEvent
+  StPhmdDetector* evtdet1 = mevtPmdCollection->detector(StDetectorId(kPhmdCpvId)); //! DetectorId = 25 for CPV in StEvent
+  
+  
+  for(Int_t id=1;id<13;id++)
+    {
+      
+      //    Int_t hitpmd=0, hitcpv=0;
+      Int_t subdet=1;
+      //Filling StEvent for PMD
+      
+      StPmdModule * pmd_mod=pmd_det->module(id);  
+      Int_t nmh1=pmd_det->module_hit(id);   
+      if(nmh1>0)
 	{
-	  spmcl1 = (StPmdHit*)next();
-	  if(spmcl1){
-	    Int_t gsuper=spmcl1->Gsuper();
-	    Int_t col=spmcl1->Column();
-	    Int_t row=spmcl1->Row();
-	    Float_t edep=spmcl1->Edep();         
-	    Int_t adc=spmcl1->Adc();
-	    //! Filling PmdHit for StEvent 
-	    StPhmdHit *phit = new StPhmdHit();
-	    phit->setSuperModule(Int_t(gsuper-1));     // filling supermodule no (range 0-11)
-	    phit->setSubDetector(Int_t(subdet)); // filling subdetector
-	    phit->setRow(Int_t(row));            // filling row
-	    phit->setColumn(Int_t(col));         // filling col
-	    phit->setEnergy(edep);              // filling energy in KeV  
-	    phit->setAdc(adc);              // filling energy(ADC)   
-	    evtdet0->addHit(phit);
-	  }
+	  TIter next(pmd_mod->Hits());
+	  StPmdHit *spmcl1;  
+	  for(Int_t im=0; im<nmh1; im++)
+	    {
+	      spmcl1 = (StPmdHit*)next();
+	      if(spmcl1)
+		{
+		  Int_t gsuper=spmcl1->Gsuper();
+		  Int_t col=spmcl1->Column();
+		  Int_t row=spmcl1->Row();
+		  Float_t edep=spmcl1->Edep();         
+		  Int_t adc=spmcl1->Adc();
+		  //! Filling PmdHit for StEvent 
+		  StPhmdHit *phit = new StPhmdHit();
+		  phit->setSuperModule(Int_t(gsuper-1));     // filling supermodule no (range 0-11)
+		  phit->setSubDetector(Int_t(subdet)); // filling subdetector PMD = 1 and CPV = 2
+		  phit->setRow(Int_t(row));            // filling row 1-72
+		  phit->setColumn(Int_t(col));         // filling col 1-96
+		  phit->setEnergy(edep);              // filling energy in KeV  
+		  phit->setAdc(adc);              // filling energy(ADC)   
+		  evtdet0->addHit(phit);
+		}
+	    }
 	}
+      
+      // Filling StEvent for  CPV 
+      StPmdModule * cpv_mod=cpv_det->module(id);
+      Int_t nmh2=cpv_det->module_hit(id);     
+      if(nmh2>0)
+	{
+	  subdet=2;
+	  TIter next(cpv_mod->Hits());
+	  StPmdHit *spmcl2;  
+	  for(Int_t im=0; im<nmh2; im++)
+	    {
+	      spmcl2 = (StPmdHit*)next();
+	      if(spmcl2)
+		{
+		  Int_t gsuper=spmcl2->Gsuper();
+		  Int_t col=spmcl2->Column();
+		  Int_t row=spmcl2->Row();
+		  Float_t edep=spmcl2->Edep();         
+		  Int_t adc=spmcl2->Adc();
+		  //! Filling PmdHit  for CPV in StEvent 
+		  StPhmdHit *phit = new StPhmdHit();
+		  phit->setSuperModule(Int_t(gsuper-1)); // filling supermodule no (0-11)
+		  phit->setSubDetector(Int_t(subdet)); // filling subdetector PMD=1 and CPV=2
+		  phit->setRow(Int_t(row));            // filling row 1-72
+		  phit->setColumn(Int_t(col));         // filling col 1-96
+		  phit->setEnergy(edep);              // filling energy in KeV  
+		  phit->setAdc(adc);              // filling energy(ADC)   
+		  evtdet1->addHit(phit);
+		}
+	    }
+	}  
     }
-    
-    // Filling StEvent for  CPV 
-    StPmdModule * cpv_mod=cpv_det->module(id);
-    Int_t nmh2=cpv_det->module_hit(id);     
-    if(nmh2>0){
-      subdet=2;
-      TIter next(cpv_mod->Hits());
-      StPmdHit *spmcl2;  
-      for(Int_t im=0; im<nmh2; im++)
-	{
-	  spmcl2 = (StPmdHit*)next();
-	  if(spmcl2){
-	    Int_t gsuper=spmcl2->Gsuper();
-	    Int_t col=spmcl2->Column();
-	    Int_t row=spmcl2->Row();
-	    Float_t edep=spmcl2->Edep();         
-	    Int_t adc=spmcl2->Adc();
-	    
-	    //! Filling PmdHit  for CPV in StEvent 
-	    StPhmdHit *phit = new StPhmdHit();
-	    phit->setSuperModule(Int_t(gsuper-1)); // filling supermodule no (0-11)
-	    phit->setSubDetector(Int_t(subdet)); // filling subdetector
-	    phit->setRow(Int_t(row));            // filling row
-	    phit->setColumn(Int_t(col));         // filling col
-	    phit->setEnergy(edep);              // filling energy in KeV  
-	    phit->setAdc(adc);              // filling energy(ADC)   
-	    evtdet1->addHit(phit);
-	  }
-	}
-    }  
-  }
   
   return kStOK;
 }
 
-void StPmdSimulatorMaker::FinalEdep(StPmdDetector* pdet,Int_t id){
+void StPmdSimulatorMaker::FinalEdep(StPmdDetector* pdet,Int_t id)
+{
   
   StPmdModule * mod=pdet->module(id);  
   Int_t nmh=pdet->module_hit(id);   
-  if(nmh>0){
-    TIter next(mod->Hits());
-    StPmdHit *spmcl;  
-    for(Int_t im=0; im<nmh; im++)
-      {
-	Float_t rawadc=0., Edep=0.;
-        Int_t ADC=0;
-	spmcl = (StPmdHit*)next();
-	if(spmcl){
-	  Float_t rawedep=spmcl->Edep();         
-	  Float_t keVedep=rawedep;
-	  keV_ADC(keVedep,rawadc);
-	  if(mResFlag) ADC_Readout(rawadc,ADC);
-	  else ADC = (int)rawadc;
-	  mpmdgeom->ADC2Edep(ADC,Edep);
-	  spmcl->setEdep(Edep);
-	  spmcl->setAdc(ADC);
+  if(nmh>0)
+    {
+      TIter next(mod->Hits());
+      StPmdHit *spmcl;  
+      for(Int_t im=0; im<nmh; im++)
+	{
+	  Float_t rawadc=0.;
+	  //Float_t Edep=0.;
+	  Int_t ADC=0;
+	  spmcl = (StPmdHit*)next();
+	  if(spmcl)
+	    {
+	      Float_t rawedep=spmcl->Edep();         
+	      Float_t keVedep=rawedep;
+	      keV_ADC(keVedep,rawadc);
+	      if(mResFlag) ADC_Readout(rawadc,ADC);
+	      else ADC = (int)rawadc;
+	      //commented because of saturation problem in Edep
+
+	      //	  mpmdgeom->ADC2Edep(ADC,Edep); //Again changeing back to Edep
+	      //	  spmcl->setEdep(Edep);
+	      spmcl->setAdc(ADC);
+	    }
 	}
-      }
-  }
+    }
 }
 
 Float_t StPmdSimulatorMaker::keV_ADC(Float_t edep, Float_t& adc)
