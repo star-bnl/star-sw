@@ -18,8 +18,8 @@ c
       IMPLICIT NONE
 #include "fill_dst_tof.inc"
       LOGICAL   first_call/.TRUE./
-      INTEGER   itptrk2ttetrk(0:12500)
-      INTEGER   ig2ttrk2ctfhit(0:32000)
+      INTEGER   itptrk2ttetrk(0:15000)
+      INTEGER   ig2ttrk2ctfhit(0:50000)
       INTEGER   ietaphi2mslat(20,300)
       INTEGER   nopoint_ttetrk,nopoint_g2ttrk,nopoint_ctfhit
       INTEGER   itptrk,imctrk,igetrk,ittetrk,ig2ttrk,ictfhit,imslat
@@ -44,23 +44,31 @@ c
       LOGICAL   KEEPIT
 
 c---- start executable statements...
-      write(*,*)' FILL_DST_TOF: >>>----> Starting...'
-
 c---- initialize...
       if(first_call)then
        first_call   = .FALSE.
+       if(ctg_slat_eta_h.nok.eq.4)then
+        write(*,*)' FILL_DST_TOF: the geometry tables say CTB data was passed...'
+        write(*,*)' FILL_DST_TOF: this routine handles TOFp data only...'
+        goto 1000
+       elseif(ctg_slat_eta_h.nok.ne.18)then
+        write(*,*)' FILL_DST_TOF: the geometry tables are empty or incorrect...'
+        goto 1000
+       end if
        icall        = 0
        do i         = 1,18
         ctg_zmin(i) = ctg_slat_eta(i).z_min
         ctg_zmax(i) = ctg_slat_eta(i).z_max
-c        write(*,*)i,ctg_zmin(i),ctg_zmax(i)
+cTEST        write(*,*)i,ctg_zmin(i),ctg_zmax(i)
        end do
       end if       ! end first_call code...
-      icall        = icall + 1
-      do i                 = 0,12500
+c
+      write(*,*)' FILL_DST_TOF: ~~~~~~~~~~~~ Starting ~~~~~~~~~~~~~~'
+      icall = icall + 1
+      do i                 = 0,15000
        itptrk2ttetrk(i)    = 0
       end do
-      do i                 = 1,32000
+      do i                 = 1,50000
        ig2ttrk2ctfhit(i)   = 0
       end do
       do i                 = 1,300
@@ -81,12 +89,12 @@ c        write(*,*)i,ctg_zmin(i),ctg_zmax(i)
       pi            = ACOS(-1.)
       deg_to_rad    = pi/180.
       rad_to_deg    = 1./deg_to_rad
-      zmin          =  13.56  - 1.0 !
-      zmax          = 227.346 + 1.0 ! was 241.49
+      zmin          =  13.56  - 2.0 !
+      zmax          = 227.346 + 2.0 ! was 241.49
       b_field       = 4.982340      ! should be a parameter...
-      trk_qual_cut  =  3.           ! should be a parameter...
-      trk_npts_min  = 15            ! should be a parameter...
-      privert_r_cut =  1.0          ! should be a parameter...
+      trk_qual_cut  = 10.   ! OPEN CUT because data volume so small, and cut vars are in output
+      trk_npts_min  = 10    ! OPEN CUT because data volume so small, and cut vars are in output
+      privert_r_cut =  4.0  ! OPEN CUT because data volume so small, and cut vars are in output
 
 c---- privert setup
 c      x_privert = dst_vertex(1).x
@@ -98,9 +106,9 @@ c      write(*,'(1x,a36,3f9.3)')' FILL_DST_TOF: primary vertex posn =',
 c     1         x_privert,y_privert,z_privert
 
 c---- set up lookup from tptrack table to tte_mctrk table...
-      if(tpt_track_h.nok.gt.12500)then
+      if(tpt_track_h.nok.gt.15000)then
        write(*,*)' TOFANA -- internal array too small: itptrk2ttetrk'
-       stop
+       goto 1000
       end if
       do ittetrk = 1,tte_mctrk_h.nok
        itptrk    = tte_mctrk(ittetrk).recid
@@ -109,9 +117,9 @@ c---- set up lookup from tptrack table to tte_mctrk table...
        end if
       end do
 c---- set up lookup from g2t_track table to g2t_ctf_hit table...
-      if(g2t_track_h.nok.gt.32000)then
+      if(g2t_track_h.nok.gt.50000)then
        write(*,*)' TOFANA -- internal array too small: ig2ttrk2ctfhit'
-       stop
+       goto 1000
       end if
       do ictfhit = 1,g2t_ctf_hit_h.nok
        ig2ttrk   = g2t_ctf_hit(ictfhit).track_p
@@ -141,7 +149,6 @@ c---- set up lookup from i_eta and i_phi to cts_mslat table...
          goto 1000
         end if
         ietaphi2mslat(j,k) = i   ! get pointer to row in cts_mslat...
-c	write(*,*)i,j,k,cts_mslat(i).z_hit
        else
         write(*,*)' FILL_DST_TOF: mslat problem -- ',i,j,k
         write(*,*)'             : exiting with error...'
@@ -433,6 +440,7 @@ c      write(*,*)iout,iout1,iout2,iout3,iout4
 999   FILL_DST_TOF=STAFCV_OK
       GOTO 1001
 1000  FILL_DST_TOF=STAFCV_BAD
+      WRITE(*,*)' FILL_DST_TOF: Exits with error...'
 1001  RETURN
       END
 
