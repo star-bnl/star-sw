@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StRichRayTracer.cxx,v $
+ * Revision 1.3  2001/11/21 20:36:07  lasiuk
+ * azimuth angle calculation, trace and retracing algorithms, rotation
+ * matrices, clean up intersection calculation.  Addition of quick
+ * rings for graphics, change definition of ntuples, and
+ * removal of old PID method
+ *
  * Revision 1.2  2001/08/21 17:58:34  lasiuk
  * for 2000 analysis
  *
@@ -48,7 +54,7 @@ StRichRayTracer::StRichRayTracer(double wavelength,
     this->init(wavelength);
     this->setTrack(pLocal, radiationPoint, normalRadiationPoint);
 
-//     PR(mNormalRadiationPoint);
+//     PR(mRadiationPoint);
 }
 
 // ----------------------------------------------------
@@ -57,12 +63,22 @@ StRichRayTracer::~StRichRayTracer() {/*nopt*/}
 // ----------------------------------------------------
 void StRichRayTracer::setTrack(StThreeVectorF& pLocal,
 			       StThreeVectorF& radiationPoint,
-			       StThreeVectorF& normalRadiationPoint) {
+			       StThreeVectorF& radiationPlanePoint) {
 
     mLocalTrackMomentum     = pLocal;
     mExpectedRadiationPoint = radiationPoint;
-    mNormalRadiationPoint   = normalRadiationPoint;
+    mRadiationPlanePoint   = radiationPlanePoint;
 
+    //
+    // this defines the axis from which the
+    // azimuthal distribution of the photon
+    // is calculated
+    //
+    
+    mAxis = pLocal;
+    mAxis.setZ(0.);
+    PR(mAxis);
+    
     this->calculateTrackAngle();
 }
 
@@ -93,15 +109,31 @@ void StRichRayTracer::init(double wavelength)
      PR(mIndexQuartz);
      PR(mIndexCH4);
 
+     double mLower = 165.*nanometer;
+     mnF1 = materialsDb->indexOfRefractionOfC6F14At(mLower);
+     mnQ1 = materialsDb->indexOfRefractionOfQuartzAt(mLower);
+     mnG1 = materialsDb->indexOfRefractionOfMethaneAt(mLower);
+     double mUpper = 200.*nanometer;
+     mnF2 = materialsDb->indexOfRefractionOfC6F14At(mUpper);
+     mnQ2 = materialsDb->indexOfRefractionOfQuartzAt(mUpper);
+     mnG2 = materialsDb->indexOfRefractionOfMethaneAt(mUpper);
+
+     PR(mnF1);
+     PR(mnQ1);
+     PR(mnG1);
+     PR(mnF2);
+     PR(mnQ2);
+     PR(mnG2);
+     
     StRichGeometryDb* geometryDb = StRichGeometryDb::getDb();
     
     mRadiatorThickness =  geometryDb->radiatorDimension().z();  //1.0*centimeter;
     mQuartzThickness = geometryDb->quartzDimension().z();       //5.*millimeter;
     mGapThickness    = geometryDb->proximityGap();              //8.0*centimeter;
 
-//     PR(mRadiatorThickness/millimeter);
-//     PR(mQuartzThickness/millimeter);
-//     PR(mGapThickness/millimeter);
+     PR(mRadiatorThickness/millimeter);
+     PR(mQuartzThickness/millimeter);
+     PR(mGapThickness/millimeter);
 
     //mxyPrecision = 1.*millimeter;
     mxyPrecision = 50.*micrometer;
@@ -131,63 +163,29 @@ void StRichRayTracer::setxyPrecision(double p) {
 void StRichRayTracer::calculateGeometry()
 {
 //     cout << "StRichRayTracer::calculateGeometry()" << endl;
-    
-    mNormalBottomQuartz = StThreeVectorF(0., 0., mGapThickness);
-    mNormalTopQuartz    = StThreeVectorF(0., 0., mGapThickness + mQuartzThickness);
-    mNormalTopRadiator  = StThreeVectorF(0., 0., mNormalTopQuartz.z() + mRadiatorThickness);
+
+    mDetectorNormal     = StThreeVectorF(0., 0., 1.);
+    mBottomQuartzPoint  = StThreeVectorF(0., 0., mGapThickness);
+    mTopQuartzPoint   = StThreeVectorF(0., 0., mGapThickness + mQuartzThickness);
+    mTopRadiatorPoint  = StThreeVectorF(0., 0., mTopRadiatorPoint.z() + mRadiatorThickness);
 
     // MUST BE THE SAME AS THAT IN SPECTRA_MAKER
-    //mNormalRadiationPoint = StThreeVectorF(0., 0., mNormalTopQuartz.z() + mRadiatorThickness/2.);
-
-//     PR(mNormalBottomQuartz);
-//     PR(mNormalTopQuartz);
-//     PR(mNormalTopRadiator);
-//     PR(mNormalRadiationPoint);
+    //mRadiationPlanePoint = StThreeVectorF(0., 0., mNormalTopQuartz.z() + mRadiatorThickness/2.);
+//     PR(mDetectorNormal
+//     PR(mBottomQuartzPoint);
+//     PR(mTopRadiatorPoint);
+//     PR(mRadiationPlanePoint);
 }
 
 // ----------------------------------------------------
 void StRichRayTracer::calculateTrackAngle()
 {
-//     cout << "StRichRayTracer::calculateTrackAngle()" << endl;
     //
     // Calculate the incident track angle (mAlpha):
     //
-    // BUT...must determine the sign first:
-    //
-    // The sign of mAlpha is given by the sign of px
-    // if (px>0) rotation is in the negative sense
-    //
 
-    //
-    //    pt
-    //   \  |
-    //  p \a| pz  tan(a) = pt/pz
-    //     \|         ^
-    //                |
-    //                 -- mAlpha
-    //
-    //
-    
-//     PR(mLocalTrackMomentum/GeV);
-//     PR(mLocalTrackMomentum.theta()/degree);
+    mAlpha = M_PI - mLocalTrackMomentum.theta();
 
-    if( sign(mLocalTrackMomentum.x()) > 0 ) {
-	//cout << " +alpha " << endl;
-	mAlpha = M_PI + mLocalTrackMomentum.theta();
-    }
-    else  {
-	//
-	// this should also cover the case for normal tracks
-	// i.e. pz = |p|
-	//
-	//cout << " -alpha " << endl;
-	mAlpha = M_PI - mLocalTrackMomentum.theta();
-    }
-
-    if(mAlpha > M_PI)
-	mAlpha -= m2Pi;
-    
-//     PR(mAlpha/degree);
 }
 
 // ----------------------------------------------------
@@ -203,12 +201,214 @@ void StRichRayTracer::setPhotonPosition(StThreeVectorF& pos)
 {
 //     cout << "StRichRayTracer::setPhotonPosition()" << endl;
     mLocalPhotonPosition = pos;
-
+     PR(mLocalPhotonPosition);
     //
     // reset the step for optimizing theta
     //
+    
     mDeltaTheta = mInitialIncrement;
 }
+
+// ----------------------------------------------------
+StThreeVectorF StRichRayTracer::intersectionWithPlane(StThreeVectorF& n, StThreeVectorF& r,
+						      StThreeVectorF& b, StThreeVectorF& a)
+{
+    //
+    // r = point in plane
+    // n = plane normal
+    //
+    // b = point to start
+    // a = propagator direction
+    //
+    double s = (r.dot(n)-b.dot(n))/(a.dot(n));
+    return b+s*a;
+}
+
+// ----------------------------------------------------
+StThreeVectorF StRichRayTracer::rotateToAxis(double angle, StThreeVectorF& vec)
+{
+    //
+    // in x-y plane
+    // axis defined by the track momentum in the xy plane
+    // (chi)
+    
+    StThreeVectorF newPt(vec.x()*cos(angle)-vec.y()*sin(angle),
+			 vec.x()*sin(angle)+vec.y()*cos(angle),
+			 vec.z());
+    return newPt;
+}
+
+
+// ----------------------------------------------------
+StThreeVectorF StRichRayTracer::rotateToTrackInclination(double angle, StThreeVectorF& vec)
+{
+    // in xz plane
+    // defined by the track incident angle
+    // (alpha)
+
+    StThreeVectorF newPt(vec.x()*cos(angle)-vec.z()*sin(angle),
+			 vec.y(),
+			 vec.x()*sin(angle)+vec.z()*cos(angle));
+
+    return newPt;
+}
+
+// ----------------------------------------------------
+void StRichRayTracer::traceDown()
+{
+    cout << "********StRichRayTracer::traceDown()*******" << endl;
+    StThreeVectorF unrotatedPhotonPropagator(sin(mCerenkovAngle)*cos(mPhi),
+					     sin(mCerenkovAngle)*sin(mPhi),
+					     -cos(mCerenkovAngle));
+    //
+    // rotate by track inclination angle (alpha)
+    // in x-z plane
+    //
+    
+    StThreeVectorF photonPropagatorxz =
+	rotateToTrackInclination(mAlpha,unrotatedPhotonPropagator);
+
+    StThreeVectorF photonPropagator =
+	rotateToAxis(mAxis.phi(), photonPropagatorxz);
+
+    StThreeVectorF topQuartz =
+	intersectionWithPlane(mDetectorNormal, mTopQuartzPoint,
+			      mExpectedRadiationPoint, photonPropagator);
+	    
+    //
+    // recover phi
+    //
+//     cout << "  ---- Recover phi? ----- " << endl;
+//     StThreeVectorF prop1 = (topQuartz-mExpectedRadiationPoint).unit();
+//     PR(prop1);
+//     StThreeVectorF unrotprop1 = rotateToAxis(-mAxis.phi(), prop1);
+//     PR(unrotprop1);
+    
+//     StThreeVectorF prop = rotateToTrackInclination(-mAlpha,unrotprop1);
+//     PR(prop);
+//     PR(prop.phi()/degree);
+//     PR(mPhi/degree);
+//     cout << "  ^^^^^^ Recover phi? ^^^^^^ " << endl;
+    //
+    //
+    //
+
+    double openingAngle = acos( (photonPropagator.unit()).dot(mDetectorNormal.unit()) );	    
+    double incidentAngle = M_PI - openingAngle;
+    double sinr = mIndexFreon*sin(incidentAngle)/mIndexQuartz;
+    if(sinr>1) {
+	cout << "StRichRayTracer::traceDown()\n";
+	cout << "ERROR --> freon/quartz refraction: sinr = " << sinr << ")" << endl;
+	return;
+    }
+	    
+    double refractedAngle = asin(sinr);
+    double newPropagatorAngle = M_PI - refractedAngle;    
+    photonPropagator.setTheta(newPropagatorAngle);
+
+    StThreeVectorF bottomQuartz =
+	intersectionWithPlane(mDetectorNormal, mBottomQuartzPoint,
+			      topQuartz, photonPropagator);
+	    
+    openingAngle = acos( (photonPropagator.unit()).dot(mDetectorNormal.unit()) );
+	    
+    incidentAngle = M_PI - openingAngle;
+    sinr = mIndexQuartz*sin(incidentAngle)/mIndexCH4;
+    if(sinr>1) {
+	cout << "StRichRayTracer::traceDown()\n";
+	cout << "ERROR --> CH4/quartz refraction: sinr = " << sinr << ")" << endl;
+	return;
+    }
+	    
+    refractedAngle = asin(sinr);
+    newPropagatorAngle = M_PI - refractedAngle;
+    photonPropagator.setTheta(newPropagatorAngle);
+	    
+    StThreeVectorF bottomDetector =
+	intersectionWithPlane(mDetectorNormal, mLocalPhotonPosition,
+			      bottomQuartz, photonPropagator);
+
+    //
+    // these can be compared for convergence
+    //
+//     PR(bottomDetector);
+//     PR(mLocalPhotonPosition);
+}
+
+// -------------------------------------------------------
+void StRichRayTracer::traceUp()
+{
+    cout << "\nStRichRayTracer::traceUp()" << endl;
+
+    PR(mGapPropagator);
+    StThreeVectorF propagator = mGapPropagator;
+    PR(propagator.theta()/degree);
+    //
+    // propagate to the bottom quartz
+    //
+    
+    StThreeVectorF zAtBottomQuartz =
+	this->intersectionWithPlane(mDetectorNormal, mBottomQuartzPoint,
+				    mLocalPhotonPosition, propagator);
+    
+    PR(zAtBottomQuartz);
+
+    //
+    // angle wrt quartz?
+    //
+
+    double cosGapAngle = (propagator.unit()).dot(mDetectorNormal.unit());
+    double gapAngle = acos( cosGapAngle );
+    PR(gapAngle/degree);
+
+    double quartzAngle = asin(mIndexCH4/mIndexQuartz*sin(gapAngle));
+    PR(quartzAngle/degree);
+
+    propagator.setTheta(quartzAngle);
+    PR(propagator);
+    PR(propagator.theta()/degree);
+
+    //
+    // at what point does it hit the top of the quartz
+    //
+
+    StThreeVectorF mTopOfQuartzPlate =
+	this->intersectionWithPlane(mDetectorNormal, mTopQuartzPoint,
+				    zAtBottomQuartz, propagator);
+    
+    PR(mTopOfQuartzPlate);    
+    
+    //
+    // angle wrt freon
+    //
+
+    double cosQuartzAngle = (propagator.unit()).dot(mDetectorNormal.unit());
+    quartzAngle = acos(cosQuartzAngle);
+
+    double freonAngle = asin(mIndexQuartz/mIndexFreon*sin(quartzAngle));
+    PR(freonAngle/degree);
+
+    propagator.setTheta(freonAngle);
+    PR(propagator);
+    PR(propagator.theta()/degree);
+
+    //
+    // at what point does it hit the 1/2 way point of the radiator
+    //
+
+    StThreeVectorF theCalculatedRadiationPoint =
+	this->intersectionWithPlane(mDetectorNormal, mRadiationPlanePoint,
+				    mTopOfQuartzPlate, propagator);
+
+    PR(theCalculatedRadiationPoint);
+    PR(mExpectedRadiationPoint);
+
+    PR(propagator.unit());
+    double cosCerenkovAngle =
+	-1.*(propagator.unit()).dot(mLocalTrackMomentum.unit());
+    PR(acos( cosCerenkovAngle )/degree);        
+}
+
 
 // ----------------------------------------------------
 bool StRichRayTracer::initialPropagator()
@@ -226,18 +426,10 @@ bool StRichRayTracer::initialPropagator()
 //     PR(mExpectedRadiationPoint);
 //     PR(mLocalPhotonPosition);
 
-    mGapPropagator = mExpectedRadiationPoint - mLocalPhotonPosition;
-//     PR(mGapPropagator);
-
-    //
-    // angle with the normal
-    //
-
-    //mTheta = mGapPropagator.theta();
-//     PR(mGapPropagator.theta()/degree);
+    mGapPropagator = (mExpectedRadiationPoint - mLocalPhotonPosition).unit();
     
     mPhotonRadPointTransverseDistance = mGapPropagator.perp();
-
+    
 //     PR(mPhotonRadPointTransverseDistance);
 
     return true;
@@ -261,36 +453,70 @@ bool StRichRayTracer::checkConvergence(StThreeVectorF& point) const
 }
 
 // ----------------------------------------------------
+bool StRichRayTracer::findAzimuth()
+{
+//     cout << "StRichRayTracer::findAzimuth()" << endl;
+    //
+    // calculate the phi (azimuth) of the photon
+    // wrt the axis defined by the local momentum
+    //
+
+    StThreeVectorF shiftedPhoton = mTopOfQuartzPlate - mTheCalculatedRadiationPoint;
+
+    StThreeVectorF photonRotatedToXAxis =
+	this->rotateToAxis(-mAxis.phi(),shiftedPhoton);
+
+    StThreeVectorF photonTrackAngleRemoved =
+	this->rotateToTrackInclination(-mAlpha,photonRotatedToXAxis);
+
+
+    mPhi = photonTrackAngleRemoved.phi();
+
+    return true;
+}
+
+// ----------------------------------------------------
 bool  StRichRayTracer::processPhoton(double* angle) {
 
 //     cout << "StRichRayTracer::processPhoton()" << endl;
     
     if(!this->initialPropagator()) {
 	cout << "initialPropagator is BAD***" << endl;
+	return false;
     }
     else {
-// 	cout << "initialPropagator is okay" << endl;
+//  	cout << "initialPropagator is okay" << endl;
     }
     
-    //mGapPropagator.setTheta(70.*degree);
-    //cout << "--> findCerenkovAngle" << endl;
-
     if(this->findCerenkovAngle()) {
-	// cout << "\n**** Convergence..." << endl;
+	//cout << "\n**** Convergence..." << endl;
 	*angle = mCerenkovAngle;
+	this->findAzimuth();
     }
     else {
 	// cout << "\n**** No Convergence..." << endl;
 	*angle = FLT_MAX;
     }
-    return true;
+
+    PR(mCerenkovAngle/degree);
+    PR(mPhi/degree);
     
+    //
+    // tests for convergence and performance
+    // can be put here
+    //
+//     PR(mExpectedRadiationPoint);
+//     PR(mTheCalculatedRadiationPoint);
+//     this->traceDown();
+//     this->traceUp();
+    
+    return true;
 }
 
 // -------------------------------------------------------
 bool StRichRayTracer::propagateToRadiator()
 {
-//      cout << "\nStRichRayTracer::propagateToRadiator()" << endl;
+//     cout << "\nStRichRayTracer::propagateToRadiator()" << endl;
 
     //
     // find the linear distance (mLOne) which is covered
@@ -301,110 +527,60 @@ bool StRichRayTracer::propagateToRadiator()
     //
     //
 
-//     PR(mGapPropagator);
-
     StThreeVectorF propagator = mGapPropagator;
-
-//     PR(propagator);
-//     PR(propagator.theta()/degree);
-//     PR(propagator.phi()/degree);
-    
-//     PR(mNormalBottomQuartz);
-
 
     //
     // propagate to the bottom quartz
     //
     
-    double scale =
-	(mLocalPhotonPosition.dot(mNormalBottomQuartz) - mNormalBottomQuartz.dot(mNormalBottomQuartz))/
-	(propagator.dot(mNormalBottomQuartz));
-
-//     PR(scale);
-
     StThreeVectorF zAtBottomQuartz =
-	mLocalPhotonPosition - scale*propagator;
-
-//     PR(zAtBottomQuartz);
-//     PR(zAtBottomQuartz.perp());
-//     PR((zAtBottomQuartz-mLocalPhotonPosition).perp());
-
+	this->intersectionWithPlane(mDetectorNormal, mBottomQuartzPoint,
+				    mLocalPhotonPosition, propagator);
+    
     //
     // angle wrt quartz?
     //
 
-    double cosGapAngle = (propagator.unit()).dot(mNormalBottomQuartz.unit());
+    double cosGapAngle = (propagator.unit()).dot(mDetectorNormal.unit());
     double gapAngle = acos( cosGapAngle );
-//     PR(gapAngle/degree);
 
     double quartzAngle = asin(mIndexCH4/mIndexQuartz*sin(gapAngle));
-//     PR(quartzAngle/degree);
-
-//     PR(quartzAngle/degree);
-//     PR(propagator);
     propagator.setTheta(quartzAngle);
-//     PR(propagator);
-//     PR(propagator.phi()/degree);
 
     //
     // at what point does it hit the top of the quartz
     //
 
-    scale =
-	(zAtBottomQuartz.dot(mNormalTopQuartz) - mNormalTopQuartz.dot(mNormalTopQuartz))/
-	(propagator.dot(mNormalTopQuartz));
-//     PR(scale);
-
-    StThreeVectorF zAtTopQuartz =
-	zAtBottomQuartz - scale*propagator;
-//     PR(zAtTopQuartz);
-//     PR(zAtTopQuartz.perp());
-//     PR((zAtTopQuartz-mLocalPhotonPosition).perp());
-	
+    mTopOfQuartzPlate =
+	this->intersectionWithPlane(mDetectorNormal, mTopQuartzPoint,
+				    zAtBottomQuartz, propagator);
     
     //
     // angle wrt freon
     //
 
-    double cosQuartzAngle = (propagator.unit()).dot(mNormalTopQuartz.unit());
+    double cosQuartzAngle = (propagator.unit()).dot(mDetectorNormal.unit());
     quartzAngle = acos(cosQuartzAngle);
 
     double freonAngle = asin(mIndexQuartz/mIndexFreon*sin(quartzAngle));
-//     PR(freonAngle/degree);
-
-//     PR(freonAngle/degree);
-//     PR(propagator);
     propagator.setTheta(freonAngle);
-//     PR(propagator);
-//     PR(propagator.phi()/degree);
 
     //
-    // at what point does it hit the 1/2 way point of the radiator
+    // at what point does the propagator impact
+    // the 1/2 way point (radiation point) of the radiator
     //
 
-    scale =
-	(zAtTopQuartz.dot(mNormalRadiationPoint) - mNormalRadiationPoint.dot(mNormalRadiationPoint))/
-	(propagator.dot(mNormalRadiationPoint));
-//     PR(scale);
-
-    mTheCalculatedRadiationPoint = zAtTopQuartz - scale*propagator;
-//     PR(mTheCalculatedRadiationPoint);
-//     PR(mTheCalculatedRadiationPoint.perp());
-//     PR((mTheCalculatedRadiationPoint-mLocalPhotonPosition).perp());
+    mTheCalculatedRadiationPoint =
+	this->intersectionWithPlane(mDetectorNormal, mRadiationPlanePoint,
+				    mTopOfQuartzPlate, propagator);
 
     mConvergenceValue = (mTheCalculatedRadiationPoint-mLocalPhotonPosition).perp();
-//     PR(mConvergenceValue);
 
-    mPhi = propagator.phi();
-//     PR(mPhi);
-    
     double cosCerenkovAngle =
 	-1.*(propagator.unit()).dot(mLocalTrackMomentum.unit());
     mCerenkovAngle = acos(cosCerenkovAngle);
 
-//     PR(mCerenkovAngle/degree);
-    
-    
+        
     return true;
 }
 
@@ -412,36 +588,31 @@ bool StRichRayTracer::propagateToRadiator()
 bool StRichRayTracer::findCerenkovAngle()
 {
 //     cout << "StRichRayTracer::findCerenkovAngle()" << endl;
-    bool validAngle = false;
 
     //
     // the first iteration to get a starting point
     //
 
-    int safetyMargin = 100;
-    int ctr = 0;
-    while (!validAngle) {
-	ctr++;
-	//cout << "...new iteration" << endl;
-	validAngle = this->propagateToRadiator();
-	if(ctr>safetyMargin) break;
+    if(!this->propagateToRadiator()) {
+	cout << "StRichRayTracer::findCerenkovAngle()\n";
+	cout << "FATAL::1st iteration of propagateToRadiator()" << endl;
+	return false;
     };
 
     StThreeVectorF oldRadiationPoint = mTheCalculatedRadiationPoint;
-//     PR(oldRadiationPoint);
 
     if(this->checkConvergence(oldRadiationPoint)) {
-// 	cout << " StRichRayTracer::findCerenkovAngle()\n";
-// 	cout << " \tConvergence in first iteration" << endl;
+ 	cout << "*StRichRayTracer::findCerenkovAngle()\n";
+ 	cout << "\tConvergence in first iteration" << endl;
 	return true;
     }
     
     //
     // adjust theta and continue with next iterations
     // if x^2 + y^2 bounds are NOT exceeded
-
+    //
+    
     if(mConvergenceValue > mPhotonRadPointTransverseDistance) {
-// 	cout << "mConvergenceValue > mPhotonRadPointTransverseDistance" << endl;
 	//
 	// went to far(overshot)
  	// decrease theta (saves an iteration)
@@ -449,61 +620,48 @@ bool StRichRayTracer::findCerenkovAngle()
 	mDeltaTheta *= -1.;
     }
     
-//     PR(mGapPropagator.theta()/degree);
     mGapPropagator.setTheta(mGapPropagator.theta() + mDeltaTheta);
-//     PR(mGapPropagator);
-//     PR(mGapPropagator.theta()/degree);
 
     int iteration=0;
     do {
 	iteration++;
-	validAngle = false;
 
-	ctr=0;
-	while (!validAngle) {
-	    ctr++;
-	    validAngle = this->propagateToRadiator();
-	    if(ctr>safetyMargin) break;
-	    
-	};
+	if(!this->propagateToRadiator()) {
+	    cout << "StRichRayTracer::findCerenekovAngle()\n";
+	    cout << "FATAL ERROR 2 on iteration (" << iteration << ")" << endl;
+	    return false;
+	}
 	
  	StThreeVectorF newRadiationPoint = mTheCalculatedRadiationPoint;
-//  	PR(newRadiationPoint);
 	
 	//
-	// Did we converge?
+	// Check for convergence and recalculate the
+	// stepsize for the next iteration if necessary
 	//
 
 	if(this->checkConvergence(newRadiationPoint)) {
-// 	    cout << " StRichRayTracer::findCerenkovAngle()\n";
-// 	    cout << " \tConvergence in (" << iteration << ") iteration" << endl;
+//  	    cout << "*StRichRayTracer::findCerenkovAngle()\n";
+//  	    cout << " \tConvergence in (" << iteration << ") iteration" << endl;
+// 	    cout << "final gap propagator " << mGapPropagator << endl;
 	    return true;
 	}
 
-// 	cout << "test for convergence: old=" << abs(oldRadiationPoint-mExpectedRadiationPoint)
-// 	     << " newL3=" << abs(newRadiationPoint-mExpectedRadiationPoint) << endl;
-// 	PR(abs(oldRadiationPoint-mExpectedRadiationPoint));
-// 	PR(abs(newRadiationPoint-mExpectedRadiationPoint))
 	if( abs(oldRadiationPoint-mExpectedRadiationPoint) >
 	    abs(newRadiationPoint-mExpectedRadiationPoint) ) {
 	    //
 	    // good, leave deltaTheta alone
 	    //
-// 	    cout << "okay" << endl;
 	}
 	else {
 	    //
-	    // Wrong way
-	    // change of sign
+	    // Wrong way:  Change of sign of the
+	    // step size and decrease by a factor of 2
 	    //
-// 	    cout << "wrong way scale -.5" << endl;
 	    mDeltaTheta *= -0.5;
 	}
 
 	oldRadiationPoint = newRadiationPoint;
 	
-// 	PR(mDeltaTheta/degree);
-// 	PR(mGapPropagator.theta()/degree);
 	mGapPropagator.setTheta(mGapPropagator.theta() + mDeltaTheta);
 
     } while (iteration < mMaximumNumberOfIterations);
@@ -518,3 +676,102 @@ void StRichRayTracer::status() const
     cout << "===========================" << endl;
 }
 
+// ----------------------------------------------------
+vector<StThreeVectorF>
+StRichRayTracer::calculatePoints(StThreeVectorF& radPt, double mass)
+{
+    cout << "StRichRayTracer::calculatePoints()" << endl;
+    vector<StThreeVectorF> pts;
+    //
+    // track must already be set
+    // --> Generate points on the plane for a ring
+    //
+    double beta2 = sqr(abs(mLocalTrackMomentum))/(sqr(abs(mLocalTrackMomentum))+sqr(mass));
+    double beta = sqrt(beta2);
+
+    double nF;
+    double nQ;
+    double nG;
+
+    if(radPt.z()>8.5) {
+	//
+	// use the lower bounds
+	//
+	nF = mnF1;
+	nQ = mnQ1;
+	nG = mnG1;
+    }
+    else {
+	nF = mnF2;
+	nQ = mnQ2;
+	nG = mnG2;
+    }
+
+    StThreeVectorF shift(radPt.x(), radPt.y(),0.);
+
+    double cosCerenkovAngle = 1./(nF*beta);
+    if(cosCerenkovAngle>1) return pts;
+
+    double cerenkovAngle = acos(cosCerenkovAngle);
+
+    StThreeVectorF axis(mLocalTrackMomentum.x(), mLocalTrackMomentum.y(), 0.);
+    double alpha = M_PI - mLocalTrackMomentum.theta();
+    
+    double chi = axis.phi();
+
+    double dphi = 1.*degree;
+    for(double phi=0.*degree; phi<360.*degree; phi+=dphi) {
+	
+	StThreeVectorF unrotatedPhotonPropagator(sin(cerenkovAngle)*cos(phi),
+						 sin(cerenkovAngle)*sin(phi),
+						 -cos(cerenkovAngle));
+	
+	// rotate by track inclination angle (alpha)
+	// in x-z plane
+	
+	StThreeVectorF photonPropagatorxz =
+	    rotateToTrackInclination(alpha,unrotatedPhotonPropagator);
+
+	StThreeVectorF photonPropagator =
+	    rotateToAxis(axis.phi(), photonPropagatorxz);
+
+	
+	StThreeVectorF topQuartz =
+	    intersectionWithPlane(mDetectorNormal, mTopQuartzPoint,
+				  radPt, photonPropagator);
+		
+	//
+	// incident angle wrt normal
+	//
+	double openingAngle = acos( (photonPropagator.unit()).dot(mDetectorNormal.unit()) );
+	double incidentAngle = M_PI - openingAngle;
+	double sinr = nF*sin(incidentAngle)/nQ;
+	if(sinr>1) continue;
+	
+	double refractedAngle = asin(sinr);
+	double newPropagatorAngle = M_PI - refractedAngle;   
+	photonPropagator.setTheta(newPropagatorAngle);
+	
+	StThreeVectorF bottomQuartz =
+	    intersectionWithPlane(mDetectorNormal, mBottomQuartzPoint,
+				  topQuartz, photonPropagator);
+	
+	openingAngle = acos( (photonPropagator.unit()).dot(mDetectorNormal.unit()) );
+	    
+	incidentAngle = M_PI - openingAngle;
+	sinr = nQ*sin(incidentAngle)/nG;
+	if(sinr>1) continue;
+	
+	refractedAngle = asin(sinr);
+	newPropagatorAngle = M_PI - refractedAngle;
+	photonPropagator.setTheta(newPropagatorAngle);
+	
+	StThreeVectorF bottomDetector =
+	    intersectionWithPlane(mDetectorNormal, mLocalPhotonPosition,
+				  bottomQuartz, photonPropagator);
+
+	if( (abs(bottomDetector.x())>70) || (abs(bottomDetector.y())>50)) continue;
+	pts.push_back(bottomDetector);
+    }
+    return pts;
+}

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichRayTracer.h,v 1.2 2001/08/21 17:58:34 lasiuk Exp $
+ * $Id: StRichRayTracer.h,v 1.3 2001/11/21 20:36:07 lasiuk Exp $
  *
  * Author:  bl Feb 21, 2001
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StRichRayTracer.h,v $
+ * Revision 1.3  2001/11/21 20:36:07  lasiuk
+ * azimuth angle calculation, trace and retracing algorithms, rotation
+ * matrices, clean up intersection calculation.  Addition of quick
+ * rings for graphics, change definition of ntuples, and
+ * removal of old PID method
+ *
  * Revision 1.2  2001/08/21 17:58:34  lasiuk
  * for 2000 analysis
  *
@@ -24,11 +30,13 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <vector>
 
 #include "StThreeVectorF.hh"
 #include "SystemOfUnits.h"
 #ifndef ST_NO_NAMESPACES
 using namespace units;
+using std::vector;
 #endif
 
 class StRichRayTracer {
@@ -48,6 +56,7 @@ public:
 
     bool propagateToRadiator();
     bool findCerenkovAngle();
+    bool findAzimuth();
     bool processPhoton(double*);
 
     bool checkConvergence(StThreeVectorF&) const;
@@ -64,6 +73,10 @@ public:
     double convergenceValue() const;
     double epsilon()          const;
 
+    StThreeVectorF photonAtQuartzPlate() const;
+
+    vector<StThreeVectorF> calculatePoints(StThreeVectorF&, double);
+    
     void  status() const;
     
 protected:    
@@ -73,7 +86,13 @@ protected:
     void calculateTrackAngle();
 
     bool adjustPropagator();
+    StThreeVectorF intersectionWithPlane(StThreeVectorF&, StThreeVectorF&,
+					 StThreeVectorF&, StThreeVectorF&);
+    StThreeVectorF rotateToAxis(double, StThreeVectorF&);
+    StThreeVectorF rotateToTrackInclination(double, StThreeVectorF&);
 
+    void traceDown();
+    void traceUp();
 private:
     
     //
@@ -83,6 +102,9 @@ private:
     StThreeVectorF mLocalTrackMomentum;
     StThreeVectorF mExpectedRadiationPoint;
     StThreeVectorF mTheCalculatedRadiationPoint;
+
+    StThreeVectorF mTopOfQuartzPlate;
+
     double mAlpha;   // track incident angle
 
     //
@@ -103,7 +125,6 @@ private:
     double mPhotonRadPointTransverseDistance;
     double mConvergenceValue;
     
-    //double mTheta;
     double mDeltaTheta;
     double mInitialIncrement;
     double mCerenkovAngle;
@@ -125,15 +146,19 @@ private:
     double mIndexFreon;
     double mIndexQuartz;
     double mIndexCH4;
-
+    double mnF1,mnQ1,mnG1;
+    double mnF2,mnQ2,mnG2;
+    
     double mRadiatorThickness;
     double mQuartzThickness;
     double mGapThickness;
 
-    StThreeVectorF mNormalBottomQuartz;
-    StThreeVectorF mNormalTopQuartz;
-    StThreeVectorF mNormalTopRadiator;
-    StThreeVectorF mNormalRadiationPoint;
+    StThreeVectorF mDetectorNormal;
+    StThreeVectorF mBottomQuartzPoint;
+    StThreeVectorF mTopQuartzPoint;
+    StThreeVectorF mTopRadiatorPoint;
+    StThreeVectorF mRadiationPlanePoint;
+    StThreeVectorF mAxis;
 };
 
 inline double StRichRayTracer::azimuth() const {return mPhi; }
@@ -141,5 +166,6 @@ inline double StRichRayTracer::cerenkovAngle() const {return mCerenkovAngle;}
 inline double StRichRayTracer::trackAngle() const {return mAlpha; }
 inline double StRichRayTracer::convergenceValue() const {return mConvergenceValue; }
 inline double StRichRayTracer::epsilon() const {return (mConvergenceValue - mPhotonRadPointTransverseDistance); }
+inline StThreeVectorF StRichRayTracer::photonAtQuartzPlate() const {return mTopOfQuartzPlate;}
 
 #endif
