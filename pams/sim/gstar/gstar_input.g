@@ -1,6 +1,9 @@
-* $Id: gstar_input.g,v 1.31 2000/02/25 02:26:35 nevski Exp $
+* $Id: gstar_input.g,v 1.32 2000/02/25 16:20:12 nevski Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.32  2000/02/25 16:20:12  nevski
+* no header printed on skipped events
+*
 * Revision 1.31  2000/02/25 02:26:35  nevski
 * debugging print commented out
 *
@@ -139,8 +142,8 @@
      elseif C=='M' { J=CsADDR ('MICKINE'); IF (J!=0) Call CsJCAL(J,1,Igate)}
      elseif C=='S' { J=AMI_CALL ('gstar_readtab'//o,1,%L(Table)//o)-1;     }
      If Igate<=0   { Ier=1; return }
-     print *,' AgUsREAD mode ',C,': # particles in GEANT=',Ntrack,
-                                 '  # vertices=',Nvertx
+     If (NtoSkip<=0 | Idebug>0) print *,' AgUsREAD mode ',C,' Event ',Ievent,
+        ': # particles in GEANT=',Ntrack,'  # vertices=',Nvertx   
      if (J==0) print *,' AgUsREAD ERROR : input processor did not work '
    enddo
 
