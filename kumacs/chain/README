@@ -112,7 +112,9 @@
 * drhd  - dst run header
 * ebye1 - run ebye sca analysis code
 * ev0j  - join ev0out and vertex tables and make new ev0joined table
-* smdst - strange micro dst analysis 
+* smdst - strange micro dst analysis
+* dchkt - dumps from dst files
+* dwntp - write out ntuples from dst files
 * user  - user kumacs called here: init_user,run_user,finish_user
 * ntup  - create output ntuple file
 * fzout - write out fz file from gstar (only works if you run gstar!)
