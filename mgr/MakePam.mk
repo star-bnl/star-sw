@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.93 1999/06/08 11:30:14 fisyak Exp $
+# $Id: MakePam.mk,v 1.94 1999/06/11 15:41:56 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.94  1999/06/11 15:41:56  fisyak
+# Move mortran generated files to OBJ instead of GEN
+#
 # Revision 1.93  1999/06/08 11:30:14  fisyak
 # take out NT stuff for the moment
 #
@@ -449,12 +452,12 @@ $(GEN_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
 	@test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def 
 #$(LIB_PKG)($(notdir $(FILES_OG)): $(OBJ_DIR)/%.o:%.g $(GEN_DIR)/geant3.def
 $(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(GEN_DIR)/geant3.def
-	$(CP) $(1ST_DEPS) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(1ST_DEPS) -o  $(GEN_DIR)/$(STEM).F
-	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  -o  $(OBJ_DIR)/$(STEM).o
+	$(CP) $(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
+	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  -o  $(OBJ_DIR)/$(STEM).o
 $(LIB_PKG)(%.o):%.g $(GEN_DIR)/geant3.def
-	cp $(1ST_DEPS) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(1ST_DEPS) -o  $(GEN_DIR)/$(STEM).F
-	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  -o  $(OBJ_DIR)/$(STEM).o
-#	$(RM) $(GEN_DIR)/$(STEM).F 
+	cp $(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
+	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  -o  $(OBJ_DIR)/$(STEM).o
+#	$(RM) $(OBJ_DIR)/$(STEM).F 
 	$(AR) $(ARFLAGS) $(LIB_PKG)  $(OBJ_DIR)/$(STEM).o
 $(FILES_OBJ) $(FILES_ORJ) $(FILES_OTJ): $(OBJ_DIR)/%.o: %.cxx
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
@@ -471,10 +474,10 @@ $(LIB_PKG)(%.o): %.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o; $(RM) $(OBJ_DIR)/$(STEM).o
 $(LIB_PKG)(%.o): %.cdf
-	$(KUIPC) $(KUIPC_FLAGS) $(1ST_DEPS) $(GEN_DIR)/$(STEM).c
-	$(CC)  $(CPPFLAGS) $(CFLAGS)   -c $(GEN_DIR)/$(STEM).c $(COUT) $(OBJ_DIR)/$(STEM).$(O); \
-        $(RM)  $(GEN_DIR)/$(STEM).c
+	$(KUIPC) $(KUIPC_FLAGS) $(1ST_DEPS) $(OBJ_DIR)/$(STEM).c
+	$(CC)  $(CPPFLAGS) $(CFLAGS)   -c $(OBJ_DIR)/$(STEM).c $(COUT) $(OBJ_DIR)/$(STEM).$(O); \
 	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).$(O); $(RM) $(OBJ_DIR)/$(STEM).$(O)
+#       $(RM)  $(OBJ_DIR)/$(STEM).c
 #_______________________dependencies_________________________________
 ifneq (,$(FILES_IDM))
 $(FILES_ICC) : $(GEN_DIR)/%_i.cc : %.idl
