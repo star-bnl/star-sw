@@ -1,0 +1,133 @@
+* *************************************************************************
+* run_ftpc_slow_sim_tracker.kumac
+* 
+* 
+* created July 28,1998 - Janet Seyboth
+*                        (with lots of help from Kathy Turner)
+*                      - this is now the kumac that drives the ftpc slow 
+*                        chain: simulation,tracking, track evaluation
+************************************************************************
+************************************************************************
+
+ macro run__
+          TOP=$STAR _
+          domain='ftpc' _
+          INPUT_DATA_DIR=$AFS_RHIC/star/users/jcs/public/ _
+          input_g2t_file=auau_gstar_g2t.tab _
+          num_events=1 _
+          funit=21 _
+          nfile=ftpc_tracks.ntup _
+          nid=111 _
+          table=ftpc/tracks/fpt_fptrack
+* 
+*  this is an example!! you must change to fill your needs
+*  
+* --> to run
+*    - change the inputs above as desired
+*    - run staf
+*    -   exec run_ftpc_slow_sim_chain
+* 
+	  
+  message ' *** TOP directory to search for kumacs --> ' [TOP]
+  message ' *** domains to load  -->                   ' [domain]
+  message ' *** Data Sample directory -->              ' [INPUT_DATA_DIR]
+  message ' *** Input G2T file -->                     ' [input_g2t_file]
+  message ' *** Num Events to process -->              ' [num_events]
+  message ' *** ntup file unit -->                     ' [funit]
+  message ' *** output Ntuple filename  -->            ' [nfile]
+  message ' *** Ntuple ID # -->                        ' [nid]
+  message ' *** Table to write to ntup -->             ' [table]
+ 
+ 
+* ----------- General setup stuff ------------------------*
+  macro/global/create TOP              [TOP]
+    
+* setup default directories to search for kumacs in
+* setup default table directory structure in STAF
+* load libraries [domain]
+    
+ exec [TOP]/kumacs/chain/bfc_util#bfc_start [domain]
+     
+ macro/global/import *
+   
+* **************************************************************
+* --------- Setup and run ftpc slow simulator & tracker pams -------------*
+   
+* open input g2t data file
+  exec input_g2t_file#init [INPUT_DATA_DIR][input_g2t_file]
+
+  if STAF_STATUS(1).eq.0 goto ENDOFDATA
+  
+* open output ntuple
+  exec write_table_to_ntuple#init_disk [funit] [nfile]  
+   
+* --------------------- initialization ----------------------------*
+
+* create tables
+    
+    exec create_tables_ftpc#fss_tables
+    exec create_tables_ftpc#fcl_tables
+    exec create_tables_ftpc#fpt_tables
+    exec create_tables_ftpc#fte_tables
+
+* initialize tables
+
+    exec fss_init#init
+    exec fcl_init#init 
+    exec fpt_init#init
+    exec fte_init#init
+
+  
+* ------------------- process events ------------------------------*
+
+* read event and then process thru ftpc slow sim, cluster finder & then tracker
+  do i=1,[num_events]
+    message ' run_ftpc_slow_sim_chain: processing event ' [i]
+* clear all event tables
+    tabclear [event]
+* read input file
+    exec input_g2t_file#read
+    if STAF_STATUS(1).eq.0 goto ENDOFDATA
+* ftpc slow simulator 
+    exec fss_run#run
+      if STAF_STATUS(1).eq.0 then
+        message ' problem with fss '
+      endif
+* ftpc cluster finder
+      exec fcl_run#run
+        if STAF_STATUS(1).eq.0 then
+          message ' problem with fcl '
+        endif
+* ftpc tracking
+	exec fpt_run#run_slow_sim
+	if STAF_STATUS(1).eq.0 then
+	  message ' problem with fpt '
+	endif  
+* ftpc track evaluation
+	exec fte_run#run_slow_sim
+	if STAF_STATUS(1).eq.0 then
+	  message ' problem with fte '
+	 endif 
+* write table to ntuple
+    exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
+  enddo
+
+  
+* -------------------- end stuff -----------------------------*
+  
+  ENDOFDATA:
+    if [i].lt.[num_events] then
+    message ' End of input file'
+  endif  
+
+* close ntuple
+  message ' close ntuple'
+  exec write_table_to_ntuple#close_disk [funit]
+
+* close input file
+  message ' close input file'
+  exec input_g2t_file#close
+
+return
+ 
+************************************************************************
