@@ -1,5 +1,12 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.9 2001/04/25 17:55:10 perev Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.10 2001/04/27 10:25:21 oldi Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.10  2001/04/27 10:25:21  oldi
+// Protection against crash due to lack of fast simulator hit information.
+// The evaluator gives (up to now) only valueable information when tracking was
+// performed with the fast simulator. But now it is possile to evaluate slow
+// simulated events as well (as far as the necessary information is available).
+// ShowTracks() has still a problem due the change of ROOT version.
+//
 // Revision 1.9  2001/04/25 17:55:10  perev
 // HPcorrs
 //
@@ -256,6 +263,28 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
   SetupFile(filename, write_permission);
   SetupHistos();
   Setup(geant, ftpc_data);
+
+  St_ffs_gepoint *ffs_gepoint = (St_ffs_gepoint *)ftpc_data->Find("ffs_fgepoint");
+ 
+  if (!ffs_gepoint) {
+    // event processed with slow simulator
+    gMessMgr->Message("", "I", "OST") << "This event was processed with the slow simulator!" << endm;
+    gMessMgr->Message("", "I", "OST") << "Most information will be missing due to lack of geant hit information." << endm;
+  }
+  
+  Info();
+  FillHitsOnTrack();
+
+  if (ffs_gepoint) {
+    // fast simulator was present
+    FillParentHistos();
+    FillMomentumHistos();
+  }
+
+  FillEventHistos();
+  FillCutHistos();
+  DivideHistos();
+  WriteHistos();
 }
 
 
@@ -293,6 +322,28 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
   SetupFile(filename, write_permission);
   SetupHistos();
   Setup(geant, ftpc_data);
+
+  St_ffs_gepoint *ffs_gepoint = (St_ffs_gepoint *)ftpc_data->Find("ffs_fgepoint");
+ 
+  if (!ffs_gepoint) {
+    // event processed with slow simulator
+    gMessMgr->Message("", "I", "OST") << "This event was processed with the slow simulator!" << endm;
+    gMessMgr->Message("", "I", "OST") << "Most information will be missing due to lack of geant hit information." << endm;
+  }
+  
+  Info();
+  FillHitsOnTrack();
+
+  if (ffs_gepoint) {
+    // fast simulator was present
+    FillParentHistos();
+    FillMomentumHistos();
+  }
+
+  FillEventHistos();
+  FillCutHistos();
+  DivideHistos();
+  WriteHistos();
 }
 
 
@@ -550,11 +601,17 @@ void StFtpcTrackEvaluator::Setup(St_DataSet *geant, St_DataSet *ftpc_data)
     
     GeantHitInit((St_g2t_ftp_hit *)geantI("g2t_ftp_hit"));
     GeantTrackInit((St_g2t_track *)geantI("g2t_track"), (St_g2t_ftp_hit *)geantI("g2t_ftp_hit"));
-    FastSimHitInit((St_ffs_gepoint *)ftpc_data->Find("ffs_fgepoint"));   
-    ParentTrackInit();
-    CalcSplitTracks();
+    
+    St_ffs_gepoint *ffs_gepoint = (St_ffs_gepoint *)ftpc_data->Find("ffs_fgepoint");
+
+    if (ffs_gepoint) {
+      // event processed with fast simulator
+      FastSimHitInit(ffs_gepoint);   
+      ParentTrackInit();
+      CalcSplitTracks();
+    }   
   }
- 
+  
   return;
 }
 
