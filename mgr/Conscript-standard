@@ -137,7 +137,23 @@ if ( $pkg =~ /^StHbtMaker$/ ) {
     print "CPPPATH = $CPPPATH\n" if $param::debug;
 }
 
-if ( $pkg =~ /^StDaqLib$/ || $pkg =~ /^StMuDSTMaker$/ ) {
+# This block can be used for ANY make having a 2 level
+# directory structure + auto-globbing
+if ( $pkg =~ /^StMuDSTMaker$/ ) {
+    $CPPPATH = "#" . $Dir;
+
+    foreach my $subdir ( glob("$Dir/*") ){
+	if( -d $subdir && $subdir ne "$Dir/CVS"){
+	    #print "Inserting $subdir\n";
+	    $CPPPATH  .= $main::PATH_SEPARATOR . "#"  . $subdir;
+	}
+    }
+    $CPPPATH .= $main::PATH_SEPARATOR . $env->{CPPPATH};
+    print "CPPPATH = $CPPPATH\n" if $param::debug;
+}
+
+
+if ( $pkg =~ /^StDaqLib$/ ) {
     $CPPPATH = "#" . $Dir . $main::PATH_SEPARATOR . $env->{CPPPATH};
     print "CPPPATH = $CPPPATH\n" if $param::debug;
 }
