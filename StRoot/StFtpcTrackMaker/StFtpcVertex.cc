@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.cc,v 1.4 2000/11/10 18:39:25 oldi Exp $
+// $Id: StFtpcVertex.cc,v 1.5 2000/11/28 14:00:53 hummler Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.5  2000/11/28 14:00:53  hummler
+// protect vertex finder against nan
+//
 // Revision 1.4  2000/11/10 18:39:25  oldi
 // Changes due to replacement of StThreeVector by TVector3.
 // New constructor added to find the main vertex with given point array.
@@ -158,6 +161,11 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints)
   
   SetX((Double_t) 0);
   SetY((Double_t) 0);
+  if(vertex*0 != 0)
+    {
+      cerr << "vertex not found, setting to 0!" << endl;
+      vertex = 0;
+    }
   SetZ((Double_t) vertex);
 }
 
@@ -266,6 +274,11 @@ StFtpcVertex::StFtpcVertex(TClonesArray *hits)
   
   SetX(0.);
   SetY(0.);
+  if(vertex*0 != 0)
+    {
+      cerr << "vertex not found, setting to 0!" << endl;
+      vertex = 0;
+    }
   SetZ((Double_t) vertex);
 }
 
