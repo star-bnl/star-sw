@@ -1,6 +1,7 @@
 #ifndef STRARETRACK_HH
 #define STRARETRACK_HH
 #include "TObject.h"
+#include <math.h>
 
 class StPrimaryTrack;
 
