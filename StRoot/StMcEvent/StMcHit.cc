@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.cc,v 2.4 2000/04/18 00:55:14 calderon Exp $
+ * $Id: StMcHit.cc,v 2.5 2000/05/05 15:25:43 calderon Exp $
  * $Log: StMcHit.cc,v $
+ * Revision 2.5  2000/05/05 15:25:43  calderon
+ * Reduced dependencies and made constructors more efficient
+ *
  * Revision 2.4  2000/04/18 00:55:14  calderon
  * added printout of local momentum to operator<<
  *
@@ -24,19 +27,18 @@
  *
  **************************************************************************/
 #include "StMcHit.hh"
-#include "StMcTrack.hh"
 
 #include "tables/St_g2t_hits_Table.h"
 
-static const char rcsid[] = "$Id: StMcHit.cc,v 2.4 2000/04/18 00:55:14 calderon Exp $";
+static const char rcsid[] = "$Id: StMcHit.cc,v 2.5 2000/05/05 15:25:43 calderon Exp $";
 
 StMcHit::StMcHit()
     : mPosition(0.,0.,0.), mdE(0),mdS(0),mParentTrack(0)
 { /* noop */   }
 
-StMcHit::StMcHit(const StThreeVectorF& p,
+StMcHit::StMcHit(const StThreeVectorF& x,const StThreeVectorF& p,
 		 float de, float ds, StMcTrack* parent)
-    : mPosition(p), mdE(de), mdS(ds), mParentTrack(parent)
+    : mPosition(x), mLocalMomentum(p), mdE(de), mdS(ds), mParentTrack(parent)
 { /* noop */ }
 
 StMcHit::StMcHit(g2t_hits_st* pt)

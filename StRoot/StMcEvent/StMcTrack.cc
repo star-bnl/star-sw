@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.10 2000/05/04 22:46:01 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.11 2000/05/05 15:25:44 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.11  2000/05/05 15:25:44  calderon
+ * Reduced dependencies and made constructors more efficient
+ *
  * Revision 2.10  2000/05/04 22:46:01  calderon
  * read the pdg Id ALSO from the g2t_track table.  This caused problems
  * for embedded tracks.
@@ -57,11 +60,6 @@ using std::find;
 
 #include "StMcTrack.hh"
 
-#include "StMcVertex.hh"
-#include "StMcTpcHit.hh"
-#include "StMcSvtHit.hh"
-#include "StMcFtpcHit.hh"
-
 #include "StMcContainers.hh"
 #include "StParticleTable.hh"
 #include "StParticleDefinition.hh"
@@ -69,7 +67,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.10 2000/05/04 22:46:01 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.11 2000/05/05 15:25:44 calderon Exp $";
 
 StMcTrack::StMcTrack() 
 {

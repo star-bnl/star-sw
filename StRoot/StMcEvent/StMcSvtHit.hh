@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.hh,v 2.7 2000/04/19 14:34:48 calderon Exp $
+ * $Id: StMcSvtHit.hh,v 2.8 2000/05/05 15:25:44 calderon Exp $
  * $Log: StMcSvtHit.hh,v $
+ * Revision 2.8  2000/05/05 15:25:44  calderon
+ * Reduced dependencies and made constructors more efficient
+ *
  * Revision 2.7  2000/04/19 14:34:48  calderon
  * More corrections for the SSD, thanks Helen
  *
@@ -54,7 +57,7 @@ class g2t_svt_hit_st;
 class StMcSvtHit : public StMcHit {
 public:
     StMcSvtHit();
-    StMcSvtHit(const StThreeVectorF&,
+    StMcSvtHit(const StThreeVectorF&,const StThreeVectorF&,
 	     const float, const float,
 	     StMcTrack*);
     StMcSvtHit(g2t_svt_hit_st*);
