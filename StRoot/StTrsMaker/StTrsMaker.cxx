@@ -1,10 +1,6 @@
-// $Id: StTrsMaker.cxx,v 1.34 1999/05/28 02:55:44 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.33 1999/04/29 00:15:10 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
-// Revision 1.34  1999/05/28 02:55:44  lasiuk
-// change default settings for testing.  Only in the Maker!
-// Remove histograms
-//
 // Revision 1.33  1999/04/29 00:15:10  lasiuk
 // make sure to clean up pointers that are stored
 // in the StTrsRawDataEvent() because they are allocated
@@ -191,7 +187,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.34 1999/05/28 02:55:44 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.33 1999/04/29 00:15:10 lasiuk Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -199,11 +195,12 @@ ClassImp(slowcontrolDataSet)
 ClassImp(StTrsMaker)
 
 StTrsMaker::StTrsMaker(const char *name):
-mMiniSegmentLength(400.*millimeter),  // used to be 4mm
+mMiniSegmentLength(4.*millimeter),
 mFirstSectorToProcess(1),
 mLastSectorToProcess(24),
 StMaker(name)
-{/* nopt */ }
+{
+}
 
 StTrsMaker::~StTrsMaker() { /* nopt */ }
 
@@ -292,8 +289,6 @@ Int_t StTrsMaker::Init()
    //mElectronicsDb->print();
 #endif
 
-   //
-   // Select the gas: Ar, NeCO2, P10 available
    string gas =("P10");
    mGasDb = new StTrsDeDx(gas);
    //mGasDb->print();
@@ -316,14 +311,13 @@ Int_t StTrsMaker::Init()
    // A Wire Plane
    mWireHistogram =
        StTrsWireHistogram::instance(mGeometryDb, mSlowControlDb);
-   mWireHistogram->setDoGasGain(true);
-   mWireHistogram->setDoGasGainFluctuations(false); // used to be true
+   mWireHistogram->setDoGasGain(true);             // True by default
+   mWireHistogram->setDoGasGainFluctuations(true);
+   //cout << ">innerSectorGasGain= " << mSlowControlDb->innerSectorGasGain() << endl;
+   //cout << ">outerSectorGasGain= " << mSlowControlDb->outerSectorGasGain() << endl;
    mWireHistogram->setGasGainInnerSector(mSlowControlDb->innerSectorGasGain());
    mWireHistogram->setGasGainOuterSector(mSlowControlDb->outerSectorGasGain());
    mWireHistogram->setDoTimeDelay(false);
-   
-   //cout << ">innerSectorGasGain= " << mSlowControlDb->innerSectorGasGain() << endl;
-   //cout << ">outerSectorGasGain= " << mSlowControlDb->outerSectorGasGain() << endl;
 
    //
    // An Analog (for calculation)
@@ -336,10 +330,10 @@ Int_t StTrsMaker::Init()
    mChargeTransporter =
        StTrsFastChargeTransporter::instance(mGeometryDb, mSlowControlDb, mGasDb, mMagneticFieldDb);
    // set status:
-   mChargeTransporter->setChargeAttachment(false); // used to be true
+   mChargeTransporter->setChargeAttachment(true);
    mChargeTransporter->setGatingGridTransparency(false);
-   mChargeTransporter->setTransverseDiffusion(false);  // used to be true
-   mChargeTransporter->setLongitudinalDiffusion(false); // used to be true
+   mChargeTransporter->setTransverseDiffusion(true);
+   mChargeTransporter->setLongitudinalDiffusion(true);
    mChargeTransporter->setExB(false);
 
 
@@ -359,8 +353,8 @@ Int_t StTrsMaker::Init()
    //-->StTrsSlowAnalogSignalGenerator::symmetricGaussianExact
    //-->asymmetricGaussianApproximation
    //-->StTrsSlowAnalogSignalGenerator::realShaper
-   static_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
-       setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
+     static_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
+	 setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
    mAnalogSignalGenerator->setDeltaRow(0);
    mAnalogSignalGenerator->setDeltaPad(2);
    mAnalogSignalGenerator->setSignalThreshold(.1*millivolt);
@@ -375,41 +369,25 @@ Int_t StTrsMaker::Init()
 
    //
    // Output is into an StTpcRawDataEvent* vector<StTrsDigitalSector*>
-   // which is accessible via the StTrsUnpacker.  Initialize the pointers!
+   // which is accessible via the StTrsUnpacker
    mUnPacker=0;
    mAllTheData=0;
+   //mUnPacker = new StTrsUnpacker;
 
    //
-   // Maker Initialization ---now given by default arguments in the constructor
-   //    mFirstSectorToProcess = 1;
-   //    mLastSectorToProcess  = 1;
-
-
-   // This should really be a boolean...when ROOT can handle it, change it!
-   mProcessPseudoPadRows = 0;  // 0 is no, 1 is yes!
-
+   // Maker Initialization
    //
-   // Construct constant data sets.  This is what is passed downstream
+//    mFirstSectorToProcess = 1;
+//    mLastSectorToProcess  = 1;
+
+
+   // This should really be a boolean
+   mProcessPseudoPadRows = 0;  // 0 is no!
+
    mUnPacker = new StTrsUnpacker();
    mAllTheData = new StTrsRawDataEvent();
    AddConst(new St_ObjectSet("Event"  , mAllTheData));
    AddConst(new St_ObjectSet("Decoder", mUnPacker));
-
-// #ifdef HISTOGRAM
-//     //
-//     //  Open histogram file and book tuple
-//     //
-//     string fname = "hbook";
-//     mHbookFile = new StHbookFile(fname.c_str());
-
-//     mTupleSize = 2;
-//     float tuple[mTupleSize];
-//     StHbookTuple *theTuple  =
-// 	new StHbookTuple("segment", tupleSize1);
-//     *theTuple << "seg"  << "n" << book;
-        
-// #endif
-
    
    return StMaker::Init();
 }
@@ -432,10 +410,51 @@ void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
 Int_t StTrsMaker::Make(){
     //  PrintInfo();
 
+    // Somehow this isn't quite right.  The new maker schem deletes
+    // the data set each time through the loop, so an "event" and
+    // a "reader" must be created each time...The maker shouldn't have
+    // to do that...
     
     //Do not use this unless you really know what you are
-    // doing...This is a histogram diagnostic to compare
-    // the GEANT hits to those produced by TRS!
+    // doing...
+#ifdef HISTOGRAM
+    cout << "Histogram" << endl;
+
+    //
+    StTpcCoordinateTransform transformer(mGeometryDb,
+					 mSlowControlDb,
+					 mElectronicsDb);
+    StTpcPadCoordinate raw;
+    StTpcLocalCoordinate local;
+    //
+    
+    //
+    //  Open histogram file and book tuple
+    //
+    string fname = "hbook";
+    StHbookFile *hbookFile =
+	new StHbookFile(fname.c_str());
+
+    //
+    // Unpacker Data
+    const int tupleSize1 = 8;
+    float tuple[tupleSize1];
+    StHbookTuple *theTuple  =
+	new StHbookTuple("data", tupleSize1);
+    *theTuple << "sec"  << "row" << "pad"
+	      << "x"   << "y"   << "z"
+	      << "amp" << "t" << book;
+    
+    //
+    const int tupleSize2 = 8;
+    float tuple2[tupleSize2];
+    StHbookTuple *secTuple  =
+	new StHbookTuple("raw_data", tupleSize2);
+    
+    *secTuple << "sec" << "row"
+	      << "x"  << "y"  << "z"
+	      << "xr" << "yr" << "zr" << book;
+#endif
 
     int currentSectorProcessed = mFirstSectorToProcess;
 
@@ -522,7 +541,10 @@ Int_t StTrsMaker::Make(){
 	   (bsectorOfHit == currentSectorProcessed) &&
 	   (i            != no_tpc_hits           )) {
 
-	    // CAREFUL:
+	    // I can't believe this.  After careful design of the coordinate
+	    // transformation, I am reduced to this because I am fixed to GEANT
+	    // coordinates.  This is the problem you get if you
+	    // don't use a common data base
 	    // GEANT uses: (which is not correct!)
 	    //double GEANTDriftLength = 208.55119*centimeter;
 	    //double GEANTOffSet      = mGeometryDb->frischGrid() - GEANTDriftLength;
@@ -571,7 +593,8 @@ Int_t StTrsMaker::Make(){
 					      tpc_hit->p[1]*GeV,
 					      tpc_hit->p[2]*GeV);
 
-	    // I need PID info here, for the ionization splitting (beta gamma)!
+	    // I need PID info here, otherwise it is a pion.
+	    // This is needed for the ionization splitting!
 	    int geantPID = tpc_track[tpc_hit->track_p].ge_pid;
 	    //cout << "gentPID " << gentPID << " " << tpc_hit->de << endl;
 	    // WARNING:  cannot use "abs" (not overloaded (double) for LINUX!
@@ -581,6 +604,17 @@ Int_t StTrsMaker::Make(){
 					tpc_hit->ds*centimeter,
 					geantPID);
 
+#ifdef HISTOGRAM
+	    tuple2[0] = static_cast<float>(bsectorOfHit);
+	    tuple2[1] = static_cast<float>(bpadrow);
+	    tuple2[2] = static_cast<float>(tpc_hit->x[0]);
+	    tuple2[3] = static_cast<float>(tpc_hit->x[1]);
+	    tuple2[4] = static_cast<float>(tpc_hit->x[2]);
+	    tuple2[5] = static_cast<float>(sector12Coordinate.x());
+	    tuple2[6] = static_cast<float>(sector12Coordinate.y());
+	    tuple2[7] = static_cast<float>(sector12Coordinate.z());
+	    secTuple->fill(tuple2);
+#endif
 // 	    PR(hitPosition);
 // 	    PR(sector12Coordinate);
 // 	    PR(hitMomentum.mag());
@@ -608,12 +642,6 @@ Int_t StTrsMaker::Make(){
 	    int breakNumber = max(aSegment.ds()/mMiniSegmentLength,1.);
 // 	    PR(aSegment.ds()/millimeter);
 // 	    PR(breakNumber);
-#ifdef HISTOGRAM
-	    tuple[0] = static_cast<float>(aSegment.ds()/millimeter);
-	    tuple[1] = static_cast<float>(breakNumber);
-	    theTuple->fill(tuple);
-#endif
-
 	    aSegment.split(mGasDb, mMagneticFieldDb, breakNumber, &comp);
 	    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
@@ -746,6 +774,22 @@ Int_t StTrsMaker::Make(){
 			     << " " << zz << '\t'
 			     << static_cast<int>(*(listOfSequences[kk].firstAdc)) << endl;
 #endif
+#ifdef HISTOGRAM
+			tuple[0] = static_cast<float>(isector);
+			tuple[1] = static_cast<float>(irow);
+			tuple[2] = static_cast<float>(padList[ipad]);
+			raw.setSector(isector);
+			raw.setRow(irow);
+			raw.setPad(padList[ipad]);
+			raw.setTimeBucket(listOfSequences[kk].startTimeBin+zz);
+			transformer(raw,local);
+			tuple[3] = static_cast<float>(local.pos().x());
+			tuple[4] = static_cast<float>(local.pos().y());
+			tuple[5] = static_cast<float>(local.pos().z());
+			tuple[6] = static_cast<float>(static_cast<int>(*(listOfSequences[kk].firstAdc)));
+			tuple[7] = static_cast<float>(listOfSequences[kk].startTimeBin+zz);
+ 		      theTuple->fill(tuple);
+#endif
 			listOfSequences[kk].firstAdc++;
 		    } // zz
 
@@ -797,7 +841,8 @@ Int_t StTrsMaker::Finish()
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.34 1999/05/28 02:55:44 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.33 1999/04/29 00:15:10 lasiuk Exp $\n");
+//  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.77  1999/06/21 12:46:04  fisyak
+#  Fix rtti and exceptions for ROOT_LEVEL < 2.22
+#
 #  Revision 1.76  1999/06/16 12:37:01  fisyak
 #  Changes for egcs-1.1.2 on Solaris
 #
@@ -206,7 +209,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/06/16 12:37:01 $ 
+#             Last modification $Date: 1999/06/21 12:46:04 $ 
 #. default setings
 
 MAKE  := gmake
@@ -424,6 +427,9 @@ ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_re
   LD       := $(CXX)
   SO	   := $(CXX)
   CXXFLAGS := $(DEBUG) -fPIC -Wall -I/usr/include/g++
+ifeq (,$(findstring 2.22,$(ROOT_LEVEL)))
+  CXXFLAGS := -fno-rtti -fno-exceptions -fno-for-scope
+endif
 #                                             -fpipe
   CFLAGS   := $(DEBUG) -fPIC -Wall
   CPPFLAGS += f2cFortran

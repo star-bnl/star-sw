@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.h,v 1.5 1999/06/16 10:50:19 ullrich Exp $
+ * $Id: StGlobalTrack.h,v 1.4 1999/04/28 22:27:33 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,10 +13,8 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.h,v $
- * Revision 1.5  1999/06/16 10:50:19  ullrich
- * Added members to hold the number of hits in case
- * the hits are not stored on the DST. Sync changes in
- * StEvent with StRootEvent.
+ * Revision 1.4  1999/04/28 22:27:33  fisyak
+ * New version with pointer instead referencies
  *
  * the hits are not stored on the DST. Sync changes in
  * StEvent with StRootEvent.
@@ -89,11 +87,11 @@ using namespace std;
 #define StGlobalTrack_hh
 
 #include "StTrack.h"
-
-    StGlobalTrack(const dst_track_st&);
-    StGlobalTrack(dst_track_st* trk,
+                  Double_t curvature,
+                  Double_t dip,
+                  Double_t phase,
                   double curvature,
-                  double dip,
+		  Int_t h);
                   double phase,
                   StThreeVectorD& origin,
 		  int h);
@@ -105,25 +103,11 @@ using namespace std;
     virtual const StDedx*             ftpcDedx() const;
     virtual const StTrackPidTraits*   pidTraits() const;
     virtual const StDedx*             tpcDedx() const   { return  mTpcDedx;   };
-    virtual const StDedx*             ftpcDedx() const  { return  mFtpcDedx;  }; 
-    virtual const StTrackPidTraits&   pidTraits() const { return *mPidTraits; };
-    StGlobalTrack(const StGlobalTrack&);
-    virtual int  numberOfTpcHits() const;
     virtual int  numberOfSvtHits() const;
     virtual int  numberOfFtpcHits() const;
 
     virtual void setTpcDedx(StDedx*);      
     virtual void setFtpcDedx(StDedx*);     
-    virtual void setSvtDedx(StDedx*);
-
-    //
-    //  These 3 set-functions only make sense if no hits are 
-    //  available (e.g. they are not stored on the DST).
-    //  Else the number of hits is simply determined by the size
-    //  of the hit collections.
-    //
-    virtual void  setNumberOfTpcHits(unsigned char);
-    virtual void  setNumberOfSvtHits(unsigned char);
     virtual void  setNumberOfFtpcHits(unsigned char);
 
     //
@@ -143,11 +127,7 @@ protected:
     StVecPtrSvtHit*   mSvtHits;
     StVecPtrFtpcHit*  mFtpcHits;
     StDedx*           mTpcDedx;
-    StDedx*           mFtpcDedx;
-    StDedx*           mSvtDedx;       
-    StTrackPidTraits* mPidTraits;
-    unsigned char     mNumberOfTpcHits;
-    unsigned char     mNumberOfSvtHits;
+  ClassDef(StGlobalTrack,1)  //StGlobalTrack structure
     unsigned char     mNumberOfFtpcHits;
     
     ClassDef(StGlobalTrack,1)  //StGlobalTrack structure

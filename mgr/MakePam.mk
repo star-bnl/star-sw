@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.95 1999/06/16 12:37:02 fisyak Exp $
+# $Id: MakePam.mk,v 1.96 1999/06/19 20:31:51 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.96  1999/06/19 20:31:51  fisyak
+# Fix bugs with include path
+#
 # Revision 1.95  1999/06/16 12:37:02  fisyak
 # Changes for egcs-1.1.2 on Solaris
 #
@@ -247,9 +250,9 @@ INCLUDES += -I. -I../ -I/usr/include -I$(STAF_SYS_INCS) \
             -I$(CERN_ROOT)/include
 
 ifneq ($(OUT_DIR),$(STAR))        
-INCLUDES := $(INCLUDES) -I$(STAR)/.share/$(DOMAIN) -I$(STAR)/.share/tables
+INCLUDES += -I$(STAR)/.share/$(DOMAIN) -I$(STAR)/.share/tables
 endif                          
-CPPFLAGS := $(CPPFLAGS) $(INCLUDES)
+CPPFLAGS += $(INCLUDES)
 FFLAGS   += -DCERNLIB_TYPE
 #                                   -I$(CERN_ROOT)/src/geant321 
 #                 I have idl- or g-files
