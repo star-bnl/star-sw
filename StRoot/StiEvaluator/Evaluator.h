@@ -17,6 +17,7 @@ class Evaluator : public Named, public Described, public TObject
   void run(const char * inputFile);
   void save(const char * inputFile);
   void save(const string & targetDirectory);
+  /*
   void saveHtml(const char * inputFile);
   void saveHtml(const string &targetDirectory);
   void saveHtml(const char * targetDirectory,
@@ -41,6 +42,7 @@ class Evaluator : public Named, public Described, public TObject
 		StiEvaluatorHistograms* hg1,
 		StiEvaluatorHistograms* hg2,
 		StiEvaluatorHistograms* hg3);
+  */
   StiEvaluatorHistograms * add(StiEvaluatorHistograms *);
   
  protected:

@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.147  2005/01/25 17:23:48  pruneau
+// removed references to html package
+//
 // Revision 1.146  2005/01/21 03:13:37  pruneau
 // turned off StiHistograms
 //
@@ -201,7 +204,6 @@
 #include "StiMaker.h"
 #include "TFile.h"
 #include "TCanvas.h"
-#include "Sti/Html/HistoDocument.h"
 #include "Sti/StiTrackingPlots.h"
 #include "Sti/RadLengthPlots.h"
 #include "Sti/StiTrackingParameters.h"
