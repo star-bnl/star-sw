@@ -1,13 +1,12 @@
 /**********************************************************
- * $Id: StRichRingCalculator.h,v 2.1 2000/09/29 01:35:37 horsley Exp $
+ * $Id: StRichRingCalculator.h,v 2.2 2000/11/01 17:40:52 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingCalculator.h,v $
- *  Revision 2.1  2000/09/29 01:35:37  horsley
- *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
- *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
+ *  Revision 2.2  2000/11/01 17:40:52  lasiuk
+ *  add const to access member functions
  *
  *  Revision 2.1  2000/09/29 01:35:37  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
@@ -34,37 +33,35 @@
 class  StRichRingCalculator {
 
 public:
-  StRichRingCalculator(StRichTrack* track);
-  StRichRingCalculator(StRichTrack* track, StParticleDefinition* );
-  ~StRichRingCalculator();
+    StRichRingCalculator(StRichTrack* track);
+    StRichRingCalculator(StRichTrack* track, StParticleDefinition* );
+    ~StRichRingCalculator();
 
-  double         calculateArea(double , bool);
-  double         calculateConstantArea(double , bool, double&);
-  double         getTotalArea();
-  double         getPadPlaneArea();
+    void   clear();
+    double calculateArea(double , bool);
+    double calculateConstantArea(double , bool, double&);
 
-  vector<StThreeVectorF >& getPtsToDraw();
-  StRichRingPoint* getRing(StRichRingDefinition ringType);
+    void   setParticleType(StParticleDefinition* particle);
 
-  void   setParticleType(StParticleDefinition* particle);
-  double getTotalAngle();
-  double getConstantAreaAngle();
+    double getTotalArea()          const;
+    double getPadPlaneArea()       const;
+    double getTotalAngle()         const;
+    double getRingWidth()          const;
+    double getConstantAreaAngle()  const;
+    double getMeanPathInRadiator() const;
+    double getMeanPathInQuartz()   const;
 
-  double getInnerDistance(StThreeVectorF& testPoint, double& innerAngle);
-  double getOuterDistance(StThreeVectorF& testPoint, double& outerAngle);
-  double getMeanDistance(StThreeVectorF& testPoint, double& meanAngle);
+    StThreeVectorF& getInnerRingPoint();
+    StThreeVectorF& getOuterRingPoint();
+    StThreeVectorF& getMeanRingPoint();
 
-  double getMeanPathInRadiator();
-  double getMeanPathInQuartz();
+    double getInnerDistance(StThreeVectorF& testPoint, double& innerAngle);
+    double getOuterDistance(StThreeVectorF& testPoint, double& outerAngle);
+    double getMeanDistance(StThreeVectorF& testPoint, double& meanAngle);
 
-  void   clear();
-  double getRingWidth();
-  
-  StThreeVectorF getInnerRingPoint();
-  StThreeVectorF getOuterRingPoint();
-  StThreeVectorF getMeanRingPoint();
+    vector<StThreeVectorF >& getPtsToDraw();
  
-
+    StRichRingPoint* getRing(StRichRingDefinition ringType);
 
 private:
   StRichRingPoint* mInnerRing;
@@ -75,7 +72,7 @@ private:
   StRichMinimization* mOuterMinimization;
   StRichMinimization* mMeanMinimization;
 
-  vector<StThreeVectorF > vectorOfPtsToDraw;
+  vector<StThreeVectorF> vectorOfPtsToDraw;
 
   StThreeVectorF  closestInnerRingPoint;
   StThreeVectorF  closestOuterRingPoint;
@@ -89,4 +86,16 @@ private:
   double mMeanPathInQuartz;
 };
 
+inline double StRichRingCalculator::getTotalArea() const { return mTotalArea;}
+inline double StRichRingCalculator::getPadPlaneArea() const { return mPadPlaneArea;}
+inline double StRichRingCalculator::getTotalAngle() const { return mTotalAngleOnPadPlane;}
+
+inline double StRichRingCalculator::getConstantAreaAngle() const {return mConstantAreaAngle;}
+
+inline double StRichRingCalculator::getMeanPathInRadiator() const { return mMeanPathInRadiator;}
+inline double StRichRingCalculator::getMeanPathInQuartz() const { return mMeanPathInQuartz;}
+
+inline StThreeVectorF& StRichRingCalculator::getOuterRingPoint() { return closestOuterRingPoint;}
+inline StThreeVectorF& StRichRingCalculator::getInnerRingPoint() { return closestInnerRingPoint;}
+inline StThreeVectorF& StRichRingCalculator::getMeanRingPoint()  { return closestMeanRingPoint;}
 #endif
