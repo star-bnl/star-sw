@@ -324,17 +324,21 @@ void StEventQAMaker::MakeHistEvSum() {
   if (event->softwareMonitor()) {
     StTpcSoftwareMonitor *tpcMon = event->softwareMonitor()->tpc();
     StFtpcSoftwareMonitor *ftpcMon = event->softwareMonitor()->ftpc();
-    Float_t tpcChgWest=0;
-    Float_t tpcChgEast=0;
-    for (UInt_t i=0; i<24; i++) {
-      if (i<12)
-	tpcChgWest += tpcMon->chrg_tpc_in[i]+tpcMon->chrg_tpc_out[i];
-      else
-	tpcChgEast += tpcMon->chrg_tpc_in[i]+tpcMon->chrg_tpc_out[i];
+    if (tpcMon) {
+      Float_t tpcChgWest=0;
+      Float_t tpcChgEast=0;
+      for (UInt_t i=0; i<24; i++) {
+        if (i<12)
+	  tpcChgWest += tpcMon->chrg_tpc_in[i]+tpcMon->chrg_tpc_out[i];
+        else
+	  tpcChgEast += tpcMon->chrg_tpc_in[i]+tpcMon->chrg_tpc_out[i];
+      }
+      m_glb_trk_chg->Fill(tpcChgEast/(tpcChgWest+1.e-10),(float) eventClass);
     }
-    m_glb_trk_chg->Fill(tpcChgEast/(tpcChgWest+1.e-10),(float) eventClass);
-    m_glb_trk_chgF->Fill(ftpcMon->chrg_ftpc_tot[1]/(ftpcMon->chrg_ftpc_tot[0]+1.e-10),
-      (float) eventClass);
+    if (ftpcMon) {
+      m_glb_trk_chgF->Fill(ftpcMon->chrg_ftpc_tot[1]/(ftpcMon->chrg_ftpc_tot[0]+1.e-10),
+        (float) eventClass);
+    }
   }
 }
 
@@ -2128,8 +2132,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.60 2004/04/23 23:15:29 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.61 2004/05/29 12:41:42 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.61  2004/05/29 12:41:42  genevb
+// handle absence of tpc & ftpc software monitors
+//
 // Revision 2.60  2004/04/23 23:15:29  genevb
 // Added signedDCA (Impact) plots for globals
 //
