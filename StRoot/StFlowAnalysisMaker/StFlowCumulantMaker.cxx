@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.1 2001/11/02 04:47:42 aihong Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.2 2001/11/08 03:12:24 aihong Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -18,6 +18,7 @@
 #include "float.h"
 #include "StMaker.h"
 #include "StFlowCumulantMaker.h"
+#include "StFlowAnalysisMaker.h"
 #include "StFlowMaker/StFlowMaker.h"
 #include "StFlowMaker/StFlowEvent.h"
 #include "StFlowTagMaker/StFlowTagMaker.h"
@@ -27,7 +28,6 @@
 #include "StEnumerations.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
-#include "TVector2.h"
 #include "TFile.h"
 #include "TString.h"
 #include "TH1.h"
@@ -106,98 +106,18 @@ Int_t StFlowCumulantMaker::Make() {
 Int_t StFlowCumulantMaker::Init() {
   // Book histograms
 
-  float ptMaxPart = 2.;
-  if (pFlowSelect->PtMaxPart()) {
-    ptMaxPart = pFlowSelect->PtMaxPart();
-  }
   xLabel = "Pseudorapidity";
   if (strlen(pFlowSelect->PidPart()) != 0) { xLabel = "Rapidity"; }
 
   // Commit with these values.
-  const float triggerMin      =    0.;
-  const float triggerMax      =   10.;
   const float etaMin          =  -4.5;
   const float etaMax          =   4.5;
   const float ptMin           =    0.;
-  //  const float ptMax           =    2.;
   const float ptMax           =    8.;
-  const float chargeMin       =  -2.5;
-  const float chargeMax       =   2.5; 
-  const float dcaMin          =    0.;
-  const float dcaMax          =   1.2; 
-  const float glDcaMax        =   3.6; 
-  const float chi2Min         =    0.;
-  const float chi2Max         =    5.; 
-  const float fitPtsMinTpc    =  -0.5;
-  const float fitPtsMaxTpc    =  60.5; 
-  const float maxPtsMinTpc    =  -0.5;
-  const float maxPtsMaxTpc    =  60.5; 
-  const float fitPtsMinFtpc   =  -0.5;
-  const float fitPtsMaxFtpc   =  13.5; 
-  const float maxPtsMinFtpc   =  -0.5;
-  const float maxPtsMaxFtpc   =  13.5; 
-  const float fitOverMaxMin   =    0.;
-  const float fitOverMaxMax   =   1.2; 
-  const float origMultMin     =    0.;
-  const float origMultMax     = 2000.; 
-  const float MultEtaMin      =    0.;
-  const float MultEtaMax      = 1000.; 
-  const float totalMultMin    =    0.;
-  const float totalMultMax    = 2000.; 
-  const float corrMultMin     =    0.;
-  const float corrMultMax     = 2000.; 
-  const float multOverOrigMin =    0.;
-  const float multOverOrigMax =    1.; 
-  const float vertexZMin      = -150.;
-  const float vertexZMax      =  150.; 
-  const float vertexXYMin     =   -1.;
-  const float vertexXYMax     =    1.; 
-  const float etaSymZMin      =  -0.5; 
-  const float etaSymZMax      =   0.5; 
-  const float etaSymMin       =   -5.; 
-  const float etaSymMax       =    5.; 
-  const float phiMin          =    0.;
-  const float phiMax          = twopi; 
-  const float multMin         =    0.;
-  const float multMax         = 2000.;
-  const float pidMin          =  -10.;
-  const float pidMax          =   10.;
-  const float centMin         =  -0.5;
-  const float centMax         =   9.5;
-  const float pMin            =  -2.5;
-  const float pMax            =   1.5;
-  const float dEdxMax       = 0.00004;
-
 
   enum { // commit with this value
-	 nTriggerBins      = 11,
 	 nEtaBins          = 90,
-         //nEtaBins          = 30,
-	 //	 nPtBins           = 40,
 	 nPtBins           = 40,
-	 nChargeBins       = 50,
-	 nDcaBins          = 60,
-	 nChi2Bins         = 50,
-	 nFitPtsBinsTpc    = 61,
-	 nFitPtsBinsFtpc   = 14,
-	 nMaxPtsBinsTpc    = 61,
-	 nMaxPtsBinsFtpc   = 14,
-	 nFitOverMaxBins   = 40,
-	 nOrigMultBins     = 40,
-	 nMultEtaBins      = 50,
-	 nTotalMultBins    = 40,
-	 nMultOverOrigBins = 50,
-	 nMultPartBins     = 40,
-	 nVertexZBins      = 60,
-	 nVertexXYBins     = 50,
-	 nEtaSymBins       = 50,
-	 nPhi3DBins        = 18,
-	 nPsiBins          = 36,
-	 nMultBins         = 40,
-	 nPidBins          = 50,
-         nCentBins         = 10,
-	 nDedxBins        = 200,
-	 nMomenBins       = 200
   };
   
 
@@ -208,447 +128,8 @@ Int_t StFlowCumulantMaker::Init() {
    m_M=1;  //  if m_M =2, what measured is v2,v4, v6... etc. for harmonic 1,2,3
            //  m_M=2 is not working. do not know why at the moment.
  
-
-  // Trigger
-  mHistTrigger = new TH1F("Flow_Trigger", "Flow_Trigger",
-      nTriggerBins, triggerMin, triggerMax);
-  mHistTrigger->SetXTitle("Trigger: 1 minbias, 2 central, 3 laser, 10 other");
-  mHistTrigger->SetYTitle("Counts");
-
-  // Charge
-  mHistCharge = new TH1F("Flow_Charge", "Flow_Charge",
-      nChargeBins, chargeMin, chargeMax);
-  mHistCharge->SetXTitle("Charge");
-  mHistCharge->SetYTitle("Counts");
-    
-
-  // Distance of closest approach
-  // Tpc
-  mHistDcaTpc = new TH1F("Flow_Dca_Tpc", "Flow_Dca_Tpc",
-      nDcaBins, dcaMin, dcaMax);
-  mHistDcaTpc->SetXTitle("Track dca to Vertex (cm)");
-  mHistDcaTpc->SetYTitle("Counts");
-    
-  // Ftpc
-  mHistDcaFtpc = new TH1F("Flow_Dca_Ftpc", "Flow_Dca_Ftpc",
-      nDcaBins, dcaMin, dcaMax);
-  mHistDcaFtpc->SetXTitle("Track dca to Vertex (cm)");
-  mHistDcaFtpc->SetYTitle("Counts");
-    
-
-  // Distance of closest approach for global tracks
-  // Tpc
-  mHistDcaGlobalTpc = new TH1F("Flow_DcaGlobal_Tpc", "Flow_DcaGlobal_Tpc",
-      nDcaBins, dcaMin, glDcaMax);
-  mHistDcaGlobalTpc->SetXTitle("Global Track dca (cm)");
-  mHistDcaGlobalTpc->SetYTitle("Counts");
-
-  // Ftpc
-  mHistDcaGlobalFtpc = new TH1F("Flow_DcaGlobal_Ftpc", "Flow_DcaGlobal_Ftpc",
-      nDcaBins, dcaMin, glDcaMax);
-  mHistDcaGlobalFtpc->SetXTitle("Global Track dca (cm)");
-  mHistDcaGlobalFtpc->SetYTitle("Counts");
-
-    
-  // Chi2
-  // Tpc
-  mHistChi2Tpc = new TH1F("Flow_Chi2_Tpc", "Flow_Chi2_Tpc",
-      nChi2Bins, chi2Min, chi2Max);
-  mHistChi2Tpc->SetXTitle("Chi square per df");
-  mHistChi2Tpc->SetYTitle("Counts");
-  
-  // Ftpc
-  mHistChi2Ftpc = new TH1F("Flow_Chi2_Ftpc", "Flow_Chi2_Ftpc",
-      nChi2Bins, chi2Min, chi2Max);
-  mHistChi2Ftpc->SetXTitle("Chi square per df");
-  mHistChi2Ftpc->SetYTitle("Counts");
-  
-  
-  // FitPts
-  // Tpc
-  mHistFitPtsTpc = new TH1F("Flow_FitPts_Tpc", "Flow_FitPts_Tpc",
-      nFitPtsBinsTpc, fitPtsMinTpc, fitPtsMaxTpc);
-  mHistFitPtsTpc->SetXTitle("Fit Points");
-  mHistFitPtsTpc->SetYTitle("Counts");
-
-  // Ftpc
-  mHistFitPtsFtpc = new TH1F("Flow_FitPts_Ftpc", "Flow_FitPts_Ftpc",
-      nFitPtsBinsFtpc, fitPtsMinFtpc, fitPtsMaxFtpc);
-  mHistFitPtsFtpc->SetXTitle("Fit Points");
-  mHistFitPtsFtpc->SetYTitle("Counts");
-    
-
-  // MaxPts
-  // Tpc
-  mHistMaxPtsTpc = new TH1F("Flow_MaxPts_Tpc ", "Flow_MaxPts_Tpc ",
-      nMaxPtsBinsTpc , maxPtsMinTpc , maxPtsMaxTpc );
-  mHistMaxPtsTpc ->SetXTitle("Max Points");
-  mHistMaxPtsTpc ->SetYTitle("Counts");
-  
-  // Ftpc
-  mHistMaxPtsFtpc = new TH1F("Flow_MaxPts_Ftpc", "Flow_MaxPts_Ftpc",
-      nMaxPtsBinsFtpc, maxPtsMinFtpc, maxPtsMaxFtpc);
-  mHistMaxPtsFtpc->SetXTitle("Max Points");
-  mHistMaxPtsFtpc->SetYTitle("Counts");
-    
-
-  // FitOverMax
-  // Tpc
-  mHistFitOverMaxTpc = new TH1F("Flow_FitOverMax_Tpc", "Flow_FitOverMax_Tpc",
-      nFitOverMaxBins, fitOverMaxMin, fitOverMaxMax);
-  mHistFitOverMaxTpc->SetXTitle("Fit Points / Max Points");
-  mHistFitOverMaxTpc->SetYTitle("Counts");
-    
-  // Ftpc
-  mHistFitOverMaxFtpc = new TH1F("Flow_FitOverMax_Ftpc", "Flow_FitOverMax_Ftpc",
-      nFitOverMaxBins, fitOverMaxMin, fitOverMaxMax);
-  mHistFitOverMaxFtpc->SetXTitle("Fit Points / Max Points");
-  mHistFitOverMaxFtpc->SetYTitle("Counts");
-    
-
-  // OrigMult
-  mHistOrigMult = new TH1F("Flow_OrigMult", "Flow_OrigMult",
-      nOrigMultBins, origMultMin, origMultMax);
-  mHistOrigMult->SetXTitle("Original Mult");
-  mHistOrigMult->SetYTitle("Counts");
-
-  // MultEta
-  mHistMultEta = new TH1F("Flow_MultEta", "Flow_MultEta",
-      nMultEtaBins, MultEtaMin, MultEtaMax);
-  mHistMultEta->SetXTitle("Mult |eta| < 0.75");
-  mHistMultEta->SetYTitle("Counts");
-    
-  // Mult
-  mHistMult = new TH1F("Flow_Mult", "Flow_Mult",
-      nTotalMultBins, totalMultMin, totalMultMax);
-  mHistMult->SetXTitle("Mult");
-  mHistMult->SetYTitle("Counts");
-    
-  // MultOverOrig
-  mHistMultOverOrig = new TH1F("Flow_MultOverOrig", "Flow_MultOverOrig",
-      nMultOverOrigBins, multOverOrigMin, multOverOrigMax);
-  mHistMultOverOrig->SetXTitle("Mult / Orig. Mult");
-  mHistMultOverOrig->SetYTitle("Counts");
-    
-  // Mult correlated with the event planes
-  mHistMultPart = new TH1F("Flow_MultPart", "Flow_MultPart",
-      nMultPartBins, corrMultMin, corrMultMax);
-  mHistMultPart->SetXTitle("Mult of Correlated Particles");
-  mHistMultPart->SetYTitle("Counts");
-    
-  // VertexZ
-  mHistVertexZ = new TH1F("Flow_VertexZ", "Flow_VertexZ",
-      nVertexZBins, vertexZMin, vertexZMax);
-  mHistVertexZ->SetXTitle("Vertex Z (cm)");
-  mHistVertexZ->SetYTitle("Counts");
-    
-  // VertexXY
-  mHistVertexXY2D = new TH2F("Flow_VertexXY2D", "Flow_VertexXY2D",
-			     nVertexXYBins, vertexXYMin, vertexXYMax,
-			     nVertexXYBins, vertexXYMin, vertexXYMax);
-  mHistVertexXY2D->SetXTitle("Vertex X (cm)");
-  mHistVertexXY2D->SetYTitle("Vertex Y (cm)");
-    
-  // EtaSym vs. Vertex Z
-  mHistEtaSymVerZ2D = new TH2F("Flow_EtaSymVerZ2D", "Flow_EtaSymVerZ2D",
-    nVertexZBins, vertexZMin, vertexZMax, nEtaSymBins, etaSymZMin, etaSymZMax);
-  mHistEtaSymVerZ2D->SetXTitle("Vertex Z (cm)");
-  mHistEtaSymVerZ2D->SetYTitle("Eta Symmetry");
-
-  // EtaSym
-  mHistEtaSym = new TH1F("Flow_EtaSym", "Flow_EtaSym",
-      nEtaSymBins, etaSymMin, etaSymMax);
-  mHistEtaSym->SetXTitle("Eta Symmetry Ratio");
-  mHistEtaSym->SetYTitle("Counts");
-    
-  // EtaPtPhi
-  mHistEtaPtPhi3D = new TH3F("Flow_EtaPtPhi3D", "Flow_EtaPtPhi3D",
-      nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMax, nPhi3DBins,
-      phiMin, phiMax);
-  mHistEtaPtPhi3D->SetXTitle("Eta");
-  mHistEtaPtPhi3D->SetYTitle("Pt (GeV)");
-  mHistEtaPtPhi3D->SetZTitle("Phi (rad)");
-    
-  // Yield for all particles
-  mHistYieldAll2D = new TH2D("Flow_YieldAll2D", "Flow_YieldAll2D",
-    nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMax);
-  mHistYieldAll2D->Sumw2();
-  mHistYieldAll2D->SetXTitle("Pseudorapidty");
-  mHistYieldAll2D->SetYTitle("Pt (GeV)");
-
-  // Yield for particles correlated with the event plane
-  mHistYieldPart2D = new TH2D("Flow_YieldPart2D", "Flow_YieldPart2D",
-    nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMaxPart);
-  mHistYieldPart2D->Sumw2();
-  mHistYieldPart2D->SetXTitle((char*)xLabel.Data());
-  mHistYieldPart2D->SetYTitle("Pt (GeV)");
-
-  // Mean Eta in each bin
-  mHistBinEta = new TProfile("Flow_Bin_Eta", "Flow_Bin_Eta",
-    nEtaBins, etaMin, etaMax, etaMin, etaMax, "");
-  mHistBinEta->SetXTitle((char*)xLabel.Data());
-  mHistBinEta->SetYTitle("<Eta>");
-  
-  // Mean Pt in each bin
-  mHistBinPt = new TProfile("Flow_Bin_Pt", "Flow_Bin_Pt",
-    nPtBins, ptMin, ptMaxPart, ptMin, ptMaxPart, "");
-  mHistBinPt->SetXTitle("Pt (GeV)");
-  mHistBinPt->SetYTitle("<Pt> (GeV)");
-  
-  // cos(n*phiLab)
-  mHistCosPhi = new TProfile("Flow_CosPhiLab", "Flow_CosPhiLab",
-    Flow::nHars, 0.5, (float)(Flow::nHars) + 0.5, -100., 100., "");
-  mHistCosPhi->SetXTitle("Harmonic");
-  mHistCosPhi->SetYTitle("<cos(n*PhiLab)> (%)");
-    
-  // PID pi+
-  mHistPidPiPlus = new TH1F("Flow_PidPiPlus", "Flow_PidPiPlus",
-			    nPidBins, pidMin, pidMax);
-  mHistPidPiPlus->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidPiPlus->SetYTitle("Counts");
-    
-  // PID pi-
-  mHistPidPiMinus = new TH1F("Flow_PidPiMinus", "Flow_PidPiMinus",
-			     nPidBins, pidMin, pidMax);
-  mHistPidPiMinus->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidPiMinus->SetYTitle("Counts");
-    
-  // PID proton
-  mHistPidProton = new TH1F("Flow_PidProton", "Flow_PidProton",
-			    nPidBins, pidMin, pidMax);
-  mHistPidProton->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidProton->SetYTitle("Counts");
-
-  // PID anti proton
-  mHistPidAntiProton = new TH1F("Flow_PidAntiProton", "Flow_PidAntiProton",
-				nPidBins, pidMin, pidMax);
-  mHistPidAntiProton->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidAntiProton->SetYTitle("Counts");
-
-  // PID Kplus
-  mHistPidKplus = new TH1F("Flow_PidKplus", "Flow_PidKplus",
-			   nPidBins, pidMin, pidMax);
-  mHistPidKplus->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidKplus->SetYTitle("Counts");
-
-  // PID Kminus
-  mHistPidKminus = new TH1F("Flow_PidKminus", "Flow_PidKminus",
-			    nPidBins, pidMin, pidMax);
-  mHistPidKminus->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidKminus->SetYTitle("Counts");
-
-  // PID deuteron
-  mHistPidDeuteron = new TH1F("Flow_PidDeuteron", "Flow_PidDeuteron",
-			      nPidBins, pidMin, pidMax);
-  mHistPidDeuteron->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidDeuteron->SetYTitle("Counts");
-
-  // PID anti deuteron
-  mHistPidAntiDeuteron = new TH1F("Flow_PidAntiDeuteron", 
-				  "Flow_PidAntiDeuteron",
-				  nPidBins, pidMin, pidMax);
-  mHistPidAntiDeuteron->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidAntiDeuteron->SetYTitle("Counts");
-
-  // PID electron
-  mHistPidElectron = new TH1F("Flow_PidElectron", "Flow_PidElectron",
-			      nPidBins, pidMin, pidMax);
-  mHistPidElectron->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidElectron->SetYTitle("Counts");
-
-  // PID positron
-  mHistPidPositron = new TH1F("Flow_PidPositron", "Flow_PidPositron",
-			      nPidBins, pidMin, pidMax);
-  mHistPidPositron->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidPositron->SetYTitle("Counts");
-
-  // PID pi+ selected
-  mHistPidPiPlusPart = new TH1F("Flow_PidPiPlusPart", 
-			       "Flow_PidPiPlusPart",
-			       nPidBins, pidMin, pidMax);
-  mHistPidPiPlusPart->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidPiPlusPart->SetYTitle("Counts");
-    
-  // PID pi- selected
-  mHistPidPiMinusPart = new TH1F("Flow_PidPiMinusPart", 
-				"Flow_PidPiMinusPart",
-				nPidBins, pidMin, pidMax);
-  mHistPidPiMinusPart->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidPiMinusPart->SetYTitle("Counts");
-    
-  // PID proton selected
-  mHistPidProtonPart = new TH1F("Flow_PidProtonPart", 
-			       "Flow_PidProtonPart",
-			       nPidBins, pidMin, pidMax);
-  mHistPidProtonPart->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidProtonPart->SetYTitle("Counts");
-
-  // PID anti proton selected
-  mHistPidAntiProtonPart = new TH1F("Flow_PidAntiProtonPart", 
-				   "Flow_PidAntiProtonPart",
-				   nPidBins, pidMin, pidMax);
-  mHistPidAntiProtonPart->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidAntiProtonPart->SetYTitle("Counts");
-
-  // PID Kplus selected
-  mHistPidKplusPart = new TH1F("Flow_PidKplusPart", 
-			      "Flow_PidKplusPart",
-			      nPidBins, pidMin, pidMax);
-  mHistPidKplusPart->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidKplusPart->SetYTitle("Counts");
-
-  // PID Kminus selected
-  mHistPidKminusPart = new TH1F("Flow_PidKminusPart", 
-			       "Flow_PidKminusPart",
-			       nPidBins, pidMin, pidMax);
-  mHistPidKminusPart->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidKminusPart->SetYTitle("Counts");
-
-  // PID deuteron selected
-  mHistPidDeuteronPart = new TH1F("Flow_PidDeuteronPart", 
-				 "Flow_PidDeuteronPart",
-				 nPidBins, pidMin, pidMax);
-  mHistPidDeuteronPart->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidDeuteronPart->SetYTitle("Counts");
-
-  // PID anti deuteron selected
-  mHistPidAntiDeuteronPart = new TH1F("Flow_PidAntiDeuteronPart", 
-				     "Flow_PidAntiDeuteronPart",
-				     nPidBins, pidMin, pidMax);
-  mHistPidAntiDeuteronPart->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidAntiDeuteronPart->SetYTitle("Counts");
-
-  // PID electron selected
-  mHistPidElectronPart = new TH1F("Flow_PidElectronPart", 
-				 "Flow_PidElectronPart",
-				 nPidBins, pidMin, pidMax);
-  mHistPidElectronPart->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidElectronPart->SetYTitle("Counts");
-
-  // PID positron selected
-  mHistPidPositronPart = new TH1F("Flow_PidPositronPart", 
-				 "Flow_PidPositronPart",
-				 nPidBins, pidMin, pidMax);
-  mHistPidPositronPart->SetXTitle("(PID - Mean) / Resolution");
-  mHistPidPositronPart->SetYTitle("Counts");
-
-  // PID multiplicities selected
-  mHistPidMult = new TProfile("Flow_PidMult", "Flow_PidMult",
-			      11, 0.5, 11.5, 0., 10000., "");
-  mHistPidMult->SetXTitle("All, Pi+, Pi-, Proton, Pbar, K+, K-, d, dbar, e-, e+");
-  mHistPidMult->SetYTitle("Multiplicity");
-    
-  // Centrality
-  mHistCent = new TH1F("Flow_Cent", "Flow_Cent",
-		       nCentBins, centMin, centMax);
-  mHistCent->SetXTitle("Centrality Bin");
-  mHistCent->SetYTitle("Counts");
-    
-  // CTB versus ZDC
-  mHistCTBvsZDC2D = new TH2F("Flow_CTBvsZDC2D", "Flow_CTBvsZDC2D",
-			       125, 0, 250,
-			       125, 0, 25000);
-  mHistCTBvsZDC2D->SetXTitle("ZDC sum");
-  mHistCTBvsZDC2D->SetYTitle("CTB sum");
-
-  // MeanDedxPos
-  mHistMeanDedxPos2D = new TH2F("Flow_MeanDedxPos2D",
-				"Flow_MeanDedxPos2D",
-				nMomenBins, pMin, pMax,
-				nDedxBins, 0, dEdxMax);
-  mHistMeanDedxPos2D->SetXTitle("log(momentum) (GeV)");
-  mHistMeanDedxPos2D->SetYTitle("mean dEdx");
-  
-  // MeanDedxNeg
-  mHistMeanDedxNeg2D = new TH2F("Flow_MeanDedxNeg2D",
-				"Flow_MeanDedxNeg2D",
-				nMomenBins, pMin, pMax,
-			   nDedxBins, 0, dEdxMax);
-  mHistMeanDedxNeg2D->SetXTitle("log(momentum) (GeV)");
-  mHistMeanDedxNeg2D->SetYTitle("mean dEdx");
-  
-  // MeanDedx PiPlus
-  mHistMeanDedxPiPlus2D = new TH2F("Flow_MeanDedxPiPlus2D", 
-				   "Flow_MeanDedxPiPlus2D",
-				   nMomenBins, pMin, pMax,
-				   nDedxBins, 0, dEdxMax);
-  mHistMeanDedxPiPlus2D->SetXTitle("log(momentum) (GeV)");
-  mHistMeanDedxPiPlus2D->SetYTitle("mean dEdx");
-  
-  // MeanDedxPiMinus
-  mHistMeanDedxPiMinus2D = new TH2F("Flow_MeanDedxPiMinus2D", 
-				    "Flow_MeanDedxPiMinus2D",
-				    nMomenBins, pMin, pMax,
-				    nDedxBins, 0, dEdxMax);
-  mHistMeanDedxPiMinus2D->SetXTitle("log(momentum) (GeV)");
-  mHistMeanDedxPiMinus2D->SetYTitle("mean dEdx");
-  
-  // MeanDedxProton
-  mHistMeanDedxProton2D = new TH2F("Flow_MeanDedxProton2D", 
-				   "Flow_MeanDedxProton2D",
-				   nMomenBins, pMin, pMax,
-				   nDedxBins, 0, dEdxMax);
-  mHistMeanDedxProton2D->SetXTitle("log(momentum) (GeV)");
-  mHistMeanDedxProton2D->SetYTitle("mean dEdx");
-  
-  // MeanDedxPbar
-  mHistMeanDedxPbar2D = new TH2F("Flow_MeanDedxPbar2D", 
-				 "Flow_MeanDedxPbar2D",
-				 nMomenBins, pMin, pMax,
-				 nDedxBins, 0, dEdxMax);
-  mHistMeanDedxPbar2D->SetXTitle("log(momentum) (GeV)");
-  mHistMeanDedxPbar2D->SetYTitle("mean dEdx");
-  
-  // MeanDedxKplus
-  mHistMeanDedxKplus2D = new TH2F("Flow_MeanDedxKplus2D", 
-				  "Flow_MeanDedxKplus2D",
-				  nMomenBins, pMin, pMax,
-				  nDedxBins, 0, dEdxMax);
-  mHistMeanDedxKplus2D->SetXTitle("log(momentum) (GeV)");
-  mHistMeanDedxKplus2D->SetYTitle("mean dEdx");
-  
-  // MeanDedxKminus
-  mHistMeanDedxKminus2D = new TH2F("Flow_MeanDedxKminus2D", 
-				   "Flow_MeanDedxKminus2D",
-				   nMomenBins, pMin, pMax,
-				   nDedxBins, 0, dEdxMax);
-  mHistMeanDedxKminus2D->SetXTitle("log(momentum) (GeV)");
-  mHistMeanDedxKminus2D->SetYTitle("mean dEdx");
-  
-  // MeanDedxDeuteron
-  mHistMeanDedxDeuteron2D = new TH2F("Flow_MeanDedxDeuteron2D", 
-				     "Flow_MeanDedxDeuteron2D",
-				     nMomenBins, pMin, pMax,
-				     nDedxBins, 0, dEdxMax);
-  mHistMeanDedxDeuteron2D->SetXTitle("log(momentum) (GeV)");
-  mHistMeanDedxDeuteron2D->SetYTitle("mean dEdx");
-
-  // MeanDedxAntiDeuteron
-  mHistMeanDedxAntiDeuteron2D = new TH2F("Flow_MeanDedxAntiDeuteron2D", 
-					 "Flow_MeanDedxAntiDeuteron2D",
-					 nMomenBins, pMin, pMax,
-					 nDedxBins, 0, dEdxMax);
-  mHistMeanDedxAntiDeuteron2D->SetXTitle("log(momentum) (GeV)");
-  mHistMeanDedxAntiDeuteron2D->SetYTitle("mean dEdx");
-  
-  // MeanDedxElectron
-  mHistMeanDedxElectron2D = new TH2F("Flow_MeanDedxElectron2D", 
-				     "Flow_MeanDedxElectron2D",
-				     nMomenBins, pMin, pMax,
-				     nDedxBins, 0, dEdxMax);
-  mHistMeanDedxElectron2D->SetXTitle("log(momentum) (GeV)");
-  mHistMeanDedxElectron2D->SetYTitle("mean dEdx");
-  
-  // MeanDedxPositron
-  mHistMeanDedxPositron2D = new TH2F("Flow_MeanDedxPositron2D", 
-				     "Flow_MeanDedxPositron2D",
-				     nMomenBins, pMin, pMax,
-				     nDedxBins, 0, dEdxMax);
-  mHistMeanDedxPositron2D->SetXTitle("log(momentum) (GeV)");
-  mHistMeanDedxPositron2D->SetYTitle("mean dEdx");
-  
-  TString* histTitle;
-
+   Bool_t   mNoDenomeFileWarned=kFALSE;
+   TString* histTitle;
 
   for (int k = 0; k < Flow::nSels; k++) {
     char countSels[2];
@@ -682,147 +163,6 @@ Int_t StFlowCumulantMaker::Init() {
       char countHars[2];
       sprintf(countHars,"%d",j+1);
 
-      // multiplicity
-      histTitle = new TString("Flow_Mul_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistMult = new TH1F(histTitle->Data(),
-        histTitle->Data(), nMultBins, multMin, multMax);
-      histFull[k].histFullHar[j].mHistMult->SetXTitle("Multiplicity");
-      histFull[k].histFullHar[j].mHistMult->SetYTitle("Counts");
-      delete histTitle;
-
-
-      // Phi lab
-      // Tpc
-      histTitle = new TString("Flow_Phi_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistPhi = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhi->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhi->SetYTitle("Counts");
-      delete histTitle;
-      
-      // Ftpc (east)
-      histTitle = new TString("Flow_Phi_FtpcEast_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistPhiFtpcEast = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFtpcEast->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFtpcEast->SetYTitle("Counts");
-      delete histTitle;
-      
-      // Ftpc (west)
-      histTitle = new TString("Flow_Phi_FtpcWest_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistPhiFtpcWest = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFtpcWest->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFtpcEast->SetYTitle("Counts");
-      delete histTitle;
-      
-
-      // PhiWgt new
-      // Tpc
-      histTitle = new TString("Flow_Phi_Weight_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistPhiWgt =  new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiWgt->Sumw2();
-      histFull[k].histFullHar[j].mHistPhiWgt->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiWgt->SetYTitle("PhiWgt");
-      delete histTitle;
-      
-      // Ftpc (east)
-      histTitle = new TString("Flow_Phi_Weight_FtpcEast_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast =  new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->Sumw2();
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetYTitle("PhiWgt");
-      delete histTitle;
-      
-      // Ftpc (west)
-      histTitle = new TString("Flow_Phi_Weight_FtpcWest_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest =  new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->Sumw2();
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetYTitle("PhiWgt");
-      delete histTitle;
-      
-
-      // Phi lab flattened
-      // Tpc
-      histTitle = new TString("Flow_Phi_Flat_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistPhiFlat =	new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFlat->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFlat->SetYTitle("Counts");
-      delete histTitle;
-
-      // Ftpc (east)
-      histTitle = new TString("Flow_Phi_Flat_FtpcEast_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcEast =	new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcEast->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcEast->SetYTitle("Counts");
-      delete histTitle;
-      
-      // Ftpc (west)
-      histTitle = new TString("Flow_Phi_Flat_FtpcWest_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcWest =	new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcWest->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcWest->SetYTitle("Counts");
-      delete histTitle;
-      
-      // Yield
-      histTitle = new TString("Flow_Yield2D_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistYield2D =	new TH2D(histTitle->Data(),
-        histTitle->Data(), nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMax);
-      histFull[k].histFullHar[j].mHistYield2D->Sumw2();
-      histFull[k].histFullHar[j].mHistYield2D->SetXTitle("Pseudorapidty");
-      histFull[k].histFullHar[j].mHistYield2D->SetYTitle("Pt (GeV)");
-      delete histTitle;
-
-    //cumulant 
     //            ****  for differential flow   ****
 
     // cumulant        dp/n{k}      
@@ -858,7 +198,7 @@ Int_t StFlowCumulantMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistCumulant2D[ddd] =	
-        new TProfile2D(histTitle->Data(),histTitle->Data(), nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMaxPart, -1.*FLT_MAX, FLT_MAX, "");
+        new TProfile2D(histTitle->Data(),histTitle->Data(), nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMax, -1.*FLT_MAX, FLT_MAX, "");
       histFull[k].histFullHar[j].mHistCumulant2D[ddd]->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHistCumulant2D[ddd]->SetYTitle("Pt (GeV)");
       delete histTitle;
@@ -923,7 +263,7 @@ Int_t StFlowCumulantMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mCumuDifferentialG0Denominator2D[ifcn] =
-            new TProfile2D(histTitle->Data(),histTitle->Data(), nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMaxPart,-1.*FLT_MAX, FLT_MAX, "");
+            new TProfile2D(histTitle->Data(),histTitle->Data(), nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMax,-1.*FLT_MAX, FLT_MAX, "");
       histFull[k].histFullHar[j].mCumuDifferentialG0Denominator2D[ifcn]->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mCumuDifferentialG0Denominator2D[ifcn]->SetYTitle("Pt (GeV)");
       delete histTitle;
@@ -983,13 +323,15 @@ Int_t StFlowCumulantMaker::Init() {
       histFull[k].histFullHar[j].mCumuDifferentialG0DenominatorRead[ifcn]
         = tempDenomIntegral/tempDenomInteNoZeroBins;
 
-
       f.Close();
 
       } else {
-	cout<<"denominator.root is not present, assumming this run is just for producing denominator.root. that means cumulant flow result in flow.hist.root is nonsense for this run."<<endl;
+        if(!mNoDenomeFileWarned) {
+        gMessMgr->Info("##### FlowCumulantAnalysis:denominator.root is not present,assumming this run is just for producing denominator.root. that means cumulant flow result in flow.cumulant.root is nonsense for this run. ");
+	mNoDenomeFileWarned=kTRUE;
+	}
 
-  histFull[k].histFullHar[j].mCumuDifferentialG0DenominatorRead[ifcn]=1.; 
+       histFull[k].histFullHar[j].mCumuDifferentialG0DenominatorRead[ifcn]=1.; 
       }
 
       Double_t theTempPhi =  twopi*((Double_t)(qIndex))/((Double_t)(Flow::nCumulantDifferential_qMax)); 
@@ -998,9 +340,6 @@ Int_t StFlowCumulantMaker::Init() {
       histFull[k].histFullHar[j].mDifferentialYz[ifcn]= theRz*sin(theTempPhi);
 
       }
-
-
-
 
       //      for integrated flow stuff  
 
@@ -1029,7 +368,7 @@ Int_t StFlowCumulantMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.1 2001/11/02 04:47:42 aihong Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.2 2001/11/08 03:12:24 aihong Exp $");
 
   return StMaker::Init();
 }
@@ -1080,39 +419,12 @@ void StFlowCumulantMaker::FillFromFlowEvent() {
 void StFlowCumulantMaker::FillEventHistograms() {
   // Fill histograms with event quantities
 
-  unsigned int triggerWord = pFlowEvent->L0TriggerWord();
-  float trigger;
-  switch (triggerWord) {
-  case 4096: trigger = 1.; break; // minbias
-  case 4352: trigger = 2.; break; // central
-  case 61952: trigger = 3.; break; // laser
-  default: trigger = 10.; break; // no clue
-  }
-  mHistTrigger->Fill(trigger);
-
-  // no selections: OrigMult, Centrality, Mult, MultOverOrig, VertexZ, VertexXY
-  int origMult  = pFlowEvent->OrigMult();
-  mHistOrigMult ->Fill((float)origMult);
-  mHistMultEta  ->Fill((float)pFlowEvent->MultEta());
-  int cent      = pFlowEvent->Centrality();
-  mHistCent     ->Fill((float)cent);
-  int totalMult = pFlowEvent->TrackCollection()->size();
-  mHistMult     ->Fill((float)totalMult);
-  if (origMult) mHistMultOverOrig->Fill((float)totalMult / (float)origMult);
-
-  StThreeVectorF vertex = pFlowEvent->VertexPos();
-  mHistVertexZ   ->Fill(vertex.z());
-  mHistVertexXY2D->Fill(vertex.x(), vertex.y());
-
-  mHistCTBvsZDC2D->Fill(pFlowEvent->ZDCe() + pFlowEvent->ZDCe(), 
-			pFlowEvent->CTB());
 
     for (int k = 0; k < Flow::nSels; k++) {
       pFlowSelect->SetSelection(k);
       for (int j = 0; j < Flow::nHars; j++) {
 	pFlowSelect->SetHarmonic(j);
 
-      histFull[k].histFullHar[j].mHistMult->Fill((float)mMult[k][j]);
       histFull[k].histFullHar[j].mMultSum +=float(mMult[k][j]);
       histFull[k].histFullHar[j].mWgtMultSum_q4 +=mWgtMult_q4[k][j];
       histFull[k].histFullHar[j].mWgtMultSum_q6 +=mWgtMult_q6[k][j];
@@ -1142,25 +454,9 @@ void StFlowCumulantMaker::FillEventHistograms() {
 void StFlowCumulantMaker::FillParticleHistograms() {
   // Fill histograms from the particles
 
-  float corrMultN  = 0.;
-  float etaSymPosN = 0.;
-  float etaSymNegN = 0.;
-  float piPlusN    = 0.;
-  float piMinusN   = 0.;
-  float protonN    = 0.;
-  float pbarN      = 0.;
-  float kMinusN    = 0.;
-  float kPlusN     = 0.;
-  float deuteronN  = 0.;
-  float dbarN      = 0.;
-  float electronN  = 0.;
-  float positronN  = 0.;
-
   // Initialize Iterator
   StFlowTrackCollection* pFlowTracks = pFlowEvent->TrackCollection();
   StFlowTrackIterator itr;
-  
-
 
 //In the view of a good coding, the following block should be placed inside
 //the track loop, It is put here to reduce run time.
@@ -1214,147 +510,6 @@ void StFlowCumulantMaker::FillParticleHistograms() {
     if (phi < 0.) phi += twopi;
     float eta       = pFlowTrack->Eta();
     float pt        = pFlowTrack->Pt();
-    int   charge    = pFlowTrack->Charge();
-    float dca       = pFlowTrack->Dca();
-    float dcaGlobal = pFlowTrack->DcaGlobal();
-    float chi2      = pFlowTrack->Chi2();
-    int   fitPts    = pFlowTrack->FitPts();
-    int   maxPts    = pFlowTrack->MaxPts();
-    Char_t pid[10];
-    strcpy(pid, pFlowTrack->Pid());
-    float totalp    = pFlowTrack->P();
-    float logp      = log(totalp);
-    float dEdx      = pFlowTrack->Dedx();
-
-    // no selections: Charge, Dca, Chi2, FitPts, MaxPts, FitOverMax, PID
-    mHistCharge->Fill((float)charge);
-
-    // distinguish between Tpc and Ftpc
-
-    if (pFlowTrack->TopologyMap().numberOfHits(kFtpcEastId) ||
-	pFlowTrack->TopologyMap().numberOfHits(kFtpcWestId)) {
-      mHistDcaFtpc      ->Fill(dca);
-      mHistDcaGlobalFtpc->Fill(dcaGlobal);
-      mHistChi2Ftpc     ->Fill(chi2);
-      mHistFitPtsFtpc   ->Fill((float)fitPts);
-      mHistMaxPtsFtpc   ->Fill((float)maxPts);
-      if (maxPts) mHistFitOverMaxFtpc->Fill((float)fitPts/(float)maxPts);
-    }
-    
-    else { // Tpc track or otherwise!!!
-      
-      // For PID multiplicites
-      if (strcmp(pid, "pi+")    == 0)  piPlusN++;
-      if (strcmp(pid, "pi-")    == 0)  piMinusN++;
-      if (strcmp(pid, "proton") == 0)  protonN++;
-      if (strcmp(pid, "pbar")   == 0)  pbarN++;
-      if (strcmp(pid, "k+")     == 0)  kPlusN++;
-      if (strcmp(pid, "k-")     == 0)  kMinusN++;
-      if (strcmp(pid, "d")      == 0)  deuteronN++;
-      if (strcmp(pid, "dbar")   == 0)  dbarN++;
-      if (strcmp(pid, "e-")     == 0)  electronN++;
-      if (strcmp(pid, "e+")     == 0)  positronN++;
-      
-      mHistDcaTpc      ->Fill(dca);
-      mHistDcaGlobalTpc->Fill(dcaGlobal);
-      mHistChi2Tpc     ->Fill(chi2);
-      mHistFitPtsTpc   ->Fill((float)fitPts);
-      mHistMaxPtsTpc   ->Fill((float)maxPts);
-      if (maxPts) mHistFitOverMaxTpc->Fill((float)fitPts/(float)maxPts);
-      
-      if (charge == 1) {
-	mHistMeanDedxPos2D->Fill(logp, dEdx);
-	float piPlus = pFlowTrack->PidPiPlus();
-	mHistPidPiPlus->Fill(piPlus);
-	if (strcmp(pid, "pi+") == 0) {
-	  mHistMeanDedxPiPlus2D->Fill(logp, dEdx);
-	  mHistPidPiPlusPart->Fill(piPlus);
-	}
-	float kplus  = pFlowTrack->PidKaonPlus();
-	mHistPidKplus->Fill(kplus);
-	if (strcmp(pid, "k+") == 0) {
-	  mHistMeanDedxKplus2D->Fill(logp, dEdx);
-	  mHistPidKplusPart->Fill(kplus);
-	}
-	float proton  = pFlowTrack->PidProton();
-	mHistPidProton->Fill(proton);
-	if (strcmp(pid, "proton") == 0) {
-	  mHistMeanDedxProton2D->Fill(logp, dEdx);
-	  mHistPidProtonPart->Fill(proton);
-	}
-	float deuteron  = pFlowTrack->PidDeuteron();
-	mHistPidDeuteron->Fill(deuteron);
-	if (strcmp(pid, "d") == 0) {
-	  mHistMeanDedxDeuteron2D->Fill(logp, dEdx);
-	  mHistPidDeuteronPart->Fill(deuteron);
-	}
-	float positron  = pFlowTrack->PidPositron();
-	mHistPidPositron->Fill(positron);
-	if (strcmp(pid, "e+") == 0) {
-	  mHistMeanDedxPositron2D->Fill(logp, dEdx);
-	  mHistPidPositronPart->Fill(positron);
-	  }
-      } else if (charge == -1) {
-	mHistMeanDedxNeg2D->Fill(logp, dEdx);
-	float piMinus = pFlowTrack->PidPiMinus();
-	mHistPidPiMinus->Fill(piMinus);
-	if (strcmp(pid, "pi-") == 0) {
-	  mHistMeanDedxPiMinus2D->Fill(logp, dEdx);
-	  mHistPidPiMinusPart->Fill(piMinus);
-	}
-	float kminus  = pFlowTrack->PidKaonMinus();
-	mHistPidKminus->Fill(kminus);
-	if (strcmp(pid, "k-") == 0) {
-	  mHistMeanDedxKminus2D->Fill(logp, dEdx);
-	  mHistPidKminusPart->Fill(kminus);
-	}
-	float antiproton  = pFlowTrack->PidAntiProton();
-	mHistPidAntiProton->Fill(antiproton);
-	if (strcmp(pid, "pbar") == 0) {
-	  mHistMeanDedxPbar2D->Fill(logp, dEdx);
-	  mHistPidAntiProtonPart->Fill(antiproton);
-	}
-	float antideuteron  = pFlowTrack->PidAntiDeuteron();
-	mHistPidAntiDeuteron->Fill(antideuteron);
-	if (strcmp(pid, "dbar") == 0) {
-	  mHistMeanDedxAntiDeuteron2D->Fill(logp, dEdx);
-	  mHistPidAntiDeuteronPart->Fill(antideuteron);
-	}
-	float electron  = pFlowTrack->PidElectron();
-	mHistPidElectron->Fill(electron);
-	if (strcmp(pid, "e-") == 0) {
-	  mHistMeanDedxElectron2D->Fill(logp, dEdx);
-	  mHistPidElectronPart->Fill(electron);
-	}
-      }
-    }
-    
-    // Yield3D, Yield2D, BinEta, BinPt
-    mHistEtaPtPhi3D->Fill(eta, pt, phi);
-    mHistYieldAll2D->Fill(eta, pt);
-    if (pFlowSelect->SelectPart(pFlowTrack)) {
-      if (strlen(pFlowSelect->PidPart()) != 0) { 
-	float rapidity = pFlowTrack->Y();
-	mHistBinEta->Fill(rapidity, rapidity);
-	mHistYieldPart2D->Fill(rapidity, pt);
-      } else {
-	mHistBinEta->Fill(eta, eta);
-	mHistYieldPart2D->Fill(eta, pt);
-      }
-      mHistBinPt->Fill(pt, pt);
-    }
-
-    // cos(n*phiLab)
-    for (int j = 0; j < Flow::nHars; j++) {
-      bool oddHar = (j+1) % 2;
-      float order = (float)(j+1);
-      float vIn   = cos((double)order * phi)/perCent;
-      if (eta < 0 && oddHar) vIn *= -1;
-      mHistCosPhi->Fill(order, vIn);
-    }
-
-    // For Eta symmetry
-    (eta > 0.) ? etaSymPosN++ : etaSymNegN++;
 
     for (int k = 0; k < Flow::nSels; k++) {
       pFlowSelect->SetSelection(k);
@@ -1386,13 +541,6 @@ void StFlowCumulantMaker::FillParticleHistograms() {
 	  // Get phiWgt
 	  phiWgt = pFlowEvent->PhiWeight(phi, k, j, 
 						pFlowTrack->TopologyMap());
-	  if (detId == kFtpcEastId) {
-	    histFull[k].histFullHar[j].mHistPhiFlatFtpcEast->Fill(phi, phiWgt);
-	  } else if (detId == kFtpcWestId) {
-	    histFull[k].histFullHar[j].mHistPhiFlatFtpcWest->Fill(phi, phiWgt);
-	  } else { // (detId == kTpcId) or otherwise !!!
-	    histFull[k].histFullHar[j].mHistPhiFlat->Fill(phi, phiWgt);
-	  }
 
 
 	  if (!pFlowEvent->EtaSubs()) {
@@ -1400,20 +548,12 @@ void StFlowCumulantMaker::FillParticleHistograms() {
 	    if (pFlowEvent->PtWgt()) phiWgt *= pt;
 	  }
 	  
-	  // Fill histograms with selections
-	  if (detId == kFtpcEastId) {
-	    histFull[k].histFullHar[j].mHistPhiFtpcEast->Fill(phi);
-	  } else if (detId == kFtpcWestId) {
-	    histFull[k].histFullHar[j].mHistPhiFtpcWest->Fill(phi);
-	  } else { // (detId == kTpcId) or otherwise !!!
-	    histFull[k].histFullHar[j].mHistPhi->Fill(phi);
-	  }
-	  histFull[k].histFullHar[j].mHistYield2D->Fill(eta, pt);
+
 	}
 
        	// Caculate v for all particles selected for correlation analysis
 	if (pFlowSelect->SelectPart(pFlowTrack)) {
-	  corrMultN++;
+
 
 	  float YOrEta = 
              (strlen(pFlowSelect->PidPart()) != 0) ?  pFlowTrack->Y() : eta;
@@ -1456,7 +596,7 @@ void StFlowCumulantMaker::FillParticleHistograms() {
      Dp[theCumulantOrder-1] 
         += theCoeff*(theCosTerm*theXpq+theSinTerm*theYpq);//(B7)
 
-     //for writting out denomXpqYpq, which is the denominator in (B6)
+     //for writting out denomenator, which is the denominator in (B6)
       histFull[k].histFullHar[j].mCumuDifferentialG0Denominator2D[ifcn]->
        Fill(YOrEta, pt, theCrossterm ); 
       histFull[k].histFullHar[j].mCumuDifferentialG0DenominatorPt[ifcn]->
@@ -1494,35 +634,7 @@ void StFlowCumulantMaker::FillParticleHistograms() {
     }  
   }
 
-  // EtaSym
-  float etaSym = (etaSymPosN - etaSymNegN) / (etaSymPosN + etaSymNegN);
 
-  StThreeVectorF vertex = pFlowEvent->VertexPos();
-  Float_t vertexZ = vertex.z();
-  mHistEtaSymVerZ2D->Fill(vertexZ , etaSym);
-
-  float etaSymZSlope = 0.003;
-  etaSym += (etaSymZSlope * vertexZ);                // corrected for acceptance
-  etaSym *= sqrt((double)(etaSymPosN + etaSymNegN)); // corrected for statistics
-  mHistEtaSym->Fill(etaSym);
-
-  // PID multiplicities
-  float totalMult = (float)pFlowEvent->TrackCollection()->size();
-  mHistPidMult->Fill(1., totalMult);
-  mHistPidMult->Fill(2., piPlusN);
-  mHistPidMult->Fill(3., piMinusN);
-  mHistPidMult->Fill(4., protonN);
-  mHistPidMult->Fill(5., pbarN);
-  mHistPidMult->Fill(6., kPlusN);
-  mHistPidMult->Fill(7., kMinusN);
-  mHistPidMult->Fill(8., deuteronN);
-  mHistPidMult->Fill(9., dbarN);
-  mHistPidMult->Fill(10., electronN);
-  mHistPidMult->Fill(11., positronN);
-
-  // Multiplicity of particles correlated with the event planes
-  corrMultN = corrMultN / (float)(Flow::nHars * Flow::nSels);
-  mHistMultPart->Fill(corrMultN);
 
 }
 
@@ -1531,12 +643,9 @@ void StFlowCumulantMaker::FillParticleHistograms() {
 //-----------------------------------------------------------------------
 
 Int_t StFlowCumulantMaker::Finish() {
-  // Calculates resolution and mean flow values
-  // Fits q distribution and outputs phiWgt values
+
   TString* histTitle;
 
-  // PhiWgt histogram collection
-  TOrdCollection* phiWgtHistNames = new TOrdCollection(Flow::nSels*Flow::nHars);
   TOrdCollection* XpqYpqDenomNames = new TOrdCollection(Flow::nSels*Flow::nHars); 
 
 
@@ -1769,49 +878,6 @@ Int_t StFlowCumulantMaker::Finish() {
 	AddHist(histFull[k].histFullHar[j].mHist_vPt[asdf]);
      }
 
-
-
-
-
-
-
-
-
-
-      // Calculate PhiWgt
-      double mean = histFull[k].histFullHar[j].mHistPhi->Integral() 
-	/ (double)Flow::nPhiBins;
-      double meanFtpcEast = histFull[k].histFullHar[j].mHistPhiFtpcEast->Integral() 
-	/ (double)Flow::nPhiBinsFtpc;
-      double meanFtpcWest = histFull[k].histFullHar[j].mHistPhiFtpcWest->Integral() 
-	/ (double)Flow::nPhiBinsFtpc;
-      {for (int i = 0; i < Flow::nPhiBins; i++) {
-	// Tpc
-	histFull[k].histFullHar[j].mHistPhiWgt->SetBinContent(i+1, mean);
-	histFull[k].histFullHar[j].mHistPhiWgt->SetBinError(i+1, 0.);
-      }}
-      {for (int i = 0; i < Flow::nPhiBinsFtpc; i++) {
-	// Ftpc (east)
-	histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetBinContent(i+1, meanFtpcEast);
-	histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetBinError(i+1, 0.);
-	// Ftpc (west)
-	histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetBinContent(i+1, meanFtpcWest);
-	histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetBinError(i+1, 0.);
-      }}
-      // Tpc
-      histFull[k].histFullHar[j].mHistPhiWgt->
-	Divide(histFull[k].histFullHar[j].mHistPhi);
-      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgt);
-      // Ftpc (east)
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->
-	Divide(histFull[k].histFullHar[j].mHistPhiFtpcEast);
-      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtFtpcEast);
-      // Ftpc (west)
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->
-	Divide(histFull[k].histFullHar[j].mHistPhiFtpcWest);
-      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtFtpcWest);
-
-
     }
 
 
@@ -1846,7 +912,6 @@ Int_t StFlowCumulantMaker::Finish() {
    << histFull[k].mHist_v[1]->GetBinContent(nx) 
    <<" +/- "<< histFull[k].mHist_v[1]->GetBinError(nx)<<" )"<<endl;
 	  }
-          
 
 	  delete hisOfMeanIntegratedV; delete hisOfMeanIntegratedV3;
 
@@ -1880,7 +945,6 @@ Int_t StFlowCumulantMaker::Finish() {
    <<") +/- "<< histFull[k].mHist_v[1]->GetBinError(nx)<<endl;
 	  }
           
-
 	  delete hisOfMeanIntegratedV2; delete hisOfMeanIntegratedV4;
 	}
 
@@ -1891,10 +955,11 @@ Int_t StFlowCumulantMaker::Finish() {
 
 
   }
+
   //GetHistList()->ls();
 
   // Write all histograms
-  TFile histFile("flow.hist.root", "RECREATE");
+  TFile histFile("flow.cumulant.root", "RECREATE");
   //histFile.SetFormat(1);
   TList* hisList = GetHistList(); 
   for (int k = 0; k < Flow::nSels; k++) 
@@ -1905,16 +970,19 @@ Int_t StFlowCumulantMaker::Finish() {
       hisList->Remove(histFull[k].histFullHar[j].mCumuDifferentialG0DenominatorEta[ifcn]);
 		    }
   hisList->Write();
-  histFile.Close();
-  
-  // Write PhiWgt histograms
-  TFile phiWgtNewFile("flowPhiWgtNew.hist.root", "RECREATE");
-  //phiWgtNewFile.SetFormat(1);
-  phiWgtHistNames->Write();
-  phiWgtNewFile.Close();
-  delete phiWgtHistNames;
 
-  //write profile for the denominator of Xpq.
+  //write histograms from standard analysis maker
+  StFlowAnalysisMaker* pFlowAnalysisMaker = NULL;
+  pFlowAnalysisMaker = (StFlowAnalysisMaker*)GetMaker("FlowAnalysis");
+
+  if (pFlowAnalysisMaker) 
+    pFlowAnalysisMaker->GetHistList()->Write();
+
+  histFile.Write();
+  histFile.Close();
+
+
+  //write profile for the denominator of XpqYpq.
   TString*  fileName = new TString("denominatorNew.root");
   TFile XpqYpqDenomNewFile(fileName->Data(),"RECREATE"); 
   XpqYpqDenomNewFile.SetFormat(1);
@@ -1922,8 +990,6 @@ Int_t StFlowCumulantMaker::Finish() {
   XpqYpqDenomNewFile.Close();
   delete fileName;
   delete XpqYpqDenomNames;
-
-
 
   // Print the selection object details
   pFlowSelect->PrintList();
@@ -1941,6 +1007,9 @@ Int_t StFlowCumulantMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.2  2001/11/08 03:12:24  aihong
+// clean up redundant histograms
+//
 // Revision 1.1  2001/11/02 04:47:42  aihong
 // install cumulant maker
 //
