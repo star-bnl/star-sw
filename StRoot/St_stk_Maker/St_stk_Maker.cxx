@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.18 2000/01/31 23:54:37 caines Exp $
+// $Id: St_stk_Maker.cxx,v 1.19 2000/05/24 14:19:03 caines Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.19  2000/05/24 14:19:03  caines
+// Use prevertex for search not geant + find own vertex for alignment
+//
 // Revision 1.18  2000/01/31 23:54:37  caines
 // Add code for SVT vtx finding - Not yet switched on
 //
@@ -68,7 +71,8 @@
 
 #include <iostream.h>
 #include <stdlib.h>
-#include "TMath.h"
+#include <math.h>
+#include "math_constants.h"
 #include "St_stk_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -86,7 +90,7 @@ long sft_main( St_scs_spt *scs_spt, St_dst_vertex *vertex);
 
 ClassImp(St_stk_Maker)
   
-  //_____________________________________________________________________________
+//__________________________________________________________________________
   St_stk_Maker::St_stk_Maker(const char *name):
     StMaker(name),
     m_stk_stkpar(0),
@@ -146,8 +150,8 @@ Int_t St_stk_Maker::Init(){
   m_stk_filler     = (St_stk_filler *)     gime("stkpars/stk_filler");
   m_stk_stkpar     = new St_stk_stkpar("stk_stkpar",1);
   stk_stkpar_st stk_stkpar;
-  stk_stkpar.direct           = m_direct;      // control call to svt_tracking_direct ;
-  stk_stkpar.fill             = m_fill;        // control call to svt_tracking_fill3 ;
+  stk_stkpar.direct           = m_direct;  // control call to svt_tracking_direct ;
+  stk_stkpar.fill             = 1;        // control call to svt_tracking_fill3 ;
   stk_stkpar.long_tracks      = m_long_tracks; // 1=get rid of short tracks ;
   stk_stkpar.method           = m_method;      // fit as prim, secondary, etc. ;
   stk_stkpar.mode             = m_mode;        // track pri, sec, or both, ... ;
@@ -184,9 +188,8 @@ Int_t St_stk_Maker::Init(){
    m_z0 = new TH1F("StkZ0"    ,"Z0 of svt tracks"  ,100,-25.,25.);
   m_azimuth   = new TH1F("StkAzimuth"     ,"Azimuthal distribution of svt tracks" ,60,0.,360.0);
   m_tan_dip   = new TH1F("StkTanDip"      ,"Distribution of the svt dip angle"    ,100,-1.5,1.5);
-  m_dedx      = new TH2F("StkDedx"        ,"svt de/dx distribution"               ,100,0.,2.0,100,0.,0.01);
-   m_vtx_z     = new TH1F("SvtVert"        ,"Z of svt found primary vertex"        ,100,-40.,40.);
-
+  m_dedx      = new TH2F("StkDedx"        ,"Svt dE/dx distribution"               ,100,0.,2.0,100,0.,0.01);
+   m_vtx_z     = new TH1F("StkSvtVert"        ,"Z SVT - Z TPC Primary vertex resolution"        ,100,-0.5,0.5);
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -241,32 +244,50 @@ Int_t St_stk_Maker::Make()
   if (Res_stk_init !=  kSTAFCV_OK) {
     cout << "Problem on return from STK_AM_INIT" << endl;
   }
-
-  g2t_vertex_st *g_vertex = g2t_vertex->GetTable();
-
-   //St_dst_vertex *vertex = new St_dst_vertex("vertex",1); 
-    //AddData(vertex);  
-
-    //vertex->SetNRows(0);
-    // Int_t Res_sft= sft_main(scs_spt,vertex);
-
-    // dst_vertex_st *svt_vertex = vertex->GetTable();
-    //printf(" vertex->x[2] = %f, geant= %f \n", svt_vertex->z,g_vertex->ge_x[2] );
-    
-    //if (Res_sft !=  kSTAFCV_OK) {
-    //  cout << " Problem on return from SFT" << endl;
-      
-    //  return kStOK;}
-    
-  
+ 
+  //Get pointer to svt vertex
+ 
   stk_vtx_st *stk_vtx = m_stk_vtx->GetTable();
-  printf("*************************** Warning cheating with vtx using geant\n");
-  stk_vtx->x[2] = g_vertex->ge_x[2];
+
+  //pointer to preVertex dataset
+  St_DataSet *preVertex = GetDataSet("preVertex"); 
+  
+  //iterator
+  St_DataSetIter preVertexI(preVertex);
+  
+  //pointer to preVertex
+  St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
+  int numRowPreVtx = preVtx->GetNRows();
+  preVtx->ReAllocate(numRowPreVtx+1);
+
+
+  // Find SVT vertex
+  Int_t Res_sft= sft_main(scs_spt,preVtx);
+
+  if (Res_sft !=  kSTAFCV_OK) {
+	cout << " Problem on return from SFT" << endl;
+	
+	return kStOK;}
+
+
+  if (preVtx) {
+    dst_vertex_st *preVtxPtr = preVtx->GetTable();
+    
+    for (Int_t i = 0; i <preVtx->GetNRows();i++,preVtxPtr++) {
+      
+      if (preVtxPtr->iflag == 101) {
+        stk_vtx->x[0] = preVtxPtr->x;
+        stk_vtx->x[1] = preVtxPtr->y;
+        stk_vtx->x[2] = preVtxPtr->z;
+      }
+    }
+  }
   
   Int_t Res_sgr = sgr_am(m_stk_vtx,m_geom,
 			 scs_spt,groups,
 			 m_pix_info,candidate_groups,stk_track);
   if (Res_sgr !=  kSTAFCV_OK) {cout << " Problem on return from SGR" << endl;}
+
   
   stk_stkpar_st *stk_stkpar = m_stk_stkpar->GetTable();
   stk_stkpar->direct = 1;
@@ -278,6 +299,8 @@ Int_t St_stk_Maker::Make()
 			  stk_mctrack,stk_mckine,
 			  m_stk_filler,m_config,m_geom );
   if (Res_stk !=  kSTAFCV_OK) {cout << " Problem on return from STK_AM" << endl;}
+
+
   Int_t Res_spr_svt = spr_svt(m_sprpar, stk_kine,
 			      m_geom, scs_spt,
 			      groups, stk_track);
@@ -300,12 +323,19 @@ void St_stk_Maker::MakeHistograms() {
   //		Get the table:
   St_stk_track *spr = 0;
   St_sgr_groups *gpr = 0;
-  St_dst_vertex *vtx = 0;
   St_scs_spt *spc = 0;
+  //pointer to preVertex dataset
+  St_DataSet *preVertex = GetDataSet("preVertex"); 
+  
+  //iterator
+  St_DataSetIter preVertexI(preVertex);
+  
+  //pointer to preVertex
+  St_dst_vertex*  vtx  = (St_dst_vertex *)preVertexI("preVertex");
+
   
   spr  = (St_stk_track  *) svt_tracks.Find("stk_track");  
   gpr  = (St_sgr_groups *) svt_tracks.Find("groups");
-  vtx  = (St_dst_vertex    *) svt_tracks.Find("vertex");
   spc  = (St_scs_spt    *) hits.Find("scs_spt");
   
   if(Debug()) cout << "Filling SVT track histograms" << endl;
@@ -321,22 +351,35 @@ void St_stk_Maker::MakeHistograms() {
       m_q_pt->Fill(r->invpt);
       m_azimuth->Fill(r->psi);
       m_tan_dip->Fill(r->tanl); 
-      m_x0y0->Fill((float)(r->r0*cos(r->phi0*3.141/180.)),(float)(r->r0*sin(r->phi0*3.1416/180.)));
+      m_x0y0->Fill((float)(r->r0*cos(r->phi0*C_RAD_PER_DEG)),(float)(r->r0*sin(r->phi0*C_RAD_PER_DEG)));
       m_z0->Fill(r->z0); 
       
       // Fill dedx
       Float_t pt = 1./r->invpt;
       Float_t pz = r->tanl/r->invpt;
-      Float_t p = TMath::Sqrt(pt*pt+pz*pz);
+      Float_t p = sqrt(pt*pt+pz*pz);
       
       m_dedx->Fill(p,r->dedx[0]);
     }
   }
 
-  // dst_vertex_st *v = vtx->GetTable();
 
-  //if( vtx){    
-  //  m_vtx_z->Fill(v->z);
-  // }
-
+  if (vtx) {
+    float z_svt=999.;
+    float z_tpc=-999.;
+    dst_vertex_st *preVtxPtr = vtx->GetTable();
+    
+    for (Int_t i = 0; i <vtx->GetNRows();i++,preVtxPtr++) {
+      
+      if (preVtxPtr->iflag == 201) {
+	z_svt = preVtxPtr->z;
+      }
+      else if(preVtxPtr->iflag == 101) {
+	z_tpc = preVtxPtr->z;
+      }
+    }
+    m_vtx_z->Fill(z_tpc-z_svt);
+  }
+    
 }
+
