@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.6 2000/08/28 16:28:45 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.7 2000/09/28 10:57:13 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
- * Revision 2.6  2000/08/28 16:28:45  ullrich
- * Added enum tpt and removed CINT pragmas.
+ * Revision 2.7  2000/09/28 10:57:13  ullrich
+ * Added enums related to RICH PID.
  *
  * Revision 2.9  2000/11/25 11:48:40  lasiuk
  * Modify the StRichHitFlags to account for ambiguities
@@ -60,6 +60,11 @@ enum StTrackType {global, primary, tpt, secondary};
 enum StTrackModel {helixModel, kalmanModel};
 
 enum StTrackFinderMethod { svtGrouper = 4,
+			   svtStk,
+			   svtOther, 
+			   tpcStandard,
+			   tpcOther,
+			   ftpcConformal,
 			   svtTpcSvm,
 			   svtTpcEst,
 
