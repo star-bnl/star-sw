@@ -32,6 +32,7 @@ public:
   Int_t     	GetTime()  	  const {return ((TDatime *)&mEventTime)->GetTime();};
   TDatime       GetDateTime()     const {return mEventTime;};
   TDatime       GetProdDateTime() const {return mProdTime;};
+  Int_t     	GetIventNumber()  const {return mIventNumber;};
   Int_t     	GetEventNumber()  const {return mEventNumber;};
   Int_t     	GetGenerType()    const {return mGenerType;};
   Int_t     	IsNewRun()    const {return (mRunNumber!=mOldRunNumber);};
@@ -55,6 +56,7 @@ public:
   void          SetDateTime(TDatime dt)	{mEventTime=dt;};
   void          SetGMTime(UInt_t ut);
   void          SetProdDateTime()	{mProdTime.Set();};
+  void     	SetIventNumber(int iv)	{mIventNumber=iv;};
   void     	SetEventNumber(int ev)	{mEventNumber=ev;};
   void     	SetGenerType(int g)	{mGenerType=g;};
   void     	Print();
@@ -74,17 +76,18 @@ protected:
     Float_t     mLuminosity;
     Float_t     mBeamPolarizationEast[3];
     Float_t     mBeamPolarizationWest[3];
-    Float_t	mBImpact;			//Impact parameter
-    Float_t	mPhImpact;			//Phi angle of impact
-    Int_t       mGenerType;			//Gener type see below
+    Float_t	mBImpact;		//Impact parameter
+    Float_t	mPhImpact;		//Phi angle of impact
+    Int_t       mGenerType;		//Gener type see below
     UInt_t	mBunchCrossingNumber;
+    Int_t       mIventNumber;    	//sequential number in DAQ/Geant file
     Int_t       mEventNumber;    
 //
     TDatime     mEventTime;		//DAQ Time
     TDatime     mProdTime;		//Production time
     TString     mEventType;
 
-ClassDef(StEvtHddr,1)
+ClassDef(StEvtHddr,2)
 };
 struct EvtHddr_st 
 {
@@ -101,10 +104,11 @@ struct EvtHddr_st
     Float_t     mLuminosity;
     Float_t     mBeamPolarizationEast[3];
     Float_t     mBeamPolarizationWest[3];
-    Float_t	mBImpact;			//Impact parameter
-    Float_t	mPhImpact;			//Phi angle of impact
-    Int_t       mGenerType;			//Gener type see below
+    Float_t	mBImpact;		//Impact parameter
+    Float_t	mPhImpact;		//Phi angle of impact
+    Int_t       mGenerType;		//Gener type see below
     UInt_t	mBunchCrossingNumber;
+    Int_t       mIventNumber;    	//sequential number in DAQ/Geant file
     Int_t       mEventNumber;    
 //
 //    TDatime     mEventTime;		//DAQ Time

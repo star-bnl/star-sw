@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.91 2000/04/20 14:25:17 perev Exp $
+// $Id: StMaker.cxx,v 1.92 2000/05/20 01:11:07 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -41,6 +41,7 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),fActive(
 {
    SetMode();
    m_DebugLevel=0;
+   m_MakeReturn=0;
    m_Inputs = 0;
    if (!fgStChain) {	// it is first maker, it is chain
      fgStChain = this;
@@ -336,6 +337,7 @@ Int_t   StMaker::GetValidity(const TTable *tb, TDatime *val) const
 //_____________________________________________________________________________
 void StMaker::Clear(Option_t *option)
 {
+  m_MakeReturn = 0;
   if(option){};
   if (m_DataSet) m_DataSet->Delete();
 //    Reset lists of event objects
@@ -409,11 +411,9 @@ void StMaker::StartMaker()
 //_____________________________________________________________________________
 void StMaker::EndMaker(int ierr)
 {
-  if (ierr){};
-  TDataSet *dat = Find(".data");
-  if (dat) dat->Pass(ClearDS,0);
-  TDataSet *gar = Find(".garb");
-  if (gar) gar->Delete();
+  SetMakeReturn(ierr);
+  if (m_DataSet) m_DataSet->Pass(ClearDS,0);
+  if (m_GarbSet) m_GarbSet->Delete();
   ::doPs(GetName(),"EndMaker");
   
   if (GetDebug()>1) {
@@ -524,7 +524,11 @@ StMaker *StMaker::GetMaker(const TDataSet *ds)
 //_____________________________________________________________________________
 EDataSetPass StMaker::ClearDS (TDataSet* ds,void * )
 {
-  if (ds->InheritsFrom(TTable::Class())) ds->Clear("Garbage");
+  if (ds->InheritsFrom(TTable::Class())) {
+    TTable *tb = (TTable *)ds;
+    ds->Clear("Garbage");
+    tb->NaN();
+  }
   return kContinue; 
 }
 //_____________________________________________________________________________
@@ -539,6 +543,20 @@ void StMaker::PrintInfo() const
    while ((maker = (StMaker*)next())) {
       maker->PrintInfo();
    }
+}
+//_____________________________________________________________________________
+Int_t        StMaker::GetIventNumber() const 
+{
+   StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
+   if (!hd) return -1;
+   return hd->GetIventNumber();
+}
+//_____________________________________________________________________________
+void         StMaker::SetIventNumber(Int_t iv)  
+{
+   StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
+   if (!hd) return;
+   hd->SetIventNumber(iv);
 }
 //_____________________________________________________________________________
 Int_t        StMaker::GetEventNumber() const 
@@ -960,6 +978,9 @@ Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.92  2000/05/20 01:11:07  perev
+// IventNumber and BfcStatus added
+//
 // Revision 1.91  2000/04/20 14:25:17  perev
 // Minor simplification
 //
