@@ -1,6 +1,9 @@
 #!/usr/bin/csh
-#  $Id: hijing_sim.batch,v 1.3 1998/04/13 16:03:49 fisyak Exp $
+#  $Id: hijing_sim.batch,v 1.4 1998/05/05 19:12:42 nevski Exp $
 #  $Log: hijing_sim.batch,v $
+#  Revision 1.4  1998/05/05 19:12:42  nevski
+#  directory patch-up
+#
 #  Revision 1.3  1998/04/13 16:03:49  fisyak
 #  Correct HPUX flags
 #
@@ -42,43 +45,48 @@
 #printenv
 echo Starting job execution at `date`
 set dir  = /star/mds/data/SD98/auau200
-set set  = central/hijing/set0001/regular
+set skip = 0
 set trig = 200
-set file = auau_ce_b0-2
-set part = 1_200
+set prefix = central/hijing/set0001/regular/auau_ce_b0-2
+set fev  = 1
+set lev = 200
+
 while ( $#argv > 0 )
         switch ($1)
         case -d:        # top level directory
         shift; if ( $#argv > 0 ) set dir  = $1
                 breaksw
-        case -s:        # set number
-        shift; if ( $#argv > 0 ) set set  = $1
+        case -p:        # prefix
+        shift; if ( $#argv > 0 ) set prefix = $1
                 breaksw
-        case -t:        # No.of event
+        case -f:        # first event no. on input
+        shift; if ( $#argv > 0 ) set fev = $1
+                breaksw
+        case -l:        # last event no. on input
+        shift; if ( $#argv > 0 ) set lev = $1
+                breaksw
+        case -s:        # No.of event to skip
+        shift; if ( $#argv > 0 ) set skip  = $1
+                breaksw
+        case -t:        # No.of event to process
         shift; if ( $#argv > 0 ) set trig = $1
-                breaksw
-        case -f:        # file
-        shift; if ( $#argv > 0 ) set file = $1
-                breaksw
-        case -p:        # part
-        shift; if ( $#argv > 0 ) set part = $1
                 breaksw
         default:
                 echo $1 unrecognised
         endsw
         shift
 end
-#set log = `echo ${dir}/${set}/${file}_${part}_${trig} | sed -e 's/\//_/g' `_`date +"%d_%h_%Y"`
-set log = `echo ${file}_${part}_${trig} | sed -e 's/\//_/g' `_`date +"%d_%h_%Y"`
+set part = ${fev}_${lev}_${skip}_${trig}
+set log  = gst_`date +"%d_%h_%Y"`
 #
-cd ${dir}
-if (  -d gst/${set} == 0) mkdir -p gst/${set}
 cd ${SCRATCH}
 if ( -d log == 0) mkdir log
 if ( -d log/${part} == 0) mkdir log/${part}
 cd ${SCRATCH}/log/${part}
 # ============================================
 staf -w 0 << EOF > $SCRATCH/log/${part}/${log}
+trace on full
+debug on
 Root  Geant
 * sets standard geant geometry and  parameters for "physics on" running
 def $STAR/kumacs/sim
@@ -89,20 +97,35 @@ make geometry sim/gstar/gstar_input
 Mode TRAC  SIMU 1
 detp TRAC  DCAY 210 210 0.1 0.01
 mode tpce  simu 2
-debug off
 
 * keep track of memory/cpu consumption
 ghist star.his  STAR
 gstat time size mult stak
-
-user/input  U ${dir}/evg/${set}/${file}_${part}.xdf
-user/output O ${dir}/gst/${set}/${file}_${part}_new.fzd
-trig  ${trig}
+*
+llev = ${fev}+${lev}-1
+user/input  U ${dir}/evg/${prefix}_${fev}_[llev].xdf
+skip ${skip}
+fev1 = ${fev}+${skip}
+last = [fev1]+[trig]-1
+on error goto exit
+do iev = [fev1], last, 10
+  ll=[iev]+10
+  if [ll]>[last] then
+    ll=[last]
+  endif
+    i1 = \$format([iev],i4.4)
+    i2 = \$format([ll],i4.4)
+  user/output oz ${dir}/gst/${prefix}_[i1]_[i2].fzd
+  do i = [iev], [ll]
+    trig 1
+    if \$iquest(1)<>0 goto exit
+  enddo
+enddo
+exit:
 
 * show histograms
 ge/rz/cd //PAWC
 hi/list
-
 exit
 EOF
 #
