@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdDiscriminatorMaker.cxx,v 1.7 2004/10/30 00:08:00 subhasis Exp $
+ * $Id: StPmdDiscriminatorMaker.cxx,v 1.8 2005/02/23 05:17:18 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  ***************************************************************
  *
@@ -9,6 +9,9 @@
  *
  ****************************************************************
  * $Log: StPmdDiscriminatorMaker.cxx,v $
+ * Revision 1.8  2005/02/23 05:17:18  subhasis
+ * DiscbyNN option fixed
+ *
  * Revision 1.7  2004/10/30 00:08:00  subhasis
  * TranFlag added and set to 0 in ctor
  *
@@ -122,7 +125,7 @@ Int_t StPmdDiscriminatorMaker::Make()
 	if(d==1)cluscoll = detector->cluster();
 	if(d==0)cpvcluscoll = detector->cluster();
 	if(d==1){
-	  if(!discbyNN){
+	  if(discbyNN){
 	    Int_t ret=PrepareInputforNN(pmd_det,cpv_det,cluscoll,cpvcluscoll);
 	    if(ret==1)goto DISC;
 	  }
@@ -155,6 +158,8 @@ Int_t StPmdDiscriminatorMaker::Make()
     
     if(disc){
       disc->SetEdepcut(0.0000063);  //! 3 MIP cut
+      cout<<"calling edep_disc "<<endl;
+
       disc->Discriminate();   //! Discrimination through Energy cut
     //  disc->Print();  //! Print photon like hits
     }
@@ -345,12 +350,16 @@ void StPmdDiscriminatorMaker::fillStEvent(StPmdCollection* cluster_hit,StPhmdCol
 	  Int_t nclust = clusters->Nclusters();
 	  TIter next(clusters->Clusters());
 	  StPmdCluster *spmcl1;
+	  cout<<"nclust "<<nclust<<endl;
+
 	  for(Int_t i=0; i<nclust ; i++)
 	    {
 	      spmcl1 = (StPmdCluster*)next();
 	      int edeppid=spmcl1->CluEdepPID();
 	      StPhmdCluster *cl1=(StPhmdCluster*)pmdclusters[i];
-	      cl1->setEnergyPid(edeppid);
+              cout<<"cl1, edeppid  "<<i<<" "<<cl1<<" "<<edeppid<<endl;
+		if(!cl1)break;
+	      if(cl1)cl1->setEnergyPid(edeppid);
 	    }
 	}
       }
