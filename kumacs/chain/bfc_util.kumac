@@ -184,6 +184,9 @@
 * 12/3/98 K. Turner  - for "ev0d" chain, after running ev0d,
 *                      set rowcount ev0out table to 0 instead of deleting it 
 * 12/8/98 K. Turner - remove tcc from tcl chain - doesn't work ?!
+* 12/9/98 K. Turner - fix sgr chain to check if sgr ran okay before running stk
+*                   - after reading in fz file in fzin (init) do make gstar
+*                     again so that hepe_* tables get created
 * 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -262,6 +265,7 @@ macro bfc_init _
             gfile p [input_file]      | PN: p is a generic format
             tables ' ' [geant_Run]
             detp g2tm dete(cdet=SFSD).onoff=0 gttc.rdir=0
+	    make gstar
     (g2tin) 
 	    exec input_g2t_file#init [input_file]
             if (STAF_STATUS(1).ne. STAFCV_OK) then
