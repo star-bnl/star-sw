@@ -136,7 +136,6 @@ virtual TObject* Back() const ;
 virtual TObject* Front() const;
 virtual void 	clear();
 virtual Bool_t 	empty() const ;
-virtual void    SetLast(Int_t last);
 virtual const TIterator *Begin() const;
 virtual const TIterator *End() const;
 virtual TIterator* MakeIterator(Bool_t dir = kIterForward) const;
