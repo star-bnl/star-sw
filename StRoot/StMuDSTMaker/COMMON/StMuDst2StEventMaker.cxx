@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst2StEventMaker.cxx,v 1.8 2003/09/12 21:32:40 jeromel Exp $
+ * $Id: StMuDst2StEventMaker.cxx,v 1.9 2003/09/17 02:54:37 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDst2StEventMaker.h"
@@ -16,7 +16,11 @@
 
 StMuDst2StEventMaker::StMuDst2StEventMaker(const char* self ,const char* muDstMakerName) : StMaker(self) {
   mStEvent =0;
-  mMuDstMaker = (StMuDstMaker*)GetMaker(muDstMakerName);
+  mMuDstMaker = (StMuDstMaker*) GetMaker(muDstMakerName);
+  //cout << "StMuDst2StEventMaker::StMuDst2StEventMaker : constructor with args called" << endl;
+  //cout << "                      muDstMakerName           " << muDstMakerName << endl;
+  //cout << "                      self                     " << self << endl;
+  //cout << "                      GetMaker(muDstMakerName) " << (int) mMuDstMaker << endl;
 }
 
 StMuDst2StEventMaker::~StMuDst2StEventMaker() { 
@@ -35,8 +39,8 @@ int StMuDst2StEventMaker::Make(){  ///< create a StEvent from the muDst and put 
 
   if ( mMuDstMaker ) {
     mStEvent = mMuDstMaker->muDst()->createStEvent();
-//VP    StMuDst* muDst = mMuDstMaker->muDst();
-        if(mStEvent) {
+    //VP    StMuDst* muDst = mMuDstMaker->muDst();
+    if(mStEvent) {
       // set chain date to be the same of event date
       StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
       if(!hd) { hd = new StEvtHddr();  AddData(hd); }
@@ -48,11 +52,14 @@ int StMuDst2StEventMaker::Make(){  ///< create a StEvent from the muDst and put 
     // print all the trigger ids
     // so now you have a StEvent and you can loop
     // uncomment the following if to have to print out and tests
-//     if (mStEvent) {
-// 	printTriggerIds(mStEvent);
-// 	loopOverTracks(mStEvent);
-//     }
+    //if (mStEvent) {
+    //  printTriggerIds(mStEvent);
+    //  loopOverTracks(mStEvent);
+    //}
 
+  } else {
+    cout << "StMuDst2StEventMaker::Make() : WARNING Did not get pointer to MuDstMaker. "    << endl;
+    cout <<  "                              StEvent will NOT be filled (nothing we can do)" << endl;
   }
   return 0;
 }
@@ -126,6 +133,9 @@ ClassImp(StMuDst2StEventMaker)
 /***************************************************************************
  *
  * $Log: StMuDst2StEventMaker.cxx,v $
+ * Revision 1.9  2003/09/17 02:54:37  jeromel
+ * Name clash. Added warning in case this happens in future
+ *
  * Revision 1.8  2003/09/12 21:32:40  jeromel
  * Bug fix : zeroing missing
  *
