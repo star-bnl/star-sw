@@ -173,7 +173,10 @@ CC:  Fill Foreign Key to dst_track table>>>
 
                dst_point(dst_point_h.nok).id_track = 
      1            tcl_tphit(i).id_globtrk
-
+               dst_point(dst_point_h.nok).id_simtrk = 
+     1              tcl_tphit(i).id_simtrk
+               dst_point(dst_point_h.nok).id_quality = 
+     1              tcl_tphit(i).id_quality
             else if (dst_point_h.nok .ge. dst_point_h.maxlen) then
                write(6,10) dst_point_h.nok
 10             Format(2x,'Number DST POINT entries = ',I10,
@@ -338,7 +341,8 @@ CC:  Fill Foreign Key to dst_track table>>>
 
                dst_point(dst_point_h.nok).id_track = 
      1            scs_spt(i).id_globtrk
-
+               dst_point(dst_point_h.nok).id_simtrk = 0
+               dst_point(dst_point_h.nok).id_quality = 0
             else if (dst_point_h.nok .ge. dst_point_h.maxlen) then
                write(6,10) dst_point_h.nok
                DST_POINT_FILLER = STAFCV_BAD

@@ -85,7 +85,6 @@ long  type_of_call fill_dst_event_summary_ (
    */
   
   /*  ==================  Local Variables  ======================== */
-  int     irange, i;
   int     glb_trk_good, glb_trk_plus, glb_trk_minus;
   int     prim_trk_good;
   int     itrk, nphirange;
@@ -101,38 +100,10 @@ long  type_of_call fill_dst_event_summary_ (
   /* Initialize valid rows in dstEventSummary table */
   if (!dstEventSummary_h->nok)
     dstEventSummary_h->nok = 1; 
-  
   /* Initialize dstEventSummary table */
-  dstEventSummary->n_event                   = 0;
-  dstEventSummary->bfc_run_id                  = 0;         
-  dstEventSummary->glb_trk_tot               = 0;
-  dstEventSummary->glb_trk_good              = 0;
-  dstEventSummary->glb_trk_prim              = 0;
-  dstEventSummary->glb_trk_plus              = 0;
-  dstEventSummary->glb_trk_minus             = 0;
-  dstEventSummary->glb_trk_exotic            = 0;
-  dstEventSummary->n_vert_total              = 0;
-  for (i=0; i<5; i++) {
-    dstEventSummary->n_vert_type[i]          = 0;
-  }
-  dstEventSummary->n_vert_pileup             = 0;
-  dstEventSummary->mean_pt                   = 0;
-  dstEventSummary->mean_pt2                  = 0;
-  dstEventSummary->mean_eta                  = 0;
-  dstEventSummary->rms_eta                   = 0;
-  for (irange=0; irange<NRANGE; irange++) {
-    dstEventSummary->mult_eta[irange]        = 0;
-    dstEventSummary->mult_pt[irange]         = 0;
-    dstEventSummary->mult_phi[irange]        = 0;
-    dstEventSummary->energy_emc_eta[irange]  = 0;
-    dstEventSummary->energy_emc_phi[irange]  = 0;
-  }
+  memset (dstEventSummary, 0, sizeof (dst_event_summary_st));
   nphirange = NRANGE ;
 
-  for (i=0; i<3; i++) {
-    dstEventSummary->prim_vrtx[i]          = 0.;
-  }
-  dstEventSummary->field         = 0.;
   if (!dstTrack_h->nok){
     fprintf(stderr,"FILL_DST_EVENT_SUMMARY: Zero dst tracks...exiting.\n");
     return STAFCV_BAD;
@@ -209,12 +180,12 @@ long  type_of_call fill_dst_event_summary_ (
   dstEventSummary->glb_trk_minus = glb_trk_minus ;
   
   /* Fill mean eta, pt, pt^2 and rms_eta */
-  dstEventSummary->mean_pt  = mean_pt/((float)glb_trk_good+1.e-10);
-  dstEventSummary->mean_pt2 = mean_pt2/((float)glb_trk_good+1.e-10);
-  dstEventSummary->mean_eta = mean_eta/((float)glb_trk_good+1.e-10);
-  dstEventSummary->rms_eta  = sqrt(rms_eta/((float)glb_trk_good+1.e-10));
-  
-
+  if (glb_trk_good > 0) {
+    dstEventSummary->mean_pt  = mean_pt/(float)glb_trk_good;
+    dstEventSummary->mean_pt2 = mean_pt2/(float)glb_trk_good;
+    dstEventSummary->mean_eta = mean_eta/(float)glb_trk_good;
+    dstEventSummary->rms_eta  = sqrt(rms_eta/(float)glb_trk_good);
+  }
   /* Fill total # of vertices */
   dstEventSummary->n_vert_total = dstVertex_h->nok;  
 

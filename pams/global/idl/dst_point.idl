@@ -75,6 +75,8 @@
   long      position[2];     /* compressed x,y,z of space-point         */
   long      pos_err[2];      /* compressed x,y,z space-point error      */
   long      charge;          /* total charge and max_adc                */
+  short     id_simtrk;       /* id of simulated track */
+  short     id_quality;      /* percentage of charge associated with above id */
  } ;
-/*  Last mod. for dst_point:   $Date: 1999/09/27 16:54:08 $ */
+/*  Last mod. for dst_point:   $Date: 2004/01/15 00:35:31 $ */
 

@@ -136,6 +136,8 @@ CC:  Determine which detector this space point is located in>>>
                tcl_tphit(tcl_tphit_h.nok).dx = float(tpcx)/float(two17)
                tcl_tphit(tcl_tphit_h.nok).dy = float(tpcy)/float(two17)
                tcl_tphit(tcl_tphit_h.nok).dz = float(tpcz)/float(two17)
+               tcl_tphit(tcl_tphit_h.nok).id_simtrk = dst_point(i).id_simtrk
+               tcl_tphit(tcl_tphit_h.nok).id_quality = dst_point(i).id_quality
 
                tpcdq = dst_point(i).charge/two16
                tpcq  = dst_point(i).charge - two16*tpcdq
@@ -158,7 +160,6 @@ c               tcl_tphit(tcl_tphit_h.nok).flag      = 0
                tcl_tphit(tcl_tphit_h.nok).phi       = 0.0
                tcl_tphit(tcl_tphit_h.nok).prf       = 0.0
                tcl_tphit(tcl_tphit_h.nok).zrf       = 0.0
-
             else if(tcl_tphit_h.nok .ge. tcl_tphit_h.maxlen) then
                write(6,20) tcl_tphit_h.nok
 20             Format(2x,'Number of TPC space point entries = ',
