@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.21 1999/10/09 18:17:10 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.22 1999/10/14 13:42:14 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.22  1999/10/14 13:42:14  fine
+// Some big to draw tables have been fixed
+//
 // Revision 1.21  1999/10/09 18:17:10  fine
 // Some correction to draw tptrack table
 //
@@ -116,6 +119,7 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
 
   m_HitCollector  = new TList;
   m_TrackCollector= new TList;
+  m_TableCollector= new TList;
 
   m_PadBrowserCanvas = 0;
 
@@ -135,6 +139,7 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
 }
 //_____________________________________________________________________________
 StEventDisplayMaker::~StEventDisplayMaker(){
+  gROOT->GetListOfBrowsables()->RecursiveRemove(this);
   ClearEvents();
   delete m_FilterArray;
   delete m_EventsNode;
@@ -272,6 +277,10 @@ Int_t StEventDisplayMaker::BuildGeometry()
 //______________________________________________________________________________
 void StEventDisplayMaker::AddName(const Char_t *name)
 {
+  //  "name" - StEvent
+  //  "g2t_tpc_hit(track_id,x[0]:x[1]:x[2])"
+  //   Attention:     NO EXPRESSION, yet !!!
+
   if (!m_ListDataSetNames) m_ListDataSetNames = new TList;
   m_ListDataSetNames->Add(new TObjString(name));
 }
@@ -399,56 +408,67 @@ Int_t StEventDisplayMaker::Make()
  //_______________________________________
   Int_t totalCounter = 0;
   if (m_ShortView){
-    if (!m_ListDataSetNames) {
-        m_Event  = (StEvent *) GetDataSet("StEvent");
-        if (m_Event) totalCounter = MakeEvent();
-        else {
-          St_DataSet *dshits = GetDataSet("tphit");
-          if (dshits)   { printf(" tphit found !!!\n");   }
-          St_DataSet *dstracks = GetDataSet("tptrack");
-          if (dstracks) { printf(" tptrack found !!!\n"); }
+    if (!m_ListDataSetNames || m_ListDataSetNames->GetSize() == 0) 
+    {
+    // Add default names
+      m_Event  = (StEvent *) GetDataSet("StEvent");       
+      if (m_Event)  AddName("StEvent");
+      else {
+        St_DataSet *dshits = GetDataSet("tphit");
+        if (dshits)   {
+           AddName("tphit(id_globtrk,x:y:z)");
+           printf(" tphit found !!!\n");  
+          ((St_Table *)dshits)->Print(0,10);   
         }
-    } else {
-      TIter nextNames(m_ListDataSetNames);
-      TObjString *eventName = 0;
-      while ( (eventName = (TObjString *)nextNames()) ) {
-        m_Event = 0;
-        m_Table = 0;
+        //- St_DataSet *dstracks = GetDataSet("tptrack");
+        //- if (dstracks) {
+        //-    AddName("tptrack(id,x,y,z)");
+        //-    printf(" tptrack found !!!\n"); 
+        //-    ((St_Table *)dstracks)->Print(0,1);
+        //- }
+      }
+    }
+    TIter nextNames(m_ListDataSetNames);
+    TObjString *eventName = 0;
+     while ( (eventName = (TObjString *)nextNames()) ) 
+    {
+      m_Event = 0;
+      m_Table = 0;
   
-        Char_t *nextObjectName = StrDup(eventName->String().Data());
-        Char_t *positions[] = {0,0,0,0,0};
-        Int_t type = ParseName(nextObjectName, positions);
-        if (!type) { delete [] nextObjectName; continue; }
-        const Char_t *foundName = positions[0];
-        St_DataSet *event = GetDataSet(foundName);
-        if (!event) {
-          if (Debug()) Warning("Make","No object \"%s\" found",foundName);
-          continue;
-        }
-        if (event->InheritsFrom("St_Table") && type == 5) {
-             //  ----- Draw "table" events -------------------------- //
-               m_Table = (St_Table *)event;                           //
-               totalCounter += MakeTable((const Char_t **)positions); //
-             //  ---------------------------------------------------- //
-        }
-        else if (event->InheritsFrom("StEvent") && type == 1) {
-             //  ---- Draw "StEvent" events ---- //
-               m_Event = (StEvent *)event;       //
-               totalCounter += MakeEvent();      //
-             //  ------------------------------- //
-        }
-        else if (Debug()) Warning("Make","Can not draw the object \"%s\"",nextObjectName); 
-        delete [] nextObjectName;
+      Char_t *nextObjectName = StrDup(eventName->String().Data());
+      Char_t *positions[] = {0,0,0,0,0,0};
+      Int_t type = ParseName(nextObjectName, positions);
+      if (Debug()) { printf(" The type of the current parameter is %d \n", type); }
+      if (!type) { delete [] nextObjectName; continue; }
+      const Char_t *foundName = positions[0];
+      St_DataSet *event = GetDataSet(foundName);
+      if (!event) {
+         if (Debug()) Warning("Make","No object \"%s\" found",foundName);
+         continue;
+      }
+      if (event->InheritsFrom("St_Table") && type == 5) {
+        //  ----- Draw "table" events -------------------------- //
+          m_Table = (St_Table *)event;                           //
+          totalCounter += MakeTable((const Char_t **)positions); //
+        //  ---------------------------------------------------- //
+      }
+      else if (event->InheritsFrom("StEvent") && type == 1) {
+         //  ---- Draw "StEvent" events ---- //
+           m_Event = (StEvent *)event;       //
+           totalCounter += MakeEvent();      //
+         //  ------------------------------- //
+      }
+      else if (Debug()) Warning("Make","Can not draw the object \"%s\"",nextObjectName); 
+      delete [] nextObjectName;
      }
+     if (totalCounter) {
+       m_EventsView = new St_NodeView(*m_EventsNode);
+       m_ShortView->Add(m_EventsView);
+     }
+     printf(" updating view of %d objects\n",totalCounter);
+     m_PadBrowserCanvas->Update();
    }
-   if (totalCounter) {
-      m_EventsView = new St_NodeView(*m_EventsNode);
-      m_ShortView->Add(m_EventsView);
-   }
-   printf(" updating view of %d objects\n",totalCounter);
-   m_PadBrowserCanvas->Update();
- }
- return kStOK;
+   return kStOK;
 }
 
 //_____________________________________________________________________________
@@ -467,9 +487,7 @@ Int_t StEventDisplayMaker::ParseName(Char_t *inName, Char_t *positions[])
 
   Int_t nParsed = 0;
   if (inName && inName[0]) {
-//    Char_t *parsedName = StrDup(inName);
     Char_t *pos = 0;
-//    const Char_t *positions[] = {0,0,0,0,0};
     const Char_t *errorMessages[] = {  "the open bracket missed"
                                      , "first comma missed"
                                      , "first collon missed"
@@ -484,13 +502,14 @@ Int_t StEventDisplayMaker::ParseName(Char_t *inName, Char_t *positions[])
     const Char_t delimiters[] = {openBracket,comma,collon,collon,closeBracket };
     pos = positions[nParsed] = inName;
     for (nParsed=1;nParsed <= lenExpr;nParsed++)  {
-       if( (pos = strchr(pos+1,delimiters[nParsed])) ) {
-           positions[nParsed] = pos;
+       if( (pos = strchr(pos+1,delimiters[nParsed-1])) ) {
+           positions[nParsed] = pos+1;
           *pos = 0;
        } else break;
     }
     if (nParsed > 1) {
-      for (Int_t i=1;i<nParsed;nParsed++) 
+      nParsed--;
+      for (Int_t i=1;i<nParsed;i++) 
          if (!positions[i]) cerr << "StEventDisplayMaker::ParseName" << errorMessages[i-1] << endl;
       if (nParsed < lenExpr) nParsed = 0;
     }
@@ -733,7 +752,7 @@ Int_t StEventDisplayMaker::MakeTable(const Char_t **positions)
 
   filter = (StVirtualEventFilter *)m_FilterArray->At(kTable);
   if (!filter || filter->IsOn() ) {
-     tableCounter = MakeTableHits(m_Table,filter,positions[0],&positions[1]);
+     tableCounter = MakeTableHits(m_Table,filter,positions[1],&positions[2]);
      if (Debug()) printf(" St_Table: %d \n", tableCounter);
   }
   return tableCounter;
