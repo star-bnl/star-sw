@@ -3,8 +3,8 @@
 
 
 long type_of_call sca_filter_(
-  TABLE_HEAD_ST   *dst_run_header_h,    DST_RUN_HEADER_ST    *dstRunHeader,
-  TABLE_HEAD_ST   *dst_event_header_h,  DST_EVENT_HEADER_ST  *dstEventHeader,
+  TABLE_HEAD_ST   *run_header_h,        RUN_HEADER_ST    *dstRunHeader,
+  TABLE_HEAD_ST   *event_header_h,      EVENT_HEADER_ST      *dstEventHeader,
   TABLE_HEAD_ST   *dst_track_h,         DST_TRACK_ST         *dstTrack,
   TABLE_HEAD_ST   *sca_filter_const_h,  SCA_FILTER_CONST_ST  *filter_const,
   TABLE_HEAD_ST   *sca_switch_h,        SCA_SWITCH_ST        *sca_switch,
@@ -106,8 +106,8 @@ long type_of_call sca_filter_(
     sca_in[iGoodTrack].z     = dstTrack[idstTrack].psi;
     if ( sca_in[iGoodTrack].z < 0 )
       sca_in[iGoodTrack].z += 360.;
-    sca_in[iGoodTrack].evn   = dstEventHeader->n_event[0];
-    sca_in[iGoodTrack].run   = dstRunHeader->run_id;
+    sca_in[iGoodTrack].evn   = dstEventHeader->n_event;
+    sca_in[iGoodTrack].run   = dstRunHeader->exp_run_id;
     sca_in[iGoodTrack].iflag = 0;
     iGoodTrack++;
   } 
