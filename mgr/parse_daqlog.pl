@@ -7,7 +7,7 @@ use strict;
 use Sys::Hostname;
 my $hostname     = hostname();
 my $dir_log      = "/star/rcf/disk00001/star/prod4/log/daq";
-my $dir_sum      = "../../sum/daq";   
+my $dir_sum      = "/star/rcf/disk00001/star/prod4/sum/daq";   
 my @set ;
 my @list; 
 my @list_sum;     
