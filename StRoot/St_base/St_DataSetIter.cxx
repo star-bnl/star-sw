@@ -557,6 +557,7 @@ void St_DataSetIter::Reset(St_DataSet *l, int depth)
              fNext = new TIter(fRootDataSet->fList);
   }
   else {
+    fWorkingDataSet =  fRootDataSet;
     if (fNext)
         fNext->Reset();
     else if (fRootDataSet->fList)
