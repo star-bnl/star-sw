@@ -300,9 +300,9 @@ Int_t StPmdCalibConstMaker::FindMipParameters()
 {
   Float_t MipFitParam[3];
   Float_t MipFitChiSqr, MipPeakPosition, MipPeakWidth;
-  TF1* LandauFunction = new TF1("LandauFunction","landau",0,100);
-  LandauFunction->SetParameters(1,1,1);
-  LandauFunction->SetParNames("Constant","MPV","Sigma");
+  TF1 LandauFunction("LandauFunction","landau",0,100);
+  LandauFunction.SetParameters(1,1,1);
+  LandauFunction.SetParNames("Constant","MPV","Sigma");
   Float_t MPV_Sum   = 0;
   Int_t   MPV_Count = 0;
   TH1F * miphist;
@@ -324,7 +324,7 @@ Int_t StPmdCalibConstMaker::FindMipParameters()
 	 if(mOptHist)mMipEnergy[sm][i][j]->Fit("LandauFunction","q","r");
 	 if(!mOptHist)miphist->Fit("LandauFunction","q","r");
 	  for(Int_t m=0; m < 3; m++){
-	    MipFitParam[m]    = LandauFunction->GetParameter(m);
+	    MipFitParam[m]    = LandauFunction.GetParameter(m);
 	  }
 
 	  if(MipFitParam[1] > 0.){
@@ -332,7 +332,7 @@ Int_t StPmdCalibConstMaker::FindMipParameters()
 	    MPV_Entry[sm][i][j] = MipFitParam[1]; 
 	    MPV_Count++;
 	  }
-	  MipFitChiSqr        = LandauFunction->GetChisquare();
+	  MipFitChiSqr        = LandauFunction.GetChisquare();
 	  //Float_t ndf       = func->GetNDF();
 	  if(mOptHist){
 		MipPeakPosition     = mMipEnergy[sm][i][j]->GetMean();
