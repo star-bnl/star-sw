@@ -584,6 +584,7 @@ ABEND:
 
  ABEND:
  NEXT_EVENT:
+     STAF_STATUS(1)=[STAFCV_OK]
  EOF:
 
  goto END
