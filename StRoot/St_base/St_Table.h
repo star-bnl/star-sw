@@ -1,8 +1,8 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.19 1998/12/29 22:12:56 fisyak Exp $
+// $Id: St_Table.h,v 1.20 1998/12/30 00:52:42 fisyak Exp $
 // $Log: St_Table.h,v $
-// Revision 1.19  1998/12/29 22:12:56  fisyak
-// Make SetfN Public
+// Revision 1.20  1998/12/30 00:52:42  fisyak
+// Remove SetfN from public
 //
 // Revision 1.18  1998/12/29 19:37:40  fine
 // St_NodeView:  new class to create refs topology of the "main" St_Node object has been introduced
@@ -75,6 +75,7 @@ protected:
    void       Delete(Option_t *opt="");
    void       LinkHeader();
    void       SetHeadFields(Text_t *name);
+   Int_t      SetfN(Long_t len);
    void       SetName(const Char_t *name);
    void       SetTablePointer(void *table);
    void       SetUsedRows(Int_t n);
@@ -129,7 +130,6 @@ public:
    virtual     void       StafStreamer(Char_t *structname=0, FILE *fl=0);
    virtual     void       Set(Int_t n);
    virtual     void       Set(Int_t n, Char_t *array);
-   virtual     Int_t      SetfN(Long_t len);
    virtual     void       Reset(Int_t c=0);
    virtual     void       Update();
    virtual     void       Update(St_DataSet *set,UInt_t opt=0);
