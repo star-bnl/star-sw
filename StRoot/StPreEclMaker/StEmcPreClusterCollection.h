@@ -2,7 +2,12 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.h,v $
+// Revision 1.4  2000/08/24 22:11:35  suaide
+// restored some files for background compatibility
+//
 // Revision 1.3  2000/08/24 19:45:37  suaide
+//
+//
 // small modifications: some cout has been removed
 //
 // Revision 1.2  2000/08/24 11:26:48  suaide
@@ -19,15 +24,6 @@
 //    compatibility
 // 4. Do clustering in bemc, bprs, bsmde, bsmdp
 // 5. Included method StPreEclMaker::SetClusterCollection
-//
-// Removed Files:
-//
-//    StBemcPreCluster.cxx StBemcPreCluster.h
-//    StBsmdePreCluster.cxx StBsmdePreCluster.h
-//    StBsmdpPreCluster.cxx StBsmdpPreCluster.h
-//    StBemcPreClusterCollection.cxx StBemcPreClusterCollection.h
-//    StBsmdePreClusterCollection.cxx StBsmdePreClusterCollection.h
-//    StBsmdpPreClusterCollection.cxx StBsmdpPreClusterCollection.h
 //
 // Revision 1.1  2000/05/15 21:24:00  subhasis
 // initial version
