@@ -20,7 +20,7 @@ double gamovCorrect(const StHbtPair* pair,
   static double e1,e2,e1new,e2new;
   static double psi,theta;
   static double beta,gamma;
-  static double VcmsXnew, VcmsYnew, VcmsZnew;
+  static double VcmsXnew;
 
   // G = 2*pi*(eta)/(Exp(2*pi*(eta))-1)
   // eta = Z1*Z2*e^2/((h_bar)*c* Vel(rel) )
