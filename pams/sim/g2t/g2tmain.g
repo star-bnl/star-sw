@@ -170,6 +170,7 @@ created   22 april 98
       prin5 i; (' g2tmain: get_kine done with i=',i6)
 
       Use GTTC
+      ctabo = ' '
       do j=1,GTTC_Nsys
 
         use dete(j) 
