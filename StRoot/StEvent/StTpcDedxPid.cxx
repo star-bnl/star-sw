@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPid.cxx,v 1.2 1999/04/30 13:16:29 fisyak Exp $
+ * $Id: StTpcDedxPid.cxx,v 1.3 1999/07/13 13:20:35 fisyak Exp $
  *
  * Author: Craig Ogilvie, April 1999
  ***************************************************************************
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPid.cxx,v $
- * Revision 1.2  1999/04/30 13:16:29  fisyak
- * add StArray for StRootEvent
+ * Revision 1.3  1999/07/13 13:20:35  fisyak
+ * Add lost Craig functions, use gufld for magnetic field
+ *
+ * Revision 1.3  1999/07/13 13:20:35  fisyak
+ * Add lost Craig functions, use gufld for magnetic field
  *
  * Revision 1.2  1999/04/30 13:16:29  fisyak
  * add StArray for StRootEvent
@@ -27,6 +30,13 @@
  *
  **************************************************************************/
 #include "StTpcDedxPid.h"
+#include "StDedx.h"
+#ifndef __CINT__
+#define gufld F77_NAME(gufld,GUFLD)
+#define quickid F77_NAME(quickid,QUICKID)
+Double_t StTpcDedxPid::mTpcDedxGain = 0.174325e-06;
+Double_t StTpcDedxPid::mTpcDedxOffset = -2.71889 ;
+Double_t StTpcDedxPid::mTpcDedxRise = 776.626 ;
 Double_t StTpcDedxPid::mTpcDedxOffset = -3.75785 ;
 Double_t StTpcDedxPid::mTpcDedxRise = 29.706 ;
 Double_t StTpcDedxPid::mTpcDedxTcut = 1.50536 ;
@@ -85,21 +95,28 @@ Double_t StTpcDedxPid::numberOfSigma(Double_t mass) const
 
 Double_t StTpcDedxPid::meanPidFunction(Double_t mass) const
 {     
-    const Double_t  bField = 0.5*tesla;
+    // can't we get bfield from somewhere else, and why does p
+    // in StEvent need it anyway?
+    //
+    //   const Double_t  bField = 0.5*tesla;
+  Float_t x[3] = {0,0,0};
+  Float_t b[3];
   gufld(x,b);
-    Double_t momentum  = abs(((StGlobalTrack&)mTrack).helix().momentum(bField));
+  Double_t bField     = b[2]*kilogauss;
     
     // cast away const'ness (we know what we are doing here)
     Double_t momentum  = abs(mTrack->helix().momentum(bField));
 
-    Double_t bpar[3] = {0.1221537e-06,-4.608514, 5613.} ;
+    // placeholder constants for charcaterizeing bethe-bloch curve
+    // use some data-base solution
     
     // double bpar[3] = {0.1221537e-06,-4.608514, 5613.} ;
     // double bpar[3] = {0.174325e-06,-2.71889, 776.626} ;
-    Double_t rise = bpar[2]*pow(beta*gamma,2);
+    Double_t rise = mTpcDedxRise*pow(beta*gamma,2);
     Double_t dedxmean;
     //  "gamma " << gamma<< endl;
-	dedxmean = bpar[0]/pow(beta,2)*(0.5*log(rise)-pow(beta,2)-bpar[1]);
+ 
+	  (0.5*log(rise)-pow(beta,2)- mTpcDedxOffset);
     if ( beta > 0) 
 	dedxmean = mTpcDedxGain/pow(beta,2)*
 	  (0.5*log(rise)-mTpcDedxTcut*pow(beta,2)- mTpcDedxOffset);
