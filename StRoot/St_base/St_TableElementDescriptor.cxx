@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableElementDescriptor.cxx,v 1.5 1999/08/02 00:44:12 fine Exp $
+// $Id: St_TableElementDescriptor.cxx,v 1.6 1999/08/06 15:25:03 fine Exp $
 // $Log: St_TableElementDescriptor.cxx,v $
+// Revision 1.6  1999/08/06 15:25:03  fine
+// St_TableElementDescriptor.cxx has been restored
+//
 // Revision 1.5  1999/08/02 00:44:12  fine
-// Wrong element size was returned - fixed
+//  Wrong element size was returned - fixed
 //
 // Revision 1.4  1999/07/01 23:12:37  fine
 // Bug fixed, when an array is supplied with no index. Afftect I/O
@@ -132,7 +135,8 @@ void St_TableElementDescriptor::LearnTable(St_Table *parentTable, const Char_t *
       }
 //      m_Size   = memberType->Size() * globalIndex; // memberType->Size();
 //      m_Offset = member->GetOffset() + m_Size;     // memberType->Size() * globalIndex;
-      m_Size   = memberType->Size() * (!indexArray?1:globalIndex);
+      //  for VP ***       m_Size   = memberType->Size() * (!indexArray?1:globalIndex);
+      m_Size   = memberType->Size() * (indexArray?1:globalIndex);
       m_Offset = member->GetOffset() + (indexArray?m_Size * globalIndex : 0);
     }
     break;
