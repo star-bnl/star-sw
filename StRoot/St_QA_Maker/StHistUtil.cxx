@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.21 1999/12/22 16:32:28 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.22 1999/12/22 17:16:43 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.22  1999/12/22 17:16:43  kathy
+// fix so that it doesn't try to print/draw in logY scale if the max entries in any bins is 0
+//
 // Revision 1.21  1999/12/22 16:32:28  kathy
 // check if histogram has entries before setting logY scale
 //
@@ -233,9 +236,9 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
 	if (strcmp(obj->GetName(),lastHistName)==0) started = kFALSE;
 	histCounter++;
 	printf("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",histCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
+// Switch to a new page
 	if (padCount == numPads) {
 	  if (psf) psf->NewPage();
-	  
 // update the page number
           Ipagenum++;
           ostrstream Cpagenumt(Ctmp,10);
@@ -249,9 +252,15 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
         HistCanvas->Update();
 	  padCount=0;
 	}
+
+// go to next pad & set logy scale off
 	graphPad->cd(++padCount);
-          gPad->SetLogy(0);
-	if (m_ListOfLog && m_ListOfLog->FindObject(obj->GetName()) && ((TH1 *)obj)->GetEntries()){
+          gPad->SetLogy(0);	  
+
+// set logy scale on if: there is a loglist, if the hist name is on the list, if it has entries
+// and if the max entries in all bins is > 0
+	if (m_ListOfLog && m_ListOfLog->FindObject(obj->GetName()) && ((TH1 *)obj)->GetEntries()
+            && ((TH1 *)obj)->GetMaximum() ){
 	  gPad->SetLogy(1);
           cout << "StHistUtil::DrawHists -- Will draw in log scale: " << obj->GetName() <<endl;
         }
