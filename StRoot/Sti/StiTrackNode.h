@@ -23,10 +23,12 @@ class StiTrackNode : public StiDefaultMutableTreeNode
   StiHit * getHit() const      {  return hit;}
   friend ostream& operator<<(ostream& os, const StiTrackNode& n);
 
-  StiDetector *getDetector() const;
-  void setDetector(StiDetector *pDetector);
+  const StiDetector *getDetector() const;
+  void setDetector(const StiDetector *pDetector);
 
  protected:   
+
+  StiTrackNode(): hit(NULL), detector(NULL){}
 
   StiHit      * hit;  
   StiDetector * detector; // used if not hit for node
