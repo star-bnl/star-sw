@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.2 1999/01/15 11:03:59 lasiuk Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.3 1999/01/28 02:51:27 lasiuk Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,8 +16,12 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
- * Revision 1.2  1999/01/15 11:03:59  lasiuk
- * sector 12/24 compatibility
+ * Revision 1.3  1999/01/28 02:51:27  lasiuk
+ * add ()localSector --> Raw
+ * add ()localSector --> Local
+ *
+ * protection against pad<1
+ * const removed from several functions (because of matrix)
  *
  * Revision 1.6  1999/02/16 18:15:41  fisyak
  * Check in the latest updates to fix them
@@ -75,8 +79,9 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a, StGlobalC
     StTpcLocalCoordinate tmp;
     
 void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a, StTpcLocalCoordinate& b) const 
-    if(a.sector() > 12)
+    this->operator()(tmp,b);
 }
+
 void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a, StTpcPadCoordinate& b)
 {
     StTpcLocalCoordinate tmp;
@@ -97,13 +102,67 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate&  a, StTpcP
 	tmp.setZ((zFromTB(a.timeBucket())));
 
     b = StTpcLocalCoordinate(tmp);
+    cout << "tBFromZ z=" << a.pos().z() << endl;
+
 void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate&  a, StTpcPadCoordinate& b)
-    //PR(tb);
+    PR(tb);
     int sector = sectorFromCoordinate(a);
     if(a.pos().z() < 0)
-    // rotate xy to the appropriate sector!
+	sector += 12;
+    //PR(sector);
+    
+    // rotate to local sector frame (12)
+void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, StTpcPadCoordinate& b) const
+    PR(decodedVolumeId);
+    int row = rowFromLocal(tmp);
+    //PR(row);
+    int pad = padFromLocal(tmp,row);
+    //PR(pad);
+    //cout << "tBFromZ z=" << a.pos().z() << endl;
+
+    int tb = tBFromZ(fabs(a.pos().z()));
+    //PR(tb);
+    b = StTpcPadCoordinate(sector,row,pad,tb);     
+}
+//      LocalSector Coordnate    -->  Tpc Raw Pad Coordinate
+void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, StTpcPadCoordinate& b)
+{
+     // LocalSector is a kind of sector (12) frame
     int decodedVolumeId = a.volumeId();
-//      Local Coordinate  <-->  Tpc Local Coordinate
+    //PR(decodedVolumeId);
+    cout << "Number of Pads (shift): " << numberOfPads << endl;
+    decodedVolumeId -= isdet*100000;
+    PR(probablePad);
+    decodedVolumeId -= sector*100;
+
+    int row = decodedVolumeId;
+    //////////-------///////////////////
+    //  See padFromLocal()
+    int probablePad = mTPCdb->numberOfPadsAtRow(row)/2;
+    double thePitch = (row<=13) ?
+	mTPCdb->innerSectorPadPitch() :
+	mTPCdb->outerSectorPadPitch();
+void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, StTpcLocalCoordinate& b) const 
+    double shift =  (a.pos().x())/thePitch + .5;
+    // shift in number of pads from centerline
+    int numberOfPads = nearestInteger(shift);
+    PR(decodedVolumeId);
+    probablePad += numberOfPads;
+    //PR(probablePad);
+    /////////////--------------////////
+    
+    PR(row);
+    b = StTpcPadCoordinate(sector, row, probablePad, tb);
+}
+//      LocalSector Coordnate    -->  Tpc Local Coordinate
+void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, StTpcLocalCoordinate& b)
+{
+    // Add the offset and then,
+    // rotate xy to the appropriate sector!
+
+    // LocalSector is a kind of sector (12) frame
+    int decodedVolumeId = a.volumeId();
+    //PR(decodedVolumeId);
     int isdet = (decodedVolumeId/100000);
     decodedVolumeId -= isdet*100000;
     int sector = decodedVolumeId/100;
@@ -296,9 +355,12 @@ double StTpcCoordinateTransform::xFromPad(const int row, const int pad) const
 	mTPCdb->outerSectorPadPitch();
 
     int pads2move = pad - (mTPCdb->numberOfPadsAtRow(row))/2;
-    //    double tb = (mTPCdb->frischGrid - z)/mTPCdb->vD;
+    double dist2move = pitch*(pads2move-.5);
+    return(dist2move);
+
     double z = mTPCdb->frischGrid() - (mSCdb->driftVelocity()*tb);
-    return(nearestInteger(tb));
+}
+
 #ifndef ST_NO_NAMESPACES
     // I do not like this.  This should be passed via the electronics data base!
     // We will have to see what is decided about this code!
