@@ -194,7 +194,12 @@ CCC        ENDIF
         REAL XYZ(3),XYZOU(3),TKIN(1),UBUF(1)
         REAL FIELDM,TMAXFD,STEMAX,DEEMAX,EPSIL,STMIN
         REAL DX,DP,DEDX,MOMENTUM,TMOMENTUM,ENERGY,RE1,RE2
+        REAL COSL
+        REAL rcrossi, rcrosso, pio2, phi
 
+        REAL dein,deou,destep
+        Logical trackdedx
+ 
         INTEGER IPART,KDIN,NMED,NMAT,ISVOL,IFIELD,NWBUF,IRET
 
         CHARACTER*4 MECAN
@@ -253,12 +258,12 @@ CCC        POU(2) = PIN(2) + DPH * HRH / TAN( PIN(3) )
         XYZ(1) = RE1*COS(PIN(1)/RE1)
         XYZ(2) = RE1*SIN(PIN(1)/RE1)
         XYZ(3) = PIN(2)
-        MOMENTUM = SQRT(1.+PIN(3)**2)/PIN(5)
+        MOMENTUM = SQRT(1.+PIN(3)**2)/ABS(PIN(5))
         ENERGY = SQRT(MOMENTUM**2+PMASS**2)
 
         TKIN(1) = ENERGY - PMASS ! KE 
         IPART = IGPART ! GEANT particle ID
-CCC        IPART = 14 ! hard wire proton for now
+      IF(RE1.GT.55.0)THEN ! Inside TPC
         MECAN = 'LOSS'
         KDIN = 1
         CALL GMEDIA(XYZ,NMED)
@@ -274,8 +279,21 @@ CCC        IPART = 14 ! hard wire proton for now
      +           +(XYZOU(3)-XYZ(3))**2)
         IF(ROU.GT.RIN)DX = -DX ! Energy loss or gain
         
-        DP = ENERGY*DEDX*DX/MOMENTUM ! approximation
-        MOMENTUM = MOMENTUM+DP
+        TKIN(1) = TKIN(1)+DEDX*DX
+        ENERGY = TKIN(1)+PMASS
+        MOMENTUM = SQRT(ENERGY**2-PMASS**2)
+
+      ELSE
+CCC        print *,'rin,rou, momentum in = ',re1,re2,momentum
+C Use precalculated tables for this track
+         if(trackdedx(re1,dein).and.trackdedx(re2,deou))then
+          destep = dein-deou
+          ENERGY = TKIN(1)+destep+PMASS
+          MOMENTUM = SQRT(ENERGY**2-PMASS**2)
+CCC          print *,' destep,dein,deou,rin,rou,mom = ',destep,dein,deou,re1,re2,momentum
+         endif
+      ENDIF
+
         TMOMENTUM = MOMENTUM/SQRT(1.+PIN(3)**2)
         POU(5) = SIGN(1./TMOMENTUM,PIN(5))
 
@@ -560,3 +578,4 @@ CCC        POU(5) = PIN(5)
         PXYZ(3) = P * COS( P1(3) )
 
         END
+
