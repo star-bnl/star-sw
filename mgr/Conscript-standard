@@ -194,6 +194,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	      $pkg =~ m/EmcUtil$/             ||
 	      $pkg =~ m/^StMuDSTMaker$/       ||
 	      $pkg =~ m/^StJetMaker$/         ||
+	      $pkg =~ m/^StEmcPool$/          ||
 	      $pkg =~ m/^StEEmcPool$/         ||
 	      $pkg =~ m/^StTofPool$/          ||
 	      $pkg =~ m/^StRichPool$/         ||
