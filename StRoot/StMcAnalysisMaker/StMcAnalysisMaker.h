@@ -1,7 +1,12 @@
 /**********************************************
  *
- * $Id: StMcAnalysisMaker.h,v 1.4 1999/09/09 23:59:38 calderon Exp $
+ * $Id: StMcAnalysisMaker.h,v 1.5 1999/09/10 19:11:15 calderon Exp $
  * $Log: StMcAnalysisMaker.h,v $
+ * Revision 1.5  1999/09/10 19:11:15  calderon
+ * Write the Ntuple in StMcAnalysisMaker into a file.
+ * This way it can be accessed after the macro finishes,
+ * otherwise it gets deleted.
+ *
  * Revision 1.4  1999/09/09 23:59:38  calderon
  * Made the following changes:
  *
@@ -34,6 +39,7 @@
 
 class TH1F;
 class TH2F;
+class TFile;
 class TNtuple;
 class TCanvas;
 
@@ -58,6 +64,7 @@ class StMcAnalysisMaker : public StMaker {
     TH2F*     mHitResolution;    //! Diff. between x and z coordinates of the hits.
     TH2F*     coordRec;          //! X and Y coord of rec. Track.
     TH2F*     coordMcPartner;    //! X and Y coord of  MC  Track.
+    TFile*    mNtupleFile;       //! File to contain the mTrackNtuple, otherwise it is deleted!
     TNtuple*  mTrackNtuple;      //! Miscellaneous info of the track pairs
     // Data-members to make up the output Canvases
     TCanvas*       mAssociationCanvas;    //!   
@@ -77,7 +84,7 @@ private:
     static const Float_t mMaxDeltaZ;
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcAnalysisMaker.h,v 1.4 1999/09/09 23:59:38 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcAnalysisMaker.h,v 1.5 1999/09/10 19:11:15 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StMcAnalysisMaker, 1)

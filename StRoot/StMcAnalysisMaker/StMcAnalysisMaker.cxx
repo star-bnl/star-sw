@@ -1,7 +1,12 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.5 1999/09/09 23:59:37 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.6 1999/09/10 19:11:15 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.6  1999/09/10 19:11:15  calderon
+ * Write the Ntuple in StMcAnalysisMaker into a file.
+ * This way it can be accessed after the macro finishes,
+ * otherwise it gets deleted.
+ *
  * Revision 1.5  1999/09/09 23:59:37  calderon
  * Made the following changes:
  *
@@ -30,11 +35,13 @@
 #include <string>
 #include <vector>
 #include <math.h>
+
 #include "TStyle.h"
 #include "TCanvas.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TNtuple.h"
+#include "TFile.h"
 
 #include "StMcAnalysisMaker.h"
 #include "PhysicalConstants.h"
@@ -111,11 +118,11 @@ StMcAnalysisMaker::~StMcAnalysisMaker()
     //  delete the histograms
     cout << "Inside StMcAnalysisMaker Destructor" << endl;
     SafeDelete(mAssociationCanvas);
-    SafeDelete(mMomResolution);
-    SafeDelete(mHitResolution);
-    SafeDelete(coordRec);
-    SafeDelete(coordMcPartner);
-    SafeDelete(mTrackNtuple);
+//     SafeDelete(mMomResolution);
+//     SafeDelete(mHitResolution);
+//     SafeDelete(coordRec);
+//     SafeDelete(coordMcPartner);
+//     SafeDelete(mTrackNtuple);
 }
 
 //_____________________________________________________________________________
@@ -132,6 +139,7 @@ void StMcAnalysisMaker::Clear(const char*)
 Int_t StMcAnalysisMaker::Finish()
 {
     cout << "in StMcAnalysisMaker::Finish....." << endl;
+    //mNtupleFile->Close();
     return StMaker::Finish();
 }
 
@@ -152,11 +160,6 @@ Int_t StMcAnalysisMaker::Init()
     mMomResolution = new TH1F("Mom. Resolution","(|p| - |pmc|)/|p|",100,-1.,1.);
     mMomResolution->SetXTitle("Resolution (%)");
 
-    char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commHits:hitDiffX:hitDiffY:hitDiffZ";
-    mTrackNtuple = new TNtuple("Track Ntuple","Track Pair Info",vars);
-    
-    //cout << "Defined Momentum Res. Histogram & Ntuple" << endl;
-
     coordRec = new TH2F("coords. Rec","X vs Y pos. of Hits", 100, -200, 200, 100, -200, 200);
     coordRec->SetXTitle("X (cm)");
     coordRec->SetYTitle("Y (cm)");
@@ -164,6 +167,16 @@ Int_t StMcAnalysisMaker::Init()
     coordMcPartner = new TH2F("coords. MC","X vs Y pos. of Hits", 100, -200, 200, 100, -200, 200);
     coordMcPartner->SetXTitle("X (cm)");
     coordMcPartner->SetYTitle("Y (cm)");
+
+    // Define the file for the Ntuple, otherwise it won't be available later.
+    
+    mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");
+
+    char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commHits:hitDiffX:hitDiffY:hitDiffZ";
+    mTrackNtuple = new TNtuple("TrackNtuple","Track Pair Info",vars);
+    
+    //cout << "Defined Momentum Res. Histogram & Ntuple" << endl;
+
 
     return StMaker::Init();
 }
@@ -295,10 +308,10 @@ Int_t StMcAnalysisMaker::Make()
 // 	mTrackNtuple=0;
 //     }
 //     char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commHits:hitDiffX:hitDiffY:hitDiffZ";
-    float* values = new float[12];
 //     mTrackNtuple = new TNtuple("Track Ntuple","Track Pair Info",vars);
+
+    float* values = new float[12];
     
-//     cout << "Defined Momentum Res. Histogram & Ntuple" << endl;
     for (trackMapIter tIter=theTrackMap->begin();
 	 tIter!=theTrackMap->end(); ++tIter){
 
@@ -343,7 +356,7 @@ Int_t StMcAnalysisMaker::Make()
     cout << "Finished Track Loop, Made Ntuple" << endl;
     //delete vars;
     delete values;
-
+    mNtupleFile->Write(); // Write the Ntuple to the File.
 
     // Example: Make 2 Histograms
     // - x and y positions of the hits from the reconstructed track.
