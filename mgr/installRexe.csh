@@ -14,11 +14,20 @@ endif
 set OUT = $cwd
 
 # define where all Make*.mk are. Here the place is the same as input area
-if ( -e $cwd/MakeArch.mk ) then
-  setenv STAF_MAKE_HOME $cwd
-else
+if ( ! ${?STAF_MAKE_HOME} ) then
+  if ( -e $cwd/MakeRexe.mk ) then
+    setenv STAF_MAKE_HOME $cwd
+  endif
+endif
+if ( ! ${?STAF_MAKE_HOME} ) then
+  if ( -e $cwd/mgr/MakeRexe.mk ) then
+    setenv STAF_MAKE_HOME $cwd/mgr
+  endif
+endif
+if ( ! ${?STAF_MAKE_HOME} ) then
   setenv STAF_MAKE_HOME ${STAR}/mgr
 endif
+
 echo Use makefiles from $STAF_MAKE_HOME
 
 # define STAF SYS area
