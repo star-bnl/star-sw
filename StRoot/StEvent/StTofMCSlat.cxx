@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMCSlat.cxx,v 2.1 2001/04/26 01:07:42 ullrich Exp $
+ * $Id: StTofMCSlat.cxx,v 2.2 2001/04/26 15:19:10 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, April 2001 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofMCSlat.cxx,v $
+ * Revision 2.2  2001/04/26 15:19:10  ullrich
+ * Added ClassDef and ClassImp macros.
+ *
  * Revision 2.1  2001/04/26 01:07:42  ullrich
  * Initial Revision.
  *
@@ -24,8 +27,9 @@ ostream& operator<<(ostream& os, const StructTofMCInfo& MCInfo)
                << ", tof: "   << MCInfo.mTof   << endl); 
 }
 
-static const char rcsid[] = "$Id: StTofMCSlat.cxx,v 2.1 2001/04/26 01:07:42 ullrich Exp $";
+static const char rcsid[] = "$Id: StTofMCSlat.cxx,v 2.2 2001/04/26 15:19:10 ullrich Exp $";
 
+ClassImp(StructTofMCInfo)
 ClassImp(StTofMCSlat)
 
 StTofMCSlat::StTofMCSlat() { /* nopt */ }
