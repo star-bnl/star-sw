@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.30 2000/09/07 19:00:53 lbarnby Exp $
+// $Id: StMatchMaker.cxx,v 1.31 2000/10/20 21:21:35 lbarnby Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.31  2000/10/20 21:21:35  lbarnby
+// Set up copying into globtrk table (NO refit) if field-off run
+//
 // Revision 1.30  2000/09/07 19:00:53  lbarnby
 // Explicitly set Kalman mass hypothesis to pion (whad been commented out) rather than relying on default inside Kalman module
 //
@@ -437,6 +440,17 @@ Int_t StMatchMaker::Init(){
   //Use this as the GEANT pid to be used for the kalman filter for now 
     row.useglobal = 8;
     m_egr_egrpar->AddAt(&row,1);
+  }
+
+  // Set up copying of TPC tracks (no refit) if field off (B very small)
+  gMessMgr->Info() << "B field is " << B*kilogauss << " kilogauss" << endm;
+  if (B < 0.005*kilogauss){
+    gMessMgr->Info() <<
+      "No field run: no refit, copy tracks into globtrk table" << endm;
+    egr_egrpar_st *egr_egrpar = m_egr_egrpar->GetTable();
+    egr_egrpar->usetpc = 1;
+    egr_egrpar->usesvt = 1;
+    egr_egrpar->useglobal  = 0;
   }
   
   AddRunCont(m_egr_egrpar);
