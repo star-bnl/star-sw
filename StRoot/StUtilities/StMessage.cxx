@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.3 1999/06/26 00:24:52 genevb Exp $
+// $Id: StMessage.cxx,v 1.4 1999/06/29 17:37:30 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.4  1999/06/29 17:37:30  genevb
+// Lots of fixes...
+//
 // Revision 1.3  1999/06/26 00:24:52  genevb
 // Fixed const type mismatches
 //
@@ -22,88 +25,97 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
+#ifdef __ROOT__
+#include "TROOT.h"
+#endif
 #include <ctype.h>
 #include <string.h>
-#include "TROOT.h"
 #include "StMessage.h"
 #include "StMessageCounter.h"
+#include "StMessTypeList.h"
+#include "TDatime.h"
+#include <strstream.h>
 
-StMessage* gMessage=0;
-StMessage* endm=0;
-ostream& operator<<(ostream& os, StMessage* mm) {
-  mm->Print();
-  return os;
-}
-static Char_t* leader = "St";
 static StMessageCounter* messCounter = StMessageCounter::Instance();
 
+ostrstream messBuffer(new char[1024],1024);
+
+#ifdef __ROOT__
 ClassImp(StMessage)
+#endif
 
 //_____________________________________________________________________________
-StMessage::StMessage(Char_t *mess, Char_t *ty, Char_t* opt) : ostrstream(),
-type(new Char_t(toupper(*ty))), messTime(new TDatime()) {
-  Int_t len = strlen(opt);
-  option = new Char_t[len];
+StMessage::StMessage(char *mess, char *ty, char* opt) :
+type(new char(toupper(*ty))),
+messTime(new TDatime()) {
+  static char space = ' ';
+  int len = strlen(opt);
+  option = new char[len];
   while (len--)
     option[len] = toupper(opt[len]);
 //  location = "Unknown";
 //  runNumber = 0;
-  operator<<(mess);
-  if (strcmp(mess,""))
-    Print();
-  gMessage = this;
-  endm = this;
+  len = strlen(mess);
+  while (mess[--len] == space) {}    // remove trailing spaces
+  message = new char[++len];
+  strncpy(message,mess,len);
+  Print();
 }
 //_____________________________________________________________________________
 StMessage::~StMessage() {
   messTime->~TDatime();
 }
 //_____________________________________________________________________________
-Int_t StMessage::Print(Int_t nChars) {
-  operator<<(ends);
-  TString outstr;
+int StMessage::Print(int nChars) {
+  static const char* leader = "St";
+  static const char* insert1 = ": ";
+  static const char* insert2 = " (";
+  static const char* insert3 = ")";
+  static const char* insert4 = "\n";
+  messBuffer.seekp(0);
   int printIt=1;
   if (!nChars) {
-    printIt = messCounter->CheckLimit(str(),type);
+    printIt = messCounter->CheckLimit(message,type);
   }
   if (printIt) {
-    outstr = leader;
-    const Char_t* temp(StMessTypeList::Instance()->Text(type));
-    if (temp) outstr += temp;
-    outstr += ": ";
-    outstr += str();
+    messBuffer << leader;
+    const char* temp(StMessTypeList::Instance()->Text(type));
+    if (temp) messBuffer << temp;
+    messBuffer << insert1 << message;         // ": ",message
     if (nChars<=0) {
       if (!strchr(option,'T')) {
-        outstr += " (";
-        Char_t* temp2 = strchr(messTime->AsString(),' ');
-        outstr += ++temp2;
-        outstr += ")";
+        char* temp2 = strchr(messTime->AsString(),' ');
+        messBuffer << insert2 << (++temp2) << insert3 ;  // " (",time,")"
       }
-      outstr += "\n";
+      messBuffer << insert4;       // "\n" end-line
     }
   }
+  char* addedMessage=0;
   if (!nChars) {
-    outstr += messCounter->GetOutMessage();
+    addedMessage = messCounter->str();
   } else {
-    if (nChars>0) 
-      outstr = outstr(0,nChars);
-    else
+    if (nChars>0) {
+      messBuffer.seekp(nChars);   // set end-of-string at nChars
+    } else
       nChars = 0;
   }
+  messBuffer << ends;
   if ((strchr(option,'O')) || (nChars)) {
-    cout << outstr;
+    cout << messBuffer.str();
+    if (addedMessage) cout << addedMessage;
     cout.flush();
   }
   if ((strchr(option,'E')) && !(nChars)) {
-    cerr << outstr;
+    cerr << messBuffer.str();
+    if (addedMessage) cout << addedMessage;
     cerr.flush();
   }
-  return outstr.Length();
+  return messBuffer.tellp();
 }
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.3 1999/06/26 00:24:52 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.4 1999/06/29 17:37:30 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

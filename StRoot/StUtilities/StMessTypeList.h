@@ -1,5 +1,8 @@
-// $Id: StMessTypeList.h,v 1.2 1999/06/26 00:24:52 genevb Exp $
+// $Id: StMessTypeList.h,v 1.3 1999/06/29 17:37:30 genevb Exp $
 // $Log: StMessTypeList.h,v $
+// Revision 1.3  1999/06/29 17:37:30  genevb
+// Lots of fixes...
+//
 // Revision 1.2  1999/06/26 00:24:52  genevb
 // Fixed const type mismatches
 //
@@ -30,14 +33,13 @@
 
 class StMessTypePair {
 private:
- const Char_t* type;
- const Char_t* text;
+ const char* type;
+ const char* text;
 public:
- StMessTypePair(const Char_t* ty, const Char_t* te);
+ StMessTypePair(const char* ty, const char* te);
  virtual ~StMessTypePair();
- const Char_t* Type() const {return type;}
- const Char_t* Text() const {return text;}
- ClassDef(StMessTypePair,0)
+ const char* Type() const {return type;}
+ const char* Text() const {return text;}
 };
 
 typedef StVector(StMessTypePair*) StMessTypeVec;
@@ -56,12 +58,11 @@ class StMessTypeList {
  public:
    virtual ~StMessTypeList();
    static StMessTypeList* Instance();
-                    Int_t AddType(const Char_t* type, const Char_t* text);
-                    Int_t FindTypeNum(const Char_t* type);
-          StMessTypePair* FindType(const Char_t* type);
-            const Char_t* Text(const Char_t* type);
-                    Int_t ListTypes();
-   ClassDef(StMessTypeList,0)
+                    int AddType(const char* type, const char* text);
+                    int FindTypeNum(const char* type);
+          StMessTypePair* FindType(const char* type);
+            const char* Text(const char* type);
+                    int ListTypes();
 };
 
 #endif

@@ -1,5 +1,8 @@
-// $Id: StMessageManager.h,v 1.5 1999/06/28 15:42:13 genevb Exp $
+// $Id: StMessageManager.h,v 1.6 1999/06/29 17:37:32 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.6  1999/06/29 17:37:32  genevb
+// Lots of fixes...
+//
 // Revision 1.5  1999/06/28 15:42:13  genevb
 // Added Debug message class
 //
@@ -46,117 +49,128 @@
 #define StDebug_ F77_NAME(stdebug,STDEBUG)
 #define StMessAddType_ F77_NAME(stmessaddtype,StMESSADDTYPE)
 extern "C" {
-R__EXTERN  void type_of_call Message_(Char_t* mess="", int lines=1, int id=-1);
-R__EXTERN  void type_of_call Msg_Enable_(Char_t* mess="");
-R__EXTERN   int type_of_call Msg_Enabled_(Char_t* mess="", int id=-1);
-R__EXTERN  void type_of_call Msg_Disable_(Char_t* mess="");
-R__EXTERN  void type_of_call StMessage_(Char_t* mess="", Char_t* type="I", Char_t* opt="O");
-R__EXTERN  void type_of_call StInfo_(Char_t* mess="", Char_t* opt="O");
-R__EXTERN  void type_of_call StWarning_(Char_t* mess="", Char_t* opt="O");
-R__EXTERN  void type_of_call StError_(Char_t* mess="", Char_t* opt="O");
-R__EXTERN  void type_of_call StDebug_(Char_t* mess="", Char_t* opt="O");
-R__EXTERN  void type_of_call StMessAddType_(const Char_t* type, const Char_t* text);
+R__EXTERN  void type_of_call Message_(char* mess="", int lines=1, int id=-1);
+R__EXTERN  void type_of_call Msg_Enable_(char* mess="");
+R__EXTERN   int type_of_call Msg_Enabled_(char* mess="", int id=-1);
+R__EXTERN  void type_of_call Msg_Disable_(char* mess="");
+R__EXTERN  void type_of_call StMessage_(char* mess="", char* type="I", char* opt="O");
+R__EXTERN  void type_of_call StInfo_(char* mess="", char* opt="O");
+R__EXTERN  void type_of_call StWarning_(char* mess="", char* opt="O");
+R__EXTERN  void type_of_call StError_(char* mess="", char* opt="O");
+R__EXTERN  void type_of_call StDebug_(char* mess="", char* opt="O");
+R__EXTERN  void type_of_call StMessAddType_(const char* type, const char* text);
 }
 #endif
 
 #include "StMessage.h"
 #include "StMessTypeList.h"
 #include "StMessageCounter.h"
+#include <strstream.h>
 
 typedef StVector(StMessage*) messVec;
 typedef StVector(StMessage*)::iterator messVecIter;
 typedef StVector(messVec*) messTypeVec;
 
 
-class StMessageManager {
+class StMessageManager : public ostrstream {
+   friend ostream& operator<<(ostream& ,StMessage*);
+
  private:
    static StMessageManager* mInstance;
-   StMessage* messObj;
    StMessTypeList* messTypeList;
    StMessageCounter* messCounter;
+   char* curType;
+   char* curOpt;
 
  protected:
    StMessageManager();
    StMessageManager(const StMessageManager&);
    messVec messList;
    messTypeVec messCollection;
-   virtual messVecIter FindMessageIter(const Char_t* s1, Char_t* s2="",
-         Char_t* s3="", Char_t* s4="", messVec* list=0);
+   virtual messVecIter FindMessageIter(const char* s1, char* s2="",
+         char* s3="", char* s4="", messVec* list=0);
+   virtual        void BuildMessage(char* mess="", char* type="I",
+                                                      char* opt="O");
  
  public:
    virtual ~StMessageManager();
    static StMessageManager* Instance();
 
 // Generic Messages:
-   virtual StMessage& Message(Char_t* mess="", Char_t* type="I", Char_t* opt="O");
-   virtual        int Print() {return messObj->Print();}
+   virtual StMessageManager& Message(char* mess="", char* type="I",
+                                                      char* opt="O");
+   virtual       void Print();
    virtual        int PrintList(messVec* list);
    virtual        int PrintAll() {return PrintList(&messList); }
-   virtual StMessage& GetCurrent() {return (*messObj);}
    virtual const messVec& GetAll() {return messList;}
-   virtual StMessage* FindMessage(const Char_t* s1, Char_t* s2="",
-         Char_t* s3="", Char_t* s4="", messVec* list=0);
-   virtual   messVec& FindMessageList(const Char_t* s1, Char_t* s2="",
-         Char_t* s3="", Char_t* s4="", messVec* list=0);
+   virtual StMessage* FindMessage(const char* s1, char* s2="",
+         char* s3="", char* s4="", messVec* list=0);
+   virtual   messVec& FindMessageList(const char* s1, char* s2="",
+         char* s3="", char* s4="", messVec* list=0);
    virtual        int RemoveMessage(StMessage* mess);
-   virtual        int RemoveMessage(const Char_t* s1, Char_t* s2="",
-         Char_t* s3="", Char_t* s4="")
+   virtual        int RemoveMessage(const char* s1, char* s2="",
+         char* s3="", char* s4="")
          {return RemoveMessage(FindMessage(s1,s2,s3,s4));}
-   virtual       void SetLimit(Char_t* str, Int_t n=0) {messCounter->SetLimit(str,n);}
-   virtual        int GetLimit(Char_t* str) {return messCounter->GetLimit(str);}
+   virtual       void SetLimit(char* str, int n=0) {messCounter->SetLimit(str,n);}
+   virtual        int GetLimit(char* str) {return messCounter->GetLimit(str);}
    virtual       void ListLimits() {messCounter->ListLimits();}
-   virtual       void RemoveLimit(Char_t* str) {SetLimit(str,-1);}
-   virtual       void SwitchOff(Char_t* str) {SetLimit(str,0);}
-   virtual       void SwitchOn(Char_t* str) {RemoveLimit(str);}
-   virtual       void Summary(Int_t nTerms=1);
-   virtual        int AddType(const Char_t* type, const Char_t* text);
+   virtual       void RemoveLimit(char* str) {SetLimit(str,-1);}
+   virtual       void SwitchOff(char* str) {SetLimit(str,0);}
+   virtual       void SwitchOn(char* str) {RemoveLimit(str);}
+   virtual       void Summary(int nTerms=1);
+   virtual        int AddType(const char* type, const char* text);
    virtual        int ListTypes() {return messTypeList->ListTypes();}
 
 // Info Messages:
-   virtual StMessage& Info(Char_t* mess="", Char_t* opt="O")
+   virtual StMessageManager& Info(char* mess="", char* opt="O")
          { return Message(mess, "I", opt);}
    virtual        int PrintInfos() {return PrintList(messCollection[1]); }
    virtual const messVec& GetInfos() {return *(messCollection[1]);}
-   virtual StMessage* FindInfo(const Char_t* s1, Char_t* s2="", Char_t* s3="",
-         Char_t* s4="") {return FindMessage(s1,s2,s3,s4,messCollection[1]);}
-   virtual messVec& FindInfoList(const Char_t* s1, Char_t* s2="", Char_t* s3="",
-         Char_t* s4="") {return FindMessageList(s1,s2,s3,s4,messCollection[1]);}
+   virtual StMessage* FindInfo(const char* s1, char* s2="", char* s3="",
+         char* s4="") {return FindMessage(s1,s2,s3,s4,messCollection[1]);}
+   virtual messVec& FindInfoList(const char* s1, char* s2="", char* s3="",
+         char* s4="") {return FindMessageList(s1,s2,s3,s4,messCollection[1]);}
 
 // Warning Messages:
-   virtual StMessage& Warning(Char_t* mess="", Char_t* opt="O")
+   virtual StMessageManager& Warning(char* mess="", char* opt="O")
          { return Message(mess, "W", opt);}
    virtual        int PrintWarnings() {return PrintList(messCollection[2]); }
    virtual const messVec& GetWarnings() {return *(messCollection[2]);}
-   virtual StMessage* FindWarning(const Char_t* s1, Char_t* s2="", Char_t* s3="",
-         Char_t* s4="") {return FindMessage(s1,s2,s3,s4,messCollection[2]);}
-   virtual messVec& FindWarningList(const Char_t* s1, Char_t* s2="", Char_t* s3="",
-         Char_t* s4="") {return FindMessageList(s1,s2,s3,s4,messCollection[2]);}
+   virtual StMessage* FindWarning(const char* s1, char* s2="", char* s3="",
+         char* s4="") {return FindMessage(s1,s2,s3,s4,messCollection[2]);}
+   virtual messVec& FindWarningList(const char* s1, char* s2="", char* s3="",
+         char* s4="") {return FindMessageList(s1,s2,s3,s4,messCollection[2]);}
 
 // Error Messages:
-   virtual StMessage& Error(Char_t* mess="", Char_t* opt="O")
+   virtual StMessageManager& Error(char* mess="", char* opt="O")
          { return Message(mess, "E", opt);}
    virtual        int PrintErrors() {return PrintList(messCollection[3]); }
    virtual const messVec& GetErrors() {return *(messCollection[3]);}
-   virtual StMessage* FindError(const Char_t* s1, Char_t* s2="", Char_t* s3="",
-         Char_t* s4="") {return FindMessage(s1,s2,s3,s4,messCollection[3]);}
-   virtual messVec& FindErrorList(const Char_t* s1, Char_t* s2="", Char_t* s3="",
-         Char_t* s4="") {return FindMessageList(s1,s2,s3,s4,messCollection[3]);}
+   virtual StMessage* FindError(const char* s1, char* s2="", char* s3="",
+         char* s4="") {return FindMessage(s1,s2,s3,s4,messCollection[3]);}
+   virtual messVec& FindErrorList(const char* s1, char* s2="", char* s3="",
+         char* s4="") {return FindMessageList(s1,s2,s3,s4,messCollection[3]);}
 
 // Debug Messages:
-   virtual StMessage& Debug(Char_t* mess="", Char_t* opt="O")
+   virtual StMessageManager& Debug(char* mess="", char* opt="O")
          { return Message(mess, "D", opt);}
    virtual        int PrintDebug() {return PrintList(messCollection[4]); }
    virtual const messVec& GetDebugs() {return *(messCollection[4]);}
-   virtual StMessage* FindDebug(const Char_t* s1, Char_t* s2="", Char_t* s3="",
-         Char_t* s4="") {return FindMessage(s1,s2,s3,s4,messCollection[4]);}
-   virtual messVec& FindDebugList(const Char_t* s1, Char_t* s2="", Char_t* s3="",
-         Char_t* s4="") {return FindMessageList(s1,s2,s3,s4,messCollection[4]);}
+   virtual StMessage* FindDebug(const char* s1, char* s2="", char* s3="",
+         char* s4="") {return FindMessage(s1,s2,s3,s4,messCollection[4]);}
+   virtual messVec& FindDebugList(const char* s1, char* s2="", char* s3="",
+         char* s4="") {return FindMessageList(s1,s2,s3,s4,messCollection[4]);}
 
    virtual       void PrintInfo();
+#ifdef __ROOT__
    ClassDef(StMessageManager,0)
+#endif
 };
 
-// Globalpointer:
+// Globalpointers:
 R__EXTERN StMessageManager* gMessMgr;
+R__EXTERN StMessage* gMessage;
+R__EXTERN StMessage* endm;
+
 
 #endif

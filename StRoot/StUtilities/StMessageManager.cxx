@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.7 1999/06/28 15:42:12 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.8 1999/06/29 17:37:31 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.8  1999/06/29 17:37:31  genevb
+// Lots of fixes...
+//
 // Revision 1.7  1999/06/28 15:42:12  genevb
 // Added Debug message class
 //
@@ -80,7 +83,7 @@
 //
 //   gMessMgr->Message("This is the text of the message.");
 //     or
-//   Char_t* myText = "hello";
+//   char* myText = "hello";
 //   gMessMgr->Message(myText);
 //
 // The default action here is to create an "Info" message.
@@ -121,7 +124,9 @@
 // you can use the stream version of the message declaration:
 //
 //   gMessMgr->Info() << "The number is: " << 3.42 << endm;
+//
 //   gMessMgr->Message("","W") << big_num << " seems too big." << endm;
+//
 //   gMessMgr->Error() << "Alarm #" << alarmNo << "!!!";
 //   gMessMgr->Print();
 //
@@ -164,6 +169,14 @@
 //
 // Notice that using a large number for the character string will cause
 // spaces to be printed which may cause the string to wrap around lines.
+//
+// For backwards compatibility with the MSG package, the following routines
+// have been supplied:
+//
+//   message(message,lines,id)    (the id and lines parameters are unused)
+//   msg_enabled(message,id)      (the id parameter is unused)
+//   msg_enable(message)
+//   msg_disable(message)
 //
 //
 //
@@ -251,12 +264,12 @@
 //
 // *** II-10. Formatting output
 //
-// StMessage is an ostream, like cout. It can therefore be used to format
-// like cout:
+// StMessageManager is an ostream, like cout. It can therefore be used
+// to format, like cout:
 //
 //   gMessMgr->Info() << "Here, n=";
-//   gMessage->width(5)
-//   *gMessage << x << endm;
+//   gMessMgr->width(5)
+//   *gMessMgr << x << endm;
 //
 // Notice that once an StMessage gets printed (either by a Print() call
 // or the use of "endm"), a message is closed to further streamed input.
@@ -292,72 +305,90 @@
 //
 ///////////////////////////////////////////////////////////////////////////
  
+#ifdef __ROOT__
 #include "TROOT.h"
+#endif
 #include "StMessageManager.h"
 #include <ctype.h>
 #include <string.h>
 
 StMessageManager* gMessMgr = 0;
+StMessage* gMessage=0;
+StMessage* endm=0;
+ostream& operator<<(ostream& os, StMessage*) {
+  gMessMgr->Print();
+  return os;
+}
 static char* defaultMessType = "I";
 StMessageManager* StMessageManager::mInstance = 0;
-
+static char* messReturnChar = "\n";
 //
 // C and Fortran routines:
 //________________________________________
-void type_of_call Message_(Char_t* mess, int lines, int id) {
+void type_of_call Message_(char* mess, int lines, int) {
   char* cptr = strchr(mess,'-');
-  char* type = defaultMessType;
-  if (cptr) strncpy(type,++cptr,1);
+  char* type = new char[2];
+  strcpy(type,defaultMessType);
+  if (cptr) type[0] = cptr[1];
+  if (lines>1) {
+    int lineSize = strlen(mess)/lines;
+    for (int i=1; i<lines; i++)
+      strncpy(&(mess[((lineSize*i)-1)]),messReturnChar,1);
+  }
   gMessMgr->Message(mess,type);
+  delete [] type;
 }
 //________________________________________
-void type_of_call Msg_Enable_(Char_t* mess) {
+void type_of_call Msg_Enable_(char* mess) {
   gMessMgr->SwitchOn(mess);
 }
 //________________________________________
-int type_of_call Msg_Enabled_(Char_t* mess, int id) {
+int type_of_call Msg_Enabled_(char* mess, int) {
   if ((gMessMgr->GetLimit(mess))==0) return 0;
   return 1;
 }
 //________________________________________
-void type_of_call Msg_Disable_(Char_t* mess) {
+void type_of_call Msg_Disable_(char* mess) {
   gMessMgr->SwitchOff(mess);
 }
 //________________________________________
-void type_of_call StMessage_(Char_t* mess, Char_t* type, Char_t* opt) {
+void type_of_call StMessage_(char* mess, char* type, char* opt) {
   gMessMgr->Message(mess,type,opt);
 }
 //________________________________________
-void type_of_call StInfo_(Char_t* mess, Char_t* opt) {
+void type_of_call StInfo_(char* mess, char* opt) {
   gMessMgr->Message(mess,"I",opt);
 }
 //________________________________________
-void type_of_call StWarning_(Char_t* mess, Char_t* opt) {
+void type_of_call StWarning_(char* mess, char* opt) {
   gMessMgr->Message(mess,"W",opt);
 }
 //________________________________________
-void type_of_call StError_(Char_t* mess, Char_t* opt) {
+void type_of_call StError_(char* mess, char* opt) {
   gMessMgr->Message(mess,"E",opt);
 }
 //________________________________________
-void type_of_call StDebug_(Char_t* mess, Char_t* opt) {
+void type_of_call StDebug_(char* mess, char* opt) {
   gMessMgr->Message(mess,"D",opt);
 }
 //________________________________________
-void type_of_call StMessAddType_(const Char_t* type, const Char_t* text) {
+void type_of_call StMessAddType_(const char* type, const char* text) {
   gMessMgr->AddType(type,text);
 }
 
 //
 // C++ routines:
 //_____________________________________________________________________________
+#ifdef __ROOT__
 ClassImp(StMessageManager)
+#endif
 //_____________________________________________________________________________
-StMessageManager::StMessageManager() {
+StMessageManager::StMessageManager() : ostrstream(new char[1024],1024) {
 //
 // Constructor - only called once when the library is loaded to
 // instantiate the global message manager.
 //
+  curType = 0;
   gMessMgr = this;
   messTypeList = StMessTypeList::Instance();
   messCounter = StMessageCounter::Instance();
@@ -378,7 +409,7 @@ StMessageManager::~StMessageManager() {
   messVecIter current;
   for (current=messList.begin(); current!=messList.end(); current++)
     delete (*current);
-  for (Int_t i=1; i<messCollection.size(); i++)
+  for (int i=1; i<messCollection.size(); i++)
     delete (messCollection[i]);
   cout << "WARNING!!! DELETING StMessageManager!" << endl;
   gMessMgr = 0;
@@ -395,22 +426,55 @@ StMessageManager* StMessageManager::Instance() {
   return mInstance;
 }
 //_____________________________________________________________________________
-StMessage& StMessageManager::Message(Char_t* mess, Char_t* type, Char_t* opt) {
+StMessageManager& StMessageManager::Message(char* mess, char* type, char* opt) {
 //
-// Message declarator - creates a new message (of class StMessage) and places
-// it on the list of known messages.
+// Message declarator - creates a new message if mess is not empty,
+// otherwise, prepares for << input.
+//
+  if (strlen(mess)) {
+    BuildMessage(mess, type, opt);
+    curType = 0;
+  } else {
+    curType = type;
+    curOpt = opt;
+    seekp(0);
+  }
+  return (*this);
+}
+//_____________________________________________________________________________
+void StMessageManager::BuildMessage(char* mess, char* type, char* opt) {
+//
+// Instantiate an StMessage and place on the lists of known messages
 //
   int typeN = messTypeList->FindTypeNum(type);
   if (!typeN) {
     type = defaultMessType;      // default type is Info
     typeN = 1;                   // type number for Info is 1
   }
-  messObj = new StMessage(mess, type, opt);
+  gMessage = new StMessage(mess, type, opt);
+  endm = gMessage;
   if (!strchr(opt,'-')) {
-    messList.push_back(messObj);
-    messCollection[typeN]->push_back(messObj);
+    messList.push_back(gMessage);
+    messCollection[typeN]->push_back(gMessage);
   }
-  return (*messObj);
+}
+//_____________________________________________________________________________
+void StMessageManager::Print() {
+//
+// Empty the buffer into the current message and print it.
+// If not currenty building a message, print the last one created.
+//
+  if (curType) {
+    operator<<(ends);
+    BuildMessage(str(), curType, curOpt);
+    curType = 0;
+  } else {
+    if (gMessage) {
+      gMessage->Print(-1);
+    } else {
+      cout << "No current message." << endl;
+    }
+  }
 }
 //_____________________________________________________________________________
 int StMessageManager::PrintList(messVec* list) {
@@ -424,15 +488,15 @@ int StMessageManager::PrintList(messVec* list) {
   return i;
 }
 //_____________________________________________________________________________
-messVecIter StMessageManager::FindMessageIter(const Char_t* s1, Char_t* s2,
-               Char_t* s3, Char_t* s4, messVec* list) {
+messVecIter StMessageManager::FindMessageIter(const char* s1, char* s2,
+               char* s3, char* s4, messVec* list) {
 //
 // Obtain an iterator for a particular StMessage on a list of messages.
 // First message which contains matches to the strings s1,s2,s3,s4 is returned.
 //
   if (!list) list = &messList;
   messVecIter current;
-  const Char_t* curMess;
+  const char* curMess;
   for (current=list->begin(); current!=list->end(); current++) {
     curMess = (*current)->GetMessage();
     if ((strstr(curMess,s1)) && (strstr(curMess,s2)) &&
@@ -441,8 +505,8 @@ messVecIter StMessageManager::FindMessageIter(const Char_t* s1, Char_t* s2,
   return 0;
 }
 //_____________________________________________________________________________
-StMessage* StMessageManager::FindMessage(const Char_t* s1, Char_t* s2,
-               Char_t* s3, Char_t* s4, messVec* list) {
+StMessage* StMessageManager::FindMessage(const char* s1, char* s2,
+               char* s3, char* s4, messVec* list) {
 //
 // Obtain a pointer to a particular StMessage on a list of messages.
 // First message which contains matches to the strings s1,s2,s3,s4 is returned.
@@ -451,13 +515,13 @@ StMessage* StMessageManager::FindMessage(const Char_t* s1, Char_t* s2,
   return ( (current) ? (*current) : 0 );
 }
 //_____________________________________________________________________________
-messVec& StMessageManager::FindMessageList(const Char_t* s1, Char_t* s2,
-               Char_t* s3, Char_t* s4, messVec* list) {
+messVec& StMessageManager::FindMessageList(const char* s1, char* s2,
+               char* s3, char* s4, messVec* list) {
 //
 // Obtain a list (messVec) of StMessage pointers for all messages
 // which contain matches to the strings s1,s2,s3,s4.
 //
-  Char_t* s1a = new Char_t[strlen(s1)];
+  char* s1a = new char[strlen(s1)];
   strcpy(s1a,s1);
   if ((strlen(s1)==1) && (!list)) {
     int typeN = messTypeList->FindTypeNum(s1);
@@ -471,7 +535,7 @@ messVec& StMessageManager::FindMessageList(const Char_t* s1, Char_t* s2,
     return (*list);
   messVec* newList = new messVec();
   messVecIter current;
-  const Char_t* curMess;
+  const char* curMess;
   for (current=list->begin(); current!=list->end(); current++) {
     curMess = (*current)->GetMessage();
     if ((strstr(curMess,s1)) && (strstr(curMess,s2)) &&
@@ -486,7 +550,7 @@ int StMessageManager::RemoveMessage(StMessage* mess) {
 // Delete a message and remove it from all lists.
 //
   if (!mess) return 3;
-  const Char_t* curMess = mess->GetMessage();
+  const char* curMess = mess->GetMessage();
   messVecIter current = FindMessageIter(curMess);
   if (!current) return 1;
   messList.erase(current);
@@ -499,7 +563,7 @@ int StMessageManager::RemoveMessage(StMessage* mess) {
   return 0;
 }
 //_____________________________________________________________________________
-void StMessageManager::Summary(Int_t nTerms) {
+void StMessageManager::Summary(int nTerms) {
 //
 // Output a summary of the messages printed so far.
 //   nTerms - number of tokens (text separated by spaces) to use in
@@ -513,21 +577,21 @@ void StMessageManager::Summary(Int_t nTerms) {
   int max = 67;
   int nMess = messList.size();
   StVector(Bool_t) done;
-  typedef StVector(Char_t*) CharPtrVec;
+  typedef StVector(char*) CharPtrVec;
   CharPtrVec mType;
   StVector(CharPtrVec) toks;
   int i;
   int j;
   int k;
   Bool_t agree;
-  Char_t* temp;
+  char* temp;
   cout << "  ***** StMessageManager message summary *****" << endl;
   for (i=0; i<nMess; i++) {
     done.push_back(kFALSE);
-    temp = new Char_t(*(messList[i]->GetType()));
+    temp = new char(*(messList[i]->GetType()));
     mType.push_back(temp);
     toks.push_back(*(new CharPtrVec));
-    temp = new Char_t[81];
+    temp = new char[81];
     temp = strncpy(temp,(messList[i]->GetMessage()),80);
     temp = strtok(temp, " ");
     toks[i].push_back(temp);
@@ -564,7 +628,7 @@ void StMessageManager::Summary(Int_t nTerms) {
   return;
 }
 //_____________________________________________________________________________
-int StMessageManager::AddType(const Char_t* type, const Char_t* text) {
+int StMessageManager::AddType(const char* type, const char* text) {
 //
 // Add an additional message type. ListTypes() will return a list of all
 // currently defined message types. AddType returns a integer which is zero
@@ -585,7 +649,7 @@ int StMessageManager::AddType(const Char_t* type, const Char_t* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.7 1999/06/28 15:42:12 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.8 1999/06/29 17:37:31 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

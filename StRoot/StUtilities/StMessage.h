@@ -1,5 +1,8 @@
-// $Id: StMessage.h,v 1.2 1999/06/24 16:30:41 genevb Exp $
+// $Id: StMessage.h,v 1.3 1999/06/29 17:37:31 genevb Exp $
 // $Log: StMessage.h,v $
+// Revision 1.3  1999/06/29 17:37:31  genevb
+// Lots of fixes...
+//
 // Revision 1.2  1999/06/24 16:30:41  genevb
 // Fixed some memory leaks
 //
@@ -22,41 +25,35 @@
 #ifndef ClassStMessage
 #define ClassStMessage
 
-#include <iostream.h>
-#include "TString.h"
-#include <strstream.h>
-#include "TDatime.h"
-#include "StMessTypeList.h"
+class TDatime;
 
-class StMessage : public ostrstream {
-   friend ostream& operator<<(ostream& ,StMessage*);
+class StMessage {
 
  private:
 
  protected:
-   const Char_t* type;
-//   Char_t* location;
+   const char* type;
+//   char* location;
 //   unsigned long runNumber;
 //   pair<long, long> eventId;
-   Char_t* option;
-   const TDatime* messTime; //!
+   char* option;
+   const TDatime* messTime;
+   char* message;
 
  public:
-   StMessage(Char_t* mess="", Char_t* ty="I", Char_t* opt="O");
+   StMessage(char* mess="", char* ty="I", char* opt="O");
    StMessage(const StMessage&);
    virtual ~StMessage();
    virtual           void PrintInfo();
-   virtual          Int_t Print(Int_t nChars=0);
+   virtual          int Print(int nChars=0);
    virtual const TDatime* GetTime() const {return messTime;}
-   virtual const  Char_t* GetType() const {return type;}
-   virtual        Char_t* GetMessage() {return str();}
-   virtual        Char_t* GetOptions() {return option;}
-   virtual           void SetOption(Char_t* opt) {option = opt;}
+   virtual const  char* GetType() const {return type;}
+   virtual        char* GetMessage() {return message;}
+   virtual        char* GetOptions() {return option;}
+   virtual           void SetOption(char* opt) {option = opt;}
+#ifdef __ROOT__
    ClassDef(StMessage,1)
+#endif
 };
-
-// Globalpointer:
-R__EXTERN StMessage* gMessage;
-R__EXTERN StMessage* endm;
 
 #endif
