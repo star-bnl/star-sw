@@ -563,6 +563,7 @@ mTypes.push_back(new dbType(Geometry,"Geometry"));
 mTypes.push_back(new dbType(RunCatalog,"RunCatalog")); 
 mTypes.push_back(new dbType(Configurations,"Configurations")); 
 mTypes.push_back(new dbType(RunParams,"RunParams")); 
+mTypes.push_back(new dbType(TestScheme,"TestScheme")); 
 
 }
 
