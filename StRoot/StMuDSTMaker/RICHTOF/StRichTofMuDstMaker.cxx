@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichTofMuDstMaker.cxx,v 1.9 2003/01/22 22:42:22 dunlop Exp $
+ * $Id: StRichTofMuDstMaker.cxx,v 1.10 2003/02/06 22:30:34 geurts Exp $
  *
  * Author: Thomas Ullrich, Oct 2000
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StRichTofMuDstMaker.cxx,v $
+ * Revision 1.10  2003/02/06 22:30:34  geurts
+ * TOF track filter covers both the TOFp and TOFr tray.
+ * TOF strobed events selection is now based on scaler and TDC data.
+ * Different strobed-TDC ranges for year2 and year3 data.
+ *
  * Revision 1.9  2003/01/22 22:42:22  dunlop
  * Fixed compilation on solaris
  *
@@ -95,8 +100,10 @@ Int_t StRichTofMuDstMaker::Init()
     mOuterTrackGeometry = true;
     mTrackAcceptZ_min =   -250*centimeter; // default Z-range: East Barrel
     mTrackAcceptZ_max =      0*centimeter;
-    mTrackAcceptPhi_min = -1.25*radian;     // default phi-range: 3 trays
-    mTrackAcceptPhi_max = -1.05*radian;
+    mTofpTrackAcceptPhi_min = -1.25*radian;     // default phi-range: ~3 trays
+    mTofpTrackAcceptPhi_max = -1.05*radian;
+    mTofrTrackAcceptPhi_min = -2.19*radian;  // TOFr is 9*6degr (0.9425*radian)  displaced from TOFp
+    mTofrTrackAcceptPhi_max = -1.99*radian;
  // L3 projection
     mRichGlobalEdgeMin.setX(83.031);
     mRichGlobalEdgeMax.setX(157.511);
@@ -200,13 +207,17 @@ Int_t StRichTofMuDstMaker::InitRun(int runumber)
 
     mTofGeom = new StTofGeometry;
     mTofGeom->init(this);
+    //mTofGeomParamR = 213.95;
+
     cout <<"StRichTofMuDstMaker::InitRun()  ==== settings === " << endl;
     cout <<"Reject strobe events      ... " << mRejectStrobeEvents << endl;
     cout <<"Use outer track geometry  ... " << mOuterTrackGeometry << endl;
     cout <<"Track Z-range   ... "
 	<<mTrackAcceptZ_min <<" to " <<  mTrackAcceptZ_max << endl;
-    cout <<"Track Phi-range ... "
-	<<mTrackAcceptPhi_min <<" to " <<  mTrackAcceptPhi_max << endl;
+    cout <<"TOFp Track Phi-range ... "
+	<<mTofpTrackAcceptPhi_min <<" to " <<  mTofpTrackAcceptPhi_max << endl;
+    cout <<"TOFr Track Phi-range ... "
+	<<mTofrTrackAcceptPhi_min <<" to " <<  mTofrTrackAcceptPhi_max << endl;
 
     return StMaker::InitRun(runumber);
 }
@@ -227,6 +238,8 @@ Int_t StRichTofMuDstMaker::Make()
 	return kStOK;
     }
        
+    // determine STAR year from runnumber
+    mYear3Data = (event->runId() > 4000000);
 
     if (!accept(event)) {
 	cout << "StRichTofMuDstMaker::Make(): event not accepted." << endl;
@@ -401,7 +414,7 @@ bool StRichTofMuDstMaker::accept(StEvent* event)
     // 2. must have TOF collection and TofData()
     StTofCollection *theTof = event->tofCollection();
     if (!(theTof && theTof->dataPresent())){
-//	cout <<"no TOF collection/data present";
+      //cout <<"no TOF collection/data present" <<endl;
 	mEventAcceptedTof = false;
     }
     else {
@@ -409,7 +422,7 @@ bool StRichTofMuDstMaker::accept(StEvent* event)
     // 3. must be beam event (i.e. non-strobe)
 	StSPtrVecTofData  &tofData = theTof->tofData();
 	if (strobeEvent(tofData) && mRejectStrobeEvents) {
-//	cout <<"event not accepted: strobed event";
+	  cout <<"tof event not accepted: strobed"<<endl;
 	    mEventAcceptedTof = false;
 	}
     }
@@ -448,11 +461,12 @@ bool StRichTofMuDstMaker::acceptTof(StTrack* track)
     // Check only if the tof accepts the event
     if (mEventAcceptedTof) {
 	
-	// 2. Ask if track must be "in range" of TOFp
+	// 2. Track must be "in range" of TOFp or TOFr
 	StPhysicalHelixD theHelix;
 	if (mOuterTrackGeometry) theHelix = track->outerGeometry()->helix();
 	else                     theHelix = track->geometry()->helix();
 	pairD pairLength = theHelix.pathLength(mTofGeom->tofParam().r);
+	//pairD pairLength = theHelix.pathLength(mTofGeomParamR);
 	StThreeVectorD firstPoint = theHelix.at(pairLength.first);
 	StThreeVectorD secondPoint = theHelix.at(pairLength.second);
 	
@@ -460,13 +474,19 @@ bool StRichTofMuDstMaker::acceptTof(StTrack* track)
 	bool firstPointInRange =  (pairLength.first>0) &&
 	    (firstPoint.z()>mTrackAcceptZ_min)  &&
 	    (firstPoint.z()<mTrackAcceptZ_max)  &&
-	    (atan2(firstPoint.y(),firstPoint.x())>mTrackAcceptPhi_min) &&
-	    (atan2(firstPoint.y(),firstPoint.x())<mTrackAcceptPhi_max);
+	    (((atan2(firstPoint.y(),firstPoint.x())>mTofpTrackAcceptPhi_min) &&
+	      (atan2(firstPoint.y(),firstPoint.x())<mTofpTrackAcceptPhi_max))
+	     ||
+	     ((atan2(firstPoint.y(),firstPoint.x())>mTofrTrackAcceptPhi_min) &&
+	      (atan2(firstPoint.y(),firstPoint.x())<mTofrTrackAcceptPhi_max)));
 	bool secondPointInRange = (pairLength.second>0) && 
 	    (secondPoint.z()>mTrackAcceptZ_min)  &&
 	    (secondPoint.z()<mTrackAcceptZ_max)  &&
-	    (atan2(secondPoint.y(),secondPoint.x())>mTrackAcceptPhi_min) &&
-	    (atan2(secondPoint.y(),secondPoint.x())<mTrackAcceptPhi_max);
+	    (((atan2(secondPoint.y(),secondPoint.x())>mTofpTrackAcceptPhi_min) &&
+	      (atan2(secondPoint.y(),secondPoint.x())<mTofpTrackAcceptPhi_max))
+	     ||
+	     ((atan2(secondPoint.y(),secondPoint.x())>mTofrTrackAcceptPhi_min) &&
+	      (atan2(secondPoint.y(),secondPoint.x())<mTofrTrackAcceptPhi_max)));
 	if (firstPointInRange || secondPointInRange) 
 // Short circuit out of here if matches tof
 	    
@@ -582,10 +602,18 @@ bool StRichTofMuDstMaker::acceptL3TrackInRich(StTrack *gt)
     return retval;
 }
 bool StRichTofMuDstMaker::strobeEvent(StSPtrVecTofData tofData){
-  // determine strobe event from pVPD TDC data
-
-  const int strobeTdcMin = 1600;
-  const int strobeTdcMax = 1650;
+  // first determine strobe event from scaler data
+  if ((tofData[9]->sc()==1) && (tofData[10]->sc()==1)){
+    return true;
+  }
+  // next, determine strobe event from pVPD TDC data.
+  int strobeTdcMin = 1600;
+  int strobeTdcMax = 1650;
+  // change pVPD range for year3 data.
+  if (mYear3Data){
+    strobeTdcMin = 980;
+    strobeTdcMax = 1020;
+  }
 
   int nStrobedPvpdTdcs=0;
   for(int i=42;i<48;i++)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichTofMuDstMaker.h,v 1.5 2003/01/22 22:42:22 dunlop Exp $
+ * $Id: StRichTofMuDstMaker.h,v 1.6 2003/02/06 22:30:34 geurts Exp $
  *
  * Author: Thomas Ullrich, Oct 2000
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StRichTofMuDstMaker.h,v $
+ * Revision 1.6  2003/02/06 22:30:34  geurts
+ * TOF track filter covers both the TOFp and TOFr tray.
+ * TOF strobed events selection is now based on scaler and TDC data.
+ * Different strobed-TDC ranges for year2 and year3 data.
+ *
  * Revision 1.5  2003/01/22 22:42:22  dunlop
  * Fixed compilation on solaris
  *
@@ -68,7 +73,8 @@ public:
     void SetOuterTrackGeometry(){mOuterTrackGeometry=true;};
     void SetStandardTrackGeometry(){mOuterTrackGeometry=false;};
     void SetTrackAcceptZ(Float_t a,Float_t b){ mTrackAcceptZ_min=a; mTrackAcceptZ_max=b;};
-    void SetTrackAcceptPhi(Float_t a, Float_t b){mTrackAcceptPhi_min=a; mTrackAcceptPhi_max=b;};
+    void SetTofpTrackAcceptPhi(Float_t a, Float_t b){mTofpTrackAcceptPhi_min=a; mTofpTrackAcceptPhi_max=b;};
+    void SetTofrTrackAcceptPhi(Float_t a, Float_t b){mTofrTrackAcceptPhi_min=a; mTofrTrackAcceptPhi_max=b;};
 	
 protected:
     bool accept(StEvent*);
@@ -88,14 +94,18 @@ protected:
 
 
 private:
+    bool mYear3Data; //! based on runnumber
     bool mOuterTrackGeometry; //! use Outer (true, default) or Standard (false) track geometry
     StTofGeometry *mTofGeom; //!
+    //Float_t mTofGeomParamR; //!
     bool mRejectStrobeEvents; //! don't include TOF strobed events (true, default)
     bool strobeEvent(StSPtrVecTofData); //! determine if an event is strobed (true)
     Float_t mTrackAcceptZ_min;   //! Z and Phi ranges for
     Float_t mTrackAcceptZ_max;   //! global track selection
-    Float_t mTrackAcceptPhi_min; //!
-    Float_t mTrackAcceptPhi_max; //!
+    Float_t mTofpTrackAcceptPhi_min; //!
+    Float_t mTofpTrackAcceptPhi_max; //!
+    Float_t mTofrTrackAcceptPhi_min; //!
+    Float_t mTofrTrackAcceptPhi_max; //!
     
     bool mEventAcceptedTof;
     bool mEventAcceptedRich;
@@ -129,11 +139,11 @@ private:
     
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRichTofMuDstMaker.h,v 1.5 2003/01/22 22:42:22 dunlop Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRichTofMuDstMaker.h,v 1.6 2003/02/06 22:30:34 geurts Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 
-    ClassDef(StRichTofMuDstMaker,1)
+    ClassDef(StRichTofMuDstMaker,2)
 };
 
 #endif
