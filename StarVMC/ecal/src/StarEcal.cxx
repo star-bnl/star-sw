@@ -1,4 +1,4 @@
-/* $Id: StarEcal.cxx,v 1.1 2004/07/16 22:56:49 potekhin Exp $ */
+/* $Id: StarEcal.cxx,v 1.2 2004/09/02 23:24:48 potekhin Exp $ */
 
 #include <TVirtualMC.h>
 
@@ -16,15 +16,13 @@ ClassImp(StarEcal)
 
 
 //_______________________________________________________________________
-  StarEcal::StarEcal()
-{
+  StarEcal::StarEcal() {
   cout<<"Constructing Star ECAL"<<endl;
 }
 //_______________________________________________________________________
 //_______________________________________________________________________
-StarEcal::StarEcal(const char* name_, const char *title_):
-  StarDetector(name_,title_)
-{
+StarEcal::StarEcal(const char* name_, const char *title_): StarDetector(name_,title_) {
+  cout<<"Constructing Star ECAL"<<endl;
 }
 
 //_______________________________________________________________________
