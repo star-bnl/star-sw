@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.2 1999/10/06 16:50:44 long Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.3 1999/10/22 00:00:14 calderon Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,8 +10,15 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.3  1999/10/22 00:00:14  calderon
+ * -added macro to use Erf instead of erf if we have HP and Root together.
+ * -constructor with char* for StTrsDedx so solaris doesn't complain
+ * -remove mZeros from StTrsDigitalSector.  This causes several files to
+ *  be modified to conform to the new data format, so only mData remains,
+ *  access functions change and digitization procedure is different.
+ *
  * Revision 1.2  1999/10/06 16:50:44  long
- * in the calculation of sigma_x,iter->position().z()----->mGeomDb->frischGrid()-iter->position().z()
+ *  in the calculation of sigma_x,iter->position().z()----->mGeomDb->frischGrid()-iter->position().z()
  *
  * Revision 1.1  1999/10/04 15:43:00  long
  * TrsParameterizedAnalogSignalGenerator using tss algorithm
@@ -27,6 +34,15 @@
 #include "StCoordinates.hh"
 
 #include "StTrsParameterizedAnalogSignalGenerator.hh"
+
+#ifdef HPUX
+#ifdef __ROOT__
+// erf() is not loaded in root4star in HP because it is an archived library.
+#include "TMath.h"
+#define erf(x) TMath::Erf(x)
+#define erfc(x) TMath::Erfc(x)
+#endif
+#endif
 
 static const double sigmaL = .037*centimeter/sqrt(centimeter);
 static const double sigmaT = .0633*centimeter/sqrt(centimeter);
@@ -500,7 +516,9 @@ void StTrsParameterizedAnalogSignalGenerator::sampleAnalogSignal()
 		    // 10 time bins.  This should be a settable
 		    // parameter.
 		    //
-		  if( fabs(timeBinT-mTimeSequenceIterator->time()) > 10.*mTimeBinWidth)continue; 
+		  if( timeBinT-mTimeSequenceIterator->time() < -3.*mTimeBinWidth ||
+		      timeBinT-mTimeSequenceIterator->time() >  6.*mTimeBinWidth)
+		      continue; 
                         
 //    		    cout << " tb " << itbin << " "
 // 			 << mTimeSequenceIterator->time()/nanosecond << " " << (*mTimeSequenceIterator) << endl;

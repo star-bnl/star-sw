@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.11 1999/07/20 02:19:58 lasiuk Exp $
+ * $Id: StTrsDeDx.cc,v 1.12 1999/10/22 00:00:13 calderon Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,6 +13,13 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
+ * Revision 1.12  1999/10/22 00:00:13  calderon
+ * -added macro to use Erf instead of erf if we have HP and Root together.
+ * -constructor with char* for StTrsDedx so solaris doesn't complain
+ * -remove mZeros from StTrsDigitalSector.  This causes several files to
+ *  be modified to conform to the new data format, so only mData remains,
+ *  access functions change and digitization procedure is different.
+ *
  * Revision 1.11  1999/07/20 02:19:58  lasiuk
  * remove CVS merge conflicts
  *
@@ -106,7 +113,24 @@ StTrsDeDx::StTrsDeDx()
   mPadLength = 1.95*centimeter;
   doInitialization();
 }
-
+StTrsDeDx::StTrsDeDx(const char* gas, double pad)
+    : mPadLength(pad)
+{
+    mGas = gas;
+    if((gas != "Ne")  && (gas != "Ar") &&
+       (gas != "P10") && (gas != "p10")) {
+#ifdef ST_USES_EXCEPTIONS
+	cerr << "oops" << endl;
+	throw invalid_argument("Gas not currently Implemented.\nMust use either \"Ne\" or \"Ar\" or \"P10\".");
+#else
+	cerr << gas << " gas not currently Implemented." << endl;
+	cerr << "Must use either: \"Ne\", \"Ar\", or \"P10\"." << endl;
+	cerr << "Exitting..." << endl;
+	exit(1);
+#endif
+    }
+    doInitialization();
+}
 StTrsDeDx::StTrsDeDx(const string& gas, double pad)
     : mPadLength(pad)
 {

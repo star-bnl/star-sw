@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.18 1999/07/19 21:41:22 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.19 1999/10/22 00:00:15 calderon Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
+ * Revision 1.19  1999/10/22 00:00:15  calderon
+ * -added macro to use Erf instead of erf if we have HP and Root together.
+ * -constructor with char* for StTrsDedx so solaris doesn't complain
+ * -remove mZeros from StTrsDigitalSector.  This causes several files to
+ *  be modified to conform to the new data format, so only mData remains,
+ *  access functions change and digitization procedure is different.
+ *
  * Revision 1.18  1999/07/19 21:41:22  lasiuk
  * - debug check and cleanup.  No changes
  *
@@ -95,6 +102,15 @@
 #include "StCoordinates.hh"
 
 #include "StTrsSlowAnalogSignalGenerator.hh"
+
+#ifdef HPUX
+#ifdef __ROOT__
+// erf() is not loaded in root4star in HP because it is an archived library.
+#include "TMath.h"
+#define erf(x) TMath::Erf(x)
+#define erfc(x) TMath::Erfc(x)
+#endif
+#endif
 
 //static const double symGausAppFactor  = (M_SQRT1_2*M_2_SQRTPI/(2.*mSigma1));
 //static const double tau1              = mSigma1;
@@ -329,7 +345,6 @@ void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wire
 	for(iter  = currentWire.begin();
 	    iter != currentWire.end();
 	    iter++) {
-	    
 	    // What is the location of the avalanche
 	    // center of Pad that is being processed?
 	    // the y coordinate is the position of the wire
@@ -337,8 +352,8 @@ void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wire
   	    //PR(*iter);
 	    
 	    StTpcPadCoordinate    tpcRaw;
-	    StTpcLocalCoordinate  xyCoord(iter->position());
-
+	    //StTpcLocalCoordinate  xyCoord(iter->position()); // mVolumeId seems to be invalid??
+	    StTpcLocalSectorCoordinate  xyCoord(iter->position(),12);
 	    //
 	    // THIS IS IMPORTANT TO REALIZE!!!
 	    //
@@ -389,7 +404,6 @@ void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wire
 		    centralPad + mDeltaPad : mGeomDb->numberOfPadsAtRow(irow);
 //  		PR(mPadLimits.first);
 //  		PR(mPadLimits.second);
-		
 		for(int ipad=mPadLimits.first; ipad<=mPadLimits.second; ipad++) {
 // 		    cout << " row: " << irow << " pad: " << ipad << endl;
 #ifdef ST_SECTOR_BOUNDS_CHECK
@@ -453,7 +467,6 @@ void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wire
 // 			 << padSignal.amplitude() << '\t'
 // 			 << irow << "," << ipad <<endl;
 		    mSector->addEntry(irow,ipad,padSignal);
-		    
 		} // pad limits
 
 	    } // row limits
@@ -507,7 +520,7 @@ double StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximateResponse(doub
     // Calculate at bin Centroid (from static const double)
     double t = mTimeBinWidth*(tbin+.5);
 
-    value =  mGain*s.amplitude()*mSymGausApproxFactor*exp(-sqr(t-s.time())/(2*sqr(mSigma1)));
+    value =  mGain*s.amplitude()*mSymGausApproxFactor*exp(-sqr(t - s.time())/(2*sqr(mSigma1)));
     
     value *= mFractionSampled*mTimeBinWidth;
 //     PR(value/(.001*volt));
@@ -723,7 +736,7 @@ void StTrsSlowAnalogSignalGenerator::setElectronicSampler(StSignal t)
 
 void StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()
 {
-//     cout << "StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()" << endl;
+     cout << "StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()" << endl;
     
     // operates on mSector 
 
@@ -735,13 +748,18 @@ void StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()
 #endif
     //double freq = mElectronicsDb->samplingFrequency();
     //PR(freq);
+    //PR(mSector->numberOfRows());
     for(int irow=1; irow<=mSector->numberOfRows(); irow++) {
+	
+	//PR(irow);
 	for(int ipad=1; ipad<=mSector->numberOfPadsInRow(irow); ipad++) {
+	    //PR(ipad);
 	    continuousAnalogTimeSequence = mSector->timeBinsOfRowAndPad(irow,ipad);
 
 	    mDiscreteAnalogTimeSequence.clear();
 
 	    // Make sure it is not empty
+	    //PR(continuousAnalogTimeSequence.size());
 	    if(!continuousAnalogTimeSequence.size()) continue;
 	    for(mTimeSequenceIterator  = continuousAnalogTimeSequence.begin();
 		mTimeSequenceIterator != continuousAnalogTimeSequence.end();

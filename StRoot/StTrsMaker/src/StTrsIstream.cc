@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsIstream.cc,v 1.3 1999/10/12 01:39:55 calderon Exp $
+ * $Id: StTrsIstream.cc,v 1.4 1999/10/22 00:00:14 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsIstream.cc,v $
+ * Revision 1.4  1999/10/22 00:00:14  calderon
+ * -added macro to use Erf instead of erf if we have HP and Root together.
+ * -constructor with char* for StTrsDedx so solaris doesn't complain
+ * -remove mZeros from StTrsDigitalSector.  This causes several files to
+ *  be modified to conform to the new data format, so only mData remains,
+ *  access functions change and digitization procedure is different.
+ *
  * Revision 1.3  1999/10/12 01:39:55  calderon
  * The <algorithm> header wasn't missing, it
  * was the STL distance() function in ObjectSpace
@@ -98,7 +105,7 @@ void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
 	cerr << "This file has only " << mEvents << " events, make sure you don't request more!" << endl;
 	exit(1);
     }
-    cout << "Filling Tpc Info from File " << endl; 
+    cout << "Filling Tpc Info from File ... " << endl; 
     unsigned short lengthData;
     unsigned short currentSectorNum;
     unsigned short currentRowNum;
@@ -106,17 +113,16 @@ void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
     ifs >> currentSectorNum;
     while (currentSectorNum < static_cast<unsigned short>(mSectors)) {
 	//PR(currentSectorNum);
-	//EventData->mSectors[iSector] = new StTrsDigitalSector;
 	StTrsDigitalSector* aDigitalSector = new StTrsDigitalSector(mGeomDb);
 
 	digitalTimeBins digitalPadData;
-	digitalTimeBins digitalPadZeros;
+	
 	ifs >> currentRowNum;
 	while (currentRowNum < static_cast<unsigned short>(mRows)) {
 	    //PR(currentRowNum);
 	    
 	    aDigitalSector->mData[currentRowNum].resize(padsAtRow[currentRowNum]);
-	    aDigitalSector->mZeros[currentRowNum].resize(padsAtRow[currentRowNum]);
+	    
 	    ifs >> currentPadNum;
 	    while (static_cast<unsigned int>(currentPadNum) < padsAtRow[currentRowNum]) {
 		
@@ -124,45 +130,11 @@ void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
 		ifs >> lengthData;
 		//PR(lengthData);
 		digitalPadData.clear();
-		digitalPadZeros.clear();
-// 		if (lengthData>0) {
-// 		    digitalPadData.resize(lengthData);
-// 		    digitalPadZeros.resize(lengthData);
-
-// 		    ifs.read(static_cast<unsigned char*>(digitalPadData.begin()), lengthData);
-// 		    ifs.read(static_cast<unsigned char*>(digitalPadZeros.begin()), lengthData);
-		    
-// 		}
-		if (lengthData>0) {
-		    digitalTimeBins inputData(lengthData);
-		    ifs.read(static_cast<unsigned char*>(inputData.begin()), lengthData);
-		    unsigned int  nZeros = count(inputData.begin(),inputData.end(),static_cast<unsigned char>(0));
-		    digitalPadData.resize(lengthData-nZeros);
-		    digitalPadData.resize(lengthData-nZeros);
-		    
-		    digitalTimeBins::iterator dataBegin  = inputData.begin();
-		    digitalTimeBins::iterator dataEnd    = inputData.end();
-		    digitalTimeBins::iterator rangeBegin = dataBegin;
-		    digitalTimeBins::iterator currentPos = digitalPadData.begin();
-		    while (rangeBegin!=inputData.end() && currentPos != digitalPadData.end()){
-			digitalTimeBins::iterator rangeEnd = find(rangeBegin,dataEnd,static_cast<unsigned char>(0));
-			copy(rangeBegin,rangeEnd,currentPos);
-			unsigned int dummy = 0;
-			distance(rangeBegin,rangeEnd,dummy);
-			currentPos+=dummy;
-			if (*rangeEnd == static_cast<unsigned char>(0)) {
-			    unsigned int index = 0;
-			    distance(dataBegin, rangeEnd, index);
-			    *currentPos++ = static_cast<unsigned char>(0);
-			    digitalPadZeros[index] = *currentPos;
-			    currentPos++;
-			}
-			rangeBegin = (rangeEnd==dataEnd) ?  dataEnd : rangeEnd+1;
-		    }
-		    
+		if (lengthData>0) { // We have data, read it in
+		    digitalPadData.resize(lengthData);
+		    ifs.read(static_cast<unsigned char*>(digitalPadData.begin()), lengthData);
 		}
-		pair<digitalTimeBins*, digitalTimeBins*> tmp(&digitalPadData, &digitalPadZeros);
-		aDigitalSector->assignTimeBins(currentRowNum+1,currentPadNum+1,tmp);
+		aDigitalSector->assignTimeBins(currentRowNum+1,currentPadNum+1,&digitalPadData);
 		ifs >> currentPadNum;
 	    } // while currentPadNum is not = padsAtRow[currentRowNum] 
 	    ifs >> currentRowNum;
@@ -172,49 +144,37 @@ void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
     } // While currentSectorNum is not = mSectors
 
     // See what we read
-    bool PrintToScreen = true;
+    bool PrintToScreen = false;
     if (PrintToScreen) {
-    intVec DataOut;
-    intVec ZeroOut;
-    cout << "Sector   Row   Pad    TimeBins" << endl;
-    cout << "==========================================" << endl;
-    for (int iSector = 0; iSector < mSectors; iSector++) {
-	if (EventData->mSectors[iSector]) {
-	    cout << "Data from Sector " << iSector+1 << endl;
-	    for (int iRow = 0; iRow < mRows; iRow++) {
-		for (int iPad = 0; iPad < padsAtRow[iRow]; iPad++) {
-		    StTrsDigitalSector* currentSector = EventData->mSectors[iSector];
-		    digitalTimeBins padData = currentSector->mData[iRow][iPad];
-		    digitalTimeBins padZero = currentSector->mZeros[iRow][iPad]; 
-		    if (padData.size() != padZero.size()) {
-			cerr << "Error reading from file" << endl;
-			cerr << "Data and Zero vector don't have the same lenght!!" << endl;
-			exit(1);
-		    }
-		    if (padData.size()>0){
-			DataOut.clear();
-			ZeroOut.clear();
-			
-			DataOut.resize(padData.size());
-			ZeroOut.resize(padZero.size());
-			
-			transform (padData.begin(), padData.end(), DataOut.begin(), getInt);
-			transform (padZero.begin(), padZero.end(), ZeroOut.begin(), getInt);
-			// Output the vector to the screen.
-			cout << "     " << iSector+1;
-			cout << "     " << iRow+1;
-			cout << "     " << iPad+1;
-			cout << "     ";
-			copy (DataOut.begin(), DataOut.end(), ostream_iter_int(cout, " "));
-			cout << endl;
-			cout << "                         ";
-			copy (ZeroOut.begin(), ZeroOut.end(), ostream_iter_int(cout, " "));
-			cout << endl;
-		    } // if there's data to write...
-		} // pad
-	    } // row
-	} // check for existence of sector
-    } // sector
+	intVec DataOut;
+	intVec ZeroOut;
+	cout << "Sector   Row   Pad    TimeBins" << endl;
+	cout << "==========================================" << endl;
+	for (unsigned int iSector = 0; iSector < mSectors; iSector++) { // sector loop
+	    if (EventData->mSectors[iSector]) { // does sector exist?
+		cout << "Data from Sector " << iSector+1 << endl;
+		for (unsigned int iRow = 0; iRow < mRows; iRow++) { // row loop
+		    for (unsigned int iPad = 0; iPad < padsAtRow[iRow]; iPad++) { // pad loop
+			StTrsDigitalSector* currentSector = EventData->mSectors[iSector];
+			digitalTimeBins padData = currentSector->mData[iRow][iPad];
+			if (padData.size()>0){ // check if there is data
+			    DataOut.clear();
+			    
+			    DataOut.resize(padData.size());
+			    
+			    transform (padData.begin(), padData.end(), DataOut.begin(), getInt);
+			    // Output the vector to the screen.
+			    cout << "     " << iSector+1;
+			    cout << "     " << iRow+1;
+			    cout << "     " << iPad+1;
+			    cout << "     ";
+			    copy (DataOut.begin(), DataOut.end(), ostream_iter_int(cout, " "));
+			    cout << endl;
+			} // if there's data to write...
+		    } // pad
+		} // row
+	    } // check for existence of sector
+	} // sector
     } // if print
     
 }

@@ -10,8 +10,15 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedDigitalSignalGenerator.cc,v $
+ * Revision 1.4  1999/10/22 00:00:14  calderon
+ * -added macro to use Erf instead of erf if we have HP and Root together.
+ * -constructor with char* for StTrsDedx so solaris doesn't complain
+ * -remove mZeros from StTrsDigitalSector.  This causes several files to
+ *  be modified to conform to the new data format, so only mData remains,
+ *  access functions change and digitization procedure is different.
+ *
  * Revision 1.3  1999/10/06 21:53:19  long
- * comment out one message output
+ *  comment out one message output
  *
  * Revision 1.2  1999/10/04 15:56:55  long
  * add 10 to 8 bit transformation
@@ -88,10 +95,8 @@ void StTrsParameterizedDigitalSignalGenerator::digitizeSignal()
     // Make a digital Pad!
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<unsigned char> digitalPadData;
-    vector<unsigned char> digitalPadZeros;
 #else
     vector<unsigned char, allocator<unsigned char> > digitalPadData;
-    vector<unsigned char, allocator<unsigned char> > digitalPadZeros;
 #endif
     // Remember mSector is the "normal" analog sector! 
       cout << "StTrsParameterizedDigitalSignalGenerator::digitizeSignal()" << endl;
@@ -104,20 +109,17 @@ void StTrsParameterizedDigitalSignalGenerator::digitizeSignal()
    	    //cout << "dig() r/p " << irow << '/' << ipad << endl;
 	    // Make sure the digital Pad is clear!
 	    digitalPadData.clear();
-	    digitalPadZeros.clear();
 	    //   cout<<irow<<" row "<<ipad<<" pad"<<endl;
          
 	    int currentTimeBin = digitalPadData.size();
 	    //  cout<<currentTimeBin<<"  should be 0 "<<endl;
 // 	    PR(currentTimeBin);
-	    
+	    unsigned int zeroCounter = 0;
 	    for(mTimeSequenceIterator  = currentPad.begin();
 		mTimeSequenceIterator != currentPad.end();
 		mTimeSequenceIterator++) {
 
 		//PR(*mTimeSequenceIterator);
-	     
-
 	        
 		int temporary_digitalAmplitude =
 		   (int) (mTimeSequenceIterator->amplitude()/mSimpleConversion);
@@ -140,74 +142,42 @@ void StTrsParameterizedDigitalSignalGenerator::digitizeSignal()
 		if(digitalAmplitude>255) digitalAmplitude = 255;
 
 		if(digitalAmplitude != 0) {
+		    if (zeroCounter) {
+			digitalPadData.push_back(static_cast<unsigned char>(zeroCounter));
+			zeroCounter = 0;
+		    }
 		    digitalPadData.push_back(static_cast<unsigned char>(digitalAmplitude));
-		    digitalPadZeros.push_back(static_cast<unsigned char>(0));
 		    currentTimeBin++;
 		}
 		// Otherwise there is no signals!
-		else if(digitalPadZeros.size() == 0) {
-		    digitalPadData.push_back(static_cast<unsigned char>(0));
-		    digitalPadZeros.push_back(static_cast<unsigned char>(1));
-		    currentTimeBin++;
-		}
-		else if(digitalPadData.back() == static_cast<unsigned char>(0) ) {
-		    
-		    if (digitalPadZeros.back() == static_cast<unsigned char>(255)) {
+		else if(currentTimeBin!=mNumberOfTimeBins){
+		    if (!zeroCounter) digitalPadData.push_back(static_cast<unsigned char>(0));
+		    else if(zeroCounter==255) {
+			digitalPadData.push_back(static_cast<unsigned char>(255));
 			digitalPadData.push_back(static_cast<unsigned char>(0));
-			digitalPadZeros.push_back(static_cast<unsigned char>(1));
-			currentTimeBin++;
+			zeroCounter=0;
 		    }
-		    else {
-			digitalPadZeros.back()++;
-			currentTimeBin++;
-		    }
-		}
-		else {
-		    digitalPadData.push_back(static_cast<unsigned char>(0));
-		    digitalPadZeros.push_back(static_cast<unsigned char>(1));
+		    zeroCounter++;
 		    currentTimeBin++;
+		    if (currentTimeBin==mNumberOfTimeBins){
+		    digitalPadData.push_back(static_cast<unsigned char>(zeroCounter));
+		    zeroCounter = 0;
+		    }
 		}
 	    } // the iterator (mTimeSequence)
+// 	    PR(currentTimeBin);
+// 	    PR(mNumberOfTimeBins);
 
-	    if(currentTimeBin<mNumberOfTimeBins) {
-		int remainingTimeBins = mNumberOfTimeBins - (currentTimeBin+1);
- // 		PR(currentTimeBin);
-		do {
-		    if(digitalPadData.back() == 0) {
-			if(remainingTimeBins>255) {
-			    digitalPadZeros.back() += 254;
-			    remainingTimeBins -= 254;
-			}
-			else {
-			    digitalPadZeros.back() += remainingTimeBins;
-			    break;
-			}
-		    }
-		    if(remainingTimeBins>255) {
-			digitalPadData.push_back(static_cast<unsigned char>(0));
-			digitalPadZeros.push_back(static_cast<unsigned char>(255));
-			remainingTimeBins -= 255;
-		    }
-		    else {
-
-			digitalPadData.push_back(static_cast<unsigned char>(0));
-			digitalPadZeros.push_back(static_cast<unsigned char>(remainingTimeBins));
-			remainingTimeBins = 0;
-			break;
-		    }
-		} while (remainingTimeBins > 0);
-	    }
 
 	    
 	    // print it out:
 //   	    PR(digitalPadData.size());
 //   	    for(int ii=0; ii<digitalPadData.size(); ii++) {
-//   		cout << (ii) << '\t' << dec << (int)(digitalPadData[ii]) << '\t' << dec << (int)(digitalPadZeros[ii]) << endl;
+//   		cout << (ii) << '\t' << dec << (int)(digitalPadData[ii]) << endl;
 //   	    }
 	    
 	    currentPad.clear();
-	    pair<digitalTimeBins*, digitalTimeBins*> tmp(&digitalPadData, &digitalPadZeros);
-	    mDigitalSector->assignTimeBins(irow,ipad,tmp);
+	    mDigitalSector->assignTimeBins(irow,ipad,&digitalPadData);
 	    //sleep(2);
 
   	} // pads

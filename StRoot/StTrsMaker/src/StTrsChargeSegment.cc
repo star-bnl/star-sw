@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.16 1999/10/04 16:22:33 long Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.17 1999/10/22 00:00:13 calderon Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,6 +12,13 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.17  1999/10/22 00:00:13  calderon
+ * -added macro to use Erf instead of erf if we have HP and Root together.
+ * -constructor with char* for StTrsDedx so solaris doesn't complain
+ * -remove mZeros from StTrsDigitalSector.  This causes several files to
+ *  be modified to conform to the new data format, so only mData remains,
+ *  access functions change and digitization procedure is different.
+ *
  * Revision 1.16  1999/10/04 16:22:33  long
  * straight line model in case of de<0
  *
@@ -72,7 +79,6 @@
 #if  defined(__sun) && ! defined(__GNUG__)
 #include <ospace/stl/src/randgen.cpp>
 #endif
-
 #include "StPhysicalHelix.hh"
 
 #include "StTpcCoordinateTransform.hh"
@@ -80,6 +86,15 @@
 
 // Need a CERNLIB routine for tssSplit
 extern "C"  float dstlan_(float *);
+//extern "C"  float erf_(float*);
+#ifdef HPUX
+#ifdef __ROOT__
+// erf() is not loaded in root4star in HP because it is an archived library.
+#include "TMath.h"
+#define erf(x) TMath::Erf(x)
+#define erfc(x) TMath::Erfc(x)
+#endif
+#endif
 
 HepJamesRandom  StTrsChargeSegment::mEngine;
 RandFlat        StTrsChargeSegment::mFlatDistribution(mEngine);
@@ -452,7 +467,7 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 		//PR(mip);
 		    
 		// Must pass the length of segment in the units of centimeters!
-		    
+		
 		xBinary = binaryPartition((lengthOfSegmentToBeSplit/centimeter),
 					  dErelave,mip);
 		//PR(xBinary);
@@ -566,9 +581,7 @@ double StTrsChargeSegment::xReflectedGauss(double x0, double sig) const
 {
     double granularity = .001;
     double root2Sigma  = M_SQRT2*sig;
-
     double denom = erf((1.-x0)/root2Sigma) + erf(x0/root2Sigma);
-
     double testValue = mFlatDistribution.shoot();
     
     double xlo =0.;
@@ -577,7 +590,7 @@ double StTrsChargeSegment::xReflectedGauss(double x0, double sig) const
     double x,p;
     do {
 	x = .5*(xlo+xhi);
-	p =.5*(1. + (erf((x-x0)/root2Sigma) + erf((x+x0-1)/root2Sigma))/denom);
+ 	p =.5*(1. + (erf((x-x0)/root2Sigma) + erf((x+x0-1)/root2Sigma))/denom);
 	if( (fabs(testValue-p)<granularity) || (fabs(xhi-xlo)<1.e-7)) {
 	    return x;
 	}

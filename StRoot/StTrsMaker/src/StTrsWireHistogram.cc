@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.15 1999/10/04 16:17:33 long Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.16 1999/10/22 00:00:15 calderon Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,13 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.16  1999/10/22 00:00:15  calderon
+ * -added macro to use Erf instead of erf if we have HP and Root together.
+ * -constructor with char* for StTrsDedx so solaris doesn't complain
+ * -remove mZeros from StTrsDigitalSector.  This causes several files to
+ *  be modified to conform to the new data format, so only mData remains,
+ *  access functions change and digitization procedure is different.
+ *
  * Revision 1.15  1999/10/04 16:17:33  long
  * wireCoordinate(kk)--> bin.position().y()
  *
@@ -86,6 +93,15 @@
 
 #include "SystemOfUnits.h"
 #include "StTrsWireHistogram.hh"
+
+#ifdef HPUX
+#ifdef __ROOT__
+// erf() is not loaded in root4star in HP because it is an archived library.
+#include "TMath.h"
+#define erf(x) TMath::Erf(x)
+#define erfc(x) TMath::Erfc(x)
+#endif
+#endif
 
 StTrsWireHistogram* StTrsWireHistogram::mInstance = 0; // static data member
 HepJamesRandom  StTrsWireHistogram::mEngine;
