@@ -16,7 +16,7 @@
 
 
 
-extern "C" long l3cl_(
+extern "C" long type_of_call l3cl_(
   TABLE_HEAD_ST     *para_h,       L3CL_PARA_ST    *para,
   TABLE_HEAD_ST     *pad_h,        TSS_TPPAD_ST    *pad,
   TABLE_HEAD_ST     *pixel_h,      TSS_TPPIXEL_ST  *pixel,        

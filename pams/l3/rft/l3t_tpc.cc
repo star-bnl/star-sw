@@ -15,7 +15,7 @@
 
 
 
-extern "C" long l3t_tpc_(
+extern "C" long type_of_call l3t_tpc_(
   TABLE_HEAD_ST     *para_h,       L3T_TPC_PARA_ST    *para,
   TABLE_HEAD_ST     *tphit_h,      TCL_TPHIT_ST       *tphit,        
   TABLE_HEAD_ST     *tptrack_h,    TPT_TRACK_ST       *tptrack,  
