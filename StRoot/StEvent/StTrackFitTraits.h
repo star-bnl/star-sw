@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.2 1999/11/01 12:45:17 ullrich Exp $
+ * $Id: StTrackFitTraits.h,v 2.3 2001/03/16 20:57:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
+ * Revision 2.3  2001/03/16 20:57:45  ullrich
+ * Covariant matrix now stored in TArrayF.
+ *
  * Revision 2.2  1999/11/01 12:45:17  ullrich
  * Modified unpacking of point counter
  *
@@ -25,6 +28,7 @@
 #include "StObject.h"
 #include "StEnumerations.h"
 #include "StMatrixF.hh"
+#include "TArrayF.h"
 
 class dst_track_st;
 class StParticleDefinition;
@@ -43,12 +47,14 @@ public:
     StParticleDefinition* pidHypothesis() const;
     StMatrixF             covariantMatrix() const;
     Double_t              chi2(UInt_t = 0) const;
-        
+
+    void                  clearCovariantMatrix();
+    
 protected:
     UShort_t mPidHypothesis;       // GeantId
     UShort_t mNumberOfFitPoints;
     Float_t  mChi2[2];
-    Float_t  mCovariantMatrix[15];
+    TArrayF  mCovariantMatrix;
     
     ClassDef(StTrackFitTraits,1)
 };

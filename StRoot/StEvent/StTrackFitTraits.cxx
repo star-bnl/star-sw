@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.5 2000/02/22 23:24:08 ullrich Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.6 2001/03/16 20:57:44 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.6  2001/03/16 20:57:44  ullrich
+ * Covariant matrix now stored in TArrayF.
+ *
  * Revision 2.5  2000/02/22 23:24:08  ullrich
  * Fixed bug in covariantMatrix().
  *
@@ -41,14 +44,13 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.5 2000/02/22 23:24:08 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.6 2001/03/16 20:57:44 ullrich Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
     mPidHypothesis = 0;
     mNumberOfFitPoints = 0;
     fill_n(mChi2, 2, 0);
-    fill_n(mCovariantMatrix, 15, 0);
 }
 
 StTrackFitTraits::StTrackFitTraits(const dst_track_st& t)
@@ -56,7 +58,7 @@ StTrackFitTraits::StTrackFitTraits(const dst_track_st& t)
     mPidHypothesis = t.pid;
     mNumberOfFitPoints = t.n_fit_point;
     copy(t.chisq+0, t.chisq+2, mChi2);
-    copy(t.covar+0, t.covar+15, mCovariantMatrix);
+    mCovariantMatrix.Set(15, t.covar);
 }
 
 StTrackFitTraits::StTrackFitTraits(UShort_t pid, UShort_t nfp,
@@ -65,7 +67,7 @@ StTrackFitTraits::StTrackFitTraits(UShort_t pid, UShort_t nfp,
     mPidHypothesis = pid;
     mNumberOfFitPoints = nfp;
     copy(chi, chi+2, mChi2);
-    copy(cov, cov+15, mCovariantMatrix);
+    mCovariantMatrix.Set(15, cov);
 }
 
 StTrackFitTraits::~StTrackFitTraits() {/* noop */}
@@ -118,21 +120,27 @@ StMatrixF
 StTrackFitTraits::covariantMatrix() const
 {
     StMatrixF m(5,5);
-    m(1,1) = mCovariantMatrix[0];
-    m(1,2) = m(2,1) = mCovariantMatrix[1];
-    m(1,3) = m(3,1) = mCovariantMatrix[2];
-    m(1,4) = m(4,1) = mCovariantMatrix[3];
-    m(1,5) = m(5,1) = mCovariantMatrix[4];
-    m(2,2) = mCovariantMatrix[5];
-    m(2,3) = m(3,2) = mCovariantMatrix[6];
-    m(2,4) = m(4,2) = mCovariantMatrix[7];
-    m(2,5) = m(5,2) = mCovariantMatrix[8];
-    m(3,3) = mCovariantMatrix[9];
-    m(3,4) = m(4,3) = mCovariantMatrix[10];
-    m(3,5) = m(5,3) = mCovariantMatrix[11];
-    m(4,4) = mCovariantMatrix[12];
-    m(4,5) = m(5,4) = mCovariantMatrix[13];
-    m(5,5) = mCovariantMatrix[14];
+    if (mCovariantMatrix.GetSize() == 15) {
+	m(1,1) = mCovariantMatrix[0];
+	m(1,2) = m(2,1) = mCovariantMatrix[1];
+	m(1,3) = m(3,1) = mCovariantMatrix[2];
+	m(1,4) = m(4,1) = mCovariantMatrix[3];
+	m(1,5) = m(5,1) = mCovariantMatrix[4];
+	m(2,2) = mCovariantMatrix[5];
+	m(2,3) = m(3,2) = mCovariantMatrix[6];
+	m(2,4) = m(4,2) = mCovariantMatrix[7];
+	m(2,5) = m(5,2) = mCovariantMatrix[8];
+	m(3,3) = mCovariantMatrix[9];
+	m(3,4) = m(4,3) = mCovariantMatrix[10];
+	m(3,5) = m(5,3) = mCovariantMatrix[11];
+	m(4,4) = mCovariantMatrix[12];
+	m(4,5) = m(5,4) = mCovariantMatrix[13];
+	m(5,5) = mCovariantMatrix[14];
+    }
     return m;
 }
+
+void
+StTrackFitTraits::clearCovariantMatrix() {mCovariantMatrix.Set(0);}
+
 
