@@ -143,7 +143,7 @@ void St_Table::AddAt(ULong_t *row, Int_t i)
    if (!BoundsOk("St_Table::AddAt", i))
       i = 0;
    memcpy(s_Table+i*(*s_Size),row,*s_Size);
-   *s_MaxIndex = TMath::Max((Int_t)i,Int_t(*s_MaxIndex));
+   *s_MaxIndex = TMath::Max((Int_t)i+1,Int_t(*s_MaxIndex));
 }
  
 //______________________________________________________________________________
