@@ -27,7 +27,12 @@
  * map -> getRangeV( sector, subsector, etabin, vMin, vMax); // indexed from 0
  *
  * Int_t iuv;
- * map -> getRange( sector, subsector, etabin, iuv, vMin, vMax); // indexed from 0
+ * map -> getRange( sector, subsector, etabin, iuv, vMin, vMax); // to be retired due to nonunique name, see below,JB
+ * map -> getRangeTw2Smd( isector, isubsector, ietabin, iuv, ivMin, ivMax); 
+ *
+ * map -> getRangeSmd2Smd( isector, iuv, istrip, juv, jMin, jMax);  
+ * returns range of strips from the other plane , all counts from 0.   
+ * Input: arguments with prefix 'i', output with prefix 'j'
  *
  * Limitations:
  *
@@ -48,6 +53,7 @@
 #include <vector>
 
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
+class EEmcStrip2StripMapItem;
 
 //-- Structure to map strip ranges to towers --
 struct EEmcStripMapItem {
@@ -111,7 +117,8 @@ class EEmcSmdMap
   }
   // Min and max returned via reference.
   //
-  void getRange ( Int_t sector,  
+  
+  void getRangeTw2Smd ( Int_t sector,  
 		  Int_t subsector,  
 		  Int_t etabin,  
 		  Int_t iuv,
@@ -123,6 +130,17 @@ class EEmcSmdMap
     default: {assert(2==3);} 
     }
   }
+
+  // to be retired seeon,JB
+  void getRange ( Int_t sector,  
+		  Int_t subsector,  
+		  Int_t etabin,  
+		  Int_t iuv,
+		  Int_t &Min,
+		  Int_t &Max ) {
+    getRangeTw2Smd (sector, subsector, etabin, iuv, Min, Max); 
+  }
+  
   // Central strip(s) returned vis reference.
   //
   void getMiddleU ( Int_t sector,
@@ -143,6 +161,21 @@ class EEmcSmdMap
       mSmdMap[sector][subsector][etabin].vMax ) / 2;
 
   }
+  //
+  //////////////////////////////////////////////////
+
+
+  ///////////////////////////////////////////////////
+  //
+  // Get min and max strips in the other plane 
+  //   match the a given strips.  All arguements are c++
+  //   indices (i.e. sector runs from 0-11 not 1-12).
+  //
+  // juv, jMin and jMax returned via reference.
+  //
+  void getRangeSmd2Smd( Int_t isector, Int_t iuv, Int_t istrip,
+			Int_t &juv, Int_t &jMin, Int_t &jMax );
+
   //
   //////////////////////////////////////////////////
 
@@ -177,11 +210,16 @@ class EEmcSmdMap
 
  private:
 
+  void InitStrip2Strip();
   static EEmcSmdMap *sInstance;
  
   EEmcStripMapItem mSmdMap[ kEEmcNumSectors ][ kEEmcNumSubSectors ][ kEEmcNumEtas ];
   EEmcTowerMapItem mTowerMap[ kEEmcNumSectors ][ kEEmcNumSmdUVs ][ kEEmcNumStrips ];
 
+  enum { mxS=3,mxI=2};
+  
+
+  EEmcStrip2StripMapItem *mSmd2SmdMap[ kEEmcNumSectors][kEEmcNumSmdUVs];
   void Init();
 
  protected:
