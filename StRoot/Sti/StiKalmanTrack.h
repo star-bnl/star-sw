@@ -232,10 +232,11 @@ class StiKalmanTrack : public StiTrack
    StiKalmanTrackNode * getFirstNode()  const { return firstNode; };
    /// Accessor method returns the last node associated with the track.
    // Assumes the track has been pruned.
-   StiKalmanTrackNode * getLastNode()   const { return lastNode; };
+   StiKalmanTrackNode * getLastNode()   const { return  lastNode; };
 
-   void  setLastNode(StiKalmanTrackNode *n) { lastNode = n; };
+   void  setLastNode (StiKalmanTrackNode *n) { lastNode  = n; };
    void  setFirstNode(StiKalmanTrackNode *n) { firstNode = n; };   
+   void  setFirstLastNode(StiKalmanTrackNode *n);   
 
    /// Returns the direction (kInsideOut, kOutsideIn) used in the reconstruction of this track.
    StiDirection getTrackingDirection() const { return  trackingDirection;};
@@ -248,53 +249,28 @@ class StiKalmanTrack : public StiTrack
    
    /// Sets the direction (kInsideOut, kOutsideIn) used in the fit of this track.
    void setFittingDirection(StiDirection direction) { fittingDirection = direction;}
-   
    /// Method used to add a hit to this track
-   virtual StiKalmanTrackNode * add(StiHit *h,double alpha, double eta, double curvature, double tanl);
+   virtual StiKalmanTrackNode * add(StiHit *h,double alpha, double eta, double curvature, double tanl,int direction);
    
    /// Add a kalman track node to this track as a child to the last node of the track
    /// Return the added node 
-   virtual StiKalmanTrackNode * add(StiKalmanTrackNode * node);
-
-  /// Remove given hit from this track
-  void removeHit(StiHit *h);
-  
-  /// Work method used to find the node containing the given hit.
-  StiKalmanTrackNode * findHit(StiHit * h);
-  
+   virtual void add(StiKalmanTrackNode * node,int direction);
   /// Convenience method to initialize a track based on seed information 
   void initialize(double curvature,
 		  double tanl,
 		  const StThreeVectorD& origin,
 		  const vector<StiHit*> &);
   
-  /// Work method returns the node closest to the given position.
-  /*! Work method returns the node closest to the given position. 
-    The given position is a radial distance calculated in the local
-    reference frame of the detector.
-  */
-  StiKalmanTrackNode *  getNodeNear(double x) const;
 
     /// Method to return the pointer to the fitter parameters.
     StiKalmanTrackFitterParameters* fitPars() const {return fitpars;}
-  /*! Convenience method returns a point corresponding to the node
-    of this track which is the closest to the given position.
-  */
-  StThreeVector<double> getPointNear(double x) const;
-  StThreeVector<double> getGlobalPointNear(double x) const;
-  StThreeVector<double> getGlobalPointAt(double x) const;
   
    StThreeVector<double> getMomentumAtOrigin() const;
-   StThreeVector<double> getMomentumNear(double x);
-   StThreeVector<double> getHitPositionNear(double x) const;
 
    virtual vector<StiHit*> getHits();
    virtual vector<StMeasuredPoint*> stHits() const;
    virtual vector<StiKalmanTrackNode*> getNodes(int detectorGroupId) const;
 	 
-  // Function to reverse the node geometry of a track
-  void swap();
-
 
   double  getMass() const;   // mass when pid known
   int     getCharge()const;   // charge of the particle
@@ -304,7 +280,6 @@ class StiKalmanTrack : public StiTrack
 
   bool find(int direction=kOutsideIn);
   int  refit();
-  void prune();
   void reserveHits();
   bool extendToVertex(StiHit* vertex);
   bool extendToVertex(StiHit* vertex, const StiDetector*alternate);

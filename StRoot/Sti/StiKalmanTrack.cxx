@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.57 2005/03/24 17:59:38 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.57 2005/03/24 17:59:38 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.58 2005/03/28 05:48:49 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.58 2005/03/28 05:48:49 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.58  2005/03/28 05:48:49  perev
+ * Reorganization of node container
+ *
  * Revision 2.57  2005/03/24 17:59:38  perev
  * refit() method added
  *
@@ -201,7 +204,6 @@
 #include "StiToolkit.h"
 #include "StiTrackFinder.h"
 #include "StiHit.h"
-#include "StiDefaultMutableTreeNode.h"
 #include "StiKalmanTrackNode.h"
 #include "StiKalmanTrack.h"
 #include "StiDetector.h"
@@ -272,89 +274,19 @@ void StiKalmanTrack::setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>* val)
   <li>Insert the given hit in a StiKalmanTrackNode instance.</li>
   </ol>
 */
-StiKalmanTrackNode * StiKalmanTrack::add(StiHit *h,double alpha, double eta, double curvature, double tanl)
+StiKalmanTrackNode * StiKalmanTrack::add(StiHit *h,double alpha, double eta, double curvature, double tanl,int direction)
 {
   TRACKMESSENGER << "StiKalmanTrack::add(...) -I- Started"<<endl;
   StiKalmanTrackNode * n = trackNodeFactory->getInstance();
-  TRACKMESSENGER << "StiKalmanTrack::add(...) -I- have n"<<endl;
-  if (!n)
-    {
-      TRACKMESSENGER << "StiKalmanTrack::add(...) -E- n==0"<<endl;
-      throw runtime_error("StiKalmanTrack::add(...) -F- n==0");
-    }
-  TRACKMESSENGER << "StiKalmanTrack::add(...) -I- have valid n"<<endl;
+  assert(n);
   n->initialize(h,alpha,eta,curvature,tanl);
   
-  if (lastNode!=0)
-    lastNode->add(n);
-  else 
-    firstNode = n;
-  lastNode = n;
+  add(n,direction);
   TRACKMESSENGER << "StiKalmanTrack::add(...) -I- Done"<<endl;
-  return lastNode;
+  return n;
 }
 
-// remove the given hit (and node) from this track
-// It is assume that the hit has at most one child
-void StiKalmanTrack::removeHit(StiHit *h)
-{
-  StiKalmanTrackNode * n = findHit(h);
-  if (n!=0)
-    {
-      // the hit belongs to this track, let's remove it
-      StiKalmanTrackNode * cn = static_cast<StiKalmanTrackNode *> (n->getFirstChild());
-      if (cn==0)
-	{
-	  // no child, this is the last hit
-	  StiKalmanTrackNode * pn = static_cast<StiKalmanTrackNode *> (n->getParent());
-	  if (pn==0)
-	    firstNode = 0;
-	  else
-	    pn->remove(n);
-	}
-      else
-	{
-	  // child exist
-	  StiKalmanTrackNode * pn = static_cast<StiKalmanTrackNode *> (n->getParent());
-	  if (pn==0)
-	    {
-	      // no parent, this is the first hit
-	      cn->setParent(0); 
-	      firstNode = cn;
-	    }
-	  else
-	    {
-	      pn->remove(n);
-	      pn->add(cn);
-	    }
-	}
-    }
-  else
-    throw logic_error("StiKalmanTrack::removeHit() - Error - Given hit does not belong to this track");
-}
 
-/*!
-  Current implementation only considers the first child of each node
-  and must therefore be revised.
-*/
-StiKalmanTrackNode * StiKalmanTrack::findHit(StiHit * h)
-{
-  if (firstNode==0)
-    return 0;
-  else
-    {
-      if (h==firstNode->getHit())
-	return firstNode;
-      StiKalmanTrackNode * n = firstNode;
-      while (n->getChildCount()>0)
-	{
-	  n = static_cast<StiKalmanTrackNode *> (n->getFirstChild());
-	  if (h==n->getHit())
-	    return firstNode;
-	}
-    }
-  return 0;
-}
 
 /*! Initialization of this kalman track from external parameters.
   <p>
@@ -418,101 +350,11 @@ void StiKalmanTrack::initialize(double curvature,
 	  eta = curvature*temp.x();
 	  alphaP=alpha;
 	}
-      add((*it),alpha,eta,curvature,tanl);
+      add((*it),alpha,eta,curvature,tanl,kOutsideIn);
     }
    //cout << "StiKalmanTrack::initialize() -I- Done"<<endl;
 }
 
-StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
-{
-  if (firstNode==0) throw logic_error("StiKalmanTrack::getNodeNear() - FATAL - firstNode==0");
-  StiDefaultMutableTreeNodeVector* nodes  = firstNode->breadthFirstEnumeration();
-  double minDist  = 1.E10;
-  double xx, diff;
-  StiKalmanTrackNode * bestNode = firstNode;
-  StiDefaultMutableTreeNodeIterator it;
-  for (it=nodes->begin(); it!=nodes->end(); it++)
-    {
-      StiKalmanTrackNode * node = static_cast<StiKalmanTrackNode *>(*it);
-      xx = node->getX();
-      diff = xx-x; if (diff<0) diff = -diff;
-      //TRACKMESSENGER << "===> x/diff:" << xx << "\t" << diff << endl;
-      if (diff<minDist) 
-	{
-	  minDist = diff;
-	  bestNode = node;
-	}
-    }
-  delete nodes;
-  return bestNode;
-}
-
-/*!
-  Returns the hit position associated with the node nearest to the given "x" value.
-*/
-StThreeVector<double>
-StiKalmanTrack::getHitPositionNear(double x) const
-{
-  StiKalmanTrackNode * node = getNodeNear(x);
-  if (node==0)
-    throw logic_error("StiKalmanTrack::getHitPositionNear(double x) - ERROR - node==0");
-  StiHit * hit = node->getHit();
-  if (hit==0)
-    throw runtime_error("StiKalmanTrack::getHitPositionNear(double x) - ERROR - hit==0");
-  StThreeVectorF pos = hit->globalPosition();
-  return StThreeVector<double>( pos.x(), pos.y(), pos.z() );
-}
-
-/// Find and return the nearest track point in the local coordinates
-/// of the detector this track lies in.
-StThreeVector<double> StiKalmanTrack::getPointNear(double x) const
-{
-  StiKalmanTrackNode * node = getNodeNear(x);
-  if (node==0) throw logic_error("StiKalmanTrack::getPointNear(double x) - ERROR - node==0");
-  return node->getPoint();
-}
-
-StThreeVector<double> StiKalmanTrack::getGlobalPointNear(double x) const
-{
-  StiKalmanTrackNode * node = getNodeNear(x);
-  if (node==0) throw logic_error("StiKalmanTrack::getGlobalPointNear(double x) - ERROR - node==0");
-  return node->getGlobalPoint();
-}
-
-// returns a point along the track in global coordinates at radius "x"
-// Note that if the track does not pass at or near the given x value
-// the null vector is returned.
-//
-// Algorithm: One first look for the node closest to "x". A "fresh"
-// node is obtained from the factory, and its state is set to that
-// of the found node. Then the fresh node is "propagated" to the 
-// desired "x" position. A null vector (i.e. [0,0,0]) is returned
-// if anything fails...
-StThreeVector<double> StiKalmanTrack::getGlobalPointAt(double x) const
-{
-  StiKalmanTrackNode * nearNode = getNodeNear(x);
-  if (nearNode==0) throw logic_error("StiKalmanTrack::getGlobalPointAt(double x) - ERROR - nearNode==0");
-  Factory<StiKalmanTrackNode> * f = static_cast<Factory<StiKalmanTrackNode>*>(trackNodeFactory);
-  if (f==0) throw logic_error("StiKalmanTrack::getGlobalPointAt(double x) - ERROR - no factory f==0");
-  StiKalmanTrackNode * n = f->getInstance();
-  if (n==0) throw logic_error("StiKalmanTrack::getGlobalPointAt(double x) - ERROR - n==0");
-  n->reset();
-  n->setState(nearNode);
-  int status = n->propagate(x,0,trackingDirection);
-  if (status<0) throw runtime_error(" StiKalmanTrack::getGlobalPointAt() - WARNING - Position not reachable by this track");
-  return n->getGlobalPoint();
-}
-
-StThreeVector<double> StiKalmanTrack::getMomentumNear(double x)
-{
-  StiKalmanTrackNode * node = getNodeNear(x);
-  double p[3];
-  double e[6];
-  node->getMomentum(p,e);
-  StThreeVector<double> p3(p[0],p[1],p[2]);
-  p3.rotateZ(node->getAlpha());
-  return p3;
-}
 
 StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
 {
@@ -844,8 +686,9 @@ StiKalmanTrackNode * StiKalmanTrack::getInnOutMostNode(int inot,int qua)  const
     if ((qua&2) && hit && node->getChi2()>10000.)	continue;
     return node;
   }
-  //cout << "StiKalmanTrack::getInnOutMostNode() -E- No requested tracks " << endl;
-  throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- No requested tracks");
+  cout << "StiKalmanTrack::getInnOutMostNode() -E- No requested tracks " << endl;
+  //throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- No requested tracks");
+  return 0;
 }
 StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode(int qua)  const
 {
@@ -898,51 +741,6 @@ bool  StiKalmanTrack::isPrimary() const
   return (fabs(node->getX())<2.);
 }
 
-/*! Swap the track node sequence inside-out
-   <h3>Algorithm</h3>
-   <ol>
-   <li>Loop through the node sequence starting with the firstNode and invert the parent child relationships.</li>
-   <li>Include removal of all children for each node.</li>
-   <li>Include change of parent</li>
-   <li>Set parent of last node as "0" to complete swap.</li>
-   <li>Change the "trackingDirection" flag to reflect the swap.
-   </ol>
- */
-void StiKalmanTrack::swap()
-{
-  StiKalmanTrackNode * parent = 0;
-  StiKalmanTrackNode * child  = 0;
-  StiKalmanTrackNode * grandChild = 0;
-  
-  parent = firstNode;
-  firstNode = lastNode;
-  lastNode = parent; 
-  if (parent && parent->getChildCount()>0)
-    {
-      child  = dynamic_cast<StiKalmanTrackNode *>(parent->getFirstChild());
-      parent->removeAllChildren();			
-      while (child)
-	{
-	  if (child->getChildCount()>0)
-	    {
-	      grandChild = dynamic_cast<StiKalmanTrackNode *>(child->getFirstChild());
-	      child->removeAllChildren();
-	    }
-	  else
-	    grandChild = 0;
-	  child->add(parent);
-	  parent = child;
-	  child = grandChild;
-	}
-      // last parent has no parent
-      parent->setParent(0);
-    }
-  if (trackingDirection==kOutsideIn)
-    trackingDirection = kInsideOut;
-  else
-    trackingDirection = kOutsideIn;
-}
-
 
 ///return vector of nodes with hits
 vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(int detectorId) const
@@ -981,24 +779,6 @@ vector<StMeasuredPoint*> StiKalmanTrack::stHits() const
 }
 
 
-/*! Prune the track to select the best branch of the tree identified by given leaf node.
-  <p>
-  The best brach is assumed to be the one given by the leaf "node".
-  All siblings of the given node, are removed, and iteratively
-  all siblings of its parent are removed from the parent of the
-  parent, etc.
-*/
-void StiKalmanTrack::prune()
-{
-  StiKalmanTrackNode * node   = lastNode;
-  StiKalmanTrackNode * parent = static_cast<StiKalmanTrackNode *>(node->getParent());
-  while (parent)
-    {
-      parent->removeAllChildrenBut(node);
-      node = parent;
-      parent = static_cast<StiKalmanTrackNode *>(node->getParent());
-    }
-}
 
 /*! Declare hits associated with given track as used.
   <p>
@@ -1118,7 +898,9 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 	  tNode->setHit(myHit);
 	  tNode->setChi2(chi2);
 	  tNode->setDetector(0);
-	  trackExtended = (add(tNode)!=0);
+          trackExtended = (tNode->updateNode()==0);
+          
+	  if (trackExtended) add(tNode,kOutsideIn);
 #ifdef Sti_DEBUG      
 	cout << "StiKalmanTrack::extendToVertex: TrackAfter:" << *this << endl;
 #endif
@@ -1143,7 +925,7 @@ static int nCall=0; nCall++;
     {
       if (debug()) cout << "StiKalmanTrack::find seed " << *((StiTrack *) this);
       if (trackFinder->find(this,kOutsideIn)) {
-          int status = refit();
+          int status = refit(); if(status){};
 	  trackExtended = getNNodes(3)>5;
       }	
     }
@@ -1162,8 +944,7 @@ static int nCall=0; nCall++;
     {
       // swap the track inside-out in preparation for the outward search/extension
       //cout<<"StiKalmanTrack::find(int) -I- Swap track"<<endl;
-static int mySwap=0; mySwap++;
-      swap();      
+//????      swap();      
       try
 	{
 	  if (debug()) cout << "StiKalmanTrack::find swap " << *((StiTrack *) this);
@@ -1184,8 +965,8 @@ static int mySwap=0; mySwap++;
 	  cout << "StiKalmanTrack::find(int direction) -W- Exception while in OutsideIn fit"<<endl;
 	} 
       //cout<<"StiKalmanTrack::find(int) -I- Swap back track"<<endl;
-      swap();
-      setTrackingDirection(kOutsideIn);
+//?????      swap();
+//?????      setTrackingDirection(kOutsideIn);
       //cout<<"StiKalmanTrack::find(int) -I- Swap back track Done"<<endl;
     }
   setFlag(1);
@@ -1297,27 +1078,31 @@ StiKalmanTrackNode * StiKalmanTrack::extrapolateToRadius(double radius)
 }
 
 //_____________________________________________________________________________
-StiKalmanTrackNode * StiKalmanTrack::add(StiKalmanTrackNode * node)
+void StiKalmanTrack::add(StiKalmanTrackNode * node,int direction)
 {
-  if (node->getHit())
-    {
-      if (node->nudge()) return 0;
-      int status = node->updateNode();
-      if (status<0) return 0;
-      else if (status>0) 
-	// remove the hit (CP Oct 21, 04 ) if the track direction has changed from update..
-	node->setHit(0);
-    }
-  lastNode->add(node);
-  lastNode = node;
-  return lastNode;
+   if (lastNode==0) {
+     lastNode = firstNode = node; return;
+   }
+   if (direction==0) {
+     lastNode->add(node,direction);
+     lastNode = node;
+  } else {
+     firstNode->add(node,direction);
+     firstNode = node;
+  }
+}
+//_____________________________________________________________________________
+void StiKalmanTrack::setFirstLastNode(StiKalmanTrackNode * node)
+{
+ firstNode = (StiKalmanTrackNode*)node->getFirstNode();
+  lastNode = (StiKalmanTrackNode*)node->getLastNode ();
 }
 //_____________________________________________________________________________
 int StiKalmanTrack::refit() 
 {
   enum {kMaxIter=10};
 
-  int nn = getNNodes(3);
+//??  int nn = getNNodes(3);
 //??  if (nn<5) return -1;
   StiKalmanTrackNode *inn = getInnerMostNode(3);
   int fail = 1;

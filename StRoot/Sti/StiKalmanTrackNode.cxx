@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.71 2005/03/24 19:28:35 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.72 2005/03/28 05:52:40 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.72  2005/03/28 05:52:40  perev
+ * Reorganization of node container
+ *
  * Revision 2.71  2005/03/24 19:28:35  perev
  * Switch off DerivTest
  *
@@ -234,6 +237,11 @@ using namespace std;
 // x[2] = (Psi)
 // x[3] = C  (local) curvature of the track
 // x[4] = tan(l) 
+
+static const double kMaxEta = acos(0.2);
+static const double kMaxCur = 0.2;
+
+
 StiKalmanTrackFinderParameters * StiKalmanTrackNode::pars = 0;
 bool StiKalmanTrackNode::recurse = false;
 
@@ -360,11 +368,10 @@ void StiKalmanTrackNode::setState(const StiKalmanTrackNode * n)
   memcpy(&_cXX,&n->_cXX,sizeof(_cXX)*kNErrs);
   _sinCA = n->_sinCA;
   _cosCA = n->_cosCA;
-  hitCount = n->hitCount;
   nullCount = n->nullCount;
   contiguousHitCount = n->contiguousHitCount;
   contiguousNullCount = n->contiguousNullCount;
-  setChi2(1e62);   //VP
+  setChi2(1e62);  
 }
 
 /**
@@ -687,7 +694,7 @@ Break(nCall);
       double xy[4];
       position = cylCross(endVal,&_cosCA,_curv,xy);
       if (position) 			return -11;
-      if (xy[0]<0.)			return -11;
+//VP??      if (xy[0]<0.)			return -11;
       dAlpha = atan2(xy[1],xy[0]);
       if (fabs(dAlpha)<0.5e-2)		break;
       position = rotate(dAlpha);
@@ -1056,7 +1063,9 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   //Do not attempt this calculation for the main vertex.
   if (!hit)throw runtime_error("SKTN::evaluateChi2(const StiHit &) - hit==0");
   double dsin =_curv*(hit->x()-_x);
-  if (fabs(_sinCA+dsin)>0.99) return 1e41;
+  if (fabs(_sinCA+dsin)>0.99   )	return 1e41;
+  if (fabs(_eta)       >kMaxEta) 	return 1e41;
+  if (fabs(_curv)      >kMaxCur)    	return 1e41;
 
   const StiDetector * detector = hit->detector();
   if (useCalculatedHitError && detector)
@@ -1067,9 +1076,12 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
     }
   else
     {
-      r00=hit->syy()+_cYY;
-      r01=hit->syz()+_cZY;  
-      r11=hit->szz()+_cZZ;
+      double ss[3];
+      getHitErrors(hit,ss);
+
+      r00=ss[0]+_cYY;
+      r01=ss[1]+_cZY;  
+      r11=ss[2]+_cZZ;
     }
   TRSymMatrix R(2,
 		r00,
@@ -1098,6 +1110,15 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   if (debug() & 8) {comment += Form(" chi2 = %6.2f",cc);}
   return cc;
 }
+//______________________________________________________________________________
+int StiKalmanTrackNode::isEnded() const
+{
+
+   if(fabs(_eta )>kMaxEta) return 1;
+   if(fabs(_curv)>kMaxCur) return 2;
+   return 0;   
+}		
+		
 //______________________________________________________________________________
 /*! Calculate the effect of MCS on the track error matrix.
   <p>
@@ -1261,8 +1282,9 @@ static int nCall=0; nCall++;
   double v11 = ezz;
   if (! (useCalculatedHitError && detector))
     {
-      v00=getHit()->syy();
-      v10=getHit()->syz();  v11=getHit()->szz();
+      double ss[3];
+      getHitErrors(getHit(),ss);
+      v00 = ss[0]; v10 = ss[1]; v11 = ss[2];
     }  
   r00=v00+_cYY;
   r01=v10+_cZY;  r11=v11+_cZZ;
@@ -1327,10 +1349,9 @@ static int nCall=0; nCall++;
   if (debug() & 4) dP1.Verify(dP);//,1e-7,2);
 #endif
   double eta  = nice(_eta + dp2);
-static double ACOS02 = acos(0.2);
-  if (fabs(eta)>ACOS02) return -14;
+  if (fabs(eta)>kMaxEta) return -14;
   double cur  = _curv + dp3;
-  if (fabs(cur) > 0.2) return -16;
+  if (fabs(cur)>kMaxCur) return -16;
   assert(finite(cur));
   double tanl = _tanl + dp4;
   // Check if any of the quantities required to pursue the update
@@ -1530,41 +1551,6 @@ int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
   return 0;
 }
 
-//_____________________________________________________________________________
-void StiKalmanTrackNode::add(StiKalmanTrackNode * newChild)
-{
-  // set counters of the newChild node
-  /*
-  if (newChild->getHit())
-    {
-      //cout<<"SKTN::add(SKTN*) -I- Add node with hit:"<<endl;
-      newChild->hitCount = hitCount+1;
-      newChild->contiguousHitCount = contiguousHitCount+1; 
-      if (contiguousHitCount>pars->minContiguousHitCountForNullReset)
-	newChild->contiguousNullCount = 0;
-      else
-	newChild->contiguousNullCount = contiguousNullCount;
-      newChild->nullCount = nullCount;
-    }
-  else
-    {
-      //cout<<"SKTN::add(SKTN*) -I- Add node WIHTOUT hit:"<<endl;
-      newChild->nullCount           = nullCount+1;
-      newChild->contiguousNullCount = contiguousNullCount+1;
-      newChild->hitCount            = hitCount;
-      newChild->contiguousHitCount  = 0;
-      }*/ 
-  children.push_back(newChild);
-  newChild->setParent(this);
-  //cout<< *this<<endl;
-}
-
-//_____________________________________________________________________________
-void StiKalmanTrackNode::cutTail()
-{
-  if (children.size()) children[0]=0;
-  children.clear();
-}
 
 //_____________________________________________________________________________
 /// print to the ostream "os" the parameters of this node 
@@ -1772,6 +1758,27 @@ void StiKalmanTrackNode::setHitErrors()
   calc->calculateError(this,myEyy,myEzz);
   setHitErrors(myEyy,myEzz);
 }
+//______________________________________________________________________________
+void StiKalmanTrackNode::getHitErrors(const StiHit *hit,double ss[3]) const
+{
+  double syy = hit->syy();
+  double syz = hit->syz();
+  double szz = hit->szz();
+  double sxx = hit->sxx();
+  if (sxx < 1e-10) {// no X errors
+     ss[0] = syy; ss[1] = syz; ss[2] = szz;}
+  else             {//account uncertaincy in X for primary mainly
+    double sxy = hit->sxy();
+    double sxz = hit->sxy();
+    double kY = _sinCA; 
+    double kZ = _tanl*sqrt(1.+kY*kY);
+    ss[0] = syy + 2.*kY*sxy + kY*kY*sxx;
+    ss[1] = syz + kY*sxz    + kZ*sxy + kY*kZ*sxx;
+    ss[2] = szz + 2.*kZ*sxz + kZ*kZ*sxx;
+  }	
+}	
+
+
 #if 1
 //______________________________________________________________________________
 int StiKalmanTrackNode::testError(double *emx, int begend)
