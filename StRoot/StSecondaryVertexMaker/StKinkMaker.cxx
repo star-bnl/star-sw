@@ -537,6 +537,9 @@ void StKinkMaker::FillEvent(StTrackGeometry *myDaughterGeometry1,StTrackGeometry
   tracks set as kHelix3DIdentifier but for safety purposes, 
   kTrackerUseTPT will consider any tracks not being kITKalmanFitId.
 */
+/*!
+  Julien : I change this on Jerome's request : now TPT tracks will only be kHelix3DIdentifier... for safety purposes too ;-))
+*/
 bool StKinkMaker::acceptTrack(StTrack *trk)
 {
   //cout << "DEBUG Track [" << trk->fittingMethod() << "] [" << trk->flag() << "] FitIds [" 
@@ -546,7 +549,7 @@ bool StKinkMaker::acceptTrack(StTrack *trk)
   if (trk->flag() <= 0) return false;
 
   // on fittingMethod() 
-  if  (  ( trk->fittingMethod() != kITKalmanFitId  && (mUseTracker == kTrackerUseTPT  || mUseTracker == kTrackerUseBOTH) ) ||
+  if  (  ( trk->fittingMethod() == kHelix3DIdentifier  && (mUseTracker == kTrackerUseTPT  || mUseTracker == kTrackerUseBOTH) ) ||
   	 ( trk->fittingMethod() == kITKalmanFitId  && (mUseTracker == kTrackerUseITTF || mUseTracker == kTrackerUseBOTH) ) ){
     return true;
   } else {
