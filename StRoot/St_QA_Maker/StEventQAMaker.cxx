@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.9 1999/12/13 20:08:37 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.10 1999/12/14 18:33:21 kathy Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.10  1999/12/14 18:33:21  kathy
+// removed 4 ftpc histograms as per Janet's request
+//
 // Revision 1.9  1999/12/13 20:08:37  lansdell
 // added pt vs eta in ftpc histogram to match table QA changes; updated logy scale histograms
 //
@@ -241,8 +244,8 @@ void StEventQAMaker::MakeHistGlob() {
 	//originally t->psi... but psi()=t->psi*degree in StEvent -CL
 	m_psiFE->Fill(globtrk->geometry()->psi());
 	//originally was t->tanl -CL
-	m_tanlFE->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
-	m_glb_thetaFE->Fill(theta);
+	//	m_tanlFE->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
+	//m_glb_thetaFE->Fill(theta);
 	m_etaFE->Fill(eta);
 	m_pTFE->Fill(pT);
 	m_momFE->Fill(gmom);
@@ -278,8 +281,8 @@ void StEventQAMaker::MakeHistGlob() {
 	//originally t->psi... but psi()=t->psi*degree in StEvent -CL
 	m_psiFW->Fill(globtrk->geometry()->psi());
 	//originally was t->tanl -CL
-	m_tanlFW->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
-	m_glb_thetaFW->Fill(theta);
+	//m_tanlFW->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
+	//m_glb_thetaFW->Fill(theta);
 	m_etaFW->Fill(eta);
 	m_pTFW->Fill(pT);
 	m_momFW->Fill(gmom);
