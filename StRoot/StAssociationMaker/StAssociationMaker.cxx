@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.37 2003/09/02 17:55:28 perev Exp $
+ * $Id: StAssociationMaker.cxx,v 1.38 2003/10/08 20:15:03 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.38  2003/10/08 20:15:03  calderon
+ * using <iostream> and std::cout, std::ostream, as well as <cmath>.
+ *
  * Revision 1.37  2003/09/02 17:55:28  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -164,17 +167,20 @@
  *
  *************************************************/
 
-#include <Stiostream.h>
+
+#include <iostream>
 #include <iterator>
 #include <stdlib.h>
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 #if !defined(ST_NO_NAMESPACES)
 using std::string;
 using std::vector;
 using std::find_if;
+using std::cout;
+using std::ostream;
 #endif
 
 #include "StAssociationMaker.h"
