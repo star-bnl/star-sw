@@ -90,6 +90,34 @@ void StiKalmanTrackNode::set(int   depth,
   fC44=cc[14];
 }
 
+void StiKalmanTrackNode::setState(const StiKalmanTrackNode * node)
+{
+  fX   = node->fX;
+  // state matrix
+  fP0  = node->fP0;
+  fP1  = node->fP1;
+  fP2  = node->fP2;
+  fP3  = node->fP3;
+  fP4  = node->fP4;
+  // covariance error matrix
+  fC00 = node->fC00;
+  fC10 = node->fC10;
+  fC11 = node->fC11;
+  fC20 = node->fC20;
+  fC21 = node->fC21;
+  fC22 = node->fC22;
+  fC30 = node->fC30;
+  fC31 = node->fC31;
+  fC32 = node->fC32;
+  fC33 = node->fC33;
+  fC40 = node->fC40;
+  fC41 = node->fC41;
+  fC42 = node->fC42;
+  fC43 = node->fC43;
+  fC44 = node->fC44;
+}
+
+
 //_____________________________________________________________________________
 void StiKalmanTrackNode::setAsCopyOf(const StiKalmanTrackNode * node)
 {

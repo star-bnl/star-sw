@@ -26,6 +26,7 @@ class StiKalmanTrackNode : public StiTrackNode
 	   const double cc[15], 
 	   const double dEdx,
 	   const double chi2);
+  void setState(const StiKalmanTrackNode * node);
   void get(double& alpha,
 	   double& xRef,
 	   double x[5], 

@@ -2,6 +2,7 @@
 #define StiKalmanTrackFinder_H 1
 
 #include "StiTrackFinder.h"
+#include "Exception.h"
 
 class StiDetector;
 class StiDectorContainer;
@@ -28,23 +29,29 @@ class StiKalmanTrackFinder : public StiTrackFinder
 
 private:
     //Local
-    int  findTrack(StiTrack * t);
+    int  findTrack(StiTrack * t) throw ( Exception);
     
-    bool followTrackAtNode(StiKalmanTrack * t, StiKalmanTrackNode * node);
-    bool propagateTrackAtNodeTo(StiKalmanTrack * t, 
-				StiKalmanTrackNode * node, 
-				StiDetector  * sDet,
-				StiDetector  * tDet);
-    bool exploreTrackAtNode(StiKalmanTrack * t, StiKalmanTrackNode * parentNode, StiKalmanTrackNode * workNode);
-    bool followBestTrackAtNode(StiKalmanTrack * t, StiKalmanTrackNode * node, StiKalmanTrackNode * wNode);
+    void fitInward(StiKalmanTrackNode * node) throw (Exception) ;
+    void fitOutward(StiKalmanTrackNode * node) throw (Exception) ;
+
+    void followTrackAtNode(StiKalmanTrackNode * node) throw (Exception) ;
+    int  propagate(StiKalmanTrackNode * node, 
+				     StiDetector  * sDet,
+				     StiDetector  * tDet) throw ( Exception) ; 
+    void exploreNode(StiKalmanTrackNode * sNode,
+				       StiKalmanTrackNode * tNode) throw (Exception) ; 
+
+    void updateNode(StiKalmanTrackNode * node, double chisq) throw ( Exception) ; 
+    void followBestNode(StiKalmanTrackNode * sNode, 
+			StiKalmanTrackNode * tNode) throw ( Exception);
     
-    double getPredictedChi2(const StiKalmanTrackNode * node, const StiHit *hit) const ;
+    double evaluateChi2(const StiKalmanTrackNode * node, 
+			const StiHit *hit) const  throw ( Exception);
     
-    StiKalmanTrackNode * updateTrackAtNode(StiKalmanTrackNode * node, StiKalmanTrackNode * wNode, StiHit * hit, double chisq);
-    int rotate(StiKalmanTrackNode * node, double alpha);
+    void rotate(StiKalmanTrackNode * node, double alpha)  throw ( Exception);
     void removeNodeFromTrack(StiKalmanTrackNode * node, StiKalmanTrack* track);
     void pruneNodes(StiKalmanTrackNode * node);
-    StiKalmanTrackNode * findBestBranch(StiKalmanTrackNode * node);
+    StiKalmanTrackNode * findBestBranch(StiKalmanTrackNode * node) throw ( Exception);
     bool extendToMainVertex(StiKalmanTrackNode * node);
     void   setMassHypothesis(double m) { massHypothesis=m;};
     double getMassHypothesis()         { return massHypothesis;};
