@@ -1,6 +1,9 @@
-// $Id: StFtpcChargeStep.cc,v 1.7 2001/04/02 12:10:08 jcs Exp $
+// $Id: StFtpcChargeStep.cc,v 1.8 2001/04/19 12:18:57 jcs Exp $
 //
 // $Log: StFtpcChargeStep.cc,v $
+// Revision 1.8  2001/04/19 12:18:57  jcs
+// change pRadius to pradius to remove warning on Sun
+//
 // Revision 1.7  2001/04/02 12:10:08  jcs
 // get FTPC calibrations,geometry from MySQL database and code parameters
 // from StarDb/ftpc
@@ -266,7 +269,7 @@ int StFtpcChargeStep::histogram(int setPressure)
 }
 
 
-int StFtpcChargeStep::calcpadtrans(double *pRadius)
+int StFtpcChargeStep::calcpadtrans(double *pradius)
 {
   int i, j, v_buf, padrow;
   double t_last, t_next, r_last, r_next, e_now, v_now, psi_now;
@@ -286,7 +289,7 @@ int StFtpcChargeStep::calcpadtrans(double *pRadius)
       t_last=0;
       v_buf=0;
       r_last=mDb->sensitiveVolumeOuterRadius();
-      pRadius[padrow]=mDb->sensitiveVolumeOuterRadius();
+      pradius[padrow]=mDb->sensitiveVolumeOuterRadius();
       e_now = mDb->radiusTimesField() / (0.5*r_last);
       for(j=v_buf; j<mDb->numberOfMagboltzBins() 
 	    && mDb->magboltzEField(j) < e_now; j++);
@@ -348,7 +351,7 @@ int StFtpcChargeStep::calcpadtrans(double *pRadius)
 	  
 	  /* correct r_next: */
 	  r_next = r_last - v_now * step_size *mDb->microsecondsPerTimebin();
-	  pRadius[padrow+(i+1)]=r_next;
+	  pradius[padrow+(i+1)]=r_next;
 	  t_last=t_next;
 	  r_last=r_next;
 	}
