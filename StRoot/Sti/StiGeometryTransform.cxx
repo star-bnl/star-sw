@@ -519,6 +519,10 @@ void StiGeometryTransform::operator() (const StiHit* stihit, StSsdHit* ssdhit){
 
 void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
                                        StPhysicalHelix *pHelix){
+#ifndef ST_NO_NAMESPACES
+using namespace units;
+#endif
+
   // thanks to StPhysicalHelix constructor, this is easy.
 
   // first, calculate the helix origin in global coords
@@ -539,39 +543,43 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
   *pHelix = StPhysicalHelix(momentum*GeV, origin*GeV, 
                             dField*tesla, dCharge*eplus);
 
-/*
+/* This is the old way, gives same results:
+
   // dip angle & curvature easy
-  *(Messenger::instance(MessageType::kGeometryMessage)) << "tanDip=" << pTrackNode->fP4 << endl;
+  //*(Messenger::instance(MessageType::kGeometryMessage)) 
+  //<< "tanDip=" << pTrackNode->fP4 << endl;
   double dDip = atan(pTrackNode->fP4);
-  *(Messenger::instance(MessageType::kGeometryMessage)) << "dip=" << dDip << endl;
-  double dCurvature = pTrackNode->fP3;
+  //*(Messenger::instance(MessageType::kGeometryMessage))
+  //<< "dip=" << dDip << endl;
+  double dCurvature = fabs(pTrackNode->fP3);
+  int iH = (pTrackNode->fP3 > 0) ? 1 : -1;
 
   // now calculate azimuthal angle of the helix origin wrt the helix axis
   // in _local_ coordinates.
-  double dDeltaX = pTrackNode->fX - pTrackNode->fP2/dCurvature;
-  double dDeltaY = sqrt(1./(dCurvature*dCurvature) - dDeltaX*dDeltaX) *
-      (dCurvature>0 ? -1 : 1); // sign(curvature) == -sign(Y-Y0)
-  // *(Messenger::instance(MessageType::kGeometryMessage)) << "deltaX=" << dDeltaX << ", deltaY=" << dDeltaY << endl;
-  double dPhi = atan2( dDeltaY, dDeltaX); // in [0,2pi]
+  double dDeltaX = pTrackNode->fX - pTrackNode->fP2/pTrackNode->fP3;
+  double dDeltaY = -sqrt(1./(dCurvature*dCurvature) - dDeltaX*dDeltaX) * iH;
+  *(Messenger::instance(MessageType::kGeometryMessage))
+      << "deltaX=" << dDeltaX << ", deltaY=" << dDeltaY << endl;
+  double dPhi = atan2( dDeltaY, dDeltaX); // in [-pi,pi]
   // now change to global coords
   dPhi -= pTrackNode->fAlpha;
   while(dPhi <  -M_PI){ dPhi += 2.*M_PI; };
   while(dPhi >=  M_PI){ dPhi -= 2.*M_PI; };
   // *(Messenger::instance(MessageType::kGeometryMessage)) << "phi=" << dPhi << endl;
 
-  // finally, need the sense of rotation.  Here we need the fact that
-  // the track model assumes outward tracks (positive local x coord of mtm).
-  int iH = dCurvature>0 ? 1 : -1;
+  StHelix *pHelix2 = new StHelix( fabs(dCurvature), dDip, dPhi, origin, iH );
 
-  pHelix->setParameters( fabs(dCurvature), dDip, dPhi, origin, iH );
-
-  *(Messenger::instance(MessageType::kGeometryMessage)) << "StHelix: x0=" << pHelix->x(0)
-       << ", y0=" << pHelix->y(0)
-       << ", z0=" << pHelix->z(0)
-       << ", c=" << pHelix->curvature()
-       << ", phi0=" << pHelix->phase()
-       << ", dip=" << pHelix->dipAngle()
-       << ", h=" << pHelix->h() << endl;
+  *(Messenger::instance(MessageType::kGeometryMessage)) 
+      << "StHelix:         origin=" << pHelix2->origin() << endl
+      << "StPhysicalHelix: origin=" << pHelix->origin() << endl
+      << "StHelix:         curvature=" << pHelix2->curvature() << endl
+      << "StPhysicalHelix: curvature=" << pHelix->curvature() << endl
+      << "StHelix:         phase=" << pHelix2->phase() << endl
+      << "StPhysicalHelix: phase=" << pHelix->phase() << endl
+      << "StHelix:         dipAngle=" << pHelix2->dipAngle() << endl
+      << "StPhysicalHelix: dipAngle=" << pHelix->dipAngle() << endl
+      << "StHelix:         h=" << pHelix2->h() << endl
+      << "StPhysicalHelix: h=" << pHelix->h() << endl;
 */
 }
 
