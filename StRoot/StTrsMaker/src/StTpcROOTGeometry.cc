@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcROOTGeometry.cc,v 1.1 1999/03/23 03:39:22 lasiuk Exp $
+ * $Id: StTpcROOTGeometry.cc,v 1.2 1999/04/07 00:48:00 lasiuk Exp $
  *
  * Author: brian May March 22, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcROOTGeometry.cc,v $
+ * Revision 1.2  1999/04/07 00:48:00  lasiuk
+ * add z offset for driftLength
+ *
  * Revision 1.1  1999/03/23 03:39:22  lasiuk
  * Initial Revsion
  *
@@ -28,59 +31,61 @@ StTpcROOTGeometry::StTpcROOTGeometry() { /* nopt */ }
 
 StTpcROOTGeometry::StTpcROOTGeometry(geometryDataSet* dS)
 {
-    mPadRows = dS->padRows;
-    mInnerPadRows = dS->innerPadRows;
+    mPadRows        = dS->padRows;
+    mInnerPadRows   = dS->innerPadRows;
     mInnerPadRows48 = dS->innerPadRows48;
     mInnerPadRows52 = dS->innerPadRows52;
-    mOuterPadRows = dS->outerPadRows;
-    mTimeBuckets = dS->timeBuckets;
-    mSectors = dS->sectors;
-    mIfcRadius = dS->ifcRadius;
-    mOfcRadius = dS->ofcRadius;
-    mEndCapZ = dS->endCapZ;
-    mInnerSectorPadWidth = dS->innerSectorPadWidth;
-    mInnerSectorPadLength = dS->innerSectorPadLength;
-    mInnerSectorPadPitch = dS->innerSectorPadPitch;
-    mInnerSectorRowPitch1 = dS->innerSectorRowPitch1;
-    mInnerSectorRowPitch2 = dS->innerSectorRowPitch2;
-    mFirstPadRow = dS->firstPadRow;
+    mOuterPadRows   = dS->outerPadRows;
+    mTimeBuckets    = dS->timeBuckets;
+    mSectors        = dS->sectors;
+    mIfcRadius      = dS->ifcRadius;
+    mOfcRadius      = dS->ofcRadius;
+    mEndCapZ        = dS->endCapZ;
+    mInnerSectorPadWidth    = dS->innerSectorPadWidth;
+    mInnerSectorPadLength   = dS->innerSectorPadLength;
+    mInnerSectorPadPitch    = dS->innerSectorPadPitch;
+    mInnerSectorRowPitch1   = dS->innerSectorRowPitch1;
+    mInnerSectorRowPitch2   = dS->innerSectorRowPitch2;
+    mFirstPadRow            = dS->firstPadRow;
     mFirstOuterSectorPadRow = dS->firstOuterSectorPadRow;
-    mLastOuterSectorPadRow= dS->lastOuterSectorPadRow;
-    mFirstRowWidth = dS->firstRowWidth;
-    mLastRowWidth = dS->lastRowWidth;
-    mOuterSectorPadWidth = dS->outerSectorPadWidth;
-    mOuterSectorPadLength = dS->outerSectorPadLength;
-    mOuterSectorPadPitch = dS->outerSectorPadPitch;
-    mOuterSectorRowPitch = dS->outerSectorRowPitch;
-    mOuterSectorLength = dS->outerSectorLength;
-    mIoSectorSeparation = dS->ioSectorSeparation;
+    mLastOuterSectorPadRow  = dS->lastOuterSectorPadRow;
+    mFirstRowWidth          = dS->firstRowWidth;
+    mLastRowWidth           = dS->lastRowWidth;
+    mOuterSectorPadWidth    = dS->outerSectorPadWidth;
+    mOuterSectorPadLength   = dS->outerSectorPadLength;
+    mOuterSectorPadPitch    = dS->outerSectorPadPitch;
+    mOuterSectorRowPitch    = dS->outerSectorRowPitch;
+    mOuterSectorLength      = dS->outerSectorLength;
+    mIoSectorSeparation     = dS->ioSectorSeparation;
     
-    mFrischGrid = dS->frischGrid;
-    mDriftDistance = dS->maximumDriftDistance;
-	
-    mAnodeWirePitch = dS->anodeWirePitch;
-    mFrischGridWirePitch = dS->frischGridWirePitch;
-    mGateWirePitch = dS->gateWirePitch;
-    mAnodeWireRadius = dS->anodeWireRadius;
+    mFrischGrid           = dS->frischGrid;
+    mDriftDistance        = dS->maximumDriftDistance;
+    mInnerSectorzOffSet   = dS->innerSectorzOffSet;
+    mOuterSectorzOffSet   = dS->outerSectorzOffSet;
+    
+    mAnodeWirePitch       = dS->anodeWirePitch;
+    mFrischGridWirePitch  = dS->frischGridWirePitch;
+    mGateWirePitch        = dS->gateWirePitch;
+    mAnodeWireRadius      = dS->anodeWireRadius;
     mFrischGridWireRadius = dS->frischGridWireRadius;
-    mGateWireRadius = dS->gateWireRadius;
+    mGateWireRadius       = dS->gateWireRadius;
 	
-    mInnerSectorAnodeWirePadPlaneSeparation = dS->iSAnodeWirePadPlaneSeparation;
+    mInnerSectorAnodeWirePadPlaneSeparation  = dS->iSAnodeWirePadPlaneSeparation;
     mInnerSectorFrischGridPadPlaneSeparation = dS->iSFrischGridPadPlaneSeparation;
     mInnerSectorGatingGridPadPlaneSeparation = dS->iSGatingGridPadPlaneSeparation;
-    mOuterSectorAnodeWirePadPlaneSeparation = dS->oSAnodeWirePadPlaneSeparation;
+    mOuterSectorAnodeWirePadPlaneSeparation  = dS->oSAnodeWirePadPlaneSeparation;
     mOuterSectorFrischGridPadPlaneSeparation = dS->oSFrischGridPadPlaneSeparation;
     mOuterSectorGatingGridPadPlaneSeparation = dS->oSGatingGridPadPlaneSeparation;
 	
-    mFirstInnerSectorAnodeWire = dS->firstInnerSectorAnodeWire;
-    mLastInnerSectorAnodeWire = dS->lastInnerSectorAnodeWire;
+    mFirstInnerSectorAnodeWire     = dS->firstInnerSectorAnodeWire;
+    mLastInnerSectorAnodeWire      = dS->lastInnerSectorAnodeWire;
     mNumberOfInnerSectorAnodeWires = dS->numberOfInnerSectorAnodeWires;
 
-    mFirstOuterSectorAnodeWire = dS->firstOuterSectorAnodeWire;
-    mLastOuterSectorAnodeWire = dS->lastOuterSectorAnodeWire;
+    mFirstOuterSectorAnodeWire     = dS->firstOuterSectorAnodeWire;
+    mLastOuterSectorAnodeWire      = dS->lastOuterSectorAnodeWire;
     mNumberOfOuterSectorAnodeWires = dS->numberOfOuterSectorAnodeWires;
-    mInnerSectorEdge = dS->innerSectorEdge;
-    mOuterSectorEdge = dS->outerSectorEdge;
+    mInnerSectorEdge               = dS->innerSectorEdge;
+    mOuterSectorEdge               = dS->outerSectorEdge;
 
     // should be assign --- not supported by egcs 1.0.2
     //mPadsInRow.assign(mPadRows);
@@ -143,6 +148,10 @@ StTpcROOTGeometry::StTpcROOTGeometry(geometryDataSet* dS)
     
     mFrischGrid            *= millimeter;
     mDriftDistance         *= millimeter;
+    mInnerSectorzOffSet    *= millimeter;
+    mOuterSectorzOffSet    *= millimeter;
+
+    
     for(ii=0; ii<mRadialDistanceAtRow.size(); ii++)
 	mRadialDistanceAtRow[ii] *= millimeter;
 
@@ -294,6 +303,8 @@ void StTpcROOTGeometry::print(ostream& os) const
     os << "ofcRadius              = " << mOfcRadius/millimeter              << " mm" << endl;
     os << "endCapZ                = " << mEndCapZ/millimeter                << " mm" << endl;
     os << "DriftDistance          = " << mDriftDistance/millimeter          << " mm" << endl;
+    os << "innerSectorzOffSet = " << mInnerSectorzOffSet/millimeter    << " mm"  << endl;
+    os << "outerSectorzOffSet = " << mOuterSectorzOffSet/millimeter    << " mm"  << endl;
     os << "\nPads & Rows:" << endl;
     os << "innerSectorPadWidth    = " << mInnerSectorPadWidth/millimeter    << " mm" << endl;
     os << "innerSectorPadLength   = " << mInnerSectorPadLength/millimeter   << " mm" << endl;

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcSimpleGeometry.hh,v 1.2 1998/12/15 11:20:38 lasiuk Exp $
+ * $Id: StTpcSimpleGeometry.hh,v 1.3 1999/04/07 00:47:50 lasiuk Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -12,6 +12,9 @@
  **********************************************************************
  *
  * $Log: StTpcSimpleGeometry.hh,v $
+ * Revision 1.3  1999/04/07 00:47:50  lasiuk
+ * add z offset for driftLength
+ *
  * Revision 1.2  1998/12/15 11:20:38  lasiuk
  * add i/o sector spacing = 3 mm
  *
@@ -121,7 +124,9 @@ public:
     double ifcRadius()                  const;
     double ofcRadius()                  const;
     double frischGrid()                 const;
-    
+    double innerSectorzOffSet()         const;
+    double outerSectorzOffSet()         const;
+
     bool   acceptance(StThreeVector<StDouble>&) const;
 
     // Diagnostic: print out complete database
@@ -168,6 +173,8 @@ private:
     
     double mFrischGrid;
     double mDriftDistance;
+    double mInnerSectorzOffSet;
+    double mOuterSectorzOffSet;
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<int> mPadsInRow;
     vector<double> mRadialDistanceAtRow;
@@ -224,6 +231,8 @@ inline double StTpcSimpleGeometry::endCapZ()    const {return (mEndCapZ);}
 inline double StTpcSimpleGeometry::driftDistance() const {return (mDriftDistance);}
 inline double StTpcSimpleGeometry::ifcRadius()    const {return (mIfcRadius);}
 inline double StTpcSimpleGeometry::ofcRadius()    const {return (mOfcRadius);}
+inline double StTpcSimpleGeometry::innerSectorzOffSet() const {return mInnerSectorzOffSet;}
+inline double StTpcSimpleGeometry::outerSectorzOffSet() const {return mOuterSectorzOffSet;}
 
 // Wires
 inline double StTpcSimpleGeometry::anodeWireRadius() const {return mAnodeWireRadius;}

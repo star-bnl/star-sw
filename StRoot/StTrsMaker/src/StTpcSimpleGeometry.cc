@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleGeometry.cc,v 1.3 1999/03/15 13:46:54 lasiuk Exp $
+ * $Id: StTpcSimpleGeometry.cc,v 1.4 1999/04/07 00:48:00 lasiuk Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleGeometry.cc,v $
+ * Revision 1.4  1999/04/07 00:48:00  lasiuk
+ * add z offset for driftLength
+ *
  * Revision 1.3  1999/03/15 13:46:54  lasiuk
  * do not use mIoSectorSpacing; use separation instead
  *
@@ -87,6 +90,8 @@ StTpcSimpleGeometry::StTpcSimpleGeometry(const char* file)
     StGetConfigValue(file,"outerSectorLength",mOuterSectorLength);
     StGetConfigValue(file,"ioSectorSeparation",mIoSectorSeparation);
     StGetConfigValue(file,"frischGrid",mFrischGrid);
+    StGetConfigValue(file,"innerSectorzOffSet",mInnerSectorzOffSet);
+    StGetConfigValue(file,"outerSectorzOffSet",mOuterSectorzOffSet);
     StGetConfigValue(file,"maximumDriftDistance",mDriftDistance);
 
     StGetConfigValue(file,"anodeWirePitch",mAnodeWirePitch);
@@ -173,6 +178,9 @@ StTpcSimpleGeometry::StTpcSimpleGeometry(const char* file)
     
     mFrischGrid            *= millimeter;
     mDriftDistance         *= millimeter;
+    mInnerSectorzOffSet    *= millimeter;
+    mOuterSectorzOffSet    *= millimeter;
+    
     for(ii=0; ii<mRadialDistanceAtRow.size(); ii++)
 	mRadialDistanceAtRow[ii] *= millimeter;
 
@@ -324,6 +332,8 @@ void StTpcSimpleGeometry::print(ostream& os) const
     os << "ofcRadius              = " << mOfcRadius/millimeter              << " mm" << endl;
     os << "endCapZ                = " << mEndCapZ/millimeter                << " mm" << endl;
     os << "DriftDistance          = " << mDriftDistance/millimeter          << " mm" << endl;
+    os << "innerSectorzOffSet = " << mInnerSectorzOffSet/millimeter    << " mm"  << endl;
+    os << "outerSectorzOffSet = " << mOuterSectorzOffSet/millimeter    << " mm"  << endl;
     os << "\nPads & Rows:" << endl;
     os << "innerSectorPadWidth    = " << mInnerSectorPadWidth/millimeter    << " mm" << endl;
     os << "innerSectorPadLength   = " << mInnerSectorPadLength/millimeter   << " mm" << endl;
