@@ -26,14 +26,14 @@ my $prodSr = "P00hi";
 
 my @Sets = (
 #             "2000/06",
-#             "2000/07",
+             "2000/07",
              "2000/08",
              "2000/09",
 );
 
 my @DirD = (
-#            "P00hg/2000/06",
-#            "P00hg/2000/07",
+#            "P00hi/2000/06",
+            "P00hi/2000/07",
             "P00hi/2000/08",
             "P00hi/2000/09",
 	  );
@@ -76,15 +76,6 @@ my $debugOn = 0;
 
 my $topHpssReco  =  "/home/starreco/reco";
 my $DISK1 = "/star/rcf/disk00001/star";
-
-my @DISKR = (
-#              "/star/rcf/data09/reco",
-#              "/star/rcf/data10/reco",
-#              "/star/rcf/data05/reco",
-#              "/star/rcf/data08/reco",
-              "/star/rcf/data03/reco",
-              "/star/rcf/disk00001/star/reco",
-); 
 
 my %monthHash = (
 		 "Jan" => 1,
@@ -162,7 +153,7 @@ my $jbSt = "n\/a";
 for( $ll = 0; $ll<scalar(@Sets); $ll++) {
   $hpssRecoDirs[$ll] = $topHpssReco . "/" . $prodSr . "/" . $Sets[$ll] ;
   }
-my $ftpHpss = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>200)
+my $ftpHpss = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>400)
   or die "HPSS access failed";
 $ftpHpss->login("starsink","MockData") or die "HPSS access failed";
 
@@ -176,68 +167,6 @@ $ftpHpss->quit();
 my $maccess; 
  my $mdowner;
  my $flname;
-my $nDiskFiles = 0;
-my @diskRecoDirs;
-my $ndir = 0;
-
-print "\nFinding reco files in disk\n";
-
- for( $kk = 0; $kk<scalar(@DISKR); $kk++)  { 
- for( $ll = 0; $ll<scalar(@Sets); $ll++) {
-   $diskRecoDirs[$ndir] = $DISKR[$kk] . "/" . $prodSr . "/" . $Sets[$ll];
-   print "diskRecotDir: $diskRecoDirs[$ndir]\n";
-   $ndir++;   
- }
-}
-
-my $dflag;
-
-foreach $diskDir (@diskRecoDirs) {
-  print "diskRecoDir: ", $diskDir, "\n";
-  if (-d $diskDir) {
-  opendir(DIR, $diskDir) or die "can't open $diskDir\n";
-  while( defined($flname = readdir(DIR)) ) {
-     next if $flname =~ /^\.\.?$/;
-     next if $flname =~ /geant.root/;
-
-        $maccess = "-rw-r--r--"; 
-        $mdowner = "starreco";
-     $fullname = $diskDir."/".$flname;
-#    print "Name :", $fullname, "\n";
-
-    ($size, $mTime) = (stat($fullname))[7, 9];
-    ($sec,$min,$hr,$dy,$mo,$yr) = (localtime($mTime))[0,1,2,3,4,5];
-    $mo = sprintf("%2.2d", $mo+1);
-    $dy = sprintf("%2.2d", $dy);
-  
-    if( $yr > 98 ) {
-      $fullyear = 1900 + $yr;
-    } else {
-      $fullyear = 2000 + $yr;
-    }
-
-
-    $timeS = sprintf ("%4.4d%2.2d%2.2d",
-                      $fullyear,$mo,$dy);
-#  print "File Name = ", $flname, "\n";
-    $dflag = 1;    
-
-    $fObjAdr = \(FileAttr->new());
-    ($$fObjAdr)->filename($flname);
-    ($$fObjAdr)->fpath($diskDir);
-    ($$fObjAdr)->size($size);
-    ($$fObjAdr)->timeS($timeS);
-    ($$fObjAdr)->faccess($maccess);
-    ($$fObjAdr)->fowner($mdowner);
-    ($$fObjAdr)->iflag($dflag); 
-    $hpssRecoFiles[$nHpssFiles] = $fObjAdr;
-   $nHpssFiles++;
-   $nDiskFiles++;
-  }
-closedir DIR;
-}
-}
-print "Total reco files: $nDiskFiles\n";
 
 
 ###### Find reco files in FileCatalog
@@ -273,7 +202,7 @@ print "Total reco files: $nDiskFiles\n";
 
 ### select reco files status from JobStatus
 
- $sql="SELECT JobID, prodSeries, jobfileName, sumFileName, sumFileDir, jobStatus, NoEvents, CPU_per_evt_sec FROM $JobStatusT WHERE JobID like '%$prodSr%' AND jobfileName like 'P00h%' AND jobStatus <> 'n/a'";
+ $sql="SELECT JobID, prodSeries, jobfileName, sumFileName, sumFileDir, jobStatus, NoEvents, CPU_per_evt_sec FROM $JobStatusT WHERE JobID like '%$prodSr%' AND jobfileName like 'P00hi%' AND jobStatus <> 'n/a'";
 
   $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
@@ -546,10 +475,13 @@ my $mName;
    if( $fullName =~ /$topHpss/) {
     $jbFile = $trk[4] ."_" . $trk[5] ."_" . $trk[6];    
    }
-  elsif (  $fullName =~ /$topDisk/) { 
+  elsif (  $fullName =~ /$topDisk/ && $fullName =~ /data0/ ) { 
      $jbFile = $trk[5] ."_" . $trk[6] ."_" . $trk[7];        
    }     
-  
+  elsif ($fullName =~ /$topDisk/ && $fullName =~ /disk00001/ ) {
+     $jbFile = $trk[6] ."_" . $trk[7] ."_" . $trk[8];        
+   }      
+
    if( $gflag != 0 ) {
 #print "File name to be inserted :",$fullName, "\n"; 
     foreach my $jobnm (@jobFSum_set){
@@ -565,6 +497,7 @@ my $mName;
       $jfile =~ s/.sum//g;
 
        if ($mfName =~ /$jfile/ and $mjobFname =~ /$jbFile/) {
+  print "JobFileName :", $jbFile, "\n";
   if ( $gflag == 1) {
 
    print "Files to be inserted :", "\n"; 
@@ -828,7 +761,7 @@ foreach my $runDsc (@runDescr) {
   
     $sql="update $FileCatalogT set ";   
     $sql.="dataset='$mdataset'";
-    $sql.=" WHERE runID = '$mrunID' AND fName like '%root' and path like '%P00hf%' "; 
+    $sql.=" WHERE runID = '$mrunID' AND fName like '%root' and path like '%$prodSr%' "; 
     print "$sql\n" if $debugOn;
     $rv = $dbh->do($sql) || die $dbh->errstr;
   
