@@ -17,6 +17,7 @@ A ladder is made of :
 
 class StSsdWafer;
 class St_ssdWafersPosition;
+class ssdWafersPosition_st;
 
 class StSsdLadder
 {
@@ -25,6 +26,7 @@ class StSsdLadder
  ~StSsdLadder();
 
   void  initWafers(St_ssdWafersPosition *wafpos);
+  void  initWafers(ssdWafersPosition_st *position);
   int  getLadderNumb();
   int  getWaferPerLadder();
   void debugUnPeu (int monwafer);

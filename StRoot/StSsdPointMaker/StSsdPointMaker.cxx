@@ -3,6 +3,9 @@
  **************************************************************************
  *
  * $Log: StSsdPointMaker.cxx,v $
+ * Revision 1.3  2004/08/13 07:07:23  croy
+ * Updates to read SSD databases
+ *
  * Revision 1.2  2004/07/20 14:04:02  croy
  * Use of new database structure definitions related to SSD config
  *
@@ -22,6 +25,10 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StMessMgr.h"
+
+#include "StDbLib/StDbManager.hh"                      // Database Libraries
+#include "StDbLib/StDbConfigNode.hh"                   //
+#include "StDbLib/StDbTable.h"                         //
 
 #include "StSsdBarrel.hh"
 #include "StSsdLadder.hh"
@@ -62,73 +69,124 @@ StSsdPointMaker::~StSsdPointMaker(){
 }
 //_____________________________________________________________________________
 Int_t StSsdPointMaker::Init(){
-  if (Debug())  gMessMgr->Debug() << "In StSsdPointMaker::Init() ... "
-                               << GetName() << endm;
+  gMessMgr->Info() << " In StSsdPointMaker::init() - " << endm;
 
+  // database readout 
+  gMessMgr->Info() << " Trying to access to databases " << endm;
 
+  mDbMgr = StDbManager::Instance();
+  mDbMgr -> setVerbose(false);             // set Verbose mode for debug
 
+  //-> connect to the db & get an empty container
+  maccess    = mDbMgr -> initConfig(dbGeometry,dbSsd);
+  if (maccess) 
+    {
+      gMessMgr->Info() << "SSD Databases respond " << endm;
+      StDbTable* slsCtrlTable = maccess -> addDbTable("slsCtrl");
+      mDbMgr->fetchDbTable(slsCtrlTable);
+      slsCtrl_st *control  = (slsCtrl_st*) slsCtrlTable->GetTable();
+      if (!control) 
+	gMessMgr->Error() << "No  access to slsCtrl table" << endm;
+      else
+	{
+	  mDynamicControl = new StSsdDynamicControl();
+	  mDynamicControl -> setNElectronInAMip(control->nElectronInAMip);
+	  mDynamicControl -> setADCDynamic(control->adcDynamic);
+	  mDynamicControl -> setA128Dynamic(control->a128Dynamic);
+	  mDynamicControl -> setNBitEncoding(control->nbitEncoding);
+	  mDynamicControl -> setNStripInACluster(control->nstripInACluster);
+	  mDynamicControl -> setPairCreationEnergy(control->pairCreationEnergy);
+	  mDynamicControl -> setParDiffP(control->parDiffP);
+	  mDynamicControl -> setParDiffN(control->parDiffN);
+	  mDynamicControl -> setParIndRightP(control->parIndRightP);
+	  mDynamicControl -> setParIndRightN(control->parIndRightN);
+	  mDynamicControl -> setParIndLeftP(control->parIndLeftP);
+	  mDynamicControl -> setParIndLeftN(control->parIndLeftN);
+	  mDynamicControl -> setDAQCutValue(control->daqCutValue);
+	  mDynamicControl -> printParameters();
+	}
 
+      StDbTable* clusterCtrlTable = maccess -> addDbTable("clusterControl");
+      mDbMgr->fetchDbTable(clusterCtrlTable);
+      clusterControl_st *clusterCtrl  = (clusterControl_st*) clusterCtrlTable->GetTable() ;
+      if (!clusterCtrl) 
+	gMessMgr->Error() << "No  access to clusterControl table" << endm;
+      else 
+	{
+	  mClusterControl = new StSsdClusterControl();
+	  //	  mClusterControl -> setHighCut(clusterCtrl->highCut);  
+	  mClusterControl -> setHighCut(3);  
+	  mClusterControl -> setTestTolerance(clusterCtrl->testTolerance);
+	  mClusterControl -> setClusterTreat(clusterCtrl->clusterTreat);
+	  mClusterControl -> setAdcTolerance(clusterCtrl->adcTolerance);
+	  mClusterControl -> setMatchMean(clusterCtrl->matchMean);
+	  mClusterControl -> setMatchSigma(clusterCtrl->matchSigma);
+	  mClusterControl -> printParameters();
+	}      
+      // to be replace by database reading when it will be filled.....
+      St_DataSet *svtparams = GetInputDB("svt");
+      St_DataSetIter       local(svtparams);
+      m_noise2       = (St_ssdStripCalib     *)local("ssd/ssdStripCalib");
+    }
+  else // No access to databases -> read tables
+    {
+      // 		Create tables
+      gMessMgr->Info() << " No access to databases so ...read tables" << endm;
+      St_DataSet *svtparams = GetInputDB("svt");
+      St_DataSetIter       local(svtparams);
+      m_condition_db = (St_sdm_condition_db  *)local("ssd/sdm_condition_db");
+      m_noise        = (St_sdm_calib_db      *)local("ssd/sdm_calib_db");
+      m_configuration= (St_ssdConfiguration  *)local("ssd/ssdConfiguration");
+      m_wafpos       = (St_ssdWafersPosition *)local("ssd/ssdWafersPosition");
+      m_noise2       = (St_ssdStripCalib     *)local("ssd/ssdStripCalib");
+      m_dimensions   = (St_ssdDimensions     *)local("ssd/ssdDimensions");
 
-  // A GARDER POUR UNE LECTURE DIRECTE EN DB PLUS TARD
-//   St_DataSet *mondataset = GetInputDB("Geometry/");
-//   St_DataSetIter       moniterateur(mondataset);
-//   St_slsCtrl      *monessai;
-//   monessai     = (St_slsCtrl      *)moniterateur("slsCtrl");
+      St_slsCtrl *control;
+      control = (St_slsCtrl *)local("ssd/slsCtrl");
+      if (!control) {
+	gMessMgr->Error() << "No  access to slsCtrl table" << endm;
+      }  
+
+      St_clusterControl  *clusterCtrl;
+      clusterCtrl = (St_clusterControl *)local("ssd/clusterControl");
+      if (!clusterCtrl) {
+	gMessMgr->Error() << "No  access to clusterControl table" << endm;
+      }   
+      if (!m_condition_db) {
+	gMessMgr->Error() << "No  access to condition database" << endm;
+      }   
+      if (!m_noise) {
+	gMessMgr->Error() << "No  access to noise condition" << endm;
+      }
+      if (!m_dimensions) {
+	gMessMgr->Error() << "No  access to ssdDimensions table" << endm;
+      }
+      if (!m_configuration) {
+	gMessMgr->Error() << "No  access to ssdConfiguration table" << endm;
+      }
+      if (!m_wafpos) {
+	gMessMgr->Error() << "No  access to ssdWafersPosition table" << endm;
+      }
+
+      // Replace tables for dynamic parameters with default values
+      mDynamicControl = new StSsdDynamicControl(control);
+      mDynamicControl->printParameters();
+      // Replace tables for control parameters
+      mClusterControl = new StSsdClusterControl(clusterCtrl);
+      mClusterControl->setHighCut(3);
+      mClusterControl->printParameters();
+      // End of Setting Cluster Control parameters
+      if ((!mDynamicControl)||(!mClusterControl)) {
+	gMessMgr->Error() << "No  access to control parameters" << endm;
+      } 
+    }
   
-  // 		Create tables
-  St_DataSet *svtparams = GetInputDB("svt");
-  St_DataSetIter       local(svtparams);
-  m_condition_db = (St_sdm_condition_db  *)local("ssd/sdm_condition_db");
-  m_noise        = (St_sdm_calib_db      *)local("ssd/sdm_calib_db");
-  m_dimensions   = (St_ssdDimensions     *)local("ssd/ssdDimensions");
-  m_configuration= (St_ssdConfiguration  *)local("ssd/ssdConfiguration");
-  m_wafpos       = (St_ssdWafersPosition *)local("ssd/ssdWafersPosition");
-  m_noise2       = (St_ssdStripCalib     *)local("ssd/ssdStripCalib");
- 
-  St_slsCtrl *control;
-  control = (St_slsCtrl *)local("ssd/slsCtrl");
-  if (!control) {
-    gMessMgr->Error() << "No  access to slsCtrl table" << endm;
-  }   
-  St_clusterControl  *clusterCtrl;
-  clusterCtrl = (St_clusterControl *)local("ssd/clusterControl");
-  if (!clusterCtrl) {
-    gMessMgr->Error() << "No  access to clusterControl table" << endm;
-  }   
-  if (!m_condition_db) {
-    gMessMgr->Error() << "No  access to condition database" << endm;
-  }   
-  if (!m_noise) {
-    gMessMgr->Error() << "No  access to noise condition" << endm;
-  }
-  if (!m_dimensions) {
-    gMessMgr->Error() << "No  access to ssdDimensions table" << endm;
-  }
-  if (!m_configuration) {
-    gMessMgr->Error() << "No  access to ssdConfiguration table" << endm;
-  }
-  if (!m_wafpos) {
-    gMessMgr->Error() << "No  access to ssdWafersPosition table" << endm;
-  }
-
-  // Replace tables for dynamic parameters with default values
-  mDynamicControl = new StSsdDynamicControl(control);
-  mDynamicControl->printParameters();
-  // Replace tables for control parameters
-  mClusterControl = new StSsdClusterControl(clusterCtrl);
-  mClusterControl->setHighCut(3);
-  mClusterControl->printParameters();
-  // End of Setting Cluster Control parameters
-  if ((!mDynamicControl)||(!mClusterControl)) {
-    gMessMgr->Error() << "No  access to control parameters" << endm;
-  } 
-
   // 		Create SCF histograms
   noisDisP = new TH1F("Noise_p","Noise Distribution",25,0,25);
   snRatioP = new TH1F("SN_p","Signal/Noise (p)",200,0,200);
   stpClusP = new TH1F("NumberOfStrips_p","Strips per Cluster",8,0,8);
   totChrgP = new TH1F("ChargeElectron_p","Total Cluster Charge",100,0,300000);
-
+  
   noisDisN = new TH1F("Noise_n","Noise Distribution",25,0,25);
   snRatioN = new TH1F("SN_n","Signal/Noise",200,0,200);
   stpClusN = new TH1F("NumberOfStrips_n","Strips per Cluster",8,0,8);
@@ -162,7 +220,6 @@ Int_t StSsdPointMaker::Make()
                                << GetName() << endm;
   // 		Create output tables
   Int_t res = 0; 
-  
   St_spa_strip *spa_strip = (St_spa_strip *)GetDataSet("spa_strip");
   if (!spa_strip){
     gMessMgr->Warning("StSsdPointMaker: no input (fired strip for the SSD)");
@@ -171,14 +228,29 @@ Int_t StSsdPointMaker::Make()
   
   St_scm_spt *scm_spt = new St_scm_spt("scm_spt",5000);
   m_DataSet->Add(scm_spt);
-
   mCurrentEvent = (StEvent*) GetInputDS("StEvent");
   if(mCurrentEvent) mSsdHitColl = mCurrentEvent->ssdHitCollection();
   else              mSsdHitColl = 0;
   
-  ssdDimensions_st  *dimensions = m_dimensions->GetTable();
-  ssdConfiguration_st  *configuration = m_configuration->GetTable();
-  if ((!dimensions)||(!configuration)){
+  StDbTable* configTable = maccess -> addDbTable("ssdConfiguration");
+  mDbMgr->fetchDbTable(configTable);
+  ssdConfiguration_st *config  = (ssdConfiguration_st*) configTable->GetTable() ;
+  if (!config) 
+    gMessMgr->Error() << "No  access to ssdConfiguration database" << endm;
+  
+  StDbTable* positionTable = maccess -> addDbTable("ssdWafersPosition");
+  mDbMgr->fetchDbTable(positionTable);
+  ssdWafersPosition_st *position  = (ssdWafersPosition_st*) positionTable->GetTable() ;
+  if (!position) 
+    gMessMgr->Error() << "No  access to ssdWafersPosition database" << endm;
+
+  StDbTable* dimensionsTable = maccess -> addDbTable("ssdDimensions");
+  mDbMgr->fetchDbTable(dimensionsTable);
+  ssdDimensions_st *dimensions  = (ssdDimensions_st*) dimensionsTable->GetTable() ;
+  if (!dimensions) 
+    gMessMgr->Error() << "No  access to ssdDimensions database" << endm;
+  
+  if ((!dimensions)||(!config)){
     gMessMgr->Error() << "No geometry or configuration parameters " << endm;
     return kStErr;
   }
@@ -186,8 +258,9 @@ Int_t StSsdPointMaker::Make()
   cout<<"#################################################"<<endl;
   cout<<"####     START OF NEW SSD POINT MAKER        ####"<<endl;
   cout<<"####        SSD BARREL INITIALIZATION        ####"<<endl;  
-  StSsdBarrel *mySsd = new StSsdBarrel(dimensions,configuration);
-  mySsd->initLadders(m_wafpos);
+  StSsdBarrel *mySsd = new StSsdBarrel(dimensions,config);
+  //mySsd->initLadders(m_wafpos); 
+  mySsd->initLadders(position);
   int stripTableSize = mySsd->readStripFromTable(spa_strip);
   cout<<"####        NUMBER OF SPA STRIPS "<<stripTableSize<<"        ####"<<endl;
   //  mySsd->writeNoiseToFile(spa_strip);

@@ -55,14 +55,16 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
   if (!pSsdDb_Reader)
     throw runtime_error("StiSsdDetectorBuilder::loadDb() - ERROR - pSsdDb_Reader==0");
   /*_______________________________________*/
-  St_ssdWafersPosition*  wafersPosition = pSsdDb_Reader->getWafersPosition() ;
+  //  St_ssdWafersPosition*  wafersPosition = pSsdDb_Reader->getWafersPosition() ;
+  ssdWafersPosition_st*  wafersPosition = pSsdDb_Reader->getWafersPosition() ;
   _geometry = pSsdDb_Reader->getGeometry(wafersPosition);
   if (_geometry) 
     gMessMgr->Info()<< "StiSsdDetectorBuilder : SSD Geometry loaded..."<<endm;
   else
     throw runtime_error("StiSsdDetectorBuilder::loadDb() - ERROR - _geometry==0");
   /*_______________________________________*/
-  St_ssdConfiguration*  ssdConfiguration = pSsdDb_Reader->getSsdConfiguration() ;
+  //  St_ssdConfiguration*  ssdConfiguration = pSsdDb_Reader->getSsdConfiguration() ;
+  ssdConfiguration_st*  ssdConfiguration = pSsdDb_Reader->getSsdConfiguration() ;
   _config = pSsdDb_Reader->getConfiguration(ssdConfiguration);
   if (_config) 
     gMessMgr->Info() <<"StiSsdDetectorBuilder : SSD Configuration loaded..." << endm;
@@ -70,7 +72,8 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
     throw runtime_error("StiSsdDetectorBuilder::loadDb() - ERROR - _config==0");
   /*_______________________________________*/
 
-  St_ssdDimensions*  ssdDimensions = pSsdDb_Reader->getSsdDimensions() ;
+  //  St_ssdDimensions*  ssdDimensions = pSsdDb_Reader->getSsdDimensions() ;
+  ssdDimensions_st*  ssdDimensions = pSsdDb_Reader->getSsdDimensions() ;
   _dimensions = pSsdDb_Reader->getDimensions(ssdDimensions);
   if (_dimensions) 
     gMessMgr->Info() <<"StiSsdDetectorBuilder : SSD Dimensions set..." << endm;

@@ -8,15 +8,15 @@ Basic constructor. The members are filled in the code
 StSsdClusterControl::StSsdClusterControl()
 {
   // Former scf_ctrl table
-  mHighCut       = 5.0;
-  mTestTolerance = 0.2;
+//   mHighCut       = 5.0;
+//   mTestTolerance = 0.2;
 
 
-  // Former scm_ctrl table
-  mClusterTreat  = 13;
-  mAdcTolerance  =  0.2;
-  mMatchMean     =  0.;
-  mMatchSigma    =  8.;
+//   // Former scm_ctrl table
+//   mClusterTreat  = 13;
+//   mAdcTolerance  =  0.2;
+//   mMatchMean     =  0.;
+//   mMatchSigma    =  8.;
 }
 /*!
 Constructor loading the parameters from the Db table
@@ -47,11 +47,11 @@ Printing the major parameters
  */
 void  StSsdClusterControl::printParameters(){
   cout<<"**** **** SSD Cluster Control Parameters **** ****"<<endl;
-  cout<<"**** HighCut = "<<this->getHighCut()<<"  ****"<<endl;
+  cout<<"**** HighCut       = "<<this->getHighCut()<<"  ****"<<endl;
   cout<<"**** TestTolerance = "<<this->getTestTolerance()<<"  ****"<<endl;
-  cout<<"**** ClusterTreat = "<<this->getClusterTreat()<<"  ****"<<endl;
-  cout<<"**** AdcTolerance = "<<this->getAdcTolerance()<<"  ****"<<endl;
-  cout<<"**** MatchMean = "<<this->getMatchMean()<<"  ****"<<endl;
-  cout<<"**** MatchSigma = "<<this->getMatchSigma()<<"  ****"<<endl;
+  cout<<"**** ClusterTreat  = "<<this->getClusterTreat()<<"  ****"<<endl;
+  cout<<"**** AdcTolerance  = "<<this->getAdcTolerance()<<"  ****"<<endl;
+  cout<<"**** MatchMean     = "<<this->getMatchMean()<<"  ****"<<endl;
+  cout<<"**** MatchSigma    = "<<this->getMatchSigma()<<"  ****"<<endl;
   cout<<"**************************************"<<endl;
 }

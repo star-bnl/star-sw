@@ -29,10 +29,10 @@
 /*!
 Constructor using the ssdDimensions_st and ssdConfiguration_st tables from the db
  */
-StSsdBarrel::StSsdBarrel(ssdDimensions_st  *dimensions, ssdConfiguration_st *configuration)
+StSsdBarrel::StSsdBarrel(ssdDimensions_st  *dimensions, ssdConfiguration_st *config)
 {
   mSsdLayer        = 7; // all layers : 1->7
-  mNLadder         = configuration[0].nMaxLadders;
+  mNLadder         = config[0].nMaxLadders;
   mNWaferPerLadder = dimensions[0].wafersPerLadder;
   mNStripPerSide   = dimensions[0].stripPerSide;
 
@@ -49,7 +49,6 @@ StSsdBarrel::~StSsdBarrel()
 
 void StSsdBarrel::debugUnPeu (int monladder, int monwafer)
 {
-  cout<<"Number of ladders : "<<this->getNumberOfLadders()<<endl;
   for (int i=0;i<this->getNumberOfLadders();i++)
     {
       if (this->mLadders[i]->getLadderNumb()==monladder) 
@@ -63,7 +62,14 @@ void StSsdBarrel::debugUnPeu (int monladder, int monwafer)
 void StSsdBarrel::initLadders(St_ssdWafersPosition *wafpos)
 {
   for (int iLad = 0; iLad < mNLadder; iLad++)
-    mLadders[iLad]->initWafers(wafpos);
+      mLadders[iLad]->initWafers(wafpos);
+}
+
+
+void StSsdBarrel::initLadders(ssdWafersPosition_st *position)
+{
+  for (int iLad = 0; iLad < mNLadder; iLad++)
+      mLadders[iLad]->initWafers(position);
 }
 
 // int StSsdBarrel::readDeadStripFromTable(table_head_st *condition_db_h, sdm_condition_db_st *condition_db)
@@ -229,6 +235,7 @@ int  StSsdBarrel::readNoiseFromTable(St_ssdStripCalib *strip_calib, StSsdDynamic
   return NumberOfNoise;
 //   return noise_h->nok;
 }
+
 
 int StSsdBarrel::readClusterFromTable(St_scf_cluster *scf_cluster)
 {

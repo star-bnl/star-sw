@@ -73,7 +73,7 @@ void StiSsdHitLoader::loadHits(StEvent* source,
 	    {
 	      if (!*it) throw runtime_error("StiSsdHitLoader::loadHits() - WARNING - *it==0");
 	      hit = static_cast<StSsdHit*>(*it);
-
+	      if (hit) cout << " Un hit existe " << endl;
 	      if (!hit) throw runtime_error("StiSsdHitLoader::loadHits() - WARNING - hit==0");
 
 	      int ssdLadder = hit->ladder();
