@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.34 2003/03/19 17:16:19 calderon Exp $
+// $Id: StAssociator.C,v 1.35 2004/03/26 23:29:02 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.35  2004/03/26 23:29:02  calderon
+// Added switch to control the id or distance association.
+//
 // Revision 1.34  2003/03/19 17:16:19  calderon
 // remove loading of StarRoot (it's loaded by default).
 //
@@ -182,6 +185,14 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
   // If you need to use L3 TRIGGER uncomment the line:
   // associator->useL3Trigger();
   //associator->SetDebug();
+  // For tracks created with the Sti package (ITTF), uncomment the next line:
+  //associator->useInTracker();
+  // Switch to use the distance or id association.
+  associator->useDistanceAssoc();
+  //associator->useIdAssoc();
+  // Note: useDistanceAssoc and useIdAssoc are mutually exclusive
+  // and they set and unset the same flag.
+  // The flag will be set by the call done at the end.
   //associator->doPrintMemoryInfo = kTRUE;
   StMcAnalysisMaker*  examples      = new StMcAnalysisMaker;
 
@@ -189,9 +200,9 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
 
   StMcParameterDB* parameterDB = StMcParameterDB::instance();  
   // TPC
-  parameterDB->setXCutTpc(.5); // 5 mm
-  parameterDB->setYCutTpc(.5); // 5 mm
-  parameterDB->setZCutTpc(.5); // 5 mm
+  parameterDB->setXCutTpc(.6); // 6 mm
+  parameterDB->setYCutTpc(.6); // 6 mm
+  parameterDB->setZCutTpc(.6); // 6 mm
   parameterDB->setReqCommonHitsTpc(3); // Require 3 hits in common for tracks to be associated
   // FTPC
   parameterDB->setRCutFtpc(.3); // 3 mm
