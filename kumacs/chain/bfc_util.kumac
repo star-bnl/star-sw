@@ -36,7 +36,8 @@
  macro/global/import *
    
 *  THESE NEXT 4 MUST BE DONE IN THIS ORDER!!!!
-* exec bfc_util#bfc_gstar_setup    [chain]
+   message ' *** SET GEOMETRY: physics type -->   ' [phystype]
+   message ' *** SET GEOMETRY: geometry type -->  ' [geomtype]
    detp geometry [phystype] [geomtype]
    exec bfc_util#bfc_g2t_b4_load    [chain]
    exec load_libraries#run          [domain]
@@ -291,6 +292,29 @@ return
   
  return
  
+*********************************************************************
+**********************************************************************
+************************************************************
+ 
+macro bfc_g2t_b4_load chain
+   
+   macro/global/import *
+           
+ test1 = [chain]
+ nw1=$words([test1])
+ message ' !!! bfc_g2t_b4_load ==> Number of words in chain = ',[nw1]
+ do i=1,[nw1]
+   mod1 = $word([test1],[i],1)
+   CASE [mod1] in
+     (rg2t)
+         message ' !!! bfc_g2t_b4_load ==> set params for chain:' [mod1]
+* initialize for g2t: tell g2t where to put tables
+         detp g2tmain gttc.rdir=0		  
+   ENDCASE
+ enddo
+       
+return
+
 **********************************************************************
 **********************************************************************
 ***********************************************************************
@@ -317,67 +341,7 @@ return
   
 return
 
- 
-*********************************************************************
-**********************************************************************
-************************************************************
- 
-macro bfc_gstar_setup chain
-   
-   macro/global/import *
-     
-      
- test1 = [chain]
- nw1=$words([test1])
- message ' !!! bfc_gstar_setup ==> Number of words in chain = ',[nw1]
- do i=1,[nw1]
-   mod1 = $word([test1],[i],1)
-   CASE [mod1] in
-     (rgst)
-         message ' !!! bfc_gstar_setup ==> set params for chain:' [mod1]
-* initialize physics types for running gstar
-	 exec set_phys_hadronic_[phystype]
-         message ' gstar: set hadronic physics ' [phystype]
-* initialize geometry for running gstar
-         if ([geomtype].eq.all) then 
-           message ' gstar: load star geometry - all '
-           exec set_geom#all
-         elseif ([geomtype].eq.tpc_nofield) then
-           message ' gstar: load star geometry - tpc only, no mag.field '
-           exec set_geom#tpc_nofield
-	 elseif ([geomtype].eq.tpc_field) then
-	   message ' gstar: load star geometry - tpc only with mag field'
-	   exec set_geom#tpc_field
-         else 
-           message ' gstar: geometry type not available!! '
-         endif	  
-   ENDCASE
- enddo
-       
-return
- 
-*********************************************************************
-**********************************************************************
-************************************************************
- 
-macro bfc_g2t_b4_load chain
-   
-   macro/global/import *
-           
- test1 = [chain]
- nw1=$words([test1])
- message ' !!! bfc_g2t_b4_load ==> Number of words in chain = ',[nw1]
- do i=1,[nw1]
-   mod1 = $word([test1],[i],1)
-   CASE [mod1] in
-     (rg2t)
-         message ' !!! bfc_g2t_b4_load ==> set params for chain:' [mod1]
-* initialize for g2t: tell g2t where to put tables
-         detp g2tmain gttc.rdir=0		  
-   ENDCASE
- enddo
-       
-return
+
 
 **********************************************************************
 **********************************************************************
