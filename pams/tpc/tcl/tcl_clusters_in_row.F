@@ -1,5 +1,8 @@
-* $Id: tcl_clusters_in_row.F,v 1.6 1999/03/06 21:08:12 perev Exp $
+* $Id: tcl_clusters_in_row.F,v 1.7 1999/07/06 18:59:08 sakrejda Exp $
 * $Log: tcl_clusters_in_row.F,v $
+* Revision 1.7  1999/07/06 18:59:08  sakrejda
+* PadOffset and SeqOffset handling changed to accound for the fact that they are unsigned shorts in C
+*
 * Revision 1.6  1999/03/06 21:08:12  perev
 * some small fixes
 *
@@ -258,14 +261,24 @@ CDH now loop over all pads in this row and sequences on these pads
         if (number_of_pads.lt.0) then   
          number_of_pads = 256 + number_of_pads
         endif
+CIS raw_row(row_table).ipad is unsigned short but it can be at most
+C   3941, sth must be very wrong...
+        if(raw_row(row_table).ipad.lt.0) then
+           write(6,*) "Bad value for raw_row.ipad",raw_row(row_table).ipad
+           stop
+        endif
+
         do iipad = 1, number_of_pads
          pad_table = raw_row(row_table).ipad + iipad
-         if ((iipad.le.pad_break).or.(pad_break.eq.0)) then
-          pad_pixeloffset = raw_pad(pad_table).PadOffset 
-         else
-          pad_pixeloffset = raw_pad(pad_table).PadOffset + 65536
+         pad_pixeloffset = raw_pad(pad_table).PadOffset 
+CIS raw_pad(pad_table).PadOffset is unsigned short, take care of it     
+         if(pad_pixeloffset.lt.0)pad_pixeloffset=pad_pixeloffset+65536
+         if ((iipad.gt.pad_break).and.(pad_break.gt.0)) then
+          pad_pixeloffset = pad_pixeloffset + 65536
          endif
          pad_seqoffset = raw_pad(pad_table).SeqOffset
+CIS raw_pad(pad_table).SeqOffset is unsigned short, take care of it     
+         if(pad_seqoffset.lt.0) pad_seqoffset = pad_seqoffset+65536
          npixel_pad = 0 
          number_of_sequences =raw_pad(pad_table).nseq 
          if (number_of_sequences.lt.0) then
