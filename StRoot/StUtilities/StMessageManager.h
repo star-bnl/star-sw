@@ -1,5 +1,8 @@
-// $Id: StMessageManager.h,v 1.11 1999/07/17 00:23:24 genevb Exp $
+// $Id: StMessageManager.h,v 1.12 1999/07/23 16:56:40 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.12  1999/07/23 16:56:40  genevb
+// Fix extern C prototypes, default options for omitted types, Linux bug with multi-line messages
+//
 // Revision 1.11  1999/07/17 00:23:24  genevb
 // Fixed bug when option fields are empty in FORTRAN, and let type limits be set before types are even added
 //
@@ -77,16 +80,14 @@ class StMessageManager : public StMessMgr {
    messTypeVec messCollection;
    virtual messVecIter FindMessageIter(const char* s1, char* s2="",
          char* s3="", char* s4="", messVec* list=0);
-   virtual        void BuildMessage(char* mess="", char* type="",
-                                                      char* opt="O");
+   virtual        void BuildMessage(char* mess="", char* type="", char* opt=0);
  
  public:
    virtual ~StMessageManager();
    static StMessMgr* Instance();      //!
 
 // Generic Messages:
-   virtual StMessMgr& Message(char* mess="", char* type="",
-                                                      char* opt="O");
+   virtual StMessMgr& Message(char* mess="", char* type="", char* opt=0);
    virtual       void Print();
    virtual        int PrintList(messVec* list);
    virtual        int PrintAll() {return PrintList(&messList); }
