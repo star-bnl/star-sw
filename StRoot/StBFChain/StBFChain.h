@@ -1,5 +1,8 @@
-// $Id: StBFChain.h,v 1.13 2000/06/16 23:34:16 fisyak Exp $
+// $Id: StBFChain.h,v 1.14 2000/07/26 14:09:03 fisyak Exp $
 // $Log: StBFChain.h,v $
+// Revision 1.14  2000/07/26 14:09:03  fisyak
+// Split and move emc, remove SetDataBases
+//
 // Revision 1.13  2000/06/16 23:34:16  fisyak
 // replace arrays in parser by TObjArrays
 //
@@ -111,7 +114,6 @@ class StBFChain : public StChain {
    virtual Int_t       kOpt(const Char_t  *Tag) const; 
    virtual void        SetXdfOut(St_XDFFile *xdf=0) {fXdfOut = xdf;}
    virtual void        SetDbOptions();
-   virtual void        SetDataBases(const Char_t *TimeStamp);
    virtual void        SetGeantOptions();
    virtual void        SetTreeOptions();
    virtual void        SetOption(const Int_t k);
@@ -127,7 +129,7 @@ class StBFChain : public StChain {
    virtual Bool_t      GetOption(const TString *Opt) {return GetOption(kOpt(Opt));}
    virtual Bool_t      GetOption(const Char_t *Opt)  {return GetOption(kOpt(Opt));}
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.13 2000/06/16 23:34:16 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.14 2000/07/26 14:09:03 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StBFChain, 0)   //StBFChain control class
 };
 #endif
