@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.27 2000/05/26 11:36:19 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.28 2000/08/17 00:38:48 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.27  2000/05/26 11:36:19  ullrich
- * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
+ * Revision 2.28  2000/08/17 00:38:48  ullrich
+ * Allow loading of tpt tracks.
  *
  * Revision 2.28  2000/08/17 00:38:48  ullrich
  * Allow loading of tpt tracks.
@@ -132,10 +132,10 @@ using std::pair;
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.27 2000/05/26 11:36:19 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.28 2000/08/17 00:38:48 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.27 2000/05/26 11:36:19 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.28 2000/08/17 00:38:48 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -148,6 +148,7 @@ StEventMaker::StEventMaker(const char *name, const char *title) : StMaker(name)
     mCurrentEvent = 0;
     mDstSummaryParam = 0;
     doLoadTpcHits     = kTRUE;
+    doLoadFtpcHits    = kTRUE;
     doLoadSvtHits     = kTRUE;
     doLoadSsdHits     = kTRUE;
     doLoadTptTracks   = kFALSE;
@@ -464,7 +465,7 @@ StEventMaker::makeEvent()
         gtrack->setDetectorInfo(info);
         detectorInfo.push_back(info);
         node = new StTrackNode();
-    
+        node->addTrack(gtrack);          // node<->track association
         trackNodes.push_back(node);
     }
 
@@ -536,8 +537,66 @@ StEventMaker::makeEvent()
     }
     if (nfailed)
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
+                            << " primary tracks, no valid primary vertex found." << endm;
+
+    //
+    //  Create TPT tracks.
+    //  TPT tracks are owned by the nodes as are global tracks.
+    //  The scheme is, however, similar to primary tracks: checks if
+    //  the referring node already exist and the detector info problem.
+    //
+    StTptTrack   *ttrack = 0;
+    dst_track_st *dstTptTracks = 0;
+    if (doLoadTptTracks) 
+	dstTptTracks = mEventManager->returnTable_CpyTrk(nrows);
+    if (!dstTptTracks) nrows = 0;
+    maxId = dstTptTracks && nrows>0 ? max((long) dstTptTracks[nrows-1].id, nrows) : 0;
+    StVector(StTptTrack*) vecTptTracks(maxId+1, ttrack);
+	
+    for (i=0; i<nrows; i++) {
+	ttrack = new StTptTrack(dstTptTracks[i]);
+	vecTptTracks[dstTptTracks[i].id] = ttrack;
+	ttrack->setGeometry(new StHelixModel(dstTptTracks[i]));
+	id = ttrack->key();
+	//
+	//   Tpt tracks come in late. Good chance that there is already
+	//   a node where it belongs to. If not we have to create one. 
+	//   If a node already exist we have to check if the detector
+	//   info available matches the one of the tpt track.
+	//
+	node = 0;
+	info = 0;
+	if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
+	    node = vecGlobalTracks[id]->node();
+	    info = vecGlobalTracks[id]->detectorInfo();
+	}
+	else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id]) {
+	    node = vecPrimaryTracks[id]->node();
+	}
+	else {
+	    node = new StTrackNode();
+	    trackNodes.push_back(node);
+	}
+
+	//
+	//  Check if the existing detector info is still ok for the
+	//  tpt track. If not we have to create a new one.
+	//
+	if (info) {
+	    StThreeVectorF firstPoint(dstTptTracks[i].x_first);
+	    StThreeVectorF lastPoint(dstTptTracks[i].x_last);
+	    if (firstPoint != info->firstPoint() || lastPoint != info->lastPoint()) info = 0;
+	}
+	
+	if (!info) {
+	    info = new StTrackDetectorInfo(dstTptTracks[i]);
+	    detectorInfo.push_back(info);
+	}
+	
+	ttrack->setDetectorInfo(info);
+	node->addTrack(ttrack);          // node<->track association
     }
-    //  global and primary tracks.
+
     //
     //  Load the dedx table and assign the dE/dx traits to all loaded
     //  global, tpt and primary tracks.
@@ -552,6 +611,10 @@ StEventMaker::makeEvent()
             k++;
         }
         if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id]) {
+            vecPrimaryTracks[id]->addPidTraits(new StDedxPidTraits(dstDedx[i]));
+            k++;
+        }
+        if (id < vecTptTracks.size() && vecTptTracks[id]) {
             vecTptTracks[id]->addPidTraits(new StDedxPidTraits(dstDedx[i]));
             k++;
         }
@@ -704,6 +767,9 @@ StEventMaker::makeEvent()
                         info = vecGlobalTracks[id]->detectorInfo();
                         info->addHit(tpcHit);
                     }
+                    if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
+                        if (vecPrimaryTracks[id]->detectorInfo() != info)
+                            vecPrimaryTracks[id]->detectorInfo()->addHit(tpcHit);
                     if (id < vecTptTracks.size() && vecTptTracks[id])
                         if (vecTptTracks[id]->detectorInfo() != info)
                             vecTptTracks[id]->detectorInfo()->addHit(tpcHit);
@@ -878,6 +944,12 @@ StEventMaker::printEventInfo()
     if (mCurrentEvent)
         mCurrentEvent->Dump();
     else
+        return;
+
+    cout << "---------------------------------------------------------" << endl;
+    cout << "StEventInfo at " << (void*) mCurrentEvent->info()          << endl;
+    cout << "---------------------------------------------------------" << endl;
+    if (mCurrentEvent->info())
         mCurrentEvent->info()->Dump();
 
     cout << "---------------------------------------------------------" << endl;
@@ -1204,6 +1276,8 @@ StEventMaker::printEventInfo()
     cout << "*********************************************************" << endl;
     long nrows;
     cout << "globtrk:    ";
+    if (mEventManager->returnTable_dst_globtrk(nrows))    cout << nrows << endl; else cout << "n/a" << endl;
+    cout << "primtrk:    ";
     if (mEventManager->returnTable_dst_primtrk(nrows))    cout << nrows << endl; else cout << "n/a" << endl;
     cout << "tpt:        ";
     if (mEventManager->returnTable_CpyTrk(nrows))         cout << nrows << endl; else cout << "n/a" << endl;
