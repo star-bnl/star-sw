@@ -24,7 +24,7 @@ my $TOP_DIRD = "/star/rcf/test/dev/";
 my @dir_year = ("year_1h", "year_2001");
 my @node_dir = ("trs_redhat61", "trs_redhat61_opt");
 my @node_daq = ("daq_redhat61", "daq_redhat61_opt"); 
-my @hc_dir = ("hc_lowdensity", "hc_standard", "hc_highdensity", "peripheral","pp_minbias");
+my @hc_dir = ("hc_lowdensity", "hc_standard", "hc_highdensity", "peripheral","pp_minbias","ppl_minbias");
 my @daq_dir = ("minbias", "central");
 
 my @OUT_DIR;
@@ -602,7 +602,7 @@ foreach  $eachOutNDir (@OUT_DIR) {
        $EvGen = "hadronic_cocktail";
        $EvType = substr($EvTp,3); 
     }
-       elsif ($EvTp =~ /pp_/) {
+       elsif ($EvTp =~ /pp_/ or $EvTp =~ /ppp_/) {
        $EvGen = "pythia";
        $EvType = "pp_minbias";
      }
@@ -647,8 +647,11 @@ foreach  $eachOutNDir (@OUT_DIR) {
     elsif($EvTp eq "peripheral") {          
          $EvReq = 500;
  }
+    elsif($EvTp eq "ppl_minbias") {          
+         $EvReq = 100;
+ }
     elsif($EvTp eq "pp_minbias") {          
-         $EvReq = 50;
+         $EvReq = 1000;
  }
 
        $lgFile = $eachOutNDir ."/" . $bsname . "log";
@@ -1207,7 +1210,7 @@ my $Anflag = 0;
 ##### get CPU and Real Time per event
       
  if ($EvCom != 0) {
-    @cpu_output = `tail -400 $fl_log`;
+    @cpu_output = `tail -1000 $fl_log`;
      
   foreach $end_line (@cpu_output){
           chop $end_line;
