@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.12 2003/09/10 19:47:08 perev Exp $
+// $Id: StEEmcDbMaker.h,v 1.13 2003/10/03 22:44:27 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -56,7 +56,7 @@ class DbFlavor {
 
 class StEEmcDbMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.12 2003/09/10 19:47:08 perev Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.13 2003/10/03 22:44:27 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -78,7 +78,6 @@ class StEEmcDbMaker : public StMaker {
   StEEmcDbIndexItem1   ***mLookup; //! access via crate/chan
   int mxAdcCrate, mxAdcChan;
 
-  void mCleanDbNames(char*,int); ///< utility  
   void mPrintItems();///< utility
  
   float KsigOverPed; // defines threshold
@@ -118,7 +117,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.12 2003/09/10 19:47:08 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.13 2003/10/03 22:44:27 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -129,6 +128,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.13  2003/10/03 22:44:27  balewski
+// fix '$' problem in db-entries name
+//
 // Revision 1.12  2003/09/10 19:47:08  perev
 // ansi corrs
 //

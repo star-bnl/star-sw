@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.18 2003/09/11 05:49:17 perev Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.19 2003/10/03 22:44:27 balewski Exp $
  
 #include <TDatime.h>
 #include <time.h>
@@ -375,7 +375,7 @@ void  StEEmcDbMaker::mOptimizeDb(){
     for(j=0;j<EEMCDbMaxAdc; j++) { // loop within sector
       char *name=t->name+j*EEMCDbMaxName;
       //      printf("jjj i=%d j=%d %d %d '%s' kill!\n",i,j,t->slot[j],t->channel[j],name);// continue;
-      if(*name==0) continue;
+      if(*name==EEMCDbStringDelim) continue;
 
       //      printf("aaa %d %d\n",t->slot[j],t->channel[j]);
       // validate entries
@@ -428,14 +428,16 @@ void  StEEmcDbMaker::mOptimizeDb(){
     if(cal==0) continue; // DB data for this sector not loaded from DB
     
     for(j=0;j<EEMCDbMaxAdc; j++) { // loop within sector
-      char *name1=cal->name+j*EEMCDbMaxName;
-      if(name1[0]==0) break;
-      char *p=strstr(item->name,name1);
+      char name1[EEMCDbMaxName];
+      strncpy(name1,cal->name+j*EEMCDbMaxName, EEMCDbMaxName-1);
+      if(name1[0]==EEMCDbStringDelim) break;
+      name1[EEMCDbMaxName-1]=0;
+      char *p=strstr(name1,item->name);
       if(p==0) continue;
       mDbItem1[index].gain=cal->gain[j];
       mDbItem1[index].hv=cal->hv[j];
       //if(strchr(name1,'T')==0)
-      //printf(" xx=%s, index=%d j=%d  gain=%f hv=%f\n",name1,j,index,cal->gain[j],cal->hv[j]) ;
+      //    printf(" Axx=%s, index=%d j=%d  gain=%f hv=%f c1=%d c2\%d\n",name1,j,index,cal->gain[j],cal->hv[j], name1[0], name1[1]) ;
       break;
     }
     
@@ -443,9 +445,11 @@ void  StEEmcDbMaker::mOptimizeDb(){
     if(ped==0) continue; // DB data for this sector not loaded from DB
     
     for(j=0;j<EEMCDbMaxAdc; j++) { // loop within sector
-      char *name1=ped->name+j*EEMCDbMaxName;
-      if(name1[0]==0) break;
-      char *p=strstr(item->name,name1);
+      char name1[EEMCDbMaxName];
+      strncpy(name1,ped->name+j*EEMCDbMaxName, EEMCDbMaxName-1);
+      if(name1[0]==EEMCDbStringDelim) break;
+      name1[EEMCDbMaxName-1]=0;
+      char *p=strstr(name1,item->name);
       if(p==0) continue;
       mDbItem1[index].ped=ped->ped[j];
       mDbItem1[index].thr=ped->ped[j]+KsigOverPed*ped->sig[j];
@@ -456,9 +460,11 @@ void  StEEmcDbMaker::mOptimizeDb(){
     if(stat==0) continue; // DB data for this sector not loaded from DB
     
     for(j=0;j<EEMCDbMaxAdc; j++) { // loop within sector
-      char *name1=stat->name+j*EEMCDbMaxName;
-      if(name1[0]==0) break;
-      char *p=strstr(item->name,name1);
+     char name1[EEMCDbMaxName];
+      strncpy(name1,stat->name+j*EEMCDbMaxName, EEMCDbMaxName-1);
+      if(name1[0]==EEMCDbStringDelim) break;
+      name1[EEMCDbMaxName-1]=0;
+      char *p=strstr(name1,item->name);
       if(p==0) continue;
       mDbItem1[index].stat=stat->stat[j];
       mDbItem1[index].fail=stat->fail[j];
@@ -534,15 +540,6 @@ Int_t StEEmcDbMaker::Make(){
 
 }
 
-//_________________________________________________________
-//_________________________________________________________
-//_________________________________________________________
-void StEEmcDbMaker::mCleanDbNames(char * buf, int len){
-  assert(buf); // dumm input, better crash
-  int k;
-  for(k=0;k<len;k++) 
-    if( buf[k]==EEMCDbStringDelim) buf[k]=0;
-}
 
 //_________________________________________________________
 //_________________________________________________________
@@ -579,7 +576,7 @@ template <class St_T, class T_st>  void StEEmcDbMaker
   }
 
   *outTab= new T_st (*tab); // copy the whole s-struct to allow flavor change
-  mCleanDbNames((*outTab)->name, EEMCDbMaxAdcName);
+  // mCleanDbNames((*outTab)->name, EEMCDbMaxAdcName);
   printf("'%s'\n",tab->comment);
 
   nFound++;
@@ -588,6 +585,9 @@ template <class St_T, class T_st>  void StEEmcDbMaker
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.19  2003/10/03 22:44:27  balewski
+// fix '$' problem in db-entries name
+//
 // Revision 1.18  2003/09/11 05:49:17  perev
 // ansi corrs
 //
