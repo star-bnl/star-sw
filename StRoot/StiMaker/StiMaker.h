@@ -8,8 +8,6 @@ using std::string;
 
 #include "StMaker.h"
 #include "StEvent/StEnumerations.h"
-#include "Sti/StiObjectFactoryInterface.h"
-#include "Sti/StiFactoryTypes.h"
 #include "Sti/StiKalmanTrackFinder.h"
 
 class StEvent;
@@ -40,7 +38,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.47 2002/09/05 21:27:11 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.48 2002/10/04 01:54:51 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 

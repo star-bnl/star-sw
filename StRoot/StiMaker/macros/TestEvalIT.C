@@ -1,8 +1,11 @@
 //
-// $Id: TestEvalIT.C,v 1.13 2002/09/27 19:19:28 mmiller Exp $
+// $Id: TestEvalIT.C,v 1.14 2002/10/04 01:55:03 pruneau Exp $
 //
 //
 // $Log: TestEvalIT.C,v $
+// Revision 1.14  2002/10/04 01:55:03  pruneau
+// DefaultToolkit now uses the StiHitLoader scheme rahter than the StiHitFiller.
+//
 // Revision 1.13  2002/09/27 19:19:28  mmiller
 // Hid some necessary calls behind if (simulated) to restore proper handling of both mc and data.
 //
@@ -74,7 +77,7 @@
 //
 //
 #include <iostream>
-
+#include <stdexcept>
 Bool_t   doProfile = false;
 Int_t    usePath = 0;
 Int_t    nFile = 0;
@@ -440,13 +443,28 @@ void TestEvalIT(Int_t firstEvtIndex,
 	{
 	    cout << "============= Event " <<i<< " started =============" << endl;
 	    chain->Clear();
-	    istat =chain->Make(i); 
-	    switch(istat)
-		{
-		case 2: cout << "Event completed with Status = 2" << endl; break;
-		case 3: cout << "Event completed with error Status = 3" << endl; break;
-		}
-	    i++;
+	    try
+	      {
+		istat =chain->Make(i); 
+		switch(istat)
+		  {
+		  case 2: cout << "Event completed with Status = 2" << endl; break;
+		  case 3: cout << "Event completed with error Status = 3" << endl; break;
+		  }
+		i++;
+	      }
+	    catch (runtime_error & rte)
+	      {
+		cout << "TestEvalIT.C - ERROR -" << rte.what() << endl;
+	      }
+	    catch (exception & eee)
+	      {
+		cout << "TestEvalIT.C - ERROR -" << eee.what() << endl;
+	      }
+	    catch (...)
+	      {
+		cout << " TestEvalIT.C - ERROR - Unknown exception"<<endl;
+	      }
 	}
     //chain->Finish();
     cout << "\n=============== Event "<<i<< " finished ============" << endl;
