@@ -52,16 +52,30 @@ return
  
 **********************************************************
  
- macro run_summary
+ macro dst_run_summary
    
      macro/global/import *
 
        message ' run_dst: Calling fill_dst_run_summary'
        
+ami/mod/call fill_dst_run_summary_
+        [run_dst]/run_header _
+        [dst]/event_header _
+        [dst]/event_summary _
+        [dst]/globtrk _
+        [dst]/vertex _
+        [run_dst]/run_summary
+
+if ( staf_status(1) .ne. STAFCV_OK) then
+     message 'Problem on return from FILL_DST_RUN_SUMMARY'
+endif
+
+
+message ' run_dst: finished calling fill_dst_run_summary'
  return
 * *****************************************************
  
- macro event_summary
+ macro dst_event_summary
      macro/global/import *
 
        message ' run_dst: Calling fill_dst_event_summary'
