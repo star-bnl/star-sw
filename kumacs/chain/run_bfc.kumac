@@ -38,7 +38,8 @@
  *                       - broke up tpc into simulation & tracker
  *  editted June 3, 1998 by Kathy Turner - new versions of tpc kumacs
 *   editted June 3, 1998 by Kathy Turner - new versions of svt kumacs
- **************************************************
+*  editted 6/10/98 Kathy Turner - new tpc tables in new version of tpc kumac
+**************************************************
  
 MACRO run_all _
    no_events=1 _ 
@@ -52,25 +53,27 @@ MACRO run_all _
    tpc_svt_match=svm _ 
    event_refit=egr _
    ev0_finder=ev0 _
-   emc_sim_jet=none
-
+   emc_sim_jet=none _
+   outfile=ev0out_tte.xdf _
+   outtable=/dui/data/global
 
 ***********************************************************
 * PRINT OUT INPUT VALUES
 ***********************************************************
 
-message ' *** Data sample directory -->  ' [INPUT_DATA_DIR]
-message ' *** Input file -->             ' [file]
-message ' *** Num Events to process -->  ' [no_events]
-message ' *** SVT simulator         -->  ' [svt_simul]
-message ' *** SVT tracker           -->  ' [svt_tracker]
-message ' *** TPC simulator         -->  ' [tpc_simul]
-message ' *** TPC tracker           -->  ' [tpc_tracker]
-message ' *** TPC-SVT track matcher -->  ' [tpc_svt_match]
-message ' *** Event Refitter        -->  ' [event_refit]
-message ' *** EV0 Finder            -->   ' [ev0_finder]
-message ' *** EMC simulation and Jets --> ' [emc_sim_jet]
-
+message ' *** Data sample directory         --> ' [INPUT_DATA_DIR]
+message ' *** Input file                    --> ' [file]
+message ' *** Num Events to process         --> ' [no_events]
+message ' *** SVT simulator                 --> ' [svt_simul]
+message ' *** SVT tracker                   --> ' [svt_tracker]
+message ' *** TPC simulator                 --> ' [tpc_simul]
+message ' *** TPC tracker                   --> ' [tpc_tracker]
+message ' *** TPC-SVT track matcher         --> ' [tpc_svt_match]
+message ' *** Event Refitter                --> ' [event_refit]
+message ' *** EV0 Finder                    --> ' [ev0_finder]
+message ' *** EMC simulation and Jets       --> ' [emc_sim_jet]
+message ' *** Output file name              --> ' [outfile]
+message ' *** Table written to output file  --> ' [outtable]
 
 ***********************************
 * SETUP DIRECTORIES TO FIND KUMACS:
@@ -167,7 +170,7 @@ $STAR/pams/trg/kumac
  **************************************
  * open new output file
  **************************************
- exec write_table_to_file#init evout ev0out_tte.dsl
+ exec write_table_to_file#init evout [outfile]
 
 
  *****************************************
@@ -371,7 +374,8 @@ TPC:
 
 * Write output file --------------------------------------------------
 
-  exec write_table_to_file#write evout /dui/data/global
+  exec write_table_to_file#write evout [outtable]
+
 
 
  NEXT_EVENT:
