@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.15 2002/01/22 22:09:59 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.16 2002/09/24 09:50:09 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.16  2002/09/24 09:50:09  jcs
+// Remove gufld remains
+//
 // Revision 1.15  2002/01/22 22:09:59  jcs
 // remove unused line of code to remove warning
 //
@@ -64,11 +67,6 @@
 #include "St_DataSetIter.h"
 #include "TH1.h"
 #include "TH2.h"
-
-#ifndef gufld
-#define gufld gufld_
-extern "C" void gufld(float *, float *);
-#endif
 
 ClassImp(StFtpcDriftMapMaker)
 
