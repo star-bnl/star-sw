@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.36 2004/06/25 22:55:53 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.37 2004/07/27 22:00:19 balewski Exp $
  
 
 #include <time.h>
@@ -55,7 +55,6 @@ gMessMgr->Message("","W") << big_num << " seems too big." << endm;
 
 ClassImp(StEEmcDbMaker)
 
-//_________________________________________________________
 //________________________________________________________
 //________________________________________________________
 StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
@@ -82,7 +81,15 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
   setDBname("Calibrations/eemc");
 
   mAsciiDbase = "";
-  
+
+  mxChGain=8;
+  chGainL = new TString [mxChGain];
+  nChGain=0;
+
+  mxChMask=8;
+  chMaskL = new TString [mxChMask];
+  nChMask=0;
+
 }
 
 
@@ -105,7 +112,6 @@ StEEmcDbMaker::~StEEmcDbMaker(){
 
 }
 
-//________________________________________________________
 //________________________________________________________
 //________________________________________________________
 void  StEEmcDbMaker::setTimeStampDay( int tD) {
@@ -277,6 +283,10 @@ Int_t  StEEmcDbMaker::InitRun  (int runNumber)
   }
 
   mOptimizeFibers();
+
+  // overload some of DB info
+  for(is=0;is<nChGain;is++) changeGainsAction(chGainL[is].Data());
+
 
   // exportAscii(); //tmp
 
@@ -879,12 +889,6 @@ void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
       for ( Int_t myStrip = 1; myStrip <= 288; myStrip++ ) byStrip[mySec-1][uv-'U'][myStrip-1] = getStrip(mySec,uv,myStrip);
 
       
-      
-
-
-
-
-
   //--
   printf("setAsciiDataBase() done, found %d valid records\n",nd);
 
@@ -898,8 +902,121 @@ void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
 
 }
 
+//________________________________________________________
+//________________________________________________________
+void  StEEmcDbMaker::changeGains(char *fname) {
+  assert(nChGain+1< mxChGain);
+  chGainL[nChGain]=fname;
+  nChGain++;
+}
+
+//________________________________________________________
+//________________________________________________________
+void  StEEmcDbMaker::changeMask(char *fname) {
+  assert(nChMask+1< mxChMask);
+  chGainL[nChMask]=fname;
+  nChMask++;
+}
+
+//________________________________________________________
+//________________________________________________________
+void  StEEmcDbMaker::changeGainsAction(const char *fname) {
+    
+  /* Replace gains only for channels already initialized from the DB 
+     format : {name, gains anythingElse}
+     lines starting with '#' are ignored
+     empty lines are not permitted
+  */
+
+  gMessMgr->Message("","W") <<"  EEDB ::changeGains('"<<fname<<"')"<<endm;
+  FILE *fd=fopen(fname,"r");
+  int nd=0,nl=0;
+  const int mx=1000;
+  char buf[mx];
+
+  if(fd==0) goto end;
+  char cVal[100];
+  float xVal;
+    
+  while(1) {
+    char *ret=fgets(buf,mx,fd);
+    if(ret==0) break;
+    
+    nl++;
+    if(buf[0]=='#') continue;
+    int n=sscanf(buf,"%s %f",cVal,&xVal);
+    assert(n==2);
+    int key=EEname2Index(cVal);
+    EEmcDbItem *x=byIndex+key;
+    // printf("%s %p\n",cVal,x);
+    if(x->isEmpty()) continue;
+    // replace only initialized channels
+    if(xVal<=0)  printf("Warning ! buf=%s=\n",buf);
+    //    assert(xVal>0);
+     x->gain=xVal;
+     nd++;
+  }
+  fclose(fd);
+    
+ end:
+  gMessMgr->Message("","I") <<"  EEDB ::changeGains('"<<fname<<"') done inpLines="<<nl<<" nChanged="<<nd<<endm;
+  return;
+  
+} 
+
+//________________________________________________________
+//________________________________________________________
+void  StEEmcDbMaker::changeMaskAction(const char *fname) {
+
+  /* Replace gains only for channels already initialized from the DB 
+     format : {name, stat, fail enythingElse}
+     lines starting with '#' are ignored
+     empty lines are not permitted
+  */
+
+  gMessMgr->Message("","I") <<"  EEDB ::changeMask('"<<fname<<"') "<<endm;
+
+  FILE *fd=fopen(fname,"r");
+
+  int nd=0,nl=0;
+  const int mx=1000;
+  char buf[mx];
+
+  if(fd==0) goto end;
+  char cVal[100];
+  int xStat,xFail ;
+
+  while(1) {
+    char *ret=fgets(buf,mx,fd);
+    if(ret==0) break;
+
+    nl++;
+    if(buf[0]=='#') continue;
+    int n=sscanf(buf,"%s %d %d",cVal,&xStat,&xFail);
+    assert(n==3);
+    int key=EEname2Index(cVal);
+    EEmcDbItem *x=byIndex+key;
+    if(x->isEmpty()) continue;
+    assert(xStat>=0);
+    assert(xFail>=0);
+    x->stat=xStat;
+    x->fail=xFail;
+    nd++;
+  }
+  fclose(fd);
+
+ end:
+ gMessMgr->Message("","I") <<"  EEDB ::changeMask('"<<fname<<"') done inpLines="<<nl<<" nChanged="<<nd<<endm;
+  return;
+
+}
+
+
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.37  2004/07/27 22:00:19  balewski
+// can overwrite gains & stat from DB
+//
 // Revision 1.36  2004/06/25 22:55:53  balewski
 // now it survives missing fiberMap in DB , also gMessMgr is used
 //

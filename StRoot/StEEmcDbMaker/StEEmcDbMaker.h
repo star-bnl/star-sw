@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.26 2004/06/25 22:55:53 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.27 2004/07/27 22:00:19 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -65,7 +65,7 @@ class StEEmcDbMaker : public StMaker {
   // private:
  public:
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.26 2004/06/25 22:55:53 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.27 2004/07/27 22:00:19 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -89,7 +89,7 @@ class StEEmcDbMaker : public StMaker {
   kretDbBlobS_st  *mDbFiberConfBlob; //!
   
   // local fast look-up tables
-  EEmcDbItem   *byIndex; //!  assess via plain index
+  EEmcDbItem   *byIndex; //!  assess via  index
   EEmcDbItem   ***byCrate; //! access via crate/chan
   const EEmcDbItem   *byStrip[MaxSectors][MaxSmdPlains][MaxSmdStrips]; //! access via sec/UV/strip
 
@@ -107,6 +107,15 @@ class StEEmcDbMaker : public StMaker {
 
   TString mAsciiDbase; // Ascii database filename (default NONE)
 
+  // tmp solution to hold list of strings
+  TString *chGainL;
+  int nChGain, mxChGain;
+  void changeGainsAction(const char *fname);
+
+  TString *chMaskL;
+  int nChMask, mxChMask;
+  void changeMaskAction(const char *fname);
+
  protected:
  public:  
   
@@ -115,8 +124,8 @@ class StEEmcDbMaker : public StMaker {
 
 
   void setAsciiDatabase ( const Char_t *dbfile );
-
-
+  void changeGains(char *fname);// Replace gains for  initialized channels
+  void changeMask(char *fname);// Replace stat/fail mask for initialized channels 
   const EEmcDbCrate * getFiber(int icr);
   const  int getNFiber(){return nFiber;}
   const  EEmcDbItem* getByIndex(int ikey); ///< returns full DB info for one pixel
@@ -169,7 +178,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.26 2004/06/25 22:55:53 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.27 2004/07/27 22:00:19 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -180,6 +189,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.27  2004/07/27 22:00:19  balewski
+// can overwrite gains & stat from DB
+//
 // Revision 1.26  2004/06/25 22:55:53  balewski
 // now it survives missing fiberMap in DB , also gMessMgr is used
 //
