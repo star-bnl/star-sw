@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.hh,v 1.8 2000/01/13 22:19:20 posk Exp $
+//  $Id: StFlowMaker.hh,v 1.9 2000/02/18 22:49:57 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.hh,v $
+//  Revision 1.9  2000/02/18 22:49:57  posk
+//  Added PID and centrality.
+//
 //  Revision 1.8  2000/01/13 22:19:20  posk
 //  Updates and corrections.
 //
@@ -49,6 +52,8 @@
 #include "TString.h"
 #include "StFlowConstants.hh"
 class StEvent;
+class StPrimaryTrack;
+class StParticleDefinition;
 class StFlowEvent;
 
 class StFlowMaker : public StMaker {
@@ -72,7 +77,8 @@ private:
 
   Int_t           readPhiWgtFile();
   void            fillFlowEvent();
-
+  Float_t         PidSigmas(const StPrimaryTrack*, 
+			    const StParticleDefinition* particle);
   StEvent*        pEvent;                    //! pointer to DST data
   StFlowEvent*    pFlowEvent;                //! pointer to micro-DST data
 
