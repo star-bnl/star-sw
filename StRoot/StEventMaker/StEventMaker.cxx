@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.14 2000/01/14 13:58:03 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.15 2000/01/14 18:51:06 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,9 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.14  2000/01/14 13:58:03  ullrich
- * Create and fill the RICH pixel collection. Added also
- * the debug output for the RICH to printEventInfo().
+ * Revision 2.15  2000/01/14 18:51:06  ullrich
+ * Added printout of quasi-histos in the event summary
+ * to printEventInfo().
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -93,7 +93,7 @@
  * Revision 2.5  1999/11/11 10:02:58  ullrich
  * Added warning message in case some hits cannot be stored.
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.14 2000/01/14 13:58:03 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.15 2000/01/14 18:51:06 ullrich Exp $";
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -130,10 +130,10 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.14 2000/01/14 13:58:03 ul
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.14 2000/01/14 13:58:03 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.15 2000/01/14 18:51:06 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.14 2000/01/14 13:58:03 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.15 2000/01/14 18:51:06 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -804,7 +804,42 @@ StEventMaker::makeEvent()
 	mCurrentEvent->setTriggerMask(header->GetTriggerMask());
     }
     
+    return kStOK;
+}
 
+void
+StEventMaker::printRunInfo()
+{
+    cout << "*********************************************************" << endl;
+    cout << "*                  StRun Information                    *" << endl;
+	mCurrentEvent->Dump();
+
+	return;
+    cout << "StRun at " << (void*) mCurrentRun                          << endl;
+    cout << "---------------------------------------------------------" << endl;
+    if (mCurrentRun)
+        mCurrentRun->Dump();
+    
+    cout << "---------------------------------------------------------" << endl;
+	unsigned int k;
+	StEventSummary *evtsum = mCurrentEvent->summary();
+	cout << "--> StEventSummary quasi-histograms" << endl;
+	cout << "--> StEventSummary quasi-histogram -> # of tracks vs. eta" << endl;
+	for (k=0; k<evtsum->numberOfBins(); k++) {
+	    cout << k << "\t[" << evtsum->lowerEdgeEtaBin(k)
+		 << " - "      << evtsum->upperEdgeEtaBin(k)
+		 << "] : \t"  <<  evtsum->tracksInEtaBin(k) << endl;
+	}
+	cout << "--> StEventSummary quasi-histogram -> # of tracks vs. phi" << endl;
+	for (k=0; k<evtsum->numberOfBins(); k++) {
+	    cout << k << "\t[" << evtsum->lowerEdgePhiBin(k)
+		 << " - "      << evtsum->upperEdgePhiBin(k)
+		 << "] : \t"   << evtsum->tracksInPhiBin(k) << endl;
+	}
+	cout << "--> StEventSummary quasi-histogram -> # of tracks vs. pt" << endl;
+	for (k=0; k<evtsum->numberOfBins(); k++) {
+	    cout << k << "\t[" << evtsum->lowerEdgePtBin(k)
+		 << " - "      << evtsum->upperEdgePtBin(k)
 		 << "] : \t"   << evtsum->tracksInPtBin(k) << endl;
 	}
 	cout << "--> StEventSummary quasi-histogram -> energy vs. eta" << endl;
