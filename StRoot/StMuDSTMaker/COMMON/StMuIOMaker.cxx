@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.cxx,v 1.4 2004/02/17 04:56:36 jeromel Exp $
+ * $Id: StMuIOMaker.cxx,v 1.5 2004/04/02 03:24:54 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -51,15 +51,18 @@ StMuIOMaker::~StMuIOMaker() {
   DEBUGMESSAGE1("");
   clear();
   delete mStMuDst;
-  for ( int i=0; i<__NARRAYS__; i++) { delete arrays[i]; arrays[i]=0;} 
-  for ( int i=0; i<__NSTRANGEARRAYS__; i++) { delete strangeArrays[i];strangeArrays[i]=0;}
-  for ( int i=0; i<__NEMCARRAYS__; i++) { delete emcArrays[i]; emcArrays[i]=0;}
+  int i;
+  for (  i=0; i<__NARRAYS__; i++) { delete arrays[i]; arrays[i]=0;} 
+  for (  i=0; i<__NSTRANGEARRAYS__; i++) { delete strangeArrays[i];strangeArrays[i]=0;}
+  for (  i=0; i<__NEMCARRAYS__; i++) { delete emcArrays[i]; emcArrays[i]=0;}
+  for (  i=0; i<__NPMDARRAYS__; i++) { delete pmdArrays[i]; pmdArrays[i]=0;}
+  for (  i=0; i<__NTOFARRAYS__; i++) { delete tofArrays[i]; tofArrays[i]=0;}
   DEBUGMESSAGE3("after arrays");
   closeRead();
   DEBUGMESSAGE3("after close");
   if (mChain) { 
-	  delete mChain;
-	  mChain=0;
+    delete mChain;
+    mChain=0;
   }
   DEBUGMESSAGE3("out");
 }
@@ -82,7 +85,16 @@ void StMuIOMaker::createArrays() {
   for ( int i=0; i<__NEMCARRAYS__; i++) {
     mEmcArrays[i]= clonesArray(emcArrays[i],StMuArrays::emcArrayTypes[i],StMuArrays::emcArraySizes[i],StMuArrays::emcArrayCounters[i]);
   }
-  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays);
+  /// from pmdness group
+  for ( int i=0; i<__NPMDARRAYS__; i++) {
+    mPmdArrays[i]= clonesArray(pmdArrays[i],StMuArrays::pmdArrayTypes[i],StMuArrays::pmdArraySizes[i],StMuArrays::pmdArrayCounters[i]);
+  }
+  // added for Xin since was not there in the first place
+  for ( int i=0; i<__NTOFARRAYS__; i++) {
+    mTofArrays[i]= clonesArray(tofArrays[i],StMuArrays::tofArrayTypes[i],StMuArrays::tofArraySizes[i],StMuArrays::tofArrayCounters[i]);
+  }
+
+  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -98,6 +110,12 @@ void StMuIOMaker::clear(){
   }
   for ( int i=0; i<__NEMCARRAYS__; i++) {
     del(mEmcArrays[i],StMuArrays::emcArrayCounters[i]);
+  }
+  for ( int i=0; i<__NPMDARRAYS__; i++) {
+    del(mPmdArrays[i],StMuArrays::pmdArrayCounters[i]);
+  }
+  for ( int i=0; i<__NTOFARRAYS__; i++) {
+    del(mTofArrays[i],StMuArrays::tofArrayCounters[i]);
   }
   DEBUGMESSAGE2("out");
 }
@@ -191,6 +209,16 @@ void StMuIOMaker::setBranchAddresses(TChain* chain) {
   for ( int i=0; i<__NEMCARRAYS__; i++) {
       chain->SetBranchAddress(StMuArrays::emcArrayNames[i],&mEmcArrays[i]);
   } 
+  // pmd stuff
+  for ( int i=0; i<__NPMDARRAYS__; i++) {
+      chain->SetBranchAddress(StMuArrays::pmdArrayNames[i],&mPmdArrays[i]);
+  } 
+
+  // added for Xin since it did not 
+  for ( int i=0; i<__NPMDARRAYS__; i++) {
+      chain->SetBranchAddress(StMuArrays::tofArrayNames[i],&mTofArrays[i]);
+  } 
+ 
   TTree *tree;
   tree = mChain->GetTree();
 }
@@ -247,7 +275,7 @@ int StMuIOMaker::Make(int index){
   if (!mChain) return kStEOF;
   int bytes = mChain->GetEntry(mCurrentIndex);
   DEBUGVALUE3(bytes);
-  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays);
+  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);
   mEventCounter++;
   return kStOk;
 }
@@ -337,6 +365,9 @@ void  StMuIOMaker::SetFile(const char *fileName)    {
 /***************************************************************************
  *
  * $Log: StMuIOMaker.cxx,v $
+ * Revision 1.5  2004/04/02 03:24:54  jeromel
+ * Changes implements PMD and TOF.  TOF is clearly incomplete.
+ *
  * Revision 1.4  2004/02/17 04:56:36  jeromel
  * Extended help, added crs support, restored __GNUC__ for PRETTY_FUNCTION(checked once
  * more and yes, it is ONLY defined in GCC and so is __FUCTION__),  use of a consistent
