@@ -7,11 +7,13 @@
 
 #include "StMaker.h"
 #include "StEvent/StEnumerations.h"
-#include "Sti/StiFactoryTypedefs.h"
+#include "Sti/StiHit.h" //For StiHitFactory
+#include "Sti/StiCompositeTreeNode.h" //For data_node_factory
 #include "Sti/StiTrackNode.h"
 #include "Sti/StiKalmanTrackNode.h"
 
-#include "StiGui/StiGuiTypedefs.h"
+#include "StiGui/StiRootDrawableStiEvaluableTrack.h" //For EvaluableTrackFactory
+#include "StiGui/StiRootDrawableDetector.h"
 
 class StEvent;
 class StiHitContainer;
@@ -38,7 +40,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.17 2001/08/29 22:49:34 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.18 2001/08/30 18:26:54 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
