@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.255 2001/12/18 01:47:52 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.256 2001/12/21 21:53:21 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -115,7 +115,7 @@ Bfc_st BFC[] = {
 
   // pp Chains -- Experimental ; will follow P2001* chains model
   {"pp2001"      ,""  ,"",
-   "pp,B2001,-PreVtx,-SpinTag,l3onl,tofDat,AlignSectors,ExB,OBmap,OClock,OPr13",
+   "pp,B2001,-PreVtx,-SpinTag,-tags,l3onl,tofDat,AlignSectors,ExB,OBmap,OClock,OPr13",
    "",""                                                                                 ,"pp 2001",kFALSE},
 
 
