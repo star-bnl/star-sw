@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsOstream.cc,v 1.1 1999/10/11 23:55:23 calderon Exp $
+ * $Id: StTrsOstream.cc,v 1.2 1999/10/12 01:39:56 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsOstream.cc,v $
+ * Revision 1.2  1999/10/12 01:39:56  calderon
+ * The <algorithm> header wasn't missing, it
+ * was the STL distance() function in ObjectSpace
+ * that had a different call than in Linux and HP
+ * (as usual).  It only has the version that
+ * takes 3 arguments, not 2.
+ *
  * Revision 1.1  1999/10/11 23:55:23  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
@@ -122,9 +129,12 @@ void StTrsOstream::writeTrsEvent(StTrsRawDataEvent* EventData)
 				while (rangeBegin!=dataEnd && currentPos!=outputData.end()) {
 				    digitalTimeBins::iterator rangeEnd = find(rangeBegin,dataEnd,static_cast<unsigned char>(0));
 				    copy(rangeBegin,rangeEnd,currentPos);
-				    currentPos+=distance(rangeBegin,rangeEnd);
+				    unsigned int dummy =0;
+				    distance(rangeBegin,rangeEnd, dummy);
+				    currentPos+= dummy;
 				    if (*rangeEnd == static_cast<unsigned char>(0)) {
-					unsigned int index = distance(dataBegin, rangeEnd);
+					unsigned int index = 0;
+					distance(dataBegin, rangeEnd, index);
 					*currentPos++ = static_cast<unsigned char>(0);
 					*currentPos++ = aDigitalSector->mZeros[iRow][iPad][index];
 					
