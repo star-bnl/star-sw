@@ -239,13 +239,14 @@ c               scs_spt(scs_spt_h.nok).flag      = 0
                fcl_fppoint(fcl_fppoint_h.nok).n_pads = npads
                fcl_fppoint(fcl_fppoint_h.nok).n_bins = nbins
 
-               fcl_fppoint(fcl_fppoint_h.nok).max_adc = 
+               fcl_fppoint(fcl_fppoint_h.nok).max_adc   = 0
+
+               fcl_fppoint(fcl_fppoint_h.nok).flags = 
      1               dst_point(i).charge/two16
                fcl_fppoint(fcl_fppoint_h.nok).charge  = 
      1               dst_point(i).charge 
-     2                 - two16*fcl_fppoint(fcl_fppoint_h.nok).max_adc
+     2                 - two16*fcl_fppoint(fcl_fppoint_h.nok).flags
              
-               fcl_fppoint(fcl_fppoint_h.nok).flags      = 0
 
                pos1 = dst_point(i).position(1)
                pos2 = dst_point(i).position(2)
