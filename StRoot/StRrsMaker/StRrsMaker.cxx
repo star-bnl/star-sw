@@ -1,9 +1,13 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.17 2000/04/05 15:57:11 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 1.18 2000/04/14 22:38:09 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
+ * Revision 1.18  2000/04/14 22:38:09  lasiuk
+ * add print diagnostic for crash
+ * extra careful on clearing the dataset
+ *
  * Revision 1.17  2000/04/05 15:57:11  lasiuk
  * SIMU 2 protocol
  *
@@ -606,7 +610,7 @@ Int_t StRrsMaker::Make()
     } //else process from stream
 
 
-    //cout << "Try Write" << endl;
+    cout << "Try Write" << endl;
     for ( int i = 0; i < mWriter->rows(); i++ ) {
 	for ( int j = 0; j < mWriter->cols(); j++ ) {
 
@@ -623,6 +627,7 @@ Int_t StRrsMaker::Make()
 	}
     }
 
+    cout << "cleanup" << endl;
     mWriter->cleanUpMCInfo();
     
     if(mWriteToFile) {
@@ -634,6 +639,7 @@ Int_t StRrsMaker::Make()
 
     //
     // clear up the list<StRichMiniHit*>
+    cout << "Try clear" << endl;
     for(iter  = theList.begin();
 	iter != theList.end();
 	iter++) {

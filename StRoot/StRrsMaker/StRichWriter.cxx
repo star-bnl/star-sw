@@ -1,10 +1,14 @@
 /*****************************************************
- * $Id: StRichWriter.cxx,v 1.8 2000/04/05 16:07:42 lasiuk Exp $
+ * $Id: StRichWriter.cxx,v 1.9 2000/04/14 22:38:09 lasiuk Exp $
  *
  * Description:
  *  Implementation of the StRichWriter output object.
  ******************************************************
  * $Log: StRichWriter.cxx,v $
+ * Revision 1.9  2000/04/14 22:38:09  lasiuk
+ * add print diagnostic for crash
+ * extra careful on clearing the dataset
+ *
  * Revision 1.8  2000/04/05 16:07:42  lasiuk
  * add to coded list of info
  *
@@ -87,8 +91,8 @@ void StRichWriter::putSignal(int row, int col, double s, int id, int gid, int tr
     (*mStorage)[row][col].signal += s;
     (*mStorage)[row][col].IDs.push_back(StRichID(id,
 						 gid,
- 						 track_p,
- 						 floor(s/mAdcConversion),
+						 track_p,
+						 floor(s/mAdcConversion),
 						 signalType));
 } 
 
