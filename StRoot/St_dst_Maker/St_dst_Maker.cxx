@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.67 2001/10/26 16:49:28 caines Exp $
+// $Id: St_dst_Maker.cxx,v 1.68 2002/02/03 00:35:14 caines Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.68  2002/02/03 00:35:14  caines
+// Remove annoying printout
+//
 // Revision 1.67  2001/10/26 16:49:28  caines
 // Temporarily feed nanodes and npixels into the SVT hit errors
 //
@@ -208,7 +211,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.67 2001/10/26 16:49:28 caines Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.68 2002/02/03 00:35:14 caines Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -506,11 +509,8 @@ Int_t  St_dst_Maker::Filler(){
 	      
 	      for( int clu=0; clu<mSvtBigHit->numOfHits(); clu++){
 
-	       
-		if( ladder == 15 || ladder ==16 && mSvtBigHit->svtHit()[clu].charge() > 250){
-		  cout << mSvtBigHit->WaferPosition()[clu].x() << " " 
-		       << mSvtBigHit->WaferPosition()[clu].y() << " " << index << " " << index2 << endl;
-		}
+		if( mSvtBigHit->svtHit()[clu].flag() > 3 ||
+		   mSvtBigHit->svtHitData()[clu].peakAdc < 15 ) continue;
 		mypoint[HitIndex].hw_position = 2;
   		mypoint[HitIndex].hw_position += (1L<<4)*(index2);
 		svtx = int(mSvtBigHit-> WaferPosition()[clu].x()*4);
