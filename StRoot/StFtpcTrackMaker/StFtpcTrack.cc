@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.25 2003/01/16 18:04:33 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.26 2003/01/20 09:16:30 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.26  2003/01/20 09:16:30  oldi
+// Calculation of residuals simplified.
+//
 // Revision 1.25  2003/01/16 18:04:33  oldi
 // Bugs eliminated. Now it compiles on Solaris again.
 // Split residuals for global and primary fit.
@@ -576,6 +579,7 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Bool_t primary_fit
   
   // call fit class
   MomentumFit();
+  CalcGlobResiduals();
 
   // tracks are treated as the particles fly
   StFtpcPoint *firstP = (StFtpcPoint *)mPoints->At(GetNumberOfPoints()-1);
@@ -609,6 +613,7 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Bool_t primary_fit
     
     else {
       MomentumFit(vertex); // refit
+      CalcPrimResiduals();
       
       firstPoint = StThreeVector<Double_t>(vertexPos.x(), vertexPos.y(), vertexPos.z());
       mFromMainVertex = (Bool_t)kTRUE;
@@ -638,8 +643,6 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Bool_t primary_fit
   if (vertex->GetId() == 0) { // no vertex found, tracking done with arbitray vertex at 0., 0., 0.
     mDca = 0.; // set dca to zero
   }
-
-  CalcResiduals(primary_fit);
 
   return;
 }
