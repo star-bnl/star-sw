@@ -4,8 +4,10 @@
   macro/global/import *
 
 
- message 'Calling ev02...'
-
+ message 'init_ev0#ev0_am2: set dst/vertex rowcount to 1, then call ev0_am2'
+ 
+ rowcount [dst]/vertex 1
+ 
  ami/mod/call ev0_am2 _
         [params]/global/ev0pars/ev0par2 _
         [dst]/globtrk _

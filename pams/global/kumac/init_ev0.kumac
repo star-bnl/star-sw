@@ -38,14 +38,18 @@ cd /dui
 * **************************************************
  
  macro init_ev02
+   macro/global/import *
+ return
+* ***********************************************
+ macro fill_ev02
    
   macro/global/import *
 
-cd [params]/global/ev0pars
-
-tdm/newtable ev0par2 ev0_ev0par2 3
-rowcount ev0par2 3
-
+ cd [params]/global/ev0pars
+     
+ tdm/newtable ev0par2 ev0_ev0par2 3
+ rowcount ev0par2 3
+ 
 tdm/table/cell/putvalue 'ev0par2[0].iflag' 0
 tdm/table/cell/putvalue 'ev0par2[1].iflag' 0
 tdm/table/cell/putvalue 'ev0par2[2].iflag' 0
@@ -70,13 +74,9 @@ tdm/table/cell/putvalue 'ev0par2[2].alpha_max' 1.2
 tdm/table/cell/putvalue 'ev0par2[2].ptarm_max' 0.3
 
 
-   maxrow [dst]/ev0out 100000
-   newtable [data]/global/tracks/ev0track2 ev0_track2 10000
-   maxrow [data]/global/tracks/ev0track2 10000
-
-cd /dui
+ cd /dui
  
- return
+return
 
 * **************************************************
 
