@@ -1,5 +1,8 @@
-// $Id: StChargeStepMaker.cxx,v 1.2 2000/07/14 00:08:39 hardtke Exp $
+// $Id: StChargeStepMaker.cxx,v 1.3 2000/07/14 14:42:43 hardtke Exp $
 // $Log: StChargeStepMaker.cxx,v $
+// Revision 1.3  2000/07/14 14:42:43  hardtke
+// Add return values so it compiles on Solaris
+//
 // Revision 1.2  2000/07/14 00:08:39  hardtke
 // improve speed by factor of 1000
 //
@@ -84,7 +87,7 @@ Int_t StChargeStepMaker::Make() {
   if (!raw_data_tpc)
     {
       cout << "No raw data found." << endl ;
-      return ;
+      return kStOK;
     }
   else
     {
@@ -97,7 +100,7 @@ Int_t StChargeStepMaker::Make() {
       St_DataSet *sector = rawdata.FindObject(sectorname) ;
       //      cout << " Examining sector : " << sectorname << endl ;	
       
-      if (!sector) return ;
+      if (!sector) return kStOK;
       
       St_DataSetIter sector_iterator(sector) ;
       //sector_iterator.Du() ;
@@ -284,7 +287,7 @@ Int_t StChargeStepMaker::Make() {
 
 void StChargeStepMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StChargeStepMaker.cxx,v 1.2 2000/07/14 00:08:39 hardtke Exp $\n");
+  printf("* $Id: StChargeStepMaker.cxx,v 1.3 2000/07/14 14:42:43 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -328,7 +331,7 @@ theGuess = (int)((theDb->Dimensions()->outerEffectiveDriftDistance()/(theDb->Dri
   derivative[i] = new TH1S(histname,histname,100,theGuess-50,theGuess+50);
   AddHist(derivative[i]);
   sprintf(histname,"Result %s",eRegions_names[i]); 
-  result[i] = new TH1F(histname,histname,200,theGuess-10,theGuess+10);
+  result[i] = new TH1F(histname,histname,200,theGuess-20,theGuess+20);
   AddHist(result[i]);
  };
 
@@ -349,7 +352,7 @@ void StChargeStepMaker::MakeHistograms() {
 float StChargeStepMaker::GetWeightedMean(TH1S* hist){
 int peak = hist->GetMaximumBin();
  int location = hist->GetBinCenter(peak);
- if (location<theGuess-10||location>theGuess+10) {
+ if (location<theGuess-20||location>theGuess+20) {
    cout << "StChargeStepMaker:: False peak found at tb = " << location << endl;
    return -1.0;
  }
