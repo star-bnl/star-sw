@@ -6,38 +6,38 @@ my @idl = find_idl($Dir); #print "@idl\n";
 my @idlT = ();
 my @tgt_idlT = ();
 my %idl    = ();
-my @src = ();
+my @sources = ();
+my $src;
 my $obj = $OBJ . "/tables"; 
-my $DirPath  = cwd(); print "DirPath = $DirPath\n";
-my $share  = $DirPath . "/.share/tables";
-#Link $obj =>  $share; print "Link $obj =>  $share\n";
+my $share  = "#.share/tables"; #print "share = $share\n";
 Link $obj =>  $share; print "Link $obj =>  $share\n";
 my $SO_PKG = "St_Tables.so";
 for my $idl (@idl) {#  print "$idl \n";
-  if (! grep (/\/idl\//,$idl)) {next;}
-#  if (! grep (/vpd\//,$idl)) {next;}
+  if (! grep (/\/idl\//,$idl)) {next;} #  if (! grep (/vpd\//,$idl)) {next;}
   push @idlT, $idl; #print "i=",$i++," idl = ",$idl,"\n";
   my $export_idl = $share . "/" . basename ($idl); #print "export_idl = $export_idl\n";
   push @tgt_idlT, $export_idl;
-  my $dir = dirname ($export_idl); 
-  my $stem = basename ($export_idl, ".idl"); #print "dir = $dir; stem = $stem\n";
+  my $stem = basename ($export_idl, ".idl"); #print "stem = $stem\n";
   $idl{$stem} = $export_idl;
 }
-InstallAs $env [ @tgt_idlT ], [ @idlT ];
+Install $env $share, @idlT;
 #___________________________________
-(my $build = $OBJ) =~ s/\#//g;  #print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
-(my $Dir = DirPath '.') =~ s/$build\///g; #print "Dir = $Dir\n";
-my $CPPPATH = "$Dir:$env->{CPPPATH}"; #print "CPPPATH = $CPPPATH\n";
+(my $build = $obj) =~ s/\#//g;  #print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
 my $CPPFLAGS = cppflags($env);
-foreach my $stem (sort keys %idl) { #print "Idl: $stem => $idl{$stem}, $idlH{$stem}, $idlI{$stem}, $idlHH{$stem}, $idlCXX{$stem}\n"; 
-  (my $dir = dirname ($idl{$stem})) =~ s/\#//g; #print "D dir = $dir \n";
-  my @idll = ($idl{$stem}); #print "@idll\n";
+foreach my $stem (sort keys %idl) { 
+  my $idll = ($idl{$stem}); #print "@idll\n";
+  my $dir  = dirname ($idll); #print "dir = $dir\n"; 
   my $idl  = basename ($idl{$stem});
   my $idlH = $dir . "/" . $stem . ".h"; 
   my $idlI = $dir . "/" . $stem . ".inc"; 
-  Command $env [$idlH, $idlI], @idll, qq (cd $dir; stic -H -q $idl );
-  my $idlHH = $dir . "/St_" . $stem . "_Table.h"; 
-  Command $env [$idlHH], ConscriptTables, 
+  (my $Dir = $dir) =~ s/\#//g; #print "Dir = $Dir \n";
+  my @Deps = ();
+  push  @Deps, $idll;
+  Command $env [$idlH, $idlI], @Deps, qq (cd $Dir; stic -H -q $idl );
+  my $idlHH = $obj . "/St_" . $stem . "_Table.h"; 
+  push @Deps, $idlH;
+  push @Deps, $idlI;
+  Command $env [$idlHH], @Deps, 
   qq (
       echo "#ifndef STAF_St_"$stem"_Table        ">%>
       echo "#define STAF_St_"$stem"_Table        ">>%>
@@ -60,8 +60,9 @@ foreach my $stem (sort keys %idl) { #print "Idl: $stem => $idl{$stem}, $idlH{$st
       echo "};                                                                              ">>%>
       echo "#endif                                                                          ">>%>
      );
-  my $idlCXX = $dir . "/St_" . $stem . "_Table.cxx"; 
-  Command $env [$idlCXX], ConscriptTables, 
+  Install $env  $share, $idlHH;
+  my $idlCXX = $obj . "/St_" . $stem . "_Table.cxx"; 
+  Command $env [$idlCXX], @Deps, 
   qq (
       echo "#include \\"St_"$stem"_Table.h\\"                                              " >%>
       echo "/////////////////////////////////////////////////////////////////////////   ">>%>
@@ -75,32 +76,26 @@ foreach my $stem (sort keys %idl) { #print "Idl: $stem => $idl{$stem}, $idlH{$st
       echo "TableImp("$stem")                                                              ">>%>
       echo "TableStreamerImp("$stem")                                                      ">>%>
      );
-  Install $env $obj, $idlCXX;
-  my $idlcxx = basename($idlCXX);
-  my $idlcxx_obj = $obj . "/" . $idlcxx;
-  push @src, $idlcxx_obj;# print "src+ $idlcxx_obj\n";
-  my $idlCintH = $dir . "/St_" . $stem . "_TableCint.h"; 
-  my $idlCintC = $dir . "/St_" . $stem . "_TableCint.cxx"; 
-  my $idlcintH = basename($idlCintH);
-  my $idlcintC = basename($idlCintC);
+  push @sources, $idlCXX;
+  my $idlcintC = "St_" . $stem . "_TableCint.cxx";
+  my $idlCintC = $obj . "/" . $idlcintC;   
+  my $idlCintH = $obj . "/St_" . $stem . "_TableCint.h"; 
   my $idlhh    = basename($idlHH);
-  Command $env [$idlCintH, $idlCintC], $idlHH,
-  qq (
-      cd $dir; rm -f LinkDef.h;      echo "#ifdef __CINT__" > LinkDef.h;      echo "#pragma link off all globals;" >> LinkDef.h;      echo "#pragma link off all classes;" >> LinkDef.h;      echo "#pragma link off all functions;" >> LinkDef.h;      echo "#pragma link C++ class St_"$stem"-;" >> LinkDef.h;      echo "#pragma link C++ class "$stem"_st-!;" >> LinkDef.h;      echo "#endif" >> LinkDef.h;      rootcint -f $idlcintC -c $CPPFLAGS  $idlhh LinkDef.h;
-    );
-  my $CintC = $obj . "/" . $idlcintC;
-  push @src,  $CintC;# print "src+ $CintC\n";
-  Install $env $obj, $idlCintC;
+  (my $idlHHH = $idlHH) =~ s/$obj/$share/g;
+  push @Deps, $idlHHH;
+  my $cmd = "cd $build; rm -f LinkDef.h;";
+     $cmd.= "echo \"#ifdef __CINT__\" > LinkDef.h;";
+     $cmd.= "echo \"#pragma link off all globals;\" >> LinkDef.h;";
+     $cmd.= "echo \"#pragma link off all classes;\" >> LinkDef.h;";
+     $cmd.= "echo \"#pragma link off all functions;\" >> LinkDef.h;";
+     $cmd.= "echo \"#pragma link C++ class St_\"$stem\"-;\" >> LinkDef.h;";
+     $cmd.= "echo \"#pragma link C++ class \"$stem\"_st-!;\" >> LinkDef.h;";
+     $cmd.= "echo \"#endif\" >> LinkDef.h;";
+     $cmd.= " rootcint -f $idlcintC -c $CPPFLAGS  $idlhh LinkDef.h;"; #print "$cmd\n";
+  Command $env [$idlCintC, $idlCintH], @Deps,  qq ($cmd);
+  push @sources, $idlCintC; 
 }
-#my $conscript = $share . "/"  . "Conscript"; print "conscript = $conscript\n";
-#Command $env $conscript, [@src], 
-#qq (
-#    echo "Import qw ( env INCLUDE LIB BIN EXPORT BUILD OBJ);" > %>
-#    echo "LinkedModule \$env $SO_PKG, qw (%<)"; >> %>
-#    echo "Install $env $LIB, $SO_PKG;">> %>
-#);
-#Build ( "$conscript" );
-LinkedModule $env $SO_PKG, @src;
+LinkedModule $env $SO_PKG, @sources;
 Install $env $LIB, $SO_PKG;
 #________________________________________
 sub script::find_idl {
