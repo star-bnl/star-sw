@@ -2,6 +2,9 @@
 Module   FTPCGEO  is the geometry of the Forward TPC in STAR
 Author   Michael Konrad
 Created  18-Okt-96
+* modification:
+* PN. 06/08/98: truncate variable in structures to 8 letters maximum
+*               otherwise they can not be converted into tables
 ******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
 *
@@ -13,20 +16,20 @@ Created  18-Okt-96
 		FFRG, FFRH, FFRI, FFRJ, FFRK, FFRL, FFRM, 
 		FFRN, FFRO, FFRP, FFRQ 
 *
-	structure FTPG { Version, Rinnermost, Routermost,
-                         RGasOut, Zstart, totLen, LayLen,
-                         Hitlay, DrInAlLay1, DrInAlLay2,
-                         DrInIsoLay, DzKaptonW, DrIFR, DzIFR}
+	structure FTPG { Version,  RinnerMs, RouterMs,
+                         RGasOut,  Zstart,   totLen, LayLen,
+                         Hitlay,   DrInAlL1, DrInAlL2,
+                         DrInIsoL, DzKapton, DrIFR,  DzIFR}
 *
 	structure FFCC {Version, StiLeng, StiDia, StiRpos, RiThick,
                         RiDr, RiGap, BarLeng, BarWidt, BarThik}
 *
 	structure FRBD {Version, Phi1, Phi2, ModLeng, GlassDr, 
                         AlDr, PcbDr, ElektrDr, CoolDr, PhibarDr, 
-                        PhibarTh, SidebarDr, SidebarWi}
+                        PhibarTh, SidBarDr, SidBarWi}
 *
-	structure FSSD {Version, EringRmax, EringTh, EringWTh, 
-                        DringDr, DringWi, IringRmax, IringTh, 
+	structure FSSD {Version, ERingRmx, EringTh, EringWTh, 
+                        DringDr, DringWi, IRingRmx, IringTh, 
                         FringDr, FringWi, SbarWi, SbarTh,
                         SplaLe, SplaWi, SplaTh, SplaDia, TbarWi, 
                         TbarHe, TplaWi, TplaTh}
@@ -38,17 +41,17 @@ Created  18-Okt-96
 * ----------------------------------------------------------------------------
    Fill FTPG	    ! basic FTPC data
 	Version		= 1	! geometry Version
-	Rinnermost	= 7.5   ! innermost radius of envelope
-	Routermost	= 36.5	! outermost radius of envelope
+	RinnerMs	= 7.5   ! innermost radius of envelope
+	RouterMs	= 36.5	! outermost radius of envelope
 	RGasOut		= 30.5  ! outer radius of the gas-volume
 	Zstart		= 150	! distance from the interaction point
 	totLen		= 120	! overall length
         LayLen          = 0.1   ! thickness of the sensitive Layer
         Hitlay          = 10    ! # of padrows in one FTPC : 10
-	DrInAlLay1	= 0.05  ! thickness of inner Al-Layer of inner Tube
-	DrInAlLay2	= 0.05  ! thickness of outer Al-Layer of inner Tube
-	DrInIsoLay	= 0.4	! thickness of plastic insulation of inner tube
-	DzKaptonW	= 0.02	! thickness of a double kapton-windows
+	DrInAlL1	= 0.05  ! thickness of inner Al-Layer of inner Tube
+	DrInAlL2	= 0.05  ! thickness of outer Al-Layer of inner Tube
+	DrInIsoL	= 0.4	! thickness of plastic insulation of inner tube
+	DzKapton	= 0.02	! thickness of a double kapton-windows
 	DrIFR		= 1.15	! thickness (r) of inner flange ring
 	DzIFR		= 0.4	! thickness (z) of inner flange ring
    Endfill
@@ -78,18 +81,18 @@ Created  18-Okt-96
 	CoolDr		= .1	! cooling plate thickness
 	PhibarDr	= 1.5	! height (r) of the phibar
 	PhibarTh	= .8	! thickness (z) of the phibar
-	SidebarDr	= 1.9	! Sidebar Thickness
-	SidebarWi	= 2.2	! Sidebar Width
+	SidBarDr	= 1.9	! SideBar Thickness
+	SidBarWi	= 2.2	! Sidebar Width
 Endfill
 *
    Fill FSSD           ! Support Structure Design
 	Version		= 1	! geometry Version
-	EringRmax	= 36.5	! endring outer radius
+	ERingRmx	= 36.5	! endring outer radius
 	EringTh		= 6.7	! endring thickness (z) 
 	EringWTh	= .9	! wall thickness of the endring
 	DringDr		= 1.75	! distance ring thickness (r)
 	DringWi		= 2.35	! distance ring width (z)
-	IringRmax	= 36.5	! intersection ring outer radius
+	IRingRmx	= 36.5	! intersection ring outer radius
 	IringTh		= .9	! intersection ring thickness (z) 
 	FringDr		= 1.75	! flange ring thickness (r)
 	FringWi		= 1.9	! flange ring width (z)
@@ -126,18 +129,18 @@ Block FTPC is the Forward TPC mother (needed for standalong test only)
       Material  Air
       Medium    Standard
       Attribute FTPC   seen=1   colo=1
-      shape     TUBE  Rmin=ftpg_Rinnermost, 
-                           Rmax=ftpg_Routermost, 
+      shape     TUBE  Rmin=ftpg_RinnerMs, 
+                           Rmax=ftpg_RouterMs, 
                            Dz=ftpg_totLen/2 
 *
       Create and position FIAL 
       Create and position FMPT 
       Create and position FOAL
       Create and position FDUM
-      Create and position FIFR z=(ftpg_totLen/2)-(ftpg_DzIFR/2)-ftpg_DzKaptonW
-               position FIFR z=-((ftpg_totLen/2)-(ftpg_DzIFR/2)-ftpg_DzKaptonW)
-      Create and position FKWI z=(ftpg_totLen/2)-ftpg_DzKaptonW/2
-               position FKWI z=-((ftpg_totLen/2)-ftpg_DzKaptonW/2)
+      Create and position FIFR z=(ftpg_totLen/2)-(ftpg_DzIFR/2)-ftpg_DzKapton
+               position FIFR z=-((ftpg_totLen/2)-(ftpg_DzIFR/2)-ftpg_DzKapton)
+      Create and position FKWI z=(ftpg_totLen/2)-ftpg_DzKapton/2
+               position FKWI z=-((ftpg_totLen/2)-ftpg_DzKapton/2)
 *
 * Start here with the Readout Chambers
       temp3=(ftpg_totLen/2)-fssd_EringTh-fssd_DringWi-frbd_ModLeng/2
@@ -161,87 +164,87 @@ Block FTPC is the Forward TPC mother (needed for standalong test only)
                     position FSFL z=temp3-fssd_IringTh/2-fssd_FringWi/2
       EndDo
       Create and position FSSB AlphaZ=19.2 _
-                          x=(fssd_EringRmax-fssd_SbarTh/2)*cos(pi*19.2/180.) _
-                          y=(fssd_EringRmax-fssd_SbarTh/2)*sin(pi*19.2/180.)
+                          x=(fssd_ERingRmx-fssd_SbarTh/2)*cos(pi*19.2/180.) _
+                          y=(fssd_ERingRmx-fssd_SbarTh/2)*sin(pi*19.2/180.)
       position FSSB AlphaZ=19.2 _
-                          x=-(fssd_EringRmax-fssd_SbarTh/2)*cos(pi*19.2/180.) _
-                          y=-(fssd_EringRmax-fssd_SbarTh/2)*sin(pi*19.2/180.)
+                          x=-(fssd_ERingRmx-fssd_SbarTh/2)*cos(pi*19.2/180.) _
+                          y=-(fssd_ERingRmx-fssd_SbarTh/2)*sin(pi*19.2/180.)
       position FSSB AlphaZ=-19.2 _
-                          x=(fssd_EringRmax-fssd_SbarTh/2)*cos(pi*19.2/180.) _
-                          y=-(fssd_EringRmax-fssd_SbarTh/2)*sin(pi*19.2/180.)
+                          x=(fssd_ERingRmx-fssd_SbarTh/2)*cos(pi*19.2/180.) _
+                          y=-(fssd_ERingRmx-fssd_SbarTh/2)*sin(pi*19.2/180.)
       position FSSB AlphaZ=-19.2 _
-                          x=-(fssd_EringRmax-fssd_SbarTh/2)*cos(pi*19.2/180.) _
-                          y=(fssd_EringRmax-fssd_SbarTh/2)*sin(pi*19.2/180.)
+                          x=-(fssd_ERingRmx-fssd_SbarTh/2)*cos(pi*19.2/180.) _
+                          y=(fssd_ERingRmx-fssd_SbarTh/2)*sin(pi*19.2/180.)
 *
       Do k=1,5
       Create and position FSSP z=(ftpg_totLen/2)-fssd_EringTh-(k-.5)*21.3  _
-                               x=fssd_EringRmax-fssd_SbarTh/2 y=0
+                               x=fssd_ERingRmx-fssd_SbarTh/2 y=0
       Create and position FSSP z=(ftpg_totLen/2)-fssd_EringTh-(k-.5)*21.3  _
-                               x=-fssd_EringRmax+fssd_SbarTh/2 y=0
+                               x=-fssd_ERingRmx+fssd_SbarTh/2 y=0
       EndDo
 *
       Create and position FSTB x=-fssd_TbarWi/2-fssd_TplaWi/2 _
-                               y=fssd_EringRmax-fssd_TbarHe/2
+                               y=fssd_ERingRmx-fssd_TbarHe/2
                  position FSTB x=+fssd_TbarWi/2+fssd_TplaWi/2 _
-                               y=fssd_EringRmax-fssd_TbarHe/2
+                               y=fssd_ERingRmx-fssd_TbarHe/2
                  position FSTB x=-fssd_TbarWi/2-fssd_TplaWi/2 _
-                               y=-fssd_EringRmax+fssd_TbarHe/2
+                               y=-fssd_ERingRmx+fssd_TbarHe/2
                  position FSTB x=+fssd_TbarWi/2+fssd_TplaWi/2 _
-                               y=-fssd_EringRmax+fssd_TbarHe/2
+                               y=-fssd_ERingRmx+fssd_TbarHe/2
 *
-      Create and position FSTP x=0 y=fssd_EringRmax-fssd_TplaTh/2
-                 position FSTP x=0 y=-fssd_EringRmax+fssd_TplaTh/2
+      Create and position FSTP x=0 y=fssd_ERingRmx-fssd_TplaTh/2
+                 position FSTP x=0 y=-fssd_ERingRmx+fssd_TplaTh/2
 Endblock
 * ----------------------------------------------------------------------------
 Block FIAL is the inner AL-tube of the FTPC 
 	Material Aluminium
 	Attribute FIAL seen=1 colo=2
-	shape	TUBE Rmin=ftpg_Rinnermost,
-                     Rmax=ftpg_Rinnermost+ftpg_DrInAlLay1,
-		     Dz=(ftpg_totLen/2)-ftpg_DzIFR-ftpg_DzKaptonW
+	shape	TUBE Rmin=ftpg_RinnerMs,
+                     Rmax=ftpg_RinnerMs+ftpg_DrInAlL1,
+		     Dz=(ftpg_totLen/2)-ftpg_DzIFR-ftpg_DzKapton
 Endblock
 * ----------------------------------------------------------------------------
 Block FMPT is the insulating plastic tube of the drift-electrode
 	Material POLYETHYLENE 
 	Attribute FMPT seen=1 colo=3
-	shape   TUBE Rmin=ftpg_Rinnermost+ftpg_DrInAlLay1,
-                     Rmax=ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay,
-		     Dz=(ftpg_totLen/2)-ftpg_DzIFR-ftpg_DzKaptonW
+	shape   TUBE Rmin=ftpg_RinnerMs+ftpg_DrInAlL1,
+                     Rmax=ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL,
+		     Dz=(ftpg_totLen/2)-ftpg_DzIFR-ftpg_DzKapton
 Endblock
 * ----------------------------------------------------------------------------
 Block FOAL is the Al drift-electrode
 	Material Aluminium 
 	Attribute FMPT seen=1 colo=2
-	temp1=ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-              ftpg_DrInIsoLay+ftpg_DrInAlLay2
-	shape   TUBE Rmin=ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay,
+	temp1=ftpg_RinnerMs+ftpg_DrInAlL1+ _
+              ftpg_DrInIsoL+ftpg_DrInAlL2
+	shape   TUBE Rmin=ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL,
                      Rmax=temp1,
-		     Dz=(ftpg_totLen/2)-ftpg_DzIFR-ftpg_DzKaptonW
+		     Dz=(ftpg_totLen/2)-ftpg_DzIFR-ftpg_DzKapton
 Endblock
 * ----------------------------------------------------------------------------
 Block FDUM is a dummy volume to provide the correct hitplane-numbering
       Material  Argon_gas
       attribute FINR   seen=0  colo=7
-      temp1=ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-              ftpg_DrInIsoLay+ftpg_DrInAlLay2
+      temp1=ftpg_RinnerMs+ftpg_DrInAlL1+ _
+              ftpg_DrInIsoL+ftpg_DrInAlL2
       Shape     TUBE   Rmin=temp1,
                        Rmax=ftpg_RGasOut,
-                       Dz=ftpg_totLen/2-ftpg_DzKaptonW
+                       Dz=ftpg_totLen/2-ftpg_DzKapton
       Create and position FGAS
 Endblock
 * ----------------------------------------------------------------------------
 Block FGAS is the FTPC gas volume
       Material  Argon_gas
       attribute FINR   seen=1  colo=7
-      temp1=ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-              ftpg_DrInIsoLay+ftpg_DrInAlLay2
+      temp1=ftpg_RinnerMs+ftpg_DrInAlL1+ _
+              ftpg_DrInIsoL+ftpg_DrInAlL2
       Shape     TUBE   Rmin=temp1,
                        Rmax=ftpg_RGasOut,
-                       Dz=ftpg_totLen/2-ftpg_DzKaptonW
+                       Dz=ftpg_totLen/2-ftpg_DzKapton
 	create FSEN
 *
 * temp1 is length of the gas-volume 
-	temp1=ftpg_totLen-2*(ftpg_DzKaptonW)
+	temp1=ftpg_totLen-2*(ftpg_DzKapton)
 *
 	Do k=1,nint(ftpg_Hitlay)
            position FSEN z = temp1*k/(ftpg_Hitlay+1.)-temp1/2.
@@ -249,8 +252,8 @@ Block FGAS is the FTPC gas volume
 *
 * FIFR must be called a second time; else 'overrruled' by FGAS
 * PN:  why the first one was needed ?
-      Create and position FIFR z=(ftpg_totLen/2)-(ftpg_DzIFR/2)-ftpg_DzKaptonW
-               position FIFR z=-((ftpg_totLen/2)-(ftpg_DzIFR/2)-ftpg_DzKaptonW)
+      Create and position FIFR z=(ftpg_totLen/2)-(ftpg_DzIFR/2)-ftpg_DzKapton
+               position FIFR z=-((ftpg_totLen/2)-(ftpg_DzIFR/2)-ftpg_DzKapton)
 *
 * Start here to built the Fieldcage in the Gas-Volume
 *
@@ -268,8 +271,8 @@ Block FGAS is the FTPC gas volume
                          x=ffcc_StiRpos*cos(pi/6.)  y=-ffcc_StiRpos*sin(pi/6.)
 *
 	create FFCE
-	temp1 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	temp2 = ((ftpg_RGasOut-temp1)/2)+temp1
 	position FFCE in FGAS _
                  z=(ftpg_totLen/2+ffcc_StiDia/2+ffcc_BarWidt/2)-5 y=temp2
@@ -357,8 +360,8 @@ Block FSEN is the sensetive gas volume
       Medium    sensitive  ISVOL=1
       attribute FSEN   seen=1  colo=4
 *      attribute FSEN   seen=0  colo=0
-      temp1=ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-            ftpg_DrInIsoLay+ftpg_DrInAlLay2
+      temp1=ftpg_RinnerMs+ftpg_DrInAlL1+ _
+            ftpg_DrInIsoL+ftpg_DrInAlL2
       Shape     TUBE   Rmin=temp1,
                        Rmax=ftpg_RGasOut,
 		       Dz=ftpg_LayLen/2
@@ -376,17 +379,17 @@ endblock
 Block FIFR is the Al inner flange ring
 	Material Aluminium 
 	Attribute FMPT seen=1 colo=2
-	shape   TUBE Rmin=ftpg_Rinnermost,
-                     Rmax=ftpg_Rinnermost+ftpg_DrIFR,
+	shape   TUBE Rmin=ftpg_RinnerMs,
+                     Rmax=ftpg_RinnerMs+ftpg_DrIFR,
 		     Dz=ftpg_DzIFR/2
 Endblock
 * ----------------------------------------------------------------------------
 Block FKWI is the double Kapton window
 	Material  MYLAR
 	Attribute FMPT seen=1 colo=3
-	shape   TUBE Rmin=ftpg_Rinnermost,
+	shape   TUBE Rmin=ftpg_RinnerMs,
                      Rmax=ftpg_RGasOut,
-		     Dz=ftpg_DzKaptonW/2
+		     Dz=ftpg_DzKapton/2
 Endblock
 * ----------------------------------------------------------------------------
 * ----------------------------------------------------------------------------
@@ -401,8 +404,8 @@ Endblock
 Block FFCE is the Fildcage Enhanced Support Structure
 	Material Aluminium 
 	Attribute FFCE seen=1 colo=2
-	temp1 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   BOX Dx=ffcc_BarThik/2 Dy=(ftpg_RGasOut-temp1)/2 _
                     Dz=ffcc_BarWidt/2
 Endblock
@@ -412,7 +415,7 @@ Block FROC is one Module of the Readout Chamber
 	Material  Air
 	Attribute FROC seen=0 colo=0
 	temp1=ftpg_RGasOut+frbd_GlassDr+frbd_AlDr+frbd_PcbDr+ _
-              frbd_ElektrDr+frbd_CoolDr+1.2*frbd_SidebarDr
+              frbd_ElektrDr+frbd_CoolDr+1.2*frbd_SidBarDr
 	shape TUBS Rmin=ftpg_RGasOut,
                    Rmax=temp1,
                    Dz=frbd_ModLeng/2 Phi1=frbd_Phi1 Phi2=frbd_Phi2
@@ -423,9 +426,9 @@ Block FROC is one Module of the Readout Chamber
 	Create and position FRCC in FROC
 	Create and position FRPB in FROC
 	temp1=ftpg_RGasOut+frbd_GlassDr+frbd_AlDr+frbd_PcbDr+ _
-              frbd_ElektrDr+frbd_CoolDr+frbd_SidebarDr
-	Create and position FRSB in FROC x=temp1-frbd_SidebarDr/2 _
-                   y=frbd_SidebarWi/2 
+              frbd_ElektrDr+frbd_CoolDr+frbd_SidBarDr
+	Create and position FRSB in FROC x=temp1-frbd_SidBarDr/2 _
+                   y=frbd_SidBarWi/2 
 Endblock
 *
 * ----------------------------------------------------------------------------
@@ -495,14 +498,14 @@ Endblock
 Block FRSB is the Side Bar of the Readout Chamber
 	Material Aluminium
 	Attribute FRSB seen=1 colo=2
-	shape BOX Dx=frbd_SidebarDr/2 Dy=frbd_SidebarWi/2 Dz=frbd_ModLeng/2
+	shape BOX Dx=frbd_SidBarDr/2 Dy=frbd_SidBarWi/2 Dz=frbd_ModLeng/2
 Endblock
 * ----------------------------------------------------------------------------
 * ----------------------------------------------------------------------------
 Block FSER is the Support End Ring
 	Material Aluminium
 	Attribute FSER seen=1 colo=2
-	shape TUBE Rmin=ftpg_RGasOut Rmax=fssd_EringRmax Dz=fssd_EringTh/2
+	shape TUBE Rmin=ftpg_RGasOut Rmax=fssd_ERingRmx Dz=fssd_EringTh/2
 	Create and position FSEI in FSER
 Endblock
 * ----------------------------------------------------------------------------
@@ -510,7 +513,7 @@ Block FSEI is the inner Part of the Support And Ring
 	Material Air
 	Attribute FSER seen=1 colo=1
 	shape TUBE Rmin=ftpg_RGasOut+fssd_EringWTh,
-                   Rmax=fssd_EringRmax-fssd_EringWTh,
+                   Rmax=fssd_ERingRmx-fssd_EringWTh,
                    Dz=fssd_EringTh/2-fssd_EringWTh
 Endblock
 * ----------------------------------------------------------------------------
@@ -526,7 +529,7 @@ Block FSIL is the Inner Support Ring
 	Material Aluminium
 	Attribute FSIL seen=1 colo=2
 	shape TUBE Rmin=ftpg_RGasOut,
-                   Rmax=fssd_IringRmax,
+                   Rmax=fssd_IRingRmx,
                    Dz=fssd_IringTh/2
 *	Create and position FSFL in FSIL z=fssd_IringTh/2+fssd_FringWi/2
 *	position FSFL in FSIL z=-fssd_IringTh/2-fssd_FringWi/2
@@ -580,10 +583,10 @@ Block FFRA is outermost FC Ring
 	Material Aluminium 
 	Attribute FFRA seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+17*temp1-ffcc_RiDr/2,
                      Rmax=temp2+17*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
@@ -593,10 +596,10 @@ Block FFRB
 	Material Aluminium 
 	Attribute FFRB seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+16*temp1-ffcc_RiDr/2,
                      Rmax=temp2+16*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
@@ -606,10 +609,10 @@ Block FFRC
 	Material Aluminium 
 	Attribute FFRC seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+15*temp1-ffcc_RiDr/2,
                      Rmax=temp2+15*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
@@ -619,10 +622,10 @@ Block FFRD
 	Material Aluminium 
 	Attribute FFRD seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+14*temp1-ffcc_RiDr/2,
                      Rmax=temp2+14*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
@@ -632,10 +635,10 @@ Block FFRE
 	Material Aluminium 
 	Attribute FFRE seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+13*temp1-ffcc_RiDr/2,
                      Rmax=temp2+13*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
@@ -646,10 +649,10 @@ Block FFRF
 	Material Aluminium 
 	Attribute FFRF seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+12*temp1-ffcc_RiDr/2,
                      Rmax=temp2+12*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
@@ -659,10 +662,10 @@ Block FFRG
 	Material Aluminium 
 	Attribute FFRG seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+11*temp1-ffcc_RiDr/2,
                      Rmax=temp2+11*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
@@ -672,10 +675,10 @@ Block FFRH
 	Material Aluminium 
 	Attribute FFRH seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+10*temp1-ffcc_RiDr/2,
                      Rmax=temp2+10*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
@@ -685,10 +688,10 @@ Block FFRI
 	Material Aluminium 
 	Attribute FFRI seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+9*temp1-ffcc_RiDr/2,
                      Rmax=temp2+9*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
@@ -698,10 +701,10 @@ Block FFRJ
 	Material Aluminium 
 	Attribute FFRJ seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+8*temp1-ffcc_RiDr/2,
                      Rmax=temp2+8*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
@@ -711,10 +714,10 @@ Block FFRK
 	Material Aluminium 
 	Attribute FFRK seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+7*temp1-ffcc_RiDr/2,
                      Rmax=temp2+7*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
@@ -724,10 +727,10 @@ Block FFRL
 	Material Aluminium 
 	Attribute FFRL seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+6*temp1-ffcc_RiDr/2,
                      Rmax=temp2+6*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
@@ -737,10 +740,10 @@ Block FFRM
 	Material Aluminium 
 	Attribute FFRM seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+5*temp1-ffcc_RiDr/2,
                      Rmax=temp2+5*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
@@ -750,10 +753,10 @@ Block FFRN
 	Material Aluminium 
 	Attribute FFRN seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+4*temp1-ffcc_RiDr/2,
                      Rmax=temp2+4*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
@@ -763,10 +766,10 @@ Block FFRO
 	Material Aluminium 
 	Attribute FFRO seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+3*temp1-ffcc_RiDr/2,
                      Rmax=temp2+3*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
@@ -776,10 +779,10 @@ Block FFRP
 	Material Aluminium 
 	Attribute FFRP seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+2*temp1-ffcc_RiDr/2,
                      Rmax=temp2+2*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
@@ -789,10 +792,10 @@ Block FFRQ
 	Material Aluminium 
 	Attribute FFRQ seen=1 colo=2
 * 17 Rings -> 18 gaps
-	temp1 = (ftpg_RGasOut-(ftpg_Rinnermost+ftpg_DrInAlLay1+ _
-                ftpg_DrInIsoLay+ftpg_DrInAlLay2))/18
-	temp2 = ftpg_Rinnermost+ftpg_DrInAlLay1+ftpg_DrInIsoLay+ _
-                ftpg_DrInAlLay2
+	temp1 = (ftpg_RGasOut-(ftpg_RinnerMs+ftpg_DrInAlL1+ _
+                ftpg_DrInIsoL+ftpg_DrInAlL2))/18
+	temp2 = ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL+ _
+                ftpg_DrInAlL2
 	shape   TUBE Rmin=temp2+1*temp1-ffcc_RiDr/2,
                      Rmax=temp2+1*temp1+ffcc_RiDr/2,
 		     Dz=ffcc_RiThick/2
