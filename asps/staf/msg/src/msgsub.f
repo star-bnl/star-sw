@@ -33,7 +33,48 @@
 *                      **  ***     ***  **
 *                     **                 **
 *
-	SUBROUTINE MSG_Check( MSG, ID, Active, Counting )
+	SUBROUTINE			MSG_Abort_Check( ID )
+
+	IMPLICIT NONE
+
+*  Input: 
+	INTEGER ID !Fast-reference msg ID of a message to be checked.
+
+*  Brief description:  Abort program if abort limit reached.
+
+*  Description:
+*	Check the specified message-prefix's (ID) abort limit.  If it
+*	has been reached, display a message, then output the summary
+*	to the journal file, then abort.
+
+	INCLUDE 'msg_inc'
+
+	INTEGER TL, JL
+	LOGICAL Void
+	LOGICAL MSG_Journal_Close
+
+	IF ( MSG_Abort_Limit( ID ) .LE. 0 ) THEN !No abort limit -- do nothing.
+	
+	ELSE IF ( MSG_Counts( ID ) .GE. MSG_Abort_Limit( ID ) ) THEN !Time to abort.
+
+	  CALL MESSAGE_OUT( 'MSG_Abort_Check  Aborting on message [' // MSG_Prefix(ID)(:MSG_Length(ID)) // ']', 1 )
+
+	  IF (MSG_JOURNAL_ENABLE) THEN !Journal is open & enabled:
+	    CALL MSG_Get_LUN( TL, JL ) !Terminal LUN (don't care), Journal LUN.
+	    CALL MSG_Summary( JL ) !Put an msg summary on the journal file.
+	    CALL MSG_Summary_CPU( JL ) !Put an msg CPU-usage summary on the journal file.
+	    Void = MSG_Journal_Close() !Close the file, ignore return status.
+	  END IF
+
+*	  Abort:
+	  CALL EXIT
+
+	END IF
+
+	RETURN
+	END
+*
+	SUBROUTINE			MSG_Check( MSG, ID, Active, Counting )
 
 	IMPLICIT NONE
 
@@ -215,12 +256,12 @@
 	RETURN
 	END
 *
-	SUBROUTINE MSG_Enter( Prefix, ID )
+	SUBROUTINE			MSG_Enter( Prefix, ID )
 
 	IMPLICIT NONE
 
 *  Input:
-	CHARACTER*(*) Prefix !A STAR-standard message prefix.
+	CHARACTER*(*) Prefix !A message prefix.
 
 *  Output:
 	INTEGER ID !Fast-reference ID of the newly-entered
@@ -230,7 +271,7 @@
 
 *   Description:
 
-*	Enter the STAR-standard message prefix into the index.
+*	Enter the message prefix into the index.
 *	If there is no more room in the index, display a message
 *	and return ID=0.
 
@@ -260,20 +301,7 @@
 	  MSG_CPU_Mark(  ID ) = 0 !CPU usage "Mark", set at call to MSG_Mark.
 	  MSG_CPU_Delta( ID ) = 0 !Most recent CPU-usage between calls to MSG_Mark and MSG_Incr.
 	  MSG_CPU_Total( ID ) = 0 !Sum of all CPU-usages between calls to MSG_Mark and MSG_Incr.
-	  MSG_Counts(    ID ) = 0
-	  MSG_Lookups  ( ID ) = 0
-	  CALL MSG_Get_Class( MSG_Prefix(ID), Class ) !Get the class, from the prefix.
-	  IF ( MSG_Find_Class( Class, CID ) ) THEN !Found the class -- set class defaults:
-	    MSG_Active(      ID ) = MSG_Class_Default_Active(      CID )
-	    MSG_Counting(    ID ) = MSG_Class_Default_Counting(    CID )
-	    MSG_Count_limit( ID ) = MSG_Class_Default_Count_Limit( CID )
-	    MSG_Abort_limit( ID ) = MSG_Class_Default_Abort_Limit( CID )
-	  ELSE                                     !Didn't find the class:
-	    MSG_Active(      ID ) = .NOT. MSG_All_Disable
-	    MSG_Counting(    ID ) = .NOT. MSG_All_Nocount
-	    MSG_Count_limit( ID ) = MSG_All_Count_Limit !The default.
-	    MSG_Abort_limit( ID ) = 0 !The default -- no abort limit.
-	  END IF
+	  CALL MSG_ResetID( ID )  !Reset counters, flags and default limits.
 	ELSE !There's no room -- message:
 	  ID=0
 	  WRITE(M132,501) Prefix
@@ -289,7 +317,7 @@
 	RETURN
 	END
 *
-	LOGICAL FUNCTION MSG_Enter_Class( Class, ID )
+	LOGICAL FUNCTION		MSG_Enter_Class( Class, ID )
 
 	IMPLICIT NONE
 
@@ -349,7 +377,7 @@
 	RETURN
 	END
 *
-	LOGICAL FUNCTION MSG_Find( Prefix, ID, Active, Counting )
+	LOGICAL FUNCTION		MSG_Find( Prefix, ID, Active, Counting )
 
 	IMPLICIT NONE
 
@@ -430,7 +458,7 @@
 	RETURN
 	END
 *
-	LOGICAL FUNCTION MSG_Find_Class( Class, ID )
+	LOGICAL FUNCTION		MSG_Find_Class( Class, ID )
 
 	IMPLICIT NONE
 
@@ -491,7 +519,7 @@
 	RETURN
 	END
 *
-	SUBROUTINE MSG_Get_Class( Prefix, Class )
+	SUBROUTINE			MSG_Get_Class( Prefix, Class )
 
 	IMPLICIT NONE
 
@@ -550,7 +578,7 @@
 	RETURN
 	END
 *
-	SUBROUTINE MSG_Get_Prefix( MSG, Prefix )
+	SUBROUTINE			MSG_Get_Prefix( MSG, Prefix )
 
 	IMPLICIT NONE
 
@@ -628,7 +656,7 @@
 	RETURN
 	END
 *
-	SUBROUTINE MSG_Incr( ID )
+	SUBROUTINE			MSG_Incr( ID )
 
 	IMPLICIT NONE
 
@@ -666,7 +694,7 @@
 	RETURN
 	END
 *
-	SUBROUTINE MSG_Parse_Prefix( Prefix, Prefix_stripped, Prefix_number)
+	SUBROUTINE			MSG_Parse_Prefix( Prefix, Prefix_stripped, Prefix_number)
 
 	IMPLICIT NONE
 
@@ -735,6 +763,91 @@
 	  Prefix_stripped=Prefix
 	  Prefix_number=0
 	END IF
+
+	RETURN
+	END
+*
+	SUBROUTINE			MSG_ResetID( ID )
+
+	IMPLICIT NONE
+
+*  Input:
+	INTEGER ID !Fast-reference ID of an already-entered
+	           !message-prefix.
+
+*   Description:  Reset the message prefix in the index.
+*	Do nothing if ID is .LE. 0.
+
+*   Error conditions:  none
+
+	INCLUDE 'msg_inc'
+
+	CHARACTER*(MSG_class_length_P) Class
+	INTEGER CID
+	LOGICAL MSG_Find_Class
+
+	IF ( ID .LE. 0 ) RETURN
+	MSG_Counts(    ID ) = 0
+	MSG_Lookups(   ID ) = 0
+	CALL MSG_Get_Class( MSG_Prefix(ID), Class ) !Get the class, from the prefix.
+	IF ( MSG_Find_Class( Class, CID ) ) THEN !Found the class -- set class defaults:
+	  MSG_Active(      ID ) = MSG_Class_Default_Active(      CID )
+	  MSG_Counting(    ID ) = MSG_Class_Default_Counting(    CID )
+	  MSG_Count_limit( ID ) = MSG_Class_Default_Count_Limit( CID )
+	  MSG_Abort_limit( ID ) = MSG_Class_Default_Abort_Limit( CID )
+	  MSG_Iclass(      ID ) = CID
+	ELSE                                     !Didn't find the class:
+	  MSG_Active(      ID ) = .NOT. MSG_All_Disable
+	  MSG_Counting(    ID ) = .NOT. MSG_All_Nocount
+	  MSG_Count_limit( ID ) = MSG_All_Count_Limit !The default.
+	  MSG_Abort_limit( ID ) = 0 !The default -- no abort limit.
+	  MSG_Iclass(      ID ) = 0 !No class.
+	END IF
+
+	RETURN
+	END
+*
+	SUBROUTINE			MSG_Sort
+
+	IMPLICIT NONE
+
+	INCLUDE 'msg_inc'
+
+*  Brief Description:  Sort the MSG prefixes, in alphabetical order.
+
+	INTEGER Prefix_number_1,Prefix_number_2
+	CHARACTER*(MSG_Prefix_length_P) Prefix_stripped_1,Prefix_stripped_2
+	INTEGER I
+	INTEGER ID
+
+
+	IF ( MSG_Sorted ) RETURN !Already sorted.
+
+	DO ID = 1, MSG_Nprefixes !Initialize the map.
+	  MSG_SID( ID ) = ID
+	END DO
+
+	DO WHILE ( .NOT. MSG_Sorted )
+	  MSG_Sorted = .TRUE.
+	  DO ID = 1, MSG_Nprefixes - 1
+	    CALL MSG_PARSE_PREFIX( MSG_Prefix( MSG_SID(ID)   ), Prefix_stripped_1, Prefix_number_1 )
+	    CALL MSG_PARSE_PREFIX( MSG_Prefix( MSG_SID(ID+1) ), Prefix_stripped_2, Prefix_number_2 )
+	    IF ( LGT( Prefix_stripped_1, Prefix_stripped_2 ) ) THEN
+	      MSG_Sorted      = .FALSE.
+	      I               = MSG_SID( ID   )
+	      MSG_SID( ID   ) = MSG_SID( ID+1 )
+	      MSG_SID( ID+1 ) = I
+	    ELSE IF ( LLT( Prefix_stripped_1, Prefix_stripped_2 ) ) THEN
+*	      Do nothing.
+	    ELSE IF ( Prefix_number_1 .GT. Prefix_number_2 ) THEN
+	      MSG_Sorted      = .FALSE.
+	      I               = MSG_SID( ID   )
+	      MSG_SID( ID   ) = MSG_SID( ID+1 )
+	      MSG_SID( ID+1 ) = I
+	    END IF !LGT( Prefix_stripped_1, Prefix_stripped_2 )
+	  END DO !ID = 1, MSG_Nprefixes - 1
+
+	END DO !WHILE ( .NOT. MSG_Sorted )
 
 	RETURN
 	END

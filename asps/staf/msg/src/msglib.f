@@ -122,47 +122,6 @@
 	RETURN
 	END
 *
-	SUBROUTINE			MSG_Abort_Check( ID )
-
-	IMPLICIT NONE
-
-*  Input: 
-	INTEGER ID !Fast-reference msg ID of a message to be checked.
-
-*  Brief description:  Abort program if abort limit reached.
-
-*  Description:
-*	Check the specified message-prefix's (ID) abort limit.  If it
-*	has been reached, display a message, then output the summary
-*	to the journal file, then abort.
-
-	INCLUDE 'msg_inc'
-
-	INTEGER TL, JL
-	LOGICAL Void
-	LOGICAL MSG_Journal_Close
-
-	IF ( MSG_Abort_Limit( ID ) .LE. 0 ) THEN !No abort limit -- do nothing.
-	
-	ELSE IF ( MSG_Counts( ID ) .GE. MSG_Abort_Limit( ID ) ) THEN !Time to abort.
-
-	  CALL MESSAGE_OUT( 'MSG_Abort_Check  Aborting on message [' // MSG_Prefix(ID)(:MSG_Length(ID)) // ']', 1 )
-
-	  IF (MSG_JOURNAL_ENABLE) THEN !Journal is open & enabled:
-	    CALL MSG_Get_LUN( TL, JL ) !Terminal LUN (don't care), Journal LUN.
-	    CALL MSG_Summary( JL ) !Put an msg summary on the journal file.
-	    CALL MSG_Summary_CPU( JL ) !Put an msg CPU-usage summary on the journal file.
-	    Void = MSG_Journal_Close() !Close the file, ignore return status.
-	  END IF
-
-*	  Abort:
-	  CALL EXIT
-
-	END IF
-
-	RETURN
-	END
-*
 	SUBROUTINE			MSG_Class_Define( Class, State, Count_Limit, Abort_Limit )
 
 	IMPLICIT NONE
@@ -558,7 +517,7 @@
 	  ID=0 !Clear this to do a lookup-by-prefix.
 *	  Check that the message-prefix is in the index, enter it
 *	  in the index if necessary, and return its ID:
-	  CALL MSG_CHECK(PREFIX,ID,ACTIVE,COUNTING)
+	  CALL MSG_Check( Prefix, ID, Active, Counting )
 	  IF (ID.GT.0) THEN
 	    MSG_Active(      ID ) = .TRUE.
 	    MSG_Counting(    ID ) = .TRUE. !Active, No-Counting is an illegal state.
@@ -765,37 +724,53 @@
 	INTEGER     Terminal_LUN
 	PARAMETER ( Terminal_LUN = 6 )
 
-	MSG_Nprefixes       = 0
-	MSG_Nclasses        = 0
-	MSG_Total_Lookups   = 0 !Count of all prefix (character-search) lookups.
-	MSG_All_Count_Limit = 50 !Default for no-class messages.
-	MSG_TimeStamp_CPU   = .FALSE. !If true, time-stamp on changed CPU time.
-	MSG_All_Disable     = .FALSE.
-	MSG_All_Nocount     = .FALSE.
-	MSG_Sorted          = .FALSE.
-	CALL MSG_Journal_Off
-	CALL MSG_Set_LUN( Terminal_LUN, Journal_LUN )
-	CALL MSG_Name_Node( ' ' )
+	INTEGER ID
 
-*	MSG Summary defaults:
-	CALL MSG_Set_Summary_Page_Length (   60 )     !60 lines per page.
-	CALL MSG_Set_Summary_Mode_Active(   .TRUE.  ) !List active messages.
-	CALL MSG_Set_Summary_Mode_Counting( .TRUE.  ) !List counting (but not displaying) messages.
-	CALL MSG_Set_Summary_Mode_Inactive( .FALSE. ) !Do not list inactive messages.
-	CALL MSG_Set_Summary_Mode_Aborted(  .TRUE. )  !List the aborted message.
+	LOGICAL MSG_Initialized
+	SAVE    MSG_Initialized
 
-*	Define the predefined classes:
-	CALL MSG_Class_Define( ' ',   'Active', 50, 0 ) !Null or blank class.
-	CALL MSG_Class_Define( 'A',   'Active',  0, 1 ) !Abort message class (MSG abort).
-	CALL MSG_Class_Define( 'B',   'Active',  0, 0 ) !Bug message class.
-	CALL MSG_Class_Define( 'C', 'Counting',  0, 0 ) !Counting (CPU-measuring) class.
-	CALL MSG_Class_Define( 'D',   'Active',  0, 0 ) !Debug message class.
-	CALL MSG_Class_Define( 'E',   'Active', 20, 0 ) !Error message class.
-	CALL MSG_Class_Define( 'F',   'Active',  0, 0 ) !Fatal message class (application abort).
-	CALL MSG_Class_Define( 'I',   'Active',  0, 0 ) !Informative message class.
-	CALL MSG_Class_Define( 'O',   'Active',  1, 0 ) !Once-only message class.
-	CALL MSG_Class_Define( 'T', 'Inactive',  0, 0 ) !Trace (silient debug) message class.
-	CALL MSG_Class_Define( 'W',   'Active', 10, 0 ) !Warning message class.
+	DATA    MSG_Initialized / .FALSE. /
+
+	IF ( MSG_Initialized ) THEN !Already initialized -- don't hose the existing prefixes:
+	  MSG_Total_Lookups   = 0 !Count of all prefix (character-search) lookups.
+	  DO ID = 1, MSG_Nprefixes
+	    CALL MSG_ResetID( ID ) !Reset counters, flags and limits to the defaults.
+	  END DO
+ 	ELSE                        !Cold-start initialization -- get everything:
+
+	  MSG_Nprefixes       = 0
+	  MSG_Nclasses        = 0
+	  MSG_Total_Lookups   = 0 !Count of all prefix (character-search) lookups.
+	  MSG_All_Count_Limit = 50 !Default for no-class messages.
+	  MSG_TimeStamp_CPU   = .FALSE. !If true, time-stamp on changed CPU time.
+	  MSG_All_Disable     = .FALSE.
+	  MSG_All_Nocount     = .FALSE.
+	  MSG_Sorted          = .FALSE.
+	  CALL MSG_Journal_Off
+	  CALL MSG_Set_LUN( Terminal_LUN, Journal_LUN )
+	  CALL MSG_Name_Node( ' ' )
+
+*	  MSG Summary defaults:
+	  CALL MSG_Set_Summary_Page_Length (   60 )     !60 lines per page.
+	  CALL MSG_Set_Summary_Mode_Active(   .TRUE.  ) !List active messages.
+	  CALL MSG_Set_Summary_Mode_Counting( .TRUE.  ) !List counting (but not displaying) messages.
+	  CALL MSG_Set_Summary_Mode_Inactive( .FALSE. ) !Do not list inactive messages.
+	  CALL MSG_Set_Summary_Mode_Aborted(  .TRUE. )  !List the aborted message.
+
+*	  Define the predefined classes:
+	  CALL MSG_Class_Define( ' ',   'Active', 50, 0 ) !Null or blank class.
+	  CALL MSG_Class_Define( 'A',   'Active',  0, 1 ) !Abort message class (MSG abort).
+	  CALL MSG_Class_Define( 'B',   'Active',  0, 0 ) !Bug message class.
+	  CALL MSG_Class_Define( 'C', 'Counting',  0, 0 ) !Counting (CPU-measuring) class.
+	  CALL MSG_Class_Define( 'D',   'Active',  0, 0 ) !Debug message class.
+	  CALL MSG_Class_Define( 'E',   'Active', 20, 0 ) !Error message class.
+	  CALL MSG_Class_Define( 'F',   'Active',  0, 0 ) !Fatal message class (application abort).
+	  CALL MSG_Class_Define( 'I',   'Active',  0, 0 ) !Informative message class.
+	  CALL MSG_Class_Define( 'O',   'Active',  1, 0 ) !Once-only message class.
+	  CALL MSG_Class_Define( 'T', 'Inactive',  0, 0 ) !Trace (silient debug) message class.
+	  CALL MSG_Class_Define( 'W',   'Active', 10, 0 ) !Warning message class.
+
+	END IF ! MSG_Initialized
 
 	CALL STRELA0 !Initialize elapsed real-time.
 	CALL STRCPU0 !Initialize elapsed CPU-time.
@@ -1346,7 +1321,7 @@
 	    ELSE IF (.NOT.VIARG(JARG+2)) THEN !Not a valid integer.
 	      ERROR=.TRUE.
 	    ELSE !All's well -- set this limit:
-	      CALL MSG_SET_LIMIT(ARG(JARG),IARG(JARG+2))
+	      CALL MSG_Set_Limit( ARG(JARG), IARG(JARG+2) )
 	    END IF
 	    JARG=JARG+3
 	  ELSE IF (ARG(1).EQ.'ABORT'  ) THEN
@@ -1442,13 +1417,13 @@
 	RETURN
 	END
 *
-	SUBROUTINE			MSG_Set_Limit( PREFIX, LIMIT )
+	SUBROUTINE			MSG_Set_Limit( Prefix, Limit )
 
 	IMPLICIT NONE
 
 *  Inputs:
-	CHARACTER*(*) PREFIX !A STAR-standard message prefix.
-	INTEGER LIMIT !Maximum no. of times to display a message.
+	CHARACTER*(*) Prefix !A message prefix.
+	INTEGER       Limit  !Maximum no. of (additional) times to display a message.
 
 *  Brief description:  Set auto-disable count limit for a prefix.
 
@@ -1470,7 +1445,11 @@
 
 	  DO ID=1,MSG_Nprefixes
 	    IF ( MSG_Active( ID ) ) THEN
-	      MSG_Count_limit( ID ) = LIMIT
+	      IF ( Limit .EQ. 0 ) THEN !No limit is different:
+	        MSG_Count_limit( ID ) = 0
+	      ELSE                     !Add limit to existing counts:
+	        MSG_Count_limit( ID ) = MSG_Counts( ID ) + Limit
+	      END IF
 	      MSG_Counting(    ID ) = .TRUE. !... can't be active with no-count!
 	    END IF
 	  END DO
@@ -1483,7 +1462,11 @@
 	  DO ID=1,MSG_Nprefixes
 	    IF ( PREFIX(:SPT).EQ.MSG_Prefix(ID)(:SPT) ) THEN	    
 	      IF ( MSG_Active( ID ) ) THEN
-	        MSG_Count_limit( ID ) = LIMIT
+	        IF ( Limit .EQ. 0 ) THEN !No limit is different:
+	          MSG_Count_limit( ID ) = 0
+	        ELSE                     !Add limit to existing counts:
+	          MSG_Count_limit( ID ) = MSG_Counts( ID ) + Limit
+	        END IF
 	        MSG_Counting(    ID ) = .TRUE. !... can't be active with no-count!
 	      END IF
 	    END IF
@@ -1494,9 +1477,13 @@
 	  ID=0 !Clear this to do a lookup-by-prefix.
 *	  Check that the message-prefix is in the index, enter it
 *	  in the index if necessary, and return its ID:
-	  CALL MSG_CHECK(PREFIX,ID,ACTIVE,COUNTING)
+	  CALL MSG_Check(Prefix,ID,Active,Counting)
 	  IF (ID.GT.0) THEN
-	    MSG_Count_limit( ID ) = LIMIT
+	    IF ( Limit .EQ. 0 ) THEN !No limit is different:
+	      MSG_Count_limit( ID ) = 0
+	    ELSE                     !Add limit to existing counts:
+	      MSG_Count_limit( ID ) = MSG_Counts( ID ) + Limit
+	    END IF
 	    MSG_Active(      ID ) = .TRUE. !Always enable on set-limit.
 	    MSG_Counting(    ID ) = .TRUE. !... can't be active with no-count!
 	  END IF
@@ -1625,51 +1612,6 @@
 	INCLUDE 'msg_inc'
 
 	MSG_TimeStamp_CPU = Mode
-
-	RETURN
-	END
-*
-	SUBROUTINE			MSG_Sort
-
-	IMPLICIT NONE
-
-	INCLUDE 'msg_inc'
-
-*  Brief Description:  Sort the MSG prefixes, in alphabetical order.
-
-	INTEGER Prefix_number_1,Prefix_number_2
-	CHARACTER*(MSG_Prefix_length_P) Prefix_stripped_1,Prefix_stripped_2
-	INTEGER I
-	INTEGER ID
-
-
-	IF ( MSG_Sorted ) RETURN !Already sorted.
-
-	DO ID = 1, MSG_Nprefixes !Initialize the map.
-	  MSG_SID( ID ) = ID
-	END DO
-
-	DO WHILE ( .NOT. MSG_Sorted )
-	  MSG_Sorted = .TRUE.
-	  DO ID = 1, MSG_Nprefixes - 1
-	    CALL MSG_PARSE_PREFIX( MSG_Prefix( MSG_SID(ID)   ), Prefix_stripped_1, Prefix_number_1 )
-	    CALL MSG_PARSE_PREFIX( MSG_Prefix( MSG_SID(ID+1) ), Prefix_stripped_2, Prefix_number_2 )
-	    IF ( LGT( Prefix_stripped_1, Prefix_stripped_2 ) ) THEN
-	      MSG_Sorted      = .FALSE.
-	      I               = MSG_SID( ID   )
-	      MSG_SID( ID   ) = MSG_SID( ID+1 )
-	      MSG_SID( ID+1 ) = I
-	    ELSE IF ( LLT( Prefix_stripped_1, Prefix_stripped_2 ) ) THEN
-*	      Do nothing.
-	    ELSE IF ( Prefix_number_1 .GT. Prefix_number_2 ) THEN
-	      MSG_Sorted      = .FALSE.
-	      I               = MSG_SID( ID   )
-	      MSG_SID( ID   ) = MSG_SID( ID+1 )
-	      MSG_SID( ID+1 ) = I
-	    END IF !LGT( Prefix_stripped_1, Prefix_stripped_2 )
-	  END DO !ID = 1, MSG_Nprefixes - 1
-
-	END DO !WHILE ( .NOT. MSG_Sorted )
 
 	RETURN
 	END
