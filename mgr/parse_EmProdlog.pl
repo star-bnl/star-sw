@@ -12,19 +12,15 @@ use Sys::Hostname;
 
 my $hostname     = hostname();
 my @dir_log      = (
-#                    "/star/rcf/data06/reco/embedding_alamhipt/P00hg/log/daq",
-#                    "/star/rcf/data06/reco/embedding_alamlopt/P00hg/log/daq",
-#                    "/star/rcf/data06/reco/embedding_lamhipt/P00hg/log/daq",
-#                    "/star/rcf/data06/reco/embedding_lamlopt/P00hg/log/daq",
-                    "/star/rcf/data07/reco/embedding_pbar/P00hg/log/daq",
+                    "/star/rcf/data06/reco/embedding_pi+/P00hi/log/daq", 
+                    "/star/rcf/data06/reco/embeddingp/P00hi/log/daq",
+                    "/star/rcf/data06/reco/embeddingk0/P00hi/log/daq",
 );
 
 my @dir_sum      = (
-#                     "/star/rcf/data06/reco/embedding_alamhipt/P00hg/sum/daq",
-#                     "/star/rcf/data06/reco/embedding_alamlopt/P00hg/sum/daq",
-#                     "/star/rcf/data06/reco/embedding_lamhipt/P00hg/sum/daq",
-#                     "/star/rcf/data06/reco/embedding_lamlopt/P00hg/sum/daq",
-                     "/star/rcf/data07/reco/embedding_pbar/P00hg/sum/daq",
+                     "/star/rcf/data06/reco/embedding_pi+/P00hi/sum/daq",
+                     "/star/rcf/data06/reco/embeddingp/P00hi/sum/daq",
+                     "/star/rcf/data06/reco/embeddingk0/P00hi/sum/daq",
 );   
 my @set ;
 my @list;
@@ -58,6 +54,9 @@ struct FileAttr => {
 for ($ii = 0; $ii < scalar(@dir_log); $ii++)  {
   opendir(DIR, $dir_log[$ii]) or die "can't open $dir_log[$ii]\n";
   $nlist = 0;
+for ($ik = 0; $ik < 1000; $ik++) {
+     $list[$ik] = " ";
+} 
   while( defined($flname = readdir(DIR)) ) {
            next if $flname =~ /^\.\.?$/;
            next if $flname =~ /.err/; 
@@ -75,7 +74,7 @@ for ($ii = 0; $ii < scalar(@dir_log); $ii++)  {
  closedir DIR;
 
 
-chdir $dir_log[$ii];
+#chdir $dir_log[$ii];
 
 foreach my $logFile (@list) {
      
@@ -83,8 +82,8 @@ foreach my $logFile (@list) {
          $msize = ($$logFile)->lsize;
        
         my $ltime = `mod_time $mfile`;
-           if( $ltime > 7200){
-		    if ($msize < 5000 )  {
+           if( $ltime > 3600){
+		    if ($msize < 12000 )  {
 #     print "Crashed job :", $mfile, "\n";
    }else { 
               $f_flag = 0;
@@ -103,12 +102,13 @@ foreach my $logFile (@list) {
 	     }
            }
          chdir $dir_log[$ii];
+
               if($f_flag != 1) {  
 #         print "Name of file: ", $mfile, "\n";
              parse_log($mfile);
              timestamp($mfile);
             $name_log = $mfile; 
-         $dummy = `mv $file_sum $dir_sum[$ii]`;
+         $dummy = `mv $file_sum ../../sum/daq`;
 #         $dummy = `mv $name_log $dir_lg`;   
            }             
         }
