@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.18 2003/06/13 12:11:12 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.19 2003/07/03 13:21:54 fsimon Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.19  2003/07/03 13:21:54  fsimon
+// Added cathode offset information to constructor for SlowSimulator
+//
 // Revision 1.18  2003/06/13 12:11:12  jcs
 // change constructor comment to specify that it is also used for StFtpcMixerMaker
 //
@@ -207,7 +210,8 @@ public:
                  St_ftpcElectronics   *electronics,
 		 St_ftpcAmpSlope      *ampslope,
                  St_ftpcAmpOffset     *ampoffset,
-                 St_ftpcTimeOffset    *timeoffset);
+                 St_ftpcTimeOffset    *timeoffset,
+		 St_ftpcInnerCathode  *cathode);
   // constructor used by StFtpcDriftMapMaker:
   StFtpcDbReader(St_ftpcDimensions    *dimensions,
                  St_ftpcPadrowZ       *zrow,
