@@ -253,11 +253,13 @@ C---- find square of impact param of reconstructed particle------
                        vertex(vertex_h.nok).y=xpp(2)
                        vertex(vertex_h.nok).z=xpp(3)
                        vertex(vertex_h.nok).iflag = 0
-                       vertex(vertex_h.nok).id_det = 0
-                       vertex(vertex_h.nok).id_vtx= 2
-                       vertex(vertex_h.nok).sigma = 0
+                       vertex(vertex_h.nok).det_id = 0
+                       vertex(vertex_h.nok).vtx_id= 2
+                       vertex(vertex_h.nok).sigma(1) = 0
+                       vertex(vertex_h.nok).sigma(2) = 0
+                       vertex(vertex_h.nok).sigma(3) = 0
                        vertex(vertex_h.nok).pchi2 = 0
-                       vertex(vertex_h.nok).id_aux_vert= ok
+                       vertex(vertex_h.nok).id_aux_ent= ok
                        vertex(vertex_h.nok).id = vertex_h.nok
                        ev0out(ok).px=pp(1)
                        ev0out(ok).py=pp(2)
