@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.13 2004/07/30 20:31:38 fisyak Exp $
+// $Id: StTagsMaker.cxx,v 1.14 2004/08/17 20:52:11 perev Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.14  2004/08/17 20:52:11  perev
+// Replace St_DataSet ==> TDataSet
+//
 // Revision 1.13  2004/07/30 20:31:38  fisyak
 // Remove second i++
 //
@@ -58,7 +61,7 @@
 #include "StEventUtilities/StuFtpcRefMult.hh"
 static TClass *tabClass = 0;
 static TTree  *fTree = 0; //!
-static St_DataSet *fTagsList =  new St_DataSet("TagList");
+static TDataSet *fTagsList =  new TDataSet("TagList");
 
 //TableImpl(GlobalTag);
 ClassImp(StTagsMaker); 
@@ -124,19 +127,19 @@ Int_t StTagsMaker::Make(){
   tagtab->AddAt(&row); if (Debug()) tagtab->Print(0,1);
   if (!fTree) InitTags();
   if (fTree && fTagsList && tabClass) {
-    St_DataSetIter next(fTagsList);
-    St_DataSet *set = 0;
+    TDataSetIter next(fTagsList);
+    TDataSet *set = 0;
     TClass *cl = 0;
     void *address = 0;
     EvtHddr_st fEvtHddr;
 
     while ((set = next())) {
-      St_DataSet *ds = GetDataSet(set->GetTitle());
+      TDataSet *ds = GetDataSet(set->GetTitle());
 
       if (ds) {
 	if (ds->InheritsFrom(tabClass)) {
-	  St_Table *tabl = (St_Table *) ds;
-	  St_Table &tab  = *tabl;
+	  TTable *tabl = (TTable *) ds;
+	  TTable &tab  = *tabl;
 	  address = tab[0];
 	  cl = gROOT->GetClass(ds->GetTitle());
 	}
@@ -164,21 +167,21 @@ Int_t StTagsMaker::Make(){
   return kStOK;
 }
 //_____________________________________________________________________________
-EDataSetPass StTagsMaker::GetTags (St_DataSet* ds)
+EDataSetPass StTagsMaker::GetTags (TDataSet* ds)
 {
-  St_DataSet *newds = 0;
+  TDataSet *newds = 0;
   TString name, leaflist, branchName;
   TClass *cl = 0;
   Int_t bufsize= 64000;
   void *address = 0;
 
   const char *Name=ds->GetName();
-  newds = new St_DataSet(Name);
+  newds = new TDataSet(Name);
 
-  if (!tabClass) tabClass  = gROOT->GetClass("St_Table"); 
+  if (!tabClass) tabClass  = gROOT->GetClass("TTable"); 
   if (ds->InheritsFrom(tabClass) && strstr(Name,"Tag")) {
     name = TString(ds->GetTitle());
-    St_Table &tab = *((St_Table *)ds); 
+    TTable &tab = *((TTable *)ds); 
     address = tab[0];
   }
   else if (strstr(Name,"EvtHddr")){   
