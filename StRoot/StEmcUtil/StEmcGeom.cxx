@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.13 2001/09/22 00:29:05 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.14 2001/09/28 23:54:37 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.14  2001/09/28 23:54:37  pavlinov
+ * Change dtor
+ *
  * Revision 1.13  2001/09/22 00:29:05  pavlinov
  * No public constructor for StEmcGeom
  *
@@ -166,7 +169,10 @@ StEmcGeom::getDetNumFromName(const Char_t *cdet)
   return det;
 }
 
-StEmcGeom::~StEmcGeom() { /* Nobody */ } 
+StEmcGeom::~StEmcGeom() 
+{// for shure
+  mGeom[mDetector] = 0;
+} 
 
 void StEmcGeom::initGeom(const Int_t det) 
 {
