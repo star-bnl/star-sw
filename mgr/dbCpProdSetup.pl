@@ -20,12 +20,10 @@ $dbname="operation";
 
 
 # Tables
-$cpFileCatalogT = "cpFileCatalog";
-$FilesCatalogTestT = "FilesCatalogTest";
+$FileCatalogT = "FileCatalog";
 $ProdOptionsT = "ProdOptions";
-$cpJobStatusT = "cpJobStatus";
 $JobStatusT = "JobStatus";
-$cpjobRelationsT = "cpjobRelations";
+$jobRelationsT = "jobRelations";
 
 ######################
 sub StDbProdConnect {
