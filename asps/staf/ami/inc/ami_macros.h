@@ -19,7 +19,7 @@
 /*- Don't use CORBA (by default).
 #define CORBA -*/
 
-#define AMI_MAX_TABLES 16 /* CURRENTLY MAXIMUM OF 32 TABLES */
+#define AMI_MAX_TABLES 32 /* CURRENTLY MAXIMUM OF 32 TABLES */
 
 #define AMIINVOKER(OBJ) ((amiInvoker*)(OBJ->ptr()))
 #define AMIBROKER(OBJ) ((amiBroker*)(OBJ->ptr()))
