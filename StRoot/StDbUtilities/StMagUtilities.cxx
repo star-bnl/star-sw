@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.54 2004/08/29 19:59:53 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.55 2004/08/29 21:48:33 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.55  2004/08/29 21:48:33  jhthomas
+ * Put Manual space charge back to 0.0 in order to enable DB.  Previous CVS was a mistake.
+ *
  * Revision 1.54  2004/08/29 19:59:53  jhthomas
  * *** empty log message ***
  *
@@ -297,7 +300,7 @@ StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t 
   thedb   = 0         ;      // Do not get TPC parameters from the DB  - use defaults in CommonStart
   fTpcVolts      =  0 ;      // Do not get TpcVoltages out of the DB   - use defaults in CommonStart
   ManualSpaceCharge(0);      // Do not get SpaceCharge out of the DB   - use defaults inserted here.
-  ManualSpaceChargeR2(0.01); // JT test    // Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
+  ManualSpaceChargeR2(0);    // Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
   CommonStart( mode ) ;      // Read the Magnetic and Electric Field Data Files, set constants
 }
 
