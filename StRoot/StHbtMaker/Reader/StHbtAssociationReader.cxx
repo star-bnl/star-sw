@@ -239,10 +239,10 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   hbtEvent->SetEventNumber(rEventNumber);
   hbtEvent->SetUncorrectedNumberOfPositivePrimaries(uncorrectedNumberOfPositivePrimaries(*rEvent));
   hbtEvent->SetUncorrectedNumberOfNegativePrimaries(uncorrectedNumberOfNegativePrimaries(*rEvent));
-  hbtEvent->SetCtbMult(0.);
-  hbtEvent->SetZdcAdcEast(0.);
-  hbtEvent->SetZdcAdcWest(0.);
-  hbtEvent->SetNumberOfTpcHits(0.);
+  hbtEvent->SetCtbMult(0);
+  hbtEvent->SetZdcAdcEast(0);
+  hbtEvent->SetZdcAdcWest(0);
+  hbtEvent->SetNumberOfTpcHits(0);
   hbtEvent->SetNumberOfTracks(rMult);
   hbtEvent->SetReactionPlane(0.);
   hbtEvent->SetReactionPlaneSubEventDifference(0.);
@@ -329,7 +329,7 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
 	check += CheckPdgIdList(pdgCode,motherPdgCode,0);
       }
       else {
-	for (int iDaughter=0; iDaughter < mTrack->stopVertex()->daughters().size()-1; iDaughter++) {
+	for (unsigned int iDaughter=0; iDaughter < mTrack->stopVertex()->daughters().size()-1; iDaughter++) {
 	  daughterPdgCode = mTrack->stopVertex()->daughters()[iDaughter]->pdgId();
 	  check += CheckPdgIdList(pdgCode,motherPdgCode,daughterPdgCode);
 	}
@@ -371,7 +371,7 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     
     //cout << "StHbtTrack instantiated " << endl;
     
-    hbtTrack->SetTrackId(rTrack->key()+motherTrackId*pow(2,16));
+    hbtTrack->SetTrackId((int)(rTrack->key()+motherTrackId*pow(2,16)));
 
     hbtTrack->SetNHits(nhits);
     
@@ -490,7 +490,6 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     // loop over associated tracks // maybe later you want to check particle ids
     pair<rcV0MapIter, rcV0MapIter> boundsV0 = theV0Map->equal_range(rV0Vertex);
     for (rcV0MapIter v0Iter = boundsV0.first; v0Iter!= boundsV0.second; v0Iter++){ // loop over all associated V0s
-      StMcVertex* mcV0 = (*v0Iter).second;
     }
     StHbtV0* hbtV0 = new StHbtV0(v0MuDst);       // copy into StHbtV0;
     if (mV0Cut){                                 // check whether vo passes cuts

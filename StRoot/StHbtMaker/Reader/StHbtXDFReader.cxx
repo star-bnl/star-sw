@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtXDFReader.cxx,v 1.8 2001/04/25 18:07:50 perev Exp $
+ * $Id: StHbtXDFReader.cxx,v 1.9 2003/01/31 20:22:57 magestro Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -134,12 +134,12 @@ StHbtEvent* StHbtXDFReader::ReturnHbtEvent(){
 
   cout << "StHbtXDFReader::ReturnHbtEvent" << endl;
 
-  StEvtHddr* fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
-#ifdef STHBTDEBUG
-  if (fEvtHddr) {
-    cout << " got event headder " << fEvtHddr << endl;
-  }
-#endif
+//  StEvtHddr* fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
+//#ifdef STHBTDEBUG
+//  if (fEvtHddr) {
+//    cout << " got event headder " << fEvtHddr << endl;
+//  }
+//#endif
 
   St_DataSet* event; 
   event = GetDataSet(mDataSetName);
@@ -301,7 +301,7 @@ StHbtEvent* StHbtXDFReader::ReturnHbtEvent(){
 #endif
 
 
-    hbtTrack->SetCharge( StParticle->charge() ); 
+    hbtTrack->SetCharge( (int)StParticle->charge() ); 
 #ifdef STHBTDEBUG
     cout << " charge " << hbtTrack->Charge() << endl;
 #endif 

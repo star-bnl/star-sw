@@ -179,10 +179,10 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
     
   StHbtEvent* hbtEvent = new StHbtEvent;
   hbtEvent->SetEventNumber(EventNumber);
-  hbtEvent->SetCtbMult(0.);
-  hbtEvent->SetZdcAdcEast(0.);
-  hbtEvent->SetZdcAdcWest(0.);
-  hbtEvent->SetNumberOfTpcHits(0.);
+  hbtEvent->SetCtbMult(0);
+  hbtEvent->SetZdcAdcEast(0);
+  hbtEvent->SetZdcAdcWest(0);
+  hbtEvent->SetNumberOfTpcHits(0);
   hbtEvent->SetNumberOfTracks(Mult);
   hbtEvent->SetNumberOfGoodTracks(Mult);  // same for now
   hbtEvent->SetReactionPlane(0.);
@@ -238,7 +238,7 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
 	// 	    cout << " no stop vertex " << endl;
       }
       else {
-	for (int iDaughter=0; iDaughter < track->stopVertex()->daughters().size()-1; iDaughter++) {
+	for (unsigned int iDaughter=0; iDaughter < track->stopVertex()->daughters().size()-1; iDaughter++) {
 	  daughterPdgCode = track->stopVertex()->daughters()[iDaughter]->pdgId();
 	  check += CheckPdgIdList(pdgCode,motherPdgCode,daughterPdgCode);
 	  // 		cout << " daughterPdgCode " << daughterPdgCode;
@@ -333,7 +333,7 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
     hbtTrack->SetPt( track->momentum().perp() );   
     //cout << " Pt " << hbtTrack->Pt() << endl;
 
-    hbtTrack->SetCharge( track->particleDefinition()->charge() ); 
+    hbtTrack->SetCharge( (int)(track->particleDefinition()->charge()) ); 
     //cout << " choarge " << hbtTrack->Charge() << endl;
     
 #ifdef TheWorldIsNice
