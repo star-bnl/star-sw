@@ -3,7 +3,9 @@ CC: FILE:       dep_e_toadc.F
 CC: HISTORY: Created Pavlinov Aleksei 02-aug-1998
 CC: Corr. 13-aug for output from ems_interface2 by Akio
 CC: Corr. 22-sep => for dep=2 is dep.energy for whole tower 
-CC: Corr. 29-jan => little corrections for BPRS, BSMDE, BSMDP by PAI
+CC: Corr. 29-jan-1999 => little corrections for BPRS, BSMDE, BSMDP by Aleksei
+CC: Corr. 28-feb => added Geant reconstruction energy (for convenient) by Aleksei
+cc: Corr. 07-jun => minor correction by Aleksei
 CC:<--------------------------------------------------------------------
       INTEGER*4 FUNCTION DEP_E_TOADC(
      1       ems_control_h,       ems_control ,
@@ -36,10 +38,10 @@ CC:      adc_emc2_h     - Header Structure for adc_emc
 CC: RETURNS:    STAF Condition Value
 CC:>--------------------------------------------------------------------
 
-      integer det, i, mode, module, ieta, sub, temp(1)
-      integer key, ih, o1, o2, adc, nphe, ierr, mod, min, max
+      integer det, i, mode, module, ieta, sub, temp(1), det1, det2
+      integer key, ih, o1, o2, adc, nphe, ierr, adcmax, mod, min, max
       real c1(MAXDET), c2(MAXDET), c3(MAXDET), radc, amu, phi, eta
-     + , sf, samplefraction
+     + , sf, samplefraction, const_w, energy_w
       data key/0/
 
       dep_e_toadc    = STAFCV_BAD       ! default is failure...
@@ -105,11 +107,12 @@ c         write(6,*) ' det ',det,' module ',module,' ieta ',ieta
 c     +   , ' sub ',sub, ' phi ',phi,' eta ', eta
  
          mode=control_toadc(1).mode(det)
-         if(mode .eq. 0) then ! No ADC
+         if(mode .eq. 0) then ! No ADC  => Deposit Energy will be passed
             adc  = -1
             
          elseif(mode .eq. 1) then ! DE => ADC
-            sf   = samplefraction(%VAL(det),%VAL(eta))
+            sf      = samplefraction(%VAL(det),%VAL(eta))
+            const_w = control_toadc(1).c1(det) / cosh(eta)
             radc = hits_ems(ih).energy / cosh(eta)        ! 1./cosh(eta)=sin(theta)
      +           * sf * control_toadc(1).c1(det)
             adc  = int (radc+0.5) ! Nearest positive integer number  
@@ -117,6 +120,7 @@ c     +   , ' sub ',sub, ' phi ',phi,' eta ', eta
 
          elseif(mode .eq. 2) then ! DE => PHE => ADC
             sf   = samplefraction(%VAL(det),%VAL(eta)) 
+            const_w = control_toadc(1).c1(det) / cosh(eta)
             amu  = hits_ems(ih).energy / cosh(eta)        ! 1./cosh(eta)=sin(theta)
      +           * sf * control_toadc(1).c2(det)
             if(amu.gt.0.0) then
@@ -140,7 +144,9 @@ c               write(*,*) '<<<' , nphe, ierr
          endif                  ! mode .eq. 0,1,2
 c         write(*,*) 'det ', det,' eta ', eta,' sf ', sf  ! For testing only         
 
-         adc = min(ems_control(1).adcbits(det),adc)
+         adcmax = int(1.2 * ems_control(1).adcbits(det))
+         adc    = min(adcmax, adc)        ! For discarding big value of ADC
+         if(mode .ge. 1) energy_w = adc / const_w 
              
          if(control_toadc(1).zero_sup(det).eq.1 .and. adc.eq.0) then 
             goto 100
@@ -159,9 +165,9 @@ c         write(*,*) 'det ', det,' eta ', eta,' sf ', sf  ! For testing only
             adc_emc1(o1).sub     = hits_ems(ih).sub 
             adc_emc1(o1).adc     = adc
             if(adc.eq.-1)then
-               adc_emc1(o1).energy  = hits_ems(ih).energy
+               adc_emc1(o1).energy  = hits_ems(ih).energy  ! Deposit Energy
             else
-               adc_emc1(o1).energy  = 0.0
+               adc_emc1(o1).energy  = energy_w             ! Energy
             endif
          else
             o2 = o2 + 1
@@ -175,9 +181,9 @@ c         write(*,*) 'det ', det,' eta ', eta,' sf ', sf  ! For testing only
             adc_emc2(o2).sub     = hits_ems(ih).sub 
             adc_emc2(o2).adc     = adc
             if(adc.eq.-1)then
-               adc_emc2(o2).energy  = hits_ems(ih).energy
+               adc_emc2(o2).energy  = hits_ems(ih).energy ! Deposit Energy
             else
-               adc_emc2(o2).energy  = 0.0
+               adc_emc2(o2).energy  = energy_w            ! Energy
             endif
          endif
 
@@ -188,8 +194,15 @@ c         write(*,*) 'det ', det,' eta ', eta,' sf ', sf  ! For testing only
       adc_emc2_h.nok=o2
       dep_e_toadc = STAFCV_OK
 
+*** For testing only
+      det1 = 0
+      if(o1.ge.1) det1 = adc_emc1(o1).det
+      det2 = 0
+      if(o2.ge.1) det2 = adc_emc2(o2).det
+      write(*,7) det1,o1, det2,o2
+      
       return
- 1    format(6x,'dep_e_toadc(Ver. 1.30) date => 29-Jan-1999')
+ 1    format(6x,'dep_e_toadc(Ver. 1.32) date => 07-Jun-1999')
  2    format(6x,'dep_e_toadc: detector# = ',i2,' mode =',i2)
  3    format(
      + ' Sample Fraction coefficient (unused now)     ', f10.2/
@@ -205,4 +218,6 @@ c         write(*,*) 'det ', det,' eta ', eta,' sf ', sf  ! For testing only
      + ,i5,' is not enough') 
  6    format('***dep_e_toadc ERROR: Not enough memory in adc_emc2:'
      + ,i5,' is not enough') 
+ 7    format(' <I> dep_e_toadc => det1=', i2,' hits ', i5,
+     + ' det2',i2,' hits ',i5)
       end
