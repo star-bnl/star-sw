@@ -14,6 +14,7 @@
 #include "StTreeMaker/StTreeMaker.h"
 #include "StIOMaker/StIOMaker.h"
 #include "StMessMgr.h"
+
 //_____________________________________________________________________
 BfcItem BFC[] = {
   {"Key"         ,"Name","Chain","Opts"                                   ,"Maker","Libs","Comment",kFALSE},
@@ -77,6 +78,7 @@ BfcItem BFC[] = {
   {"GeantOut"    ,""  ,"","Tree"                                ,"","","Write g2t tables to StTree",kFALSE},
   {"TrsOut"      ,""  ,"","Tree"                                ,"","","Write Trs output to StTree",kFALSE},
   {"Simu"        ,""  ,"",""                                                ,"","","Simulated Data",kFALSE},
+  {"paw"         ,""  ,"",""                                      ,"","","Allocate memory for pawc",kFALSE},
   {"TrsOut"      ,""  ,"","Tree"                                ,"","","Write Trs output to StTree",kFALSE},
   {"AllEvent"    ,""  ,"","Tree"                               ,"","","Write whole event to StTree",kFALSE},
   {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
@@ -138,10 +140,6 @@ BfcItem BFC[] = {
   {"Fcl"         ,"ftpc_hits","ftpc","SCL"
                           ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,St_ftpc,StFtpcClusterMaker","",kFALSE},
   {"fpt"         ,"ftpc_tracks","ftpc","SCL"              ,"StFtpcTrackMaker","St_ftpc,StFtpcTrackMaker","",kFALSE},
-  {"emc"         ,"emc","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl" ,"StChainMaker","StChain","",kFALSE},
-  {"ems"         ,"emc_raw","emc","geant,emc_T"    ,"St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
-  {"emh"         ,"emc_hits","emc","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
-  {"PreEcl"      ,"ecl","emc","emh"                            ,"StPreEclMaker","StPreEclMaker","",kFALSE},
   {"l0"          ,"l0","","trg_T,globT,ctf,mwc,trg"                    ,"StChainMaker","StChain","",kFALSE}, 
   {"ctf"         ,"ctf","l0","ctf_T,db"                    ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE}, 
   {"mwc"         ,"mwc","l0","mwc_T,db"                    ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
@@ -149,8 +147,6 @@ BfcItem BFC[] = {
   {"l3"          ,"l3","","l3cl,l3t"                                 ,"StChainMaker","StBFChain","",kFALSE},
   {"l3cl"        ,"","l3","l3_T"                    ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3","l3_T"                            ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
-  {"Rrs"         ,"","","sim_T"                                       ,"StRrsMaker","StRrsMaker","",kFALSE},
-  {"rich"        ,"","","sim_T,globT"                      ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
   {"global"      ,"global","","globT,Match,primary,v0,xi,kink,dst,SCL"
                                                          ,"StChainMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","global","SCL,tpc_T,svt_T,globT,tls"
@@ -164,8 +160,15 @@ BfcItem BFC[] = {
   {"dst"         ,"dst","global","SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT","St_dst_Maker" 
                                                                 ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Event"       ,"","","globT,SCL"                       ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
+  {"emc"         ,"emc","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl" ,"StChainMaker","StChain","",kFALSE},
+  {"ems"         ,"emc_raw","emc","geant,emc_T"    ,"St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
+  {"emh"         ,"emc_hits","emc","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
+  {"PreEcl"      ,"preecl","emc","emh"                          ,"StPreEclMaker","StPreEclMaker","",kFALSE},
+  {"Rrs"         ,"","","sim_T"                                       ,"StRrsMaker","StRrsMaker","",kFALSE},
+  {"rich"        ,"","","sim_T,globT"                      ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
   {"analysis"    ,"","","Event"           ,"StAnalysisMaker","StAnalysisMaker","Exampe of Analysis",kFALSE},
-  {"TagsChain"   ,"TagsChain","",""                                    ,"StChainMaker","StChain","",kFALSE},
+  {"TagsChain"   ,"","TagsChain",""                                    ,"StChainMaker","StChain","",kFALSE},
+  {"TpcTag"      ,"","TagsChain",""                             ,"StTpcTagMaker","StTpcTagMaker","",kFALSE},
   {"Flow"        ,"","TagsChain","Event"                            ,"StFlowMaker","StFlowMaker","",kFALSE},
   {"FlowTag"     ,"","TagsChain","Event,Flow"                 ,"StFlowTagMaker","StFlowTagMaker","",kFALSE},
   {"FlowAnalysis","","TagsChain","Event,Flow"       ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
@@ -344,6 +347,7 @@ Int_t StBFChain::Instantiate()
 	    Int_t IwType = 0;
 	    if (GetOption("Higz"))  IwType = 1;
 	    Int_t NwPaw = 0;
+	    if (GetOption("paw")) NwPaw  = 200000;
 	    geantMk = new St_geant_Maker("geant",NwGeant,NwPaw,IwType);
 	    if (geantMk) {
 	      fBFC[i].Name = (Char_t *) geantMk->GetName();
@@ -709,8 +713,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.89 2000/05/17 16:22:59 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.90 2000/05/25 21:25:47 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.90  2000/05/25 21:25:47  fisyak
+// Put emc and rich after StEvent, add TpcTag
+//
 // Revision 1.89  2000/05/17 16:22:59  fisyak
 // Add Ev03, PreEcl and Epc flags, checks for loading shared libraries and instatiaton of makers
 //
