@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.h,v 2.2 1999/10/28 22:26:19 ullrich Exp $
+ * $Id: StPrimaryVertex.h,v 2.3 1999/11/04 20:36:17 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.h,v $
- * Revision 2.2  1999/10/28 22:26:19  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/11/04 20:36:17  ullrich
+ * New method to obtain daughter container directly
+ *
+ * Revision 2.3  1999/11/04 20:36:17  ullrich
+ * New method to obtain daughter container directly
  *
  * Revision 2.2  1999/10/28 22:26:19  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -29,13 +32,15 @@ public:
     StPrimaryVertex();
     StPrimaryVertex(const dst_vertex_st&);
     // StPrimaryVertex(const StPrimaryVertex&);            use default
-    StVertexId       type() const;
-    UInt_t           numberOfDaughters() const;
-    StTrack*         daughter(UInt_t);
-    const StTrack*   daughter(UInt_t) const;
-    StPtrVecTrack    daughters(StTrackFilter&);
-    void             addDaughter(StTrack*);
-    void             removeDaughter(StTrack*);
+    // StPrimaryVertex& operator=(const StPrimaryVertex&); use default
+    ~StPrimaryVertex();
+    
+    StVertexId                   type() const;
+    UInt_t                       numberOfDaughters() const;
+    StTrack*                     daughter(UInt_t);
+    const StTrack*               daughter(UInt_t) const;
+    StPtrVecTrack                daughters(StTrackFilter&);
+    StSPtrVecPrimaryTrack&       daughters();
     const StSPtrVecPrimaryTrack& daughters() const;
     void                         addDaughter(StTrack*);
     void                         removeDaughter(StTrack*);
