@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEsttoGlobtrk.cc,v 1.2 2001/01/25 18:10:21 lmartin Exp $
+ * $Id: StEsttoGlobtrk.cc,v 1.3 2001/01/31 16:59:54 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEsttoGlobtrk.cc,v $
+ * Revision 1.3  2001/01/31 16:59:54  lmartin
+ * mParams[]->debug replaced by mDebug.
+ *
  * Revision 1.2  2001/01/25 18:10:21  lmartin
  * Method declared as StEstTracker method.
  * Output tables passed as arguments of the method.
@@ -36,7 +39,7 @@ void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
 				St_sgr_groups* svtgrps,
 				St_svm_evt_match* EstMatch){
 				    
-  if (mParams[mPass]->debug>0)
+  if (mDebugLevel>0)
     cout<<"StEstTracker::StEsttoGlobtrk : Saving into the global tables"<<endl;
   int CountHits=0;
   int CountMatch=0;
@@ -108,7 +111,7 @@ void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
   svtgrps->SetNRows(CountHits);
   EstMatch->SetNRows(CountMatch);
   svttrk->SetNRows(CountMatch);
-  if (mParams[mPass]->debug>0)
+  if (mDebugLevel>0)
     cout<<"StEstTracker::StEsttoGlobtrk : Stop"<<endl;
   
 }
