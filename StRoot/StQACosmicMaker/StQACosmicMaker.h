@@ -2,13 +2,16 @@
 #define StQACosmicMaker_HH
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.h,v 1.6 1999/09/03 16:07:37 snelling Exp $
+ * $Id: StQACosmicMaker.h,v 1.7 1999/09/23 18:25:19 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking, 
  *               geometry etc.)
  *
  * $Log: StQACosmicMaker.h,v $
+ * Revision 1.7  1999/09/23 18:25:19  snelling
+ * Added QA hists for hitclus table and morphology table
+ *
  * Revision 1.6  1999/09/03 16:07:37  snelling
  * Added method to write out histogrmas and TNtuple
  *
@@ -30,6 +33,12 @@
  *  
  **************************************************************************/
 #include "StMaker.h"
+#include "St_TableSorter.h"
+#include "tpc/St_tcl_Module.h"
+#include "tpc/St_tph_Module.h"
+#include "tpc/St_tpt_residuals_Module.h"
+#include "tpc/St_xyz_newtab_Module.h"
+#include "St_tcc_morphology_Table.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TNtuple.h"
@@ -59,46 +68,122 @@ class StQACosmicMaker : public StMaker {
   virtual void   WriteHistogramsOff(){WriteHistograms();}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.6 1999/09/03 16:07:37 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.7 1999/09/23 18:25:19 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  private:
 
-  Int_t SelectedSector;
+  Int_t  SelectedSector;
   Bool_t bSectorSelectionOn;
   Bool_t bWriteTNtupleOn;
-  Bool_t bWriteHistogramsOn;
   Bool_t bWritePostscriptOn;
-  Int_t nXBins;
+  Bool_t bWriteHistogramsOn;
+  Int_t  nXBins;
   TString MakerName;
 
-  virtual Int_t  initResHistograms();
-  virtual Int_t  fillResHistograms();
-  virtual Int_t  calcResHistograms();
-  virtual Int_t  initChargeHistograms();
-  virtual Int_t  fillChargeHistograms();
-  virtual Int_t  calcChargeHistograms();
-  virtual Int_t  writeOutHistograms();
-  virtual Int_t  writeOutPostscript();
+  Int_t  initClusHistograms();
+  Int_t  fillClusHistograms();
+  Int_t  initMorphHistograms();
+  Int_t  fillMorphHistograms();
+  Int_t  initResHistograms();
+  Int_t  fillResHistograms();
+  Int_t  calcResHistograms();
+  Int_t  initChargeHistograms();
+  Int_t  fillChargeHistograms();
+  Int_t  calcChargeHistograms();
+  Int_t  writeOutHistograms();
+  Int_t  writeOutPostscript();
 
-  virtual Int_t  initTNtuple();
-  virtual Int_t  fillTNtuple();
-  virtual Int_t  writeOutTNtuple();
+  Int_t  initTNtuple();
+  Int_t  fillTNtuple();
+  Int_t  writeOutTNtuple();
 
+  Int_t  fillTablePointers();
+  Int_t  cleanUpTableSorters();
+
+  Bool_t btphit;
+  Bool_t btphitclus;
+  Bool_t bmorph;
+  Bool_t brestpt;
+  Bool_t btptrack;
+  
   // bool selection
-  virtual void   WritePostscript(Bool_t flag=kFALSE){bWritePostscriptOn=flag;}
-  virtual void   WriteTNtuple(Bool_t flag=kFALSE){bWriteTNtupleOn=flag;}
-  virtual void   WriteHistograms(Bool_t flag=kFALSE){bWriteHistogramsOn=flag;}
-  virtual void   SectorSelection(Bool_t flag=kFALSE){bSectorSelectionOn=flag;}
-  virtual void   SectorSelectionOn() {SectorSelection(kTRUE);} 
-  virtual void   SectorSelectionOff(){SectorSelection();}
+  void   WritePostscript(Bool_t flag=kFALSE){bWritePostscriptOn=flag;}
+  void   WriteTNtuple(Bool_t flag=kFALSE){bWriteTNtupleOn=flag;}
+  void   WriteHistograms(Bool_t flag=kFALSE){bWriteHistogramsOn=flag;}
+  void   SectorSelection(Bool_t flag=kFALSE){bSectorSelectionOn=flag;}
+  void   SectorSelectionOn() {SectorSelection(kTRUE);} 
+  void   SectorSelectionOff(){SectorSelection();}
 
+  //-----------------------------------------------------------------------
+  // pointers to tables
+  // pixel table
+  St_tfc_adcxyz *phtfc; //!
+  tfc_adcxyz_st *ptadcxyz; //!
+
+  // hit table
+  St_tcl_tphit *phtcl; //!
+  tcl_tphit_st *pttphit; //!
+
+  // Li Qun's table
+  St_tcl_hitclus *phhcl; //!
+  tcl_hitclus_st *pthcl; //!
+
+  // Tom's morphology table
+  St_tcc_morphology *phmorph; //!
+  tcc_morphology_st *ptmorph; //!
+
+  // track table 
+  St_tpt_track *phtrk; //!
+  tpt_track_st *pttrk; //!
+
+  // residuals
+  St_tpt_res *phres;//!
+  tpt_res_st *ptres; //!
+
+  // Table sorters
+  St_TableSorter *ressorter; //!
+  St_TableSorter *trksorter; //!
+  St_TableSorter *morphsorter; //!
 
  protected:
 
-  enum {nResHist = 4, nChargeHist = 4};
+  enum {nResHist = 4, nChargeHist = 4, nClusterHist = 4,
+	nMorphHist = 4 };
 
   TNtuple *mTNtupleTPC; //!
 
+  struct ClusterHist {
+    TH1F *mNHits;
+    TH1F *mNPadsPerCluster;
+    TH1F *mNTimeBucketsPerCluster;
+    TH1F *mNPadsPerHit;
+    TH1F *mNTimeBucketsPerHit;
+  };
+
+  struct ClusterHist ClusterHists[nClusterHist]; //!
+
+  struct MorphHist {
+    TH1F *mNumberOfSequences;
+    TH1F *mNumberOfPixels;
+    TH1F *mNumberOfPads;
+    TH1F *mNumberOfHits;
+    TH1F *mTotalCharge;
+    TH1F *mMaxCharge;
+    TH1F *mAverageCharge;
+    TH1F *mPadSigma1;
+    TH1F *mTimeSigma1;
+    TH1F *mPadTimeSigma1Sq;
+    TH1F *mEcc1;
+    TH1F *mLinEcc1;
+    TH1F *mPadSigma2;
+    TH1F *mTimeSigma2;
+    TH1F *mPadTimeSigma2Sq;
+    TH1F *mEcc2;
+    TH1F *mLinEcc2;
+  };
+  
+  struct MorphHist MorphHists[nMorphHist]; //!
+  
   struct FitHist {
     TH1D *mXYResVersusAlpha_mean;
     TH1D *mXYResVersusAlpha_sigma;
