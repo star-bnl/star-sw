@@ -8,6 +8,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TGraph.h"
+#include "TGraphErrors.h"
 #include "TMultiGraph.h"
 #include "TSystem.h"
 #include "TF1.h"
@@ -29,6 +30,9 @@ using namespace std;
 eemcTimingScanPlot::eemcTimingScanPlot() {
   mAxisMin=0.;
   mAxisMax=110.;
+  mNormalize=false;
+  mNormalizePreshower=false;
+  mErrors=false;
 }
 
 // ----------------------------------------------------------------------------
@@ -70,8 +74,6 @@ Int_t eemcTimingScanPlot::scan(TString directory) {
 
 	/// Determine if we're looking at an MAPMT or TOWER run
         flavor = dirEntry(4,5);
-
-	//std::cout << "FLAVOR=" << flavor << std::endl;
 	
 	/// Access TTree to obtain channel integral and 
 	/// timing information
@@ -153,7 +155,7 @@ Int_t eemcTimingScanPlot::scan(TString directory) {
       gr->SetLineColor(icol);  
       if(ich==0)gr->SetName(tit);
       if(ich==0)gr->SetTitle(tit+"; delay(ns)");
-      graphs[icr][ich]=gr;
+      graphs[icr][ich]=(TGraph*)gr;
     }
   }
 
@@ -161,17 +163,50 @@ Int_t eemcTimingScanPlot::scan(TString directory) {
   /// Fill the TGraphs
   Int_t numberofPoints = timingDelay.size();
   Float_t maxima[MaxMapmtCrates];
-  for(int icr=0;icr<MaxMapmtCrates;icr++)
+  Float_t maxCrateChan[MaxMapmtCrates][12];
+  for(int icr=0;icr<MaxMapmtCrates;icr++) {
     maxima[icr] = 0;
+    for ( Int_t jch=0; jch<12; jch++ ) maxCrateChan[icr][jch]=0.;
+  }
 
-  for(Int_t i=0; i<numberofPoints; i++) {
+  /// Find largest in crate and largest in crate for
+  /// specified channel.
+  for(Int_t i=0; i<numberofPoints; i++) {    
+    /// All crates or boxes
     for(int icr=0;icr<MaxMapmtCrates;icr++) {
+      /// Loop over 12 selected channels
       for(int ich=0; ich<12; ich++) {
-        graphs[icr][ich]->SetPoint(i,timingDelay[i],allRunsVector[i][icr][ich]);
-        if(allRunsVector[i][icr][ich] > maxima[icr]) maxima[icr] = allRunsVector[i][icr][ich];
+	  
+	/// Determine the maximum channel for this crate
+	if (allRunsVector[i][icr][ich] > maxima[icr]) {
+	  maxima[icr] = allRunsVector[i][icr][ich];
+	  }
+	if (allRunsVector[i][icr][ich] > maxCrateChan[icr][ich] ){
+	  maxCrateChan[icr][ich] = allRunsVector[i][icr][ich];
+	}
+	
       }
     }
   }
+  
+  
+  /// Loop over all points
+  for(Int_t i=0; i<numberofPoints; i++) {    
+    /// All crates or boxes
+    for(int icr=0;icr<MaxMapmtCrates;icr++) {
+      /// Loop over 12 selected channels
+      for(int ich=0; ich<12; ich++) {
+ 	/// Set the specified point for this crate and channel,
+	/// rescaled to a common maximum for the specified channel
+	Float_t scale = 1.;
+	if ( mNormalize && maxCrateChan[icr][ich] != 0. ) scale = maxima[icr]/maxCrateChan[icr][ich];
+	TString myName=graphs[icr][ich]->GetName();
+	if ( myName.Contains("P") && !mNormalizePreshower ) scale = 1.;
+	graphs[icr][ich]->SetPoint(i,timingDelay[i],scale*allRunsVector[i][icr][ich]);
+      }
+    }
+  }
+
 
   /// Loop over all graphs and sort them
   for ( Int_t i = 0; i < MaxMapmtCrates; i++ ) {

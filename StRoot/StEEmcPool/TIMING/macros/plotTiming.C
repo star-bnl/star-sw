@@ -15,10 +15,11 @@ void plotTiming(TString directory = "crate1/") {
     gSystem->Load("StPreEclMaker");
     gSystem->Load("StEpcMaker");
   }
-  assert(gSystem->Load("StEEmcPooltimingCalibration")==0);
+  assert(gSystem->Load("StEEmcPoolTIMING")==0);
   cout<<"All libs loaded"<<endl;
   
   eemcTimingScanPlot tsp;
-  tsp.setAxisRange(0.,110.); 
+  tsp.setAxisRange(0.,55.); 
+  tsp.normalize();
   tsp.scan(directory);
 }
