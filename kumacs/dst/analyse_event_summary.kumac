@@ -17,12 +17,36 @@ hi/file 21 [ntuple_file]
  1dhist 101 'Num Global Tracks total'   100 0. 5000.
  1dhist 102 'Num Global Tracks good '   100 0. 5000.
  1dhist 103 'Num Global Tracks primary' 100 0. 5000.
+ 1dhist 104  '   '   100 0. 5000.
+ 1dhist 105  '   '   100 0. 5000.
+ 1dhist 106  '   '   100 0. 5000.
+ 1dhist 107  '   '   100 0. 5000.
+ 1dhist 108  '   '   100 0. 5000.
+ 1dhist 109  '   '   100 0. 5000.
+ 1dhist 110  '   '   100 0. 5000.
+ 1dhist 111  '   '   100 0. 5000.
+ 1dhist 112  '   '   100 0. 5000.
+ 1dhist 113  '   '   100 0. 5000.
  
 
 * --- Fill Histograms ---------------------------------------------------- 
  nt/proj 101 111.glb_trk_tot
  nt/proj 102 111.glb_trk_good
  nt/proj 103 111.glb_trk_prim
+ 
+ nt/proj 104 111.n_vert_total
+ nt/proj 105 111.n_vert_V0
+ nt/proj 106 111.n_vert_K0
+ nt/proj 107 111.mean_pt
+ nt/proj 108 111.mean_eta
+ nt/proj 109 111.prim_vrtx(1)
+ nt/proj 110 111.prim_vrtx(2)
+ nt/proj 111 111.prim_vrtx(3)
+ nt/proj 112 111.mult_eta(1)
+ nt/proj 113 111.mult_pt(1)
+ 
+ 
+ 
  
  
 * or use nt/plot 
