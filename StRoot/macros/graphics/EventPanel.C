@@ -1,0 +1,20 @@
+{
+//
+// This macro generates a Controlbar menu: To see the output, click begin_html <a href="gif/demos.gif" >here</a> end_html
+// To execute an item, click with the left mouse button.
+// To see the HELP of a button, click on the right mouse button.
+   gROOT->Reset();
+   TControlBar *bar = new TControlBar("vertical", "Control Panel"); 
+   bar->AddButton("Help on Demos",".x demoshelp.C", "Click Here For Help on Running the Demos");
+   bar->AddButton("browser",     "{b = new TBrowser(\"HALL\");}", "Start the ROOT Browser");
+   bar->AddButton("Print view port size",   ".x Get3DSize.C", "Print the total size of all 3D axice");
+   bar->AddButton("Read StEvent",".x EventRead.C","Read StEvent objects from root file");
+   bar->AddButton("Draw ALL TPC hits",".x DrawTpcHits.C","Draw the global tracks by its helix object");
+   bar->AddButton("Draw tracks",".x DrawTrackTpcHits.C","Draw the global tracks by its helix object");
+   bar->AddButton("1. Draw g2t_tpc_hits",".x H.C","Read STAF tables from XDF file and draw \"g2t_tpc_hits\" hits");
+   bar->AddButton("2. Draw g2t_tpc_hits",".x HitsDraw.C","Read STAF tables from XDF file and draw \"g2t_tpc_hits\" hits");
+   bar->Show();
+   gROOT->LoadMacro("PadControlPanel.C");
+   gROOT->SaveContext();
+}
+ 
