@@ -44,7 +44,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.62 2003/12/04 03:54:13 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.63 2003/12/29 00:00:34 perev Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -457,9 +457,11 @@ StEventMaker::makeEvent()
     maxId = dstGlobalTracks && nrows>0 ? max((long)dstGlobalTracks[nrows-1].id, nrows) : 0;
     StGlobalTrack *gtrack = 0;
     StVector(StGlobalTrack*) vecGlobalTracks(maxId+101, gtrack);
-    
+    int bad;
     for (i=0; i<nrows; i++) {
-        if (badDstTrack(dstGlobalTracks+i)) continue;
+        if ((bad=badDstTrack(dstGlobalTracks+i))) {
+	  if (Debug()) Warning("makeEvent","global track rejected by %d",bad);
+          continue;}
         gtrack = new StGlobalTrack(dstGlobalTracks[i]);
         vecGlobalTracks[dstGlobalTracks[i].id] = gtrack;
         gtrack->setGeometry(new StHelixModel(dstGlobalTracks[i]));
@@ -507,7 +509,9 @@ StEventMaker::makeEvent()
     nfailed = 0;
     
     for (i=0; i<nrows; i++) {
-        if (badDstTrack(dstPrimaryTracks+i)) {nfailed++; continue;}
+        if ((bad=badDstTrack(dstPrimaryTracks+i))) {
+	  if (Debug()) Warning("makeEvent","primary track rejected by %d",bad);
+          nfailed++; continue;}
         idvtx = dstPrimaryTracks[i].id_start_vertex ? dstPrimaryTracks[i].id_start_vertex/10 : 0;
         if (!idvtx) {
             nfailed++;
@@ -569,7 +573,9 @@ StEventMaker::makeEvent()
     StVector(StTptTrack*) vecTptTracks(maxId+101, ttrack);
 	
     for (i=0; i<nrows; i++) {
-        if (badDstTrack(dstTptTracks+i)) {nfailed++; continue;}
+        if ((bad=badDstTrack(dstTptTracks+i))) {
+	  if (Debug()) Warning("makeEvent","tpt track rejected by %d",bad);
+          nfailed++; continue;}
 	ttrack = new StTptTrack(dstTptTracks[i]);
 	vecTptTracks[dstTptTracks[i].id] = ttrack;
 	ttrack->setGeometry(new StHelixModel(dstTptTracks[i]));
@@ -631,7 +637,9 @@ StEventMaker::makeEvent()
     nfailed2 = 0;
     
     for (i=0; i<nrows; i++) {
-        if (badDstTrack(dstEstGlobalTracks+i)) {nfailed++; continue;}
+        if ((bad=badDstTrack(dstEstGlobalTracks+i))) {
+	  if (Debug()) Warning("makeEvent","est global track rejected by %d",bad);
+          nfailed++; continue;}
 	//
 	//   For each EST global track there must be already a node
 	//   since EST doesn't create new tracks.
@@ -693,7 +701,9 @@ StEventMaker::makeEvent()
     nfailed = 0;
     
     for (i=0; i<nrows; i++) {
-        if (badDstTrack(dstEstPrimaryTracks+i)) {nfailed++;continue;}
+        if ((bad=badDstTrack(dstEstPrimaryTracks+i))) {
+	  if (Debug()) Warning("makeEvent","estprimary track rejected by %d",bad);
+          nfailed++;continue;}
 	//
 	//  Check for valid primary vertex
 	//
@@ -803,7 +813,10 @@ StEventMaker::makeEvent()
 
     for (i=0; i<nVertices; i++) {
         if (dstVertices[i].iflag <=0) 	 continue;
-        if (badDstVertex(dstVertices+i)) {dstVertices[i].iflag = -abs(dstVertices[i].iflag);continue;}
+        if ((bad=badDstVertex(dstVertices+i))) {
+	  if (Debug()) Warning("makeEvent","vertex rejected by %d",bad);
+          dstVertices[i].iflag = -abs(dstVertices[i].iflag);continue;}
+
         if (dstVertices[i].iflag < 100 && dstVertices[i].iflag%10 == 1 &&
 	    dstVertices[i].vtx_id == kEventVtxId ) {
             StPrimaryVertex *pvtx = new StPrimaryVertex(dstVertices[i]);
@@ -865,10 +878,13 @@ StEventMaker::makeEvent()
 
     nfailed = 0;
     for (i=0; i<nV0Vertices; i++) {
-        if(badDstV0Vertex(dstV0Vertices+i)) {nfailed++;continue;}
+        if((bad=badDstV0Vertex(dstV0Vertices+i))) {
+	  if (Debug()) Warning("makeEvent","V0 vertex rejected by %d",bad);
+          nfailed++;continue;}
+
         id = dstV0Vertices[i].id_vertex - 1;
-        if (dstVertices[id].iflag > 0
-        && (id < static_cast<unsigned long>(nVertices))) {
+        if (id < static_cast<unsigned long>(nVertices)
+        &&  dstVertices[id].iflag > 0) {
             StV0Vertex *v0 = new StV0Vertex(dstVertices[id], dstV0Vertices[i]);
             id = dstV0Vertices[i].idneg;
             if (id < vecGlobalTracks.size()) v0->addDaughter(vecGlobalTracks[id]);
@@ -891,7 +907,9 @@ StEventMaker::makeEvent()
     
     nfailed = 0;
     for (i=0; i<nXiVertices; i++) {
-        if (badDstXiVertex(dstXiVertices+i)) {nfailed++;continue;}
+        if ((bad=badDstXiVertex(dstXiVertices+i))) {
+	  if (Debug()) Warning("makeEvent","Xi vertex rejected by %d",bad);
+          nfailed++;continue;}
         id    = dstXiVertices[i].id_xi - 1;
         if (dstVertices[id].iflag > 0
         && (id < static_cast<unsigned long>(nVertices))) {
@@ -917,7 +935,10 @@ StEventMaker::makeEvent()
 
     nfailed = 0;
     for (i=0; i<nKinkVertices; i++) {
-        if (badDstTkfVertex(dstKinkVertices+i)) {nfailed++;continue;}
+        if ((bad=badDstTkfVertex(dstKinkVertices+i))) {
+	  if (Debug()) Warning("makeEvent","tkf vertex rejected by %d",bad);
+          nfailed++;continue;}
+
         id = dstKinkVertices[i].id_vertex - 1;
         if (dstVertices[id].iflag > 0
         && (id < static_cast<unsigned long>(nVertices))) {
@@ -1588,8 +1609,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.62 2003/12/04 03:54:13 perev Exp $
+ * $Id: StEventMaker.cxx,v 2.63 2003/12/29 00:00:34 perev Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.63  2003/12/29 00:00:34  perev
+ * More debug prints
+ *
  * Revision 2.62  2003/12/04 03:54:13  perev
  * Set empty, instead of crazy outer geometry
  *
