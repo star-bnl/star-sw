@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.1.1.1 1999/02/21 22:17:48 jgreid Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.2 1999/03/20 21:02:26 perev Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
- * Revision 1.1.1.1  1999/02/21 22:17:48  jgreid
- * EbyE SCA Tags Filler Maker
+ * Revision 1.2  1999/03/20 21:02:26  perev
+ * new maker schema
+ *
+ * Revision 1.1.1.1  1999/02/21 21:08:03  jgreid
+ * Ebye SCA Tag Filler
  *
  **************************************************************************/
 #include "StEbyeScaTagsMaker.h"
@@ -53,8 +56,8 @@ Int_t StEbyeScaTagsMaker::Make() {
 }
 
 void StEbyeScaTagsMaker::PrintInfo() {
-  cout << "$Id: StEbyeScaTagsMaker.cxx,v 1.1.1.1 1999/02/21 22:17:48 jgreid Exp $" << endl;
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  cout << "$Id: StEbyeScaTagsMaker.cxx,v 1.2 1999/03/20 21:02:26 perev Exp $" << endl;
+  if (Debug()) StMaker::PrintInfo();
 }
 
 
