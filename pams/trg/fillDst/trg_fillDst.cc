@@ -1,8 +1,7 @@
 /*:>-------------------------------------------------------------------
-**: FILE:       ftf_tpc.cc
-
+**: FILE:       trg_fillDst.cc
 **: HISTORY:
-**:   
+**:   3/18/99 ppy Bug zeroing CTB info fixed, found by Torre Weneaus 
 **:  
 **:<------------------------------------------------------------------*/
 #include "trg_fillDst.h"
@@ -11,7 +10,6 @@
 extern "C" long type_of_call trg_fillDst_(
   TABLE_HEAD_ST     *ctu_cor_h,    CTU_COR_ST              *ctu_cor,   
   TABLE_HEAD_ST     *mwc_raw_h,    MWC_RAW_ST              *mwc_raw,   
-  //  TABLE_HEAD_ST     *vps_raw_h,    VPS_RAW_ST              *vps_raw,   
   TABLE_HEAD_ST     *dst_h,        DST_TRIGGERDETECTORS_ST *dst )  
 {
 /*:>--------------------------------------------------------------------
@@ -37,7 +35,7 @@ extern "C" long type_of_call trg_fillDst_(
 //
 //    Fill DST MWC info
 //
-   for ( i = 0 ; i < 96 ; i++ ) dst->nCtb[i] = 0 ;
+   for ( i = 0 ; i < 96 ; i++ ) dst->nMwc[i] = 0 ;
    if ( mwc_raw_h->nok > 0 ) {
       for ( i = 0 ; i < mwc_raw_h->nok ; i++ ) {
          index = mwc_raw[i].sector - 1  ;
