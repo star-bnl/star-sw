@@ -1,10 +1,9 @@
-//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // Macro for plotting hits and pixels in combination with bfc.C         //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-void draw_sector(TPad &padname, Float_t theta, Float_t phi){
+int draw_sector(TPad &padname, Float_t theta, Float_t phi){
   /* 
    * -----------------------------------------------------------------
    *	draw TPC sectors, two sections, inner and outer.
@@ -34,55 +33,27 @@ void draw_sector(TPad &padname, Float_t theta, Float_t phi){
   padname.SetPhi(phi);
   padname.Modified();
   padname.Update();
+
+  return kStOK;
 }
 //______________________________________________________________________
-int draw_event(TPad &padname, Int_t nslice){
+int draw_event(TPad &padname) {
   /*-----------------------------------------------------------------------
    * Plot hits and tracks in the TPC */
   
-  char slstring[10], tkstring[10];
-  int value; 
+  char tkstring[10];
 
-  // seven slices for the full laser event - These for the 97 test data.
-  Float_t zsep[8] = {-210.0,15.0,45.0,75.0,105.0,140.0,170.0,210.0};
-  // And these for the 1998 sector 18-19 test data.
-  // Float_t zsep[8] = {-210.0,-165.0,-135.0,-105.0,-75.0,-45.0,-15.0,210.0};
-  //  Int_t m_nslice=-7;
-  Int_t m_nslice= nslice;
-  Int_t first_slice = 0;
-  Int_t last_slice =  1;
-  if(m_nslice<0){
-    zsep[1]= 210.0;
-  }
-  else{
-    if(m_nslice==7)
-      last_slice = 7;
-    else{
-      first_slice = m_nslice;
-      last_slice =  m_nslice+1;
-    }
-  }
-  cout << "from " << first_slice << " to " << last_slice << endl;
-  
-  Int_t i=0;
-  Int_t incolor;
-  
-  // Plot the part of the TPC with tracks from the tpctest test
+  // Plot the part of the TPC with tracks 
   m_node1->Draw();
 
   TView *view = padname.GetView();
-  //  Float_t rmin[3]={-40, -180,-210};
-  //  Float_t rmax[3]={ 40,  -60, 210};
   Float_t rmin[3]={ -180, -180,-210};
   Float_t rmax[3]={ 180,  180, 210};
   Float_t p[6];
-  Float_t pts[7500],tkpts[75][150]; //allow for 75, 50 hit tracks
-  Int_t ntkpt[75];                  // and 75 track hit counters 
   
   view->SetRange(rmin,rmax);
   view->SetLongitude(15.0);
   view->SetLatitude(90.0);
-
 
   // Create iterators for the two datasets
   St_DataSetIter tpc_data(chain->DataSet("tpc_hits"));
@@ -93,7 +64,7 @@ int draw_event(TPad &padname, Int_t nslice){
   else { cout << "Error: tphit table header does not exist " << endl; return kStWarn; }
   if (!hit1) { cout << "Error: tphit table does not exist " << endl; return kStWarn; }
   Int_t nhits = hits->GetNRows();
-  if (nhits == 0) {cout << "error: tphit table contains zero rows " << endl; return kStWarn;}
+  if (nhits == 0) {cout << "Error: tphit table contains zero rows " << endl; return kStWarn;}
   St_TableSorter sortrk(*hits,"track",0,nhits-1);
 
   St_DataSetIter tpc_tracks(chain->DataSet("tpc_tracks"));
@@ -104,146 +75,118 @@ int draw_event(TPad &padname, Int_t nslice){
   else { cout << "Error: tptrack table header does not exist " << endl; return kStWarn; }
   if (!track1) { cout << "Error: tptrack table does not exist " << endl; return kStWarn; }
   Int_t ntracks = track->GetNRows();
+  if (ntracks == 0) {cout << "Error: tptrack table contains zero rows " << endl; return kStWarn;}
 
   // Show the tpc event in z slices.
-  for (int islice=first_slice;islice<last_slice;islice++) {
-    Float_t  zmin=zsep[islice];
-    Float_t  zmax=zsep[islice+1];
-    cout << " slice "<< islice <<" z limits  "<< zmin <<" to "<< zmax << endl;
-    //    tcl_tphit_st *h = hit1;
-    for (int mm=0;mm<75;mm++) ntkpt[mm] = 0;
-    Int_t k=0, savnum[75]; 
-    Int_t oldie=0, itkno =0;
+  Float_t  zmin=-210;
+  Float_t  zmax=210;
 
-    for (i = 0; i < hits->GetNRows(); i++) {
-      //      h = hit1[sortrk->GetIndex(i)];
-      if (hit1[i]->z > zmin && hit1[i]->z < zmax) {
-	pts[3*k]=hit1[i]->x; pts[3*k+1]=hit1[i]->y; pts[3*k+2]=hit1[i]->z;
-	k++;
-        if(hit1[i].track !=0){
-          Int_t newtk = hit1[i]->track / 1000;
-          if( newtk != oldie){
-            oldie= newtk;
-            itkno++;
-            savnum[itkno]=oldie;
-          }
-          tkpts[itkno][3*ntkpt[itkno]]=hit1[i]->x;
-          tkpts[itkno][3*ntkpt[itkno]+1]=hit1[i]->y;
-          tkpts[itkno][3*ntkpt[itkno]+2]=hit1[i]->z;
-          ntkpt[itkno]++;
-        }
-      }
+  Int_t k=0; 
+  Float_t *pts = new Float_t[3*nhits];
+  for (Int_t j = 0; j < nhits; j++) {
+    if (hit1[j]->z > zmin && hit1[j]->z < zmax) {
+      pts[3*k]   = hit1[j]->x; 
+      pts[3*k+1] = hit1[j]->y; 
+      pts[3*k+2] = hit1[j]->z;
+      k++;
     }
-
-    cout << "total hits " << k << endl; 
-
-    TPolyMarker3D *hit = new TPolyMarker3D(k,pts,2);
-    hit->SetMarkerColor(1);
-    hit->Draw();
-
-    //Now plot the tracks hits in color ;
-    TPolyMarker3D *thit[75];
-    for(int m=0; m < 75; m++){
-      if(ntkpt[m] !=0){
-	//    
-	cout <<" Track #" << savnum[m] << " "<< ntkpt[m] <<" hits" << endl;
-	Int_t mark   = m+19;
-	if(m>11)mark = m+8;
-	if(m>22)mark = m-3;
-	if(m>33)mark = m-14;
-	if(m>44)mark = m-25;
-	thit[m] = new TPolyMarker3D(ntkpt[m],tkpts[m],mark);
-	incolor =m;
-	//  colors 0 and 10 are white - invisible
-	if(m==10)incolor=1;
-	if(m> 50)incolor=m-50; 
-	
-	thit[m]->SetMarkerColor(incolor);
-	thit[m]->Draw();
-      }
-    }
-    // Now plot all the tracks as polylines.  
-    TPolyLine3D *trk[75];
-    Int_t tin=0;
-    Int_t tid[75];
-    tpt_track_st *t = track1;
-
-    for( i=0;i<ntracks;i++){
-      //    cout << "track flag " << i <<", " << t->nfit <<", " << t->flag <<endl;
-      //skip any fake tracks (negative flag?)
-      if(t->flag < 0){ t++;continue;}
-      Float_t ay = 1.0/tan(0.0174533*t->psi);
-      Float_t x0 = t->r0*cos(0.0174533*t->phi0);
-      Float_t y0 = t->r0*sin(0.0174533*t->phi0);
-      if(t->z0 >zmin && t->z0 < zmax){
-	p[1] = rmin[1];
-	p[4] = rmax[1];
-	p[0] = x0 + ay*(p[1]-y0);
-	if(p[0] < rmin[0]){
-	  p[0] = rmin[0];
-	  p[1] = y0 + (p[0]-x0)/ay;
-	}
-	if(p[0] > rmax[0]){
-	  p[0] = rmax[0];
-	  p[1] = y0 + (p[0]-x0)/ay;
-	}
-	p[2] = t->tanl*(y0-p[1]) + t->z0;
-	p[3] = x0 + ay*(p[4]-y0);
-	if(p[3] < rmin[0]){   
-	  p[3] = rmin[0];
-	  p[4] = y0 + (p[3]-x0)/ay;
-	}
-	if(p[3] > rmax[0]){
-	  p[3] = rmax[0];
-	  p[4] = y0 + (p[3]-x0)/ay;
-	}
-	p[5] = t->tanl*(y0-p[4]) + t->z0;
-	trk[tin] = new TPolyLine3D(2,p);
-	tid[tin]=t->id;
-	tin++;
-      }
-      t++;
-    }
-    for( i=0;i<tin;i++){
-      incolor=tid[i];
-      //  colors 0 and 10 are white - invisible
-      if(tid[i]==10)incolor=1;
-      if(tid[i]> 50)incolor=tid[i]-50; 
-      
-      trk[i]->SetLineColor(incolor);
-      trk[i]->Draw();
-    }
-    // put the slice number and number of tracks in a separate pad
-    TPad *event = new TPad("event","event",0.75,0.84,0.95,0.95);
-    event->Draw();
-    event->cd();
-    event->Range(0,0,1,1);
-    event->SetFillColor(19);
-    event->SetBorderSize(0);
-    event->SetBorderMode(0);
-
-    if(m_nslice>=0){
-      sprintf(slstring,"Slice %d",islice);
-      TText *stext = new TText(0.125,0.40,slstring);
-      stext->SetTextSize(0.5);
-      stext->Draw();
-    }
-
-    //label counts only the good tracks.
-    sprintf(tkstring," %d Tracks",tin);
-    TText *ttext = new TText(0.125,0.11,tkstring);
-    ttext->SetTextSize(0.5);
-    ttext->Draw();
-    event->Modified();
-    padname.cd();
-    padname.Modified();
-    padname.Update();
   }
+  cout << "total hits " << k << endl; 
+  TPolyMarker3D *hit = new TPolyMarker3D(k,pts,2);
+  hit->SetMarkerColor(1);
+  hit->Draw();
+
+  Int_t ngoodtrks = 0;
+  for (j = 0; j < ntracks; j++) {
+    Int_t trkid = track1[j]->id;
+    Int_t trkflag = track1[j]->flag;
+    Int_t trknrec = track1[j]->nrec;
+    cout <<" Track #" << j << " "<< trknrec <<" hits" << endl;
+    Float_t *tkpts = new Float_t[3*trknrec];
+    // define colors and markers for different tracks
+    Int_t mark = j + 19;
+    if (j>11) {mark = j + 8;}
+    if (j>22) {mark = j - 3;}
+    if (j>33) {mark = j - 14;}
+    if (j>44) {mark = j - 25;}
+    Int_t incolor = j;
+    //  colors 0 and 10 are white - invisible
+    if (j == 10) {incolor = 1;}
+    if (j > 50) {incolor = j - 50;} 
+    // loop over hits belonging to a track
+    for (Int_t i = 0; i < trknrec; i++) {
+      Int_t hitid = 1000*trkid + i;
+      Int_t irow_hit = sortrk[hitid];
+      if (hit1[irow_hit]->z > zmin && hit1[irow_hit]->z < zmax) {
+	tkpts[i]   = hit1[irow_hit]->x;
+	tkpts[i+1] = hit1[irow_hit]->y;
+	tkpts[i+2] = hit1[irow_hit]->z;
+      }
+    }
+    TPolyMarker3D *thit = new TPolyMarker3D(trknrec,tkpts,mark);
+    thit->SetMarkerColor(incolor);
+    thit->Draw();
+    // Draw good tracks as polylines.
+    if (trkflag < 0) {continue;}
+    Float_t ay = 1.0/tan(0.0174533*track1[j]->psi);
+    Float_t x0 = track1[j]->r0*cos(0.0174533*track1[j]->phi0);
+    Float_t y0 = track1[j]->r0*sin(0.0174533*track1[j]->phi0);
+    if (track1[j]->z0 >zmin && track1[j]->z0 < zmax) {
+      p[1] = rmin[1];
+      p[4] = rmax[1];
+      p[0] = x0 + ay*(p[1]-y0);
+      if (p[0] < rmin[0]) {
+	p[0] = rmin[0];
+	p[1] = y0 + (p[0]-x0)/ay;
+      }
+      if (p[0] > rmax[0]) {
+	p[0] = rmax[0];
+	p[1] = y0 + (p[0]-x0)/ay;
+      }
+      p[2] = track1[j]->tanl*(y0-p[1]) + track1[j]->z0;
+      p[3] = x0 + ay*(p[4]-y0);
+      if (p[3] < rmin[0]) {   
+	p[3] = rmin[0];
+	p[4] = y0 + (p[3]-x0)/ay;
+      }
+      if (p[3] > rmax[0]) {
+	p[3] = rmax[0];
+	p[4] = y0 + (p[3]-x0)/ay;
+      }
+      p[5] = track1[j]->tanl*(y0-p[4]) + track1[j]->z0;
+      TPolyLine3D *trk = new TPolyLine3D(2,p);
+      trk->SetLineColor(incolor);
+      trk->Draw();
+      ngoodtrks++;
+    }
+  }
+  
+  // put the slice number and number of tracks in a separate pad
+  TPad *event = new TPad("event","event",0.75,0.75,0.95,0.95);
+  event->Draw();
+  event->cd();
+  event->Range(0,0,1,1);
+  event->SetFillColor(0);
+  event->SetBorderSize(0);
+  event->SetBorderMode(0);
+
+  // label counts only the good tracks.
+  //  sprintf(tkstring," %d Good Tracks",ngoodtrks);
+  //  TText *ttext = new TText(0.125,0.11,tkstring);
+  //  ttext->SetTextSize(0.5);
+  //  cout << "nr good tracks " << ngoodtrks << endl;
+  //  ttext->Draw();
+  //  event->Modified();
+  //  padname.cd();
+  //  padname.Modified();
+  //  padname.Update();
+
+  return kStOK;
 }
 
 //-----------------------------------------------------------------------
 
-int draw_pixels(Text_t* varexp, Text_t* selection, Text_t* options){
+int draw_pixels(Text_t* varexp, Text_t* selection, Text_t* options) {
   /* 
    * -----------------------------------------------------------------
    *	draw TPC pixels
@@ -266,7 +209,7 @@ int draw_pixels(Text_t* varexp, Text_t* selection, Text_t* options){
   adcxyz.SetMarkerColor(4);
   adcxyz.Draw(varexp,selection,options);
 
-  return 0;
+  return kStOK;
 }
 
 //-----------------------------------------------------------------------
@@ -293,12 +236,12 @@ int draw_hits(Text_t* varexp, Text_t* selection, Text_t* options){
   tphit.SetMarkerColor(2);
   tphit.Draw(varexp,selection,options);
 
-  return 0;
+  return kStOK;
 }
 
 //-----------------------------------------------------------------------
 
-int draw_geant_hits(Text_t* varexp, Text_t* selection, Text_t* options){
+int draw_geant_hits(Text_t* varexp, Text_t* selection, Text_t* options) {
   /* 
    * -----------------------------------------------------------------
    *	draw TPC geant hits
@@ -319,12 +262,12 @@ int draw_geant_hits(Text_t* varexp, Text_t* selection, Text_t* options){
   g2t_tpc_hit.SetMarkerColor(5);
   g2t_tpc_hit.Draw(varexp,selection,options);
 
-  return 0;
+  return kStOK;
 }
 
 //-----------------------------------------------------------------------
 
-void tpcdraw(){
+void tpcdraw() {
   /* 
    * -----------------------------------------------------------------
    *	draw TPC sectors with some options 
@@ -408,11 +351,11 @@ void tpcdraw(){
   
   pad3->cd();
   draw_sector(*pad3,90.0,0.0);
-  draw_event(*pad3,-7);
+  draw_event(*pad3);
   
   pad4->cd();
   draw_sector(*pad4,0.0,0.0);
-  draw_event(*pad4,-7);
+  draw_event(*pad4);
 }
 
 
