@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitCollection.hh,v 1.3 1999/03/04 15:57:03 wenaus Exp $
+ * $Id: StSvtHitCollection.hh,v 1.4 1999/03/07 14:01:23 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitCollection.hh,v $
+ * Revision 1.4  1999/03/07 14:01:23  wenaus
+ * Add a few missing 'using' protections
+ *
  * Revision 1.3  1999/03/04 15:57:03  wenaus
  * add std namespace for Sun CC5 compatibility
  *
@@ -20,8 +23,10 @@
 #ifndef StSvtHitCollection_hh
 #define StSvtHitCollection_hh
 #include "StEvent/StSvtHit.hh"
-using namespace std;
 #include <vector>
+#if !defined(ST_NO_NAMESPACES)
+using namespace std;
+#endif
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<StSvtHit*, allocator<StSvtHit*> >            StSvtHitCollection;
