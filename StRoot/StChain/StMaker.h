@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.21 1999/05/10 15:37:52 perev Exp $
+// $Id: StMaker.h,v 1.22 1999/05/23 04:05:03 fine Exp $
 // $Log: StMaker.h,v $
+// Revision 1.22  1999/05/23 04:05:03  fine
+// The lost since 1.35 Wed Mar 10 20:23:58 timer functions have been re-introduced
+//
 // Revision 1.21  1999/05/10 15:37:52  perev
 // Save of hisogramm in StMaker::Init
 //
@@ -169,7 +172,8 @@ public:
    virtual void       	SetOutputAll(St_DataSet *ds);
    virtual void   	SetMode(Int_t mode=0)   {m_Mode=mode;}
 
-
+   virtual Double_t     RealTime(){ return m_Timer.RealTime();}
+   virtual Double_t     CpuTime() { return m_Timer.CpuTime();}
    virtual void   	StartTimer(Bool_t reset = kFALSE){m_Timer.Start(reset);}
    virtual void   	StopTimer(){m_Timer.Stop();}
    virtual void   	PrintTimer(Option_t *option="");
@@ -183,7 +187,7 @@ public:
 
 //		must be in here in .h
    static const char   *GetCVSIdH() 
-    {static const char cvs[]="$Id: StMaker.h,v 1.21 1999/05/10 15:37:52 perev Exp $";
+    {static const char cvs[]="$Id: StMaker.h,v 1.22 1999/05/23 04:05:03 fine Exp $";
      return cvs;};
    static const char   *GetCVSTag()
      {static const char cvs[]="$Name:  $"; return cvs;};
