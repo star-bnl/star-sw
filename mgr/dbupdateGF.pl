@@ -246,7 +246,7 @@ my $ztime = "000000";
    $mtype = "MC"; 
    $gflag = $flagHash{$mfName}; 
     next if ($mfName =~ /fzd.hold/);
-#  print "Set: ", $mdataSet, "File: ", $mfName, "Flag = ", $gflag, "\n";
+
 if ( $gflag eq 1) {
 
    print "Files to be inserted :", "\n"; 
@@ -257,16 +257,16 @@ if ( $gflag eq 1) {
    &fillDbTable();
  }
 
-elsif ( $gflag eq 2) {
+#elsif ( $gflag eq 2) {
   
- print "Files to be updated :", "\n";    
- print "Set: ", $mdataSet, "Path: ", $mpath,"File:", $mfName, "Date:", $mcTime, "\n";
+# print "Files to be updated :", "\n";    
+# print "Set: ", $mdataSet, "Path: ", $mpath,"File:", $mfName, "Date:", $mcTime, "\n";
 
 ## update GEANT files in Files Catalog 
-   print "Updating Files Catalog\n";
-   &updateDbTable();  
+#   print "Updating Files Catalog\n";
+#   &updateDbTable();  
 
-}
+#}
 }
  &StDbProdDisconnect();
 
