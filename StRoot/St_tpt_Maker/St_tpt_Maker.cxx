@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.64 2001/08/31 20:45:54 hardtke Exp $
+// $Id: St_tpt_Maker.cxx,v 1.65 2001/09/06 18:27:37 jeromel Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.65  2001/09/06 18:27:37  jeromel
+// Modifications for larger number of ExB options, forcing different configuration 9EB1 EB2 ...). Added loading of StTableUtilities when 'display' option is required.
+//
 // Revision 1.64  2001/08/31 20:45:54  hardtke
 // Add bums hit moving option
 //
@@ -396,13 +399,12 @@ Int_t St_tpt_Maker::Make(){
     if(m_Mode & 1)
       {
 	Float_t x[3], xprime[3] ;
-	Int_t   option = (m_Mode & 2) >> 1;
+	Int_t   option = (m_Mode & 0x0E) >> 1;
 	// request from Jim Thomas to have 2 (or more)
 	// method in StMagUtilities. We then use the
 	// option as a mask. J.Lauret July 2001. 
-	(void) printf("St_tpt_Maker: ExB StMagUtilities(%d)\n",option);
+	(void) printf("St_tpt_Maker: ExB StMagUtilities(%d)\n\n",option);
 	if ( m_ExB == 0 ) m_ExB = new StMagUtilities( option ) ;
-	//if ( m_ExB == 0 ) m_ExB = new StMagUtilities() ;
 	tcl_tphit_st *spc = tphit -> GetTable() ;
 	for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ )
 	  {

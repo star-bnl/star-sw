@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.226 2001/08/31 21:20:34 didenko Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.227 2001/09/06 18:27:41 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -142,7 +142,9 @@ Bfc_st BFC[] = {
   {"AllEvent"    ,""  ,"","Tree"                               ,"","","Write whole event to StTree",kFALSE},
   {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
   {"ExB"         ,""  ,"","",""                       ,"","Activate ExB correction in St_tpt_Maker",kFALSE},
-  {"AlignSectors"         ,""  ,"","",""                       ,"","Activate Sector Alignment correction in St_tpt_Maker",kFALSE},
+  {"EB1"         ,""  ,"","",""                                     ,"","Force ExB configuration 1",kFALSE},
+  {"EB2"         ,""  ,"","",""                                     ,"","Force ExB configuration 2",kFALSE},
+  {"AlignSectors",""  ,"","",""          ,"","Activate Sector Alignment correction in St_tpt_Maker",kFALSE},
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
@@ -314,7 +316,8 @@ Bfc_st BFC[] = {
   {"EventQA"     ,"EventQA","","Event"                           ,"StEventQAMaker","St_QA_Maker","",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
-  {"Display"     ,"","","SCL,St_geom"               ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
+  {"Display"     ,"","","SCL,St_geom",
+                                    "StEventDisplayMaker","StEventDisplayMaker,StTableUtilities","",kFALSE},
   {"Mc"          ,"McChain","","sim_T,globT,McAss,McAna"                    ,"StMaker","StChain","",kFALSE},
   {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
   {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
@@ -529,8 +532,20 @@ Int_t StBFChain::Instantiate()
 	  if (maker == "St_dst_Maker" && GetOption("HitsBranch")) mk->SetMode(2); 
 	  if (maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
 	  if (maker == "St_tpt_Maker" && GetOption("ExB")){
-	    int mask=1;                                  // Al Saulys request
-	    if( GetOption("RY2001") ) mask = mask | 2 ;  // Jim Thomas request
+	    // bit 0 is ExB ON or OFF
+	    // The next 3 bits are reserved for yearly changes.
+	    // Backward compatibility preserved.
+	    int mask=1;                                    // Al Saulys request
+	    if( GetOption("EB1") ){
+	      // Do nothing (i.e. bit 1 at 0)
+	    } else if ( GetOption("EB2") ){
+	      // Force bit 1 at 1 regardless
+	      mask = mask | 2;
+	    } else {
+	      // depend on RY option i.e. take default for that RealYear data
+	      // expectations.
+	      if( GetOption("RY2001") ) mask = mask | 2 ;  // Jim Thomas request
+	    }
 	    (void) printf("StBFChain: ExB The option passed will be %d\n",mask);
 	    mk->SetMode(mask); 
 	  }

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.17 2001/08/08 20:11:42 jeromel Exp $
+ * $Id: StMagUtilities.cxx,v 1.18 2001/09/06 18:27:39 jeromel Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.18  2001/09/06 18:27:39  jeromel
+ * Modifications for larger number of ExB options, forcing different configuration 9EB1 EB2 ...). Added loading of StTableUtilities when 'display' option is required.
+ *
  * Revision 1.17  2001/08/08 20:11:42  jeromel
  * Added debugging lines for ExB correction option. WAS NEVER ON ==> Corrected & -> | (i.e. mea culpa)
  *
@@ -166,15 +169,17 @@ void StMagUtilities::Init ( Int_t mode )
   BField(X,B) ;                             // Work in kGauss, cm and assume Bz dominates
 
   // Mode = 0 is for Year 1 running, Mode = 1 is for year 2 running (different cathode potentials)
+  // We reserved 3 bits for the option so we can extend up to 111=7 => 8 options (0 to 7)
 
   // Theoretically, OmegaTau is defined as shown in the next line.  
   // OmegaTau   =  -10. * B[2] * StarDriftV / StarMagE ;  // cm/microsec, Volts/cm
   // Instead, we will use scaled values from the Aleph collaboration
 
-  if ( mode == 0 ) 
+  if ( mode == 0 ){
     OmegaTau   =  -11.0 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note that the sign of B is important 
-  else
+  } else {
     OmegaTau   =  -12.4 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note that the sign of B is important 
+  }
 
   Const_0    =  1. / ( 1. + pow( OmegaTau, 2 ) ) ;
   Const_1    =  OmegaTau / ( 1. + pow( OmegaTau, 2 ) ) ;
