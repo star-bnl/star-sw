@@ -51,7 +51,7 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.14 2004/02/21 19:17:39 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.15 2004/03/25 22:43:11 andrewar Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
@@ -66,6 +66,8 @@ class StiMaker : public StMaker
 		void load(TDataSet *);
 
 private:
+
+		double runField;
     StiMakerParameters * _pars;
     bool                 eventIsFinished;
     bool                 _initialized;
