@@ -42,7 +42,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.52 2003/02/18 23:25:55 jeromel Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.53 2003/02/19 16:35:04 jeromel Exp $";
 
 ClassImp(StEventMaker)
   
@@ -308,13 +308,12 @@ StEventMaker::makeEvent()
         StTrigSummary* trigSummary =
             ((StDAQReader*) (daqReaderSet->GetObject()))->getTrigSummary();
 
+	// The nominal is a pointer to one of the above. 
         trigId[0]->setMask(trigSummary->L1summary[0]);
         trigId[1]->setMask(trigSummary->L2summary[0]);
         trigId[2]->setMask(trigSummary->L3summary[0]);
 
         StDetectorDbTriggerID* dbTriggerId = StDetectorDbTriggerID::instance();
-        triggerIdColl->setNominal(trigId[dbTriggerId->getDefaultTriggerLevel()]);
-
 
 	// Loop over trigger level
 	for(unsigned int trglevel=0 ; trglevel < 3 ; trglevel++){
@@ -334,6 +333,8 @@ StEventMaker::makeEvent()
             }
 	  }
 	}
+
+        triggerIdColl->setNominal(new StTriggerId(*(trigId[dbTriggerId->getDefaultTriggerLevel()-1])));
 
 
     } else {
@@ -1478,8 +1479,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.52 2003/02/18 23:25:55 jeromel Exp $
+ * $Id: StEventMaker.cxx,v 2.53 2003/02/19 16:35:04 jeromel Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.53  2003/02/19 16:35:04  jeromel
+ * $LINK mechanism removed
+ *
  * Revision 2.52  2003/02/18 23:25:55  jeromel
  * Loop over trigger blabla corrected
  *
