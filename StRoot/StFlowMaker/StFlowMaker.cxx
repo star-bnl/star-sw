@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.73 2002/03/15 16:43:22 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.74 2002/05/23 18:54:12 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -156,9 +156,9 @@ Int_t StFlowMaker::Make() {
       double magneticField = pFlowEvent->MagneticField();
       short beamMassE   = pFlowEvent->BeamMassNumberEast();
       short beamMassW   = pFlowEvent->BeamMassNumberWest();
-      gMessMgr->Info() << "##### FlowMaker: " << runID << " run, " <<
-	beamEnergy << " GeV/c " << beamMassE << " + " << beamMassW << 
-	" B field " << magneticField << endm;
+      gMessMgr->Info() << "##### FlowMaker: " << runID << ", " <<
+	beamEnergy << " GeV/A " << beamMassE << "+" << beamMassW << 
+	", B= " << magneticField << endm;
       mRunID = runID;
     }
   }
@@ -191,7 +191,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.73 2002/03/15 16:43:22 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.74 2002/05/23 18:54:12 posk Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -530,7 +530,8 @@ void StFlowMaker::FillFlowEvent() {
         }
 
 	// Probability pid
-	const StParticleDefinition* def = pTrack->pidTraits(uPid);
+	//const StParticleDefinition* def = pTrack->pidTraits(uPid);
+	(void*)pTrack->pidTraits(uPid);
 	pFlowTrack->SetMostLikelihoodPID(uPid.mostLikelihoodParticleGeantID());
 	pFlowTrack->SetMostLikelihoodProb(uPid.mostLikelihoodProbability());
 	if (uPid.isExtrap()) pFlowTrack->SetExtrapTag(1); //merging area. 
@@ -560,7 +561,12 @@ void StFlowMaker::FillFlowEvent() {
     return;
   }
 
-  pFlowEvent->SetMultEta(goodTracksEta);
+  if (pFlowEvent->CenterOfMassEnergy() == 0.) { // year=1
+    pFlowEvent->SetMultEta(goodTracksEta);
+  } else {
+    UInt_t rawMult = pFlowEvent->UncorrNegMult() + pFlowEvent->UncorrPosMult();
+    pFlowEvent->SetMultEta(rawMult);
+  }
 
   pFlowEvent->SetCentrality();
 
@@ -820,8 +826,14 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   }
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
+
+  // Recalculate MultEta for year=2 old pico tapes
+  if (pPicoEvent->CenterOfMassEnergy()) {
+    UInt_t rawMult = pPicoEvent->UncorrNegMult() + pPicoEvent->UncorrPosMult();
+    pPicoEvent->SetMultEta(rawMult);
+  }
   
-  // Check event cuts
+  // Check event cuts including centrality
   if (!StFlowCutEvent::CheckEvent(pPicoEvent)) {  
     Int_t eventID = pPicoEvent->EventID();
     gMessMgr->Info() << "##### FlowMaker: picoevent " << eventID 
@@ -1433,6 +1445,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.74  2002/05/23 18:54:12  posk
+// Moved centrality cuts into StFlowConstants
+//
 // Revision 1.73  2002/03/15 16:43:22  snelling
 // Added a method to recalculate the centrality in StFlowPicoEvent
 //

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.39 2002/03/15 16:43:22 snelling Exp $
+// $Id: StFlowEvent.h,v 1.40 2002/05/23 18:54:11 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -167,7 +167,6 @@ private:
   static Float_t      mPositronCuts[2];
   static Float_t      mDcaGlobalCuts[2];
 
-  StFlowEvent*           pFlowEvent;         //!
   StFlowTrackCollection* pTrackCollection;   //!
 
   ClassDef(StFlowEvent,1)                    // macro for rootcint
@@ -343,6 +342,9 @@ inline void StFlowEvent::SetEtaWgt(Bool_t EtaWgt) { mEtaWgt = EtaWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.40  2002/05/23 18:54:11  posk
+// Moved centrality cuts into StFlowConstants
+//
 // Revision 1.39  2002/03/15 16:43:22  snelling
 // Added a method to recalculate the centrality in StFlowPicoEvent
 //

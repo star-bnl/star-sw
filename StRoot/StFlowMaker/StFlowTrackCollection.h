@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrackCollection.h,v 1.7 2001/05/22 20:18:08 posk Exp $
+// $Id: StFlowTrackCollection.h,v 1.8 2002/05/23 18:54:14 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -17,12 +17,16 @@
 
 StCollectionDef(FlowTrack)
 typedef StSPtrVecFlowTrack StFlowTrackCollection;
+//typedef StFlowTrack**      StFlowTrackIterator;
 
 #endif
 
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrackCollection.h,v $
+// Revision 1.8  2002/05/23 18:54:14  posk
+// Moved centrality cuts into StFlowConstants
+//
 // Revision 1.7  2001/05/22 20:18:08  posk
 // Now can do pseudorapidity subevents.
 //
