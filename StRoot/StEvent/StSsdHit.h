@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdHit.h,v 2.1 1999/10/13 19:43:42 ullrich Exp $
+ * $Id: StSsdHit.h,v 2.2 1999/10/28 22:26:39 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.h,v $
- * Revision 2.1  1999/10/13 19:43:42  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:26:39  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.3  1999/11/09 19:35:17  ullrich
  * Memory now allocated using StMemoryPool via overloaded new/delete
@@ -40,6 +40,8 @@ public:
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
     
+    ULong_t  centralStripNSide() const;   // 0-767
+    ULong_t  centralStripPSide() const;   // 0-767
     ULong_t  clusterSizeNSide() const;
     ULong_t  clusterSizePSide() const;
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBrowsableEvent.cxx,v 2.1 1999/10/13 19:44:24 ullrich Exp $
+ * $Id: StBrowsableEvent.cxx,v 2.2 1999/10/28 22:24:50 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StBrowsableEvent.cxx,v $
- * Revision 2.1  1999/10/13 19:44:24  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:24:50  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.5  2000/02/23 17:35:52  ullrich
  * Changes due to the addition of the EMC to StEvent
@@ -25,7 +25,7 @@
  * Revision 2.2  1999/10/28 22:24:50  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
-#include "StArray.h"
+ * Revision 2.1  1999/10/13 19:44:24  ullrich
  * Initial Revision
  *
  **************************************************************************/
@@ -44,7 +44,7 @@
 #include "StEmcCollection.h"
 #include "StRichPixelCollection.h"
 
-static const char rcsid[] = "$Id: StBrowsableEvent.cxx,v 2.1 1999/10/13 19:44:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StBrowsableEvent.cxx,v 2.2 1999/10/28 22:24:50 ullrich Exp $";
 
   
 StBrowsableEvent::StBrowsableEvent(const event_header_st& evtHdr,
@@ -64,12 +64,6 @@ StBrowsableEvent::browse(TBrowser *b)
         if (mSoftwareMonitor)  b->Add(mSoftwareMonitor);
         if (mTpcHits)          b->Add(mTpcHits);
         if (mFtpcHits)         b->Add(mFtpcHits);
-}
-
-void
-StBrowsableEvent::print(Option_t *opt)
-{
-    cout << '\n' << *this << endl;
         if (mSvtHits)          b->Add(mSvtHits);
         if (mL0Trigger)        b->Add(mL0Trigger);
         if (mEmcCollection)    b->Add(mEmcCollection);

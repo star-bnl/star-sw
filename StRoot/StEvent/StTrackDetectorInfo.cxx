@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.cxx,v 2.1 1999/10/13 19:45:39 ullrich Exp $
+ * $Id: StTrackDetectorInfo.cxx,v 2.2 1999/10/28 22:27:27 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.cxx,v $
- * Revision 2.1  1999/10/13 19:45:39  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:27:27  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.4  2000/01/20 14:43:07  ullrich
  * Fixed bug in numberOfPoints(). Sum was wrong.
@@ -20,7 +20,7 @@
  * Modified unpacking of point counter
  *
  * Revision 2.2  1999/10/28 22:27:27  ullrich
-#include "tables/dst_track.h"
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.1  1999/10/13 19:45:39  ullrich
  * Initial Revision
@@ -33,7 +33,10 @@
 
 ClassImp(StTrackDetectorInfo)
 
-static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.1 1999/10/13 19:45:39 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.2 1999/10/28 22:27:27 ullrich Exp $";
+
+StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0)
+{ /* noop */ }
 
 StTrackDetectorInfo::StTrackDetectorInfo(const dst_track_st& t) :
     mFirstPoint(t.x_first),  mLastPoint(t.x_last), mNumberOfPoints(t.n_point)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.cxx,v 2.0 1999/10/12 18:42:29 ullrich Exp $
+ * $Id: StRun.cxx,v 2.1 1999/10/28 22:26:27 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StRun.cxx,v $
- * Revision 2.0  1999/10/12 18:42:29  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:26:27  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.0  1999/10/12 18:42:29  ullrich
  * Completely Revised for New Version
@@ -24,12 +24,12 @@
 #include <iostream.h>
 #include "StRun.h"
 #include "StRunSummary.h"
-#include "tables/run_header.h"
-#include "tables/dst_run_summary.h"
+#include "tables/St_run_header_Table.h"
+#include "tables/St_dst_run_summary_Table.h"
 #include "SystemOfUnits.h"
 
-TString StRun::mCvsTag = "$Id: StRun.cxx,v 2.0 1999/10/12 18:42:29 ullrich Exp $";
-static const char rcsid[] = "$Id: StRun.cxx,v 2.0 1999/10/12 18:42:29 ullrich Exp $";
+TString StRun::mCvsTag = "$Id: StRun.cxx,v 2.1 1999/10/28 22:26:27 ullrich Exp $";
+static const char rcsid[] = "$Id: StRun.cxx,v 2.1 1999/10/28 22:26:27 ullrich Exp $";
 
 ClassImp(StRun)
 

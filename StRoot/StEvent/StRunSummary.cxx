@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunSummary.cxx,v 2.0 1999/10/12 18:42:36 ullrich Exp $
+ * $Id: StRunSummary.cxx,v 2.1 1999/10/28 22:26:30 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,15 +13,15 @@
  ***************************************************************************
  *
  * $Log: StRunSummary.cxx,v $
- * Revision 2.0  1999/10/12 18:42:36  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:26:30  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.2  1999/12/21 15:09:06  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 2.1  1999/10/28 22:26:30  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
-#include "tables/dst_run_summary.h"
+ *
  * Revision 2.0  1999/10/12 18:42:36  ullrich
  * Completely Revised for New Version
  *
@@ -29,7 +29,7 @@
 #include "StRunSummary.h"
 #include "tables/St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: StRunSummary.cxx,v 2.0 1999/10/12 18:42:36 ullrich Exp $";
+static const char rcsid[] = "$Id: StRunSummary.cxx,v 2.1 1999/10/28 22:26:30 ullrich Exp $";
 
 ClassImp(StRunSummary)
 

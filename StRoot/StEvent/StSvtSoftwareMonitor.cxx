@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSoftwareMonitor.cxx,v 2.1 1999/10/13 19:45:20 ullrich Exp $
+ * $Id: StSvtSoftwareMonitor.cxx,v 2.2 1999/10/28 22:26:55 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtSoftwareMonitor.cxx,v $
- * Revision 2.1  1999/10/13 19:45:20  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:26:55  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.2  1999/10/28 22:26:55  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -19,12 +19,12 @@
  * Revision 2.1  1999/10/13 19:45:20  ullrich
  * Initial Revision
  *
-#include "tables/dst_mon_soft_svt.h"
+ **************************************************************************/
 #include <algorithm>
 #include "StSvtSoftwareMonitor.h"
 #include "tables/St_dst_mon_soft_svt_Table.h"
 
-static const char rcsid[] = "$Id: StSvtSoftwareMonitor.cxx,v 2.1 1999/10/13 19:45:20 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtSoftwareMonitor.cxx,v 2.2 1999/10/28 22:26:55 ullrich Exp $";
 
 ClassImp(StSvtSoftwareMonitor)
 

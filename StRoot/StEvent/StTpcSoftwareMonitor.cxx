@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcSoftwareMonitor.cxx,v 2.1 1999/10/13 19:45:37 ullrich Exp $
+ * $Id: StTpcSoftwareMonitor.cxx,v 2.2 1999/10/28 22:27:18 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcSoftwareMonitor.cxx,v $
- * Revision 2.1  1999/10/13 19:45:37  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:27:18  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.2  1999/10/28 22:27:18  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -19,7 +19,7 @@
  * Revision 2.1  1999/10/13 19:45:37  ullrich
  * Initial Revision
  *
-#include "tables/dst_mon_soft_tpc.h"
+ **************************************************************************/
 #include <algorithm>
 #include "StTpcSoftwareMonitor.h"
 #include "tables/St_dst_mon_soft_tpc_Table.h"
@@ -28,7 +28,7 @@
 using namespace std;
 #endif
 
-static const char rcsid[] = "$Id: StTpcSoftwareMonitor.cxx,v 2.1 1999/10/13 19:45:37 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcSoftwareMonitor.cxx,v 2.2 1999/10/28 22:27:18 ullrich Exp $";
 
 ClassImp(StTpcSoftwareMonitor)
 

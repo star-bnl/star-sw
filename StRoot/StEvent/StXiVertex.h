@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.h,v 2.0 1999/10/12 18:43:37 ullrich Exp $
+ * $Id: StXiVertex.h,v 2.1 1999/10/28 22:28:18 ullrich Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.h,v $
- * Revision 2.0  1999/10/12 18:43:37  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:28:18  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.1  1999/10/28 22:28:18  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -67,6 +67,7 @@ protected:
     Float_t                mDcaBachelorToPrimaryVertex;
     StThreeVectorF         mMomentumOfBachelor;
     Float_t                mDcaDaughters;
+    Float_t                mDcaParentToPrimaryVertex;
     StV0Vertex*            mV0Vertex;                   //$LINK
 
     StObject* clone();

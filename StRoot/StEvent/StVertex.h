@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.h,v 2.0 1999/10/12 18:43:32 ullrich Exp $
+ * $Id: StVertex.h,v 2.1 1999/10/28 22:28:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
- * Revision 2.0  1999/10/12 18:43:32  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:28:09  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.4  2000/02/10 18:49:08  ullrich
  * Fixed typo introduced at last check-in.
@@ -22,7 +22,7 @@
  * Revision 2.2  2000/01/11 19:22:14  ullrich
  * Added non-const parent() method.
  *
-#include "StArray.h"
+ * Revision 2.1  1999/10/28 22:28:09  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.0  1999/10/12 18:43:32  ullrich
@@ -63,7 +63,7 @@ public:
     virtual StPtrVecTrack  daughters(StTrackFilter&) = 0;
 
     virtual void setFlag(Long_t);
-    
+    virtual void setCovariantMatrix(Float_t[6]);
     virtual void setChiSquared(Float_t);
     ULong_t       mFlag;
     virtual void addDaughter(StTrack*) = 0;

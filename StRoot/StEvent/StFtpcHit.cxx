@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.cxx,v 2.0 1999/10/12 18:42:02 ullrich Exp $
+ * $Id: StFtpcHit.cxx,v 2.1 1999/10/28 22:25:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,15 +10,15 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.cxx,v $
- * Revision 2.0  1999/10/12 18:42:02  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:25:16  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.5  1999/12/13 20:16:12  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
  *
  * Revision 2.4  1999/12/06 18:28:21  ullrich
  * Changed method names xxxInCluster to xxxInHit
-#include "tables/dst_point.h"
+ *
  * Revision 2.3  1999/11/09 19:35:09  ullrich
  * Memory now allocated using StMemoryPool via overloaded new/delete
  *
@@ -32,7 +32,7 @@
 #include "tables/St_dst_point_Table.h"
 #include "StTrack.h"
 
-static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.0 1999/10/12 18:42:02 ullrich Exp $";
+static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.1 1999/10/28 22:25:16 ullrich Exp $";
 
 StMemoryPool StFtpcHit::mPool(sizeof(StFtpcHit));
 
@@ -76,6 +76,9 @@ StFtpcHit::StFtpcHit(const dst_point_st& pt)
     // Unpack error on position in xyz
     //
     ftpcy11 = pt.pos_err[0]/(1L<<20);
+    ftpcz   = pt.pos_err[1]/(1L<<10);
+    ftpcx   = pt.pos_err[0] - (1L<<20)*ftpcy11;
+    ftpcy10 = pt.pos_err[1] - (1L<<10)*ftpcz;
     ftpcy   = ftpcy11 + (1L<<10)*ftpcy10;
     mPositionError.setX(Float_t(ftpcx)/(1L<<17));
     mPositionError.setY(Float_t(ftpcy)/(1L<<17));

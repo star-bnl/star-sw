@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.h,v 2.0 1999/10/12 18:42:07 ullrich Exp $
+ * $Id: StFtpcHit.h,v 2.1 1999/10/28 22:25:19 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.h,v $
- * Revision 2.0  1999/10/12 18:42:07  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:25:19  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.3  1999/12/06 18:28:24  ullrich
  * Changed method names xxxInCluster to xxxInHit
@@ -38,8 +38,10 @@ public:
     StFtpcHit(const StThreeVectorF&,
     // StFtpcHit(const StFtpcHit&);            use default
     // StFtpcHit& operator=(const StFtpcHit&); use default
-    
-    ClassDef(StFtpcHit,1)  //StFtpcHit structure
+    ~StFtpcHit();
+
+    void* operator new(size_t)     { return mPool.alloc(); }
+    void  operator delete(void* p) { mPool.free(p); }
     ULong_t padsInCluster() const;
     ULong_t plane() const;         // 0-19
     ULong_t padsInHit() const;

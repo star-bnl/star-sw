@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.0 1999/10/12 18:42:59 ullrich Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.1 1999/10/28 22:27:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
- * Revision 2.0  1999/10/12 18:42:59  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:27:32  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.4  2000/01/20 14:43:39  ullrich
  * Fixed bug in numberOfFitPoints(). Sum was wrong.
@@ -21,7 +21,7 @@
  *
  * Revision 2.2  1999/11/01 12:45:14  ullrich
  * Modified unpacking of point counter
-#include "tables/dst_track.h"
+ *
  * Revision 2.1  1999/10/28 22:27:32  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
@@ -37,7 +37,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.0 1999/10/12 18:42:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.1 1999/10/28 22:27:32 ullrich Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {

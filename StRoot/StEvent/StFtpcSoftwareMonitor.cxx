@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcSoftwareMonitor.cxx,v 2.1 1999/10/13 19:44:44 ullrich Exp $
+ * $Id: StFtpcSoftwareMonitor.cxx,v 2.2 1999/10/28 22:25:27 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StFtpcSoftwareMonitor.cxx,v $
- * Revision 2.1  1999/10/13 19:44:44  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:25:27  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.2  1999/10/28 22:25:27  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -19,12 +19,12 @@
  * Revision 2.1  1999/10/13 19:44:44  ullrich
  * Initial Revision
  *
-#include "tables/dst_mon_soft_ftpc.h"
+ **************************************************************************/
 #include <algorithm>
 #include "StFtpcSoftwareMonitor.h"
 #include "tables/St_dst_mon_soft_ftpc_Table.h"
 
-static const char rcsid[] = "$Id: StFtpcSoftwareMonitor.cxx,v 2.1 1999/10/13 19:44:44 ullrich Exp $";
+static const char rcsid[] = "$Id: StFtpcSoftwareMonitor.cxx,v 2.2 1999/10/28 22:25:27 ullrich Exp $";
 
 ClassImp(StFtpcSoftwareMonitor)
 

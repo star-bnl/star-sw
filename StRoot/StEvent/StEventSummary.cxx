@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventSummary.cxx,v 2.1 1999/10/13 19:44:35 ullrich Exp $
+ * $Id: StEventSummary.cxx,v 2.2 1999/10/28 22:25:13 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEventSummary.cxx,v $
- * Revision 2.1  1999/10/13 19:44:35  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:25:13  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.5  2000/01/14 19:06:47  ullrich
  * Made code more robust if read-in table is not well defined.
@@ -21,8 +21,8 @@
  *
  * Revision 2.3  1999/12/21 15:08:50  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
-#include "tables/dst_event_summary.h"
-#include "tables/dst_summary_param.h"
+ *
+ * Revision 2.2  1999/10/28 22:25:13  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.1  1999/10/13 19:44:35  ullrich
@@ -33,10 +33,10 @@
 #include "tables/St_dst_event_summary_Table.h"
 #ifndef ST_NO_NAMESPACES
 using units::tesla;
-static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.1 1999/10/13 19:44:35 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.2 1999/10/28 22:25:13 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.1 1999/10/13 19:44:35 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.2 1999/10/28 22:25:13 ullrich Exp $";
 
 ClassImp(StEventSummary)
 

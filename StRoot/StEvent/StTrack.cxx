@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.0 1999/10/12 18:42:54 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.1 1999/10/28 22:27:21 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,15 +10,15 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
- * Revision 2.0  1999/10/12 18:42:54  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:27:21  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.9  1999/12/01 15:58:08  ullrich
  * New decoding for dst_track::method. New enum added.
  *
  * Revision 2.8  1999/12/01 00:15:27  didenko
  * temporary solution to compile the library
-#include "tables/dst_track.h"
+ *
  * Revision 2.7  1999/11/29 17:32:42  ullrich
  * Added non-const method pidTraits().
  *
@@ -46,7 +46,7 @@
  **************************************************************************/
 #include "StTrack.h"
 #include "tables/St_dst_track_Table.h"
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.0 1999/10/12 18:42:54 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.1 1999/10/28 22:27:21 ullrich Exp $";
 #include "StVertex.h"
 #include "StTrackGeometry.h"
     mReconstructionMethod = 0;
@@ -55,7 +55,7 @@ static const char rcsid[] = "$Id: StTrack.cxx,v 2.0 1999/10/12 18:42:54 ullrich 
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.0 1999/10/12 18:42:54 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.1 1999/10/28 22:27:21 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -68,7 +68,7 @@ StTrack::StTrack()
     mGeometry = 0;
     mDetectorInfo = 0;
     mNode = 0;
-        mGeometry = track.mGeometry->clone();
+}
 
 StTrack::StTrack(const dst_track_st& track) :
     mTopologyMap(track.map), mFitTraits(track)
@@ -92,11 +92,11 @@ StTrack::StTrack(const StTrack& track)
     mImpactParameter = track.mImpactParameter;
     mLength = track.mLength;
     mNumberOfPossiblePoints = track.mNumberOfPossiblePoints;
-            mGeometry = track.mGeometry->clone();
+    mTopologyMap = track.mTopologyMap;
     mFitTraits = track.mFitTraits;
     if (track.mGeometry)
         mGeometry = track.mGeometry->copy();
-        mPidTraitsVec = track.mPidTraitsVec;
+    else
         mGeometry = 0;
     mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
         mReconstructionMethod = track.mReconstructionMethod;
@@ -146,7 +146,7 @@ StTrack::numberOfPossiblePoints(StDetectorId det) const
     default:
 	return 0;
     }
-    for (int i=0; i<mPidTraitsVec.size(); i++)
+}
 
 const StTrackTopologyMap&
 StTrack::topologyMap() const { return mTopologyMap; }

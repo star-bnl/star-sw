@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.h,v 2.0 1999/10/12 18:43:07 ullrich Exp $
+ * $Id: StTrackPidTraits.h,v 2.1 1999/10/28 22:27:52 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.h,v $
- * Revision 2.0  1999/10/12 18:43:07  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:27:52  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.2  1999/11/15 18:48:28  ullrich
  * Adapted new enums for dedx and track reco methods.
@@ -39,7 +39,8 @@ public:
     Short_t method() const;
     Short_t detector() const;
     StDedxMethod method() const;
-    
+    Short_t      encodedMethod() const;
+    Short_t      detector() const;
 
 protected:
     Short_t mDetectorId;

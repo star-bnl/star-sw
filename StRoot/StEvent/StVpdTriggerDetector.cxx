@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdTriggerDetector.cxx,v 2.1 1999/10/13 19:45:48 ullrich Exp $
+ * $Id: StVpdTriggerDetector.cxx,v 2.2 1999/10/28 22:28:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVpdTriggerDetector.cxx,v $
- * Revision 2.1  1999/10/13 19:45:48  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:28:12  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.2  1999/10/28 22:28:12  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -19,12 +19,12 @@
  * Revision 2.1  1999/10/13 19:45:48  ullrich
  * Initial Revision
  *
-#include "tables/dst_TrgDet.h"
+ **************************************************************************/
 #include <algorithm>
 #include "StVpdTriggerDetector.h"
 #include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StVpdTriggerDetector.cxx,v 2.1 1999/10/13 19:45:48 ullrich Exp $";
+static const char rcsid[] = "$Id: StVpdTriggerDetector.cxx,v 2.2 1999/10/28 22:28:12 ullrich Exp $";
 
 ClassImp(StVpdTriggerDetector)
 

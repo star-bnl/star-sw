@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.0 1999/10/12 18:41:53 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.1 1999/10/28 22:25:07 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 2.0  1999/10/12 18:41:53  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:25:07  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.11  2000/05/15 18:35:38  ullrich
  * All data member related to collections and containers are now
@@ -25,9 +25,9 @@
  * Revision 2.9  2000/04/20 14:27:29  perev
  * Add Dataset browser to StEvent browser
  *
-#include "tables/event_header.h"
-#include "tables/dst_event_summary.h"
-#include "tables/dst_summary_param.h"
+ * Revision 2.8  2000/04/18 17:31:28  perev
+ *
+ * Revision 2.7  2000/03/29 16:54:11  ullrich
  *
  * Changes due to the addition of the EMC to StEvent
  *
@@ -35,8 +35,8 @@
  * Primary vertices automatically sorted in addPrimaryVertex().
  * add rich pixel info/containers
  *
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.0 1999/10/12 18:41:53 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.0 1999/10/12 18:41:53 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.1 1999/10/28 22:25:07 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.1 1999/10/28 22:25:07 ullrich Exp $";
  *
  * Revision 2.0  1999/10/12 18:41:53  ullrich
 
@@ -44,11 +44,11 @@ static const char rcsid[] = "$Id: StEvent.cxx,v 2.0 1999/10/12 18:41:53 ullrich 
 #include <typeinfo>
 #include <algorithm>
 #include "StEvent.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.0 1999/10/12 18:41:53 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.0 1999/10/12 18:41:53 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.1 1999/10/28 22:25:07 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.1 1999/10/28 22:25:07 ullrich Exp $";
 #include "StTpcHitCollection.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.0 1999/10/12 18:41:53 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.0 1999/10/12 18:41:53 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.1 1999/10/28 22:25:07 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.1 1999/10/28 22:25:07 ullrich Exp $";
 #include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
 #include "StRichCollection.h"

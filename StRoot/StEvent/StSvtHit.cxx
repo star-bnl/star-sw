@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.0 1999/10/12 18:42:43 ullrich Exp $
+ * $Id: StSvtHit.cxx,v 2.1 1999/10/28 22:26:41 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
- * Revision 2.0  1999/10/12 18:42:43  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:26:41  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.5  1999/12/13 20:16:19  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
@@ -19,7 +19,7 @@
  * Revision 2.4  1999/11/11 11:03:55  ullrich
  * Inlined layer(), sector() and ladder().
  *
-#include "tables/dst_point.h"
+ * Revision 2.3  1999/11/09 19:35:20  ullrich
  * Memory now allocated using StMemoryPool via overloaded new/delete
  *
  * Revision 2.2  1999/11/04 21:40:55  ullrich
@@ -32,7 +32,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.0 1999/10/12 18:42:43 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.1 1999/10/28 22:26:41 ullrich Exp $";
 
 ClassImp(StSvtHit)
     
@@ -76,6 +76,9 @@ StSvtHit::StSvtHit(const dst_point_st& pt)
     // Unpack error on position in xyz
     //
     svty11 = pt.pos_err[0]/(1L<<20);
+    svtz   = pt.pos_err[1]/(1L<<10);
+    svtx   = pt.pos_err[0] - (1L<<20)*svty11;
+    svty10 = pt.pos_err[1] - (1L<<10)*svtz;
     svty   = svty11 + (1L<<10)*svty10;
     mPositionError.setX(Float_t(svtx)/(1L<<26));
     mPositionError.setY(Float_t(svty)/(1L<<26));

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcSectorHitCollection.h,v 2.1 1999/10/13 19:43:11 ullrich Exp $
+ * $Id: StFtpcSectorHitCollection.h,v 2.2 1999/10/28 22:25:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StFtpcSectorHitCollection.h,v $
- * Revision 2.1  1999/10/13 19:43:11  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:25:24  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.1  1999/10/13 19:43:11  ullrich
  * Initial Revision
@@ -21,7 +21,7 @@
 #define StFtpcSectorHitCollection_hh
 
 #include "StObject.h"
-#include "StArray.h"
+#include "StContainers.h"
 
 class StFtpcHit;
 

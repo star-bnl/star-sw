@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.cxx,v 2.0 1999/10/12 18:43:23 ullrich Exp $
+ * $Id: StV0Vertex.cxx,v 2.1 1999/10/28 22:28:01 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.cxx,v $
- * Revision 2.0  1999/10/12 18:43:23  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:28:01  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.1  1999/10/28 22:28:01  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -21,15 +21,15 @@
  *
  **************************************************************************/
 #include <algorithm>
-#include "tables/dst_vertex.h"
-#include "tables/dst_v0_vertex.h"
+#include "StV0Vertex.h"
+#include "StTrack.h"
 #include "StTrackGeometry.h"
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_v0_vertex_Table.h"
 
 ClassImp(StV0Vertex)
 
-static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.0 1999/10/12 18:43:23 ullrich Exp $";
+static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.1 1999/10/28 22:28:01 ullrich Exp $";
 
 StV0Vertex::StV0Vertex()
 {
@@ -58,6 +58,9 @@ StV0Vertex::StV0Vertex(const dst_vertex_st& vtx, const dst_v0_vertex_st& v0vtx) 
     mMomentumOfDaughters[positive].setZ(v0vtx.pos_pz);
     mDcaDaughters = v0vtx.dcapn;
     mDcaParentToPrimaryVertex = v0vtx.dcav0;
+}
+
+StV0Vertex::~StV0Vertex() { /* noop */ }
 
 StObject*
 StV0Vertex::clone() { return new StV0Vertex(*this); }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.h,v 2.0 1999/10/12 18:43:26 ullrich Exp $
+ * $Id: StV0Vertex.h,v 2.1 1999/10/28 22:28:04 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.h,v $
- * Revision 2.0  1999/10/12 18:43:26  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:28:04  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.0  1999/10/12 18:43:26  ullrich
  * Completely Revised for New Version
@@ -20,7 +20,7 @@
 #ifndef StV0Vertex_hh
 #define StV0Vertex_hh
 #include "StVertex.h"
-#include "StArray.h"
+#include "StContainers.h"
 
 class dst_v0_vertex_st;
 
@@ -60,6 +60,7 @@ private:
     Float_t          mDcaDaughters;
     Float_t          mDcaParentToPrimaryVertex;
 
+    StObject* clone();
     ClassDef(StV0Vertex,1)
 };
 #endif

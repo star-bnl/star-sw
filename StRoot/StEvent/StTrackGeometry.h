@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackGeometry.h,v 2.1 1999/10/13 19:44:13 ullrich Exp $
+ * $Id: StTrackGeometry.h,v 2.2 1999/10/28 22:27:41 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackGeometry.h,v $
- * Revision 2.1  1999/10/13 19:44:13  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:27:41  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.1  1999/10/13 19:44:13  ullrich
  * Initial Revision
@@ -43,8 +43,10 @@ public:
     virtual const StThreeVectorF& momentum() const = 0;
     virtual StPhysicalHelixD      helix() const = 0;
 
-    virtual StTrackGeometry*      clone() const = 0;     // virtual constructor
-    
+    virtual StTrackGeometry*      copy() const = 0;     // virtual constructor
+
+protected:    
+    virtual StObject*  clone() = 0;     // virtual constructor used in StArray
     ClassDef(StTrackGeometry,1)
 };
 

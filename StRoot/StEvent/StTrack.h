@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.0 1999/10/12 18:42:56 ullrich Exp $
+ * $Id: StTrack.h,v 2.1 1999/10/28 22:27:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
- * Revision 2.0  1999/10/12 18:42:56  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:27:24  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.6  1999/11/29 17:32:45  ullrich
  * Added non-const method pidTraits().
@@ -20,7 +20,7 @@
  * Adapted new enums for dedx and track reco methods.
  *
  * Revision 2.4  1999/11/05 15:27:07  ullrich
-#include "StArray.h"
+ * Added non-const versions of several methods
  *
  * Revision 2.3  1999/11/04 13:32:03  ullrich
  * Added non-const versions of some methods
@@ -44,7 +44,7 @@
 #include "StFunctional.h"
 #include "StTrackFitTraits.h"
 
-    virtual UShort_t               key() const = 0;
+class dst_track_st;
 class StParticleDefinition;
 class StVertex;
 class StTrackGeometry;
@@ -59,7 +59,6 @@ class StTrack : public StObject {
     StTrack & operator=(const StTrack&);
     UChar_t                        reconstructionMethod() const;
     StTrackQualityScheme           qualityScheme() const;
-    virtual void setVertex(StVertex*) = 0;
 //    StTrackFindingMethod           findingMethod() const;
 //    StTrackQualityScheme           qualityScheme() const;
     StTrackFittingMethod           fittingMethod() const;
@@ -84,7 +83,8 @@ class StTrack : public StObject {
     void         setLength(Float_t);
     void         setTopologyMap(const StTrackTopologyMap&);
     void         setGeometry(StTrackGeometry*);
-    
+    void         setFitTraits(const StTrackFitTraits&);
+    void         addPidTraits(StTrackPidTraits*);
     UChar_t                 mReconstructionMethod;
     void         setNode(StTrackNode*);
     

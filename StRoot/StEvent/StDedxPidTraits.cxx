@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.cxx,v 2.1 1999/10/13 19:44:31 ullrich Exp $
+ * $Id: StDedxPidTraits.cxx,v 2.2 1999/10/28 22:25:01 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,14 +10,14 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.cxx,v $
- * Revision 2.1  1999/10/13 19:44:31  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:25:01  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.5  1999/11/29 17:07:24  ullrich
  * Moved method() from StTrackPidTraits to StDedxPidTraits.cxx
  *
  * Revision 2.4  1999/11/23 15:56:23  ullrich
-#include "tables/dst_dedx.h"
+ * Added clone() method. Was pure virtual.
  *
  * Revision 2.3  1999/11/16 14:11:38  ullrich
  * Changed variance to sigma.

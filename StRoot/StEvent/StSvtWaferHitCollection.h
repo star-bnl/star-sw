@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtWaferHitCollection.h,v 2.1 1999/10/13 19:43:53 ullrich Exp $
+ * $Id: StSvtWaferHitCollection.h,v 2.2 1999/10/28 22:26:58 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtWaferHitCollection.h,v $
- * Revision 2.1  1999/10/13 19:43:53  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:26:58  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.1  1999/10/13 19:43:53  ullrich
  * Initial Revision
@@ -21,7 +21,7 @@
 #define StSvtWaferHitCollection_hh
 
 #include "StObject.h"
-#include "StArray.h"
+#include "StContainers.h"
 
 class StSvtHit;
 

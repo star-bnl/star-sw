@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixModel.h,v 2.1 1999/10/13 19:43:20 ullrich Exp $
+ * $Id: StHelixModel.h,v 2.2 1999/10/28 22:25:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.h,v $
- * Revision 2.1  1999/10/13 19:43:20  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:25:45  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.1  1999/10/13 19:43:20  ullrich
  * Initial Revision
@@ -41,8 +41,11 @@ public:
     const StThreeVectorF& momentum() const;
     StPhysicalHelixD      helix() const;
 
-    StHelixModel*         clone() const;     // virtual constructor
-        
+    StTrackGeometry*      copy() const;     // virtual constructor
+
+protected:
+    StObject*      clone();
+    
 private:
     StTrackModel   mModel;
     Short_t        mCharge;

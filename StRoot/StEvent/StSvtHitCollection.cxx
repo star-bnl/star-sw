@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitCollection.cxx,v 2.1 1999/10/13 19:45:13 ullrich Exp $
+ * $Id: StSvtHitCollection.cxx,v 2.2 1999/10/28 22:26:47 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtHitCollection.cxx,v $
- * Revision 2.1  1999/10/13 19:45:13  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:26:47  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.3  1999/12/13 20:16:24  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
@@ -22,18 +22,18 @@
  * Revision 2.1  1999/10/13 19:45:13  ullrich
  * Initial Revision
  *
-ClassImp(StSvtWaferHitCollection)
+ **************************************************************************/
 #include "StSvtHitCollection.h"
 #include "StSvtHit.h"
 
-static const char rcsid[] = "$Id: StSvtHitCollection.cxx,v 2.1 1999/10/13 19:45:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtHitCollection.cxx,v 2.2 1999/10/28 22:26:47 ullrich Exp $";
 
 ClassImp(StSvtHitCollection)
 
 StSvtHitCollection::StSvtHitCollection()
 {
     //
-        for (int j=0; j<mLayers[i].numberOfLadders(); j++)
+    //  Layer and ladder collections have to know
     //  their layer number in order to return the
     //  proper numberOfLadders() and numberOfWafers().
     //
@@ -63,8 +63,8 @@ StSvtHitCollection::addHit(StSvtHit* hit)
     else
         return kFALSE;
 }
-        for (int j=0; j<mLayers[i].numberOfLadders(); j++)
-            for (int k=0; k<mLayers[i].ladder(j)->numberOfWafers(); k++)
+
+ULong_t
 StSvtHitCollection::numberOfHits() const
 {
     ULong_t sum = 0;

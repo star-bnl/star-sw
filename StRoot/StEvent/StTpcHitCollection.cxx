@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitCollection.cxx,v 2.1 1999/10/13 19:45:27 ullrich Exp $
+ * $Id: StTpcHitCollection.cxx,v 2.2 1999/10/28 22:27:13 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHitCollection.cxx,v $
- * Revision 2.1  1999/10/13 19:45:27  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:27:13  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.2  1999/10/28 22:27:13  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -24,7 +24,7 @@
 #include "StTpcPadrowHitCollection.h"
 #include "StTpcHit.h"
 
-static const char rcsid[] = "$Id: StTpcHitCollection.cxx,v 2.1 1999/10/13 19:45:27 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcHitCollection.cxx,v 2.2 1999/10/28 22:27:13 ullrich Exp $";
 
 ClassImp(StTpcHitCollection)
 
@@ -51,7 +51,7 @@ StTpcHitCollection::numberOfSectors() const { return mNumberOfSectors; }
 
 ULong_t
 StTpcHitCollection::numberOfHits() const
-        for (int j=0; j<mSectors[i].numberOfPadrows(); j++) {
+{
     ULong_t sum = 0;
     for (int i=0; i<mNumberOfSectors; i++) {
         for (unsigned int j=0; j<mSectors[i].numberOfPadrows(); j++) {

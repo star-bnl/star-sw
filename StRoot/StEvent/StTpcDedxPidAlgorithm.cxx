@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.1 1999/10/13 19:45:24 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.2 1999/10/28 22:27:01 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
- * Revision 2.1  1999/10/13 19:45:24  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:27:01  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.7  2000/04/20 16:47:31  ullrich
  * Check for null pointer added.
@@ -46,14 +46,19 @@ StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm()
 #include "StDedxPidTraits.h"
 #include "StTrackGeometry.h"
 
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.1 1999/10/13 19:45:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.2 1999/10/28 22:27:01 ullrich Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
 {
-    mTrack = &track;
-    for (int i=0; i<vec.size(); i++) {
-        const StDedxPidTraits *p = dynamic_cast<const StDedxPidTraits*>(vec[i]);
+    //
+    //  Add all particles we want to get
+    //  checked in operator().
+    //
+    //  vec[i]->method() might be needed.
+    mParticles.push_back(StPionPlus::instance());
+    mParticles.push_back(StKaonMinus::instance());
+    mParticles.push_back(StKaonPlus::instance());
     mParticles.push_back(StProton::instance());
 }
 	const StDedxPidTraits *p = dynamic_cast<const StDedxPidTraits*>((StTrackPidTraits*)vec[i]);
@@ -69,7 +74,7 @@ StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     mTraits = 0;
     if (mTraits->numberOfPoints() < 5) return 0;
     for (unsigned int i=0; i<vec.size(); i++) {
-    for (int k=0; k<mParticles.size(); k++)
+#if defined (__SUNPRO_CC) && __SUNPRO_CC < 0x500
         const StDedxPidTraits *p = dynamic_cast<StDedxPidTraits*>((StTrackPidTraits*)vec[i]);
 #else
     //  Check if we have enough points
@@ -114,7 +119,6 @@ StTpcDedxPidAlgorithm::traits() const { return mTraits; }
 
 {
     if (!mTrack) return 0;
-    double resolution ;
 
     double momentum  = abs(mTrack->geometry()->momentum());
     

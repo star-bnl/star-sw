@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.cxx,v 2.0 1999/10/12 18:42:24 ullrich Exp $
+ * $Id: StL0Trigger.cxx,v 2.1 1999/10/28 22:25:59 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.cxx,v $
- * Revision 2.0  1999/10/12 18:42:24  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:25:59  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.1  1999/10/28 22:25:59  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -19,12 +19,12 @@
  * Revision 2.0  1999/10/12 18:42:24  ullrich
  * Completely Revised for New Version
  *
-#include "tables/dst_L0_Trigger.h"
+ **************************************************************************/
 #include <algorithm>
 #include "StL0Trigger.h"
 #include "tables/St_dst_L0_Trigger_Table.h"
 
-static const char rcsid[] = "$Id: StL0Trigger.cxx,v 2.0 1999/10/12 18:42:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StL0Trigger.cxx,v 2.1 1999/10/28 22:25:59 ullrich Exp $";
 
 ClassImp(StL0Trigger)
 

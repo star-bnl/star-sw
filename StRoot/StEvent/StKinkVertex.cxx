@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StKinkVertex.cxx,v 2.2 1999/10/14 11:07:57 ullrich Exp $
+ * $Id: StKinkVertex.cxx,v 2.3 1999/10/28 22:25:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StKinkVertex.cxx,v $
- * Revision 2.2  1999/10/14 11:07:57  ullrich
- * Fixed geantIdDaughter(). Was returning parent not daughter Id.
+ * Revision 2.3  1999/10/28 22:25:53  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.3  1999/10/28 22:25:53  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -24,14 +24,14 @@
  *
  **************************************************************************/
 #include <algorithm>
-#include "tables/dst_tkf_vertex.h"
+#include "StKinkVertex.h"
 #include "StParticleTable.hh"
 #include "StTrack.h"
 #include "tables/St_dst_tkf_vertex_Table.h"
 
 ClassImp(StKinkVertex)
 
-static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.2 1999/10/14 11:07:57 ullrich Exp $";
+static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.3 1999/10/28 22:25:53 ullrich Exp $";
 
 StKinkVertex::StKinkVertex()
 {
@@ -65,6 +65,9 @@ StKinkVertex::StKinkVertex(const dst_vertex_st& vtx, const dst_tkf_vertex_st& kv
     mDecayAngle = kvtx.theta;
     mDecayAngleCM = kvtx.theta_cm;
 }
+
+StKinkVertex::~StKinkVertex() {/* noop */}
+
 StObject*
 StKinkVertex::clone() { return new StKinkVertex(*this); }
 
@@ -199,7 +202,7 @@ StKinkVertex::addDaughter(StTrack* val)
     if (val) mDaughter = val;
 }
 
-    if (mDaughter == val) mDaughter == 0;
+void
 StKinkVertex::removeDaughter(StTrack* val)
 {
     if (mDaughter == val) mDaughter = 0;

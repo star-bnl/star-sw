@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.0 1999/10/12 18:41:58 ullrich Exp $
+ * $Id: StEvent.h,v 2.1 1999/10/28 22:25:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 2.0  1999/10/12 18:41:58  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:25:10  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.9  2000/05/15 18:35:37  ullrich
  * All data member related to collections and containers are now
@@ -22,7 +22,7 @@
  * Revision 2.8  2000/04/26 20:33:26  ullrich
  * Removed redundant virtual keywords.
  *
-#include "StArray.h"
+ * Revision 2.7  2000/04/18 17:31:28  perev
  * StEvent::Browse overload of TDataSet:;One
  *
  * Revision 2.6  2000/03/29 16:54:15  ullrich
