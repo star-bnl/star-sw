@@ -1,4 +1,5 @@
 MACRO run_stk i=1 
+macro/global/import *
 i = [1]
 
 if [i] = 1 then
@@ -9,7 +10,7 @@ if [i] = 1 then
 
   message ' *** Warning vertex not found just filled fron MC ***'
 
-  cd /dui/data/global/vertices
+  cd [data]/global/vertices
    tdm/newtable stk_vtx stk_vtx 1
    tdm/table/rowcount stk_vtx 1
    tdm/table/cell/putvalue 'stk_vtx[0].id' 1
@@ -26,22 +27,22 @@ endif
 message 'Calling STK_AM'
 
 ami/mod/call stk_am _
-        /dui/constants/svt/params/stk_stkpar _
-        /dui/geant/Event/g2t_track _
-        /dui/geant/Event/g2t_event _
-        /dui/geant/Event/g2t_vertex _
-        /dui/data/svt/hits/scs_spt _
-        /dui/data/global/vertices/stk_vtx _
-        /dui/data/global/vertices/stk_vtx_direct _
-        /dui/data/svt/tracks/groups _
-        /dui/data/svt/tracks/stk_track _
-        /dui/data/svt/tracks/stk_kine _
-        /dui/data/svt/tracks/mcgroups _
-        /dui/data/svt/tracks/stk_mctrack _
-        /dui/data/svt/tracks/stk_mckine _
-        /dui/constants/svt/params/stk_filler _
-        /dui/constants/svt/geometry/config _
-        /dui/constants/svt/geometry/geom 
+        [params]/svt/stk_stkpar _
+        [geant]/Event/g2t_track _
+        [geant]/Event/g2t_event _
+        [geant]/Event/g2t_vertex _
+        [data]/svt/hits/scs_spt _
+        [data]/global/vertices/stk_vtx _
+        [data]/global/vertices/stk_vtx_direct _
+        [data]/svt/tracks/groups _
+        [data]/svt/tracks/stk_track _
+        [data]/svt/tracks/stk_kine _
+        [data]/svt/tracks/mcgroups _
+        [data]/svt/tracks/stk_mctrack _
+        [data]/svt/tracks/stk_mckine _
+        [params]/svt/stk_filler _
+        [geometry]/svt/config _
+        [geometry]/svt/geom 
 
         if (staf_status(1).ne.stafcv_ok) then
                 message 'Problem on return from STK_AM'
@@ -52,25 +53,26 @@ RETURN
 ***************************************************************
 
 MACRO eval_stk
+macro/global/import *
 	
 	message 'Calling STE_AM...'
 
 	ami/mod/call ste_am _
-		/dui/geant/Run/g2t_gepart _
-		/dui/geant/Event/g2t_svt_hit _
-		/dui/geant/Event/g2t_track _
-		/dui/geant/Event/g2t_event _
-		/dui/geant/Event/g2t_vertex _
-		/dui/data/svt/hits/scs_spt _
-		/dui/data/global/vertices/stk_vtx _
-	        /dui/data/svt/tracks/groups _
-		/dui/data/svt/tracks/stk_track _
-		/dui/data/svt/tracks/stk_kine _
-	 	/dui/data/svt/tracks/mcgroups _
-		/dui/data/svt/tracks/stk_mctrack _
-		/dui/data/svt/tracks/stk_mckine _
-                /dui/data/svt/tracks/ste_teval _
-                /dui/data/svt/tracks/ste_teff
+	 [geant]/Run/g2t_gepart _
+	 [geant]/Event/g2t_svt_hit _
+	 [geant]/Event/g2t_track _
+	 [geant]/Event/g2t_event _
+	 [geant]/Event/g2t_vertex _
+	 [data]/svt/hits/scs_spt _
+	 [data]/global/vertices/stk_vtx _
+	        [data]/svt/tracks/groups _
+	 [data]/svt/tracks/stk_track _
+	 [data]/svt/tracks/stk_kine _
+	  [data]/svt/tracks/mcgroups _
+	 [data]/svt/tracks/stk_mctrack _
+	 [data]/svt/tracks/stk_mckine _
+                [data]/svt/tracks/ste_teval _
+                [data]/svt/tracks/ste_teff
 
 	if (staf_status(1).ne.stafcv_ok) then
 		message 'Problem on return from STE_AM'

@@ -5,9 +5,10 @@
  
 * ******************* Create Tables ***************************
  
-
+macro/global/import *
+exec create_tables_svt#sgr
 * Book  pix_info table
-cd /dui/constants/svt/params/
+cd [params]/svt/
 tdm/newtable pix_info sgr_pixmap 4
 tdm/table/rowcount pix_info 4
  

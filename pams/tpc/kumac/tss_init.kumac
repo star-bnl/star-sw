@@ -1,10 +1,12 @@
 macro init 
+macro/global/import *
 
-  cd /dui/constants/tpc/params
+  cd [params]/tpc
 
-  dio/newfilestream    tss $STAR/params/tpc/tss_pars.xdf r
-  dio/stream/getevent  tss
-  dio/stream/close     tss
+  dio/newfilestream    tss_par $STAR/params/tpc/tss_pars.xdf r
+  dio/stream/getevent  tss_par
+  dio/stream/close     tss_par
+  soc/object/oid tss_par; oid = staf_result(1); soc/deleteoid [oid]
 
   cd /dui
 

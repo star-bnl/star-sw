@@ -1,13 +1,13 @@
 macro init
+macro/global/import *
 
-cd /dui/constants/tpc/params
+cd [params]/tpc
 
   dio/newfilestream    tptpar $STAR/params/tpc/tpt_pars.xdf r
   dio/stream/getevent  tptpar
   dio/stream/close     tptpar
-
+  soc/object/oid tptpar; oid = staf_result(1); soc/deleteoid [oid]
 cd /dui
 
 return
 
-*****************************************************************

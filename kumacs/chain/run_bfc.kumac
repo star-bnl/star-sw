@@ -291,7 +291,7 @@ $STAR/pams/trg/kumac
  
  if [gstar_on]=true then
    exec write_table_to_file#init  goutunit [gstar_output_file]
-   exec write_table_to_file#write goutunit /dui/geant/Run
+   exec write_table_to_file#write goutunit [geant]/Run
  endif
  
  *****************************************
@@ -388,7 +388,7 @@ $STAR/pams/trg/kumac
      
 
 * write out event information to file 
-     exec write_table_to_file#write goutunit /dui/geant/Event
+     exec write_table_to_file#write goutunit [geant]/Event
      
    endif
    

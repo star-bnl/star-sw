@@ -1,0 +1,137 @@
+****************************************************
+* TO RUN:
+*
+*  1. stardev (or whichever version you want)
+*  2. staf
+*  3. exec $STAR/kumacs/chain/run_bfc
+* 
+* if you want to change anything, copy kumac to your area and change:
+*  4. input values on macro command line
+*  5. default directory list where you pick up kumacs from 
+**************************************************
+* 
+*
+* SYNOPSIS: STAF analysis driver for running BFC which has
+*   event generation,
+*   detector simulation in GSTAR,
+*   SVT + TPC + EMC  simulation 
+*   and tracking and analysis
+*
+*
+* History:
+*          Feb 24, 97 - created by H. Caines, C. Pruneau
+*          May 1, 1998 - editted by Kathy Turner
+*          May 5, 1998 - Kathy
+*          May 22, 1998 - editted by Kathy Turner 
+*                       - broke up tpc into simulation & tracker
+*  editted June 3, 1998 by Kathy Turner - new versions of tpc kumacs
+*  editted June 3, 1998 by Kathy Turner - new versions of svt kumacs
+*  editted 6/10/98 Kathy Turner - new tpc tables in new version of tpc kumac
+*  editted 6/12/98 Kathy Turner - put in tpc slow sim - had to add new inputs
+*                               to macro (adcxyzon,tpc_sector_first,_last)
+* ******************************************************************************
+* 
+* domain     list of domains to load [domain='tpc svt global]
+* chain       list of modules to run **** IN ORDER ****  
+*   [chain='g2t svg tpg srs tss tcl sgr tpt svm egr  ev0 evout']
+* gethij     read hijing xdf file
+* g2t        read G2T xdf file
+* gst        run gstar with predefined tables 
+* svg        initialize geometry for SVT
+* tpg        initialize geometry for TPC
+* srs        SVT  resolution simulator (fast)
+* sss        SVT slow simulator - not implemented yet
+* tss        TPC slow simulator 
+* tcl        TPC clustering
+* sgr        grouping SVT hits into tracks 
+* tpt        TPC track finding
+* tte_t    TPC tte tracker
+* tte_e    TPC track evaluator
+* egr        refit global tracks
+* ev0        Strange particle reconstruction
+* evout      write event into xdf file
+*               
+* 
+* 
+* 
+MACRO bfc _
+   TOP=/star/u2e/fisyak/public/SL98d _
+   adcxyzon=0 _
+   tpc_sector_first=1 _
+   tpc_sector_last=24 _
+   domain='tpc svt global' _
+   chain='gethij gst svg tpg srs tss'_ 
+   first=401 _
+   no_events=200 _
+   no_in_bunch=200 _
+   nsplit=20 _
+   prefix_in=/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2 _
+   prefix_out=/star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/tss/auau_ce_b0-2 
+
+ff    = $format([no_in_bunch]*int([first]/[no_in_bunch])+1,i5)
+f     = [ff]
+l     = [f]+[no_in_bunch]-1
+last  = [f]+[no_in_bunch]-1
+
+input_file = [prefix_in]_[f]_[l].xdf
+if [no_in_bunch]>[nsplit] then | split mode
+  output_file = ""
+endif
+ macro/global/create input_file       [input_file]              'Input file name'
+ macro/global/create output_file      [output_file]             'Output file name'
+ macro/global/create adcxyzon         [adcxyzon]                'flag'
+ macro/global/create tpc_sector_first [tpc_sector_first]        'first sector in TPC'
+ macro/global/create tpc_sector_last  [tpc_sector_last]         'last sector in TPC'
+ macro/global/create ievent           1                         'Event counter'
+ macro/global/create TOP              [TOP]
+ macro/global/create TOPDIR           /star/u2e/fisyak/public/SL98d
+*trace off
+***********************************************************
+* PRINT OUT INPUT VALUES
+***********************************************************
+
+message ' *** Input file                    --> ' [input_file]
+message ' *** Num Events to process         --> ' [no_events]
+message ' *** domains to load               --> ' [domain]
+message ' *** modules to process            --> ' [chain]   
+message ' *** Output file name              --> ' [output_file]
+
+ exec [TOP]/kumacs/chain/bfc_util#bfc_start domain=[domain]
+
+ if $iquest(1)<>0 goto ABEND
+
+ exec [TOP]/kumacs/chain/bfc_util#bfc_init chain=[chain]
+
+ macro/global/import *
+  
+ *****************************************
+ *  MAIN EVENT LOOP 
+ *****************************************
+ message $cptime
+ do iev=[first],[last],[nsplit]
+   iev1=[iev]
+   iev2=[iev]+[nsplit]-1
+   if [iev2]>[last] then
+     iev2 = [last
+   endif
+   i1 = $format([iev1],i4.4)
+   i2 = $format([iev2],i4.4)
+   output_file = [prefix_out]_[i1]_[i2].xdf
+   exec [TOP]/kumacs/chain/bfc_util#bfc_init chain=evout  
+   do ievent=[iev1],[iev2]
+* clean tables
+     tabclear [event]
+     exec [TOP]/kumacs/chain/bfc_util#bfc_process [chain]
+     exec [TOP]/kumacs/chain/bfc_util#bfc_process chain=evout
+   enddo
+   exec [TOP]/kumacs/chain/bfc_util#bfc_finish chain=evout
+*   wait
+ enddo
+EOF:
+  exec [TOP]/kumacs/chain/bfc_util#bfc_finish [chain]
+  goto END
+ABEND:
+* fatal error
+  message "<bfc> Fatal error"
+END:
+RETURN

@@ -1,4 +1,5 @@
 MACRO callgeo 
+macro/global/import *
 
 mkdir mws
 cd   mws 

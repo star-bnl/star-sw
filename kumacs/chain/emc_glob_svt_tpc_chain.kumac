@@ -47,6 +47,7 @@ MACRO run_all _
    tpc_svt_match=svm _ 
    event_refit=egr _
    ev0_finder=ev0 
+macro/global/import *
 
 
 ***********************************************************
@@ -357,7 +358,7 @@ TPC:
 
 
 * Write output file -------------------------------------------
-  exec write_table_to_file#write evout /dui/data/global
+  exec write_table_to_file#write evout [data]/global
 
 
  NEXT_EVENT:

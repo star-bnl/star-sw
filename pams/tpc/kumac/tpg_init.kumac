@@ -1,19 +1,21 @@
 macro init
+macro/global/import *
 
-  cd /dui/constants/tpc/geometry
+  cd [params]/tpc
 
   dio/newfilestream   geom $STAR/params/tpc/tpg_pars.xdf r
   dio/stream/getevent geom 
   dio/stream/close    geom
+  soc/object/oid geom; oid = staf_result(1); soc/deleteoid [oid]
 
   cd tpgpar
   tdm/newtable tpg_pad tpg_pad 1
 
   cd /dui
 
-  ami/module/call tpg_main /dui/constants/tpc/geometry/tpgpar/tpg_pad_plane _
-                           /dui/constants/tpc/geometry/tpgpar/tpg_detector _
-                           /dui/constants/tpc/geometry/tpgpar/tpg_pad
+  ami/module/call tpg_main [geometry]/tpc/tpgpar/tpg_pad_plane _
+                           [geometry]/tpc/tpgpar/tpg_detector _
+                           [geometry]/tpc/tpgpar/tpg_pad
 
   cd /dui
  

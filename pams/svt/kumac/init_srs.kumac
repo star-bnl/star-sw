@@ -11,10 +11,11 @@
 **************************************************************************
  
 macro init
+macro/global/import *
  
 *********** Create Tables ************************************
-
-cd /dui/constants/svt/geometry
+ exec create_tables_svt#srs
+cd [params]/svt
 
 newtable srs_activea srs_activea 3
 tdm/table/rowcount srs_activea 3
@@ -46,7 +47,7 @@ tdm/table/cell/putvalue 'srs_activea[2].param' .3475 .125 .68 .68 0 0 0 0 0 0
 * initializes the random seed, chooses the shape of the active area,
 * and fixes the resolution
 
-cd /dui/constants/svt/params
+cd [params]/svt
 message 'initializing the srs parameter table...'
 newtable srs_srspar srs_srspar 1
 tdm/table/rowcount srs_srspar 1

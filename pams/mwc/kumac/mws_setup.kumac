@@ -1,4 +1,5 @@
 macro cts_setup
+macro/global/import *
 *
 *    Define tables
 *
