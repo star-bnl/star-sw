@@ -44,11 +44,18 @@ class StiMcTrack : public StiTrack
   virtual long    getFlag() const;
   void setStMcTrack(const StMcTrack * track);
   const StMcTrack * getStMcTrack(const StMcTrack * track) const;
-
+	bool extendToVertex(StiHit* vertex);
  protected:
 
   const StMcTrack * mcTrack;
 };
+
+inline bool StiMcTrack::extendToVertex(StiHit* vertex)
+{
+	// no ops 
+	return false;
+}
+
 
 /// Set the given StMcTrack as the track this wrapper points to
 inline  void StiMcTrack::setStMcTrack(const StMcTrack * track)

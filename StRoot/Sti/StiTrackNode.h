@@ -20,8 +20,6 @@ public:
   void add(StiTrackNode * node);
   const StiDetector *getDetector() const; 
   void setDetector(const StiDetector *detector);
-
-  //friend ostream& operator<<(ostream& os, const StiTrackNode& n);
  protected:   
   StiTrackNode();    
   StiHit * _hit; 

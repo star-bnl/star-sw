@@ -126,7 +126,7 @@ public:
   int  propagate(StiKalmanTrackNode *p, const StiDetector * tDet);	//throw (Exception);
   
   /// Propagates a track encapsulated by the given node "p" to the given vertex
-  void  propagate(const StiKalmanTrackNode *p, StiHit * vertex);
+  bool propagate(const StiKalmanTrackNode *p, StiHit * vertex);
   
   /// Evaluates, stores and returns the dedx associated with this node.
   /// Possible returned values are:
@@ -229,15 +229,15 @@ public:
 inline void StiKalmanTrackNode::reset()
 { 
   StiTrackNode::reset();
-	_detector = 0;
   _cosAlpha = 1.;
-  _alpha=_sinAlpha=_x=_refX=_p0=_p1=_p2=_p3=_p4=0.;
+  _alpha=_sinAlpha=_sinCA=_cosCA=_refX=_x=_p0=_p1=_p2=_p3=_p4=0.;
   // diagonal error set to 1
   _c00=_c11=_c22=_c33=_c44=1.;
   // off diagonal set to zero
   _c10=_c20=_c21=_c30=_c31=_c32=_c40=_c41=_c42=_c43=0.;
   _chi2=eyy=ezz=0.;
   hitCount=nullCount=contiguousHitCount=contiguousNullCount = 0;
+	_detector = 0;
 }
 
 inline double StiKalmanTrackNode::nice(double angle) const
@@ -481,7 +481,7 @@ inline  void StiKalmanTrackNode::initialize(StiHit*h,double alpha, double eta, d
 
 inline const StiKalmanTrackNode& StiKalmanTrackNode::operator=(const StiKalmanTrackNode & n)
 {
-  //children is NOT copid.
+  children.clear();
   parent     = n.parent;
   _detector  = n._detector;
   _hit       = n._hit;

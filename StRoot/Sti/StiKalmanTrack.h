@@ -276,8 +276,6 @@ class StiKalmanTrack : public StiTrack
    StThreeVector<double> getMomentumNear(double x);
    StThreeVector<double> getHitPositionNear(double x) const;
 
-    ///return hits;
-	 //virtual vector<StHit*> stHits() const;
 	 virtual vector<StMeasuredPoint*> stHits() const;
 	 virtual vector<StiKalmanTrackNode*> getNodes(StDetectorId det) const;
 	 
@@ -525,7 +523,10 @@ inline double  StiKalmanTrack::getDca3(StiTrack *t)   const
 inline StiKTNBidirectionalIterator StiKalmanTrack::begin() const 
 {
   if (!firstNode)
-    throw runtime_error("StiKalmanTrack::begin() - ERROR - firstNode==0");
+		{
+			cout << "StiKTNBidirectionalIterator StiKalmanTrack::begin() -F- firstNode==0"<<endl;
+			throw runtime_error("StiKalmanTrack::begin() - ERROR - firstNode==0");
+		}
   return StiKTNBidirectionalIterator(firstNode);
 }
 

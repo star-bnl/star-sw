@@ -125,6 +125,8 @@ public:
   // Convenience Accessor using a switch
   virtual double  getValue(int key) const;
 
+	virtual bool extendToVertex(StiHit* vertex)=0;
+
  protected:
   static StiTrackFinder * trackFinder;
   static StiTrackFitter * trackFitter;

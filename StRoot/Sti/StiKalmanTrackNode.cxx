@@ -406,21 +406,26 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 }
 
 /*! Propagate the track encapsulated by pNode to the given vertex. Use this node
- to represent the track parameters at the vertex.
+	to represent the track parameters at the vertex.
   <p>
   This method propagates the track from the given parent node
   "pNode" to the given vertex effectively calculating the
   location (x,y,z) of the track near the given vertex. It use "this" node
  to represent/hold the track parameters at the vertex.
+ return true when the propagation is successfull and false otherwise.
 <p>
 */
-void StiKalmanTrackNode::propagate(const StiKalmanTrackNode *parentNode, StiHit * vertex)
+bool StiKalmanTrackNode::propagate(const StiKalmanTrackNode *parentNode, StiHit * vertex)
 {
   setState(parentNode);
   double locVx = _cosAlpha*vertex->x() + _sinAlpha*vertex->y();
-  propagate(locVx,0);
+  if (propagate(locVx,0) < 0)
+		return false; // track does not reach vertex "plane"
   //propagateError();
   _hit = vertex;
+	_detector = 0;
+	cout<<"SKTN -i- propagateDone";
+	return true;
 }
 
 
@@ -666,7 +671,8 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
 void StiKalmanTrackNode::updateNode() 
 {
   double r00,r01,r11;
-  if (useCalculatedHitError)
+	const StiDetector * detector = _hit->detector();
+  if (useCalculatedHitError && detector)
     {
       r00=_c00+eyy;
       r01=_c10;      r11=_c11+ezz;
@@ -697,7 +703,11 @@ void StiKalmanTrackNode::updateNode()
   _p3  = cur;
   _p4 += k40*dy + k41*dz;
   _sinCA  =  _p3*_x-_p2;
-  if (_sinCA>1.) throw runtime_error("SKTN::updateNode() - WARNING - _sinCA>1");
+  if (_sinCA>1.) 
+		{
+			cout << " SKTN    _sinCA>1";
+			throw runtime_error("SKTN::updateNode() - WARNING - _sinCA>1");
+		}
   _cosCA = sqrt(1.-_sinCA*_sinCA); 
   // update error matrix
   double c01=_c10, c02=_c20, c03=_c30, c04=_c40;

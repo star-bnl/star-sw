@@ -79,7 +79,8 @@ StiKalmanTrack* StiLocalTrackSeedFinder::next()
 	  if ( (*_hitIter).timesUsed()==0 ) 
 	    {
 	      track = makeTrack(&*_hitIter);
-	    }      
+	    } 
+
 	}
       catch(runtime_error & rte )
 	{
@@ -182,7 +183,6 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
       _messenger <<"StiLocalTrackSeedFinder::makeTrack() -W- Hit extension failed because size()<mSeedLength+mExtrapMinLength"<<endl;
       return track;
     }
-  cout <<" ::::::::::::::::::seed size:"<<mSeedHitVec.size()<<endl;
   //Test: Scale the errors (MLM 12/10/01)
   for_each( mSeedHitVec.begin(), mSeedHitVec.end(), ScaleHitError(10.) );
   track = initializeTrack(_trackFactory->getInstance());

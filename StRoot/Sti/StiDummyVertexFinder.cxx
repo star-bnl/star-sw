@@ -34,7 +34,10 @@ StiHit * StiDummyVertexFinder::findVertex(StEvent * event)
       const StThreeVectorF& vp = event->primaryVertex()->position();
       const StThreeVectorF& ve = event->primaryVertex()->positionError();
 			cout <<"StiDummyVertexFinder::findVertex(StEvent * event) -I- set hit parameters"<<endl;
-      vertex->set(0, event->primaryVertex(), 0., vp.x(),vp.y(),vp.z(),ve.x(),0.,0.,ve.y(),0.,ve.z());
+			cout << "x:"<< vp.x() << "+-" << ve.x()<<endl;
+			cout << "y:"<< vp.y() << "+-" << ve.y()<<endl;
+			cout << "z:"<< vp.z() << "+-" << ve.z()<<endl;
+      vertex->set(0, event->primaryVertex(), 0., vp.x(),vp.y(),vp.z(),ve.x()*ve.x(),0.,0.,ve.y()*ve.y(),0.,ve.z()*ve.z());
     }
   return vertex;
 }
