@@ -35,9 +35,6 @@ Int_t StTreeMaker::Init()
     fTree = new StTree("bfc"); 
     if (!fFileName.IsNull()) fTree->SetBaseName(fFileName);
     
-    new StBranch("DST",fTree);
-    new StBranch("Global",fTree);
-
     fTopMaker = GetMaker(this);
     fMakers   = fTopMaker->Find(".make");
     assert (fMakers);
