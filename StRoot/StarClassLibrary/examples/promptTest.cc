@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: promptTest.cc,v 1.2 1999/12/21 15:14:56 ullrich Exp $
+ * $Id: promptTest.cc,v 1.3 2000/02/02 19:05:18 ullrich Exp $
  *
  * Author: Thomas Ullrich, April 1998
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: promptTest.cc,v $
- * Revision 1.2  1999/12/21 15:14:56  ullrich
- * Modified to cope with new compiler version on Sun (CC5.0).
+ * Revision 1.3  2000/02/02 19:05:18  ullrich
+ * Changed macros for CC5/CC4.2 compatibility
  *
  * Revision 1.2  1999/12/21 15:14:56  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -50,7 +50,7 @@ int main()
 	    StPrompt("any number", var);
 	    cout << "new value: " << var << endl;
 
-#ifdef __SUNPRO_CC
+#if defined (__SUNPRO_CC) && __SUNPRO_CC < 0x500  
 	    StBoolPrompt("more questions", answer);
 #else
 	    StPrompt("more questions", answer);
