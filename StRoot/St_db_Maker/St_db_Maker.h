@@ -1,5 +1,8 @@
+// $Id: St_db_Maker.h,v 1.10 2000/02/26 01:45:04 fine Exp $
+// $Log: St_db_Maker.h,v $
+// Revision 1.10  2000/02/26 01:45:04  fine
+// CVS id has been introduced
 // 
-//  
 //
 #ifndef STAR_St_db_Maker
 #define STAR_St_db_Maker
@@ -43,7 +46,7 @@ private:
   TDatime     fDBTime;		//! Own DB time stamp
   Int_t       fUpdateMode;	//! 
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.9 2000/02/26 01:44:17 fine Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.10 2000/02/26 01:45:04 fine Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name,const char *maindir,const char *userdir=0);
@@ -76,7 +79,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.9 2000/02/26 01:44:17 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.10 2000/02/26 01:45:04 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   //StAF chain virtual base class for Makers
 };
