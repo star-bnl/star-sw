@@ -105,7 +105,7 @@ macro/global/import *
   
  ami/module/call tph_
         [params]/tpc/tclpars/tcl_sector_index_
-        [params]/tpc/tclpars/tclpar_
+        [params]/tpc/tclpars/tclpar_ 
         [params]/tpc/tsspars/tsspar_
         [geometry]/tpc/tpgpar/tpg_detector_
         [geometry]/tpc/tpgpar/tpg_pad_plane_
