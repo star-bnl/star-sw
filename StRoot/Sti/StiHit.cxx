@@ -46,6 +46,15 @@ void StiHit::setError(const StMatrixF& matrix)
     return;
 }
 
+double StiHit::getEloss()
+{
+	if (msthit)
+		return msthit->charge();
+	else
+		return -2;// signals error condition or absence of data
+}
+
+
 /*! Streamer for StiHit objects. */
 ostream& operator<<(ostream& os, const StiHit& hit)
 {

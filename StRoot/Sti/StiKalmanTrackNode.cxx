@@ -78,6 +78,10 @@ void StiKalmanTrackNode::set(int   depth,
 	if (StiDebug::isReq(StiDebug::Flow)) cout <<"StiKalmanTrackNode:set(...) - Beginning" << endl;
   StiTrackNode::set(depth, hit);
   fAlpha  = alpha;
+  if (fAlpha < -3.1415927) fAlpha += 2*3.1415927;
+  if (fAlpha >= 3.1415927) fAlpha -= 2*3.1415927;
+  cout  << "rotate() - fAlpha:" << fAlpha*180/3.1415927 << " degs" << endl;
+
   fX      = xRef;
   fdEdx   = dEdx;
   fChi2   = chi2;
@@ -109,6 +113,8 @@ void StiKalmanTrackNode::setState(const StiKalmanTrackNode * node)
 	if (StiDebug::isReq(StiDebug::Flow)) 
 		cout <<"StiKalmanTrackNode:setState(const StiKalmanTrackNode * node) - Beginning" << endl;
 	fAlpha = node->fAlpha;
+  if (fAlpha < -3.1415927) fAlpha += 2*3.1415927;
+  if (fAlpha >= 3.1415927) fAlpha -= 2*3.1415927;
   fX   = node->fX;
   // state matrix
   fP0  = node->fP0;
@@ -144,6 +150,8 @@ void StiKalmanTrackNode::setAsCopyOf(const StiKalmanTrackNode * node)
   StiTrackNode::setAsCopyOf(node);
   fX    = node->fX;
   fAlpha= node->fAlpha;
+  if (fAlpha < -3.1415927) fAlpha += 2*3.1415927;
+  if (fAlpha >= 3.1415927) fAlpha -= 2*3.1415927;
   fdEdx = node->fdEdx;
   fChi2  = node->fChi2;
   fP0   = node->fP0;
@@ -401,16 +409,39 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 	setState(pNode);
   StiPlacement * tPlace = tDet->getPlacement();
   double tAlpha = tPlace->getNormalRefAngle();
+  if (tAlpha < -3.1415927) tAlpha += 2*3.1415927;
+  if (tAlpha >= 3.1415927) tAlpha -= 2*3.1415927;
+
+	/////////////////////
   double dAlpha = tAlpha - fAlpha;
-	//cout << " Propagate : tAlpha/fAlpha :" << tAlpha << "\t" << fAlpha << endl;
+	cout << " Propagate : tAlpha/fAlpha :"
+			 << tAlpha*180./3.1415927 << " degs\t"
+			 << fAlpha*180./3.1415927 << " degs" << endl;
   if (fabs(dAlpha)>1e-4)   // perform rotation if needed
 		{
-			cout << " doing rotation <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
+			cout << " requesting rotation by " << dAlpha*180./3.1415927 << "degs"<<endl;
 			rotate(dAlpha);
 		}
   double x, x0, rho, pathLength;
   position = StiMaterialInteraction::findIntersection(pNode,tDet,x,x0,rho,
                                                       pathLength);
+	StiHit * hit = pNode->getHit();
+	if (hit)
+		{
+			if (pathLength>0)
+			{
+					double eloss = hit->getEloss();
+					if (eloss>0)
+						dedx = eloss/pathLength;
+					else
+						dedx = -3; // signals error condition/absence of data.
+				}
+			else
+				dedx = -1.; // signals error condition!
+		}
+	else
+		dedx = -2; // signals absence of hit - node has no hit and is not
+	// a measurement
   if (StiDebug::isReq(StiDebug::Node))
 		cout << "StiKalmanTrackNode::propagate(...)\tx/x0/rho:" << x << "\t" << x0 << "\t" << rho << endl;
   propagate(x,x0,rho);
@@ -629,7 +660,7 @@ void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
   fAlpha += alpha;
   if (fAlpha < -3.1415927) fAlpha += 2*3.1415927;
   if (fAlpha >= 3.1415927) fAlpha -= 2*3.1415927;
-  
+  cout  << "rotate() - new fAlpha:" << alpha*180/3.1415927 << " degs" << endl;
   double x1=fX;
   double y1=fP0;
   double ca=cos(alpha);
@@ -738,7 +769,7 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 	int nChildren = n.getChildCount();
   os << "Level: " << n.mDepth << "\t"
 		 << " x:" << n.fX  <<"\t"
-		 << "alpha:" << n.fAlpha<<"\t"
+		 << "alpha:" << 180*n.fAlpha/3.1415927<<" degs\t"
 		 << "dedx:" << n.fdEdx <<"\t"
 		 << "chi2:" << n.fChi2 << endl
 		 << "P0/1/2/3/4:" << n.fP0 << " " 
