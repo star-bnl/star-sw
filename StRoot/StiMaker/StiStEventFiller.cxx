@@ -1,11 +1,16 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.16 2003/05/08 22:23:33 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.17 2003/05/12 21:21:39 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.17  2003/05/12 21:21:39  calderon
+ * switch back to getting the chi2 from track->getChi2()
+ * Covariance matrix is still obtained from node->get(), and the values
+ * are not as expected in StEvent, so this will still need to change.
+ *
  * Revision 2.16  2003/05/08 22:23:33  calderon
  * Adding a check for finiteness of node origin and node curvature.  If any
  * of the numbers is not finite, the code will abort().
@@ -541,7 +546,7 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   double alpha, xRef, x[5], covM[15], chi2node;
   node->get(alpha,xRef,x,covM,chi2node);
   float chi2[2];
-  chi2[0] = chi2node; // change: perhaps use chi2node instead of track->getChi2()?
+  chi2[0] = track->getChi2(); // changed 12/May/03: using track->getChi2() instead of chi2node, want sum of chi2 for all nodes
   chi2[1] = -9999; // change: here goes an actual probability, need to calculate?
     
 
