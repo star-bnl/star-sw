@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.h,v 1.10 1999/08/23 22:37:29 wdeng Exp $
+// $Id: StKinkMaker.h,v 1.11 1999/08/26 17:30:38 wdeng Exp $
 // $Log: StKinkMaker.h,v $
+// Revision 1.11  1999/08/26 17:30:38  wdeng
+// Fix typo. Reorganize Make() function. Use shorter names for identifiers
+//
 // Revision 1.10  1999/08/23 22:37:29  wdeng
 // New definiton with function dcaTwoLines
 //
@@ -60,17 +63,33 @@ using namespace std;
 
 class StKinkMaker : public StMaker {
  private:
-  Bool_t m_kinkEvalOn;   //switch for the evaluation
-  // static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.10 1999/08/23 22:37:29 wdeng Exp $";
+  Bool_t            m_kinkEvalOn;   //switch for the evaluation
+  // static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.11 1999/08/26 17:30:38 wdeng Exp $";
   St_tkf_tkfpar    *m_tkfpar;          //!
+
+  StKinkLocalTrack *myTrack1;          //! 
+  StKinkLocalTrack *myTrack2;          //!
+
+  dst_tkf_vertex_st kinkVtxRow;        //!
+  dst_vertex_st     dstVtxRow;         //!
+
+  StThreeVectorD   parentMoment, daughterMoment;
+  StThreeVectorD   mKinkVertex;
+  Float_t          parentImpact, daughterImpact;
+  Float_t          dca, decayAngle;
+
+  Int_t  kinkVtxIndex, dstVtxIndex;
+
  protected:
-  Int_t    meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& helix1, 
-			    const StPhysicalHelixD& helix2, Float_t xCoordinates[2], 
-			    Float_t yCoordinates[2]);
-  Float_t  dcaTwoLines(const StThreeVectorD& p1Project, const StThreeVectorD& p2Project, 
-		       const StThreeVectorD& parentMoment, const StThreeVectorD& daughterMoment, 
+  Int_t    MeetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& helix1, 
+			    const StPhysicalHelixD& helix2, Float_t xCords[2], 
+			    Float_t yCords[2]);
+  Float_t  DcaTwoLines(const StThreeVectorD& t1Project, const StThreeVectorD& t2Project, 
+		       const StThreeVectorD& parentMom, const StThreeVectorD& daughterMom, 
 		       Float_t point1AtDca[3], Float_t point2AtDca[3]);
-  
+  void     FillTableRow();
+  void     FillIflag();
+ 
  public: 
   StKinkMaker(const char *name="kink");
   virtual  ~StKinkMaker(); 
@@ -80,7 +99,7 @@ class StKinkMaker : public StMaker {
   virtual  void   kinkEvalOn() {kinkEval();} 
   virtual  void   kinkEvalOff(){kinkEval(kFALSE);}      
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.10 1999/08/23 22:37:29 wdeng Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.11 1999/08/26 17:30:38 wdeng Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StKinkMaker, 1)   //StAF chain virtual base class for Makers
 };
     
