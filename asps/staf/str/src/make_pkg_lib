@@ -111,6 +111,7 @@ rm -f *.o
 #
 echo "cleaning up include file links.."
 rmlink *
+rmlink ../lib/*
 #
 echo "Done at `date`"
 
