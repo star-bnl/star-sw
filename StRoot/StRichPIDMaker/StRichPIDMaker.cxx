@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.31 2000/12/15 00:05:18 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.32 2000/12/15 01:05:49 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.32  2000/12/15 01:05:49  horsley
+ * corrected distHits entry number in hitFilter
+ *
  * Revision 2.31  2000/12/15 00:05:18  horsley
  * added associated Mip's charge to dist ntuple
  *
@@ -241,7 +244,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.31 2000/12/15 00:05:18 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.32 2000/12/15 01:05:49 horsley Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -946,9 +949,9 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 #ifdef myRICH_WITH_NTUPLE
 
 #ifdef myRICH_WITH_MC
-    float distHits[34];
+    float distHits[35];
 #else
-    float distHits[33];
+    float distHits[34];
 #endif
 
 #endif
