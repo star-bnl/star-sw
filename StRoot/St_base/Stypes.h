@@ -47,7 +47,7 @@ enum EReturnCodes {
   kStFATAL = 4,                           /**< Fatal error, processing impossible                 */
   kStSKIP  = kStErr   + 10,               /**< Skip this event if chain allows                    */
   kStSkip  = kStSKIP,                     /**< Skip this event if chain allows                    */
-  kStSTOP  = kStFATAL + 10,               /**< enum value kStSTOP                                 */
+  kStSTOP  = kStEOF   + 10,               /**< enum value kStSTOP                                 */
   kStStop  = kStSTOP                      /**< enum value kStStop                                 */
 };  
 
