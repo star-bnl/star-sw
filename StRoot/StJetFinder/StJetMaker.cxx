@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.6 2003/08/01 16:29:21 thenry Exp $
+ * $Id: StJetMaker.cxx,v 1.7 2003/09/03 00:48:00 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -106,28 +106,18 @@ Int_t StJetMaker::Init()
 {
     //create udst & its branches    
     jetTree  = new TTree("jet","jetTree",99);
-    jetEvent = new StppEvent(); //jetEvent->setInfoLevel(infoLevel);
-    jetTree->Branch ("Event","StppEvent",&jetEvent,64000,99);
+    jetEvent = NULL;
+    //jetEvent = new StppEvent(); //jetEvent->setInfoLevel(infoLevel);
+    mudst = muDstMaker->muDst();
+    jetTree->Branch ("MuDst","StMuDst",&mudst,64000,99);
     for(jetBranchesMap::iterator i = jetBranches.begin(); i != jetBranches.end(); i++)
     {
       (*i).second->addBranch((*i).first.c_str(), jetTree);
     }
-#ifdef _GEANT_
-    ppGeant = new StppGeant(); ppGeant->setInfoLevel(infoLevel);
-    jetTree->Branch ("Geant","StppGeant",&ppGeant,64000,99);
-#endif
-#ifdef _BBC_data_
-    bbc     = new StBbcTriggerDetector();
-    jetTree->Branch ("Bbc","StBbcTriggerDetector",&bbc,64000,99);
-#endif
-#ifdef _FPD_data_
-    fpd     = new StFpdCollection();
-    jetTree->Branch ("Fpd","StFpdCollection",&fpd,64000,99);
-#endif
-    if(saveEMC)
-    {
-      jetTree->Branch ("Emc", "StMuEmcCollection", &muEmcCol, 64000, 99);
-    }
+    //if(saveEMC)
+    //{
+    //jetTree->Branch ("Emc", "StMuEmcCollection", &muEmcCol, 64000, 99);
+    //}
 
     InitFile();
     return StMaker::Init();
@@ -144,11 +134,8 @@ Int_t StJetMaker::Make() {
     InitFile();
   }
 
-  jetEvent->clear();
-#ifdef _GEANT_
-  ppGeant->clear();
-#endif
-  
+  //jetEvent->clear();
+
   // Get MuDst, or if it's not there, get StEvent
   StEvent* event;
   if(muDstMaker != NULL)  
@@ -158,7 +145,7 @@ Int_t StJetMaker::Make() {
   }
   if(mudst != NULL) 
   {
-    jetEvent->setMuDst(mudst);
+    //jetEvent->setMuDst(mudst);
     event = NULL;
   }
   else{
@@ -168,45 +155,27 @@ Int_t StJetMaker::Make() {
       return kStOK;
     }
   }
-  jetEvent->setMuDst(mudst);
-  while(mudst != jetEvent->getMuDst())
-  {
-    cout << "Failed to set muDst in event.  Retrying!" << endl; 
-    jetEvent->mudst = mudst;
-  }
+  //jetEvent->setMuDst(mudst);
+  //while(mudst != jetEvent->getMuDst())
+  //{
+  //cout << "Failed to set muDst in event.  Retrying!" << endl; 
+  //jetEvent->mudst = mudst;
+  //}
   if(muDstMaker->muDst()->numberOfPrimaryTracks() <= 0) return kStOk;
 
   // fill jetEvent 
-  int res;
-  res = jetEvent->fill(event, mudst);
-  if(res<0){
-    mBadCounter++;
-    return kStOK;
-  }
-
-  // Get geant info, if any, and fill geant branch
-#ifdef _GEANT_
-  TDataSet *geantBranch = GetInputDS("geantBranch");
-  if(geantBranch){
-    ppGeant->fill(geantBranch);
-  }
-#endif
-  
-  // Get FPD & BBC infos
-#ifdef _BBC_data_
-  if(event) bbc = &(event->triggerDetectorCollection()->bbc());
-  if(mudst) bbc = &(mudst->event()->bbcTriggerDetector());
-#endif
-#ifdef _FPD_data_
-  if(event) fpd = event->fpdCollection();
-  if(mudst) fpd = &(mudst->event()->fpdCollection());
-#endif
+  //int res;
+  //res = jetEvent->fill(event, mudst);
+  //if(res<0){
+  //mBadCounter++;
+  //return kStOK;
+  //}
 
   //EMC info is retrieved at this point:
-  if(saveEMC) 
-  {
-    muEmcCol = fourPMaker->getStMuEmcCollection();  
-  }  
+  //if(saveEMC) 
+  //{
+  //muEmcCol = fourPMaker->getStMuEmcCollection();  
+  //}  
 
   //Find the Jets, using the fourPMaker information:
   bool hadJets = false;
@@ -275,12 +244,12 @@ Int_t StJetMaker::Make() {
 void StJetMaker::FinishFile(void) 
 {
   if(neverSave) return;
-    fileCounter++;
+  fileCounter++;
     
-    //close file
-    m_outfile->Write();
-    m_outfile->Close();
-    delete m_outfile;
+  //close file
+  m_outfile->Write();
+  m_outfile->Close();
+  delete m_outfile;
 }
 
 Int_t StJetMaker::Finish()
