@@ -13,7 +13,6 @@ message 'start tfs_run'
 	 [geant_Event]/g2t_track _
 	 [geant_Event]/g2t_vertex _
 		[params]/tpc/tfspars/tfs_fspar _ 
-  		[params]/tpc/tfspars/tfs_bmpar _
 		[params]/tpc/tfspars/tfs_fsctrl _
 	 [data]/tpc/hits/index _
 	        [params]/tpc/tclpars/type _
