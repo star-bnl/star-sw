@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.5 1999/08/06 16:20:58 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.6 1999/08/10 00:28:50 fisyak Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.6  1999/08/10 00:28:50  fisyak
+ * Herb/Victor corrects for errors
+ *
  * Revision 1.5  1999/08/06 16:20:58  perev
  * RICHReader added
  *
@@ -20,6 +23,7 @@
  * leak removed author added
  *
  **************************************************************************/#include "StDAQMaker/StDAQReader.h"
+#include "Stypes.h"
 #include "StDaqLib/GENERIC/EventReader.hh"
 
 //	non standard open,close,read
@@ -66,7 +70,7 @@ int StDAQReader::open(const char *file)
   fFd = ::open(file,O_RDONLY);
    if (fFd==-1) { 
      printf("<StDAQReader::open>  %s %s ",file, strerror( errno ) );
-     return 1;
+     return kStErr;
   }
    
   return 0;  
@@ -90,9 +94,10 @@ int StDAQReader::readEvent()
 {  
   delete fEventReader;
   delete fRICHReader; fRICHReader = 0;
-  if (fOffset == -1) return 1;
+  if (fOffset == -1) return kStEOF;
   fEventReader = new EventReader();
   fEventReader->InitEventReader(fFd, fOffset, 0);
+  if(fEventReader->errorNo()) return kStErr;  
   fOffset = fEventReader->NextEventOffset();
   *fEventInfo = fEventReader->getEventInfo();
 
@@ -109,6 +114,7 @@ int StDAQReader::skipEvent(int nskip)
     if (fOffset == -1) return kStEOF;
     fEventReader = new EventReader();
     fEventReader->InitEventReader(fFd, fOffset, 0);
+    if(fEventReader->errorNo()) return kStErr;  
   }
   return 0;
 }
