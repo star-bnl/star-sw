@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.h,v 1.11 1999/07/20 04:59:03 caines Exp $
+// $Id: St_stk_Maker.h,v 1.12 2000/01/31 23:54:38 caines Exp $
 // $Log: St_stk_Maker.h,v $
+// Revision 1.12  2000/01/31 23:54:38  caines
+// Add code for SVT vtx finding - Not yet switched on
+//
 // Revision 1.11  1999/07/20 04:59:03  caines
 // Temporary fix using geant vtx for tracking
 //
@@ -63,7 +66,7 @@ class TH2F;
 
 class St_stk_Maker : public StMaker {
 protected:
-// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.11 1999/07/20 04:59:03 caines Exp $";
+// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.12 2000/01/31 23:54:38 caines Exp $";
    Int_t  m_mode;      // mode 1 = primaries;
 	               // mode 2 = secondaries;
 	               // mode 3 = primaries to secondaries 
@@ -118,10 +121,11 @@ protected:
    TH1F *m_q_pt; //!number of hits assigned to a reconstructed track
    TH1F *m_frac_used;   //!Frac. of hits used
    TH1F *m_azimuth;       //!azimuthal angle
+   TH2F *m_x0y0;       //! x0 vs y0 of stk track
+   TH1F *m_z0;       //! z0 of stk track
    TH1F *m_tan_dip;       //!tangent of the dip angle
    TH2F *m_dedx;       //! dedx plot
-   TH2F *m_gededx;  //! geant dedx plot
-
+   TH1F *m_vtx_z;      //! Z of found primary vertex
 public: 
                   St_stk_Maker(const char *name="svt_tracks");
    virtual       ~St_stk_Maker();
@@ -129,7 +133,7 @@ public:
    virtual Int_t  Make();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_stk_Maker.h,v 1.11 1999/07/20 04:59:03 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_stk_Maker.h,v 1.12 2000/01/31 23:54:38 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(St_stk_Maker, 1)   //STAR chain virtual base class for Makers
 };
 
