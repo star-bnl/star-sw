@@ -1,4 +1,4 @@
-// $Id: bfcx.C,v 1.3 1999/02/19 22:34:56 fisyak Exp $
+// $Id: bfcx.C,v 1.4 1999/02/19 22:36:47 fisyak Exp $
 #define gtrack
 #define trs
 #define emc
@@ -31,7 +31,7 @@ void Load(){
     gSystem->Load("StTrsMaker");
     gSystem->Load("St_tpcdaq_Maker");
 #endif
-    gSystem->Load("St_tcl_Maker");
+    gSystem->Load("St_tcl_Maker");  
     gSystem->Load("St_tpt_Maker");
     gSystem->Load("St_ftpc");
     gSystem->Load("St_fss_Maker");
