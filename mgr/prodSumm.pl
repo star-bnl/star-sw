@@ -389,9 +389,9 @@ foreach $eachSet (@Sets) {
      foreach my $job_fname (@j_name) {
     if( $job_fname =~ /$basename/ ) {
       $job_status = $j_status[$jj];
-   print $job_fname, "\n";
-   print $basename, "\n";
-   print $job_status, "\n";
+#   print $job_fname, "\n";
+#   print $basename, "\n";
+#   print $job_status, "\n";
   last;
 }
    else {   
