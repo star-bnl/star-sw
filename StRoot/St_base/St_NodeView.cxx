@@ -167,10 +167,60 @@ St_NodeView::St_NodeView(St_NodeView *viewNode,const Char_t *nodeName1,const Cha
        mode = kContinue;
       // Skip till  "top Node" found
       Int_t i = 0;
+      found = kFALSE;
       for (i=0;i<2;i++) {
         if (foundName[i]) {
             if (strcmp(nextView->GetName(),foundName[i])) continue;
             foundName[i] = 0; 
+            found = kTRUE;
+            break;
+        }
+      } 
+      if (!found) continue;
+      St_NodePosition *position = next[0];
+      if (!position->GetNode()) {
+         Error("St_NodeView ctor","%s %s ",GetName(),nextView->GetName());
+      }
+      Add(new St_NodeView(nextView,position));
+      mode = kPrune;
+    }
+  }
+}
+
+//_____________________________________________________________________________
+St_NodeView::St_NodeView(St_NodeView *viewNode,const St_NodeView *node1,const St_NodeView *node2)
+            : St_ObjectSet(viewNode->GetName(),(TObject *)0),fListOfShapes(0)
+            //             ,fListOfAttributes(0)
+{
+  //
+  // This ctor creates a St_NodeView structure containing:
+  //
+  //   - viewNode on the top
+  //   - skip ALL node from the original viewNode untill topNodeName found
+  //   - include all "marked" node below "topNodename" if any
+  //     topNodeName is always included
+  //
+  // It re-calculates all positions according of the new topology
+  //
+  const St_NodeView *foundView[2] = {node1, node2};
+  const Int_t nViews = sizeof(foundView)/sizeof(const St_NodeView *);  
+  Bool_t found = kFALSE;
+  if (viewNode) 
+  {
+     SetTitle(viewNode->GetTitle());
+     // define the depth of the "top" Node
+     EDataSetPass mode = kContinue;
+     St_NodeViewIter next(viewNode,0);
+     St_NodeView *nextView = 0;
+     while ( (nextView = (St_NodeView *)next(mode)) ){     
+       mode = kContinue;
+      // Skip till  "top Node" found
+      Int_t i = 0;
+      found = kFALSE;
+      for (i=0;i<nViews;i++) {
+        if (foundView[i]) {
+            if (nextView != foundView[i]) continue;
+            foundView[i] = 0; 
             found = kTRUE;
             break;
         }
