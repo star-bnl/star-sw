@@ -43,34 +43,39 @@ foreach my $Rep (@Repo) {
 my @src     = sortu (@srcL);# print "@src\n";
 my @h_files = sortu (@h_filesL);
 my @idlM    = sortu (@idlML);
+my $so_pkg  = "";
 if ($#idlM > -1) {$PKG = "St_" . $PKG;}
 printf ("Run Conscript-standard in %-30s  for %-20s\n",$Dir, $PKG) unless ($param::quiet);
-my $obj  = $ObjDir;  #print "obj = $obj\n";
-my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; #print "SO_PKG = $SO_PKG\n";
+my $obj  = $ObjDir;  print "obj = $obj\n" if $param::debug;
+my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; #print "SO_PKG = $SO_PKG\n" if $param::debug;
 my $LIBS  = $env->{LIBS};
 my $LIBPATH = $env->{LIBPATH};
 if ($pkg =~ /^StDb/) {
-  $LIBPATH .= ":/opt/star/lib/mysql";# print "LIBPATH = $LIBPATH\n";
+  $LIBPATH .= ":/opt/star/lib/mysql";# print "LIBPATH = $LIBPATH\n" if $param::debug;
   $LIBS .= " -lmysqlclient";
 }
 if ($pkg =~ /^pyth$/){
-  my $CERN_ROOT = $env->{ENV}->{CERN_ROOT};# print "CERN_ROOT = $CERN_ROOT\n";
+  my $CERN_ROOT = $env->{ENV}->{CERN_ROOT};# print "CERN_ROOT = $CERN_ROOT\n" if $param::debug;
   $LIBPATH .= ":" . $CERN_ROOT . "/lib";
   if ($STAR_SYS =~ /^i386/) {$LIBS .= " -lpythia6115";} 
   else                      {$LIBS .= " -lpythia6125";} 
 }
-(my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g;# print "new share $share\n";
+(my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g;# print "new share $share\n" if $param::debug;
 $share =~ s/\/StRoot//g;
 $share =~ s/\/(sim|gen)//g; 
-my $CPPP = ":" . $INCLUDE . "/" . $pkg . ":#" . $Dir . ":" . $env->{CPPPATH};# print "CPPP = $CPPP\n";
+my $CPPP = ":" . $INCLUDE . "/" . $pkg . ":#" . $Dir . ":" . $env->{CPPPATH};# print "CPPP = $CPPP\n" if $param::debug;
 my $include = $INCLUDE . "/" . $pkg;
 my $LIBPKG = "";
+my @srco = @src;
 if ($Dir =~ /pams\// || $STAR_SYS =~ /^intel_wnt$/) {
+  if ($pkg !~ /tables/) {
+    $so_pkg  = $pkg . ".sl";# print "Ask for $so_pkg\n" if $param::debug;
+  }
   $LIBPKG = "lib" . $pkg . "." . $env->{SUFLIB};
   (my $lib_lib = $LIB) =~ s/^\#//g;
-  $LIBS .= " " . $lib_lib . "/" . $LIBPKG;#     print "LIBS    = $LIBS\n";
+  $LIBS .= " " . $lib_lib . "/" . $LIBPKG;#     print "LIBS    = $LIBS\n" if $param::debug;
   foreach my $rep (@Repo) {
-    my $_lib = $rep . "/" . $lib_lib . "/". $LIBPKG;# print "_lib = $_lib\n";
+    my $_lib = $rep . "/" . $lib_lib . "/". $LIBPKG;# print "_lib = $_lib\n" if $param::debug;
     next if !-e "$_lib";
     $LIBS .= " " . $_lib;#     print "LIBS    = $LIBS\n"
   }
@@ -82,9 +87,9 @@ $env2 = $env->clone('CPPPATH'      => $CPPP,
                     'LIBPATH'      => $LIBPATH,
                     'LIBS'         => $LIBS);
 my $cscanner= find scan::cpp($env2->{_cwd}, $env2->{CPPPATH});
-my $CPPPATH = $cscanner->iflags;#  print "CPPPATH = $CPPPATH\n";
+my $CPPPATH = $cscanner->iflags;#  print "CPPPATH = $CPPPATH\n" if $param::debug;
 my $STIC_CPPPATH = $CPPPATH;
-my @cpps = split /:/,$env2->{CPPPATH};# print "@cpps\n";
+my @cpps = split /:/,$env2->{CPPPATH};# print "@cpps\n" if $param::debug;
 my $ROOTCINT_CPP ="";
 foreach my $cpp (@cpps) {
   if ($cpp =~ /cern/ ||
@@ -93,9 +98,9 @@ foreach my $cpp (@cpps) {
   if ($ROOTCINT_CPP) {$ROOTCINT_CPP .= ":" . $cpp;}
   else               {$ROOTCINT_CPP .= $cpp;}
 }
-$cscanner= find scan::cpp($env2->{_cwd}, $ROOTCINT_CPP);# print "ROOTCINT_CPP = $ROOTCINT_CPP\n";
-my $ROOTCINT_CPPPATH = $cscanner->iflags;# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
-my $DIR = cwd(); #print "DIR = $DIR\n";
+$cscanner= find scan::cpp($env2->{_cwd}, $ROOTCINT_CPP);# print "ROOTCINT_CPP = $ROOTCINT_CPP\n" if $param::debug;
+my $ROOTCINT_CPPPATH = $cscanner->iflags;# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n" if $param::debug;
+my $DIR = cwd(); #print "DIR = $DIR\n" if $param::debug;
 my $line;
 my @Defs = ();
 if ($Dir !~ /pams\//) {
@@ -109,7 +114,7 @@ if ($Dir !~ /pams\//) {
     }
     else {      
       foreach my $Rep (@Repo) {
-	my $RepDir = $Rep . "/" . $Dir;# print "RepDir = $RepDir\n";
+	my $RepDir = $Rep . "/" . $Dir;# print "RepDir = $RepDir\n" if $param::debug;
 	if (-d $RepDir) {
 	  my $hh = $RepDir . "/" . $h;
 	  if (-r $hh) {
@@ -125,25 +130,25 @@ if ($Dir !~ /pams\//) {
 else {
   if ($#idlM > -1) {
     for $idl (@idlM) {
-      my $stem = basename($idl,".idl"); #print "idl = $idl  stem = $stem\n";
+      my $stem = basename($idl,".idl"); #print "idl = $idl  stem = $stem\n" if $param::debug;
       my $idm  = $stem . ".idl";
-      my $idMM = $DIR . "/" . $Dir . "/" . $idl;# print "idMM = $idMM\n";
-      my $idM  = "#" . $Dir . "/" . $idl;# print "idM = $idM\n";
+      my $idMM = $DIR . "/" . $Dir . "/" . $idl;# print "idMM = $idMM\n" if $param::debug;
+      my $idM  = "#" . $Dir . "/" . $idl;# print "idM = $idM\n" if $param::debug;
       my @idlS = ($idM);
       my $modh = $INCLUDE . "/"   . $stem . ".h";
       my $modi = $INCLUDE . "/"   . $stem . ".inc";
       my $modH = $include . "/"   . "St_" . $stem . "_Module.h"; 
-      my $modC = $share . "/"   . "St_" . $stem . "_Module.cxx";# print "mod = $mod\n";
-      if (-r $idMM) {
-	open (IN, "<$idMM") or die  "Can't open $idMM";
-	while ($line = <IN>) {
-	  if ($line !~ "include") {next;}
-	  if ($line =~ "PAM")     {next;}
-	  my @words = split '"', $line; my $idt = $INCLUDE . "/" . $words[1]; #print "idt = $idt\n";
-	  push @idlS, $idt; 
-	}
-	close (IN);
-      }
+      my $modC = $share . "/"   . "St_" . $stem . "_Module.cxx";# print "mod = $mod\n" if $param::debug;
+#      if (-r $idMM) {
+#	open (IN, "<$idMM") or die  "Can't open $idMM";
+#	while ($line = <IN>) {
+#	  if ($line !~ "include") {next;}
+#	  if ($line =~ "PAM")     {next;}
+#	  my @words = split '"', $line; my $idt = $INCLUDE . "/" . $words[1]; #print "idt = $idt\n" if $param::debug;
+#	  push @idlS, $idt; 
+#	}
+#	close (IN);
+#      }
 	if ($STAR_SYS !~ /^intel_wnt$/) {
 	  Command $env2 [$modh], @idlS,  qq(stic.pl %> -r $STIC_CPPPATH -q %1);  
 	  Command $env2 [$modi], @idlS,  qq(stic.pl %> -r $STIC_CPPPATH -q %1);  
@@ -151,30 +156,34 @@ else {
 	  Command $env2 [$modC], @idlS,  qq(stic.pl %> -r $STIC_CPPPATH -q %1);  
 	}
 	my @objmod = ($modC);
-	Install $env2 $ObjDir, @objmod;#  print "Install @objmod in $ObjDir\n";
+	Install $env2 $ObjDir, @objmod;#  print "Install @objmod in $ObjDir\n" if $param::debug;
       (my $mod = $modC) =~  s/$share/$obj/g; 
-      push @src, $mod;# print "src + $mod: @src\n";
+      push @src, $mod;# print "src + $mod: @src\n" if $param::debug;
       push @Defs, $modH;
     }
   }
 }
 if ($#Defs > -1) {
   my @CintFiles = 
-  ($share . "/"  . $PKG . "_Cint.cxx", $share . "/"  . $PKG . "_Cint.h", $share . "/"  . "LinkDef.h"); 
-#  Depends $env2, [@CintFiles], [@St_base];
+  ($share . "/"  . $PKG . "_Cint.cxx", $share . "/"  . $PKG . "_Cint.h");#, $share . "/"  . "LinkDef.h"); 
   Command $env2 [@CintFiles], @Defs,  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
-  my $linkdef = pop @CintFiles;# print "ObjDir and Cints: $ObjDir => @CintFiles\n";
+#  my $linkdef = pop @CintFiles; print "ObjDir and Cints: $ObjDir => @CintFiles\n" if $param::debug;
   Install $env2 $ObjDir, @CintFiles;
   (my $cint =  $CintFiles[0]) =~ s/$share/$obj/g;
-  push @src, $cint;# print "+==========add $cint\n"; 
+  push @src, $cint;# print "+==========add $cint\n" if $param::debug; 
 }
 if ($#src > -1) {
   if ($LIBPKG) {
     Library      $env2 $LIBPKG, @src;  
-    Install $env2 $LIB, $LIBPKG;# print "Install $env2 $LIB, $LIBPKG\n";
+    Install $env2 $LIB, $LIBPKG;# print "Install $env2 $LIB, $LIBPKG\n" if $param::debug;
     my $libpkg = $LIB . "/" . basename($LIBPKG);
     Depends $env2 $SO_PKG, $libpkg;
+  }
+  if ($so_pkg) {
+    LinkedModule $env2 $so_pkg, @srco;
+    Install $env2 $LIB, $so_pkg;
   }
   LinkedModule $env2 $SO_PKG, @src;
   Install $env2 $LIB, $SO_PKG;
 }  
+#________________________________________________________________________________
