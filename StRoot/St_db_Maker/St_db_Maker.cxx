@@ -38,6 +38,7 @@ St_ValiSet::St_ValiSet(const char *name,St_DataSet *parent): St_DataSet(name,par
   SetTitle(".Val");
   fTimeMin.Set(kMaxTime,0);
   fTimeMax.Set(kMinTime,0);
+  fDat =0;
 }
 
 //_____________________________________________________________________________
@@ -252,7 +253,7 @@ void    St_db_Maker::SetUserDir(const Char_t *db)
 //_____________________________________________________________________________
 void St_db_Maker::PrintInfo(){
   printf("***************************************************************\n");
-  printf("* $Id: St_db_Maker.cxx,v 1.3 1999/03/11 01:32:56 perev Exp $\n");
+  printf("* $Id: St_db_Maker.cxx,v 1.4 1999/03/20 22:26:49 perev Exp $\n");
   printf("***************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
