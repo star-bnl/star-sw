@@ -15,6 +15,9 @@
 
 /*
 $Log: TPaveTree.cxx,v $
+Revision 1.3  2001/02/10 20:31:29  fisyak
+New dev release
+
 Revision 1.2  2000/04/23 19:18:14  fisyak
 Merge with Alice V3.03
 
@@ -150,6 +153,7 @@ void TPaveTree::ExecuteEvent(Int_t event, Int_t px, Int_t py)
 //_____________________________________________________________________________
 void TPaveTree::SavePrimitive(ofstream &out, Option_t *)
 {
+#ifndef __CC5__
   //
   // Save primitive as a C++ statement(s) on output stream out
   //
@@ -168,4 +172,5 @@ void TPaveTree::SavePrimitive(ofstream &out, Option_t *)
   SaveTextAttributes(out,"pvar",22,0,1,62,0);
   
   out<<"   pvar->Draw();"<<endl;
+#endif
 }
