@@ -4,6 +4,7 @@
 //:DESCRIPTION: Dataset Unix-like Interface Classes
 //:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
 //:BUGS:        -- STILL IN DEVELOPMENT --
+//:HISTORY:     13may97-v020a-cet- lock '/dui'
 //:HISTORY:     23dec96-v010a-cet- OLD_DSL -> NEW_DSL default
 //:HISTORY:     01feb96-v001a-cet- make more like tdmFactory
 //:HISTORY:     08dec95-v000a-cet- creation
@@ -56,6 +57,10 @@ duiFactory:: duiFactory(const char * name)
    }
    addEntry(id);
    findNode_ds(myCwd,dui_pDScwd);
+
+//- Lock '/dui' dataset 
+   socObject *s=soc->getObject(id);
+   s->lock(0);
 }
 
 //----------------------------------
