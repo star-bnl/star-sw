@@ -9,6 +9,16 @@
 //*KEND.
 #include "TSystem.h"
 
+#ifndef WIN32
+# ifndef HASSTRCASE
+#  define HASSTRCASE
+# endif
+#endif
+
+#ifndef HASSTRCASE
+#  define strcasecmp(arg1,arg2) stricmp(arg1,arg2)
+#endif
+
 ClassImp(St_DataSetIter)
  
 //////////////////////////////////////////////////////////////////////////
@@ -160,6 +170,62 @@ St_DataSet *St_DataSetIter::Dir(Char_t *dirname)
   if (set) set->ls();
   return set;
 }
+
+//______________________________________________________________________________
+St_DataSet *St_DataSetIter::FindObject(const Char_t *name,const Char_t *path,Option_t *opt)
+{
+  // opt = "i"  - case nonsensetive search
+  if (!name || strlen(name) == 0) return 0;
+  if (strchr(name,'/')) {
+    Error("FindObject","The name of the object <%s> can not contain any \"/\"",name);
+    return 0;
+  }
+  
+  Bool_t opti = opt ? strcasecmp(opt,"-i") == 0 : kFALSE;
+
+  St_DataSet *startset = 0;
+  if (path && strlen(path)) startset = Next(path);
+  else                      startset = fWorkingDataSet;
+  if (!startset) return 0;
+
+  St_DataSetIter next(startset,100);
+  St_DataSet *set = 0;
+  while (set = next()){
+     if (opti) {
+         if (strcasecmp(set->GetName(),name) == 0 )break;
+     }
+     else 
+      if (set->IsThisDir(name)) break;
+  }
+  return set;
+}
+#if 0
+//______________________________________________________________________________
+St_DataSet *St_DataSetIter::FindObject(St_DataSet *set,const Char_t *path,Option_t *opt)
+{
+  //
+  // Check whether the object does belong the St_DataSet defined with "path"
+  // opt = "-l"  - check the "reference" links only
+  //       "-s"  - check the "structural" links only
+  //             = "by default" - checks all links
+  //
+  if (!set) return 0;
+  Bool_t optl = opt ? stricmp(opt,"-l") == 0 : kFALSE;
+  Bool_t opts = opt ? stricmp(opt,"-s") == 0 : kFALSE;
+
+  St_DataSet *startset = 0;
+  if (path) startset = Next(path);
+  else      startset = fWorkingDataSet;
+  if (!startset) return 0;
+
+  St_DataSetIter next(fWorkingDataSet);
+  while (set = next()) 
+        if (set == this) break;
+ }
+
+  return set;
+}
+#endif
 //______________________________________________________________________________
 Int_t St_DataSetIter::Flag(const Char_t *path,UInt_t flag,EBitOpt reset)
 {
@@ -326,7 +392,7 @@ St_DataSet *St_DataSetIter::Next(const Char_t *path, St_DataSet *rootset,
       if (!dataset)
            dataset = fWorkingDataSet;  //*-* "relative path"
  
-  if (!dataset) {
+  if (!(dataset || mkdirflag)) {
     Warning("Next()","Empty iterator. Nothing to do!");
     return 0;
   }
