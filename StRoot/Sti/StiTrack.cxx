@@ -28,3 +28,14 @@ void StiTrack::reset()
   m      = 0.139;
   chi2   = 0.;
 }
+
+ostream& operator<<(ostream& os, const StiTrack& track)
+{
+    return os <<"q: "<<track.getCharge()
+	      <<" pt: "<<track.getPt()
+	      <<" eta: "<<track.getPseudoRapidity()
+	      <<" tanLambda: "<<track.getTanL()
+	      <<" Chi2: "<<track.getChi2()
+	      <<" points: "<<track.getPointCount()
+	      <<" fitPoints: "<<track.getFitPointCount();
+}

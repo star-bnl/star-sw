@@ -84,7 +84,7 @@ int StiTrackSeedFinder::numberOfLayers() const
     return mnlayers;
 }
 
-void StiTrackSeedFinder::clear()
+void StiTrackSeedFinder::reset()
 {
     mnlayers = 0;
     miterator.clear();

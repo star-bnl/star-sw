@@ -50,6 +50,8 @@ public:
   
 
 protected:
+    friend ostream& operator<<(ostream& os, const StiTrack& track);
+
     int    q;          // charge of the track 
     int    nPts;       // number of points on the track
     int    nFitPts;    // number of points included in the fit of the track

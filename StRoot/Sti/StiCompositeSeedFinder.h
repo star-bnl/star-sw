@@ -24,9 +24,8 @@ public:
     //Inherited User interface
     virtual bool hasMore();
     virtual StiKalmanTrack* next();
-    virtual void build();
-    
-    void reset();
+    virtual void build();    
+    virtual void reset();
 
     void setFactory(StiObjectFactoryInterface<StiKalmanTrack>*);    
     void setBuildPath(const string&);

@@ -401,7 +401,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 		}
   double x, x0, rho;
   position = StiMaterialInteraction::findIntersection(pNode,tDet,x,x0,rho);
-	cout << "propagate x/x0/rho:" << x << "\t" << x0 << "\t" << rho << endl;
+  cout << "propagate x/x0/rho:" << x << "\t" << x0 << "\t" << rho << endl;
   propagate(x,x0,rho);
   return position;
 }
@@ -413,24 +413,24 @@ void  StiKalmanTrackNode::propagate(double xk,
 {
   double x1=fX, x2=x1+(xk-x1), dx=x2-x1, y1=fP0, z1=fP1;
   double c1=fP3*x1 - fP2;
-	double c1sq = c1*c1; 
-	if (c1sq>1.) 
-		{
-			cout << "c1sq:" << c1sq << endl;
-			c1sq = 0.99999999;
-		}
-	double r1=sqrt(1.- c1sq );
+  double c1sq = c1*c1; 
+  if (c1sq>1.) 
+      {
+	  cout << "c1sq:" << c1sq << endl;
+	  c1sq = 0.99999999;
+      }
+  double r1=sqrt(1.- c1sq );
   double c2=fP3*x2 - fP2; 
-	double c2sq = c2*c2; 
-	if (c2sq>1.) 
-		{
-			cout << "c2sq:" << c2sq << endl;
-			c2sq = 0.99999999;
-		}
-	double r2=sqrt(1.- c2sq );
+  double c2sq = c2*c2; 
+  if (c2sq>1.) 
+      {
+	  cout << "c2sq:" << c2sq << endl;
+	  c2sq = 0.99999999;
+      }
+  double r2=sqrt(1.- c2sq );
   fP0 = fP0 + dx*(c1+c2)/(r1+r2);
   fP1 = fP1 + dx*(c1+c2)/(c1*r2 + c2*r1)*fP4; 
-
+  
   //f = F - 1
   double rr=r1+r2, cc=c1+c2, xx=x1+x2;
   double f02=-dx*(2*rr + cc*(c1/r1 + c2/r2))/(rr*rr);

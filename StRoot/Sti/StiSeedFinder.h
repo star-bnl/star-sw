@@ -22,6 +22,7 @@ public:
     virtual bool hasMore() = 0;
     virtual StiKalmanTrack* next() = 0;
     virtual void build() = 0;
+    virtual void reset() =0;
 
 protected:
 private:
