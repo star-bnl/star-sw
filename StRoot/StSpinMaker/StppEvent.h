@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.h,v 1.6 2003/02/04 21:57:09 akio Exp $ 
+// $Id: StppEvent.h,v 1.7 2003/02/20 22:12:47 thenry Exp $ 
 // $Log: StppEvent.h,v $
+// Revision 1.7  2003/02/20 22:12:47  thenry
+// Allowed External undefine of _jet_.
+//
 // Revision 1.6  2003/02/04 21:57:09  akio
 // Improvments on pi0 reconstruction code and ntuple
 //
@@ -45,7 +48,9 @@
 #ifndef StppEvent_h
 #define StppEvent_h
 
+#ifndef _NoJet_
 #define _Jet_
+#endif /* _NoJet_ */
 
 #include "TObject.h"
 #include <vector>
