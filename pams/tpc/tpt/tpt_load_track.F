@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.5 1999/06/24 15:14:37 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.6 1999/08/23 01:05:10 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.6  1999/08/23 01:05:10  sakrejda
+* curvature and npos filled
+*
 * Revision 1.5  1999/06/24 15:14:37  sakrejda
 * possible maximum number of points on track estimate added (Spiros)
 *
@@ -57,7 +60,7 @@ C     REAL     xlocal(3), bfield(3)                  !ALREADY EXISTS
       data nmax /0/
 
       LOGICAL nposOn
-      DATA nposOn /.FALSE./
+      DATA nposOn /.TRUE./
 
 
 C___________________________________________________________________
@@ -76,7 +79,9 @@ C
 C     chisq from the linear fit
       track(ipt).chisq(1) = trk(ipt).p(8)
       track(ipt).chisq(2) = trk(ipt).p(9)
-C     
+C 
+C     curvature
+      track(ipt).curvature = 1.0/abs(trk(ipt).p(2))    
 C     inverse of the pt
       call gufld(xlocal,bfield)
       track(ipt).invp =  1.0/(abs(trk(ipt).p(2))*bfield(3)*C_D_CURVATURE)
