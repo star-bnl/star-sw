@@ -16,8 +16,8 @@
        long      max_adc;  /* cluster peak height (adc channels) */
        long      charge;   /* cluster charge (adc channels) */
        long      flags;    /* bit0:unfolded, bit1:unfold failed, */
-                           /* bit2: saturated, bit3:bad shape, */
-                           /* bit4:cut off, bit5:tracked */
+                           /* bit2:saturated, bit3:bad shape, */
+                           /* bit4:cut off, bit5:tracked, bit6:global coord*/
        float     x;        /* x-position of hit */
        float     y;        /* y-position of hit */
        float     z;        /* z-position of hit */
@@ -28,7 +28,7 @@
        float     s_r;      /* cluster sigma in drift direction */
     };
 
-/*  Last mod. for fcl_fppoint: $Date: 1998/12/16 16:04:22 $ */
+/*  Last mod. for fcl_fppoint: $Date: 2002/06/04 13:58:14 $ */
 
 
 
