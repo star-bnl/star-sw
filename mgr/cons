@@ -13,14 +13,14 @@
 # Regression tests keep the code honest by checking for warnings
 # and "use strict" failures.
 
-# $Id: cons,v 1.1.1.23 2000/12/18 13:59:28 fisyak Exp $
+# $Id: cons,v 1.1.1.24 2001/01/02 15:54:50 fisyak Exp $
 
 use vars qw( $ver_num $ver_rev $version );
 
 $ver_num = "2.3";
 $ver_rev = ".0";
 $version = sprintf "This is Cons %s%s " .
-	    '($Id: cons,v 1.1.1.23 2000/12/18 13:59:28 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.1.1.24 2001/01/02 15:54:50 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -1123,8 +1123,7 @@ sub Install_Local {
 
 sub Objects {
     my($env) = shift;
-    map($dir::cwd->relpath($_),
-	_Objects($env, map($dir::cwd->lookupfile($env->_subst($_)), @_)))
+    map($dir::cwd->relpath($_), $env->_Objects(@_));
 }
 
 # Called with multiple source file references (or object files).
@@ -1132,7 +1131,8 @@ sub Objects {
 sub _Objects {
     my($env) = shift;
     my($suffix) = $env->{SUFOBJ};
-    map(_Object($env, $_, $_->{dir}->lookupfile($_->base_suf($suffix))), @_);
+    map($env->_Object($_, $_->{dir}->lookupfile($_->base_suf($suffix))),
+        map($dir::cwd->lookupfile($env->_subst($_)), grep(defined $_, @_)));
 }
 
 # Called with an object and source reference.  If no object reference
@@ -1162,7 +1162,7 @@ sub Program {
 						 $env->{SUFEXE}));
     my($progenv) = $env->_resolve($tgt);
     $tgt->bind(find build::command::link($progenv, $progenv->{LINKCOM}),
-	       $env->_Objects(map($dir::cwd->lookupfile($env->_subst($_)), @_)));
+	       $env->_Objects(@_));
 }
 
 sub Module {
@@ -1170,8 +1170,7 @@ sub Module {
     my($tgt) = $dir::cwd->lookupfile($env->_subst(shift));
     my($modenv) = $env->_resolve($tgt);
     my($com) = pop(@_);
-    $tgt->bind(find build::command::link($modenv, $com),
-	       $env->_Objects(map($dir::cwd->lookupfile($env->_subst($_)), @_)));
+    $tgt->bind(find build::command::link($modenv, $com), $env->_Objects(@_));
 }
 
 sub LinkedModule {
@@ -1180,7 +1179,7 @@ sub LinkedModule {
     my($progenv) = $env->_resolve($tgt);
     $tgt->bind(find build::command::linkedmodule
 	       ($progenv, $progenv->{LINKMODULECOM}),
-	       $env->_Objects(map($dir::cwd->lookupfile($env->_subst($_)), @_)));
+	       $env->_Objects(@_));
 }
 
 sub Library {
@@ -1188,8 +1187,7 @@ sub Library {
     my($lib) = $dir::cwd->lookupfile(file::addsuffix($env->_subst(shift),
 						 $env->{SUFLIB}));
     my($libenv) = $env->_resolve($lib);
-    $lib->bind(find build::command::library($libenv),
-	       $env->_Objects(map($dir::cwd->lookupfile($env->_subst($_)), @_)));
+    $lib->bind(find build::command::library($libenv), $env->_Objects(@_));
 }
 
 # Simple derivation: you provide target, source(s), command.
