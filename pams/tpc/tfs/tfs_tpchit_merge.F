@@ -1,5 +1,23 @@
-* $Id: tfs_tpchit_merge.F,v 1.2 1998/04/02 20:57:23 sakrejda Exp $
+* $Id: tfs_tpchit_merge.F,v 1.3 1998/04/07 20:56:34 hardtke Exp $
 * $Log: tfs_tpchit_merge.F,v $
+* Revision 1.3  1998/04/07 20:56:34  hardtke
+* AZZZZ
+* A
+* B
+* C
+* B
+* B
+* B
+*
+* A
+* A
+* B
+* B
+*
+*
+* C
+* add error message if tphit table too small
+*
 * Revision 1.2  1998/04/02 20:57:23  sakrejda
 * check error condition on return from tls_Quick_Sort_i
 *
@@ -94,10 +112,10 @@ C Local variables
       integer  max_hit_merge,n_hit_merge,imerge_hit_id
       parameter (max_hit_merge=50000)
       integer  imerge_id(max_hit_merge,2)
-      integer idI1, idI2
+      integer idI1, idI2, idI3
       character*132 m132  ! And some message-generating space.
-      data idI1, idI2 /0, 0/
-      save idI1, idI2
+      data idI1, idI2, idI3 /0, 0, 0/
+      save idI1, idI2, idI3
 C=========================== Begin Executable Code =======================
 
 C     Initialize imerge_id.  04/16/1997   DSW.
@@ -167,8 +185,16 @@ C     hits are sorted in z, so can't merge in the limit ...
                      
 C     check separation in r-phi
                      drmin = tphit(k).prf + tphit(l).prf + rsep(ipad)
-                     dr    = sqrt( ( tphit(k).x - tphit(l).x )**2 +
-     >                    ( tphit(k).y - tphit(l).y )**2 )
+                     dr    = ( tphit(k).x - tphit(l).x )**2 +
+     >                    ( tphit(k).y - tphit(l).y )**2 
+                     if (dr.ge.0.) then
+                      dr    = sqrt( dr )
+                     else
+                      write(m132,*) 'TFS-MERGE-I3 SQRT of negative number '
+     >                          //'set to 0.0  '  
+                      call Message( m132, 1, idI3 )
+                      dr = 0.
+                     endif
                      if ( dr.lt.drmin .and. dz.lt.dzmin ) then
                         
 C     these hits are close enough to merge
@@ -230,8 +256,16 @@ C     find merged partner
                zsizl = 2. * tphit(l).zrf
                
 C     calculate widths and overlaps
-               dr    = sqrt( ( tphit(k).x - tphit(l).x )**2 +
-     >              ( tphit(k).y - tphit(l).y )**2 )
+               dr    = ( tphit(k).x - tphit(l).x )**2 +
+     >                 ( tphit(k).y - tphit(l).y )**2 
+                     if (dr.ge.0.) then
+                      dr    = sqrt( dr )
+                     else
+                      write(m132,*) 'TFS-MERGE-I3 SQRT of negative number '
+     >                          //'set to 0.0  '  
+                      call Message( m132, 1, idI3 )
+                      dr = 0.
+                     endif
                dz    = abs( tphit(k).z - tphit(l).z )
                zwid = tphit(k).zrf + tphit(l).zrf
                rwid = tphit(k).prf + tphit(l).prf
@@ -316,7 +350,15 @@ C     flag the lth hit, but don't discard it
                endif
 C     add the amplitudes and quadrature the errors
                tphit(l).q = tphit(l).q + tphit(k).q
-               tphit(l).dq = sqrt(tphit(l).dq**2 + tphit(k).dq**2)
+               tphit(l).dq = tphit(l).dq**2 + tphit(k).dq**2
+                     if (tphit(l).dq.ge.0.) then
+                      tphit(l).dq = sqrt( tphit(l).dq )
+                     else
+                      write(m132,*) 'TFS-MERGE-I3 SQRT of negative number '
+     >                          //'set to 0.0  '  
+                      call Message( m132, 1, idI3 )
+                      tphit(l).dq = 0.
+                     endif
                xoutl(2) = (rmax + rmin) / 2.
                xoutl(3) = (zmax + zmin) / 2.
                iret  = tgc_local_to_global(i,xoutl,xglob) 
@@ -325,8 +367,24 @@ C     add the amplitudes and quadrature the errors
                tphit(l).z = xglob(3)
                tphit(l).prf = rsiz / 2.
                tphit(l).zrf = zsiz / 2.
-               tphit(l).dx = sqrt(tphit(l).dx**2 + tphit(k).dx**2)
-               tphit(l).dy = sqrt(tphit(l).dy**2 + tphit(k).dy**2)
+               tphit(l).dx = tphit(l).dx**2 + tphit(k).dx**2
+                     if (tphit(l).dx.ge.0.) then
+                      tphit(l).dx = sqrt( tphit(l).dx )
+                     else
+                      write(m132,*) 'TFS-MERGE-I3 SQRT of negative number '
+     >                          //'set to 0.0  '  
+                      call Message( m132, 1, idI3 )
+                      tphit(l).dx = 0.
+                     endif
+               tphit(l).dy = tphit(l).dy**2 + tphit(k).dy**2
+                     if (tphit(l).dy.ge.0.) then
+                      tphit(l).dy = sqrt( tphit(l).dy )
+                     else
+                      write(m132,*) 'TFS-MERGE-I3 SQRT of negative number '
+     >                          //'set to 0.0  '  
+                      call Message( m132, 1, idI3 )
+                      tphit(l).dy = 0.
+                     endif
                
 C     update the g2t_hit table for this hit (instead)
 CCC   g2t_hit(tphit(k).id).recdig = tphit(l).id

@@ -1,5 +1,23 @@
-* $Id: tfs_g2t_hit_rd.F,v 1.2 1998/04/02 20:52:20 sakrejda Exp $
+* $Id: tfs_g2t_hit_rd.F,v 1.3 1998/04/07 20:56:32 hardtke Exp $
 * $Log: tfs_g2t_hit_rd.F,v $
+* Revision 1.3  1998/04/07 20:56:32  hardtke
+* AZZZZ
+* A
+* B
+* C
+* B
+* B
+* B
+*
+* A
+* A
+* B
+* B
+*
+*
+* C
+* add error message if tphit table too small
+*
 * Revision 1.2  1998/04/02 20:52:20  sakrejda
 * tphit.dq initialised to avoid Infinities
 *
@@ -13,7 +31,8 @@
      >                           tphit_h,          tphit,
      >                           ix,              nxtrig,
      >                           tpc_index_h,      tpc_index,
-     >                           tpc_index_type_h, tpc_index_type)
+     >                           tpc_index_type_h, tpc_index_type,
+     >                           ierr)
 
 
       IMPLICIT NONE
@@ -22,7 +41,7 @@ C
 C     Input arguments:
 C       ix = current crossing number
 C
-C     Output arguments:
+C     Output arguments: ierr = 0 all ok, ierr = 1 tphit too small
 C
 C     Functional Description :
 C       Extracts hit information from the tables translation of the
@@ -36,13 +55,15 @@ C       10-Mar-1993
 C
 C     Modified:
 C	     By		     	      Date	 	  History
-C            --                       ----                -------
+C            --                       ----                ------- 
 C       Iwona Sakrejda(LBL) 	   02/18/1996      To use the GSTAR tables
 C	Dhammika Weerasundara(UW)  03/27/1996      Added TPC_INDEX tables
 C       Dhammika W.                04/18/1996      Updated to conform with g2t
 C                                                  tpc volume_id.
 C                                                  Updated tpc central membrane
 C                                                  thickness.
+C       David Hardtke              04/02/1998      return error if tphit table
+C                                                  is too small
 C
 C-----------------------------------------------------------------------
 #include "PAM.inc"
@@ -82,7 +103,7 @@ C     IROW  - 2 number of hits
 
 
 C Local variables
-      integer ih, jrow, jsect, nok, ix, nxtrig
+      integer ih, jrow, jsect, nok, ix, nxtrig, ierr
 
       real x, dx, y, dy
 
@@ -95,6 +116,7 @@ C=========================== Begin Executable Code =======================
 
 C     set row counter for tphit
       nok = tphit_h.nok
+      ierr = 0
 
 C     loop over MC hits and extract sector-row information
       do 100 ih = 1, g2t_hit_h.nok
@@ -249,12 +271,16 @@ C     rotate sectors into one quadrant
                   tphit(ih).dy = dy
                endif
             endif
-            
-         endif
+         
+         else                        ! not enough space in tphit
+          ierr = 1
+          goto 998   
+         endif                       ! nok < tphit.maxlen
          
  100  enddo
 
 C     set the row counter
+ 998  continue
       tphit_h.nok = nok
 
  999  CONTINUE
