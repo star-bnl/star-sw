@@ -52,7 +52,6 @@ Int_t St_srs_Maker::Make(){
 // Create output tables
    if (!m_DataSet->GetList())  {
      St_DataSetIter local(m_DataSet);
-     local.Mkdir("hits"); local.Cd("hits");
      St_scs_spt    *scs_spt    = new St_scs_spt("scs_spt",20000); local.Add(scs_spt);
      St_srs_result *srs_result = new St_srs_result("srs_result",20000); local.Add(srs_result);
      St_DataSetIter geant(gStChain->GetGeant());
@@ -68,7 +67,7 @@ Int_t St_srs_Maker::Make(){
 //_____________________________________________________________________________
 void St_srs_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_srs_Maker.cxx,v 1.6 1998/08/07 19:34:54 fisyak Exp $\n");
+  printf("* $Id: St_srs_Maker.cxx,v 1.7 1998/08/12 13:09:04 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
