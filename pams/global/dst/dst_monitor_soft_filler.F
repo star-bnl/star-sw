@@ -504,9 +504,9 @@ CC:  Fraction of SVT hits used in SVT tracks
             end if
          end do
          do i = 1,4
-         dms_svt(1).hit_frac_svt(layer) =
-     1      dms_svt(1).hit_frac_svt(layer)/
-     2           float(dms_svt(1).n_pts_svt(layer))
+         dms_svt(1).hit_frac_svt(i) =
+     1      dms_svt(1).hit_frac_svt(i)/
+     2           float(dms_svt(1).n_pts_svt(i))
          end do
       end if
 
