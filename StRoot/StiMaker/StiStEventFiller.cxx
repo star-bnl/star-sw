@@ -1,11 +1,15 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.29 2004/03/23 23:12:36 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.30 2004/03/29 00:52:20 andrewar Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.30  2004/03/29 00:52:20  andrewar
+ * Added key value to StTrack fill. Key is simply the size of the
+ * StTrackNode container at the time the track is filled.
+ *
  * Revision 2.29  2004/03/23 23:12:36  calderon
  * Added an "accept" function to filter unwanted tracks from Sti into StEvent.
  * The current method just looks for tracks with a negative length, since
@@ -408,7 +412,9 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	  fillTrack(gTrack,kTrack);
 	  // filling successful, set up relationships between objects
 	  detInfoVec.push_back(detInfo);
-	  gTrack->setDetectorInfo(detInfo);	
+	  gTrack->setDetectorInfo(detInfo);
+	  //cout <<"Setting key: "<<(unsigned short)(trNodeVec.size())<<endl;
+	  gTrack->setKey((unsigned short)(trNodeVec.size()));
 	  trackNode->addTrack(gTrack);
 	  trNodeVec.push_back(trackNode);
 	  // reuse the utility to fill the topology map
@@ -512,6 +518,8 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	      // set up relationships between objects
 	      detInfoVec.push_back(detInfo);
 	      pTrack->setDetectorInfo(detInfo);
+	     
+	      pTrack->setKey( currentGlobalTrack->key());
 	      currentTrackNode->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
 	      vertex->addDaughter(pTrack);
 	      StuFixTopoMap(pTrack);
