@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.49 2004/04/01 22:19:18 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.50 2004/04/03 00:22:21 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.50  2004/04/03 00:22:21  jhthomas
+ * Update Spacecharge R2 to use new DB call built by Gene VB
+ *
  * Revision 1.49  2004/04/01 22:19:18  jhthomas
  * Update Omega Tau parameters to Run IV values.
  * Increase speed of space charge calculation with new Relaxation Algorithm.
@@ -328,8 +331,8 @@ void StMagUtilities::GetSpaceCharge ()
 
 void StMagUtilities::GetSpaceChargeR2 ()  
 { 
-  fSpaceChargeR2 =  StDetectorDbSpaceCharge::instance() ;  // Temporary until the DB has a new entry! 
-  SpaceChargeR2  =  0.525 * fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ; 
+  fSpaceChargeR2 =  StDetectorDbSpaceChargeR2::instance() ;  
+  SpaceChargeR2  =  fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ; 
 }
 
 void StMagUtilities::GetShortedRing ()
@@ -393,7 +396,6 @@ void StMagUtilities::CommonStart ( Int_t mode )
   if ( fSpaceChargeR2 == 0 )
     {
       SpaceChargeR2 =    0.0 ;      // Space Charge parameter (space charge from event ~1/R**2, Coulombs/Epsilon-nought)
-      cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected SpaceChargeR2 settings. " << endl ; 
     }
   else  cout << "StMagUtilities::CommonSta  Using SpaceChargeR2 values from the DB." << endl ; 
 
@@ -684,6 +686,7 @@ void StMagUtilities::DoDistortion( const Float_t x[], Float_t Xprime[] )
 
 
 //________________________________________
+
 
 /// B field distortions in 3D ( no Table ) - calculate the distortions due to the shape of the B field
 /*! 
@@ -1472,9 +1475,8 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
   // Need to reset the instance every hit.  May be slow, but there's no per-event hook.
   if ( fSpaceChargeR2 !=0 )   // need to reset it. 
     {
-      fSpaceChargeR2 =  StDetectorDbSpaceCharge::instance();
+      fSpaceChargeR2 =  StDetectorDbSpaceChargeR2::instance();
       SpaceChargeR2  =  fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ;
-      SpaceChargeR2 *= 0.525 ; // Temporary until the DB has a new entry to cover this case
     }
 
   // Subtract to Undo the distortions
