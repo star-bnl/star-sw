@@ -1,5 +1,5 @@
 //:>------------------------------------------------------------------
-//: FILE:       FtfHit.cpp
+//: FILE:       FtfHit.cxx
 //: HISTORY:
 //:             28oct1996 version 1.00
 //:             23aug1999 ppy print format changed
