@@ -1,8 +1,11 @@
 //
-// $Id: StPreEclMaker.h,v 1.13 2003/01/23 03:49:59 jeromel Exp $
+// $Id: StPreEclMaker.h,v 1.14 2003/03/20 23:45:37 jeromel Exp $
 //
 //
 // $Log: StPreEclMaker.h,v $
+// Revision 1.14  2003/03/20 23:45:37  jeromel
+// GetCVS() added
+//
 // Revision 1.13  2003/01/23 03:49:59  jeromel
 // Include changed
 //
@@ -111,7 +114,13 @@ public:
           void  SetClusterConditions(char*,Int_t,Float_t,Float_t,Float_t,Bool_t);
   St_emcClusterParam* getParam() {return mParam;} 
   
-          Bool_t doClearEmc;
+  Bool_t doClearEmc;
+
+  virtual const char *GetCVS() const {
+    static const char cvs[]="Tag $Name:  $ $Id: StPreEclMaker.h,v 1.14 2003/03/20 23:45:37 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    return cvs;
+  }
+  
         
   ClassDef(StPreEclMaker, 1)// Electromagnetic PreClusters maker
 };
