@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.h,v 1.4 2001/07/11 23:29:47 munhoz Exp $
+ * $Id: StSvtDaqMaker.h,v 1.5 2001/08/22 14:22:17 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.h,v $
+ * Revision 1.5  2001/08/22 14:22:17  caines
+ * Default to config to FULL and ZS
+ *
  * Revision 1.4  2001/07/11 23:29:47  munhoz
  * adding capability for zero suppressed and pedestal reading
  *
@@ -58,7 +61,7 @@ class StSvtDaqMaker : public StMaker {
  protected:
 
  public: 
-  StSvtDaqMaker(const char *name="SvtDaq", char* config="Y1L", char* data="RAW");
+  StSvtDaqMaker(const char *name="SvtDaq", char* config="FULL", char* data="ZS");
   virtual       ~StSvtDaqMaker();
   void   SetConfiguration(char* config){fConfig = config;}
   void   SetDataType(char* data){fDataType = data;}
