@@ -1,5 +1,8 @@
-// $Id: StEmcPreCalibrationMaker.h,v 1.2 2001/10/17 13:51:31 suaide Exp $
+// $Id: StEmcPreCalibrationMaker.h,v 1.3 2001/10/26 21:00:33 suaide Exp $
 // $Log: StEmcPreCalibrationMaker.h,v $
+// Revision 1.3  2001/10/26 21:00:33  suaide
+// Many modifications to optimize for real data
+//
 // Revision 1.2  2001/10/17 13:51:31  suaide
 // new modifications to work with real data
 //
@@ -24,6 +27,7 @@ using std::vector;
 #endif
 
 #include "TH2.h"
+#include "TH2.h"
 
 class StEvent;
 class StEmcCollection;
@@ -35,6 +39,7 @@ class StEmcPreCalibrationMaker : public StMaker
     StEmcCollection *emccol; //!
     TH2F            *etaDistr; //!
     TH2F            *pDistr; //!
+    TH2F            *pDistr1; //!
   protected:    
     
   public: 

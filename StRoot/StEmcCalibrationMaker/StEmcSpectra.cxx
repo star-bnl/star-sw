@@ -487,3 +487,52 @@ Int_t StEmcSpectra::GetEtaBinId(Int_t m,Int_t e)
   }
   return -1;
 }
+//_____________________________________________________________________________
+void StEmcSpectra::SaveAll(char *filename)
+{
+  ofstream file(filename);
+  for(Int_t i=0;i<nBins;i++)
+  {
+    if(Sum[i]>0)
+    {
+      file <<i<<"  "<<Sum[i]<<endl;
+      if(Sum[i]>0)
+      {
+        for(Int_t k=0;k<nAdcMax;k++)
+          if(Spectra(i,k)>0) file << k<<"  "<<Spectra(i,k)<<endl;
+        file <<"9999 0"<<endl;
+      }
+    }
+  }
+  file <<"99999 0"<<endl;
+  file.close();
+}
+//_____________________________________________________________________________
+void StEmcSpectra::LoadAll(char *filename)
+{
+  ifstream file(filename);
+  cout <<"Loading spectra data from file "<<filename<<endl;
+  Int_t i;
+  Float_t sumt;
+  next:
+    file >>i>>sumt;
+    if(i<99999)
+    {
+      Sum[i]+=sumt;
+      Int_t k;
+      Float_t value;
+      cont:
+        file >> k >> value;
+        if(k<9999)
+        {
+          Spectra(i,k)+=value;
+          goto cont;
+        }
+      goto next;
+    }  
+  file.close();
+}
+
+
+
+

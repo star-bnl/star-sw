@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide 
 // 
-// $Id: StEmcPreCalibrationMaker.cxx,v 1.2 2001/10/17 13:51:31 suaide Exp $
+// $Id: StEmcPreCalibrationMaker.cxx,v 1.3 2001/10/26 21:00:33 suaide Exp $
 // $Log: StEmcPreCalibrationMaker.cxx,v $
+// Revision 1.3  2001/10/26 21:00:33  suaide
+// Many modifications to optimize for real data
+//
 // Revision 1.2  2001/10/17 13:51:31  suaide
 // new modifications to work with real data
 //
@@ -44,6 +47,7 @@ Int_t StEmcPreCalibrationMaker::Init()
   cout <<"Starting EmcPreCalibration maker ++++++++++++++++++++++++\n";
   etaDistr=new TH2F("etaDistr","nHits x eta",300,-2,2,200,0,200);
   pDistr=new TH2F("pDistr","nHits x momentum",1000,0,5,200,0,200);
+  pDistr1=new TH2F("pDistr1","nHighPt x eta",300,-2,2,1000,0,5);
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -135,13 +139,14 @@ Int_t StEmcPreCalibrationMaker::Make()
     gTrack->setFitTraits(fit);
         
     pDistr->Fill(momentum.mag(),(Int_t)tracks[i].nHits);
+    Float_t R=230;
+    Float_t dr=R-r0;
+    StThreeVectorF tmp(dr*cos(psi),dr*sin(psi),dr*tanl);
+    StThreeVectorF tmp1=tmp+origin;
+    Float_t eta=tmp1.pseudoRapidity();      
+    pDistr1->Fill(eta,momentum.mag());
     if(momentum.mag()>1.2) 
     {
-      Float_t R=230;
-      Float_t dr=R-r0;
-      StThreeVectorF tmp(dr*cos(psi),dr*sin(psi),dr*tanl);
-      StThreeVectorF tmp1=tmp+origin;
-      Float_t eta=tmp1.pseudoRapidity();      
       etaDistr->Fill(eta,(Int_t)tracks[i].nHits);
       /*if(eta>=0 && eta<=1) cout <<" track "<<i<<"  p = "<<momentum.mag()
                                 <<"  nHits = "<<(Int_t)tracks[i].nHits

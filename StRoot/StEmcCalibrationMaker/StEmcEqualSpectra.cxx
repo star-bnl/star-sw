@@ -23,10 +23,14 @@ StEmcEqualSpectra::~StEmcEqualSpectra()
 //_____________________________________________________________________________
 void StEmcEqualSpectra::DrawEqualConst()
 {
-  TCanvas* canvas5=new TCanvas("canvas5","EMC Equalization Constants",500,700);
+  TCanvas* canvas5=new TCanvas("canvas5","EMC Equalization Slope",500,700);
   canvas5->Divide(1,2);
+  TCanvas* canvas6=new TCanvas("canvas6","EMC Equalization Shift",500,700);
+  canvas6->Divide(1,2);
   
   emcEqualization_st* rows=EqualTable->GetTable();
+  TH1F* distr1=new TH1F("distr1","Relative gain distribution",200,0,4);
+  TH1F* distr2=new TH1F("distr2","Relative shift distribution",200,-4,4);
   
   const int nbins=GetNBin();
   
@@ -42,6 +46,9 @@ void StEmcEqualSpectra::DrawEqualConst()
       ey[j]=rows[j].EqSlopeError;
       y1[j]=rows[j].EqShift;
       ey1[j]=rows[j].EqShiftError;
+      if(y[j]>2 || y[j]<0.5) cout <<"tower = "<<x[j]<<"  slope ="<<y[j]<<"+-"<<ey[j]<<"  shift = "<<y1[j]<<"+-"<<ey1[j]<<endl;
+      distr1->Fill(y[j]);
+      distr2->Fill(y1[j]);
     } 
     else
     {
@@ -53,11 +60,20 @@ void StEmcEqualSpectra::DrawEqualConst()
     
   }
   TGraphErrors* graph1=new TGraphErrors(nbins,x,y,ex,ey);
+  graph1->SetTitle("Equalization Relative gain");
   TGraphErrors* graph2=new TGraphErrors(nbins,x,y1,ex,ey1);
+  graph2->SetTitle("Equalization Relative shift");
+
   canvas5->cd(1);
   graph1->Draw("A*");
   canvas5->cd(2);
+  distr1->Draw();
+  
+  canvas6->cd(1);
   graph2->Draw("A*");
+  canvas6->cd(2);
+  distr2->Draw();
+  
   return;
 }
 
@@ -72,8 +88,8 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
    
   Bool_t EqDone=kFALSE;
     
-  Float_t pwd1=15;
-  Float_t pwd2=15;
+  Float_t pwd1=20;
+  Float_t pwd2=20;
 
   Float_t a=0,b=0,erra=0,errb=0,cov=0,chi=0;
   const int npoints=6;

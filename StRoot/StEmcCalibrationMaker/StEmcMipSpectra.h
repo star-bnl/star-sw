@@ -24,6 +24,7 @@ class StEmcMipSpectra : public StEmcSpectra
            Bool_t  CalibrateEtaBin(Int_t,Int_t);
            Bool_t  CalibrateBin(Int_t,Int_t);
            Bool_t  CalibrateByMip(Int_t,TArrayF,Int_t,Int_t); 
+           TArrayF GetEtaBinSpectra(Int_t);
 
   ClassDef(StEmcMipSpectra,1)
 };
