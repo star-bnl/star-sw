@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.57 1999/07/17 19:08:45 perev Exp $
+// $Id: StMaker.cxx,v 1.58 1999/07/17 23:29:22 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.58  1999/07/17 23:29:22  fisyak
+// Add Peter Jacobs QAInfo tag in printout
+//
 // Revision 1.57  1999/07/17 19:08:45  perev
 // StMemoryInfo added
 //
@@ -133,6 +136,8 @@
 // StChain virtual base class for StMaker                              //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "TSystem.h"
 #include "TClass.h"
@@ -557,12 +562,12 @@ Int_t StMaker::Finish()
    // Print relative time
    if (totalCpuTime && totalRealTime) {
      Printf("------------------------------------------------------------------");
-     Printf("%-10s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds"
+     Printf("QAInfo:%-20s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds"
                                ,GetName(),totalRealTime,totalCpuTime);
      Printf("------------------------------------------------------------------");
      next.Reset();
      while ((maker = (StMaker*)next())) {
-        Printf("%-10s: Real Time = %5.1f %%        Cpu Time = %5.1f %% "
+        Printf("QAInfo:%-20s: Real Time = %5.1f %%        Cpu Time = %5.1f %% "
                ,maker->GetName()
                ,100*maker->RealTime()/totalRealTime
                ,100*maker->CpuTime()/totalCpuTime);
@@ -599,7 +604,7 @@ Int_t StMaker::Make()
 //_____________________________________________________________________________
 void StMaker::Fatal(int Ierr, const char *com)
 {
-   printf("%s::Fatal: Error %d %s\n",GetName(),Ierr,com);
+   printf("QAInfo:%s::Fatal: Error %d %s\n",GetName(),Ierr,com);
    StMaker *parent = (StMaker *)GetParent();
    if (parent) ((StMaker*)parent)->Fatal(Ierr,com);
    fflush(stdout);
@@ -625,7 +630,7 @@ void StMaker::PrintInfo() const
 {
    const char *cvs = GetCVS();
    const char *built = strstr(cvs,"built");
-   printf(" %-20s %s from %.*s\n",ClassName(),built,built-cvs,cvs);
+   printf("QAInfo:%-20s %s from %.*s\n",ClassName(),built,built-cvs,cvs);
 //     Print info for all defined Makers
    TIter next(GetMakeList());
    StMaker *maker;
@@ -672,7 +677,7 @@ const Char_t *StMaker::GetEventType() const
 void StMaker::PrintTimer(Option_t *option) 
 {
    if(option){};
-   Printf("%-10s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds",GetName()
+   Printf("QAInfo:%-20s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds",GetName()
                                          ,m_Timer.RealTime(),m_Timer.CpuTime());
 }
 
@@ -824,18 +829,38 @@ static void doPs(const char *who, const char *where)
 //		execute shell      
     ps = gSystem->Getenv("StarEndMakerShell"); 
     if (ps) {
-      TString *ts = new TString(ps);
       char buf[12]; sprintf(buf,"%d",gSystem->GetPid());
+      if (!ps[0]) {
+#if defined(__linux)
+	ps = "ps ux $$";
+#elif defined(__sun)
+	ps = "ps -o user -o pid -o pcpu -o pmem -o osz -o rss -o stime -o time -o comm -p $$";
+#elif defined(__hpux)
+	ps = "ps -lP -p $$";
+#endif
+      }
+      TString *ts = new TString(ps);
       ts->ReplaceAll("$$",buf);
       ps = ts->Data();
     } else { ps ="";}
   }
   if (ps[0]) { //Execute shell
-    printf("\ndoPs for <%s.%s> shell=%s\n",who,where,ps);
-    fflush(stdout);
-    if (gSystem->Exec(ps)) ps="";
+    //    fflush(stdout);
+    //    if (gSystem->Exec(ps)) ps="";
+    char   psBuffer[128];
+    FILE   *pipe;
+    if( (pipe = gSystem->OpenPipe(ps, "r" )) == NULL ) ps = "";
+    else {
+      while( !feof( pipe ) ) {
+	if( fgets( psBuffer, 128, pipe ) != NULL ) {
+	  printf("QAInfo: doPs for %20s:%12s \t%s",who,where,psBuffer);
+	}
+      }
+    }
+    gSystem->ClosePipe( pipe );
   }
 }
+
 //_____________________________________________________________________________
 void StMaker::Streamer(TBuffer &b)
 { Error("Streamer"," attempt to write %s\n ",GetName());
