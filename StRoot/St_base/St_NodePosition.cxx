@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.19 1999/09/22 03:51:50 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.20 1999/09/27 23:45:43 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.20  1999/09/27 23:45:43  fine
+// Several methods to calculate errors were introduced
+//
 // Revision 1.19  1999/09/22 03:51:50  fine
 // New method and RMath class to manage different transformation have been introduced
 //
@@ -66,6 +69,7 @@
 #include <iostream.h>
 #include <iomanip.h>
 
+#include "RMath.h"
 #include "St_NodePosition.h" 
 #include "St_Node.h" 
 
@@ -220,7 +224,55 @@ Text_t *St_NodePosition::GetObjectInfo(Int_t, Int_t)
    return info;
 }
 
+//______________________________________________________________________________
+Double_t *St_NodePosition::Errmx2Master(const Double_t *localError, Double_t *masterError)
+{
+  Double_t error[6];
+  RMath::vzero(&error[1],4);
+  error[0] = localError[0]; error[2] = localError[1]; error[5] = localError[2];
+  return Cormx2Master(error, masterError);
+} 
+
+//______________________________________________________________________________
+Float_t *St_NodePosition::Errmx2Master(const Float_t *localError, Float_t *masterError)
+{
+  Float_t error[6];
+  RMath::vzero(&error[1],4);
+  error[0] = localError[0]; error[2] = localError[1]; error[5] = localError[2];
+  return Cormx2Master(error, masterError);
+} 
+
+//______________________________________________________________________________
+Double_t *St_NodePosition::Cormx2Master(const Double_t *localCorr, Double_t *masterCorr)
+{
+  Double_t *res = 0;
+  TRotMatrix *rm = GetMatrix();
+  double *m = 0;
+  if (rm && ( m = rm->GetMatrix()) ) 
+    res = RMath::trasat(m,(Double_t *)localCorr,masterCorr,3,3);
+  else
+    res = RMath::ucopy(localCorr,masterCorr,6);
+  return res;
+} 
  
+//______________________________________________________________________________
+Float_t *St_NodePosition::Cormx2Master(const Float_t *localCorr, Float_t *masterCorr)
+{
+ Float_t *res = 0;
+ TRotMatrix *rm = GetMatrix();
+ Double_t *m = 0;
+ if (rm && (m = rm->GetMatrix()) ) {
+    double corLocal[6], corGlobal[6]; 
+    RMath::ucopy(localCorr,corLocal,6);
+    RMath::trasat(m,corLocal,corGlobal,3,3);
+    res =  RMath::ucopy(corGlobal,masterCorr,6);
+ }
+ else
+    res =  RMath::ucopy(localCorr,masterCorr,6);
+ return res;
+} 
+
+
 //______________________________________________________________________________
 Double_t *St_NodePosition::Local2Master(const Double_t *local, Double_t *master, Int_t nPoints)
 {

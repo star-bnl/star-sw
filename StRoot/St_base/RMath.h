@@ -5,8 +5,11 @@
 // The set of methods to work with the plain matrix / vector
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: RMath.h,v 1.5 1999/09/26 02:48:50 fine Exp $
+// $Id: RMath.h,v 1.6 1999/09/27 23:45:43 fine Exp $
 // $Log: RMath.h,v $
+// Revision 1.6  1999/09/27 23:45:43  fine
+// Several methods to calculate errors were introduced
+//
 // Revision 1.5  1999/09/26 02:48:50  fine
 // F112 CERNLIB package (TR matrix) has been added. No micky test yet
 //
@@ -35,8 +38,10 @@
 
 class RMath  {
   public:
-    static float  *ucopy(float *a,  float *b, int n);
-    static double *ucopy(double *a, double *b, int n);
+    static float  *ucopy(const float  *a, float  *b, int n);
+    static double *ucopy(const float  *a, double *b, int n);
+    static float  *ucopy(const double *a, float  *b, int n);
+    static double *ucopy(const double *a, double *b, int n);
 
     static float  *uzero(float *a,  int n1, int n2);
     static double *uzero(double *a, int n1, int n2);
@@ -319,11 +324,27 @@ inline void RMath::mxmltr(double *a, double *b, double *c, int ni, int nj)
 // ----
 
 //________________________________________________________
-inline float *RMath::ucopy(float *b, float *a, int n)
+inline float *RMath::ucopy(const float *b, float *a, int n)
 { if (n <= 0) return 0; memcpy(a,b,n*sizeof(float)); return a;}
 
 //________________________________________________________
-inline double *RMath::ucopy(double *b, double *a, int n)
+inline float *RMath::ucopy(const double *b, float *a, int n)
+{ 
+  if (n <= 0) return 0; 
+  for (int i=0;i<n;i++,a++,b++) *a = float(*b);
+  return a;
+}
+
+//________________________________________________________
+inline double *RMath::ucopy(const float *b, double *a, int n)
+{ 
+  if (n <= 0) return 0; 
+  for (int i=0;i<n;i++,a++,b++) *a = double(*b);
+  return a;
+}
+
+//________________________________________________________
+inline double *RMath::ucopy(const double *b, double *a, int n)
 { if (n <= 0) return 0; memcpy(a,b,n*sizeof(double)); return a;}
 
 //________________________________________________________

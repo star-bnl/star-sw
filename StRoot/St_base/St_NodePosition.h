@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98   
-// $Id: St_NodePosition.h,v 1.16 1999/09/22 03:51:50 fine Exp $
+// $Id: St_NodePosition.h,v 1.17 1999/09/27 23:45:43 fine Exp $
 // $Log: St_NodePosition.h,v $
+// Revision 1.17  1999/09/27 23:45:43  fine
+// Several methods to calculate errors were introduced
+//
 // Revision 1.16  1999/09/22 03:51:50  fine
 // New method and RMath class to manage different transformation have been introduced
 //
@@ -82,6 +85,10 @@ class St_NodePosition  : public TObject /*, public St_DefineSet */ {
                                  fMatrix(pos.GetMatrix()),fNode(pos.GetNode()),fId(pos.GetId()){;}
         virtual ~St_NodePosition(){;}
         virtual void        Browse(TBrowser *b);
+        virtual Float_t    *Errmx2Master(const Float_t *localError, Float_t *masterError);
+        virtual Double_t   *Errmx2Master(const Double_t *localError, Double_t *masterError);
+        virtual Double_t   *Cormx2Master(const Double_t *localCorr, Double_t *masterCorr);
+        virtual Float_t    *Cormx2Master(const Float_t *localCorr, Float_t *masterCorr);
         virtual Int_t       DistancetoPrimitive(Int_t px, Int_t py);
         virtual St_DataSet *DefineSet();
         virtual void        Draw(Option_t *option=""); // *MENU*
