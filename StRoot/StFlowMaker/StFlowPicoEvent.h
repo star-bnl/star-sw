@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.h,v 1.2 2000/05/26 21:29:32 posk Exp $
+// $Id: StFlowPicoEvent.h,v 1.3 2000/06/01 18:26:39 posk Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.h,v $
+// Revision 1.3  2000/06/01 18:26:39  posk
+// Increased precision of Track integer data members.
+//
 // Revision 1.2  2000/05/26 21:29:32  posk
 // Protected Track data members from overflow.
 //
@@ -90,8 +93,8 @@ public:
    Float_t  Eta()        const { return mEta; }
    Float_t  Phi()        const { return mPhi; }
    Short_t  Charge()     const { return (Short_t)mCharge; }
-   Float_t  Dca()        const { return mDca/1000.; }
-   Float_t  Chi2()       const { return mChi2/1000.; }
+   Float_t  Dca()        const { return mDca/10000.; }
+   Float_t  Chi2()       const { return mChi2/10000.; }
    Int_t    FitPts()     const { return (Int_t)mFitPts; }
    Int_t    MaxPts()     const { return (Int_t)mMaxPts; }
    Float_t  PidPiPlus()  const { return mPidPiPlus/1000.; }

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.10 2000/05/11 20:00:32 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.11 2000/06/01 18:26:34 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.11  2000/06/01 18:26:34  posk
+// Increased precision of Track integer data members.
+//
 // Revision 1.10  2000/05/11 20:00:32  posk
 // Preparation for micro and nano DSTs.
 //
@@ -118,12 +121,10 @@ void StFlowCutTrack::PrintCutList() {
   cout << "#######################################################" << endl;
   cout << "# Track Cut List:" << endl;
   cout << "#   FitPts cuts= " << mFitPtsCuts[0] << ", " << mFitPtsCuts[1] 
-    //      << " :\t " << setprecision(4) << (float)mFitPtsCutN/(float)mTrackN/perCent 
-       << " :\t " << (float)mFitPtsCutN/(float)mTrackN/perCent 
+       << " :\t " << setprecision(4) << (float)mFitPtsCutN/(float)mTrackN/perCent 
        << "% cut" << endl;
   cout << "#   FitOverMax cuts= " << mFitOverMaxCuts[0] << ", " 
-    //       << mFitOverMaxCuts[1] << " :\t " << setprecision(4)
-       << mFitOverMaxCuts[1] << " :\t " 
+       << mFitOverMaxCuts[1] << " :\t " << setprecision(4)
        << (float)mFitOverMaxCutN/(float)mTrackN/perCent << "% cut" << endl;
   cout << "# Good Tracks = " << (float)mGoodTrackN/(float)mTrackN/perCent
        << "%" << endl;

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.28 2000/05/26 21:29:28 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.29 2000/06/01 18:26:36 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.29  2000/06/01 18:26:36  posk
+// Increased precision of Track integer data members.
+//
 // Revision 1.28  2000/05/26 21:29:28  posk
 // Protected Track data members from overflow.
 //
@@ -200,7 +203,7 @@ Int_t StFlowMaker::Make() {
 
 void StFlowMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowMaker.cxx,v 1.28 2000/05/26 21:29:28 posk Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.29 2000/06/01 18:26:36 posk Exp $" << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
 
@@ -212,14 +215,16 @@ Int_t StFlowMaker::Init() {
   // Open PhiWgt file
   ReadPhiWgtFile();
 
-  if (mNanoEventWrite) InitNanoEventWrite();
-  if (mNanoEventRead)  InitNanoEventRead();
-  if (mPicoEventWrite) InitPicoEventWrite();
-  if (mPicoEventRead)  InitPicoEventRead();
-  if (mFlowEventWrite) InitFlowEventWrite();
-  if (mFlowEventRead)  InitFlowEventRead();
+  Int_t kRETURN = kStOK;
 
-  return StMaker::Init();
+  if (mNanoEventWrite) kRETURN += InitNanoEventWrite();
+  if (mNanoEventRead)  kRETURN += InitNanoEventRead();
+  if (mPicoEventWrite) kRETURN += InitPicoEventWrite();
+  if (mPicoEventRead)  kRETURN += InitPicoEventRead();
+  if (mFlowEventWrite) kRETURN += InitFlowEventWrite();
+  if (mFlowEventRead)  kRETURN += InitFlowEventRead();
+
+  return kRETURN;
 }
 
 //-----------------------------------------------------------------------
@@ -371,6 +376,7 @@ void StFlowMaker::FillFlowEvent() {
 // 		 pFlowEvent->TrackCollection()->end());
 
   pFlowEvent->TrackCollection()->random_shuffle();
+
   pFlowEvent->SetSelections();
   pFlowEvent->MakeSubEvents();
   pFlowEvent->SetPids();
@@ -565,7 +571,7 @@ void StFlowMaker::PrintSubeventMults() {
 
 //-----------------------------------------------------------------------
 
-void StFlowMaker::InitNanoEventWrite() {
+Int_t StFlowMaker::InitNanoEventWrite() {
 
   Int_t split  = 1;       // by default split Event into sub branches
   Int_t comp   = 1;       // by default file is compressed
@@ -579,7 +585,7 @@ void StFlowMaker::InitNanoEventWrite() {
   pNanoDST = new TFile(mNanoEventFileName,"RECREATE","Flow Nano DST file");
   if (!pNanoDST) {
     cout << "##### FlowMaker: Warning: no NanoEvents file = " << file << endl;
-    return;
+    return kStWarn;
   }
 
   pNanoDST->SetCompressionLevel(comp);
@@ -589,18 +595,19 @@ void StFlowMaker::InitNanoEventWrite() {
   pFlowTree = new TTree("FlowTree", "Flow Nano Tree");
   if (!pFlowTree) {
     cout << "##### FlowMaker: Warning: No FlowNanoTree" << endl;
-    return;
+    return kStWarn;
   }
 
   pFlowTree->SetAutoSave(10000000);  // autosave when 10 Mbyte written
   pFlowTree->Branch("pNanoEvent", "StFlowNanoEvent", &pNanoEvent,
 		    bufsize, split);
-  
+
+  return kStOK;  
 }
 
 //-----------------------------------------------------------------------
 
-void StFlowMaker::InitPicoEventWrite() {
+Int_t StFlowMaker::InitPicoEventWrite() {
 
   Int_t split  = 1;       // by default split Event into sub branches
   Int_t comp   = 1;       // by default file is compressed
@@ -613,7 +620,7 @@ void StFlowMaker::InitPicoEventWrite() {
   pPicoDST = new TFile(mPicoEventFileName,"RECREATE","Flow Pico DST file");
   if (!pPicoDST) {
     cout << "##### FlowMaker: Warning: no PicoEvents file = " << file << endl;
-    return;
+    return kStWarn;
   }
   
   pPicoDST->SetCompressionLevel(comp);
@@ -623,27 +630,28 @@ void StFlowMaker::InitPicoEventWrite() {
   pFlowTree = new TTree("FlowTree", "Flow Pico Tree");
   if (!pFlowTree) {
     cout << "##### FlowMaker: Warning: No FlowPicoTree" << endl;
-    return;
+    return kStWarn;
   }
 
   pFlowTree->SetAutoSave(10000000);  // autosave when 10 Mbyte written
   pFlowTree->Branch("pPicoEvent", "StFlowPicoEvent", &pPicoEvent,
 		    bufsize, split);
-  
+
+  return kStOK;
 }
 
 //-----------------------------------------------------------------------
 
-void StFlowMaker::InitNanoEventRead() {
+Int_t StFlowMaker::InitNanoEventRead() {
   
   pNanoEvent = new StFlowNanoEvent(); 
   
   // Open the input file
   Char_t* file = mNanoEventFileName;  
   pNanoDST = new TFile(file);
-  if (!pNanoDST) {
+  if (!pNanoDST->IsOpen()) {
     cout << "##### FlowMaker: Warning: no NanoEvents file = " << file << endl;
-    return;
+    return kStErr;
   }
 
   cout << "##### FlowMaker: NanoEvents file = " << file << endl;
@@ -652,7 +660,7 @@ void StFlowMaker::InitNanoEventRead() {
   pFlowTree = (TTree*)pNanoDST->Get("FlowTree");
   if (!pFlowTree) {
     cout << "##### FlowMaker: Warning: No FlowTree" << endl;
-    return;
+    return kStErr;
   }
 
   TBranch* branch = pFlowTree->GetBranch("pNanoEvent");
@@ -661,21 +669,22 @@ void StFlowMaker::InitNanoEventRead() {
   cout << "##### FlowMaker: events in nano-DST file = " << nEntries << endl;
   
   mNanoEventCounter = 0;
-  
+
+  return kStOK;  
   }
 
 //-----------------------------------------------------------------------
 
-void StFlowMaker::InitPicoEventRead() {
+Int_t StFlowMaker::InitPicoEventRead() {
   
   pPicoEvent = new StFlowPicoEvent(); 
   
   // Open the file
   Char_t* file = mPicoEventFileName;  
   pPicoDST = new TFile(file);
-  if (!pPicoDST) {
-    cout << "##### FlowMaker: Warning: no PicoEvents file = " << file << endl;
-    return;
+  if (!pPicoDST->IsOpen()) {
+    cout << "##### FlowMaker: Error: no PicoEvents file = " << file << endl;
+    return kStErr;
   }
 
   cout << "##### FlowMaker: " << "PicoEvents file = " << file << endl;
@@ -683,8 +692,8 @@ void StFlowMaker::InitPicoEventRead() {
   // Get the tree, the branch, and the entries
   pFlowTree = (TTree*)pPicoDST->Get("FlowTree");
   if (!pFlowTree) {
-    cout << "##### FlowMaker: Warning: No FlowTree" << endl;
-    return;
+    cout << "##### FlowMaker: Error: No FlowTree" << endl;
+    return kStErr;
   }
 
   TBranch* branch = pFlowTree->GetBranch("pPicoEvent");
@@ -694,11 +703,12 @@ void StFlowMaker::InitPicoEventRead() {
 
   mPicoEventCounter = 0;
 
+  return kStOK;
   }
 
 //-----------------------------------------------------------------------
 
-void StFlowMaker::InitFlowEventWrite() {
+Int_t StFlowMaker::InitFlowEventWrite() {
 
   Int_t split  = 1;       // by default, split Event in sub branches
   Int_t comp   = 1;       // by default file is compressed
@@ -712,7 +722,7 @@ void StFlowMaker::InitFlowEventWrite() {
   pFlowDST = new TFile("flowevent.root", "RECREATE", "Flow micro DST file");
   if (!pFlowDST) {
     cout << "##### FlowMaker: Warning: no FlowEvents file" << endl;
-    return;
+    return kStWarn;
   }
 
   pFlowDST->SetCompressionLevel(comp);
@@ -721,19 +731,22 @@ void StFlowMaker::InitFlowEventWrite() {
   pFlowMicroTree = new TTree("FlowMicroTree", "Flow Micro Tree");
   if (!pFlowMicroTree) {
     cout << "##### FlowMaker: Warning: No FlowMicroTree" << endl;
-    return;
+    return kStWarn;
   }
 
   pFlowMicroTree->SetAutoSave(100000000);  // autosave when 100 Mbyte written
   pFlowMicroTree->Branch("pFlowEvent", "StFlowEvent", &pFlowEvent, bufsize, split);
-  
+
+  return kStOK;
 }
 
 //-----------------------------------------------------------------------
 
-void StFlowMaker::InitFlowEventRead() {
+Int_t StFlowMaker::InitFlowEventRead() {
   pFlowDST = new TFile("flowevent.root", "READ");
+  if (pFlowDST) return kStErr;
 
+  return kStOK;
 }
 
 //-----------------------------------------------------------------------

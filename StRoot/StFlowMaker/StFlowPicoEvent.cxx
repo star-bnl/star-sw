@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.cxx,v 1.2 2000/05/26 21:29:31 posk Exp $
+// $Id: StFlowPicoEvent.cxx,v 1.3 2000/06/01 18:26:39 posk Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -23,6 +23,9 @@
 ////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.cxx,v $
+// Revision 1.3  2000/06/01 18:26:39  posk
+// Increased precision of Track integer data members.
+//
 // Revision 1.2  2000/05/26 21:29:31  posk
 // Protected Track data members from overflow.
 //
@@ -79,7 +82,7 @@ StFlowPicoTrack::StFlowPicoTrack(Float_t pt,
                                  Float_t pidProton) : TObject()
 {
   float maxShort  = 32.;
-  float maxUShort = 64.;
+  float maxUShort = 6.4;
   
   if (dca > maxUShort)       dca         = maxUShort;
   if (chi2 > maxUShort)      chi2        = maxUShort;
@@ -91,8 +94,8 @@ StFlowPicoTrack::StFlowPicoTrack(Float_t pt,
   mPhi        = phi;
   mEta        = eta;
   mCharge     = (Char_t)charge;
-  mDca        = (UShort_t)(dca*1000.);
-  mChi2       = (UShort_t)(chi2*1000.);
+  mDca        = (UShort_t)(dca*10000.);
+  mChi2       = (UShort_t)(chi2*10000.);
   mFitPts     = (UChar_t)fitPts;
   mMaxPts     = (UChar_t)maxPts;
   mPidPiPlus  = (Short_t)(pidPiPlus*1000.);
