@@ -5,6 +5,7 @@
 //STD
 #include <algorithm>
 #include <math.h>
+using namespace std;
 
 //StEvent
 #include "StEventTypes.h"
@@ -21,7 +22,7 @@
 #include "StThreeVectorF.hh"
 
 //Sti
-#include "Sti/StiKTNVertIterator.h"
+#include "Sti/StiKTNIterator.h"
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiMapUtilities.h"
 
@@ -112,8 +113,8 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
     
     bool go = true;
     double xLocal = lastNode->fX;
-    StiKTNVertIterator it(lastNode);
-    StiKTNVertIterator end = it.end();
+    StiKTNForwardIterator it(lastNode);
+    StiKTNForwardIterator end = it.end();
     
     while( go && it!=end ) {
 	//cout <<"Entered loop";
@@ -127,16 +128,7 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
 	}
 	else {
 	    StiKalmanTrackNode& next = *it;
-	    //cout <<"\tDereferenced ++it"<<endl;
-	    //cout <<"node->fX: "<<node.fX<<"\tnext->fX: "<<next.fX<<endl;
-
-	    //This is a temp hack to avoid IFC nodes!
-	    //if (node.fX!=0. && next.fX!=0.) {
-		
-	    //cout <<"node.fX!=0. && next.fX!=0."<<endl;
-	    //now step!
 	    while (xLocal<next.fX) {
-		//cout <<" xLocal: "<<xLocal<<"\tnext->fX: "<<next.fX<<endl;
 		double xx = node.fX;
 		double yy = node.fP0;
 		double zz = node.fP1;
@@ -195,9 +187,10 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
     }
     if (!mLineHitPair.second->isAdded()) {
 	StiDisplayManager::instance()->addDrawable( mLineHitPair.second );
-    }
-    
+    }    
+	
     return;
+
 }
 
 void StiRootDrawableStiEvaluableTrack::setLineInfo()
