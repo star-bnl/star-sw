@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbloaddaq.pl,v 1.1 1999/07/07 13:19:30 wenaus Exp $
+# $Id: dbloaddaq.pl,v 1.2 1999/07/21 09:16:32 wenaus Exp $
 #
 # $Log: dbloaddaq.pl,v $
+# Revision 1.2  1999/07/21 09:16:32  wenaus
+# Add timestamp file; add LD_LIBRARY_PATH
+#
 # Revision 1.1  1999/07/07 13:19:30  wenaus
 # real data log
 #
@@ -18,6 +21,7 @@
 # Usage: dbloaddaq.pl
 #
 
+print "Run dbloaddaq\n";
 use lib "/star/u2d/wenaus/datadb";
 use File::Find;
 use File::Basename;
@@ -27,6 +31,8 @@ use Time::Local;
 require "dbsetup.pl";
 
 my $debugOn=0;
+
+$timestampFile = '/disk1/star/daq/last_update';
 
 for ($ii=0; $ii<@ARGV; $ii++) {
     if ( $ARGV[$ii] eq "droprun" ) {
@@ -181,6 +187,7 @@ foreach $line ( @content ) {
 
 # scan the DAQ data files and load new files
 @daqfiles = </disk1/star/daq/*.daq>;
+`rm $timestampFile; touch $timestampFile`;
 if ( @daqfiles>0 ) {
     foreach $daqf ( @daqfiles ) {
         if ( $daqf =~ m/([0-9]{2})([0-9]{2})([0-9]{2})\.([0-9]+)\.daq$/ ) {
@@ -209,7 +216,7 @@ exit;
 
 sub dbaddfile {
     ## First check whether an entry exists for this run number
-    $sql="select name from $RunT where name='$nrun'";
+    $sql="select name,endtime from $RunT where name='$nrun'";
     $cursor =$dbh->prepare($sql) 
         || die "Cannot prepare statement: $DBI::errstr\n";
     $cursor->execute;
@@ -224,6 +231,7 @@ sub dbaddfile {
             $val{$fn} = $fvalue;
         }
     }
+    $runDaqscan = 0;
     if ($nrow>0) {
         # Update
 #        print "Already exists in DB. Update.\n";
@@ -232,6 +240,8 @@ sub dbaddfile {
 #        $sql.="ctime=$ctime,";
 #        $sql.="starttime=$ctime";
 #        $sql.=" where name='$nrun'";
+        # if endtime=0, file has not been read
+        if (substr($val{'endtime'},0,4) eq '0000') {$runDaqscan = 1};
     } else {
         # New entry
         $sql="insert into $RunT set ";
@@ -240,11 +250,12 @@ sub dbaddfile {
         $sql.="starttime=$ctime";
         print "$sql\n" if $debugOn;
         $rv = $dbh->do($sql) || die $dbh->errstr;
-        if ( $nrun > 100 ) {
-            print "======== $daqf $sizeMB MB===========================\n";
-            $content = `/star/u2d/wenaus/bin/daqscan $daqf`;
-            print $content;
-        }
+        $runDaqscan = 1;
+    }
+    if ( ($nrun > 100) && $runDaqscan ) {
+        print "======== $daqf $sizeMB MB===========================\n";
+        $content = `LD_LIBRARY_PATH="$LD_LIBRARY_PATH"; export LD_LIBRARY_PATH; /star/u2d/wenaus/bin/daqscan $daqf`;
+        print $content;
     }
 }
 
