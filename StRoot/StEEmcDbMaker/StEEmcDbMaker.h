@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.1 2003/01/28 23:18:34 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.2 2003/02/18 19:55:53 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -45,16 +45,17 @@ class  StEEmcDbIndexItem1;
 
 class StEEmcDbMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.1 2003/01/28 23:18:34 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.2 2003/02/18 19:55:53 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
   int myTimeStampDay;
   unsigned int myTimeStampUnix;
   void mReloadDb(); ///< reads data from STAR-DB
-  void mOptimizeDb(); ///< creates local fast correlation tables
+  void mOptimizeDb(); ///< creates local fast look-up tables
   
   // pointers to Db tables for each sector
+  int *mDbsectorID; //!
   eemcDbADCconf_st **mDbADCconf; //!
   eemcDbPMTconf_st **mDbPMTconf; //!
   eemcDbPMTcal_st  **mDbPMTcal ; //!
@@ -83,7 +84,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.1 2003/01/28 23:18:34 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.2 2003/02/18 19:55:53 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   

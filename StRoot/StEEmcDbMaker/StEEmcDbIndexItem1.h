@@ -16,8 +16,9 @@ class StEEmcDbIndexItem1 {
   float gain, hv; 
   float ped, sig;
 
+  StEEmcDbIndexItem1();
   void clear();
-  void print();
+  void print() const;
   void setName(char *text);
 
 };

@@ -1,7 +1,10 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.2 2003/02/14 00:04:31 balewski Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.3 2003/02/18 19:56:03 balewski Exp $
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.3  2003/02/18 19:56:03  balewski
+// add pedestals
+//
 // Revision 1.2  2003/02/14 00:04:31  balewski
 // remove few printouts
 //
@@ -41,7 +44,7 @@ StEEmcFastMaker::StEEmcFastMaker(const char *name):StMaker(name){
   
   mfixTgain=new float [kEEmcNumEtas];
   for (i=0;i<kEEmcNumEtas;i++) {
-    mfixTgain[i]=maxAdc/maxEtot/cosh(feta[i-1])/msamplingFraction;
+    mfixTgain[i]=maxAdc/maxEtot/cosh(feta[i])/msamplingFraction;
   }
 
 

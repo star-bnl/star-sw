@@ -1,7 +1,10 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.1 2003/01/28 23:18:34 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.2 2003/02/18 19:55:53 balewski Exp $
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.2  2003/02/18 19:55:53  balewski
+// add pedestals
+//
 // Revision 1.1  2003/01/28 23:18:34  balewski
 // start
 //
@@ -68,6 +71,7 @@ StEEmcDbMaker::~StEEmcDbMaker(){
     delete [] mDbADCconf;
     delete [] mDbPMTconf;
     delete [] mDbPMTcal;
+    delete [] mDbsectorID;
   }
 }
 
@@ -129,6 +133,7 @@ void StEEmcDbMaker::setSectors(int sec1,int sec2){
   mDbADCconf=(eemcDbADCconf_st **) new void *[mNSector];
   mDbPMTconf=(eemcDbPMTconf_st **) new void *[mNSector];
   mDbPMTcal= (eemcDbPMTcal_st  **) new void *[mNSector];
+  mDbsectorID=  new int [mNSector];
   
   printf("\n\n%s Use sectors from %d to %d\n",GetName(),mfirstSecID,mlastSecID);
 
@@ -211,35 +216,30 @@ void  StEEmcDbMaker::mReloadDb  (){
     mDbADCconf[i]=0;
     mDbPMTconf[i]=0;
     mDbPMTcal [i]=0;
+    mDbsectorID[i]=-1;
   }
 
-  for(i=0; i<EEindexMax; i++)mDbItem1[i].clear();
+  for(i=0; i<EEindexMax; i++)
+    mDbItem1[i].clear();
 
-
-#if 0
-  // clear old lookup tables  ...................
-  for(i=0; i<EEMC_MaxAdcSlot; i++) 
-    for(j=0; j<EEMC_MaxAdcChan; j++) {
-      DbChan2name[i][j][0]=0;
-    }
-
-#endif  
-  
-  
-  for(i=mfirstSecID-1; i<mlastSecID; i++) {
+  int is;
+  for(is=0; is< mNSector; is++) {
+    int secID=is+mfirstSecID;
     char secTx[100];
-    sprintf(secTx,"sector%2.2d",i+1);
+    sprintf(secTx,"sector%2.2d",secID);
     char name[100];
-    
+    mDbsectorID[is]=secID;
+ 
     sprintf(name,"%s/eemcADCconf",secTx); //.................
     printf("request=%s==>",name);
     St_eemcDbADCconf *ds1= (St_eemcDbADCconf *)eedb->Find(name);
+
     if(ds1) {
       printf("Conf->NRows()=%d\n",(int)ds1->GetNRows());
       assert(ds1->GetNRows()==1); // DB TABLE HAS ONLY ONE ROW
-      mDbADCconf[i]=(eemcDbADCconf_st *) ds1->GetArray();
-      assert(mDbADCconf[i]); // db error if not delivered
-      mCleanDbNames(mDbADCconf[i]->name, EEMCDbMaxAdcName);   
+      mDbADCconf[is]=(eemcDbADCconf_st *) ds1->GetArray();
+      assert(mDbADCconf[is]); // db error if not delivered
+      mCleanDbNames(mDbADCconf[is]->name, EEMCDbMaxAdcName);   
       found++;
     } else {
       printf("Not Found in DB, continue \n");
@@ -251,9 +251,9 @@ void  StEEmcDbMaker::mReloadDb  (){
     if(ds2) {
       printf("Conf->NRows()=%d\n",(int)ds2->GetNRows());
       assert(ds2->GetNRows()==1);  // DB TABLE HAS ONLY ONE ROW
-      mDbPMTconf[i]=(eemcDbPMTconf_st *) ds2->GetArray();
-      assert(mDbPMTconf[i]); // db error
-      mCleanDbNames(mDbPMTconf[i]->name, EEMCDbMaxAdcName);
+      mDbPMTconf[is]=(eemcDbPMTconf_st *) ds2->GetArray();
+      assert(mDbPMTconf[is]); // db error
+      mCleanDbNames(mDbPMTconf[is]->name, EEMCDbMaxAdcName);
       found++;
     } else {
       printf("Not Found in DB : %s , continue \n",name);
@@ -265,9 +265,9 @@ void  StEEmcDbMaker::mReloadDb  (){
     if(ds3) {
       printf("Cal->NRows()=%d\n",(int)ds3->GetNRows());
       assert(ds3->GetNRows()==1);  // DB TABLE HAS ONLY ONE ROW
-      mDbPMTcal[i]=(eemcDbPMTcal_st *) ds3->GetArray();
-      assert(mDbPMTcal[i]); // db error
-      mCleanDbNames(mDbPMTcal[i]->name, EEMCDbMaxAdcName);
+      mDbPMTcal[is]=(eemcDbPMTcal_st *) ds3->GetArray();
+      assert(mDbPMTcal[is]); // db error
+      mCleanDbNames(mDbPMTcal[is]->name, EEMCDbMaxAdcName);
       found++;
     } else {
       printf("Not Found in DB : %s , continue \n",name);
@@ -289,10 +289,9 @@ void  StEEmcDbMaker::mOptimizeDb(){
   int i, j;
   printf("\n\noptimizeDb :::::: %s\n\n\n",GetName());
 
+
   // primary information: slot,chan <--> element name
-
-
-  for(i=mfirstSecID-1; i<mlastSecID; i++) {
+  for(i=0; i<mNSector; i++) {
     eemcDbADCconf_st *t= mDbADCconf[i];
     if(t==0) continue;
  
@@ -309,11 +308,6 @@ void  StEEmcDbMaker::mOptimizeDb(){
       //tmp assert(t->channel[j]>=0 && t->channel[j]<EEMC_MaxAdcChan);
 
       int index=EEname2Index(name);
-      {//tmp, drop it later
-	char name2[20];
-	EEindex2Name(index,name2);
-	assert(strstr(name2,name)); // consistency check
-      }  
       // store valid entry
       mDbItem1[index].crate=t->slot[j];
       mDbItem1[index].chan=t->channel[j];
@@ -325,42 +319,43 @@ void  StEEmcDbMaker::mOptimizeDb(){
 
   } 
 
-#if 0
 
   //---------------------------------------------------
   printf("\nAcquire secondary info for active elements\n");
 
-  int key;
-  for(key=0; key<EEMC_MaxNameHash; key++){ 
-    if(DbName2chan[key].chan<0) continue;
-    printf("update %s   %d  %d \n",DbName2chan[key].name, DbName2chan[key].slot, DbName2chan[key].chan);
+  int index;
+  for(index=0; index<EEindexMax; index++){
+    if(mDbItem1[index].chan<0) continue;
+    StEEmcDbIndexItem1 *item=mDbItem1+index;
 
-    char *name=DbName2chan[key].name;
-
-    for(i=mfirstSecID-1; i<mlastSecID; i++) {// PMT calibration
-      eemcDbPMTcal_st *t= DbPMTcal[i];
-      if(t==0) continue;
-
-      int found=0;
-      for(j=0;j<EEMCDbMaxAdc; j++) { // loop within sector
-	char *name1=t->name+j*EEMCDbMaxName;
-	char *p=strstr(t->name,name1);
-	printf("ppp %x %s %s \n",p,t->name,name1);
-	if(p==0) continue;
-	found+=1;
-	DbName2HV[key].gain=t->gain[j];
-	DbName2HV[key].hv=t->hv[j];
-	printf(" found gain=%f hv=%f\n",DbName2HV[key].gain,DbName2HV[key].hv);
-	break;
-      }
-      if(found&1) printf("Warn: missing PMTcal for %s\n",name);
+    char *name=item->name;
+    int secID=atoi(name);
+    printf("update %s in sec=%d \n",name,secID);
 
 
+    for(i=0; i<EEindexMax; i++) {
+      if(secID==mDbsectorID[i]) break;
     }
+    assert(i<EEindexMax ); // sector not loaded from DB ???, sth is wrong
 
-  }// end of loop over elements
+    eemcDbPMTcal_st *t= mDbPMTcal[i];
+    if(t==0) continue; // DB data for this sector not loaded from DB
+    
+    int found=0;
+    for(j=0;j<EEMCDbMaxAdc; j++) { // loop within sector
+      char *name1=t->name+j*EEMCDbMaxName;
+      char *p=strstr(item->name,name1);
+      //	printf("ppp %p %s %s \n",p,item->name,name1);
+      if(p==0) continue;
+      found+=1;
+      mDbItem1[index].gain=t->gain[j];
+      mDbItem1[index].hv=t->hv[j];
+      printf(" found=%d gain=%f hv=%f\n",found,mDbItem1[index].gain,mDbItem1[index].hv);
+      break;
+    }
+    
+  }// end of loop over index
 
-#endif
 
 }
 
