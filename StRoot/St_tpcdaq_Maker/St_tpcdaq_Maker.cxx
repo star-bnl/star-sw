@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.75  2003/07/10 19:41:00  ward
+// Fix bug for running under TRS.
+//
 // Revision 1.74  2003/07/01 21:32:46  ward
 // Do not skip event if TPC data is legitimately missing because of mixed triggers.
 //
@@ -713,8 +716,9 @@ int St_tpcdaq_Maker::Output() {
       offsetIntoPadTable=padR; pixTblWhere=0; numPadsWithSignal=0;
       seqOffset=0; npad=getPadList(ipadrow+1,&padlist);
 
-      assert(victorPrelim);
-      if(!(victorPrelim->TPCPresent())) { assert(pixCnt==0); return 4321; /* TPC data missing in this event */ }
+      if(victorPrelim&&m_Mode!=1) {
+        if(!(victorPrelim->TPCPresent())) { assert(pixCnt==0); return 4321; /* TPC data missing in this event */ }
+      }
 
       if(npad<0) return 1; // Corrupted event, see comment 66f.
 
