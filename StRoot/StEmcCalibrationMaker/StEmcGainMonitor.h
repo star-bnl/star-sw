@@ -1,5 +1,8 @@
-// $Id: StEmcGainMonitor.h,v 1.2 2002/05/22 18:50:38 jklay Exp $
+// $Id: StEmcGainMonitor.h,v 1.3 2002/06/26 02:09:17 jklay Exp $
 // $Log: StEmcGainMonitor.h,v $
+// Revision 1.3  2002/06/26 02:09:17  jklay
+// Gain calculated from ped-subtracted mean above 30 ADC counts
+//
 // Revision 1.2  2002/05/22 18:50:38  jklay
 // Fixed bug in the way emcTowerGain table is filled
 //
@@ -28,11 +31,12 @@ class StEmcGainMonitor : public TObject
 {
   private: 
     TH2F            *m_Tower;    //!
+    TH2F            *m_TowerSubPed;    //!Pedestal subtracted version of m_Tower
     TH2F            *m_TowerMean;//!
     TH2F            *m_TowerRMS; //!
-    TH2F            *m_TowerRelGain;//!For ADC>30/ADC>0
+    TH2F            *m_TowerRelGain;//!For Mean>30
     TH2F            *m_TowerRelGainDayByDay;//!For ADC>30/ADC>0
-    TH2F            *m_TowerRelGain1;//!For ADC>80/ADC>30
+    TH2F            *m_TowerRelGain1;//!For Mean>30
     TH2F            *m_TowerRelGainDayByDay1;//!For ADC>80/ADC>30
     TH2F            *m_TowerTmp; //!
 
@@ -49,7 +53,8 @@ class StEmcGainMonitor : public TObject
     
     Bool_t          GetHist(const char*, const char*,Int_t&,Int_t&);
     void            GetYearDay(const char*,Int_t&,Int_t&);
-    Bool_t          CalcMeanRMS(Int_t,Int_t,Int_t);
+    void            CalcMeanRMS(Int_t,Int_t,Int_t);
+    void            SubtractPedestal();
     void            Init();
     void            WriteTower();
     void            WriteMeanRMS();
