@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.13 1999/05/04 21:00:43 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.14 1999/06/15 18:39:12 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.14  1999/06/15 18:39:12  fisyak
+// shunt particle to dst
+//
 // Revision 1.13  1999/05/04 21:00:43  fisyak
 // Step back to MDC2 version
 //
@@ -14,7 +17,7 @@
 
 #include "TClass.h"
 #include "St_dst_Maker.h"
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.13 1999/05/04 21:00:43 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.14 1999/06/15 18:39:12 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -42,7 +45,7 @@ Int_t St_dst_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_dst_Maker::Make(){
 
-  St_DataSet *ds=0,*mk=0;
+  St_DataSet *ds=0,*mk=0, *dst=0;
   const char *name,*mkname;
   
   
@@ -54,7 +57,9 @@ Int_t St_dst_Maker::Make(){
     if (!mk) continue;
     ds = mk->Find(name);
     if (!ds) continue;
-    ds->Shunt(m_DataSet);
+    dst = m_DataSet;
+    if (strcmp(name,"dst")) dst = m_DataSet->Find("dst");
+    if (dst) ds->Shunt(dst);
     if (Debug()) printf("\n*** <%s::Make> *** selected %s%s\n",ClassName(),mkname,name);
   }
   return kStOK;
@@ -62,7 +67,7 @@ Int_t St_dst_Maker::Make(){
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_dst_Maker.cxx,v 1.13 1999/05/04 21:00:43 fisyak Exp $\n");
+  printf("* $Id: St_dst_Maker.cxx,v 1.14 1999/06/15 18:39:12 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
