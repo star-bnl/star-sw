@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.23 2004/03/05 17:22:54 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.24 2004/03/10 20:30:39 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.24  2004/03/10 20:30:39  fisyak
+ * Comment out check that Z is in fid. volume
+ *
  * Revision 1.23  2004/03/05 17:22:54  fisyak
  * Add TPC transformations for direction, aligned sectors, protection in order to stay in the same sector when moving from/to Pad coordinates
  *
@@ -347,7 +350,9 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLoc
       (gTpcDbPtr->T0(a.sector())->getT0(a.row(),a.pad()) *mTimeBinWidth);  
       //t0 offset -- DH  27-Mar-00
     Double_t z = zFromTB(a.timeBucket())-zoffset-t0zoffset;
+#if 0
     if (z <= 0) z = 1.e-5;
+#endif
     tmp.setZ(z);
     b = StTpcLocalSectorCoordinate(tmp,a.sector());
 }
@@ -672,8 +677,10 @@ StTpcCoordinateTransform::rotateToLocal(const StThreeVector<double>& a,
 //       return (sector>12)? (StThreeVector<double>(result.x(),result.y(),a.z()-mDriftDistance))
 // 	: (StThreeVector<double>(result.x(),result.y(),-a.z()+mDriftDistance));
       double z = mDriftDistance-a.z();
+#if 0
       if (z > mDriftDistance) z = mDriftDistance;
       if (z < 1.e-5) z = 1.e-5;
+#endif
       if (sector > 12) z = -z;
       return StThreeVector<double>(result.x(),result.y(),z);
     }
@@ -705,12 +712,16 @@ StTpcCoordinateTransform::rotateFromLocal(const StThreeVector<double>& a,
       //	: (StThreeVector<double>(-result.x(),result.y(),-a.z()+mDriftDistance));
       if (sector > 12) {
 	double z = a.z()+mDriftDistance; 
+#if 0
 	if (z < 1.e-5) z = 1.e-5;
+#endif
 	return StThreeVector<double>(result.x(),result.y(),z);
       }
       else {
 	double z = a.z()-mDriftDistance;
+#if 0
 	if (z > -1.e-5) z = -1.e-5;
+#endif
 	return StThreeVector<double>(-result.x(),result.y(),-z);
       }
     }
