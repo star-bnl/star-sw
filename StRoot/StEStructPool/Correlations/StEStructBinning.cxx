@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.cxx,v 1.1 2003/10/15 18:20:46 porter Exp $
+ * $Id: StEStructBinning.cxx,v 1.2 2004/06/25 03:11:49 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -55,7 +55,7 @@ StEStructBinning::StEStructBinning(){
   //--> mt (x) ranges <--
   
   minMt=0.9; //0.15;
-  maxMt=4.5; // 0.925;
+  maxMt=5.0;//4.5; // 0.925;
   nMt = EBYE_MT_BINS-1;
   dMt = (maxMt-minMt)/(float)nMt;
 
@@ -80,6 +80,9 @@ StEStructBinning::StEStructBinning(){
 /***********************************************************************
  *
  * $Log: StEStructBinning.cxx,v $
+ * Revision 1.2  2004/06/25 03:11:49  porter
+ * New cut-binning implementation and modified pair-cuts for chunhui to review
+ *
  * Revision 1.1  2003/10/15 18:20:46  porter
  * initial check in of Estruct Analysis maker codes.
  *

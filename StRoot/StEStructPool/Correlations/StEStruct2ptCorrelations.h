@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.1 2003/10/15 18:20:46 porter Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.2 2004/06/25 03:11:49 porter Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -44,6 +44,8 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   int  manalysisMode; //! simple enumeration of analyses ...
   bool mskipPairCuts; //!
   bool mdoPairCutHistograms; //!
+  bool mInit;  //! found need when overridding this class
+  bool mDeleted;//! "     " ...
 
   StEStructEvent*        mCurrentEvent;  //!  pointer to EStruct2pt data 
   StEStructPairCuts      mPair; //! for pairs (1 at a time) and all pair cuts
@@ -59,10 +61,13 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   // All are arrays of 6 for 6 charged sign and combinatoric types;
   // 0,1,2 for Sibling (++,+-,--)
   // 3,4,5, for Mixed  (++,+-,--)
-
+  
   int numPairs[6];
   int numPairsProcessed[6];
   int mpossiblePairs[6];
+
+  TH1F* mHNEvents[2];
+
   deltaMtBins mDeltaMt[6]; //!
   TH1F * mHDeltaMt[6];//!
  
@@ -148,6 +153,8 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   int   getNumPairsProcessed(int i){ return numPairsProcessed[i]; };
   int   getPossiblePairs(int i){ return mpossiblePairs[i]; };
 
+  void logStats(ostream& os);
+
     ClassDef(StEStruct2ptCorrelations,1)
 };   
 
@@ -168,12 +175,31 @@ inline StEStructPairCuts& StEStruct2ptCorrelations::getPairCuts() {
   return mPair;
 }
 
+inline void StEStruct2ptCorrelations::logStats(ostream& os){
+  char* htp[]={"SibPP","SibPM","SibMM","MixPP","MixPM","MixMM"};
+  for(int i=0;i<6;i++){
+    os<<"<pairType>"<<htp[i]<<" "<<endl;;
+   os<<"   <processStat \"possiblePairs\">"<<getPossiblePairs(i);
+   os<<"</processStat> "<<endl;;
+   os<<"   <processStat \"inputPairs\">"<<getNumPairs(i);
+   os<<"</processStat> "<<endl;;
+   os<<"   <processStat \"outputPairs\">"<<getNumPairsProcessed(i);
+   os<<"</processStat> "<<endl;
+   os<<"</pairType>"<<endl;
+  }
+};
+
+
+
 #endif
 
 
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.2  2004/06/25 03:11:49  porter
+ * New cut-binning implementation and modified pair-cuts for chunhui to review
+ *
  * Revision 1.1  2003/10/15 18:20:46  porter
  * initial check in of Estruct Analysis maker codes.
  *

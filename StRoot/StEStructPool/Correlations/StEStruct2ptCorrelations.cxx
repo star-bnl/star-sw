@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.1 2003/10/15 18:20:46 porter Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.2 2004/06/25 03:11:48 porter Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -29,15 +29,16 @@
 #include "StEStructPool/EventMaker/StEStructEvent.h"
 #include "StEStructPool/EventMaker/StEStructTrack.h"
 #include "StTimer.hh"
+#include "StEStructCutBin.h"
 
 
 ClassImp(StEStruct2ptCorrelations)
 
 //--------------------------------------------------------------------------
-StEStruct2ptCorrelations::StEStruct2ptCorrelations(int mode): manalysisMode(mode), mskipPairCuts(false), mdoPairCutHistograms(false) {  init();  }
+StEStruct2ptCorrelations::StEStruct2ptCorrelations(int mode): manalysisMode(mode), mskipPairCuts(false), mdoPairCutHistograms(false) , mInit(false), mDeleted(false) {  init();  }
 
 //--------------------------------------------------------------------------
-StEStruct2ptCorrelations::StEStruct2ptCorrelations(const char* cutFileName, int mode): manalysisMode(mode), mskipPairCuts(false), mdoPairCutHistograms(false), mPair(cutFileName) {  init(); }
+StEStruct2ptCorrelations::StEStruct2ptCorrelations(const char* cutFileName, int mode): manalysisMode(mode), mskipPairCuts(false), mdoPairCutHistograms(false), mInit(false), mDeleted(false), mPair(cutFileName) {  init(); }
 
 //--------------------------------------------------------------------------
 StEStruct2ptCorrelations::~StEStruct2ptCorrelations(){ cleanUp(); };
@@ -57,6 +58,12 @@ void StEStruct2ptCorrelations::init(){
 
   for(int i=0;i<10;i++)mbuffCounter[i]=0;
   initArraysAndHistograms();
+
+  /* Event count via Nch distribution */
+mHNEvents[0]=new TH1F("NEventsSame","NEventsSame",1001,-0.5,1000.5);
+mHNEvents[1]=new TH1F("NEventsMixed","NEventsMixed",1001,-0.5,1000.5);
+
+  mInit=true;
 }
 
 //--------------------------------------------------------------------------
@@ -75,7 +82,9 @@ void StEStruct2ptCorrelations::finish(){
 
 //--------------------------------------------------------------------------
 void StEStruct2ptCorrelations::cleanUp(){ 
- deleteArraysAndHistograms(); 
+  if(mDeleted) return;
+  deleteArraysAndHistograms(); 
+  mDeleted=true;
 }
 
 
@@ -94,6 +103,7 @@ bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
 
   moveEvents();
   mCurrentEvent=event;
+  mHNEvents[0]->Fill(event->Ntrack());
   return makeSiblingAndMixedPairs();
 }
 
@@ -112,7 +122,7 @@ void StEStruct2ptCorrelations::moveEvents(){
 bool StEStruct2ptCorrelations::makeSiblingAndMixedPairs(){
 
   if(!mCurrentEvent) return false; // logic problem!
-  int i=(int)floor((mCurrentEvent->VertexZ()+25.)/5);
+  int i=(int)floor((mCurrentEvent->VertexZ()+25.)/5.);
   if(i<0 || i>9) return false;
 
   makePairs(mCurrentEvent,mCurrentEvent,0);
@@ -123,6 +133,7 @@ bool StEStruct2ptCorrelations::makeSiblingAndMixedPairs(){
   while(1){
     mMixingEvent=mbuffer[i].nextEvent();
     if(!mMixingEvent) break;
+      mHNEvents[1]->Fill(mMixingEvent->Ntrack());
       makePairs(mCurrentEvent,mMixingEvent,3);
       makePairs(mCurrentEvent,mMixingEvent,4);
       makePairs(mMixingEvent,mCurrentEvent,4);
@@ -140,6 +151,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
   StEStructTrackCollection* t2;
 
   StEStructBinning* b=StEStructBinning::Instance();
+  StEStructCutBin* cb=StEStructCutBin::Instance();
 
   mtBins**  mtmt   = mMtMt[j];
   etaBins** etaeta = mEtaEta[j];
@@ -235,7 +247,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
       mPair.SetTrack2(*Iter2);
       if( mskipPairCuts || mPair.cutPair(mdoPairCutHistograms)==0){
 	numPairsProcessed[j]++;
-        int iy=mPair.getYtBin();
+        int iy=cb->getCutBin(&mPair);
         //     cout<<"iy="<<iy<<endl;
         float weight=1.0;//mPair.SigmaPt();
          imt2  = b->imt(mPair.Track2()->Yt());
@@ -316,9 +328,9 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
 void StEStruct2ptCorrelations::fillHistograms(){
 
   StEStructBinning* b=StEStructBinning::Instance();
+  int numCutBins=StEStructCutBin::Instance()->getNumBins();
 
   for(int i=0; i<6; i++){
-
 
     for(int k=0;k<b->deltaMtBins();k++)
       mHDeltaMt[i]->Fill(b->deltaMtVal(k),mDeltaMt[i].dmt[k]);
@@ -355,7 +367,7 @@ void StEStruct2ptCorrelations::fillHistograms(){
     smtBins**  jtsetasmt  = mJtSEtaSMt[i];
     sphiBins** jtsetasphi = mJtSEtaSPhi[i];
 
-    for(int y=0;y<EBYE_YT_BINS;y++){
+    for(int y=0;y<numCutBins;y++){
 
     for(int k=0;k<b->mtBins();k++)
       for(int j=0;j<b->mtBins();j++)
@@ -417,8 +429,11 @@ void StEStruct2ptCorrelations::fillHistograms(){
 void StEStruct2ptCorrelations::writeHistograms(TFile* tf){
 
   tf->cd();
+  for(int j=0;j<2;j++)mHNEvents[j]->Write(); 
  
-  for(int j=0;j<EBYE_YT_BINS;j++){
+  int numCutBins=StEStructCutBin::Instance()->getNumBins();
+
+  for(int j=0;j<numCutBins;j++){
   for(int i=0;i<6;i++){
      mHMtMt[i][j]->Write();
      mHPhiPhi[i][j]->Write();
@@ -436,7 +451,7 @@ void StEStruct2ptCorrelations::writeHistograms(TFile* tf){
       mHsphis[i]->Write();
   };
 
-  for(int j=0;j<EBYE_YT_BINS;j++){
+  for(int j=0;j<numCutBins;j++){
   for(int i=0;i<6;i++){
       mHJtDMtDPhi[i][j]->Write();
       mHJtDEtaDMt[i][j]->Write();
@@ -444,7 +459,7 @@ void StEStruct2ptCorrelations::writeHistograms(TFile* tf){
   }
   }
 
-  for(int j=0;j<EBYE_YT_BINS;j++){
+  for(int j=0;j<numCutBins;j++){
   for(int i=0;i<6;i++){
      mHAtSMtDMt[i][j]->Write();
      mHAtSPhiDPhi[i][j]->Write();
@@ -452,7 +467,7 @@ void StEStruct2ptCorrelations::writeHistograms(TFile* tf){
   }
   }
 
-  for(int j=0;j<EBYE_YT_BINS;j++){
+  for(int j=0;j<numCutBins;j++){
   for(int i=0;i<6;i++){
      mHJtSMtSPhi[i][j]->Write();
      mHJtSEtaSMt[i][j]->Write();
@@ -464,22 +479,24 @@ void StEStruct2ptCorrelations::writeHistograms(TFile* tf){
 //--------------------------------------------------------------------------
 void StEStruct2ptCorrelations::initArraysAndHistograms(){
 
+  int numCutBins=StEStructCutBin::Instance()->getNumBins();
+
   for(int i=0;i<6;i++){
-     mMtMt[i]=new mtBins*[EBYE_YT_BINS];
-     mEtaEta[i]=new etaBins*[EBYE_YT_BINS];
-     mPhiPhi[i]=new phiBins*[EBYE_YT_BINS];
-     mAtSMtDMt[i]=new dmtBins*[EBYE_YT_BINS];
-     mAtSEtaDEta[i]=new detaBins*[EBYE_YT_BINS];
-     mAtSPhiDPhi[i]=new dphiBins*[EBYE_YT_BINS];
-     mJtDMtDPhi[i]=new dphiBins*[EBYE_YT_BINS];
-     mJtDEtaDMt[i]=new dmtBins*[EBYE_YT_BINS];
-     mJtDEtaDPhi[i]=new dphiBins*[EBYE_YT_BINS];
-     mJtSMtSPhi[i]=new sphiBins*[EBYE_YT_BINS];
-     mJtSEtaSMt[i]=new smtBins*[EBYE_YT_BINS];
-     mJtSEtaSPhi[i]=new sphiBins*[EBYE_YT_BINS];    
+     mMtMt[i]=new mtBins*[numCutBins];
+     mEtaEta[i]=new etaBins*[numCutBins];
+     mPhiPhi[i]=new phiBins*[numCutBins];
+     mAtSMtDMt[i]=new dmtBins*[numCutBins];
+     mAtSEtaDEta[i]=new detaBins*[numCutBins];
+     mAtSPhiDPhi[i]=new dphiBins*[numCutBins];
+     mJtDMtDPhi[i]=new dphiBins*[numCutBins];
+     mJtDEtaDMt[i]=new dmtBins*[numCutBins];
+     mJtDEtaDPhi[i]=new dphiBins*[numCutBins];
+     mJtSMtSPhi[i]=new sphiBins*[numCutBins];
+     mJtSEtaSMt[i]=new smtBins*[numCutBins];
+     mJtSEtaSPhi[i]=new sphiBins*[numCutBins];    
   }
 
-  for(int j=0;j<EBYE_YT_BINS;j++){
+  for(int j=0;j<numCutBins;j++){
    for(int i=0;i<6;i++){
      mMtMt[i][j]=new mtBins[EBYE_MT_BINS];
      memset(mMtMt[i][j],0,EBYE_MT_BINS*sizeof(mtBins));
@@ -567,66 +584,69 @@ void StEStruct2ptCorrelations::initArraysAndHistograms(){
     TString htSPhi("SPhi"); htSPhi+=bTitle[i];
     mHsphis[i]=new TH1F(hnSPhi.Data(),htSPhi.Data(),b->sphiBins(),b->sphiMin(),b->sphiMax());
 
-    mHMtMt[i]=new TH2F*[EBYE_YT_BINS];
-    mHEtaEta[i]=new TH2F*[EBYE_YT_BINS];
-    mHPhiPhi[i]=new TH2F*[EBYE_YT_BINS];
-    mHAtSMtDMt[i]=new TH2F*[EBYE_YT_BINS];
-    mHAtSEtaDEta[i]=new TH2F*[EBYE_YT_BINS];
-    mHAtSPhiDPhi[i]=new TH2F*[EBYE_YT_BINS];
-    mHJtDMtDPhi[i]=new TH2F*[EBYE_YT_BINS];
-    mHJtDEtaDMt[i]=new TH2F*[EBYE_YT_BINS];
-    mHJtDEtaDPhi[i]=new TH2F*[EBYE_YT_BINS];
-    mHJtSMtSPhi[i]=new TH2F*[EBYE_YT_BINS];
-    mHJtSEtaSMt[i]=new TH2F*[EBYE_YT_BINS];
-    mHJtSEtaSPhi[i]=new TH2F*[EBYE_YT_BINS];
+    mHMtMt[i]=new TH2F*[numCutBins];
+    mHEtaEta[i]=new TH2F*[numCutBins];
+    mHPhiPhi[i]=new TH2F*[numCutBins];
+    mHAtSMtDMt[i]=new TH2F*[numCutBins];
+    mHAtSEtaDEta[i]=new TH2F*[numCutBins];
+    mHAtSPhiDPhi[i]=new TH2F*[numCutBins];
+    mHJtDMtDPhi[i]=new TH2F*[numCutBins];
+    mHJtDEtaDMt[i]=new TH2F*[numCutBins];
+    mHJtDEtaDPhi[i]=new TH2F*[numCutBins];
+    mHJtSMtSPhi[i]=new TH2F*[numCutBins];
+    mHJtSEtaSMt[i]=new TH2F*[numCutBins];
+    mHJtSEtaSPhi[i]=new TH2F*[numCutBins];
 
-    for(int j=0;j<EBYE_YT_BINS;j++){
-    TString hnMtMt(bName[i]); hnMtMt+="MtMt"; hnMtMt+=j;
+    bool ytcuts=false;
+    if(numCutBins>1)ytcuts=true;
+
+    for(int j=0;j<numCutBins;j++){
+    TString hnMtMt(bName[i]); hnMtMt+="MtMt"; if(ytcuts)hnMtMt+=j;
     TString htMtMt("MtMt"); htMtMt+=bTitle[i]; 
     mHMtMt[i][j]=new TH2F(hnMtMt.Data(),htMtMt.Data(),b->mtBins(),b->mtMin(),b->mtMax(),b->mtBins(),b->mtMin(),b->mtMax());
 
-    TString hnEtaEta(bName[i]); hnEtaEta+="EtaEta"; hnEtaEta+=j;
+    TString hnEtaEta(bName[i]); hnEtaEta+="EtaEta"; if(ytcuts)hnEtaEta+=j;
     TString htEtaEta("EtaEta"); htEtaEta+=bTitle[i];
     mHEtaEta[i][j]=new TH2F(hnEtaEta.Data(),htEtaEta.Data(),b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
 
-    TString hnPhiPhi(bName[i]); hnPhiPhi+="PhiPhi"; hnPhiPhi+=j;
+    TString hnPhiPhi(bName[i]); hnPhiPhi+="PhiPhi"; if(ytcuts)hnPhiPhi+=j;
     TString htPhiPhi("PhiPhi"); htPhiPhi+=bTitle[i];
     mHPhiPhi[i][j]=new TH2F(hnPhiPhi.Data(),htPhiPhi.Data(),b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
 
-    TString hnSMtDMt(bName[i]); hnSMtDMt+="SMtDMt"; hnSMtDMt+=j;
+    TString hnSMtDMt(bName[i]); hnSMtDMt+="SMtDMt"; if(ytcuts)hnSMtDMt+=j;
     TString htSMtDMt("Auto SMtDMt"); htSMtDMt+=bTitle[i];
     mHAtSMtDMt[i][j]=new TH2F(hnSMtDMt.Data(),htSMtDMt.Data(),b->smtBins(),b->smtMin(),b->smtMax(),b->dmtBins(),b->dmtMin(),b->dmtMax());
 
-    TString hnSEtaDEta(bName[i]); hnSEtaDEta+="SEtaDEta"; hnSEtaDEta+=j;
+    TString hnSEtaDEta(bName[i]); hnSEtaDEta+="SEtaDEta"; if(ytcuts)hnSEtaDEta+=j;
     TString htSEtaDEta("Auto SEtaDEta"); htSEtaDEta+=bTitle[i];
     mHAtSEtaDEta[i][j]=new TH2F(hnSEtaDEta.Data(),htSEtaDEta.Data(),b->setaBins(),b->setaMin(),b->setaMax(),b->detaBins(),b->detaMin(),b->detaMax());
 
-    TString hnSPhiDPhi(bName[i]); hnSPhiDPhi+="SPhiDPhi"; hnSPhiDPhi+=j;
+    TString hnSPhiDPhi(bName[i]); hnSPhiDPhi+="SPhiDPhi"; if(ytcuts)hnSPhiDPhi+=j;
     TString htSPhiDPhi("Auto SPhiDPhi"); htSPhiDPhi+=bTitle[i];
     mHAtSPhiDPhi[i][j]=new TH2F(hnSPhiDPhi.Data(),htSPhiDPhi.Data(),b->sphiBins(),b->sphiMin(),b->sphiMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
 
-    TString hnDMtDPhi(bName[i]); hnDMtDPhi+="DMtDPhi"; hnDMtDPhi+=j;
+    TString hnDMtDPhi(bName[i]); hnDMtDPhi+="DMtDPhi"; if(ytcuts)hnDMtDPhi+=j;
     TString htDMtDPhi("Joint DMtDPhi"); htDMtDPhi+=bTitle[i];
     mHJtDMtDPhi[i][j]=new TH2F(hnDMtDPhi.Data(),htDMtDPhi.Data(),b->dmtBins(),b->dmtMin(),b->dmtMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
 
-    TString hnDEtaDMt(bName[i]); hnDEtaDMt+="DEtaDMt"; hnDEtaDMt+=j;
+    TString hnDEtaDMt(bName[i]); hnDEtaDMt+="DEtaDMt"; if(ytcuts)hnDEtaDMt+=j;
     TString htDEtaDMt("Joint DEtaDMt"); htDEtaDMt+=bTitle[i];
     mHJtDEtaDMt[i][j]=new TH2F(hnDEtaDMt.Data(),htDEtaDMt.Data(),b->detaBins(),b->detaMin(),b->detaMax(),b->dmtBins(),b->dmtMin(),b->dmtMax());
 
-    TString hnDEtaDPhi(bName[i]); hnDEtaDPhi+="DEtaDPhi"; hnDEtaDPhi+=j;
+    TString hnDEtaDPhi(bName[i]); hnDEtaDPhi+="DEtaDPhi"; if(ytcuts)hnDEtaDPhi+=j;
     TString htDEtaDPhi("Joint DEtaDPhi"); htDEtaDPhi+=bTitle[i];
     mHJtDEtaDPhi[i][j]=new TH2F(hnDEtaDPhi.Data(),htDEtaDPhi.Data(),b->detaBins(),b->detaMin(),b->detaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
 
-    TString hnSMtSPhi(bName[i]); hnSMtSPhi+="SMtSPhi"; hnSMtSPhi+=j;
+    TString hnSMtSPhi(bName[i]); hnSMtSPhi+="SMtSPhi"; if(ytcuts)hnSMtSPhi+=j;
     TString htSMtSPhi("Joint SMtSPhi"); htSMtSPhi+=bTitle[i];
     mHJtSMtSPhi[i][j]=new TH2F(hnSMtSPhi.Data(),htSMtSPhi.Data(),b->smtBins(),b->smtMin(),b->smtMax(),b->sphiBins(),b->sphiMin(),b->sphiMax());
 
 
-    TString hnSEtaSMt(bName[i]); hnSEtaSMt+="SEtaSMt"; hnSEtaSMt+=j; 
+    TString hnSEtaSMt(bName[i]); hnSEtaSMt+="SEtaSMt"; if(ytcuts)hnSEtaSMt+=j; 
     TString htSEtaSMt("Joint SEtaSMt"); htSEtaSMt+=bTitle[i];
     mHJtSEtaSMt[i][j]=new TH2F(hnSEtaSMt.Data(),htSEtaSMt.Data(),b->setaBins(),b->setaMin(),b->setaMax(),b->smtBins(),b->smtMin(),b->smtMax());
 
-    TString hnSEtaSPhi(bName[i]); hnSEtaSPhi+="SEtaSPhi"; hnSEtaSPhi+=j;
+    TString hnSEtaSPhi(bName[i]); hnSEtaSPhi+="SEtaSPhi"; if(ytcuts)hnSEtaSPhi+=j;
     TString htSEtaSPhi("Joint SEtaSPhi"); htSEtaSPhi+=bTitle[i];
     mHJtSEtaSPhi[i][j]=new TH2F(hnSEtaSPhi.Data(),htSEtaSPhi.Data(),b->setaBins(),b->setaMin(),b->setaMax(),b->sphiBins(),b->sphiMin(),b->sphiMax());
 
@@ -638,10 +658,11 @@ void StEStruct2ptCorrelations::initArraysAndHistograms(){
 //--------------------------------------------------------------------------
 void StEStruct2ptCorrelations::deleteArraysAndHistograms(){
 
+  int numCutBins=StEStructCutBin::Instance()->getNumBins();
 
   for(int i=0;i<6;i++){
 
-   for(int j=0;j<EBYE_YT_BINS;j++){
+   for(int j=0;j<numCutBins;j++){
 
    delete [] mMtMt[i][j];
    delete []  mEtaEta[i][j];
@@ -678,7 +699,7 @@ void StEStruct2ptCorrelations::deleteArraysAndHistograms(){
     delete mHsetas[i];
     delete mHdphis[i];
     delete mHsphis[i];
-    for(int j=0;j<EBYE_YT_BINS;j++){
+    for(int j=0;j<numCutBins;j++){
    delete mHMtMt[i][j];
    delete mHEtaEta[i][j];
    delete mHPhiPhi[i][j];
@@ -713,6 +734,9 @@ void StEStruct2ptCorrelations::deleteArraysAndHistograms(){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.2  2004/06/25 03:11:48  porter
+ * New cut-binning implementation and modified pair-cuts for chunhui to review
+ *
  * Revision 1.1  2003/10/15 18:20:46  porter
  * initial check in of Estruct Analysis maker codes.
  *

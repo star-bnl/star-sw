@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.h,v 1.3 2004/06/10 17:09:22 msd Exp $
+ * $Id: StEStructBinning.h,v 1.4 2004/06/25 03:11:49 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -14,6 +14,7 @@
 #define __STEBYEBINNING__H
 
 #include <math.h>
+
 /*
  *  I made these c-structs as floats in order to able to have them contain
  *  more than just the counts. If wts are added I need another word
@@ -26,9 +27,8 @@
 // 25 + 1 over&under
 #define EBYE_PHI_BINS 26
 #define EBYE_ETA_BINS 26
-#define EBYE_MT_BINS 40
+#define EBYE_MT_BINS 26
 #define EBYE_DELTAMT_BINS 26
-#define EBYE_YT_BINS 28
 
 #define EBYE_DPHI_BINS 26
 #define EBYE_DETA_BINS 26
@@ -237,6 +237,7 @@ inline int StEStructBinning::ideta(float eta){
 
 inline int StEStructBinning::iseta(float eta){
   if( eta < minSEta ) return EBYE_ETA_BINS - 1;
+  int j = (int)( (eta-minSEta)/dSEta );
   return (j > EBYE_SETA_BINS - 2) ? EBYE_SETA_BINS - 1 : j;
 }
 
@@ -297,6 +298,9 @@ inline float StEStructBinning::deltaMtVal(int ideltaMt){
 /***********************************************************************
  *
  * $Log: StEStructBinning.h,v $
+ * Revision 1.4  2004/06/25 03:11:49  porter
+ * New cut-binning implementation and modified pair-cuts for chunhui to review
+ *
  * Revision 1.3  2004/06/10 17:09:22  msd
  * Quick-fixed EBYE_YT_BINS.  Better implementation of cut-binning on the way...
  *
