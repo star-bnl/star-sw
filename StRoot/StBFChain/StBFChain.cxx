@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.461 2005/01/31 20:16:57 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.462 2005/02/04 16:14:20 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -474,13 +474,6 @@ Bfc_st BFC1[] = { // standard chains
   {"Est"         ,"","svtChain","globT"              ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
 
 
-  {"emcDY2"   ,"emcRaw","emcY2",
-  "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
-                                                                        "B/E EMC data common maker",kFALSE},
-  {"emcAtoE"  ,"","" ,"db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker", "B-EMC ADC to E converter",kFALSE},
-  {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
-
-
   {"global"      ,"globalChain","","globT,Match,vertex,primary,dst,SCL,dEdxY2"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
@@ -503,14 +496,26 @@ Bfc_st BFC1[] = { // standard chains
   {"FindVtxSeed" ,"FindVtxSeed","","","StVertexSeedMaker","St_global,St_dst_Maker,StPass0CalibMaker",
 
                                                                      "Performs vertex seed finding",kFALSE},
+
   {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil,-dEdxY2", "StdEdxMaker","StdEdxMaker",
                                                                          "Regular dEdx calculation",kFALSE},
   {"svtdEdx"     ,"svtdEdx","globalChain","globT,TbUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
-
   {"Event",  "","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation/filling>",kFALSE},
+
+
+
+  {"emcDY2"   ,"emcRaw","emcY2",
+  "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
+                                                                        "B/E EMC data common maker",kFALSE},
+  {"emcAtoE"  ,"","" ,"db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker", "B-EMC ADC to E converter",kFALSE},
+  {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
+
+
+
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
+
 
 
   {"Ftpc"      ,"ftpcChain"  ,"","ftpcT,fcl,fpt"                            ,"StMaker","StChain","",kFALSE},
@@ -1117,12 +1122,6 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Est"         ,"","svtChain","globT"              ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
 
 
-  {"emcDY2"   ,"emcRaw","emcY2",
-  "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
-                                                                        "B/E EMC data common maker",kFALSE},
-  {"emcAtoE"  ,"","" ,"db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker", "B-EMC ADC to E converter",kFALSE},
-  {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
-
 
   //  Reminder: You are within the ITTF chain definitions
   {"global"      ,"globalChain","","globT,Match,vertex,primary,dst,SCL,dEdxY2"
@@ -1156,12 +1155,25 @@ Bfc_st BFC2[] = { // ITTF Chains
 
   //  Reminder: You are within the ITTF chain definitions
   {"Event"  ,"","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation/filling>",kFALSE},
+
+
+
+  {"emcDY2"   ,"emcRaw","emcY2",
+  "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
+                                                                        "B/E EMC data common maker",kFALSE},
+  {"emcAtoE"  ,"","" ,"db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker", "B-EMC ADC to E converter",kFALSE},
+  {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
+
+
+
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"genvtx"      ,"","","","StGenericVertexMaker","Sti,StGenericVertexMaker","Generic Vertex Finder",kFALSE},
   {"Mc"          ,"McChain","McEvent","sim_T,globT,McAss,McAna"             ,"StMaker","StChain","",kFALSE},
   {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
+
+
   {"Sti"         ,"Sti","","SCL,StEvent,tables,McEvent,TpcDb,SvtDb,ssdDb","StiMaker",
-   "libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc",                 "ITTF tracker",kFALSE},
+   "libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiEmc,StiFtpc",                 "ITTF tracker",kFALSE},
   {"dEdxY2"      ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
@@ -1600,10 +1612,10 @@ Int_t StBFChain::Instantiate()
 
 	    pars->useSvt=kTRUE;         // SVT used in Sti but not active. ??
 	                                // Pre-2001 data, will build only 1 ladder?
-	    pars->useSsd=kTRUE;         // use SSD in Sti
+	    //pars->useSsd=kTRUE;         // use SSD in Sti
 
 	    if (GetOption("SvtIT")) pars->activeSvt=kTRUE;
-	    if (GetOption("SsdIT")) pars->activeSsd=kTRUE;
+	    //if (GetOption("SsdIT")) pars->activeSsd=kTRUE;
 	    if (GetOption("FtpcIT")){
 	      pars->useFtpc=kTRUE;
 	      pars->activeFtpc=kTRUE;
