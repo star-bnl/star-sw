@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.120 1999/09/18 01:12:06 fisyak Exp $
+# $Id: MakePam.mk,v 1.121 1999/09/24 22:18:28 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.121  1999/09/24 22:18:28  fisyak
+# Add new Table method (VF), fix bug in VPATH
+#
 # Revision 1.120  1999/09/18 01:12:06  fisyak
 # Add CERN_ROOT/include
 #
@@ -319,7 +322,8 @@ echo "  St_$(STEM)() : St_Table(\"$(STEM)\",sizeof($(STEM)_st)) {SetType(\"$(STE
 echo "  St_$(STEM)(Text_t *name) : St_Table(name,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}          ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
 echo "  St_$(STEM)(Int_t n): St_Table(\"$(STEM)\",n,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}   ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
 echo "  St_$(STEM)(Text_t *name,Int_t n): St_Table(name,n,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");} ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "  $(STEM)_st *GetTable(){ return ($(STEM)_st *)s_Table;}                                            ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
+echo "  $(STEM)_st *GetTable(Int_t i=0){ return ($(STEM)_st *)s_Table+i;}                           ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
+echo "  $(STEM)_st &operator[](Int_t i){ assert(i<0 || i >= GetNRows()); return *GetTable(i); }     ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
 echo "                                           ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
 echo "  ClassDef(St_$(STEM),0) // class particle STAF tables  ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
 echo "};                                                            ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\

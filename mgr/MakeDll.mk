@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.113 1999/09/13 22:19:48 fisyak Exp $
+# $Id: MakeDll.mk,v 1.114 1999/09/24 22:18:27 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.114  1999/09/24 22:18:27  fisyak
+# Add new Table method (VF), fix bug in VPATH
+#
 # Revision 1.113  1999/09/13 22:19:48  fisyak
 # Add inlclude and include/tables in CPP path
 #
@@ -339,19 +342,18 @@ INPUT_DIRS  += $(SRC_DIRS)
 #    	non existing directories
 MAKEDIRS := $(shell mkdir -p $(OUTPUT_DIRS))
 
-VPATH =  $(INPUT_DIRS) $(OUTPUT_DIRS)
+VPATH =  $(INPUT_DIRS) $(OUTPUT_DIRS) $(GEN_TAB_INC)
 
 FILES_MOD  := $(wildcard $(SRC_DIR)/St_*_Module.cxx)
-ifneq (tables,$(PKGNAME))
-FILES_TAB  := $(wildcard $(GEN_TAB_INC)/St_*_Table.cxx)
-#FILES_HH   := $(wildcard $(SRC_DIR)/*.h $(SRC_DIR)/*.hh $(SRC_DIR)/*.h $(SRC_DIR)/*.hh)
+ifeq (tables,$(PKGNAME)) 
+FILES_TAB  := $(wildcard $(GEN_TAB)/St_*_Table.cxx)
+#FILES_H    := $(wildcard $(GEN_TAB_INC)/St_*_Table.h)
+else
 FILES_HH   := $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.h) $(wildcard $(dir)/*.hh))
 FILES_HH := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_HH)))
 ifneq (,$(FILES_HH))
 FILES_H    := $(foreach p, $(FILES_HH), $(shell grep -l ClassDef $(p)))
 endif
-else
-FILES_H    := $(wildcard $(SRC_DIR)/St*Table.h)
 endif
 FILES_ST   := $(FILES_TAB) $(FILES_MOD) 
 NAMES_ST   := $(basename $(notdir $(FILES_ST)))
@@ -362,7 +364,7 @@ FILES_ORD  := $(FILES_ALL)
 ifdef FILES_TAB
   NAMES_TAB      := $(strip $(subst _Table,,$(subst St_,,$(basename $(notdir $(FILES_TAB))))))
   FILES_CINT_TAB := $(addprefix $(GEN_DIR)/St_,$(addsuffix _TableCint.cxx,$(NAMES_TAB)))
-  FILES_H        := $(filter-out $(subst .cxx,.h,$(FILES_TAB)), $(FILES_H))
+#  FILES_H        := $(filter-out $(subst .cxx,.h,$(FILES_TAB)), $(FILES_H))
 endif
 
 ifdef FILES_MOD
@@ -515,14 +517,14 @@ $(FILES_CINT_DEF) : $(FILES_DEF_H)  $(LinkDef)
         $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(FILES_DEF_H)) \
         $(notdir $(LinkDef))
 
-$(FILES_CINT_TAB) : $(GEN_DIR)/St_%_TableCint.cxx : $(SRC_DIR)/St_%_Table.h 
+$(FILES_CINT_TAB) : $(GEN_DIR)/St_%_TableCint.cxx : $(GEN_TAB_INC)/St_%_Table.h 
 	$(COMMON_LINKDEF)
 	echo "#pragma link C++ class St_$(STEM)-;"	>> $(LINKDEF);
 	echo "#pragma link C++ class $(STEM)_st-!;"	>> $(LINKDEF);
 	echo "#endif"					>> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
 	cd $(GEN_DIR); \
-	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
+	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) -I$(GEN_TAB_INC) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
 
 $(FILES_CINT_MOD) : $(FILES_MOD_H) $(FILES_MOD_HS)
 	$(COMMON_LINKDEF)

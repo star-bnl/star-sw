@@ -64,14 +64,16 @@ my @h_filesL = find_hfiles($Dir);   #$i = 0; for my $s (@h_files) {print "i=",$i
 my @Repo = Repository_List;# print "Repositories = |@Repo|\n";
 foreach my $Rep (@Repo) {
   my $RepDir = $Rep . "/" . $Dir;# print "RepDir = $RepDir\n";
-  my @srcR = find_sources($RepDir);
-  foreach my $i (@srcR) {
-#    push @srcL, "#" . $Dir . "/" . $i; 
-    push @srcL,  $i; 
-  }
-  my @h_filesR = find_hfiles($RepDir);
-  foreach my $i (@h_filesR) {
-    push @h_filesL, $i; 
+  if (-d $RepDir) {
+    my @srcR = find_sources($RepDir);
+    foreach my $i (@srcR) {
+      #    push @srcL, "#" . $Dir . "/" . $i; 
+      push @srcL,  $i; 
+    }
+    my @h_filesR = find_hfiles($RepDir);
+    foreach my $i (@h_filesR) {
+      push @h_filesL, $i; 
+    }
   }
 }
 my @src = sortu (@srcL);# print "@src\n";

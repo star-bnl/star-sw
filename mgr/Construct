@@ -349,7 +349,7 @@ foreach my $dir ("StRoot","pams") {
 	  $sub_dir =~ /^StAssociationMaker$/    ||
 	  $sub_dir =~ /^StMcAnalysisMaker$/    ||
 	  $sub_dir =~ /^StHbt/    ||
-#	  $sub_dir =~ /^StTrsMaker$/    ||
+	  $sub_dir =~ /^St_baseTest$/    ||
 	  $sub_dir =~ /^StTpcDb$/    ||
 	  $sub_dir =~ /^StDbMaker$/    ||
           $sub_dir =~ /^test$/)  {next;}
