@@ -1,5 +1,9 @@
-* $Id: tpt_row_sect_pnt.F,v 1.9 1998/11/30 19:07:56 sakrejda Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.10 1999/03/30 15:55:04 love Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.10  1999/03/30 15:55:04  love
+* Spelling.  make_segment_uv removed doubling of tolerance on row skip.
+*  row_sect_point remove check on sector z position
+*
 * Revision 1.9  1998/11/30 19:07:56  sakrejda
 * double declaration for isect (found by Valeri) removed
 *
@@ -91,18 +95,19 @@ C        clean up sector assignement.
          xglobal(2)=hit(i).y
          xglobal(3)=hit(i).z
 c        check what xy and z says about the sector.
-         iret=tgc_global_to_sector(isec2,xglobal)
-         isec3=int(hit(i).row/100)
-         if(isec3.ne.isec2) then
-           write(m132,*) 'TPTI1-E1 sector missmatch',isec3,isec2,xglobal
-           call message(m132,1,idI1)
-           isec3=isec2
+C         iret=tgc_global_to_sector(isec2,xglobal)
+C         isec3=int(hit(i).row/100)
+C         if(isec3.ne.isec2) then
+C           write(m132,*) 'TPTI1-E1 sector missmatch',isec3,isec2,xglobal
+C           call message(m132,1,idI1)
+C           isec3=isec2
 c          repair it
-           hit(i).row = isec3*100+mod(hit(i).row,100)
-         endif
+C           hit(i).row = isec3*100+mod(hit(i).row,100)
+C         endif
          if(xglobal(3).gt.0) then
             rhit(i)=hit(i).row
          else
+            isec3=int(hit(i).row/100)
             iret=tgc_sec24_to_sec12(isec3,isect)
             rhit(i) = isect*100+mod(hit(i).row,100)
          endif

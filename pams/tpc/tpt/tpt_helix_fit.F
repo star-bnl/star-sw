@@ -1,5 +1,9 @@
-* $Id: tpt_helix_fit.F,v 1.3 1998/05/26 04:15:13 sakrejda Exp $
+* $Id: tpt_helix_fit.F,v 1.4 1999/03/30 15:55:01 love Exp $
 * $Log: tpt_helix_fit.F,v $
+* Revision 1.4  1999/03/30 15:55:01  love
+* Spelling.  make_segment_uv removed doubling of tolerance on row skip.
+*  row_sect_point remove check on sector z position
+*
 * Revision 1.3  1998/05/26 04:15:13  sakrejda
 * message type set to E to limit printing
 *
@@ -70,7 +74,7 @@ C
           endif
           tpt_helix_fit =  STAFCV_BAD
       else
-C        eveluate charge
+C        evaluate charge
          if(tpar(ipass).debug(2).eq.1) then
             write(6,*) 'out from utcfit - no error'
          endif

@@ -1,5 +1,9 @@
-* $Id: tpt_make_segment_uv.F,v 1.7 1998/09/01 13:32:36 sakrejda Exp $
+* $Id: tpt_make_segment_uv.F,v 1.8 1999/03/30 15:55:02 love Exp $
 * $Log: tpt_make_segment_uv.F,v $
+* Revision 1.8  1999/03/30 15:55:02  love
+* Spelling.  make_segment_uv removed doubling of tolerance on row skip.
+*  row_sect_point remove check on sector z position
+*
 * Revision 1.7  1998/09/01 13:32:36  sakrejda
 * restored sector numbering 1-24 in tphit.row
 *
@@ -92,6 +96,7 @@ C     Local variables
       REAL    at,bt,az,bz,stot
       REAL    phi,x0,y0,rc,da,ds
       REAL    xglobal(3), dummy
+      REAL    foo1, foo2, foo3
 
       LOGICAL sector_change
       
@@ -245,7 +250,8 @@ C          check there are hits here
                    dz = hit(i).z-zp1
                    dfir = dx**2+dy**2
                    fact=1.0
-                   if(ir1.lt.14.or.drow.gt.1) fact=2.0
+                   if(ir1.lt.14) fact=2.0
+C                   if(ir1.lt.14.or.drow.gt.1) fact=2.0
                    tolr2 = (fact*tpar(ipass).drplim*hit(i).prf)**2
                    if(dfir.lt.tolr2) then
                      disr2 = dy**2+dx**2+dz**2
