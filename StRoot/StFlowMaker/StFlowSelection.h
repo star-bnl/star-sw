@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.7 2000/09/13 00:32:27 snelling Exp $
+// $Id: StFlowSelection.h,v 1.8 2000/09/15 01:20:03 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.8  2000/09/15 01:20:03  snelling
+// Added methods for P and Y and added selection on Y
+//
 // Revision 1.7  2000/09/13 00:32:27  snelling
 // Added selections for particles correlated with reaction plane
 //
@@ -71,12 +74,11 @@ class StFlowSelection : public StObject {
   void    SetPidPart(const Char_t*);
   void    SetPtPart(const Float_t, const Float_t);
   void    SetEtaPart(const Float_t, const Float_t);
-
+  void    SetYPart(const Float_t, const Float_t);
   void    SetFitPtsPart(const Int_t, const Int_t);
   void    SetFitOverMaxPtsPart(const Float_t, const Float_t);
   void    SetChiSqPart(const Float_t, const Float_t);
   void    SetDcaPart(const Float_t, const Float_t);
-
   void    SetHarmonic(const Int_t&);
   void    SetSelection(const Int_t&);
   void    SetSubevent(const Int_t&);
@@ -85,12 +87,12 @@ class StFlowSelection : public StObject {
 
   Char_t  mNumber[3];                        // selection number
   UInt_t  mCentrality;                       // centrality bin
-  Char_t  mPid[10];                          // "pi-", "pi+", "pi", "k+", "k-", 
-                                             //"pbar", "proton" or "deuteron"
+  Char_t  mPid[10];                          // pi-, pi+, pi, k+, k-, 
+                                             // pbar, proton or deuteron
   Char_t  mPidPart[10];                      // PID for particles wrt plane
   Float_t mPtPart[2];                        // pt cuts for parts. wrt plane
   Float_t mEtaPart[2];                       // eta cuts for parts. wrt plane
-
+  Float_t mYPart[2];                         // rapidity cuts 
   Int_t   mFitPtsPart[2];                    // for parts. wrt plane
   Float_t mFitOverMaxPtsPart[2];             // for parts. wrt plane
   Float_t mChiSqPart[2];                     // for parts. wrt plane
@@ -137,6 +139,9 @@ inline void StFlowSelection::SetPtPart(Float_t lo, Float_t hi) {
 
 inline void StFlowSelection::SetEtaPart(Float_t lo, Float_t hi) {
   mEtaPart[0] = lo; mEtaPart[1] = hi; }
+
+inline void StFlowSelection::SetYPart(Float_t lo, Float_t hi) {
+  mYPart[0] = lo; mYPart[1] = hi; }
 
 inline void StFlowSelection::SetFitPtsPart(Int_t lo, Int_t hi) {
   mFitPtsPart[0] = lo; mFitPtsPart[1] = hi; }
