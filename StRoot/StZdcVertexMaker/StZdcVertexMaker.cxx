@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcVertexMaker.cxx,v 1.2 2001/08/31 19:07:36 macross Exp $
+ * $Id: StZdcVertexMaker.cxx,v 1.3 2001/10/05 13:39:56 jeromel Exp $
  *
  * Author:  Johan E. Gonzalez, August 2001
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StZdcVertexMaker.cxx,v $
+ * Revision 1.3  2001/10/05 13:39:56  jeromel
+ * Changes made by Lee Barnby.
+ *
  * Revision 1.2  2001/08/31 19:07:36  macross
  * Modified code to retrieve ADC and TDC pulses from TrgDet table
  *
@@ -36,7 +39,7 @@
 
 //#include "StEventMaker/StEventMaker.h"
 
-static const char rcsid[] = "$Id: StZdcVertexMaker.cxx,v 1.2 2001/08/31 19:07:36 macross Exp $";
+static const char rcsid[] = "$Id: StZdcVertexMaker.cxx,v 1.3 2001/10/05 13:39:56 jeromel Exp $";
 
 ClassImp(StZdcVertexMaker)
 
@@ -126,16 +129,16 @@ Int_t StZdcVertexMaker::Make()
     //  Get ZDC trigger
     //
 
-    TDataSet *triggerDS = GetDataSet("trg");
-    if (!triggerDS)
-    {
-        gMessMgr->Error() << "StZdcVertexMaker::Make():  GetDataSet() in ZdcVertexMaker did not find Data Set ." << endm;
-        return kStErr;
-    }
+  //TDataSet *triggerDS = GetDataSet("trg");
+  //if (!triggerDS)
+  // {
+  //    gMessMgr->Error() << "StZdcVertexMaker::Make():  GetDataSet() in ZdcVertexMaker did not find Data Set ." << endm;
+  //   return kStErr;
+  // }
 
-    St_DataSetIter triggerI(triggerDS);
-    St_dst_TrgDet *triggertable = (St_dst_TrgDet *) triggerI("TrgDet");         
-    dst_TrgDet_st *tt = triggertable->GetTable();
+    // St_DataSetIter triggerI(triggerDS);
+    St_dst_TrgDet *triggertable = (St_dst_TrgDet *)GetDataSet("TrgDet");         
+    dst_TrgDet_st *tt =(dst_TrgDet_st *) triggertable->GetTable();
 
 /*
     StTriggerDetectorCollection *theTriggers = event->triggerDetectorCollection();
