@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.19 2004/08/11 02:09:35 deph Exp $
+ * $Id: StDbManagerImpl.cc,v 1.20 2005/01/25 22:05:48 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.20  2005/01/25 22:05:48  deph
+ * Reset precedence for connecting to db. From Low to High: star,home,envVar
+ *
  * Revision 1.19  2004/08/11 02:09:35  deph
  * added zdc domain
  *
@@ -433,13 +436,15 @@ void StDbManagerImpl::lookUpServers(){
 #define __METHOD__ "lookUpServer()"
 
  char* xmlFile[3]={NULL,NULL,NULL};
- dbFindServerMode mode[3]={userHome,serverEnvVar,starDefault};
+// dbFindServerMode mode[3]={userHome,serverEnvVar,starDefault};
+ dbFindServerMode mode[3]={serverEnvVar,userHome,starDefault};
 
  StString cos;
  cos<<stendl<<"******** Order of Files searched for dbServers ********* "<<stendl;
 
  for(int i=0;i<3; i++){
    xmlFile[i]=StDbDefaults::Instance()->getServerFileName(mode[i]);
+
    if(xmlFile[i]){
      ifstream is(xmlFile[i]);
      if(is){
