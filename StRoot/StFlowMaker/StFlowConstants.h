@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.6 2001/05/22 20:17:09 posk Exp $
+// $Id: StFlowConstants.h,v 1.7 2001/11/02 04:49:52 aihong Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -24,7 +24,11 @@ class Flow{
     nSels        =   2,
     nSubs        =   2,
     nPhiBins     = 120,
-    nPhiBinsFtpc = 360
+    nPhiBinsFtpc = 360,
+    nCumulantIntegratedOrders     =   3, 
+    nCumulantIntegrated_qMax      =   8,
+    nCumulantDifferentialOrders   =   2,
+    nCumulantDifferential_qMax    =   8
   };
 
   typedef Double_t PhiWgt_t[nSels][nHars][nPhiBins];
@@ -38,6 +42,9 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.7  2001/11/02 04:49:52  aihong
+// add func. for cumulant maker
+//
 // Revision 1.6  2001/05/22 20:17:09  posk
 // Now can do pseudorapidity subevents.
 //
