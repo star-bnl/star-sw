@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.13 2000/02/24 18:21:51 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.14 2000/04/11 16:06:26 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.14  2000/04/11 16:06:26  hardtke
+ * improve speed of tpc_row_par and tpc_global_to_sector
+ *
  * Revision 1.13  2000/02/24 18:21:51  hardtke
  * re-define drift distance as central membrane to gating grid
  *
@@ -148,38 +151,30 @@ int type_of_call tpc_drift_volume_length_(float *length){
 }
 int type_of_call tpc_row_par_(int *isector, float *row, float *a, float *b){
   //return ax+by = 1 parameterization of a TPC row
-  int time[1] = {10};
-  int ipad[2] = {20,40};
-  StTpcPadCoordinate pad1(*isector, (int)*row, ipad[0], *time);
-  StTpcPadCoordinate pad2(*isector, (int)*row, ipad[1], *time);
-  StGlobalCoordinate gc1,gc2;
-  StTpcCoordinateTransform transform(gStTpcDb);
-  transform(pad1,gc1);
-  transform(pad2,gc2);
-  float x1,y1,x2,y2;
-  float m,bb; // y = mx + bb
-  x1 = gc1.position().x();
-  y1 = gc1.position().y();
-  x2 = gc2.position().x();
-  y2 = gc2.position().y();
-  if (abs(x2-x1)<0.000001) {
-     *a = 1/x1;
-     *b = 0.;
-     return 1;
-  }
-  m = (y2 - y1)/(x2 - x1);
-  bb = y1 - m*x1;
-  if (bb == 0) return 0;
-  *a = -m/bb;
-  *b = 1/bb;
+  *a = aline[*isector-1][(int)*row-1];
+  *b = bline[*isector-1][(int)*row-1];
   return 1;
 }
 int type_of_call tpc_global_to_sector_(int *isector, float *xglobal){
-  StGlobalCoordinate gc(xglobal[0],xglobal[1],xglobal[2]);
-  StTpcPadCoordinate pad;
-  StTpcCoordinateTransform transform(gStTpcDb);
-  transform(gc,pad);
-  *isector = pad.sector();
+//    StGlobalCoordinate gc(xglobal[0],xglobal[1],xglobal[2]);
+//    StTpcPadCoordinate pad;
+//    StTpcCoordinateTransform transform(gStTpcDb);
+//    transform(gc,pad);
+//    *isector = pad.sector();
+  float angle = atan2(xglobal[1],xglobal[0]);
+  //  cout << angle << endl;
+  if(angle<0)angle=angle+C_2PI;
+  int isect=int((angle+C_PI_4/3.)/(C_PI_2/3.));
+  if(isect==12)isect=0;
+  if(xglobal[2]>0) {
+    isect=15-isect;
+    if(isect>12) isect=isect-12;
+  }
+  else{
+    isect=isect+9;
+    if(isect<=12) isect=isect+12;
+  }
+  *isector = isect;
   return 1;
 }
 int type_of_call tpc_sec24_to_sec12_(int *isecin, int *isecout){
@@ -213,6 +208,39 @@ Int_t StTpcDbMaker::Init(){
   if (tpcDbInterface()->Electronics()&&tpcDbInterface()->Dimensions()&&
       tpcDbInterface()->DriftVelocity()) 
    Update_tpg_detector();
+ 
+  //Here I fill in the arrays for the row parameterization ax+by=1
+  for (int i=0;i<24;i++){
+    for (int j=0;j<45;j++){
+     int time[1] = {10}; 
+     int ipad[2] = {20,40};
+     StTpcPadCoordinate pad1(i+1, j+1, ipad[0], *time);
+     StTpcPadCoordinate pad2(i+1, j+1, ipad[1], *time);
+     StGlobalCoordinate gc1,gc2;
+     StTpcCoordinateTransform transform(gStTpcDb);
+     transform(pad1,gc1);
+     transform(pad2,gc2);
+     float x1,y1,x2,y2;
+     float m,bb; // y = mx + bb
+     x1 = gc1.position().x();
+     y1 = gc1.position().y();
+     x2 = gc2.position().x();
+     y2 = gc2.position().y();
+     if (abs(x2-x1)<0.000001) {
+        aline[i][j] = 1/x1;
+        bline[i][j] = 0.;
+        continue;
+     }
+     m = (y2 - y1)/(x2 - x1);
+     bb = y1 - m*x1;
+     if (bb == 0) {
+      gMessMgr->Warning() << "StTpcDbMaker::Init() Row intersects 0,0" << endm;
+      continue;
+     }
+     aline[i][j] = -m/bb;
+     bline[i][j] = 1/bb;
+    }
+  }
 //
    return StMaker::Init();
 }
