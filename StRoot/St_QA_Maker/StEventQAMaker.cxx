@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.37 2000/05/25 15:27:05 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.38 2000/06/02 01:11:51 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.38  2000/06/02 01:11:51  lansdell
+// added several x,y,z-dca to beam axis histograms
+//
 // Revision 1.37  2000/05/25 15:27:05  lansdell
 // changed primtrk iflag check: 300<=iflag<400 (TPC), 600<=iflag<700 (TPC+SVT)
 //
@@ -230,6 +233,23 @@ void StEventQAMaker::MakeHistGlob() {
       Float_t logImpact = TMath::Log10(globtrk->impactParameter());
       Float_t logCurvature = TMath::Log10(globtrk->geometry()->curvature());
 
+      // pathLength(double x,double y) should return path length at
+      // DCA in the xy-plane to a given point
+      double S = globtrk->geometry()->helix().pathLength(0,0);
+      StThreeVectorD dcaToBeam = globtrk->geometry()->helix().at(S);
+      // these histogram additions are for Lanny's evr QA histograms
+      m_dcaToBeamXY->Fill(dcaToBeam.x(),dcaToBeam.y());
+      m_dcaToBeamZ1->Fill(dcaToBeam.z());
+      m_dcaToBeamZ2->Fill(dcaToBeam.z());
+      m_dcaToBeamZ3->Fill(dcaToBeam.z());
+      m_zDcaTanl->Fill(dcaToBeam.z(),TMath::Tan(globtrk->geometry()->dipAngle()));
+      m_zDcaZf->Fill(dcaToBeam.z(),globtrk->detectorInfo()->firstPoint().z());
+      m_zDcaPsi->Fill(dcaToBeam.z(),globtrk->geometry()->psi()/degree);
+      if (globtrk->geometry()->origin().phi() < 0)
+	m_zDcaPhi0->Fill(dcaToBeam.z(),360+globtrk->geometry()->origin().phi()/degree);
+      else
+	m_zDcaPhi0->Fill(dcaToBeam.z(),globtrk->geometry()->origin().phi()/degree);
+
 // from Lanny on 2 Jul 1999 9:56:03
 //1. x0,y0,z0 are coordinates on the helix at the starting point, which
 //   should be close to the first TPC hit position assigned to the track.
@@ -354,7 +374,6 @@ void StEventQAMaker::MakeHistGlob() {
 	m_lengthTS->Fill(globtrk->length());
 	m_chisq0TS->Fill(chisq0);
 	m_chisq1TS->Fill(chisq1);
-
 	m_globtrk_xf_yfTS->Fill(globtrk->detectorInfo()->firstPoint().x(),
 			       globtrk->detectorInfo()->firstPoint().y());
 	m_eta_trklengthTS->Fill(eta,globtrk->length());
