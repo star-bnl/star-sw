@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichRingPoint.h,v 2.2 2001/02/07 16:01:06 lasiuk Exp $
+ * $Id: StRichRingPoint.h,v 2.3 2002/02/01 16:16:37 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingPoint.h,v $
+ *  Revision 2.3  2002/02/01 16:16:37  lasiuk
+ *  include float.h to allow for use of FLT_MAX (gcc7.2)
+ *
  *  Revision 2.2  2001/02/07 16:01:06  lasiuk
  *  no units with mass of particle in c'tor
  *  momentum loss (uses local copy) taken into account
@@ -23,6 +26,7 @@
 
 #ifndef StRichRingPoint_h
 #define StRichRingPoint_h
+#include <float.h>
 
 #include "StRichTrack.h"
 #include "StParticleDefinition.hh"

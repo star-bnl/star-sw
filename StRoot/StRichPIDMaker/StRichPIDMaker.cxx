@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.48 2001/11/12 16:16:44 jeromel Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.49 2002/02/01 16:17:34 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.49  2002/02/01 16:17:34  lasiuk
+ * include float.h to allow for use of FLT_MAX (gcc7.2)
+ *
  * Revision 2.48  2001/11/12 16:16:44  jeromel
  * Removed unused variable 'olddist' ; unknown escape sequence `\W' fixed.
  *
@@ -240,6 +243,7 @@ using std::less;
 #include "TNtuple.h"
 #include <fstream.h>
 #include <math.h>
+#include <float.h>
 #ifdef SUN
 #include <ieeefp.h>
 #endif
@@ -318,7 +322,7 @@ using std::less;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.48 2001/11/12 16:16:44 jeromel Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.49 2002/02/01 16:17:34 lasiuk Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
