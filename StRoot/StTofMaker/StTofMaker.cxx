@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.cxx,v 1.11 2003/08/08 00:20:41 geurts Exp $
+ * $Id: StTofMaker.cxx,v 1.12 2003/09/17 19:54:28 geurts Exp $
  *
  * Author: W.J. Llope / Wei-Ming Zhang / Frank Geurts
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.cxx,v $
+ * Revision 1.12  2003/09/17 19:54:28  geurts
+ * zeroed geometry pointer
+ *
  * Revision 1.11  2003/08/08 00:20:41  geurts
  * moved local collection code to StTofUtil, changed StTofMaker accordingly
  *
@@ -77,8 +80,11 @@
 ClassImp(StTofMaker)
 
 
-/// default (almost) empty constructor
-StTofMaker::StTofMaker(const char *name):StMaker(name) { drawinit=kFALSE; }
+/// default constructor
+StTofMaker::StTofMaker(const char *name):StMaker(name) {
+  drawinit=kFALSE;
+  mTofGeom = 0;
+ }
 
 /// default empty destructor
 StTofMaker::~StTofMaker(){/* nope */}
