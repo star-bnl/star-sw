@@ -19,16 +19,15 @@ The	compare function, cmp(a, b, key),  must return:
   -1 if a < b.
 Any other value indicates an error.    
 */
-#include <stddef.h>
-
 #define FALSE 0
+#define NULL (void *)0
 #define TRUE 1
  
-struct unsigned_test {char c; unsigned l;};
-#define UNSIGNED_ALIGNED(p) (0 == (((char *)(p) - (char *)0)&\
-	(sizeof(struct unsigned_test) - sizeof(unsigned) - sizeof(char))))
+struct long_test {char c; long l;};
+#define LONG_ALIGNED(p) (0 == (((char *)(p) - (char *)0)&\
+	(sizeof(struct long_test) - sizeof(long) - sizeof(char))))
 	 
-static int dsQuickSortR(char *pLeft, char *pRight, size_t size,
+static int dsQuickSortR(char *pLeft, char *pRight, unsigned size,
 	int (*cmp)(char *base1, char *base2, char *keyDef), char *key);
 /******************************************************************************
 *
@@ -38,19 +37,14 @@ static int dsQuickSortR(char *pLeft, char *pRight, size_t size,
 * RETURN: TRUE if element found else FALSE
 *
 */
-int dsBinSearch(char **pFound, char *value, char *base, size_t count,
-	size_t size, int (*cmp)(char *base1, char *base2, char *key), char *key)
+int dsBinSearch(char **pFound, char *value, char *base, unsigned count,
+	unsigned size, int (*cmp)(char *base1, char *base2, char *key), char *key)
 {
-	char *ptr = NULL;
-	int test;
-	size_t left, mid, right;
+  char *ptr = 0; /* Initialize to quiet compiler. */
+  int left, mid, right, test;
     
-	if (count == 0) {
-		*pFound = NULL;
-		return FALSE;
-	}
 	left = 0;
-	right = count - 1;
+	right = (int)count - 1;
 	test = 2;
 	while (left <= right) {
 		mid = (left + right)/2;
@@ -81,19 +75,19 @@ int dsBinSearch(char **pFound, char *value, char *base, size_t count,
 * memSwap - swap n bytes between locations pointed to by p1 and p2
 *
 */
-void memSwap(void *p1, void *p2, size_t n)
+void memSwap(void *p1, void *p2, unsigned n)
 {
 	char c;
-	size_t i, u;
+	unsigned i;
+	long l;
 	
 	/* check size and alignment for four byte swap */
-	if (n%sizeof(unsigned) == 0 && UNSIGNED_ALIGNED(p1) &&
-		UNSIGNED_ALIGNED(p2)) {
-		n /= sizeof(unsigned);
+	if (n%sizeof(long) == 0 && LONG_ALIGNED(p1) && LONG_ALIGNED(p2)) {
+		n /= sizeof(long);
 		for (i = 0; i < n; i++) {
-			u = ((unsigned *)p1)[i];
-			((unsigned *)p1)[i] = ((unsigned *)p2)[i];
-			((unsigned *)p2)[i] = u;
+			l = ((long *)p1)[i];
+			((long *)p1)[i] = ((long *)p2)[i];
+			((long *)p2)[i] = l;
 		}
 	}
 	else {
@@ -109,7 +103,7 @@ void memSwap(void *p1, void *p2, size_t n)
 * dsQuickSort - like ansi qsort with an extra argument passed to cmp
 *
 */
-int dsQuickSort(char *base, size_t count, size_t size,
+int dsQuickSort(char *base, unsigned count, int size,
 	int (*cmp)(char * base1, char *base2, char *key), char *key)
 {
 	return dsQuickSortR(base, base + size*(count - 1), size, cmp, key);
@@ -120,12 +114,11 @@ int dsQuickSort(char *base, size_t count, size_t size,
 *
 * RETURN: FALSE if value from cmp is invalid or bug detected else TRUE
 */
-static int dsQuickSortR(char *pLeft, char *pRight, size_t size,
+static int dsQuickSortR(char *pLeft, char *pRight, unsigned size,
 	int (*cmp)(char *base1, char *base2, char *key), char *key)
 {
 	char *pI, *pJ, *ptr;
-	int c;
-	size_t n;
+	int c, n;
 	
 	/* done if less than two elements */
 	if (pRight <= pLeft) {

@@ -1,0 +1,51 @@
+<!doctype html public "-//IETF//DTD HTML//EN">
+<HTML>
+
+<HEAD>
+
+<META NAME="BUILD" CONTENT="Feb 10 1995">
+<META NAME="BUILD" CONTENT="Feb 10 1995">
+<META NAME="BUILD" CONTENT="Feb 10 1995">
+<META NAM >
+<META NAME="GENERATOR" CONTENT="Internet Assistant for Word 1.00">
+<META NAME="AUTHOR" CONTENT="bill">
+<META NAME="DOCCOMM" CONTENT="r                                      ">
+</HEAD>
+
+<BODY>
+
+<H2>dsNewDataset</H2>
+
+<P>
+The <B>dsNewDataset</B> function creates a new dataset.
+<P>
+<B>int dsNewDataset(DS_DATASET_T</B> **<I>pDataset</I><B>, char
+*</B><I>dsetName</I><B>, size_t </B><I>dsetDim);</I> 
+<H3>Parameters </H3>
+
+<DL>
+<DT><I>pDataset</I> 
+<DD>Address of pointer to array for dataset
+<DT><I>dsetName</I> 
+<DD>Name of dataset
+<DT><I>dsetDim</I> 
+<DD>Dimension of dataset array
+</DL>
+
+<H3>Return Value</H3>
+
+<P>
+If the function succeeds, the return value is TRUE.
+<P>
+If the function fails, the return value is FALSE. To get extended
+error information, call <A HREF="dserror.htm">dsErrorCode</A>
+. To print error information call <A HREF="dsperr.htm">dsPerror</A>.
+<H3>Remarks</H3>
+
+<P>
+One entry in the dataset array is used by the root of the dataset.
+The number of entries that can be added to the dataset is <I>dsetDim
+</I>- 1. 
+</BODY>
+
+</HTML>

@@ -6,104 +6,91 @@
 modification history
 --------------------
 12feb95,whg	written.
-11jun96,whg added indirection to dataset structure
-12jun98,whg updated to allow C++ wrappers
+11jun96,whg  added indirection to dataset structure
 */
 
 /*
 DESCRIPTION
 These routines parse struct defs defined by the CORBA IDL version 2
 */
-/* the grammer:
-
-struct_type:
-	STRUCT IDENT '{' field_list '}'
-	;
-field_list:
-	declaration
-	| field_list declaration
-	;
-declaration:
-	type_specifier declarator_list ';'
-	;
-declarator_list:
-	declarator
-	| declarator_list ',' declarator
-	;
-declarator:
-	IDENT
-	| declarator '[' NUM ']'
-	;
-type_specifier:
-	base_type
-	| IDENT
-	| struct_type
-	;
-base_type:
-	CHAR
-	| OCTET
-	| SHORT
-	| UNSIGNED SHORT
-	| LONG
-	| UNSIGNED LONG
-	| FLOAT
-	| DOUBLE
-	| LONG DOUBLE
-	| LONG LONG
-	| UNSIGNED LONG LONG
-	;
-*/
 #include <ctype.h>
-#include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 #define DS_PRIVATE
 #define DS_GLOBAL_ONE
 #include "dstype.h"
 /******************************************************************************
 *
-* static structures for types
+* descriptor for memory region
 *
 */
-/* replace by real semaphore for multi thread */
-#define DS_TYPE_GIVE (++semGive == semTake)
-#define DS_TYPE_TAKE (semTake++ == semGive)
-static int semGive = 0, semTake = 0;
-/*
- * macros to initialize basic types
- */
-struct STRUCT_MOD_T {char a; struct t2 {char b;}c;};
-#define DS_STRUCT_MODULUS offsetof(struct STRUCT_MOD_T, c)
+typedef struct {
+	char *first;	/* address of memory region */
+	char *next;		/* next free byte of region */
+	char *limit;	/* address of last byte of region plus one */
+	int *map;		/* number of fields in type */
+}DS_MEM_T;
+/*****************************************************************************
+*
+* prototypes for static functions
+*
+*/
+static int dsBasicInit(void);
+static int dsFirstPass(int *pSepCount, int *map,
+	int *pMapCount, int maxMapCount, char *str);  /* str modif inside*/
+static int dsFormatTypeSpecifierR(DS_BUF_T *bp,
+	DS_TYPE_T *type, int level, size_t *pNTag, DS_TYPE_T **tag);
+static int dsParseTypeR(DS_TYPE_T **pType, DS_BUF_T *bp,
+	DS_MEM_T *mem, DS_TYPE_T **scope, unsigned level);
+static int dsSearchScope(DS_TYPE_T **ppType, char *name,
+	DS_TYPE_T **scope, unsigned level, int top);
+/******************************************************************************
+*
+* basicType - definition of basic types
+*
+*/
+DS_MODULUS_STRUCT(1, DS_TYPE_CHAR,    char);
+DS_MODULUS_STRUCT(1, DS_TYPE_OCTET,   octet);
+DS_MODULUS_STRUCT(2, DS_TYPE_SHORT,   short);
+DS_MODULUS_STRUCT(2, DS_TYPE_U_SHORT, unsigned short);
 
-#define DS_TYPE_DEF(v, t, n) struct t ## _MOD_T {char x;  DS_ ## t y;};\
-	static DS_TYPE_T v = {#n, DS_TYPE_ ## t, sizeof(DS_ ## t),\
-	offsetof(struct t ## _MOD_T , y), DS_LEN_ ## t, DS_LEN_ ## t,\
-	 0, 0, 0, 0, 0, 0};
- /*
-  * Basic types
-  */
-DS_TYPE_DEF(dsCharType,   CHAR,    char)
-DS_TYPE_DEF(dsOctetType,  OCTET,   octet)
-DS_TYPE_DEF(dsShortType,  SHORT,   short)
-DS_TYPE_DEF(dsUShortType, U_SHORT, unsigned short)
-DS_TYPE_DEF(dsLongType,   LONG,    long)
-DS_TYPE_DEF(dsULongType,  U_LONG,  unsigned long)
-DS_TYPE_DEF(dsFloatType,  FLOAT,   float)
-DS_TYPE_DEF(dsDoubleType, DOUBLE,  double)
+/* 12 December 1997 - fixed basicType definition for 64-bit Alpha
+                      long and ulong are 8 bytes (not 4!)
+		      John Lajoie - lajoie@iastate.edu
+*/
+#if defined(__alpha)
+DS_MODULUS_STRUCT(8, DS_TYPE_LONG,    long);
+DS_MODULUS_STRUCT(8, DS_TYPE_U_LONG,  unsigned long);
+#else
+DS_MODULUS_STRUCT(4, DS_TYPE_LONG,    long);
+DS_MODULUS_STRUCT(4, DS_TYPE_U_LONG,  unsigned long);
+#endif
 
-static DS_TYPE_T *basicType[] = {&dsCharType, &dsOctetType, &dsShortType,
-&dsUShortType, &dsLongType, &dsULongType, &dsFloatType, &dsDoubleType};
+DS_MODULUS_STRUCT(4, DS_TYPE_FLOAT,   float);
+DS_MODULUS_STRUCT(8, DS_TYPE_DOUBLE,  double);
 
+static DS_TYPE_T basicType[] = {
+	DS_TYPE_INIT(1, DS_TYPE_CHAR,    char),
+	DS_TYPE_INIT(1, DS_TYPE_OCTET,   octet),
+	DS_TYPE_INIT(2, DS_TYPE_SHORT,   short),
+	DS_TYPE_INIT(2, DS_TYPE_U_SHORT, unsigned short),
+
+/* 12 December 1997 - fixed basicType definition for 64-bit Alpha
+                      long and ulong are 8 bytes (not 4!)
+		      John Lajoie - lajoie@iastate.edu
+*/
+#if defined(__alpha)
+	DS_TYPE_INIT(8, DS_TYPE_LONG,    long),
+	DS_TYPE_INIT(8, DS_TYPE_U_LONG,  unsigned long),
+#else
+	DS_TYPE_INIT(4, DS_TYPE_LONG,    long),
+	DS_TYPE_INIT(4, DS_TYPE_U_LONG,  unsigned long),
+#endif
+
+	DS_TYPE_INIT(4, DS_TYPE_FLOAT,   float),
+	DS_TYPE_INIT(8, DS_TYPE_DOUBLE,  double)};
+	
 static size_t nBasic = 0;
-/*
- *  hash struct for types
- */
-struct type_node_t {
-	size_t next;
-	DS_TYPE_T *type;
-};
-static size_t *typeHash = NULL;
-static struct type_node_t *typeNode = NULL;
-static unsigned nodeCount = 0;
 /******************************************************************************
 *
 * dsBasicInit - initialize basic types
@@ -112,100 +99,86 @@ static unsigned nodeCount = 0;
 */
 static int dsBasicInit()
 {
-	float floatOne = 1.0f;
-	int intOne = 1;
-	size_t i;
+	size_t i, n = sizeof(basicType)/sizeof(basicType[0]);
 	DS_TYPE_T *t;
 
 	/********** start critical section *******************************/
-	if (!DS_TYPE_TAKE) {
-		DS_ERROR(DS_E_SEM_TAKE_ERROR);
+	if (!dsTypeSemTake()) {
+		return FALSE;
 	}
 	if (nBasic != 0) {
-		DS_TYPE_GIVE;
-		DS_ERROR(DS_E_SYSTEM_ERROR);
+		return dsTypeSemGive();
 	}
-	nBasic = sizeof(basicType)/sizeof(basicType[0]);
-	if (DS_LEN_CHAR != sizeof(DS_CHAR) || DS_LEN_OCTET != sizeof(DS_OCTET) ||
-		DS_LEN_FLOAT != sizeof(DS_FLOAT) || DS_LEN_DOUBLE != sizeof(DS_DOUBLE)) {
-		goto fail;
-	}
-	dsIsBigEndian = (((char *)&intOne)[sizeof(intOne)-1] == 1);
-	i = sizeof(float);
-	dsIsIeee = ((sizeof(int) == i && ((int *)&floatOne)[0] == DS_IEEEF_ONE) ||
-		(sizeof(short) == i && ((short *)&floatOne)[0] == DS_IEEEF_ONE));
-	for (i = 0; i < nBasic; i++) {
-		t = basicType[i];
-		if (t->flags != 0 ||  t->nField != 0 ||t->modulus == 0 ||
-			t->size == 0 || t->size < t->stdsize) {
+	for (i = 0, t = basicType; i < n; i++, t++) {
+		if (i != (size_t)t->code || t->flags != 0 || t->modulus == 0 ||
+			t->size != t->stdsize || t->size != t->stdmodulus || 
+			t->nField != 0) {
 			goto fail;		
 		}
-		if (t->size > 1) t->flags |= DS_MULTI_BYTE;
-		if (t->size != t->stdsize || (DS_IS_REAL(t) && !DS_IS_IEEE_FLOAT)) {
-			t->flags |= DS_NOT_STD_REP;
+		if ((t->size > 1 && !DS_IS_BIG_ENDIAN) ||
+			(DS_IS_REAL(t) && !DS_IS_IEEE_FLOAT)) {
+			t->flags = DS_NOT_STD_REP;
 		}
 	}
-	typeHash = dsTypeCalloc(sizeof(typeHash[0])*DS_TYPE_HASH_DIM);
-	typeNode = dsTypeCalloc(sizeof(typeNode[0])*DS_TYPE_NODE_DIM);
-	if (typeHash == NULL || typeNode == NULL) {
-		goto fail;
-	}
-	nodeCount = 1;
-	/********** end critical section *******************************/
-	if (DS_TYPE_GIVE) {
-		return TRUE;
-	}
-	DS_ERROR(DS_E_SEM_GIVE_ERROR);
+	nBasic = n;
+	return dsTypeSemGive();
 	
 fail:
-	DS_TYPE_GIVE;
-
-	DS_ERROR(DS_E_TYPE_REPRESENTATION_ERROR);
+	if (!dsTypeSemGive()) {
+		return FALSE;
+	}
+	/********** end critical section *******************************/
+	DS_ERROR(DS_E_SYSTEM_ERROR);
 }
 /******************************************************************************
 *
-* dsCountFields - count fields in a struct specifier
+* dsCheckDupField - verify field names are unique 
 *
-* RETURNS: number of fields or -1 for error
+* RETURNS: TRUE if unique names, FALSE if duplicate or names collide
 */
-static int dsCountFields(char *str)
+static int dsCheckDupField(DS_TYPE_T *pType)
 {
-	int nest, nField;
+	int c, n;
+	DS_FIELD_T *f1, *f2, *last;
 
-	for (; isalnum(*str) || isspace(*str) || *str == '_'; str++);
-
-	if (*str != '{') {
-		return -1;
-	}
-	for (nest = nField = 0;;) {
-		for (; isalnum(*str) || isspace(*str) || *str == '_'; str++);
-		switch (*str++) {
-
-			case ';':
-			case ',':
-				if (nest == 1) {
-					nField++;
+	if ((n = pType->nField - 1) > 0) {
+		for (f1 = DS_FIELD_PTR(pType), last = f1 + n; f1 < last; f1++) {
+			for (f2 = f1 + 1; f2 <= last; f2++) {
+				if ((c = dsCmpName(f1->name, f2->name)) <= 0) {
+					if (c < 0) {
+						DS_ERROR(DS_E_NAMES_COLLIDE);
+					}
+					else {
+						DS_ERROR(DS_E_DUPLICATE_NAME);
+					}
 				}
-				break;
-
-			case '{':
-				nest++;
-				break;
-
-			case '}':
-				if (nest-- == 1) {
-					return nField;
-				}
-				break;
-
-			case '[':
-				while(*str != '\0' && *str++ != ']');
-				break;
-
-			default:
-				return -1;
+			}
 		}
 	}
+	return TRUE;
+}
+/*****************************************************************************
+*
+* dsCmpFieldType - compare two fields for project compatibility
+*
+* RETURN: zero if equal, one if not equal
+*/
+int dsCmpFieldType(DS_FIELD_T *f1, DS_FIELD_T *f2)
+{
+	int i;
+
+	if (f1->count != f2->count || dsTypeCmp(f1->type, f2->type) != 0) {
+		return 1;
+	}
+	for (i = 0; i < DS_MAX_DIMS; i++) {
+		if (f1->dim[i] != f2->dim[i]) {
+			return 1;
+		}
+		if (f1->dim[i] == 0) {
+			break;
+		}
+	}
+	return 0;
 }
 /******************************************************************************
 *
@@ -217,220 +190,350 @@ int dsDumpTypes(void)
 {
 	char c = 0;
 	size_t i;
-	DS_TYPE_T *t;
 
-	if (nBasic == 0 && !dsBasicInit()) {
-		dsPerror("initialization failed");
-		return FALSE;
+	if (nBasic == 0) {
+		dsBasicInit();
 	}
-	printf("\nchar type is %s\n", --c > 0 ? "unsigned": "signed");
+	printf("char type is %s\n", --c > 0 ? "unsigned": "signed");
 	printf("addressing is %s\n",
 		DS_IS_BIG_ENDIAN ? "BIG_ENDIAN" : "LITTLE_ENDIAN");
 	printf("floating point is %s \n", DS_IS_IEEE_FLOAT ? "IEEE" : "UNKNOWN");
-	printf("minimum struct modulus is %d\n", DS_STRUCT_MODULUS);
-	printf("\ncode\tflags\tmod\tsize\tstdmod\tstdsize\tname\n");
+	printf("code\tflags\tmod\tsize\tstdmod\tstdsize\tnField\tname\n");
 	for (i = 0; i < nBasic; i++) {
-		t = basicType[i];
-		printf("%d\t%X\t%d\t%d\t%d\t%d\t%s\n", t->code, t->flags,
-			t->modulus, t->size, t->stdmodulus, t->stdsize, t->name);
+		printf("%d\t%X\t%d\t%d\t%d\t%d\t%d\t%s\n",
+			basicType[i].code, basicType[i].flags, basicType[i].modulus,
+			basicType[i].size, basicType[i].stdmodulus,
+			basicType[i].stdsize, basicType[i].nField, basicType[i].name);
 	}
-	printf("\n");
-	return TRUE;
-}
-/*****************************************************************************
-*
-* dsHashType - maintain master type lists
-*
-* RETURNS: pointer to master struct for type or NULL if error
-*/
-static DS_TYPE_T *dsHashType(DS_TYPE_T *pType)
-{
-	size_t h, *link, tid;
-	
-	if (pType->tid != 0) {
-		DS_LOG_ERROR(DS_E_SYSTEM_ERROR);
-		return NULL;
-	}
-	h = dsHash(pType->name)%DS_TYPE_HASH_DIM;
-	/********** start critical section *******************************/
-	if (!DS_TYPE_TAKE) {
-		DS_LOG_ERROR(DS_E_SEM_TAKE_ERROR);
-		return NULL;
-	}
-	for (link = &typeHash[h]; (tid = *link) != 0; link = &typeNode[tid].next) {
-		if (dsTypeCmp(typeNode[tid].type, pType) == 0) {
-			goto done;
-		}
-	}
-	if (nodeCount < DS_TYPE_NODE_DIM) {
-		*link = nodeCount;
-		tid = nodeCount++;
-		typeNode[tid].type = pType;
-		pType->tid = tid;
-	}
-	else {
-		DS_LOG_ERROR(DS_E_TOO_MANY_TYPES);
-		tid = 0;
-	}
-done:
-	/********** end critical section *******************************/
-	if (!DS_TYPE_GIVE) {
-		DS_LOG_ERROR(DS_E_SEM_GIVE_ERROR);
-		tid = 0;
-	}
-	return tid ? typeNode[tid].type : NULL;
-}
-/*****************************************************************************
-*
-* dsIsReserved - check for reserved name
-*
-* RETURNS: TRUE for reserved name else FALSE
-*/
-static int dsIsReserved(char *name)
-{
-	switch(tolower(*name)) {
-	case 'c': return dsCmpName(name, "char") < 1;
-	case 'd': return dsCmpName(name, "double") < 1;
-	case 'f': return dsCmpName(name, "float") < 1;
-	case 'l': return dsCmpName(name, "long") < 1;
-	case 'o': return dsCmpName(name, "octet") < 1;
-	case 's': return dsCmpName(name, "short") < 1 ||
-					 dsCmpName(name, "struct") < 1;
-	case 'u': return dsCmpName(name, "unsigned") < 1;
-	default: return FALSE;
-	}
-}
-/******************************************************************************
-*
-* dsParseSimple - parse basic type or scoped name
-*
-* RETURNS: TRUE if success else FALSE
-*/
-static int dsParseSimple(DS_TYPE_T **pType, char *str, char **ptr,
-						 DS_TYPE_T **scope, size_t nScope)
-{
-	int i;
-
-	for(;isspace(*str); str++);
-	if (dsIsNextName("char", str, &str)) {
-		*pType = &dsCharType;
-	}
-	else if (dsIsNextName("double", str, &str)) {
-		*pType = &dsDoubleType;
-	}
-	else if (dsIsNextName("float", str, &str)) {
-		*pType = &dsFloatType;
-	}
-	else if (dsIsNextName("long", str, &str)) {
-		if (dsIsNextName("double", str, &str)) {
-			DS_ERROR(DS_E_LONG_DOUBLE_NOT_SUPPORTED);
-		}
-		else if (dsIsNextName("long", str, &str)) {
-			DS_ERROR(DS_E_LONG_LONG_NOT_SUPPORTED);
-		}
-		else {
-			*pType = &dsLongType;
-		}
-	}
-	else if (dsIsNextName("octet", str, &str)) {
-		*pType = &dsOctetType;
-	}
-	else if (dsIsNextName("short", str, &str)) {
-		*pType = &dsShortType;
-	}
-	else if (dsIsNextName("unsigned", str, &str)) {
-		if (dsIsNextName("short", str, &str)) {
-			*pType = &dsUShortType;
-		}
-		else if (dsIsNextName("long", str, &str)) {
-			if (dsIsNextName("long", str, &str)) {
-				DS_ERROR(DS_E_UNSIGNED_LONG_LONG_NOT_SUPPORTED);
-			}
-			else {
-				*pType = &dsULongType;
-			}
-		}
-		else {
-			DS_ERROR(DS_E_INVALID_TYPE_NAME);
-		}
-	}
-	else {
-		for (i = nScope; i-- > 0;) {
-			if (dsIsNextName(scope[i]->name, str, &str)) {
-				break;
-			}
-		}
-		if (i < 0) {
-			DS_ERROR(DS_E_INVALID_TYPE_NAME);
-		}
-		*pType = scope[i];
-	}
-	*ptr = str;
 	return TRUE;
 }
 /******************************************************************************
 *
-* dsParseStruct - parse struct
+* dsFindField - return a pointer to a named field
 *
-* RETURNS: TRUE if success else FALSE
+* RETURN: -1 if name collision, 0 if found or 1 if not found
 */
-static int dsParseStruct(DS_TYPE_T **pType, char *str, char **ptr,
-	DS_TYPE_T **scope, size_t nScope)
+int dsFindField(DS_FIELD_T **ppField, DS_TYPE_T *pType, const char *name)
 {
-	char name[DS_NAME_DIM];
 	int c;
-	size_t dim, i, j, nField, size;
+	size_t i;
 	DS_FIELD_T *field;
-	DS_TYPE_T *fieldType, *hashType, *type;
 
-	if (!dsParseName(name, str, &str) || strcmp(name, "struct") != 0 ||
-		!dsParseName(name, str, &str) || dsIsReserved(name)) {
-		DS_ERROR(DS_E_INVALID_TYPE_NAME);
+	field = DS_FIELD_PTR(pType);
+	for (i = 0; i < pType->nField; i++) {
+		if (( c = dsCmpName(field[i].name, name)) <= 0) {
+			*ppField = &field[i];
+			return c;
+		}
 	}
-	nField = dsCountFields(str);
-	if (nField < 1 || dsNonSpace(str, &str) != '{') {
-		DS_ERROR(DS_E_SYNTAX_ERROR);
+	return 1;
+}
+/******************************************************************************
+*
+* dsFirstPass - first pass parse of type specifier to get memory map
+*
+* RETURNS: TRUE for success or FALSE for error
+*/
+static int dsFirstPass(int *pSepCount, int *map,
+	int *pMapCount, int maxMapCount, char *str)
+{
+	int mapCount = 0, nest = -1, sepCount = 0, stack[DS_MAX_NEST];
+
+	for (; isalnum(*str) || isspace(*str) || *str == '_'; str++);
+
+	if (*str != '{') {
+		*pMapCount = mapCount;
+		*pSepCount = 0;
+		return TRUE;
 	}
-	size = sizeof(DS_TYPE_T) + nField*sizeof(DS_FIELD_T);
-	if ((type = dsTypeCalloc(size)) == NULL) {
+	for (;;) {
+		for (; isalnum(*str) || isspace(*str) || *str == '_'; str++);
+		switch (*str++) {
+
+			case ';':
+			case ',':
+				map[stack[nest]]++;
+				sepCount++;
+				break;
+
+			case '{':
+				if (++nest >= DS_MAX_NEST) {
+					DS_ERROR(DS_E_NESTED_TOO_DEEP);
+				}
+				stack[nest] = mapCount++;
+				if (mapCount > maxMapCount) {
+					DS_ERROR(DS_E_TOO_MANY_MEMBERS);
+				}
+				map[stack[nest]] = 0;
+				break;
+
+			case '}':
+				if (nest == 0) {
+					*pMapCount = mapCount;
+					*pSepCount = sepCount;
+					return TRUE;
+				}
+				nest--;
+				break;
+
+			case '[':
+				while(*str != '\0' && *str++ != ']');
+				break;
+
+			default: 
+				DS_ERROR(DS_E_SYNTAX_ERROR);
+		}
+	}
+}
+/******************************************************************************
+*
+* dsFormatTypeSpecifier - format a declaration string for a structure
+*
+* RETURNS: TRUE if success else FALSE
+*/
+int dsFormatTypeSpecifier(char *str, size_t maxSize, DS_TYPE_T *type)
+{
+	size_t nTag = 0;
+	DS_TYPE_T *tags[DS_MAX_STRUCT];
+	DS_BUF_T bp;
+
+	DS_PUT_INIT(&bp, str, maxSize);
+	if (!dsFormatTypeSpecifierR(&bp, type, 0, &nTag, tags)) {
 		return FALSE;
 	}
-	strcpy(type->name, name);
-	type->field = (DS_FIELD_T *)&type[1];
-	type->code = DS_TYPE_STRUCT;
-	type->modulus = DS_STRUCT_MODULUS;
-	type->nField = nField;
-	for(fieldType = NULL, i = 0; i < nField; i++) {
-		field = &type->field[i];
-		if (fieldType == NULL) {
-			if (!dsIsNextName("struct", str, NULL)) {
-				if (!dsParseSimple(&fieldType, str, &str, scope, nScope)) {
-					goto fail;
-				}
+	if (dsPutc('\0', &bp) < 0) {
+		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+	}
+	return TRUE;
+}
+/******************************************************************************
+*
+* dsFormatTypeSpecifierR - recursive part of format type declaration string
+*
+* RETURNS: TRUE if success else FALSE
+*/
+static int dsFormatTypeSpecifierR(DS_BUF_T *bp,
+	DS_TYPE_T *type, int level, size_t *pNTag, DS_TYPE_T **tag)
+{
+	size_t i, j;
+	DS_TYPE_T *ft, *lastType = NULL;
+	DS_FIELD_T *field;
+
+	if (dsPutTabs(level, bp) < 0) {
+		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+	}
+	if (type->code != DS_TYPE_STRUCT) {
+		if (dsPuts(type->name, bp) < 0) {
+			DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+		}
+		return TRUE;
+	}
+	for (i = 0; i < *pNTag; i++) {
+		if (tag[i] == type) {
+			if (dsPuts(type->name, bp) < 0) {
+				DS_ERROR(DS_E_ARRAY_TOO_SMALL);
 			}
-			else {
-				if (!dsParseStruct(&fieldType, str, &str, scope, nScope)) {
-					goto fail;
-				}
-				for (j = 0; j < i; j++) {
-					if (dsCmpName(fieldType->name, type->field[j].type->name) < 1) {
-						DS_LOG_ERROR(DS_E_STRUCT_REDEFINITION);
-						goto fail;
-					}
-				}
-				for (j = 0; j < nScope; j++) {
-					if (dsCmpName(scope[j]->name, fieldType->name) < 0) {
-						DS_LOG_ERROR(DS_E_NAMES_COLLIDE);
-						goto fail;
-					}
-				}
-				if (nScope >= DS_SCOPE_DIM) {
-					DS_LOG_ERROR(DS_E_SCOPE_TOO_LARGE);
-					goto fail;
-				}
-				scope[nScope++] = fieldType;
+			return TRUE;
+		}
+	}
+	if (dsPuts("struct ", bp) < 0 ||
+		dsPuts(type->name, bp) < 0 ||
+		dsPuts(" {\n", bp) < 0) {
+		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+	}
+	if (!dsCheckDupField(type)) {
+		return FALSE;
+	}
+	for (field = DS_FIELD_PTR(type), i = 0; i < type->nField; i++) {
+		ft = field[i].type;
+		if (ft != lastType) {
+			if (lastType && dsPuts(";\n", bp) < 0) {
+				DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+			}
+			if (!dsFormatTypeSpecifierR(bp, ft, level + 1, pNTag, tag)) {
+				return FALSE;
+			}
+			lastType = ft;
+		}
+		else {
+			if (dsPuts(", ", bp) < 0) {
+				DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+			}
+		}
+		if (dsPutc(' ', bp) < 0 || dsPuts(field[i].name, bp) < 0) {
+			DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+		}
+
+		for (j = 0; j < DS_MAX_DIMS && field[i].dim[j]; j++) {
+			if (dsPutc('[', bp) < 0 ||
+				dsPutNumber(field[i].dim[j], bp) < 0 ||
+				dsPutc(']', bp) < 0) {
+				DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+			}
+		}
+	}
+	if (dsPuts(";\n", bp) < 0|| dsPutTabs(level, bp) < 0 ||
+		dsPuts("}", bp) < 0) {
+		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+	}
+	if (type->name[0] != '\0') {
+		if ((i = *pNTag) >= DS_MAX_STRUCT) {
+			DS_ERROR(DS_E_TOO_MANY_STRUCT_TAGS);
+		}
+		tag[i] = type;
+		*pNTag = i + 1;
+	}
+	return TRUE;
+}
+/******************************************************************************
+*
+* dsParseType - create a type structure for a type declaration string
+*
+* RETURNS: TRUE if success else FALSE
+*/
+int dsParseType(DS_TYPE_T **pType, size_t *pSize, const char *str, const char **ptr)
+{
+	int map[DS_MAX_STRUCT], nMap, nSep;
+	size_t size;
+	DS_BUF_T bp;
+	DS_MEM_T mem;
+	DS_TYPE_T *scope[DS_MAX_NEST], *type;
+
+	DS_GET_INIT(&bp, str)
+	if (nBasic == 0  && !dsBasicInit()) {
+		return FALSE;
+	}
+	if (!dsFirstPass(&nSep, map, &nMap, DS_MAX_STRUCT, (char*)str)) {
+		return FALSE;
+	}
+	if (nMap == 0) {
+		DS_ERROR(DS_E_INVALID_TYPE);
+	}
+	size = nMap*sizeof(DS_TYPE_T) + nSep*sizeof(DS_FIELD_T);
+	if ((mem.first = (char *)*pType) != NULL) {
+		if (*pSize < size) {
+			DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+		}
+		memset(mem.first, 0 , size);
+	}
+	else if ((mem.first = dsTypeCalloc(size)) == NULL) {
+		return FALSE;
+	}
+	mem.next = mem.first;
+	mem.limit = mem.first + size;
+	mem.map = map;
+	if (!dsParseTypeR(&type, &bp, &mem, scope, 0)) {
+		goto fail;
+	}
+	if (type->code != DS_TYPE_STRUCT) {
+		DS_LOG_ERROR(DS_E_STRUCT_REQUIRED);
+		goto fail;
+	}
+	if (mem.limit != mem.next) {
+		DS_LOG_ERROR(DS_E_SYSTEM_ERROR);
+		goto fail;
+	}
+	if (pSize != NULL) {
+		*pSize = size;
+	}
+	if (ptr) {
+		*ptr = bp.out;
+	}
+	*pType = type;
+	return TRUE;
+fail:
+	if (*pType == NULL) {
+		dsTypeFree(mem.first, size);
+	}
+	return FALSE;
+}
+/******************************************************************************
+*
+* dsParseTypeR - second pass for parse of type declaration
+*
+* RETURNS: TRUE if success else FALSE
+*/
+static int dsParseTypeR(DS_TYPE_T **pType, DS_BUF_T *bp,
+	DS_MEM_T *mem, DS_TYPE_T **scope, unsigned level)
+{
+	char name[DS_NAME_DIM], tmp[DS_NAME_DIM];
+	int c, j, nField;
+	size_t dim, i, isUnsigned;
+	DS_FIELD_T *field;
+	DS_TYPE_T *fieldType, *type;
+
+	if (dsGetName(name, bp) < 0) {
+		DS_ERROR(DS_E_INVALID_TYPE_NAME);
+	}
+	if ((c = dsCmpName("unsigned", name)) == 0) {
+ 	 	if (dsGetName(tmp, bp) < 0 ||
+  			(strlen(tmp) + strlen(name)) >= DS_MAX_NAME_LEN) {
+  	 		DS_ERROR(DS_E_INVALID_TYPE_NAME);
+  	 	}
+  	 	strcat(name, " ");
+  	 	strcat(name, tmp);
+  	 	isUnsigned = TRUE;
+  	}
+  	else {
+		if (c < 0) {
+			DS_ERROR(DS_E_NAMES_COLLIDE);
+  	 	}
+  		isUnsigned = FALSE;
+  	}
+  	for (i = 0; i < nBasic; i++) {
+  		if ((c = dsCmpName(name, basicType[i].name)) <= 0) {
+			if (c < 0) {
+				DS_ERROR(DS_E_NAMES_COLLIDE);
+	  	 	}
+	  	 	*pType = &basicType[i];
+	  	 	return TRUE;
+	  	 }
+	}
+	if (isUnsigned) {
+		DS_ERROR(DS_E_INVALID_TYPE_NAME);
+	}
+	if ((c = dsCmpName(name, "struct")) != 0) {
+		if (c < 0 ) {
+			DS_ERROR(DS_E_NAMES_COLLIDE);
+		}
+		if (dsSearchScope(&type, name, scope, level, FALSE) != 0) {	
+			DS_ERROR(DS_E_INVALID_TYPE_NAME);
+		}
+		*pType = type;
+		return TRUE;
+	}
+	if (dsGetName(name, bp) < 0) {
+		DS_ERROR(DS_E_INVALID_TYPE_NAME);
+	}
+	if (dsGetNonSpace(bp) != '{') {
+		DS_ERROR(DS_E_SYNTAX_ERROR);
+	}
+	if (dsSearchScope(&type, name, scope, level, TRUE) <= 0) {
+		DS_ERROR(DS_E_STRUCT_REDEFINITION);
+	}
+	type = (DS_TYPE_T *)mem->next;
+	field = DS_FIELD_PTR(type);
+	nField = *mem->map++;
+	if (nField == 0) {
+		DS_ERROR(DS_E_SYNTAX_ERROR);
+	}
+	mem->next = (char *)&field[nField];
+	if (mem->next > mem->limit) {
+		DS_ERROR(DS_E_SYSTEM_ERROR);
+	}
+	type->code = DS_TYPE_STRUCT;
+	type->nField = nField;
+	if (level >= DS_MAX_NEST) {
+		DS_ERROR(DS_E_NESTED_TOO_DEEP);
+	}
+	scope[level] = type;
+	for(i = type->nField, fieldType = NULL; i-- > 0 ; field++) {
+		if (fieldType == NULL) {
+			if (!dsParseTypeR(&fieldType, bp, mem, scope, level + 1)) {
+				return FALSE;
 			}
 			type->size += DS_PAD(type->size, fieldType->modulus);
+
 			if (fieldType->modulus > type->modulus) {
 				type->modulus = fieldType->modulus;
 			}
@@ -444,37 +547,19 @@ static int dsParseStruct(DS_TYPE_T **pType, char *str, char **ptr,
 				type->size != type->stdsize) {
 				type->flags |= DS_NOT_STD_REP;
 			}
-			if (!DS_IS_MULTI_BYTE(fieldType)) {
-				type->flags |= DS_MULTI_BYTE;
-			}
 		}
-		if (!dsParseName(field->name, str, &str) ||
-			dsIsReserved(field->name)) {
-			DS_LOG_ERROR(DS_E_INVALID_NAME);
-			goto fail;
-		}
-		for (j = 0; j < i; j++) {
-			if ((c = dsCmpName(field->name, type->field[j].name)) < 1) {
-				if (c < 0) {
-					DS_LOG_ERROR(DS_E_NAMES_COLLIDE);
-				}
-				else {
-					DS_LOG_ERROR(DS_E_DUPLICATE_NAME);
-				}
-				goto fail;
-			}
+		if (dsGetName(field->name, bp) < 0) {
+			DS_ERROR(DS_E_INVALID_NAME);
 		}
 		field->type = fieldType;
 		field->count = 1;
-		for (j = 0; (c = dsNonSpace(str, &str)) == '['; j++) {
+		for (j = 0; (c = dsGetNonSpace(bp)) == '['; j++) {
 			if (j == DS_MAX_DIMS) {
-				DS_LOG_ERROR(DS_E_TOO_MANY_DIMENSIONS);
-				goto fail;
+				DS_ERROR(DS_E_TOO_MANY_DIMENSIONS);
 			}
-			if (!dsParseNumber(&dim, str, &str) ||
-				 dim < 1 || dsNonSpace(str, &str) != ']') {
-				DS_LOG_ERROR(DS_E_INVALID_DIMENSION);
-				goto fail;
+			if (dsGetNumber(&dim, bp) < 0 ||
+				 dim < 1 || dsGetNonSpace(bp) != ']') {
+				DS_ERROR(DS_E_INVALID_DIMENSION);
 			}
 			field->dim[j] = (unsigned)dim;
 			field->count *= (unsigned)dim;
@@ -488,69 +573,65 @@ static int dsParseStruct(DS_TYPE_T **pType, char *str, char **ptr,
 			fieldType = NULL;
 		}
 		else if (c != ',') {
-			DS_LOG_ERROR(DS_E_SYNTAX_ERROR);
-			goto fail;
+			DS_ERROR(DS_E_SYNTAX_ERROR);
 		}
 	}
-	if (dsNonSpace(str, &str) != '}') {
-		DS_LOG_ERROR(DS_E_SYNTAX_ERROR);
-		goto fail;
+	if (!dsCheckDupField(type)) {
+		return FALSE;
+	}
+	if (dsGetNonSpace(bp) != '}') {
+		DS_ERROR(DS_E_SYNTAX_ERROR);
 	}
 	type->size += DS_PAD(type->size, type->modulus);
 	type->stdsize += DS_PAD(type->stdsize, type->stdmodulus);
 	if (type->size != type->stdsize) {
 		type->flags |= DS_NOT_STD_REP;
 	}
-	if ((hashType = dsHashType(type)) == NULL) {
-		goto fail;
-	}
-	*ptr = str;
-	if (type != hashType) {
-		dsTypeFree(type, size);
-		*pType = hashType;
-	}
-	else {
-		*pType = type;
-	}
-	return TRUE;
-fail:
-	dsTypeFree(type, size);
-	return FALSE;
-}
-/******************************************************************************
-*
-* dsParseType - create a type structure for a type declaration string
-*
-* RETURNS: TRUE if success else FALSE
-*/
-int dsParseType(DS_TYPE_T **pType, char *str, char **ptr)
-{
-	DS_TYPE_T *scope[DS_SCOPE_DIM], *type;
-
-	if (nBasic == 0  && !dsBasicInit()) {
-		return FALSE;
-	}
-	if (!dsParseStruct(&type, str, &str, scope, 0)) {
-	return FALSE;
-	}
-	if (ptr) {
-		*ptr = str;
-	}
+	strcpy(type->name, name);
 	*pType = type;
 	return TRUE;
 }
 /******************************************************************************
 *
+* dsSearchScope - look for type name in fields of scope
+*
+* RETURNS: one if not found, zero if found, -1 if name collision
+*/
+static int dsSearchScope(DS_TYPE_T **ppType, char *name,
+	DS_TYPE_T **scope, unsigned level, int top)
+{
+	unsigned c, i;
+	DS_FIELD_T *field;
+	DS_TYPE_T *type;
+
+	for (; level-- > 0;) {
+		type = scope[level];
+		field = DS_FIELD_PTR(type);
+		for (i = 0; i < type->nField && field[i].type; i++) {
+			if ((c = dsCmpName(name, field[i].type->name)) <= 0) {
+				if (c == 0) {
+					*ppType =  field[i].type;
+				}
+				return c;
+			}
+		}
+		if (top) {
+			break;
+		}
+	}
+	return 1;
+}	
+/******************************************************************************
+*
 * dsTypeCmp - compare two type structures
 *
-* RETURN: zero if equal, negative if t1 < t2. positive if t1 > t2
+* RETURN: zero if equal, negative if t1 < t2. posative if t1 > t2
 */
 int dsTypeCmp(DS_TYPE_T *t1, DS_TYPE_T *t2)
 {
 	int c, i;
 	DS_FIELD_T *f1, *f2, *limit;
 
-	if(t1 == t2) return 0;
 	if ((c = strcmp(t1->name, t2->name)) != 0) return c;
 	if (t1->code - t2->code) return (t1->code - t2->code);
 	if (t1->size - t2->size) return (t1->size - t2->size);
@@ -581,19 +662,4 @@ int dsTypeCmp(DS_TYPE_T *t1, DS_TYPE_T *t2)
 		}
 	}
 	return 0;
-}
-/******************************************************************************
-*
-* dsTypePtr - get pointer to a type structure for a tid
-*
-* RETURNS: TRUE if success else FALSE
-*/
-int dsTypePtr(DS_TYPE_T **pType, size_t tid)
-{
-	if (tid < 1 || tid >= nodeCount) {
-printf("tid %d, nodeCount %d\n", tid, nodeCount);
-		DS_ERROR(DS_E_INVALID_TYPE_ID);
-	}
-	*pType = typeNode[tid].type;
-	return TRUE;
 }
