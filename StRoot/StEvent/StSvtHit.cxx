@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.8 2001/04/05 04:00:56 ullrich Exp $
+ * $Id: StSvtHit.cxx,v 2.9 2001/08/07 20:50:57 caines Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
+ * Revision 2.9  2001/08/07 20:50:57  caines
+ * Implement better packing of hardware and charge values
+ *
  * Revision 2.8  2001/04/05 04:00:56  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -42,7 +45,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.8 2001/04/05 04:00:56 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.9 2001/08/07 20:50:57 caines Exp $";
 
 ClassImp(StSvtHit)
     
@@ -61,10 +64,13 @@ StSvtHit::StSvtHit(const dst_point_st& pt)
     //
     // Unpack charge and status flag
     //
-    const unsigned int iflag = pt.charge/(1L<<16);
-    const unsigned int svtq  = pt.charge - iflag*(1L<<16);
-    mCharge = float(svtq)/(1<<21);
+    const unsigned int iflag = pt.charge/(1L<<17);    
+    const unsigned int svtq  = pt.charge - iflag*(1L<<17); 
+    // mPeak is private to SvtHit
+    mPeak = (float)(svtq/(1L<<10));
+    mCharge = (float)(svtq - mPeak*(1L<<10));
     mFlag = static_cast<unsigned char>(iflag);
+    
 
     //
     // Unpack position in xyz
@@ -104,8 +110,128 @@ StObject*
 StSvtHit::clone() const { return new StSvtHit(*this); }
 
 unsigned int
-StSvtHit::barrel() const { return (layer()+1)/2; }
+StSvtHit::barrel() const { 
+  
+  int Index = index();
+
+  if( Index < 0) return 0; // Something wrong
+
+  if( Index < 64) return 1;        // Index starts at 0 for hybrid1,wafer1, 
+  else if( Index < 208) return 2;  // ladder1,barrel1 and moves out 
+  else if( Index < 432) return 3;  // Index=431 is the largest value
+  return 0;  // Something wrong
+
+}
+
+
+unsigned int 
+StSvtHit::ladder() const { 
+  
+  int Index = index();
+  int mLadder;
+  int mHybrid[3]={8,12,14};  // Hybrids on each ladder
+  int mLadderTot[2]={8,12};  // Ladders on each barrel
+  switch( barrel()){
+  case 1:
+    mLadder = Index/mHybrid[0];
+    return mLadder+1;
+    break;
+  case 2:
+    Index -= mHybrid[0]*mLadderTot[0];  // Subtract off hybrids from previous
+    mLadder = Index/mHybrid[1];         // layers the div. by hybrids per lay 
+    return mLadder+1;
+    break;
+  case 3:
+    Index -= mHybrid[0]*mLadderTot[0]; // Subtract off hybrids from previous
+    Index -= mHybrid[1]*mLadderTot[1]; // layers the div. by hybrids per lay
+    mLadder = Index/mHybrid[2];
+    return mLadder+1;
+    break;
+  default:
+    return 0; //Something Wrong
+  }
+
+
+}
 
 unsigned int
-StSvtHit::hybrid() const { return 0; } // to be implemented
+StSvtHit::layer() const {
 
+  int Barrel = barrel();
+  int Ladder = ladder();
+
+  if( Ladder%2){
+    switch( Barrel){
+    case 1:
+      return 2;    // Outer layers are the odd numbered ladders
+      break;
+    case 2:
+      return 4;
+      break;
+    case 3:
+      return 6;
+      break;
+    default:
+      return 0;
+    }
+  }
+   else{
+     switch( Barrel){
+     case 1: 
+       return 1;  // Inner layers are the even ladders
+       break;
+     case 2:
+       return 3;
+       break;
+     case 3:
+       return 5;
+       break;
+     default:
+       return 0;
+     }
+   }
+
+  return 0;
+}
+
+
+unsigned int
+StSvtHit::wafer() const
+{
+ 
+  int Index = index();
+  int Barrel = barrel()-1;
+  int Ladder = ladder()-1;
+  int mHybrid[3] ={8,12,14};  // Number of hybrids per ladder
+  int mLadderTot[3] ={8,12,16}; // Number of ladders per barrel
+  
+  for( int B=0; B<Barrel; B++){
+    Index -= mHybrid[B]*mLadderTot[B]; // Sub. the hybrids from prev. barrels
+  }
+
+  for( int L=0; L<Ladder; L++){
+    Index -= mHybrid[Barrel]; // Sub. hybrids from previous ladders on  barrel
+  }
+
+  return (Index/2)+1;  // Two hybrids per wafer start counting from 1
+
+}
+
+
+unsigned int
+StSvtHit::hybrid() const { return ((index()%2)+1); }
+
+
+float
+StSvtHit::anode() const {
+  float anode = mHardwarePosition >> 22;
+  return (anode/4.); }  // Anode packed in quarters
+
+
+float
+StSvtHit::timebucket() const {
+  float t = mHardwarePosition >> 13;
+    t = t-(anode()*4*(1L<<9));
+    t /=4.; // timebucket packed in quarters
+  return t;    
+}
