@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.74 1999/12/21 23:11:00 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.75 2000/01/04 15:18:45 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.75  2000/01/04 15:18:45  kathy
+// comment out unused variables so we don't get compilation warnings - needed for getting working with the new compiler
+//
 // Revision 1.74  1999/12/21 23:11:00  kathy
 // unpack number of points correctly in primtrk table; change some limits
 //
@@ -1013,8 +1016,8 @@ void St_QA_Maker::MakeHistPID(){
 	  if (invpt) pT = 1./TMath::Abs(invpt);
 	  Float_t pz = pT*t->tanl;
 	  Float_t  p = TMath::Sqrt(pT*pT+pz*pz);
-	  Float_t x0 = t->x_first[0];
-	  Float_t y0 = t->x_first[1];
+	  //	  Float_t x0 = t->x_first[0];
+	  //      Float_t y0 = t->x_first[1];
 	  
 	  if (d->det_id==1 && d->ndedx >15 ) { 
 	    m_p_dedx_rec->Fill(p,(float)(dedx_m*1e6)); // change from GeV/cm to keV/cm
