@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.65 2004/03/31 23:56:25 jeromel Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.66 2004/04/05 18:56:15 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.66  2004/04/05 18:56:15  suaide
+// raw data structure is filled in StEvent
+//
 // Revision 1.65  2004/03/31 23:56:25  jeromel
 // Initialize mPedRMS, mPed and added a value to an empty return statement in
 // a non-void context (ANSI C++ forbids this). Should fix valgrind messages.
@@ -231,7 +234,8 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
   mDBRunNumber = 0;
   mFillHisto = kTRUE;
   mDebug = kFALSE;
-  mSaveAllStEvent = kTRUE;
+  mSaveAllStEvent = kFALSE;
+  mRawData = NULL;               
 
 }
 //_____________________________________________________________________________
@@ -378,6 +382,7 @@ void StEmcADCtoEMaker::zeroAll()
 { 
   mData->zeroAll();
   clearStEventStaf();
+  mRawData = NULL;
 } 
 //_____________________________________________________________________________
 /*!
@@ -652,7 +657,7 @@ for SMD and saves it in the calibrationType member of StEmcRawHit.
 */
 Bool_t StEmcADCtoEMaker::getEmcFromDaq(TDataSet* daq)
 {
-  if(mPrint) cout <<"***** Getting EMC event from daq file\n";
+  if(mPrint) cout <<"Decoding EMC information from DAQ structure "<<endl;
 
 	StDAQReader* TheDataReader=(StDAQReader*)(daq->GetObject());
   if(!TheDataReader->EMCPresent()) return kFALSE;
@@ -662,6 +667,7 @@ Bool_t StEmcADCtoEMaker::getEmcFromDaq(TDataSet* daq)
 	
 	EMC_Reader* reader = TheEmcReader->getBemcReader();
 	if(!reader) return kFALSE;
+  if(!mRawData) mRawData = new StEmcRawData();
 	  
   // tower data
 	mData->TowerPresent = reader->isTowerPresent();
@@ -673,6 +679,8 @@ Bool_t StEmcADCtoEMaker::getEmcFromDaq(TDataSet* daq)
 		mData->NTowerHits = tower.NTowerHits;
 		mData->TDCErrorFlag = tower.TDCErrorFlag;
 		mData->NTDCChannels = tower.NTDCChannels;
+    mRawData->createBank(0,120,4800);
+    for(int i = 0;i<120;i++) mRawData->setHeader(0,i,tower.TDCHeader[i]);
 		for(Int_t i=0;i<30;i++)
 		{
 			mData->TDCError[i] = tower.TDCError[i];
@@ -686,6 +694,7 @@ Bool_t StEmcADCtoEMaker::getEmcFromDaq(TDataSet* daq)
 			Int_t m,e,s;
 			mGeo[0]->getBin(id,m,e,s);
 			mData->TowerADC[id-1] = tower.TowerMatrix[m-1][e-1][s-1];
+      mRawData->setData(0,id-1,tower.TowerADCArray[id-1]);
 		}
 	}	
 	
@@ -709,6 +718,8 @@ Bool_t StEmcADCtoEMaker::getEmcFromDaq(TDataSet* daq)
       {
         mData->TimeBin[i]=(Char_t)smd.TimeBin[i];
         int m,e,s,det,id;
+        mRawData->createBank(i+1,128,4800);
+        for(int j=0;j<128;j++) mRawData->setHeader(i+1,j,smd.SmdHeader[i][j]);
         for(int j=0;j<4800;j++) 
         {
           int stat = mDecoder->GetSmdCoord(i,j,det,m,e,s);
@@ -722,6 +733,7 @@ Bool_t StEmcADCtoEMaker::getEmcFromDaq(TDataSet* daq)
             mGeo[3]->getId(m,e,s,id);
             mData->SmdpADC[id-1] =  smd.SmdP_ADCMatrix[m-1][e-1][s-1];
           }
+          mRawData->setData(i+1,j,smd.SMDADCArray[i][j]);
         }
       }
     }
@@ -742,10 +754,13 @@ Bool_t StEmcADCtoEMaker::getEmcFromDaq(TDataSet* daq)
         int SMDRDO = RDO+4;
         if(smd.HasData[SMDRDO]==1) 
         {
+          mRawData->createBank(RDO+9,128,4800);
+          for(int i=0;i<128;i++) mRawData->setHeader(RDO+9,i,smd.SmdHeader[SMDRDO][i]);
           for(int index = 0;index<4800;index++)
           {
             int adc = smd.SMDADCArray[SMDRDO][index];
             int cap = smd.TimeBin[SMDRDO];
+            mRawData->setData(RDO+9,index,smd.SMDADCArray[SMDRDO][index]);
             if(adc>0)
             {
               int id;
@@ -772,6 +787,7 @@ Bool_t StEmcADCtoEMaker::getEmcFromDaq(TDataSet* daq)
 //_____________________________________________________________________________
 Bool_t StEmcADCtoEMaker::getEmcFromStEvent(StEmcCollection *emc)
 {
+  if(mPrint) cout <<"Decoding EMC information from StEmcCollection "<<endl;
 	mData->NTowerHits = 0;
 	mData->NSmdHits = 0;
 	mData->ValidTowerEvent = kFALSE; 
@@ -779,6 +795,7 @@ Bool_t StEmcADCtoEMaker::getEmcFromStEvent(StEmcCollection *emc)
 	mData->ValidSMDEvent = kFALSE;
 	mData->SMDPresent = kFALSE;
   if(!emc) return kFALSE;
+  
   for(Int_t det=0;det<MAXDETBARREL;det++)
   {
     StDetectorId id = static_cast<StDetectorId>(det+kBarrelEmcTowerId);
@@ -834,6 +851,104 @@ Bool_t StEmcADCtoEMaker::getEmcFromStEvent(StEmcCollection *emc)
   return kTRUE;
 }
 //_____________________________________________________________________________
+Bool_t StEmcADCtoEMaker::getEmcFromStEventRaw(StEmcRawData *raw)
+{
+  if(mPrint) cout <<"Decoding EMC information from StEmcRawData "<<endl;
+	mData->NTowerHits = 0;
+	mData->NSmdHits = 0;
+	mData->ValidTowerEvent = kFALSE; 
+	mData->TowerPresent = kFALSE;
+	mData->ValidSMDEvent = kFALSE;
+	mData->SMDPresent = kFALSE;
+  if(!raw) return kFALSE;
+  
+  unsigned short *header = NULL;
+  unsigned short *data   = NULL;
+  
+  // tower stuff
+  
+  header = raw->header(0);
+  data   = raw->data(0);
+  if(header && data) // tower present
+  {
+		for(Int_t i=0;i<30;i++)
+		{
+			mData->TDCCount[i] = header[i];
+			mData->TDCError[i] = header[i+30];
+			mData->TDCToken[i] = header[i+60];
+			mData->TDCTrigger[i] = (header[i+90] & 0xF00) >> 8;
+			mData->TDCCrateId[i] = (header[i+90] & 0x0FF);
+		}
+		for(Int_t daqId=0;daqId<4800;daqId++) if(data[daqId]>0)
+		{
+			int id=-1;
+      int stat=mDecoder->GetTowerIdFromDaqId(daqId,id);
+      if(stat && id>0)
+      {
+        mData->TowerADC[id-1] = data[daqId];
+				mData->TowerPresent = kTRUE;
+				mData->NTowerHits++;
+      }
+		}    
+  }
+  
+  // SMD stuff
+  for(int RDO = 0;RDO<8;RDO++)
+  { 
+    header = raw->header(RDO+1);
+    data   = raw->data(RDO+1);
+    if(header && data)
+    {
+      mData->TimeBin[RDO] = header[32];
+      int m,e,s,det,id;
+      for(int j=0;j<4800;j++) if(data[j]>0)
+      {
+        int stat = mDecoder->GetSmdCoord(RDO,j,det,m,e,s);
+        if(stat==1 && det==3)
+        {
+          mGeo[2]->getId(m,e,s,id);
+          mData->SmdeADC[id-1] = data[j];
+        }
+        if(stat==1 && det==4)
+        {
+          mGeo[3]->getId(m,e,s,id);
+          mData->SmdpADC[id-1] = data[j];
+        }
+				if(stat==1)
+        {
+          mData->ValidSMDEvent=kTRUE; 
+					mData->SMDPresent = kTRUE;
+          mData->NSmdHits++;
+        }
+      }
+    }
+  }
+  
+  // PSD stuff
+  for(int RDO = 0;RDO<4;RDO++)
+  { 
+    header = raw->header(RDO+9);
+    data   = raw->data(RDO+9);
+    if(header && data)
+    {
+      int id;
+      for(int j=0;j<4800;j++) if(data[j]>0)
+      {
+        int stat = mDecoder->GetPsdId(RDO,j,id,false);
+        if(stat==1)
+        {
+          mData->PsdADC[id-1] = data[j];
+					mData->ValidPSDEvent=kTRUE; 
+					mData->PSDPresent = kTRUE;
+					mData->NPsdHits++;
+        }
+      }
+    }
+  }
+	mData->validateData();
+  return kTRUE;
+}
+//_____________________________________________________________________________
 /*!
 This method gets EMC hits from different sources. First it looks for DAQ datasets.
 if Not present, looks for StEvent hits to recalibrate.
@@ -841,6 +956,7 @@ if Not present, looks for StEvent hits to recalibrate.
 Bool_t StEmcADCtoEMaker::getEmc()
 {  
 // check if there is event from DAQ
+  if(mPrint) cout <<"Decoding EMC information. Looking for available data format "<<endl;
   mData->EventDate = GetDate();
 	mData->EventTime = GetTime();
 	mFromDaq = kFALSE;
@@ -880,9 +996,11 @@ Bool_t StEmcADCtoEMaker::getEmc()
 		
 		StEmcCollection* emctemp=event->emcCollection();
   	if(!emctemp)  return kFALSE;
+    if(emctemp->bemcRawData()) return getEmcFromStEventRaw(emctemp->bemcRawData());
   	return getEmcFromStEvent(emctemp);
 	}  
   
+  if(mPrint) cout <<"No EMC data structure was found. Can not do anything. "<<endl;
   return kFALSE;
 }
 //_____________________________________________________________________________
@@ -1077,6 +1195,29 @@ Bool_t StEmcADCtoEMaker::fillStEvent()
   for(Int_t det=0;det<MAXDETBARREL;det++) if(mSave[det]) save = true;
   if(!save) return kFALSE; 
   if(!mEmc) mEmc =new StEmcCollection();
+  
+  if(mRawData)
+  {
+    if(mEmc->bemcRawData())
+    {
+      // there is already a StEmcRawData object defined... Need 
+      // to copy this information into the other and delete this
+      // object
+      for(int i = 0;i<12;i++)
+      {
+        UShort_t* header = mRawData->header(i);
+        UShort_t* data   = mRawData->data(i);
+        Int_t sh = mRawData->sizeHeader(i);
+        Int_t sd = mRawData->sizeData(i);
+        mEmc->bemcRawData()->createBank(i,sh,sd);
+        mEmc->bemcRawData()->setHeader(i,header);
+        mEmc->bemcRawData()->setData(i,data);    
+      }
+      delete mRawData; 
+      mRawData = NULL;
+    }
+    else mEmc->setBemcRawData(mRawData);
+  }
     
   for(Int_t det=0;det<MAXDETBARREL;det++) 
 	{
@@ -1093,7 +1234,6 @@ Bool_t StEmcADCtoEMaker::fillStEvent()
 			{
 				Int_t Max = 18000;
         if(det<2) Max = 4800;    
-        Int_t date = mData->EventDate;
     		// first check if there is at least one valid hit to save
     		if(mSave[det])
     		{

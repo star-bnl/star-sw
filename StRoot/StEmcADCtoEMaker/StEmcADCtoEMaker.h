@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.40 2004/03/24 00:09:51 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.41 2004/04/05 18:56:15 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.41  2004/04/05 18:56:15  suaide
+// raw data structure is filled in StEvent
+//
 // Revision 1.40  2004/03/24 00:09:51  suaide
 // small bug fixed and PSD is added to the maker
 //
@@ -147,6 +150,7 @@ class StEmcCollection;
 class StEmcDecoder;
 class StEmcGeom;
 class StBemcData;
+class StEmcRawData;
 
 class StEmcADCtoEMaker : public StMaker 
 {
@@ -177,6 +181,7 @@ class StEmcADCtoEMaker : public StMaker
   StEmcCollection   *mEmc;            
   StEmcDecoder      *mDecoder;          
   StBemcData        *mData;                      
+  StEmcRawData      *mRawData;
   StEmcGeom         *mGeo[MAXDETBARREL]; 
   Int_t             mDBRunNumber;
   Int_t             mRunNumber;
@@ -203,6 +208,7 @@ class StEmcADCtoEMaker : public StMaker
   Bool_t            getEmcFromDaq(TDataSet* daq);///< This method gets EMC collection from DAQ dataset.
   Bool_t            clearOldEmc(); ///< Clear old emc collection
   Bool_t            getEmcFromStEvent(StEmcCollection*); ///< This method creates a temporary ADC vector for each detector.
+  Bool_t            getEmcFromStEventRaw(StEmcRawData*); ///< This method creates a temporary ADC vector for each detector.
   Bool_t            saveHit(Int_t,Int_t,Int_t cap=0);///< Decide if a hit should be saved or not
  protected:    
     
@@ -227,7 +233,7 @@ class StEmcADCtoEMaker : public StMaker
   void                      setSMDPhiIdMinus1Bug(Bool_t a = kFALSE) { mSMDPidMinus1Bug = a;} ///< Turns on the correction for the SMD-phi id-1 Pedestal bug if using old Pedestal tables for the y2003 d+Au and p+p runs
   void                      saveAllStEvent(Bool_t a) { mSaveAllStEvent = a;} ///< Set to kTRUE if all hits are to be saved on StEvent
   
-  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.40 2004/03/24 00:09:51 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.41 2004/04/05 18:56:15 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcADCtoEMaker, 2)  
 };
