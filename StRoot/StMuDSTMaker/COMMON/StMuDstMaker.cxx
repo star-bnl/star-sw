@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.35 2003/10/03 15:26:07 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.36 2003/10/08 21:17:15 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -805,7 +805,8 @@ void StMuDstMaker::addType(TClonesArray* tcaFrom, TClonesArray* tcaTo , T t) {
     int n = tcaFrom->GetEntries();
     int counter = tcaTo->GetEntries();
     for (int i=0; i<n;i++) {
-      new((*tcaTo)[counter++]) T( (T&)*tcaFrom->UncheckedAt(i) );
+	// old     new((*tcaTo)[counter++]) T( (T&)*tcaFrom->UncheckedAt(i) );
+	new((*tcaTo)[counter++]) T( *(T*)(void*)tcaFrom->UncheckedAt(i) );
     }
   }
 }
@@ -914,6 +915,12 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.36  2003/10/08 21:17:15  laue
+ * StMuEmcUtil updates from Alex Suaide
+ * StMuDst and StMuDstMaker fixes to take the double inheritance of the
+ * StKinkMuDsts into account. A void* had to be introduced when casting
+ * TObject* to StKinkMuDst*.
+ *
  * Revision 1.35  2003/10/03 15:26:07  laue
  * some moe arrays initialized
  *
