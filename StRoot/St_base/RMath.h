@@ -1,10 +1,34 @@
 #ifndef STAR_RMath
 #define STAR_RMath
+//*-- Author :    Valery Fine(fine@bnl.gov)   25/09/99  
+//
+// The set of methods to work with the plain matrix / vector
+// "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
+//
+// $Id: RMath.h,v 1.4 1999/09/23 18:32:11 fine Exp $
+// $Log: RMath.h,v $
+// Revision 1.4  1999/09/23 18:32:11  fine
+// double prec for float matrices was introduced
+//
+//
 
 #include "Rtypes.h"
 #include <string.h>
 
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
+
+///////////////////////////////////////////////////////////////////////////////////////
+//                                                                                   //
+// The routines of MXPACK compute the product of two matrices or the product of      //
+// their transposed matrices and may add or subtract to the resultant matrix         //
+// a third one, add or subtract one matrix from another, or transfer a matrix,       //
+// its negative, or a multiple of it, transpose a given matrix, build up a unit      //
+// matrix, multiply a matrix by a diagonal (from left or from right) and may         //
+// add the result to another matrix, add to square matrix the multiple of a diagonal //
+// matrix, compute the products <IMG WIDTH=79 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline191" SRC="gif/mxpack_ABAt.gif"> (<IMG WIDTH=16 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline193" SRC="gif/mxpack_At.gif"> denotes the transpose of <IMG WIDTH=12 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline195" SRC="gif/mxpack_A.gif">) and <IMG WIDTH=79 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline197" SRC="gif/mxpack_AtBA.gif">.               //
+// It is assumed that matrices are begin_html <B>row-wise without gaps</B> end_html without gaps.                     //
+//                                                                                   //
+///////////////////////////////////////////////////////////////////////////////////////
 
 class RMath  {
   public:
@@ -13,6 +37,9 @@ class RMath  {
 
     static float  *uzero(float *a,  int n1, int n2);
     static double *uzero(double *a, int n1, int n2);
+
+    static float  *vzero(float *a,  int n2);
+    static double *vzero(double *a, int n2);
 
     static float  *vadd(float *b, float *c,  float *a, int n);
     static double *vadd(double *b, double *c,  double *a, int n);
@@ -69,118 +96,174 @@ class RMath  {
 
 //___________________________________________________________________________
 inline void RMath::mxmad(float *a, float *b, float *c, int i, int j, int k)
-{  mxmad_0_(0, a, b, c, i, j, k);   }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
+  mxmad_0_(0, a, b, c, i, j, k);   }
 
 //___________________________________________________________________________
-inline void RMath:: mxmad1(float *a, float *b, float *c, int i, int j, int k)
-{ mxmad_0_(1, a, b, c, i, j, k);  }
+inline void RMath:: mxmad1(float *a, float *q, float *c, int i, int j, int k)
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad1.gif"> </P> End_Html // 
+ mxmad_0_(1, a, q, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline void RMath::mxmad2(float *a, float *b, float *c, int i, int j, int k)
-{ mxmad_0_(2, a, b, c, i, j, k);  }
+inline void RMath::mxmad2(float *p, float *b, float *c, int i, int j, int k)
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad2.gif"> </P> End_Html // 
+ mxmad_0_(2, p, b, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline void RMath::mxmad3(float *a, float *b, float *c, int i, int j, int k)
-{ mxmad_0_(3, a, b, c, i, j, k);  }
+inline void RMath::mxmad3(float *p, float *q, float *c, int i, int j, int k)
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad3.gif"> </P> End_Html // 
+ mxmad_0_(3, p, q, c, i, j, k);  }
 
 //___________________________________________________________________________
 inline void RMath::mxmpy(float *a, float *b, float *c, int i, int j, int k)
-{  mxmad_0_(4, a, b, c, i, j, k); }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmpy.gif"> </P> End_Html // 
+  mxmad_0_(4, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmpy1(float *a, float *b, float *c, int i, int j, int k)
-{ mxmad_0_(5, a, b, c, i, j, k);  }
+inline void RMath::mxmpy1(float *a, float *q, float *c, int i, int j, int k)
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmpy1.gif"> </P> End_Html // 
+ mxmad_0_(5, a, q, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline void RMath::mxmpy2(float *a, float *b, float *c, int i, int j, int k)
-{ mxmad_0_(6, a, b, c, i, j, k); }
+inline void RMath::mxmpy2(float *p, float *b, float *c, int i, int j, int k)
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmpy2.gif"> </P> End_Html // 
+ mxmad_0_(6, p, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmpy3(float *a, float *b, float *c, int i, int j, int k)
-{ mxmad_0_(7, a, b, c, i, j, k); }
+inline void RMath::mxmpy3(float *p, float *q, float *c, int i, int j, int k)
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmpy3.gif"> </P> End_Html // 
+ mxmad_0_(7, p, q, c, i, j, k); }
 
 //___________________________________________________________________________
 inline void RMath::mxmub(float *a, float *b, float *c, int i, int j, int k)
-{ mxmad_0_(8, a, b, c, i, j, k);  }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmub.gif"> </P> End_Html // 
+ mxmad_0_(8, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline void RMath::mxmub1(float *a, float *b, float *c, int i, int j, int k)
-{  mxmad_0_(9, a, b, c, i, j, k); }
+inline void RMath::mxmub1(float *a, float *q, float *c, int i, int j, int k)
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmub1.gif"> </P> End_Html // 
+  mxmad_0_(9, a, q, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmub2(float *a, float *b, float *c, int i, int j, int k)
-{  mxmad_0_(10, a, b, c, i, j, k); }
+inline void RMath::mxmub2(float *p, float *b, float *c, int i, int j, int k)
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmub2.gif"> </P> End_Html // 
+  mxmad_0_(10, p, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmub3(float *a, float *b, float *c, int i, int j, int k)
-{  mxmad_0_(11, a, b, c, i, j, k); }
+inline void RMath::mxmub3(float *p, float *q, float *c, int i, int j, int k)
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmub3.gif"> </P> End_Html // 
+  mxmad_0_(11, p, q, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmlrt(float *a, float *b, float *c, int ni, int nj)
-{  mxmlrt_0_(0, a, b, c, ni, nj); }
+inline void RMath::mxmlrt(float *a, float *b, float *x, int ni, int nj)
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmlrt.gif"> </P> End_Html // 
+  mxmlrt_0_(0, a, b, x, ni, nj); }
 
 //___________________________________________________________________________
-inline void RMath::mxmltr(float *a, float *b, float *c, int ni, int nj)
-{  mxmlrt_0_(1, a, b, c, ni, nj);   }
+inline void RMath::mxmltr(float *a, float *b, float *x, int ni, int nj)
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmltr.gif"> </P> End_Html // 
+  mxmlrt_0_(1, a, b, x, ni, nj);   }
 
 
 //--   double version --
 
 //___________________________________________________________________________
 inline void RMath::mxmad(double *a, double *b, double *c, int i, int j, int k)
-{  mxmad_0_(0, a, b, c, i, j, k);   }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
+  mxmad_0_(0, a, b, c, i, j, k);   }
 
 //___________________________________________________________________________
 inline void RMath:: mxmad1(double *a, double *b, double *c, int i, int j, int k)
-{ mxmad_0_(1, a, b, c, i, j, k);  }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
+ mxmad_0_(1, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
 inline void RMath::mxmad2(double *a, double *b, double *c, int i, int j, int k)
-{ mxmad_0_(2, a, b, c, i, j, k);  }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
+ mxmad_0_(2, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
 inline void RMath::mxmad3(double *a, double *b, double *c, int i, int j, int k)
-{ mxmad_0_(3, a, b, c, i, j, k);  }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
+ mxmad_0_(3, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
 inline void RMath::mxmpy(double *a, double *b, double *c, int i, int j, int k)
-{  mxmad_0_(4, a, b, c, i, j, k); }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
+  mxmad_0_(4, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
 inline void RMath::mxmpy1(double *a, double *b, double *c, int i, int j, int k)
-{ mxmad_0_(5, a, b, c, i, j, k);  }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
+ mxmad_0_(5, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
 inline void RMath::mxmpy2(double *a, double *b, double *c, int i, int j, int k)
-{ mxmad_0_(6, a, b, c, i, j, k); }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
+ mxmad_0_(6, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
 inline void RMath::mxmpy3(double *a, double *b, double *c, int i, int j, int k)
-{ mxmad_0_(7, a, b, c, i, j, k); }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
+ mxmad_0_(7, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
 inline void RMath::mxmub(double *a, double *b, double *c, int i, int j, int k)
-{ mxmad_0_(8, a, b, c, i, j, k);  }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
+ mxmad_0_(8, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
 inline void RMath::mxmub1(double *a, double *b, double *c, int i, int j, int k)
-{  mxmad_0_(9, a, b, c, i, j, k); }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
+  mxmad_0_(9, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
 inline void RMath::mxmub2(double *a, double *b, double *c, int i, int j, int k)
-{  mxmad_0_(10, a, b, c, i, j, k); }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
+  mxmad_0_(10, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
 inline void RMath::mxmub3(double *a, double *b, double *c, int i, int j, int k)
-{  mxmad_0_(11, a, b, c, i, j, k); }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
+  mxmad_0_(11, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
 inline void RMath::mxmlrt(double *a, double *b, double *c, int ni, int nj)
-{ mxmlrt_0_(0, a, b, c, ni, nj); }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
+ mxmlrt_0_(0, a, b, c, ni, nj); }
 
 //___________________________________________________________________________
 inline void RMath::mxmltr(double *a, double *b, double *c, int ni, int nj)
-{ mxmlrt_0_(1, a, b, c, ni, nj);   }
+{
+ // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
+ mxmlrt_0_(1, a, b, c, ni, nj);   }
 
 // ----
 
@@ -242,15 +325,33 @@ inline double *RMath::vcopyn(double *a, double *x, int n)
 //________________________________________________________
 inline float *RMath::uzero(float *a, int n1, int n2)
 { 
+  // Attention: n1, n2 is "Fortran-like index
+  // namely the first element has index "1" 
   if (n2-n1 < 0) return 0;
-  return (float *)memset(a,0,(n2-n1+1)*sizeof(float));
+  return (float *)memset(&a[n1-1],0,(n2-n1+1)*sizeof(float));
 }
 
 //________________________________________________________
 inline double *RMath::uzero(double *a, int n1, int n2)
 { 
+  // Attention: n1, n2 is "Fortran-like index
+  // namely the first element has index "1" 
   if (n2-n1 < 0) return 0;
-  return (double *)memset(a,0,(n2-n1+1)*sizeof(double));
+  return (double *)memset(&a[n1-1],0,(n2-n1+1)*sizeof(double));
+}
+
+//________________________________________________________
+inline float *RMath::vzero(float *a, int n1)
+{ 
+  if (n1 <= 0) return 0;
+  return (float *)memset(a,0,n1*sizeof(float));
+}
+
+//________________________________________________________
+inline double *RMath::vzero(double *a, int n1)
+{ 
+  if (n1 <= 0) return 0;
+  return (double *)memset(a,0,n1*sizeof(double));
 }
 
 #endif
