@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.3 1998/07/12 05:25:01 sakrejda Exp $
+* $Id: tph.F,v 1.4 1998/07/12 21:21:03 sakrejda Exp $
 * $Log: tph.F,v $
+* Revision 1.4  1998/07/12 21:21:03  sakrejda
+* protection against unphysical time buckets
+*
 * Revision 1.3  1998/07/12 05:25:01  sakrejda
 * id_globtrk,dalpha,dlambda,dq - initialized
 *
@@ -345,6 +348,14 @@ c ??? Check index?
      +,				    nclpix_max, npix_seq, ipad_lo
      +,				    ipad_hi, itdc_lo, itdc_hi)
             endif
+              if(itdc_hi.gt.512) then
+                 write(6,*) itdc_hi,'itdc_hi'
+                 itdc_hi=512
+              endif
+              if(itdc_lo.lt.1) then
+                 write(6,*) itdc_lo,'itdc_lo'
+                 itdc_lo=1
+              endif
  
 	      call tph_fit_cluster(tclpar,nseq, nclspix, npix_seq,
      +             ipad, itdc, iadc, itrk, 

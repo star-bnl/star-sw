@@ -1,5 +1,8 @@
-* $Id: tph_get_cluster_data.F,v 1.1 1998/05/22 00:18:22 hardtke Exp $
+* $Id: tph_get_cluster_data.F,v 1.2 1998/07/12 21:21:35 sakrejda Exp $
 * $Log: tph_get_cluster_data.F,v $
+* Revision 1.2  1998/07/12 21:21:35  sakrejda
+* protection against unphysical time buckets
+*
 * Revision 1.1  1998/05/22 00:18:22  hardtke
 * modified hit finder with new data format
 *
@@ -128,6 +131,8 @@ C
         integer ktrk                  ! Track number for MC data
         integer ldatum                ! tppixel word
         integer nclpix_max            ! Max. pixels in cluster
+        integer local_tdc_low
+        integer local_tdc_high
 c
 c 24mar95 -now data is packed in a new way in tppixel
 C-----------------------------------------------------------------------
@@ -142,6 +147,9 @@ C-----------------------------------------------------------------------
         itdc_hi = 1
         do kseq = jseq, jseq+nseq-1
            jpix = tpseq(kseq).jpix
+           local_tdc_low=tpseq(kseq).tdc_low
+           local_tdc_high=tpseq(kseq).tdc_hi
+           if(local_tdc_high.gt.512) local_tdc_high=512
            
            iclspix = iclspix + 1
 
@@ -158,9 +166,11 @@ c          for MC data!
 c
            itrk(iclspix) = 0
 c new way to unpack data
-           kseqpix = tpseq(kseq).tdc_hi - tpseq(kseq).tdc_low
+*           kseqpix = tpseq(kseq).tdc_hi - tpseq(kseq).tdc_low
+           kseqpix = local_tdc_high -local_tdc_low
          
-           itdc(iclspix) = tpseq(kseq).tdc_low
+*           itdc(iclspix) = tpseq(kseq).tdc_low
+           itdc(iclspix) = local_tdc_low
            iadc(iclspix) = ldatum
 c
            itdc_lo = MIN(itdc_lo,itdc(iclspix))
