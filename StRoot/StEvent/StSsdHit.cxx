@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdHit.cxx,v 2.2 1999/10/28 22:26:36 ullrich Exp $
+ * $Id: StSsdHit.cxx,v 2.3 1999/11/04 21:40:52 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.cxx,v $
- * Revision 2.2  1999/10/28 22:26:36  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/11/04 21:40:52  ullrich
+ * Added missing default constructor
  *
  * Revision 2.5  2000/01/05 16:05:37  ullrich
  * Updated for actual use in StEvent. Unpacking changed.
@@ -28,8 +28,10 @@
  * Revision 2.1  1999/10/13 19:45:11  ullrich
  * Initial Revision
  *
+ **************************************************************************/
+#include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.2 1999/10/28 22:26:36 ullrich Exp $";
+static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.3 1999/11/04 21:40:52 ullrich Exp $";
 
 StMemoryPool StSsdHit::mPool(sizeof(StSsdHit));
 

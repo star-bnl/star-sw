@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.1 1999/10/28 22:26:41 ullrich Exp $
+ * $Id: StSvtHit.cxx,v 2.2 1999/11/04 21:40:55 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
- * Revision 2.1  1999/10/28 22:26:41  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.2  1999/11/04 21:40:55  ullrich
+ * Added missing default constructor
  *
  * Revision 2.5  1999/12/13 20:16:19  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
@@ -27,12 +27,14 @@
  *
  * Revision 2.1  1999/10/28 22:26:41  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
+ *
+ * Revision 2.0  1999/10/12 18:42:43  ullrich
  * Completely Revised for New Version
  *
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.1 1999/10/28 22:26:41 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.2 1999/11/04 21:40:55 ullrich Exp $";
 
 ClassImp(StSvtHit)
     
@@ -101,6 +103,13 @@ StSvtHit::ladder() const
 {
     ULong_t w = mHardwarePosition>>4;
     return w-1000*layer()-100*wafer();
+}
+
+ULong_t
+StSvtHit::wafer() const
+{
+    ULong_t w = mHardwarePosition>>4;
+    return (w-layer()*1000)/100;
 }
 
 ULong_t
