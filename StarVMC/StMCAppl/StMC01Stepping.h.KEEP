@@ -1,0 +1,30 @@
+// $Id: StMC01Stepping.h.KEEP,v 1.1.1.1 2004/07/17 20:02:55 perev Exp $
+//
+//
+// Class StMC01Stepping
+// ------------------
+
+
+#ifndef STMC_01STEPPING_H
+#define STMC_01STEPPING_H
+
+#include "TNamed.h"
+#include "StMCUser.h"
+
+class StMC01Stepping : public StMCUser
+{
+  public:
+    StMC01Stepping(const char *name="DefaultField",const char *tit="",Double_t *fld=0);
+    virtual ~StMC01Stepping(){}    
+    // methods
+    virtual void User();
+    virtual void Print(const Option_t* opt=0) const;
+  private:
+    // data members
+    
+    ClassDef(StMC01Stepping,0) // Extended TParticle
+};
+
+#endif //STMC_01STEPPING_H   
+   
+
