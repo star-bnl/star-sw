@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.cxx,v 1.11 2002/01/31 21:10:00 caines Exp $ 
+ * $Id: StEstTracker.cxx,v 1.12 2002/02/20 17:22:03 caines Exp $ 
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.cxx,v $
+ * Revision 1.12  2002/02/20 17:22:03  caines
+ * Comment out some of the print statements
+ *
  * Revision 1.11  2002/01/31 21:10:00  caines
  * Open est cuts up
  *
@@ -115,7 +118,7 @@ Int_t StEstTracker::DoTracking() {
   for(mSuperPass=0; mSuperPass<mNSuperPass; mSuperPass++) {
     if (mSuperPass>0) {
       for (mPass=0;mPass<mNPass;mPass++) {
-	cout<< " Setting params here" << endl;
+	//	cout<< " Setting params here" << endl;
 	mParams[mPass]->geomcutl[2] = 5.;
 	mParams[mPass]->geomcutl[1] = 5.;
 	mParams[mPass]->geomcutl[0] = 5.;

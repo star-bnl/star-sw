@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.13 2002/01/31 21:10:00 caines Exp $
+ * $Id: StEstMaker.cxx,v 1.14 2002/02/20 17:22:02 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.14  2002/02/20 17:22:02  caines
+ * Comment out some of the print statements
+ *
  * Revision 1.13  2002/01/31 21:10:00  caines
  * Open est cuts up
  *
@@ -202,7 +205,7 @@ Int_t StEstMaker::Init(){
 
  // ideal tracking: mIdealTracking = 1
   mIdealTracking = 0;
-  mDebugLevel = 1;
+  mDebugLevel = 0;
 
   mParams = new StEstParams*[mNPass];
   for (i=0;i<mNPass;i++) mParams[i] = new StEstParams;

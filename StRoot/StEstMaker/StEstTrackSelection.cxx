@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrackSelection.cxx,v 1.11 2001/07/15 20:31:31 caines Exp $
+ * $Id: StEstTrackSelection.cxx,v 1.12 2002/02/20 17:22:03 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrackSelection.cxx,v $
+ * Revision 1.12  2002/02/20 17:22:03  caines
+ * Comment out some of the print statements
+ *
  * Revision 1.11  2001/07/15 20:31:31  caines
  * Fixes from Insure++ debugging
  *
@@ -255,8 +258,8 @@ void StEstTracker::RemoveHitSharing2() {
 	brmin=j;
 	minbr=mSvtHit[i]->mBranch[j]->GetChiSq();
       }
-      cout<<"j,nbranch,chisq,brmin,minbr = "<<j<<" "<<mSvtHit[i]->GetNBranch()
-	  <<" "<<mSvtHit[i]->mBranch[j]->GetChiSq()<<" "<<brmin<<" "<<minbr<<endl;
+      //cout<<"j,nbranch,chisq,brmin,minbr = "<<j<<" "<<mSvtHit[i]->GetNBranch()
+      //	  <<" "<<mSvtHit[i]->mBranch[j]->GetChiSq()<<" "<<brmin<<" "<<minbr<<endl;
     }
 
     brmax = mSvtHit[i]->GetNBranch(); 
