@@ -11,8 +11,8 @@
 #include "Sti/StiNeverActiveFunctor.h"
 #include <stdexcept>
 
-StiEmcDetectorBuilder::StiEmcDetectorBuilder(bool active)
-  : StiDetectorBuilder("EmcBuilder",active)
+StiEmcDetectorBuilder::StiEmcDetectorBuilder(bool active, const string & inputFile)
+  : StiDetectorBuilder("EmcBuilder",active,inputFile)
 {}
 
 StiEmcDetectorBuilder::~StiEmcDetectorBuilder()

@@ -13,7 +13,7 @@ class StiDetectorBuilder;
 class StiFtpcDetectorGroup : public StiDetectorGroup<StEvent,StMcEvent>
 {
   public:
-  StiFtpcDetectorGroup(bool active);
+  StiFtpcDetectorGroup(bool active, const string & inputFile);
   ~StiFtpcDetectorGroup();
 };
 

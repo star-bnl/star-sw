@@ -6,13 +6,11 @@
 #include "StiPixelHitLoader.h"
 
 
-StiPixelDetectorGroup::StiPixelDetectorGroup(bool active)
+StiPixelDetectorGroup::StiPixelDetectorGroup(bool active, const string & inputFile)
     : StiDetectorGroup<StEvent,StMcEvent>("Pixel",
 					  active?new StiPixelHitLoader():0,
-					  new StiPixelDetectorBuilder(active),0,0)
-{
-    //_hitLoader->setDetector(_detectorBuilder);
-}
+					  new StiPixelDetectorBuilder(active,inputFile),0,0)
+{}
 
 StiPixelDetectorGroup::~StiPixelDetectorGroup()
 {}

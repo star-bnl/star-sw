@@ -5,7 +5,7 @@
 class StiEmcDetectorBuilder : public StiDetectorBuilder
 {
 public:
-    StiEmcDetectorBuilder(bool active);
+    StiEmcDetectorBuilder(bool active, const string & inputFile);
     virtual ~StiEmcDetectorBuilder(); 
     virtual void buildDetectors(StMaker&source);
  protected:

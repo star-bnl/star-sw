@@ -12,7 +12,7 @@ class StMcEvent;
 class StiPixelDetectorGroup : public StiDetectorGroup<StEvent,StMcEvent>
 {
   public:
-    StiPixelDetectorGroup(bool active);
+    StiPixelDetectorGroup(bool active, const string & inputFile);
     ~StiPixelDetectorGroup();
 };
 
