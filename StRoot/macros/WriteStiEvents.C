@@ -5,6 +5,9 @@
 //
 //  A. Rose, M. Calderon
 // $Log: WriteStiEvents.C,v $
+// Revision 1.2  2002/09/16 22:57:25  jeromel
+// Would work better without the return ...
+//
 // Revision 1.1  2002/09/16 21:55:55  jeromel
 // For production purposes, copy of Andrew's macro slightly reshaped for CRS.
 //
@@ -166,7 +169,7 @@ void WriteStiEvents(Int_t nevents=1,
     TString *ofile = new TString(Mainfile);
     ofile->ReplaceAll(".event.root","_sti.event.root");
     cout << "Output file is " << ofile->Data() << endl;
-    return;
+    //return;
 
     StTreeMaker *outMk = new StTreeMaker("EvOut","","bfcTree");
     outMk->SetIOMode("w");
