@@ -19,6 +19,7 @@
 
 #include "dstype.h"
 
+#define KUIP
 #include "kuip.h"
 
 #include "asuAlloc.h"
@@ -122,7 +123,7 @@ void kam_tdm_newdataset_()
 STAFCV_T tdm_newdataset(char* name, long dim)
 {
    if( !tdm->newDataset(name,dim) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -149,7 +150,7 @@ STAFCV_T tdm_newtable(char* name, char* spec, long rowcount)
 {
    if( sutMatchPrefix("struct",spec) ){
       if( !tdm->newTable(name,spec,rowcount) ){
-	 EML_ERROR(KAM_METHOD_FAILURE);
+	 EML_FAILURE(KAM_METHOD_FAILURE);
       }
       EML_SUCCESS(STAFCV_OK);
    }
@@ -158,7 +159,7 @@ STAFCV_T tdm_newtable(char* name, char* spec, long rowcount)
       if( !tdm->findTypeSpecification(spec,specs)
       ||  !tdm->newTable(name,specs,rowcount) ){
 	 FREE(specs);
-	 EML_ERROR(KAM_METHOD_FAILURE);
+	 EML_FAILURE(KAM_METHOD_FAILURE);
       }
       FREE(specs);
       EML_SUCCESS(STAFCV_OK);
@@ -196,7 +197,7 @@ STAFCV_T tdm_type_list(long tid)
    }
    else {
       if( !tdm->getTypeName(tid,name) ){
-         EML_ERROR(KAM_METHOD_FAILURE);
+         EML_FAILURE(KAM_METHOD_FAILURE);
       }
       printf("TDM:\tType name = (%s) \n",name);
       FREE(name);
@@ -241,6 +242,69 @@ STAFCV_T tdm_type_show(char* name)
 
 /*
 *:>---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdm_type_load_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/TYPESPECIFIERS/LIST [ TID ]
+*:<---------------------------------------------------------------------
+*/
+void kam_tdm_type_load_()
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* fname = ku_gets();	/* idl file name */
+
+        STAFCV_T status = tdm_type_load(fname);
+}
+STAFCV_T tdm_type_load(char * fname)
+{
+   printf("file = %s\n",fname); fflush(0);
+   FILE *f = NULL;
+   if( NULL == (f = fopen(fname,"rb")) ){
+      fclose(f);
+      EML_FAILURE(KAM_FILE_OPEN_FAILURE);
+   }
+   char * spec = (char*)MALLOC(2048);
+   char * s = spec;
+   char * buffer = (char*)MALLOC(256);
+   size_t l;
+   while( fgets(buffer,255,f) ){
+      printf("*"); fflush(0);
+      l = strlen(buffer);
+      if( (strlen(spec) + l) >= 2047 ){
+	 FREE(spec); FREE(buffer);
+	 fclose(f);
+	 EML_FAILURE(KAM_SPEC_TOO_LONG);
+      }
+      strncpy(s,buffer,l);
+      s += l;
+   }
+   unsigned char ccmt=0;
+   unsigned char cccmt=0;
+   for( int i=0; i<strlen(spec); i++ ){
+      if( '/' == spec[i] && '*' == spec[i+1] )ccmt = 1;
+      if( '*' == spec[i] && '/' == spec[i+1] ){
+	 spec[i] = spec[i+1] = ' '; ccmt = 0;
+      }
+      if( '/' == spec[i] && '/' == spec[i+1] )cccmt = 1;
+      if( '\n' == spec[i] )cccmt = 0;
+      if( ccmt || cccmt ) spec[i] = ' ';
+   }
+   printf("\n---\n%s\n---\n",spec); fflush(0);
+
+   if( !tdm->newTable("tdm_temporary",spec,1)
+   ||  !tdm->deleteTable("tdm_temporary")
+   ){
+      EML_FAILURE(KAM_METHOD_FAILURE);
+   }
+
+   FREE(spec); FREE(buffer);
+   fclose(f);
+   EML_SUCCESS(STAFCV_OK);
+}
+
+/*
+*:>---------------------------------------------------------------------
 *:ROUTINE:      void kam_tdmdataset_adddataset_
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --
@@ -263,7 +327,7 @@ STAFCV_T tdmdataset_adddataset(char* dsname,char* name,long dim)
    if( NULL == (dataset = tdm->findDataset(dsname))
    ||  !dataset->addDataset(name,dim)
    ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -295,7 +359,7 @@ STAFCV_T tdmdataset_addtable(char* dsname, char* name, char* spec
    if( NULL == (dataset = tdm->findDataset(dsname))
    ||  !dataset->addTable(name,spec,rowcount)
    ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -323,7 +387,7 @@ STAFCV_T tdmdataset_entrycount(char* name)
    long result=0;
 
    if( NULL == (dataset = tdm->findDataset(name)) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    printf("TDMDATASET:\tEntry Count = %d \n"
 		,result=dataset->entryCount());
@@ -341,7 +405,7 @@ void kam_tdmdataset_entryname_()
 }
 STAFCV_T tdmdataset_entryname()
 {
-EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -354,7 +418,7 @@ void kam_tdmdataset_findentry_()
 }
 STAFCV_T tdmdataset_findentry()
 {
-EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -380,7 +444,7 @@ STAFCV_T tdmdataset_maxentrycount(char* name)
    long result=0;
 
    if( NULL == (dataset = tdm->findDataset(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    printf("TDMDATASET:\tMax Entry Count = %d \n"
 		,result=dataset->maxEntryCount());
@@ -410,7 +474,7 @@ STAFCV_T tdmdataset_name(char* name)
    tdmDataset* dataset;
 
    if( NULL == (dataset = tdm->findDataset(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    char *c=NULL;
    printf("TDMDATASET:\tDSL name = (%s) \n",c = dataset->dslName());
@@ -428,7 +492,7 @@ void kam_tdmdataset_show_()
 }
 STAFCV_T tdmdataset_show()
 {
-EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -469,19 +533,19 @@ STAFCV_T tdmtable_cell_getvalue(char* cellSpec)
 #**/
    
    if( NULL == (table = tdm->findTable((tname))) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
 
    TDM_COLUMN_T col;
    if( !table->findColumn(col,cname) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
 
    int ncol = col.nCol;
 	
    TDM_CELLDATA_T cellData;
    if( !table->getCell(cellData,nrow,ncol) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
 
    printf("TDMTABLE:\tCell data = ");
@@ -517,7 +581,7 @@ STAFCV_T tdmtable_cell_getvalue(char* cellSpec)
       case DS_TYPE_STRUCT:
 	 result = 11301957; /*-TDM_E_UNIMPLEMENTED_TYPE-*/
 	 set_staf_result(result);
-	 EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+	 EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 	 break;
       default:
 	 result = -11301957; /*-TDM_E_UNKNOWN_TYPE-*/
@@ -527,7 +591,7 @@ STAFCV_T tdmtable_cell_getvalue(char* cellSpec)
 	 ,DS_TYPE_CHAR,DS_TYPE_OCTET,DS_TYPE_SHORT,DS_TYPE_U_SHORT
 	 ,DS_TYPE_LONG,DS_TYPE_U_LONG,DS_TYPE_FLOAT,DS_TYPE_DOUBLE
 	 ,DS_TYPE_STRUCT);
-	 EML_ERROR(KAM_INVALID_TYPE);
+	 EML_FAILURE(KAM_INVALID_TYPE);
 	 break;
    }
    set_staf_result(result);
@@ -549,7 +613,7 @@ void kam_tdmtable_cell_putvalue_()
 /** 03dec96 - THIS HAS BEEN REWRITTEN? **/
 
    values = new char*[npars-1];
-   for( int np=1;np<npars;np++ ){
+   for( int np=0;np<npars-1;np++ ){
       values[np] = ku_gets();
    }
    STAFCV_T status = tdmtable_cell_putvalue(cellSpec,npars-1,values);
@@ -569,12 +633,12 @@ STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
    char *cname = strtok(NULL,"[].");
    
    if( NULL == (table = tdm->findTable((tname))) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
 
    TDM_COLUMN_T col;
    if( !table->findColumn(col,cname) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
 
    int ncol = col.nCol;
@@ -624,12 +688,12 @@ STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
 	 case DS_TYPE_STRUCT:
 	    FREE(cellData.data.v);
 	    FREE(cs);
-	    EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+	    EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 	    break;
 	 default:
 	    FREE(cellData.data.v);
 	    FREE(cs);
-	    EML_ERROR(KAM_INVALID_TYPE);
+	    EML_FAILURE(KAM_INVALID_TYPE);
 	    break;
       }
       buff.data.c += elsize;
@@ -638,7 +702,7 @@ STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
    if( !table->putCell(cellData,nrow,ncol) ){
       FREE(cellData.data.v);
       FREE(cs);
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
 
    FREE(cellData.data.v);
@@ -668,7 +732,7 @@ STAFCV_T tdmtable_colcount(char* name)
    long result=0;
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    printf("TDMTABLE:\tColumn Count = %d \n"
 		,result=table->columnCount());
@@ -686,7 +750,7 @@ void kam_tdmtable_column_code_()
 }
 STAFCV_T tdmtable_column_code()
 {
-EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -699,7 +763,7 @@ void kam_tdmtable_column_elcount_()
 }
 STAFCV_T tdmtable_column_elcount()
 {
-EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -712,7 +776,7 @@ void kam_tdmtable_column_find_()
 }
 STAFCV_T tdmtable_column_find()
 {
-EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -725,7 +789,7 @@ void kam_tdmtable_column_name_()
 }
 STAFCV_T tdmtable_column_name()
 {
-EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -738,7 +802,7 @@ void kam_tdmtable_column_rank_()
 }
 STAFCV_T tdmtable_column_rank()
 {
-EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -751,7 +815,7 @@ void kam_tdmtable_column_shape_()
 }
 STAFCV_T tdmtable_column_shape()
 {
-EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -764,7 +828,7 @@ void kam_tdmtable_column_size_()
 }
 STAFCV_T tdmtable_column_size()
 {
-EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -777,7 +841,7 @@ void kam_tdmtable_column_type_()
 }
 STAFCV_T tdmtable_column_type()
 {
-EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -803,7 +867,7 @@ STAFCV_T tdmtable_maxrowcount(char* name,long maxrowcount)
    long result=0;
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    if( maxrowcount >= 0 ){				/* SET */
       table->maxRowCount(maxrowcount);
@@ -837,7 +901,7 @@ STAFCV_T tdmtable_name(char* name)
    tdmTable* table;		/* tdmTable object */
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    char *c=NULL;
    printf("TDMTABLE:\tDSL Name = (%s) \n",c = table->dslName());
@@ -868,7 +932,7 @@ STAFCV_T tdmtable_print(char* name, long nrows, long ifirst)
    tdmTable* table;		/* tdmTable object */
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    table->printRows(ifirst,nrows);
    EML_SUCCESS(STAFCV_OK);
@@ -897,7 +961,7 @@ STAFCV_T tdmtable_rowcount(char* name, long rowcount)
    long result=0;
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    if( rowcount >= 0 ){					/* SET */
       table->rowCount(rowcount);
@@ -931,7 +995,7 @@ STAFCV_T tdmtable_rowsize(char* name)
    long result=0;
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    printf("TDMTABLE:\tRow Size = %d bytes \n"
 		,result=table->rowSize());
@@ -961,7 +1025,7 @@ STAFCV_T tdmtable_show(char* name, char* option)
    tdmTable* table;		/* tdmTable object */
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    printf("TDMTABLE:\tTable = ...\n"); table->show(); printf("\n.\n");
    EML_SUCCESS(STAFCV_OK);
@@ -989,7 +1053,7 @@ STAFCV_T tdmtable_specifier(char* name)
    char *c=NULL;
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    printf("TDMTABLE:\tType Specifier = ...\n%s\n.\n"
 		,c=table->typeSpecifier());
@@ -1019,7 +1083,7 @@ STAFCV_T tdmtable_typename(char* name)
    char *c=NULL;
 
    if( NULL == (table = tdm->findTable(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    printf("TDMTABLE:\tType Name = (%s) \n",c=table->typeName());
    FREE(c);

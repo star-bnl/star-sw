@@ -16,7 +16,7 @@
 >MENU TDM
 >GUIDANCE
 Table & Dataset Memory commands.
-$Id: tdm_def.cdf,v 1.3 1997/01/30 22:08:50 tull Exp $
+$Id: tdm_def.cdf,v 1.4 1997/05/10 21:44:29 tull Exp $
 .
 Commands for the Table & Dataset Memory (TDM) ASP.
 .
@@ -134,11 +134,18 @@ Show table type names.
 Possible OPTION values are:
    ' '   Show everything.
 .
- ************************
- * Still In Development *
- ************************
-.
 >ACTION KAM_TDM_TYPE_SHOW
+
+** ---------------------------------------------------------------------
+** TDM/TYPESPECIFIERS/LOAD [ IDL_FILE ]
+>COMMAND LOAD
+>PARAMETERS
++
+IDL_FILE 'IDL file containing table specificaiont.' C D='-'
+>GUIDANCE
+Load table definitions from IDL files.
+.
+>ACTION KAM_TDM_TYPE_LOAD
 
 ************************************************************************
 ************************************************************************

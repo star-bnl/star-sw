@@ -15,6 +15,7 @@
 //:<--------------------------------------------------------------------
 
 //:----------------------------------------------- INCLUDES           --
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -106,6 +107,14 @@ unsigned char tdmObject:: isTable () {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- override socObject::implementsInterface
+unsigned char tdmObject:: implementsInterface (const char * iface) {
+   if( 0 == strcmp("tdmObject",iface)
+   ||  socObject::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+}
+
 //- Use this function ONLY in a collocated process.
 DS_DATASET_T * tdmObject:: dslPointer() {
    return pDSthis;
@@ -275,6 +284,15 @@ char * tdmTable::  listing () {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- override socObject::implementsInterface
+unsigned char tdmTable :: implementsInterface (const char * iface) {
+   if( 0 == strcmp("tdmTable",iface)
+   ||  tdmObject::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+
+}
+
 //-02feb96- return result as return value, not argument
 unsigned char tdmTable:: isType (const char * aType) {
    bool_t rslt;
@@ -289,11 +307,11 @@ unsigned char tdmTable:: isType (const char * aType) {
 STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
 
    size_t i,j;
-   DS_TYPE_T *type;
+   DS_TYPE_T *dstype;
    char *pCellData;
    char *c=NULL;
 
-   if( !dsTypePtr(&type,pDSthis->tid)) {
+   if( !dsTypePtr(&dstype,pDSthis->tid)) {
       EML_ERROR(BAD_TABLE_TYPE);
    }
    long ii=rowCount();
@@ -305,13 +323,28 @@ STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
    for( i=0;i<columnCount();i++ ){
       fprintf(stdout,"\t%s",c=columnName(i));
 /*HACK:			FREE(c); 	UNKNOWN BUG*/
-      for( long n=1;n<MIN(columnElcount(i),100); n++ ){
-         fprintf(stdout,"\t%s(%d)",c=columnName(i),n);
-         FREE(c);
+      if( DS_TYPE_CHAR == columnTypeCode(i) ){
+	 long ii = columnElcount(i)-strlen(c=columnName(i));
+	 for(;0<ii;ii--){ fprintf(stdout," "); }
+//	 for(long ii=0;ii<iii;i++){ fprintf(stdout," "); }
       }
-      if( columnElcount(i) > 100 ){
-	 fprintf(stdout,"\t***%d MORE HEADERS UNPRINTED***"
-			,columnElcount(i)-100);
+      else {
+	 if( 1 < columnElcount(i) ){
+	    fprintf(stdout,"[0]");
+	    for( long n=1;n<columnElcount(i);n++ ){
+	       if( (8 > n)
+	       ||  (columnElcount(i) == n)
+	       ||  (12 > columnElcount(i))
+	       ){
+		  fprintf(stdout,"\t%s[%d]",c=columnName(i),n);
+		  FREE(c);
+	       }
+	       else if( (8 == n) ){
+		  fprintf(stdout,"\t***%d HEADERS UNPRINTED***"
+			   ,columnElcount(i)-9);
+	       }
+	    }
+	 }
       }
    }
    fprintf(stdout,"\n");
@@ -321,9 +354,9 @@ STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
    for( i=ifirst;i<MIN(ii,ifirst+nrows);i++){
       fprintf(stdout,"%6d:",i);
 /*REPLACE *** dsPrintData with dsuPrintData ***
-      dsPrintData(stdout, type
+      dsPrintData(stdout, dstype
 		, 1 
-		, (char *)pDSthis->p.data +i*type->size);
+		, (char *)pDSthis->p.data +i*dstype->size);
 */
 /*REPLACE *** dsuPrintData with dsPrintData ***
       for(j=0;j<columnCount();j++){
@@ -332,7 +365,7 @@ STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
 	 pCellData += columnSize(j);
       }
 */
-      dsPrintData(stdout, type, 1, pCellData);
+      dsPrintData(stdout, dstype, 1, pCellData);
       pCellData += rowSize();
       fprintf(stdout,"\n");
    }
@@ -681,6 +714,15 @@ char * tdmDataset::  listing () {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- override socObject::implementsInterface
+unsigned char tdmDataset :: implementsInterface (const char * iface) {
+   if( 0 == strcmp("tdmDataset",iface)
+   ||  tdmObject::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+
+}
+
 STAFCV_T tdmDataset:: addDataset (const char * name, long setDim) {
 //BUG- add dsAddDataset functionality
    EML_ERROR(NOT_YET_IMPLEMENTED);
@@ -773,6 +815,15 @@ tdmFactory:: ~tdmFactory() {
 //:**NONE**
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- override socObject::implementsInterface
+unsigned char tdmFactory :: implementsInterface (const char * iface) {
+   if( 0 == strcmp("tdmFactory",iface)
+   ||  socFactory::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+}
+
+//----------------------------------
 STAFCV_T tdmFactory:: deleteDataset (const char * name) {
    if( !soc->deleteObject(name,"tdmDataset") ){
       EML_ERROR(CANT_DELETE_OBJECT);
@@ -890,7 +941,7 @@ tdmDataset* tdmFactory:: createDataset (const char * name
    if( soc->idObject(name,"tdmDataset",id) ){
       return NULL;
    }
-   static tdmDataset* p = new tdmDataset(name,pDS);
+   tdmDataset* p = new tdmDataset(name,pDS);
    addEntry(p->idRef());
    return p;
 }
@@ -902,7 +953,7 @@ tdmTable* tdmFactory:: createTable (const char * name
    if( soc->idObject(name,"tdmTable",id) ){
       return NULL;
    }
-   static tdmTable* p = new tdmTable(name,pDS);
+   tdmTable* p = new tdmTable(name,pDS);
    addEntry(p->idRef());
    return p;
 }
