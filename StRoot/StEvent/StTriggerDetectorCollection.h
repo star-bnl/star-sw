@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.h,v 2.1 2002/01/03 20:59:34 ullrich Exp $
+ * $Id: StTriggerDetectorCollection.h,v 2.2 2002/02/20 03:12:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.h,v $
+ * Revision 2.2  2002/02/20 03:12:15  ullrich
+ * Added EMC trigger.
+ *
  * Revision 2.1  2002/01/03 20:59:34  ullrich
  * Added BBC and FPD.
  *
@@ -25,6 +28,7 @@
 #include "StMwcTriggerDetector.h"
 #include "StVpdTriggerDetector.h"
 #include "StZdcTriggerDetector.h"
+#include "StEmcTriggerDetector.h"
 
 class dst_TrgDet_st;
 
@@ -46,6 +50,8 @@ public:
     const StVpdTriggerDetector& vpd() const;
     StZdcTriggerDetector&       zdc();
     const StZdcTriggerDetector& zdc() const;
+    StEmcTriggerDetector&       emc();
+    const StEmcTriggerDetector& emc() const;
     
 protected:
     StCtbTriggerDetector mCtb;
@@ -53,7 +59,8 @@ protected:
     StVpdTriggerDetector mVpd;
     StZdcTriggerDetector mZdc;
     StBbcTriggerDetector mBbc;
+    StEmcTriggerDetector mEmc;
     
-    ClassDef(StTriggerDetectorCollection,2)
+    ClassDef(StTriggerDetectorCollection,3)
 };
 #endif

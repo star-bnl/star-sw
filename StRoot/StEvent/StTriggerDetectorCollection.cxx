@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.cxx,v 2.2 2002/01/03 20:59:33 ullrich Exp $
+ * $Id: StTriggerDetectorCollection.cxx,v 2.3 2002/02/20 03:12:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.cxx,v $
+ * Revision 2.3  2002/02/20 03:12:15  ullrich
+ * Added EMC trigger.
+ *
  * Revision 2.2  2002/01/03 20:59:33  ullrich
  * Added BBC and FPD.
  *
@@ -23,14 +26,14 @@
 #include "StTriggerDetectorCollection.h"
 #include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.2 2002/01/03 20:59:33 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.3 2002/02/20 03:12:15 ullrich Exp $";
 
 ClassImp(StTriggerDetectorCollection)
 
 StTriggerDetectorCollection::StTriggerDetectorCollection() {/* noop */}
 
 StTriggerDetectorCollection::StTriggerDetectorCollection(const dst_TrgDet_st& t) :
-    mCtb(t), mMwc(t), mVpd(t), mZdc(t) {/* noop */}
+    mCtb(t), mMwc(t), mVpd(t), mZdc(t), mEmc(t) {/* noop */}
 
 StTriggerDetectorCollection::~StTriggerDetectorCollection() {/* noop */}
 
@@ -63,4 +66,10 @@ StTriggerDetectorCollection::zdc() { return mZdc; }
 
 const StZdcTriggerDetector&
 StTriggerDetectorCollection::zdc() const { return mZdc; }
+
+StEmcTriggerDetector&
+StTriggerDetectorCollection::emc() { return mEmc; }
+
+const StEmcTriggerDetector&
+StTriggerDetectorCollection::emc() const { return mEmc; }
 
