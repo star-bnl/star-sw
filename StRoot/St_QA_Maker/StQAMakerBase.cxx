@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.13 2002/01/21 22:09:24 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.14 2002/01/26 03:04:07 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.14  2002/01/26 03:04:07  genevb
+// Fixed some problems with fcl histos
+//
 // Revision 2.13  2002/01/21 22:09:24  genevb
 // Include some ftpc histograms from StFtpcClusterMaker
 //
@@ -122,6 +125,7 @@ Int_t StQAMakerBase::Make(){
 
   // Call methods to fill histograms
 
+
   // histograms from table event_summary
   MakeHistEvSum();
   // histograms from table globtrk
@@ -143,37 +147,6 @@ Int_t StQAMakerBase::Make(){
   // histograms from geant and reco tables 
   if (histsSet==0) MakeHistEval();
 
-  if (!(hists->m_ftpc_chargestepW)) {
-    // First try to get histograms from StFtpcClusterMaker named "ftpc_hits"
-    StMaker* fhMaker = GetMaker("ftpc_hits");
-    if (fhMaker) {
-      hists->m_ftpc_chargestepW = (TH1F*) (fhMaker->GetHist("fcl_chargestepW"));
-      AddHist(hists->m_ftpc_chargestepW);
-      hists->m_ftpc_chargestepE = (TH1F*) (fhMaker->GetHist("fcl_chargestepE"));
-      AddHist(hists->m_ftpc_chargestepE);
-      hists->m_ftpc_fcl_radius = (TH1F*) (fhMaker->GetHist("fcl_radius"));
-      AddHist(hists->m_ftpc_fcl_radius);
-    } else {
-      // "ftpc_hits" maker doesn't exist, so look in hist branch
-      // *** Currently isn't working for bfcread_event_QAhist.C ***
-      St_DataSet* hDS = GetDataSet("histBranch");
-      if (hDS) {
-        // hDS->ls(9);
-        St_DataSet* fhDS = hDS->Find("ftpc_hitsHist");
-        if (fhDS) {
-          hists->m_ftpc_chargestepW =
-	    (TH1F*) (fhDS->FindObject("fcl_chargestepW"));
-          AddHist(hists->m_ftpc_chargestepW);
-          hists->m_ftpc_chargestepE =
-	    (TH1F*) (fhDS->FindObject("fcl_chargestepE"));
-          AddHist(hists->m_ftpc_chargestepE);
-          hists->m_ftpc_fcl_radius =
-	    (TH1F*) (fhDS->FindObject("fcl_radius"));
-          AddHist(hists->m_ftpc_fcl_radius);
-        }
-      }
-    }
-  }
   return kStOk;
 }
 //_____________________________________________________________________________
@@ -235,6 +208,7 @@ void StQAMakerBase::BookHist() {
   BookHistTrigger();
   BookHistGeneral();
   BookHistEvSum();
+  BookHistFcl();
   for (Int_t i=0; i<multClass; i++)
     ((StQABookHist*) (histsList->At(i)))->BookHist(histsSet);
 }
@@ -266,5 +240,41 @@ void StQAMakerBase::BookHistEvSum(){
 
   m_glb_trk_chg = MH1F("QaEvsumTotChg","softmon: all charge east/west,tpc",60,0,3);
   m_glb_trk_chgF = MH1F("QaEvsumTotChgF","softmon: all charge east/west,ftpc",60,0,3);
+}
+//_____________________________________________________________________________
+void StQAMakerBase::BookHistFcl(){  
+
+  // Get fcl histograms from FTPC makers
+  if (!(hists->m_ftpc_chargestepW)) {
+    // First try to get histograms from StFtpcClusterMaker named "ftpc_hits"
+    StMaker* fhMaker = GetMaker("ftpc_hits");
+    if (fhMaker) {
+      hists->m_ftpc_chargestepW = (TH1F*) (fhMaker->GetHist("fcl_chargestepW"));
+      AddHist(hists->m_ftpc_chargestepW);
+      hists->m_ftpc_chargestepE = (TH1F*) (fhMaker->GetHist("fcl_chargestepE"));
+      AddHist(hists->m_ftpc_chargestepE);
+      hists->m_ftpc_fcl_radius = (TH1F*) (fhMaker->GetHist("fcl_radius"));
+      AddHist(hists->m_ftpc_fcl_radius);
+    } else {
+      // "ftpc_hits" maker doesn't exist, so look in hist branch
+      // *** Currently isn't working for bfcread_event_QAhist.C ***
+      St_DataSet* hDS = GetDataSet("histBranch");
+      if (hDS) {
+        // hDS->ls(9);
+        St_DataSet* fhDS = hDS->Find("ftpc_hitsHist");
+        if (fhDS) {
+          hists->m_ftpc_chargestepW =
+	    (TH1F*) (fhDS->FindObject("fcl_chargestepW"));
+          AddHist(hists->m_ftpc_chargestepW);
+          hists->m_ftpc_chargestepE =
+	    (TH1F*) (fhDS->FindObject("fcl_chargestepE"));
+          AddHist(hists->m_ftpc_chargestepE);
+          hists->m_ftpc_fcl_radius =
+	    (TH1F*) (fhDS->FindObject("fcl_radius"));
+          AddHist(hists->m_ftpc_fcl_radius);
+        }
+      }
+    }
+  }
 }
 //_____________________________________________________________________________

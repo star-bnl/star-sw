@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.13 2002/01/21 22:09:24 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.14 2002/01/26 03:04:07 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.14  2002/01/26 03:04:07  genevb
+// Fixed some problems with fcl histos
+//
 // Revision 2.13  2002/01/21 22:09:24  genevb
 // Include some ftpc histograms from StFtpcClusterMaker
 //
@@ -49,6 +52,10 @@
   "StEQaMultClass",
   "StEQaTrigWord",
   "StEQaTrigBits",
+  "fcl_chargestepW",
+  "fcl_chargestepE",
+  "fcl_radius",
+
   "StEQaPointTpc",
   "StEQaPointSvt",
   "StEQaPointFtpc",
@@ -166,9 +173,6 @@
   "StEQaGRpvtxDx",
   "StEQaGRpvtxDy",
   "StEQaGRpvtxDz",
-  "fcl_chargestepW",
-  "fcl_chargestepE",
-  "fcl_radius",
 
   "StELMQaPointTpc",
   "StELMQaPointSvt",

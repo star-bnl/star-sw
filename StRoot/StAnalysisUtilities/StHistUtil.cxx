@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.8 2002/01/21 22:09:23 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.9 2002/01/26 03:04:05 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.9  2002/01/26 03:04:05  genevb
+// Fixed some problems with fcl histos
+//
 // Revision 2.8  2002/01/21 22:09:23  genevb
 // Include some ftpc histograms from StFtpcClusterMaker
 //
@@ -118,9 +121,9 @@ Bool_t StHistUtil::CheckPSFile(const Char_t *histName) {
   TString hName = histName;
   if ((hName.BeginsWith("Tab")) || (hName.BeginsWith("StE"))) {
     hName.Remove(0,3);
-    for (Int_t i=1; i<numOfPosPrefixes; i++) {
-      if (hName.BeginsWith(possiblePrefixes[i])) newPrefix = i;
-    }
+  }
+  for (Int_t i=1; i<numOfPosPrefixes; i++) {
+    if (hName.BeginsWith(possiblePrefixes[i])) newPrefix = i;
   }
 
   if (newPrefix != m_CurPrefix) {
@@ -133,8 +136,11 @@ Bool_t StHistUtil::CheckPSFile(const Char_t *histName) {
     } else {
       m_CurFileName.Insert(insertPos,possiblePrefixes[m_CurPrefix]);
     }
-    if (psf) psf->Close();
-    if (!m_PsFileName.IsNull()) psf = new TPostScript(m_CurFileName.Data());
+    if (!m_PsFileName.IsNull()) {
+      if (psf) psf->Close();
+      else psf = new TPostScript();
+      psf->Open(m_CurFileName.Data());
+    }
     Ldesc->Clear();
     Ldesc->AddText(possibleSuffixes[m_CurPrefix]);
     Ldesc->AddText("Hists");
@@ -227,6 +233,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
   TObject *obj = 0;
   Int_t chkdim=0;
+  TLine ruler;
   while ((obj = nextHist())) {
 
     if (obj->InheritsFrom("TH1")) { 
@@ -315,15 +322,19 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 		!strcmp(obj->GetName(),"StEMMQaPtrkGoodF") ||
 		!strcmp(obj->GetName(),"StEHMQaGtrkGoodF") ||
 		!strcmp(obj->GetName(),"StEHMQaPtrkGoodF")) {
-	      TLine diagonal;
-	      diagonal.SetLineColor(46);
-	      diagonal.SetLineWidth(2);
-	      diagonal.DrawLineNDC(0.1,0.1,0.9,0.9);
+              ruler.SetLineColor(46);
+              ruler.SetLineWidth(2);
+              ruler.DrawLineNDC(0.1,0.1,0.9,0.9);
 	    }
           } else {
 	    TH1F* tempHist = (TH1F*) obj;
 	    tempHist->SetLineWidth(2);
 	    tempHist->Draw();
+            if (!strcmp(obj->GetName(),"fcl_radius")) {
+              ruler.SetLineColor(46);
+              ruler.SetLineWidth(2);
+              ruler.DrawLine(7.73,0.,7.73,tempHist->GetMaximum());
+            }
 	  }
 	  if (gPad) gPad->Update();
         }
@@ -973,7 +984,8 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
 	strcmp(sdefList[ilg],"QaOuterSectorDeDx") &&
 	strcmp(sdefList[ilg],"QaDedxAllSectors") &&
 	strcmp(sdefList[ilg],"fcl_chargestepW") &&
-	strcmp(sdefList[ilg],"fcl_chargestepE")) {
+	strcmp(sdefList[ilg],"fcl_chargestepE") &&
+	strcmp(sdefList[ilg],"fcl_radius")) {
       for (Int_t k=0; k<numOfPosPrefixes; k++) {
         ((listString = type) += possiblePrefixes[k]) += sdefList[ilg];
         numLog = AddToLogYList(listString.Data());
@@ -1016,9 +1028,12 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
   Int_t ilg = 0;
   for (ilg=0;ilg<lengofList;ilg++) {
     TString listString;
-    if ((sdefList[ilg] != "QaInnerSectorDeDx") &&
-	(sdefList[ilg] != "QaOuterSectorDeDx") &&
-	(sdefList[ilg] != "QaDedxAllSectors")) {
+    if (strcmp(sdefList[ilg],"QaInnerSectorDeDx") &&
+	strcmp(sdefList[ilg],"QaOuterSectorDeDx") &&
+	strcmp(sdefList[ilg],"QaDedxAllSectors") &&
+	strcmp(sdefList[ilg],"fcl_chargestepW") &&
+	strcmp(sdefList[ilg],"fcl_chargestepE") &&
+	strcmp(sdefList[ilg],"fcl_radius")) {
       for (Int_t k=0; k<numOfPosPrefixes; k++) {
         ((listString = type) += possiblePrefixes[k]) += sdefList[ilg];
         numLog = AddToLogXList(listString.Data());

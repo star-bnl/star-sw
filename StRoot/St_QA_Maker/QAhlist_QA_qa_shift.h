@@ -1,5 +1,8 @@
-// $Id: QAhlist_QA_qa_shift.h,v 2.5 2002/01/21 22:09:24 genevb Exp $
+// $Id: QAhlist_QA_qa_shift.h,v 2.6 2002/01/26 03:04:07 genevb Exp $
 // $Log: QAhlist_QA_qa_shift.h,v $
+// Revision 2.6  2002/01/26 03:04:07  genevb
+// Fixed some problems with fcl histos
+//
 // Revision 2.5  2002/01/21 22:09:24  genevb
 // Include some ftpc histograms from StFtpcClusterMaker
 //
@@ -25,6 +28,10 @@
      "TabQaNullPrimVtx",
      "TabQaMultClass",
      "TabQaEvsumTotChg",
+     "fcl_chargestepW",
+     "fcl_chargestepE",
+     "fcl_radius",
+
      "TabQaGtrkRnfT",
      "TabQaGtrkR0T",
      "TabQaGtrkPhi0T",
@@ -83,9 +90,6 @@
      "TabQaXiVtxTot",
      "TabQaXiaMass",
      "TabQaKinkTot",
-     "fcl_chargestepW",
-     "fcl_chargestepW",
-     "fcl_radius",
 
      "TabLMQaGtrkRnfT",
      "TabLMQaGtrkR0T",
@@ -145,6 +149,7 @@
      "TabLMQaXiVtxTot",
      "TabLMQaXiaMass",
      "TabLMQaKinkTot",
+
      "TabMMQaGtrkRnfT",
      "TabMMQaGtrkR0T",
      "TabMMQaGtrkPhi0T",
@@ -203,6 +208,7 @@
      "TabMMQaXiVtxTot",
      "TabMMQaXiaMass",
      "TabMMQaKinkTot",
+
      "TabHMQaGtrkRnfT",
      "TabHMQaGtrkR0T",
      "TabHMQaGtrkPhi0T",
