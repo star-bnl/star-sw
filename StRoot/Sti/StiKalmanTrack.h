@@ -29,6 +29,9 @@ class StiKalmanTrack : public StiTrack
     };
 
     static void setKalmanTrackNodeFactory(StiKalmanTrackNodeFactory*);
+
+    //Action method for polymorphic graphical behavior
+    virtual void update();
     
   // Action methods
   // Implementation of virtua methods inherited

@@ -36,6 +36,12 @@ void StiRootDrawableStiEvaluableTrack::reset()
     const_hit_vector::clear();
 }
 
+void StiRootDrawableStiEvaluableTrack::update()
+{
+    cout <<"void StiRootDrawableStiEvaluableTrack::update()"<<endl;
+    fillHitsForDrawing();
+}
+
 void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
 {
     if (!mPair) {

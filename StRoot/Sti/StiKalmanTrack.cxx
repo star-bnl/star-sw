@@ -24,6 +24,13 @@ void StiKalmanTrack::reset()
   lastNode  = 0;
 }
 
+//Null implementation, meant to be overwritten by graphical derived class
+void StiKalmanTrack::update()
+{
+    cout<<"void StiKalmanTrack::update()"<<endl;
+    return;
+}
+
 void StiKalmanTrack::setKalmanTrackNodeFactory(StiKalmanTrackNodeFactory* val)
 {
     trackNodeFactory = val;

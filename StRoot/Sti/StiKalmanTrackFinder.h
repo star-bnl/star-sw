@@ -25,8 +25,6 @@ class StiKalmanTrackFinder : public StiTrackFinder
     virtual bool isValid(bool debug=false) const; //Check if everything is kosher    
     virtual void doNextAction();
 
-    void initSeedFinderForStart();
-
 private:
     //Local
     int  findTrack(StiTrack * t) throw ( Exception);
