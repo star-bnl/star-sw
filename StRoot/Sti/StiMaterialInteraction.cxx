@@ -36,19 +36,19 @@ static void StiMaterialInteraction::nameForIntersection(
 StiIntersection StiMaterialInteraction::findIntersection(
     const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
     double &dXlocal, double &dThickness, double &dDensity){
-
+  
   switch(pDetector->getShape()->getShapeCode()){
-    case kPlanar:  
-        return findPlanarIntersection(pNode, pDetector, 
-                                      dXlocal, dThickness, dDensity);
+  case kPlanar:  
+    return findPlanarIntersection(pNode, pDetector, 
+				  dXlocal, dThickness, dDensity);
     case kCylindrical:
-        return findCylindricalIntersection(pNode, pDetector, 
-                                           dXlocal, dThickness, dDensity);
-    case kConical:
-        return findConicalIntersection(pNode, pDetector, 
-                                       dXlocal, dThickness, dDensity);
-    default:
-        return kFailed;
+      return findCylindricalIntersection(pNode, pDetector, 
+					 dXlocal, dThickness, dDensity);
+  case kConical:
+    return findConicalIntersection(pNode, pDetector, 
+				   dXlocal, dThickness, dDensity);
+  default:
+    return kFailed;
   }
 
 } // findIntersection
