@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.256 2001/12/21 21:53:21 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.257 2001/12/27 01:20:51 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -114,8 +114,10 @@ Bfc_st BFC[] = {
                                ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
   // pp Chains -- Experimental ; will follow P2001* chains model
+  {"BPP2001"     ,""  ,"","ry2001,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,Tree,evout","",""
+                                                      ,"pp Base chain for 2001 (tpc+rhic, no tags)",kFALSE},
   {"pp2001"      ,""  ,"",
-   "pp,B2001,-PreVtx,-SpinTag,-tags,l3onl,tofDat,AlignSectors,ExB,OBmap,OClock,OPr13",
+   "pp,BPP2001,-PreVtx,-SpinTag,l3onl,tofDat,AlignSectors,ExB,OBmap,OClock,OPr13",
    "",""                                                                                 ,"pp 2001",kFALSE},
 
 
@@ -392,21 +394,24 @@ class StTreeMaker;
 ClassImp(StBFChain)
 
 //_____________________________________________________________________________
+/// Default Constructor
 StBFChain::StBFChain(const char *name):
 StChain(name),fXdfOut(0),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0),fXdfFile(0) {
    fBFC = new Bfc_st[NoChainOptions];
    memcpy (fBFC, &BFC, sizeof (BFC));
 }
 //_____________________________________________________________________________
+/// Destructor
 StBFChain::~StBFChain(){
   Finish();
 }
 //_____________________________________________________________________________
+/// Routine handling library loading depending on chain options
 Int_t StBFChain::Load()
 {
   Int_t status = kStOk;
   Int_t i, iok;
-  for (i = 1; i< NoChainOptions; i++) {// Load Libraries if any
+  for (i = 1; i< NoChainOptions; i++) { // Load Libraries if any
     if (fBFC[i].Flag) {
       if (strlen(fBFC[i].Libs) > 0) {
 	TObjArray Libs;
@@ -447,7 +452,14 @@ Int_t StBFChain::Load()
   }
   return status;
 }
+
 //_____________________________________________________________________________
+/*!
+  Maker-instantiation handler.
+  This routine contains it all, from calibration precedence to
+  parameter setting depending on option etc ... The SetMode()
+  and  mechanism is also treated here.
+*/
 Int_t StBFChain::Instantiate()
 {
   Int_t status = kStOk;
@@ -674,6 +686,8 @@ Int_t StBFChain::Instantiate()
   if (GetOption("Debug2")) SetDEBUG(2);
   return status;
 }
+
+/// Really the destructor (close files, delete pointers etc ...)
 Int_t StBFChain::Finish()
 {
   if (fBFC) {
