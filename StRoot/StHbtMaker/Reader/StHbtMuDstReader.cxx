@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMuDstReader.cxx,v 1.2 2002/03/22 14:17:49 laue Exp $
+ * $Id: StHbtMuDstReader.cxx,v 1.3 2002/05/24 16:08:03 rcwells Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -34,6 +34,7 @@
 
 #include "StHbtMuDstReader.h"
 #include "Infrastructure/StHbtEvent.hh"
+#include "StHbtMaker/Base/StHbtEventCut.h"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -165,6 +166,12 @@ StHbtEvent* StHbtMuDstReader::ReturnHbtEvent(){
   if (mStMuDst) {
     mStMuDst->fixTrackIndices();
     mHbtEvent = new StHbtEvent(mStMuDst, mTrackType);
+  }
+  if (mEventCut){
+    if (!(mEventCut->Pass(mHbtEvent))){
+      mHbtEvent = 0;
+      return 0;
+    }
   }
   return mHbtEvent;
 }
@@ -661,6 +668,9 @@ void StHbtMuDstReader::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StHbtMuDstReader.cxx,v $
+ * Revision 1.3  2002/05/24 16:08:03  rcwells
+ * Added event cut to StHbtMuDstReader
+ *
  * Revision 1.2  2002/03/22 14:17:49  laue
  * minor changes for RH 7.2
  *
