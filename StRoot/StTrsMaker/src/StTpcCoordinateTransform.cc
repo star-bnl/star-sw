@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.11 1999/03/15 13:48:20 lasiuk Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.12 1999/07/19 21:40:13 lasiuk Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,10 +16,8 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
- * Revision 1.11  1999/03/15 13:48:20  lasiuk
- * xyFromRaw is changed to take into account the inversion.
- * The local coordinate system should be rechecked to make
- * sure it is defined as the STAR Coordinate system!
+ * Revision 1.12  1999/07/19 21:40:13  lasiuk
+ * local->raw transform redefine origin for shift offset calculation
  *
  * Revision 1.11  1999/03/15 13:48:20  lasiuk
  * xyFromRaw is changed to take into account the inversion.
@@ -162,11 +160,14 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
     //////////-------///////////////////
     //  See padFromLocal()
     int probablePad = mTPCdb->numberOfPadsAtRow(row)/2;
+    //    PR(probablePad);
     double thePitch = (row<=13) ?
 	mTPCdb->innerSectorPadPitch() :
 	mTPCdb->outerSectorPadPitch();
-
-    double shift =  (a.pos().x())/thePitch + .5;
+    //PR(thePitch);
+    double shift =  (a.pos().x()+thePitch/2.)/thePitch;
+    shift = (a.pos().x()<0) ? shift-.5 : shift+.5;
+    //PR(shift);
     // shift in number of pads from centerline
     int numberOfPads = nearestInteger(shift);
     //cout << "Number of Pads (shift): " << numberOfPads << endl;
@@ -245,17 +246,14 @@ StTpcCoordinateTransform::padCentroid(StTpcLocalCoordinate& local, int *pad, int
 int StTpcCoordinateTransform::sectorFromCoordinate(const StTpcLocalCoordinate& a) const
 {
     const double anglePerSector = M_PI/6;  // 30 degrees should be from db
-
     double angle = atan2(a.pos().y(),a.pos().x());
     if(angle<0) angle+= 2*M_PI;
-
      if(angle>=0 && angle<= M_PI/2)
 	 angle = M_PI/2 - angle;
      else
 	 angle = 5*M_PI/2 - angle;
 
      double sector = (angle + anglePerSector/2)/anglePerSector;
-
      int sectorNumber = (sector<1) ? 12 : (int)sector;
      return(sectorNumber);
 }
@@ -327,22 +325,24 @@ int StTpcCoordinateTransform::rowFromLocal(const StThreeVector<double>& b) const
 int StTpcCoordinateTransform::padFromLocal(const StThreeVector<double>& b, const int row) const
 {
     int probablePad = mTPCdb->numberOfPadsAtRow(row)/2;
-    idb << "Probable Pad: " << probablePad << endl;
-    idb << "Row " << row << " has " << mTPCdb->numberOfPadsAtRow(row) << " pads." << endl;
+    //cout << "Probable Pad: " << probablePad << endl;
+    //cout << "Row " << row << " has " << mTPCdb->numberOfPadsAtRow(row) << " pads." << endl;
 
     double thePitch = (row<=13) ?
 	mTPCdb->innerSectorPadPitch() :
 	mTPCdb->outerSectorPadPitch();
 
-    double shift =  b.x()/thePitch + .5;
-
+    //PR(thePitch);
+    double shift =  (b.x()+thePitch/2.)/thePitch;
+    shift = (b.x()<0) ? shift-.5 : shift+.5;
+    //PR(shift);
     // shift in number of pads from centerline
-    int numberOfPads = nearestInteger(shift);
+    int numberOfPads = static_cast<int>(shift);
     
-    idb << "Number of Pads (shift): " << numberOfPads << endl;
+    //cout << "Number of Pads (shift): " << numberOfPads << endl;
 
     probablePad += numberOfPads;
-
+    
     // CAUTION: pad cannot be <1
     if(probablePad<1) {
 // 	cerr << "ERROR in pad From Local.\n";
@@ -484,7 +484,8 @@ StThreeVector<double> StTpcCoordinateTransform::rotateFromLocal(const StThreeVec
     //
     // ( cos Þ   sin Þ )
     // (-sin Þ   cos Þ )
-    double beta = (sector>12) ? (sector-12)*M_PI/6 : -sector*M_PI/6;
+
+    double beta = (sector>12) ? (sector-12)*M_PI/6 : -sector*M_PI/6;   //(30 degrees)  NEGATIVE ANGLE!!!!!!!!
     //double beta = -sector*M_PI/6;   //(30 degrees)  NEGATIVE ANGLE!!!!!!!!
 
     //
