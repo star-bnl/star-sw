@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.13 2003/01/21 10:04:13 jcs Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.14 2003/01/29 17:24:37 oldi Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.14  2003/01/29 17:24:37  oldi
+// Message added which will be printed when StMagUtilities is initialized.
+//
 // Revision 1.13  2003/01/21 10:04:13  jcs
 // initialize variables to eliminate compiler warnings for NODEBUG=yes
 //
@@ -384,6 +387,7 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
 
   // magnetic field
   mMagFieldFactor = magFieldFactor;
+  gMessMgr->Message("", "I", "OST") << "Initializing StMagUtilities for FTPC!" << endm;
   mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);
 
   // transformation due to rotated and displaced TPC
@@ -800,6 +804,7 @@ Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog) {
       
       if (mMagFieldFactor == -9999.) { // field will be set the first time
 	mMagFieldFactor = newFactor;
+	gMessMgr->Message("", "I", "OST") << "Initializing StMagUtilities for FTPC!" << endm;
 	mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);  
 	// I hope this is ok. Should be the same as the table in the database.
       }
@@ -809,6 +814,7 @@ Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog) {
 					  << mMagFieldFactor << " to " << newFactor << "." << endm;
 	mMagFieldFactor = newFactor;
 	delete mMagField;
+	gMessMgr->Message("", "I", "OST") << "Initializing StMagUtilities for FTPC!" << endm;
 	mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);
       }
     }
