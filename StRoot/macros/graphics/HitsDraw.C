@@ -6,8 +6,11 @@
 // begin_html
 // Full text of this macro can be downloaded from the repository: <a href = "http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/macros/HitsDraw.C">HitsDraw.C</a> 
 // end_html
-// $Id: HitsDraw.C,v 1.5 1999/06/03 00:48:59 fine Exp $
+// $Id: HitsDraw.C,v 1.6 1999/07/09 17:54:12 fine Exp $
 // $Log: HitsDraw.C,v $
+// Revision 1.6  1999/07/09 17:54:12  fine
+// A example of selecting subdetectors and range was introduced
+//
 // Revision 1.5  1999/06/03 00:48:59  fine
 // New version of HitsDraw
 //
@@ -29,13 +32,14 @@ class St_NodeView;
 class St_g2t_tpc_hit;
 
 // Global variables to access from an interactive session
-St_Node     *hall      = 0;
-St_NodeView *fullView  = 0;
-St_NodeView *shortView = 0;
-St_NodeView *sensible  = 0;
-St_g2t_tpc_hit *points = 0;
+St_Node     *hall         = 0;
+St_NodeView *fullView     = 0;
+St_NodeView *shortView    = 0;
+St_NodeView *sensible     = 0;
+St_NodeView *singleSector = 0;
+St_g2t_tpc_hit *points    = 0;
 //________________________________________________________________________________
-// Subroutine to define t=the track color
+// Subroutine to define the track color
 Color_t trackColor(Long_t geantId)
 {
   Color_t color = kYellow;
@@ -98,6 +102,11 @@ void HitsDraw(){
   Load();
 //  Draw STAR detector first
 //  TWebFile f("http://www.star.bnl.gov/~fine/star.root");
+//_______________________________________
+//
+//  reading STAR GEANT geometry database
+//_______________________________________
+
   TFile f("/star/u2a/fine/WWW/star.root");
   // read STAR geometry database remotely
   TGeometry *star = f.Get("STAR");
@@ -105,28 +114,43 @@ void HitsDraw(){
     printf("Sorry, STAR was not found !\n");
     return;
   }
-  TList *listOfNode = star->GetListOfNodes();
+//_______________________________________
+//
+// Remove hall from the list of ROOT nodes
+// to make it free of ROOT control
+//_______________________________________
+  TList *listOfNode = gGeometry->GetListOfNodes();
   St_Node *hall = listOfNode->First();
-  // Remove hall from the kist of ROOT nodes to make it free of ROOT control
+  // Remove hall from the list of ROOT nodes to make it free of ROOT control
   listOfNode->Remove(hall);
   listOfNode->Remove(hall);
+//_______________________________________
+//
+// Create an iterator to navigate STAR geometry
+//_______________________________________
   St_DataSetIter volume(hall);
 
-//   TView *view = m_TreeD->GetView();
 
+//_______________________________________
+//
+// Read XDF file with some table information
+//_______________________________________
    St_XDFFile file("/disk00000/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/tss_dst/set184_01_48evts.p1.xdf");
-  // skip first record
- 
+
+  // skip first record 
   St_DataSet *skip = file.NextEventGet();
   if (skip) delete skip;
+  // Read the second "real" record
   St_DataSet *muons = file.NextEventGet();
   if (!muons) return;
-  muons->ls(2);
+//_______________________________________
+//
+// Find in there two kind of the tables we whan to use now
+//_______________________________________
   St_DataSetIter next(muons);
-  const Char_t *table = "event/geant/Event/g2t_tpc_hit";
+  const Char_t *table      = "event/geant/Event/g2t_tpc_hit";
   const Char_t *trackTable = "event/geant/Event/g2t_track";
-  next.ls(table);
-  next.ls(trackTable );
+
 // struct g2t_tpc_hit_st {
 //        long    id;             // primary key
 //        long    next_tr_hit_p;  // Id of next hit on same track
@@ -158,11 +182,21 @@ void HitsDraw(){
   trackT->Print(0,10);
   g2t_track_st *geTrack = trackT->GetTable(); 
 
+//_______________________________________
+//
+// The table was found, let's create 3D viewer for that
+//
+//   We want to see all x[0],x[1],x[2] columns of each row
+//   with one and the same value of "track_id" columns as one
+//   3D objects.
+//
+//   One objects means all part (points) of this simgle object
+//   will have one and same 3D attributes: color, size, style etc
+//_______________________________________
   St_Table3Points *track = 0;
   TString tr;
   tr = "track_p";
   St_Table &ttt = *((St_Table *)points);
-  ttt.ls();
   // Track2Line MUST be on heap othwesie 3D view will crash just code leaves this
   // subroutine
   St_TableSorter *Track2Line = new St_TableSorter (ttt,tr);
@@ -184,6 +218,12 @@ void HitsDraw(){
   Int_t  MaxTracks = Track2Line->CountKeys();
   printf(" Total tracks here %d \n",MaxTracks);
   MaxTracks = 100;
+// Create one "dummy" node to hold all tracks
+  St_Node *allTracks = new St_Node(".hits","Global Hits", (TShape *)0);
+  if (!allTracks) { printf("Bug !!!\n"); return; }
+  allTracks->Mark();
+  allTracks->SetVisibility();
+  hall->Add(allTracks);
   for (i=0;i<Track2Line->GetNRows() && ntracks <  MaxTracks ;i++) 
   {
    hitPoint = p + Track2Line->GetIndex(i);
@@ -191,7 +231,6 @@ void HitsDraw(){
 
    if (newId != currentId)  {
      printf(".");
-//==1     track =  new St_PointsArray3D;   
      const Char_t *xName = "x[0]";
      const Char_t *yName = "x[1]";
      const Char_t *zName = "x[2]";
@@ -202,16 +241,13 @@ void HitsDraw(){
      trackShape->SetVisibility(1);
      Int_t colorIndx = ntracks%7;
 //     trackShape->SetLineColor(trackColor(geTrack[newId]->ge_pid));
-//     trackShape->SetLineColor(kYellow);
      trackShape->SetColorAttribute(colorIndx+kGreen);
-     trackShape->SetLineStyle(1);
-     trackShape->SetSizeAttribute(2);
+     trackShape->SetLineStyle(1);   trackShape->SetSizeAttribute(2);
      // Create a node to hold it
      if (!thisTrack[colorIndx])  {
          thisTrack[colorIndx] = new St_Node("hits","hits",trackShape);
-         thisTrack[colorIndx]->Mark();
-         thisTrack[colorIndx]->SetVisibility();
-         St_NodePosition *pp = hall->Add(thisTrack[colorIndx]);
+         thisTrack[colorIndx]->Mark();  thisTrack[colorIndx]->SetVisibility();
+         St_NodePosition *pp = allTracks->Add(thisTrack[colorIndx]);
          if (!pp) printf(" no position %d\n",ntrack);
      }
      else 
@@ -251,7 +287,11 @@ void HitsDraw(){
    if (shortView) shortView->Mark();     
 
    // Select all hits                                              // Select ALL Hits
-   St_DataSetIter nextHits(sensible);
+   sensible->FindByName(".hits")->Mark();
+   St_DataSetIter nextHits(sensible->FindByName(".hits"));
+   while (shortView = (St_NodeView *) nextHits())  shortView->Mark();
+   
+   nextHits.Reset(sensible);   
    while (shortView = (St_NodeView *) nextHits()) {
       if (strcmp(shortView->GetName(),"ZCAL")==0) continue;       // skip ZCAL detector element
       shortView->Mark();
@@ -278,4 +318,26 @@ void HitsDraw(){
   printf("\tSt_NodeView *fullView  -  \"open\"   full GEANT geometry structure\n");
   printf("\tSt_NodeView *sensible  - all \"sensible\" detector elements of the full GEANT structure\n");
   printf("\tSt_NodeView *shortView - subset of the structure above\n");
+
+  // Draw hits and one sector only   
+  St_NodeView *singleSector = new St_NodeView(fullView,".hits","TPSS");
+  St_NodeView *sector = (St_NodeView *)singleSector->FindByName("TPSS");
+  sector->SetVisibility(2);  // This node is invisibible but sons
+  TCanvas *ccc = new TCanvas("STARTPC","Sectors",500,10,200,200);
+  ccc.cd();
+  singleSector->Draw();
+  gPad->Update();
+  //  Set a new range 
+#if 1
+  Float_t min[3];
+  Float_t max[3];
+  TVirtualPad *thisPad = gPad;
+  TView *view = thisPad->GetView(); 
+  sector->GetGlobalRange(singleSector,min,max);
+  view->SetRange(min,max);
+  // Update the last picture within the range provided
+  thisPad->Modified();
+  thisPad->Update();
+#endif
+ 
 }
