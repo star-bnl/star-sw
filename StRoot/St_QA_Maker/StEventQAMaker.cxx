@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.24 2001/10/15 16:15:02 pavlinov Exp $
+// $Id: StEventQAMaker.cxx,v 2.25 2001/10/24 20:11:49 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.25  2001/10/24 20:11:49  genevb
+// Fixed trigger issue for year 1
+//
 // Revision 2.24  2001/10/15 16:15:02  pavlinov
 // Clenup EMC stuff for production
 //
@@ -164,7 +167,9 @@ Int_t StEventQAMaker::Make() {
     UInt_t tword = 0;
     Bool_t doEvent = kTRUE;
     StTrigger* l0Trig = event->l0Trigger();
-    if (l0Trig) {
+    Int_t run_num = event->runId();
+    Int_t run_year = run_num/1000000;       // Determine run year from run #
+    if ((l0Trig) && (run_year != 1)) {      // Don't use year 1 trigger word
       if (realData) doEvent = kFALSE;
       tword = l0Trig->triggerWord();
       if (tword) {
@@ -191,8 +196,9 @@ Int_t StEventQAMaker::Make() {
         if (realData)
           gMessMgr->Warning("StEventQAMaker::Make(): trigger word=0 !!!!!");
       }
-    } else { // No trigger info!
-      gMessMgr->Warning("StEventQAMaker::Make(): No trigger info...processing anyhow");
+    } else { // No trigger info or year 1 data!
+      if (run_year != 1)
+        gMessMgr->Warning("StEventQAMaker::Make(): No trigger info...processing anyhow");
     }
     if (!doEvent) {
       gMessMgr->Message() << "StEventQAMaker::Make(): "
