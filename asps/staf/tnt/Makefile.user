@@ -1,0 +1,3 @@
+# Use full PAW
+CPPFLAGS += -DFULLPAW
+#
