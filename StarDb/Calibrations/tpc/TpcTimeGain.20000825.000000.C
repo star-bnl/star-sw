@@ -9,8 +9,8 @@ TpcTimeGain_st row;
 St_TpcTimeGain *tableSet = new St_TpcTimeGain("TpcTimeGain",1);
 //
 memset(&row,0,tableSet->GetRowSize());
-    row.ScaleFactor	 =    1.00363; // ;
-    row.ErrorScaleFactor	 = 0.000422893; // ;
+    row.ScaleFactor	 =   0.937479; // ;
+    row.ErrorScaleFactor	 = 0.000702162; // ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;
