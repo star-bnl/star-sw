@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.cxx,v 1.8 2002/12/16 23:04:02 yepes Exp $
+// $Id: StPeCPair.cxx,v 1.9 2002/12/16 23:05:38 yepes Exp $
 // $Log: StPeCPair.cxx,v $
+// Revision 1.9  2002/12/16 23:05:38  yepes
+// *** empty log message ***
+//
 // Revision 1.8  2002/12/16 23:04:02  yepes
 // Field comes in KGauss and should be passed to routines in Teslas
 // problem pointed out by Vladimir
@@ -114,7 +117,6 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEventSummary* summary,
    Float_t bField ;
    if ( summary != 0 ) bField = summary->magneticField();
    else bField = 2.5 ;
-   printf ( "bField %f tesla %f \n", bField, tesla ) ;
 
    // The momentum we do not need for the primary pair ....
    if ( !primaryFlag ) {
