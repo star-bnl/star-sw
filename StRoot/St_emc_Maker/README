@@ -1,0 +1,25 @@
+Package St_ems_Maker
+
+Authors:
+Akio Ogawa,  BNL/Penn
+A. Pavlinov, WSU/IHEP
+
+EMc Calibration Maker. This makes St_emc_hit object from St_ems_Maker's 
+output.
+
+Modification history (reverse chronological)
+====================
+
+01-Jul 1999  A. Pavlinov
+- class StEmcGeom was created and maker was remade for new maker scheme
+
+03-Mar 1999  Yu.Fisyak
+- replace kStErr to kStWarn   
+
+26-Feb 1999  Akio Ogawa 
+- fix histograms
+
+15-Dec 1998  Akio Ogawa 
+- add emc_hit object and  adc_to_energy in here
+
+06-Dec 1998  Akio Ogawa Created

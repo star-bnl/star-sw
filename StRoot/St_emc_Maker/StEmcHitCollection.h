@@ -1,5 +1,8 @@
-// $Id: StEmcHitCollection.h,v 1.1 1999/02/12 19:15:39 akio Exp $
+// $Id: StEmcHitCollection.h,v 1.2 1999/07/01 16:17:57 pavlinov Exp $
 // $Log: StEmcHitCollection.h,v $
+// Revision 1.2  1999/07/01 16:17:57  pavlinov
+// class StEmcGeom was created and maker was remade for new maker scheme
+//
 // Revision 1.1  1999/02/12 19:15:39  akio
 // *** empty log message ***
 //
@@ -12,74 +15,65 @@
 #include "St_DataSetIter.h"
 #include "St_Table.h"
 #include "St_TableSorter.h"
+#include "StMaker.h"
+#include "St_db_Maker/St_db_Maker.h"
+#include "StEmcGeom.h"
 #include "StChain.h"
 #include "TArrayS.h"
 #include "TArrayF.h"
 #include "TArrayI.h"
-#include "St_ems_control_Table.h"
 #include "St_emc_hits_Table.h"
 #include "St_emc_pedestal_Table.h"
 #include "St_emc_adcslope_Table.h"
 #include "St_emc_calib_header_Table.h"
+//
+//#include <vector>
+//#include "StEvent/StEmcHit.hh"
+//#include "StEvent/StEmcTowerHitCollection.hh"
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StEmcHitCollection class for <FONT COLOR="RED">EMc Calibrated Hit</FONT>     //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-class StEmcHitCollection : public St_DataSet {
+class StEmcHitCollection : public St_DataSet , StEmcGeom {
 private:
-  TString mName;
-  Int_t mDetector;
-  Int_t mMode;
-  Int_t mNModule;
-  Int_t mNEta;
-  Int_t mNSub;
-  Int_t mNes;
-  Int_t mNRaw;
-  Int_t mNHit;
+
+  St_DataSet     *mEmcCalib;   //!  For StEmcCollection::ADCtoEnergy
+  //  TString mName;  Delete => GetName()
+
+  Int_t   mNHit;
+  TArrayS mId;      // Id and Energy are the
+  TArrayF mEnergy;  // hits collection !!!!
+
   Float_t mEnergySum;
   Float_t mEtSum;
-  TArrayS mID;
   TArrayS mModulePosition;
-  TArrayF mEnergy;
-  void init(Int_t);
-  void getMemory(Int_t);
-  Int_t ADCtoEnergy(St_emc_hits*, TArrayF*); // Get ADC from emc_hits and fill energy
-  Int_t getID(Int_t);                        // Get Id from raw#;
-  Int_t getID(Int_t, Int_t, Int_t);          // Get Id from bin;
+
+  Int_t ADCtoEnergy(St_emc_hits*);   // Get ADC from emc_hits and fill energy
 protected:   
 public: 
-  StEmcHitCollection();
-  StEmcHitCollection(const Char_t *);
-  virtual ~StEmcHitCollection();
-  const Char_t* getDetName(){return mName;}  // Get Detector Name
-  Int_t   getDetector() {return mDetector;}  // Get Detector Number
-  Int_t   getMode()     {return mMode;}      // Get mode
-  Int_t   getNModule()  {return mNModule;}   // Get Number of Module
-  Int_t   getNEta()     {return mNEta;}      // Get Number of Eta bin
-  Int_t   getNSub()     {return mNSub;}      // Get Number of Sub bin
-  Int_t   getNRaw()     {return mNRaw;}      // Get Number of Raws;
-  Int_t   getNHit()     {return mNHit;}      // Get Number of Hits;
-  Float_t getEnergySum(){return mEnergySum;} // Get total energy;
-  Float_t getEtSum()    {return mEtSum;}     // Get total transverse energy;
-  Int_t   getRaw(Int_t, Int_t, Int_t);       // Get raw# from bin, return 0 if no raw for the bin;
-  Int_t   fill(St_emc_hits*);                // Fill energy from ADC table
-  Float_t getEnergy(Int_t i) {return mEnergy[i];}          // Get energy in raw i;
-  Float_t getEnergy(Int_t m, Int_t e, Int_t s){
-    return mEnergy[getRaw(m,e,s)];}                         // Get energy in bin;
-  void    getBin(Int_t, Int_t*, Int_t*, Int_t*);           // Get bin in the raw#; 
-  void    getPos(Int_t, Float_t*, Float_t*);               // Get eta/phi in the raw#;
-  void    getPos(Int_t, Int_t, Int_t, Float_t*, Float_t*); // Get eta/phi in the bin;
-  void    getGrid(Int_t, Int_t, Int_t, Int_t*, Int_t*);    // Get grid(eta/phi) from bin(m,e,s);
-  void    getGrid(Int_t, Int_t*, Int_t*);                  // Get grid(eta/phi) from raw#;
-  St_emc_hits *copyToTable(const Char_t*);                 // Create emc_hit table and copy hits;
-  St_TableSorter *getSortedID();                           // Create index sorted by energy
-  TArrayI *getNeighborID(int, int*, int*);                 // Get neighbor hit id
+  StEmcHitCollection();              // For comfort
+  StEmcHitCollection(const Char_t* );
+  ~StEmcHitCollection();
+
+  inline  void    setEmcCalib(St_DataSet *var) {mEmcCalib = var;}
+
+  inline Int_t   NHit()     {return mNHit;}      // Get Number of Hits;
+  inline Float_t EnergySum(){return mEnergySum;} // Get total energy;
+  inline Float_t EtSum()    {return mEtSum;}     // Get total transverse energy;
+
+  inline Float_t getHitEnergy(Int_t i) { return mEnergy[i];}  // Get hit energy in raw i;
+  inline Int_t   getHitId(Int_t i) { return mId[i];}          // Get hit id     in raw i;
+  St_emc_hits *copyToTable(const Char_t*);                 // Create emc_hit table and copy hits; ??
+  const TArrayF *getmEnergy() {return &mEnergy;}           // Get array of energy
   void    printHits(Int_t n=10, Int_t start=0);            // *MENU*
   void    printHitsAll();                                  // *MENU*
   void    Browse(TBrowser *b);                             // browser
-  virtual Long_t HasData() const {return 1;}               // Non zero means it has data;
-  virtual Bool_t IsFolder() {return kFALSE;}               // KTRUE means it is directory;
+  //virtual Long_t HasData() const {return 1;}               // Non zero means it has data;
+  //virtual Bool_t IsFolder() {return kFALSE;}               // KTRUE means it is directory;
+  void    printNameTable();
+  
+  Int_t   fill(St_emc_hits*);             // Fill energy from ADC table
   ClassDef(StEmcHitCollection,1)                           // Standard Root macro;
 };
 
