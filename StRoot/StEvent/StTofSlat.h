@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofSlat.h,v 2.7 2003/07/11 00:01:04 jeromel Exp $
+ * $Id: StTofSlat.h,v 2.8 2003/07/28 21:00:22 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofSlat.h,v $
+ * Revision 2.8  2003/07/28 21:00:22  ullrich
+ * Revised version: new but not inheriting from StHit as before.
+ *
  * Revision 2.7  2003/07/11 00:01:04  jeromel
  * Re-adding preceeding revision
  *
@@ -35,72 +38,85 @@
 #define StTofSlat_hh
 
 #include "StObject.h"
+#include "StThreeVectorF.hh"
 class StTrack;
 
 class StTofSlat : public StObject {
 public:
     StTofSlat();
-    StTofSlat(unsigned short, unsigned short, unsigned short, StTrack*);
+    StTofSlat(unsigned short, unsigned short, unsigned short, StTrack*,
+              float, unsigned short, unsigned short);
     ~StTofSlat();
     
     int operator==(const StTofSlat&) const;
     int operator!=(const StTofSlat&) const;
 
-    unsigned short  slatIndex() const;
-    unsigned short  adc() const;
-    unsigned short  tdc() const;
+    unsigned short        slatIndex() const;
+    unsigned short        adc() const;
+    unsigned short        tdc() const;
+    StTrack*              associatedTrack();
+    const StTrack*        associatedTrack() const;
+    float                 zHit() const;
+    unsigned short        hitProf() const;
+    unsigned short        matchFlag() const;
+    const StThreeVectorF& position() const;
     
-    StTrack*       associatedTrack();
-    const StTrack* associatedTrack() const;
-    
-    void      setSlatIndex(unsigned short);
-    void      setAdc(unsigned short);
-    void      setTdc(unsigned short);
-    void      setAssociatedTrack(StTrack*);
+    void setSlatIndex(unsigned short);
+    void setAdc(unsigned short);
+    void setTdc(unsigned short);
+    void setAssociatedTrack(StTrack*);
+    void setZHit(float);
+    void setHitProf(unsigned short);
+    void setMatchFlag(unsigned short);
+    void setPosition(const StThreeVectorF&);
     
 protected:
     UShort_t  mSlatIndex;
     UShort_t  mAdc;
     UShort_t  mTdc;
     StTrack  *mAssociatedTrack; //$LINK
-    
-    ClassDef(StTofSlat,2)
+    Float_t   mZhit;
+    UShort_t  mHitProf;
+    UShort_t  mMatchFlag;
+    StThreeVectorF mPosition;
+
+    ClassDef(StTofSlat,3)
 };
 
 inline void
-StTofSlat::setSlatIndex(unsigned short slatId)
-{
-    mSlatIndex = slatId;
-}
+StTofSlat::setSlatIndex(unsigned short slatId) {mSlatIndex = slatId;}
 
 inline void
-StTofSlat::setAdc(unsigned short rawAdc)
-{
-    mAdc = rawAdc;
-}
+StTofSlat::setAdc(unsigned short rawAdc) {mAdc = rawAdc;}
 
 inline void
-StTofSlat::setTdc(unsigned short rawTdc)
-{
-    mTdc = rawTdc;
-}
+StTofSlat::setTdc(unsigned short rawTdc) {mTdc = rawTdc;}
+
+inline void
+StTofSlat::setZHit(float zhit) {mZhit = zhit;}
+
+inline void
+StTofSlat::setHitProf(unsigned short hitprof) {mHitProf = hitprof;}
+
+inline void
+StTofSlat::setMatchFlag(unsigned short matchflag) {mMatchFlag = matchflag;}
 
 inline unsigned short
-StTofSlat::slatIndex() const
-{
-    return mSlatIndex;
-}
+StTofSlat::slatIndex() const {return mSlatIndex;}
 
 inline unsigned short
-StTofSlat::adc()  const
-{
-    return mAdc;
-}
+StTofSlat::adc()  const {return mAdc;}
 
 inline unsigned short
-StTofSlat::tdc()  const
-{
-    return mTdc;
-}
+StTofSlat::tdc()  const {return mTdc;}
+
+inline float
+StTofSlat::zHit() const {return mZhit;}
+
+inline unsigned short
+StTofSlat::hitProf() const {return mHitProf;}
+
+inline unsigned short
+StTofSlat::matchFlag() const {return mMatchFlag;}
 
 #endif
