@@ -1,10 +1,10 @@
 #ifndef STDBCONFIGNODE_HH
 #define STDBCONFIGNODE_HH
 
-//#include "StDbTableComponent.h"
+//#include "StDbTable.h"
 #include "StDbDefs.hh"
-class StDbTableComponent;
 
+class StDbTable;
 class StDbFactoryI;
 class TableIter;
 
@@ -12,9 +12,9 @@ class TableIter;
 #ifndef __CINT__
 #include <list>
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
-typedef list<StDbTableComponent*, allocator<StDbTableComponent*> > TableList;
+typedef list<StDbTable*, allocator<StDbTable*> > TableList;
 #else
-typedef list<StDbTableComponent*> TableList;
+typedef list<StDbTable*> TableList;
 #endif
 #endif
 #ifdef __CINT__
@@ -38,7 +38,6 @@ private:
  StDbConfigNode* mnextNode;
  StDbConfigNode* mparentNode;
 
- 
 protected:
 
   void zeroNodes(){
@@ -63,13 +62,11 @@ public:
   StDbConfigNode(StDbType type, StDbDomain domain, const char* nodeName, const char* configName);
   StDbConfigNode(StDbConfigNode* parent, const char* nodeName, const char* configName);
 
-  virtual ~StDbConfigNode() {if(mconfigName) delete [] mconfigName;
-                     if(mnodeName) delete [] mnodeName;};
-
+  virtual ~StDbConfigNode(); 
   virtual void setName(const char* name); 
-  virtual char * getName() const ;
+  virtual char* getName() const ;
   virtual void setConfigName(const char* name); 
-  virtual char * getConfigName() const ;
+  virtual char* getConfigName() const ;
   virtual void setDbType(StDbType type) {mdbType = type;};
   virtual StDbType getDbType() const { return mdbType;};
   virtual void setDbDomain(StDbDomain domain) {mdbDomain = domain;};
@@ -81,19 +78,19 @@ public:
   virtual void setParentNode(StDbConfigNode* node); 
   virtual void setFirstChildNode(StDbConfigNode* node); 
   virtual void appendNode(StDbConfigNode* node); 
-
-  virtual void deleteTree();
-  virtual void buildTree();
-
   virtual StDbConfigNode* getNextNode() const { return mnextNode;} ;
   virtual StDbConfigNode* getParentNode() const {return mparentNode;}; 
   virtual StDbConfigNode* getFirstChildNode() const {return mfirstChildNode;}; 
- 
+
+  virtual void deleteTree();
+  virtual void buildTree();
+  virtual void deleteChildren();
+
   virtual bool hasChildren();
   virtual bool hasData();
   virtual void printTree();
 
-  virtual void addTable(const char* tableName, int version, int elementID);
+  virtual StDbTable* addTable(const char* tableName, char* version, int elementID);
   virtual TableIter* getTableIter();
   virtual StDbConfigNode* findConfigNode(StDbType type, StDbDomain domain);
 
@@ -119,6 +116,7 @@ return retVal;
 }
 
 #endif
+
 
 
 

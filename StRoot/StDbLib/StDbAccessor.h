@@ -2,7 +2,6 @@
 #define STDBACCESSOR_H
 
 #include "StDbDefs.hh"
-#include "TObject.h"
 
 class StDbAccessor {
 public:
@@ -13,13 +12,14 @@ public:
  int schemaID;
  int beginTime;
  int endTime;
- int version;
+ char version[20];
  int elementID;
  int requestTime;
- ClassDef(StDbAccessor,0)
 };
  
 
 
 #endif
+
+
 

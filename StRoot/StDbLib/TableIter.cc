@@ -1,32 +1,46 @@
 #include "TableIter.hh"
-#include "StDbTableComponent.h"
+#include "StDbTable.h"
+
+
+////////////////////////////////////////////////////////
 
 void
 TableIter::init(StDbConfigNode* node){
-itr = node->mTables.begin();
-// cout << " will try here first " << endl;
-// cout << "Table [" << (*itr)->getTableName()<<"] is available" << endl;
+mnode=node; itr = mnode->mTables.begin();
 }
 
+////////////////////////////////////////////////////////
 
-StDbTableComponent*
-TableIter::next(char*& name){
-StDbTableComponent* ret = *itr;
-name = (*itr)->getTableName();
+StDbTableI*
+TableIter::next(){
+StDbTableI* ret = 0;
+if(!done()) { 
+ ret = *itr;
  cout << "Table [" << (*itr)->getTableName()<<"] is available" << endl;
-itr++;
-// cout << " will try here " << endl;
-// cout << (*itr)->getTableName() << endl;
-
+ itr++;
+}
 return ret;
 }
 
+////////////////////////////////////////////////////////
+
+
+StDbTableI*
+TableIter::operator++(){
+return next();
+}
+
+////////////////////////////////////////////////////////
 
 bool
-TableIter::done(StDbConfigNode* node){
-
+TableIter::done(){
 bool retVal = true;
-if(itr != node->mTables.end())retVal = false;
+if(itr != mnode->mTables.end())retVal = false;
 return retVal;
-
 }
+
+
+
+
+
+

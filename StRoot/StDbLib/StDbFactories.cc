@@ -1,16 +1,19 @@
 #include "StDbFactories.hh"
+#include "StDbCalibFactory.hh"
+#include "StDbGeomFactory.hh"
+#include "StDbCondFactory.hh"
 
 StDbFactories* StDbFactories::mInstance=0;
 
 StDbFactoryI*
-StDbFactories::getFactory(StDbType type, StDbDomain domain){
+StDbFactories::getFactory(StDbType type){
 
 
-StDbFactoryI* factory;
+StDbFactoryI* factory = 0;
 
 for(Factories::iterator itr = mfactories.begin();
     itr != mfactories.end(); ++itr){
-  if( (*itr)->getDbType()==type && (*itr)->getDbDomain()==domain){
+  if( (*itr)->getDbType()==type){
      factory = *itr;
      break;
   }
@@ -22,9 +25,9 @@ return factory;
 void
 StDbFactories::initList(){
 
-mfactories.push_back(StDbTpcCalibFactory::Instance());
-mfactories.push_back(StDbTpcCondFactory::Instance());
-mfactories.push_back(StDbTpcGeomFactory::Instance());
+mfactories.push_back(StDbCalibFactory::Instance());
+mfactories.push_back(StDbCondFactory::Instance());
+mfactories.push_back(StDbGeomFactory::Instance());
 
 }
 

@@ -2,12 +2,9 @@
 #define STDBFACTORIESI_HH
 
 #include "StDbDefs.hh"
-#include "StDbTableComponent.h"
+#include "StDbTable.h"
 #include "StDbFactoryI.hh"
-#include "StDbFactoryTypes.hh"
 
-
-//class StDbTableComponent;
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef list<StDbFactoryI*, allocator<StDbFactoryI*> > Factories;
@@ -35,7 +32,7 @@ public:
   return mInstance;
   }
 
-  StDbFactoryI* getFactory(StDbType type, StDbDomain domain);
+  StDbFactoryI* getFactory(StDbType type);
  
 };
 
