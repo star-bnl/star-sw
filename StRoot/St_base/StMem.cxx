@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMem.cxx,v 1.3 2001/03/05 01:20:13 perev Exp $
+ * $Id: StMem.cxx,v 1.4 2001/03/13 18:41:24 perev Exp $
  *
  ***************************************************************************
  *
@@ -14,7 +14,6 @@
 #include <unistd.h>
 #include "StMem.h"
 double  StMem::fUsed=0;
-
 double StMem::Used()
 {
   struct mallinfo info;
