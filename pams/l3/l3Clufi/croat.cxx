@@ -10,6 +10,7 @@
 #include <strings.h>
 #include <sys/types.h>
 #include <stdlib.h>
+#include <Rtypes.h> /* use ROOT variables: ..._t */
 
 /* Run as unix offline version */
 #define UNIX_OFFLINE
