@@ -113,9 +113,9 @@ BfcItem BFC[] = {
   {"calib"       ,""  ,"","xdf2root"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"magF"        ,"","","NoFieldSet,StDbT,db","StMagFMaker","StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
-  {"tpc"         ,"tpc","","tpc_T,globT,tls,db,tpcDb,tcl,tpt,PreVtx"   ,"StChainMaker","StChain","",kFALSE},
-  {"tpcDb"       ,"tpcDb","tpc","dbutil,db"                            ,"StTpcDbMaker","StTpcDb","",kFALSE},
-  {"Trs"         ,"","tpc","scl,tpcDb,tpc_daq"                        ,"StTrsMaker","StTrsMaker","",kFALSE},
+  {"tpc"         ,"tpc","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StChainMaker","StChain","",kFALSE},
+  {"tpcDB"       ,"tpcDB","tpc","dbutil,db"                            ,"StTpcDbMaker","StTpcDb","",kFALSE},
+  {"Trs"         ,"","tpc","scl,tpcDB,tpc_daq"                        ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"Mixer"      ,"tpc_raw","tpc","","StMixerMaker","StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
   {"tpc_daq"     ,"tpc_raw","tpc","tpc_T"                   ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"tfs"         ,""  ,"tpc","","",""                                    ,"use tfs (no StTrsMaker)",kFALSE},
@@ -142,7 +142,7 @@ BfcItem BFC[] = {
   {"l3"          ,"l3","","l3cl,l3t"                                 ,"StChainMaker","StBFChain","",kFALSE},
   {"l3cl"        ,"","l3","l3_T"                    ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3","l3_T"                            ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
-  {"rrs"         ,"","","sim_T"                                       ,"StRrsMaker","StRrsMaker","",kFALSE},
+  {"Rrs"         ,"","","sim_T"                                       ,"StRrsMaker","StRrsMaker","",kFALSE},
   {"rich"        ,"","","sim_T,globT"                                 ,"StRchMaker","StRchMaker","",kFALSE},
   {"global"      ,"global","","globT,Match,primary,v0,xi,kink,dst,SCL"
                                                          ,"StChainMaker","St_tpc,St_svt,StChain","",kFALSE},
@@ -183,12 +183,15 @@ class StEvent;
 StEvent *Event;
 class StIOMaker; StIOMaker *inpMk=0;     
 class St_geant_Maker; St_geant_Maker *geantMk = 0;   
-class St_db_Maker;    St_db_Maker    *dbMk    = 0; St_db_Maker *calibMk = 0; 
-St_db_Maker *GeometryMk = 0; St_db_Maker *CalibrationsMk = 0;
-St_db_Maker *ConditionsMk = 0;
-StMaker *tpcDbMk = 0;
+class St_db_Maker;    
+St_db_Maker *dbMk    = 0; 
+St_db_Maker *calibMk = 0; 
+St_db_Maker *GeometryMk = 0; 
+St_db_Maker *CalibrationsMk = 0;
+St_db_Maker *ConditionsMk = 0; 
+St_db_Maker *RunLogMk = 0;
+StMaker *tpcDBMk = 0;
 class StTreeMaker;    StTreeMaker    *treeMk  = 0;
-Bool_t kFZIN = kFALSE;
 ClassImp(StBFChain)
 
 //_____________________________________________________________________________
@@ -286,11 +289,12 @@ Int_t StBFChain::Instantiate()
 	    gMessMgr->QAInfo() << " Main DataBase == " << mainDB << endm;  
 	    if (userDB) gMessMgr->QAInfo() << " User DataBase == " << PWD.Data() << "/" << userDB << endm;  
 	    if (!dbMk) dbMk = new St_db_Maker("db",mainDB,userDB);
-	    if (GetOption("tpcDb")){// 
-	      if (!GeometryMk) GeometryMk = new St_db_Maker("Geometry","MySQL:Geometry_tpc");
+	    if (GetOption("tpcDB")){// 
+	      if (!GeometryMk)     GeometryMk     = new St_db_Maker("Geometry","MySQL:Geometry_tpc");
 	      if (!CalibrationsMk) CalibrationsMk = new St_db_Maker("Calibrations","MySQL:Calibrations_tpc");
-	      //            ConditionsMk = new St_db_Maker("Conditions","MySQL:Conditions");
+	    //if (!ConditionsMk)   ConditionsMk   = new St_db_Maker("Conditions","MySQL:Conditions");
 	    }
+	    if (!RunLogMk) RunLogMk = new St_db_Maker("RunConditions","MySQL:RunLog");
 	    if (dbMk) {
 	      fBFC[i].Name = (Char_t *) dbMk->GetName();
 	      SetDbOptions();
@@ -317,28 +321,30 @@ Int_t StBFChain::Instantiate()
 	  }
 	}
 	if (Key == "geant") {
-	  Int_t                    NwGeant = 10000000;
-	  if (!GetOption("fzin") && !GetOption("gstar"))
-	                           NwGeant =  5000000;
-	  if (GetOption("big"))    NwGeant = 20000000;
-	  if (GetOption("bigbig")) NwGeant = 40000000;
-	  Int_t IwType = 0;
-	  if (GetOption("Higz"))  IwType = 1;
-	  Int_t NwPaw = 0;
-	  if (!geantMk) geantMk = new St_geant_Maker("geant",NwGeant,NwPaw,IwType);
-	  if (geantMk) {
-	    fBFC[i].Name = (Char_t *) geantMk->GetName();
-	    if (!GetOption("fzin") && !GetOption("gstar")) {
-	      geantMk->SetActive(kFALSE);
+	  if (!geantMk) {
+	    Int_t                    NwGeant = 10000000;
+	    if (!GetOption("fzin") && !GetOption("gstar"))
+	                             NwGeant =  5000000;
+	    if (GetOption("big"))    NwGeant = 20000000;
+	    if (GetOption("bigbig")) NwGeant = 40000000;
+	    Int_t IwType = 0;
+	    if (GetOption("Higz"))  IwType = 1;
+	    Int_t NwPaw = 0;
+	    geantMk = new St_geant_Maker("geant",NwGeant,NwPaw,IwType);
+	    if (geantMk) {
+	      fBFC[i].Name = (Char_t *) geantMk->GetName();
+	      if (!GetOption("fzin") && !GetOption("gstar")) {
+		geantMk->SetActive(kFALSE);
+	      }
+	      else {
+	      }
+	      SetGeantOptions();
 	    }
-	    else {
-	    }
-	    SetGeantOptions();
 	  }
 	  continue;
 	}
 	StMaker *mk = 0;
-	if (maker == "StTpcDbMaker") mk = tpcDbMk;
+	if (maker == "StTpcDbMaker") mk = tpcDBMk;
 	if (!mk) {
 	  if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
 	  else  {
@@ -346,7 +352,7 @@ Int_t StBFChain::Instantiate()
 	    if (mk) fBFC[i].Name = (Char_t *) mk->GetName();
 	  }
 	}
-	if (maker == "StTpcDbMaker") tpcDbMk = mk;
+	if (maker == "StTpcDbMaker") tpcDBMk = mk;
 	if (mk && maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
 	if (mk && maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
 	if (mk && maker == "St_tpcdaq_Maker") {
@@ -673,8 +679,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.80 2000/03/14 01:12:52 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.81 2000/03/15 23:20:12 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.81  2000/03/15 23:20:12  fisyak
+// Force only instance of geant Maker
+//
 // Revision 1.80  2000/03/14 01:12:52  fisyak
 // Split chain files
 //
@@ -724,7 +733,7 @@ void StBFChain::SetTreeOptions()
 // Add tpcDB in default tpc chain
 //
 // Revision 1.63  2000/02/09 22:13:00  fisyak
-// Dave's correction for tpcDb
+// Dave's correction for tpcDB
 //
 // Revision 1.62  2000/02/09 20:49:46  fisyak
 // Change naming convention for Tables shared libraries
