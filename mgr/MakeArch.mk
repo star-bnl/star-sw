@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.72  1999/05/08 03:14:42  fisyak
+#  Add -I/usr/include/g++ for egcs-1.1.2
+#
 #  Revision 1.71  1999/04/26 22:40:14  fisyak
 #  remove -lpgc for new pfg77, Victor has updated libpgf77S.so
 #
@@ -191,7 +194,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/04/26 22:40:14 $ 
+#             Last modification $Date: 1999/05/08 03:14:42 $ 
 #. default setings
 
 MAKE  := gmake
@@ -407,7 +410,7 @@ ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_re
   FOREXE      := g77 -fno-automatic -fno-second-underscore -fugly-complex
   LD       := $(CXX)
   SO	   := $(CXX)
-  CXXFLAGS := $(DEBUG) -fPIC -Wall -fno-rtti -fno-exceptions -fno-for-scope
+  CXXFLAGS := $(DEBUG) -fPIC -Wall -fno-rtti -fno-exceptions -fno-for-scope -I/usr/include/g++
 #                                             -fpipe
   CFLAGS   := $(DEBUG) -fPIC -Wall
   CPPFLAGS += f2cFortran
