@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.14 1999/10/25 18:38:49 calderon Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.15 1999/11/12 01:35:28 long Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.15  1999/11/12 01:35:28  long
+ * fix bug for tracks with z<0
+ *
  * Revision 1.14  1999/10/25 18:38:49  calderon
  * changed mPos and pos() to mPosition and position() to
  * be compatible with StEvent/StMcEvent.
@@ -347,9 +350,9 @@ int StTpcCoordinateTransform::padFromLocal(const StThreeVector<double>& b, const
     //PR(shift);
     // shift in number of pads from centerline
     // int numberOfPads = static_cast<int>(shift); 
-   double shift =  (b.x())/thePitch;//HL,8/31/99 
+   double shift =  (-b.x())/thePitch;//HL,11/11/99 
    int numberOfPads = static_cast<int>(shift); 
-    numberOfPads  = (b.x()<0) ?  numberOfPads :numberOfPads+1 ;
+    numberOfPads  = (b.x()>0) ?  numberOfPads :numberOfPads+1 ;
     
     //cout << "Number of Pads (shift): " << numberOfPads << endl;
 
@@ -411,7 +414,7 @@ double StTpcCoordinateTransform::xFromPad(const int row, const int pad) const
     int pads2move = pad - (mTPCdb->numberOfPadsAtRow(row))/2;
     double dist2move = pitch*(pads2move-.5);
  
-    return(dist2move);
+    return(-dist2move);
 }
 
 double StTpcCoordinateTransform::zFromTB(const int tb) const
@@ -443,7 +446,7 @@ int StTpcCoordinateTransform::tBFromZ(const double z) const
 StThreeVector<double>
 StTpcCoordinateTransform::rotateToLocal(const StThreeVector<double>& a,
 				     const int sector)
-{
+{    //  to local means " from sector 12 local to tpc local"
     // Should be replaced with Rotation class:
     //
     // define 2x2 rotation matrix
@@ -489,7 +492,7 @@ StTpcCoordinateTransform::rotateToLocal(const StThreeVector<double>& a,
     mRotation(2,1) = -1.*mRotation(1,2);   // saves calculation sin(beta);
     mRotation(2,2) =    mRotation(1,1);   // saves calculation cos(beta);
 
-    mRotate(1,1) = a.x();
+    mRotate(1,1) = (sector>12)? a.x():-a.x();
     mRotate(2,1) = a.y();  // z co-ordinate is immaterial
 
     mResult = mRotation*mRotate;
@@ -503,7 +506,7 @@ StThreeVector<double>
 StTpcCoordinateTransform::rotateFromLocal(const StThreeVector<double>& a,
 						     const int sector)
 {
-    //
+    // FromLocal means " from the tpc local to sector 12 local"
     // define 2x2 rotation matrix
     //
     // ( cos Þ   sin Þ )
@@ -552,7 +555,7 @@ StTpcCoordinateTransform::rotateFromLocal(const StThreeVector<double>& a,
     mResult = mRotation*mRotate;
 //     PR(mResult);
     return (sector>12) ? (StThreeVector<double>(mResult(1,1),mResult(2,1),-a.z()))
-                         : (StThreeVector<double>(mResult(1,1),mResult(2,1),a.z()));
+      : (StThreeVector<double>(-mResult(1,1),mResult(2,1),a.z()));// HL 11/11/99
 }
 
 /****************************************************************/
