@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrigger.h,v 1.1 1999/01/30 03:58:09 fisyak Exp $
+ * $Id: StTrigger.h,v 1.2 1999/02/10 02:17:37 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrigger.h,v $
- * Revision 1.1  1999/01/30 03:58:09  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/10 02:17:37  fisyak
+ * Merging with new Torre stuff
  *
  * Revision 1.3  1999/03/23 21:54:12  ullrich
  * Member function made virtual

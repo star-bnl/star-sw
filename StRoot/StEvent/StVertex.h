@@ -1,10 +1,12 @@
 /***************************************************************************
  *
- * $Id: StVertex.h,v 1.1 1999/01/30 03:58:10 fisyak Exp $
+ * $Id: StVertex.h,v 1.2 1999/02/10 02:17:40 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
  * History:
+ * 01/30/1999 T. Wenaus  Add index method to allow indexed access when in
+ *                       a list
  * 15/01/1999 T. Wenaus  Add table-based constructor
  ***************************************************************************
  *
@@ -13,8 +15,11 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
- * Revision 1.1  1999/01/30 03:58:10  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/10 02:17:40  fisyak
+ * Merging with new Torre stuff
+ *
+ * Revision 1.6  1999/03/23 21:47:45  ullrich
+ * Member function made virtual
  *
  * Revision 1.5  1999/02/17 11:04:52  ullrich
  * Added numberOfDaughters() and daughter(i) methods.
@@ -30,14 +35,8 @@
 #endif
  * version with constructors for table-based loading
  *
-#ifndef StGlobalTrack_hh
-#include "StGlobalTrack.h"
-#endif
-#ifndef StVecPtrGlobalTrack_hh
 #include "StVecPtrGlobalTrack.h"
-#endif
-
-#include "dst_vertex.h"
+ * Fixed typo introduced at last check-in.
  *
 class StVertex : public TObject {
     StVecPtrGlobalTrack   *mDaughters;
@@ -57,6 +56,7 @@ class StVertex : public TObject {
     const StThreeVectorF& positionError();
     ULong_t               qualityBitmask();
     Float_t                       chiSquared();         
+    Long_t                        index() {return mIndex;};
     virtual const StThreeVectorF& position() const{ return mPosition; } ;
     virtual const StThreeVectorF& positionError() const { return mPositionError; };
     void setParent(StGlobalTrack* );         
@@ -64,8 +64,10 @@ class StVertex : public TObject {
     void setPositionError(const StThreeVectorF&);  
     void setQualityBitmask(ULong_t); 
     void setChiSquared(Float_t);     
+    void setIndex(Long_t ii) {mIndex = ii;};
     virtual void setParent(StGlobalTrack* );         
 protected:
+    ULong_t          mIndex;
     StVertexType           mType;
     StVecPtrGlobalTrack    mDaughters;
     StGlobalTrack*         mParent;

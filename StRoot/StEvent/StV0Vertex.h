@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.h,v 1.2 1999/02/09 19:53:53 fisyak Exp $
+ * $Id: StV0Vertex.h,v 1.3 1999/02/10 02:17:37 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.h,v $
+ * Revision 1.3  1999/02/10 02:17:37  fisyak
+ * Merging with new Torre stuff
+ *
  * Revision 1.2  1999/02/09 19:53:53  fisyak
  * Import new Torre staff
  *
@@ -62,7 +65,7 @@
 	ClassDef(StV0Vertex,1)  //StV0Vertex structure
 #endif
     Float_t                mDcaDaughters;
-
+#ifndef __CINT__
 inline Float_t StV0Vertex::dcaDaughterToPrimaryVertex (UInt_t i) const
 
     if (i < 2)
@@ -74,7 +77,7 @@ inline Float_t StV0Vertex::dcaDaughterToPrimaryVertex (UInt_t i) const
             mMomentumOfDaughters[positiveTrack]);
 }
 
-
+#endif
 
 inline Float_t StV0Vertex::dcaParentToPrimaryVertex() const { return mDcaParentToPrimaryVertex; }
 
