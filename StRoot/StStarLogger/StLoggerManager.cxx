@@ -163,7 +163,7 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
        ConsoleAppenderPtr appender = new ConsoleAppender(
 		      new PatternLayout("%-3c{2}:%-5p - %m%n"));
 //		      new PatternLayout(PatternLayout::TTCC_CONVERSION_PATTERN)));
-       appender ->setName(_T("defaultAppender"));       
+       appender->setName(_T("defaultAppender"));       
        filter = new StarOptionFilter();
        appender->addFilter(filter);
        root->addAppender(appender);
@@ -381,7 +381,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.10 2004/11/13 00:28:16 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.11 2004/11/15 17:25:59 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -635,12 +635,13 @@ void StLoggerManager::SetLimit(const char* str, int n)
 {  
      if (str && str[0] && str[1]) {
         LoggerPtr root = Logger::getRootLogger();
-        StarOptionFilterPtr filter = new StarOptionFilter();
-        filter->setRepeatCounterOption(n);
-        filter->setOption(_T("StringToCount"),str);
-        AppenderPtr defaultAppender = root->getAppender(_T("defaultAppender"));
-        if (defaultAppender){
-            cout << "------------ Appedner " << defaultAppender->getName() << " ------------------- " << str << "n = " << n << endl;               
+         AppenderPtr defaultAppender = root->getAppender(_T("defaultAppender"));
+        if (defaultAppender != 0){
+           StarOptionFilterPtr filter = new StarOptionFilter();
+           filter->setRepeatCounterOption(n);
+           filter->setOption(_T("StringToCount"),str);
+//           cout << endl<< "--  Appedner " << defaultAppender->getName() << " -* -* -* -* -* -* -* -* " 
+//                 << str << "n = " << n << " -* -* -* -* -* -* -* -* " << endl << endl;               
            defaultAppender->addFilter(filter);
         }
     }
@@ -702,8 +703,11 @@ _NO_IMPLEMENTATION_;   return 5;
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.10 2004/11/13 00:28:16 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.11 2004/11/15 17:25:59 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.11  2004/11/15 17:25:59  fine
+// Make Star filer workign properly
+//
 // Revision 1.10  2004/11/13 00:28:16  fine
 // teach StarOption filter to count the messages
 //
