@@ -145,14 +145,14 @@ while (l<hit_h->nok && hit[loc_hit[l]].track>0)
     	if (res_h->nok >= res_h->maxlen) { /* Increase table length*/
              newmaxlen = res_h->maxlen*1.3;
              ds2ReallocTable(&res_h,&res,newmaxlen);}
-        if(l>hit_h->nok) break;
+        if(l>=hit_h->nok) break;
       }
     }
     else
       {
 	l++;
       }
-    if(l>hit_h->nok) break;
+    if(l>=hit_h->nok) break;
   }
    return STAFCV_OK;
 }
