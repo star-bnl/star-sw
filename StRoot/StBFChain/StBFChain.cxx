@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.379 2004/02/01 23:27:48 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.380 2004/02/11 18:50:20 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -308,7 +308,7 @@ Bfc_st BFC1[] = {
   {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
   {"xdf2root"    ,""  ,"",""                                   ,"","xdf2root","Read XDF input file",kFALSE},
   {"geant"       ,"geant","","geomT,gen_T,sim_T"
-                                  ,"St_geant_Maker","geometry,St_g2t,StMagF,St_geant_Maker","GEANT",kFALSE},
+                          ,"St_geant_Maker","libGeom,geometry,St_g2t,StMagF,St_geant_Maker","GEANT",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -849,7 +849,7 @@ Bfc_st BFC2[] = {
   {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
   {"xdf2root"    ,""  ,"",""                                   ,"","xdf2root","Read XDF input file",kFALSE},
   {"geant"       ,"geant","","geomT,gen_T,sim_T"
-                                  ,"St_geant_Maker","geometry,St_g2t,StMagF,St_geant_Maker","GEANT",kFALSE},
+                          ,"St_geant_Maker","libGeom,geometry,St_g2t,StMagF,St_geant_Maker","GEANT",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
