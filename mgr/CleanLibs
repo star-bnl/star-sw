@@ -28,7 +28,12 @@ if ($#ARGV > -1) {
     push(@dirs,$fs."IOBJ");
 }
 
-my $KEEP = 1;
+my $KEEP;
+if( $^O eq "linux"){
+    $KEEP = 2;
+} else {
+    $KEEP = 1;
+}
 if ($#ARGV > 0) {$KEEP = $ARGV[1];}
 
 foreach my $dir (@dirs) {
