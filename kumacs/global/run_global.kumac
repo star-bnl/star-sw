@@ -2,9 +2,13 @@
 * run_global.kumac
 * needs file with all tpc and svt information on it as input
 *
-* 8/11/98 K. Turner - created
-* 8/12/98 K. Turner - added dst_monitor_soft_filler
-* ***********************************************************************
+* 08/11/98 K. Turner       - created
+* 08/12/98 K. Turner       - added dst_monitor_soft_filler
+* 08/27/98 D. Weerasundara - added  init_dst#init_rhead
+*                            added  init_dst#init_ehead
+*                            added  run_dst#dst_event_summary
+*
+************************************************************************
 ************************************************************************
 
  macro run__
@@ -83,28 +87,41 @@
   mkdir [params]/global/magnetic_field
 
 * evr - must be before egr
-  exec init_evr
+  exec init_evr#init
    
 * svm
   exec create_tables_global#svm
-  exec init_svm
+  exec init_svm#init
 
 * egr
   exec create_tables_global#egr
-  exec init_egr
+  exec init_egr#init
   
 * ev0
   exec create_tables_global#ev0 
-  exec init_ev0#init_ev0
+  exec init_ev0#init
+  exec init_magf#init
    
 * dst_dedx_filler - must be after tpc tracking
-  exec create_tables_global#dst	
-  
+  exec create_tables_global#dst_dedx_filler
+
 * dst_monitor_soft_filler - call at end!
 *           needs info from svt, tpc, ctf, global 
 * just create ctf tables for now since don't have them in input file!
   exec create_tables_ctf#init
-  
+  exec create_tables_global#dst_monitor_soft_filler
+
+* dst_point_filler
+ exec create_tables_global#dst_point_filler
+
+* fill_dst_event_summary
+  exec create_tables_global#fill_dst_event_summary
+  exec init_dst#init_ehead
+
+* fill_dst_run_summary
+   exec create_tables_global#fill_dst_run_summary
+   exec init_dst#init_rhead
+
 ***************************************************************
 *  Run global
 * ****************************************************************
@@ -119,7 +136,7 @@
     exec read_table_from_file#read simd
     if STAF_STATUS(1).eq.0 goto ENDOFDATA
 * evr  - must be before egr
-   exec run_evr
+   exec run_evr#run
 * svm
      exec run_svm#run_svm 
 * egr
@@ -128,6 +145,10 @@
      exec run_ev0#ev0_am     
 * dst_dedx_filler - must be after tpc_tracking
      exec run_dst#dst_dedx_filler
+* dst_point_filler
+     exec run_dst#point_filler
+* dst_event_summary - must be called before dst_monitor_software 
+     exec  run_dst#dst_event_summary
 * dst_monitor_software - call this last!
      exec run_dst#dst_mon_soft
 * write table to ntuple
