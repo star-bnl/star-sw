@@ -77,6 +77,8 @@ class St_DataSet : public TNamed
     virtual void         Delete(Option_t *opt="");   
     virtual St_DataSet  *Find(const Char_t *path) const;
     virtual St_DataSet  *FindObject(const Char_t *name,const Char_t *path="",Option_t *opt="") const;
+    virtual St_DataSet  *FindByPath(const Char_t *path) const;
+    virtual St_DataSet  *FindByName(const Char_t *name,const Char_t *path="",Option_t *opt="") const;
     virtual St_DataSet  *First() const;
             TList       *GetList()   const { return fList; }
     virtual Int_t        GetListSize() const;
