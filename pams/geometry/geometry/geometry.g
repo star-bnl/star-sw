@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.93 2004/09/11 01:16:32 potekhin Exp $
+* $Id: geometry.g,v 1.94 2004/10/26 21:11:00 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.94  2004/10/26 21:11:00  potekhin
+* 1) Moved filling of GDAT to the end of code after a consultation
+* with Pavel -- this is less error prone as by this time the main
+* Zebra bank is properly populated
+* 2) Chaged the Y2004B to activate the sisdgeo1
+*
 * Revision 1.93  2004/09/11 01:16:32  potekhin
 * Two additions:
 * (a) Geo tag Y2004B will include the most recent enhancements
@@ -391,6 +397,11 @@
               BtofConfig, VpddConfig, FpdmConfig,
               SisdConfig, PipeConfig, CalbConfig,
               PixlConfig, IstbConfig, FtroConfig
+
+* Note that SisdConfig can take values in the tens, for example 20
+* We do this to not proliferate additional version flags -- there has
+* been a correction which resulted in new code.. We check the value
+* and divide by 10 if necessary.
 
 * configuration variables for tuning the geometry:
 *            BtofConfig  -- tof trays
@@ -882,7 +893,7 @@ If LL>1
                 }
 
 ****************************************************************************************
-* NOTE:  this geometry, y2004x, should logically follow the baseline y2004,
+* NOTE:  this geometry, y2004x, should logically follow the baseline y2004, as a block of code,
 * however the parser we used isn't too good and it grabs the y2004 and then
 * stumbles, hence the order of tags is sometimes important and we have to list
 * the y2004x prior to y2004
@@ -997,9 +1008,6 @@ If LL>1
 ****************************************************************************************
   on Y2004B    { corrected 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD+FTRO with standard GSTPAR in PHMD;
                   "svt: 3 layers ";
-magp=off
-btof=off
-tpce=off
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
                      wdm=0  " width is in the code      ";
@@ -1016,11 +1024,7 @@ tpce=off
                   "calb" 
                      calb=off
                      ems=off
-                     CalbConfig = 1
-* remember that with this config, the following parameters have
-* a different meaning because we have to (unfortunately) switch
-* from divisions to copies and introduce a map, which DOES
-* control the configuration
+                     CalbConfig = 1  " Please see note in Y2004A"
                      nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
 
 
@@ -1050,12 +1054,14 @@ tpce=off
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=off;
-                     SisdConfig = 2;
+                     sisd=on;
+                     SisdConfig = 20;
 
-                  "FTPC Readout barrel "
-                     ftro=on;
-                     FtroConfig = 1;
+* Until thorougly tested, this is deferred:
+*
+*                  "FTPC Readout barrel "
+*                     ftro=on;
+*                     FtroConfig = 1;
 
                 }
 
@@ -1180,12 +1186,6 @@ tpce=off
   }
 }
 
-* -------------------- persist certain global parameters -------------------
-
-   Fill GDAT                     ! GEANT run data
-      mfscale=field/5.0          ! magnetic field scale (nominal)
-      gtag={geom(1:4),geom(5:8)} ! geometry tag 
-   EndFill
 
 * -------------------- setup selected configuration ------------------------
 * Now when all parameters and flags are ready, make gstar work as usually
@@ -1246,10 +1246,19 @@ tpce=off
   endif
 
 * Set the proper configuration of the Silicon Strip Detector
+* See note on top about using MOD(10) to encode the geometry
+* cut, as opposed to configuration of the detector:
+
   if(sisd) then
        call AgDETP new ('SISD')
-       call AgDETP add ('ssdp.Config=',SisdConfig ,1)
-       call sisdgeo
+       if (SisdConfig>10) then
+         SisdConfig=SisdConfig/10
+         call AgDETP add ('ssdp.Config=',SisdConfig ,1)
+         call sisdgeo1
+       else
+         call AgDETP add ('ssdp.Config=',SisdConfig ,1)
+         call sisdgeo
+       endif
   endif
 
 
@@ -1404,6 +1413,13 @@ tpce=off
      NtrSubEv = MLEFT*(NLEFT/MLEFT)
      Prin1 NtrSubEv; (' Ntrack per subevent = ',i6)
    } 
+*
+* -------------------- persist certain global parameters -------------------
+
+   Fill GDAT                     ! GEANT run data
+      mfscale=field/5.0          ! magnetic field scale (nominal)
+      gtag={geom(1:4),geom(5:8)} ! geometry tag 
+   EndFill
 *
    end
 
