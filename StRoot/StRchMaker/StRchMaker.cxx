@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.23 2000/06/16 02:05:38 lasiuk Exp $
+ * $Id: StRchMaker.cxx,v 1.24 2000/06/16 20:34:11 dunlop Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 1.23  2000/06/16 02:05:38  lasiuk
- * include paths; drawing cleanup macros
+ * Revision 1.24  2000/06/16 20:34:11  dunlop
+ * Fixed segfault again.  Was stomped last checkin
+ *
+ * Revision 1.24  2000/06/16 20:34:11  dunlop
+ * Fixed segfault again.  Was stomped last checkin
  *
  * Revision 1.23  2000/06/16 02:05:38  lasiuk
  * include paths; drawing cleanup macros
@@ -308,6 +311,12 @@ Int_t StRchMaker::Make() {
 	    mTheDataReader = (StDAQReader*)(mTheRichData->GetObject());
 	    if(!mTheDataReader) {
 		cout << "\tStDAQReader*: not there\n";
+		cout << "\tSkip this event\n" << endl;
+		clearPadMonitor();
+		return kStWarn;
+	    }
+	    if (!(mTheDataReader->RICHPresent())) {
+		cout << "\tRICH not in datastream\n";
 		cout << "\tSkip this event\n" << endl;
 		clearPadMonitor();
 		return kStWarn;
@@ -725,10 +734,10 @@ void StRchMaker::fillStEvent()
     
 }
 //-----------------------------------------------------------------
-  printf("* $Id: StRchMaker.cxx,v 1.23 2000/06/16 02:05:38 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.24 2000/06/16 20:34:11 dunlop Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
-    printf("* $Id: StRchMaker.cxx,v 1.23 2000/06/16 02:05:38 lasiuk Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 1.24 2000/06/16 20:34:11 dunlop Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
