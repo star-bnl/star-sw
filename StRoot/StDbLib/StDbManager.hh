@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.hh,v 1.17 2000/03/28 17:03:19 porter Exp $
+ * $Id: StDbManager.hh,v 1.18 2000/06/02 13:37:37 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,14 @@
  ***************************************************************************
  *
  * $Log: StDbManager.hh,v $
+ * Revision 1.18  2000/06/02 13:37:37  porter
+ * built up list of minor changes:
+ *  - made buffer more robust for certain null inputs
+ *  - fixed small leak in StDbTables & restructure call to createMemory
+ *  - added dbRhic as a database domain in StDbDefs
+ *  - added setUser() in StDbManager
+ *  - added more diagnostic printouts in mysqlAccessor.cc
+ *
  * Revision 1.17  2000/03/28 17:03:19  porter
  * Several upgrades:
  * 1. configuration by timestamp for Conditions
@@ -133,10 +141,10 @@ private:
   QueryObjects mqobjects;
   parseXmlString mparser; // parses strings in XML
 
-  StDbManager(): misVerbose(false), misQuiet(false), mhasServerList(false), mhasDefaultServer(false)             { 
-                                        initTypes(); 
-                                        initDomains(); 
-                                   };
+  StDbManager(): misVerbose(false), misQuiet(false), mhasServerList(false), mhasDefaultServer(false), muserName(0), mpWord(0)  { 
+                                                   initTypes(); 
+                                                   initDomains(); 
+                                                };
 
   // singleton pointer
   static StDbManager* mInstance;
@@ -145,7 +153,10 @@ private:
   bool mhasDefaultServer;
   StDbTime mcheckTime;  
   StDbTime mstoreTime;
-
+  
+  char* muserName;
+  char* mpWord;
+  
 protected:
 
   // server methods needed internally
@@ -247,11 +258,17 @@ public:
   virtual void closeAllConnections(StDbConfigNode* node); 
   virtual void closeConnection(StDbNode* node);
 
+  virtual char* userName();
+  virtual char* pWord();
+  virtual void  setUser(const char* userName, const char* pWord);
+
   // make ROOT-CLI via star-ofl "makefiles"
   // ClassDef(StDbManager,0)
 
 };
 
+inline char* StDbManager::userName() { return muserName; }
+inline char* StDbManager::pWord() { return mpWord; }
 
 #endif
 

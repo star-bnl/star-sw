@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.12 2000/04/25 18:26:03 porter Exp $
+ * $Id: StDbTable.h,v 1.13 2000/06/02 13:37:37 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,14 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.13  2000/06/02 13:37:37  porter
+ * built up list of minor changes:
+ *  - made buffer more robust for certain null inputs
+ *  - fixed small leak in StDbTables & restructure call to createMemory
+ *  - added dbRhic as a database domain in StDbDefs
+ *  - added setUser() in StDbManager
+ *  - added more diagnostic printouts in mysqlAccessor.cc
+ *
  * Revision 1.12  2000/04/25 18:26:03  porter
  * added flavor & production time as settable query fields in
  * table &/or node. Associated SQL updated in mysqlAccessor.
@@ -173,7 +181,7 @@ public:
   virtual void        SetTable(char* data, int nrows);
   virtual void        AddRows(char* data, int nrows);
   virtual int         GetNRows() const;
-  virtual void        SetNRows(int nrows){ mrows = nrows; }; 
+  virtual void        SetNRows(int nrows);
   virtual void        setRowNumber(int row=0);
   virtual bool        hasData() const;
   
@@ -284,6 +292,9 @@ StDbTable* StDbTable::Clone() {return (new StDbTable(*this));}
 
 inline 
 int StDbTable::GetNRows() const { return mrows; }
+
+inline
+void StDbTable::SetNRows(int nrows) { createMemory(nrows); }; 
 
 inline 
 void StDbTable::setRowNumber(int row){

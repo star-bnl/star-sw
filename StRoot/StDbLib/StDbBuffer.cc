@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.8 2000/05/10 21:39:01 porter Exp $
+ * $Id: StDbBuffer.cc,v 1.9 2000/06/02 13:37:36 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,14 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.9  2000/06/02 13:37:36  porter
+ * built up list of minor changes:
+ *  - made buffer more robust for certain null inputs
+ *  - fixed small leak in StDbTables & restructure call to createMemory
+ *  - added dbRhic as a database domain in StDbDefs
+ *  - added setUser() in StDbManager
+ *  - added more diagnostic printouts in mysqlAccessor.cc
+ *
  * Revision 1.8  2000/05/10 21:39:01  porter
  * fixed delete[] bug in reading from table where input schema includes fields that
  * are not in the database by checking buffer status for reads
@@ -368,9 +376,9 @@ bool  StDbBuffer::ReadArray(tpe* &s, int &len,const char *aName)\
     for (i=0;i<len;i++)\
       { if (!(WriteMem(&s[i],(void*)(((char*)mCol[mCur].val)+i*mycsize[mCol[mCur].type]),mCol[mCur].type))) break;}\
       if (i==(int)mCol[mCur].length) tRetVal=true;};}\
- else { cerr << "WARNING:: field " << aName << " doesnt exist in this Buffer" << endl; }\
  return tRetVal;\
 }
+// else { cerr << "WARNING:: field " << aName << " does not exist in this Buffer" << endl; }\
 
 //Rarray(char,_char);
 Rarray(unsigned char,_uchar);
@@ -394,7 +402,7 @@ bool  StDbBuffer::ReadArray(char* &s, int &len,const char *aName)
    tRetVal=true;
  } else { 
    s=0;
-   cerr << "WARNING:: field " << aName << " doesnt exist in this Buffer" << endl; 
+   //   cerr << "WARNING:: field " << aName << " doesnt exist in this Buffer" << endl; 
  };
  return tRetVal;\
 };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.17 2000/05/10 21:39:02 porter Exp $
+ * $Id: StDbTable.cc,v 1.18 2000/06/02 13:37:37 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,14 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.18  2000/06/02 13:37:37  porter
+ * built up list of minor changes:
+ *  - made buffer more robust for certain null inputs
+ *  - fixed small leak in StDbTables & restructure call to createMemory
+ *  - added dbRhic as a database domain in StDbDefs
+ *  - added setUser() in StDbManager
+ *  - added more diagnostic printouts in mysqlAccessor.cc
+ *
  * Revision 1.17  2000/05/10 21:39:02  porter
  * fixed delete[] bug in reading from table where input schema includes fields that
  * are not in the database by checking buffer status for reads
@@ -69,6 +77,14 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.18  2000/06/02 13:37:37  porter
+ * built up list of minor changes:
+ *  - made buffer more robust for certain null inputs
+ *  - fixed small leak in StDbTables & restructure call to createMemory
+ *  - added dbRhic as a database domain in StDbDefs
+ *  - added setUser() in StDbManager
+ *  - added more diagnostic printouts in mysqlAccessor.cc
+ *
  * Revision 1.17  2000/05/10 21:39:02  porter
  * fixed delete[] bug in reading from table where input schema includes fields that
  * are not in the database by checking buffer status for reads
@@ -143,7 +159,7 @@ StDbTable::StDbTable(const char* tableName): StDbNode(tableName), mhasDescriptor
 
  mschemaID=0;
  mendTime.munixTime=0;
- mrows=0;
+ mrows=0; 
  mrowNumber=0;
  melementID = 0;
  mdataIDs = 0;
@@ -195,6 +211,7 @@ melementID=0;
  mrows = table.GetNRows();
  mhasDescriptor=table.hasDescriptor();
  mdescriptor=table.getDescriptorCpy();
+ 
  mdataIDs = 0;
  mdataRows = 0;
  mMaxRows = 500;
@@ -205,9 +222,9 @@ melementID=0;
  mendTime.setUnixTime(table.getEndTime());
 
  char* tmp = table.GetTable();
- if(mrows==0) mrows = 1;
+ if(mrows==0) mrows = 1; 
  if(tmp) {
-   unsigned int size = mrows*table.getTableSize();
+   unsigned int size =  mrows*table.getTableSize();
    mdata = new char[size];
    memcpy(mdata,tmp,size);
    mhasData = true;
@@ -233,6 +250,7 @@ StDbTable::setDefaultFlavor(){
 
   char* flavor = StDbDefaults::Instance()->getFlavor();
   strncpy(mflavor,flavor,sizeof(mflavor));
+  delete [] flavor;
   mdefaultFlavor = true;
 
 }
@@ -262,6 +280,7 @@ StDbTable::setDescriptor(StTableDescriptorI* descriptor){
  if(mdescriptor) delete mdescriptor;
  mdescriptor=descriptor;
  mhasDescriptor=true;
+ 
  //checkDescriptor();
 
 };
@@ -279,7 +298,7 @@ StDbTable::GetTableCpy() {
 
 if(!mdata)return (void*)GetTable();
 
-int len = mrows*getTableSize();
+ int len =  mrows*getTableSize();
 //char* c = new char[len];
 char* c = (char*)calloc(mrows,getTableSize());
 memcpy(c,mdata,len);
@@ -337,7 +356,7 @@ StDbTable::duplicateData() {
 
 char* dup=0;
 
-int len1 = mrows*getTableSize();
+ int len1 = mrows*getTableSize();
  if(len1 !=0){
   dup=new char[len1];
   memcpy(dup,mdata,len1);
@@ -352,20 +371,16 @@ return dup;
 bool
 StDbTable::createMemory(int nrows) { 
  mrows = nrows;
- return createMemory();
-}
-
-/////////////////////////////////////////////////////////////////////
-
-bool
-StDbTable::createMemory() {
-bool retVal = true;
-
-  if(mdata)return retVal;
+ bool retVal = true;
+ if(mrows==0) {
+   delete mdata; mdata=0;
+   return retVal;
+ }
 
   if(mdescriptor && mdescriptor->getNumElements()>0){
-     if(mrows==0) mrows = 1;
+    //     if(mrows==0) mrows = 1;
      int len = mrows*mdescriptor->getTotalSizeInBytes();
+     if(mdata)delete [] mdata;
      mdata=new char[len];
      memset(mdata,0,len);
      int max = mdescriptor->getNumElements();
@@ -382,7 +397,18 @@ bool retVal = true;
     if(!mnode.name){mnode.mstrCpy(mnode.name,"Unknown");}
     retVal = false;
   }
+
 return retVal;
+}
+
+/////////////////////////////////////////////////////////////////////
+
+bool
+StDbTable::createMemory() {
+
+  if(mdata)return true;
+  if(mrows==0) mrows=1;
+  return createMemory(mrows);
 }
     
 //////////////////////////////////////////////////////////////////////
@@ -390,18 +416,21 @@ return retVal;
 void
 StDbTable::setElementID(int* elements, int nrows) { 
 
-   mrows = nrows;
-
+   createMemory(mrows);
+   // set up & fill char* will element list
    if(mnode.elementID) delete [] mnode.elementID;
    mnode.elementID = new char[4*nrows];
    ostrstream os(mnode.elementID,4*nrows);
-   melementID = new int[nrows];
-   memcpy(melementID,elements,nrows*sizeof(int));
 
    for(int i=0;i<nrows-1;i++){
      os<<elements[i]<<",";
    }
    os<<elements[nrows-1]<<ends;
+
+   //set up & fill int* with element list
+   if(melementID) delete [] melementID;
+   melementID = new int[nrows];
+   memcpy(melementID,elements,nrows*sizeof(int));
 
 }
 

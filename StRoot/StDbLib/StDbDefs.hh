@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbDefs.hh,v 1.11 2000/05/04 15:13:11 porter Exp $
+ * $Id: StDbDefs.hh,v 1.12 2000/06/02 13:37:36 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -13,6 +13,14 @@
  ***************************************************************************
  *
  * $Log: StDbDefs.hh,v $
+ * Revision 1.12  2000/06/02 13:37:36  porter
+ * built up list of minor changes:
+ *  - made buffer more robust for certain null inputs
+ *  - fixed small leak in StDbTables & restructure call to createMemory
+ *  - added dbRhic as a database domain in StDbDefs
+ *  - added setUser() in StDbManager
+ *  - added more diagnostic printouts in mysqlAccessor.cc
+ *
  * Revision 1.11  2000/05/04 15:13:11  porter
  * added dbOnl, dbRich, dbMwc domains as standards
  *
@@ -66,7 +74,7 @@ enum StDbType { dbStDb=0, dbServer, dbRunLog, dbConfigurations, dbConditions, db
 
 // enumerated standard set of database domains
 
-enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3, dbOnl, dbRich, dbMwc };
+enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3, dbOnl, dbRich, dbMwc, dbRhic };
 
 #include "dbstl.h"
 #include <string.h>
