@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.h,v 1.13 2002/01/03 22:41:14 jeromel Exp $
+// $Id: StLaserEventMaker.h,v 1.14 2002/01/24 23:56:51 pfachini Exp $
 // $Log: StLaserEventMaker.h,v $
+// Revision 1.14  2002/01/24 23:56:51  pfachini
+// Correcting for the clock
+//
 // Revision 1.13  2002/01/03 22:41:14  jeromel
 // Forgot to change the calibration file name. Also added doxygen-like comments
 // and documentation. Trimmed traling spaces + ident in some places.
@@ -72,6 +75,7 @@ private:
   Float_t m_tzero;        // record tzero etc. in the event header
   Float_t m_drivel;
   Float_t m_clock;
+  Float_t m_clockNominal;
   Float_t m_trigger;//additional time added to tZero for trigger delay
   Int_t m_rowmin ; Int_t m_rowmax ;  //Range for the pixel branch.
   Bool_t m_mklaser;   	          //control flag for laser tree production
@@ -126,9 +130,11 @@ public:
   double fzlAverageWestHigh();
   double fzlAverageWestLow();
   double driftVelocityReco;
+  double clock;
+  double clockNominal;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.13 2002/01/03 22:41:14 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.14 2002/01/24 23:56:51 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker, 1)   //StAF chain virtual base class for Makers
 };

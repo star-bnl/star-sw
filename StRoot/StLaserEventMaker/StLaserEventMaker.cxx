@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.21 2002/01/03 22:41:14 jeromel Exp $
+// $Id: StLaserEventMaker.cxx,v 1.22 2002/01/24 23:56:31 pfachini Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.22  2002/01/24 23:56:31  pfachini
+// Correcting for the clock
+//
 // Revision 1.21  2002/01/03 22:41:14  jeromel
 // Forgot to change the calibration file name. Also added doxygen-like comments
 // and documentation. Trimmed traling spaces + ident in some places.
@@ -63,6 +66,7 @@
 #include "tpc/St_tpt_Module.h"
 #include "tables/St_tfc_adcxyz_Table.h"
 #include "tables/St_tpt_track_Table.h"
+#include "tables/St_starClockOnl_Table.h"
 #include "TTree.h"
 #include "StLaserEvent/StLaserEvent.h"
 #include "tables/St_tpcDriftVelocity_Table.h"
@@ -235,7 +239,22 @@ void StLaserEventMaker::MakeHistograms()
     driftVelocityReco = m_drivel;
     driftVelocityRec->Fill(driftVelocityReco);
     Float_t m_tzero = gStTpcDb->Electronics()->tZero();
-    Float_t m_clock = gStTpcDb->Electronics()->samplingFrequency();
+    Float_t m_clockNominal = gStTpcDb->Electronics()->samplingFrequency();
+    clockNominal = m_clockNominal;
+    Float_t m_clock = 0;
+    TDataSet* rundb=GetDataBase("RunLog/onl");
+    if (rundb) {
+     St_starClockOnl* starclock = (St_starClockOnl*)rundb->Find("starClockOnl");
+     if (starclock) {
+       starClockOnl_st* clkstr = (starClockOnl_st*)starclock->GetArray();
+       if (clkstr) m_clock = clkstr->frequency/1000000.0;
+     }
+    }
+    if (m_clock == 0) {
+      m_clock = m_clockNominal;
+      cout << "No real clock! Clock is set to be ClockNominal then." << endl;
+    }
+    clock = m_clock;
     Float_t m_trigger = gStTpcDb->triggerTimeOffset();
     m_date = GetDate();
     m_time = GetTime();
@@ -246,7 +265,8 @@ void StLaserEventMaker::MakeHistograms()
 		     m_tzero, m_drivel, m_clock, m_trigger);
     cout << "Event "<< evno << " Run " << m_runno << endl;
     cout << " tZero "<< m_tzero << " trigger " << m_trigger << endl;
-    cout << " clock "<< m_clock << " drivel " << m_drivel << endl;
+    cout << " clock "<< m_clock << " clockNominal " << m_clockNominal << endl;
+    cout << " drivel " << m_drivel << endl;
 
     //  Make the "laser"  TTree  Should be controllable.
     // Create an iterator for the track dataset
@@ -470,7 +490,7 @@ void StLaserEventMaker::DOCA(Float_t r0,Float_t phi0,Float_t z0,
           if((x*px+y*py)<0) sign=-1.0;
           disxy = sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
           z = z0 + sign*tanl*disxy;
-          if(TMath::Abs(z-zpt[iz])<5.0){
+          if(TMath::Abs(z-zpt[iz])<15.0){
 	    Float_t disq = (x-xp)*(x-xp) + (y-yp)*(y-yp);
 	    if (disq<test) {
 	      test=disq;
@@ -710,7 +730,7 @@ Int_t StLaserEventMaker::Finish() {
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.21 2002/01/03 22:41:14 jeromel Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.22 2002/01/24 23:56:31 pfachini Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -738,14 +758,17 @@ void StLaserEventMaker::WriteTableToFile(){
  St_tpcDriftVelocity* StLaserEventMaker::driftTable(){
    double velocityEast = 147.199*driftVelocityReco/fabs(fzlAverageEastHigh()-fzlAverageEastLow());
    double velocityWest = 147.164*driftVelocityReco/fabs(fzlAverageWestHigh()-fzlAverageWestLow());
-  St_tpcDriftVelocity* table = new St_tpcDriftVelocity("tpcDriftVelocity",1);
-  tpcDriftVelocity_st* row = table->GetTable();
-  row->cathodeDriftVelocityEast = 0.0;
-  row->cathodeDriftVelocityWest = 0.0;
-  row->laserDriftVelocityEast = velocityEast/1000000.0;
-  row->laserDriftVelocityWest = velocityWest/1000000.0;
-  table->SetNRows(1);
-  return table;
+   //Now correcting for the clock...
+   velocityEast = velocityEast*clock/clockNominal;
+   velocityWest = velocityWest*clock/clockNominal;
+   St_tpcDriftVelocity* table = new St_tpcDriftVelocity("tpcDriftVelocity",1);
+   tpcDriftVelocity_st* row = table->GetTable();
+   row->cathodeDriftVelocityEast = 0.0;
+   row->cathodeDriftVelocityWest = 0.0;
+   row->laserDriftVelocityEast = velocityEast/1000000.0;
+   row->laserDriftVelocityWest = velocityWest/1000000.0;
+   table->SetNRows(1);
+   return table;
  }
 //_____________________________________________________________________________
 void StLaserEventMaker::WriteHistFile(){
@@ -755,6 +778,7 @@ void StLaserEventMaker::WriteHistFile(){
   GetHistList()->Write();
   out.Close();
 }
+
 
 double StLaserEventMaker::fzlAverageEastHigh(){double mean = fzlEastHigh->GetMean();return mean;};
 double StLaserEventMaker::fzlAverageEastLow(){double mean = fzlEastLow->GetMean();return mean;};
