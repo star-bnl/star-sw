@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.24 2001/08/24 21:40:04 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.25 2001/08/28 19:02:55 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.25  2001/08/28 19:02:55  caines
+ * Remove hardwired line that makes it always do common mode average (dumb!)
+ *
  * Revision 1.24  2001/08/24 21:40:04  caines
  * Adjust rawHybridData not SeqHybridData in Common Mode noise subtraction
  *
@@ -469,7 +472,7 @@ Int_t StSvtSeqAdjMaker::Make()
 	    
 	  for( int i=0; i<nSequence; i++)  length += Seq[i].length;
 	  if( length != 128) doCommon =1;
-	  doCommon = 1;
+	  
 	  
 	  if( doCommon){
 	    cout << "Doing Common mode average" << endl;
