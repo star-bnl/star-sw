@@ -1,5 +1,4 @@
 #include "Sti/Base/EditableParameters.h"
-//#include "Sti/StiTrackSeedFinder.h"
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiKalmanTrackFitter.h"
 #include "StiGui/OptionMenuGroup.h"
@@ -7,6 +6,7 @@
 #include "StiGui/EventDisplayParameters.h"
 #include "StiMaker/MessengerOptionsDialog.h"
 #include "StiMaker/StiOptionFrame.h"
+#include "StiGui/StiFilterOptionFrame.h"
 
 OptionMenuGroup::OptionMenuGroup(const string & name, 
 				 const string & description, 
@@ -110,7 +110,7 @@ void OptionMenuGroup::setHitFilterOptions()
   EditableParameters * pars = dynamic_cast<EditableParameters *>(getDisplay()->getHitFilter());
   if (pars)
     {
-      new StiOptionFrame(getClient()->GetRoot(), getDisplay(), pars); 
+      new StiFilterOptionFrame(getClient()->GetRoot(), getDisplay(), pars); 
       getDisplay()->draw();
     }
   else
@@ -124,7 +124,7 @@ void OptionMenuGroup::setMcHitFilterOptions()
   EditableParameters * pars = dynamic_cast<EditableParameters *>(getDisplay()->getMcHitFilter());
   if (pars)
     {
-      new StiOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
+      new StiFilterOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
       getDisplay()->draw();
     }
   else
@@ -138,7 +138,7 @@ void OptionMenuGroup::setGuiTrackFilterOptions()
   EditableParameters * pars = dynamic_cast<EditableParameters *>(getDisplay()->getTrackFilter());
   if (pars)
     {
-      new StiOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
+      new StiFilterOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
       getDisplay()->draw();
     }
   else
@@ -153,7 +153,7 @@ void OptionMenuGroup::setGuiMcTrackFilterOptions()
   EditableParameters * pars = dynamic_cast<EditableParameters *>(getDisplay()->getMcTrackFilter());
   if (pars)
     {
-      new StiOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
+      new StiFilterOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
        getDisplay()->draw();
     }
   else
@@ -167,7 +167,7 @@ void OptionMenuGroup::setFinderTrackFilterOptions()
   cout << "OptionMenuGroup::setFinderTrackFilterOptions() -I- Started" <<endl;
   EditableParameters * pars = dynamic_cast<EditableParameters *>(getToolkit()->getFinderTrackFilter());
   if (pars)
-    new StiOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
+    new StiFilterOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
   else
     cout << "OptionMenuGroup::setFinderTrackFilterOptions() -E- Finder Track Filter options not available"<<endl;
   cout << "OptionMenuGroup::setFinderTrackFilterOptions() -I- Done" <<endl;
@@ -180,7 +180,7 @@ void OptionMenuGroup::setMcTrackLoaderFilterOptions()
   cout << "OptionMenuGroup::setFinderTrackFilterOptions() -I- Started" <<endl;
   EditableParameters * pars = dynamic_cast<EditableParameters *>(getToolkit()->getLoaderTrackFilter());
   if (pars)
-    new StiOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
+    new StiFilterOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
   else
     cout << "OptionMenuGroup::setFinderTrackFilterOptions() -E- Finder Track Filter options not available"<<endl;
   cout << "OptionMenuGroup::setFinderTrackFilterOptions() -I- Done" <<endl;
