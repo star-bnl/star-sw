@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.12 1998/08/18 14:05:01 fisyak Exp $
+// $Id: StChain.cxx,v 1.13 1998/08/26 12:15:08 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.13  1998/08/26 12:15:08  fisyak
+// Remove asu & dsl libraries
+//
 // Revision 1.12  1998/08/18 14:05:01  fisyak
 // Add to bfc dst
 //
@@ -202,6 +205,7 @@
 #include <TTree.h>
 #include <TBrowser.h>
 #include <TClonesArray.h>
+#include <TBenchmark.h>
 #include "St_XDFFile.h"
 #include "St_FileSet.h"
 #include "StChain.h"
@@ -420,8 +424,9 @@ void StChain::Init()
       objlast = gDirectory->GetList()->Last();
 
      // Initialise maker
+      gBenchmark->Start((const char *) maker->GetName());
       maker->Init();
-
+      gBenchmark->Stop((const char *) maker->GetName());
      // Add the Maker histograms in the Maker histograms list
       if (objlast) objfirst = gDirectory->GetList()->After(objlast);
       else         objfirst = gDirectory->GetList()->First();
@@ -456,7 +461,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.12 1998/08/18 14:05:01 fisyak Exp $    *\n");
+   printf("* $Id: StChain.cxx,v 1.13 1998/08/26 12:15:08 fisyak Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
@@ -529,7 +534,7 @@ void StChain::MakeBranch()
 //  Make a branch tree if a branch name has been set
    Int_t buffersize = 4000;
    m_BranchName = GetName();
-   m_Tree->Branch(m_BranchName.Data(),ClassName(), this, buffersize);
+   m_Tree->Branch(m_BranchName.Data(),ClassName(), &gStChain, buffersize);
 }
 
 
@@ -565,7 +570,9 @@ Int_t StChain::Make(Int_t i)
          makerset = m_EventSet;
   // Call Maker
      maker->SetDataSet(makerset);
+     gBenchmark->Start((const char *) maker->GetName());
      ret = maker->Make();
+     gBenchmark->Stop((const char *) maker->GetName());
      if (gStChain->Debug()) printf("%s %i\n",maker->GetName(),ret);
      if (ret < 0) return ret;
      if (gStChain->Debug()) m_DataSet->ls(2);
@@ -595,8 +602,8 @@ void StChain::Finish()
    StMaker *maker;
    while ((maker = (StMaker*)next())) {
       maker->Finish();
+      gBenchmark->Print((char *) maker->GetName());
    }
-   if (m_DataSet) delete m_DataSet; m_DataSet = 0;
 }
 
 //_____________________________________________________________________________

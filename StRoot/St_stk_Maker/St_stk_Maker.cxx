@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.2 1998/08/18 14:05:03 fisyak Exp $
+// $Id: St_stk_Maker.cxx,v 1.3 1998/08/26 12:15:10 fisyak Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.3  1998/08/26 12:15:10  fisyak
+// Remove asu & dsl libraries
+//
 // Revision 1.2  1998/08/18 14:05:03  fisyak
 // Add to bfc dst
 //
@@ -51,7 +54,7 @@ St_stk_Maker::St_stk_Maker(){
    m_nitermax = 7;
    m_niternull = 1000;
    m_sec_factor = 6.0;
-   m_ifstk = kTRUE;
+   m_ifstk = kFALSE;
 }
 //_____________________________________________________________________________
 St_stk_Maker::St_stk_Maker(const char *name, const char *title):StMaker(name,title){
@@ -73,7 +76,7 @@ St_stk_Maker::St_stk_Maker(const char *name, const char *title):StMaker(name,tit
    m_nitermax = 7;
    m_niternull = 1000;
    m_sec_factor = 6.0;
-   m_ifstk = kTRUE;
+   m_ifstk = kFALSE;
 }
 //_____________________________________________________________________________
 St_stk_Maker::~St_stk_Maker(){
@@ -153,7 +156,7 @@ Int_t St_stk_Maker::Make(){
      St_DataSetIter run(gStChain->GetRun());
      St_g2t_gepart *g2t_gepart  = (St_g2t_gepart *) run("geant/Run/g2t_gepart");
      if (!g2t_gepart){
-       St_g2t_gepart  *g2t_gepart   = new St_g2t_gepart("g2t_gepart",1);
+       g2t_gepart   = new St_g2t_gepart("g2t_gepart",1);
        St_DataSetIter loc(run("geant/Run"));
        loc.Add(g2t_gepart);
      }
@@ -208,7 +211,7 @@ return kSTAFCV_OK;
 //_____________________________________________________________________________
 void St_stk_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_stk_Maker.cxx,v 1.2 1998/08/18 14:05:03 fisyak Exp $\n");
+  printf("* $Id: St_stk_Maker.cxx,v 1.3 1998/08/26 12:15:10 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

@@ -1,5 +1,5 @@
 {
-  gSystem.Load("lib/St_base.so");
+  gSystem.Load("St_base.so");
   Int_t first = 111;
   Int_t second = 222;
   St_Module defmodule;
@@ -20,4 +20,29 @@
   const Char_t *name[]= {"First", "Second"};
   module->CheckParameters(name);
 
+  printf("Checking the post-module diagnostics\n");
+  table_head_st h1; 
+  table_head_st h2; 
+  // Everything Ok;
+  h1.maxlen=10;
+  h1.nok   = 2;
+
+  h2.maxlen=12;
+  h2.nok   = 3;
+
+  module_check = new St_Module((ULong_t *)&h1,&first,(ULong_t *)&h2,&second); 
+  printf("Everything Ok!\n");
+  Int_t res = module_check();
+  module_check->CheckResults(res,name);
+  
+  h1.nok = h1.maxlen;
+  printf("First header is wrong!\n");
+  module_check->CheckResults(res,name);
+  
+  h2.nok = h2.maxlen+2;
+  Int_t res = module_check();
+  printf("First header and second one are wrong!\n");
+  module_check->CheckResults(res,name);
+  delete module_check;
+  delete module;
 }

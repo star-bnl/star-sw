@@ -6,8 +6,6 @@ void myLoad(Char_t  *file){
 }
 LoadXDF(){
   myLoad("St_base.so");
-  myLoad("libasu.so");
-  myLoad("libdsl.so");
   myLoad("xdf2root.so");
   myLoad("St_Tables.so");
   myLoad("StChain.so");

@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.1 1998/08/18 14:06:06 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.2 1998/08/26 12:15:08 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.2  1998/08/26 12:15:08  fisyak
+// Remove asu & dsl libraries
+//
 // Revision 1.1  1998/08/18 14:06:06  fisyak
 // Add to bfc dst
 //
@@ -98,12 +101,10 @@ void St_dst_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_dst_Maker::Make(){
   //  PrintInfo();
-  St_DataSetIter data(gStChain->GetData());// data
-  St_DataSet  *global = data("global");
-  if (!global) global = data.Mkdir("global");
+  St_DataSetIter global(m_DataSet);         // data/global
+  St_DataSetIter data(gStChain->GetData()); // data
   //svm
-  data.Mkdir("global/tracks");
-  St_DataSet  *global_track = data("global/tracks");
+  St_DataSet  *global_track = global.Mkdir("tracks");
   St_DataSetIter track(global_track);
   St_svm_evt_match *evt_match  = new St_svm_evt_match("evt_match",3000); track.Add(evt_match);
 
@@ -116,7 +117,7 @@ Int_t St_dst_Maker::Make(){
   St_DataSetIter run(gStChain->GetRun());
   St_g2t_gepart *g2t_gepart  = (St_g2t_gepart *) run("geant/Run/g2t_gepart");
   if (!g2t_gepart){
-    St_g2t_gepart  *g2t_gepart   = new St_g2t_gepart("g2t_gepart",1);
+    g2t_gepart   = new St_g2t_gepart("g2t_gepart",1);
     St_DataSetIter loc(run("geant/Run"));
     loc.Add(g2t_gepart);
   }
@@ -138,8 +139,9 @@ Int_t St_dst_Maker::Make(){
 
   Int_t Res_svm_svt_eval  = svm_svt_eval(scs_spt,groups,stk_track,tptrack,evaltrk,
                                         evt_match, svm_eval_par,svm_eval_strk);
-
-  St_DataSetIter dst(m_DataSet); // dst
+  St_DataSet    *global_dst = global("dst");
+  if (!global_dst) global_dst = global.Mkdir("dst");
+  St_DataSetIter dst(global_dst); // dst
   St_dst_track     *globtrk     = new St_dst_track("globtrk",100000);         dst.Add(globtrk);
   St_dst_track_aux *globtrk_aux = new St_dst_track_aux("globtrk_aux",100000); dst.Add(globtrk_aux);
   St_ev0_track     *ev0track    = new St_ev0_track("ev0track",100000);        dst.Add(ev0track);
@@ -229,7 +231,7 @@ Int_t St_dst_Maker::Make(){
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.1 1998/08/18 14:06:06 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.2 1998/08/26 12:15:08 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

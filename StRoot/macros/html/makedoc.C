@@ -1,9 +1,9 @@
 {
   gROOT.Reset();
-  Char_t *libs[] = {"St_base","libasu","libdsl","xdf2root.so","St_Tables", 
+  Char_t *libs[] = {"St_base","xdf2root.so","St_Tables", 
   "libmsg","libtls","tpc.sl","St_tpc","svt.sl","St_svt","StChain"};
   Char_t *suffix=0;
-  Int_t nlist = 12;
+  Int_t nlist = 10;
   Bool_t NT=kFALSE;
   if (strcmp(gSystem.GetName(),"WinNT") == 0 ) {
      NT=kTRUE;
@@ -65,6 +65,7 @@
 
   html.Convert("./../Chain/xdf.C","STAR chain example");
   html.Convert("./../test/XDFcopy.C","How to read/write XDF file");
+  html.Convert("./../test/XDFtest.C","How to read/write XDF and ROOT files");
   html.Convert("./par_anal.cxx","How to create several histrograms from XDF file");
   html.Convert("./../test/test10.C","How to use the dataset iterator class");
   html.Convert("./../test/test9.C","How to read the event from XDF file and build some histograms with ROOT");

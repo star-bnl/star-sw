@@ -1,8 +1,6 @@
 {
  gROOT->Reset();
 #include "iostream.h"
-  gSystem.Load("libasu.so");
-  gSystem.Load("libdsl.so");
   gSystem.Load("St_base.so");
   St_DataSetIter d;
   d.Mkdir("v1/v1_1/v1_1_1");
