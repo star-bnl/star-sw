@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.12 2001/04/24 15:38:08 fisyak Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.13 2001/04/27 21:41:07 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.13  2001/04/27 21:41:07  ullrich
+ * Fixed bug.
+ *
  * Revision 2.12  2001/04/24 15:38:08  fisyak
  * Add switch (use length) for calibrated and non calibrated data
  *
@@ -67,7 +70,7 @@
 #include "StTrackGeometry.h"
 #include "BetheBloch.h"
 
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.12 2001/04/24 15:38:08 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.13 2001/04/27 21:41:07 ullrich Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -124,25 +127,28 @@ StTpcDedxPidAlgorithm::numberOfSigma(const StParticleDefinition* particle) const
 {
     if (!mTraits) return 0;
 
-    if (mTraits->numberOfPoints()==0) return DBL_MAX; // sigmaPidFunction already checks this, but when number of dE/dx points is = 0, mTraits->mean() is probably undefined too (have to check this) so might as well exit here.
+    if (mTraits->numberOfPoints()==0) return DBL_MAX;
+    // sigmaPidFunction already checks this, but when number of dE/dx points is = 0,
+    // mTraits->mean() is probably undefined too (have to check this)
+    // so might as well exit here.
 
     // returns the number of sigma a tracks dedx is away from
     // the expected mean for a track for a particle of this mass
     double dedx_expected;
     double dedx_resolution;
+    double momentum;
     double z;
     if (mTrack && mTraits->length() > 0) {
-      double momentum  = abs(mTrack->geometry()->momentum());
-      double dedx_expected   = 
-	1.e-6*BetheBloch::Sirrf(momentum/particle->mass(),mTraits->length(),
-				abs(particle->pdgEncoding())==11);
+      momentum  = abs(mTrack->geometry()->momentum());
+      dedx_expected = 1.e-6*BetheBloch::Sirrf(momentum/particle->mass(),mTraits->length(),
+					      abs(particle->pdgEncoding())==11);
       dedx_resolution = mTraits->errorOnMean();
       if (dedx_resolution <= 0) dedx_resolution = sigmaPidFunction(particle) ;
     }
     else {
-      dedx_expected   = meanPidFunction(particle) ;
-      dedx_resolution = sigmaPidFunction(particle) ;
-//     return (mTraits->mean() - dedx_expected)/dedx_resolution ;
+	dedx_expected   = meanPidFunction(particle) ;
+	dedx_resolution = sigmaPidFunction(particle) ;
+	//     return (mTraits->mean() - dedx_expected)/dedx_resolution ;
     }
     z = log(mTraits->mean()/dedx_expected);
     return z/dedx_resolution ;
