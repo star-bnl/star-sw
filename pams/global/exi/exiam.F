@@ -32,7 +32,7 @@ C   Modified by                 WK.Wilson
 C   Moved to STAF JUNE-1997     S. Margetis
 C   26-Aug-1998 PGJ Clean-up and modified to use dst tables.
 C   10-Feb-1999 PGJ Made ready for MDC2. 
-C
+C 
 C   Error conditions	: None-Yet
 C   Status		: Tested 
 C<----------------------------------------------------------------------
@@ -77,8 +77,7 @@ C<----------------------------------------------------------------------
       REAL      invs_xi, invms_om, mala, malb, v0_mass
       REAL	xp(2), xn1(2), xn2(2), dca, xpp(3), pxi(3)
       REAL      energy_v0, beta_v0, gamma_v0, ep, ppar_cm, vmain(3)
-      REAL      r0, phi0, charge
-      REAL      xlocal(3), bfield(3), bscale
+      REAL      xlocal(3), bfield(3), bscale, charge
       REAL      ptotp2, ptotn2, pdotn, eprp, eprn, epip, epin
 
       LOGICAL   first
@@ -262,11 +261,8 @@ c*** pgj: don't use tracks already used in the v0
 
 c*** pgj: convert to local parameters
 
-          r0 = sqrt(globtrk(i).x0**2 + globtrk(i).y0**2)
-          phi0 = atan2(globtrk(i).y0,globtrk(i).x0)
-
-          trki(1) = r0
-          trki(2) = r0*phi0
+          trki(1) = globtrk(i).r0
+          trki(2) = globtrk(i).r0*globtrk(i).phi0
           trki(3) = globtrk(i).z0
           trki(4) = globtrk(i).psi*C_RAD_PER_DEG
           trki(5) = globtrk(i).tanl
