@@ -8,11 +8,14 @@
 #include "StiObjectFactory.h"
 
 #include "StiHit.h"
-#include "StiDefaultMutableTreeNode.h"
 #include "StiTrackNode.h"
+#include "StiKalmanTrack.h"
+
+//#include "StiDefaultMutableTreeNode.h" //Obsolete
+//typedef StiObjectFactory<StiDefaultMutableTreeNode> StiTreeNodeFactory;  //Obsolete
 
 typedef StiObjectFactory<StiHit> StiHitFactory;
-typedef StiObjectFactory<StiDefaultMutableTreeNode> StiTreeNodeFactory;
+typedef StiObjectFactory<StiKalmanTrack> StiKalmanTrackNodeFactory;
 typedef StiObjectFactory<StiTrackNode> StiTrackNodeFactory;
 
 #endif

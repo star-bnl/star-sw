@@ -15,7 +15,10 @@ struct HitMapKey {
 
 //Functor for ordering hit map key
 struct MapKeyLessThan{
+    MapKeyLessThan() : reftolerance(.01), postolerance(.01) {};
     bool operator() (const HitMapKey&, const HitMapKey&) const;
+    double reftolerance;
+    double postolerance;
 };
 
 //Structure for detector map key

@@ -231,7 +231,7 @@ void StiDetectorContainer::buildPolygons(const char* buildDirectory)
 	    //do action here
 	    StiDetPolygon* poly = new StiDetPolygon();
 	    poly->build(buildfile);
-	    cout <<"Building Polygon from "<<buildfile<<endl;
+	    //cout <<"Building Polygon from "<<buildfile<<endl;
 	    //cout <<(*poly)<<endl;
 	    push_back(poly);
 

@@ -3,11 +3,18 @@
 //04/01
 
 #include <iostream>
+#include <cmath>
 
 // StEvent
 #include "StEventTypes.h"
 
-//Sti
+//StDb
+#include "StDbUtilities/StTpcCoordinateTransform.hh"
+#include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
+#include "StDbUtilities/StGlobalCoordinate.hh"
+#include "StTpcDb/StTpcDb.h"
+
+///Sti
 #include "StiHit.h"
 #include "StiHitContainer.h"
 #include "StiObjectFactory.h"
@@ -15,14 +22,30 @@
 
 #include "StiHitFiller.h"
 
-StiHitFiller::StiHitFiller() : mtranslator(StiGeometryTransform::instance())
+double gRefAnleForSector(unsigned int sector);
+
+//StiHitFiller::StiHitFiller() : mtranslator(StiGeometryTransform::instance())
+StiHitFiller::StiHitFiller() : mtranslator(0), mtpctransformer( new StTpcCoordinateTransform(gStTpcDb) )
 {
     cout <<"\nStiHitFiller::StiHitFiller()\n"<<endl;
+
+    //Temp, build map of padrow radius
+    cout <<"Generating Padrow Radius Map"<<endl;
+    for (unsigned int padrow=1; padrow<=45; ++padrow) {
+	double center = gStTpcDb->PadPlaneGeometry()->radialDistanceAtRow(padrow);
+	mpadrowradiusmap.insert( padrow_radius_map_ValType( padrow, center ) );	
+    }
+    cout <<"\nPadrow\tRadius"<<endl;
+    for (padrow_radius_map::const_iterator it=mpadrowradiusmap.begin(); it!=mpadrowradiusmap.end(); ++it) {
+	cout <<(*it).first<<"\t"<<(*it).second<<endl;
+    }
 }
 
 StiHitFiller::~StiHitFiller()
 {
     cout <<"\nStiHitFiller::~StiHitFiller()\n"<<endl;
+    delete mtpctransformer;
+    mtpctransformer=0;
 }
 
 void StiHitFiller::addDetector(StDetectorId det)
@@ -31,7 +54,7 @@ void StiHitFiller::addDetector(StDetectorId det)
     return;
 }
 
-void StiHitFiller::fillHits(StiHitContainer* store, StiHitFactory* factory) const
+void StiHitFiller::fillHits(StiHitContainer* store, StiHitFactory* factory)
 {
     for (det_id_vector::const_iterator it=mvec.begin(); it!=mvec.end(); ++it) {
 	if ( *it == kTpcId) fillTpcHits(store, factory);
@@ -40,7 +63,7 @@ void StiHitFiller::fillHits(StiHitContainer* store, StiHitFactory* factory) cons
     return;
 }
 
-void StiHitFiller::fillTpcHits(StiHitContainer* store, StiHitFactory* factory) const
+void StiHitFiller::fillTpcHits(StiHitContainer* store, StiHitFactory* factory)
 {
     const StTpcHitCollection* tpcHits = mevent->tpcHitCollection();    
     //Loop over sectors
@@ -54,11 +77,16 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store, StiHitFactory* factory) c
 	    for (StSPtrVecTpcHitIterator iter = hitvec.begin(); iter != hitvec.end(); iter++) {
 		StTpcHit* hit = dynamic_cast<StTpcHit*>(*iter);
 		if (hit) {
+		    
 		    //Now we have the hit
-		    StiHit* stihit = new StiHit();
-		    mtranslator->operator()(hit, stihit);
-		    //cout <<"TpcHit: "<<hit->sector()<<" "<<hit->padrow()<<" "<<hit->position()<<"\tStiHit: "<<*stihit<<endl;
-		    delete stihit;
+		    StiHit* stihit = factory->getObject();
+		    stihit->reset();
+		    
+		    this->operator()(hit, stihit);
+		    //mtranslator->operator()(hit, stihit);
+
+		    //Now Fill the Hit Container!
+		    store->push_back( stihit );
 		}
 	    }
 	}	    
@@ -67,7 +95,7 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store, StiHitFactory* factory) c
     return;
 }
 
-void StiHitFiller::fillSvtHits(StiHitContainer* store, StiHitFactory* factory) const
+void StiHitFiller::fillSvtHits(StiHitContainer* store, StiHitFactory* factory)
 {
     return;
 }
@@ -79,4 +107,52 @@ ostream& operator<<(ostream& os, const StiHitFiller& h)
 	os <<static_cast<int>( (*it) )<<" ";
     }
     return os;
+}
+
+void StiHitFiller::operator() (const StTpcHit* tpchit, StiHit* stihit)
+{
+    //Change if we change numbering scheme
+    double refangle = gRefAnleForSector( tpchit->sector() );
+    double pos = mpadrowradiusmap[ tpchit->padrow() ];
+    stihit->setRefangle( refangle );
+    stihit->setPosition( pos );
+
+    //Make Tpc hits
+    StGlobalCoordinate gHit( tpchit->position() );
+    StTpcLocalSectorCoordinate lsHit;
+
+    //Transform 
+    mtpctransformer->operator()(gHit, lsHit);
+
+    //Careful, we have to swap z for all hits, and x and y for hits with global z>0
+
+    //Keep z in global coordinates
+    stihit->setZ( tpchit->position().z() );
+
+    //Take x -> -x, then swap x for y
+    if (tpchit->position().z() >0) {
+	stihit->setX( lsHit.position().y() );
+	stihit->setY( -1.*lsHit.position().x() );
+    }
+
+    //Swap x for y, 
+    else {
+	stihit->setX( lsHit.position().y() );
+	stihit->setY( lsHit.position().x() );
+    }
+
+    /*
+      cout <<"TpcHit: "<<tpchit->sector()<<" "<<tpchit->padrow()<<" "<<tpchit->position();
+      cout <<" GlobHit: "<<gHit.position();
+      cout <<" LSHit: "<<lsHit.position()<<" From Sector: "<<lsHit.fromSector()<<" ";
+      cout <<" StiHit: "<<stihit->x()<<" "<<stihit->y()<<" "<<stihit->z()<<endl;
+    */
+    return;
+}
+
+double gRefAnleForSector(unsigned int sector)
+{
+    unsigned int numSectors = 24;
+    return (sector > 12) ?(numSectors-sector)*2.*M_PI/(static_cast<double>(numSectors)/2.) :
+	sector*2.*M_PI/(static_cast<double>(numSectors)/2.);
 }

@@ -64,7 +64,7 @@ class StiObjectFactory : public StiFactory
     }
 
     inline int getCurrentSize() const {// Get the current size of the container
-	return currentSize;
+	return container.size();
     }
 
     inline int getNextObjectIndex() const {
@@ -106,6 +106,7 @@ protected:
 	for (int i=0;i<n; ++i) {
 	    container.push_back( new T() );
 	}
+	currentSize = container.size();
     }
     
     int originalSize;

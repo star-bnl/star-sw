@@ -2,8 +2,8 @@
 //M.L. Miller (Yale Software)
 //04/01
 
-//Class to make StiTrack seeds from any type of track in the StEvent track node.
-//Used access to StiTracks via the enforced interface of hasMore() and next()
+//Class to make StiKalmanTrack seeds from any type of track in the StEvent track node.
+//Used access to StiKalmanTracks via the enforced interface of hasMore() and next()
 
 #ifndef StiEvaluableTrackSeedFinder_HH
 #define StiEvaluableTrackSeedFinder_HH
@@ -13,7 +13,7 @@
 #include "StEvent/StEnumerations.h"
 
 class StEvent;
-class StiTrack;
+class StiKalmanTrack;
 class StTrack;
 class StiStTrackFilter;
 class StMcEvent;
@@ -32,9 +32,9 @@ public:
     void addStTrackFilter(StiStTrackFilter*);
     void setStTrackType(StTrackType);
     
-    //User query interface to StiTracks
+    //User query interface to StiKalmanTracks
     virtual bool hasMore();
-    virtual StiTrack* next();
+    virtual StiKalmanTrack* next();
 
     //Utilites
     void printStTracks() const;

@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#include "StiTrack.h"
+#include "StiKalmanTrack.h"
 #include "StiMapUtilities.h"
 #include "StiHitContainer.h"
 #include "CombinationIterator.h"
@@ -57,19 +57,19 @@ bool StiTrackSeedFinder::hasMore()
     return ( miterator->current() < miterator->size() );
 }
 
-StiTrack* StiTrackSeedFinder::next()
+StiKalmanTrack* StiTrackSeedFinder::next()
 {
     combo_iterator& it = *miterator;
     cout <<"\nCombination "<<it.current()<<" -----------"<<endl;
-    StiTrack* track = makeTrack( it() );
+    StiKalmanTrack* track = makeTrack( it() );
     ++it;
     return track;
 }
 
-StiTrack* StiTrackSeedFinder::makeTrack(const tvector& vec) const
+StiKalmanTrack* StiTrackSeedFinder::makeTrack(const tvector& vec) const
 {
     //Construct Track fromt these points
-    StiTrack* track = 0;
+    StiKalmanTrack* track = 0;
     for (tvector::const_iterator cit=vec.begin(); cit!=vec.end(); ++cit) {
 	//cout <<"\t"<<*(*cit)<<endl;
     }

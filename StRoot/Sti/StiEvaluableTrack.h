@@ -5,12 +5,12 @@
 #ifndef StiEvaluableTrack_HH
 #define StiEvaluableTrack_HH
 
-#include "StiTrack.h"
+#include "StiKalmanTrack.h"
 
 class StTrack;
 class StMcTrack;
 
-class StiEvaluableTrack : public StiTrack
+class StiEvaluableTrack : public StiKalmanTrack
 {
 public:
     StiEvaluableTrack();
