@@ -6,7 +6,7 @@
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // Stypes                                                               //
-// $Id: Stypes.h,v 1.14 2000/03/24 20:35:25 fine Exp $                                                               
+// $Id: Stypes.h,v 1.15 2000/03/29 03:04:02 fine Exp $                                                               
 // Basic types used by STAF - ROOT interface.                           //
 //                                                                      //
 // This header file contains the set of the macro definitions           //
@@ -17,7 +17,7 @@
 // classes (by stic compiler)                                           //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include "Ttypes.h"
+#include <Ttypes.h>
 
 #if 0
  
@@ -137,6 +137,9 @@ void className::Streamer(TBuffer &R__b) {                        \
   TableClassStreamerImp(className,structName)
 
 // $Log: Stypes.h,v $
+// Revision 1.15  2000/03/29 03:04:02  fine
+// includes adjusted to Sun
+//
 // Revision 1.14  2000/03/24 20:35:25  fine
 // adjusted to ROOT 2.24. Doesn't work yet. Under development
 //
