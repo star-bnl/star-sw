@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.39 2001/03/12 01:01:30 nevski Exp $
+* $Id: geometry.g,v 1.40 2001/03/13 20:56:31 nevski Exp $
 * $Log: geometry.g,v $
+* Revision 1.40  2001/03/13 20:56:31  nevski
+* variable rich position taken from DB
+*
 * Revision 1.39  2001/03/12 01:01:30  nevski
 * mwc x-hits corrected
 *
@@ -155,7 +158,8 @@ If LL>1
 *
    if (rich) ItCKOV = 1
    if (rich & Rv>1) call AgDETP new ('Rich')
-   if (rich & Rv>1) call AgDETP add ('Rich.Version=',Rv,1)
+   if (rich & Rv>1) call AgDETP add ('Rich.Version=',Rv,1) 
+   if (rich & y>1)  call AgDETP add ('Rich.Position=',y,1)
    if (cave)        Call cavegeo
    If (LL>1)        call AgDETP new ('PIPE')
    if (alpipe)      call AgDETP add ('pipg.BeLeng=', 0, 1)
