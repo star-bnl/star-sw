@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.55 2000/02/01 18:49:54 love Exp $
+// $Id: St_tcl_Maker.cxx,v 1.56 2000/02/08 15:12:48 love Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.56  2000/02/08 15:12:48  love
+// Make tcl_Maker abort empty events
+//
 // Revision 1.55  2000/02/01 18:49:54  love
 // Protect against empty TPC data
 //
@@ -318,7 +321,7 @@ Int_t St_tcl_Maker::Make() {
   m_raw_data_tpc = kFALSE;
   Int_t sector_tot = 0;
   
-  if (raw_data_tpc) {// Row data exits -> make clustering
+  if (raw_data_tpc) {// Raw data exists -> make clustering
     m_raw_data_tpc = kTRUE;
     St_DataSetIter next(raw_data_tpc);
     St_raw_sec_m  *raw_sec_m = (St_raw_sec_m *) next("raw_sec_m");
@@ -356,11 +359,17 @@ Int_t St_tcl_Maker::Make() {
     tpseq = new St_tcl_tp_seq("tpseq",isumseq);      
     local.Add(tpseq);
 
-    // WARNING no knowledge of actual number of hits here but we need to create the
-    // table smart enough to contain biggest events. Therefore max number of hits
-    // can be number of pixels divided by 10 (no 1 pad hits and estimated sequence
-    // length to be 5)
+    // WARNING no knowledge of actual number of hits here but we create a
+    // table smart enough to contain biggest events. Try max number of hits
+    // equal to number of pixels divided by 10 (no 1 pad hits and estimated
+    // sequence length to be 5)
     int max_hit = (int) ceil((float)(isumpix/10));
+    // We have to protect against DAQ event records that say there is TPC data
+    // when its empty.
+    if(isumpix<1){
+      Warning ("Make"," TPC data is empty, isumpix=%d dump event.",isumpix);
+      return kStErr;
+    }
     cout << "number of estimated hits used: " << max_hit << endl;
     // create tables used with a reasonable size
     tphit = new St_tcl_tphit("tphit",max_hit); 
@@ -454,10 +463,8 @@ Int_t St_tcl_Maker::Make() {
         if (tph_res!=kSTAFCV_OK) Warning("Make","tph == %d",tph_res);
 	  }      
       }
-    }
-
     // end raw data
-
+    }
     if (sector_tot && m_tclEvalOn) { //slow simulation exist and evaluation switch set
       if (Debug()) cout << "start run_tte_hit_match" << endl;
       St_DataSet *geant = GetInputDS("geant");
@@ -545,7 +552,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.55 2000/02/01 18:49:54 love Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.56 2000/02/08 15:12:48 love Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
