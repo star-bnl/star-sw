@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPid.h,v 1.3 1999/05/02 00:00:17 fisyak Exp $
+ * $Id: StTpcDedxPid.h,v 1.4 1999/07/13 13:20:35 fisyak Exp $
  *
  * Author: Craig Ogilvie, April 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPid.h,v $
- * Revision 1.3  1999/05/02 00:00:17  fisyak
- * Add default ctors
+ * Revision 1.4  1999/07/13 13:20:35  fisyak
+ * Add lost Craig functions, use gufld for magnetic field
+ *
+ * Revision 1.4  1999/07/13 13:20:35  fisyak
+ * Add lost Craig functions, use gufld for magnetic field
  *
  * Revision 1.3  1999/05/02 00:00:17  fisyak
  * Add default ctors
@@ -39,6 +42,17 @@ public:
   ~StTpcDedxPid();
   Int_t detectorInfoAvailable() const;
   Int_t meetsStandardPid() const;
+  Double_t numberOfSigma(Double_t mass) const;
+  void setTpcDedxGain(Double_t gain) ;
+  void setTpcDedxOffset(Double_t offset) ;
+  void setTpcDedxRise(Double_t rise) ;
+  Double_t getTpcDedxGain() ;
+  Double_t getTpcDedxOffset() ;
+  Double_t getTpcDedxRise() ;
+  Double_t getTpcDedxOffset()            { return mTpcDedxOffset ;} 
+  Double_t getTpcDedxRise()              { return mTpcDedxRise;}
+  Double_t getTpcDedxTcut()              { return mTpcDedxTcut;}
+  static Double_t mTpcDedxRise ;  
   static Int_t quickPid(Float_t rig, Float_t dedx);
 
 
