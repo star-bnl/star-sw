@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFTPCReader.h,v 1.4 2001/06/19 21:12:12 jeromel Exp $
+ * $Id: StFTPCReader.h,v 1.5 2001/07/26 13:52:33 oldi Exp $
  *
  * Author: Holm Huemmler
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFTPCReader.h,v $
+ * Revision 1.5  2001/07/26 13:52:33  oldi
+ * Bug fix to circumvent crashes due to missing FTPC data.
+ *
  * Revision 1.4  2001/06/19 21:12:12  jeromel
  * Code update (Janet S.)
  *
@@ -42,6 +45,8 @@ class  StFTPCReader
 	       char *fcl_ftpcadc, int nAdc);
   virtual ~StFTPCReader();
   virtual  int close();
+
+  bool checkForData(); // gives true if FTPC data available
 
   int getMaxPad(int PadRow) const {return 160;};	//Number of pads in padrow
 
