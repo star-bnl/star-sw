@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.11 2000/03/23 14:55:56 fine Exp $
+// $Id: St_db_Maker.h,v 1.12 2000/04/13 02:58:47 perev Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.12  2000/04/13 02:58:47  perev
+// Method Save is added & default CintDB loaded if exists
+//
 // Revision 1.11  2000/03/23 14:55:56  fine
 // Adjusted to libSTAR and ROOT 2.24
 //
@@ -48,7 +51,7 @@ private:
   TDatime     fDBTime;		//! Own DB time stamp
   Int_t       fUpdateMode;	//! 
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.11 2000/03/23 14:55:56 fine Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.12 2000/04/13 02:58:47 perev Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name,const char *maindir,const char *userdir=0);
@@ -56,10 +59,12 @@ private:
    virtual TString GetMainDir(){ return fMainDir;}
    virtual TString GetUserDir(){ return fUserDir;}
    virtual TDatime GetDateTime();
+   virtual Int_t   GetValidity(const TTable *tb, TDatime *val) const;
    virtual void    SetDateTime(int idat,int itim);
    virtual void    SetDateTime(const char *datalias);
    virtual Int_t   Init();
    virtual Int_t   Make();
+   virtual Int_t   Save(const char *path);
    virtual void    SetMainDir(const Char_t *db);
    virtual void    SetUserDir(const Char_t *db);
    virtual void    SetOff(const Char_t *path);
@@ -81,7 +86,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.11 2000/03/23 14:55:56 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.12 2000/04/13 02:58:47 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   //StAF chain virtual base class for Makers
 };
